@@ -100,7 +100,8 @@ struct jited_objfile_data
     : addr (addr),
       symfile_addr (symfile_addr),
       symfile_size (symfile_size)
-  {}
+  {
+  }
 
   /* Address of struct jit_code_entry for this objfile.  */
   CORE_ADDR addr;

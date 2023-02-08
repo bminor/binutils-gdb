@@ -40,8 +40,7 @@ status_to_str (int status)
 			      strsignal (WSTOPSIG (status)));
     }
   else if (WIFSIGNALED (status))
-    return string_printf ("%s - %s (terminated)",
-			  strsigno (WTERMSIG (status)),
+    return string_printf ("%s - %s (terminated)", strsigno (WTERMSIG (status)),
 			  strsignal (WTERMSIG (status)));
   else
     return string_printf ("%d (exited)", WEXITSTATUS (status));

@@ -48,38 +48,26 @@ namespace gdb
 template<typename T, typename Policy>
 class ref_ptr
 {
- public:
-
+public:
   /* Create a new NULL instance.  */
-  ref_ptr ()
-    : m_obj (NULL)
-  {
-  }
+  ref_ptr () : m_obj (NULL) {}
 
   /* Create a new NULL instance.  Note that this is not explicit.  */
-  ref_ptr (const std::nullptr_t)
-    : m_obj (NULL)
-  {
-  }
+  ref_ptr (const std::nullptr_t) : m_obj (NULL) {}
 
   /* Create a new instance.  OBJ is a reference, management of which
      is now transferred to this class.  */
-  explicit ref_ptr (T *obj)
-    : m_obj (obj)
-  {
-  }
+  explicit ref_ptr (T *obj) : m_obj (obj) {}
 
   /* Copy another instance.  */
-  ref_ptr (const ref_ptr &other)
-    : m_obj (other.m_obj)
+  ref_ptr (const ref_ptr &other) : m_obj (other.m_obj)
   {
     if (m_obj != NULL)
       Policy::incref (m_obj);
   }
 
   /* Transfer ownership from OTHER.  */
-  ref_ptr (ref_ptr &&other) noexcept
-    : m_obj (other.m_obj)
+  ref_ptr (ref_ptr &&other) noexcept : m_obj (other.m_obj)
   {
     other.m_obj = NULL;
   }
@@ -97,9 +85,9 @@ class ref_ptr
     /* Do nothing on self-assignment.  */
     if (this != &other)
       {
-	reset (other.m_obj);
-	if (m_obj != NULL)
-	  Policy::incref (m_obj);
+        reset (other.m_obj);
+        if (m_obj != NULL)
+          Policy::incref (m_obj);
       }
     return *this;
   }
@@ -110,8 +98,8 @@ class ref_ptr
     /* Do nothing on self-assignment.  */
     if (this != &other)
       {
-	reset (other.m_obj);
-	other.m_obj = NULL;
+        reset (other.m_obj);
+        other.m_obj = NULL;
       }
     return *this;
   }
@@ -127,10 +115,7 @@ class ref_ptr
 
   /* Return this instance's referent without changing the state of
      this class.  */
-  T *get () const
-  {
-    return m_obj;
-  }
+  T *get () const { return m_obj; }
 
   /* Return this instance's referent, and stop managing this
      reference.  The caller is now responsible for the ownership of
@@ -144,10 +129,7 @@ class ref_ptr
   }
 
   /* Let users refer to members of the underlying pointer.  */
-  T *operator-> () const
-  {
-    return m_obj;
-  }
+  T *operator->() const { return m_obj; }
 
   /* Acquire a new reference and return a ref_ptr that owns it.  */
   static ref_ptr<T, Policy> new_reference (T *obj)
@@ -156,73 +138,80 @@ class ref_ptr
     return ref_ptr<T, Policy> (obj);
   }
 
- private:
-
+private:
   T *m_obj;
 };
 
 template<typename T, typename Policy>
-inline bool operator== (const ref_ptr<T, Policy> &lhs,
-			const ref_ptr<T, Policy> &rhs)
+inline bool
+operator== (const ref_ptr<T, Policy> &lhs, const ref_ptr<T, Policy> &rhs)
 {
   return lhs.get () == rhs.get ();
 }
 
 template<typename T, typename Policy>
-inline bool operator== (const ref_ptr<T, Policy> &lhs, const T *rhs)
+inline bool
+operator== (const ref_ptr<T, Policy> &lhs, const T *rhs)
 {
   return lhs.get () == rhs;
 }
 
 template<typename T, typename Policy>
-inline bool operator== (const ref_ptr<T, Policy> &lhs, const std::nullptr_t)
+inline bool
+operator== (const ref_ptr<T, Policy> &lhs, const std::nullptr_t)
 {
   return lhs.get () == nullptr;
 }
 
 template<typename T, typename Policy>
-inline bool operator== (const T *lhs, const ref_ptr<T, Policy> &rhs)
+inline bool
+operator== (const T *lhs, const ref_ptr<T, Policy> &rhs)
 {
   return lhs == rhs.get ();
 }
 
 template<typename T, typename Policy>
-inline bool operator== (const std::nullptr_t, const ref_ptr<T, Policy> &rhs)
+inline bool
+operator== (const std::nullptr_t, const ref_ptr<T, Policy> &rhs)
 {
   return nullptr == rhs.get ();
 }
 
 template<typename T, typename Policy>
-inline bool operator!= (const ref_ptr<T, Policy> &lhs,
-			const ref_ptr<T, Policy> &rhs)
+inline bool
+operator!= (const ref_ptr<T, Policy> &lhs, const ref_ptr<T, Policy> &rhs)
 {
   return lhs.get () != rhs.get ();
 }
 
 template<typename T, typename Policy>
-inline bool operator!= (const ref_ptr<T, Policy> &lhs, const T *rhs)
+inline bool
+operator!= (const ref_ptr<T, Policy> &lhs, const T *rhs)
 {
   return lhs.get () != rhs;
 }
 
 template<typename T, typename Policy>
-inline bool operator!= (const ref_ptr<T, Policy> &lhs, const std::nullptr_t)
+inline bool
+operator!= (const ref_ptr<T, Policy> &lhs, const std::nullptr_t)
 {
   return lhs.get () != nullptr;
 }
 
 template<typename T, typename Policy>
-inline bool operator!= (const T *lhs, const ref_ptr<T, Policy> &rhs)
+inline bool
+operator!= (const T *lhs, const ref_ptr<T, Policy> &rhs)
 {
   return lhs != rhs.get ();
 }
 
 template<typename T, typename Policy>
-inline bool operator!= (const std::nullptr_t, const ref_ptr<T, Policy> &rhs)
+inline bool
+operator!= (const std::nullptr_t, const ref_ptr<T, Policy> &rhs)
 {
   return nullptr != rhs.get ();
 }
 
-}
+} // namespace gdb
 
 #endif /* COMMON_GDB_REF_PTR_H */

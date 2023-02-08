@@ -179,8 +179,8 @@ struct open_script
   }
 };
 
-extern gdb::optional<open_script>
-    find_and_open_script (const char *file, int search_path);
+extern gdb::optional<open_script> find_and_open_script (const char *file,
+							int search_path);
 
 /* Command tracing state.  */
 
@@ -192,8 +192,8 @@ extern bool trace_commands;
    prefix: i.e., "set " or "maintenance set ".  SETLIST is the command
    element for the same "set" command prefix.  */
 extern void with_command_1 (const char *set_cmd_prefix,
-			    cmd_list_element *setlist,
-			    const char *args, int from_tty);
+			    cmd_list_element *setlist, const char *args,
+			    int from_tty);
 
 /* Common code for the completers of the "with" and "maintenance with"
    commands.  SET_CMD_PREFIX is the spelling of the corresponding

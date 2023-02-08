@@ -25,53 +25,40 @@
 #ifdef __x86_64__
 #define CONTEXT WOW64_CONTEXT
 #endif
-#define context_offset(x) ((int)(size_t)&(((CONTEXT *)NULL)->x))
-const int i386_mappings[] =
-{
-  context_offset (Eax),
-  context_offset (Ecx),
-  context_offset (Edx),
-  context_offset (Ebx),
-  context_offset (Esp),
-  context_offset (Ebp),
-  context_offset (Esi),
-  context_offset (Edi),
-  context_offset (Eip),
-  context_offset (EFlags),
-  context_offset (SegCs),
-  context_offset (SegSs),
-  context_offset (SegDs),
-  context_offset (SegEs),
-  context_offset (SegFs),
-  context_offset (SegGs),
-  context_offset (FloatSave.RegisterArea[0 * 10]),
-  context_offset (FloatSave.RegisterArea[1 * 10]),
-  context_offset (FloatSave.RegisterArea[2 * 10]),
-  context_offset (FloatSave.RegisterArea[3 * 10]),
-  context_offset (FloatSave.RegisterArea[4 * 10]),
-  context_offset (FloatSave.RegisterArea[5 * 10]),
-  context_offset (FloatSave.RegisterArea[6 * 10]),
-  context_offset (FloatSave.RegisterArea[7 * 10]),
-  context_offset (FloatSave.ControlWord),
-  context_offset (FloatSave.StatusWord),
-  context_offset (FloatSave.TagWord),
-  context_offset (FloatSave.ErrorSelector),
-  context_offset (FloatSave.ErrorOffset),
-  context_offset (FloatSave.DataSelector),
-  context_offset (FloatSave.DataOffset),
-  context_offset (FloatSave.ErrorSelector)
-  /* XMM0-7 */ ,
-  context_offset (ExtendedRegisters[10*16]),
-  context_offset (ExtendedRegisters[11*16]),
-  context_offset (ExtendedRegisters[12*16]),
-  context_offset (ExtendedRegisters[13*16]),
-  context_offset (ExtendedRegisters[14*16]),
-  context_offset (ExtendedRegisters[15*16]),
-  context_offset (ExtendedRegisters[16*16]),
-  context_offset (ExtendedRegisters[17*16]),
-  /* MXCSR */
-  context_offset (ExtendedRegisters[24])
-};
+#define context_offset(x) ((int) (size_t) & (((CONTEXT *) NULL)->x))
+const int i386_mappings[]
+  = { context_offset (Eax), context_offset (Ecx), context_offset (Edx),
+      context_offset (Ebx), context_offset (Esp), context_offset (Ebp),
+      context_offset (Esi), context_offset (Edi), context_offset (Eip),
+      context_offset (EFlags), context_offset (SegCs), context_offset (SegSs),
+      context_offset (SegDs), context_offset (SegEs), context_offset (SegFs),
+      context_offset (SegGs), context_offset (FloatSave.RegisterArea[0 * 10]),
+      context_offset (FloatSave.RegisterArea[1 * 10]),
+      context_offset (FloatSave.RegisterArea[2 * 10]),
+      context_offset (FloatSave.RegisterArea[3 * 10]),
+      context_offset (FloatSave.RegisterArea[4 * 10]),
+      context_offset (FloatSave.RegisterArea[5 * 10]),
+      context_offset (FloatSave.RegisterArea[6 * 10]),
+      context_offset (FloatSave.RegisterArea[7 * 10]),
+      context_offset (FloatSave.ControlWord),
+      context_offset (FloatSave.StatusWord),
+      context_offset (FloatSave.TagWord),
+      context_offset (FloatSave.ErrorSelector),
+      context_offset (FloatSave.ErrorOffset),
+      context_offset (FloatSave.DataSelector),
+      context_offset (FloatSave.DataOffset),
+      context_offset (FloatSave.ErrorSelector)
+      /* XMM0-7 */,
+      context_offset (ExtendedRegisters[10 * 16]),
+      context_offset (ExtendedRegisters[11 * 16]),
+      context_offset (ExtendedRegisters[12 * 16]),
+      context_offset (ExtendedRegisters[13 * 16]),
+      context_offset (ExtendedRegisters[14 * 16]),
+      context_offset (ExtendedRegisters[15 * 16]),
+      context_offset (ExtendedRegisters[16 * 16]),
+      context_offset (ExtendedRegisters[17 * 16]),
+      /* MXCSR */
+      context_offset (ExtendedRegisters[24]) };
 #undef context_offset
 #undef CONTEXT
 
@@ -84,6 +71,7 @@ i386_windows_segment_register_p (int regnum)
 }
 
 void _initialize_i386_windows_nat ();
+
 void
 _initialize_i386_windows_nat ()
 {

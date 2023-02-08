@@ -22,14 +22,12 @@
 
 #include "splay-tree.h"
 
-namespace gdb {
+namespace gdb
+{
 
 struct splay_tree_deleter
 {
-  void operator() (splay_tree tree) const
-  {
-    splay_tree_delete (tree);
-  }
+  void operator() (splay_tree tree) const { splay_tree_delete (tree); }
 };
 
 } /* namespace gdb */
@@ -37,6 +35,6 @@ struct splay_tree_deleter
 /* A unique pointer to a splay tree.  */
 
 typedef std::unique_ptr<splay_tree_s, gdb::splay_tree_deleter>
-    gdb_splay_tree_up;
+  gdb_splay_tree_up;
 
 #endif /* COMMON_GDB_SPLAY_TREE_H */

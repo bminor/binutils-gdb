@@ -36,10 +36,10 @@
    false positives is justified by the utility of reporting the
    terminating signal in the "normal" cases.  */
 
-# include <signal.h>
+#include <signal.h>
 
-# define WIN32_LEAN_AND_MEAN
-# include <windows.h>		/* for EXCEPTION_* constants */
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h> /* for EXCEPTION_* constants */
 
 struct xlate_status
 {
@@ -53,27 +53,25 @@ struct xlate_status
 int
 windows_status_to_termsig (unsigned long status)
 {
-  static const xlate_status status_xlate_tbl[] =
-    {
-     {EXCEPTION_ACCESS_VIOLATION,	  SIGSEGV},
-     {EXCEPTION_IN_PAGE_ERROR,		  SIGSEGV},
-     {EXCEPTION_INVALID_HANDLE,		  SIGSEGV},
-     {EXCEPTION_ILLEGAL_INSTRUCTION,	  SIGILL},
-     {EXCEPTION_NONCONTINUABLE_EXCEPTION, SIGILL},
-     {EXCEPTION_ARRAY_BOUNDS_EXCEEDED,	  SIGSEGV},
-     {EXCEPTION_FLT_DENORMAL_OPERAND,	  SIGFPE},
-     {EXCEPTION_FLT_DIVIDE_BY_ZERO,	  SIGFPE},
-     {EXCEPTION_FLT_INEXACT_RESULT,	  SIGFPE},
-     {EXCEPTION_FLT_INVALID_OPERATION,	  SIGFPE},
-     {EXCEPTION_FLT_OVERFLOW,		  SIGFPE},
-     {EXCEPTION_FLT_STACK_CHECK,	  SIGFPE},
-     {EXCEPTION_FLT_UNDERFLOW,		  SIGFPE},
-     {EXCEPTION_INT_DIVIDE_BY_ZERO,	  SIGFPE},
-     {EXCEPTION_INT_OVERFLOW,		  SIGFPE},
-     {EXCEPTION_PRIV_INSTRUCTION,	  SIGILL},
-     {EXCEPTION_STACK_OVERFLOW,		  SIGSEGV},
-     {CONTROL_C_EXIT,			  SIGTERM}
-    };
+  static const xlate_status status_xlate_tbl[]
+    = { { EXCEPTION_ACCESS_VIOLATION, SIGSEGV },
+        { EXCEPTION_IN_PAGE_ERROR, SIGSEGV },
+        { EXCEPTION_INVALID_HANDLE, SIGSEGV },
+        { EXCEPTION_ILLEGAL_INSTRUCTION, SIGILL },
+        { EXCEPTION_NONCONTINUABLE_EXCEPTION, SIGILL },
+        { EXCEPTION_ARRAY_BOUNDS_EXCEEDED, SIGSEGV },
+        { EXCEPTION_FLT_DENORMAL_OPERAND, SIGFPE },
+        { EXCEPTION_FLT_DIVIDE_BY_ZERO, SIGFPE },
+        { EXCEPTION_FLT_INEXACT_RESULT, SIGFPE },
+        { EXCEPTION_FLT_INVALID_OPERATION, SIGFPE },
+        { EXCEPTION_FLT_OVERFLOW, SIGFPE },
+        { EXCEPTION_FLT_STACK_CHECK, SIGFPE },
+        { EXCEPTION_FLT_UNDERFLOW, SIGFPE },
+        { EXCEPTION_INT_DIVIDE_BY_ZERO, SIGFPE },
+        { EXCEPTION_INT_OVERFLOW, SIGFPE },
+        { EXCEPTION_PRIV_INSTRUCTION, SIGILL },
+        { EXCEPTION_STACK_OVERFLOW, SIGSEGV },
+        { CONTROL_C_EXIT, SIGTERM } };
 
   for (const xlate_status &x : status_xlate_tbl)
     if (x.status == status)
@@ -82,4 +80,4 @@ windows_status_to_termsig (unsigned long status)
   return -1;
 }
 
-#endif	/* __MINGW32__ */
+#endif /* __MINGW32__ */

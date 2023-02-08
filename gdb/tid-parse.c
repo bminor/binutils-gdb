@@ -28,7 +28,7 @@
 void ATTRIBUTE_NORETURN
 invalid_thread_id_error (const char *string)
 {
-  error (_("Invalid thread ID: %s"), string);
+  error (_ ("Invalid thread ID: %s"), string);
 }
 
 /* Wrapper for get_number_trailer that throws an error if we get back
@@ -44,7 +44,7 @@ get_positive_number_trailer (const char **pp, int trailer, const char *string)
 
   num = get_number_trailer (pp, trailer);
   if (num < 0)
-    error (_("negative value: %s"), string);
+    error (_ ("negative value: %s"), string);
   return num;
 }
 
@@ -73,7 +73,7 @@ parse_thread_id (const char *tidstr, const char **end)
 
       inf = find_inferior_id (inf_num);
       if (inf == NULL)
-	error (_("No inferior number '%d'"), inf_num);
+	error (_ ("No inferior number '%d'"), inf_num);
 
       explicit_inf_id = 1;
       p1 = dot + 1;
@@ -100,9 +100,9 @@ parse_thread_id (const char *tidstr, const char **end)
   if (tp == NULL)
     {
       if (show_inferior_qualified_tids () || explicit_inf_id)
-	error (_("Unknown thread %d.%d."), inf->num, thr_num);
+	error (_ ("Unknown thread %d.%d."), inf->num, thr_num);
       else
-	error (_("Unknown thread %d."), thr_num);
+	error (_ ("Unknown thread %d."), thr_num);
     }
 
   if (end != NULL)
@@ -113,8 +113,7 @@ parse_thread_id (const char *tidstr, const char **end)
 
 /* See tid-parse.h.  */
 
-tid_range_parser::tid_range_parser (const char *tidlist,
-				    int default_inferior)
+tid_range_parser::tid_range_parser (const char *tidlist, int default_inferior)
 {
   init (tidlist, default_inferior);
 }
@@ -143,8 +142,7 @@ tid_range_parser::finished () const
 	 or we are not in a range and not in front of an integer, negative
 	 integer, convenience var or negative convenience var.  */
       return (*m_cur_tok == '\0'
-	      || !(isdigit (*m_cur_tok)
-		   || *m_cur_tok == '$'
+	      || !(isdigit (*m_cur_tok) || *m_cur_tok == '$'
 		   || *m_cur_tok == '*'));
     case STATE_THREAD_RANGE:
     case STATE_STAR_RANGE:
@@ -174,8 +172,7 @@ tid_range_parser::cur_tok () const
 void
 tid_range_parser::skip_range ()
 {
-  gdb_assert (m_state == STATE_THREAD_RANGE
-	      || m_state == STATE_STAR_RANGE);
+  gdb_assert (m_state == STATE_THREAD_RANGE || m_state == STATE_STAR_RANGE);
 
   m_range_parser.skip_range ();
   init (m_range_parser.cur_tok (), m_default_inferior);
@@ -194,8 +191,7 @@ tid_range_parser::tid_is_qualified () const
    is non-NULL, return a single thread ID otherwise.  */
 
 bool
-tid_range_parser::get_tid_or_range (int *inf_num,
-				    int *thr_start, int *thr_end)
+tid_range_parser::get_tid_or_range (int *inf_num, int *thr_start, int *thr_end)
 {
   if (m_state == STATE_INFERIOR)
     {
@@ -245,7 +241,7 @@ tid_range_parser::get_tid_or_range (int *inf_num,
   *inf_num = m_inf_num;
   *thr_start = m_range_parser.get_number ();
   if (*thr_start < 0)
-    error (_("negative value: %s"), m_cur_tok);
+    error (_ ("negative value: %s"), m_cur_tok);
   if (*thr_start == 0)
     {
       m_state = STATE_INFERIOR;
@@ -267,8 +263,7 @@ tid_range_parser::get_tid_or_range (int *inf_num,
   /* If we're midway through a range, and the caller wants the end
      value, return it and skip to the end of the range.  */
   if (thr_end != NULL
-      && (m_state == STATE_THREAD_RANGE
-	  || m_state == STATE_STAR_RANGE))
+      && (m_state == STATE_THREAD_RANGE || m_state == STATE_STAR_RANGE))
     {
       *thr_end = m_range_parser.end_value ();
 
@@ -281,8 +276,7 @@ tid_range_parser::get_tid_or_range (int *inf_num,
 /* See tid-parse.h.  */
 
 bool
-tid_range_parser::get_tid_range (int *inf_num,
-				 int *thr_start, int *thr_end)
+tid_range_parser::get_tid_range (int *inf_num, int *thr_start, int *thr_end)
 {
   gdb_assert (inf_num != NULL && thr_start != NULL && thr_end != NULL);
 
@@ -316,8 +310,8 @@ tid_range_parser::in_thread_range () const
 /* See tid-parse.h.  */
 
 int
-tid_is_in_list (const char *list, int default_inferior,
-		int inf_num, int thr_num)
+tid_is_in_list (const char *list, int default_inferior, int inf_num,
+		int thr_num)
 {
   if (list == NULL || *list == '\0')
     return 1;
@@ -331,8 +325,8 @@ tid_is_in_list (const char *list, int default_inferior,
 
       if (!parser.get_tid_range (&tmp_inf, &tmp_thr_start, &tmp_thr_end))
 	invalid_thread_id_error (parser.cur_tok ());
-      if (tmp_inf == inf_num
-	  && tmp_thr_start <= thr_num && thr_num <= tmp_thr_end)
+      if (tmp_inf == inf_num && tmp_thr_start <= thr_num
+	  && thr_num <= tmp_thr_end)
 	return 1;
     }
   return 0;

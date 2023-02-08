@@ -47,13 +47,11 @@ struct gdb_disassemble_info
   DISABLE_COPY_AND_ASSIGN (gdb_disassemble_info);
 
   /* Return the gdbarch we are disassembling for.  */
-  struct gdbarch *arch ()
-  { return m_gdbarch; }
+  struct gdbarch *arch () { return m_gdbarch; }
 
   /* Return a pointer to the disassemble_info, this will be needed for
      passing into the libopcodes disassembler.  */
-  struct disassemble_info *disasm_info ()
-  { return &m_di; }
+  struct disassemble_info *disasm_info () { return &m_di; }
 
 protected:
 
@@ -65,20 +63,19 @@ protected:
      will become relevant when you switch to C++17, and this warning
      causes the build to fail.  */
   using read_memory_ftype
-    = int (*) (bfd_vma, bfd_byte *, unsigned int, struct disassemble_info *)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = int (*) (bfd_vma, bfd_byte *, unsigned int,
+	       struct disassemble_info *) LIBOPCODE_CALLBACK_NOEXCEPT;
   using memory_error_ftype
-    = void (*) (int, bfd_vma, struct disassemble_info *)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = void (*) (int, bfd_vma,
+		struct disassemble_info *) LIBOPCODE_CALLBACK_NOEXCEPT;
   using print_address_ftype
-    = void (*) (bfd_vma, struct disassemble_info *)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = void (*) (bfd_vma,
+		struct disassemble_info *) LIBOPCODE_CALLBACK_NOEXCEPT;
   using fprintf_ftype
-    = int (*) (void *, const char *, ...)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = int (*) (void *, const char *, ...) LIBOPCODE_CALLBACK_NOEXCEPT;
   using fprintf_styled_ftype
-    = int (*) (void *, enum disassembler_style, const char *, ...)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = int (*) (void *, enum disassembler_style, const char *,
+	       ...) LIBOPCODE_CALLBACK_NOEXCEPT;
 
   /* Constructor, many fields in m_di are initialized from GDBARCH.  The
      remaining arguments are function callbacks that are written into m_di.
@@ -102,6 +99,7 @@ protected:
   struct disassemble_info m_di;
 
 private:
+
   /* The architecture we are disassembling for.  */
   struct gdbarch *m_gdbarch;
 
@@ -124,8 +122,7 @@ struct gdb_printing_disassembler : public gdb_disassemble_info
   DISABLE_COPY_AND_ASSIGN (gdb_printing_disassembler);
 
   /* The stream that disassembler output is being written too.  */
-  struct ui_file *stream ()
-  { return m_stream; }
+  struct ui_file *stream () { return m_stream; }
 
 protected:
 
@@ -133,14 +130,13 @@ protected:
      We also add the two print functions to the arguments passed to the
      parent.  See gdb_disassemble_info for a description of how the
      arguments are handled.  */
-  gdb_printing_disassembler (struct gdbarch *gdbarch,
-			     struct ui_file *stream,
+  gdb_printing_disassembler (struct gdbarch *gdbarch, struct ui_file *stream,
 			     read_memory_ftype read_memory_func,
 			     memory_error_ftype memory_error_func,
 			     print_address_ftype print_address_func)
-    : gdb_disassemble_info (gdbarch, read_memory_func,
-			    memory_error_func, print_address_func,
-			    fprintf_func, fprintf_styled_func),
+    : gdb_disassemble_info (gdbarch, read_memory_func, memory_error_func,
+			    print_address_func, fprintf_func,
+			    fprintf_styled_func),
       m_stream (stream)
   {
     gdb_assert (stream != nullptr);
@@ -150,7 +146,7 @@ protected:
      DIS_INFO pointer is a pointer to a gdb_printing_disassembler object.
      Content is written to the m_stream extracted from DIS_INFO.  */
   static int fprintf_func (void *dis_info, const char *format, ...) noexcept
-    ATTRIBUTE_PRINTF(2,3);
+    ATTRIBUTE_PRINTF (2, 3);
 
   /* Callback used as the disassemble_info's fprintf_styled_func callback.
      The DIS_INFO pointer is a pointer to a gdb_printing_disassembler
@@ -158,17 +154,15 @@ protected:
   static int fprintf_styled_func (void *dis_info,
 				  enum disassembler_style style,
 				  const char *format, ...) noexcept
-    ATTRIBUTE_PRINTF(3,4);
+    ATTRIBUTE_PRINTF (3, 4);
 
   /* Return true if the disassembler is considered inside a comment, false
      otherwise.  */
-  bool in_comment_p () const
-  { return m_in_comment; }
+  bool in_comment_p () const { return m_in_comment; }
 
   /* Set whether the disassembler should be considered as within comment
      text or not.  */
-  void set_in_comment (bool c)
-  { m_in_comment = c; }
+  void set_in_comment (bool c) { m_in_comment = c; }
 
 private:
 
@@ -197,27 +191,26 @@ struct gdb_non_printing_disassembler : public gdb_disassemble_info
 {
   gdb_non_printing_disassembler (struct gdbarch *gdbarch,
 				 read_memory_ftype read_memory_func)
-    : gdb_disassemble_info (gdbarch,
-			    read_memory_func,
+    : gdb_disassemble_info (gdbarch, read_memory_func,
 			    nullptr /* memory_error_func */,
 			    nullptr /* print_address_func */,
-			    null_fprintf_func,
-			    null_fprintf_styled_func)
-  { /* Nothing.  */ }
+			    null_fprintf_func, null_fprintf_styled_func)
+  { /* Nothing.  */
+  }
 
 private:
 
   /* Callback used as the disassemble_info's fprintf_func callback, this
      doesn't write anything to STREAM, but just returns 0.  */
   static int null_fprintf_func (void *stream, const char *format, ...) noexcept
-    ATTRIBUTE_PRINTF(2,3);
+    ATTRIBUTE_PRINTF (2, 3);
 
   /* Callback used as the disassemble_info's fprintf_styled_func callback,
      , this doesn't write anything to STREAM, but just returns 0.  */
   static int null_fprintf_styled_func (void *stream,
 				       enum disassembler_style style,
 				       const char *format, ...) noexcept
-    ATTRIBUTE_PRINTF(3,4);
+    ATTRIBUTE_PRINTF (3, 4);
 };
 
 /* This is a helper class, for use as an additional base-class, by some of
@@ -244,8 +237,9 @@ struct gdb_non_printing_memory_disassembler
 {
   /* Constructor.  GDBARCH is the architecture to disassemble for.  */
   gdb_non_printing_memory_disassembler (struct gdbarch *gdbarch)
-    :gdb_non_printing_disassembler (gdbarch, dis_asm_read_memory)
-  { /* Nothing.  */ }
+    : gdb_non_printing_disassembler (gdbarch, dis_asm_read_memory)
+  { /* Nothing.  */
+  }
 };
 
 /* A dissassembler class that provides 'print_insn', a method for
@@ -256,7 +250,8 @@ struct gdb_disassembler : public gdb_printing_disassembler,
 {
   gdb_disassembler (struct gdbarch *gdbarch, struct ui_file *file)
     : gdb_disassembler (gdbarch, file, dis_asm_read_memory)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   DISABLE_COPY_AND_ASSIGN (gdb_disassembler);
 
@@ -266,10 +261,12 @@ struct gdb_disassembler : public gdb_printing_disassembler,
   int print_insn (CORE_ADDR memaddr, int *branch_delay_insns = NULL);
 
 protected:
+
   gdb_disassembler (struct gdbarch *gdbarch, struct ui_file *file,
 		    read_memory_ftype func);
 
 private:
+
   /* This member variable is given a value by calling dis_asm_memory_error.
      If after calling into the libopcodes disassembler we get back a
      negative value (which indicates an error), then, if this variable has
@@ -334,7 +331,7 @@ struct disasm_insn
   unsigned int number;
 
   /* True if the instruction was executed speculatively.  */
-  unsigned int is_speculative:1;
+  unsigned int is_speculative : 1;
 };
 
 extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
@@ -353,12 +350,14 @@ extern int gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 class gdb_pretty_print_disassembler
 {
 public:
+
   explicit gdb_pretty_print_disassembler (struct gdbarch *gdbarch,
 					  struct ui_out *uiout)
     : m_uiout (uiout),
       m_insn_stb (uiout->can_emit_style_escape ()),
       m_di (gdbarch, &m_insn_stb)
-  {}
+  {
+  }
 
   /* Prints the instruction INSN into the saved ui_out and returns the
      length of the printed instruction in bytes.  */
@@ -366,6 +365,7 @@ public:
 			 gdb_disassembly_flags flags);
 
 private:
+
   /* Returns the architecture used for disassembling.  */
   struct gdbarch *arch () { return m_di.arch (); }
 

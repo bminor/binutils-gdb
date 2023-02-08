@@ -46,20 +46,25 @@
 #include "features/nds32.c"
 
 /* Simple macros for instruction analysis.  */
-#define CHOP_BITS(insn, n)	(insn & ~__MASK (n))
-#define N32_LSMW_ENABLE4(insn)	(((insn) >> 6) & 0xf)
+#define CHOP_BITS(insn, n) (insn & ~__MASK (n))
+#define N32_LSMW_ENABLE4(insn) (((insn) >> 6) & 0xf)
 #define N32_SMW_ADM \
-	N32_TYPE4 (LSMW, 0, 0, 0, 1, (N32_LSMW_ADM << 2) | N32_LSMW_LSMW)
+  N32_TYPE4 (LSMW, 0, 0, 0, 1, (N32_LSMW_ADM << 2) | N32_LSMW_LSMW)
 #define N32_LMW_BIM \
-	N32_TYPE4 (LSMW, 0, 0, 0, 0, (N32_LSMW_BIM << 2) | N32_LSMW_LSMW)
-#define N32_FLDI_SP \
-	N32_TYPE2 (LDC, 0, REG_SP, 0)
+  N32_TYPE4 (LSMW, 0, 0, 0, 0, (N32_LSMW_BIM << 2) | N32_LSMW_LSMW)
+#define N32_FLDI_SP N32_TYPE2 (LDC, 0, REG_SP, 0)
 
 /* Use an invalid address value as 'not available' marker.  */
-enum { REG_UNAVAIL = (CORE_ADDR) -1 };
+enum
+{
+  REG_UNAVAIL = (CORE_ADDR) -1
+};
 
 /* Use an impossible value as invalid offset.  */
-enum { INVALID_OFFSET = (CORE_ADDR) -1 };
+enum
+{
+  INVALID_OFFSET = (CORE_ADDR) -1
+};
 
 /* Instruction groups for NDS32 epilogue analysis.  */
 enum
@@ -76,32 +81,55 @@ enum
   INSN_RECOVER_RETURN,
 };
 
-static const char *const nds32_register_names[] =
-{
+static const char *const nds32_register_names[] = {
   /* 32 GPRs.  */
-  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-  "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
-  "r24", "r25", "r26", "r27", "fp", "gp", "lp", "sp",
+  "r0",
+  "r1",
+  "r2",
+  "r3",
+  "r4",
+  "r5",
+  "r6",
+  "r7",
+  "r8",
+  "r9",
+  "r10",
+  "r11",
+  "r12",
+  "r13",
+  "r14",
+  "r15",
+  "r16",
+  "r17",
+  "r18",
+  "r19",
+  "r20",
+  "r21",
+  "r22",
+  "r23",
+  "r24",
+  "r25",
+  "r26",
+  "r27",
+  "fp",
+  "gp",
+  "lp",
+  "sp",
   /* PC.  */
   "pc",
 };
 
-static const char *const nds32_fdr_register_names[] =
-{
-  "fd0", "fd1", "fd2", "fd3", "fd4", "fd5", "fd6", "fd7",
-  "fd8", "fd9", "fd10", "fd11", "fd12", "fd13", "fd14", "fd15",
-  "fd16", "fd17", "fd18", "fd19", "fd20", "fd21", "fd22", "fd23",
-  "fd24", "fd25", "fd26", "fd27", "fd28", "fd29", "fd30", "fd31"
-};
+static const char *const nds32_fdr_register_names[]
+  = { "fd0",  "fd1",  "fd2",  "fd3",  "fd4",  "fd5",  "fd6",  "fd7",
+      "fd8",  "fd9",  "fd10", "fd11", "fd12", "fd13", "fd14", "fd15",
+      "fd16", "fd17", "fd18", "fd19", "fd20", "fd21", "fd22", "fd23",
+      "fd24", "fd25", "fd26", "fd27", "fd28", "fd29", "fd30", "fd31" };
 
-static const char *const nds32_fsr_register_names[] =
-{
-  "fs0", "fs1", "fs2", "fs3", "fs4", "fs5", "fs6", "fs7",
-  "fs8", "fs9", "fs10", "fs11", "fs12", "fs13", "fs14", "fs15",
-  "fs16", "fs17", "fs18", "fs19", "fs20", "fs21", "fs22", "fs23",
-  "fs24", "fs25", "fs26", "fs27", "fs28", "fs29", "fs30", "fs31"
-};
+static const char *const nds32_fsr_register_names[]
+  = { "fs0",  "fs1",  "fs2",  "fs3",  "fs4",  "fs5",  "fs6",  "fs7",
+      "fs8",  "fs9",  "fs10", "fs11", "fs12", "fs13", "fs14", "fs15",
+      "fs16", "fs17", "fs18", "fs19", "fs20", "fs21", "fs22", "fs23",
+      "fs24", "fs25", "fs26", "fs27", "fs28", "fs29", "fs30", "fs31" };
 
 /* The number of registers for four FPU configuration options.  */
 const int num_fdr_map[] = { 4, 8, 16, 32 };
@@ -112,153 +140,152 @@ static const struct
 {
   const char *name;
   const char *alias;
-} nds32_register_aliases[] =
-{
-  {"r15", "ta"},
-  {"r26", "p0"},
-  {"r27", "p1"},
-  {"fp", "r28"},
-  {"gp", "r29"},
-  {"lp", "r30"},
-  {"sp", "r31"},
+} nds32_register_aliases[] = {
+  { "r15", "ta" },
+  { "r26", "p0" },
+  { "r27", "p1" },
+  { "fp", "r28" },
+  { "gp", "r29" },
+  { "lp", "r30" },
+  { "sp", "r31" },
 
-  {"cr0", "cpu_ver"},
-  {"cr1", "icm_cfg"},
-  {"cr2", "dcm_cfg"},
-  {"cr3", "mmu_cfg"},
-  {"cr4", "msc_cfg"},
-  {"cr5", "core_id"},
-  {"cr6", "fucop_exist"},
-  {"cr7", "msc_cfg2"},
+  { "cr0", "cpu_ver" },
+  { "cr1", "icm_cfg" },
+  { "cr2", "dcm_cfg" },
+  { "cr3", "mmu_cfg" },
+  { "cr4", "msc_cfg" },
+  { "cr5", "core_id" },
+  { "cr6", "fucop_exist" },
+  { "cr7", "msc_cfg2" },
 
-  {"ir0", "psw"},
-  {"ir1", "ipsw"},
-  {"ir2", "p_psw"},
-  {"ir3", "ivb"},
-  {"ir4", "eva"},
-  {"ir5", "p_eva"},
-  {"ir6", "itype"},
-  {"ir7", "p_itype"},
-  {"ir8", "merr"},
-  {"ir9", "ipc"},
-  {"ir10", "p_ipc"},
-  {"ir11", "oipc"},
-  {"ir12", "p_p0"},
-  {"ir13", "p_p1"},
-  {"ir14", "int_mask"},
-  {"ir15", "int_pend"},
-  {"ir16", "sp_usr"},
-  {"ir17", "sp_priv"},
-  {"ir18", "int_pri"},
-  {"ir19", "int_ctrl"},
-  {"ir20", "sp_usr1"},
-  {"ir21", "sp_priv1"},
-  {"ir22", "sp_usr2"},
-  {"ir23", "sp_priv2"},
-  {"ir24", "sp_usr3"},
-  {"ir25", "sp_priv3"},
-  {"ir26", "int_mask2"},
-  {"ir27", "int_pend2"},
-  {"ir28", "int_pri2"},
-  {"ir29", "int_trigger"},
+  { "ir0", "psw" },
+  { "ir1", "ipsw" },
+  { "ir2", "p_psw" },
+  { "ir3", "ivb" },
+  { "ir4", "eva" },
+  { "ir5", "p_eva" },
+  { "ir6", "itype" },
+  { "ir7", "p_itype" },
+  { "ir8", "merr" },
+  { "ir9", "ipc" },
+  { "ir10", "p_ipc" },
+  { "ir11", "oipc" },
+  { "ir12", "p_p0" },
+  { "ir13", "p_p1" },
+  { "ir14", "int_mask" },
+  { "ir15", "int_pend" },
+  { "ir16", "sp_usr" },
+  { "ir17", "sp_priv" },
+  { "ir18", "int_pri" },
+  { "ir19", "int_ctrl" },
+  { "ir20", "sp_usr1" },
+  { "ir21", "sp_priv1" },
+  { "ir22", "sp_usr2" },
+  { "ir23", "sp_priv2" },
+  { "ir24", "sp_usr3" },
+  { "ir25", "sp_priv3" },
+  { "ir26", "int_mask2" },
+  { "ir27", "int_pend2" },
+  { "ir28", "int_pri2" },
+  { "ir29", "int_trigger" },
 
-  {"mr0", "mmu_ctl"},
-  {"mr1", "l1_pptb"},
-  {"mr2", "tlb_vpn"},
-  {"mr3", "tlb_data"},
-  {"mr4", "tlb_misc"},
-  {"mr5", "vlpt_idx"},
-  {"mr6", "ilmb"},
-  {"mr7", "dlmb"},
-  {"mr8", "cache_ctl"},
-  {"mr9", "hsmp_saddr"},
-  {"mr10", "hsmp_eaddr"},
-  {"mr11", "bg_region"},
+  { "mr0", "mmu_ctl" },
+  { "mr1", "l1_pptb" },
+  { "mr2", "tlb_vpn" },
+  { "mr3", "tlb_data" },
+  { "mr4", "tlb_misc" },
+  { "mr5", "vlpt_idx" },
+  { "mr6", "ilmb" },
+  { "mr7", "dlmb" },
+  { "mr8", "cache_ctl" },
+  { "mr9", "hsmp_saddr" },
+  { "mr10", "hsmp_eaddr" },
+  { "mr11", "bg_region" },
 
-  {"dr0", "bpc0"},
-  {"dr1", "bpc1"},
-  {"dr2", "bpc2"},
-  {"dr3", "bpc3"},
-  {"dr4", "bpc4"},
-  {"dr5", "bpc5"},
-  {"dr6", "bpc6"},
-  {"dr7", "bpc7"},
-  {"dr8", "bpa0"},
-  {"dr9", "bpa1"},
-  {"dr10", "bpa2"},
-  {"dr11", "bpa3"},
-  {"dr12", "bpa4"},
-  {"dr13", "bpa5"},
-  {"dr14", "bpa6"},
-  {"dr15", "bpa7"},
-  {"dr16", "bpam0"},
-  {"dr17", "bpam1"},
-  {"dr18", "bpam2"},
-  {"dr19", "bpam3"},
-  {"dr20", "bpam4"},
-  {"dr21", "bpam5"},
-  {"dr22", "bpam6"},
-  {"dr23", "bpam7"},
-  {"dr24", "bpv0"},
-  {"dr25", "bpv1"},
-  {"dr26", "bpv2"},
-  {"dr27", "bpv3"},
-  {"dr28", "bpv4"},
-  {"dr29", "bpv5"},
-  {"dr30", "bpv6"},
-  {"dr31", "bpv7"},
-  {"dr32", "bpcid0"},
-  {"dr33", "bpcid1"},
-  {"dr34", "bpcid2"},
-  {"dr35", "bpcid3"},
-  {"dr36", "bpcid4"},
-  {"dr37", "bpcid5"},
-  {"dr38", "bpcid6"},
-  {"dr39", "bpcid7"},
-  {"dr40", "edm_cfg"},
-  {"dr41", "edmsw"},
-  {"dr42", "edm_ctl"},
-  {"dr43", "edm_dtr"},
-  {"dr44", "bpmtc"},
-  {"dr45", "dimbr"},
-  {"dr46", "tecr0"},
-  {"dr47", "tecr1"},
+  { "dr0", "bpc0" },
+  { "dr1", "bpc1" },
+  { "dr2", "bpc2" },
+  { "dr3", "bpc3" },
+  { "dr4", "bpc4" },
+  { "dr5", "bpc5" },
+  { "dr6", "bpc6" },
+  { "dr7", "bpc7" },
+  { "dr8", "bpa0" },
+  { "dr9", "bpa1" },
+  { "dr10", "bpa2" },
+  { "dr11", "bpa3" },
+  { "dr12", "bpa4" },
+  { "dr13", "bpa5" },
+  { "dr14", "bpa6" },
+  { "dr15", "bpa7" },
+  { "dr16", "bpam0" },
+  { "dr17", "bpam1" },
+  { "dr18", "bpam2" },
+  { "dr19", "bpam3" },
+  { "dr20", "bpam4" },
+  { "dr21", "bpam5" },
+  { "dr22", "bpam6" },
+  { "dr23", "bpam7" },
+  { "dr24", "bpv0" },
+  { "dr25", "bpv1" },
+  { "dr26", "bpv2" },
+  { "dr27", "bpv3" },
+  { "dr28", "bpv4" },
+  { "dr29", "bpv5" },
+  { "dr30", "bpv6" },
+  { "dr31", "bpv7" },
+  { "dr32", "bpcid0" },
+  { "dr33", "bpcid1" },
+  { "dr34", "bpcid2" },
+  { "dr35", "bpcid3" },
+  { "dr36", "bpcid4" },
+  { "dr37", "bpcid5" },
+  { "dr38", "bpcid6" },
+  { "dr39", "bpcid7" },
+  { "dr40", "edm_cfg" },
+  { "dr41", "edmsw" },
+  { "dr42", "edm_ctl" },
+  { "dr43", "edm_dtr" },
+  { "dr44", "bpmtc" },
+  { "dr45", "dimbr" },
+  { "dr46", "tecr0" },
+  { "dr47", "tecr1" },
 
-  {"hspr0", "hsp_ctl"},
-  {"hspr1", "sp_bound"},
-  {"hspr2", "sp_bound_priv"},
+  { "hspr0", "hsp_ctl" },
+  { "hspr1", "sp_bound" },
+  { "hspr2", "sp_bound_priv" },
 
-  {"pfr0", "pfmc0"},
-  {"pfr1", "pfmc1"},
-  {"pfr2", "pfmc2"},
-  {"pfr3", "pfm_ctl"},
-  {"pfr4", "pft_ctl"},
+  { "pfr0", "pfmc0" },
+  { "pfr1", "pfmc1" },
+  { "pfr2", "pfmc2" },
+  { "pfr3", "pfm_ctl" },
+  { "pfr4", "pft_ctl" },
 
-  {"dmar0", "dma_cfg"},
-  {"dmar1", "dma_gcsw"},
-  {"dmar2", "dma_chnsel"},
-  {"dmar3", "dma_act"},
-  {"dmar4", "dma_setup"},
-  {"dmar5", "dma_isaddr"},
-  {"dmar6", "dma_esaddr"},
-  {"dmar7", "dma_tcnt"},
-  {"dmar8", "dma_status"},
-  {"dmar9", "dma_2dset"},
-  {"dmar10", "dma_2dsctl"},
-  {"dmar11", "dma_rcnt"},
-  {"dmar12", "dma_hstatus"},
+  { "dmar0", "dma_cfg" },
+  { "dmar1", "dma_gcsw" },
+  { "dmar2", "dma_chnsel" },
+  { "dmar3", "dma_act" },
+  { "dmar4", "dma_setup" },
+  { "dmar5", "dma_isaddr" },
+  { "dmar6", "dma_esaddr" },
+  { "dmar7", "dma_tcnt" },
+  { "dmar8", "dma_status" },
+  { "dmar9", "dma_2dset" },
+  { "dmar10", "dma_2dsctl" },
+  { "dmar11", "dma_rcnt" },
+  { "dmar12", "dma_hstatus" },
 
-  {"racr0", "prusr_acc_ctl"},
-  {"fucpr", "fucop_ctl"},
+  { "racr0", "prusr_acc_ctl" },
+  { "fucpr", "fucop_ctl" },
 
-  {"idr0", "sdz_ctl"},
-  {"idr1", "misc_ctl"},
-  {"idr2", "ecc_misc"},
+  { "idr0", "sdz_ctl" },
+  { "idr1", "misc_ctl" },
+  { "idr2", "ecc_misc" },
 
-  {"secur0", "sfcr"},
-  {"secur1", "sign"},
-  {"secur2", "isign"},
-  {"secur3", "p_isign"},
+  { "secur0", "sfcr" },
+  { "secur1", "sign" },
+  { "secur2", "isign" },
+  { "secur3", "p_isign" },
 };
 
 /* Value of a register alias.  BATON is the regnum of the corresponding
@@ -269,7 +296,7 @@ value_of_nds32_reg (frame_info_ptr frame, const void *baton)
 {
   return value_of_register ((int) (intptr_t) baton, frame);
 }
-
+
 /* Implement the "frame_align" gdbarch method.  */
 
 static CORE_ADDR
@@ -312,7 +339,7 @@ nds32_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
   /* No match, return a inaccessible register number.  */
   return -1;
 }
-
+
 /* NDS32 register groups.  */
 static const reggroup *nds32_cr_reggroup;
 static const reggroup *nds32_ir_reggroup;
@@ -385,7 +412,7 @@ nds32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
   if (reggroup == system_reggroup)
     return (regnum > NDS32_PC_REGNUM)
-	    && !nds32_register_reggroup_p (gdbarch, regnum, float_reggroup);
+	   && !nds32_register_reggroup_p (gdbarch, regnum, float_reggroup);
 
   /* The NDS32 reggroup contains registers whose name is prefixed
      by reggroup name.  */
@@ -393,7 +420,7 @@ nds32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   group_name = reggroup->name ();
   return !strncmp (reg_name, group_name, strlen (group_name));
 }
-
+
 /* Implement the "pseudo_register_type" tdesc_arch_data method.  */
 
 static struct type *
@@ -406,7 +433,7 @@ nds32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
     return arch_float_type (gdbarch, -1, "builtin_type_ieee_single",
 			    floatformats_ieee_single);
 
-  warning (_("Unknown nds32 pseudo register %d."), regnum);
+  warning (_ ("Unknown nds32 pseudo register %d."), regnum);
   return NULL;
 }
 
@@ -497,7 +524,7 @@ nds32_pseudo_register_write (struct gdbarch *gdbarch,
 
   gdb_assert_not_reached ("invalid pseudo register number");
 }
-
+
 /* Helper function for NDS32 ABI.  Return true if FPRs can be used
    to pass function arguments and return value.  */
 
@@ -740,10 +767,8 @@ nds32_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 		{
 		  int op = N32_OP6 (insn);
 
-		  if (op == N32_OP6_JI
-		      || op == N32_OP6_JREG
-		      || op == N32_OP6_BR1
-		      || op == N32_OP6_BR2
+		  if (op == N32_OP6_JI || op == N32_OP6_JREG
+		      || op == N32_OP6_BR1 || op == N32_OP6_BR2
 		      || op == N32_OP6_BR3)
 		    break;
 		}
@@ -887,7 +912,7 @@ nds32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      that bound, then use an arbitrary large number as the upper bound.  */
   limit_pc = skip_prologue_using_sal (gdbarch, pc);
   if (limit_pc == 0)
-    limit_pc = pc + 128;	/* Magic.  */
+    limit_pc = pc + 128; /* Magic.  */
 
   /* Find the end of prologue.  */
   return nds32_analyze_prologue (gdbarch, pc, limit_pc, NULL);
@@ -949,8 +974,8 @@ nds32_frame_cache (frame_info_ptr this_frame, void **this_cache)
    PC and the caller's SP when we were called.  */
 
 static void
-nds32_frame_this_id (frame_info_ptr this_frame,
-		     void **this_cache, struct frame_id *this_id)
+nds32_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+		     struct frame_id *this_id)
 {
   struct nds32_frame_cache *cache = nds32_frame_cache (this_frame, this_cache);
 
@@ -977,15 +1002,15 @@ nds32_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
   if (regnum == NDS32_PC_REGNUM)
     regnum = NDS32_LP_REGNUM;
 
-  if (regnum < NDS32_NUM_SAVED_REGS && cache->saved_regs[regnum] != REG_UNAVAIL)
+  if (regnum < NDS32_NUM_SAVED_REGS
+      && cache->saved_regs[regnum] != REG_UNAVAIL)
     return frame_unwind_got_memory (this_frame, regnum,
 				    cache->saved_regs[regnum]);
 
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind nds32_frame_unwind =
-{
+static const struct frame_unwind nds32_frame_unwind = {
   "nds32 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
@@ -1005,14 +1030,10 @@ nds32_frame_base_address (frame_info_ptr this_frame, void **this_cache)
   return cache->base;
 }
 
-static const struct frame_base nds32_frame_base =
-{
-  &nds32_frame_unwind,
-  nds32_frame_base_address,
-  nds32_frame_base_address,
-  nds32_frame_base_address
-};
-
+static const struct frame_base nds32_frame_base
+  = { &nds32_frame_unwind, nds32_frame_base_address, nds32_frame_base_address,
+      nds32_frame_base_address };
+
 /* Helper function for instructions used to pop multiple words.  */
 
 static void
@@ -1074,8 +1095,8 @@ nds32_analyze_epilogue_insn32 (int abi_use_fpr, uint32_t insn,
     {
       /* lmw.bim Rb, [$sp], Re, enable4 */
       if (cache != NULL)
-	nds32_pop_multiple_words (cache, N32_RT5 (insn),
-				  N32_RB5 (insn), N32_LSMW_ENABLE4 (insn));
+	nds32_pop_multiple_words (cache, N32_RT5 (insn), N32_RB5 (insn),
+				  N32_LSMW_ENABLE4 (insn));
 
       return INSN_RECOVER;
     }
@@ -1331,8 +1352,8 @@ nds32_epilogue_frame_cache (frame_info_ptr this_frame, void **this_cache)
 /* Implement the "this_id" frame_unwind method.  */
 
 static void
-nds32_epilogue_frame_this_id (frame_info_ptr this_frame,
-			      void **this_cache, struct frame_id *this_id)
+nds32_epilogue_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+			      struct frame_id *this_id)
 {
   struct nds32_frame_cache *cache
     = nds32_epilogue_frame_cache (this_frame, this_cache);
@@ -1361,25 +1382,23 @@ nds32_epilogue_frame_prev_register (frame_info_ptr this_frame,
   if (regnum == NDS32_PC_REGNUM)
     regnum = NDS32_LP_REGNUM;
 
-  if (regnum < NDS32_NUM_SAVED_REGS && cache->saved_regs[regnum] != REG_UNAVAIL)
+  if (regnum < NDS32_NUM_SAVED_REGS
+      && cache->saved_regs[regnum] != REG_UNAVAIL)
     return frame_unwind_got_memory (this_frame, regnum,
 				    cache->saved_regs[regnum]);
 
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind nds32_epilogue_frame_unwind =
-{
-  "nds32 epilogue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  nds32_epilogue_frame_this_id,
-  nds32_epilogue_frame_prev_register,
-  NULL,
-  nds32_epilogue_frame_sniffer
-};
+static const struct frame_unwind nds32_epilogue_frame_unwind
+  = { "nds32 epilogue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      nds32_epilogue_frame_this_id,
+      nds32_epilogue_frame_prev_register,
+      NULL,
+      nds32_epilogue_frame_sniffer };
 
-
 /* Floating type and struct type that has only one floating type member
    can pass value using FPU registers (when FPU ABI is used).  */
 
@@ -1409,15 +1428,15 @@ nds32_check_calling_use_fpr (struct type *type)
 
 static CORE_ADDR
 nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		       struct regcache *regcache, CORE_ADDR bp_addr,
-		       int nargs, struct value **args, CORE_ADDR sp,
+		       struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		       struct value **args, CORE_ADDR sp,
 		       function_call_return_method return_method,
 		       CORE_ADDR struct_addr)
 {
-  const int REND = 6;		/* End for register offset.  */
-  int goff = 0;			/* Current gpr offset for argument.  */
-  int foff = 0;			/* Current fpr offset for argument.  */
-  int soff = 0;			/* Current stack offset for argument.  */
+  const int REND = 6; /* End for register offset.  */
+  int goff = 0;	      /* Current gpr offset for argument.  */
+  int foff = 0;	      /* Current fpr offset for argument.  */
+  int soff = 0;	      /* Current stack offset for argument.  */
   int i;
   ULONGEST regval;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1518,8 +1537,8 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  break;
 		default:
 		  /* Long double?  */
-		  internal_error ("Do not know how to handle %d-byte double.\n",
-				  len);
+		  internal_error (
+		    "Do not know how to handle %d-byte double.\n", len);
 		  break;
 		}
 	      continue;
@@ -1591,7 +1610,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	}
 
-use_stack:
+    use_stack:
       /*
 	 When pushing (split parts of) an argument into stack,
 
@@ -1637,9 +1656,9 @@ use_stack:
 error_no_fpr:
   /* If use_fpr, but no floating-point register exists,
      then it is an error.  */
-  error (_("Fail to call. FPU registers are required."));
+  error (_ ("Fail to call. FPU registers are required."));
 }
-
+
 /* Read, for architecture GDBARCH, a function return value of TYPE
    from REGCACHE, and copy that into VALBUF.  */
 
@@ -1663,8 +1682,9 @@ nds32_extract_return_value (struct gdbarch *gdbarch, struct type *type,
       else if (len == 8)
 	regcache->cooked_read (NDS32_FD0_REGNUM, valbuf);
       else
-	internal_error (_("Cannot extract return value of %d bytes "
-			  "long floating-point."), len);
+	internal_error (_ ("Cannot extract return value of %d bytes "
+			   "long floating-point."),
+			len);
     }
   else
     {
@@ -1752,8 +1772,9 @@ nds32_store_return_value (struct gdbarch *gdbarch, struct type *type,
       else if (len == 8)
 	regcache->cooked_write (NDS32_FD0_REGNUM, valbuf);
       else
-	internal_error (_("Cannot store return value of %d bytes "
-			  "long floating-point."), len);
+	internal_error (_ ("Cannot store return value of %d bytes "
+			   "long floating-point."),
+			len);
     }
   else
     {
@@ -1817,7 +1838,7 @@ nds32_return_value (struct gdbarch *gdbarch, struct value *func_type,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 }
-
+
 /* Implement the "get_longjmp_target" gdbarch method.  */
 
 static int
@@ -1836,15 +1857,15 @@ nds32_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
   *pc = extract_unsigned_integer (buf, 4, byte_order);
   return 1;
 }
-
+
 /* Validate the given TDESC, and fixed-number some registers in it.
    Return 0 if the given TDESC does not contain the required feature
    or not contain required registers.  */
 
 static int
 nds32_validate_tdesc_p (const struct target_desc *tdesc,
-			struct tdesc_arch_data *tdesc_data,
-			int *fpu_freg, int *use_pseudo_fsrs)
+			struct tdesc_arch_data *tdesc_data, int *fpu_freg,
+			int *use_pseudo_fsrs)
 {
   const struct tdesc_feature *feature;
   int i, valid_p;
@@ -1911,9 +1932,9 @@ nds32_validate_tdesc_p (const struct target_desc *tdesc,
       fs0_regnum = NDS32_FD0_REGNUM + num_fdr_regs;
       num_listed_fsr = 0;
       for (i = 0; i < num_fsr_regs; i++)
-	num_listed_fsr += tdesc_numbered_register (feature, tdesc_data,
-						   fs0_regnum + i,
-						   nds32_fsr_register_names[i]);
+	num_listed_fsr
+	  += tdesc_numbered_register (feature, tdesc_data, fs0_regnum + i,
+				      nds32_fsr_register_names[i]);
 
       if (num_listed_fsr == 0)
 	/* No required FSRs are listed explicitly,  make them pseudo registers
@@ -2082,6 +2103,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_nds32_tdep ();
+
 void
 _initialize_nds32_tdep ()
 {

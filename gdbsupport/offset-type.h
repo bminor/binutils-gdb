@@ -50,8 +50,10 @@
 
 /* Declare TYPE as being an offset type.  This declares the type and
    enables the operators defined below.  */
-#define DEFINE_OFFSET_TYPE(TYPE, UNDERLYING)	\
-  enum class TYPE : UNDERLYING {};		\
+#define DEFINE_OFFSET_TYPE(TYPE, UNDERLYING) \
+  enum class TYPE : UNDERLYING               \
+  {                                          \
+  };                                         \
   void is_offset_type (TYPE)
 
 /* The macro macro is all you need to know use offset types.  The rest
@@ -76,53 +78,48 @@
 /* Adding or subtracting an integer to an offset type shifts the
    offset.  This is like "PTR = PTR + INT" and "PTR += INT".  */
 
-#define DEFINE_OFFSET_ARITHM_OP(OP)					\
-  template<typename E,							\
-	   typename = decltype (is_offset_type (std::declval<E> ()))>	\
-  constexpr E								\
-  operator OP (E lhs, typename std::underlying_type<E>::type rhs)	\
-  {									\
-    using underlying = typename std::underlying_type<E>::type;		\
-    return (E) (static_cast<underlying> (lhs) OP rhs);			\
-  }									\
-									\
-  template<typename E,							\
-	   typename = decltype (is_offset_type (std::declval<E> ()))>	\
-  constexpr E								\
-  operator OP (typename std::underlying_type<E>::type lhs, E rhs)	\
-  {									\
-    using underlying = typename std::underlying_type<E>::type;		\
-    return (E) (lhs OP static_cast<underlying> (rhs));			\
-  }									\
-									\
-  template<typename E,							\
-	   typename = decltype (is_offset_type (std::declval<E> ()))>	\
-  E &									\
-  operator OP ## = (E &lhs, typename std::underlying_type<E>::type rhs)	\
-  {									\
-    using underlying = typename std::underlying_type<E>::type;		\
-    lhs = (E) (static_cast<underlying> (lhs) OP rhs);			\
-    return lhs;								\
+#define DEFINE_OFFSET_ARITHM_OP(OP)                                           \
+  template<typename E,                                                        \
+           typename = decltype (is_offset_type (std::declval<E> ()))>         \
+  constexpr E operator OP (E lhs, typename std::underlying_type<E>::type rhs) \
+  {                                                                           \
+    using underlying = typename std::underlying_type<E>::type;                \
+    return (E) (static_cast<underlying> (lhs) OP rhs);                        \
+  }                                                                           \
+                                                                              \
+  template<typename E,                                                        \
+           typename = decltype (is_offset_type (std::declval<E> ()))>         \
+  constexpr E operator OP (typename std::underlying_type<E>::type lhs, E rhs) \
+  {                                                                           \
+    using underlying = typename std::underlying_type<E>::type;                \
+    return (E) (lhs OP static_cast<underlying> (rhs));                        \
+  }                                                                           \
+                                                                              \
+  template<typename E,                                                        \
+           typename = decltype (is_offset_type (std::declval<E> ()))>         \
+  E &operator OP##= (E &lhs, typename std::underlying_type<E>::type rhs)      \
+  {                                                                           \
+    using underlying = typename std::underlying_type<E>::type;                \
+    lhs = (E) (static_cast<underlying> (lhs) OP rhs);                         \
+    return lhs;                                                               \
   }
 
-DEFINE_OFFSET_ARITHM_OP(+)
-DEFINE_OFFSET_ARITHM_OP(-)
+DEFINE_OFFSET_ARITHM_OP (+)
+DEFINE_OFFSET_ARITHM_OP (-)
 
 /* Adding two offset types doesn't make sense, just like "PTR + PTR"
    doesn't make sense.  This is defined as a deleted function so that
    a compile error easily brings you to this comment.  */
 
-template<typename E,
-	 typename = decltype (is_offset_type (std::declval<E> ()))>
-constexpr typename std::underlying_type<E>::type
-operator+ (E lhs, E rhs) = delete;
+template<typename E, typename = decltype (is_offset_type (std::declval<E> ()))>
+constexpr typename std::underlying_type<E>::type operator+ (E lhs, E rhs)
+  = delete;
 
 /* Subtracting two offset types, however, gives you back the
    difference between the offsets, as an underlying type.  Similar to
    how "PTR2 - PTR1" returns a ptrdiff_t.  */
 
-template<typename E,
-	 typename = decltype (is_offset_type (std::declval<E> ()))>
+template<typename E, typename = decltype (is_offset_type (std::declval<E> ()))>
 constexpr typename std::underlying_type<E>::type
 operator- (E lhs, E rhs)
 {

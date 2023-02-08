@@ -34,8 +34,8 @@
 
 struct fork_catchpoint : public catchpoint
 {
-  fork_catchpoint (struct gdbarch *gdbarch, bool temp,
-		   const char *cond_string, bool is_vfork_)
+  fork_catchpoint (struct gdbarch *gdbarch, bool temp, const char *cond_string,
+		   bool is_vfork_)
     : catchpoint (gdbarch, temp, cond_string),
       is_vfork (is_vfork_)
   {
@@ -45,8 +45,7 @@ struct fork_catchpoint : public catchpoint
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
   int breakpoint_hit (const struct bp_location *bl,
-		      const address_space *aspace,
-		      CORE_ADDR bp_addr,
+		      const address_space *aspace, CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
@@ -93,9 +92,8 @@ fork_catchpoint::breakpoint_hit (const struct bp_location *bl,
 				 CORE_ADDR bp_addr,
 				 const target_waitstatus &ws)
 {
-  if (ws.kind () != (is_vfork
-		     ? TARGET_WAITKIND_VFORKED
-		     : TARGET_WAITKIND_FORKED))
+  if (ws.kind ()
+      != (is_vfork ? TARGET_WAITKIND_VFORKED : TARGET_WAITKIND_FORKED))
     return 0;
 
   forked_inferior_pid = ws.child_ptid ();
@@ -118,9 +116,8 @@ fork_catchpoint::print_it (const bpstat *bs) const
   if (uiout->is_mi_like_p ())
     {
       uiout->field_string ("reason",
-			   async_reason_lookup (is_vfork
-						? EXEC_ASYNC_VFORK
-						: EXEC_ASYNC_FORK));
+			   async_reason_lookup (is_vfork ? EXEC_ASYNC_VFORK
+							 : EXEC_ASYNC_FORK));
       uiout->field_string ("disp", bpdisp_text (disposition));
     }
   uiout->field_signed ("bkptno", number);
@@ -169,8 +166,7 @@ fork_catchpoint::print_one (bp_location **last_loc) const
 void
 fork_catchpoint::print_mention () const
 {
-  gdb_printf (_("Catchpoint %d (%s)"), number,
-	      is_vfork ? "vfork" : "fork");
+  gdb_printf (_ ("Catchpoint %d (%s)"), number, is_vfork ? "vfork" : "fork");
 }
 
 /* Implement the "print_recreate" method for fork catchpoints.  */
@@ -183,20 +179,22 @@ fork_catchpoint::print_recreate (struct ui_file *fp) const
 }
 
 static void
-create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
-				    bool temp, const char *cond_string,
-				    bool is_vfork)
+create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch, bool temp,
+				    const char *cond_string, bool is_vfork)
 {
-  std::unique_ptr<fork_catchpoint> c
-    (new fork_catchpoint (gdbarch, temp, cond_string, is_vfork));
+  std::unique_ptr<fork_catchpoint> c (new fork_catchpoint (gdbarch, temp,
+							   cond_string,
+							   is_vfork));
 
   install_breakpoint (0, std::move (c), 1);
 }
 
 enum catch_fork_kind
 {
-  catch_fork_temporary, catch_vfork_temporary,
-  catch_fork_permanent, catch_vfork_permanent
+  catch_fork_temporary,
+  catch_vfork_temporary,
+  catch_fork_permanent,
+  catch_vfork_permanent
 };
 
 static void
@@ -223,7 +221,7 @@ catch_fork_command_1 (const char *arg, int from_tty,
   cond_string = ep_parse_optional_if_clause (&arg);
 
   if ((*arg != '\0') && !isspace (*arg))
-    error (_("Junk at end of arguments."));
+    error (_ ("Junk at end of arguments."));
 
   /* If this target supports it, create a fork or vfork catchpoint
      and enable reporting of such events.  */
@@ -238,23 +236,21 @@ catch_fork_command_1 (const char *arg, int from_tty,
       create_fork_vfork_event_catchpoint (gdbarch, temp, cond_string, true);
       break;
     default:
-      error (_("unsupported or unknown fork kind; cannot catch it"));
+      error (_ ("unsupported or unknown fork kind; cannot catch it"));
       break;
     }
 }
 
 void _initialize_break_catch_fork ();
+
 void
 _initialize_break_catch_fork ()
 {
-  add_catch_command ("fork", _("Catch calls to fork."),
-		     catch_fork_command_1,
-		     NULL,
-		     (void *) (uintptr_t) catch_fork_permanent,
+  add_catch_command ("fork", _ ("Catch calls to fork."), catch_fork_command_1,
+		     NULL, (void *) (uintptr_t) catch_fork_permanent,
 		     (void *) (uintptr_t) catch_fork_temporary);
-  add_catch_command ("vfork", _("Catch calls to vfork."),
-		     catch_fork_command_1,
-		     NULL,
+  add_catch_command ("vfork", _ ("Catch calls to vfork."),
+		     catch_fork_command_1, NULL,
 		     (void *) (uintptr_t) catch_vfork_permanent,
 		     (void *) (uintptr_t) catch_vfork_temporary);
 }

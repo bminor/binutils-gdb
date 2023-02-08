@@ -25,22 +25,20 @@
    vprintf-style argument list.  The function "vwarning" must be
    provided by the client.  */
 
-extern void warning (const char *fmt, ...)
-     ATTRIBUTE_PRINTF (1, 2);
+extern void warning (const char *fmt, ...) ATTRIBUTE_PRINTF (1, 2);
 
-extern void vwarning (const char *fmt, va_list args)
-     ATTRIBUTE_PRINTF (1, 0);
+extern void vwarning (const char *fmt, va_list args) ATTRIBUTE_PRINTF (1, 0);
 
 /* A non-predictable, non-fatal error was detected.  The requested
    operation cannot proceed.  An error message is constructed using
    a printf- or vprintf-style argument list.  These functions do not
    return.  The function "verror" must be provided by the client.  */
 
-extern void error (const char *fmt, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+extern void error (const char *fmt, ...) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (1, 2);
 
-extern void verror (const char *fmt, va_list args)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
+extern void verror (const char *fmt, va_list args) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (1, 0);
 
 /* An internal error was detected.  Internal errors indicate
    programming errors such as assertion failures, as opposed to
@@ -53,16 +51,16 @@ extern void verror (const char *fmt, va_list args)
    automatically.  The function "internal_verror" must be provided
    by the client.  */
 
-extern void internal_error_loc (const char *file, int line,
-				const char *fmt, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 4);
+extern void internal_error_loc (const char *file, int line, const char *fmt,
+                                ...) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (3, 4);
 
-#define internal_error(fmt, ...)				\
+#define internal_error(fmt, ...) \
   internal_error_loc (__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
-extern void internal_verror (const char *file, int line,
-			     const char *fmt, va_list args)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0);
+extern void internal_verror (const char *file, int line, const char *fmt,
+                             va_list args) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (3, 0);
 
 /* An internal problem was detected, but the requested operation can
    still proceed.  Internal warnings indicate programming errors as
@@ -71,17 +69,14 @@ extern void internal_verror (const char *file, int line,
    argument list.  The function "internal_vwarning" must be provided
    by the client.  */
 
-extern void internal_warning_loc (const char *file, int line,
-				  const char *fmt, ...)
-     ATTRIBUTE_PRINTF (3, 4);
+extern void internal_warning_loc (const char *file, int line, const char *fmt,
+                                  ...) ATTRIBUTE_PRINTF (3, 4);
 
-#define internal_warning(fmt, ...)				\
+#define internal_warning(fmt, ...) \
   internal_warning_loc (__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
-extern void internal_vwarning (const char *file, int line,
-			       const char *fmt, va_list args)
-     ATTRIBUTE_PRINTF (3, 0);
-
+extern void internal_vwarning (const char *file, int line, const char *fmt,
+                               va_list args) ATTRIBUTE_PRINTF (3, 0);
 
 /* Like "error", but the error message is constructed by combining
    STRING with the system error message for errno.  This function does

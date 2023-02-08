@@ -25,13 +25,9 @@
 const char file_system_kind_auto[] = "auto";
 const char file_system_kind_unix[] = "unix";
 const char file_system_kind_dos_based[] = "dos-based";
-const char *const target_file_system_kinds[] =
-{
-  file_system_kind_auto,
-  file_system_kind_unix,
-  file_system_kind_dos_based,
-  NULL
-};
+const char *const target_file_system_kinds[]
+  = { file_system_kind_auto, file_system_kind_unix, file_system_kind_dos_based,
+      NULL };
 const char *target_file_system_kind = file_system_kind_auto;
 
 const char *
@@ -58,35 +54,34 @@ target_lbasename (const char *kind, const char *name)
 }
 
 static void
-show_target_file_system_kind_command (struct ui_file *file,
-				      int from_tty,
+show_target_file_system_kind_command (struct ui_file *file, int from_tty,
 				      struct cmd_list_element *c,
 				      const char *value)
 {
   if (target_file_system_kind == file_system_kind_auto)
-    gdb_printf (file, _("\
+    gdb_printf (file, _ ("\
 The assumed file system kind for target reported file names \
 is \"%s\" (currently \"%s\").\n"),
-		value,
-		effective_target_file_system_kind ());
+		value, effective_target_file_system_kind ());
   else
-    gdb_printf (file, _("\
+    gdb_printf (file, _ ("\
 The assumed file system kind for target reported file names \
 is \"%s\".\n"),
 		value);
 }
 
 void _initialize_filesystem ();
+
 void
 _initialize_filesystem ()
 {
-  add_setshow_enum_cmd ("target-file-system-kind",
-			class_files,
-			target_file_system_kinds,
-			&target_file_system_kind, _("\
-Set assumed file system kind for target reported file names."), _("\
+  add_setshow_enum_cmd ("target-file-system-kind", class_files,
+			target_file_system_kinds, &target_file_system_kind,
+			_ ("\
+Set assumed file system kind for target reported file names."),
+			_ ("\
 Show assumed file system kind for target reported file names."),
-			_("\
+			_ ("\
 If `unix', target file names (e.g., loaded shared library file names)\n\
 starting the forward slash (`/') character are considered absolute,\n\
 and the directory separator character is the forward slash (`/').  If\n\
@@ -96,6 +91,6 @@ backslash (`\\') is also considered a directory separator.  Set to\n\
 `auto' (which is the default), to let GDB decide, based on its\n\
 knowledge of the target operating system."),
 			NULL, /* setfunc */
-			show_target_file_system_kind_command,
-			&setlist, &showlist);
+			show_target_file_system_kind_command, &setlist,
+			&showlist);
 }

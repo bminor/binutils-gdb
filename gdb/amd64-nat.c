@@ -80,13 +80,12 @@ amd64_native_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
   return (amd64_native_gregset_reg_offset (gdbarch, regnum) != -1);
 }
 
-
 /* Supply register REGNUM, whose contents are stored in GREGS, to
    REGCACHE.  If REGNUM is -1, supply all appropriate registers.  */
 
 void
-amd64_supply_native_gregset (struct regcache *regcache,
-			     const void *gregs, int regnum)
+amd64_supply_native_gregset (struct regcache *regcache, const void *gregs,
+			     int regnum)
 {
   const char *regs = (const char *) gregs;
   struct gdbarch *gdbarch = regcache->arch ();
@@ -116,8 +115,8 @@ amd64_supply_native_gregset (struct regcache *regcache,
    registers.  */
 
 void
-amd64_collect_native_gregset (const struct regcache *regcache,
-			      void *gregs, int regnum)
+amd64_collect_native_gregset (const struct regcache *regcache, void *gregs,
+			      int regnum)
 {
   char *regs = (char *) gregs;
   struct gdbarch *gdbarch = regcache->arch ();

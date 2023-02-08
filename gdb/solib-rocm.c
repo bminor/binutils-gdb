@@ -61,7 +61,6 @@ rocm_free_solib_list (struct solib_info *info)
   info->solib_list = nullptr;
 }
 
-
 /* Fetch the solib_info data for INF.  */
 
 static struct solib_info *
@@ -165,7 +164,8 @@ rocm_solib_current_sos ()
   return head;
 }
 
-namespace {
+namespace
+{
 
 /* Interface to interact with a ROCm code object stream.  */
 
@@ -189,6 +189,7 @@ struct rocm_code_object_stream
   virtual ~rocm_code_object_stream () = default;
 
 protected:
+
   rocm_code_object_stream () = default;
 
   /* Return the size of the object file, or -1 if the size cannot be
@@ -238,15 +239,17 @@ protected:
   ULONGEST m_size;
 };
 
-rocm_code_object_stream_file::rocm_code_object_stream_file
-  (int fd, ULONGEST offset, ULONGEST size)
-  : m_fd (fd), m_offset (offset), m_size (size)
+rocm_code_object_stream_file::rocm_code_object_stream_file (int fd,
+							    ULONGEST offset,
+							    ULONGEST size)
+  : m_fd (fd),
+    m_offset (offset),
+    m_size (size)
 {
 }
 
 file_ptr
-rocm_code_object_stream_file::read (void *buf, file_ptr size,
-				    file_ptr offset)
+rocm_code_object_stream_file::read (void *buf, file_ptr size, file_ptr offset)
 {
   fileio_error target_errno;
   file_ptr nbytes = 0;
@@ -326,14 +329,11 @@ protected:
      releases or re-uses this memory before GDB is done using it.  */
   gdb::byte_vector m_objfile_image;
 
-  LONGEST size () override
-  {
-    return m_objfile_image.size ();
-  }
+  LONGEST size () override { return m_objfile_image.size (); }
 };
 
-rocm_code_object_stream_memory::rocm_code_object_stream_memory
-  (gdb::byte_vector buffer)
+rocm_code_object_stream_memory::rocm_code_object_stream_memory (
+  gdb::byte_vector buffer)
   : m_objfile_image (std::move (buffer))
 {
 }
@@ -374,9 +374,7 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
   std::string decoded_path;
   decoded_path.reserve (path.length ());
   for (size_t i = 0; i < path.length (); ++i)
-    if (path[i] == '%'
-	&& i < path.length () - 2
-	&& std::isxdigit (path[i + 1])
+    if (path[i] == '%' && i < path.length () - 2 && std::isxdigit (path[i + 1])
 	&& std::isxdigit (path[i + 2]))
       {
 	gdb::string_view hex_digits = path.substr (i + 1, 2);
@@ -399,8 +397,8 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
     tokens.emplace_back (uri.substr (last));
 
   /* Create a tag-value map from the tokenized query/fragment.  */
-  std::unordered_map<gdb::string_view, gdb::string_view,
-		     gdb::string_view_hash> params;
+  std::unordered_map<gdb::string_view, gdb::string_view, gdb::string_view_hash>
+    params;
   for (gdb::string_view token : tokens)
     {
       size_t delim = token.find ('=');
@@ -418,19 +416,18 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
       ULONGEST size = 0;
       inferior *inferior = static_cast<struct inferior *> (inferior_void);
 
-      auto try_strtoulst = [] (gdb::string_view v)
-	{
-	  errno = 0;
-	  ULONGEST value = strtoulst (v.data (), nullptr, 0);
-	  if (errno != 0)
-	    {
-	      /* The actual message doesn't matter, the exception is caught
+      auto try_strtoulst = [] (gdb::string_view v) {
+	errno = 0;
+	ULONGEST value = strtoulst (v.data (), nullptr, 0);
+	if (errno != 0)
+	  {
+	    /* The actual message doesn't matter, the exception is caught
 	         below, transformed in a BFD error, and the message is lost.  */
-	      error (_("Failed to parse integer."));
-	    }
+	    error (_ ("Failed to parse integer."));
+	  }
 
-	  return value;
-	};
+	return value;
+      };
 
       auto offset_it = params.find ("offset");
       if (offset_it != params.end ())
@@ -441,7 +438,7 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
 	{
 	  size = try_strtoulst (size_it->second);
 	  if (size == 0)
-	    error (_("Invalid size value"));
+	    error (_ ("Invalid size value"));
 	}
 
       if (protocol == "file")
@@ -467,7 +464,7 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
 	  ULONGEST pid = try_strtoulst (path);
 	  if (pid != inferior->pid)
 	    {
-	      warning (_("`%s': code object is from another inferior"),
+	      warning (_ ("`%s': code object is from another inferior"),
 		       gdb::to_string (uri).c_str ());
 	      bfd_set_error (bfd_error_bad_value);
 	      return nullptr;
@@ -476,7 +473,7 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
 	  gdb::byte_vector buffer (size);
 	  if (target_read_memory (offset, buffer.data (), size) != 0)
 	    {
-	      warning (_("Failed to copy the code object from the inferior"));
+	      warning (_ ("Failed to copy the code object from the inferior"));
 	      bfd_set_error (bfd_error_bad_value);
 	      return nullptr;
 	    }
@@ -484,7 +481,7 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
 	  return new rocm_code_object_stream_memory (std::move (buffer));
 	}
 
-      warning (_("`%s': protocol not supported: %s"),
+      warning (_ ("`%s': protocol not supported: %s"),
 	       gdb::to_string (uri).c_str (), protocol.c_str ());
       bfd_set_error (bfd_error_bad_value);
       return nullptr;
@@ -537,12 +534,12 @@ rocm_solib_bfd_open (const char *pathname)
 			   rocm_bfd_iovec_close, rocm_bfd_iovec_stat);
 
   if (abfd == nullptr)
-    error (_("Could not open `%s' as an executable file: %s"), pathname,
+    error (_ ("Could not open `%s' as an executable file: %s"), pathname,
 	   bfd_errmsg (bfd_get_error ()));
 
   /* Check bfd format.  */
   if (!bfd_check_format (abfd.get (), bfd_object))
-    error (_("`%s': not in executable format: %s"),
+    error (_ ("`%s': not in executable format: %s"),
 	   bfd_get_filename (abfd.get ()), bfd_errmsg (bfd_get_error ()));
 
   unsigned char osabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
@@ -550,12 +547,12 @@ rocm_solib_bfd_open (const char *pathname)
 
   /* Check that the code object is using the HSA OS ABI.  */
   if (osabi != ELFOSABI_AMDGPU_HSA)
-    error (_("`%s': ELF file OS ABI is not supported (%d)."),
+    error (_ ("`%s': ELF file OS ABI is not supported (%d)."),
 	   bfd_get_filename (abfd.get ()), osabi);
 
   /* We support HSA code objects V3 and greater.  */
   if (osabiversion < ELFABIVERSION_AMDGPU_HSA_V3)
-    error (_("`%s': ELF file HSA OS ABI version is not supported (%d)."),
+    error (_ ("`%s': ELF file HSA OS ABI version is not supported (%d)."),
 	   bfd_get_filename (abfd.get ()), osabiversion);
 
   return abfd;
@@ -591,7 +588,7 @@ rocm_update_solib_list ()
 					   &code_object_list, nullptr);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
     {
-      warning (_("amd_dbgapi_process_code_object_list failed (%s)"),
+      warning (_ ("amd_dbgapi_process_code_object_list failed (%s)"),
 	       get_status_string (status));
       return;
     }
@@ -601,15 +598,15 @@ rocm_update_solib_list ()
       CORE_ADDR l_addr;
       char *uri_bytes;
 
-      status = amd_dbgapi_code_object_get_info
-	(code_object_list[i], AMD_DBGAPI_CODE_OBJECT_INFO_LOAD_ADDRESS,
-	 sizeof (l_addr), &l_addr);
+      status = amd_dbgapi_code_object_get_info (
+	code_object_list[i], AMD_DBGAPI_CODE_OBJECT_INFO_LOAD_ADDRESS,
+	sizeof (l_addr), &l_addr);
       if (status != AMD_DBGAPI_STATUS_SUCCESS)
 	continue;
 
-      status = amd_dbgapi_code_object_get_info
-	(code_object_list[i], AMD_DBGAPI_CODE_OBJECT_INFO_URI_NAME,
-	 sizeof (uri_bytes), &uri_bytes);
+      status = amd_dbgapi_code_object_get_info (
+	code_object_list[i], AMD_DBGAPI_CODE_OBJECT_INFO_URI_NAME,
+	sizeof (uri_bytes), &uri_bytes);
       if (status != AMD_DBGAPI_STATUS_SUCCESS)
 	continue;
 
@@ -672,8 +669,7 @@ _initialize_rocm_solib ()
   /* The dependency on the amd-dbgapi exists because solib-rocm's
      inferior_created observer needs amd-dbgapi to have attached the process,
      which happens in amd_dbgapi_target's inferior_created observer.  */
-  gdb::observers::inferior_created.attach
-    (rocm_solib_target_inferior_created,
-     "solib-rocm",
-     { &get_amd_dbgapi_target_inferior_created_observer_token () });
+  gdb::observers::inferior_created.attach (
+    rocm_solib_target_inferior_created, "solib-rocm",
+    { &get_amd_dbgapi_target_inferior_created_observer_token () });
 }

@@ -33,7 +33,8 @@
 #endif
 
 STATIC_IN_GDB target_desc_up
-loongarch_create_target_description (const struct loongarch_gdbarch_features features)
+loongarch_create_target_description (
+  const struct loongarch_gdbarch_features features)
 {
   /* Now we should create a new target description.  */
   target_desc_up tdesc = allocate_target_description ();
@@ -80,12 +81,13 @@ struct loongarch_gdbarch_features_hasher
 
 /* Cache of previously seen target descriptions, indexed by the feature set
    that created them.  */
-static std::unordered_map<loongarch_gdbarch_features,
-			  const target_desc_up,
-			  loongarch_gdbarch_features_hasher> loongarch_tdesc_cache;
+static std::unordered_map<loongarch_gdbarch_features, const target_desc_up,
+			  loongarch_gdbarch_features_hasher>
+  loongarch_tdesc_cache;
 
 const target_desc *
-loongarch_lookup_target_description (const struct loongarch_gdbarch_features features)
+loongarch_lookup_target_description (
+  const struct loongarch_gdbarch_features features)
 {
   /* Lookup in the cache.  If we find it then return the pointer out of
      the target_desc_up (which is a unique_ptr).  This is safe as the

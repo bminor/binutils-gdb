@@ -31,23 +31,18 @@
 struct agent_expr;
 struct axs_value;
 
-extern void gen_expr_binop (struct expression *exp,
-			    enum exp_opcode op,
+extern void gen_expr_binop (struct expression *exp, enum exp_opcode op,
 			    expr::operation *lhs, expr::operation *rhs,
 			    struct agent_expr *ax, struct axs_value *value);
-extern void gen_expr_structop (struct expression *exp,
-			       enum exp_opcode op,
-			       expr::operation *lhs,
-			       const char *name,
+extern void gen_expr_structop (struct expression *exp, enum exp_opcode op,
+			       expr::operation *lhs, const char *name,
 			       struct agent_expr *ax, struct axs_value *value);
-extern void gen_expr_unop (struct expression *exp,
-			   enum exp_opcode op,
-			   expr::operation *lhs,
-			   struct agent_expr *ax, struct axs_value *value);
+extern void gen_expr_unop (struct expression *exp, enum exp_opcode op,
+			   expr::operation *lhs, struct agent_expr *ax,
+			   struct axs_value *value);
 
 extern struct value *eval_op_scope (struct type *expect_type,
-				    struct expression *exp,
-				    enum noside noside,
+				    struct expression *exp, enum noside noside,
 				    struct type *type, const char *string);
 extern struct value *eval_op_var_msym_value (struct type *expect_type,
 					     struct expression *exp,
@@ -59,16 +54,15 @@ extern struct value *eval_op_var_entry_value (struct type *expect_type,
 					      enum noside noside, symbol *sym);
 extern struct value *eval_op_func_static_var (struct type *expect_type,
 					      struct expression *exp,
-					      enum noside noside,
-					      value *func, const char *var);
+					      enum noside noside, value *func,
+					      const char *var);
 extern struct value *eval_op_register (struct type *expect_type,
 				       struct expression *exp,
 				       enum noside noside, const char *name);
 extern struct value *eval_op_ternop (struct type *expect_type,
 				     struct expression *exp,
-				     enum noside noside,
-				     struct value *array, struct value *low,
-				     struct value *upper);
+				     enum noside noside, struct value *array,
+				     struct value *low, struct value *upper);
 extern struct value *eval_op_structop_struct (struct type *expect_type,
 					      struct expression *exp,
 					      enum noside noside,
@@ -81,15 +75,13 @@ extern struct value *eval_op_structop_ptr (struct type *expect_type,
 					   const char *string);
 extern struct value *eval_op_member (struct type *expect_type,
 				     struct expression *exp,
-				     enum noside noside,
-				     struct value *arg1, struct value *arg2);
+				     enum noside noside, struct value *arg1,
+				     struct value *arg2);
 extern struct value *eval_op_add (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside,
+				  struct expression *exp, enum noside noside,
 				  struct value *arg1, struct value *arg2);
 extern struct value *eval_op_sub (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside,
+				  struct expression *exp, enum noside noside,
 				  struct value *arg1, struct value *arg2);
 extern struct value *eval_op_binary (struct type *expect_type,
 				     struct expression *exp,
@@ -101,48 +93,39 @@ extern struct value *eval_op_subscript (struct type *expect_type,
 					struct value *arg1,
 					struct value *arg2);
 extern struct value *eval_op_equal (struct type *expect_type,
-				    struct expression *exp,
-				    enum noside noside, enum exp_opcode op,
-				    struct value *arg1,
+				    struct expression *exp, enum noside noside,
+				    enum exp_opcode op, struct value *arg1,
 				    struct value *arg2);
 extern struct value *eval_op_notequal (struct type *expect_type,
 				       struct expression *exp,
 				       enum noside noside, enum exp_opcode op,
-				       struct value *arg1,
-				       struct value *arg2);
+				       struct value *arg1, struct value *arg2);
 extern struct value *eval_op_less (struct type *expect_type,
-				   struct expression *exp,
-				   enum noside noside, enum exp_opcode op,
-				   struct value *arg1,
+				   struct expression *exp, enum noside noside,
+				   enum exp_opcode op, struct value *arg1,
 				   struct value *arg2);
 extern struct value *eval_op_gtr (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside, enum exp_opcode op,
-				  struct value *arg1,
+				  struct expression *exp, enum noside noside,
+				  enum exp_opcode op, struct value *arg1,
 				  struct value *arg2);
 extern struct value *eval_op_geq (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside, enum exp_opcode op,
-				  struct value *arg1,
+				  struct expression *exp, enum noside noside,
+				  enum exp_opcode op, struct value *arg1,
 				  struct value *arg2);
 extern struct value *eval_op_leq (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside, enum exp_opcode op,
-				  struct value *arg1,
+				  struct expression *exp, enum noside noside,
+				  enum exp_opcode op, struct value *arg1,
 				  struct value *arg2);
 extern struct value *eval_op_repeat (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, enum exp_opcode op,
-				     struct value *arg1,
-				     struct value *arg2);
+				     struct value *arg1, struct value *arg2);
 extern struct value *eval_op_plus (struct type *expect_type,
-				   struct expression *exp,
-				   enum noside noside, enum exp_opcode op,
-				   struct value *arg1);
+				   struct expression *exp, enum noside noside,
+				   enum exp_opcode op, struct value *arg1);
 extern struct value *eval_op_neg (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside, enum exp_opcode op,
-				  struct value *arg1);
+				  struct expression *exp, enum noside noside,
+				  enum exp_opcode op, struct value *arg1);
 extern struct value *eval_op_complement (struct type *expect_type,
 					 struct expression *exp,
 					 enum noside noside,
@@ -150,50 +133,41 @@ extern struct value *eval_op_complement (struct type *expect_type,
 					 struct value *arg1);
 extern struct value *eval_op_lognot (struct type *expect_type,
 				     struct expression *exp,
-				     enum noside noside,
-				     enum exp_opcode op,
+				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1);
 extern struct value *eval_op_preinc (struct type *expect_type,
 				     struct expression *exp,
-				     enum noside noside,
-				     enum exp_opcode op,
+				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1);
 extern struct value *eval_op_predec (struct type *expect_type,
 				     struct expression *exp,
-				     enum noside noside,
-				     enum exp_opcode op,
+				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1);
 extern struct value *eval_op_postinc (struct type *expect_type,
 				      struct expression *exp,
-				      enum noside noside,
-				      enum exp_opcode op,
+				      enum noside noside, enum exp_opcode op,
 				      struct value *arg1);
 extern struct value *eval_op_postdec (struct type *expect_type,
 				      struct expression *exp,
-				      enum noside noside,
-				      enum exp_opcode op,
+				      enum noside noside, enum exp_opcode op,
 				      struct value *arg1);
 extern struct value *eval_op_ind (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside,
+				  struct expression *exp, enum noside noside,
 				  struct value *arg1);
 extern struct value *eval_op_type (struct type *expect_type,
-				   struct expression *exp,
-				   enum noside noside, struct type *type);
+				   struct expression *exp, enum noside noside,
+				   struct type *type);
 extern struct value *eval_op_alignof (struct type *expect_type,
 				      struct expression *exp,
-				      enum noside noside,
-				      struct value *arg1);
+				      enum noside noside, struct value *arg1);
 extern struct value *eval_op_memval (struct type *expect_type,
 				     struct expression *exp,
-				     enum noside noside,
-				     struct value *arg1, struct type *type);
-extern struct value *eval_binop_assign_modify (struct type *expect_type,
-					       struct expression *exp,
-					       enum noside noside,
-					       enum exp_opcode op,
-					       struct value *arg1,
-					       struct value *arg2);
+				     enum noside noside, struct value *arg1,
+				     struct type *type);
+extern struct value *
+eval_binop_assign_modify (struct type *expect_type, struct expression *exp,
+			  enum noside noside, enum exp_opcode op,
+			  struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -228,8 +202,7 @@ check_objfile (struct symbol *sym, struct objfile *objfile)
   return check_objfile (sym->objfile (), objfile);
 }
 
-extern bool check_objfile (const struct block *block,
-			   struct objfile *objfile);
+extern bool check_objfile (const struct block *block, struct objfile *objfile);
 
 static inline bool
 check_objfile (const block_symbol &sym, struct objfile *objfile)
@@ -305,8 +278,7 @@ extern bool check_objfile (const std::unique_ptr<ada_component> &comp,
 			   struct objfile *objfile);
 
 static inline void
-dump_for_expression (struct ui_file *stream, int depth,
-		     const operation_up &op)
+dump_for_expression (struct ui_file *stream, int depth, const operation_up &op)
 {
   op->dump (stream, depth);
 }
@@ -343,7 +315,7 @@ void
 dump_for_expression (struct ui_file *stream, int depth,
 		     const std::vector<T> &vals)
 {
-  gdb_printf (stream, _("%*sVector:\n"), depth, "");
+  gdb_printf (stream, _ ("%*sVector:\n"), depth, "");
   for (auto &item : vals)
     dump_for_expression (stream, depth + 1, item);
 }
@@ -392,16 +364,16 @@ private:
 
   /* do_dump does the work of dumping the data.  */
   template<int I, typename... T>
-  typename std::enable_if<I == sizeof... (T), void>::type
-  do_dump (struct ui_file *stream, int depth, const std::tuple<T...> &value)
-    const
+  typename std::enable_if<I == sizeof...(T), void>::type
+  do_dump (struct ui_file *stream, int depth,
+	   const std::tuple<T...> &value) const
   {
   }
 
   template<int I, typename... T>
-  typename std::enable_if<I < sizeof... (T), void>::type
-  do_dump (struct ui_file *stream, int depth, const std::tuple<T...> &value)
-    const
+    typename std::enable_if
+    < I<sizeof...(T), void>::type do_dump (struct ui_file *stream, int depth,
+					   const std::tuple<T...> &value) const
   {
     dump_for_expression (stream, depth, std::get<I> (value));
     do_dump<I + 1, T...> (stream, depth, value);
@@ -410,17 +382,17 @@ private:
   /* do_check_objfile does the work of checking whether this object
      refers to OBJFILE.  */
   template<int I, typename... T>
-  typename std::enable_if<I == sizeof... (T), bool>::type
-  do_check_objfile (struct objfile *objfile, const std::tuple<T...> &value)
-    const
+  typename std::enable_if<I == sizeof...(T), bool>::type
+  do_check_objfile (struct objfile *objfile,
+		    const std::tuple<T...> &value) const
   {
     return false;
   }
 
   template<int I, typename... T>
-  typename std::enable_if<I < sizeof... (T), bool>::type
-  do_check_objfile (struct objfile *objfile, const std::tuple<T...> &value)
-    const
+    typename std::enable_if < I<sizeof...(T), bool>::type
+    do_check_objfile (struct objfile *objfile,
+		      const std::tuple<T...> &value) const
   {
     if (check_objfile (std::get<I> (value), objfile))
       return true;
@@ -472,9 +444,7 @@ static inline bool
 check_constant (struct symbol *sym)
 {
   enum address_class sc = sym->aclass ();
-  return (sc == LOC_BLOCK
-	  || sc == LOC_CONST
-	  || sc == LOC_CONST_BYTES
+  return (sc == LOC_BLOCK || sc == LOC_CONST || sc == LOC_CONST_BYTES
 	  || sc == LOC_LABEL);
 }
 
@@ -507,8 +477,7 @@ check_constant (const std::pair<S, T> &item)
    implementation of 'constant_p' that works by checking the
    operands.  */
 template<typename... Arg>
-class maybe_constant_operation
-  : public tuple_holding_operation<Arg...>
+class maybe_constant_operation : public tuple_holding_operation<Arg...>
 {
 public:
 
@@ -522,15 +491,15 @@ public:
 private:
 
   template<int I, typename... T>
-  typename std::enable_if<I == sizeof... (T), bool>::type
+  typename std::enable_if<I == sizeof...(T), bool>::type
   do_check_constant (const std::tuple<T...> &value) const
   {
     return true;
   }
 
   template<int I, typename... T>
-  typename std::enable_if<I < sizeof... (T), bool>::type
-  do_check_constant (const std::tuple<T...> &value) const
+    typename std::enable_if < I<sizeof...(T), bool>::type
+    do_check_constant (const std::tuple<T...> &value) const
   {
     if (!check_constant (std::get<I> (value)))
       return false;
@@ -548,8 +517,7 @@ typedef std::array<gdb_byte, 16> float_data;
 
    This does not need the facilities provided by
    tuple_holding_operation, so it does not use it.  */
-class float_const_operation
-  : public operation
+class float_const_operation : public operation
 {
 public:
 
@@ -559,18 +527,15 @@ public:
   {
   }
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return value_from_contents (m_type, m_data.data ());
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_FLOAT; }
+  enum exp_opcode opcode () const override { return OP_FLOAT; }
 
-  bool constant_p () const override
-  { return true; }
+  bool constant_p () const override { return true; }
 
   void dump (struct ui_file *stream, int depth) const override;
 
@@ -587,81 +552,65 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    return eval_op_scope (expect_type, exp, noside,
-			  std::get<0> (m_storage),
+    return eval_op_scope (expect_type, exp, noside, std::get<0> (m_storage),
 			  std::get<1> (m_storage).c_str ());
   }
 
   value *evaluate_for_address (struct expression *exp,
 			       enum noside noside) override;
 
-  value *evaluate_funcall (struct type *expect_type,
-			   struct expression *exp,
+  value *evaluate_funcall (struct type *expect_type, struct expression *exp,
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_SCOPE; }
+  enum exp_opcode opcode () const override { return OP_SCOPE; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* Compute the value of a variable.  */
-class var_value_operation
-  : public maybe_constant_operation<block_symbol>
+class var_value_operation : public maybe_constant_operation<block_symbol>
 {
 public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
   value *evaluate_with_coercion (struct expression *exp,
 				 enum noside noside) override;
 
-  value *evaluate_for_sizeof (struct expression *exp, enum noside noside)
-    override;
+  value *evaluate_for_sizeof (struct expression *exp,
+			      enum noside noside) override;
 
-  value *evaluate_for_cast (struct type *expect_type,
-			    struct expression *exp,
+  value *evaluate_for_cast (struct type *expect_type, struct expression *exp,
 			    enum noside noside) override;
 
-  value *evaluate_for_address (struct expression *exp, enum noside noside)
-    override;
+  value *evaluate_for_address (struct expression *exp,
+			       enum noside noside) override;
 
-  value *evaluate_funcall (struct type *expect_type,
-			   struct expression *exp,
+  value *evaluate_funcall (struct type *expect_type, struct expression *exp,
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_VAR_VALUE; }
+  enum exp_opcode opcode () const override { return OP_VAR_VALUE; }
 
   /* Return the symbol referenced by this object.  */
-  symbol *get_symbol () const
-  {
-    return std::get<0> (m_storage).symbol;
-  }
+  symbol *get_symbol () const { return std::get<0> (m_storage).symbol; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 class long_const_operation
@@ -671,27 +620,22 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return value_from_longest (std::get<0> (m_storage),
 			       std::get<1> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_LONG; }
+  enum exp_opcode opcode () const override { return OP_LONG; }
 
-  bool constant_p () const override
-  { return true; }
+  bool constant_p () const override { return true; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 class var_msym_value_operation
@@ -701,26 +645,23 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return eval_op_var_msym_value (expect_type, exp, noside, m_outermost,
 				   std::get<0> (m_storage));
   }
 
-  value *evaluate_for_sizeof (struct expression *exp, enum noside noside)
-    override;
+  value *evaluate_for_sizeof (struct expression *exp,
+			      enum noside noside) override;
 
-  value *evaluate_for_address (struct expression *exp, enum noside noside)
-    override;
+  value *evaluate_for_address (struct expression *exp,
+			       enum noside noside) override;
 
-  value *evaluate_for_cast (struct type *expect_type,
-			    struct expression *exp,
+  value *evaluate_for_cast (struct type *expect_type, struct expression *exp,
 			    enum noside noside) override;
 
-  value *evaluate_funcall (struct type *expect_type,
-			   struct expression *exp,
+  value *evaluate_funcall (struct type *expect_type, struct expression *exp,
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override
   {
@@ -728,43 +669,34 @@ public:
     return operation::evaluate_funcall (expect_type, exp, noside, name, args);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_VAR_MSYM_VALUE; }
+  enum exp_opcode opcode () const override { return OP_VAR_MSYM_VALUE; }
 
-  void set_outermost () override
-  {
-    m_outermost = true;
-  }
+  void set_outermost () override { m_outermost = true; }
 
 protected:
 
   /* True if this is the outermost operation in the expression.  */
   bool m_outermost = false;
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
-class var_entry_value_operation
-  : public tuple_holding_operation<symbol *>
+class var_entry_value_operation : public tuple_holding_operation<symbol *>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return eval_op_var_entry_value (expect_type, exp, noside,
 				    std::get<0> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_VAR_ENTRY_VALUE; }
+  enum exp_opcode opcode () const override { return OP_VAR_ENTRY_VALUE; }
 };
 
 class func_static_var_operation
@@ -774,8 +706,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *func = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -783,128 +714,100 @@ public:
 				    std::get<1> (m_storage).c_str ());
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_FUNC_STATIC_VAR; }
+  enum exp_opcode opcode () const override { return OP_FUNC_STATIC_VAR; }
 };
 
-class last_operation
-  : public tuple_holding_operation<int>
+class last_operation : public tuple_holding_operation<int>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return access_value_history (std::get<0> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_LAST; }
+  enum exp_opcode opcode () const override { return OP_LAST; }
 };
 
-class register_operation
-  : public tuple_holding_operation<std::string>
+class register_operation : public tuple_holding_operation<std::string>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return eval_op_register (expect_type, exp, noside,
 			     std::get<0> (m_storage).c_str ());
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_REGISTER; }
+  enum exp_opcode opcode () const override { return OP_REGISTER; }
 
   /* Return the name of the register.  */
-  const char *get_name () const
-  {
-    return std::get<0> (m_storage).c_str ();
-  }
+  const char *get_name () const { return std::get<0> (m_storage).c_str (); }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
-class bool_operation
-  : public tuple_holding_operation<bool>
+class bool_operation : public tuple_holding_operation<bool>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     struct type *type = language_bool_type (exp->language_defn, exp->gdbarch);
     return value_from_longest (type, std::get<0> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_BOOL; }
+  enum exp_opcode opcode () const override { return OP_BOOL; }
 
-  bool constant_p () const override
-  { return true; }
+  bool constant_p () const override { return true; }
 };
 
-class internalvar_operation
-  : public tuple_holding_operation<internalvar *>
+class internalvar_operation : public tuple_holding_operation<internalvar *>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    return value_of_internalvar (exp->gdbarch,
-				 std::get<0> (m_storage));
+    return value_of_internalvar (exp->gdbarch, std::get<0> (m_storage));
   }
 
-  internalvar *get_internalvar () const
-  {
-    return std::get<0> (m_storage);
-  }
+  internalvar *get_internalvar () const { return std::get<0> (m_storage); }
 
-  enum exp_opcode opcode () const override
-  { return OP_INTERNALVAR; }
+  enum exp_opcode opcode () const override { return OP_INTERNALVAR; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
-class string_operation
-  : public tuple_holding_operation<std::string>
+class string_operation : public tuple_holding_operation<std::string>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_STRING; }
+  enum exp_opcode opcode () const override { return OP_STRING; }
 };
 
 class ternop_slice_operation
@@ -914,8 +817,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     struct value *array
@@ -927,8 +829,7 @@ public:
     return eval_op_ternop (expect_type, exp, noside, array, low, upper);
   }
 
-  enum exp_opcode opcode () const override
-  { return TERNOP_SLICE; }
+  enum exp_opcode opcode () const override { return TERNOP_SLICE; }
 };
 
 class ternop_cond_operation
@@ -938,8 +839,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     struct value *val
@@ -950,16 +850,13 @@ public:
     return std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
   }
 
-  enum exp_opcode opcode () const override
-  { return TERNOP_COND; }
+  enum exp_opcode opcode () const override { return TERNOP_COND; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 class complex_operation
@@ -969,18 +866,15 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *real = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
     value *imag = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
-    return value_literal_complex (real, imag,
-				  std::get<2> (m_storage));
+    return value_literal_complex (real, imag, std::get<2> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_COMPLEX; }
+  enum exp_opcode opcode () const override { return OP_COMPLEX; }
 };
 
 class structop_base_operation
@@ -989,13 +883,9 @@ class structop_base_operation
 public:
 
   /* Used for completion.  Return the field name.  */
-  const std::string &get_string () const
-  {
-    return std::get<1> (m_storage);
-  }
+  const std::string &get_string () const { return std::get<1> (m_storage); }
 
-  value *evaluate_funcall (struct type *expect_type,
-			   struct expression *exp,
+  value *evaluate_funcall (struct type *expect_type, struct expression *exp,
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override;
 
@@ -1017,49 +907,41 @@ protected:
   using tuple_holding_operation::tuple_holding_operation;
 };
 
-class structop_operation
-  : public structop_base_operation
+class structop_operation : public structop_base_operation
 {
 public:
 
   using structop_base_operation::structop_base_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *val =std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
     return eval_op_structop_struct (expect_type, exp, noside, val,
 				    std::get<1> (m_storage).c_str ());
   }
 
-  enum exp_opcode opcode () const override
-  { return STRUCTOP_STRUCT; }
+  enum exp_opcode opcode () const override { return STRUCTOP_STRUCT; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
     gen_expr_structop (exp, STRUCTOP_STRUCT,
 		       std::get<0> (this->m_storage).get (),
-		       std::get<1> (this->m_storage).c_str (),
-		       ax, value);
+		       std::get<1> (this->m_storage).c_str (), ax, value);
   }
 };
 
-class structop_ptr_operation
-  : public structop_base_operation
+class structop_ptr_operation : public structop_base_operation
 {
 public:
 
   using structop_base_operation::structop_base_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -1067,21 +949,16 @@ public:
 				 std::get<1> (m_storage).c_str ());
   }
 
-  enum exp_opcode opcode () const override
-  { return STRUCTOP_PTR; }
+  enum exp_opcode opcode () const override { return STRUCTOP_PTR; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
-    gen_expr_structop (exp, STRUCTOP_PTR,
-		       std::get<0> (this->m_storage).get (),
-		       std::get<1> (this->m_storage).c_str (),
-		       ax, value);
+    gen_expr_structop (exp, STRUCTOP_PTR, std::get<0> (this->m_storage).get (),
+		       std::get<1> (this->m_storage).c_str (), ax, value);
   }
 };
 
@@ -1092,54 +969,43 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate_funcall (struct type *expect_type,
-			   struct expression *exp,
+  value *evaluate_funcall (struct type *expect_type, struct expression *exp,
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override;
 };
 
-class structop_member_operation
-  : public structop_member_base
+class structop_member_operation : public structop_member_base
 {
 public:
 
   using structop_member_base::structop_member_base;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *lhs
-      = std::get<0> (m_storage)->evaluate_for_address (exp, noside);
-    value *rhs
-      = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    value *lhs = std::get<0> (m_storage)->evaluate_for_address (exp, noside);
+    value *rhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
     return eval_op_member (expect_type, exp, noside, lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return STRUCTOP_MEMBER; }
+  enum exp_opcode opcode () const override { return STRUCTOP_MEMBER; }
 };
 
-class structop_mptr_operation
-  : public structop_member_base
+class structop_mptr_operation : public structop_member_base
 {
 public:
 
   using structop_member_base::structop_member_base;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *lhs
-      = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    value *rhs
-      = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *rhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
     return eval_op_member (expect_type, exp, noside, lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return STRUCTOP_MPTR; }
+  enum exp_opcode opcode () const override { return STRUCTOP_MPTR; }
 };
 
 class concat_operation
@@ -1149,19 +1015,15 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *lhs
-      = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
-    value *rhs
-      = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *lhs = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *rhs = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
     return value_concat (lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_CONCAT; }
+  enum exp_opcode opcode () const override { return BINOP_CONCAT; }
 };
 
 class add_operation
@@ -1171,32 +1033,24 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *lhs
-      = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
-    value *rhs
-      = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *lhs = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *rhs = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
     return eval_op_add (expect_type, exp, noside, lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_ADD; }
+  enum exp_opcode opcode () const override { return BINOP_ADD; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
-    gen_expr_binop (exp, BINOP_ADD,
-		    std::get<0> (this->m_storage).get (),
-		    std::get<1> (this->m_storage).get (),
-		    ax, value);
+    gen_expr_binop (exp, BINOP_ADD, std::get<0> (this->m_storage).get (),
+		    std::get<1> (this->m_storage).get (), ax, value);
   }
 };
 
@@ -1207,39 +1061,31 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *lhs
-      = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
-    value *rhs
-      = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *lhs = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *rhs = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
     return eval_op_sub (expect_type, exp, noside, lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_SUB; }
+  enum exp_opcode opcode () const override { return BINOP_SUB; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
-    gen_expr_binop (exp, BINOP_SUB,
-		    std::get<0> (this->m_storage).get (),
-		    std::get<1> (this->m_storage).get (),
-		    ax, value);
+    gen_expr_binop (exp, BINOP_SUB, std::get<0> (this->m_storage).get (),
+		    std::get<1> (this->m_storage).get (), ax, value);
   }
 };
 
 typedef struct value *binary_ftype (struct type *expect_type,
-				    struct expression *exp,
-				    enum noside noside, enum exp_opcode op,
-				    struct value *arg1, struct value *arg2);
+				    struct expression *exp, enum noside noside,
+				    enum exp_opcode op, struct value *arg1,
+				    struct value *arg2);
 
 template<enum exp_opcode OP, binary_ftype FUNC>
 class binop_operation
@@ -1249,24 +1095,19 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *lhs
-      = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    value *rhs
-      = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *rhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
     return FUNC (expect_type, exp, noside, OP, lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP; }
+  enum exp_opcode opcode () const override { return OP; }
 };
 
 template<enum exp_opcode OP, binary_ftype FUNC>
-class usual_ax_binop_operation
-  : public binop_operation<OP, FUNC>
+class usual_ax_binop_operation : public binop_operation<OP, FUNC>
 {
 public:
 
@@ -1274,16 +1115,12 @@ public:
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
-    gen_expr_binop (exp, OP,
-		    std::get<0> (this->m_storage).get (),
-		    std::get<1> (this->m_storage).get (),
-		    ax, value);
+    gen_expr_binop (exp, OP, std::get<0> (this->m_storage).get (),
+		    std::get<1> (this->m_storage).get (), ax, value);
   }
 };
 
@@ -1297,16 +1134,17 @@ using rem_operation = usual_ax_binop_operation<BINOP_REM, eval_op_binary>;
 using lsh_operation = usual_ax_binop_operation<BINOP_LSH, eval_op_binary>;
 using rsh_operation = usual_ax_binop_operation<BINOP_RSH, eval_op_binary>;
 using bitwise_and_operation
-     = usual_ax_binop_operation<BINOP_BITWISE_AND, eval_op_binary>;
+  = usual_ax_binop_operation<BINOP_BITWISE_AND, eval_op_binary>;
 using bitwise_ior_operation
-     = usual_ax_binop_operation<BINOP_BITWISE_IOR, eval_op_binary>;
+  = usual_ax_binop_operation<BINOP_BITWISE_IOR, eval_op_binary>;
 using bitwise_xor_operation
-     = usual_ax_binop_operation<BINOP_BITWISE_XOR, eval_op_binary>;
+  = usual_ax_binop_operation<BINOP_BITWISE_XOR, eval_op_binary>;
 
 class subscript_operation
   : public usual_ax_binop_operation<BINOP_SUBSCRIPT, eval_op_subscript>
 {
 public:
+
   using usual_ax_binop_operation<BINOP_SUBSCRIPT,
 				 eval_op_subscript>::usual_ax_binop_operation;
 
@@ -1316,64 +1154,51 @@ public:
 
 /* Implementation of comparison operations.  */
 template<enum exp_opcode OP, binary_ftype FUNC>
-class comparison_operation
-  : public usual_ax_binop_operation<OP, FUNC>
+class comparison_operation : public usual_ax_binop_operation<OP, FUNC>
 {
 public:
 
   using usual_ax_binop_operation<OP, FUNC>::usual_ax_binop_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *lhs
       = std::get<0> (this->m_storage)->evaluate (nullptr, exp, noside);
-    value *rhs
-      = std::get<1> (this->m_storage)->evaluate (value_type (lhs), exp,
-						 noside);
+    value *rhs = std::get<1> (this->m_storage)
+		   ->evaluate (value_type (lhs), exp, noside);
     return FUNC (expect_type, exp, noside, OP, lhs, rhs);
   }
 };
 
-class equal_operation
-  : public comparison_operation<BINOP_EQUAL, eval_op_equal>
+class equal_operation : public comparison_operation<BINOP_EQUAL, eval_op_equal>
 {
 public:
 
   using comparison_operation::comparison_operation;
 
-  operation *get_lhs () const
-  {
-    return std::get<0> (m_storage).get ();
-  }
+  operation *get_lhs () const { return std::get<0> (m_storage).get (); }
 
-  operation *get_rhs () const
-  {
-    return std::get<1> (m_storage).get ();
-  }
+  operation *get_rhs () const { return std::get<1> (m_storage).get (); }
 };
 
 using notequal_operation
-     = comparison_operation<BINOP_NOTEQUAL, eval_op_notequal>;
+  = comparison_operation<BINOP_NOTEQUAL, eval_op_notequal>;
 using less_operation = comparison_operation<BINOP_LESS, eval_op_less>;
 using gtr_operation = comparison_operation<BINOP_GTR, eval_op_gtr>;
 using geq_operation = comparison_operation<BINOP_GEQ, eval_op_geq>;
 using leq_operation = comparison_operation<BINOP_LEQ, eval_op_leq>;
 
 /* Implement the GDB '@' repeat operator.  */
-class repeat_operation
-  : public binop_operation<BINOP_REPEAT, eval_op_repeat>
+class repeat_operation : public binop_operation<BINOP_REPEAT, eval_op_repeat>
 {
   using binop_operation<BINOP_REPEAT, eval_op_repeat>::binop_operation;
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* C-style comma operator.  */
@@ -1384,8 +1209,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     /* The left-hand-side is only evaluated for side effects, so don't
@@ -1395,113 +1219,96 @@ public:
     return std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_COMMA; }
+  enum exp_opcode opcode () const override { return BINOP_COMMA; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 typedef struct value *unary_ftype (struct type *expect_type,
-				   struct expression *exp,
-				   enum noside noside, enum exp_opcode op,
-				   struct value *arg1);
+				   struct expression *exp, enum noside noside,
+				   enum exp_opcode op, struct value *arg1);
 
 /* Base class for unary operations.  */
 template<enum exp_opcode OP, unary_ftype FUNC>
-class unop_operation
-  : public maybe_constant_operation<operation_up>
+class unop_operation : public maybe_constant_operation<operation_up>
 {
 public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
     return FUNC (expect_type, exp, noside, OP, val);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP; }
+  enum exp_opcode opcode () const override { return OP; }
 };
 
 /* Unary operations that can also be turned into agent expressions in
    the "usual" way.  */
 template<enum exp_opcode OP, unary_ftype FUNC>
-class usual_ax_unop_operation
-  : public unop_operation<OP, FUNC>
+class usual_ax_unop_operation : public unop_operation<OP, FUNC>
 {
   using unop_operation<OP, FUNC>::unop_operation;
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
-    gen_expr_unop (exp, OP,
-		   std::get<0> (this->m_storage).get (),
-		   ax, value);
+    gen_expr_unop (exp, OP, std::get<0> (this->m_storage).get (), ax, value);
   }
 };
 
 using unary_plus_operation = usual_ax_unop_operation<UNOP_PLUS, eval_op_plus>;
 using unary_neg_operation = usual_ax_unop_operation<UNOP_NEG, eval_op_neg>;
 using unary_complement_operation
-     = usual_ax_unop_operation<UNOP_COMPLEMENT, eval_op_complement>;
+  = usual_ax_unop_operation<UNOP_COMPLEMENT, eval_op_complement>;
 using unary_logical_not_operation
-     = usual_ax_unop_operation<UNOP_LOGICAL_NOT, eval_op_lognot>;
+  = usual_ax_unop_operation<UNOP_LOGICAL_NOT, eval_op_lognot>;
 
 /* Handle pre- and post- increment and -decrement.  */
 template<enum exp_opcode OP, unary_ftype FUNC>
-class unop_incr_operation
-  : public tuple_holding_operation<operation_up>
+class unop_incr_operation : public tuple_holding_operation<operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
     return FUNC (expect_type, exp, noside, OP, val);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP; }
+  enum exp_opcode opcode () const override { return OP; }
 };
 
 using preinc_operation
-     = unop_incr_operation<UNOP_PREINCREMENT, eval_op_preinc>;
+  = unop_incr_operation<UNOP_PREINCREMENT, eval_op_preinc>;
 using predec_operation
-     = unop_incr_operation<UNOP_PREDECREMENT, eval_op_predec>;
+  = unop_incr_operation<UNOP_PREDECREMENT, eval_op_predec>;
 using postinc_operation
-     = unop_incr_operation<UNOP_POSTINCREMENT, eval_op_postinc>;
+  = unop_incr_operation<UNOP_POSTINCREMENT, eval_op_postinc>;
 using postdec_operation
-     = unop_incr_operation<UNOP_POSTDECREMENT, eval_op_postdec>;
+  = unop_incr_operation<UNOP_POSTDECREMENT, eval_op_postdec>;
 
 /* Base class for implementations of UNOP_IND.  */
-class unop_ind_base_operation
-  : public tuple_holding_operation<operation_up>
+class unop_ind_base_operation : public tuple_holding_operation<operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     if (expect_type != nullptr && expect_type->code () == TYPE_CODE_PTR)
@@ -1516,13 +1323,11 @@ public:
   value *evaluate_for_sizeof (struct expression *exp,
 			      enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return UNOP_IND; }
+  enum exp_opcode opcode () const override { return UNOP_IND; }
 };
 
 /* Ordinary UNOP_IND implementation.  */
-class unop_ind_operation
-  : public unop_ind_base_operation
+class unop_ind_operation : public unop_ind_base_operation
 {
 public:
 
@@ -1530,73 +1335,61 @@ public:
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
-    gen_expr_unop (exp, UNOP_IND,
-		   std::get<0> (this->m_storage).get (),
-		   ax, value);
+    gen_expr_unop (exp, UNOP_IND, std::get<0> (this->m_storage).get (), ax,
+		   value);
   }
 };
 
 /* Implement OP_TYPE.  */
-class type_operation
-  : public tuple_holding_operation<struct type *>
+class type_operation : public tuple_holding_operation<struct type *>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return eval_op_type (expect_type, exp, noside, std::get<0> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_TYPE; }
+  enum exp_opcode opcode () const override { return OP_TYPE; }
 
-  bool constant_p () const override
-  { return true; }
+  bool constant_p () const override { return true; }
 };
 
 /* Implement the "typeof" operation.  */
-class typeof_operation
-  : public maybe_constant_operation<operation_up>
+class typeof_operation : public maybe_constant_operation<operation_up>
 {
 public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     if (noside == EVAL_AVOID_SIDE_EFFECTS)
       return std::get<0> (m_storage)->evaluate (nullptr, exp,
 						EVAL_AVOID_SIDE_EFFECTS);
     else
-      error (_("Attempt to use a type as an expression"));
+      error (_ ("Attempt to use a type as an expression"));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_TYPEOF; }
+  enum exp_opcode opcode () const override { return OP_TYPEOF; }
 };
 
 /* Implement 'decltype'.  */
-class decltype_operation
-  : public maybe_constant_operation<operation_up>
+class decltype_operation : public maybe_constant_operation<operation_up>
 {
 public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -1605,12 +1398,9 @@ public:
 	  = std::get<0> (m_storage)->evaluate (nullptr, exp,
 					       EVAL_AVOID_SIDE_EFFECTS);
 	enum exp_opcode sub_op = std::get<0> (m_storage)->opcode ();
-	if (sub_op == BINOP_SUBSCRIPT
-	    || sub_op == STRUCTOP_MEMBER
-	    || sub_op == STRUCTOP_MPTR
-	    || sub_op == UNOP_IND
-	    || sub_op == STRUCTOP_STRUCT
-	    || sub_op == STRUCTOP_PTR
+	if (sub_op == BINOP_SUBSCRIPT || sub_op == STRUCTOP_MEMBER
+	    || sub_op == STRUCTOP_MPTR || sub_op == UNOP_IND
+	    || sub_op == STRUCTOP_STRUCT || sub_op == STRUCTOP_PTR
 	    || sub_op == OP_SCOPE)
 	  {
 	    struct type *type = value_type (result);
@@ -1625,60 +1415,53 @@ public:
 	return result;
       }
     else
-      error (_("Attempt to use a type as an expression"));
+      error (_ ("Attempt to use a type as an expression"));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_DECLTYPE; }
+  enum exp_opcode opcode () const override { return OP_DECLTYPE; }
 };
 
 /* Implement 'typeid'.  */
-class typeid_operation
-  : public tuple_holding_operation<operation_up>
+class typeid_operation : public tuple_holding_operation<operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     enum exp_opcode sub_op = std::get<0> (m_storage)->opcode ();
     enum noside sub_noside
       = ((sub_op == OP_TYPE || sub_op == OP_DECLTYPE || sub_op == OP_TYPEOF)
-	 ? EVAL_AVOID_SIDE_EFFECTS
-	 : noside);
+	   ? EVAL_AVOID_SIDE_EFFECTS
+	   : noside);
 
-    value *result = std::get<0> (m_storage)->evaluate (nullptr, exp,
-						       sub_noside);
+    value *result
+      = std::get<0> (m_storage)->evaluate (nullptr, exp, sub_noside);
     if (noside != EVAL_NORMAL)
       return allocate_value (cplus_typeid_type (exp->gdbarch));
     return cplus_typeid (result);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_TYPEID; }
+  enum exp_opcode opcode () const override { return OP_TYPEID; }
 };
 
 /* Implement the address-of operation.  */
-class unop_addr_operation
-  : public maybe_constant_operation<operation_up>
+class unop_addr_operation : public maybe_constant_operation<operation_up>
 {
 public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     /* C++: check for and handle pointer to members.  */
     return std::get<0> (m_storage)->evaluate_for_address (exp, noside);
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_ADDR; }
+  enum exp_opcode opcode () const override { return UNOP_ADDR; }
 
   /* Return the subexpression.  */
   const operation_up &get_expression () const
@@ -1688,55 +1471,45 @@ public:
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override
+		       struct type *cast_type) override
   {
-    gen_expr_unop (exp, UNOP_ADDR,
-		   std::get<0> (this->m_storage).get (),
-		   ax, value);
+    gen_expr_unop (exp, UNOP_ADDR, std::get<0> (this->m_storage).get (), ax,
+		   value);
   }
 };
 
 /* Implement 'sizeof'.  */
-class unop_sizeof_operation
-  : public maybe_constant_operation<operation_up>
+class unop_sizeof_operation : public maybe_constant_operation<operation_up>
 {
 public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return std::get<0> (m_storage)->evaluate_for_sizeof (exp, noside);
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_SIZEOF; }
+  enum exp_opcode opcode () const override { return UNOP_SIZEOF; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* Implement 'alignof'.  */
-class unop_alignof_operation
-  : public maybe_constant_operation<operation_up>
+class unop_alignof_operation : public maybe_constant_operation<operation_up>
 {
 public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
@@ -1744,8 +1517,7 @@ public:
     return eval_op_alignof (expect_type, exp, noside, val);
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_ALIGNOF; }
+  enum exp_opcode opcode () const override { return UNOP_ALIGNOF; }
 };
 
 /* Implement UNOP_MEMVAL.  */
@@ -1756,8 +1528,7 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
@@ -1771,22 +1542,16 @@ public:
   value *evaluate_for_address (struct expression *exp,
 			       enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return UNOP_MEMVAL; }
+  enum exp_opcode opcode () const override { return UNOP_MEMVAL; }
 
   /* Return the type referenced by this object.  */
-  struct type *get_type () const
-  {
-    return std::get<1> (m_storage);
-  }
+  struct type *get_type () const { return std::get<1> (m_storage); }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* Implement UNOP_MEMVAL_TYPE.  */
@@ -1797,8 +1562,7 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *typeval
@@ -1815,43 +1579,35 @@ public:
   value *evaluate_for_address (struct expression *exp,
 			       enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return UNOP_MEMVAL_TYPE; }
+  enum exp_opcode opcode () const override { return UNOP_MEMVAL_TYPE; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* Implement the 'this' expression.  */
-class op_this_operation
-  : public tuple_holding_operation<>
+class op_this_operation : public tuple_holding_operation<>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return value_of_this (exp->language_defn);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_THIS; }
+  enum exp_opcode opcode () const override { return OP_THIS; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* Implement the "type instance" operation.  */
@@ -1863,12 +1619,10 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return TYPE_INSTANCE; }
+  enum exp_opcode opcode () const override { return TYPE_INSTANCE; }
 };
 
 /* The assignment operator.  */
@@ -1879,8 +1633,7 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -1889,9 +1642,8 @@ public:
        expected type.  This avoids a weird case where re-assigning a
        string or array to an internal variable could error with "Too
        many array elements".  */
-    struct type *xtype = (VALUE_LVAL (lhs) == lval_internalvar
-			  ? nullptr
-			  : value_type (lhs));
+    struct type *xtype
+      = (VALUE_LVAL (lhs) == lval_internalvar ? nullptr : value_type (lhs));
     value *rhs = std::get<1> (m_storage)->evaluate (xtype, exp, noside);
 
     if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -1902,22 +1654,16 @@ public:
       return value_assign (lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_ASSIGN; }
+  enum exp_opcode opcode () const override { return BINOP_ASSIGN; }
 
   /* Return the left-hand-side of the assignment.  */
-  operation *get_lhs () const
-  {
-    return std::get<0> (m_storage).get ();
-  }
+  operation *get_lhs () const { return std::get<0> (m_storage).get (); }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* Assignment with modification, like "+=".  */
@@ -1928,8 +1674,7 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *lhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
@@ -1938,16 +1683,13 @@ public:
 				     std::get<0> (m_storage), lhs, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_ASSIGN_MODIFY; }
+  enum exp_opcode opcode () const override { return BINOP_ASSIGN_MODIFY; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* Not a cast!  Extract a value of a given type from the contents of a
@@ -1964,19 +1706,14 @@ public:
   value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return UNOP_EXTRACT; }
+  enum exp_opcode opcode () const override { return UNOP_EXTRACT; }
 
   /* Return the type referenced by this object.  */
-  struct type *get_type () const
-  {
-    return std::get<1> (m_storage);
-  }
+  struct type *get_type () const { return std::get<1> (m_storage); }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
 		       struct type *cast_type) override;
 };
@@ -1989,30 +1726,23 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return std::get<0> (m_storage)->evaluate_for_cast (std::get<1> (m_storage),
 						       exp, noside);
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_CAST; }
+  enum exp_opcode opcode () const override { return UNOP_CAST; }
 
   /* Return the type referenced by this object.  */
-  struct type *get_type () const
-  {
-    return std::get<1> (m_storage);
-  }
+  struct type *get_type () const { return std::get<1> (m_storage); }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* A cast, but the type comes from an expression, not a "struct
@@ -2024,26 +1754,22 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
 						    EVAL_AVOID_SIDE_EFFECTS);
-    return std::get<1> (m_storage)->evaluate_for_cast (value_type (val),
-						       exp, noside);
+    return std::get<1> (m_storage)->evaluate_for_cast (value_type (val), exp,
+						       noside);
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_CAST_TYPE; }
+  enum exp_opcode opcode () const override { return UNOP_CAST_TYPE; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 typedef value *cxx_cast_ftype (struct type *, value *);
@@ -2058,8 +1784,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
@@ -2069,14 +1794,13 @@ public:
     return FUNC (type, rhs);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP; }
+  enum exp_opcode opcode () const override { return OP; }
 };
 
-using dynamic_cast_operation = cxx_cast_operation<UNOP_DYNAMIC_CAST,
-						  value_dynamic_cast>;
-using reinterpret_cast_operation = cxx_cast_operation<UNOP_REINTERPRET_CAST,
-						      value_reinterpret_cast>;
+using dynamic_cast_operation
+  = cxx_cast_operation<UNOP_DYNAMIC_CAST, value_dynamic_cast>;
+using reinterpret_cast_operation
+  = cxx_cast_operation<UNOP_REINTERPRET_CAST, value_reinterpret_cast>;
 
 /* Multi-dimensional subscripting.  */
 class multi_subscript_operation
@@ -2086,12 +1810,10 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return MULTI_SUBSCRIPT; }
+  enum exp_opcode opcode () const override { return MULTI_SUBSCRIPT; }
 };
 
 /* The "&&" operator.  */
@@ -2102,20 +1824,16 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return BINOP_LOGICAL_AND; }
+  enum exp_opcode opcode () const override { return BINOP_LOGICAL_AND; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* The "||" operator.  */
@@ -2126,20 +1844,16 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return BINOP_LOGICAL_OR; }
+  enum exp_opcode opcode () const override { return BINOP_LOGICAL_OR; }
 
 protected:
 
-  void do_generate_ax (struct expression *exp,
-		       struct agent_expr *ax,
+  void do_generate_ax (struct expression *exp, struct agent_expr *ax,
 		       struct axs_value *value,
-		       struct type *cast_type)
-    override;
+		       struct type *cast_type) override;
 };
 
 /* This class implements ADL (aka Koenig) function calls for C++.  It
@@ -2153,12 +1867,10 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_ADL_FUNC; }
+  enum exp_opcode opcode () const override { return OP_ADL_FUNC; }
 };
 
 /* The OP_ARRAY operation.  */
@@ -2169,12 +1881,10 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_ARRAY; }
+  enum exp_opcode opcode () const override { return OP_ARRAY; }
 
 private:
 
@@ -2192,16 +1902,14 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return std::get<0> (m_storage)->evaluate_funcall (expect_type, exp, noside,
 						      std::get<1> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_FUNCALL; }
+  enum exp_opcode opcode () const override { return OP_FUNCALL; }
 };
 
 } /* namespace expr */

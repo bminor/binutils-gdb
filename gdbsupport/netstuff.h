@@ -31,10 +31,7 @@ class scoped_free_addrinfo
 {
 public:
   /* Default constructor.  */
-  explicit scoped_free_addrinfo (struct addrinfo *ainfo)
-    : m_res (ainfo)
-  {
-  }
+  explicit scoped_free_addrinfo (struct addrinfo *ainfo) : m_res (ainfo) {}
 
   /* Destructor responsible for free'ing M_RES by calling
      'freeaddrinfo'.  */
@@ -58,19 +55,17 @@ struct parsed_connection_spec
   std::string port_str;
 };
 
-
 /* Parse SPEC (which is a string in the form of "ADDR:PORT") and
    return a 'parsed_connection_spec' structure with the proper fields
    filled in.  Also adjust HINT accordingly.  */
 extern parsed_connection_spec
-  parse_connection_spec_without_prefix (std::string spec,
-					struct addrinfo *hint);
+parse_connection_spec_without_prefix (std::string spec, struct addrinfo *hint);
 
 /* Parse SPEC (which is a string in the form of
    "[tcp[6]:|udp[6]:]ADDR:PORT") and return a 'parsed_connection_spec'
    structure with the proper fields filled in.  Also adjust HINT
    accordingly.  */
 extern parsed_connection_spec parse_connection_spec (const char *spec,
-						     struct addrinfo *hint);
+                                                     struct addrinfo *hint);
 
 #endif /* COMMON_NETSTUFF_H */

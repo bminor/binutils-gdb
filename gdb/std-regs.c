@@ -38,16 +38,15 @@ value_of_builtin_frame_fp_reg (frame_info_ptr frame, const void *baton)
        An architecture wanting to implement "$fp" as alias for a raw
        register can do so by adding "fp" to register name table (mind
        you, doing this is probably a dangerous thing).  */
-    return value_of_register (gdbarch_deprecated_fp_regnum (gdbarch),
-			      frame);
+    return value_of_register (gdbarch_deprecated_fp_regnum (gdbarch), frame);
   else
     {
       struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
       struct value *val = allocate_value (data_ptr_type);
       gdb_byte *buf = value_contents_raw (val).data ();
 
-      gdbarch_address_to_pointer (gdbarch, data_ptr_type,
-				  buf, get_frame_base_address (frame));
+      gdbarch_address_to_pointer (gdbarch, data_ptr_type, buf,
+				  get_frame_base_address (frame));
       return val;
     }
 }
@@ -65,8 +64,8 @@ value_of_builtin_frame_pc_reg (frame_info_ptr frame, const void *baton)
       struct value *val = allocate_value (func_ptr_type);
       gdb_byte *buf = value_contents_raw (val).data ();
 
-      gdbarch_address_to_pointer (gdbarch, func_ptr_type,
-				  buf, get_frame_pc (frame));
+      gdbarch_address_to_pointer (gdbarch, func_ptr_type, buf,
+				  get_frame_pc (frame));
       return val;
     }
 }
@@ -78,7 +77,7 @@ value_of_builtin_frame_sp_reg (frame_info_ptr frame, const void *baton)
 
   if (gdbarch_sp_regnum (gdbarch) >= 0)
     return value_of_register (gdbarch_sp_regnum (gdbarch), frame);
-  error (_("Standard register ``$sp'' is not available for this target"));
+  error (_ ("Standard register ``$sp'' is not available for this target"));
 }
 
 static struct value *
@@ -88,10 +87,11 @@ value_of_builtin_frame_ps_reg (frame_info_ptr frame, const void *baton)
 
   if (gdbarch_ps_regnum (gdbarch) >= 0)
     return value_of_register (gdbarch_ps_regnum (gdbarch), frame);
-  error (_("Standard register ``$ps'' is not available for this target"));
+  error (_ ("Standard register ``$ps'' is not available for this target"));
 }
 
 void _initialize_frame_reg ();
+
 void
 _initialize_frame_reg ()
 {

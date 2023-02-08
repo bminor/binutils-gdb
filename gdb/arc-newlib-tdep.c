@@ -60,6 +60,7 @@ arc_newlib_osabi_sniffer (bfd *abfd)
 }
 
 void _initialize_arc_newlib_tdep ();
+
 void
 _initialize_arc_newlib_tdep ()
 {

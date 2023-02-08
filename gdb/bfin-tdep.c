@@ -41,105 +41,102 @@
 #include "bfin-tdep.h"
 
 /* Macros used by prologue functions.  */
-#define P_LINKAGE			0xE800
-#define P_MINUS_SP1			0x0140
-#define P_MINUS_SP2			0x05C0
-#define P_MINUS_SP3			0x0540
-#define P_MINUS_SP4			0x04C0
-#define P_SP_PLUS			0x6C06
-#define P_P2_LOW			0xE10A
-#define P_P2_HIGH			0XE14A
-#define P_SP_EQ_SP_PLUS_P2		0X5BB2
-#define P_SP_EQ_P2_PLUS_SP		0x5B96
-#define P_MINUS_MINUS_SP_EQ_RETS	0x0167
+#define P_LINKAGE 0xE800
+#define P_MINUS_SP1 0x0140
+#define P_MINUS_SP2 0x05C0
+#define P_MINUS_SP3 0x0540
+#define P_MINUS_SP4 0x04C0
+#define P_SP_PLUS 0x6C06
+#define P_P2_LOW 0xE10A
+#define P_P2_HIGH 0XE14A
+#define P_SP_EQ_SP_PLUS_P2 0X5BB2
+#define P_SP_EQ_P2_PLUS_SP 0x5B96
+#define P_MINUS_MINUS_SP_EQ_RETS 0x0167
 
 /* Macros used for program flow control.  */
 /* 16 bit instruction, max  */
-#define P_16_BIT_INSR_MAX		0xBFFF
+#define P_16_BIT_INSR_MAX 0xBFFF
 /* 32 bit instruction, min  */
-#define P_32_BIT_INSR_MIN		0xC000
+#define P_32_BIT_INSR_MIN 0xC000
 /* 32 bit instruction, max  */
-#define P_32_BIT_INSR_MAX		0xE801
+#define P_32_BIT_INSR_MAX 0xE801
 /* jump (preg), 16-bit, min  */
-#define P_JUMP_PREG_MIN			0x0050
+#define P_JUMP_PREG_MIN 0x0050
 /* jump (preg), 16-bit, max  */
-#define P_JUMP_PREG_MAX			0x0057
+#define P_JUMP_PREG_MAX 0x0057
 /* jump (pc+preg), 16-bit, min  */
-#define P_JUMP_PC_PLUS_PREG_MIN		0x0080
+#define P_JUMP_PC_PLUS_PREG_MIN 0x0080
 /* jump (pc+preg), 16-bit, max  */
-#define P_JUMP_PC_PLUS_PREG_MAX		0x0087
+#define P_JUMP_PC_PLUS_PREG_MAX 0x0087
 /* jump.s pcrel13m2, 16-bit, min  */
-#define P_JUMP_S_MIN			0x2000
+#define P_JUMP_S_MIN 0x2000
 /* jump.s pcrel13m2, 16-bit, max  */
-#define P_JUMP_S_MAX			0x2FFF
+#define P_JUMP_S_MAX 0x2FFF
 /* jump.l pcrel25m2, 32-bit, min  */
-#define P_JUMP_L_MIN			0xE200
+#define P_JUMP_L_MIN 0xE200
 /* jump.l pcrel25m2, 32-bit, max  */
-#define P_JUMP_L_MAX			0xE2FF
+#define P_JUMP_L_MAX 0xE2FF
 /* conditional jump pcrel11m2, 16-bit, min  */
-#define P_IF_CC_JUMP_MIN		0x1800
+#define P_IF_CC_JUMP_MIN 0x1800
 /* conditional jump pcrel11m2, 16-bit, max  */
-#define P_IF_CC_JUMP_MAX		0x1BFF
+#define P_IF_CC_JUMP_MAX 0x1BFF
 /* conditional jump(bp) pcrel11m2, 16-bit, min  */
-#define P_IF_CC_JUMP_BP_MIN		0x1C00
+#define P_IF_CC_JUMP_BP_MIN 0x1C00
 /* conditional jump(bp) pcrel11m2, 16-bit, max  */
-#define P_IF_CC_JUMP_BP_MAX		0x1FFF
+#define P_IF_CC_JUMP_BP_MAX 0x1FFF
 /* conditional !jump pcrel11m2, 16-bit, min  */
-#define P_IF_NOT_CC_JUMP_MIN		0x1000
+#define P_IF_NOT_CC_JUMP_MIN 0x1000
 /* conditional !jump pcrel11m2, 16-bit, max  */
-#define P_IF_NOT_CC_JUMP_MAX		0x13FF
+#define P_IF_NOT_CC_JUMP_MAX 0x13FF
 /* conditional jump(bp) pcrel11m2, 16-bit, min  */
-#define P_IF_NOT_CC_JUMP_BP_MIN		0x1400
+#define P_IF_NOT_CC_JUMP_BP_MIN 0x1400
 /* conditional jump(bp) pcrel11m2, 16-bit, max  */
-#define P_IF_NOT_CC_JUMP_BP_MAX		0x17FF
+#define P_IF_NOT_CC_JUMP_BP_MAX 0x17FF
 /* call (preg), 16-bit, min  */
-#define P_CALL_PREG_MIN			0x0060
+#define P_CALL_PREG_MIN 0x0060
 /* call (preg), 16-bit, max  */
-#define P_CALL_PREG_MAX			0x0067
+#define P_CALL_PREG_MAX 0x0067
 /* call (pc+preg), 16-bit, min  */
-#define P_CALL_PC_PLUS_PREG_MIN		0x0070
+#define P_CALL_PC_PLUS_PREG_MIN 0x0070
 /* call (pc+preg), 16-bit, max  */
-#define P_CALL_PC_PLUS_PREG_MAX		0x0077
+#define P_CALL_PC_PLUS_PREG_MAX 0x0077
 /* call pcrel25m2, 32-bit, min  */
-#define P_CALL_MIN			0xE300
+#define P_CALL_MIN 0xE300
 /* call pcrel25m2, 32-bit, max  */
-#define P_CALL_MAX			0xE3FF
+#define P_CALL_MAX 0xE3FF
 /* RTS  */
-#define P_RTS				0x0010
+#define P_RTS 0x0010
 /* MNOP  */
-#define P_MNOP				0xC803
+#define P_MNOP 0xC803
 /* EXCPT, 16-bit, min  */
-#define P_EXCPT_MIN			0x00A0
+#define P_EXCPT_MIN 0x00A0
 /* EXCPT, 16-bit, max  */
-#define P_EXCPT_MAX			0x00AF
+#define P_EXCPT_MAX 0x00AF
 /* multi instruction mask 1, 16-bit  */
-#define P_BIT_MULTI_INS_1		0xC000
+#define P_BIT_MULTI_INS_1 0xC000
 /* multi instruction mask 2, 16-bit  */
-#define P_BIT_MULTI_INS_2		0x0800
+#define P_BIT_MULTI_INS_2 0x0800
 
 /* The maximum bytes we search to skip the prologue.  */
-#define UPPER_LIMIT			40
+#define UPPER_LIMIT 40
 
 /* ASTAT bits  */
-#define ASTAT_CC_POS			5
-#define ASTAT_CC			(1 << ASTAT_CC_POS)
+#define ASTAT_CC_POS 5
+#define ASTAT_CC (1 << ASTAT_CC_POS)
 
 /* Initial value: Register names used in BFIN's ISA documentation.  */
 
-static const char * const bfin_register_name_strings[] =
-{
-  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-  "p0", "p1", "p2", "p3", "p4", "p5", "sp", "fp",
-  "i0", "i1", "i2", "i3", "m0", "m1", "m2", "m3",
-  "b0", "b1", "b2", "b3", "l0", "l1", "l2", "l3",
-  "a0x", "a0w", "a1x", "a1w", "astat", "rets",
-  "lc0", "lt0", "lb0", "lc1", "lt1", "lb1", "cycles", "cycles2",
-  "usp", "seqstat", "syscfg", "reti", "retx", "retn", "rete",
-  "pc", "cc",
+static const char *const bfin_register_name_strings[] = {
+  "r0",	    "r1",   "r2",   "r3",   "r4",     "r5",	 "r6",	"r7",
+  "p0",	    "p1",   "p2",   "p3",   "p4",     "p5",	 "sp",	"fp",
+  "i0",	    "i1",   "i2",   "i3",   "m0",     "m1",	 "m2",	"m3",
+  "b0",	    "b1",   "b2",   "b3",   "l0",     "l1",	 "l2",	"l3",
+  "a0x",    "a0w",  "a1x",  "a1w",  "astat",  "rets",	 "lc0", "lt0",
+  "lb0",    "lc1",  "lt1",  "lb1",  "cycles", "cycles2", "usp", "seqstat",
+  "syscfg", "reti", "retx", "retn", "rete",   "pc",	 "cc",
 };
 
 #define NUM_BFIN_REGNAMES ARRAY_SIZE (bfin_register_name_strings)
-
 
 /* In this diagram successive memory locations increase downwards or the
    stack grows upwards with negative indices.  (PUSH analogy for stack.)
@@ -185,64 +182,29 @@ static const char * const bfin_register_name_strings[] =
      FP has the topmost frame.
      FP + 4 has the previous FP and so on.  */
 
-
 /* Map from DWARF2 register number to GDB register number.  */
 
-static const int map_gcc_gdb[] =
-{
-  BFIN_R0_REGNUM,
-  BFIN_R1_REGNUM,
-  BFIN_R2_REGNUM,
-  BFIN_R3_REGNUM,
-  BFIN_R4_REGNUM,
-  BFIN_R5_REGNUM,
-  BFIN_R6_REGNUM,
-  BFIN_R7_REGNUM,
-  BFIN_P0_REGNUM,
-  BFIN_P1_REGNUM,
-  BFIN_P2_REGNUM,
-  BFIN_P3_REGNUM,
-  BFIN_P4_REGNUM,
-  BFIN_P5_REGNUM,
-  BFIN_SP_REGNUM,
-  BFIN_FP_REGNUM,
-  BFIN_I0_REGNUM,
-  BFIN_I1_REGNUM,
-  BFIN_I2_REGNUM,
-  BFIN_I3_REGNUM,
-  BFIN_B0_REGNUM,
-  BFIN_B1_REGNUM,
-  BFIN_B2_REGNUM,
-  BFIN_B3_REGNUM,
-  BFIN_L0_REGNUM,
-  BFIN_L1_REGNUM,
-  BFIN_L2_REGNUM,
-  BFIN_L3_REGNUM,
-  BFIN_M0_REGNUM,
-  BFIN_M1_REGNUM,
-  BFIN_M2_REGNUM,
-  BFIN_M3_REGNUM,
-  BFIN_A0_DOT_X_REGNUM,
-  BFIN_A1_DOT_X_REGNUM,
-  BFIN_CC_REGNUM,
-  BFIN_RETS_REGNUM,
-  BFIN_RETI_REGNUM,
-  BFIN_RETX_REGNUM,
-  BFIN_RETN_REGNUM,
-  BFIN_RETE_REGNUM,
-  BFIN_ASTAT_REGNUM,
-  BFIN_SEQSTAT_REGNUM,
-  BFIN_USP_REGNUM,
-  BFIN_LT0_REGNUM,
-  BFIN_LT1_REGNUM,
-  BFIN_LC0_REGNUM,
-  BFIN_LC1_REGNUM,
-  BFIN_LB0_REGNUM,
-  BFIN_LB1_REGNUM
-};
+static const int map_gcc_gdb[]
+  = { BFIN_R0_REGNUM,	    BFIN_R1_REGNUM,    BFIN_R2_REGNUM,
+      BFIN_R3_REGNUM,	    BFIN_R4_REGNUM,    BFIN_R5_REGNUM,
+      BFIN_R6_REGNUM,	    BFIN_R7_REGNUM,    BFIN_P0_REGNUM,
+      BFIN_P1_REGNUM,	    BFIN_P2_REGNUM,    BFIN_P3_REGNUM,
+      BFIN_P4_REGNUM,	    BFIN_P5_REGNUM,    BFIN_SP_REGNUM,
+      BFIN_FP_REGNUM,	    BFIN_I0_REGNUM,    BFIN_I1_REGNUM,
+      BFIN_I2_REGNUM,	    BFIN_I3_REGNUM,    BFIN_B0_REGNUM,
+      BFIN_B1_REGNUM,	    BFIN_B2_REGNUM,    BFIN_B3_REGNUM,
+      BFIN_L0_REGNUM,	    BFIN_L1_REGNUM,    BFIN_L2_REGNUM,
+      BFIN_L3_REGNUM,	    BFIN_M0_REGNUM,    BFIN_M1_REGNUM,
+      BFIN_M2_REGNUM,	    BFIN_M3_REGNUM,    BFIN_A0_DOT_X_REGNUM,
+      BFIN_A1_DOT_X_REGNUM, BFIN_CC_REGNUM,    BFIN_RETS_REGNUM,
+      BFIN_RETI_REGNUM,	    BFIN_RETX_REGNUM,  BFIN_RETN_REGNUM,
+      BFIN_RETE_REGNUM,	    BFIN_ASTAT_REGNUM, BFIN_SEQSTAT_REGNUM,
+      BFIN_USP_REGNUM,	    BFIN_LT0_REGNUM,   BFIN_LT1_REGNUM,
+      BFIN_LC0_REGNUM,	    BFIN_LC1_REGNUM,   BFIN_LB0_REGNUM,
+      BFIN_LB1_REGNUM };
 
 /* Big enough to hold the size of the largest register in bytes.  */
-#define BFIN_MAX_REGISTER_SIZE	4
+#define BFIN_MAX_REGISTER_SIZE 4
 
 struct bfin_frame_cache
 {
@@ -313,15 +275,15 @@ bfin_frame_cache (frame_info_ptr this_frame, void **this_cache)
     if (cache->saved_regs[i] != -1)
       cache->saved_regs[i] += cache->base;
 
-  cache->pc = get_frame_func (this_frame) ;
+  cache->pc = get_frame_func (this_frame);
   if (cache->pc == 0 || cache->pc == get_frame_pc (this_frame))
     {
       /* Either there is no prologue (frameless function) or we are at
 	 the start of a function.  In short we do not have a frame.
 	 PC is stored in rets register.  FP points to previous frame.  */
 
-      cache->saved_regs[BFIN_PC_REGNUM] =
-	get_frame_register_unsigned (this_frame, BFIN_RETS_REGNUM);
+      cache->saved_regs[BFIN_PC_REGNUM]
+	= get_frame_register_unsigned (this_frame, BFIN_RETS_REGNUM);
       cache->frameless_pc_value = 1;
       cache->base = get_frame_register_unsigned (this_frame, BFIN_FP_REGNUM);
       cache->saved_regs[BFIN_FP_REGNUM] = cache->base;
@@ -340,8 +302,7 @@ bfin_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static void
-bfin_frame_this_id (frame_info_ptr this_frame,
-		    void **this_cache,
+bfin_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
   struct bfin_frame_cache *cache = bfin_frame_cache (this_frame, this_cache);
@@ -355,8 +316,7 @@ bfin_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-bfin_frame_prev_register (frame_info_ptr this_frame,
-			  void **this_cache,
+bfin_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			  int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -372,16 +332,14 @@ bfin_frame_prev_register (frame_info_ptr this_frame,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind bfin_frame_unwind =
-{
-  "bfin prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  bfin_frame_this_id,
-  bfin_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind bfin_frame_unwind
+  = { "bfin prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      bfin_frame_this_id,
+      bfin_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 /* Check for "[--SP] = <reg>;" insns.  These are appear in function
    prologues to save misc registers onto the stack.  */
@@ -391,8 +349,8 @@ is_minus_minus_sp (int op)
 {
   op &= 0xFFC0;
 
-  if ((op == P_MINUS_SP1) || (op == P_MINUS_SP2)
-      || (op == P_MINUS_SP3) || (op == P_MINUS_SP4))
+  if ((op == P_MINUS_SP1) || (op == P_MINUS_SP2) || (op == P_MINUS_SP3)
+      || (op == P_MINUS_SP4))
     return 1;
 
   return 0;
@@ -451,8 +409,8 @@ bfin_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
       else if (pc - orig_pc >= UPPER_LIMIT)
 	{
-	  warning (_("Function Prologue not recognised; "
-		     "pc will point to ENTRY_POINT of the function"));
+	  warning (_ ("Function Prologue not recognised; "
+		      "pc will point to ENTRY_POINT of the function"));
 	  pc = orig_pc + 2;
 	  done = 1;
 	}
@@ -463,7 +421,7 @@ bfin_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
     }
 
-   /* TODO:
+  /* TODO:
       Dwarf2 uses entry point value AFTER some register initializations.
       We should perhaps skip such asssignments as well (R6 = R1, ...).  */
 
@@ -492,13 +450,9 @@ bfin_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 static CORE_ADDR
-bfin_push_dummy_call (struct gdbarch *gdbarch,
-		      struct value *function,
-		      struct regcache *regcache,
-		      CORE_ADDR bp_addr,
-		      int nargs,
-		      struct value **args,
-		      CORE_ADDR sp,
+bfin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		      struct value **args, CORE_ADDR sp,
 		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
@@ -593,8 +547,8 @@ bfin_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 static const gdb_byte *
 bfin_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
-  static unsigned char bfin_breakpoint[] = {0xa1, 0x00, 0x00, 0x00};
-  static unsigned char bfin_sim_breakpoint[] = {0x25, 0x00, 0x00, 0x00};
+  static unsigned char bfin_breakpoint[] = { 0xa1, 0x00, 0x00, 0x00 };
+  static unsigned char bfin_sim_breakpoint[] = { 0x25, 0x00, 0x00, 0x00 };
 
   *size = kind;
 
@@ -605,8 +559,7 @@ bfin_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 }
 
 static void
-bfin_extract_return_value (struct type *type,
-			   struct regcache *regs,
+bfin_extract_return_value (struct type *type, struct regcache *regs,
 			   gdb_byte *dst)
 {
   struct gdbarch *gdbarch = regs->arch ();
@@ -631,8 +584,7 @@ bfin_extract_return_value (struct type *type,
    TYPE, given in virtual format.  */
 
 static void
-bfin_store_return_value (struct type *type,
-			 struct regcache *regs,
+bfin_store_return_value (struct type *type, struct regcache *regs,
 			 const gdb_byte *src)
 {
   const bfd_byte *valbuf = src;
@@ -661,12 +613,9 @@ bfin_store_return_value (struct type *type,
    from WRITEBUF into REGCACHE.  */
 
 static enum return_value_convention
-bfin_return_value (struct gdbarch *gdbarch,
-		   struct value *function,
-		   struct type *type,
-		   struct regcache *regcache,
-		   gdb_byte *readbuf,
-		   const gdb_byte *writebuf)
+bfin_return_value (struct gdbarch *gdbarch, struct value *function,
+		   struct type *type, struct regcache *regcache,
+		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (type->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -689,14 +638,15 @@ bfin_register_name (struct gdbarch *gdbarch, int i)
 }
 
 static enum register_status
-bfin_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
-			   int regnum, gdb_byte *buffer)
+bfin_pseudo_register_read (struct gdbarch *gdbarch,
+			   readable_regcache *regcache, int regnum,
+			   gdb_byte *buffer)
 {
   gdb_byte buf[BFIN_MAX_REGISTER_SIZE];
   enum register_status status;
 
   if (regnum != BFIN_CC_REGNUM)
-    internal_error (_("invalid register number %d"), regnum);
+    internal_error (_ ("invalid register number %d"), regnum);
 
   /* Extract the CC bit from the ASTAT register.  */
   status = regcache->raw_read (BFIN_ASTAT_REGNUM, buf);
@@ -715,7 +665,7 @@ bfin_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   gdb_byte buf[BFIN_MAX_REGISTER_SIZE];
 
   if (regnum != BFIN_CC_REGNUM)
-    internal_error (_("invalid register number %d"), regnum);
+    internal_error (_ ("invalid register number %d"), regnum);
 
   /* Overlay the CC bit in the ASTAT register.  */
   regcache->raw_read (BFIN_ASTAT_REGNUM, buf);
@@ -747,13 +697,9 @@ bfin_frame_args_address (frame_info_ptr this_frame, void **this_cache)
   return cache->base + 8;
 }
 
-static const struct frame_base bfin_frame_base =
-{
-  &bfin_frame_unwind,
-  bfin_frame_base_address,
-  bfin_frame_local_address,
-  bfin_frame_args_address
-};
+static const struct frame_base bfin_frame_base
+  = { &bfin_frame_unwind, bfin_frame_base_address, bfin_frame_local_address,
+      bfin_frame_args_address };
 
 static CORE_ADDR
 bfin_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
@@ -784,8 +730,7 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* If there is already a candidate, use it.  */
 
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info); arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       bfin_gdbarch_tdep *tdep
@@ -837,6 +782,7 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_bfin_tdep ();
+
 void
 _initialize_bfin_tdep ()
 {

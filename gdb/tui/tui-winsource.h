@@ -35,11 +35,12 @@ enum tui_line_or_address_kind
 struct tui_line_or_address
 {
   enum tui_line_or_address_kind loa;
+
   union
-    {
-      int line_no;
-      CORE_ADDR addr;
-    } u;
+  {
+    int line_no;
+    CORE_ADDR addr;
+  } u;
 };
 
 /* Flags to tell what kind of breakpoint is at current line.  */
@@ -55,10 +56,10 @@ enum tui_bp_flag
 DEF_ENUM_FLAGS_TYPE (enum tui_bp_flag, tui_bp_flags);
 
 /* Position of breakpoint markers in the exec info string.  */
-#define TUI_BP_HIT_POS      0
-#define TUI_BP_BREAK_POS    1
-#define TUI_EXEC_POS        2
-#define TUI_EXECINFO_SIZE   4
+#define TUI_BP_HIT_POS 0
+#define TUI_BP_BREAK_POS 1
+#define TUI_EXEC_POS 2
+#define TUI_EXECINFO_SIZE 4
 
 /* Elements in the Source/Disassembly Window.  */
 struct tui_source_element
@@ -85,13 +86,13 @@ struct tui_source_element
   tui_bp_flags break_mode = 0;
 };
 
-
 /* The base class for all source-like windows, namely the source and
    disassembly windows.  */
 
 struct tui_source_window_base : public tui_win_info
 {
 protected:
+
   tui_source_window_base ();
   ~tui_source_window_base ();
 
@@ -105,21 +106,17 @@ protected:
   void rerender () override;
 
   virtual bool set_contents (struct gdbarch *gdbarch,
-			     const struct symtab_and_line &sal) = 0;
+			     const struct symtab_and_line &sal)
+    = 0;
 
   /* Return the number of extra margin characters needed by this
      instance.  */
-  virtual int extra_margin () const
-  {
-    return 0;
-  }
+  virtual int extra_margin () const { return 0; }
 
   /* Display the line number in the window margin.  OFFSET indicates
      which line to display; it is 0-based, with 0 meaning the line at
      the top of the window.  */
-  virtual void show_line_number (int offset) const
-  {
-  }
+  virtual void show_line_number (int offset) const {}
 
   /* Redraw the complete line of a source or disassembly window.  */
   void show_source_line (int lineno);
@@ -161,8 +158,8 @@ public:
      the location is already displayed.  */
   virtual void maybe_update (frame_info_ptr fi, symtab_and_line sal) = 0;
 
-  void update_source_window_as_is  (struct gdbarch *gdbarch,
-				    const struct symtab_and_line &sal);
+  void update_source_window_as_is (struct gdbarch *gdbarch,
+				   const struct symtab_and_line &sal);
   void update_source_window (struct gdbarch *gdbarch,
 			     const struct symtab_and_line &sal);
 
@@ -181,7 +178,8 @@ public:
 
   /* Return the start address and gdbarch.  */
   virtual void display_start_addr (struct gdbarch **gdbarch_p,
-				   CORE_ADDR *addr_p) = 0;
+				   CORE_ADDR *addr_p)
+    = 0;
 
 private:
 
@@ -205,14 +203,12 @@ private:
 
   /* Return the size of the left margin space, this is the space used to
      display things like breakpoint markers.  */
-  int left_margin () const
-  { return 1 + TUI_EXECINFO_SIZE + extra_margin (); }
+  int left_margin () const { return 1 + TUI_EXECINFO_SIZE + extra_margin (); }
 
   /* Return the width of the area that is available for window content.
      This is the window width minus the borders and the left margin, which
      is used for displaying things like breakpoint markers.  */
-  int view_width () const
-  { return width - left_margin () - 1; }
+  int view_width () const { return width - left_margin () - 1; }
 
   void show_source_content ();
 
@@ -251,7 +247,6 @@ private:
      then this value indicates the offset at which the pad contents begin.  */
   int m_pad_offset = 0;
 };
-
 
 /* A wrapper for a TUI window iterator that only iterates over source
    windows.  */
@@ -358,6 +353,6 @@ extern std::string tui_copy_source_line (const char **ptr,
 					 int *length = nullptr);
 
 /* Constant definitions. */
-#define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */
+#define SCROLL_THRESHOLD 2 /* Threshold for lazy scroll.  */
 
 #endif /* TUI_TUI_WINSOURCE_H */

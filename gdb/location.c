@@ -31,8 +31,8 @@
 #include <string.h>
 
 static std::string
-  explicit_to_string_internal (bool as_linespec,
-			       const explicit_location_spec *explicit_loc);
+explicit_to_string_internal (bool as_linespec,
+			     const explicit_location_spec *explicit_loc);
 
 /* Return a xstrdup of STR if not NULL, otherwise return NULL.  */
 
@@ -59,14 +59,15 @@ probe_location_spec::empty_p () const
   return false;
 }
 
-std::string probe_location_spec::compute_string () const
+std::string
+probe_location_spec::compute_string () const
 {
   return std::move (m_as_string);
 }
 
 /* A "normal" linespec.  */
-linespec_location_spec::linespec_location_spec
-  (const char **linespec, symbol_name_match_type match_type_)
+linespec_location_spec::linespec_location_spec (
+  const char **linespec, symbol_name_match_type match_type_)
   : location_spec (LINESPEC_LOCATION_SPEC),
     match_type (match_type_)
 {
@@ -104,8 +105,8 @@ linespec_location_spec::empty_p () const
   return false;
 }
 
-linespec_location_spec::linespec_location_spec
-  (const linespec_location_spec &other)
+linespec_location_spec::linespec_location_spec (
+  const linespec_location_spec &other)
   : location_spec (other),
     match_type (other.match_type),
     spec_string (maybe_xstrdup (other.spec_string))
@@ -147,8 +148,8 @@ address_location_spec::empty_p () const
   return false;
 }
 
-address_location_spec::address_location_spec
-  (const address_location_spec &other)
+address_location_spec::address_location_spec (
+  const address_location_spec &other)
   : location_spec (other),
     address (other.address)
 {
@@ -173,8 +174,8 @@ explicit_location_spec::~explicit_location_spec ()
   xfree (label_name);
 }
 
-explicit_location_spec::explicit_location_spec
-  (const explicit_location_spec &other)
+explicit_location_spec::explicit_location_spec (
+  const explicit_location_spec &other)
   : location_spec (other),
     source_filename (maybe_xstrdup (other.source_filename)),
     function_name (maybe_xstrdup (other.function_name)),
@@ -193,10 +194,8 @@ explicit_location_spec::clone () const
 bool
 explicit_location_spec::empty_p () const
 {
-  return (source_filename == nullptr
-	  && function_name == nullptr
-	  && label_name == nullptr
-	  && line_offset.sign == LINE_OFFSET_UNKNOWN);
+  return (source_filename == nullptr && function_name == nullptr
+	  && label_name == nullptr && line_offset.sign == LINE_OFFSET_UNKNOWN);
 }
 
 std::string
@@ -211,8 +210,7 @@ location_spec_up
 new_linespec_location_spec (const char **linespec,
 			    symbol_name_match_type match_type)
 {
-  return location_spec_up (new linespec_location_spec (linespec,
-						       match_type));
+  return location_spec_up (new linespec_location_spec (linespec, match_type));
 }
 
 /* See description in location.h.  */
@@ -328,11 +326,12 @@ explicit_to_string_internal (bool as_linespec,
 	buf.putc (space);
       if (!as_linespec)
 	buf.puts ("-line ");
-      buf.printf ("%s%d",
-		  (explicit_loc->line_offset.sign == LINE_OFFSET_NONE ? ""
-		   : (explicit_loc->line_offset.sign
-		      == LINE_OFFSET_PLUS ? "+" : "-")),
-		  explicit_loc->line_offset.offset);
+      buf.printf (
+	"%s%d",
+	(explicit_loc->line_offset.sign == LINE_OFFSET_NONE
+	   ? ""
+	   : (explicit_loc->line_offset.sign == LINE_OFFSET_PLUS ? "+" : "-")),
+	explicit_loc->line_offset.offset);
     }
 
   return buf.release ();
@@ -401,7 +400,7 @@ explicit_location_spec_lex_one (const char **inp,
       if (end == NULL)
 	{
 	  if (completion_info == NULL)
-	    error (_("Unmatched quote, %s."), start);
+	    error (_ ("Unmatched quote, %s."), start);
 
 	  end = start + strlen (start);
 	  *inp = end;
@@ -435,8 +434,7 @@ explicit_location_spec_lex_one (const char **inp,
       /* Otherwise stop at the next occurrence of whitespace, '\0',
 	 keyword, or ','.  */
       *inp = start;
-      while ((*inp)[0]
-	     && (*inp)[0] != ','
+      while ((*inp)[0] && (*inp)[0] != ','
 	     && !(isspace ((*inp)[0])
 		  || linespec_lexer_lex_keyword (&(*inp)[1])))
 	{
@@ -461,8 +459,7 @@ explicit_location_spec_lex_one (const char **inp,
 static bool
 is_cp_operator (const char *start, const char *comma)
 {
-  if (comma != NULL
-      && (comma - start) >= CP_OPERATOR_LEN)
+  if (comma != NULL && (comma - start) >= CP_OPERATOR_LEN)
     {
       const char *p = comma;
 
@@ -472,8 +469,7 @@ is_cp_operator (const char *start, const char *comma)
 	{
 	  p -= CP_OPERATOR_LEN;
 	  if (strncmp (p, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
-	      && (p == start
-		  || !(isalnum (p[-1]) || p[-1] == '_')))
+	      && (p == start || !(isalnum (p[-1]) || p[-1] == '_')))
 	    {
 	      return true;
 	    }
@@ -532,10 +528,9 @@ first_of (const char *first, const char *new_tok)
    lexing was done.  */
 
 static gdb::unique_xmalloc_ptr<char>
-explicit_location_spec_lex_one_function
-  (const char **inp,
-   const struct language_defn *language,
-   explicit_completion_info *completion_info)
+explicit_location_spec_lex_one_function (
+  const char **inp, const struct language_defn *language,
+  explicit_completion_info *completion_info)
 {
   const char *start = *inp;
 
@@ -549,8 +544,8 @@ explicit_location_spec_lex_one_function
 
       /* If the input is not an Ada operator, skip to the matching
 	 closing quote and return the string.  */
-      if (!(language->la_language == language_ada
-	    && quote_char == '\"' && is_ada_operator (start)))
+      if (!(language->la_language == language_ada && quote_char == '\"'
+	    && is_ada_operator (start)))
 	{
 	  if (completion_info != NULL)
 	    completion_info->quoted_arg_start = start;
@@ -560,7 +555,7 @@ explicit_location_spec_lex_one_function
 	  if (end == NULL)
 	    {
 	      if (completion_info == NULL)
-		error (_("Unmatched quote, %s."), start);
+		error (_ ("Unmatched quote, %s."), start);
 
 	      end = start + strlen (start);
 	      *inp = end;
@@ -584,10 +579,8 @@ explicit_location_spec_lex_one_function
      it is an hyphen.  Don't skip the first char always, because we
      may have C++ "operator<", and find_toplevel_char needs to see the
      'o' in that case.  */
-  const char *hyphen
-    = (*start == '-'
-       ? find_toplevel_char (start + 1, '-')
-       : find_toplevel_char (start, '-'));
+  const char *hyphen = (*start == '-' ? find_toplevel_char (start + 1, '-')
+				      : find_toplevel_char (start, '-'));
 
   /* Check for C++ "operator," and "operator-".  */
   comma = skip_op_false_positives (start, comma);
@@ -633,15 +626,12 @@ string_to_explicit_location_spec (const char **argp,
   /* It is assumed that input beginning with '-' and a non-digit
      character is an explicit location.  "-p" is reserved, though,
      for probe locations.  */
-  if (argp == NULL
-      || *argp == NULL
-      || *argp[0] != '-'
-      || !isalpha ((*argp)[1])
+  if (argp == NULL || *argp == NULL || *argp[0] != '-' || !isalpha ((*argp)[1])
       || ((*argp)[0] == '-' && (*argp)[1] == 'p'))
     return NULL;
 
-  std::unique_ptr<explicit_location_spec> locspec
-    (new explicit_location_spec ());
+  std::unique_ptr<explicit_location_spec> locspec (
+    new explicit_location_spec ());
 
   /* Process option/argument pairs.  dprintf_command
      requires that processing stop on ','.  */
@@ -692,19 +682,18 @@ string_to_explicit_location_spec (const char **argp,
 
       /* Convenience to consistently set both OARG/HAVE_OARG from
 	 ARG.  */
-      auto set_oarg = [&] (gdb::unique_xmalloc_ptr<char> arg)
-	{
-	  if (completion_info != NULL)
-	    {
-	      /* We do this here because the set of options that take
+      auto set_oarg = [&] (gdb::unique_xmalloc_ptr<char> arg) {
+	if (completion_info != NULL)
+	  {
+	    /* We do this here because the set of options that take
 		 arguments matches the set of explicit location
 		 options.  */
-	      completion_info->saw_explicit_location_spec_option = true;
-	    }
-	  oarg = std::move (arg);
-	  have_oarg = oarg != NULL;
-	  need_oarg = true;
-	};
+	    completion_info->saw_explicit_location_spec_option = true;
+	  }
+	oarg = std::move (arg);
+	have_oarg = oarg != NULL;
+	need_oarg = true;
+      };
 
       if (strncmp (opt.get (), "-source", len) == 0)
 	{
@@ -743,7 +732,8 @@ string_to_explicit_location_spec (const char **argp,
       else if (opt.get ()[0] == '-' && !isdigit (opt.get ()[1]))
 	{
 	  if (completion_info == NULL)
-	    error (_("invalid explicit location argument, \"%s\""), opt.get ());
+	    error (_ ("invalid explicit location argument, \"%s\""),
+		   opt.get ());
 	}
       else
 	{
@@ -761,19 +751,18 @@ string_to_explicit_location_spec (const char **argp,
 	 the "invalid argument" error before any missing
 	 argument error.  */
       if (need_oarg && !have_oarg && completion_info == NULL)
-	error (_("missing argument for \"%s\""), opt.get ());
+	error (_ ("missing argument for \"%s\""), opt.get ());
     }
 
   /* One special error check:  If a source filename was given
      without offset, function, or label, issue an error.  */
-  if (locspec->source_filename != NULL
-      && locspec->function_name == NULL
+  if (locspec->source_filename != NULL && locspec->function_name == NULL
       && locspec->label_name == NULL
       && (locspec->line_offset.sign == LINE_OFFSET_UNKNOWN)
       && completion_info == NULL)
     {
-      error (_("Source filename requires function, label, or "
-	       "line offset."));
+      error (_ ("Source filename requires function, label, or "
+		"line offset."));
     }
 
   return location_spec_up (locspec.release ());

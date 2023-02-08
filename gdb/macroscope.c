@@ -34,7 +34,6 @@
    things.  */
 struct macro_table *macro_user_macros;
 
-
 gdb::unique_xmalloc_ptr<struct macro_scope>
 sal_macro_scope (struct symtab_and_line sal)
 {
@@ -77,14 +76,14 @@ sal_macro_scope (struct symtab_and_line sal)
       ms->file = main_file;
       ms->line = -1;
 
-      complaint (_("symtab found for `%s', but that file\n"
-		 "is not covered in the compilation unit's macro information"),
-		 symtab_to_filename_for_display (sal.symtab));
+      complaint (
+	_ ("symtab found for `%s', but that file\n"
+	   "is not covered in the compilation unit's macro information"),
+	symtab_to_filename_for_display (sal.symtab));
     }
 
   return ms;
 }
-
 
 gdb::unique_xmalloc_ptr<struct macro_scope>
 user_macro_scope (void)
@@ -122,20 +121,18 @@ default_macro_scope (void)
 	 symbol files loaded, then get_current_or_default would raise an
 	 error.  But `set width' shouldn't raise an error just because
 	 it can't decide which scope to macro-expand its argument in.  */
-      struct symtab_and_line cursal
-	= get_current_source_symtab_and_line ();
-      
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+
       sal.symtab = cursal.symtab;
       sal.line = cursal.line;
     }
 
   ms = sal_macro_scope (sal);
-  if (! ms)
+  if (!ms)
     ms = user_macro_scope ();
 
   return ms;
 }
-
 
 /* Look up the definition of the macro named NAME in scope at the source
    location given by BATON, which must be a pointer to a `struct
@@ -154,6 +151,7 @@ standard_macro_lookup (const char *name, const macro_scope &ms)
 }
 
 void _initialize_macroscope ();
+
 void
 _initialize_macroscope ()
 {

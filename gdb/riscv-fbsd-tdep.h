@@ -24,7 +24,7 @@
 
 /* The general-purpose regset consists of 31 X registers, EPC, and
    SSTATUS.  */
-#define RISCV_FBSD_NUM_GREGS		33
+#define RISCV_FBSD_NUM_GREGS 33
 
 /* The fp regset always consists of 32 128-bit registers, plus a
    64-bit CSR_FCSR.  If 'Q' is not supported, only the low 64-bits of

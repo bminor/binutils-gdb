@@ -20,20 +20,20 @@
 #define COMMON_GDB_LOCALE_H
 
 #ifdef HAVE_LOCALE_H
-# include <locale.h>
+#include <locale.h>
 #endif
 
 #ifdef ENABLE_NLS
-# include <libintl.h>
-# define _(String) gettext (String)
-# ifdef gettext_noop
-#  define N_(String) gettext_noop (String)
-# else
-#  define N_(String) (String)
-# endif
+#include <libintl.h>
+#define _(String) gettext (String)
+#ifdef gettext_noop
+#define N_(String) gettext_noop (String)
 #else
-# define _(String) (String)
-# define N_(String) (String)
+#define N_(String) (String)
+#endif
+#else
+#define _(String) (String)
+#define N_(String) (String)
 #endif
 
 #ifdef HAVE_LANGINFO_CODESET

@@ -27,35 +27,27 @@
 
 /* Python Record type.  */
 
-static PyTypeObject recpy_record_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-};
+static PyTypeObject recpy_record_type = { PyVarObject_HEAD_INIT (NULL, 0) };
 
 /* Python RecordInstruction type.  */
 
-PyTypeObject recpy_insn_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-};
+PyTypeObject recpy_insn_type = { PyVarObject_HEAD_INIT (NULL, 0) };
 
 /* Python RecordFunctionSegment type.  */
 
-PyTypeObject recpy_func_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-};
+PyTypeObject recpy_func_type = { PyVarObject_HEAD_INIT (NULL, 0) };
 
 /* Python RecordGap type.  */
 
-static PyTypeObject recpy_gap_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-};
+static PyTypeObject recpy_gap_type = { PyVarObject_HEAD_INIT (NULL, 0) };
 
 /* Python RecordGap object.  */
 struct recpy_gap_object
 {
   PyObject_HEAD
 
-  /* Reason code.  */
-  int reason_code;
+    /* Reason code.  */
+    int reason_code;
 
   /* Reason message.  */
   const char *reason_string;
@@ -67,9 +59,9 @@ struct recpy_gap_object
 /* Implementation of record.method.  */
 
 static PyObject *
-recpy_method (PyObject *self, void* closure)
+recpy_method (PyObject *self, void *closure)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_FULL)
     return recpy_full_method (self, closure);
@@ -77,15 +69,15 @@ recpy_method (PyObject *self, void* closure)
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_method (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of record.format.  */
 
 static PyObject *
-recpy_format (PyObject *self, void* closure)
+recpy_format (PyObject *self, void *closure)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_FULL)
     return recpy_full_format (self, closure);
@@ -93,7 +85,7 @@ recpy_format (PyObject *self, void* closure)
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_format (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of record.goto (instruction) -> None.  */
@@ -101,12 +93,12 @@ recpy_format (PyObject *self, void* closure)
 static PyObject *
 recpy_goto (PyObject *self, PyObject *value)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_goto (self, value);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of record.replay_position [instruction]  */
@@ -114,76 +106,77 @@ recpy_goto (PyObject *self, PyObject *value)
 static PyObject *
 recpy_replay_position (PyObject *self, void *closure)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_replay_position (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of record.instruction_history [list].  */
 
 static PyObject *
-recpy_instruction_history (PyObject *self, void* closure)
+recpy_instruction_history (PyObject *self, void *closure)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_instruction_history (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of record.function_call_history [list].  */
 
 static PyObject *
-recpy_function_call_history (PyObject *self, void* closure)
+recpy_function_call_history (PyObject *self, void *closure)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_function_call_history (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of record.begin [instruction].  */
 
 static PyObject *
-recpy_begin (PyObject *self, void* closure)
+recpy_begin (PyObject *self, void *closure)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_begin (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of record.end [instruction].  */
 
 static PyObject *
-recpy_end (PyObject *self, void* closure)
+recpy_end (PyObject *self, void *closure)
 {
-  const recpy_record_object * const obj = (recpy_record_object *) self;
+  const recpy_record_object *const obj = (recpy_record_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_end (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Create a new gdb.RecordInstruction object.  */
 
 PyObject *
-recpy_insn_new (thread_info *thread, enum record_method method, Py_ssize_t number)
+recpy_insn_new (thread_info *thread, enum record_method method,
+		Py_ssize_t number)
 {
-  recpy_element_object * const obj = PyObject_New (recpy_element_object,
-						   &recpy_insn_type);
+  recpy_element_object *const obj
+    = PyObject_New (recpy_element_object, &recpy_insn_type);
 
   if (obj == NULL)
-   return NULL;
+    return NULL;
 
   obj->thread = thread;
   obj->method = method;
@@ -197,12 +190,12 @@ recpy_insn_new (thread_info *thread, enum record_method method, Py_ssize_t numbe
 static PyObject *
 recpy_insn_sal (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_insn_sal (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordInstruction.pc [int].  */
@@ -210,12 +203,12 @@ recpy_insn_sal (PyObject *self, void *closure)
 static PyObject *
 recpy_insn_pc (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_insn_pc (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordInstruction.data [buffer].  */
@@ -223,12 +216,12 @@ recpy_insn_pc (PyObject *self, void *closure)
 static PyObject *
 recpy_insn_data (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_insn_data (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordInstruction.decoded [str].  */
@@ -236,12 +229,12 @@ recpy_insn_data (PyObject *self, void *closure)
 static PyObject *
 recpy_insn_decoded (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_insn_decoded (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordInstruction.size [int].  */
@@ -249,12 +242,12 @@ recpy_insn_decoded (PyObject *self, void *closure)
 static PyObject *
 recpy_insn_size (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_insn_size (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordInstruction.is_speculative [bool].  */
@@ -262,24 +255,25 @@ recpy_insn_size (PyObject *self, void *closure)
 static PyObject *
 recpy_insn_is_speculative (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_insn_is_speculative (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Create a new gdb.RecordFunctionSegment object.  */
 
 PyObject *
-recpy_func_new (thread_info *thread, enum record_method method, Py_ssize_t number)
+recpy_func_new (thread_info *thread, enum record_method method,
+		Py_ssize_t number)
 {
-  recpy_element_object * const obj = PyObject_New (recpy_element_object,
-						   &recpy_func_type);
+  recpy_element_object *const obj
+    = PyObject_New (recpy_element_object, &recpy_func_type);
 
   if (obj == NULL)
-   return NULL;
+    return NULL;
 
   obj->thread = thread;
   obj->method = method;
@@ -293,12 +287,12 @@ recpy_func_new (thread_info *thread, enum record_method method, Py_ssize_t numbe
 static PyObject *
 recpy_func_level (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_func_level (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordFunctionSegment.symbol [gdb.Symbol].  */
@@ -306,12 +300,12 @@ recpy_func_level (PyObject *self, void *closure)
 static PyObject *
 recpy_func_symbol (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_func_symbol (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordFunctionSegment.instructions [list].  */
@@ -319,12 +313,12 @@ recpy_func_symbol (PyObject *self, void *closure)
 static PyObject *
 recpy_func_instructions (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_func_instructions (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordFunctionSegment.up [RecordFunctionSegment].  */
@@ -332,12 +326,12 @@ recpy_func_instructions (PyObject *self, void *closure)
 static PyObject *
 recpy_func_up (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_func_up (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordFunctionSegment.prev [RecordFunctionSegment].  */
@@ -345,12 +339,12 @@ recpy_func_up (PyObject *self, void *closure)
 static PyObject *
 recpy_func_prev (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_func_prev (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordFunctionSegment.next [RecordFunctionSegment].  */
@@ -358,21 +352,21 @@ recpy_func_prev (PyObject *self, void *closure)
 static PyObject *
 recpy_func_next (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   if (obj->method == RECORD_METHOD_BTRACE)
     return recpy_bt_func_next (self, closure);
 
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Implementation of RecordInstruction.number [int] and
    RecordFunctionSegment.number [int].  */
 
 static PyObject *
-recpy_element_number (PyObject *self, void* closure)
+recpy_element_number (PyObject *self, void *closure)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   return gdb_py_object_from_longest (obj->number).release ();
 }
@@ -383,7 +377,7 @@ recpy_element_number (PyObject *self, void* closure)
 static Py_hash_t
 recpy_element_hash (PyObject *self)
 {
-  const recpy_element_object * const obj = (recpy_element_object *) self;
+  const recpy_element_object *const obj = (recpy_element_object *) self;
 
   return obj->number;
 }
@@ -394,8 +388,8 @@ recpy_element_hash (PyObject *self)
 static PyObject *
 recpy_element_richcompare (PyObject *self, PyObject *other, int op)
 {
-  const recpy_element_object * const obj1 = (recpy_element_object *) self;
-  const recpy_element_object * const obj2 = (recpy_element_object *) other;
+  const recpy_element_object *const obj1 = (recpy_element_object *) self;
+  const recpy_element_object *const obj2 = (recpy_element_object *) other;
 
   if (Py_TYPE (self) != Py_TYPE (other))
     {
@@ -404,18 +398,16 @@ recpy_element_richcompare (PyObject *self, PyObject *other, int op)
     }
 
   switch (op)
-  {
+    {
     case Py_EQ:
-      if (obj1->thread == obj2->thread
-	  && obj1->method == obj2->method
+      if (obj1->thread == obj2->thread && obj1->method == obj2->method
 	  && obj1->number == obj2->number)
 	Py_RETURN_TRUE;
       else
 	Py_RETURN_FALSE;
 
     case Py_NE:
-      if (obj1->thread != obj2->thread
-	  || obj1->method != obj2->method
+      if (obj1->thread != obj2->thread || obj1->method != obj2->method
 	  || obj1->number != obj2->number)
 	Py_RETURN_TRUE;
       else
@@ -423,7 +415,7 @@ recpy_element_richcompare (PyObject *self, PyObject *other, int op)
 
     default:
       break;
-  }
+    }
 
   Py_INCREF (Py_NotImplemented);
   return Py_NotImplemented;
@@ -434,11 +426,11 @@ recpy_element_richcompare (PyObject *self, PyObject *other, int op)
 PyObject *
 recpy_gap_new (int reason_code, const char *reason_string, Py_ssize_t number)
 {
-  recpy_gap_object * const obj = PyObject_New (recpy_gap_object,
-					       &recpy_gap_type);
+  recpy_gap_object *const obj
+    = PyObject_New (recpy_gap_object, &recpy_gap_type);
 
   if (obj == NULL)
-   return NULL;
+    return NULL;
 
   obj->reason_code = reason_code;
   obj->reason_string = reason_string;
@@ -452,7 +444,7 @@ recpy_gap_new (int reason_code, const char *reason_string, Py_ssize_t number)
 static PyObject *
 recpy_gap_number (PyObject *self, void *closure)
 {
-  const recpy_gap_object * const obj = (const recpy_gap_object *) self;
+  const recpy_gap_object *const obj = (const recpy_gap_object *) self;
 
   return gdb_py_object_from_longest (obj->number).release ();
 }
@@ -462,7 +454,7 @@ recpy_gap_number (PyObject *self, void *closure)
 static PyObject *
 recpy_gap_reason_code (PyObject *self, void *closure)
 {
-  const recpy_gap_object * const obj = (const recpy_gap_object *) self;
+  const recpy_gap_object *const obj = (const recpy_gap_object *) self;
 
   return gdb_py_object_from_longest (obj->reason_code).release ();
 }
@@ -472,19 +464,18 @@ recpy_gap_reason_code (PyObject *self, void *closure)
 static PyObject *
 recpy_gap_reason_string (PyObject *self, void *closure)
 {
-  const recpy_gap_object * const obj = (const recpy_gap_object *) self;
+  const recpy_gap_object *const obj = (const recpy_gap_object *) self;
 
   return PyUnicode_FromString (obj->reason_string);
 }
 
 /* Record method list.  */
 
-static PyMethodDef recpy_record_methods[] = {
-  { "goto", recpy_goto, METH_VARARGS,
-    "goto (instruction|function_call) -> None.\n\
-Rewind to given location."},
-  { NULL }
-};
+static PyMethodDef recpy_record_methods[]
+  = { { "goto", recpy_goto, METH_VARARGS,
+	"goto (instruction|function_call) -> None.\n\
+Rewind to given location." },
+      { NULL } };
 
 /* Record member list.  */
 
@@ -497,50 +488,54 @@ static gdb_PyGetSetDef recpy_record_getset[] = {
     "List of instructions in current recording.", NULL },
   { "function_call_history", recpy_function_call_history, NULL,
     "List of function calls in current recording.", NULL },
-  { "begin", recpy_begin, NULL,
-    "First instruction in current recording.", NULL },
+  { "begin", recpy_begin, NULL, "First instruction in current recording.",
+    NULL },
   { "end", recpy_end, NULL,
     "One past the last instruction in current recording.  This is typically \
-the current instruction and is used for e.g. record.goto (record.end).", NULL },
+the current instruction and is used for e.g. record.goto (record.end).",
+    NULL },
   { NULL }
 };
 
 /* RecordInstruction member list.  */
 
-static gdb_PyGetSetDef recpy_insn_getset[] = {
-  { "number", recpy_element_number, NULL, "instruction number", NULL},
-  { "sal", recpy_insn_sal, NULL, "associated symbol and line", NULL},
-  { "pc", recpy_insn_pc, NULL, "instruction address", NULL},
-  { "data", recpy_insn_data, NULL, "raw instruction data", NULL},
-  { "decoded", recpy_insn_decoded, NULL, "decoded instruction", NULL},
-  { "size", recpy_insn_size, NULL, "instruction size in byte", NULL},
-  { "is_speculative", recpy_insn_is_speculative, NULL, "if the instruction was \
-  executed speculatively", NULL},
-  { NULL }
-};
+static gdb_PyGetSetDef recpy_insn_getset[]
+  = { { "number", recpy_element_number, NULL, "instruction number", NULL },
+      { "sal", recpy_insn_sal, NULL, "associated symbol and line", NULL },
+      { "pc", recpy_insn_pc, NULL, "instruction address", NULL },
+      { "data", recpy_insn_data, NULL, "raw instruction data", NULL },
+      { "decoded", recpy_insn_decoded, NULL, "decoded instruction", NULL },
+      { "size", recpy_insn_size, NULL, "instruction size in byte", NULL },
+      { "is_speculative", recpy_insn_is_speculative, NULL,
+	"if the instruction was \
+  executed speculatively",
+	NULL },
+      { NULL } };
 
 /* RecordFunctionSegment member list.  */
 
 static gdb_PyGetSetDef recpy_func_getset[] = {
-  { "number", recpy_element_number, NULL, "function segment number", NULL},
-  { "level", recpy_func_level, NULL, "call stack level", NULL},
-  { "symbol", recpy_func_symbol, NULL, "associated line and symbol", NULL},
+  { "number", recpy_element_number, NULL, "function segment number", NULL },
+  { "level", recpy_func_level, NULL, "call stack level", NULL },
+  { "symbol", recpy_func_symbol, NULL, "associated line and symbol", NULL },
   { "instructions", recpy_func_instructions, NULL, "list of instructions in \
-this function segment", NULL},
-  { "up", recpy_func_up, NULL, "caller or returned-to function segment", NULL},
-  { "prev", recpy_func_prev, NULL, "previous segment of this function", NULL},
-  { "next", recpy_func_next, NULL, "next segment of this function", NULL},
+this function segment",
+    NULL },
+  { "up", recpy_func_up, NULL, "caller or returned-to function segment",
+    NULL },
+  { "prev", recpy_func_prev, NULL, "previous segment of this function", NULL },
+  { "next", recpy_func_next, NULL, "next segment of this function", NULL },
   { NULL }
 };
 
 /* RecordGap member list.  */
 
-static gdb_PyGetSetDef recpy_gap_getset[] = {
-  { "number", recpy_gap_number, NULL, "element number", NULL},
-  { "reason_code", recpy_gap_reason_code, NULL, "reason code", NULL},
-  { "reason_string", recpy_gap_reason_string, NULL, "reason string", NULL},
-  { NULL }
-};
+static gdb_PyGetSetDef recpy_gap_getset[]
+  = { { "number", recpy_gap_number, NULL, "element number", NULL },
+      { "reason_code", recpy_gap_reason_code, NULL, "reason code", NULL },
+      { "reason_string", recpy_gap_reason_string, NULL, "reason string",
+	NULL },
+      { NULL } };
 
 /* Sets up the record API in the gdb module.  */
 

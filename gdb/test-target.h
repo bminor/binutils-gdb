@@ -23,7 +23,8 @@
 #include "process-stratum-target.h"
 
 #if GDB_SELF_TEST
-namespace selftests {
+namespace selftests
+{
 
 /* A mock process_stratum target_ops that doesn't read/write registers
    anywhere.  */
@@ -31,32 +32,20 @@ namespace selftests {
 class test_target_ops : public process_stratum_target
 {
 public:
+
   test_target_ops () = default;
 
   const target_info &info () const override;
 
-  bool has_registers () override
-  {
-    return true;
-  }
+  bool has_registers () override { return true; }
 
-  bool has_stack () override
-  {
-    return true;
-  }
+  bool has_stack () override { return true; }
 
-  bool has_memory () override
-  {
-    return true;
-  }
+  bool has_memory () override { return true; }
 
-  void prepare_to_store (regcache *regs) override
-  {
-  }
+  void prepare_to_store (regcache *regs) override {}
 
-  void store_registers (regcache *regs, int regno) override
-  {
-  }
+  void store_registers (regcache *regs, int regno) override {}
 };
 
 } // namespace selftests

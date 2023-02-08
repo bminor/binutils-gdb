@@ -69,12 +69,10 @@ infrun_debug_show_threads (const char *title, ThreadRange threads)
 	infrun_debug_printf ("  thread %s, executing = %d, resumed = %d, "
 			     "state = %s",
 			     thread->ptid.to_string ().c_str (),
-			     thread->executing (),
-			     thread->resumed (),
+			     thread->executing (), thread->resumed (),
 			     thread_state_string (thread->state));
     }
 }
-
 
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
@@ -109,10 +107,10 @@ extern ULONGEST get_stop_id (void);
 
 /* Reverse execution.  */
 enum exec_direction_kind
-  {
-    EXEC_FORWARD,
-    EXEC_REVERSE
-  };
+{
+  EXEC_FORWARD,
+  EXEC_REVERSE
+};
 
 /* The current execution direction.  */
 extern enum exec_direction_kind execution_direction;
@@ -159,7 +157,8 @@ extern void get_last_target_status (process_stratum_target **target,
 				    struct target_waitstatus *status);
 
 /* Set the cached copy of the last target/ptid/waitstatus.  */
-extern void set_last_target_status (process_stratum_target *target, ptid_t ptid,
+extern void set_last_target_status (process_stratum_target *target,
+				    ptid_t ptid,
 				    const target_waitstatus &status);
 
 /* Clear the cached copy of the last ptid/waitstatus returned by
@@ -182,7 +181,7 @@ extern void fetch_inferior_event ();
 extern void init_wait_for_inferior (void);
 
 extern void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
-						  struct symtab_and_line ,
+						  struct symtab_and_line,
 						  struct frame_id);
 
 /* Returns true if we're trying to step past the instruction at
@@ -199,8 +198,7 @@ extern int thread_is_stepping_over_breakpoint (int thread);
 extern int stepping_past_nonsteppable_watchpoint (void);
 
 /* Record in TP the frame and location we're currently stepping through.  */
-extern void set_step_info (thread_info *tp,
-			   frame_info_ptr frame,
+extern void set_step_info (thread_info *tp, frame_info_ptr frame,
 			   struct symtab_and_line sal);
 
 /* Several print_*_reason helper functions to print why the inferior
@@ -306,7 +304,8 @@ extern void all_uis_on_sync_execution_starting (void);
 
 /* In all-stop, restart the target if it had to be stopped to
    detach.  */
-extern void restart_after_all_stop_detach (process_stratum_target *proc_target);
+extern void
+restart_after_all_stop_detach (process_stratum_target *proc_target);
 
 /* RAII object to temporarily disable the requirement for target
    stacks to commit their resumed threads.
@@ -372,6 +371,7 @@ struct scoped_disable_commit_resumed
   void reset_and_commit ();
 
 private:
+
   /* Undoes the disabling done by the ctor.  */
   void reset ();
 
@@ -401,9 +401,9 @@ struct scoped_enable_commit_resumed
   DISABLE_COPY_AND_ASSIGN (scoped_enable_commit_resumed);
 
 private:
+
   const char *m_reason;
   bool m_prev_enable_commit_resumed;
 };
-
 
 #endif /* INFRUN_H */

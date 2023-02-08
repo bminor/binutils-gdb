@@ -96,7 +96,7 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   if (size < LZMA_STREAM_HEADER_SIZE
       || bfd_seek (section->owner, offset, SEEK_SET) != 0
       || bfd_bread (footer, LZMA_STREAM_HEADER_SIZE, section->owner)
-	 != LZMA_STREAM_HEADER_SIZE
+	   != LZMA_STREAM_HEADER_SIZE
       || lzma_stream_footer_decode (&options, footer) != LZMA_OK
       || offset < options.backward_size)
     {
@@ -110,10 +110,10 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   pos = 0;
   if (bfd_seek (section->owner, offset, SEEK_SET) != 0
       || bfd_bread (indexdata, options.backward_size, section->owner)
-	 != options.backward_size
+	   != options.backward_size
       || lzma_index_buffer_decode (&index, &memlimit, &gdb_lzma_allocator,
 				   indexdata, &pos, options.backward_size)
-	 != LZMA_OK
+	   != LZMA_OK
       || lzma_index_size (index) != options.backward_size)
     {
       xfree (indexdata);
@@ -150,8 +150,8 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
   res = 0;
   while (nbytes > 0)
     {
-      if (lstream->data == NULL
-	  || lstream->data_start > offset || offset >= lstream->data_end)
+      if (lstream->data == NULL || lstream->data_start > offset
+	  || offset >= lstream->data_end)
 	{
 	  asection *section = lstream->section;
 
@@ -163,7 +163,7 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 	  block_offset = section->filepos + iter.block.compressed_file_offset;
 	  if (bfd_seek (section->owner, block_offset, SEEK_SET) != 0
 	      || bfd_bread (compressed, iter.block.total_size, section->owner)
-		 != iter.block.total_size)
+		   != iter.block.total_size)
 	    {
 	      xfree (compressed);
 	      break;
@@ -174,7 +174,8 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 	  memset (&block, 0, sizeof (block));
 	  block.filters = filters;
 	  block.header_size = lzma_block_header_size_decode (compressed[0]);
-	  if (lzma_block_header_decode (&block, &gdb_lzma_allocator, compressed)
+	  if (lzma_block_header_decode (&block, &gdb_lzma_allocator,
+					compressed)
 	      != LZMA_OK)
 	    {
 	      xfree (compressed);
@@ -186,8 +187,8 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 	  uncompressed_pos = 0;
 	  if (lzma_block_buffer_decode (&block, &gdb_lzma_allocator,
 					compressed, &compressed_pos,
-					iter.block.total_size,
-					uncompressed, &uncompressed_pos,
+					iter.block.total_size, uncompressed,
+					&uncompressed_pos,
 					iter.block.uncompressed_size)
 	      != LZMA_OK)
 	    {
@@ -221,8 +222,7 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
    is 'struct gdb_lzma_stream *'.  */
 
 static int
-lzma_close (struct bfd *nbfd,
-	    void *stream)
+lzma_close (struct bfd *nbfd, void *stream)
 {
   struct gdb_lzma_stream *lstream = (struct gdb_lzma_stream *) stream;
 
@@ -239,9 +239,7 @@ lzma_close (struct bfd *nbfd,
    is 'struct gdb_lzma_stream *'.  */
 
 static int
-lzma_stat (struct bfd *abfd,
-	   void *stream,
-	   struct stat *sb)
+lzma_stat (struct bfd *abfd, void *stream, struct stat *sb)
 {
   struct gdb_lzma_stream *lstream = (struct gdb_lzma_stream *) stream;
 
@@ -277,25 +275,25 @@ find_separate_debug_file_in_section (struct objfile *objfile)
   if (shared != nullptr)
     return *shared;
 
-  std::string filename = string_printf (_(".gnu_debugdata for %s"),
-					objfile_name (objfile));
+  std::string filename
+    = string_printf (_ (".gnu_debugdata for %s"), objfile_name (objfile));
 
-  abfd = gdb_bfd_openr_iovec (filename.c_str (), gnutarget, lzma_open,
-			      section, lzma_pread, lzma_close, lzma_stat);
+  abfd = gdb_bfd_openr_iovec (filename.c_str (), gnutarget, lzma_open, section,
+			      lzma_pread, lzma_close, lzma_stat);
   if (abfd == NULL)
     return NULL;
 
   if (!bfd_check_format (abfd.get (), bfd_object))
     {
-      warning (_("Cannot parse .gnu_debugdata section; not a BFD object"));
+      warning (_ ("Cannot parse .gnu_debugdata section; not a BFD object"));
       return NULL;
     }
 
   gnu_debug_key.emplace (objfile->obfd.get (), abfd);
 
 #else
-  warning (_("Cannot parse .gnu_debugdata section; LZMA support was "
-	     "disabled at compile time"));
+  warning (_ ("Cannot parse .gnu_debugdata section; LZMA support was "
+	      "disabled at compile time"));
 #endif /* !HAVE_LIBLZMA */
 
   return abfd;

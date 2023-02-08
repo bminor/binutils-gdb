@@ -32,7 +32,7 @@ struct type;
    type, and *RETVAL_TYPE to the target function's return type.
    Calls error() if the function is not valid for calling.  */
 
-extern CORE_ADDR find_function_addr (struct value *function, 
+extern CORE_ADDR find_function_addr (struct value *function,
 				     struct type **retval_type,
 				     struct type **function_type = NULL);
 
@@ -58,11 +58,10 @@ extern struct value *call_function_by_hand (struct value *function,
    created inferior call dummy frame.  */
 
 extern struct value *
-  call_function_by_hand_dummy (struct value *function,
-			       type *default_return_type,
-			       gdb::array_view<value *> args,
-			       dummy_frame_dtor_ftype *dummy_dtor,
-			       void *dummy_dtor_data);
+call_function_by_hand_dummy (struct value *function, type *default_return_type,
+			     gdb::array_view<value *> args,
+			     dummy_frame_dtor_ftype *dummy_dtor,
+			     void *dummy_dtor_data);
 
 /* Throw an error indicating that the user tried to call a function
    that has unknown return type.  FUNC_NAME is the name of the

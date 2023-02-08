@@ -36,25 +36,24 @@
 
 /* Macros to extract fields from SPARC instructions.  */
 #define X_RS1(i) (((i) >> 14) & 0x1f)
-#define X_RS2(i) ((i) & 0x1f)
+#define X_RS2(i) ((i) &0x1f)
 #define X_I(i) (((i) >> 13) & 1)
 
-const struct sparc_gregmap sparc32nbsd_gregmap =
-{
-  0 * 4,			/* %psr */
-  1 * 4,			/* %pc */
-  2 * 4,			/* %npc */
-  3 * 4,			/* %y */
-  -1,				/* %wim */
-  -1,				/* %tbr */
-  5 * 4,			/* %g1 */
-  -1				/* %l0 */
+const struct sparc_gregmap sparc32nbsd_gregmap = {
+  0 * 4, /* %psr */
+  1 * 4, /* %pc */
+  2 * 4, /* %npc */
+  3 * 4, /* %y */
+  -1,	 /* %wim */
+  -1,	 /* %tbr */
+  5 * 4, /* %g1 */
+  -1	 /* %l0 */
 };
 
 static void
 sparc32nbsd_supply_gregset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *gregs, size_t len)
+			    struct regcache *regcache, int regnum,
+			    const void *gregs, size_t len)
 {
   sparc32_supply_gregset (&sparc32nbsd_gregmap, regcache, regnum, gregs);
 
@@ -68,13 +67,12 @@ sparc32nbsd_supply_gregset (const struct regset *regset,
 
 static void
 sparc32nbsd_supply_fpregset (const struct regset *regset,
-			     struct regcache *regcache,
-			     int regnum, const void *fpregs, size_t len)
+			     struct regcache *regcache, int regnum,
+			     const void *fpregs, size_t len)
 {
   sparc32_supply_fpregset (&sparc32_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
-
 /* Signal trampolines.  */
 
 /* The following variables describe the location of an on-stack signal
@@ -140,8 +138,8 @@ sparc32nbsd_sigcontext_saved_regs (frame_info_ptr this_frame)
      save area.  */
   addr = saved_regs[SPARC_SP_REGNUM].addr ();
   addr = get_frame_memory_unsigned (this_frame, addr, 4);
-  for (regnum = SPARC_L0_REGNUM;
-       regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
+  for (regnum = SPARC_L0_REGNUM; regnum <= SPARC_I7_REGNUM;
+       regnum++, addr += 4)
     saved_regs[regnum].set_addr (addr);
 
   /* Handle StackGhost.  */
@@ -161,7 +159,7 @@ sparc32nbsd_sigcontext_saved_regs (frame_info_ptr this_frame)
   /* The floating-point registers are only saved if the EF bit in %prs
      has been set.  */
 
-#define PSR_EF	0x00001000
+#define PSR_EF 0x00001000
 
   addr = saved_regs[SPARC32_PSR_REGNUM].addr ();
   psr = get_frame_memory_unsigned (this_frame, addr, 4);
@@ -215,8 +213,8 @@ sparc32nbsd_sigcontext_frame_this_id (frame_info_ptr this_frame,
 				      void **this_cache,
 				      struct frame_id *this_id)
 {
-  struct sparc_frame_cache *cache =
-    sparc32nbsd_sigcontext_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc32nbsd_sigcontext_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
@@ -225,8 +223,8 @@ static struct value *
 sparc32nbsd_sigcontext_frame_prev_register (frame_info_ptr this_frame,
 					    void **this_cache, int regnum)
 {
-  struct sparc_frame_cache *cache =
-    sparc32nbsd_sigcontext_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc32nbsd_sigcontext_frame_cache (this_frame, this_cache);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
@@ -249,17 +247,15 @@ sparc32nbsd_sigcontext_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
-{
-  "sparc32 netbsd sigcontext",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  sparc32nbsd_sigcontext_frame_this_id,
-  sparc32nbsd_sigcontext_frame_prev_register,
-  NULL,
-  sparc32nbsd_sigcontext_frame_sniffer
-};
-
+static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind
+  = { "sparc32 netbsd sigcontext",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      sparc32nbsd_sigcontext_frame_this_id,
+      sparc32nbsd_sigcontext_frame_prev_register,
+      NULL,
+      sparc32nbsd_sigcontext_frame_sniffer };
+
 /* Return the address of a system call's alternative return
    address.  */
 
@@ -280,17 +276,12 @@ sparcnbsd_step_trap (frame_info_ptr frame, unsigned long insn)
 
   return 0;
 }
-
 
-static const struct regset sparc32nbsd_gregset =
-  {
-    NULL, sparc32nbsd_supply_gregset, NULL
-  };
+static const struct regset sparc32nbsd_gregset
+  = { NULL, sparc32nbsd_supply_gregset, NULL };
 
-static const struct regset sparc32nbsd_fpregset =
-  {
-    NULL, sparc32nbsd_supply_fpregset, NULL
-  };
+static const struct regset sparc32nbsd_fpregset
+  = { NULL, sparc32nbsd_supply_fpregset, NULL };
 
 void
 sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -314,11 +305,12 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   frame_unwind_append_unwinder (gdbarch, &sparc32nbsd_sigcontext_frame_unwind);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 }
 
 void _initialize_sparcnbsd_tdep ();
+
 void
 _initialize_sparcnbsd_tdep ()
 {

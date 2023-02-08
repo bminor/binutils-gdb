@@ -39,10 +39,8 @@ sparc64obsd_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
     return 1;
 
   /* Control registers.  */
-  if (regnum == SPARC64_PC_REGNUM
-      || regnum == SPARC64_NPC_REGNUM
-      || regnum == SPARC64_STATE_REGNUM
-      || regnum == SPARC64_Y_REGNUM)
+  if (regnum == SPARC64_PC_REGNUM || regnum == SPARC64_NPC_REGNUM
+      || regnum == SPARC64_STATE_REGNUM || regnum == SPARC64_Y_REGNUM)
     return 1;
 
   return 0;
@@ -64,7 +62,6 @@ sparc64obsd_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 
   return 0;
 }
-
 
 /* Support for debugging kernel virtual memory images.  */
 
@@ -92,8 +89,8 @@ sparc64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   /* If the program counter is zero, this is probably a core dump, and
      we can get %pc from the stack.  */
   if (pcb->pcb_pc == 0)
-      read_memory(pcb->pcb_sp + BIAS - 176 + (11 * 8), 
-		  (gdb_byte *)&pcb->pcb_pc, sizeof pcb->pcb_pc);
+    read_memory (pcb->pcb_sp + BIAS - 176 + (11 * 8),
+		 (gdb_byte *) &pcb->pcb_pc, sizeof pcb->pcb_pc);
 
   regcache->raw_supply (SPARC_SP_REGNUM, &pcb->pcb_sp);
   regcache->raw_supply (SPARC64_PC_REGNUM, &pcb->pcb_pc);
@@ -110,6 +107,7 @@ sparc64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 static sparc_target<obsd_nat_target> the_sparc64_obsd_nat_target;
 
 void _initialize_sparc64obsd_nat ();
+
 void
 _initialize_sparc64obsd_nat ()
 {

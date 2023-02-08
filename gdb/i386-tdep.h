@@ -52,8 +52,8 @@ struct regcache;
 
 enum struct_return
 {
-  pcc_struct_return,		/* Return "short" structures in memory.  */
-  reg_struct_return		/* Return "short" structures in registers.  */
+  pcc_struct_return, /* Return "short" structures in memory.  */
+  reg_struct_return  /* Return "short" structures in registers.  */
 };
 
 /* i386 architecture specific information.  */
@@ -146,21 +146,21 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
   int xsave_xcr0_offset = 0;
 
   /* Register names.  */
-  const char * const *register_names = nullptr;
+  const char *const *register_names = nullptr;
 
   /* Register number for %ymm0h.  Set this to -1 to indicate the absence
      of upper YMM register support.  */
   int ymm0h_regnum = 0;
 
   /* Upper YMM register names.  Only used for tdesc_numbered_register.  */
-  const char * const *ymmh_register_names = nullptr;
+  const char *const *ymmh_register_names = nullptr;
 
   /* Register number for %ymm16h.  Set this to -1 to indicate the absence
   of support for YMM16-31.  */
   int ymm16h_regnum = 0;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char * const *ymm16h_register_names = nullptr;
+  const char *const *ymm16h_register_names = nullptr;
 
   /* Register number for %bnd0r.  Set this to -1 to indicate the absence
      bound registers.  */
@@ -175,23 +175,23 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
   int bndcfgu_regnum = 0;
 
   /* MPX register names.  Only used for tdesc_numbered_register.  */
-  const char * const *mpx_register_names = nullptr;
+  const char *const *mpx_register_names = nullptr;
 
   /* Register number for %zmm0h.  Set this to -1 to indicate the absence
      of ZMM_HI256 register support.  */
   int zmm0h_regnum = 0;
 
   /* OpMask register names.  */
-  const char * const *k_register_names = nullptr;
+  const char *const *k_register_names = nullptr;
 
   /* ZMM register names.  Only used for tdesc_numbered_register.  */
-  const char * const *zmmh_register_names = nullptr;
+  const char *const *zmmh_register_names = nullptr;
 
   /* XMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char * const *xmm_avx512_register_names = nullptr;
+  const char *const *xmm_avx512_register_names = nullptr;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char * const *ymm_avx512_register_names = nullptr;
+  const char *const *ymm_avx512_register_names = nullptr;
 
   /* Number of PKEYS registers.  */
   int num_pkeys_regs = 0;
@@ -200,7 +200,7 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
   int pkru_regnum = 0;
 
   /* PKEYS register names.  */
-  const char * const *pkeys_register_names = nullptr;
+  const char *const *pkeys_register_names = nullptr;
 
   /* Register number for %fsbase.  Set this to -1 to indicate the
      absence of segment base registers.  */
@@ -216,7 +216,9 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
   int jb_pc_offset = 0;
 
   /* Convention for returning structures.  */
-  enum struct_return struct_return {};
+  enum struct_return struct_return
+  {
+  };
 
   /* Address range where sigtramp lives.  */
   CORE_ADDR sigtramp_start = 0;
@@ -274,33 +276,33 @@ extern int i386_fpc_regnum_p (struct gdbarch *, int);
 
 enum i386_regnum
 {
-  I386_EAX_REGNUM,		/* %eax */
-  I386_ECX_REGNUM,		/* %ecx */
-  I386_EDX_REGNUM,		/* %edx */
-  I386_EBX_REGNUM,		/* %ebx */
-  I386_ESP_REGNUM,		/* %esp */
-  I386_EBP_REGNUM,		/* %ebp */
-  I386_ESI_REGNUM,		/* %esi */
-  I386_EDI_REGNUM,		/* %edi */
-  I386_EIP_REGNUM,		/* %eip */
-  I386_EFLAGS_REGNUM,		/* %eflags */
-  I386_CS_REGNUM,		/* %cs */
-  I386_SS_REGNUM,		/* %ss */
-  I386_DS_REGNUM,		/* %ds */
-  I386_ES_REGNUM,		/* %es */
-  I386_FS_REGNUM,		/* %fs */
-  I386_GS_REGNUM,		/* %gs */
-  I386_ST0_REGNUM,		/* %st(0) */
-  I386_MXCSR_REGNUM = 40,	/* %mxcsr */ 
-  I386_YMM0H_REGNUM,		/* %ymm0h */
+  I386_EAX_REGNUM,	  /* %eax */
+  I386_ECX_REGNUM,	  /* %ecx */
+  I386_EDX_REGNUM,	  /* %edx */
+  I386_EBX_REGNUM,	  /* %ebx */
+  I386_ESP_REGNUM,	  /* %esp */
+  I386_EBP_REGNUM,	  /* %ebp */
+  I386_ESI_REGNUM,	  /* %esi */
+  I386_EDI_REGNUM,	  /* %edi */
+  I386_EIP_REGNUM,	  /* %eip */
+  I386_EFLAGS_REGNUM,	  /* %eflags */
+  I386_CS_REGNUM,	  /* %cs */
+  I386_SS_REGNUM,	  /* %ss */
+  I386_DS_REGNUM,	  /* %ds */
+  I386_ES_REGNUM,	  /* %es */
+  I386_FS_REGNUM,	  /* %fs */
+  I386_GS_REGNUM,	  /* %gs */
+  I386_ST0_REGNUM,	  /* %st(0) */
+  I386_MXCSR_REGNUM = 40, /* %mxcsr */
+  I386_YMM0H_REGNUM,	  /* %ymm0h */
   I386_YMM7H_REGNUM = I386_YMM0H_REGNUM + 7,
   I386_BND0R_REGNUM,
   I386_BND3R_REGNUM = I386_BND0R_REGNUM + 3,
   I386_BNDCFGU_REGNUM,
   I386_BNDSTATUS_REGNUM,
-  I386_K0_REGNUM,		/* %k0 */
+  I386_K0_REGNUM, /* %k0 */
   I386_K7_REGNUM = I386_K0_REGNUM + 7,
-  I386_ZMM0H_REGNUM,		/* %zmm0h */
+  I386_ZMM0H_REGNUM, /* %zmm0h */
   I386_ZMM7H_REGNUM = I386_ZMM0H_REGNUM + 7,
   I386_PKRU_REGNUM,
   I386_FSBASE_REGNUM,
@@ -337,18 +339,18 @@ enum record_i386_regnum
   X86_RECORD_GS_REGNUM,
 };
 
-#define I386_NUM_GREGS	16
-#define I386_NUM_XREGS  9
+#define I386_NUM_GREGS 16
+#define I386_NUM_XREGS 9
 
-#define I386_SSE_NUM_REGS	(I386_MXCSR_REGNUM + 1)
-#define I386_AVX_NUM_REGS	(I386_YMM7H_REGNUM + 1)
-#define I386_MPX_NUM_REGS	(I386_BNDSTATUS_REGNUM + 1)
-#define I386_AVX512_NUM_REGS	(I386_ZMM7H_REGNUM + 1)
-#define I386_PKEYS_NUM_REGS	(I386_PKRU_REGNUM + 1)
-#define I386_NUM_REGS		(I386_GSBASE_REGNUM + 1)
+#define I386_SSE_NUM_REGS (I386_MXCSR_REGNUM + 1)
+#define I386_AVX_NUM_REGS (I386_YMM7H_REGNUM + 1)
+#define I386_MPX_NUM_REGS (I386_BNDSTATUS_REGNUM + 1)
+#define I386_AVX512_NUM_REGS (I386_ZMM7H_REGNUM + 1)
+#define I386_PKEYS_NUM_REGS (I386_PKRU_REGNUM + 1)
+#define I386_NUM_REGS (I386_GSBASE_REGNUM + 1)
 
 /* Size of the largest register.  */
-#define I386_MAX_REGISTER_SIZE	64
+#define I386_MAX_REGISTER_SIZE 64
 
 /* Types for i386-specific registers.  */
 extern struct type *i387_ext_type (struct gdbarch *gdbarch);
@@ -358,7 +360,7 @@ extern int i386_byte_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_word_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_xmm_regnum_p (struct gdbarch *gdbarch, int regnum);
-extern int i386_xmm_avx512_regnum_p (struct gdbarch * gdbarch, int regnum);
+extern int i386_xmm_avx512_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_ymm_avx512_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_bnd_regnum_p (struct gdbarch *gdbarch, int regnum);
@@ -378,17 +380,16 @@ extern void i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 						  struct value *result);
 
 extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
-					struct regcache *regcache,
-					int regnum, const gdb_byte *buf);
+					struct regcache *regcache, int regnum,
+					const gdb_byte *buf);
 
 extern int i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
-					    struct agent_expr *ax,
-					    int regnum);
+					    struct agent_expr *ax, int regnum);
 
 /* Segment selectors.  */
-#define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */
-#define I386_SEL_UPL	0x0003	/* User Privilige Level.  */
-#define I386_SEL_KPL	0x0000	/* Kernel Privilige Level.  */
+#define I386_SEL_RPL 0x0003 /* Requester's Privilege Level mask.  */
+#define I386_SEL_UPL 0x0003 /* User Privilige Level.  */
+#define I386_SEL_KPL 0x0000 /* Kernel Privilige Level.  */
 
 /* The length of the longest i386 instruction (according to
    include/asm-i386/kprobes.h in Linux 2.6.  */
@@ -402,16 +403,12 @@ extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch,
 
 /* The "push_dummy_call" gdbarch method, optionally with the thiscall
    calling convention.  */
-extern CORE_ADDR i386_thiscall_push_dummy_call (struct gdbarch *gdbarch,
-						struct value *function,
-						struct regcache *regcache,
-						CORE_ADDR bp_addr,
-						int nargs, struct value **args,
-						CORE_ADDR sp,
-						function_call_return_method
-						return_method,
-						CORE_ADDR struct_addr,
-						bool thiscall);
+extern CORE_ADDR
+i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+			       struct regcache *regcache, CORE_ADDR bp_addr,
+			       int nargs, struct value **args, CORE_ADDR sp,
+			       function_call_return_method return_method,
+			       CORE_ADDR struct_addr, bool thiscall);
 
 /* Return whether the THIS_FRAME corresponds to a sigtramp routine.  */
 extern int i386_sigtramp_p (frame_info_ptr this_frame);
@@ -434,21 +431,20 @@ extern const struct regset i386_gregset;
 extern const struct regset i386_fpregset;
 
 /* Default iterator over core file register note sections.  */
-extern void
-  i386_iterate_over_regset_sections (struct gdbarch *gdbarch,
-				     iterate_over_regset_sections_cb *cb,
-				     void *cb_data,
-				     const struct regcache *regcache);
+extern void i386_iterate_over_regset_sections (
+  struct gdbarch *gdbarch, iterate_over_regset_sections_cb *cb, void *cb_data,
+  const struct regcache *regcache);
 
 typedef buf_displaced_step_copy_insn_closure
   i386_displaced_step_copy_insn_closure;
 
-extern displaced_step_copy_insn_closure_up i386_displaced_step_copy_insn
-  (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
-   struct regcache *regs);
-extern void i386_displaced_step_fixup
-  (struct gdbarch *gdbarch, displaced_step_copy_insn_closure *closure,
-   CORE_ADDR from, CORE_ADDR to, regcache *regs);
+extern displaced_step_copy_insn_closure_up
+i386_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from,
+			       CORE_ADDR to, struct regcache *regs);
+extern void
+i386_displaced_step_fixup (struct gdbarch *gdbarch,
+			   displaced_step_copy_insn_closure *closure,
+			   CORE_ADDR from, CORE_ADDR to, regcache *regs);
 
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
@@ -467,7 +463,6 @@ extern const struct target_desc *i386_target_description (uint64_t xcr0,
 
 /* Return true iff the current target is MPX enabled.  */
 extern int i386_mpx_enabled (void);
-
 
 /* Functions and variables exported from i386-bsd-tdep.c.  */
 
@@ -482,7 +477,8 @@ extern int i386bsd_sc_reg_offset[];
 extern int i386_stap_is_single_operand (struct gdbarch *gdbarch,
 					const char *s);
 
-extern expr::operation_up i386_stap_parse_special_token
-     (struct gdbarch *gdbarch, struct stap_parse_info *p);
+extern expr::operation_up
+i386_stap_parse_special_token (struct gdbarch *gdbarch,
+			       struct stap_parse_info *p);
 
 #endif /* i386-tdep.h */

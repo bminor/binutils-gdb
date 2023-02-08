@@ -39,28 +39,27 @@
 
 /* Offsets into the struct i386_thread_state where we'll find the saved regs.
    From <mach/i386/thread_status.h> and i386-tdep.h.  */
-int i386_darwin_thread_state_reg_offset[] =
-{
-   0 * 4,   /* EAX */
-   2 * 4,   /* ECX */
-   3 * 4,   /* EDX */
-   1 * 4,   /* EBX */
-   7 * 4,   /* ESP */
-   6 * 4,   /* EBP */
-   5 * 4,   /* ESI */
-   4 * 4,   /* EDI */
-  10 * 4,   /* EIP */
-   9 * 4,   /* EFLAGS */
-  11 * 4,   /* CS */
-   8 * 4,   /* SS */
-  12 * 4,   /* DS */
-  13 * 4,   /* ES */
-  14 * 4,   /* FS */
-  15 * 4    /* GS */
+int i386_darwin_thread_state_reg_offset[] = {
+  0 * 4,  /* EAX */
+  2 * 4,  /* ECX */
+  3 * 4,  /* EDX */
+  1 * 4,  /* EBX */
+  7 * 4,  /* ESP */
+  6 * 4,  /* EBP */
+  5 * 4,  /* ESI */
+  4 * 4,  /* EDI */
+  10 * 4, /* EIP */
+  9 * 4,  /* EFLAGS */
+  11 * 4, /* CS */
+  8 * 4,  /* SS */
+  12 * 4, /* DS */
+  13 * 4, /* ES */
+  14 * 4, /* FS */
+  15 * 4  /* GS */
 };
 
-const int i386_darwin_thread_state_num_regs = 
-  ARRAY_SIZE (i386_darwin_thread_state_reg_offset);
+const int i386_darwin_thread_state_num_regs
+  = ARRAY_SIZE (i386_darwin_thread_state_reg_offset);
 
 /* Assuming THIS_FRAME is a Darwin sigtramp routine, return the
    address of the associated sigcontext structure.  */
@@ -131,15 +130,13 @@ i386_darwin_arg_type_alignment (struct type *type)
 	 aligned.
      5.  The caller places structures with vector elements on the stack,
 	 16-byte aligned.  */
-  if (type->code () == TYPE_CODE_STRUCT
-      || type->code () == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_STRUCT || type->code () == TYPE_CODE_UNION)
     {
       int i;
       int res = 4;
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  int align
-	    = i386_darwin_arg_type_alignment (type->field (i).type ());
+	  int align = i386_darwin_arg_type_alignment (type->field (i).type ());
 
 	  res = std::max (res, align);
 	}
@@ -190,14 +187,15 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      if (write_pass)
 		{
 		  const gdb_byte *val = value_contents_all (args[i]).data ();
-		  regcache->raw_write (I387_MM0_REGNUM(tdep) + num_m128, val);
+		  regcache->raw_write (I387_MM0_REGNUM (tdep) + num_m128, val);
 		}
 	      num_m128++;
 	    }
 	  else
 	    {
-	      args_space = align_up (args_space,
-				     i386_darwin_arg_type_alignment (arg_type));
+	      args_space
+		= align_up (args_space,
+			    i386_darwin_arg_type_alignment (arg_type));
 	      if (write_pass)
 		write_memory (sp + args_space,
 			      value_contents_all (args[i]).data (),
@@ -279,7 +277,7 @@ i386_mach_o_osabi_sniffer (bfd *abfd)
 {
   if (!bfd_check_format (abfd, bfd_object))
     return GDB_OSABI_UNKNOWN;
-  
+
   if (bfd_get_arch (abfd) == bfd_arch_i386)
     return GDB_OSABI_DARWIN;
 
@@ -287,12 +285,13 @@ i386_mach_o_osabi_sniffer (bfd *abfd)
 }
 
 void _initialize_i386_darwin_tdep ();
+
 void
 _initialize_i386_darwin_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_unknown, bfd_target_mach_o_flavour,
 				  i386_mach_o_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_i386_i386,
-			  GDB_OSABI_DARWIN, i386_darwin_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_i386_i386, GDB_OSABI_DARWIN,
+			  i386_darwin_init_abi);
 }

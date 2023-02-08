@@ -53,8 +53,8 @@ extern int target_read_uint32 (CORE_ADDR memaddr, uint32_t *result);
    in some cases -- but these will not be returned).  Returns nullptr
    on error.  */
 
-extern gdb::unique_xmalloc_ptr<char> target_read_string
-  (CORE_ADDR memaddr, int len, int *bytes_read = nullptr);
+extern gdb::unique_xmalloc_ptr<char>
+target_read_string (CORE_ADDR memaddr, int len, int *bytes_read = nullptr);
 
 /* Read a string from the inferior, at ADDR, with LEN characters of
    WIDTH bytes each.  Fetch at most FETCHLIMIT characters.  BUFFER
@@ -131,17 +131,17 @@ extern int target_supports_multi_process (void);
 /* Possible terminal states.  */
 
 enum class target_terminal_state
-  {
-    /* The inferior's terminal settings are in effect.  */
-    is_inferior = 0,
+{
+  /* The inferior's terminal settings are in effect.  */
+  is_inferior = 0,
 
-    /* Some of our terminal settings are in effect, enough to get
+  /* Some of our terminal settings are in effect, enough to get
        proper output.  */
-    is_ours_for_output = 1,
+  is_ours_for_output = 1,
 
-    /* Our terminal settings are in effect, for output and input.  */
-    is_ours = 2
-  };
+  /* Our terminal settings are in effect, for output and input.  */
+  is_ours = 2
+};
 
 /* Represents the state of the target terminal.  */
 class target_terminal

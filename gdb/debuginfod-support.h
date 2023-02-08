@@ -38,8 +38,7 @@
    function returns -ENOSYS.  */
 
 extern scoped_fd
-debuginfod_source_query (const unsigned char *build_id,
-			 int build_id_len,
+debuginfod_source_query (const unsigned char *build_id, int build_id_len,
 			 const char *src_path,
 			 gdb::unique_xmalloc_ptr<char> *destname);
 
@@ -56,8 +55,7 @@ debuginfod_source_query (const unsigned char *build_id,
    function returns -ENOSYS.  */
 
 extern scoped_fd
-debuginfod_debuginfo_query (const unsigned char *build_id,
-			    int build_id_len,
+debuginfod_debuginfo_query (const unsigned char *build_id, int build_id_len,
 			    const char *filename,
 			    gdb::unique_xmalloc_ptr<char> *destname);
 
@@ -73,9 +71,8 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
    is stored in DESTNAME.  If GDB is not built with debuginfod, this
    function returns -ENOSYS.  */
 
-extern scoped_fd debuginfod_exec_query (const unsigned char *build_id,
-					int build_id_len,
-					const char *filename,
-					gdb::unique_xmalloc_ptr<char>
-					  *destname);
+extern scoped_fd
+debuginfod_exec_query (const unsigned char *build_id, int build_id_len,
+		       const char *filename,
+		       gdb::unique_xmalloc_ptr<char> *destname);
 #endif /* DEBUGINFOD_SUPPORT_H */

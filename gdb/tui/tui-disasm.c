@@ -98,10 +98,8 @@ len_without_escapes (const std::string &str)
    reason, for example, we hit invalid memory, then ASM_LINES can have
    fewer entries than requested.  */
 static CORE_ADDR
-tui_disassemble (struct gdbarch *gdbarch,
-		 std::vector<tui_asm_line> &asm_lines,
-		 CORE_ADDR pc, int count,
-		 size_t *addr_size = nullptr)
+tui_disassemble (struct gdbarch *gdbarch, std::vector<tui_asm_line> &asm_lines,
+		 CORE_ADDR pc, int count, size_t *addr_size = nullptr)
 {
   bool term_out = source_styling && gdb_stdout->can_emit_style_escape ();
   string_file gdb_dis_out (term_out);
@@ -190,7 +188,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
   CORE_ADDR new_low;
   int max_lines;
 
-  max_lines = (from > 0) ? from : - from;
+  max_lines = (from > 0) ? from : -from;
   if (max_lines == 0)
     return pc;
 
@@ -293,17 +291,18 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 
 	    CORE_ADDR old_next_addr = next_addr;
 	    std::vector<tui_asm_line> single_asm_line;
-	    next_addr = tui_disassemble (gdbarch, single_asm_line,
-					 next_addr, 1);
+	    next_addr
+	      = tui_disassemble (gdbarch, single_asm_line, next_addr, 1);
 	    /* If there are some problems while disassembling exit.  */
 	    if (next_addr <= old_next_addr)
 	      return pc;
 	    gdb_assert (single_asm_line.size () == 1);
 	    asm_lines[pos] = single_asm_line[0];
-	  } while (next_addr <= pc);
+	  }
+	while (next_addr <= pc);
       pos++;
       if (pos >= max_lines)
-	 pos = 0;
+	pos = 0;
       new_low = asm_lines[pos].addr;
 
       /* When scrolling backward the addresses should move backward, or at
@@ -357,10 +356,9 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 
       if (i < asm_lines.size ())
 	{
-	  line
-	    = (asm_lines[i].addr_string
-	       + n_spaces (insn_pos - asm_lines[i].addr_size)
-	       + asm_lines[i].insn);
+	  line = (asm_lines[i].addr_string
+		  + n_spaces (insn_pos - asm_lines[i].addr_size)
+		  + asm_lines[i].insn);
 	  addr = asm_lines[i].addr;
 	}
       else
@@ -380,7 +378,6 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
     }
   return true;
 }
-
 
 void
 tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
@@ -407,7 +404,7 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 	    addr = main_symbol.value_address ();
 	}
     }
-  else				/* The target is executing.  */
+  else /* The target is executing.  */
     {
       gdbarch = tui_location.gdbarch ();
       addr = tui_location.addr ();
@@ -421,8 +418,8 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
    disassembly window.  This may or may not be the same as the low
    address input.  */
 CORE_ADDR
-tui_get_low_disassembly_address (struct gdbarch *gdbarch,
-				 CORE_ADDR low, CORE_ADDR pc)
+tui_get_low_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR low,
+				 CORE_ADDR pc)
 {
   int pos;
 

@@ -6,6 +6,7 @@
 #include "target-descriptions.h"
 
 const struct target_desc *tdesc_s390x_gs_linux64;
+
 static void
 initialize_tdesc_s390x_gs_linux64 (void)
 {

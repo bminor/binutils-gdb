@@ -36,36 +36,28 @@
    gdb puts it at offset 32.  Register x0 is always 0 and can be ignored.
    Registers x1 to x31 are in the same place.  */
 
-static const struct regcache_map_entry riscv_linux_gregmap[] =
-{
-  { 1,  RISCV_PC_REGNUM, 0 },
-  { 31, RISCV_RA_REGNUM, 0 }, /* x1 to x31 */
-  { 0 }
-};
+static const struct regcache_map_entry riscv_linux_gregmap[]
+  = { { 1, RISCV_PC_REGNUM, 0 },
+      { 31, RISCV_RA_REGNUM, 0 }, /* x1 to x31 */
+      { 0 } };
 
 /* Define the FP register mapping.  The kernel puts the 32 FP regs first, and
    then FCSR.  */
 
-static const struct regcache_map_entry riscv_linux_fregmap[] =
-{
-  { 32, RISCV_FIRST_FP_REGNUM, 0 },
-  { 1, RISCV_CSR_FCSR_REGNUM, 0 },
-  { 0 }
-};
+static const struct regcache_map_entry riscv_linux_fregmap[]
+  = { { 32, RISCV_FIRST_FP_REGNUM, 0 },
+      { 1, RISCV_CSR_FCSR_REGNUM, 0 },
+      { 0 } };
 
 /* Define the general register regset.  */
 
-static const struct regset riscv_linux_gregset =
-{
-  riscv_linux_gregmap, riscv_supply_regset, regcache_collect_regset
-};
+static const struct regset riscv_linux_gregset
+  = { riscv_linux_gregmap, riscv_supply_regset, regcache_collect_regset };
 
 /* Define the FP register regset.  */
 
-static const struct regset riscv_linux_fregset =
-{
-  riscv_linux_fregmap, riscv_supply_regset, regcache_collect_regset
-};
+static const struct regset riscv_linux_fregset
+  = { riscv_linux_fregmap, riscv_supply_regset, regcache_collect_regset };
 
 /* Define hook for core file support.  */
 
@@ -79,8 +71,8 @@ riscv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &riscv_linux_gregset, NULL, cb_data);
   /* The kernel is adding 8 bytes for FCSR.  */
   cb (".reg2", (32 * riscv_isa_flen (gdbarch)) + 8,
-      (32 * riscv_isa_flen (gdbarch)) + 8,
-      &riscv_linux_fregset, NULL, cb_data);
+      (32 * riscv_isa_flen (gdbarch)) + 8, &riscv_linux_fregset, NULL,
+      cb_data);
 }
 
 /* Signal trampoline support.  */
@@ -90,20 +82,17 @@ static void riscv_linux_sigframe_init (const struct tramp_frame *self,
 				       struct trad_frame_cache *this_cache,
 				       CORE_ADDR func);
 
-#define RISCV_INST_LI_A7_SIGRETURN	0x08b00893
-#define RISCV_INST_ECALL		0x00000073
+#define RISCV_INST_LI_A7_SIGRETURN 0x08b00893
+#define RISCV_INST_ECALL 0x00000073
 
-static const struct tramp_frame riscv_linux_sigframe = {
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { RISCV_INST_LI_A7_SIGRETURN, ULONGEST_MAX },
-    { RISCV_INST_ECALL, ULONGEST_MAX },
-    { TRAMP_SENTINEL_INSN }
-  },
-  riscv_linux_sigframe_init,
-  NULL
-};
+static const struct tramp_frame riscv_linux_sigframe
+  = { SIGTRAMP_FRAME,
+      4,
+      { { RISCV_INST_LI_A7_SIGRETURN, ULONGEST_MAX },
+	{ RISCV_INST_ECALL, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN } },
+      riscv_linux_sigframe_init,
+      NULL };
 
 /* Runtime signal frames look like this:
    struct rt_sigframe {
@@ -120,14 +109,13 @@ static const struct tramp_frame riscv_linux_sigframe = {
      mcontext_t uc_mcontext;
    }; */
 
-#define SIGFRAME_SIGINFO_SIZE		128
-#define UCONTEXT_MCONTEXT_OFFSET	176
+#define SIGFRAME_SIGINFO_SIZE 128
+#define UCONTEXT_MCONTEXT_OFFSET 176
 
 static void
 riscv_linux_sigframe_init (const struct tramp_frame *self,
 			   frame_info_ptr this_frame,
-			   struct trad_frame_cache *this_cache,
-			   CORE_ADDR func)
+			   struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int xlen = riscv_isa_xlen (gdbarch);
@@ -185,10 +173,10 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_software_single_step (gdbarch, riscv_software_single_step);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 (riscv_isa_xlen (gdbarch) == 4
-					  ? linux_ilp32_fetch_link_map_offsets
-					  : linux_lp64_fetch_link_map_offsets));
+  set_solib_svr4_fetch_link_map_offsets (
+    gdbarch,
+    (riscv_isa_xlen (gdbarch) == 4 ? linux_ilp32_fetch_link_map_offsets
+				   : linux_lp64_fetch_link_map_offsets));
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
@@ -200,8 +188,8 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, riscv_linux_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, riscv_linux_iterate_over_regset_sections);
 
   tramp_frame_prepend_unwinder (gdbarch, &riscv_linux_sigframe);
 
@@ -211,6 +199,7 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 /* Initialize RISC-V Linux target support.  */
 
 void _initialize_riscv_linux_tdep ();
+
 void
 _initialize_riscv_linux_tdep ()
 {

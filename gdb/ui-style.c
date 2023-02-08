@@ -35,7 +35,7 @@ static const char ansi_regex_text[] =
   "[\x20-\x2f]*"
   /* End the first capture.  */
   ")"
-  /* The final byte.  */
+/* The final byte.  */
 #define FINAL_SUBEXP 2
   "([\x40-\x7e])";
 
@@ -52,14 +52,14 @@ static regex_t ansi_regex;
    xterm.  */
 
 static const uint8_t bright_colors[][3] = {
-  { 127, 127, 127 },		/* Black.  */
-  { 255, 0, 0 },		/* Red.  */
-  { 0, 255, 0 },		/* Green.  */
-  { 255, 255, 0 },		/* Yellow.  */
-  { 92, 92, 255 },		/* Blue.  */
-  { 255, 0, 255 },		/* Magenta.  */
-  { 0, 255, 255 },		/* Cyan.  */
-  { 255, 255, 255 }		/* White.  */
+  { 127, 127, 127 }, /* Black.  */
+  { 255, 0, 0 },     /* Red.  */
+  { 0, 255, 0 },     /* Green.  */
+  { 255, 255, 0 },   /* Yellow.  */
+  { 92, 92, 255 },   /* Blue.  */
+  { 255, 0, 255 },   /* Magenta.  */
+  { 0, 255, 255 },   /* Cyan.  */
+  { 255, 255, 255 }  /* White.  */
 };
 
 /* See ui-style.h.  */
@@ -84,8 +84,7 @@ ui_file_style::color::append_ansi (bool is_fg, std::string *str) const
   else
     {
       str->append (is_fg ? "38;2;" : "48;2;");
-      str->append (std::to_string (m_red)
-		   + ";" + std::to_string (m_green)
+      str->append (std::to_string (m_red) + ";" + std::to_string (m_green)
 		   + ";" + std::to_string (m_blue));
     }
   return true;
@@ -208,12 +207,9 @@ extended_color (const char *str, regoff_t *idx, ui_file_style::color *color)
     {
       /* 24-bit color.  */
       long r, g, b;
-      if (!read_semi_number (str, idx, &r)
-	  || r > 255
-	  || !read_semi_number (str, idx, &g)
-	  || g > 255
-	  || !read_semi_number (str, idx, &b)
-	  || b > 255)
+      if (!read_semi_number (str, idx, &r) || r > 255
+	  || !read_semi_number (str, idx, &g) || g > 255
+	  || !read_semi_number (str, idx, &b) || b > 255)
 	return false;
       *color = ui_file_style::color (r, g, b);
     }
@@ -264,8 +260,7 @@ ui_file_style::parse (const char *buf, size_t *n_read)
   if (subexps[DATA_SUBEXP].rm_so == subexps[DATA_SUBEXP].rm_eo)
     *this = ui_file_style ();
 
-  for (regoff_t i = subexps[DATA_SUBEXP].rm_so;
-       i < subexps[DATA_SUBEXP].rm_eo;
+  for (regoff_t i = subexps[DATA_SUBEXP].rm_so; i < subexps[DATA_SUBEXP].rm_eo;
        ++i)
     {
       if (buf[i] == ';')
@@ -405,6 +400,7 @@ skip_ansi_escape (const char *buf, int *n_read)
 }
 
 void _initialize_ui_style ();
+
 void
 _initialize_ui_style ()
 {

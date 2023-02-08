@@ -98,7 +98,6 @@ private:
   /* Maximum of alignments of all sections matching LAST_PROT.
      This value is always at least 1.  This value is always a power of 2.  */
   CORE_ADDR m_last_max_alignment = -1;
-
 };
 
 /* See setup_sections_data.  */
@@ -128,17 +127,14 @@ setup_sections_data::setup_one_section (asection *sect)
       if (compile_debug)
 	gdb_printf (gdb_stdlog,
 		    "module \"%s\" section \"%s\" size %s prot %u\n",
-		    bfd_get_filename (m_bfd),
-		    bfd_section_name (sect),
-		    paddress (target_gdbarch (),
-			      bfd_section_size (sect)),
+		    bfd_get_filename (m_bfd), bfd_section_name (sect),
+		    paddress (target_gdbarch (), bfd_section_size (sect)),
 		    prot);
     }
   else
     prot = -1;
 
-  if (sect == NULL
-      || (m_last_prot != prot && bfd_section_size (sect) != 0))
+  if (sect == NULL || (m_last_prot != prot && bfd_section_size (sect) != 0))
     {
       CORE_ADDR addr;
       asection *sect_iter;
@@ -149,18 +145,16 @@ setup_sections_data::setup_one_section (asection *sect)
 				       m_last_prot);
 	  munmap_list.add (addr, m_last_size);
 	  if (compile_debug)
-	    gdb_printf (gdb_stdlog,
-			"allocated %s bytes at %s prot %u\n",
+	    gdb_printf (gdb_stdlog, "allocated %s bytes at %s prot %u\n",
 			paddress (target_gdbarch (), m_last_size),
-			paddress (target_gdbarch (), addr),
-			m_last_prot);
+			paddress (target_gdbarch (), addr), m_last_prot);
 	}
       else
 	addr = 0;
 
       if ((addr & (m_last_max_alignment - 1)) != 0)
-	error (_("Inferior compiled module address %s "
-		 "is not aligned to BFD required %s."),
+	error (_ ("Inferior compiled module address %s "
+		  "is not aligned to BFD required %s."),
 	       paddress (target_gdbarch (), addr),
 	       paddress (target_gdbarch (), m_last_max_alignment));
 
@@ -200,7 +194,7 @@ link_callbacks_multiple_definition (struct bfd_link_info *link_info,
 
   if (link_info->allow_multiple_definition)
     return;
-  warning (_("Compiled module \"%s\": multiple symbol definitions: %s"),
+  warning (_ ("Compiled module \"%s\": multiple symbol definitions: %s"),
 	   bfd_get_filename (abfd), h->root.string);
 }
 
@@ -211,20 +205,20 @@ link_callbacks_warning (struct bfd_link_info *link_info, const char *xwarning,
 			const char *symbol, bfd *abfd, asection *section,
 			bfd_vma address)
 {
-  warning (_("Compiled module \"%s\" section \"%s\": warning: %s"),
-	   bfd_get_filename (abfd), bfd_section_name (section),
-	   xwarning);
+  warning (_ ("Compiled module \"%s\" section \"%s\": warning: %s"),
+	   bfd_get_filename (abfd), bfd_section_name (section), xwarning);
 }
 
 /* Helper for link_callbacks callbacks vector.  */
 
 static void
 link_callbacks_undefined_symbol (struct bfd_link_info *link_info,
-				 const char *name, bfd *abfd, asection *section,
-				 bfd_vma address, bfd_boolean is_fatal)
+				 const char *name, bfd *abfd,
+				 asection *section, bfd_vma address,
+				 bfd_boolean is_fatal)
 {
-  warning (_("Cannot resolve relocation to \"%s\" "
-	     "from compiled module \"%s\" section \"%s\"."),
+  warning (_ ("Cannot resolve relocation to \"%s\" "
+	      "from compiled module \"%s\" section \"%s\"."),
 	   name, bfd_get_filename (abfd), bfd_section_name (section));
 }
 
@@ -246,23 +240,21 @@ link_callbacks_reloc_dangerous (struct bfd_link_info *link_info,
 				const char *message, bfd *abfd,
 				asection *section, bfd_vma address)
 {
-  warning (_("Compiled module \"%s\" section \"%s\": dangerous "
-	     "relocation: %s\n"),
-	   bfd_get_filename (abfd), bfd_section_name (section),
-	   message);
+  warning (_ ("Compiled module \"%s\" section \"%s\": dangerous "
+	      "relocation: %s\n"),
+	   bfd_get_filename (abfd), bfd_section_name (section), message);
 }
 
 /* Helper for link_callbacks callbacks vector.  */
 
 static void
 link_callbacks_unattached_reloc (struct bfd_link_info *link_info,
-				 const char *name, bfd *abfd, asection *section,
-				 bfd_vma address)
+				 const char *name, bfd *abfd,
+				 asection *section, bfd_vma address)
 {
-  warning (_("Compiled module \"%s\" section \"%s\": unattached "
-	     "relocation: %s\n"),
-	   bfd_get_filename (abfd), bfd_section_name (section),
-	   name);
+  warning (_ ("Compiled module \"%s\" section \"%s\": unattached "
+	      "relocation: %s\n"),
+	   bfd_get_filename (abfd), bfd_section_name (section), name);
 }
 
 /* Helper for link_callbacks callbacks vector.  */
@@ -279,30 +271,29 @@ link_callbacks_einfo (const char *fmt, ...)
   std::string str = string_vprintf (fmt, ap);
   va_end (ap);
 
-  warning (_("Compile module: warning: %s"), str.c_str ());
+  warning (_ ("Compile module: warning: %s"), str.c_str ());
 }
 
 /* Helper for bfd_get_relocated_section_contents.
    Only these symbols are set by bfd_simple_get_relocated_section_contents
    but bfd/ seems to use even the NULL ones without checking them first.  */
 
-static const struct bfd_link_callbacks link_callbacks =
-{
-  NULL, /* add_archive_element */
+static const struct bfd_link_callbacks link_callbacks = {
+  NULL,				      /* add_archive_element */
   link_callbacks_multiple_definition, /* multiple_definition */
-  NULL, /* multiple_common */
-  NULL, /* add_to_set */
-  NULL, /* constructor */
-  link_callbacks_warning, /* warning */
-  link_callbacks_undefined_symbol, /* undefined_symbol */
-  link_callbacks_reloc_overflow, /* reloc_overflow */
-  link_callbacks_reloc_dangerous, /* reloc_dangerous */
-  link_callbacks_unattached_reloc, /* unattached_reloc */
-  NULL, /* notice */
-  link_callbacks_einfo, /* einfo */
-  NULL, /* info */
-  NULL, /* minfo */
-  NULL, /* override_segment_assignment */
+  NULL,				      /* multiple_common */
+  NULL,				      /* add_to_set */
+  NULL,				      /* constructor */
+  link_callbacks_warning,	      /* warning */
+  link_callbacks_undefined_symbol,    /* undefined_symbol */
+  link_callbacks_reloc_overflow,      /* reloc_overflow */
+  link_callbacks_reloc_dangerous,     /* reloc_dangerous */
+  link_callbacks_unattached_reloc,    /* unattached_reloc */
+  NULL,				      /* notice */
+  link_callbacks_einfo,		      /* einfo */
+  NULL,				      /* info */
+  NULL,				      /* minfo */
+  NULL,				      /* override_segment_assignment */
 };
 
 struct link_hash_table_cleanup_data
@@ -367,25 +358,26 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   link_order.size = bfd_section_size (sect);
   link_order.u.indirect.section = sect;
 
-  gdb::unique_xmalloc_ptr<gdb_byte> sect_data
-    ((bfd_byte *) xmalloc (bfd_section_size (sect)));
+  gdb::unique_xmalloc_ptr<gdb_byte> sect_data (
+    (bfd_byte *) xmalloc (bfd_section_size (sect)));
 
-  sect_data_got = bfd_get_relocated_section_contents (abfd, &link_info,
-						      &link_order,
-						      sect_data.get (),
-						      FALSE, symbol_table);
+  sect_data_got
+    = bfd_get_relocated_section_contents (abfd, &link_info, &link_order,
+					  sect_data.get (), FALSE,
+					  symbol_table);
 
   if (sect_data_got == NULL)
-    error (_("Cannot map compiled module \"%s\" section \"%s\": %s"),
+    error (_ ("Cannot map compiled module \"%s\" section \"%s\": %s"),
 	   bfd_get_filename (abfd), bfd_section_name (sect),
 	   bfd_errmsg (bfd_get_error ()));
   gdb_assert (sect_data_got == sect_data.get ());
 
   inferior_addr = bfd_section_vma (sect);
-  if (0 != target_write_memory (inferior_addr, sect_data.get (),
-				bfd_section_size (sect)))
-    error (_("Cannot write compiled module \"%s\" section \"%s\" "
-	     "to inferior memory range %s-%s."),
+  if (0
+      != target_write_memory (inferior_addr, sect_data.get (),
+			      bfd_section_size (sect)))
+    error (_ ("Cannot write compiled module \"%s\" section \"%s\" "
+	      "to inferior memory range %s-%s."),
 	   bfd_get_filename (abfd), bfd_section_name (sect),
 	   paddress (target_gdbarch (), inferior_addr),
 	   paddress (target_gdbarch (),
@@ -433,8 +425,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       block = bv->block (block_loop);
       if (block->function () != NULL)
 	continue;
-      gdb_val_sym = block_lookup_symbol (block,
-					 COMPILE_I_EXPR_VAL,
+      gdb_val_sym = block_lookup_symbol (block, COMPILE_I_EXPR_VAL,
 					 symbol_name_match_type::SEARCH_NAME,
 					 VAR_DOMAIN);
       if (gdb_val_sym == NULL)
@@ -455,36 +446,36 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	break;
     }
   if (block_loop == nblocks)
-    error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_VAL);
+    error (_ ("No \"%s\" symbol found"), COMPILE_I_EXPR_VAL);
 
   gdb_type = gdb_val_sym->type ();
   gdb_type = check_typedef (gdb_type);
 
-  gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
-					  symbol_name_match_type::SEARCH_NAME,
-					  VAR_DOMAIN);
+  gdb_ptr_type_sym
+    = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
+			   symbol_name_match_type::SEARCH_NAME, VAR_DOMAIN);
   if (gdb_ptr_type_sym == NULL)
-    error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
+    error (_ ("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_ptr_type = gdb_ptr_type_sym->type ();
   gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (gdb_ptr_type->code () != TYPE_CODE_PTR)
-    error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
+    error (_ ("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_type_from_ptr = check_typedef (gdb_ptr_type->target_type ());
 
   if (types_deeply_equal (gdb_type, gdb_type_from_ptr))
     {
       if (scope != COMPILE_I_PRINT_ADDRESS_SCOPE)
-	error (_("Expected address scope in compiled module \"%s\"."),
+	error (_ ("Expected address scope in compiled module \"%s\"."),
 	       objfile_name (objfile));
       return gdb_type;
     }
 
   if (gdb_type->code () != TYPE_CODE_PTR)
-    error (_("Invalid type code %d of symbol \"%s\" "
-	     "in compiled module \"%s\"."),
+    error (_ ("Invalid type code %d of symbol \"%s\" "
+	      "in compiled module \"%s\"."),
 	   gdb_type_from_ptr->code (), COMPILE_I_EXPR_VAL,
 	   objfile_name (objfile));
-  
+
   retval = gdb_type_from_ptr;
   switch (gdb_type_from_ptr->code ())
     {
@@ -494,15 +485,14 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
     case TYPE_CODE_FUNC:
       break;
     default:
-      error (_("Invalid type code %d of symbol \"%s\" "
-	       "in compiled module \"%s\"."),
+      error (_ ("Invalid type code %d of symbol \"%s\" "
+		"in compiled module \"%s\"."),
 	     gdb_type_from_ptr->code (), COMPILE_I_EXPR_PTR_TYPE,
 	     objfile_name (objfile));
     }
-  if (!types_deeply_equal (gdb_type_from_ptr,
-			   gdb_type->target_type ()))
-    error (_("Referenced types do not match for symbols \"%s\" and \"%s\" "
-	     "in compiled module \"%s\"."),
+  if (!types_deeply_equal (gdb_type_from_ptr, gdb_type->target_type ()))
+    error (_ ("Referenced types do not match for symbols \"%s\" and \"%s\" "
+	      "in compiled module \"%s\"."),
 	   COMPILE_I_EXPR_PTR_TYPE, COMPILE_I_EXPR_VAL,
 	   objfile_name (objfile));
   if (scope == COMPILE_I_PRINT_ADDRESS_SCOPE)
@@ -525,15 +515,15 @@ get_regs_type (struct symbol *func_sym, struct objfile *objfile)
 
   regsp_type = check_typedef (func_type->field (0).type ());
   if (regsp_type->code () != TYPE_CODE_PTR)
-    error (_("Invalid type code %d of first parameter of function \"%s\" "
-	     "in compiled module \"%s\"."),
+    error (_ ("Invalid type code %d of first parameter of function \"%s\" "
+	      "in compiled module \"%s\"."),
 	   regsp_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
   regs_type = check_typedef (regsp_type->target_type ());
   if (regs_type->code () != TYPE_CODE_STRUCT)
-    error (_("Invalid type code %d of dereferenced first parameter "
-	     "of function \"%s\" in compiled module \"%s\"."),
+    error (_ ("Invalid type code %d of dereferenced first parameter "
+	      "of function \"%s\" in compiled module \"%s\"."),
 	   regs_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
@@ -566,28 +556,28 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
 	continue;
 
       if ((reg_bitpos % 8) != 0 || reg_bitsize != 0)
-	error (_("Invalid register \"%s\" position %s bits or size %s bits"),
+	error (_ ("Invalid register \"%s\" position %s bits or size %s bits"),
 	       reg_name, pulongest (reg_bitpos), pulongest (reg_bitsize));
       reg_offset = reg_bitpos / 8;
 
       if (reg_type->code () != TYPE_CODE_INT
 	  && reg_type->code () != TYPE_CODE_PTR)
-	error (_("Invalid register \"%s\" type code %d"), reg_name,
+	error (_ ("Invalid register \"%s\" type code %d"), reg_name,
 	       reg_type->code ());
 
       regnum = compile_register_name_demangle (gdbarch, reg_name);
 
       regval = value_from_register (reg_type, regnum, get_current_frame ());
       if (value_optimized_out (regval))
-	error (_("Register \"%s\" is optimized out."), reg_name);
+	error (_ ("Register \"%s\" is optimized out."), reg_name);
       if (!value_entirely_available (regval))
-	error (_("Register \"%s\" is not available."), reg_name);
+	error (_ ("Register \"%s\" is not available."), reg_name);
 
       inferior_addr = regs_base + reg_offset;
-      if (0 != target_write_memory (inferior_addr,
-				    value_contents (regval).data (),
-				    reg_size))
-	error (_("Cannot write register \"%s\" to inferior memory at %s."),
+      if (0
+	  != target_write_memory (inferior_addr,
+				  value_contents (regval).data (), reg_size))
+	error (_ ("Cannot write register \"%s\" to inferior memory at %s."),
 	       reg_name, paddress (gdbarch, inferior_addr));
     }
 }
@@ -615,21 +605,20 @@ compile_object_load (const compile_file_names &file_names,
   int expect_parameters;
   struct type *expect_return_type;
 
-  gdb::unique_xmalloc_ptr<char> filename
-    (tilde_expand (file_names.object_file ()));
+  gdb::unique_xmalloc_ptr<char> filename (
+    tilde_expand (file_names.object_file ()));
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget));
   if (abfd == NULL)
-    error (_("\"%s\": could not open as compiled module: %s"),
-	  filename.get (), bfd_errmsg (bfd_get_error ()));
+    error (_ ("\"%s\": could not open as compiled module: %s"),
+	   filename.get (), bfd_errmsg (bfd_get_error ()));
 
   if (!bfd_check_format_matches (abfd.get (), bfd_object, &matching))
-    error (_("\"%s\": not in loadable format: %s"),
-	   filename.get (),
+    error (_ ("\"%s\": not in loadable format: %s"), filename.get (),
 	   gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 
   if ((bfd_get_file_flags (abfd.get ()) & (EXEC_P | DYNAMIC)) != 0)
-    error (_("\"%s\": not in object format."), filename.get ());
+    error (_ ("\"%s\": not in object format."), filename.get ());
 
   struct setup_sections_data setup_sections_data (abfd.get ());
   for (asection *sect = abfd->sections; sect != nullptr; sect = sect->next)
@@ -638,27 +627,26 @@ compile_object_load (const compile_file_names &file_names,
 
   storage_needed = bfd_get_symtab_upper_bound (abfd.get ());
   if (storage_needed < 0)
-    error (_("Cannot read symbols of compiled module \"%s\": %s"),
+    error (_ ("Cannot read symbols of compiled module \"%s\": %s"),
 	   filename.get (), bfd_errmsg (bfd_get_error ()));
 
   /* SYMFILE_VERBOSE is not passed even if FROM_TTY, user is not interested in
      "Reading symbols from ..." message for automatically generated file.  */
-  objfile_up objfile_holder (symbol_file_add_from_bfd (abfd,
-						       filename.get (),
+  objfile_up objfile_holder (symbol_file_add_from_bfd (abfd, filename.get (),
 						       0, NULL, 0, NULL));
   objfile = objfile_holder.get ();
 
-  func_sym = lookup_global_symbol_from_objfile (objfile,
-						GLOBAL_BLOCK,
-						GCC_FE_WRAPPER_FUNCTION,
-						VAR_DOMAIN).symbol;
+  func_sym
+    = lookup_global_symbol_from_objfile (objfile, GLOBAL_BLOCK,
+					 GCC_FE_WRAPPER_FUNCTION, VAR_DOMAIN)
+	.symbol;
   if (func_sym == NULL)
-    error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
+    error (_ ("Cannot find function \"%s\" in compiled module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
   func_type = func_sym->type ();
   if (func_type->code () != TYPE_CODE_FUNC)
-    error (_("Invalid type code %d of function \"%s\" in compiled "
-	     "module \"%s\"."),
+    error (_ ("Invalid type code %d of function \"%s\" in compiled "
+	      "module \"%s\"."),
 	   func_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
@@ -678,26 +666,26 @@ compile_object_load (const compile_file_names &file_names,
       expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
       break;
     default:
-      internal_error (_("invalid scope %d"), scope);
+      internal_error (_ ("invalid scope %d"), scope);
     }
   if (func_type->num_fields () != expect_parameters)
-    error (_("Invalid %d parameters of function \"%s\" in compiled "
-	     "module \"%s\"."),
+    error (_ ("Invalid %d parameters of function \"%s\" in compiled "
+	      "module \"%s\"."),
 	   func_type->num_fields (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
   if (!types_deeply_equal (expect_return_type, func_type->target_type ()))
-    error (_("Invalid return type of function \"%s\" in compiled "
-	     "module \"%s\"."),
+    error (_ ("Invalid return type of function \"%s\" in compiled "
+	      "module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
 
   /* The memory may be later needed
      by bfd_generic_get_relocated_section_contents
      called from default_symfile_relocate.  */
-  symbol_table = (asymbol **) obstack_alloc (&objfile->objfile_obstack,
-					     storage_needed);
+  symbol_table
+    = (asymbol **) obstack_alloc (&objfile->objfile_obstack, storage_needed);
   number_of_symbols = bfd_canonicalize_symtab (abfd.get (), symbol_table);
   if (number_of_symbols < 0)
-    error (_("Cannot parse symbols of compiled module \"%s\": %s"),
+    error (_ ("Cannot parse symbols of compiled module \"%s\": %s"),
 	   filename.get (), bfd_errmsg (bfd_get_error ()));
 
   missing_symbols = 0;
@@ -712,8 +700,7 @@ compile_object_load (const compile_file_names &file_names,
       if (strcmp (sym->name, "_GLOBAL_OFFSET_TABLE_") == 0)
 	{
 	  if (compile_debug)
-	    gdb_printf (gdb_stdlog,
-			"ELF symbol \"%s\" relocated to zero\n",
+	    gdb_printf (gdb_stdlog, "ELF symbol \"%s\" relocated to zero\n",
 			sym->name);
 
 	  /* It seems to be a GCC bug, with -mcmodel=large there should be no
@@ -732,40 +719,40 @@ compile_object_load (const compile_file_names &file_names,
 	     with the SEC_ALLOC flag set.  In the unlikely case that
 	     we still do not have a section identified, fall back to using
 	     the "*ABS*" section.  */
-	  asection *toc_fallback = bfd_get_section_by_name(abfd.get(), ".toc");
+	  asection *toc_fallback
+	    = bfd_get_section_by_name (abfd.get (), ".toc");
 	  if (toc_fallback == NULL)
 	    {
 	      for (asection *tsect = abfd->sections; tsect != nullptr;
 		   tsect = tsect->next)
-		 {
-		    if (bfd_section_flags (tsect) & SEC_ALLOC)
-		       {
-			  toc_fallback = tsect;
-			  break;
-		       }
-		 }
+		{
+		  if (bfd_section_flags (tsect) & SEC_ALLOC)
+		    {
+		      toc_fallback = tsect;
+		      break;
+		    }
+		}
 	    }
 
 	  if (toc_fallback == NULL)
 	    /*  If we've gotten here, we have not found a section usable
 		as a backup for the .toc section.  In this case, use the
 		absolute (*ABS*) section.  */
-	     toc_fallback = bfd_abs_section_ptr;
+	    toc_fallback = bfd_abs_section_ptr;
 
 	  sym->section = toc_fallback;
 	  sym->value = 0x8000;
-	  bfd_set_gp_value(abfd.get(), toc_fallback->vma);
+	  bfd_set_gp_value (abfd.get (), toc_fallback->vma);
 	  if (compile_debug)
-	    gdb_printf (gdb_stdlog,
-			"Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
-			sym->name,
-			paddress (target_gdbarch (), sym->value));
+	    gdb_printf (
+	      gdb_stdlog,
+	      "Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
+	      sym->name, paddress (target_gdbarch (), sym->value));
 	  continue;
 	}
 
       bmsym = lookup_minimal_symbol (sym->name, NULL, NULL);
-      switch (bmsym.minsym == NULL
-	      ? mst_unknown : bmsym.minsym->type ())
+      switch (bmsym.minsym == NULL ? mst_unknown : bmsym.minsym->type ())
 	{
 	case mst_text:
 	case mst_bss:
@@ -774,8 +761,7 @@ compile_object_load (const compile_file_names &file_names,
 	  if (compile_debug)
 	    gdb_printf (gdb_stdlog,
 			"ELF mst_text symbol \"%s\" relocated to %s\n",
-			sym->name,
-			paddress (target_gdbarch (), sym->value));
+			sym->name, paddress (target_gdbarch (), sym->value));
 	  break;
 	case mst_text_gnu_ifunc:
 	  sym->value = gnu_ifunc_resolve_addr (target_gdbarch (),
@@ -784,18 +770,17 @@ compile_object_load (const compile_file_names &file_names,
 	    gdb_printf (gdb_stdlog,
 			"ELF mst_text_gnu_ifunc symbol \"%s\" "
 			"relocated to %s\n",
-			sym->name,
-			paddress (target_gdbarch (), sym->value));
+			sym->name, paddress (target_gdbarch (), sym->value));
 	  break;
 	default:
-	  warning (_("Could not find symbol \"%s\" "
-		     "for compiled module \"%s\"."),
+	  warning (_ ("Could not find symbol \"%s\" "
+		      "for compiled module \"%s\"."),
 		   sym->name, filename.get ());
 	  missing_symbols++;
 	}
     }
   if (missing_symbols)
-    error (_("%ld symbols were missing, cannot continue."), missing_symbols);
+    error (_ ("%ld symbols were missing, cannot continue."), missing_symbols);
 
   bfd_map_over_sections (abfd.get (), copy_sections, symbol_table);
 
@@ -805,16 +790,14 @@ compile_object_load (const compile_file_names &file_names,
   else
     {
       /* Use read-only non-executable memory protection.  */
-      regs_addr = gdbarch_infcall_mmap (target_gdbarch (),
-					regs_type->length (),
-					GDB_MMAP_PROT_READ);
+      regs_addr
+	= gdbarch_infcall_mmap (target_gdbarch (), regs_type->length (),
+				GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
       setup_sections_data.munmap_list.add (regs_addr, regs_type->length ());
       if (compile_debug)
-	gdb_printf (gdb_stdlog,
-		    "allocated %s bytes at %s for registers\n",
-		    paddress (target_gdbarch (),
-			      regs_type->length ()),
+	gdb_printf (gdb_stdlog, "allocated %s bytes at %s for registers\n",
+		    paddress (target_gdbarch (), regs_type->length ()),
 		    paddress (target_gdbarch (), regs_addr));
       store_regs (regs_type, regs_addr);
     }
@@ -826,18 +809,15 @@ compile_object_load (const compile_file_names &file_names,
       if (out_value_type == NULL)
 	return NULL;
       check_typedef (out_value_type);
-      out_value_addr = gdbarch_infcall_mmap (target_gdbarch (),
-					     out_value_type->length (),
-					     (GDB_MMAP_PROT_READ
-					      | GDB_MMAP_PROT_WRITE));
+      out_value_addr
+	= gdbarch_infcall_mmap (target_gdbarch (), out_value_type->length (),
+				(GDB_MMAP_PROT_READ | GDB_MMAP_PROT_WRITE));
       gdb_assert (out_value_addr != 0);
       setup_sections_data.munmap_list.add (out_value_addr,
 					   out_value_type->length ());
       if (compile_debug)
-	gdb_printf (gdb_stdlog,
-		    "allocated %s bytes at %s for printed value\n",
-		    paddress (target_gdbarch (),
-			      out_value_type->length ()),
+	gdb_printf (gdb_stdlog, "allocated %s bytes at %s for printed value\n",
+		    paddress (target_gdbarch (), out_value_type->length ()),
 		    paddress (target_gdbarch (), out_value_addr));
     }
 

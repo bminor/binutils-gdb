@@ -24,8 +24,10 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/pathstuff.h"
 
-namespace selftests {
-namespace mkdir_recursive {
+namespace selftests
+{
+namespace mkdir_recursive
+{
 
 /* Try to create DIR using mkdir_recursive and make sure it exists.  */
 
@@ -53,12 +55,15 @@ test ()
     perror_with_name (("mkdtemp"));
 
   /* Try not to leave leftover directories.  */
-  struct cleanup_dirs {
+  struct cleanup_dirs
+  {
     cleanup_dirs (const char *base)
       : m_base (base)
-    {}
+    {
+    }
 
-    ~cleanup_dirs () {
+    ~cleanup_dirs ()
+    {
       rmdir (string_printf ("%s/a/b/c/d/e", m_base).c_str ());
       rmdir (string_printf ("%s/a/b/c/d", m_base).c_str ());
       rmdir (string_printf ("%s/a/b/c", m_base).c_str ());
@@ -68,6 +73,7 @@ test ()
     }
 
   private:
+
     const char *m_base;
   } cleanup_dirs (base.data ());
 
@@ -78,14 +84,14 @@ test ()
   SELF_CHECK (create_dir_and_check (dir.c_str ()));
 }
 
-}
-}
+} // namespace mkdir_recursive
+} // namespace selftests
 
 void _initialize_mkdir_recursive_selftests ();
+
 void
 _initialize_mkdir_recursive_selftests ()
 {
   selftests::register_test ("mkdir_recursive",
 			    selftests::mkdir_recursive::test);
 }
-

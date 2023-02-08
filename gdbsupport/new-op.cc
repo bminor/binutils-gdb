@@ -19,7 +19,7 @@
 
 /* GCC does not understand __has_feature.  */
 #if !defined(__has_feature)
-# define __has_feature(x) 0
+#define __has_feature(x) 0
 #endif
 
 #if !__has_feature(address_sanitizer) && !defined(__SANITIZE_ADDRESS__)
@@ -56,7 +56,7 @@ operator new (std::size_t sz)
   if (sz == 0)
     sz = 1;
 
-  void *p = malloc (sz);	/* ARI: malloc */
+  void *p = malloc (sz); /* ARI: malloc */
   if (p == NULL)
     {
       /* If the user decides to continue debugging, throw a
@@ -66,34 +66,34 @@ operator new (std::size_t sz)
 	 can only ever throw std::bad_alloc, or something that extends
 	 it.  */
       try
-	{
-	  malloc_failure (sz);
-	}
+        {
+          malloc_failure (sz);
+        }
       catch (gdb_exception &ex)
-	{
-	  throw gdb_quit_bad_alloc (std::move (ex));
-	}
+        {
+          throw gdb_quit_bad_alloc (std::move (ex));
+        }
     }
   return p;
 }
 
 void *
-operator new (std::size_t sz, const std::nothrow_t&) noexcept
+operator new (std::size_t sz, const std::nothrow_t &) noexcept
 {
   /* malloc (0) is unpredictable; avoid it.  */
   if (sz == 0)
     sz = 1;
-  return malloc (sz);		/* ARI: malloc */
+  return malloc (sz); /* ARI: malloc */
 }
 
 void *
 operator new[] (std::size_t sz)
 {
-   return ::operator new (sz);
+  return ::operator new (sz);
 }
 
-void*
-operator new[] (std::size_t sz, const std::nothrow_t&) noexcept
+void *
+operator new[] (std::size_t sz, const std::nothrow_t &) noexcept
 {
   return ::operator new (sz, std::nothrow);
 }
@@ -110,7 +110,7 @@ operator delete (void *p) noexcept
 }
 
 void
-operator delete (void *p, const std::nothrow_t&) noexcept
+operator delete (void *p, const std::nothrow_t &) noexcept
 {
   return ::operator delete (p);
 }
@@ -128,7 +128,7 @@ operator delete[] (void *p) noexcept
 }
 
 void
-operator delete[] (void *p, const std::nothrow_t&) noexcept
+operator delete[] (void *p, const std::nothrow_t &) noexcept
 {
   return ::operator delete (p, std::nothrow);
 }

@@ -38,38 +38,37 @@ struct aarch64_features
   uint8_t tls = 0;
 };
 
-inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
+inline bool
+operator== (const aarch64_features &lhs, const aarch64_features &rhs)
 {
-  return lhs.vq == rhs.vq
-    && lhs.pauth == rhs.pauth
-    && lhs.mte == rhs.mte
-    && lhs.tls == rhs.tls;
+  return lhs.vq == rhs.vq && lhs.pauth == rhs.pauth && lhs.mte == rhs.mte
+	 && lhs.tls == rhs.tls;
 }
 
 namespace std
 {
-  template<>
-  struct hash<aarch64_features>
+template<>
+struct hash<aarch64_features>
+{
+  std::size_t operator() (const aarch64_features &features) const noexcept
   {
-    std::size_t operator()(const aarch64_features &features) const noexcept
-    {
-      std::size_t h;
+    std::size_t h;
 
-      h = features.vq;
-      h = h << 1 | features.pauth;
-      h = h << 1 | features.mte;
-      /* Shift by two bits for now.  We may need to increase this in the future
+    h = features.vq;
+    h = h << 1 | features.pauth;
+    h = h << 1 | features.mte;
+    /* Shift by two bits for now.  We may need to increase this in the future
 	 if more TLS registers get added.  */
-      h = h << 2 | features.tls;
-      return h;
-    }
-  };
-}
+    h = h << 2 | features.tls;
+    return h;
+  }
+};
+} // namespace std
 
 /* Create the aarch64 target description.  */
 
 target_desc *
-  aarch64_create_target_description (const aarch64_features &features);
+aarch64_create_target_description (const aarch64_features &features);
 
 /* Given a pointer value POINTER and a MASK of non-address bits, remove the
    non-address bits from the pointer and sign-extend the result if required.
@@ -87,23 +86,23 @@ aarch64_mask_from_pac_registers (const CORE_ADDR cmask, const CORE_ADDR dmask);
    registers become pseudo registers.  */
 enum aarch64_regnum
 {
-  AARCH64_X0_REGNUM,		/* First integer register.  */
-  AARCH64_FP_REGNUM = AARCH64_X0_REGNUM + 29,	/* Frame register, if used.  */
-  AARCH64_LR_REGNUM = AARCH64_X0_REGNUM + 30,	/* Return address.  */
-  AARCH64_SP_REGNUM,		/* Stack pointer.  */
-  AARCH64_PC_REGNUM,		/* Program counter.  */
-  AARCH64_CPSR_REGNUM,		/* Current Program Status Register.  */
-  AARCH64_V0_REGNUM,		/* First fp/vec register.  */
-  AARCH64_V31_REGNUM = AARCH64_V0_REGNUM + 31,	/* Last fp/vec register.  */
-  AARCH64_SVE_Z0_REGNUM = AARCH64_V0_REGNUM,	/* First SVE Z register.  */
-  AARCH64_SVE_Z31_REGNUM = AARCH64_V31_REGNUM,  /* Last SVE Z register.  */
-  AARCH64_FPSR_REGNUM,		/* Floating Point Status Register.  */
-  AARCH64_FPCR_REGNUM,		/* Floating Point Control Register.  */
-  AARCH64_SVE_P0_REGNUM,	/* First SVE predicate register.  */
-  AARCH64_SVE_P15_REGNUM = AARCH64_SVE_P0_REGNUM + 15,	/* Last SVE predicate
+  AARCH64_X0_REGNUM,			      /* First integer register.  */
+  AARCH64_FP_REGNUM = AARCH64_X0_REGNUM + 29, /* Frame register, if used.  */
+  AARCH64_LR_REGNUM = AARCH64_X0_REGNUM + 30, /* Return address.  */
+  AARCH64_SP_REGNUM,			      /* Stack pointer.  */
+  AARCH64_PC_REGNUM,			      /* Program counter.  */
+  AARCH64_CPSR_REGNUM, /* Current Program Status Register.  */
+  AARCH64_V0_REGNUM,   /* First fp/vec register.  */
+  AARCH64_V31_REGNUM = AARCH64_V0_REGNUM + 31, /* Last fp/vec register.  */
+  AARCH64_SVE_Z0_REGNUM = AARCH64_V0_REGNUM,   /* First SVE Z register.  */
+  AARCH64_SVE_Z31_REGNUM = AARCH64_V31_REGNUM, /* Last SVE Z register.  */
+  AARCH64_FPSR_REGNUM,	 /* Floating Point Status Register.  */
+  AARCH64_FPCR_REGNUM,	 /* Floating Point Control Register.  */
+  AARCH64_SVE_P0_REGNUM, /* First SVE predicate register.  */
+  AARCH64_SVE_P15_REGNUM = AARCH64_SVE_P0_REGNUM + 15, /* Last SVE predicate
 							   register.  */
-  AARCH64_SVE_FFR_REGNUM,	/* SVE First Fault Register.  */
-  AARCH64_SVE_VG_REGNUM,	/* SVE Vector Granule.  */
+  AARCH64_SVE_FFR_REGNUM, /* SVE First Fault Register.  */
+  AARCH64_SVE_VG_REGNUM,  /* SVE Vector Granule.  */
 
   /* Other useful registers.  */
   AARCH64_LAST_X_ARG_REGNUM = AARCH64_X0_REGNUM + 7,
@@ -113,14 +112,14 @@ enum aarch64_regnum
 
 /* Sizes of various AArch64 registers.  */
 #define AARCH64_TLS_REGISTER_SIZE 8
-#define V_REGISTER_SIZE	  16
+#define V_REGISTER_SIZE 16
 
 /* PAC-related constants.  */
 /* Bit 55 is used to select between a kernel-space and user-space address.  */
-#define VA_RANGE_SELECT_BIT_MASK  0x80000000000000ULL
+#define VA_RANGE_SELECT_BIT_MASK 0x80000000000000ULL
 /* Mask with 1's in bits 55~63, used to remove the top byte of pointers
    (Top Byte Ignore).  */
-#define AARCH64_TOP_BITS_MASK	  0xff80000000000000ULL
+#define AARCH64_TOP_BITS_MASK 0xff80000000000000ULL
 
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
@@ -150,19 +149,18 @@ enum aarch64_regnum
    VG : Vector Granule.
 	The number of 64bit chunks in an SVE Z register.  */
 
-#define sve_vg_from_vl(vl)	((vl) / 8)
-#define sve_vl_from_vg(vg)	((vg) * 8)
+#define sve_vg_from_vl(vl) ((vl) / 8)
+#define sve_vl_from_vg(vg) ((vg) *8)
 #ifndef sve_vq_from_vl
-#define sve_vq_from_vl(vl)	((vl) / 0x10)
+#define sve_vq_from_vl(vl) ((vl) / 0x10)
 #endif
 #ifndef sve_vl_from_vq
-#define sve_vl_from_vq(vq)	((vq) * 0x10)
+#define sve_vl_from_vq(vq) ((vq) *0x10)
 #endif
-#define sve_vq_from_vg(vg)	(sve_vq_from_vl (sve_vl_from_vg (vg)))
-#define sve_vg_from_vq(vq)	(sve_vg_from_vl (sve_vl_from_vq (vq)))
-
+#define sve_vq_from_vg(vg) (sve_vq_from_vl (sve_vl_from_vg (vg)))
+#define sve_vg_from_vq(vq) (sve_vg_from_vl (sve_vl_from_vq (vq)))
 
 /* Maximum supported VQ value.  Increase if required.  */
-#define AARCH64_MAX_SVE_VQ  16
+#define AARCH64_MAX_SVE_VQ 16
 
 #endif /* ARCH_AARCH64_H */

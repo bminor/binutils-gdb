@@ -21,8 +21,10 @@
 #include "gdbsupport/selftest.h"
 #include "ui-file.h"
 
-namespace selftests {
-namespace file {
+namespace selftests
+{
+namespace file
+{
 
 static void
 check_one (const char *str, int quoter, const char *result)
@@ -35,28 +37,24 @@ check_one (const char *str, int quoter, const char *result)
 static void
 run_tests ()
 {
-  check_one ("basic stuff: \\", '\\',
-	     "basic stuff: \\\\");
-  check_one ("more basic stuff: \\Q", 'Q',
-	     "more basic stuff: \\\\\\Q");
-  check_one ("more basic stuff: \\Q", '\0',
-	     "more basic stuff: \\Q");
+  check_one ("basic stuff: \\", '\\', "basic stuff: \\\\");
+  check_one ("more basic stuff: \\Q", 'Q', "more basic stuff: \\\\\\Q");
+  check_one ("more basic stuff: \\Q", '\0', "more basic stuff: \\Q");
 
   check_one ("weird stuff: \x1f\x90\n\b\t\f\r\033\007", '\\',
 	     "weird stuff: \\037\\220\\n\\b\\t\\f\\r\\e\\a");
 
   scoped_restore save_7 = make_scoped_restore (&sevenbit_strings, true);
-  check_one ("more weird stuff: \xa5", '\\',
-	     "more weird stuff: \\245");
+  check_one ("more weird stuff: \xa5", '\\', "more weird stuff: \\245");
 }
 
 } /* namespace file*/
 } /* namespace selftests */
 
 void _initialize_ui_file_selftest ();
+
 void
 _initialize_ui_file_selftest ()
 {
-  selftests::register_test ("ui-file",
-			    selftests::file::run_tests);
+  selftests::register_test ("ui-file", selftests::file::run_tests);
 }

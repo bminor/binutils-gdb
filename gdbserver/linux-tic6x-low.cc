@@ -43,13 +43,11 @@
 class tic6x_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -93,109 +91,79 @@ union tic6x_register
 #if __BYTE_ORDER == __BIG_ENDIAN
 static int tic6x_regmap_c64xp[] = {
   /* A0 - A15 */
-  53, 52, 55, 54, 57, 56, 59, 58,
-  61, 60, 63, 62, 65, 64, 67, 66,
+  53, 52, 55, 54, 57, 56, 59, 58, 61, 60, 63, 62, 65, 64, 67, 66,
   /* B0 - B15 */
-  23, 22, 25, 24, 27, 26, 29, 28,
-  31, 30, 33, 32, 35, 34, 69, 68,
+  23, 22, 25, 24, 27, 26, 29, 28, 31, 30, 33, 32, 35, 34, 69, 68,
   /* CSR PC */
   5, 4,
   /* A16 - A31 */
-  37, 36, 39, 38, 41, 40, 43, 42,
-  45, 44, 47, 46, 49, 48, 51, 50,
+  37, 36, 39, 38, 41, 40, 43, 42, 45, 44, 47, 46, 49, 48, 51, 50,
   /* B16 - B31 */
-  7,  6,  9,  8,  11, 10, 13, 12,
-  15, 14, 17, 16, 19, 18, 21, 20,
+  7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 17, 16, 19, 18, 21, 20,
   /* TSR, ILC, RILC */
-  1,  2, 3
+  1, 2, 3
 };
 
 static int tic6x_regmap_c64x[] = {
   /* A0 - A15 */
-  51, 50, 53, 52, 55, 54, 57, 56,
-  59, 58, 61, 60, 63, 62, 65, 64,
+  51, 50, 53, 52, 55, 54, 57, 56, 59, 58, 61, 60, 63, 62, 65, 64,
   /* B0 - B15 */
-  21, 20, 23, 22, 25, 24, 27, 26,
-  29, 28, 31, 30, 33, 32, 67, 66,
+  21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30, 33, 32, 67, 66,
   /* CSR PC */
-  3,  2,
+  3, 2,
   /* A16 - A31 */
-  35, 34, 37, 36, 39, 38, 41, 40,
-  43, 42, 45, 44, 47, 46, 49, 48,
+  35, 34, 37, 36, 39, 38, 41, 40, 43, 42, 45, 44, 47, 46, 49, 48,
   /* B16 - B31 */
-  5,  4,  7,  6,  9,  8,  11, 10,
-  13, 12, 15, 14, 17, 16, 19, 18,
-  -1, -1, -1
+  5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 17, 16, 19, 18, -1, -1, -1
 };
 
 static int tic6x_regmap_c62x[] = {
   /* A0 - A15 */
-  19, 18, 21, 20, 23, 22, 25, 24,
-  27, 26, 29, 28, 31, 30, 33, 32,
+  19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30, 33, 32,
   /* B0 - B15 */
-   5,  4,  7,  6,  9,  8, 11, 10,
-  13, 12, 15, 14, 17, 16, 35, 34,
+  5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 17, 16, 35, 34,
   /* CSR, PC */
-  3, 2,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1
+  3, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
 #else
 static int tic6x_regmap_c64xp[] = {
   /* A0 - A15 */
-  52, 53, 54, 55, 56, 57, 58, 59,
-  60, 61, 62, 63, 64, 65, 66, 67,
+  52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67,
   /* B0 - B15 */
-  22, 23, 24, 25, 26, 27, 28, 29,
-  30, 31, 32, 33, 34, 35, 68, 69,
+  22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 68, 69,
   /* CSR PC */
-   4,  5,
+  4, 5,
   /* A16 - A31 */
-  36, 37, 38, 39, 40, 41, 42, 43,
-  44, 45, 46, 47, 48, 49, 50, 51,
+  36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
   /* B16 -B31 */
-   6,  7,  8,  9, 10, 11, 12, 13,
-  14, 15, 16, 17, 18, 19, 20, 31,
+  6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 31,
   /* TSR, ILC, RILC */
-  0,  3, 2
+  0, 3, 2
 };
 
 static int tic6x_regmap_c64x[] = {
   /* A0 - A15 */
-  50, 51, 52, 53, 54, 55, 56, 57,
-  58, 59, 60, 61, 62, 63, 64, 65,
+  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65,
   /* B0 - B15 */
-  20, 21, 22, 23, 24, 25, 26, 27,
-  28, 29, 30, 31, 32, 33, 66, 67,
+  20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 66, 67,
   /* CSR PC */
-  2,  3,
+  2, 3,
   /* A16 - A31 */
-  34, 35, 36, 37, 38, 39, 40, 41,
-  42, 43, 44, 45, 46, 47, 48, 49,
+  34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
   /* B16 - B31 */
-  4,  5,  6,  7,  8,  9,  10, 11,
-  12, 13, 14, 15, 16, 17, 18, 19,
-  -1, -1, -1
+  4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, -1, -1, -1
 };
 
 static int tic6x_regmap_c62x[] = {
   /* A0 - A15 */
-  18, 19, 20, 21, 22, 23, 24, 25,
-  26, 27, 28, 29, 30, 31, 32, 33,
+  18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
   /* B0 - B15 */
-  4,  5,  6,  7,  8,  9, 10, 11,
-  12, 13, 14, 15, 16, 17, 34, 35,
+  4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 34, 35,
   /* CSR PC */
-  2,  3,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1
+  2, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
 #endif
@@ -213,16 +181,14 @@ tic6x_target::sw_breakpoint_from_kind (int kind, int *size)
   return (const gdb_byte *) &tic6x_breakpoint;
 }
 
-static struct usrregs_info tic6x_usrregs_info =
-  {
-    TIC6X_NUM_REGS,
-    NULL, /* Set in tic6x_read_description.  */
-  };
+static struct usrregs_info tic6x_usrregs_info = {
+  TIC6X_NUM_REGS, NULL, /* Set in tic6x_read_description.  */
+};
 
 static const struct target_desc *
 tic6x_read_description (enum c6x_feature feature)
 {
-  static target_desc *tdescs[C6X_LAST] = { };
+  static target_desc *tdescs[C6X_LAST] = {};
   struct target_desc **tdesc = &tdescs[feature];
 
   if (*tdesc == NULL)
@@ -288,8 +254,8 @@ tic6x_target::low_breakpoint_at (CORE_ADDR where)
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph,
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;
@@ -304,7 +270,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
 
 static void
 tic6x_collect_register (struct regcache *regcache, int regno,
-			union tic6x_register *reg)
+                        union tic6x_register *reg)
 {
   union tic6x_register tmp_reg;
 
@@ -314,7 +280,7 @@ tic6x_collect_register (struct regcache *regcache, int regno,
 
 static void
 tic6x_supply_register (struct regcache *regcache, int regno,
-		       const union tic6x_register *reg)
+                       const union tic6x_register *reg)
 {
   int offset = 0;
 
@@ -343,11 +309,10 @@ tic6x_store_gregset (struct regcache *regcache, const void *buf)
       tic6x_supply_register (regcache, i, regset + tic6x_regmap[i]);
 }
 
-static struct regset_info tic6x_regsets[] = {
-  { PTRACE_GETREGS, PTRACE_SETREGS, 0, TIC6X_NUM_REGS * 4, GENERAL_REGS,
-    tic6x_fill_gregset, tic6x_store_gregset },
-  NULL_REGSET
-};
+static struct regset_info tic6x_regsets[]
+  = { { PTRACE_GETREGS, PTRACE_SETREGS, 0, TIC6X_NUM_REGS * 4, GENERAL_REGS,
+        tic6x_fill_gregset, tic6x_store_gregset },
+      NULL_REGSET };
 
 void
 tic6x_target::low_arch_setup ()
@@ -357,31 +322,31 @@ tic6x_target::low_arch_setup ()
   enum c6x_feature feature = C6X_CORE;
 
   /* Determine the CPU we're running on to find the register order.  */
-  __asm__ ("MVC .S2 CSR,%0" : "=r" (csr) :);
+  __asm__ ("MVC .S2 CSR,%0" : "=r"(csr) :);
   cpuid = csr >> 24;
   switch (cpuid)
     {
     case 0x00: /* C62x */
     case 0x02: /* C67x */
       tic6x_regmap = tic6x_regmap_c62x;
-      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
+      tic6x_breakpoint = 0x0000a122; /* BNOP .S2 0,5 */
       feature = C6X_CORE;
       break;
     case 0x03: /* C67x+ */
       tic6x_regmap = tic6x_regmap_c64x;
-      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
+      tic6x_breakpoint = 0x0000a122; /* BNOP .S2 0,5 */
       feature = C6X_GP;
       break;
     case 0x0c: /* C64x */
       tic6x_regmap = tic6x_regmap_c64x;
-      tic6x_breakpoint = 0x0000a122;  /* BNOP .S2 0,5 */
+      tic6x_breakpoint = 0x0000a122; /* BNOP .S2 0,5 */
       feature = C6X_GP;
       break;
     case 0x10: /* C64x+ */
     case 0x14: /* C674x */
     case 0x15: /* C66x */
       tic6x_regmap = tic6x_regmap_c64xp;
-      tic6x_breakpoint = 0x56454314;  /* illegal opcode */
+      tic6x_breakpoint = 0x56454314; /* illegal opcode */
       feature = C6X_C6XP;
       break;
     default:
@@ -392,19 +357,15 @@ tic6x_target::low_arch_setup ()
   current_process ()->tdesc = tic6x_read_description (feature);
 }
 
-static struct regsets_info tic6x_regsets_info =
-  {
-    tic6x_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct regsets_info tic6x_regsets_info = {
+  tic6x_regsets, /* regsets */
+  0,             /* num_regsets */
+  NULL,          /* disabled_regsets */
+};
 
-static struct regs_info myregs_info =
-  {
-    NULL, /* regset_bitmap */
-    &tic6x_usrregs_info,
-    &tic6x_regsets_info
-  };
+static struct regs_info myregs_info
+  = { NULL, /* regset_bitmap */
+      &tic6x_usrregs_info, &tic6x_regsets_info };
 
 const regs_info *
 tic6x_target::get_regs_info ()
@@ -415,8 +376,10 @@ tic6x_target::get_regs_info ()
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
-namespace tdesc {
+namespace selftests
+{
+namespace tdesc
+{
 static void
 tic6x_tdesc_test ()
 {
@@ -424,8 +387,8 @@ tic6x_tdesc_test ()
   SELF_CHECK (*tdesc_tic6x_c64x_linux == *tic6x_read_description (C6X_GP));
   SELF_CHECK (*tdesc_tic6x_c64xp_linux == *tic6x_read_description (C6X_C6XP));
 }
-}
-}
+} // namespace tdesc
+} // namespace selftests
 #endif
 
 /* The linux target ops object.  */

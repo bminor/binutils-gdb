@@ -21,7 +21,8 @@
 #include "gdbsupport/selftest.h"
 #include "utils.h"
 
-namespace selftests {
+namespace selftests
+{
 
 /* Helper function for the unit test of copy_bitwise.  Convert NBITS bits
    out of BITS, starting at OFFS, to the respective '0'/'1'-string.  MSB0
@@ -29,8 +30,8 @@ namespace selftests {
    resulting (not null-terminated) string at STR.  */
 
 static void
-bits_to_str (char *str, const gdb_byte *bits, ULONGEST offs,
-	     ULONGEST nbits, int msb0)
+bits_to_str (char *str, const gdb_byte *bits, ULONGEST offs, ULONGEST nbits,
+	     int msb0)
 {
   unsigned int j;
   size_t i;
@@ -84,8 +85,8 @@ check_copy_bitwise (const gdb_byte *dest, unsigned int dest_offset,
   /* Compare the resulting strings.  */
   expected[len] = actual[len] = '\0';
   if (strcmp (expected, actual) != 0)
-    error (_("copy_bitwise %s != %s (%u+%u -> %u)"),
-	   expected, actual, source_offset, nbits, dest_offset);
+    error (_ ("copy_bitwise %s != %s (%u+%u -> %u)"), expected, actual,
+	   source_offset, nbits, dest_offset);
 }
 
 /* Unit test for copy_bitwise.  */
@@ -102,12 +103,8 @@ copy_bitwise_tests (void)
      - 0/1- and 1/0 transitions on all bit positions within a byte;
      - several sufficiently asymmetric bytes.
   */
-  static const gdb_byte data_lsb0[] = {
-    0x00, 0xf8, 0xff, 0x12, 0xa5, 0x4f
-  };
-  static const gdb_byte data_msb0[] = {
-    0x00, 0x1f, 0xff, 0x48, 0xa5, 0xf2
-  };
+  static const gdb_byte data_lsb0[] = { 0x00, 0xf8, 0xff, 0x12, 0xa5, 0x4f };
+  static const gdb_byte data_msb0[] = { 0x00, 0x1f, 0xff, 0x48, 0xa5, 0xf2 };
 
   constexpr size_t data_nbits = 8 * sizeof (data_lsb0);
   constexpr unsigned max_nbits = 24;
@@ -126,19 +123,15 @@ copy_bitwise_tests (void)
 	{
 	  const unsigned int max_offset = data_nbits - nbits;
 
-	  for (unsigned source_offset = 0;
-	       source_offset <= max_offset;
+	  for (unsigned source_offset = 0; source_offset <= max_offset;
 	       source_offset++)
 	    {
-	      for (unsigned dest_offset = 0;
-		   dest_offset <= max_offset;
+	      for (unsigned dest_offset = 0; dest_offset <= max_offset;
 		   dest_offset++)
 		{
-		  check_copy_bitwise (data + dest_offset / 8,
-				      dest_offset % 8,
+		  check_copy_bitwise (data + dest_offset / 8, dest_offset % 8,
 				      data + source_offset / 8,
-				      source_offset % 8,
-				      nbits, msb0);
+				      source_offset % 8, nbits, msb0);
 		}
 	    }
 	}
@@ -153,6 +146,7 @@ copy_bitwise_tests (void)
 } /* namespace selftests */
 
 void _initialize_copy_bitwise_utils_selftests ();
+
 void
 _initialize_copy_bitwise_utils_selftests ()
 {

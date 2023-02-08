@@ -63,18 +63,17 @@ debug_reg_change_callback (struct lwp_info *lwp, int is_watchpoint,
     {
       debug_printf ("debug_reg_change_callback: \n\tOn entry:\n");
       debug_printf ("\ttid%d, dr_changed_bp=0x%s, "
-		    "dr_changed_wp=0x%s\n", tid,
-		    phex (info->dr_changed_bp, 8),
+		    "dr_changed_wp=0x%s\n",
+		    tid, phex (info->dr_changed_bp, 8),
 		    phex (info->dr_changed_wp, 8));
     }
 
-  dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp
-    : &info->dr_changed_bp;
+  dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp : &info->dr_changed_bp;
   dr_changed = *dr_changed_ptr;
 
   gdb_assert (idx >= 0
 	      && (idx <= (is_watchpoint ? aarch64_num_wp_regs
-			  : aarch64_num_bp_regs)));
+					: aarch64_num_bp_regs)));
 
   /* The actual update is done later just before resuming the lwp,
      we just mark that one register pair needs updating.  */
@@ -89,8 +88,8 @@ debug_reg_change_callback (struct lwp_info *lwp, int is_watchpoint,
   if (show_debug_regs)
     {
       debug_printf ("\tOn exit:\n\ttid%d, dr_changed_bp=0x%s, "
-		    "dr_changed_wp=0x%s\n", tid,
-		    phex (info->dr_changed_bp, 8),
+		    "dr_changed_wp=0x%s\n",
+		    tid, phex (info->dr_changed_bp, 8),
 		    phex (info->dr_changed_wp, 8));
     }
 
@@ -103,17 +102,14 @@ debug_reg_change_callback (struct lwp_info *lwp, int is_watchpoint,
    when the thread is resumed.  */
 
 void
-aarch64_notify_debug_reg_change (ptid_t ptid,
-				 int is_watchpoint, unsigned int idx)
+aarch64_notify_debug_reg_change (ptid_t ptid, int is_watchpoint,
+				 unsigned int idx)
 {
   ptid_t pid_ptid = ptid_t (ptid.pid ());
 
-  iterate_over_lwps (pid_ptid, [=] (struct lwp_info *info)
-			       {
-				 return debug_reg_change_callback (info,
-								   is_watchpoint,
-								   idx);
-			       });
+  iterate_over_lwps (pid_ptid, [=] (struct lwp_info *info) {
+    return debug_reg_change_callback (info, is_watchpoint, idx);
+  });
 }
 
 /* Reconfigure STATE to be compatible with Linux kernels with the PR
@@ -176,8 +172,8 @@ aarch64_downgrade_regs (struct aarch64_debug_reg_state *state)
    registers with data from *STATE.  */
 
 void
-aarch64_linux_set_debug_regs (struct aarch64_debug_reg_state *state,
-			      int tid, int watchpoint)
+aarch64_linux_set_debug_regs (struct aarch64_debug_reg_state *state, int tid,
+			      int watchpoint)
 {
   int i, count;
   struct iovec iov;
@@ -202,8 +198,7 @@ aarch64_linux_set_debug_regs (struct aarch64_debug_reg_state *state,
     }
 
   if (ptrace (PTRACE_SETREGSET, tid,
-	      watchpoint ? NT_ARM_HW_WATCH : NT_ARM_HW_BREAK,
-	      (void *) &iov))
+	      watchpoint ? NT_ARM_HW_WATCH : NT_ARM_HW_BREAK, (void *) &iov))
     {
       /* Handle Linux kernels with the PR external/20207 bug.  */
       if (watchpoint && errno == EINVAL
@@ -214,7 +209,7 @@ aarch64_linux_set_debug_regs (struct aarch64_debug_reg_state *state,
 	  aarch64_linux_set_debug_regs (state, tid, watchpoint);
 	  return;
 	}
-      error (_("Unexpected error setting hardware debug registers"));
+      error (_ ("Unexpected error setting hardware debug registers"));
     }
 }
 
@@ -255,16 +250,16 @@ aarch64_linux_get_debug_reg_capacity (int tid)
       aarch64_num_wp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
       if (aarch64_num_wp_regs > AARCH64_HWP_MAX_NUM)
 	{
-	  warning (_("Unexpected number of hardware watchpoint registers"
-		     " reported by ptrace, got %d, expected %d."),
+	  warning (_ ("Unexpected number of hardware watchpoint registers"
+		      " reported by ptrace, got %d, expected %d."),
 		   aarch64_num_wp_regs, AARCH64_HWP_MAX_NUM);
 	  aarch64_num_wp_regs = AARCH64_HWP_MAX_NUM;
 	}
     }
   else
     {
-      warning (_("Unable to determine the number of hardware watchpoints"
-		 " available."));
+      warning (_ ("Unable to determine the number of hardware watchpoints"
+		  " available."));
       aarch64_num_wp_regs = 0;
     }
 
@@ -275,16 +270,16 @@ aarch64_linux_get_debug_reg_capacity (int tid)
       aarch64_num_bp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
       if (aarch64_num_bp_regs > AARCH64_HBP_MAX_NUM)
 	{
-	  warning (_("Unexpected number of hardware breakpoint registers"
-		     " reported by ptrace, got %d, expected %d."),
+	  warning (_ ("Unexpected number of hardware breakpoint registers"
+		      " reported by ptrace, got %d, expected %d."),
 		   aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
 	  aarch64_num_bp_regs = AARCH64_HBP_MAX_NUM;
 	}
     }
   else
     {
-      warning (_("Unable to determine the number of hardware breakpoints"
-		 " available."));
+      warning (_ ("Unable to determine the number of hardware breakpoints"
+		  " available."));
       aarch64_num_bp_regs = 0;
     }
 }

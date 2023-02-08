@@ -46,20 +46,16 @@ struct blockrange
   }
 
   /* Return this blockrange's start address.  */
-  CORE_ADDR start () const
-  { return m_start; }
+  CORE_ADDR start () const { return m_start; }
 
   /* Set this blockrange's start address.  */
-  void set_start (CORE_ADDR start)
-  { m_start = start; }
+  void set_start (CORE_ADDR start) { m_start = start; }
 
   /* Return this blockrange's end address.  */
-  CORE_ADDR end () const
-  { return m_end; }
+  CORE_ADDR end () const { return m_end; }
 
   /* Set this blockrange's end address.  */
-  void set_end (CORE_ADDR end)
-  { m_end = end; }
+  void set_end (CORE_ADDR end) { m_end = end; }
 
   /* Lowest address in this range.  */
 
@@ -108,52 +104,43 @@ struct blockranges
 struct block
 {
   /* Return this block's start address.  */
-  CORE_ADDR start () const
-  { return m_start; }
+  CORE_ADDR start () const { return m_start; }
 
   /* Set this block's start address.  */
-  void set_start (CORE_ADDR start)
-  { m_start = start; }
+  void set_start (CORE_ADDR start) { m_start = start; }
 
   /* Return this block's end address.  */
-  CORE_ADDR end () const
-  { return m_end; }
+  CORE_ADDR end () const { return m_end; }
 
   /* Set this block's end address.  */
-  void set_end (CORE_ADDR end)
-  { m_end = end; }
+  void set_end (CORE_ADDR end) { m_end = end; }
 
   /* Return this block's function symbol.  */
-  symbol *function () const
-  { return m_function; }
+  symbol *function () const { return m_function; }
 
   /* Set this block's function symbol.  */
-  void set_function (symbol *function)
-  { m_function = function; }
+  void set_function (symbol *function) { m_function = function; }
 
   /* Return this block's superblock.  */
-  const block *superblock () const
-  { return m_superblock; }
+  const block *superblock () const { return m_superblock; }
 
   /* Set this block's superblock.  */
-  void set_superblock (const block *superblock)
-  { m_superblock = superblock; }
+  void set_superblock (const block *superblock) { m_superblock = superblock; }
 
   /* Return this block's multidict.  */
-  multidictionary *multidict () const
-  { return m_multidict; }
+  multidictionary *multidict () const { return m_multidict; }
 
   /* Set this block's multidict.  */
-  void set_multidict (multidictionary *multidict)
-  { m_multidict = multidict; }
+  void set_multidict (multidictionary *multidict) { m_multidict = multidict; }
 
   /* Return this block's namespace info.  */
-  block_namespace_info *namespace_info () const
-  { return m_namespace_info; }
+  block_namespace_info *namespace_info () const { return m_namespace_info; }
 
   /* Set this block's namespace info.  */
   void set_namespace_info (block_namespace_info *namespace_info)
-  { m_namespace_info = namespace_info; }
+  {
+    m_namespace_info = namespace_info;
+  }
 
   /* Return a view on this block's ranges.  */
   gdb::array_view<blockrange> ranges ()
@@ -174,12 +161,10 @@ struct block
   }
 
   /* Set this block's ranges array.  */
-  void set_ranges (blockranges *ranges)
-  { m_ranges = ranges; }
+  void set_ranges (blockranges *ranges) { m_ranges = ranges; }
 
   /* Return true if all addresses within this block are contiguous.  */
-  bool is_contiguous () const
-  { return this->ranges ().size () <= 1; }
+  bool is_contiguous () const { return this->ranges ().size () <= 1; }
 
   /* Return the "entry PC" of this block.
 
@@ -268,57 +253,52 @@ struct blockvector
   }
 
   /* Return the block at index I.  */
-  struct block *block (size_t i)
-  { return this->blocks ()[i]; }
+  struct block *block (size_t i) { return this->blocks ()[i]; }
 
   /* Const version of the above.  */
-  const struct block *block (size_t i) const
-  { return this->blocks ()[i]; }
+  const struct block *block (size_t i) const { return this->blocks ()[i]; }
 
   /* Set the block at index I.  */
-  void set_block (int i, struct block *block)
-  { m_blocks[i] = block; }
+  void set_block (int i, struct block *block) { m_blocks[i] = block; }
 
   /* Set the number of blocks of this blockvector.
 
      The storage of blocks is done using a flexible array member, so the number
      of blocks set here must agree with what was effectively allocated.  */
-  void set_num_blocks (int num_blocks)
-  { m_num_blocks = num_blocks; }
+  void set_num_blocks (int num_blocks) { m_num_blocks = num_blocks; }
 
   /* Return the number of blocks in this blockvector.  */
-  int num_blocks () const
-  { return m_num_blocks; }
+  int num_blocks () const { return m_num_blocks; }
 
   /* Return the global block of this blockvector.  */
-  struct block *global_block ()
-  { return this->block (GLOBAL_BLOCK); }
+  struct block *global_block () { return this->block (GLOBAL_BLOCK); }
 
   /* Const version of the above.  */
   const struct block *global_block () const
-  { return this->block (GLOBAL_BLOCK); }
+  {
+    return this->block (GLOBAL_BLOCK);
+  }
 
   /* Return the static block of this blockvector.  */
-  struct block *static_block ()
-  { return this->block (STATIC_BLOCK); }
+  struct block *static_block () { return this->block (STATIC_BLOCK); }
 
   /* Const version of the above.  */
   const struct block *static_block () const
-  { return this->block (STATIC_BLOCK); }
+  {
+    return this->block (STATIC_BLOCK);
+  }
 
   /* Return the address -> block map of this blockvector.  */
-  addrmap *map ()
-  { return m_map; }
+  addrmap *map () { return m_map; }
 
   /* Const version of the above.  */
-  const addrmap *map () const
-  { return m_map; }
+  const addrmap *map () const { return m_map; }
 
   /* Set this blockvector's address -> block map.  */
-  void set_map (addrmap *map)
-  { m_map = map; }
+  void set_map (addrmap *map) { m_map = map; }
 
 private:
+
   /* An address map mapping addresses to blocks in this blockvector.
      This pointer is zero if the blocks' start and end addresses are
      enough.  */
@@ -356,13 +336,14 @@ extern bool contained_in (const struct block *a, const struct block *b,
 			  bool allow_nested = false);
 
 extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
-					       const struct block **);
+						     const struct block **);
 
 extern const struct blockvector *
-  blockvector_for_pc_sect (CORE_ADDR, struct obj_section *,
-			   const struct block **, struct compunit_symtab *);
+blockvector_for_pc_sect (CORE_ADDR, struct obj_section *,
+			 const struct block **, struct compunit_symtab *);
 
-extern int blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc);
+extern int blockvector_contains_pc (const struct blockvector *bv,
+				    CORE_ADDR pc);
 
 extern struct call_site *call_site_for_pc (struct gdbarch *gdbarch,
 					   CORE_ADDR pc);
@@ -465,8 +446,8 @@ extern struct symbol *block_iter_match_first (const struct block *block,
    iteration.  And don't call it unless ITERATOR was created by a
    previous call to block_iter_match_first with the same NAME.  */
 
-extern struct symbol *block_iter_match_next
-  (const lookup_name_info &name, struct block_iterator *iterator);
+extern struct symbol *block_iter_match_next (const lookup_name_info &name,
+					     struct block_iterator *iterator);
 
 /* Return true if symbol A is the best match possible for DOMAIN.  */
 
@@ -531,9 +512,8 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
    order.  ITER helps keep track of the iteration, and must be a
    struct block_iterator.  SYM points to the current symbol.  */
 
-#define ALL_BLOCK_SYMBOLS(block, iter, sym)		\
-  for ((sym) = block_iterator_first ((block), &(iter));	\
-       (sym);						\
+#define ALL_BLOCK_SYMBOLS(block, iter, sym)                    \
+  for ((sym) = block_iterator_first ((block), &(iter)); (sym); \
        (sym) = block_iterator_next (&(iter)))
 
 /* Macro to loop through all symbols in BLOCK with a name that matches
@@ -541,10 +521,9 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
    iteration, and must be a struct block_iterator.  SYM points to the
    current symbol.  */
 
-#define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)		\
-  for ((sym) = block_iter_match_first ((block), (name), &(iter));	\
-       (sym) != NULL;							\
-       (sym) = block_iter_match_next ((name), &(iter)))
+#define ALL_BLOCK_SYMBOLS_WITH_NAME(block, name, iter, sym)       \
+  for ((sym) = block_iter_match_first ((block), (name), &(iter)); \
+       (sym) != NULL; (sym) = block_iter_match_next ((name), &(iter)))
 
 /* Given a vector of pairs, allocate and build an obstack allocated
    blockranges struct for a block.  */

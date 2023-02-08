@@ -30,8 +30,10 @@
 
 #include <unistd.h>
 
-namespace selftests {
-namespace scoped_mmap {
+namespace selftests
+{
+namespace scoped_mmap
+{
 
 /* Test that the file is unmapped.  */
 static void
@@ -113,15 +115,17 @@ test_invalid_filename ()
 {
   bool threw = false;
 
-  try {
+  try
+    {
       ::scoped_mmap m = ::mmap_file ("/this/file/should/not/exist");
-  } catch (gdb_exception &e) {
+    }
+  catch (gdb_exception &e)
+    {
       threw = true;
-  }
+    }
 
   SELF_CHECK (threw);
 }
-
 
 /* Run selftests.  */
 static void
@@ -137,13 +141,12 @@ run_tests ()
 #endif /* !defined(HAVE_SYS_MMAN_H) */
 
 void _initialize_scoped_mmap_selftests ();
+
 void
 _initialize_scoped_mmap_selftests ()
 {
 #if defined(HAVE_SYS_MMAN_H)
-  selftests::register_test ("scoped_mmap",
-			    selftests::scoped_mmap::run_tests);
-  selftests::register_test ("mmap_file",
-			    selftests::mmap_file::run_tests);
+  selftests::register_test ("scoped_mmap", selftests::scoped_mmap::run_tests);
+  selftests::register_test ("mmap_file", selftests::mmap_file::run_tests);
 #endif
 }

@@ -82,11 +82,13 @@ typedef void (*segv_handler_t) (int);
    original one.  */
 class scoped_segv_handler_restore
 {
- public:
+public:
+
   scoped_segv_handler_restore (segv_handler_t new_handler);
   ~scoped_segv_handler_restore ();
 
- private:
+private:
+
   segv_handler_t m_old_handler;
 };
 

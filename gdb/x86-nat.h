@@ -53,18 +53,19 @@ extern void x86_forget_process (pid_t pid);
 /* Helper functions used by x86_nat_target below.  See their
    definitions.  */
 
-extern int x86_can_use_hw_breakpoint (enum bptype type, int cnt, int othertype);
+extern int x86_can_use_hw_breakpoint (enum bptype type, int cnt,
+				      int othertype);
 extern int x86_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len);
 extern int x86_stopped_by_watchpoint ();
 extern int x86_stopped_data_address (CORE_ADDR *addr_p);
 extern int x86_insert_watchpoint (CORE_ADDR addr, int len,
-			   enum target_hw_bp_type type,
-			   struct expression *cond);
+				  enum target_hw_bp_type type,
+				  struct expression *cond);
 extern int x86_remove_watchpoint (CORE_ADDR addr, int len,
-			   enum target_hw_bp_type type,
-			   struct expression *cond);
+				  enum target_hw_bp_type type,
+				  struct expression *cond);
 extern int x86_insert_hw_breakpoint (struct gdbarch *gdbarch,
-			      struct bp_target_info *bp_tgt);
+				     struct bp_target_info *bp_tgt);
 extern int x86_remove_hw_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);
 extern int x86_stopped_by_hw_breakpoint ();
@@ -72,46 +73,62 @@ extern int x86_stopped_by_hw_breakpoint ();
 /* Convenience template mixin used to add x86 watchpoints support to a
    target.  */
 
-template <typename BaseTarget>
+template<typename BaseTarget>
 struct x86_nat_target : public BaseTarget
 {
   /* Hook in the x86 hardware watchpoints/breakpoints support.  */
 
   int can_use_hw_breakpoint (enum bptype type, int cnt, int othertype) override
-  { return x86_can_use_hw_breakpoint (type, cnt, othertype); }
+  {
+    return x86_can_use_hw_breakpoint (type, cnt, othertype);
+  }
 
   int region_ok_for_hw_watchpoint (CORE_ADDR addr, int len) override
-  { return x86_region_ok_for_hw_watchpoint (addr, len); }
+  {
+    return x86_region_ok_for_hw_watchpoint (addr, len);
+  }
 
-  int insert_watchpoint (CORE_ADDR addr, int len,
-			 enum target_hw_bp_type type,
+  int insert_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			 struct expression *cond) override
-  { return x86_insert_watchpoint (addr, len, type, cond); }
+  {
+    return x86_insert_watchpoint (addr, len, type, cond);
+  }
 
-  int remove_watchpoint (CORE_ADDR addr, int len,
-			 enum target_hw_bp_type type,
+  int remove_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			 struct expression *cond) override
-  { return x86_remove_watchpoint (addr, len, type, cond); }
+  {
+    return x86_remove_watchpoint (addr, len, type, cond);
+  }
 
   int insert_hw_breakpoint (struct gdbarch *gdbarch,
 			    struct bp_target_info *bp_tgt) override
-  { return x86_insert_hw_breakpoint (gdbarch, bp_tgt); }
+  {
+    return x86_insert_hw_breakpoint (gdbarch, bp_tgt);
+  }
 
   int remove_hw_breakpoint (struct gdbarch *gdbarch,
 			    struct bp_target_info *bp_tgt) override
-  { return x86_remove_hw_breakpoint (gdbarch, bp_tgt); }
+  {
+    return x86_remove_hw_breakpoint (gdbarch, bp_tgt);
+  }
 
   bool stopped_by_watchpoint () override
-  { return x86_stopped_by_watchpoint (); }
+  {
+    return x86_stopped_by_watchpoint ();
+  }
 
   bool stopped_data_address (CORE_ADDR *addr_p) override
-  { return x86_stopped_data_address (addr_p); }
+  {
+    return x86_stopped_data_address (addr_p);
+  }
 
   /* A target must provide an implementation of the
      "supports_stopped_by_hw_breakpoint" target method before this
      callback will be used.  */
   bool stopped_by_hw_breakpoint () override
-  { return x86_stopped_by_hw_breakpoint (); }
+  {
+    return x86_stopped_by_hw_breakpoint ();
+  }
 };
 
 #endif /* X86_NAT_H */

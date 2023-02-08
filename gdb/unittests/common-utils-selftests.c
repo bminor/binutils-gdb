@@ -20,7 +20,8 @@
 #include "gdbsupport/common-defs.h"
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
+namespace selftests
+{
 
 /* Type of both 'string_printf' and the 'format' function below.  Used
    to run the same tests against both string_printf and
@@ -46,7 +47,8 @@ test_format_func (format_func *func)
 #define X100 X10 X10 X10 X10 X10 X10 X10 X10 X10 X10
 #define X1000 X100 X100 X100 X100 X100 X100 X100 X100 X100 X100
 #define X10000 X1000 X1000 X1000 X1000 X1000 X1000 X1000 X1000 X1000 X1000
-#define X100000 X10000 X10000 X10000 X10000 X10000 X10000 X10000 X10000 X10000 X10000
+#define X100000 \
+  X10000 X10000 X10000 X10000 X10000 X10000 X10000 X10000 X10000 X10000
   SELF_CHECK (func ("%s", X10) == X10);
   SELF_CHECK (func ("%s", X100) == X100);
   SELF_CHECK (func ("%s", X1000) == X1000);
@@ -60,8 +62,7 @@ string_printf_tests ()
   test_format_func (string_printf);
 }
 
-static std::string ATTRIBUTE_PRINTF (1, 2)
-format (const char *fmt, ...)
+static std::string ATTRIBUTE_PRINTF (1, 2) format (const char *fmt, ...)
 {
   va_list vp;
 
@@ -81,8 +82,7 @@ string_vprintf_tests ()
    function below.  Used to run the same tests against both
    string_appendf and string_vappendf.  */
 typedef std::string &(string_appendf_func) (std::string &str, const char *fmt,
-					    ...)
-  ATTRIBUTE_PRINTF (2, 3);
+					    ...) ATTRIBUTE_PRINTF (2, 3);
 
 static void
 test_appendf_func (string_appendf_func *func)
@@ -102,8 +102,8 @@ test_appendf_func (string_appendf_func *func)
   SELF_CHECK (str == "test23foo 45 bar");
 }
 
-static std::string & ATTRIBUTE_PRINTF (2, 3)
-string_vappendf_wrapper (std::string &str, const char *fmt, ...)
+static std::string &ATTRIBUTE_PRINTF (2, 3)
+  string_vappendf_wrapper (std::string &str, const char *fmt, ...)
 {
   va_list vp;
 
@@ -129,6 +129,7 @@ string_vappendf_tests ()
 } /* namespace selftests */
 
 void _initialize_common_utils_selftests ();
+
 void
 _initialize_common_utils_selftests ()
 {

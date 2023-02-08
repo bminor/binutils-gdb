@@ -82,7 +82,10 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   /* Flags to handle the --opcodes option.  */
   enum opcodes_mode
   {
-    OPCODES_DEFAULT, OPCODES_NONE, OPCODES_DISPLAY, OPCODES_BYTES
+    OPCODES_DEFAULT,
+    OPCODES_NONE,
+    OPCODES_DISPLAY,
+    OPCODES_BYTES
   };
   enum opcodes_mode opcodes_mode = OPCODES_DEFAULT;
 
@@ -92,30 +95,34 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   /* Options processing stuff.  */
   int oind = 0;
   char *oarg;
+
   enum opt
   {
-    FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT, ADDR_OPT, OPCODES_OPT,
+    FILE_OPT,
+    LINE_OPT,
+    NUM_OPT,
+    START_OPT,
+    END_OPT,
+    ADDR_OPT,
+    OPCODES_OPT,
     SHOW_SRC_OPT
   };
-  static const struct mi_opt opts[] =
-    {
-      {"f", FILE_OPT, 1},
-      {"l", LINE_OPT, 1},
-      {"n", NUM_OPT, 1},
-      {"s", START_OPT, 1},
-      {"e", END_OPT, 1},
-      {"a", ADDR_OPT, 1},
-      {"-opcodes", OPCODES_OPT, 1},
-      {"-source", SHOW_SRC_OPT, 0},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { "f", FILE_OPT, 1 },
+					{ "l", LINE_OPT, 1 },
+					{ "n", NUM_OPT, 1 },
+					{ "s", START_OPT, 1 },
+					{ "e", END_OPT, 1 },
+					{ "a", ADDR_OPT, 1 },
+					{ "-opcodes", OPCODES_OPT, 1 },
+					{ "-source", SHOW_SRC_OPT, 0 },
+					{ 0, 0, 0 } };
 
   /* Get the options with their arguments. Keep track of what we
      encountered.  */
   while (1)
     {
-      int opt = mi_getopt ("-data-disassemble", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-data-disassemble", argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -153,7 +160,8 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
 	  else if (strcmp (oarg, "bytes") == 0)
 	    opcodes_mode = OPCODES_BYTES;
 	  else
-	    error (_("-data-disassemble: unknown value for -opcodes argument"));
+	    error (
+	      _ ("-data-disassemble: unknown value for -opcodes argument"));
 	  break;
 	case SHOW_SRC_OPT:
 	  source_seen = true;
@@ -167,36 +175,36 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   /* Allow only filename + linenum (with how_many which is not
      required) OR start_addr + end_addr OR addr.  */
 
-  if (!(
-	  ( line_seen &&  file_seen &&              !start_seen && !end_seen
-								&& !addr_seen)
+  if (!((line_seen && file_seen && !start_seen && !end_seen && !addr_seen)
 
-       || (!line_seen && !file_seen && !num_seen &&  start_seen &&  end_seen
-								&& !addr_seen)
+	|| (!line_seen && !file_seen && !num_seen && start_seen && end_seen
+	    && !addr_seen)
 
-       || (!line_seen && !file_seen && !num_seen && !start_seen && !end_seen
-								&&  addr_seen))
+	|| (!line_seen && !file_seen && !num_seen && !start_seen && !end_seen
+	    && addr_seen))
       || argc > 1)
-    error (_("-data-disassemble: Usage: "
-	     "( -f filename -l linenum [-n howmany] |"
-	     " -s startaddr -e endaddr | -a addr ) "
-	     "[ --opcodes mode ] [ --source ] [ [--] mode ]."));
+    error (_ ("-data-disassemble: Usage: "
+	      "( -f filename -l linenum [-n howmany] |"
+	      " -s startaddr -e endaddr | -a addr ) "
+	      "[ --opcodes mode ] [ --source ] [ [--] mode ]."));
 
   if (argc == 1)
     {
       mode = atoi (argv[0]);
       if (mode < 0 || mode > 5)
-	error (_("-data-disassemble: Mode argument must be in the range 0-5."));
+	error (
+	  _ ("-data-disassemble: Mode argument must be in the range 0-5."));
     }
   else
     mode = 0;
 
   if (mode != 0 && (source_seen || opcodes_seen))
-    error (_("-data-disassemble: --opcodes and --source can only be used with mode 0"));
+    error (_ ("-data-disassemble: --opcodes and --source can only be used "
+	      "with mode 0"));
 
   /* Convert the mode into a set of disassembly flags.  */
 
-  disasm_flags = 0;  /* Initialize here for -Wall.  */
+  disasm_flags = 0; /* Initialize here for -Wall.  */
   switch (mode)
     {
     case 0:
@@ -248,21 +256,19 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
     {
       s = lookup_symtab (file_string);
       if (s == NULL)
-	error (_("-data-disassemble: Invalid filename."));
+	error (_ ("-data-disassemble: Invalid filename."));
       if (!find_line_pc (s, line_num, &start))
-	error (_("-data-disassemble: Invalid line number"));
+	error (_ ("-data-disassemble: Invalid line number"));
       if (find_pc_partial_function (start, NULL, &low, &high) == 0)
-	error (_("-data-disassemble: "
-		 "No function contains specified address"));
+	error (_ ("-data-disassemble: "
+		  "No function contains specified address"));
     }
   else if (addr_seen)
     {
       if (find_pc_partial_function (addr, NULL, &low, &high) == 0)
-	error (_("-data-disassemble: "
-		 "No function contains specified address"));
+	error (_ ("-data-disassemble: "
+		  "No function contains specified address"));
     }
 
-  gdb_disassembly (gdbarch, uiout,
-		   disasm_flags,
-		   how_many, low, high);
+  gdb_disassembly (gdbarch, uiout, disasm_flags, how_many, low, high);
 }

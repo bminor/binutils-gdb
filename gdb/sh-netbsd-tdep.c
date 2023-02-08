@@ -32,53 +32,37 @@
 
 /* Convert a register number into an offset into a ptrace
    register structure.  */
-static const struct sh_corefile_regmap regmap[] =
-{
-  {R0_REGNUM,      20 * 4},
-  {R0_REGNUM + 1,  19 * 4},
-  {R0_REGNUM + 2,  18 * 4},
-  {R0_REGNUM + 3,  17 * 4},
-  {R0_REGNUM + 4,  16 * 4},
-  {R0_REGNUM + 5,  15 * 4},
-  {R0_REGNUM + 6,  14 * 4},
-  {R0_REGNUM + 7,  13 * 4},
-  {R0_REGNUM + 8,  12 * 4},
-  {R0_REGNUM + 9,  11 * 4},
-  {R0_REGNUM + 10, 10 * 4},
-  {R0_REGNUM + 11,  9 * 4},
-  {R0_REGNUM + 12,  8 * 4},
-  {R0_REGNUM + 13,  7 * 4},
-  {R0_REGNUM + 14,  6 * 4},
-  {R0_REGNUM + 15,  5 * 4},
-  {PC_REGNUM,       0 * 4},
-  {SR_REGNUM,       1 * 4},
-  {PR_REGNUM,	    2 * 4},
-  {MACH_REGNUM,	    3 * 4},
-  {MACL_REGNUM,	    4 * 4},
-  {-1 /* Terminator.  */, 0}
-};
-
+static const struct sh_corefile_regmap regmap[]
+  = { { R0_REGNUM, 20 * 4 },	  { R0_REGNUM + 1, 19 * 4 },
+      { R0_REGNUM + 2, 18 * 4 },  { R0_REGNUM + 3, 17 * 4 },
+      { R0_REGNUM + 4, 16 * 4 },  { R0_REGNUM + 5, 15 * 4 },
+      { R0_REGNUM + 6, 14 * 4 },  { R0_REGNUM + 7, 13 * 4 },
+      { R0_REGNUM + 8, 12 * 4 },  { R0_REGNUM + 9, 11 * 4 },
+      { R0_REGNUM + 10, 10 * 4 }, { R0_REGNUM + 11, 9 * 4 },
+      { R0_REGNUM + 12, 8 * 4 },  { R0_REGNUM + 13, 7 * 4 },
+      { R0_REGNUM + 14, 6 * 4 },  { R0_REGNUM + 15, 5 * 4 },
+      { PC_REGNUM, 0 * 4 },	  { SR_REGNUM, 1 * 4 },
+      { PR_REGNUM, 2 * 4 },	  { MACH_REGNUM, 3 * 4 },
+      { MACL_REGNUM, 4 * 4 },	  { -1 /* Terminator.  */, 0 } };
 
 static void
-shnbsd_init_abi (struct gdbarch_info info,
-		  struct gdbarch *gdbarch)
+shnbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
   nbsd_init_abi (info, gdbarch);
 
-  tdep->core_gregmap = (struct sh_corefile_regmap *)regmap;
+  tdep->core_gregmap = (struct sh_corefile_regmap *) regmap;
   tdep->sizeof_gregset = 84;
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 }
 
 void _initialize_shnbsd_tdep ();
+
 void
 _initialize_shnbsd_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_NETBSD,
-			  shnbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_OPENBSD,
-			  shnbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_NETBSD, shnbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_OPENBSD, shnbsd_init_abi);
 }

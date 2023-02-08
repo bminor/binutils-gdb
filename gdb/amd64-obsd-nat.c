@@ -36,26 +36,24 @@
    little-endian we get away with that.  */
 
 /* From <machine/reg.h>.  */
-static int amd64obsd32_r_reg_offset[] =
-{
-  14 * 8,			/* %eax */
-  3 * 8,			/* %ecx */
-  2 * 8,			/* %edx */
-  13 * 8,			/* %ebx */
-  15 * 8,			/* %esp */
-  12 * 8,			/* %ebp */
-  1 * 8,			/* %esi */
-  0 * 8,			/* %edi */
-  16 * 8,			/* %eip */
-  17 * 8,			/* %eflags */
-  18 * 8,			/* %cs */
-  19 * 8,			/* %ss */
-  20 * 8,			/* %ds */
-  21 * 8,			/* %es */
-  22 * 8,			/* %fs */
-  23 * 8			/* %gs */
+static int amd64obsd32_r_reg_offset[] = {
+  14 * 8, /* %eax */
+  3 * 8,  /* %ecx */
+  2 * 8,  /* %edx */
+  13 * 8, /* %ebx */
+  15 * 8, /* %esp */
+  12 * 8, /* %ebp */
+  1 * 8,  /* %esi */
+  0 * 8,  /* %edi */
+  16 * 8, /* %eip */
+  17 * 8, /* %eflags */
+  18 * 8, /* %cs */
+  19 * 8, /* %ss */
+  20 * 8, /* %ds */
+  21 * 8, /* %es */
+  22 * 8, /* %fs */
+  23 * 8  /* %gs */
 };
-
 
 /* Support for debugging kernel virtual memory images.  */
 
@@ -129,6 +127,7 @@ amd64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 static amd64_bsd_nat_target<obsd_nat_target> the_amd64_obsd_nat_target;
 
 void _initialize_amd64obsd_nat ();
+
 void
 _initialize_amd64obsd_nat ()
 {

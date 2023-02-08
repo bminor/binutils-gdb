@@ -36,7 +36,7 @@
 #include "event-top.h"
 #include "interps.h"
 #include "completer.h"
-#include "top.h"		/* For command_loop.  */
+#include "top.h" /* For command_loop.  */
 #include "main.h"
 #include "gdbsupport/buildargv.h"
 #include "gdbsupport/scope-exit.h"
@@ -76,17 +76,14 @@ get_current_interp_info (void)
 
 /* The magic initialization routine for this module.  */
 
-static struct interp *interp_lookup_existing (struct ui *ui,
-					      const char *name);
+static struct interp *interp_lookup_existing (struct ui *ui, const char *name);
 
 interp::interp (const char *name)
   : m_name (make_unique_xstrdup (name))
 {
 }
 
-interp::~interp ()
-{
-}
+interp::~interp () {}
 
 /* An interpreter factory.  Maps an interpreter name to the factory
    function that instantiates an interpreter by that name.  */
@@ -94,8 +91,10 @@ interp::~interp ()
 struct interp_factory
 {
   interp_factory (const char *name_, interp_factory_func func_)
-  : name (name_), func (func_)
-  {}
+    : name (name_),
+      func (func_)
+  {
+  }
 
   /* This is the name in "-i=INTERP" and "interpreter-exec INTERP".  */
   const char *name;
@@ -116,7 +115,7 @@ interp_factory_register (const char *name, interp_factory_func func)
   for (const interp_factory &f : interpreter_factories)
     if (strcmp (f.name, name) == 0)
       {
-	internal_error (_("interpreter factory already registered: \"%s\"\n"),
+	internal_error (_ ("interpreter factory already registered: \"%s\"\n"),
 			name);
       }
 
@@ -192,9 +191,9 @@ interp_set (struct interp *interp, bool top_level)
   interp->resume ();
 
   if (warn_about_mi1)
-    warning (_("MI version 1 is deprecated in GDB 13 and "
-	       "will be removed in GDB 14.  Please upgrade "
-	       "to a newer version of MI."));
+    warning (_ ("MI version 1 is deprecated in GDB 13 and "
+		"will be removed in GDB 14.  Please upgrade "
+		"to a newer version of MI."));
 }
 
 /* Look up the interpreter for NAME.  If no such interpreter exists,
@@ -206,9 +205,7 @@ interp_lookup_existing (struct ui *ui, const char *name)
   struct ui_interp_info *ui_interp = get_interp_info (ui);
   struct interp *interp;
 
-  for (interp = ui_interp->interp_list;
-       interp != NULL;
-       interp = interp->next)
+  for (interp = ui_interp->interp_list; interp != NULL; interp = interp->next)
     {
       if (strcmp (interp->name (), name) == 0)
 	return interp;
@@ -250,7 +247,7 @@ set_top_level_interpreter (const char *name)
   struct interp *interp = interp_lookup (current_ui, name);
 
   if (interp == NULL)
-    error (_("Interpreter `%s' unrecognized"), name);
+    error (_ ("Interpreter `%s' unrecognized"), name);
   /* Install it.  */
   interp_set (interp, true);
 }
@@ -379,25 +376,25 @@ interpreter_exec_cmd (const char *args, int from_tty)
   scoped_restore save_stdtargerr = make_scoped_restore (&gdb_stdtargerr);
 
   if (args == NULL)
-    error_no_arg (_("interpreter-exec command"));
+    error_no_arg (_ ("interpreter-exec command"));
 
   gdb_argv prules (args);
   nrules = prules.count ();
 
   if (nrules < 2)
-    error (_("Usage: interpreter-exec INTERPRETER COMMAND..."));
+    error (_ ("Usage: interpreter-exec INTERPRETER COMMAND..."));
 
   old_interp = ui_interp->current_interpreter;
 
   interp_to_use = interp_lookup (current_ui, prules[0]);
   if (interp_to_use == NULL)
-    error (_("Could not find interpreter \"%s\"."), prules[0]);
+    error (_ ("Could not find interpreter \"%s\"."), prules[0]);
 
   interp_set (interp_to_use, false);
   SCOPE_EXIT
-    {
-      interp_set (old_interp, false);
-    };
+  {
+    interp_set (old_interp, false);
+  };
 
   for (i = 1; i < nrules; i++)
     interp_exec (interp_to_use, prules[i]);
@@ -407,8 +404,8 @@ interpreter_exec_cmd (const char *args, int from_tty)
 
 void
 interpreter_completer (struct cmd_list_element *ignore,
-		       completion_tracker &tracker,
-		       const char *text, const char *word)
+		       completion_tracker &tracker, const char *text,
+		       const char *word)
 {
   int textlen = strlen (text);
 
@@ -416,8 +413,8 @@ interpreter_completer (struct cmd_list_element *ignore,
     {
       if (strncmp (interp.name, text, textlen) == 0)
 	{
-	  tracker.add_completion
-	    (make_completion_match_str (interp.name, text, word));
+	  tracker.add_completion (make_completion_match_str (interp.name, text,
+							     word));
 	}
     }
 }
@@ -442,19 +439,20 @@ current_interpreter (void)
 
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
+
 void
 _initialize_interpreter ()
 {
   struct cmd_list_element *c;
 
-  c = add_cmd ("interpreter-exec", class_support,
-	       interpreter_exec_cmd, _("\
+  c = add_cmd ("interpreter-exec", class_support, interpreter_exec_cmd, _ ("\
 Execute a command in an interpreter.\n\
 Usage: interpreter-exec INTERPRETER COMMAND...\n\
 The first argument is the name of the interpreter to use.\n\
 The following arguments are the commands to execute.\n\
 A command can have arguments, separated by spaces.\n\
 These spaces must be escaped using \\ or the command\n\
-and its arguments must be enclosed in double quotes."), &cmdlist);
+and its arguments must be enclosed in double quotes."),
+	       &cmdlist);
   set_cmd_completer (c, interpreter_completer);
 }

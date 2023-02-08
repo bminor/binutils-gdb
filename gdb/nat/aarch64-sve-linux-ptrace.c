@@ -53,7 +53,7 @@ aarch64_sve_get_vq (int tid)
 
   if (!sve_vl_valid (header.vl))
     {
-      warning (_("Invalid SVE state from kernel; SVE disabled."));
+      warning (_ ("Invalid SVE state from kernel; SVE disabled."));
       return 0;
     }
 
@@ -126,7 +126,7 @@ aarch64_sve_get_sveregs (int tid)
   uint64_t vq = aarch64_sve_get_vq (tid);
 
   if (vq == 0)
-    perror_with_name (_("Unable to fetch SVE register header"));
+    perror_with_name (_ ("Unable to fetch SVE register header"));
 
   /* A ptrace call with NT_ARM_SVE will return a header followed by either a
      dump of all the SVE and FP registers, or an fpsimd structure (identical to
@@ -138,7 +138,7 @@ aarch64_sve_get_sveregs (int tid)
   iovec.iov_base = buf.get ();
 
   if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_SVE, &iovec) < 0)
-    perror_with_name (_("Unable to fetch SVE registers"));
+    perror_with_name (_ ("Unable to fetch SVE registers"));
 
   return buf;
 }
@@ -176,7 +176,7 @@ aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
   /* Sanity check the data in the header.  */
   if (!sve_vl_valid (header->vl)
       || SVE_PT_SIZE (vq, header->flags) != header->size)
-    error (_("Invalid SVE header from kernel."));
+    error (_ ("Invalid SVE header from kernel."));
 
   /* Update VG.  Note, the registers in the regcache will already be of the
      correct length.  */
@@ -220,7 +220,7 @@ aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
 
       gdb_byte *reg = (gdb_byte *) alloca (SVE_PT_SVE_ZREG_SIZE (vq));
       struct user_fpsimd_state *fpsimd
-	= (struct user_fpsimd_state *)(base + SVE_PT_FPSIMD_OFFSET);
+	= (struct user_fpsimd_state *) (base + SVE_PT_FPSIMD_OFFSET);
 
       /* Make sure we have a zeroed register buffer.  We will need the zero
 	 padding below.  */
@@ -263,7 +263,7 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
   /* Sanity check the data in the header.  */
   if (!sve_vl_valid (header->vl)
       || SVE_PT_SIZE (vq, header->flags) != header->size)
-    error (_("Invalid SVE header from kernel."));
+    error (_ ("Invalid SVE header from kernel."));
 
   if (!HAS_SVE_STATE (*header))
     {
@@ -277,7 +277,7 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
       bool has_sve_state = false;
       gdb_byte *reg = (gdb_byte *) alloca (SVE_PT_SVE_ZREG_SIZE (vq));
       struct user_fpsimd_state *fpsimd
-	= (struct user_fpsimd_state *)(base + SVE_PT_FPSIMD_OFFSET);
+	= (struct user_fpsimd_state *) (base + SVE_PT_FPSIMD_OFFSET);
 
       memset (reg, 0, SVE_PT_SVE_ZREG_SIZE (vq));
 
@@ -295,15 +295,14 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
       if (!has_sve_state)
 	for (int i = 0; i < AARCH64_SVE_P_REGS_NUM; i++)
 	  {
-	    has_sve_state |= reg_buf->raw_compare (AARCH64_SVE_P0_REGNUM + i,
-						   reg, 0);
+	    has_sve_state
+	      |= reg_buf->raw_compare (AARCH64_SVE_P0_REGNUM + i, reg, 0);
 	    if (has_sve_state)
 	      break;
 	  }
 
       if (!has_sve_state)
-	  has_sve_state |= reg_buf->raw_compare (AARCH64_SVE_FFR_REGNUM,
-						 reg, 0);
+	has_sve_state |= reg_buf->raw_compare (AARCH64_SVE_FFR_REGNUM, reg, 0);
 
       /* If no SVE state exists, then use the existing fpsimd structure to
 	 write out state and return.  */
@@ -360,7 +359,7 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
       memcpy (base + SVE_PT_SVE_FPCR_OFFSET (vq), &fpsimd->fpcr,
 	      sizeof (uint32_t));
 
-      for (int i = AARCH64_SVE_Z_REGS_NUM; i >= 0 ; i--)
+      for (int i = AARCH64_SVE_Z_REGS_NUM; i >= 0; i--)
 	{
 	  memcpy (base + SVE_PT_SVE_ZREG_OFFSET (vq, i), &fpsimd->vregs[i],
 		  sizeof (__int128_t));
@@ -388,5 +387,4 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
   if (REG_VALID == reg_buf->get_register_status (AARCH64_FPCR_REGNUM))
     reg_buf->raw_collect (AARCH64_FPCR_REGNUM,
 			  base + SVE_PT_SVE_FPCR_OFFSET (vq));
-
 }

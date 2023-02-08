@@ -32,7 +32,7 @@
 
 struct nto_target_ops
 {
-/* The CPUINFO flags from the remote.  Currently used by
+  /* The CPUINFO flags from the remote.  Currently used by
    i386 for fxsave but future proofing other hosts.
    This is initialized in procfs_attach or nto_start_remote
    depending on our host/target.  It would only be invalid
@@ -40,10 +40,10 @@ struct nto_target_ops
    the cpuinfo message.  */
   unsigned cpuinfo_flags;
 
-/* True if successfully retrieved cpuinfo from remote.  */
+  /* True if successfully retrieved cpuinfo from remote.  */
   int cpuinfo_valid;
 
-/* Given a register, return an id that represents the Neutrino
+  /* Given a register, return an id that represents the Neutrino
    regset it came from.  If reg == -1 update all regsets.  */
   int (*regset_id) (int);
 
@@ -53,24 +53,24 @@ struct nto_target_ops
 
   void (*supply_altregset) (struct regcache *, char *);
 
-/* Given a regset, tell gdb about registers stored in data.  */
+  /* Given a regset, tell gdb about registers stored in data.  */
   void (*supply_regset) (struct regcache *, int, char *);
 
-/* Given a register and regset, calculate the offset into the regset
+  /* Given a register and regset, calculate the offset into the regset
    and stuff it into the last argument.  If regno is -1, calculate the
    size of the entire regset.  Returns length of data, -1 if unknown
    regset, 0 if unknown register.  */
   int (*register_area) (struct gdbarch *, int, int, unsigned *);
 
-/* Build the Neutrino register set info into the data buffer.
+  /* Build the Neutrino register set info into the data buffer.
    Return -1 if unknown regset, 0 otherwise.  */
   int (*regset_fill) (const struct regcache *, int, char *);
 
-/* Gives the fetch_link_map_offsets function exposure outside of
+  /* Gives the fetch_link_map_offsets function exposure outside of
    solib-svr4.c so that we can override relocate_section_addresses().  */
   struct link_map_offsets *(*fetch_link_map_offsets) (void);
 
-/* Used by nto_elf_osabi_sniffer to determine if we're connected to an
+  /* Used by nto_elf_osabi_sniffer to determine if we're connected to an
    Neutrino target.  */
   enum gdb_osabi (*is_nto_target) (bfd *abfd);
 };
@@ -95,8 +95,7 @@ extern struct nto_target_ops current_nto_target;
 
 #define nto_regset_fill (current_nto_target.regset_fill)
 
-#define nto_fetch_link_map_offsets \
-(current_nto_target.fetch_link_map_offsets)
+#define nto_fetch_link_map_offsets (current_nto_target.fetch_link_map_offsets)
 
 #define nto_is_nto_target (current_nto_target.is_nto_target)
 
@@ -184,11 +183,12 @@ void nto_dummy_supply_regset (struct regcache *regcache, char *regs);
 
 int nto_in_dynsym_resolve_code (CORE_ADDR pc);
 
-const char *nto_extra_thread_info (struct target_ops *self, struct thread_info *);
+const char *nto_extra_thread_info (struct target_ops *self,
+				   struct thread_info *);
 
 LONGEST nto_read_auxv_from_initial_stack (CORE_ADDR inital_stack,
-					  gdb_byte *readbuf,
-					  LONGEST len, size_t sizeof_auxv_t);
+					  gdb_byte *readbuf, LONGEST len,
+					  size_t sizeof_auxv_t);
 
 struct nto_inferior_data *nto_inferior_data (struct inferior *inf);
 

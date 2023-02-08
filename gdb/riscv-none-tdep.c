@@ -35,45 +35,35 @@
    gdb puts it at offset 32.  Register x0 is always 0 and can be ignored.
    Registers x1 to x31 are in the same place.  */
 
-static const struct regcache_map_entry riscv_gregmap[] =
-{
-  { 1,  RISCV_PC_REGNUM, 0 },
-  { 31, RISCV_RA_REGNUM, 0 }, /* x1 to x31 */
-  { 0 }
-};
+static const struct regcache_map_entry riscv_gregmap[]
+  = { { 1, RISCV_PC_REGNUM, 0 },
+      { 31, RISCV_RA_REGNUM, 0 }, /* x1 to x31 */
+      { 0 } };
 
 /* Define the FP register mapping.  This follows the same format as the
    RISC-V linux corefile.  The kernel puts the 32 FP regs first, and then
    FCSR.  */
 
-static const struct regcache_map_entry riscv_fregmap[] =
-{
-  { 32, RISCV_FIRST_FP_REGNUM, 0 },
-  { 1, RISCV_CSR_FCSR_REGNUM, 4 },	/* Always stored as 4-bytes.  */
-  { 0 }
-};
+static const struct regcache_map_entry riscv_fregmap[]
+  = { { 32, RISCV_FIRST_FP_REGNUM, 0 },
+      { 1, RISCV_CSR_FCSR_REGNUM, 4 }, /* Always stored as 4-bytes.  */
+      { 0 } };
 
 /* Define the general register regset.  */
 
-static const struct regset riscv_gregset =
-{
-  riscv_gregmap, riscv_supply_regset, regcache_collect_regset
-};
+static const struct regset riscv_gregset
+  = { riscv_gregmap, riscv_supply_regset, regcache_collect_regset };
 
 /* Define the FP register regset.  */
 
-static const struct regset riscv_fregset =
-{
-  riscv_fregmap, riscv_supply_regset, regcache_collect_regset
-};
+static const struct regset riscv_fregset
+  = { riscv_fregmap, riscv_supply_regset, regcache_collect_regset };
 
 /* Define the CSR regset, this is not constant as the regmap field is
    updated dynamically based on the current target description.  */
 
-static struct regset riscv_csrset =
-{
-  nullptr, regcache_supply_regset, regcache_collect_regset
-};
+static struct regset riscv_csrset
+  = { nullptr, regcache_supply_regset, regcache_collect_regset };
 
 /* Update the regmap field of RISCV_CSRSET based on the CSRs available in
    the current target description.  */
@@ -90,16 +80,16 @@ riscv_update_csrmap (struct gdbarch *gdbarch,
   /* Now create a register map for every csr found in the target
      description.  */
   struct regcache_map_entry *riscv_csrmap
-    = new struct regcache_map_entry[feature_csr->registers.size() + 1];
+    = new struct regcache_map_entry[feature_csr->registers.size () + 1];
   for (auto &csr : feature_csr->registers)
     {
-      int regnum = user_reg_map_name_to_regnum (gdbarch, csr->name.c_str(),
-						csr->name.length());
-      riscv_csrmap[i++] = {1, regnum, 0};
+      int regnum = user_reg_map_name_to_regnum (gdbarch, csr->name.c_str (),
+						csr->name.length ());
+      riscv_csrmap[i++] = { 1, regnum, 0 };
     }
 
   /* Mark the end of the array.  */
-  riscv_csrmap[i] = {0};
+  riscv_csrmap[i] = { 0 };
   riscv_csrset.regmap = riscv_csrmap;
 }
 
@@ -134,13 +124,13 @@ riscv_iterate_over_regset_sections (struct gdbarch *gdbarch,
   if (tdesc != nullptr)
     {
       const struct tdesc_feature *feature_csr
-        = tdesc_find_feature (tdesc, riscv_feature_name_csr);
+	= tdesc_find_feature (tdesc, riscv_feature_name_csr);
       if (feature_csr != nullptr && feature_csr->registers.size () > 0)
 	{
 	  riscv_update_csrmap (gdbarch, feature_csr);
 	  cb (".reg-riscv-csr",
-	      (feature_csr->registers.size() * riscv_isa_xlen (gdbarch)),
-	      (feature_csr->registers.size() * riscv_isa_xlen (gdbarch)),
+	      (feature_csr->registers.size () * riscv_isa_xlen (gdbarch)),
+	      (feature_csr->registers.size () * riscv_isa_xlen (gdbarch)),
 	      &riscv_csrset, NULL, cb_data);
 	}
     }
@@ -157,14 +147,14 @@ riscv_none_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Iterate over registers for reading and writing bare metal RISC-V core
      files.  */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, riscv_iterate_over_regset_sections);
-
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, riscv_iterate_over_regset_sections);
 }
 
 /* Initialize RISC-V bare-metal target support.  */
 
 void _initialize_riscv_none_tdep ();
+
 void
 _initialize_riscv_none_tdep ()
 {

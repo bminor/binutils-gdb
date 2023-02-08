@@ -27,10 +27,10 @@
 /* Core file support.  */
 
 /* Sizeof `struct reg' in <machine/reg.h>.  */
-#define ARMBSD_SIZEOF_GREGS	(17 * 4)
+#define ARMBSD_SIZEOF_GREGS (17 * 4)
 
 /* Sizeof `struct fpreg' in <machine/reg.h.  */
-#define ARMBSD_SIZEOF_FPREGS	((1 + (8 * 3)) * 4)
+#define ARMBSD_SIZEOF_FPREGS ((1 + (8 * 3)) * 4)
 
 static int
 armbsd_fpreg_offset (int regnum)
@@ -46,8 +46,7 @@ armbsd_fpreg_offset (int regnum)
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
-armbsd_supply_fpregset (const struct regset *regset,
-			struct regcache *regcache,
+armbsd_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 			int regnum, const void *fpregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) fpregs;
@@ -67,8 +66,7 @@ armbsd_supply_fpregset (const struct regset *regset,
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
-armbsd_supply_gregset (const struct regset *regset,
-		       struct regcache *regcache,
+armbsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		       int regnum, const void *gregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
@@ -95,19 +93,10 @@ armbsd_supply_gregset (const struct regset *regset,
 
 /* ARM register sets.  */
 
-static const struct regset armbsd_gregset =
-{
-  NULL,
-  armbsd_supply_gregset,
-  NULL,
-  REGSET_VARIABLE_SIZE
-};
+static const struct regset armbsd_gregset
+  = { NULL, armbsd_supply_gregset, NULL, REGSET_VARIABLE_SIZE };
 
-static const struct regset armbsd_fpregset =
-{
-  NULL,
-  armbsd_supply_fpregset
-};
+static const struct regset armbsd_fpregset = { NULL, armbsd_supply_fpregset };
 
 /* Iterate over supported core file register note sections. */
 

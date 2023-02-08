@@ -27,8 +27,10 @@
 #define LL "ll"
 #endif
 
-namespace selftests {
-namespace format_pieces {
+namespace selftests
+{
+namespace format_pieces
+{
 
 /* Verify that parsing STR gives pieces equal to EXPECTED_PIECES.  */
 
@@ -47,9 +49,9 @@ static void
 test_escape_sequences ()
 {
   check ("This is an escape sequence: \\e",
-    {
-      format_piece ("This is an escape sequence: \e", literal_piece, 0),
-    });
+	 {
+	   format_piece ("This is an escape sequence: \e", literal_piece, 0),
+	 });
 }
 
 static void
@@ -58,28 +60,29 @@ test_format_specifier ()
   /* The format string here ends with a % sequence, to ensure we don't
      see a trailing empty literal piece.  */
   check ("Hello\\t %d%llx%%d%d", /* ARI: %ll */
-    {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%d", int_arg, 0),
-      format_piece ("%" LL "x", long_long_arg, 0),
-      format_piece ("%%d", literal_piece, 0),
-      format_piece ("%d", int_arg, 0),
-    });
+	 {
+	   format_piece ("Hello\t ", literal_piece, 0),
+	   format_piece ("%d", int_arg, 0),
+	   format_piece ("%" LL "x", long_long_arg, 0),
+	   format_piece ("%%d", literal_piece, 0),
+	   format_piece ("%d", int_arg, 0),
+	 });
 }
 
 static void
 test_gdb_formats ()
 {
   check ("Hello\\t \"%p[%pF%ps%*.*d%p]\"",
-    {
-      format_piece ("Hello\\t \"", literal_piece, 0),
-      format_piece ("%p[", ptr_arg, 0),
-      format_piece ("%pF", ptr_arg, 0),
-      format_piece ("%ps", ptr_arg, 0),
-      format_piece ("%*.*d", int_arg, 2),
-      format_piece ("%p]", ptr_arg, 0),
-      format_piece ("\"", literal_piece, 0),
-    }, true);
+	 {
+	   format_piece ("Hello\\t \"", literal_piece, 0),
+	   format_piece ("%p[", ptr_arg, 0),
+	   format_piece ("%pF", ptr_arg, 0),
+	   format_piece ("%ps", ptr_arg, 0),
+	   format_piece ("%*.*d", int_arg, 2),
+	   format_piece ("%p]", ptr_arg, 0),
+	   format_piece ("\"", literal_piece, 0),
+	 },
+	 true);
 }
 
 /* Test the different size modifiers that can be applied to an integer
@@ -89,50 +92,37 @@ static void
 test_format_int_sizes ()
 {
   check ("Hello\\t %hu%lu%llu%zu", /* ARI: %ll */
-    {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%hu", int_arg, 0),
-      format_piece ("%lu", long_arg, 0),
-      format_piece ("%" LL "u", long_long_arg, 0),
-      format_piece ("%zu", size_t_arg, 0)
-    });
+	 { format_piece ("Hello\t ", literal_piece, 0),
+	   format_piece ("%hu", int_arg, 0), format_piece ("%lu", long_arg, 0),
+	   format_piece ("%" LL "u", long_long_arg, 0),
+	   format_piece ("%zu", size_t_arg, 0) });
 
   check ("Hello\\t %hx%lx%llx%zx", /* ARI: %ll */
-    {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%hx", int_arg, 0),
-      format_piece ("%lx", long_arg, 0),
-      format_piece ("%" LL "x", long_long_arg, 0),
-      format_piece ("%zx", size_t_arg, 0)
-    });
+	 { format_piece ("Hello\t ", literal_piece, 0),
+	   format_piece ("%hx", int_arg, 0), format_piece ("%lx", long_arg, 0),
+	   format_piece ("%" LL "x", long_long_arg, 0),
+	   format_piece ("%zx", size_t_arg, 0) });
 
   check ("Hello\\t %ho%lo%llo%zo", /* ARI: %ll */
-    {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%ho", int_arg, 0),
-      format_piece ("%lo", long_arg, 0),
-      format_piece ("%" LL "o", long_long_arg, 0),
-      format_piece ("%zo", size_t_arg, 0)
-    });
+	 { format_piece ("Hello\t ", literal_piece, 0),
+	   format_piece ("%ho", int_arg, 0), format_piece ("%lo", long_arg, 0),
+	   format_piece ("%" LL "o", long_long_arg, 0),
+	   format_piece ("%zo", size_t_arg, 0) });
 
   check ("Hello\\t %hd%ld%lld%zd", /* ARI: %ll */
-    {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%hd", int_arg, 0),
-      format_piece ("%ld", long_arg, 0),
-      format_piece ("%" LL "d", long_long_arg, 0),
-      format_piece ("%zd", size_t_arg, 0)
-    });
+	 { format_piece ("Hello\t ", literal_piece, 0),
+	   format_piece ("%hd", int_arg, 0), format_piece ("%ld", long_arg, 0),
+	   format_piece ("%" LL "d", long_long_arg, 0),
+	   format_piece ("%zd", size_t_arg, 0) });
 }
 
 static void
 test_windows_formats ()
 {
-  check ("rc%I64d",
-    {
-     format_piece ("rc", literal_piece, 0),
-     format_piece ("%I64d", long_long_arg, 0),
-    });
+  check ("rc%I64d", {
+		      format_piece ("rc", literal_piece, 0),
+		      format_piece ("%I64d", long_long_arg, 0),
+		    });
 }
 
 static void
@@ -149,6 +139,7 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_format_pieces_selftests ();
+
 void
 _initialize_format_pieces_selftests ()
 {

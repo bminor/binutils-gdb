@@ -24,7 +24,7 @@
 
 int
 find_minimal_symbol_address (const char *name, CORE_ADDR *addr,
-			     struct objfile *objfile)
+                             struct objfile *objfile)
 {
   gdb_assert (objfile == NULL);
 

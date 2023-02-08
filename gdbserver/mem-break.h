@@ -39,22 +39,22 @@ struct process_info;
 /* The low level breakpoint types.  */
 
 enum raw_bkpt_type
-  {
-    /* Software/memory breakpoint.  */
-    raw_bkpt_type_sw,
+{
+  /* Software/memory breakpoint.  */
+  raw_bkpt_type_sw,
 
-    /* Hardware-assisted breakpoint.  */
-    raw_bkpt_type_hw,
+  /* Hardware-assisted breakpoint.  */
+  raw_bkpt_type_hw,
 
-    /* Hardware-assisted write watchpoint.  */
-    raw_bkpt_type_write_wp,
+  /* Hardware-assisted write watchpoint.  */
+  raw_bkpt_type_write_wp,
 
-    /* Hardware-assisted read watchpoint.  */
-    raw_bkpt_type_read_wp,
+  /* Hardware-assisted read watchpoint.  */
+  raw_bkpt_type_read_wp,
 
-    /* Hardware-assisted access watchpoint.  */
-    raw_bkpt_type_access_wp
-  };
+  /* Hardware-assisted access watchpoint.  */
+  raw_bkpt_type_access_wp
+};
 
 /* Map the protocol breakpoint/watchpoint type Z_TYPE to the internal
    raw breakpoint type.  */
@@ -63,8 +63,8 @@ enum raw_bkpt_type Z_packet_to_raw_bkpt_type (char z_type);
 
 /* Map a raw breakpoint type to an enum target_hw_bp_type.  */
 
-enum target_hw_bp_type raw_bkpt_type_to_target_hw_bp_type
-  (enum raw_bkpt_type raw_type);
+enum target_hw_bp_type
+raw_bkpt_type_to_target_hw_bp_type (enum raw_bkpt_type raw_type);
 
 /* Create a new GDB breakpoint of type Z_TYPE at ADDR with kind KIND.
    Returns a pointer to the newly created breakpoint on success.  On
@@ -72,7 +72,7 @@ enum target_hw_bp_type raw_bkpt_type_to_target_hw_bp_type
    Z_TYPE breakpoints are not supported on this target.  */
 
 struct gdb_breakpoint *set_gdb_breakpoint (char z_type, CORE_ADDR addr,
-					   int kind, int *err);
+                                           int kind, int *err);
 
 /* Delete a GDB breakpoint of type Z_TYPE and kind KIND previously
    inserted at ADDR with set_gdb_breakpoint_at.  Returns 0 on success,
@@ -115,7 +115,7 @@ void clear_breakpoint_conditions_and_commands (struct gdb_breakpoint *bp);
    past the condition and returns true.  */
 
 int add_breakpoint_condition (struct gdb_breakpoint *bp,
-			      const char **condition);
+                              const char **condition);
 
 /* Set target-side commands COMMANDS to the breakpoint at ADDR.
    Returns false on failure.  On success, advances COMMANDS past the
@@ -123,7 +123,7 @@ int add_breakpoint_condition (struct gdb_breakpoint *bp,
    even while GDB is disconnected.  */
 
 int add_breakpoint_commands (struct gdb_breakpoint *bp, const char **commands,
-			     int persist);
+                             int persist);
 
 /* Return true if PROC has any persistent command.  */
 bool any_persistent_commands (process_info *proc);
@@ -148,7 +148,7 @@ int gdb_breakpoint_here (CORE_ADDR where);
    breakpoint is other_breakpoint.  */
 
 struct breakpoint *set_breakpoint_at (CORE_ADDR where,
-				      int (*handler) (CORE_ADDR));
+                                      int (*handler) (CORE_ADDR));
 
 /* Delete a breakpoint.  */
 
@@ -213,8 +213,8 @@ void check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
    (in BUF, a copy of MYADDR on entry) if necessary, as well as the
    original data for any breakpoints.  */
 
-void check_mem_write (CORE_ADDR mem_addr,
-		      unsigned char *buf, const unsigned char *myaddr, int mem_len);
+void check_mem_write (CORE_ADDR mem_addr, unsigned char *buf,
+                      const unsigned char *myaddr, int mem_len);
 
 /* Delete all breakpoints.  */
 
@@ -237,8 +237,8 @@ void validate_breakpoints (void);
    LENGTH bytes.  */
 
 struct fast_tracepoint_jump *set_fast_tracepoint_jump (CORE_ADDR where,
-						       unsigned char *insn,
-						       ULONGEST length);
+                                                       unsigned char *insn,
+                                                       ULONGEST length);
 
 /* Increment reference counter of JP.  */
 void inc_ref_fast_tracepoint_jump (struct fast_tracepoint_jump *jp);
@@ -274,6 +274,6 @@ int remove_memory_breakpoint (struct raw_breakpoint *bp);
    copy of breakpoint list in PARENT_THREAD's process.  */
 
 void clone_all_breakpoints (struct thread_info *child_thread,
-			    const struct thread_info *parent_thread);
+                            const struct thread_info *parent_thread);
 
 #endif /* GDBSERVER_MEM_BREAK_H */

@@ -91,7 +91,6 @@ int batch_silent = 0;
 int return_child_result = 0;
 int return_child_result_value = -1;
 
-
 /* GDB as it has been invoked from the command line (i.e. argv[0]).  */
 static char *gdb_program_name;
 
@@ -121,7 +120,7 @@ set_gdb_data_directory (const char *new_datadir)
       print_sys_errmsg (new_datadir, save_errno);
     }
   else if (!S_ISDIR (st.st_mode))
-    warning (_("%ps is not a directory."),
+    warning (_ ("%ps is not a directory."),
 	     styled_string (file_name_style.style (), new_datadir));
 
   gdb_datadir = gdb_realpath (new_datadir).get ();
@@ -193,8 +192,7 @@ relocate_gdb_directory (const char *initial, bool relocatable)
    otherwise.  */
 
 static std::string
-relocate_file_path_maybe_in_datadir (const std::string &file,
-				     bool relocatable)
+relocate_file_path_maybe_in_datadir (const std::string &file, bool relocatable)
 {
   size_t datadir_len = strlen (GDB_DATADIR);
 
@@ -202,8 +200,7 @@ relocate_file_path_maybe_in_datadir (const std::string &file,
 
   /* If SYSTEM_GDBINIT lives in data-directory, and data-directory
      has been provided, search for SYSTEM_GDBINIT there.  */
-  if (gdb_datadir_provided
-      && datadir_len < file.length ()
+  if (gdb_datadir_provided && datadir_len < file.length ()
       && filename_ncmp (file.c_str (), GDB_DATADIR, datadir_len) == 0
       && IS_DIR_SEPARATOR (file[datadir_len]))
     {
@@ -217,10 +214,10 @@ relocate_file_path_maybe_in_datadir (const std::string &file,
     }
   else
     {
-      relocated_path = relocate_path (gdb_program_name, file.c_str (),
-				      relocatable);
+      relocated_path
+	= relocate_path (gdb_program_name, file.c_str (), relocatable);
     }
-    return relocated_path;
+  return relocated_path;
 }
 
 /* A class to wrap up the logic for finding the three different types of
@@ -230,6 +227,7 @@ relocate_file_path_maybe_in_datadir (const std::string &file,
 class gdb_initfile_finder
 {
 public:
+
   /* Constructor.  Finds initialisation files named FILENAME in the home
      directory or local (current working) directory.  System initialisation
      files are found in both SYSTEM_FILENAME and SYSTEM_DIRNAME if these
@@ -293,13 +291,13 @@ public:
 		      files.push_back (std::move (tmp_filename));
 		  }
 		std::sort (files.begin (), files.end ());
-		m_system_files.insert (m_system_files.end (),
-				       files.begin (), files.end ());
+		m_system_files.insert (m_system_files.end (), files.begin (),
+				       files.end ());
 	      }
 	  }
       }
 
-      /* If the .gdbinit file in the current directory is the same as
+    /* If the .gdbinit file in the current directory is the same as
 	 the $HOME/.gdbinit file, it should not be sourced.  homebuf
 	 and cwdbuf are used in that purpose.  Make sure that the stats
 	 are zero in case one of them fails (this guarantees that they
@@ -325,17 +323,17 @@ public:
   /* Return a list of system initialisation files.  The list could be
      empty.  */
   const std::vector<std::string> &system_files () const
-  { return m_system_files; }
+  {
+    return m_system_files;
+  }
 
   /* Return the path to the home initialisation file.  The string can be
      empty if there is no such file.  */
-  const std::string &home_file () const
-  { return m_home_file; }
+  const std::string &home_file () const { return m_home_file; }
 
   /* Return the path to the local initialisation file.  The string can be
      empty if there is no such file.  */
-  const std::string &local_file () const
-  { return m_local_file; }
+  const std::string &local_file () const { return m_local_file; }
 
 private:
 
@@ -360,8 +358,7 @@ private:
 
 static void
 get_init_files (std::vector<std::string> *system_gdbinit,
-		std::string *home_gdbinit,
-		std::string *local_gdbinit)
+		std::string *home_gdbinit, std::string *local_gdbinit)
 {
   /* Cache the file lookup object so we only actually search for the files
      once.  */
@@ -418,9 +415,9 @@ start_event_loop ()
 	     stdin.  Otherwise, any command that calls async_disable_stdin,
 	     and then throws, will leave stdin inoperable.  */
 	  SWITCH_THRU_ALL_UIS ()
-	    {
-	      async_enable_stdin ();
-	    }
+	  {
+	    async_enable_stdin ();
+	  }
 	  /* If we long-jumped out of do_one_event, we probably didn't
 	     get around to resetting the prompt, which leaves readline
 	     in a messed-up state.  Reset it here.  */
@@ -452,7 +449,7 @@ start_event_loop ()
 /* Prevent inlining this function for the benefit of GDB's selftests
    in the testsuite.  Those tests want to run GDB under GDB and stop
    here.  */
-static void captured_command_loop () __attribute__((noinline));
+static void captured_command_loop () __attribute__ ((noinline));
 
 static void
 captured_command_loop ()
@@ -547,8 +544,8 @@ validate_readnow_readnever ()
 {
   if (readnever_symbol_files && readnow_symbol_files)
     {
-      error (_("%s: '--readnow' and '--readnever' cannot be "
-	       "specified simultaneously"),
+      error (_ ("%s: '--readnow' and '--readnever' cannot be "
+		"specified simultaneously"),
 	     gdb_program_name);
     }
 }
@@ -579,8 +576,10 @@ enum cmdarg_kind
 struct cmdarg
 {
   cmdarg (cmdarg_kind type_, char *string_)
-    : type (type_), string (string_)
-  {}
+    : type (type_),
+      string (string_)
+  {
+  }
 
   /* Type of this option.  */
   enum cmdarg_kind type;
@@ -596,14 +595,13 @@ struct cmdarg
 
 static void
 execute_cmdargs (const std::vector<struct cmdarg> *cmdarg_vec,
-		 cmdarg_kind file_type, cmdarg_kind cmd_type,
-		 int *ret)
+		 cmdarg_kind file_type, cmdarg_kind cmd_type, int *ret)
 {
   for (const auto &cmdarg_p : *cmdarg_vec)
     {
       if (cmdarg_p.type == file_type)
-	*ret = catch_command_errors (source_script, cmdarg_p.string,
-				     !batch_flag);
+	*ret
+	  = catch_command_errors (source_script, cmdarg_p.string, !batch_flag);
       else if (cmdarg_p.type == cmd_type)
 	*ret = catch_command_errors (execute_command, cmdarg_p.string,
 				     !batch_flag, true);
@@ -652,10 +650,10 @@ captured_main_1 (struct captured_main_args *context)
 
   scoped_command_stats stat_reporter (false);
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#if defined(HAVE_SETLOCALE) && defined(HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
+#if defined(HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
 #endif
 #ifdef ENABLE_NLS
@@ -681,7 +679,7 @@ captured_main_1 (struct captured_main_args *context)
   gdb_stdtargin = gdb_stdin;
 
   if (bfd_init () != BFD_INIT_MAGIC)
-    error (_("fatal error: libbfd ABI mismatch"));
+    error (_ ("fatal error: libbfd ABI mismatch"));
 
 #ifdef __MINGW32__
   /* On Windows, argv[0] is not necessarily set to absolute form when
@@ -698,7 +696,7 @@ captured_main_1 (struct captured_main_args *context)
 
   current_directory = getcwd (NULL, 0);
   if (current_directory == NULL)
-    perror_warning_with_name (_("error finding working directory"));
+    perror_warning_with_name (_ ("error finding working directory"));
 
   /* Set the sysroot path.  */
   gdb_sysroot = relocate_gdb_directory (TARGET_SYSTEM_ROOT,
@@ -710,12 +708,11 @@ captured_main_1 (struct captured_main_args *context)
   debug_file_directory
     = relocate_gdb_directory (DEBUGDIR, DEBUGDIR_RELOCATABLE);
 
-  gdb_datadir = relocate_gdb_directory (GDB_DATADIR,
-					GDB_DATADIR_RELOCATABLE);
+  gdb_datadir = relocate_gdb_directory (GDB_DATADIR, GDB_DATADIR_RELOCATABLE);
 
 #ifdef WITH_PYTHON_LIBDIR
-  python_libdir = relocate_gdb_directory (WITH_PYTHON_LIBDIR,
-					  PYTHON_LIBDIR_RELOCATABLE);
+  python_libdir
+    = relocate_gdb_directory (WITH_PYTHON_LIBDIR, PYTHON_LIBDIR_RELOCATABLE);
 #endif
 
 #ifdef RELOC_SRCDIR
@@ -733,10 +730,12 @@ captured_main_1 (struct captured_main_args *context)
   /* Parse arguments and options.  */
   {
     int c;
+
     /* When var field is 0, use flag field to record the equivalent
        short option (or arbitrary numbers starting at 10 for those
        with no equivalent).  */
-    enum {
+    enum
+    {
       OPT_SE = 10,
       OPT_CD,
       OPT_ANNOTATE,
@@ -751,89 +750,87 @@ captured_main_1 (struct captured_main_args *context)
       OPT_READNOW,
       OPT_READNEVER
     };
+
     /* This struct requires int* in the struct, but write_files is a bool.
        So use this temporary int that we write back after argument parsing.  */
     int write_files_1 = 0;
-    static struct option long_options[] =
-    {
-      {"tui", no_argument, 0, OPT_TUI},
-      {"readnow", no_argument, NULL, OPT_READNOW},
-      {"readnever", no_argument, NULL, OPT_READNEVER},
-      {"r", no_argument, NULL, OPT_READNOW},
-      {"quiet", no_argument, &quiet, 1},
-      {"q", no_argument, &quiet, 1},
-      {"silent", no_argument, &quiet, 1},
-      {"nh", no_argument, &inhibit_home_gdbinit, 1},
-      {"nx", no_argument, &inhibit_gdbinit, 1},
-      {"n", no_argument, &inhibit_gdbinit, 1},
-      {"batch-silent", no_argument, 0, 'B'},
-      {"batch", no_argument, &batch_flag, 1},
+    static struct option long_options[]
+      = { { "tui", no_argument, 0, OPT_TUI },
+	  { "readnow", no_argument, NULL, OPT_READNOW },
+	  { "readnever", no_argument, NULL, OPT_READNEVER },
+	  { "r", no_argument, NULL, OPT_READNOW },
+	  { "quiet", no_argument, &quiet, 1 },
+	  { "q", no_argument, &quiet, 1 },
+	  { "silent", no_argument, &quiet, 1 },
+	  { "nh", no_argument, &inhibit_home_gdbinit, 1 },
+	  { "nx", no_argument, &inhibit_gdbinit, 1 },
+	  { "n", no_argument, &inhibit_gdbinit, 1 },
+	  { "batch-silent", no_argument, 0, 'B' },
+	  { "batch", no_argument, &batch_flag, 1 },
 
-    /* This is a synonym for "--annotate=1".  --annotate is now
+	  /* This is a synonym for "--annotate=1".  --annotate is now
        preferred, but keep this here for a long time because people
        will be running emacses which use --fullname.  */
-      {"fullname", no_argument, 0, 'f'},
-      {"f", no_argument, 0, 'f'},
+	  { "fullname", no_argument, 0, 'f' },
+	  { "f", no_argument, 0, 'f' },
 
-      {"annotate", required_argument, 0, OPT_ANNOTATE},
-      {"help", no_argument, &print_help, 1},
-      {"se", required_argument, 0, OPT_SE},
-      {"symbols", required_argument, 0, 's'},
-      {"s", required_argument, 0, 's'},
-      {"exec", required_argument, 0, 'e'},
-      {"e", required_argument, 0, 'e'},
-      {"core", required_argument, 0, 'c'},
-      {"c", required_argument, 0, 'c'},
-      {"pid", required_argument, 0, 'p'},
-      {"p", required_argument, 0, 'p'},
-      {"command", required_argument, 0, 'x'},
-      {"eval-command", required_argument, 0, 'X'},
-      {"version", no_argument, &print_version, 1},
-      {"configuration", no_argument, &print_configuration, 1},
-      {"x", required_argument, 0, 'x'},
-      {"ex", required_argument, 0, 'X'},
-      {"init-command", required_argument, 0, OPT_IX},
-      {"init-eval-command", required_argument, 0, OPT_IEX},
-      {"ix", required_argument, 0, OPT_IX},
-      {"iex", required_argument, 0, OPT_IEX},
-      {"early-init-command", required_argument, 0, OPT_EIX},
-      {"early-init-eval-command", required_argument, 0, OPT_EIEX},
-      {"eix", required_argument, 0, OPT_EIX},
-      {"eiex", required_argument, 0, OPT_EIEX},
+	  { "annotate", required_argument, 0, OPT_ANNOTATE },
+	  { "help", no_argument, &print_help, 1 },
+	  { "se", required_argument, 0, OPT_SE },
+	  { "symbols", required_argument, 0, 's' },
+	  { "s", required_argument, 0, 's' },
+	  { "exec", required_argument, 0, 'e' },
+	  { "e", required_argument, 0, 'e' },
+	  { "core", required_argument, 0, 'c' },
+	  { "c", required_argument, 0, 'c' },
+	  { "pid", required_argument, 0, 'p' },
+	  { "p", required_argument, 0, 'p' },
+	  { "command", required_argument, 0, 'x' },
+	  { "eval-command", required_argument, 0, 'X' },
+	  { "version", no_argument, &print_version, 1 },
+	  { "configuration", no_argument, &print_configuration, 1 },
+	  { "x", required_argument, 0, 'x' },
+	  { "ex", required_argument, 0, 'X' },
+	  { "init-command", required_argument, 0, OPT_IX },
+	  { "init-eval-command", required_argument, 0, OPT_IEX },
+	  { "ix", required_argument, 0, OPT_IX },
+	  { "iex", required_argument, 0, OPT_IEX },
+	  { "early-init-command", required_argument, 0, OPT_EIX },
+	  { "early-init-eval-command", required_argument, 0, OPT_EIEX },
+	  { "eix", required_argument, 0, OPT_EIX },
+	  { "eiex", required_argument, 0, OPT_EIEX },
 #ifdef GDBTK
-      {"tclcommand", required_argument, 0, 'z'},
-      {"enable-external-editor", no_argument, 0, 'y'},
-      {"editor-command", required_argument, 0, 'w'},
+	  { "tclcommand", required_argument, 0, 'z' },
+	  { "enable-external-editor", no_argument, 0, 'y' },
+	  { "editor-command", required_argument, 0, 'w' },
 #endif
-      {"ui", required_argument, 0, 'i'},
-      {"interpreter", required_argument, 0, 'i'},
-      {"i", required_argument, 0, 'i'},
-      {"directory", required_argument, 0, 'd'},
-      {"d", required_argument, 0, 'd'},
-      {"data-directory", required_argument, 0, 'D'},
-      {"D", required_argument, 0, 'D'},
-      {"cd", required_argument, 0, OPT_CD},
-      {"tty", required_argument, 0, 't'},
-      {"baud", required_argument, 0, 'b'},
-      {"b", required_argument, 0, 'b'},
-      {"nw", no_argument, NULL, OPT_NOWINDOWS},
-      {"nowindows", no_argument, NULL, OPT_NOWINDOWS},
-      {"w", no_argument, NULL, OPT_WINDOWS},
-      {"windows", no_argument, NULL, OPT_WINDOWS},
-      {"statistics", no_argument, 0, OPT_STATISTICS},
-      {"write", no_argument, &write_files_1, 1},
-      {"args", no_argument, &set_args, 1},
-      {"l", required_argument, 0, 'l'},
-      {"return-child-result", no_argument, &return_child_result, 1},
-      {0, no_argument, 0, 0}
-    };
+	  { "ui", required_argument, 0, 'i' },
+	  { "interpreter", required_argument, 0, 'i' },
+	  { "i", required_argument, 0, 'i' },
+	  { "directory", required_argument, 0, 'd' },
+	  { "d", required_argument, 0, 'd' },
+	  { "data-directory", required_argument, 0, 'D' },
+	  { "D", required_argument, 0, 'D' },
+	  { "cd", required_argument, 0, OPT_CD },
+	  { "tty", required_argument, 0, 't' },
+	  { "baud", required_argument, 0, 'b' },
+	  { "b", required_argument, 0, 'b' },
+	  { "nw", no_argument, NULL, OPT_NOWINDOWS },
+	  { "nowindows", no_argument, NULL, OPT_NOWINDOWS },
+	  { "w", no_argument, NULL, OPT_WINDOWS },
+	  { "windows", no_argument, NULL, OPT_WINDOWS },
+	  { "statistics", no_argument, 0, OPT_STATISTICS },
+	  { "write", no_argument, &write_files_1, 1 },
+	  { "args", no_argument, &set_args, 1 },
+	  { "l", required_argument, 0, 'l' },
+	  { "return-child-result", no_argument, &return_child_result, 1 },
+	  { 0, no_argument, 0, 0 } };
 
     while (1)
       {
 	int option_index;
 
-	c = getopt_long_only (argc, argv, "",
-			      long_options, &option_index);
+	c = getopt_long_only (argc, argv, "", long_options, &option_index);
 	if (c == EOF || set_args)
 	  break;
 
@@ -867,7 +864,7 @@ captured_main_1 (struct captured_main_args *context)
 #ifdef TUI
 	    interpreter_p = INTERP_TUI;
 #else
-	    error (_("%s: TUI mode is not supported"), gdb_program_name);
+	    error (_ ("%s: TUI mode is not supported"), gdb_program_name);
 #endif
 	    break;
 	  case OPT_WINDOWS:
@@ -921,7 +918,7 @@ captured_main_1 (struct captured_main_args *context)
 	    break;
 	  case 'D':
 	    if (optarg[0] == '\0')
-	      error (_("%s: empty path for `--data-directory'"),
+	      error (_ ("%s: empty path for `--data-directory'"),
 		     gdb_program_name);
 	    set_gdb_data_directory (optarg);
 	    gdb_datadir_provided = 1;
@@ -930,7 +927,7 @@ captured_main_1 (struct captured_main_args *context)
 	  case 'z':
 	    {
 	      if (!gdbtk_test (optarg))
-		error (_("%s: unable to load tclcommand file \"%s\""),
+		error (_ ("%s: unable to load tclcommand file \"%s\""),
 		       gdb_program_name, optarg);
 	      break;
 	    }
@@ -964,8 +961,7 @@ captured_main_1 (struct captured_main_args *context)
 
 	      rate = strtol (optarg, &p, 0);
 	      if (rate == 0 && p == optarg)
-		warning (_("could not set baud rate to `%s'."),
-			 optarg);
+		warning (_ ("could not set baud rate to `%s'."), optarg);
 	      else
 		baud_rate = rate;
 	    }
@@ -977,8 +973,7 @@ captured_main_1 (struct captured_main_args *context)
 
 	      timeout = strtol (optarg, &p, 0);
 	      if (timeout == 0 && p == optarg)
-		warning (_("could not set timeout limit to `%s'."),
-			 optarg);
+		warning (_ ("could not set timeout limit to `%s'."), optarg);
 	      else
 		remote_timeout = timeout;
 	    }
@@ -999,7 +994,7 @@ captured_main_1 (struct captured_main_args *context)
 	    break;
 
 	  case '?':
-	    error (_("Use `%s --help' for a complete list of options."),
+	    error (_ ("Use `%s --help' for a complete list of options."),
 		   gdb_program_name);
 	  }
       }
@@ -1028,8 +1023,8 @@ captured_main_1 (struct captured_main_args *context)
       std::string home_gdbearlyinit;
       get_earlyinit_files (&home_gdbearlyinit);
       if (!home_gdbearlyinit.empty () && !inhibit_home_gdbinit)
-	ret = catch_command_errors (source_script,
-				    home_gdbearlyinit.c_str (), 0);
+	ret = catch_command_errors (source_script, home_gdbearlyinit.c_str (),
+				    0);
     }
   execute_cmdargs (&cmdarg_vec, CMDARG_EARLYINIT_FILE,
 		   CMDARG_EARLYINIT_COMMAND, &ret);
@@ -1050,7 +1045,7 @@ captured_main_1 (struct captured_main_args *context)
 	 inferior.  The first one is the sym/exec file, and the rest
 	 are arguments.  */
       if (optind >= argc)
-	error (_("%s: `--args' specified but no program specified"),
+	error (_ ("%s: `--args' specified but no program specified"),
 	       gdb_program_name);
 
       symarg = argv[optind];
@@ -1085,10 +1080,9 @@ captured_main_1 (struct captured_main_args *context)
 	 will be ignored.  Inform the user.  */
       if (optind < argc)
 	gdb_printf (gdb_stderr,
-		    _("Excess command line "
-		      "arguments ignored. (%s%s)\n"),
-		    argv[optind],
-		    (optind == argc - 1) ? "" : " ...");
+		    _ ("Excess command line "
+		       "arguments ignored. (%s%s)\n"),
+		    argv[optind], (optind == argc - 1) ? "" : " ...");
     }
 
   /* Lookup gdbinit files.  Note that the gdbinit file name may be
@@ -1136,13 +1130,13 @@ captured_main_1 (struct captured_main_args *context)
       if (symarg)
 	gdb_printf ("..");
       gdb_printf ("\n");
-      gdb_flush (gdb_stdout);	/* Force to screen during slow
+      gdb_flush (gdb_stdout); /* Force to screen during slow
 				   operations.  */
     }
 
   /* Set off error and warning messages with a blank line.  */
   tmp_warn_preprint.reset ();
-  warning_pre_print = _("\nwarning: ");
+  warning_pre_print = _ ("\nwarning: ");
 
   /* Read and execute the system-wide gdbinit file, if it exists.
      This is done *before* all the command line arguments are
@@ -1180,37 +1174,32 @@ captured_main_1 (struct captured_main_args *context)
   save_auto_load = global_auto_load;
   global_auto_load = 0;
 
-  if (execarg != NULL
-      && symarg != NULL
-      && strcmp (execarg, symarg) == 0)
+  if (execarg != NULL && symarg != NULL && strcmp (execarg, symarg) == 0)
     {
       /* The exec file and the symbol-file are the same.  If we can't
 	 open it, better only print one error message.
 	 catch_command_errors returns non-zero on success!  */
-      ret = catch_command_errors (exec_file_attach, execarg,
-				  !batch_flag);
+      ret = catch_command_errors (exec_file_attach, execarg, !batch_flag);
       if (ret != 0)
-	ret = catch_command_errors (symbol_file_add_main_adapter,
-				    symarg, !batch_flag);
+	ret = catch_command_errors (symbol_file_add_main_adapter, symarg,
+				    !batch_flag);
     }
   else
     {
       if (execarg != NULL)
-	ret = catch_command_errors (exec_file_attach, execarg,
-				    !batch_flag);
+	ret = catch_command_errors (exec_file_attach, execarg, !batch_flag);
       if (symarg != NULL)
-	ret = catch_command_errors (symbol_file_add_main_adapter,
-				    symarg, !batch_flag);
+	ret = catch_command_errors (symbol_file_add_main_adapter, symarg,
+				    !batch_flag);
     }
 
   if (corearg && pidarg)
-    error (_("Can't attach to process and specify "
-	     "a core file at the same time."));
+    error (_ ("Can't attach to process and specify "
+	      "a core file at the same time."));
 
   if (corearg != NULL)
     {
-      ret = catch_command_errors (core_file_command, corearg,
-				  !batch_flag);
+      ret = catch_command_errors (core_file_command, corearg, !batch_flag);
     }
   else if (pidarg != NULL)
     {
@@ -1227,15 +1216,13 @@ captured_main_1 (struct captured_main_args *context)
 	  ret = catch_command_errors (attach_command, pid_or_core_arg,
 				      !batch_flag);
 	  if (ret == 0)
-	    ret = catch_command_errors (core_file_command,
-					pid_or_core_arg,
+	    ret = catch_command_errors (core_file_command, pid_or_core_arg,
 					!batch_flag);
 	}
       else
 	{
 	  /* Can't be a pid, better be a corefile.  */
-	  ret = catch_command_errors (core_file_command,
-				      pid_or_core_arg,
+	  ret = catch_command_errors (core_file_command, pid_or_core_arg,
 				      !batch_flag);
 	}
     }
@@ -1244,7 +1231,7 @@ captured_main_1 (struct captured_main_args *context)
     current_inferior ()->set_tty (ttyarg);
 
   /* Error messages should no longer be distinguished with extra output.  */
-  warning_pre_print = _("warning: ");
+  warning_pre_print = _ ("warning: ");
 
   /* Read the .gdbinit file in the current directory, *if* it isn't
      the same as the $HOME/.gdbinit file (it should exist, also).  */
@@ -1262,7 +1249,8 @@ captured_main_1 (struct captured_main_args *context)
 	    {
 	      auto_load_local_gdbinit_loaded = 1;
 
-	      ret = catch_command_errors (source_script, local_gdbinit.c_str (), 0);
+	      ret = catch_command_errors (source_script,
+					  local_gdbinit.c_str (), 0);
 	    }
 	}
     }
@@ -1334,7 +1322,6 @@ gdb_main (struct captured_main_args *args)
   return 1;
 }
 
-
 /* Don't use *_filtered for printing help.  We don't want to prompt
    for continue no matter how small the screen or how much we're going
    to print.  */
@@ -1353,12 +1340,13 @@ print_gdb_help (struct ui_file *stream)
   /* Note: The options in the list below are only approximately sorted
      in the alphabetical order, so as to group closely related options
      together.  */
-  gdb_puts (_("\
+  gdb_puts (_ ("\
 This is the GNU debugger.  Usage:\n\n\
     gdb [options] [executable-file [core-file or process-id]]\n\
     gdb [options] --args executable-file [inferior-arguments ...]\n\n\
-"), stream);
-  gdb_puts (_("\
+"),
+	    stream);
+  gdb_puts (_ ("\
 Selection of debuggee and its files:\n\n\
   --args             Arguments after executable-file are passed to inferior.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
@@ -1370,8 +1358,9 @@ Selection of debuggee and its files:\n\n\
   --readnow          Fully read symbol files on first access.\n\
   --readnever        Do not read symbol files.\n\
   --write            Set writing into executable and core files.\n\n\
-"), stream);
-  gdb_puts (_("\
+"),
+	    stream);
+  gdb_puts (_ ("\
 Initial commands and command files:\n\n\
   --command=FILE, -x Execute GDB commands from FILE.\n\
   --init-command=FILE, -ix\n\
@@ -1384,8 +1373,9 @@ Initial commands and command files:\n\n\
 		     Like -ex but before loading inferior.\n\
   --nh               Do not read ~/.gdbinit.\n\
   --nx               Do not read any .gdbinit files in any directory.\n\n\
-"), stream);
-  gdb_puts (_("\
+"),
+	    stream);
+  gdb_puts (_ ("\
 Output and user interface control:\n\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --interpreter=INTERP\n\
@@ -1393,17 +1383,20 @@ Output and user interface control:\n\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
   -w                 Use the GUI interface.\n\
   --nw               Do not use the GUI interface.\n\
-"), stream);
+"),
+	    stream);
 #if defined(TUI)
-  gdb_puts (_("\
+  gdb_puts (_ ("\
   --tui              Use a terminal user interface.\n\
-"), stream);
+"),
+	    stream);
 #endif
-  gdb_puts (_("\
+  gdb_puts (_ ("\
   -q, --quiet, --silent\n\
 		     Do not print version number on startup.\n\n\
-"), stream);
-  gdb_puts (_("\
+"),
+	    stream);
+  gdb_puts (_ ("\
 Operating modes:\n\n\
   --batch            Exit after processing options.\n\
   --batch-silent     Like --batch, but suppress all gdb stdout output.\n\
@@ -1419,21 +1412,25 @@ Other options:\n\n\
   --cd=DIR           Change current directory to DIR.\n\
   --data-directory=DIR, -D\n\
 		     Set GDB's data-directory to DIR.\n\
-"), stream);
-  gdb_puts (_("\n\
+"),
+	    stream);
+  gdb_puts (_ ("\n\
 At startup, GDB reads the following early init files and executes their\n\
 commands:\n\
-"), stream);
+"),
+	    stream);
   if (!home_gdbearlyinit.empty ())
-    gdb_printf (stream, _("\
+    gdb_printf (stream, _ ("\
    * user-specific early init file: %s\n\
-"), home_gdbearlyinit.c_str ());
+"),
+		home_gdbearlyinit.c_str ());
   if (home_gdbearlyinit.empty ())
-    gdb_printf (stream, _("\
+    gdb_printf (stream, _ ("\
    None found.\n"));
-  gdb_puts (_("\n\
+  gdb_puts (_ ("\n\
 At startup, GDB reads the following init files and executes their commands:\n\
-"), stream);
+"),
+	    stream);
   if (!system_gdbinit.empty ())
     {
       std::string output;
@@ -1443,32 +1440,37 @@ At startup, GDB reads the following init files and executes their commands:\n\
 	  if (idx < system_gdbinit.size () - 1)
 	    output += ", ";
 	}
-      gdb_printf (stream, _("\
+      gdb_printf (stream, _ ("\
    * system-wide init files: %s\n\
-"), output.c_str ());
+"),
+		  output.c_str ());
     }
   if (!home_gdbinit.empty ())
-    gdb_printf (stream, _("\
+    gdb_printf (stream, _ ("\
    * user-specific init file: %s\n\
-"), home_gdbinit.c_str ());
+"),
+		home_gdbinit.c_str ());
   if (!local_gdbinit.empty ())
-    gdb_printf (stream, _("\
+    gdb_printf (stream, _ ("\
    * local init file (see also 'set auto-load local-gdbinit'): ./%s\n\
-"), local_gdbinit.c_str ());
+"),
+		local_gdbinit.c_str ());
   if (system_gdbinit.empty () && home_gdbinit.empty ()
       && local_gdbinit.empty ())
-    gdb_printf (stream, _("\
+    gdb_printf (stream, _ ("\
    None found.\n"));
-  gdb_puts (_("\n\
+  gdb_puts (_ ("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
-"), stream);
+"),
+	    stream);
   if (REPORT_BUGS_TO[0] && stream == gdb_stdout)
-    gdb_printf (stream, _("\n\
+    gdb_printf (stream, _ ("\n\
 Report bugs to %ps.\n\
-"), styled_string (file_name_style.style (), REPORT_BUGS_TO));
+"),
+		styled_string (file_name_style.style (), REPORT_BUGS_TO));
   if (stream == gdb_stdout)
-    gdb_printf (stream, _("\n\
+    gdb_printf (stream, _ ("\n\
 You can ask GDB-related questions on the GDB users mailing list\n\
 (gdb@sourceware.org) or on GDB's IRC channel (#gdb on Freenode).\n"));
 }

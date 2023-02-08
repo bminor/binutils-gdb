@@ -22,11 +22,11 @@
    variable is used depends on host/configuration, we mark it
    ATTRIBUTE_UNUSED to keep it simple here.  */
 static const char *i386_expedite_regs[] ATTRIBUTE_UNUSED
-    = {"ebp", "esp", "eip", NULL};
+  = { "ebp", "esp", "eip", NULL };
 
 #ifdef __x86_64__
 /* The "expedite" registers for x86_64 targets.  */
-static const char *amd64_expedite_regs[] = {"rbp", "rsp", "rip", NULL};
+static const char *amd64_expedite_regs[] = { "rbp", "rsp", "rip", NULL };
 #endif
 
 #endif /* GDBSERVER_X86_TDESC_H */

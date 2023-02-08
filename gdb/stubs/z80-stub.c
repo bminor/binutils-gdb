@@ -167,16 +167,16 @@ void debug_nmi (void);
  */
 void debug_int (void);
 
-#define EX_SWBREAK	0	/* sw breakpoint */
-#define EX_HWBREAK	-1	/* hw breakpoint */
-#define EX_WWATCH	-2	/* memory write watch */
-#define EX_RWATCH	-3	/* memory read watch */
-#define EX_AWATCH	-4	/* memory access watch */
-#define EX_SIGINT	2
-#define EX_SIGTRAP	5
-#define EX_SIGABRT	6
-#define EX_SIGBUS	10
-#define EX_SIGSEGV	11
+#define EX_SWBREAK 0  /* sw breakpoint */
+#define EX_HWBREAK -1 /* hw breakpoint */
+#define EX_WWATCH -2  /* memory write watch */
+#define EX_RWATCH -3  /* memory read watch */
+#define EX_AWATCH -4  /* memory access watch */
+#define EX_SIGINT 2
+#define EX_SIGTRAP 5
+#define EX_SIGABRT 6
+#define EX_SIGBUS 10
+#define EX_SIGSEGV 11
 /* or any standard *nix signal value */
 
 /* Enter to debug mode (after receiving BREAK from GDB, for example)
@@ -188,7 +188,7 @@ void debug_int (void);
 void debug_exception (int ex);
 
 /* Prints to debugger console. */
-void debug_print(const char *str);
+void debug_print (const char *str);
 /******************************************************************************\
 			      Required functions
 \******************************************************************************/
@@ -197,12 +197,12 @@ extern int getDebugChar (void);
 extern void putDebugChar (int ch);
 
 #ifdef DBG_SWBREAK
-#define DO_EXPAND(VAL)  VAL ## 123456
-#define EXPAND(VAL)     DO_EXPAND(VAL)
+#define DO_EXPAND(VAL) VAL##123456
+#define EXPAND(VAL) DO_EXPAND (VAL)
 
 #if EXPAND(DBG_SWBREAK) != 123456
 #define DBG_SWBREAK_PROC DBG_SWBREAK
-extern int DBG_SWBREAK(int set, void *addr);
+extern int DBG_SWBREAK (int set, void *addr);
 #endif
 
 #undef EXPAND
@@ -210,23 +210,23 @@ extern int DBG_SWBREAK(int set, void *addr);
 #endif /* DBG_SWBREAK */
 
 #ifdef DBG_HWBREAK
-extern int DBG_HWBREAK(int set, void *addr);
+extern int DBG_HWBREAK (int set, void *addr);
 #endif
 
 #ifdef DBG_MEMCPY
-extern void* DBG_MEMCPY (void *dest, const void *src, unsigned n);
+extern void *DBG_MEMCPY (void *dest, const void *src, unsigned n);
 #endif
 
 #ifdef DBG_WWATCH
-extern int DBG_WWATCH(int set, void *addr, unsigned size);
+extern int DBG_WWATCH (int set, void *addr, unsigned size);
 #endif
 
 #ifdef DBG_RWATCH
-extern int DBG_RWATCH(int set, void *addr, unsigned size);
+extern int DBG_RWATCH (int set, void *addr, unsigned size);
 #endif
 
 #ifdef DBG_AWATCH
-extern int DBG_AWATCH(int set, void *addr, unsigned size);
+extern int DBG_AWATCH (int set, void *addr, unsigned size);
 #endif
 
 /******************************************************************************\
@@ -236,7 +236,7 @@ extern int DBG_AWATCH(int set, void *addr, unsigned size);
 #include <string.h>
 
 #ifndef NULL
-# define NULL (void*)0
+#define NULL (void *) 0
 #endif
 
 typedef unsigned char byte;
@@ -244,40 +244,40 @@ typedef unsigned short word;
 
 /* CPU state */
 #ifdef __SDCC_ez80_adl
-# define REG_SIZE 3
+#define REG_SIZE 3
 #else
-# define REG_SIZE 2
+#define REG_SIZE 2
 #endif /* __SDCC_ez80_adl */
 
-#define R_AF    (0*REG_SIZE)
-#define R_BC    (1*REG_SIZE)
-#define R_DE    (2*REG_SIZE)
-#define R_HL    (3*REG_SIZE)
-#define R_SP    (4*REG_SIZE)
-#define R_PC    (5*REG_SIZE)
+#define R_AF (0 * REG_SIZE)
+#define R_BC (1 * REG_SIZE)
+#define R_DE (2 * REG_SIZE)
+#define R_HL (3 * REG_SIZE)
+#define R_SP (4 * REG_SIZE)
+#define R_PC (5 * REG_SIZE)
 
 #ifndef __SDCC_gbz80
-#define R_IX    (6*REG_SIZE)
-#define R_IY    (7*REG_SIZE)
-#define R_AF_   (8*REG_SIZE)
-#define R_BC_   (9*REG_SIZE)
-#define R_DE_   (10*REG_SIZE)
-#define R_HL_   (11*REG_SIZE)
-#define R_IR    (12*REG_SIZE)
+#define R_IX (6 * REG_SIZE)
+#define R_IY (7 * REG_SIZE)
+#define R_AF_ (8 * REG_SIZE)
+#define R_BC_ (9 * REG_SIZE)
+#define R_DE_ (10 * REG_SIZE)
+#define R_HL_ (11 * REG_SIZE)
+#define R_IR (12 * REG_SIZE)
 
 #ifdef __SDCC_ez80_adl
-#define R_SPS   (13*REG_SIZE)
-#define NUMREGBYTES (14*REG_SIZE)
+#define R_SPS (13 * REG_SIZE)
+#define NUMREGBYTES (14 * REG_SIZE)
 #else
-#define NUMREGBYTES (13*REG_SIZE)
+#define NUMREGBYTES (13 * REG_SIZE)
 #endif /* __SDCC_ez80_adl */
 #else
-#define NUMREGBYTES (6*REG_SIZE)
+#define NUMREGBYTES (6 * REG_SIZE)
 #define FASTCALL
 #endif /*__SDCC_gbz80 */
 static byte state[NUMREGBYTES];
 
-#if DBG_PACKET_SIZE < (NUMREGBYTES*2+5)
+#if DBG_PACKET_SIZE < (NUMREGBYTES * 2 + 5)
 #error "Too small DBG_PACKET_SIZE"
 #endif
 
@@ -288,7 +288,7 @@ static byte state[NUMREGBYTES];
 /* dedicated stack */
 #ifdef DBG_STACK_SIZE
 
-#define LOAD_SP	ld	sp, #_stack + DBG_STACK_SIZE
+#define LOAD_SP ld sp, #_stack + DBG_STACK_SIZE
 
 static char stack[DBG_STACK_SIZE];
 
@@ -326,22 +326,15 @@ static void rest_cpu_state (void);
 void
 debug_swbreak (void) __naked
 {
-  __asm
-	ld	(#_state + R_SP), sp
-	LOAD_SP
-	call	_save_cpu_state
-	ld	hl, #-DBG_SWBREAK_SIZE
-	push	hl
-	ld	hl, #EX_SWBREAK
-	push	hl
-	call	_stub_main
-	.globl	_break_handler
+  __asm ld (#_state + R_SP), sp LOAD_SP call _save_cpu_state ld hl,
+#- DBG_SWBREAK_SIZE push hl ld hl,
+#EX_SWBREAK push hl call _stub_main.globl _break_handler
 #ifdef DBG_SWBREAK_RST
-_break_handler = DBG_SWBREAK_RST
+    _break_handler = DBG_SWBREAK_RST
 #else
-_break_handler = _debug_swbreak
+    _break_handler = _debug_swbreak
 #endif
-  __endasm;
+      __endasm;
 }
 #endif /* DBG_SWBREAK */
 /******************************************************************************/
@@ -352,94 +345,58 @@ _break_handler = _debug_swbreak
 void
 debug_hwbreak (void) __naked
 {
-  __asm
-	ld	(#_state + R_SP), sp
-	LOAD_SP
-	call	_save_cpu_state
-	ld	hl, #-DBG_HWBREAK_SIZE
-	push	hl
-	ld	hl, #EX_HWBREAK
-	push	hl
-	call	_stub_main
-  __endasm;
+  __asm ld (#_state + R_SP), sp LOAD_SP call _save_cpu_state ld hl,
+#- DBG_HWBREAK_SIZE push hl ld hl,
+#EX_HWBREAK push hl call _stub_main __endasm;
 }
 #endif /* DBG_HWBREAK_SET */
 /******************************************************************************/
 void
 debug_exception (int ex) __naked
 {
-  __asm
-	ld	(#_state + R_SP), sp
-	LOAD_SP
-	call	_save_cpu_state
-	ld	hl, #0
-	push	hl
+  __asm ld (#_state + R_SP), sp LOAD_SP call _save_cpu_state ld hl,
+# 0 push hl
 #ifdef __SDCC_gbz80
-	ld	hl, #_state + R_SP
-	ld	a, (hl+)
-	ld	h, (hl)
-	ld	l, a
+    ld hl,
+#_state + R_SP ld a, (hl +) ld h, (hl) ld l,
+    a
 #else
-	ld	hl, (#_state + R_SP)
+    ld hl,
+    (#_state + R_SP)
 #endif
-	inc	hl
-	inc	hl
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	push	de
-	call	_stub_main
-  __endasm;
-  (void)ex;
+      inc hl inc hl ld e,
+    (hl) inc hl ld d, (hl) push de call _stub_main __endasm;
+  (void) ex;
 }
+
 /******************************************************************************/
 #ifndef __SDCC_gbz80
 void
-debug_nmi(void) __naked
+debug_nmi (void) __naked
 {
-  __asm
-	ld	(#_state + R_SP), sp
-	LOAD_SP
-	call	_save_cpu_state
-	ld	hl, #0	;pc_adj
-	push	hl
-	ld	hl, #DBG_NMI_EX
-	push	hl
-	ld	hl, #_stub_main
-	push	hl
-	push	hl
-	retn
-  __endasm;
+  __asm ld (#_state + R_SP), sp LOAD_SP call _save_cpu_state ld hl, #0;
+  pc_adj push hl ld hl, #DBG_NMI_EX push hl ld hl,
+#_stub_main push hl push hl retn __endasm;
 }
 #endif
 /******************************************************************************/
 void
-debug_int(void) __naked
+debug_int (void) __naked
 {
-  __asm
-	ld	(#_state + R_SP), sp
-	LOAD_SP
-	call	_save_cpu_state
-	ld	hl, #0	;pc_adj
-	push	hl
-	ld	hl, #DBG_INT_EX
-	push	hl
-	ld	hl, #_stub_main
-	push	hl
-	push	hl
-	ei
-	reti
-  __endasm;
+  __asm ld (#_state + R_SP), sp LOAD_SP call _save_cpu_state ld hl, #0;
+  pc_adj push hl ld hl, #DBG_INT_EX push hl ld hl,
+#_stub_main push hl push hl ei reti __endasm;
 }
+
 /******************************************************************************/
 #ifdef DBG_PRINT
 void
-debug_print(const char *str)
+debug_print (const char *str)
 {
   putDebugChar ('$');
   putDebugChar ('O');
   char csum = 'O';
-  for (; *str != '\0'; )
+  for (; *str != '\0';)
     {
       char c = high_hex (*str);
       csum += c;
@@ -455,11 +412,16 @@ debug_print(const char *str)
 #endif /* DBG_PRINT */
 /******************************************************************************/
 static void store_pc_sp (int pc_adj) FASTCALL;
-#define get_reg_value(mem) (*(void* const*)(mem))
-#define set_reg_value(mem,val) do { (*(void**)(mem) = (val)); } while (0)
-static char* byte2hex(char *buf, byte val);
+#define get_reg_value(mem) (*(void *const *) (mem))
+#define set_reg_value(mem, val)   \
+  do                              \
+    {                             \
+      (*(void **) (mem) = (val)); \
+    }                             \
+  while (0)
+static char *byte2hex (char *buf, byte val);
 static int hex2int (const char **buf) FASTCALL;
-static char* int2hex (char *buf, int v);
+static char *int2hex (char *buf, int v);
 static void get_packet (char *buffer);
 static void put_packet (const char *buffer);
 static char process (char *buffer) FASTCALL;
@@ -468,8 +430,8 @@ static void rest_cpu_state (void);
 static void
 stub_main (int ex, int pc_adj)
 {
-  char buffer[DBG_PACKET_SIZE+1];
-  sigval = (signed char)ex;
+  char buffer[DBG_PACKET_SIZE + 1];
+  sigval = (signed char) ex;
   store_pc_sp (pc_adj);
 
   DBG_ENTER
@@ -500,8 +462,9 @@ get_packet (char *buffer)
   for (;; putDebugChar ('-'))
     {
       /* wait for packet start character */
-      while (getDebugChar () != '$');
-retry:
+      while (getDebugChar () != '$')
+	;
+    retry:
       csum = 0;
       esc = 0;
       p = buffer;
@@ -526,7 +489,7 @@ retry:
 	  csum += ch;
 	}
       while (count != 0);
-finish:
+    finish:
       *p = '\0';
       if (ch != '#') /* packet is too large */
 	continue;
@@ -550,15 +513,17 @@ put_packet (const char *buffer)
       putDebugChar ('$');
       char checksum = put_packet_info (buffer);
       putDebugChar ('#');
-      putDebugChar (high_hex(checksum));
-      putDebugChar (low_hex(checksum));
+      putDebugChar (high_hex (checksum));
+      putDebugChar (low_hex (checksum));
       for (;;)
 	{
 	  char c = getDebugChar ();
 	  switch (c)
 	    {
-	    case '+': return;
-	    case '-': break;
+	    case '+':
+	      return;
+	    case '-':
+	      break;
 	    default:
 	      putDebugChar (c);
 	      continue;
@@ -617,7 +582,7 @@ process_question (char *p) FASTCALL
   sig = sigval;
   if (sig <= 0)
     sig = EX_SIGTRAP;
-  p = byte2hex (p, (byte)sig);
+  p = byte2hex (p, (byte) sig);
   *p = '\0';
   return 0;
 }
@@ -632,11 +597,12 @@ process_question (char *p) FASTCALL
   sig = sigval;
   if (sig <= 0)
     sig = EX_SIGTRAP;
-  p = byte2hex (p, (byte)sig);
-  p = format_reg_value(p, R_AF/REG_SIZE, &state[R_AF]);
-  p = format_reg_value(p, R_SP/REG_SIZE, &state[R_SP]);
-  p = format_reg_value(p, R_PC/REG_SIZE, &state[R_PC]);
-#if defined(DBG_SWBREAK_PROC) || defined(DBG_HWBREAK) || defined(DBG_WWATCH) || defined(DBG_RWATCH) || defined(DBG_AWATCH)
+  p = byte2hex (p, (byte) sig);
+  p = format_reg_value (p, R_AF / REG_SIZE, &state[R_AF]);
+  p = format_reg_value (p, R_SP / REG_SIZE, &state[R_SP]);
+  p = format_reg_value (p, R_PC / REG_SIZE, &state[R_PC]);
+#if defined(DBG_SWBREAK_PROC) || defined(DBG_HWBREAK) || defined(DBG_WWATCH) \
+  || defined(DBG_RWATCH) || defined(DBG_AWATCH)
   const char *reason;
   unsigned addr = 0;
   switch (sigval)
@@ -677,7 +643,7 @@ process_question (char *p) FASTCALL
   --p;
   *p++ = ':';
   if (addr != 0)
-    p = int2hex(p, addr);
+    p = int2hex (p, addr);
   *p++ = ';';
 finish:
 #endif /* DBG_HWBREAK, DBG_WWATCH, DBG_RWATCH, DBG_AWATCH */
@@ -687,8 +653,8 @@ finish:
 #endif /* DBG_MINSIZE */
 
 #define STRING2(x) #x
-#define STRING1(x) STRING2(x)
-#define STRING(x) STRING1(x)
+#define STRING1(x) STRING2 (x)
+#define STRING(x) STRING1 (x)
 #ifdef DBG_MEMORY_MAP
 static void read_memory_map (char *buffer, unsigned offset, unsigned length);
 #endif
@@ -743,7 +709,7 @@ process_q (char *buffer) FASTCALL
     {
       /* Just report that GDB attached to existing process
 	 if it is not applicable for you, then send patches */
-      memcpy(buffer, "1", 2);
+      memcpy (buffer, "1", 2);
       return 0;
     }
 #endif /* DBG_MIN_SIZE */
@@ -769,25 +735,25 @@ process_G (char *buffer) FASTCALL
 
 static signed char
 process_m (char *buffer) FASTCALL
-{/* mAA..AA,LLLL  Read LLLL bytes at address AA..AA */
+{ /* mAA..AA,LLLL  Read LLLL bytes at address AA..AA */
   char *p = &buffer[1];
-  byte *addr = (void*)hex2int(&p);
+  byte *addr = (void *) hex2int (&p);
   if (*p++ != ',')
     return 1;
-  unsigned len = (unsigned)hex2int(&p);
+  unsigned len = (unsigned) hex2int (&p);
   if (len == 0)
     return 2;
-  if (len > DBG_PACKET_SIZE/2)
+  if (len > DBG_PACKET_SIZE / 2)
     return 3;
   p = buffer;
 #ifdef DBG_MEMCPY
   do
     {
       byte tmp[16];
-      unsigned tlen = sizeof(tmp);
+      unsigned tlen = sizeof (tmp);
       if (tlen > len)
 	tlen = len;
-      if (!DBG_MEMCPY(tmp, addr, tlen))
+      if (!DBG_MEMCPY (tmp, addr, tlen))
 	return 4;
       p = mem2hex (p, tmp, tlen);
       addr += tlen;
@@ -802,31 +768,31 @@ process_m (char *buffer) FASTCALL
 
 static signed char
 process_M (char *buffer) FASTCALL
-{/* MAA..AA,LLLL: Write LLLL bytes at address AA.AA return OK */
+{ /* MAA..AA,LLLL: Write LLLL bytes at address AA.AA return OK */
   char *p = &buffer[1];
-  byte *addr = (void*)hex2int(&p);
+  byte *addr = (void *) hex2int (&p);
   if (*p != ',')
     return 1;
   ++p;
-  unsigned len = (unsigned)hex2int(&p);
+  unsigned len = (unsigned) hex2int (&p);
   if (*p++ != ':')
     return 2;
   if (len == 0)
     goto end;
-  if (len*2 + (p - buffer) > DBG_PACKET_SIZE)
+  if (len * 2 + (p - buffer) > DBG_PACKET_SIZE)
     return 3;
 #ifdef DBG_MEMCPY
   do
     {
       byte tmp[16];
-      unsigned tlen = sizeof(tmp);
+      unsigned tlen = sizeof (tmp);
       if (tlen > len)
 	tlen = len;
       p = hex2mem (tmp, p, tlen);
-      if (!DBG_MEMCPY(addr, tmp, tlen))
+      if (!DBG_MEMCPY (addr, tmp, tlen))
 	return 4;
       addr += tlen;
-	len -= tlen;
+      len -= tlen;
     }
   while (len);
 #else
@@ -841,13 +807,13 @@ end:
 #ifndef DBG_MIN_SIZE
 static signed char
 process_X (char *buffer) FASTCALL
-{/* XAA..AA,LLLL: Write LLLL binary bytes at address AA.AA return OK */
+{ /* XAA..AA,LLLL: Write LLLL binary bytes at address AA.AA return OK */
   char *p = &buffer[1];
-  byte *addr = (void*)hex2int(&p);
+  byte *addr = (void *) hex2int (&p);
   if (*p != ',')
     return 1;
   ++p;
-  unsigned len = (unsigned)hex2int(&p);
+  unsigned len = (unsigned) hex2int (&p);
   if (*p++ != ':')
     return 2;
   if (len == 0)
@@ -855,7 +821,7 @@ process_X (char *buffer) FASTCALL
   if (len + (p - buffer) > DBG_PACKET_SIZE)
     return 3;
 #ifdef DBG_MEMCPY
-  if (!DBG_MEMCPY(addr, p, len))
+  if (!DBG_MEMCPY (addr, p, len))
     return 4;
 #else
   memcpy (addr, p, len);
@@ -865,22 +831,22 @@ end:
   *buffer = '\0';
   return 0;
 }
-#else /* DBG_MIN_SIZE */
+#else  /* DBG_MIN_SIZE */
 static signed char
 process_X (char *buffer) FASTCALL
 {
-  (void)buffer;
+  (void) buffer;
   return -1;
 }
 #endif /* DBG_MIN_SIZE */
 
 static signed char
 process_c (char *buffer) FASTCALL
-{/* 'cAAAA' - Continue at address AAAA(optional) */
+{ /* 'cAAAA' - Continue at address AAAA(optional) */
   const char *p = &buffer[1];
   if (*p != '\0')
     {
-      void *addr = (void*)hex2int(&p);
+      void *addr = (void *) hex2int (&p);
       set_reg_value (&state[R_PC], addr);
     }
   rest_cpu_state ();
@@ -889,17 +855,17 @@ process_c (char *buffer) FASTCALL
 
 static signed char
 process_D (char *buffer) FASTCALL
-{/* 'D' - detach the program: continue execution */
+{ /* 'D' - detach the program: continue execution */
   *buffer = '\0';
   return -2;
 }
 
 static signed char
 process_k (char *buffer) FASTCALL
-{/* 'k' - Kill the program */
+{ /* 'k' - Kill the program */
   set_reg_value (&state[R_PC], 0);
   rest_cpu_state ();
-  (void)buffer;
+  (void) buffer;
   return 0;
 }
 
@@ -920,7 +886,7 @@ process_v (char *buffer) FASTCALL
       if (buffer[5] == ';' && (buffer[6] == 'c' || buffer[6] == 'C'))
 	return -2; /* resume execution */
       return 1;
-  }
+    }
 #endif /* DBG_MIN_SIZE */
   return -1;
 }
@@ -928,42 +894,42 @@ process_v (char *buffer) FASTCALL
 static signed char
 process_zZ (char *buffer) FASTCALL
 { /* insert/remove breakpoint */
-#if defined(DBG_SWBREAK_PROC) || defined(DBG_HWBREAK) || \
-    defined(DBG_WWATCH) || defined(DBG_RWATCH) || defined(DBG_AWATCH)
+#if defined(DBG_SWBREAK_PROC) || defined(DBG_HWBREAK) || defined(DBG_WWATCH) \
+  || defined(DBG_RWATCH) || defined(DBG_AWATCH)
   const byte set = (*buffer == 'Z');
   const char *p = &buffer[3];
-  void *addr = (void*)hex2int(&p);
+  void *addr = (void *) hex2int (&p);
   if (*p != ',')
     return 1;
   p++;
-  int kind = hex2int(&p);
+  int kind = hex2int (&p);
   *buffer = '\0';
   switch (buffer[1])
     {
 #ifdef DBG_SWBREAK_PROC
     case '0': /* sw break */
-      return DBG_SWBREAK_PROC(set, addr);
+      return DBG_SWBREAK_PROC (set, addr);
 #endif
 #ifdef DBG_HWBREAK
     case '1': /* hw break */
-      return DBG_HWBREAK(set, addr);
+      return DBG_HWBREAK (set, addr);
 #endif
 #ifdef DBG_WWATCH
     case '2': /* write watch */
-      return DBG_WWATCH(set, addr, kind);
+      return DBG_WWATCH (set, addr, kind);
 #endif
 #ifdef DBG_RWATCH
     case '3': /* read watch */
-      return DBG_RWATCH(set, addr, kind);
+      return DBG_RWATCH (set, addr, kind);
 #endif
 #ifdef DBG_AWATCH
     case '4': /* access watch */
-      return DBG_AWATCH(set, addr, kind);
+      return DBG_AWATCH (set, addr, kind);
 #endif
     default:; /* not supported */
     }
 #endif
-  (void)buffer;
+  (void) buffer;
   return -1;
 }
 
@@ -972,20 +938,34 @@ do_process (char *buffer) FASTCALL
 {
   switch (*buffer)
     {
-    case '?': return process_question (buffer);
-    case 'G': return process_G (buffer);
-    case 'k': return process_k (buffer);
-    case 'M': return process_M (buffer);
-    case 'X': return process_X (buffer);
-    case 'Z': return process_zZ (buffer);
-    case 'c': return process_c (buffer);
-    case 'D': return process_D (buffer);
-    case 'g': return process_g (buffer);
-    case 'm': return process_m (buffer);
-    case 'q': return process_q (buffer);
-    case 'v': return process_v (buffer);
-    case 'z': return process_zZ (buffer);
-    default:  return -1; /* empty response */
+    case '?':
+      return process_question (buffer);
+    case 'G':
+      return process_G (buffer);
+    case 'k':
+      return process_k (buffer);
+    case 'M':
+      return process_M (buffer);
+    case 'X':
+      return process_X (buffer);
+    case 'Z':
+      return process_zZ (buffer);
+    case 'c':
+      return process_c (buffer);
+    case 'D':
+      return process_D (buffer);
+    case 'g':
+      return process_g (buffer);
+    case 'm':
+      return process_m (buffer);
+    case 'q':
+      return process_q (buffer);
+    case 'v':
+      return process_v (buffer);
+    case 'z':
+      return process_zZ (buffer);
+    default:
+      return -1; /* empty response */
     }
 }
 
@@ -1011,7 +991,7 @@ process (char *buffer) FASTCALL
       *p = '\0';
     }
   else if (*p == '\0')
-    memcpy(p, "OK", 3);
+    memcpy (p, "OK", 3);
   return ret;
 }
 
@@ -1040,7 +1020,7 @@ hex2byte (const char *p) FASTCALL
   signed char l = hex2val (p[1]);
   if (h < 0 || l < 0)
     return -1;
-  return (byte)((byte)h << 4) | (byte)l;
+  return (byte) ((byte) h << 4) | (byte) l;
 }
 
 static int
@@ -1049,32 +1029,32 @@ hex2int (const char **buf) FASTCALL
   word r = 0;
   for (;; (*buf)++)
     {
-      signed char a = hex2val(**buf);
+      signed char a = hex2val (**buf);
       if (a < 0)
 	break;
       r <<= 4;
-      r += (byte)a;
+      r += (byte) a;
     }
-  return (int)r;
+  return (int) r;
 }
 
 static char *
 int2hex (char *buf, int v)
 {
-  buf = byte2hex(buf, (word)v >> 8);
-  return byte2hex(buf, (byte)v);
+  buf = byte2hex (buf, (word) v >> 8);
+  return byte2hex (buf, (byte) v);
 }
 
 static char
 high_hex (byte v) FASTCALL
 {
-  return low_hex(v >> 4);
+  return low_hex (v >> 4);
 }
 
 static char
 low_hex (byte v) FASTCALL
 {
-/*
+  /*
   __asm
 	ld	a, l
 	and	a, #0x0f
@@ -1088,7 +1068,7 @@ low_hex (byte v) FASTCALL
 */
   v &= 0x0f;
   v += '0';
-  if (v < '9'+1)
+  if (v < '9' + 1)
     return v;
   return v + 'a' - '0' - 10;
 }
@@ -1134,7 +1114,7 @@ static void
 read_memory_map (char *buffer, unsigned offset, unsigned length)
 {
   const char *map = DBG_MEMORY_MAP;
-  const unsigned map_sz = strlen(map);
+  const unsigned map_sz = strlen (map);
   if (offset >= map_sz)
     {
       buffer[0] = 'l';
@@ -1145,7 +1125,7 @@ read_memory_map (char *buffer, unsigned offset, unsigned length)
     length = map_sz - offset;
   buffer[0] = 'm';
   memcpy (&buffer[1], &map[offset], length);
-  buffer[1+length] = '\0';
+  buffer[1 + length] = '\0';
 }
 #endif
 
@@ -1156,13 +1136,13 @@ format_reg_value (char *p, unsigned reg_num, const byte *value)
 {
   char *d = p;
   unsigned char i;
-  d = byte2hex(d, reg_num);
+  d = byte2hex (d, reg_num);
   *d++ = ':';
   value += REG_SIZE;
   i = REG_SIZE;
   do
     {
-      d = byte2hex(d, *--value);
+      d = byte2hex (d, *--value);
     }
   while (--i != 0);
   *d++ = ';';
@@ -1173,133 +1153,69 @@ format_reg_value (char *p, unsigned reg_num, const byte *value)
 #ifdef __SDCC_gbz80
 /* saves all state.except PC and SP */
 static void
-save_cpu_state() __naked
+save_cpu_state () __naked
 {
-  __asm
-	push	af
-	ld	a, l
-	ld	(#_state + R_HL + 0), a
-	ld	a, h
-	ld	(#_state + R_HL + 1), a
-	ld	hl, #_state + R_HL - 1
-	ld	(hl), d
-	dec	hl
-	ld	(hl), e
-	dec	hl
-	ld	(hl), b
-	dec	hl
-	ld	(hl), c
-	dec	hl
-	pop	bc
-	ld	(hl), b
-	dec	hl
-	ld	(hl), c
-	ret
-  __endasm;
+  __asm push af ld a, l ld (#_state + R_HL + 0), a ld a,
+    h ld (#_state + R_HL + 1), a ld hl, #_state + R_HL - 1 ld (hl),
+    d dec hl ld (hl), e dec hl ld (hl), b dec hl ld (hl),
+    c dec hl pop bc ld (hl), b dec hl ld (hl), c ret __endasm;
 }
 
 /* restore CPU state and continue execution */
 static void
-rest_cpu_state() __naked
+rest_cpu_state () __naked
 {
-  __asm
-;restore SP
-	ld	a, (#_state + R_SP + 0)
-	ld	l,a
-	ld	a, (#_state + R_SP + 1)
-	ld	h,a
-	ld	sp, hl
-;push PC value as return address
-	ld	a, (#_state + R_PC + 0)
-	ld	l, a
-	ld	a, (#_state + R_PC + 1)
-	ld	h, a
-	push	hl
-;restore registers
-	ld	hl, #_state + R_AF
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	inc	hl
-	push	bc
-	ld	c, (hl)
-	inc	hl
-	ld	b, (hl)
-	inc	hl
-	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	inc	hl
-	ld	a, (hl)
-	inc	hl
-	ld	h, (hl)
-	ld	l, a
-	pop	af
-	ret
-  __endasm;
+  __asm;
+  restore SP ld a, (#_state + R_SP + 0) ld l, a ld a,
+    (#_state + R_SP + 1) ld h, a ld sp, hl;
+  push PC value as return address ld a, (#_state + R_PC + 0) ld l, a ld a,
+    (#_state + R_PC + 1) ld h, a push hl;
+  restore registers ld hl, #_state + R_AF ld c, (hl) inc hl ld b,
+    (hl) inc hl push bc ld c, (hl) inc hl ld b, (hl) inc hl ld e,
+    (hl) inc hl ld d, (hl) inc hl ld a, (hl) inc hl ld h, (hl) ld l,
+    a pop af ret __endasm;
 }
 #else
 /* saves all state.except PC and SP */
 static void
-save_cpu_state() __naked
+save_cpu_state () __naked
 {
-  __asm
-	ld	(#_state + R_HL), hl
-	ld	(#_state + R_DE), de
-	ld	(#_state + R_BC), bc
-	push	af
-	pop	hl
-	ld	(#_state + R_AF), hl
-	ld	a, r	;R is increased by 7 or by 8 if called via RST
-	ld	l, a
-	sub	a, #7
-	xor	a, l
-	and	a, #0x7f
-	xor	a, l
+  __asm ld (#_state + R_HL), hl ld (#_state + R_DE), de ld (#_state + R_BC),
+    bc push af pop hl ld (#_state + R_AF), hl ld a, r;
+  R is increased by 7 or by 8 if called via RST ld l, a sub a, #7 xor a,
+    l and a, #0x7f xor a,
+    l
 #ifdef __SDCC_ez80_adl
-	ld	hl, i
-	ex	de, hl
-	ld	hl, #_state + R_IR
-	ld	(hl), a
-	inc	hl
-	ld	(hl), e
-	inc	hl
-	ld	(hl), d
-	ld	a, MB
-	ld	(#_state + R_AF+2), a
+      ld hl,
+    i ex de, hl ld hl, #_state + R_IR ld (hl), a inc hl ld (hl),
+    e inc hl ld (hl), d ld a, MB ld (#_state + R_AF + 2),
+    a
 #else
-	ld	l, a
-	ld	a, i
-	ld	h, a
-	ld	(#_state + R_IR), hl
+      ld l,
+    a ld a, i ld h, a ld (#_state + R_IR),
+    hl
 #endif /* __SDCC_ez80_adl */
-	ld	(#_state + R_IX), ix
-	ld	(#_state + R_IY), iy
-	ex	af, af'	;'
-	exx
-	ld	(#_state + R_HL_), hl
-	ld	(#_state + R_DE_), de
-	ld	(#_state + R_BC_), bc
-	push	af
-	pop	hl
-	ld	(#_state + R_AF_), hl
-	ret
-  __endasm;
+      ld (#_state + R_IX),
+    ix ld (#_state + R_IY), iy ex af, af '	;' exx ld (#_state + R_HL_),
+    hl ld (#_state + R_DE_), de ld (#_state + R_BC_),
+    bc push af pop hl ld (#_state + R_AF_), hl ret __endasm;
 }
 
 /* restore CPU state and continue execution */
 static void
-rest_cpu_state() __naked
+rest_cpu_state () __naked
 {
   __asm
 #ifdef DBG_USE_TRAMPOLINE
-	ld	sp, _stack + DBG_STACK_SIZE
-	ld	hl, (#_state + R_PC)
-	push	hl	/* resume address */
+    ld sp,
+    _stack + DBG_STACK_SIZE ld hl,
+    (#_state + R_PC) push hl /* resume address */
 #ifdef __SDCC_ez80_adl
-	ld	hl, 0xc30000 ; use 0xc34000 for jp.s
+      ld hl,
+    0xc30000; use 0xc34000 for jp.s
 #else
-	ld	hl, 0xc300
+      ld hl,
+    0xc300
 #endif
 	push	hl	/* JP opcode */
 #endif /* DBG_USE_TRAMPOLINE */
@@ -1316,40 +1232,38 @@ rest_cpu_state() __naked
 #ifdef __SDCC_ez80_adl
 	ld	a, (#_state + R_AF + 2)
 	ld	MB, a
-	ld	hl, (#_state + R_IR + 1) ;I register
-	ld	i, hl
-	ld	a, (#_state + R_IR + 0) ; R register
-	ld	l, a
+	ld	hl, (#_state + R_IR + 1) ;
+  I register ld i, hl ld a, (#_state + R_IR + 0);
+  R register ld l,
+    a
 #else
-	ld	hl, (#_state + R_IR)
-	ld	a, h
-	ld	i, a
-	ld	a, l
+      ld hl,
+    (#_state + R_IR) ld a, h ld i, a ld a,
+    l
 #endif /* __SDCC_ez80_adl */
-	sub	a, #10	;number of M1 cycles after ld r,a
-	xor	a, l
-	and	a, #0x7f
-	xor	a, l
-	ld	r, a
-	ld	de, (#_state + R_DE)
-	ld	bc, (#_state + R_BC)
-	ld	hl, (#_state + R_AF)
-	push	hl
-	pop	af
-	ld	sp, (#_state + R_SP)
+      sub a,
+# 10;
+    number of M1 cycles after ld r, a xor a, l and a, #0x7f xor a, l ld r,
+    a ld de, (#_state + R_DE) ld bc, (#_state + R_BC) ld hl,
+    (#_state + R_AF) push hl pop af ld sp,
+    (#_state + R_SP)
 #ifndef DBG_USE_TRAMPOLINE
-	ld	hl, (#_state + R_PC)
-	push	hl
-	ld	hl, (#_state + R_HL)
-	DBG_RESUME
+      ld hl,
+    (#_state + R_PC) push hl ld hl,
+    (#_state + R_HL) DBG_RESUME
 #else
-	ld	hl, (#_state + R_HL)
+      ld hl,
+    (#_state + R_HL)
 #ifdef __SDCC_ez80_adl
-	jp	#_stack + DBG_STACK_SIZE - 4
+	jp #_stack
+      + DBG_STACK_SIZE
+      - 4
 #else
-	jp	#_stack + DBG_STACK_SIZE - 3
+	jp #_stack
+      + DBG_STACK_SIZE
+      - 3
 #endif
 #endif /* DBG_USE_TRAMPOLINE */
-  __endasm;
+      __endasm;
 }
 #endif /* __SDCC_gbz80 */

@@ -21,8 +21,10 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/packed.h"
 
-namespace selftests {
-namespace packed_tests {
+namespace selftests
+{
+namespace packed_tests
+{
 
 enum test_enum
 {
@@ -43,7 +45,7 @@ gdb_static_assert (alignof (packed<test_enum, 3>) == 1);
 gdb_static_assert (alignof (packed<test_enum, 4>) == 1);
 
 /* Triviality checks.  */
-#define CHECK_TRAIT(TRAIT)			\
+#define CHECK_TRAIT(TRAIT) \
   static_assert (std::TRAIT<packed<test_enum, 1>>::value, "")
 
 #if HAVE_IS_TRIVIALLY_COPYABLE
@@ -125,6 +127,7 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_packed_selftests ();
+
 void
 _initialize_packed_selftests ()
 {

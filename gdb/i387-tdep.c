@@ -33,8 +33,8 @@
 /* Print the floating point number specified by RAW.  */
 
 static void
-print_i387_value (struct gdbarch *gdbarch,
-		  const gdb_byte *raw, struct ui_file *file)
+print_i387_value (struct gdbarch *gdbarch, const gdb_byte *raw,
+		  struct ui_file *file)
 {
   /* We try to print 19 digits.  The last digit may or may not contain
      garbage, but we'd better print one too many.  We need enough room
@@ -48,8 +48,8 @@ print_i387_value (struct gdbarch *gdbarch,
 /* Print the classification for the register contents RAW.  */
 
 static void
-print_i387_ext (struct gdbarch *gdbarch,
-		const gdb_byte *raw, struct ui_file *file)
+print_i387_ext (struct gdbarch *gdbarch, const gdb_byte *raw,
+		struct ui_file *file)
 {
   int sign;
   int integer;
@@ -60,8 +60,8 @@ print_i387_ext (struct gdbarch *gdbarch,
   integer = raw[7] & 0x80;
   exponent = (((raw[9] & 0x7f) << 8) | raw[8]);
   fraction[0] = ((raw[3] << 24) | (raw[2] << 16) | (raw[1] << 8) | raw[0]);
-  fraction[1] = (((raw[7] & 0x7f) << 24) | (raw[6] << 16)
-		 | (raw[5] << 8) | raw[4]);
+  fraction[1]
+    = (((raw[7] & 0x7f) << 24) | (raw[6] << 16) | (raw[5] << 8) | raw[4]);
 
   if (exponent == 0x7fff && integer)
     {
@@ -85,7 +85,7 @@ print_i387_ext (struct gdbarch *gdbarch,
     {
       /* Denormal or zero.  */
       print_i387_value (gdbarch, raw, file);
-      
+
       if (integer)
 	/* Pseudo-denormal.  */
 	gdb_puts (" Pseudo-denormal", file);
@@ -102,13 +102,13 @@ print_i387_ext (struct gdbarch *gdbarch,
    was unavailable.  */
 
 static void
-print_i387_status_word (int status_p,
-			unsigned int status, struct ui_file *file)
+print_i387_status_word (int status_p, unsigned int status,
+			struct ui_file *file)
 {
   gdb_printf (file, "Status Word:         ");
   if (!status_p)
     {
-      gdb_printf (file, "%s\n", _("<unavailable>"));
+      gdb_printf (file, "%s\n", _ ("<unavailable>"));
       return;
     }
 
@@ -132,21 +132,20 @@ print_i387_status_word (int status_p,
 
   gdb_puts ("\n", file);
 
-  gdb_printf (file,
-	      "                       TOP: %d\n", ((status >> 11) & 7));
+  gdb_printf (file, "                       TOP: %d\n", ((status >> 11) & 7));
 }
 
 /* Print the control word CONTROL.  If CONTROL_P is false, then
    CONTROL was unavailable.  */
 
 static void
-print_i387_control_word (int control_p,
-			 unsigned int control, struct ui_file *file)
+print_i387_control_word (int control_p, unsigned int control,
+			 struct ui_file *file)
 {
   gdb_printf (file, "Control Word:        ");
   if (!control_p)
     {
-      gdb_printf (file, "%s\n", _("<unavailable>"));
+      gdb_printf (file, "%s\n", _ ("<unavailable>"));
       return;
     }
 
@@ -177,7 +176,7 @@ print_i387_control_word (int control_p,
       gdb_puts ("Extended Precision (64-bits)\n", file);
       break;
     }
-      
+
   gdb_puts ("                       RC: ", file);
   switch ((control >> 10) & 3)
     {
@@ -226,22 +225,21 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 
   gdb_assert (gdbarch == get_frame_arch (frame));
 
-  fctrl_p = read_frame_register_unsigned (frame,
-					  I387_FCTRL_REGNUM (tdep), &fctrl);
-  fstat_p = read_frame_register_unsigned (frame,
-					  I387_FSTAT_REGNUM (tdep), &fstat);
-  ftag_p = read_frame_register_unsigned (frame,
-					 I387_FTAG_REGNUM (tdep), &ftag);
-  fiseg_p = read_frame_register_unsigned (frame,
-					  I387_FISEG_REGNUM (tdep), &fiseg);
-  fioff_p = read_frame_register_unsigned (frame,
-					  I387_FIOFF_REGNUM (tdep), &fioff);
-  foseg_p = read_frame_register_unsigned (frame,
-					  I387_FOSEG_REGNUM (tdep), &foseg);
-  fooff_p = read_frame_register_unsigned (frame,
-					  I387_FOOFF_REGNUM (tdep), &fooff);
-  fop_p = read_frame_register_unsigned (frame,
-					I387_FOP_REGNUM (tdep), &fop);
+  fctrl_p
+    = read_frame_register_unsigned (frame, I387_FCTRL_REGNUM (tdep), &fctrl);
+  fstat_p
+    = read_frame_register_unsigned (frame, I387_FSTAT_REGNUM (tdep), &fstat);
+  ftag_p
+    = read_frame_register_unsigned (frame, I387_FTAG_REGNUM (tdep), &ftag);
+  fiseg_p
+    = read_frame_register_unsigned (frame, I387_FISEG_REGNUM (tdep), &fiseg);
+  fioff_p
+    = read_frame_register_unsigned (frame, I387_FIOFF_REGNUM (tdep), &fioff);
+  foseg_p
+    = read_frame_register_unsigned (frame, I387_FOSEG_REGNUM (tdep), &foseg);
+  fooff_p
+    = read_frame_register_unsigned (frame, I387_FOOFF_REGNUM (tdep), &fooff);
+  fop_p = read_frame_register_unsigned (frame, I387_FOP_REGNUM (tdep), &fop);
 
   if (fstat_p)
     {
@@ -294,7 +292,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		print_i387_ext (gdbarch, raw, file);
 	    }
 	  else
-	    gdb_printf (file, "%s", _("<unavailable>"));
+	    gdb_printf (file, "%s", _ ("<unavailable>"));
 
 	  gdb_puts ("\n", file);
 	}
@@ -304,21 +302,19 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   print_i387_status_word (fstat_p, fstat, file);
   print_i387_control_word (fctrl_p, fctrl, file);
   gdb_printf (file, "Tag Word:            %s\n",
-	      ftag_p ? hex_string_custom (ftag, 4) : _("<unavailable>"));
+	      ftag_p ? hex_string_custom (ftag, 4) : _ ("<unavailable>"));
   gdb_printf (file, "Instruction Pointer: %s:",
-	      fiseg_p ? hex_string_custom (fiseg, 2) : _("<unavailable>"));
+	      fiseg_p ? hex_string_custom (fiseg, 2) : _ ("<unavailable>"));
   gdb_printf (file, "%s\n",
-	      fioff_p ? hex_string_custom (fioff, 8) : _("<unavailable>"));
+	      fioff_p ? hex_string_custom (fioff, 8) : _ ("<unavailable>"));
   gdb_printf (file, "Operand Pointer:     %s:",
-	      foseg_p ? hex_string_custom (foseg, 2) : _("<unavailable>"));
+	      foseg_p ? hex_string_custom (foseg, 2) : _ ("<unavailable>"));
   gdb_printf (file, "%s\n",
-	      fooff_p ? hex_string_custom (fooff, 8) : _("<unavailable>"));
+	      fooff_p ? hex_string_custom (fooff, 8) : _ ("<unavailable>"));
   gdb_printf (file, "Opcode:              %s\n",
-	      fop_p
-	      ? (hex_string_custom (fop ? (fop | 0xd800) : 0, 4))
-	      : _("<unavailable>"));
+	      fop_p ? (hex_string_custom (fop ? (fop | 0xd800) : 0, 4))
+		    : _ ("<unavailable>"));
 }
-
 
 /* Return nonzero if a value of type TYPE stored in register REGNUM
    needs any special handling.  */
@@ -331,8 +327,7 @@ i387_convert_register_p (struct gdbarch *gdbarch, int regnum,
     {
       /* Floating point registers must be converted unless we are
 	 accessing them in their hardware type or TYPE is not float.  */
-      if (type == i387_ext_type (gdbarch)
-	  || type->code () != TYPE_CODE_FLT)
+      if (type == i387_ext_type (gdbarch) || type->code () != TYPE_CODE_FLT)
 	return 0;
       else
 	return 1;
@@ -345,9 +340,8 @@ i387_convert_register_p (struct gdbarch *gdbarch, int regnum,
    return its contents in TO.  */
 
 int
-i387_register_to_value (frame_info_ptr frame, int regnum,
-			struct type *type, gdb_byte *to,
-			int *optimizedp, int *unavailablep)
+i387_register_to_value (frame_info_ptr frame, int regnum, struct type *type,
+			gdb_byte *to, int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte from[I386_MAX_REGISTER_SIZE];
@@ -357,18 +351,17 @@ i387_register_to_value (frame_info_ptr frame, int regnum,
   /* We only support floating-point values.  */
   if (type->code () != TYPE_CODE_FLT)
     {
-      warning (_("Cannot convert floating-point register value "
-	       "to non-floating-point type."));
+      warning (_ ("Cannot convert floating-point register value "
+		  "to non-floating-point type."));
       *optimizedp = *unavailablep = 0;
       return 0;
     }
 
   /* Convert to TYPE.  */
-  if (!get_frame_register_bytes (frame, regnum, 0,
-				 gdb::make_array_view (from,
-						       register_size (gdbarch,
-								      regnum)),
-				 optimizedp, unavailablep))
+  if (!get_frame_register_bytes (
+	frame, regnum, 0,
+	gdb::make_array_view (from, register_size (gdbarch, regnum)),
+	optimizedp, unavailablep))
     return 0;
 
   target_float_convert (from, i387_ext_type (gdbarch), to, type);
@@ -380,8 +373,8 @@ i387_register_to_value (frame_info_ptr frame, int regnum,
    REGNUM in frame FRAME.  */
 
 void
-i387_value_to_register (frame_info_ptr frame, int regnum,
-			struct type *type, const gdb_byte *from)
+i387_value_to_register (frame_info_ptr frame, int regnum, struct type *type,
+			const gdb_byte *from)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte to[I386_MAX_REGISTER_SIZE];
@@ -391,8 +384,8 @@ i387_value_to_register (frame_info_ptr frame, int regnum,
   /* We only support floating-point values.  */
   if (type->code () != TYPE_CODE_FLT)
     {
-      warning (_("Cannot convert non-floating-point type "
-	       "to floating-point register value."));
+      warning (_ ("Cannot convert non-floating-point type "
+		  "to floating-point register value."));
       return;
     }
 
@@ -400,7 +393,6 @@ i387_value_to_register (frame_info_ptr frame, int regnum,
   target_float_convert (from, type, to, i387_ext_type (gdbarch));
   put_frame_register (frame, regnum, to);
 }
-
 
 /* Handle FSAVE and FXSAVE formats.  */
 
@@ -408,29 +400,22 @@ i387_value_to_register (frame_info_ptr frame, int regnum,
    the data structure used by the "fsave" instruction where GDB
    register REGNUM is stored.  */
 
-static int fsave_offset[] =
-{
-  28 + 0 * 10,			/* %st(0) ...  */
-  28 + 1 * 10,
-  28 + 2 * 10,
-  28 + 3 * 10,
-  28 + 4 * 10,
-  28 + 5 * 10,
-  28 + 6 * 10,
-  28 + 7 * 10,			/* ... %st(7).  */
-  0,				/* `fctrl' (16 bits).  */
-  4,				/* `fstat' (16 bits).  */
-  8,				/* `ftag' (16 bits).  */
-  16,				/* `fiseg' (16 bits).  */
-  12,				/* `fioff'.  */
-  24,				/* `foseg' (16 bits).  */
-  20,				/* `fooff'.  */
-  18				/* `fop' (bottom 11 bits).  */
+static int fsave_offset[] = {
+  28 + 0 * 10, /* %st(0) ...  */
+  28 + 1 * 10, 28 + 2 * 10, 28 + 3 * 10, 28 + 4 * 10,
+  28 + 5 * 10, 28 + 6 * 10, 28 + 7 * 10, /* ... %st(7).  */
+  0,					 /* `fctrl' (16 bits).  */
+  4,					 /* `fstat' (16 bits).  */
+  8,					 /* `ftag' (16 bits).  */
+  16,					 /* `fiseg' (16 bits).  */
+  12,					 /* `fioff'.  */
+  24,					 /* `foseg' (16 bits).  */
+  20,					 /* `fooff'.  */
+  18					 /* `fop' (bottom 11 bits).  */
 };
 
 #define FSAVE_ADDR(tdep, fsave, regnum) \
   (fsave + fsave_offset[regnum - I387_ST0_REGNUM (tdep)])
-
 
 /* Fill register REGNUM in REGCACHE with the appropriate value from
    *FSAVE.  This function masks off any of the reserved bits in
@@ -458,8 +443,8 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 
 	/* Most of the FPU control registers occupy only 16 bits in the
 	   fsave area.  Give those a special treatment.  */
-	if (i >= I387_FCTRL_REGNUM (tdep)
-	    && i != I387_FIOFF_REGNUM (tdep) && i != I387_FOOFF_REGNUM (tdep))
+	if (i >= I387_FCTRL_REGNUM (tdep) && i != I387_FIOFF_REGNUM (tdep)
+	    && i != I387_FOOFF_REGNUM (tdep))
 	  {
 	    gdb_byte val[4];
 
@@ -506,8 +491,8 @@ i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
       {
 	/* Most of the FPU control registers occupy only 16 bits in
 	   the fsave area.  Give those a special treatment.  */
-	if (i >= I387_FCTRL_REGNUM (tdep)
-	    && i != I387_FIOFF_REGNUM (tdep) && i != I387_FOOFF_REGNUM (tdep))
+	if (i >= I387_FCTRL_REGNUM (tdep) && i != I387_FIOFF_REGNUM (tdep)
+	    && i != I387_FOOFF_REGNUM (tdep))
 	  {
 	    gdb_byte buf[4];
 
@@ -526,31 +511,29 @@ i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 	  regcache->raw_collect (i, FSAVE_ADDR (tdep, regs, i));
       }
 }
-
 
 /* At fxsave_offset[REGNUM] you'll find the offset to the location in
    the data structure used by the "fxsave" instruction where GDB
    register REGNUM is stored.  */
 
-static int fxsave_offset[] =
-{
-  32,				/* %st(0) through ...  */
+static int fxsave_offset[] = {
+  32, /* %st(0) through ...  */
   48,
   64,
   80,
   96,
   112,
   128,
-  144,				/* ... %st(7) (80 bits each).  */
-  0,				/* `fctrl' (16 bits).  */
-  2,				/* `fstat' (16 bits).  */
-  4,				/* `ftag' (16 bits).  */
-  12,				/* `fiseg' (16 bits).  */
-  8,				/* `fioff'.  */
-  20,				/* `foseg' (16 bits).  */
-  16,				/* `fooff'.  */
-  6,				/* `fop' (bottom 11 bits).  */
-  160 + 0 * 16,			/* %xmm0 through ...  */
+  144,		/* ... %st(7) (80 bits each).  */
+  0,		/* `fctrl' (16 bits).  */
+  2,		/* `fstat' (16 bits).  */
+  4,		/* `ftag' (16 bits).  */
+  12,		/* `fiseg' (16 bits).  */
+  8,		/* `fioff'.  */
+  20,		/* `foseg' (16 bits).  */
+  16,		/* `fooff'.  */
+  6,		/* `fop' (bottom 11 bits).  */
+  160 + 0 * 16, /* %xmm0 through ...  */
   160 + 1 * 16,
   160 + 2 * 16,
   160 + 3 * 16,
@@ -565,7 +548,7 @@ static int fxsave_offset[] =
   160 + 12 * 16,
   160 + 13 * 16,
   160 + 14 * 16,
-  160 + 15 * 16,		/* ... %xmm15 (128 bits each).  */
+  160 + 15 * 16, /* ... %xmm15 (128 bits each).  */
 };
 
 #define FXSAVE_ADDR(tdep, fxsave, regnum) \
@@ -579,7 +562,6 @@ static int fxsave_offset[] =
 #define FXSAVE_MXCSR_ADDR(fxsave) (fxsave + 24)
 
 static int i387_tag (const gdb_byte *raw);
-
 
 /* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  This function
@@ -616,7 +598,7 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 	    val[2] = val[3] = 0;
 	    if (i == I387_FOP_REGNUM (tdep))
 	      val[1] &= ((1 << 3) - 1);
-	    else if (i== I387_FTAG_REGNUM (tdep))
+	    else if (i == I387_FTAG_REGNUM (tdep))
 	      {
 		/* The fxsave area contains a simplified version of
 		   the tag word.  We have to look at the actual 80-bit
@@ -626,8 +608,8 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 		int fpreg;
 		int top;
 
-		top = ((FXSAVE_ADDR (tdep, regs,
-				     I387_FSTAT_REGNUM (tdep)))[1] >> 3);
+		top = ((FXSAVE_ADDR (tdep, regs, I387_FSTAT_REGNUM (tdep)))[1]
+		       >> 3);
 		top &= 0x7;
 
 		for (fpreg = 7; fpreg >= 0; fpreg--)
@@ -636,12 +618,12 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 
 		    if (val[0] & (1 << fpreg))
 		      {
-			int thisreg = (fpreg + 8 - top) % 8 
-				       + I387_ST0_REGNUM (tdep);
+			int thisreg
+			  = (fpreg + 8 - top) % 8 + I387_ST0_REGNUM (tdep);
 			tag = i387_tag (FXSAVE_ADDR (tdep, regs, thisreg));
 		      }
 		    else
-		      tag = 3;		/* Empty */
+		      tag = 3; /* Empty */
 
 		    ftag |= tag << (2 * fpreg);
 		  }
@@ -660,7 +642,7 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 	regcache->raw_supply (I387_MXCSR_REGNUM (tdep), NULL);
       else
 	regcache->raw_supply (I387_MXCSR_REGNUM (tdep),
-			     FXSAVE_MXCSR_ADDR (regs));
+			      FXSAVE_MXCSR_ADDR (regs));
     }
 }
 
@@ -725,8 +707,7 @@ i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
       }
 
   if (regnum == I387_MXCSR_REGNUM (tdep) || regnum == -1)
-    regcache->raw_collect (I387_MXCSR_REGNUM (tdep),
-			  FXSAVE_MXCSR_ADDR (regs));
+    regcache->raw_collect (I387_MXCSR_REGNUM (tdep), FXSAVE_MXCSR_ADDR (regs));
 }
 
 /* `xstate_bv' is at byte offset 512.  */
@@ -736,24 +717,12 @@ i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
    the upper 128bit of AVX register data structure used by the "xsave"
    instruction where GDB register REGNUM is stored.  */
 
-static int xsave_avxh_offset[] =
-{
-  576 + 0 * 16,		/* Upper 128bit of %ymm0 through ...  */
-  576 + 1 * 16,
-  576 + 2 * 16,
-  576 + 3 * 16,
-  576 + 4 * 16,
-  576 + 5 * 16,
-  576 + 6 * 16,
-  576 + 7 * 16,
-  576 + 8 * 16,
-  576 + 9 * 16,
-  576 + 10 * 16,
-  576 + 11 * 16,
-  576 + 12 * 16,
-  576 + 13 * 16,
-  576 + 14 * 16,
-  576 + 15 * 16		/* Upper 128bit of ... %ymm15 (128 bits each).  */
+static int xsave_avxh_offset[] = {
+  576 + 0 * 16, /* Upper 128bit of %ymm0 through ...  */
+  576 + 1 * 16,	 576 + 2 * 16,	576 + 3 * 16,  576 + 4 * 16,
+  576 + 5 * 16,	 576 + 6 * 16,	576 + 7 * 16,  576 + 8 * 16,
+  576 + 9 * 16,	 576 + 10 * 16, 576 + 11 * 16, 576 + 12 * 16,
+  576 + 13 * 16, 576 + 14 * 16, 576 + 15 * 16 /* Upper 128bit of ... %ymm15 (128 bits each).  */
 };
 
 #define XSAVE_AVXH_ADDR(tdep, xsave, regnum) \
@@ -763,79 +732,51 @@ static int xsave_avxh_offset[] =
    the upper 128bit of ZMM register data structure used by the "xsave"
    instruction where GDB register REGNUM is stored.  */
 
-static int xsave_ymm_avx512_offset[] =
-{
+static int xsave_ymm_avx512_offset[] = {
   /* HI16_ZMM_area + 16 bytes + regnum* 64 bytes.  */
-  1664 + 16 + 0 * 64,		/* %ymm16 through...  */
-  1664 + 16 + 1 * 64,
-  1664 + 16 + 2 * 64,
-  1664 + 16 + 3 * 64,
-  1664 + 16 + 4 * 64,
-  1664 + 16 + 5 * 64,
-  1664 + 16 + 6 * 64,
-  1664 + 16 + 7 * 64,
-  1664 + 16 + 8 * 64,
-  1664 + 16 + 9 * 64,
-  1664 + 16 + 10 * 64,
-  1664 + 16 + 11 * 64,
-  1664 + 16 + 12 * 64,
-  1664 + 16 + 13 * 64,
-  1664 + 16 + 14 * 64,
-  1664 + 16 + 15 * 64		/* ...  %ymm31 (128 bits each).  */
+  1664 + 16 + 0 * 64, /* %ymm16 through...  */
+  1664 + 16 + 1 * 64,  1664 + 16 + 2 * 64,
+  1664 + 16 + 3 * 64,  1664 + 16 + 4 * 64,
+  1664 + 16 + 5 * 64,  1664 + 16 + 6 * 64,
+  1664 + 16 + 7 * 64,  1664 + 16 + 8 * 64,
+  1664 + 16 + 9 * 64,  1664 + 16 + 10 * 64,
+  1664 + 16 + 11 * 64, 1664 + 16 + 12 * 64,
+  1664 + 16 + 13 * 64, 1664 + 16 + 14 * 64,
+  1664 + 16 + 15 * 64 /* ...  %ymm31 (128 bits each).  */
 };
 
 #define XSAVE_YMM_AVX512_ADDR(tdep, xsave, regnum) \
   (xsave + xsave_ymm_avx512_offset[regnum - I387_YMM16H_REGNUM (tdep)])
 
-static int xsave_xmm_avx512_offset[] =
-{
-  1664 + 0 * 64,		/* %ymm16 through...  */
-  1664 + 1 * 64,
-  1664 + 2 * 64,
-  1664 + 3 * 64,
-  1664 + 4 * 64,
-  1664 + 5 * 64,
-  1664 + 6 * 64,
-  1664 + 7 * 64,
-  1664 + 8 * 64,
-  1664 + 9 * 64,
-  1664 + 10 * 64,
-  1664 + 11 * 64,
-  1664 + 12 * 64,
-  1664 + 13 * 64,
-  1664 + 14 * 64,
-  1664 + 15 * 64		/* ...  %ymm31 (128 bits each).  */
+static int xsave_xmm_avx512_offset[] = {
+  1664 + 0 * 64, /* %ymm16 through...  */
+  1664 + 1 * 64,  1664 + 2 * 64,  1664 + 3 * 64,  1664 + 4 * 64,
+  1664 + 5 * 64,  1664 + 6 * 64,  1664 + 7 * 64,  1664 + 8 * 64,
+  1664 + 9 * 64,  1664 + 10 * 64, 1664 + 11 * 64, 1664 + 12 * 64,
+  1664 + 13 * 64, 1664 + 14 * 64, 1664 + 15 * 64 /* ...  %ymm31 (128 bits each).  */
 };
 
 #define XSAVE_XMM_AVX512_ADDR(tdep, xsave, regnum) \
   (xsave + xsave_xmm_avx512_offset[regnum - I387_XMM16_REGNUM (tdep)])
 
 static int xsave_mpx_offset[] = {
-  960 + 0 * 16,			/* bnd0r...bnd3r registers.  */
-  960 + 1 * 16,
-  960 + 2 * 16,
-  960 + 3 * 16,
-  1024 + 0 * 8,			/* bndcfg ... bndstatus.  */
+  960 + 0 * 16, /* bnd0r...bnd3r registers.  */
+  960 + 1 * 16, 960 + 2 * 16,
+  960 + 3 * 16, 1024 + 0 * 8, /* bndcfg ... bndstatus.  */
   1024 + 1 * 8,
 };
 
 #define XSAVE_MPX_ADDR(tdep, xsave, regnum) \
   (xsave + xsave_mpx_offset[regnum - I387_BND0R_REGNUM (tdep)])
 
-  /* At xsave_avx512__h_offset[REGNUM] you find the offset to the location
+/* At xsave_avx512__h_offset[REGNUM] you find the offset to the location
    of the AVX512 opmask register data structure used by the "xsave"
    instruction where GDB register REGNUM is stored.  */
 
-static int xsave_avx512_k_offset[] =
-{
-  1088 + 0 * 8,			/* %k0 through...  */
-  1088 + 1 * 8,
-  1088 + 2 * 8,
-  1088 + 3 * 8,
-  1088 + 4 * 8,
-  1088 + 5 * 8,
-  1088 + 6 * 8,
-  1088 + 7 * 8     		/* %k7 (64 bits each).  */
+static int xsave_avx512_k_offset[] = {
+  1088 + 0 * 8, /* %k0 through...  */
+  1088 + 1 * 8, 1088 + 2 * 8, 1088 + 3 * 8, 1088 + 4 * 8,
+  1088 + 5 * 8, 1088 + 6 * 8, 1088 + 7 * 8 /* %k7 (64 bits each).  */
 };
 
 #define XSAVE_AVX512_K_ADDR(tdep, xsave, regnum) \
@@ -845,10 +786,9 @@ static int xsave_avx512_k_offset[] =
    the upper 256bit of AVX512 ZMMH register data structure used by the "xsave"
    instruction where GDB register REGNUM is stored.  */
 
-static int xsave_avx512_zmm_h_offset[] =
-{
+static int xsave_avx512_zmm_h_offset[] = {
   1152 + 0 * 32,
-  1152 + 1 * 32,	/* Upper 256bit of %zmmh0 through...  */
+  1152 + 1 * 32, /* Upper 256bit of %zmmh0 through...  */
   1152 + 2 * 32,
   1152 + 3 * 32,
   1152 + 4 * 32,
@@ -862,8 +802,8 @@ static int xsave_avx512_zmm_h_offset[] =
   1152 + 12 * 32,
   1152 + 13 * 32,
   1152 + 14 * 32,
-  1152 + 15 * 32,	/* Upper 256bit of...  %zmmh15 (256 bits each).  */
-  1664 + 32 + 0 * 64,   /* Upper 256bit of...  %zmmh16 (256 bits each).  */
+  1152 + 15 * 32,     /* Upper 256bit of...  %zmmh15 (256 bits each).  */
+  1664 + 32 + 0 * 64, /* Upper 256bit of...  %zmmh16 (256 bits each).  */
   1664 + 32 + 1 * 64,
   1664 + 32 + 2 * 64,
   1664 + 32 + 3 * 64,
@@ -878,7 +818,7 @@ static int xsave_avx512_zmm_h_offset[] =
   1664 + 32 + 12 * 64,
   1664 + 32 + 13 * 64,
   1664 + 32 + 14 * 64,
-  1664 + 32 + 15 * 64   /* Upper 256bit of... %zmmh31 (256 bits each).  */
+  1664 + 32 + 15 * 64 /* Upper 256bit of... %zmmh31 (256 bits each).  */
 };
 
 #define XSAVE_AVX512_ZMM_H_ADDR(tdep, xsave, regnum) \
@@ -888,15 +828,13 @@ static int xsave_avx512_zmm_h_offset[] =
    of the PKRU register data structure used by the "xsave"
    instruction where GDB register REGNUM is stored.  */
 
-static int xsave_pkeys_offset[] =
-{
-2688 + 0 * 8		/* %pkru (64 bits in XSTATE, 32-bit actually used by
+static int xsave_pkeys_offset[] = {
+  2688 + 0 * 8 /* %pkru (64 bits in XSTATE, 32-bit actually used by
 			   instructions and applications).  */
 };
 
 #define XSAVE_PKEYS_ADDR(tdep, xsave, regnum) \
   (xsave + xsave_pkeys_offset[regnum - I387_PKRU_REGNUM (tdep)])
-
 
 /* Extract from XSAVE a bitset of the features that are available on the
    target, but which have not yet been enabled.  */
@@ -909,8 +847,8 @@ i387_xsave_get_clear_bv (struct gdbarch *gdbarch, const void *xsave)
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   /* Get `xstat_bv'.  The supported bits in `xstat_bv' are 8 bytes.  */
-  ULONGEST xstate_bv = extract_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs),
-						 8, byte_order);
+  ULONGEST xstate_bv
+    = extract_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs), 8, byte_order);
 
   /* Clear part in vector registers if its bit in xstat_bv is zero.  */
   ULONGEST clear_bv = (~(xstate_bv)) & tdep->xcr0;
@@ -921,8 +859,7 @@ i387_xsave_get_clear_bv (struct gdbarch *gdbarch, const void *xsave)
 /* Similar to i387_supply_fxsave, but use XSAVE extended state.  */
 
 void
-i387_supply_xsave (struct regcache *regcache, int regnum,
-		   const void *xsave)
+i387_supply_xsave (struct regcache *regcache, int regnum, const void *xsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -933,25 +870,26 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
      ZMM16.  Outside of 64-bit mode there are no "high" ZMM registers at all.
      Precalculate the number to be used for the split point, with the all
      registers in the "low" portion outside of 64-bit mode.  */
-  unsigned int zmm_endlo_regnum = I387_ZMM0H_REGNUM (tdep)
-				  + std::min (tdep->num_zmm_regs, 16);
+  unsigned int zmm_endlo_regnum
+    = I387_ZMM0H_REGNUM (tdep) + std::min (tdep->num_zmm_regs, 16);
   ULONGEST clear_bv;
   static const gdb_byte zero[I386_MAX_REGISTER_SIZE] = { 0 };
+
   enum
-    {
-      none = 0x0,
-      x87 = 0x1,
-      sse = 0x2,
-      avxh = 0x4,
-      mpx  = 0x8,
-      avx512_k = 0x10,
-      avx512_zmm_h = 0x20,
-      avx512_ymmh_avx512 = 0x40,
-      avx512_xmm_avx512 = 0x80,
-      pkeys = 0x100,
-      all = x87 | sse | avxh | mpx | avx512_k | avx512_zmm_h
-	    | avx512_ymmh_avx512 | avx512_xmm_avx512 | pkeys
-    } regclass;
+  {
+    none = 0x0,
+    x87 = 0x1,
+    sse = 0x2,
+    avxh = 0x4,
+    mpx = 0x8,
+    avx512_k = 0x10,
+    avx512_zmm_h = 0x20,
+    avx512_ymmh_avx512 = 0x40,
+    avx512_xmm_avx512 = 0x80,
+    pkeys = 0x100,
+    all = x87 | sse | avxh | mpx | avx512_k | avx512_zmm_h | avx512_ymmh_avx512
+	  | avx512_xmm_avx512 | pkeys
+  } regclass;
 
   gdb_assert (regs != NULL);
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
@@ -965,8 +903,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   else if (regnum >= I387_ZMM0H_REGNUM (tdep)
 	   && regnum < I387_ZMMENDH_REGNUM (tdep))
     regclass = avx512_zmm_h;
-  else if (regnum >= I387_K0_REGNUM (tdep)
-	   && regnum < I387_KEND_REGNUM (tdep))
+  else if (regnum >= I387_K0_REGNUM (tdep) && regnum < I387_KEND_REGNUM (tdep))
     regclass = avx512_k;
   else if (regnum >= I387_YMM16H_REGNUM (tdep)
 	   && regnum < I387_YMMH_AVX512_END_REGNUM (tdep))
@@ -1013,8 +950,8 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
       return;
 
     case avx512_zmm_h:
-      if ((clear_bv & (regnum < zmm_endlo_regnum ? X86_XSTATE_ZMM_H
-						 : X86_XSTATE_ZMM)))
+      if ((clear_bv
+	   & (regnum < zmm_endlo_regnum ? X86_XSTATE_ZMM_H : X86_XSTATE_ZMM)))
 	regcache->raw_supply (regnum, zero);
       else
 	regcache->raw_supply (regnum,
@@ -1025,7 +962,8 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
       if ((clear_bv & X86_XSTATE_K))
 	regcache->raw_supply (regnum, zero);
       else
-	regcache->raw_supply (regnum, XSAVE_AVX512_K_ADDR (tdep, regs, regnum));
+	regcache->raw_supply (regnum,
+			      XSAVE_AVX512_K_ADDR (tdep, regs, regnum));
       return;
 
     case avx512_ymmh_avx512:
@@ -1079,15 +1017,13 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	  if ((clear_bv & X86_XSTATE_PKRU))
 	    {
 	      for (i = I387_PKRU_REGNUM (tdep);
-		   i < I387_PKEYSEND_REGNUM (tdep);
-		   i++)
+		   i < I387_PKEYSEND_REGNUM (tdep); i++)
 		regcache->raw_supply (i, zero);
 	    }
 	  else
 	    {
 	      for (i = I387_PKRU_REGNUM (tdep);
-		   i < I387_PKEYSEND_REGNUM (tdep);
-		   i++)
+		   i < I387_PKEYSEND_REGNUM (tdep); i++)
 		regcache->raw_supply (i, XSAVE_PKEYS_ADDR (tdep, regs, i));
 	    }
 	}
@@ -1113,16 +1049,12 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	{
 	  if ((clear_bv & X86_XSTATE_K))
 	    {
-	      for (i = I387_K0_REGNUM (tdep);
-		   i < I387_KEND_REGNUM (tdep);
-		   i++)
+	      for (i = I387_K0_REGNUM (tdep); i < I387_KEND_REGNUM (tdep); i++)
 		regcache->raw_supply (i, zero);
 	    }
 	  else
 	    {
-	      for (i = I387_K0_REGNUM (tdep);
-		   i < I387_KEND_REGNUM (tdep);
-		   i++)
+	      for (i = I387_K0_REGNUM (tdep); i < I387_KEND_REGNUM (tdep); i++)
 		regcache->raw_supply (i, XSAVE_AVX512_K_ADDR (tdep, regs, i));
 	    }
 	}
@@ -1135,12 +1067,10 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = zmm_endlo_regnum; i < I387_ZMMENDH_REGNUM (tdep); i++)
 		regcache->raw_supply (i, zero);
 	      for (i = I387_YMM16H_REGNUM (tdep);
-		   i < I387_YMMH_AVX512_END_REGNUM (tdep);
-		   i++)
+		   i < I387_YMMH_AVX512_END_REGNUM (tdep); i++)
 		regcache->raw_supply (i, zero);
 	      for (i = I387_XMM16_REGNUM (tdep);
-		   i < I387_XMM_AVX512_END_REGNUM (tdep);
-		   i++)
+		   i < I387_XMM_AVX512_END_REGNUM (tdep); i++)
 		regcache->raw_supply (i, zero);
 	    }
 	  else
@@ -1149,13 +1079,13 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 		regcache->raw_supply (i,
 				      XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i));
 	      for (i = I387_YMM16H_REGNUM (tdep);
-		   i < I387_YMMH_AVX512_END_REGNUM (tdep);
-		   i++)
-		regcache->raw_supply (i, XSAVE_YMM_AVX512_ADDR (tdep, regs, i));
+		   i < I387_YMMH_AVX512_END_REGNUM (tdep); i++)
+		regcache->raw_supply (i,
+				      XSAVE_YMM_AVX512_ADDR (tdep, regs, i));
 	      for (i = I387_XMM16_REGNUM (tdep);
-		   i < I387_XMM_AVX512_END_REGNUM (tdep);
-		   i++)
-		regcache->raw_supply (i, XSAVE_XMM_AVX512_ADDR (tdep, regs, i));
+		   i < I387_XMM_AVX512_END_REGNUM (tdep); i++)
+		regcache->raw_supply (i,
+				      XSAVE_XMM_AVX512_ADDR (tdep, regs, i));
 	    }
 	}
       /* Handle the upper YMM registers.  */
@@ -1164,15 +1094,13 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	  if ((clear_bv & X86_XSTATE_AVX))
 	    {
 	      for (i = I387_YMM0H_REGNUM (tdep);
-		   i < I387_YMMENDH_REGNUM (tdep);
-		   i++)
+		   i < I387_YMMENDH_REGNUM (tdep); i++)
 		regcache->raw_supply (i, zero);
 	    }
 	  else
 	    {
 	      for (i = I387_YMM0H_REGNUM (tdep);
-		   i < I387_YMMENDH_REGNUM (tdep);
-		   i++)
+		   i < I387_YMMENDH_REGNUM (tdep); i++)
 		regcache->raw_supply (i, XSAVE_AVXH_ADDR (tdep, regs, i));
 	    }
 	}
@@ -1216,15 +1144,14 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	{
 	  if ((clear_bv & X86_XSTATE_SSE))
 	    {
-	      for (i = I387_XMM0_REGNUM (tdep);
-		   i < I387_MXCSR_REGNUM (tdep);
+	      for (i = I387_XMM0_REGNUM (tdep); i < I387_MXCSR_REGNUM (tdep);
 		   i++)
 		regcache->raw_supply (i, zero);
 	    }
 	  else
 	    {
-	      for (i = I387_XMM0_REGNUM (tdep);
-		   i < I387_MXCSR_REGNUM (tdep); i++)
+	      for (i = I387_XMM0_REGNUM (tdep); i < I387_MXCSR_REGNUM (tdep);
+		   i++)
 		regcache->raw_supply (i, FXSAVE_ADDR (tdep, regs, i));
 	    }
 	}
@@ -1234,15 +1161,13 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	{
 	  if ((clear_bv & X86_XSTATE_X87))
 	    {
-	      for (i = I387_ST0_REGNUM (tdep);
-		   i < I387_FCTRL_REGNUM (tdep);
+	      for (i = I387_ST0_REGNUM (tdep); i < I387_FCTRL_REGNUM (tdep);
 		   i++)
 		regcache->raw_supply (i, zero);
 	    }
 	  else
 	    {
-	      for (i = I387_ST0_REGNUM (tdep);
-		   i < I387_FCTRL_REGNUM (tdep);
+	      for (i = I387_ST0_REGNUM (tdep); i < I387_FCTRL_REGNUM (tdep);
 		   i++)
 		regcache->raw_supply (i, FXSAVE_ADDR (tdep, regs, i));
 	    }
@@ -1295,8 +1220,8 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 		int fpreg;
 		int top;
 
-		top = ((FXSAVE_ADDR (tdep, regs,
-				     I387_FSTAT_REGNUM (tdep)))[1] >> 3);
+		top = ((FXSAVE_ADDR (tdep, regs, I387_FSTAT_REGNUM (tdep)))[1]
+		       >> 3);
 		top &= 0x7;
 
 		for (fpreg = 7; fpreg >= 0; fpreg--)
@@ -1305,12 +1230,12 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
 		    if (val[0] & (1 << fpreg))
 		      {
-			int thisreg = (fpreg + 8 - top) % 8 
-				       + I387_ST0_REGNUM (tdep);
+			int thisreg
+			  = (fpreg + 8 - top) % 8 + I387_ST0_REGNUM (tdep);
 			tag = i387_tag (FXSAVE_ADDR (tdep, regs, thisreg));
 		      }
 		    else
-		      tag = 3;		/* Empty */
+		      tag = 3; /* Empty */
 
 		    ftag |= tag << (2 * fpreg);
 		  }
@@ -1344,8 +1269,8 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 /* Similar to i387_collect_fxsave, but use XSAVE extended state.  */
 
 void
-i387_collect_xsave (const struct regcache *regcache, int regnum,
-		    void *xsave, int gcore)
+i387_collect_xsave (const struct regcache *regcache, int regnum, void *xsave,
+		    int gcore)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1355,23 +1280,24 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   ULONGEST initial_xstate_bv, clear_bv, xstate_bv = 0;
   unsigned int i;
   /* See the comment in i387_supply_xsave().  */
-  unsigned int zmm_endlo_regnum = I387_ZMM0H_REGNUM (tdep)
-				  + std::min (tdep->num_zmm_regs, 16);
+  unsigned int zmm_endlo_regnum
+    = I387_ZMM0H_REGNUM (tdep) + std::min (tdep->num_zmm_regs, 16);
+
   enum
-    {
-      x87_ctrl_or_mxcsr = 0x1,
-      x87 = 0x2,
-      sse = 0x4,
-      avxh = 0x8,
-      mpx  = 0x10,
-      avx512_k = 0x20,
-      avx512_zmm_h = 0x40,
-      avx512_ymmh_avx512 = 0x80,
-      avx512_xmm_avx512 = 0x100,
-      pkeys = 0x200,
-      all = x87 | sse | avxh | mpx | avx512_k | avx512_zmm_h
-	    | avx512_ymmh_avx512 | avx512_xmm_avx512 | pkeys
-    } regclass;
+  {
+    x87_ctrl_or_mxcsr = 0x1,
+    x87 = 0x2,
+    sse = 0x4,
+    avxh = 0x8,
+    mpx = 0x10,
+    avx512_k = 0x20,
+    avx512_zmm_h = 0x40,
+    avx512_ymmh_avx512 = 0x80,
+    avx512_xmm_avx512 = 0x100,
+    pkeys = 0x200,
+    all = x87 | sse | avxh | mpx | avx512_k | avx512_zmm_h | avx512_ymmh_avx512
+	  | avx512_xmm_avx512 | pkeys
+  } regclass;
 
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
   gdb_assert (tdep->num_xmm_regs > 0);
@@ -1384,8 +1310,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   else if (regnum >= I387_ZMM0H_REGNUM (tdep)
 	   && regnum < I387_ZMMENDH_REGNUM (tdep))
     regclass = avx512_zmm_h;
-  else if (regnum >= I387_K0_REGNUM (tdep)
-	   && regnum < I387_KEND_REGNUM (tdep))
+  else if (regnum >= I387_K0_REGNUM (tdep) && regnum < I387_KEND_REGNUM (tdep))
     regclass = avx512_k;
   else if (regnum >= I387_YMM16H_REGNUM (tdep)
 	   && regnum < I387_YMMH_AVX512_END_REGNUM (tdep))
@@ -1410,7 +1335,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	   || regnum == I387_MXCSR_REGNUM (tdep))
     regclass = x87_ctrl_or_mxcsr;
   else
-    internal_error (_("invalid i387 regnum %d"), regnum);
+    internal_error (_ ("invalid i387 regnum %d"), regnum);
 
   if (gcore)
     {
@@ -1424,8 +1349,8 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
     }
 
   /* The supported bits in `xstat_bv' are 8 bytes.  */
-  initial_xstate_bv = extract_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs),
-						8, byte_order);
+  initial_xstate_bv
+    = extract_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs), 8, byte_order);
   clear_bv = (~(initial_xstate_bv)) & tdep->xcr0;
 
   /* The XSAVE buffer was filled lazily by the kernel.  Only those
@@ -1443,18 +1368,16 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   if (clear_bv)
     {
       if ((clear_bv & X86_XSTATE_PKRU))
-	for (i = I387_PKRU_REGNUM (tdep);
-	     i < I387_PKEYSEND_REGNUM (tdep); i++)
+	for (i = I387_PKRU_REGNUM (tdep); i < I387_PKEYSEND_REGNUM (tdep); i++)
 	  memset (XSAVE_PKEYS_ADDR (tdep, regs, i), 0, 4);
 
       if ((clear_bv & X86_XSTATE_BNDREGS))
-	for (i = I387_BND0R_REGNUM (tdep);
-	     i < I387_BNDCFGU_REGNUM (tdep); i++)
+	for (i = I387_BND0R_REGNUM (tdep); i < I387_BNDCFGU_REGNUM (tdep); i++)
 	  memset (XSAVE_MPX_ADDR (tdep, regs, i), 0, 16);
 
       if ((clear_bv & X86_XSTATE_BNDCFG))
-	for (i = I387_BNDCFGU_REGNUM (tdep);
-	     i < I387_MPXEND_REGNUM (tdep); i++)
+	for (i = I387_BNDCFGU_REGNUM (tdep); i < I387_MPXEND_REGNUM (tdep);
+	     i++)
 	  memset (XSAVE_MPX_ADDR (tdep, regs, i), 0, 8);
 
       if ((clear_bv & X86_XSTATE_ZMM_H))
@@ -1462,8 +1385,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  memset (XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i), 0, 32);
 
       if ((clear_bv & X86_XSTATE_K))
-	for (i = I387_K0_REGNUM (tdep);
-	     i < I387_KEND_REGNUM (tdep); i++)
+	for (i = I387_K0_REGNUM (tdep); i < I387_KEND_REGNUM (tdep); i++)
 	  memset (XSAVE_AVX512_K_ADDR (tdep, regs, i), 0, 8);
 
       if ((clear_bv & X86_XSTATE_ZMM))
@@ -1479,13 +1401,11 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	}
 
       if ((clear_bv & X86_XSTATE_AVX))
-	for (i = I387_YMM0H_REGNUM (tdep);
-	     i < I387_YMMENDH_REGNUM (tdep); i++)
+	for (i = I387_YMM0H_REGNUM (tdep); i < I387_YMMENDH_REGNUM (tdep); i++)
 	  memset (XSAVE_AVXH_ADDR (tdep, regs, i), 0, 16);
 
       if ((clear_bv & X86_XSTATE_SSE))
-	for (i = I387_XMM0_REGNUM (tdep);
-	     i < I387_MXCSR_REGNUM (tdep); i++)
+	for (i = I387_XMM0_REGNUM (tdep); i < I387_MXCSR_REGNUM (tdep); i++)
 	  memset (FXSAVE_ADDR (tdep, regs, i), 0, 16);
 
       /* The mxcsr register is written into the xsave buffer if either AVX
@@ -1498,12 +1418,10 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       if ((clear_bv & X86_XSTATE_X87))
 	{
-	  for (i = I387_ST0_REGNUM (tdep);
-	       i < I387_FCTRL_REGNUM (tdep); i++)
+	  for (i = I387_ST0_REGNUM (tdep); i < I387_FCTRL_REGNUM (tdep); i++)
 	    memset (FXSAVE_ADDR (tdep, regs, i), 0, 10);
 
-	  for (i = I387_FCTRL_REGNUM (tdep);
-	       i < I387_XMM0_REGNUM (tdep); i++)
+	  for (i = I387_FCTRL_REGNUM (tdep); i < I387_XMM0_REGNUM (tdep); i++)
 	    {
 	      if (i == I387_FCTRL_REGNUM (tdep))
 		store_unsigned_integer (FXSAVE_ADDR (tdep, regs, i), 2,
@@ -1519,8 +1437,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
     {
       /* Check if any PKEYS registers are changed.  */
       if ((tdep->xcr0 & X86_XSTATE_PKRU))
-	for (i = I387_PKRU_REGNUM (tdep);
-	     i < I387_PKEYSEND_REGNUM (tdep); i++)
+	for (i = I387_PKRU_REGNUM (tdep); i < I387_PKEYSEND_REGNUM (tdep); i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = XSAVE_PKEYS_ADDR (tdep, regs, i);
@@ -1533,8 +1450,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       /* Check if any ZMMH registers are changed.  */
       if ((tdep->xcr0 & (X86_XSTATE_ZMM_H | X86_XSTATE_ZMM)))
-	for (i = I387_ZMM0H_REGNUM (tdep);
-	     i < I387_ZMMENDH_REGNUM (tdep); i++)
+	for (i = I387_ZMM0H_REGNUM (tdep); i < I387_ZMMENDH_REGNUM (tdep); i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i);
@@ -1547,8 +1463,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       /* Check if any K registers are changed.  */
       if ((tdep->xcr0 & X86_XSTATE_K))
-	for (i = I387_K0_REGNUM (tdep);
-	     i < I387_KEND_REGNUM (tdep); i++)
+	for (i = I387_K0_REGNUM (tdep); i < I387_KEND_REGNUM (tdep); i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = XSAVE_AVX512_K_ADDR (tdep, regs, i);
@@ -1588,8 +1503,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       /* Check if any upper MPX registers are changed.  */
       if ((tdep->xcr0 & X86_XSTATE_BNDREGS))
-	for (i = I387_BND0R_REGNUM (tdep);
-	     i < I387_BNDCFGU_REGNUM (tdep); i++)
+	for (i = I387_BND0R_REGNUM (tdep); i < I387_BNDCFGU_REGNUM (tdep); i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = XSAVE_MPX_ADDR (tdep, regs, i);
@@ -1602,8 +1516,8 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       /* Check if any upper MPX registers are changed.  */
       if ((tdep->xcr0 & X86_XSTATE_BNDCFG))
-	for (i = I387_BNDCFGU_REGNUM (tdep);
-	     i < I387_MPXEND_REGNUM (tdep); i++)
+	for (i = I387_BNDCFGU_REGNUM (tdep); i < I387_MPXEND_REGNUM (tdep);
+	     i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = XSAVE_MPX_ADDR (tdep, regs, i);
@@ -1616,8 +1530,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       /* Check if any upper YMM registers are changed.  */
       if ((tdep->xcr0 & X86_XSTATE_AVX))
-	for (i = I387_YMM0H_REGNUM (tdep);
-	     i < I387_YMMENDH_REGNUM (tdep); i++)
+	for (i = I387_YMM0H_REGNUM (tdep); i < I387_YMMENDH_REGNUM (tdep); i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = XSAVE_AVXH_ADDR (tdep, regs, i);
@@ -1630,8 +1543,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       /* Check if any SSE registers are changed.  */
       if ((tdep->xcr0 & X86_XSTATE_SSE))
-	for (i = I387_XMM0_REGNUM (tdep);
-	     i < I387_MXCSR_REGNUM (tdep); i++)
+	for (i = I387_XMM0_REGNUM (tdep); i < I387_MXCSR_REGNUM (tdep); i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = FXSAVE_ADDR (tdep, regs, i);
@@ -1663,8 +1575,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	 registers are handled here, the control registers are all handled
 	 later on in this function.  */
       if ((tdep->xcr0 & X86_XSTATE_X87))
-	for (i = I387_ST0_REGNUM (tdep);
-	     i < I387_FCTRL_REGNUM (tdep); i++)
+	for (i = I387_ST0_REGNUM (tdep); i < I387_FCTRL_REGNUM (tdep); i++)
 	  {
 	    regcache->raw_collect (i, raw);
 	    p = FXSAVE_ADDR (tdep, regs, i);
@@ -1683,7 +1594,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
       switch (regclass)
 	{
 	default:
-	  internal_error (_("invalid i387 regclass"));
+	  internal_error (_ ("invalid i387 regclass"));
 
 	case pkeys:
 	  /* This is a PKEYS register.  */
@@ -1796,8 +1707,8 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 		     If they are then we'll attribute this changed MXCSR to
 		     that feature.  If neither feature is enabled, then
 		     we'll attribute this change to the SSE feature.  */
-		  xstate_bv |= (initial_xstate_bv
-				& (X86_XSTATE_AVX | X86_XSTATE_SSE));
+		  xstate_bv
+		    |= (initial_xstate_bv & (X86_XSTATE_AVX | X86_XSTATE_SSE));
 		  if ((xstate_bv & (X86_XSTATE_AVX | X86_XSTATE_SSE)) == 0)
 		    xstate_bv |= X86_XSTATE_SSE;
 		  memcpy (p, raw, 2);
@@ -1812,8 +1723,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
       {
 	/* Most of the FPU control registers occupy only 16 bits in
 	   the xsave extended state.  Give those a special treatment.  */
-	if (i != I387_FIOFF_REGNUM (tdep)
-	    && i != I387_FOOFF_REGNUM (tdep))
+	if (i != I387_FIOFF_REGNUM (tdep) && i != I387_FOOFF_REGNUM (tdep))
 	  {
 	    gdb_byte buf[4];
 
@@ -1873,8 +1783,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
     {
       /* The supported bits in `xstat_bv' are 8 bytes.  */
       initial_xstate_bv |= xstate_bv;
-      store_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs),
-			      8, byte_order,
+      store_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs), 8, byte_order,
 			      initial_xstate_bv);
     }
 }
@@ -1892,8 +1801,8 @@ i387_tag (const gdb_byte *raw)
   integer = raw[7] & 0x80;
   exponent = (((raw[9] & 0x7f) << 8) | raw[8]);
   fraction[0] = ((raw[3] << 24) | (raw[2] << 16) | (raw[1] << 8) | raw[0]);
-  fraction[1] = (((raw[7] & 0x7f) << 24) | (raw[6] << 16)
-		 | (raw[5] << 8) | raw[4]);
+  fraction[1]
+    = (((raw[7] & 0x7f) << 24) | (raw[6] << 16) | (raw[5] << 8) | raw[4]);
 
   if (exponent == 0x7fff)
     {
@@ -1948,7 +1857,6 @@ i387_return_value (struct gdbarch *gdbarch, struct regcache *regcache)
      floating-point register stack to 7, the appropriate value for the
      tag word is 0x3fff.  */
   regcache_raw_write_unsigned (regcache, I387_FTAG_REGNUM (tdep), 0x3fff);
-
 }
 
 /* See i387-tdep.h.  */

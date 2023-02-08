@@ -69,7 +69,7 @@ struct run_time_clock
      supported.  If not supported, then the combined user+kernel time
      is returned in USER and SYSTEM is set to zero.  */
   static void now (user_cpu_time_clock::time_point &user,
-		   system_cpu_time_clock::time_point &system) noexcept;
+                   system_cpu_time_clock::time_point &system) noexcept;
 };
 
 #endif /* COMMON_RUN_TIME_CLOCK_H */

@@ -21,8 +21,10 @@
 #include "gdbsupport/selftest.h"
 #include "tracepoint.h"
 
-namespace selftests {
-namespace tracepoint_tests {
+namespace selftests
+{
+namespace tracepoint_tests
+{
 
 static void
 test_parse_static_tracepoint_marker_definition ()
@@ -62,10 +64,11 @@ test_parse_static_tracepoint_marker_definition ()
 } /* namespace selftests */
 
 void _initialize_tracepoint_selftests ();
+
 void
 _initialize_tracepoint_selftests ()
 {
-  selftests::register_test
-    ("parse_static_tracepoint_marker_definition",
-     selftests::tracepoint_tests::test_parse_static_tracepoint_marker_definition);
+  selftests::register_test ("parse_static_tracepoint_marker_definition",
+			    selftests::tracepoint_tests::
+			      test_parse_static_tracepoint_marker_definition);
 }

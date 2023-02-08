@@ -74,19 +74,19 @@ struct demangle_parse_info
   struct obstack obstack;
 };
 
-
 /* Functions from cp-support.c.  */
 
-extern gdb::unique_xmalloc_ptr<char> cp_canonicalize_string
-  (const char *string);
+extern gdb::unique_xmalloc_ptr<char>
+cp_canonicalize_string (const char *string);
 
-extern gdb::unique_xmalloc_ptr<char> cp_canonicalize_string_no_typedefs
-  (const char *string);
+extern gdb::unique_xmalloc_ptr<char>
+cp_canonicalize_string_no_typedefs (const char *string);
 
 typedef const char *(canonicalization_ftype) (struct type *, void *);
 
-extern gdb::unique_xmalloc_ptr<char> cp_canonicalize_string_full
-  (const char *string, canonicalization_ftype *finder, void *data);
+extern gdb::unique_xmalloc_ptr<char>
+cp_canonicalize_string_full (const char *string,
+			     canonicalization_ftype *finder, void *data);
 
 extern char *cp_class_name_from_physname (const char *physname);
 
@@ -98,24 +98,24 @@ extern unsigned int cp_entire_prefix_len (const char *name);
 
 extern gdb::unique_xmalloc_ptr<char> cp_func_name (const char *full_name);
 
-extern gdb::unique_xmalloc_ptr<char> cp_remove_params
-  (const char *demanged_name);
+extern gdb::unique_xmalloc_ptr<char>
+cp_remove_params (const char *demanged_name);
 
 /* DEMANGLED_NAME is the name of a function, (optionally) including
    parameters and (optionally) a return type.  Return the name of the
    function without parameters or return type, or NULL if we can not
    parse the name.  If COMPLETION_MODE is true, then tolerate a
    non-existing or unbalanced parameter list.  */
-extern gdb::unique_xmalloc_ptr<char> cp_remove_params_if_any
-  (const char *demangled_name, bool completion_mode);
+extern gdb::unique_xmalloc_ptr<char>
+cp_remove_params_if_any (const char *demangled_name, bool completion_mode);
 
 extern std::vector<symbol *> make_symbol_overload_list (const char *,
 							const char *);
 
-extern void add_symbol_overload_list_adl
-  (gdb::array_view<type *> arg_types,
-   const char *func_name,
-   std::vector<symbol *> *overload_list);
+extern void
+add_symbol_overload_list_adl (gdb::array_view<type *> arg_types,
+			      const char *func_name,
+			      std::vector<symbol *> *overload_list);
 
 extern struct type *cp_lookup_rtti_type (const char *name,
 					 const struct block *block);
@@ -128,8 +128,8 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 extern unsigned int cp_search_name_hash (const char *search_name);
 
 /* Implement the "get_symbol_name_matcher" language_defn method for C++.  */
-extern symbol_name_matcher_ftype *cp_get_symbol_name_matcher
-  (const lookup_name_info &lookup_name);
+extern symbol_name_matcher_ftype *
+cp_get_symbol_name_matcher (const lookup_name_info &lookup_name);
 
 /* Functions/variables from cp-namespace.c.  */
 
@@ -139,29 +139,25 @@ extern void cp_scan_for_anonymous_namespaces (struct buildsym_compunit *,
 					      const struct symbol *symbol,
 					      struct objfile *objfile);
 
-extern struct block_symbol cp_lookup_symbol_nonlocal
-     (const struct language_defn *langdef,
-      const char *name,
-      const struct block *block,
-      const domain_enum domain);
-
 extern struct block_symbol
-  cp_lookup_symbol_namespace (const char *the_namespace,
-			      const char *name,
-			      const struct block *block,
-			      const domain_enum domain);
-
-extern struct block_symbol cp_lookup_symbol_imports_or_template
-     (const char *scope,
-      const char *name,
-      const struct block *block,
-      const domain_enum domain);
-
-extern struct block_symbol
-  cp_lookup_nested_symbol (struct type *parent_type,
-			   const char *nested_name,
-			   const struct block *block,
+cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
+			   const char *name, const struct block *block,
 			   const domain_enum domain);
+
+extern struct block_symbol
+cp_lookup_symbol_namespace (const char *the_namespace, const char *name,
+			    const struct block *block,
+			    const domain_enum domain);
+
+extern struct block_symbol
+cp_lookup_symbol_imports_or_template (const char *scope, const char *name,
+				      const struct block *block,
+				      const domain_enum domain);
+
+extern struct block_symbol cp_lookup_nested_symbol (struct type *parent_type,
+						    const char *nested_name,
+						    const struct block *block,
+						    const domain_enum domain);
 
 struct type *cp_lookup_transparent_type (const char *name);
 
@@ -172,14 +168,14 @@ struct type *cp_find_type_baseclass_by_name (struct type *parent_type,
 
 /* Functions from cp-name-parser.y.  */
 
-extern std::unique_ptr<demangle_parse_info> cp_demangled_name_to_comp
-     (const char *demangled_name, std::string *errmsg);
+extern std::unique_ptr<demangle_parse_info>
+cp_demangled_name_to_comp (const char *demangled_name, std::string *errmsg);
 
 /* Convert RESULT to a string.  ESTIMATED_LEN is used only as a guide
    to the length of the result.  */
 
-extern gdb::unique_xmalloc_ptr<char> cp_comp_to_string
-  (struct demangle_component *result, int estimated_len);
+extern gdb::unique_xmalloc_ptr<char>
+cp_comp_to_string (struct demangle_component *result, int estimated_len);
 
 extern void cp_merge_demangle_parse_infos (struct demangle_parse_info *,
 					   struct demangle_component *,

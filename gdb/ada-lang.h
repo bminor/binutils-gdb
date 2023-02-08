@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (ADA_LANG_H)
+#if !defined(ADA_LANG_H)
 #define ADA_LANG_H 1
 
 class frame_info_ptr;
@@ -33,25 +33,22 @@ struct parser_state;
    system and that might consider (confusing) debugging information.
    Each name (a basic regular expression string) is followed by a
    comma.  FIXME: Should be part of a configuration file.  */
-#if defined (__linux__)
-#define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
-   "^[agis]-.*\\.ad[bs]$", \
-   "/lib.*/libpthread\\.so[.0-9]*$", "/lib.*/libpthread\\.a$", \
-   "/lib.*/libc\\.so[.0-9]*$", "/lib.*/libc\\.a$",
+#if defined(__linux__)
+#define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS                \
+  "^[agis]-.*\\.ad[bs]$", "/lib.*/libpthread\\.so[.0-9]*$", \
+    "/lib.*/libpthread\\.a$", "/lib.*/libc\\.so[.0-9]*$", "/lib.*/libc\\.a$",
 #endif
 
-#if !defined (ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS)
+#if !defined(ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS)
 #define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
-   "^unwind-seh.c$", \
-   "^[agis]-.*\\.ad[bs]$",
+  "^unwind-seh.c$", "^[agis]-.*\\.ad[bs]$",
 #endif
 
 /* Names of compiler-generated auxiliary functions probably of no
    interest to users.  Each name (a basic regular expression string)
    is followed by a comma.  */
 #define ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS \
-   "___clean[.$a-zA-Z0-9_]*$", \
-   "___finalizer[.$a-zA-Z0-9_]*$",
+  "___clean[.$a-zA-Z0-9_]*$", "___finalizer[.$a-zA-Z0-9_]*$",
 
 /* The maximum number of frame levels searched for non-local,
    non-global symbols.  This limit exists as a precaution to prevent
@@ -80,25 +77,25 @@ extern const struct ada_opname_map ada_opname_table[];
 
 /* Denotes a type of renaming symbol (see ada_parse_renaming).  */
 enum ada_renaming_category
-  {
-    /* Indicates a symbol that does not encode a renaming.  */
-    ADA_NOT_RENAMING,
+{
+  /* Indicates a symbol that does not encode a renaming.  */
+  ADA_NOT_RENAMING,
 
-    /* For symbols declared
+  /* For symbols declared
 	 Foo : TYPE renamed OBJECT;  */
-    ADA_OBJECT_RENAMING,
+  ADA_OBJECT_RENAMING,
 
-    /* For symbols declared
+  /* For symbols declared
 	 Foo : exception renames EXCEPTION;  */
-    ADA_EXCEPTION_RENAMING,
-    /* For packages declared
+  ADA_EXCEPTION_RENAMING,
+  /* For packages declared
 	  package Foo renames PACKAGE; */
-    ADA_PACKAGE_RENAMING,
-    /* For subprograms declared
+  ADA_PACKAGE_RENAMING,
+  /* For subprograms declared
 	  SUBPROGRAM_SPEC renames SUBPROGRAM;
        (Currently not used).  */
-    ADA_SUBPROGRAM_RENAMING
-  };
+  ADA_SUBPROGRAM_RENAMING
+};
 
 /* The different types of catchpoints that we introduced for catching
    Ada exceptions.  */
@@ -150,12 +147,11 @@ struct ada_task_info
 };
 
 extern int ada_get_field_index (const struct type *type,
-				const char *field_name,
-				int maybe_missing);
+				const char *field_name, int maybe_missing);
 
-extern int ada_parse (struct parser_state *);    /* Defined in ada-exp.y */
+extern int ada_parse (struct parser_state *); /* Defined in ada-exp.y */
 
-			/* Defined in ada-typeprint.c */
+/* Defined in ada-typeprint.c */
 extern void ada_print_type (struct type *, const char *, struct ui_file *, int,
 			    int, const struct type_print_options *);
 
@@ -170,7 +166,7 @@ extern void ada_value_print_inner (struct value *, struct ui_file *, int,
 extern void ada_value_print (struct value *, struct ui_file *,
 			     const struct value_print_options *);
 
-				/* Defined in ada-lang.c */
+/* Defined in ada-lang.c */
 
 extern void ada_emit_char (int, struct type *, struct ui_file *, int, int);
 
@@ -223,24 +219,23 @@ extern const char *ada_decode_symbol (const struct general_symbol_info *);
 extern std::string ada_decode (const char *name, bool wrap = true,
 			       bool operators = true);
 
-extern std::vector<struct block_symbol> ada_lookup_symbol_list
-     (const char *, const struct block *, domain_enum);
+extern std::vector<struct block_symbol>
+ada_lookup_symbol_list (const char *, const struct block *, domain_enum);
 
-extern struct block_symbol ada_lookup_symbol (const char *,
-					      const struct block *,
-					      domain_enum);
+extern struct block_symbol
+ada_lookup_symbol (const char *, const struct block *, domain_enum);
 
-extern void ada_lookup_encoded_symbol
-  (const char *name, const struct block *block, domain_enum domain,
-   struct block_symbol *symbol_info);
+extern void ada_lookup_encoded_symbol (const char *name,
+				       const struct block *block,
+				       domain_enum domain,
+				       struct block_symbol *symbol_info);
 
 extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *,
 							     objfile *);
 
 extern int ada_scan_number (const char *, int, LONGEST *, int *);
 
-extern struct value *ada_value_primitive_field (struct value *arg1,
-						int offset,
+extern struct value *ada_value_primitive_field (struct value *arg1, int offset,
 						int fieldno,
 						struct type *arg_type);
 
@@ -251,9 +246,8 @@ extern int ada_is_ignored_field (struct type *, int);
 extern int ada_is_constrained_packed_array_type (struct type *);
 
 extern struct value *ada_value_primitive_packed_val (struct value *,
-						     const gdb_byte *,
-						     long, int, int,
-						     struct type *);
+						     const gdb_byte *, long,
+						     int, int, struct type *);
 
 extern struct type *ada_coerce_to_simple_array_type (struct type *);
 
@@ -296,18 +290,15 @@ extern struct type *ada_to_fixed_type (struct type *, const gdb_byte *,
 
 extern struct value *ada_to_fixed_value (struct value *val);
 
-extern struct type *ada_template_to_fixed_record_type_1 (struct type *type,
-							 const gdb_byte *valaddr,
-							 CORE_ADDR address,
-							 struct value *dval0,
-							 int keep_dynamic_fields);
+extern struct type *ada_template_to_fixed_record_type_1 (
+  struct type *type, const gdb_byte *valaddr, CORE_ADDR address,
+  struct value *dval0, int keep_dynamic_fields);
 
 extern int ada_name_prefix_len (const char *);
 
 extern const char *ada_type_name (struct type *);
 
-extern struct type *ada_find_parallel_type (struct type *,
-					    const char *suffix);
+extern struct type *ada_find_parallel_type (struct type *, const char *suffix);
 
 extern bool get_int_var_value (const char *, LONGEST &value);
 
@@ -331,9 +322,8 @@ extern void ada_print_scalar (struct type *, LONGEST, struct ui_file *);
 
 extern int ada_is_range_type_name (const char *);
 
-extern enum ada_renaming_category ada_parse_renaming (struct symbol *,
-						      const char **,
-						      int *, const char **);
+extern enum ada_renaming_category
+ada_parse_renaming (struct symbol *, const char **, int *, const char **);
 
 extern void ada_find_printable_frame (frame_info_ptr fi);
 
@@ -341,10 +331,10 @@ extern char *ada_breakpoint_rewrite (char *, int *);
 
 extern char *ada_main_name (void);
 
-extern void create_ada_exception_catchpoint
-  (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,
-   const std::string &excep_string, const std::string &cond_string, int tempflag,
-   int disabled, int from_tty);
+extern void create_ada_exception_catchpoint (
+  struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,
+  const std::string &excep_string, const std::string &cond_string,
+  int tempflag, int disabled, int from_tty);
 
 /* Return true if BP is an Ada catchpoint.  */
 
@@ -360,7 +350,7 @@ struct ada_exc_info
   /* The address of the symbol corresponding to that exception.  */
   CORE_ADDR addr;
 
-  bool operator< (const ada_exc_info &) const;
+  bool operator<(const ada_exc_info &) const;
   bool operator== (const ada_exc_info &) const;
 };
 
@@ -376,13 +366,12 @@ extern int ada_get_task_number (thread_info *thread);
 
 typedef gdb::function_view<void (struct ada_task_info *task)>
   ada_task_list_iterator_ftype;
-extern void iterate_over_live_ada_tasks
-  (ada_task_list_iterator_ftype iterator);
+extern void
+iterate_over_live_ada_tasks (ada_task_list_iterator_ftype iterator);
 
 extern const char *ada_get_tcb_types_info (void);
 
-extern void print_ada_task_info (struct ui_out *uiout,
-				 const char *taskno_str,
+extern void print_ada_task_info (struct ui_out *uiout, const char *taskno_str,
 				 struct inferior *inf);
 
 /* Look for a symbol for an overloaded operator for the operation OP.
@@ -391,8 +380,8 @@ extern void print_ada_task_info (struct ui_out *uiout,
    "null" block_symbol if no such operator is found.  */
 
 extern block_symbol ada_find_operator_symbol (enum exp_opcode op,
-					      bool parse_completion,
-					      int nargs, value *argvec[]);
+					      bool parse_completion, int nargs,
+					      value *argvec[]);
 
 /* Resolve a function call, selecting among possible function symbols.
    SYM and BLOCK are passed to ada_lookup_symbol_list.  CONTEXT_TYPE
@@ -404,8 +393,8 @@ extern block_symbol ada_find_operator_symbol (enum exp_opcode op,
 extern block_symbol ada_resolve_funcall (struct symbol *sym,
 					 const struct block *block,
 					 struct type *context_type,
-					 bool parse_completion,
-					 int nargs, value *argvec[],
+					 bool parse_completion, int nargs,
+					 value *argvec[],
 					 innermost_block_tracker *tracker);
 
 /* Resolve a symbol reference, selecting among possible values.  SYM
@@ -416,12 +405,10 @@ extern block_symbol ada_resolve_funcall (struct symbol *sym,
    through ada_resolve_function.  This returns the chosen symbol and
    will update TRACKER accordingly.  */
 
-extern block_symbol ada_resolve_variable (struct symbol *sym,
-					  const struct block *block,
-					  struct type *context_type,
-					  bool parse_completion,
-					  int deprocedure_p,
-					  innermost_block_tracker *tracker);
+extern block_symbol
+ada_resolve_variable (struct symbol *sym, const struct block *block,
+		      struct type *context_type, bool parse_completion,
+		      int deprocedure_p, innermost_block_tracker *tracker);
 
 /* The type of nth index in arrays of given type (n numbering from 1).
    Does not examine memory.  Throws an error if N is invalid or TYPE

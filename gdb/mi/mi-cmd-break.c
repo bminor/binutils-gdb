@@ -35,9 +35,9 @@
 #include "tracepoint.h"
 
 enum
-  {
-    FROM_TTY = 0
-  };
+{
+  FROM_TTY = 0
+};
 
 /* True if MI breakpoint observers have been registered.  */
 
@@ -66,11 +66,11 @@ breakpoint_notify (struct breakpoint *b)
 }
 
 enum bp_type
-  {
-    REG_BP,
-    HW_BP,
-    REGEXP_BP
-  };
+{
+  REG_BP,
+  HW_BP,
+  REGEXP_BP
+};
 
 /* Arrange for all new breakpoints and catchpoints to be reported to
    CURRENT_UIOUT until the destructor of the returned scoped_restore
@@ -82,7 +82,7 @@ enum bp_type
 scoped_restore_tmpl<int>
 setup_breakpoint_reporting (void)
 {
-  if (! mi_breakpoint_observers_installed)
+  if (!mi_breakpoint_observers_installed)
     {
       gdb::observers::breakpoint_created.attach (breakpoint_notify,
 						 "mi-cmd-break");
@@ -91,7 +91,6 @@ setup_breakpoint_reporting (void)
 
   return make_scoped_restore (&mi_can_breakpoint_notify, 1);
 }
-
 
 /* Convert arguments in ARGV to the string in "format",argv,argv...
    and return it.  */
@@ -182,39 +181,44 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   location_spec_up locspec;
   const struct breakpoint_ops *ops;
   int is_explicit = 0;
-  std::unique_ptr<explicit_location_spec> explicit_loc
-    (new explicit_location_spec ());
+  std::unique_ptr<explicit_location_spec> explicit_loc (
+    new explicit_location_spec ());
   std::string extra_string;
   bool force_condition = false;
 
   enum opt
-    {
-      HARDWARE_OPT, TEMP_OPT, CONDITION_OPT,
-      IGNORE_COUNT_OPT, THREAD_OPT, PENDING_OPT, DISABLE_OPT,
-      TRACEPOINT_OPT,
-      FORCE_CONDITION_OPT,
-      QUALIFIED_OPT,
-      EXPLICIT_SOURCE_OPT, EXPLICIT_FUNC_OPT,
-      EXPLICIT_LABEL_OPT, EXPLICIT_LINE_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"h", HARDWARE_OPT, 0},
-    {"t", TEMP_OPT, 0},
-    {"c", CONDITION_OPT, 1},
-    {"i", IGNORE_COUNT_OPT, 1},
-    {"p", THREAD_OPT, 1},
-    {"f", PENDING_OPT, 0},
-    {"d", DISABLE_OPT, 0},
-    {"a", TRACEPOINT_OPT, 0},
-    {"-force-condition", FORCE_CONDITION_OPT, 0},
-    {"-qualified", QUALIFIED_OPT, 0},
-    {"-source" , EXPLICIT_SOURCE_OPT, 1},
-    {"-function", EXPLICIT_FUNC_OPT, 1},
-    {"-label", EXPLICIT_LABEL_OPT, 1},
-    {"-line", EXPLICIT_LINE_OPT, 1},
-    { 0, 0, 0 }
+    HARDWARE_OPT,
+    TEMP_OPT,
+    CONDITION_OPT,
+    IGNORE_COUNT_OPT,
+    THREAD_OPT,
+    PENDING_OPT,
+    DISABLE_OPT,
+    TRACEPOINT_OPT,
+    FORCE_CONDITION_OPT,
+    QUALIFIED_OPT,
+    EXPLICIT_SOURCE_OPT,
+    EXPLICIT_FUNC_OPT,
+    EXPLICIT_LABEL_OPT,
+    EXPLICIT_LINE_OPT
   };
+  static const struct mi_opt opts[]
+    = { { "h", HARDWARE_OPT, 0 },
+	{ "t", TEMP_OPT, 0 },
+	{ "c", CONDITION_OPT, 1 },
+	{ "i", IGNORE_COUNT_OPT, 1 },
+	{ "p", THREAD_OPT, 1 },
+	{ "f", PENDING_OPT, 0 },
+	{ "d", DISABLE_OPT, 0 },
+	{ "a", TRACEPOINT_OPT, 0 },
+	{ "-force-condition", FORCE_CONDITION_OPT, 0 },
+	{ "-qualified", QUALIFIED_OPT, 0 },
+	{ "-source", EXPLICIT_SOURCE_OPT, 1 },
+	{ "-function", EXPLICIT_FUNC_OPT, 1 },
+	{ "-label", EXPLICIT_LABEL_OPT, 1 },
+	{ "-line", EXPLICIT_LINE_OPT, 1 },
+	{ 0, 0, 0 } };
 
   /* Parse arguments. It could be -r or -h or -t, <location> or ``--''
      to denote the end of the option list. */
@@ -223,8 +227,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 
   while (1)
     {
-      int opt = mi_getopt ("-break-insert", argc, argv,
-			   opts, &oind, &oarg);
+      int opt = mi_getopt ("-break-insert", argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -279,16 +282,16 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
     }
 
   if (oind >= argc && !is_explicit)
-    error (_("-%s-insert: Missing <location>"),
+    error (_ ("-%s-insert: Missing <location>"),
 	   dprintf ? "dprintf" : "break");
   if (dprintf)
     {
       int format_num = is_explicit ? oind : oind + 1;
 
       if (hardware || tracepoint)
-	error (_("-dprintf-insert: does not support -h or -a"));
+	error (_ ("-dprintf-insert: does not support -h or -a"));
       if (format_num >= argc)
-	error (_("-dprintf-insert: Missing <format>"));
+	error (_ ("-dprintf-insert: Missing <format>"));
 
       extra_string = mi_argv_to_format (argv + format_num, argc - format_num);
       address = argv[oind];
@@ -298,12 +301,12 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
       if (is_explicit)
 	{
 	  if (oind < argc)
-	    error (_("-break-insert: Garbage following explicit location"));
+	    error (_ ("-break-insert: Garbage following explicit location"));
 	}
       else
 	{
 	  if (oind < argc - 1)
-	    error (_("-break-insert: Garbage following <location>"));
+	    error (_ ("-break-insert: Garbage following <location>"));
 	  address = argv[oind];
 	}
     }
@@ -342,8 +345,9 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	  && explicit_loc->function_name == NULL
 	  && explicit_loc->label_name == NULL
 	  && explicit_loc->line_offset.sign == LINE_OFFSET_UNKNOWN)
-	error (_("-%s-insert: --source option requires --function, --label,"
-		 " or --line"), dprintf ? "dprintf" : "break");
+	error (_ ("-%s-insert: --source option requires --function, --label,"
+		  " or --line"),
+	       dprintf ? "dprintf" : "break");
 
       explicit_loc->func_name_match_type = match_type;
 
@@ -354,17 +358,15 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
       locspec = string_to_location_spec_basic (&address, current_language,
 					       match_type);
       if (*address)
-	error (_("Garbage '%s' at end of location"), address);
+	error (_ ("Garbage '%s' at end of location"), address);
     }
 
   create_breakpoint (get_current_arch (), locspec.get (), condition, thread,
-		     extra_string.c_str (),
-		     force_condition,
-		     0 /* condition and thread are valid.  */,
-		     temp_p, type_wanted,
-		     ignore_count,
-		     pending ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
-		     ops, 0, enabled, 0, 0);
+		     extra_string.c_str (), force_condition,
+		     0 /* condition and thread are valid.  */, temp_p,
+		     type_wanted, ignore_count,
+		     pending ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE, ops, 0,
+		     enabled, 0, 0);
 }
 
 /* Implements the -break-insert command.
@@ -392,15 +394,12 @@ void
 mi_cmd_break_condition (const char *command, char **argv, int argc)
 {
   enum option
-    {
-      FORCE_CONDITION_OPT,
-    };
-
-  static const struct mi_opt opts[] =
   {
-    {"-force", FORCE_CONDITION_OPT, 0},
-    { 0, 0, 0 }
+    FORCE_CONDITION_OPT,
   };
+
+  static const struct mi_opt opts[]
+    = { { "-force", FORCE_CONDITION_OPT, 0 }, { 0, 0, 0 } };
 
   /* Parse arguments.  */
   int oind = 0;
@@ -409,8 +408,7 @@ mi_cmd_break_condition (const char *command, char **argv, int argc)
 
   while (true)
     {
-      int opt = mi_getopt ("-break-condition", argc, argv,
-			   opts, &oind, &oarg);
+      int opt = mi_getopt ("-break-condition", argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
 
@@ -424,7 +422,7 @@ mi_cmd_break_condition (const char *command, char **argv, int argc)
 
   /* There must be at least one more arg: a bpnum.  */
   if (oind >= argc)
-    error (_("-break-condition: Missing the <number> argument"));
+    error (_ ("-break-condition: Missing the <number> argument"));
 
   int bpnum = atoi (argv[oind]);
 
@@ -456,7 +454,7 @@ mi_cmd_break_passcount (const char *command, char **argv, int argc)
   struct tracepoint *t;
 
   if (argc != 2)
-    error (_("Usage: tracepoint-number passcount"));
+    error (_ ("Usage: tracepoint-number passcount"));
 
   n = atoi (argv[0]);
   p = atoi (argv[1]);
@@ -469,7 +467,7 @@ mi_cmd_break_passcount (const char *command, char **argv, int argc)
     }
   else
     {
-      error (_("Could not find tracepoint %d"), n);
+      error (_ ("Could not find tracepoint %d"), n);
     }
 }
 
@@ -484,16 +482,14 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
 {
   char *expr = NULL;
   enum wp_type type = REG_WP;
+
   enum opt
-    {
-      READ_OPT, ACCESS_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"r", READ_OPT, 0},
-    {"a", ACCESS_OPT, 0},
-    { 0, 0, 0 }
+    READ_OPT,
+    ACCESS_OPT
   };
+  static const struct mi_opt opts[]
+    = { { "r", READ_OPT, 0 }, { "a", ACCESS_OPT, 0 }, { 0, 0, 0 } };
 
   /* Parse arguments. */
   int oind = 0;
@@ -501,8 +497,7 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
 
   while (1)
     {
-      int opt = mi_getopt ("-break-watch", argc, argv,
-			   opts, &oind, &oarg);
+      int opt = mi_getopt ("-break-watch", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -517,9 +512,9 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
 	}
     }
   if (oind >= argc)
-    error (_("-break-watch: Missing <expression>"));
+    error (_ ("-break-watch: Missing <expression>"));
   if (oind < argc - 1)
-    error (_("-break-watch: Garbage following <expression>"));
+    error (_ ("-break-watch: Garbage following <expression>"));
   expr = argv[oind];
 
   /* Now we have what we need, let's insert the watchpoint!  */
@@ -535,7 +530,7 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
       awatch_command_wrapper (expr, FROM_TTY, false);
       break;
     default:
-      error (_("-break-watch: Unknown watchpoint type."));
+      error (_ ("-break-watch: Unknown watchpoint type."));
     }
 }
 
@@ -548,39 +543,33 @@ mi_cmd_break_commands (const char *command, char **argv, int argc)
   struct breakpoint *b;
 
   if (argc < 1)
-    error (_("USAGE: %s <BKPT> [<COMMAND> [<COMMAND>...]]"), command);
+    error (_ ("USAGE: %s <BKPT> [<COMMAND> [<COMMAND>...]]"), command);
 
   bnum = strtol (argv[0], &endptr, 0);
   if (endptr == argv[0])
-    error (_("breakpoint number argument \"%s\" is not a number."),
-	   argv[0]);
+    error (_ ("breakpoint number argument \"%s\" is not a number."), argv[0]);
   else if (*endptr != '\0')
-    error (_("junk at the end of breakpoint number argument \"%s\"."),
+    error (_ ("junk at the end of breakpoint number argument \"%s\"."),
 	   argv[0]);
 
   b = get_breakpoint (bnum);
   if (b == NULL)
-    error (_("breakpoint %d not found."), bnum);
+    error (_ ("breakpoint %d not found."), bnum);
 
   int count = 1;
-  auto reader
-    = [&] (std::string &buffer)
-      {
-	const char *result = nullptr;
-	if (count < argc)
-	  result = argv[count++];
-	return result;
-      };
+  auto reader = [&] (std::string &buffer) {
+    const char *result = nullptr;
+    if (count < argc)
+      result = argv[count++];
+    return result;
+  };
 
   if (is_tracepoint (b))
-    break_command = read_command_lines_1 (reader, 1,
-					  [=] (const char *line)
-					    {
-					      validate_actionline (line, b);
-					    });
+    break_command = read_command_lines_1 (reader, 1, [=] (const char *line) {
+      validate_actionline (line, b);
+    });
   else
     break_command = read_command_lines_1 (reader, 1, 0);
 
   breakpoint_set_commands (b, std::move (break_command));
 }
-

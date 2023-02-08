@@ -26,13 +26,10 @@ class scoped_restore_base
 public:
   /* This informs the (scoped_restore_tmpl<T>) dtor that you no longer
      want the original value restored.  */
-  void release () const
-  { m_saved_var = NULL; }
+  void release () const { m_saved_var = NULL; }
 
 protected:
-  scoped_restore_base (void *saved_var)
-    : m_saved_var (saved_var)
-  {}
+  scoped_restore_base (void *saved_var) : m_saved_var (saved_var) {}
 
   /* The type-erased saved variable.  This is here so that clients can
      call release() on a "scoped_restore" local, which is a typedef to
@@ -49,8 +46,7 @@ typedef const scoped_restore_base &scoped_restore;
 template<typename T>
 class scoped_restore_tmpl : public scoped_restore_base
 {
- public:
-
+public:
   /* Create a new scoped_restore object that saves the current value
      of *VAR.  *VAR will be restored when this scoped_restore object
      is destroyed.  */
@@ -65,7 +61,7 @@ class scoped_restore_tmpl : public scoped_restore_base
      scoped_restore object is destroyed.  This is templated on T2 to
      allow passing VALUEs of types convertible to T.
      E.g.: T='base'; T2='derived'.  */
-  template <typename T2>
+  template<typename T2>
   scoped_restore_tmpl (T *var, T2 value)
     : scoped_restore_base (var),
       m_saved_value (*var)
@@ -74,7 +70,7 @@ class scoped_restore_tmpl : public scoped_restore_base
   }
 
   scoped_restore_tmpl (const scoped_restore_tmpl<T> &other)
-    : scoped_restore_base {other.m_saved_var},
+    : scoped_restore_base { other.m_saved_var },
       m_saved_value (other.m_saved_value)
   {
     other.m_saved_var = NULL;
@@ -89,8 +85,7 @@ class scoped_restore_tmpl : public scoped_restore_base
 private:
   /* Return a pointer to the saved variable with its type
      restored.  */
-  T *saved_var ()
-  { return static_cast<T *> (m_saved_var); }
+  T *saved_var () { return static_cast<T *> (m_saved_var); }
 
   /* No need for this.  It is intentionally not defined anywhere.  */
   scoped_restore_tmpl &operator= (const scoped_restore_tmpl &);
@@ -102,7 +97,8 @@ private:
 /* Make a scoped_restore.  This is useful because it lets template
    argument deduction work.  */
 template<typename T>
-scoped_restore_tmpl<T> make_scoped_restore (T *var)
+scoped_restore_tmpl<T>
+make_scoped_restore (T *var)
 {
   return scoped_restore_tmpl<T> (var);
 }
@@ -110,7 +106,8 @@ scoped_restore_tmpl<T> make_scoped_restore (T *var)
 /* Make a scoped_restore.  This is useful because it lets template
    argument deduction work.  */
 template<typename T, typename T2>
-scoped_restore_tmpl<T> make_scoped_restore (T *var, T2 value)
+scoped_restore_tmpl<T>
+make_scoped_restore (T *var, T2 value)
 {
   return scoped_restore_tmpl<T> (var, value);
 }

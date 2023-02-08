@@ -125,13 +125,10 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 
   gdb_assert (num_handles <= MAXIMUM_WAIT_OBJECTS);
 
-  event = WaitForMultipleObjects (num_handles,
-				  handles,
-				  FALSE,
-				  timeout
-				  ? (timeout->tv_sec * 1000
-				     + timeout->tv_usec / 1000)
-				  : INFINITE);
+  event = WaitForMultipleObjects (num_handles, handles, FALSE,
+				  timeout ? (timeout->tv_sec * 1000
+					     + timeout->tv_usec / 1000)
+					  : INFINITE);
   /* EVENT can only be a value in the WAIT_ABANDONED_0 range if the
      HANDLES included an abandoned mutex.  Since GDB doesn't use
      mutexes, that should never occur.  */
@@ -213,7 +210,7 @@ static int mingw_console_initialized;
 static HANDLE hstdout = INVALID_HANDLE_VALUE;
 
 /* Text attribute to use for normal text (the "none" pseudo-color).  */
-static SHORT  norm_attr;
+static SHORT norm_attr;
 
 /* The most recently applied style.  */
 static ui_file_style last_style;
@@ -226,7 +223,7 @@ gdb_console_fputs (const char *linebuf, FILE *fstream)
 {
   if (!mingw_console_initialized)
     {
-      hstdout = (HANDLE)_get_osfhandle (fileno (fstream));
+      hstdout = (HANDLE) _get_osfhandle (fileno (fstream));
       DWORD cmode;
       CONSOLE_SCREEN_BUFFER_INFO csbi;
 
@@ -247,23 +244,23 @@ gdb_console_fputs (const char *linebuf, FILE *fstream)
 
   /* Mapping between 8 ANSI colors and Windows console attributes.  */
   static int fg_color[] = {
-    0,					/* black */
-    FOREGROUND_RED,			/* red */
-    FOREGROUND_GREEN,			/* green */
-    FOREGROUND_GREEN | FOREGROUND_RED,	/* yellow */
-    FOREGROUND_BLUE,			/* blue */
-    FOREGROUND_BLUE | FOREGROUND_RED,	/* magenta */
-    FOREGROUND_BLUE | FOREGROUND_GREEN, /* cyan */
+    0,							/* black */
+    FOREGROUND_RED,					/* red */
+    FOREGROUND_GREEN,					/* green */
+    FOREGROUND_GREEN | FOREGROUND_RED,			/* yellow */
+    FOREGROUND_BLUE,					/* blue */
+    FOREGROUND_BLUE | FOREGROUND_RED,			/* magenta */
+    FOREGROUND_BLUE | FOREGROUND_GREEN,			/* cyan */
     FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE /* gray */
   };
   static int bg_color[] = {
-    0,					/* black */
-    BACKGROUND_RED,			/* red */
-    BACKGROUND_GREEN,			/* green */
-    BACKGROUND_GREEN | BACKGROUND_RED,	/* yellow */
-    BACKGROUND_BLUE,			/* blue */
-    BACKGROUND_BLUE | BACKGROUND_RED,	/* magenta */
-    BACKGROUND_BLUE | BACKGROUND_GREEN, /* cyan */
+    0,							/* black */
+    BACKGROUND_RED,					/* red */
+    BACKGROUND_GREEN,					/* green */
+    BACKGROUND_GREEN | BACKGROUND_RED,			/* yellow */
+    BACKGROUND_BLUE,					/* blue */
+    BACKGROUND_BLUE | BACKGROUND_RED,			/* magenta */
+    BACKGROUND_BLUE | BACKGROUND_GREEN,			/* cyan */
     BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE /* gray */
   };
 
@@ -271,13 +268,13 @@ gdb_console_fputs (const char *linebuf, FILE *fstream)
   unsigned char c;
   size_t n_read;
 
-  for ( ; (c = *linebuf) != 0; linebuf += n_read)
+  for (; (c = *linebuf) != 0; linebuf += n_read)
     {
       if (c == '\033')
 	{
 	  fflush (fstream);
 	  bool parsed = style.parse (linebuf, &n_read);
-	  if (n_read <= 0)	/* should never happen */
+	  if (n_read <= 0) /* should never happen */
 	    n_read = 1;
 	  if (!parsed)
 	    {
@@ -360,8 +357,8 @@ gdb_console_fputs (const char *linebuf, FILE *fstream)
 
 		  FillConsoleOutputAttribute (hstdout, norm_attr, nchars,
 					      start_pos, &written);
-		  FillConsoleOutputCharacter (hstdout, ' ', nchars,
-					      start_pos, &written);
+		  FillConsoleOutputCharacter (hstdout, ' ', nchars, start_pos,
+					      &written);
 		}
 	    }
 	  fputc (c, fstream);

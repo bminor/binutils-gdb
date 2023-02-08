@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "defs.h"
 #include "regcache.h"
 #include "sentinel-frame.h"
@@ -32,8 +31,8 @@ struct frame_unwind_cache
 void *
 sentinel_frame_cache (struct regcache *regcache)
 {
-  struct frame_unwind_cache *cache = 
-    FRAME_OBSTACK_ZALLOC (struct frame_unwind_cache);
+  struct frame_unwind_cache *cache
+    = FRAME_OBSTACK_ZALLOC (struct frame_unwind_cache);
 
   cache->regcache = regcache;
   return cache;
@@ -43,8 +42,7 @@ sentinel_frame_cache (struct regcache *regcache)
 
 static struct value *
 sentinel_frame_prev_register (frame_info_ptr this_frame,
-			      void **this_prologue_cache,
-			      int regnum)
+			      void **this_prologue_cache, int regnum)
 {
   struct frame_unwind_cache *cache
     = (struct frame_unwind_cache *) *this_prologue_cache;
@@ -57,14 +55,13 @@ sentinel_frame_prev_register (frame_info_ptr this_frame,
 }
 
 static void
-sentinel_frame_this_id (frame_info_ptr this_frame,
-			void **this_prologue_cache,
+sentinel_frame_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
 			struct frame_id *this_id)
 {
   /* The sentinel frame is used as a starting point for creating the
      previous (inner most) frame.  That frame's THIS_ID method will be
      called to determine the inner most frame's ID.  Not this one.  */
-  internal_error (_("sentinel_frame_this_id called"));
+  internal_error (_ ("sentinel_frame_this_id called"));
 }
 
 static struct gdbarch *
@@ -77,8 +74,7 @@ sentinel_frame_prev_arch (frame_info_ptr this_frame,
   return cache->regcache->arch ();
 }
 
-const struct frame_unwind sentinel_frame_unwind =
-{
+const struct frame_unwind sentinel_frame_unwind = {
   "sentinel",
   SENTINEL_FRAME,
   default_frame_unwind_stop_reason,

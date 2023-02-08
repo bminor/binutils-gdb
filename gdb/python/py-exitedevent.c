@@ -35,14 +35,16 @@ create_exited_event_object (const LONGEST *exit_code, struct inferior *inf)
       if (exit_code_obj == NULL)
 	return NULL;
       if (evpy_add_attribute (exited_event.get (), "exit_code",
-			      exit_code_obj.get ()) < 0)
+			      exit_code_obj.get ())
+	  < 0)
 	return NULL;
     }
 
   gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (inf);
-  if (inf_obj == NULL || evpy_add_attribute (exited_event.get (),
-					     "inferior",
-					     (PyObject *) inf_obj.get ()) < 0)
+  if (inf_obj == NULL
+      || evpy_add_attribute (exited_event.get (), "inferior",
+			     (PyObject *) inf_obj.get ())
+	   < 0)
     return NULL;
 
   return exited_event;

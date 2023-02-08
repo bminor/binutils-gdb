@@ -31,26 +31,25 @@
    If the trampoline function name can not be identified, we resort to reading
    memory from the process in order to identify it.  */
 
-static const gdb_byte gnu_sigtramp_code[] =
-{
-/* rpc_wait_trampoline: */
-  0xb8, 0xe7, 0xff, 0xff, 0xff,			/* mov    $-25,%eax */
-  0x9a, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00,	/* lcall  $7,$0 */
-  0x89, 0x01,					/* movl   %eax, (%ecx) */
-  0x89, 0xdc,					/* movl   %ebx, %esp */
+static const gdb_byte gnu_sigtramp_code[] = {
+  /* rpc_wait_trampoline: */
+  0xb8, 0xe7, 0xff, 0xff, 0xff,		    /* mov    $-25,%eax */
+  0x9a, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00, /* lcall  $7,$0 */
+  0x89, 0x01,				    /* movl   %eax, (%ecx) */
+  0x89, 0xdc,				    /* movl   %ebx, %esp */
 
-/* trampoline: */
-  0xff, 0xd2,					/* call   *%edx */
-/* RA HERE */
-  0x83, 0xc4, 0x0c,				/* addl   $12, %esp */
-  0xc3,						/* ret */
+  /* trampoline: */
+  0xff, 0xd2,	    /* call   *%edx */
+		    /* RA HERE */
+  0x83, 0xc4, 0x0c, /* addl   $12, %esp */
+  0xc3,		    /* ret */
 
-/* firewall: */
-  0xf4,						/* hlt */
+  /* firewall: */
+  0xf4, /* hlt */
 };
 
 #define GNU_SIGTRAMP_LEN (sizeof gnu_sigtramp_code)
-#define GNU_SIGTRAMP_TAIL 5			/* length of tail after RA */
+#define GNU_SIGTRAMP_TAIL 5 /* length of tail after RA */
 
 /* If THIS_FRAME is a sigtramp routine, return the address of the
    start of the routine.  Otherwise, return 0.  */
@@ -120,7 +119,7 @@ i386_gnu_sigcontext_addr (frame_info_ptr this_frame)
       return sigcontext_addr + I386_GNU_SIGCONTEXT_THREAD_STATE_OFFSET;
     }
 
-  error (_("Couldn't recognize signal trampoline."));
+  error (_ ("Couldn't recognize signal trampoline."));
   return 0;
 }
 
@@ -129,45 +128,43 @@ i386_gnu_sigcontext_addr (frame_info_ptr this_frame)
    and GDB's register cache layout.  */
 
 /* From <bits/sigcontext.h>.  */
-static int i386_gnu_sc_reg_offset[] =
-{
-  11 * 4,			/* %eax */
-  10 * 4,			/* %ecx */
-  9 * 4,			/* %edx */
-  8 * 4,			/* %ebx */
-  7 * 4,			/* %esp */
-  6 * 4,			/* %ebp */
-  5 * 4,			/* %esi */
-  4 * 4,			/* %edi */
-  12 * 4,			/* %eip */
-  14 * 4,			/* %eflags */
-  13 * 4,			/* %cs */
-  16 * 4,			/* %ss */
-  3 * 4,			/* %ds */
-  2 * 4,			/* %es */
-  1 * 4,			/* %fs */
-  0 * 4				/* %gs */
+static int i386_gnu_sc_reg_offset[] = {
+  11 * 4, /* %eax */
+  10 * 4, /* %ecx */
+  9 * 4,  /* %edx */
+  8 * 4,  /* %ebx */
+  7 * 4,  /* %esp */
+  6 * 4,  /* %ebp */
+  5 * 4,  /* %esi */
+  4 * 4,  /* %edi */
+  12 * 4, /* %eip */
+  14 * 4, /* %eflags */
+  13 * 4, /* %cs */
+  16 * 4, /* %ss */
+  3 * 4,  /* %ds */
+  2 * 4,  /* %es */
+  1 * 4,  /* %fs */
+  0 * 4	  /* %gs */
 };
 
 /* From <sys/ucontext.h>.  */
-static int i386gnu_gregset_reg_offset[] =
-{
-  11 * 4,		/* %eax */
-  10 * 4,		/* %ecx */
-  9 * 4,		/* %edx */
-  8 * 4,		/* %ebx */
-  17 * 4,		/* %uesp */
-  6 * 4,		/* %ebp */
-  5 * 4,		/* %esi */
-  4 * 4,		/* %edi */
-  14 * 4,		/* %eip */
-  16 * 4,		/* %efl */
-  15 * 4,		/* %cs */
-  18 * 4,		/* %ss */
-  3 * 4,		/* %ds */
-  2 * 4,		/* %es */
-  1 * 4,		/* %fs */
-  0 * 4,		/* %gs */
+static int i386gnu_gregset_reg_offset[] = {
+  11 * 4, /* %eax */
+  10 * 4, /* %ecx */
+  9 * 4,  /* %edx */
+  8 * 4,  /* %ebx */
+  17 * 4, /* %uesp */
+  6 * 4,  /* %ebp */
+  5 * 4,  /* %esi */
+  4 * 4,  /* %edi */
+  14 * 4, /* %eip */
+  16 * 4, /* %efl */
+  15 * 4, /* %cs */
+  18 * 4, /* %ss */
+  3 * 4,  /* %ds */
+  2 * 4,  /* %es */
+  1 * 4,  /* %fs */
+  0 * 4,  /* %gs */
 };
 
 static void
@@ -178,14 +175,14 @@ i386gnu_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
   tdep->gregset_reg_offset = i386gnu_gregset_reg_offset;
   tdep->gregset_num_regs = ARRAY_SIZE (i386gnu_gregset_reg_offset);
   tdep->sizeof_gregset = 19 * 4;
 
-  tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
+  tdep->jb_pc_offset = 20; /* From <bits/setjmp.h>.  */
 
   tdep->sigtramp_p = i386_gnu_sigtramp_p;
   tdep->sigcontext_addr = i386_gnu_sigcontext_addr;
@@ -194,6 +191,7 @@ i386gnu_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_i386gnu_tdep ();
+
 void
 _initialize_i386gnu_tdep ()
 {

@@ -31,6 +31,7 @@
 class process_stratum_target : public target_ops
 {
 public:
+
   ~process_stratum_target () override = 0;
 
   strata stratum () const final override { return process_stratum; }
@@ -48,7 +49,9 @@ public:
   /* We must default these because they must be implemented by any
      target that can run.  */
   bool can_async_p () override { return false; }
+
   bool supports_non_stop () override { return false; }
+
   bool supports_disable_randomization () override { return false; }
 
   /* This default implementation returns the inferior's address
@@ -101,12 +104,14 @@ public:
   /* Return true if this target has at least one resumed thread with a pending
      wait status.  */
   bool has_resumed_with_pending_wait_status () const
-  { return !m_resumed_with_pending_wait_status.empty (); }
+  {
+    return !m_resumed_with_pending_wait_status.empty ();
+  }
 
   /* Return a random resumed thread with pending wait status belonging to INF
      and matching FILTER_PTID.  */
-  thread_info *random_resumed_with_pending_wait_status
-    (inferior *inf, ptid_t filter_ptid);
+  thread_info *random_resumed_with_pending_wait_status (inferior *inf,
+							ptid_t filter_ptid);
 
   /* The connection number.  Visible in "info connections".  */
   int connection_number = 0;
@@ -144,6 +149,7 @@ public:
   bool commit_resumed_state = false;
 
 private:
+
   /* List of threads managed by this target which simultaneously are resumed
      and have a pending wait status.
 

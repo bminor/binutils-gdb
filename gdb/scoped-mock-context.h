@@ -26,7 +26,8 @@
 #include "progspace-and-thread.h"
 
 #if GDB_SELF_TEST
-namespace selftests {
+namespace selftests
+{
 
 /* RAII type to create (and switch to) a temporary mock context.  An
    inferior with a thread, with a process_stratum target pushed.  */
@@ -37,10 +38,10 @@ struct scoped_mock_context
   /* Order here is important.  */
 
   Target mock_target;
-  ptid_t mock_ptid {1, 1};
-  program_space mock_pspace {new address_space ()};
-  inferior mock_inferior {mock_ptid.pid ()};
-  thread_info mock_thread {&mock_inferior, mock_ptid};
+  ptid_t mock_ptid { 1, 1 };
+  program_space mock_pspace { new address_space () };
+  inferior mock_inferior { mock_ptid.pid () };
+  thread_info mock_thread { &mock_inferior, mock_ptid };
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
 

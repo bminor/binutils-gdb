@@ -39,6 +39,7 @@
 class amd64_fbsd_nat_target final : public x86_fbsd_nat_target
 {
 public:
+
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
 
@@ -54,34 +55,21 @@ static size_t xsave_len;
 /* This is a layout of the amd64 'struct reg' but with i386
    registers.  */
 
-static const struct regcache_map_entry amd64_fbsd32_gregmap[] =
-{
-  { 8, REGCACHE_MAP_SKIP, 8 },
-  { 1, I386_EDI_REGNUM, 8 },
-  { 1, I386_ESI_REGNUM, 8 },
-  { 1, I386_EBP_REGNUM, 8 },
-  { 1, I386_EBX_REGNUM, 8 },
-  { 1, I386_EDX_REGNUM, 8 },
-  { 1, I386_ECX_REGNUM, 8 },
-  { 1, I386_EAX_REGNUM, 8 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* trapno */
-  { 1, I386_FS_REGNUM, 2 },
-  { 1, I386_GS_REGNUM, 2 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* err */
-  { 1, I386_ES_REGNUM, 2 },
-  { 1, I386_DS_REGNUM, 2 },
-  { 1, I386_EIP_REGNUM, 8 },
-  { 1, I386_CS_REGNUM, 8 },
-  { 1, I386_EFLAGS_REGNUM, 8 },
-  { 1, I386_ESP_REGNUM, 0 },
-  { 1, I386_SS_REGNUM, 8 },
-  { 0 }
-};
+static const struct regcache_map_entry amd64_fbsd32_gregmap[]
+  = { { 8, REGCACHE_MAP_SKIP, 8 },  { 1, I386_EDI_REGNUM, 8 },
+      { 1, I386_ESI_REGNUM, 8 },    { 1, I386_EBP_REGNUM, 8 },
+      { 1, I386_EBX_REGNUM, 8 },    { 1, I386_EDX_REGNUM, 8 },
+      { 1, I386_ECX_REGNUM, 8 },    { 1, I386_EAX_REGNUM, 8 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* trapno */
+      { 1, I386_FS_REGNUM, 2 },	    { 1, I386_GS_REGNUM, 2 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* err */
+      { 1, I386_ES_REGNUM, 2 },	    { 1, I386_DS_REGNUM, 2 },
+      { 1, I386_EIP_REGNUM, 8 },    { 1, I386_CS_REGNUM, 8 },
+      { 1, I386_EFLAGS_REGNUM, 8 }, { 1, I386_ESP_REGNUM, 0 },
+      { 1, I386_SS_REGNUM, 8 },	    { 0 } };
 
-static const struct regset amd64_fbsd32_gregset =
-{
-  amd64_fbsd32_gregmap, regcache_supply_regset, regcache_collect_regset
-};
+static const struct regset amd64_fbsd32_gregset
+  = { amd64_fbsd32_gregmap, regcache_supply_regset, regcache_collect_regset };
 
 /* Return the regset to use for 'struct reg' for the GDBARCH.  */
 
@@ -119,7 +107,7 @@ amd64_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       register_t base;
 
       if (ptrace (PT_GETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't get segment register fs_base"));
+	perror_with_name (_ ("Couldn't get segment register fs_base"));
 
       regcache->raw_supply (tdep->fsbase_regnum, &base);
       if (regnum != -1)
@@ -132,7 +120,7 @@ amd64_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       register_t base;
 
       if (ptrace (PT_GETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't get segment register gs_base"));
+	perror_with_name (_ ("Couldn't get segment register gs_base"));
 
       regcache->raw_supply (tdep->fsbase_regnum + 1, &base);
       if (regnum != -1)
@@ -140,7 +128,7 @@ amd64_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
     }
 #endif
 
-  /* There is no amd64_fxsave_supplies or amd64_xsave_supplies.
+    /* There is no amd64_fxsave_supplies or amd64_xsave_supplies.
      Instead, the earlier register sets return early if the request
      was for a specific register that was already satisified to avoid
      fetching the FPU/XSAVE state unnecessarily.  */
@@ -151,7 +139,7 @@ amd64_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       void *xstateregs = alloca (xsave_len);
 
       if (ptrace (PT_GETXSTATE, pid, (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
-	perror_with_name (_("Couldn't get extended state status"));
+	perror_with_name (_ ("Couldn't get extended state status"));
 
       amd64_supply_xsave (regcache, regnum, xstateregs);
       return;
@@ -161,7 +149,7 @@ amd64_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
   struct fpreg fpregs;
 
   if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-    perror_with_name (_("Couldn't get floating point status"));
+    perror_with_name (_ ("Couldn't get floating point status"));
 
   amd64_supply_fxsave (regcache, regnum, &fpregs);
 }
@@ -196,7 +184,7 @@ amd64_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       regcache->raw_collect (tdep->fsbase_regnum, &base);
 
       if (ptrace (PT_SETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't write segment register fs_base"));
+	perror_with_name (_ ("Couldn't write segment register fs_base"));
       if (regnum != -1)
 	return;
     }
@@ -211,13 +199,13 @@ amd64_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       regcache->raw_collect (tdep->fsbase_regnum + 1, &base);
 
       if (ptrace (PT_SETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't write segment register gs_base"));
+	perror_with_name (_ ("Couldn't write segment register gs_base"));
       if (regnum != -1)
 	return;
     }
 #endif
 
-  /* There is no amd64_fxsave_supplies or amd64_xsave_supplies.
+    /* There is no amd64_fxsave_supplies or amd64_xsave_supplies.
      Instead, the earlier register sets return early if the request
      was for a specific register that was already satisified to avoid
      fetching the FPU/XSAVE state unnecessarily.  */
@@ -228,13 +216,13 @@ amd64_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       void *xstateregs = alloca (xsave_len);
 
       if (ptrace (PT_GETXSTATE, pid, (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
-	perror_with_name (_("Couldn't get extended state status"));
+	perror_with_name (_ ("Couldn't get extended state status"));
 
       amd64_collect_xsave (regcache, regnum, xstateregs, 0);
 
-      if (ptrace (PT_SETXSTATE, pid, (PTRACE_TYPE_ARG3) xstateregs,
-		  xsave_len) == -1)
-	perror_with_name (_("Couldn't write extended state status"));
+      if (ptrace (PT_SETXSTATE, pid, (PTRACE_TYPE_ARG3) xstateregs, xsave_len)
+	  == -1)
+	perror_with_name (_ ("Couldn't write extended state status"));
       return;
     }
 #endif
@@ -242,12 +230,12 @@ amd64_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
   struct fpreg fpregs;
 
   if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-    perror_with_name (_("Couldn't get floating point status"));
+    perror_with_name (_ ("Couldn't get floating point status"));
 
   amd64_collect_fxsave (regcache, regnum, &fpregs);
 
   if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-    perror_with_name (_("Couldn't write floating point status"));
+    perror_with_name (_ ("Couldn't write floating point status"));
 }
 
 /* Support for debugging kernel virtual memory images.  */
@@ -296,7 +284,6 @@ amd64fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
 
 /* Implement the read_description method.  */
 
@@ -310,9 +297,9 @@ amd64_fbsd_nat_target::read_description ()
   struct reg regs;
   int is64;
 
-  if (ptrace (PT_GETREGS, inferior_ptid.pid (),
-	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't get registers"));
+  if (ptrace (PT_GETREGS, inferior_ptid.pid (), (PTRACE_TYPE_ARG3) &regs, 0)
+      == -1)
+    perror_with_name (_ ("Couldn't get registers"));
   is64 = (regs.r_cs == GSEL (GUCODE_SEL, SEL_UPL));
 #ifdef PT_GETXSTATE_INFO
   if (!xsave_probed)
@@ -320,7 +307,8 @@ amd64_fbsd_nat_target::read_description ()
       struct ptrace_xstate_info info;
 
       if (ptrace (PT_GETXSTATE_INFO, inferior_ptid.pid (),
-		  (PTRACE_TYPE_ARG3) &info, sizeof (info)) == 0)
+		  (PTRACE_TYPE_ARG3) &info, sizeof (info))
+	  == 0)
 	{
 	  xsave_len = info.xsave_len;
 	  xcr0 = info.xsave_mask;
@@ -343,6 +331,7 @@ amd64_fbsd_nat_target::read_description ()
 }
 
 void _initialize_amd64fbsd_nat ();
+
 void
 _initialize_amd64fbsd_nat ()
 {

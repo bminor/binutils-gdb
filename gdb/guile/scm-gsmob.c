@@ -91,8 +91,8 @@ gdbscm_is_gsmob (SCM scm)
 
   if (SCM_IMP (scm))
     return 0;
-  slot = htab_find_slot (registered_gsmobs, (void *) SCM_TYP16 (scm),
-			 NO_INSERT);
+  slot
+    = htab_find_slot (registered_gsmobs, (void *) SCM_TYP16 (scm), NO_INSERT);
   return slot != NULL;
 }
 
@@ -109,19 +109,22 @@ gdbscm_make_smob_type (const char *name, size_t size)
 #if SCM_MAJOR_VERSION == 2 && SCM_MINOR_VERSION == 0
   /* Prior to Guile 2.1.0, smob classes were only exposed via exports
      from the (oop goops) module.  */
-  SCM bound_name = scm_string_append (scm_list_3 (scm_from_latin1_string ("<"),
-						  scm_from_latin1_string (name),
-						  scm_from_latin1_string (">")));
+  SCM bound_name
+    = scm_string_append (scm_list_3 (scm_from_latin1_string ("<"),
+				     scm_from_latin1_string (name),
+				     scm_from_latin1_string (">")));
   bound_name = scm_string_to_symbol (bound_name);
-  SCM smob_type = scm_public_ref (scm_list_2 (scm_from_latin1_symbol ("oop"),
-					      scm_from_latin1_symbol ("goops")),
-				  bound_name);
-#elif SCM_MAJOR_VERSION == 2 && SCM_MINOR_VERSION == 1 && SCM_MICRO_VERSION == 0
+  SCM smob_type
+    = scm_public_ref (scm_list_2 (scm_from_latin1_symbol ("oop"),
+				  scm_from_latin1_symbol ("goops")),
+		      bound_name);
+#elif SCM_MAJOR_VERSION == 2 && SCM_MINOR_VERSION == 1 \
+  && SCM_MICRO_VERSION == 0
   /* Guile 2.1.0 doesn't provide any API for looking up smob classes.
      We could try allocating a fake instance and using scm_class_of,
      but it's probably not worth the trouble for the sake of a single
      development release.  */
-#  error "Unsupported Guile version"
+#error "Unsupported Guile version"
 #else
   /* Guile 2.1.1 and above provides scm_smob_type_class.  */
   SCM smob_type = scm_smob_type_class (result);
@@ -165,7 +168,6 @@ gdbscm_init_eqable_gsmob (eqable_gdb_smob *base, SCM containing_scm)
   base->containing_scm = containing_scm;
 }
 
-
 /* gsmob accessors */
 
 /* Return the gsmob in SELF.
@@ -175,7 +177,7 @@ static SCM
 gsscm_get_gsmob_arg_unsafe (SCM self, int arg_pos, const char *func_name)
 {
   SCM_ASSERT_TYPE (gdbscm_is_gsmob (self), self, arg_pos, func_name,
-		   _("any gdb smob"));
+		   _ ("any gdb smob"));
 
   return self;
 }
@@ -201,7 +203,6 @@ gdbscm_gsmob_kind (SCM self)
   return result;
 }
 
-
 /* When underlying gdb data structures are deleted, we need to update any
    smobs with references to them.  There are several smobs that reference
    objfile-based data, so we provide helpers to manage this.  */
@@ -212,8 +213,7 @@ gdbscm_gsmob_kind (SCM self)
 htab_t
 gdbscm_create_eqable_gsmob_ptr_map (htab_hash hash_fn, htab_eq eq_fn)
 {
-  htab_t htab = htab_create_alloc (7, hash_fn, eq_fn,
-				   NULL, xcalloc, xfree);
+  htab_t htab = htab_create_alloc (7, hash_fn, eq_fn, NULL, xcalloc, xfree);
 
   return htab;
 }
@@ -255,16 +255,14 @@ gdbscm_clear_eqable_gsmob_ptr_slot (htab_t htab, eqable_gdb_smob *base)
   gdb_assert (slot != NULL);
   htab_clear_slot (htab, slot);
 }
-
+
 /* Initialize the Scheme gsmobs code.  */
 
-static const scheme_function gsmob_functions[] =
-{
+static const scheme_function gsmob_functions[] = {
   /* N.B. There is a general rule of not naming symbols in gdb-guile with a
      "gdb" prefix.  This symbol does not violate this rule because it is to
      be read as "gdb-object-foo", not "gdb-foo".  */
-  { "gdb-object-kind", 1, 0, 0, as_a_scm_t_subr (gdbscm_gsmob_kind),
-    "\
+  { "gdb-object-kind", 1, 0, 0, as_a_scm_t_subr (gdbscm_gsmob_kind), "\
 Return the kind of the GDB object, e.g., <gdb:breakpoint>, as a symbol." },
 
   END_FUNCTIONS
@@ -273,8 +271,7 @@ Return the kind of the GDB object, e.g., <gdb:breakpoint>, as a symbol." },
 void
 gdbscm_initialize_smobs (void)
 {
-  registered_gsmobs = htab_create_alloc (10,
-					 hash_scm_t_bits, eq_scm_t_bits,
+  registered_gsmobs = htab_create_alloc (10, hash_scm_t_bits, eq_scm_t_bits,
 					 NULL, xcalloc, xfree);
 
   gdbscm_define_functions (gsmob_functions, 1);

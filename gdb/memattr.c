@@ -56,15 +56,14 @@ static bool inaccessible_by_default = true;
 
 static void
 show_inaccessible_by_default (struct ui_file *file, int from_tty,
-			      struct cmd_list_element *c,
-			      const char *value)
+			      struct cmd_list_element *c, const char *value)
 {
   if (inaccessible_by_default)
-    gdb_printf (file, _("Unknown memory addresses will "
-			"be treated as inaccessible.\n"));
+    gdb_printf (file, _ ("Unknown memory addresses will "
+			 "be treated as inaccessible.\n"));
   else
-    gdb_printf (file, _("Unknown memory addresses "
-			"will be treated as RAM.\n"));          
+    gdb_printf (file, _ ("Unknown memory addresses "
+			 "will be treated as RAM.\n"));
 }
 
 /* This function should be called before any command which would
@@ -89,8 +88,8 @@ require_user_regions (int from_tty)
 
   /* Otherwise, let the user know how to get back.  */
   if (from_tty)
-    warning (_("Switching to manual control of memory regions; use "
-	       "\"mem auto\" to fetch regions from the target again."));
+    warning (_ ("Switching to manual control of memory regions; use "
+		"\"mem auto\" to fetch regions from the target again."));
 
   /* And create a new list (copy of the target-supplied regions) for the user
      to modify.  */
@@ -115,21 +114,19 @@ require_target_regions (void)
 /* Create a new user-defined memory region.  */
 
 static void
-create_user_mem_region (CORE_ADDR lo, CORE_ADDR hi,
-			const mem_attrib &attrib)
+create_user_mem_region (CORE_ADDR lo, CORE_ADDR hi, const mem_attrib &attrib)
 {
   /* lo == hi is a useless empty region.  */
   if (lo >= hi && hi != 0)
     {
-      gdb_printf (_("invalid memory region: low >= high\n"));
+      gdb_printf (_ ("invalid memory region: low >= high\n"));
       return;
     }
 
   mem_region newobj (lo, hi, attrib);
 
   auto it = std::lower_bound (user_mem_region_list.begin (),
-			      user_mem_region_list.end (),
-			      newobj);
+			      user_mem_region_list.end (), newobj);
   int ix = std::distance (user_mem_region_list.begin (), it);
 
   /* Check for an overlapping memory region.  We only need to check
@@ -148,7 +145,7 @@ create_user_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 	  || (hi > n.lo && (hi <= n.hi || n.hi == 0))
 	  || (lo <= n.lo && ((hi >= n.hi && n.hi != 0) || hi == 0)))
 	{
-	  gdb_printf (_("overlapping memory region\n"));
+	  gdb_printf (_ ("overlapping memory region\n"));
 	  return;
 	}
     }
@@ -243,7 +240,6 @@ user_mem_clear (void)
 {
   user_mem_region_list.clear ();
 }
-
 
 static void
 mem_command (const char *args, int from_tty)
@@ -251,7 +247,7 @@ mem_command (const char *args, int from_tty)
   CORE_ADDR lo, hi;
 
   if (!args)
-    error_no_arg (_("No mem"));
+    error_no_arg (_ ("No mem"));
 
   /* For "mem auto", switch back to using a target provided list.  */
   if (strcmp (args, "auto") == 0)
@@ -269,12 +265,12 @@ mem_command (const char *args, int from_tty)
 
   std::string tok = extract_arg (&args);
   if (tok == "")
-    error (_("no lo address"));
+    error (_ ("no lo address"));
   lo = parse_and_eval_address (tok.c_str ());
 
   tok = extract_arg (&args);
   if (tok == "")
-    error (_("no hi address"));
+    error (_ ("no hi address"));
   hi = parse_and_eval_address (tok.c_str ());
 
   mem_attrib attrib;
@@ -292,19 +288,19 @@ mem_command (const char *args, int from_tty)
       else if (tok == "16")
 	{
 	  if ((lo % 2 != 0) || (hi % 2 != 0))
-	    error (_("region bounds not 16 bit aligned"));
+	    error (_ ("region bounds not 16 bit aligned"));
 	  attrib.width = MEM_WIDTH_16;
 	}
       else if (tok == "32")
 	{
 	  if ((lo % 4 != 0) || (hi % 4 != 0))
-	    error (_("region bounds not 32 bit aligned"));
+	    error (_ ("region bounds not 32 bit aligned"));
 	  attrib.width = MEM_WIDTH_32;
 	}
       else if (tok == "64")
 	{
 	  if ((lo % 8 != 0) || (hi % 8 != 0))
-	    error (_("region bounds not 64 bit aligned"));
+	    error (_ ("region bounds not 64 bit aligned"));
 	  attrib.width = MEM_WIDTH_64;
 	}
 
@@ -328,26 +324,25 @@ mem_command (const char *args, int from_tty)
 #endif
 
       else
-	error (_("unknown attribute: %s"), tok.c_str ());
+	error (_ ("unknown attribute: %s"), tok.c_str ());
     }
 
   create_user_mem_region (lo, hi, attrib);
 }
-
 
 static void
 info_mem_command (const char *args, int from_tty)
 {
   if (mem_use_target ())
-    gdb_printf (_("Using memory regions provided by the target.\n"));
+    gdb_printf (_ ("Using memory regions provided by the target.\n"));
   else
-    gdb_printf (_("Using user-defined memory regions.\n"));
+    gdb_printf (_ ("Using user-defined memory regions.\n"));
 
   require_target_regions ();
 
   if (mem_region_list->empty ())
     {
-      gdb_printf (_("There are no memory regions defined.\n"));
+      gdb_printf (_ ("There are no memory regions defined.\n"));
       return;
     }
 
@@ -366,14 +361,12 @@ info_mem_command (const char *args, int from_tty)
     {
       const char *tmp;
 
-      gdb_printf ("%-3d %-3c\t",
-		  m.number,
-		  m.enabled_p ? 'y' : 'n');
+      gdb_printf ("%-3d %-3c\t", m.number, m.enabled_p ? 'y' : 'n');
       if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
 	tmp = hex_string_custom (m.lo, 8);
       else
 	tmp = hex_string_custom (m.lo, 16);
-      
+
       gdb_printf ("%s ", tmp);
 
       if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
@@ -461,7 +454,6 @@ info_mem_command (const char *args, int from_tty)
       gdb_printf ("\n");
     }
 }
-
 
 /* Enable the memory region number NUM.  */
 
@@ -474,7 +466,7 @@ mem_enable (int num)
 	m.enabled_p = 1;
 	return;
       }
-  gdb_printf (_("No memory region number %d.\n"), num);
+  gdb_printf (_ ("No memory region number %d.\n"), num);
 }
 
 static void
@@ -499,7 +491,6 @@ enable_mem_command (const char *args, int from_tty)
 	}
     }
 }
-
 
 /* Disable the memory region number NUM.  */
 
@@ -512,7 +503,7 @@ mem_disable (int num)
 	m.enabled_p = 0;
 	return;
       }
-  gdb_printf (_("No memory region number %d.\n"), num);
+  gdb_printf (_ ("No memory region number %d.\n"), num);
 }
 
 static void
@@ -545,20 +536,18 @@ mem_delete (int num)
 {
   if (!mem_region_list)
     {
-      gdb_printf (_("No memory region number %d.\n"), num);
+      gdb_printf (_ ("No memory region number %d.\n"), num);
       return;
     }
 
-  auto it = std::remove_if (mem_region_list->begin (), mem_region_list->end (),
-			    [num] (const mem_region &m)
-    {
-      return m.number == num;
-    });
+  auto it
+    = std::remove_if (mem_region_list->begin (), mem_region_list->end (),
+		      [num] (const mem_region &m) { return m.number == num; });
 
   if (it != mem_region_list->end ())
     mem_region_list->erase (it);
   else
-    gdb_printf (_("No memory region number %d.\n"), num);
+    gdb_printf (_ ("No memory region number %d.\n"), num);
 }
 
 static void
@@ -570,7 +559,7 @@ delete_mem_command (const char *args, int from_tty)
 
   if (args == NULL || *args == '\0')
     {
-      if (query (_("Delete all memory regions? ")))
+      if (query (_ ("Delete all memory regions? ")))
 	user_mem_clear ();
       dont_repeat ();
       return;
@@ -590,54 +579,56 @@ static struct cmd_list_element *mem_set_cmdlist;
 static struct cmd_list_element *mem_show_cmdlist;
 
 void _initialize_mem ();
+
 void
 _initialize_mem ()
 {
-  add_com ("mem", class_vars, mem_command, _("\
+  add_com ("mem", class_vars, mem_command,
+	   _ ("\
 Define attributes for memory region or reset memory region handling to "
-"target-based.\n\
+	      "target-based.\n\
 Usage: mem auto\n\
        mem LOW HIGH [MODE WIDTH CACHE],\n\
 where MODE  may be rw (read/write), ro (read-only) or wo (write-only),\n\
       WIDTH may be 8, 16, 32, or 64, and\n\
       CACHE may be cache or nocache"));
 
-  add_cmd ("mem", class_vars, enable_mem_command, _("\
+  add_cmd ("mem", class_vars, enable_mem_command, _ ("\
 Enable memory region.\n\
 Arguments are the IDs of the memory regions to enable.\n\
 Usage: enable mem [ID]...\n\
-Do \"info mem\" to see current list of IDs."), &enablelist);
+Do \"info mem\" to see current list of IDs."),
+	   &enablelist);
 
-  add_cmd ("mem", class_vars, disable_mem_command, _("\
+  add_cmd ("mem", class_vars, disable_mem_command, _ ("\
 Disable memory region.\n\
 Arguments are the IDs of the memory regions to disable.\n\
 Usage: disable mem [ID]...\n\
-Do \"info mem\" to see current list of IDs."), &disablelist);
+Do \"info mem\" to see current list of IDs."),
+	   &disablelist);
 
-  add_cmd ("mem", class_vars, delete_mem_command, _("\
+  add_cmd ("mem", class_vars, delete_mem_command, _ ("\
 Delete memory region.\n\
 Arguments are the IDs of the memory regions to delete.\n\
 Usage: delete mem [ID]...\n\
-Do \"info mem\" to see current list of IDs."), &deletelist);
+Do \"info mem\" to see current list of IDs."),
+	   &deletelist);
 
-  add_info ("mem", info_mem_command,
-	    _("Memory region attributes."));
+  add_info ("mem", info_mem_command, _ ("Memory region attributes."));
 
-  add_setshow_prefix_cmd ("mem", class_vars,
-			  _("Memory regions settings."),
-			  _("Memory regions settings."),
-			  &mem_set_cmdlist, &mem_show_cmdlist,
-			  &setlist, &showlist);
+  add_setshow_prefix_cmd ("mem", class_vars, _ ("Memory regions settings."),
+			  _ ("Memory regions settings."), &mem_set_cmdlist,
+			  &mem_show_cmdlist, &setlist, &showlist);
 
   add_setshow_boolean_cmd ("inaccessible-by-default", no_class,
-				  &inaccessible_by_default, _("\
-Set handling of unknown memory regions."), _("\
-Show handling of unknown memory regions."), _("\
+			   &inaccessible_by_default, _ ("\
+Set handling of unknown memory regions."),
+			   _ ("\
+Show handling of unknown memory regions."),
+			   _ ("\
 If on, and some memory map is defined, debugger will emit errors on\n\
 accesses to memory not defined in the memory map. If off, accesses to all\n\
 memory addresses will be allowed."),
-				NULL,
-				show_inaccessible_by_default,
-				&mem_set_cmdlist,
-				&mem_show_cmdlist);
+			   NULL, show_inaccessible_by_default,
+			   &mem_set_cmdlist, &mem_show_cmdlist);
 }

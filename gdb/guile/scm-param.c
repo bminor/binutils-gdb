@@ -99,7 +99,7 @@ struct param_smob
 
   /* For an enum parameter, the possible values.  The vector lives in GC
      space, it will be freed with the smob.  */
-  const char * const *enumeration;
+  const char *const *enumeration;
 
   /* The set_func funcion or #f if not specified.
      This function is called *after* the parameter is set.
@@ -143,21 +143,17 @@ static const struct
 
   /* Extra literals, such as `unlimited', accepted in lieu of a number.  */
   const literal_def *extra_literals;
-}
-param_to_var[] =
-{
-  { var_boolean },
-  { var_auto_boolean },
-  { var_integer },
-  { var_uinteger, uinteger_unlimited_literals },
-  { var_uinteger },
-  { var_pinteger, pinteger_unlimited_literals },
-  { var_string },
-  { var_string_noescape },
-  { var_optional_filename },
-  { var_filename },
-  { var_enum }
-};
+} param_to_var[] = { { var_boolean },
+		     { var_auto_boolean },
+		     { var_integer },
+		     { var_uinteger, uinteger_unlimited_literals },
+		     { var_uinteger },
+		     { var_pinteger, pinteger_unlimited_literals },
+		     { var_string },
+		     { var_string_noescape },
+		     { var_optional_filename },
+		     { var_filename },
+		     { var_enum } };
 
 /* Wraps a setting around an existing param_smob.  This abstraction
    is used to manipulate the value in S->VALUE in a type safe manner using
@@ -205,7 +201,7 @@ static int pascm_is_valid (param_smob *);
 static const char *pascm_param_type_name (enum param_types type);
 static SCM pascm_param_value (const setting &var, int arg_pos,
 			      const char *func_name);
-
+
 /* Administrivia for parameter smobs.  */
 
 static int
@@ -218,7 +214,7 @@ pascm_print_param_smob (SCM self, SCM port, scm_print_state *pstate)
 
   gdbscm_printf (port, " %s", p_smob->name);
 
-  if (! pascm_is_valid (p_smob))
+  if (!pascm_is_valid (p_smob))
     scm_puts (" {invalid}", port);
 
   gdbscm_printf (port, " %s ", p_smob->pname);
@@ -239,8 +235,8 @@ pascm_print_param_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 pascm_make_param_smob (void)
 {
-  param_smob *p_smob = (param_smob *)
-    scm_gc_malloc (sizeof (param_smob), param_smob_name);
+  param_smob *p_smob
+    = (param_smob *) scm_gc_malloc (sizeof (param_smob), param_smob_name);
   SCM p_scm;
 
   memset (p_smob, 0, sizeof (*p_smob));
@@ -302,14 +298,14 @@ pascm_is_valid (param_smob *p_smob)
 {
   return p_smob->commands.set != nullptr;
 }
-
+
 /* A helper function which return the default documentation string for
    a parameter (which is to say that it's undocumented).  */
 
 static char *
 get_doc_string (void)
 {
-  return xstrdup (_("This command is not documented."));
+  return xstrdup (_ ("This command is not documented."));
 }
 
 /* Subroutine of pascm_set_func, pascm_show_func to simplify them.
@@ -354,18 +350,18 @@ pascm_set_func (const char *args, int from_tty, struct cmd_list_element *c)
   if (gdbscm_is_exception (result))
     {
       pascm_signal_setshow_error (result,
-				  _("Error occurred setting parameter."));
+				  _ ("Error occurred setting parameter."));
     }
 
   if (!scm_is_string (result))
-    error (_("Result of %s set-func is not a string."), p_smob->name);
+    error (_ ("Result of %s set-func is not a string."), p_smob->name);
 
-  gdb::unique_xmalloc_ptr<char> msg = gdbscm_scm_to_host_string (result, NULL,
-								 &exception);
+  gdb::unique_xmalloc_ptr<char> msg
+    = gdbscm_scm_to_host_string (result, NULL, &exception);
   if (msg == NULL)
     {
       gdbscm_print_gdb_exception (SCM_BOOL_F, exception);
-      error (_("Error converting show text to host string."));
+      error (_ ("Error converting show text to host string."));
     }
 
   /* GDB is usually silent when a parameter is set.  */
@@ -390,7 +386,7 @@ pascm_show_func (struct ui_file *file, int from_tty,
   value_scm = gdbscm_scm_from_host_string (value, strlen (value));
   if (gdbscm_is_exception (value_scm))
     {
-      error (_("Error converting parameter value \"%s\" to Scheme string."),
+      error (_ ("Error converting parameter value \"%s\" to Scheme string."),
 	     value);
     }
   self = p_smob->containing_scm;
@@ -401,15 +397,15 @@ pascm_show_func (struct ui_file *file, int from_tty,
   if (gdbscm_is_exception (result))
     {
       pascm_signal_setshow_error (result,
-				  _("Error occurred showing parameter."));
+				  _ ("Error occurred showing parameter."));
     }
 
-  gdb::unique_xmalloc_ptr<char> msg = gdbscm_scm_to_host_string (result, NULL,
-								 &exception);
+  gdb::unique_xmalloc_ptr<char> msg
+    = gdbscm_scm_to_host_string (result, NULL, &exception);
   if (msg == NULL)
     {
       gdbscm_print_gdb_exception (SCM_BOOL_F, exception);
-      error (_("Error converting show text to host string."));
+      error (_ ("Error converting show text to host string."));
     }
 
   gdb_printf (file, "%s\n", msg.get ());
@@ -421,10 +417,9 @@ pascm_show_func (struct ui_file *file, int from_tty,
 static set_show_commands
 add_setshow_generic (enum var_types param_type,
 		     const literal_def *extra_literals,
-		     enum command_class cmd_class,
-		     char *cmd_name, param_smob *self,
-		     char *set_doc, char *show_doc, char *help_doc,
-		     cmd_func_ftype *set_func,
+		     enum command_class cmd_class, char *cmd_name,
+		     param_smob *self, char *set_doc, char *show_doc,
+		     char *help_doc, cmd_func_ftype *set_func,
 		     show_value_ftype *show_func,
 		     struct cmd_list_element **set_list,
 		     struct cmd_list_element **show_list)
@@ -434,73 +429,72 @@ add_setshow_generic (enum var_types param_type,
   switch (param_type)
     {
     case var_boolean:
-      commands = add_setshow_boolean_cmd (cmd_name, cmd_class,
-					  &self->value.boolval, set_doc,
-					  show_doc, help_doc, set_func,
-					  show_func, set_list, show_list);
+      commands
+	= add_setshow_boolean_cmd (cmd_name, cmd_class, &self->value.boolval,
+				   set_doc, show_doc, help_doc, set_func,
+				   show_func, set_list, show_list);
       break;
 
     case var_auto_boolean:
-      commands = add_setshow_auto_boolean_cmd (cmd_name, cmd_class,
-					       &self->value.autoboolval,
-					       set_doc, show_doc, help_doc,
-					       set_func, show_func, set_list,
-					       show_list);
+      commands
+	= add_setshow_auto_boolean_cmd (cmd_name, cmd_class,
+					&self->value.autoboolval, set_doc,
+					show_doc, help_doc, set_func,
+					show_func, set_list, show_list);
       break;
 
     case var_uinteger:
-      commands = add_setshow_uinteger_cmd (cmd_name, cmd_class,
-					   &self->value.uintval,
-					   extra_literals, set_doc,
-					   show_doc, help_doc, set_func,
-					   show_func, set_list, show_list);
+      commands
+	= add_setshow_uinteger_cmd (cmd_name, cmd_class, &self->value.uintval,
+				    extra_literals, set_doc, show_doc,
+				    help_doc, set_func, show_func, set_list,
+				    show_list);
       break;
 
     case var_integer:
-      commands = add_setshow_integer_cmd (cmd_name, cmd_class,
-					  &self->value.intval,
-					  extra_literals, set_doc,
-					  show_doc, help_doc, set_func,
-					  show_func, set_list, show_list);
+      commands
+	= add_setshow_integer_cmd (cmd_name, cmd_class, &self->value.intval,
+				   extra_literals, set_doc, show_doc, help_doc,
+				   set_func, show_func, set_list, show_list);
       break;
 
     case var_pinteger:
-      commands = add_setshow_pinteger_cmd (cmd_name, cmd_class,
-					   &self->value.intval,
-					   extra_literals, set_doc,
-					   show_doc, help_doc, set_func,
-					   show_func, set_list, show_list);
+      commands
+	= add_setshow_pinteger_cmd (cmd_name, cmd_class, &self->value.intval,
+				    extra_literals, set_doc, show_doc,
+				    help_doc, set_func, show_func, set_list,
+				    show_list);
       break;
 
     case var_string:
-      commands = add_setshow_string_cmd (cmd_name, cmd_class,
-					 self->value.stringval, set_doc,
-					 show_doc, help_doc, set_func,
-					 show_func, set_list, show_list);
+      commands
+	= add_setshow_string_cmd (cmd_name, cmd_class, self->value.stringval,
+				  set_doc, show_doc, help_doc, set_func,
+				  show_func, set_list, show_list);
       break;
 
     case var_string_noescape:
-      commands = add_setshow_string_noescape_cmd (cmd_name, cmd_class,
-						  self->value.stringval,
-						  set_doc, show_doc, help_doc,
-						  set_func, show_func, set_list,
-						  show_list);
+      commands
+	= add_setshow_string_noescape_cmd (cmd_name, cmd_class,
+					   self->value.stringval, set_doc,
+					   show_doc, help_doc, set_func,
+					   show_func, set_list, show_list);
 
       break;
 
     case var_optional_filename:
-      commands = add_setshow_optional_filename_cmd (cmd_name, cmd_class,
-						    self->value.stringval,
-						    set_doc, show_doc, help_doc,
-						    set_func, show_func,
-						    set_list, show_list);
+      commands
+	= add_setshow_optional_filename_cmd (cmd_name, cmd_class,
+					     self->value.stringval, set_doc,
+					     show_doc, help_doc, set_func,
+					     show_func, set_list, show_list);
       break;
 
     case var_filename:
-      commands = add_setshow_filename_cmd (cmd_name, cmd_class,
-					   self->value.stringval, set_doc,
-					   show_doc, help_doc, set_func,
-					   show_func, set_list, show_list);
+      commands
+	= add_setshow_filename_cmd (cmd_name, cmd_class, self->value.stringval,
+				    set_doc, show_doc, help_doc, set_func,
+				    show_func, set_list, show_list);
       break;
 
     case var_enum:
@@ -529,21 +523,21 @@ add_setshow_generic (enum var_types param_type,
    Throws an exception if there's a problem with the values.
    Space for the result is allocated from the GC heap.  */
 
-static const char * const *
+static const char *const *
 compute_enum_list (SCM enum_values_scm, int arg_pos, const char *func_name)
 {
   long i, size;
   char **enum_values;
-  const char * const *result;
+  const char *const *result;
 
   SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (enum_values_scm)),
-		   enum_values_scm, arg_pos, func_name, _("list"));
+		   enum_values_scm, arg_pos, func_name, _ ("list"));
 
   size = scm_ilength (enum_values_scm);
   if (size == 0)
     {
       gdbscm_out_of_range_error (FUNC_NAME, arg_pos, enum_values_scm,
-				 _("enumeration list is empty"));
+				 _ ("enumeration list is empty"));
     }
 
   enum_values = XCNEWVEC (char *, size + 1);
@@ -557,10 +551,10 @@ compute_enum_list (SCM enum_values_scm, int arg_pos, const char *func_name)
       if (!scm_is_string (value))
 	{
 	  freeargv (enum_values);
-	  SCM_ASSERT_TYPE (0, value, arg_pos, func_name, _("string"));
+	  SCM_ASSERT_TYPE (0, value, arg_pos, func_name, _ ("string"));
 	}
-      enum_values[i] = gdbscm_scm_to_host_string (value, NULL,
-						  &exception).release ();
+      enum_values[i]
+	= gdbscm_scm_to_host_string (value, NULL, &exception).release ();
       if (enum_values[i] == NULL)
 	{
 	  freeargv (enum_values);
@@ -576,22 +570,20 @@ compute_enum_list (SCM enum_values_scm, int arg_pos, const char *func_name)
   return result;
 }
 
-static const scheme_integer_constant parameter_types[] =
-{
-  { "PARAM_BOOLEAN", param_boolean }, /* ARI: param_boolean */
-  { "PARAM_AUTO_BOOLEAN", param_auto_boolean },
-  { "PARAM_ZINTEGER", param_zinteger },
-  { "PARAM_UINTEGER", param_uinteger },
-  { "PARAM_ZUINTEGER", param_zuinteger },
-  { "PARAM_ZUINTEGER_UNLIMITED", param_zuinteger_unlimited },
-  { "PARAM_STRING", param_string },
-  { "PARAM_STRING_NOESCAPE", param_string_noescape },
-  { "PARAM_OPTIONAL_FILENAME", param_optional_filename },
-  { "PARAM_FILENAME", param_filename },
-  { "PARAM_ENUM", param_enum },
+static const scheme_integer_constant parameter_types[]
+  = { { "PARAM_BOOLEAN", param_boolean }, /* ARI: param_boolean */
+      { "PARAM_AUTO_BOOLEAN", param_auto_boolean },
+      { "PARAM_ZINTEGER", param_zinteger },
+      { "PARAM_UINTEGER", param_uinteger },
+      { "PARAM_ZUINTEGER", param_zuinteger },
+      { "PARAM_ZUINTEGER_UNLIMITED", param_zuinteger_unlimited },
+      { "PARAM_STRING", param_string },
+      { "PARAM_STRING_NOESCAPE", param_string_noescape },
+      { "PARAM_OPTIONAL_FILENAME", param_optional_filename },
+      { "PARAM_FILENAME", param_filename },
+      { "PARAM_ENUM", param_enum },
 
-  END_INTEGER_CONSTANTS
-};
+      END_INTEGER_CONSTANTS };
 
 /* Return non-zero if PARAM_TYPE is a valid parameter type.  */
 
@@ -675,15 +667,13 @@ pascm_param_value (const setting &var, int arg_pos, const char *func_name)
     case var_integer:
     case var_pinteger:
       {
-	LONGEST value
-	  = (var.type () == var_uinteger
-	     ? static_cast<LONGEST> (var.get<unsigned int> ())
-	     : static_cast<LONGEST> (var.get<int> ()));
+	LONGEST value = (var.type () == var_uinteger
+			   ? static_cast<LONGEST> (var.get<unsigned int> ())
+			   : static_cast<LONGEST> (var.get<int> ()));
 
 	if (var.extra_literals () != nullptr)
 	  for (const literal_def *l = var.extra_literals ();
-	       l->literal != nullptr;
-	       l++)
+	       l->literal != nullptr; l++)
 	    if (value == l->use)
 	      return scm_from_latin1_keyword (l->literal);
 	if (var.type () == var_pinteger)
@@ -701,7 +691,7 @@ pascm_param_value (const setting &var, int arg_pos, const char *func_name)
 
   return gdbscm_make_out_of_range_error (func_name, arg_pos,
 					 scm_from_int (var.type ()),
-					 _("program error: unhandled type"));
+					 _ ("program error: unhandled type"));
 }
 
 /* Set the value of a parameter of type P_SMOB->TYPE in P_SMOB->VAR from VALUE.
@@ -709,8 +699,7 @@ pascm_param_value (const setting &var, int arg_pos, const char *func_name)
    Throws a Scheme exception if VALUE_SCM is invalid for TYPE.  */
 
 static void
-pascm_set_param_value_x (param_smob *p_smob,
-			 const char * const *enumeration,
+pascm_set_param_value_x (param_smob *p_smob, const char *const *enumeration,
 			 SCM value, int arg_pos, const char *func_name)
 {
   setting var = make_setting (p_smob);
@@ -722,10 +711,10 @@ pascm_set_param_value_x (param_smob *p_smob,
     case var_optional_filename:
     case var_filename:
       SCM_ASSERT_TYPE (scm_is_string (value)
-		       || (var.type () != var_filename
-			   && gdbscm_is_false (value)),
+			 || (var.type () != var_filename
+			     && gdbscm_is_false (value)),
 		       value, arg_pos, func_name,
-		       _("string or #f for non-PARAM_FILENAME parameters"));
+		       _ ("string or #f for non-PARAM_FILENAME parameters"));
       if (gdbscm_is_false (value))
 	var.set<std::string> ("");
       else
@@ -746,7 +735,7 @@ pascm_set_param_value_x (param_smob *p_smob,
 	SCM exception;
 
 	SCM_ASSERT_TYPE (scm_is_string (value), value, arg_pos, func_name,
-		       _("string"));
+			 _ ("string"));
 	gdb::unique_xmalloc_ptr<char> str
 	  = gdbscm_scm_to_host_string (value, nullptr, &exception);
 	if (str == nullptr)
@@ -759,7 +748,7 @@ pascm_set_param_value_x (param_smob *p_smob,
 	if (enumeration[i] == nullptr)
 	  {
 	    gdbscm_out_of_range_error (func_name, arg_pos, value,
-				       _("not member of enumeration"));
+				       _ ("not member of enumeration"));
 	  }
 	var.set<const char *> (enumeration[i]);
 	break;
@@ -767,15 +756,14 @@ pascm_set_param_value_x (param_smob *p_smob,
 
     case var_boolean:
       SCM_ASSERT_TYPE (gdbscm_is_bool (value), value, arg_pos, func_name,
-		       _("boolean"));
+		       _ ("boolean"));
       var.set<bool> (gdbscm_is_true (value));
       break;
 
     case var_auto_boolean:
       SCM_ASSERT_TYPE (gdbscm_is_bool (value)
-		       || scm_is_eq (value, auto_keyword),
-		       value, arg_pos, func_name,
-		       _("boolean or #:auto"));
+			 || scm_is_eq (value, auto_keyword),
+		       value, arg_pos, func_name, _ ("boolean or #:auto"));
       if (scm_is_eq (value, auto_keyword))
 	var.set<enum auto_boolean> (AUTO_BOOLEAN_AUTO);
       else if (gdbscm_is_true (value))
@@ -798,17 +786,14 @@ pascm_set_param_value_x (param_smob *p_smob,
 	LONGEST val;
 
 	if (extra_literals != nullptr)
-	  for (const literal_def *l = extra_literals;
-	       l->literal != nullptr;
+	  for (const literal_def *l = extra_literals; l->literal != nullptr;
 	       l++, count++)
 	    {
 	      if (count != 0)
 		buffer += ", ";
 	      buffer = buffer + "#:" + l->literal;
-	      if (keyword
-		  && allowed == TRIBOOL_UNKNOWN
-		  && scm_is_eq (value,
-				scm_from_latin1_keyword (l->literal)))
+	      if (keyword && allowed == TRIBOOL_UNKNOWN
+		  && scm_is_eq (value, scm_from_latin1_keyword (l->literal)))
 		{
 		  val = l->use;
 		  allowed = TRIBOOL_TRUE;
@@ -819,24 +804,24 @@ pascm_set_param_value_x (param_smob *p_smob,
 	  {
 	    if (extra_literals == nullptr)
 	      SCM_ASSERT_TYPE (integer, value, arg_pos, func_name,
-			       _("integer"));
+			       _ ("integer"));
 	    else if (count > 1)
 	      SCM_ASSERT_TYPE (integer, value, arg_pos, func_name,
-			       string_printf (_("integer or one of: %s"),
-					      buffer.c_str ()).c_str ());
+			       string_printf (_ ("integer or one of: %s"),
+					      buffer.c_str ())
+				 .c_str ());
 	    else
-	      SCM_ASSERT_TYPE (integer, value, arg_pos, func_name,
-			       string_printf (_("integer or %s"),
-					      buffer.c_str ()).c_str ());
+	      SCM_ASSERT_TYPE (
+		integer, value, arg_pos, func_name,
+		string_printf (_ ("integer or %s"), buffer.c_str ()).c_str ());
 
 	    val = (var_type == var_uinteger
-		   ? static_cast<LONGEST> (scm_to_uint (value))
-		   : static_cast<LONGEST> (scm_to_int (value)));
+		     ? static_cast<LONGEST> (scm_to_uint (value))
+		     : static_cast<LONGEST> (scm_to_int (value)));
 
 	    if (extra_literals != nullptr)
 	      for (const literal_def *l = extra_literals;
-		   l->literal != nullptr;
-		   l++)
+		   l->literal != nullptr; l++)
 		{
 		  if (l->val.has_value () && val == *l->val)
 		    {
@@ -847,7 +832,7 @@ pascm_set_param_value_x (param_smob *p_smob,
 		  else if (val == l->use)
 		    allowed = TRIBOOL_FALSE;
 		}
-	    }
+	  }
 
 	if (allowed == TRIBOOL_UNKNOWN)
 	  {
@@ -860,7 +845,7 @@ pascm_set_param_value_x (param_smob *p_smob,
 	  }
 	if (allowed == TRIBOOL_FALSE)
 	  gdbscm_out_of_range_error (func_name, arg_pos, value,
-				     _("integer out of range"));
+				     _ ("integer out of range"));
 
 	if (var_type == var_uinteger)
 	  var.set<unsigned int> (static_cast<unsigned int> (val));
@@ -889,7 +874,7 @@ pascm_free_parameter_smob (SCM self)
 
   return 0;
 }
-
+
 /* Parameter Scheme functions.  */
 
 /* (make-parameter name
@@ -932,12 +917,11 @@ pascm_free_parameter_smob (SCM self)
 static SCM
 gdbscm_make_parameter (SCM name_scm, SCM rest)
 {
-  const SCM keywords[] = {
-    command_class_keyword, parameter_type_keyword, enum_list_keyword,
-    set_func_keyword, show_func_keyword,
-    doc_keyword, set_doc_keyword, show_doc_keyword,
-    initial_value_keyword, SCM_BOOL_F
-  };
+  const SCM keywords[] = { command_class_keyword, parameter_type_keyword,
+			   enum_list_keyword,	  set_func_keyword,
+			   show_func_keyword,	  doc_keyword,
+			   set_doc_keyword,	  show_doc_keyword,
+			   initial_value_keyword, SCM_BOOL_F };
   int cmd_class_arg_pos = -1, param_type_arg_pos = -1;
   int enum_list_arg_pos = -1, set_func_arg_pos = -1, show_func_arg_pos = -1;
   int doc_arg_pos = -1, set_doc_arg_pos = -1, show_doc_arg_pos = -1;
@@ -950,20 +934,17 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
   SCM set_func = SCM_BOOL_F, show_func = SCM_BOOL_F;
   char *doc = NULL, *set_doc = NULL, *show_doc = NULL;
   SCM initial_value_scm = SCM_BOOL_F;
-  const char * const *enum_list = NULL;
+  const char *const *enum_list = NULL;
   SCM p_scm;
   param_smob *p_smob;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, keywords, "s#iiOOOsssO",
-			      name_scm, &name, rest,
-			      &cmd_class_arg_pos, &cmd_class,
-			      &param_type_arg_pos, &param_type,
+			      name_scm, &name, rest, &cmd_class_arg_pos,
+			      &cmd_class, &param_type_arg_pos, &param_type,
 			      &enum_list_arg_pos, &enum_list_scm,
-			      &set_func_arg_pos, &set_func,
-			      &show_func_arg_pos, &show_func,
-			      &doc_arg_pos, &doc,
-			      &set_doc_arg_pos, &set_doc,
-			      &show_doc_arg_pos, &show_doc,
+			      &set_func_arg_pos, &set_func, &show_func_arg_pos,
+			      &show_func, &doc_arg_pos, &doc, &set_doc_arg_pos,
+			      &set_doc, &show_doc_arg_pos, &show_doc,
 			      &initial_value_arg_pos, &initial_value_scm);
 
   /* If doc is NULL, leave it NULL.  See add_setshow_cmd_full.  */
@@ -992,40 +973,41 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
     {
       gdbscm_out_of_range_error (FUNC_NAME, cmd_class_arg_pos,
 				 scm_from_int (cmd_class),
-				 _("invalid command class argument"));
+				 _ ("invalid command class argument"));
     }
   if (!pascm_valid_parameter_type_p (param_type))
     {
       gdbscm_out_of_range_error (FUNC_NAME, param_type_arg_pos,
 				 scm_from_int (param_type),
-				 _("invalid parameter type argument"));
+				 _ ("invalid parameter type argument"));
     }
   if (enum_list_arg_pos > 0 && param_type != param_enum)
     {
-      gdbscm_misc_error (FUNC_NAME, enum_list_arg_pos, enum_list_scm,
-		_("#:enum-values can only be provided with PARAM_ENUM"));
+      gdbscm_misc_error (
+	FUNC_NAME, enum_list_arg_pos, enum_list_scm,
+	_ ("#:enum-values can only be provided with PARAM_ENUM"));
     }
   if (enum_list_arg_pos < 0 && param_type == param_enum)
     {
       gdbscm_misc_error (FUNC_NAME, GDBSCM_ARG_NONE, SCM_BOOL_F,
-			 _("PARAM_ENUM requires an enum-values argument"));
+			 _ ("PARAM_ENUM requires an enum-values argument"));
     }
   if (set_func_arg_pos > 0)
     {
       SCM_ASSERT_TYPE (gdbscm_is_procedure (set_func), set_func,
-		       set_func_arg_pos, FUNC_NAME, _("procedure"));
+		       set_func_arg_pos, FUNC_NAME, _ ("procedure"));
     }
   if (show_func_arg_pos > 0)
     {
       SCM_ASSERT_TYPE (gdbscm_is_procedure (show_func), show_func,
-		       show_func_arg_pos, FUNC_NAME, _("procedure"));
+		       show_func_arg_pos, FUNC_NAME, _ ("procedure"));
     }
   if (param_type == param_enum)
     {
       /* Note: enum_list lives in GC space, so we don't have to worry about
 	 freeing it if we later throw an exception.  */
-      enum_list = compute_enum_list (enum_list_scm, enum_list_arg_pos,
-				     FUNC_NAME);
+      enum_list
+	= compute_enum_list (enum_list_scm, enum_list_arg_pos, FUNC_NAME);
     }
 
   /* If initial-value is a function, we need the parameter object constructed
@@ -1056,13 +1038,13 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
     {
       if (gdbscm_is_procedure (initial_value_scm))
 	{
-	  initial_value_scm = gdbscm_safe_call_1 (initial_value_scm,
-						  p_smob->containing_scm, NULL);
+	  initial_value_scm
+	    = gdbscm_safe_call_1 (initial_value_scm, p_smob->containing_scm,
+				  NULL);
 	  if (gdbscm_is_exception (initial_value_scm))
 	    gdbscm_throw (initial_value_scm);
 	}
-      pascm_set_param_value_x (p_smob, enum_list,
-			       initial_value_scm,
+      pascm_set_param_value_x (p_smob, enum_list, initial_value_scm,
 			       initial_value_arg_pos, FUNC_NAME);
     }
 
@@ -1096,7 +1078,7 @@ gdbscm_register_parameter_x (SCM self)
   struct cmd_list_element **set_list, **show_list;
 
   if (pascm_is_valid (p_smob))
-    scm_misc_error (FUNC_NAME, _("parameter is already registered"), SCM_EOL);
+    scm_misc_error (FUNC_NAME, _ ("parameter is already registered"), SCM_EOL);
 
   cmd_name = gdbscm_parse_command_name (p_smob->name, FUNC_NAME, SCM_ARG1,
 					&set_list, &setlist);
@@ -1108,25 +1090,27 @@ gdbscm_register_parameter_x (SCM self)
 
   if (pascm_parameter_defined_p (p_smob->cmd_name, *set_list))
     {
-      gdbscm_misc_error (FUNC_NAME, SCM_ARG1, self,
-		_("parameter exists, \"set\" command is already defined"));
+      gdbscm_misc_error (
+	FUNC_NAME, SCM_ARG1, self,
+	_ ("parameter exists, \"set\" command is already defined"));
     }
   if (pascm_parameter_defined_p (p_smob->cmd_name, *show_list))
     {
-      gdbscm_misc_error (FUNC_NAME, SCM_ARG1, self,
-		_("parameter exists, \"show\" command is already defined"));
+      gdbscm_misc_error (
+	FUNC_NAME, SCM_ARG1, self,
+	_ ("parameter exists, \"show\" command is already defined"));
     }
 
   gdbscm_gdb_exception exc {};
   try
     {
-      p_smob->commands = add_setshow_generic
-	(p_smob->type, p_smob->extra_literals,
-	 p_smob->cmd_class, p_smob->cmd_name, p_smob,
-	 p_smob->set_doc, p_smob->show_doc, p_smob->doc,
-	 (gdbscm_is_procedure (p_smob->set_func) ? pascm_set_func : NULL),
-	 (gdbscm_is_procedure (p_smob->show_func) ? pascm_show_func : NULL),
-	 set_list, show_list);
+      p_smob->commands = add_setshow_generic (
+	p_smob->type, p_smob->extra_literals, p_smob->cmd_class,
+	p_smob->cmd_name, p_smob, p_smob->set_doc, p_smob->show_doc,
+	p_smob->doc,
+	(gdbscm_is_procedure (p_smob->set_func) ? pascm_set_func : NULL),
+	(gdbscm_is_procedure (p_smob->show_func) ? pascm_show_func : NULL),
+	set_list, show_list);
     }
   catch (const gdb_exception &except)
     {
@@ -1150,13 +1134,13 @@ gdbscm_register_parameter_x (SCM self)
 static SCM
 gdbscm_parameter_value (SCM self)
 {
-  SCM_ASSERT_TYPE (pascm_is_parameter (self) || scm_is_string (self),
-		   self, SCM_ARG1, FUNC_NAME, _("<gdb:parameter> or string"));
+  SCM_ASSERT_TYPE (pascm_is_parameter (self) || scm_is_string (self), self,
+		   SCM_ARG1, FUNC_NAME, _ ("<gdb:parameter> or string"));
 
   if (pascm_is_parameter (self))
     {
-      param_smob *p_smob = pascm_get_param_smob_arg_unsafe (self, SCM_ARG1,
-							    FUNC_NAME);
+      param_smob *p_smob
+	= pascm_get_param_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
       return pascm_param_value (make_setting (p_smob), SCM_ARG1, FUNC_NAME);
     }
@@ -1187,13 +1171,13 @@ gdbscm_parameter_value (SCM self)
       if (!found)
 	{
 	  gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
-				     _("parameter not found"));
+				     _ ("parameter not found"));
 	}
 
       if (!cmd->var.has_value ())
 	{
 	  gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
-				     _("not a parameter"));
+				     _ ("not a parameter"));
 	}
 
       return pascm_param_value (*cmd->var, SCM_ARG1, FUNC_NAME);
@@ -1205,21 +1189,19 @@ gdbscm_parameter_value (SCM self)
 static SCM
 gdbscm_set_parameter_value_x (SCM self, SCM value)
 {
-  param_smob *p_smob = pascm_get_param_smob_arg_unsafe (self, SCM_ARG1,
-							FUNC_NAME);
+  param_smob *p_smob
+    = pascm_get_param_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  pascm_set_param_value_x (p_smob, p_smob->enumeration,
-			   value, SCM_ARG2, FUNC_NAME);
+  pascm_set_param_value_x (p_smob, p_smob->enumeration, value, SCM_ARG2,
+			   FUNC_NAME);
 
   return SCM_UNSPECIFIED;
 }
-
+
 /* Initialize the Scheme parameter support.  */
 
-static const scheme_function parameter_functions[] =
-{
-  { "make-parameter", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_parameter),
-    "\
+static const scheme_function parameter_functions[]
+  = { { "make-parameter", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_parameter), "\
 Make a GDB parameter object.\n\
 \n\
   Arguments: name\n\
@@ -1250,29 +1232,25 @@ Make a GDB parameter object.\n\
     show-doc: The \"doc string\" when showing the parameter.\n\
     initial-value: The initial value of the parameter." },
 
-  { "register-parameter!", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_register_parameter_x),
-    "\
+      { "register-parameter!", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_register_parameter_x), "\
 Register a <gdb:parameter> object with GDB." },
 
-  { "parameter?", 1, 0, 0, as_a_scm_t_subr (gdbscm_parameter_p),
-    "\
+      { "parameter?", 1, 0, 0, as_a_scm_t_subr (gdbscm_parameter_p), "\
 Return #t if the object is a <gdb:parameter> object." },
 
-  { "parameter-value", 1, 0, 0, as_a_scm_t_subr (gdbscm_parameter_value),
-    "\
+      { "parameter-value", 1, 0, 0, as_a_scm_t_subr (gdbscm_parameter_value),
+	"\
 Return the value of a <gdb:parameter> object\n\
 or any gdb parameter if param is a string naming the parameter." },
 
-  { "set-parameter-value!", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_parameter_value_x),
-    "\
+      { "set-parameter-value!", 2, 0, 0,
+	as_a_scm_t_subr (gdbscm_set_parameter_value_x), "\
 Set the value of a <gdb:parameter> object.\n\
 \n\
   Arguments: <gdb:parameter> value" },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_parameters (void)

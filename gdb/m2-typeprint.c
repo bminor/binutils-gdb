@@ -19,7 +19,7 @@
 #include "defs.h"
 #include "language.h"
 #include "gdbsupport/gdb_obstack.h"
-#include "bfd.h"		/* Binary File Description */
+#include "bfd.h" /* Binary File Description */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -34,9 +34,8 @@
 #include "cp-abi.h"
 #include "cli/cli-style.h"
 
-static void m2_print_bounds (struct type *type,
-			     struct ui_file *stream, int show, int level,
-			     int print_high);
+static void m2_print_bounds (struct type *type, struct ui_file *stream,
+			     int show, int level, int print_high);
 
 static void m2_typedef (struct type *, struct ui_file *, int, int,
 			const struct type_print_options *);
@@ -53,15 +52,16 @@ static void m2_enum (struct type *, struct ui_file *, int, int);
 static void m2_range (struct type *, struct ui_file *, int, int,
 		      const struct type_print_options *);
 static void m2_type_name (struct type *type, struct ui_file *stream);
-static void m2_short_set (struct type *type, struct ui_file *stream,
-			  int show, int level);
-static int m2_long_set (struct type *type, struct ui_file *stream,
-			int show, int level, const struct type_print_options *flags);
+static void m2_short_set (struct type *type, struct ui_file *stream, int show,
+			  int level);
+static int m2_long_set (struct type *type, struct ui_file *stream, int show,
+			int level, const struct type_print_options *flags);
 static int m2_unbounded_array (struct type *type, struct ui_file *stream,
 			       int show, int level,
 			       const struct type_print_options *flags);
 static void m2_record_fields (struct type *type, struct ui_file *stream,
-			      int show, int level, const struct type_print_options *flags);
+			      int show, int level,
+			      const struct type_print_options *flags);
 static void m2_unknown (const char *s, struct type *type,
 			struct ui_file *stream, int show, int level);
 
@@ -69,11 +69,9 @@ int m2_is_long_set (struct type *type);
 int m2_is_long_set_of_type (struct type *type, struct type **of_type);
 int m2_is_unbounded_array (struct type *type);
 
-
 void
 m2_print_type (struct type *type, const char *varstring,
-	       struct ui_file *stream,
-	       int show, int level,
+	       struct ui_file *stream, int show, int level,
 	       const struct type_print_options *flags)
 {
   type = check_typedef (type);
@@ -83,14 +81,14 @@ m2_print_type (struct type *type, const char *varstring,
   stream->wrap_here (4);
   if (type == NULL)
     {
-      fputs_styled (_("<type unknown>"), metadata_style.style (), stream);
+      fputs_styled (_ ("<type unknown>"), metadata_style.style (), stream);
       return;
     }
 
   switch (type->code ())
     {
     case TYPE_CODE_SET:
-      m2_short_set(type, stream, show, level);
+      m2_short_set (type, stream, show, level);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -117,7 +115,7 @@ m2_print_type (struct type *type, const char *varstring,
       break;
 
     case TYPE_CODE_METHOD:
-      m2_unknown (_("method"), type, stream, show, level);
+      m2_unknown (_ ("method"), type, stream, show, level);
       break;
 
     case TYPE_CODE_FUNC:
@@ -137,11 +135,11 @@ m2_print_type (struct type *type, const char *varstring,
 
     case TYPE_CODE_UNDEF:
       /* i18n: Do not translate the "struct" part!  */
-      m2_unknown (_("undef"), type, stream, show, level);
+      m2_unknown (_ ("undef"), type, stream, show, level);
       break;
 
     case TYPE_CODE_ERROR:
-      m2_unknown (_("error"), type, stream, show, level);
+      m2_unknown (_ ("error"), type, stream, show, level);
       break;
 
     case TYPE_CODE_RANGE:
@@ -165,8 +163,8 @@ m2_language::print_typedef (struct type *type, struct symbol *new_symbol,
   type = check_typedef (type);
   gdb_printf (stream, "TYPE ");
   if (!new_symbol->type ()->name ()
-      || strcmp ((new_symbol->type ())->name (),
-		 new_symbol->linkage_name ()) != 0)
+      || strcmp ((new_symbol->type ())->name (), new_symbol->linkage_name ())
+	   != 0)
     gdb_printf (stream, "%s = ", new_symbol->print_name ());
   else
     gdb_printf (stream, "<builtin> = ");
@@ -186,15 +184,14 @@ m2_type_name (struct type *type, struct ui_file *stream)
 /* m2_range - displays a Modula-2 subrange type.  */
 
 void
-m2_range (struct type *type, struct ui_file *stream, int show,
-	  int level, const struct type_print_options *flags)
+m2_range (struct type *type, struct ui_file *stream, int show, int level,
+	  const struct type_print_options *flags)
 {
   if (type->bounds ()->high.const_val () == type->bounds ()->low.const_val ())
     {
       /* FIXME: type::target_type used to be TYPE_DOMAIN_TYPE but that was
 	 wrong.  Not sure if type::target_type is correct though.  */
-      m2_print_type (type->target_type (), "", stream, show, level,
-		     flags);
+      m2_print_type (type->target_type (), "", stream, show, level, flags);
     }
   else
     {
@@ -209,8 +206,8 @@ m2_range (struct type *type, struct ui_file *stream, int show,
 }
 
 static void
-m2_typedef (struct type *type, struct ui_file *stream, int show,
-	    int level, const struct type_print_options *flags)
+m2_typedef (struct type *type, struct ui_file *stream, int show, int level,
+	    const struct type_print_options *flags)
 {
   if (type->name () != NULL)
     {
@@ -222,8 +219,9 @@ m2_typedef (struct type *type, struct ui_file *stream, int show,
 
 /* m2_array - prints out a Modula-2 ARRAY ... OF type.  */
 
-static void m2_array (struct type *type, struct ui_file *stream,
-		      int show, int level, const struct type_print_options *flags)
+static void
+m2_array (struct type *type, struct ui_file *stream, int show, int level,
+	  const struct type_print_options *flags)
 {
   gdb_printf (stream, "ARRAY [");
   if (type->target_type ()->length () > 0
@@ -237,7 +235,7 @@ static void m2_array (struct type *type, struct ui_file *stream,
 	}
       else
 	gdb_puts (pulongest ((type->length ()
-			     / type->target_type ()->length ())),
+			      / type->target_type ()->length ())),
 		  stream);
     }
   gdb_printf (stream, "] OF ");
@@ -245,8 +243,8 @@ static void m2_array (struct type *type, struct ui_file *stream,
 }
 
 static void
-m2_pointer (struct type *type, struct ui_file *stream, int show,
-	    int level, const struct type_print_options *flags)
+m2_pointer (struct type *type, struct ui_file *stream, int show, int level,
+	    const struct type_print_options *flags)
 {
   if (TYPE_CONST (type))
     gdb_printf (stream, "[...] : ");
@@ -257,28 +255,29 @@ m2_pointer (struct type *type, struct ui_file *stream, int show,
 }
 
 static void
-m2_ref (struct type *type, struct ui_file *stream, int show,
-	int level, const struct type_print_options *flags)
+m2_ref (struct type *type, struct ui_file *stream, int show, int level,
+	const struct type_print_options *flags)
 {
   gdb_printf (stream, "VAR");
   m2_print_type (type->target_type (), "", stream, show, level, flags);
 }
 
 static void
-m2_unknown (const char *s, struct type *type, struct ui_file *stream,
-	    int show, int level)
+m2_unknown (const char *s, struct type *type, struct ui_file *stream, int show,
+	    int level)
 {
-  gdb_printf (stream, "%s %s", s, _("is unknown"));
+  gdb_printf (stream, "%s %s", s, _ ("is unknown"));
 }
 
-static void m2_union (struct type *type, struct ui_file *stream)
+static void
+m2_union (struct type *type, struct ui_file *stream)
 {
   gdb_printf (stream, "union");
 }
 
 static void
-m2_procedure (struct type *type, struct ui_file *stream,
-	      int show, int level, const struct type_print_options *flags)
+m2_procedure (struct type *type, struct ui_file *stream, int show, int level,
+	      const struct type_print_options *flags)
 {
   gdb_printf (stream, "PROCEDURE ");
   m2_type_name (type, stream);
@@ -306,9 +305,8 @@ m2_procedure (struct type *type, struct ui_file *stream,
 }
 
 static void
-m2_print_bounds (struct type *type,
-		 struct ui_file *stream, int show, int level,
-		 int print_high)
+m2_print_bounds (struct type *type, struct ui_file *stream, int show,
+		 int level, int print_high)
 {
   struct type *target = type->target_type ();
 
@@ -324,27 +322,24 @@ m2_print_bounds (struct type *type,
 static void
 m2_short_set (struct type *type, struct ui_file *stream, int show, int level)
 {
-  gdb_printf(stream, "SET [");
-  m2_print_bounds (type->index_type (), stream,
-		   show - 1, level, 0);
+  gdb_printf (stream, "SET [");
+  m2_print_bounds (type->index_type (), stream, show - 1, level, 0);
 
-  gdb_printf(stream, "..");
-  m2_print_bounds (type->index_type (), stream,
-		   show - 1, level, 1);
-  gdb_printf(stream, "]");
+  gdb_printf (stream, "..");
+  m2_print_bounds (type->index_type (), stream, show - 1, level, 1);
+  gdb_printf (stream, "]");
 }
 
 int
 m2_is_long_set (struct type *type)
 {
-  LONGEST previous_high = 0;  /* Unnecessary initialization
+  LONGEST previous_high = 0; /* Unnecessary initialization
 				 keeps gcc -Wall happy.  */
   int len, i;
   struct type *range;
 
   if (type->code () == TYPE_CODE_STRUCT)
     {
-
       /* check if all fields of the RECORD are consecutive sets.  */
 
       len = type->num_fields ();
@@ -363,7 +358,7 @@ m2_is_long_set (struct type *type)
 	    return 0;
 	  previous_high = range->bounds ()->high.const_val ();
 	}
-      return len>0;
+      return len > 0;
     }
   return 0;
 }
@@ -422,10 +417,10 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
       *of_type = target;
       if (m2_get_discrete_bounds (target, &l2, &h2))
 	return (l1 == l2 && h1 == h2);
-      error (_("long_set failed to find discrete bounds for its subtype"));
+      error (_ ("long_set failed to find discrete bounds for its subtype"));
       return 0;
     }
-  error (_("expecting long_set"));
+  error (_ ("expecting long_set"));
   return 0;
 }
 
@@ -451,26 +446,26 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 
       if (get_long_set_bounds (type, &low, &high))
 	{
-	  gdb_printf(stream, "SET OF ");
+	  gdb_printf (stream, "SET OF ");
 	  i = TYPE_N_BASECLASSES (type);
 	  if (m2_is_long_set_of_type (type, &of_type))
 	    m2_print_type (of_type, "", stream, show - 1, level, flags);
 	  else
 	    {
-	      gdb_printf(stream, "[");
-	      m2_print_bounds (type->field (i).type ()->index_type (),
-			       stream, show - 1, level, 0);
+	      gdb_printf (stream, "[");
+	      m2_print_bounds (type->field (i).type ()->index_type (), stream,
+			       show - 1, level, 0);
 
-	      gdb_printf(stream, "..");
+	      gdb_printf (stream, "..");
 
 	      m2_print_bounds (type->field (len - 1).type ()->index_type (),
 			       stream, show - 1, level, 1);
-	      gdb_printf(stream, "]");
+	      gdb_printf (stream, "]");
 	    }
 	}
       else
 	/* i18n: Do not translate the "SET OF" part!  */
-	gdb_printf(stream, _("SET OF <unknown>"));
+	gdb_printf (stream, _ ("SET OF <unknown>"));
 
       return 1;
     }
@@ -518,8 +513,8 @@ m2_unbounded_array (struct type *type, struct ui_file *stream, int show,
       if (show > 0)
 	{
 	  gdb_puts ("ARRAY OF ", stream);
-	  m2_print_type (type->field (0).type ()->target_type (),
-			 "", stream, 0, level, flags);
+	  m2_print_type (type->field (0).type ()->target_type (), "", stream,
+			 0, level, flags);
 	}
       return 1;
     }
@@ -557,19 +552,18 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	gdb_printf (stream, "RECORD\n");
       else if (type->code () == TYPE_CODE_UNION)
 	/* i18n: Do not translate "CASE" and "OF".  */
-	gdb_printf (stream, _("CASE <variant> OF\n"));
+	gdb_printf (stream, _ ("CASE <variant> OF\n"));
 
       for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
 	  QUIT;
 
 	  print_spaces (level + 4, stream);
-	  fputs_styled (type->field (i).name (),
-			variable_name_style.style (), stream);
+	  fputs_styled (type->field (i).name (), variable_name_style.style (),
+			stream);
 	  gdb_puts (" : ", stream);
-	  m2_print_type (type->field (i).type (),
-			 "",
-			 stream, 0, level + 4, flags);
+	  m2_print_type (type->field (i).type (), "", stream, 0, level + 4,
+			 flags);
 	  if (TYPE_FIELD_PACKED (type, i))
 	    {
 	      /* It is a bitfield.  This code does not attempt
@@ -577,12 +571,11 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 		 unnamed fields.  This would lead to misleading
 		 results if the compiler does not put out fields
 		 for such things (I don't know what it does).  */
-	      gdb_printf (stream, " : %d",
-			  TYPE_FIELD_BITSIZE (type, i));
+	      gdb_printf (stream, " : %d", TYPE_FIELD_BITSIZE (type, i));
 	    }
 	  gdb_printf (stream, ";\n");
 	}
-      
+
       gdb_printf (stream, "%*sEND ", level, "");
     }
 }
@@ -610,8 +603,8 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
 	  if (i > 0)
 	    gdb_printf (stream, ", ");
 	  stream->wrap_here (4);
-	  fputs_styled (type->field (i).name (),
-			variable_name_style.style (), stream);
+	  fputs_styled (type->field (i).name (), variable_name_style.style (),
+			stream);
 	  if (lastval != type->field (i).loc_enumval ())
 	    {
 	      gdb_printf (stream, " = %s",

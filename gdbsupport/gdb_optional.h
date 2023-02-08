@@ -51,19 +51,16 @@ template<typename T>
 class optional
 {
 public:
-
-  constexpr optional ()
-    : m_dummy ()
-  {}
+  constexpr optional () : m_dummy () {}
 
   template<typename... Args>
-  constexpr optional (in_place_t, Args &&... args)
+  constexpr optional (in_place_t, Args &&...args)
     : m_item (std::forward<Args> (args)...),
       m_instantiated (true)
-  {}
+  {
+  }
 
-  ~optional ()
-  { this->reset (); }
+  ~optional () { this->reset (); }
 
   /* Copy and move constructors.  */
 
@@ -73,61 +70,58 @@ public:
       this->emplace (other.get ());
   }
 
-  optional (optional &&other)
-    noexcept(std::is_nothrow_move_constructible<T> ())
+  optional (optional &&other) noexcept (
+    std::is_nothrow_move_constructible<T> ())
   {
     if (other.m_instantiated)
       this->emplace (std::move (other.get ()));
   }
 
-  constexpr optional (const T &other)
-    : m_item (other),
-      m_instantiated (true)
-  {}
+  constexpr optional (const T &other) : m_item (other), m_instantiated (true)
+  {
+  }
 
-  constexpr optional (T &&other)
-    noexcept (std::is_nothrow_move_constructible<T> ())
+  constexpr optional (T &&other) noexcept (
+    std::is_nothrow_move_constructible<T> ())
     : m_item (std::move (other)),
       m_instantiated (true)
-  {}
+  {
+  }
 
   /* Assignment operators.  */
 
-  optional &
-  operator= (const optional &other)
+  optional &operator= (const optional &other)
   {
     if (m_instantiated && other.m_instantiated)
       this->get () = other.get ();
     else
       {
-	if (other.m_instantiated)
-	  this->emplace (other.get ());
-	else
-	  this->reset ();
+        if (other.m_instantiated)
+          this->emplace (other.get ());
+        else
+          this->reset ();
       }
 
     return *this;
   }
 
-  optional &
-  operator= (optional &&other)
-    noexcept (And<std::is_nothrow_move_constructible<T>,
-	      std::is_nothrow_move_assignable<T>> ())
+  optional &operator= (optional &&other) noexcept (
+    And<std::is_nothrow_move_constructible<T>,
+        std::is_nothrow_move_assignable<T>> ())
   {
     if (m_instantiated && other.m_instantiated)
       this->get () = std::move (other.get ());
     else
       {
-	if (other.m_instantiated)
-	  this->emplace (std::move (other.get ()));
-	else
-	  this->reset ();
+        if (other.m_instantiated)
+          this->emplace (std::move (other.get ()));
+        else
+          this->reset ();
       }
     return *this;
   }
 
-  optional &
-  operator= (const T &other)
+  optional &operator= (const T &other)
   {
     if (m_instantiated)
       this->get () = other;
@@ -137,9 +131,8 @@ public:
   }
 
   optional &
-  operator= (T &&other)
-    noexcept (And<std::is_nothrow_move_constructible<T>,
-	      std::is_nothrow_move_assignable<T>> ())
+  operator= (T &&other) noexcept (And<std::is_nothrow_move_constructible<T>,
+                                      std::is_nothrow_move_assignable<T>> ())
   {
     if (m_instantiated)
       this->get () = std::move (other);
@@ -149,38 +142,36 @@ public:
   }
 
   template<typename... Args>
-  T &emplace (Args &&... args)
+  T &emplace (Args &&...args)
   {
     this->reset ();
-    new (&m_item) T (std::forward<Args>(args)...);
+    new (&m_item) T (std::forward<Args> (args)...);
     m_instantiated = true;
     return this->get ();
   }
 
   /* Observers.  */
-  constexpr const T *operator-> () const
-  { return std::addressof (this->get ()); }
+  constexpr const T *operator->() const
+  {
+    return std::addressof (this->get ());
+  }
 
-  T *operator-> ()
-  { return std::addressof (this->get ()); }
+  T *operator->() { return std::addressof (this->get ()); }
 
-  constexpr const T &operator* () const &
-  { return this->get (); }
+  constexpr const T &operator* () const & { return this->get (); }
 
-  T &operator* () &
-  { return this->get (); }
+  T &operator* () & { return this->get (); }
 
-  T &&operator* () &&
-  { return std::move (this->get ()); }
+  T &&operator* () && { return std::move (this->get ()); }
 
   constexpr const T &&operator* () const &&
-  { return std::move (this->get ()); }
+  {
+    return std::move (this->get ());
+  }
 
-  constexpr explicit operator bool () const noexcept
-  { return m_instantiated; }
+  constexpr explicit operator bool () const noexcept { return m_instantiated; }
 
-  constexpr bool has_value () const noexcept
-  { return m_instantiated; }
+  constexpr bool has_value () const noexcept { return m_instantiated; }
 
   /* 'reset' is a 'safe' operation with no precondition.  */
   void reset () noexcept
@@ -190,7 +181,6 @@ public:
   }
 
 private:
-
   /* Destroy the object.  */
   void destroy ()
   {
@@ -218,7 +208,9 @@ private:
   /* The object.  */
   union
   {
-    struct { } m_dummy;
+    struct
+    {
+    } m_dummy;
     T m_item;
     volatile char dont_use; /* Silences -Wmaybe-uninitialized warning, see
 			       PR gcc/80635.  */
@@ -228,6 +220,6 @@ private:
   bool m_instantiated = false;
 };
 
-}
+} // namespace gdb
 
 #endif /* COMMON_GDB_OPTIONAL_H */

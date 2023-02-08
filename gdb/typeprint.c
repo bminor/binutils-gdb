@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "gdbsupport/gdb_obstack.h"
-#include "bfd.h"		/* Binary File Description */
+#include "bfd.h" /* Binary File Description */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -38,35 +38,31 @@
 #include "completer.h"
 #include "cli/cli-style.h"
 
-const struct type_print_options type_print_raw_options =
-{
-  1,				/* raw */
-  1,				/* print_methods */
-  1,				/* print_typedefs */
-  0,				/* print_offsets */
-  0,				/* print_in_hex */
-  0,				/* print_nested_type_limit  */
-  NULL,				/* local_typedefs */
-  NULL,				/* global_table */
-  NULL				/* global_printers */
+const struct type_print_options type_print_raw_options = {
+  1,	/* raw */
+  1,	/* print_methods */
+  1,	/* print_typedefs */
+  0,	/* print_offsets */
+  0,	/* print_in_hex */
+  0,	/* print_nested_type_limit  */
+  NULL, /* local_typedefs */
+  NULL, /* global_table */
+  NULL	/* global_printers */
 };
 
 /* The default flags for 'ptype' and 'whatis'.  */
 
-static struct type_print_options default_ptype_flags =
-{
-  0,				/* raw */
-  1,				/* print_methods */
-  1,				/* print_typedefs */
-  0,				/* print_offsets */
-  0,				/* print_in_hex */
-  0,				/* print_nested_type_limit  */
-  NULL,				/* local_typedefs */
-  NULL,				/* global_table */
-  NULL				/* global_printers */
+static struct type_print_options default_ptype_flags = {
+  0,	/* raw */
+  1,	/* print_methods */
+  1,	/* print_typedefs */
+  0,	/* print_offsets */
+  0,	/* print_in_hex */
+  0,	/* print_nested_type_limit  */
+  NULL, /* local_typedefs */
+  NULL, /* global_table */
+  NULL	/* global_printers */
 };
-
-
 
 /* See typeprint.h.  */
 
@@ -84,8 +80,7 @@ print_offset_data::print_offset_data (const struct type_print_options *flags)
 
 void
 print_offset_data::maybe_print_hole (struct ui_file *stream,
-				     unsigned int bitpos,
-				     const char *for_what)
+				     unsigned int bitpos, const char *for_what)
 {
   /* We check for END_BITPOS > 0 because there is a specific
      scenario when END_BITPOS can be zero and BITPOS can be >
@@ -137,9 +132,8 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
       /* Since union fields don't have the concept of offsets, we just
 	 print their sizes.  */
       gdb_printf (stream, "/*                %6s */",
-		  (print_in_hex ?
-		   hex_string_custom (ftype->length (), 4) :
-		   pulongest (ftype->length ())));
+		  (print_in_hex ? hex_string_custom (ftype->length (), 4)
+				: pulongest (ftype->length ())));
       return;
     }
 
@@ -157,8 +151,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
 
       unsigned real_bitpos = bitpos + offset_bitpos;
 
-      gdb_printf (stream,
-		  (print_in_hex ? "/* 0x%04x: 0x%x" : "/* %6u:%2u  "),
+      gdb_printf (stream, (print_in_hex ? "/* 0x%04x: 0x%x" : "/* %6u:%2u  "),
 		  real_bitpos / TARGET_CHAR_BIT,
 		  real_bitpos % TARGET_CHAR_BIT);
     }
@@ -166,7 +159,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
     {
       /* The position of the field, relative to the beginning of the
 	 struct.  */
-      gdb_printf (stream, (print_in_hex ?  "/* 0x%04x" : "/* %6u"),
+      gdb_printf (stream, (print_in_hex ? "/* 0x%04x" : "/* %6u"),
 		  (bitpos + offset_bitpos) / TARGET_CHAR_BIT);
 
       gdb_printf (stream, "     ");
@@ -192,8 +185,6 @@ print_offset_data::finish (struct type *type, int level,
   gdb_printf (stream, "/* total size (bytes): %4s */\n",
 	      pulongest (type->length ()));
 }
-
-
 
 /* A hash function for a typedef_field.  */
 
@@ -270,8 +261,8 @@ typedef_hash_table::add_template_parameters (struct type *t)
 /* See typeprint.h.  */
 
 typedef_hash_table::typedef_hash_table ()
-  : m_table (htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
-				NULL, xcalloc, xfree))
+  : m_table (htab_create_alloc (10, hash_typedef_field, eq_typedef_field, NULL,
+				xcalloc, xfree))
 {
 }
 
@@ -306,8 +297,8 @@ typedef_hash_table::typedef_hash_table (const typedef_hash_table &table)
    result.  A NULL return means that the name was not found.  */
 
 const char *
-typedef_hash_table::find_global_typedef (const struct type_print_options *flags,
-					 struct type *t)
+typedef_hash_table::find_global_typedef (
+  const struct type_print_options *flags, struct type *t)
 {
   char *applied;
   void **slot;
@@ -338,8 +329,8 @@ typedef_hash_table::find_global_typedef (const struct type_print_options *flags,
 
   if (applied != NULL)
     {
-      new_tf->name = obstack_strdup (&flags->global_typedefs->m_storage,
-				     applied);
+      new_tf->name
+	= obstack_strdup (&flags->global_typedefs->m_storage, applied);
       xfree (applied);
     }
 
@@ -368,14 +359,13 @@ typedef_hash_table::find_typedef (const struct type_print_options *flags,
   return find_global_typedef (flags, t);
 }
 
-
-
 /* Print a description of a type in the format of a 
    typedef for the current language.
    NEW is the new name for a type TYPE.  */
 
 void
-typedef_print (struct type *type, struct symbol *newobj, struct ui_file *stream)
+typedef_print (struct type *type, struct symbol *newobj,
+	       struct ui_file *stream)
 {
   current_language->print_typedef (type, newobj, stream);
 }
@@ -421,7 +411,7 @@ void
 type_print_unknown_return_type (struct ui_file *stream)
 {
   fprintf_styled (stream, metadata_style.style (),
-		  _("<unknown return type>"));
+		  _ ("<unknown return type>"));
 }
 
 /* See typeprint.h.  */
@@ -429,7 +419,7 @@ type_print_unknown_return_type (struct ui_file *stream)
 void
 error_unknown_type (const char *sym_print_name)
 {
-  error (_("'%s' has unknown type; cast it to its declared type"),
+  error (_ ("'%s' has unknown type; cast it to its declared type"),
 	 sym_print_name);
 }
 
@@ -493,15 +483,15 @@ whatis_exp (const char *exp, int show)
 		  flags.print_in_hex = 0;
 		  break;
 		default:
-		  error (_("unrecognized flag '%c'"), *exp);
+		  error (_ ("unrecognized flag '%c'"), *exp);
 		}
 	      seen_one = 1;
 	    }
 
 	  if (!*exp && !seen_one)
-	    error (_("flag expected"));
+	    error (_ ("flag expected"));
 	  if (!isspace (*exp))
-	    error (_("expected space after format"));
+	    error (_ ("expected space after format"));
 	  exp = skip_spaces (exp);
 	}
 
@@ -541,7 +531,7 @@ whatis_exp (const char *exp, int show)
 
   if (flags.print_offsets && is_dynamic_type (type))
     {
-      warning (_("ptype/o does not work with dynamic types; disabling '/o'"));
+      warning (_ ("ptype/o does not work with dynamic types; disabling '/o'"));
       flags.print_offsets = 0;
     }
 
@@ -577,9 +567,9 @@ whatis_exp (const char *exp, int show)
     {
       gdb_printf ("/* real type = ");
       type_print (real_type, "", gdb_stdout, -1);
-      if (! full)
+      if (!full)
 	gdb_printf (" (incomplete object)");
-      gdb_printf (" */\n");    
+      gdb_printf (" */\n");
     }
 
   current_language->print_type (type, "", gdb_stdout, show, 0, &flags);
@@ -625,7 +615,6 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 
   switch (type->code ())
     {
-
     case TYPE_CODE_ENUM:
       len = type->num_fields ();
       for (i = 0; i < len; i++)
@@ -682,11 +671,11 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_NAMESPACE:
-      error (_("internal error: unhandled type in print_type_scalar"));
+      error (_ ("internal error: unhandled type in print_type_scalar"));
       break;
 
     default:
-      error (_("Invalid type code in symbol table."));
+      error (_ ("Invalid type code in symbol table."));
     }
 }
 
@@ -718,7 +707,6 @@ maintenance_print_type (const char *type_name, int from_tty)
 	recursive_dump_type (type, 0);
     }
 }
-
 
 struct cmd_list_element *setprinttypelist;
 
@@ -727,8 +715,8 @@ struct cmd_list_element *showprinttypelist;
 static bool print_methods = true;
 
 static void
-set_print_type_methods (const char *args,
-			int from_tty, struct cmd_list_element *c)
+set_print_type_methods (const char *args, int from_tty,
+			struct cmd_list_element *c)
 {
   default_ptype_flags.print_methods = print_methods;
 }
@@ -737,24 +725,24 @@ static void
 show_print_type_methods (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Printing of methods defined in a class in %s\n"),
+  gdb_printf (file, _ ("Printing of methods defined in a class in %s\n"),
 	      value);
 }
 
 static bool print_typedefs = true;
 
 static void
-set_print_type_typedefs (const char *args,
-			 int from_tty, struct cmd_list_element *c)
+set_print_type_typedefs (const char *args, int from_tty,
+			 struct cmd_list_element *c)
 {
   default_ptype_flags.print_typedefs = print_typedefs;
 }
 
 static void
 show_print_type_typedefs (struct ui_file *file, int from_tty,
-			 struct cmd_list_element *c, const char *value)
+			  struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Printing of typedefs defined in a class in %s\n"),
+  gdb_printf (file, _ ("Printing of typedefs defined in a class in %s\n"),
 	      value);
 }
 
@@ -777,18 +765,17 @@ set_print_type_nested_types (const char *args, int from_tty,
 /* Show how many nested type definitions the type printer will print.  */
 
 static void
-show_print_type_nested_types  (struct ui_file *file, int from_tty,
-			       struct cmd_list_element *c, const char *value)
+show_print_type_nested_types (struct ui_file *file, int from_tty,
+			      struct cmd_list_element *c, const char *value)
 {
   if (*value == '0')
     {
       gdb_printf (file,
-		  _("Will not print nested types defined in a class\n"));
+		  _ ("Will not print nested types defined in a class\n"));
     }
   else
     {
-      gdb_printf (file,
-		  _("Will print %s nested types defined in a class\n"),
+      gdb_printf (file, _ ("Will print %s nested types defined in a class\n"),
 		  value);
     }
 }
@@ -803,8 +790,8 @@ static bool print_offsets_and_sizes_in_hex = false;
    displayed in hexadecimal or decimal notation.  */
 
 static void
-set_print_offsets_and_sizes_in_hex (const char *args,
-				    int from_tty, struct cmd_list_element *c)
+set_print_offsets_and_sizes_in_hex (const char *args, int from_tty,
+				    struct cmd_list_element *c)
 {
   default_ptype_flags.print_in_hex = print_offsets_and_sizes_in_hex;
 }
@@ -817,18 +804,19 @@ show_print_offsets_and_sizes_in_hex (struct ui_file *file, int from_tty,
 				     struct cmd_list_element *c,
 				     const char *value)
 {
-  gdb_printf (file, _("\
+  gdb_printf (file, _ ("\
 Display of struct members offsets and sizes in hexadecimal is %s\n"),
 	      value);
 }
 
 void _initialize_typeprint ();
+
 void
 _initialize_typeprint ()
 {
   struct cmd_list_element *c;
 
-  c = add_com ("ptype", class_vars, ptype_command, _("\
+  c = add_com ("ptype", class_vars, ptype_command, _ ("\
 Print definition of type TYPE.\n\
 Usage: ptype[/FLAGS] TYPE | EXPRESSION\n\
 Argument may be any type (for example a type name defined by typedef,\n\
@@ -851,46 +839,48 @@ Available FLAGS are:\n\
   set_cmd_completer (c, expression_completer);
 
   c = add_com ("whatis", class_vars, whatis_command,
-	       _("Print data type of expression EXP.\n\
+	       _ ("Print data type of expression EXP.\n\
 Only one level of typedefs is unrolled.  See also \"ptype\"."));
   set_cmd_completer (c, expression_completer);
 
-  add_setshow_prefix_cmd ("type", no_class,
-			  _("Generic command for showing type-printing settings."),
-			  _("Generic command for setting how types print."),
-			  &setprinttypelist, &showprinttypelist,
-			  &setprintlist, &showprintlist);
+  add_setshow_prefix_cmd (
+    "type", no_class,
+    _ ("Generic command for showing type-printing settings."),
+    _ ("Generic command for setting how types print."), &setprinttypelist,
+    &showprinttypelist, &setprintlist, &showprintlist);
 
-  add_setshow_boolean_cmd ("methods", no_class, &print_methods,
-			   _("\
-Set printing of methods defined in classes."), _("\
-Show printing of methods defined in classes."), NULL,
-			   set_print_type_methods,
-			   show_print_type_methods,
-			   &setprinttypelist, &showprinttypelist);
-  add_setshow_boolean_cmd ("typedefs", no_class, &print_typedefs,
-			   _("\
-Set printing of typedefs defined in classes."), _("\
-Show printing of typedefs defined in classes."), NULL,
-			   set_print_type_typedefs,
-			   show_print_type_typedefs,
-			   &setprinttypelist, &showprinttypelist);
+  add_setshow_boolean_cmd ("methods", no_class, &print_methods, _ ("\
+Set printing of methods defined in classes."),
+			   _ ("\
+Show printing of methods defined in classes."),
+			   NULL, set_print_type_methods,
+			   show_print_type_methods, &setprinttypelist,
+			   &showprinttypelist);
+  add_setshow_boolean_cmd ("typedefs", no_class, &print_typedefs, _ ("\
+Set printing of typedefs defined in classes."),
+			   _ ("\
+Show printing of typedefs defined in classes."),
+			   NULL, set_print_type_typedefs,
+			   show_print_type_typedefs, &setprinttypelist,
+			   &showprinttypelist);
 
   add_setshow_zuinteger_unlimited_cmd ("nested-type-limit", no_class,
-				       &print_nested_type_limit,
-				       _("\
+				       &print_nested_type_limit, _ ("\
 Set the number of recursive nested type definitions to print \
-(\"unlimited\" or -1 to show all)."), _("\
-Show the number of recursive nested type definitions to print."), NULL,
-				       set_print_type_nested_types,
+(\"unlimited\" or -1 to show all)."),
+				       _ ("\
+Show the number of recursive nested type definitions to print."),
+				       NULL, set_print_type_nested_types,
 				       show_print_type_nested_types,
 				       &setprinttypelist, &showprinttypelist);
 
   add_setshow_boolean_cmd ("hex", no_class, &print_offsets_and_sizes_in_hex,
-			   _("\
-Set printing of struct members sizes and offsets using hex notation."), _("\
+			   _ ("\
+Set printing of struct members sizes and offsets using hex notation."),
+			   _ ("\
 Show whether sizes and offsets of struct members are printed using hex \
-notation."), nullptr, set_print_offsets_and_sizes_in_hex,
+notation."),
+			   nullptr, set_print_offsets_and_sizes_in_hex,
 			   show_print_offsets_and_sizes_in_hex,
 			   &setprinttypelist, &showprinttypelist);
 }
@@ -900,7 +890,7 @@ notation."), nullptr, set_print_offsets_and_sizes_in_hex,
 void
 val_print_not_allocated (struct ui_file *stream)
 {
-  fprintf_styled (stream, metadata_style.style (), _("<not allocated>"));
+  fprintf_styled (stream, metadata_style.style (), _ ("<not allocated>"));
 }
 
 /* Print <not associated> status to stream STREAM.  */
@@ -908,5 +898,5 @@ val_print_not_allocated (struct ui_file *stream)
 void
 val_print_not_associated (struct ui_file *stream)
 {
-  fprintf_styled (stream, metadata_style.style (), _("<not associated>"));
+  fprintf_styled (stream, metadata_style.style (), _ ("<not associated>"));
 }

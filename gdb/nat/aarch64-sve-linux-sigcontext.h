@@ -19,12 +19,13 @@
 #ifndef NAT_AARCH64_SVE_LINUX_SIGCONTEXT_H
 #define NAT_AARCH64_SVE_LINUX_SIGCONTEXT_H
 
-#define SVE_MAGIC	0x53564501
+#define SVE_MAGIC 0x53564501
 
-struct sve_context {
-	struct _aarch64_ctx head;
-	__u16 vl;
-	__u16 __reserved[3];
+struct sve_context
+{
+  struct _aarch64_ctx head;
+  __u16 vl;
+  __u16 __reserved[3];
 };
 
 /*
@@ -35,19 +36,19 @@ struct sve_context {
  * See linux/Documentation/arm64/sve.txt for a description of the VL/VQ
  * terminology.
  */
-#define SVE_VQ_BYTES		16	/* number of bytes per quadword */
+#define SVE_VQ_BYTES 16 /* number of bytes per quadword */
 
-#define SVE_VQ_MIN		1
-#define SVE_VQ_MAX		512
+#define SVE_VQ_MIN 1
+#define SVE_VQ_MAX 512
 
-#define SVE_VL_MIN		(SVE_VQ_MIN * SVE_VQ_BYTES)
-#define SVE_VL_MAX		(SVE_VQ_MAX * SVE_VQ_BYTES)
+#define SVE_VL_MIN (SVE_VQ_MIN * SVE_VQ_BYTES)
+#define SVE_VL_MAX (SVE_VQ_MAX * SVE_VQ_BYTES)
 
-#define SVE_NUM_ZREGS		32
-#define SVE_NUM_PREGS		16
+#define SVE_NUM_ZREGS 32
+#define SVE_NUM_PREGS 16
 
 #define sve_vl_valid(vl) \
-	((vl) % SVE_VQ_BYTES == 0 && (vl) >= SVE_VL_MIN && (vl) <= SVE_VL_MAX)
+  ((vl) % SVE_VQ_BYTES == 0 && (vl) >= SVE_VL_MIN && (vl) <= SVE_VL_MAX)
 
 /*
  * If the SVE registers are currently live for the thread at signal delivery,
@@ -100,59 +101,59 @@ struct sve_context {
  * Additional data might be appended in the future.
  */
 
-#define SVE_SIG_ZREG_SIZE(vq)	((__u32)(vq) * SVE_VQ_BYTES)
-#define SVE_SIG_PREG_SIZE(vq)	((__u32)(vq) * (SVE_VQ_BYTES / 8))
-#define SVE_SIG_FFR_SIZE(vq)	SVE_SIG_PREG_SIZE(vq)
+#define SVE_SIG_ZREG_SIZE(vq) ((__u32) (vq) *SVE_VQ_BYTES)
+#define SVE_SIG_PREG_SIZE(vq) ((__u32) (vq) * (SVE_VQ_BYTES / 8))
+#define SVE_SIG_FFR_SIZE(vq) SVE_SIG_PREG_SIZE (vq)
 
-#define SVE_SIG_REGS_OFFSET					\
-	((sizeof(struct sve_context) + (SVE_VQ_BYTES - 1))	\
-		/ SVE_VQ_BYTES * SVE_VQ_BYTES)
+#define SVE_SIG_REGS_OFFSET                                          \
+  ((sizeof (struct sve_context) + (SVE_VQ_BYTES - 1)) / SVE_VQ_BYTES \
+   * SVE_VQ_BYTES)
 
-#define SVE_SIG_ZREGS_OFFSET	SVE_SIG_REGS_OFFSET
+#define SVE_SIG_ZREGS_OFFSET SVE_SIG_REGS_OFFSET
 #define SVE_SIG_ZREG_OFFSET(vq, n) \
-	(SVE_SIG_ZREGS_OFFSET + SVE_SIG_ZREG_SIZE(vq) * (n))
+  (SVE_SIG_ZREGS_OFFSET + SVE_SIG_ZREG_SIZE (vq) * (n))
 #define SVE_SIG_ZREGS_SIZE(vq) \
-	(SVE_SIG_ZREG_OFFSET(vq, SVE_NUM_ZREGS) - SVE_SIG_ZREGS_OFFSET)
+  (SVE_SIG_ZREG_OFFSET (vq, SVE_NUM_ZREGS) - SVE_SIG_ZREGS_OFFSET)
 
 #define SVE_SIG_PREGS_OFFSET(vq) \
-	(SVE_SIG_ZREGS_OFFSET + SVE_SIG_ZREGS_SIZE(vq))
+  (SVE_SIG_ZREGS_OFFSET + SVE_SIG_ZREGS_SIZE (vq))
 #define SVE_SIG_PREG_OFFSET(vq, n) \
-	(SVE_SIG_PREGS_OFFSET(vq) + SVE_SIG_PREG_SIZE(vq) * (n))
+  (SVE_SIG_PREGS_OFFSET (vq) + SVE_SIG_PREG_SIZE (vq) * (n))
 #define SVE_SIG_PREGS_SIZE(vq) \
-	(SVE_SIG_PREG_OFFSET(vq, SVE_NUM_PREGS) - SVE_SIG_PREGS_OFFSET(vq))
+  (SVE_SIG_PREG_OFFSET (vq, SVE_NUM_PREGS) - SVE_SIG_PREGS_OFFSET (vq))
 
 #define SVE_SIG_FFR_OFFSET(vq) \
-	(SVE_SIG_PREGS_OFFSET(vq) + SVE_SIG_PREGS_SIZE(vq))
+  (SVE_SIG_PREGS_OFFSET (vq) + SVE_SIG_PREGS_SIZE (vq))
 
 #define SVE_SIG_REGS_SIZE(vq) \
-	(SVE_SIG_FFR_OFFSET(vq) + SVE_SIG_FFR_SIZE(vq) - SVE_SIG_REGS_OFFSET)
+  (SVE_SIG_FFR_OFFSET (vq) + SVE_SIG_FFR_SIZE (vq) - SVE_SIG_REGS_OFFSET)
 
-#define SVE_SIG_CONTEXT_SIZE(vq) (SVE_SIG_REGS_OFFSET + SVE_SIG_REGS_SIZE(vq))
+#define SVE_SIG_CONTEXT_SIZE(vq) (SVE_SIG_REGS_OFFSET + SVE_SIG_REGS_SIZE (vq))
 
 /* SVE/FP/SIMD state (NT_ARM_SVE) */
 
-struct user_sve_header {
-	__u32 size; /* total meaningful regset content in bytes */
-	__u32 max_size; /* maximum possible size for this thread */
-	__u16 vl; /* current vector length */
-	__u16 max_vl; /* maximum possible vector length */
-	__u16 flags;
-	__u16 __reserved;
+struct user_sve_header
+{
+  __u32 size;	  /* total meaningful regset content in bytes */
+  __u32 max_size; /* maximum possible size for this thread */
+  __u16 vl;	  /* current vector length */
+  __u16 max_vl;	  /* maximum possible vector length */
+  __u16 flags;
+  __u16 __reserved;
 };
 
 /* Definitions for user_sve_header.flags: */
-#define SVE_PT_REGS_MASK		(1 << 0)
+#define SVE_PT_REGS_MASK (1 << 0)
 
-#define SVE_PT_REGS_FPSIMD		0
-#define SVE_PT_REGS_SVE			SVE_PT_REGS_MASK
+#define SVE_PT_REGS_FPSIMD 0
+#define SVE_PT_REGS_SVE SVE_PT_REGS_MASK
 
 /*
  * Common SVE_PT_* flags:
  * These must be kept in sync with prctl interface in <linux/ptrace.h>
  */
-#define SVE_PT_VL_INHERIT		(PR_SVE_VL_INHERIT >> 16)
-#define SVE_PT_VL_ONEXEC		(PR_SVE_SET_VL_ONEXEC >> 16)
-
+#define SVE_PT_VL_INHERIT (PR_SVE_VL_INHERIT >> 16)
+#define SVE_PT_VL_ONEXEC (PR_SVE_SET_VL_ONEXEC >> 16)
 
 /*
  * The remainder of the SVE state follows struct user_sve_header.  The
@@ -165,9 +166,9 @@ struct user_sve_header {
  */
 
 /* Offset from the start of struct user_sve_header to the register data */
-#define SVE_PT_REGS_OFFSET					\
-	((sizeof(struct user_sve_header) + (SVE_VQ_BYTES - 1))	\
-		/ SVE_VQ_BYTES * SVE_VQ_BYTES)
+#define SVE_PT_REGS_OFFSET                                               \
+  ((sizeof (struct user_sve_header) + (SVE_VQ_BYTES - 1)) / SVE_VQ_BYTES \
+   * SVE_VQ_BYTES)
 
 /*
  * The register data content and layout depends on the value of the
@@ -184,9 +185,9 @@ struct user_sve_header {
  * sizeof(struct user_fpsimd_state).
  */
 
-#define SVE_PT_FPSIMD_OFFSET		SVE_PT_REGS_OFFSET
+#define SVE_PT_FPSIMD_OFFSET SVE_PT_REGS_OFFSET
 
-#define SVE_PT_FPSIMD_SIZE(vq, flags)	(sizeof(struct user_fpsimd_state))
+#define SVE_PT_FPSIMD_SIZE(vq, flags) (sizeof (struct user_fpsimd_state))
 
 /*
  * (flags & SVE_PT_REGS_MASK) == SVE_PT_REGS_SVE case:
@@ -213,55 +214,51 @@ struct user_sve_header {
  * Additional data might be appended in the future.
  */
 
-#define SVE_PT_SVE_ZREG_SIZE(vq)	SVE_SIG_ZREG_SIZE(vq)
-#define SVE_PT_SVE_PREG_SIZE(vq)	SVE_SIG_PREG_SIZE(vq)
-#define SVE_PT_SVE_FFR_SIZE(vq)		SVE_SIG_FFR_SIZE(vq)
-#define SVE_PT_SVE_FPSR_SIZE		sizeof(__u32)
-#define SVE_PT_SVE_FPCR_SIZE		sizeof(__u32)
+#define SVE_PT_SVE_ZREG_SIZE(vq) SVE_SIG_ZREG_SIZE (vq)
+#define SVE_PT_SVE_PREG_SIZE(vq) SVE_SIG_PREG_SIZE (vq)
+#define SVE_PT_SVE_FFR_SIZE(vq) SVE_SIG_FFR_SIZE (vq)
+#define SVE_PT_SVE_FPSR_SIZE sizeof (__u32)
+#define SVE_PT_SVE_FPCR_SIZE sizeof (__u32)
 
 #define __SVE_SIG_TO_PT(offset) \
-	((offset) - SVE_SIG_REGS_OFFSET + SVE_PT_REGS_OFFSET)
+  ((offset) -SVE_SIG_REGS_OFFSET + SVE_PT_REGS_OFFSET)
 
-#define SVE_PT_SVE_OFFSET		SVE_PT_REGS_OFFSET
+#define SVE_PT_SVE_OFFSET SVE_PT_REGS_OFFSET
 
-#define SVE_PT_SVE_ZREGS_OFFSET \
-	__SVE_SIG_TO_PT(SVE_SIG_ZREGS_OFFSET)
+#define SVE_PT_SVE_ZREGS_OFFSET __SVE_SIG_TO_PT (SVE_SIG_ZREGS_OFFSET)
 #define SVE_PT_SVE_ZREG_OFFSET(vq, n) \
-	__SVE_SIG_TO_PT(SVE_SIG_ZREG_OFFSET(vq, n))
+  __SVE_SIG_TO_PT (SVE_SIG_ZREG_OFFSET (vq, n))
 #define SVE_PT_SVE_ZREGS_SIZE(vq) \
-	(SVE_PT_SVE_ZREG_OFFSET(vq, SVE_NUM_ZREGS) - SVE_PT_SVE_ZREGS_OFFSET)
+  (SVE_PT_SVE_ZREG_OFFSET (vq, SVE_NUM_ZREGS) - SVE_PT_SVE_ZREGS_OFFSET)
 
-#define SVE_PT_SVE_PREGS_OFFSET(vq) \
-	__SVE_SIG_TO_PT(SVE_SIG_PREGS_OFFSET(vq))
+#define SVE_PT_SVE_PREGS_OFFSET(vq) __SVE_SIG_TO_PT (SVE_SIG_PREGS_OFFSET (vq))
 #define SVE_PT_SVE_PREG_OFFSET(vq, n) \
-	__SVE_SIG_TO_PT(SVE_SIG_PREG_OFFSET(vq, n))
+  __SVE_SIG_TO_PT (SVE_SIG_PREG_OFFSET (vq, n))
 #define SVE_PT_SVE_PREGS_SIZE(vq) \
-	(SVE_PT_SVE_PREG_OFFSET(vq, SVE_NUM_PREGS) - \
-		SVE_PT_SVE_PREGS_OFFSET(vq))
+  (SVE_PT_SVE_PREG_OFFSET (vq, SVE_NUM_PREGS) - SVE_PT_SVE_PREGS_OFFSET (vq))
 
-#define SVE_PT_SVE_FFR_OFFSET(vq) \
-	__SVE_SIG_TO_PT(SVE_SIG_FFR_OFFSET(vq))
+#define SVE_PT_SVE_FFR_OFFSET(vq) __SVE_SIG_TO_PT (SVE_SIG_FFR_OFFSET (vq))
 
-#define SVE_PT_SVE_FPSR_OFFSET(vq)				\
-	((SVE_PT_SVE_FFR_OFFSET(vq) + SVE_PT_SVE_FFR_SIZE(vq) +	\
-			(SVE_VQ_BYTES - 1))			\
-		/ SVE_VQ_BYTES * SVE_VQ_BYTES)
+#define SVE_PT_SVE_FPSR_OFFSET(vq)                        \
+  ((SVE_PT_SVE_FFR_OFFSET (vq) + SVE_PT_SVE_FFR_SIZE (vq) \
+    + (SVE_VQ_BYTES - 1))                                 \
+   / SVE_VQ_BYTES * SVE_VQ_BYTES)
 #define SVE_PT_SVE_FPCR_OFFSET(vq) \
-	(SVE_PT_SVE_FPSR_OFFSET(vq) + SVE_PT_SVE_FPSR_SIZE)
+  (SVE_PT_SVE_FPSR_OFFSET (vq) + SVE_PT_SVE_FPSR_SIZE)
 
 /*
  * Any future extension appended after FPCR must be aligned to the next
  * 128-bit boundary.
  */
 
-#define SVE_PT_SVE_SIZE(vq, flags)					\
-	((SVE_PT_SVE_FPCR_OFFSET(vq) + SVE_PT_SVE_FPCR_SIZE		\
-			- SVE_PT_SVE_OFFSET + (SVE_VQ_BYTES - 1))	\
-		/ SVE_VQ_BYTES * SVE_VQ_BYTES)
+#define SVE_PT_SVE_SIZE(vq, flags)                                         \
+  ((SVE_PT_SVE_FPCR_OFFSET (vq) + SVE_PT_SVE_FPCR_SIZE - SVE_PT_SVE_OFFSET \
+    + (SVE_VQ_BYTES - 1))                                                  \
+   / SVE_VQ_BYTES * SVE_VQ_BYTES)
 
-#define SVE_PT_SIZE(vq, flags)						\
-	 (((flags) & SVE_PT_REGS_MASK) == SVE_PT_REGS_SVE ?		\
-		  SVE_PT_SVE_OFFSET + SVE_PT_SVE_SIZE(vq, flags)	\
-		: SVE_PT_FPSIMD_OFFSET + SVE_PT_FPSIMD_SIZE(vq, flags))
+#define SVE_PT_SIZE(vq, flags)                         \
+  (((flags) &SVE_PT_REGS_MASK) == SVE_PT_REGS_SVE      \
+     ? SVE_PT_SVE_OFFSET + SVE_PT_SVE_SIZE (vq, flags) \
+     : SVE_PT_FPSIMD_OFFSET + SVE_PT_FPSIMD_SIZE (vq, flags))
 
 #endif /* NAT_AARCH64_SVE_LINUX_SIGCONTEXT_H */

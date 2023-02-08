@@ -40,8 +40,7 @@
    a phony iconv which only handles a single character set, and we
    provide wrappers for the wchar_t functionality we use.  */
 
-
-#if defined (HAVE_ICONV)
+#if defined(HAVE_ICONV)
 #include <iconv.h>
 #else
 /* This define is used elsewhere so we don't need to duplicate the
@@ -57,9 +56,9 @@
    order to ensure we can convert to and from wchar_t.  We choose
    libiconv version 0x108 because it is the first version with
    iconvlist.  */
-#if defined (HAVE_ICONV) && defined (HAVE_BTOWC) \
-  && (defined (__STDC_ISO_10646__) \
-      || (defined (_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x108))
+#if defined(HAVE_ICONV) && defined(HAVE_BTOWC) \
+  && (defined(__STDC_ISO_10646__)              \
+      || (defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x108))
 
 typedef wchar_t gdb_wchar_t;
 typedef wint_t gdb_wint_t;
@@ -70,19 +69,19 @@ typedef wint_t gdb_wint_t;
 #define gdb_btowc btowc
 #define gdb_WEOF WEOF
 
-#define LCST(X) L ## X
+#define LCST(X) L##X
 
 /* If __STDC_ISO_10646__ is defined, then the host wchar_t is UCS-4.
    We exploit this fact in the hope that there are hosts that define
    this but which do not support "wchar_t" as an encoding argument to
    iconv_open.  We put the endianness into the encoding name to avoid
    hosts that emit a BOM when the unadorned name is used.  */
-#if defined (__STDC_ISO_10646__)
+#if defined(__STDC_ISO_10646__)
 #define USE_INTERMEDIATE_ENCODING_FUNCTION
 #define INTERMEDIATE_ENCODING intermediate_encoding ()
 const char *intermediate_encoding (void);
 
-#elif defined (_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x108
+#elif defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x108
 #define INTERMEDIATE_ENCODING "wchar_t"
 #else
 /* This shouldn't happen, because the earlier #if should have filtered
@@ -94,7 +93,7 @@ const char *intermediate_encoding (void);
 
 /* If we got here and have wchar_t support, we might be on a system
    with some problem.  So, we just disable everything.  */
-#if defined (HAVE_BTOWC)
+#if defined(HAVE_BTOWC)
 #define PHONY_ICONV
 #endif
 

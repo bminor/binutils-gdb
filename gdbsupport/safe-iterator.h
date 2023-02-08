@@ -72,8 +72,7 @@ public:
   }
 
   /* Create a one-past-end iterator.  */
-  basic_safe_iterator ()
-  {}
+  basic_safe_iterator () {}
 
   value_type operator* () const { return *m_it; }
 
@@ -85,11 +84,9 @@ public:
     return *this;
   }
 
-  bool operator== (const self_type &other) const
-  { return m_it == other.m_it; }
+  bool operator== (const self_type &other) const { return m_it == other.m_it; }
 
-  bool operator!= (const self_type &other) const
-  { return m_it != other.m_it; }
+  bool operator!= (const self_type &other) const { return m_it != other.m_it; }
 
 private:
   /* The current element.  */
@@ -109,26 +106,15 @@ template<typename Range>
 class basic_safe_range
 {
 public:
-
   typedef basic_safe_iterator<typename Range::iterator> iterator;
 
-  explicit basic_safe_range (Range range)
-    : m_range (range)
-  {
-  }
+  explicit basic_safe_range (Range range) : m_range (range) {}
 
-  iterator begin ()
-  {
-    return iterator (m_range.begin (), m_range.end ());
-  }
+  iterator begin () { return iterator (m_range.begin (), m_range.end ()); }
 
-  iterator end ()
-  {
-    return iterator (m_range.end (), m_range.end ());
-  }
+  iterator end () { return iterator (m_range.end (), m_range.end ()); }
 
 private:
-
   Range m_range;
 };
 

@@ -89,39 +89,106 @@
  * external low-level support routines
  */
 
-extern void putDebugChar();	/* write a single character      */
-extern int getDebugChar();	/* read and return a single char */
+extern void putDebugChar (); /* write a single character      */
+extern int getDebugChar ();  /* read and return a single char */
 
 /************************************************************************/
 /* BUFMAX defines the maximum number of characters in inbound/outbound buffers*/
 /* at least NUMREGBYTES*2 are needed for register packets */
 #define BUFMAX 2048
 
-static int initialized = 0;	/* !0 means we've been initialized */
+static int initialized = 0; /* !0 means we've been initialized */
 
-static void set_mem_fault_trap();
+static void set_mem_fault_trap ();
 
-static const char hexchars[]="0123456789abcdef";
+static const char hexchars[] = "0123456789abcdef";
 
 #define NUMREGS 72
 
 /* Number of bytes of registers.  */
 #define NUMREGBYTES (NUMREGS * 4)
-enum regnames {G0, G1, G2, G3, G4, G5, G6, G7,
-		 O0, O1, O2, O3, O4, O5, SP, O7,
-		 L0, L1, L2, L3, L4, L5, L6, L7,
-		 I0, I1, I2, I3, I4, I5, FP, I7,
 
-		 F0, F1, F2, F3, F4, F5, F6, F7,
-		 F8, F9, F10, F11, F12, F13, F14, F15,
-		 F16, F17, F18, F19, F20, F21, F22, F23,
-		 F24, F25, F26, F27, F28, F29, F30, F31,
-		 Y, PSR, WIM, TBR, PC, NPC, FPSR, CPSR };
+enum regnames
+{
+  G0,
+  G1,
+  G2,
+  G3,
+  G4,
+  G5,
+  G6,
+  G7,
+  O0,
+  O1,
+  O2,
+  O3,
+  O4,
+  O5,
+  SP,
+  O7,
+  L0,
+  L1,
+  L2,
+  L3,
+  L4,
+  L5,
+  L6,
+  L7,
+  I0,
+  I1,
+  I2,
+  I3,
+  I4,
+  I5,
+  FP,
+  I7,
+
+  F0,
+  F1,
+  F2,
+  F3,
+  F4,
+  F5,
+  F6,
+  F7,
+  F8,
+  F9,
+  F10,
+  F11,
+  F12,
+  F13,
+  F14,
+  F15,
+  F16,
+  F17,
+  F18,
+  F19,
+  F20,
+  F21,
+  F22,
+  F23,
+  F24,
+  F25,
+  F26,
+  F27,
+  F28,
+  F29,
+  F30,
+  F31,
+  Y,
+  PSR,
+  WIM,
+  TBR,
+  PC,
+  NPC,
+  FPSR,
+  CPSR
+};
 
 /***************************  ASSEMBLY CODE MACROS *************************/
 /* 									   */
 
-extern void trap_low();
+extern void trap_low ();
 
 asm("
 	.reserve trapstack, 1000 * 4, \"bss\", 8
@@ -272,11 +339,11 @@ static int
 hex (unsigned char ch)
 {
   if (ch >= 'a' && ch <= 'f')
-    return ch-'a'+10;
+    return ch - 'a' + 10;
   if (ch >= '0' && ch <= '9')
-    return ch-'0';
+    return ch - '0';
   if (ch >= 'A' && ch <= 'F')
-    return ch-'A'+10;
+    return ch - 'A' + 10;
   return -1;
 }
 
@@ -300,7 +367,7 @@ getpacket (void)
       while ((ch = getDebugChar ()) != '$')
 	;
 
-retry:
+    retry:
       checksum = 0;
       xmitcsum = -1;
       count = 0;
@@ -328,11 +395,11 @@ retry:
 
 	  if (checksum != xmitcsum)
 	    {
-	      putDebugChar ('-');	/* failed checksum */
+	      putDebugChar ('-'); /* failed checksum */
 	    }
 	  else
 	    {
-	      putDebugChar ('+');	/* successful transfer */
+	      putDebugChar ('+'); /* successful transfer */
 
 	      /* if a sequence char is present, reply the sequence ID */
 	      if (buffer[2] == ':')
@@ -361,23 +428,22 @@ putpacket (unsigned char *buffer)
   /*  $<packet info>#<checksum>. */
   do
     {
-      putDebugChar('$');
+      putDebugChar ('$');
       checksum = 0;
       count = 0;
 
       while (ch = buffer[count])
 	{
-	  putDebugChar(ch);
+	  putDebugChar (ch);
 	  checksum += ch;
 	  count += 1;
 	}
 
-      putDebugChar('#');
-      putDebugChar(hexchars[checksum >> 4]);
-      putDebugChar(hexchars[checksum & 0xf]);
-
+      putDebugChar ('#');
+      putDebugChar (hexchars[checksum >> 4]);
+      putDebugChar (hexchars[checksum & 0xf]);
     }
-  while (getDebugChar() != '+');
+  while (getDebugChar () != '+');
 }
 
 /* Indicate to caller of mem2hex or hex2mem that there has been an
@@ -396,7 +462,7 @@ mem2hex (unsigned char *mem, unsigned char *buf, int count, int may_fault)
 {
   unsigned char ch;
 
-  set_mem_fault_trap(may_fault);
+  set_mem_fault_trap (may_fault);
 
   while (count-- > 0)
     {
@@ -409,7 +475,7 @@ mem2hex (unsigned char *mem, unsigned char *buf, int count, int may_fault)
 
   *buf = 0;
 
-  set_mem_fault_trap(0);
+  set_mem_fault_trap (0);
 
   return buf;
 }
@@ -423,18 +489,18 @@ hex2mem (unsigned char *buf, unsigned char *mem, int count, int may_fault)
   int i;
   unsigned char ch;
 
-  set_mem_fault_trap(may_fault);
+  set_mem_fault_trap (may_fault);
 
-  for (i=0; i<count; i++)
+  for (i = 0; i < count; i++)
     {
-      ch = hex(*buf++) << 4;
-      ch |= hex(*buf++);
+      ch = hex (*buf++) << 4;
+      ch |= hex (*buf++);
       *mem++ = ch;
       if (mem_err)
 	return 0;
     }
 
-  set_mem_fault_trap(0);
+  set_mem_fault_trap (0);
 
   return mem;
 }
@@ -445,8 +511,8 @@ hex2mem (unsigned char *buf, unsigned char *mem, int count, int may_fault)
 
 static struct hard_trap_info
 {
-  unsigned char tt;		/* Trap type code for SPARClite */
-  unsigned char signo;		/* Signal that we map this trap into */
+  unsigned char tt;    /* Trap type code for SPARClite */
+  unsigned char signo; /* Signal that we map this trap into */
 } hard_trap_info[] = {
   {1, SIGSEGV},			/* instruction access error */
   {2, SIGILL},			/* privileged instruction */
@@ -468,7 +534,7 @@ set_debug_traps (void)
   struct hard_trap_info *ht;
 
   for (ht = hard_trap_info; ht->tt && ht->signo; ht++)
-    exceptionHandler(ht->tt, trap_low);
+    exceptionHandler (ht->tt, trap_low);
 
   initialized = 1;
 }
@@ -492,13 +558,13 @@ _fltr_set_mem_err:
 static void
 set_mem_fault_trap (int enable)
 {
-  extern void fltr_set_mem_err();
+  extern void fltr_set_mem_err ();
   mem_err = 0;
 
   if (enable)
-    exceptionHandler(9, fltr_set_mem_err);
+    exceptionHandler (9, fltr_set_mem_err);
   else
-    exceptionHandler(9, trap_low);
+    exceptionHandler (9, trap_low);
 }
 
 /* Convert the SPARC hardware trap type code to a unix signal number. */
@@ -512,7 +578,7 @@ computeSignal (int tt)
     if (ht->tt == tt)
       return ht->signo;
 
-  return SIGHUP;		/* default for things we don't know about */
+  return SIGHUP; /* default for things we don't know about */
 }
 
 /*
@@ -530,12 +596,12 @@ hexToInt(char **ptr, int *intValue)
 
   while (**ptr)
     {
-      hexValue = hex(**ptr);
+      hexValue = hex (**ptr);
       if (hexValue < 0)
 	break;
 
       *intValue = (*intValue << 4) | hexValue;
-      numChars ++;
+      numChars++;
 
       (*ptr)++;
     }
@@ -554,14 +620,14 @@ extern void breakinst();
 static void
 handle_exception (unsigned long *registers)
 {
-  int tt;			/* Trap type */
+  int tt; /* Trap type */
   int sigval;
   int addr;
   int length;
   char *ptr;
   unsigned long *sp;
 
-/* First, we must force all of the windows to be spilled out */
+  /* First, we must force all of the windows to be spilled out */
 
   asm("	save %sp, -64, %sp
 	save %sp, -64, %sp
@@ -583,8 +649,8 @@ handle_exception (unsigned long *registers)
 
   if (registers[PC] == (unsigned long)breakinst)
     {
-      registers[PC] = registers[NPC];
-      registers[NPC] += 4;
+    registers[PC] = registers[NPC];
+    registers[NPC] += 4;
     }
 
   sp = (unsigned long *)registers[SP];
@@ -635,128 +701,123 @@ handle_exception (unsigned long *registers)
 
   while (1)
     {
-      remcomOutBuffer[0] = 0;
+    remcomOutBuffer[0] = 0;
 
-      ptr = getpacket();
-      switch (*ptr++)
+    ptr = getpacket ();
+    switch (*ptr++)
+      {
+      case '?':
+	remcomOutBuffer[0] = 'S';
+	remcomOutBuffer[1] = hexchars[sigval >> 4];
+	remcomOutBuffer[2] = hexchars[sigval & 0xf];
+	remcomOutBuffer[3] = 0;
+	break;
+
+      case 'd': /* toggle debug flag */
+	break;
+
+      case 'g': /* return the value of the CPU registers */
 	{
-	case '?':
-	  remcomOutBuffer[0] = 'S';
-	  remcomOutBuffer[1] = hexchars[sigval >> 4];
-	  remcomOutBuffer[2] = hexchars[sigval & 0xf];
-	  remcomOutBuffer[3] = 0;
-	  break;
+	  ptr = remcomOutBuffer;
+	  ptr = mem2hex ((char *) registers, ptr, 16 * 4, 0); /* G & O regs */
+	  ptr = mem2hex (sp + 0, ptr, 16 * 4, 0);	      /* L & I regs */
+	  memset (ptr, '0', 32 * 8); /* Floating point */
+	  mem2hex ((char *) &registers[Y], ptr + 32 * 4 * 2, 8 * 4,
+		   0); /* Y, PSR, WIM, TBR, PC, NPC, FPSR, CPSR */
+	}
+	break;
 
-	case 'd':		/* toggle debug flag */
-	  break;
+      case 'G': /* set the value of the CPU registers - return OK */
+	{
+	  unsigned long *newsp, psr;
 
-	case 'g':		/* return the value of the CPU registers */
-	  {
-	    ptr = remcomOutBuffer;
-	    ptr = mem2hex((char *)registers, ptr, 16 * 4, 0); /* G & O regs */
-	    ptr = mem2hex(sp + 0, ptr, 16 * 4, 0); /* L & I regs */
-	    memset(ptr, '0', 32 * 8); /* Floating point */
-	    mem2hex((char *)&registers[Y],
-		    ptr + 32 * 4 * 2,
-		    8 * 4,
-		    0);		/* Y, PSR, WIM, TBR, PC, NPC, FPSR, CPSR */
-	  }
-	  break;
+	  psr = registers[PSR];
 
-	case 'G':	   /* set the value of the CPU registers - return OK */
-	  {
-	    unsigned long *newsp, psr;
+	  hex2mem (ptr, (char *) registers, 16 * 4, 0);	 /* G & O regs */
+	  hex2mem (ptr + 16 * 4 * 2, sp + 0, 16 * 4, 0); /* L & I regs */
+	  hex2mem (ptr + 64 * 4 * 2, (char *) &registers[Y], 8 * 4,
+		   0); /* Y, PSR, WIM, TBR, PC, NPC, FPSR, CPSR */
 
-	    psr = registers[PSR];
-
-	    hex2mem(ptr, (char *)registers, 16 * 4, 0); /* G & O regs */
-	    hex2mem(ptr + 16 * 4 * 2, sp + 0, 16 * 4, 0); /* L & I regs */
-	    hex2mem(ptr + 64 * 4 * 2, (char *)&registers[Y],
-		    8 * 4, 0);	/* Y, PSR, WIM, TBR, PC, NPC, FPSR, CPSR */
-
-	    /* See if the stack pointer has moved.  If so, then copy the saved
+	  /* See if the stack pointer has moved.  If so, then copy the saved
 	       locals and ins to the new location.  This keeps the window
 	       overflow and underflow routines happy.  */
 
-	    newsp = (unsigned long *)registers[SP];
-	    if (sp != newsp)
-	      sp = memcpy(newsp, sp, 16 * 4);
+	  newsp = (unsigned long *) registers[SP];
+	  if (sp != newsp)
+	    sp = memcpy (newsp, sp, 16 * 4);
 
-	    /* Don't allow CWP to be modified. */
+	  /* Don't allow CWP to be modified. */
 
-	    if (psr != registers[PSR])
-	      registers[PSR] = (psr & 0x1f) | (registers[PSR] & ~0x1f);
+	  if (psr != registers[PSR])
+	    registers[PSR] = (psr & 0x1f) | (registers[PSR] & ~0x1f);
 
-	    strcpy(remcomOutBuffer,"OK");
+	  strcpy (remcomOutBuffer, "OK");
+	}
+	break;
+
+      case 'm': /* mAA..AA,LLLL  Read LLLL bytes at address AA..AA */
+	/* Try to read %x,%x.  */
+
+	if (hexToInt (&ptr, &addr) && *ptr++ == ','
+	    && hexToInt (&ptr, &length))
+	  {
+	    if (mem2hex ((char *) addr, remcomOutBuffer, length, 1))
+	      break;
+
+	    strcpy (remcomOutBuffer, "E03");
 	  }
-	  break;
+	else
+	  strcpy (remcomOutBuffer, "E01");
+	break;
 
-	case 'm':	  /* mAA..AA,LLLL  Read LLLL bytes at address AA..AA */
-	  /* Try to read %x,%x.  */
+      case 'M': /* MAA..AA,LLLL: Write LLLL bytes at address AA.AA return OK */
+	/* Try to read '%x,%x:'.  */
 
-	  if (hexToInt(&ptr, &addr)
-	      && *ptr++ == ','
-	      && hexToInt(&ptr, &length))
-	    {
-	      if (mem2hex((char *)addr, remcomOutBuffer, length, 1))
-		break;
-
+	if (hexToInt (&ptr, &addr) && *ptr++ == ',' && hexToInt (&ptr, &length)
+	    && *ptr++ == ':')
+	  {
+	    if (hex2mem (ptr, (char *) addr, length, 1))
+	      strcpy (remcomOutBuffer, "OK");
+	    else
 	      strcpy (remcomOutBuffer, "E03");
-	    }
-	  else
-	    strcpy(remcomOutBuffer,"E01");
-	  break;
+	  }
+	else
+	  strcpy (remcomOutBuffer, "E02");
+	break;
 
-	case 'M': /* MAA..AA,LLLL: Write LLLL bytes at address AA.AA return OK */
-	  /* Try to read '%x,%x:'.  */
+      case 'c': /* cAA..AA    Continue at address AA..AA(optional) */
+	/* try to read optional parameter, pc unchanged if no parm */
 
-	  if (hexToInt(&ptr, &addr)
-	      && *ptr++ == ','
-	      && hexToInt(&ptr, &length)
-	      && *ptr++ == ':')
-	    {
-	      if (hex2mem(ptr, (char *)addr, length, 1))
-		strcpy(remcomOutBuffer, "OK");
-	      else
-		strcpy(remcomOutBuffer, "E03");
-	    }
-	  else
-	    strcpy(remcomOutBuffer, "E02");
-	  break;
+	if (hexToInt (&ptr, &addr))
+	  {
+	    registers[PC] = addr;
+	    registers[NPC] = addr + 4;
+	  }
 
-	case 'c':    /* cAA..AA    Continue at address AA..AA(optional) */
-	  /* try to read optional parameter, pc unchanged if no parm */
-
-	  if (hexToInt(&ptr, &addr))
-	    {
-	      registers[PC] = addr;
-	      registers[NPC] = addr + 4;
-	    }
-
-/* Need to flush the instruction cache here, as we may have deposited a
+	/* Need to flush the instruction cache here, as we may have deposited a
    breakpoint, and the icache probably has no way of knowing that a data ref to
    some location may have changed something that is in the instruction cache.
  */
 
-	  flush_i_cache();
-	  return;
+	flush_i_cache ();
+	return;
 
-	  /* kill the program */
-	case 'k' :		/* do nothing */
-	  break;
+	/* kill the program */
+      case 'k': /* do nothing */
+	break;
 #if 0
 	case 't':		/* Test feature */
 	  asm (" std %f30,[%sp]");
 	  break;
 #endif
-	case 'r':		/* Reset */
+      case 'r': /* Reset */
 	  asm ("call 0
 		nop ");
 	  break;
-	}			/* switch */
+      } /* switch */
 
-      /* reply to the request */
-      putpacket(remcomOutBuffer);
+    /* reply to the request */
+    putpacket (remcomOutBuffer);
     }
 }
 

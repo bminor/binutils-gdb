@@ -54,10 +54,10 @@ safe_fromhex (char a, int *nibble)
 
 /* Filenames are hex encoded, so the maximum we can handle is half the
    packet buffer size.  Cap to PATH_MAX, if it is shorter.  */
-#if !defined (PATH_MAX) || (PATH_MAX > (PBUFSIZ / 2 + 1))
-#  define HOSTIO_PATH_MAX (PBUFSIZ / 2 + 1)
+#if !defined(PATH_MAX) || (PATH_MAX > (PBUFSIZ / 2 + 1))
+#define HOSTIO_PATH_MAX (PBUFSIZ / 2 + 1)
 #else
-#  define HOSTIO_PATH_MAX PATH_MAX
+#define HOSTIO_PATH_MAX PATH_MAX
 #endif
 
 static int
@@ -75,11 +75,10 @@ require_filename (char **pp, char *filename)
 
       /* Don't allow overflow.  */
       if (count >= HOSTIO_PATH_MAX - 1)
-	return -1;
+        return -1;
 
-      if (safe_fromhex (p[0], &nib1)
-	  || safe_fromhex (p[1], &nib2))
-	return -1;
+      if (safe_fromhex (p[0], &nib1) || safe_fromhex (p[1], &nib2))
+        return -1;
 
       filename[count++] = nib1 * 16 + nib2;
       p += 2;
@@ -106,14 +105,14 @@ require_int (char **pp, int *value)
       int nib;
 
       if (safe_fromhex (p[0], &nib))
-	return -1;
+        return -1;
 
       if (firstdigit == -1)
-	firstdigit = nib;
+        firstdigit = nib;
 
       /* Don't allow overflow.  */
       if (count >= 8 || (count == 7 && firstdigit >= 0x8))
-	return -1;
+        return -1;
 
       *value = *value * 16 + nib;
       p++;
@@ -138,14 +137,14 @@ require_data (char *p, int p_len, char **data, int *data_len)
       char b = p[input_index];
 
       if (escaped)
-	{
-	  (*data)[output_index++] = b ^ 0x20;
-	  escaped = 0;
-	}
+        {
+          (*data)[output_index++] = b ^ 0x20;
+          escaped = 0;
+        }
       else if (b == '}')
-	escaped = 1;
+        escaped = 1;
       else
-	(*data)[output_index++] = b;
+        (*data)[output_index++] = b;
     }
 
   if (escaped)
@@ -215,7 +214,7 @@ hostio_reply (char *own_buf, int result)
 
 static int
 hostio_reply_with_data (char *own_buf, char *buffer, int len,
-			int *new_packet_len)
+                        int *new_packet_len)
 {
   int input_index, output_index, out_maxlen;
 
@@ -229,19 +228,19 @@ hostio_reply_with_data (char *own_buf, char *buffer, int len,
       char b = buffer[input_index];
 
       if (b == '$' || b == '#' || b == '}' || b == '*')
-	{
-	  /* These must be escaped.  */
-	  if (output_index + 2 > out_maxlen)
-	    break;
-	  own_buf[output_index++] = '}';
-	  own_buf[output_index++] = b ^ 0x20;
-	}
+        {
+          /* These must be escaped.  */
+          if (output_index + 2 > out_maxlen)
+            break;
+          own_buf[output_index++] = '}';
+          own_buf[output_index++] = b ^ 0x20;
+        }
       else
-	{
-	  if (output_index + 1 > out_maxlen)
-	    break;
-	  own_buf[output_index++] = b;
-	}
+        {
+          if (output_index + 1 > out_maxlen)
+            break;
+          own_buf[output_index++] = b;
+        }
     }
 
   *new_packet_len = output_index;
@@ -282,9 +281,7 @@ handle_setfs (char *own_buf)
 
   p = own_buf + strlen ("vFile:setfs:");
 
-  if (require_int (&p, &pid)
-      || pid < 0
-      || require_end (p))
+  if (require_int (&p, &pid) || pid < 0 || require_end (p))
     {
       hostio_packet_error (own_buf);
       return;
@@ -306,12 +303,9 @@ handle_open (char *own_buf)
 
   p = own_buf + strlen ("vFile:open:");
 
-  if (require_filename (&p, filename)
-      || require_comma (&p)
-      || require_int (&p, &fileio_flags)
-      || require_comma (&p)
-      || require_int (&p, &fileio_mode)
-      || require_end (p)
+  if (require_filename (&p, filename) || require_comma (&p)
+      || require_int (&p, &fileio_flags) || require_comma (&p)
+      || require_int (&p, &fileio_mode) || require_end (p)
       || fileio_to_host_openflags (fileio_flags, &flags)
       || fileio_to_host_mode (fileio_mode, &mode))
     {
@@ -350,13 +344,9 @@ handle_pread (char *own_buf, int *new_packet_len)
 
   p = own_buf + strlen ("vFile:pread:");
 
-  if (require_int (&p, &fd)
-      || require_comma (&p)
-      || require_valid_fd (fd)
-      || require_int (&p, &len)
-      || require_comma (&p)
-      || require_int (&p, &offset)
-      || require_end (p))
+  if (require_int (&p, &fd) || require_comma (&p) || require_valid_fd (fd)
+      || require_int (&p, &len) || require_comma (&p)
+      || require_int (&p, &offset) || require_end (p))
     {
       hostio_packet_error (own_buf);
       return;
@@ -384,7 +374,7 @@ handle_pread (char *own_buf, int *new_packet_len)
     {
       ret = lseek (fd, offset, SEEK_SET);
       if (ret != -1)
-	ret = read (fd, data, len);
+        ret = read (fd, data, len);
     }
 
   if (ret == -1)
@@ -402,8 +392,8 @@ handle_pread (char *own_buf, int *new_packet_len)
      packet might be wrong, so we must fix it.  This time it will
      definitely fit.  */
   if (bytes_sent < ret)
-    bytes_sent = hostio_reply_with_data (own_buf, data, bytes_sent,
-					 new_packet_len);
+    bytes_sent
+      = hostio_reply_with_data (own_buf, data, bytes_sent, new_packet_len);
 
   free (data);
 }
@@ -416,11 +406,8 @@ handle_pwrite (char *own_buf, int packet_len)
 
   p = own_buf + strlen ("vFile:pwrite:");
 
-  if (require_int (&p, &fd)
-      || require_comma (&p)
-      || require_valid_fd (fd)
-      || require_int (&p, &offset)
-      || require_comma (&p)
+  if (require_int (&p, &fd) || require_comma (&p) || require_valid_fd (fd)
+      || require_int (&p, &offset) || require_comma (&p)
       || require_data (p, packet_len - (p - own_buf), &data, &len))
     {
       hostio_packet_error (own_buf);
@@ -437,7 +424,7 @@ handle_pwrite (char *own_buf, int packet_len)
     {
       ret = lseek (fd, offset, SEEK_SET);
       if (ret != -1)
-	ret = write (fd, data, len);
+        ret = write (fd, data, len);
     }
 
   if (ret == -1)
@@ -461,9 +448,7 @@ handle_fstat (char *own_buf, int *new_packet_len)
 
   p = own_buf + strlen ("vFile:fstat:");
 
-  if (require_int (&p, &fd)
-      || require_valid_fd (fd)
-      || require_end (p))
+  if (require_int (&p, &fd) || require_valid_fd (fd) || require_end (p))
     {
       hostio_packet_error (own_buf);
       return;
@@ -477,9 +462,8 @@ handle_fstat (char *own_buf, int *new_packet_len)
 
   host_to_fileio_stat (&st, &fst);
 
-  bytes_sent = hostio_reply_with_data (own_buf,
-				       (char *) &fst, sizeof (fst),
-				       new_packet_len);
+  bytes_sent = hostio_reply_with_data (own_buf, (char *) &fst, sizeof (fst),
+                                       new_packet_len);
 
   /* If the response does not fit into a single packet, do not attempt
      to return a partial response, but simply fail.  */
@@ -496,9 +480,7 @@ handle_close (char *own_buf)
 
   p = own_buf + strlen ("vFile:close:");
 
-  if (require_int (&p, &fd)
-      || require_valid_fd (fd)
-      || require_end (p))
+  if (require_int (&p, &fd) || require_valid_fd (fd) || require_end (p))
     {
       hostio_packet_error (own_buf);
       return;
@@ -533,8 +515,7 @@ handle_unlink (char *own_buf)
 
   p = own_buf + strlen ("vFile:unlink:");
 
-  if (require_filename (&p, filename)
-      || require_end (p))
+  if (require_filename (&p, filename) || require_end (p))
     {
       hostio_packet_error (own_buf);
       return;
@@ -563,17 +544,15 @@ handle_readlink (char *own_buf, int *new_packet_len)
 
   p = own_buf + strlen ("vFile:readlink:");
 
-  if (require_filename (&p, filename)
-      || require_end (p))
+  if (require_filename (&p, filename) || require_end (p))
     {
       hostio_packet_error (own_buf);
       return;
     }
 
   if (hostio_fs_pid != 0)
-    ret = the_target->multifs_readlink (hostio_fs_pid, filename,
-					linkname,
-					sizeof (linkname) - 1);
+    ret = the_target->multifs_readlink (hostio_fs_pid, filename, linkname,
+                                        sizeof (linkname) - 1);
   else
     ret = readlink (filename, linkname, sizeof (linkname) - 1);
 

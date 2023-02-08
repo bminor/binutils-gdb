@@ -31,7 +31,7 @@
 void
 mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
 {
-  struct gdbarch *gdbarch = get_current_arch();
+  struct gdbarch *gdbarch = get_current_arch ();
   std::string condition;
   int enabled = 1;
   int temp = 0;
@@ -40,21 +40,19 @@ mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
   char *oarg;
 
   enum opt
-    {
-      OPT_CONDITION, OPT_DISABLED, OPT_TEMP,
-    };
-  static const struct mi_opt opts[] =
-    {
-      { "c", OPT_CONDITION, 1},
-      { "d", OPT_DISABLED, 0 },
-      { "t", OPT_TEMP, 0 },
-      { 0, 0, 0 }
-    };
+  {
+    OPT_CONDITION,
+    OPT_DISABLED,
+    OPT_TEMP,
+  };
+  static const struct mi_opt opts[] = { { "c", OPT_CONDITION, 1 },
+					{ "d", OPT_DISABLED, 0 },
+					{ "t", OPT_TEMP, 0 },
+					{ 0, 0, 0 } };
 
   for (;;)
     {
-      int opt = mi_getopt ("-catch-assert", argc, argv, opts,
-			   &oind, &oarg);
+      int opt = mi_getopt ("-catch-assert", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -76,7 +74,7 @@ mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
   /* This command does not accept any argument.  Make sure the user
      did not provide any.  */
   if (oind != argc)
-    error (_("Invalid argument: %s"), argv[oind]);
+    error (_ ("Invalid argument: %s"), argv[oind]);
 
   scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
   create_ada_exception_catchpoint (gdbarch, ada_catch_assert, std::string (),
@@ -88,7 +86,7 @@ mi_cmd_catch_assert (const char *cmd, char *argv[], int argc)
 void
 mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
 {
-  struct gdbarch *gdbarch = get_current_arch();
+  struct gdbarch *gdbarch = get_current_arch ();
   std::string condition;
   int enabled = 1;
   std::string exception_name;
@@ -99,24 +97,21 @@ mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
   char *oarg;
 
   enum opt
-    {
-      OPT_CONDITION, OPT_DISABLED, OPT_EXCEPTION_NAME, OPT_TEMP,
-      OPT_UNHANDLED,
-    };
-  static const struct mi_opt opts[] =
-    {
-      { "c", OPT_CONDITION, 1},
-      { "d", OPT_DISABLED, 0 },
-      { "e", OPT_EXCEPTION_NAME, 1 },
-      { "t", OPT_TEMP, 0 },
-      { "u", OPT_UNHANDLED, 0},
-      { 0, 0, 0 }
-    };
+  {
+    OPT_CONDITION,
+    OPT_DISABLED,
+    OPT_EXCEPTION_NAME,
+    OPT_TEMP,
+    OPT_UNHANDLED,
+  };
+  static const struct mi_opt opts[]
+    = { { "c", OPT_CONDITION, 1 },	{ "d", OPT_DISABLED, 0 },
+	{ "e", OPT_EXCEPTION_NAME, 1 }, { "t", OPT_TEMP, 0 },
+	{ "u", OPT_UNHANDLED, 0 },	{ 0, 0, 0 } };
 
   for (;;)
     {
-      int opt = mi_getopt ("-catch-exception", argc, argv, opts,
-			   &oind, &oarg);
+      int opt = mi_getopt ("-catch-exception", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -144,17 +139,16 @@ mi_cmd_catch_exception (const char *cmd, char *argv[], int argc)
   /* This command does not accept any argument.  Make sure the user
      did not provide any.  */
   if (oind != argc)
-    error (_("Invalid argument: %s"), argv[oind]);
+    error (_ ("Invalid argument: %s"), argv[oind]);
 
   /* Specifying an exception name does not make sense when requesting
      an unhandled exception breakpoint.  */
   if (ex_kind == ada_catch_exception_unhandled && !exception_name.empty ())
-    error (_("\"-e\" and \"-u\" are mutually exclusive"));
+    error (_ ("\"-e\" and \"-u\" are mutually exclusive"));
 
   scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
-  create_ada_exception_catchpoint (gdbarch, ex_kind,
-				   exception_name,
-				   condition, temp, enabled, 0);
+  create_ada_exception_catchpoint (gdbarch, ex_kind, exception_name, condition,
+				   temp, enabled, 0);
 }
 
 /* Handler for the -catch-handlers command.  */
@@ -172,22 +166,21 @@ mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
   char *oarg;
 
   enum opt
-    {
-      OPT_CONDITION, OPT_DISABLED, OPT_EXCEPTION_NAME, OPT_TEMP
-    };
-  static const struct mi_opt opts[] =
-    {
-      { "c", OPT_CONDITION, 1},
-      { "d", OPT_DISABLED, 0 },
-      { "e", OPT_EXCEPTION_NAME, 1 },
-      { "t", OPT_TEMP, 0 },
-      { 0, 0, 0 }
-    };
+  {
+    OPT_CONDITION,
+    OPT_DISABLED,
+    OPT_EXCEPTION_NAME,
+    OPT_TEMP
+  };
+  static const struct mi_opt opts[] = { { "c", OPT_CONDITION, 1 },
+					{ "d", OPT_DISABLED, 0 },
+					{ "e", OPT_EXCEPTION_NAME, 1 },
+					{ "t", OPT_TEMP, 0 },
+					{ 0, 0, 0 } };
 
   for (;;)
     {
-      int opt = mi_getopt ("-catch-handlers", argc, argv, opts,
-			   &oind, &oarg);
+      int opt = mi_getopt ("-catch-handlers", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -212,12 +205,10 @@ mi_cmd_catch_handlers (const char *cmd, char *argv[], int argc)
   /* This command does not accept any argument.  Make sure the user
      did not provide any.  */
   if (oind != argc)
-    error (_("Invalid argument: %s"), argv[oind]);
+    error (_ ("Invalid argument: %s"), argv[oind]);
 
-  scoped_restore restore_breakpoint_reporting
-    = setup_breakpoint_reporting ();
-  create_ada_exception_catchpoint (gdbarch, ada_catch_handlers,
-				   exception_name,
+  scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
+  create_ada_exception_catchpoint (gdbarch, ada_catch_handlers, exception_name,
 				   condition, temp, enabled, 0);
 }
 
@@ -231,22 +222,18 @@ mi_catch_load_unload (int load, char *argv[], int argc)
   int enabled = 1;
   int oind = 0;
   char *oarg;
+
   enum opt
-    {
-      OPT_TEMP,
-      OPT_DISABLED,
-    };
-  static const struct mi_opt opts[] =
-    {
-      { "t", OPT_TEMP, 0 },
-      { "d", OPT_DISABLED, 0 },
-      { 0, 0, 0 }
-    };
+  {
+    OPT_TEMP,
+    OPT_DISABLED,
+  };
+  static const struct mi_opt opts[]
+    = { { "t", OPT_TEMP, 0 }, { "d", OPT_DISABLED, 0 }, { 0, 0, 0 } };
 
   for (;;)
     {
-      int opt = mi_getopt (actual_cmd, argc, argv, opts,
-			   &oind, &oarg);
+      int opt = mi_getopt (actual_cmd, argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -263,9 +250,9 @@ mi_catch_load_unload (int load, char *argv[], int argc)
     }
 
   if (oind >= argc)
-    error (_("-catch-load/unload: Missing <library name>"));
-  if (oind < argc -1)
-    error (_("-catch-load/unload: Garbage following the <library name>"));
+    error (_ ("-catch-load/unload: Missing <library name>"));
+  if (oind < argc - 1)
+    error (_ ("-catch-load/unload: Garbage following the <library name>"));
 
   scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
   add_solib_catchpoint (argv[oind], load, temp, enabled);
@@ -278,7 +265,6 @@ mi_cmd_catch_load (const char *cmd, char *argv[], int argc)
 {
   mi_catch_load_unload (1, argv, argc);
 }
-
 
 /* Handler for the -catch-unload.  */
 
@@ -293,29 +279,25 @@ mi_cmd_catch_unload (const char *cmd, char *argv[], int argc)
    pass KIND through to GDB's core to select the correct event type.  */
 
 static void
-mi_cmd_catch_exception_event (enum exception_event_kind kind,
-			      const char *cmd, char *argv[], int argc)
+mi_cmd_catch_exception_event (enum exception_event_kind kind, const char *cmd,
+			      char *argv[], int argc)
 {
   char *regex = NULL;
   bool temp = false;
   int oind = 0;
   char *oarg;
+
   enum opt
-    {
-      OPT_TEMP,
-      OPT_REGEX,
-    };
-  static const struct mi_opt opts[] =
-    {
-      { "t", OPT_TEMP, 0 },
-      { "r", OPT_REGEX, 1 },
-      { 0, 0, 0 }
-    };
+  {
+    OPT_TEMP,
+    OPT_REGEX,
+  };
+  static const struct mi_opt opts[]
+    = { { "t", OPT_TEMP, 0 }, { "r", OPT_REGEX, 1 }, { 0, 0, 0 } };
 
   for (;;)
     {
-      int opt = mi_getopt (cmd, argc, argv, opts,
-			   &oind, &oarg);
+      int opt = mi_getopt (cmd, argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -358,4 +340,3 @@ mi_cmd_catch_catch (const char *cmd, char *argv[], int argc)
 {
   mi_cmd_catch_exception_event (EX_EVENT_CATCH, cmd, argv, argc);
 }
-

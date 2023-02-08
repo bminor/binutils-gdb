@@ -38,15 +38,15 @@ aarch64_mte_linux_peek_error (int error)
   switch (error)
     {
     case EIO:
-      perror_with_name (_("PEEKMTETAGS not supported"));
+      perror_with_name (_ ("PEEKMTETAGS not supported"));
       break;
     case EFAULT:
-      perror_with_name (_("Couldn't fetch allocation tags"));
+      perror_with_name (_ ("Couldn't fetch allocation tags"));
       break;
     case EOPNOTSUPP:
-      perror_with_name (_("PROT_MTE not enabled for requested address"));
+      perror_with_name (_ ("PROT_MTE not enabled for requested address"));
     default:
-      perror_with_name (_("Unknown MTE error"));
+      perror_with_name (_ ("Unknown MTE error"));
       break;
     }
 }
@@ -60,15 +60,15 @@ aarch64_mte_linux_poke_error (int error)
   switch (error)
     {
     case EIO:
-      perror_with_name (_("POKEMTETAGS not supported"));
+      perror_with_name (_ ("POKEMTETAGS not supported"));
       break;
     case EFAULT:
-      perror_with_name (_("Couldn't store allocation tags"));
+      perror_with_name (_ ("Couldn't store allocation tags"));
       break;
     case EOPNOTSUPP:
-      perror_with_name (_("PROT_MTE not enabled for requested address"));
+      perror_with_name (_ ("PROT_MTE not enabled for requested address"));
     default:
-      perror_with_name (_("Unknown MTE error"));
+      perror_with_name (_ ("Unknown MTE error"));
       break;
     }
 }
@@ -112,8 +112,8 @@ bool
 aarch64_mte_fetch_memtags (int tid, CORE_ADDR address, size_t len,
 			   gdb::byte_vector &tags)
 {
-  size_t ntags = aarch64_mte_get_tag_granules (address, len,
-					       AARCH64_MTE_GRANULE_SIZE);
+  size_t ntags
+    = aarch64_mte_get_tag_granules (address, len, AARCH64_MTE_GRANULE_SIZE);
 
   /* If the memory range contains no tags, nothing left to do.  */
   if (ntags == 0)
@@ -169,8 +169,8 @@ aarch64_mte_store_memtags (int tid, CORE_ADDR address, size_t len,
     return true;
 
   /* Get the number of tags we need to write.  */
-  size_t ntags = aarch64_mte_get_tag_granules (address, len,
-					       AARCH64_MTE_GRANULE_SIZE);
+  size_t ntags
+    = aarch64_mte_get_tag_granules (address, len, AARCH64_MTE_GRANULE_SIZE);
 
   /* If the memory range contains no tags, nothing left to do.  */
   if (ntags == 0)
@@ -182,9 +182,9 @@ aarch64_mte_store_memtags (int tid, CORE_ADDR address, size_t len,
   /* Write all the tags, AARCH64_MTE_TAGS_MAX_SIZE blocks at a time.  */
   while (!done_writing)
     {
-      gdb::byte_vector t = prepare_tag_vector (ntags - tags_written, tags,
-					       tags_written,
-					       AARCH64_MTE_TAGS_MAX_SIZE);
+      gdb::byte_vector t
+	= prepare_tag_vector (ntags - tags_written, tags, tags_written,
+			      AARCH64_MTE_TAGS_MAX_SIZE);
 
       struct iovec iovec;
       iovec.iov_base = t.data ();

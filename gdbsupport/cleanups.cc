@@ -73,7 +73,7 @@ static struct cleanup *final_cleanup_chain = SENTINEL_CLEANUP;
 
 static struct cleanup *
 make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
-		  void *arg,  void (*free_arg) (void *))
+                  void *arg, void (*free_arg) (void *))
 {
   struct cleanup *newobj = XNEW (struct cleanup);
   struct cleanup *old_chain = *pmy_chain;
@@ -98,7 +98,7 @@ make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 
 static struct cleanup *
 make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
-		 void *arg)
+                 void *arg)
 {
   return make_my_cleanup2 (pmy_chain, function, arg, NULL);
 }
@@ -120,17 +120,16 @@ make_final_cleanup (make_cleanup_ftype *function, void *arg)
    Cleanups are performed until we get back to the old end of the chain.  */
 
 static void
-do_my_cleanups (struct cleanup **pmy_chain,
-		struct cleanup *old_chain)
+do_my_cleanups (struct cleanup **pmy_chain, struct cleanup *old_chain)
 {
   struct cleanup *ptr;
 
   while ((ptr = *pmy_chain) != old_chain)
     {
-      *pmy_chain = ptr->next;	/* Do this first in case of recursion.  */
+      *pmy_chain = ptr->next; /* Do this first in case of recursion.  */
       (*ptr->function) (ptr->arg);
       if (ptr->free_arg)
-	(*ptr->free_arg) (ptr->arg);
+        (*ptr->free_arg) (ptr->arg);
       xfree (ptr);
     }
 }

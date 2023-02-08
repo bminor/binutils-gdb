@@ -28,7 +28,7 @@
 
 /* Work around glibc header breakage causing ELF_NFPREG not to be usable.  */
 #ifndef NFPREG
-# define NFPREG 33
+#define NFPREG 33
 #endif
 
 /* See nat/riscv-linux-tdesc.h.  */
@@ -47,7 +47,7 @@ riscv_linux_read_features (int tid)
   features.flen = 0;
 
   /* How much worth of f-registers can we fetch if any?  */
-  for (flen = sizeof (regs.__f.__f[0]); ; flen *= 2)
+  for (flen = sizeof (regs.__f.__f[0]);; flen *= 2)
     {
       size_t regset_size;
       struct iovec iov;
@@ -60,8 +60,8 @@ riscv_linux_read_features (int tid)
 
       iov.iov_base = &regs;
       iov.iov_len = regset_size;
-      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, (PTRACE_TYPE_ARG3) &iov)
+	  == -1)
 	{
 	  switch (errno)
 	    {
@@ -70,7 +70,7 @@ riscv_linux_read_features (int tid)
 	    case EIO:
 	      break;
 	    default:
-	      perror_with_name (_("Couldn't get registers"));
+	      perror_with_name (_ ("Couldn't get registers"));
 	      break;
 	    }
 	}

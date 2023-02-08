@@ -23,7 +23,8 @@
 
 #include <iterator>
 
-namespace selftests {
+namespace selftests
+{
 
 /* An iterator class that iterates on integer arrays.  */
 
@@ -38,13 +39,17 @@ struct int_array_iterator
   /* Create an iterator that points at the first element of an integer
      array at ARRAY of size SIZE.  */
   int_array_iterator (int *array, size_t size)
-    : m_array (array), m_size (size)
-  {}
+    : m_array (array),
+      m_size (size)
+  {
+  }
 
   /* Create a past-the-end iterator.  */
   int_array_iterator ()
-    : m_array (nullptr), m_size (0)
-  {}
+    : m_array (nullptr),
+      m_size (0)
+  {
+  }
 
   bool operator== (const int_array_iterator &other) const
   {
@@ -91,6 +96,7 @@ struct int_array_iterator
   }
 
 private:
+
   /* A nullptr value in M_ARRAY indicates a past-the-end iterator.  */
   int *m_array;
   size_t m_size;
@@ -101,10 +107,7 @@ private:
 
 struct even_numbers_only
 {
-  bool operator() (int n)
-  {
-    return n % 2 == 0;
-  }
+  bool operator() (int n) { return n % 2 == 0; }
 };
 
 /* Test typical usage.  */
@@ -116,8 +119,8 @@ test_filtered_iterator ()
   std::vector<int> even_ints;
   const std::vector<int> expected_even_ints { 4, 4, 6, 8 };
 
-  filtered_iterator<int_array_iterator, even_numbers_only>
-    iter (array, ARRAY_SIZE (array));
+  filtered_iterator<int_array_iterator, even_numbers_only> iter (
+    array, ARRAY_SIZE (array));
   filtered_iterator<int_array_iterator, even_numbers_only> end;
 
   for (; iter != end; ++iter)
@@ -133,10 +136,10 @@ test_filtered_iterator_eq ()
 {
   int array[] = { 4, 4, 5, 6, 7, 8, 9 };
 
-  filtered_iterator<int_array_iterator, even_numbers_only>
-    iter1(array, ARRAY_SIZE (array));
-  filtered_iterator<int_array_iterator, even_numbers_only>
-    iter2(array, ARRAY_SIZE (array));
+  filtered_iterator<int_array_iterator, even_numbers_only> iter1 (
+    array, ARRAY_SIZE (array));
+  filtered_iterator<int_array_iterator, even_numbers_only> iter2 (
+    array, ARRAY_SIZE (array));
 
   /* They start equal.  */
   gdb_assert (iter1 == iter2);
@@ -156,6 +159,7 @@ test_filtered_iterator_eq ()
 } /* namespace selftests */
 
 void _initialize_filtered_iterator_selftests ();
+
 void
 _initialize_filtered_iterator_selftests ()
 {

@@ -62,7 +62,8 @@ trad_frame_saved_reg *
 trad_frame_alloc_saved_regs (struct gdbarch *gdbarch)
 {
 #ifdef HAVE_IS_TRIVIALLY_CONSTRUCTIBLE
-  gdb_static_assert (std::is_trivially_constructible<trad_frame_saved_reg>::value);
+  gdb_static_assert (
+    std::is_trivially_constructible<trad_frame_saved_reg>::value);
 #endif
 
   int numregs = gdbarch_num_cooked_regs (gdbarch);
@@ -91,8 +92,8 @@ trad_frame_alloc_saved_regs (frame_info_ptr this_frame)
 }
 
 void
-trad_frame_set_reg_value (struct trad_frame_cache *this_trad_cache,
-			  int regnum, LONGEST val)
+trad_frame_set_reg_value (struct trad_frame_cache *this_trad_cache, int regnum,
+			  LONGEST val)
 {
   /* External interface for users of trad_frame_cache
      (who cannot access the prev_regs object directly).  */
@@ -107,8 +108,8 @@ trad_frame_set_reg_realreg (struct trad_frame_cache *this_trad_cache,
 }
 
 void
-trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
-			 int regnum, CORE_ADDR addr)
+trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache, int regnum,
+			 CORE_ADDR addr)
 {
   this_trad_cache->prev_regs[regnum].set_addr (addr);
 }
@@ -181,8 +182,6 @@ trad_frame_set_reg_value_bytes (struct trad_frame_cache *this_trad_cache,
   this_trad_cache->prev_regs[regnum].set_value_bytes (bytes);
 }
 
-
-
 struct value *
 trad_frame_get_prev_register (frame_info_ptr this_frame,
 			      trad_frame_saved_reg this_saved_regs[],
@@ -209,8 +208,7 @@ trad_frame_get_prev_register (frame_info_ptr this_frame,
 
 struct value *
 trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
-			 frame_info_ptr this_frame,
-			 int regnum)
+			 frame_info_ptr this_frame, int regnum)
 {
   return trad_frame_get_prev_register (this_frame, this_trad_cache->prev_regs,
 				       regnum);

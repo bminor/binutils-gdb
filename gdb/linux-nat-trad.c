@@ -39,7 +39,7 @@ linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = register_u_offset (gdbarch, regnum, 0);
-  if (addr == (CORE_ADDR)-1
+  if (addr == (CORE_ADDR) -1
       || gdbarch_cannot_fetch_register (gdbarch, regnum))
     {
       regcache->raw_supply (regnum, NULL);
@@ -60,9 +60,9 @@ linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
       errno = 0;
       val = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3) (uintptr_t) addr, 0);
       if (errno != 0)
-	error (_("Couldn't read register %s (#%d): %s."),
-	       gdbarch_register_name (gdbarch, regnum),
-	       regnum, safe_strerror (errno));
+	error (_ ("Couldn't read register %s (#%d): %s."),
+	       gdbarch_register_name (gdbarch, regnum), regnum,
+	       safe_strerror (errno));
       store_unsigned_integer (buf + i, chunk, byte_order, val);
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -77,9 +77,7 @@ void
 linux_nat_trad_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0;
-	 regnum < gdbarch_num_regs (regcache->arch ());
-	 regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (regcache->arch ()); regnum++)
       fetch_register (regcache, regnum);
   else
     fetch_register (regcache, regnum);
@@ -101,7 +99,7 @@ linux_nat_trad_target::store_register (const struct regcache *regcache,
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = register_u_offset (gdbarch, regnum, 1);
-  if (addr == (CORE_ADDR)-1
+  if (addr == (CORE_ADDR) -1
       || gdbarch_cannot_store_register (gdbarch, regnum))
     return;
 
@@ -121,9 +119,9 @@ linux_nat_trad_target::store_register (const struct regcache *regcache,
       errno = 0;
       ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3) (uintptr_t) addr, val);
       if (errno != 0)
-	error (_("Couldn't write register %s (#%d): %s."),
-	       gdbarch_register_name (gdbarch, regnum),
-	       regnum, safe_strerror (errno));
+	error (_ ("Couldn't write register %s (#%d): %s."),
+	       gdbarch_register_name (gdbarch, regnum), regnum,
+	       safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
     }
@@ -136,9 +134,7 @@ void
 linux_nat_trad_target::store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0;
-	 regnum < gdbarch_num_regs (regcache->arch ());
-	 regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (regcache->arch ()); regnum++)
       store_register (regcache, regnum);
   else
     store_register (regcache, regnum);

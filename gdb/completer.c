@@ -20,7 +20,7 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
-#include "filenames.h"		/* For DOSish file names.  */
+#include "filenames.h" /* For DOSish file names.  */
 #include "language.h"
 #include "gdbsupport/gdb_signals.h"
 #include "target.h"
@@ -50,6 +50,7 @@
 class completion_tracker::completion_hash_entry
 {
 public:
+
   /* Constructor.  */
   completion_hash_entry (gdb::unique_xmalloc_ptr<char> name,
 			 gdb::unique_xmalloc_ptr<char> lcd)
@@ -63,18 +64,12 @@ public:
      string will only be valid while this hash entry is still valid as the
      string continues to be owned by this hash entry and will be released
      when this entry is deleted.  */
-  char *get_lcd () const
-  {
-    return m_lcd.get ();
-  }
+  char *get_lcd () const { return m_lcd.get (); }
 
   /* Get, and release the name field from this hash entry.  This can only
      be called once, after which the name field is no longer valid.  This
      should be used to pass ownership of the name to someone else.  */
-  char *release_name ()
-  {
-    return m_name.release ();
-  }
+  char *release_name () { return m_name.release (); }
 
   /* Return true of the name in this hash entry is STR.  */
   bool is_name_eq (const char *str) const
@@ -83,10 +78,7 @@ public:
   }
 
   /* Return the hash value based on the name of the entry.  */
-  hashval_t hash_name () const
-  {
-    return htab_hash_string (m_name.get ());
-  }
+  hashval_t hash_name () const { return htab_hash_string (m_name.get ()); }
 
 private:
 
@@ -122,20 +114,20 @@ static gdb_completer_state current_completion;
 
 enum explicit_location_match_type
 {
-    /* The filename of a source file.  */
-    MATCH_SOURCE,
+  /* The filename of a source file.  */
+  MATCH_SOURCE,
 
-    /* The name of a function or method.  */
-    MATCH_FUNCTION,
+  /* The name of a function or method.  */
+  MATCH_FUNCTION,
 
-    /* The fully-qualified name of a function or method.  */
-    MATCH_QUALIFIED,
+  /* The fully-qualified name of a function or method.  */
+  MATCH_QUALIFIED,
 
-    /* A line number.  */
-    MATCH_LINE,
+  /* A line number.  */
+  MATCH_LINE,
 
-    /* The name of a label.  */
-    MATCH_LABEL
+  /* The name of a label.  */
+  MATCH_LABEL
 };
 
 /* Prototypes for local functions.  */
@@ -159,8 +151,8 @@ enum explicit_location_match_type
    readline library sees one in any of the current completion strings,
    it thinks that the string needs to be quoted and automatically
    supplies a leading quote.  */
-static const char gdb_completer_command_word_break_characters[] =
-" \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
+static const char gdb_completer_command_word_break_characters[]
+  = " \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
 
 /* When completing on file names, we remove from the list of word
    break characters any characters that are commonly used in file
@@ -179,7 +171,7 @@ static const char gdb_completer_file_name_break_characters[] =
    we can't include '"' because the gdb C parser treats such quoted
    sequences as strings.  */
 static const char gdb_completer_quote_characters[] = "'";
-
+
 /* Accessor for some completer data that may interest other files.  */
 
 const char *
@@ -192,8 +184,7 @@ get_gdb_completer_quote_characters (void)
    symbols but don't want to complete on anything else either.  */
 
 void
-noop_completer (struct cmd_list_element *ignore, 
-		completion_tracker &tracker,
+noop_completer (struct cmd_list_element *ignore, completion_tracker &tracker,
 		const char *text, const char *prefix)
 {
 }
@@ -202,16 +193,16 @@ noop_completer (struct cmd_list_element *ignore,
 
 void
 filename_completer (struct cmd_list_element *ignore,
-		    completion_tracker &tracker,
-		    const char *text, const char *word)
+		    completion_tracker &tracker, const char *text,
+		    const char *word)
 {
   int subsequent_name;
 
   subsequent_name = 0;
   while (1)
     {
-      gdb::unique_xmalloc_ptr<char> p_rl
-	(rl_filename_completion_function (text, subsequent_name));
+      gdb::unique_xmalloc_ptr<char> p_rl (
+	rl_filename_completion_function (text, subsequent_name));
       if (p_rl == NULL)
 	break;
       /* We need to set subsequent_name to a non-zero value before the
@@ -225,8 +216,8 @@ filename_completer (struct cmd_list_element *ignore,
       if (p[strlen (p) - 1] == '~')
 	continue;
 
-      tracker.add_completion
-	(make_completion_match_str (std::move (p_rl), text, word));
+      tracker.add_completion (make_completion_match_str (std::move (p_rl),
+							 text, word));
     }
 #if 0
   /* There is no way to do this just long enough to affect quote
@@ -246,8 +237,8 @@ filename_completer_handle_brkchars (struct cmd_list_element *ignore,
 				    completion_tracker &tracker,
 				    const char *text, const char *word)
 {
-  set_rl_completer_word_break_characters
-    (gdb_completer_file_name_break_characters);
+  set_rl_completer_word_break_characters (
+    gdb_completer_file_name_break_characters);
 }
 
 /* Find the bounds of the current word for completion purposes, and
@@ -272,9 +263,8 @@ struct gdb_rl_completion_word_info
 };
 
 static const char *
-gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
-			     int *qc, int *dp,
-			     const char *line_buffer)
+gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info, int *qc,
+			     int *dp, const char *line_buffer)
 {
   int scan, end, delimiter, pass_next, isbrk;
   char quote_char;
@@ -303,9 +293,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
       /* We have a list of characters which can be used in pairs to
 	 quote substrings for the completer.  Try to find the start of
 	 an unclosed quoted substring.  */
-      for (scan = pass_next = 0;
-	   scan < end;
-	   scan++)
+      for (scan = pass_next = 0; scan < end; scan++)
 	{
 	  if (pass_next)
 	    {
@@ -473,8 +461,8 @@ complete_nested_command_line (completion_tracker &tracker, const char *text)
   size_t save_custom_word_point = tracker.custom_word_point ();
 
   int quote_char = '\0';
-  const char *word = completion_find_completion_word (tracker, text,
-						      &quote_char);
+  const char *word
+    = completion_find_completion_word (tracker, text, &quote_char);
 
   if (tracker.use_custom_word_point ())
     {
@@ -501,8 +489,8 @@ complete_nested_command_line (completion_tracker &tracker, const char *text)
    etc.  */
 
 static void
-complete_files_symbols (completion_tracker &tracker,
-			const char *text, const char *word)
+complete_files_symbols (completion_tracker &tracker, const char *text,
+			const char *word)
 {
   completion_list fn_list;
   const char *p;
@@ -533,7 +521,7 @@ complete_files_symbols (completion_tracker &tracker,
 	  if (*p == quote_found)
 	    quote_found = 0;
 	  else
-	    break;		/* Hit the end of text.  */
+	    break; /* Hit the end of text.  */
 	}
 #if HAVE_DOS_BASED_FILE_SYSTEM
       /* If we have a DOS-style absolute file name at the beginning of
@@ -563,9 +551,7 @@ complete_files_symbols (completion_tracker &tracker,
       strncpy (file_to_match, text, colon - text);
       file_to_match[colon - text] = '\0';
       /* Remove trailing colons and quotes from the file name.  */
-      for (s = file_to_match + (colon - text);
-	   s > file_to_match;
-	   s--)
+      for (s = file_to_match + (colon - text); s > file_to_match; s--)
 	if (*s == ':' || *s == quote_char)
 	  *s = '\0';
     }
@@ -574,11 +560,9 @@ complete_files_symbols (completion_tracker &tracker,
      symbols as well as on files.  */
   if (colon)
     {
-      collect_file_symbol_completion_matches (tracker,
-					      complete_symbol_mode::EXPRESSION,
-					      symbol_name_match_type::EXPRESSION,
-					      symbol_start, word,
-					      file_to_match);
+      collect_file_symbol_completion_matches (
+	tracker, complete_symbol_mode::EXPRESSION,
+	symbol_name_match_type::EXPRESSION, symbol_start, word, file_to_match);
       xfree (file_to_match);
     }
   else
@@ -591,8 +575,7 @@ complete_files_symbols (completion_tracker &tracker,
 					 symbol_start, word);
       /* If text includes characters which cannot appear in a file
 	 name, they cannot be asking for completion on files.  */
-      if (strcspn (text,
-		   gdb_completer_file_name_break_characters) == text_len)
+      if (strcspn (text, gdb_completer_file_name_break_characters) == text_len)
 	fn_list = make_source_files_completion_list (text, text);
     }
 
@@ -613,7 +596,7 @@ complete_files_symbols (completion_tracker &tracker,
 	 completion, because rl_complete will prepend "/foo/" to each
 	 candidate completion.  The loop below removes that leading
 	 part.  */
-      for (const auto &fn_up: fn_list)
+      for (const auto &fn_up : fn_list)
 	{
 	  char *fn = fn_up.get ();
 	  memmove (fn, fn + (word - text), strlen (fn) + 1 - (word - text));
@@ -642,9 +625,7 @@ complete_source_filenames (const char *text)
 
   /* If text includes characters which cannot appear in a file name,
      the user cannot be asking for completion on files.  */
-  if (strcspn (text,
-	       gdb_completer_file_name_break_characters)
-      == text_len)
+  if (strcspn (text, gdb_completer_file_name_break_characters) == text_len)
     return make_source_files_completion_list (text, text);
 
   return {};
@@ -674,25 +655,13 @@ complete_address_and_linespec_locations (completion_tracker &tracker,
 /* The explicit location options.  Note that indexes into this array
    must match the explicit_location_match_type enumerators.  */
 
-static const char *const explicit_options[] =
-  {
-    "-source",
-    "-function",
-    "-qualified",
-    "-line",
-    "-label",
-    NULL
-  };
+static const char *const explicit_options[]
+  = { "-source", "-function", "-qualified", "-line", "-label", NULL };
 
 /* The probe modifier options.  These can appear before a location in
    breakpoint commands.  */
-static const char *const probe_options[] =
-  {
-    "-probe",
-    "-probe-stap",
-    "-probe-dtrace",
-    NULL
-  };
+static const char *const probe_options[]
+  = { "-probe", "-probe-stap", "-probe-dtrace", NULL };
 
 /* Returns STRING if not NULL, the empty string otherwise.  */
 
@@ -754,8 +723,7 @@ collect_explicit_location_matches (completion_tracker &tracker,
 	linespec_complete_label (tracker, language,
 				 explicit_loc->source_filename,
 				 explicit_loc->function_name,
-				 explicit_loc->func_name_match_type,
-				 label);
+				 explicit_loc->func_name_match_type, label);
       }
       break;
 
@@ -813,8 +781,8 @@ collect_explicit_location_matches (completion_tracker &tracker,
    matched.  Otherwise, return -1.  */
 
 static int
-skip_keyword (completion_tracker &tracker,
-	      const char * const *keywords, const char **text_p)
+skip_keyword (completion_tracker &tracker, const char *const *keywords,
+	      const char **text_p)
 {
   const char *text = *text_p;
   const char *after = skip_to_space (text);
@@ -854,8 +822,7 @@ skip_keyword (completion_tracker &tracker,
 
 static void
 complete_explicit_location_spec (completion_tracker &tracker,
-				 location_spec *locspec,
-				 const char *text,
+				 location_spec *locspec, const char *text,
 				 const language_defn *language,
 				 const char *quoted_arg_start,
 				 const char *quoted_arg_end)
@@ -925,8 +892,8 @@ complete_explicit_location_spec (completion_tracker &tracker,
 
 void
 location_completer (struct cmd_list_element *ignore,
-		    completion_tracker &tracker,
-		    const char *text, const char * /* word */)
+		    completion_tracker &tracker, const char *text,
+		    const char * /* word */)
 {
   int found_probe_option = -1;
 
@@ -991,7 +958,6 @@ location_completer (struct cmd_list_element *ignore,
 					   current_language,
 					   completion_info.quoted_arg_start,
 					   completion_info.quoted_arg_end);
-
 	}
     }
   /* This is an address or linespec location.  */
@@ -1047,8 +1013,7 @@ location_completer (struct cmd_list_element *ignore,
 static void
 location_completer_handle_brkchars (struct cmd_list_element *ignore,
 				    completion_tracker &tracker,
-				    const char *text,
-				    const char *word_ignored)
+				    const char *text, const char *word_ignored)
 {
   tracker.set_use_custom_word_point (true);
 
@@ -1058,8 +1023,8 @@ location_completer_handle_brkchars (struct cmd_list_element *ignore,
 /* See completer.h.  */
 
 void
-complete_expression (completion_tracker &tracker,
-		     const char *text, const char *word)
+complete_expression (completion_tracker &tracker, const char *text,
+		     const char *word)
 {
   expression_up exp;
   std::unique_ptr<expr_completion_base> expr_completer;
@@ -1090,8 +1055,8 @@ complete_expression (completion_tracker &tracker,
 
 void
 expression_completer (struct cmd_list_element *ignore,
-		      completion_tracker &tracker,
-		      const char *text, const char *word)
+		      completion_tracker &tracker, const char *text,
+		      const char *word)
 {
   complete_expression (tracker, text, word);
 }
@@ -1107,13 +1072,12 @@ set_rl_completer_word_break_characters (const char *break_chars)
 /* Complete on symbols.  */
 
 void
-symbol_completer (struct cmd_list_element *ignore,
-		  completion_tracker &tracker,
+symbol_completer (struct cmd_list_element *ignore, completion_tracker &tracker,
 		  const char *text, const char *word)
 {
   collect_symbol_completion_matches (tracker, complete_symbol_mode::EXPRESSION,
-				     symbol_name_match_type::EXPRESSION,
-				     text, word);
+				     symbol_name_match_type::EXPRESSION, text,
+				     word);
 }
 
 /* Here are some useful test cases for completion.  FIXME: These
@@ -1192,8 +1156,7 @@ complete_line_internal_normal_command (completion_tracker &tracker,
 	 file name by starting at `word' and going backwards.  */
       for (p = word;
 	   p > command
-	     && strchr (gdb_completer_file_name_break_characters,
-			p[-1]) == NULL;
+	   && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
 	   p--)
 	;
     }
@@ -1207,8 +1170,7 @@ complete_line_internal_normal_command (completion_tracker &tracker,
       else
 	{
 	  brkchars_fn
-	    = (completer_handle_brkchars_func_for_completer
-	       (c->completer));
+	    = (completer_handle_brkchars_func_for_completer (c->completer));
 	}
 
       brkchars_fn (c, tracker, p, word);
@@ -1230,8 +1192,7 @@ complete_line_internal_normal_command (completion_tracker &tracker,
    See complete_line_internal_reason for description of REASON.  */
 
 static void
-complete_line_internal_1 (completion_tracker &tracker,
-			  const char *text,
+complete_line_internal_1 (completion_tracker &tracker, const char *text,
 			  const char *line_buffer, int point,
 			  complete_line_internal_reason reason)
 {
@@ -1249,8 +1210,8 @@ complete_line_internal_1 (completion_tracker &tracker,
      then we will switch to the special word break set for command
      strings, which leaves out the '-' and '.' character used in some
      commands.  */
-  set_rl_completer_word_break_characters
-    (current_language->word_break_characters ());
+  set_rl_completer_word_break_characters (
+    current_language->word_break_characters ());
 
   /* Decide whether to complete on a list of gdb commands or on
      symbols.  */
@@ -1337,8 +1298,8 @@ complete_line_internal_1 (completion_tracker &tracker,
 	    }
 	  /* Ensure that readline does the right thing with respect to
 	     inserting quotes.  */
-	  set_rl_completer_word_break_characters
-	    (gdb_completer_command_word_break_characters);
+	  set_rl_completer_word_break_characters (
+	    gdb_completer_command_word_break_characters);
 	}
     }
   else
@@ -1364,8 +1325,8 @@ complete_line_internal_1 (completion_tracker &tracker,
 
 		  /* Ensure that readline does the right thing
 		     with respect to inserting quotes.  */
-		  set_rl_completer_word_break_characters
-		    (gdb_completer_command_word_break_characters);
+		  set_rl_completer_word_break_characters (
+		    gdb_completer_command_word_break_characters);
 		}
 	      else if (reason == handle_help)
 		;
@@ -1373,16 +1334,15 @@ complete_line_internal_1 (completion_tracker &tracker,
 		{
 		  if (reason != handle_brkchars)
 		    complete_on_enum (tracker, c->enums, p, word);
-		  set_rl_completer_word_break_characters
-		    (gdb_completer_command_word_break_characters);
+		  set_rl_completer_word_break_characters (
+		    gdb_completer_command_word_break_characters);
 		}
 	      else
 		{
 		  /* It is a normal command; what comes after it is
 		     completed by the command's completer function.  */
-		  complete_line_internal_normal_command (tracker,
-							 tmp_command, word, p,
-							 reason, c);
+		  complete_line_internal_normal_command (tracker, tmp_command,
+							 word, p, reason, c);
 		}
 	    }
 	  else
@@ -1412,8 +1372,8 @@ complete_line_internal_1 (completion_tracker &tracker,
 
 	      /* Ensure that readline does the right thing
 		 with respect to inserting quotes.  */
-	      set_rl_completer_word_break_characters
-		(gdb_completer_command_word_break_characters);
+	      set_rl_completer_word_break_characters (
+		gdb_completer_command_word_break_characters);
 	    }
 	}
       else if (reason == handle_help)
@@ -1435,9 +1395,8 @@ complete_line_internal_1 (completion_tracker &tracker,
 	  else
 	    {
 	      /* It is a normal command.  */
-	      complete_line_internal_normal_command (tracker,
-						     tmp_command, word, p,
-						     reason, c);
+	      complete_line_internal_normal_command (tracker, tmp_command,
+						     word, p, reason, c);
 	    }
 	}
     }
@@ -1447,8 +1406,7 @@ complete_line_internal_1 (completion_tracker &tracker,
    MAX_COMPLETIONS_REACHED_ERROR.  */
 
 static void
-complete_line_internal (completion_tracker &tracker,
-			const char *text,
+complete_line_internal (completion_tracker &tracker, const char *text,
 			const char *line_buffer, int point,
 			complete_line_internal_reason reason)
 {
@@ -1495,32 +1453,25 @@ completion_tracker::discard_completions ()
      key to our hash is just a single string, while the values we store in
      the hash are a struct containing multiple strings.  */
   static auto entry_eq_func
-    = [] (const void *first, const void *second) -> int
-      {
-	/* The FIRST argument is the entry already in the hash table, and
+    = [] (const void *first, const void *second) -> int {
+    /* The FIRST argument is the entry already in the hash table, and
 	   the SECOND argument is the new item being inserted.  */
-	const completion_hash_entry *entry
-	  = (const completion_hash_entry *) first;
-	const char *name_str = (const char *) second;
+    const completion_hash_entry *entry = (const completion_hash_entry *) first;
+    const char *name_str = (const char *) second;
 
-	return entry->is_name_eq (name_str);
-      };
+    return entry->is_name_eq (name_str);
+  };
 
   /* Callback used by the hash table to compute the hash value for an
      existing entry.  This is needed when expanding the hash table.  */
-  static auto entry_hash_func
-    = [] (const void *arg) -> hashval_t
-      {
-	const completion_hash_entry *entry
-	  = (const completion_hash_entry *) arg;
-	return entry->hash_name ();
-      };
+  static auto entry_hash_func = [] (const void *arg) -> hashval_t {
+    const completion_hash_entry *entry = (const completion_hash_entry *) arg;
+    return entry->hash_name ();
+  };
 
-  m_entries_hash.reset
-    (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-			entry_hash_func, entry_eq_func,
-			htab_delete_entry<completion_hash_entry>,
-			xcalloc, xfree));
+  m_entries_hash.reset (htab_create_alloc (
+    INITIAL_COMPLETION_HTAB_SIZE, entry_hash_func, entry_eq_func,
+    htab_delete_entry<completion_hash_entry>, xcalloc, xfree));
 }
 
 /* See completer.h.  */
@@ -1533,10 +1484,9 @@ completion_tracker::~completion_tracker ()
 /* See completer.h.  */
 
 bool
-completion_tracker::maybe_add_completion
-  (gdb::unique_xmalloc_ptr<char> name,
-   completion_match_for_lcd *match_for_lcd,
-   const char *text, const char *word)
+completion_tracker::maybe_add_completion (
+  gdb::unique_xmalloc_ptr<char> name, completion_match_for_lcd *match_for_lcd,
+  const char *text, const char *word)
 {
   void **slot;
 
@@ -1547,8 +1497,8 @@ completion_tracker::maybe_add_completion
     return false;
 
   hashval_t hash = htab_hash_string (name.get ());
-  slot = htab_find_slot_with_hash (m_entries_hash.get (), name.get (),
-				   hash, INSERT);
+  slot = htab_find_slot_with_hash (m_entries_hash.get (), name.get (), hash,
+				   INSERT);
   if (*slot == HTAB_EMPTY_ENTRY)
     {
       const char *match_for_lcd_str = NULL;
@@ -1581,7 +1531,8 @@ completion_tracker::add_completion (gdb::unique_xmalloc_ptr<char> name,
 				    const char *text, const char *word)
 {
   if (!maybe_add_completion (std::move (name), match_for_lcd, text, word))
-    throw_error (MAX_COMPLETIONS_REACHED_ERROR, _("Max completions reached."));
+    throw_error (MAX_COMPLETIONS_REACHED_ERROR,
+		 _ ("Max completions reached."));
 }
 
 /* See completer.h.  */
@@ -1612,8 +1563,8 @@ completion_tracker::remove_completion (const char *name)
    caller to xstrdup that string if desired.  */
 
 static char *
-make_completion_match_str_1 (const char *match_name,
-			     const char *text, const char *word)
+make_completion_match_str_1 (const char *match_name, const char *text,
+			     const char *word)
 {
   char *newobj;
 
@@ -1643,8 +1594,8 @@ make_completion_match_str_1 (const char *match_name,
 /* See completer.h.  */
 
 gdb::unique_xmalloc_ptr<char>
-make_completion_match_str (const char *match_name,
-			   const char *text, const char *word)
+make_completion_match_str (const char *match_name, const char *text,
+			   const char *word)
 {
   char *newobj = make_completion_match_str_1 (match_name, text, word);
   if (newobj == NULL)
@@ -1682,8 +1633,8 @@ complete (const char *line, char const **word, int *quote_char)
 
   try
     {
-      *word = completion_find_completion_word (tracker_handle_brkchars,
-					      line, quote_char);
+      *word = completion_find_completion_word (tracker_handle_brkchars, line,
+					       quote_char);
 
       /* Completers that provide a custom word point in the
 	 handle_brkchars phase also compute their completions then.
@@ -1693,7 +1644,8 @@ complete (const char *line, char const **word, int *quote_char)
 	tracker = &tracker_handle_brkchars;
       else
 	{
-	  complete_line (tracker_handle_completions, *word, line, strlen (line));
+	  complete_line (tracker_handle_completions, *word, line,
+			 strlen (line));
 	  tracker = &tracker_handle_completions;
 	}
     }
@@ -1704,7 +1656,6 @@ complete (const char *line, char const **word, int *quote_char)
 
   return tracker->build_completion_result (*word, *word - line, strlen (line));
 }
-
 
 /* Generate completions all at once.  Does nothing if max_completions
    is 0.  If max_completions is non-negative, this will collect at
@@ -1719,8 +1670,8 @@ complete (const char *line, char const **word, int *quote_char)
    should pretend that the line ends at POINT.  */
 
 void
-complete_line (completion_tracker &tracker,
-	       const char *text, const char *line_buffer, int point)
+complete_line (completion_tracker &tracker, const char *text,
+	       const char *line_buffer, int point)
 {
   if (max_completions == 0)
     return;
@@ -1731,12 +1682,11 @@ complete_line (completion_tracker &tracker,
 /* Complete on command names.  Used by "help".  */
 
 void
-command_completer (struct cmd_list_element *ignore, 
-		   completion_tracker &tracker,
-		   const char *text, const char *word)
+command_completer (struct cmd_list_element *ignore,
+		   completion_tracker &tracker, const char *text,
+		   const char *word)
 {
-  complete_line_internal (tracker, word, text,
-			  strlen (text), handle_help);
+  complete_line_internal (tracker, word, text, strlen (text), handle_help);
 }
 
 /* The corresponding completer_handle_brkchars implementation.  */
@@ -1746,15 +1696,14 @@ command_completer_handle_brkchars (struct cmd_list_element *ignore,
 				   completion_tracker &tracker,
 				   const char *text, const char *word)
 {
-  set_rl_completer_word_break_characters
-    (gdb_completer_command_word_break_characters);
+  set_rl_completer_word_break_characters (
+    gdb_completer_command_word_break_characters);
 }
 
 /* Complete on signals.  */
 
 void
-signal_completer (struct cmd_list_element *ignore,
-		  completion_tracker &tracker,
+signal_completer (struct cmd_list_element *ignore, completion_tracker &tracker,
 		  const char *text, const char *word)
 {
   size_t len = strlen (word);
@@ -1782,34 +1731,33 @@ signal_completer (struct cmd_list_element *ignore,
    completer should complete on.  */
 
 enum reg_completer_target
-  {
-    complete_register_names = 0x1,
-    complete_reggroup_names = 0x2
-  };
+{
+  complete_register_names = 0x1,
+  complete_reggroup_names = 0x2
+};
+
 DEF_ENUM_FLAGS_TYPE (enum reg_completer_target, reg_completer_targets);
 
 /* Complete register names and/or reggroup names based on the value passed
    in TARGETS.  At least one bit in TARGETS must be set.  */
 
 static void
-reg_or_group_completer_1 (completion_tracker &tracker,
-			  const char *text, const char *word,
-			  reg_completer_targets targets)
+reg_or_group_completer_1 (completion_tracker &tracker, const char *text,
+			  const char *word, reg_completer_targets targets)
 {
   size_t len = strlen (word);
   struct gdbarch *gdbarch;
   const char *name;
 
-  gdb_assert ((targets & (complete_register_names
-			  | complete_reggroup_names)) != 0);
+  gdb_assert ((targets & (complete_register_names | complete_reggroup_names))
+	      != 0);
   gdbarch = get_current_arch ();
 
   if ((targets & complete_register_names) != 0)
     {
       int i;
 
-      for (i = 0;
-	   (name = user_reg_map_regnum_to_name (gdbarch, i)) != NULL;
+      for (i = 0; (name = user_reg_map_regnum_to_name (gdbarch, i)) != NULL;
 	   i++)
 	{
 	  if (*name != '\0' && strncmp (word, name, len) == 0)
@@ -1832,8 +1780,8 @@ reg_or_group_completer_1 (completion_tracker &tracker,
 
 void
 reg_or_group_completer (struct cmd_list_element *ignore,
-			completion_tracker &tracker,
-			const char *text, const char *word)
+			completion_tracker &tracker, const char *text,
+			const char *word)
 {
   reg_or_group_completer_1 (tracker, text, word,
 			    (complete_register_names
@@ -1844,11 +1792,10 @@ reg_or_group_completer (struct cmd_list_element *ignore,
 
 void
 reggroup_completer (struct cmd_list_element *ignore,
-		    completion_tracker &tracker,
-		    const char *text, const char *word)
+		    completion_tracker &tracker, const char *text,
+		    const char *word)
 {
-  reg_or_group_completer_1 (tracker, text, word,
-			    complete_reggroup_names);
+  reg_or_group_completer_1 (tracker, text, word, complete_reggroup_names);
 }
 
 /* The default completer_handle_brkchars implementation.  */
@@ -1858,8 +1805,8 @@ default_completer_handle_brkchars (struct cmd_list_element *ignore,
 				   completion_tracker &tracker,
 				   const char *text, const char *word)
 {
-  set_rl_completer_word_break_characters
-    (current_language->word_break_characters ());
+  set_rl_completer_word_break_characters (
+    current_language->word_break_characters ());
 }
 
 /* See definition in completer.h.  */
@@ -1889,7 +1836,8 @@ static char gdb_custom_word_point_brkchars[2];
 /* Since rl_basic_quote_characters is not completer-specific, we save
    its original value here, in order to be able to restore it in
    gdb_rl_attempted_completion_function.  */
-static const char *gdb_org_rl_basic_quote_characters = rl_basic_quote_characters;
+static const char *gdb_org_rl_basic_quote_characters
+  = rl_basic_quote_characters;
 
 /* Get the list of chars that are considered as word breaks
    for the current command.  */
@@ -1904,8 +1852,8 @@ gdb_completion_word_break_characters_throw ()
 
   completion_tracker &tracker = *current_completion.tracker;
 
-  complete_line_internal (tracker, NULL, rl_line_buffer,
-			  rl_point, handle_brkchars);
+  complete_line_internal (tracker, NULL, rl_line_buffer, rl_point,
+			  handle_brkchars);
 
   if (tracker.use_custom_word_point ())
     {
@@ -2001,9 +1949,8 @@ completion_tracker::recompute_lcd_visitor (completion_hash_entry *entry)
       size_t i;
       const char *new_match = entry->get_lcd ();
 
-      for (i = 0;
-	   (new_match[i] != '\0'
-	    && new_match[i] == m_lowest_common_denominator[i]);
+      for (i = 0; (new_match[i] != '\0'
+		   && new_match[i] == m_lowest_common_denominator[i]);
 	   i++)
 	;
       if (m_lowest_common_denominator[i] != new_match[i])
@@ -2030,14 +1977,12 @@ completion_tracker::recompute_lowest_common_denominator ()
 			 m_lowest_common_denominator_max_length + 1);
 
   /* Callback used to visit each entry in the m_entries_hash.  */
-  auto visitor_func
-    = [] (void **slot, void *info) -> int
-      {
-	completion_tracker *obj = (completion_tracker *) info;
-	completion_hash_entry *entry = (completion_hash_entry *) *slot;
-	obj->recompute_lcd_visitor (entry);
-	return 1;
-      };
+  auto visitor_func = [] (void **slot, void *info) -> int {
+    completion_tracker *obj = (completion_tracker *) info;
+    completion_hash_entry *entry = (completion_hash_entry *) *slot;
+    obj->recompute_lcd_visitor (entry);
+    return 1;
+  };
 
   htab_traverse (m_entries_hash.get (), visitor_func, this);
   m_lowest_common_denominator_valid = true;
@@ -2079,8 +2024,7 @@ completion_tracker::advance_custom_word_point_by (int len)
 */
 
 static char *
-expand_preserving_ws (const char *orig, size_t orig_len,
-		      const char *lcd)
+expand_preserving_ws (const char *orig, size_t orig_len, const char *lcd)
 {
   const char *p_orig = orig;
   const char *orig_end = orig + orig_len;
@@ -2119,8 +2063,8 @@ expand_preserving_ws (const char *orig, size_t orig_len,
 /* See completer.h.  */
 
 completion_result
-completion_tracker::build_completion_result (const char *text,
-					     int start, int end)
+completion_tracker::build_completion_result (const char *text, int start,
+					     int end)
 {
   size_t element_count = htab_elements (m_entries_hash.get ());
 
@@ -2134,8 +2078,7 @@ completion_tracker::build_completion_result (const char *text,
 
   recompute_lowest_common_denominator ();
   match_list[0]
-    = expand_preserving_ws (text, end - start,
-			    m_lowest_common_denominator);
+    = expand_preserving_ws (text, end - start, m_lowest_common_denominator);
 
   if (m_lowest_common_denominator_unique)
     {
@@ -2144,8 +2087,8 @@ completion_tracker::build_completion_result (const char *text,
 	 completion.  */
       char buf[2] = { (char) quote_char () };
 
-      match_list[0] = reconcat (match_list[0], match_list[0],
-				buf, (char *) NULL);
+      match_list[0]
+	= reconcat (match_list[0], match_list[0], buf, (char *) NULL);
       match_list[1] = NULL;
 
       /* If the tracker wants to, or we already have a space at the
@@ -2154,8 +2097,7 @@ completion_tracker::build_completion_result (const char *text,
       char *match = match_list[0];
       bool completion_suppress_append
 	= (suppress_append_ws ()
-	   || (match[0] != '\0'
-	       && match[strlen (match) - 1] == ' '));
+	   || (match[0] != '\0' && match[strlen (match) - 1] == ' '));
 
       return completion_result (match_list, 1, completion_suppress_append);
     }
@@ -2167,7 +2109,8 @@ completion_tracker::build_completion_result (const char *text,
 	list_builder (char **ml)
 	  : match_list (ml),
 	    index (1)
-	{ /* Nothing.  */ }
+	{ /* Nothing.  */
+	}
 
 	/* The list we are filling.  */
 	char **match_list;
@@ -2175,20 +2118,19 @@ completion_tracker::build_completion_result (const char *text,
 	/* The next index in the list to write to.  */
 	int index;
       };
+
       list_builder builder (match_list);
 
       /* Visit each entry in m_entries_hash and add it to the completion
 	 list, updating the builder state object.  */
-      auto func
-	= [] (void **slot, void *info) -> int
-	  {
-	    completion_hash_entry *entry = (completion_hash_entry *) *slot;
-	    list_builder *state = (list_builder *) info;
+      auto func = [] (void **slot, void *info) -> int {
+	completion_hash_entry *entry = (completion_hash_entry *) *slot;
+	list_builder *state = (list_builder *) info;
 
-	    state->match_list[state->index] = entry->release_name ();
-	    state->index++;
-	    return 1;
-	  };
+	state->match_list[state->index] = entry->release_name ();
+	state->index++;
+	return 1;
+      };
 
       /* Build the completion list and add a null at the end.  */
       htab_traverse_noresize (m_entries_hash.get (), func, &builder);
@@ -2201,9 +2143,11 @@ completion_tracker::build_completion_result (const char *text,
 /* See completer.h  */
 
 completion_result::completion_result ()
-  : match_list (NULL), number_matches (0),
+  : match_list (NULL),
+    number_matches (0),
     completion_suppress_append (false)
-{}
+{
+}
 
 /* See completer.h  */
 
@@ -2213,7 +2157,8 @@ completion_result::completion_result (char **match_list_,
   : match_list (match_list_),
     number_matches (number_matches_),
     completion_suppress_append (completion_suppress_append_)
-{}
+{
+}
 
 /* See completer.h  */
 
@@ -2251,8 +2196,7 @@ completion_result::sort_match_list ()
     {
       /* Element 0 is special (it's the common prefix), leave it
 	 be.  */
-      std::sort (&match_list[1],
-		 &match_list[number_matches + 1],
+      std::sort (&match_list[1], &match_list[number_matches + 1],
 		 compare_cstrings);
     }
 }
@@ -2295,7 +2239,8 @@ completion_result::reset_match_list ()
    Returns NULL if there are no completions.  */
 
 static char **
-gdb_rl_attempted_completion_function_throw (const char *text, int start, int end)
+gdb_rl_attempted_completion_function_throw (const char *text, int start,
+					    int end)
 {
   /* Completers that provide a custom word point in the
      handle_brkchars phase also compute their completions then.
@@ -2308,8 +2253,8 @@ gdb_rl_attempted_completion_function_throw (const char *text, int start, int end
       delete current_completion.tracker;
       current_completion.tracker = new completion_tracker ();
 
-      complete_line (*current_completion.tracker, text,
-		     rl_line_buffer, rl_point);
+      complete_line (*current_completion.tracker, text, rl_line_buffer,
+		     rl_point);
     }
 
   completion_tracker &tracker = *current_completion.tracker;
@@ -2414,9 +2359,9 @@ skip_quoted (const char *str)
 const char *
 get_max_completions_reached_message (void)
 {
-  return _("*** List may be truncated, max-completions reached. ***");
+  return _ ("*** List may be truncated, max-completions reached. ***");
 }
-
+
 /* GDB replacement for rl_display_match_list.
    Readline doesn't provide a clean interface for TUI(curses).
    A hack previously used was to send readline's rl_outstream through a pipe
@@ -2434,12 +2379,12 @@ get_max_completions_reached_message (void)
 /* Not supported here.  */
 #undef VISIBLE_STATS
 
-#if defined (HANDLE_MULTIBYTE)
-#define MB_INVALIDCH(x) ((x) == (size_t)-1 || (x) == (size_t)-2)
-#define MB_NULLWCH(x)   ((x) == 0)
+#if defined(HANDLE_MULTIBYTE)
+#define MB_INVALIDCH(x) ((x) == (size_t) -1 || (x) == (size_t) -2)
+#define MB_NULLWCH(x) ((x) == 0)
 #endif
 
-#define ELLIPSIS_LEN	3
+#define ELLIPSIS_LEN 3
 
 /* gdb version of readline/complete.c:get_y_or_n.
    'y' -> returns 1, and 'n' -> returns 0.
@@ -2532,12 +2477,12 @@ gdb_printable_part (char *pathname)
 {
   char *temp, *x;
 
-  if (rl_filename_completion_desired == 0)	/* don't need to do anything */
+  if (rl_filename_completion_desired == 0) /* don't need to do anything */
     return (pathname);
 
   temp = strrchr (pathname, '/');
-#if defined (__MSDOS__)
-  if (temp == 0 && ISALPHA ((unsigned char)pathname[0]) && pathname[1] == ':')
+#if defined(__MSDOS__)
+  if (temp == 0 && ISALPHA ((unsigned char) pathname[0]) && pathname[1] == ':')
     temp = pathname + 1;
 #endif
 
@@ -2565,7 +2510,7 @@ static int
 gdb_fnwidth (const char *string)
 {
   int width, pos;
-#if defined (HANDLE_MULTIBYTE)
+#if defined(HANDLE_MULTIBYTE)
   mbstate_t ps;
   int left, w;
   size_t clen;
@@ -2585,7 +2530,7 @@ gdb_fnwidth (const char *string)
 	}
       else
 	{
-#if defined (HANDLE_MULTIBYTE)
+#if defined(HANDLE_MULTIBYTE)
 	  clen = mbrtowc (&wc, string + pos, left - pos, &ps);
 	  if (MB_INVALIDCH (clen))
 	    {
@@ -2621,7 +2566,7 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
 {
   int printed_len, w;
   const char *s;
-#if defined (HANDLE_MULTIBYTE)
+#if defined(HANDLE_MULTIBYTE)
   mbstate_t ps;
   const char *end;
   size_t tlen;
@@ -2658,7 +2603,7 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
 	  displayer->putch (displayer, UNCTRL (*s));
 	  printed_len += 2;
 	  s++;
-#if defined (HANDLE_MULTIBYTE)
+#if defined(HANDLE_MULTIBYTE)
 	  memset (&ps, 0, sizeof (mbstate_t));
 #endif
 	}
@@ -2668,13 +2613,13 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
 	  displayer->putch (displayer, '?');
 	  printed_len += 2;
 	  s++;
-#if defined (HANDLE_MULTIBYTE)
+#if defined(HANDLE_MULTIBYTE)
 	  memset (&ps, 0, sizeof (mbstate_t));
 #endif
 	}
       else
 	{
-#if defined (HANDLE_MULTIBYTE)
+#if defined(HANDLE_MULTIBYTE)
 	  tlen = mbrtowc (&wc, s, end - s, &ps);
 	  if (MB_INVALIDCH (tlen))
 	    {
@@ -2721,10 +2666,11 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
   extension_char = 0;
   printed_len = gdb_fnprint (to_print, prefix_bytes, displayer);
 
-#if defined (VISIBLE_STATS)
- if (rl_filename_completion_desired && (rl_visible_stats || _rl_complete_mark_directories))
+#if defined(VISIBLE_STATS)
+  if (rl_filename_completion_desired
+      && (rl_visible_stats || _rl_complete_mark_directories))
 #else
- if (rl_filename_completion_desired && _rl_complete_mark_directories)
+  if (rl_filename_completion_desired && _rl_complete_mark_directories)
 #endif
     {
       /* If to_print != full_pathname, to_print is the basename of the
@@ -2746,9 +2692,9 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
 	  else if (full_pathname[0] != '/')
 	    dn = full_pathname;
 	  else if (full_pathname[1] == 0)
-	    dn = "//";		/* restore trailing slash to `//' */
+	    dn = "//"; /* restore trailing slash to `//' */
 	  else if (full_pathname[1] == '/' && full_pathname[2] == 0)
-	    dn = "/";		/* don't turn /// into // */
+	    dn = "/"; /* don't turn /// into // */
 	  else
 	    dn = full_pathname;
 	  s = tilde_expand (dn);
@@ -2757,7 +2703,7 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
 
 	  slen = strlen (s);
 	  tlen = strlen (to_print);
-	  new_full_pathname = (char *)xmalloc (slen + tlen + 2);
+	  new_full_pathname = (char *) xmalloc (slen + tlen + 2);
 	  strcpy (new_full_pathname, s);
 	  if (s[slen - 1] == '/')
 	    slen--;
@@ -2766,12 +2712,12 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
 	  new_full_pathname[slen] = '/';
 	  strcpy (new_full_pathname + slen + 1, to_print);
 
-#if defined (VISIBLE_STATS)
+#if defined(VISIBLE_STATS)
 	  if (rl_visible_stats)
 	    extension_char = stat_char (new_full_pathname);
 	  else
 #endif
-	  if (gdb_path_isdir (new_full_pathname))
+	    if (gdb_path_isdir (new_full_pathname))
 	    extension_char = '/';
 
 	  xfree (new_full_pathname);
@@ -2780,13 +2726,13 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
       else
 	{
 	  s = tilde_expand (full_pathname);
-#if defined (VISIBLE_STATS)
+#if defined(VISIBLE_STATS)
 	  if (rl_visible_stats)
 	    extension_char = stat_char (s);
 	  else
 #endif
 	    if (gdb_path_isdir (s))
-	      extension_char = '/';
+	    extension_char = '/';
 	}
 
       xfree (s);
@@ -2838,7 +2784,8 @@ gdb_display_match_list_1 (char **matches, int len, int max,
       common_length = temp ? gdb_fnwidth (temp) : gdb_fnwidth (t);
       sind = temp ? strlen (temp) : strlen (t);
 
-      if (common_length > _rl_completion_prefix_display_length && common_length > ELLIPSIS_LEN)
+      if (common_length > _rl_completion_prefix_display_length
+	  && common_length > ELLIPSIS_LEN)
 	max -= common_length - ELLIPSIS_LEN;
       else
 	common_length = sind = 0;
@@ -2869,7 +2816,8 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 
   /* Sort the items if they are not already sorted. */
   if (rl_ignore_completion_duplicates == 0 && rl_sort_completion_matches)
-    qsort (matches + 1, len, sizeof (char *), (QSFUNC *)_rl_qsort_string_compare);
+    qsort (matches + 1, len, sizeof (char *),
+	   (QSFUNC *) _rl_qsort_string_compare);
 
   displayer->crlf (displayer);
 
@@ -2886,8 +2834,8 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 	      else
 		{
 		  temp = gdb_printable_part (matches[l]);
-		  printed_len = gdb_print_filename (temp, matches[l], sind,
-						    displayer);
+		  printed_len
+		    = gdb_print_filename (temp, matches[l], sind, displayer);
 
 		  if (j + 1 < limit)
 		    for (k = 0; k < max - printed_len; k++)
@@ -2897,7 +2845,8 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 	    }
 	  displayer->crlf (displayer);
 	  lines++;
-	  if (page_completions && lines >= (displayer->height - 1) && i < count)
+	  if (page_completions && lines >= (displayer->height - 1)
+	      && i < count)
 	    {
 	      lines = gdb_display_match_list_pager (lines, displayer);
 	      if (lines < 0)
@@ -2913,7 +2862,7 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 	  temp = gdb_printable_part (matches[i]);
 	  printed_len = gdb_print_filename (temp, matches[i], sind, displayer);
 	  /* Have we reached the end of this line? */
-	  if (matches[i+1])
+	  if (matches[i + 1])
 	    {
 	      if (i && (limit > 1) && (i % limit) == 0)
 		{
@@ -2964,8 +2913,8 @@ gdb_display_match_list (char **matches, int len, int max,
 
       displayer->crlf (displayer);
 
-      xsnprintf (msg, sizeof (msg),
-		 "Display all %d possibilities? (y or n)", len);
+      xsnprintf (msg, sizeof (msg), "Display all %d possibilities? (y or n)",
+		 len);
       displayer->puts (displayer, msg);
       displayer->flush (displayer);
 
@@ -2992,13 +2941,16 @@ gdb_display_match_list (char **matches, int len, int max,
 }
 
 void _initialize_completer ();
+
 void
 _initialize_completer ()
 {
   add_setshow_zuinteger_unlimited_cmd ("max-completions", no_class,
-				       &max_completions, _("\
-Set maximum number of completion candidates."), _("\
-Show maximum number of completion candidates."), _("\
+				       &max_completions, _ ("\
+Set maximum number of completion candidates."),
+				       _ ("\
+Show maximum number of completion candidates."),
+				       _ ("\
 Use this to limit the number of candidates considered\n\
 during completion.  Specifying \"unlimited\" or -1\n\
 disables limiting.  Note that setting either no limit or\n\

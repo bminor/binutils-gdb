@@ -20,7 +20,7 @@
 #include "gdbsupport/def-vector.h"
 
 compiled_regex::compiled_regex (const char *regex, int cflags,
-				const char *message)
+                                const char *message)
 {
   gdb_assert (regex != NULL);
   gdb_assert (message != NULL);
@@ -42,16 +42,15 @@ compiled_regex::~compiled_regex ()
 }
 
 int
-compiled_regex::exec (const char *string, size_t nmatch,
-		      regmatch_t pmatch[], int eflags) const
+compiled_regex::exec (const char *string, size_t nmatch, regmatch_t pmatch[],
+                      int eflags) const
 {
   return regexec (&m_pattern, string, nmatch, pmatch, eflags);
 }
 
 int
-compiled_regex::search (const char *string,
-			int length, int start, int range,
-			struct re_registers *regs)
+compiled_regex::search (const char *string, int length, int start, int range,
+                        struct re_registers *regs)
 {
   return re_search (&m_pattern, string, length, start, range, regs);
 }

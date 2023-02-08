@@ -23,19 +23,16 @@
 #define TUI_TUI_DATA_H
 
 #include "tui/tui.h"
-#include "gdb_curses.h"	/* For WINDOW.  */
+#include "gdb_curses.h" /* For WINDOW.  */
 #include "observable.h"
 
 /* A deleter that calls delwin.  */
 struct curses_deleter
 {
-  void operator() (WINDOW *win) const
-  {
-    delwin (win);
-  }
+  void operator() (WINDOW *win) const { delwin (win); }
 };
 
-#define MIN_WIN_HEIGHT          3
+#define MIN_WIN_HEIGHT 3
 
 /* Generic window information.  */
 struct tui_win_info
@@ -52,6 +49,7 @@ protected:
   virtual void make_window ();
 
 public:
+
   tui_win_info (tui_win_info &&) = default;
   virtual ~tui_win_info () = default;
 
@@ -68,42 +66,26 @@ public:
   virtual int max_height () const;
 
   /* Compute the minimum height of this window.  */
-  virtual int min_height () const
-  {
-    return MIN_WIN_HEIGHT;
-  }
+  virtual int min_height () const { return MIN_WIN_HEIGHT; }
 
   /* Compute the maximum width of this window.  */
   int max_width () const;
 
   /* Compute the minimum width of this window.  */
-  int min_width () const
-  {
-    return 3;
-  }
+  int min_width () const { return 3; }
 
   /* Return true if this window can be boxed.  */
-  virtual bool can_box () const
-  {
-    return true;
-  }
+  virtual bool can_box () const { return true; }
 
   /* Resize this window.  The parameters are used to set the window's
      size and position.  */
-  virtual void resize (int height, int width,
-		       int origin_x, int origin_y);
+  virtual void resize (int height, int width, int origin_x, int origin_y);
 
   /* Return true if this window is visible.  */
-  bool is_visible () const
-  {
-    return handle != nullptr && tui_active;
-  }
+  bool is_visible () const { return handle != nullptr && tui_active; }
 
   /* Return true if this window can accept the focus.  */
-  virtual bool can_focus () const
-  {
-    return true;
-  }
+  virtual bool can_focus () const { return true; }
 
   /* Disable output until the next call to doupdate.  */
   void no_refresh ()
@@ -113,15 +95,10 @@ public:
   }
 
   /* Called after the tab width has been changed.  */
-  virtual void update_tab_width ()
-  {
-  }
+  virtual void update_tab_width () {}
 
   /* Set whether this window is highlighted.  */
-  void set_highlight (bool highlight)
-  {
-    is_highlighted = highlight;
-  }
+  void set_highlight (bool highlight) { is_highlighted = highlight; }
 
   /* Methods to scroll the contents of this window.  Note that they
      are named with "_scroll" coming at the end because the more
@@ -132,17 +109,12 @@ public:
   void right_scroll (int num_to_scroll);
 
   /* Return true if this window can be scrolled, false otherwise.  */
-  virtual bool can_scroll () const
-  {
-    return true;
-  }
+  virtual bool can_scroll () const { return true; }
 
   /* Called for each mouse click inside this window.  Coordinates MOUSE_X
      and MOUSE_Y are 0-based relative to the window, and MOUSE_BUTTON can
      be 1 (left), 2 (middle), or 3 (right).  */
-  virtual void click (int mouse_x, int mouse_y, int mouse_button)
-  {
-  }
+  virtual void click (int mouse_x, int mouse_y, int mouse_button) {}
 
   void check_and_display_highlight_if_needed ();
 
@@ -174,20 +146,20 @@ protected:
 };
 
 /* Constant definitions.  */
-#define SRC_NAME                "src"
-#define CMD_NAME                "cmd"
-#define DATA_NAME               "regs"
-#define DISASSEM_NAME           "asm"
-#define STATUS_NAME		"status"
+#define SRC_NAME "src"
+#define CMD_NAME "cmd"
+#define DATA_NAME "regs"
+#define DISASSEM_NAME "asm"
+#define STATUS_NAME "status"
 
 /* Global Data.  */
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
-#define TUI_SRC_WIN     ((tui_source_window *) tui_win_list[SRC_WIN])
-#define TUI_DISASM_WIN	((tui_disasm_window *) tui_win_list[DISASSEM_WIN])
-#define TUI_DATA_WIN    ((tui_data_window *) tui_win_list[DATA_WIN])
-#define TUI_CMD_WIN     ((tui_cmd_window *) tui_win_list[CMD_WIN])
-#define TUI_STATUS_WIN  ((tui_locator_window *) tui_win_list[STATUS_WIN])
+#define TUI_SRC_WIN ((tui_source_window *) tui_win_list[SRC_WIN])
+#define TUI_DISASM_WIN ((tui_disasm_window *) tui_win_list[DISASSEM_WIN])
+#define TUI_DATA_WIN ((tui_data_window *) tui_win_list[DATA_WIN])
+#define TUI_CMD_WIN ((tui_cmd_window *) tui_win_list[CMD_WIN])
+#define TUI_STATUS_WIN ((tui_locator_window *) tui_win_list[STATUS_WIN])
 
 /* All the windows that are currently instantiated, in layout
    order.  */

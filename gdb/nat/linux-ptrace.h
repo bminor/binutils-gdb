@@ -40,61 +40,61 @@ struct buffer;
 #endif
 
 #ifndef PTRACE_GETSIGINFO
-# define PTRACE_GETSIGINFO 0x4202
-# define PTRACE_SETSIGINFO 0x4203
+#define PTRACE_GETSIGINFO 0x4202
+#define PTRACE_SETSIGINFO 0x4203
 #endif /* PTRACE_GETSIGINF */
 
 #ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET	0x4204
+#define PTRACE_GETREGSET 0x4204
 #endif
 
 #ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET	0x4205
+#define PTRACE_SETREGSET 0x4205
 #endif
 
 /* If the system headers did not provide the constants, hard-code the normal
    values.  */
 #ifndef PTRACE_EVENT_FORK
 
-#define PTRACE_SETOPTIONS	0x4200
-#define PTRACE_GETEVENTMSG	0x4201
+#define PTRACE_SETOPTIONS 0x4200
+#define PTRACE_GETEVENTMSG 0x4201
 
 /* options set using PTRACE_SETOPTIONS */
-#define PTRACE_O_TRACESYSGOOD	0x00000001
-#define PTRACE_O_TRACEFORK	0x00000002
-#define PTRACE_O_TRACEVFORK	0x00000004
-#define PTRACE_O_TRACECLONE	0x00000008
-#define PTRACE_O_TRACEEXEC	0x00000010
-#define PTRACE_O_TRACEVFORKDONE	0x00000020
-#define PTRACE_O_TRACEEXIT	0x00000040
+#define PTRACE_O_TRACESYSGOOD 0x00000001
+#define PTRACE_O_TRACEFORK 0x00000002
+#define PTRACE_O_TRACEVFORK 0x00000004
+#define PTRACE_O_TRACECLONE 0x00000008
+#define PTRACE_O_TRACEEXEC 0x00000010
+#define PTRACE_O_TRACEVFORKDONE 0x00000020
+#define PTRACE_O_TRACEEXIT 0x00000040
 
 /* Wait extended result codes for the above trace options.  */
-#define PTRACE_EVENT_FORK	1
-#define PTRACE_EVENT_VFORK	2
-#define PTRACE_EVENT_CLONE	3
-#define PTRACE_EVENT_EXEC	4
-#define PTRACE_EVENT_VFORK_DONE	5
-#define PTRACE_EVENT_EXIT	6
+#define PTRACE_EVENT_FORK 1
+#define PTRACE_EVENT_VFORK 2
+#define PTRACE_EVENT_CLONE 3
+#define PTRACE_EVENT_EXEC 4
+#define PTRACE_EVENT_VFORK_DONE 5
+#define PTRACE_EVENT_EXIT 6
 
 #endif /* PTRACE_EVENT_FORK */
 
 #ifndef PTRACE_O_EXITKILL
 /* Only defined in Linux Kernel 3.8 or later.  */
-#define PTRACE_O_EXITKILL	0x00100000
+#define PTRACE_O_EXITKILL 0x00100000
 #endif
 
 #if (defined __bfin__ || defined __frv__ || defined __sh__) \
-    && !defined PTRACE_GETFDPIC
-#define PTRACE_GETFDPIC		31
-#define PTRACE_GETFDPIC_EXEC	0
-#define PTRACE_GETFDPIC_INTERP	1
+  && !defined PTRACE_GETFDPIC
+#define PTRACE_GETFDPIC 31
+#define PTRACE_GETFDPIC_EXEC 0
+#define PTRACE_GETFDPIC_INTERP 1
 #endif
 
 /* We can't always assume that this flag is available, but all systems
    with the ptrace event handlers also have __WALL, so it's safe to use
    in some contexts.  */
 #ifndef __WALL
-#define __WALL          0x40000000 /* Wait for any child.  */
+#define __WALL 0x40000000 /* Wait for any child.  */
 #endif
 
 /* True if whether a breakpoint/watchpoint triggered can be determined
@@ -159,21 +159,21 @@ struct buffer;
    The generic Linux target code should use GDB_ARCH_IS_TRAP_* instead
    of TRAP_* to abstract out these peculiarities.  */
 #if defined __i386__ || defined __x86_64__
-# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL)
-# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
+#define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL)
+#define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
 #elif defined __powerpc__
-# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
-# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
+#define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
+#define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
 #elif defined __mips__
-# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
-# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL || (X) == TRAP_HWBKPT)
+#define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
+#define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL || (X) == TRAP_HWBKPT)
 #else
-# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
-# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
+#define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
+#define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
 #endif
 
 #ifndef TRAP_HWBKPT
-# define TRAP_HWBKPT 4
+#define TRAP_HWBKPT 4
 #endif
 
 extern std::string linux_ptrace_attach_fail_reason (pid_t pid);
@@ -181,7 +181,8 @@ extern std::string linux_ptrace_attach_fail_reason (pid_t pid);
 /* Find all possible reasons we could have failed to attach to PTID
    and return them as a string.  ERR is the error PTRACE_ATTACH failed
    with (an errno).  */
-extern std::string linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
+extern std::string linux_ptrace_attach_fail_reason_string (ptid_t ptid,
+							   int err);
 
 extern void linux_ptrace_init_warnings (void);
 extern void linux_check_ptrace_features (void);

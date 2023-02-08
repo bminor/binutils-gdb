@@ -24,7 +24,8 @@
    it's sufficient to pass only the register set here.  This, together with
    the ABI known at IPA compile time, maps to a tdesc.  */
 
-enum s390_linux_tdesc {
+enum s390_linux_tdesc
+{
   S390_TDESC_32,
   S390_TDESC_32V1,
   S390_TDESC_32V2,

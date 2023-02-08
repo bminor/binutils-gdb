@@ -24,16 +24,18 @@
 #include "gdbtypes.h"
 #include "arch-utils.h"
 
-namespace selftests {
-namespace unpack {
+namespace selftests
+{
+namespace unpack
+{
 
 static void
 unpack_field_as_long_tests (struct gdbarch *arch)
 {
   gdb_byte buffer[8];
   const struct builtin_type *bt = builtin_type (arch);
-  struct type *struct_type = arch_composite_type (arch, "<<selftest>>",
-						  TYPE_CODE_STRUCT);
+  struct type *struct_type
+    = arch_composite_type (arch, "<<selftest>>", TYPE_CODE_STRUCT);
 
   append_composite_type_field (struct_type, "field0", bt->builtin_int8);
   append_composite_type_field_aligned (struct_type, "field1",
@@ -50,13 +52,14 @@ unpack_field_as_long_tests (struct gdbarch *arch)
   SELF_CHECK (unpack_field_as_long (struct_type, buffer, 1) == 23);
 }
 
-}
-}
+} // namespace unpack
+} // namespace selftests
 
 void _initialize_unpack_selftests ();
+
 void
 _initialize_unpack_selftests ()
 {
-  selftests::register_test_foreach_arch
-    ("unpack_field_as_long", selftests::unpack::unpack_field_as_long_tests);
+  selftests::register_test_foreach_arch (
+    "unpack_field_as_long", selftests::unpack::unpack_field_as_long_tests);
 }

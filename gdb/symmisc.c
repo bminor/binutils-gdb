@@ -46,7 +46,6 @@ static int block_depth (const struct block *);
 
 static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			  int depth, ui_file *outfile);
-
 
 void
 print_objfile_statistics (void)
@@ -57,18 +56,18 @@ print_objfile_statistics (void)
     for (objfile *objfile : pspace->objfiles ())
       {
 	QUIT;
-	gdb_printf (_("Statistics for '%s':\n"), objfile_name (objfile));
+	gdb_printf (_ ("Statistics for '%s':\n"), objfile_name (objfile));
 	if (OBJSTAT (objfile, n_stabs) > 0)
-	  gdb_printf (_("  Number of \"stab\" symbols read: %d\n"),
+	  gdb_printf (_ ("  Number of \"stab\" symbols read: %d\n"),
 		      OBJSTAT (objfile, n_stabs));
 	if (objfile->per_bfd->n_minsyms > 0)
-	  gdb_printf (_("  Number of \"minimal\" symbols read: %d\n"),
+	  gdb_printf (_ ("  Number of \"minimal\" symbols read: %d\n"),
 		      objfile->per_bfd->n_minsyms);
 	if (OBJSTAT (objfile, n_syms) > 0)
-	  gdb_printf (_("  Number of \"full\" symbols read: %d\n"),
+	  gdb_printf (_ ("  Number of \"full\" symbols read: %d\n"),
 		      OBJSTAT (objfile, n_syms));
 	if (OBJSTAT (objfile, n_types) > 0)
-	  gdb_printf (_("  Number of \"types\" defined: %d\n"),
+	  gdb_printf (_ ("  Number of \"types\" defined: %d\n"),
 		      OBJSTAT (objfile, n_types));
 
 	i = linetables = 0;
@@ -83,27 +82,27 @@ print_objfile_statistics (void)
 	  }
 	blockvectors = std::distance (objfile->compunits ().begin (),
 				      objfile->compunits ().end ());
-	gdb_printf (_("  Number of symbol tables: %d\n"), i);
-	gdb_printf (_("  Number of symbol tables with line tables: %d\n"),
+	gdb_printf (_ ("  Number of symbol tables: %d\n"), i);
+	gdb_printf (_ ("  Number of symbol tables with line tables: %d\n"),
 		    linetables);
-	gdb_printf (_("  Number of symbol tables with blockvectors: %d\n"),
+	gdb_printf (_ ("  Number of symbol tables with blockvectors: %d\n"),
 		    blockvectors);
 
 	objfile->print_stats (false);
 
 	if (OBJSTAT (objfile, sz_strtab) > 0)
-	  gdb_printf (_("  Space used by string tables: %d\n"),
+	  gdb_printf (_ ("  Space used by string tables: %d\n"),
 		      OBJSTAT (objfile, sz_strtab));
-	gdb_printf (_("  Total memory used for objfile obstack: %s\n"),
-		    pulongest (obstack_memory_used (&objfile
-						    ->objfile_obstack)));
-	gdb_printf (_("  Total memory used for BFD obstack: %s\n"),
-		    pulongest (obstack_memory_used (&objfile->per_bfd
-						    ->storage_obstack)));
+	gdb_printf (
+	  _ ("  Total memory used for objfile obstack: %s\n"),
+	  pulongest (obstack_memory_used (&objfile->objfile_obstack)));
+	gdb_printf (_ ("  Total memory used for BFD obstack: %s\n"),
+		    pulongest (obstack_memory_used (
+		      &objfile->per_bfd->storage_obstack)));
 
-	gdb_printf (_("  Total memory used for string cache: %d\n"),
+	gdb_printf (_ ("  Total memory used for string cache: %d\n"),
 		    objfile->per_bfd->string_cache.memory_used ());
-	gdb_printf (_("Byte cache statistics for '%s':\n"),
+	gdb_printf (_ ("Byte cache statistics for '%s':\n"),
 		    objfile_name (objfile));
 	objfile->per_bfd->string_cache.print_statistics ("string cache");
 	objfile->print_stats (true);
@@ -128,8 +127,7 @@ dump_objfile (struct objfile *objfile)
 	{
 	  for (symtab *symtab : cu->filetabs ())
 	    {
-	      gdb_printf ("%s at %s",
-			  symtab_to_filename_for_display (symtab),
+	      gdb_printf ("%s at %s", symtab_to_filename_for_display (symtab),
 			  host_address_to_string (symtab));
 	      if (symtab->compunit ()->objfile () != objfile)
 		gdb_printf (", NOT ON CHAIN!");
@@ -225,7 +223,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
     }
   if (objfile->per_bfd->minimal_symbol_count != index)
     {
-      warning (_("internal error:  minimal symbol count %d != %d"),
+      warning (_ ("internal error:  minimal symbol count %d != %d"),
 	       objfile->per_bfd->minimal_symbol_count, index);
     }
   gdb_printf (outfile, "\n");
@@ -249,10 +247,8 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
     gdb_printf (outfile, "Compilation directory is %s\n",
 		symtab->compunit ()->dirname ());
   gdb_printf (outfile, "Read from object file %s (%s)\n",
-	      objfile_name (objfile),
-	      host_address_to_string (objfile));
-  gdb_printf (outfile, "Language: %s\n",
-	      language_str (symtab->language ()));
+	      objfile_name (objfile), host_address_to_string (objfile));
+  gdb_printf (outfile, "Language: %s\n", language_str (symtab->language ()));
 
   /* First print the line table.  */
   l = symtab->linetable ();
@@ -279,8 +275,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	{
 	  const block *b = bv->block (i);
 	  depth = block_depth (b) * 2;
-	  gdb_printf (outfile, "%*sblock #%03d, object at %s",
-		      depth, "", i,
+	  gdb_printf (outfile, "%*sblock #%03d, object at %s", depth, "", i,
 		      host_address_to_string (b));
 	  if (b->superblock ())
 	    gdb_printf (outfile, " under %s",
@@ -328,8 +323,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
       const char *compunit_filename
 	= symtab_to_filename_for_display (compunit->primary_filetab ());
 
-      gdb_printf (outfile,
-		  "\nBlockvector same as owning compunit: %s\n\n",
+      gdb_printf (outfile, "\nBlockvector same as owning compunit: %s\n\n",
 		  compunit_filename);
     }
 
@@ -346,7 +340,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  gdb_printf (outfile, "Compunit user: %s\n", addr);
 	}
       if (cust->includes != nullptr)
-	for (int i = 0; ; ++i)
+	for (int i = 0;; ++i)
 	  {
 	    struct compunit_symtab *include = cust->includes[i];
 	    if (include == nullptr)
@@ -392,19 +386,19 @@ maintenance_print_symbols (const char *args, int from_tty)
       if (strcmp (argv[i], "-pc") == 0)
 	{
 	  if (argv[i + 1] == NULL)
-	    error (_("Missing pc value"));
+	    error (_ ("Missing pc value"));
 	  address_arg = argv[++i];
 	}
       else if (strcmp (argv[i], "-source") == 0)
 	{
 	  if (argv[i + 1] == NULL)
-	    error (_("Missing source file"));
+	    error (_ ("Missing source file"));
 	  source_arg = argv[++i];
 	}
       else if (strcmp (argv[i], "-objfile") == 0)
 	{
 	  if (argv[i + 1] == NULL)
-	    error (_("Missing objfile name"));
+	    error (_ ("Missing objfile name"));
 	  objfile_arg = argv[++i];
 	}
       else if (strcmp (argv[i], "--") == 0)
@@ -416,7 +410,7 @@ maintenance_print_symbols (const char *args, int from_tty)
       else if (argv[i][0] == '-')
 	{
 	  /* Future proofing: Don't allow OUTFILE to begin with "-".  */
-	  error (_("Unknown option: %s"), argv[i]);
+	  error (_ ("Unknown option: %s"), argv[i]);
 	}
       else
 	break;
@@ -424,16 +418,16 @@ maintenance_print_symbols (const char *args, int from_tty)
   outfile_idx = i;
 
   if (address_arg != NULL && source_arg != NULL)
-    error (_("Must specify at most one of -pc and -source"));
+    error (_ ("Must specify at most one of -pc and -source"));
 
   stdio_file arg_outfile;
 
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
       if (argv[outfile_idx + 1] != NULL)
-	error (_("Junk at end of command"));
-      gdb::unique_xmalloc_ptr<char> outfile_name
-	(tilde_expand (argv[outfile_idx]));
+	error (_ ("Junk at end of command"));
+      gdb::unique_xmalloc_ptr<char> outfile_name (
+	tilde_expand (argv[outfile_idx]));
       if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
 	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
@@ -445,7 +439,7 @@ maintenance_print_symbols (const char *args, int from_tty)
       struct symtab *s = find_pc_line_symtab (pc);
 
       if (s == NULL)
-	error (_("No symtab for address: %s"), address_arg);
+	error (_ ("No symtab for address: %s"), address_arg);
       dump_symtab (s, outfile);
     }
   else
@@ -472,28 +466,26 @@ maintenance_print_symbols (const char *args, int from_tty)
 		  QUIT;
 		  if (source_arg != NULL)
 		    {
-		      print_for_source
-			= compare_filenames_for_search
-			(symtab_to_filename_for_display (s), source_arg);
+		      print_for_source = compare_filenames_for_search (
+			symtab_to_filename_for_display (s), source_arg);
 		      found = 1;
 		    }
-		  if (source_arg == NULL
-		      || print_for_source)
+		  if (source_arg == NULL || print_for_source)
 		    dump_symtab (s, outfile);
 		}
 	    }
 	}
 
       if (source_arg != NULL && !found)
-	error (_("No symtab for source file: %s"), source_arg);
+	error (_ ("No symtab for source file: %s"), source_arg);
     }
 }
 
 /* Print symbol SYMBOL on OUTFILE.  DEPTH says how far to indent.  */
 
 static void
-print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
-	      int depth, ui_file *outfile)
+print_symbol (struct gdbarch *gdbarch, struct symbol *symbol, int depth,
+	      ui_file *outfile)
 {
   struct obj_section *section;
 
@@ -506,8 +498,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
   if (symbol->domain () == LABEL_DOMAIN)
     {
       gdb_printf (outfile, "label %s at ", symbol->print_name ());
-      gdb_puts (paddress (gdbarch, symbol->value_address ()),
-		outfile);
+      gdb_puts (paddress (gdbarch, symbol->value_address ()), outfile);
       if (section)
 	gdb_printf (outfile, " section %s\n",
 		    bfd_section_name (section->the_bfd_section));
@@ -527,9 +518,10 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	{
 	  gdb_printf (outfile, "%s %s = ",
 		      (symbol->type ()->code () == TYPE_CODE_ENUM
-		       ? "enum"
-		       : (symbol->type ()->code () == TYPE_CODE_STRUCT
-			  ? "struct" : "union")),
+			 ? "enum"
+			 : (symbol->type ()->code () == TYPE_CODE_STRUCT
+			      ? "struct"
+			      : "union")),
 		      symbol->linkage_name ());
 	  current_language->print_type (symbol->type (), "", outfile, 1, depth,
 					&type_print_raw_options);
@@ -545,9 +537,9 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	  /* Print details of types, except for enums where it's clutter.  */
 	  current_language->print_type (symbol->type (), symbol->print_name (),
 					outfile,
-					symbol->type ()->code () != TYPE_CODE_ENUM,
-					depth,
-					&type_print_raw_options);
+					symbol->type ()->code ()
+					  != TYPE_CODE_ENUM,
+					depth, &type_print_raw_options);
 	  gdb_printf (outfile, "; ");
 	}
       else
@@ -566,8 +558,8 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	    unsigned i;
 	    struct type *type = check_typedef (symbol->type ());
 
-	    gdb_printf (outfile, "const %s hex bytes:",
-			pulongest (type->length ()));
+	    gdb_printf (outfile,
+			"const %s hex bytes:", pulongest (type->length ()));
 	    for (i = 0; i < type->length (); i++)
 	      gdb_printf (outfile, " %02x",
 			  (unsigned) symbol->value_bytes ()[i]);
@@ -623,11 +615,10 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	  break;
 
 	case LOC_BLOCK:
-	  gdb_printf
-	    (outfile, "block object %s, %s..%s",
-	     host_address_to_string (symbol->value_block ()),
-	     paddress (gdbarch, symbol->value_block()->start ()),
-	     paddress (gdbarch, symbol->value_block()->end ()));
+	  gdb_printf (outfile, "block object %s, %s..%s",
+		      host_address_to_string (symbol->value_block ()),
+		      paddress (gdbarch, symbol->value_block ()->start ()),
+		      paddress (gdbarch, symbol->value_block ()->end ()));
 	  if (section)
 	    gdb_printf (outfile, " section %s",
 			bfd_section_name (section->the_bfd_section));
@@ -646,8 +637,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	  break;
 
 	default:
-	  gdb_printf (outfile, "botched symbol class %x",
-		      symbol->aclass ());
+	  gdb_printf (outfile, "botched symbol class %x", symbol->aclass ());
 	  break;
 	}
     }
@@ -670,7 +660,7 @@ maintenance_print_msymbols (const char *args, int from_tty)
       if (strcmp (argv[i], "-objfile") == 0)
 	{
 	  if (argv[i + 1] == NULL)
-	    error (_("Missing objfile name"));
+	    error (_ ("Missing objfile name"));
 	  objfile_arg = argv[++i];
 	}
       else if (strcmp (argv[i], "--") == 0)
@@ -682,7 +672,7 @@ maintenance_print_msymbols (const char *args, int from_tty)
       else if (argv[i][0] == '-')
 	{
 	  /* Future proofing: Don't allow OUTFILE to begin with "-".  */
-	  error (_("Unknown option: %s"), argv[i]);
+	  error (_ ("Unknown option: %s"), argv[i]);
 	}
       else
 	break;
@@ -694,9 +684,9 @@ maintenance_print_msymbols (const char *args, int from_tty)
   if (argv != NULL && argv[outfile_idx] != NULL)
     {
       if (argv[outfile_idx + 1] != NULL)
-	error (_("Junk at end of command"));
-      gdb::unique_xmalloc_ptr<char> outfile_name
-	(tilde_expand (argv[outfile_idx]));
+	error (_ ("Junk at end of command"));
+      gdb::unique_xmalloc_ptr<char> outfile_name (
+	tilde_expand (argv[outfile_idx]));
       if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
 	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
@@ -706,7 +696,8 @@ maintenance_print_msymbols (const char *args, int from_tty)
     {
       QUIT;
       if (objfile_arg == NULL
-	  || compare_filenames_for_search (objfile_name (objfile), objfile_arg))
+	  || compare_filenames_for_search (objfile_name (objfile),
+					   objfile_arg))
 	dump_msymbols (objfile, outfile);
     }
 }
@@ -723,8 +714,7 @@ maintenance_print_objfiles (const char *regexp, int from_tty)
     for (objfile *objfile : pspace->objfiles ())
       {
 	QUIT;
-	if (! regexp
-	    || re_exec (objfile_name (objfile)))
+	if (!regexp || re_exec (objfile_name (objfile)))
 	  dump_objfile (objfile);
       }
 }
@@ -754,10 +744,10 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 	      {
 		QUIT;
 
-		if (! regexp
+		if (!regexp
 		    || re_exec (symtab_to_filename_for_display (symtab)))
 		  {
-		    if (! printed_objfile_start)
+		    if (!printed_objfile_start)
 		      {
 			gdb_printf ("{ objfile %s ", objfile_name (objfile));
 			gdb_stdout->wrap_here (2);
@@ -765,7 +755,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 				    host_address_to_string (objfile));
 			printed_objfile_start = 1;
 		      }
-		    if (! printed_compunit_symtab_start)
+		    if (!printed_compunit_symtab_start)
 		      {
 			gdb_printf ("  { ((struct compunit_symtab *) %s)\n",
 				    host_address_to_string (cust));
@@ -773,24 +763,26 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 				    cust->debugformat ());
 			gdb_printf ("    producer %s\n",
 				    (cust->producer () != nullptr
-				     ? cust->producer () : "(null)"));
+				       ? cust->producer ()
+				       : "(null)"));
 			gdb_printf ("    name %s\n", cust->name);
 			gdb_printf ("    dirname %s\n",
 				    (cust->dirname () != NULL
-				     ? cust->dirname () : "(null)"));
-			gdb_printf ("    blockvector"
-				    " ((struct blockvector *) %s)\n",
-				    host_address_to_string
-				    (cust->blockvector ()));
+				       ? cust->dirname ()
+				       : "(null)"));
+			gdb_printf (
+			  "    blockvector"
+			  " ((struct blockvector *) %s)\n",
+			  host_address_to_string (cust->blockvector ()));
 			gdb_printf ("    user"
 				    " ((struct compunit_symtab *) %s)\n",
 				    cust->user != nullptr
-				    ? host_address_to_string (cust->user)
-				    : "(null)");
+				      ? host_address_to_string (cust->user)
+				      : "(null)");
 			if (cust->includes != nullptr)
 			  {
 			    gdb_printf ("    ( includes\n");
-			    for (int i = 0; ; ++i)
+			    for (int i = 0;; ++i)
 			      {
 				struct compunit_symtab *include
 				  = cust->includes[i];
@@ -812,14 +804,12 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 		    gdb_stdout->wrap_here (4);
 		    gdb_printf ("((struct symtab *) %s)\n",
 				host_address_to_string (symtab));
-		    gdb_printf ("\t  fullname %s\n",
-				symtab->fullname != NULL
-				? symtab->fullname
-				: "(null)");
+		    gdb_printf ("\t  fullname %s\n", symtab->fullname != NULL
+						       ? symtab->fullname
+						       : "(null)");
 		    gdb_printf ("\t  "
 				"linetable ((struct linetable *) %s)\n",
-				host_address_to_string
-				(symtab->linetable ()));
+				host_address_to_string (symtab->linetable ()));
 		    gdb_printf ("\t}\n");
 		  }
 	      }
@@ -864,7 +854,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 
 	    if (found_something)
 	      {
-		if (! printed_objfile_start)
+		if (!printed_objfile_start)
 		  {
 		    gdb_printf ("{ objfile %s ", objfile_name (objfile));
 		    gdb_stdout->wrap_here (2);
@@ -902,7 +892,7 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 	{
 	  regexp = argv[0];
 	  if (argv[1] != NULL)
-	    error (_("Extra arguments after regexp."));
+	    error (_ ("Extra arguments after regexp."));
 	}
     }
 
@@ -911,21 +901,14 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 
   for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
-      objfile->expand_symtabs_matching
-	([&] (const char *filename, bool basenames)
-	 {
-	   /* KISS: Only apply the regexp to the complete file name.  */
-	   return (!basenames
-		   && (regexp == NULL || re_exec (filename)));
-	 },
-	 NULL,
-	 NULL,
-	 NULL,
-	 SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-	 UNDEF_DOMAIN,
-	 ALL_DOMAIN);
+      objfile->expand_symtabs_matching (
+	[&] (const char *filename, bool basenames) {
+	/* KISS: Only apply the regexp to the complete file name.  */
+	return (!basenames && (regexp == NULL || re_exec (filename)));
+	},
+	NULL, NULL, NULL, SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+	UNDEF_DOMAIN, ALL_DOMAIN);
 }
-
 
 /* Return the nexting depth of a block within other blocks in its symtab.  */
 
@@ -940,7 +923,6 @@ block_depth (const struct block *block)
     }
   return i;
 }
-
 
 /* Used by MAINTENANCE_INFO_LINE_TABLES to print the information about a
    single line table.  */
@@ -952,51 +934,49 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
   struct objfile *objfile;
 
   objfile = symtab->compunit ()->objfile ();
-  gdb_printf (_("objfile: %ps ((struct objfile *) %s)\n"),
-	      styled_string (file_name_style.style (),
-			     objfile_name (objfile)),
+  gdb_printf (_ ("objfile: %ps ((struct objfile *) %s)\n"),
+	      styled_string (file_name_style.style (), objfile_name (objfile)),
 	      host_address_to_string (objfile));
-  gdb_printf (_("compunit_symtab: %s ((struct compunit_symtab *) %s)\n"),
+  gdb_printf (_ ("compunit_symtab: %s ((struct compunit_symtab *) %s)\n"),
 	      symtab->compunit ()->name,
 	      host_address_to_string (symtab->compunit ()));
-  gdb_printf (_("symtab: %ps ((struct symtab *) %s)\n"),
+  gdb_printf (_ ("symtab: %ps ((struct symtab *) %s)\n"),
 	      styled_string (file_name_style.style (),
 			     symtab_to_fullname (symtab)),
 	      host_address_to_string (symtab));
   linetable = symtab->linetable ();
-  gdb_printf (_("linetable: ((struct linetable *) %s):\n"),
+  gdb_printf (_ ("linetable: ((struct linetable *) %s):\n"),
 	      host_address_to_string (linetable));
 
   if (linetable == NULL)
-    gdb_printf (_("No line table.\n"));
+    gdb_printf (_ ("No line table.\n"));
   else if (linetable->nitems <= 0)
-    gdb_printf (_("Line table has no lines.\n"));
+    gdb_printf (_ ("Line table has no lines.\n"));
   else
     {
       /* Leave space for 6 digits of index and line number.  After that the
 	 tables will just not format as well.  */
       struct ui_out *uiout = current_uiout;
       ui_out_emit_table table_emitter (uiout, 5, -1, "line-table");
-      uiout->table_header (6, ui_left, "index", _("INDEX"));
-      uiout->table_header (6, ui_left, "line", _("LINE"));
-      uiout->table_header (18, ui_left, "address", _("ADDRESS"));
-      uiout->table_header (7, ui_left, "is-stmt", _("IS-STMT"));
-      uiout->table_header (12, ui_left, "prologue-end", _("PROLOGUE-END"));
+      uiout->table_header (6, ui_left, "index", _ ("INDEX"));
+      uiout->table_header (6, ui_left, "line", _ ("LINE"));
+      uiout->table_header (18, ui_left, "address", _ ("ADDRESS"));
+      uiout->table_header (7, ui_left, "is-stmt", _ ("IS-STMT"));
+      uiout->table_header (12, ui_left, "prologue-end", _ ("PROLOGUE-END"));
       uiout->table_body ();
 
       for (int i = 0; i < linetable->nitems; ++i)
 	{
 	  struct linetable_entry *item;
 
-	  item = &linetable->item [i];
+	  item = &linetable->item[i];
 	  ui_out_emit_tuple tuple_emitter (uiout, nullptr);
 	  uiout->field_signed ("index", i);
 	  if (item->line > 0)
 	    uiout->field_signed ("line", item->line);
 	  else
-	    uiout->field_string ("line", _("END"));
-	  uiout->field_core_addr ("address", objfile->arch (),
-				  item->pc);
+	    uiout->field_string ("line", _ ("END"));
+	  uiout->field_core_addr ("address", objfile->arch (), item->pc);
 	  uiout->field_string ("is-stmt", item->is_stmt ? "Y" : "");
 	  uiout->field_string ("prologue-end", item->prologue_end ? "Y" : "");
 	  uiout->text ("\n");
@@ -1036,15 +1016,14 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
       }
 }
 
-
-
 /* Do early runtime initializations.  */
 
 void _initialize_symmisc ();
+
 void
 _initialize_symmisc ()
 {
-  add_cmd ("symbols", class_maintenance, maintenance_print_symbols, _("\
+  add_cmd ("symbols", class_maintenance, maintenance_print_symbols, _ ("\
 Print dump of current symbol definitions.\n\
 Usage: mt print symbols [-pc ADDRESS] [--] [OUTFILE]\n\
        mt print symbols [-objfile OBJFILE] [-source SOURCE] [--] [OUTFILE]\n\
@@ -1055,7 +1034,7 @@ If SOURCE is provided, dump only that file's symbols.\n\
 If OBJFILE is provided, dump only that file's minimal symbols."),
 	   &maintenanceprintlist);
 
-  add_cmd ("msymbols", class_maintenance, maintenance_print_msymbols, _("\
+  add_cmd ("msymbols", class_maintenance, maintenance_print_msymbols, _ ("\
 Print dump of current minimal symbol definitions.\n\
 Usage: mt print msymbols [-objfile OBJFILE] [--] [OUTFILE]\n\
 Entries in the minimal symbol table are dumped to file OUTFILE,\n\
@@ -1064,30 +1043,29 @@ If OBJFILE is provided, dump only that file's minimal symbols."),
 	   &maintenanceprintlist);
 
   add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
-	   _("Print dump of current object file definitions.\n\
+	   _ ("Print dump of current object file definitions.\n\
 With an argument REGEXP, list the object files with matching names."),
 	   &maintenanceprintlist);
 
-  add_cmd ("symtabs", class_maintenance, maintenance_info_symtabs, _("\
+  add_cmd ("symtabs", class_maintenance, maintenance_info_symtabs, _ ("\
 List the full symbol tables for all object files.\n\
 This does not include information about individual symbols, blocks, or\n\
 linetables --- just the symbol table structures themselves.\n\
 With an argument REGEXP, list the symbol tables with matching names."),
 	   &maintenanceinfolist);
 
-  add_cmd ("line-table", class_maintenance, maintenance_info_line_tables, _("\
+  add_cmd ("line-table", class_maintenance, maintenance_info_line_tables, _ ("\
 List the contents of all line tables, from all symbol tables.\n\
 With an argument REGEXP, list just the line tables for the symbol\n\
 tables with matching names."),
 	   &maintenanceinfolist);
 
-  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
-	   _("\
+  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs, _ ("\
 Check consistency of currently expanded symtabs."),
 	   &maintenancelist);
 
   add_cmd ("expand-symtabs", class_maintenance, maintenance_expand_symtabs,
-	   _("Expand symbol tables.\n\
+	   _ ("Expand symbol tables.\n\
 With an argument REGEXP, only expand the symbol tables with matching names."),
 	   &maintenancelist);
 }

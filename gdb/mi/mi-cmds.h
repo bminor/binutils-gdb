@@ -26,10 +26,11 @@
 #include "gdbsupport/gdb_optional.h"
 #include "mi/mi-main.h"
 
-enum print_values {
-   PRINT_NO_VALUES,
-   PRINT_ALL_VALUES,
-   PRINT_SIMPLE_VALUES
+enum print_values
+{
+  PRINT_NO_VALUES,
+  PRINT_ALL_VALUES,
+  PRINT_SIMPLE_VALUES
 };
 
 typedef void (mi_cmd_argv_ftype) (const char *command, char **argv, int argc);
@@ -158,8 +159,7 @@ struct mi_command
   /* Return the name of this command.  This is the command that the user
      will actually type in, without any arguments, and without the leading
      dash.  */
-  const char *name () const
-  { return m_name; }
+  const char *name () const { return m_name; }
 
   /* Execute the MI command.  this needs to be overridden in each
      base class.  PARSE is the parsed command line from the user.
@@ -174,7 +174,8 @@ struct mi_command
        user context, then it should not emit change notifications.  Therefore if
        command does not suppress user context change notifications, then it should
        preserve the context.  */
-    return m_suppress_notification != &mi_suppress_notification.user_selected_context;
+    return m_suppress_notification
+	   != &mi_suppress_notification.user_selected_context;
   }
 
   /* If this command was created with a suppress notifications pointer,
@@ -222,8 +223,7 @@ extern bool remove_mi_cmd_entry (const std::string &name);
 /* Call CALLBACK for each registered MI command.  Remove commands for which
    CALLBACK returns true.  */
 
-using remove_mi_cmd_entries_ftype
-  = gdb::function_view<bool (mi_command *)>;
+using remove_mi_cmd_entries_ftype = gdb::function_view<bool (mi_command *)>;
 extern void remove_mi_cmd_entries (remove_mi_cmd_entries_ftype callback);
 
 #endif /* MI_MI_CMDS_H */

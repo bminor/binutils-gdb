@@ -46,8 +46,8 @@ extern void exec_on_vfork (inferior *vfork_child);
    otherwise.  */
 
 extern enum target_xfer_status
-  exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
-			       ULONGEST len, ULONGEST *xfered_len);
+exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
+			     ULONGEST *xfered_len);
 
 /* Read or write from mappable sections of BFD executable files.
 
@@ -71,22 +71,18 @@ extern enum target_xfer_status
 
    One, and only one, of readbuf or writebuf must be non-NULL.  */
 
-extern enum target_xfer_status
-  section_table_xfer_memory_partial (gdb_byte *,
-				     const gdb_byte *,
-				     ULONGEST, ULONGEST, ULONGEST *,
-				     const target_section_table &,
-				     gdb::function_view<bool
-				       (const struct target_section *)> match_cb
-					 = nullptr);
+extern enum target_xfer_status section_table_xfer_memory_partial (
+  gdb_byte *, const gdb_byte *, ULONGEST, ULONGEST, ULONGEST *,
+  const target_section_table &,
+  gdb::function_view<bool (const struct target_section *)> match_cb = nullptr);
 
 /* Read from mappable read-only sections of BFD executable files.
    Similar to exec_read_partial_read_only, but return
    TARGET_XFER_UNAVAILABLE if data is unavailable.  */
 
 extern enum target_xfer_status
-  section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
-				       ULONGEST len, ULONGEST *xfered_len);
+section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
+				     ULONGEST len, ULONGEST *xfered_len);
 
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);
@@ -95,8 +91,7 @@ extern void exec_set_section_address (const char *, int, CORE_ADDR);
    special cased --- it's filename is omitted; if it is the executable
    file, its entry point is printed.  */
 
-extern void print_section_info (const target_section_table *table,
-				bfd *abfd);
+extern void print_section_info (const target_section_table *table, bfd *abfd);
 
 /* Helper function that attempts to open the symbol file at EXEC_FILE_HOST.
    If successful, it proceeds to add the symbol file as the main symbol file.

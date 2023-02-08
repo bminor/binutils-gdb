@@ -30,9 +30,8 @@
    |   RESERVED    |   RESERVED   |   DEBUG_ARCH  |  NUM_SLOTS    |
    +---------------+--------------+---------------+---------------+  */
 
-
 /* Macros to extract fields from the hardware debug information word.  */
-#define AARCH64_DEBUG_NUM_SLOTS(x) ((x) & 0xff)
+#define AARCH64_DEBUG_NUM_SLOTS(x) ((x) &0xff)
 #define AARCH64_DEBUG_ARCH(x) (((x) >> 8) & 0xff)
 
 /* Each bit of a variable of this type is used to indicate whether a
@@ -60,27 +59,30 @@ typedef ULONGEST dr_changed_t;
 
 /* Set each of the lower M bits of X to 1; assert X is wide enough.  */
 
-#define DR_MARK_ALL_CHANGED(x, m)					\
-  do									\
-    {									\
-      gdb_assert (sizeof ((x)) * 8 >= (m));				\
-      (x) = (((dr_changed_t)1 << (m)) - 1);				\
-    } while (0)
+#define DR_MARK_ALL_CHANGED(x, m)            \
+  do                                         \
+    {                                        \
+      gdb_assert (sizeof ((x)) * 8 >= (m));  \
+      (x) = (((dr_changed_t) 1 << (m)) - 1); \
+    }                                        \
+  while (0)
 
-#define DR_MARK_N_CHANGED(x, n)						\
-  do									\
-    {									\
-      (x) |= ((dr_changed_t)1 << (n));					\
-    } while (0)
+#define DR_MARK_N_CHANGED(x, n)         \
+  do                                    \
+    {                                   \
+      (x) |= ((dr_changed_t) 1 << (n)); \
+    }                                   \
+  while (0)
 
-#define DR_CLEAR_CHANGED(x)						\
-  do									\
-    {									\
-      (x) = 0;								\
-    } while (0)
+#define DR_CLEAR_CHANGED(x) \
+  do                        \
+    {                       \
+      (x) = 0;              \
+    }                       \
+  while (0)
 
 #define DR_HAS_CHANGED(x) ((x) != 0)
-#define DR_N_HAS_CHANGED(x, n) ((x) & ((dr_changed_t)1 << (n)))
+#define DR_N_HAS_CHANGED(x, n) ((x) & ((dr_changed_t) 1 << (n)))
 
 /* Per-thread arch-specific data we want to keep.  */
 

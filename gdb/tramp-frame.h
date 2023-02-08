@@ -20,7 +20,7 @@
 #ifndef TRAMP_FRAME_H
 #define TRAMP_FRAME_H
 
-#include "frame.h"		/* For "enum frame_type".  */
+#include "frame.h" /* For "enum frame_type".  */
 
 class frame_info_ptr;
 struct trad_frame_cache;
@@ -57,23 +57,22 @@ struct tramp_frame
      The instruction sequence is terminated by
      TRAMP_SENTINEL_INSN.  */
   int insn_size;
+
   struct
   {
     ULONGEST bytes;
     ULONGEST mask;
   } insn[48];
+
   /* Initialize a trad-frame cache corresponding to the tramp-frame.
      FUNC is the address of the instruction TRAMP[0] in memory.  */
-  void (*init) (const struct tramp_frame *self,
-		frame_info_ptr this_frame,
-		struct trad_frame_cache *this_cache,
-		CORE_ADDR func);
+  void (*init) (const struct tramp_frame *self, frame_info_ptr this_frame,
+		struct trad_frame_cache *this_cache, CORE_ADDR func);
   /* Return non-zero if the tramp-frame is valid for the PC requested.
      Adjust the PC to point to the address to check the instruction
      sequence against if required.  If this is NULL, then the tramp-frame
      is valid for any PC.  */
-  int (*validate) (const struct tramp_frame *self,
-		   frame_info_ptr this_frame,
+  int (*validate) (const struct tramp_frame *self, frame_info_ptr this_frame,
 		   CORE_ADDR *pc);
 };
 

@@ -21,8 +21,10 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/observable.h"
 
-namespace selftests {
-namespace observers {
+namespace selftests
+{
+namespace observers
+{
 
 static gdb::observers::observable<int> test_notification ("test_notification");
 
@@ -66,22 +68,46 @@ static void observer_dependency_test_callback (size_t index);
 /* Data for observers to use for dependency tests, using some sample
    dependencies between the observers.  */
 static std::vector<dependency_observer_data> test_observers = {
-  {&observer_token0, "test0", {}, {},
-   [] (int) { observer_dependency_test_callback (0); }},
-  {&observer_token1, "test1", {0}, {0},
-   [] (int) { observer_dependency_test_callback (1); }},
-  {&observer_token2, "test2", {1}, {0, 1},
-   [] (int) { observer_dependency_test_callback (2); }},
-  {&observer_token3, "test3", {1}, {0, 1},
-   [] (int) { observer_dependency_test_callback (3); }},
-  {&observer_token4, "test4", {2, 3, 5}, {0, 1, 2, 3, 5},
-   [] (int) { observer_dependency_test_callback (4); }},
-  {&observer_token5, "test5", {0}, {0},
-   [] (int) { observer_dependency_test_callback (5); }},
-  {nullptr, "test6", {4}, {0, 1, 2, 3, 4, 5},
-   [] (int) { observer_dependency_test_callback (6); }},
-  {nullptr, "test7", {0}, {0},
-   [] (int) { observer_dependency_test_callback (7); }},
+  { &observer_token0,
+    "test0",
+    {},
+    {},
+    [] (int) { observer_dependency_test_callback (0); } },
+  { &observer_token1,
+    "test1",
+    { 0 },
+    { 0 },
+    [] (int) { observer_dependency_test_callback (1); } },
+  { &observer_token2,
+    "test2",
+    { 1 },
+    { 0, 1 },
+    [] (int) { observer_dependency_test_callback (2); } },
+  { &observer_token3,
+    "test3",
+    { 1 },
+    { 0, 1 },
+    [] (int) { observer_dependency_test_callback (3); } },
+  { &observer_token4,
+    "test4",
+    { 2, 3, 5 },
+    { 0, 1, 2, 3, 5 },
+    [] (int) { observer_dependency_test_callback (4); } },
+  { &observer_token5,
+    "test5",
+    { 0 },
+    { 0 },
+    [] (int) { observer_dependency_test_callback (5); } },
+  { nullptr,
+    "test6",
+    { 4 },
+    { 0, 1, 2, 3, 4, 5 },
+    [] (int) { observer_dependency_test_callback (6); } },
+  { nullptr,
+    "test7",
+    { 0 },
+    { 0 },
+    [] (int) { observer_dependency_test_callback (7); } },
 };
 
 static void
@@ -137,8 +163,8 @@ observer_dependency_test_callback (size_t index)
 static void
 run_dependency_test (std::vector<int> insertion_order)
 {
-  gdb::observers::observable<int> dependency_test_notification
-    ("dependency_test_notification");
+  gdb::observers::observable<int> dependency_test_notification (
+    "dependency_test_notification");
 
   /* Reset counters.  */
   dependency_test_counters = std::vector<int> (test_observers.size (), 0);
@@ -154,8 +180,8 @@ run_dependency_test (std::vector<int> insertion_order)
 	dependency_tokens.emplace_back (test_observers[index].token);
 
       if (o.token != nullptr)
-	dependency_test_notification.attach
-	  (o.callback, *o.token, o.name, dependency_tokens);
+	dependency_test_notification.attach (o.callback, *o.token, o.name,
+					     dependency_tokens);
       else
 	dependency_test_notification.attach (o.callback, o.name,
 					     dependency_tokens);
@@ -169,9 +195,9 @@ static void
 test_dependency ()
 {
   /* Run dependency tests with different insertion orders.  */
-  run_dependency_test ({0, 1, 2, 3, 4, 5, 6, 7});
-  run_dependency_test ({7, 6, 5, 4, 3, 2, 1, 0});
-  run_dependency_test ({0, 3, 2, 1, 7, 6, 4, 5});
+  run_dependency_test ({ 0, 1, 2, 3, 4, 5, 6, 7 });
+  run_dependency_test ({ 7, 6, 5, 4, 3, 2, 1, 0 });
+  run_dependency_test ({ 0, 3, 2, 1, 7, 6, 4, 5 });
 }
 
 static void
@@ -181,10 +207,11 @@ run_tests ()
      attached.  */
   notify_check_counters (0, 0, 0);
 
-  const gdb::observers::token token1 {}, token2 {} , token3 {};
+  const gdb::observers::token token1 {}, token2 {}, token3 {};
 
   /* Now, attach one observer, and send a notification.  */
-  test_notification.attach (&test_second_notification_function, token2, "test");
+  test_notification.attach (&test_second_notification_function, token2,
+			    "test");
   notify_check_counters (0, 1, 0);
 
   /* Remove the observer, and send a notification.  */
@@ -196,7 +223,8 @@ run_tests ()
   notify_check_counters (1, 0, 0);
 
   /* With 2 observers.  */
-  test_notification.attach (&test_second_notification_function, token2, "test");
+  test_notification.attach (&test_second_notification_function, token2,
+			    "test");
   notify_check_counters (1, 1, 0);
 
   /* With 3 observers.  */
@@ -218,7 +246,8 @@ run_tests ()
   /* Go back to 3 observers, and remove them in a different
      order...  */
   test_notification.attach (&test_first_notification_function, token1, "test");
-  test_notification.attach (&test_second_notification_function, token2, "test");
+  test_notification.attach (&test_second_notification_function, token2,
+			    "test");
   test_notification.attach (&test_third_notification_function, token3, "test");
   notify_check_counters (1, 1, 1);
 
@@ -239,11 +268,11 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_observer_selftest ();
+
 void
 _initialize_observer_selftest ()
 {
-  selftests::register_test ("gdb::observers",
-			    selftests::observers::run_tests);
+  selftests::register_test ("gdb::observers", selftests::observers::run_tests);
   selftests::register_test ("gdb::observers dependency",
 			    selftests::observers::test_dependency);
 }

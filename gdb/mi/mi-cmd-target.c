@@ -29,15 +29,12 @@ mi_cmd_target_file_get (const char *command, char **argv, int argc)
   int oind = 0;
   char *oarg;
   const char *remote_file, *local_file;
-  static const struct mi_opt opts[] =
-    {
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { 0, 0, 0 } };
   static const char prefix[] = "-target-file-get";
 
   if (mi_getopt (prefix, argc, argv, opts, &oind, &oarg) != -1
       || oind != argc - 2)
-    error (_("-target-file-get: Usage: REMOTE_FILE LOCAL_FILE"));
+    error (_ ("-target-file-get: Usage: REMOTE_FILE LOCAL_FILE"));
 
   remote_file = argv[oind];
   local_file = argv[oind + 1];
@@ -53,15 +50,12 @@ mi_cmd_target_file_put (const char *command, char **argv, int argc)
   int oind = 0;
   char *oarg;
   const char *remote_file, *local_file;
-  static const struct mi_opt opts[] =
-    {
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { 0, 0, 0 } };
   static const char prefix[] = "-target-file-put";
 
   if (mi_getopt (prefix, argc, argv, opts, &oind, &oarg) != -1
       || oind != argc - 2)
-    error (_("-target-file-put: Usage: LOCAL_FILE REMOTE_FILE"));
+    error (_ ("-target-file-put: Usage: LOCAL_FILE REMOTE_FILE"));
 
   local_file = argv[oind];
   remote_file = argv[oind + 1];
@@ -77,18 +71,14 @@ mi_cmd_target_file_delete (const char *command, char **argv, int argc)
   int oind = 0;
   char *oarg;
   const char *remote_file;
-  static const struct mi_opt opts[] =
-    {
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { 0, 0, 0 } };
   static const char prefix[] = "-target-file-delete";
 
   if (mi_getopt (prefix, argc, argv, opts, &oind, &oarg) != -1
       || oind != argc - 1)
-    error (_("-target-file-delete: Usage: REMOTE_FILE"));
+    error (_ ("-target-file-delete: Usage: REMOTE_FILE"));
 
   remote_file = argv[oind];
 
   remote_file_delete (remote_file, 0);
 }
-

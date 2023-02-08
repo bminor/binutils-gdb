@@ -30,8 +30,7 @@ bool debug_agent = false;
 
 /* A stdarg wrapper for debug_vprintf.  */
 
-static void ATTRIBUTE_PRINTF (1, 2)
-debug_agent_printf (const char *fmt, ...)
+static void ATTRIBUTE_PRINTF (1, 2) debug_agent_printf (const char *fmt, ...)
 {
   va_list ap;
 
@@ -66,9 +65,9 @@ static struct
   const char *name;
   int offset;
 } symbol_list[] = {
-  IPA_SYM(helper_thread_id),
-  IPA_SYM(cmd_buf),
-  IPA_SYM(capability),
+  IPA_SYM (helper_thread_id),
+  IPA_SYM (cmd_buf),
+  IPA_SYM (capability),
 };
 
 static struct ipa_sym_addresses_common ipa_sym_addrs;
@@ -91,16 +90,16 @@ agent_look_up_symbols (void *arg)
 
   for (int i = 0; i < sizeof (symbol_list) / sizeof (symbol_list[0]); i++)
     {
-      CORE_ADDR *addrp =
-	(CORE_ADDR *) ((char *) &ipa_sym_addrs + symbol_list[i].offset);
+      CORE_ADDR *addrp
+        = (CORE_ADDR *) ((char *) &ipa_sym_addrs + symbol_list[i].offset);
       struct objfile *objfile = (struct objfile *) arg;
 
-      if (find_minimal_symbol_address (symbol_list[i].name, addrp,
-				       objfile) != 0)
-	{
-	  DEBUG_AGENT ("symbol `%s' not found\n", symbol_list[i].name);
-	  return -1;
-	}
+      if (find_minimal_symbol_address (symbol_list[i].name, addrp, objfile)
+          != 0)
+        {
+          DEBUG_AGENT ("symbol `%s' not found\n", symbol_list[i].name);
+          return -1;
+        }
     }
 
   all_agent_symbols_looked_up = true;
@@ -110,11 +109,11 @@ agent_look_up_symbols (void *arg)
 static unsigned int
 agent_get_helper_thread_id (void)
 {
-  if  (helper_thread_id == 0)
+  if (helper_thread_id == 0)
     {
       if (target_read_uint32 (ipa_sym_addrs.addr_helper_thread_id,
-			      &helper_thread_id))
-	warning (_("Error reading helper thread's id in lib"));
+                              &helper_thread_id))
+        warning (_ ("Error reading helper thread's id in lib"));
     }
 
   return helper_thread_id;
@@ -126,7 +125,7 @@ agent_get_helper_thread_id (void)
 #define SOCK_DIR P_tmpdir
 
 #ifndef UNIX_PATH_MAX
-#define UNIX_PATH_MAX sizeof(((struct sockaddr_un *) NULL)->sun_path)
+#define UNIX_PATH_MAX sizeof (((struct sockaddr_un *) NULL)->sun_path)
 #endif
 
 #endif
@@ -149,7 +148,7 @@ gdb_connect_sync_socket (int pid)
   res = fd = gdb_socket_cloexec (PF_UNIX, SOCK_STREAM, 0);
   if (res == -1)
     {
-      warning (_("error opening sync socket: %s"), safe_strerror (errno));
+      warning (_ ("error opening sync socket: %s"), safe_strerror (errno));
       return -1;
     }
 
@@ -158,7 +157,7 @@ gdb_connect_sync_socket (int pid)
   res = xsnprintf (addr.sun_path, UNIX_PATH_MAX, "%s", path);
   if (res >= UNIX_PATH_MAX)
     {
-      warning (_("string overflow allocating socket name"));
+      warning (_ ("string overflow allocating socket name"));
       close (fd);
       return -1;
     }
@@ -166,9 +165,9 @@ gdb_connect_sync_socket (int pid)
   res = connect (fd, (struct sockaddr *) &addr, sizeof (addr));
   if (res == -1)
     {
-      warning (_("error connecting sync socket (%s): %s. "
-		 "Make sure the directory exists and that it is writable."),
-		 path, safe_strerror (errno));
+      warning (_ ("error connecting sync socket (%s): %s. "
+                  "Make sure the directory exists and that it is writable."),
+               path, safe_strerror (errno));
       close (fd);
       return -1;
     }
@@ -192,12 +191,12 @@ agent_run_command (int pid, const char *cmd, int len)
   int tid = agent_get_helper_thread_id ();
   ptid_t ptid = ptid_t (pid, tid);
 
-  int ret = target_write_memory (ipa_sym_addrs.addr_cmd_buf,
-				 (gdb_byte *) cmd, len);
+  int ret
+    = target_write_memory (ipa_sym_addrs.addr_cmd_buf, (gdb_byte *) cmd, len);
 
   if (ret != 0)
     {
-      warning (_("unable to write"));
+      warning (_ ("unable to write"));
       return -1;
     }
 
@@ -214,16 +213,18 @@ agent_run_command (int pid, const char *cmd, int len)
       DEBUG_AGENT ("agent: signalling helper thread\n");
 
       do
-	{
-	  ret = write (fd, buf, 1);
-	} while (ret == -1 && errno == EINTR);
+        {
+          ret = write (fd, buf, 1);
+        }
+      while (ret == -1 && errno == EINTR);
 
-	DEBUG_AGENT ("agent: waiting for helper thread's response\n");
+      DEBUG_AGENT ("agent: waiting for helper thread's response\n");
 
       do
-	{
-	  ret = read (fd, buf, 1);
-	} while (ret == -1 && errno == EINTR);
+        {
+          ret = read (fd, buf, 1);
+        }
+      while (ret == -1 && errno == EINTR);
 
       close (fd);
 
@@ -243,11 +244,11 @@ agent_run_command (int pid, const char *cmd, int len)
   if (fd >= 0)
     {
       if (target_read_memory (ipa_sym_addrs.addr_cmd_buf, (gdb_byte *) cmd,
-			      IPA_CMD_BUF_SIZE))
-	{
-	  warning (_("Error reading command response"));
-	  return -1;
-	}
+                              IPA_CMD_BUF_SIZE))
+        {
+          warning (_ ("Error reading command response"));
+          return -1;
+        }
     }
 
   return 0;
@@ -264,8 +265,8 @@ agent_capability_check (enum agent_capa agent_capa)
   if (agent_capability == 0)
     {
       if (target_read_uint32 (ipa_sym_addrs.addr_capability,
-			      &agent_capability))
-	warning (_("Error reading capability of agent"));
+                              &agent_capability))
+        warning (_ ("Error reading capability of agent"));
     }
   return (agent_capability & agent_capa) != 0;
 }

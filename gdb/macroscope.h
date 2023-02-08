@@ -23,25 +23,23 @@
 #include "macrotab.h"
 #include "symtab.h"
 
-
 /* The table of macros defined by the user.  */
 extern struct macro_table *macro_user_macros;
 
 /* All the information we need to decide which macro definitions are
    in scope: a source file (either a main source file or an
    #inclusion), and a line number in that file.  */
-struct macro_scope {
+struct macro_scope
+{
   struct macro_source_file *file;
   int line;
 };
 
-
 /* Return a `struct macro_scope' object corresponding to the symtab
    and line given in SAL.  If we have no macro information for that
    location, or if SAL's pc is zero, return zero.  */
-gdb::unique_xmalloc_ptr<struct macro_scope> sal_macro_scope
-    (struct symtab_and_line sal);
-
+gdb::unique_xmalloc_ptr<struct macro_scope>
+sal_macro_scope (struct symtab_and_line sal);
 
 /* Return a `struct macro_scope' object representing just the
    user-defined macros.  */

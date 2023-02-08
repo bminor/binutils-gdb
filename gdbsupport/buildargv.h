@@ -28,29 +28,18 @@
 class gdb_argv
 {
 public:
-
   /* A constructor that initializes to NULL.  */
 
-  gdb_argv ()
-    : m_argv (NULL)
-  {
-  }
+  gdb_argv () : m_argv (NULL) {}
 
   /* A constructor that calls buildargv on STR.  STR may be NULL, in
      which case this object is initialized with a NULL array.  */
 
-  explicit gdb_argv (const char *str)
-    : m_argv (NULL)
-  {
-    reset (str);
-  }
+  explicit gdb_argv (const char *str) : m_argv (NULL) { reset (str); }
 
   /* A constructor that takes ownership of an existing array.  */
 
-  explicit gdb_argv (char **array)
-    : m_argv (array)
-  {
-  }
+  explicit gdb_argv (char **array) : m_argv (array) {}
 
   gdb_argv (const gdb_argv &) = delete;
   gdb_argv &operator= (const gdb_argv &) = delete;
@@ -69,10 +58,7 @@ public:
     other.m_argv = nullptr;
   }
 
-  ~gdb_argv ()
-  {
-    freeargv (m_argv);
-  }
+  ~gdb_argv () { freeargv (m_argv); }
 
   /* Call buildargv on STR, storing the result in this object.  Any
      previous state is freed.  STR may be NULL, in which case this
@@ -90,15 +76,9 @@ public:
 
   /* Return the underlying array.  */
 
-  char **get ()
-  {
-    return m_argv;
-  }
+  char **get () { return m_argv; }
 
-  const char * const * get () const
-  {
-    return m_argv;
-  }
+  const char *const *get () const { return m_argv; }
 
   /* Return the underlying array, transferring ownership to the
      caller.  */
@@ -112,10 +92,7 @@ public:
 
   /* Return the number of items in the array.  */
 
-  int count () const
-  {
-    return countargv (m_argv);
-  }
+  int count () const { return countargv (m_argv); }
 
   /* Index into the array.  */
 
@@ -132,9 +109,9 @@ public:
     return gdb::array_view<char *> (this->get (), this->count ());
   }
 
-  gdb::array_view<const char * const> as_array_view () const
+  gdb::array_view<const char *const> as_array_view () const
   {
-    return gdb::array_view<const char * const> (this->get (), this->count ());
+    return gdb::array_view<const char *const> (this->get (), this->count ());
   }
 
   /* Append arguments to this array.  */
@@ -146,10 +123,10 @@ public:
 
     for (int argi = 0; argi < argc; argi++)
       {
-	/* Transfer ownership of the string.  */
-	m_argv[size++] = other.m_argv[argi];
-	/* Ensure that destruction of OTHER works correctly.  */
-	other.m_argv[argi] = nullptr;
+        /* Transfer ownership of the string.  */
+        m_argv[size++] = other.m_argv[argi];
+        /* Ensure that destruction of OTHER works correctly.  */
+        other.m_argv[argi] = nullptr;
       }
     m_argv[size] = nullptr;
   }
@@ -172,30 +149,17 @@ public:
 
   /* Return an iterator pointing to the start of the array.  */
 
-  iterator begin ()
-  {
-    return m_argv;
-  }
+  iterator begin () { return m_argv; }
 
   /* Return an iterator pointing to the end of the array.  */
 
-  iterator end ()
-  {
-    return m_argv + count ();
-  }
+  iterator end () { return m_argv + count (); }
 
-  bool operator!= (std::nullptr_t)
-  {
-    return m_argv != NULL;
-  }
+  bool operator!= (std::nullptr_t) { return m_argv != NULL; }
 
-  bool operator== (std::nullptr_t)
-  {
-    return m_argv == NULL;
-  }
+  bool operator== (std::nullptr_t) { return m_argv == NULL; }
 
 private:
-
   /* The wrapped array.  */
 
   char **m_argv;

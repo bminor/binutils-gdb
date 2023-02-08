@@ -32,8 +32,8 @@ static const gdb_byte arm_wince_le_breakpoint[] = { 0x10, 0x00, 0x00, 0xe6 };
 static const gdb_byte arm_wince_thumb_le_breakpoint[] = { 0xfe, 0xdf };
 
 /* Description of the longjmp buffer.  */
-#define ARM_WINCE_JB_ELEMENT_SIZE	ARM_INT_REGISTER_SIZE
-#define ARM_WINCE_JB_PC			10
+#define ARM_WINCE_JB_ELEMENT_SIZE ARM_INT_REGISTER_SIZE
+#define ARM_WINCE_JB_PC 10
 
 static CORE_ADDR
 arm_pe_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
@@ -96,15 +96,13 @@ arm_wince_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* bl offset <__gccmain> */
   if ((this_instr & 0xfff00000) == 0xeb000000)
     {
-#define sign_extend(V, N) \
-  (((long) (V) ^ (1L << ((N) - 1))) - (1L << ((N) - 1)))
+#define sign_extend(V, N) (((long) (V) ^ (1L << ((N) -1))) - (1L << ((N) -1)))
 
       long offset = sign_extend (this_instr & 0x000fffff, 23) << 2;
       CORE_ADDR call_dest = (pc + 8 + offset) & 0xffffffffU;
       struct bound_minimal_symbol s = lookup_minimal_symbol_by_pc (call_dest);
 
-      if (s.minsym != NULL
-	  && s.minsym->linkage_name () != NULL
+      if (s.minsym != NULL && s.minsym->linkage_name () != NULL
 	  && strcmp (s.minsym->linkage_name (), "__gccmain") == 0)
 	pc += 4;
     }
@@ -155,6 +153,7 @@ arm_wince_osabi_sniffer (bfd *abfd)
 }
 
 void _initialize_arm_wince_tdep ();
+
 void
 _initialize_arm_wince_tdep ()
 {

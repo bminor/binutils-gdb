@@ -54,15 +54,15 @@ hppa_linux_target_write_pc (struct regcache *regcache, CORE_ADDR v)
 {
   /* Probably this should be done by the kernel, but it isn't.  */
   regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_HEAD_REGNUM, v | 0x3);
-  regcache_cooked_write_unsigned (regcache,
-				  HPPA_PCOQ_TAIL_REGNUM, (v + 4) | 0x3);
+  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_TAIL_REGNUM,
+				  (v + 4) | 0x3);
 }
 
 /* An instruction to match.  */
 struct insn_pattern
 {
-  unsigned int data;            /* See if it matches this....  */
-  unsigned int mask;            /* ... with this mask.  */
+  unsigned int data; /* See if it matches this....  */
+  unsigned int mask; /* ... with this mask.  */
 };
 
 static struct insn_pattern hppa_sigtramp[] = {
@@ -88,8 +88,7 @@ static struct insn_pattern hppa_sigtramp[] = {
    matched.  */
 static int
 insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
-		     struct insn_pattern *pattern,
-		     unsigned int *insn)
+		     struct insn_pattern *pattern, unsigned int *insn)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
@@ -137,9 +136,9 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
   int offs = 0;
   int attempt;
   /* offsets to try to find the trampoline */
-  static int pcoffs[] = { 0, 4*4, 5*4 };
+  static int pcoffs[] = { 0, 4 * 4, 5 * 4 };
   /* offsets to the rt_sigframe structure */
-  static int sfoffs[] = { 4*4, 10*4, 10*4 };
+  static int sfoffs[] = { 4 * 4, 10 * 4, 10 * 4 };
   CORE_ADDR sp;
 
   /* Most of the time, this will be correct.  The one case when this will
@@ -155,8 +154,8 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   for (attempt = 0; attempt < ARRAY_SIZE (pcoffs); attempt++)
     {
-      if (insns_match_pattern (gdbarch, sp + pcoffs[attempt],
-			       hppa_sigtramp, dummy))
+      if (insns_match_pattern (gdbarch, sp + pcoffs[attempt], hppa_sigtramp,
+			       dummy))
 	{
 	  offs = sfoffs[attempt];
 	  break;
@@ -284,8 +283,8 @@ hppa_linux_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 {
   struct hppa_linux_sigtramp_unwind_cache *info
     = hppa_linux_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
-  return hppa_frame_prev_register_helper (this_frame,
-					  info->saved_regs, regnum);
+  return hppa_frame_prev_register_helper (this_frame, info->saved_regs,
+					  regnum);
 }
 
 /* hppa-linux always uses "new-style" rt-signals.  The signal handler's return
@@ -308,15 +307,14 @@ hppa_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {
-  "hppa linux sigtramp",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  hppa_linux_sigtramp_frame_this_id,
-  hppa_linux_sigtramp_frame_prev_register,
-  NULL,
-  hppa_linux_sigtramp_frame_sniffer
-};
+static const struct frame_unwind hppa_linux_sigtramp_frame_unwind
+  = { "hppa linux sigtramp",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      hppa_linux_sigtramp_frame_this_id,
+      hppa_linux_sigtramp_frame_prev_register,
+      NULL,
+      hppa_linux_sigtramp_frame_sniffer };
 
 /* Attempt to find (and return) the global pointer for the given
    function.
@@ -335,7 +333,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *faddr_sect;
   CORE_ADDR faddr;
-  
+
   faddr = value_as_address (function);
 
   /* Is this a plabel? If so, dereference it to get the gp value.  */
@@ -393,8 +391,8 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
 		  status = target_read_memory (addr + 4, buf, sizeof (buf));
 		  if (status != 0)
 		    break;
-		  global_pointer = extract_unsigned_integer (buf, sizeof (buf),
-							     byte_order);
+		  global_pointer
+		    = extract_unsigned_integer (buf, sizeof (buf), byte_order);
 		  /* The payoff...  */
 		  return global_pointer;
 		}
@@ -408,7 +406,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
     }
   return 0;
 }
-
+
 /*
  * Registers saved in a coredump:
  * gr0..gr31
@@ -421,54 +419,33 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
  * cr10, cr15
  */
 
-static const struct regcache_map_entry hppa_linux_gregmap[] =
-  {
-    { 32, HPPA_R0_REGNUM },
-    { 1, HPPA_SR4_REGNUM+1 },
-    { 1, HPPA_SR4_REGNUM+2 },
-    { 1, HPPA_SR4_REGNUM+3 },
-    { 1, HPPA_SR4_REGNUM+4 },
-    { 1, HPPA_SR4_REGNUM },
-    { 1, HPPA_SR4_REGNUM+5 },
-    { 1, HPPA_SR4_REGNUM+6 },
-    { 1, HPPA_SR4_REGNUM+7 },
-    { 1, HPPA_PCOQ_HEAD_REGNUM },
-    { 1, HPPA_PCOQ_TAIL_REGNUM },
-    { 1, HPPA_PCSQ_HEAD_REGNUM },
-    { 1, HPPA_PCSQ_TAIL_REGNUM },
-    { 1, HPPA_SAR_REGNUM },
-    { 1, HPPA_IIR_REGNUM },
-    { 1, HPPA_ISR_REGNUM },
-    { 1, HPPA_IOR_REGNUM },
-    { 1, HPPA_IPSW_REGNUM },
-    { 1, HPPA_RCR_REGNUM },
-    { 8, HPPA_TR0_REGNUM },
-    { 4, HPPA_PID0_REGNUM },
-    { 1, HPPA_CCR_REGNUM },
-    { 1, HPPA_EIEM_REGNUM },
-    { 0 }
-  };
+static const struct regcache_map_entry hppa_linux_gregmap[]
+  = { { 32, HPPA_R0_REGNUM },	    { 1, HPPA_SR4_REGNUM + 1 },
+      { 1, HPPA_SR4_REGNUM + 2 },   { 1, HPPA_SR4_REGNUM + 3 },
+      { 1, HPPA_SR4_REGNUM + 4 },   { 1, HPPA_SR4_REGNUM },
+      { 1, HPPA_SR4_REGNUM + 5 },   { 1, HPPA_SR4_REGNUM + 6 },
+      { 1, HPPA_SR4_REGNUM + 7 },   { 1, HPPA_PCOQ_HEAD_REGNUM },
+      { 1, HPPA_PCOQ_TAIL_REGNUM }, { 1, HPPA_PCSQ_HEAD_REGNUM },
+      { 1, HPPA_PCSQ_TAIL_REGNUM }, { 1, HPPA_SAR_REGNUM },
+      { 1, HPPA_IIR_REGNUM },	    { 1, HPPA_ISR_REGNUM },
+      { 1, HPPA_IOR_REGNUM },	    { 1, HPPA_IPSW_REGNUM },
+      { 1, HPPA_RCR_REGNUM },	    { 8, HPPA_TR0_REGNUM },
+      { 4, HPPA_PID0_REGNUM },	    { 1, HPPA_CCR_REGNUM },
+      { 1, HPPA_EIEM_REGNUM },	    { 0 } };
 
-static const struct regcache_map_entry hppa_linux_fpregmap[] =
-  {
-    /* FIXME: Only works for 32-bit mode.  In 64-bit mode there should
+static const struct regcache_map_entry hppa_linux_fpregmap[] = {
+  /* FIXME: Only works for 32-bit mode.  In 64-bit mode there should
        be 32 fpregs, 8 bytes each.  */
-    { 64, HPPA_FP0_REGNUM, 4 },
-    { 0 }
-  };
+  { 64, HPPA_FP0_REGNUM, 4 },
+  { 0 }
+};
 
 /* HPPA Linux kernel register set.  */
-static const struct regset hppa_linux_regset =
-{
-  hppa_linux_gregmap,
-  regcache_supply_regset, regcache_collect_regset
-};
+static const struct regset hppa_linux_regset
+  = { hppa_linux_gregmap, regcache_supply_regset, regcache_collect_regset };
 
-static const struct regset hppa_linux_fpregset =
-{
-  hppa_linux_fpregmap,
-  regcache_supply_regset, regcache_collect_regset
-};
+static const struct regset hppa_linux_fpregset
+  = { hppa_linux_fpregmap, regcache_supply_regset, regcache_collect_regset };
 
 static void
 hppa_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
@@ -500,8 +477,8 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_unwinder (gdbarch, &hppa_linux_sigtramp_frame_unwind);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 linux_ilp32_fetch_link_map_offsets);
 
   tdep->in_solib_call_trampoline = hppa_in_solib_call_trampoline;
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
@@ -515,8 +492,8 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, hppa_linux_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, hppa_linux_iterate_over_regset_sections);
 
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, hppa_dwarf_reg_to_regnum);
 
@@ -526,11 +503,12 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_hppa_linux_tdep ();
+
 void
 _initialize_hppa_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_LINUX,
 			  hppa_linux_init_abi);
-  gdbarch_register_osabi (bfd_arch_hppa, bfd_mach_hppa20w,
-			  GDB_OSABI_LINUX, hppa_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_hppa, bfd_mach_hppa20w, GDB_OSABI_LINUX,
+			  hppa_linux_init_abi);
 }

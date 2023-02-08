@@ -73,7 +73,7 @@ struct pretty_printer_smob
   /* A procedure called to look up the printer for the given value.
      The procedure is called as (lookup gdb:pretty-printer value).
      The result should either be a gdb:pretty-printer object that will print
-     the value, or #f if the value is not recognized.  */     
+     the value, or #f if the value is not recognized.  */
   SCM lookup;
 
   /* Note: Attaching subprinters to this smob is left to Scheme.  */
@@ -101,10 +101,9 @@ struct pretty_printer_worker_smob
   SCM children;
 };
 
-static const char pretty_printer_smob_name[] =
-  "gdb:pretty-printer";
-static const char pretty_printer_worker_smob_name[] =
-  "gdb:pretty-printer-worker";
+static const char pretty_printer_smob_name[] = "gdb:pretty-printer";
+static const char pretty_printer_worker_smob_name[]
+  = "gdb:pretty-printer-worker";
 
 /* The tag Guile knows the pretty-printer smobs by.  */
 static scm_t_bits pretty_printer_smob_tag;
@@ -120,7 +119,7 @@ static SCM pp_type_error_symbol;
 static SCM ppscm_map_string;
 static SCM ppscm_array_string;
 static SCM ppscm_string_string;
-
+
 /* Administrivia for pretty-printer matcher smobs.  */
 
 /* The smob "print" function for <gdb:pretty-printer>.  */
@@ -147,15 +146,15 @@ ppscm_print_pretty_printer_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 gdbscm_make_pretty_printer (SCM name, SCM lookup)
 {
-  pretty_printer_smob *pp_smob = (pretty_printer_smob *)
-    scm_gc_malloc (sizeof (pretty_printer_smob),
-		   pretty_printer_smob_name);
+  pretty_printer_smob *pp_smob
+    = (pretty_printer_smob *) scm_gc_malloc (sizeof (pretty_printer_smob),
+					     pretty_printer_smob_name);
   SCM smob;
 
   SCM_ASSERT_TYPE (scm_is_string (name), name, SCM_ARG1, FUNC_NAME,
-		   _("string"));
+		   _ ("string"));
   SCM_ASSERT_TYPE (gdbscm_is_procedure (lookup), lookup, SCM_ARG2, FUNC_NAME,
-		   _("procedure"));
+		   _ ("procedure"));
 
   pp_smob->name = name;
   pp_smob->lookup = lookup;
@@ -208,7 +207,7 @@ ppscm_get_pretty_printer_smob_arg_unsafe (SCM self, int arg_pos,
 
   return pp_smob;
 }
-
+
 /* Pretty-printer methods.  */
 
 /* (pretty-printer-enabled? <gdb:pretty-printer>) -> boolean */
@@ -251,14 +250,14 @@ gdbscm_pretty_printers (void)
 static SCM
 gdbscm_set_pretty_printers_x (SCM printers)
 {
-  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (printers)), printers,
-		   SCM_ARG1, FUNC_NAME, _("list"));
+  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (printers)), printers, SCM_ARG1,
+		   FUNC_NAME, _ ("list"));
 
   pretty_printer_list = printers;
 
   return SCM_UNSPECIFIED;
 }
-
+
 /* Administrivia for pretty-printer-worker smobs.
    These are created when a matcher recognizes a value.  */
 
@@ -320,7 +319,7 @@ gdbscm_pretty_printer_worker_p (SCM scm)
 {
   return scm_from_bool (ppscm_is_pretty_printer_worker (scm));
 }
-
+
 /* Helper function to create a <gdb:exception> object indicating that the
    type of some value returned from a pretty-printer is invalid.  */
 
@@ -328,9 +327,9 @@ static SCM
 ppscm_make_pp_type_error_exception (const char *message, SCM object)
 {
   std::string msg = string_printf ("%s: ~S", message);
-  return gdbscm_make_error (pp_type_error_symbol,
-			    NULL /* func */, msg.c_str (),
-			    scm_list_1 (object), scm_list_1 (object));
+  return gdbscm_make_error (pp_type_error_symbol, NULL /* func */,
+			    msg.c_str (), scm_list_1 (object),
+			    scm_list_1 (object));
 }
 
 /* Print MESSAGE as an exception (meaning it is controlled by
@@ -366,11 +365,11 @@ ppscm_search_pp_list (SCM list, SCM value)
     return SCM_BOOL_F;
   if (gdbscm_is_false (scm_list_p (list))) /* scm_is_pair? */
     {
-      return ppscm_make_pp_type_error_exception
-	(_("pretty-printer list is not a list"), list);
+      return ppscm_make_pp_type_error_exception (
+	_ ("pretty-printer list is not a list"), list);
     }
 
-  for ( ; scm_is_pair (list); list = scm_cdr (list))
+  for (; scm_is_pair (list); list = scm_cdr (list))
     {
       SCM matcher = scm_car (list);
       SCM worker;
@@ -378,9 +377,9 @@ ppscm_search_pp_list (SCM list, SCM value)
 
       if (!ppscm_is_pretty_printer (matcher))
 	{
-	  return ppscm_make_pp_type_error_exception
-	    (_("pretty-printer list contains non-pretty-printer object"),
-	     matcher);
+	  return ppscm_make_pp_type_error_exception (
+	    _ ("pretty-printer list contains non-pretty-printer object"),
+	    matcher);
 	}
 
       pp_smob = (pretty_printer_smob *) SCM_SMOB_DATA (matcher);
@@ -391,28 +390,28 @@ ppscm_search_pp_list (SCM list, SCM value)
 
       if (!gdbscm_is_procedure (pp_smob->lookup))
 	{
-	  return ppscm_make_pp_type_error_exception
-	    (_("invalid lookup object in pretty-printer matcher"),
-	     pp_smob->lookup);
+	  return ppscm_make_pp_type_error_exception (
+	    _ ("invalid lookup object in pretty-printer matcher"),
+	    pp_smob->lookup);
 	}
 
-      worker = gdbscm_safe_call_2 (pp_smob->lookup, matcher,
-				   value, gdbscm_memory_error_p);
+      worker = gdbscm_safe_call_2 (pp_smob->lookup, matcher, value,
+				   gdbscm_memory_error_p);
       if (!gdbscm_is_false (worker))
 	{
 	  if (gdbscm_is_exception (worker))
 	    return worker;
 	  if (ppscm_is_pretty_printer_worker (worker))
 	    return worker;
-	  return ppscm_make_pp_type_error_exception
-	    (_("invalid result from pretty-printer lookup"), worker);
+	  return ppscm_make_pp_type_error_exception (
+	    _ ("invalid result from pretty-printer lookup"), worker);
 	}
     }
 
   if (!scm_is_null (list))
     {
-      return ppscm_make_pp_type_error_exception
-	(_("pretty-printer list is not a list"), orig_list);
+      return ppscm_make_pp_type_error_exception (
+	_ ("pretty-printer list is not a list"), orig_list);
     }
 
   return SCM_BOOL_F;
@@ -533,8 +532,7 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
 				   gdbscm_memory_error_p);
       if (gdbscm_is_false (result))
 	; /* Done.  */
-      else if (scm_is_string (result)
-	       || lsscm_is_lazy_string (result))
+      else if (scm_is_string (result) || lsscm_is_lazy_string (result))
 	; /* Done.  */
       else if (vlscm_is_value (result))
 	{
@@ -542,8 +540,8 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
 
 	  *out_value
 	    = vlscm_convert_value_from_scheme (FUNC_NAME, GDBSCM_ARG_NONE,
-					       result, &except_scm,
-					       gdbarch, language);
+					       result, &except_scm, gdbarch,
+					       language);
 	  if (*out_value != NULL)
 	    result = SCM_BOOL_T;
 	  else
@@ -554,8 +552,8 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
       else
 	{
 	  /* Invalid result from to-string.  */
-	  result = ppscm_make_pp_type_error_exception
-	    (_("invalid result from pretty-printer to-string"), result);
+	  result = ppscm_make_pp_type_error_exception (
+	    _ ("invalid result from pretty-printer to-string"), result);
 	}
     }
   catch (const gdb_exception &except)
@@ -568,7 +566,7 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
 /* Return the display hint for PRINTER as a Scheme object.
    The caller is responsible for ensuring PRINTER is a
    <gdb:pretty-printer-worker> object.  */
- 
+
 static SCM
 ppscm_get_display_hint_scm (SCM printer)
 {
@@ -617,7 +615,7 @@ ppscm_print_exception_unless_memory_error (SCM exception,
 
       /* This "shouldn't happen", but play it safe.  */
       if (msg == NULL || msg.get ()[0] == '\0')
-	gdb_printf (stream, _("<error reading variable>"));
+	gdb_printf (stream, _ ("<error reading variable>"));
       else
 	{
 	  /* Remove the trailing newline.  We could instead call a special
@@ -628,7 +626,7 @@ ppscm_print_exception_unless_memory_error (SCM exception,
 
 	  if (msg_text[len - 1] == '\n')
 	    msg_text[len - 1] = '\0';
-	  gdb_printf (stream, _("<error reading variable: %s>"), msg_text);
+	  gdb_printf (stream, _ ("<error reading variable: %s>"), msg_text);
 	}
     }
   else
@@ -649,8 +647,8 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
   SCM str_scm;
   enum guile_string_repr_result result = STRING_REPR_ERROR;
 
-  str_scm = ppscm_pretty_print_one_value (printer, &replacement,
-					  gdbarch, language);
+  str_scm
+    = ppscm_pretty_print_one_value (printer, &replacement, gdbarch, language);
   if (gdbscm_is_false (str_scm))
     {
       result = STRING_REPR_NONE;
@@ -668,15 +666,15 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
     {
       size_t length;
       gdb::unique_xmalloc_ptr<char> string
-	= gdbscm_scm_to_string (str_scm, &length,
-				target_charset (gdbarch), 0 /*!strict*/, NULL);
+	= gdbscm_scm_to_string (str_scm, &length, target_charset (gdbarch),
+				0 /*!strict*/, NULL);
 
       if (hint == HINT_STRING)
 	{
 	  struct type *type = builtin_type (gdbarch)->builtin_char;
-	  
-	  language->printstr (stream, type, (gdb_byte *) string.get (),
-			      length, NULL, 0, options);
+
+	  language->printstr (stream, type, (gdb_byte *) string.get (), length,
+			      NULL, 0, options);
 	}
       else
 	{
@@ -737,9 +735,9 @@ ppscm_print_children (SCM printer, enum display_hint hint,
     return;
   if (!gdbscm_is_procedure (w_smob->children))
     {
-      ppscm_print_pp_type_error
-	(_("pretty-printer \"children\" object is not a procedure or #f"),
-	 w_smob->children);
+      ppscm_print_pp_type_error (
+	_ ("pretty-printer \"children\" object is not a procedure or #f"),
+	w_smob->children);
       return;
     }
 
@@ -747,8 +745,8 @@ ppscm_print_children (SCM printer, enum display_hint hint,
   is_map = hint == HINT_MAP;
   is_array = hint == HINT_ARRAY;
 
-  children = gdbscm_safe_call_1 (w_smob->children, printer,
-				 gdbscm_memory_error_p);
+  children
+    = gdbscm_safe_call_1 (w_smob->children, printer, gdbscm_memory_error_p);
   if (gdbscm_is_exception (children))
     {
       ppscm_print_exception_unless_memory_error (children, stream);
@@ -760,9 +758,10 @@ ppscm_print_children (SCM printer, enum display_hint hint,
      children iterated over.  */
   if (!itscm_is_iterator (children))
     {
-      ppscm_print_pp_type_error
-	(_("result of pretty-printer \"children\" procedure is not"
-	   " a <gdb:iterator> object"), children);
+      ppscm_print_pp_type_error (
+	_ ("result of pretty-printer \"children\" procedure is not"
+	   " a <gdb:iterator> object"),
+	children);
       goto done;
     }
   iter = children;
@@ -798,25 +797,25 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  break;
 	}
 
-      if (! scm_is_pair (item))
+      if (!scm_is_pair (item))
 	{
-	  ppscm_print_pp_type_error
-	    (_("result of pretty-printer children iterator is not a pair"
+	  ppscm_print_pp_type_error (
+	    _ ("result of pretty-printer children iterator is not a pair"
 	       " or (end-of-iteration)"),
-	     item);
+	    item);
 	  continue;
 	}
       scm_name = scm_car (item);
       v_scm = scm_cdr (item);
       if (!scm_is_string (scm_name))
 	{
-	  ppscm_print_pp_type_error
-	    (_("first element of pretty-printer children iterator is not"
-	       " a string"), item);
+	  ppscm_print_pp_type_error (
+	    _ ("first element of pretty-printer children iterator is not"
+	       " a string"),
+	    item);
 	  continue;
 	}
-      gdb::unique_xmalloc_ptr<char> name
-	= gdbscm_scm_to_c_string (scm_name);
+      gdb::unique_xmalloc_ptr<char> name = gdbscm_scm_to_c_string (scm_name);
 
       /* Print initial "=" to separate print_string_repr output and
 	 children.  For other elements, there are three cases:
@@ -828,7 +827,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  if (!printed_nothing)
 	    gdb_puts (" = ", stream);
 	}
-      else if (! is_map || i % 2 == 0)
+      else if (!is_map || i % 2 == 0)
 	gdb_puts (pretty ? "," : ", ", stream);
 
       /* Skip printing children if max_depth has been reached.  This check
@@ -853,7 +852,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  break;
 	}
 
-      if (! is_map || i % 2 == 0)
+      if (!is_map || i % 2 == 0)
 	{
 	  if (pretty)
 	    {
@@ -861,7 +860,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
-	    stream->wrap_here (2 + 2 *recurse);
+	    stream->wrap_here (2 + 2 * recurse);
 	}
 
       if (is_map && i % 2 == 0)
@@ -873,7 +872,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  if (options->print_array_indexes)
 	    gdb_printf (stream, "[%d] = ", i);
 	}
-      else if (! is_map)
+      else if (!is_map)
 	{
 	  gdb_puts (name.get (), stream);
 	  gdb_puts (" = ", stream);
@@ -897,8 +896,8 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  SCM except_scm;
 	  struct value *value
 	    = vlscm_convert_value_from_scheme (FUNC_NAME, GDBSCM_ARG_NONE,
-					       v_scm, &except_scm,
-					       gdbarch, language);
+					       v_scm, &except_scm, gdbarch,
+					       language);
 
 	  if (value == NULL)
 	    {
@@ -911,8 +910,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 		 level of depth.  This means the key will print before the
 		 value does.  */
 	      struct value_print_options opt = *options;
-	      if (is_map && i % 2 == 0
-		  && opt.max_depth != -1
+	      if (is_map && i % 2 == 0 && opt.max_depth != -1
 		  && opt.max_depth < INT_MAX)
 		++opt.max_depth;
 	      common_val_print (value, stream, recurse + 1, &opt, language);
@@ -942,7 +940,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
       gdb_puts ("}", stream);
     }
 
- done:
+done:
   /* Play it safe, make sure ITER doesn't get GC'd.  */
   scm_remember_upto_here_1 (iter);
 }
@@ -951,8 +949,8 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 
 enum ext_lang_rc
 gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
-				 struct value *value,
-				 struct ui_file *stream, int recurse,
+				 struct value *value, struct ui_file *stream,
+				 int recurse,
 				 const struct value_print_options *options,
 				 const struct language_defn *language)
 {
@@ -1016,26 +1014,23 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 					  options, gdbarch, language);
   if (print_result != STRING_REPR_ERROR)
     {
-      ppscm_print_children (printer, hint, stream, recurse, options,
-			    gdbarch, language,
-			    print_result == STRING_REPR_NONE);
+      ppscm_print_children (printer, hint, stream, recurse, options, gdbarch,
+			    language, print_result == STRING_REPR_NONE);
     }
 
   result = EXT_LANG_RC_OK;
 
- done:
+done:
   if (gdbscm_is_exception (exception))
     ppscm_print_exception_unless_memory_error (exception, stream);
   return result;
 }
-
+
 /* Initialize the Scheme pretty-printer code.  */
 
-static const scheme_function pretty_printer_functions[] =
-{
+static const scheme_function pretty_printer_functions[] = {
   { "make-pretty-printer", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_make_pretty_printer),
-    "\
+    as_a_scm_t_subr (gdbscm_make_pretty_printer), "\
 Create a <gdb:pretty-printer> object.\n\
 \n\
   Arguments: name lookup\n\
@@ -1043,24 +1038,20 @@ Create a <gdb:pretty-printer> object.\n\
     lookup: a procedure:\n\
       (pretty-printer <gdb:value>) -> <gdb:pretty-printer-worker> | #f." },
 
-  { "pretty-printer?", 1, 0, 0, as_a_scm_t_subr (gdbscm_pretty_printer_p),
-    "\
+  { "pretty-printer?", 1, 0, 0, as_a_scm_t_subr (gdbscm_pretty_printer_p), "\
 Return #t if the object is a <gdb:pretty-printer> object." },
 
   { "pretty-printer-enabled?", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_pretty_printer_enabled_p),
-    "\
+    as_a_scm_t_subr (gdbscm_pretty_printer_enabled_p), "\
 Return #t if the pretty-printer is enabled." },
 
   { "set-pretty-printer-enabled!", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_pretty_printer_enabled_x),
-    "\
+    as_a_scm_t_subr (gdbscm_set_pretty_printer_enabled_x), "\
 Set the enabled flag of the pretty-printer.\n\
 Returns \"unspecified\"." },
 
   { "make-pretty-printer-worker", 3, 0, 0,
-    as_a_scm_t_subr (gdbscm_make_pretty_printer_worker),
-    "\
+    as_a_scm_t_subr (gdbscm_make_pretty_printer_worker), "\
 Create a <gdb:pretty-printer-worker> object.\n\
 \n\
   Arguments: display-hint to-string children\n\
@@ -1071,17 +1062,14 @@ Create a <gdb:pretty-printer-worker> object.\n\
       (pretty-printer) -> <gdb:iterator>" },
 
   { "pretty-printer-worker?", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_pretty_printer_worker_p),
-    "\
+    as_a_scm_t_subr (gdbscm_pretty_printer_worker_p), "\
 Return #t if the object is a <gdb:pretty-printer-worker> object." },
 
-  { "pretty-printers", 0, 0, 0, as_a_scm_t_subr (gdbscm_pretty_printers),
-    "\
+  { "pretty-printers", 0, 0, 0, as_a_scm_t_subr (gdbscm_pretty_printers), "\
 Return the list of global pretty-printers." },
 
   { "set-pretty-printers!", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_pretty_printers_x),
-    "\
+    as_a_scm_t_subr (gdbscm_set_pretty_printers_x), "\
 Set the list of global pretty-printers." },
 
   END_FUNCTIONS

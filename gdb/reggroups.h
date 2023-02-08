@@ -25,7 +25,8 @@
 struct gdbarch;
 
 /* The different register group types.  */
-enum reggroup_type {
+enum reggroup_type
+{
   /* Used for any register group that should be visible to the user.
      Architecture specific register groups, as well as most of the default
      groups will have this type.  */
@@ -45,17 +46,17 @@ struct reggroup
   reggroup (const char *name, enum reggroup_type type)
     : m_name (name),
       m_type (type)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* Return the name for this register group.  */
-  const char *name () const
-  { return m_name; }
+  const char *name () const { return m_name; }
 
   /* Return the type of this register group.  */
-  enum reggroup_type type () const
-  { return m_type; }
+  enum reggroup_type type () const { return m_type; }
 
 private:
+
   /* The name of this register group.  */
   const char *m_name;
 
@@ -88,7 +89,7 @@ extern void reggroup_add (struct gdbarch *gdbarch, const reggroup *group);
 
 /* Return the list of all register groups for GDBARCH.  */
 extern const std::vector<const reggroup *> &
-	gdbarch_reggroups (struct gdbarch *gdbarch);
+gdbarch_reggroups (struct gdbarch *gdbarch);
 
 /* Find a reggroup by name.  */
 extern const reggroup *reggroup_find (struct gdbarch *gdbarch,

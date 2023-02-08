@@ -26,7 +26,6 @@
 
 ****************************************************************************/
 
-
 /* Remote communication protocol.
 
    A debug packet whose contents are <data>
@@ -149,31 +148,31 @@
 
 /* Renesas SH architecture instruction encoding masks */
 
-#define COND_BR_MASK   0xff00
+#define COND_BR_MASK 0xff00
 #define UCOND_DBR_MASK 0xe000
 #define UCOND_RBR_MASK 0xf0df
-#define TRAPA_MASK     0xff00
+#define TRAPA_MASK 0xff00
 
-#define COND_DISP      0x00ff
-#define UCOND_DISP     0x0fff
-#define UCOND_REG      0x0f00
+#define COND_DISP 0x00ff
+#define UCOND_DISP 0x0fff
+#define UCOND_REG 0x0f00
 
 /* Renesas SH instruction opcodes */
 
-#define BF_INSTR       0x8b00
-#define BT_INSTR       0x8900
-#define BRA_INSTR      0xa000
-#define BSR_INSTR      0xb000
-#define JMP_INSTR      0x402b
-#define JSR_INSTR      0x400b
-#define RTS_INSTR      0x000b
-#define RTE_INSTR      0x002b
-#define TRAPA_INSTR    0xc300
-#define SSTEP_INSTR    0xc3ff
+#define BF_INSTR 0x8b00
+#define BT_INSTR 0x8900
+#define BRA_INSTR 0xa000
+#define BSR_INSTR 0xb000
+#define JMP_INSTR 0x402b
+#define JSR_INSTR 0x400b
+#define RTS_INSTR 0x000b
+#define RTE_INSTR 0x002b
+#define TRAPA_INSTR 0xc300
+#define SSTEP_INSTR 0xc3ff
 
 /* Renesas SH processor register masks */
 
-#define T_BIT_MASK     0x0001
+#define T_BIT_MASK 0x0001
 
 /*
  * BUFMAX defines the maximum number of characters in inbound/outbound
@@ -184,7 +183,7 @@
 /*
  * Number of bytes for registers
  */
-#define NUMREGBYTES 112		/* 92 */
+#define NUMREGBYTES 112 /* 92 */
 
 /*
  * typedef
@@ -204,7 +203,7 @@ static void putpacket (char *);
 static void handle_buserror (void);
 static int computeSignal (int exceptionVector);
 static void handle_exception (int exceptionVector);
-void init_serial();
+void init_serial ();
 
 void putDebugChar (char);
 char getDebugChar (void);
@@ -219,36 +218,32 @@ void catch_exception_32 (void);
 void catch_exception_33 (void);
 void catch_exception_255 (void);
 
-
-
-#define catch_exception_random catch_exception_255 /* Treat all odd ones like 255 */
+#define catch_exception_random \
+  catch_exception_255 /* Treat all odd ones like 255 */
 
 void breakpoint (void);
 
+#define init_stack_size \
+  8 * 1024 /* if you change this you should also modify BINIT */
+#define stub_stack_size 8 * 1024
 
-#define init_stack_size 8*1024  /* if you change this you should also modify BINIT */
-#define stub_stack_size 8*1024
-
-int init_stack[init_stack_size] __attribute__ ((section ("stack"))) = {0};
-int stub_stack[stub_stack_size] __attribute__ ((section ("stack"))) = {0};
-
+int init_stack[init_stack_size] __attribute__ ((section ("stack"))) = { 0 };
+int stub_stack[stub_stack_size] __attribute__ ((section ("stack"))) = { 0 };
 
 void INIT ();
 void BINIT ();
 
-#define CPU_BUS_ERROR_VEC  9
+#define CPU_BUS_ERROR_VEC 9
 #define DMA_BUS_ERROR_VEC 10
-#define NMI_VEC           11
-#define INVALID_INSN_VEC   4
-#define INVALID_SLOT_VEC   6
-#define TRAP_VEC          32
-#define IO_VEC            33
-#define USER_VEC         255
+#define NMI_VEC 11
+#define INVALID_INSN_VEC 4
+#define INVALID_SLOT_VEC 6
+#define TRAP_VEC 32
+#define IO_VEC 33
+#define USER_VEC 255
 
-
-
-char in_nmi;   /* Set when handling an NMI, so we don't reenter */
-int dofault;  /* Non zero, bus errors will raise exception */
+char in_nmi; /* Set when handling an NMI, so we don't reenter */
+int dofault; /* Non zero, bus errors will raise exception */
 
 int *stub_sp;
 
@@ -259,19 +254,42 @@ int remote_debug;
 jmp_buf remcomEnv;
 
 enum regnames
-  {
-    R0, R1, R2, R3, R4, R5, R6, R7,
-    R8, R9, R10, R11, R12, R13, R14,
-    R15, PC, PR, GBR, VBR, MACH, MACL, SR,
-    TICKS, STALLS, CYCLES, INSTS, PLR
-  };
+{
+  R0,
+  R1,
+  R2,
+  R3,
+  R4,
+  R5,
+  R6,
+  R7,
+  R8,
+  R9,
+  R10,
+  R11,
+  R12,
+  R13,
+  R14,
+  R15,
+  PC,
+  PR,
+  GBR,
+  VBR,
+  MACH,
+  MACL,
+  SR,
+  TICKS,
+  STALLS,
+  CYCLES,
+  INSTS,
+  PLR
+};
 
 typedef struct
-  {
-    short *memAddr;
-    short oldInstr;
-  }
-stepData;
+{
+  short *memAddr;
+  short oldInstr;
+} stepData;
 
 int registers[NUMREGBYTES / 4];
 stepData instrBuffer;
@@ -280,12 +298,14 @@ static const char hexchars[] = "0123456789abcdef";
 static char remcomInBuffer[BUFMAX];
 static char remcomOutBuffer[BUFMAX];
 
-char highhex(int  x)
+char
+highhex (int x)
 {
   return hexchars[(x >> 4) & 0xf];
 }
 
-char lowhex(int  x)
+char
+lowhex (int x)
 {
   return hexchars[x & 0xf];
 }
@@ -294,8 +314,7 @@ char lowhex(int  x)
  * Assembly macros
  */
 
-#define BREAKPOINT()   asm("trapa	#0x20"::);
-
+#define BREAKPOINT() asm ("trapa	#0x20" ::);
 
 /*
  * Routines to handle hex data
@@ -397,7 +416,7 @@ getpacket (void)
       while ((ch = getDebugChar ()) != '$')
 	;
 
-retry:
+    retry:
       checksum = 0;
       xmitcsum = -1;
       count = 0;
@@ -425,11 +444,11 @@ retry:
 
 	  if (checksum != xmitcsum)
 	    {
-	      putDebugChar ('-');	/* failed checksum */
+	      putDebugChar ('-'); /* failed checksum */
 	    }
 	  else
 	    {
-	      putDebugChar ('+');	/* successful transfer */
+	      putDebugChar ('+'); /* successful transfer */
 
 	      /* if a sequence char is present, reply the sequence ID */
 	      if (buffer[2] == ':')
@@ -445,7 +464,6 @@ retry:
 	}
     }
 }
-
 
 /* send the packet in buffer. */
 
@@ -467,11 +485,11 @@ putpacket (char *buffer)
 	  int runlen;
 
 	  /* Do run length encoding */
-	  for (runlen = 0; runlen < 100; runlen ++) 
+	  for (runlen = 0; runlen < 100; runlen++)
 	    {
-	      if (src[0] != src[runlen]) 
+	      if (src[0] != src[runlen])
 		{
-		  if (runlen > 3) 
+		  if (runlen > 3)
 		    {
 		      int encode;
 		      /* Got a useful amount */
@@ -494,14 +512,12 @@ putpacket (char *buffer)
 	    }
 	}
 
-
       putDebugChar ('#');
-      putDebugChar (highhex(checksum));
-      putDebugChar (lowhex(checksum));
+      putDebugChar (highhex (checksum));
+      putDebugChar (lowhex (checksum));
     }
-  while  (getDebugChar() != '+');
+  while (getDebugChar () != '+');
 }
-
 
 /* a bus error has occurred, perform a longjmp
    to return execution and allow handling of the error */
@@ -524,19 +540,19 @@ computeSignal (int exceptionVector)
     {
     case INVALID_INSN_VEC:
       sigval = 4;
-      break;			
+      break;
     case INVALID_SLOT_VEC:
       sigval = 4;
-      break;			
+      break;
     case CPU_BUS_ERROR_VEC:
       sigval = 10;
-      break;			
+      break;
     case DMA_BUS_ERROR_VEC:
       sigval = 10;
-      break;	
+      break;
     case NMI_VEC:
       sigval = 2;
-      break;	
+      break;
 
     case TRAP_VEC:
     case USER_VEC:
@@ -544,7 +560,7 @@ computeSignal (int exceptionVector)
       break;
 
     default:
-      sigval = 7;		/* "software generated"*/
+      sigval = 7; /* "software generated"*/
       break;
     }
   return (sigval);
@@ -627,7 +643,6 @@ doSStep (void)
   *instrMem = SSTEP_INSTR;
 }
 
-
 /* Undo the effect of a previous doSStep.  If we single stepped,
    restore the old instruction. */
 
@@ -635,7 +650,8 @@ void
 undoSStep (void)
 {
   if (stepped)
-    {  short *instrMem;
+    {
+      short *instrMem;
       instrMem = instrBuffer.memAddr;
       *instrMem = instrBuffer.oldInstr;
     }
@@ -651,7 +667,6 @@ When in the monitor mode we talk a human on the serial line rather than gdb.
 
 */
 
-
 void
 gdb_handle_exception (int exceptionVector)
 {
@@ -662,7 +677,7 @@ gdb_handle_exception (int exceptionVector)
   /* reply to host that an exception has occurred */
   sigval = computeSignal (exceptionVector);
   remcomOutBuffer[0] = 'S';
-  remcomOutBuffer[1] = highhex(sigval);
+  remcomOutBuffer[1] = highhex (sigval);
   remcomOutBuffer[2] = lowhex (sigval);
   remcomOutBuffer[3] = 0;
 
@@ -674,8 +689,7 @@ gdb_handle_exception (int exceptionVector)
    * PC by one instruction, since this instruction
    * will later be replaced by its original one!
    */
-  if (exceptionVector == 0xff
-      || exceptionVector == 0x20)
+  if (exceptionVector == 0xff || exceptionVector == 0x20)
     registers[PC] -= 2;
 
   /*
@@ -700,12 +714,12 @@ gdb_handle_exception (int exceptionVector)
 	  remcomOutBuffer[3] = 0;
 	  break;
 	case 'd':
-	  remote_debug = !(remote_debug);	/* toggle debug flag */
+	  remote_debug = !(remote_debug); /* toggle debug flag */
 	  break;
-	case 'g':		/* return the value of the CPU registers */
+	case 'g': /* return the value of the CPU registers */
 	  mem2hex ((char *) registers, remcomOutBuffer, NUMREGBYTES);
 	  break;
-	case 'G':		/* set the value of the CPU registers - return OK */
+	case 'G': /* set the value of the CPU registers - return OK */
 	  hex2mem (ptr, (char *) registers, NUMREGBYTES);
 	  strcpy (remcomOutBuffer, "OK");
 	  break;
@@ -776,37 +790,38 @@ gdb_handle_exception (int exceptionVector)
 	  break;
 
 	  /* kill the program */
-	case 'k':		/* do nothing */
+	case 'k': /* do nothing */
 	  break;
-	}			/* switch */
+	} /* switch */
 
       /* reply to the request */
       putpacket (remcomOutBuffer);
     }
 }
 
-
-#define GDBCOOKIE 0x5ac 
+#define GDBCOOKIE 0x5ac
 static int ingdbmode;
+
 /* We've had an exception - choose to go into the monitor or
    the gdb stub */
-void handle_exception(int exceptionVector)
+void
+handle_exception (int exceptionVector)
 {
 #ifdef MONITOR
-    if (ingdbmode != GDBCOOKIE)
-      monitor_handle_exception (exceptionVector);
-    else 
+  if (ingdbmode != GDBCOOKIE)
+    monitor_handle_exception (exceptionVector);
+  else
 #endif
-      gdb_handle_exception (exceptionVector);
-
+    gdb_handle_exception (exceptionVector);
 }
 
 void
 gdb_mode (void)
 {
   ingdbmode = GDBCOOKIE;
-  breakpoint();
+  breakpoint ();
 }
+
 /* This function will generate a breakpoint exception.  It is used at the
    beginning of a program to sync up with a debugger and can be used
    otherwise as a quick means to stop program execution and "break" into
@@ -815,7 +830,7 @@ gdb_mode (void)
 void
 breakpoint (void)
 {
-      BREAKPOINT ();
+  BREAKPOINT ();
 }
 
 /**** Processor-specific routines start here ****/
@@ -842,299 +857,176 @@ breakpoint (void)
 /* SH1/SH2 exception vector table format */
 
 typedef struct
-  {
-    void (*func_cold) ();
-    int *stack_cold;
-    void (*func_warm) ();
-    int *stack_warm;
-    void (*(handler[256 - 4])) ();
-  }
-vec_type;
+{
+  void (*func_cold) ();
+  int *stack_cold;
+  void (*func_warm) ();
+  int *stack_warm;
+  void (*(handler[256 - 4])) ();
+} vec_type;
 
 /* vectable is the SH1/SH2 vector table. It must be at address 0
    or wherever your vbr points. */
 
-const vec_type vectable =
-{ 
+const vec_type vectable = {
   &BINIT,			/* 0: Power-on reset PC */
   init_stack + init_stack_size, /* 1: Power-on reset SP */
   &BINIT,			/* 2: Manual reset PC */
   init_stack + init_stack_size, /* 3: Manual reset SP */
-{
-  &catch_exception_4,		/* 4: General invalid instruction */
-  &catch_exception_random,	/* 5: Reserved for system */
-  &catch_exception_6,		/* 6: Invalid slot instruction */
-  &catch_exception_random,	/* 7: Reserved for system */
-  &catch_exception_random,	/* 8: Reserved for system */
-  &catch_exception_9,		/* 9: CPU bus error */
-  &catch_exception_10,		/* 10: DMA bus error */
-  &catch_exception_11,		/* 11: NMI */
-  &catch_exception_random,	/* 12: User break */
-  &catch_exception_random,	/* 13: Reserved for system */
-  &catch_exception_random,	/* 14: Reserved for system */
-  &catch_exception_random,	/* 15: Reserved for system */
-  &catch_exception_random,	/* 16: Reserved for system */
-  &catch_exception_random,	/* 17: Reserved for system */
-  &catch_exception_random,	/* 18: Reserved for system */
-  &catch_exception_random,	/* 19: Reserved for system */
-  &catch_exception_random,	/* 20: Reserved for system */
-  &catch_exception_random,	/* 21: Reserved for system */
-  &catch_exception_random,	/* 22: Reserved for system */
-  &catch_exception_random,	/* 23: Reserved for system */
-  &catch_exception_random,	/* 24: Reserved for system */
-  &catch_exception_random,	/* 25: Reserved for system */
-  &catch_exception_random,	/* 26: Reserved for system */
-  &catch_exception_random,	/* 27: Reserved for system */
-  &catch_exception_random,	/* 28: Reserved for system */
-  &catch_exception_random,	/* 29: Reserved for system */
-  &catch_exception_random,	/* 30: Reserved for system */
-  &catch_exception_random,	/* 31: Reserved for system */
-  &catch_exception_32,		/* 32: Trap instr (user vectors) */
-  &catch_exception_33,		/* 33: Trap instr (user vectors) */
-  &catch_exception_random,	/* 34: Trap instr (user vectors) */
-  &catch_exception_random,	/* 35: Trap instr (user vectors) */
-  &catch_exception_random,	/* 36: Trap instr (user vectors) */
-  &catch_exception_random,	/* 37: Trap instr (user vectors) */
-  &catch_exception_random,	/* 38: Trap instr (user vectors) */
-  &catch_exception_random,	/* 39: Trap instr (user vectors) */
-  &catch_exception_random,	/* 40: Trap instr (user vectors) */
-  &catch_exception_random,	/* 41: Trap instr (user vectors) */
-  &catch_exception_random,	/* 42: Trap instr (user vectors) */
-  &catch_exception_random,	/* 43: Trap instr (user vectors) */
-  &catch_exception_random,	/* 44: Trap instr (user vectors) */
-  &catch_exception_random,	/* 45: Trap instr (user vectors) */
-  &catch_exception_random,	/* 46: Trap instr (user vectors) */
-  &catch_exception_random,	/* 47: Trap instr (user vectors) */
-  &catch_exception_random,	/* 48: Trap instr (user vectors) */
-  &catch_exception_random,	/* 49: Trap instr (user vectors) */
-  &catch_exception_random,	/* 50: Trap instr (user vectors) */
-  &catch_exception_random,	/* 51: Trap instr (user vectors) */
-  &catch_exception_random,	/* 52: Trap instr (user vectors) */
-  &catch_exception_random,	/* 53: Trap instr (user vectors) */
-  &catch_exception_random,	/* 54: Trap instr (user vectors) */
-  &catch_exception_random,	/* 55: Trap instr (user vectors) */
-  &catch_exception_random,	/* 56: Trap instr (user vectors) */
-  &catch_exception_random,	/* 57: Trap instr (user vectors) */
-  &catch_exception_random,	/* 58: Trap instr (user vectors) */
-  &catch_exception_random,	/* 59: Trap instr (user vectors) */
-  &catch_exception_random,	/* 60: Trap instr (user vectors) */
-  &catch_exception_random,	/* 61: Trap instr (user vectors) */
-  &catch_exception_random,	/* 62: Trap instr (user vectors) */
-  &catch_exception_random,	/* 63: Trap instr (user vectors) */
-  &catch_exception_random,	/* 64: IRQ0 */
-  &catch_exception_random,	/* 65: IRQ1 */
-  &catch_exception_random,	/* 66: IRQ2 */
-  &catch_exception_random,	/* 67: IRQ3 */
-  &catch_exception_random,	/* 68: IRQ4 */
-  &catch_exception_random,	/* 69: IRQ5 */
-  &catch_exception_random,	/* 70: IRQ6 */
-  &catch_exception_random,	/* 71: IRQ7 */
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_255}};
+  { &catch_exception_4,		/* 4: General invalid instruction */
+    &catch_exception_random,	/* 5: Reserved for system */
+    &catch_exception_6,		/* 6: Invalid slot instruction */
+    &catch_exception_random,	/* 7: Reserved for system */
+    &catch_exception_random,	/* 8: Reserved for system */
+    &catch_exception_9,		/* 9: CPU bus error */
+    &catch_exception_10,	/* 10: DMA bus error */
+    &catch_exception_11,	/* 11: NMI */
+    &catch_exception_random,	/* 12: User break */
+    &catch_exception_random,	/* 13: Reserved for system */
+    &catch_exception_random,	/* 14: Reserved for system */
+    &catch_exception_random,	/* 15: Reserved for system */
+    &catch_exception_random,	/* 16: Reserved for system */
+    &catch_exception_random,	/* 17: Reserved for system */
+    &catch_exception_random,	/* 18: Reserved for system */
+    &catch_exception_random,	/* 19: Reserved for system */
+    &catch_exception_random,	/* 20: Reserved for system */
+    &catch_exception_random,	/* 21: Reserved for system */
+    &catch_exception_random,	/* 22: Reserved for system */
+    &catch_exception_random,	/* 23: Reserved for system */
+    &catch_exception_random,	/* 24: Reserved for system */
+    &catch_exception_random,	/* 25: Reserved for system */
+    &catch_exception_random,	/* 26: Reserved for system */
+    &catch_exception_random,	/* 27: Reserved for system */
+    &catch_exception_random,	/* 28: Reserved for system */
+    &catch_exception_random,	/* 29: Reserved for system */
+    &catch_exception_random,	/* 30: Reserved for system */
+    &catch_exception_random,	/* 31: Reserved for system */
+    &catch_exception_32,	/* 32: Trap instr (user vectors) */
+    &catch_exception_33,	/* 33: Trap instr (user vectors) */
+    &catch_exception_random,	/* 34: Trap instr (user vectors) */
+    &catch_exception_random,	/* 35: Trap instr (user vectors) */
+    &catch_exception_random,	/* 36: Trap instr (user vectors) */
+    &catch_exception_random,	/* 37: Trap instr (user vectors) */
+    &catch_exception_random,	/* 38: Trap instr (user vectors) */
+    &catch_exception_random,	/* 39: Trap instr (user vectors) */
+    &catch_exception_random,	/* 40: Trap instr (user vectors) */
+    &catch_exception_random,	/* 41: Trap instr (user vectors) */
+    &catch_exception_random,	/* 42: Trap instr (user vectors) */
+    &catch_exception_random,	/* 43: Trap instr (user vectors) */
+    &catch_exception_random,	/* 44: Trap instr (user vectors) */
+    &catch_exception_random,	/* 45: Trap instr (user vectors) */
+    &catch_exception_random,	/* 46: Trap instr (user vectors) */
+    &catch_exception_random,	/* 47: Trap instr (user vectors) */
+    &catch_exception_random,	/* 48: Trap instr (user vectors) */
+    &catch_exception_random,	/* 49: Trap instr (user vectors) */
+    &catch_exception_random,	/* 50: Trap instr (user vectors) */
+    &catch_exception_random,	/* 51: Trap instr (user vectors) */
+    &catch_exception_random,	/* 52: Trap instr (user vectors) */
+    &catch_exception_random,	/* 53: Trap instr (user vectors) */
+    &catch_exception_random,	/* 54: Trap instr (user vectors) */
+    &catch_exception_random,	/* 55: Trap instr (user vectors) */
+    &catch_exception_random,	/* 56: Trap instr (user vectors) */
+    &catch_exception_random,	/* 57: Trap instr (user vectors) */
+    &catch_exception_random,	/* 58: Trap instr (user vectors) */
+    &catch_exception_random,	/* 59: Trap instr (user vectors) */
+    &catch_exception_random,	/* 60: Trap instr (user vectors) */
+    &catch_exception_random,	/* 61: Trap instr (user vectors) */
+    &catch_exception_random,	/* 62: Trap instr (user vectors) */
+    &catch_exception_random,	/* 63: Trap instr (user vectors) */
+    &catch_exception_random,	/* 64: IRQ0 */
+    &catch_exception_random,	/* 65: IRQ1 */
+    &catch_exception_random,	/* 66: IRQ2 */
+    &catch_exception_random,	/* 67: IRQ3 */
+    &catch_exception_random,	/* 68: IRQ4 */
+    &catch_exception_random,	/* 69: IRQ5 */
+    &catch_exception_random,	/* 70: IRQ6 */
+    &catch_exception_random,	/* 71: IRQ7 */
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_random, &catch_exception_random, &catch_exception_random,
+    &catch_exception_255 }
+};
 
-#define BCR  (*(volatile short *)(0x05FFFFA0)) /* Bus control register */
-#define BAS  (0x800)				/* Byte access select */
-#define WCR1 (*(volatile short *)(0x05ffffA2)) /* Wait state control register */
+#define BCR (*(volatile short *) (0x05FFFFA0)) /* Bus control register */
+#define BAS (0x800)			       /* Byte access select */
+#define WCR1 \
+  (*(volatile short *) (0x05ffffA2)) /* Wait state control register */
 
 asm ("_BINIT: mov.l  L1,r15");
 asm ("bra _INIT");
 asm ("nop");
 asm ("L1: .long _init_stack + 8*1024*4");
+
 void
 INIT (void)
 {
   /* First turn on the ram */
-  WCR1  = 0;    /* Never sample wait */
-  BCR = BAS;    /* use lowbyte/high byte */
+  WCR1 = 0;  /* Never sample wait */
+  BCR = BAS; /* use lowbyte/high byte */
 
-  init_serial();
+  init_serial ();
 
 #ifdef MONITOR
   reset_hook ();
 #endif
-
 
   in_nmi = 0;
   dofault = 1;
@@ -1147,11 +1039,9 @@ INIT (void)
     ;
 }
 
-
-static void sr()
+static void
+sr ()
 {
-
-
   /* Calling Reset does the same as pressing the button */
   asm (".global _Reset
 	.global _WarmReset
@@ -1214,10 +1104,10 @@ L_stubstack:
 	.long	_stub_sp
 L_hdl_except:
 	.long	_handle_exception");
-
 }
 
-static void rr()
+static void
+rr ()
 {
 asm("
 	.align 2	
@@ -1263,230 +1153,245 @@ restoreRegisters:
 ");
 }
 
-
-static __inline__ void code_for_catch_exception(int n) 
+static __inline__ void
+code_for_catch_exception (int n)
 {
-  asm("		.globl	_catch_exception_%O0" : : "i" (n) 				); 
-  asm("	_catch_exception_%O0:" :: "i" (n)      						);
+asm ("		.globl	_catch_exception_%O0" : : "i"(n));
+asm ("	_catch_exception_%O0:" ::"i"(n));
 
-  asm("		add	#-4, r15 				! reserve spot on stack ");
-  asm("		mov.l	r1, @-r15				! push R1		");
+asm ("		add	#-4, r15 				! reserve "
+     "spot on stack ");
+asm ("		mov.l	r1, @-r15				! push "
+     "R1		");
 
-  if (n == NMI_VEC) 
-    {
-      /* Special case for NMI - make sure that they don't nest */
-      asm("	mov.l	r0, @-r15					! push R0");
-      asm("	mov.l	L_in_nmi, r0");
-      asm("	tas.b	@r0						! Fend off against addtnl NMIs");
-      asm("	bt		noNMI");
-      asm("	mov.l	@r15+, r0");
-      asm("	mov.l	@r15+, r1");
-      asm("	add		#4, r15");
-      asm("	rte");
-      asm("	nop");
-      asm(".align 2");
-      asm("L_in_nmi: .long	_in_nmi");
-      asm("noNMI:");
-    }
-  else
-    {
-
-      if (n == CPU_BUS_ERROR_VEC)
-	{
-	  /* Exception 9 (bus errors) are disasbleable - so that you
+if (n == NMI_VEC)
+  {
+    /* Special case for NMI - make sure that they don't nest */
+    asm ("	mov.l	r0, @-r15					! "
+	 "push R0");
+    asm ("	mov.l	L_in_nmi, r0");
+    asm ("	tas.b	@r0						! "
+	 "Fend off against addtnl NMIs");
+    asm ("	bt		noNMI");
+    asm ("	mov.l	@r15+, r0");
+    asm ("	mov.l	@r15+, r1");
+    asm ("	add		#4, r15");
+    asm ("	rte");
+    asm ("	nop");
+    asm (".align 2");
+    asm ("L_in_nmi: .long	_in_nmi");
+    asm ("noNMI:");
+  }
+else
+  {
+    if (n == CPU_BUS_ERROR_VEC)
+      {
+	/* Exception 9 (bus errors) are disasbleable - so that you
 	     can probe memory and get zero instead of a fault.
 	     Because the vector table may be in ROM we don't revector
 	     the interrupt like all the other stubs, we check in here
 	     */
-	  asm("mov.l	L_dofault,r1");
-	  asm("mov.l	@r1,r1");
-	  asm("tst	r1,r1");
-	  asm("bf	faultaway");
-	  asm("bsr	_handle_buserror");
-	  asm(".align	2");
-	  asm("L_dofault: .long _dofault");
-	  asm("faultaway:");
-	}
-      asm("		mov	#15<<4, r1							");
-      asm("		ldc	r1, sr					! disable interrupts	");
-      asm("		mov.l	r0, @-r15				! push R0		");
-    }
+	asm ("mov.l	L_dofault,r1");
+	asm ("mov.l	@r1,r1");
+	asm ("tst	r1,r1");
+	asm ("bf	faultaway");
+	asm ("bsr	_handle_buserror");
+	asm (".align	2");
+	asm ("L_dofault: .long _dofault");
+	asm ("faultaway:");
+      }
+    asm ("		mov	#15<<4, r1				"
+	 "			");
+    asm ("		ldc	r1, sr					! "
+	 "disable interrupts	");
+    asm ("		mov.l	r0, @-r15				! "
+	 "push R0		");
+  }
 
-  /* Prepare for saving context, we've already pushed r0 and r1, stick exception number
+/* Prepare for saving context, we've already pushed r0 and r1, stick exception number
      into the frame */
-  asm("		mov	r15, r0								");
-  asm("		add	#8, r0								");
-  asm("		mov	%0,r1" :: "i" (n)        					);
-  asm("		extu.b  r1,r1								");
-  asm("		bra	saveRegisters				! save register values	");
-  asm("		mov.l	r1, @r0					! save exception # 	");
+asm ("		mov	r15, r0						"
+     "		");
+asm ("		add	#8, r0						"
+     "		");
+asm ("		mov	%0,r1" ::"i"(n));
+asm ("		extu.b  r1,r1						"
+     "		");
+asm ("		bra	saveRegisters				! save "
+     "register values	");
+asm ("		mov.l	r1, @r0					! save "
+     "exception # 	");
 }
 
-
-static  void
+static void
 exceptions (void)
 {
-  code_for_catch_exception (CPU_BUS_ERROR_VEC);
-  code_for_catch_exception (DMA_BUS_ERROR_VEC);
-  code_for_catch_exception (INVALID_INSN_VEC);
-  code_for_catch_exception (INVALID_SLOT_VEC);
-  code_for_catch_exception (NMI_VEC);
-  code_for_catch_exception (TRAP_VEC);
-  code_for_catch_exception (USER_VEC);
-  code_for_catch_exception (IO_VEC);
+code_for_catch_exception (CPU_BUS_ERROR_VEC);
+code_for_catch_exception (DMA_BUS_ERROR_VEC);
+code_for_catch_exception (INVALID_INSN_VEC);
+code_for_catch_exception (INVALID_SLOT_VEC);
+code_for_catch_exception (NMI_VEC);
+code_for_catch_exception (TRAP_VEC);
+code_for_catch_exception (USER_VEC);
+code_for_catch_exception (IO_VEC);
 }
-
-
-
-
-
 
 /* Support for Serial I/O using on chip uart */
 
-#define SMR0 (*(volatile char *)(0x05FFFEC0)) /* Channel 0  serial mode register */
-#define BRR0 (*(volatile char *)(0x05FFFEC1)) /* Channel 0  bit rate register */
-#define SCR0 (*(volatile char *)(0x05FFFEC2)) /* Channel 0  serial control register */
-#define TDR0 (*(volatile char *)(0x05FFFEC3)) /* Channel 0  transmit data register */
-#define SSR0 (*(volatile char *)(0x05FFFEC4)) /* Channel 0  serial status register */
-#define RDR0 (*(volatile char *)(0x05FFFEC5)) /* Channel 0  receive data register */
+#define SMR0 \
+  (*(volatile char *) (0x05FFFEC0)) /* Channel 0  serial mode register */
+#define BRR0 \
+  (*(volatile char *) (0x05FFFEC1)) /* Channel 0  bit rate register */
+#define SCR0 \
+  (*(volatile char *) (0x05FFFEC2)) /* Channel 0  serial control register */
+#define TDR0 \
+  (*(volatile char *) (0x05FFFEC3)) /* Channel 0  transmit data register */
+#define SSR0 \
+  (*(volatile char *) (0x05FFFEC4)) /* Channel 0  serial status register */
+#define RDR0 \
+  (*(volatile char *) (0x05FFFEC5)) /* Channel 0  receive data register */
 
-#define SMR1 (*(volatile char *)(0x05FFFEC8)) /* Channel 1  serial mode register */
-#define BRR1 (*(volatile char *)(0x05FFFEC9)) /* Channel 1  bit rate register */
-#define SCR1 (*(volatile char *)(0x05FFFECA)) /* Channel 1  serial control register */
-#define TDR1 (*(volatile char *)(0x05FFFECB)) /* Channel 1  transmit data register */
-#define SSR1 (*(volatile char *)(0x05FFFECC)) /* Channel 1  serial status register */
-#define RDR1 (*(volatile char *)(0x05FFFECD)) /* Channel 1  receive data register */
+#define SMR1 \
+  (*(volatile char *) (0x05FFFEC8)) /* Channel 1  serial mode register */
+#define BRR1 \
+  (*(volatile char *) (0x05FFFEC9)) /* Channel 1  bit rate register */
+#define SCR1 \
+  (*(volatile char *) (0x05FFFECA)) /* Channel 1  serial control register */
+#define TDR1 \
+  (*(volatile char *) (0x05FFFECB)) /* Channel 1  transmit data register */
+#define SSR1 \
+  (*(volatile char *) (0x05FFFECC)) /* Channel 1  serial status register */
+#define RDR1 \
+  (*(volatile char *) (0x05FFFECD)) /* Channel 1  receive data register */
 
 /*
  * Serial mode register bits
  */
 
-#define SYNC_MODE 		0x80
-#define SEVEN_BIT_DATA 		0x40
-#define PARITY_ON		0x20
-#define ODD_PARITY		0x10
-#define STOP_BITS_2		0x08
-#define ENABLE_MULTIP		0x04
-#define PHI_64			0x03
-#define PHI_16			0x02
-#define PHI_4			0x01
+#define SYNC_MODE 0x80
+#define SEVEN_BIT_DATA 0x40
+#define PARITY_ON 0x20
+#define ODD_PARITY 0x10
+#define STOP_BITS_2 0x08
+#define ENABLE_MULTIP 0x04
+#define PHI_64 0x03
+#define PHI_16 0x02
+#define PHI_4 0x01
 
 /*
  * Serial control register bits
  */
-#define SCI_TIE				0x80	/* Transmit interrupt enable */
-#define SCI_RIE				0x40	/* Receive interrupt enable */
-#define SCI_TE				0x20	/* Transmit enable */
-#define SCI_RE				0x10	/* Receive enable */
-#define SCI_MPIE			0x08	/* Multiprocessor interrupt enable */
-#define SCI_TEIE			0x04	/* Transmit end interrupt enable */
-#define SCI_CKE1			0x02	/* Clock enable 1 */
-#define SCI_CKE0			0x01	/* Clock enable 0 */
+#define SCI_TIE 0x80  /* Transmit interrupt enable */
+#define SCI_RIE 0x40  /* Receive interrupt enable */
+#define SCI_TE 0x20   /* Transmit enable */
+#define SCI_RE 0x10   /* Receive enable */
+#define SCI_MPIE 0x08 /* Multiprocessor interrupt enable */
+#define SCI_TEIE 0x04 /* Transmit end interrupt enable */
+#define SCI_CKE1 0x02 /* Clock enable 1 */
+#define SCI_CKE0 0x01 /* Clock enable 0 */
 
 /*
  * Serial status register bits
  */
-#define SCI_TDRE			0x80	/* Transmit data register empty */
-#define SCI_RDRF			0x40	/* Receive data register full */
-#define SCI_ORER			0x20	/* Overrun error */
-#define SCI_FER				0x10	/* Framing error */
-#define SCI_PER				0x08	/* Parity error */
-#define SCI_TEND			0x04	/* Transmit end */
-#define SCI_MPB				0x02	/* Multiprocessor bit */
-#define SCI_MPBT			0x01	/* Multiprocessor bit transfer */
-
+#define SCI_TDRE 0x80 /* Transmit data register empty */
+#define SCI_RDRF 0x40 /* Receive data register full */
+#define SCI_ORER 0x20 /* Overrun error */
+#define SCI_FER 0x10  /* Framing error */
+#define SCI_PER 0x08  /* Parity error */
+#define SCI_TEND 0x04 /* Transmit end */
+#define SCI_MPB 0x02  /* Multiprocessor bit */
+#define SCI_MPBT 0x01 /* Multiprocessor bit transfer */
 
 /*
  * Port B IO Register (PBIOR)
  */
-#define	PBIOR 		(*(volatile char *)(0x05FFFFC6))
-#define	PB15IOR 	0x8000
-#define	PB14IOR 	0x4000
-#define	PB13IOR 	0x2000
-#define	PB12IOR 	0x1000
-#define	PB11IOR 	0x0800
-#define	PB10IOR 	0x0400
-#define	PB9IOR 		0x0200
-#define	PB8IOR 		0x0100
-#define	PB7IOR 		0x0080
-#define	PB6IOR 		0x0040
-#define	PB5IOR 		0x0020
-#define	PB4IOR 		0x0010
-#define	PB3IOR 		0x0008
-#define	PB2IOR 		0x0004
-#define	PB1IOR 		0x0002
-#define	PB0IOR 		0x0001
+#define PBIOR (*(volatile char *) (0x05FFFFC6))
+#define PB15IOR 0x8000
+#define PB14IOR 0x4000
+#define PB13IOR 0x2000
+#define PB12IOR 0x1000
+#define PB11IOR 0x0800
+#define PB10IOR 0x0400
+#define PB9IOR 0x0200
+#define PB8IOR 0x0100
+#define PB7IOR 0x0080
+#define PB6IOR 0x0040
+#define PB5IOR 0x0020
+#define PB4IOR 0x0010
+#define PB3IOR 0x0008
+#define PB2IOR 0x0004
+#define PB1IOR 0x0002
+#define PB0IOR 0x0001
 
 /*
  * Port B Control Register (PBCR1)
  */
-#define	PBCR1 		(*(volatile short *)(0x05FFFFCC))
-#define	PB15MD1 	0x8000
-#define	PB15MD0 	0x4000
-#define	PB14MD1 	0x2000
-#define	PB14MD0 	0x1000
-#define	PB13MD1 	0x0800
-#define	PB13MD0 	0x0400
-#define	PB12MD1 	0x0200
-#define	PB12MD0 	0x0100
-#define	PB11MD1 	0x0080
-#define	PB11MD0 	0x0040
-#define	PB10MD1 	0x0020
-#define	PB10MD0 	0x0010
-#define	PB9MD1 		0x0008
-#define	PB9MD0 		0x0004
-#define	PB8MD1 		0x0002
-#define	PB8MD0 		0x0001
+#define PBCR1 (*(volatile short *) (0x05FFFFCC))
+#define PB15MD1 0x8000
+#define PB15MD0 0x4000
+#define PB14MD1 0x2000
+#define PB14MD0 0x1000
+#define PB13MD1 0x0800
+#define PB13MD0 0x0400
+#define PB12MD1 0x0200
+#define PB12MD0 0x0100
+#define PB11MD1 0x0080
+#define PB11MD0 0x0040
+#define PB10MD1 0x0020
+#define PB10MD0 0x0010
+#define PB9MD1 0x0008
+#define PB9MD0 0x0004
+#define PB8MD1 0x0002
+#define PB8MD0 0x0001
 
-#define	PB15MD 		PB15MD1|PB14MD0
-#define	PB14MD 		PB14MD1|PB14MD0
-#define	PB13MD 		PB13MD1|PB13MD0
-#define	PB12MD 		PB12MD1|PB12MD0
-#define	PB11MD 		PB11MD1|PB11MD0
-#define	PB10MD 		PB10MD1|PB10MD0
-#define	PB9MD 		PB9MD1|PB9MD0
-#define	PB8MD 		PB8MD1|PB8MD0
+#define PB15MD PB15MD1 | PB14MD0
+#define PB14MD PB14MD1 | PB14MD0
+#define PB13MD PB13MD1 | PB13MD0
+#define PB12MD PB12MD1 | PB12MD0
+#define PB11MD PB11MD1 | PB11MD0
+#define PB10MD PB10MD1 | PB10MD0
+#define PB9MD PB9MD1 | PB9MD0
+#define PB8MD PB8MD1 | PB8MD0
 
-#define PB_TXD1 	PB11MD1
-#define PB_RXD1 	PB10MD1
-#define PB_TXD0 	PB9MD1
-#define PB_RXD0 	PB8MD1
+#define PB_TXD1 PB11MD1
+#define PB_RXD1 PB10MD1
+#define PB_TXD0 PB9MD1
+#define PB_RXD0 PB8MD1
 
 /*
  * Port B Control Register (PBCR2)
  */
-#define	PBCR2 	0x05FFFFCE
-#define	PB7MD1 	0x8000
-#define	PB7MD0 	0x4000
-#define	PB6MD1 	0x2000
-#define	PB6MD0 	0x1000
-#define	PB5MD1 	0x0800
-#define	PB5MD0 	0x0400
-#define	PB4MD1 	0x0200
-#define	PB4MD0 	0x0100
-#define	PB3MD1 	0x0080
-#define	PB3MD0 	0x0040
-#define	PB2MD1 	0x0020
-#define	PB2MD0 	0x0010
-#define	PB1MD1 	0x0008
-#define	PB1MD0 	0x0004
-#define	PB0MD1 	0x0002
-#define	PB0MD0 	0x0001
-	
-#define	PB7MD 	PB7MD1|PB7MD0
-#define	PB6MD 	PB6MD1|PB6MD0
-#define	PB5MD 	PB5MD1|PB5MD0
-#define	PB4MD 	PB4MD1|PB4MD0
-#define	PB3MD 	PB3MD1|PB3MD0
-#define	PB2MD 	PB2MD1|PB2MD0
-#define	PB1MD 	PB1MD1|PB1MD0
-#define	PB0MD 	PB0MD1|PB0MD0
+#define PBCR2 0x05FFFFCE
+#define PB7MD1 0x8000
+#define PB7MD0 0x4000
+#define PB6MD1 0x2000
+#define PB6MD0 0x1000
+#define PB5MD1 0x0800
+#define PB5MD0 0x0400
+#define PB4MD1 0x0200
+#define PB4MD0 0x0100
+#define PB3MD1 0x0080
+#define PB3MD0 0x0040
+#define PB2MD1 0x0020
+#define PB2MD0 0x0010
+#define PB1MD1 0x0008
+#define PB1MD0 0x0004
+#define PB0MD1 0x0002
+#define PB0MD0 0x0001
 
+#define PB7MD PB7MD1 | PB7MD0
+#define PB6MD PB6MD1 | PB6MD0
+#define PB5MD PB5MD1 | PB5MD0
+#define PB4MD PB4MD1 | PB4MD0
+#define PB3MD PB3MD1 | PB3MD0
+#define PB2MD PB2MD1 | PB2MD0
+#define PB1MD PB1MD1 | PB1MD0
+#define PB0MD PB0MD1 | PB0MD0
 
 #ifdef MHZ
-#define BPS			32 * 9600 * MHZ / ( BAUD * 10)
+#define BPS 32 * 9600 * MHZ / (BAUD * 10)
 #else
-#define BPS			32	/* 9600 for 10 Mhz */
+#define BPS 32 /* 9600 for 10 Mhz */
 #endif
 
 void handleError (char theSSR);
@@ -1494,90 +1399,89 @@ void handleError (char theSSR);
 void
 nop (void)
 {
-
 }
-void 
+
+void
 init_serial (void)
 {
-  int i;
+int i;
 
-  /* Clear TE and RE in Channel 1's SCR   */
-  SCR1 &= ~(SCI_TE | SCI_RE);
+/* Clear TE and RE in Channel 1's SCR   */
+SCR1 &= ~(SCI_TE | SCI_RE);
 
-  /* Set communication to be async, 8-bit data, no parity, 1 stop bit and use internal clock */
+/* Set communication to be async, 8-bit data, no parity, 1 stop bit and use internal clock */
 
-  SMR1 = 0;
-  BRR1 = BPS;
+SMR1 = 0;
+BRR1 = BPS;
 
-  SCR1 &= ~(SCI_CKE1 | SCI_CKE0);
+SCR1 &= ~(SCI_CKE1 | SCI_CKE0);
 
-  /* let the hardware settle */
+/* let the hardware settle */
 
-  for (i = 0; i < 1000; i++)
-    nop ();
+for (i = 0; i < 1000; i++)
+  nop ();
 
-  /* Turn on in and out */
-  SCR1 |= SCI_RE | SCI_TE;
+/* Turn on in and out */
+SCR1 |= SCI_RE | SCI_TE;
 
-  /* Set the PFC to make RXD1 (pin PB8) an input pin and TXD1 (pin PB9) an output pin */
-  PBCR1 &= ~(PB_TXD1 | PB_RXD1);
-  PBCR1 |= PB_TXD1 | PB_RXD1;
+/* Set the PFC to make RXD1 (pin PB8) an input pin and TXD1 (pin PB9) an output pin */
+PBCR1 &= ~(PB_TXD1 | PB_RXD1);
+PBCR1 |= PB_TXD1 | PB_RXD1;
 }
-
 
 int
 getDebugCharReady (void)
 {
-  char mySSR;
-  mySSR = SSR1 & ( SCI_PER | SCI_FER | SCI_ORER );
-  if ( mySSR )
-    handleError ( mySSR );
-  return SSR1 & SCI_RDRF ;
+char mySSR;
+mySSR = SSR1 & (SCI_PER | SCI_FER | SCI_ORER);
+if (mySSR)
+  handleError (mySSR);
+return SSR1 & SCI_RDRF;
 }
 
-char 
+char
 getDebugChar (void)
 {
-  char ch;
-  char mySSR;
+char ch;
+char mySSR;
 
-  while ( ! getDebugCharReady())
-    ;
+while (!getDebugCharReady ())
+  ;
 
-  ch = RDR1;
-  SSR1 &= ~SCI_RDRF;
+ch = RDR1;
+SSR1 &= ~SCI_RDRF;
 
-  mySSR = SSR1 & (SCI_PER | SCI_FER | SCI_ORER);
+mySSR = SSR1 & (SCI_PER | SCI_FER | SCI_ORER);
 
-  if (mySSR)
-    handleError (mySSR);
+if (mySSR)
+  handleError (mySSR);
 
-  return ch;
+return ch;
 }
 
-int 
+int
 putDebugCharReady (void)
 {
-  return (SSR1 & SCI_TDRE);
+return (SSR1 & SCI_TDRE);
 }
 
 void
 putDebugChar (char ch)
 {
-  while (!putDebugCharReady())
-    ;
+while (!putDebugCharReady ())
+  ;
 
-  /*
+/*
    * Write data into TDR and clear TDRE
    */
-  TDR1 = ch;
-  SSR1 &= ~SCI_TDRE;
+TDR1 = ch;
+SSR1 &= ~SCI_TDRE;
 }
 
-void 
+void
 handleError (char theSSR)
 {
-  SSR1 &= ~(SCI_ORER | SCI_PER | SCI_FER);
+SSR1 &= ~(SCI_ORER | SCI_PER | SCI_FER);
 }
 
 #endif

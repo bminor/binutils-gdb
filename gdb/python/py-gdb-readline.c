@@ -111,4 +111,3 @@ sys.meta_path.append(GdbRemoveReadlineFinder())\n\
 ") == 0)
     PyOS_ReadlineFunctionPointer = gdbpy_readline_wrapper;
 }
-

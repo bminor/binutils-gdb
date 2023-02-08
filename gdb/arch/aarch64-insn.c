@@ -47,8 +47,8 @@ decode_masked_match (uint32_t insn, uint32_t mask, uint32_t pattern)
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 int
-aarch64_decode_adr (CORE_ADDR addr, uint32_t insn, int *is_adrp,
-		    unsigned *rd, int32_t *offset)
+aarch64_decode_adr (CORE_ADDR addr, uint32_t insn, int *is_adrp, unsigned *rd,
+		    int32_t *offset)
 {
   /* adr  0ii1 0000 iiii iiii iiii iiii iiir rrrr */
   /* adrp 1ii1 0000 iiii iiii iiii iiii iiir rrrr */
@@ -71,7 +71,7 @@ aarch64_decode_adr (CORE_ADDR addr, uint32_t insn, int *is_adrp,
 
       aarch64_debug_printf ("decode: 0x%s 0x%x %s x%u, #?",
 			    core_addr_to_string_nz (addr), insn,
-			    *is_adrp ?  "adrp" : "adr", *rd);
+			    *is_adrp ? "adrp" : "adr", *rd);
       return 1;
     }
   return 0;
@@ -88,8 +88,7 @@ aarch64_decode_adr (CORE_ADDR addr, uint32_t insn, int *is_adrp,
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 int
-aarch64_decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl,
-		  int32_t *offset)
+aarch64_decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl, int32_t *offset)
 {
   /* b  0001 01ii iiii iiii iiii iiii iiii iiii */
   /* bl 1001 01ii iiii iiii iiii iiii iiii iiii */
@@ -190,8 +189,8 @@ aarch64_decode_cb (CORE_ADDR addr, uint32_t insn, int *is64, int *is_cbnz,
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 int
-aarch64_decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz,
-		   unsigned *bit, unsigned *rt, int32_t *imm)
+aarch64_decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz, unsigned *bit,
+		   unsigned *rt, int32_t *imm)
 {
   /* tbz  b011 0110 bbbb biii iiii iiii iiir rrrr */
   /* tbnz B011 0111 bbbb biii iiii iiii iiir rrrr */
@@ -250,8 +249,7 @@ aarch64_decode_ldr_literal (CORE_ADDR addr, uint32_t insn, int *is_w,
       if (aarch64_debug)
 	debug_printf ("decode: %s 0x%x %s %s%u, #?\n",
 		      core_addr_to_string_nz (addr), insn,
-		      *is_w ? "ldrsw" : "ldr",
-		      *is64 ? "x" : "w", *rt);
+		      *is_w ? "ldrsw" : "ldr", *is64 ? "x" : "w", *rt);
 
       return 1;
     }
@@ -335,9 +333,9 @@ aarch64_emit_load_store (uint32_t *buf, uint32_t size,
 	op = ENCODE (1, 1, 24);
 
 	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-				  | ENCODE (operand.index >> 3, 12, 10)
-				  | ENCODE (rn.num, 5, 5)
-				  | ENCODE (rt.num, 5, 0));
+					 | ENCODE (operand.index >> 3, 12, 10)
+					 | ENCODE (rn.num, 5, 5)
+					 | ENCODE (rt.num, 5, 0));
       }
     case MEMORY_OPERAND_POSTINDEX:
       {
@@ -346,9 +344,10 @@ aarch64_emit_load_store (uint32_t *buf, uint32_t size,
 	op = ENCODE (0, 1, 24);
 
 	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-				  | post_index | ENCODE (operand.index, 9, 12)
-				  | ENCODE (rn.num, 5, 5)
-				  | ENCODE (rt.num, 5, 0));
+					 | post_index
+					 | ENCODE (operand.index, 9, 12)
+					 | ENCODE (rn.num, 5, 5)
+					 | ENCODE (rt.num, 5, 0));
       }
     case MEMORY_OPERAND_PREINDEX:
       {
@@ -357,9 +356,10 @@ aarch64_emit_load_store (uint32_t *buf, uint32_t size,
 	op = ENCODE (0, 1, 24);
 
 	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-				  | pre_index | ENCODE (operand.index, 9, 12)
-				  | ENCODE (rn.num, 5, 5)
-				  | ENCODE (rt.num, 5, 0));
+					 | pre_index
+					 | ENCODE (operand.index, 9, 12)
+					 | ENCODE (rn.num, 5, 5)
+					 | ENCODE (rt.num, 5, 0));
       }
     default:
       return 0;

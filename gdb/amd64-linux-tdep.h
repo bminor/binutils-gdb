@@ -53,7 +53,8 @@ const target_desc *amd64_linux_read_description (uint64_t xcr0_features_bit,
    Used for process record/replay, these will be translated into
    a gdb-canonical set of syscall ids in linux-record.c.  */
 
-enum amd64_syscall {
+enum amd64_syscall
+{
   amd64_sys_read = 0,
   amd64_sys_write = 1,
   amd64_sys_open = 2,
@@ -328,7 +329,8 @@ enum amd64_syscall {
    Used for process record/replay, these will be translated into
    a gdb-canonical set of syscall ids in linux-record.c.  */
 
-enum amd64_x32_syscall {
+enum amd64_x32_syscall
+{
   amd64_x32_syscall_bit = 0x40000000,
   amd64_x32_sys_read = (amd64_x32_syscall_bit + 0),
   amd64_x32_sys_write = (amd64_x32_syscall_bit + 1),

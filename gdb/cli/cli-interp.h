@@ -25,6 +25,7 @@
 class cli_interp_base : public interp
 {
 public:
+
   explicit cli_interp_base (const char *name);
   virtual ~cli_interp_base () = 0;
 
@@ -34,6 +35,7 @@ public:
   bool supports_command_editing () override;
 
 private:
+
   struct saved_output_files
   {
     /* Saved gdb_stdout, gdb_stderr, etc.  */

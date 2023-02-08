@@ -36,13 +36,13 @@ typedef struct
   xtensa_elf_greg_t windowstart;
   xtensa_elf_greg_t windowbase;
   xtensa_elf_greg_t threadptr;
-  xtensa_elf_greg_t reserved[7+48];
+  xtensa_elf_greg_t reserved[7 + 48];
   xtensa_elf_greg_t ar[64];
 } xtensa_elf_gregset_t;
 
-#define XTENSA_ELF_NGREG (sizeof (xtensa_elf_gregset_t) \
-			  / sizeof (xtensa_elf_greg_t))
+#define XTENSA_ELF_NGREG \
+  (sizeof (xtensa_elf_gregset_t) / sizeof (xtensa_elf_greg_t))
 
-#define C0_NREGS   16	/* Number of A-registers to track in call0 ABI.  */
+#define C0_NREGS 16 /* Number of A-registers to track in call0 ABI.  */
 
 #endif /* ARCH_XTENSA_H */

@@ -110,7 +110,7 @@ struct attribute
     if (form_is_unsigned ())
       return as_unsigned ();
     if (form_is_signed ())
-      return (ULONGEST)as_signed ();
+      return (ULONGEST) as_signed ();
     gdb_assert (false);
   }
 
@@ -149,12 +149,9 @@ struct attribute
 
   bool form_is_ref () const
   {
-    return (form == DW_FORM_ref_addr
-	    || form == DW_FORM_ref1
-	    || form == DW_FORM_ref2
-	    || form == DW_FORM_ref4
-	    || form == DW_FORM_ref8
-	    || form == DW_FORM_ref_udata
+    return (form == DW_FORM_ref_addr || form == DW_FORM_ref1
+	    || form == DW_FORM_ref2 || form == DW_FORM_ref4
+	    || form == DW_FORM_ref8 || form == DW_FORM_ref_udata
 	    || form == DW_FORM_GNU_ref_alt);
   }
 
@@ -264,18 +261,14 @@ struct attribute
   void set_address (CORE_ADDR addr)
   {
     gdb_assert (form == DW_FORM_addr
-		|| ((form == DW_FORM_addrx
-		     || form == DW_FORM_GNU_addr_index)
+		|| ((form == DW_FORM_addrx || form == DW_FORM_GNU_addr_index)
 		    && requires_reprocessing));
     u.addr = addr;
     requires_reprocessing = 0;
   }
 
   /* True if this attribute requires reprocessing.  */
-  bool requires_reprocessing_p () const
-  {
-    return requires_reprocessing;
-  }
+  bool requires_reprocessing_p () const { return requires_reprocessing; }
 
   /* Return the value as one of the recognized enum
      dwarf_defaulted_attribute constants according to DWARF5 spec,
@@ -293,7 +286,7 @@ struct attribute
      will issue a complaint and return false.  */
   bool as_boolean () const;
 
-  ENUM_BITFIELD(dwarf_attribute) name : 15;
+  ENUM_BITFIELD (dwarf_attribute) name : 15;
 
   /* A boolean that is used for forms that require reprocessing.  A
      form may require data not directly available in the attribute.
@@ -306,7 +299,7 @@ struct attribute
      forms.  */
   unsigned int requires_reprocessing : 1;
 
-  ENUM_BITFIELD(dwarf_form) form : 15;
+  ENUM_BITFIELD (dwarf_form) form : 15;
 
   /* Has u.str already been updated by dwarf2_canonicalize_name?  This
      field should be in u.str but it is kept here for better struct
@@ -314,15 +307,14 @@ struct attribute
   unsigned int string_is_canonical : 1;
 
   union
-    {
-      const char *str;
-      struct dwarf_block *blk;
-      ULONGEST unsnd;
-      LONGEST snd;
-      CORE_ADDR addr;
-      ULONGEST signature;
-    }
-  u;
+  {
+    const char *str;
+    struct dwarf_block *blk;
+    ULONGEST unsnd;
+    LONGEST snd;
+    CORE_ADDR addr;
+    ULONGEST signature;
+  } u;
 
 private:
 

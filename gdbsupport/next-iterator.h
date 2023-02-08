@@ -35,21 +35,12 @@ struct next_iterator
   typedef std::forward_iterator_tag iterator_category;
   typedef int difference_type;
 
-  explicit next_iterator (T *item)
-    : m_item (item)
-  {
-  }
+  explicit next_iterator (T *item) : m_item (item) {}
 
   /* Create a one-past-the-end iterator.  */
-  next_iterator ()
-    : m_item (nullptr)
-  {
-  }
+  next_iterator () : m_item (nullptr) {}
 
-  value_type operator* () const
-  {
-    return m_item;
-  }
+  value_type operator* () const { return m_item; }
 
   bool operator== (const self_type &other) const
   {
@@ -68,13 +59,12 @@ struct next_iterator
   }
 
 private:
-
   T *m_item;
 };
 
 /* A convenience wrapper to make a range type around a next_iterator.  */
 
-template <typename T>
+template<typename T>
 using next_range = iterator_range<next_iterator<T>>;
 
 #endif /* COMMON_NEXT_ITERATOR_H */

@@ -180,7 +180,8 @@ struct linux_record_tdep
    Different architectures will have different sets of syscall ids, and
    each must provide a mapping from their set to this one.  */
 
-enum gdb_syscall {
+enum gdb_syscall
+{
   /* An unknown GDB syscall, not a real syscall.  */
   gdb_sys_no_syscall = -1,
 
@@ -545,7 +546,7 @@ enum gdb_syscall {
 
 /* Record a linux syscall.  */
 
-extern int record_linux_system_call (enum gdb_syscall num, 
+extern int record_linux_system_call (enum gdb_syscall num,
 				     struct regcache *regcache,
 				     struct linux_record_tdep *tdep);
 

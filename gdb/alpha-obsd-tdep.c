@@ -46,8 +46,8 @@ alphaobsd_sigtramp_offset (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 static int
-alphaobsd_pc_in_sigtramp (struct gdbarch *gdbarch,
-			  CORE_ADDR pc, const char *name)
+alphaobsd_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc,
+			  const char *name)
 {
   CORE_ADDR start_pc = (pc & ~(alphaobsd_page_size - 1));
   unsigned insn;
@@ -92,10 +92,9 @@ alphaobsd_sigcontext_addr (frame_info_ptr this_frame)
       return get_frame_register_unsigned (this_frame, ALPHA_A0_REGNUM);
     }
 }
-
 
 static void
-alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
+alphaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
@@ -110,8 +109,8 @@ alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
 
   /* OpenBSD/alpha has SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
   set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 
   tdep->dynamic_sigtramp_offset = alphaobsd_sigtramp_offset;
@@ -121,12 +120,12 @@ alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc = 2;
   tdep->jb_elt_size = 8;
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, alphanbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, alphanbsd_iterate_over_regset_sections);
 }
-
 
 void _initialize_alphaobsd_tdep ();
+
 void
 _initialize_alphaobsd_tdep ()
 {

@@ -23,7 +23,8 @@
 #include "selftest-arch.h"
 #include "gdbarch.h"
 
-namespace selftests {
+namespace selftests
+{
 
 /* Return a pointer to a buffer containing an instruction that can be
    disassembled for architecture GDBARCH.  *LEN will be set to the length
@@ -43,14 +44,14 @@ get_test_insn (struct gdbarch *gdbarch, size_t *len)
     {
     case bfd_arch_bfin:
       /* M3.L = 0xe117 */
-      static const gdb_byte bfin_insn[] = {0x17, 0xe1, 0xff, 0xff};
+      static const gdb_byte bfin_insn[] = { 0x17, 0xe1, 0xff, 0xff };
 
       insn = bfin_insn;
       *len = sizeof (bfin_insn);
       break;
     case bfd_arch_arm:
       /* mov     r0, #0 */
-      static const gdb_byte arm_insn[] = {0x0, 0x0, 0xa0, 0xe3};
+      static const gdb_byte arm_insn[] = { 0x0, 0x0, 0xa0, 0xe3 };
 
       insn = arm_insn;
       *len = sizeof (arm_insn);
@@ -81,14 +82,14 @@ get_test_insn (struct gdbarch *gdbarch, size_t *len)
       goto generic_case;
     case bfd_arch_s390:
       /* nopr %r7 */
-      static const gdb_byte s390_insn[] = {0x07, 0x07};
+      static const gdb_byte s390_insn[] = { 0x07, 0x07 };
 
       insn = s390_insn;
       *len = sizeof (s390_insn);
       break;
     case bfd_arch_xstormy16:
       /* nop */
-      static const gdb_byte xstormy16_insn[] = {0x0, 0x0};
+      static const gdb_byte xstormy16_insn[] = { 0x0, 0x0 };
 
       insn = xstormy16_insn;
       *len = sizeof (xstormy16_insn);
@@ -141,7 +142,7 @@ get_test_insn (struct gdbarch *gdbarch, size_t *len)
 	enum gdb_osabi it;
 	bool found = false;
 	for (it = GDB_OSABI_UNKNOWN; it != GDB_OSABI_INVALID;
-	     it = static_cast<enum gdb_osabi>(static_cast<int>(it) + 1))
+	     it = static_cast<enum gdb_osabi> (static_cast<int> (it) + 1))
 	  {
 	    if (it == GDB_OSABI_UNKNOWN)
 	      continue;
@@ -206,17 +207,16 @@ print_one_insn_test (struct gdbarch *gdbarch)
   public:
 
     explicit gdb_disassembler_test (struct gdbarch *gdbarch,
-				    const gdb_byte *insn,
-				    size_t len)
+				    const gdb_byte *insn, size_t len)
       : gdb_disassembler (gdbarch,
 			  (run_verbose () ? gdb_stdlog : &null_stream),
 			  gdb_disassembler_test::read_memory),
-	m_insn (insn), m_len (len)
+	m_insn (insn),
+	m_len (len)
     {
     }
 
-    int
-    print_insn (CORE_ADDR memaddr)
+    int print_insn (CORE_ADDR memaddr)
     {
       int len = gdb_disassembler::print_insn (memaddr);
 
@@ -227,6 +227,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
     }
 
   private:
+
     /* A buffer contain one instruction.  */
     const gdb_byte *m_insn;
 
@@ -238,7 +239,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
 			    struct disassemble_info *info) noexcept
     {
       gdb_disassembler_test *self
-	= static_cast<gdb_disassembler_test *>(info->application_data);
+	= static_cast<gdb_disassembler_test *> (info->application_data);
 
       /* The disassembler in opcodes may read more data than one
 	 instruction.  Supply infinite consecutive copies
@@ -275,8 +276,8 @@ buffered_insn_length_test (struct gdbarch *gdbarch)
     return;
 
   CORE_ADDR insn_address = 0;
-  int calculated_len = gdb_buffered_insn_length (gdbarch, insn, buf_len,
-						 insn_address);
+  int calculated_len
+    = gdb_buffered_insn_length (gdbarch, insn, buf_len, insn_address);
 
   SELF_CHECK (calculated_len == buf_len);
 }
@@ -289,6 +290,7 @@ memory_error_test (struct gdbarch *gdbarch)
   class gdb_disassembler_test : public gdb_disassembler
   {
   public:
+
     gdb_disassembler_test (struct gdbarch *gdbarch)
       : gdb_disassembler (gdbarch, &null_stream,
 			  gdb_disassembler_test::read_memory)
@@ -334,6 +336,7 @@ memory_error_test (struct gdbarch *gdbarch)
 } // namespace selftests
 
 void _initialize_disasm_selftests ();
+
 void
 _initialize_disasm_selftests ()
 {

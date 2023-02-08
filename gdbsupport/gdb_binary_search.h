@@ -17,13 +17,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef GDBSUPPORT_GDB_BINARY_SEARCH_H
 #define GDBSUPPORT_GDB_BINARY_SEARCH_H
 
 #include <algorithm>
 
-namespace gdb {
+namespace gdb
+{
 
 /* Implements a binary search using C++ iterators.
    This differs from std::binary_search in that it returns an iterator for
@@ -39,17 +39,17 @@ namespace gdb {
    The return value is an iterator pointing to the found element, or LAST if
    no element was found.  */
 template<typename It, typename T, typename Comp>
-It binary_search (It first, It last, T el, Comp comp)
+It
+binary_search (It first, It last, T el, Comp comp)
 {
   auto lt = [&] (const typename std::iterator_traits<It>::value_type &a,
-		 const T &b)
-    { return comp (a, b) < 0; };
+                 const T &b) { return comp (a, b) < 0; };
 
   auto lb = std::lower_bound (first, last, el, lt);
   if (lb != last)
     {
       if (comp (*lb, el) == 0)
-	return lb;
+        return lb;
     }
   return last;
 }

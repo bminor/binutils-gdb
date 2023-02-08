@@ -36,12 +36,12 @@ dwz_file::read_string (struct objfile *objfile, LONGEST str_offset)
   str.read (objfile);
 
   if (str.buffer == NULL)
-    error (_("DW_FORM_GNU_strp_alt used without .debug_str "
-	     "section [in module %s]"),
+    error (_ ("DW_FORM_GNU_strp_alt used without .debug_str "
+	      "section [in module %s]"),
 	   bfd_get_filename (dwz_bfd.get ()));
   if (str_offset >= str.size)
-    error (_("DW_FORM_GNU_strp_alt pointing outside of "
-	     ".debug_str section [in module %s]"),
+    error (_ ("DW_FORM_GNU_strp_alt pointing outside of "
+	      ".debug_str section [in module %s]"),
 	   bfd_get_filename (dwz_bfd.get ()));
   gdb_assert (HOST_CHAR_BIT == 8);
   if (str.buffer[str_offset] == '\0')
@@ -195,18 +195,17 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
     return per_bfd->dwz_file.get ();
 
   bfd_set_error (bfd_error_no_error);
-  gdb::unique_xmalloc_ptr<char> data
-    (bfd_get_alt_debug_link_info (per_bfd->obfd,
-				  &buildid_len_arg, &buildid));
+  gdb::unique_xmalloc_ptr<char> data (
+    bfd_get_alt_debug_link_info (per_bfd->obfd, &buildid_len_arg, &buildid));
   if (data == NULL)
     {
       if (bfd_get_error () == bfd_error_no_error)
 	{
 	  if (!require)
 	    return nullptr;
-	  error (_("could not read '.gnu_debugaltlink' section"));
+	  error (_ ("could not read '.gnu_debugaltlink' section"));
 	}
-      error (_("could not read '.gnu_debugaltlink' section: %s"),
+      error (_ ("could not read '.gnu_debugaltlink' section: %s"),
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -248,9 +247,7 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
       gdb::unique_xmalloc_ptr<char> alt_filename;
       const char *origname = bfd_get_filename (per_bfd->obfd);
 
-      scoped_fd fd (debuginfod_debuginfo_query (buildid,
-						buildid_len,
-						origname,
+      scoped_fd fd (debuginfod_debuginfo_query (buildid, buildid_len, origname,
 						&alt_filename));
 
       if (fd.get () >= 0)
@@ -259,7 +256,7 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
 	  dwz_bfd = gdb_bfd_open (alt_filename.get (), gnutarget);
 
 	  if (dwz_bfd == nullptr)
-	    warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),
+	    warning (_ ("File \"%s\" from debuginfod cannot be opened as bfd"),
 		     alt_filename.get ());
 	  else if (!build_id_verify (dwz_bfd.get (), buildid_len, buildid))
 	    dwz_bfd.reset (nullptr);
@@ -267,11 +264,11 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
     }
 
   if (dwz_bfd == NULL)
-    error (_("could not find '.gnu_debugaltlink' file for %s"),
+    error (_ ("could not find '.gnu_debugaltlink' file for %s"),
 	   bfd_get_filename (per_bfd->obfd));
 
-  std::unique_ptr<struct dwz_file> result
-    (new struct dwz_file (std::move (dwz_bfd)));
+  std::unique_ptr<struct dwz_file> result (
+    new struct dwz_file (std::move (dwz_bfd)));
 
   for (asection *sec : gdb_bfd_sections (result->dwz_bfd))
     locate_dwz_sections (result->dwz_bfd.get (), sec, result.get ());

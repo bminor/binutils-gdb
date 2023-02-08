@@ -35,10 +35,7 @@ struct tui_source_window : public tui_source_window_base
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
 
-  const char *name () const override
-  {
-    return SRC_NAME;
-  }
+  const char *name () const override { return SRC_NAME; }
 
   /* Return true if the location LOC corresponds to the line number
      LINE_NO in this source window; false otherwise.  */
@@ -50,7 +47,7 @@ struct tui_source_window : public tui_source_window_base
 
   void erase_source_content () override
   {
-    do_erase_source_content (_("[ No Source Available ]"));
+    do_erase_source_content (_ ("[ No Source Available ]"));
   }
 
   void display_start_addr (struct gdbarch **gdbarch_p,
@@ -63,10 +60,7 @@ protected:
   bool set_contents (struct gdbarch *gdbarch,
 		     const struct symtab_and_line &sal) override;
 
-  int extra_margin () const override
-  {
-    return m_digits;
-  }
+  int extra_margin () const override { return m_digits; }
 
   void show_line_number (int lineno) const override;
 

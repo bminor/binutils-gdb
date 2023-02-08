@@ -37,14 +37,12 @@ struct index_cache_resource
 class index_cache
 {
 public:
+
   /* Change the directory used to save/load index files.  */
   void set_directory (std::string dir);
 
   /* Return true if the usage of the cache is enabled.  */
-  bool enabled () const
-  {
-    return m_enabled;
-  }
+  bool enabled () const { return m_enabled; }
 
   /* Enable the cache.  */
   void enable ();
@@ -66,8 +64,7 @@ public:
 		    std::unique_ptr<index_cache_resource> *resource);
 
   /* Return the number of cache hits.  */
-  unsigned int n_hits () const
-  { return m_n_hits; }
+  unsigned int n_hits () const { return m_n_hits; }
 
   /* Record a cache hit.  */
   void hit ()
@@ -77,8 +74,7 @@ public:
   }
 
   /* Return the number of cache misses.  */
-  unsigned int n_misses () const
-  { return m_n_misses; }
+  unsigned int n_misses () const { return m_n_misses; }
 
   /* Record a cache miss.  */
   void miss ()

@@ -43,8 +43,8 @@ extern void nbsd_info_proc_mappings_header (int addr_bit);
 
 extern void nbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
 					   ULONGEST kve_end,
-					   ULONGEST kve_offset,
-					   int kve_flags, int kve_protection,
+					   ULONGEST kve_offset, int kve_flags,
+					   int kve_protection,
 					   const char *kve_path);
 
 #endif /* NBSD_TDEP_H */

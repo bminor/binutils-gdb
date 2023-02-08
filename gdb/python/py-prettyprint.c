@@ -30,14 +30,14 @@
 /* Return type of print_string_repr.  */
 
 enum gdbpy_string_repr_result
-  {
-    /* The string method returned None.  */
-    string_repr_none,
-    /* The string method had an error.  */
-    string_repr_error,
-    /* Everything ok.  */
-    string_repr_ok
-  };
+{
+  /* The string method returned None.  */
+  string_repr_none,
+  /* The string method had an error.  */
+  string_repr_error,
+  /* Everything ok.  */
+  string_repr_ok
+};
 
 /* If non-null, points to options that are in effect while
    printing.  */
@@ -58,7 +58,7 @@ search_pp_list (PyObject *list, PyObject *value)
   for (list_index = 0; list_index < pp_list_size; list_index++)
     {
       PyObject *function = PyList_GetItem (list, list_index);
-      if (! function)
+      if (!function)
 	return NULL;
 
       /* Skip if disabled.  */
@@ -149,11 +149,11 @@ find_pretty_printer_from_gdb (PyObject *value)
 {
   /* Fetch the global pretty printer list.  */
   if (gdb_python_module == NULL
-      || ! PyObject_HasAttrString (gdb_python_module, "pretty_printers"))
+      || !PyObject_HasAttrString (gdb_python_module, "pretty_printers"))
     return gdbpy_ref<>::new_reference (Py_None);
   gdbpy_ref<> pp_list (PyObject_GetAttrString (gdb_python_module,
 					       "pretty_printers"));
-  if (pp_list == NULL || ! PyList_Check (pp_list.get ()))
+  if (pp_list == NULL || !PyList_Check (pp_list.get ()))
     return gdbpy_ref<>::new_reference (Py_None);
 
   return search_pp_list (pp_list.get (), value);
@@ -201,12 +201,13 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
 	result = gdbpy_ref<>::new_reference (Py_None);
       else
 	{
-	  result.reset (PyObject_CallMethodObjArgs (printer, gdbpy_to_string_cst,
+	  result.reset (PyObject_CallMethodObjArgs (printer,
+						    gdbpy_to_string_cst,
 						    NULL));
 	  if (result != NULL)
 	    {
-	      if (! gdbpy_is_string (result.get ())
-		  && ! gdbpy_is_lazy_string (result.get ())
+	      if (!gdbpy_is_string (result.get ())
+		  && !gdbpy_is_lazy_string (result.get ())
 		  && result != Py_None)
 		{
 		  *out_value = convert_value_from_python (result.get ());
@@ -233,11 +234,11 @@ gdbpy_get_display_hint (PyObject *printer)
 {
   gdb::unique_xmalloc_ptr<char> result;
 
-  if (! PyObject_HasAttr (printer, gdbpy_display_hint_cst))
+  if (!PyObject_HasAttr (printer, gdbpy_display_hint_cst))
     return NULL;
 
-  gdbpy_ref<> hint (PyObject_CallMethodObjArgs (printer, gdbpy_display_hint_cst,
-						NULL));
+  gdbpy_ref<> hint (PyObject_CallMethodObjArgs (printer,
+						gdbpy_display_hint_cst, NULL));
   if (hint != NULL)
     {
       if (gdbpy_is_string (hint.get ()))
@@ -265,10 +266,10 @@ print_stack_unless_memory_error (struct ui_file *stream)
 
       if (msg == NULL || *msg == '\0')
 	fprintf_styled (stream, metadata_style.style (),
-			_("<error reading variable>"));
+			_ ("<error reading variable>"));
       else
 	fprintf_styled (stream, metadata_style.style (),
-			_("<error reading variable: %s>"), msg.get ());
+			_ ("<error reading variable: %s>"), msg.get ());
     }
   else
     gdbpy_print_stack ();
@@ -278,9 +279,8 @@ print_stack_unless_memory_error (struct ui_file *stream)
    formats the result.  */
 
 static enum gdbpy_string_repr_result
-print_string_repr (PyObject *printer, const char *hint,
-		   struct ui_file *stream, int recurse,
-		   const struct value_print_options *options,
+print_string_repr (PyObject *printer, const char *hint, struct ui_file *stream,
+		   int recurse, const struct value_print_options *options,
 		   const struct language_defn *language,
 		   struct gdbarch *gdbarch)
 {
@@ -300,12 +300,12 @@ print_string_repr (PyObject *printer, const char *hint,
 	  gdb::unique_xmalloc_ptr<char> encoding;
 	  struct value_print_options local_opts = *options;
 
-	  gdbpy_extract_lazy_string (py_str.get (), &addr, &type,
-				     &length, &encoding);
+	  gdbpy_extract_lazy_string (py_str.get (), &addr, &type, &length,
+				     &encoding);
 
 	  local_opts.addressprint = false;
-	  val_print_string (type, encoding.get (), addr, (int) length,
-			    stream, &local_opts);
+	  val_print_string (type, encoding.get (), addr, (int) length, stream,
+			    &local_opts);
 	}
       else
 	{
@@ -322,8 +322,8 @@ print_string_repr (PyObject *printer, const char *hint,
 	      type = builtin_type (gdbarch)->builtin_char;
 
 	      if (hint && !strcmp (hint, "string"))
-		language->printstr (stream, type, (gdb_byte *) output,
-				    length, NULL, 0, options);
+		language->printstr (stream, type, (gdb_byte *) output, length,
+				    NULL, 0, options);
 	      else
 		gdb_puts (output, stream);
 	    }
@@ -354,25 +354,23 @@ print_string_repr (PyObject *printer, const char *hint,
    printer, if any exist.  If is_py_none is true, then nothing has
    been printed by to_string, and format output accordingly. */
 static void
-print_children (PyObject *printer, const char *hint,
-		struct ui_file *stream, int recurse,
-		const struct value_print_options *options,
-		const struct language_defn *language,
-		int is_py_none)
+print_children (PyObject *printer, const char *hint, struct ui_file *stream,
+		int recurse, const struct value_print_options *options,
+		const struct language_defn *language, int is_py_none)
 {
   int is_map, is_array, done_flag, pretty;
   unsigned int i;
 
-  if (! PyObject_HasAttr (printer, gdbpy_children_cst))
+  if (!PyObject_HasAttr (printer, gdbpy_children_cst))
     return;
 
   /* If we are printing a map or an array, we want some special
      formatting.  */
-  is_map = hint && ! strcmp (hint, "map");
-  is_array = hint && ! strcmp (hint, "array");
+  is_map = hint && !strcmp (hint, "map");
+  is_array = hint && !strcmp (hint, "array");
 
-  gdbpy_ref<> children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
-						    NULL));
+  gdbpy_ref<> children (PyObject_CallMethodObjArgs (printer,
+						    gdbpy_children_cst, NULL));
   if (children == NULL)
     {
       print_stack_unless_memory_error (stream);
@@ -411,26 +409,26 @@ print_children (PyObject *printer, const char *hint,
 	    print_stack_unless_memory_error (stream);
 	  /* Set a flag so we can know whether we printed all the
 	     available elements.  */
-	  else	
+	  else
 	    done_flag = 1;
 	  break;
 	}
 
-      if (! PyTuple_Check (item.get ()) || PyTuple_Size (item.get ()) != 2)
+      if (!PyTuple_Check (item.get ()) || PyTuple_Size (item.get ()) != 2)
 	{
 	  PyErr_SetString (PyExc_TypeError,
-			   _("Result of children iterator not a tuple"
-			     " of two elements."));
+			   _ ("Result of children iterator not a tuple"
+			      " of two elements."));
 	  gdbpy_print_stack ();
 	  continue;
 	}
-      if (! PyArg_ParseTuple (item.get (), "sO", &name, &py_v))
+      if (!PyArg_ParseTuple (item.get (), "sO", &name, &py_v))
 	{
 	  /* The user won't necessarily get a stack trace here, so provide
 	     more context.  */
 	  if (gdbpy_print_python_errors_p ())
 	    gdb_printf (gdb_stderr,
-			_("Bad result from children iterator.\n"));
+			_ ("Bad result from children iterator.\n"));
 	  gdbpy_print_stack ();
 	  continue;
 	}
@@ -445,7 +443,7 @@ print_children (PyObject *printer, const char *hint,
 	  if (!is_py_none)
 	    gdb_puts (" = ", stream);
 	}
-      else if (! is_map || i % 2 == 0)
+      else if (!is_map || i % 2 == 0)
 	gdb_puts (pretty ? "," : ", ", stream);
 
       /* Skip printing children if max_depth has been reached.  This check
@@ -470,7 +468,7 @@ print_children (PyObject *printer, const char *hint,
 	  break;
 	}
 
-      if (! is_map || i % 2 == 0)
+      if (!is_map || i % 2 == 0)
 	{
 	  if (pretty)
 	    {
@@ -478,7 +476,7 @@ print_children (PyObject *printer, const char *hint,
 	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
-	    stream->wrap_here (2 + 2 *recurse);
+	    stream->wrap_here (2 + 2 * recurse);
 	}
 
       if (is_map && i % 2 == 0)
@@ -490,7 +488,7 @@ print_children (PyObject *printer, const char *hint,
 	  if (options->print_array_indexes)
 	    gdb_printf (stream, "[%d] = ", i);
 	}
-      else if (! is_map)
+      else if (!is_map)
 	{
 	  gdb_puts (name, stream);
 	  gdb_puts (" = ", stream);
@@ -527,7 +525,7 @@ print_children (PyObject *printer, const char *hint,
 	  if (value == NULL)
 	    {
 	      gdbpy_print_stack ();
-	      error (_("Error while executing Python code."));
+	      error (_ ("Error while executing Python code."));
 	    }
 	  else
 	    {
@@ -535,8 +533,7 @@ print_children (PyObject *printer, const char *hint,
 		 level of depth.  This means the key will print before the
 		 value does.  */
 	      struct value_print_options opt = *options;
-	      if (is_map && i % 2 == 0
-		  && opt.max_depth != -1
+	      if (is_map && i % 2 == 0 && opt.max_depth != -1
 		  && opt.max_depth < INT_MAX)
 		++opt.max_depth;
 	      common_val_print (value, stream, recurse + 1, &opt, language);
@@ -569,8 +566,8 @@ print_children (PyObject *printer, const char *hint,
 
 enum ext_lang_rc
 gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
-				struct value *value,
-				struct ui_file *stream, int recurse,
+				struct value *value, struct ui_file *stream,
+				int recurse,
 				const struct value_print_options *options,
 				const struct language_defn *language)
 {
@@ -608,8 +605,8 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   if (printer == Py_None)
     return EXT_LANG_RC_NOP;
 
-  scoped_restore set_options = make_scoped_restore (&gdbpy_current_print_options,
-						    options);
+  scoped_restore set_options
+    = make_scoped_restore (&gdbpy_current_print_options, options);
 
   /* If we are printing a map, we want some special formatting.  */
   gdb::unique_xmalloc_ptr<char> hint (gdbpy_get_display_hint (printer.get ()));
@@ -626,7 +623,6 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   return EXT_LANG_RC_OK;
 }
 
-
 /* Apply a pretty-printer for the varobj code.  PRINTER_OBJ is the
    print object.  It must have a 'to_string' method (but this is
    checked by varobj, not here) which takes no arguments and
@@ -637,13 +633,12 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
    error, *REPLACEMENT is set to NULL and this function also returns
    NULL.  */
 gdbpy_ref<>
-apply_varobj_pretty_printer (PyObject *printer_obj,
-			     struct value **replacement,
+apply_varobj_pretty_printer (PyObject *printer_obj, struct value **replacement,
 			     struct ui_file *stream,
 			     const value_print_options *opts)
 {
-  scoped_restore set_options = make_scoped_restore (&gdbpy_current_print_options,
-						    opts);
+  scoped_restore set_options
+    = make_scoped_restore (&gdbpy_current_print_options, opts);
 
   *replacement = NULL;
   gdbpy_ref<> py_str = pretty_print_one_value (printer_obj, replacement);
@@ -687,13 +682,12 @@ gdbpy_default_visualizer (PyObject *self, PyObject *args)
   PyObject *val_obj;
   struct value *value;
 
-  if (! PyArg_ParseTuple (args, "O", &val_obj))
+  if (!PyArg_ParseTuple (args, "O", &val_obj))
     return NULL;
   value = value_object_to_value (val_obj);
-  if (! value)
+  if (!value)
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("Argument must be a gdb.Value."));
+      PyErr_SetString (PyExc_TypeError, _ ("Argument must be a gdb.Value."));
       return NULL;
     }
 
@@ -731,38 +725,29 @@ gdbpy_print_options (PyObject *unused1, PyObject *unused2)
   value_print_options opts;
   gdbpy_get_print_options (&opts);
 
-  if (set_boolean (result.get (), "raw",
-		   opts.raw) < 0
-      || set_boolean (result.get (), "pretty_arrays",
-		      opts.prettyformat_arrays) < 0
+  if (set_boolean (result.get (), "raw", opts.raw) < 0
+      || set_boolean (result.get (), "pretty_arrays", opts.prettyformat_arrays)
+	   < 0
       || set_boolean (result.get (), "pretty_structs",
-		      opts.prettyformat_structs) < 0
-      || set_boolean (result.get (), "array_indexes",
-		      opts.print_array_indexes) < 0
-      || set_boolean (result.get (), "symbols",
-		      opts.symbol_print) < 0
-      || set_boolean (result.get (), "unions",
-		      opts.unionprint) < 0
-      || set_boolean (result.get (), "address",
-		      opts.addressprint) < 0
-      || set_boolean (result.get (), "deref_refs",
-		      opts.deref_ref) < 0
-      || set_boolean (result.get (), "actual_objects",
-		      opts.objectprint) < 0
-      || set_boolean (result.get (), "static_members",
-		      opts.static_field_print) < 0
-      || set_boolean (result.get (), "deref_refs",
-		      opts.deref_ref) < 0
-      || set_boolean (result.get (), "nibbles",
-		      opts.nibblesprint) < 0
-      || set_boolean (result.get (), "summary",
-		      opts.summary) < 0
-      || set_unsigned (result.get (), "max_elements",
-		       opts.print_max) < 0
-      || set_unsigned (result.get (), "max_depth",
-		       opts.max_depth) < 0
+		      opts.prettyformat_structs)
+	   < 0
+      || set_boolean (result.get (), "array_indexes", opts.print_array_indexes)
+	   < 0
+      || set_boolean (result.get (), "symbols", opts.symbol_print) < 0
+      || set_boolean (result.get (), "unions", opts.unionprint) < 0
+      || set_boolean (result.get (), "address", opts.addressprint) < 0
+      || set_boolean (result.get (), "deref_refs", opts.deref_ref) < 0
+      || set_boolean (result.get (), "actual_objects", opts.objectprint) < 0
+      || set_boolean (result.get (), "static_members", opts.static_field_print)
+	   < 0
+      || set_boolean (result.get (), "deref_refs", opts.deref_ref) < 0
+      || set_boolean (result.get (), "nibbles", opts.nibblesprint) < 0
+      || set_boolean (result.get (), "summary", opts.summary) < 0
+      || set_unsigned (result.get (), "max_elements", opts.print_max) < 0
+      || set_unsigned (result.get (), "max_depth", opts.max_depth) < 0
       || set_unsigned (result.get (), "repeat_threshold",
-		       opts.repeat_count_threshold) < 0)
+		       opts.repeat_count_threshold)
+	   < 0)
     return nullptr;
 
   if (opts.format != 0)

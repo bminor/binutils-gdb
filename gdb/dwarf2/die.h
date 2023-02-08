@@ -42,14 +42,14 @@ struct die_info
   {
     for (unsigned i = 0; i < num_attrs; ++i)
       if (attrs[i].name == DW_AT_addr_base
-	   || attrs[i].name == DW_AT_GNU_addr_base)
+	  || attrs[i].name == DW_AT_GNU_addr_base)
 	{
 	  if (attrs[i].form_is_unsigned ())
 	    {
 	      /* If both exist, just use the first one.  */
 	      return attrs[i].as_unsigned ();
 	    }
-	  complaint (_("address base attribute (offset %s) as wrong form"),
+	  complaint (_ ("address base attribute (offset %s) as wrong form"),
 		     sect_offset_str (sect_off));
 	}
     return gdb::optional<ULONGEST> ();
@@ -66,7 +66,7 @@ struct die_info
 	  if (attrs[i].form_is_unsigned ())
 	    return attrs[i].as_unsigned ();
 
-	  complaint (_("ranges base attribute (offset %s) has wrong form"),
+	  complaint (_ ("ranges base attribute (offset %s) has wrong form"),
 		     sect_offset_str (sect_off));
 	}
 
@@ -83,7 +83,7 @@ struct die_info
 	  if (attrs[i].form_is_unsigned ())
 	    return attrs[i].as_unsigned ();
 
-	  complaint (_("rnglists base attribute (offset %s) has wrong form"),
+	  complaint (_ ("rnglists base attribute (offset %s) has wrong form"),
 		     sect_offset_str (sect_off));
 	}
 
@@ -91,7 +91,7 @@ struct die_info
   }
 
   /* DWARF-2 tag for this DIE.  */
-  ENUM_BITFIELD(dwarf_tag) tag : 16;
+  ENUM_BITFIELD (dwarf_tag) tag : 16;
 
   /* Number of attributes */
   unsigned char num_attrs;
@@ -116,9 +116,9 @@ struct die_info
      points to this die's parent; CHILD points to the first child of
      this node; and all the children of a given node are chained
      together via their SIBLING fields.  */
-  struct die_info *child;	/* Its first child, if any.  */
-  struct die_info *sibling;	/* Its next sibling, if any.  */
-  struct die_info *parent;	/* Its parent, if any.  */
+  struct die_info *child;   /* Its first child, if any.  */
+  struct die_info *sibling; /* Its next sibling, if any.  */
+  struct die_info *parent;  /* Its parent, if any.  */
 
   /* An array of attributes, with NUM_ATTRS elements.  There may be
      zero, but it's not common and zero-sized arrays are not

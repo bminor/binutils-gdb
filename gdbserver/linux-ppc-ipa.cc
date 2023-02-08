@@ -30,60 +30,54 @@
 
 /* These macros define the position of registers in the buffer collected
    by the fast tracepoint jump pad.  */
-#define FT_CR_R0	0
-#define FT_CR_CR	32
-#define FT_CR_XER	33
-#define FT_CR_LR	34
-#define FT_CR_CTR	35
-#define FT_CR_PC	36
-#define FT_CR_GPR(n)	(FT_CR_R0 + (n))
+#define FT_CR_R0 0
+#define FT_CR_CR 32
+#define FT_CR_XER 33
+#define FT_CR_LR 34
+#define FT_CR_CTR 35
+#define FT_CR_PC 36
+#define FT_CR_GPR(n) (FT_CR_R0 + (n))
 
 static const int ppc_ft_collect_regmap[] = {
   /* GPRs */
-  FT_CR_GPR (0), FT_CR_GPR (1), FT_CR_GPR (2),
-  FT_CR_GPR (3), FT_CR_GPR (4), FT_CR_GPR (5),
-  FT_CR_GPR (6), FT_CR_GPR (7), FT_CR_GPR (8),
-  FT_CR_GPR (9), FT_CR_GPR (10), FT_CR_GPR (11),
-  FT_CR_GPR (12), FT_CR_GPR (13), FT_CR_GPR (14),
-  FT_CR_GPR (15), FT_CR_GPR (16), FT_CR_GPR (17),
-  FT_CR_GPR (18), FT_CR_GPR (19), FT_CR_GPR (20),
-  FT_CR_GPR (21), FT_CR_GPR (22), FT_CR_GPR (23),
-  FT_CR_GPR (24), FT_CR_GPR (25), FT_CR_GPR (26),
-  FT_CR_GPR (27), FT_CR_GPR (28), FT_CR_GPR (29),
+  FT_CR_GPR (0), FT_CR_GPR (1), FT_CR_GPR (2), FT_CR_GPR (3), FT_CR_GPR (4),
+  FT_CR_GPR (5), FT_CR_GPR (6), FT_CR_GPR (7), FT_CR_GPR (8), FT_CR_GPR (9),
+  FT_CR_GPR (10), FT_CR_GPR (11), FT_CR_GPR (12), FT_CR_GPR (13),
+  FT_CR_GPR (14), FT_CR_GPR (15), FT_CR_GPR (16), FT_CR_GPR (17),
+  FT_CR_GPR (18), FT_CR_GPR (19), FT_CR_GPR (20), FT_CR_GPR (21),
+  FT_CR_GPR (22), FT_CR_GPR (23), FT_CR_GPR (24), FT_CR_GPR (25),
+  FT_CR_GPR (26), FT_CR_GPR (27), FT_CR_GPR (28), FT_CR_GPR (29),
   FT_CR_GPR (30), FT_CR_GPR (31),
   /* FPRs - not collected.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  FT_CR_PC, /* PC */
-  -1, /* MSR */
-  FT_CR_CR, /* CR */
-  FT_CR_LR, /* LR */
-  FT_CR_CTR, /* CTR */
-  FT_CR_XER, /* XER */
-  -1, /* FPSCR */
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, FT_CR_PC, /* PC */
+  -1,                                                           /* MSR */
+  FT_CR_CR,                                                     /* CR */
+  FT_CR_LR,                                                     /* LR */
+  FT_CR_CTR,                                                    /* CTR */
+  FT_CR_XER,                                                    /* XER */
+  -1,                                                           /* FPSCR */
 };
 
 #define PPC_NUM_FT_COLLECT_GREGS \
-  (sizeof (ppc_ft_collect_regmap) / sizeof(ppc_ft_collect_regmap[0]))
+  (sizeof (ppc_ft_collect_regmap) / sizeof (ppc_ft_collect_regmap[0]))
 
 /* Supply registers collected by the fast tracepoint jump pad.
    BUF is the second argument we pass to gdb_collect in jump pad.  */
 
 void
 supply_fast_tracepoint_registers (struct regcache *regcache,
-				  const unsigned char *buf)
+                                  const unsigned char *buf)
 {
   int i;
 
   for (i = 0; i < PPC_NUM_FT_COLLECT_GREGS; i++)
     {
       if (ppc_ft_collect_regmap[i] == -1)
-	continue;
+        continue;
       supply_register (regcache, i,
-		       ((char *) buf)
-			+ ppc_ft_collect_regmap[i] * sizeof (long));
+                       ((char *) buf)
+                         + ppc_ft_collect_regmap[i] * sizeof (long));
     }
 }
 
@@ -99,7 +93,7 @@ get_raw_reg (const unsigned char *raw_regs, int regnum)
     return 0;
 
   return *(unsigned long *) (raw_regs
-			     + ppc_ft_collect_regmap[regnum] * sizeof (long));
+                             + ppc_ft_collect_regmap[regnum] * sizeof (long));
 }
 
 /* Allocate buffer for the jump pads.  The branch instruction has a reach
@@ -139,24 +133,23 @@ alloc_jump_pad_buffer (size_t size)
   for (; addr; addr -= pagesize)
     {
       /* No MAP_FIXED - we don't want to zap someone's mapping.  */
-      res = mmap ((void *) addr, size,
-		  PROT_READ | PROT_WRITE | PROT_EXEC,
-		  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+      res = mmap ((void *) addr, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
       /* If we got what we wanted, return.  */
       if ((uintptr_t) res == addr)
-	return res;
+        return res;
 
       /* If we got a mapping, but at a wrong address, undo it.  */
       if (res != MAP_FAILED)
-	munmap (res, size);
+        munmap (res, size);
     }
 
   return NULL;
 #else
   void *target = sbrk (0);
   void *res = mmap (target, size, PROT_READ | PROT_WRITE | PROT_EXEC,
-		    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
   if (res == target)
     return res;
@@ -226,7 +219,6 @@ get_ipa_tdesc (int idx)
 #endif
     }
 }
-
 
 /* Initialize ipa_tdesc and others.  */
 

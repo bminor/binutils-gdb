@@ -31,7 +31,7 @@
    (e.g., fork children, checkpoints).  */
 
 static std::unordered_map<pid_t, aarch64_debug_reg_state>
-aarch64_debug_process_state;
+  aarch64_debug_process_state;
 
 /* See aarch64-nat.h.  */
 
@@ -123,8 +123,8 @@ aarch64_insert_hw_breakpoint (struct gdbarch *gdbarch,
 
   if (show_debug_regs)
     {
-      aarch64_show_debug_reg_state (state,
-				    "insert_hw_breakpoint", addr, len, type);
+      aarch64_show_debug_reg_state (state, "insert_hw_breakpoint", addr, len,
+				    type);
     }
 
   return ret;
@@ -156,8 +156,8 @@ aarch64_remove_hw_breakpoint (struct gdbarch *gdbarch,
 
   if (show_debug_regs)
     {
-      aarch64_show_debug_reg_state (state,
-				    "remove_hw_watchpoint", addr, len, type);
+      aarch64_show_debug_reg_state (state, "remove_hw_watchpoint", addr, len,
+				    type);
     }
 
   return ret;
@@ -168,7 +168,8 @@ aarch64_remove_hw_breakpoint (struct gdbarch *gdbarch,
    of the type TYPE.  Return 0 on success, -1 on failure.  */
 
 int
-aarch64_insert_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
+aarch64_insert_watchpoint (CORE_ADDR addr, int len,
+			   enum target_hw_bp_type type,
 			   struct expression *cond)
 {
   int ret;
@@ -187,8 +188,8 @@ aarch64_insert_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
 
   if (show_debug_regs)
     {
-      aarch64_show_debug_reg_state (state,
-				    "insert_watchpoint", addr, len, type);
+      aarch64_show_debug_reg_state (state, "insert_watchpoint", addr, len,
+				    type);
     }
 
   return ret;
@@ -199,7 +200,8 @@ aarch64_insert_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
    type TYPE.  Return 0 on success, -1 on failure.  */
 
 int
-aarch64_remove_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
+aarch64_remove_watchpoint (CORE_ADDR addr, int len,
+			   enum target_hw_bp_type type,
 			   struct expression *cond)
 {
   int ret;
@@ -218,8 +220,8 @@ aarch64_remove_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
 
   if (show_debug_regs)
     {
-      aarch64_show_debug_reg_state (state,
-				    "remove_watchpoint", addr, len, type);
+      aarch64_show_debug_reg_state (state, "remove_watchpoint", addr, len,
+				    type);
     }
 
   return ret;
@@ -237,15 +239,16 @@ aarch64_stopped_data_address (const struct aarch64_debug_reg_state *state,
     {
       const unsigned int offset
 	= aarch64_watchpoint_offset (state->dr_ctrl_wp[i]);
-      const unsigned int len = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
+      const unsigned int len
+	= aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
       const CORE_ADDR addr_watch = state->dr_addr_wp[i] + offset;
-      const CORE_ADDR addr_watch_aligned = align_down (state->dr_addr_wp[i], 8);
+      const CORE_ADDR addr_watch_aligned
+	= align_down (state->dr_addr_wp[i], 8);
       const CORE_ADDR addr_orig = state->dr_addr_orig_wp[i];
 
       if (state->dr_ref_count_wp[i]
 	  && DR_CONTROL_ENABLED (state->dr_ctrl_wp[i])
-	  && addr_trap >= addr_watch_aligned
-	  && addr_trap < addr_watch + len)
+	  && addr_trap >= addr_watch_aligned && addr_trap < addr_watch + len)
 	{
 	  /* ADDR_TRAP reports the first address of the memory range
 	     accessed by the CPU, regardless of what was the memory
@@ -281,16 +284,16 @@ add_show_debug_regs_command (void)
   /* A maintenance command to enable printing the internal DRi mirror
      variables.  */
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
-			   &show_debug_regs, _("\
-Set whether to show variables that mirror the AArch64 debug registers."), _("\
-Show whether to show variables that mirror the AArch64 debug registers."), _("\
+			   &show_debug_regs, _ ("\
+Set whether to show variables that mirror the AArch64 debug registers."),
+			   _ ("\
+Show whether to show variables that mirror the AArch64 debug registers."),
+			   _ ("\
 Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, the debug registers values are shown when GDB inserts\n\
 or removes a hardware breakpoint or watchpoint, and when the inferior\n\
 triggers a breakpoint or watchpoint."),
-			   NULL,
-			   NULL,
-			   &maintenance_set_cmdlist,
+			   NULL, NULL, &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 }
 

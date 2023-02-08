@@ -73,8 +73,7 @@ cli_ui_out::do_table_header (int width, ui_align alignment,
   if (m_suppress_output)
     return;
 
-  do_field_string (0, width, alignment, 0, col_hdr.c_str (),
-		   ui_file_style ());
+  do_field_string (0, width, alignment, 0, col_hdr.c_str (), ui_file_style ());
 }
 
 /* Mark beginning of a list */
@@ -126,8 +125,7 @@ cli_ui_out::do_field_skip (int fldno, int width, ui_align alignment,
   if (m_suppress_output)
     return;
 
-  do_field_string (fldno, width, alignment, fldname, "",
-		   ui_file_style ());
+  do_field_string (fldno, width, alignment, fldname, "", ui_file_style ());
 }
 
 /* other specific cli_field_* end up here so alignment and field
@@ -219,8 +217,8 @@ cli_ui_out::do_text (const char *string)
 }
 
 void
-cli_ui_out::do_message (const ui_file_style &style,
-			const char *format, va_list args)
+cli_ui_out::do_message (const ui_file_style &style, const char *format,
+			va_list args)
 {
   if (m_suppress_output)
     return;
@@ -294,8 +292,7 @@ cli_ui_out::do_progress_start ()
 */
 
 void
-cli_ui_out::do_progress_notify (const std::string &msg,
-				const char *unit,
+cli_ui_out::do_progress_notify (const std::string &msg, const char *unit,
 				double howmuch, double total)
 {
   int chars_per_line = get_chars_per_line ();
@@ -307,8 +304,7 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 
   if (info.state == progress_update::START)
     {
-      if (stream->isatty ()
-	  && current_ui->input_interactive_p ()
+      if (stream->isatty () && current_ui->input_interactive_p ()
 	  && chars_per_line >= MIN_CHARS_PER_LINE)
 	{
 	  gdb_printf (stream, "%s\n", msg.c_str ());
@@ -327,9 +323,8 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 
   if (total > 0 && howmuch >= 0 && howmuch <= 1.0)
     {
-      std::string progress = string_printf (" %3.f%% (%.2f %s)",
-					    howmuch * 100, total,
-					    unit);
+      std::string progress
+	= string_printf (" %3.f%% (%.2f %s)", howmuch * 100, total, unit);
       int width = chars_per_line - progress.size () - 4;
       int max = width * howmuch;
 
@@ -348,8 +343,8 @@ cli_ui_out::do_progress_notify (const std::string &msg,
   else
     {
       using namespace std::chrono;
-      milliseconds diff = duration_cast<milliseconds>
-	(steady_clock::now () - info.last_update);
+      milliseconds diff = duration_cast<milliseconds> (steady_clock::now ()
+						       - info.last_update);
 
       /* Advance the progress indicator at a rate of 1 tick every
 	 every 0.5 seconds.  */
@@ -360,8 +355,7 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 	  gdb_printf (stream, "\r[");
 	  for (int i = 0; i < width; ++i)
 	    {
-	      if (i == info.pos % width
-		  || i == (info.pos + 1) % width
+	      if (i == info.pos % width || i == (info.pos + 1) % width
 		  || i == (info.pos + 2) % width)
 		gdb_printf (stream, "#");
 	      else
@@ -387,8 +381,7 @@ cli_ui_out::clear_current_line ()
   struct ui_file *stream = m_streams.back ();
   int chars_per_line = get_chars_per_line ();
 
-  if (!stream->isatty ()
-      || !current_ui->input_interactive_p ()
+  if (!stream->isatty () || !current_ui->input_interactive_p ()
       || chars_per_line < MIN_CHARS_PER_LINE)
     return;
 
@@ -427,17 +420,15 @@ cli_ui_out::field_separator ()
 /* Constructor for cli_ui_out.  */
 
 cli_ui_out::cli_ui_out (ui_file *stream, ui_out_flags flags)
-: ui_out (flags),
-  m_suppress_output (false)
+  : ui_out (flags),
+    m_suppress_output (false)
 {
   gdb_assert (stream != NULL);
 
   m_streams.push_back (stream);
 }
 
-cli_ui_out::~cli_ui_out ()
-{
-}
+cli_ui_out::~cli_ui_out () {}
 
 ui_file *
 cli_ui_out::set_stream (struct ui_file *stream)

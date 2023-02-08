@@ -46,7 +46,6 @@
 /* OpenRISC specific includes.  */
 #include "or1k-tdep.h"
 #include "features/or1k.c"
-
 
 /* Global debug flag.  */
 
@@ -56,9 +55,8 @@ static void
 show_or1k_debug (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("OpenRISC debugging is %s.\n"), value);
+  gdb_printf (file, _ ("OpenRISC debugging is %s.\n"), value);
 }
-
 
 /* The target-dependent structure for gdbarch.  */
 
@@ -79,9 +77,10 @@ or1k_fetch_instruction (struct gdbarch *gdbarch, CORE_ADDR addr)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[OR1K_INSTLEN];
 
-  if (target_read_code (addr, buf, OR1K_INSTLEN)) {
-    memory_error (TARGET_XFER_E_IO, addr);
-  }
+  if (target_read_code (addr, buf, OR1K_INSTLEN))
+    {
+      memory_error (TARGET_XFER_E_IO, addr);
+    }
 
   return extract_unsigned_integer (buf, OR1K_INSTLEN, byte_order);
 }
@@ -103,7 +102,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
       const char *start_ptr;
       char *end_ptr;
 
-      uint32_t bits; /* Bit substring of interest */
+      uint32_t bits;  /* Bit substring of interest */
       uint32_t width; /* Substring width */
       uint32_t *arg_ptr;
 
@@ -131,7 +130,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 
 	  /* Check we got something, and if so skip on.  */
 	  if (start_ptr == end_ptr)
-	    error (_("bitstring \"%s\" at offset %d has no length field."),
+	    error (_ ("bitstring \"%s\" at offset %d has no length field."),
 		   format, i);
 
 	  i += end_ptr - start_ptr;
@@ -140,7 +139,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 	     still give a fatal error, because these are fixed strings that
 	     just should not be wrong.  */
 	  if ('b' != format[i++])
-	    error (_("bitstring \"%s\" at offset %d has no terminating 'b'."),
+	    error (_ ("bitstring \"%s\" at offset %d has no terminating 'b'."),
 		   format, i);
 
 	  /* Break out the field.  There is a special case with a bit width
@@ -148,8 +147,8 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 	  if (32 == width)
 	    bits = inst;
 	  else
-	    bits =
-	      (inst >> (OR1K_INSTBITLEN - iptr - width)) & ((1 << width) - 1);
+	    bits = (inst >> (OR1K_INSTBITLEN - iptr - width))
+		   & ((1 << width) - 1);
 
 	  arg_ptr = va_arg (ap, uint32_t *);
 	  *arg_ptr = bits;
@@ -157,7 +156,7 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
 	  break;
 
 	default:
-	  error (_("invalid character in bitstring \"%s\" at offset %d."),
+	  error (_ ("invalid character in bitstring \"%s\" at offset %d."),
 		 format, i);
 	  break;
 	}
@@ -180,8 +179,8 @@ or1k_analyse_inst (uint32_t inst, const char *format, ...)
    false on failure. */
 
 static bool
-or1k_analyse_l_addi (uint32_t inst, unsigned int *rd_ptr,
-		     unsigned int *ra_ptr, int *simm_ptr)
+or1k_analyse_l_addi (uint32_t inst, unsigned int *rd_ptr, unsigned int *ra_ptr,
+		     int *simm_ptr)
 {
   /* Instruction fields */
   uint32_t rd, ra, i;
@@ -233,7 +232,6 @@ or1k_analyse_l_sw (uint32_t inst, int *simm_ptr, unsigned int *ra_ptr,
   else
     return false; /* Failure */
 }
-
 
 /* Functions defining the architecture.  */
 
@@ -285,11 +283,10 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
 
 	  regcache_cooked_read_unsigned (regcache, OR1K_RV_REGNUM, &tmp);
 	  store_unsigned_integer (readbuf, rv_size, byte_order, tmp);
-
 	}
       if (writebuf != NULL)
 	{
-	  gdb_byte *buf = XCNEWVEC(gdb_byte, bpw);
+	  gdb_byte *buf = XCNEWVEC (gdb_byte, bpw);
 
 	  if (BFD_ENDIAN_BIG == byte_order)
 	    memcpy (buf + (sizeof (gdb_byte) * bpw) - rv_size, writebuf,
@@ -311,8 +308,7 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
 	  ULONGEST tmp_hi;
 	  ULONGEST tmp;
 
-	  regcache_cooked_read_unsigned (regcache, OR1K_RV_REGNUM,
-					 &tmp_hi);
+	  regcache_cooked_read_unsigned (regcache, OR1K_RV_REGNUM, &tmp_hi);
 	  regcache_cooked_read_unsigned (regcache, OR1K_RV_REGNUM + 1,
 					 &tmp_lo);
 	  tmp = (tmp_hi << (bpw * 8)) | tmp_lo;
@@ -321,8 +317,8 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
 	}
       if (writebuf != NULL)
 	{
-	  gdb_byte *buf_lo = XCNEWVEC(gdb_byte, bpw);
-	  gdb_byte *buf_hi = XCNEWVEC(gdb_byte, bpw);
+	  gdb_byte *buf_lo = XCNEWVEC (gdb_byte, bpw);
+	  gdb_byte *buf_hi = XCNEWVEC (gdb_byte, bpw);
 
 	  /* This is cheating.  We assume that we fit in 2 words exactly,
 	     which wouldn't work if we had (say) a 6-byte scalar type on a
@@ -343,7 +339,7 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
 
 /* OR1K always uses a l.trap instruction for breakpoints.  */
 
-constexpr gdb_byte or1k_break_insn[] = {0x21, 0x00, 0x00, 0x01};
+constexpr gdb_byte or1k_break_insn[] = { 0x21, 0x00, 0x00, 0x01 };
 
 typedef BP_MANIPULATION (or1k_break_insn) or1k_breakpoint;
 
@@ -354,10 +350,9 @@ or1k_delay_slot_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   CGEN_FIELDS tmp_fields;
   or1k_gdbarch_tdep *tdep = gdbarch_tdep<or1k_gdbarch_tdep> (gdbarch);
 
-  insn = cgen_lookup_insn (tdep->gdb_cgen_cpu_desc,
-			   NULL,
-			   or1k_fetch_instruction (gdbarch, pc),
-			   NULL, 32, &tmp_fields, 0);
+  insn = cgen_lookup_insn (tdep->gdb_cgen_cpu_desc, NULL,
+			   or1k_fetch_instruction (gdbarch, pc), NULL, 32,
+			   &tmp_fields, 0);
 
   /* NULL here would mean the last instruction was not understood by cgen.
      This should not usually happen, but if does its not a delay slot.  */
@@ -416,17 +411,16 @@ or1k_software_single_step (struct regcache *regcache)
   if (or1k_delay_slot_p (gdbarch, pc))
     next_pc += 4;
 
-  return {next_pc};
+  return { next_pc };
 }
 
 /* Name for or1k general registers.  */
 
 static const char *const or1k_reg_names[OR1K_NUM_REGS] = {
   /* general purpose registers */
-  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-  "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
-  "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
+  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11",
+  "r12", "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22",
+  "r23", "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
 
   /* previous program counter, next program counter and status register */
   "ppc", "npc", "sr"
@@ -435,8 +429,7 @@ static const char *const or1k_reg_names[OR1K_NUM_REGS] = {
 static int
 or1k_is_arg_reg (unsigned int regnum)
 {
-  return (OR1K_FIRST_ARG_REGNUM <= regnum)
-    && (regnum <= OR1K_LAST_ARG_REGNUM);
+  return (OR1K_FIRST_ARG_REGNUM <= regnum) && (regnum <= OR1K_LAST_ARG_REGNUM);
 }
 
 static int
@@ -469,8 +462,7 @@ or1k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (0 != prologue_end)
 	{
 	  struct symtab_and_line prologue_sal = find_pc_line (start_pc, 0);
-	  struct compunit_symtab *compunit
-	    = prologue_sal.symtab->compunit ();
+	  struct compunit_symtab *compunit = prologue_sal.symtab->compunit ();
 	  const char *debug_format = compunit->debugformat ();
 
 	  if ((NULL != debug_format)
@@ -488,9 +480,8 @@ or1k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   inst = or1k_fetch_instruction (gdbarch, addr);
 
   /* Look for the new stack pointer being set up.  */
-  if (or1k_analyse_l_addi (inst, &rd, &ra, &simm)
-      && (OR1K_SP_REGNUM == rd) && (OR1K_SP_REGNUM == ra)
-      && (simm < 0) && (0 == (simm % 4)))
+  if (or1k_analyse_l_addi (inst, &rd, &ra, &simm) && (OR1K_SP_REGNUM == rd)
+      && (OR1K_SP_REGNUM == ra) && (simm < 0) && (0 == (simm % 4)))
     {
       frame_size = -simm;
       addr += OR1K_INSTLEN;
@@ -498,9 +489,8 @@ or1k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
 
   /* Look for the frame pointer being manipulated.  */
-  if (or1k_analyse_l_sw (inst, &simm, &ra, &rb)
-      && (OR1K_SP_REGNUM == ra) && (OR1K_FP_REGNUM == rb)
-      && (simm >= 0) && (0 == (simm % 4)))
+  if (or1k_analyse_l_sw (inst, &simm, &ra, &rb) && (OR1K_SP_REGNUM == ra)
+      && (OR1K_FP_REGNUM == rb) && (simm >= 0) && (0 == (simm % 4)))
     {
       addr += OR1K_INSTLEN;
       inst = or1k_fetch_instruction (gdbarch, addr);
@@ -514,9 +504,8 @@ or1k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
 
   /* Look for the link register being saved.  */
-  if (or1k_analyse_l_sw (inst, &simm, &ra, &rb)
-      && (OR1K_SP_REGNUM == ra) && (OR1K_LR_REGNUM == rb)
-      && (simm >= 0) && (0 == (simm % 4)))
+  if (or1k_analyse_l_sw (inst, &simm, &ra, &rb) && (OR1K_SP_REGNUM == ra)
+      && (OR1K_LR_REGNUM == rb) && (simm >= 0) && (0 == (simm % 4)))
     {
       addr += OR1K_INSTLEN;
       inst = or1k_fetch_instruction (gdbarch, addr);
@@ -569,8 +558,7 @@ or1k_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
   pc = frame_unwind_register_unsigned (next_frame, OR1K_NPC_REGNUM);
 
   if (or1k_debug)
-    gdb_printf (gdb_stdlog, "or1k_unwind_pc, pc=%s\n",
-		paddress (gdbarch, pc));
+    gdb_printf (gdb_stdlog, "or1k_unwind_pc, pc=%s\n", paddress (gdbarch, pc));
 
   return pc;
 }
@@ -589,8 +577,7 @@ or1k_unwind_sp (struct gdbarch *gdbarch, frame_info_ptr next_frame)
   sp = frame_unwind_register_unsigned (next_frame, OR1K_SP_REGNUM);
 
   if (or1k_debug)
-    gdb_printf (gdb_stdlog, "or1k_unwind_sp, sp=%s\n",
-		paddress (gdbarch, sp));
+    gdb_printf (gdb_stdlog, "or1k_unwind_sp, sp=%s\n", paddress (gdbarch, sp));
 
   return sp;
 }
@@ -600,8 +587,8 @@ or1k_unwind_sp (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 static CORE_ADDR
 or1k_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 		      CORE_ADDR function, struct value **args, int nargs,
-		      struct type *value_type, CORE_ADDR * real_pc,
-		      CORE_ADDR * bp_addr, struct regcache *regcache)
+		      struct type *value_type, CORE_ADDR *real_pc,
+		      CORE_ADDR *bp_addr, struct regcache *regcache)
 {
   CORE_ADDR bp_slot;
 
@@ -621,12 +608,11 @@ or1k_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
 static CORE_ADDR
 or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		      struct regcache *regcache, CORE_ADDR bp_addr,
-		      int nargs, struct value **args, CORE_ADDR sp,
+		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		      struct value **args, CORE_ADDR sp,
 		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
-
   int argreg;
   int argnum;
   int first_stack_arg;
@@ -707,8 +693,8 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  if (argreg <= (OR1K_LAST_ARG_REGNUM - 1))
 	    {
-	      ULONGEST regval =	extract_unsigned_integer (val, len,
-							  byte_order);
+	      ULONGEST regval
+		= extract_unsigned_integer (val, len, byte_order);
 
 	      unsigned int bits_per_word = bpw * 8;
 	      ULONGEST mask = (((ULONGEST) 1) << bits_per_word) - 1;
@@ -728,9 +714,8 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else if (argreg <= OR1K_LAST_ARG_REGNUM)
 	{
 	  /* Smaller scalars fit in a single register.  */
-	  regcache_cooked_write_unsigned
-	    (regcache, argreg, extract_unsigned_integer (val, len,
-							 byte_order));
+	  regcache_cooked_write_unsigned (
+	    regcache, argreg, extract_unsigned_integer (val, len, byte_order));
 	  argreg++;
 	}
       else
@@ -819,8 +804,6 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp;
 }
 
-
-
 /* Support functions for frame handling.  */
 
 /* Initialize a prologue cache
@@ -903,8 +886,7 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
   CORE_ADDR end_addr;
 
   if (or1k_debug)
-    gdb_printf (gdb_stdlog,
-		"or1k_frame_cache, prologue_cache = %s\n",
+    gdb_printf (gdb_stdlog, "or1k_frame_cache, prologue_cache = %s\n",
 		host_address_to_string (*prologue_cache));
 
   /* Nothing to do if we already have this info.  */
@@ -922,8 +904,9 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 
   /* Get the stack pointer if we have one (if there's no process executing
      yet we won't have a frame.  */
-  this_sp = (NULL == this_frame) ? 0 :
-    get_frame_register_unsigned (this_frame, OR1K_SP_REGNUM);
+  this_sp = (NULL == this_frame)
+	      ? 0
+	      : get_frame_register_unsigned (this_frame, OR1K_SP_REGNUM);
 
   /* Return early if GDB couldn't find the function.  */
   if (start_addr == 0)
@@ -964,7 +947,7 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
      have executed the code.  Check we have a sane prologue size, and if
      zero we are frameless and can give up here.  */
   if (end_addr < start_addr)
-    error (_("end addr %s is less than start addr %s"),
+    error (_ ("end addr %s is less than start addr %s"),
 	   paddress (gdbarch, end_addr), paddress (gdbarch, start_addr));
 
   if (end_addr == start_addr)
@@ -979,9 +962,8 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
       int simm;
 
       /* Look for the new stack pointer being set up.  */
-      if (or1k_analyse_l_addi (inst, &rd, &ra, &simm)
-	  && (OR1K_SP_REGNUM == rd) && (OR1K_SP_REGNUM == ra)
-	  && (simm < 0) && (0 == (simm % 4)))
+      if (or1k_analyse_l_addi (inst, &rd, &ra, &simm) && (OR1K_SP_REGNUM == rd)
+	  && (OR1K_SP_REGNUM == ra) && (simm < 0) && (0 == (simm % 4)))
 	{
 	  frame_size = -simm;
 	  addr += OR1K_INSTLEN;
@@ -1016,10 +998,9 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
       end_addr = (this_pc < end_addr) ? this_pc : end_addr;
 
       /* Look for the frame pointer being manipulated.  */
-      if ((addr < end_addr)
-	  && or1k_analyse_l_sw (inst, &simm, &ra, &rb)
-	  && (OR1K_SP_REGNUM == ra) && (OR1K_FP_REGNUM == rb)
-	  && (simm >= 0) && (0 == (simm % 4)))
+      if ((addr < end_addr) && or1k_analyse_l_sw (inst, &simm, &ra, &rb)
+	  && (OR1K_SP_REGNUM == ra) && (OR1K_FP_REGNUM == rb) && (simm >= 0)
+	  && (0 == (simm % 4)))
 	{
 	  addr += OR1K_INSTLEN;
 	  inst = or1k_fetch_instruction (gdbarch, addr);
@@ -1029,8 +1010,7 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 	  trad_frame_set_reg_addr (info, OR1K_FP_REGNUM, this_sp + simm);
 
 	  /* Look for the new frame pointer being set up.  */
-	  if ((addr < end_addr)
-	      && or1k_analyse_l_addi (inst, &rd, &ra, &simm)
+	  if ((addr < end_addr) && or1k_analyse_l_addi (inst, &rd, &ra, &simm)
 	      && (OR1K_FP_REGNUM == rd) && (OR1K_SP_REGNUM == ra)
 	      && (simm == frame_size))
 	    {
@@ -1045,10 +1025,9 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 	}
 
       /* Look for the link register being saved.  */
-      if ((addr < end_addr)
-	  && or1k_analyse_l_sw (inst, &simm, &ra, &rb)
-	  && (OR1K_SP_REGNUM == ra) && (OR1K_LR_REGNUM == rb)
-	  && (simm >= 0) && (0 == (simm % 4)))
+      if ((addr < end_addr) && or1k_analyse_l_sw (inst, &simm, &ra, &rb)
+	  && (OR1K_SP_REGNUM == ra) && (OR1K_LR_REGNUM == rb) && (simm >= 0)
+	  && (0 == (simm % 4)))
 	{
 	  addr += OR1K_INSTLEN;
 	  inst = or1k_fetch_instruction (gdbarch, addr);
@@ -1069,8 +1048,7 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 	{
 	  if (or1k_analyse_l_sw (inst, &simm, &ra, &rb)
 	      && (((OR1K_FP_REGNUM == ra) && or1k_is_arg_reg (rb))
-		  || ((OR1K_SP_REGNUM == ra)
-		      && or1k_is_callee_saved_reg (rb)))
+		  || ((OR1K_SP_REGNUM == ra) && or1k_is_callee_saved_reg (rb)))
 	      && (0 == (simm % 4)))
 	    {
 	      addr += OR1K_INSTLEN;
@@ -1102,11 +1080,11 @@ or1k_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 /* Implement the this_id function for the stub unwinder.  */
 
 static void
-or1k_frame_this_id (frame_info_ptr this_frame,
-		    void **prologue_cache, struct frame_id *this_id)
+or1k_frame_this_id (frame_info_ptr this_frame, void **prologue_cache,
+		    struct frame_id *this_id)
 {
-  struct trad_frame_cache *info = or1k_frame_cache (this_frame,
-						    prologue_cache);
+  struct trad_frame_cache *info
+    = or1k_frame_cache (this_frame, prologue_cache);
 
   trad_frame_get_id (info, this_id);
 }
@@ -1114,11 +1092,11 @@ or1k_frame_this_id (frame_info_ptr this_frame,
 /* Implement the prev_register function for the stub unwinder.  */
 
 static struct value *
-or1k_frame_prev_register (frame_info_ptr this_frame,
-			  void **prologue_cache, int regnum)
+or1k_frame_prev_register (frame_info_ptr this_frame, void **prologue_cache,
+			  int regnum)
 {
-  struct trad_frame_cache *info = or1k_frame_cache (this_frame,
-						    prologue_cache);
+  struct trad_frame_cache *info
+    = or1k_frame_cache (this_frame, prologue_cache);
 
   return trad_frame_get_register (info, this_frame, regnum);
 }
@@ -1179,10 +1157,8 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Information about the target architecture */
   set_gdbarch_return_value (gdbarch, or1k_return_value);
-  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
-				       or1k_breakpoint::kind_from_pc);
-  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
-				       or1k_breakpoint::bp_from_kind);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, or1k_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, or1k_breakpoint::bp_from_kind);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   /* Register architecture */
@@ -1215,14 +1191,14 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Get a CGEN CPU descriptor for this architecture.  */
   {
-
     const char *mach_name = binfo->printable_name;
-    enum cgen_endian endian = (info.byte_order == BFD_ENDIAN_BIG
-			       ? CGEN_ENDIAN_BIG : CGEN_ENDIAN_LITTLE);
+    enum cgen_endian endian
+      = (info.byte_order == BFD_ENDIAN_BIG ? CGEN_ENDIAN_BIG
+					   : CGEN_ENDIAN_LITTLE);
 
-    tdep->gdb_cgen_cpu_desc =
-      or1k_cgen_cpu_open (CGEN_CPU_OPEN_BFDMACH, mach_name,
-			  CGEN_CPU_OPEN_ENDIAN, endian, CGEN_CPU_OPEN_END);
+    tdep->gdb_cgen_cpu_desc
+      = or1k_cgen_cpu_open (CGEN_CPU_OPEN_BFDMACH, mach_name,
+			    CGEN_CPU_OPEN_ENDIAN, endian, CGEN_CPU_OPEN_END);
 
     or1k_cgen_init_asm (tdep->gdb_cgen_cpu_desc);
   }
@@ -1283,9 +1259,9 @@ or1k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file, "or1k_dump_tdep: %d bytes per address\n",
 	      tdep->bytes_per_address);
 }
-
 
 void _initialize_or1k_tdep ();
+
 void
 _initialize_or1k_tdep ()
 {
@@ -1295,11 +1271,9 @@ _initialize_or1k_tdep ()
   initialize_tdesc_or1k ();
 
   /* Debugging flag.  */
-  add_setshow_boolean_cmd ("or1k", class_maintenance, &or1k_debug,
-			   _("Set OpenRISC debugging."),
-			   _("Show OpenRISC debugging."),
-			   _("When on, OpenRISC specific debugging is enabled."),
-			   NULL,
-			   show_or1k_debug,
-			   &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd (
+    "or1k", class_maintenance, &or1k_debug, _ ("Set OpenRISC debugging."),
+    _ ("Show OpenRISC debugging."),
+    _ ("When on, OpenRISC specific debugging is enabled."), NULL,
+    show_or1k_debug, &setdebuglist, &showdebuglist);
 }

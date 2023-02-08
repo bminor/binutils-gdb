@@ -28,8 +28,8 @@
 class event_pipe
 {
 public:
-  event_pipe() = default;
-  ~event_pipe();
+  event_pipe () = default;
+  ~event_pipe ();
 
   DISABLE_COPY_AND_ASSIGN (event_pipe);
 
@@ -40,19 +40,18 @@ public:
   void close_pipe ();
 
   /* True if the event pipe has been opened.  */
-  bool is_open () const
-  { return m_fds[0] != -1; }
+  bool is_open () const { return m_fds[0] != -1; }
 
   /* The file descriptor of the waitable file to use in the event
      loop.  */
-  int event_fd () const
-  { return m_fds[0]; }
+  int event_fd () const { return m_fds[0]; }
 
   /* Flush the event pipe.  */
   void flush ();
 
   /* Put something in the pipe, so the event loop wakes up.  */
   void mark ();
+
 private:
   int m_fds[2] = { -1, -1 };
 };

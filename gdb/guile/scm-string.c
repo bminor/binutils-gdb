@@ -114,8 +114,8 @@ gdbscm_call_scm_to_stringn (void *datap)
    It is an error to call this if STRING is not a string.  */
 
 gdb::unique_xmalloc_ptr<char>
-gdbscm_scm_to_string (SCM string, size_t *lenp,
-		      const char *charset, int strict, SCM *except_scmp)
+gdbscm_scm_to_string (SCM string, size_t *lenp, const char *charset,
+		      int strict, SCM *except_scmp)
 {
   struct scm_to_stringn_data data;
   SCM scm_result;
@@ -123,9 +123,8 @@ gdbscm_scm_to_string (SCM string, size_t *lenp,
   data.string = string;
   data.lenp = lenp;
   data.charset = charset;
-  data.conversion_kind = (strict
-			  ? SCM_FAILED_CONVERSION_ERROR
-			  : SCM_FAILED_CONVERSION_ESCAPE_SEQUENCE);
+  data.conversion_kind = (strict ? SCM_FAILED_CONVERSION_ERROR
+				 : SCM_FAILED_CONVERSION_ESCAPE_SEQUENCE);
   data.result = NULL;
 
   scm_result = gdbscm_call_guile (gdbscm_call_scm_to_stringn, &data, NULL);
@@ -174,8 +173,8 @@ gdbscm_call_scm_from_stringn (void *datap)
    can't be converted (limitation of underlying Guile conversion support).  */
 
 SCM
-gdbscm_scm_from_string (const char *string, size_t len,
-			const char *charset, int strict)
+gdbscm_scm_from_string (const char *string, size_t len, const char *charset,
+			int strict)
 {
   struct scm_from_stringn_data data;
   SCM scm_result;
@@ -184,9 +183,8 @@ gdbscm_scm_from_string (const char *string, size_t len,
   data.len = len;
   data.charset = charset;
   /* The use of SCM_FAILED_CONVERSION_QUESTION_MARK is specified by Guile.  */
-  data.conversion_kind = (strict
-			  ? SCM_FAILED_CONVERSION_ERROR
-			  : SCM_FAILED_CONVERSION_QUESTION_MARK);
+  data.conversion_kind = (strict ? SCM_FAILED_CONVERSION_ERROR
+				 : SCM_FAILED_CONVERSION_QUESTION_MARK);
   data.result = SCM_UNDEFINED;
 
   scm_result = gdbscm_call_guile (gdbscm_call_scm_from_stringn, &data, NULL);
@@ -239,8 +237,8 @@ gdbscm_string_to_argv (SCM string_scm)
   char *string;
   SCM result = SCM_EOL;
 
-  gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "s",
-			      string_scm, &string);
+  gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "s", string_scm,
+			      &string);
 
   if (string == NULL || *string == '\0')
     {
@@ -256,18 +254,15 @@ gdbscm_string_to_argv (SCM string_scm)
 
   return scm_reverse_x (result, SCM_EOL);
 }
-
+
 /* Initialize the Scheme charset interface to GDB.  */
 
-static const scheme_function string_functions[] =
-{
-  { "string->argv", 1, 0, 0, as_a_scm_t_subr (gdbscm_string_to_argv),
-  "\
+static const scheme_function string_functions[]
+  = { { "string->argv", 1, 0, 0, as_a_scm_t_subr (gdbscm_string_to_argv), "\
 Convert a string to a list of strings split up according to\n\
 gdb's argv parsing rules." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_strings (void)

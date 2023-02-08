@@ -36,30 +36,26 @@
 
 /* The CTF target.  */
 
-static const target_info ctf_target_info = {
-  "ctf",
-  N_("CTF file"),
-  N_("(Use a CTF directory as a target.\n\
-Specify the filename of the CTF directory.")
-};
+static const target_info ctf_target_info
+  = { "ctf", N_ ("CTF file"), N_ ("(Use a CTF directory as a target.\n\
+Specify the filename of the CTF directory.") };
 
 class ctf_target final : public tracefile_target
 {
 public:
-  const target_info &info () const override
-  { return ctf_target_info; }
+
+  const target_info &info () const override { return ctf_target_info; }
 
   void close () override;
   void fetch_registers (struct regcache *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
-						const char *annex,
-						gdb_byte *readbuf,
-						const gdb_byte *writebuf,
-						ULONGEST offset, ULONGEST len,
-						ULONGEST *xfered_len) override;
+					const char *annex, gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
   void files_info () override;
-  int trace_find (enum trace_find_type type, int num,
-			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp) override;
+  int trace_find (enum trace_find_type type, int num, CORE_ADDR addr1,
+		  CORE_ADDR addr2, int *tpp) override;
   bool get_trace_state_variable_value (int tsv, LONGEST *val) override;
   traceframe_info_up traceframe_info () override;
 };
@@ -94,12 +90,12 @@ public:
    that iterator goes into a new packet or frame.  We define event
    "frame".  */
 
-#define CTF_MAGIC		0xC1FC1FC1
-#define CTF_SAVE_MAJOR		1
-#define CTF_SAVE_MINOR		8
+#define CTF_MAGIC 0xC1FC1FC1
+#define CTF_SAVE_MAJOR 1
+#define CTF_SAVE_MINOR 8
 
-#define CTF_METADATA_NAME	"metadata"
-#define CTF_DATASTREAM_NAME	"datastream"
+#define CTF_METADATA_NAME "metadata"
+#define CTF_DATASTREAM_NAME "datastream"
 
 /* Reserved event id.  */
 
@@ -131,9 +127,8 @@ struct trace_write_handler
 
 /* Write metadata in FORMAT.  */
 
-static void
-ctf_save_write_metadata (struct trace_write_handler *handler,
-			 const char *format, ...)
+static void ctf_save_write_metadata (struct trace_write_handler *handler,
+				     const char *format, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
 static void
@@ -144,8 +139,7 @@ ctf_save_write_metadata (struct trace_write_handler *handler,
 
   va_start (args, format);
   if (vfprintf (handler->metadata_fd, format, args) < 0)
-    error (_("Unable to write metadata file (%s)"),
-	     safe_strerror (errno));
+    error (_ ("Unable to write metadata file (%s)"), safe_strerror (errno));
   va_end (args);
 }
 
@@ -153,11 +147,11 @@ ctf_save_write_metadata (struct trace_write_handler *handler,
    HANDLER.  */
 
 static int
-ctf_save_write (struct trace_write_handler *handler,
-		const gdb_byte *buf, size_t size)
+ctf_save_write (struct trace_write_handler *handler, const gdb_byte *buf,
+		size_t size)
 {
   if (fwrite (buf, size, 1, handler->datastream_fd) != 1)
-    error (_("Unable to write file for saving trace data (%s)"),
+    error (_ ("Unable to write file for saving trace data (%s)"),
 	   safe_strerror (errno));
 
   handler->content_size += size;
@@ -181,15 +175,14 @@ ctf_save_write (struct trace_write_handler *handler,
    if WHENCE is SEEK_CUR.  */
 
 static int
-ctf_save_fseek (struct trace_write_handler *handler, long offset,
-		int whence)
+ctf_save_fseek (struct trace_write_handler *handler, long offset, int whence)
 {
   gdb_assert (whence != SEEK_END);
   gdb_assert (whence != SEEK_SET
 	      || offset <= handler->content_size + handler->packet_start);
 
   if (fseek (handler->datastream_fd, offset, whence))
-    error (_("Unable to seek file for saving trace data (%s)"),
+    error (_ ("Unable to seek file for saving trace data (%s)"),
 	   safe_strerror (errno));
 
   if (whence == SEEK_CUR)
@@ -202,13 +195,11 @@ ctf_save_fseek (struct trace_write_handler *handler, long offset,
    and write BUF to datastream file.  The size of BUF is SIZE.  */
 
 static int
-ctf_save_align_write (struct trace_write_handler *handler,
-		      const gdb_byte *buf,
+ctf_save_align_write (struct trace_write_handler *handler, const gdb_byte *buf,
 		      size_t size, size_t align_size)
 {
   long offset
-    = (align_up (handler->content_size, align_size)
-       - handler->content_size);
+    = (align_up (handler->content_size, align_size) - handler->content_size);
 
   if (ctf_save_fseek (handler, offset, SEEK_CUR))
     return -1;
@@ -234,16 +225,14 @@ ctf_save_next_packet (struct trace_write_handler *handler)
 static void
 ctf_save_metadata_header (struct trace_write_handler *handler)
 {
-  ctf_save_write_metadata (handler, "/* CTF %d.%d */\n",
-			   CTF_SAVE_MAJOR, CTF_SAVE_MINOR);
-  ctf_save_write_metadata (handler,
-			   "typealias integer { size = 8; align = 8; "
-			   "signed = false; encoding = ascii;}"
-			   " := ascii;\n");
-  ctf_save_write_metadata (handler,
-			   "typealias integer { size = 8; align = 8; "
-			   "signed = false; }"
-			   " := uint8_t;\n");
+  ctf_save_write_metadata (handler, "/* CTF %d.%d */\n", CTF_SAVE_MAJOR,
+			   CTF_SAVE_MINOR);
+  ctf_save_write_metadata (handler, "typealias integer { size = 8; align = 8; "
+				    "signed = false; encoding = ascii;}"
+				    " := ascii;\n");
+  ctf_save_write_metadata (handler, "typealias integer { size = 8; align = 8; "
+				    "signed = false; }"
+				    " := uint8_t;\n");
   ctf_save_write_metadata (handler,
 			   "typealias integer { size = 16; align = 16;"
 			   "signed = false; } := uint16_t;\n");
@@ -260,9 +249,8 @@ ctf_save_metadata_header (struct trace_write_handler *handler)
   ctf_save_write_metadata (handler,
 			   "typealias integer { size = 64; align = 64;"
 			   "signed = true; } := int64_t;\n");
-  ctf_save_write_metadata (handler,
-			   "typealias string { encoding = ascii;"
-			   " } := chars;\n");
+  ctf_save_write_metadata (handler, "typealias string { encoding = ascii;"
+				    " } := chars;\n");
   ctf_save_write_metadata (handler, "\n");
 
   /* Get the byte order of the host and write CTF data in this byte
@@ -293,8 +281,7 @@ ctf_save_metadata_header (struct trace_write_handler *handler)
 			   "		uint32_t id;\n"
 			   "	};\n"
 			   "};\n",
-			   CTF_SAVE_MAJOR, CTF_SAVE_MINOR,
-			   HOST_ENDIANNESS);
+			   CTF_SAVE_MAJOR, CTF_SAVE_MINOR, HOST_ENDIANNESS);
   ctf_save_write_metadata (handler, "\n");
 }
 
@@ -314,23 +301,20 @@ struct ctf_trace_file_writer
 static void
 ctf_dtor (struct trace_file_writer *self)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
 
   if (writer->tcs.metadata_fd != NULL)
     fclose (writer->tcs.metadata_fd);
 
   if (writer->tcs.datastream_fd != NULL)
     fclose (writer->tcs.datastream_fd);
-
 }
 
 /* This is the implementation of trace_file_write_ops method
    target_save.  */
 
 static int
-ctf_target_save (struct trace_file_writer *self,
-		 const char *dirname)
+ctf_target_save (struct trace_file_writer *self, const char *dirname)
 {
   /* Don't support save trace file to CTF format in the target.  */
   return 0;
@@ -343,13 +327,12 @@ ctf_target_save (struct trace_file_writer *self,
 static void
 ctf_start (struct trace_file_writer *self, const char *dirname)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   mode_t hmode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH;
 
   /* Create DIRNAME.  */
   if (mkdir (dirname, hmode) && errno != EEXIST)
-    error (_("Unable to open directory '%s' for saving trace data (%s)"),
+    error (_ ("Unable to open directory '%s' for saving trace data (%s)"),
 	   dirname, safe_strerror (errno));
 
   memset (&writer->tcs, '\0', sizeof (writer->tcs));
@@ -359,7 +342,7 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
   writer->tcs.metadata_fd
     = gdb_fopen_cloexec (file_name.c_str (), "w").release ();
   if (writer->tcs.metadata_fd == NULL)
-    error (_("Unable to open file '%s' for saving trace data (%s)"),
+    error (_ ("Unable to open file '%s' for saving trace data (%s)"),
 	   file_name.c_str (), safe_strerror (errno));
 
   ctf_save_metadata_header (&writer->tcs);
@@ -368,7 +351,7 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
   writer->tcs.datastream_fd
     = gdb_fopen_cloexec (file_name.c_str (), "w").release ();
   if (writer->tcs.datastream_fd == NULL)
-    error (_("Unable to open file '%s' for saving trace data (%s)"),
+    error (_ ("Unable to open file '%s' for saving trace data (%s)"),
 	   file_name.c_str (), safe_strerror (errno));
 }
 
@@ -379,9 +362,7 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
 static void
 ctf_write_header (struct trace_file_writer *self)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
-
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
 
   ctf_save_write_metadata (&writer->tcs, "\n");
   ctf_save_write_metadata (&writer->tcs,
@@ -391,7 +372,8 @@ ctf_write_header (struct trace_file_writer *self)
 			   "\t\tuint16_t length;\n"
 			   "\t\tuint8_t contents[length];\n"
 			   "\t};\n"
-			   "};\n", CTF_EVENT_ID_MEMORY);
+			   "};\n",
+			   CTF_EVENT_ID_MEMORY);
 
   ctf_save_write_metadata (&writer->tcs, "\n");
   ctf_save_write_metadata (&writer->tcs,
@@ -400,25 +382,28 @@ ctf_write_header (struct trace_file_writer *self)
 			   "\t\tuint64_t val;\n"
 			   "\t\tuint32_t num;\n"
 			   "\t};\n"
-			   "};\n", CTF_EVENT_ID_TSV);
+			   "};\n",
+			   CTF_EVENT_ID_TSV);
 
   ctf_save_write_metadata (&writer->tcs, "\n");
   ctf_save_write_metadata (&writer->tcs,
 			   "event {\n\tname = \"frame\";\n\tid = %u;\n"
 			   "\tfields := struct { \n"
 			   "\t};\n"
-			   "};\n", CTF_EVENT_ID_FRAME);
+			   "};\n",
+			   CTF_EVENT_ID_FRAME);
 
   ctf_save_write_metadata (&writer->tcs, "\n");
   ctf_save_write_metadata (&writer->tcs,
-			  "event {\n\tname = \"tsv_def\";\n"
-			  "\tid = %u;\n\tfields := struct { \n"
-			  "\t\tint64_t initial_value;\n"
-			  "\t\tint32_t number;\n"
-			  "\t\tint32_t builtin;\n"
-			  "\t\tchars name;\n"
-			  "\t};\n"
-			  "};\n", CTF_EVENT_ID_TSV_DEF);
+			   "event {\n\tname = \"tsv_def\";\n"
+			   "\tid = %u;\n\tfields := struct { \n"
+			   "\t\tint64_t initial_value;\n"
+			   "\t\tint32_t number;\n"
+			   "\t\tint32_t builtin;\n"
+			   "\t\tchars name;\n"
+			   "\t};\n"
+			   "};\n",
+			   CTF_EVENT_ID_TSV_DEF);
 
   ctf_save_write_metadata (&writer->tcs, "\n");
   ctf_save_write_metadata (&writer->tcs,
@@ -434,19 +419,20 @@ ctf_write_header (struct trace_file_writer *self)
 			   "\t\tint32_t type;\n"
 			   "\t\tchars cond;\n"
 
-			  "\t\tuint32_t action_num;\n"
-			  "\t\tchars actions[action_num];\n"
+			   "\t\tuint32_t action_num;\n"
+			   "\t\tchars actions[action_num];\n"
 
-			  "\t\tuint32_t step_action_num;\n"
-			  "\t\tchars step_actions[step_action_num];\n"
+			   "\t\tuint32_t step_action_num;\n"
+			   "\t\tchars step_actions[step_action_num];\n"
 
-			  "\t\tchars at_string;\n"
-			  "\t\tchars cond_string;\n"
+			   "\t\tchars at_string;\n"
+			   "\t\tchars cond_string;\n"
 
-			  "\t\tuint32_t cmd_num;\n"
-			  "\t\tchars cmd_strings[cmd_num];\n"
-			  "\t};\n"
-			  "};\n", CTF_EVENT_ID_TP_DEF);
+			   "\t\tuint32_t cmd_num;\n"
+			   "\t\tchars cmd_strings[cmd_num];\n"
+			   "\t};\n"
+			   "};\n",
+			   CTF_EVENT_ID_TP_DEF);
 
   gdb_assert (writer->tcs.content_size == 0);
   gdb_assert (writer->tcs.packet_start == 0);
@@ -462,8 +448,7 @@ ctf_write_header (struct trace_file_writer *self)
 static void
 ctf_write_regblock_type (struct trace_file_writer *self, int size)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
 
   ctf_save_write_metadata (&writer->tcs, "\n");
 
@@ -480,11 +465,9 @@ ctf_write_regblock_type (struct trace_file_writer *self, int size)
    write_status.  */
 
 static void
-ctf_write_status (struct trace_file_writer *self,
-		  struct trace_status *ts)
+ctf_write_status (struct trace_file_writer *self, struct trace_status *ts)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   uint32_t id;
 
   ctf_save_write_metadata (&writer->tcs, "\n");
@@ -524,8 +507,7 @@ static void
 ctf_write_uploaded_tsv (struct trace_file_writer *self,
 			struct uploaded_tsv *tsv)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   int32_t int32;
   int64_t int64;
   const gdb_byte zero = 0;
@@ -546,8 +528,7 @@ ctf_write_uploaded_tsv (struct trace_file_writer *self,
 
   /* name */
   if (tsv->name != NULL)
-    ctf_save_write (&writer->tcs, (gdb_byte *) tsv->name,
-		    strlen (tsv->name));
+    ctf_save_write (&writer->tcs, (gdb_byte *) tsv->name, strlen (tsv->name));
   ctf_save_write (&writer->tcs, &zero, 1);
 }
 
@@ -555,11 +536,9 @@ ctf_write_uploaded_tsv (struct trace_file_writer *self,
    write_uploaded_tp.  */
 
 static void
-ctf_write_uploaded_tp (struct trace_file_writer *self,
-		       struct uploaded_tp *tp)
+ctf_write_uploaded_tp (struct trace_file_writer *self, struct uploaded_tp *tp)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   int32_t int32;
   int64_t int64;
   uint32_t u32;
@@ -633,7 +612,6 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
   for (const auto &act : tp->cmd_strings)
     ctf_save_write (&writer->tcs, (gdb_byte *) act.get (),
 		    strlen (act.get ()) + 1);
-
 }
 
 /* This is the implementation of trace_file_write_ops method
@@ -671,8 +649,7 @@ ctf_end (struct trace_file_writer *self)
 static void
 ctf_write_frame_start (struct trace_file_writer *self, uint16_t tpnum)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   uint32_t id = CTF_EVENT_ID_FRAME;
   uint32_t u32;
 
@@ -696,11 +673,10 @@ ctf_write_frame_start (struct trace_file_writer *self, uint16_t tpnum)
    write_r_block.  */
 
 static void
-ctf_write_frame_r_block (struct trace_file_writer *self,
-			 gdb_byte *buf, int32_t size)
+ctf_write_frame_r_block (struct trace_file_writer *self, gdb_byte *buf,
+			 int32_t size)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   uint32_t id = CTF_EVENT_ID_REGISTER;
 
   /* Event Id.  */
@@ -714,11 +690,10 @@ ctf_write_frame_r_block (struct trace_file_writer *self,
    write_m_block_header.  */
 
 static void
-ctf_write_frame_m_block_header (struct trace_file_writer *self,
-				uint64_t addr, uint16_t length)
+ctf_write_frame_m_block_header (struct trace_file_writer *self, uint64_t addr,
+				uint16_t length)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   uint32_t event_id = CTF_EVENT_ID_MEMORY;
 
   /* Event Id.  */
@@ -735,11 +710,10 @@ ctf_write_frame_m_block_header (struct trace_file_writer *self,
    write_m_block_memory.  */
 
 static void
-ctf_write_frame_m_block_memory (struct trace_file_writer *self,
-				gdb_byte *buf, uint16_t length)
+ctf_write_frame_m_block_memory (struct trace_file_writer *self, gdb_byte *buf,
+				uint16_t length)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
 
   /* Contents.  */
   ctf_save_align_write (&writer->tcs, (gdb_byte *) buf, length, 1);
@@ -749,11 +723,10 @@ ctf_write_frame_m_block_memory (struct trace_file_writer *self,
    write_v_block.  */
 
 static void
-ctf_write_frame_v_block (struct trace_file_writer *self,
-			 int32_t num, uint64_t val)
+ctf_write_frame_v_block (struct trace_file_writer *self, int32_t num,
+			 uint64_t val)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   uint32_t id = CTF_EVENT_ID_TSV;
 
   /* Event Id.  */
@@ -771,14 +744,12 @@ ctf_write_frame_v_block (struct trace_file_writer *self,
 static void
 ctf_write_frame_end (struct trace_file_writer *self)
 {
-  struct ctf_trace_file_writer *writer
-    = (struct ctf_trace_file_writer *) self;
+  struct ctf_trace_file_writer *writer = (struct ctf_trace_file_writer *) self;
   uint32_t u32;
   uint32_t t;
 
   /* Write the content size to packet header.  */
-  ctf_save_fseek (&writer->tcs, writer->tcs.packet_start + 4,
-		  SEEK_SET);
+  ctf_save_fseek (&writer->tcs, writer->tcs.packet_start + 4, SEEK_SET);
   u32 = writer->tcs.content_size * TARGET_CHAR_BIT;
 
   t = writer->tcs.content_size;
@@ -791,8 +762,7 @@ ctf_write_frame_end (struct trace_file_writer *self)
   writer->tcs.content_size = t;
 
   /* Write zero at the end of the packet.  */
-  ctf_save_fseek (&writer->tcs, writer->tcs.packet_start + t,
-		  SEEK_SET);
+  ctf_save_fseek (&writer->tcs, writer->tcs.packet_start + t, SEEK_SET);
   u32 = 0;
   ctf_save_write_uint32 (&writer->tcs, u32);
   writer->tcs.content_size = t;
@@ -803,20 +773,15 @@ ctf_write_frame_end (struct trace_file_writer *self)
 /* Operations to write various types of trace frames into CTF
    format.  */
 
-static const struct trace_frame_write_ops ctf_write_frame_ops =
-{
-  ctf_write_frame_start,
-  ctf_write_frame_r_block,
-  ctf_write_frame_m_block_header,
-  ctf_write_frame_m_block_memory,
-  ctf_write_frame_v_block,
-  ctf_write_frame_end,
+static const struct trace_frame_write_ops ctf_write_frame_ops = {
+  ctf_write_frame_start,	  ctf_write_frame_r_block,
+  ctf_write_frame_m_block_header, ctf_write_frame_m_block_memory,
+  ctf_write_frame_v_block,	  ctf_write_frame_end,
 };
 
 /* Operations to write trace buffers into CTF format.  */
 
-static const struct trace_file_write_ops ctf_write_ops =
-{
+static const struct trace_file_write_ops ctf_write_ops = {
   ctf_dtor,
   ctf_target_save,
   ctf_start,
@@ -890,17 +855,16 @@ ctf_open_dir (const char *dirname)
 {
   struct bt_iter_pos begin_pos;
   unsigned int count, i;
-  struct bt_ctf_event_decl * const *list;
+  struct bt_ctf_event_decl *const *list;
 
   ctx = bt_context_create ();
   if (ctx == NULL)
-    error (_("Unable to create bt_context"));
+    error (_ ("Unable to create bt_context"));
   handle_id = bt_context_add_trace (ctx, dirname, "ctf", NULL, NULL, NULL);
   if (handle_id < 0)
     {
       ctf_destroy ();
-      error (_("Unable to use libbabeltrace on directory \"%s\""),
-	     dirname);
+      error (_ ("Unable to use libbabeltrace on directory \"%s\""), dirname);
     }
 
   begin_pos.type = BT_SEEK_BEGIN;
@@ -908,7 +872,7 @@ ctf_open_dir (const char *dirname)
   if (ctf_iter == NULL)
     {
       ctf_destroy ();
-      error (_("Unable to create bt_iterator"));
+      error (_ ("Unable to create bt_iterator"));
     }
 
   /* Look for the declaration of register block.  Get the length of
@@ -918,15 +882,15 @@ ctf_open_dir (const char *dirname)
   for (i = 0; i < count; i++)
     if (strcmp ("register", bt_ctf_get_decl_event_name (list[i])) == 0)
       {
-	const struct bt_ctf_field_decl * const *field_list;
+	const struct bt_ctf_field_decl *const *field_list;
 	const struct bt_declaration *decl;
 
-	bt_ctf_get_decl_fields (list[i], BT_EVENT_FIELDS, &field_list,
-				&count);
+	bt_ctf_get_decl_fields (list[i], BT_EVENT_FIELDS, &field_list, &count);
 
 	gdb_assert (count == 1);
-	gdb_assert (0 == strcmp ("contents",
-				 bt_ctf_get_decl_field_name (field_list[0])));
+	gdb_assert (0
+		    == strcmp ("contents",
+			       bt_ctf_get_decl_field_name (field_list[0])));
 	decl = bt_ctf_get_decl_from_field_decl (field_list[0]);
 	trace_regblock_size = bt_ctf_get_array_len (decl);
 
@@ -934,16 +898,13 @@ ctf_open_dir (const char *dirname)
       }
 }
 
-#define SET_INT32_FIELD(EVENT, SCOPE, VAR, FIELD)			\
-  (VAR)->FIELD = (int) bt_ctf_get_int64 (bt_ctf_get_field ((EVENT),	\
-							   (SCOPE),	\
-							   #FIELD))
+#define SET_INT32_FIELD(EVENT, SCOPE, VAR, FIELD) \
+  (VAR)->FIELD                                    \
+    = (int) bt_ctf_get_int64 (bt_ctf_get_field ((EVENT), (SCOPE), #FIELD))
 
-#define SET_ENUM_FIELD(EVENT, SCOPE, VAR, TYPE, FIELD)			\
-  (VAR)->FIELD = (TYPE) bt_ctf_get_int64 (bt_ctf_get_field ((EVENT),	\
-							    (SCOPE),	\
-							    #FIELD))
-
+#define SET_ENUM_FIELD(EVENT, SCOPE, VAR, TYPE, FIELD) \
+  (VAR)->FIELD                                         \
+    = (TYPE) bt_ctf_get_int64 (bt_ctf_get_field ((EVENT), (SCOPE), #FIELD))
 
 /* EVENT is the "status" event and TS is filled in.  */
 
@@ -982,19 +943,16 @@ ctf_read_tsv (struct uploaded_tsv **uploaded_tsvs)
       struct uploaded_tsv *utsv = NULL;
 
       event = bt_ctf_iter_read_event (ctf_iter);
-      scope = bt_ctf_get_top_level_scope (event,
-					  BT_STREAM_EVENT_HEADER);
-      event_id = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope,
-						      "id"));
+      scope = bt_ctf_get_top_level_scope (event, BT_STREAM_EVENT_HEADER);
+      event_id = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
       if (event_id != CTF_EVENT_ID_TSV_DEF)
 	break;
 
-      scope = bt_ctf_get_top_level_scope (event,
-					  BT_EVENT_FIELDS);
+      scope = bt_ctf_get_top_level_scope (event, BT_EVENT_FIELDS);
 
       def = bt_ctf_get_field (event, scope, "number");
-      utsv = get_uploaded_tsv ((int32_t) bt_ctf_get_int64 (def),
-			       uploaded_tsvs);
+      utsv
+	= get_uploaded_tsv ((int32_t) bt_ctf_get_int64 (def), uploaded_tsvs);
 
       def = bt_ctf_get_field (event, scope, "builtin");
       utsv->builtin = (int32_t) bt_ctf_get_int64 (def);
@@ -1002,53 +960,49 @@ ctf_read_tsv (struct uploaded_tsv **uploaded_tsvs)
       utsv->initial_value = bt_ctf_get_int64 (def);
 
       def = bt_ctf_get_field (event, scope, "name");
-      utsv->name =  xstrdup (bt_ctf_get_string (def));
+      utsv->name = xstrdup (bt_ctf_get_string (def));
 
       if (bt_iter_next (bt_ctf_get_iter (ctf_iter)) < 0)
 	break;
     }
-
 }
 
 /* Read the value of element whose index is NUM from CTF and write it
    to the corresponding VAR->ARRAY. */
 
-#define SET_ARRAY_FIELD(EVENT, SCOPE, VAR, NUM, ARRAY)	\
-  do							\
-    {							\
-      uint32_t lu32, i;						\
-      const struct bt_definition *def;				\
-								\
-      lu32 = (uint32_t) bt_ctf_get_uint64 (bt_ctf_get_field ((EVENT),	\
-							     (SCOPE),	\
-							     #NUM));	\
-      def = bt_ctf_get_field ((EVENT), (SCOPE), #ARRAY);		\
-      for (i = 0; i < lu32; i++)					\
-	{								\
-	  const struct bt_definition *element				\
-	    = bt_ctf_get_index ((EVENT), def, i);			\
-									\
-	  (VAR)->ARRAY.emplace_back					\
-	    (xstrdup (bt_ctf_get_string (element)));			\
-	}								\
-    }									\
+#define SET_ARRAY_FIELD(EVENT, SCOPE, VAR, NUM, ARRAY)                        \
+  do                                                                          \
+    {                                                                         \
+      uint32_t lu32, i;                                                       \
+      const struct bt_definition *def;                                        \
+                                                                              \
+      lu32 = (uint32_t) bt_ctf_get_uint64 (bt_ctf_get_field ((EVENT),         \
+							     (SCOPE), #NUM)); \
+      def = bt_ctf_get_field ((EVENT), (SCOPE), #ARRAY);                      \
+      for (i = 0; i < lu32; i++)                                              \
+	{                                                                     \
+	  const struct bt_definition *element                                 \
+	    = bt_ctf_get_index ((EVENT), def, i);                             \
+                                                                              \
+	  (VAR)->ARRAY.emplace_back (xstrdup (bt_ctf_get_string (element)));  \
+	}                                                                     \
+    }                                                                         \
   while (0)
 
 /* Read a string from CTF and set VAR->FIELD. If the length of string
    is zero, set VAR->FIELD to NULL.  */
 
-#define SET_STRING_FIELD(EVENT, SCOPE, VAR, FIELD)			\
-  do									\
-    {									\
-      const char *p = bt_ctf_get_string (bt_ctf_get_field ((EVENT),	\
-							   (SCOPE),	\
-							   #FIELD));	\
-									\
-      if (strlen (p) > 0)						\
-	(VAR)->FIELD.reset (xstrdup (p));				\
-      else								\
-	(VAR)->FIELD = NULL;						\
-    }									\
+#define SET_STRING_FIELD(EVENT, SCOPE, VAR, FIELD)                         \
+  do                                                                       \
+    {                                                                      \
+      const char *p                                                        \
+	= bt_ctf_get_string (bt_ctf_get_field ((EVENT), (SCOPE), #FIELD)); \
+                                                                           \
+      if (strlen (p) > 0)                                                  \
+	(VAR)->FIELD.reset (xstrdup (p));                                  \
+      else                                                                 \
+	(VAR)->FIELD = NULL;                                               \
+    }                                                                      \
   while (0)
 
 /* Read the events "tp_def" one by one, extract its contents and fill
@@ -1069,21 +1023,16 @@ ctf_read_tp (struct uploaded_tp **uploaded_tps)
       struct uploaded_tp *utp = NULL;
 
       event = bt_ctf_iter_read_event (ctf_iter);
-      scope = bt_ctf_get_top_level_scope (event,
-					  BT_STREAM_EVENT_HEADER);
-      u32 = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope,
-						 "id"));
+      scope = bt_ctf_get_top_level_scope (event, BT_STREAM_EVENT_HEADER);
+      u32 = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
       if (u32 != CTF_EVENT_ID_TP_DEF)
 	break;
 
-      scope = bt_ctf_get_top_level_scope (event,
-					  BT_EVENT_FIELDS);
-      int32 = (int32_t) bt_ctf_get_int64 (bt_ctf_get_field (event,
-							    scope,
+      scope = bt_ctf_get_top_level_scope (event, BT_EVENT_FIELDS);
+      int32 = (int32_t) bt_ctf_get_int64 (bt_ctf_get_field (event, scope,
 							    "number"));
-      u64 = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope,
-						 "addr"));
-      utp = get_uploaded_tp (int32, u64,  uploaded_tps);
+      u64 = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "addr"));
+      utp = get_uploaded_tp (int32, u64, uploaded_tps);
 
       SET_INT32_FIELD (event, scope, utp, enabled);
       SET_INT32_FIELD (event, scope, utp, step);
@@ -1096,11 +1045,10 @@ ctf_read_tp (struct uploaded_tp **uploaded_tps)
       /* Read 'actions'.  */
       SET_ARRAY_FIELD (event, scope, utp, action_num, actions);
       /* Read 'step_actions'.  */
-      SET_ARRAY_FIELD (event, scope, utp, step_action_num,
-		       step_actions);
+      SET_ARRAY_FIELD (event, scope, utp, step_action_num, step_actions);
 
-      SET_STRING_FIELD(event, scope, utp, at_string);
-      SET_STRING_FIELD(event, scope, utp, cond_string);
+      SET_STRING_FIELD (event, scope, utp, at_string);
+      SET_STRING_FIELD (event, scope, utp, cond_string);
 
       if (bt_iter_next (bt_ctf_get_iter (ctf_iter)) < 0)
 	break;
@@ -1122,7 +1070,7 @@ ctf_target_open (const char *dirname, int from_tty)
   struct uploaded_tp *uploaded_tps = NULL;
 
   if (!dirname)
-    error (_("No CTF directory specified."));
+    error (_ ("No CTF directory specified."));
 
   ctf_open_dir (dirname);
 
@@ -1134,14 +1082,14 @@ ctf_target_open (const char *dirname, int from_tty)
   scope = bt_ctf_get_top_level_scope (event, BT_STREAM_EVENT_HEADER);
   event_id = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
   if (event_id != CTF_EVENT_ID_FRAME)
-    error (_("Wrong event id of the first event"));
+    error (_ ("Wrong event id of the first event"));
   /* The second event is "status".  */
   bt_iter_next (bt_ctf_get_iter (ctf_iter));
   event = bt_ctf_iter_read_event (ctf_iter);
   scope = bt_ctf_get_top_level_scope (event, BT_STREAM_EVENT_HEADER);
   event_id = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
   if (event_id != CTF_EVENT_ID_STATUS)
-    error (_("Wrong event id of the second event"));
+    error (_ ("Wrong event id of the second event"));
   ctf_read_status (event, current_trace_status ());
 
   ctf_read_tsv (&uploaded_tsvs);
@@ -1153,12 +1101,10 @@ ctf_target_open (const char *dirname, int from_tty)
      events.  */
   if (event != NULL)
     {
-      scope = bt_ctf_get_top_level_scope (event,
-					  BT_STREAM_EVENT_HEADER);
-      event_id = bt_ctf_get_uint64 (bt_ctf_get_field (event,
-						      scope, "id"));
+      scope = bt_ctf_get_top_level_scope (event, BT_STREAM_EVENT_HEADER);
+      event_id = bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
       if (event_id != CTF_EVENT_ID_FRAME)
-	error (_("Wrong event id of the first event of the second packet"));
+	error (_ ("Wrong event id of the first event of the second packet"));
     }
 
   start_pos = bt_iter_get_pos (bt_ctf_get_iter (ctf_iter));
@@ -1188,7 +1134,7 @@ ctf_target::close ()
   xfree (trace_dirname);
   trace_dirname = NULL;
 
-  switch_to_no_thread ();	/* Avoid confusion from thread stuff.  */
+  switch_to_no_thread (); /* Avoid confusion from thread stuff.  */
   exit_inferior_silent (current_inferior ());
 
   trace_reset_local_state ();
@@ -1253,8 +1199,7 @@ ctf_target::fetch_registers (struct regcache *regcache, int regno)
     {
       int offset, regsize, regn;
       const struct bt_definition *scope
-	= bt_ctf_get_top_level_scope (event,
-				      BT_EVENT_FIELDS);
+	= bt_ctf_get_top_level_scope (event, BT_EVENT_FIELDS);
       const struct bt_definition *array
 	= bt_ctf_get_field (event, scope, "contents");
       gdb_byte *regs = (gdb_byte *) bt_ctf_get_char_array (array);
@@ -1294,17 +1239,16 @@ ctf_target::fetch_registers (struct regcache *regcache, int regno)
    READBUF.  */
 
 enum target_xfer_status
-ctf_target::xfer_partial (enum target_object object,
-			  const char *annex, gdb_byte *readbuf,
-			  const gdb_byte *writebuf, ULONGEST offset,
-			  ULONGEST len, ULONGEST *xfered_len)
+ctf_target::xfer_partial (enum target_object object, const char *annex,
+			  gdb_byte *readbuf, const gdb_byte *writebuf,
+			  ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
     return TARGET_XFER_E_IO;
 
   if (readbuf == NULL)
-    error (_("ctf_xfer_partial: trace file is read-only"));
+    error (_ ("ctf_xfer_partial: trace file is read-only"));
 
   if (get_traceframe_number () != -1)
     {
@@ -1328,8 +1272,7 @@ ctf_target::xfer_partial (enum target_object object,
 	  uint16_t mlen;
 	  const struct bt_definition *scope;
 	  const struct bt_definition *def;
-	  struct bt_ctf_event *event
-	    = bt_ctf_iter_read_event (ctf_iter);
+	  struct bt_ctf_event *event = bt_ctf_iter_read_event (ctf_iter);
 	  const char *name = bt_ctf_event_name (event);
 
 	  if (name == NULL || strcmp (name, "frame") == 0)
@@ -1342,8 +1285,7 @@ ctf_target::xfer_partial (enum target_object object,
 	      continue;
 	    }
 
-	  scope = bt_ctf_get_top_level_scope (event,
-					      BT_EVENT_FIELDS);
+	  scope = bt_ctf_get_top_level_scope (event, BT_EVENT_FIELDS);
 
 	  def = bt_ctf_get_field (event, scope, "address");
 	  maddr = bt_ctf_get_uint64 (def);
@@ -1422,7 +1364,8 @@ ctf_target::xfer_partial (enum target_object object,
   else
     {
       /* Fallback to reading from read-only sections.  */
-      return section_table_read_available_memory (readbuf, offset, len, xfered_len);
+      return section_table_read_available_memory (readbuf, offset, len,
+						  xfered_len);
     }
 }
 
@@ -1447,8 +1390,7 @@ ctf_target::get_trace_state_variable_value (int tsvnum, LONGEST *val)
      block.  */
   while (1)
     {
-      struct bt_ctf_event *event
-	= bt_ctf_iter_read_event (ctf_iter);
+      struct bt_ctf_event *event = bt_ctf_iter_read_event (ctf_iter);
       const char *name = bt_ctf_event_name (event);
 
       if (name == NULL || strcmp (name, "frame") == 0)
@@ -1458,8 +1400,7 @@ ctf_target::get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	  const struct bt_definition *scope;
 	  const struct bt_definition *def;
 
-	  scope = bt_ctf_get_top_level_scope (event,
-					      BT_EVENT_FIELDS);
+	  scope = bt_ctf_get_top_level_scope (event, BT_EVENT_FIELDS);
 
 	  def = bt_ctf_get_field (event, scope, "num");
 	  if (tsvnum == (int32_t) bt_ctf_get_uint64 (def))
@@ -1505,7 +1446,7 @@ ctf_get_traceframe_address (void)
   CORE_ADDR addr = 0;
 
   gdb_assert (ctf_iter != NULL);
-  pos  = bt_iter_get_pos (bt_ctf_get_iter (ctf_iter));
+  pos = bt_iter_get_pos (bt_ctf_get_iter (ctf_iter));
   gdb_assert (pos->type == BT_SEEK_RESTORE);
 
   while (1)
@@ -1532,8 +1473,7 @@ ctf_get_traceframe_address (void)
   if (event != NULL)
     {
       int tpnum = ctf_get_tpnum_from_frame_event (event);
-      struct tracepoint *tp
-	= get_tracepoint_by_number_on_target (tpnum);
+      struct tracepoint *tp = get_tracepoint_by_number_on_target (tpnum);
 
       if (tp && tp->loc)
 	addr = tp->loc->address;
@@ -1550,8 +1490,8 @@ ctf_get_traceframe_address (void)
    number in it.  Return traceframe number when matched.  */
 
 int
-ctf_target::trace_find (enum trace_find_type type, int num,
-			CORE_ADDR addr1, CORE_ADDR addr2, int *tpp)
+ctf_target::trace_find (enum trace_find_type type, int num, CORE_ADDR addr1,
+			CORE_ADDR addr2, int *tpp)
 {
   int tfnum = 0;
   int found = 0;
@@ -1622,7 +1562,7 @@ ctf_target::trace_find (enum trace_find_type type, int num,
 			found = 1;
 		      break;
 		    default:
-		      internal_error (_("unknown tfind type"));
+		      internal_error (_ ("unknown tfind type"));
 		    }
 		}
 	    }
@@ -1665,8 +1605,7 @@ ctf_target::traceframe_info ()
 
   do
     {
-      struct bt_ctf_event *event
-	= bt_ctf_iter_read_event (ctf_iter);
+      struct bt_ctf_event *event = bt_ctf_iter_read_event (ctf_iter);
 
       name = bt_ctf_event_name (event);
 
@@ -1676,8 +1615,7 @@ ctf_target::traceframe_info ()
       else if (strcmp (name, "memory") == 0)
 	{
 	  const struct bt_definition *scope
-	    = bt_ctf_get_top_level_scope (event,
-					  BT_EVENT_FIELDS);
+	    = bt_ctf_get_top_level_scope (event, BT_EVENT_FIELDS);
 	  const struct bt_definition *def;
 
 	  def = bt_ctf_get_field (event, scope, "address");
@@ -1692,8 +1630,7 @@ ctf_target::traceframe_info ()
 	{
 	  int vnum;
 	  const struct bt_definition *scope
-	    = bt_ctf_get_top_level_scope (event,
-					  BT_EVENT_FIELDS);
+	    = bt_ctf_get_top_level_scope (event, BT_EVENT_FIELDS);
 	  const struct bt_definition *def;
 
 	  def = bt_ctf_get_field (event, scope, "num");
@@ -1702,8 +1639,8 @@ ctf_target::traceframe_info ()
 	}
       else
 	{
-	  warning (_("Unhandled trace block type (%s) "
-		     "while building trace frame info."),
+	  warning (_ ("Unhandled trace block type (%s) "
+		      "while building trace frame info."),
 		   name);
 	}
 
@@ -1723,6 +1660,7 @@ ctf_target::traceframe_info ()
 /* module initialization */
 
 void _initialize_ctf ();
+
 void
 _initialize_ctf ()
 {

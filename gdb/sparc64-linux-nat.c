@@ -33,35 +33,40 @@
 class sparc64_linux_nat_target final : public linux_nat_target
 {
 public:
+
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *regcache, int regnum) override
-  { sparc_fetch_inferior_registers (this, regcache, regnum); }
+  {
+    sparc_fetch_inferior_registers (this, regcache, regnum);
+  }
 
   void store_registers (struct regcache *regcache, int regnum) override
-  { sparc_store_inferior_registers (this, regcache, regnum); }
+  {
+    sparc_store_inferior_registers (this, regcache, regnum);
+  }
 
   /* Override linux_nat_target low methods.  */
 
   /* ADI support */
   void low_forget_process (pid_t pid) override
-  { sparc64_forget_process (pid); }
+  {
+    sparc64_forget_process (pid);
+  }
 };
 
 static sparc64_linux_nat_target the_sparc64_linux_nat_target;
 
-static const struct sparc_gregmap sparc64_linux_ptrace_gregmap =
-{
-  16 * 8,			/* "tstate" */
-  17 * 8,			/* %pc */
-  18 * 8,			/* %npc */
-  19 * 8,			/* %y */
-  -1,				/* %wim */
-  -1,				/* %tbr */
-  0 * 8,			/* %g1 */
-  -1,				/* %l0 */
-  4				/* sizeof (%y) */
+static const struct sparc_gregmap sparc64_linux_ptrace_gregmap = {
+  16 * 8, /* "tstate" */
+  17 * 8, /* %pc */
+  18 * 8, /* %npc */
+  19 * 8, /* %y */
+  -1,	  /* %wim */
+  -1,	  /* %tbr */
+  0 * 8,  /* %g1 */
+  -1,	  /* %l0 */
+  4	  /* sizeof (%y) */
 };
-
 
 void
 supply_gregset (struct regcache *regcache, const prgregset_t *gregs)
@@ -82,13 +87,14 @@ fill_gregset (const struct regcache *regcache, prgregset_t *gregs, int regnum)
 }
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       prfpregset_t *fpregs, int regnum)
+fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
+	       int regnum)
 {
   sparc64_collect_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
 void _initialize_sparc64_linux_nat ();
+
 void
 _initialize_sparc64_linux_nat ()
 {

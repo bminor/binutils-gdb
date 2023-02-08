@@ -17,8 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-
 #include "defs.h"
 #include "python-internal.h"
 #include "breakpoint.h"
@@ -62,7 +60,7 @@ struct finish_breakpoint_object
 };
 
 extern PyTypeObject finish_breakpoint_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("finish_breakpoint_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("finish_breakpoint_object");
 
 /* Python function to get the 'return_value' attribute of
    FinishBreakpoint.  */
@@ -70,8 +68,8 @@ extern PyTypeObject finish_breakpoint_object_type
 static PyObject *
 bpfinishpy_get_returnvalue (PyObject *self, void *closure)
 {
-  struct finish_breakpoint_object *self_finishbp =
-      (struct finish_breakpoint_object *) self;
+  struct finish_breakpoint_object *self_finishbp
+    = (struct finish_breakpoint_object *) self;
 
   if (!self_finishbp->return_value)
     Py_RETURN_NONE;
@@ -85,8 +83,8 @@ bpfinishpy_get_returnvalue (PyObject *self, void *closure)
 static void
 bpfinishpy_dealloc (PyObject *self)
 {
-  struct finish_breakpoint_object *self_bpfinish =
-	(struct finish_breakpoint_object *) self;
+  struct finish_breakpoint_object *self_bpfinish
+    = (struct finish_breakpoint_object *) self;
 
   Py_XDECREF (self_bpfinish->func_symbol);
   Py_XDECREF (self_bpfinish->function_value);
@@ -101,8 +99,8 @@ bpfinishpy_dealloc (PyObject *self)
 void
 bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 {
-  struct finish_breakpoint_object *self_finishbp =
-	(struct finish_breakpoint_object *) bp_obj;
+  struct finish_breakpoint_object *self_finishbp
+    = (struct finish_breakpoint_object *) bp_obj;
 
   /* Can compute return_value only once.  */
   gdb_assert (!self_finishbp->return_value);
@@ -112,18 +110,17 @@ bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 
   try
     {
-      struct symbol *func_symbol =
-	symbol_object_to_symbol (self_finishbp->func_symbol);
-      struct value *function =
-	value_object_to_value (self_finishbp->function_value);
-      struct value *ret =
-	get_return_value (func_symbol, function);
+      struct symbol *func_symbol
+	= symbol_object_to_symbol (self_finishbp->func_symbol);
+      struct value *function
+	= value_object_to_value (self_finishbp->function_value);
+      struct value *ret = get_return_value (func_symbol, function);
 
       if (ret)
 	{
 	  self_finishbp->return_value = value_to_value_object (ret);
 	  if (!self_finishbp->return_value)
-	      gdbpy_print_stack ();
+	    gdbpy_print_stack ();
 	}
       else
 	{
@@ -144,7 +141,6 @@ bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 void
 bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 {
-
   try
     {
       /* Can't delete it here, but it will be removed at the next stop.  */
@@ -164,8 +160,8 @@ static int
 bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
   static const char *keywords[] = { "frame", "internal", NULL };
-  struct finish_breakpoint_object *self_bpfinish =
-      (struct finish_breakpoint_object *) self;
+  struct finish_breakpoint_object *self_bpfinish
+    = (struct finish_breakpoint_object *) self;
   PyObject *frame_obj = NULL;
   int thread;
   frame_info_ptr frame = NULL; /* init for gcc -Wall */
@@ -190,7 +186,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       if (frame == NULL)
 	{
 	  PyErr_SetString (PyExc_ValueError,
-			   _("Invalid ID for the `frame' object."));
+			   _ ("Invalid ID for the `frame' object."));
 	}
       else
 	{
@@ -198,15 +194,15 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  if (prev_frame == 0)
 	    {
 	      PyErr_SetString (PyExc_ValueError,
-			       _("\"FinishBreakpoint\" not "
-				 "meaningful in the outermost "
-				 "frame."));
+			       _ ("\"FinishBreakpoint\" not "
+				  "meaningful in the outermost "
+				  "frame."));
 	    }
 	  else if (get_frame_type (prev_frame) == DUMMY_FRAME)
 	    {
 	      PyErr_SetString (PyExc_ValueError,
-			       _("\"FinishBreakpoint\" cannot "
-				 "be set on a dummy frame."));
+			       _ ("\"FinishBreakpoint\" cannot "
+				  "be set on a dummy frame."));
 	    }
 	  else
 	    frame_id = get_frame_id (prev_frame);
@@ -223,8 +219,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   if (inferior_ptid == null_ptid)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("No thread currently selected."));
+      PyErr_SetString (PyExc_ValueError, _ ("No thread currently selected."));
       return -1;
     }
 
@@ -236,7 +231,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       if (internal_bp == -1)
 	{
 	  PyErr_SetString (PyExc_ValueError,
-			   _("The value of `internal' must be a boolean."));
+			   _ ("The value of `internal' must be a boolean."));
 	  return -1;
 	}
     }
@@ -252,8 +247,8 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  struct symbol *function = find_pc_function (pc);
 	  if (function != nullptr)
 	    {
-	      struct type *ret_type =
-		check_typedef (function->type ()->target_type ());
+	      struct type *ret_type
+		= check_typedef (function->type ()->target_type ());
 
 	      /* Remember only non-void return types.  */
 	      if (ret_type->code () != TYPE_CODE_VOID)
@@ -297,15 +292,10 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       /* Set a breakpoint on the return address.  */
       location_spec_up locspec
 	= new_address_location_spec (get_frame_pc (prev_frame), NULL, 0);
-      create_breakpoint (gdbpy_enter::get_gdbarch (),
-			 locspec.get (), NULL, thread, NULL, false,
-			 0,
-			 1 /*temp_flag*/,
-			 bp_breakpoint,
-			 0,
-			 AUTO_BOOLEAN_TRUE,
-			 &code_breakpoint_ops,
-			 0, 1, internal_bp, 0);
+      create_breakpoint (gdbpy_enter::get_gdbarch (), locspec.get (), NULL,
+			 thread, NULL, false, 0, 1 /*temp_flag*/,
+			 bp_breakpoint, 0, AUTO_BOOLEAN_TRUE,
+			 &code_breakpoint_ops, 0, 1, internal_bp, 0);
     }
   catch (const gdb_exception &except)
     {
@@ -357,8 +347,8 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
      not anymore in the current callstack.  */
   if (py_bp != NULL && b->py_bp_object->is_finish_bp)
     {
-      struct finish_breakpoint_object *finish_bp =
-	  (struct finish_breakpoint_object *) py_bp;
+      struct finish_breakpoint_object *finish_bp
+	= (struct finish_breakpoint_object *) py_bp;
 
       /* Check scope if not currently stopped at the FinishBreakpoint.  */
       if (b != bp_stopped)
@@ -417,7 +407,8 @@ gdbpy_initialize_finishbreakpoints (void)
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "FinishBreakpoint",
-			      (PyObject *) &finish_breakpoint_object_type) < 0)
+			      (PyObject *) &finish_breakpoint_object_type)
+      < 0)
     return -1;
 
   gdb::observers::normal_stop.attach (bpfinishpy_handle_stop,
@@ -430,49 +421,48 @@ gdbpy_initialize_finishbreakpoints (void)
 
 static gdb_PyGetSetDef finish_breakpoint_object_getset[] = {
   { "return_value", bpfinishpy_get_returnvalue, NULL,
-  "gdb.Value object representing the return value, if any. \
-None otherwise.", NULL },
-    { NULL }  /* Sentinel.  */
+    "gdb.Value object representing the return value, if any. \
+None otherwise.",
+    NULL },
+  { NULL } /* Sentinel.  */
 };
 
-PyTypeObject finish_breakpoint_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.FinishBreakpoint",         /*tp_name*/
-  sizeof (struct finish_breakpoint_object),  /*tp_basicsize*/
-  0,                              /*tp_itemsize*/
-  bpfinishpy_dealloc,             /*tp_dealloc*/
-  0,                              /*tp_print*/
-  0,                              /*tp_getattr*/
-  0,                              /*tp_setattr*/
-  0,                              /*tp_compare*/
-  0,                              /*tp_repr*/
-  0,                              /*tp_as_number*/
-  0,                              /*tp_as_sequence*/
-  0,                              /*tp_as_mapping*/
-  0,                              /*tp_hash */
-  0,                              /*tp_call*/
-  0,                              /*tp_str*/
-  0,                              /*tp_getattro*/
-  0,                              /*tp_setattro */
-  0,                              /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  /*tp_flags*/
-  "GDB finish breakpoint object", /* tp_doc */
-  0,                              /* tp_traverse */
-  0,                              /* tp_clear */
-  0,                              /* tp_richcompare */
-  0,                              /* tp_weaklistoffset */
-  0,                              /* tp_iter */
-  0,                              /* tp_iternext */
-  0,                              /* tp_methods */
-  0,                              /* tp_members */
-  finish_breakpoint_object_getset,/* tp_getset */
-  &breakpoint_object_type,        /* tp_base */
-  0,                              /* tp_dict */
-  0,                              /* tp_descr_get */
-  0,                              /* tp_descr_set */
-  0,                              /* tp_dictoffset */
-  bpfinishpy_init,                /* tp_init */
-  0,                              /* tp_alloc */
-  0                               /* tp_new */
+PyTypeObject finish_breakpoint_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.FinishBreakpoint", /*tp_name*/
+  sizeof (struct finish_breakpoint_object),		  /*tp_basicsize*/
+  0,							  /*tp_itemsize*/
+  bpfinishpy_dealloc,					  /*tp_dealloc*/
+  0,							  /*tp_print*/
+  0,							  /*tp_getattr*/
+  0,							  /*tp_setattr*/
+  0,							  /*tp_compare*/
+  0,							  /*tp_repr*/
+  0,							  /*tp_as_number*/
+  0,							  /*tp_as_sequence*/
+  0,							  /*tp_as_mapping*/
+  0,							  /*tp_hash */
+  0,							  /*tp_call*/
+  0,							  /*tp_str*/
+  0,							  /*tp_getattro*/
+  0,							  /*tp_setattro */
+  0,							  /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,		  /*tp_flags*/
+  "GDB finish breakpoint object",			  /* tp_doc */
+  0,							  /* tp_traverse */
+  0,							  /* tp_clear */
+  0,							  /* tp_richcompare */
+  0,				   /* tp_weaklistoffset */
+  0,				   /* tp_iter */
+  0,				   /* tp_iternext */
+  0,				   /* tp_methods */
+  0,				   /* tp_members */
+  finish_breakpoint_object_getset, /* tp_getset */
+  &breakpoint_object_type,	   /* tp_base */
+  0,				   /* tp_dict */
+  0,				   /* tp_descr_get */
+  0,				   /* tp_descr_set */
+  0,				   /* tp_dictoffset */
+  bpfinishpy_init,		   /* tp_init */
+  0,				   /* tp_alloc */
+  0				   /* tp_new */
 };

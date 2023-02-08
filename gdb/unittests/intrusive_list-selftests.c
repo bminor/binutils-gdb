@@ -36,7 +36,8 @@ struct item_with_base : public other_base,
 {
   explicit item_with_base (const char *name)
     : name (name)
-  {}
+  {
+  }
 
   const char *const name;
 };
@@ -51,7 +52,8 @@ struct item_with_member
 {
   explicit item_with_member (const char *name)
     : name (name)
-  {}
+  {
+  }
 
   const char *const name;
   intrusive_list_node<item_with_member> node;
@@ -66,7 +68,7 @@ using item_with_member_list
    declared in this templated class, which is instantiated once for each
    list type.  */
 
-template <typename ListType>
+template<typename ListType>
 struct intrusive_list_test
 {
   using item_type = typename ListType::value_type;
@@ -75,14 +77,13 @@ struct intrusive_list_test
 
      Traverse the list forward and backwards to exercise all links.  */
 
-  static void
-  verify_items (const ListType &list,
-		gdb::array_view<const typename ListType::value_type *> expected)
+  static void verify_items (
+    const ListType &list,
+    gdb::array_view<const typename ListType::value_type *> expected)
   {
     int i = 0;
 
-    for (typename ListType::iterator it = list.begin ();
-	 it != list.end ();
+    for (typename ListType::iterator it = list.begin (); it != list.end ();
 	 ++it)
       {
 	const item_type &item = *it;
@@ -96,8 +97,7 @@ struct intrusive_list_test
     gdb_assert (i == expected.size ());
 
     for (typename ListType::reverse_iterator it = list.rbegin ();
-	 it != list.rend ();
-	 ++it)
+	 it != list.rend (); ++it)
       {
 	const item_type &item = *it;
 
@@ -110,8 +110,7 @@ struct intrusive_list_test
     gdb_assert (i == 0);
   }
 
-  static void
-  test_move_constructor ()
+  static void test_move_constructor ()
   {
     {
       /* Other list is not empty.  */
@@ -128,7 +127,7 @@ struct intrusive_list_test
       expected = {};
       verify_items (list1, expected);
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list2, expected);
     }
 
@@ -145,7 +144,7 @@ struct intrusive_list_test
       expected = {};
       verify_items (list1, expected);
 
-      expected = {&a};
+      expected = { &a };
       verify_items (list2, expected);
     }
 
@@ -164,8 +163,7 @@ struct intrusive_list_test
     }
   }
 
-  static void
-  test_move_assignment ()
+  static void test_move_assignment ()
   {
     {
       /* Both lists are not empty.  */
@@ -186,7 +184,7 @@ struct intrusive_list_test
       expected = {};
       verify_items (list1, expected);
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list2, expected);
     }
 
@@ -226,7 +224,7 @@ struct intrusive_list_test
       expected = {};
       verify_items (list1, expected);
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list2, expected);
     }
 
@@ -245,7 +243,7 @@ struct intrusive_list_test
       expected = {};
       verify_items (list1, expected);
 
-      expected = {&a};
+      expected = { &a };
       verify_items (list2, expected);
     }
 
@@ -265,8 +263,7 @@ struct intrusive_list_test
     }
   }
 
-  static void
-  test_swap ()
+  static void test_swap ()
   {
     {
       /* Two non-empty lists.  */
@@ -284,10 +281,10 @@ struct intrusive_list_test
 
       std::swap (list1, list2);
 
-      expected = {&d, &e};
+      expected = { &d, &e };
       verify_items (list1, expected);
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list2, expected);
     }
 
@@ -307,7 +304,7 @@ struct intrusive_list_test
       expected = {};
       verify_items (list1, expected);
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list2, expected);
     }
 
@@ -324,7 +321,7 @@ struct intrusive_list_test
 
       std::swap (list1, list2);
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list1, expected);
 
       expected = {};
@@ -360,12 +357,12 @@ struct intrusive_list_test
       expected = {};
       verify_items (list1, expected);
 
-      expected = {&a};
+      expected = { &a };
       verify_items (list2, expected);
 
       std::swap (list1, list2);
 
-      expected = {&a};
+      expected = { &a };
       verify_items (list1, expected);
 
       expected = {};
@@ -373,8 +370,7 @@ struct intrusive_list_test
     }
   }
 
-  static void
-  test_front_back ()
+  static void test_front_back ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -390,8 +386,7 @@ struct intrusive_list_test
     gdb_assert (&clist.back () == &c);
   }
 
-  static void
-  test_push_front ()
+  static void test_push_front ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -401,20 +396,19 @@ struct intrusive_list_test
     verify_items (list, expected);
 
     list.push_front (a);
-    expected = {&a};
+    expected = { &a };
     verify_items (list, expected);
 
     list.push_front (b);
-    expected = {&b, &a};
+    expected = { &b, &a };
     verify_items (list, expected);
 
     list.push_front (c);
-    expected = {&c, &b, &a};
+    expected = { &c, &b, &a };
     verify_items (list, expected);
   }
 
-  static void
-  test_push_back ()
+  static void test_push_back ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -424,20 +418,19 @@ struct intrusive_list_test
     verify_items (list, expected);
 
     list.push_back (a);
-    expected = {&a};
+    expected = { &a };
     verify_items (list, expected);
 
     list.push_back (b);
-    expected = {&a, &b};
+    expected = { &a, &b };
     verify_items (list, expected);
 
     list.push_back (c);
-    expected = {&a, &b, &c};
+    expected = { &a, &b, &c };
     verify_items (list, expected);
   }
 
-  static void
-  test_insert ()
+  static void test_insert ()
   {
     std::vector<const item_type *> expected;
 
@@ -446,17 +439,16 @@ struct intrusive_list_test
       item_type a ("a"), b ("b"), c ("c");
       ListType list;
 
-
       list.insert (list.begin (), a);
-      expected = {&a};
+      expected = { &a };
       verify_items (list, expected);
 
       list.insert (list.begin (), b);
-      expected = {&b, &a};
+      expected = { &b, &a };
       verify_items (list, expected);
 
       list.insert (list.begin (), c);
-      expected = {&c, &b, &a};
+      expected = { &c, &b, &a };
       verify_items (list, expected);
     }
 
@@ -465,17 +457,16 @@ struct intrusive_list_test
       item_type a ("a"), b ("b"), c ("c");
       ListType list;
 
-
       list.insert (list.end (), a);
-      expected = {&a};
+      expected = { &a };
       verify_items (list, expected);
 
       list.insert (list.end (), b);
-      expected = {&a, &b};
+      expected = { &a, &b };
       verify_items (list, expected);
 
       list.insert (list.end (), c);
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list, expected);
     }
 
@@ -488,7 +479,7 @@ struct intrusive_list_test
       list.push_back (b);
 
       list.insert (list.iterator_to (b), c);
-      expected = {&a, &c, &b};
+      expected = { &a, &c, &b };
       verify_items (list, expected);
     }
 
@@ -498,13 +489,12 @@ struct intrusive_list_test
       ListType list;
 
       list.insert (list.end (), a);
-      expected = {&a};
+      expected = { &a };
       verify_items (list, expected);
     }
   }
 
-  static void
-  test_splice ()
+  static void test_splice ()
   {
     {
       /* Two non-empty lists.  */
@@ -522,7 +512,7 @@ struct intrusive_list_test
 
       list1.splice (std::move (list2));
 
-      expected = {&a, &b, &c, &d, &e};
+      expected = { &a, &b, &c, &d, &e };
       verify_items (list1, expected);
 
       expected = {};
@@ -542,7 +532,7 @@ struct intrusive_list_test
 
       list1.splice (std::move (list2));
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list1, expected);
 
       expected = {};
@@ -562,7 +552,7 @@ struct intrusive_list_test
 
       list1.splice (std::move (list2));
 
-      expected = {&a, &b, &c};
+      expected = { &a, &b, &c };
       verify_items (list1, expected);
 
       expected = {};
@@ -586,8 +576,7 @@ struct intrusive_list_test
     }
   }
 
-  static void
-  test_pop_front ()
+  static void test_pop_front ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -598,11 +587,11 @@ struct intrusive_list_test
     list.push_back (c);
 
     list.pop_front ();
-    expected = {&b, &c};
+    expected = { &b, &c };
     verify_items (list, expected);
 
     list.pop_front ();
-    expected = {&c};
+    expected = { &c };
     verify_items (list, expected);
 
     list.pop_front ();
@@ -610,8 +599,7 @@ struct intrusive_list_test
     verify_items (list, expected);
   }
 
-  static void
-  test_pop_back ()
+  static void test_pop_back ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -621,12 +609,12 @@ struct intrusive_list_test
     list.push_back (b);
     list.push_back (c);
 
-    list.pop_back();
-    expected = {&a, &b};
+    list.pop_back ();
+    expected = { &a, &b };
     verify_items (list, expected);
 
     list.pop_back ();
-    expected = {&a};
+    expected = { &a };
     verify_items (list, expected);
 
     list.pop_back ();
@@ -634,8 +622,7 @@ struct intrusive_list_test
     verify_items (list, expected);
   }
 
-  static void
-  test_erase ()
+  static void test_erase ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -646,11 +633,11 @@ struct intrusive_list_test
     list.push_back (c);
 
     list.erase (list.iterator_to (b));
-    expected = {&a, &c};
+    expected = { &a, &c };
     verify_items (list, expected);
 
     list.erase (list.iterator_to (c));
-    expected = {&a};
+    expected = { &a };
     verify_items (list, expected);
 
     list.erase (list.iterator_to (a));
@@ -658,8 +645,7 @@ struct intrusive_list_test
     verify_items (list, expected);
   }
 
-  static void
-  test_clear ()
+  static void test_clear ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -679,8 +665,7 @@ struct intrusive_list_test
     verify_items (list, expected);
   }
 
-  static void
-  test_clear_and_dispose ()
+  static void test_clear_and_dispose ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -692,11 +677,10 @@ struct intrusive_list_test
     list.push_back (b);
     list.push_back (c);
 
-    auto disposer = [&] (const item_type *item)
-      {
-	disposer_seen.insert (item);
-	disposer_calls++;
-      };
+    auto disposer = [&] (const item_type *item) {
+      disposer_seen.insert (item);
+      disposer_calls++;
+    };
     list.clear_and_dispose (disposer);
 
     expected = {};
@@ -711,8 +695,7 @@ struct intrusive_list_test
     gdb_assert (disposer_calls == 3);
   }
 
-  static void
-  test_empty ()
+  static void test_empty ()
   {
     item_type a ("a");
     ListType list;
@@ -724,8 +707,7 @@ struct intrusive_list_test
     gdb_assert (list.empty ());
   }
 
-  static void
-  test_begin_end ()
+  static void test_begin_end ()
   {
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
@@ -752,7 +734,7 @@ struct intrusive_list_test
   }
 };
 
-template <typename ListType>
+template<typename ListType>
 static void
 test_intrusive_list_1 ()
 {
@@ -810,9 +792,9 @@ test_intrusive_list ()
 }
 
 void _initialize_intrusive_list_selftests ();
+
 void
 _initialize_intrusive_list_selftests ()
 {
-  selftests::register_test
-    ("intrusive_list", test_intrusive_list);
+  selftests::register_test ("intrusive_list", test_intrusive_list);
 }

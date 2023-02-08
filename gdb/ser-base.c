@@ -28,7 +28,6 @@
 #include <winsock2.h>
 #endif
 
-
 static timer_handler_func push_event;
 static handler_func fd_event;
 
@@ -42,7 +41,8 @@ static handler_func fd_event;
    is told to go away.  */
 
 /* Value of scb->async_state: */
-enum {
+enum
+{
   /* When >= 0, this contains the ID of the currently scheduled timer event.
      This state is rarely encountered.  Timer events are one-off so as soon as
      the event is delivered the state is changed to NOTHING_SCHEDULED.  */
@@ -108,13 +108,11 @@ reschedule (struct serial *scb)
 	    {
 	    case FD_SCHEDULED:
 	      if (scb->async_state != FD_SCHEDULED)
-		gdb_printf (gdb_stdlog, "[fd%d->fd-scheduled]\n",
-			    scb->fd);
+		gdb_printf (gdb_stdlog, "[fd%d->fd-scheduled]\n", scb->fd);
 	      break;
 	    default: /* TIMER SCHEDULED */
 	      if (scb->async_state == FD_SCHEDULED)
-		gdb_printf (gdb_stdlog, "[fd%d->timer-scheduled]\n",
-			    scb->fd);
+		gdb_printf (gdb_stdlog, "[fd%d->timer-scheduled]\n", scb->fd);
 	      break;
 	    }
 	}
@@ -248,7 +246,7 @@ ser_base_wait_for (struct serial *scb, int timeout)
 	  else if (errno == EINTR)
 	    continue;
 	  else
-	    return SERIAL_ERROR;	/* Got an error from select or
+	    return SERIAL_ERROR; /* Got an error from select or
 					   poll.  */
 	}
 
@@ -274,7 +272,7 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 	  int num_bytes = -1;
 
 	  if (scb->ops->avail)
-	    num_bytes = (scb->ops->avail)(scb, scb->error_fd);
+	    num_bytes = (scb->ops->avail) (scb, scb->error_fd);
 
 	  if (num_bytes != -1)
 	    to_read = (num_bytes < to_read) ? num_bytes : to_read;
@@ -312,7 +310,7 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 	    }
 
 	  gdb_puts (current, gdb_stderr);
-       }
+	}
     }
 }
 
@@ -400,7 +398,7 @@ do_ser_base_readchar (struct serial *scb, int timeout)
 	return SERIAL_EOF;
       else
 	/* Got an error from read.  */
-	return SERIAL_ERROR;	
+	return SERIAL_ERROR;
     }
 
   scb->bufcnt = status;
@@ -529,7 +527,7 @@ ser_base_drain_output (struct serial *scb)
 void
 ser_base_raw (struct serial *scb)
 {
-  return;			/* Always in raw mode.  */
+  return; /* Always in raw mode.  */
 }
 
 serial_ttystate
@@ -553,8 +551,7 @@ ser_base_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 }
 
 void
-ser_base_print_tty_state (struct serial *scb, 
-			  serial_ttystate ttystate,
+ser_base_print_tty_state (struct serial *scb, serial_ttystate ttystate,
 			  struct ui_file *stream)
 {
   /* Nothing to print.  */
@@ -564,13 +561,13 @@ ser_base_print_tty_state (struct serial *scb,
 int
 ser_base_setbaudrate (struct serial *scb, int rate)
 {
-  return 0;			/* Never fails!  */
+  return 0; /* Never fails!  */
 }
 
 int
 ser_base_setstopbits (struct serial *scb, int num)
 {
-  return 0;			/* Never fails!  */
+  return 0; /* Never fails!  */
 }
 
 /* Implement the "setparity" serial_ops callback.  */
@@ -578,22 +575,20 @@ ser_base_setstopbits (struct serial *scb, int num)
 int
 ser_base_setparity (struct serial *scb, int parity)
 {
-  return 0;			/* Never fails!  */
+  return 0; /* Never fails!  */
 }
 
 /* Put the SERIAL device into/out-of ASYNC mode.  */
 
 void
-ser_base_async (struct serial *scb,
-		int async_p)
+ser_base_async (struct serial *scb, int async_p)
 {
   if (async_p)
     {
       /* Force a re-schedule.  */
       scb->async_state = NOTHING_SCHEDULED;
       if (serial_debug_p (scb))
-	gdb_printf (gdb_stdlog, "[fd%d->asynchronous]\n",
-		    scb->fd);
+	gdb_printf (gdb_stdlog, "[fd%d->asynchronous]\n", scb->fd);
       reschedule (scb);
 
       if (scb->error_fd != -1)
@@ -602,8 +597,7 @@ ser_base_async (struct serial *scb,
   else
     {
       if (serial_debug_p (scb))
-	gdb_printf (gdb_stdlog, "[fd%d->synchronous]\n",
-		    scb->fd);
+	gdb_printf (gdb_stdlog, "[fd%d->synchronous]\n", scb->fd);
       /* De-schedule whatever tasks are currently scheduled.  */
       switch (scb->async_state)
 	{

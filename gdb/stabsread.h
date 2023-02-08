@@ -26,7 +26,8 @@ enum language;
 /* Definitions, prototypes, etc for stabs debugging format support
    functions.  */
 
-#define HASHSIZE 127		/* Size of things hashed via
+#define HASHSIZE \
+  127 /* Size of things hashed via
 				   hashname().  */
 
 /* Compute a small integer hash code for the given name.  */
@@ -37,7 +38,7 @@ extern int hashname (const char *name);
 
 extern unsigned int symnum;
 
-#define next_symbol_text(objfile) (*next_symbol_text_func)(objfile)
+#define next_symbol_text(objfile) (*next_symbol_text_func) (objfile)
 
 /* Function to invoke get the next symbol.  Return the symbol name.  */
 
@@ -69,11 +70,11 @@ extern void common_block_end (struct objfile *);
 /* Kludge for xcoffread.c */
 
 struct pending_stabs
-  {
-    int count;
-    int length;
-    char *stab[1];
-  };
+{
+  int count;
+  int length;
+  char *stab[1];
+};
 
 extern struct pending_stabs *global_stabs;
 
@@ -81,7 +82,7 @@ extern struct pending_stabs *global_stabs;
    Used to detect pairs of N_SO symbols.  */
 
 extern int previous_stab_code;
-
+
 /* Support for Sun changes to dbx symbol format.  */
 
 /* For each identified header file, we have a table of types defined
@@ -103,27 +104,25 @@ extern int previous_stab_code;
    used to match header-file references to their corresponding data.  */
 
 struct header_file
-  {
+{
+  /* Name of header file */
 
-    /* Name of header file */
+  char *name;
 
-    char *name;
-
-    /* Numeric code distinguishing instances of one header file that
+  /* Numeric code distinguishing instances of one header file that
        produced different results when included.  It comes from the
        N_BINCL or N_EXCL.  */
 
-    int instance;
+  int instance;
 
-    /* Pointer to vector of types */
+  /* Pointer to vector of types */
 
-    struct type **vector;
+  struct type **vector;
 
-    /* Allocated length (# elts) of that vector */
+  /* Allocated length (# elts) of that vector */
 
-    int length;
-
-  };
+  int length;
+};
 
 /* The table of header_files of this OBJFILE.  */
 #define HEADER_FILES(OBJFILE) (DBX_SYMFILE_INFO (OBJFILE)->header_files)
@@ -167,32 +166,30 @@ extern void start_stabs (void);
 extern void end_stabs (void);
 
 extern void finish_global_stabs (struct objfile *objfile);
-
+
 /* Functions exported by dbxread.c.  These are not in stabsread.c because
    they are only used by some stabs readers.  */
 
-extern legacy_psymtab *dbx_end_psymtab
-  (struct objfile *objfile, psymtab_storage *partial_symtabs,
-   legacy_psymtab *pst,
-   const char **include_list, int num_includes,
-   int capping_symbol_offset, CORE_ADDR capping_text,
-   legacy_psymtab **dependency_list, int number_dependencies,
-   int textlow_not_set);
+extern legacy_psymtab *
+dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
+		 legacy_psymtab *pst, const char **include_list,
+		 int num_includes, int capping_symbol_offset,
+		 CORE_ADDR capping_text, legacy_psymtab **dependency_list,
+		 int number_dependencies, int textlow_not_set);
 
 extern void process_one_symbol (int, int, CORE_ADDR, const char *,
-				const section_offsets &,
-				struct objfile *, enum language);
+				const section_offsets &, struct objfile *,
+				enum language);
 
 extern void elfstab_build_psymtabs (struct objfile *objfile,
-				    asection *stabsect,
-				    file_ptr stabstroffset,
+				    asection *stabsect, file_ptr stabstroffset,
 				    unsigned int stabstrsize);
 
-extern void coffstab_build_psymtabs
-  (struct objfile *objfile,
-   CORE_ADDR textaddr, unsigned int textsize,
-   const std::vector<asection *> &stabs,
-   file_ptr stabstroffset, unsigned int stabstrsize);
+extern void coffstab_build_psymtabs (struct objfile *objfile,
+				     CORE_ADDR textaddr, unsigned int textsize,
+				     const std::vector<asection *> &stabs,
+				     file_ptr stabstroffset,
+				     unsigned int stabstrsize);
 
 extern void stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
 				     char *stabstr_name, char *text_name);

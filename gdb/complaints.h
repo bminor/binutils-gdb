@@ -17,15 +17,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-#if !defined (COMPLAINTS_H)
+#if !defined(COMPLAINTS_H)
 #define COMPLAINTS_H
 
 #include <unordered_set>
 
 /* Helper for complaint.  */
-extern void complaint_internal (const char *fmt, ...)
-  ATTRIBUTE_PRINTF (1, 2);
+extern void complaint_internal (const char *fmt, ...) ATTRIBUTE_PRINTF (1, 2);
 
 /* This controls whether complaints are emitted.  */
 
@@ -44,12 +42,12 @@ have_complaint ()
    avoid computing complaint's arguments when complaints are disabled.
    Running FMT via gettext [i.e., _(FMT)] can be quite expensive, for
    example.  */
-#define complaint(FMT, ...)					\
-  do								\
-    {								\
-      if (have_complaint ())					\
-	complaint_internal (FMT, ##__VA_ARGS__);		\
-    }								\
+#define complaint(FMT, ...)                      \
+  do                                             \
+    {                                            \
+      if (have_complaint ())                     \
+	complaint_internal (FMT, ##__VA_ARGS__); \
+    }                                            \
   while (0)
 
 /* Clear out / initialize all complaint counters that have ever been
@@ -79,12 +77,11 @@ private:
 
   /* The saved value of deprecated_warning_hook.  */
   void (*m_saved_warning_hook) (const char *, va_list)
-    ATTRIBUTE_FPTR_PRINTF (1,0);
+    ATTRIBUTE_FPTR_PRINTF (1, 0);
 
   /* A helper function that is used by the 'complaint' implementation
      to issue a complaint.  */
-  static void issue_complaint (const char *, va_list)
-    ATTRIBUTE_PRINTF (1, 0);
+  static void issue_complaint (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
   /* This object.  Used by the static callback function.  */
   static complaint_interceptor *g_complaint_interceptor;

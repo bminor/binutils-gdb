@@ -20,11 +20,12 @@
 #include "defs.h"
 #include "python-internal.h"
 
-struct membuf_object {
+struct membuf_object
+{
   PyObject_HEAD
 
-  /* Pointer to the raw data, and array of gdb_bytes.  */
-  void *buffer;
+    /* Pointer to the raw data, and array of gdb_bytes.  */
+    void *buffer;
 
   /* The address from where the data was read, held for mbpy_str.  */
   CORE_ADDR addr;
@@ -33,8 +34,8 @@ struct membuf_object {
   CORE_ADDR length;
 };
 
-extern PyTypeObject membuf_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("membuf_object");
+extern PyTypeObject
+  membuf_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("membuf_object");
 
 /* Wrap BUFFER, ADDRESS, and LENGTH into a gdb.Membuf object.  ADDRESS is
    the address within the inferior that the contents of BUFFER were read,
@@ -42,8 +43,7 @@ extern PyTypeObject membuf_object_type
 
 PyObject *
 gdbpy_buffer_to_membuf (gdb::unique_xmalloc_ptr<gdb_byte> buffer,
-			CORE_ADDR address,
-			ULONGEST length)
+			CORE_ADDR address, ULONGEST length)
 {
   gdbpy_ref<membuf_object> membuf_obj (PyObject_New (membuf_object,
 						     &membuf_object_type));
@@ -73,7 +73,7 @@ mbpy_str (PyObject *self)
 {
   membuf_object *membuf_obj = (membuf_object *) self;
 
-  return PyUnicode_FromFormat (_("Memory buffer for address %s, \
+  return PyUnicode_FromFormat (_ ("Memory buffer for address %s, \
 which is %s bytes long."),
 			       paddress (gdbpy_enter::get_gdbarch (),
 					 membuf_obj->addr),
@@ -86,9 +86,8 @@ get_buffer (PyObject *self, Py_buffer *buf, int flags)
   membuf_object *membuf_obj = (membuf_object *) self;
   int ret;
 
-  ret = PyBuffer_FillInfo (buf, self, membuf_obj->buffer,
-			   membuf_obj->length, 0,
-			   PyBUF_CONTIG);
+  ret = PyBuffer_FillInfo (buf, self, membuf_obj->buffer, membuf_obj->length,
+			   0, PyBUF_CONTIG);
 
   /* Despite the documentation saying this field is a "const char *",
      in Python 3.4 at least, it's really a "char *".  */
@@ -110,47 +109,43 @@ gdbpy_initialize_membuf (void)
 				 (PyObject *) &membuf_object_type);
 }
 
-static PyBufferProcs buffer_procs =
-{
-  get_buffer
-};
+static PyBufferProcs buffer_procs = { get_buffer };
 
 PyTypeObject membuf_object_type = {
-  PyVarObject_HEAD_INIT (nullptr, 0)
-  "gdb.Membuf",			  /*tp_name*/
-  sizeof (membuf_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  mbpy_dealloc,			  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  mbpy_str,			  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  &buffer_procs,		  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
-  "GDB memory buffer object", 	  /*tp_doc*/
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  0,				  /* tp_methods */
-  0,				  /* tp_members */
-  0,				  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,				  /* tp_init */
-  0,				  /* tp_alloc */
+  PyVarObject_HEAD_INIT (nullptr, 0) "gdb.Membuf", /*tp_name*/
+  sizeof (membuf_object),			   /*tp_basicsize*/
+  0,						   /*tp_itemsize*/
+  mbpy_dealloc,					   /*tp_dealloc*/
+  0,						   /*tp_print*/
+  0,						   /*tp_getattr*/
+  0,						   /*tp_setattr*/
+  0,						   /*tp_compare*/
+  0,						   /*tp_repr*/
+  0,						   /*tp_as_number*/
+  0,						   /*tp_as_sequence*/
+  0,						   /*tp_as_mapping*/
+  0,						   /*tp_hash */
+  0,						   /*tp_call*/
+  mbpy_str,					   /*tp_str*/
+  0,						   /*tp_getattro*/
+  0,						   /*tp_setattro*/
+  &buffer_procs,				   /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,				   /*tp_flags*/
+  "GDB memory buffer object",			   /*tp_doc*/
+  0,						   /* tp_traverse */
+  0,						   /* tp_clear */
+  0,						   /* tp_richcompare */
+  0,						   /* tp_weaklistoffset */
+  0,						   /* tp_iter */
+  0,						   /* tp_iternext */
+  0,						   /* tp_methods */
+  0,						   /* tp_members */
+  0,						   /* tp_getset */
+  0,						   /* tp_base */
+  0,						   /* tp_dict */
+  0,						   /* tp_descr_get */
+  0,						   /* tp_descr_set */
+  0,						   /* tp_dictoffset */
+  0,						   /* tp_init */
+  0,						   /* tp_alloc */
 };

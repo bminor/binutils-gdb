@@ -21,12 +21,15 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/rsp-low.h"
 
-namespace selftests {
-namespace rsp_low {
+namespace selftests
+{
+namespace rsp_low
+{
 
 /* Test the variant of hex2bin that returns a byte_vector.  */
 
-static void test_hex2bin_byte_vector ()
+static void
+test_hex2bin_byte_vector ()
 {
   gdb::byte_vector bv;
 
@@ -48,7 +51,8 @@ static void test_hex2bin_byte_vector ()
   SELF_CHECK (bv[1] == 0x23);
 }
 
-static void test_hex2str ()
+static void
+test_hex2str ()
 {
   SELF_CHECK (hex2str ("666f6f") == "foo");
   SELF_CHECK (hex2str ("666f6fa") == "foo");
@@ -62,11 +66,11 @@ static void test_hex2str ()
 } /* namespace selftests */
 
 void _initialize_rsp_low_selftests ();
+
 void
 _initialize_rsp_low_selftests ()
 {
   selftests::register_test ("hex2bin_byte_vector",
 			    selftests::rsp_low::test_hex2bin_byte_vector);
-  selftests::register_test ("hex2str",
-			    selftests::rsp_low::test_hex2str);
+  selftests::register_test ("hex2str", selftests::rsp_low::test_hex2str);
 }

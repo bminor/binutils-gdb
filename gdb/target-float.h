@@ -30,31 +30,28 @@ extern bool target_float_is_zero (const gdb_byte *addr,
 extern std::string target_float_to_string (const gdb_byte *addr,
 					   const struct type *type,
 					   const char *format = nullptr);
-extern bool target_float_from_string (gdb_byte *addr,
-				      const struct type *type,
+extern bool target_float_from_string (gdb_byte *addr, const struct type *type,
 				      const std::string &string);
 
 extern LONGEST target_float_to_longest (const gdb_byte *addr,
 					const struct type *type);
-extern void target_float_from_longest (gdb_byte *addr,
-				       const struct type *type,
+extern void target_float_from_longest (gdb_byte *addr, const struct type *type,
 				       LONGEST val);
 extern void target_float_from_ulongest (gdb_byte *addr,
-					const struct type *type,
-					ULONGEST val);
+					const struct type *type, ULONGEST val);
 extern double target_float_to_host_double (const gdb_byte *addr,
 					   const struct type *type);
 extern void target_float_from_host_double (gdb_byte *addr,
 					   const struct type *type,
 					   double val);
 extern void target_float_convert (const gdb_byte *from,
-				  const struct type *from_type,
-				  gdb_byte *to, const struct type *to_type);
+				  const struct type *from_type, gdb_byte *to,
+				  const struct type *to_type);
 
-extern void target_float_binop (enum exp_opcode opcode,
-				const gdb_byte *x, const struct type *type_x,
-				const gdb_byte *y, const struct type *type_y,
-				gdb_byte *res, const struct type *type_res);
+extern void target_float_binop (enum exp_opcode opcode, const gdb_byte *x,
+				const struct type *type_x, const gdb_byte *y,
+				const struct type *type_y, gdb_byte *res,
+				const struct type *type_res);
 extern int target_float_compare (const gdb_byte *x, const struct type *type_x,
 				 const gdb_byte *y, const struct type *type_y);
 

@@ -54,7 +54,7 @@ xmalloc (size_t size)
   if (size == 0)
     size = 1;
 
-  val = malloc (size);         /* ARI: malloc */
+  val = malloc (size); /* ARI: malloc */
   if (val == NULL)
     malloc_failure (size);
 
@@ -72,9 +72,9 @@ xrealloc (void *ptr, size_t size)
     size = 1;
 
   if (ptr != NULL)
-    val = realloc (ptr, size);	/* ARI: realloc */
+    val = realloc (ptr, size); /* ARI: realloc */
   else
-    val = malloc (size);	        /* ARI: malloc */
+    val = malloc (size); /* ARI: malloc */
   if (val == NULL)
     malloc_failure (size);
 
@@ -94,7 +94,7 @@ xcalloc (size_t number, size_t size)
       size = 1;
     }
 
-  mem = calloc (number, size);      /* ARI: xcalloc */
+  mem = calloc (number, size); /* ARI: xcalloc */
   if (mem == NULL)
     malloc_failure (number * size);
 

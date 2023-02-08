@@ -68,8 +68,8 @@
 
    The TYPE field is ignored for breakpoints.  */
 
-#define DR_CONTROL_ENABLED(ctrl)	(((ctrl) & 0x1) == 1)
-#define DR_CONTROL_MASK(ctrl)		(((ctrl) >> 5) & 0xff)
+#define DR_CONTROL_ENABLED(ctrl) (((ctrl) &0x1) == 1)
+#define DR_CONTROL_MASK(ctrl) (((ctrl) >> 5) & 0xff)
 
 /* Structure for managing the hardware breakpoint/watchpoint resources.
    DR_ADDR_* stores the address, DR_CTRL_* stores the control register
@@ -118,8 +118,8 @@ bool aarch64_any_set_debug_regs_state (aarch64_debug_reg_state *state,
 				       bool watchpoint);
 
 void aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
-				   const char *func, CORE_ADDR addr,
-				   int len, enum target_hw_bp_type type);
+				   const char *func, CORE_ADDR addr, int len,
+				   enum target_hw_bp_type type);
 
 int aarch64_region_ok_for_watchpoint (CORE_ADDR addr, int len);
 

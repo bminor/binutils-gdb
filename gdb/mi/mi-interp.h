@@ -29,9 +29,11 @@ struct mi_console_file;
 class mi_interp final : public interp
 {
 public:
+
   mi_interp (const char *name)
     : interp (name)
-  {}
+  {
+  }
 
   void init (bool top_level) override;
   void resume () override;

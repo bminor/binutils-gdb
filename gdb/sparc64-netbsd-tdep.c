@@ -34,36 +34,32 @@
 #include "netbsd-tdep.h"
 
 /* From <machine/reg.h>.  */
-const struct sparc_gregmap sparc64nbsd_gregmap =
-{
-  0 * 8,			/* "tstate" */
-  1 * 8,			/* %pc */
-  2 * 8,			/* %npc */
-  3 * 8,			/* %y */
-  -1,				/* %fprs */
-  -1,
-  5 * 8,			/* %g1 */
-  -1,				/* %l0 */
-  4				/* sizeof (%y) */
+const struct sparc_gregmap sparc64nbsd_gregmap = {
+  0 * 8,	/* "tstate" */
+  1 * 8,	/* %pc */
+  2 * 8,	/* %npc */
+  3 * 8,	/* %y */
+  -1,		/* %fprs */
+  -1,	 5 * 8, /* %g1 */
+  -1,		/* %l0 */
+  4		/* sizeof (%y) */
 };
-
 
 static void
 sparc64nbsd_supply_gregset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *gregs, size_t len)
+			    struct regcache *regcache, int regnum,
+			    const void *gregs, size_t len)
 {
   sparc64_supply_gregset (&sparc64nbsd_gregmap, regcache, regnum, gregs);
 }
 
 static void
 sparc64nbsd_supply_fpregset (const struct regset *regset,
-			     struct regcache *regcache,
-			     int regnum, const void *fpregs, size_t len)
+			     struct regcache *regcache, int regnum,
+			     const void *fpregs, size_t len)
 {
   sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
-
 
 /* Signal trampolines.  */
 
@@ -125,8 +121,8 @@ sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
      save area.  */
   addr = saved_regs[SPARC_SP_REGNUM].addr ();
   sp = get_frame_memory_unsigned (this_frame, addr, 8);
-  for (regnum = SPARC_L0_REGNUM, addr = sp + BIAS;
-       regnum <= SPARC_I7_REGNUM; regnum++, addr += 8)
+  for (regnum = SPARC_L0_REGNUM, addr = sp + BIAS; regnum <= SPARC_I7_REGNUM;
+       regnum++, addr += 8)
     saved_regs[regnum].set_addr (addr);
 
   /* Handle StackGhost.  */
@@ -189,8 +185,8 @@ sparc64nbsd_sigcontext_frame_this_id (frame_info_ptr this_frame,
 				      void **this_cache,
 				      struct frame_id *this_id)
 {
-  struct sparc_frame_cache *cache =
-    sparc64nbsd_sigcontext_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc64nbsd_sigcontext_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
@@ -199,8 +195,8 @@ static struct value *
 sparc64nbsd_sigcontext_frame_prev_register (frame_info_ptr this_frame,
 					    void **this_cache, int regnum)
 {
-  struct sparc_frame_cache *cache =
-    sparc64nbsd_sigcontext_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc64nbsd_sigcontext_frame_cache (this_frame, this_cache);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
@@ -223,27 +219,20 @@ sparc64nbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind sparc64nbsd_sigcontext_frame_unwind =
-{
-  "sparc64 netbsd sigcontext",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  sparc64nbsd_sigcontext_frame_this_id,
-  sparc64nbsd_sigcontext_frame_prev_register,
-  NULL,
-  sparc64nbsd_sigtramp_frame_sniffer
-};
-
+static const struct frame_unwind sparc64nbsd_sigcontext_frame_unwind
+  = { "sparc64 netbsd sigcontext",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      sparc64nbsd_sigcontext_frame_this_id,
+      sparc64nbsd_sigcontext_frame_prev_register,
+      NULL,
+      sparc64nbsd_sigtramp_frame_sniffer };
 
-static const struct regset sparc64nbsd_gregset =
-  {
-    NULL, sparc64nbsd_supply_gregset, NULL
-  };
+static const struct regset sparc64nbsd_gregset
+  = { NULL, sparc64nbsd_supply_gregset, NULL };
 
-static const struct regset sparc64nbsd_fpregset =
-  {
-    NULL, sparc64nbsd_supply_fpregset, NULL
-  };
+static const struct regset sparc64nbsd_fpregset
+  = { NULL, sparc64nbsd_supply_fpregset, NULL };
 
 static void
 sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -255,7 +244,7 @@ sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset = &sparc64nbsd_gregset;
   tdep->sizeof_gregset = 160;
 
-  tdep->fpregset =  &sparc64nbsd_fpregset;
+  tdep->fpregset = &sparc64nbsd_fpregset;
   tdep->sizeof_fpregset = 272;
 
   /* Make sure we can single-step "new" syscalls.  */
@@ -267,14 +256,15 @@ sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* NetBSD/sparc64 has SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
 }
 
 void _initialize_sparc64nbsd_tdep ();
+
 void
 _initialize_sparc64nbsd_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
-			  GDB_OSABI_NETBSD, sparc64nbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9, GDB_OSABI_NETBSD,
+			  sparc64nbsd_init_abi);
 }

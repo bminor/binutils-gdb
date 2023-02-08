@@ -86,9 +86,9 @@ static unsigned dcache_line_size = DCACHE_DEFAULT_LINE_SIZE;
 /* Each cache block holds LINE_SIZE bytes of data
    starting at a multiple-of-LINE_SIZE address.  */
 
-#define LINE_SIZE_MASK(dcache)  ((dcache->line_size - 1))
-#define XFORM(dcache, x) 	((x) & LINE_SIZE_MASK (dcache))
-#define MASK(dcache, x)         ((x) & ~LINE_SIZE_MASK (dcache))
+#define LINE_SIZE_MASK(dcache) ((dcache->line_size - 1))
+#define XFORM(dcache, x) ((x) &LINE_SIZE_MASK (dcache))
+#define MASK(dcache, x) ((x) & ~LINE_SIZE_MASK (dcache))
 
 struct dcache_block
 {
@@ -96,9 +96,9 @@ struct dcache_block
   struct dcache_block *prev;
   struct dcache_block *next;
 
-  CORE_ADDR addr;		/* address of data */
-  int refs;			/* # hits */
-  gdb_byte data[1];		/* line_size bytes at given address */
+  CORE_ADDR addr;   /* address of data */
+  int refs;	    /* # hits */
+  gdb_byte data[1]; /* line_size bytes at given address */
 };
 
 struct dcache_struct
@@ -112,7 +112,7 @@ struct dcache_struct
 
   /* The number of in-use lines in the cache.  */
   int size;
-  CORE_ADDR line_size;  /* current line_size.  */
+  CORE_ADDR line_size; /* current line_size.  */
 
   /* The ptid of last inferior to use cache or null_ptid.  */
   ptid_t ptid;
@@ -136,7 +136,7 @@ static void
 show_dcache_enabled_p (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Deprecated remotecache flag is %s.\n"), value);
+  gdb_printf (file, _ ("Deprecated remotecache flag is %s.\n"), value);
 }
 
 /* Add BLOCK to circular block list BLIST, behind the block at *BLIST.
@@ -229,7 +229,6 @@ dcache_free (DCACHE *dcache)
   xfree (dcache);
 }
 
-
 /* BLOCK_FUNC function for dcache_invalidate.
    This doesn't remove the block from the oldest list on purpose.
    dcache_invalidate will do it later.  */
@@ -290,8 +289,8 @@ dcache_hit (DCACHE *dcache, CORE_ADDR addr)
 {
   struct dcache_block *db;
 
-  splay_tree_node node = splay_tree_lookup (dcache->tree,
-					    (splay_tree_key) MASK (dcache, addr));
+  splay_tree_node node
+    = splay_tree_lookup (dcache->tree, (splay_tree_key) MASK (dcache, addr));
 
   if (!node)
     return NULL;
@@ -317,7 +316,7 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 
   len = dcache->line_size;
   memaddr = db->addr;
-  myaddr  = db->data;
+  myaddr = db->data;
 
   while (len > 0)
     {
@@ -333,8 +332,8 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
       if (region->attrib.mode == MEM_WO)
 	{
 	  memaddr += reg_len;
-	  myaddr  += reg_len;
-	  len     -= reg_len;
+	  myaddr += reg_len;
+	  len -= reg_len;
 	  continue;
 	}
 
@@ -372,9 +371,8 @@ dcache_alloc (DCACHE *dcache, CORE_ADDR addr)
       if (db)
 	remove_block (&dcache->freelist, db);
       else
-	db = ((struct dcache_block *)
-	      xmalloc (offsetof (struct dcache_block, data)
-		       + dcache->line_size));
+	db = ((struct dcache_block *) xmalloc (
+	  offsetof (struct dcache_block, data) + dcache->line_size));
 
       dcache->size++;
     }
@@ -406,7 +404,7 @@ dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr)
       db = dcache_alloc (dcache, addr);
 
       if (!dcache_read_line (dcache, db))
-	 return 0;
+	return 0;
     }
 
   *ptr = db->data[XFORM (dcache, addr)];
@@ -449,9 +447,7 @@ dcache_init (void)
 {
   DCACHE *dcache = XNEW (DCACHE);
 
-  dcache->tree = splay_tree_new (dcache_splay_tree_compare,
-				 NULL,
-				 NULL);
+  dcache->tree = splay_tree_new (dcache_splay_tree_compare, NULL, NULL);
 
   dcache->oldest = NULL;
   dcache->freelist = NULL;
@@ -463,7 +459,6 @@ dcache_init (void)
   return dcache;
 }
 
-
 /* Read LEN bytes from dcache memory at MEMADDR, transferring to
    debugger address MYADDR.  If the data is presently cached, this
    fills the cache.  Arguments/return are like the target_xfer_partial
@@ -471,8 +466,8 @@ dcache_init (void)
 
 enum target_xfer_status
 dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
-			    CORE_ADDR memaddr, gdb_byte *myaddr,
-			    ULONGEST len, ULONGEST *xfered_len)
+			    CORE_ADDR memaddr, gdb_byte *myaddr, ULONGEST len,
+			    ULONGEST *xfered_len)
 {
   ULONGEST i;
 
@@ -527,8 +522,7 @@ dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
 
 void
 dcache_update (DCACHE *dcache, enum target_xfer_status status,
-	       CORE_ADDR memaddr, const gdb_byte *myaddr,
-	       ULONGEST len)
+	       CORE_ADDR memaddr, const gdb_byte *myaddr, ULONGEST len)
 {
   ULONGEST i;
 
@@ -554,7 +548,7 @@ dcache_print_line (DCACHE *dcache, int index)
 
   if (dcache == NULL)
     {
-      gdb_printf (_("No data cache available.\n"));
+      gdb_printf (_ ("No data cache available.\n"));
       return;
     }
 
@@ -569,14 +563,14 @@ dcache_print_line (DCACHE *dcache, int index)
 
   if (!n)
     {
-      gdb_printf (_("No such cache line exists.\n"));
+      gdb_printf (_ ("No such cache line exists.\n"));
       return;
     }
-    
+
   db = (struct dcache_block *) n->value;
 
-  gdb_printf (_("Line %d: address %s [%d hits]\n"),
-	      index, paddress (target_gdbarch (), db->addr), db->refs);
+  gdb_printf (_ ("Line %d: address %s [%d hits]\n"), index,
+	      paddress (target_gdbarch (), db->addr), db->refs);
 
   for (j = 0; j < dcache->line_size; j++)
     {
@@ -604,7 +598,7 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
       i = strtol (exp, &linestart, 10);
       if (linestart == exp || i < 0)
 	{
-	  gdb_printf (_("Usage: info dcache [LINENUMBER]\n"));
+	  gdb_printf (_ ("Usage: info dcache [LINENUMBER]\n"));
 	  return;
 	}
 
@@ -612,18 +606,16 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
       return;
     }
 
-  gdb_printf (_("Dcache %u lines of %u bytes each.\n"),
-	      dcache_size,
-	      dcache ? (unsigned) dcache->line_size
-	      : dcache_line_size);
+  gdb_printf (_ ("Dcache %u lines of %u bytes each.\n"), dcache_size,
+	      dcache ? (unsigned) dcache->line_size : dcache_line_size);
 
   if (dcache == NULL || dcache->ptid == null_ptid)
     {
-      gdb_printf (_("No data cache available.\n"));
+      gdb_printf (_ ("No data cache available.\n"));
       return;
     }
 
-  gdb_printf (_("Contains data for %s\n"),
+  gdb_printf (_ ("Contains data for %s\n"),
 	      target_pid_to_str (dcache->ptid).c_str ());
 
   refcount = 0;
@@ -635,15 +627,15 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
     {
       struct dcache_block *db = (struct dcache_block *) n->value;
 
-      gdb_printf (_("Line %d: address %s [%d hits]\n"),
-		  i, paddress (target_gdbarch (), db->addr), db->refs);
+      gdb_printf (_ ("Line %d: address %s [%d hits]\n"), i,
+		  paddress (target_gdbarch (), db->addr), db->refs);
       i++;
       refcount += db->refs;
 
       n = splay_tree_successor (dcache->tree, n->key);
     }
 
-  gdb_printf (_("Cache state: %d active lines, %d hits\n"), i, refcount);
+  gdb_printf (_ ("Cache state: %d active lines, %d hits\n"), i, refcount);
 }
 
 static void
@@ -653,13 +645,12 @@ info_dcache_command (const char *exp, int tty)
 }
 
 static void
-set_dcache_size (const char *args, int from_tty,
-		 struct cmd_list_element *c)
+set_dcache_size (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (dcache_size == 0)
     {
       dcache_size = DCACHE_DEFAULT_SIZE;
-      error (_("Dcache size must be greater than 0."));
+      error (_ ("Dcache size must be greater than 0."));
     }
   target_dcache_invalidate ();
 }
@@ -668,61 +659,55 @@ static void
 set_dcache_line_size (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
-  if (dcache_line_size < 2
-      || (dcache_line_size & (dcache_line_size - 1)) != 0)
+  if (dcache_line_size < 2 || (dcache_line_size & (dcache_line_size - 1)) != 0)
     {
       unsigned d = dcache_line_size;
       dcache_line_size = DCACHE_DEFAULT_LINE_SIZE;
-      error (_("Invalid dcache line size: %u (must be power of 2)."), d);
+      error (_ ("Invalid dcache line size: %u (must be power of 2)."), d);
     }
   target_dcache_invalidate ();
 }
 
 void _initialize_dcache ();
+
 void
 _initialize_dcache ()
 {
-  add_setshow_boolean_cmd ("remotecache", class_support,
-			   &dcache_enabled_p, _("\
-Set cache use for remote targets."), _("\
-Show cache use for remote targets."), _("\
+  add_setshow_boolean_cmd ("remotecache", class_support, &dcache_enabled_p,
+			   _ ("\
+Set cache use for remote targets."),
+			   _ ("\
+Show cache use for remote targets."),
+			   _ ("\
 This used to enable the data cache for remote targets.  The cache\n\
 functionality is now controlled by the memory region system and the\n\
 \"stack-cache\" flag; \"remotecache\" now does nothing and\n\
 exists only for compatibility reasons."),
-			   NULL,
-			   show_dcache_enabled_p,
-			   &setlist, &showlist);
+			   NULL, show_dcache_enabled_p, &setlist, &showlist);
 
-  add_info ("dcache", info_dcache_command,
-	    _("\
+  add_info ("dcache", info_dcache_command, _ ("\
 Print information on the dcache performance.\n\
 Usage: info dcache [LINENUMBER]\n\
 With no arguments, this command prints the cache configuration and a\n\
 summary of each line in the cache.  With an argument, dump\"\n\
 the contents of the given line."));
 
-  add_setshow_prefix_cmd ("dcache", class_obscure,
-			  _("\
+  add_setshow_prefix_cmd ("dcache", class_obscure, _ ("\
 Use this command to set number of lines in dcache and line-size."),
-			  ("Show dcache settings."),
-			  &dcache_set_list, &dcache_show_list,
-			  &setlist, &showlist);
+			  ("Show dcache settings."), &dcache_set_list,
+			  &dcache_show_list, &setlist, &showlist);
 
-  add_setshow_zuinteger_cmd ("line-size", class_obscure,
-			     &dcache_line_size, _("\
-Set dcache line size in bytes (must be power of 2)."), _("\
+  add_setshow_zuinteger_cmd ("line-size", class_obscure, &dcache_line_size,
+			     _ ("\
+Set dcache line size in bytes (must be power of 2)."),
+			     _ ("\
 Show dcache line size."),
-			     NULL,
-			     set_dcache_line_size,
-			     NULL,
+			     NULL, set_dcache_line_size, NULL,
 			     &dcache_set_list, &dcache_show_list);
-  add_setshow_zuinteger_cmd ("size", class_obscure,
-			     &dcache_size, _("\
-Set number of dcache lines."), _("\
+  add_setshow_zuinteger_cmd ("size", class_obscure, &dcache_size, _ ("\
+Set number of dcache lines."),
+			     _ ("\
 Show number of dcache lines."),
-			     NULL,
-			     set_dcache_size,
-			     NULL,
-			     &dcache_set_list, &dcache_show_list);
+			     NULL, set_dcache_size, NULL, &dcache_set_list,
+			     &dcache_show_list);
 }

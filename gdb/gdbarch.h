@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
@@ -66,7 +65,7 @@ struct inferior;
 
 struct gdbarch_tdep_base
 {
-  virtual ~gdbarch_tdep_base() = default;
+  virtual ~gdbarch_tdep_base () = default;
 };
 
 using gdbarch_tdep_up = std::unique_ptr<gdbarch_tdep_base>;
@@ -90,7 +89,7 @@ extern struct gdbarch *target_gdbarch (void);
    gdbarch  method.  */
 
 using iterate_over_objfiles_in_search_order_cb_ftype
-  = gdb::function_view<bool(objfile *)>;
+  = gdb::function_view<bool (objfile *)>;
 
 /* Callback type for regset section iterators.  The callback usually
    invokes the REGSET's supply or collect method, to which it must
@@ -100,9 +99,9 @@ using iterate_over_objfiles_in_search_order_cb_ftype
    is used for diagnostic messages.  CB_DATA should have been passed
    unchanged through the iterator.  */
 
-typedef void (iterate_over_regset_sections_cb)
-  (const char *sect_name, int supply_size, int collect_size,
-   const struct regset *regset, const char *human_name, void *cb_data);
+typedef void (iterate_over_regset_sections_cb) (
+  const char *sect_name, int supply_size, int collect_size,
+  const struct regset *regset, const char *human_name, void *cb_data);
 
 /* For a function call, does the function return a value using a
    normal value return or a structure return - passing a hidden
@@ -140,16 +139,13 @@ enum class memtag_type
 
 /* Callback types for 'read_core_file_mappings' gdbarch method.  */
 
-using read_core_file_mappings_pre_loop_ftype =
-  gdb::function_view<void (ULONGEST count)>;
+using read_core_file_mappings_pre_loop_ftype
+  = gdb::function_view<void (ULONGEST count)>;
 
-using read_core_file_mappings_loop_ftype =
-  gdb::function_view<void (int num,
-			   ULONGEST start,
-			   ULONGEST end,
-			   ULONGEST file_ofs,
-			   const char *filename,
-			   const bfd_build_id *build_id)>;
+using read_core_file_mappings_loop_ftype
+  = gdb::function_view<void (int num, ULONGEST start, ULONGEST end,
+			     ULONGEST file_ofs, const char *filename,
+			     const bfd_build_id *build_id)>;
 
 /* Possible values for gdbarch_call_dummy_location.  */
 enum call_dummy_location_type
@@ -204,7 +200,6 @@ gdbarch_tdep (struct gdbarch *gdbarch)
    components it was determined that the global aproach was not
    applicable.  */
 
-
 /* Register a new architectural family with GDB.
 
    Register support for the specified ARCHITECTURE with GDB.  When
@@ -250,7 +245,8 @@ struct gdbarch_info
     /* Ensure the union is zero-initialized.  Relies on the fact that there's
        no member larger than TDESC_DATA.  */
     : tdesc_data ()
-  {}
+  {
+  }
 
   const struct bfd_arch_info *bfd_arch_info = nullptr;
 
@@ -268,15 +264,17 @@ struct gdbarch_info
   const struct target_desc *target_desc = nullptr;
 };
 
-typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
-typedef void (gdbarch_dump_tdep_ftype) (struct gdbarch *gdbarch, struct ui_file *file);
+typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info,
+					      struct gdbarch_list *arches);
+typedef void (gdbarch_dump_tdep_ftype) (struct gdbarch *gdbarch,
+					struct ui_file *file);
 typedef bool (gdbarch_supports_arch_info_ftype) (const struct bfd_arch_info *);
 
-extern void gdbarch_register (enum bfd_architecture architecture,
-			      gdbarch_init_ftype *init,
-			      gdbarch_dump_tdep_ftype *dump_tdep = nullptr,
-			      gdbarch_supports_arch_info_ftype *supports_arch_info = nullptr);
-
+extern void
+gdbarch_register (enum bfd_architecture architecture, gdbarch_init_ftype *init,
+		  gdbarch_dump_tdep_ftype *dump_tdep = nullptr,
+		  gdbarch_supports_arch_info_ftype *supports_arch_info
+		  = nullptr);
 
 /* Return a vector of the valid architecture names.  Since architectures are
    registered during the _initialize phase this function only returns useful
@@ -284,12 +282,12 @@ extern void gdbarch_register (enum bfd_architecture architecture,
 
 extern std::vector<const char *> gdbarch_printable_names ();
 
-
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
    matches the information provided by INFO.  */
 
-extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches, const struct gdbarch_info *info);
-
+extern struct gdbarch_list *
+gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
+			     const struct gdbarch_info *info);
 
 /* Helper function.  Create a preliminary ``struct gdbarch''.  Perform
    basic initialization using values obtained from the INFO and TDEP
@@ -299,7 +297,6 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info,
 				      gdbarch_tdep_up tdep);
 
-
 /* Helper function.  Free a partially-constructed ``struct gdbarch''.
    It is assumed that the caller freeds the ``struct
    gdbarch_tdep''.  */
@@ -308,8 +305,7 @@ extern void gdbarch_free (struct gdbarch *);
 
 struct gdbarch_deleter
 {
-  void operator() (gdbarch *arch) const
-  { gdbarch_free (arch); }
+  void operator() (gdbarch *arch) const { gdbarch_free (arch); }
 };
 
 using gdbarch_up = std::unique_ptr<gdbarch, gdbarch_deleter>;
@@ -322,9 +318,11 @@ extern obstack *gdbarch_obstack (gdbarch *arch);
    obstack.  The memory is freed when the corresponding architecture
    is also freed.  */
 
-#define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE)   obstack_calloc<TYPE> (gdbarch_obstack ((GDBARCH)), (NR))
+#define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) \
+  obstack_calloc<TYPE> (gdbarch_obstack ((GDBARCH)), (NR))
 
-#define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE)   obstack_zalloc<TYPE> (gdbarch_obstack ((GDBARCH)))
+#define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) \
+  obstack_zalloc<TYPE> (gdbarch_obstack ((GDBARCH)))
 
 /* Duplicate STRING, returning an equivalent string that's allocated on the
    obstack associated with GDBARCH.  The string is freed when the corresponding
@@ -343,7 +341,6 @@ extern char *gdbarch_obstack_strdup (struct gdbarch *arch, const char *string);
 
 extern int gdbarch_update_p (struct gdbarch_info info);
 
-
 /* Helper function.  Find an architecture matching info.
 
    INFO should have relevant fields set, and then finished using
@@ -354,11 +351,9 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
 extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
 
-
 /* Helper function.  Set the target gdbarch to "gdbarch".  */
 
 extern void set_target_gdbarch (struct gdbarch *gdbarch);
-
 
 /* A registry adaptor for gdbarch.  This arranges to store the
    registry in the gdbarch.  */
@@ -372,7 +367,6 @@ struct registry_accessor<gdbarch>
    byte-order, ...) using information found in the BFD.  */
 
 extern void set_gdbarch_from_file (bfd *);
-
 
 /* Initialize the current architecture to the "first" one we find on
    our list.  */

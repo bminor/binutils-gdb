@@ -53,14 +53,12 @@ extern ULONGEST get_ulongest (const char **pp, int trailer = '\0');
 extern void report_unrecognized_option_error (const char *command,
 					      const char *args);
 
-
 /* Builds the help string for a command documented by PREFIX,
    followed by the extract_info_print_args help for ENTITY_KIND.  If
    DOCUMENT_N_FLAG is true then help text describing the -n flag is also
    included.  */
 
-const char *info_print_args_help (const char *prefix,
-				  const char *entity_kind,
+const char *info_print_args_help (const char *prefix, const char *entity_kind,
 				  bool document_n_flag);
 
 /* Parse a number or a range.
@@ -72,6 +70,7 @@ const char *info_print_args_help (const char *prefix,
 class number_or_range_parser
 {
 public:
+
   /* Default construction.  Must call init before calling
      get_next.  */
   number_or_range_parser () {}
@@ -95,24 +94,20 @@ public:
   /* Setup internal state such that get_next() returns numbers in the
      START_VALUE to END_VALUE range.  END_PTR is where the string is
      advanced to when get_next() returns END_VALUE.  */
-  void setup_range (int start_value, int end_value,
-		    const char *end_ptr);
+  void setup_range (int start_value, int end_value, const char *end_ptr);
 
   /* Returns true if parsing has completed.  */
   bool finished () const;
 
   /* Return the string being parsed.  When parsing has finished, this
      points past the last parsed token.  */
-  const char *cur_tok () const
-  { return m_cur_tok; }
+  const char *cur_tok () const { return m_cur_tok; }
 
   /* True when parsing a range.  */
-  bool in_range () const
-  { return m_in_range; }
+  bool in_range () const { return m_in_range; }
 
   /* When parsing a range, the final value in the range.  */
-  int end_value () const
-  { return m_end_value; }
+  int end_value () const { return m_end_value; }
 
   /* When parsing a range, skip past the final token in the range.  */
   void skip_range ()
@@ -123,6 +118,7 @@ public:
   }
 
 private:
+
   /* No need for these.  They are intentionally not defined anywhere.  */
   number_or_range_parser (const number_or_range_parser &);
   number_or_range_parser &operator= (const number_or_range_parser &);
@@ -200,8 +196,7 @@ check_for_argument (const char **str, const char *arg)
 static inline int
 check_for_argument (char **str, const char *arg, int arg_len)
 {
-  return check_for_argument (const_cast<const char **> (str),
-			     arg, arg_len);
+  return check_for_argument (const_cast<const char **> (str), arg, arg_len);
 }
 
 static inline int

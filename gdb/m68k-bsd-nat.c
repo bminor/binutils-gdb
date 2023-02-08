@@ -82,8 +82,8 @@ m68kbsd_supply_fpregset (struct regcache *regcache, const void *fpregs)
    in GREGS.  */
 
 static void
-m68kbsd_collect_gregset (const struct regcache *regcache,
-			 void *gregs, int regnum)
+m68kbsd_collect_gregset (const struct regcache *regcache, void *gregs,
+			 int regnum)
 {
   gdb_byte *regs = (gdb_byte *) gregs;
   int i;
@@ -99,8 +99,7 @@ m68kbsd_collect_gregset (const struct regcache *regcache,
    in FPREGS.  */
 
 static void
-m68kbsd_collect_fpregset (struct regcache *regcache,
-			  void *fpregs, int regnum)
+m68kbsd_collect_fpregset (struct regcache *regcache, void *fpregs, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   char *regs = fpregs;
@@ -112,7 +111,6 @@ m68kbsd_collect_fpregset (struct regcache *regcache,
 	regcache->raw_collect (i, regs + m68kbsd_fpreg_offset (gdbarch, i));
     }
 }
-
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating-point registers).  */
@@ -128,7 +126,7 @@ m68k_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
-	perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_ ("Couldn't get registers"));
 
       m68kbsd_supply_gregset (regcache, &regs);
     }
@@ -138,7 +136,7 @@ m68k_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, lwp) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
       m68kbsd_supply_fpregset (regcache, &fpregs);
     }
@@ -158,12 +156,12 @@ m68k_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
-	perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_ ("Couldn't get registers"));
 
       m68kbsd_collect_gregset (regcache, &regs, regnum);
 
       if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
-	perror_with_name (_("Couldn't write registers"));
+	perror_with_name (_ ("Couldn't write registers"));
     }
 
   if (regnum == -1 || m68kbsd_fpregset_supplies_p (regnum))
@@ -171,15 +169,14 @@ m68k_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, lwp) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
       m68kbsd_collect_fpregset (regcache, &fpregs, regnum);
 
       if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, lwp) == -1)
-	perror_with_name (_("Couldn't write floating point status"));
+	perror_with_name (_ ("Couldn't write floating point status"));
     }
 }
-
 
 /* Support for debugging kernel virtual memory images.  */
 
@@ -227,6 +224,7 @@ m68kbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 void _initialize_m68kbsd_nat ();
+
 void
 _initialize_m68kbsd_nat ()
 {

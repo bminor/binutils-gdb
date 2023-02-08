@@ -22,8 +22,10 @@
 #include "selftest-arch.h"
 #include "gdbsupport/gdb_unique_ptr.h"
 
-namespace selftests {
-namespace unpack {
+namespace selftests
+{
+namespace unpack
+{
 
 static void
 unique_xmalloc_ptr_char ()
@@ -45,10 +47,11 @@ unique_xmalloc_ptr_char ()
   SELF_CHECK (str == "xxxabcdef");
 }
 
-}
-}
+} // namespace unpack
+} // namespace selftests
 
 void _initialize_unique_xmalloc_ptr_char ();
+
 void
 _initialize_unique_xmalloc_ptr_char ()
 {

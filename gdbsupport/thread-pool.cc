@@ -47,14 +47,14 @@
 
 ATTRIBUTE_UNUSED static void
 do_set_thread_name (int (*set_name) (pthread_t, const char *, void *),
-		    const char *name)
+                    const char *name)
 {
   set_name (pthread_self (), "%s", const_cast<char *> (name));
 }
 
 ATTRIBUTE_UNUSED static void
 do_set_thread_name (int (*set_name) (pthread_t, const char *),
-		    const char *name)
+                    const char *name)
 {
   set_name (pthread_self (), name);
 }
@@ -73,7 +73,7 @@ set_thread_name (const char *name)
   do_set_thread_name (pthread_setname_np, name);
 }
 
-#elif defined (USE_WIN32API)
+#elif defined(USE_WIN32API)
 
 #include <windows.h>
 
@@ -90,7 +90,7 @@ init_windows ()
   if (hm)
     dyn_SetThreadDescription
       = (SetThreadDescription_ftype *) GetProcAddress (hm,
-						       "SetThreadDescription");
+                                                       "SetThreadDescription");
 
   /* On some versions of Windows, this function is only available in
      KernelBase.dll, not kernel32.dll.  */
@@ -98,9 +98,8 @@ init_windows ()
     {
       hm = LoadLibrary (TEXT ("KernelBase.dll"));
       if (hm)
-	dyn_SetThreadDescription
-	  = (SetThreadDescription_ftype *) GetProcAddress (hm,
-							   "SetThreadDescription");
+        dyn_SetThreadDescription = (SetThreadDescription_ftype *)
+          GetProcAddress (hm, "SetThreadDescription");
     }
 }
 
@@ -114,7 +113,7 @@ do_set_thread_name (const wchar_t *name)
     dyn_SetThreadDescription (GetCurrentThread (), name);
 }
 
-#define set_thread_name(NAME) do_set_thread_name (L ## NAME)
+#define set_thread_name(NAME) do_set_thread_name (L##NAME)
 
 #else /* USE_WIN32API */
 
@@ -162,27 +161,27 @@ thread_pool::set_thread_count (size_t num_threads)
 	 threads.  */
       block_signals blocker;
       for (size_t i = m_thread_count; i < num_threads; ++i)
-	{
-	  try
-	    {
-	      std::thread thread (&thread_pool::thread_function, this);
-	      thread.detach ();
-	    }
-	  catch (const std::system_error &)
-	    {
-	      /* libstdc++ may not implement std::thread, and will
+        {
+          try
+            {
+              std::thread thread (&thread_pool::thread_function, this);
+              thread.detach ();
+            }
+          catch (const std::system_error &)
+            {
+              /* libstdc++ may not implement std::thread, and will
 		 throw an exception on use.  It seems fine to ignore
 		 this, and any other sort of startup failure here.  */
-	      num_threads = i;
-	      break;
-	    }
-	}
+              num_threads = i;
+              break;
+            }
+        }
     }
   /* If the new size is smaller, terminate some existing threads.  */
   if (num_threads < m_thread_count)
     {
       for (size_t i = num_threads; i < m_thread_count; ++i)
-	m_tasks.emplace ();
+        m_tasks.emplace ();
       m_tasks_cv.notify_all ();
     }
 
@@ -228,17 +227,17 @@ thread_pool::thread_function ()
       optional<task_t> t;
 
       {
-	/* We want to hold the lock while examining the task list, but
+        /* We want to hold the lock while examining the task list, but
 	   not while invoking the task function.  */
-	std::unique_lock<std::mutex> guard (m_tasks_mutex);
-	while (m_tasks.empty ())
-	  m_tasks_cv.wait (guard);
-	t = std::move (m_tasks.front());
-	m_tasks.pop ();
+        std::unique_lock<std::mutex> guard (m_tasks_mutex);
+        while (m_tasks.empty ())
+          m_tasks_cv.wait (guard);
+        t = std::move (m_tasks.front ());
+        m_tasks.pop ();
       }
 
       if (!t.has_value ())
-	break;
+        break;
       (*t) ();
     }
 }

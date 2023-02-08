@@ -62,8 +62,8 @@ solib_target_parse_libraries (const char *library)
   if (!have_warned)
     {
       have_warned = 1;
-      warning (_("Can not parse XML library list; XML support was disabled "
-		 "at compile time"));
+      warning (_ ("Can not parse XML library list; XML support was disabled "
+		  "at compile time"));
     }
 
   return lm_info_vector ();
@@ -88,8 +88,7 @@ library_list_start_segment (struct gdb_xml_parser *parser,
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
   if (!last->section_bases.empty ())
-    gdb_xml_error (parser,
-		   _("Library list with both segments and sections"));
+    gdb_xml_error (parser, _ ("Library list with both segments and sections"));
 
   last->segment_bases.push_back (address);
 }
@@ -107,8 +106,7 @@ library_list_start_section (struct gdb_xml_parser *parser,
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
   if (!last->segment_bases.empty ())
-    gdb_xml_error (parser,
-		   _("Library list with both segments and sections"));
+    gdb_xml_error (parser, _ ("Library list with both segments and sections"));
 
   last->section_bases.push_back (address);
 }
@@ -138,9 +136,8 @@ library_list_end_library (struct gdb_xml_parser *parser,
   lm_info_target *lm_info = list->back ().get ();
 
   if (lm_info->segment_bases.empty () && lm_info->section_bases.empty ())
-    gdb_xml_error (parser, _("No segment or section bases defined"));
+    gdb_xml_error (parser, _ ("No segment or section bases defined"));
 }
-
 
 /* Handle the start of a <library-list> element.  */
 
@@ -159,7 +156,7 @@ library_list_start_list (struct gdb_xml_parser *parser,
 
       if (strcmp (string, "1.0") != 0)
 	gdb_xml_error (parser,
-		       _("Library list has unsupported version \"%s\""),
+		       _ ("Library list has unsupported version \"%s\""),
 		       string);
     }
 }
@@ -167,56 +164,50 @@ library_list_start_list (struct gdb_xml_parser *parser,
 /* The allowed elements and attributes for an XML library list.
    The root element is a <library-list>.  */
 
-static const struct gdb_xml_attribute segment_attributes[] = {
-  { "address", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
-  { NULL, GDB_XML_AF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_attribute segment_attributes[]
+  = { { "address", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+      { NULL, GDB_XML_AF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_attribute section_attributes[] = {
-  { "address", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
-  { NULL, GDB_XML_AF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_attribute section_attributes[]
+  = { { "address", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+      { NULL, GDB_XML_AF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_element library_children[] = {
-  { "segment", segment_attributes, NULL,
-    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
-    library_list_start_segment, NULL },
-  { "section", section_attributes, NULL,
-    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
-    library_list_start_section, NULL },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_element library_children[]
+  = { { "segment", segment_attributes, NULL,
+	GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+	library_list_start_segment, NULL },
+      { "section", section_attributes, NULL,
+	GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+	library_list_start_section, NULL },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_attribute library_attributes[] = {
-  { "name", GDB_XML_AF_NONE, NULL, NULL },
-  { NULL, GDB_XML_AF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_attribute library_attributes[]
+  = { { "name", GDB_XML_AF_NONE, NULL, NULL },
+      { NULL, GDB_XML_AF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_element library_list_children[] = {
-  { "library", library_attributes, library_children,
-    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
-    library_list_start_library, library_list_end_library },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_element library_list_children[]
+  = { { "library", library_attributes, library_children,
+	GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+	library_list_start_library, library_list_end_library },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_attribute library_list_attributes[] = {
-  { "version", GDB_XML_AF_OPTIONAL, NULL, NULL },
-  { NULL, GDB_XML_AF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_attribute library_list_attributes[]
+  = { { "version", GDB_XML_AF_OPTIONAL, NULL, NULL },
+      { NULL, GDB_XML_AF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_element library_list_elements[] = {
-  { "library-list", library_list_attributes, library_list_children,
-    GDB_XML_EF_NONE, library_list_start_list, NULL },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_element library_list_elements[]
+  = { { "library-list", library_list_attributes, library_list_children,
+	GDB_XML_EF_NONE, library_list_start_list, NULL },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
 static lm_info_vector
 solib_target_parse_libraries (const char *library)
 {
   lm_info_vector result;
 
-  if (gdb_xml_parse_quick (_("target library list"), "library-list.dtd",
-			   library_list_elements, library, &result) == 0)
+  if (gdb_xml_parse_quick (_ ("target library list"), "library-list.dtd",
+			   library_list_elements, library, &result)
+      == 0)
     {
       /* Parsed successfully.  */
       return result;
@@ -318,14 +309,13 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	  asection *sect;
 	  int num_alloc_sections = 0;
 
-	  for (i = 0, sect = so->abfd->sections;
-	       sect != NULL;
+	  for (i = 0, sect = so->abfd->sections; sect != NULL;
 	       i++, sect = sect->next)
 	    if ((bfd_section_flags (sect) & SEC_ALLOC))
 	      num_alloc_sections++;
 
 	  if (num_alloc_sections != li->section_bases.size ())
-	    warning (_("\
+	    warning (_ ("\
 Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		     so->so_name);
 	  else
@@ -335,8 +325,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 
 	      so->addr_low = ~(CORE_ADDR) 0;
 	      so->addr_high = 0;
-	      for (i = 0, sect = so->abfd->sections;
-		   sect != NULL;
+	      for (i = 0, sect = so->abfd->sections; sect != NULL;
 		   i++, sect = sect->next)
 		{
 		  if (!(bfd_section_flags (sect) & SEC_ALLOC))
@@ -365,12 +354,12 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 	}
       else if (!li->segment_bases.empty ())
 	{
-	  symfile_segment_data_up data
-	    = get_symfile_segment_data (so->abfd);
+	  symfile_segment_data_up data = get_symfile_segment_data (so->abfd);
 
 	  if (data == NULL)
-	    warning (_("\
-Could not relocate shared library \"%s\": no segments"), so->so_name);
+	    warning (_ ("\
+Could not relocate shared library \"%s\": no segments"),
+		     so->so_name);
 	  else
 	    {
 	      ULONGEST orig_delta;
@@ -380,8 +369,9 @@ Could not relocate shared library \"%s\": no segments"), so->so_name);
 						    li->offsets,
 						    li->segment_bases.size (),
 						    li->segment_bases.data ()))
-		warning (_("\
-Could not relocate shared library \"%s\": bad offsets"), so->so_name);
+		warning (_ ("\
+Could not relocate shared library \"%s\": bad offsets"),
+			 so->so_name);
 
 	      /* Find the range of addresses to report for this library in
 		 "info sharedlibrary".  Report any consecutive segments
@@ -405,8 +395,7 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 
 	      so->addr_low = li->segment_bases[0];
 	      so->addr_high = (data->segments[i - 1].base
-			       + data->segments[i - 1].size
-			       + orig_delta);
+			       + data->segments[i - 1].size + orig_delta);
 	      gdb_assert (so->addr_low <= so->addr_high);
 	    }
 	}
@@ -435,8 +424,7 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
   return in_plt_section (pc);
 }
 
-const struct target_so_ops solib_target_so_ops =
-{
+const struct target_so_ops solib_target_so_ops = {
   solib_target_relocate_section_addresses,
   solib_target_free_so,
   nullptr,

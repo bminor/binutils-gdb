@@ -52,9 +52,9 @@ typedef int (iterate_over_lwps_ftype) (struct lwp_info *lwp);
    LWP immediately.  Otherwise return NULL.  This function must be
    provided by the client.  */
 
-extern struct lwp_info *iterate_over_lwps
-    (ptid_t filter,
-     gdb::function_view<iterate_over_lwps_ftype> callback);
+extern struct lwp_info *
+iterate_over_lwps (ptid_t filter,
+		   gdb::function_view<iterate_over_lwps_ftype> callback);
 
 /* Return the ptid of LWP.  */
 

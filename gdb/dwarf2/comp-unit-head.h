@@ -38,8 +38,11 @@ struct dwarf2_per_objfile;
 struct comp_unit_head
 {
 private:
+
   unsigned int m_length = 0;
+
 public:
+
   unsigned char version = 0;
   unsigned char addr_size = 0;
   unsigned char signed_addr_p = 0;
@@ -51,7 +54,9 @@ public:
   /* Size of the length field; either 4 or 12.  */
   unsigned int initial_length_size = 0;
 
-  enum dwarf_unit_type unit_type {};
+  enum dwarf_unit_type unit_type
+  {
+  };
 
   /* Offset to first die in this cu from the start of the cu.
      This will be the first byte following the compilation unit header.  */
@@ -70,10 +75,7 @@ public:
      DW_UT_skeleton or DW_UT_split_compile.  */
   ULONGEST signature = 0;
 
-  void set_length (unsigned int length)
-  {
-    m_length = length;
-  }
+  void set_length (unsigned int length) { m_length = length; }
 
   /* Return the total length of the CU described by this header, including the
      initial length field.  */
@@ -84,10 +86,7 @@ public:
 
   /* Return the total length of the CU described by this header, excluding the
      initial length field.  */
-  unsigned int get_length_without_initial () const
-  {
-    return m_length;
-  }
+  unsigned int get_length_without_initial () const { return m_length; }
 
   /* Return TRUE if OFF is within this CU.  */
   bool offset_in_cu_p (sect_offset off) const
@@ -113,27 +112,27 @@ public:
 };
 
 /* Expected enum dwarf_unit_type for read_comp_unit_head.  */
-enum class rcuh_kind { COMPILE, TYPE };
+enum class rcuh_kind
+{
+  COMPILE,
+  TYPE
+};
 
 /* Read in the comp unit header information from the debug_info at info_ptr.
    Use rcuh_kind::COMPILE as the default type if not known by the caller.
    NOTE: This leaves members offset, first_die_offset to be filled in
    by the caller.  */
-extern const gdb_byte *read_comp_unit_head
-  (struct comp_unit_head *cu_header,
-   const gdb_byte *info_ptr,
-   struct dwarf2_section_info *section,
-   rcuh_kind section_kind);
+extern const gdb_byte *read_comp_unit_head (
+  struct comp_unit_head *cu_header, const gdb_byte *info_ptr,
+  struct dwarf2_section_info *section, rcuh_kind section_kind);
 
 /* Read in a CU/TU header and perform some basic error checking.
    The contents of the header are stored in HEADER.
    The result is a pointer to the start of the first DIE.  */
-extern const gdb_byte *read_and_check_comp_unit_head
-  (dwarf2_per_objfile *per_objfile,
-   struct comp_unit_head *header,
-   struct dwarf2_section_info *section,
-   struct dwarf2_section_info *abbrev_section,
-   const gdb_byte *info_ptr,
-   rcuh_kind section_kind);
+extern const gdb_byte *read_and_check_comp_unit_head (
+  dwarf2_per_objfile *per_objfile, struct comp_unit_head *header,
+  struct dwarf2_section_info *section,
+  struct dwarf2_section_info *abbrev_section, const gdb_byte *info_ptr,
+  rcuh_kind section_kind);
 
 #endif /* GDB_DWARF2_COMP_UNIT_H */

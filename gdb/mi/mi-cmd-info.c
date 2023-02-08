@@ -40,14 +40,13 @@ mi_cmd_info_ada_exceptions (const char *command, char **argv, int argc)
       regexp = argv[0];
       break;
     default:
-      error (_("Usage: -info-ada-exceptions [REGEXP]"));
+      error (_ ("Usage: -info-ada-exceptions [REGEXP]"));
       break;
     }
 
   std::vector<ada_exc_info> exceptions = ada_exceptions_list (regexp);
 
-  ui_out_emit_table table_emitter (uiout, 2,
-				   exceptions.size (),
+  ui_out_emit_table table_emitter (uiout, 2, exceptions.size (),
 				   "ada-exceptions");
   uiout->table_header (1, ui_left, "name", "Name");
   uiout->table_header (1, ui_left, "address", "Address");
@@ -72,7 +71,7 @@ mi_cmd_info_gdb_mi_command (const char *command, char **argv, int argc)
 
   /* This command takes exactly one argument.  */
   if (argc != 1)
-    error (_("Usage: -info-gdb-mi-command MI_COMMAND_NAME"));
+    error (_ ("Usage: -info-gdb-mi-command MI_COMMAND_NAME"));
   cmd_name = argv[0];
 
   /* Normally, the command name (aka the "operation" in the GDB/MI
@@ -100,7 +99,7 @@ mi_cmd_info_os (const char *command, char **argv, int argc)
       info_osdata (argv[0]);
       break;
     default:
-      error (_("Usage: -info-os [INFOTYPE]"));
+      error (_ ("Usage: -info-os [INFOTYPE]"));
       break;
     }
 }

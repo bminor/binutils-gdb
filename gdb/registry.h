@@ -22,7 +22,8 @@
 
 #include <type_traits>
 
-template<typename T> class registry;
+template<typename T>
+class registry;
 
 /* An accessor class that is used by registry_key.
 
@@ -38,10 +39,7 @@ template<typename T>
 struct registry_accessor
 {
   /* Given a container of type T, return its registry.  */
-  static registry<T> *get (T *obj)
-  {
-    return &obj->registry_fields;
-  }
+  static registry<T> *get (T *obj) { return &obj->registry_fields; }
 };
 
 /* In gdb, sometimes there is a need for one module (e.g., the Python
@@ -73,10 +71,7 @@ public:
   {
   }
 
-  ~registry ()
-  {
-    clear_registry ();
-  }
+  ~registry () { clear_registry (); }
 
   DISABLE_COPY_AND_ASSIGN (registry);
 
@@ -125,9 +120,8 @@ public:
        type and attaches it to OBJ using this key.  The arguments, if
        any, are forwarded to the constructor.  */
     template<typename Dummy = DATA *, typename... Args>
-    typename std::enable_if<std::is_same<Deleter,
-					 std::default_delete<DATA>>::value,
-			    Dummy>::type
+    typename std::enable_if<
+      std::is_same<Deleter, std::default_delete<DATA>>::value, Dummy>::type
     emplace (T *obj, Args &&...args) const
     {
       DATA *result = new DATA (std::forward<Args> (args)...);
@@ -168,15 +162,14 @@ public:
   void clear_registry ()
   {
     /* Call all the free functions.  */
-    std::vector<registry_data_callback> &registrations
-      = get_registrations ();
+    std::vector<registry_data_callback> &registrations = get_registrations ();
     unsigned last = registrations.size ();
     for (unsigned i = 0; i < last; ++i)
       {
 	void *elt = m_fields[i];
 	if (elt != nullptr)
 	  {
-	    registrations[i] (elt);
+	    registrations[i](elt);
 	    m_fields[i] = nullptr;
 	  }
       }
@@ -193,25 +186,18 @@ private:
      to the callback.  */
   static unsigned new_key (registry_data_callback free)
   {
-    std::vector<registry_data_callback> &registrations
-      = get_registrations ();
+    std::vector<registry_data_callback> &registrations = get_registrations ();
     unsigned result = registrations.size ();
     registrations.push_back (free);
     return result;
   }
 
   /* Set the datum associated with KEY in this container.  */
-  void set (unsigned key, void *datum)
-  {
-    m_fields[key] = datum;
-  }
+  void set (unsigned key, void *datum) { m_fields[key] = datum; }
 
   /* Fetch the datum associated with KEY in this container.  If 'set'
      has not been called for this key, nullptr is returned.  */
-  void *get (unsigned key)
-  {
-    return m_fields[key];
-  }
+  void *get (unsigned key) { return m_fields[key]; }
 
   /* The data stored in this instance.  */
   std::vector<void *> m_fields;

@@ -25,17 +25,17 @@
 /* Flags used to control how GDB's disassembler behaves.  */
 
 enum gdb_disassembly_flag : unsigned
-  {
-    DISASSEMBLY_SOURCE_DEPRECATED = (0x1 << 0),
-    DISASSEMBLY_RAW_INSN = (0x1 << 1),
-    DISASSEMBLY_OMIT_FNAME = (0x1 << 2),
-    DISASSEMBLY_FILENAME = (0x1 << 3),
-    DISASSEMBLY_OMIT_PC = (0x1 << 4),
-    DISASSEMBLY_SOURCE = (0x1 << 5),
-    DISASSEMBLY_SPECULATIVE = (0x1 << 6),
-    DISASSEMBLY_RAW_BYTES = (0x1 << 7),
-  };
+{
+  DISASSEMBLY_SOURCE_DEPRECATED = (0x1 << 0),
+  DISASSEMBLY_RAW_INSN = (0x1 << 1),
+  DISASSEMBLY_OMIT_FNAME = (0x1 << 2),
+  DISASSEMBLY_FILENAME = (0x1 << 3),
+  DISASSEMBLY_OMIT_PC = (0x1 << 4),
+  DISASSEMBLY_SOURCE = (0x1 << 5),
+  DISASSEMBLY_SPECULATIVE = (0x1 << 6),
+  DISASSEMBLY_RAW_BYTES = (0x1 << 7),
+};
+
 DEF_ENUM_FLAGS_TYPE (enum gdb_disassembly_flag, gdb_disassembly_flags);
 
 #endif /* DISASM_FLAGS_H */
-

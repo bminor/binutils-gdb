@@ -21,14 +21,15 @@
 
 /* Enumerate the possible ABIs for FR-V.  */
 enum frv_abi
-  {
-    FRV_ABI_EABI,
-    FRV_ABI_FDPIC
-  };
+{
+  FRV_ABI_EABI,
+  FRV_ABI_FDPIC
+};
 
 /* Register numbers.  The order in which these appear define the
    remote protocol, so take care in changing them.  */
-enum {
+enum
+{
   /* Register numbers 0 -- 63 are always reserved for general-purpose
      registers.  The chip at hand may have less.  */
   first_gpr_regnum = 0,
@@ -112,7 +113,6 @@ CORE_ADDR frv_fdpic_find_global_pointer (CORE_ADDR addr);
    for that function, if one exists.  If no canonical descriptor could
    be found, return 0.  */
 CORE_ADDR frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point);
-
 
 /* Given an objfile, return the address of its link map.  This value is
    needed for TLS support.  */

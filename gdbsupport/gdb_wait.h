@@ -45,23 +45,23 @@
    exception, as defined by the various EXCEPTION_* symbols in the
    Windows API headers.  See also gdb_wait.c.  */
 
-#ifndef	WIFEXITED
-# ifdef __MINGW32__
-#  define WIFEXITED(w)	(((w) & 0xC0000000) == 0)
-# else
-#  define WIFEXITED(w)	(((w)&0377) == 0)
-# endif
+#ifndef WIFEXITED
+#ifdef __MINGW32__
+#define WIFEXITED(w) (((w) &0xC0000000) == 0)
+#else
+#define WIFEXITED(w) (((w) &0377) == 0)
+#endif
 #endif
 
-#ifndef	WIFSIGNALED
-# ifdef __MINGW32__
-#  define WIFSIGNALED(w)	(((w) & 0xC0000000) == 0xC0000000)
-# else
-#  define WIFSIGNALED(w)	(((w)&0377) != 0177 && ((w)&~0377) == 0)
-# endif
+#ifndef WIFSIGNALED
+#ifdef __MINGW32__
+#define WIFSIGNALED(w) (((w) &0xC0000000) == 0xC0000000)
+#else
+#define WIFSIGNALED(w) (((w) &0377) != 0177 && ((w) & ~0377) == 0)
+#endif
 #endif
 
-#ifndef	WIFSTOPPED
+#ifndef WIFSTOPPED
 #ifdef IBM6000
 
 /* Unfortunately, the above comment (about being compatible in all Unix
@@ -69,50 +69,50 @@
    status words like 0x57c (sigtrap received after load), and gdb would
    choke on it.  */
 
-#define WIFSTOPPED(w)	((w)&0x40)
+#define WIFSTOPPED(w) ((w) &0x40)
 
 #else
-#define WIFSTOPPED(w)	(((w)&0377) == 0177)
+#define WIFSTOPPED(w) (((w) &0377) == 0177)
 #endif
 #endif
 
-#ifndef	WEXITSTATUS
-# ifdef __MINGW32__
-#  define WEXITSTATUS(w)	((w) & ~0xC0000000)
-# else
-#  define WEXITSTATUS(w)	(((w) >> 8) & 0377) /* same as WRETCODE */
-# endif
+#ifndef WEXITSTATUS
+#ifdef __MINGW32__
+#define WEXITSTATUS(w) ((w) & ~0xC0000000)
+#else
+#define WEXITSTATUS(w) (((w) >> 8) & 0377) /* same as WRETCODE */
+#endif
 #endif
 
-#ifndef	WTERMSIG
-# ifdef __MINGW32__
+#ifndef WTERMSIG
+#ifdef __MINGW32__
 extern int windows_status_to_termsig (unsigned long);
-#  define WTERMSIG(w)	windows_status_to_termsig (w)
-# else
-#  define WTERMSIG(w)	((w) & 0177)
-# endif
+#define WTERMSIG(w) windows_status_to_termsig (w)
+#else
+#define WTERMSIG(w) ((w) &0177)
+#endif
 #endif
 
-#ifndef	WSTOPSIG
-#define WSTOPSIG	WEXITSTATUS
+#ifndef WSTOPSIG
+#define WSTOPSIG WEXITSTATUS
 #endif
 
 /* These are not defined in POSIX, but are used by our programs.  */
 
-#ifndef	WSETEXIT
-# ifdef	W_EXITCODE
-#define	WSETEXIT(w,status) ((w) = W_EXITCODE(status,0))
-# else
-#define WSETEXIT(w,status) ((w) = (0 | ((status) << 8)))
-# endif
+#ifndef WSETEXIT
+#ifdef W_EXITCODE
+#define WSETEXIT(w, status) ((w) = W_EXITCODE (status, 0))
+#else
+#define WSETEXIT(w, status) ((w) = (0 | ((status) << 8)))
+#endif
 #endif
 
 #ifndef W_STOPCODE
 #define W_STOPCODE(sig) ((sig) << 8 | 0x7f)
 #endif
 
-#ifndef	WSETSTOP
-#define	WSETSTOP(w,sig)    ((w) = W_STOPCODE(sig))
+#ifndef WSETSTOP
+#define WSETSTOP(w, sig) ((w) = W_STOPCODE (sig))
 #endif
 
 /* For native GNU/Linux we may use waitpid and the __WCLONE option.
@@ -121,15 +121,15 @@ extern int windows_status_to_termsig (unsigned long);
 
 /* Bits in the third argument to `waitpid'.  */
 #ifndef WNOHANG
-#define	WNOHANG		1	/* Don't block waiting.  */
+#define WNOHANG 1 /* Don't block waiting.  */
 #endif
 
 #ifndef WUNTRACED
-#define	WUNTRACED	2	/* Report status of stopped children.  */
+#define WUNTRACED 2 /* Report status of stopped children.  */
 #endif
 
 #ifndef __WCLONE
-#define __WCLONE	0x80000000 /* Wait for cloned process.  */
+#define __WCLONE 0x80000000 /* Wait for cloned process.  */
 #endif
 
 #endif /* COMMON_GDB_WAIT_H */

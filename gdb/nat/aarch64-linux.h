@@ -114,9 +114,9 @@ typedef struct compat_siginfo
 #define cpt_si_fd _sifields._sigpoll._fd
 
 void aarch64_siginfo_from_compat_siginfo (siginfo_t *to,
-					    compat_siginfo_t *from);
+					  compat_siginfo_t *from);
 void aarch64_compat_siginfo_from_siginfo (compat_siginfo_t *to,
-					    siginfo_t *from);
+					  siginfo_t *from);
 
 void aarch64_linux_prepare_to_resume (struct lwp_info *lwp);
 
@@ -125,9 +125,8 @@ void aarch64_linux_new_thread (struct lwp_info *lwp);
 /* Function to call when a thread is being deleted.  */
 void aarch64_linux_delete_thread (struct arch_lwp_info *arch_lwp);
 
-ps_err_e aarch64_ps_get_thread_area (struct ps_prochandle *ph,
-				       lwpid_t lwpid, int idx, void **base,
-				       int is_64bit_p);
+ps_err_e aarch64_ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid,
+				     int idx, void **base, int is_64bit_p);
 
 /* Return the number of TLS registers in the NT_ARM_TLS set.  This is only
    used for aarch64 state.  */

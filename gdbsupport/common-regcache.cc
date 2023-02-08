@@ -30,7 +30,7 @@ regcache_raw_get_unsigned (struct regcache *regcache, int regnum)
 
   status = regcache_raw_read_unsigned (regcache, regnum, &value);
   if (status == REG_UNAVAILABLE)
-    throw_error (NOT_AVAILABLE_ERROR,
-		 _("Register %d is not available"), regnum);
+    throw_error (NOT_AVAILABLE_ERROR, _ ("Register %d is not available"),
+                 regnum);
   return value;
 }

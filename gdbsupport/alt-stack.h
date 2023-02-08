@@ -58,13 +58,12 @@ public:
   DISABLE_COPY_AND_ASSIGN (alternate_signal_stack);
 
 private:
-
 #ifdef HAVE_SIGALTSTACK
   gdb::unique_xmalloc_ptr<char> m_stack;
   stack_t m_old_stack;
 #endif
 };
 
-}
+} // namespace gdb
 
 #endif /* GDBSUPPORT_ALT_STACK_H */

@@ -26,10 +26,12 @@
 class tui_file : public stdio_file
 {
 public:
+
   tui_file (FILE *stream, bool buffered)
     : stdio_file (stream),
       m_buffered (buffered)
-  {}
+  {
+  }
 
   void write (const char *buf, long length_buf) override;
   void puts (const char *) override;

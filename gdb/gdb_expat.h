@@ -25,8 +25,8 @@
 /* Expat 1.95.x does not define these; this is the definition
    recommended by the expat 2.0 headers.  */
 #ifndef XML_STATUS_OK
-# define XML_STATUS_OK    1
-# define XML_STATUS_ERROR 0
+#define XML_STATUS_OK 1
+#define XML_STATUS_ERROR 0
 #endif
 
 /* Old versions of expat do not define this macro, so define it

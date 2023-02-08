@@ -34,19 +34,15 @@
    linux and 33 in GDB, in GDB 32 is for PPC which is not popupated from linux.
    Register r0 is always 0 and can be ignored.  */
 
-static const struct regcache_map_entry or1k_linux_gregmap[] =
-{
-  { 32, OR1K_ZERO_REGNUM, 4 }, /* r0 to r31 */
-  { 1,  OR1K_NPC_REGNUM, 4 },
-  { 0 }
-};
+static const struct regcache_map_entry or1k_linux_gregmap[]
+  = { { 32, OR1K_ZERO_REGNUM, 4 }, /* r0 to r31 */
+      { 1, OR1K_NPC_REGNUM, 4 },
+      { 0 } };
 
 /* Define the general register regset.  */
 
-static const struct regset or1k_linux_gregset =
-{
-  or1k_linux_gregmap, regcache_supply_regset, regcache_collect_regset
-};
+static const struct regset or1k_linux_gregset
+  = { or1k_linux_gregmap, regcache_supply_regset, regcache_collect_regset };
 
 /* Define hook for core file support.  */
 
@@ -62,28 +58,25 @@ or1k_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 /* Signal trampoline support.  */
 
 static void or1k_linux_sigframe_init (const struct tramp_frame *self,
-				       frame_info_ptr this_frame,
-				       struct trad_frame_cache *this_cache,
-				       CORE_ADDR func);
+				      frame_info_ptr this_frame,
+				      struct trad_frame_cache *this_cache,
+				      CORE_ADDR func);
 
-#define OR1K_RT_SIGRETURN		139
+#define OR1K_RT_SIGRETURN 139
 
-#define OR1K_INST_L_ORI_R11_R0_IMM	0xa9600000
-#define OR1K_INST_L_SYS_1		0x20000001
-#define OR1K_INST_L_NOP			0x15000000
+#define OR1K_INST_L_ORI_R11_R0_IMM 0xa9600000
+#define OR1K_INST_L_SYS_1 0x20000001
+#define OR1K_INST_L_NOP 0x15000000
 
-static const struct tramp_frame or1k_linux_sigframe = {
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { OR1K_INST_L_ORI_R11_R0_IMM | OR1K_RT_SIGRETURN, ULONGEST_MAX },
-    { OR1K_INST_L_SYS_1, ULONGEST_MAX },
-    { OR1K_INST_L_NOP, ULONGEST_MAX },
-    { TRAMP_SENTINEL_INSN }
-  },
-  or1k_linux_sigframe_init,
-  NULL
-};
+static const struct tramp_frame or1k_linux_sigframe
+  = { SIGTRAMP_FRAME,
+      4,
+      { { OR1K_INST_L_ORI_R11_R0_IMM | OR1K_RT_SIGRETURN, ULONGEST_MAX },
+	{ OR1K_INST_L_SYS_1, ULONGEST_MAX },
+	{ OR1K_INST_L_NOP, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN } },
+      or1k_linux_sigframe_init,
+      NULL };
 
 /* Runtime signal frames look like this:
   struct rt_sigframe {
@@ -111,14 +104,13 @@ static const struct tramp_frame or1k_linux_sigframe = {
     unsigned long sr;
   };  */
 
-#define SIGFRAME_SIGINFO_SIZE		128
-#define UCONTEXT_MCONTEXT_OFFSET	20
+#define SIGFRAME_SIGINFO_SIZE 128
+#define UCONTEXT_MCONTEXT_OFFSET 20
 
 static void
 or1k_linux_sigframe_init (const struct tramp_frame *self,
-			   frame_info_ptr this_frame,
-			   struct trad_frame_cache *this_cache,
-			   CORE_ADDR func)
+			  frame_info_ptr this_frame,
+			  struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   CORE_ADDR frame_sp = get_frame_sp (this_frame);
   CORE_ADDR mcontext_base;
@@ -160,8 +152,8 @@ or1k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, or1k_linux_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, or1k_linux_iterate_over_regset_sections);
 
   tramp_frame_prepend_unwinder (gdbarch, &or1k_linux_sigframe);
 }
@@ -169,6 +161,7 @@ or1k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 /* Initialize OpenRISC Linux target support.  */
 
 void _initialize_or1k_linux_tdep ();
+
 void
 _initialize_or1k_linux_tdep ()
 {

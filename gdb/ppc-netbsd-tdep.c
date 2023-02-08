@@ -34,23 +34,16 @@
 
 /* Register offsets from <machine/reg.h>.  */
 static ppc_reg_offsets ppcnbsd_reg_offsets;
-
 
 /* Core file support.  */
 
 /* NetBSD/powerpc register sets.  */
 
-const struct regset ppcnbsd_gregset =
-{
-  &ppcnbsd_reg_offsets,
-  ppc_supply_gregset
-};
+const struct regset ppcnbsd_gregset
+  = { &ppcnbsd_reg_offsets, ppc_supply_gregset };
 
-const struct regset ppcnbsd_fpregset =
-{
-  &ppcnbsd_reg_offsets,
-  ppc_supply_fpregset
-};
+const struct regset ppcnbsd_fpregset
+  = { &ppcnbsd_reg_offsets, ppc_supply_fpregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -63,7 +56,6 @@ ppcnbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg", 148, 148, &ppcnbsd_gregset, NULL, cb_data);
   cb (".reg2", 264, 264, &ppcnbsd_fpregset, NULL, cb_data);
 }
-
 
 /* NetBSD is confused.  It appears that 1.5 was using the correct SVR4
    convention but, 1.6 switched to the below broken convention.  For
@@ -86,10 +78,9 @@ ppcnbsd_return_value (struct gdbarch *gdbarch, struct value *function,
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
 #endif
-    return ppc_sysv_abi_broken_return_value (gdbarch, function, valtype,
-					     regcache, readbuf, writebuf);
+  return ppc_sysv_abi_broken_return_value (gdbarch, function, valtype,
+					   regcache, readbuf, writebuf);
 }
-
 
 /* Signal trampolines.  */
 
@@ -106,8 +97,7 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
   CORE_ADDR addr, base;
   int i;
 
-  base = get_frame_register_unsigned (this_frame,
-				      gdbarch_sp_regnum (gdbarch));
+  base = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
   if (self == &ppcnbsd2_sigtramp)
     addr = base + 0x10 + 2 * tdep->wordsize;
   else
@@ -133,46 +123,36 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
-static const struct tramp_frame ppcnbsd_sigtramp =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { 0x3821fff0, ULONGEST_MAX },		/* add r1,r1,-16 */
-    { 0x4e800021, ULONGEST_MAX },		/* blrl */
-    { 0x38610018, ULONGEST_MAX },		/* addi r3,r1,24 */
-    { 0x38000127, ULONGEST_MAX },		/* li r0,295 */
-    { 0x44000002, ULONGEST_MAX },		/* sc */
-    { 0x38000001, ULONGEST_MAX },		/* li r0,1 */
-    { 0x44000002, ULONGEST_MAX },		/* sc */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  ppcnbsd_sigtramp_cache_init
-};
+static const struct tramp_frame ppcnbsd_sigtramp
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0x3821fff0, ULONGEST_MAX }, /* add r1,r1,-16 */
+	{ 0x4e800021, ULONGEST_MAX }, /* blrl */
+	{ 0x38610018, ULONGEST_MAX }, /* addi r3,r1,24 */
+	{ 0x38000127, ULONGEST_MAX }, /* li r0,295 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ 0x38000001, ULONGEST_MAX }, /* li r0,1 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      ppcnbsd_sigtramp_cache_init };
 
 /* NetBSD 2.0 introduced a slightly different signal trampoline.  */
 
-const struct tramp_frame ppcnbsd2_sigtramp =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { 0x3821fff0, ULONGEST_MAX },		/* add r1,r1,-16 */
-    { 0x4e800021, ULONGEST_MAX },		/* blrl */
-    { 0x38610010, ULONGEST_MAX },		/* addi r3,r1,16 */
-    { 0x38000127, ULONGEST_MAX },		/* li r0,295 */
-    { 0x44000002, ULONGEST_MAX },		/* sc */
-    { 0x38000001, ULONGEST_MAX },		/* li r0,1 */
-    { 0x44000002, ULONGEST_MAX },		/* sc */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  ppcnbsd_sigtramp_cache_init
-};
-
+const struct tramp_frame ppcnbsd2_sigtramp
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0x3821fff0, ULONGEST_MAX }, /* add r1,r1,-16 */
+	{ 0x4e800021, ULONGEST_MAX }, /* blrl */
+	{ 0x38610010, ULONGEST_MAX }, /* addi r3,r1,16 */
+	{ 0x38000127, ULONGEST_MAX }, /* li r0,295 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ 0x38000001, ULONGEST_MAX }, /* li r0,1 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      ppcnbsd_sigtramp_cache_init };
 
 static void
-ppcnbsd_init_abi (struct gdbarch_info info,
-		  struct gdbarch *gdbarch)
+ppcnbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   nbsd_init_abi (info, gdbarch);
 
@@ -181,17 +161,18 @@ ppcnbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_return_value (gdbarch, ppcnbsd_return_value);
 
   /* NetBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, ppcnbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, ppcnbsd_iterate_over_regset_sections);
 
   tramp_frame_prepend_unwinder (gdbarch, &ppcnbsd_sigtramp);
   tramp_frame_prepend_unwinder (gdbarch, &ppcnbsd2_sigtramp);
 }
 
 void _initialize_ppcnbsd_tdep ();
+
 void
 _initialize_ppcnbsd_tdep ()
 {
@@ -218,6 +199,5 @@ _initialize_ppcnbsd_tdep ()
       ppcnbsd_reg_offsets.f0_offset = 0;
       ppcnbsd_reg_offsets.fpscr_offset = 256;
       ppcnbsd_reg_offsets.fpscr_size = 4;
-
     }
 }

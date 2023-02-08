@@ -32,9 +32,12 @@ netbsd_aarch64_fill_gregset (struct regcache *regcache, char *buf)
 {
   struct reg *r = (struct reg *) buf;
 
-#define netbsd_aarch64_collect_gp(regnum, fld) do {		\
-    collect_register (regcache, regnum, &r->fld);		\
-  } while (0)
+#define netbsd_aarch64_collect_gp(regnum, fld)      \
+  do                                                \
+    {                                               \
+      collect_register (regcache, regnum, &r->fld); \
+    }                                               \
+  while (0)
 
   for (size_t i = 0; i < ARRAY_SIZE (r->r_reg); i++)
     netbsd_aarch64_collect_gp (AARCH64_X0_REGNUM + i, r_reg[i]);
@@ -50,9 +53,12 @@ netbsd_aarch64_store_gregset (struct regcache *regcache, const char *buf)
 {
   struct reg *r = (struct reg *) buf;
 
-#define netbsd_aarch64_supply_gp(regnum, fld) do {		\
-    supply_register (regcache, regnum, &r->fld);		\
-  } while(0)
+#define netbsd_aarch64_supply_gp(regnum, fld)      \
+  do                                               \
+    {                                              \
+      supply_register (regcache, regnum, &r->fld); \
+    }                                              \
+  while (0)
 
   for (size_t i = 0; i < ARRAY_SIZE (r->r_reg); i++)
     netbsd_aarch64_supply_gp (AARCH64_X0_REGNUM + i, r_reg[i]);
@@ -63,13 +69,12 @@ netbsd_aarch64_store_gregset (struct regcache *regcache, const char *buf)
 
 /* Description of all the aarch64-netbsd register sets.  */
 
-static const struct netbsd_regset_info netbsd_target_regsets[] =
-{
+static const struct netbsd_regset_info netbsd_target_regsets[] = {
   /* General Purpose Registers.  */
-  {PT_GETREGS, PT_SETREGS, sizeof (struct reg),
-  netbsd_aarch64_fill_gregset, netbsd_aarch64_store_gregset},
+  { PT_GETREGS, PT_SETREGS, sizeof (struct reg), netbsd_aarch64_fill_gregset,
+    netbsd_aarch64_store_gregset },
   /* End of list marker.  */
-  {0, 0, -1, NULL, NULL }
+  { 0, 0, -1, NULL, NULL }
 };
 
 /* NetBSD target op definitions for the aarch64 architecture.  */
@@ -95,8 +100,7 @@ netbsd_aarch64_target::get_regs_info ()
 void
 netbsd_aarch64_target::low_arch_setup ()
 {
-  target_desc *tdesc
-    = aarch64_create_target_description ({});
+  target_desc *tdesc = aarch64_create_target_description ({});
 
   static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
   init_target_desc (tdesc, expedite_regs_aarch64);

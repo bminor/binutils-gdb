@@ -19,29 +19,27 @@
 #include "defs.h"
 #include "mi-common.h"
 
-static const char * const async_reason_string_lookup[] =
-{
-  "breakpoint-hit",
-  "watchpoint-trigger",
-  "read-watchpoint-trigger",
-  "access-watchpoint-trigger",
-  "function-finished",
-  "location-reached",
-  "watchpoint-scope",
-  "end-stepping-range",
-  "exited-signalled",
-  "exited",
-  "exited-normally",
-  "signal-received",
-  "solib-event",
-  "fork",
-  "vfork",
-  "syscall-entry",
-  "syscall-return",
-  "exec",
-  "no-history",
-  NULL
-};
+static const char *const async_reason_string_lookup[]
+  = { "breakpoint-hit",
+      "watchpoint-trigger",
+      "read-watchpoint-trigger",
+      "access-watchpoint-trigger",
+      "function-finished",
+      "location-reached",
+      "watchpoint-scope",
+      "end-stepping-range",
+      "exited-signalled",
+      "exited",
+      "exited-normally",
+      "signal-received",
+      "solib-event",
+      "fork",
+      "vfork",
+      "syscall-entry",
+      "syscall-return",
+      "exec",
+      "no-history",
+      NULL };
 
 gdb_static_assert (ARRAY_SIZE (async_reason_string_lookup)
 		   == EXEC_ASYNC_LAST + 1);

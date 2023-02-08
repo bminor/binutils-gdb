@@ -68,11 +68,10 @@
 
 #define ARM_NEW_SIGFRAME_MAGIC 0x5ac3c35a
 
-int
-arm_linux_sigreturn_next_pc_offset (unsigned long sp,
-				    unsigned long sp_data,
-				    unsigned long svc_number,
-				    int is_sigreturn);
+int arm_linux_sigreturn_next_pc_offset (unsigned long sp,
+					unsigned long sp_data,
+					unsigned long svc_number,
+					int is_sigreturn);
 
 struct arm_get_next_pcs;
 

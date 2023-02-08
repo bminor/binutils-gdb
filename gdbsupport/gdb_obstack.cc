@@ -36,7 +36,7 @@ obconcat (struct obstack *obstackp, ...)
       const char *s = va_arg (ap, const char *);
 
       if (s == NULL)
-	break;
+        break;
 
       obstack_grow_str (obstackp, s);
     }

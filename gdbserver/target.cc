@@ -41,17 +41,17 @@ set_desired_thread ()
     {
       process_info *proc = find_process_pid (cs.general_thread.pid ());
       if (proc == nullptr)
-	{
-	  threads_debug_printf
-	    ("did not find thread nor process for general_thread %s",
-	     cs.general_thread.to_string ().c_str ());
-	}
+        {
+          threads_debug_printf (
+            "did not find thread nor process for general_thread %s",
+            cs.general_thread.to_string ().c_str ());
+        }
       else
-	{
-	  threads_debug_printf
-	    ("did not find thread for general_thread %s, but found process",
-	     cs.general_thread.to_string ().c_str ());
-	}
+        {
+          threads_debug_printf (
+            "did not find thread for general_thread %s, but found process",
+            cs.general_thread.to_string ().c_str ());
+        }
       switch_to_process (proc);
     }
   else
@@ -70,9 +70,8 @@ set_desired_process ()
   process_info *proc = find_process_pid (cs.general_thread.pid ());
   if (proc == nullptr)
     {
-      threads_debug_printf
-	("did not find process for general_thread %s",
-	 cs.general_thread.to_string ().c_str ());
+      threads_debug_printf ("did not find process for general_thread %s",
+                            cs.general_thread.to_string ().c_str ());
     }
   switch_to_process (proc);
 
@@ -116,7 +115,7 @@ target_read_uint32 (CORE_ADDR memaddr, uint32_t *result)
 
 int
 target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-		     ssize_t len)
+                     ssize_t len)
 {
   /* GDB may send X packets with LEN==0, for probing packet support.
      If we let such a request go through, then buffer.data() below may
@@ -134,7 +133,7 @@ target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 
 ptid_t
 mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
-	target_wait_flags options, int connected_wait)
+        target_wait_flags options, int connected_wait)
 {
   ptid_t ret;
 
@@ -157,12 +156,12 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
   if (!remote_connection_is_stdio ())
     {
       if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
-	fprintf (stderr,
-		 "\nChild exited with status %d\n", ourstatus->exit_status ());
+        fprintf (stderr, "\nChild exited with status %d\n",
+                 ourstatus->exit_status ());
       else if (ourstatus->kind () == TARGET_WAITKIND_SIGNALLED)
-	fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-		 gdb_signal_to_host (ourstatus->sig ()),
-		 gdb_signal_to_name (ourstatus->sig ()));
+        fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
+                 gdb_signal_to_host (ourstatus->sig ()),
+                 gdb_signal_to_name (ourstatus->sig ()));
     }
 
   if (connected_wait)
@@ -194,7 +193,7 @@ target_stop_and_wait (ptid_t ptid)
 
 ptid_t
 target_wait (ptid_t ptid, struct target_waitstatus *status,
-	     target_wait_flags options)
+             target_wait_flags options)
 {
   return the_target->wait (ptid, status, options);
 }
@@ -253,19 +252,16 @@ std::string
 target_pid_to_str (ptid_t ptid)
 {
   if (ptid == minus_one_ptid)
-    return string_printf("<all threads>");
+    return string_printf ("<all threads>");
   else if (ptid == null_ptid)
-    return string_printf("<null thread>");
+    return string_printf ("<null thread>");
   else if (ptid.tid () != 0)
-    return string_printf("Thread %d.0x%s",
-			 ptid.pid (),
-			 phex_nz (ptid.tid (), sizeof (ULONGEST)));
+    return string_printf ("Thread %d.0x%s", ptid.pid (),
+                          phex_nz (ptid.tid (), sizeof (ULONGEST)));
   else if (ptid.lwp () != 0)
-    return string_printf("LWP %d.%ld",
-			 ptid.pid (), ptid.lwp ());
+    return string_printf ("LWP %d.%ld", ptid.pid (), ptid.lwp ());
   else
-    return string_printf("Process %d",
-			 ptid.pid ());
+    return string_printf ("Process %d", ptid.pid ());
 }
 
 int
@@ -347,7 +343,7 @@ process_stratum_target::supports_read_auxv ()
 
 int
 process_stratum_target::read_auxv (int pid, CORE_ADDR offset,
-				   unsigned char *myaddr, unsigned int len)
+                                   unsigned char *myaddr, unsigned int len)
 {
   gdb_assert_not_reached ("target op read_auxv not supported");
 }
@@ -359,17 +355,15 @@ process_stratum_target::supports_z_point_type (char z_type)
 }
 
 int
-process_stratum_target::insert_point (enum raw_bkpt_type type,
-				      CORE_ADDR addr,
-				      int size, raw_breakpoint *bp)
+process_stratum_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+                                      int size, raw_breakpoint *bp)
 {
   return 1;
 }
 
 int
-process_stratum_target::remove_point (enum raw_bkpt_type type,
-				      CORE_ADDR addr,
-				      int size, raw_breakpoint *bp)
+process_stratum_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+                                      int size, raw_breakpoint *bp)
 {
   return 1;
 }
@@ -430,14 +424,14 @@ process_stratum_target::supports_memory_tagging ()
 
 bool
 process_stratum_target::fetch_memtags (CORE_ADDR address, size_t len,
-				       gdb::byte_vector &tags, int type)
+                                       gdb::byte_vector &tags, int type)
 {
   gdb_assert_not_reached ("target op fetch_memtags not supported");
 }
 
 bool
 process_stratum_target::store_memtags (CORE_ADDR address, size_t len,
-				       const gdb::byte_vector &tags, int type)
+                                       const gdb::byte_vector &tags, int type)
 {
   gdb_assert_not_reached ("target op store_memtags not supported");
 }
@@ -455,10 +449,9 @@ process_stratum_target::supports_get_tls_address ()
 }
 
 int
-process_stratum_target::get_tls_address (thread_info *thread,
-					 CORE_ADDR offset,
-					 CORE_ADDR load_module,
-					 CORE_ADDR *address)
+process_stratum_target::get_tls_address (thread_info *thread, CORE_ADDR offset,
+                                         CORE_ADDR load_module,
+                                         CORE_ADDR *address)
 {
   gdb_assert_not_reached ("target op get_tls_address not supported");
 }
@@ -471,9 +464,9 @@ process_stratum_target::supports_qxfer_osdata ()
 
 int
 process_stratum_target::qxfer_osdata (const char *annex,
-				      unsigned char *readbuf,
-				      unsigned const char *writebuf,
-				      CORE_ADDR offset, int len)
+                                      unsigned char *readbuf,
+                                      unsigned const char *writebuf,
+                                      CORE_ADDR offset, int len)
 {
   gdb_assert_not_reached ("target op qxfer_osdata not supported");
 }
@@ -486,9 +479,9 @@ process_stratum_target::supports_qxfer_siginfo ()
 
 int
 process_stratum_target::qxfer_siginfo (const char *annex,
-				       unsigned char *readbuf,
-				       unsigned const char *writebuf,
-				       CORE_ADDR offset, int len)
+                                       unsigned char *readbuf,
+                                       unsigned const char *writebuf,
+                                       CORE_ADDR offset, int len)
 {
   gdb_assert_not_reached ("target op qxfer_siginfo not supported");
 }
@@ -563,17 +556,15 @@ process_stratum_target::supports_read_loadmap ()
 }
 
 int
-process_stratum_target::read_loadmap (const char *annex,
-				      CORE_ADDR offset,
-				      unsigned char *myaddr,
-				      unsigned int len)
+process_stratum_target::read_loadmap (const char *annex, CORE_ADDR offset,
+                                      unsigned char *myaddr, unsigned int len)
 {
   gdb_assert_not_reached ("target op read_loadmap not supported");
 }
 
 void
-process_stratum_target::process_qsupported
-  (gdb::array_view<const char * const> features)
+process_stratum_target::process_qsupported (
+  gdb::array_view<const char *const> features)
 {
   /* Nop.  */
 }
@@ -645,16 +636,15 @@ process_stratum_target::supports_fast_tracepoints ()
 }
 
 int
-process_stratum_target::install_fast_tracepoint_jump_pad
-  (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
-   CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
-   CORE_ADDR *trampoline, ULONGEST *trampoline_size,
-   unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
-   CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
-   char *err)
+process_stratum_target::install_fast_tracepoint_jump_pad (
+  CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector, CORE_ADDR lockaddr,
+  ULONGEST orig_size, CORE_ADDR *jump_entry, CORE_ADDR *trampoline,
+  ULONGEST *trampoline_size, unsigned char *jjump_pad_insn,
+  ULONGEST *jjump_pad_insn_size, CORE_ADDR *adjusted_insn_addr,
+  CORE_ADDR *adjusted_insn_addr_end, char *err)
 {
   gdb_assert_not_reached ("target op install_fast_tracepoint_jump_pad "
-			  "not supported");
+                          "not supported");
 }
 
 int
@@ -683,9 +673,9 @@ process_stratum_target::supports_qxfer_libraries_svr4 ()
 
 int
 process_stratum_target::qxfer_libraries_svr4 (const char *annex,
-					      unsigned char *readbuf,
-					      unsigned const char *writebuf,
-					      CORE_ADDR offset, int len)
+                                              unsigned char *readbuf,
+                                              unsigned const char *writebuf,
+                                              CORE_ADDR offset, int len)
 {
   gdb_assert_not_reached ("target op qxfer_libraries_svr4 not supported");
 }
@@ -704,30 +694,29 @@ process_stratum_target::supports_btrace ()
 
 btrace_target_info *
 process_stratum_target::enable_btrace (thread_info *tp,
-				       const btrace_config *conf)
+                                       const btrace_config *conf)
 {
-  error (_("Target does not support branch tracing."));
+  error (_ ("Target does not support branch tracing."));
 }
 
 int
 process_stratum_target::disable_btrace (btrace_target_info *tinfo)
 {
-  error (_("Target does not support branch tracing."));
+  error (_ ("Target does not support branch tracing."));
 }
 
 int
-process_stratum_target::read_btrace (btrace_target_info *tinfo,
-			     buffer *buffer,
-			     enum btrace_read_type type)
+process_stratum_target::read_btrace (btrace_target_info *tinfo, buffer *buffer,
+                                     enum btrace_read_type type)
 {
-  error (_("Target does not support branch tracing."));
+  error (_ ("Target does not support branch tracing."));
 }
 
 int
 process_stratum_target::read_btrace_conf (const btrace_target_info *tinfo,
-					  buffer *buffer)
+                                          buffer *buffer)
 {
-  error (_("Target does not support branch tracing."));
+  error (_ ("Target does not support branch tracing."));
 }
 
 bool
@@ -755,8 +744,8 @@ process_stratum_target::supports_multifs ()
 }
 
 int
-process_stratum_target::multifs_open (int pid, const char *filename,
-				      int flags, mode_t mode)
+process_stratum_target::multifs_open (int pid, const char *filename, int flags,
+                                      mode_t mode)
 {
   return open (filename, flags, mode);
 }
@@ -769,7 +758,7 @@ process_stratum_target::multifs_unlink (int pid, const char *filename)
 
 ssize_t
 process_stratum_target::multifs_readlink (int pid, const char *filename,
-					  char *buf, size_t bufsiz)
+                                          char *buf, size_t bufsiz)
 {
   return readlink (filename, buf, bufsiz);
 }
@@ -798,7 +787,7 @@ process_stratum_target::thread_name (ptid_t thread)
 
 bool
 process_stratum_target::thread_handle (ptid_t ptid, gdb_byte **handle,
-				       int *handle_len)
+                                       int *handle_len)
 {
   return false;
 }

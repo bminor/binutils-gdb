@@ -40,10 +40,10 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii;
   int len = 0;
-  int argno;			/* current argument number */
-  int argbytes;			/* current argument byte */
+  int argno;	/* current argument number */
+  int argbytes; /* current argument byte */
   gdb_byte tmp_buffer[50];
-  int f_argno = 0;		/* current floating point argno */
+  int f_argno = 0; /* current floating point argno */
   int wordsize = tdep->wordsize;
 
   struct value *arg = 0;
@@ -98,7 +98,6 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 
       if (type->code () == TYPE_CODE_FLT)
 	{
-
 	  /* Floating point arguments are passed in fpr's, as well as gpr's.
 	     There are 13 fpr's reserved for passing parameters.  At this point
 	     there is no way we would run out of them.
@@ -119,16 +118,13 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 
       if (len > reg_size)
 	{
-
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
 	      gdb_byte word[PPC_MAX_REGISTER_SIZE];
 	      memset (word, 0, reg_size);
-	      memcpy (word,
-		      ((char *) value_contents (arg).data ()) + argbytes,
-		      (len - argbytes) > reg_size
-			? reg_size : len - argbytes);
+	      memcpy (word, ((char *) value_contents (arg).data ()) + argbytes,
+		      (len - argbytes) > reg_size ? reg_size : len - argbytes);
 	      regcache->cooked_write (tdep->ppc_gp0_regnum + 3 + ii, word);
 	      ++ii, argbytes += reg_size;
 
@@ -145,15 +141,14 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 
 	  memset (word, 0, reg_size);
 	  memcpy (word, value_contents (arg).data (), len);
-	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3 +ii, word);
+	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3 + ii, word);
 	}
       ++argno;
     }
 
 ran_out_of_registers_for_arguments:
 
-  regcache_cooked_read_unsigned (regcache,
-				 gdbarch_sp_regnum (gdbarch),
+  regcache_cooked_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch),
 				 &saved_sp);
 
   /* Location for 8 parameters are always reserved.  */
@@ -197,8 +192,7 @@ ran_out_of_registers_for_arguments:
 	 to use this area.  So, update %sp first before doing anything
 	 else.  */
 
-      regcache_raw_write_signed (regcache,
-				 gdbarch_sp_regnum (gdbarch), sp);
+      regcache_raw_write_signed (regcache, gdbarch_sp_regnum (gdbarch), sp);
 
       /* If the last argument copied into the registers didn't fit there
 	 completely, push the rest of it into stack.  */
@@ -215,17 +209,14 @@ ran_out_of_registers_for_arguments:
       /* Push the rest of the arguments into stack.  */
       for (; argno < nargs; ++argno)
 	{
-
 	  arg = args[argno];
 	  type = check_typedef (value_type (arg));
 	  len = type->length ();
-
 
 	  /* Float types should be passed in fpr's, as well as in the
 	     stack.  */
 	  if (type->code () == TYPE_CODE_FLT && f_argno < 13)
 	    {
-
 	      gdb_assert (len <= 8);
 
 	      regcache->cooked_write (tdep->ppc_fp0_regnum + 1 + f_argno,
@@ -321,7 +312,7 @@ rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
 	}
 
       return RETURN_VALUE_REGISTER_CONVENTION;
-  }
+    }
 
   /* Values of the types int, long, short, pointer, and char (length
      is less than or equal to four bytes), as well as bit values of
@@ -408,13 +399,12 @@ rs6000_lynx178_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_rs6000_lynx178_tdep ();
+
 void
 _initialize_rs6000_lynx178_tdep ()
 {
-  gdbarch_register_osabi_sniffer (bfd_arch_rs6000,
-				  bfd_target_xcoff_flavour,
+  gdbarch_register_osabi_sniffer (bfd_arch_rs6000, bfd_target_xcoff_flavour,
 				  rs6000_lynx178_osabi_sniffer);
   gdbarch_register_osabi (bfd_arch_rs6000, 0, GDB_OSABI_LYNXOS178,
 			  rs6000_lynx178_init_osabi);
 }
-

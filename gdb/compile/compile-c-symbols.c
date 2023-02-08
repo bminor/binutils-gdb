@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "defs.h"
 #include "compile-internal.h"
 #include "compile-c.h"
@@ -31,16 +30,14 @@
 #include "gdbtypes.h"
 #include "dwarf2/loc.h"
 
-
-
 /* Compute the name of the pointer representing a local symbol's
    address.  */
 
 gdb::unique_xmalloc_ptr<char>
 c_symbol_substitution_name (struct symbol *sym)
 {
-  return gdb::unique_xmalloc_ptr<char>
-    (concat ("__", sym->natural_name (), "_ptr", (char *) NULL));
+  return gdb::unique_xmalloc_ptr<char> (concat ("__", sym->natural_name (),
+						"_ptr", (char *) NULL));
 }
 
 /* Convert a given symbol, SYM, to the compiler's representation.
@@ -51,10 +48,8 @@ c_symbol_substitution_name (struct symbol *sym)
    scope.)  */
 
 static void
-convert_one_symbol (compile_c_instance *context,
-		    struct block_symbol sym,
-		    int is_global,
-		    int is_local)
+convert_one_symbol (compile_c_instance *context, struct block_symbol sym,
+		    int is_global, int is_local)
 {
   gcc_type sym_type;
   const char *filename = sym.symbol->symtab ()->filename;
@@ -70,8 +65,8 @@ convert_one_symbol (compile_c_instance *context,
   if (sym.symbol->domain () == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
-      context->plugin ().tagbind (sym.symbol->natural_name (),
-				  sym_type, filename, line);
+      context->plugin ().tagbind (sym.symbol->natural_name (), sym_type,
+				  filename, line);
     }
   else
     {
@@ -104,37 +99,37 @@ convert_one_symbol (compile_c_instance *context,
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  context->plugin ().build_constant
-	    (sym_type, sym.symbol->natural_name (),
-	     sym.symbol->value_longest (),
-	     filename, line);
+	  context->plugin ().build_constant (sym_type,
+					     sym.symbol->natural_name (),
+					     sym.symbol->value_longest (),
+					     filename, line);
 	  return;
 
 	case LOC_CONST_BYTES:
-	  error (_("Unsupported LOC_CONST_BYTES for symbol \"%s\"."),
+	  error (_ ("Unsupported LOC_CONST_BYTES for symbol \"%s\"."),
 		 sym.symbol->print_name ());
 
 	case LOC_UNDEF:
-	  internal_error (_("LOC_UNDEF found for \"%s\"."),
+	  internal_error (_ ("LOC_UNDEF found for \"%s\"."),
 			  sym.symbol->print_name ());
 
 	case LOC_COMMON_BLOCK:
-	  error (_("Fortran common block is unsupported for compilation "
-		   "evaluaton of symbol \"%s\"."),
+	  error (_ ("Fortran common block is unsupported for compilation "
+		    "evaluaton of symbol \"%s\"."),
 		 sym.symbol->print_name ());
 
 	case LOC_OPTIMIZED_OUT:
-	  error (_("Symbol \"%s\" cannot be used for compilation evaluation "
-		   "as it is optimized out."),
+	  error (_ ("Symbol \"%s\" cannot be used for compilation evaluation "
+		    "as it is optimized out."),
 		 sym.symbol->print_name ());
 
 	case LOC_COMPUTED:
 	  if (is_local)
 	    goto substitution;
 	  /* Probably TLS here.  */
-	  warning (_("Symbol \"%s\" is thread-local and currently can only "
-		     "be referenced from the current thread in "
-		     "compiled code."),
+	  warning (_ ("Symbol \"%s\" is thread-local and currently can only "
+		      "be referenced from the current thread in "
+		      "compiled code."),
 		   sym.symbol->print_name ());
 	  /* FALLTHROUGH */
 	case LOC_UNRESOLVED:
@@ -150,22 +145,21 @@ convert_one_symbol (compile_c_instance *context,
 	      {
 		frame = get_selected_frame (NULL);
 		if (frame == NULL)
-		  error (_("Symbol \"%s\" cannot be used because "
-			   "there is no selected frame"),
+		  error (_ ("Symbol \"%s\" cannot be used because "
+			    "there is no selected frame"),
 			 sym.symbol->print_name ());
 	      }
 
 	    val = read_var_value (sym.symbol, sym.block, frame);
 	    if (VALUE_LVAL (val) != lval_memory)
-	      error (_("Symbol \"%s\" cannot be used for compilation "
-		       "evaluation as its address has not been found."),
+	      error (_ ("Symbol \"%s\" cannot be used for compilation "
+			"evaluation as its address has not been found."),
 		     sym.symbol->print_name ());
 
 	    kind = GCC_C_SYMBOL_VARIABLE;
 	    addr = value_address (val);
 	  }
 	  break;
-
 
 	case LOC_REGISTER:
 	case LOC_ARG:
@@ -185,19 +179,15 @@ convert_one_symbol (compile_c_instance *context,
 	case LOC_FINAL_VALUE:
 	default:
 	  gdb_assert_not_reached ("Unreachable case in convert_one_symbol.");
-
 	}
 
       /* Don't emit local variable decls for a raw expression.  */
-      if (context->scope () != COMPILE_I_RAW_SCOPE
-	  || symbol_name == NULL)
+      if (context->scope () != COMPILE_I_RAW_SCOPE || symbol_name == NULL)
 	{
-	  decl = context->plugin ().build_decl
-	    (sym.symbol->natural_name (),
-	     kind,
-	     sym_type,
-	     symbol_name.get (), addr,
-	     filename, line);
+	  decl
+	    = context->plugin ().build_decl (sym.symbol->natural_name (), kind,
+					     sym_type, symbol_name.get (),
+					     addr, filename, line);
 
 	  context->plugin ().bind (decl, is_global);
 	}
@@ -249,8 +239,7 @@ convert_symbol_sym (compile_c_instance *context, const char *identifier,
     }
 
   if (compile_debug)
-    gdb_printf (gdb_stdlog,
-		"gcc_convert_symbol \"%s\": local symbol\n",
+    gdb_printf (gdb_stdlog, "gcc_convert_symbol \"%s\": local symbol\n",
 		identifier);
   convert_one_symbol (context, sym, 0, is_local_symbol);
 }
@@ -308,22 +297,18 @@ convert_symbol_bmsym (compile_c_instance *context,
     }
 
   sym_type = context->convert_type (type);
-  decl = context->plugin ().build_decl (msym->natural_name (),
-					kind, sym_type, NULL, addr,
-					NULL, 0);
+  decl = context->plugin ().build_decl (msym->natural_name (), kind, sym_type,
+					NULL, addr, NULL, 0);
   context->plugin ().bind (decl, 1 /* is_global */);
 }
 
 /* See compile-internal.h.  */
 
 void
-gcc_convert_symbol (void *datum,
-		    struct gcc_c_context *gcc_context,
-		    enum gcc_c_oracle_request request,
-		    const char *identifier)
+gcc_convert_symbol (void *datum, struct gcc_c_context *gcc_context,
+		    enum gcc_c_oracle_request request, const char *identifier)
 {
-  compile_c_instance *context
-    = static_cast<compile_c_instance *> (datum);
+  compile_c_instance *context = static_cast<compile_c_instance *> (datum);
   domain_enum domain;
   int found = 0;
 
@@ -385,8 +370,7 @@ gcc_address
 gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 		    const char *identifier)
 {
-  compile_c_instance *context
-    = static_cast<compile_c_instance *> (datum);
+  compile_c_instance *context = static_cast<compile_c_instance *> (datum);
   gcc_address result = 0;
   int found = 0;
 
@@ -401,8 +385,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
       if (sym != NULL && sym->aclass () == LOC_BLOCK)
 	{
 	  if (compile_debug)
-	    gdb_printf (gdb_stdlog,
-			"gcc_symbol_address \"%s\": full symbol\n",
+	    gdb_printf (gdb_stdlog, "gcc_symbol_address \"%s\": full symbol\n",
 			identifier);
 	  result = sym->value_block ()->entry_pc ();
 	  if (sym->type ()->is_gnu_ifunc ())
@@ -435,13 +418,9 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
     }
 
   if (compile_debug && !found)
-    gdb_printf (gdb_stdlog,
-		"gcc_symbol_address \"%s\": failed\n",
-		identifier);
+    gdb_printf (gdb_stdlog, "gcc_symbol_address \"%s\": failed\n", identifier);
   return result;
 }
-
-
 
 /* A hash function for symbol names.  */
 
@@ -484,13 +463,9 @@ symbol_seen (htab_t hashtab, struct symbol *sym)
 /* Generate C code to compute the length of a VLA.  */
 
 static void
-generate_vla_size (compile_instance *compiler,
-		   string_file *stream,
-		   struct gdbarch *gdbarch,
-		   std::vector<bool> &registers_used,
-		   CORE_ADDR pc,
-		   struct type *type,
-		   struct symbol *sym)
+generate_vla_size (compile_instance *compiler, string_file *stream,
+		   struct gdbarch *gdbarch, std::vector<bool> &registers_used,
+		   CORE_ADDR pc, struct type *type, struct symbol *sym)
 {
   type = check_typedef (type);
 
@@ -507,9 +482,8 @@ generate_vla_size (compile_instance *compiler,
 	    const struct dynamic_prop *prop = &type->bounds ()->high;
 	    std::string name = c_get_range_decl_name (prop);
 
-	    dwarf2_compile_property_to_c (stream, name.c_str (),
-					  gdbarch, registers_used,
-					  prop, pc, sym);
+	    dwarf2_compile_property_to_c (stream, name.c_str (), gdbarch,
+					  registers_used, prop, pc, sym);
 	  }
       }
       break;
@@ -539,13 +513,10 @@ generate_vla_size (compile_instance *compiler,
 
 static void
 generate_c_for_for_one_variable (compile_instance *compiler,
-				 string_file *stream,
-				 struct gdbarch *gdbarch,
+				 string_file *stream, struct gdbarch *gdbarch,
 				 std::vector<bool> &registers_used,
-				 CORE_ADDR pc,
-				 struct symbol *sym)
+				 CORE_ADDR pc, struct symbol *sym)
 {
-
   try
     {
       if (is_dynamic_type (sym->type ()))
@@ -554,8 +525,8 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	     occurs in the middle.  */
 	  string_file local_file;
 
-	  generate_vla_size (compiler, &local_file, gdbarch, registers_used, pc,
-			     sym->type (), sym);
+	  generate_vla_size (compiler, &local_file, gdbarch, registers_used,
+			     pc, sym->type (), sym);
 
 	  stream->write (local_file.c_str (), local_file.size ());
 	}
@@ -568,11 +539,9 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	     occurs in the middle.  */
 	  string_file local_file;
 
-	  SYMBOL_COMPUTED_OPS (sym)->generate_c_location (sym, &local_file,
-							  gdbarch,
-							  registers_used,
-							  pc,
-							  generated_name.get ());
+	  SYMBOL_COMPUTED_OPS (sym)->generate_c_location (
+	    sym, &local_file, gdbarch, registers_used, pc,
+	    generated_name.get ());
 	  stream->write (local_file.c_str (), local_file.size ());
 	}
       else
@@ -584,7 +553,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	    case LOC_REF_ARG:
 	    case LOC_REGPARM_ADDR:
 	    case LOC_LOCAL:
-	      error (_("Local symbol unhandled when generating C code."));
+	      error (_ ("Local symbol unhandled when generating C code."));
 
 	    case LOC_COMPUTED:
 	      gdb_assert_not_reached ("LOC_COMPUTED variable "
@@ -610,8 +579,7 @@ std::vector<bool>
 generate_c_for_variable_locations (compile_instance *compiler,
 				   string_file *stream,
 				   struct gdbarch *gdbarch,
-				   const struct block *block,
-				   CORE_ADDR pc)
+				   const struct block *block, CORE_ADDR pc)
 {
   const struct block *static_block = block_static_block (block);
 
@@ -634,8 +602,7 @@ generate_c_for_variable_locations (compile_instance *compiler,
 
       /* Iterate over symbols in this block, generating code to
 	 compute the location of each local variable.  */
-      for (sym = block_iterator_first (block, &iter);
-	   sym != NULL;
+      for (sym = block_iterator_first (block, &iter); sym != NULL;
 	   sym = block_iterator_next (&iter))
 	{
 	  if (!symbol_seen (symhash.get (), sym))

@@ -20,7 +20,6 @@
 #include "common-defs.h"
 #include "btrace-common.h"
 
-
 /* See btrace-common.h.  */
 
 const char *
@@ -29,16 +28,16 @@ btrace_format_string (enum btrace_format format)
   switch (format)
     {
     case BTRACE_FORMAT_NONE:
-      return _("No or unknown format");
+      return _ ("No or unknown format");
 
     case BTRACE_FORMAT_BTS:
-      return _("Branch Trace Store");
+      return _ ("Branch Trace Store");
 
     case BTRACE_FORMAT_PT:
-      return _("Intel Processor Trace");
+      return _ ("Intel Processor Trace");
     }
 
-  internal_error (_("Unknown branch trace format"));
+  internal_error (_ ("Unknown branch trace format"));
 }
 
 /* See btrace-common.h.  */
@@ -58,7 +57,7 @@ btrace_format_short_string (enum btrace_format format)
       return "pt";
     }
 
-  internal_error (_("Unknown branch trace format"));
+  internal_error (_ ("Unknown branch trace format"));
 }
 
 /* See btrace-common.h.  */
@@ -82,7 +81,7 @@ btrace_data::fini ()
       return;
     }
 
-  internal_error (_("Unkown branch trace format."));
+  internal_error (_ ("Unkown branch trace format."));
 }
 
 /* See btrace-common.h.  */
@@ -102,7 +101,7 @@ btrace_data::empty () const
       return (variant.pt.size == 0);
     }
 
-  internal_error (_("Unkown branch trace format."));
+  internal_error (_ ("Unkown branch trace format."));
 }
 
 /* See btrace-common.h.  */
@@ -117,8 +116,7 @@ btrace_data::clear ()
 /* See btrace-common.h.  */
 
 int
-btrace_data_append (struct btrace_data *dst,
-		    const struct btrace_data *src)
+btrace_data_append (struct btrace_data *dst, const struct btrace_data *src)
 {
   switch (src->format)
     {
@@ -127,65 +125,65 @@ btrace_data_append (struct btrace_data *dst,
 
     case BTRACE_FORMAT_BTS:
       switch (dst->format)
-	{
-	default:
-	  return -1;
+        {
+        default:
+          return -1;
 
-	case BTRACE_FORMAT_NONE:
-	  dst->format = BTRACE_FORMAT_BTS;
-	  dst->variant.bts.blocks = new std::vector<btrace_block>;
+        case BTRACE_FORMAT_NONE:
+          dst->format = BTRACE_FORMAT_BTS;
+          dst->variant.bts.blocks = new std::vector<btrace_block>;
 
-	  /* Fall-through.  */
-	case BTRACE_FORMAT_BTS:
-	  {
-	    unsigned int blk;
+          /* Fall-through.  */
+        case BTRACE_FORMAT_BTS:
+          {
+            unsigned int blk;
 
-	    /* We copy blocks in reverse order to have the oldest block at
+            /* We copy blocks in reverse order to have the oldest block at
 	       index zero.  */
-	    blk = src->variant.bts.blocks->size ();
-	    while (blk != 0)
-	      {
-		const btrace_block &block
-		  = src->variant.bts.blocks->at (--blk);
-		dst->variant.bts.blocks->push_back (block);
-	      }
-	  }
-	}
+            blk = src->variant.bts.blocks->size ();
+            while (blk != 0)
+              {
+                const btrace_block &block
+                  = src->variant.bts.blocks->at (--blk);
+                dst->variant.bts.blocks->push_back (block);
+              }
+          }
+        }
       return 0;
 
     case BTRACE_FORMAT_PT:
       switch (dst->format)
-	{
-	default:
-	  return -1;
+        {
+        default:
+          return -1;
 
-	case BTRACE_FORMAT_NONE:
-	  dst->format = BTRACE_FORMAT_PT;
-	  dst->variant.pt.data = NULL;
-	  dst->variant.pt.size = 0;
+        case BTRACE_FORMAT_NONE:
+          dst->format = BTRACE_FORMAT_PT;
+          dst->variant.pt.data = NULL;
+          dst->variant.pt.size = 0;
 
-	  /* fall-through.  */
-	case BTRACE_FORMAT_PT:
-	  {
-	    gdb_byte *data;
-	    size_t size;
+          /* fall-through.  */
+        case BTRACE_FORMAT_PT:
+          {
+            gdb_byte *data;
+            size_t size;
 
-	    size = src->variant.pt.size + dst->variant.pt.size;
-	    data = (gdb_byte *) xmalloc (size);
+            size = src->variant.pt.size + dst->variant.pt.size;
+            data = (gdb_byte *) xmalloc (size);
 
-	    if (dst->variant.pt.size > 0)
-	      memcpy (data, dst->variant.pt.data, dst->variant.pt.size);
-	    memcpy (data + dst->variant.pt.size, src->variant.pt.data,
-		    src->variant.pt.size);
+            if (dst->variant.pt.size > 0)
+              memcpy (data, dst->variant.pt.data, dst->variant.pt.size);
+            memcpy (data + dst->variant.pt.size, src->variant.pt.data,
+                    src->variant.pt.size);
 
-	    xfree (dst->variant.pt.data);
+            xfree (dst->variant.pt.data);
 
-	    dst->variant.pt.data = data;
-	    dst->variant.pt.size = size;
-	  }
-	}
+            dst->variant.pt.data = data;
+            dst->variant.pt.size = size;
+          }
+        }
       return 0;
     }
 
-  internal_error (_("Unkown branch trace format."));
+  internal_error (_ ("Unkown branch trace format."));
 }

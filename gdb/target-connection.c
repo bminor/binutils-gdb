@@ -63,8 +63,7 @@ std::string
 make_target_connection_string (process_stratum_target *t)
 {
   if (t->connection_string () != NULL)
-    return string_printf ("%s %s", t->shortname (),
-			  t->connection_string ());
+    return string_printf ("%s %s", t->shortname (), t->connection_string ());
   else
     return t->shortname ();
 }
@@ -98,7 +97,7 @@ print_connection (struct ui_out *uiout, const char *requested_connections)
 
   if (count == 0)
     {
-      uiout->message (_("No connections.\n"));
+      uiout->message (_ ("No connections.\n"));
       return;
     }
 
@@ -155,8 +154,7 @@ void _initialize_target_connection ();
 void
 _initialize_target_connection ()
 {
-  add_info ("connections", info_connections_command,
-	    _("\
+  add_info ("connections", info_connections_command, _ ("\
 Target connections in use.\n\
 Shows the list of target connections currently in use."));
 }

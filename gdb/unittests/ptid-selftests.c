@@ -21,8 +21,10 @@
 #include "gdbsupport/ptid.h"
 #include <type_traits>
 
-namespace selftests {
-namespace ptid {
+namespace selftests
+{
+namespace ptid
+{
 
 /* Check that the ptid_t class is POD.
 
@@ -125,7 +127,8 @@ static_assert (both.matches (pid), "both matches pid");
 static_assert (!ptid_t (2, 0, 0).matches (pid), "other pid doesn't match pid");
 static_assert (!ptid_t (2, 2, 0).matches (pid), "other lwp doesn't match pid");
 static_assert (!ptid_t (2, 0, 2).matches (pid), "other tid doesn't match pid");
-static_assert (!ptid_t (2, 2, 2).matches (pid), "other both doesn't match pid");
+static_assert (!ptid_t (2, 2, 2).matches (pid),
+	       "other both doesn't match pid");
 
 /* Verify matches against exact matches.  */
 
@@ -147,7 +150,6 @@ static_assert (!tid.matches (both), "tid doesn't match both");
 static_assert (both.matches (both), "both matches both");
 static_assert (!ptid_t (2, 2, 2).matches (both),
 	       "other both doesn't match both");
-
 
 } /* namespace ptid */
 } /* namespace selftests */

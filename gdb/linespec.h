@@ -14,7 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (LINESPEC_H)
+#if !defined(LINESPEC_H)
 #define LINESPEC_H 1
 
 struct symtab;
@@ -24,16 +24,16 @@ struct symtab;
 /* Flags to pass to decode_line_1 and decode_line_full.  */
 
 enum decode_line_flags
-  {
-    /* Set this flag if you want the resulting SALs to describe the
+{
+  /* Set this flag if you want the resulting SALs to describe the
        first line of indicated functions.  */
-    DECODE_LINE_FUNFIRSTLINE = 1,
+  DECODE_LINE_FUNFIRSTLINE = 1,
 
-    /* Set this flag if you want "list mode".  In this mode, a
+  /* Set this flag if you want "list mode".  In this mode, a
        FILE:LINE linespec will always return a result, and such
        linespecs will not be expanded to all matches.  */
-    DECODE_LINE_LIST_MODE = 2
-  };
+  DECODE_LINE_LIST_MODE = 2
+};
 
 /* decode_line_full returns a vector of these.  */
 
@@ -81,9 +81,9 @@ struct linespec_result
 /* Decode a linespec using the provided default symtab and line.  */
 
 extern std::vector<symtab_and_line>
-	decode_line_1 (const location_spec *locspec, int flags,
-		       struct program_space *search_pspace,
-		       struct symtab *default_symtab, int default_line);
+decode_line_1 (const location_spec *locspec, int flags,
+	       struct program_space *search_pspace,
+	       struct symtab *default_symtab, int default_line);
 
 /* Parse LOCSPEC and return results.  This is the "full"
    interface to this module, which handles multiple results
@@ -128,21 +128,20 @@ extern void decode_line_full (struct location_spec *locspec, int flags,
 			      struct program_space *search_pspace,
 			      struct symtab *default_symtab, int default_line,
 			      struct linespec_result *canonical,
-			      const char *select_mode,
-			      const char *filter);
+			      const char *select_mode, const char *filter);
 
 /* Given a string, return the line specified by it, using the current
    source symtab and line as defaults.
    This is for commands like "list" and "breakpoint".  */
 
-extern std::vector<symtab_and_line> decode_line_with_current_source
-    (const char *, int);
+extern std::vector<symtab_and_line>
+decode_line_with_current_source (const char *, int);
 
 /* Given a string, return the line specified by it, using the last displayed
    codepoint's values as defaults, or nothing if they aren't valid.  */
 
-extern std::vector<symtab_and_line> decode_line_with_last_displayed
-    (const char *, int);
+extern std::vector<symtab_and_line>
+decode_line_with_last_displayed (const char *, int);
 
 /* Does P represent one of the keywords?  If so, return
    the keyword.  If not, return NULL.  */
@@ -167,12 +166,11 @@ extern int is_ada_operator (const char *string);
 
 extern void linespec_lex_to_end (const char **stringp);
 
-extern const char * const linespec_keywords[];
+extern const char *const linespec_keywords[];
 
 /* Complete a linespec.  */
 
-extern void linespec_complete (completion_tracker &tracker,
-			       const char *text,
+extern void linespec_complete (completion_tracker &tracker, const char *text,
 			       symbol_name_match_type match_type);
 
 /* Complete a function symbol, in linespec mode, according to

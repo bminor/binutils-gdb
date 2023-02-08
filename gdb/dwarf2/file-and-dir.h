@@ -43,10 +43,7 @@ struct file_and_directory
   }
 
   /* Return true if the file name is unknown.  */
-  bool is_unknown () const
-  {
-    return m_name == nullptr;
-  }
+  bool is_unknown () const { return m_name == nullptr; }
 
   /* Set the compilation directory.  */
   void set_comp_dir (std::string &&dir)
@@ -100,10 +97,7 @@ struct file_and_directory
   }
 
   /* Forget the full name.  */
-  void forget_fullname ()
-  {
-    m_fullname.reset ();
-  }
+  void forget_fullname () { m_fullname.reset (); }
 
 private:
 

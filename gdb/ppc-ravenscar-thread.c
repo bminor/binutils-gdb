@@ -29,72 +29,48 @@
 
 /* See ppc-tdep.h for register numbers.  */
 
-static const int powerpc_context_offsets[] =
-{
+static const int powerpc_context_offsets[] = {
   /* R0 - R32 */
-  NO_OFFSET, 0,         4,         NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, 8,         12,        16,
-  20,        24,        28,        32,
-  36,        40,        44,        48,
-  52,        56,        60,        64,
-  68,        72,        76,        80,
+  NO_OFFSET, 0, 4, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, 8, 12, 16, 20, 24, 28,
+  32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80,
 
   /* F0 - F31 */
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, 96,        104,
-  112,       120,       128,       136,
-  144,       152,       160,       168,
-  176,       184,       192,       200,
-  208,       216,       224,       232,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208,
+  216, 224, 232,
 
   /* PC, MSR, CR, LR */
-  88,        NO_OFFSET, 84,        NO_OFFSET,
+  88, NO_OFFSET, 84, NO_OFFSET,
 
   /* CTR, XER, FPSCR  */
   NO_OFFSET, NO_OFFSET, 240
 };
 
-static const int e500_context_offsets[] =
-{
+static const int e500_context_offsets[] = {
   /* R0 - R32 */
-  NO_OFFSET, 4,         12,        NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, 20,        28,        36,
-  44,        52,        60,        68,
-  76,        84,        92,        100,
-  108,       116,       124,       132,
-  140,       148,       156,       164,
+  NO_OFFSET, 4, 12, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, 20, 28, 36, 44, 52,
+  60, 68, 76, 84, 92, 100, 108, 116, 124, 132, 140, 148, 156, 164,
 
   /* F0 - F31 */
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
   NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
 
   /* PC, MSR, CR, LR */
-  172,       NO_OFFSET, 168,       NO_OFFSET,
+  172, NO_OFFSET, 168, NO_OFFSET,
 
   /* CTR, XER, FPSCR, MQ  */
   NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
 
   /* Upper R0-R32.  */
-  NO_OFFSET, 0,         8,        NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, 16,        24,        32,
-  40,        48,        56,        64,
-  72,        80,        88,        96,
-  104,       112,       120,       128,
-  136,       144,       152,       160,
+  NO_OFFSET, 0, 8, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
+  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET, 16, 24, 32, 40, 48,
+  56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160,
 
   /* ACC, FSCR */
   NO_OFFSET, 176
@@ -102,8 +78,8 @@ static const int e500_context_offsets[] =
 
 /* The ravenscar_arch_ops vector for most PowerPC targets.  */
 
-static struct ravenscar_arch_ops ppc_ravenscar_powerpc_ops
-     (powerpc_context_offsets);
+static struct ravenscar_arch_ops
+  ppc_ravenscar_powerpc_ops (powerpc_context_offsets);
 
 /* Register ppc_ravenscar_powerpc_ops in GDBARCH.  */
 

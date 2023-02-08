@@ -46,12 +46,10 @@ default_frame_args_address (frame_info_ptr this_frame, void **this_cache)
   return default_frame_base_address (this_frame, this_cache);
 }
 
-const struct frame_base default_frame_base = {
-  NULL, /* No parent.  */
-  default_frame_base_address,
-  default_frame_locals_address,
-  default_frame_args_address
-};
+const struct frame_base default_frame_base
+  = { NULL, /* No parent.  */
+      default_frame_base_address, default_frame_locals_address,
+      default_frame_args_address };
 
 struct frame_base_table_entry
 {

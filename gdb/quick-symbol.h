@@ -32,8 +32,7 @@ DEF_ENUM_FLAGS_TYPE (enum block_search_flag_values, block_search_flags);
 
 /* Comparison function for symbol look ups.  */
 
-typedef int (symbol_compare_ftype) (const char *string1,
-				    const char *string2);
+typedef int (symbol_compare_ftype) (const char *string1, const char *string2);
 
 /* Callback for quick_symbol_functions->map_symbol_filenames.  */
 
@@ -78,9 +77,7 @@ typedef bool (expand_symtabs_exp_notify_ftype) (compunit_symtab *symtab);
 
 struct quick_symbol_functions
 {
-  virtual ~quick_symbol_functions ()
-  {
-  }
+  virtual ~quick_symbol_functions () {}
 
   /* Return true if this objfile has any "partial" symbols
      available.  */
@@ -105,11 +102,10 @@ struct quick_symbol_functions
 
      If found, sets *symbol_found_p to true and returns the symbol language.
      defined, or NULL if no such symbol table exists.  */
-  virtual enum language lookup_global_symbol_language
-       (struct objfile *objfile,
-	const char *name,
-	domain_enum domain,
-	bool *symbol_found_p) = 0;
+  virtual enum language
+  lookup_global_symbol_language (struct objfile *objfile, const char *name,
+				 domain_enum domain, bool *symbol_found_p)
+    = 0;
 
   /* Print statistics about any indices loaded for OBJFILE.  The
      statistics should be printed to gdb_stdout.  This is used for
@@ -140,12 +136,11 @@ struct quick_symbol_functions
      (allowing strcmp_iw_ordered(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
   */
 
-  virtual void expand_matching_symbols
-    (struct objfile *,
-     const lookup_name_info &lookup_name,
-     domain_enum domain,
-     int global,
-     symbol_compare_ftype *ordered_compare) = 0;
+  virtual void expand_matching_symbols (struct objfile *,
+					const lookup_name_info &lookup_name,
+					domain_enum domain, int global,
+					symbol_compare_ftype *ordered_compare)
+    = 0;
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
 
@@ -175,15 +170,15 @@ struct quick_symbol_functions
      returns false, execution stops and this method returns false.
      Otherwise, more files are considered.  This method will return
      true if all calls to the notification function return true.  */
-  virtual bool expand_symtabs_matching
-    (struct objfile *objfile,
-     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-     const lookup_name_info *lookup_name,
-     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-     block_search_flags search_flags,
-     domain_enum domain,
-     enum search_domain kind) = 0;
+  virtual bool expand_symtabs_matching (
+    struct objfile *objfile,
+    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+    const lookup_name_info *lookup_name,
+    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+    block_search_flags search_flags, domain_enum domain,
+    enum search_domain kind)
+    = 0;
 
   /* Return the comp unit from OBJFILE that contains PC and
      SECTION.  Return NULL if there is no such compunit.  This
@@ -191,40 +186,38 @@ struct quick_symbol_functions
      address exactly matches PC, or, if there is no exact match, the
      compunit that contains a symbol whose address is closest to
      PC.  */
-  virtual struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) = 0;
+  virtual struct compunit_symtab *find_pc_sect_compunit_symtab (
+    struct objfile *objfile, struct bound_minimal_symbol msymbol, CORE_ADDR pc,
+    struct obj_section *section, int warn_if_readin)
+    = 0;
 
   /* Return the comp unit from OBJFILE that contains a symbol at
      ADDRESS.  Return NULL if there is no such comp unit.  Unlike
      find_pc_sect_compunit_symtab, any sort of symbol (not just text
      symbols) can be considered, and only exact address matches are
      considered.  */
-  virtual struct compunit_symtab *find_compunit_symtab_by_address
-    (struct objfile *objfile, CORE_ADDR address) = 0;
+  virtual struct compunit_symtab *
+  find_compunit_symtab_by_address (struct objfile *objfile, CORE_ADDR address)
+    = 0;
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
      not already read in.  FUN is the callback.  It is passed the
      file's FILENAME and the file's FULLNAME (if need_fullname is
      non-zero).  */
-  virtual void map_symbol_filenames
-       (struct objfile *objfile,
-	gdb::function_view<symbol_filename_ftype> fun,
-	bool need_fullname) = 0;
+  virtual void
+  map_symbol_filenames (struct objfile *objfile,
+			gdb::function_view<symbol_filename_ftype> fun,
+			bool need_fullname)
+    = 0;
 
   /* Return true if this class can lazily read the symbols.  This may
      only return true if there are in fact symbols to be read, because
      this is used in the implementation of 'has_partial_symbols'.  */
-  virtual bool can_lazily_read_symbols ()
-  {
-    return false;
-  }
+  virtual bool can_lazily_read_symbols () { return false; }
 
   /* Read the partial symbols for OBJFILE.  This will only ever be
      called if can_lazily_read_symbols returns true.  */
-  virtual void read_partial_symbols (struct objfile *objfile)
-  {
-  }
+  virtual void read_partial_symbols (struct objfile *objfile) {}
 };
 
 typedef std::unique_ptr<quick_symbol_functions> quick_symbol_functions_up;

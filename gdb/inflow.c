@@ -47,7 +47,7 @@
 static void pass_signal (int);
 
 static void child_terminal_ours_1 (target_terminal_state);
-
+
 /* Record terminal status separately for debugger and inferior.  */
 
 static struct serial *stdin_serial;
@@ -170,10 +170,10 @@ gdb_has_a_terminal (void)
 
 /* Macro for printing errors from ioctl operations */
 
-#define	OOPSY(what)	\
-  if (result == -1)	\
-    gdb_printf(gdb_stderr, "[%s failed in terminal_inferior: %s]\n",	\
-	       what, safe_strerror (errno))
+#define OOPSY(what)                                                       \
+  if (result == -1)                                                       \
+  gdb_printf (gdb_stderr, "[%s failed in terminal_inferior: %s]\n", what, \
+	      safe_strerror (errno))
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
@@ -231,8 +231,8 @@ is_gdb_terminal (const char *tty)
 
   return ((gdb_tty.st_dev == other_tty.st_dev
 	   && gdb_tty.st_ino == other_tty.st_ino)
-	  ? TRIBOOL_TRUE
-	  : TRIBOOL_FALSE);
+	    ? TRIBOOL_TRUE
+	    : TRIBOOL_FALSE);
 }
 
 /* Return true if the inferior is using the same TTY for input as GDB
@@ -311,8 +311,7 @@ child_terminal_inferior (struct target_ops *self)
   inferior *inf = current_inferior ();
   terminal_info *tinfo = get_inflow_inferior_data (inf);
 
-  if (gdb_has_a_terminal ()
-      && tinfo->ttystate != NULL
+  if (gdb_has_a_terminal () && tinfo->ttystate != NULL
       && sharing_input_terminal (inf))
     {
       int result;
@@ -664,7 +663,7 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
 
   if (!gdb_has_a_terminal ())
     {
-      gdb_printf (_("This GDB does not control a terminal.\n"));
+      gdb_printf (_ ("This GDB does not control a terminal.\n"));
       return;
     }
 
@@ -674,8 +673,8 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
   inf = current_inferior ();
   tinfo = get_inflow_inferior_data (inf);
 
-  gdb_printf (_("Inferior's terminal status "
-		"(currently saved by GDB):\n"));
+  gdb_printf (_ ("Inferior's terminal status "
+		 "(currently saved by GDB):\n"));
 
   /* First the fcntl flags.  */
   {
@@ -709,7 +708,7 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
     flags &= ~O_NONBLOCK;
 #endif
 
-#if defined (O_NDELAY)
+#if defined(O_NDELAY)
     /* If O_NDELAY and O_NONBLOCK are defined to the same thing, we will
        print it as O_NONBLOCK, which is good cause that is what POSIX
        has, and the flag will already be cleared by the time we get here.  */
@@ -722,7 +721,7 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
       gdb_printf (" | O_APPEND");
     flags &= ~O_APPEND;
 
-#if defined (O_BINARY)
+#if defined(O_BINARY)
     if (flags & O_BINARY)
       gdb_printf (" | O_BINARY");
     flags &= ~O_BINARY;
@@ -739,7 +738,7 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
 
   serial_print_tty_state (stdin_serial, tinfo->ttystate, gdb_stdout);
 }
-
+
 /* NEW_TTY_PREFORK is called before forking a new child process,
    so we can record the state of ttys in the child to be formed.
    TTYNAME is empty if we are to share the terminal with gdb;
@@ -820,7 +819,7 @@ new_tty (void)
   if (ioctl (tty, TIOCSCTTY, 0) == -1)
     /* Mention GDB in warning because it will appear in the inferior's
        terminal instead of GDB's.  */
-    warning (_("GDB: Failed to set controlling terminal: %s"),
+    warning (_ ("GDB: Failed to set controlling terminal: %s"),
 	     safe_strerror (errno));
 #endif
 
@@ -846,7 +845,6 @@ new_tty_postfork (void)
   inferior_thisrun_terminal.clear ();
 }
 
-
 /* Call set_sigint_trap when you need to pass a signal on to an attached
    process when handling SIGINT.  */
 
@@ -885,7 +883,6 @@ clear_sigint_trap (void)
       osig_set = 0;
     }
 }
-
 
 /* Create a new session if the inferior will run in a different tty.
    A session is UNIX's way of grouping processes that share a controlling
@@ -905,7 +902,7 @@ create_tty_session (void)
 
   ret = setsid ();
   if (ret == -1)
-    warning (_("Failed to create new terminal session: setsid: %s"),
+    warning (_ ("Failed to create new terminal session: setsid: %s"),
 	     safe_strerror (errno));
 
   return ret;
@@ -927,11 +924,12 @@ initialize_stdin_serial (void)
 }
 
 void _initialize_inflow ();
+
 void
 _initialize_inflow ()
 {
   add_info ("terminal", info_terminal_command,
-	    _("Print inferior's saved terminal status."));
+	    _ ("Print inferior's saved terminal status."));
 
   /* OK, figure out whether we have job control.  */
   have_job_control ();

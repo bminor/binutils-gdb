@@ -26,13 +26,13 @@ enum
 {
   TIC6X_A4_REGNUM = 4,
   TIC6X_A5_REGNUM = 5,
-  TIC6X_FP_REGNUM = 15,  /* Frame Pointer: A15 */
+  TIC6X_FP_REGNUM = 15, /* Frame Pointer: A15 */
   TIC6X_B0_REGNUM = 16,
-  TIC6X_RA_REGNUM = 19,  /* Return address: B3 */
+  TIC6X_RA_REGNUM = 19, /* Return address: B3 */
   TIC6X_B4_REGNUM = 20,
   TIC6X_B5_REGNUM = 21,
-  TIC6X_DP_REGNUM = 30,  /* Data Page Pointer: B14 */
-  TIC6X_SP_REGNUM = 31,  /* Stack Pointer: B15 */
+  TIC6X_DP_REGNUM = 30, /* Data Page Pointer: B14 */
+  TIC6X_SP_REGNUM = 31, /* Stack Pointer: B15 */
   TIC6X_CSR_REGNUM = 32,
   TIC6X_PC_REGNUM = 33,
   TIC6X_NUM_CORE_REGS = 33, /* The number of core registers */

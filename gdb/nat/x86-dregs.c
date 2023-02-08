@@ -104,28 +104,28 @@ x86_get_debug_register_length ()
 /* DR7 Debug Control register fields.  */
 
 /* How many bits to skip in DR7 to get to R/W and LEN fields.  */
-#define DR_CONTROL_SHIFT	16
+#define DR_CONTROL_SHIFT 16
 /* How many bits in DR7 per R/W and LEN field for each watchpoint.  */
-#define DR_CONTROL_SIZE		4
+#define DR_CONTROL_SIZE 4
 
 /* Watchpoint/breakpoint read/write fields in DR7.  */
-#define DR_RW_EXECUTE	(0x0)	/* Break on instruction execution.  */
-#define DR_RW_WRITE	(0x1)	/* Break on data writes.  */
-#define DR_RW_READ	(0x3)	/* Break on data reads or writes.  */
+#define DR_RW_EXECUTE (0x0) /* Break on instruction execution.  */
+#define DR_RW_WRITE (0x1)   /* Break on data writes.  */
+#define DR_RW_READ (0x3)    /* Break on data reads or writes.  */
 
 /* This is here for completeness.  No platform supports this
    functionality yet (as of March 2001).  Note that the DE flag in the
    CR4 register needs to be set to support this.  */
 #ifndef DR_RW_IORW
-#define DR_RW_IORW	(0x2)	/* Break on I/O reads or writes.  */
+#define DR_RW_IORW (0x2) /* Break on I/O reads or writes.  */
 #endif
 
 /* Watchpoint/breakpoint length fields in DR7.  The 2-bit left shift
    is so we could OR this with the read/write field defined above.  */
-#define DR_LEN_1	(0x0 << 2) /* 1-byte region watch or breakpoint.  */
-#define DR_LEN_2	(0x1 << 2) /* 2-byte region watch.  */
-#define DR_LEN_4	(0x3 << 2) /* 4-byte region watch.  */
-#define DR_LEN_8	(0x2 << 2) /* 8-byte region watch (AMD64).  */
+#define DR_LEN_1 (0x0 << 2) /* 1-byte region watch or breakpoint.  */
+#define DR_LEN_2 (0x1 << 2) /* 2-byte region watch.  */
+#define DR_LEN_4 (0x3 << 2) /* 4-byte region watch.  */
+#define DR_LEN_8 (0x2 << 2) /* 8-byte region watch (AMD64).  */
 
 /* Local and Global Enable flags in DR7.
 
@@ -138,29 +138,29 @@ x86_get_debug_register_length ()
    Currently, all watchpoint are locally enabled.  If you need to
    enable them globally, read the comment which pertains to this in
    x86_insert_aligned_watchpoint below.  */
-#define DR_LOCAL_ENABLE_SHIFT	0 /* Extra shift to the local enable bit.  */
-#define DR_GLOBAL_ENABLE_SHIFT	1 /* Extra shift to the global enable bit.  */
-#define DR_ENABLE_SIZE		2 /* Two enable bits per debug register.  */
+#define DR_LOCAL_ENABLE_SHIFT 0	 /* Extra shift to the local enable bit.  */
+#define DR_GLOBAL_ENABLE_SHIFT 1 /* Extra shift to the global enable bit.  */
+#define DR_ENABLE_SIZE 2	 /* Two enable bits per debug register.  */
 
 /* Local and global exact breakpoint enable flags (a.k.a. slowdown
    flags).  These are only required on i386, to allow detection of the
    exact instruction which caused a watchpoint to break; i486 and
    later processors do that automatically.  We set these flags for
    backwards compatibility.  */
-#define DR_LOCAL_SLOWDOWN	(0x100)
-#define DR_GLOBAL_SLOWDOWN	(0x200)
+#define DR_LOCAL_SLOWDOWN (0x100)
+#define DR_GLOBAL_SLOWDOWN (0x200)
 
 /* Fields reserved by Intel.  This includes the GD (General Detect
    Enable) flag, which causes a debug exception to be generated when a
    MOV instruction accesses one of the debug registers.
 
    FIXME: My Intel manual says we should use 0xF800, not 0xFC00.  */
-#define DR_CONTROL_RESERVED	(0xFC00)
+#define DR_CONTROL_RESERVED (0xFC00)
 
 /* Auxiliary helper macros.  */
 
 /* A value that masks all fields in DR7 that are reserved by Intel.  */
-#define X86_DR_CONTROL_MASK	(~DR_CONTROL_RESERVED)
+#define X86_DR_CONTROL_MASK (~DR_CONTROL_RESERVED)
 
 /* The I'th debug register is vacant if its Local and Global Enable
    bits are reset in the Debug Control register.  */
@@ -168,79 +168,91 @@ x86_get_debug_register_length ()
   (((state)->dr_control_mirror & (3 << (DR_ENABLE_SIZE * (i)))) == 0)
 
 /* Locally enable the break/watchpoint in the I'th debug register.  */
-#define X86_DR_LOCAL_ENABLE(state, i) \
-  do { \
-    (state)->dr_control_mirror |= \
-      (1 << (DR_LOCAL_ENABLE_SHIFT + DR_ENABLE_SIZE * (i))); \
-  } while (0)
+#define X86_DR_LOCAL_ENABLE(state, i)                             \
+  do                                                              \
+    {                                                             \
+      (state)->dr_control_mirror                                  \
+	|= (1 << (DR_LOCAL_ENABLE_SHIFT + DR_ENABLE_SIZE * (i))); \
+    }                                                             \
+  while (0)
 
 /* Globally enable the break/watchpoint in the I'th debug register.  */
-#define X86_DR_GLOBAL_ENABLE(state, i) \
-  do { \
-    (state)->dr_control_mirror |= \
-      (1 << (DR_GLOBAL_ENABLE_SHIFT + DR_ENABLE_SIZE * (i))); \
-  } while (0)
+#define X86_DR_GLOBAL_ENABLE(state, i)                             \
+  do                                                               \
+    {                                                              \
+      (state)->dr_control_mirror                                   \
+	|= (1 << (DR_GLOBAL_ENABLE_SHIFT + DR_ENABLE_SIZE * (i))); \
+    }                                                              \
+  while (0)
 
 /* Disable the break/watchpoint in the I'th debug register.  */
-#define X86_DR_DISABLE(state, i) \
-  do { \
-    (state)->dr_control_mirror &= \
-      ~(3 << (DR_ENABLE_SIZE * (i))); \
-  } while (0)
+#define X86_DR_DISABLE(state, i)                                    \
+  do                                                                \
+    {                                                               \
+      (state)->dr_control_mirror &= ~(3 << (DR_ENABLE_SIZE * (i))); \
+    }                                                               \
+  while (0)
 
 /* Set in DR7 the RW and LEN fields for the I'th debug register.  */
-#define X86_DR_SET_RW_LEN(state, i, rwlen) \
-  do { \
-    (state)->dr_control_mirror &= \
-      ~(0x0f << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))); \
-    (state)->dr_control_mirror |= \
-      ((rwlen) << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))); \
-  } while (0)
+#define X86_DR_SET_RW_LEN(state, i, rwlen)                          \
+  do                                                                \
+    {                                                               \
+      (state)->dr_control_mirror                                    \
+	&= ~(0x0f << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i)));   \
+      (state)->dr_control_mirror                                    \
+	|= ((rwlen) << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))); \
+    }                                                               \
+  while (0)
 
 /* Get from DR7 the RW and LEN fields for the I'th debug register.  */
 #define X86_DR_GET_RW_LEN(dr7, i) \
-  (((dr7) \
-    >> (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))) & 0x0f)
+  (((dr7) >> (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))) & 0x0f)
 
 /* Did the watchpoint whose address is in the I'th register break?  */
 #define X86_DR_WATCH_HIT(dr6, i) ((dr6) & (1 << (i)))
 
 /* Types of operations supported by x86_handle_nonaligned_watchpoint.  */
-enum x86_wp_op_t { WP_INSERT, WP_REMOVE, WP_COUNT };
+enum x86_wp_op_t
+{
+  WP_INSERT,
+  WP_REMOVE,
+  WP_COUNT
+};
 
 /* Print the values of the mirrored debug registers.  */
 
 static void
-x86_show_dr (struct x86_debug_reg_state *state,
-	     const char *func, CORE_ADDR addr,
-	     int len, enum target_hw_bp_type type)
+x86_show_dr (struct x86_debug_reg_state *state, const char *func,
+	     CORE_ADDR addr, int len, enum target_hw_bp_type type)
 {
   int i;
 
   debug_printf ("%s", func);
   if (addr || len)
-    debug_printf (" (addr=%s, len=%d, type=%s)",
-		  phex (addr, 8), len,
-		  type == hw_write ? "data-write"
-		  : (type == hw_read ? "data-read"
-		     : (type == hw_access ? "data-read/write"
-			: (type == hw_execute ? "instruction-execute"
-			   /* FIXME: if/when I/O read/write
+    debug_printf (" (addr=%s, len=%d, type=%s)", phex (addr, 8), len,
+		  type == hw_write
+		    ? "data-write"
+		    : (type == hw_read
+			 ? "data-read"
+			 : (type == hw_access
+			      ? "data-read/write"
+			      : (type == hw_execute
+				   ? "instruction-execute"
+				   /* FIXME: if/when I/O read/write
 			      watchpoints are supported, add them
 			      here.  */
-			   : "??unknown??"))));
+				   : "??unknown??"))));
   debug_printf (":\n");
 
   debug_printf ("\tCONTROL (DR7): 0x%s\n", phex (state->dr_control_mirror, 8));
   debug_printf ("\tSTATUS (DR6): 0x%s\n", phex (state->dr_status_mirror, 8));
 
   ALL_DEBUG_ADDRESS_REGISTERS (i)
-    {
-      debug_printf ("\tDR%d: addr=0x%s, ref.count=%d\n",
-		    i, phex (state->dr_mirror[i],
-			     x86_get_debug_register_length ()),
-		    state->dr_ref_count[i]);
-    }
+  {
+    debug_printf ("\tDR%d: addr=0x%s, ref.count=%d\n", i,
+		  phex (state->dr_mirror[i], x86_get_debug_register_length ()),
+		  state->dr_ref_count[i]);
+  }
 }
 
 /* Return the value of a 4-bit field for DR7 suitable for watching a
@@ -254,45 +266,46 @@ x86_length_and_rw_bits (int len, enum target_hw_bp_type type)
 
   switch (type)
     {
-      case hw_execute:
-	rw = DR_RW_EXECUTE;
-	break;
-      case hw_write:
-	rw = DR_RW_WRITE;
-	break;
-      case hw_read:
-	internal_error (_("The i386 doesn't support "
-			  "data-read watchpoints.\n"));
-      case hw_access:
-	rw = DR_RW_READ;
-	break;
+    case hw_execute:
+      rw = DR_RW_EXECUTE;
+      break;
+    case hw_write:
+      rw = DR_RW_WRITE;
+      break;
+    case hw_read:
+      internal_error (_ ("The i386 doesn't support "
+			 "data-read watchpoints.\n"));
+    case hw_access:
+      rw = DR_RW_READ;
+      break;
 #if 0
 	/* Not yet supported.  */
       case hw_io_access:
 	rw = DR_RW_IORW;
 	break;
 #endif
-      default:
-	internal_error (_("\
+    default:
+      internal_error (_ ("\
 Invalid hardware breakpoint type %d in x86_length_and_rw_bits.\n"),
-			(int) type);
+		      (int) type);
     }
 
   switch (len)
     {
-      case 1:
-	return (DR_LEN_1 | rw);
-      case 2:
-	return (DR_LEN_2 | rw);
-      case 4:
-	return (DR_LEN_4 | rw);
-      case 8:
-	if (TARGET_HAS_DR_LEN_8)
-	  return (DR_LEN_8 | rw);
-	/* FALL THROUGH */
-      default:
-	internal_error (_("\
-Invalid hardware breakpoint length %d in x86_length_and_rw_bits.\n"), len);
+    case 1:
+      return (DR_LEN_1 | rw);
+    case 2:
+      return (DR_LEN_2 | rw);
+    case 4:
+      return (DR_LEN_4 | rw);
+    case 8:
+      if (TARGET_HAS_DR_LEN_8)
+	return (DR_LEN_8 | rw);
+      /* FALL THROUGH */
+    default:
+      internal_error (_ ("\
+Invalid hardware breakpoint length %d in x86_length_and_rw_bits.\n"),
+		      len);
     }
 }
 
@@ -315,22 +328,21 @@ x86_insert_aligned_watchpoint (struct x86_debug_reg_state *state,
      and the same RW and LEN definitions.  If we find one, we can
      reuse it for this watchpoint as well (and save a register).  */
   ALL_DEBUG_ADDRESS_REGISTERS (i)
-    {
-      if (!X86_DR_VACANT (state, i)
-	  && state->dr_mirror[i] == addr
-	  && X86_DR_GET_RW_LEN (state->dr_control_mirror, i) == len_rw_bits)
-	{
-	  state->dr_ref_count[i]++;
-	  return 0;
-	}
-    }
+  {
+    if (!X86_DR_VACANT (state, i) && state->dr_mirror[i] == addr
+	&& X86_DR_GET_RW_LEN (state->dr_control_mirror, i) == len_rw_bits)
+      {
+	state->dr_ref_count[i]++;
+	return 0;
+      }
+  }
 
   /* Next, look for a vacant debug register.  */
   ALL_DEBUG_ADDRESS_REGISTERS (i)
-    {
-      if (X86_DR_VACANT (state, i))
-	break;
-    }
+  {
+    if (X86_DR_VACANT (state, i))
+      break;
+  }
 
   /* No more debug registers!  */
   if (i >= DR_NADDR)
@@ -370,28 +382,27 @@ x86_remove_aligned_watchpoint (struct x86_debug_reg_state *state,
   int all_vacant = 1;
 
   ALL_DEBUG_ADDRESS_REGISTERS (i)
-    {
-      if (!X86_DR_VACANT (state, i)
-	  && state->dr_mirror[i] == addr
-	  && X86_DR_GET_RW_LEN (state->dr_control_mirror, i) == len_rw_bits)
-	{
-	  if (--state->dr_ref_count[i] == 0) /* No longer in use?  */
-	    {
-	      /* Reset our mirror.  */
-	      state->dr_mirror[i] = 0;
-	      X86_DR_DISABLE (state, i);
-	      /* Even though not strictly necessary, clear out all
+  {
+    if (!X86_DR_VACANT (state, i) && state->dr_mirror[i] == addr
+	&& X86_DR_GET_RW_LEN (state->dr_control_mirror, i) == len_rw_bits)
+      {
+	if (--state->dr_ref_count[i] == 0) /* No longer in use?  */
+	  {
+	    /* Reset our mirror.  */
+	    state->dr_mirror[i] = 0;
+	    X86_DR_DISABLE (state, i);
+	    /* Even though not strictly necessary, clear out all
 		 bits in DR_CONTROL related to this debug register.
 		 Debug output is clearer when we don't have stale bits
 		 in place.  This also allows the assertion below.  */
-	      X86_DR_SET_RW_LEN (state, i, 0);
-	    }
-	  retval = 0;
-	}
+	    X86_DR_SET_RW_LEN (state, i, 0);
+	  }
+	retval = 0;
+      }
 
-      if (!X86_DR_VACANT (state, i))
-	all_vacant = 0;
-    }
+    if (!X86_DR_VACANT (state, i))
+      all_vacant = 0;
+  }
 
   if (all_vacant)
     {
@@ -422,16 +433,15 @@ x86_handle_nonaligned_watchpoint (struct x86_debug_reg_state *state,
   int retval = 0;
   int max_wp_len = TARGET_HAS_DR_LEN_8 ? 8 : 4;
 
-  static const int size_try_array[8][8] =
-  {
-    {1, 1, 1, 1, 1, 1, 1, 1},	/* Trying size one.  */
-    {2, 1, 2, 1, 2, 1, 2, 1},	/* Trying size two.  */
-    {2, 1, 2, 1, 2, 1, 2, 1},	/* Trying size three.  */
-    {4, 1, 2, 1, 4, 1, 2, 1},	/* Trying size four.  */
-    {4, 1, 2, 1, 4, 1, 2, 1},	/* Trying size five.  */
-    {4, 1, 2, 1, 4, 1, 2, 1},	/* Trying size six.  */
-    {4, 1, 2, 1, 4, 1, 2, 1},	/* Trying size seven.  */
-    {8, 1, 2, 1, 4, 1, 2, 1},	/* Trying size eight.  */
+  static const int size_try_array[8][8] = {
+    { 1, 1, 1, 1, 1, 1, 1, 1 }, /* Trying size one.  */
+    { 2, 1, 2, 1, 2, 1, 2, 1 }, /* Trying size two.  */
+    { 2, 1, 2, 1, 2, 1, 2, 1 }, /* Trying size three.  */
+    { 4, 1, 2, 1, 4, 1, 2, 1 }, /* Trying size four.  */
+    { 4, 1, 2, 1, 4, 1, 2, 1 }, /* Trying size five.  */
+    { 4, 1, 2, 1, 4, 1, 2, 1 }, /* Trying size six.  */
+    { 4, 1, 2, 1, 4, 1, 2, 1 }, /* Trying size seven.  */
+    { 8, 1, 2, 1, 4, 1, 2, 1 }, /* Trying size eight.  */
   };
 
   while (len > 0)
@@ -461,7 +471,7 @@ x86_handle_nonaligned_watchpoint (struct x86_debug_reg_state *state,
 	  else if (what == WP_REMOVE)
 	    retval = x86_remove_aligned_watchpoint (state, addr, len_rw);
 	  else
-	    internal_error (_("\
+	    internal_error (_ ("\
 Invalid value %d of operation in x86_handle_nonaligned_watchpoint.\n"),
 			    (int) what);
 	  if (retval)
@@ -485,12 +495,12 @@ x86_update_inferior_debug_regs (struct x86_debug_reg_state *state,
   int i;
 
   ALL_DEBUG_ADDRESS_REGISTERS (i)
-    {
-      if (X86_DR_VACANT (new_state, i) != X86_DR_VACANT (state, i))
-	x86_dr_low_set_addr (new_state, i);
-      else
-	gdb_assert (new_state->dr_mirror[i] == state->dr_mirror[i]);
-    }
+  {
+    if (X86_DR_VACANT (new_state, i) != X86_DR_VACANT (state, i))
+      x86_dr_low_set_addr (new_state, i);
+    else
+      gdb_assert (new_state->dr_mirror[i] == state->dr_mirror[i]);
+  }
 
   if (new_state->dr_control_mirror != state->dr_control_mirror)
     x86_dr_low_set_control (new_state);
@@ -504,8 +514,7 @@ x86_update_inferior_debug_regs (struct x86_debug_reg_state *state,
 
 int
 x86_dr_insert_watchpoint (struct x86_debug_reg_state *state,
-			  enum target_hw_bp_type type,
-			  CORE_ADDR addr, int len)
+			  enum target_hw_bp_type type, CORE_ADDR addr, int len)
 {
   int retval;
   /* Work on a local copy of the debug registers, and on success,
@@ -519,16 +528,14 @@ x86_dr_insert_watchpoint (struct x86_debug_reg_state *state,
        && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)
     {
-      retval = x86_handle_nonaligned_watchpoint (&local_state,
-						 WP_INSERT,
-						 addr, len, type);
+      retval = x86_handle_nonaligned_watchpoint (&local_state, WP_INSERT, addr,
+						 len, type);
     }
   else
     {
       unsigned len_rw = x86_length_and_rw_bits (len, type);
 
-      retval = x86_insert_aligned_watchpoint (&local_state,
-					      addr, len_rw);
+      retval = x86_insert_aligned_watchpoint (&local_state, addr, len_rw);
     }
 
   if (retval == 0)
@@ -546,8 +553,7 @@ x86_dr_insert_watchpoint (struct x86_debug_reg_state *state,
 
 int
 x86_dr_remove_watchpoint (struct x86_debug_reg_state *state,
-			  enum target_hw_bp_type type,
-			  CORE_ADDR addr, int len)
+			  enum target_hw_bp_type type, CORE_ADDR addr, int len)
 {
   int retval;
   /* Work on a local copy of the debug registers, and on success,
@@ -558,16 +564,14 @@ x86_dr_remove_watchpoint (struct x86_debug_reg_state *state,
        && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)
     {
-      retval = x86_handle_nonaligned_watchpoint (&local_state,
-						 WP_REMOVE,
-						 addr, len, type);
+      retval = x86_handle_nonaligned_watchpoint (&local_state, WP_REMOVE, addr,
+						 len, type);
     }
   else
     {
       unsigned len_rw = x86_length_and_rw_bits (len, type);
 
-      retval = x86_remove_aligned_watchpoint (&local_state,
-					      addr, len_rw);
+      retval = x86_remove_aligned_watchpoint (&local_state, addr, len_rw);
     }
 
   if (retval == 0)
@@ -590,8 +594,8 @@ x86_dr_region_ok_for_watchpoint (struct x86_debug_reg_state *state,
 
   /* Compute how many aligned watchpoints we would need to cover this
      region.  */
-  nregs = x86_handle_nonaligned_watchpoint (state, WP_COUNT,
-					     addr, len, hw_write);
+  nregs
+    = x86_handle_nonaligned_watchpoint (state, WP_COUNT, addr, len, hw_write);
   return nregs <= DR_NADDR ? 1 : 0;
 }
 
@@ -644,29 +648,29 @@ x86_dr_stopped_data_address (struct x86_debug_reg_state *state,
   status = x86_dr_low_get_status ();
 
   ALL_DEBUG_ADDRESS_REGISTERS (i)
-    {
-      if (!X86_DR_WATCH_HIT (status, i))
-	continue;
+  {
+    if (!X86_DR_WATCH_HIT (status, i))
+      continue;
 
-      if (!control_p)
-	{
-	  control = x86_dr_low_get_control ();
-	  control_p = 1;
-	}
+    if (!control_p)
+      {
+	control = x86_dr_low_get_control ();
+	control_p = 1;
+      }
 
-      /* This second condition makes sure DRi is set up for a data
+    /* This second condition makes sure DRi is set up for a data
 	 watchpoint, not a hardware breakpoint.  The reason is that
 	 GDB doesn't call the target_stopped_data_address method
 	 except for data watchpoints.  In other words, I'm being
 	 paranoiac.  */
-      if (X86_DR_GET_RW_LEN (control, i) != 0)
-	{
-	  addr = x86_dr_low_get_addr (i);
-	  rc = 1;
-	  if (show_debug_regs)
-	    x86_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
-	}
-    }
+    if (X86_DR_GET_RW_LEN (control, i) != 0)
+      {
+	addr = x86_dr_low_get_addr (i);
+	rc = 1;
+	if (show_debug_regs)
+	  x86_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
+      }
+  }
 
   if (show_debug_regs && addr == 0)
     x86_show_dr (state, "stopped_data_addr", 0, 0, hw_write);
@@ -709,24 +713,24 @@ x86_dr_stopped_by_hw_breakpoint (struct x86_debug_reg_state *state)
   status = x86_dr_low_get_status ();
 
   ALL_DEBUG_ADDRESS_REGISTERS (i)
-    {
-      if (!X86_DR_WATCH_HIT (status, i))
-	continue;
+  {
+    if (!X86_DR_WATCH_HIT (status, i))
+      continue;
 
-      if (!control_p)
-	{
-	  control = x86_dr_low_get_control ();
-	  control_p = 1;
-	}
+    if (!control_p)
+      {
+	control = x86_dr_low_get_control ();
+	control_p = 1;
+      }
 
-      if (X86_DR_GET_RW_LEN (control, i) == 0)
-	{
-	  addr = x86_dr_low_get_addr (i);
-	  rc = 1;
-	  if (show_debug_regs)
-	    x86_show_dr (state, "watchpoint_hit", addr, -1, hw_execute);
-	}
-    }
+    if (X86_DR_GET_RW_LEN (control, i) == 0)
+      {
+	addr = x86_dr_low_get_addr (i);
+	rc = 1;
+	if (show_debug_regs)
+	  x86_show_dr (state, "watchpoint_hit", addr, -1, hw_execute);
+      }
+  }
 
   return rc;
 }

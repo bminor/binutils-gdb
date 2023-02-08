@@ -23,8 +23,10 @@
 
 #if defined(HAVE_LIBEXPAT)
 
-namespace selftests {
-namespace memory_map_tests {
+namespace selftests
+{
+namespace memory_map_tests
+{
 
 /* A simple valid test input for parse_memory_map.  */
 
@@ -54,7 +56,6 @@ check_mem_region (const mem_region &r, CORE_ADDR lo, CORE_ADDR hi,
 
   SELF_CHECK (r.attrib.mode == mode);
   SELF_CHECK (r.attrib.blocksize == blocksize);
-
 }
 
 /* Test the parse_memory_map function.  */
@@ -77,12 +78,12 @@ parse_memory_map_tests ()
 #endif /* HAVE_LIBEXPAT */
 
 void _initialize_memory_map_selftests ();
+
 void
 _initialize_memory_map_selftests ()
 {
 #if defined(HAVE_LIBEXPAT)
-  selftests::register_test
-    ("parse_memory_map",
-     selftests::memory_map_tests::parse_memory_map_tests);
+  selftests::register_test (
+    "parse_memory_map", selftests::memory_map_tests::parse_memory_map_tests);
 #endif
 }

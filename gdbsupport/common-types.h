@@ -39,6 +39,11 @@ typedef uint64_t ULONGEST;
 /* * The largest ULONGEST value.  */
 #define ULONGEST_MAX (~(ULONGEST) 0)
 
-enum tribool { TRIBOOL_UNKNOWN = -1, TRIBOOL_FALSE = 0, TRIBOOL_TRUE = 1 };
+enum tribool
+{
+  TRIBOOL_UNKNOWN = -1,
+  TRIBOOL_FALSE = 0,
+  TRIBOOL_TRUE = 1
+};
 
 #endif /* COMMON_COMMON_TYPES_H */

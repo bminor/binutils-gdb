@@ -55,57 +55,52 @@
    line number, so client code should wrap sets of calls in a
    test-specific namespace too, to fully guarantee uniqueness between
    the multiple clients in the codebase.  */
-#define CHECK_VALID_EXPR_INT(TYPENAMES, TYPES, VALID, EXPR_TYPE, EXPR)	\
-  namespace CONCAT (check_valid_expr, __LINE__) {			\
-									\
-  template <TYPENAMES, typename = decltype (EXPR)>			\
-  struct archetype							\
-  {									\
-  };									\
-									\
-  static_assert (gdb::is_detected_exact<archetype<TYPES, EXPR_TYPE>,	\
-		 archetype, TYPES>::value == VALID,			\
-		 "");							\
+#define CHECK_VALID_EXPR_INT(TYPENAMES, TYPES, VALID, EXPR_TYPE, EXPR) \
+  namespace CONCAT (check_valid_expr, __LINE__)                        \
+  {                                                                    \
+                                                                       \
+  template<TYPENAMES, typename = decltype (EXPR)>                      \
+  struct archetype                                                     \
+  {                                                                    \
+  };                                                                   \
+                                                                       \
+  static_assert (gdb::is_detected_exact<archetype<TYPES, EXPR_TYPE>,   \
+                                        archetype, TYPES>::value       \
+                   == VALID,                                           \
+                 "");                                                  \
   } /* namespace */
 
 /* A few convenience macros that support expressions involving a
    varying numbers of types.  If you need more types, feel free to add
    another variant.  */
 
-#define CHECK_VALID_EXPR_1(T1, VALID, EXPR_TYPE, EXPR)			\
-  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1),			\
-			ESC_PARENS (T1),				\
-			VALID, EXPR_TYPE, EXPR)
+#define CHECK_VALID_EXPR_1(T1, VALID, EXPR_TYPE, EXPR)                    \
+  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1), ESC_PARENS (T1), VALID, \
+                        EXPR_TYPE, EXPR)
 
-#define CHECK_VALID_EXPR_2(T1, T2, VALID, EXPR_TYPE, EXPR)		\
-  CHECK_VALID_EXPR_INT (ESC_PARENS(typename T1, typename T2),		\
-			ESC_PARENS (T1, T2),				\
-			VALID, EXPR_TYPE, EXPR)
+#define CHECK_VALID_EXPR_2(T1, T2, VALID, EXPR_TYPE, EXPR)     \
+  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2), \
+                        ESC_PARENS (T1, T2), VALID, EXPR_TYPE, EXPR)
 
-#define CHECK_VALID_EXPR_3(T1, T2, T3, VALID, EXPR_TYPE, EXPR)		\
+#define CHECK_VALID_EXPR_3(T1, T2, T3, VALID, EXPR_TYPE, EXPR)              \
   CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2, typename T3), \
-			ESC_PARENS (T1, T2, T3),				\
-			VALID, EXPR_TYPE, EXPR)
+                        ESC_PARENS (T1, T2, T3), VALID, EXPR_TYPE, EXPR)
 
-#define CHECK_VALID_EXPR_4(T1, T2, T3, T4, VALID, EXPR_TYPE, EXPR)	\
-  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2,		\
-				    typename T3, typename T4),		\
-			ESC_PARENS (T1, T2, T3, T4),			\
-			VALID, EXPR_TYPE, EXPR)
+#define CHECK_VALID_EXPR_4(T1, T2, T3, T4, VALID, EXPR_TYPE, EXPR)         \
+  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2, typename T3, \
+                                    typename T4),                          \
+                        ESC_PARENS (T1, T2, T3, T4), VALID, EXPR_TYPE, EXPR)
 
-#define CHECK_VALID_EXPR_5(T1, T2, T3, T4, T5, VALID, EXPR_TYPE, EXPR)	\
-  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2,		\
-				    typename T3, typename T4,		\
-				    typename T5),			\
-			ESC_PARENS (T1, T2, T3, T4, T5),		\
-			VALID, EXPR_TYPE, EXPR)
+#define CHECK_VALID_EXPR_5(T1, T2, T3, T4, T5, VALID, EXPR_TYPE, EXPR)     \
+  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2, typename T3, \
+                                    typename T4, typename T5),             \
+                        ESC_PARENS (T1, T2, T3, T4, T5), VALID, EXPR_TYPE, \
+                        EXPR)
 
-#define CHECK_VALID_EXPR_6(T1, T2, T3, T4, T5, T6,			\
-			   VALID, EXPR_TYPE, EXPR)			\
-  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2,		\
-				    typename T3, typename T4,		\
-				    typename T5, typename T6),		\
-			ESC_PARENS (T1, T2, T3, T4, T5, T6),		\
-			VALID, EXPR_TYPE, EXPR)
+#define CHECK_VALID_EXPR_6(T1, T2, T3, T4, T5, T6, VALID, EXPR_TYPE, EXPR)  \
+  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2, typename T3,  \
+                                    typename T4, typename T5, typename T6), \
+                        ESC_PARENS (T1, T2, T3, T4, T5, T6), VALID,         \
+                        EXPR_TYPE, EXPR)
 
 #endif /* COMMON_VALID_EXPR_H */

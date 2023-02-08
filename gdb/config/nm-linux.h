@@ -23,7 +23,7 @@
 /* Use elf_gregset_t and elf_fpregset_t, rather than
    gregset_t and fpregset_t.  */
 
-#define GDB_GREGSET_T  elf_gregset_t
+#define GDB_GREGSET_T elf_gregset_t
 #define GDB_FPREGSET_T elf_fpregset_t
 
 #endif /* CONFIG_NM_LINUX_H */

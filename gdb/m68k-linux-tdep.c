@@ -36,7 +36,7 @@
 #include "elf/common.h"
 #include "linux-tdep.h"
 #include "regset.h"
-
+
 /* Offsets (in target ints) into jmp_buf.  */
 
 #define M68K_LINUX_JB_ELEMENT_SIZE 4
@@ -44,16 +44,15 @@
 
 /* Check whether insn1 and insn2 are parts of a signal trampoline.  */
 
-#define IS_SIGTRAMP(insn1, insn2)					\
-  (/* addaw #20,sp; moveq #119,d0; trap #0 */				\
-   (insn1 == 0xdefc0014 && insn2 == 0x70774e40)				\
-   /* moveq #119,d0; trap #0 */						\
+#define IS_SIGTRAMP(insn1, insn2)                                            \
+  (/* addaw #20,sp; moveq #119,d0; trap #0 */                                \
+   (insn1 == 0xdefc0014 && insn2 == 0x70774e40) /* moveq #119,d0; trap #0 */ \
    || insn1 == 0x70774e40)
 
-#define IS_RT_SIGTRAMP(insn1, insn2)					\
-  (/* movel #173,d0; trap #0 */						\
-   (insn1 == 0x203c0000 && insn2 == 0x00ad4e40)				\
-   /* moveq #82,d0; notb d0; trap #0 */					\
+#define IS_RT_SIGTRAMP(insn1, insn2)                             \
+  (/* movel #173,d0; trap #0 */                                  \
+   (insn1 == 0x203c0000                                          \
+    && insn2 == 0x00ad4e40) /* moveq #82,d0; notb d0; trap #0 */ \
    || (insn1 == 0x70524600 && (insn2 >> 16) == 0x4e40))
 
 /* Return non-zero if THIS_FRAME corresponds to a signal trampoline.  For
@@ -69,7 +68,7 @@ m68k_linux_pc_in_sigtramp (frame_info_ptr this_frame)
   unsigned long insn0, insn1, insn2;
   CORE_ADDR pc = get_frame_pc (this_frame);
 
-  if (!safe_frame_unwind_memory (this_frame, pc - 4, {buf, sizeof (buf)}))
+  if (!safe_frame_unwind_memory (this_frame, pc - 4, { buf, sizeof (buf) }))
     return 0;
   insn1 = extract_unsigned_integer (buf + 4, 4, byte_order);
   insn2 = extract_unsigned_integer (buf + 8, 4, byte_order);
@@ -95,106 +94,102 @@ m68k_linux_pc_in_sigtramp (frame_info_ptr this_frame)
 }
 
 /* From <asm/sigcontext.h>.  */
-static int m68k_linux_sigcontext_reg_offset[M68K_NUM_REGS] =
-{
-  2 * 4,			/* %d0 */
-  3 * 4,			/* %d1 */
-  -1,				/* %d2 */
-  -1,				/* %d3 */
-  -1,				/* %d4 */
-  -1,				/* %d5 */
-  -1,				/* %d6 */
-  -1,				/* %d7 */
-  4 * 4,			/* %a0 */
-  5 * 4,			/* %a1 */
-  -1,				/* %a2 */
-  -1,				/* %a3 */
-  -1,				/* %a4 */
-  -1,				/* %a5 */
-  -1,				/* %fp */
-  1 * 4,			/* %sp */
-  6 * 4,			/* %sr */
-  6 * 4 + 2,			/* %pc */
-  8 * 4,			/* %fp0 */
-  11 * 4,			/* %fp1 */
-  -1,				/* %fp2 */
-  -1,				/* %fp3 */
-  -1,				/* %fp4 */
-  -1,				/* %fp5 */
-  -1,				/* %fp6 */
-  -1,				/* %fp7 */
-  14 * 4,			/* %fpcr */
-  15 * 4,			/* %fpsr */
-  16 * 4			/* %fpiaddr */
+static int m68k_linux_sigcontext_reg_offset[M68K_NUM_REGS] = {
+  2 * 4,     /* %d0 */
+  3 * 4,     /* %d1 */
+  -1,	     /* %d2 */
+  -1,	     /* %d3 */
+  -1,	     /* %d4 */
+  -1,	     /* %d5 */
+  -1,	     /* %d6 */
+  -1,	     /* %d7 */
+  4 * 4,     /* %a0 */
+  5 * 4,     /* %a1 */
+  -1,	     /* %a2 */
+  -1,	     /* %a3 */
+  -1,	     /* %a4 */
+  -1,	     /* %a5 */
+  -1,	     /* %fp */
+  1 * 4,     /* %sp */
+  6 * 4,     /* %sr */
+  6 * 4 + 2, /* %pc */
+  8 * 4,     /* %fp0 */
+  11 * 4,    /* %fp1 */
+  -1,	     /* %fp2 */
+  -1,	     /* %fp3 */
+  -1,	     /* %fp4 */
+  -1,	     /* %fp5 */
+  -1,	     /* %fp6 */
+  -1,	     /* %fp7 */
+  14 * 4,    /* %fpcr */
+  15 * 4,    /* %fpsr */
+  16 * 4     /* %fpiaddr */
 };
 
-static int m68k_uclinux_sigcontext_reg_offset[M68K_NUM_REGS] =
-{
-  2 * 4,			/* %d0 */
-  3 * 4,			/* %d1 */
-  -1,				/* %d2 */
-  -1,				/* %d3 */
-  -1,				/* %d4 */
-  -1,				/* %d5 */
-  -1,				/* %d6 */
-  -1,				/* %d7 */
-  4 * 4,			/* %a0 */
-  5 * 4,			/* %a1 */
-  -1,				/* %a2 */
-  -1,				/* %a3 */
-  -1,				/* %a4 */
-  6 * 4,			/* %a5 */
-  -1,				/* %fp */
-  1 * 4,			/* %sp */
-  7 * 4,			/* %sr */
-  7 * 4 + 2,			/* %pc */
-  -1,				/* %fp0 */
-  -1,				/* %fp1 */
-  -1,				/* %fp2 */
-  -1,				/* %fp3 */
-  -1,				/* %fp4 */
-  -1,				/* %fp5 */
-  -1,				/* %fp6 */
-  -1,				/* %fp7 */
-  -1,				/* %fpcr */
-  -1,				/* %fpsr */
-  -1				/* %fpiaddr */
+static int m68k_uclinux_sigcontext_reg_offset[M68K_NUM_REGS] = {
+  2 * 4,     /* %d0 */
+  3 * 4,     /* %d1 */
+  -1,	     /* %d2 */
+  -1,	     /* %d3 */
+  -1,	     /* %d4 */
+  -1,	     /* %d5 */
+  -1,	     /* %d6 */
+  -1,	     /* %d7 */
+  4 * 4,     /* %a0 */
+  5 * 4,     /* %a1 */
+  -1,	     /* %a2 */
+  -1,	     /* %a3 */
+  -1,	     /* %a4 */
+  6 * 4,     /* %a5 */
+  -1,	     /* %fp */
+  1 * 4,     /* %sp */
+  7 * 4,     /* %sr */
+  7 * 4 + 2, /* %pc */
+  -1,	     /* %fp0 */
+  -1,	     /* %fp1 */
+  -1,	     /* %fp2 */
+  -1,	     /* %fp3 */
+  -1,	     /* %fp4 */
+  -1,	     /* %fp5 */
+  -1,	     /* %fp6 */
+  -1,	     /* %fp7 */
+  -1,	     /* %fpcr */
+  -1,	     /* %fpsr */
+  -1	     /* %fpiaddr */
 };
 
 /* From <asm/ucontext.h>.  */
-static int m68k_linux_ucontext_reg_offset[M68K_NUM_REGS] =
-{
-  6 * 4,			/* %d0 */
-  7 * 4,			/* %d1 */
-  8 * 4,			/* %d2 */
-  9 * 4,			/* %d3 */
-  10 * 4,			/* %d4 */
-  11 * 4,			/* %d5 */
-  12 * 4,			/* %d6 */
-  13 * 4,			/* %d7 */
-  14 * 4,			/* %a0 */
-  15 * 4,			/* %a1 */
-  16 * 4,			/* %a2 */
-  17 * 4,			/* %a3 */
-  18 * 4,			/* %a4 */
-  19 * 4,			/* %a5 */
-  20 * 4,			/* %fp */
-  21 * 4,			/* %sp */
-  23 * 4,			/* %sr */
-  22 * 4,			/* %pc */
-  27 * 4,			/* %fp0 */
-  30 * 4,			/* %fp1 */
-  33 * 4,			/* %fp2 */
-  36 * 4,			/* %fp3 */
-  39 * 4,			/* %fp4 */
-  42 * 4,			/* %fp5 */
-  45 * 4,			/* %fp6 */
-  48 * 4,			/* %fp7 */
-  24 * 4,			/* %fpcr */
-  25 * 4,			/* %fpsr */
-  26 * 4			/* %fpiaddr */
+static int m68k_linux_ucontext_reg_offset[M68K_NUM_REGS] = {
+  6 * 4,  /* %d0 */
+  7 * 4,  /* %d1 */
+  8 * 4,  /* %d2 */
+  9 * 4,  /* %d3 */
+  10 * 4, /* %d4 */
+  11 * 4, /* %d5 */
+  12 * 4, /* %d6 */
+  13 * 4, /* %d7 */
+  14 * 4, /* %a0 */
+  15 * 4, /* %a1 */
+  16 * 4, /* %a2 */
+  17 * 4, /* %a3 */
+  18 * 4, /* %a4 */
+  19 * 4, /* %a5 */
+  20 * 4, /* %fp */
+  21 * 4, /* %sp */
+  23 * 4, /* %sr */
+  22 * 4, /* %pc */
+  27 * 4, /* %fp0 */
+  30 * 4, /* %fp1 */
+  33 * 4, /* %fp2 */
+  36 * 4, /* %fp3 */
+  39 * 4, /* %fp4 */
+  42 * 4, /* %fp5 */
+  45 * 4, /* %fp6 */
+  48 * 4, /* %fp7 */
+  24 * 4, /* %fpcr */
+  25 * 4, /* %fpsr */
+  26 * 4  /* %fpiaddr */
 };
-
 
 /* Get info about saved registers in sigtramp.  */
 
@@ -239,17 +234,16 @@ m68k_linux_get_sigtramp_info (frame_info_ptr this_frame)
   if (m68k_linux_pc_in_sigtramp (this_frame) == 2)
     info.sc_reg_offset = m68k_linux_ucontext_reg_offset;
   else
-    info.sc_reg_offset = (target_is_uclinux
-			  ? m68k_uclinux_sigcontext_reg_offset
-			  : m68k_linux_sigcontext_reg_offset);
+    info.sc_reg_offset
+      = (target_is_uclinux ? m68k_uclinux_sigcontext_reg_offset
+			   : m68k_linux_sigcontext_reg_offset);
   return info;
 }
 
 /* Signal trampolines.  */
 
 static struct trad_frame_cache *
-m68k_linux_sigtramp_frame_cache (frame_info_ptr this_frame,
-				 void **this_cache)
+m68k_linux_sigtramp_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct frame_id this_id;
   struct trad_frame_cache *cache;
@@ -270,8 +264,9 @@ m68k_linux_sigtramp_frame_cache (frame_info_ptr this_frame,
      trampoline.  */
   get_frame_register (this_frame, M68K_SP_REGNUM, buf);
   /* See the end of m68k_push_dummy_call.  */
-  this_id = frame_id_build (extract_unsigned_integer (buf, 4, byte_order)
-			    - 4 + 8, get_frame_pc (this_frame));
+  this_id
+    = frame_id_build (extract_unsigned_integer (buf, 4, byte_order) - 4 + 8,
+		      get_frame_pc (this_frame));
   trad_frame_set_id (cache, this_id);
 
   info = m68k_linux_get_sigtramp_info (this_frame);
@@ -287,22 +282,20 @@ m68k_linux_sigtramp_frame_cache (frame_info_ptr this_frame,
 
 static void
 m68k_linux_sigtramp_frame_this_id (frame_info_ptr this_frame,
-				   void **this_cache,
-				   struct frame_id *this_id)
+				   void **this_cache, struct frame_id *this_id)
 {
-  struct trad_frame_cache *cache =
-    m68k_linux_sigtramp_frame_cache (this_frame, this_cache);
+  struct trad_frame_cache *cache
+    = m68k_linux_sigtramp_frame_cache (this_frame, this_cache);
   trad_frame_get_id (cache, this_id);
 }
 
 static struct value *
 m68k_linux_sigtramp_frame_prev_register (frame_info_ptr this_frame,
-					 void **this_cache,
-					 int regnum)
+					 void **this_cache, int regnum)
 {
   /* Make sure we've initialized the cache.  */
-  struct trad_frame_cache *cache =
-    m68k_linux_sigtramp_frame_cache (this_frame, this_cache);
+  struct trad_frame_cache *cache
+    = m68k_linux_sigtramp_frame_cache (this_frame, this_cache);
   return trad_frame_get_register (cache, this_frame, regnum);
 }
 
@@ -314,58 +307,46 @@ m68k_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return m68k_linux_pc_in_sigtramp (this_frame);
 }
 
-static const struct frame_unwind m68k_linux_sigtramp_frame_unwind =
-{
-  "m68k linux sigtramp",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  m68k_linux_sigtramp_frame_this_id,
-  m68k_linux_sigtramp_frame_prev_register,
-  NULL,
-  m68k_linux_sigtramp_frame_sniffer
-};
+static const struct frame_unwind m68k_linux_sigtramp_frame_unwind
+  = { "m68k linux sigtramp",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      m68k_linux_sigtramp_frame_this_id,
+      m68k_linux_sigtramp_frame_prev_register,
+      NULL,
+      m68k_linux_sigtramp_frame_sniffer };
 
 /* Register maps for supply/collect regset functions.  */
 
-static const struct regcache_map_entry m68k_linux_gregmap[] =
-  {
-    { 7, M68K_D1_REGNUM, 4 },	/* d1 ... d7 */
-    { 7, M68K_A0_REGNUM, 4 },	/* a0 ... a6 */
-    { 1, M68K_D0_REGNUM, 4 },
-    { 1, M68K_SP_REGNUM, 4 },
-    { 1, REGCACHE_MAP_SKIP, 4 }, /* orig_d0 (skip) */
-    { 1, M68K_PS_REGNUM, 4 },
-    { 1, M68K_PC_REGNUM, 4 },
-    /* Ignore 16-bit fields 'fmtvec' and '__fill'.  */
-    { 0 }
-  };
+static const struct regcache_map_entry m68k_linux_gregmap[]
+  = { { 7, M68K_D1_REGNUM, 4 }, /* d1 ... d7 */
+      { 7, M68K_A0_REGNUM, 4 }, /* a0 ... a6 */
+      { 1, M68K_D0_REGNUM, 4 },
+      { 1, M68K_SP_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* orig_d0 (skip) */
+      { 1, M68K_PS_REGNUM, 4 },
+      { 1, M68K_PC_REGNUM, 4 },
+      /* Ignore 16-bit fields 'fmtvec' and '__fill'.  */
+      { 0 } };
 
 #define M68K_LINUX_GREGS_SIZE (20 * 4)
 
-static const struct regcache_map_entry m68k_linux_fpregmap[] =
-  {
-    { 8, M68K_FP0_REGNUM, 12 },	/* fp0 ... fp7 */
-    { 1, M68K_FPC_REGNUM, 4 },
-    { 1, M68K_FPS_REGNUM, 4 },
-    { 1, M68K_FPI_REGNUM, 4 },
-    { 0 }
-  };
+static const struct regcache_map_entry m68k_linux_fpregmap[]
+  = { { 8, M68K_FP0_REGNUM, 12 }, /* fp0 ... fp7 */
+      { 1, M68K_FPC_REGNUM, 4 },
+      { 1, M68K_FPS_REGNUM, 4 },
+      { 1, M68K_FPI_REGNUM, 4 },
+      { 0 } };
 
 #define M68K_LINUX_FPREGS_SIZE (27 * 4)
 
 /* Register sets. */
 
-static const struct regset m68k_linux_gregset =
-  {
-    m68k_linux_gregmap,
-    regcache_supply_regset, regcache_collect_regset
-  };
+static const struct regset m68k_linux_gregset
+  = { m68k_linux_gregmap, regcache_supply_regset, regcache_collect_regset };
 
-static const struct regset m68k_linux_fpregset =
-  {
-    m68k_linux_fpregmap,
-    regcache_supply_regset, regcache_collect_regset
-  };
+static const struct regset m68k_linux_fpregset
+  = { m68k_linux_fpregmap, regcache_supply_regset, regcache_collect_regset };
 
 /* Iterate over core file register note sections.  */
 
@@ -375,8 +356,8 @@ m68k_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  cb (".reg", M68K_LINUX_GREGS_SIZE, M68K_LINUX_GREGS_SIZE, &m68k_linux_gregset,
-      NULL, cb_data);
+  cb (".reg", M68K_LINUX_GREGS_SIZE, M68K_LINUX_GREGS_SIZE,
+      &m68k_linux_gregset, NULL, cb_data);
   cb (".reg2", M68K_LINUX_FPREGS_SIZE, M68K_LINUX_FPREGS_SIZE,
       &m68k_linux_fpregset, NULL, cb_data);
 }
@@ -416,8 +397,8 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Core file support. */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, m68k_linux_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, m68k_linux_iterate_over_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
@@ -425,6 +406,7 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_m68k_linux_tdep ();
+
 void
 _initialize_m68k_linux_tdep ()
 {

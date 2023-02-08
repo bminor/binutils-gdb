@@ -18,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (INFERIOR_H)
+#if !defined(INFERIOR_H)
 #define INFERIOR_H 1
 
 #include <exception>
@@ -93,14 +93,14 @@ struct infcall_suspend_state_deleter
 	unwinding = std::uncaught_exception ();
 #endif
 	if (!unwinding)
-	  warning (_("Failed to restore inferior state: %s"), e.what ());
+	  warning (_ ("Failed to restore inferior state: %s"), e.what ());
       }
   }
 };
 
 /* A unique_ptr specialization for infcall_suspend_state.  */
 typedef std::unique_ptr<infcall_suspend_state, infcall_suspend_state_deleter>
-    infcall_suspend_state_up;
+  infcall_suspend_state_up;
 
 extern infcall_suspend_state_up save_infcall_suspend_state ();
 
@@ -116,7 +116,7 @@ struct infcall_control_state_deleter
 
 /* A unique_ptr specialization for infcall_control_state.  */
 typedef std::unique_ptr<infcall_control_state, infcall_control_state_deleter>
-    infcall_control_state_up;
+  infcall_control_state_up;
 
 extern infcall_control_state_up save_infcall_control_state ();
 
@@ -124,7 +124,7 @@ extern void discard_infcall_suspend_state (struct infcall_suspend_state *);
 extern void discard_infcall_control_state (struct infcall_control_state *);
 
 extern readonly_detached_regcache *
-  get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
+get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
 
 extern void set_sigint_trap (void);
 
@@ -156,16 +156,15 @@ extern void reopen_exec_file (void);
 
 extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct ui_file *file,
-					  frame_info_ptr frame,
-					  int regnum, int all);
+					  frame_info_ptr frame, int regnum,
+					  int all);
 
 /* Default implementation of gdbarch_print_float_info.  Print
    the values of all floating point registers.  */
 
 extern void default_print_float_info (struct gdbarch *gdbarch,
 				      struct ui_file *file,
-				      frame_info_ptr frame,
-				      const char *args);
+				      frame_info_ptr frame, const char *args);
 
 /* Try to determine whether TTY is GDB's input terminal.  Returns
    TRIBOOL_UNKNOWN if we can't tell.  */
@@ -295,14 +294,12 @@ extern bool print_inferior_events;
    is not passed back down to the kernel.  */
 
 enum stop_kind
-  {
-    NO_STOP_QUIETLY = 0,
-    STOP_QUIETLY,
-    STOP_QUIETLY_REMOTE,
-    STOP_QUIETLY_NO_SIGSTOP
-  };
-
-
+{
+  NO_STOP_QUIETLY = 0,
+  STOP_QUIETLY,
+  STOP_QUIETLY_REMOTE,
+  STOP_QUIETLY_NO_SIGSTOP
+};
 
 /* Base class for target-specific inferior data.  */
 
@@ -347,8 +344,7 @@ struct target_desc_info
 {
   /* Returns true if this target description information has been supplied by
      the user.  */
-  bool from_user_p ()
-  { return !this->filename.empty (); }
+  bool from_user_p () { return !this->filename.empty (); }
 
   /* A flag indicating that a description has already been fetched
      from the target, so it should not be queried again.  */
@@ -390,10 +386,10 @@ struct target_desc_info
    listed exactly once in the inferior list, so placing an inferior in
    the inferior list is an implicit, not counted strong reference.  */
 
-class inferior : public refcounted_object,
-		 public intrusive_list_node<inferior>
+class inferior : public refcounted_object, public intrusive_list_node<inferior>
 {
 public:
+
   explicit inferior (int pid);
   ~inferior ();
 
@@ -401,8 +397,7 @@ public:
   bool deletable () const { return refcount () == 0; }
 
   /* Push T in this inferior's target stack.  */
-  void push_target (struct target_ops *t)
-  { m_target_stack.push (t); }
+  void push_target (struct target_ops *t) { m_target_stack.push (t); }
 
   /* An overload that deletes the target on failure.  */
   void push_target (target_ops_up &&t)
@@ -416,21 +411,23 @@ public:
 
   /* Returns true if T is pushed in this inferior's target stack.  */
   bool target_is_pushed (const target_ops *t) const
-  { return m_target_stack.is_pushed (t); }
+  {
+    return m_target_stack.is_pushed (t);
+  }
 
   /* Find the target beneath T in this inferior's target stack.  */
   target_ops *find_target_beneath (const target_ops *t)
-  { return m_target_stack.find_beneath (t); }
+  {
+    return m_target_stack.find_beneath (t);
+  }
 
   /* Return the target at the top of this inferior's target stack.  */
-  target_ops *top_target ()
-  { return m_target_stack.top (); }
+  target_ops *top_target () { return m_target_stack.top (); }
 
   /* Unpush all targets except the dummy target from m_target_stack.  As
      targets are removed from m_target_stack their reference count is
      decremented, which may cause a target to close.  */
-  void pop_all_targets ()
-  { pop_all_targets_above (dummy_stratum); }
+  void pop_all_targets () { pop_all_targets_above (dummy_stratum); }
 
   /* Unpush all targets above STRATUM from m_target_stack.  As targets are
      removed from m_target_stack their reference count is decremented,
@@ -445,14 +442,17 @@ public:
   /* Return the target at process_stratum level in this inferior's
      target stack.  */
   struct process_stratum_target *process_target ()
-  { return (process_stratum_target *) m_target_stack.at (process_stratum); }
+  {
+    return (process_stratum_target *) m_target_stack.at (process_stratum);
+  }
 
   /* Return the target at STRATUM in this inferior's target stack.  */
   target_ops *target_at (enum strata stratum)
-  { return m_target_stack.at (stratum); }
+  {
+    return m_target_stack.at (stratum);
+  }
 
-  bool has_execution ()
-  { return target_has_execution (this); }
+  bool has_execution () { return target_has_execution (this); }
 
   /* This inferior's thread list, sorted by creation order.  */
   intrusive_list<thread_info> thread_list;
@@ -468,7 +468,9 @@ public:
 	 { .... }
   */
   inf_threads_range threads ()
-  { return inf_threads_range (this->thread_list.begin ()); }
+  {
+    return inf_threads_range (this->thread_list.begin ());
+  }
 
   /* Returns a range adapter covering the inferior's non-exited
      threads.  Used like this:
@@ -477,7 +479,9 @@ public:
 	 { .... }
   */
   inf_non_exited_threads_range non_exited_threads ()
-  { return inf_non_exited_threads_range (this->thread_list.begin ()); }
+  {
+    return inf_non_exited_threads_range (this->thread_list.begin ());
+  }
 
   /* Like inferior::threads(), but returns a range adapter that can be
      used with range-for, safely.  I.e., it is safe to delete the
@@ -488,7 +492,9 @@ public:
 	 delete f;
   */
   inline safe_inf_threads_range threads_safe ()
-  { return safe_inf_threads_range (this->thread_list.begin ()); }
+  {
+    return safe_inf_threads_range (this->thread_list.begin ());
+  }
 
   /* Delete all threads in the thread list.  If SILENT, exit threads
      silently.  */
@@ -515,35 +521,23 @@ public:
   /* Set the argument string to use when running this inferior.
 
      An empty string can be used to represent "no arguments".  */
-  void set_args (std::string args)
-  {
-    m_args = std::move (args);
-  };
+  void set_args (std::string args) { m_args = std::move (args); };
 
   /* Get the argument string to use when running this inferior.
 
      No arguments is represented by an empty string.  */
-  const std::string &args () const
-  {
-    return m_args;
-  }
+  const std::string &args () const { return m_args; }
 
   /* Set the inferior current working directory.
 
      If CWD is empty, unset the directory.  */
-  void set_cwd (std::string cwd)
-  {
-    m_cwd = std::move (cwd);
-  }
+  void set_cwd (std::string cwd) { m_cwd = std::move (cwd); }
 
   /* Get the inferior current working directory.
 
      Return an empty string if the current working directory is not
      specified.  */
-  const std::string &cwd () const
-  {
-    return m_cwd;
-  }
+  const std::string &cwd () const { return m_cwd; }
 
   /* Convenient handle (GDB inferior id).  Unique across all
      inferiors.  */
@@ -719,7 +713,7 @@ extern struct inferior *find_inferior_id (int num);
 /* Find an inferior bound to PSPACE, giving preference to the current
    inferior.  */
 extern struct inferior *
-  find_inferior_for_program_space (struct program_space *pspace);
+find_inferior_for_program_space (struct program_space *pspace);
 
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
@@ -737,19 +731,20 @@ extern int have_live_inferiors (void);
 class scoped_restore_current_inferior
 {
 public:
+
   scoped_restore_current_inferior ()
     : m_saved_inf (current_inferior ())
-  {}
+  {
+  }
 
-  ~scoped_restore_current_inferior ()
-  { set_current_inferior (m_saved_inf); }
+  ~scoped_restore_current_inferior () { set_current_inferior (m_saved_inf); }
 
   DISABLE_COPY_AND_ASSIGN (scoped_restore_current_inferior);
 
 private:
+
   inferior *m_saved_inf;
 };
-
 
 /* Traverse all inferiors.  */
 
@@ -812,7 +807,8 @@ extern void print_selected_inferior (struct ui_out *uiout);
    NO_CONNECTION is true, push the process_stratum_target of ORG_INF
    to NEW_INF.  */
 
-extern void switch_to_inferior_and_push_target
-  (inferior *new_inf, bool no_connection, inferior *org_inf);
+extern void switch_to_inferior_and_push_target (inferior *new_inf,
+						bool no_connection,
+						inferior *org_inf);
 
 #endif /* !defined (INFERIOR_H) */

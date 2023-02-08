@@ -51,7 +51,7 @@ namespace gdb
 
 template<typename ErrorValType, typename Fun, typename... Args>
 inline auto
-handle_eintr (ErrorValType errval, const Fun &f, const Args &... args)
+handle_eintr (ErrorValType errval, const Fun &f, const Args &...args)
   -> decltype (f (args...))
 {
   decltype (f (args...)) ret;

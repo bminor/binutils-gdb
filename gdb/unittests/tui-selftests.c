@@ -24,8 +24,10 @@
 
 #include "tui/tui-winsource.h"
 
-namespace selftests {
-namespace tui {
+namespace selftests
+{
+namespace tui
+{
 
 static void
 run_tests ()
@@ -47,6 +49,7 @@ run_tests ()
 #endif /* TUI */
 
 void _initialize_tui_selftest ();
+
 void
 _initialize_tui_selftest ()
 {

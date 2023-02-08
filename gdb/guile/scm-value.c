@@ -77,7 +77,7 @@ static SCM length_keyword;
 static SCM error_symbol;
 static SCM escape_symbol;
 static SCM substitute_symbol;
-
+
 /* Administrivia for value smobs.  */
 
 /* Iterate over all the <gdb:value> objects, calling preserve_one_value on
@@ -207,8 +207,8 @@ vlscm_equal_p_value_smob (SCM v1, SCM v2)
 static SCM
 vlscm_make_value_smob (void)
 {
-  value_smob *v_smob = (value_smob *)
-    scm_gc_malloc (sizeof (value_smob), value_smob_name);
+  value_smob *v_smob
+    = (value_smob *) scm_gc_malloc (sizeof (value_smob), value_smob_name);
   SCM v_scm;
 
   /* These must be filled in by the caller.  */
@@ -315,7 +315,7 @@ vlscm_scm_to_value (SCM v_scm)
   v_smob = (value_smob *) SCM_SMOB_DATA (v_scm);
   return v_smob->value;
 }
-
+
 /* Value methods.  */
 
 /* (make-value x [#:type type]) -> <gdb:value> */
@@ -333,28 +333,23 @@ gdbscm_make_value (SCM x, SCM rest)
   struct type *type = NULL;
   if (type_arg_pos > 0)
     {
-      type_smob *t_smob = tyscm_get_type_smob_arg_unsafe (type_scm,
-							  type_arg_pos,
-							  FUNC_NAME);
+      type_smob *t_smob
+	= tyscm_get_type_smob_arg_unsafe (type_scm, type_arg_pos, FUNC_NAME);
       type = tyscm_type_smob_type (t_smob);
     }
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      SCM except_scm;
-      struct value *value
-	= vlscm_convert_typed_value_from_scheme (FUNC_NAME, SCM_ARG1, x,
-						 type_arg_pos, type_scm, type,
-						 &except_scm,
-						 get_current_arch (),
-						 current_language);
-      if (value == NULL)
-	return except_scm;
+    SCM except_scm;
+    struct value *value = vlscm_convert_typed_value_from_scheme (
+      FUNC_NAME, SCM_ARG1, x, type_arg_pos, type_scm, type, &except_scm,
+      get_current_arch (), current_language);
+    if (value == NULL)
+      return except_scm;
 
-      return vlscm_scm_from_value (value);
-    });
+    return vlscm_scm_from_value (value);
+  });
 }
 
 /* (make-lazy-value <gdb:type> address) -> <gdb:value> */
@@ -362,22 +357,21 @@ gdbscm_make_value (SCM x, SCM rest)
 static SCM
 gdbscm_make_lazy_value (SCM type_scm, SCM address_scm)
 {
-  type_smob *t_smob = tyscm_get_type_smob_arg_unsafe (type_scm,
-						      SCM_ARG1, FUNC_NAME);
+  type_smob *t_smob
+    = tyscm_get_type_smob_arg_unsafe (type_scm, SCM_ARG1, FUNC_NAME);
   struct type *type = tyscm_type_smob_type (t_smob);
 
   ULONGEST address;
-  gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, NULL, "U",
-			      address_scm, &address);
+  gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, NULL, "U", address_scm,
+			      &address);
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      struct value *value = value_from_contents_and_address (type, NULL,
-							     address);
-      return vlscm_scm_from_value (value);
-    });
+    struct value *value
+      = value_from_contents_and_address (type, NULL, address);
+    return vlscm_scm_from_value (value);
+  });
 }
 
 /* (value-optimized-out? <gdb:value>) -> boolean */
@@ -388,10 +382,9 @@ gdbscm_value_optimized_out_p (SCM self)
   value_smob *v_smob
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  return gdbscm_wrap ([=]
-    {
-      return scm_from_bool (value_optimized_out (v_smob->value));
-    });
+  return gdbscm_wrap ([=] {
+    return scm_from_bool (value_optimized_out (v_smob->value));
+  });
 }
 
 /* (value-address <gdb:value>) -> integer
@@ -404,30 +397,29 @@ gdbscm_value_address (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
 
-  return gdbscm_wrap ([=]
-    {
-      if (SCM_UNBNDP (v_smob->address))
-	{
-	  scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    if (SCM_UNBNDP (v_smob->address))
+      {
+	scoped_value_mark free_values;
 
-	  SCM address = SCM_BOOL_F;
+	SCM address = SCM_BOOL_F;
 
-	  try
-	    {
-	      address = vlscm_scm_from_value (value_addr (value));
-	    }
-	  catch (const gdb_exception &except)
-	    {
-	    }
+	try
+	  {
+	    address = vlscm_scm_from_value (value_addr (value));
+	  }
+	catch (const gdb_exception &except)
+	  {
+	  }
 
-	  if (gdbscm_is_exception (address))
-	    return address;
+	if (gdbscm_is_exception (address))
+	  return address;
 
-	  v_smob->address = address;
-	}
+	v_smob->address = address;
+      }
 
-      return v_smob->address;
-    });
+    return v_smob->address;
+  });
 }
 
 /* (value-dereference <gdb:value>) -> <gdb:value>
@@ -439,13 +431,12 @@ gdbscm_value_dereference (SCM self)
   value_smob *v_smob
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      struct value *res_val = value_ind (v_smob->value);
-      return vlscm_scm_from_value (res_val);
-    });
+    struct value *res_val = value_ind (v_smob->value);
+    return vlscm_scm_from_value (res_val);
+  });
 }
 
 /* (value-referenced-value <gdb:value>) -> <gdb:value>
@@ -464,28 +455,27 @@ gdbscm_value_referenced_value (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      struct value *res_val;
+    struct value *res_val;
 
-      switch (check_typedef (value_type (value))->code ())
-	{
-	case TYPE_CODE_PTR:
-	  res_val = value_ind (value);
-	  break;
-	case TYPE_CODE_REF:
-	case TYPE_CODE_RVALUE_REF:
-	  res_val = coerce_ref (value);
-	  break;
-	default:
-	  error (_("Trying to get the referenced value from a value which is"
-		   " neither a pointer nor a reference"));
-	}
+    switch (check_typedef (value_type (value))->code ())
+      {
+      case TYPE_CODE_PTR:
+	res_val = value_ind (value);
+	break;
+      case TYPE_CODE_REF:
+      case TYPE_CODE_RVALUE_REF:
+	res_val = coerce_ref (value);
+	break;
+      default:
+	error (_ ("Trying to get the referenced value from a value which is"
+		  " neither a pointer nor a reference"));
+      }
 
-      return vlscm_scm_from_value (res_val);
-    });
+    return vlscm_scm_from_value (res_val);
+  });
 }
 
 static SCM
@@ -495,13 +485,12 @@ gdbscm_reference_value (SCM self, enum type_code refcode)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      struct value *res_val = value_ref (value, refcode);
-      return vlscm_scm_from_value (res_val);
-    });
+    struct value *res_val = value_ref (value, refcode);
+    return vlscm_scm_from_value (res_val);
+  });
 }
 
 /* (value-reference-value <gdb:value>) -> <gdb:value> */
@@ -529,13 +518,12 @@ gdbscm_value_const_value (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      struct value *res_val = make_cv_value (1, 0, value);
-      return vlscm_scm_from_value (res_val);
-    });
+    struct value *res_val = make_cv_value (1, 0, value);
+    return vlscm_scm_from_value (res_val);
+  });
 }
 
 /* (value-type <gdb:value>) -> <gdb:type> */
@@ -563,7 +551,7 @@ gdbscm_value_dynamic_type (SCM self)
   struct value *value = v_smob->value;
   struct type *type = NULL;
 
-  if (! SCM_UNBNDP (v_smob->dynamic_type))
+  if (!SCM_UNBNDP (v_smob->dynamic_type))
     return v_smob->dynamic_type;
 
   gdbscm_gdb_exception exc {};
@@ -630,23 +618,22 @@ vlscm_do_cast (SCM self, SCM type_scm, enum exp_opcode op,
     = tyscm_get_type_smob_arg_unsafe (type_scm, SCM_ARG2, FUNC_NAME);
   struct type *type = tyscm_type_smob_type (t_smob);
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      struct value *res_val;
-      if (op == UNOP_DYNAMIC_CAST)
-	res_val = value_dynamic_cast (type, value);
-      else if (op == UNOP_REINTERPRET_CAST)
-	res_val = value_reinterpret_cast (type, value);
-      else
-	{
-	  gdb_assert (op == UNOP_CAST);
-	  res_val = value_cast (type, value);
-	}
+    struct value *res_val;
+    if (op == UNOP_DYNAMIC_CAST)
+      res_val = value_dynamic_cast (type, value);
+    else if (op == UNOP_REINTERPRET_CAST)
+      res_val = value_reinterpret_cast (type, value);
+    else
+      {
+	gdb_assert (op == UNOP_CAST);
+	res_val = value_cast (type, value);
+      }
 
-      return vlscm_scm_from_value (res_val);
-    });
+    return vlscm_scm_from_value (res_val);
+  });
 }
 
 /* (value-cast <gdb:value> <gdb:type>) -> <gdb:value> */
@@ -684,21 +671,20 @@ gdbscm_value_field (SCM self, SCM field_scm)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
   SCM_ASSERT_TYPE (scm_is_string (field_scm), field_scm, SCM_ARG2, FUNC_NAME,
-		   _("string"));
+		   _ ("string"));
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      gdb::unique_xmalloc_ptr<char> field = gdbscm_scm_to_c_string (field_scm);
+    gdb::unique_xmalloc_ptr<char> field = gdbscm_scm_to_c_string (field_scm);
 
-      struct value *tmp = v_smob->value;
+    struct value *tmp = v_smob->value;
 
-      struct value *res_val = value_struct_elt (&tmp, {}, field.get (), NULL,
-						"struct/class/union");
+    struct value *res_val
+      = value_struct_elt (&tmp, {}, field.get (), NULL, "struct/class/union");
 
-      return vlscm_scm_from_value (res_val);
-    });
+    return vlscm_scm_from_value (res_val);
+  });
 }
 
 /* (value-subscript <gdb:value> integer|<gdb:value>) -> <gdb:value>
@@ -714,32 +700,30 @@ gdbscm_value_subscript (SCM self, SCM index_scm)
 
   SCM_ASSERT (type != NULL, self, SCM_ARG2, FUNC_NAME);
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      SCM except_scm;
-      struct value *index
-	= vlscm_convert_value_from_scheme (FUNC_NAME, SCM_ARG2, index_scm,
-					   &except_scm,
-					   type->arch (),
-					   current_language);
-      if (index == NULL)
-	return except_scm;
+    SCM except_scm;
+    struct value *index
+      = vlscm_convert_value_from_scheme (FUNC_NAME, SCM_ARG2, index_scm,
+					 &except_scm, type->arch (),
+					 current_language);
+    if (index == NULL)
+      return except_scm;
 
-      /* Assume we are attempting an array access, and let the value code
+    /* Assume we are attempting an array access, and let the value code
 	 throw an exception if the index has an invalid type.
 	 Check the value's type is something that can be accessed via
 	 a subscript.  */
-      struct value *tmp = coerce_ref (value);
-      struct type *tmp_type = check_typedef (value_type (tmp));
-      if (tmp_type->code () != TYPE_CODE_ARRAY
-	  && tmp_type->code () != TYPE_CODE_PTR)
-	error (_("Cannot subscript requested type"));
+    struct value *tmp = coerce_ref (value);
+    struct type *tmp_type = check_typedef (value_type (tmp));
+    if (tmp_type->code () != TYPE_CODE_ARRAY
+	&& tmp_type->code () != TYPE_CODE_PTR)
+      error (_ ("Cannot subscript requested type"));
 
-      struct value *res_val = value_subscript (tmp, value_as_long (index));
-      return vlscm_scm_from_value (res_val);
-    });
+    struct value *res_val = value_subscript (tmp, value_as_long (index));
+    return vlscm_scm_from_value (res_val);
+  });
 }
 
 /* (value-call <gdb:value> arg-list) -> <gdb:value>
@@ -766,12 +750,11 @@ gdbscm_value_call (SCM self, SCM args)
     }
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-  SCM_ASSERT_TYPE (ftype->code () == TYPE_CODE_FUNC, self,
-		   SCM_ARG1, FUNC_NAME,
-		   _("function (value of TYPE_CODE_FUNC)"));
+  SCM_ASSERT_TYPE (ftype->code () == TYPE_CODE_FUNC, self, SCM_ARG1, FUNC_NAME,
+		   _ ("function (value of TYPE_CODE_FUNC)"));
 
-  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (args)), args,
-		   SCM_ARG2, FUNC_NAME, _("list"));
+  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (args)), args, SCM_ARG2,
+		   FUNC_NAME, _ ("list"));
 
   args_count = scm_ilength (args);
   if (args_count > 0)
@@ -786,10 +769,9 @@ gdbscm_value_call (SCM self, SCM args)
 	{
 	  SCM arg = scm_car (args);
 
-	  vargs[i] = vlscm_convert_value_from_scheme (FUNC_NAME,
-						      GDBSCM_ARG_NONE, arg,
-						      &except_scm,
-						      gdbarch, language);
+	  vargs[i]
+	    = vlscm_convert_value_from_scheme (FUNC_NAME, GDBSCM_ARG_NONE, arg,
+					       &except_scm, gdbarch, language);
 	  if (vargs[i] == NULL)
 	    gdbscm_throw (except_scm);
 
@@ -798,14 +780,13 @@ gdbscm_value_call (SCM self, SCM args)
       gdb_assert (gdbscm_is_true (scm_null_p (args)));
     }
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
 
-      auto av = gdb::make_array_view (vargs, args_count);
-      value *return_value = call_function_by_hand (function, NULL, av);
-      return vlscm_scm_from_value (return_value);
-    });
+    auto av = gdb::make_array_view (vargs, args_count);
+    value *return_value = call_function_by_hand (function, NULL, av);
+    return vlscm_scm_from_value (return_value);
+  });
 }
 
 /* (value->bytevector <gdb:value>) -> bytevector */
@@ -847,10 +828,8 @@ gdbscm_value_to_bytevector (SCM self)
 static int
 is_intlike (struct type *type, int ptr_ok)
 {
-  return (type->code () == TYPE_CODE_INT
-	  || type->code () == TYPE_CODE_ENUM
-	  || type->code () == TYPE_CODE_BOOL
-	  || type->code () == TYPE_CODE_CHAR
+  return (type->code () == TYPE_CODE_INT || type->code () == TYPE_CODE_ENUM
+	  || type->code () == TYPE_CODE_BOOL || type->code () == TYPE_CODE_CHAR
 	  || (ptr_ok && type->code () == TYPE_CODE_PTR));
 }
 
@@ -880,7 +859,7 @@ gdbscm_value_to_bool (SCM self)
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   SCM_ASSERT_TYPE (is_intlike (type, 1), self, SCM_ARG1, FUNC_NAME,
-		   _("integer-like gdb value"));
+		   _ ("integer-like gdb value"));
 
   try
     {
@@ -924,7 +903,7 @@ gdbscm_value_to_integer (SCM self)
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   SCM_ASSERT_TYPE (is_intlike (type, 1), self, SCM_ARG1, FUNC_NAME,
-		   _("integer-like gdb value"));
+		   _ ("integer-like gdb value"));
 
   try
     {
@@ -972,7 +951,7 @@ gdbscm_value_to_real (SCM self)
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   SCM_ASSERT_TYPE (is_intlike (type, 0) || type->code () == TYPE_CODE_FLT,
-		   self, SCM_ARG1, FUNC_NAME, _("number"));
+		   self, SCM_ARG1, FUNC_NAME, _ ("number"));
 
   try
     {
@@ -1002,7 +981,7 @@ gdbscm_value_to_real (SCM self)
   /* TODO: Is there a better way to check if the value fits?  */
   if (!value_equal (value, check))
     gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
-			       _("number can't be converted to a double"));
+			       _ ("number can't be converted to a double"));
 
   return scm_from_double (d);
 }
@@ -1036,9 +1015,8 @@ gdbscm_value_to_string (SCM self, SCM rest)
   value_smob *v_smob
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
-  const SCM keywords[] = {
-    encoding_keyword, errors_keyword, length_keyword, SCM_BOOL_F
-  };
+  const SCM keywords[]
+    = { encoding_keyword, errors_keyword, length_keyword, SCM_BOOL_F };
   int encoding_arg_pos = -1, errors_arg_pos = -1, length_arg_pos = -1;
   char *encoding = NULL;
   SCM errors = SCM_BOOL_F;
@@ -1053,18 +1031,16 @@ gdbscm_value_to_string (SCM self, SCM rest)
      We can't have existing cleanups when a Scheme exception is thrown.  */
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, keywords, "#sOi", rest,
-			      &encoding_arg_pos, &encoding,
-			      &errors_arg_pos, &errors,
-			      &length_arg_pos, &length);
+			      &encoding_arg_pos, &encoding, &errors_arg_pos,
+			      &errors, &length_arg_pos, &length);
 
-  if (errors_arg_pos > 0
-      && errors != SCM_BOOL_F
+  if (errors_arg_pos > 0 && errors != SCM_BOOL_F
       && !scm_is_eq (errors, error_symbol)
       && !scm_is_eq (errors, substitute_symbol))
     {
       SCM excp
 	= gdbscm_make_out_of_range_error (FUNC_NAME, errors_arg_pos, errors,
-					  _("invalid error kind"));
+					  _ ("invalid error kind"));
 
       xfree (encoding);
       gdbscm_throw (excp);
@@ -1103,14 +1079,11 @@ gdbscm_value_to_string (SCM self, SCM rest)
   gdbscm_dynwind_xfree (encoding);
   gdbscm_dynwind_xfree (buffer_contents);
 
-  result = scm_from_stringn ((const char *) buffer_contents,
-			     length * char_type->length (),
-			     (encoding != NULL && *encoding != '\0'
-			      ? encoding
-			      : la_encoding),
-			     scm_is_eq (errors, error_symbol)
-			     ? SCM_FAILED_CONVERSION_ERROR
-			     : SCM_FAILED_CONVERSION_QUESTION_MARK);
+  result = scm_from_stringn (
+    (const char *) buffer_contents, length * char_type->length (),
+    (encoding != NULL && *encoding != '\0' ? encoding : la_encoding),
+    scm_is_eq (errors, error_symbol) ? SCM_FAILED_CONVERSION_ERROR
+				     : SCM_FAILED_CONVERSION_QUESTION_MARK);
 
   scm_dynwind_end ();
 
@@ -1145,14 +1118,13 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
      We can't have existing cleanups when a Scheme exception is thrown.  */
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, keywords, "#si", rest,
-			      &encoding_arg_pos, &encoding,
-			      &length_arg_pos, &length);
+			      &encoding_arg_pos, &encoding, &length_arg_pos,
+			      &length);
 
   if (length < -1)
     {
       gdbscm_out_of_range_error (FUNC_NAME, length_arg_pos,
-				 scm_from_int (length),
-				 _("invalid length"));
+				 scm_from_int (length), _ ("invalid length"));
     }
 
   try
@@ -1181,18 +1153,18 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 	      length = array_length;
 	    else if (array_length == -1)
 	      {
-		type = lookup_array_range_type (realtype->target_type (),
-						0, length - 1);
+		type = lookup_array_range_type (realtype->target_type (), 0,
+						length - 1);
 	      }
 	    else if (length != array_length)
 	      {
 		/* We need to create a new array type with the
 		   specified length.  */
 		if (length > array_length)
-		  error (_("length is larger than array size"));
-		type = lookup_array_range_type (type->target_type (),
-						low_bound,
-						low_bound + length - 1);
+		  error (_ ("length is larger than array size"));
+		type
+		  = lookup_array_range_type (type->target_type (), low_bound,
+					     low_bound + length - 1);
 	      }
 	    addr = value_address (value);
 	    break;
@@ -1245,12 +1217,11 @@ gdbscm_value_fetch_lazy_x (SCM self)
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *value = v_smob->value;
 
-  return gdbscm_wrap ([=]
-    {
-      if (value_lazy (value))
-	value_fetch_lazy (value);
-      return SCM_UNSPECIFIED;
-    });
+  return gdbscm_wrap ([=] {
+    if (value_lazy (value))
+      value_fetch_lazy (value);
+    return SCM_UNSPECIFIED;
+  });
 }
 
 /* (value-print <gdb:value>) -> string */
@@ -1287,7 +1258,7 @@ gdbscm_value_print (SCM self)
   return scm_from_stringn (stb.c_str (), stb.size (), host_charset (),
 			   SCM_FAILED_CONVERSION_QUESTION_MARK);
 }
-
+
 /* (parse-and-eval string) -> <gdb:value>
    Parse a string and evaluate the string as an expression.  */
 
@@ -1295,14 +1266,13 @@ static SCM
 gdbscm_parse_and_eval (SCM expr_scm)
 {
   char *expr_str;
-  gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "s",
-			      expr_scm, &expr_str);
+  gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "s", expr_scm,
+			      &expr_str);
 
-  return gdbscm_wrap ([=]
-    {
-      scoped_value_mark free_values;
-      return vlscm_scm_from_value (parse_and_eval (expr_str));
-    });
+  return gdbscm_wrap ([=] {
+    scoped_value_mark free_values;
+    return vlscm_scm_from_value (parse_and_eval (expr_str));
+  });
 }
 
 /* (history-ref integer) -> <gdb:value>
@@ -1314,10 +1284,9 @@ gdbscm_history_ref (SCM index)
   int i;
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "i", index, &i);
 
-  return gdbscm_wrap ([=]
-    {
-      return vlscm_scm_from_value (access_value_history (i));
-    });
+  return gdbscm_wrap ([=] {
+    return vlscm_scm_from_value (access_value_history (i));
+  });
 }
 
 /* (history-append! <gdb:value>) -> index
@@ -1328,22 +1297,18 @@ gdbscm_history_append_x (SCM value)
 {
   value_smob *v_smob
     = vlscm_get_value_smob_arg_unsafe (value, SCM_ARG1, FUNC_NAME);
-  return gdbscm_wrap ([=]
-    {
-      return scm_from_int (record_latest_value (v_smob->value));
-    });
+  return gdbscm_wrap ([=] {
+    return scm_from_int (record_latest_value (v_smob->value));
+  });
 }
-
+
 /* Initialize the Scheme value code.  */
 
-static const scheme_function value_functions[] =
-{
-  { "value?", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_p),
-    "\
+static const scheme_function value_functions[] = {
+  { "value?", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_p), "\
 Return #t if the object is a <gdb:value> object." },
 
-  { "make-value", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_value),
-    "\
+  { "make-value", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_value), "\
 Create a <gdb:value> representing object.\n\
 Typically this is used to convert numbers and strings to\n\
 <gdb:value> objects.\n\
@@ -1351,24 +1316,20 @@ Typically this is used to convert numbers and strings to\n\
   Arguments: object [#:type <gdb:type>]" },
 
   { "value-optimized-out?", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_value_optimized_out_p),
-    "\
+    as_a_scm_t_subr (gdbscm_value_optimized_out_p), "\
 Return #t if the value has been optimizd out." },
 
-  { "value-address", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_address),
-    "\
+  { "value-address", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_address), "\
 Return the address of the value." },
 
-  { "value-type", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_type),
-    "\
+  { "value-type", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_type), "\
 Return the type of the value." },
 
   { "value-dynamic-type", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_dynamic_type),
     "\
 Return the dynamic type of the value." },
 
-  { "value-cast", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_cast),
-    "\
+  { "value-cast", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_cast), "\
 Cast the value to the supplied type.\n\
 \n\
   Arguments: <gdb:value> <gdb:type>" },
@@ -1381,8 +1342,7 @@ dynamic_cast operator.\n\
   Arguments: <gdb:value> <gdb:type>" },
 
   { "value-reinterpret-cast", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_value_reinterpret_cast),
-    "\
+    as_a_scm_t_subr (gdbscm_value_reinterpret_cast), "\
 Cast the value to the supplied type, as if by the C++\n\
 reinterpret_cast operator.\n\
 \n\
@@ -1393,8 +1353,7 @@ reinterpret_cast operator.\n\
 Return the result of applying the C unary * operator to the value." },
 
   { "value-referenced-value", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_value_referenced_value),
-    "\
+    as_a_scm_t_subr (gdbscm_value_referenced_value), "\
 Given a value of a reference type, return the value referenced.\n\
 The difference between this function and value-dereference is that\n\
 the latter applies * unary operator to a value, which need not always\n\
@@ -1404,34 +1363,28 @@ value-dereference will result in a value of type 'int' while\n\
 value-referenced-value will result in a value of type 'int *'." },
 
   { "value-reference-value", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_value_reference_value),
-    "\
+    as_a_scm_t_subr (gdbscm_value_reference_value), "\
 Return a <gdb:value> object which is a reference to the given value." },
 
   { "value-rvalue-reference-value", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_value_rvalue_reference_value),
-    "\
+    as_a_scm_t_subr (gdbscm_value_rvalue_reference_value), "\
 Return a <gdb:value> object which is an rvalue reference to the given value." },
 
-  { "value-const-value", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_value_const_value),
+  { "value-const-value", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_const_value),
     "\
 Return a <gdb:value> object which is a 'const' version of the given value." },
 
-  { "value-field", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_field),
-    "\
+  { "value-field", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_field), "\
 Return the specified field of the value.\n\
 \n\
   Arguments: <gdb:value> string" },
 
-  { "value-subscript", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_subscript),
-    "\
+  { "value-subscript", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_subscript), "\
 Return the value of the array at the specified index.\n\
 \n\
   Arguments: <gdb:value> integer" },
 
-  { "value-call", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_call),
-    "\
+  { "value-call", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_call), "\
 Perform an inferior function call taking the value as a pointer to the\n\
 function to call.\n\
 Each element of the argument list must be a <gdb:value> object or an object\n\
@@ -1440,18 +1393,15 @@ The result is the value returned by the function.\n\
 \n\
   Arguments: <gdb:value> arg-list" },
 
-  { "value->bool", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_to_bool),
-    "\
+  { "value->bool", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_to_bool), "\
 Return the Scheme boolean representing the GDB value.\n\
 The value must be \"integer like\".  Pointers are ok." },
 
-  { "value->integer", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_to_integer),
-    "\
+  { "value->integer", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_to_integer), "\
 Return the Scheme integer representing the GDB value.\n\
 The value must be \"integer like\".  Pointers are ok." },
 
-  { "value->real", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_to_real),
-    "\
+  { "value->real", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_to_real), "\
 Return the Scheme real number representing the GDB value.\n\
 The value must be a number." },
 
@@ -1460,8 +1410,7 @@ The value must be a number." },
 Return a Scheme bytevector with the raw contents of the GDB value.\n\
 No transformation, endian or otherwise, is performed." },
 
-  { "value->string", 1, 0, 1, as_a_scm_t_subr (gdbscm_value_to_string),
-    "\
+  { "value->string", 1, 0, 1, as_a_scm_t_subr (gdbscm_value_to_string), "\
 Return the Unicode string of the value's contents.\n\
 If ENCODING is not given, the string is assumed to be encoded in\n\
 the target's charset.\n\
@@ -1475,8 +1424,7 @@ If LENGTH is provided, only fetch string to the length provided.\n\
 	     [#:length length]" },
 
   { "value->lazy-string", 1, 0, 1,
-    as_a_scm_t_subr (gdbscm_value_to_lazy_string),
-    "\
+    as_a_scm_t_subr (gdbscm_value_to_lazy_string), "\
 Return a Scheme object representing a lazily fetched Unicode string\n\
 of the value's contents.\n\
 If ENCODING is not given, the string is assumed to be encoded in\n\
@@ -1485,14 +1433,12 @@ If LENGTH is provided, only fetch string to the length provided.\n\
 \n\
   Arguments: <gdb:value> [#:encoding encoding] [#:length length]" },
 
-  { "value-lazy?", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_lazy_p),
-    "\
+  { "value-lazy?", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_lazy_p), "\
 Return #t if the value is lazy (not fetched yet from the inferior).\n\
 A lazy value is fetched when needed, or when the value-fetch-lazy! function\n\
 is called." },
 
-  { "make-lazy-value", 2, 0, 0, as_a_scm_t_subr (gdbscm_make_lazy_value),
-    "\
+  { "make-lazy-value", 2, 0, 0, as_a_scm_t_subr (gdbscm_make_lazy_value), "\
 Create a <gdb:value> that will be lazily fetched from the target.\n\
 \n\
   Arguments: <gdb:type> address" },
@@ -1502,20 +1448,16 @@ Create a <gdb:value> that will be lazily fetched from the target.\n\
 Fetch the value from the inferior, if it was lazy.\n\
 The result is \"unspecified\"." },
 
-  { "value-print", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_print),
-    "\
+  { "value-print", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_print), "\
 Return the string representation (print form) of the value." },
 
-  { "parse-and-eval", 1, 0, 0, as_a_scm_t_subr (gdbscm_parse_and_eval),
-    "\
+  { "parse-and-eval", 1, 0, 0, as_a_scm_t_subr (gdbscm_parse_and_eval), "\
 Evaluates string in gdb and returns the result as a <gdb:value> object." },
 
-  { "history-ref", 1, 0, 0, as_a_scm_t_subr (gdbscm_history_ref),
-    "\
+  { "history-ref", 1, 0, 0, as_a_scm_t_subr (gdbscm_history_ref), "\
 Return the specified value from GDB's value history." },
 
-  { "history-append!", 1, 0, 0, as_a_scm_t_subr (gdbscm_history_append_x),
-    "\
+  { "history-append!", 1, 0, 0, as_a_scm_t_subr (gdbscm_history_append_x), "\
 Append the specified value onto GDB's value history." },
 
   END_FUNCTIONS
@@ -1524,8 +1466,8 @@ Append the specified value onto GDB's value history." },
 void
 gdbscm_initialize_values (void)
 {
-  value_smob_tag = gdbscm_make_smob_type (value_smob_name,
-					  sizeof (value_smob));
+  value_smob_tag
+    = gdbscm_make_smob_type (value_smob_name, sizeof (value_smob));
   scm_set_smob_free (value_smob_tag, vlscm_free_value_smob);
   scm_set_smob_print (value_smob_tag, vlscm_print_value_smob);
   scm_set_smob_equalp (value_smob_tag, vlscm_equal_p_value_smob);

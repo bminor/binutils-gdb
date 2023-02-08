@@ -35,16 +35,16 @@
    nothing ever actually waits on that file descriptor.  */
 
 struct serial_event_state
-  {
+{
 #ifdef USE_WIN32API
-    /* The Windows event object, created with CreateEvent.  */
-    HANDLE event;
+  /* The Windows event object, created with CreateEvent.  */
+  HANDLE event;
 #else
-    /* The write side of the pipe.  The read side is in
+  /* The write side of the pipe.  The read side is in
        serial->fd.  */
-    int write_fd;
+  int write_fd;
 #endif
-  };
+};
 
 /* Open a new serial event.  */
 
@@ -127,8 +127,7 @@ serial_event_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
    is internal implementation detail never to be used by remote
    targets for protocol transport.  */
 
-static const struct serial_ops serial_event_ops =
-{
+static const struct serial_ops serial_event_ops = {
   "event",
   serial_event_open,
   serial_event_close,
@@ -183,7 +182,7 @@ serial_event_set (struct serial_event *event)
   struct serial_event_state *state = (struct serial_event_state *) ser->state;
 #ifndef USE_WIN32API
   int r;
-  char c = '+';		/* Anything.  */
+  char c = '+'; /* Anything.  */
 
   do
     {

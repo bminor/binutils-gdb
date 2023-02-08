@@ -6,6 +6,7 @@
 #include "target-descriptions.h"
 
 const struct target_desc *tdesc_or1k;
+
 static void
 initialize_tdesc_or1k (void)
 {

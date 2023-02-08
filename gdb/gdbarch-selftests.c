@@ -29,7 +29,8 @@
 
 #include <map>
 
-namespace selftests {
+namespace selftests
+{
 
 /* Test gdbarch methods register_to_value and value_to_register.  */
 
@@ -37,39 +38,23 @@ static void
 register_to_value_test (struct gdbarch *gdbarch)
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
-  struct type *types[] =
-    {
-      builtin->builtin_void,
-      builtin->builtin_char,
-      builtin->builtin_short,
-      builtin->builtin_int,
-      builtin->builtin_long,
-      builtin->builtin_signed_char,
-      builtin->builtin_unsigned_short,
-      builtin->builtin_unsigned_int,
-      builtin->builtin_unsigned_long,
-      builtin->builtin_float,
-      builtin->builtin_double,
-      builtin->builtin_long_double,
-      builtin->builtin_complex,
-      builtin->builtin_double_complex,
-      builtin->builtin_string,
-      builtin->builtin_bool,
-      builtin->builtin_long_long,
-      builtin->builtin_unsigned_long_long,
-      builtin->builtin_int8,
-      builtin->builtin_uint8,
-      builtin->builtin_int16,
-      builtin->builtin_uint16,
-      builtin->builtin_int32,
-      builtin->builtin_uint32,
-      builtin->builtin_int64,
-      builtin->builtin_uint64,
-      builtin->builtin_int128,
-      builtin->builtin_uint128,
-      builtin->builtin_char16,
-      builtin->builtin_char32,
-    };
+  struct type *types[] = {
+    builtin->builtin_void,	     builtin->builtin_char,
+    builtin->builtin_short,	     builtin->builtin_int,
+    builtin->builtin_long,	     builtin->builtin_signed_char,
+    builtin->builtin_unsigned_short, builtin->builtin_unsigned_int,
+    builtin->builtin_unsigned_long,  builtin->builtin_float,
+    builtin->builtin_double,	     builtin->builtin_long_double,
+    builtin->builtin_complex,	     builtin->builtin_double_complex,
+    builtin->builtin_string,	     builtin->builtin_bool,
+    builtin->builtin_long_long,	     builtin->builtin_unsigned_long_long,
+    builtin->builtin_int8,	     builtin->builtin_uint8,
+    builtin->builtin_int16,	     builtin->builtin_uint16,
+    builtin->builtin_int32,	     builtin->builtin_uint32,
+    builtin->builtin_int64,	     builtin->builtin_uint64,
+    builtin->builtin_int128,	     builtin->builtin_uint128,
+    builtin->builtin_char16,	     builtin->builtin_char32,
+  };
 
   scoped_mock_context<test_target_ops> mockctx (gdbarch);
 
@@ -105,8 +90,8 @@ register_to_value_test (struct gdbarch *gdbarch)
 	      int optim, unavail, ok;
 
 	      /* Set the fingerprint in the last two bytes.  */
-	      buf [type->length ()]= 'w';
-	      buf [type->length () + 1]= 'l';
+	      buf[type->length ()] = 'w';
+	      buf[type->length () + 1] = 'l';
 	      ok = gdbarch_register_to_value (gdbarch, frame, regnum, type,
 					      buf.data (), &optim, &unavail);
 
@@ -142,10 +127,9 @@ register_name_test (struct gdbarch *gdbarch)
 	 return a non-empty string.  */
       const char *name = gdbarch_register_name (gdbarch, regnum);
 
-      if (run_verbose() && name == nullptr)
+      if (run_verbose () && name == nullptr)
 	debug_printf ("arch: %s, register: %d returned nullptr\n",
-		      gdbarch_bfd_arch_info (gdbarch)->printable_name,
-		      regnum);
+		      gdbarch_bfd_arch_info (gdbarch)->printable_name, regnum);
       SELF_CHECK (name != nullptr);
 
       /* Every register name, that is not the empty string, should be
@@ -156,7 +140,7 @@ register_name_test (struct gdbarch *gdbarch)
 	{
 	  std::string s (name);
 	  name_counts[s]++;
-	  if (run_verbose() && name_counts[s] > 1)
+	  if (run_verbose () && name_counts[s] > 1)
 	    debug_printf ("arch: %s, register: %d (%s) is a duplicate\n",
 			  gdbarch_bfd_arch_info (gdbarch)->printable_name,
 			  regnum, name);
@@ -168,6 +152,7 @@ register_name_test (struct gdbarch *gdbarch)
 } // namespace selftests
 
 void _initialize_gdbarch_selftests ();
+
 void
 _initialize_gdbarch_selftests ()
 {

@@ -41,8 +41,7 @@ compare_block_starting_address (const memory_write_request &a_req,
 
 static void
 claim_memory (const std::vector<memory_write_request> &blocks,
-	      std::vector<memory_write_request> *result,
-	      ULONGEST begin,
+	      std::vector<memory_write_request> *result, ULONGEST begin,
 	      ULONGEST end)
 {
   ULONGEST claimed_begin;
@@ -87,9 +86,10 @@ claim_memory (const std::vector<memory_write_request> &blocks,
    regular memory to REGULAR_BLOCKS.  */
 
 static void
-split_regular_and_flash_blocks (const std::vector<memory_write_request> &blocks,
-				std::vector<memory_write_request> *regular_blocks,
-				std::vector<memory_write_request> *flash_blocks)
+split_regular_and_flash_blocks (
+  const std::vector<memory_write_request> &blocks,
+  std::vector<memory_write_request> *regular_blocks,
+  std::vector<memory_write_request> *flash_blocks)
 {
   struct mem_region *region;
   CORE_ADDR cur_address;
@@ -138,7 +138,8 @@ block_boundaries (CORE_ADDR address, CORE_ADDR *begin, CORE_ADDR *end)
   if (begin)
     *begin = region->lo + offset_in_region / blocksize * blocksize;
   if (end)
-    *end = region->lo + (offset_in_region + blocksize - 1) / blocksize * blocksize;
+    *end = region->lo
+	   + (offset_in_region + blocksize - 1) / blocksize * blocksize;
 }
 
 /* Given the list of memory requests to be WRITTEN, this function
@@ -173,8 +174,9 @@ blocks_to_erase (const std::vector<memory_write_request> &written)
    which is only partially filled by "load").  */
 
 static std::vector<memory_write_request>
-compute_garbled_blocks (const std::vector<memory_write_request> &erased_blocks,
-			const std::vector<memory_write_request> &written_blocks)
+compute_garbled_blocks (
+  const std::vector<memory_write_request> &erased_blocks,
+  const std::vector<memory_write_request> &written_blocks)
 {
   std::vector<memory_write_request> result;
 
@@ -219,8 +221,7 @@ compute_garbled_blocks (const std::vector<memory_write_request> &erased_blocks,
 
 	  /* If all of ERASED is completely written, we can move on to
 	     the next erased region.  */
-	  if (written->begin <= erased.begin
-	      && written->end >= erased.end)
+	  if (written->begin <= erased.begin && written->end >= erased.end)
 	    {
 	      goto next_erased;
 	    }
@@ -251,8 +252,7 @@ compute_garbled_blocks (const std::vector<memory_write_request> &erased_blocks,
 	 ERASED, then that means it's really erased.  */
       result.push_back (erased);
 
-    next_erased:
-      ;
+    next_erased:;
     }
 
   return result;
@@ -305,8 +305,8 @@ target_write_memory_blocks (const std::vector<memory_write_request> &requests,
 	  for (memory_write_request &iter : garbled)
 	    {
 	      gdb_assert (iter.data == NULL);
-	      gdb::unique_xmalloc_ptr<gdb_byte> holder
-		((gdb_byte *) xmalloc (iter.end - iter.begin));
+	      gdb::unique_xmalloc_ptr<gdb_byte> holder (
+		(gdb_byte *) xmalloc (iter.end - iter.begin));
 	      iter.data = holder.get ();
 	      mem_holders.push_back (std::move (holder));
 	      int err = target_read_memory (iter.begin, iter.data,
@@ -337,9 +337,8 @@ target_write_memory_blocks (const std::vector<memory_write_request> &requests,
       LONGEST len;
 
       len = target_write_with_progress (current_inferior ()->top_target (),
-					TARGET_OBJECT_MEMORY, NULL,
-					iter.data, iter.begin,
-					iter.end - iter.begin,
+					TARGET_OBJECT_MEMORY, NULL, iter.data,
+					iter.begin, iter.end - iter.begin,
 					progress_cb, iter.baton);
       if (len < (LONGEST) (iter.end - iter.begin))
 	{
@@ -359,13 +358,13 @@ target_write_memory_blocks (const std::vector<memory_write_request> &requests,
 	{
 	  LONGEST len;
 
-	  len = target_write_with_progress (current_inferior ()->top_target (),
-					    TARGET_OBJECT_FLASH, NULL,
-					    iter.data, iter.begin,
-					    iter.end - iter.begin,
-					    progress_cb, iter.baton);
+	  len
+	    = target_write_with_progress (current_inferior ()->top_target (),
+					  TARGET_OBJECT_FLASH, NULL, iter.data,
+					  iter.begin, iter.end - iter.begin,
+					  progress_cb, iter.baton);
 	  if (len < (LONGEST) (iter.end - iter.begin))
-	    error (_("Error writing data to flash"));
+	    error (_ ("Error writing data to flash"));
 	}
 
       target_flash_done ();

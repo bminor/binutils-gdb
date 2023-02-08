@@ -37,4 +37,3 @@ extern const int amd64_mappings[];
 #endif
 
 #endif
-

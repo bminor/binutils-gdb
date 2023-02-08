@@ -24,11 +24,12 @@
 #include "valprint.h"
 #include "language.h"
 
-struct lazy_string_object {
+struct lazy_string_object
+{
   PyObject_HEAD
 
-  /*  Holds the address of the lazy string.  */
-  CORE_ADDR address;
+    /*  Holds the address of the lazy string.  */
+    CORE_ADDR address;
 
   /*  Holds the encoding that will be applied to the string
       when the string is printed by GDB.  If the encoding is set
@@ -54,7 +55,7 @@ struct lazy_string_object {
 };
 
 extern PyTypeObject lazy_string_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("lazy_string_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("lazy_string_object");
 
 static PyObject *
 stpy_get_address (PyObject *self, void *closure)
@@ -109,7 +110,7 @@ stpy_convert_to_value (PyObject *self, PyObject *args)
   if (self_string->address == 0)
     {
       PyErr_SetString (gdbpy_gdb_memory_error,
-		       _("Cannot create a value from NULL."));
+		       _ ("Cannot create a value from NULL."));
       return NULL;
     }
 
@@ -130,8 +131,8 @@ stpy_convert_to_value (PyObject *self, PyObject *args)
 	      /* PR 20786: There's no way to specify an array of length zero.
 		 Record a length of [0,-1] which is how Ada does it.  Anything
 		 we do is broken, but this is one possible solution.  */
-	      type = lookup_array_range_type (realtype->target_type (),
-					      0, self_string->length - 1);
+	      type = lookup_array_range_type (realtype->target_type (), 0,
+					      self_string->length - 1);
 	      val = value_at_lazy (type, self_string->address);
 	    }
 	  else
@@ -174,22 +175,22 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 
   if (length < -1)
     {
-      PyErr_SetString (PyExc_ValueError, _("Invalid length."));
+      PyErr_SetString (PyExc_ValueError, _ ("Invalid length."));
       return NULL;
     }
 
   if (address == 0 && length != 0)
     {
       PyErr_SetString (gdbpy_gdb_memory_error,
-		       _("Cannot create a lazy string with address 0x0, " \
-			 "and a non-zero length."));
+		       _ ("Cannot create a lazy string with address 0x0, "
+			  "and a non-zero length."));
       return NULL;
     }
 
   if (!type)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       _("A lazy string's type cannot be NULL."));
+		       _ ("A lazy string's type cannot be NULL."));
       return NULL;
     }
 
@@ -207,7 +208,7 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 	  length = array_length;
 	else if (length != array_length)
 	  {
-	    PyErr_SetString (PyExc_ValueError, _("Invalid length."));
+	    PyErr_SetString (PyExc_ValueError, _ ("Invalid length."));
 	    return NULL;
 	  }
 	break;
@@ -275,8 +276,7 @@ stpy_lazy_string_elt_type (lazy_string_object *lazy)
 
 void
 gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
-			   struct type **str_elt_type,
-			   long *length,
+			   struct type **str_elt_type, long *length,
 			   gdb::unique_xmalloc_ptr<char> *encoding)
 {
   lazy_string_object *lazy;
@@ -291,52 +291,48 @@ gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
   encoding->reset (lazy->encoding ? xstrdup (lazy->encoding) : NULL);
 }
 
-
-
 static PyMethodDef lazy_string_object_methods[] = {
   { "value", stpy_convert_to_value, METH_NOARGS,
     "Create a (lazy) value that contains a pointer to the string." },
-  {NULL}  /* Sentinel */
+  { NULL } /* Sentinel */
 };
-
 
 static gdb_PyGetSetDef lazy_string_object_getset[] = {
   { "address", stpy_get_address, NULL, "Address of the string.", NULL },
   { "encoding", stpy_get_encoding, NULL, "Encoding of the string.", NULL },
   { "length", stpy_get_length, NULL, "Length of the string.", NULL },
   { "type", stpy_get_type, NULL, "Type associated with the string.", NULL },
-  { NULL }  /* Sentinel */
+  { NULL } /* Sentinel */
 };
 
 PyTypeObject lazy_string_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.LazyString",	          /*tp_name*/
-  sizeof (lazy_string_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  stpy_dealloc,                   /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  0,				  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,             /*tp_flags*/
-  "GDB lazy string object",	  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,			          /* tp_iter */
-  0,				  /* tp_iternext */
-  lazy_string_object_methods,	  /* tp_methods */
-  0,				  /* tp_members */
-  lazy_string_object_getset	  /* tp_getset */
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.LazyString", /*tp_name*/
+  sizeof (lazy_string_object),			    /*tp_basicsize*/
+  0,						    /*tp_itemsize*/
+  stpy_dealloc,					    /*tp_dealloc*/
+  0,						    /*tp_print*/
+  0,						    /*tp_getattr*/
+  0,						    /*tp_setattr*/
+  0,						    /*tp_compare*/
+  0,						    /*tp_repr*/
+  0,						    /*tp_as_number*/
+  0,						    /*tp_as_sequence*/
+  0,						    /*tp_as_mapping*/
+  0,						    /*tp_hash */
+  0,						    /*tp_call*/
+  0,						    /*tp_str*/
+  0,						    /*tp_getattro*/
+  0,						    /*tp_setattro*/
+  0,						    /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,				    /*tp_flags*/
+  "GDB lazy string object",			    /* tp_doc */
+  0,						    /* tp_traverse */
+  0,						    /* tp_clear */
+  0,						    /* tp_richcompare */
+  0,						    /* tp_weaklistoffset */
+  0,						    /* tp_iter */
+  0,						    /* tp_iternext */
+  lazy_string_object_methods,			    /* tp_methods */
+  0,						    /* tp_members */
+  lazy_string_object_getset			    /* tp_getset */
 };

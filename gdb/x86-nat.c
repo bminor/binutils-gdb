@@ -43,8 +43,8 @@ struct x86_dr_low_type x86_dr_low;
    need to keep track of processes that aren't bound to any inferior
    (e.g., fork children, checkpoints).  */
 
-static std::unordered_map<pid_t,
-			  struct x86_debug_reg_state> x86_debug_process_state;
+static std::unordered_map<pid_t, struct x86_debug_reg_state>
+  x86_debug_process_state;
 
 /* See x86-nat.h.  */
 
@@ -89,8 +89,8 @@ x86_cleanup_dregs (void)
    of the type TYPE.  Return 0 on success, -1 on failure.  */
 
 int
-x86_insert_watchpoint (CORE_ADDR addr, int len,
-		       enum target_hw_bp_type type, struct expression *cond)
+x86_insert_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
+		       struct expression *cond)
 {
   struct x86_debug_reg_state *state
     = x86_debug_reg_state (inferior_ptid.pid ());
@@ -102,8 +102,8 @@ x86_insert_watchpoint (CORE_ADDR addr, int len,
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
 int
-x86_remove_watchpoint (CORE_ADDR addr, int len,
-		       enum target_hw_bp_type type, struct expression *cond)
+x86_remove_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
+		       struct expression *cond)
 {
   struct x86_debug_reg_state *state
     = x86_debug_reg_state (inferior_ptid.pid ());
@@ -152,14 +152,17 @@ x86_stopped_by_watchpoint ()
    Return 0 on success, EBUSY on failure.  */
 
 int
-x86_insert_hw_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
+x86_insert_hw_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   struct x86_debug_reg_state *state
     = x86_debug_reg_state (inferior_ptid.pid ());
 
   bp_tgt->placed_address = bp_tgt->reqstd_address;
-  return x86_dr_insert_watchpoint (state, hw_execute,
-				   bp_tgt->placed_address, 1) ? EBUSY : 0;
+  return x86_dr_insert_watchpoint (state, hw_execute, bp_tgt->placed_address,
+				   1)
+	   ? EBUSY
+	   : 0;
 }
 
 /* Remove a hardware-assisted breakpoint at BP_TGT->placed_address.
@@ -172,8 +175,8 @@ x86_remove_hw_breakpoint (struct gdbarch *gdbarch,
   struct x86_debug_reg_state *state
     = x86_debug_reg_state (inferior_ptid.pid ());
 
-  return x86_dr_remove_watchpoint (state, hw_execute,
-				   bp_tgt->placed_address, 1);
+  return x86_dr_remove_watchpoint (state, hw_execute, bp_tgt->placed_address,
+				   1);
 }
 
 /* Returns the number of hardware watchpoints of type TYPE that we can
@@ -217,16 +220,16 @@ add_show_debug_regs_command (void)
   /* A maintenance command to enable printing the internal DRi mirror
      variables.  */
   add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
-			   &show_debug_regs, _("\
-Set whether to show variables that mirror the x86 debug registers."), _("\
-Show whether to show variables that mirror the x86 debug registers."), _("\
+			   &show_debug_regs, _ ("\
+Set whether to show variables that mirror the x86 debug registers."),
+			   _ ("\
+Show whether to show variables that mirror the x86 debug registers."),
+			   _ ("\
 Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, the debug registers values are shown when GDB inserts\n\
 or removes a hardware breakpoint or watchpoint, and when the inferior\n\
 triggers a breakpoint or watchpoint."),
-			   NULL,
-			   NULL,
-			   &maintenance_set_cmdlist,
+			   NULL, NULL, &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 }
 

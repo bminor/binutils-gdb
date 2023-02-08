@@ -94,8 +94,7 @@ tui_register_format (frame_info_ptr frame, int regnum)
 
   scoped_restore save_pagination
     = make_scoped_restore (&pagination_enabled, false);
-  scoped_restore save_stdout
-    = make_scoped_restore (&gdb_stdout, &stream);
+  scoped_restore save_stdout = make_scoped_restore (&gdb_stdout, &stream);
 
   gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
 
@@ -111,8 +110,7 @@ tui_register_format (frame_info_ptr frame, int regnum)
    display.  When changep is set, check if the new register value has
    changed with respect to the previous call.  */
 static void
-tui_get_register (frame_info_ptr frame,
-		  struct tui_data_item_window *data, 
+tui_get_register (frame_info_ptr frame, struct tui_data_item_window *data,
 		  int regnum, bool *changedp)
 {
   if (changedp)
@@ -201,14 +199,13 @@ tui_data_window::show_registers (const reggroup *group)
   rerender ();
 }
 
-
 /* Set the data window to display the registers of the register group
    using the given frame.  Values are refreshed only when
    refresh_values_only is true.  */
 
 void
 tui_data_window::show_register_group (const reggroup *group,
-				      frame_info_ptr frame, 
+				      frame_info_ptr frame,
 				      bool refresh_values_only)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -297,8 +294,7 @@ tui_data_window::display_registers_from (int start_element_no)
   int cur_y = 1;
   while (i < m_regs_content.size () && cur_y <= height - 2)
     {
-      for (int j = 0;
-	   j < m_regs_column_count && i < m_regs_content.size ();
+      for (int j = 0; j < m_regs_column_count && i < m_regs_content.size ();
 	   j++)
 	{
 	  /* Create the window if necessary.  */
@@ -306,9 +302,9 @@ tui_data_window::display_registers_from (int start_element_no)
 	  m_regs_content[i].y = cur_y;
 	  m_regs_content[i].visible = true;
 	  m_regs_content[i].rerender (handle.get (), m_item_width);
-	  i++;		/* Next register.  */
+	  i++; /* Next register.  */
 	}
-      cur_y++;		/* Next row.  */
+      cur_y++; /* Next row.  */
     }
 
   /* Mark register windows below the visible area.  */
@@ -374,7 +370,6 @@ tui_data_window::display_registers_from_line (int line_no)
   return line_no;
 }
 
-
 /* Answer the index first element displayed.  If none are displayed,
    then return (-1).  */
 int
@@ -397,7 +392,6 @@ tui_data_window::delete_data_content_windows ()
   for (auto &win : m_regs_content)
     win.visible = false;
 }
-
 
 void
 tui_data_window::erase_data_content (const char *prompt)
@@ -424,7 +418,7 @@ void
 tui_data_window::rerender ()
 {
   if (m_regs_content.empty ())
-    erase_data_content (_("[ Register Values Unavailable ]"));
+    erase_data_content (_ ("[ Register Values Unavailable ]"));
   else
     {
       erase_data_content (NULL);
@@ -432,7 +426,6 @@ tui_data_window::rerender ()
       display_registers_from (0);
     }
 }
-
 
 /* Scroll the data window vertically forward or backward.  */
 void
@@ -474,8 +467,7 @@ tui_data_window::check_register_values (frame_info_ptr frame)
 
 	  was_hilighted = data_item_win.highlight;
 
-	  tui_get_register (frame, &data_item_win,
-			    data_item_win.regno,
+	  tui_get_register (frame, &data_item_win, data_item_win.regno,
 			    &data_item_win.highlight);
 
 	  /* Register windows whose y == 0 are outside the visible area.  */
@@ -500,7 +492,7 @@ tui_data_item_window::rerender (WINDOW *handle, int field_width)
        to code that causes the compiler to generate an unused-value
        warning.  */
     (void) wstandout (handle);
-      
+
   mvwaddnstr (handle, y, x, content.c_str (), field_width - 1);
   if (content.size () < field_width)
     waddstr (handle, n_spaces (field_width - content.size ()));
@@ -598,22 +590,22 @@ tui_reg_command (const char *args, int from_tty)
 	      if (strncmp (group->name (), args, len) == 0)
 		{
 		  if (match != NULL)
-		    error (_("ambiguous register group name '%s'"), args);
+		    error (_ ("ambiguous register group name '%s'"), args);
 		  match = group;
 		}
 	    }
 	}
 
       if (match == NULL)
-	error (_("unknown register group '%s'"), args);
+	error (_ ("unknown register group '%s'"), args);
 
       TUI_DATA_WIN->show_registers (match);
     }
   else
     {
-      gdb_printf (_("\"tui reg\" must be followed by the name of "
-		    "either a register group,\nor one of 'next' "
-		    "or 'prev'.  Known register groups are:\n"));
+      gdb_printf (_ ("\"tui reg\" must be followed by the name of "
+		     "either a register group,\nor one of 'next' "
+		     "or 'prev'.  Known register groups are:\n"));
 
       bool first = true;
       for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
@@ -633,10 +625,10 @@ tui_reg_command (const char *args, int from_tty)
 
 static void
 tui_reggroup_completer (struct cmd_list_element *ignore,
-			completion_tracker &tracker,
-			const char *text, const char *word)
+			completion_tracker &tracker, const char *text,
+			const char *word)
 {
-  static const char * const extra[] = { "next", "prev", NULL };
+  static const char *const extra[] = { "next", "prev", NULL };
 
   reggroup_completer (ignore, tracker, text, word);
 
@@ -644,6 +636,7 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
 }
 
 void _initialize_tui_regs ();
+
 void
 _initialize_tui_regs ()
 {
@@ -651,9 +644,10 @@ _initialize_tui_regs ()
 
   tuicmd = tui_get_cmd_list ();
 
-  cmd = add_cmd ("reg", class_tui, tui_reg_command, _("\
+  cmd = add_cmd ("reg", class_tui, tui_reg_command, _ ("\
 TUI command to control the register window.\n\
 Usage: tui reg NAME\n\
-NAME is the name of the register group to display"), tuicmd);
+NAME is the name of the register group to display"),
+		 tuicmd);
   set_cmd_completer (cmd, tui_reggroup_completer);
 }

@@ -96,8 +96,8 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
       if (*sym == NULL)
 	{
 	  PyErr_SetString (PyExc_RuntimeError,
-			   _("Unexpected value.  Expecting a "
-			     "gdb.Symbol or a Python string."));
+			   _ ("Unexpected value.  Expecting a "
+			      "gdb.Symbol or a Python string."));
 	  return EXT_LANG_BT_ERROR;
 	}
 
@@ -172,26 +172,26 @@ mi_should_print (struct symbol *sym, enum mi_print_types type)
   switch (sym->aclass ())
     {
     default:
-    case LOC_UNDEF:	/* catches errors        */
-    case LOC_CONST:	/* constant              */
-    case LOC_TYPEDEF:	/* local typedef         */
-    case LOC_LABEL:	/* local label           */
-    case LOC_BLOCK:	/* local function        */
-    case LOC_CONST_BYTES:	/* loc. byte seq.        */
-    case LOC_UNRESOLVED:	/* unresolved static     */
-    case LOC_OPTIMIZED_OUT:	/* optimized out         */
+    case LOC_UNDEF:	    /* catches errors        */
+    case LOC_CONST:	    /* constant              */
+    case LOC_TYPEDEF:	    /* local typedef         */
+    case LOC_LABEL:	    /* local label           */
+    case LOC_BLOCK:	    /* local function        */
+    case LOC_CONST_BYTES:   /* loc. byte seq.        */
+    case LOC_UNRESOLVED:    /* unresolved static     */
+    case LOC_OPTIMIZED_OUT: /* optimized out         */
       print_me = 0;
       break;
 
-    case LOC_ARG:	/* argument              */
-    case LOC_REF_ARG:	/* reference arg         */
-    case LOC_REGPARM_ADDR:	/* indirect register arg */
-    case LOC_LOCAL:	/* stack local           */
-    case LOC_STATIC:	/* static                */
-    case LOC_REGISTER:	/* register              */
-    case LOC_COMPUTED:	/* computed location     */
+    case LOC_ARG:	   /* argument              */
+    case LOC_REF_ARG:	   /* reference arg         */
+    case LOC_REGPARM_ADDR: /* indirect register arg */
+    case LOC_LOCAL:	   /* stack local           */
+    case LOC_STATIC:	   /* static                */
+    case LOC_REGISTER:	   /* register              */
+    case LOC_COMPUTED:	   /* computed location     */
       if (type == MI_PRINT_LOCALS)
-	print_me = ! sym->is_argument ();
+	print_me = !sym->is_argument ();
       else
 	print_me = sym->is_argument ();
     }
@@ -222,8 +222,7 @@ py_print_type (struct ui_out *out, struct value *val)
 
 static void
 py_print_value (struct ui_out *out, struct value *val,
-		const struct value_print_options *opts,
-		int indent,
+		const struct value_print_options *opts, int indent,
 		enum ext_lang_frame_args args_type,
 		const struct language_defn *language)
 {
@@ -232,8 +231,7 @@ py_print_value (struct ui_out *out, struct value *val,
   /* MI does not print certain values, differentiated by type,
      depending on what ARGS_TYPE indicates.  Test type against option.
      For CLI print all values.  */
-  if (args_type == MI_PRINT_SIMPLE_VALUES
-      || args_type == MI_PRINT_ALL_VALUES)
+  if (args_type == MI_PRINT_SIMPLE_VALUES || args_type == MI_PRINT_ALL_VALUES)
     {
       struct type *type = check_typedef (value_type (val));
 
@@ -305,13 +303,10 @@ get_py_iter_from_func (PyObject *filter, const char *func)
     printed.  */
 
 static void
-py_print_single_arg (struct ui_out *out,
-		     const char *sym_name,
-		     struct frame_arg *fa,
-		     struct value *fv,
+py_print_single_arg (struct ui_out *out, const char *sym_name,
+		     struct frame_arg *fa, struct value *fv,
 		     const struct value_print_options *opts,
-		     enum ext_lang_frame_args args_type,
-		     int print_args_field,
+		     enum ext_lang_frame_args args_type, int print_args_field,
 		     const struct language_defn *language)
 {
   struct value *val;
@@ -382,7 +377,7 @@ py_print_single_arg (struct ui_out *out,
 
   /* If the output is to the CLI, and the user option "set print
      frame-arguments" is set to none, just output "...".  */
-  if (! out->is_mi_like_p () && args_type == NO_VALUES)
+  if (!out->is_mi_like_p () && args_type == NO_VALUES)
     out->field_string ("value", "...");
   else
     {
@@ -394,7 +389,7 @@ py_print_single_arg (struct ui_out *out,
 	    {
 	      gdb_assert (fa != NULL && fa->error != NULL);
 	      out->field_fmt ("value", metadata_style.style (),
-			      _("<error reading variable: %s>"),
+			      _ ("<error reading variable: %s>"),
 			      fa->error.get ());
 	    }
 	  else
@@ -415,10 +410,8 @@ py_print_single_arg (struct ui_out *out,
    success.  */
 
 static enum ext_lang_bt_status
-enumerate_args (PyObject *iter,
-		struct ui_out *out,
-		enum ext_lang_frame_args args_type,
-		int print_args_field,
+enumerate_args (PyObject *iter, struct ui_out *out,
+		enum ext_lang_frame_args args_type, int print_args_field,
 		frame_info_ptr frame)
 {
   struct value_print_options opts;
@@ -452,8 +445,8 @@ enumerate_args (PyObject *iter,
       struct value *val;
       enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
 
-      success = extract_sym (item.get (), &sym_name, &sym, &sym_block,
-			     &language);
+      success
+	= extract_sym (item.get (), &sym_name, &sym, &sym_block, &language);
       if (success == EXT_LANG_BT_ERROR)
 	return EXT_LANG_BT_ERROR;
 
@@ -461,8 +454,7 @@ enumerate_args (PyObject *iter,
       if (success == EXT_LANG_BT_ERROR)
 	return EXT_LANG_BT_ERROR;
 
-      if (sym && out->is_mi_like_p ()
-	  && ! mi_should_print (sym, MI_PRINT_ARGS))
+      if (sym && out->is_mi_like_p () && !mi_should_print (sym, MI_PRINT_ARGS))
 	continue;
 
       /* If the object did not provide a value, read it using
@@ -476,12 +468,12 @@ enumerate_args (PyObject *iter,
 	  if (sym == NULL)
 	    {
 	      PyErr_SetString (PyExc_RuntimeError,
-			       _("No symbol or value provided."));
+			       _ ("No symbol or value provided."));
 	      return EXT_LANG_BT_ERROR;
 	    }
 
-	  read_frame_arg (user_frame_print_options,
-			  sym, frame, &arg, &entryarg);
+	  read_frame_arg (user_frame_print_options, sym, frame, &arg,
+			  &entryarg);
 
 	  /* The object has not provided a value, so this is a frame
 	     argument to be read by GDB.  In this case we have to
@@ -489,11 +481,8 @@ enumerate_args (PyObject *iter,
 
 	  if (arg.entry_kind != print_entry_values_only)
 	    {
-	      py_print_single_arg (out, NULL, &arg,
-				   NULL, &opts,
-				   args_type,
-				   print_args_field,
-				   NULL);
+	      py_print_single_arg (out, NULL, &arg, NULL, &opts, args_type,
+				   print_args_field, NULL);
 	    }
 
 	  if (entryarg.entry_kind != print_entry_values_no)
@@ -513,8 +502,7 @@ enumerate_args (PyObject *iter,
 	  /* If the object has provided a value, we just print that.  */
 	  if (val != NULL)
 	    py_print_single_arg (out, sym_name.get (), NULL, val, &opts,
-				 args_type, print_args_field,
-				 language);
+				 args_type, print_args_field, language);
 	}
 
       /* Collect the next item from the iterator.  If
@@ -532,7 +520,6 @@ enumerate_args (PyObject *iter,
   return EXT_LANG_BT_OK;
 }
 
-
 /* Helper function to loop over variables provided by the
    "frame_locals" Python API.  Elements in the iterable must conform
    to the "Symbol Value" interface.  ITER is the Python iterable
@@ -545,11 +532,8 @@ enumerate_args (PyObject *iter,
    exception, or EXT_LANG_BT_OK on success.  */
 
 static enum ext_lang_bt_status
-enumerate_locals (PyObject *iter,
-		  struct ui_out *out,
-		  int indent,
-		  enum ext_lang_frame_args args_type,
-		  int print_args_field,
+enumerate_locals (PyObject *iter, struct ui_out *out, int indent,
+		  enum ext_lang_frame_args args_type, int print_args_field,
 		  frame_info_ptr frame)
 {
   struct value_print_options opts;
@@ -572,8 +556,8 @@ enumerate_locals (PyObject *iter,
       if (item == NULL)
 	break;
 
-      success = extract_sym (item.get (), &sym_name, &sym, &sym_block,
-			     &language);
+      success
+	= extract_sym (item.get (), &sym_name, &sym, &sym_block, &language);
       if (success == EXT_LANG_BT_ERROR)
 	return EXT_LANG_BT_ERROR;
 
@@ -582,7 +566,7 @@ enumerate_locals (PyObject *iter,
 	return EXT_LANG_BT_ERROR;
 
       if (sym != NULL && out->is_mi_like_p ()
-	  && ! mi_should_print (sym, MI_PRINT_LOCALS))
+	  && !mi_should_print (sym, MI_PRINT_LOCALS))
 	continue;
 
       /* If the object did not provide a value, read it.  */
@@ -608,18 +592,16 @@ enumerate_locals (PyObject *iter,
 
       /* CLI always prints values for locals.  MI uses the
 	 simple/no/all system.  */
-      if (! out->is_mi_like_p ())
+      if (!out->is_mi_like_p ())
 	{
 	  int val_indent = (indent + 1) * 4;
 
-	  py_print_value (out, val, &opts, val_indent, args_type,
-			  language);
+	  py_print_value (out, val, &opts, val_indent, args_type, language);
 	}
       else
 	{
 	  if (args_type != NO_VALUES)
-	    py_print_value (out, val, &opts, 0, args_type,
-			    language);
+	    py_print_value (out, val, &opts, 0, args_type, language);
 	}
 
       out->text ("\n");
@@ -668,10 +650,8 @@ py_mi_print_variables (PyObject *filter, struct ui_out *out,
    EXT_LANG_BT_ERROR on error, or EXT_LANG_BT_OK on success.  */
 
 static enum ext_lang_bt_status
-py_print_locals (PyObject *filter,
-		 struct ui_out *out,
-		 enum ext_lang_frame_args args_type,
-		 int indent,
+py_print_locals (PyObject *filter, struct ui_out *out,
+		 enum ext_lang_frame_args args_type, int indent,
 		 frame_info_ptr frame)
 {
   gdbpy_ref<> locals_iter (get_py_iter_from_func (filter, "frame_locals"));
@@ -681,8 +661,9 @@ py_print_locals (PyObject *filter,
   ui_out_emit_list list_emitter (out, "locals");
 
   if (locals_iter != Py_None
-      && (enumerate_locals (locals_iter.get (), out, indent, args_type,
-			    0, frame) == EXT_LANG_BT_ERROR))
+      && (enumerate_locals (locals_iter.get (), out, indent, args_type, 0,
+			    frame)
+	  == EXT_LANG_BT_ERROR))
     return EXT_LANG_BT_ERROR;
 
   return EXT_LANG_BT_OK;
@@ -694,10 +675,8 @@ py_print_locals (PyObject *filter,
    a Python exception, or EXT_LANG_BT_OK on success.  */
 
 static enum ext_lang_bt_status
-py_print_args (PyObject *filter,
-	       struct ui_out *out,
-	       enum ext_lang_frame_args args_type,
-	       frame_info_ptr frame)
+py_print_args (PyObject *filter, struct ui_out *out,
+	       enum ext_lang_frame_args args_type, frame_info_ptr frame)
 {
   gdbpy_ref<> args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
@@ -748,8 +727,8 @@ py_print_args (PyObject *filter,
 
 static enum ext_lang_bt_status
 py_print_frame (PyObject *filter, frame_filter_flags flags,
-		enum ext_lang_frame_args args_type,
-		struct ui_out *out, int indent, htab_t levels_printed)
+		enum ext_lang_frame_args args_type, struct ui_out *out,
+		int indent, htab_t levels_printed)
 {
   int has_addr = 0;
   CORE_ADDR address = 0;
@@ -804,10 +783,10 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
   gdbarch = get_frame_arch (frame);
 
   /* stack-list-variables.  */
-  if (print_locals && print_args && ! print_frame_info)
+  if (print_locals && print_args && !print_frame_info)
     {
-      if (py_mi_print_variables (filter, out, &opts,
-				 args_type, frame) == EXT_LANG_BT_ERROR)
+      if (py_mi_print_variables (filter, out, &opts, args_type, frame)
+	  == EXT_LANG_BT_ERROR)
 	return EXT_LANG_BT_ERROR;
       return EXT_LANG_BT_OK;
     }
@@ -816,7 +795,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
   /* -stack-list-locals does not require a
      wrapping frame attribute.  */
-  if (print_frame_info || (print_args && ! print_locals))
+  if (print_frame_info || (print_args && !print_locals))
     tuple.emplace (out, "frame");
 
   if (print_frame_info)
@@ -846,12 +825,10 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
     }
 
   /* For MI, each piece is controlled individually.  */
-  bool location_print = (print_frame_info
-			 && !out->is_mi_like_p ()
-			 && (print_what == LOCATION
-			     || print_what == SRC_AND_LOC
-			     || print_what == LOC_AND_ADDRESS
-			     || print_what == SHORT_LOCATION));
+  bool location_print
+    = (print_frame_info && !out->is_mi_like_p ()
+       && (print_what == LOCATION || print_what == SRC_AND_LOC
+	   || print_what == LOC_AND_ADDRESS || print_what == SHORT_LOCATION));
 
   /* Print frame level.  MI does not require the level if
      locals/variables only are being printed.  */
@@ -862,8 +839,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
       struct frame_info **slot;
       int level;
 
-      slot = (frame_info **) htab_find_slot (levels_printed,
-						   frame.get(), INSERT);
+      slot = (frame_info **) htab_find_slot (levels_printed, frame.get (),
+					     INSERT);
 
       level = frame_relative_level (frame);
 
@@ -876,8 +853,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
       else
 	{
 	  *slot = frame.get ();
-	  annotate_frame_begin (print_level ? level : 0,
-				gdbarch, address);
+	  annotate_frame_begin (print_level ? level : 0, gdbarch, address);
 	  out->text ("#");
 	  out->field_fmt_signed (2, ui_left, "level", level);
 	}
@@ -889,8 +865,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	 print nothing.  */
       if (opts.addressprint && has_addr)
 	{
-	  if (!sal.symtab
-	      || frame_show_address (frame, sal)
+	  if (!sal.symtab || frame_show_address (frame, sal)
 	      || print_what == LOC_AND_ADDRESS)
 	    {
 	      annotate_frame_address ();
@@ -935,8 +910,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	  else if (py_func != Py_None)
 	    {
 	      PyErr_SetString (PyExc_RuntimeError,
-			       _("FrameDecorator.function: expecting a " \
-				 "String, integer or None."));
+			       _ ("FrameDecorator.function: expecting a "
+				  "String, integer or None."));
 	      return EXT_LANG_BT_ERROR;
 	    }
 
@@ -947,7 +922,6 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	    out->field_string ("func", function, function_name_style.style ());
 	}
     }
-
 
   /* Frame arguments.  Check the result, and error if something went
      wrong.  */
@@ -974,8 +948,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
 	  if (py_fn != Py_None)
 	    {
-	      gdb::unique_xmalloc_ptr<char>
-		filename (python_string_to_host_string (py_fn.get ()));
+	      gdb::unique_xmalloc_ptr<char> filename (
+		python_string_to_host_string (py_fn.get ()));
 
 	      if (filename == NULL)
 		return EXT_LANG_BT_ERROR;
@@ -1014,7 +988,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
     }
 
   bool source_print
-    = (! out->is_mi_like_p ()
+    = (!out->is_mi_like_p ()
        && (print_what == SRC_LINE || print_what == SRC_AND_LOC));
   if (source_print)
     {
@@ -1025,7 +999,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
   /* For MI we need to deal with the "children" list population of
      elided frames, so if MI output detected do not send newline.  */
-  if (! out->is_mi_like_p ())
+  if (!out->is_mi_like_p ())
     {
       annotate_frame_end ();
       /* print_source_lines has already printed a newline.  */
@@ -1035,8 +1009,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
   if (print_locals)
     {
-      if (py_print_locals (filter, out, args_type, indent,
-			   frame) == EXT_LANG_BT_ERROR)
+      if (py_print_locals (filter, out, args_type, indent, frame)
+	  == EXT_LANG_BT_ERROR)
 	return EXT_LANG_BT_ERROR;
     }
 
@@ -1078,8 +1052,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
    frame FRAME.  */
 
 static PyObject *
-bootstrap_python_frame_filters (frame_info_ptr frame,
-				int frame_low, int frame_high)
+bootstrap_python_frame_filters (frame_info_ptr frame, int frame_low,
+				int frame_high)
 {
   gdbpy_ref<> frame_obj (frame_info_to_frame_object (frame));
   if (frame_obj == NULL)
@@ -1102,11 +1076,9 @@ bootstrap_python_frame_filters (frame_info_ptr frame,
   if (py_frame_high == NULL)
     return NULL;
 
-  gdbpy_ref<> iterable (PyObject_CallFunctionObjArgs (sort_func.get (),
-						      frame_obj.get (),
-						      py_frame_low.get (),
-						      py_frame_high.get (),
-						      NULL));
+  gdbpy_ref<> iterable (PyObject_CallFunctionObjArgs (
+    sort_func.get (), frame_obj.get (), py_frame_low.get (),
+    py_frame_high.get (), NULL));
   if (iterable == NULL)
     return NULL;
 
@@ -1195,9 +1167,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
   if (iterable == Py_None)
     return EXT_LANG_BT_NO_FILTERS;
 
-  htab_up levels_printed (htab_create (20,
-				       htab_hash_pointer,
-				       htab_eq_pointer,
+  htab_up levels_printed (htab_create (20, htab_hash_pointer, htab_eq_pointer,
 				       NULL));
 
   while (true)
@@ -1222,7 +1192,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	    {
 	      /* We've printed all the frames we were asked to
 		 print, but more frames existed.  */
-	      gdb_printf (_("(More stack frames follow...)\n"));
+	      gdb_printf (_ ("(More stack frames follow...)\n"));
 	      break;
 	    }
 	}

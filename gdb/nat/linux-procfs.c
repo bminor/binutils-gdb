@@ -37,7 +37,7 @@ linux_proc_get_int (pid_t lwpid, const char *field, int warn)
   if (status_file == NULL)
     {
       if (warn)
-	warning (_("unable to open /proc file '%s'"), buf);
+	warning (_ ("unable to open /proc file '%s'"), buf);
       return -1;
     }
 
@@ -117,7 +117,6 @@ parse_proc_status_state (const char *state)
   return PROC_STATE_UNKNOWN;
 }
 
-
 /* Fill in STATE, a buffer with BUFFER_SIZE bytes with the 'State'
    line of /proc/PID/status.  Returns -1 on failure to open the /proc
    file, 1 if the line is found, and 0 if not found.  If WARN, warn on
@@ -134,7 +133,7 @@ linux_proc_pid_get_state (pid_t pid, int warn, enum proc_state *state)
   if (procfile == NULL)
     {
       if (warn)
-	warning (_("unable to open /proc file '%s'"), buffer);
+	warning (_ ("unable to open /proc file '%s'"), buffer);
       return -1;
     }
 
@@ -234,7 +233,7 @@ linux_proc_pid_is_zombie (pid_t pid)
 const char *
 linux_proc_tid_get_name (ptid_t ptid)
 {
-#define TASK_COMM_LEN 16  /* As defined in the kernel's sched.h.  */
+#define TASK_COMM_LEN 16 /* As defined in the kernel's sched.h.  */
 
   static char comm_buf[TASK_COMM_LEN];
   char comm_path[100];
@@ -242,8 +241,8 @@ linux_proc_tid_get_name (ptid_t ptid)
   pid_t pid = ptid.pid ();
   pid_t tid = ptid.lwp_p () ? ptid.lwp () : ptid.pid ();
 
-  xsnprintf (comm_path, sizeof (comm_path),
-	     "/proc/%ld/task/%ld/comm", (long) pid, (long) tid);
+  xsnprintf (comm_path, sizeof (comm_path), "/proc/%ld/task/%ld/comm",
+	     (long) pid, (long) tid);
 
   gdb_file_up comm_file = gdb_fopen_cloexec (comm_path, "r");
   if (comm_file == NULL)
@@ -287,7 +286,7 @@ linux_proc_attach_tgid_threads (pid_t pid,
   dir = opendir (pathname);
   if (dir == NULL)
     {
-      warning (_("Could not open /proc/%ld/task."), (long) pid);
+      warning (_ ("Could not open /proc/%ld/task."), (long) pid);
       return;
     }
 
@@ -372,5 +371,5 @@ linux_proc_init_warnings ()
   struct stat st;
 
   if (stat ("/proc/self", &st) != 0)
-    warning (_("/proc is not accessible."));
+    warning (_ ("/proc is not accessible."));
 }

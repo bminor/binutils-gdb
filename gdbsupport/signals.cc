@@ -32,24 +32,24 @@ struct gdbarch;
    several for its own use.  */
 
 #ifndef REALTIME_LO
-# if defined(__SIGRTMIN)
-#  define REALTIME_LO __SIGRTMIN
-#  define REALTIME_HI (__SIGRTMAX + 1)
-# elif defined(SIGRTMIN)
-#  define REALTIME_LO SIGRTMIN
-#  define REALTIME_HI (SIGRTMAX + 1)
-# endif
+#if defined(__SIGRTMIN)
+#define REALTIME_LO __SIGRTMIN
+#define REALTIME_HI (__SIGRTMAX + 1)
+#elif defined(SIGRTMIN)
+#define REALTIME_LO SIGRTMIN
+#define REALTIME_HI (SIGRTMAX + 1)
+#endif
 #endif
 
 /* This table must match in order and size the signals in enum
    gdb_signal.  */
 
-static const struct {
+static const struct
+{
   const char *symbol;
   const char *name;
   const char *string;
-  } signals [] =
-{
+} signals[] = {
 #define SET(symbol, constant, name, string) { #symbol, name, string },
 #include "gdb/signals.def"
 #undef SET
@@ -98,15 +98,13 @@ gdb_signal_from_name (const char *name)
      instead.  */
 
   /* This ugly cast brought to you by the native VAX compiler.  */
-  for (sig = GDB_SIGNAL_HUP;
-       sig < GDB_SIGNAL_LAST;
+  for (sig = GDB_SIGNAL_HUP; sig < GDB_SIGNAL_LAST;
        sig = (enum gdb_signal) ((int) sig + 1))
-    if (signals[sig].name != NULL
-	&& strcmp (name, signals[sig].name) == 0)
+    if (signals[sig].name != NULL && strcmp (name, signals[sig].name) == 0)
       return sig;
   return GDB_SIGNAL_UNKNOWN;
 }
-
+
 /* The following functions are to help certain targets deal
    with the signal/waitstatus stuff.  They could just as well be in
    a file called native-utils.c or unixwaitstatus-utils.c or whatever.  */
@@ -139,218 +137,216 @@ gdb_signal_from_host (int hostsig)
   if (hostsig == SIGTERM)
     return GDB_SIGNAL_TERM;
 
-  /* All other signals need preprocessor conditionals.  */
-#if defined (SIGHUP)
+    /* All other signals need preprocessor conditionals.  */
+#if defined(SIGHUP)
   if (hostsig == SIGHUP)
     return GDB_SIGNAL_HUP;
 #endif
-#if defined (SIGQUIT)
+#if defined(SIGQUIT)
   if (hostsig == SIGQUIT)
     return GDB_SIGNAL_QUIT;
 #endif
-#if defined (SIGTRAP)
+#if defined(SIGTRAP)
   if (hostsig == SIGTRAP)
     return GDB_SIGNAL_TRAP;
 #endif
-#if defined (SIGEMT)
+#if defined(SIGEMT)
   if (hostsig == SIGEMT)
     return GDB_SIGNAL_EMT;
 #endif
-#if defined (SIGKILL)
+#if defined(SIGKILL)
   if (hostsig == SIGKILL)
     return GDB_SIGNAL_KILL;
 #endif
-#if defined (SIGBUS)
+#if defined(SIGBUS)
   if (hostsig == SIGBUS)
     return GDB_SIGNAL_BUS;
 #endif
-#if defined (SIGSYS)
+#if defined(SIGSYS)
   if (hostsig == SIGSYS)
     return GDB_SIGNAL_SYS;
 #endif
-#if defined (SIGPIPE)
+#if defined(SIGPIPE)
   if (hostsig == SIGPIPE)
     return GDB_SIGNAL_PIPE;
 #endif
-#if defined (SIGALRM)
+#if defined(SIGALRM)
   if (hostsig == SIGALRM)
     return GDB_SIGNAL_ALRM;
 #endif
-#if defined (SIGUSR1)
+#if defined(SIGUSR1)
   if (hostsig == SIGUSR1)
     return GDB_SIGNAL_USR1;
 #endif
-#if defined (SIGUSR2)
+#if defined(SIGUSR2)
   if (hostsig == SIGUSR2)
     return GDB_SIGNAL_USR2;
 #endif
-#if defined (SIGCLD)
+#if defined(SIGCLD)
   if (hostsig == SIGCLD)
     return GDB_SIGNAL_CHLD;
 #endif
-#if defined (SIGCHLD)
+#if defined(SIGCHLD)
   if (hostsig == SIGCHLD)
     return GDB_SIGNAL_CHLD;
 #endif
-#if defined (SIGPWR)
+#if defined(SIGPWR)
   if (hostsig == SIGPWR)
     return GDB_SIGNAL_PWR;
 #endif
-#if defined (SIGWINCH)
+#if defined(SIGWINCH)
   if (hostsig == SIGWINCH)
     return GDB_SIGNAL_WINCH;
 #endif
-#if defined (SIGURG)
+#if defined(SIGURG)
   if (hostsig == SIGURG)
     return GDB_SIGNAL_URG;
 #endif
-#if defined (SIGIO)
+#if defined(SIGIO)
   if (hostsig == SIGIO)
     return GDB_SIGNAL_IO;
 #endif
-#if defined (SIGPOLL)
+#if defined(SIGPOLL)
   if (hostsig == SIGPOLL)
     return GDB_SIGNAL_POLL;
 #endif
-#if defined (SIGSTOP)
+#if defined(SIGSTOP)
   if (hostsig == SIGSTOP)
     return GDB_SIGNAL_STOP;
 #endif
-#if defined (SIGTSTP)
+#if defined(SIGTSTP)
   if (hostsig == SIGTSTP)
     return GDB_SIGNAL_TSTP;
 #endif
-#if defined (SIGCONT)
+#if defined(SIGCONT)
   if (hostsig == SIGCONT)
     return GDB_SIGNAL_CONT;
 #endif
-#if defined (SIGTTIN)
+#if defined(SIGTTIN)
   if (hostsig == SIGTTIN)
     return GDB_SIGNAL_TTIN;
 #endif
-#if defined (SIGTTOU)
+#if defined(SIGTTOU)
   if (hostsig == SIGTTOU)
     return GDB_SIGNAL_TTOU;
 #endif
-#if defined (SIGVTALRM)
+#if defined(SIGVTALRM)
   if (hostsig == SIGVTALRM)
     return GDB_SIGNAL_VTALRM;
 #endif
-#if defined (SIGPROF)
+#if defined(SIGPROF)
   if (hostsig == SIGPROF)
     return GDB_SIGNAL_PROF;
 #endif
-#if defined (SIGXCPU)
+#if defined(SIGXCPU)
   if (hostsig == SIGXCPU)
     return GDB_SIGNAL_XCPU;
 #endif
-#if defined (SIGXFSZ)
+#if defined(SIGXFSZ)
   if (hostsig == SIGXFSZ)
     return GDB_SIGNAL_XFSZ;
 #endif
-#if defined (SIGWIND)
+#if defined(SIGWIND)
   if (hostsig == SIGWIND)
     return GDB_SIGNAL_WIND;
 #endif
-#if defined (SIGPHONE)
+#if defined(SIGPHONE)
   if (hostsig == SIGPHONE)
     return GDB_SIGNAL_PHONE;
 #endif
-#if defined (SIGLOST)
+#if defined(SIGLOST)
   if (hostsig == SIGLOST)
     return GDB_SIGNAL_LOST;
 #endif
-#if defined (SIGWAITING)
+#if defined(SIGWAITING)
   if (hostsig == SIGWAITING)
     return GDB_SIGNAL_WAITING;
 #endif
-#if defined (SIGCANCEL)
+#if defined(SIGCANCEL)
   if (hostsig == SIGCANCEL)
     return GDB_SIGNAL_CANCEL;
 #endif
-#if defined (SIGLWP)
+#if defined(SIGLWP)
   if (hostsig == SIGLWP)
     return GDB_SIGNAL_LWP;
 #endif
-#if defined (SIGDANGER)
+#if defined(SIGDANGER)
   if (hostsig == SIGDANGER)
     return GDB_SIGNAL_DANGER;
 #endif
-#if defined (SIGGRANT)
+#if defined(SIGGRANT)
   if (hostsig == SIGGRANT)
     return GDB_SIGNAL_GRANT;
 #endif
-#if defined (SIGRETRACT)
+#if defined(SIGRETRACT)
   if (hostsig == SIGRETRACT)
     return GDB_SIGNAL_RETRACT;
 #endif
-#if defined (SIGMSG)
+#if defined(SIGMSG)
   if (hostsig == SIGMSG)
     return GDB_SIGNAL_MSG;
 #endif
-#if defined (SIGSOUND)
+#if defined(SIGSOUND)
   if (hostsig == SIGSOUND)
     return GDB_SIGNAL_SOUND;
 #endif
-#if defined (SIGSAK)
+#if defined(SIGSAK)
   if (hostsig == SIGSAK)
     return GDB_SIGNAL_SAK;
 #endif
-#if defined (SIGPRIO)
+#if defined(SIGPRIO)
   if (hostsig == SIGPRIO)
     return GDB_SIGNAL_PRIO;
 #endif
 
-  /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
-#if defined (EXC_BAD_ACCESS) && defined (_NSIG)
+    /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
+#if defined(EXC_BAD_ACCESS) && defined(_NSIG)
   if (hostsig == _NSIG + EXC_BAD_ACCESS)
     return GDB_EXC_BAD_ACCESS;
 #endif
-#if defined (EXC_BAD_INSTRUCTION) && defined (_NSIG)
+#if defined(EXC_BAD_INSTRUCTION) && defined(_NSIG)
   if (hostsig == _NSIG + EXC_BAD_INSTRUCTION)
     return GDB_EXC_BAD_INSTRUCTION;
 #endif
-#if defined (EXC_ARITHMETIC) && defined (_NSIG)
+#if defined(EXC_ARITHMETIC) && defined(_NSIG)
   if (hostsig == _NSIG + EXC_ARITHMETIC)
     return GDB_EXC_ARITHMETIC;
 #endif
-#if defined (EXC_EMULATION) && defined (_NSIG)
+#if defined(EXC_EMULATION) && defined(_NSIG)
   if (hostsig == _NSIG + EXC_EMULATION)
     return GDB_EXC_EMULATION;
 #endif
-#if defined (EXC_SOFTWARE) && defined (_NSIG)
+#if defined(EXC_SOFTWARE) && defined(_NSIG)
   if (hostsig == _NSIG + EXC_SOFTWARE)
     return GDB_EXC_SOFTWARE;
 #endif
-#if defined (EXC_BREAKPOINT) && defined (_NSIG)
+#if defined(EXC_BREAKPOINT) && defined(_NSIG)
   if (hostsig == _NSIG + EXC_BREAKPOINT)
     return GDB_EXC_BREAKPOINT;
 #endif
 
-#if defined (SIGINFO)
+#if defined(SIGINFO)
   if (hostsig == SIGINFO)
     return GDB_SIGNAL_INFO;
 #endif
-#if defined (SIGLIBRT)
+#if defined(SIGLIBRT)
   if (hostsig == SIGLIBRT)
     return GDB_SIGNAL_LIBRT;
 #endif
 
-#if defined (REALTIME_LO)
+#if defined(REALTIME_LO)
   if (hostsig >= REALTIME_LO && hostsig < REALTIME_HI)
     {
       /* This block of GDB_SIGNAL_REALTIME value is in order.  */
       if (33 <= hostsig && hostsig <= 63)
-	return (enum gdb_signal)
-	  (hostsig - 33 + (int) GDB_SIGNAL_REALTIME_33);
+        return (enum gdb_signal) (hostsig - 33 + (int) GDB_SIGNAL_REALTIME_33);
       else if (hostsig == 32)
-	return GDB_SIGNAL_REALTIME_32;
+        return GDB_SIGNAL_REALTIME_32;
       else if (64 <= hostsig && hostsig <= 127)
-	return (enum gdb_signal)
-	  (hostsig - 64 + (int) GDB_SIGNAL_REALTIME_64);
+        return (enum gdb_signal) (hostsig - 64 + (int) GDB_SIGNAL_REALTIME_64);
       else
-	error (_("GDB bug: target.c (gdb_signal_from_host): "
-	       "unrecognized real-time signal"));
+        error (_ ("GDB bug: target.c (gdb_signal_from_host): "
+                  "unrecognized real-time signal"));
     }
 #endif
 
@@ -363,8 +359,7 @@ gdb_signal_from_host (int hostsig)
    accordingly. */
 
 static int
-do_gdb_signal_to_host (enum gdb_signal oursig,
-			  int *oursig_ok)
+do_gdb_signal_to_host (enum gdb_signal oursig, int *oursig_ok)
 {
   int retsig;
   /* Silence the 'not used' warning, for targets that
@@ -397,229 +392,228 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
       return SIGTERM;
 
       /* All other signals need preprocessor conditionals.  */
-#if defined (SIGHUP)
+#if defined(SIGHUP)
     case GDB_SIGNAL_HUP:
       return SIGHUP;
 #endif
-#if defined (SIGQUIT)
+#if defined(SIGQUIT)
     case GDB_SIGNAL_QUIT:
       return SIGQUIT;
 #endif
-#if defined (SIGTRAP)
+#if defined(SIGTRAP)
     case GDB_SIGNAL_TRAP:
       return SIGTRAP;
 #endif
-#if defined (SIGEMT)
+#if defined(SIGEMT)
     case GDB_SIGNAL_EMT:
       return SIGEMT;
 #endif
-#if defined (SIGKILL)
+#if defined(SIGKILL)
     case GDB_SIGNAL_KILL:
       return SIGKILL;
 #endif
-#if defined (SIGBUS)
+#if defined(SIGBUS)
     case GDB_SIGNAL_BUS:
       return SIGBUS;
 #endif
-#if defined (SIGSYS)
+#if defined(SIGSYS)
     case GDB_SIGNAL_SYS:
       return SIGSYS;
 #endif
-#if defined (SIGPIPE)
+#if defined(SIGPIPE)
     case GDB_SIGNAL_PIPE:
       return SIGPIPE;
 #endif
-#if defined (SIGALRM)
+#if defined(SIGALRM)
     case GDB_SIGNAL_ALRM:
       return SIGALRM;
 #endif
-#if defined (SIGUSR1)
+#if defined(SIGUSR1)
     case GDB_SIGNAL_USR1:
       return SIGUSR1;
 #endif
-#if defined (SIGUSR2)
+#if defined(SIGUSR2)
     case GDB_SIGNAL_USR2:
       return SIGUSR2;
 #endif
-#if defined (SIGCHLD) || defined (SIGCLD)
+#if defined(SIGCHLD) || defined(SIGCLD)
     case GDB_SIGNAL_CHLD:
-#if defined (SIGCHLD)
+#if defined(SIGCHLD)
       return SIGCHLD;
 #else
       return SIGCLD;
 #endif
 #endif /* SIGCLD or SIGCHLD */
-#if defined (SIGPWR)
+#if defined(SIGPWR)
     case GDB_SIGNAL_PWR:
       return SIGPWR;
 #endif
-#if defined (SIGWINCH)
+#if defined(SIGWINCH)
     case GDB_SIGNAL_WINCH:
       return SIGWINCH;
 #endif
-#if defined (SIGURG)
+#if defined(SIGURG)
     case GDB_SIGNAL_URG:
       return SIGURG;
 #endif
-#if defined (SIGIO)
+#if defined(SIGIO)
     case GDB_SIGNAL_IO:
       return SIGIO;
 #endif
-#if defined (SIGPOLL)
+#if defined(SIGPOLL)
     case GDB_SIGNAL_POLL:
       return SIGPOLL;
 #endif
-#if defined (SIGSTOP)
+#if defined(SIGSTOP)
     case GDB_SIGNAL_STOP:
       return SIGSTOP;
 #endif
-#if defined (SIGTSTP)
+#if defined(SIGTSTP)
     case GDB_SIGNAL_TSTP:
       return SIGTSTP;
 #endif
-#if defined (SIGCONT)
+#if defined(SIGCONT)
     case GDB_SIGNAL_CONT:
       return SIGCONT;
 #endif
-#if defined (SIGTTIN)
+#if defined(SIGTTIN)
     case GDB_SIGNAL_TTIN:
       return SIGTTIN;
 #endif
-#if defined (SIGTTOU)
+#if defined(SIGTTOU)
     case GDB_SIGNAL_TTOU:
       return SIGTTOU;
 #endif
-#if defined (SIGVTALRM)
+#if defined(SIGVTALRM)
     case GDB_SIGNAL_VTALRM:
       return SIGVTALRM;
 #endif
-#if defined (SIGPROF)
+#if defined(SIGPROF)
     case GDB_SIGNAL_PROF:
       return SIGPROF;
 #endif
-#if defined (SIGXCPU)
+#if defined(SIGXCPU)
     case GDB_SIGNAL_XCPU:
       return SIGXCPU;
 #endif
-#if defined (SIGXFSZ)
+#if defined(SIGXFSZ)
     case GDB_SIGNAL_XFSZ:
       return SIGXFSZ;
 #endif
-#if defined (SIGWIND)
+#if defined(SIGWIND)
     case GDB_SIGNAL_WIND:
       return SIGWIND;
 #endif
-#if defined (SIGPHONE)
+#if defined(SIGPHONE)
     case GDB_SIGNAL_PHONE:
       return SIGPHONE;
 #endif
-#if defined (SIGLOST)
+#if defined(SIGLOST)
     case GDB_SIGNAL_LOST:
       return SIGLOST;
 #endif
-#if defined (SIGWAITING)
+#if defined(SIGWAITING)
     case GDB_SIGNAL_WAITING:
       return SIGWAITING;
 #endif
-#if defined (SIGCANCEL)
+#if defined(SIGCANCEL)
     case GDB_SIGNAL_CANCEL:
       return SIGCANCEL;
 #endif
-#if defined (SIGLWP)
+#if defined(SIGLWP)
     case GDB_SIGNAL_LWP:
       return SIGLWP;
 #endif
-#if defined (SIGDANGER)
+#if defined(SIGDANGER)
     case GDB_SIGNAL_DANGER:
       return SIGDANGER;
 #endif
-#if defined (SIGGRANT)
+#if defined(SIGGRANT)
     case GDB_SIGNAL_GRANT:
       return SIGGRANT;
 #endif
-#if defined (SIGRETRACT)
+#if defined(SIGRETRACT)
     case GDB_SIGNAL_RETRACT:
       return SIGRETRACT;
 #endif
-#if defined (SIGMSG)
+#if defined(SIGMSG)
     case GDB_SIGNAL_MSG:
       return SIGMSG;
 #endif
-#if defined (SIGSOUND)
+#if defined(SIGSOUND)
     case GDB_SIGNAL_SOUND:
       return SIGSOUND;
 #endif
-#if defined (SIGSAK)
+#if defined(SIGSAK)
     case GDB_SIGNAL_SAK:
       return SIGSAK;
 #endif
-#if defined (SIGPRIO)
+#if defined(SIGPRIO)
     case GDB_SIGNAL_PRIO:
       return SIGPRIO;
 #endif
 
       /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
-#if defined (EXC_BAD_ACCESS) && defined (_NSIG)
+#if defined(EXC_BAD_ACCESS) && defined(_NSIG)
     case GDB_EXC_BAD_ACCESS:
       return _NSIG + EXC_BAD_ACCESS;
 #endif
-#if defined (EXC_BAD_INSTRUCTION) && defined (_NSIG)
+#if defined(EXC_BAD_INSTRUCTION) && defined(_NSIG)
     case GDB_EXC_BAD_INSTRUCTION:
       return _NSIG + EXC_BAD_INSTRUCTION;
 #endif
-#if defined (EXC_ARITHMETIC) && defined (_NSIG)
+#if defined(EXC_ARITHMETIC) && defined(_NSIG)
     case GDB_EXC_ARITHMETIC:
       return _NSIG + EXC_ARITHMETIC;
 #endif
-#if defined (EXC_EMULATION) && defined (_NSIG)
+#if defined(EXC_EMULATION) && defined(_NSIG)
     case GDB_EXC_EMULATION:
       return _NSIG + EXC_EMULATION;
 #endif
-#if defined (EXC_SOFTWARE) && defined (_NSIG)
+#if defined(EXC_SOFTWARE) && defined(_NSIG)
     case GDB_EXC_SOFTWARE:
       return _NSIG + EXC_SOFTWARE;
 #endif
-#if defined (EXC_BREAKPOINT) && defined (_NSIG)
+#if defined(EXC_BREAKPOINT) && defined(_NSIG)
     case GDB_EXC_BREAKPOINT:
       return _NSIG + EXC_BREAKPOINT;
 #endif
 
-#if defined (SIGINFO)
+#if defined(SIGINFO)
     case GDB_SIGNAL_INFO:
       return SIGINFO;
 #endif
-#if defined (SIGLIBRT)
+#if defined(SIGLIBRT)
     case GDB_SIGNAL_LIBRT:
       return SIGLIBRT;
 #endif
 
     default:
-#if defined (REALTIME_LO)
+#if defined(REALTIME_LO)
       retsig = 0;
 
-      if (oursig >= GDB_SIGNAL_REALTIME_33
-	  && oursig <= GDB_SIGNAL_REALTIME_63)
-	{
-	  /* This block of signals is continuous, and
+      if (oursig >= GDB_SIGNAL_REALTIME_33 && oursig <= GDB_SIGNAL_REALTIME_63)
+        {
+          /* This block of signals is continuous, and
 	     GDB_SIGNAL_REALTIME_33 is 33 by definition.  */
-	  retsig = (int) oursig - (int) GDB_SIGNAL_REALTIME_33 + 33;
-	}
+          retsig = (int) oursig - (int) GDB_SIGNAL_REALTIME_33 + 33;
+        }
       else if (oursig == GDB_SIGNAL_REALTIME_32)
-	{
-	  /* GDB_SIGNAL_REALTIME_32 isn't contiguous with
+        {
+          /* GDB_SIGNAL_REALTIME_32 isn't contiguous with
 	     GDB_SIGNAL_REALTIME_33.  It is 32 by definition.  */
-	  retsig = 32;
-	}
+          retsig = 32;
+        }
       else if (oursig >= GDB_SIGNAL_REALTIME_64
-	  && oursig <= GDB_SIGNAL_REALTIME_127)
-	{
-	  /* This block of signals is continuous, and
+               && oursig <= GDB_SIGNAL_REALTIME_127)
+        {
+          /* This block of signals is continuous, and
 	     GDB_SIGNAL_REALTIME_64 is 64 by definition.  */
-	  retsig = (int) oursig - (int) GDB_SIGNAL_REALTIME_64 + 64;
-	}
+          retsig = (int) oursig - (int) GDB_SIGNAL_REALTIME_64 + 64;
+        }
 
       if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
-	return retsig;
+        return retsig;
 #endif
 
       *oursig_ok = 0;
@@ -644,8 +638,8 @@ gdb_signal_to_host (enum gdb_signal oursig)
     {
       /* The user might be trying to do "signal SIGSAK" where this system
 	 doesn't have SIGSAK.  */
-      warning (_("Signal %s does not exist on this system."),
-	       gdb_signal_to_name (oursig));
+      warning (_ ("Signal %s does not exist on this system."),
+               gdb_signal_to_name (oursig));
       return 0;
     }
   else

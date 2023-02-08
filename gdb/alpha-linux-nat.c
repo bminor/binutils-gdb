@@ -36,9 +36,10 @@
 class alpha_linux_nat_target final : public linux_nat_trad_target
 {
 protected:
+
   /* Override linux_nat_trad_target methods.  */
-  CORE_ADDR register_u_offset (struct gdbarch *gdbarch,
-			       int regno, int store_p) override;
+  CORE_ADDR register_u_offset (struct gdbarch *gdbarch, int regno,
+			       int store_p) override;
 };
 
 static alpha_linux_nat_target the_alpha_linux_nat_target;
@@ -49,17 +50,17 @@ static alpha_linux_nat_target the_alpha_linux_nat_target;
 void
 supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
-  const long *regp = (const long *)gregsetp;
+  const long *regp = (const long *) gregsetp;
 
   /* PC is in slot 32, UNIQUE is in slot 33.  */
   alpha_supply_int_regs (regcache, -1, regp, regp + 31, regp + 32);
 }
 
 void
-fill_gregset (const struct regcache *regcache,
-	      gdb_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache, gdb_gregset_t *gregsetp,
+	      int regno)
 {
-  long *regp = (long *)gregsetp;
+  long *regp = (long *) gregsetp;
 
   /* PC is in slot 32, UNIQUE is in slot 33.  */
   alpha_fill_int_regs (regcache, regno, regp, regp + 31, regp + 32);
@@ -71,25 +72,25 @@ fill_gregset (const struct regcache *regcache,
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  const long *regp = (const long *)fpregsetp;
+  const long *regp = (const long *) fpregsetp;
 
   /* FPCR is in slot 32.  */
   alpha_supply_fp_regs (regcache, -1, regp, regp + 31);
 }
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       gdb_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache, gdb_fpregset_t *fpregsetp,
+	       int regno)
 {
-  long *regp = (long *)fpregsetp;
+  long *regp = (long *) fpregsetp;
 
   /* FPCR is in slot 32.  */
   alpha_fill_fp_regs (regcache, regno, regp, regp + 31);
 }
 
 CORE_ADDR
-alpha_linux_nat_target::register_u_offset (struct gdbarch *gdbarch,
-					   int regno, int store_p)
+alpha_linux_nat_target::register_u_offset (struct gdbarch *gdbarch, int regno,
+					   int store_p)
 {
   if (regno == gdbarch_pc_regnum (gdbarch))
     return PC;
@@ -102,6 +103,7 @@ alpha_linux_nat_target::register_u_offset (struct gdbarch *gdbarch,
 }
 
 void _initialize_alpha_linux_nat ();
+
 void
 _initialize_alpha_linux_nat ()
 {

@@ -20,7 +20,6 @@
 #include "prologue-value.h"
 #include "regcache.h"
 
-
 /* Constructors.  */
 
 pv_t
@@ -31,19 +30,17 @@ pv_unknown (void)
   return v;
 }
 
-
 pv_t
 pv_constant (CORE_ADDR k)
 {
   pv_t v;
 
   v.kind = pvk_constant;
-  v.reg = -1;                   /* for debugging */
+  v.reg = -1; /* for debugging */
   v.k = k;
 
   return v;
 }
-
 
 pv_t
 pv_register (int reg, CORE_ADDR k)
@@ -57,8 +54,6 @@ pv_register (int reg, CORE_ADDR k)
   return v;
 }
 
-
-
 /* Arithmetic operations.  */
 
 /* If one of *A and *B is a constant, and the other isn't, swap the
@@ -68,8 +63,7 @@ pv_register (int reg, CORE_ADDR k)
 static void
 constant_last (pv_t *a, pv_t *b)
 {
-  if (a->kind == pvk_constant
-      && b->kind != pvk_constant)
+  if (a->kind == pvk_constant && b->kind != pvk_constant)
     {
       pv_t temp = *a;
       *a = *b;
@@ -77,20 +71,17 @@ constant_last (pv_t *a, pv_t *b)
     }
 }
 
-
 pv_t
 pv_add (pv_t a, pv_t b)
 {
   constant_last (&a, &b);
 
   /* We can add a constant to a register.  */
-  if (a.kind == pvk_register
-      && b.kind == pvk_constant)
+  if (a.kind == pvk_register && b.kind == pvk_constant)
     return pv_register (a.reg, a.k + b.k);
 
   /* We can add a constant to another constant.  */
-  else if (a.kind == pvk_constant
-	   && b.kind == pvk_constant)
+  else if (a.kind == pvk_constant && b.kind == pvk_constant)
     return pv_constant (a.k + b.k);
 
   /* Anything else we don't know how to add.  We don't have a
@@ -100,7 +91,6 @@ pv_add (pv_t a, pv_t b)
     return pv_unknown ();
 }
 
-
 pv_t
 pv_add_constant (pv_t v, CORE_ADDR k)
 {
@@ -108,7 +98,6 @@ pv_add_constant (pv_t v, CORE_ADDR k)
      we'll just let pv_add take care of that for us.  */
   return pv_add (v, pv_constant (k));
 }
-
 
 pv_t
 pv_subtract (pv_t a, pv_t b)
@@ -128,19 +117,15 @@ pv_subtract (pv_t a, pv_t b)
   constant_last (&a, &b);
 
   /* We can subtract two constants.  */
-  if (a.kind == pvk_constant
-      && b.kind == pvk_constant)
+  if (a.kind == pvk_constant && b.kind == pvk_constant)
     return pv_constant (a.k - b.k);
 
   /* We can subtract a constant from a register.  */
-  else if (a.kind == pvk_register
-	   && b.kind == pvk_constant)
+  else if (a.kind == pvk_register && b.kind == pvk_constant)
     return pv_register (a.reg, a.k - b.k);
 
   /* We can subtract a register from itself, yielding a constant.  */
-  else if (a.kind == pvk_register
-	   && b.kind == pvk_register
-	   && a.reg == b.reg)
+  else if (a.kind == pvk_register && b.kind == pvk_register && a.reg == b.reg)
     return pv_constant (a.k - b.k);
 
   /* We don't know how to subtract anything else.  */
@@ -148,31 +133,25 @@ pv_subtract (pv_t a, pv_t b)
     return pv_unknown ();
 }
 
-
 pv_t
 pv_logical_and (pv_t a, pv_t b)
 {
   constant_last (&a, &b);
 
   /* We can 'and' two constants.  */
-  if (a.kind == pvk_constant
-      && b.kind == pvk_constant)
+  if (a.kind == pvk_constant && b.kind == pvk_constant)
     return pv_constant (a.k & b.k);
 
   /* We can 'and' anything with the constant zero.  */
-  else if (b.kind == pvk_constant
-	   && b.k == 0)
+  else if (b.kind == pvk_constant && b.k == 0)
     return pv_constant (0);
 
   /* We can 'and' anything with ~0.  */
-  else if (b.kind == pvk_constant
-	   && b.k == ~ (CORE_ADDR) 0)
+  else if (b.kind == pvk_constant && b.k == ~(CORE_ADDR) 0)
     return a;
 
   /* We can 'and' a register with itself.  */
-  else if (a.kind == pvk_register
-	   && b.kind == pvk_register
-	   && a.reg == b.reg
+  else if (a.kind == pvk_register && b.kind == pvk_register && a.reg == b.reg
 	   && a.k == b.k)
     return a;
 
@@ -181,8 +160,6 @@ pv_logical_and (pv_t a, pv_t b)
     return pv_unknown ();
 }
 
-
-
 /* Examining prologue values.  */
 
 int
@@ -204,36 +181,27 @@ pv_is_identical (pv_t a, pv_t b)
     }
 }
 
-
 int
 pv_is_constant (pv_t a)
 {
   return (a.kind == pvk_constant);
 }
 
-
 int
 pv_is_register (pv_t a, int r)
 {
-  return (a.kind == pvk_register
-	  && a.reg == r);
+  return (a.kind == pvk_register && a.reg == r);
 }
-
 
 int
 pv_is_register_k (pv_t a, int r, CORE_ADDR k)
 {
-  return (a.kind == pvk_register
-	  && a.reg == r
-	  && a.k == k);
+  return (a.kind == pvk_register && a.reg == r && a.k == k);
 }
 
-
 enum pv_boolean
-pv_is_array_ref (pv_t addr, CORE_ADDR size,
-		 pv_t array_addr, CORE_ADDR array_len,
-		 CORE_ADDR elt_size,
-		 int *i)
+pv_is_array_ref (pv_t addr, CORE_ADDR size, pv_t array_addr,
+		 CORE_ADDR array_len, CORE_ADDR elt_size, int *i)
 {
   /* Note that, since .k is a CORE_ADDR, and CORE_ADDR is unsigned, if
      addr is *before* the start of the array, then this isn't going to
@@ -248,11 +216,9 @@ pv_is_array_ref (pv_t addr, CORE_ADDR size,
 	 completely after".  But with unsigned arithmetic, things are
 	 different: since it's a number circle, not a number line, the
 	 right values for offset.k are actually one contiguous range.  */
-      if (offset.k <= -size
-	  && offset.k >= array_len * elt_size)
+      if (offset.k <= -size && offset.k >= array_len * elt_size)
 	return pv_definite_no;
-      else if (offset.k % elt_size != 0
-	       || size != elt_size)
+      else if (offset.k % elt_size != 0 || size != elt_size)
 	return pv_maybe;
       else
 	{
@@ -264,10 +230,7 @@ pv_is_array_ref (pv_t addr, CORE_ADDR size,
     return pv_maybe;
 }
 
-
-
 /* Areas.  */
-
 
 /* A particular value known to be stored in an area.
 
@@ -294,7 +257,6 @@ struct pv_area::area_entry
   /* The value stored here.  */
   pv_t value;
 };
-
 
 /* See prologue-value.h.  */
 
@@ -332,12 +294,10 @@ pv_area::clear_entries ()
     }
 }
 
-
 pv_area::~pv_area ()
 {
   clear_entries ();
 }
-
 
 /* See prologue-value.h.  */
 
@@ -349,11 +309,9 @@ pv_area::store_would_trash (pv_t addr)
      pv_areas are always relative to a register, and we don't know the
      value of the register, so we can't compare entry addresses to
      constants.  */
-  return (addr.kind == pvk_unknown
-	  || addr.kind == pvk_constant
+  return (addr.kind == pvk_unknown || addr.kind == pvk_constant
 	  || (addr.kind == pvk_register && addr.reg != m_base_reg));
 }
-
 
 /* See prologue-value.h.  */
 
@@ -362,7 +320,7 @@ pv_area::find_entry (CORE_ADDR offset)
 {
   struct area_entry *e = m_entry;
 
-  if (! e)
+  if (!e)
     return 0;
 
   /* If the next entry would be better than the current one, then scan
@@ -391,7 +349,6 @@ pv_area::find_entry (CORE_ADDR offset)
   return e;
 }
 
-
 /* See prologue-value.h.  */
 
 int
@@ -401,7 +358,6 @@ pv_area::overlaps (struct area_entry *entry, CORE_ADDR offset, CORE_ADDR size)
   return (((entry->offset - offset) & m_addr_mask) < size
 	  || ((offset - entry->offset) & m_addr_mask) < entry->size);
 }
-
 
 /* See prologue-value.h.  */
 
@@ -464,7 +420,6 @@ pv_area::store (pv_t addr, CORE_ADDR size, pv_t value)
     }
 }
 
-
 /* See prologue-value.h.  */
 
 pv_t
@@ -472,8 +427,7 @@ pv_area::fetch (pv_t addr, CORE_ADDR size)
 {
   /* If we have no entries, or we can't decide how ADDR relates to the
      entries we do have, then the value is unknown.  */
-  if (! m_entry
-      || store_would_trash (addr))
+  if (!m_entry || store_would_trash (addr))
     return pv_unknown ();
   else
     {
@@ -489,7 +443,6 @@ pv_area::fetch (pv_t addr, CORE_ADDR size)
     }
 }
 
-
 /* See prologue-value.h.  */
 
 bool
@@ -500,10 +453,8 @@ pv_area::find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p)
   if (e)
     do
       {
-	if (e->value.kind == pvk_register
-	    && e->value.reg == reg
-	    && e->value.k == 0
-	    && e->size == register_size (gdbarch, reg))
+	if (e->value.kind == pvk_register && e->value.reg == reg
+	    && e->value.k == 0 && e->size == register_size (gdbarch, reg))
 	  {
 	    if (offset_p)
 	      *offset_p = e->offset;
@@ -517,13 +468,10 @@ pv_area::find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p)
   return false;
 }
 
-
 /* See prologue-value.h.  */
 
 void
-pv_area::scan (void (*func) (void *closure,
-			     pv_t addr,
-			     CORE_ADDR size,
+pv_area::scan (void (*func) (void *closure, pv_t addr, CORE_ADDR size,
 			     pv_t value),
 	       void *closure)
 {

@@ -40,7 +40,6 @@ notify_command_param_changed_p (bool param_changed, struct cmd_list_element *c)
   return c->theclass != class_maintenance && c->theclass != class_obscure;
 }
 
-
 static enum auto_boolean
 parse_auto_binary_operation (const char *arg)
 {
@@ -67,7 +66,7 @@ parse_auto_binary_operation (const char *arg)
 	       || (length > 1 && strncmp (arg, "-1", length) == 0))
 	return AUTO_BOOLEAN_AUTO;
     }
-  error (_("\"on\", \"off\" or \"auto\" expected."));
+  error (_ ("\"on\", \"off\" or \"auto\" expected."));
   return AUTO_BOOLEAN_AUTO; /* Pacify GCC.  */
 }
 
@@ -82,8 +81,7 @@ parse_cli_boolean_value (const char **arg)
   /* Note that "o" is ambiguous.  */
 
   if ((length == 2 && strncmp (*arg, "on", length) == 0)
-      || strncmp (*arg, "1", length) == 0
-      || strncmp (*arg, "yes", length) == 0
+      || strncmp (*arg, "1", length) == 0 || strncmp (*arg, "yes", length) == 0
       || strncmp (*arg, "enable", length) == 0)
     {
       *arg = skip_spaces (*arg + length);
@@ -116,12 +114,9 @@ parse_cli_boolean_value (const char *arg)
   return b;
 }
 
-
 void
-deprecated_show_value_hack (struct ui_file *ignore_file,
-			    int ignore_from_tty,
-			    struct cmd_list_element *c,
-			    const char *value)
+deprecated_show_value_hack (struct ui_file *ignore_file, int ignore_from_tty,
+			    struct cmd_list_element *c, const char *value)
 {
   /* If there's no command or value, don't try to print it out.  */
   if (c == NULL || value == NULL)
@@ -164,9 +159,7 @@ get_literal_val (LONGEST &val, const literal_def *extra_literals,
   size_t len = p - *arg;
 
   if (len > 0 && extra_literals != nullptr)
-    for (const literal_def *l = extra_literals;
-	 l->literal != nullptr;
-	 l++)
+    for (const literal_def *l = extra_literals; l->literal != nullptr; l++)
       if (strncmp (l->literal, *arg, len) == 0)
 	{
 	  *arg += len;
@@ -179,8 +172,8 @@ get_literal_val (LONGEST &val, const literal_def *extra_literals,
 	    {
 	      const char *after = skip_spaces (*arg);
 	      if (*after != '\0')
-		error (_("Junk after \"%.*s\": %s"),
-		       (int) len, unl_start, after);
+		error (_ ("Junk after \"%.*s\": %s"), (int) len, unl_start,
+		       after);
 	    }
 
 	  val = l->use;
@@ -201,14 +194,13 @@ parse_cli_var_integer (var_types var_type, const literal_def *extra_literals,
   if (*arg == nullptr || **arg == '\0')
     {
       if (extra_literals == nullptr)
-	error_no_arg (_("integer to set it to"));
+	error_no_arg (_ ("integer to set it to"));
       else
 	{
 	  std::string buffer = "";
 	  size_t count = 0;
 
-	  for (const literal_def *l = extra_literals;
-	       l->literal != nullptr;
+	  for (const literal_def *l = extra_literals; l->literal != nullptr;
 	       l++, count++)
 	    {
 	      if (count != 0)
@@ -216,13 +208,14 @@ parse_cli_var_integer (var_types var_type, const literal_def *extra_literals,
 	      buffer = buffer + '"' + l->literal + '"';
 	    }
 	  if (count > 1)
-	    error_no_arg
-	      (string_printf (_("integer to set it to, or one of: %s"),
-			      buffer.c_str ()).c_str ());
+	    error_no_arg (
+	      string_printf (_ ("integer to set it to, or one of: %s"),
+			     buffer.c_str ())
+		.c_str ());
 	  else
-	    error_no_arg
-	      (string_printf (_("integer to set it to, or %s"),
-			      buffer.c_str ()).c_str ());
+	    error_no_arg (string_printf (_ ("integer to set it to, or %s"),
+					 buffer.c_str ())
+			    .c_str ());
 	}
     }
 
@@ -236,8 +229,7 @@ parse_cli_var_integer (var_types var_type, const literal_def *extra_literals,
       enum tribool allowed = TRIBOOL_UNKNOWN;
       if (extra_literals != nullptr)
 	{
-	  for (const literal_def *l = extra_literals;
-	       l->literal != nullptr;
+	  for (const literal_def *l = extra_literals; l->literal != nullptr;
 	       l++)
 	    if (l->val.has_value () && val == *l->val)
 	      {
@@ -259,7 +251,7 @@ parse_cli_var_integer (var_types var_type, const literal_def *extra_literals,
 	    allowed = TRIBOOL_FALSE;
 	}
       if (allowed == TRIBOOL_FALSE)
-	error (_("integer %s out of range"), plongest (val));
+	error (_ ("integer %s out of range"), plongest (val));
     }
 
   return val;
@@ -282,7 +274,7 @@ parse_cli_var_enum (const char **args, const char *const *enums)
 	    msg += ", ";
 	  msg += enums[i];
 	}
-      error (_("Requires an argument. Valid arguments are %s."),
+      error (_ ("Requires an argument. Valid arguments are %s."),
 	     msg.c_str ());
     }
 
@@ -308,10 +300,10 @@ parse_cli_var_enum (const char **args, const char *const *enums)
       }
 
   if (nmatches == 0)
-    error (_("Undefined item: \"%.*s\"."), (int) len, *args);
+    error (_ ("Undefined item: \"%.*s\"."), (int) len, *args);
 
   if (nmatches > 1)
-    error (_("Ambiguous item \"%.*s\"."), (int) len, *args);
+    error (_ ("Ambiguous item \"%.*s\"."), (int) len, *args);
 
   *args += len;
   return match;
@@ -362,7 +354,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 		  break;
 		ch = parse_escape (get_current_arch (), &p);
 		if (ch == 0)
-		  break;	/* C loses */
+		  break; /* C loses */
 		else if (ch > 0)
 		  *q++ = ch;
 	      }
@@ -385,7 +377,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
       break;
     case var_filename:
       if (*arg == '\0')
-	error_no_arg (_("filename to set it to."));
+	error_no_arg (_ ("filename to set it to."));
       /* FALLTHROUGH */
     case var_optional_filename:
       {
@@ -406,8 +398,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	else
 	  val = xstrdup ("");
 
-	option_changed
-	  = c->var->set<std::string> (std::string (val));
+	option_changed = c->var->set<std::string> (std::string (val));
 	xfree (val);
       }
       break;
@@ -416,20 +407,18 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	int val = parse_cli_boolean_value (arg);
 
 	if (val < 0)
-	  error (_("\"on\" or \"off\" expected."));
+	  error (_ ("\"on\" or \"off\" expected."));
 
 	option_changed = c->var->set<bool> (val);
       }
       break;
     case var_auto_boolean:
-      option_changed = c->var->set<enum auto_boolean> (parse_auto_binary_operation (arg));
+      option_changed
+	= c->var->set<enum auto_boolean> (parse_auto_binary_operation (arg));
       break;
     case var_uinteger:
-      option_changed
-	= c->var->set<unsigned int> (parse_cli_var_integer (c->var->type (),
-							    c->var->
-							    extra_literals (),
-							    &arg, true));
+      option_changed = c->var->set<unsigned int> (parse_cli_var_integer (
+	c->var->type (), c->var->extra_literals (), &arg, true));
       break;
     case var_integer:
     case var_pinteger:
@@ -446,13 +435,13 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	int len = end_arg - arg;
 	const char *after = skip_spaces (end_arg);
 	if (*after != '\0')
-	  error (_("Junk after item \"%.*s\": %s"), len, arg, after);
+	  error (_ ("Junk after item \"%.*s\": %s"), len, arg, after);
 
 	option_changed = c->var->set<const char *> (match);
       }
       break;
     default:
-      error (_("gdb internal error: bad var_type in do_setshow_command"));
+      error (_ ("gdb internal error: bad var_type in do_setshow_command"));
     }
 
   c->func (NULL, from_tty, c);
@@ -521,12 +510,12 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	case var_string_noescape:
 	case var_filename:
 	case var_optional_filename:
-	  gdb::observers::command_param_changed.notify
-	    (name, c->var->get<std::string> ().c_str ());
+	  gdb::observers::command_param_changed.notify (
+	    name, c->var->get<std::string> ().c_str ());
 	  break;
 	case var_enum:
-	  gdb::observers::command_param_changed.notify
-	    (name, c->var->get<const char *> ());
+	  gdb::observers::command_param_changed.notify (
+	    name, c->var->get<const char *> ());
 	  break;
 	case var_boolean:
 	  {
@@ -620,13 +609,12 @@ get_setshow_command_value_string (const setting &var)
 	bool printed = false;
 	const LONGEST value
 	  = (var.type () == var_uinteger
-	     ? static_cast<LONGEST> (var.get<unsigned int> ())
-	     : static_cast<LONGEST> (var.get<int> ()));
+	       ? static_cast<LONGEST> (var.get<unsigned int> ())
+	       : static_cast<LONGEST> (var.get<int> ()));
 
 	if (var.extra_literals () != nullptr)
 	  for (const literal_def *l = var.extra_literals ();
-	       l->literal != nullptr;
-	       l++)
+	       l->literal != nullptr; l++)
 	    if (value == l->use)
 	      {
 		stb.puts (l->literal);
@@ -648,7 +636,6 @@ get_setshow_command_value_string (const setting &var)
 
   return stb.release ();
 }
-
 
 /* Do a "show" command.  ARG is NULL if no argument, or the
    text of the argument, and FROM_TTY is nonzero if this command is
@@ -713,8 +700,9 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 	    {
 	      /* If we find a prefix, output it (with "show " skipped).  */
 	      std::string prefixname = list->prefix->prefixname ();
-	      prefixname = (!list->prefix->is_prefix () ? ""
-			    : strstr (prefixname.c_str (), "show ") + 5);
+	      prefixname = (!list->prefix->is_prefix ()
+			      ? ""
+			      : strstr (prefixname.c_str (), "show ") + 5);
 	      uiout->text (prefixname);
 	    }
 	  uiout->field_string ("name", list->name);
@@ -726,5 +714,3 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 	}
     }
 }
-
-

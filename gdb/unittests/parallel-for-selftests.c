@@ -32,8 +32,10 @@
 
 #include "gdbsupport/thread-pool.h"
 
-namespace selftests {
-namespace parallel_for {
+namespace selftests
+{
+namespace parallel_for
+{
 
 struct save_restore_n_threads
 {
@@ -79,12 +81,13 @@ test_n_threads ()
   test (3);
 }
 
-}
-}
+} // namespace parallel_for
+} // namespace selftests
 
 #endif /* CXX_STD_THREAD */
 
 void _initialize_parallel_for_selftests ();
+
 void
 _initialize_parallel_for_selftests ()
 {
@@ -106,46 +109,29 @@ TEST (int n_threads)
 
   std::atomic<int> counter (0);
   FOR_EACH (1, 0, NUMBER,
-	    [&] (int start, int end)
-	    {
-	      counter += end - start;
-	    });
+	    [&] (int start, int end) { counter += end - start; });
   SELF_CHECK (counter == NUMBER);
 
   counter = 0;
-  FOR_EACH (1, 0, 0,
-	    [&] (int start, int end)
-	    {
-	      counter += end - start;
-	    });
+  FOR_EACH (1, 0, 0, [&] (int start, int end) { counter += end - start; });
   SELF_CHECK (counter == 0);
 
-  auto task_size_max_ = [] (int iter)
-    {
-      return (size_t)SIZE_MAX;
-    };
+  auto task_size_max_ = [] (int iter) { return (size_t) SIZE_MAX; };
   auto task_size_max = gdb::make_function_view (task_size_max_);
 
   counter = 0;
-  FOR_EACH (1, 0, NUMBER,
-	    [&] (int start, int end)
-	    {
-	      counter += end - start;
-	    }, task_size_max);
+  FOR_EACH (
+    1, 0, NUMBER, [&] (int start, int end) { counter += end - start; },
+    task_size_max);
   SELF_CHECK (counter == NUMBER);
 
-  auto task_size_one_ = [] (int iter)
-    {
-      return (size_t)1;
-    };
+  auto task_size_one_ = [] (int iter) { return (size_t) 1; };
   auto task_size_one = gdb::make_function_view (task_size_one_);
 
   counter = 0;
-  FOR_EACH (1, 0, NUMBER,
-	    [&] (int start, int end)
-	    {
-	      counter += end - start;
-	    }, task_size_one);
+  FOR_EACH (
+    1, 0, NUMBER, [&] (int start, int end) { counter += end - start; },
+    task_size_one);
   SELF_CHECK (counter == NUMBER);
 
 #undef NUMBER
@@ -155,39 +141,33 @@ TEST (int n_threads)
   std::vector<std::unique_ptr<int>> intresults;
   std::atomic<bool> any_empty_tasks (false);
 
-  FOR_EACH (1, 0, 1,
-	    [&] (int start, int end)
-	      {
-		if (start == end)
-		  any_empty_tasks = true;
-		return std::unique_ptr<int> (new int (end - start));
-	      });
+  FOR_EACH (1, 0, 1, [&] (int start, int end) {
+    if (start == end)
+      any_empty_tasks = true;
+    return std::unique_ptr<int> (new int (end - start));
+  });
   SELF_CHECK (!any_empty_tasks);
-  SELF_CHECK (std::all_of (intresults.begin (),
-			   intresults.end (),
-			   [] (const std::unique_ptr<int> &entry)
-			     {
-			       return entry != nullptr;
-			     }));
+  SELF_CHECK (std::all_of (intresults.begin (), intresults.end (),
+			   [] (const std::unique_ptr<int> &entry) {
+    return entry != nullptr;
+  }));
 
   /* The same but using the task size parameter.  */
   intresults.clear ();
   any_empty_tasks = false;
-  FOR_EACH (1, 0, 1,
-	    [&] (int start, int end)
-	      {
-		if (start == end)
-		  any_empty_tasks = true;
-		return std::unique_ptr<int> (new int (end - start));
-	      },
-	    task_size_one);
+  FOR_EACH (
+    1, 0, 1,
+    [&] (int start, int end) {
+    if (start == end)
+      any_empty_tasks = true;
+    return std::unique_ptr<int> (new int (end - start));
+    },
+    task_size_one);
   SELF_CHECK (!any_empty_tasks);
-  SELF_CHECK (std::all_of (intresults.begin (),
-			   intresults.end (),
-			   [] (const std::unique_ptr<int> &entry)
-			     {
-			       return entry != nullptr;
-			     }));
+  SELF_CHECK (std::all_of (intresults.begin (), intresults.end (),
+			   [] (const std::unique_ptr<int> &entry) {
+    return entry != nullptr;
+  }));
 }
 
 #endif /* FOR_EACH */

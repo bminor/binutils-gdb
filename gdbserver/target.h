@@ -61,8 +61,8 @@ struct thread_resume
      thread stops in this range.  (If the range is empty
      [STEP_RANGE_START == STEP_RANGE_END], then this is a single-step
      request.)  */
-  CORE_ADDR step_range_start;	/* Inclusive */
-  CORE_ADDR step_range_end;	/* Exclusive */
+  CORE_ADDR step_range_start; /* Inclusive */
+  CORE_ADDR step_range_end;   /* Exclusive */
 };
 
 /* GDBserver doesn't have a concept of strata like GDB, but we call
@@ -72,7 +72,6 @@ struct thread_resume
 class process_stratum_target
 {
 public:
-
   virtual ~process_stratum_target () = default;
 
   /* Start a new process.
@@ -84,7 +83,8 @@ public:
      Returns the new PID on success, -1 on failure.  Registers the new
      process with the process list.  */
   virtual int create_inferior (const char *program,
-			       const std::vector<char *> &program_args) = 0;
+                               const std::vector<char *> &program_args)
+    = 0;
 
   /* Do additional setup after a new process is created, including
      exec-wrapper completion.  */
@@ -129,7 +129,8 @@ public:
      no child stop to report, return is
      null_ptid/TARGET_WAITKIND_IGNORE.  */
   virtual ptid_t wait (ptid_t ptid, target_waitstatus *status,
-		       target_wait_flags options) = 0;
+                       target_wait_flags options)
+    = 0;
 
   /* Fetch registers from the inferior process.
 
@@ -147,8 +148,8 @@ public:
      Read LEN bytes at MEMADDR into a buffer at MYADDR.
 
      Returns 0 on success and errno on failure.  */
-  virtual int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
-			   int len) = 0;
+  virtual int read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
+    = 0;
 
   /* Write memory to the inferior process.  This should generally be
      called through target_write_memory, which handles breakpoint shadowing.
@@ -157,7 +158,8 @@ public:
 
      Returns 0 on success and errno on failure.  */
   virtual int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-			    int len) = 0;
+                            int len)
+    = 0;
 
   /* Query GDB for the values of any symbols we're interested in.
      This function is called whenever we receive a "qSymbols::"
@@ -176,7 +178,7 @@ public:
 
      Read LEN bytes at OFFSET into a buffer at MYADDR.  */
   virtual int read_auxv (int pid, CORE_ADDR offset, unsigned char *myaddr,
-			 unsigned int len);
+                         unsigned int len);
 
   /* Returns true if GDB Z breakpoint type TYPE is supported, false
      otherwise.  The type is coded as follows:
@@ -190,11 +192,11 @@ public:
 
   /* Insert and remove a break or watchpoint.
      Returns 0 on success, -1 on failure and 1 on unsupported.  */
-  virtual int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-			    int size, raw_breakpoint *bp);
+  virtual int insert_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                            raw_breakpoint *bp);
 
-  virtual int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-			    int size, raw_breakpoint *bp);
+  virtual int remove_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                            raw_breakpoint *bp);
 
   /* Returns true if the target stopped because it executed a software
      breakpoint instruction, false otherwise.  */
@@ -239,23 +241,23 @@ public:
      an error code.  A return value of -1 means this system does not
      support the operation.  */
   virtual int get_tls_address (thread_info *thread, CORE_ADDR offset,
-			       CORE_ADDR load_module, CORE_ADDR *address);
+                               CORE_ADDR load_module, CORE_ADDR *address);
 
   /* Return true if the qxfer_osdata target op is supported.  */
   virtual bool supports_qxfer_osdata ();
 
   /* Read/Write OS data using qXfer packets.  */
   virtual int qxfer_osdata (const char *annex, unsigned char *readbuf,
-			    unsigned const char *writebuf,
-			    CORE_ADDR offset, int len);
+                            unsigned const char *writebuf, CORE_ADDR offset,
+                            int len);
 
   /* Return true if the qxfer_siginfo target op is supported.  */
   virtual bool supports_qxfer_siginfo ();
 
   /* Read/Write extra signal info.  */
   virtual int qxfer_siginfo (const char *annex, unsigned char *readbuf,
-			     unsigned const char *writebuf,
-			     CORE_ADDR offset, int len);
+                             unsigned const char *writebuf, CORE_ADDR offset,
+                             int len);
 
   /* Return true if non-stop mode is supported.  */
   virtual bool supports_non_stop ();
@@ -295,12 +297,12 @@ public:
 
   /* Read loadmaps.  Read LEN bytes at OFFSET into a buffer at MYADDR.  */
   virtual int read_loadmap (const char *annex, CORE_ADDR offset,
-			    unsigned char *myaddr, unsigned int len);
+                            unsigned char *myaddr, unsigned int len);
 
   /* Target specific qSupported support.  FEATURES is an array of
      features unsupported by the core of GDBserver.  */
-  virtual void process_qsupported
-    (gdb::array_view<const char * const> features);
+  virtual void
+  process_qsupported (gdb::array_view<const char *const> features);
 
   /* Return true if the target supports tracepoints, false otherwise.  */
   virtual bool supports_tracepoints ();
@@ -357,13 +359,13 @@ public:
      return the address range where the instruction at TPADDR was relocated
      to.  If an error occurs, the ERR may be used to pass on an error
      message.  */
-  virtual int install_fast_tracepoint_jump_pad
-    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
-     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
-     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
-     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
-     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
-     char *err);
+  virtual int install_fast_tracepoint_jump_pad (
+    CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+    CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+    CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+    unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+    CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+    char *err);
 
   /* Return the minimum length of an instruction that can be safely
      overwritten for use as a fast tracepoint.  */
@@ -380,10 +382,9 @@ public:
   virtual bool supports_qxfer_libraries_svr4 ();
 
   /* Read solib info on SVR4 platforms.  */
-  virtual int qxfer_libraries_svr4 (const char *annex,
-				    unsigned char *readbuf,
-				    unsigned const char *writebuf,
-				    CORE_ADDR offset, int len);
+  virtual int qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
+                                    unsigned const char *writebuf,
+                                    CORE_ADDR offset, int len);
 
   /* Return true if target supports debugging agent.  */
   virtual bool supports_agent ();
@@ -394,7 +395,7 @@ public:
   /* Enable branch tracing for TP based on CONF and allocate a branch trace
      target information struct for reading and for disabling branch trace.  */
   virtual btrace_target_info *enable_btrace (thread_info *tp,
-					     const btrace_config *conf);
+                                             const btrace_config *conf);
 
   /* Disable branch tracing.
      Returns zero on success, non-zero otherwise.  */
@@ -404,13 +405,12 @@ public:
      Return 0 on success; print an error message into BUFFER and return -1,
      otherwise.  */
   virtual int read_btrace (btrace_target_info *tinfo, buffer *buf,
-			   enum btrace_read_type type);
+                           enum btrace_read_type type);
 
   /* Read the branch trace configuration into BUFFER.
      Return 0 on success; print an error message into BUFFER and return -1
      otherwise.  */
-  virtual int read_btrace_conf (const btrace_target_info *tinfo,
-				buffer *buf);
+  virtual int read_btrace_conf (const btrace_target_info *tinfo, buffer *buf);
 
   /* Return true if target supports range stepping.  */
   virtual bool supports_range_stepping ();
@@ -433,8 +433,8 @@ public:
      the filesystem as it appears to process PID.  Systems where all
      processes share a common filesystem should not override this.
      The default behavior is to use open(2).  */
-  virtual int multifs_open (int pid, const char *filename,
-			    int flags, mode_t mode);
+  virtual int multifs_open (int pid, const char *filename, int flags,
+                            mode_t mode);
 
   /* Multiple-filesystem-aware unlink.  Like unlink(2), but operates
      in the filesystem as it appears to process PID.  Systems where
@@ -446,8 +446,8 @@ public:
      operating in the filesystem as it appears to process PID.
      Systems where all processes share a common filesystem should
      not override this.  The default behavior is to use readlink(2).  */
-  virtual ssize_t multifs_readlink (int pid, const char *filename,
-				    char *buf, size_t bufsiz);
+  virtual ssize_t multifs_readlink (int pid, const char *filename, char *buf,
+                                    size_t bufsiz);
 
   /* Return the breakpoint kind for this target based on PC.  The
      PCPTR is adjusted to the real memory location in case a flag
@@ -473,8 +473,7 @@ public:
   /* Thread ID to (numeric) thread handle: Return true on success and
      false for failure.  Return pointer to thread handle via HANDLE
      and the handle's length via HANDLE_LEN.  */
-  virtual bool thread_handle (ptid_t ptid, gdb_byte **handle,
-			      int *handle_len);
+  virtual bool thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
   /* If THREAD is a fork child that was not reported to GDB, return its parent
      else nullptr.  */
@@ -501,126 +500,102 @@ public:
 
      Returns true if successful and false otherwise.  */
   virtual bool fetch_memtags (CORE_ADDR address, size_t len,
-			      gdb::byte_vector &tags, int type);
+                              gdb::byte_vector &tags, int type);
 
   /* Write the allocation tags of type TYPE contained in TAGS to the
      memory range [ADDRESS, ADDRESS + LEN).
 
      Returns true if successful and false otherwise.  */
   virtual bool store_memtags (CORE_ADDR address, size_t len,
-			      const gdb::byte_vector &tags, int type);
+                              const gdb::byte_vector &tags, int type);
 };
 
 extern process_stratum_target *the_target;
 
 void set_target_ops (process_stratum_target *);
 
-#define target_create_inferior(program, program_args)	\
+#define target_create_inferior(program, program_args) \
   the_target->create_inferior (program, program_args)
 
-#define target_post_create_inferior()			 \
-  the_target->post_create_inferior ()
+#define target_post_create_inferior() the_target->post_create_inferior ()
 
-#define myattach(pid) \
-  the_target->attach (pid)
+#define myattach(pid) the_target->attach (pid)
 
 int kill_inferior (process_info *proc);
 
-#define target_supports_fork_events() \
-  the_target->supports_fork_events ()
+#define target_supports_fork_events() the_target->supports_fork_events ()
 
-#define target_supports_vfork_events() \
-  the_target->supports_vfork_events ()
+#define target_supports_vfork_events() the_target->supports_vfork_events ()
 
-#define target_supports_exec_events() \
-  the_target->supports_exec_events ()
+#define target_supports_exec_events() the_target->supports_exec_events ()
 
-#define target_supports_memory_tagging() \
-  the_target->supports_memory_tagging ()
+#define target_supports_memory_tagging() the_target->supports_memory_tagging ()
 
-#define target_handle_new_gdb_connection()		 \
+#define target_handle_new_gdb_connection() \
   the_target->handle_new_gdb_connection ()
 
-#define detach_inferior(proc) \
-  the_target->detach (proc)
+#define detach_inferior(proc) the_target->detach (proc)
 
-#define mythread_alive(pid) \
-  the_target->thread_alive (pid)
+#define mythread_alive(pid) the_target->thread_alive (pid)
 
-#define fetch_inferior_registers(regcache, regno)	\
+#define fetch_inferior_registers(regcache, regno) \
   the_target->fetch_registers (regcache, regno)
 
 #define store_inferior_registers(regcache, regno) \
   the_target->store_registers (regcache, regno)
 
-#define join_inferior(pid) \
-  the_target->join (pid)
+#define join_inferior(pid) the_target->join (pid)
 
-#define target_supports_non_stop() \
-  the_target->supports_non_stop ()
+#define target_supports_non_stop() the_target->supports_non_stop ()
 
-#define target_async(enable) \
-  the_target->async (enable)
+#define target_async(enable) the_target->async (enable)
 
 #define target_process_qsupported(features) \
   the_target->process_qsupported (features)
 
-#define target_supports_catch_syscall()              	\
-  the_target->supports_catch_syscall ()
+#define target_supports_catch_syscall() the_target->supports_catch_syscall ()
 
-#define target_get_ipa_tdesc_idx()			\
-  the_target->get_ipa_tdesc_idx ()
+#define target_get_ipa_tdesc_idx() the_target->get_ipa_tdesc_idx ()
 
-#define target_supports_tracepoints()			\
-  the_target->supports_tracepoints ()
+#define target_supports_tracepoints() the_target->supports_tracepoints ()
 
-#define target_supports_fast_tracepoints()		\
+#define target_supports_fast_tracepoints() \
   the_target->supports_fast_tracepoints ()
 
-#define target_get_min_fast_tracepoint_insn_len()	\
+#define target_get_min_fast_tracepoint_insn_len() \
   the_target->get_min_fast_tracepoint_insn_len ()
 
-#define target_thread_stopped(thread) \
-  the_target->thread_stopped (thread)
+#define target_thread_stopped(thread) the_target->thread_stopped (thread)
 
-#define target_pause_all(freeze)		\
-  the_target->pause_all (freeze)
+#define target_pause_all(freeze) the_target->pause_all (freeze)
 
-#define target_unpause_all(unfreeze)		\
-  the_target->unpause_all (unfreeze)
+#define target_unpause_all(unfreeze) the_target->unpause_all (unfreeze)
 
-#define target_stabilize_threads()		\
-  the_target->stabilize_threads ()
+#define target_stabilize_threads() the_target->stabilize_threads ()
 
-#define target_install_fast_tracepoint_jump_pad(tpoint, tpaddr,		\
-						collector, lockaddr,	\
-						orig_size,		\
-						jump_entry,		\
-						trampoline, trampoline_size, \
-						jjump_pad_insn,		\
-						jjump_pad_insn_size,	\
-						adjusted_insn_addr,	\
-						adjusted_insn_addr_end,	\
-						err)			\
-  the_target->install_fast_tracepoint_jump_pad (tpoint, tpaddr,	\
-						collector,lockaddr,	\
-						orig_size, jump_entry,	\
-						trampoline,		\
-						trampoline_size,	\
-						jjump_pad_insn,		\
-						jjump_pad_insn_size,	\
-						adjusted_insn_addr,	\
-						adjusted_insn_addr_end, \
-						err)
+#define target_install_fast_tracepoint_jump_pad(tpoint, tpaddr, collector,   \
+                                                lockaddr, orig_size,         \
+                                                jump_entry, trampoline,      \
+                                                trampoline_size,             \
+                                                jjump_pad_insn,              \
+                                                jjump_pad_insn_size,         \
+                                                adjusted_insn_addr,          \
+                                                adjusted_insn_addr_end, err) \
+  the_target->install_fast_tracepoint_jump_pad (tpoint, tpaddr, collector,   \
+                                                lockaddr, orig_size,         \
+                                                jump_entry, trampoline,      \
+                                                trampoline_size,             \
+                                                jjump_pad_insn,              \
+                                                jjump_pad_insn_size,         \
+                                                adjusted_insn_addr,          \
+                                                adjusted_insn_addr_end, err)
 
-#define target_emit_ops() \
-  the_target->emit_ops ()
+#define target_emit_ops() the_target->emit_ops ()
 
 #define target_supports_disable_randomization() \
   the_target->supports_disable_randomization ()
 
-#define target_supports_agent() \
-  the_target->supports_agent ()
+#define target_supports_agent() the_target->supports_agent ()
 
 static inline struct btrace_target_info *
 target_enable_btrace (thread_info *tp, const struct btrace_config *conf)
@@ -635,22 +610,20 @@ target_disable_btrace (struct btrace_target_info *tinfo)
 }
 
 static inline int
-target_read_btrace (struct btrace_target_info *tinfo,
-		    struct buffer *buffer,
-		    enum btrace_read_type type)
+target_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
+                    enum btrace_read_type type)
 {
   return the_target->read_btrace (tinfo, buffer, type);
 }
 
 static inline int
 target_read_btrace_conf (struct btrace_target_info *tinfo,
-			 struct buffer *buffer)
+                         struct buffer *buffer)
 {
   return the_target->read_btrace_conf (tinfo, buffer);
 }
 
-#define target_supports_range_stepping() \
-  the_target->supports_range_stepping ()
+#define target_supports_range_stepping() the_target->supports_range_stepping ()
 
 #define target_supports_stopped_by_sw_breakpoint() \
   the_target->supports_stopped_by_sw_breakpoint ()
@@ -677,13 +650,11 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
   the_target->supports_software_single_step ()
 
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
-	       target_wait_flags options, int connected_wait);
+               target_wait_flags options, int connected_wait);
 
-#define target_core_of_thread(ptid)		\
-  the_target->core_of_thread (ptid)
+#define target_core_of_thread(ptid) the_target->core_of_thread (ptid)
 
-#define target_thread_name(ptid)                                \
-  the_target->thread_name (ptid)
+#define target_thread_name(ptid) the_target->thread_name (ptid)
 
 #define target_thread_handle(ptid, handle, handle_len) \
   the_target->thread_handle (ptid, handle, handle_len)

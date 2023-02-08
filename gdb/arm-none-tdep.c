@@ -48,8 +48,8 @@
 
 static void
 arm_none_supply_gregset (const struct regset *regset,
-			 struct regcache *regcache,
-			 int regnum, const void *gregs_buf, size_t len)
+			 struct regcache *regcache, int regnum,
+			 const void *gregs_buf, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -62,12 +62,12 @@ arm_none_supply_gregset (const struct regset *regset,
   if (regnum == ARM_PS_REGNUM || regnum == -1)
     {
       if (arm_apcs_32)
-	regcache->raw_supply (ARM_PS_REGNUM,
-			      gregs + ARM_INT_REGISTER_SIZE
-			      * ARM_NONE_CPSR_GREGNUM);
+	regcache->raw_supply (ARM_PS_REGNUM, gregs
+					       + ARM_INT_REGISTER_SIZE
+						   * ARM_NONE_CPSR_GREGNUM);
       else
 	regcache->raw_supply (ARM_PS_REGNUM,
-			     gregs + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM);
+			      gregs + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM);
     }
 
   if (regnum == ARM_PC_REGNUM || regnum == -1)
@@ -75,8 +75,8 @@ arm_none_supply_gregset (const struct regset *regset,
       gdb_byte pc_buf[ARM_INT_REGISTER_SIZE];
 
       CORE_ADDR reg_pc
-	= extract_unsigned_integer (gregs + ARM_INT_REGISTER_SIZE
-				    * ARM_PC_REGNUM,
+	= extract_unsigned_integer (gregs
+				      + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM,
 				    ARM_INT_REGISTER_SIZE, byte_order);
       reg_pc = gdbarch_addr_bits_remove (gdbarch, reg_pc);
       store_unsigned_integer (pc_buf, ARM_INT_REGISTER_SIZE, byte_order,
@@ -95,22 +95,21 @@ arm_none_supply_gregset (const struct regset *regset,
 
 static void
 arm_none_collect_gregset (const struct regset *regset,
-			  const struct regcache *regcache,
-			  int regnum, void *gregs_buf, size_t len)
+			  const struct regcache *regcache, int regnum,
+			  void *gregs_buf, size_t len)
 {
   gdb_byte *gregs = (gdb_byte *) gregs_buf;
 
   for (int regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
     if (regnum == -1 || regnum == regno)
-      regcache->raw_collect (regno,
-			     gregs + ARM_INT_REGISTER_SIZE * regno);
+      regcache->raw_collect (regno, gregs + ARM_INT_REGISTER_SIZE * regno);
 
   if (regnum == ARM_PS_REGNUM || regnum == -1)
     {
       if (arm_apcs_32)
-	regcache->raw_collect (ARM_PS_REGNUM,
-			       gregs + ARM_INT_REGISTER_SIZE
-			       * ARM_NONE_CPSR_GREGNUM);
+	regcache->raw_collect (ARM_PS_REGNUM, gregs
+						+ ARM_INT_REGISTER_SIZE
+						    * ARM_NONE_CPSR_GREGNUM);
       else
 	regcache->raw_collect (ARM_PS_REGNUM,
 			       gregs + ARM_INT_REGISTER_SIZE * ARM_PC_REGNUM);
@@ -124,8 +123,7 @@ arm_none_collect_gregset (const struct regset *regset,
 /* Supply VFP registers from REGS_BUF into REGCACHE.  */
 
 static void
-arm_none_supply_vfp (const struct regset *regset,
-		     struct regcache *regcache,
+arm_none_supply_vfp (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *regs_buf, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) regs_buf;
@@ -142,8 +140,8 @@ arm_none_supply_vfp (const struct regset *regset,
 
 static void
 arm_none_collect_vfp (const struct regset *regset,
-		      const struct regcache *regcache,
-		      int regnum, void *regs_buf, size_t len)
+		      const struct regcache *regcache, int regnum,
+		      void *regs_buf, size_t len)
 {
   gdb_byte *regs = (gdb_byte *) regs_buf;
 
@@ -157,17 +155,13 @@ arm_none_collect_vfp (const struct regset *regset,
 
 /* The general purpose register set.  */
 
-static const struct regset arm_none_gregset =
-  {
-    nullptr, arm_none_supply_gregset, arm_none_collect_gregset
-  };
+static const struct regset arm_none_gregset
+  = { nullptr, arm_none_supply_gregset, arm_none_collect_gregset };
 
 /* The VFP register set.  */
 
-static const struct regset arm_none_vfpregset =
-  {
-    nullptr, arm_none_supply_vfp, arm_none_collect_vfp
-  };
+static const struct regset arm_none_vfpregset
+  = { nullptr, arm_none_supply_vfp, arm_none_collect_vfp };
 
 /* Iterate over core file register note sections.  */
 
@@ -198,16 +192,16 @@ arm_none_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Iterate over registers for reading and writing bare metal ARM core
      files.  */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, arm_none_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, arm_none_iterate_over_regset_sections);
 }
 
 /* Initialize ARM bare-metal target support.  */
 
 void _initialize_arm_none_tdep ();
+
 void
 _initialize_arm_none_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_NONE,
-			  arm_none_init_abi);
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_NONE, arm_none_init_abi);
 }

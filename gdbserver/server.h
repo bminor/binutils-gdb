@@ -40,16 +40,16 @@ extern void perror (const char *);
 #endif
 
 #if !HAVE_DECL_VASPRINTF
-extern int vasprintf(char **strp, const char *fmt, va_list ap);
+extern int vasprintf (char **strp, const char *fmt, va_list ap);
 #endif
 #if !HAVE_DECL_VSNPRINTF
-int vsnprintf(char *str, size_t size, const char *format, va_list ap);
+int vsnprintf (char *str, size_t size, const char *format, va_list ap);
 #endif
 
 #ifdef IN_PROCESS_AGENT
-#  define PROG "ipa"
+#define PROG "ipa"
 #else
-#  define PROG "gdbserver"
+#define PROG "gdbserver"
 #endif
 
 #include "gdbsupport/buffer.h"
@@ -81,7 +81,7 @@ extern bool non_stop;
 
 /* Functions from server.c.  */
 extern void handle_v_requests (char *own_buf, int packet_len,
-			       int *new_packet_len);
+                               int *new_packet_len);
 extern void handle_serial_event (int err, gdb_client_data client_data);
 extern void handle_target_event (int err, gdb_client_data client_data);
 
@@ -100,7 +100,7 @@ extern int in_queued_stop_replies (ptid_t ptid);
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */
-#define MAXBUFBYTES(N) (((N)-32)/2)
+#define MAXBUFBYTES(N) (((N) -32) / 2)
 
 /* Buffer sizes for transferring memory, registers, etc.   Set to a constant
    value to accomodate multiple register formats.  This value must be at least
@@ -124,15 +124,12 @@ extern gdb_environ *get_environ ();
 
 extern unsigned long signal_pid;
 
-
 /* Description of the client remote protocol state for the currently
    connected client.  */
 
 struct client_state
 {
-  client_state ():
-    own_buf ((char *) xmalloc (PBUFSIZ + 1)) 
-  {}
+  client_state () : own_buf ((char *) xmalloc (PBUFSIZ + 1)) {}
 
   /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
      `vCont'.  Note the multi-process extensions made `vCont' a
@@ -192,7 +189,6 @@ struct client_state
 
   /* If true, memory tagging features are supported.  */
   bool memory_tagging_feature = false;
-
 };
 
 client_state &get_client_state ();

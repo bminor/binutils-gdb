@@ -35,7 +35,8 @@ extern PyObject *recpy_bt_goto (PyObject *self, PyObject *value);
 extern PyObject *recpy_bt_instruction_history (PyObject *self, void *closure);
 
 /* Implementation of record.function_call_history [list].  */
-extern PyObject *recpy_bt_function_call_history (PyObject *self, void *closure);
+extern PyObject *recpy_bt_function_call_history (PyObject *self,
+						 void *closure);
 
 /* Implementation of record.replay_position [instruction].  */
 extern PyObject *recpy_bt_replay_position (PyObject *self, void *closure);

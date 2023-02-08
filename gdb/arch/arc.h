@@ -23,15 +23,17 @@
 /* Supported ARC ISAs.  */
 enum arc_isa
 {
-  ARC_ISA_ARCV1 = 1,  /* a.k.a. ARCompact (ARC600, ARC700)  */
-  ARC_ISA_ARCV2	      /* such as ARC EM and ARC HS  */
+  ARC_ISA_ARCV1 = 1, /* a.k.a. ARCompact (ARC600, ARC700)  */
+  ARC_ISA_ARCV2	     /* such as ARC EM and ARC HS  */
 };
 
 struct arc_arch_features
 {
   arc_arch_features (int reg_size, arc_isa isa)
-    : reg_size (reg_size), isa (isa)
-  {}
+    : reg_size (reg_size),
+      isa (isa)
+  {
+  }
 
   /* Register size in bytes.  Possible values are 4, and 8.  A 0 indicates
      an uninitialised value.  */
@@ -70,18 +72,17 @@ struct arc_arch_features
    The only external client of this must be the gdbserver which manipulates
    the returned data.  */
 
-target_desc_up arc_create_target_description
-	(const struct arc_arch_features &features);
+target_desc_up
+arc_create_target_description (const struct arc_arch_features &features);
 
 #else
 
 /* Lookup the cache for a target description matching the FEATURES.
    If nothing is found, then create one and return it.  */
 
-const target_desc *arc_lookup_target_description
-	(const struct arc_arch_features &features);
+const target_desc *
+arc_lookup_target_description (const struct arc_arch_features &features);
 
 #endif /* GDBSERVER */
-
 
 #endif /* ARCH_ARC_H */

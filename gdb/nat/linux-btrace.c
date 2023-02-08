@@ -277,7 +277,7 @@ perf_event_sample_ok (const struct perf_event_sample *sample)
    part at the end and its upper part at the beginning of the buffer.  */
 
 static std::vector<btrace_block> *
-perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
+perf_event_read_bts (struct btrace_target_info *tinfo, const uint8_t *begin,
 		     const uint8_t *end, const uint8_t *start, size_t size)
 {
   std::vector<btrace_block> *btrace = new std::vector<btrace_block>;
@@ -338,7 +338,7 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
 
       if (!perf_event_sample_ok (psample))
 	{
-	  warning (_("Branch trace may be incomplete."));
+	  warning (_ ("Branch trace may be incomplete."));
 	  break;
 	}
 
@@ -432,19 +432,21 @@ diagnose_perf_event_open_fail ()
 	errno = 0;
 	gdb_file_up file = gdb_fopen_cloexec (filename, "r");
 	if (file.get () == nullptr)
-	  error (_("Failed to open %s (%s).  Your system does not support "
-		   "process recording."), filename, safe_strerror (errno));
+	  error (_ ("Failed to open %s (%s).  Your system does not support "
+		    "process recording."),
+		 filename, safe_strerror (errno));
 
 	int level, found = fscanf (file.get (), "%d", &level);
 	if (found == 1 && level > 2)
-	  error (_("You do not have permission to record the process.  "
-		   "Try setting %s to 2 or less."), filename);
+	  error (_ ("You do not have permission to record the process.  "
+		    "Try setting %s to 2 or less."),
+		 filename);
       }
 
       break;
     }
 
-  error (_("Failed to start recording: %s"), safe_strerror (errno));
+  error (_ ("Failed to start recording: %s"), safe_strerror (errno));
 }
 
 /* Enable branch tracing in BTS format.  */
@@ -458,10 +460,10 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   int pid, pg;
 
   if (!cpu_supports_bts ())
-    error (_("BTS support has been disabled for the target cpu."));
+    error (_ ("BTS support has been disabled for the target cpu."));
 
-  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
-    (XCNEW (btrace_target_info));
+  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo (
+    XCNEW (btrace_target_info));
   tinfo->ptid = ptid;
 
   tinfo->conf.format = BTRACE_FORMAT_BTS;
@@ -530,13 +532,13 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
     }
 
   if (pages == 0)
-    error (_("Failed to map trace buffer: %s."), safe_strerror (errno));
+    error (_ ("Failed to map trace buffer: %s."), safe_strerror (errno));
 
-  struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
-    data.get ();
+  struct perf_event_mmap_page *header
+    = (struct perf_event_mmap_page *) data.get ();
   data_offset = PAGE_SIZE;
 
-#if defined (PERF_ATTR_SIZE_VER5)
+#if defined(PERF_ATTR_SIZE_VER5)
   if (offsetof (struct perf_event_mmap_page, data_size) <= header->size)
     {
       __u64 data_size;
@@ -548,7 +550,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
       /* Check for overflows.  */
       if ((__u64) size != data_size)
-	error (_("Failed to determine trace buffer size."));
+	error (_ ("Failed to determine trace buffer size."));
     }
 #endif /* defined (PERF_ATTR_SIZE_VER5) */
 
@@ -563,7 +565,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   return tinfo.release ();
 }
 
-#if defined (PERF_ATTR_SIZE_VER5)
+#if defined(PERF_ATTR_SIZE_VER5)
 
 /* Determine the event type.  */
 
@@ -580,21 +582,23 @@ perf_event_pt_event_type ()
       case EACCES:
       case EFAULT:
       case EPERM:
-	error (_("Failed to open %s (%s).  You do not have permission "
-		 "to use Intel PT."), filename, safe_strerror (errno));
+	error (_ ("Failed to open %s (%s).  You do not have permission "
+		  "to use Intel PT."),
+	       filename, safe_strerror (errno));
 
       case ENOTDIR:
       case ENOENT:
-	error (_("Failed to open %s (%s).  Your system does not support "
-		 "Intel PT."), filename, safe_strerror (errno));
+	error (_ ("Failed to open %s (%s).  Your system does not support "
+		  "Intel PT."),
+	       filename, safe_strerror (errno));
 
       default:
-	error (_("Failed to open %s: %s."), filename, safe_strerror (errno));
+	error (_ ("Failed to open %s: %s."), filename, safe_strerror (errno));
       }
 
   int type, found = fscanf (file.get (), "%d", &type);
   if (found != 1)
-    error (_("Failed to read the PT event type from %s."), filename);
+    error (_ ("Failed to read the PT event type from %s."), filename);
 
   return type;
 }
@@ -612,8 +616,8 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   if (pid == 0)
     pid = ptid.pid ();
 
-  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
-    (XCNEW (btrace_target_info));
+  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo (
+    XCNEW (btrace_target_info));
   tinfo->ptid = ptid;
 
   tinfo->conf.format = BTRACE_FORMAT_PT;
@@ -635,10 +639,10 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   scoped_mmap data (nullptr, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
 		    fd.get (), 0);
   if (data.get () == MAP_FAILED)
-    error (_("Failed to map trace user page: %s."), safe_strerror (errno));
+    error (_ ("Failed to map trace user page: %s."), safe_strerror (errno));
 
-  struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
-    data.get ();
+  struct perf_event_mmap_page *header
+    = (struct perf_event_mmap_page *) data.get ();
 
   header->aux_offset = header->data_offset + header->data_size;
 
@@ -685,7 +689,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
     }
 
   if (pages == 0)
-    error (_("Failed to map trace buffer: %s."), safe_strerror (errno));
+    error (_ ("Failed to map trace buffer: %s."), safe_strerror (errno));
 
   pt->pt.size = aux.size ();
   pt->pt.mem = (const uint8_t *) aux.release ();
@@ -703,7 +707,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 static struct btrace_target_info *
 linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 {
-  error (_("Intel Processor Trace support was disabled at compile time."));
+  error (_ ("Intel Processor Trace support was disabled at compile time."));
 }
 
 #endif /* !defined (PERF_ATTR_SIZE_VER5) */
@@ -716,10 +720,10 @@ linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
   switch (conf->format)
     {
     case BTRACE_FORMAT_NONE:
-      error (_("Bad branch trace format."));
+      error (_ ("Bad branch trace format."));
 
     default:
-      error (_("Unknown branch trace format."));
+      error (_ ("Unknown branch trace format."));
 
     case BTRACE_FORMAT_BTS:
       return linux_enable_bts (ptid, &conf->bts);
@@ -734,7 +738,7 @@ linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 static enum btrace_error
 linux_disable_bts (struct btrace_tinfo_bts *tinfo)
 {
-  munmap((void *) tinfo->header, tinfo->bts.size + PAGE_SIZE);
+  munmap ((void *) tinfo->header, tinfo->bts.size + PAGE_SIZE);
   close (tinfo->file);
 
   return BTRACE_ERR_NONE;
@@ -745,8 +749,8 @@ linux_disable_bts (struct btrace_tinfo_bts *tinfo)
 static enum btrace_error
 linux_disable_pt (struct btrace_tinfo_pt *tinfo)
 {
-  munmap((void *) tinfo->pt.mem, tinfo->pt.size);
-  munmap((void *) tinfo->header, PAGE_SIZE);
+  munmap ((void *) tinfo->pt.mem, tinfo->pt.size);
+  munmap ((void *) tinfo->header, PAGE_SIZE);
   close (tinfo->file);
 
   return BTRACE_ERR_NONE;
@@ -785,8 +789,7 @@ linux_disable_btrace (struct btrace_target_info *tinfo)
 
 static enum btrace_error
 linux_read_bts (struct btrace_data_bts *btrace,
-		struct btrace_target_info *tinfo,
-		enum btrace_read_type type)
+		struct btrace_target_info *tinfo, enum btrace_read_type type)
 {
   struct perf_event_buffer *pevent;
   const uint8_t *begin, *end, *start;
@@ -887,8 +890,7 @@ linux_fill_btrace_pt_config (struct btrace_data_pt_config *conf)
    given by TINFO into BTRACE using the TYPE reading method.  */
 
 static enum btrace_error
-linux_read_pt (struct btrace_data_pt *btrace,
-	       struct btrace_target_info *tinfo,
+linux_read_pt (struct btrace_data_pt *btrace, struct btrace_target_info *tinfo,
 	       enum btrace_read_type type)
 {
   struct perf_event_buffer *pt;
@@ -914,7 +916,7 @@ linux_read_pt (struct btrace_data_pt *btrace,
       return BTRACE_ERR_NONE;
     }
 
-  internal_error (_("Unknown btrace read type."));
+  internal_error (_ ("Unknown btrace read type."));
 }
 
 /* See linux-btrace.h.  */
@@ -945,7 +947,7 @@ linux_read_btrace (struct btrace_data *btrace,
       return linux_read_pt (&btrace->variant.pt, tinfo, type);
     }
 
-  internal_error (_("Unkown branch trace format."));
+  internal_error (_ ("Unkown branch trace format."));
 }
 
 /* See linux-btrace.h.  */

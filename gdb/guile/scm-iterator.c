@@ -106,7 +106,7 @@ itscm_set_iterator_smob_progress_x (iterator_smob *i_smob, SCM progress)
 {
   i_smob->progress = progress;
 }
-
+
 /* Administrivia for iterator smobs.  */
 
 /* The smob "print" function for <gdb:iterator>.  */
@@ -137,8 +137,9 @@ itscm_print_iterator_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 itscm_make_iterator_smob (SCM object, SCM progress, SCM next)
 {
-  iterator_smob *i_smob = (iterator_smob *)
-    scm_gc_malloc (sizeof (iterator_smob), iterator_smob_name);
+  iterator_smob *i_smob
+    = (iterator_smob *) scm_gc_malloc (sizeof (iterator_smob),
+				       iterator_smob_name);
   SCM i_scm;
 
   i_smob->object = object;
@@ -158,7 +159,7 @@ gdbscm_make_iterator (SCM object, SCM progress, SCM next)
   SCM i_scm;
 
   SCM_ASSERT_TYPE (gdbscm_is_procedure (next), next, SCM_ARG3, FUNC_NAME,
-		   _("procedure"));
+		   _ ("procedure"));
 
   i_scm = itscm_make_iterator_smob (object, progress, next);
 
@@ -220,7 +221,7 @@ itscm_safe_call_next_x (SCM iter, excp_matcher_func *ok_excps)
   i_smob = (iterator_smob *) SCM_SMOB_DATA (iter);
   return gdbscm_safe_call_1 (i_smob->next_x, iter, ok_excps);
 }
-
+
 /* Iterator methods.  */
 
 /* Returns the <gdb:iterator> smob in SELF.
@@ -295,13 +296,11 @@ gdbscm_iterator_next_x (SCM self)
 
   return gdbscm_safe_call_1 (i_smob->next_x, self, NULL);
 }
-
+
 /* Initialize the Scheme iterator code.  */
 
-static const scheme_function iterator_functions[] =
-{
-  { "make-iterator", 3, 0, 0, as_a_scm_t_subr (gdbscm_make_iterator),
-    "\
+static const scheme_function iterator_functions[] = {
+  { "make-iterator", 3, 0, 0, as_a_scm_t_subr (gdbscm_make_iterator), "\
 Create a <gdb:iterator> object.\n\
 \n\
   Arguments: object progress next!\n\
@@ -313,12 +312,10 @@ Create a <gdb:iterator> object.\n\
       By convention end-of-iteration should be marked with (end-of-iteration)\n\
       from module (gdb iterator)." },
 
-  { "iterator?", 1, 0, 0, as_a_scm_t_subr (gdbscm_iterator_p),
-    "\
+  { "iterator?", 1, 0, 0, as_a_scm_t_subr (gdbscm_iterator_p), "\
 Return #t if the object is a <gdb:iterator> object." },
 
-  { "iterator-object", 1, 0, 0, as_a_scm_t_subr (gdbscm_iterator_object),
-    "\
+  { "iterator-object", 1, 0, 0, as_a_scm_t_subr (gdbscm_iterator_object), "\
 Return the object being iterated over." },
 
   { "iterator-progress", 1, 0, 0, as_a_scm_t_subr (gdbscm_iterator_progress),
@@ -326,16 +323,13 @@ Return the object being iterated over." },
 Return the progress object of the iterator." },
 
   { "set-iterator-progress!", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_iterator_progress_x),
-    "\
+    as_a_scm_t_subr (gdbscm_set_iterator_progress_x), "\
 Set the progress object of the iterator." },
 
-  { "iterator-next!", 1, 0, 0, as_a_scm_t_subr (gdbscm_iterator_next_x),
-    "\
+  { "iterator-next!", 1, 0, 0, as_a_scm_t_subr (gdbscm_iterator_next_x), "\
 Invoke the next! procedure of the iterator and return its result." },
 
-  { "end-of-iteration", 0, 0, 0, as_a_scm_t_subr (gdbscm_end_of_iteration),
-    "\
+  { "end-of-iteration", 0, 0, 0, as_a_scm_t_subr (gdbscm_end_of_iteration), "\
 Return the end-of-iteration marker." },
 
   { "end-of-iteration?", 1, 0, 0, as_a_scm_t_subr (gdbscm_end_of_iteration_p),
@@ -348,8 +342,8 @@ Return #t if the object is the end-of-iteration marker." },
 void
 gdbscm_initialize_iterators (void)
 {
-  iterator_smob_tag = gdbscm_make_smob_type (iterator_smob_name,
-					     sizeof (iterator_smob));
+  iterator_smob_tag
+    = gdbscm_make_smob_type (iterator_smob_name, sizeof (iterator_smob));
   scm_set_smob_print (iterator_smob_tag, itscm_print_iterator_smob);
 
   gdbscm_define_functions (iterator_functions, 1);

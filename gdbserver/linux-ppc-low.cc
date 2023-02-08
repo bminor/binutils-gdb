@@ -34,46 +34,44 @@
 #include "tracepoint.h"
 
 #define PPC_FIELD(value, from, len) \
-	(((value) >> (32 - (from) - (len))) & ((1 << (len)) - 1))
-#define PPC_SEXT(v, bs) \
-	((((CORE_ADDR) (v) & (((CORE_ADDR) 1 << (bs)) - 1)) \
-	  ^ ((CORE_ADDR) 1 << ((bs) - 1))) \
-	 - ((CORE_ADDR) 1 << ((bs) - 1)))
-#define PPC_OP6(insn)	PPC_FIELD (insn, 0, 6)
-#define PPC_BO(insn)	PPC_FIELD (insn, 6, 5)
-#define PPC_LI(insn)	(PPC_SEXT (PPC_FIELD (insn, 6, 24), 24) << 2)
-#define PPC_BD(insn)	(PPC_SEXT (PPC_FIELD (insn, 16, 14), 14) << 2)
+  (((value) >> (32 - (from) - (len))) & ((1 << (len)) - 1))
+#define PPC_SEXT(v, bs)                               \
+  ((((CORE_ADDR) (v) & (((CORE_ADDR) 1 << (bs)) - 1)) \
+    ^ ((CORE_ADDR) 1 << ((bs) -1)))                   \
+   - ((CORE_ADDR) 1 << ((bs) -1)))
+#define PPC_OP6(insn) PPC_FIELD (insn, 0, 6)
+#define PPC_BO(insn) PPC_FIELD (insn, 6, 5)
+#define PPC_LI(insn) (PPC_SEXT (PPC_FIELD (insn, 6, 24), 24) << 2)
+#define PPC_BD(insn) (PPC_SEXT (PPC_FIELD (insn, 16, 14), 14) << 2)
 
 /* Linux target op definitions for the PowerPC architecture.  */
 
 class ppc_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
   bool supports_z_point_type (char z_type) override;
 
-
   void low_collect_ptrace_register (regcache *regcache, int regno,
-				    char *buf) override;
+                                    char *buf) override;
 
   void low_supply_ptrace_register (regcache *regcache, int regno,
-				   const char *buf) override;
+                                   const char *buf) override;
 
   bool supports_tracepoints () override;
 
   bool supports_fast_tracepoints () override;
 
-  int install_fast_tracepoint_jump_pad
-    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
-     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
-     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
-     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
-     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
-     char *err) override;
+  int install_fast_tracepoint_jump_pad (
+    CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+    CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+    CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+    unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+    CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+    char *err) override;
 
   int get_min_fast_tracepoint_insn_len () override;
 
@@ -82,7 +80,6 @@ public:
   int get_ipa_tdesc_idx () override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -97,11 +94,11 @@ protected:
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
 
-  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
-  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
   int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
 };
@@ -118,77 +115,71 @@ static unsigned long ppc_hwcap;
 
 static unsigned long ppc_hwcap2;
 
-
 #define ppc_num_regs 73
 
 #ifdef __powerpc64__
 /* We use a constant for FPSCR instead of PT_FPSCR, because
    many shipped PPC64 kernels had the wrong value in ptrace.h.  */
-static int ppc_regmap[] =
- {PT_R0 * 8,     PT_R1 * 8,     PT_R2 * 8,     PT_R3 * 8,
-  PT_R4 * 8,     PT_R5 * 8,     PT_R6 * 8,     PT_R7 * 8,
-  PT_R8 * 8,     PT_R9 * 8,     PT_R10 * 8,    PT_R11 * 8,
-  PT_R12 * 8,    PT_R13 * 8,    PT_R14 * 8,    PT_R15 * 8,
-  PT_R16 * 8,    PT_R17 * 8,    PT_R18 * 8,    PT_R19 * 8,
-  PT_R20 * 8,    PT_R21 * 8,    PT_R22 * 8,    PT_R23 * 8,
-  PT_R24 * 8,    PT_R25 * 8,    PT_R26 * 8,    PT_R27 * 8,
-  PT_R28 * 8,    PT_R29 * 8,    PT_R30 * 8,    PT_R31 * 8,
-  PT_FPR0*8,     PT_FPR0*8 + 8, PT_FPR0*8+16,  PT_FPR0*8+24,
-  PT_FPR0*8+32,  PT_FPR0*8+40,  PT_FPR0*8+48,  PT_FPR0*8+56,
-  PT_FPR0*8+64,  PT_FPR0*8+72,  PT_FPR0*8+80,  PT_FPR0*8+88,
-  PT_FPR0*8+96,  PT_FPR0*8+104,  PT_FPR0*8+112,  PT_FPR0*8+120,
-  PT_FPR0*8+128, PT_FPR0*8+136,  PT_FPR0*8+144,  PT_FPR0*8+152,
-  PT_FPR0*8+160,  PT_FPR0*8+168,  PT_FPR0*8+176,  PT_FPR0*8+184,
-  PT_FPR0*8+192,  PT_FPR0*8+200,  PT_FPR0*8+208,  PT_FPR0*8+216,
-  PT_FPR0*8+224,  PT_FPR0*8+232,  PT_FPR0*8+240,  PT_FPR0*8+248,
-  PT_NIP * 8,    PT_MSR * 8,    PT_CCR * 8,    PT_LNK * 8,
-  PT_CTR * 8,    PT_XER * 8,    PT_FPR0*8 + 256,
-  PT_ORIG_R3 * 8, PT_TRAP * 8 };
+static int ppc_regmap[] = {
+  PT_R0 * 8,         PT_R1 * 8,         PT_R2 * 8,         PT_R3 * 8,
+  PT_R4 * 8,         PT_R5 * 8,         PT_R6 * 8,         PT_R7 * 8,
+  PT_R8 * 8,         PT_R9 * 8,         PT_R10 * 8,        PT_R11 * 8,
+  PT_R12 * 8,        PT_R13 * 8,        PT_R14 * 8,        PT_R15 * 8,
+  PT_R16 * 8,        PT_R17 * 8,        PT_R18 * 8,        PT_R19 * 8,
+  PT_R20 * 8,        PT_R21 * 8,        PT_R22 * 8,        PT_R23 * 8,
+  PT_R24 * 8,        PT_R25 * 8,        PT_R26 * 8,        PT_R27 * 8,
+  PT_R28 * 8,        PT_R29 * 8,        PT_R30 * 8,        PT_R31 * 8,
+  PT_FPR0 * 8,       PT_FPR0 * 8 + 8,   PT_FPR0 * 8 + 16,  PT_FPR0 * 8 + 24,
+  PT_FPR0 * 8 + 32,  PT_FPR0 * 8 + 40,  PT_FPR0 * 8 + 48,  PT_FPR0 * 8 + 56,
+  PT_FPR0 * 8 + 64,  PT_FPR0 * 8 + 72,  PT_FPR0 * 8 + 80,  PT_FPR0 * 8 + 88,
+  PT_FPR0 * 8 + 96,  PT_FPR0 * 8 + 104, PT_FPR0 * 8 + 112, PT_FPR0 * 8 + 120,
+  PT_FPR0 * 8 + 128, PT_FPR0 * 8 + 136, PT_FPR0 * 8 + 144, PT_FPR0 * 8 + 152,
+  PT_FPR0 * 8 + 160, PT_FPR0 * 8 + 168, PT_FPR0 * 8 + 176, PT_FPR0 * 8 + 184,
+  PT_FPR0 * 8 + 192, PT_FPR0 * 8 + 200, PT_FPR0 * 8 + 208, PT_FPR0 * 8 + 216,
+  PT_FPR0 * 8 + 224, PT_FPR0 * 8 + 232, PT_FPR0 * 8 + 240, PT_FPR0 * 8 + 248,
+  PT_NIP * 8,        PT_MSR * 8,        PT_CCR * 8,        PT_LNK * 8,
+  PT_CTR * 8,        PT_XER * 8,        PT_FPR0 * 8 + 256, PT_ORIG_R3 * 8,
+  PT_TRAP * 8
+};
 #else
 /* Currently, don't check/send MQ.  */
-static int ppc_regmap[] =
- {PT_R0 * 4,     PT_R1 * 4,     PT_R2 * 4,     PT_R3 * 4,
-  PT_R4 * 4,     PT_R5 * 4,     PT_R6 * 4,     PT_R7 * 4,
-  PT_R8 * 4,     PT_R9 * 4,     PT_R10 * 4,    PT_R11 * 4,
-  PT_R12 * 4,    PT_R13 * 4,    PT_R14 * 4,    PT_R15 * 4,
-  PT_R16 * 4,    PT_R17 * 4,    PT_R18 * 4,    PT_R19 * 4,
-  PT_R20 * 4,    PT_R21 * 4,    PT_R22 * 4,    PT_R23 * 4,
-  PT_R24 * 4,    PT_R25 * 4,    PT_R26 * 4,    PT_R27 * 4,
-  PT_R28 * 4,    PT_R29 * 4,    PT_R30 * 4,    PT_R31 * 4,
-  PT_FPR0*4,     PT_FPR0*4 + 8, PT_FPR0*4+16,  PT_FPR0*4+24,
-  PT_FPR0*4+32,  PT_FPR0*4+40,  PT_FPR0*4+48,  PT_FPR0*4+56,
-  PT_FPR0*4+64,  PT_FPR0*4+72,  PT_FPR0*4+80,  PT_FPR0*4+88,
-  PT_FPR0*4+96,  PT_FPR0*4+104,  PT_FPR0*4+112,  PT_FPR0*4+120,
-  PT_FPR0*4+128, PT_FPR0*4+136,  PT_FPR0*4+144,  PT_FPR0*4+152,
-  PT_FPR0*4+160,  PT_FPR0*4+168,  PT_FPR0*4+176,  PT_FPR0*4+184,
-  PT_FPR0*4+192,  PT_FPR0*4+200,  PT_FPR0*4+208,  PT_FPR0*4+216,
-  PT_FPR0*4+224,  PT_FPR0*4+232,  PT_FPR0*4+240,  PT_FPR0*4+248,
-  PT_NIP * 4,    PT_MSR * 4,    PT_CCR * 4,    PT_LNK * 4,
-  PT_CTR * 4,    PT_XER * 4,    PT_FPSCR * 4,
-  PT_ORIG_R3 * 4, PT_TRAP * 4
- };
+static int ppc_regmap[] = {
+  PT_R0 * 4,         PT_R1 * 4,         PT_R2 * 4,         PT_R3 * 4,
+  PT_R4 * 4,         PT_R5 * 4,         PT_R6 * 4,         PT_R7 * 4,
+  PT_R8 * 4,         PT_R9 * 4,         PT_R10 * 4,        PT_R11 * 4,
+  PT_R12 * 4,        PT_R13 * 4,        PT_R14 * 4,        PT_R15 * 4,
+  PT_R16 * 4,        PT_R17 * 4,        PT_R18 * 4,        PT_R19 * 4,
+  PT_R20 * 4,        PT_R21 * 4,        PT_R22 * 4,        PT_R23 * 4,
+  PT_R24 * 4,        PT_R25 * 4,        PT_R26 * 4,        PT_R27 * 4,
+  PT_R28 * 4,        PT_R29 * 4,        PT_R30 * 4,        PT_R31 * 4,
+  PT_FPR0 * 4,       PT_FPR0 * 4 + 8,   PT_FPR0 * 4 + 16,  PT_FPR0 * 4 + 24,
+  PT_FPR0 * 4 + 32,  PT_FPR0 * 4 + 40,  PT_FPR0 * 4 + 48,  PT_FPR0 * 4 + 56,
+  PT_FPR0 * 4 + 64,  PT_FPR0 * 4 + 72,  PT_FPR0 * 4 + 80,  PT_FPR0 * 4 + 88,
+  PT_FPR0 * 4 + 96,  PT_FPR0 * 4 + 104, PT_FPR0 * 4 + 112, PT_FPR0 * 4 + 120,
+  PT_FPR0 * 4 + 128, PT_FPR0 * 4 + 136, PT_FPR0 * 4 + 144, PT_FPR0 * 4 + 152,
+  PT_FPR0 * 4 + 160, PT_FPR0 * 4 + 168, PT_FPR0 * 4 + 176, PT_FPR0 * 4 + 184,
+  PT_FPR0 * 4 + 192, PT_FPR0 * 4 + 200, PT_FPR0 * 4 + 208, PT_FPR0 * 4 + 216,
+  PT_FPR0 * 4 + 224, PT_FPR0 * 4 + 232, PT_FPR0 * 4 + 240, PT_FPR0 * 4 + 248,
+  PT_NIP * 4,        PT_MSR * 4,        PT_CCR * 4,        PT_LNK * 4,
+  PT_CTR * 4,        PT_XER * 4,        PT_FPSCR * 4,      PT_ORIG_R3 * 4,
+  PT_TRAP * 4
+};
 
-static int ppc_regmap_e500[] =
- {PT_R0 * 4,     PT_R1 * 4,     PT_R2 * 4,     PT_R3 * 4,
-  PT_R4 * 4,     PT_R5 * 4,     PT_R6 * 4,     PT_R7 * 4,
-  PT_R8 * 4,     PT_R9 * 4,     PT_R10 * 4,    PT_R11 * 4,
-  PT_R12 * 4,    PT_R13 * 4,    PT_R14 * 4,    PT_R15 * 4,
-  PT_R16 * 4,    PT_R17 * 4,    PT_R18 * 4,    PT_R19 * 4,
-  PT_R20 * 4,    PT_R21 * 4,    PT_R22 * 4,    PT_R23 * 4,
-  PT_R24 * 4,    PT_R25 * 4,    PT_R26 * 4,    PT_R27 * 4,
-  PT_R28 * 4,    PT_R29 * 4,    PT_R30 * 4,    PT_R31 * 4,
-  -1,            -1,            -1,            -1,
-  -1,            -1,            -1,            -1,
-  -1,            -1,            -1,            -1,
-  -1,            -1,            -1,            -1,
-  -1,            -1,            -1,            -1,
-  -1,            -1,            -1,            -1,
-  -1,            -1,            -1,            -1,
-  -1,            -1,            -1,            -1,
-  PT_NIP * 4,    PT_MSR * 4,    PT_CCR * 4,    PT_LNK * 4,
-  PT_CTR * 4,    PT_XER * 4,    -1,
-  PT_ORIG_R3 * 4, PT_TRAP * 4
- };
+static int ppc_regmap_e500[] = {
+  PT_R0 * 4,  PT_R1 * 4,  PT_R2 * 4,  PT_R3 * 4,  PT_R4 * 4,  PT_R5 * 4,
+  PT_R6 * 4,  PT_R7 * 4,  PT_R8 * 4,  PT_R9 * 4,  PT_R10 * 4, PT_R11 * 4,
+  PT_R12 * 4, PT_R13 * 4, PT_R14 * 4, PT_R15 * 4, PT_R16 * 4, PT_R17 * 4,
+  PT_R18 * 4, PT_R19 * 4, PT_R20 * 4, PT_R21 * 4, PT_R22 * 4, PT_R23 * 4,
+  PT_R24 * 4, PT_R25 * 4, PT_R26 * 4, PT_R27 * 4, PT_R28 * 4, PT_R29 * 4,
+  PT_R30 * 4, PT_R31 * 4, -1,         -1,         -1,         -1,
+  -1,         -1,         -1,         -1,         -1,         -1,
+  -1,         -1,         -1,         -1,         -1,         -1,
+  -1,         -1,         -1,         -1,         -1,         -1,
+  -1,         -1,         -1,         -1,         -1,         -1,
+  -1,         -1,         -1,         -1,         PT_NIP * 4, PT_MSR * 4,
+  PT_CCR * 4, PT_LNK * 4, PT_CTR * 4, PT_XER * 4, -1,         PT_ORIG_R3 * 4,
+  PT_TRAP * 4
+};
 #endif
 
 /* Check whether the kernel provides a register set with number
@@ -203,8 +194,7 @@ ppc_check_regset (int tid, int regset_id, int regsetsize)
   iov.iov_base = buf;
   iov.iov_len = regsetsize;
 
-  if (ptrace (PTRACE_GETREGSET, tid, regset_id, &iov) >= 0
-      || errno == ENODATA)
+  if (ptrace (PTRACE_GETREGSET, tid, regset_id, &iov) >= 0 || errno == ENODATA)
     return 1;
   return 0;
 }
@@ -237,7 +227,7 @@ ppc_target::low_cannot_fetch_register (int regno)
 
 void
 ppc_target::low_collect_ptrace_register (regcache *regcache, int regno,
-					 char *buf)
+                                         char *buf)
 {
   memset (buf, 0, sizeof (long));
 
@@ -254,9 +244,9 @@ ppc_target::low_collect_ptrace_register (regcache *regcache, int regno,
       int size = register_size (regcache->tdesc, regno);
 
       if (size < sizeof (long))
-	collect_register (regcache, regno, buf + sizeof (long) - size);
+        collect_register (regcache, regno, buf + sizeof (long) - size);
       else
-	collect_register (regcache, regno, buf);
+        collect_register (regcache, regno, buf);
     }
   else
     perror_with_name ("Unexpected byte order");
@@ -264,7 +254,7 @@ ppc_target::low_collect_ptrace_register (regcache *regcache, int regno,
 
 void
 ppc_target::low_supply_ptrace_register (regcache *regcache, int regno,
-					const char *buf)
+                                        const char *buf)
 {
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
     {
@@ -279,9 +269,9 @@ ppc_target::low_supply_ptrace_register (regcache *regcache, int regno,
       int size = register_size (regcache->tdesc, regno);
 
       if (size < sizeof (long))
-	supply_register (regcache, regno, buf + sizeof (long) - size);
+        supply_register (regcache, regno, buf + sizeof (long) - size);
       else
-	supply_register (regcache, regno, buf);
+        supply_register (regcache, regno, buf);
     }
   else
     perror_with_name ("Unexpected byte order");
@@ -328,7 +318,6 @@ ppc_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 #ifndef __powerpc64__
 static int ppc_regmap_adjusted;
 #endif
-
 
 /* Correct in either endianness.
    This instruction is "twge r2, r2", which GDB uses as a software
@@ -384,8 +373,8 @@ ppc_target::supports_z_point_type (char z_type)
    Returns 0 on success, -1 on failure and 1 on unsupported.  */
 
 int
-ppc_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-			      int size, raw_breakpoint *bp)
+ppc_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                              raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -405,8 +394,8 @@ ppc_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
    Returns 0 on success, -1 on failure and 1 on unsupported.  */
 
 int
-ppc_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-			      int size, raw_breakpoint *bp)
+ppc_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                              raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -425,7 +414,8 @@ ppc_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
-static void ppc_fill_gregset (struct regcache *regcache, void *buf)
+static void
+ppc_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
@@ -433,15 +423,15 @@ static void ppc_fill_gregset (struct regcache *regcache, void *buf)
 
   for (i = 0; i < 32; i++)
     my_ppc_target->low_collect_ptrace_register (regcache, i,
-						(char *) buf + ppc_regmap[i]);
+                                                (char *) buf + ppc_regmap[i]);
 
   for (i = 64; i < 70; i++)
     my_ppc_target->low_collect_ptrace_register (regcache, i,
-						(char *) buf + ppc_regmap[i]);
+                                                (char *) buf + ppc_regmap[i]);
 
   for (i = 71; i < 73; i++)
     my_ppc_target->low_collect_ptrace_register (regcache, i,
-						(char *) buf + ppc_regmap[i]);
+                                                (char *) buf + ppc_regmap[i]);
 }
 
 /* Program Priority Register regset fill function.  */
@@ -614,10 +604,10 @@ ppc_store_tm_cgprregset (struct regcache *regcache, const void *buf)
     endian_offset = 4;
 
   supply_register_by_name (regcache, "ccr",
-			   &regset[PT_CCR * size + endian_offset]);
+                           &regset[PT_CCR * size + endian_offset]);
 
   supply_register_by_name (regcache, "cxer",
-			   &regset[PT_XER * size + endian_offset]);
+                           &regset[PT_XER * size + endian_offset]);
 
   supply_register_by_name (regcache, "clr", &regset[PT_LNK * size]);
   supply_register_by_name (regcache, "cctr", &regset[PT_CTR * size]);
@@ -658,8 +648,7 @@ ppc_store_tm_cvrregset (struct regcache *regcache, const void *buf)
   if (__BYTE_ORDER == __BIG_ENDIAN)
     vscr_offset = 12;
 
-  supply_register_by_name (regcache, "cvscr",
-			   &regset[32 * 16 + vscr_offset]);
+  supply_register_by_name (regcache, "cvscr", &regset[32 * 16 + vscr_offset]);
 
   supply_register_by_name (regcache, "cvrsave", &regset[33 * 16]);
 }
@@ -747,8 +736,7 @@ ppc_fill_vrregset (struct regcache *regcache, void *buf)
   if (__BYTE_ORDER == __BIG_ENDIAN)
     vscr_offset = 12;
 
-  collect_register_by_name (regcache, "vscr",
-			    &regset[32 * 16 + vscr_offset]);
+  collect_register_by_name (regcache, "vscr", &regset[32 * 16 + vscr_offset]);
 
   collect_register_by_name (regcache, "vrsave", &regset[33 * 16]);
 }
@@ -767,8 +755,7 @@ ppc_store_vrregset (struct regcache *regcache, const void *buf)
   if (__BYTE_ORDER == __BIG_ENDIAN)
     vscr_offset = 12;
 
-  supply_register_by_name (regcache, "vscr",
-			   &regset[32 * 16 + vscr_offset]);
+  supply_register_by_name (regcache, "vscr", &regset[32 * 16 + vscr_offset]);
   supply_register_by_name (regcache, "vrsave", &regset[33 * 16]);
 }
 
@@ -812,24 +799,24 @@ static struct regset_info ppc_regsets[] = {
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
      general registers.  Some kernels support these, but not the newer
      PPC_PTRACE_GETREGS.  */
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CTAR, 0, EXTENDED_REGS,
-    NULL, ppc_store_tm_ctarregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CTAR, 0, EXTENDED_REGS, NULL,
+    ppc_store_tm_ctarregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CDSCR, 0, EXTENDED_REGS,
     NULL, ppc_store_tm_cdscrregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CPPR, 0, EXTENDED_REGS,
-    NULL, ppc_store_tm_cpprregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CVSX, 0, EXTENDED_REGS,
-    NULL, ppc_store_tm_cvsxregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CVMX, 0, EXTENDED_REGS,
-    NULL, ppc_store_tm_cvrregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CFPR, 0, EXTENDED_REGS,
-    NULL, ppc_store_tm_cfprregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CGPR, 0, EXTENDED_REGS,
-    NULL, ppc_store_tm_cgprregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CPPR, 0, EXTENDED_REGS, NULL,
+    ppc_store_tm_cpprregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CVSX, 0, EXTENDED_REGS, NULL,
+    ppc_store_tm_cvsxregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CVMX, 0, EXTENDED_REGS, NULL,
+    ppc_store_tm_cvrregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CFPR, 0, EXTENDED_REGS, NULL,
+    ppc_store_tm_cfprregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CGPR, 0, EXTENDED_REGS, NULL,
+    ppc_store_tm_cgprregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_SPR, 0, EXTENDED_REGS,
     ppc_fill_tm_sprregset, ppc_store_tm_sprregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_EBB, 0, EXTENDED_REGS,
-    NULL, ppc_store_ebbregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_EBB, 0, EXTENDED_REGS, NULL,
+    ppc_store_ebbregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_PMU, 0, EXTENDED_REGS,
     ppc_fill_pmuregset, ppc_store_pmuregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TAR, 0, EXTENDED_REGS,
@@ -839,34 +826,28 @@ static struct regset_info ppc_regsets[] = {
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_DSCR, 0, EXTENDED_REGS,
     ppc_fill_dscrregset, ppc_store_dscrregset },
   { PTRACE_GETVSXREGS, PTRACE_SETVSXREGS, 0, 0, EXTENDED_REGS,
-  ppc_fill_vsxregset, ppc_store_vsxregset },
-  { PTRACE_GETVRREGS, PTRACE_SETVRREGS, 0, 0, EXTENDED_REGS,
-    ppc_fill_vrregset, ppc_store_vrregset },
+    ppc_fill_vsxregset, ppc_store_vsxregset },
+  { PTRACE_GETVRREGS, PTRACE_SETVRREGS, 0, 0, EXTENDED_REGS, ppc_fill_vrregset,
+    ppc_store_vrregset },
   { PTRACE_GETEVRREGS, PTRACE_SETEVRREGS, 0, 0, EXTENDED_REGS,
     ppc_fill_evrregset, ppc_store_evrregset },
   { 0, 0, 0, 0, GENERAL_REGS, ppc_fill_gregset, NULL },
   NULL_REGSET
 };
 
-static struct usrregs_info ppc_usrregs_info =
-  {
-    ppc_num_regs,
-    ppc_regmap,
-  };
+static struct usrregs_info ppc_usrregs_info = {
+  ppc_num_regs,
+  ppc_regmap,
+};
 
-static struct regsets_info ppc_regsets_info =
-  {
-    ppc_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct regsets_info ppc_regsets_info = {
+  ppc_regsets, /* regsets */
+  0,           /* num_regsets */
+  NULL,        /* disabled_regsets */
+};
 
-static struct regs_info myregs_info =
-  {
-    NULL, /* regset_bitmap */
-    &ppc_usrregs_info,
-    &ppc_regsets_info
-  };
+static struct regs_info myregs_info = { NULL, /* regset_bitmap */
+                                        &ppc_usrregs_info, &ppc_regsets_info };
 
 const regs_info *
 ppc_target::get_regs_info ()
@@ -886,9 +867,9 @@ ppc_target::low_arch_setup ()
   features.wordsize = ppc_linux_target_wordsize (tid);
 
   if (features.wordsize == 4)
-      tdesc = tdesc_powerpc_32l;
+    tdesc = tdesc_powerpc_32l;
   else
-      tdesc = tdesc_powerpc_64l;
+    tdesc = tdesc_powerpc_64l;
 
   current_process ()->tdesc = tdesc;
 
@@ -911,21 +892,17 @@ ppc_target::low_arch_setup ()
     {
       features.ppr_dscr = true;
       if ((ppc_hwcap2 & PPC_FEATURE2_ARCH_2_07)
-	  && (ppc_hwcap2 & PPC_FEATURE2_TAR)
-	  && (ppc_hwcap2 & PPC_FEATURE2_EBB)
-	  && ppc_check_regset (tid, NT_PPC_TAR,
-			       PPC_LINUX_SIZEOF_TARREGSET)
-	  && ppc_check_regset (tid, NT_PPC_EBB,
-			       PPC_LINUX_SIZEOF_EBBREGSET)
-	  && ppc_check_regset (tid, NT_PPC_PMU,
-			       PPC_LINUX_SIZEOF_PMUREGSET))
-	{
-	  features.isa207 = true;
-	  if ((ppc_hwcap2 & PPC_FEATURE2_HTM)
-	      && ppc_check_regset (tid, NT_PPC_TM_SPR,
-				   PPC_LINUX_SIZEOF_TM_SPRREGSET))
-	    features.htm = true;
-	}
+          && (ppc_hwcap2 & PPC_FEATURE2_TAR) && (ppc_hwcap2 & PPC_FEATURE2_EBB)
+          && ppc_check_regset (tid, NT_PPC_TAR, PPC_LINUX_SIZEOF_TARREGSET)
+          && ppc_check_regset (tid, NT_PPC_EBB, PPC_LINUX_SIZEOF_EBBREGSET)
+          && ppc_check_regset (tid, NT_PPC_PMU, PPC_LINUX_SIZEOF_PMUREGSET))
+        {
+          features.isa207 = true;
+          if ((ppc_hwcap2 & PPC_FEATURE2_HTM)
+              && ppc_check_regset (tid, NT_PPC_TM_SPR,
+                                   PPC_LINUX_SIZEOF_TM_SPRREGSET))
+            features.htm = true;
+        }
     }
 
   tdesc = ppc_linux_match_description (features);
@@ -939,17 +916,17 @@ ppc_target::low_arch_setup ()
   if (!ppc_regmap_adjusted)
     {
       if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
-	ppc_usrregs_info.regmap = ppc_regmap_e500;
+        ppc_usrregs_info.regmap = ppc_regmap_e500;
 
       /* If the FPSCR is 64-bit wide, we need to fetch the whole
 	 64-bit slot and not just its second word.  The PT_FPSCR
 	 supplied in a 32-bit GDB compilation doesn't reflect
 	 this.  */
       if (register_size (tdesc, 70) == 8)
-	ppc_regmap[70] = (48 + 2*32) * sizeof (long);
+        ppc_regmap[70] = (48 + 2 * 32) * sizeof (long);
 
       ppc_regmap_adjusted = 1;
-   }
+    }
 #endif
 
   current_process ()->tdesc = tdesc;
@@ -958,82 +935,72 @@ ppc_target::low_arch_setup ()
     switch (regset->get_request)
       {
       case PTRACE_GETVRREGS:
-	regset->size = features.altivec ? PPC_LINUX_SIZEOF_VRREGSET : 0;
-	break;
+        regset->size = features.altivec ? PPC_LINUX_SIZEOF_VRREGSET : 0;
+        break;
       case PTRACE_GETVSXREGS:
-	regset->size = features.vsx ? PPC_LINUX_SIZEOF_VSXREGSET : 0;
-	break;
+        regset->size = features.vsx ? PPC_LINUX_SIZEOF_VSXREGSET : 0;
+        break;
       case PTRACE_GETEVRREGS:
-	if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
-	  regset->size = 32 * 4 + 8 + 4;
-	else
-	  regset->size = 0;
-	break;
+        if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
+          regset->size = 32 * 4 + 8 + 4;
+        else
+          regset->size = 0;
+        break;
       case PTRACE_GETREGSET:
-	switch (regset->nt_type)
-	  {
-	  case NT_PPC_PPR:
-	    regset->size = (features.ppr_dscr ?
-			    PPC_LINUX_SIZEOF_PPRREGSET : 0);
-	    break;
-	  case NT_PPC_DSCR:
-	    regset->size = (features.ppr_dscr ?
-			    PPC_LINUX_SIZEOF_DSCRREGSET : 0);
-	    break;
-	  case NT_PPC_TAR:
-	    regset->size = (features.isa207 ?
-			    PPC_LINUX_SIZEOF_TARREGSET : 0);
-	    break;
-	  case NT_PPC_EBB:
-	    regset->size = (features.isa207 ?
-			    PPC_LINUX_SIZEOF_EBBREGSET : 0);
-	    break;
-	  case NT_PPC_PMU:
-	    regset->size = (features.isa207 ?
-			    PPC_LINUX_SIZEOF_PMUREGSET : 0);
-	    break;
-	  case NT_PPC_TM_SPR:
-	    regset->size = (features.htm ?
-			    PPC_LINUX_SIZEOF_TM_SPRREGSET : 0);
-	    break;
-	  case NT_PPC_TM_CGPR:
-	    if (features.wordsize == 4)
-	      regset->size = (features.htm ?
-			      PPC32_LINUX_SIZEOF_CGPRREGSET : 0);
-	    else
-	      regset->size = (features.htm ?
-			      PPC64_LINUX_SIZEOF_CGPRREGSET : 0);
-	    break;
-	  case NT_PPC_TM_CFPR:
-	    regset->size = (features.htm ?
-			    PPC_LINUX_SIZEOF_CFPRREGSET : 0);
-	    break;
-	  case NT_PPC_TM_CVMX:
-	    regset->size = (features.htm ?
-			    PPC_LINUX_SIZEOF_CVMXREGSET : 0);
-	    break;
-	  case NT_PPC_TM_CVSX:
-	    regset->size = (features.htm ?
-			    PPC_LINUX_SIZEOF_CVSXREGSET : 0);
-	    break;
-	  case NT_PPC_TM_CPPR:
-	    regset->size = (features.htm ?
-			    PPC_LINUX_SIZEOF_CPPRREGSET : 0);
-	    break;
-	  case NT_PPC_TM_CDSCR:
-	    regset->size = (features.htm ?
-			    PPC_LINUX_SIZEOF_CDSCRREGSET : 0);
-	    break;
-	  case NT_PPC_TM_CTAR:
-	    regset->size = (features.htm ?
-			    PPC_LINUX_SIZEOF_CTARREGSET : 0);
-	    break;
-	  default:
-	    break;
-	  }
-	break;
+        switch (regset->nt_type)
+          {
+          case NT_PPC_PPR:
+            regset->size
+              = (features.ppr_dscr ? PPC_LINUX_SIZEOF_PPRREGSET : 0);
+            break;
+          case NT_PPC_DSCR:
+            regset->size
+              = (features.ppr_dscr ? PPC_LINUX_SIZEOF_DSCRREGSET : 0);
+            break;
+          case NT_PPC_TAR:
+            regset->size = (features.isa207 ? PPC_LINUX_SIZEOF_TARREGSET : 0);
+            break;
+          case NT_PPC_EBB:
+            regset->size = (features.isa207 ? PPC_LINUX_SIZEOF_EBBREGSET : 0);
+            break;
+          case NT_PPC_PMU:
+            regset->size = (features.isa207 ? PPC_LINUX_SIZEOF_PMUREGSET : 0);
+            break;
+          case NT_PPC_TM_SPR:
+            regset->size = (features.htm ? PPC_LINUX_SIZEOF_TM_SPRREGSET : 0);
+            break;
+          case NT_PPC_TM_CGPR:
+            if (features.wordsize == 4)
+              regset->size
+                = (features.htm ? PPC32_LINUX_SIZEOF_CGPRREGSET : 0);
+            else
+              regset->size
+                = (features.htm ? PPC64_LINUX_SIZEOF_CGPRREGSET : 0);
+            break;
+          case NT_PPC_TM_CFPR:
+            regset->size = (features.htm ? PPC_LINUX_SIZEOF_CFPRREGSET : 0);
+            break;
+          case NT_PPC_TM_CVMX:
+            regset->size = (features.htm ? PPC_LINUX_SIZEOF_CVMXREGSET : 0);
+            break;
+          case NT_PPC_TM_CVSX:
+            regset->size = (features.htm ? PPC_LINUX_SIZEOF_CVSXREGSET : 0);
+            break;
+          case NT_PPC_TM_CPPR:
+            regset->size = (features.htm ? PPC_LINUX_SIZEOF_CPPRREGSET : 0);
+            break;
+          case NT_PPC_TM_CDSCR:
+            regset->size = (features.htm ? PPC_LINUX_SIZEOF_CDSCRREGSET : 0);
+            break;
+          case NT_PPC_TM_CTAR:
+            regset->size = (features.htm ? PPC_LINUX_SIZEOF_CTARREGSET : 0);
+            break;
+          default:
+            break;
+          }
+        break;
       default:
-	break;
+        break;
       }
 }
 
@@ -1104,7 +1071,7 @@ is_elfv2_inferior (void)
      are located.  If it doesn't look like one, bail.  */
 
   read_inferior_memory (phdr & ~0xfff, (unsigned char *) &ehdr, sizeof ehdr);
-  if (memcmp(ehdr.e_ident, ELFMAG, SELFMAG))
+  if (memcmp (ehdr.e_ident, ELFMAG, SELFMAG))
     return def_res;
 
   return (ehdr.e_flags & EF_PPC64_ABI) == 2;
@@ -1117,7 +1084,7 @@ is_elfv2_inferior (void)
    0      6     11   16          30 32
    | OPCD | RST | RA |     DS    |XO|  */
 
-__attribute__((unused)) /* Maybe unused due to conditional compilation.  */
+__attribute__ ((unused)) /* Maybe unused due to conditional compilation.  */
 static int
 gen_ds_form (uint32_t *buf, int opcd, int rst, int ra, int ds, int xo)
 {
@@ -1135,10 +1102,10 @@ gen_ds_form (uint32_t *buf, int opcd, int rst, int ra, int ds, int xo)
 
 /* Followings are frequently used ds-form instructions.  */
 
-#define GEN_STD(buf, rs, ra, offset)	gen_ds_form (buf, 62, rs, ra, offset, 0)
-#define GEN_STDU(buf, rs, ra, offset)	gen_ds_form (buf, 62, rs, ra, offset, 1)
-#define GEN_LD(buf, rt, ra, offset)	gen_ds_form (buf, 58, rt, ra, offset, 0)
-#define GEN_LDU(buf, rt, ra, offset)	gen_ds_form (buf, 58, rt, ra, offset, 1)
+#define GEN_STD(buf, rs, ra, offset) gen_ds_form (buf, 62, rs, ra, offset, 0)
+#define GEN_STDU(buf, rs, ra, offset) gen_ds_form (buf, 62, rs, ra, offset, 1)
+#define GEN_LD(buf, rt, ra, offset) gen_ds_form (buf, 58, rt, ra, offset, 0)
+#define GEN_LDU(buf, rt, ra, offset) gen_ds_form (buf, 58, rt, ra, offset, 1)
 
 /* Generate a d-form instruction in BUF.
 
@@ -1161,15 +1128,15 @@ gen_d_form (uint32_t *buf, int opcd, int rst, int ra, int si)
 
 /* Followings are frequently used d-form instructions.  */
 
-#define GEN_ADDI(buf, rt, ra, si)	gen_d_form (buf, 14, rt, ra, si)
-#define GEN_ADDIS(buf, rt, ra, si)	gen_d_form (buf, 15, rt, ra, si)
-#define GEN_LI(buf, rt, si)		GEN_ADDI (buf, rt, 0, si)
-#define GEN_LIS(buf, rt, si)		GEN_ADDIS (buf, rt, 0, si)
-#define GEN_ORI(buf, rt, ra, si)	gen_d_form (buf, 24, rt, ra, si)
-#define GEN_ORIS(buf, rt, ra, si)	gen_d_form (buf, 25, rt, ra, si)
-#define GEN_LWZ(buf, rt, ra, si)	gen_d_form (buf, 32, rt, ra, si)
-#define GEN_STW(buf, rt, ra, si)	gen_d_form (buf, 36, rt, ra, si)
-#define GEN_STWU(buf, rt, ra, si)	gen_d_form (buf, 37, rt, ra, si)
+#define GEN_ADDI(buf, rt, ra, si) gen_d_form (buf, 14, rt, ra, si)
+#define GEN_ADDIS(buf, rt, ra, si) gen_d_form (buf, 15, rt, ra, si)
+#define GEN_LI(buf, rt, si) GEN_ADDI (buf, rt, 0, si)
+#define GEN_LIS(buf, rt, si) GEN_ADDIS (buf, rt, 0, si)
+#define GEN_ORI(buf, rt, ra, si) gen_d_form (buf, 24, rt, ra, si)
+#define GEN_ORIS(buf, rt, ra, si) gen_d_form (buf, 25, rt, ra, si)
+#define GEN_LWZ(buf, rt, ra, si) gen_d_form (buf, 32, rt, ra, si)
+#define GEN_STW(buf, rt, ra, si) gen_d_form (buf, 36, rt, ra, si)
+#define GEN_STWU(buf, rt, ra, si) gen_d_form (buf, 37, rt, ra, si)
 
 /* Generate a xfx-form instruction in BUF and return the number of bytes
    written.
@@ -1194,14 +1161,12 @@ gen_xfx_form (uint32_t *buf, int opcd, int rst, int ri, int xo)
 
 /* Followings are frequently used xfx-form instructions.  */
 
-#define GEN_MFSPR(buf, rt, spr)		gen_xfx_form (buf, 31, rt, spr, 339)
-#define GEN_MTSPR(buf, rt, spr)		gen_xfx_form (buf, 31, rt, spr, 467)
-#define GEN_MFCR(buf, rt)		gen_xfx_form (buf, 31, rt, 0, 19)
-#define GEN_MTCR(buf, rt)		gen_xfx_form (buf, 31, rt, 0x3cf, 144)
-#define GEN_SYNC(buf, L, E)             gen_xfx_form (buf, 31, L & 0x3, \
-						      E & 0xf, 598)
-#define GEN_LWSYNC(buf)			GEN_SYNC (buf, 1, 0)
-
+#define GEN_MFSPR(buf, rt, spr) gen_xfx_form (buf, 31, rt, spr, 339)
+#define GEN_MTSPR(buf, rt, spr) gen_xfx_form (buf, 31, rt, spr, 467)
+#define GEN_MFCR(buf, rt) gen_xfx_form (buf, 31, rt, 0, 19)
+#define GEN_MTCR(buf, rt) gen_xfx_form (buf, 31, rt, 0x3cf, 144)
+#define GEN_SYNC(buf, L, E) gen_xfx_form (buf, 31, L & 0x3, E & 0xf, 598)
+#define GEN_LWSYNC(buf) GEN_SYNC (buf, 1, 0)
 
 /* Generate a x-form instruction in BUF and return the number of bytes written.
 
@@ -1227,13 +1192,12 @@ gen_x_form (uint32_t *buf, int opcd, int rst, int ra, int rb, int xo, int rc)
 
 /* Followings are frequently used x-form instructions.  */
 
-#define GEN_OR(buf, ra, rs, rb)		gen_x_form (buf, 31, rs, ra, rb, 444, 0)
-#define GEN_MR(buf, ra, rs)		GEN_OR (buf, ra, rs, rs)
-#define GEN_LWARX(buf, rt, ra, rb)	gen_x_form (buf, 31, rt, ra, rb, 20, 0)
-#define GEN_STWCX(buf, rs, ra, rb)	gen_x_form (buf, 31, rs, ra, rb, 150, 1)
+#define GEN_OR(buf, ra, rs, rb) gen_x_form (buf, 31, rs, ra, rb, 444, 0)
+#define GEN_MR(buf, ra, rs) GEN_OR (buf, ra, rs, rs)
+#define GEN_LWARX(buf, rt, ra, rb) gen_x_form (buf, 31, rt, ra, rb, 20, 0)
+#define GEN_STWCX(buf, rs, ra, rb) gen_x_form (buf, 31, rs, ra, rb, 150, 1)
 /* Assume bf = cr7.  */
-#define GEN_CMPW(buf, ra, rb)		gen_x_form (buf, 31, 28, ra, rb, 0, 0)
-
+#define GEN_CMPW(buf, ra, rb) gen_x_form (buf, 31, 28, ra, rb, 0, 0)
 
 /* Generate a md-form instruction in BUF and return the number of bytes written.
 
@@ -1241,8 +1205,8 @@ gen_x_form (uint32_t *buf, int opcd, int rst, int ra, int rb, int xo, int rc)
    | OPCD | RS | RA | sh | mb | XO |sh|Rc|  */
 
 static int
-gen_md_form (uint32_t *buf, int opcd, int rs, int ra, int sh, int mb,
-	     int xo, int rc)
+gen_md_form (uint32_t *buf, int opcd, int rs, int ra, int sh, int mb, int xo,
+             int rc)
 {
   uint32_t insn;
   unsigned int n = ((mb & 0x1f) << 1) | ((mb >> 5) & 0x1);
@@ -1257,18 +1221,18 @@ gen_md_form (uint32_t *buf, int opcd, int rs, int ra, int sh, int mb,
   gdb_assert ((xo & ~0x7) == 0);
   gdb_assert ((rc & ~0x1) == 0);
 
-  insn = (rs << 21) | (ra << 16) | (sh0_4 << 11) | (n << 5)
-	 | (sh5 << 1) | (xo << 2) | (rc & 1);
+  insn = (rs << 21) | (ra << 16) | (sh0_4 << 11) | (n << 5) | (sh5 << 1)
+         | (xo << 2) | (rc & 1);
   *buf = (opcd << 26) | insn;
   return 1;
 }
 
 /* The following are frequently used md-form instructions.  */
 
-#define GEN_RLDICL(buf, ra, rs ,sh, mb) \
-				gen_md_form (buf, 30, rs, ra, sh, mb, 0, 0)
-#define GEN_RLDICR(buf, ra, rs ,sh, mb) \
-				gen_md_form (buf, 30, rs, ra, sh, mb, 1, 0)
+#define GEN_RLDICL(buf, ra, rs, sh, mb) \
+  gen_md_form (buf, 30, rs, ra, sh, mb, 0, 0)
+#define GEN_RLDICR(buf, ra, rs, sh, mb) \
+  gen_md_form (buf, 30, rs, ra, sh, mb, 1, 0)
 
 /* Generate a i-form instruction in BUF and return the number of bytes written.
 
@@ -1289,8 +1253,8 @@ gen_i_form (uint32_t *buf, int opcd, int li, int aa, int lk)
 
 /* The following are frequently used i-form instructions.  */
 
-#define GEN_B(buf, li)		gen_i_form (buf, 18, li, 0, 0)
-#define GEN_BL(buf, li)		gen_i_form (buf, 18, li, 0, 1)
+#define GEN_B(buf, li) gen_i_form (buf, 18, li, 0, 0)
+#define GEN_BL(buf, li) gen_i_form (buf, 18, li, 0, 1)
 
 /* Generate a b-form instruction in BUF and return the number of bytes written.
 
@@ -1298,8 +1262,7 @@ gen_i_form (uint32_t *buf, int opcd, int li, int aa, int lk)
    | OPCD | BO | BI |      BD        |AA|LK|  */
 
 static int
-gen_b_form (uint32_t *buf, int opcd, int bo, int bi, int bd,
-	    int aa, int lk)
+gen_b_form (uint32_t *buf, int opcd, int bo, int bi, int bd, int aa, int lk)
 {
   uint32_t insn;
 
@@ -1314,22 +1277,20 @@ gen_b_form (uint32_t *buf, int opcd, int bo, int bi, int bd,
 
 /* The following are frequently used b-form instructions.  */
 /* Assume bi = cr7.  */
-#define GEN_BNE(buf, bd)  gen_b_form (buf, 16, 0x4, (7 << 2) | 2, bd, 0 ,0)
+#define GEN_BNE(buf, bd) gen_b_form (buf, 16, 0x4, (7 << 2) | 2, bd, 0, 0)
 
 /* GEN_LOAD and GEN_STORE generate 64- or 32-bit load/store for ppc64 or ppc32
    respectively.  They are primary used for save/restore GPRs in jump-pad,
    not used for bytecode compiling.  */
 
 #ifdef __powerpc64__
-#define GEN_LOAD(buf, rt, ra, si, is_64)	(is_64 ? \
-						 GEN_LD (buf, rt, ra, si) : \
-						 GEN_LWZ (buf, rt, ra, si))
-#define GEN_STORE(buf, rt, ra, si, is_64)	(is_64 ? \
-						 GEN_STD (buf, rt, ra, si) : \
-						 GEN_STW (buf, rt, ra, si))
+#define GEN_LOAD(buf, rt, ra, si, is_64) \
+  (is_64 ? GEN_LD (buf, rt, ra, si) : GEN_LWZ (buf, rt, ra, si))
+#define GEN_STORE(buf, rt, ra, si, is_64) \
+  (is_64 ? GEN_STD (buf, rt, ra, si) : GEN_STW (buf, rt, ra, si))
 #else
-#define GEN_LOAD(buf, rt, ra, si, is_64)	GEN_LWZ (buf, rt, ra, si)
-#define GEN_STORE(buf, rt, ra, si, is_64)	GEN_STW (buf, rt, ra, si)
+#define GEN_LOAD(buf, rt, ra, si, is_64) GEN_LWZ (buf, rt, ra, si)
+#define GEN_STORE(buf, rt, ra, si, is_64) GEN_STW (buf, rt, ra, si)
 #endif
 
 /* Generate a sequence of instructions to load IMM in the register REG.
@@ -1352,10 +1313,10 @@ gen_limm (uint32_t *buf, int reg, uint64_t imm, int is_64)
 	 rldicl reg, reg, 0, 32 */
       p += GEN_LIS (p, reg, (imm >> 16) & 0xffff);
       if ((imm & 0xffff) != 0)
-	p += GEN_ORI (p, reg, reg, imm & 0xffff);
+        p += GEN_ORI (p, reg, reg, imm & 0xffff);
       /* Clear upper 32-bit if sign-bit is set.  */
       if (imm & (1u << 31) && is_64)
-	p += GEN_RLDICL (p, reg, reg, 0, 32);
+        p += GEN_RLDICL (p, reg, reg, 0, 32);
     }
   else
     {
@@ -1367,12 +1328,12 @@ gen_limm (uint32_t *buf, int reg, uint64_t imm, int is_64)
 	 ori    reg, reg, <imm[15:0]> */
       p += GEN_LIS (p, reg, ((imm >> 48) & 0xffff));
       if (((imm >> 32) & 0xffff) != 0)
-	p += GEN_ORI (p, reg, reg, ((imm >> 32) & 0xffff));
+        p += GEN_ORI (p, reg, reg, ((imm >> 32) & 0xffff));
       p += GEN_RLDICR (p, reg, reg, 32, 31);
       if (((imm >> 16) & 0xffff) != 0)
-	p += GEN_ORIS (p, reg, reg, ((imm >> 16) & 0xffff));
+        p += GEN_ORIS (p, reg, reg, ((imm >> 16) & 0xffff));
       if ((imm & 0xffff) != 0)
-	p += GEN_ORI (p, reg, reg, (imm & 0xffff));
+        p += GEN_ORI (p, reg, reg, (imm & 0xffff));
     }
 
   return p - buf;
@@ -1385,7 +1346,7 @@ gen_limm (uint32_t *buf, int reg, uint64_t imm, int is_64)
 
 static int
 gen_atomic_xchg (uint32_t *buf, CORE_ADDR lock, int old_value, int r_new,
-		 int is_64)
+                 int is_64)
 {
   const int r_lock = 6;
   const int r_old = 7;
@@ -1427,8 +1388,8 @@ gen_call (uint32_t *buf, CORE_ADDR fn, int is_64, int is_opd)
       p += GEN_LOAD (p, 2, 12, 8, is_64);
       p += GEN_LOAD (p, 12, 12, 0, is_64);
     }
-  p += GEN_MTSPR (p, 12, 9);		/* mtctr  r12 */
-  *p++ = 0x4e800421;			/* bctrl */
+  p += GEN_MTSPR (p, 12, 9); /* mtctr  r12 */
+  *p++ = 0x4e800421;         /* bctrl */
 
   return p - buf;
 }
@@ -1454,7 +1415,7 @@ ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
 
       /* Out of range. Cannot relocate instruction.  */
       if (newrel >= (1 << 25) || newrel < -(1 << 25))
-	return;
+        return;
 
       insn = (insn & ~0x3fffffc) | (newrel & 0x3fffffc);
     }
@@ -1503,75 +1464,75 @@ ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
       newrel = (oldloc - *to) + rel;
 
       if (newrel < (1 << 15) && newrel >= -(1 << 15))
-	insn = (insn & ~0xfffc) | (newrel & 0xfffc);
+        insn = (insn & ~0xfffc) | (newrel & 0xfffc);
       else if ((PPC_BO (insn) & 0x14) == 0x4 || (PPC_BO (insn) & 0x14) == 0x10)
-	{
-	  newrel -= 4;
+        {
+          newrel -= 4;
 
-	  /* Out of range. Cannot relocate instruction.  */
-	  if (newrel >= (1 << 25) || newrel < -(1 << 25))
-	    return;
+          /* Out of range. Cannot relocate instruction.  */
+          if (newrel >= (1 << 25) || newrel < -(1 << 25))
+            return;
 
-	  if ((PPC_BO (insn) & 0x14) == 0x4)
-	    insn ^= (1 << 24);
-	  else if ((PPC_BO (insn) & 0x14) == 0x10)
-	    insn ^= (1 << 22);
+          if ((PPC_BO (insn) & 0x14) == 0x4)
+            insn ^= (1 << 24);
+          else if ((PPC_BO (insn) & 0x14) == 0x10)
+            insn ^= (1 << 22);
 
-	  /* Jump over the unconditional branch.  */
-	  insn = (insn & ~0xfffc) | 0x8;
-	  target_write_memory (*to, (unsigned char *) &insn, 4);
-	  *to += 4;
+          /* Jump over the unconditional branch.  */
+          insn = (insn & ~0xfffc) | 0x8;
+          target_write_memory (*to, (unsigned char *) &insn, 4);
+          *to += 4;
 
-	  /* Build a unconditional branch and copy LK bit.  */
-	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
-	  target_write_memory (*to, (unsigned char *) &insn, 4);
-	  *to += 4;
+          /* Build a unconditional branch and copy LK bit.  */
+          insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
+          target_write_memory (*to, (unsigned char *) &insn, 4);
+          *to += 4;
 
-	  return;
-	}
+          return;
+        }
       else if ((PPC_BO (insn) & 0x14) == 0)
-	{
-	  uint32_t bdnz_insn = (16 << 26) | (0x10 << 21) | 12;
-	  uint32_t bf_insn = (16 << 26) | (0x4 << 21) | 8;
+        {
+          uint32_t bdnz_insn = (16 << 26) | (0x10 << 21) | 12;
+          uint32_t bf_insn = (16 << 26) | (0x4 << 21) | 8;
 
-	  newrel -= 8;
+          newrel -= 8;
 
-	  /* Out of range. Cannot relocate instruction.  */
-	  if (newrel >= (1 << 25) || newrel < -(1 << 25))
-	    return;
+          /* Out of range. Cannot relocate instruction.  */
+          if (newrel >= (1 << 25) || newrel < -(1 << 25))
+            return;
 
-	  /* Copy BI field.  */
-	  bf_insn |= (insn & 0x1f0000);
+          /* Copy BI field.  */
+          bf_insn |= (insn & 0x1f0000);
 
-	  /* Invert condition.  */
-	  bdnz_insn |= (insn ^ (1 << 22)) & (1 << 22);
-	  bf_insn |= (insn ^ (1 << 24)) & (1 << 24);
+          /* Invert condition.  */
+          bdnz_insn |= (insn ^ (1 << 22)) & (1 << 22);
+          bf_insn |= (insn ^ (1 << 24)) & (1 << 24);
 
-	  target_write_memory (*to, (unsigned char *) &bdnz_insn, 4);
-	  *to += 4;
-	  target_write_memory (*to, (unsigned char *) &bf_insn, 4);
-	  *to += 4;
+          target_write_memory (*to, (unsigned char *) &bdnz_insn, 4);
+          *to += 4;
+          target_write_memory (*to, (unsigned char *) &bf_insn, 4);
+          *to += 4;
 
-	  /* Build a unconditional branch and copy LK bit.  */
-	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
-	  target_write_memory (*to, (unsigned char *) &insn, 4);
-	  *to += 4;
+          /* Build a unconditional branch and copy LK bit.  */
+          insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
+          target_write_memory (*to, (unsigned char *) &insn, 4);
+          *to += 4;
 
-	  return;
-	}
+          return;
+        }
       else /* (BO & 0x14) == 0x14, branch always.  */
-	{
-	  /* Out of range. Cannot relocate instruction.  */
-	  if (newrel >= (1 << 25) || newrel < -(1 << 25))
-	    return;
+        {
+          /* Out of range. Cannot relocate instruction.  */
+          if (newrel >= (1 << 25) || newrel < -(1 << 25))
+            return;
 
-	  /* Build a unconditional branch and copy LK bit.  */
-	  insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
-	  target_write_memory (*to, (unsigned char *) &insn, 4);
-	  *to += 4;
+          /* Build a unconditional branch and copy LK bit.  */
+          insn = (18 << 26) | (0x3fffffc & newrel) | (insn & 0x3);
+          target_write_memory (*to, (unsigned char *) &insn, 4);
+          *to += 4;
 
-	  return;
-	}
+          return;
+        }
     }
 
   target_write_memory (*to, (unsigned char *) &insn, 4);
@@ -1588,19 +1549,12 @@ ppc_target::supports_fast_tracepoints ()
    See target.h for details.  */
 
 int
-ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
-					      CORE_ADDR tpaddr,
-					      CORE_ADDR collector,
-					      CORE_ADDR lockaddr,
-					      ULONGEST orig_size,
-					      CORE_ADDR *jump_entry,
-					      CORE_ADDR *trampoline,
-					      ULONGEST *trampoline_size,
-					      unsigned char *jjump_pad_insn,
-					      ULONGEST *jjump_pad_insn_size,
-					      CORE_ADDR *adjusted_insn_addr,
-					      CORE_ADDR *adjusted_insn_addr_end,
-					      char *err)
+ppc_target::install_fast_tracepoint_jump_pad (
+  CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector, CORE_ADDR lockaddr,
+  ULONGEST orig_size, CORE_ADDR *jump_entry, CORE_ADDR *trampoline,
+  ULONGEST *trampoline_size, unsigned char *jjump_pad_insn,
+  ULONGEST *jjump_pad_insn_size, CORE_ADDR *adjusted_insn_addr,
+  CORE_ADDR *adjusted_insn_addr_end, char *err)
 {
   uint32_t buf[256];
   uint32_t *p = buf;
@@ -1669,9 +1623,9 @@ ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
 
   /* Adjust stack pointer.  */
   if (is_64)
-    p += GEN_STDU (p, 1, 1, -frame_size);		/* stdu   r1,-frame_size(r1) */
+    p += GEN_STDU (p, 1, 1, -frame_size); /* stdu   r1,-frame_size(r1) */
   else
-    p += GEN_STWU (p, 1, 1, -frame_size);		/* stwu   r1,-frame_size(r1) */
+    p += GEN_STWU (p, 1, 1, -frame_size); /* stwu   r1,-frame_size(r1) */
 
   /* Store GPRs.  Save R1 later, because it had just been modified, but
      we want the original value.  */
@@ -1684,19 +1638,22 @@ ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   p += GEN_STORE (p, 0, 1, min_frame + 1 * rsz, is_64);
 
   /* Save CR, XER, LR, and CTR.  */
-  p += GEN_MFCR (p, 3);					/* mfcr   r3 */
-  p += GEN_MFSPR (p, 4, 1);				/* mfxer  r4 */
-  p += GEN_MFSPR (p, 5, 8);				/* mflr   r5 */
-  p += GEN_MFSPR (p, 6, 9);				/* mfctr  r6 */
-  p += GEN_STORE (p, 3, 1, min_frame + 32 * rsz, is_64);/* std    r3, 32(r1) */
-  p += GEN_STORE (p, 4, 1, min_frame + 33 * rsz, is_64);/* std    r4, 33(r1) */
-  p += GEN_STORE (p, 5, 1, min_frame + 34 * rsz, is_64);/* std    r5, 34(r1) */
-  p += GEN_STORE (p, 6, 1, min_frame + 35 * rsz, is_64);/* std    r6, 35(r1) */
+  p += GEN_MFCR (p, 3);     /* mfcr   r3 */
+  p += GEN_MFSPR (p, 4, 1); /* mfxer  r4 */
+  p += GEN_MFSPR (p, 5, 8); /* mflr   r5 */
+  p += GEN_MFSPR (p, 6, 9); /* mfctr  r6 */
+  p += GEN_STORE (p, 3, 1, min_frame + 32 * rsz,
+                  is_64); /* std    r3, 32(r1) */
+  p += GEN_STORE (p, 4, 1, min_frame + 33 * rsz,
+                  is_64); /* std    r4, 33(r1) */
+  p += GEN_STORE (p, 5, 1, min_frame + 34 * rsz,
+                  is_64); /* std    r5, 34(r1) */
+  p += GEN_STORE (p, 6, 1, min_frame + 35 * rsz,
+                  is_64); /* std    r6, 35(r1) */
 
   /* Save PC<tpaddr>  */
   p += gen_limm (p, 3, tpaddr, is_64);
   p += GEN_STORE (p, 3, 1, min_frame + 36 * rsz, is_64);
-
 
   /* Setup arguments to collector.  */
   /* Set r4 to collected registers.  */
@@ -1724,14 +1681,14 @@ ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   p += GEN_STORE (p, 4, 3, 0, is_64);
 
   /* Restore stack and registers.  */
-  p += GEN_LOAD (p, 3, 1, min_frame + 32 * rsz, is_64);	/* ld	r3, 32(r1) */
-  p += GEN_LOAD (p, 4, 1, min_frame + 33 * rsz, is_64);	/* ld	r4, 33(r1) */
-  p += GEN_LOAD (p, 5, 1, min_frame + 34 * rsz, is_64);	/* ld	r5, 34(r1) */
-  p += GEN_LOAD (p, 6, 1, min_frame + 35 * rsz, is_64);	/* ld	r6, 35(r1) */
-  p += GEN_MTCR (p, 3);					/* mtcr	  r3 */
-  p += GEN_MTSPR (p, 4, 1);				/* mtxer  r4 */
-  p += GEN_MTSPR (p, 5, 8);				/* mtlr   r5 */
-  p += GEN_MTSPR (p, 6, 9);				/* mtctr  r6 */
+  p += GEN_LOAD (p, 3, 1, min_frame + 32 * rsz, is_64); /* ld	r3, 32(r1) */
+  p += GEN_LOAD (p, 4, 1, min_frame + 33 * rsz, is_64); /* ld	r4, 33(r1) */
+  p += GEN_LOAD (p, 5, 1, min_frame + 34 * rsz, is_64); /* ld	r5, 34(r1) */
+  p += GEN_LOAD (p, 6, 1, min_frame + 35 * rsz, is_64); /* ld	r6, 35(r1) */
+  p += GEN_MTCR (p, 3);                                 /* mtcr	  r3 */
+  p += GEN_MTSPR (p, 4, 1);                             /* mtxer  r4 */
+  p += GEN_MTSPR (p, 5, 8);                             /* mtlr   r5 */
+  p += GEN_MTSPR (p, 6, 9);                             /* mtctr  r6 */
 
   /* Restore GPRs.  */
   for (j = 2; j < 32; j++)
@@ -1753,9 +1710,10 @@ ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   if ((*adjusted_insn_addr_end - *adjusted_insn_addr == 0)
       || (*adjusted_insn_addr_end - *adjusted_insn_addr > 12))
     {
-      sprintf (err, "E.Unexpected instruction length = %d"
-		    "when relocate instruction.",
-		    (int) (*adjusted_insn_addr_end - *adjusted_insn_addr));
+      sprintf (err,
+               "E.Unexpected instruction length = %d"
+               "when relocate instruction.",
+               (int) (*adjusted_insn_addr_end - *adjusted_insn_addr));
       return 1;
     }
 
@@ -1765,8 +1723,10 @@ ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   offset = (tpaddr + 4) - buildaddr;
   if (offset >= (1 << 25) || offset < -(1 << 25))
     {
-      sprintf (err, "E.Jump back from jump pad too far from tracepoint "
-		    "(offset 0x%x > 26-bit).", offset);
+      sprintf (err,
+               "E.Jump back from jump pad too far from tracepoint "
+               "(offset 0x%x > 26-bit).",
+               offset);
       return 1;
     }
   /* b <tpaddr+4> */
@@ -1781,8 +1741,10 @@ ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   offset = entryaddr - tpaddr;
   if (offset >= (1 << 25) || offset < -(1 << 25))
     {
-      sprintf (err, "E.Jump back from jump pad too far from tracepoint "
-		    "(offset 0x%x > 26-bit).", offset);
+      sprintf (err,
+               "E.Jump back from jump pad too far from tracepoint "
+               "(offset 0x%x > 26-bit).",
+               offset);
       return 1;
     }
   /* b <jentry> */
@@ -1811,22 +1773,21 @@ emit_insns (uint32_t *buf, int n)
   current_insn_ptr += n;
 }
 
-#define __EMIT_ASM(NAME, INSNS)					\
-  do								\
-    {								\
-      extern uint32_t start_bcax_ ## NAME [];			\
-      extern uint32_t end_bcax_ ## NAME [];			\
-      emit_insns (start_bcax_ ## NAME,				\
-		  end_bcax_ ## NAME - start_bcax_ ## NAME);	\
-      __asm__ (".section .text.__ppcbcax\n\t"			\
-	       "start_bcax_" #NAME ":\n\t"			\
-	       INSNS "\n\t"					\
-	       "end_bcax_" #NAME ":\n\t"			\
-	       ".previous\n\t");				\
-    } while (0)
+#define __EMIT_ASM(NAME, INSNS)                                            \
+  do                                                                       \
+    {                                                                      \
+      extern uint32_t start_bcax_##NAME[];                                 \
+      extern uint32_t end_bcax_##NAME[];                                   \
+      emit_insns (start_bcax_##NAME, end_bcax_##NAME - start_bcax_##NAME); \
+      __asm__ (".section .text.__ppcbcax\n\t"                              \
+               "start_bcax_" #NAME ":\n\t" INSNS "\n\t"                    \
+               "end_bcax_" #NAME ":\n\t"                                   \
+               ".previous\n\t");                                           \
+    }                                                                      \
+  while (0)
 
-#define _EMIT_ASM(NAME, INSNS)		__EMIT_ASM (NAME, INSNS)
-#define EMIT_ASM(INSNS)			_EMIT_ASM (__LINE__, INSNS)
+#define _EMIT_ASM(NAME, INSNS) __EMIT_ASM (NAME, INSNS)
+#define EMIT_ASM(INSNS) _EMIT_ASM (__LINE__, INSNS)
 
 /*
 
@@ -1875,15 +1836,15 @@ emit_insns (uint32_t *buf, int n)
    Likewise, to simplify code, have a similiar define for 5:6. */
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-#define TOP_FIRST	"4"
-#define TOP_SECOND	"3"
-#define TMP_FIRST	"6"
-#define TMP_SECOND	"5"
+#define TOP_FIRST "4"
+#define TOP_SECOND "3"
+#define TMP_FIRST "6"
+#define TMP_SECOND "5"
 #else
-#define TOP_FIRST	"3"
-#define TOP_SECOND	"4"
-#define TMP_FIRST	"5"
-#define TMP_SECOND	"6"
+#define TOP_FIRST "3"
+#define TOP_SECOND "4"
+#define TMP_FIRST "5"
+#define TMP_SECOND "6"
 #endif
 
 /* Emit prologue in inferior memory.  See above comments.  */
@@ -1892,22 +1853,22 @@ static void
 ppc_emit_prologue (void)
 {
   EMIT_ASM (/* Save return address.  */
-	    "mflr  0		\n"
-	    "stw   0, 4(1)	\n"
-	    /* Adjust SP.  96 is the initial frame size.  */
-	    "stwu  1, -96(1)	\n"
-	    /* Save r30 and incoming arguments.  */
-	    "stw   31, 96-4(1)	\n"
-	    "stw   30, 96-8(1)	\n"
-	    "stw   4, 96-12(1)	\n"
-	    "stw   3, 96-16(1)	\n"
-	    /* Point r31 to original r1 for access arguments.  */
-	    "addi  31, 1, 96	\n"
-	    /* Set r30 to pointing stack-top.  */
-	    "addi  30, 1, 64	\n"
-	    /* Initial r3/TOP to 0.  */
-	    "li    3, 0		\n"
-	    "li    4, 0		\n");
+            "mflr  0		\n"
+            "stw   0, 4(1)	\n"
+            /* Adjust SP.  96 is the initial frame size.  */
+            "stwu  1, -96(1)	\n"
+            /* Save r30 and incoming arguments.  */
+            "stw   31, 96-4(1)	\n"
+            "stw   30, 96-8(1)	\n"
+            "stw   4, 96-12(1)	\n"
+            "stw   3, 96-16(1)	\n"
+            /* Point r31 to original r1 for access arguments.  */
+            "addi  31, 1, 96	\n"
+            /* Set r30 to pointing stack-top.  */
+            "addi  30, 1, 64	\n"
+            /* Initial r3/TOP to 0.  */
+            "li    3, 0		\n"
+            "li    4, 0		\n");
 }
 
 /* Emit epilogue in inferior memory.  See above comments.  */
@@ -1916,20 +1877,20 @@ static void
 ppc_emit_epilogue (void)
 {
   EMIT_ASM (/* *result = TOP */
-	    "lwz   5, -12(31)	\n"
-	    "stw   " TOP_FIRST ", 0(5)	\n"
-	    "stw   " TOP_SECOND ", 4(5)	\n"
-	    /* Restore registers.  */
-	    "lwz   31, -4(31)	\n"
-	    "lwz   30, -8(31)	\n"
-	    /* Restore SP.  */
-	    "lwz   1, 0(1)      \n"
-	    /* Restore LR.  */
-	    "lwz   0, 4(1)	\n"
-	    /* Return 0 for no-error.  */
-	    "li    3, 0		\n"
-	    "mtlr  0		\n"
-	    "blr		\n");
+            "lwz   5, -12(31)	\n"
+            "stw   " TOP_FIRST ", 0(5)	\n"
+            "stw   " TOP_SECOND ", 4(5)	\n"
+            /* Restore registers.  */
+            "lwz   31, -4(31)	\n"
+            "lwz   30, -8(31)	\n"
+            /* Restore SP.  */
+            "lwz   1, 0(1)      \n"
+            /* Restore LR.  */
+            "lwz   0, 4(1)	\n"
+            /* Return 0 for no-error.  */
+            "li    3, 0		\n"
+            "mtlr  0		\n"
+            "blr		\n");
 }
 
 /* TOP = stack[--sp] + TOP  */
@@ -1938,9 +1899,9 @@ static void
 ppc_emit_add (void)
 {
   EMIT_ASM ("lwzu  " TMP_FIRST ", 8(30)	\n"
-	    "lwz   " TMP_SECOND ", 4(30)\n"
-	    "addc  4, 6, 4	\n"
-	    "adde  3, 5, 3	\n");
+            "lwz   " TMP_SECOND ", 4(30)\n"
+            "addc  4, 6, 4	\n"
+            "adde  3, 5, 3	\n");
 }
 
 /* TOP = stack[--sp] - TOP  */
@@ -1949,9 +1910,9 @@ static void
 ppc_emit_sub (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "subfc  4, 4, 6	\n"
-	    "subfe  3, 3, 5	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "subfc  4, 4, 6	\n"
+            "subfe  3, 3, 5	\n");
 }
 
 /* TOP = stack[--sp] * TOP  */
@@ -1960,13 +1921,13 @@ static void
 ppc_emit_mul (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "mulhwu 7, 6, 4	\n"
-	    "mullw  3, 6, 3	\n"
-	    "mullw  5, 4, 5	\n"
-	    "mullw  4, 6, 4	\n"
-	    "add    3, 5, 3	\n"
-	    "add    3, 7, 3	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "mulhwu 7, 6, 4	\n"
+            "mullw  3, 6, 3	\n"
+            "mullw  5, 4, 5	\n"
+            "mullw  4, 6, 4	\n"
+            "add    3, 5, 3	\n"
+            "add    3, 7, 3	\n");
 }
 
 /* TOP = stack[--sp] << TOP  */
@@ -1975,15 +1936,15 @@ static void
 ppc_emit_lsh (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "subfic 3, 4, 32\n"		/* r3 = 32 - TOP */
-	    "addi   7, 4, -32\n"	/* r7 = TOP - 32 */
-	    "slw    5, 5, 4\n"		/* Shift high part left */
-	    "slw    4, 6, 4\n"		/* Shift low part left */
-	    "srw    3, 6, 3\n"		/* Shift low to high if shift < 32 */
-	    "slw    7, 6, 7\n"		/* Shift low to high if shift >= 32 */
-	    "or     3, 5, 3\n"
-	    "or     3, 7, 3\n");	/* Assemble high part */
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "subfic 3, 4, 32\n"  /* r3 = 32 - TOP */
+            "addi   7, 4, -32\n" /* r7 = TOP - 32 */
+            "slw    5, 5, 4\n"   /* Shift high part left */
+            "slw    4, 6, 4\n"   /* Shift low part left */
+            "srw    3, 6, 3\n"   /* Shift low to high if shift < 32 */
+            "slw    7, 6, 7\n"   /* Shift low to high if shift >= 32 */
+            "or     3, 5, 3\n"
+            "or     3, 7, 3\n"); /* Assemble high part */
 }
 
 /* Top = stack[--sp] >> TOP
@@ -1993,19 +1954,19 @@ static void
 ppc_emit_rsh_signed (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "addi   7, 4, -32\n"	/* r7 = TOP - 32 */
-	    "sraw   3, 5, 4\n"		/* Shift high part right */
-	    "cmpwi  7, 1\n"
-	    "blt    0, 1f\n"		/* If shift <= 32, goto 1: */
-	    "sraw   4, 5, 7\n"		/* Shift high to low */
-	    "b      2f\n"
-	    "1:\n"
-	    "subfic 7, 4, 32\n"		/* r7 = 32 - TOP */
-	    "srw    4, 6, 4\n"		/* Shift low part right */
-	    "slw    5, 5, 7\n"		/* Shift high to low */
-	    "or     4, 4, 5\n"		/* Assemble low part */
-	    "2:\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "addi   7, 4, -32\n" /* r7 = TOP - 32 */
+            "sraw   3, 5, 4\n"   /* Shift high part right */
+            "cmpwi  7, 1\n"
+            "blt    0, 1f\n"   /* If shift <= 32, goto 1: */
+            "sraw   4, 5, 7\n" /* Shift high to low */
+            "b      2f\n"
+            "1:\n"
+            "subfic 7, 4, 32\n" /* r7 = 32 - TOP */
+            "srw    4, 6, 4\n"  /* Shift low part right */
+            "slw    5, 5, 7\n"  /* Shift high to low */
+            "or     4, 4, 5\n"  /* Assemble low part */
+            "2:\n");
 }
 
 /* Top = stack[--sp] >> TOP
@@ -2015,15 +1976,15 @@ static void
 ppc_emit_rsh_unsigned (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "subfic 3, 4, 32\n"		/* r3 = 32 - TOP */
-	    "addi   7, 4, -32\n"	/* r7 = TOP - 32 */
-	    "srw    6, 6, 4\n"		/* Shift low part right */
-	    "slw    3, 5, 3\n"		/* Shift high to low if shift < 32 */
-	    "srw    7, 5, 7\n"		/* Shift high to low if shift >= 32 */
-	    "or     6, 6, 3\n"
-	    "srw    3, 5, 4\n"		/* Shift high part right */
-	    "or     4, 6, 7\n");	/* Assemble low part */
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "subfic 3, 4, 32\n"  /* r3 = 32 - TOP */
+            "addi   7, 4, -32\n" /* r7 = TOP - 32 */
+            "srw    6, 6, 4\n"   /* Shift low part right */
+            "slw    3, 5, 3\n"   /* Shift high to low if shift < 32 */
+            "srw    7, 5, 7\n"   /* Shift high to low if shift >= 32 */
+            "or     6, 6, 3\n"
+            "srw    3, 5, 4\n"   /* Shift high part right */
+            "or     4, 6, 7\n"); /* Assemble low part */
 }
 
 /* Emit code for signed-extension specified by ARG.  */
@@ -2035,11 +1996,11 @@ ppc_emit_ext (int arg)
     {
     case 8:
       EMIT_ASM ("extsb  4, 4\n"
-		"srawi 3, 4, 31");
+                "srawi 3, 4, 31");
       break;
     case 16:
       EMIT_ASM ("extsh  4, 4\n"
-		"srawi 3, 4, 31");
+                "srawi 3, 4, 31");
       break;
     case 32:
       EMIT_ASM ("srawi 3, 4, 31");
@@ -2058,11 +2019,11 @@ ppc_emit_zero_ext (int arg)
     {
     case 8:
       EMIT_ASM ("clrlwi 4,4,24\n"
-		"li 3, 0\n");
+                "li 3, 0\n");
       break;
     case 16:
       EMIT_ASM ("clrlwi 4,4,16\n"
-		"li 3, 0\n");
+                "li 3, 0\n");
       break;
     case 32:
       EMIT_ASM ("li 3, 0");
@@ -2079,9 +2040,9 @@ static void
 ppc_emit_log_not (void)
 {
   EMIT_ASM ("or      4, 3, 4	\n"
-	    "cntlzw  4, 4	\n"
-	    "srwi    4, 4, 5	\n"
-	    "li      3, 0	\n");
+            "cntlzw  4, 4	\n"
+            "srwi    4, 4, 5	\n"
+            "li      3, 0	\n");
 }
 
 /* TOP = stack[--sp] & TOP  */
@@ -2090,9 +2051,9 @@ static void
 ppc_emit_bit_and (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "and  4, 6, 4	\n"
-	    "and  3, 5, 3	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "and  4, 6, 4	\n"
+            "and  3, 5, 3	\n");
 }
 
 /* TOP = stack[--sp] | TOP  */
@@ -2101,9 +2062,9 @@ static void
 ppc_emit_bit_or (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "or  4, 6, 4	\n"
-	    "or  3, 5, 3	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "or  4, 6, 4	\n"
+            "or  3, 5, 3	\n");
 }
 
 /* TOP = stack[--sp] ^ TOP  */
@@ -2112,9 +2073,9 @@ static void
 ppc_emit_bit_xor (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "xor  4, 6, 4	\n"
-	    "xor  3, 5, 3	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "xor  4, 6, 4	\n"
+            "xor  3, 5, 3	\n");
 }
 
 /* TOP = ~TOP
@@ -2124,7 +2085,7 @@ static void
 ppc_emit_bit_not (void)
 {
   EMIT_ASM ("nor  3, 3, 3	\n"
-	    "nor  4, 4, 4	\n");
+            "nor  4, 4, 4	\n");
 }
 
 /* TOP = stack[--sp] == TOP  */
@@ -2133,13 +2094,13 @@ static void
 ppc_emit_equal (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "xor     4, 6, 4	\n"
-	    "xor     3, 5, 3	\n"
-	    "or      4, 3, 4	\n"
-	    "cntlzw  4, 4	\n"
-	    "srwi    4, 4, 5	\n"
-	    "li      3, 0	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "xor     4, 6, 4	\n"
+            "xor     3, 5, 3	\n"
+            "or      4, 3, 4	\n"
+            "cntlzw  4, 4	\n"
+            "srwi    4, 4, 5	\n"
+            "li      3, 0	\n");
 }
 
 /* TOP = stack[--sp] < TOP
@@ -2149,16 +2110,16 @@ static void
 ppc_emit_less_signed (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "cmplw   6, 6, 4		\n"
-	    "cmpw    7, 5, 3		\n"
-	    /* CR6 bit 0 = low less and high equal */
-	    "crand   6*4+0, 6*4+0, 7*4+2\n"
-	    /* CR7 bit 0 = (low less and high equal) or high less */
-	    "cror    7*4+0, 7*4+0, 6*4+0\n"
-	    "mfcr    4			\n"
-	    "rlwinm  4, 4, 29, 31, 31	\n"
-	    "li      3, 0		\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "cmplw   6, 6, 4		\n"
+            "cmpw    7, 5, 3		\n"
+            /* CR6 bit 0 = low less and high equal */
+            "crand   6*4+0, 6*4+0, 7*4+2\n"
+            /* CR7 bit 0 = (low less and high equal) or high less */
+            "cror    7*4+0, 7*4+0, 6*4+0\n"
+            "mfcr    4			\n"
+            "rlwinm  4, 4, 29, 31, 31	\n"
+            "li      3, 0		\n");
 }
 
 /* TOP = stack[--sp] < TOP
@@ -2168,16 +2129,16 @@ static void
 ppc_emit_less_unsigned (void)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "cmplw   6, 6, 4		\n"
-	    "cmplw   7, 5, 3		\n"
-	    /* CR6 bit 0 = low less and high equal */
-	    "crand   6*4+0, 6*4+0, 7*4+2\n"
-	    /* CR7 bit 0 = (low less and high equal) or high less */
-	    "cror    7*4+0, 7*4+0, 6*4+0\n"
-	    "mfcr    4			\n"
-	    "rlwinm  4, 4, 29, 31, 31	\n"
-	    "li      3, 0		\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "cmplw   6, 6, 4		\n"
+            "cmplw   7, 5, 3		\n"
+            /* CR6 bit 0 = low less and high equal */
+            "crand   6*4+0, 6*4+0, 7*4+2\n"
+            /* CR7 bit 0 = (low less and high equal) or high less */
+            "cror    7*4+0, 7*4+0, 6*4+0\n"
+            "mfcr    4			\n"
+            "rlwinm  4, 4, 29, 31, 31	\n"
+            "li      3, 0		\n");
 }
 
 /* Access the memory address in TOP in size of SIZE.
@@ -2190,23 +2151,23 @@ ppc_emit_ref (int size)
     {
     case 1:
       EMIT_ASM ("lbz   4, 0(4)\n"
-		"li    3, 0");
+                "li    3, 0");
       break;
     case 2:
       EMIT_ASM ("lhz   4, 0(4)\n"
-		"li    3, 0");
+                "li    3, 0");
       break;
     case 4:
       EMIT_ASM ("lwz   4, 0(4)\n"
-		"li    3, 0");
+                "li    3, 0");
       break;
     case 8:
       if (__BYTE_ORDER == __LITTLE_ENDIAN)
-	EMIT_ASM ("lwz   3, 4(4)\n"
-		  "lwz   4, 0(4)");
+        EMIT_ASM ("lwz   3, 4(4)\n"
+                  "lwz   4, 0(4)");
       else
-	EMIT_ASM ("lwz   3, 0(4)\n"
-		  "lwz   4, 4(4)");
+        EMIT_ASM ("lwz   3, 0(4)\n"
+                  "lwz   4, 4(4)");
       break;
     }
 }
@@ -2237,7 +2198,7 @@ ppc_emit_reg (int reg)
 
   /* fctx->regs is passed in r3 and then saved in -16(31).  */
   p += GEN_LWZ (p, 3, 31, -16);
-  p += GEN_LI (p, 4, reg);	/* li	r4, reg */
+  p += GEN_LI (p, 4, reg); /* li	r4, reg */
   p += gen_call (p, get_raw_reg_func_addr (), 0, 0);
 
   emit_insns (buf, p - buf);
@@ -2246,8 +2207,8 @@ ppc_emit_reg (int reg)
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
     {
       EMIT_ASM ("mr 5, 4\n"
-		"mr 4, 3\n"
-		"mr 3, 5\n");
+                "mr 4, 3\n"
+                "mr 3, 5\n");
     }
 }
 
@@ -2257,7 +2218,7 @@ static void
 ppc_emit_pop (void)
 {
   EMIT_ASM ("lwzu " TOP_FIRST ", 8(30)	\n"
-	    "lwz " TOP_SECOND ", 4(30)	\n");
+            "lwz " TOP_SECOND ", 4(30)	\n");
 }
 
 /* stack[sp++] = TOP
@@ -2272,12 +2233,12 @@ ppc_emit_stack_flush (void)
      Otherwise, expand 64-byte more.  */
 
   EMIT_ASM ("  stw   " TOP_FIRST ", 0(30)	\n"
-	    "  stw   " TOP_SECOND ", 4(30)\n"
-	    "  addi  5, 30, -(8 + 8)	\n"
-	    "  cmpw  7, 5, 1		\n"
-	    "  bgt   7, 1f		\n"
-	    "  stwu  31, -64(1)		\n"
-	    "1:addi  30, 30, -8		\n");
+            "  stw   " TOP_SECOND ", 4(30)\n"
+            "  addi  5, 30, -(8 + 8)	\n"
+            "  cmpw  7, 5, 1		\n"
+            "  bgt   7, 1f		\n"
+            "  stwu  31, -64(1)		\n"
+            "1:addi  30, 30, -8		\n");
 }
 
 /* Swap TOP and stack[sp-1]  */
@@ -2286,11 +2247,11 @@ static void
 ppc_emit_swap (void)
 {
   EMIT_ASM ("lwz  " TMP_FIRST ", 8(30)	\n"
-	    "lwz  " TMP_SECOND ", 12(30)	\n"
-	    "stw  " TOP_FIRST ", 8(30)	\n"
-	    "stw  " TOP_SECOND ", 12(30)	\n"
-	    "mr   3, 5		\n"
-	    "mr   4, 6		\n");
+            "lwz  " TMP_SECOND ", 12(30)	\n"
+            "stw  " TOP_FIRST ", 8(30)	\n"
+            "stw  " TOP_SECOND ", 12(30)	\n"
+            "mr   3, 5		\n"
+            "mr   4, 6		\n");
 }
 
 /* Discard N elements in the stack.  Also used for ppc64.  */
@@ -2348,8 +2309,8 @@ ppc_emit_int_call_1 (CORE_ADDR fn, int arg1)
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
     {
       EMIT_ASM ("mr 5, 4\n"
-		"mr 4, 3\n"
-		"mr 3, 5\n");
+                "mr 4, 3\n"
+                "mr 3, 5\n");
     }
 }
 
@@ -2371,13 +2332,13 @@ ppc_emit_void_call_2 (CORE_ADDR fn, int arg1)
   /* Setup argument.  arg1 is a 16-bit value.  */
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
     {
-       p += GEN_MR (p, 5, 4);
-       p += GEN_MR (p, 6, 3);
+      p += GEN_MR (p, 5, 4);
+      p += GEN_MR (p, 6, 3);
     }
   else
     {
-       p += GEN_MR (p, 5, 3);
-       p += GEN_MR (p, 6, 4);
+      p += GEN_MR (p, 5, 3);
+      p += GEN_MR (p, 6, 4);
     }
   p += gen_limm (p, 3, (uint32_t) arg1, 0);
   p += gen_call (p, fn, 0, 0);
@@ -2405,9 +2366,9 @@ static void
 ppc_emit_if_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("or.    3, 3, 4	\n"
-	    "lwzu " TOP_FIRST ", 8(30)	\n"
-	    "lwz " TOP_SECOND ", 4(30)	\n"
-	    "1:bne  0, 1b	\n");
+            "lwzu " TOP_FIRST ", 8(30)	\n"
+            "lwz " TOP_SECOND ", 4(30)	\n"
+            "1:bne  0, 1b	\n");
 
   if (offset_p)
     *offset_p = 12;
@@ -2434,13 +2395,13 @@ static void
 ppc_emit_eq_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("lwzu  " TMP_FIRST ", 8(30)	\n"
-	    "lwz   " TMP_SECOND ", 4(30)	\n"
-	    "xor   4, 6, 4	\n"
-	    "xor   3, 5, 3	\n"
-	    "or.   3, 3, 4	\n"
-	    "lwzu  " TOP_FIRST ", 8(30)	\n"
-	    "lwz   " TOP_SECOND ", 4(30)	\n"
-	    "1:beq 0, 1b	\n");
+            "lwz   " TMP_SECOND ", 4(30)	\n"
+            "xor   4, 6, 4	\n"
+            "xor   3, 5, 3	\n"
+            "or.   3, 3, 4	\n"
+            "lwzu  " TOP_FIRST ", 8(30)	\n"
+            "lwz   " TOP_SECOND ", 4(30)	\n"
+            "1:beq 0, 1b	\n");
 
   if (offset_p)
     *offset_p = 28;
@@ -2454,13 +2415,13 @@ static void
 ppc_emit_ne_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("lwzu  " TMP_FIRST ", 8(30)	\n"
-	    "lwz   " TMP_SECOND ", 4(30)	\n"
-	    "xor   4, 6, 4	\n"
-	    "xor   3, 5, 3	\n"
-	    "or.   3, 3, 4	\n"
-	    "lwzu  " TOP_FIRST ", 8(30)	\n"
-	    "lwz   " TOP_SECOND ", 4(30)	\n"
-	    "1:bne 0, 1b	\n");
+            "lwz   " TMP_SECOND ", 4(30)	\n"
+            "xor   4, 6, 4	\n"
+            "xor   3, 5, 3	\n"
+            "or.   3, 3, 4	\n"
+            "lwzu  " TOP_FIRST ", 8(30)	\n"
+            "lwz   " TOP_SECOND ", 4(30)	\n"
+            "1:bne 0, 1b	\n");
 
   if (offset_p)
     *offset_p = 28;
@@ -2474,16 +2435,16 @@ static void
 ppc_emit_lt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "cmplw   6, 6, 4		\n"
-	    "cmpw    7, 5, 3		\n"
-	    /* CR6 bit 0 = low less and high equal */
-	    "crand   6*4+0, 6*4+0, 7*4+2\n"
-	    /* CR7 bit 0 = (low less and high equal) or high less */
-	    "cror    7*4+0, 7*4+0, 6*4+0\n"
-	    "lwzu    " TOP_FIRST ", 8(30)	\n"
-	    "lwz     " TOP_SECOND ", 4(30)\n"
-	    "1:blt   7, 1b	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "cmplw   6, 6, 4		\n"
+            "cmpw    7, 5, 3		\n"
+            /* CR6 bit 0 = low less and high equal */
+            "crand   6*4+0, 6*4+0, 7*4+2\n"
+            /* CR7 bit 0 = (low less and high equal) or high less */
+            "cror    7*4+0, 7*4+0, 6*4+0\n"
+            "lwzu    " TOP_FIRST ", 8(30)	\n"
+            "lwz     " TOP_SECOND ", 4(30)\n"
+            "1:blt   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 32;
@@ -2497,16 +2458,16 @@ static void
 ppc_emit_le_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "cmplw   6, 6, 4		\n"
-	    "cmpw    7, 5, 3		\n"
-	    /* CR6 bit 0 = low less/equal and high equal */
-	    "crandc   6*4+0, 7*4+2, 6*4+1\n"
-	    /* CR7 bit 0 = (low less/eq and high equal) or high less */
-	    "cror    7*4+0, 7*4+0, 6*4+0\n"
-	    "lwzu    " TOP_FIRST ", 8(30)	\n"
-	    "lwz     " TOP_SECOND ", 4(30)\n"
-	    "1:blt   7, 1b	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "cmplw   6, 6, 4		\n"
+            "cmpw    7, 5, 3		\n"
+            /* CR6 bit 0 = low less/equal and high equal */
+            "crandc   6*4+0, 7*4+2, 6*4+1\n"
+            /* CR7 bit 0 = (low less/eq and high equal) or high less */
+            "cror    7*4+0, 7*4+0, 6*4+0\n"
+            "lwzu    " TOP_FIRST ", 8(30)	\n"
+            "lwz     " TOP_SECOND ", 4(30)\n"
+            "1:blt   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 32;
@@ -2520,16 +2481,16 @@ static void
 ppc_emit_gt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "cmplw   6, 6, 4		\n"
-	    "cmpw    7, 5, 3		\n"
-	    /* CR6 bit 0 = low greater and high equal */
-	    "crand   6*4+0, 6*4+1, 7*4+2\n"
-	    /* CR7 bit 0 = (low greater and high equal) or high greater */
-	    "cror    7*4+0, 7*4+1, 6*4+0\n"
-	    "lwzu    " TOP_FIRST ", 8(30)	\n"
-	    "lwz     " TOP_SECOND ", 4(30)\n"
-	    "1:blt   7, 1b	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "cmplw   6, 6, 4		\n"
+            "cmpw    7, 5, 3		\n"
+            /* CR6 bit 0 = low greater and high equal */
+            "crand   6*4+0, 6*4+1, 7*4+2\n"
+            /* CR7 bit 0 = (low greater and high equal) or high greater */
+            "cror    7*4+0, 7*4+1, 6*4+0\n"
+            "lwzu    " TOP_FIRST ", 8(30)	\n"
+            "lwz     " TOP_SECOND ", 4(30)\n"
+            "1:blt   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 32;
@@ -2543,16 +2504,16 @@ static void
 ppc_emit_ge_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("lwzu " TMP_FIRST ", 8(30)	\n"
-	    "lwz " TMP_SECOND ", 4(30)	\n"
-	    "cmplw   6, 6, 4		\n"
-	    "cmpw    7, 5, 3		\n"
-	    /* CR6 bit 0 = low ge and high equal */
-	    "crandc  6*4+0, 7*4+2, 6*4+0\n"
-	    /* CR7 bit 0 = (low ge and high equal) or high greater */
-	    "cror    7*4+0, 7*4+1, 6*4+0\n"
-	    "lwzu    " TOP_FIRST ", 8(30)\n"
-	    "lwz     " TOP_SECOND ", 4(30)\n"
-	    "1:blt   7, 1b	\n");
+            "lwz " TMP_SECOND ", 4(30)	\n"
+            "cmplw   6, 6, 4		\n"
+            "cmpw    7, 5, 3		\n"
+            /* CR6 bit 0 = low ge and high equal */
+            "crandc  6*4+0, 7*4+2, 6*4+0\n"
+            /* CR7 bit 0 = (low ge and high equal) or high greater */
+            "cror    7*4+0, 7*4+1, 6*4+0\n"
+            "lwzu    " TOP_FIRST ", 8(30)\n"
+            "lwz     " TOP_SECOND ", 4(30)\n"
+            "1:blt   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 32;
@@ -2579,15 +2540,13 @@ ppc_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
   switch (size)
     {
     case 14:
-      if (opcd != 16
-	  || (rel >= (1 << 15) || rel < -(1 << 15)))
-	emit_error = 1;
+      if (opcd != 16 || (rel >= (1 << 15) || rel < -(1 << 15)))
+        emit_error = 1;
       insn = (insn & ~0xfffc) | (rel & 0xfffc);
       break;
     case 24:
-      if (opcd != 18
-	  || (rel >= (1 << 25) || rel < -(1 << 25)))
-	emit_error = 1;
+      if (opcd != 18 || (rel >= (1 << 25) || rel < -(1 << 25)))
+        emit_error = 1;
       insn = (insn & ~0x3fffffc) | (rel & 0x3fffffc);
       break;
     default:
@@ -2600,46 +2559,20 @@ ppc_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
 
 /* Table of emit ops for 32-bit.  */
 
-static struct emit_ops ppc_emit_ops_impl =
-{
-  ppc_emit_prologue,
-  ppc_emit_epilogue,
-  ppc_emit_add,
-  ppc_emit_sub,
-  ppc_emit_mul,
-  ppc_emit_lsh,
-  ppc_emit_rsh_signed,
-  ppc_emit_rsh_unsigned,
-  ppc_emit_ext,
-  ppc_emit_log_not,
-  ppc_emit_bit_and,
-  ppc_emit_bit_or,
-  ppc_emit_bit_xor,
-  ppc_emit_bit_not,
-  ppc_emit_equal,
-  ppc_emit_less_signed,
-  ppc_emit_less_unsigned,
-  ppc_emit_ref,
-  ppc_emit_if_goto,
-  ppc_emit_goto,
-  ppc_write_goto_address,
-  ppc_emit_const,
-  ppc_emit_call,
-  ppc_emit_reg,
-  ppc_emit_pop,
-  ppc_emit_stack_flush,
-  ppc_emit_zero_ext,
-  ppc_emit_swap,
-  ppc_emit_stack_adjust,
-  ppc_emit_int_call_1,
-  ppc_emit_void_call_2,
-  ppc_emit_eq_goto,
-  ppc_emit_ne_goto,
-  ppc_emit_lt_goto,
-  ppc_emit_le_goto,
-  ppc_emit_gt_goto,
-  ppc_emit_ge_goto
-};
+static struct emit_ops ppc_emit_ops_impl
+  = { ppc_emit_prologue,    ppc_emit_epilogue,      ppc_emit_add,
+      ppc_emit_sub,         ppc_emit_mul,           ppc_emit_lsh,
+      ppc_emit_rsh_signed,  ppc_emit_rsh_unsigned,  ppc_emit_ext,
+      ppc_emit_log_not,     ppc_emit_bit_and,       ppc_emit_bit_or,
+      ppc_emit_bit_xor,     ppc_emit_bit_not,       ppc_emit_equal,
+      ppc_emit_less_signed, ppc_emit_less_unsigned, ppc_emit_ref,
+      ppc_emit_if_goto,     ppc_emit_goto,          ppc_write_goto_address,
+      ppc_emit_const,       ppc_emit_call,          ppc_emit_reg,
+      ppc_emit_pop,         ppc_emit_stack_flush,   ppc_emit_zero_ext,
+      ppc_emit_swap,        ppc_emit_stack_adjust,  ppc_emit_int_call_1,
+      ppc_emit_void_call_2, ppc_emit_eq_goto,       ppc_emit_ne_goto,
+      ppc_emit_lt_goto,     ppc_emit_le_goto,       ppc_emit_gt_goto,
+      ppc_emit_ge_goto };
 
 #ifdef __powerpc64__
 
@@ -2698,23 +2631,23 @@ ppc64v1_emit_prologue (void)
 
   /* Mind the strict aliasing rules.  */
   memcpy (buf, &opd, sizeof buf);
-  emit_insns(buf, 2);
+  emit_insns (buf, 2);
   EMIT_ASM (/* Save return address.  */
-	    "mflr  0		\n"
-	    "std   0, 16(1)	\n"
-	    /* Save r30 and incoming arguments.  */
-	    "std   31, -8(1)	\n"
-	    "std   30, -16(1)	\n"
-	    "std   4, -24(1)	\n"
-	    "std   3, -32(1)	\n"
-	    /* Point r31 to current r1 for access arguments.  */
-	    "mr    31, 1	\n"
-	    /* Adjust SP.  208 is the initial frame size.  */
-	    "stdu  1, -208(1)	\n"
-	    /* Set r30 to pointing stack-top.  */
-	    "addi  30, 1, 168	\n"
-	    /* Initial r3/TOP to 0.  */
-	    "li	   3, 0		\n");
+            "mflr  0		\n"
+            "std   0, 16(1)	\n"
+            /* Save r30 and incoming arguments.  */
+            "std   31, -8(1)	\n"
+            "std   30, -16(1)	\n"
+            "std   4, -24(1)	\n"
+            "std   3, -32(1)	\n"
+            /* Point r31 to current r1 for access arguments.  */
+            "mr    31, 1	\n"
+            /* Adjust SP.  208 is the initial frame size.  */
+            "stdu  1, -208(1)	\n"
+            /* Set r30 to pointing stack-top.  */
+            "addi  30, 1, 168	\n"
+            /* Initial r3/TOP to 0.  */
+            "li	   3, 0		\n");
 }
 
 /* Emit prologue in inferior memory.  See above comments.  */
@@ -2723,21 +2656,21 @@ static void
 ppc64v2_emit_prologue (void)
 {
   EMIT_ASM (/* Save return address.  */
-	    "mflr  0		\n"
-	    "std   0, 16(1)	\n"
-	    /* Save r30 and incoming arguments.  */
-	    "std   31, -8(1)	\n"
-	    "std   30, -16(1)	\n"
-	    "std   4, -24(1)	\n"
-	    "std   3, -32(1)	\n"
-	    /* Point r31 to current r1 for access arguments.  */
-	    "mr    31, 1	\n"
-	    /* Adjust SP.  208 is the initial frame size.  */
-	    "stdu  1, -208(1)	\n"
-	    /* Set r30 to pointing stack-top.  */
-	    "addi  30, 1, 168	\n"
-	    /* Initial r3/TOP to 0.  */
-	    "li	   3, 0		\n");
+            "mflr  0		\n"
+            "std   0, 16(1)	\n"
+            /* Save r30 and incoming arguments.  */
+            "std   31, -8(1)	\n"
+            "std   30, -16(1)	\n"
+            "std   4, -24(1)	\n"
+            "std   3, -32(1)	\n"
+            /* Point r31 to current r1 for access arguments.  */
+            "mr    31, 1	\n"
+            /* Adjust SP.  208 is the initial frame size.  */
+            "stdu  1, -208(1)	\n"
+            /* Set r30 to pointing stack-top.  */
+            "addi  30, 1, 168	\n"
+            /* Initial r3/TOP to 0.  */
+            "li	   3, 0		\n");
 }
 
 /* Emit epilogue in inferior memory.  See above comments.  */
@@ -2746,19 +2679,19 @@ static void
 ppc64_emit_epilogue (void)
 {
   EMIT_ASM (/* Restore SP.  */
-	    "ld    1, 0(1)      \n"
-	    /* *result = TOP */
-	    "ld    4, -24(1)	\n"
-	    "std   3, 0(4)	\n"
-	    /* Restore registers.  */
-	    "ld    31, -8(1)	\n"
-	    "ld    30, -16(1)	\n"
-	    /* Restore LR.  */
-	    "ld    0, 16(1)	\n"
-	    /* Return 0 for no-error.  */
-	    "li    3, 0		\n"
-	    "mtlr  0		\n"
-	    "blr		\n");
+            "ld    1, 0(1)      \n"
+            /* *result = TOP */
+            "ld    4, -24(1)	\n"
+            "std   3, 0(4)	\n"
+            /* Restore registers.  */
+            "ld    31, -8(1)	\n"
+            "ld    30, -16(1)	\n"
+            /* Restore LR.  */
+            "ld    0, 16(1)	\n"
+            /* Return 0 for no-error.  */
+            "li    3, 0		\n"
+            "mtlr  0		\n"
+            "blr		\n");
 }
 
 /* TOP = stack[--sp] + TOP  */
@@ -2767,7 +2700,7 @@ static void
 ppc64_emit_add (void)
 {
   EMIT_ASM ("ldu  4, 8(30)	\n"
-	    "add  3, 4, 3	\n");
+            "add  3, 4, 3	\n");
 }
 
 /* TOP = stack[--sp] - TOP  */
@@ -2776,7 +2709,7 @@ static void
 ppc64_emit_sub (void)
 {
   EMIT_ASM ("ldu  4, 8(30)	\n"
-	    "sub  3, 4, 3	\n");
+            "sub  3, 4, 3	\n");
 }
 
 /* TOP = stack[--sp] * TOP  */
@@ -2785,7 +2718,7 @@ static void
 ppc64_emit_mul (void)
 {
   EMIT_ASM ("ldu    4, 8(30)	\n"
-	    "mulld  3, 4, 3	\n");
+            "mulld  3, 4, 3	\n");
 }
 
 /* TOP = stack[--sp] << TOP  */
@@ -2794,7 +2727,7 @@ static void
 ppc64_emit_lsh (void)
 {
   EMIT_ASM ("ldu  4, 8(30)	\n"
-	    "sld  3, 4, 3	\n");
+            "sld  3, 4, 3	\n");
 }
 
 /* Top = stack[--sp] >> TOP
@@ -2804,7 +2737,7 @@ static void
 ppc64_emit_rsh_signed (void)
 {
   EMIT_ASM ("ldu   4, 8(30)	\n"
-	    "srad  3, 4, 3	\n");
+            "srad  3, 4, 3	\n");
 }
 
 /* Top = stack[--sp] >> TOP
@@ -2814,7 +2747,7 @@ static void
 ppc64_emit_rsh_unsigned (void)
 {
   EMIT_ASM ("ldu  4, 8(30)	\n"
-	    "srd  3, 4, 3	\n");
+            "srd  3, 4, 3	\n");
 }
 
 /* Emit code for signed-extension specified by ARG.  */
@@ -2866,7 +2799,7 @@ static void
 ppc64_emit_log_not (void)
 {
   EMIT_ASM ("cntlzd  3, 3	\n"
-	    "srdi    3, 3, 6	\n");
+            "srdi    3, 3, 6	\n");
 }
 
 /* TOP = stack[--sp] & TOP  */
@@ -2875,7 +2808,7 @@ static void
 ppc64_emit_bit_and (void)
 {
   EMIT_ASM ("ldu  4, 8(30)	\n"
-	    "and  3, 4, 3	\n");
+            "and  3, 4, 3	\n");
 }
 
 /* TOP = stack[--sp] | TOP  */
@@ -2884,7 +2817,7 @@ static void
 ppc64_emit_bit_or (void)
 {
   EMIT_ASM ("ldu  4, 8(30)	\n"
-	    "or   3, 4, 3	\n");
+            "or   3, 4, 3	\n");
 }
 
 /* TOP = stack[--sp] ^ TOP  */
@@ -2893,7 +2826,7 @@ static void
 ppc64_emit_bit_xor (void)
 {
   EMIT_ASM ("ldu  4, 8(30)	\n"
-	    "xor  3, 4, 3	\n");
+            "xor  3, 4, 3	\n");
 }
 
 /* TOP = ~TOP
@@ -2911,9 +2844,9 @@ static void
 ppc64_emit_equal (void)
 {
   EMIT_ASM ("ldu     4, 8(30)	\n"
-	    "xor     3, 3, 4	\n"
-	    "cntlzd  3, 3	\n"
-	    "srdi    3, 3, 6	\n");
+            "xor     3, 3, 4	\n"
+            "cntlzd  3, 3	\n"
+            "srdi    3, 3, 6	\n");
 }
 
 /* TOP = stack[--sp] < TOP
@@ -2923,9 +2856,9 @@ static void
 ppc64_emit_less_signed (void)
 {
   EMIT_ASM ("ldu     4, 8(30)		\n"
-	    "cmpd    7, 4, 3		\n"
-	    "mfcr    3			\n"
-	    "rlwinm  3, 3, 29, 31, 31	\n");
+            "cmpd    7, 4, 3		\n"
+            "mfcr    3			\n"
+            "rlwinm  3, 3, 29, 31, 31	\n");
 }
 
 /* TOP = stack[--sp] < TOP
@@ -2935,9 +2868,9 @@ static void
 ppc64_emit_less_unsigned (void)
 {
   EMIT_ASM ("ldu     4, 8(30)		\n"
-	    "cmpld   7, 4, 3		\n"
-	    "mfcr    3			\n"
-	    "rlwinm  3, 3, 29, 31, 31	\n");
+            "cmpld   7, 4, 3		\n"
+            "mfcr    3			\n"
+            "rlwinm  3, 3, 29, 31, 31	\n");
 }
 
 /* Access the memory address in TOP in size of SIZE.
@@ -2989,9 +2922,9 @@ ppc64v1_emit_reg (int reg)
   /* fctx->regs is passed in r3 and then saved in 176(1).  */
   p += GEN_LD (p, 3, 31, -32);
   p += GEN_LI (p, 4, reg);
-  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 40); /* Save TOC.  */
   p += gen_call (p, get_raw_reg_func_addr (), 1, 1);
-  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 40); /* Restore TOC.  */
 
   emit_insns (buf, p - buf);
   gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
@@ -3008,9 +2941,9 @@ ppc64v2_emit_reg (int reg)
   /* fctx->regs is passed in r3 and then saved in 176(1).  */
   p += GEN_LD (p, 3, 31, -32);
   p += GEN_LI (p, 4, reg);
-  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 24); /* Save TOC.  */
   p += gen_call (p, get_raw_reg_func_addr (), 1, 0);
-  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 24); /* Restore TOC.  */
 
   emit_insns (buf, p - buf);
   gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
@@ -3036,11 +2969,11 @@ ppc64_emit_stack_flush (void)
      Otherwise, expand 64-byte more.  */
 
   EMIT_ASM ("  std   3, 0(30)		\n"
-	    "  addi  4, 30, -(112 + 8)	\n"
-	    "  cmpd  7, 4, 1		\n"
-	    "  bgt   7, 1f		\n"
-	    "  stdu  31, -64(1)		\n"
-	    "1:addi  30, 30, -8		\n");
+            "  addi  4, 30, -(112 + 8)	\n"
+            "  cmpd  7, 4, 1		\n"
+            "  bgt   7, 1f		\n"
+            "  stdu  31, -64(1)		\n"
+            "1:addi  30, 30, -8		\n");
 }
 
 /* Swap TOP and stack[sp-1]  */
@@ -3049,8 +2982,8 @@ static void
 ppc64_emit_swap (void)
 {
   EMIT_ASM ("ld   4, 8(30)	\n"
-	    "std  3, 8(30)	\n"
-	    "mr   3, 4		\n");
+            "std  3, 8(30)	\n"
+            "mr   3, 4		\n");
 }
 
 /* Call function FN - ELFv1.  */
@@ -3061,9 +2994,9 @@ ppc64v1_emit_call (CORE_ADDR fn)
   uint32_t buf[13];
   uint32_t *p = buf;
 
-  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 40); /* Save TOC.  */
   p += gen_call (p, fn, 1, 1);
-  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 40); /* Restore TOC.  */
 
   emit_insns (buf, p - buf);
   gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
@@ -3077,9 +3010,9 @@ ppc64v2_emit_call (CORE_ADDR fn)
   uint32_t buf[10];
   uint32_t *p = buf;
 
-  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 24); /* Save TOC.  */
   p += gen_call (p, fn, 1, 0);
-  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 24); /* Restore TOC.  */
 
   emit_insns (buf, p - buf);
   gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
@@ -3097,9 +3030,9 @@ ppc64v1_emit_int_call_1 (CORE_ADDR fn, int arg1)
 
   /* Setup argument.  arg1 is a 16-bit value.  */
   p += gen_limm (p, 3, arg1, 1);
-  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 40); /* Save TOC.  */
   p += gen_call (p, fn, 1, 1);
-  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 40); /* Restore TOC.  */
 
   emit_insns (buf, p - buf);
   gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
@@ -3115,9 +3048,9 @@ ppc64v2_emit_int_call_1 (CORE_ADDR fn, int arg1)
 
   /* Setup argument.  arg1 is a 16-bit value.  */
   p += gen_limm (p, 3, arg1, 1);
-  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 24); /* Save TOC.  */
   p += gen_call (p, fn, 1, 0);
-  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 24); /* Restore TOC.  */
 
   emit_insns (buf, p - buf);
   gdb_assert ((p - buf) <= (sizeof (buf) / sizeof (*buf)));
@@ -3138,11 +3071,11 @@ ppc64v1_emit_void_call_2 (CORE_ADDR fn, int arg1)
   p += GEN_STD (p, 3, 30, 0);
 
   /* Setup argument.  arg1 is a 16-bit value.  */
-  p += GEN_MR (p, 4, 3);		/* mr	r4, r3 */
+  p += GEN_MR (p, 4, 3); /* mr	r4, r3 */
   p += gen_limm (p, 3, arg1, 1);
-  p += GEN_STD (p, 2, 1, 40);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 40); /* Save TOC.  */
   p += gen_call (p, fn, 1, 1);
-  p += GEN_LD (p, 2, 1, 40);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 40); /* Restore TOC.  */
 
   /* Restore TOP */
   p += GEN_LD (p, 3, 30, 0);
@@ -3163,11 +3096,11 @@ ppc64v2_emit_void_call_2 (CORE_ADDR fn, int arg1)
   p += GEN_STD (p, 3, 30, 0);
 
   /* Setup argument.  arg1 is a 16-bit value.  */
-  p += GEN_MR (p, 4, 3);		/* mr	r4, r3 */
+  p += GEN_MR (p, 4, 3); /* mr	r4, r3 */
   p += gen_limm (p, 3, arg1, 1);
-  p += GEN_STD (p, 2, 1, 24);	/* Save TOC.  */
+  p += GEN_STD (p, 2, 1, 24); /* Save TOC.  */
   p += gen_call (p, fn, 1, 0);
-  p += GEN_LD (p, 2, 1, 24);	/* Restore TOC.  */
+  p += GEN_LD (p, 2, 1, 24); /* Restore TOC.  */
 
   /* Restore TOP */
   p += GEN_LD (p, 3, 30, 0);
@@ -3182,8 +3115,8 @@ static void
 ppc64_emit_if_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("cmpdi  7, 3, 0	\n"
-	    "ldu    3, 8(30)	\n"
-	    "1:bne  7, 1b	\n");
+            "ldu    3, 8(30)	\n"
+            "1:bne  7, 1b	\n");
 
   if (offset_p)
     *offset_p = 8;
@@ -3197,9 +3130,9 @@ static void
 ppc64_emit_eq_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("ldu     4, 8(30)	\n"
-	    "cmpd    7, 4, 3	\n"
-	    "ldu     3, 8(30)	\n"
-	    "1:beq   7, 1b	\n");
+            "cmpd    7, 4, 3	\n"
+            "ldu     3, 8(30)	\n"
+            "1:beq   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 12;
@@ -3213,9 +3146,9 @@ static void
 ppc64_emit_ne_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("ldu     4, 8(30)	\n"
-	    "cmpd    7, 4, 3	\n"
-	    "ldu     3, 8(30)	\n"
-	    "1:bne   7, 1b	\n");
+            "cmpd    7, 4, 3	\n"
+            "ldu     3, 8(30)	\n"
+            "1:bne   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 12;
@@ -3229,9 +3162,9 @@ static void
 ppc64_emit_lt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("ldu     4, 8(30)	\n"
-	    "cmpd    7, 4, 3	\n"
-	    "ldu     3, 8(30)	\n"
-	    "1:blt   7, 1b	\n");
+            "cmpd    7, 4, 3	\n"
+            "ldu     3, 8(30)	\n"
+            "1:blt   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 12;
@@ -3245,9 +3178,9 @@ static void
 ppc64_emit_le_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("ldu     4, 8(30)	\n"
-	    "cmpd    7, 4, 3	\n"
-	    "ldu     3, 8(30)	\n"
-	    "1:ble   7, 1b	\n");
+            "cmpd    7, 4, 3	\n"
+            "ldu     3, 8(30)	\n"
+            "1:ble   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 12;
@@ -3261,9 +3194,9 @@ static void
 ppc64_emit_gt_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("ldu     4, 8(30)	\n"
-	    "cmpd    7, 4, 3	\n"
-	    "ldu     3, 8(30)	\n"
-	    "1:bgt   7, 1b	\n");
+            "cmpd    7, 4, 3	\n"
+            "ldu     3, 8(30)	\n"
+            "1:bgt   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 12;
@@ -3277,9 +3210,9 @@ static void
 ppc64_emit_ge_goto (int *offset_p, int *size_p)
 {
   EMIT_ASM ("ldu     4, 8(30)	\n"
-	    "cmpd    7, 4, 3	\n"
-	    "ldu     3, 8(30)	\n"
-	    "1:bge   7, 1b	\n");
+            "cmpd    7, 4, 3	\n"
+            "ldu     3, 8(30)	\n"
+            "1:bge   7, 1b	\n");
 
   if (offset_p)
     *offset_p = 12;
@@ -3289,89 +3222,49 @@ ppc64_emit_ge_goto (int *offset_p, int *size_p)
 
 /* Table of emit ops for 64-bit ELFv1.  */
 
-static struct emit_ops ppc64v1_emit_ops_impl =
-{
-  ppc64v1_emit_prologue,
-  ppc64_emit_epilogue,
-  ppc64_emit_add,
-  ppc64_emit_sub,
-  ppc64_emit_mul,
-  ppc64_emit_lsh,
-  ppc64_emit_rsh_signed,
-  ppc64_emit_rsh_unsigned,
-  ppc64_emit_ext,
-  ppc64_emit_log_not,
-  ppc64_emit_bit_and,
-  ppc64_emit_bit_or,
-  ppc64_emit_bit_xor,
-  ppc64_emit_bit_not,
-  ppc64_emit_equal,
-  ppc64_emit_less_signed,
-  ppc64_emit_less_unsigned,
-  ppc64_emit_ref,
-  ppc64_emit_if_goto,
-  ppc_emit_goto,
-  ppc_write_goto_address,
-  ppc64_emit_const,
-  ppc64v1_emit_call,
-  ppc64v1_emit_reg,
-  ppc64_emit_pop,
-  ppc64_emit_stack_flush,
-  ppc64_emit_zero_ext,
-  ppc64_emit_swap,
-  ppc_emit_stack_adjust,
-  ppc64v1_emit_int_call_1,
-  ppc64v1_emit_void_call_2,
-  ppc64_emit_eq_goto,
-  ppc64_emit_ne_goto,
-  ppc64_emit_lt_goto,
-  ppc64_emit_le_goto,
-  ppc64_emit_gt_goto,
-  ppc64_emit_ge_goto
-};
+static struct emit_ops ppc64v1_emit_ops_impl
+  = { ppc64v1_emit_prologue,    ppc64_emit_epilogue,
+      ppc64_emit_add,           ppc64_emit_sub,
+      ppc64_emit_mul,           ppc64_emit_lsh,
+      ppc64_emit_rsh_signed,    ppc64_emit_rsh_unsigned,
+      ppc64_emit_ext,           ppc64_emit_log_not,
+      ppc64_emit_bit_and,       ppc64_emit_bit_or,
+      ppc64_emit_bit_xor,       ppc64_emit_bit_not,
+      ppc64_emit_equal,         ppc64_emit_less_signed,
+      ppc64_emit_less_unsigned, ppc64_emit_ref,
+      ppc64_emit_if_goto,       ppc_emit_goto,
+      ppc_write_goto_address,   ppc64_emit_const,
+      ppc64v1_emit_call,        ppc64v1_emit_reg,
+      ppc64_emit_pop,           ppc64_emit_stack_flush,
+      ppc64_emit_zero_ext,      ppc64_emit_swap,
+      ppc_emit_stack_adjust,    ppc64v1_emit_int_call_1,
+      ppc64v1_emit_void_call_2, ppc64_emit_eq_goto,
+      ppc64_emit_ne_goto,       ppc64_emit_lt_goto,
+      ppc64_emit_le_goto,       ppc64_emit_gt_goto,
+      ppc64_emit_ge_goto };
 
 /* Table of emit ops for 64-bit ELFv2.  */
 
-static struct emit_ops ppc64v2_emit_ops_impl =
-{
-  ppc64v2_emit_prologue,
-  ppc64_emit_epilogue,
-  ppc64_emit_add,
-  ppc64_emit_sub,
-  ppc64_emit_mul,
-  ppc64_emit_lsh,
-  ppc64_emit_rsh_signed,
-  ppc64_emit_rsh_unsigned,
-  ppc64_emit_ext,
-  ppc64_emit_log_not,
-  ppc64_emit_bit_and,
-  ppc64_emit_bit_or,
-  ppc64_emit_bit_xor,
-  ppc64_emit_bit_not,
-  ppc64_emit_equal,
-  ppc64_emit_less_signed,
-  ppc64_emit_less_unsigned,
-  ppc64_emit_ref,
-  ppc64_emit_if_goto,
-  ppc_emit_goto,
-  ppc_write_goto_address,
-  ppc64_emit_const,
-  ppc64v2_emit_call,
-  ppc64v2_emit_reg,
-  ppc64_emit_pop,
-  ppc64_emit_stack_flush,
-  ppc64_emit_zero_ext,
-  ppc64_emit_swap,
-  ppc_emit_stack_adjust,
-  ppc64v2_emit_int_call_1,
-  ppc64v2_emit_void_call_2,
-  ppc64_emit_eq_goto,
-  ppc64_emit_ne_goto,
-  ppc64_emit_lt_goto,
-  ppc64_emit_le_goto,
-  ppc64_emit_gt_goto,
-  ppc64_emit_ge_goto
-};
+static struct emit_ops ppc64v2_emit_ops_impl
+  = { ppc64v2_emit_prologue,    ppc64_emit_epilogue,
+      ppc64_emit_add,           ppc64_emit_sub,
+      ppc64_emit_mul,           ppc64_emit_lsh,
+      ppc64_emit_rsh_signed,    ppc64_emit_rsh_unsigned,
+      ppc64_emit_ext,           ppc64_emit_log_not,
+      ppc64_emit_bit_and,       ppc64_emit_bit_or,
+      ppc64_emit_bit_xor,       ppc64_emit_bit_not,
+      ppc64_emit_equal,         ppc64_emit_less_signed,
+      ppc64_emit_less_unsigned, ppc64_emit_ref,
+      ppc64_emit_if_goto,       ppc_emit_goto,
+      ppc_write_goto_address,   ppc64_emit_const,
+      ppc64v2_emit_call,        ppc64v2_emit_reg,
+      ppc64_emit_pop,           ppc64_emit_stack_flush,
+      ppc64_emit_zero_ext,      ppc64_emit_swap,
+      ppc_emit_stack_adjust,    ppc64v2_emit_int_call_1,
+      ppc64v2_emit_void_call_2, ppc64_emit_eq_goto,
+      ppc64_emit_ne_goto,       ppc64_emit_lt_goto,
+      ppc64_emit_le_goto,       ppc64_emit_gt_goto,
+      ppc64_emit_ge_goto };
 
 #endif
 
@@ -3386,9 +3279,9 @@ ppc_target::emit_ops ()
   if (register_size (regcache->tdesc, 0) == 8)
     {
       if (is_elfv2_inferior ())
-	return &ppc64v2_emit_ops_impl;
+        return &ppc64v2_emit_ops_impl;
       else
-	return &ppc64v1_emit_ops_impl;
+        return &ppc64v1_emit_ops_impl;
     }
 #endif
   return &ppc_emit_ops_impl;

@@ -78,19 +78,17 @@ struct tic6x_unwind_cache
   CORE_ADDR reg_saved[TIC6X_NUM_CORE_REGS];
 };
 
-
 /* Name of TI C6x core registers.  */
-static const char *const tic6x_register_names[] =
-{
-  "A0",  "A1",  "A2",  "A3",  /*  0  1  2  3 */
-  "A4",  "A5",  "A6",  "A7",  /*  4  5  6  7 */
-  "A8",  "A9",  "A10", "A11", /*  8  9 10 11 */
+static const char *const tic6x_register_names[] = {
+  "A0",	 "A1",	"A2",  "A3",  /*  0  1  2  3 */
+  "A4",	 "A5",	"A6",  "A7",  /*  4  5  6  7 */
+  "A8",	 "A9",	"A10", "A11", /*  8  9 10 11 */
   "A12", "A13", "A14", "A15", /* 12 13 14 15 */
-  "B0",  "B1",  "B2",  "B3",  /* 16 17 18 19 */
-  "B4",  "B5",  "B6",  "B7",  /* 20 21 22 23 */
-  "B8",  "B9",  "B10", "B11", /* 24 25 26 27 */
+  "B0",	 "B1",	"B2",  "B3",  /* 16 17 18 19 */
+  "B4",	 "B5",	"B6",  "B7",  /* 20 21 22 23 */
+  "B8",	 "B9",	"B10", "B11", /* 24 25 26 27 */
   "B12", "B13", "B14", "B15", /* 28 29 30 31 */
-  "CSR", "PC",                /* 32 33       */
+  "CSR", "PC",		      /* 32 33       */
 };
 
 /* This array maps the arguments to the register number which passes argument
@@ -115,7 +113,6 @@ tic6x_register_name (struct gdbarch *gdbarch, int regno)
 static struct type *
 tic6x_register_type (struct gdbarch *gdbarch, int regno)
 {
-
   if (regno == TIC6X_PC_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
   else
@@ -184,11 +181,11 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 		 these three kinds of instructions.  */
 	      unsigned int ucst5 = (inst >> 13) & 0x1f;
 
-	      if ((inst & 0x1ffc) == 0x1dc0)	/* SUBAW */
+	      if ((inst & 0x1ffc) == 0x1dc0) /* SUBAW */
 		frame_base_offset_to_sp += ucst5 << 2;
-	      else if ((inst & 0x1ffc) == 0x1bc0)	/* SUBAH */
+	      else if ((inst & 0x1ffc) == 0x1bc0) /* SUBAH */
 		frame_base_offset_to_sp += ucst5 << 1;
-	      else if ((inst & 0x0ffc) == 0x9c0)	/* SUB */
+	      else if ((inst & 0x0ffc) == 0x9c0) /* SUB */
 		frame_base_offset_to_sp += ucst5;
 	      else
 		gdb_assert_not_reached ("unexpected instruction");
@@ -196,11 +193,11 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	      return_pc = pc + 4;
 	    }
 	}
-      else if ((inst & 0x174) == 0x74)	/* stw SRC, *+b15(uconst) */
+      else if ((inst & 0x174) == 0x74) /* stw SRC, *+b15(uconst) */
 	{
 	  /* The y bit determines which file base is read from.  */
-	  base_reg = tic6x_register_number ((inst >> 18) & 0x1f,
-					    (inst >> 7) & 1, 0);
+	  base_reg
+	    = tic6x_register_number ((inst >> 18) & 0x1f, (inst >> 7) & 1, 0);
 
 	  if (base_reg == TIC6X_SP_REGNUM)
 	    {
@@ -233,7 +230,6 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	    break;
 	}
 
-
       pc += 4;
     }
   /* Step 2: Skip insn on setting up dsbt if it is.  Usually, it looks like,
@@ -246,9 +242,9 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
      used.  */
   base_reg = tic6x_register_number ((inst >> 18) & 0x1f, (inst >> 7) & 1, 0);
 
-  if ((inst & 0x164) == 0x64	/* ldw */
-      && dst_reg == TIC6X_DP_REGNUM	/* dst is B14 */
-      && base_reg == TIC6X_DP_REGNUM)	/* baseR is B14 */
+  if ((inst & 0x164) == 0x64	      /* ldw */
+      && dst_reg == TIC6X_DP_REGNUM   /* dst is B14 */
+      && base_reg == TIC6X_DP_REGNUM) /* baseR is B14 */
     {
       return_pc = pc + 4;
     }
@@ -262,8 +258,8 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  /* If the FP now holds an offset from the CFA then this is a frame
 	     which uses the frame pointer.  */
 
-	  cache->cfa = get_frame_register_unsigned (this_frame,
-						    TIC6X_FP_REGNUM);
+	  cache->cfa
+	    = get_frame_register_unsigned (this_frame, TIC6X_FP_REGNUM);
 	}
       else
 	{
@@ -369,13 +365,13 @@ tic6x_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   gdb_byte buf[8];
 
-  frame_unwind_register (next_frame,  TIC6X_PC_REGNUM, buf);
+  frame_unwind_register (next_frame, TIC6X_PC_REGNUM, buf);
   return extract_typed_address (buf, builtin_type (gdbarch)->builtin_func_ptr);
 }
 
 /* Frame base handling.  */
 
-static struct tic6x_unwind_cache*
+static struct tic6x_unwind_cache *
 tic6x_frame_unwind_cache (frame_info_ptr this_frame,
 			  void **this_prologue_cache)
 {
@@ -407,8 +403,8 @@ static void
 tic6x_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		     struct frame_id *this_id)
 {
-  struct tic6x_unwind_cache *cache =
-    tic6x_frame_unwind_cache (this_frame, this_cache);
+  struct tic6x_unwind_cache *cache
+    = tic6x_frame_unwind_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -421,8 +417,8 @@ static struct value *
 tic6x_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			   int regnum)
 {
-  struct tic6x_unwind_cache *cache =
-    tic6x_frame_unwind_cache (this_frame, this_cache);
+  struct tic6x_unwind_cache *cache
+    = tic6x_frame_unwind_cache (this_frame, this_cache);
 
   gdb_assert (regnum >= 0);
 
@@ -452,25 +448,18 @@ tic6x_frame_base_address (frame_info_ptr this_frame, void **this_cache)
   return info->base;
 }
 
-static const struct frame_unwind tic6x_frame_unwind =
-{
-  "tic6x prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  tic6x_frame_this_id,
-  tic6x_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind tic6x_frame_unwind
+  = { "tic6x prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      tic6x_frame_this_id,
+      tic6x_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
-static const struct frame_base tic6x_frame_base =
-{
-  &tic6x_frame_unwind,
-  tic6x_frame_base_address,
-  tic6x_frame_base_address,
-  tic6x_frame_base_address
-};
-
+static const struct frame_base tic6x_frame_base
+  = { &tic6x_frame_unwind, tic6x_frame_base_address, tic6x_frame_base_address,
+      tic6x_frame_base_address };
 
 static struct tic6x_unwind_cache *
 tic6x_make_stub_cache (frame_info_ptr this_frame)
@@ -515,16 +504,14 @@ tic6x_stub_unwind_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind tic6x_stub_unwind =
-{
-  "tic6x stub",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  tic6x_stub_this_id,
-  tic6x_frame_prev_register,
-  NULL,
-  tic6x_stub_unwind_sniffer
-};
+static const struct frame_unwind tic6x_stub_unwind
+  = { "tic6x stub",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      tic6x_stub_this_id,
+      tic6x_frame_prev_register,
+      NULL,
+      tic6x_stub_unwind_sniffer };
 
 /* Return the instruction on address PC.  */
 
@@ -615,9 +602,9 @@ tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	    {
 	      /* B with register */
 
-	      register_number = tic6x_register_number ((inst >> 18) & 0x1f,
-						       INST_S_BIT (inst),
-						       INST_X_BIT (inst));
+	      register_number
+		= tic6x_register_number ((inst >> 18) & 0x1f,
+					 INST_S_BIT (inst), INST_X_BIT (inst));
 	      pc = regcache_raw_get_unsigned (regcache, register_number);
 	      break;
 	    }
@@ -643,8 +630,8 @@ tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	  if ((inst & 0x0f830ffe) == 0x00800362)
 	    {
 	      /* BNOP with register */
-	      register_number = tic6x_register_number ((inst >> 18) & 0x1f,
-						       1, INST_X_BIT (inst));
+	      register_number = tic6x_register_number ((inst >> 18) & 0x1f, 1,
+						       INST_X_BIT (inst));
 	      pc = regcache_raw_get_unsigned (regcache, register_number);
 	      break;
 	    }
@@ -679,9 +666,10 @@ tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 static std::vector<CORE_ADDR>
 tic6x_software_single_step (struct regcache *regcache)
 {
-  CORE_ADDR next_pc = tic6x_get_next_pc (regcache, regcache_read_pc (regcache));
+  CORE_ADDR next_pc
+    = tic6x_get_next_pc (regcache, regcache_read_pc (regcache));
 
-  return {next_pc};
+  return { next_pc };
 }
 
 /* This is the implementation of gdbarch method frame_align.  */
@@ -793,11 +781,11 @@ tic6x_return_value (struct gdbarch *gdbarch, struct value *function,
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)
-    tic6x_extract_return_value (type, regcache,
-				gdbarch_byte_order (gdbarch), readbuf);
+    tic6x_extract_return_value (type, regcache, gdbarch_byte_order (gdbarch),
+				readbuf);
   if (writebuf)
-    tic6x_store_return_value (type, regcache,
-			      gdbarch_byte_order (gdbarch), writebuf);
+    tic6x_store_return_value (type, regcache, gdbarch_byte_order (gdbarch),
+			      writebuf);
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
@@ -845,8 +833,7 @@ tic6x_arg_type_alignment (struct type *type)
 	    return 16;
 	}
       else
-	internal_error (_("unexpected length %d of type"),
-			len);
+	internal_error (_ ("unexpected length %d of type"), len);
     }
 }
 
@@ -854,8 +841,8 @@ tic6x_arg_type_alignment (struct type *type)
 
 static CORE_ADDR
 tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		       struct regcache *regcache, CORE_ADDR bp_addr,
-		       int nargs, struct value **args, CORE_ADDR sp,
+		       struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		       struct value **args, CORE_ADDR sp,
 		       function_call_return_method return_method,
 		       CORE_ADDR struct_addr)
 {
@@ -936,8 +923,8 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     so, we write the contents in VAL to the lsp of
 		     register.  */
 		  if (len < 3 && byte_order == BFD_ENDIAN_BIG)
-		    regcache->cooked_write_part (arg_regs[argreg], 4 - len, len,
-						 val);
+		    regcache->cooked_write_part (arg_regs[argreg], 4 - len,
+						 len, val);
 		  else
 		    regcache->cooked_write (arg_regs[argreg], val);
 		}
@@ -945,8 +932,8 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		{
 		  /* The argument is being passed by value in a single
 		     register.  */
-		  CORE_ADDR regval = extract_unsigned_integer (val, len,
-							       byte_order);
+		  CORE_ADDR regval
+		    = extract_unsigned_integer (val, len, byte_order);
 
 		  regcache_cooked_write_unsigned (regcache, arg_regs[argreg],
 						  regval);
@@ -981,8 +968,8 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    {
 		      /* The argument is being passed by value in a pair of
 			 registers.  */
-		      ULONGEST regval = extract_unsigned_integer (val, len,
-								  byte_order);
+		      ULONGEST regval
+			= extract_unsigned_integer (val, len, byte_order);
 
 		      regcache_cooked_write_unsigned (regcache,
 						      arg_regs[argreg],
@@ -1040,8 +1027,8 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  if (len <= 4)
 	    ; /* Default is 4-byte aligned.  Nothing to be done.  */
 	  else if (len <= 8)
-	    stack_offset = align_up (stack_offset,
-				     tic6x_arg_type_alignment (arg_type));
+	    stack_offset
+	      = align_up (stack_offset, tic6x_arg_type_alignment (arg_type));
 	  else if (len == 16)
 	    {
 	      /* _Complex double or _Complex long double */
@@ -1060,14 +1047,13 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  store_unsigned_integer ((gdb_byte *) val, 4, byte_order,
 					  addr);
 		  len = 4;
-
 		}
 	      else
-		internal_error (_("unexpected type %d of arg %d"),
-				typecode, argnum);
+		internal_error (_ ("unexpected type %d of arg %d"), typecode,
+				argnum);
 	    }
 	  else
-	    internal_error (_("unexpected length %d of arg %d"), len, argnum);
+	    internal_error (_ ("unexpected length %d of arg %d"), len, argnum);
 
 	  addr = sp + stack_offset;
 	  write_memory (addr, val, len);
@@ -1090,9 +1076,9 @@ tic6x_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Normally, the epilogue is composed by instruction `b .S2 b3'.  */
   if ((inst & 0x0f83effc) == 0x360)
     {
-      unsigned int src2 = tic6x_register_number ((inst >> 18) & 0x1f,
-						 INST_S_BIT (inst),
-						 INST_X_BIT (inst));
+      unsigned int src2
+	= tic6x_register_number ((inst >> 18) & 0x1f, INST_S_BIT (inst),
+				 INST_X_BIT (inst));
       if (src2 == TIC6X_RA_REGNUM)
 	return 1;
     }
@@ -1154,15 +1140,17 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdesc_data = tdesc_data_alloc ();
 
       valid_p = 1;
-      for (i = 0; i < 32; i++)	/* A0 - A15, B0 - B15 */
+      for (i = 0; i < 32; i++) /* A0 - A15, B0 - B15 */
 	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					    tic6x_register_names[i]);
 
       /* CSR */
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i++,
-					  tic6x_register_names[TIC6X_CSR_REGNUM]);
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i++,
-					  tic6x_register_names[TIC6X_PC_REGNUM]);
+      valid_p
+	&= tdesc_numbered_register (feature, tdesc_data.get (), i++,
+				    tic6x_register_names[TIC6X_CSR_REGNUM]);
+      valid_p
+	&= tdesc_numbered_register (feature, tdesc_data.get (), i++,
+				    tic6x_register_names[TIC6X_PC_REGNUM]);
 
       if (!valid_p)
 	return NULL;
@@ -1171,17 +1159,16 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (feature)
 	{
 	  int j = 0;
-	  static const char *const gp[] =
-	    {
-	      "A16", "A17", "A18", "A19", "A20", "A21", "A22", "A23",
-	      "A24", "A25", "A26", "A27", "A28", "A29", "A30", "A31",
-	      "B16", "B17", "B18", "B19", "B20", "B21", "B22", "B23",
-	      "B24", "B25", "B26", "B27", "B28", "B29", "B30", "B31",
-	    };
+	  static const char *const gp[] = {
+	    "A16", "A17", "A18", "A19", "A20", "A21", "A22", "A23",
+	    "A24", "A25", "A26", "A27", "A28", "A29", "A30", "A31",
+	    "B16", "B17", "B18", "B19", "B20", "B21", "B22", "B23",
+	    "B24", "B25", "B26", "B27", "B28", "B29", "B30", "B31",
+	  };
 
 	  has_gp = 1;
 	  valid_p = 1;
-	  for (j = 0; j < 32; j++)	/* A16 - A31, B16 - B31 */
+	  for (j = 0; j < 32; j++) /* A16 - A31, B16 - B31 */
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						i++, gp[j]);
 
@@ -1192,22 +1179,20 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       feature = tdesc_find_feature (tdesc, "org.gnu.gdb.tic6x.c6xp");
       if (feature)
 	{
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-					      i++, "TSR");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-					      i++, "ILC");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-					      i++, "RILC");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i++,
+					      "TSR");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i++,
+					      "ILC");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i++,
+					      "RILC");
 
 	  if (!valid_p)
 	    return NULL;
 	}
-
     }
 
   /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info); arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       tic6x_gdbarch_tdep *tdep
@@ -1250,10 +1235,8 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_skip_prologue (gdbarch, tic6x_skip_prologue);
-  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
-				       tic6x_breakpoint_kind_from_pc);
-  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
-				       tic6x_sw_breakpoint_from_kind);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, tic6x_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, tic6x_sw_breakpoint_from_kind);
 
   set_gdbarch_unwind_pc (gdbarch, tic6x_unwind_pc);
 
@@ -1281,8 +1264,8 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_stack_frame_destroyed_p (gdbarch, tic6x_stack_frame_destroyed_p);
 
-  set_gdbarch_return_in_first_hidden_param_p (gdbarch,
-					      tic6x_return_in_first_hidden_param_p);
+  set_gdbarch_return_in_first_hidden_param_p (
+    gdbarch, tic6x_return_in_first_hidden_param_p);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -1294,6 +1277,7 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_tic6x_tdep ();
+
 void
 _initialize_tic6x_tdep ()
 {

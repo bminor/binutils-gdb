@@ -37,34 +37,32 @@ extern struct regcache *get_thread_regcache (process_stratum_target *target,
 /* Get the regcache of THREAD.  */
 extern struct regcache *get_thread_regcache (thread_info *thread);
 
-extern struct regcache *get_thread_arch_regcache
-  (process_stratum_target *targ, ptid_t, struct gdbarch *);
-extern struct regcache *get_thread_arch_aspace_regcache
-  (process_stratum_target *target, ptid_t,
-   struct gdbarch *, struct address_space *);
+extern struct regcache *get_thread_arch_regcache (process_stratum_target *targ,
+						  ptid_t, struct gdbarch *);
+extern struct regcache *
+get_thread_arch_aspace_regcache (process_stratum_target *target, ptid_t,
+				 struct gdbarch *, struct address_space *);
 
 extern enum register_status
-  regcache_raw_read_signed (struct regcache *regcache,
-			    int regnum, LONGEST *val);
+regcache_raw_read_signed (struct regcache *regcache, int regnum, LONGEST *val);
 
-extern void regcache_raw_write_signed (struct regcache *regcache,
-				       int regnum, LONGEST val);
-extern void regcache_raw_write_unsigned (struct regcache *regcache,
-					 int regnum, ULONGEST val);
+extern void regcache_raw_write_signed (struct regcache *regcache, int regnum,
+				       LONGEST val);
+extern void regcache_raw_write_unsigned (struct regcache *regcache, int regnum,
+					 ULONGEST val);
 
 /* Return the register's value in signed or throw if it's not
    available.  */
 
-extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
-					int regnum);
+extern LONGEST regcache_raw_get_signed (struct regcache *regcache, int regnum);
 
 /* Read a register as a signed/unsigned quantity.  */
 extern enum register_status
-  regcache_cooked_read_signed (struct regcache *regcache,
-			       int regnum, LONGEST *val);
+regcache_cooked_read_signed (struct regcache *regcache, int regnum,
+			     LONGEST *val);
 extern enum register_status
-  regcache_cooked_read_unsigned (struct regcache *regcache,
-				 int regnum, ULONGEST *val);
+regcache_cooked_read_unsigned (struct regcache *regcache, int regnum,
+			       ULONGEST *val);
 extern void regcache_cooked_write_signed (struct regcache *regcache,
 					  int regnum, LONGEST val);
 extern void regcache_cooked_write_unsigned (struct regcache *regcache,
@@ -116,9 +114,9 @@ struct regcache_map_entry
 /* Special value for the 'regno' field in the struct above.  */
 
 enum
-  {
-    REGCACHE_MAP_SKIP = -1,
-  };
+{
+  REGCACHE_MAP_SKIP = -1,
+};
 
 /* Calculate and return the total size of all the registers in a
    regcache_map_entry.  */
@@ -142,13 +140,11 @@ regcache_map_entry_size (const struct regcache_map_entry *map)
    'regset_collect' fields in a regset structure.  */
 
 extern void regcache_supply_regset (const struct regset *regset,
-				    struct regcache *regcache,
-				    int regnum, const void *buf,
-				    size_t size);
+				    struct regcache *regcache, int regnum,
+				    const void *buf, size_t size);
 extern void regcache_collect_regset (const struct regset *regset,
 				     const struct regcache *regcache,
 				     int regnum, void *buf, size_t size);
-
 
 /* Return true if a set of registers contains the value of the
    register numbered REGNUM.  The size of the set of registers is
@@ -165,10 +161,9 @@ extern bool regcache_map_supplies (const struct regcache_map_entry *map,
 
 extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
-
 /* Return the size of register REGNUM.  All registers should have only
    one size.  */
-   
+
 extern int register_size (struct gdbarch *gdbarch, int regnum);
 
 typedef gdb::function_view<register_status (int regnum, gdb_byte *buf)>
@@ -187,6 +182,7 @@ struct cached_reg_t
 class reg_buffer : public reg_buffer_common
 {
 public:
+
   reg_buffer (gdbarch *gdbarch, bool has_pseudo);
 
   DISABLE_COPY_AND_ASSIGN (reg_buffer);
@@ -245,6 +241,7 @@ public:
   bool raw_compare (int regnum, const void *buf, int offset) const override;
 
 protected:
+
   /* Assert on the range of REGNUM.  */
   void assert_regnum (int regnum) const;
 
@@ -274,9 +271,11 @@ protected:
 class readable_regcache : public reg_buffer
 {
 public:
+
   readable_regcache (gdbarch *gdbarch, bool has_pseudo)
     : reg_buffer (gdbarch, has_pseudo)
-  {}
+  {
+  }
 
   /* Transfer a raw register [0..NUM_REGS) from core-gdb to this regcache,
      return its value in *BUF and return its availability status.  */
@@ -319,12 +318,13 @@ protected:
 class detached_regcache : public readable_regcache
 {
 public:
+
   detached_regcache (gdbarch *gdbarch, bool has_pseudo)
     : readable_regcache (gdbarch, has_pseudo)
-  {}
+  {
+  }
 
-  void raw_update (int regnum) override
-  {}
+  void raw_update (int regnum) override {}
 
   DISABLE_COPY_AND_ASSIGN (detached_regcache);
 };
@@ -336,13 +336,11 @@ class readonly_detached_regcache;
 class regcache : public detached_regcache
 {
 public:
+
   DISABLE_COPY_AND_ASSIGN (regcache);
 
   /* Return REGCACHE's address space.  */
-  const address_space *aspace () const
-  {
-    return m_aspace;
-  }
+  const address_space *aspace () const { return m_aspace; }
 
   /* Restore 'this' regcache.  The set of registers restored into
      the regcache determined by the restore_reggroup.
@@ -382,22 +380,22 @@ public:
      'struct regcache_map_entry'.  The valid register numbers in each
      entry in 'struct regcache_map_entry' are offset by REGBASE.  */
 
-  void supply_regset (const struct regset *regset, int regbase,
-		      int regnum, const void *buf, size_t size);
+  void supply_regset (const struct regset *regset, int regbase, int regnum,
+		      const void *buf, size_t size);
 
   void collect_regset (const struct regset *regset, int regbase, int regnum,
 		       void *buf, size_t size) const;
 
   /* Same as the above, but with REGBASE == 0.  */
 
-  void supply_regset (const struct regset *regset,
-		      int regnum, const void *buf, size_t size)
+  void supply_regset (const struct regset *regset, int regnum, const void *buf,
+		      size_t size)
   {
     supply_regset (regset, 0, regnum, buf, size);
   }
 
-  void collect_regset (const struct regset *regset, int regnum,
-		       void *buf, size_t size) const
+  void collect_regset (const struct regset *regset, int regnum, void *buf,
+		       size_t size) const
   {
     collect_regset (regset, 0, regnum, buf, size);
   }
@@ -411,21 +409,16 @@ public:
     return m_ptid;
   }
 
-  void set_ptid (const ptid_t ptid)
-  {
-    this->m_ptid = ptid;
-  }
+  void set_ptid (const ptid_t ptid) { this->m_ptid = ptid; }
 
-  process_stratum_target *target () const
-  {
-    return m_target;
-  }
+  process_stratum_target *target () const { return m_target; }
 
-/* Dump the contents of a register from the register cache to the target
+  /* Dump the contents of a register from the register cache to the target
    debug.  */
   void debug_print_register (const char *func, int regno);
 
 protected:
+
   regcache (process_stratum_target *target, gdbarch *gdbarch,
 	    const address_space *aspace);
 
@@ -440,9 +433,9 @@ private:
      set to or from a buffer.  This is the main worker function for
      regcache_supply_regset and regcache_collect_regset.  */
   void transfer_regset (const struct regset *regset, int regbase,
-			struct regcache *out_regcache,
-			int regnum, const gdb_byte *in_buf,
-			gdb_byte *out_buf, size_t size) const;
+			struct regcache *out_regcache, int regnum,
+			const gdb_byte *in_buf, gdb_byte *out_buf,
+			size_t size) const;
 
   /* Perform a partial register transfer using a read, modify, write
      operation.  */
@@ -451,7 +444,7 @@ private:
 
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */
-  const address_space * const m_aspace;
+  const address_space *const m_aspace;
 
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
@@ -469,11 +462,13 @@ using regcache_up = std::unique_ptr<regcache>;
 class readonly_detached_regcache : public readable_regcache
 {
 public:
+
   readonly_detached_regcache (regcache &src);
 
   /* Create a readonly regcache by getting contents from COOKED_READ.  */
 
-  readonly_detached_regcache (gdbarch *gdbarch, register_read_ftype cooked_read)
+  readonly_detached_regcache (gdbarch *gdbarch,
+			      register_read_ftype cooked_read)
     : readable_regcache (gdbarch, true)
   {
     save (cooked_read);
@@ -481,8 +476,7 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (readonly_detached_regcache);
 
-  void raw_update (int regnum) override
-  {}
+  void raw_update (int regnum) override {}
 };
 
 extern void registers_changed (void);
@@ -498,13 +492,16 @@ extern void registers_changed_thread (thread_info *thread);
 class register_dump
 {
 public:
+
   void dump (ui_file *file);
   virtual ~register_dump () = default;
 
 protected:
+
   register_dump (gdbarch *arch)
     : m_gdbarch (arch)
-  {}
+  {
+  }
 
   /* Dump the register REGNUM contents.  If REGNUM is -1, print the
      header.  */

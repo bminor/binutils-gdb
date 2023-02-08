@@ -48,20 +48,20 @@
 
 enum
 {
-  WINDOWS_SIGHUP = 1,	/* MinGW-w64 */
+  WINDOWS_SIGHUP = 1, /* MinGW-w64 */
   WINDOWS_SIGINT = 2,
-  WINDOWS_SIGQUIT = 3,	/* MinGW-w64 */
+  WINDOWS_SIGQUIT = 3, /* MinGW-w64 */
   WINDOWS_SIGILL = 4,
-  WINDOWS_SIGTRAP = 5,	/* MinGW-w64 */
-  WINDOWS_SIGIOT = 6,	/* MinGW-w64 */
-  WINDOWS_SIGEMT = 7,	/* MinGW-w64 */
+  WINDOWS_SIGTRAP = 5, /* MinGW-w64 */
+  WINDOWS_SIGIOT = 6,  /* MinGW-w64 */
+  WINDOWS_SIGEMT = 7,  /* MinGW-w64 */
   WINDOWS_SIGFPE = 8,
-  WINDOWS_SIGKILL = 9,	/* MinGW-w64 */
-  WINDOWS_SIGBUS = 10,	/* MinGW-w64 */
+  WINDOWS_SIGKILL = 9, /* MinGW-w64 */
+  WINDOWS_SIGBUS = 10, /* MinGW-w64 */
   WINDOWS_SIGSEGV = 11,
   WINDOWS_SIGSYS = 12,	/* MinGW-w64 */
-  WINDOWS_SIGPIPE = 13,	/* MinGW-w64 */
-  WINDOWS_SIGALRM = 14,	/* MinGW-w64 */
+  WINDOWS_SIGPIPE = 13, /* MinGW-w64 */
+  WINDOWS_SIGALRM = 14, /* MinGW-w64 */
   WINDOWS_SIGTERM = 15,
   WINDOWS_SIGBREAK = 21,
   WINDOWS_SIGABRT = 22,
@@ -111,66 +111,62 @@ static constexpr unsigned int NOTE_INFO_MODULE64 = 4;
 struct cmd_list_element *info_w32_cmdlist;
 
 typedef struct thread_information_block_32
-  {
-    uint32_t current_seh;			/* %fs:0x0000 */
-    uint32_t current_top_of_stack; 		/* %fs:0x0004 */
-    uint32_t current_bottom_of_stack;		/* %fs:0x0008 */
-    uint32_t sub_system_tib;			/* %fs:0x000c */
-    uint32_t fiber_data;			/* %fs:0x0010 */
-    uint32_t arbitrary_data_slot;		/* %fs:0x0014 */
-    uint32_t linear_address_tib;		/* %fs:0x0018 */
-    uint32_t environment_pointer;		/* %fs:0x001c */
-    uint32_t process_id;			/* %fs:0x0020 */
-    uint32_t current_thread_id;			/* %fs:0x0024 */
-    uint32_t active_rpc_handle;			/* %fs:0x0028 */
-    uint32_t thread_local_storage;		/* %fs:0x002c */
-    uint32_t process_environment_block;		/* %fs:0x0030 */
-    uint32_t last_error_number;			/* %fs:0x0034 */
-  }
-thread_information_32;
+{
+  uint32_t current_seh;		      /* %fs:0x0000 */
+  uint32_t current_top_of_stack;      /* %fs:0x0004 */
+  uint32_t current_bottom_of_stack;   /* %fs:0x0008 */
+  uint32_t sub_system_tib;	      /* %fs:0x000c */
+  uint32_t fiber_data;		      /* %fs:0x0010 */
+  uint32_t arbitrary_data_slot;	      /* %fs:0x0014 */
+  uint32_t linear_address_tib;	      /* %fs:0x0018 */
+  uint32_t environment_pointer;	      /* %fs:0x001c */
+  uint32_t process_id;		      /* %fs:0x0020 */
+  uint32_t current_thread_id;	      /* %fs:0x0024 */
+  uint32_t active_rpc_handle;	      /* %fs:0x0028 */
+  uint32_t thread_local_storage;      /* %fs:0x002c */
+  uint32_t process_environment_block; /* %fs:0x0030 */
+  uint32_t last_error_number;	      /* %fs:0x0034 */
+} thread_information_32;
 
 typedef struct thread_information_block_64
-  {
-    uint64_t current_seh;			/* %gs:0x0000 */
-    uint64_t current_top_of_stack; 		/* %gs:0x0008 */
-    uint64_t current_bottom_of_stack;		/* %gs:0x0010 */
-    uint64_t sub_system_tib;			/* %gs:0x0018 */
-    uint64_t fiber_data;			/* %gs:0x0020 */
-    uint64_t arbitrary_data_slot;		/* %gs:0x0028 */
-    uint64_t linear_address_tib;		/* %gs:0x0030 */
-    uint64_t environment_pointer;		/* %gs:0x0038 */
-    uint64_t process_id;			/* %gs:0x0040 */
-    uint64_t current_thread_id;			/* %gs:0x0048 */
-    uint64_t active_rpc_handle;			/* %gs:0x0050 */
-    uint64_t thread_local_storage;		/* %gs:0x0058 */
-    uint64_t process_environment_block;		/* %gs:0x0060 */
-    uint64_t last_error_number;			/* %gs:0x0068 */
-  }
-thread_information_64;
+{
+  uint64_t current_seh;		      /* %gs:0x0000 */
+  uint64_t current_top_of_stack;      /* %gs:0x0008 */
+  uint64_t current_bottom_of_stack;   /* %gs:0x0010 */
+  uint64_t sub_system_tib;	      /* %gs:0x0018 */
+  uint64_t fiber_data;		      /* %gs:0x0020 */
+  uint64_t arbitrary_data_slot;	      /* %gs:0x0028 */
+  uint64_t linear_address_tib;	      /* %gs:0x0030 */
+  uint64_t environment_pointer;	      /* %gs:0x0038 */
+  uint64_t process_id;		      /* %gs:0x0040 */
+  uint64_t current_thread_id;	      /* %gs:0x0048 */
+  uint64_t active_rpc_handle;	      /* %gs:0x0050 */
+  uint64_t thread_local_storage;      /* %gs:0x0058 */
+  uint64_t process_environment_block; /* %gs:0x0060 */
+  uint64_t last_error_number;	      /* %gs:0x0068 */
+} thread_information_64;
 
+static const char *TIB_NAME[] = {
+  " current_seh                 ", /* %fs:0x0000 */
+  " current_top_of_stack        ", /* %fs:0x0004 */
+  " current_bottom_of_stack     ", /* %fs:0x0008 */
+  " sub_system_tib              ", /* %fs:0x000c */
+  " fiber_data                  ", /* %fs:0x0010 */
+  " arbitrary_data_slot         ", /* %fs:0x0014 */
+  " linear_address_tib          ", /* %fs:0x0018 */
+  " environment_pointer         ", /* %fs:0x001c */
+  " process_id                  ", /* %fs:0x0020 */
+  " current_thread_id           ", /* %fs:0x0024 */
+  " active_rpc_handle           ", /* %fs:0x0028 */
+  " thread_local_storage        ", /* %fs:0x002c */
+  " process_environment_block   ", /* %fs:0x0030 */
+  " last_error_number           "  /* %fs:0x0034 */
+};
 
-static const char* TIB_NAME[] =
-  {
-    " current_seh                 ",	/* %fs:0x0000 */
-    " current_top_of_stack        ", 	/* %fs:0x0004 */
-    " current_bottom_of_stack     ",	/* %fs:0x0008 */
-    " sub_system_tib              ",	/* %fs:0x000c */
-    " fiber_data                  ",	/* %fs:0x0010 */
-    " arbitrary_data_slot         ",	/* %fs:0x0014 */
-    " linear_address_tib          ",	/* %fs:0x0018 */
-    " environment_pointer         ",	/* %fs:0x001c */
-    " process_id                  ",	/* %fs:0x0020 */
-    " current_thread_id           ",	/* %fs:0x0024 */
-    " active_rpc_handle           ",	/* %fs:0x0028 */
-    " thread_local_storage        ",	/* %fs:0x002c */
-    " process_environment_block   ",	/* %fs:0x0030 */
-    " last_error_number           "	/* %fs:0x0034 */
-  };
-
-static const int MAX_TIB32 =
-  sizeof (thread_information_32) / sizeof (uint32_t);
-static const int MAX_TIB64 =
-  sizeof (thread_information_64) / sizeof (uint64_t);
+static const int MAX_TIB32
+  = sizeof (thread_information_32) / sizeof (uint32_t);
+static const int MAX_TIB64
+  = sizeof (thread_information_64) / sizeof (uint64_t);
 static const int FULL_TIB_SIZE = 0x1000;
 
 static bool maint_display_all_tib = false;
@@ -183,7 +179,7 @@ struct windows_gdbarch_data
 };
 
 static const registry<gdbarch>::key<windows_gdbarch_data>
-     windows_gdbarch_data_handle;
+  windows_gdbarch_data_handle;
 
 /* Get windows_gdbarch_data of an arch.  */
 
@@ -214,17 +210,14 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   if (windows_gdbarch_data->tib_ptr_type != nullptr)
     return windows_gdbarch_data->tib_ptr_type;
 
-  dword_ptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
-				 1, "DWORD_PTR");
-  dword32_type = arch_integer_type (gdbarch, 32,
-				 1, "DWORD32");
-  word_type = arch_integer_type (gdbarch, 16,
-				 1, "WORD");
-  wchar_type = arch_integer_type (gdbarch, 16,
-				  1, "wchar_t");
+  dword_ptr_type
+    = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "DWORD_PTR");
+  dword32_type = arch_integer_type (gdbarch, 32, 1, "DWORD32");
+  word_type = arch_integer_type (gdbarch, 16, 1, "WORD");
+  wchar_type = arch_integer_type (gdbarch, 16, 1, "wchar_t");
   void_ptr_type = lookup_pointer_type (builtin_type (gdbarch)->builtin_void);
-  wchar_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
-				      NULL, wchar_type);
+  wchar_ptr_type
+    = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch), NULL, wchar_type);
 
   /* list entry */
 
@@ -244,8 +237,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   seh_type->set_name (xstrdup ("seh"));
 
   seh_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    void_ptr_type->length () * TARGET_CHAR_BIT,
-			    NULL);
+			    void_ptr_type->length () * TARGET_CHAR_BIT, NULL);
   seh_ptr_type->set_target_type (seh_type);
 
   append_composite_type_field (seh_type, "next_seh", seh_ptr_type);
@@ -264,19 +256,18 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (peb_ldr_type, "in_init_order", list_type);
   append_composite_type_field (peb_ldr_type, "entry_in_progress",
 			       void_ptr_type);
-  peb_ldr_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-				void_ptr_type->length () * TARGET_CHAR_BIT,
-				NULL);
+  peb_ldr_ptr_type
+    = arch_type (gdbarch, TYPE_CODE_PTR,
+		 void_ptr_type->length () * TARGET_CHAR_BIT, NULL);
   peb_ldr_ptr_type->set_target_type (peb_ldr_type);
 
   /* struct UNICODE_STRING */
-  uni_str_type = arch_composite_type (gdbarch, "unicode_string",
-				      TYPE_CODE_STRUCT);
+  uni_str_type
+    = arch_composite_type (gdbarch, "unicode_string", TYPE_CODE_STRUCT);
 
   append_composite_type_field (uni_str_type, "length", word_type);
   append_composite_type_field (uni_str_type, "maximum_length", word_type);
-  append_composite_type_field_aligned (uni_str_type, "buffer",
-				       wchar_ptr_type,
+  append_composite_type_field_aligned (uni_str_type, "buffer", wchar_ptr_type,
 				       wchar_ptr_type->length ());
 
   /* struct _RTL_USER_PROCESS_PARAMETERS */
@@ -310,16 +301,14 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (rupp_type, "fill_attribute", dword32_type);
   append_composite_type_field (rupp_type, "window_flags", dword32_type);
   append_composite_type_field (rupp_type, "show_window_flags", dword32_type);
-  append_composite_type_field_aligned (rupp_type, "window_title",
-				       uni_str_type,
+  append_composite_type_field_aligned (rupp_type, "window_title", uni_str_type,
 				       void_ptr_type->length ());
   append_composite_type_field (rupp_type, "desktop_info", uni_str_type);
   append_composite_type_field (rupp_type, "shell_info", uni_str_type);
   append_composite_type_field (rupp_type, "runtime_data", uni_str_type);
 
-  rupp_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
-				     NULL, rupp_type);
-
+  rupp_ptr_type
+    = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch), NULL, rupp_type);
 
   /* struct process environment block */
   peb_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
@@ -335,10 +324,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (peb_type, "process_heap", void_ptr_type);
   append_composite_type_field (peb_type, "fast_peb_lock", void_ptr_type);
   peb_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    void_ptr_type->length () * TARGET_CHAR_BIT,
-			    NULL);
+			    void_ptr_type->length () * TARGET_CHAR_BIT, NULL);
   peb_ptr_type->set_target_type (peb_type);
-
 
   /* struct thread information block */
   tib_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
@@ -379,8 +366,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (tib_type, "last_error_number", dword_ptr_type);
 
   tib_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
-			    void_ptr_type->length () * TARGET_CHAR_BIT,
-			    NULL);
+			    void_ptr_type->length () * TARGET_CHAR_BIT, NULL);
   tib_ptr_type->set_target_type (tib_type);
 
   windows_gdbarch_data->tib_ptr_type = tib_ptr_type;
@@ -403,7 +389,7 @@ tlb_value_read (struct value *val)
   struct type *type = check_typedef (value_type (val));
 
   if (!target_get_tib_address (inferior_ptid, &tlb))
-    error (_("Unable to read tlb"));
+    error (_ ("Unable to read tlb"));
   store_typed_address (value_contents_raw (val).data (), type, tlb);
 }
 
@@ -413,15 +399,11 @@ tlb_value_read (struct value *val)
 static void
 tlb_value_write (struct value *v, struct value *fromval)
 {
-  error (_("Impossible to change the Thread Local Base"));
+  error (_ ("Impossible to change the Thread Local Base"));
 }
 
-static const struct lval_funcs tlb_value_funcs =
-  {
-    tlb_value_read,
-    tlb_value_write
-  };
-
+static const struct lval_funcs tlb_value_funcs
+  = { tlb_value_read, tlb_value_write };
 
 /* Return a new value with the correct type for the tlb object of
    the current thread using architecture GDBARCH.  Return a void value
@@ -438,7 +420,6 @@ tlb_make_value (struct gdbarch *gdbarch, struct internalvar *var, void *ignore)
 
   return allocate_value (builtin_type (gdbarch)->builtin_void);
 }
-
 
 /* Display thread information block of a given thread.  */
 
@@ -472,27 +453,28 @@ display_one_tib (ptid_t ptid)
       tib_size = FULL_TIB_SIZE;
       max = tib_size / size;
     }
-  
+
   tib = (gdb_byte *) alloca (tib_size);
 
   if (target_get_tib_address (ptid, &thread_local_base) == 0)
     {
-      gdb_printf (_("Unable to get thread local base for %s\n"),
+      gdb_printf (_ ("Unable to get thread local base for %s\n"),
 		  target_pid_to_str (ptid).c_str ());
       return -1;
     }
 
   if (target_read (current_inferior ()->top_target (), TARGET_OBJECT_MEMORY,
-		   NULL, tib, thread_local_base, tib_size) != tib_size)
+		   NULL, tib, thread_local_base, tib_size)
+      != tib_size)
     {
-      gdb_printf (_("Unable to read thread information "
-		    "block for %s at address %s\n"),
-		  target_pid_to_str (ptid).c_str (), 
+      gdb_printf (_ ("Unable to read thread information "
+		     "block for %s at address %s\n"),
+		  target_pid_to_str (ptid).c_str (),
 		  paddress (target_gdbarch (), thread_local_base));
       return -1;
     }
 
-  gdb_printf (_("Thread Information Block %s at %s\n"),
+  gdb_printf (_ ("Thread Information Block %s at %s\n"),
 	      target_pid_to_str (ptid).c_str (),
 	      paddress (target_gdbarch (), thread_local_base));
 
@@ -504,26 +486,26 @@ display_one_tib (ptid_t ptid)
     {
       val = extract_unsigned_integer (index, size, byte_order);
       if (i < max_name)
-	gdb_printf (_("%s is 0x%s\n"), TIB_NAME[i], phex (val, size));
+	gdb_printf (_ ("%s is 0x%s\n"), TIB_NAME[i], phex (val, size));
       else if (val != 0)
-	gdb_printf (_("TIB[0x%s] is 0x%s\n"), phex (i * size, 2),
+	gdb_printf (_ ("TIB[0x%s] is 0x%s\n"), phex (i * size, 2),
 		    phex (val, size));
       index += size;
-    } 
-  return 1;  
+    }
+  return 1;
 }
 
 /* Display thread information block of the current thread.  */
 
 static void
-display_tib (const char * args, int from_tty)
+display_tib (const char *args, int from_tty)
 {
   if (inferior_ptid != null_ptid)
     display_one_tib (inferior_ptid);
 }
 
 void
-windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
+windows_xfer_shared_library (const char *so_name, CORE_ADDR load_addr,
 			     CORE_ADDR *text_offset_cached,
 			     struct gdbarch *gdbarch, struct obstack *obstack)
 {
@@ -568,9 +550,9 @@ windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
    name, but in a different DLL.  */
 
 static void
-windows_iterate_over_objfiles_in_search_order
-  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
-   objfile *current_objfile)
+windows_iterate_over_objfiles_in_search_order (
+  gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+  objfile *current_objfile)
 {
   if (current_objfile)
     {
@@ -588,23 +570,25 @@ windows_iterate_over_objfiles_in_search_order
 
 static void
 show_maint_show_all_tib (struct ui_file *file, int from_tty,
-		struct cmd_list_element *c, const char *value)
+			 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Show all non-zero elements of "
-		      "Thread Information Block is %s.\n"), value);
+  gdb_printf (file,
+	      _ ("Show all non-zero elements of "
+		 "Thread Information Block is %s.\n"),
+	      value);
 }
 
-
 static int w32_prefix_command_valid = 0;
+
 void
 init_w32_command_list (void)
 {
   if (!w32_prefix_command_valid)
     {
-      add_basic_prefix_cmd
-	("w32", class_info,
-	 _("Print information specific to Win32 debugging."),
-	 &info_w32_cmdlist, 0, &infolist);
+      add_basic_prefix_cmd (
+	"w32", class_info,
+	_ ("Print information specific to Win32 debugging."),
+	&info_w32_cmdlist, 0, &infolist);
       w32_prefix_command_valid = 1;
     }
 }
@@ -744,8 +728,8 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
 
   type = arch_type (gdbarch, TYPE_CODE_ENUM, bit, name);
   type->set_num_fields (count);
-  type->set_fields
-    ((struct field *) TYPE_ZALLOC (type, sizeof (struct field) * count));
+  type->set_fields ((struct field *) TYPE_ZALLOC (type, sizeof (struct field)
+							  * count));
   type->set_is_unsigned (true);
 
   for (i = 0; i < count; i++)
@@ -757,8 +741,7 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
   return type;
 }
 
-static const struct enum_value_name exception_values[] =
-{
+static const struct enum_value_name exception_values[] = {
   { 0x40000015, "FATAL_APP_EXIT" },
   { 0x4000001E, "WX86_SINGLE_STEP" },
   { 0x4000001F, "WX86_BREAKPOINT" },
@@ -787,8 +770,7 @@ static const struct enum_value_name exception_values[] =
   { 0xC0000409, "FAST_FAIL" },
 };
 
-static const struct enum_value_name violation_values[] =
-{
+static const struct enum_value_name violation_values[] = {
   { 0, "READ_ACCESS_VIOLATION" },
   { 1, "WRITE_ACCESS_VIOLATION" },
   { 8, "DATA_EXECUTION_PREVENTION_VIOLATION" },
@@ -808,22 +790,21 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   if (windows_gdbarch_data->siginfo_type != NULL)
     return windows_gdbarch_data->siginfo_type;
 
-  dword_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
-				  1, "DWORD");
+  dword_type
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "DWORD");
   pvoid_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch), "PVOID",
 				  builtin_type (gdbarch)->builtin_void);
-  ulongptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
-				     1, "ULONG_PTR");
+  ulongptr_type
+    = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "ULONG_PTR");
 
   /* ExceptionCode value names */
-  code_enum = create_enum (gdbarch, gdbarch_int_bit (gdbarch),
-			   "ExceptionCode", exception_values,
-			   ARRAY_SIZE (exception_values));
+  code_enum = create_enum (gdbarch, gdbarch_int_bit (gdbarch), "ExceptionCode",
+			   exception_values, ARRAY_SIZE (exception_values));
 
   /* ACCESS_VIOLATION type names */
-  violation_enum = create_enum (gdbarch, gdbarch_ptr_bit (gdbarch),
-				"ViolationType", violation_values,
-				ARRAY_SIZE (violation_values));
+  violation_enum
+    = create_enum (gdbarch, gdbarch_ptr_bit (gdbarch), "ViolationType",
+		   violation_values, ARRAY_SIZE (violation_values));
 
   /* ACCESS_VIOLATION information */
   violation_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
@@ -839,8 +820,8 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   append_composite_type_field (para_type, "AccessViolationInformation",
 			       violation_type);
 
-  siginfo_type = arch_composite_type (gdbarch, "EXCEPTION_RECORD",
-				      TYPE_CODE_STRUCT);
+  siginfo_type
+    = arch_composite_type (gdbarch, "EXCEPTION_RECORD", TYPE_CODE_STRUCT);
   siginfo_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
 					NULL, siginfo_type);
 
@@ -850,12 +831,11 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   append_composite_type_field (siginfo_type, "ExceptionFlags", dword_type);
   append_composite_type_field (siginfo_type, "ExceptionRecord",
 			       siginfo_ptr_type);
-  append_composite_type_field (siginfo_type, "ExceptionAddress",
-			       pvoid_type);
+  append_composite_type_field (siginfo_type, "ExceptionAddress", pvoid_type);
   append_composite_type_field (siginfo_type, "NumberParameters", dword_type);
   /* The 64-bit variant needs some padding.  */
-  append_composite_type_field_aligned (siginfo_type, "",
-				       para_type, ulongptr_type->length ());
+  append_composite_type_field_aligned (siginfo_type, "", para_type,
+				       ulongptr_type->length ());
 
   windows_gdbarch_data->siginfo_type = siginfo_type;
 
@@ -890,8 +870,7 @@ windows_solib_create_inferior_hook (int from_tty)
     }
   CORE_ADDR tlb;
   gdb_byte buf[8];
-  if (target_has_execution ()
-      && target_get_tib_address (inferior_ptid, &tlb)
+  if (target_has_execution () && target_get_tib_address (inferior_ptid, &tlb)
       && !target_read_memory (tlb + peb_offset, buf, ptr_bytes))
     {
       CORE_ADDR peb = extract_unsigned_integer (buf, ptr_bytes, byte_order);
@@ -925,8 +904,8 @@ windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
      `c:\Program Files\Foo App\mydll.dll', for example.  */
   set_gdbarch_has_dos_based_file_system (gdbarch, 1);
 
-  set_gdbarch_iterate_over_objfiles_in_search_order
-    (gdbarch, windows_iterate_over_objfiles_in_search_order);
+  set_gdbarch_iterate_over_objfiles_in_search_order (
+    gdbarch, windows_iterate_over_objfiles_in_search_order);
 
   windows_so_ops = solib_target_so_ops;
   windows_so_ops.solib_create_inferior_hook
@@ -955,8 +934,7 @@ cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* Implementation of `tlb' variable.  */
 
-static const struct internalvar_funcs tlb_funcs =
-{
+static const struct internalvar_funcs tlb_funcs = {
   tlb_make_value,
   NULL,
 };
@@ -992,7 +970,8 @@ is_linked_with_cygwin_dll (bfd *abfd)
 
   bfd_size_type idata_section_size = bfd_section_size (idata_section);
   internal_extra_pe_aouthdr *pe_extra = &pe_data (abfd)->pe_opthdr;
-  bfd_vma import_table_va = pe_extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+  bfd_vma import_table_va
+    = pe_extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
   bfd_vma idata_section_va = bfd_section_vma (idata_section);
 
   /* The section's virtual address as reported by BFD has the image base applied,
@@ -1006,7 +985,7 @@ is_linked_with_cygwin_dll (bfd *abfd)
   if (import_table_va < idata_section_va
       || import_table_va >= idata_section_end_va)
     {
-      warning (_("\
+      warning (_ ("\
 %s: import table's virtual address (%s) is outside .idata \
 section's range [%s, %s]."),
 	       bfd_get_filename (abfd), hex_string (import_table_va),
@@ -1020,9 +999,10 @@ section's range [%s, %s]."),
 
   /* Get the section's data.  */
   gdb::byte_vector idata_contents;
-  if (!gdb_bfd_get_full_section_contents (abfd, idata_section, &idata_contents))
+  if (!gdb_bfd_get_full_section_contents (abfd, idata_section,
+					  &idata_contents))
     {
-      warning (_("%s: failed to get contents of .idata section."),
+      warning (_ ("%s: failed to get contents of .idata section."),
 	       bfd_get_filename (abfd));
       return false;
     }
@@ -1039,16 +1019,18 @@ section's range [%s, %s]."),
       /* Is there enough space left in the section for another entry?  */
       if (iter + sizeof (pe_import_directory_entry) > end)
 	{
-	  warning (_("%s: unexpected end of .idata section."),
+	  warning (_ ("%s: unexpected end of .idata section."),
 		   bfd_get_filename (abfd));
 	  break;
 	}
 
-      pe_import_directory_entry *dir_entry = (pe_import_directory_entry *) iter;
+      pe_import_directory_entry *dir_entry
+	= (pe_import_directory_entry *) iter;
 
       /* Is it the end of list marker?  */
       if (memcmp (dir_entry, &null_dir_entry,
-		  sizeof (pe_import_directory_entry)) == 0)
+		  sizeof (pe_import_directory_entry))
+	  == 0)
 	break;
 
       bfd_vma name_va = dir_entry->name_rva;
@@ -1057,7 +1039,7 @@ section's range [%s, %s]."),
 	 address, there's a problem.  */
       if (name_va < idata_section_va || name_va >= idata_section_end_va)
 	{
-	  warning (_("\
+	  warning (_ ("\
 %s: name's virtual address (%s) is outside .idata section's \
 range [%s, %s]."),
 		   bfd_get_filename (abfd), hex_string (name_va),
@@ -1106,8 +1088,8 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
     return;
 
   gdb::byte_vector buf (bfd_section_size (sect) + 1);
-  if (!bfd_get_section_contents (abfd, sect,
-				 buf.data (), 0, bfd_section_size (sect)))
+  if (!bfd_get_section_contents (abfd, sect, buf.data (), 0,
+				 bfd_section_size (sect)))
     return;
   /* We're going to treat part of the buffer as a string, so make sure
      it is NUL-terminated.  */
@@ -1143,15 +1125,14 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
 
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)
-    windows_xfer_shared_library (module_name, base_addr,
-				 NULL, data->gdbarch, data->obstack);
+    windows_xfer_shared_library (module_name, base_addr, NULL, data->gdbarch,
+				 data->obstack);
   data->module_count++;
 }
 
 ULONGEST
-windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
-				  gdb_byte *readbuf,
-				  ULONGEST offset, ULONGEST len)
+windows_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf,
+				    ULONGEST offset, ULONGEST len)
 {
   struct obstack obstack;
   const char *buf;
@@ -1160,9 +1141,7 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 
   obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list>\n");
-  bfd_map_over_sections (core_bfd,
-			 core_process_module_section,
-			 &data);
+  bfd_map_over_sections (core_bfd, core_process_module_section, &data);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
   buf = (const char *) obstack_finish (&obstack);
@@ -1190,26 +1169,27 @@ windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 }
 
 void _initialize_windows_tdep ();
+
 void
 _initialize_windows_tdep ()
 {
   init_w32_command_list ();
   cmd_list_element *info_w32_thread_information_block_cmd
     = add_cmd ("thread-information-block", class_info, display_tib,
-	       _("Display thread information block."),
-	       &info_w32_cmdlist);
+	       _ ("Display thread information block."), &info_w32_cmdlist);
   add_alias_cmd ("tib", info_w32_thread_information_block_cmd, class_info, 1,
 		 &info_w32_cmdlist);
 
   add_setshow_boolean_cmd ("show-all-tib", class_maintenance,
-			   &maint_display_all_tib, _("\
-Set whether to display all non-zero fields of thread information block."), _("\
-Show whether to display all non-zero fields of thread information block."), _("\
+			   &maint_display_all_tib, _ ("\
+Set whether to display all non-zero fields of thread information block."),
+			   _ ("\
+Show whether to display all non-zero fields of thread information block."),
+			   _ ("\
 Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, all non-zero fields of thread information block are displayed,\n\
 even if their meaning is unknown."),
-			   NULL,
-			   show_maint_show_all_tib,
+			   NULL, show_maint_show_all_tib,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 

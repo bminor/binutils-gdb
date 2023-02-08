@@ -52,8 +52,10 @@ DIAGNOSTIC_POP
    gdb::string_view.  */
 #define GDB_STRING_VIEW
 
-namespace selftests {
-namespace string_view {
+namespace selftests
+{
+namespace string_view
+{
 
 /* The actual tests live in separate files, which were originally
    copied over from libstdc++'s testsuite.  To preserve the structure
@@ -184,6 +186,7 @@ run_tests ()
 #endif /* __cplusplus < 201703L */
 
 void _initialize_string_view_selftests ();
+
 void
 _initialize_string_view_selftests ()
 {

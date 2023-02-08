@@ -26,7 +26,7 @@
 /* The general-purpose regset consists of 31 X registers, plus SP, PC,
    and PSTATE registers, as defined in the AArch64 port of the Linux
    kernel.  */
-#define AARCH64_LINUX_SIZEOF_GREGSET  (34 * X_REGISTER_SIZE)
+#define AARCH64_LINUX_SIZEOF_GREGSET (34 * X_REGISTER_SIZE)
 
 /* The fp regset consists of 32 V registers, plus FPCR and FPSR which
    are 4 bytes wide each, and the whole structure is padded to 128 bit

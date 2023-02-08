@@ -22,7 +22,7 @@
 
 #include "gdbsupport/run-time-clock.h"
 #include <chrono>
-#include "mi-cmds.h"  /* For enum print_values.  */
+#include "mi-cmds.h" /* For enum print_values.  */
 
 /* MI parser */
 
@@ -35,34 +35,35 @@ struct mi_timestamp
 };
 
 enum mi_command_type
-  {
-    MI_COMMAND, CLI_COMMAND
-  };
+{
+  MI_COMMAND,
+  CLI_COMMAND
+};
 
 struct mi_parse
-  {
-    mi_parse ();
-    ~mi_parse ();
+{
+  mi_parse ();
+  ~mi_parse ();
 
-    DISABLE_COPY_AND_ASSIGN (mi_parse);
+  DISABLE_COPY_AND_ASSIGN (mi_parse);
 
-    enum mi_command_type op;
-    char *command;
-    char *token;
-    const struct mi_command *cmd;
-    struct mi_timestamp *cmd_start;
-    char *args;
-    char **argv;
-    int argc;
-    int all;
-    int thread_group; /* At present, the same as inferior number.  */
-    int thread;
-    int frame;
+  enum mi_command_type op;
+  char *command;
+  char *token;
+  const struct mi_command *cmd;
+  struct mi_timestamp *cmd_start;
+  char *args;
+  char **argv;
+  int argc;
+  int all;
+  int thread_group; /* At present, the same as inferior number.  */
+  int thread;
+  int frame;
 
-    /* The language that should be used to evaluate the MI command.
+  /* The language that should be used to evaluate the MI command.
        Ignored if set to language_unknown.  */
-    enum language language;
-  };
+  enum language language;
+};
 
 /* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is
    invalid, an exception is thrown.  For an MI_COMMAND COMMAND, ARGS

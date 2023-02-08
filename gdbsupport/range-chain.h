@@ -29,10 +29,9 @@ struct range_chain
   class iterator
   {
   public:
-
     iterator (const std::vector<Range> &ranges, size_t idx)
       : m_index (idx),
-	m_ranges (ranges)
+        m_ranges (ranges)
     {
       skip_empty ();
     }
@@ -40,27 +39,24 @@ struct range_chain
     bool operator== (const iterator &other) const
     {
       if (m_index != other.m_index || &m_ranges != &other.m_ranges)
-	return false;
+        return false;
       if (m_current.has_value () != other.m_current.has_value ())
-	return false;
+        return false;
       if (m_current.has_value ())
-	return *m_current == *other.m_current;
+        return *m_current == *other.m_current;
       return true;
     }
 
-    bool operator!= (const iterator &other) const
-    {
-      return !(*this == other);
-    }
+    bool operator!= (const iterator &other) const { return !(*this == other); }
 
     iterator &operator++ ()
     {
       ++*m_current;
       if (*m_current == m_ranges[m_index].end ())
-	{
-	  ++m_index;
-	  skip_empty ();
-	}
+        {
+          ++m_index;
+          skip_empty ();
+        }
       return *this;
     }
 
@@ -76,11 +72,11 @@ struct range_chain
     void skip_empty ()
     {
       for (; m_index < m_ranges.size (); ++m_index)
-	{
-	  m_current = m_ranges[m_index].begin ();
-	  if (*m_current != m_ranges[m_index].end ())
-	    return;
-	}
+        {
+          m_current = m_ranges[m_index].begin ();
+          if (*m_current != m_ranges[m_index].end ())
+            return;
+        }
       m_current.reset ();
     }
 
@@ -97,23 +93,15 @@ struct range_chain
 
   /* Create a new range_chain.  */
   template<typename T>
-  range_chain (T &&ranges)
-    : m_ranges (std::forward<T> (ranges))
+  range_chain (T &&ranges) : m_ranges (std::forward<T> (ranges))
   {
   }
 
-  iterator begin () const
-  {
-    return iterator (m_ranges, 0);
-  }
+  iterator begin () const { return iterator (m_ranges, 0); }
 
-  iterator end () const
-  {
-    return iterator (m_ranges, m_ranges.size ());
-  }
+  iterator end () const { return iterator (m_ranges, m_ranges.size ()); }
 
 private:
-
   /* The sub-ranges.  */
   std::vector<Range> m_ranges;
 };

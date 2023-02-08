@@ -33,12 +33,10 @@ struct dynamic_prop;
 class compile_instance
 {
 public:
+
   compile_instance (struct gcc_base_context *gcc_fe, const char *options);
 
-  virtual ~compile_instance ()
-  {
-    m_gcc_fe->ops->destroy (m_gcc_fe);
-  }
+  virtual ~compile_instance () { m_gcc_fe->ops->destroy (m_gcc_fe); }
 
   /* Returns the GCC options to be passed during compilation.  */
   const std::string &gcc_target_options () const
@@ -96,28 +94,16 @@ public:
   bool compile (const char *filename, int verbose_level = -1);
 
   /* Set the scope type for this compile.  */
-  void set_scope (enum compile_i_scope_types scope)
-  {
-    m_scope = scope;
-  }
+  void set_scope (enum compile_i_scope_types scope) { m_scope = scope; }
 
   /* Return the scope type.  */
-  enum compile_i_scope_types scope () const
-  {
-    return m_scope;
-  }
+  enum compile_i_scope_types scope () const { return m_scope; }
 
   /* Set the block to be used for symbol searches.  */
-  void set_block (const struct block *block)
-  {
-    m_block = block;
-  }
+  void set_block (const struct block *block) { m_block = block; }
 
   /* Return the search block.  */
-  const struct block *block () const
-  {
-    return m_block;
-  }
+  const struct block *block () const { return m_block; }
 
 protected:
 
@@ -175,17 +161,11 @@ extern void eval_compile_command (struct command_line *cmd,
    PER_OBJFILE is the per-objfile object also used for looking up various other
    things.  */
 
-extern void compile_dwarf_expr_to_c (string_file *stream,
-				     const char *result_name,
-				     struct symbol *sym,
-				     CORE_ADDR pc,
-				     struct gdbarch *arch,
-				     std::vector<bool> &registers_used,
-				     unsigned int addr_size,
-				     const gdb_byte *op_ptr,
-				     const gdb_byte *op_end,
-				     dwarf2_per_cu_data *per_cu,
-				     dwarf2_per_objfile *per_objfile);
+extern void compile_dwarf_expr_to_c (
+  string_file *stream, const char *result_name, struct symbol *sym,
+  CORE_ADDR pc, struct gdbarch *arch, std::vector<bool> &registers_used,
+  unsigned int addr_size, const gdb_byte *op_ptr, const gdb_byte *op_end,
+  dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile);
 
 /* Compile a DWARF bounds expression to C, suitable for use by the
    compiler.
@@ -214,17 +194,12 @@ extern void compile_dwarf_expr_to_c (string_file *stream,
    PER_OBJFILE is the per-objfile object also used for looking up various other
    things.  */
 
-extern void compile_dwarf_bounds_to_c (string_file *stream,
-				       const char *result_name,
-				       const struct dynamic_prop *prop,
-				       struct symbol *sym, CORE_ADDR pc,
-				       struct gdbarch *arch,
-				       std::vector<bool> &registers_used,
-				       unsigned int addr_size,
-				       const gdb_byte *op_ptr,
-				       const gdb_byte *op_end,
-				       dwarf2_per_cu_data *per_cu,
-				       dwarf2_per_objfile *per_objfile);
+extern void compile_dwarf_bounds_to_c (
+  string_file *stream, const char *result_name,
+  const struct dynamic_prop *prop, struct symbol *sym, CORE_ADDR pc,
+  struct gdbarch *arch, std::vector<bool> &registers_used,
+  unsigned int addr_size, const gdb_byte *op_ptr, const gdb_byte *op_end,
+  dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile);
 
 extern void compile_print_value (struct value *val, void *data_voidp);
 

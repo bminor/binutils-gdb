@@ -76,9 +76,9 @@ dwarf2_cu::start_compunit_symtab (const char *name, const char *comp_dir,
       name_for_id = name_for_id_holder.c_str ();
     }
 
-  m_builder.reset (new struct buildsym_compunit
-		   (this->per_objfile->objfile,
-		    name, comp_dir, name_for_id, lang (), low_pc));
+  m_builder.reset (new struct buildsym_compunit (this->per_objfile->objfile,
+						 name, comp_dir, name_for_id,
+						 lang (), low_pc));
 
   list_in_scope = get_builder ()->get_file_symbols ();
 
@@ -158,9 +158,8 @@ dwarf2_cu::add_dependence (struct dwarf2_per_cu_data *ref_per_cu)
 
   if (m_dependencies == nullptr)
     m_dependencies
-      = htab_create_alloc_ex (5, htab_hash_pointer, htab_eq_pointer,
-			      NULL, &comp_unit_obstack,
-			      hashtab_obstack_allocate,
+      = htab_create_alloc_ex (5, htab_hash_pointer, htab_eq_pointer, NULL,
+			      &comp_unit_obstack, hashtab_obstack_allocate,
 			      dummy_obstack_deallocate);
 
   slot = htab_find_slot (m_dependencies, ref_per_cu, INSERT);

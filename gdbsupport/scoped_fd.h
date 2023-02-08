@@ -30,8 +30,7 @@ class scoped_fd
 public:
   explicit scoped_fd (int fd = -1) noexcept : m_fd (fd) {}
 
-  scoped_fd (scoped_fd &&other) noexcept
-    : m_fd (other.m_fd)
+  scoped_fd (scoped_fd &&other) noexcept : m_fd (other.m_fd)
   {
     other.m_fd = -1;
   }
@@ -46,10 +45,10 @@ public:
   {
     if (m_fd != other.m_fd)
       {
-	if (m_fd >= 0)
-	  close (m_fd);
-	m_fd = other.m_fd;
-	other.m_fd = -1;
+        if (m_fd >= 0)
+          close (m_fd);
+        m_fd = other.m_fd;
+        other.m_fd = -1;
       }
     return *this;
   }
@@ -75,10 +74,7 @@ public:
     return result;
   }
 
-  int get () const noexcept
-  {
-    return m_fd;
-  }
+  int get () const noexcept { return m_fd; }
 
 private:
   int m_fd;

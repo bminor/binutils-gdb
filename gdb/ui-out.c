@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "expression.h"		/* For language.h */
+#include "expression.h" /* For language.h */
 #include "language.h"
 #include "ui-out.h"
 #include "gdbsupport/format.h"
@@ -32,50 +32,36 @@
 #include <memory>
 #include <string>
 
-namespace {
+namespace
+{
 
 /* A header of a ui_out_table.  */
 
 class ui_out_hdr
 {
- public:
+public:
 
   explicit ui_out_hdr (int number, int min_width, ui_align alignment,
 		       const std::string &name, const std::string &header)
-  : m_number (number),
-    m_min_width (min_width),
-    m_alignment (alignment),
-    m_name (name),
-    m_header (header)
+    : m_number (number),
+      m_min_width (min_width),
+      m_alignment (alignment),
+      m_name (name),
+      m_header (header)
   {
   }
 
-  int number () const
-  {
-    return m_number;
-  }
+  int number () const { return m_number; }
 
-  int min_width () const
-  {
-    return m_min_width;
-  }
+  int min_width () const { return m_min_width; }
 
-  ui_align alignment () const
-  {
-    return m_alignment;
-  }
+  ui_align alignment () const { return m_alignment; }
 
-  const std::string &header () const
-  {
-    return m_header;
-  }
+  const std::string &header () const { return m_header; }
 
-  const std::string &name () const
-  {
-    return m_name;
-  }
+  const std::string &name () const { return m_name; }
 
- private:
+private:
 
   /* The number of the table column this header represents, 1-based.  */
   int m_number;
@@ -101,30 +87,21 @@ class ui_out_hdr
 
 class ui_out_level
 {
- public:
+public:
 
   explicit ui_out_level (ui_out_type type)
-  : m_type (type),
-    m_field_count (0)
+    : m_type (type),
+      m_field_count (0)
   {
   }
 
-  ui_out_type type () const
-  {
-    return m_type;
-  }
+  ui_out_type type () const { return m_type; }
 
-  int field_count () const
-  {
-    return m_field_count;
-  }
+  int field_count () const { return m_field_count; }
 
-  void inc_field_count ()
-  {
-    m_field_count++;
-  }
+  void inc_field_count () { m_field_count++; }
 
- private:
+private:
 
   /* The type of this level.  */
   ui_out_type m_type;
@@ -139,7 +116,7 @@ class ui_out_level
 
 class ui_out_table
 {
- public:
+public:
 
   /* States (steps) of a table generation.  */
 
@@ -153,10 +130,10 @@ class ui_out_table
   };
 
   explicit ui_out_table (int entry_level, int nr_cols, const std::string &id)
-  : m_state (state::HEADERS),
-    m_entry_level (entry_level),
-    m_nr_cols (nr_cols),
-    m_id (id)
+    : m_state (state::HEADERS),
+      m_entry_level (entry_level),
+      m_nr_cols (nr_cols),
+      m_id (id)
   {
   }
 
@@ -175,7 +152,7 @@ class ui_out_table
      the header iterator.  Return false if there was no next header.  */
 
   bool get_next_header (int *colno, int *width, ui_align *alignment,
-		       const char **col_hdr);
+			const char **col_hdr);
 
   bool query_field (int colno, int *width, int *alignment,
 		    const char **col_name) const;
@@ -184,7 +161,7 @@ class ui_out_table
 
   int entry_level () const;
 
- private:
+private:
 
   state m_state;
 
@@ -209,18 +186,19 @@ class ui_out_table
 
 /* See ui-out.h.  */
 
-void ui_out_table::start_body ()
+void
+ui_out_table::start_body ()
 {
   if (m_state != state::HEADERS)
-    internal_error (_("extra table_body call not allowed; there must be only "
-		      "one table_body after a table_begin and before a "
-		      "table_end."));
+    internal_error (_ ("extra table_body call not allowed; there must be only "
+		       "one table_body after a table_begin and before a "
+		       "table_end."));
 
   /* Check if the number of defined headers matches the number of expected
      columns.  */
   if (m_headers.size () != m_nr_cols)
-    internal_error (_("number of headers differ from number of table "
-		      "columns."));
+    internal_error (_ ("number of headers differ from number of table "
+		       "columns."));
 
   m_state = state::BODY;
   m_headers_iterator = m_headers.begin ();
@@ -228,32 +206,35 @@ void ui_out_table::start_body ()
 
 /* See ui-out.h.  */
 
-void ui_out_table::append_header (int width, ui_align alignment,
-				  const std::string &col_name,
-				  const std::string &col_hdr)
+void
+ui_out_table::append_header (int width, ui_align alignment,
+			     const std::string &col_name,
+			     const std::string &col_hdr)
 {
   if (m_state != state::HEADERS)
-    internal_error (_("table header must be specified after table_begin and "
-		      "before table_body."));
+    internal_error (_ ("table header must be specified after table_begin and "
+		       "before table_body."));
 
   std::unique_ptr<ui_out_hdr> header (new ui_out_hdr (m_headers.size () + 1,
-							width, alignment,
-							col_name, col_hdr));
+						      width, alignment,
+						      col_name, col_hdr));
 
   m_headers.push_back (std::move (header));
 }
 
 /* See ui-out.h.  */
 
-void ui_out_table::start_row ()
+void
+ui_out_table::start_row ()
 {
   m_headers_iterator = m_headers.begin ();
 }
 
 /* See ui-out.h.  */
 
-bool ui_out_table::get_next_header (int *colno, int *width, ui_align *alignment,
-				    const char **col_hdr)
+bool
+ui_out_table::get_next_header (int *colno, int *width, ui_align *alignment,
+			       const char **col_hdr)
 {
   /* There may be no headers at all or we may have used all columns.  */
   if (m_headers_iterator == m_headers.end ())
@@ -274,8 +255,9 @@ bool ui_out_table::get_next_header (int *colno, int *width, ui_align *alignment,
 
 /* See ui-out.h.  */
 
-bool ui_out_table::query_field (int colno, int *width, int *alignment,
-				const char **col_name) const
+bool
+ui_out_table::query_field (int colno, int *width, int *alignment,
+			   const char **col_name) const
 {
   /* Column numbers are 1-based, so convert to 0-based index.  */
   int index = colno - 1;
@@ -298,14 +280,16 @@ bool ui_out_table::query_field (int colno, int *width, int *alignment,
 
 /* See ui-out.h.  */
 
-ui_out_table::state ui_out_table::current_state () const
+ui_out_table::state
+ui_out_table::current_state () const
 {
   return m_state;
 }
 
 /* See ui-out.h.  */
 
-int ui_out_table::entry_level () const
+int
+ui_out_table::entry_level () const
 {
   return m_entry_level;
 }
@@ -351,7 +335,7 @@ void
 ui_out::table_begin (int nr_cols, int nr_rows, const std::string &tblid)
 {
   if (m_table_up != nullptr)
-    internal_error (_("tables cannot be nested; table_begin found before \
+    internal_error (_ ("tables cannot be nested; table_begin found before \
 previous table_end."));
 
   m_table_up.reset (new ui_out_table (level () + 1, nr_cols, tblid));
@@ -364,7 +348,7 @@ ui_out::table_header (int width, ui_align alignment,
 		      const std::string &col_name, const std::string &col_hdr)
 {
   if (m_table_up == nullptr)
-    internal_error (_("table_header outside a table is not valid; it must be \
+    internal_error (_ ("table_header outside a table is not valid; it must be \
 after a table_begin and before a table_body."));
 
   m_table_up->append_header (width, alignment, col_name, col_hdr);
@@ -376,8 +360,8 @@ void
 ui_out::table_body ()
 {
   if (m_table_up == nullptr)
-    internal_error (_("table_body outside a table is not valid; it must be "
-		      "after a table_begin and before a table_end."));
+    internal_error (_ ("table_body outside a table is not valid; it must be "
+		       "after a table_begin and before a table_end."));
 
   m_table_up->start_body ();
 
@@ -388,7 +372,7 @@ void
 ui_out::table_end ()
 {
   if (m_table_up == nullptr)
-    internal_error (_("misplaced table_end or missing table_begin."));
+    internal_error (_ ("misplaced table_end or missing table_begin."));
 
   do_table_end ();
 
@@ -569,8 +553,7 @@ ui_out::text (const char *string)
 }
 
 void
-ui_out::call_do_message (const ui_file_style &style, const char *format,
-			 ...)
+ui_out::call_do_message (const ui_file_style &style, const char *format, ...)
 {
   va_list args;
 
@@ -605,10 +588,8 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 	intvals[i] = va_arg (args, int);
 
       /* The only ones we support for now.  */
-      gdb_assert (piece.n_int_args == 0
-		  || piece.argclass == string_arg
-		  || piece.argclass == int_arg
-		  || piece.argclass == long_arg);
+      gdb_assert (piece.n_int_args == 0 || piece.argclass == string_arg
+		  || piece.argclass == int_arg || piece.argclass == long_arg);
 
       switch (piece.argclass)
 	{
@@ -624,8 +605,8 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 		call_do_message (style, current_substring, intvals[0], str);
 		break;
 	      case 2:
-		call_do_message (style, current_substring,
-				 intvals[0], intvals[1], str);
+		call_do_message (style, current_substring, intvals[0],
+				 intvals[1], str);
 		break;
 	      }
 	  }
@@ -651,8 +632,8 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 		call_do_message (style, current_substring, intvals[0], val);
 		break;
 	      case 2:
-		call_do_message (style, current_substring,
-				 intvals[0], intvals[1], val);
+		call_do_message (style, current_substring, intvals[0],
+				 intvals[1], val);
 		break;
 	      }
 	  }
@@ -669,8 +650,8 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 		call_do_message (style, current_substring, intvals[0], val);
 		break;
 	      case 2:
-		call_do_message (style, current_substring,
-				 intvals[0], intvals[1], val);
+		call_do_message (style, current_substring, intvals[0],
+				 intvals[1], val);
 		break;
 	      }
 	  }
@@ -687,8 +668,8 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 		call_do_message (style, current_substring, intvals[0], val);
 		break;
 	      case 2:
-		call_do_message (style, current_substring,
-				 intvals[0], intvals[1], val);
+		call_do_message (style, current_substring, intvals[0],
+				 intvals[1], val);
 		break;
 	      }
 	  }
@@ -750,7 +731,8 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 	      }
 	      break;
 	    default:
-	      call_do_message (style, current_substring, va_arg (args, void *));
+	      call_do_message (style, current_substring,
+			       va_arg (args, void *));
 	      break;
 	    }
 	  break;
@@ -765,7 +747,7 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 	  call_do_message (style, current_substring, 0);
 	  break;
 	default:
-	  internal_error (_("failed internal consistency check"));
+	  internal_error (_ ("failed internal consistency check"));
 	}
     }
 }
@@ -825,7 +807,7 @@ ui_out::verify_field (int *fldno, int *width, ui_align *align)
   if (m_table_up != nullptr
       && m_table_up->current_state () != ui_out_table::state::BODY)
     {
-      internal_error (_("table_body missing; table fields must be \
+      internal_error (_ ("table_body missing; table fields must be \
 specified after table_body and inside a list."));
     }
 
@@ -837,7 +819,7 @@ specified after table_body and inside a list."));
       && m_table_up->get_next_header (fldno, width, align, &text))
     {
       if (*fldno != current->field_count ())
-	internal_error (_("ui-out internal error in handling headers."));
+	internal_error (_ ("ui-out internal error in handling headers."));
     }
   else
     {
@@ -862,12 +844,10 @@ ui_out::query_table_field (int colno, int *width, int *alignment,
 /* The constructor.  */
 
 ui_out::ui_out (ui_out_flags flags)
-: m_flags (flags)
+  : m_flags (flags)
 {
   /* Create the ui-out level #1, the default level.  */
   push_level (ui_out_type_tuple);
 }
 
-ui_out::~ui_out ()
-{
-}
+ui_out::~ui_out () {}

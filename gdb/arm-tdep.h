@@ -43,11 +43,9 @@ extern bool arm_apcs_32;
    (and called PS for processor status) so the status bits can be cleared
    from the PC (register 15).  For 32 bit ARM code, a copy of CPSR is placed
    in PS.  */
-#define NUM_FREGS	8	/* Number of floating point registers.  */
-#define NUM_SREGS	2	/* Number of status registers.  */
-#define NUM_GREGS	16	/* Number of general purpose registers.  */
-
-
+#define NUM_FREGS 8  /* Number of floating point registers.  */
+#define NUM_SREGS 2  /* Number of status registers.  */
+#define NUM_GREGS 16 /* Number of general purpose registers.  */
 
 /* Type of floating-point code in use by inferior.  There are really 3 models
    that are traditionally supported (plus the endianness issue), but gcc can
@@ -61,12 +59,12 @@ extern bool arm_apcs_32;
 
 enum arm_float_model
 {
-  ARM_FLOAT_AUTO,	/* Automatic detection.  Do not set in tdep.  */
-  ARM_FLOAT_SOFT_FPA,	/* Traditional soft-float (mixed-endian on LE ARM).  */
-  ARM_FLOAT_FPA,	/* FPA co-processor.  GCC calling convention.  */
-  ARM_FLOAT_SOFT_VFP,	/* Soft-float with pure-endian doubles.  */
-  ARM_FLOAT_VFP,	/* Full VFP calling convention.  */
-  ARM_FLOAT_LAST	/* Keep at end.  */
+  ARM_FLOAT_AUTO,     /* Automatic detection.  Do not set in tdep.  */
+  ARM_FLOAT_SOFT_FPA, /* Traditional soft-float (mixed-endian on LE ARM).  */
+  ARM_FLOAT_FPA,      /* FPA co-processor.  GCC calling convention.  */
+  ARM_FLOAT_SOFT_VFP, /* Soft-float with pure-endian doubles.  */
+  ARM_FLOAT_VFP,      /* Full VFP calling convention.  */
+  ARM_FLOAT_LAST      /* Keep at end.  */
 };
 
 /* ABI used by the inferior.  */
@@ -82,8 +80,8 @@ enum arm_abi_kind
 
 enum struct_return
 {
-  pcc_struct_return,		/* Return "short" structures in memory.  */
-  reg_struct_return		/* Return "short" structures in registers.  */
+  pcc_struct_return, /* Return "short" structures in memory.  */
+  reg_struct_return  /* Return "short" structures in registers.  */
 };
 
 /* Target-dependent structure in gdbarch.  */
@@ -91,60 +89,74 @@ struct arm_gdbarch_tdep : gdbarch_tdep_base
 {
   /* The ABI for this architecture.  It should never be set to
      ARM_ABI_AUTO.  */
-  enum arm_abi_kind arm_abi {};
+  enum arm_abi_kind arm_abi
+  {
+  };
 
-  enum arm_float_model fp_model {}; /* Floating point calling conventions.  */
+  enum arm_float_model fp_model
+  {
+  }; /* Floating point calling conventions.  */
 
-  bool have_fpa_registers = false;	/* Does the target report the FPA registers?  */
-  bool have_wmmx_registers = false;	/* Does the target report the WMMX registers?  */
+  bool have_fpa_registers
+    = false; /* Does the target report the FPA registers?  */
+  bool have_wmmx_registers
+    = false; /* Does the target report the WMMX registers?  */
   /* The number of VFP registers reported by the target.  It is zero
      if VFP registers are not supported.  */
   int vfp_register_count = 0;
-  bool have_s_pseudos = false;	/* Are we synthesizing the single precision
+  bool have_s_pseudos = false; /* Are we synthesizing the single precision
 				   VFP registers?  */
-  int s_pseudo_base = 0;	/* Register number for the first S pseudo
+  int s_pseudo_base = 0;       /* Register number for the first S pseudo
 				   register.  */
-  int s_pseudo_count = 0;	/* Number of S pseudo registers.  */
-  bool have_q_pseudos = false;	/* Are we synthesizing the quad precision
+  int s_pseudo_count = 0;      /* Number of S pseudo registers.  */
+  bool have_q_pseudos = false; /* Are we synthesizing the quad precision
 				   Q (NEON or MVE) registers?  Requires
 				   have_s_pseudos.  */
-  int q_pseudo_base = 0;	/* Register number for the first quad
+  int q_pseudo_base = 0;       /* Register number for the first quad
 				   precision pseudo register.  */
-  int q_pseudo_count = 0;	/* Number of quad precision pseudo
+  int q_pseudo_count = 0;      /* Number of quad precision pseudo
 				   registers.  */
-  bool have_neon = false;	/* Do we have a NEON unit?  */
+  bool have_neon = false;      /* Do we have a NEON unit?  */
 
-  bool have_mve = false;	/* Do we have a MVE extension?  */
-  int mve_vpr_regnum = 0;	/* MVE VPR register number.  */
-  int mve_pseudo_base = 0;	/* Number of the first MVE pseudo register.  */
-  int mve_pseudo_count = 0;	/* Total number of MVE pseudo registers.  */
+  bool have_mve = false;    /* Do we have a MVE extension?  */
+  int mve_vpr_regnum = 0;   /* MVE VPR register number.  */
+  int mve_pseudo_base = 0;  /* Number of the first MVE pseudo register.  */
+  int mve_pseudo_count = 0; /* Total number of MVE pseudo registers.  */
 
-  bool have_pacbti = false;	/* True if we have the ARMv8.1-m PACBTI
+  bool have_pacbti = false;    /* True if we have the ARMv8.1-m PACBTI
 				   extensions.  */
-  int pacbti_pseudo_base = 0;	/* Number of the first PACBTI pseudo
+  int pacbti_pseudo_base = 0;  /* Number of the first PACBTI pseudo
 				   register.  */
-  int pacbti_pseudo_count = 0;	/* Total number of PACBTI pseudo registers.  */
+  int pacbti_pseudo_count = 0; /* Total number of PACBTI pseudo registers.  */
 
-  int m_profile_msp_regnum = ARM_SP_REGNUM;	/* M-profile MSP register number.  */
-  int m_profile_psp_regnum = ARM_SP_REGNUM;	/* M-profile PSP register number.  */
+  int m_profile_msp_regnum
+    = ARM_SP_REGNUM; /* M-profile MSP register number.  */
+  int m_profile_psp_regnum
+    = ARM_SP_REGNUM; /* M-profile PSP register number.  */
 
   /* Secure and Non-secure stack pointers with security extension.  */
-  int m_profile_msp_ns_regnum = ARM_SP_REGNUM;	/* M-profile MSP_NS register number.  */
-  int m_profile_psp_ns_regnum = ARM_SP_REGNUM;	/* M-profile PSP_NS register number.  */
-  int m_profile_msp_s_regnum = ARM_SP_REGNUM;	/* M-profile MSP_S register number.  */
-  int m_profile_psp_s_regnum = ARM_SP_REGNUM;	/* M-profile PSP_S register number.  */
+  int m_profile_msp_ns_regnum
+    = ARM_SP_REGNUM; /* M-profile MSP_NS register number.  */
+  int m_profile_psp_ns_regnum
+    = ARM_SP_REGNUM; /* M-profile PSP_NS register number.  */
+  int m_profile_msp_s_regnum
+    = ARM_SP_REGNUM; /* M-profile MSP_S register number.  */
+  int m_profile_psp_s_regnum
+    = ARM_SP_REGNUM; /* M-profile PSP_S register number.  */
 
-  int tls_regnum = 0;		/* Number of the tpidruro register.  */
+  int tls_regnum = 0; /* Number of the tpidruro register.  */
 
-  bool is_m = false;		/* Does the target follow the "M" profile.  */
-  bool have_sec_ext = false;	/* Do we have security extensions?  */
-  CORE_ADDR lowest_pc = 0;	/* Lowest address at which instructions
+  bool is_m = false;	     /* Does the target follow the "M" profile.  */
+  bool have_sec_ext = false; /* Do we have security extensions?  */
+  CORE_ADDR lowest_pc = 0;   /* Lowest address at which instructions
 				   will appear.  */
 
-  const gdb_byte *arm_breakpoint = nullptr;	/* Breakpoint pattern for an ARM insn.  */
-  int arm_breakpoint_size = 0;	/* And its size.  */
-  const gdb_byte *thumb_breakpoint = nullptr;	/* Breakpoint pattern for a Thumb insn.  */
-  int thumb_breakpoint_size = 0;	/* And its size.  */
+  const gdb_byte *arm_breakpoint
+    = nullptr;		       /* Breakpoint pattern for an ARM insn.  */
+  int arm_breakpoint_size = 0; /* And its size.  */
+  const gdb_byte *thumb_breakpoint
+    = nullptr;			 /* Breakpoint pattern for a Thumb insn.  */
+  int thumb_breakpoint_size = 0; /* And its size.  */
 
   /* If the Thumb breakpoint is an undefined instruction (which is
      affected by IT blocks) rather than a BKPT instruction (which is
@@ -153,32 +165,35 @@ struct arm_gdbarch_tdep : gdbarch_tdep_base
   const gdb_byte *thumb2_breakpoint = nullptr;
   int thumb2_breakpoint_size = 0;
 
-  int jb_pc = 0;			/* Offset to PC value in jump buffer.
+  int jb_pc = 0;	  /* Offset to PC value in jump buffer.
 				   If this is negative, longjmp support
 				   will be disabled.  */
-  size_t jb_elt_size = 0;		/* And the size of each entry in the buf.  */
+  size_t jb_elt_size = 0; /* And the size of each entry in the buf.  */
 
   /* Convention for returning structures.  */
-  enum struct_return struct_return {};
+  enum struct_return struct_return
+  {
+  };
 
   /* ISA-specific data types.  */
   struct type *arm_ext_type = nullptr;
   struct type *neon_double_type = nullptr;
   struct type *neon_quad_type = nullptr;
 
-   /* syscall record.  */
+  /* syscall record.  */
   int (*arm_syscall_record) (struct regcache *regcache,
-			     unsigned long svc_number) = nullptr;
+			     unsigned long svc_number)
+    = nullptr;
 };
 
 /* Structures used for displaced stepping.  */
 
 /* The maximum number of temporaries available for displaced instructions.  */
-#define DISPLACED_TEMPS			16
+#define DISPLACED_TEMPS 16
 /* The maximum number of modified instructions generated for one single-stepped
    instruction, including the breakpoint (usually at the end of the instruction
    sequence) and any scratch words, etc.  */
-#define ARM_DISPLACED_MODIFIED_INSNS	8
+#define ARM_DISPLACED_MODIFIED_INSNS 8
 
 struct arm_displaced_step_copy_insn_closure
   : public displaced_step_copy_insn_closure
@@ -186,13 +201,14 @@ struct arm_displaced_step_copy_insn_closure
   ULONGEST tmp[DISPLACED_TEMPS];
   int rd;
   int wrote_to_pc;
+
   union
   {
     struct
     {
       int xfersize;
       int rn;			   /* Writeback register.  */
-      unsigned int immed : 1;      /* Offset is immediate.  */
+      unsigned int immed : 1;	   /* Offset is immediate.  */
       unsigned int writeback : 1;  /* Perform base-register writeback.  */
       unsigned int restore_r4 : 1; /* Used r4 as scratch.  */
     } ldst;
@@ -264,20 +280,20 @@ enum pc_write_style
 };
 
 extern void
-  arm_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
-			      CORE_ADDR to, struct regcache *regs,
-			      arm_displaced_step_copy_insn_closure *dsc);
+arm_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
+			    CORE_ADDR to, struct regcache *regs,
+			    arm_displaced_step_copy_insn_closure *dsc);
 extern void
-  arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
-			      CORE_ADDR to,
-			      arm_displaced_step_copy_insn_closure *dsc);
-extern ULONGEST
-  displaced_read_reg (regcache *regs, arm_displaced_step_copy_insn_closure *dsc,
-		      int regno);
-extern void
-  displaced_write_reg (struct regcache *regs,
-		       arm_displaced_step_copy_insn_closure *dsc, int regno,
-		       ULONGEST val, enum pc_write_style write_pc);
+arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
+			    CORE_ADDR to,
+			    arm_displaced_step_copy_insn_closure *dsc);
+extern ULONGEST displaced_read_reg (regcache *regs,
+				    arm_displaced_step_copy_insn_closure *dsc,
+				    int regno);
+extern void displaced_write_reg (struct regcache *regs,
+				 arm_displaced_step_copy_insn_closure *dsc,
+				 int regno, ULONGEST val,
+				 enum pc_write_style write_pc);
 
 CORE_ADDR arm_skip_stub (frame_info_ptr, CORE_ADDR);
 
@@ -305,18 +321,16 @@ extern int arm_psr_thumb_bit (struct gdbarch *);
    instruction?  */
 extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
 
-extern int arm_process_record (struct gdbarch *gdbarch, 
+extern int arm_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);
 /* Functions exported from arm-bsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
-extern void
-  armbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
-				       iterate_over_regset_sections_cb *cb,
-				       void *cb_data,
-				       const struct regcache *regcache);
+extern void armbsd_iterate_over_regset_sections (
+  struct gdbarch *gdbarch, iterate_over_regset_sections_cb *cb, void *cb_data,
+  const struct regcache *regcache);
 
 /* Get the correct Arm target description with given FP hardware type.  */
 const target_desc *arm_read_description (arm_fp_type fp_type, bool tls);

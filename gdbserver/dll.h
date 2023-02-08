@@ -25,8 +25,10 @@ struct process_info;
 struct dll_info
 {
   dll_info (const std::string &name_, CORE_ADDR base_addr_)
-  : name (name_), base_addr (base_addr_)
-  {}
+    : name (name_),
+      base_addr (base_addr_)
+  {
+  }
 
   std::string name;
   CORE_ADDR base_addr;
@@ -35,9 +37,9 @@ struct dll_info
 extern void clear_dlls (void);
 extern void loaded_dll (const char *name, CORE_ADDR base_addr);
 extern void loaded_dll (process_info *proc, const char *name,
-			CORE_ADDR base_addr);
+                        CORE_ADDR base_addr);
 extern void unloaded_dll (const char *name, CORE_ADDR base_addr);
 extern void unloaded_dll (process_info *proc, const char *name,
-			  CORE_ADDR base_addr);
+                          CORE_ADDR base_addr);
 
 #endif /* GDBSERVER_DLL_H */

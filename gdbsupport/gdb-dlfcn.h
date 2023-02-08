@@ -46,6 +46,6 @@ void *gdb_dlsym (const gdb_dlhandle_up &handle, const char *symbol);
 /* Return non-zero if the dynamic library functions are available on
    this platform.  */
 
-int is_dl_available(void);
+int is_dl_available (void);
 
 #endif /* GDB_DLFCN_H */

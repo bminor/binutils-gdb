@@ -42,8 +42,7 @@ static riscv_fbsd_nat_target the_riscv_fbsd_nat_target;
    for all registers.  */
 
 void
-riscv_fbsd_nat_target::fetch_registers (struct regcache *regcache,
-					int regnum)
+riscv_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1 || regnum == RISCV_ZERO_REGNUM)
     regcache->raw_supply_zeroed (RISCV_ZERO_REGNUM);
@@ -57,8 +56,7 @@ riscv_fbsd_nat_target::fetch_registers (struct regcache *regcache,
    this for all registers.  */
 
 void
-riscv_fbsd_nat_target::store_registers (struct regcache *regcache,
-					int regnum)
+riscv_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   store_register_set<struct reg> (regcache, regnum, PT_GETREGS, PT_SETREGS,
 				  &riscv_fbsd_gregset);
@@ -67,6 +65,7 @@ riscv_fbsd_nat_target::store_registers (struct regcache *regcache,
 }
 
 void _initialize_riscv_fbsd_nat ();
+
 void
 _initialize_riscv_fbsd_nat ()
 {

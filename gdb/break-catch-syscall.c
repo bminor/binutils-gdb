@@ -48,8 +48,7 @@ struct syscall_catchpoint : public catchpoint
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
   int breakpoint_hit (const struct bp_location *bl,
-		      const address_space *aspace,
-		      CORE_ADDR bp_addr,
+		      const address_space *aspace, CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
@@ -212,10 +211,11 @@ syscall_catchpoint::print_it (const bpstat *bs) const
     uiout->text ("Catchpoint ");
   if (uiout->is_mi_like_p ())
     {
-      uiout->field_string ("reason",
-			   async_reason_lookup (last.kind () == TARGET_WAITKIND_SYSCALL_ENTRY
-						? EXEC_ASYNC_SYSCALL_ENTRY
-						: EXEC_ASYNC_SYSCALL_RETURN));
+      uiout->field_string (
+	"reason",
+	async_reason_lookup (last.kind () == TARGET_WAITKIND_SYSCALL_ENTRY
+			       ? EXEC_ASYNC_SYSCALL_ENTRY
+			       : EXEC_ASYNC_SYSCALL_RETURN));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
   print_num_locno (bs, uiout);
@@ -298,9 +298,9 @@ syscall_catchpoint::print_mention () const
   if (!syscalls_to_be_caught.empty ())
     {
       if (syscalls_to_be_caught.size () > 1)
-	gdb_printf (_("Catchpoint %d (syscalls"), number);
+	gdb_printf (_ ("Catchpoint %d (syscalls"), number);
       else
-	gdb_printf (_("Catchpoint %d (syscall"), number);
+	gdb_printf (_ ("Catchpoint %d (syscall"), number);
 
       for (int iter : syscalls_to_be_caught)
 	{
@@ -315,7 +315,7 @@ syscall_catchpoint::print_mention () const
       gdb_printf (")");
     }
   else
-    gdb_printf (_("Catchpoint %d (any syscall)"), number);
+    gdb_printf (_ ("Catchpoint %d (any syscall)"), number);
 }
 
 /* Implement the "print_recreate" method for syscall catchpoints.  */
@@ -354,8 +354,8 @@ create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
-  std::unique_ptr<syscall_catchpoint> c
-    (new syscall_catchpoint (gdbarch, tempflag, std::move (filter)));
+  std::unique_ptr<syscall_catchpoint> c (
+    new syscall_catchpoint (gdbarch, tempflag, std::move (filter)));
 
   install_breakpoint (0, std::move (c), 1);
 }
@@ -388,12 +388,11 @@ catch_syscall_split_args (const char *arg)
       if (*endptr == '\0')
 	{
 	  if (syscall_number < 0)
-	    error (_("Unknown syscall number '%d'."), syscall_number);
+	    error (_ ("Unknown syscall number '%d'."), syscall_number);
 	  get_syscall_by_number (gdbarch, syscall_number, &s);
 	  result.push_back (s.number);
 	}
-      else if (startswith (cur_name, "g:")
-	       || startswith (cur_name, "group:"))
+      else if (startswith (cur_name, "g:") || startswith (cur_name, "group:"))
 	{
 	  /* We have a syscall group.  Let's expand it into a syscall
 	     list before inserting.  */
@@ -403,7 +402,7 @@ catch_syscall_split_args (const char *arg)
 	  group_name = strchr (cur_name, ':') + 1;
 
 	  if (!get_syscalls_by_group (gdbarch, group_name, &result))
-	    error (_("Unknown syscall group '%s'."), group_name);
+	    error (_ ("Unknown syscall group '%s'."), group_name);
 	}
       else
 	{
@@ -413,7 +412,7 @@ catch_syscall_split_args (const char *arg)
 	    /* Here we have to issue an error instead of a warning,
 	       because GDB cannot do anything useful if there's no
 	       syscall number to be caught.  */
-	    error (_("Unknown syscall name '%s'."), cur_name);
+	    error (_ ("Unknown syscall name '%s'."), cur_name);
 	}
     }
 
@@ -423,7 +422,7 @@ catch_syscall_split_args (const char *arg)
 /* Implement the "catch syscall" command.  */
 
 static void
-catch_syscall_command_1 (const char *arg, int from_tty, 
+catch_syscall_command_1 (const char *arg, int from_tty,
 			 struct cmd_list_element *command)
 {
   int tempflag;
@@ -433,7 +432,7 @@ catch_syscall_command_1 (const char *arg, int from_tty,
 
   /* Checking if the feature if supported.  */
   if (gdbarch_get_syscall_number_p (gdbarch) == 0)
-    error (_("The feature 'catch syscall' is not supported on \
+    error (_ ("The feature 'catch syscall' is not supported on \
 this architecture yet."));
 
   tempflag = command->context () == CATCH_TEMPORARY;
@@ -458,14 +457,12 @@ this architecture yet."));
   create_syscall_event_catchpoint (tempflag, std::move (filter));
 }
 
-
 /* Returns 0 if 'bp' is NOT a syscall catchpoint,
    non-zero otherwise.  */
 static int
 is_syscall_catchpoint_enabled (struct breakpoint *bp)
 {
-  if (syscall_catchpoint_p (bp)
-      && bp->enable_state != bp_disabled
+  if (syscall_catchpoint_p (bp) && bp->enable_state != bp_disabled
       && bp->enable_state != bp_call_disabled)
     return 1;
   else
@@ -487,7 +484,6 @@ catch_syscall_enabled (void)
 static bool
 catching_syscall_number_1 (struct breakpoint *b, int syscall_number)
 {
-
   if (is_syscall_catchpoint_enabled (b))
     {
       struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
@@ -519,8 +515,8 @@ catching_syscall_number (int syscall_number)
 
 static void
 catch_syscall_completer (struct cmd_list_element *cmd,
-			 completion_tracker &tracker,
-			 const char *text, const char *word)
+			 completion_tracker &tracker, const char *text,
+			 const char *word)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   gdb::unique_xmalloc_ptr<const char *> group_list;
@@ -542,8 +538,8 @@ catch_syscall_completer (struct cmd_list_element *cmd,
   else
     {
       /* Complete with both, syscall names and groups.  */
-      gdb::unique_xmalloc_ptr<const char *> syscall_list
-	(get_syscall_names (gdbarch));
+      gdb::unique_xmalloc_ptr<const char *> syscall_list (
+	get_syscall_names (gdbarch));
       group_list.reset (get_syscall_group_names (gdbarch));
 
       const char **group_ptr = group_list.get ();
@@ -577,20 +573,19 @@ clear_syscall_counts (struct inferior *inf)
 }
 
 void _initialize_break_catch_syscall ();
+
 void
 _initialize_break_catch_syscall ()
 {
   gdb::observers::inferior_exit.attach (clear_syscall_counts,
 					"break-catch-syscall");
 
-  add_catch_command ("syscall", _("\
+  add_catch_command ("syscall", _ ("\
 Catch system calls by their names, groups and/or numbers.\n\
 Arguments say which system calls to catch.  If no arguments are given,\n\
 every system call will be caught.  Arguments, if given, should be one\n\
 or more system call names (if your system supports that), system call\n\
 groups or system call numbers."),
-		     catch_syscall_command_1,
-		     catch_syscall_completer,
-		     CATCH_PERMANENT,
-		     CATCH_TEMPORARY);
+		     catch_syscall_command_1, catch_syscall_completer,
+		     CATCH_PERMANENT, CATCH_TEMPORARY);
 }

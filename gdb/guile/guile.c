@@ -58,13 +58,9 @@ const char gdbscm_print_excp_full[] = "full";
 const char gdbscm_print_excp_message[] = "message";
 
 /* "set guile print-stack" choices.  */
-static const char *const guile_print_excp_enums[] =
-  {
-    gdbscm_print_excp_none,
-    gdbscm_print_excp_full,
-    gdbscm_print_excp_message,
-    NULL
-  };
+static const char *const guile_print_excp_enums[]
+  = { gdbscm_print_excp_none, gdbscm_print_excp_full,
+      gdbscm_print_excp_message, NULL };
 
 /* The exception printing variable.  'full' if we want to print the
    error message and stack, 'none' if we want to print nothing, and
@@ -72,13 +68,13 @@ static const char *const guile_print_excp_enums[] =
    the default.  */
 const char *gdbscm_print_excp = gdbscm_print_excp_message;
 
-
 #ifdef HAVE_GUILE
 
 static void gdbscm_initialize (const struct extension_language_defn *);
 static int gdbscm_initialized (const struct extension_language_defn *);
-static void gdbscm_eval_from_control_command
-  (const struct extension_language_defn *, struct command_line *);
+static void
+gdbscm_eval_from_control_command (const struct extension_language_defn *,
+				  struct command_line *);
 static script_sourcer_func gdbscm_source_script;
 static void gdbscm_set_backtrace (int enable);
 
@@ -100,18 +96,13 @@ static const char boot_scm_filename[] = "boot.scm";
 
 /* The interface between gdb proper and loading of python scripts.  */
 
-static const struct extension_language_script_ops guile_extension_script_ops =
-{
-  gdbscm_source_script,
-  gdbscm_source_objfile_script,
-  gdbscm_execute_objfile_script,
-  gdbscm_auto_load_enabled
-};
+static const struct extension_language_script_ops guile_extension_script_ops
+  = { gdbscm_source_script, gdbscm_source_objfile_script,
+      gdbscm_execute_objfile_script, gdbscm_auto_load_enabled };
 
 /* The interface between gdb proper and guile scripting.  */
 
-static const struct extension_language_ops guile_extension_ops =
-{
+static const struct extension_language_ops guile_extension_ops = {
   gdbscm_initialize,
   gdbscm_initialized,
 
@@ -141,25 +132,23 @@ static const struct extension_language_ops guile_extension_ops =
 
 /* The main struct describing GDB's interface to the Guile
    extension language.  */
-extern const struct extension_language_defn extension_language_guile =
-{
-  EXT_LANG_GUILE,
-  "guile",
-  "Guile",
+extern const struct extension_language_defn extension_language_guile
+  = { EXT_LANG_GUILE,
+      "guile",
+      "Guile",
 
-  ".scm",
-  "-gdb.scm",
+      ".scm",
+      "-gdb.scm",
 
-  guile_control,
+      guile_control,
 
 #ifdef HAVE_GUILE
-  &guile_extension_script_ops,
-  &guile_extension_ops
+      &guile_extension_script_ops,
+      &guile_extension_ops
 #else
-  NULL,
-  NULL
+      NULL,	      NULL
 #endif
-};
+    };
 
 #ifdef HAVE_GUILE
 /* Implementation of the gdb "guile-repl" command.  */
@@ -178,7 +167,7 @@ guile_repl_command (const char *arg, int from_tty)
      sort it out, we forbid arguments.  */
 
   if (arg && *arg)
-    error (_("guile-repl currently does not take any arguments."));
+    error (_ ("guile-repl currently does not take any arguments."));
   else
     {
       dont_repeat ();
@@ -249,13 +238,13 @@ compute_scheme_string (struct command_line *l)
    This is the extension_language_ops.eval_from_control_command "method".  */
 
 static void
-gdbscm_eval_from_control_command
-  (const struct extension_language_defn *extlang, struct command_line *cmd)
+gdbscm_eval_from_control_command (
+  const struct extension_language_defn *extlang, struct command_line *cmd)
 {
   char *script;
 
   if (cmd->body_list_1 != nullptr)
-    error (_("Invalid \"guile\" block structure."));
+    error (_ ("Invalid \"guile\" block structure."));
 
   script = compute_scheme_string (cmd->body_list_0.get ());
   gdb::unique_xmalloc_ptr<char> msg = gdbscm_safe_eval_string (script, 0);
@@ -279,7 +268,7 @@ gdbscm_source_script (const struct extension_language_defn *extlang,
   if (msg != NULL)
     gdb_printf (gdb_stderr, "%s\n", msg.get ());
 }
-
+
 /* (execute string [#:from-tty boolean] [#:to-string boolean])
    A Scheme function which evaluates a string using the gdb CLI.  */
 
@@ -292,31 +281,28 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
   char *command;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, keywords, "s#tt",
-			      command_scm, &command, rest,
-			      &from_tty_arg_pos, &from_tty,
-			      &to_string_arg_pos, &to_string);
+			      command_scm, &command, rest, &from_tty_arg_pos,
+			      &from_tty, &to_string_arg_pos, &to_string);
 
-  return gdbscm_wrap ([=]
-    {
-      gdb::unique_xmalloc_ptr<char> command_holder (command);
-      std::string to_string_res;
+  return gdbscm_wrap ([=] {
+    gdb::unique_xmalloc_ptr<char> command_holder (command);
+    std::string to_string_res;
 
-      scoped_restore restore_async = make_scoped_restore (&current_ui->async,
-							  0);
+    scoped_restore restore_async = make_scoped_restore (&current_ui->async, 0);
 
-      scoped_restore preventer = prevent_dont_repeat ();
-      if (to_string)
-	execute_command_to_string (to_string_res, command, from_tty, false);
-      else
-	execute_command (command, from_tty);
+    scoped_restore preventer = prevent_dont_repeat ();
+    if (to_string)
+      execute_command_to_string (to_string_res, command, from_tty, false);
+    else
+      execute_command (command, from_tty);
 
-      /* Do any commands attached to breakpoint we stopped at.  */
-      bpstat_do_actions ();
+    /* Do any commands attached to breakpoint we stopped at.  */
+    bpstat_do_actions ();
 
-      if (to_string)
-	return gdbscm_scm_from_c_string (to_string_res.c_str ());
-      return SCM_UNSPECIFIED;
-    });
+    if (to_string)
+      return gdbscm_scm_from_c_string (to_string_res.c_str ());
+    return SCM_UNSPECIFIED;
+  });
 }
 
 /* (data-directory) -> string */
@@ -369,8 +355,8 @@ guile_repl_command (const char *arg, int from_tty)
 {
   arg = skip_spaces (arg);
   if (arg && *arg)
-    error (_("guile-repl currently does not take any arguments."));
-  error (_("Guile scripting is not supported in this copy of GDB."));
+    error (_ ("guile-repl currently does not take any arguments."));
+  error (_ ("Guile scripting is not supported in this copy of GDB."));
 }
 
 static void
@@ -378,7 +364,7 @@ guile_command (const char *arg, int from_tty)
 {
   arg = skip_spaces (arg);
   if (arg && *arg)
-    error (_("Guile scripting is not supported in this copy of GDB."));
+    error (_ ("Guile scripting is not supported in this copy of GDB."));
   else
     {
       /* Even if Guile isn't enabled, we still have to slurp the
@@ -390,22 +376,19 @@ guile_command (const char *arg, int from_tty)
 }
 
 #endif /* ! HAVE_GUILE */
-
+
 /* Lists for 'set,show,info guile' commands.  */
 
 static struct cmd_list_element *set_guile_list;
 static struct cmd_list_element *show_guile_list;
 static struct cmd_list_element *info_guile_list;
 
-
 /* Initialization.  */
 
 #ifdef HAVE_GUILE
 
-static const scheme_function misc_guile_functions[] =
-{
-  { "execute", 1, 0, 1, as_a_scm_t_subr (gdbscm_execute_gdb_command),
-  "\
+static const scheme_function misc_guile_functions[]
+  = { { "execute", 1, 0, 1, as_a_scm_t_subr (gdbscm_execute_gdb_command), "\
 Execute the given GDB command.\n\
 \n\
   Arguments: string [#:to-string boolean] [#:from-tty boolean]\n\
@@ -417,29 +400,23 @@ Execute the given GDB command.\n\
   Returns: The result of the command if #:to-string is true.\n\
     Otherwise returns unspecified." },
 
-  { "data-directory", 0, 0, 0, as_a_scm_t_subr (gdbscm_data_directory),
-    "\
+      { "data-directory", 0, 0, 0, as_a_scm_t_subr (gdbscm_data_directory), "\
 Return the name of GDB's data directory." },
 
-  { "guile-data-directory", 0, 0, 0,
-    as_a_scm_t_subr (gdbscm_guile_data_directory),
-    "\
+      { "guile-data-directory", 0, 0, 0,
+	as_a_scm_t_subr (gdbscm_guile_data_directory), "\
 Return the name of the Guile directory within GDB's data directory." },
 
-  { "gdb-version", 0, 0, 0, as_a_scm_t_subr (gdbscm_gdb_version),
-    "\
+      { "gdb-version", 0, 0, 0, as_a_scm_t_subr (gdbscm_gdb_version), "\
 Return GDB's version string." },
 
-  { "host-config", 0, 0, 0, as_a_scm_t_subr (gdbscm_host_config),
-    "\
+      { "host-config", 0, 0, 0, as_a_scm_t_subr (gdbscm_host_config), "\
 Return the name of the host configuration." },
 
-  { "target-config", 0, 0, 0, as_a_scm_t_subr (gdbscm_target_config),
-    "\
+      { "target-config", 0, 0, 0, as_a_scm_t_subr (gdbscm_target_config), "\
 Return the name of the target configuration." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 /* Load BOOT_SCM_FILE, the first Scheme file that gets loaded.  */
 
@@ -463,8 +440,7 @@ boot_guile_support (void *boot_scm_file)
 static int
 standard_throw_args_p (SCM args)
 {
-  if (gdbscm_is_true (scm_list_p (args))
-      && scm_ilength (args) >= 3)
+  if (gdbscm_is_true (scm_list_p (args)) && scm_ilength (args) >= 3)
     {
       /* The function in which the error occurred.  */
       SCM arg0 = scm_list_ref (args, scm_from_int (0));
@@ -474,8 +450,7 @@ standard_throw_args_p (SCM args)
       SCM arg2 = scm_list_ref (args, scm_from_int (2));
 
       if ((scm_is_string (arg0) || gdbscm_is_false (arg0))
-	  && scm_is_string (arg1)
-	  && gdbscm_is_true (scm_list_p (arg2)))
+	  && scm_is_string (arg1) && gdbscm_is_true (scm_list_p (arg2)))
 	return 1;
     }
 
@@ -497,9 +472,10 @@ print_standard_throw_error (SCM args)
   /* ARG0 is #f if no function was recorded.  */
   if (gdbscm_is_true (arg0))
     {
-      scm_simple_format (scm_current_error_port (),
-			 scm_from_latin1_string (_("Error in function ~s:~%")),
-			 scm_list_1 (arg0));
+      scm_simple_format (
+	scm_current_error_port (),
+	scm_from_latin1_string (_ ("Error in function ~s:~%")),
+	scm_list_1 (arg0));
     }
   scm_simple_format (scm_current_error_port (), arg1, arg2);
 }
@@ -521,9 +497,10 @@ print_throw_error (SCM key, SCM args)
     print_standard_throw_error (args);
   else
     {
-      scm_simple_format (scm_current_error_port (),
-			 scm_from_latin1_string (_("Throw to key `~a' with args `~s'.~%")),
-			 scm_list_2 (key, args));
+      scm_simple_format (
+	scm_current_error_port (),
+	scm_from_latin1_string (_ ("Throw to key `~a' with args `~s'.~%")),
+	scm_list_2 (key, args));
     }
 }
 
@@ -537,10 +514,10 @@ handle_boot_error (void *boot_scm_file, SCM key, SCM args)
   print_throw_error (key, args);
 
   gdb_printf (gdb_stderr, "\n");
-  warning (_("Could not complete Guile gdb module initialization from:\n"
-	     "%s.\n"
-	     "Limited Guile support is available.\n"
-	     "Suggest passing --data-directory=/path/to/gdb/data-directory."),
+  warning (_ ("Could not complete Guile gdb module initialization from:\n"
+	      "%s.\n"
+	      "Limited Guile support is available.\n"
+	      "Suggest passing --data-directory=/path/to/gdb/data-directory."),
 	   (const char *) boot_scm_file);
 
   return SCM_UNSPECIFIED;
@@ -554,10 +531,10 @@ initialize_scheme_side (void)
 {
   char *boot_scm_path;
 
-  guile_datadir = concat (gdb_datadir.c_str (), SLASH_STRING, "guile",
-			  (char *) NULL);
-  boot_scm_path = concat (guile_datadir, SLASH_STRING, "gdb",
-			  SLASH_STRING, boot_scm_filename, (char *) NULL);
+  guile_datadir
+    = concat (gdb_datadir.c_str (), SLASH_STRING, "guile", (char *) NULL);
+  boot_scm_path = concat (guile_datadir, SLASH_STRING, "gdb", SLASH_STRING,
+			  boot_scm_filename, (char *) NULL);
 
   scm_c_catch (SCM_BOOL_T, boot_guile_support, boot_scm_path,
 	       handle_boot_error, boot_scm_path, NULL, NULL);
@@ -743,26 +720,26 @@ install_gdb_commands (void)
   cmd_list_element *guile_repl_cmd
     = add_com ("guile-repl", class_obscure, guile_repl_command,
 #ifdef HAVE_GUILE
-	   _("\
+	       _ ("\
 Start an interactive Guile prompt.\n\
 \n\
 To return to GDB, type the EOF character (e.g., Ctrl-D on an empty\n\
 prompt) or ,quit.")
-#else /* HAVE_GUILE */
-	   _("\
+#else  /* HAVE_GUILE */
+	       _ ("\
 Start a Guile interactive prompt.\n\
 \n\
 Guile scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_GUILE */
-	   );
+    );
   add_com_alias ("gr", guile_repl_cmd, class_obscure, 1);
 
   /* Since "help guile" is easy to type, and intuitive, we add general help
      in using GDB+Guile to this command.  */
   guile_cmd_element = add_com ("guile", class_obscure, guile_command,
 #ifdef HAVE_GUILE
-	   _("\
+			       _ ("\
 Evaluate one or more Guile expressions.\n\
 \n\
 The expression(s) can be given as an argument, for instance:\n\
@@ -784,48 +761,49 @@ or if you want to import the (gdb) module with a prefix, use:\n\
 The Guile interactive session, started with the \"guile-repl\"\n\
 command, provides extensive help and apropos capabilities.\n\
 Type \",help\" once in a Guile interactive session.")
-#else /* HAVE_GUILE */
-	   _("\
+#else  /* HAVE_GUILE */
+			       _ ("\
 Evaluate a Guile expression.\n\
 \n\
 Guile scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_GUILE */
-	   );
+  );
   add_com_alias ("gu", guile_cmd_element, class_obscure, 1);
 
   set_show_commands setshow_guile_cmds
-    = add_setshow_prefix_cmd ("guile", class_obscure,
-			      _("\
+    = add_setshow_prefix_cmd ("guile", class_obscure, _ ("\
 Prefix command for Guile preference settings."),
-			      _("\
+			      _ ("\
 Prefix command for Guile preference settings."),
-			      &set_guile_list, &show_guile_list,
-			      &setlist, &showlist);
+			      &set_guile_list, &show_guile_list, &setlist,
+			      &showlist);
 
   add_alias_cmd ("gu", setshow_guile_cmds.set, class_obscure, 1, &setlist);
   add_alias_cmd ("gu", setshow_guile_cmds.show, class_obscure, 1, &showlist);
 
   cmd_list_element *info_guile_cmd
     = add_basic_prefix_cmd ("guile", class_obscure,
-			    _("Prefix command for Guile info displays."),
+			    _ ("Prefix command for Guile info displays."),
 			    &info_guile_list, 0, &infolist);
   add_info_alias ("gu", info_guile_cmd, 1);
 
   /* The name "print-stack" is carried over from Python.
      A better name is "print-exception".  */
   add_setshow_enum_cmd ("print-stack", no_class, guile_print_excp_enums,
-			&gdbscm_print_excp, _("\
-Set mode for Guile exception printing on error."), _("\
-Show the mode of Guile exception printing on error."), _("\
+			&gdbscm_print_excp, _ ("\
+Set mode for Guile exception printing on error."),
+			_ ("\
+Show the mode of Guile exception printing on error."),
+			_ ("\
 none  == no stack or message will be printed.\n\
 full == a message and a stack will be printed.\n\
 message == an error message without a stack will be printed."),
-			NULL, NULL,
-			&set_guile_list, &show_guile_list);
+			NULL, NULL, &set_guile_list, &show_guile_list);
 }
 
 void _initialize_guile ();
+
 void
 _initialize_guile ()
 {

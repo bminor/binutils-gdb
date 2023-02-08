@@ -94,16 +94,13 @@ tui_copy_source_line (const char **ptr, int *length)
       ++lineptr;
       ++column;
 
-      auto process_tab = [&] ()
-	{
-	  int max_tab_len = tui_tab_width;
+      auto process_tab = [&] () {
+	int max_tab_len = tui_tab_width;
 
-	  --column;
-	  for (int j = column % max_tab_len;
-	       j < max_tab_len;
-	       column++, j++)
-	    result.push_back (' ');
-	};
+	--column;
+	for (int j = column % max_tab_len; j < max_tab_len; column++, j++)
+	  result.push_back (' ');
+      };
 
       if (c == '\n' || c == '\r' || c == '\0')
 	{
@@ -148,21 +145,18 @@ tui_source_window_base::style_changed ()
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_source_window_base::update_source_window
-  (struct gdbarch *gdbarch,
-   const struct symtab_and_line &sal)
+tui_source_window_base::update_source_window (
+  struct gdbarch *gdbarch, const struct symtab_and_line &sal)
 {
   m_horizontal_offset = 0;
   update_source_window_as_is (gdbarch, sal);
 }
 
-
 /* Function to display source in the source/asm window.  This function
    shows the source as specified by the horizontal offset.  */
 void
-tui_source_window_base::update_source_window_as_is
-  (struct gdbarch *gdbarch,
-   const struct symtab_and_line &sal)
+tui_source_window_base::update_source_window_as_is (
+  struct gdbarch *gdbarch, const struct symtab_and_line &sal)
 {
   bool ret = set_contents (gdbarch, sal);
 
@@ -177,13 +171,15 @@ tui_source_window_base::update_source_window_as_is
     }
 }
 
-
 /* Function to ensure that the source and/or disassemly windows
    reflect the input address.  */
 void
 tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  struct symtab_and_line sal {};
+  struct symtab_and_line sal
+  {
+  };
+
   if (addr != 0)
     sal = find_pc_line (addr, 0);
 
@@ -223,10 +219,7 @@ tui_source_window_base::do_erase_source_content (const char *str)
 	x_pos = 1;
       else
 	x_pos = half_width - strlen (str);
-      mvwaddstr (handle.get (),
-		 (height / 2),
-		 x_pos,
-		 (char *) str);
+      mvwaddstr (handle.get (), (height / 2), x_pos, (char *) str);
 
       refresh_window ();
     }
@@ -392,7 +385,7 @@ tui_source_window_base::show_source_content ()
 		{
 		  int reduced_width = std::max (pad_width / 2, width);
 		  if (reduced_width == pad_width)
-		    error (_("failed to setup source window"));
+		    error (_ ("failed to setup source window"));
 		  pad_width = reduced_width;
 		}
 	    }
@@ -421,9 +414,9 @@ tui_source_window_base::tui_source_window_base ()
   m_start_line_or_addr.loa = LOA_ADDRESS;
   m_start_line_or_addr.u.addr = 0;
 
-  gdb::observers::styling_changed.attach
-    (std::bind (&tui_source_window::style_changed, this),
-     m_observable, "tui-winsource");
+  gdb::observers::styling_changed.attach (
+    std::bind (&tui_source_window::style_changed, this), m_observable,
+    "tui-winsource");
 }
 
 tui_source_window_base::~tui_source_window_base ()
@@ -447,8 +440,7 @@ tui_source_window_base::rerender ()
 
   if (!m_content.empty ())
     {
-      struct symtab_and_line cursal
-	= get_current_source_symtab_and_line ();
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (m_start_line_or_addr.loa == LOA_LINE)
 	cursal.line = m_start_line_or_addr.u.line_no;
@@ -458,8 +450,7 @@ tui_source_window_base::rerender ()
     }
   else if (deprecated_safe_get_selected_frame () != NULL)
     {
-      struct symtab_and_line cursal
-	= get_current_source_symtab_and_line ();
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
       frame_info_ptr frame = deprecated_safe_get_selected_frame ();
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -553,7 +544,6 @@ tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
     }
 }
 
-
 /* Set or clear the is_exec_point flag in the line whose line is
    line_no.  */
 
@@ -567,8 +557,7 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
   while (i < m_content.size ())
     {
       bool new_state;
-      struct tui_line_or_address content_loa =
-	m_content[i].line_or_addr;
+      struct tui_line_or_address content_loa = m_content[i].line_or_addr;
 
       if (content_loa.loa == l.loa
 	  && ((l.loa == LOA_LINE && content_loa.u.line_no == l.u.line_no)
@@ -599,7 +588,6 @@ tui_update_all_breakpoint_info (struct breakpoint *being_deleted)
     }
 }
 
-
 /* Scan the source window and the breakpoints to update the break_mode
    information for each line.
 
@@ -607,8 +595,8 @@ tui_update_all_breakpoint_info (struct breakpoint *being_deleted)
    refreshed.  */
 
 bool
-tui_source_window_base::update_breakpoint_info
-  (struct breakpoint *being_deleted, bool current_only)
+tui_source_window_base::update_breakpoint_info (
+  struct breakpoint *being_deleted, bool current_only)
 {
   int i;
   bool need_refresh = false;
@@ -619,7 +607,7 @@ tui_source_window_base::update_breakpoint_info
 
       line = &m_content[i];
       if (current_only && !line->is_exec_point)
-	 continue;
+	continue;
 
       /* Scan each breakpoint to see if the current line has something to
 	 do with it.  Identify enable/disabled breakpoints as well as

@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (EXPRESSION_H)
+#if !defined(EXPRESSION_H)
 #define EXPRESSION_H 1
 
 #include "gdbtypes.h"
@@ -37,24 +37,26 @@ enum innermost_block_tracker_type
   /* Track the innermost block for registers within an expression.  */
   INNERMOST_BLOCK_FOR_REGISTERS = (1 << 1)
 };
+
 DEF_ENUM_FLAGS_TYPE (enum innermost_block_tracker_type,
 		     innermost_block_tracker_types);
 
 enum exp_opcode : uint8_t
-  {
-#define OP(name) name ,
+{
+
+#define OP(name) name,
 
 #include "std-operator.def"
 
 #undef OP
-  };
+};
 
 /* Values of NOSIDE argument to eval_subexp.  */
 
 enum noside
-  {
-    EVAL_NORMAL,
-    EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
+{
+  EVAL_NORMAL,
+  EVAL_AVOID_SIDE_EFFECTS /* Don't modify any variables or
 				   call any functions.  The value
 				   returned will have the correct
 				   type, and will have an
@@ -66,7 +68,7 @@ enum noside
 				   Ideally this would not even read
 				   target memory, but currently it
 				   does in many situations.  */
-  };
+};
 
 struct expression;
 struct agent_expr;
@@ -95,9 +97,9 @@ public:
   virtual ~operation () = default;
 
   /* Evaluate this operation.  */
-  virtual value *evaluate (struct type *expect_type,
-			   struct expression *exp,
-			   enum noside noside) = 0;
+  virtual value *evaluate (struct type *expect_type, struct expression *exp,
+			   enum noside noside)
+    = 0;
 
   /* Evaluate this operation in a context where C-like coercion is
      needed.  */
@@ -128,8 +130,7 @@ public:
      'evaluate'.  ARGS holds the operations that should be evaluated
      to get the arguments to the call.  */
   virtual value *evaluate_funcall (struct type *expect_type,
-				   struct expression *exp,
-				   enum noside noside,
+				   struct expression *exp, enum noside noside,
 				   const std::vector<operation_up> &args)
   {
     /* Defer to the helper overload.  */
@@ -137,19 +138,16 @@ public:
   }
 
   /* True if this is a constant expression.  */
-  virtual bool constant_p () const
-  { return false; }
+  virtual bool constant_p () const { return false; }
 
   /* Return true if this operation uses OBJFILE (and will become
      dangling when OBJFILE is unloaded), otherwise return false.
      OBJFILE must not be a separate debug info file.  */
-  virtual bool uses_objfile (struct objfile *objfile) const
-  { return false; }
+  virtual bool uses_objfile (struct objfile *objfile) const { return false; }
 
   /* Generate agent expression bytecodes for this operation.  */
   void generate_ax (struct expression *exp, struct agent_expr *ax,
-		    struct axs_value *value,
-		    struct type *cast_type = nullptr);
+		    struct axs_value *value, struct type *cast_type = nullptr);
 
   /* Return the opcode that is implemented by this operation.  */
   virtual enum exp_opcode opcode () const = 0;
@@ -159,25 +157,21 @@ public:
 
   /* Call to indicate that this is the outermost operation in the
      expression.  This should almost never be overridden.  */
-  virtual void set_outermost () { }
+  virtual void set_outermost () {}
 
 protected:
 
   /* A helper overload that wraps evaluate_subexp_do_call.  */
-  value *evaluate_funcall (struct type *expect_type,
-			   struct expression *exp,
-			   enum noside noside,
-			   const char *function_name,
+  value *evaluate_funcall (struct type *expect_type, struct expression *exp,
+			   enum noside noside, const char *function_name,
 			   const std::vector<operation_up> &args);
 
   /* Called by generate_ax to do the work for this particular
      operation.  */
-  virtual void do_generate_ax (struct expression *exp,
-			       struct agent_expr *ax,
-			       struct axs_value *value,
-			       struct type *cast_type)
+  virtual void do_generate_ax (struct expression *exp, struct agent_expr *ax,
+			       struct axs_value *value, struct type *cast_type)
   {
-    error (_("Cannot translate to agent expression"));
+    error (_ ("Cannot translate to agent expression"));
   }
 };
 
@@ -189,7 +183,7 @@ make_operation (Arg... args)
   return operation_up (new T (std::forward<Arg> (args)...));
 }
 
-}
+} // namespace expr
 
 struct expression
 {
@@ -203,16 +197,10 @@ struct expression
 
   /* Return the opcode for the outermost sub-expression of this
      expression.  */
-  enum exp_opcode first_opcode () const
-  {
-    return op->opcode ();
-  }
+  enum exp_opcode first_opcode () const { return op->opcode (); }
 
   /* Dump the expression to STREAM.  */
-  void dump (struct ui_file *stream)
-  {
-    op->dump (stream, 0);
-  }
+  void dump (struct ui_file *stream) { op->dump (stream, 0); }
 
   /* Return true if this expression uses OBJFILE (and will become
      dangling when OBJFILE is unloaded), otherwise return false.
@@ -243,7 +231,6 @@ extern expression_up parse_expression (const char *,
 extern expression_up parse_expression_with_language (const char *string,
 						     enum language lang);
 
-
 class completion_tracker;
 
 /* Base class for expression completion.  An instance of this
@@ -255,14 +242,14 @@ struct expr_completion_base
      results.  Return true if completion was possible (even if no
      completions were found), false to fall back to ordinary
      expression completion (i.e., symbol names).  */
-  virtual bool complete (struct expression *exp,
-			 completion_tracker &tracker) = 0;
+  virtual bool complete (struct expression *exp, completion_tracker &tracker)
+    = 0;
 
   virtual ~expr_completion_base () = default;
 };
 
-extern expression_up parse_expression_for_completion
-     (const char *, std::unique_ptr<expr_completion_base> *completer);
+extern expression_up parse_expression_for_completion (
+  const char *, std::unique_ptr<expr_completion_base> *completer);
 
 class innermost_block_tracker;
 extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
@@ -277,12 +264,10 @@ extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
    DEFAULT_RETURN_TYPE is used as the function's return type if the return
    type is unknown.  */
 
-extern struct value *evaluate_subexp_do_call (expression *exp,
-					      enum noside noside,
-					      value *callee,
-					      gdb::array_view<value *> argvec,
-					      const char *function_name,
-					      type *default_return_type);
+extern struct value *
+evaluate_subexp_do_call (expression *exp, enum noside noside, value *callee,
+			 gdb::array_view<value *> argvec,
+			 const char *function_name, type *default_return_type);
 
 /* From expprint.c */
 

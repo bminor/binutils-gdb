@@ -24,10 +24,7 @@
 
 struct gdb_file_deleter
 {
-  void operator() (FILE *file) const
-  {
-    fclose (file);
-  }
+  void operator() (FILE *file) const { fclose (file); }
 };
 
 /* A unique pointer to a FILE.  */

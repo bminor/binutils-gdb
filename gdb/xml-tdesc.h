@@ -50,4 +50,3 @@ gdb::optional<std::string> target_fetch_description_xml (target_ops *ops);
 const struct target_desc *string_read_description_xml (const char *xml);
 
 #endif /* XML_TDESC_H */
-

@@ -75,9 +75,9 @@ d_entire_prefix_len (const char *name)
    symbol.  Other arguments are as in d_lookup_symbol_nonlocal.  */
 
 static struct block_symbol
-d_lookup_symbol (const struct language_defn *langdef,
-		 const char *name, const struct block *block,
-		 const domain_enum domain, int search)
+d_lookup_symbol (const struct language_defn *langdef, const char *name,
+		 const struct block *block, const domain_enum domain,
+		 int search)
 {
   struct block_symbol sym;
 
@@ -151,8 +151,8 @@ d_lookup_symbol (const struct language_defn *langdef,
 	return {};
 
       /* Look for a symbol named NESTED in this class.  */
-      sym = d_lookup_nested_symbol (class_sym.symbol->type (),
-				    nested.c_str (), block);
+      sym = d_lookup_nested_symbol (class_sym.symbol->type (), nested.c_str (),
+				    block);
     }
 
   return sym;
@@ -164,8 +164,8 @@ d_lookup_symbol (const struct language_defn *langdef,
 
 static struct block_symbol
 d_lookup_symbol_in_module (const char *module, const char *name,
-			   const struct block *block,
-			   const domain_enum domain, int search)
+			   const struct block *block, const domain_enum domain,
+			   int search)
 {
   char *concatenated_name = NULL;
 
@@ -195,10 +195,9 @@ d_lookup_symbol_in_module (const char *module, const char *name,
    and if that call fails, then the first call looks for "x".  */
 
 static struct block_symbol
-lookup_module_scope (const struct language_defn *langdef,
-		     const char *name, const struct block *block,
-		     const domain_enum domain, const char *scope,
-		     int scope_len)
+lookup_module_scope (const struct language_defn *langdef, const char *name,
+		     const struct block *block, const domain_enum domain,
+		     const char *scope, int scope_len)
 {
   char *module;
 
@@ -216,8 +215,8 @@ lookup_module_scope (const struct language_defn *langdef,
 	  new_scope_len++;
 	}
       new_scope_len += d_find_first_component (scope + new_scope_len);
-      sym = lookup_module_scope (langdef, name, block, domain,
-				 scope, new_scope_len);
+      sym = lookup_module_scope (langdef, name, block, domain, scope,
+				 new_scope_len);
       if (sym.symbol != NULL)
 	return sym;
     }
@@ -236,8 +235,7 @@ lookup_module_scope (const struct language_defn *langdef,
   module = (char *) alloca (scope_len + 1);
   strncpy (module, scope, scope_len);
   module[scope_len] = '\0';
-  return d_lookup_symbol_in_module (module, name,
-				    block, domain, 1);
+  return d_lookup_symbol_in_module (module, name, block, domain, 1);
 }
 
 /* Search through the base classes of PARENT_TYPE for a symbol named
@@ -259,8 +257,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 	continue;
 
       /* Search this particular base class.  */
-      sym = d_lookup_symbol_in_module (base_name, name, block,
-				       VAR_DOMAIN, 0);
+      sym = d_lookup_symbol_in_module (base_name, name, block, VAR_DOMAIN, 0);
       if (sym.symbol != NULL)
 	break;
 
@@ -298,8 +295,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
    given by BLOCK.  Return NULL if there is no such nested type.  */
 
 struct block_symbol
-d_lookup_nested_symbol (struct type *parent_type,
-			const char *nested_name,
+d_lookup_nested_symbol (struct type *parent_type, const char *nested_name,
 			const struct block *block)
 {
   /* type_name_no_tag_required provides better error reporting using the
@@ -314,36 +310,35 @@ d_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_UNION:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_MODULE:
-	{
-	  int size;
-	  const char *parent_name = type_name_or_error (saved_parent_type);
-	  struct block_symbol sym
-	    = d_lookup_symbol_in_module (parent_name, nested_name,
-					 block, VAR_DOMAIN, 0);
-	  char *concatenated_name;
+      {
+	int size;
+	const char *parent_name = type_name_or_error (saved_parent_type);
+	struct block_symbol sym
+	  = d_lookup_symbol_in_module (parent_name, nested_name, block,
+				       VAR_DOMAIN, 0);
+	char *concatenated_name;
 
-	  if (sym.symbol != NULL)
-	    return sym;
+	if (sym.symbol != NULL)
+	  return sym;
 
-	  /* Now search all static file-level symbols.  We have to do this
+	/* Now search all static file-level symbols.  We have to do this
 	     for things like typedefs in the class.  We do not try to
 	     guess any imported module as even the fully specified
 	     module search is already not D compliant and more assumptions
 	     could make it too magic.  */
-	  size = strlen (parent_name) + strlen (nested_name) + 2;
-	  concatenated_name = (char *) alloca (size);
+	size = strlen (parent_name) + strlen (nested_name) + 2;
+	concatenated_name = (char *) alloca (size);
 
-	  xsnprintf (concatenated_name, size, "%s.%s",
-		     parent_name, nested_name);
+	xsnprintf (concatenated_name, size, "%s.%s", parent_name, nested_name);
 
-	  sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
-	  if (sym.symbol != NULL)
-	    return sym;
+	sym = lookup_static_symbol (concatenated_name, VAR_DOMAIN);
+	if (sym.symbol != NULL)
+	  return sym;
 
-	  /* If no matching symbols were found, try searching any
+	/* If no matching symbols were found, try searching any
 	     base classes.  */
-	  return find_symbol_in_baseclass (parent_type, nested_name, block);
-	}
+	return find_symbol_in_baseclass (parent_type, nested_name, block);
+      }
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
@@ -359,8 +354,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 
 static struct block_symbol
 d_lookup_symbol_imports (const char *scope, const char *name,
-			 const struct block *block,
-			 const domain_enum domain)
+			 const struct block *block, const domain_enum domain)
 {
   struct using_direct *current;
   struct block_symbol sym;
@@ -375,9 +369,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
      the module we're searching in, see if we can find a match by
      applying them.  */
 
-  for (current = block_using (block);
-       current != NULL;
-       current = current->next)
+  for (current = block_using (block); current != NULL; current = current->next)
     {
       const char **excludep;
 
@@ -395,11 +387,12 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	     current->import_src as MODULE to direct the search towards
 	     the imported module.  */
 	  if (current->declaration
-	      && strcmp (name, current->alias
-			 ? current->alias : current->declaration) == 0)
+	      && strcmp (name, current->alias ? current->alias
+					      : current->declaration)
+		   == 0)
 	    sym = d_lookup_symbol_in_module (current->import_src,
-					     current->declaration,
-					     block, domain, 1);
+					     current->declaration, block,
+					     domain, 1);
 
 	  /* If a symbol was found or this import statement was an import
 	     declaration, the search of this import is complete.  */
@@ -453,8 +446,8 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	      /* If this import statement creates no alias, pass
 		 current->import_src as MODULE to direct the search
 		 towards the imported module.  */
-	      sym = d_lookup_symbol_in_module (current->import_src,
-					       name, block, domain, 1);
+	      sym = d_lookup_symbol_in_module (current->import_src, name,
+					       block, domain, 1);
 	    }
 
 	  if (sym.symbol != NULL)
@@ -471,14 +464,12 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 
 static struct block_symbol
 d_lookup_symbol_module (const char *scope, const char *name,
-			const struct block *block,
-			const domain_enum domain)
+			const struct block *block, const domain_enum domain)
 {
   struct block_symbol sym;
 
   /* First, try to find the symbol in the given module.  */
-  sym = d_lookup_symbol_in_module (scope, name,
-				   block, domain, 1);
+  sym = d_lookup_symbol_in_module (scope, name, block, domain, 1);
   if (sym.symbol != NULL)
     return sym;
 
@@ -506,8 +497,7 @@ d_lookup_symbol_module (const char *scope, const char *name,
 
 struct block_symbol
 d_lookup_symbol_nonlocal (const struct language_defn *langdef,
-			  const char *name,
-			  const struct block *block,
+			  const char *name, const struct block *block,
 			  const domain_enum domain)
 {
   struct block_symbol sym;
@@ -519,4 +509,3 @@ d_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
   return d_lookup_symbol_module (scope, name, block, domain);
 }
-

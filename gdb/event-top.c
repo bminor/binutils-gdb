@@ -29,11 +29,11 @@
 #include "event-top.h"
 #include "interps.h"
 #include <signal.h>
-#include "cli/cli-script.h"     /* for reset_command_nest_depth */
+#include "cli/cli-script.h" /* for reset_command_nest_depth */
 #include "main.h"
 #include "gdbthread.h"
 #include "observable.h"
-#include "gdbcmd.h"		/* for dont_repeat() */
+#include "gdbcmd.h" /* for dont_repeat() */
 #include "annotate.h"
 #include "maint.h"
 #include "gdbsupport/buffer.h"
@@ -67,7 +67,7 @@ static void handle_sighup (int sig);
 
 /* Functions to be invoked by the event loop in response to
    signals.  */
-#if defined (SIGQUIT) || defined (SIGHUP)
+#if defined(SIGQUIT) || defined(SIGHUP)
 static void async_do_nothing (gdb_client_data);
 #endif
 #ifdef SIGHUP
@@ -112,7 +112,7 @@ static void
 show_bt_on_fatal_signal (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *cmd, const char *value)
 {
-  gdb_printf (file, _("Backtrace on a fatal signal is %s.\n"), value);
+  gdb_printf (file, _ ("Backtrace on a fatal signal is %s.\n"), value);
 }
 
 /* Signal handling variables.  */
@@ -136,7 +136,6 @@ static struct async_signal_handler *async_sigterm_token;
 /* This hook is called by gdb_rl_callback_read_char_wrapper after each
    character is processed.  */
 void (*after_char_processing_hook) (void);
-
 
 /* Wrapper function for calling into the readline library.  This takes
    care of a couple things:
@@ -188,31 +187,31 @@ gdb_rl_callback_read_char_wrapper_noexcept () noexcept
      ABIs).  So we instead wrap the readline call with a sjlj-based
      TRY/CATCH, and rethrow the GDB exception once back in GDB.  */
   TRY_SJLJ
-    {
-      rl_callback_read_char ();
+  {
+    rl_callback_read_char ();
 #if RL_VERSION_MAJOR >= 8
-      /* It can happen that readline (while in rl_callback_read_char)
+    /* It can happen that readline (while in rl_callback_read_char)
 	 received a signal, but didn't handle it yet.  Make sure it's handled
 	 now.  If we don't do that we run into two related problems:
 	 - we have to wait for another event triggering
 	   rl_callback_read_char before the signal is handled
 	 - there's no guarantee that the signal will be processed before the
 	   event.  */
-      while (rl_pending_signal () != 0)
-	/* Do this in a while loop, in case rl_check_signals also leaves a
+    while (rl_pending_signal () != 0)
+      /* Do this in a while loop, in case rl_check_signals also leaves a
 	   pending signal.  I'm not sure if that's possible, but it seems
 	   better to handle the scenario than to assert.  */
-	rl_check_signals ();
+      rl_check_signals ();
 #else
-      /* Unfortunately, rl_check_signals is not available.  */
+    /* Unfortunately, rl_check_signals is not available.  */
 #endif
-      if (after_char_processing_hook)
-	(*after_char_processing_hook) ();
-    }
+    if (after_char_processing_hook)
+      (*after_char_processing_hook) ();
+  }
   CATCH_SJLJ (ex, RETURN_MASK_ALL)
-    {
-      gdb_expt = std::move (ex);
-    }
+  {
+    gdb_expt = std::move (ex);
+  }
   END_CATCH_SJLJ
 
   return gdb_expt;
@@ -398,12 +397,12 @@ display_gdb_prompt (const char *new_prompt)
   /* Do not call the python hook on an explicit prompt change as
      passed to this function, as this forms a secondary/local prompt,
      IE, displayed but not set.  */
-  if (! new_prompt)
+  if (!new_prompt)
     {
       struct ui *ui = current_ui;
 
       if (ui->prompt_state == PROMPTED)
-	internal_error (_("double prompt"));
+	internal_error (_ ("double prompt"));
       else if (ui->prompt_state == PROMPT_BLOCKED)
 	{
 	  /* This is to trick readline into not trying to display the
@@ -515,7 +514,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       if (main_ui == ui)
 	{
 	  /* If stdin died, we may as well kill gdb.  */
-	  gdb_printf (gdb_stderr, _("error detected on stdin\n"));
+	  gdb_printf (gdb_stderr, _ ("error detected on stdin\n"));
 	  quit_command ((char *) 0, 0);
 	}
       else
@@ -595,7 +594,6 @@ async_disable_stdin (void)
   ui->prompt_state = PROMPT_BLOCKED;
   ui->unregister_file_handler ();
 }
-
 
 /* Handle a gdb command line.  This function is called when
    handle_line_of_input has concatenated one or more input lines into
@@ -670,8 +668,7 @@ command_line_append_input_line (std::string &cmd_line_buffer, const char *rl)
 */
 
 const char *
-handle_line_of_input (std::string &cmd_line_buffer,
-		      const char *rl, int repeat,
+handle_line_of_input (std::string &cmd_line_buffer, const char *rl, int repeat,
 		      const char *annotation_suffix)
 {
   struct ui *ui = current_ui;
@@ -688,7 +685,8 @@ handle_line_of_input (std::string &cmd_line_buffer,
     printf_unfiltered (("\n\032\032post-%s\n"), annotation_suffix);
 
 #define SERVER_COMMAND_PREFIX "server "
-  server_command = startswith (cmd_line_buffer.c_str (), SERVER_COMMAND_PREFIX);
+  server_command
+    = startswith (cmd_line_buffer.c_str (), SERVER_COMMAND_PREFIX);
   if (server_command)
     {
       /* Note that we don't call `save_command_line'.  Between this
@@ -737,7 +735,8 @@ handle_line_of_input (std::string &cmd_line_buffer,
      and then later fetch it from the value history and remove the
      '#'.  The kill ring is probably better, but some people are in
      the habit of commenting things out.  */
-  if (cmd_line_buffer[0] != '\0' && from_tty && current_ui->input_interactive_p ())
+  if (cmd_line_buffer[0] != '\0' && from_tty
+      && current_ui->input_interactive_p ())
     gdb_add_history (cmd_line_buffer.c_str ());
 
   /* Save into global buffer if appropriate.  */
@@ -851,7 +850,10 @@ command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
       ui->prompt_state = PROMPT_NEEDED;
 
       /* Ensure the UI's line buffer is empty for the next command.  */
-      SCOPE_EXIT { line_buffer.clear (); };
+      SCOPE_EXIT
+      {
+	line_buffer.clear ();
+      };
 
       command_handler (cmd);
 
@@ -920,7 +922,6 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
   result = buffer_finish (&line_buffer);
   ui->input_handler (gdb::unique_xmalloc_ptr<char> (result));
 }
-
 
 /* Attempt to unblock signal SIG, return true if the signal was unblocked,
    otherwise, return false.  */
@@ -949,27 +950,26 @@ handle_fatal_signal (int sig)
 #endif
 
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
-  const auto sig_write = [] (const char *msg) -> void
-  {
+  const auto sig_write = [] (const char *msg) -> void {
     gdb_stderr->write_async_safe (msg, strlen (msg));
   };
 
   if (bt_on_fatal_signal)
     {
       sig_write ("\n\n");
-      sig_write (_("Fatal signal: "));
+      sig_write (_ ("Fatal signal: "));
       sig_write (strsignal (sig));
       sig_write ("\n");
 
       gdb_internal_backtrace ();
 
-      sig_write (_("A fatal error internal to GDB has been detected, "
-		   "further\ndebugging is not possible.  GDB will now "
-		   "terminate.\n\n"));
-      sig_write (_("This is a bug, please report it."));
+      sig_write (_ ("A fatal error internal to GDB has been detected, "
+		    "further\ndebugging is not possible.  GDB will now "
+		    "terminate.\n\n"));
+      sig_write (_ ("This is a bug, please report it."));
       if (REPORT_BUGS_TO[0] != '\0')
 	{
-	  sig_write (_("  For instructions, see:\n"));
+	  sig_write (_ ("  For instructions, see:\n"));
 	  sig_write (REPORT_BUGS_TO);
 	  sig_write (".");
 	}
@@ -982,15 +982,14 @@ handle_fatal_signal (int sig)
   /* If possible arrange for SIG to have its default behaviour (which
      should be to terminate the current process), unblock SIG, and reraise
      the signal.  This ensures GDB terminates with the expected signal.  */
-  if (signal (sig, SIG_DFL) != SIG_ERR
-      && unblock_signal (sig))
+  if (signal (sig, SIG_DFL) != SIG_ERR && unblock_signal (sig))
     raise (sig);
 
-  /* The above failed, so try to use SIGABRT to terminate GDB.  */
+    /* The above failed, so try to use SIGABRT to terminate GDB.  */
 #ifdef SIGABRT
   signal (SIGABRT, SIG_DFL);
 #endif
-  abort ();		/* ARI: abort */
+  abort (); /* ARI: abort */
 }
 
 /* The SIGSEGV handler for this thread, or NULL if there is none.  GDB
@@ -1011,7 +1010,7 @@ static void handle_sigsegv (int sig);
 static void
 install_handle_sigsegv ()
 {
-#if defined (HAVE_SIGACTION)
+#if defined(HAVE_SIGACTION)
   struct sigaction sa;
   sa.sa_handler = handle_sigsegv;
   sigemptyset (&sa.sa_mask);
@@ -1037,8 +1036,6 @@ handle_sigsegv (int sig)
     handle_fatal_signal (sig);
   thread_local_segv_handler (sig);
 }
-
-
 
 /* The serial event associated with the QUIT flag.  set_quit_flag sets
    this, and check_quit_flag clears it.  Used by interruptible_select
@@ -1069,8 +1066,8 @@ gdb_init_signals (void)
 
   quit_serial_event = make_serial_event ();
 
-  sigint_token =
-    create_async_signal_handler (async_request_quit, NULL, "sigint");
+  sigint_token
+    = create_async_signal_handler (async_request_quit, NULL, "sigint");
   install_sigint_handler (handle_sigint);
 
   async_sigterm_token
@@ -1078,23 +1075,23 @@ gdb_init_signals (void)
   signal (SIGTERM, handle_sigterm);
 
 #ifdef SIGQUIT
-  sigquit_token =
-    create_async_signal_handler (async_do_nothing, NULL, "sigquit");
+  sigquit_token
+    = create_async_signal_handler (async_do_nothing, NULL, "sigquit");
   signal (SIGQUIT, handle_sigquit);
 #endif
 
 #ifdef SIGHUP
   if (signal (SIGHUP, handle_sighup) != SIG_IGN)
-    sighup_token =
-      create_async_signal_handler (async_disconnect, NULL, "sighup");
+    sighup_token
+      = create_async_signal_handler (async_disconnect, NULL, "sighup");
   else
-    sighup_token =
-      create_async_signal_handler (async_do_nothing, NULL, "sighup");
+    sighup_token
+      = create_async_signal_handler (async_do_nothing, NULL, "sighup");
 #endif
 
 #ifdef SIGTSTP
-  sigtstp_token =
-    create_async_signal_handler (async_sigtstp_handler, NULL, "sigtstp");
+  sigtstp_token
+    = create_async_signal_handler (async_sigtstp_handler, NULL, "sigtstp");
 #endif
 
 #ifdef SIGFPE
@@ -1175,9 +1172,8 @@ handle_sigint (int sig)
 /* See gdb_select.h.  */
 
 int
-interruptible_select (int n,
-		      fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
-		      struct timeval *timeout)
+interruptible_select (int n, fd_set *readfds, fd_set *writefds,
+		      fd_set *exceptfds, struct timeval *timeout)
 {
   fd_set my_readfds;
   int fd;
@@ -1254,7 +1250,7 @@ handle_sigquit (int sig)
 }
 #endif
 
-#if defined (SIGQUIT) || defined (SIGHUP)
+#if defined(SIGQUIT) || defined(SIGHUP)
 /* Called by the event loop in response to a SIGQUIT or an
    ignored SIGHUP.  */
 static void
@@ -1278,7 +1274,6 @@ handle_sighup (int sig)
 static void
 async_disconnect (gdb_client_data arg)
 {
-
   try
     {
       quit_cover ();
@@ -1286,8 +1281,7 @@ async_disconnect (gdb_client_data arg)
 
   catch (const gdb_exception &exception)
     {
-      gdb_puts ("Could not kill the program being debugged",
-		gdb_stderr);
+      gdb_puts ("Could not kill the program being debugged", gdb_stderr);
       exception_print (gdb_stderr, exception);
     }
 
@@ -1302,7 +1296,7 @@ async_disconnect (gdb_client_data arg)
 	}
     }
 
-  signal (SIGHUP, SIG_DFL);	/*FIXME: ???????????  */
+  signal (SIGHUP, SIG_DFL); /*FIXME: ???????????  */
   raise (SIGHUP);
 }
 #endif
@@ -1333,8 +1327,6 @@ async_sigtstp_handler (gdb_client_data arg)
 }
 #endif /* SIGTSTP */
 
-
-
 /* Set things up for readline to be invoked via the alternate
    interface, i.e. via a callback function
    (gdb_rl_callback_read_char), and hook up instream to the event
@@ -1349,8 +1341,8 @@ gdb_setup_readline (int editing)
      However, that is only allowed on the main UI, as we can only have
      one instance of readline.  Also, INSTREAM might be nullptr when
      executing a user-defined command.  */
-  if (ui->instream != nullptr && ISATTY (ui->instream)
-      && editing && ui == main_ui)
+  if (ui->instream != nullptr && ISATTY (ui->instream) && editing
+      && ui == main_ui)
     {
       /* Tell gdb that we will be using the readline library.  This
 	 could be overwritten by a command in .gdbinit like 'set
@@ -1391,13 +1383,14 @@ gdb_disable_readline (void)
   ui->unregister_file_handler ();
 }
 
-scoped_segv_handler_restore::scoped_segv_handler_restore (segv_handler_t new_handler)
+scoped_segv_handler_restore::scoped_segv_handler_restore (
+  segv_handler_t new_handler)
 {
   m_old_handler = thread_local_segv_handler;
   thread_local_segv_handler = new_handler;
 }
 
-scoped_segv_handler_restore::~scoped_segv_handler_restore()
+scoped_segv_handler_restore::~scoped_segv_handler_restore ()
 {
   thread_local_segv_handler = m_old_handler;
 }
@@ -1406,12 +1399,9 @@ static const char debug_event_loop_off[] = "off";
 static const char debug_event_loop_all_except_ui[] = "all-except-ui";
 static const char debug_event_loop_all[] = "all";
 
-static const char *debug_event_loop_enum[] = {
-  debug_event_loop_off,
-  debug_event_loop_all_except_ui,
-  debug_event_loop_all,
-  nullptr
-};
+static const char *debug_event_loop_enum[]
+  = { debug_event_loop_off, debug_event_loop_all_except_ui,
+      debug_event_loop_all, nullptr };
 
 static const char *debug_event_loop_value = debug_event_loop_off;
 
@@ -1433,34 +1423,34 @@ static void
 show_debug_event_loop_command (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *cmd, const char *value)
 {
-  gdb_printf (file, _("Event loop debugging is %s.\n"), value);
+  gdb_printf (file, _ ("Event loop debugging is %s.\n"), value);
 }
 
 void _initialize_event_top ();
+
 void
 _initialize_event_top ()
 {
-  add_setshow_enum_cmd ("event-loop", class_maintenance,
-			debug_event_loop_enum,
+  add_setshow_enum_cmd ("event-loop", class_maintenance, debug_event_loop_enum,
 			&debug_event_loop_value,
-			_("Set event-loop debugging."),
-			_("Show event-loop debugging."),
-			_("\
+			_ ("Set event-loop debugging."),
+			_ ("Show event-loop debugging."), _ ("\
 Control whether to show event loop-related debug messages."),
 			set_debug_event_loop_command,
-			show_debug_event_loop_command,
-			&setdebuglist, &showdebuglist);
+			show_debug_event_loop_command, &setdebuglist,
+			&showdebuglist);
 
   add_setshow_boolean_cmd ("backtrace-on-fatal-signal", class_maintenance,
-			   &bt_on_fatal_signal, _("\
-Set whether to produce a backtrace if GDB receives a fatal signal."), _("\
-Show whether GDB will produce a backtrace if it receives a fatal signal."), _("\
+			   &bt_on_fatal_signal, _ ("\
+Set whether to produce a backtrace if GDB receives a fatal signal."),
+			   _ ("\
+Show whether GDB will produce a backtrace if it receives a fatal signal."),
+			   _ ("\
 Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, GDB will produce a minimal backtrace if it encounters a fatal\n\
 signal from within GDB itself.  This is a mechanism to help diagnose\n\
 crashes within GDB, not a mechanism for debugging inferiors."),
 			   gdb_internal_backtrace_set_cmd,
-			   show_bt_on_fatal_signal,
-			   &maintenance_set_cmdlist,
+			   show_bt_on_fatal_signal, &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 }

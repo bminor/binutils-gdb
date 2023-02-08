@@ -29,7 +29,7 @@
 #include "dis-asm.h"
 #include "sim-regno.h"
 #include "sim/sim-frv.h"
-#include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
+#include "opcodes/frv-desc.h" /* for the H_SPR_... enums */
 #include "symtab.h"
 #include "elf-bfd.h"
 #include "elf/frv.h"
@@ -40,18 +40,18 @@
 #include "objfiles.h"
 #include "gdbarch.h"
 
-struct frv_unwind_cache		/* was struct frame_extra_info */
-  {
-    /* The previous frame's inner-most stack address.  Used as this
+struct frv_unwind_cache /* was struct frame_extra_info */
+{
+  /* The previous frame's inner-most stack address.  Used as this
        frame ID's stack_addr.  */
-    CORE_ADDR prev_sp;
+  CORE_ADDR prev_sp;
 
-    /* The frame's base, optionally used by the high-level debug info.  */
-    CORE_ADDR base;
+  /* The frame's base, optionally used by the high-level debug info.  */
+  CORE_ADDR base;
 
-    /* Table indicating the location of each and every register.  */
-    trad_frame_saved_reg *saved_regs;
-  };
+  /* Table indicating the location of each and every register.  */
+  trad_frame_saved_reg *saved_regs;
+};
 
 /* A structure describing a particular variant of the FRV.
    We allocate and initialize one of these structures when we create
@@ -71,7 +71,9 @@ struct frv_unwind_cache		/* was struct frame_extra_info */
 struct frv_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Which ABI is in use?  */
-  enum frv_abi frv_abi {};
+  enum frv_abi frv_abi
+  {
+  };
 
   /* How many general-purpose registers does this variant have?  */
   int num_gprs = 0;
@@ -115,15 +117,15 @@ frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
       if (interp_addr != NULL)
 	{
 	  ULONGEST val;
-	  regcache_cooked_read_unsigned (regcache,
-					 fdpic_loadmap_interp_regnum, &val);
+	  regcache_cooked_read_unsigned (regcache, fdpic_loadmap_interp_regnum,
+					 &val);
 	  *interp_addr = val;
 	}
       if (exec_addr != NULL)
 	{
 	  ULONGEST val;
-	  regcache_cooked_read_unsigned (regcache,
-					 fdpic_loadmap_exec_regnum, &val);
+	  regcache_cooked_read_unsigned (regcache, fdpic_loadmap_exec_regnum,
+					 &val);
 	  *exec_addr = val;
 	}
       return 0;
@@ -147,7 +149,7 @@ new_variant ()
 
   /* By default, don't supply any general-purpose or floating-point
      register names.  */
-  var->register_names 
+  var->register_names
     = (const char **) xmalloc ((frv_num_regs + frv_num_pseudo_regs)
 			       * sizeof (const char *));
   for (r = 0; r < frv_num_regs + frv_num_pseudo_regs; r++)
@@ -159,7 +161,7 @@ new_variant ()
   var->register_names[pc_regnum] = "pc";
   var->register_names[lr_regnum] = "lr";
   var->register_names[lcr_regnum] = "lcr";
-     
+
   var->register_names[psr_regnum] = "psr";
   var->register_names[ccr_regnum] = "ccr";
   var->register_names[cccr_regnum] = "cccr";
@@ -185,8 +187,7 @@ new_variant ()
      in the G packet.  If we need more in the future, we'll add them
      elsewhere.  */
   for (r = acc0_regnum; r <= acc7_regnum; r++)
-    var->register_names[r]
-      = xstrprintf ("acc%d", r - acc0_regnum).release ();
+    var->register_names[r] = xstrprintf ("acc%d", r - acc0_regnum).release ();
 
   /* accg0 - accg7: These are one byte registers.  The remote protocol
      provides the raw values packed four into a slot.  accg0123 and
@@ -212,7 +213,6 @@ new_variant ()
   return var;
 }
 
-
 /* Indicate that the variant VAR has NUM_GPRS general-purpose
    registers, and fill in the names array appropriately.  */
 static void
@@ -230,7 +230,6 @@ set_variant_num_gprs (frv_gdbarch_tdep *var, int num_gprs)
       var->register_names[first_gpr_regnum + r] = xstrdup (buf);
     }
 }
-
 
 /* Indicate that the variant VAR has NUM_FPRS floating-point
    registers, and fill in the names array appropriately.  */
@@ -274,7 +273,6 @@ frv_register_name (struct gdbarch *gdbarch, int reg)
   frv_gdbarch_tdep *tdep = gdbarch_tdep<frv_gdbarch_tdep> (gdbarch);
   return tdep->register_names[reg];
 }
-
 
 static struct type *
 frv_register_type (struct gdbarch *gdbarch, int reg)
@@ -326,7 +324,7 @@ frv_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 
 static void
 frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-			  int reg, const gdb_byte *buffer)
+			   int reg, const gdb_byte *buffer)
 {
   if (reg == iacc0_regnum)
     {
@@ -351,47 +349,46 @@ frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static int
 frv_register_sim_regno (struct gdbarch *gdbarch, int reg)
 {
-  static const int spr_map[] =
-    {
-      H_SPR_PSR,		/* psr_regnum */
-      H_SPR_CCR,		/* ccr_regnum */
-      H_SPR_CCCR,		/* cccr_regnum */
-      -1,			/* fdpic_loadmap_exec_regnum */
-      -1,			/* fdpic_loadmap_interp_regnum */
-      -1,			/* 134 */
-      H_SPR_TBR,		/* tbr_regnum */
-      H_SPR_BRR,		/* brr_regnum */
-      H_SPR_DBAR0,		/* dbar0_regnum */
-      H_SPR_DBAR1,		/* dbar1_regnum */
-      H_SPR_DBAR2,		/* dbar2_regnum */
-      H_SPR_DBAR3,		/* dbar3_regnum */
-      H_SPR_SCR0,		/* scr0_regnum */
-      H_SPR_SCR1,		/* scr1_regnum */
-      H_SPR_SCR2,		/* scr2_regnum */
-      H_SPR_SCR3,		/* scr3_regnum */
-      H_SPR_LR,			/* lr_regnum */
-      H_SPR_LCR,		/* lcr_regnum */
-      H_SPR_IACC0H,		/* iacc0h_regnum */
-      H_SPR_IACC0L,		/* iacc0l_regnum */
-      H_SPR_FSR0,		/* fsr0_regnum */
-      /* FIXME: Add infrastructure for fetching/setting ACC and ACCG regs.  */
-      -1,			/* acc0_regnum */
-      -1,			/* acc1_regnum */
-      -1,			/* acc2_regnum */
-      -1,			/* acc3_regnum */
-      -1,			/* acc4_regnum */
-      -1,			/* acc5_regnum */
-      -1,			/* acc6_regnum */
-      -1,			/* acc7_regnum */
-      -1,			/* acc0123_regnum */
-      -1,			/* acc4567_regnum */
-      H_SPR_MSR0,		/* msr0_regnum */
-      H_SPR_MSR1,		/* msr1_regnum */
-      H_SPR_GNER0,		/* gner0_regnum */
-      H_SPR_GNER1,		/* gner1_regnum */
-      H_SPR_FNER0,		/* fner0_regnum */
-      H_SPR_FNER1,		/* fner1_regnum */
-    };
+  static const int spr_map[] = {
+    H_SPR_PSR,	  /* psr_regnum */
+    H_SPR_CCR,	  /* ccr_regnum */
+    H_SPR_CCCR,	  /* cccr_regnum */
+    -1,		  /* fdpic_loadmap_exec_regnum */
+    -1,		  /* fdpic_loadmap_interp_regnum */
+    -1,		  /* 134 */
+    H_SPR_TBR,	  /* tbr_regnum */
+    H_SPR_BRR,	  /* brr_regnum */
+    H_SPR_DBAR0,  /* dbar0_regnum */
+    H_SPR_DBAR1,  /* dbar1_regnum */
+    H_SPR_DBAR2,  /* dbar2_regnum */
+    H_SPR_DBAR3,  /* dbar3_regnum */
+    H_SPR_SCR0,	  /* scr0_regnum */
+    H_SPR_SCR1,	  /* scr1_regnum */
+    H_SPR_SCR2,	  /* scr2_regnum */
+    H_SPR_SCR3,	  /* scr3_regnum */
+    H_SPR_LR,	  /* lr_regnum */
+    H_SPR_LCR,	  /* lcr_regnum */
+    H_SPR_IACC0H, /* iacc0h_regnum */
+    H_SPR_IACC0L, /* iacc0l_regnum */
+    H_SPR_FSR0,	  /* fsr0_regnum */
+    /* FIXME: Add infrastructure for fetching/setting ACC and ACCG regs.  */
+    -1,		 /* acc0_regnum */
+    -1,		 /* acc1_regnum */
+    -1,		 /* acc2_regnum */
+    -1,		 /* acc3_regnum */
+    -1,		 /* acc4_regnum */
+    -1,		 /* acc5_regnum */
+    -1,		 /* acc6_regnum */
+    -1,		 /* acc7_regnum */
+    -1,		 /* acc0123_regnum */
+    -1,		 /* acc4567_regnum */
+    H_SPR_MSR0,	 /* msr0_regnum */
+    H_SPR_MSR1,	 /* msr1_regnum */
+    H_SPR_GNER0, /* gner0_regnum */
+    H_SPR_GNER1, /* gner1_regnum */
+    H_SPR_FNER0, /* fner0_regnum */
+    H_SPR_FNER1, /* fner1_regnum */
+  };
 
   gdb_assert (reg >= 0 && reg < gdbarch_num_regs (gdbarch));
 
@@ -412,10 +409,10 @@ frv_register_sim_regno (struct gdbarch *gdbarch, int reg)
 	return SIM_FRV_SPR0_REGNUM + spr_reg_offset;
     }
 
-  internal_error (_("Bad register number %d"), reg);
+  internal_error (_ ("Bad register number %d"), reg);
 }
 
-constexpr gdb_byte frv_break_insn[] = {0xc0, 0x70, 0x00, 0x01};
+constexpr gdb_byte frv_break_insn[] = { 0xc0, 0x70, 0x00, 0x01 };
 
 typedef BP_MANIPULATION (frv_break_insn) frv_breakpoint;
 
@@ -464,26 +461,21 @@ frv_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
   return bpaddr;
 }
 
-
 /* Return true if REG is a caller-saves ("scratch") register,
    false otherwise.  */
 static int
 is_caller_saves_reg (int reg)
 {
-  return ((4 <= reg && reg <= 7)
-	  || (14 <= reg && reg <= 15)
+  return ((4 <= reg && reg <= 7) || (14 <= reg && reg <= 15)
 	  || (32 <= reg && reg <= 47));
 }
-
 
 /* Return true if REG is a callee-saves register, false otherwise.  */
 static int
 is_callee_saves_reg (int reg)
 {
-  return ((16 <= reg && reg <= 31)
-	  || (48 <= reg && reg <= 63));
+  return ((16 <= reg && reg <= 31) || (48 <= reg && reg <= 63));
 }
-
 
 /* Return true if REG is an argument register, false otherwise.  */
 static int
@@ -506,8 +498,7 @@ is_argument_reg (int reg)
    prologue analysis.  */
 static CORE_ADDR
 frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
-		      frame_info_ptr this_frame,
-		      struct frv_unwind_cache *info)
+		      frame_info_ptr this_frame, struct frv_unwind_cache *info)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -696,10 +687,10 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 We treat this as part of the prologue, and record the register's
 	 saved address in the frame structure.  */
       else if ((op & 0x01ffffff) == 0x000c10c0
-	    || (op & 0x01ffffff) == 0x000c1100)
+	       || (op & 0x01ffffff) == 0x000c1100)
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
-	  int ope  = ((op >> 6)  & 0x3f);
+	  int ope = ((op >> 6) & 0x3f);
 	  int count;
 	  int i;
 
@@ -797,7 +788,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	     .    .   .    .   .    .   .   .
 	 We check that GRk is really an argument register, and treat
 	 all such as part of the prologue.  */
-      else if (   (op & 0x01fff000) == 0x01442000
+      else if ((op & 0x01fff000) == 0x01442000
 	       || (op & 0x01fff000) == 0x01402000)
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
@@ -822,7 +813,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 We treat this as part of the prologue, and record the register's
 	 saved address in the frame structure.  */
       else if ((op & 0x01fff000) == 0x014c1000
-	    || (op & 0x01fff000) == 0x01501000)
+	       || (op & 0x01fff000) == 0x01501000)
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
 	  int count;
@@ -865,7 +856,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 instructions fall into this pattern, so let's decode the
 	 instruction once, and then work at a higher level.  */
       else if (((op & 0x01fc0fff) == 0x000c0080)
-	    || ((op & 0x01fc0000) == 0x01480000))
+	       || ((op & 0x01fc0000) == 0x01480000))
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
 	  int gr_i = ((op >> 12) & 0x3f);
@@ -895,8 +886,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
 	  /* Saving callee-saves register(s) on the stack, relative to
 	     the SP.  */
-	  else if (gr_i == sp_regnum
-		   && is_callee_saves_reg (gr_k))
+	  else if (gr_i == sp_regnum && is_callee_saves_reg (gr_k))
 	    {
 	      gr_saved[gr_k] = 1;
 	      if (gr_i == sp_regnum)
@@ -907,8 +897,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	    }
 
 	  /* Saving the scratch register holding the return address.  */
-	  else if (lr_save_reg != -1
-		   && gr_k == lr_save_reg)
+	  else if (lr_save_reg != -1 && gr_k == lr_save_reg)
 	    {
 	      lr_saved_on_stack = 1;
 	      if (gr_i == sp_regnum)
@@ -966,7 +955,6 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
   return last_prologue_pc;
 }
 
-
 static CORE_ADDR
 frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
@@ -997,7 +985,6 @@ frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   return new_pc;
 }
-
 
 /* Examine the instruction pointed to by PC.  If it corresponds to
    a call to __main, return the address of the next instruction.
@@ -1067,8 +1054,7 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       call_dest = pc + 4 * displ;
       s = lookup_minimal_symbol_by_pc (call_dest);
 
-      if (s.minsym != NULL
-	  && s.minsym->linkage_name () != NULL
+      if (s.minsym != NULL && s.minsym->linkage_name () != NULL
 	  && strcmp (s.minsym->linkage_name (), "__main") == 0)
 	{
 	  pc += 4;
@@ -1078,10 +1064,8 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return orig_pc;
 }
 
-
 static struct frv_unwind_cache *
-frv_frame_unwind_cache (frame_info_ptr this_frame,
-			 void **this_prologue_cache)
+frv_frame_unwind_cache (frame_info_ptr this_frame, void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frv_unwind_cache *info;
@@ -1094,8 +1078,8 @@ frv_frame_unwind_cache (frame_info_ptr this_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Prologue analysis does the rest...  */
-  frv_analyze_prologue (gdbarch,
-			get_frame_func (this_frame), this_frame, info);
+  frv_analyze_prologue (gdbarch, get_frame_func (this_frame), this_frame,
+			info);
 
   return info;
 }
@@ -1124,7 +1108,7 @@ frv_extract_return_value (struct type *type, struct regcache *regcache,
       store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, byte_order, regval);
     }
   else
-    internal_error (_("Illegal return value length: %d"), len);
+    internal_error (_ ("Illegal return value length: %d"), len);
 }
 
 static CORE_ADDR
@@ -1184,8 +1168,8 @@ frv_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
 
 static CORE_ADDR
 frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		     struct regcache *regcache, CORE_ADDR bp_addr,
-		     int nargs, struct value **args, CORE_ADDR sp,
+		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		     struct value **args, CORE_ADDR sp,
 		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
@@ -1237,21 +1221,19 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	{
-	  store_unsigned_integer (valbuf, 4, byte_order,
-				  value_address (arg));
+	  store_unsigned_integer (valbuf, 4, byte_order, value_address (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;
 	}
-      else if (abi == FRV_ABI_FDPIC
-	       && len == 4
-	       && typecode == TYPE_CODE_PTR
+      else if (abi == FRV_ABI_FDPIC && len == 4 && typecode == TYPE_CODE_PTR
 	       && arg_type->target_type ()->code () == TYPE_CODE_FUNC)
 	{
 	  /* The FDPIC ABI requires function descriptors to be passed instead
 	     of entry points.  */
-	  CORE_ADDR addr = extract_unsigned_integer
-			     (value_contents (arg).data (), 4, byte_order);
+	  CORE_ADDR addr
+	    = extract_unsigned_integer (value_contents (arg).data (), 4,
+					byte_order);
 	  addr = find_func_descr (gdbarch, addr);
 	  store_unsigned_integer (valbuf, 4, byte_order, addr);
 	  typecode = TYPE_CODE_PTR;
@@ -1299,9 +1281,9 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (abi == FRV_ABI_FDPIC)
     {
       /* Set the GOT register for the FDPIC ABI.  */
-      regcache_cooked_write_unsigned
-	(regcache, first_gpr_regnum + 15,
-	 frv_fdpic_find_global_pointer (func_addr));
+      regcache_cooked_write_unsigned (
+	regcache, first_gpr_regnum + 15,
+	frv_fdpic_find_global_pointer (func_addr));
     }
 
   /* Finally, update the SP register.  */
@@ -1329,7 +1311,7 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
       regcache->cooked_write (9, (bfd_byte *) valbuf + 4);
     }
   else
-    internal_error (_("Don't know how to return a %d-byte value."), len);
+    internal_error (_ ("Don't know how to return a %d-byte value."), len);
 }
 
 static enum return_value_convention
@@ -1363,8 +1345,8 @@ frv_return_value (struct gdbarch *gdbarch, struct value *function,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-frv_frame_this_id (frame_info_ptr this_frame,
-		    void **this_prologue_cache, struct frame_id *this_id)
+frv_frame_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
+		   struct frame_id *this_id)
 {
   struct frv_unwind_cache *info
     = frv_frame_unwind_cache (this_frame, this_prologue_cache);
@@ -1393,23 +1375,22 @@ frv_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-frv_frame_prev_register (frame_info_ptr this_frame,
-			 void **this_prologue_cache, int regnum)
+frv_frame_prev_register (frame_info_ptr this_frame, void **this_prologue_cache,
+			 int regnum)
 {
   struct frv_unwind_cache *info
     = frv_frame_unwind_cache (this_frame, this_prologue_cache);
   return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
-static const struct frame_unwind frv_frame_unwind = {
-  "frv prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  frv_frame_this_id,
-  frv_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind frv_frame_unwind
+  = { "frv prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      frv_frame_this_id,
+      frv_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 static CORE_ADDR
 frv_frame_base_address (frame_info_ptr this_frame, void **this_cache)
@@ -1419,12 +1400,9 @@ frv_frame_base_address (frame_info_ptr this_frame, void **this_cache)
   return info->base;
 }
 
-static const struct frame_base frv_frame_base = {
-  &frv_frame_unwind,
-  frv_frame_base_address,
-  frv_frame_base_address,
-  frv_frame_base_address
-};
+static const struct frame_base frv_frame_base
+  = { &frv_frame_unwind, frv_frame_base_address, frv_frame_base_address,
+      frv_frame_base_address };
 
 static struct gdbarch *
 frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -1501,8 +1479,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_main_prologue (gdbarch, frv_skip_main_prologue);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, frv_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, frv_breakpoint::bp_from_kind);
-  set_gdbarch_adjust_breakpoint_address
-    (gdbarch, frv_adjust_breakpoint_address);
+  set_gdbarch_adjust_breakpoint_address (gdbarch,
+					 frv_adjust_breakpoint_address);
 
   set_gdbarch_return_value (gdbarch, frv_return_value);
 
@@ -1565,6 +1543,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_frv_tdep ();
+
 void
 _initialize_frv_tdep ()
 {

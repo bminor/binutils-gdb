@@ -37,9 +37,9 @@ extern bool remote_debug;
 
 /* Same as the above, but don't include the function name.  */
 
-#define remote_debug_printf_nofunc(fmt, ...) \
-		debug_prefixed_printf_cond_nofunc (remote_debug, "remote", \
-						   fmt, ##__VA_ARGS__)
+#define remote_debug_printf_nofunc(fmt, ...)                      \
+  debug_prefixed_printf_cond_nofunc (remote_debug, "remote", fmt, \
+				     ##__VA_ARGS__)
 
 /* Print "remote" enter/exit debug statements.  */
 
@@ -52,8 +52,8 @@ extern bool remote_debug;
    rather than timing out; this is used (in synchronous mode) to wait
    for a target that is is executing user code to stop.  */
 
-extern void getpkt (remote_target *remote,
-		    char **buf, long *sizeof_buf, int forever);
+extern void getpkt (remote_target *remote, char **buf, long *sizeof_buf,
+		    int forever);
 
 /* Send a packet to the remote machine, with error checking.  The data
    of the packet is in BUF.  The string in BUF can be at most PBUFSIZ
@@ -114,7 +114,6 @@ struct send_remote_packet_callbacks
 
 extern void send_remote_packet (gdb::array_view<const char> &buf,
 				send_remote_packet_callbacks *callbacks);
-
 
 /* Return true if TARGET is a remote, or extended-remote target, otherwise,
    return false.  */

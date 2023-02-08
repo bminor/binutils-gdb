@@ -28,7 +28,7 @@ extern void exception_print (struct ui_file *file,
 			     const struct gdb_exception &e);
 extern void exception_fprintf (struct ui_file *file,
 			       const struct gdb_exception &e,
-			       const char *prefix,
-			       ...) ATTRIBUTE_PRINTF (3, 4);
+			       const char *prefix, ...)
+  ATTRIBUTE_PRINTF (3, 4);
 
 #endif

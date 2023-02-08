@@ -34,44 +34,42 @@
 #include "solib-svr4.h"
 
 /* From <sys/regset.h>.  */
-const struct sparc_gregmap sparc32_sol2_gregmap =
-{
-  32 * 4,			/* %psr */
-  33 * 4,			/* %pc */
-  34 * 4,			/* %npc */
-  35 * 4,			/* %y */
-  36 * 4,			/* %wim */
-  37 * 4,			/* %tbr */
-  1 * 4,			/* %g1 */
-  16 * 4,			/* %l0 */
+const struct sparc_gregmap sparc32_sol2_gregmap = {
+  32 * 4, /* %psr */
+  33 * 4, /* %pc */
+  34 * 4, /* %npc */
+  35 * 4, /* %y */
+  36 * 4, /* %wim */
+  37 * 4, /* %tbr */
+  1 * 4,  /* %g1 */
+  16 * 4, /* %l0 */
 };
 
-const struct sparc_fpregmap sparc32_sol2_fpregmap =
-{
-  0 * 4,			/* %f0 */
-  33 * 4,			/* %fsr */
+const struct sparc_fpregmap sparc32_sol2_fpregmap = {
+  0 * 4,  /* %f0 */
+  33 * 4, /* %fsr */
 };
 
 static void
 sparc32_sol2_supply_core_gregset (const struct regset *regset,
-				  struct regcache *regcache,
-				  int regnum, const void *gregs, size_t len)
+				  struct regcache *regcache, int regnum,
+				  const void *gregs, size_t len)
 {
   sparc32_supply_gregset (&sparc32_sol2_gregmap, regcache, regnum, gregs);
 }
 
 static void
 sparc32_sol2_collect_core_gregset (const struct regset *regset,
-				   const struct regcache *regcache,
-				   int regnum, void *gregs, size_t len)
+				   const struct regcache *regcache, int regnum,
+				   void *gregs, size_t len)
 {
   sparc32_collect_gregset (&sparc32_sol2_gregmap, regcache, regnum, gregs);
 }
 
 static void
 sparc32_sol2_supply_core_fpregset (const struct regset *regset,
-				   struct regcache *regcache,
-				   int regnum, const void *fpregs, size_t len)
+				   struct regcache *regcache, int regnum,
+				   const void *fpregs, size_t len)
 {
   sparc32_supply_fpregset (&sparc32_sol2_fpregmap, regcache, regnum, fpregs);
 }
@@ -84,20 +82,13 @@ sparc32_sol2_collect_core_fpregset (const struct regset *regset,
   sparc32_collect_fpregset (&sparc32_sol2_fpregmap, regcache, regnum, fpregs);
 }
 
-static const struct regset sparc32_sol2_gregset =
-  {
-    NULL,
-    sparc32_sol2_supply_core_gregset,
-    sparc32_sol2_collect_core_gregset
-  };
+static const struct regset sparc32_sol2_gregset
+  = { NULL, sparc32_sol2_supply_core_gregset,
+      sparc32_sol2_collect_core_gregset };
 
-static const struct regset sparc32_sol2_fpregset =
-  {
-    NULL,
-    sparc32_sol2_supply_core_fpregset,
-    sparc32_sol2_collect_core_fpregset
-  };
-
+static const struct regset sparc32_sol2_fpregset
+  = { NULL, sparc32_sol2_supply_core_fpregset,
+      sparc32_sol2_collect_core_fpregset };
 
 static struct sparc_frame_cache *
 sparc32_sol2_sigtramp_frame_cache (frame_info_ptr this_frame,
@@ -118,8 +109,8 @@ sparc32_sol2_sigtramp_frame_cache (frame_info_ptr this_frame,
   /* The third argument is a pointer to an instance of `ucontext_t',
      which has a member `uc_mcontext' that contains the saved
      registers.  */
-  regnum =
-    (cache->copied_regs_mask & 0x04) ? SPARC_I2_REGNUM : SPARC_O2_REGNUM;
+  regnum
+    = (cache->copied_regs_mask & 0x04) ? SPARC_I2_REGNUM : SPARC_O2_REGNUM;
   mcontext_addr = get_frame_register_unsigned (this_frame, regnum) + 40;
 
   cache->saved_regs[SPARC32_PSR_REGNUM].set_addr (mcontext_addr + 0 * 4);
@@ -142,8 +133,8 @@ sparc32_sol2_sigtramp_frame_cache (frame_info_ptr this_frame,
     {
       addr = cache->saved_regs[SPARC_SP_REGNUM].addr ();
       addr = get_frame_memory_unsigned (this_frame, addr, 4);
-      for (regnum = SPARC_L0_REGNUM;
-	   regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
+      for (regnum = SPARC_L0_REGNUM; regnum <= SPARC_I7_REGNUM;
+	   regnum++, addr += 4)
 	cache->saved_regs[regnum].set_addr (addr);
     }
 
@@ -155,19 +146,18 @@ sparc32_sol2_sigtramp_frame_this_id (frame_info_ptr this_frame,
 				     void **this_cache,
 				     struct frame_id *this_id)
 {
-  struct sparc_frame_cache *cache =
-    sparc32_sol2_sigtramp_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc32_sol2_sigtramp_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
 static struct value *
 sparc32_sol2_sigtramp_frame_prev_register (frame_info_ptr this_frame,
-					   void **this_cache,
-					   int regnum)
+					   void **this_cache, int regnum)
 {
-  struct sparc_frame_cache *cache =
-    sparc32_sol2_sigtramp_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc32_sol2_sigtramp_frame_cache (this_frame, this_cache);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
@@ -180,18 +170,14 @@ sparc32_sol2_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return sol2_sigtramp_p (this_frame);
 }
 
-static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind =
-{
-  "sparc32 solaris sigtramp",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  sparc32_sol2_sigtramp_frame_this_id,
-  sparc32_sol2_sigtramp_frame_prev_register,
-  NULL,
-  sparc32_sol2_sigtramp_frame_sniffer
-};
-
-
+static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind
+  = { "sparc32 solaris sigtramp",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      sparc32_sol2_sigtramp_frame_this_id,
+      sparc32_sol2_sigtramp_frame_prev_register,
+      NULL,
+      sparc32_sol2_sigtramp_frame_sniffer };
 
 static void
 sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -208,8 +194,8 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Solaris has SVR4-style shared libraries...  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
   /* ...which means that we need some special handling when doing
      prologue analysis.  */
@@ -222,9 +208,10 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_sparc_sol2_tdep ();
+
 void
 _initialize_sparc_sol2_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_sparc, 0,
-			  GDB_OSABI_SOLARIS, sparc32_sol2_init_abi);
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_SOLARIS,
+			  sparc32_sol2_init_abi);
 }

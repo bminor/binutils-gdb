@@ -50,7 +50,6 @@ struct scope_component
 bool operator== (const scope_component &lhs, const scope_component &rhs);
 bool operator!= (const scope_component &lhs, const scope_component &rhs);
 
-
 /* A single compiler scope used to define a type.
 
    A compile_scope is a list of scope_components, where all leading
@@ -71,16 +70,14 @@ public:
   using std::vector<scope_component>::operator[];
 
   compile_scope ()
-    : m_nested_type (GCC_TYPE_NONE), m_pushed (false)
+    : m_nested_type (GCC_TYPE_NONE),
+      m_pushed (false)
   {
   }
 
   /* Return the gcc_type of the type if it is a nested definition.
      Returns GCC_TYPE_NONE if this type was not nested.  */
-  gcc_type nested_type ()
-  {
-    return m_nested_type;
-  }
+  gcc_type nested_type () { return m_nested_type; }
 
 private:
 
@@ -131,8 +128,7 @@ public:
     : compile_instance (&gcc_cp->base, m_default_cflags),
       m_plugin (gcc_cp)
   {
-    m_plugin.set_callbacks (gcc_cplus_convert_symbol,
-			    gcc_cplus_symbol_address,
+    m_plugin.set_callbacks (gcc_cplus_convert_symbol, gcc_cplus_symbol_address,
 			    gcc_cplus_enter_scope, gcc_cplus_leave_scope,
 			    this);
   }
@@ -144,9 +140,9 @@ public:
      type).  GCC_CP_ACCESS_NONE is the default nested access.
 
      The new GCC type is returned.  */
-  gcc_type convert_type
-    (struct type *type,
-     enum gcc_cp_symbol_kind nested_access = GCC_CP_ACCESS_NONE);
+  gcc_type convert_type (struct type *type,
+			 enum gcc_cp_symbol_kind nested_access
+			 = GCC_CP_ACCESS_NONE);
 
   /* Return a handle for the GCC plug-in.  */
   gcc_cp_plugin &plugin () { return m_plugin; }

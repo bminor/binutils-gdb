@@ -19,7 +19,8 @@
 #ifndef REGFORMATS_REGDEF_H
 #define REGFORMATS_REGDEF_H
 
-namespace gdb {
+namespace gdb
+{
 
 struct reg
 {
@@ -27,13 +28,15 @@ struct reg
     : name (""),
       offset (_offset),
       size (0)
-  {}
+  {
+  }
 
   reg (const char *_name, int _offset, int _size)
     : name (_name),
       offset (_offset),
       size (_size)
-  {}
+  {
+  }
 
   /* The name of this register - NULL for pad entries.  */
   const char *name;
@@ -51,15 +54,11 @@ struct reg
 
   bool operator== (const reg &other) const
   {
-    return (strcmp (name, other.name) == 0
-	    && offset == other.offset
+    return (strcmp (name, other.name) == 0 && offset == other.offset
 	    && size == other.size);
   }
 
-  bool operator!= (const reg &other) const
-  {
-    return !(*this == other);
-  }
+  bool operator!= (const reg &other) const { return !(*this == other); }
 };
 
 } /* namespace gdb */

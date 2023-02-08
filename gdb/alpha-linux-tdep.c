@@ -35,26 +35,26 @@
    from the Linux kernel tree.  */
 
 enum
-  {
-    /* SIGABRT is the same as in the generic implementation, but is
+{
+  /* SIGABRT is the same as in the generic implementation, but is
        defined here because SIGIOT depends on it.  */
-    ALPHA_LINUX_SIGABRT = 6,
-    ALPHA_LINUX_SIGEMT = 7,
-    ALPHA_LINUX_SIGBUS = 10,
-    ALPHA_LINUX_SIGSYS = 12,
-    ALPHA_LINUX_SIGURG = 16,
-    ALPHA_LINUX_SIGSTOP = 17,
-    ALPHA_LINUX_SIGTSTP = 18,
-    ALPHA_LINUX_SIGCONT = 19,
-    ALPHA_LINUX_SIGCHLD = 20,
-    ALPHA_LINUX_SIGIO = 23,
-    ALPHA_LINUX_SIGINFO = 29,
-    ALPHA_LINUX_SIGUSR1 = 30,
-    ALPHA_LINUX_SIGUSR2 = 31,
-    ALPHA_LINUX_SIGPOLL = ALPHA_LINUX_SIGIO,
-    ALPHA_LINUX_SIGPWR = ALPHA_LINUX_SIGINFO,
-    ALPHA_LINUX_SIGIOT = ALPHA_LINUX_SIGABRT,
-  };
+  ALPHA_LINUX_SIGABRT = 6,
+  ALPHA_LINUX_SIGEMT = 7,
+  ALPHA_LINUX_SIGBUS = 10,
+  ALPHA_LINUX_SIGSYS = 12,
+  ALPHA_LINUX_SIGURG = 16,
+  ALPHA_LINUX_SIGSTOP = 17,
+  ALPHA_LINUX_SIGTSTP = 18,
+  ALPHA_LINUX_SIGCONT = 19,
+  ALPHA_LINUX_SIGCHLD = 20,
+  ALPHA_LINUX_SIGIO = 23,
+  ALPHA_LINUX_SIGINFO = 29,
+  ALPHA_LINUX_SIGUSR1 = 30,
+  ALPHA_LINUX_SIGUSR2 = 31,
+  ALPHA_LINUX_SIGPOLL = ALPHA_LINUX_SIGIO,
+  ALPHA_LINUX_SIGPWR = ALPHA_LINUX_SIGINFO,
+  ALPHA_LINUX_SIGIOT = ALPHA_LINUX_SIGABRT,
+};
 
 /* Under GNU/Linux, signal handler invocations can be identified by
    the designated code sequence that is used to return from a signal
@@ -75,16 +75,16 @@ alpha_linux_sigtramp_offset_1 (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   switch (alpha_read_insn (gdbarch, pc))
     {
-    case 0x47de0410:		/* bis $30,$30,$16 */
-    case 0x47fe0410:		/* bis $31,$30,$16 */
+    case 0x47de0410: /* bis $30,$30,$16 */
+    case 0x47fe0410: /* bis $31,$30,$16 */
       return 0;
 
-    case 0x43ecf400:		/* addq $31,103,$0 */
-    case 0x201f0067:		/* lda $0,103($31) */
-    case 0x201f015f:		/* lda $0,351($31) */
+    case 0x43ecf400: /* addq $31,103,$0 */
+    case 0x201f0067: /* lda $0,103($31) */
+    case 0x201f015f: /* lda $0,351($31) */
       return 4;
 
-    case 0x00000083:		/* call_pal callsys */
+    case 0x00000083: /* call_pal callsys */
       return 8;
 
     default:
@@ -119,8 +119,8 @@ alpha_linux_sigtramp_offset (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 static int
-alpha_linux_pc_in_sigtramp (struct gdbarch *gdbarch,
-			    CORE_ADDR pc, const char *func_name)
+alpha_linux_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc,
+			    const char *func_name)
 {
   return alpha_linux_sigtramp_offset (gdbarch, pc) >= 0;
 }
@@ -161,8 +161,8 @@ alpha_linux_sigcontext_addr (frame_info_ptr this_frame)
 
 static void
 alpha_linux_supply_gregset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *gregs, size_t len)
+			    struct regcache *regcache, int regnum,
+			    const void *gregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
 
@@ -178,8 +178,8 @@ alpha_linux_supply_gregset (const struct regset *regset,
 
 static void
 alpha_linux_collect_gregset (const struct regset *regset,
-			     const struct regcache *regcache,
-			     int regnum, void *gregs, size_t len)
+			     const struct regcache *regcache, int regnum,
+			     void *gregs, size_t len)
 {
   gdb_byte *regs = (gdb_byte *) gregs;
 
@@ -194,8 +194,8 @@ alpha_linux_collect_gregset (const struct regset *regset,
 
 static void
 alpha_linux_supply_fpregset (const struct regset *regset,
-			     struct regcache *regcache,
-			     int regnum, const void *fpregs, size_t len)
+			     struct regcache *regcache, int regnum,
+			     const void *fpregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) fpregs;
 
@@ -210,8 +210,8 @@ alpha_linux_supply_fpregset (const struct regset *regset,
 
 static void
 alpha_linux_collect_fpregset (const struct regset *regset,
-			      const struct regcache *regcache,
-			      int regnum, void *fpregs, size_t len)
+			      const struct regcache *regcache, int regnum,
+			      void *fpregs, size_t len)
 {
   gdb_byte *regs = (gdb_byte *) fpregs;
 
@@ -219,17 +219,11 @@ alpha_linux_collect_fpregset (const struct regset *regset,
   alpha_fill_fp_regs (regcache, regnum, regs, regs + 31 * 8);
 }
 
-static const struct regset alpha_linux_gregset =
-{
-  NULL,
-  alpha_linux_supply_gregset, alpha_linux_collect_gregset
-};
+static const struct regset alpha_linux_gregset
+  = { NULL, alpha_linux_supply_gregset, alpha_linux_collect_gregset };
 
-static const struct regset alpha_linux_fpregset =
-{
-  NULL,
-  alpha_linux_supply_fpregset, alpha_linux_collect_fpregset
-};
+static const struct regset alpha_linux_fpregset
+  = { NULL, alpha_linux_supply_fpregset, alpha_linux_collect_fpregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -247,8 +241,7 @@ alpha_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
    gdbarch.h.  */
 
 static enum gdb_signal
-alpha_linux_gdb_signal_from_target (struct gdbarch *gdbarch,
-				    int signal)
+alpha_linux_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
 {
   switch (signal)
     {
@@ -371,23 +364,23 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 linux_lp64_fetch_link_map_offsets);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, alpha_linux_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, alpha_linux_iterate_over_regset_sections);
 
   set_gdbarch_gdb_signal_from_target (gdbarch,
 				      alpha_linux_gdb_signal_from_target);
-  set_gdbarch_gdb_signal_to_target (gdbarch,
-				    alpha_linux_gdb_signal_to_target);
+  set_gdbarch_gdb_signal_to_target (gdbarch, alpha_linux_gdb_signal_to_target);
 }
 
 void _initialize_alpha_linux_tdep ();
+
 void
 _initialize_alpha_linux_tdep ()
 {

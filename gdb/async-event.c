@@ -85,8 +85,7 @@ static struct
 
   /* Pointer to last in handler list.  */
   async_signal_handler *last_handler;
-}
-sighandler_list;
+} sighandler_list;
 
 /* All the async_event_handlers gdb is interested in are kept onto
    this list.  */
@@ -97,9 +96,7 @@ static struct
 
   /* Pointer to last in handler list.  */
   async_event_handler *last_handler;
-}
-async_event_handler_list;
-
+} async_event_handler_list;
 
 /* This event is signalled whenever an asynchronous handler needs to
    defer an action to the event loop.  */
@@ -123,8 +120,6 @@ initialize_async_signal_handlers (void)
 		    async_signals_handler, NULL, "async-signals");
 }
 
-
-
 /* Create an asynchronous handler, allocating memory for it.
    Return a pointer to the newly created handler.
    This pointer will be used to invoke the handler by 
@@ -132,9 +127,8 @@ initialize_async_signal_handlers (void)
    PROC is the function to call with CLIENT_DATA argument 
    whenever the handler is invoked.  */
 async_signal_handler *
-create_async_signal_handler (sig_handler_func * proc,
-			     gdb_client_data client_data,
-			     const char *name)
+create_async_signal_handler (sig_handler_func *proc,
+			     gdb_client_data client_data, const char *name)
 {
   async_signal_handler *async_handler_ptr;
 
@@ -239,7 +233,7 @@ invoke_async_signal_handlers (void)
 /* Delete an asynchronous handler (ASYNC_HANDLER_PTR).
    Free the space allocated for it.  */
 void
-delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
+delete_async_signal_handler (async_signal_handler **async_handler_ptr)
 {
   async_signal_handler *prev_ptr;
 
@@ -267,8 +261,7 @@ delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
 
 async_event_handler *
 create_async_event_handler (async_event_handler_func *proc,
-			    gdb_client_data client_data,
-			    const char *name)
+			    gdb_client_data client_data, const char *name)
 {
   async_event_handler *h;
 
@@ -295,8 +288,7 @@ mark_async_event_handler (async_event_handler *async_handler_ptr)
 {
   event_loop_debug_printf ("marking async event handler `%s` "
 			   "(previous state was %d)",
-			   async_handler_ptr->name,
-			   async_handler_ptr->ready);
+			   async_handler_ptr->name, async_handler_ptr->ready);
   async_handler_ptr->ready = 1;
 }
 

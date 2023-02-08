@@ -40,9 +40,8 @@ struct netbsd_regset_info
 class netbsd_process_target : public process_stratum_target
 {
 public:
-
   int create_inferior (const char *program,
-		       const std::vector<char *> &program_args) override;
+                       const std::vector<char *> &program_args) override;
 
   void post_create_inferior () override;
 
@@ -61,24 +60,23 @@ public:
   void resume (thread_resume *resume_info, size_t n) override;
 
   ptid_t wait (ptid_t ptid, target_waitstatus *status,
-	       target_wait_flags options) override;
+               target_wait_flags options) override;
 
   void fetch_registers (regcache *regcache, int regno) override;
 
   void store_registers (regcache *regcache, int regno) override;
 
-  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
-		   int len) override;
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len) override;
 
   int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-		    int len) override;
+                    int len) override;
 
   void request_interrupt () override;
 
   bool supports_read_auxv () override;
 
   int read_auxv (int pid, CORE_ADDR offset, unsigned char *myaddr,
-		 unsigned int len) override;
+                 unsigned int len) override;
 
   bool supports_hardware_single_step () override;
 
@@ -86,19 +84,19 @@ public:
 
   bool supports_z_point_type (char z_type) override;
 
-  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, struct raw_breakpoint *bp) override;
+  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                    struct raw_breakpoint *bp) override;
 
-  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, struct raw_breakpoint *bp) override;
+  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                    struct raw_breakpoint *bp) override;
 
   bool stopped_by_sw_breakpoint () override;
 
   bool supports_qxfer_siginfo () override;
 
   int qxfer_siginfo (const char *annex, unsigned char *readbuf,
-		     unsigned const char *writebuf, CORE_ADDR offset,
-		     int len) override;
+                     unsigned const char *writebuf, CORE_ADDR offset,
+                     int len) override;
 
   bool supports_stopped_by_sw_breakpoint () override;
 
@@ -116,8 +114,8 @@ public:
 
   bool supports_qxfer_libraries_svr4 () override;
 
-  int qxfer_libraries_svr4 (const char*, unsigned char*, const unsigned char*,
-			    CORE_ADDR, int) override;
+  int qxfer_libraries_svr4 (const char *, unsigned char *,
+                            const unsigned char *, CORE_ADDR, int) override;
 
   bool supports_pid_to_exec_file () override;
 

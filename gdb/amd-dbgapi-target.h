@@ -29,7 +29,7 @@ struct inferior;
 namespace detail
 {
 
-template <typename T>
+template<typename T>
 using is_amd_dbgapi_handle
   = gdb::Or<std::is_same<T, amd_dbgapi_address_class_id_t>,
 	    std::is_same<T, amd_dbgapi_address_space_id_t>,
@@ -52,20 +52,18 @@ using is_amd_dbgapi_handle
 /* Get the token of amd-dbgapi's inferior_created observer.  */
 
 const gdb::observers::token &
-  get_amd_dbgapi_target_inferior_created_observer_token ();
+get_amd_dbgapi_target_inferior_created_observer_token ();
 
 /* Comparison operators for amd-dbgapi handle types.  */
 
-template <typename T,
-	  typename = gdb::Requires<detail::is_amd_dbgapi_handle<T>>>
+template<typename T, typename = gdb::Requires<detail::is_amd_dbgapi_handle<T>>>
 bool
 operator== (const T &lhs, const T &rhs)
 {
   return lhs.handle == rhs.handle;
 }
 
-template <typename T,
-	  typename = gdb::Requires<detail::is_amd_dbgapi_handle<T>>>
+template<typename T, typename = gdb::Requires<detail::is_amd_dbgapi_handle<T>>>
 bool
 operator!= (const T &lhs, const T &rhs)
 {

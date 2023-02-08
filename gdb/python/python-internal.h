@@ -32,7 +32,7 @@
    gdb.  */
 
 #ifdef WITH_CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF_ATTRIBUTE
-#define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)		\
+#define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG) \
   __attribute__ ((cpychecker_type_object_for_typedef (ARG)))
 #else
 #define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)
@@ -45,7 +45,7 @@
 #endif
 
 #ifdef WITH_CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION_ATTRIBUTE
-#define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION		\
+#define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION \
   __attribute__ ((cpychecker_negative_result_sets_exception))
 #else
 #define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
@@ -74,7 +74,7 @@
 /* Another kludge to avoid compilation errors because MinGW defines
    'hypot' to '_hypot', but the C++ headers says "using ::hypot".  */
 #ifdef __MINGW32__
-# define _hypot hypot
+#define _hypot hypot
 #endif
 
 /* Request clean size types from Python.  */
@@ -94,9 +94,9 @@
    PyGILState_STATE will be.  */
 #ifndef WITH_THREAD
 #define PyGILState_Ensure() ((PyGILState_STATE) 0)
-#define PyGILState_Release(ARG) ((void)(ARG))
+#define PyGILState_Release(ARG) ((void) (ARG))
 #define PyEval_InitThreads()
-#define PyThreadState_Swap(ARG) ((void)(ARG))
+#define PyThreadState_Swap(ARG) ((void) (ARG))
 #define PyEval_ReleaseLock()
 #endif
 
@@ -144,10 +144,8 @@ static inline PyObject *
 gdb_PyObject_CallMethod (PyObject *o, const char *method, const char *format,
 			 Args... args) /* ARI: editCase function */
 {
-  return PyObject_CallMethod (o,
-			      const_cast<char *> (method),
-			      const_cast<char *> (format),
-			      args...);
+  return PyObject_CallMethod (o, const_cast<char *> (method),
+			      const_cast<char *> (format), args...);
 }
 
 #undef PyObject_CallMethod
@@ -157,7 +155,7 @@ gdb_PyObject_CallMethod (PyObject *o, const char *method, const char *format,
    qualifier in Python <= 3.4.  Hence, we wrap it in a function to
    avoid errors when compiled with -Werror.  */
 
-static inline PyObject*
+static inline PyObject *
 gdb_PyErr_NewException (const char *name, PyObject *base, PyObject *dict)
 {
   return PyErr_NewException (const_cast<char *> (name), base, dict);
@@ -185,7 +183,7 @@ gdb_PySys_GetObject (const char *name)
    before Python 3.6.  Hence, we wrap it in a function to avoid errors
    when compiled with -Werror.  */
 
-# define GDB_PYSYS_SETPATH_CHAR wchar_t
+#define GDB_PYSYS_SETPATH_CHAR wchar_t
 
 static inline void
 gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
@@ -209,21 +207,24 @@ struct gdb_PyGetSetDef : PyGetSetDef
 {
   constexpr gdb_PyGetSetDef (const char *name_, getter get_, setter set_,
 			     const char *doc_, void *closure_)
-    : PyGetSetDef {const_cast<char *> (name_), get_, set_,
-		   const_cast<char *> (doc_), closure_}
-  {}
+    : PyGetSetDef { const_cast<char *> (name_), get_, set_,
+		    const_cast<char *> (doc_), closure_ }
+  {
+  }
 
   /* Alternative constructor that allows omitting the closure in list
      initialization.  */
   constexpr gdb_PyGetSetDef (const char *name_, getter get_, setter set_,
 			     const char *doc_)
-    : gdb_PyGetSetDef {name_, get_, set_, doc_, NULL}
-  {}
+    : gdb_PyGetSetDef { name_, get_, set_, doc_, NULL }
+  {
+  }
 
   /* Constructor for the sentinel entries.  */
   constexpr gdb_PyGetSetDef (std::nullptr_t)
-    : gdb_PyGetSetDef {NULL, NULL, NULL, NULL, NULL}
-  {}
+    : gdb_PyGetSetDef { NULL, NULL, NULL, NULL, NULL }
+  {
+  }
 };
 
 /* The 'keywords' parameter of PyArg_ParseTupleAndKeywords has type
@@ -240,15 +241,15 @@ struct gdb_PyGetSetDef : PyGetSetDef
 
 static inline int
 gdb_PyArg_ParseTupleAndKeywords (PyObject *args, PyObject *kw,
-				 const char *format, const char **keywords, ...)
+				 const char *format, const char **keywords,
+				 ...)
 {
   va_list ap;
   int res;
 
   va_start (ap, keywords);
   res = PyArg_VaParseTupleAndKeywords (args, kw, format,
-				       const_cast<char **> (keywords),
-				       ap);
+				       const_cast<char **> (keywords), ap);
   va_end (ap);
 
   return res;
@@ -262,7 +263,12 @@ gdb_PyArg_ParseTupleAndKeywords (PyObject *args, PyObject *kw,
 #include "command.h"
 #include "breakpoint.h"
 
-enum gdbpy_iter_kind { iter_keys, iter_values, iter_items };
+enum gdbpy_iter_kind
+{
+  iter_keys,
+  iter_values,
+  iter_items
+};
 
 struct block;
 struct value;
@@ -275,20 +281,20 @@ extern int gdb_python_initialized;
 
 extern PyObject *gdb_module;
 extern PyObject *gdb_python_module;
-extern PyTypeObject value_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("value_object");
-extern PyTypeObject block_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF("block_object");
-extern PyTypeObject symbol_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symbol_object");
-extern PyTypeObject event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+extern PyTypeObject
+  value_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("value_object");
+extern PyTypeObject
+  block_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("block_object");
+extern PyTypeObject
+  symbol_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symbol_object");
+extern PyTypeObject
+  event_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 extern PyTypeObject breakpoint_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_object");
-extern PyTypeObject frame_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
-extern PyTypeObject thread_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_object");
+extern PyTypeObject
+  frame_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
+extern PyTypeObject
+  thread_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
 
 /* Ensure that breakpoint_object_type is initialized and return true.  If
    breakpoint_object_type can't be initialized then set a suitable Python
@@ -306,8 +312,8 @@ struct gdbpy_breakpoint_object
 {
   PyObject_HEAD
 
-  /* The breakpoint number according to gdb.  */
-  int number;
+    /* The breakpoint number according to gdb.  */
+    int number;
 
   /* The gdb breakpoint object, or NULL if the breakpoint has been
      deleted.  */
@@ -319,38 +325,40 @@ struct gdbpy_breakpoint_object
 
 /* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
    exception if it is invalid.  */
-#define BPPY_REQUIRE_VALID(Breakpoint)                                  \
-    do {                                                                \
-      if ((Breakpoint)->bp == NULL)                                     \
-	return PyErr_Format (PyExc_RuntimeError,                        \
-			     _("Breakpoint %d is invalid."),            \
-			     (Breakpoint)->number);                     \
-    } while (0)
+#define BPPY_REQUIRE_VALID(Breakpoint)                        \
+  do                                                          \
+    {                                                         \
+      if ((Breakpoint)->bp == NULL)                           \
+	return PyErr_Format (PyExc_RuntimeError,              \
+			     _ ("Breakpoint %d is invalid."), \
+			     (Breakpoint)->number);           \
+    }                                                         \
+  while (0)
 
 /* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
    exception if it is invalid.  This macro is for use in setter functions.  */
-#define BPPY_SET_REQUIRE_VALID(Breakpoint)                              \
-    do {                                                                \
-      if ((Breakpoint)->bp == NULL)                                     \
-	{                                                               \
-	  PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
-			(Breakpoint)->number);                          \
-	  return -1;                                                    \
-	}                                                               \
-    } while (0)
-
+#define BPPY_SET_REQUIRE_VALID(Breakpoint)                                   \
+  do                                                                         \
+    {                                                                        \
+      if ((Breakpoint)->bp == NULL)                                          \
+	{                                                                    \
+	  PyErr_Format (PyExc_RuntimeError, _ ("Breakpoint %d is invalid."), \
+			(Breakpoint)->number);                               \
+	  return -1;                                                         \
+	}                                                                    \
+    }                                                                        \
+  while (0)
 
 /* Variables used to pass information between the Breakpoint
    constructor and the breakpoint-created hook function.  */
 extern gdbpy_breakpoint_object *bppy_pending_object;
 
-
 struct thread_object
 {
   PyObject_HEAD
 
-  /* The thread we represent.  */
-  struct thread_info *thread;
+    /* The thread we represent.  */
+    struct thread_info *thread;
 
   /* The Inferior object to which this thread belongs.  */
   PyObject *inf_obj;
@@ -360,7 +368,7 @@ struct inferior_object;
 
 extern struct cmd_list_element *set_python_list;
 extern struct cmd_list_element *show_python_list;
-
+
 /* extension_language_script_ops "methods".  */
 
 /* Return true if auto-loading Python scripts is enabled.
@@ -370,31 +378,30 @@ extern bool gdbpy_auto_load_enabled (const struct extension_language_defn *);
 
 /* extension_language_ops "methods".  */
 
-extern enum ext_lang_rc gdbpy_apply_val_pretty_printer
-  (const struct extension_language_defn *,
-   struct value *value,
-   struct ui_file *stream, int recurse,
-   const struct value_print_options *options,
-   const struct language_defn *language);
-extern enum ext_lang_bt_status gdbpy_apply_frame_filter
-  (const struct extension_language_defn *,
-   frame_info_ptr frame, frame_filter_flags flags,
-   enum ext_lang_frame_args args_type,
-   struct ui_out *out, int frame_low, int frame_high);
+extern enum ext_lang_rc
+gdbpy_apply_val_pretty_printer (const struct extension_language_defn *,
+				struct value *value, struct ui_file *stream,
+				int recurse,
+				const struct value_print_options *options,
+				const struct language_defn *language);
+extern enum ext_lang_bt_status
+gdbpy_apply_frame_filter (const struct extension_language_defn *,
+			  frame_info_ptr frame, frame_filter_flags flags,
+			  enum ext_lang_frame_args args_type,
+			  struct ui_out *out, int frame_low, int frame_high);
 extern void gdbpy_preserve_values (const struct extension_language_defn *,
 				   struct objfile *objfile,
 				   htab_t copied_types);
-extern enum ext_lang_bp_stop gdbpy_breakpoint_cond_says_stop
-  (const struct extension_language_defn *, struct breakpoint *);
+extern enum ext_lang_bp_stop
+gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *,
+				 struct breakpoint *);
 extern int gdbpy_breakpoint_has_cond (const struct extension_language_defn *,
 				      struct breakpoint *b);
 
-extern enum ext_lang_rc gdbpy_get_matching_xmethod_workers
-  (const struct extension_language_defn *extlang,
-   struct type *obj_type, const char *method_name,
-   std::vector<xmethod_worker_up> *dm_vec);
+extern enum ext_lang_rc gdbpy_get_matching_xmethod_workers (
+  const struct extension_language_defn *extlang, struct type *obj_type,
+  const char *method_name, std::vector<xmethod_worker_up> *dm_vec);
 
-
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
 PyObject *gdbpy_add_history (PyObject *self, PyObject *args);
 extern PyObject *gdbpy_history_count (PyObject *self, PyObject *args);
@@ -408,7 +415,7 @@ PyObject *gdbpy_lookup_global_symbol (PyObject *self, PyObject *args,
 PyObject *gdbpy_lookup_static_symbol (PyObject *self, PyObject *args,
 				      PyObject *kw);
 PyObject *gdbpy_lookup_static_symbols (PyObject *self, PyObject *args,
-					   PyObject *kw);
+				       PyObject *kw);
 PyObject *gdbpy_start_recording (PyObject *self, PyObject *args);
 PyObject *gdbpy_current_recording (PyObject *self, PyObject *args);
 PyObject *gdbpy_stop_recording (PyObject *self, PyObject *args);
@@ -425,9 +432,10 @@ PyObject *gdbpy_selected_thread (PyObject *self, PyObject *args);
 PyObject *gdbpy_selected_inferior (PyObject *self, PyObject *args);
 PyObject *gdbpy_string_to_argv (PyObject *self, PyObject *args);
 PyObject *gdbpy_parameter_value (const setting &var);
-gdb::unique_xmalloc_ptr<char> gdbpy_parse_command_name
-  (const char *name, struct cmd_list_element ***base_list,
-   struct cmd_list_element **start_list);
+gdb::unique_xmalloc_ptr<char>
+gdbpy_parse_command_name (const char *name,
+			  struct cmd_list_element ***base_list,
+			  struct cmd_list_element **start_list);
 PyObject *gdbpy_register_tui_window (PyObject *self, PyObject *args,
 				     PyObject *kw);
 
@@ -462,7 +470,8 @@ PyObject *gdbpy_new_register_descriptor_iterator (struct gdbarch *gdbarch,
 PyObject *gdbpy_new_reggroup_iterator (struct gdbarch *gdbarch);
 
 gdbpy_ref<thread_object> create_thread_object (struct thread_info *tp);
-gdbpy_ref<> thread_to_thread_object (thread_info *thr);;
+gdbpy_ref<> thread_to_thread_object (thread_info *thr);
+;
 gdbpy_ref<inferior_object> inferior_to_inferior_object (inferior *inf);
 
 PyObject *gdbpy_buffer_to_membuf (gdb::unique_xmalloc_ptr<gdb_byte> buffer,
@@ -490,75 +499,52 @@ struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 extern struct program_space *progspace_object_to_program_space (PyObject *obj);
 
 void gdbpy_initialize_gdb_readline (void);
-int gdbpy_initialize_auto_load (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_values (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_frames (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_instruction (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_btrace (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_record (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_symtabs (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_commands (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_symbols (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_symtabs (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_blocks (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_types (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_functions (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_pspace (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_objfile (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_breakpoints (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_auto_load (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_values (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_frames (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_instruction (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_btrace (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_record (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_symtabs (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_commands (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_symbols (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_symtabs (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_blocks (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_types (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_functions (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_pspace (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_objfile (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_breakpoints (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_breakpoint_locations ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_finishbreakpoints (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_lazy_string (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_linetable (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_parameters (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_thread (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_inferior (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_lazy_string (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_linetable (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_parameters (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_thread (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_inferior (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_eventregistry (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_arch (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_registers ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_xmethods (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_unwind (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_tui ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_membuf ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_connection ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_micommands (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_event (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_arch (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_registers () CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_xmethods (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_unwind (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_tui () CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_membuf () CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_connection () CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int
+gdbpy_initialize_micommands (void) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 void gdbpy_finalize_micommands ();
-int gdbpy_initialize_disasm ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_disasm () CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 PyMODINIT_FUNC gdbpy_events_mod_func ();
 
@@ -584,8 +570,7 @@ public:
 
   void restore ()
   {
-    PyErr_Restore (m_error_type.release (),
-		   m_error_value.release (),
+    PyErr_Restore (m_error_type.release (), m_error_value.release (),
 		   m_error_traceback.release ());
   }
 
@@ -610,10 +595,7 @@ public:
 
   /* Return a new reference to the exception value object.  */
 
-  gdbpy_ref<> value ()
-  {
-    return m_error_value;
-  }
+  gdbpy_ref<> value () { return m_error_value; }
 
 private:
 
@@ -627,7 +609,7 @@ private:
    handler.  */
 class gdbpy_enter
 {
- public:
+public:
 
   /* Set the ambient Python architecture to GDBARCH and the language
      to LANGUAGE.  If GDBARCH is nullptr, then the architecture will
@@ -653,7 +635,7 @@ class gdbpy_enter
      acceptable value.  */
   static void finalize ();
 
- private:
+private:
 
   /* The current gdbarch, according to Python.  This can be
      nullptr.  */
@@ -673,12 +655,11 @@ class gdbpy_enter
    make constructor delegation a little nicer.  */
 class gdbpy_enter_varobj : public gdbpy_enter
 {
- public:
+public:
 
   /* This is defined in varobj.c, where it can access varobj
      internals.  */
   gdbpy_enter_varobj (const struct varobj *var);
-
 };
 
 /* The opposite of gdb_enter: this releases the GIL around a region,
@@ -694,10 +675,7 @@ public:
     gdb_assert (m_save != nullptr);
   }
 
-  ~gdbpy_allow_threads ()
-  {
-    PyEval_RestoreThread (m_save);
-  }
+  ~gdbpy_allow_threads () { PyEval_RestoreThread (m_save); }
 
   DISABLE_COPY_AND_ASSIGN (gdbpy_allow_threads);
 
@@ -708,25 +686,29 @@ private:
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  */
-#define GDB_PY_HANDLE_EXCEPTION(Exception)	\
-  do {						\
-    if (Exception.reason < 0)			\
-      {						\
-	gdbpy_convert_exception (Exception);	\
-	return NULL;				\
-      }						\
-  } while (0)
+#define GDB_PY_HANDLE_EXCEPTION(Exception)     \
+  do                                           \
+    {                                          \
+      if (Exception.reason < 0)                \
+	{                                      \
+	  gdbpy_convert_exception (Exception); \
+	  return NULL;                         \
+	}                                      \
+    }                                          \
+  while (0)
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  This macro is for use inside setter functions.  */
-#define GDB_PY_SET_HANDLE_EXCEPTION(Exception)				\
-    do {								\
-      if (Exception.reason < 0)						\
-	{								\
-	  gdbpy_convert_exception (Exception);				\
-	  return -1;							\
-	}								\
-    } while (0)
+#define GDB_PY_SET_HANDLE_EXCEPTION(Exception) \
+  do                                           \
+    {                                          \
+      if (Exception.reason < 0)                \
+	{                                      \
+	  gdbpy_convert_exception (Exception); \
+	  return -1;                           \
+	}                                      \
+    }                                          \
+  while (0)
 
 int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
@@ -741,8 +723,8 @@ void gdbpy_handle_exception () ATTRIBUTE_NORETURN;
 
    This always calls error, and never returns.  */
 
-void gdbpy_error (const char *fmt, ...)
-  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+void gdbpy_error (const char *fmt, ...) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (1, 2);
 
 gdbpy_ref<> python_string_to_unicode (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> unicode_to_target_string (PyObject *unicode_str);
@@ -755,8 +737,7 @@ gdb::unique_xmalloc_ptr<char> gdbpy_obj_to_string (PyObject *obj);
 
 int gdbpy_is_lazy_string (PyObject *result);
 void gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
-				struct type **str_type,
-				long *length,
+				struct type **str_type, long *length,
 				gdb::unique_xmalloc_ptr<char> *encoding);
 
 int gdbpy_is_value_object (PyObject *obj);
@@ -791,10 +772,10 @@ extern PyObject *gdbpy_gdb_memory_error;
 extern PyObject *gdbpy_gdberror_exc;
 
 extern void gdbpy_convert_exception (const struct gdb_exception &)
-    CPYCHECKER_SETS_EXCEPTION;
+  CPYCHECKER_SETS_EXCEPTION;
 
 int get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
-    CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 gdbpy_ref<> gdb_py_object_from_longest (LONGEST l);
 gdbpy_ref<> gdb_py_object_from_ulongest (ULONGEST l);
@@ -808,19 +789,15 @@ int gdb_pymodule_addobject (PyObject *module, const char *name,
 
 struct varobj_iter;
 struct varobj;
-std::unique_ptr<varobj_iter> py_varobj_get_iterator
-     (struct varobj *var,
-      PyObject *printer,
-      const value_print_options *opts);
+std::unique_ptr<varobj_iter>
+py_varobj_get_iterator (struct varobj *var, PyObject *printer,
+			const value_print_options *opts);
 
 /* Deleter for Py_buffer unique_ptr specialization.  */
 
 struct Py_buffer_deleter
 {
-  void operator() (Py_buffer *b) const
-  {
-    PyBuffer_Release (b);
-  }
+  void operator() (Py_buffer *b) const { PyBuffer_Release (b); }
 };
 
 /* A unique_ptr specialization for Py_buffer.  */
@@ -873,8 +850,8 @@ extern bool gdbpy_is_progspace (PyObject *obj);
 
    If the analysis of DOC fails then DOC will be returned unmodified.  */
 
-extern gdb::unique_xmalloc_ptr<char> gdbpy_fix_doc_string_indentation
-  (gdb::unique_xmalloc_ptr<char> doc);
+extern gdb::unique_xmalloc_ptr<char>
+gdbpy_fix_doc_string_indentation (gdb::unique_xmalloc_ptr<char> doc);
 
 /* Implement the 'print_insn' hook for Python.  Disassemble an instruction
    whose address is ADDRESS for architecture GDBARCH.  The bytes of the

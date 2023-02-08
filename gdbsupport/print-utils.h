@@ -63,8 +63,8 @@ extern char *hex_string_custom (LONGEST num, int width);
  * to use C format in all cases.  If it is false, then 'x' 
  * and 'o' formats do not include a prefix (0x or leading 0).  */
 
-extern char *int_string (LONGEST val, int radix, int is_signed, int width, 
-			 int use_c_format);	
+extern char *int_string (LONGEST val, int radix, int is_signed, int width,
+                         int use_c_format);
 
 /* Convert a CORE_ADDR into a string.  */
 

@@ -50,7 +50,7 @@
 #include "gdb_curses.h"
 
 static void
-tui_new_objfile_hook (struct objfile* objfile)
+tui_new_objfile_hook (struct objfile *objfile)
 {
   if (tui_active)
     tui_display_main ();
@@ -158,10 +158,8 @@ tui_refresh_frame_and_register_information ()
    from print_frame_info.  */
 
 static void
-tui_dummy_print_frame_info_listing_hook (struct symtab *s,
-					 int line,
-					 int stopline, 
-					 int noerror)
+tui_dummy_print_frame_info_listing_hook (struct symtab *s, int line,
+					 int stopline, int noerror)
 {
 }
 
@@ -238,14 +236,11 @@ tui_attach_detach_observers (bool attach)
 		    tui_event_delete_breakpoint, attach);
   attach_or_detach (gdb::observers::breakpoint_modified,
 		    tui_event_modify_breakpoint, attach);
-  attach_or_detach (gdb::observers::inferior_exit,
-		    tui_inferior_exit, attach);
-  attach_or_detach (gdb::observers::before_prompt,
-		    tui_before_prompt, attach);
-  attach_or_detach (gdb::observers::normal_stop,
-		    tui_normal_stop, attach);
-  attach_or_detach (gdb::observers::register_changed,
-		    tui_register_changed, attach);
+  attach_or_detach (gdb::observers::inferior_exit, tui_inferior_exit, attach);
+  attach_or_detach (gdb::observers::before_prompt, tui_before_prompt, attach);
+  attach_or_detach (gdb::observers::normal_stop, tui_normal_stop, attach);
+  attach_or_detach (gdb::observers::register_changed, tui_register_changed,
+		    attach);
   attach_or_detach (gdb::observers::user_selected_context_changed,
 		    tui_context_changed, attach);
   attach_or_detach (gdb::observers::current_source_symtab_and_line_changed,
@@ -278,6 +273,7 @@ tui_remove_hooks (void)
 }
 
 void _initialize_tui_hooks ();
+
 void
 _initialize_tui_hooks ()
 {

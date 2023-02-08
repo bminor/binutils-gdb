@@ -27,8 +27,10 @@
 #include <thread>
 #endif
 
-namespace selftests {
-namespace main_thread_tests {
+namespace selftests
+{
+namespace main_thread_tests
+{
 
 #if CXX_STD_THREAD
 
@@ -37,10 +39,7 @@ static bool done;
 static void
 set_done ()
 {
-  run_on_main_thread ([] ()
-    {
-      done = true;
-    });
+  run_on_main_thread ([] () { done = true; });
 }
 
 static void
@@ -54,10 +53,10 @@ run_tests ()
     gdb::block_signals blocker;
 
     SCOPE_EXIT
-      {
-	if (thread.joinable ())
-	  thread.join ();
-      };
+    {
+      if (thread.joinable ())
+	thread.join ();
+    };
     thread = std::thread (set_done);
   }
 
@@ -71,10 +70,11 @@ run_tests ()
 
 #endif
 
-}
-}
+} // namespace main_thread_tests
+} // namespace selftests
 
 void _initialize_main_thread_selftests ();
+
 void
 _initialize_main_thread_selftests ()
 {

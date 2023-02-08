@@ -81,8 +81,8 @@ all_matching_threads_iterator::m_inf_matches ()
 
 /* See thread-iter.h.  */
 
-all_matching_threads_iterator::all_matching_threads_iterator
-  (process_stratum_target *filter_target, ptid_t filter_ptid)
+all_matching_threads_iterator::all_matching_threads_iterator (
+  process_stratum_target *filter_target, ptid_t filter_ptid)
   : m_filter_target (filter_target)
 {
   if (filter_ptid == minus_one_ptid)
@@ -96,8 +96,7 @@ all_matching_threads_iterator::all_matching_threads_iterator
 	{
 	  m_inf = &inf;
 
-	  if (!m_inf_matches ()
-	      || inf.thread_list.empty ())
+	  if (!m_inf_matches () || inf.thread_list.empty ())
 	    continue;
 
 	  m_thr = &inf.thread_list.front ();

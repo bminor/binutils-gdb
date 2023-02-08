@@ -22,9 +22,7 @@
 #include "inferior.h"
 #include <algorithm>
 
-process_stratum_target::~process_stratum_target ()
-{
-}
+process_stratum_target::~process_stratum_target () {}
 
 struct address_space *
 process_stratum_target::thread_address_space (ptid_t ptid)
@@ -33,8 +31,8 @@ process_stratum_target::thread_address_space (ptid_t ptid)
   inferior *inf = find_inferior_ptid (this, ptid);
 
   if (inf == NULL || inf->aspace == NULL)
-    internal_error (_("Can't determine the current "
-		      "address space of thread %s\n"),
+    internal_error (_ ("Can't determine the current "
+		       "address space of thread %s\n"),
 		    target_pid_to_str (ptid).c_str ());
 
   return inf->aspace;
@@ -111,8 +109,7 @@ process_stratum_target::follow_exec (inferior *follow_inf, ptid_t ptid,
 void
 process_stratum_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 				     target_waitkind fork_kind,
-				     bool follow_child,
-				     bool detach_on_fork)
+				     bool follow_child, bool detach_on_fork)
 {
   if (child_inf != nullptr)
     {
@@ -124,8 +121,8 @@ process_stratum_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 /* See process-stratum-target.h.  */
 
 void
-process_stratum_target::maybe_add_resumed_with_pending_wait_status
-  (thread_info *thread)
+process_stratum_target::maybe_add_resumed_with_pending_wait_status (
+  thread_info *thread)
 {
   gdb_assert (!thread->resumed_with_pending_wait_status_node.is_linked ());
 
@@ -140,8 +137,8 @@ process_stratum_target::maybe_add_resumed_with_pending_wait_status
 /* See process-stratum-target.h.  */
 
 void
-process_stratum_target::maybe_remove_resumed_with_pending_wait_status
-  (thread_info *thread)
+process_stratum_target::maybe_remove_resumed_with_pending_wait_status (
+  thread_info *thread)
 {
   if (thread->resumed () && thread->has_pending_waitstatus ())
     {
@@ -158,13 +155,12 @@ process_stratum_target::maybe_remove_resumed_with_pending_wait_status
 /* See process-stratum-target.h.  */
 
 thread_info *
-process_stratum_target::random_resumed_with_pending_wait_status
-  (inferior *inf, ptid_t filter_ptid)
+process_stratum_target::random_resumed_with_pending_wait_status (
+  inferior *inf, ptid_t filter_ptid)
 {
-  auto matches = [inf, filter_ptid] (const thread_info &thread)
-    {
-      return thread.inf == inf && thread.ptid.matches (filter_ptid);
-    };
+  auto matches = [inf, filter_ptid] (const thread_info &thread) {
+    return thread.inf == inf && thread.ptid.matches (filter_ptid);
+  };
 
   /* First see how many matching events we have.  */
   const auto &l = m_resumed_with_pending_wait_status;
@@ -174,23 +170,21 @@ process_stratum_target::random_resumed_with_pending_wait_status
     return nullptr;
 
   /* Now randomly pick a thread out of those that match the criteria.  */
-  int random_selector
-    = (int) ((count * (double) rand ()) / (RAND_MAX + 1.0));
+  int random_selector = (int) ((count * (double) rand ()) / (RAND_MAX + 1.0));
 
   if (count > 1)
-    infrun_debug_printf ("Found %u events, selecting #%d",
-			 count, random_selector);
+    infrun_debug_printf ("Found %u events, selecting #%d", count,
+			 random_selector);
 
   /* Select the Nth thread that matches.  */
-  auto it = std::find_if (l.begin (), l.end (),
-			  [&random_selector, &matches]
-			  (const thread_info &thread)
-    {
-      if (!matches (thread))
-	return false;
+  auto it
+    = std::find_if (l.begin (), l.end (),
+		    [&random_selector, &matches] (const thread_info &thread) {
+    if (!matches (thread))
+      return false;
 
-      return random_selector-- == 0;
-    });
+    return random_selector-- == 0;
+      });
 
   gdb_assert (it != l.end ());
 

@@ -22,7 +22,8 @@
 #include <forward_list>
 
 /* Possible catcher states.  */
-enum catcher_state {
+enum catcher_state
+{
   /* Initial state, a new catcher has just been created.  */
   CATCHER_CREATED,
   /* The catch code is running.  */
@@ -33,7 +34,8 @@ enum catcher_state {
 };
 
 /* Possible catcher actions.  */
-enum catcher_action {
+enum catcher_action
+{
   CATCH_ITER,
   CATCH_ITER_1,
   CATCH_THROWING
@@ -68,67 +70,66 @@ exceptions_state_mc (enum catcher_action action)
     {
     case CATCHER_CREATED:
       switch (action)
-	{
-	case CATCH_ITER:
-	  /* Allow the code to run the catcher.  */
-	  catchers.front ().state = CATCHER_RUNNING;
-	  return 1;
-	default:
-	  internal_error (_("bad state"));
-	}
+        {
+        case CATCH_ITER:
+          /* Allow the code to run the catcher.  */
+          catchers.front ().state = CATCHER_RUNNING;
+          return 1;
+        default:
+          internal_error (_ ("bad state"));
+        }
     case CATCHER_RUNNING:
       switch (action)
-	{
-	case CATCH_ITER:
-	  /* No error/quit has occured.  */
-	  return 0;
-	case CATCH_ITER_1:
-	  catchers.front ().state = CATCHER_RUNNING_1;
-	  return 1;
-	case CATCH_THROWING:
-	  catchers.front ().state = CATCHER_ABORTING;
-	  /* See also throw_exception.  */
-	  return 1;
-	default:
-	  internal_error (_("bad switch"));
-	}
+        {
+        case CATCH_ITER:
+          /* No error/quit has occured.  */
+          return 0;
+        case CATCH_ITER_1:
+          catchers.front ().state = CATCHER_RUNNING_1;
+          return 1;
+        case CATCH_THROWING:
+          catchers.front ().state = CATCHER_ABORTING;
+          /* See also throw_exception.  */
+          return 1;
+        default:
+          internal_error (_ ("bad switch"));
+        }
     case CATCHER_RUNNING_1:
       switch (action)
-	{
-	case CATCH_ITER:
-	  /* The did a "break" from the inner while loop.  */
-	  return 0;
-	case CATCH_ITER_1:
-	  catchers.front ().state = CATCHER_RUNNING;
-	  return 0;
-	case CATCH_THROWING:
-	  catchers.front ().state = CATCHER_ABORTING;
-	  /* See also throw_exception.  */
-	  return 1;
-	default:
-	  internal_error (_("bad switch"));
-	}
+        {
+        case CATCH_ITER:
+          /* The did a "break" from the inner while loop.  */
+          return 0;
+        case CATCH_ITER_1:
+          catchers.front ().state = CATCHER_RUNNING;
+          return 0;
+        case CATCH_THROWING:
+          catchers.front ().state = CATCHER_ABORTING;
+          /* See also throw_exception.  */
+          return 1;
+        default:
+          internal_error (_ ("bad switch"));
+        }
     case CATCHER_ABORTING:
       switch (action)
-	{
-	case CATCH_ITER:
-	  {
-	    /* Exit normally if this catcher can handle this
+        {
+        case CATCH_ITER:
+          {
+            /* Exit normally if this catcher can handle this
 	       exception.  The caller analyses the func return
 	       values.  */
-	    return 0;
-	  }
-	default:
-	  internal_error (_("bad state"));
-	}
+            return 0;
+          }
+        default:
+          internal_error (_ ("bad state"));
+        }
     default:
-      internal_error (_("bad switch"));
+      internal_error (_ ("bad switch"));
     }
 }
 
 int
-exceptions_state_mc_catch (struct gdb_exception *exception,
-			   int mask)
+exceptions_state_mc_catch (struct gdb_exception *exception, int mask)
 {
   *exception = std::move (catchers.front ().exception);
   catchers.pop_front ();
@@ -136,11 +137,11 @@ exceptions_state_mc_catch (struct gdb_exception *exception,
   if (exception->reason < 0)
     {
       if (mask & RETURN_MASK (exception->reason))
-	{
-	  /* Exit normally and let the caller handle the
+        {
+          /* Exit normally and let the caller handle the
 	     exception.  */
-	  return 1;
-	}
+          return 1;
+        }
 
       /* The caller didn't request that the event be caught, relay the
 	 event to the next exception_catch/CATCH_SJLJ.  */
@@ -191,8 +192,8 @@ throw_exception (gdb_exception &&exception)
 }
 
 static void ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0)
-throw_it (enum return_reason reason, enum errors error, const char *fmt,
-	  va_list ap)
+  throw_it (enum return_reason reason, enum errors error, const char *fmt,
+            va_list ap)
 {
   if (reason == RETURN_QUIT)
     throw gdb_exception_quit (fmt, ap);

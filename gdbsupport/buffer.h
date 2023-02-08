@@ -24,7 +24,7 @@ struct buffer
 {
   char *buffer;
   size_t buffer_size; /* allocated size */
-  size_t used_size; /* actually used size */
+  size_t used_size;   /* actually used size */
 };
 
 /* Append DATA of size SIZE to the end of BUFFER.  Grows the buffer to
@@ -49,7 +49,7 @@ void buffer_init (struct buffer *buffer);
 /* Return a pointer into BUFFER data, effectively transferring
    ownership of the buffer memory to the caller.  Calling buffer_free
    afterwards has no effect on the returned data.  */
-char* buffer_finish (struct buffer *buffer);
+char *buffer_finish (struct buffer *buffer);
 
 /* Simple printf to buffer function.  Current implemented formatters:
    %s - grow an xml escaped text in BUFFER.
@@ -60,9 +60,9 @@ char* buffer_finish (struct buffer *buffer);
 void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
-#define buffer_grow_str(BUFFER,STRING)		\
+#define buffer_grow_str(BUFFER, STRING) \
   buffer_grow (BUFFER, STRING, strlen (STRING))
-#define buffer_grow_str0(BUFFER,STRING)			\
+#define buffer_grow_str0(BUFFER, STRING) \
   buffer_grow (BUFFER, STRING, strlen (STRING) + 1)
 
 #endif /* COMMON_BUFFER_H */

@@ -21,8 +21,10 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/function-view.h"
 
-namespace selftests {
-namespace function_view {
+namespace selftests
+{
+namespace function_view
+{
 
 static int
 plus_one_fn_int (int val)
@@ -37,20 +39,20 @@ plus_one_fn_short (short val)
 }
 
 static int
-call_callback_int (int val, gdb::function_view <int (int)> callback)
+call_callback_int (int val, gdb::function_view<int (int)> callback)
 {
   return callback (val);
 }
 
 static void
-call_callback_void (int val, gdb::function_view <void (int)> callback)
+call_callback_void (int val, gdb::function_view<void (int)> callback)
 {
   callback (val);
 }
 
 struct plus_one_int_func_obj
 {
-  int operator () (int val)
+  int operator() (int val)
   {
     ++call_count;
     return ++val;
@@ -80,10 +82,7 @@ test_function_view ()
   /* Check calling a function that takes a function_view as argument,
      by value.  Pass a lambda, making sure a function_view is properly
      constructed implicitly.  */
-  SELF_CHECK (call_callback_int (1, [] (int val)
-    {
-      return val + 2;
-    }) == 3);
+  SELF_CHECK (call_callback_int (1, [] (int val) { return val + 2; }) == 3);
 
   /* Same, passing a named/lvalue lambda.  */
   SELF_CHECK (call_callback_int (1, plus_one_lambda) == 2);
@@ -104,10 +103,9 @@ test_function_view ()
 
   /* Check calling a function with a
      compatible-but-not-exactly-the-same prototype.  */
-  SELF_CHECK (call_callback_int (1, [] (short val) -> short
-    {
-      return val + 2;
-    }) == 3);
+  SELF_CHECK (call_callback_int (1,
+				 [] (short val) -> short { return val + 2; })
+	      == 3);
   /* Same, but passing a function pointer.  */
   SELF_CHECK (call_callback_int (1, plus_one_fn_short) == 2);
 
@@ -115,10 +113,7 @@ test_function_view ()
      can reference callables with non-void return type.  The result is
      simply discarded.  Check a lambda, function object and a function
      pointer.  */
-  call_callback_void (1, [] (int val) -> int
-    {
-      return val + 2;
-    });
+  call_callback_void (1, [] (int val) -> int { return val + 2; });
   call_callback_void (1, func_obj);
   call_callback_void (1, plus_one_fn_int);
 
@@ -126,9 +121,11 @@ test_function_view ()
   auto plus_one_func_view2 (plus_one_func_view);
   auto plus_one_func_view3 (plus_one_func_view2);
   static_assert (std::is_same<decltype (plus_one_func_view),
-		 decltype (plus_one_func_view2)>::value, "");
+			      decltype (plus_one_func_view2)>::value,
+		 "");
   static_assert (std::is_same<decltype (plus_one_func_view),
-		 decltype (plus_one_func_view3)>::value, "");
+			      decltype (plus_one_func_view3)>::value,
+		 "");
 
   SELF_CHECK (plus_one_func_view3 (1) == 2);
 
@@ -188,20 +185,14 @@ make_fv_test_func (int val)
 
 struct func_obj_const_op
 {
-  int operator() (int val) const
-  {
-    return val + 1;
-  }
+  int operator() (int val) const { return val + 1; }
 };
 
 /* A function object with non-const operator().  */
 
 struct func_obj_non_const_op
 {
-  int operator() (int val)
-  {
-    return val + 1;
-  }
+  int operator() (int val) { return val + 1; }
 };
 
 static void
@@ -211,7 +202,8 @@ test_make_function_view ()
   SELF_CHECK (3 == tmpl_func (1, gdb::make_function_view (make_fv_test_func)));
 
   /* Function pointer.  */
-  SELF_CHECK (3 == tmpl_func (1, gdb::make_function_view (&make_fv_test_func)));
+  SELF_CHECK (3
+	      == tmpl_func (1, gdb::make_function_view (&make_fv_test_func)));
 
   /* Reference to const and non-const function pointers.  */
   typedef int (*func_ptr) (int);
@@ -252,6 +244,7 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_function_view_selftests ();
+
 void
 _initialize_function_view_selftests ()
 {

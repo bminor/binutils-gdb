@@ -95,7 +95,7 @@ struct frame_id
   CORE_ADDR special_addr;
 
   /* Flags to indicate the above fields have valid contents.  */
-  ENUM_BITFIELD(frame_id_stack_status) stack_status : 3;
+  ENUM_BITFIELD (frame_id_stack_status) stack_status : 3;
   unsigned int code_addr_p : 1;
   unsigned int special_addr_p : 1;
 
@@ -117,10 +117,7 @@ struct frame_id
   bool operator== (const frame_id &r) const;
 
   /* Inverse of ==.  */
-  bool operator!= (const frame_id &r) const
-  {
-    return !(*this == r);
-  }
+  bool operator!= (const frame_id &r) const { return !(*this == r); }
 };
 
 /* Methods for constructing and comparing Frame IDs.  */

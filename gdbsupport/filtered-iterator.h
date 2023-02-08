@@ -40,7 +40,9 @@ public:
   template<typename... Args>
   explicit filtered_iterator (Args &&...args)
     : m_it (std::forward<Args> (args)...)
-  { skip_filtered (); }
+  {
+    skip_filtered ();
+  }
 
   /* Create a one-past-end iterator.  */
   filtered_iterator () = default;
@@ -52,7 +54,8 @@ public:
   filtered_iterator (filtered_iterator &&) = default;
   filtered_iterator (const filtered_iterator &&other)
     : filtered_iterator (static_cast<const filtered_iterator &> (other))
-  {}
+  {
+  }
 
   value_type operator* () const { return *m_it; }
 
@@ -63,19 +66,16 @@ public:
     return *this;
   }
 
-  bool operator== (const self_type &other) const
-  { return m_it == other.m_it; }
+  bool operator== (const self_type &other) const { return m_it == other.m_it; }
 
-  bool operator!= (const self_type &other) const
-  { return m_it != other.m_it; }
+  bool operator!= (const self_type &other) const { return m_it != other.m_it; }
 
 private:
-
   void skip_filtered ()
   {
     for (; m_it != m_end; ++m_it)
       if (m_filter (*m_it))
-	break;
+        break;
   }
 
 private:

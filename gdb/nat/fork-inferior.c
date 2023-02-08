@@ -36,6 +36,7 @@ extern char **environ;
 class execv_argv
 {
 public:
+
   /* EXEC_FILE is the file to run.  ALLARGS is a string containing the
      arguments to the program.  If starting with a shell, SHELL_FILE
      is the shell to run.  Otherwise, SHELL_FILE is NULL.  */
@@ -48,25 +49,21 @@ public:
      that the execv functions expect.  Note that it is guaranteed that
      the execv functions do not modify the argv[] array nor the
      strings to which the array point.  */
-  char **argv ()
-  {
-    return const_cast<char **> (&m_argv[0]);
-  }
+  char **argv () { return const_cast<char **> (&m_argv[0]); }
 
 private:
+
   DISABLE_COPY_AND_ASSIGN (execv_argv);
 
   /* Helper methods for constructing the argument vector.  */
 
   /* Used when building an argv for a straight execv call, without
      going via the shell.  */
-  void init_for_no_shell (const char *exec_file,
-			  const std::string &allargs);
+  void init_for_no_shell (const char *exec_file, const std::string &allargs);
 
   /* Used when building an argv for execing a shell that execs the
      child program.  */
-  void init_for_shell (const char *exec_file,
-		       const std::string &allargs,
+  void init_for_shell (const char *exec_file, const std::string &allargs,
 		       const char *shell_file);
 
   /* The argument vector built.  Holds non-owning pointers.  Elements
@@ -93,7 +90,6 @@ void
 execv_argv::init_for_no_shell (const char *exec_file,
 			       const std::string &allargs)
 {
-
   /* Save/work with a copy stored in our storage.  The pointers pushed
      to M_ARGV point directly into M_STORAGE, which is modified in
      place with the necessary NULL terminators.  This avoids N heap
@@ -160,8 +156,7 @@ escape_bang_in_quoted_argument (const char *shell_file)
 
 /* See declaration.  */
 
-execv_argv::execv_argv (const char *exec_file,
-			const std::string &allargs,
+execv_argv::execv_argv (const char *exec_file, const std::string &allargs,
 			const char *shell_file)
 {
   if (shell_file == NULL)
@@ -173,8 +168,7 @@ execv_argv::execv_argv (const char *exec_file,
 /* See declaration.  */
 
 void
-execv_argv::init_for_shell (const char *exec_file,
-			    const std::string &allargs,
+execv_argv::init_for_shell (const char *exec_file, const std::string &allargs,
 			    const char *shell_file)
 {
   const char *exec_wrapper = get_exec_wrapper ();
@@ -232,7 +226,7 @@ execv_argv::init_for_shell (const char *exec_file,
 	}
       ++p;
     }
- end_scan:
+end_scan:
   if (need_to_quote)
     {
       shell_command += '\'';
@@ -268,10 +262,9 @@ pid_t
 fork_inferior (const char *exec_file_arg, const std::string &allargs,
 	       char **env, void (*traceme_fun) (),
 	       gdb::function_view<void (int)> init_trace_fun,
-	       void (*pre_trace_fun) (),
-	       const char *shell_file_arg,
-	       void (*exec_fun)(const char *file, char * const *argv,
-				char * const *env))
+	       void (*pre_trace_fun) (), const char *shell_file_arg,
+	       void (*exec_fun) (const char *file, char *const *argv,
+				 char *const *env))
 {
   pid_t pid;
   /* Set debug_fork then attach to the child while it sleeps, to debug.  */
@@ -339,7 +332,7 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
   if (pre_trace_fun != NULL)
     (*pre_trace_fun) ();
 
-  /* Create the child process.  Since the child process is going to
+    /* Create the child process.  Since the child process is going to
      exec(3) shortly afterwards, try to reduce the overhead by
      calling vfork(2).  However, if PRE_TRACE_FUN is non-null, it's
      likely that this optimization won't work since there's too much
@@ -449,8 +442,7 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
 
 ptid_t
 startup_inferior (process_stratum_target *proc_target, pid_t pid, int ntraps,
-		  struct target_waitstatus *last_waitstatus,
-		  ptid_t *last_ptid)
+		  struct target_waitstatus *last_waitstatus, ptid_t *last_ptid)
 {
   int pending_execs = ntraps;
   int terminal_initted = 0;
@@ -492,44 +484,44 @@ startup_inferior (process_stratum_target *proc_target, pid_t pid, int ntraps,
 
       switch (ws.kind ())
 	{
-	  case TARGET_WAITKIND_SPURIOUS:
-	  case TARGET_WAITKIND_LOADED:
-	  case TARGET_WAITKIND_FORKED:
-	  case TARGET_WAITKIND_VFORKED:
-	  case TARGET_WAITKIND_SYSCALL_ENTRY:
-	  case TARGET_WAITKIND_SYSCALL_RETURN:
-	    /* Ignore gracefully during startup of the inferior.  */
-	    switch_to_thread (proc_target, event_ptid);
-	    break;
+	case TARGET_WAITKIND_SPURIOUS:
+	case TARGET_WAITKIND_LOADED:
+	case TARGET_WAITKIND_FORKED:
+	case TARGET_WAITKIND_VFORKED:
+	case TARGET_WAITKIND_SYSCALL_ENTRY:
+	case TARGET_WAITKIND_SYSCALL_RETURN:
+	  /* Ignore gracefully during startup of the inferior.  */
+	  switch_to_thread (proc_target, event_ptid);
+	  break;
 
-	  case TARGET_WAITKIND_SIGNALLED:
-	    target_terminal::ours ();
-	    target_mourn_inferior (event_ptid);
-	    error (_("During startup program terminated with signal %s, %s."),
-		   gdb_signal_to_name (ws.sig ()),
-		   gdb_signal_to_string (ws.sig ()));
-	    return resume_ptid;
+	case TARGET_WAITKIND_SIGNALLED:
+	  target_terminal::ours ();
+	  target_mourn_inferior (event_ptid);
+	  error (_ ("During startup program terminated with signal %s, %s."),
+		 gdb_signal_to_name (ws.sig ()),
+		 gdb_signal_to_string (ws.sig ()));
+	  return resume_ptid;
 
-	  case TARGET_WAITKIND_EXITED:
-	    target_terminal::ours ();
-	    target_mourn_inferior (event_ptid);
-	    if (ws.exit_status ())
-	      error (_("During startup program exited with code %d."),
-		     ws.exit_status ());
-	    else
-	      error (_("During startup program exited normally."));
-	    return resume_ptid;
+	case TARGET_WAITKIND_EXITED:
+	  target_terminal::ours ();
+	  target_mourn_inferior (event_ptid);
+	  if (ws.exit_status ())
+	    error (_ ("During startup program exited with code %d."),
+		   ws.exit_status ());
+	  else
+	    error (_ ("During startup program exited normally."));
+	  return resume_ptid;
 
-	  case TARGET_WAITKIND_EXECD:
-	    /* Handle EXEC signals as if they were SIGTRAP signals.  */
-	    resume_signal = GDB_SIGNAL_TRAP;
-	    switch_to_thread (proc_target, event_ptid);
-	    break;
+	case TARGET_WAITKIND_EXECD:
+	  /* Handle EXEC signals as if they were SIGTRAP signals.  */
+	  resume_signal = GDB_SIGNAL_TRAP;
+	  switch_to_thread (proc_target, event_ptid);
+	  break;
 
-	  case TARGET_WAITKIND_STOPPED:
-	    resume_signal = ws.sig ();
-	    switch_to_thread (proc_target, event_ptid);
-	    break;
+	case TARGET_WAITKIND_STOPPED:
+	  resume_signal = ws.sig ();
+	  switch_to_thread (proc_target, event_ptid);
+	  break;
 	}
 
       if (resume_signal != GDB_SIGNAL_TRAP)

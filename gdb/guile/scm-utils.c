@@ -72,7 +72,7 @@ gdbscm_define_integer_constants (const scheme_integer_constant *constants,
 	scm_c_export (sc->name, NULL);
     }
 }
-
+
 /* scm_printf, alas it doesn't exist.  */
 
 void
@@ -109,7 +109,7 @@ gdbscm_debug_write (SCM obj)
   scm_newline (port);
   scm_force_output (port);
 }
-
+
 /* Subroutine of gdbscm_parse_function_args to simplify it.
    Return the number of keyword arguments.  */
 
@@ -177,14 +177,16 @@ validate_arg_format (const char *format)
 }
 
 /* Our version of SCM_ASSERT_TYPE that calls gdbscm_make_type_error.  */
-#define CHECK_TYPE(ok, arg, position, func_name, expected_type)		\
-  do {									\
-    if (!(ok))								\
-      {									\
-	return gdbscm_make_type_error ((func_name), (position), (arg),	\
-				       (expected_type));		\
-      }									\
-  } while (0)
+#define CHECK_TYPE(ok, arg, position, func_name, expected_type)          \
+  do                                                                     \
+    {                                                                    \
+      if (!(ok))                                                         \
+	{                                                                \
+	  return gdbscm_make_type_error ((func_name), (position), (arg), \
+					 (expected_type));               \
+	}                                                                \
+    }                                                                    \
+  while (0)
 
 /* Subroutine of gdbscm_parse_function_args to simplify it.
    Check the type of ARG against FORMAT_CHAR and extract the value.
@@ -192,8 +194,8 @@ validate_arg_format (const char *format)
    The result is #f upon success or a <gdb:exception> object.  */
 
 static SCM
-extract_arg (char format_char, SCM arg, void *argp,
-	     const char *func_name, int position)
+extract_arg (char format_char, SCM arg, void *argp, const char *func_name,
+	     int position)
 {
   switch (format_char)
     {
@@ -202,7 +204,7 @@ extract_arg (char format_char, SCM arg, void *argp,
 	char **arg_ptr = (char **) argp;
 
 	CHECK_TYPE (gdbscm_is_true (scm_string_p (arg)), arg, position,
-		    func_name, _("string"));
+		    func_name, _ ("string"));
 	*arg_ptr = gdbscm_scm_to_c_string (arg).release ();
 	break;
       }
@@ -212,7 +214,7 @@ extract_arg (char format_char, SCM arg, void *argp,
 
 	/* While in Scheme, anything non-#f is "true", we're strict.  */
 	CHECK_TYPE (gdbscm_is_bool (arg), arg, position, func_name,
-		    _("boolean"));
+		    _ ("boolean"));
 	*arg_ptr = gdbscm_is_true (arg);
 	break;
       }
@@ -220,8 +222,8 @@ extract_arg (char format_char, SCM arg, void *argp,
       {
 	int *arg_ptr = (int *) argp;
 
-	CHECK_TYPE (scm_is_signed_integer (arg, INT_MIN, INT_MAX),
-		    arg, position, func_name, _("int"));
+	CHECK_TYPE (scm_is_signed_integer (arg, INT_MIN, INT_MAX), arg,
+		    position, func_name, _ ("int"));
 	*arg_ptr = scm_to_int (arg);
 	break;
       }
@@ -229,8 +231,8 @@ extract_arg (char format_char, SCM arg, void *argp,
       {
 	int *arg_ptr = (int *) argp;
 
-	CHECK_TYPE (scm_is_unsigned_integer (arg, 0, UINT_MAX),
-		    arg, position, func_name, _("unsigned int"));
+	CHECK_TYPE (scm_is_unsigned_integer (arg, 0, UINT_MAX), arg, position,
+		    func_name, _ ("unsigned int"));
 	*arg_ptr = scm_to_uint (arg);
 	break;
       }
@@ -238,8 +240,8 @@ extract_arg (char format_char, SCM arg, void *argp,
       {
 	long *arg_ptr = (long *) argp;
 
-	CHECK_TYPE (scm_is_signed_integer (arg, LONG_MIN, LONG_MAX),
-		    arg, position, func_name, _("long"));
+	CHECK_TYPE (scm_is_signed_integer (arg, LONG_MIN, LONG_MAX), arg,
+		    position, func_name, _ ("long"));
 	*arg_ptr = scm_to_long (arg);
 	break;
       }
@@ -247,8 +249,8 @@ extract_arg (char format_char, SCM arg, void *argp,
       {
 	unsigned long *arg_ptr = (unsigned long *) argp;
 
-	CHECK_TYPE (scm_is_unsigned_integer (arg, 0, ULONG_MAX),
-		    arg, position, func_name, _("unsigned long"));
+	CHECK_TYPE (scm_is_unsigned_integer (arg, 0, ULONG_MAX), arg, position,
+		    func_name, _ ("unsigned long"));
 	*arg_ptr = scm_to_ulong (arg);
 	break;
       }
@@ -256,8 +258,8 @@ extract_arg (char format_char, SCM arg, void *argp,
       {
 	LONGEST *arg_ptr = (LONGEST *) argp;
 
-	CHECK_TYPE (scm_is_signed_integer (arg, INT64_MIN, INT64_MAX),
-		    arg, position, func_name, _("LONGEST"));
+	CHECK_TYPE (scm_is_signed_integer (arg, INT64_MIN, INT64_MAX), arg,
+		    position, func_name, _ ("LONGEST"));
 	*arg_ptr = gdbscm_scm_to_longest (arg);
 	break;
       }
@@ -265,8 +267,8 @@ extract_arg (char format_char, SCM arg, void *argp,
       {
 	ULONGEST *arg_ptr = (ULONGEST *) argp;
 
-	CHECK_TYPE (scm_is_unsigned_integer (arg, 0, UINT64_MAX),
-		    arg, position, func_name, _("ULONGEST"));
+	CHECK_TYPE (scm_is_unsigned_integer (arg, 0, UINT64_MAX), arg,
+		    position, func_name, _ ("ULONGEST"));
 	*arg_ptr = gdbscm_scm_to_ulongest (arg);
 	break;
       }
@@ -304,17 +306,15 @@ lookup_keyword (const SCM *keyword_list, SCM keyword)
   return -1;
 }
 
-
 /* Helper for gdbscm_parse_function_args that does most of the work,
    in a separate function wrapped with gdbscm_wrap so that we can use
    non-trivial-dtor objects here.  The result is #f upon success or a
    <gdb:exception> object otherwise.  */
 
 static SCM
-gdbscm_parse_function_args_1 (const char *func_name,
-			      int beginning_arg_pos,
-			      const SCM *keywords,
-			      const char *format, va_list args)
+gdbscm_parse_function_args_1 (const char *func_name, int beginning_arg_pos,
+			      const SCM *keywords, const char *format,
+			      va_list args)
 {
   const char *p;
   int i, have_rest, num_keywords, position;
@@ -377,8 +377,7 @@ gdbscm_parse_function_args_1 (const char *func_name,
 	  keyword_positions[i] = -1;
 	}
 
-      while (scm_is_pair (rest)
-	     && scm_is_keyword (scm_car (rest)))
+      while (scm_is_pair (rest) && scm_is_keyword (scm_car (rest)))
 	{
 	  SCM keyword = scm_car (rest);
 
@@ -386,16 +385,16 @@ gdbscm_parse_function_args_1 (const char *func_name,
 	  if (i < 0)
 	    {
 	      status = gdbscm_make_error (scm_arg_type_key, func_name,
-					  _("Unrecognized keyword: ~a"),
+					  _ ("Unrecognized keyword: ~a"),
 					  scm_list_1 (keyword), keyword);
 	      goto fail;
 	    }
 	  if (!scm_is_pair (scm_cdr (rest)))
 	    {
-	      status = gdbscm_make_error
-		(scm_arg_type_key, func_name,
-		 _("Missing value for keyword argument"),
-		 scm_list_1 (keyword), keyword);
+	      status
+		= gdbscm_make_error (scm_arg_type_key, func_name,
+				     _ ("Missing value for keyword argument"),
+				     scm_list_1 (keyword), keyword);
 	      goto fail;
 	    }
 	  keyword_args[i] = scm_cadr (rest);
@@ -410,7 +409,7 @@ gdbscm_parse_function_args_1 (const char *func_name,
 	  void *arg_ptr = va_arg (args, void *);
 	  SCM arg = keyword_args[i];
 
-	  if (! scm_is_eq (arg, SCM_UNSPECIFIED))
+	  if (!scm_is_eq (arg, SCM_UNSPECIFIED))
 	    {
 	      *arg_pos_ptr = keyword_positions[i];
 	      status = extract_arg (p[i], arg, arg_ptr, func_name,
@@ -436,11 +435,11 @@ gdbscm_parse_function_args_1 (const char *func_name,
     }
   else
     {
-      if (! scm_is_null (rest))
+      if (!scm_is_null (rest))
 	{
 	  status = gdbscm_make_error (scm_args_number_key, func_name,
-				      _("Too many arguments"),
-				      SCM_EOL, SCM_BOOL_F);
+				      _ ("Too many arguments"), SCM_EOL,
+				      SCM_BOOL_F);
 	  goto fail;
 	}
     }
@@ -448,7 +447,7 @@ gdbscm_parse_function_args_1 (const char *func_name,
   /* Return anything not-an-exception.  */
   return SCM_BOOL_F;
 
- fail:
+fail:
   for (char *ptr : allocated_strings)
     xfree (ptr);
 
@@ -525,21 +524,18 @@ gdbscm_parse_function_args_1 (const char *func_name,
    argument.  Unbound optional arguments are ignored.  */
 
 void
-gdbscm_parse_function_args (const char *func_name,
-			    int beginning_arg_pos,
-			    const SCM *keywords,
-			    const char *format, ...)
+gdbscm_parse_function_args (const char *func_name, int beginning_arg_pos,
+			    const SCM *keywords, const char *format, ...)
 {
   va_list args;
   va_start (args, format);
 
-  gdbscm_wrap (gdbscm_parse_function_args_1, func_name,
-	       beginning_arg_pos, keywords, format, args);
+  gdbscm_wrap (gdbscm_parse_function_args_1, func_name, beginning_arg_pos,
+	       keywords, format, args);
 
   va_end (args);
 }
 
-
 /* Return longest L as a scheme object.  */
 
 SCM
@@ -609,7 +605,7 @@ gdbscm_gc_xstrdup (const char *str)
 
 /* Return a duplicate of ARGV living on the GC heap.  */
 
-const char * const *
+const char *const *
 gdbscm_gc_dup_argv (char **argv)
 {
   int i, len;
@@ -622,7 +618,7 @@ gdbscm_gc_dup_argv (char **argv)
   /* Allocating "pointerless" works because the pointers are all
      self-contained within the object.  */
   result = (char **) scm_gc_malloc_pointerless (((len + 1) * sizeof (char *))
-						+ string_space,
+						  + string_space,
 						"parameter enum list");
   p = (char *) &result[len + 1];
 
@@ -634,7 +630,7 @@ gdbscm_gc_dup_argv (char **argv)
     }
   result[i] = NULL;
 
-  return (const char * const *) result;
+  return (const char *const *) result;
 }
 
 /* Return non-zero if the version of Guile being used it at least

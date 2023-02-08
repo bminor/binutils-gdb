@@ -60,11 +60,11 @@ build_id_verify (bfd *abfd, size_t check_len, const bfd_byte *check)
   found = build_id_bfd_get (abfd);
 
   if (found == NULL)
-    warning (_("File \"%s\" has no build-id, file skipped"),
+    warning (_ ("File \"%s\" has no build-id, file skipped"),
 	     bfd_get_filename (abfd));
   else if (found->size != check_len
 	   || memcmp (found->data, check, found->size) != 0)
-    warning (_("File \"%s\" has a different build-id, file skipped"),
+    warning (_ ("File \"%s\" has a different build-id, file skipped"),
 	     bfd_get_filename (abfd));
   else
     retval = 1;
@@ -82,7 +82,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
 {
   if (separate_debug_file_debug)
     {
-      gdb_printf (gdb_stdlog, _("  Trying %s..."), link.c_str ());
+      gdb_printf (gdb_stdlog, _ ("  Trying %s..."), link.c_str ());
       gdb_flush (gdb_stdlog);
     }
 
@@ -100,8 +100,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
   if (filename == NULL)
     {
       if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog,
-		    _(" no, unable to compute real path\n"));
+	gdb_printf (gdb_stdlog, _ (" no, unable to compute real path\n"));
 
       return {};
     }
@@ -112,21 +111,21 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
   if (debug_bfd == NULL)
     {
       if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog, _(" no, unable to open.\n"));
+	gdb_printf (gdb_stdlog, _ (" no, unable to open.\n"));
 
       return {};
     }
 
-  if (!build_id_verify (debug_bfd.get(), build_id_len, build_id))
+  if (!build_id_verify (debug_bfd.get (), build_id_len, build_id))
     {
       if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog, _(" no, build-id does not match.\n"));
+	gdb_printf (gdb_stdlog, _ (" no, build-id does not match.\n"));
 
       return {};
     }
 
   if (separate_debug_file_debug)
-    gdb_printf (gdb_stdlog, _(" yes!\n"));
+    gdb_printf (gdb_stdlog, _ (" yes!\n"));
 
   return debug_bfd;
 }
@@ -218,19 +217,22 @@ find_separate_debug_file_by_buildid (struct objfile *objfile,
     {
       if (separate_debug_file_debug)
 	gdb_printf (gdb_stdlog,
-		    _("\nLooking for separate debug info (build-id) for "
-		      "%s\n"), objfile_name (objfile));
+		    _ ("\nLooking for separate debug info (build-id) for "
+		       "%s\n"),
+		    objfile_name (objfile));
 
       gdb_bfd_ref_ptr abfd (build_id_to_debug_bfd (build_id->size,
 						   build_id->data));
       /* Prevent looping on a stripped .debug file.  */
       if (abfd != NULL
 	  && filename_cmp (bfd_get_filename (abfd.get ()),
-			   objfile_name (objfile)) == 0)
+			   objfile_name (objfile))
+	       == 0)
 	{
 	  std::string msg
-	    = string_printf (_("\"%s\": separate debug info file has no "
-			       "debug info"), bfd_get_filename (abfd.get ()));
+	    = string_printf (_ ("\"%s\": separate debug info file has no "
+				"debug info"),
+			     bfd_get_filename (abfd.get ()));
 	  if (separate_debug_file_debug)
 	    gdb_printf (gdb_stdlog, "%s", msg.c_str ());
 	  warnings_vector->emplace_back (std::move (msg));

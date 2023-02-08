@@ -60,20 +60,19 @@ mips_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
       struct reg regs;
 
       if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
-      
+	perror_with_name (_ ("Couldn't get registers"));
+
       mipsnbsd_supply_reg (regcache, (char *) &regs, regno);
       if (regno != -1)
 	return;
     }
 
-  if (regno == -1
-      || regno >= gdbarch_fp0_regnum (regcache->arch ()))
+  if (regno == -1 || regno >= gdbarch_fp0_regnum (regcache->arch ()))
     {
       struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
       mipsnbsd_supply_fpreg (regcache, (char *) &fpregs, regno);
     }
@@ -90,33 +89,33 @@ mips_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
       struct reg regs;
 
       if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_ ("Couldn't get registers"));
 
       mipsnbsd_fill_reg (regcache, (char *) &regs, regno);
 
       if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't write registers"));
+	perror_with_name (_ ("Couldn't write registers"));
 
       if (regno != -1)
 	return;
     }
 
-  if (regno == -1
-      || regno >= gdbarch_fp0_regnum (regcache->arch ()))
+  if (regno == -1 || regno >= gdbarch_fp0_regnum (regcache->arch ()))
     {
-      struct fpreg fpregs; 
+      struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
       mipsnbsd_fill_fpreg (regcache, (char *) &fpregs, regno);
 
       if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't write floating point status"));
+	perror_with_name (_ ("Couldn't write floating point status"));
     }
 }
 
 void _initialize_mipsnbsd_nat ();
+
 void
 _initialize_mipsnbsd_nat ()
 {

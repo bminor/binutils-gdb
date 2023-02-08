@@ -50,8 +50,7 @@
 #include "server.h"
 #include "notif.h"
 
-static struct notif_server *notifs[] =
-{
+static struct notif_server *notifs[] = {
   &notif_stop,
 };
 
@@ -85,9 +84,8 @@ handle_notif_ack (char *own_buf, int packet_len)
     {
       const char *ack_name = notifs[i]->ack_name;
 
-      if (startswith (own_buf, ack_name)
-	  && packet_len == strlen (ack_name))
-	break;
+      if (startswith (own_buf, ack_name) && packet_len == strlen (ack_name))
+        break;
     }
 
   if (i == ARRAY_SIZE (notifs))
@@ -103,7 +101,7 @@ handle_notif_ack (char *own_buf, int packet_len)
       np->queue.pop_front ();
 
       remote_debug_printf ("%s: acking %d", np->ack_name,
-			   (int) np->queue.size ());
+                           (int) np->queue.size ());
 
       delete head;
     }
@@ -116,14 +114,12 @@ handle_notif_ack (char *own_buf, int packet_len)
 /* Put EVENT to the queue of NOTIF.  */
 
 void
-notif_event_enque (struct notif_server *notif,
-		   struct notif_event *event)
+notif_event_enque (struct notif_server *notif, struct notif_event *event)
 {
   notif->queue.push_back (event);
 
   remote_debug_printf ("pending events: %s %d", notif->notif_name,
-		       (int) notif->queue.size ());
-
+                       (int) notif->queue.size ());
 }
 
 /* Push one event NEW_EVENT of notification NP into NP->queue.  */

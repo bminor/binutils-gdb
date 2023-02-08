@@ -24,7 +24,8 @@
 
 #include "gdbarch.h"
 
-enum gdb_regnum {
+enum gdb_regnum
+{
   /* Core Registers */
   BFIN_R0_REGNUM = 0,
   BFIN_R1_REGNUM,
@@ -86,6 +87,7 @@ enum gdb_regnum {
   /* Pseudo Registers managed locally.  */
   BFIN_CC_REGNUM
 };
+
 #define BFIN_NUM_REGS (BFIN_PC_REGNUM + 1)
 #define BFIN_NUM_PSEUDO_REGS (1)
 
@@ -99,7 +101,9 @@ enum bfin_abi
 struct bfin_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Which ABI is in use?  */
-  enum bfin_abi bfin_abi {};
+  enum bfin_abi bfin_abi
+  {
+  };
 };
 
 /* Return the Blackfin ABI associated with GDBARCH.  */

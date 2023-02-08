@@ -25,13 +25,13 @@
 std::string
 target_waitstatus::to_string () const
 {
-  std::string str = string_printf
-    ("status->kind = %s", target_waitkind_str (this->kind ()));
+  std::string str
+    = string_printf ("status->kind = %s", target_waitkind_str (this->kind ()));
 
-/* Make sure the compiler warns if a new TARGET_WAITKIND enumerator is added
+  /* Make sure the compiler warns if a new TARGET_WAITKIND enumerator is added
    but not handled here.  */
-DIAGNOSTIC_PUSH
-DIAGNOSTIC_ERROR_SWITCH
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_ERROR_SWITCH
   switch (this->kind ())
     {
     case TARGET_WAITKIND_EXITED:
@@ -63,7 +63,7 @@ DIAGNOSTIC_ERROR_SWITCH
     case TARGET_WAITKIND_THREAD_CREATED:
       return str;
     }
-DIAGNOSTIC_POP
+  DIAGNOSTIC_POP
 
   gdb_assert_not_reached ("invalid target_waitkind value: %d",
 			  (int) this->kind ());

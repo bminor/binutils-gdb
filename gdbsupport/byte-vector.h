@@ -20,7 +20,8 @@
 
 #include "gdbsupport/def-vector.h"
 
-namespace gdb {
+namespace gdb
+{
 
 /* byte_vector is a gdb_byte std::vector with a custom allocator that
    unlike std::vector<gdb_byte> does not zero-initialize new elements

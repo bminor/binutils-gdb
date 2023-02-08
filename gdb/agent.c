@@ -27,8 +27,7 @@
 
 static const char can_use_agent_on[] = "on";
 static const char can_use_agent_off[] = "off";
-static const char * const can_use_agent_enum[] =
-{
+static const char *const can_use_agent_enum[] = {
   can_use_agent_on,
   can_use_agent_off,
   NULL,
@@ -41,8 +40,9 @@ show_can_use_agent (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
   gdb_printf (file,
-	      _("Debugger's willingness to use agent in inferior "
-		"as a helper is %s.\n"), value);
+	      _ ("Debugger's willingness to use agent in inferior "
+		 "as a helper is %s.\n"),
+	      value);
 }
 
 static void
@@ -75,23 +75,23 @@ agent_new_objfile (struct objfile *objfile)
 }
 
 void _initialize_agent ();
+
 void
 _initialize_agent ()
 {
-  gdb::observers::new_objfile.attach (agent_new_objfile,
-				      "agent");
+  gdb::observers::new_objfile.attach (agent_new_objfile, "agent");
 
-  add_setshow_enum_cmd ("agent", class_run,
-			can_use_agent_enum,
-			&can_use_agent, _("\
-Set debugger's willingness to use agent as a helper."), _("\
-Show debugger's willingness to use agent as a helper."), _("\
+  add_setshow_enum_cmd ("agent", class_run, can_use_agent_enum, &can_use_agent,
+			_ ("\
+Set debugger's willingness to use agent as a helper."),
+			_ ("\
+Show debugger's willingness to use agent as a helper."),
+			_ ("\
 If on, GDB will delegate some of the debugging operations to the\n\
 agent, if the target supports it.  This will speed up those\n\
 operations that are supported by the agent.\n\
 If off, GDB will not use agent, even if such is supported by the\n\
 target."),
-			set_can_use_agent,
-			show_can_use_agent,
-			&setlist, &showlist);
+			set_can_use_agent, show_can_use_agent, &setlist,
+			&showlist);
 }

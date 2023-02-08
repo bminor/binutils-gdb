@@ -42,6 +42,7 @@ i386_dicos_osabi_sniffer (bfd *abfd)
 }
 
 void _initialize_i386_dicos_tdep ();
+
 void
 _initialize_i386_dicos_tdep ()
 {

@@ -36,32 +36,25 @@
 
 /* From <sys/regset.h>.  */
 static int amd64_sol2_gregset_reg_offset[] = {
-  14 * 8,			/* %rax */
-  11 * 8,			/* %rbx */
-  13 * 8,			/* %rcx */
-  12 * 8,			/* %rdx */
-  9 * 8,			/* %rsi */
-  8 * 8,			/* %rdi */
-  10 * 8,			/* %rbp */
-  20 * 8,			/* %rsp */
-  7 * 8,			/* %r8 ...  */
-  6 * 8,
-  5 * 8,
-  4 * 8,
-  3 * 8,
-  2 * 8,
-  1 * 8,
-  0 * 8,			/* ... %r15 */
-  17 * 8,			/* %rip */
-  19 * 8,			/* %eflags */
-  18 * 8,			/* %cs */
-  21 * 8,			/* %ss */
-  25 * 8,			/* %ds */
-  24 * 8,			/* %es */
-  22 * 8,			/* %fs */
-  23 * 8			/* %gs */
+  14 * 8,					    /* %rax */
+  11 * 8,					    /* %rbx */
+  13 * 8,					    /* %rcx */
+  12 * 8,					    /* %rdx */
+  9 * 8,					    /* %rsi */
+  8 * 8,					    /* %rdi */
+  10 * 8,					    /* %rbp */
+  20 * 8,					    /* %rsp */
+  7 * 8,					    /* %r8 ...  */
+  6 * 8,  5 * 8, 4 * 8, 3 * 8, 2 * 8, 1 * 8, 0 * 8, /* ... %r15 */
+  17 * 8,					    /* %rip */
+  19 * 8,					    /* %eflags */
+  18 * 8,					    /* %cs */
+  21 * 8,					    /* %ss */
+  25 * 8,					    /* %ds */
+  24 * 8,					    /* %es */
+  22 * 8,					    /* %fs */
+  23 * 8					    /* %gs */
 };
-
 
 /* Solaris doesn't have a 'struct sigcontext', but it does have a
    'mcontext_t' that contains the saved set of machine registers.  */
@@ -97,14 +90,15 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = tdep->gregset_num_regs;
 
   /* Solaris uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
 }
 
 void _initialize_amd64_sol2_tdep ();
+
 void
 _initialize_amd64_sol2_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_SOLARIS, amd64_sol2_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_SOLARIS,
+			  amd64_sol2_init_abi);
 }

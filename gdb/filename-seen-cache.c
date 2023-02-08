@@ -21,15 +21,14 @@
 #include "filename-seen-cache.h"
 #include "filenames.h"
 
-  /* Initial size of the table.  It automagically grows from here.  */
+/* Initial size of the table.  It automagically grows from here.  */
 #define INITIAL_FILENAME_SEEN_CACHE_SIZE 100
 
 /* filename_seen_cache constructor.  */
 
 filename_seen_cache::filename_seen_cache ()
-  : m_tab (htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
-			      filename_hash, filename_eq,
-			      NULL, xcalloc, xfree))
+  : m_tab (htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE, filename_hash,
+			      filename_eq, NULL, xcalloc, xfree))
 {
 }
 

@@ -22,8 +22,10 @@
 #include "gdbsupport/valid-expr.h"
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
-namespace enum_flags_tests {
+namespace selftests
+{
+namespace enum_flags_tests
+{
 
 /* The (real) enum types used in CHECK_VALID.  Their names match the
    template parameter names of the templates defined by CHECK_VALID to
@@ -31,32 +33,32 @@ namespace enum_flags_tests {
 
 /* A "real enum".  */
 enum RE
-  {
-    RE_FLAG1 = 1 << 1,
-    RE_FLAG2 = 1 << 2,
-  };
+{
+  RE_FLAG1 = 1 << 1,
+  RE_FLAG2 = 1 << 2,
+};
 
 /* Another "real enum".  */
 enum RE2
-  {
-    RE2_FLAG1 = 1 << 1,
-    RE2_FLAG2 = 1 << 2,
-  };
+{
+  RE2_FLAG1 = 1 << 1,
+  RE2_FLAG2 = 1 << 2,
+};
 
 /* An unsigned "real enum".  */
 enum URE : unsigned
-  {
-    URE_FLAG1 = 1 << 1,
-    URE_FLAG2 = 1 << 2,
-    URE_FLAG3 = 0xffffffff,
-  };
+{
+  URE_FLAG1 = 1 << 1,
+  URE_FLAG2 = 1 << 2,
+  URE_FLAG3 = 0xffffffff,
+};
 
 /* A non-flags enum.  */
 enum NF
-  {
-    NF_FLAG1 = 1 << 1,
-    NF_FLAG2 = 1 << 2,
-  };
+{
+  NF_FLAG1 = 1 << 1,
+  NF_FLAG2 = 1 << 2,
+};
 
 /* The corresponding "enum flags" types.  */
 DEF_ENUM_FLAGS_TYPE (RE, EF);
@@ -87,7 +89,7 @@ static EF ef ATTRIBUTE_UNUSED;
      types do compile and that they return the correct type.
 */
 
-#define CHECK_VALID(VALID, EXPR_TYPE, EXPR)		\
+#define CHECK_VALID(VALID, EXPR_TYPE, EXPR) \
   CHECK_VALID_EXPR_6 (EF, RE, EF2, RE2, UEF, URE, VALID, EXPR_TYPE, EXPR)
 
 typedef std::underlying_type<RE>::type und;
@@ -95,21 +97,21 @@ typedef std::underlying_type<RE>::type und;
 /* Test construction / conversion from/to different types.  */
 
 /* RE/EF -> underlying (explicit) */
-CHECK_VALID (true,  und,  und (RE ()))
-CHECK_VALID (true,  und,  und (EF ()))
+CHECK_VALID (true, und, und (RE ()))
+CHECK_VALID (true, und, und (EF ()))
 
 /* RE/EF -> int (explicit) */
-CHECK_VALID (true,  int,  int (RE ()))
-CHECK_VALID (true,  int,  int (EF ()))
+CHECK_VALID (true, int, int (RE ()))
+CHECK_VALID (true, int, int (EF ()))
 
 /* other -> RE */
 
 /* You can construct a raw enum value from an int explicitly to punch
    a hole in the type system if need to.  */
-CHECK_VALID (true,  RE,   RE (1))
-CHECK_VALID (true,  RE,   RE (RE2 ()))
+CHECK_VALID (true, RE, RE (1))
+CHECK_VALID (true, RE, RE (RE2 ()))
 CHECK_VALID (false, void, RE (EF2 ()))
-CHECK_VALID (true,  RE,   RE (RE ()))
+CHECK_VALID (true, RE, RE (RE ()))
 CHECK_VALID (false, void, RE (EF ()))
 
 /* other -> EF.  */
@@ -122,8 +124,8 @@ CHECK_VALID (false, void, EF (1))
 CHECK_VALID (false, void, EF (1u))
 CHECK_VALID (false, void, EF (RE2 ()))
 CHECK_VALID (false, void, EF (EF2 ()))
-CHECK_VALID (true,  EF,   EF (RE ()))
-CHECK_VALID (true,  EF,   EF (EF ()))
+CHECK_VALID (true, EF, EF (RE ()))
+CHECK_VALID (true, EF, EF (EF ()))
 
 /* Test operators.  */
 
@@ -156,18 +158,18 @@ CHECK_VALID (false, void, 1 ^ EF ())
 CHECK_VALID (false, void, RE () | RE2 ())
 CHECK_VALID (false, void, RE () & RE2 ())
 CHECK_VALID (false, void, RE () ^ RE2 ())
-CHECK_VALID (true,  RE,   RE () | RE ())
-CHECK_VALID (true,  RE,   RE () & RE ())
-CHECK_VALID (true,  RE,   RE () ^ RE ())
+CHECK_VALID (true, RE, RE () | RE ())
+CHECK_VALID (true, RE, RE () & RE ())
+CHECK_VALID (true, RE, RE () ^ RE ())
 
 /* operator OP (enum_flags, raw_enum) */
 
 CHECK_VALID (false, void, EF () | RE2 ())
 CHECK_VALID (false, void, EF () & RE2 ())
 CHECK_VALID (false, void, EF () ^ RE2 ())
-CHECK_VALID (true,  EF,   EF () | RE ())
-CHECK_VALID (true,  EF,   EF () & RE ())
-CHECK_VALID (true,  EF,   EF () ^ RE ())
+CHECK_VALID (true, EF, EF () | RE ())
+CHECK_VALID (true, EF, EF () & RE ())
+CHECK_VALID (true, EF, EF () ^ RE ())
 
 /* operator OP= (raw_enum, raw_enum), rvalue ref on the lhs. */
 
@@ -183,9 +185,9 @@ CHECK_VALID (false, void, RE () ^= RE ())
 CHECK_VALID (false, void, re |= RE2 ())
 CHECK_VALID (false, void, re &= RE2 ())
 CHECK_VALID (false, void, re ^= RE2 ())
-CHECK_VALID (true,  RE&,  re |= RE ())
-CHECK_VALID (true,  RE&,  re &= RE ())
-CHECK_VALID (true,  RE&,  re ^= RE ())
+CHECK_VALID (true, RE &, re |= RE ())
+CHECK_VALID (true, RE &, re &= RE ())
+CHECK_VALID (true, RE &, re ^= RE ())
 
 /* operator OP= (enum_flags, raw_enum), rvalue ref on the lhs.  */
 
@@ -201,9 +203,9 @@ CHECK_VALID (false, void, EF () ^= RE ())
 CHECK_VALID (false, void, ef |= RE2 ())
 CHECK_VALID (false, void, ef &= RE2 ())
 CHECK_VALID (false, void, ef ^= RE2 ())
-CHECK_VALID (true,  EF&,  ef |= EF ())
-CHECK_VALID (true,  EF&,  ef &= EF ())
-CHECK_VALID (true,  EF&,  ef ^= EF ())
+CHECK_VALID (true, EF &, ef |= EF ())
+CHECK_VALID (true, EF &, ef &= EF ())
+CHECK_VALID (true, EF &, ef ^= EF ())
 
 /* operator OP= (enum_flags, enum_flags), rvalue ref on the lhs.  */
 
@@ -219,24 +221,24 @@ CHECK_VALID (false, void, EF () ^= EF ())
 CHECK_VALID (false, void, ef |= EF2 ())
 CHECK_VALID (false, void, ef &= EF2 ())
 CHECK_VALID (false, void, ef ^= EF2 ())
-CHECK_VALID (true,  EF&,  ef |= EF ())
-CHECK_VALID (true,  EF&,  ef &= EF ())
-CHECK_VALID (true,  EF&,  ef ^= EF ())
+CHECK_VALID (true, EF &, ef |= EF ())
+CHECK_VALID (true, EF &, ef &= EF ())
+CHECK_VALID (true, EF &, ef ^= EF ())
 
 /* operator~ (raw_enum) */
 
-CHECK_VALID (false,  void,   ~RE ())
-CHECK_VALID (true,   URE,    ~URE ())
+CHECK_VALID (false, void, ~RE ())
+CHECK_VALID (true, URE, ~URE ())
 
 /* operator~ (enum_flags) */
 
-CHECK_VALID (false,  void,   ~EF ())
-CHECK_VALID (true,   UEF,    ~UEF ())
+CHECK_VALID (false, void, ~EF ())
+CHECK_VALID (true, UEF, ~UEF ())
 
 /* Check ternary operator.  This exercises implicit conversions.  */
 
-CHECK_VALID (true,  EF,   true ? EF () : RE ())
-CHECK_VALID (true,  EF,   true ? RE () : EF ())
+CHECK_VALID (true, EF, true ? EF () : RE ())
+CHECK_VALID (true, EF, true ? RE () : EF ())
 
 /* These are valid, but it's not a big deal since you won't be able to
    assign the resulting integer to an enum or an enum_flags without a
@@ -251,22 +253,22 @@ CHECK_VALID (true,  EF,   true ? RE () : EF ())
    They've been confirmed to compile/pass with gcc 5.3, gcc 7.1 and
    clang 3.7.  */
 
-CHECK_VALID (true,  int,  true ? EF () : EF2 ())
-CHECK_VALID (true,  int,  true ? EF2 () : EF ())
+CHECK_VALID (true, int, true ? EF () : EF2 ())
+CHECK_VALID (true, int, true ? EF2 () : EF ())
 #if GCC_VERSION >= 5003 || defined __clang__
-CHECK_VALID (true,  int,  true ? EF () : RE2 ())
-CHECK_VALID (true,  int,  true ? RE2 () : EF ())
+CHECK_VALID (true, int, true ? EF () : RE2 ())
+CHECK_VALID (true, int, true ? RE2 () : EF ())
 #endif
 
 /* Same, but with an unsigned enum.  */
 
 typedef unsigned int uns;
 
-CHECK_VALID (true,  uns,  true ? EF () : UEF ())
-CHECK_VALID (true,  uns,  true ? UEF () : EF ())
+CHECK_VALID (true, uns, true ? EF () : UEF ())
+CHECK_VALID (true, uns, true ? UEF () : EF ())
 #if GCC_VERSION >= 5003 || defined __clang__
-CHECK_VALID (true,  uns,  true ? EF () : URE ())
-CHECK_VALID (true,  uns,  true ? URE () : EF ())
+CHECK_VALID (true, uns, true ? EF () : URE ())
+CHECK_VALID (true, uns, true ? URE () : EF ())
 #endif
 
 /* Unfortunately this can't work due to the way C++ computes the
@@ -307,9 +309,9 @@ CHECK_VALID (false, void, EF () == EF2 ())
 CHECK_VALID (false, void, EF () == RE2 ())
 CHECK_VALID (false, void, RE () == EF2 ())
 
-CHECK_VALID (true,  bool, EF (RE (1)) == EF (RE (1)))
-CHECK_VALID (true,  bool, EF (RE (1)) == RE (1))
-CHECK_VALID (true,  bool, RE (1)      == EF (RE (1)))
+CHECK_VALID (true, bool, EF (RE (1)) == EF (RE (1)))
+CHECK_VALID (true, bool, EF (RE (1)) == RE (1))
+CHECK_VALID (true, bool, RE (1) == EF (RE (1)))
 
 CHECK_VALID (false, void, EF () != EF2 ())
 CHECK_VALID (false, void, EF () != RE2 ())
@@ -331,26 +333,26 @@ CHECK_VALID (false, void, RE () != EF2 ())
    Not a big deal since misuses like these in GDB will be caught by
    -Werror anyway.  This check is here mainly for completeness.  */
 #if defined __GNUC__
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wenum-compare"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wenum-compare"
 #endif
-CHECK_VALID (true,  bool, RE () == RE2 ())
-CHECK_VALID (true,  bool, RE () != RE2 ())
+CHECK_VALID (true, bool, RE () == RE2 ())
+CHECK_VALID (true, bool, RE () != RE2 ())
 #if defined __GNUC__
-# pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
-CHECK_VALID (true,  bool, EF (RE (1)) != EF (RE (2)))
-CHECK_VALID (true,  bool, EF (RE (1)) != RE (2))
-CHECK_VALID (true,  bool, RE (1)      != EF (RE (2)))
+CHECK_VALID (true, bool, EF (RE (1)) != EF (RE (2)))
+CHECK_VALID (true, bool, EF (RE (1)) != RE (2))
+CHECK_VALID (true, bool, RE (1) != EF (RE (2)))
 
-CHECK_VALID (true,  bool, EF () == 0)
+CHECK_VALID (true, bool, EF () == 0)
 
 /* Check we didn't disable/delete comparison between non-flags enums
    and unrelated types by mistake.  */
-CHECK_VALID (true,  bool, NF (1) == NF (1))
-CHECK_VALID (true,  bool, NF (1) == int (1))
-CHECK_VALID (true,  bool, NF (1) == char (1))
+CHECK_VALID (true, bool, NF (1) == NF (1))
+CHECK_VALID (true, bool, NF (1) == int (1))
+CHECK_VALID (true, bool, NF (1) == char (1))
 
 /* -------------------------------------------------------------------- */
 
@@ -358,20 +360,20 @@ CHECK_VALID (true,  bool, NF (1) == char (1))
    when possible, others are run time.  */
 
 enum test_flag
-  {
-    FLAG1 = 1 << 0,
-    FLAG2 = 1 << 1,
-    FLAG3 = 1 << 2,
-    FLAG4 = 1 << 3,
-  };
+{
+  FLAG1 = 1 << 0,
+  FLAG2 = 1 << 1,
+  FLAG3 = 1 << 2,
+  FLAG4 = 1 << 3,
+};
 
 enum test_uflag : unsigned
-  {
-    UFLAG1 = 1 << 0,
-    UFLAG2 = 1 << 1,
-    UFLAG3 = 1 << 2,
-    UFLAG4 = 1 << 3,
-  };
+{
+  UFLAG1 = 1 << 0,
+  UFLAG2 = 1 << 1,
+  UFLAG3 = 1 << 2,
+  UFLAG4 = 1 << 3,
+};
 
 DEF_ENUM_FLAGS_TYPE (test_flag, test_flags);
 DEF_ENUM_FLAGS_TYPE (test_uflag, test_uflags);
@@ -425,8 +427,8 @@ self_test ()
   {
     constexpr test_flags zero1 = 0;
     constexpr test_flags zero2 (0);
-    constexpr test_flags zero3 {0};
-    constexpr test_flags zero4 = {0};
+    constexpr test_flags zero3 { 0 };
+    constexpr test_flags zero4 = { 0 };
 
     gdb_static_assert (zero1 == 0);
     gdb_static_assert (zero2 == 0);
@@ -446,8 +448,8 @@ self_test ()
 
     constexpr test_flags f1 = src;
     constexpr test_flags f2 (src);
-    constexpr test_flags f3 {src};
-    constexpr test_flags f4 = {src};
+    constexpr test_flags f3 { src };
+    constexpr test_flags f4 = { src };
 
     gdb_static_assert (f1 == FLAG1);
     gdb_static_assert (f2 == FLAG1);
@@ -610,31 +612,23 @@ self_test ()
 
   /* Check string conversion.  */
   {
-    SELF_CHECK (to_string_uflags (0)
-		== "0x0 []");
-    SELF_CHECK (to_string_uflags (UFLAG1)
-		== "0x1 [UFLAG1]");
-    SELF_CHECK (to_string_uflags (UFLAG1 | UFLAG3)
-		== "0x5 [UFLAG1 UFLAG3]");
+    SELF_CHECK (to_string_uflags (0) == "0x0 []");
+    SELF_CHECK (to_string_uflags (UFLAG1) == "0x1 [UFLAG1]");
+    SELF_CHECK (to_string_uflags (UFLAG1 | UFLAG3) == "0x5 [UFLAG1 UFLAG3]");
     SELF_CHECK (to_string_uflags (UFLAG1 | UFLAG2 | UFLAG3)
 		== "0x7 [UFLAG1 UFLAG3 0x2]");
-    SELF_CHECK (to_string_uflags (UFLAG2)
-		== "0x2 [0x2]");
+    SELF_CHECK (to_string_uflags (UFLAG2) == "0x2 [0x2]");
     /* Check that even with multiple unmapped flags, we only print one
        unmapped hex number (0xa, in this case).  */
     SELF_CHECK (to_string_uflags (UFLAG1 | UFLAG2 | UFLAG3 | UFLAG4)
 		== "0xf [UFLAG1 UFLAG3 0xa]");
 
-    SELF_CHECK (to_string_flags (0)
-		== "0x0 []");
-    SELF_CHECK (to_string_flags (FLAG1)
-		== "0x1 [FLAG1]");
-    SELF_CHECK (to_string_flags (FLAG1 | FLAG3)
-		== "0x5 [FLAG1 FLAG3]");
+    SELF_CHECK (to_string_flags (0) == "0x0 []");
+    SELF_CHECK (to_string_flags (FLAG1) == "0x1 [FLAG1]");
+    SELF_CHECK (to_string_flags (FLAG1 | FLAG3) == "0x5 [FLAG1 FLAG3]");
     SELF_CHECK (to_string_flags (FLAG1 | FLAG2 | FLAG3)
 		== "0x7 [FLAG1 FLAG3 0x2]");
-    SELF_CHECK (to_string_flags (FLAG2)
-		== "0x2 [0x2]");
+    SELF_CHECK (to_string_flags (FLAG2) == "0x2 [0x2]");
     SELF_CHECK (to_string_flags (FLAG1 | FLAG2 | FLAG3 | FLAG4)
 		== "0xf [FLAG1 FLAG3 0xa]");
   }

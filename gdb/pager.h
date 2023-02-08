@@ -26,6 +26,7 @@
 class pager_file : public wrapped_file
 {
 public:
+
   /* Create a new pager_file.  The new object takes ownership of
      STREAM.  */
   explicit pager_file (ui_file *stream)
@@ -33,10 +34,7 @@ public:
   {
   }
 
-  ~pager_file ()
-  {
-    delete m_stream;
-  }
+  ~pager_file () { delete m_stream; }
 
   DISABLE_COPY_AND_ASSIGN (pager_file);
 

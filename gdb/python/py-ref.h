@@ -26,20 +26,14 @@
 template<typename T>
 struct gdbpy_ref_policy
 {
-  static void incref (T *ptr)
-  {
-    Py_INCREF (ptr);
-  }
+  static void incref (T *ptr) { Py_INCREF (ptr); }
 
-  static void decref (T *ptr)
-  {
-    Py_DECREF (ptr);
-  }
+  static void decref (T *ptr) { Py_DECREF (ptr); }
 };
 
 /* A gdb::ref_ptr that has been specialized for Python objects or
    their "subclasses".  */
-template<typename T = PyObject> using gdbpy_ref
-  = gdb::ref_ptr<T, gdbpy_ref_policy<T>>;
+template<typename T = PyObject>
+using gdbpy_ref = gdb::ref_ptr<T, gdbpy_ref_policy<T>>;
 
 #endif /* PYTHON_PY_REF_H */

@@ -38,7 +38,7 @@ struct mi_command_mi : public mi_command
      constructor, FUNC is the function called from do_invoke, which
      implements this MI command.  */
   mi_command_mi (const char *name, mi_cmd_argv_ftype func,
-                 int *suppress_notification)
+		 int *suppress_notification)
     : mi_command (name, suppress_notification),
       m_argv_function (func)
   {
@@ -52,7 +52,7 @@ struct mi_command_mi : public mi_command
     mi_parse_argv (parse->args, parse);
 
     if (parse->argv == nullptr)
-      error (_("Problem parsing arguments: %s %s"), parse->command,
+      error (_ ("Problem parsing arguments: %s %s"), parse->command,
 	     parse->args);
 
     this->m_argv_function (parse->command, parse->argv, parse->argc);
@@ -75,11 +75,12 @@ struct mi_command_cli : public mi_command
      forwarded to CLI_NAME as its argument string, otherwise, if ARGS_P is
      false, nullptr is send to CLI_NAME as its argument string.  */
   mi_command_cli (const char *name, const char *cli_name, bool args_p,
-                  int *suppress_notification)
+		  int *suppress_notification)
     : mi_command (name, suppress_notification),
       m_cli_name (cli_name),
       m_args_p (args_p)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* Called when this MI command has been invoked, calls the m_cli_name
      CLI function.  In m_args_p is true then the argument string from
@@ -133,7 +134,7 @@ remove_mi_cmd_entry (const std::string &name)
 void
 remove_mi_cmd_entries (remove_mi_cmd_entries_ftype callback)
 {
-  for (auto it = mi_cmd_table.cbegin (); it != mi_cmd_table.cend (); )
+  for (auto it = mi_cmd_table.cbegin (); it != mi_cmd_table.cend ();)
     {
       if (callback (it->second.get ()))
 	it = mi_cmd_table.erase (it);
@@ -201,8 +202,8 @@ add_builtin_mi_commands ()
   add_mi_cmd_mi ("add-inferior", mi_cmd_add_inferior);
   add_mi_cmd_cli ("break-after", "ignore", 1,
 		  &mi_suppress_notification.breakpoint);
-  add_mi_cmd_mi ("break-condition",mi_cmd_break_condition,
-		  &mi_suppress_notification.breakpoint);
+  add_mi_cmd_mi ("break-condition", mi_cmd_break_condition,
+		 &mi_suppress_notification.breakpoint);
   add_mi_cmd_mi ("break-commands", mi_cmd_break_commands,
 		 &mi_suppress_notification.breakpoint);
   add_mi_cmd_cli ("break-delete", "delete breakpoint", 1,
@@ -232,12 +233,12 @@ add_builtin_mi_commands ()
   add_mi_cmd_mi ("catch-unload", mi_cmd_catch_unload,
 		 &mi_suppress_notification.breakpoint);
   add_mi_cmd_mi ("catch-throw", mi_cmd_catch_throw,
-                 &mi_suppress_notification.breakpoint),
-  add_mi_cmd_mi ("catch-rethrow", mi_cmd_catch_rethrow,
-                 &mi_suppress_notification.breakpoint),
-  add_mi_cmd_mi ("catch-catch", mi_cmd_catch_catch,
-                 &mi_suppress_notification.breakpoint),
-  add_mi_cmd_mi ("complete", mi_cmd_complete);
+		 &mi_suppress_notification.breakpoint),
+    add_mi_cmd_mi ("catch-rethrow", mi_cmd_catch_rethrow,
+		   &mi_suppress_notification.breakpoint),
+    add_mi_cmd_mi ("catch-catch", mi_cmd_catch_catch,
+		   &mi_suppress_notification.breakpoint),
+    add_mi_cmd_mi ("complete", mi_cmd_complete);
   add_mi_cmd_mi ("data-disassemble", mi_cmd_disassemble);
   add_mi_cmd_mi ("data-evaluate-expression", mi_cmd_data_evaluate_expression);
   add_mi_cmd_mi ("data-list-changed-registers",
@@ -280,13 +281,13 @@ add_builtin_mi_commands ()
   add_mi_cmd_mi ("file-list-exec-source-files",
 		 mi_cmd_file_list_exec_source_files);
   add_mi_cmd_mi ("file-list-shared-libraries",
-     mi_cmd_file_list_shared_libraries),
-  add_mi_cmd_cli ("file-symbol-file", "symbol-file", 1);
+		 mi_cmd_file_list_shared_libraries),
+    add_mi_cmd_cli ("file-symbol-file", "symbol-file", 1);
   add_mi_cmd_mi ("fix-breakpoint-script-output",
 		 mi_cmd_fix_breakpoint_script_output),
-  add_mi_cmd_mi ("fix-multi-location-breakpoint-output",
-		 mi_cmd_fix_multi_location_breakpoint_output),
-  add_mi_cmd_mi ("gdb-exit", mi_cmd_gdb_exit);
+    add_mi_cmd_mi ("fix-multi-location-breakpoint-output",
+		   mi_cmd_fix_multi_location_breakpoint_output),
+    add_mi_cmd_mi ("gdb-exit", mi_cmd_gdb_exit);
   add_mi_cmd_cli ("gdb-set", "set", 1,
 		  &mi_suppress_notification.cmd_param_changed);
   add_mi_cmd_cli ("gdb-show", "show", 1);
@@ -315,9 +316,9 @@ add_builtin_mi_commands ()
   add_mi_cmd_mi ("symbol-info-types", mi_cmd_symbol_info_types);
   add_mi_cmd_mi ("symbol-info-modules", mi_cmd_symbol_info_modules);
   add_mi_cmd_mi ("symbol-info-module-functions",
-                 mi_cmd_symbol_info_module_functions);
+		 mi_cmd_symbol_info_module_functions);
   add_mi_cmd_mi ("symbol-info-module-variables",
-                 mi_cmd_symbol_info_module_variables);
+		 mi_cmd_symbol_info_module_variables);
   add_mi_cmd_cli ("target-attach", "attach", 1);
   add_mi_cmd_mi ("target-detach", mi_cmd_target_detach);
   add_mi_cmd_cli ("target-disconnect", "disconnect", 0);
@@ -372,6 +373,7 @@ mi_cmd_lookup (const char *command)
 }
 
 void _initialize_mi_cmds ();
+
 void
 _initialize_mi_cmds ()
 {

@@ -86,8 +86,11 @@ struct stap_probe_arg
   /* Constructor for stap_probe_arg.  */
   stap_probe_arg (enum stap_arg_bitness bitness_, struct type *atype_,
 		  expression_up &&aexpr_)
-  : bitness (bitness_), atype (atype_), aexpr (std::move (aexpr_))
-  {}
+    : bitness (bitness_),
+      atype (atype_),
+      aexpr (std::move (aexpr_))
+  {
+  }
 
   /* The bitness of this argument.  */
   enum stap_arg_bitness bitness;
@@ -104,11 +107,10 @@ struct stap_probe_arg
 class stap_static_probe_ops : public static_probe_ops
 {
 public:
+
   /* We need a user-provided constructor to placate some compilers.
      See PR build/24937.  */
-  stap_static_probe_ops ()
-  {
-  }
+  stap_static_probe_ops () {}
 
   /* See probe.h.  */
   bool is_linespec (const char **linespecp) const override;
@@ -121,8 +123,8 @@ public:
   const char *type_name () const override;
 
   /* See probe.h.  */
-  std::vector<struct info_probe_column> gen_info_probes_table_header
-    () const override;
+  std::vector<struct info_probe_column>
+  gen_info_probes_table_header () const override;
 };
 
 /* SystemTap static_probe_ops.  */
@@ -132,13 +134,16 @@ const stap_static_probe_ops stap_static_probe_ops {};
 class stap_probe : public probe
 {
 public:
+
   /* Constructor for stap_probe.  */
   stap_probe (std::string &&name_, std::string &&provider_, CORE_ADDR address_,
 	      struct gdbarch *arch_, CORE_ADDR sem_addr, const char *args_text)
     : probe (std::move (name_), std::move (provider_), address_, arch_),
       m_sem_addr (sem_addr),
-      m_have_parsed_args (false), m_unparsed_args_text (args_text)
-  {}
+      m_have_parsed_args (false),
+      m_unparsed_args_text (args_text)
+  {
+  }
 
   /* See probe.h.  */
   CORE_ADDR get_relocated_address (struct objfile *objfile) override;
@@ -150,12 +155,10 @@ public:
   bool can_evaluate_arguments () const override;
 
   /* See probe.h.  */
-  struct value *evaluate_argument (unsigned n,
-				   frame_info_ptr frame) override;
+  struct value *evaluate_argument (unsigned n, frame_info_ptr frame) override;
 
   /* See probe.h.  */
-  void compile_to_ax (struct agent_expr *aexpr,
-		      struct axs_value *axs_value,
+  void compile_to_ax (struct agent_expr *aexpr, struct axs_value *axs_value,
 		      unsigned n) override;
 
   /* See probe.h.  */
@@ -185,17 +188,18 @@ public:
 
     gdb_assert (m_have_parsed_args);
     if (m_parsed_args.empty ())
-      internal_error (_("Probe '%s' apparently does not have arguments, but \n"
-			"GDB is requesting its argument number %u anyway.  "
-			"This should not happen.  Please report this bug."),
-		      this->get_name ().c_str (), n);
+      internal_error (
+	_ ("Probe '%s' apparently does not have arguments, but \n"
+	   "GDB is requesting its argument number %u anyway.  "
+	   "This should not happen.  Please report this bug."),
+	this->get_name ().c_str (), n);
 
     if (n > m_parsed_args.size ())
-      internal_error (_("Probe '%s' has %d arguments, but GDB is requesting\n"
-			"argument %u.  This should not happen.  Please\n"
-			"report this bug."),
-		      this->get_name ().c_str (),
-		      (int) m_parsed_args.size (), n);
+      internal_error (_ ("Probe '%s' has %d arguments, but GDB is requesting\n"
+			 "argument %u.  This should not happen.  Please\n"
+			 "report this bug."),
+		      this->get_name ().c_str (), (int) m_parsed_args.size (),
+		      n);
 
     return &m_parsed_args[n];
   }
@@ -214,6 +218,7 @@ public:
   void parse_arguments (struct gdbarch *gdbarch);
 
 private:
+
   /* If the probe has a semaphore associated, then this is the value of
      it, relative to SECT_OFF_DATA.  */
   CORE_ADDR m_sem_addr;
@@ -263,13 +268,12 @@ enum stap_operand_prec
   STAP_OPERAND_PREC_MUL
 };
 
-static expr::operation_up stap_parse_argument_1 (struct stap_parse_info *p,
-						 expr::operation_up &&lhs,
-						 enum stap_operand_prec prec)
-  ATTRIBUTE_UNUSED_RESULT;
+static expr::operation_up
+stap_parse_argument_1 (struct stap_parse_info *p, expr::operation_up &&lhs,
+		       enum stap_operand_prec prec) ATTRIBUTE_UNUSED_RESULT;
 
-static expr::operation_up stap_parse_argument_conditionally
-     (struct stap_parse_info *p) ATTRIBUTE_UNUSED_RESULT;
+static expr::operation_up stap_parse_argument_conditionally (
+  struct stap_parse_info *p) ATTRIBUTE_UNUSED_RESULT;
 
 /* Returns true if *S is an operator, false otherwise.  */
 
@@ -279,7 +283,7 @@ static void
 show_stapexpressiondebug (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("SystemTap Probe expression debugging is %s.\n"),
+  gdb_printf (file, _ ("SystemTap Probe expression debugging is %s.\n"),
 	      value);
 }
 
@@ -349,7 +353,7 @@ stap_get_opcode (const char **s)
 
     case '%':
       op = BINOP_REM;
-    break;
+      break;
 
     case '<':
       op = BINOP_LESS;
@@ -368,7 +372,7 @@ stap_get_opcode (const char **s)
 	  *s += 1;
 	  op = BINOP_NOTEQUAL;
 	}
-    break;
+      break;
 
     case '>':
       op = BINOP_GTR;
@@ -382,7 +386,7 @@ stap_get_opcode (const char **s)
 	  *s += 1;
 	  op = BINOP_GEQ;
 	}
-    break;
+      break;
 
     case '|':
       op = BINOP_BITWISE_IOR;
@@ -391,7 +395,7 @@ stap_get_opcode (const char **s)
 	  *s += 1;
 	  op = BINOP_LOGICAL_OR;
 	}
-    break;
+      break;
 
     case '&':
       op = BINOP_BITWISE_AND;
@@ -400,7 +404,7 @@ stap_get_opcode (const char **s)
 	  *s += 1;
 	  op = BINOP_LOGICAL_AND;
 	}
-    break;
+      break;
 
     case '^':
       op = BINOP_BITWISE_XOR;
@@ -424,8 +428,9 @@ stap_get_opcode (const char **s)
       break;
 
     default:
-      error (_("Invalid opcode in expression `%s' for SystemTap"
-	       "probe"), *s);
+      error (_ ("Invalid opcode in expression `%s' for SystemTap"
+		"probe"),
+	     *s);
     }
 
   return op;
@@ -436,7 +441,8 @@ typedef expr::operation_up binop_maker_ftype (expr::operation_up &&,
 /* Map from an expression opcode to a function that can create a
    binary operation of that type.  */
 static std::unordered_map<exp_opcode, binop_maker_ftype *,
-			  gdb::hash_enum<exp_opcode>> stap_maker_map;
+			  gdb::hash_enum<exp_opcode>>
+  stap_maker_map;
 
 /* Helper function to create a binary operation.  */
 static expr::operation_up
@@ -490,7 +496,7 @@ stap_get_expected_argument_type (struct gdbarch *gdbarch,
       return builtin_type (gdbarch)->builtin_uint64;
 
     default:
-      error (_("Undefined bitness for probe '%s'."), probe_name);
+      error (_ ("Undefined bitness for probe '%s'."), probe_name);
       break;
     }
 }
@@ -505,8 +511,8 @@ stap_get_expected_argument_type (struct gdbarch *gdbarch,
    Return true if any prefix has been found, false otherwise.  */
 
 static bool
-stap_is_generic_prefix (struct gdbarch *gdbarch, const char *s,
-			const char **r, const char *const *prefixes)
+stap_is_generic_prefix (struct gdbarch *gdbarch, const char *s, const char **r,
+			const char *const *prefixes)
 {
   const char *const *p;
 
@@ -564,8 +570,7 @@ stap_is_register_indirection_prefix (struct gdbarch *gdbarch, const char *s,
    case-insensitive match.  */
 
 static bool
-stap_is_integer_prefix (struct gdbarch *gdbarch, const char *s,
-			const char **r)
+stap_is_integer_prefix (struct gdbarch *gdbarch, const char *s, const char **r)
 {
   const char *const *t = gdbarch_stap_integer_prefixes (gdbarch);
   const char *const *p;
@@ -757,7 +762,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
     }
 
   if (disp_op != nullptr && !indirect_p)
-    error (_("Invalid register displacement syntax on expression `%s'."),
+    error (_ ("Invalid register displacement syntax on expression `%s'."),
 	   p->saved_arg);
 
   /* Getting rid of register prefix.  */
@@ -785,12 +790,12 @@ stap_parse_register_operand (struct stap_parse_info *p)
 	regname += gdb_reg_suffix;
     }
 
-  int regnum = user_reg_map_name_to_regnum (gdbarch, regname.c_str (),
-					    regname.size ());
+  int regnum
+    = user_reg_map_name_to_regnum (gdbarch, regname.c_str (), regname.size ());
 
   /* Is this a valid register name?  */
   if (regnum == -1)
-    error (_("Invalid register name `%s' on expression `%s'."),
+    error (_ ("Invalid register name `%s' on expression `%s'."),
 	   regname.c_str (), p->saved_arg);
 
   /* Check if there's any special treatment that the arch-specific
@@ -809,8 +814,8 @@ stap_parse_register_operand (struct stap_parse_info *p)
 						newregname.size ());
 
 	  if (regnum == -1)
-	    internal_error (_("Invalid register name '%s' after replacing it"
-			      " (previous name was '%s')"),
+	    internal_error (_ ("Invalid register name '%s' after replacing it"
+			       " (previous name was '%s')"),
 			    newregname.c_str (), regname.c_str ());
 
 	  regname = std::move (newregname);
@@ -842,8 +847,8 @@ stap_parse_register_operand (struct stap_parse_info *p)
 
       /* Casting to the expected type.  */
       struct type *arg_ptr_type = lookup_pointer_type (p->arg_type);
-      reg = make_operation<unop_cast_operation> (std::move (reg),
-						 arg_ptr_type);
+      reg
+	= make_operation<unop_cast_operation> (std::move (reg), arg_ptr_type);
       reg = make_operation<unop_ind_operation> (std::move (reg));
     }
 
@@ -851,7 +856,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
   if (stap_check_register_suffix (gdbarch, p->arg, &reg_suffix))
     p->arg += strlen (reg_suffix);
   else
-    error (_("Missing register name suffix on expression `%s'."),
+    error (_ ("Missing register name suffix on expression `%s'."),
 	   p->saved_arg);
 
   /* Getting rid of the register indirection suffix.  */
@@ -861,7 +866,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 						  &reg_ind_suffix))
 	p->arg += strlen (reg_ind_suffix);
       else
-	error (_("Missing indirection suffix on expression `%s'."),
+	error (_ ("Missing indirection suffix on expression `%s'."),
 	       p->saved_arg);
     }
 
@@ -934,14 +939,15 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	  has_digit = true;
 	}
 
-      if (has_digit && stap_is_register_indirection_prefix (gdbarch, tmp,
-							    NULL))
+      if (has_digit
+	  && stap_is_register_indirection_prefix (gdbarch, tmp, NULL))
 	{
 	  /* If we are here, it means it is a displacement.  The only
 	     operations allowed here are `-' and `+'.  */
 	  if (c != '-' && c != '+')
-	    error (_("Invalid operator `%c' for register displacement "
-		     "on expression `%s'."), c, p->saved_arg);
+	    error (_ ("Invalid operator `%c' for register displacement "
+		      "on expression `%s'."),
+		   c, p->saved_arg);
 
 	  result = stap_parse_register_operand (p);
 	}
@@ -954,11 +960,11 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	  if (c == '-')
 	    result = make_operation<unary_neg_operation> (std::move (result));
 	  else if (c == '~')
-	    result = (make_operation<unary_complement_operation>
-		      (std::move (result)));
+	    result = (make_operation<unary_complement_operation> (
+	      std::move (result)));
 	  else if (c == '!')
-	    result = (make_operation<unary_logical_not_operation>
-		      (std::move (result)));
+	    result = (make_operation<unary_logical_not_operation> (
+	      std::move (result)));
 	}
     }
   else if (isdigit (*p->arg))
@@ -993,14 +999,13 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	  if (stap_check_integer_suffix (gdbarch, p->arg, &int_suffix))
 	    p->arg += strlen (int_suffix);
 	  else
-	    error (_("Invalid constant suffix on expression `%s'."),
+	    error (_ ("Invalid constant suffix on expression `%s'."),
 		   p->saved_arg);
 	}
       else if (stap_is_register_indirection_prefix (gdbarch, tmp, NULL))
 	result = stap_parse_register_operand (p);
       else
-	error (_("Unknown numeric token on expression `%s'."),
-	       p->saved_arg);
+	error (_ ("Unknown numeric token on expression `%s'."), p->saved_arg);
     }
   else if (stap_is_integer_prefix (gdbarch, p->arg, &int_prefix))
     {
@@ -1018,15 +1023,15 @@ stap_parse_single_operand (struct stap_parse_info *p)
       if (stap_check_integer_suffix (gdbarch, p->arg, &int_suffix))
 	p->arg += strlen (int_suffix);
       else
-	error (_("Invalid constant suffix on expression `%s'."),
+	error (_ ("Invalid constant suffix on expression `%s'."),
 	       p->saved_arg);
     }
   else if (stap_is_register_prefix (gdbarch, p->arg, NULL)
 	   || stap_is_register_indirection_prefix (gdbarch, p->arg, NULL))
     result = stap_parse_register_operand (p);
   else
-    error (_("Operator `%c' not recognized on expression `%s'."),
-	   *p->arg, p->saved_arg);
+    error (_ ("Operator `%c' not recognized on expression `%s'."), *p->arg,
+	   p->saved_arg);
 
   return result;
 }
@@ -1060,7 +1065,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 
       p->arg = skip_spaces (p->arg);
       if (*p->arg != ')')
-	error (_("Missing close-parenthesis on expression `%s'."),
+	error (_ ("Missing close-parenthesis on expression `%s'."),
 	       p->saved_arg);
 
       --p->inside_paren_p;
@@ -1069,7 +1074,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 	p->arg = skip_spaces (p->arg);
     }
   else
-    error (_("Cannot parse expression `%s'."), p->saved_arg);
+    error (_ ("Cannot parse expression `%s'."), p->saved_arg);
 
   return result;
 }
@@ -1078,8 +1083,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
    better understand what this function does.  */
 
 static expr::operation_up ATTRIBUTE_UNUSED_RESULT
-stap_parse_argument_1 (struct stap_parse_info *p,
-		       expr::operation_up &&lhs_in,
+stap_parse_argument_1 (struct stap_parse_info *p, expr::operation_up &&lhs_in,
 		       enum stap_operand_prec prec)
 {
   /* This is an operator-precedence parser.
@@ -1120,7 +1124,7 @@ stap_parse_argument_1 (struct stap_parse_info *p,
       enum stap_operand_prec cur_prec;
 
       if (!stap_is_operator (p->arg))
-	error (_("Invalid operator `%c' on expression `%s'."), *p->arg,
+	error (_ ("Invalid operator `%c' on expression `%s'."), *p->arg,
 	       p->saved_arg);
 
       /* We have to save the current value of the expression buffer because
@@ -1228,8 +1232,7 @@ stap_parse_argument (const char **arg, struct type *atype,
   /* We need to initialize the expression buffer, in order to begin
      our parsing efforts.  We use language_c here because we may need
      to do pointer arithmetics.  */
-  struct stap_parse_info p (*arg, atype, language_def (language_c),
-			    gdbarch);
+  struct stap_parse_info p (*arg, atype, language_def (language_c), gdbarch);
 
   using namespace expr;
   operation_up result = stap_parse_argument_1 (&p, {}, STAP_OPERAND_PREC_NONE);
@@ -1287,29 +1290,29 @@ stap_probe::parse_arguments (struct gdbarch *gdbarch)
 	    {
 	    case '1':
 	      bitness = (got_minus ? STAP_ARG_BITNESS_8BIT_SIGNED
-			 : STAP_ARG_BITNESS_8BIT_UNSIGNED);
+				   : STAP_ARG_BITNESS_8BIT_UNSIGNED);
 	      break;
 
 	    case '2':
 	      bitness = (got_minus ? STAP_ARG_BITNESS_16BIT_SIGNED
-			 : STAP_ARG_BITNESS_16BIT_UNSIGNED);
+				   : STAP_ARG_BITNESS_16BIT_UNSIGNED);
 	      break;
 
 	    case '4':
 	      bitness = (got_minus ? STAP_ARG_BITNESS_32BIT_SIGNED
-			 : STAP_ARG_BITNESS_32BIT_UNSIGNED);
+				   : STAP_ARG_BITNESS_32BIT_UNSIGNED);
 	      break;
 
 	    case '8':
 	      bitness = (got_minus ? STAP_ARG_BITNESS_64BIT_SIGNED
-			 : STAP_ARG_BITNESS_64BIT_UNSIGNED);
+				   : STAP_ARG_BITNESS_64BIT_UNSIGNED);
 	      break;
 
 	    default:
 	      {
 		/* We have an error, because we don't expect anything
 		   except 1, 2, 4 and 8.  */
-		warning (_("unrecognized bitness %s%c' for probe `%s'"),
+		warning (_ ("unrecognized bitness %s%c' for probe `%s'"),
 			 got_minus ? "`-" : "`", *cur,
 			 this->get_name ().c_str ());
 		return;
@@ -1369,10 +1372,12 @@ stap_probe::get_argument_count (struct gdbarch *gdbarch)
 
 	  if (!have_warned_stap_incomplete)
 	    {
-	      warning (_(
-"The SystemTap SDT probe support is not fully implemented on this target;\n"
-"you will not be able to inspect the arguments of the probes.\n"
-"Please report a bug against GDB requesting a port to this target."));
+	      warning (_ ("The SystemTap SDT probe support is not fully "
+			  "implemented on this target;\n"
+			  "you will not be able to inspect the arguments of "
+			  "the probes.\n"
+			  "Please report a bug against GDB requesting a port "
+			  "to this target."));
 	      have_warned_stap_incomplete = true;
 	    }
 
@@ -1463,7 +1468,6 @@ stap_probe::compile_to_ax (struct agent_expr *expr, struct axs_value *value,
   require_rvalue (expr, value);
   value->type = arg->atype;
 }
-
 
 /* Set or clear a SystemTap semaphore.  ADDRESS is the semaphore's
    address.  SET is zero if the semaphore should be cleared, or one if
@@ -1481,7 +1485,7 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
   /* Swallow errors.  */
   if (target_read_memory (address, bytes, type->length ()) != 0)
     {
-      warning (_("Could not read the value of a SystemTap semaphore."));
+      warning (_ ("Could not read the value of a SystemTap semaphore."));
       return;
     }
 
@@ -1497,7 +1501,7 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
   store_unsigned_integer (bytes, type->length (), byte_order, value);
 
   if (target_write_memory (address, bytes, type->length ()) != 0)
-    warning (_("Could not write the value of a SystemTap semaphore."));
+    warning (_ ("Could not write the value of a SystemTap semaphore."));
 }
 
 /* Implementation of the 'set_semaphore' method.
@@ -1570,13 +1574,13 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 
   /* Provider and the name of the probe.  */
   const char *provider = (const char *) &el->data[3 * size];
-  const char *name = ((const char *)
-		      memchr (provider, '\0',
+  const char *name
+    = ((const char *) memchr (provider, '\0',
 			      (char *) el->data + el->size - provider));
   /* Making sure there is a name.  */
   if (name == NULL)
     {
-      complaint (_("corrupt probe name when reading `%s'"),
+      complaint (_ ("corrupt probe name when reading `%s'"),
 		 objfile_name (objfile));
 
       /* There is no way to use a probe without a name or a provider, so
@@ -1601,9 +1605,9 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 
   /* Arguments.  We can only extract the argument format if there is a valid
      name for this probe.  */
-  const char *probe_args = ((const char*)
-			    memchr (name, '\0',
-				    (char *) el->data + el->size - name));
+  const char *probe_args
+    = ((const char *) memchr (name, '\0',
+			      (char *) el->data + el->size - name));
 
   if (probe_args != NULL)
     ++probe_args;
@@ -1612,7 +1616,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
       || (memchr (probe_args, '\0', (char *) el->data + el->size - name)
 	  != el->data + el->size - 1))
     {
-      complaint (_("corrupt probe argument when reading `%s'"),
+      complaint (_ ("corrupt probe argument when reading `%s'"),
 		 objfile_name (objfile));
       /* If the argument string is NULL, it means some problem happened with
 	 it.  So we return.  */
@@ -1639,14 +1643,14 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
   asection *ret = NULL;
 
   for (asection *sect : gdb_bfd_sections (obfd))
-    if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS))
-	&& sect->name && !strcmp (sect->name, STAP_BASE_SECTION_NAME))
+    if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS)) && sect->name
+	&& !strcmp (sect->name, STAP_BASE_SECTION_NAME))
       ret = sect;
 
   if (ret == NULL)
     {
-      complaint (_("could not obtain base address for "
-					"SystemTap section on objfile `%s'."),
+      complaint (_ ("could not obtain base address for "
+		    "SystemTap section on objfile `%s'."),
 		 bfd_get_filename (obfd));
       return 0;
     }
@@ -1670,9 +1674,8 @@ stap_static_probe_ops::is_linespec (const char **linespecp) const
 /* Implementation of the 'get_probes' method.  */
 
 void
-stap_static_probe_ops::get_probes
-  (std::vector<std::unique_ptr<probe>> *probesp,
-   struct objfile *objfile) const
+stap_static_probe_ops::get_probes (
+  std::vector<std::unique_ptr<probe>> *probesp, struct objfile *objfile) const
 {
   /* If we are here, then this is the first time we are parsing the
      SystemTap probe's information.  We basically have to count how many
@@ -1703,9 +1706,7 @@ stap_static_probe_ops::get_probes
     }
 
   /* Parsing each probe's information.  */
-  for (iter = elf_tdata (obfd)->sdt_note_head;
-       iter != NULL;
-       iter = iter->next)
+  for (iter = elf_tdata (obfd)->sdt_note_head; iter != NULL; iter = iter->next)
     {
       /* We first have to handle all the information about the
 	 probe which is present in the section.  */
@@ -1716,7 +1717,7 @@ stap_static_probe_ops::get_probes
     {
       /* If we are here, it means we have failed to parse every known
 	 probe.  */
-      complaint (_("could not parse SystemTap probe(s) from inferior"));
+      complaint (_ ("could not parse SystemTap probe(s) from inferior"));
       return;
     }
 }
@@ -1737,7 +1738,7 @@ stap_static_probe_ops::gen_info_probes_table_header () const
   struct info_probe_column stap_probe_column;
 
   stap_probe_column.field_name = "semaphore";
-  stap_probe_column.print_name = _("Semaphore");
+  stap_probe_column.print_name = _ ("Semaphore");
 
   return std::vector<struct info_probe_column> { stap_probe_column };
 }
@@ -1751,6 +1752,7 @@ info_probes_stap_command (const char *arg, int from_tty)
 }
 
 void _initialize_stap_probe ();
+
 void
 _initialize_stap_probe ()
 {
@@ -1758,16 +1760,14 @@ _initialize_stap_probe ()
 
   add_setshow_zuinteger_cmd ("stap-expression", class_maintenance,
 			     &stap_expression_debug,
-			     _("Set SystemTap expression debugging."),
-			     _("Show SystemTap expression debugging."),
-			     _("When non-zero, the internal representation "
-			       "of SystemTap expressions will be printed."),
-			     NULL,
-			     show_stapexpressiondebug,
-			     &setdebuglist, &showdebuglist);
+			     _ ("Set SystemTap expression debugging."),
+			     _ ("Show SystemTap expression debugging."),
+			     _ ("When non-zero, the internal representation "
+				"of SystemTap expressions will be printed."),
+			     NULL, show_stapexpressiondebug, &setdebuglist,
+			     &showdebuglist);
 
-  add_cmd ("stap", class_info, info_probes_stap_command,
-	   _("\
+  add_cmd ("stap", class_info, info_probes_stap_command, _ ("\
 Show information about SystemTap static probes.\n\
 Usage: info probes stap [PROVIDER [NAME [OBJECT]]]\n\
 Each argument is a regular expression, used to select probes.\n\
@@ -1775,7 +1775,6 @@ PROVIDER matches probe provider names.\n\
 NAME matches the probe names.\n\
 OBJECT matches the executable or shared library name."),
 	   info_probes_cmdlist_get ());
-
 
   using namespace expr;
   stap_maker_map[BINOP_ADD] = make_operation<add_operation>;

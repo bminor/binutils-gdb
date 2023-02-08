@@ -26,18 +26,18 @@
 #include "opcode/nios2.h"
 
 /* Registers.  */
-#define NIOS2_Z_REGNUM 0     /* Zero */
-#define NIOS2_R2_REGNUM 2    /* used for return value */
-#define NIOS2_R3_REGNUM 3    /* used for return value */
+#define NIOS2_Z_REGNUM 0  /* Zero */
+#define NIOS2_R2_REGNUM 2 /* used for return value */
+#define NIOS2_R3_REGNUM 3 /* used for return value */
 /* Used for hidden zero argument to store ptr to struct return value.  */
 #define NIOS2_R4_REGNUM 4
 #define NIOS2_R7_REGNUM 7
-#define NIOS2_GP_REGNUM 26  /* Global Pointer */
-#define NIOS2_SP_REGNUM 27  /* Stack Pointer */
-#define NIOS2_FP_REGNUM 28  /* Frame Pointer */
-#define NIOS2_EA_REGNUM 29  /* Exception address */
-#define NIOS2_BA_REGNUM 30  /* Breakpoint return address */
-#define NIOS2_RA_REGNUM 31  /* Return address */
+#define NIOS2_GP_REGNUM 26 /* Global Pointer */
+#define NIOS2_SP_REGNUM 27 /* Stack Pointer */
+#define NIOS2_FP_REGNUM 28 /* Frame Pointer */
+#define NIOS2_EA_REGNUM 29 /* Exception address */
+#define NIOS2_BA_REGNUM 30 /* Breakpoint return address */
+#define NIOS2_RA_REGNUM 31 /* Return address */
 #define NIOS2_PC_REGNUM 32
 
 /* Control registers.  */
@@ -73,8 +73,8 @@ struct nios2_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Assumes FRAME is stopped at a syscall (trap) instruction; returns
      the expected next PC.  */
-  CORE_ADDR (*syscall_next_pc) (frame_info_ptr frame,
-				const struct nios2_opcode *op) = nullptr;
+  CORE_ADDR (*syscall_next_pc)
+  (frame_info_ptr frame, const struct nios2_opcode *op) = nullptr;
 
   /* Returns true if PC points to a kernel helper function.  */
   bool (*is_kernel_helper) (CORE_ADDR pc) = nullptr;

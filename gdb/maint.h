@@ -31,12 +31,12 @@ extern void set_per_command_space (int);
 
 class scoped_command_stats
 {
- public:
+public:
 
   explicit scoped_command_stats (bool msg_type);
   ~scoped_command_stats ();
 
- private:
+private:
 
   DISABLE_COPY_AND_ASSIGN (scoped_command_stats);
 

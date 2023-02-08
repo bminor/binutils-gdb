@@ -24,7 +24,7 @@
 events_object gdb_py_events;
 
 extern PyTypeObject eventregistry_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("eventregistry_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("eventregistry_object");
 
 /* Implementation of EventRegistry.connect () -> NULL.
    Add FUNCTION to the list of listeners.  */
@@ -79,9 +79,8 @@ evregpy_disconnect (PyObject *self, PyObject *function)
 eventregistry_object *
 create_eventregistry_object (void)
 {
-  gdbpy_ref<eventregistry_object>
-    eventregistry_obj (PyObject_New (eventregistry_object,
-				     &eventregistry_object_type));
+  gdbpy_ref<eventregistry_object> eventregistry_obj (
+    PyObject_New (eventregistry_object, &eventregistry_object_type));
 
   if (eventregistry_obj == NULL)
     return NULL;
@@ -123,50 +122,47 @@ evregpy_no_listeners_p (eventregistry_object *registry)
   return registry == nullptr || PyList_Size (registry->callbacks) == 0;
 }
 
-static PyMethodDef eventregistry_object_methods[] =
-{
+static PyMethodDef eventregistry_object_methods[] = {
   { "connect", evregpy_connect, METH_VARARGS, "Add function" },
   { "disconnect", evregpy_disconnect, METH_VARARGS, "Remove function" },
   { NULL } /* Sentinel.  */
 };
 
-PyTypeObject eventregistry_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.EventRegistry",                        /* tp_name */
-  sizeof (eventregistry_object),              /* tp_basicsize */
-  0,                                          /* tp_itemsize */
-  evregpy_dealloc,                            /* tp_dealloc */
-  0,                                          /* tp_print */
-  0,                                          /* tp_getattr */
-  0,                                          /* tp_setattr */
-  0,                                          /* tp_compare */
-  0,                                          /* tp_repr */
-  0,                                          /* tp_as_number */
-  0,                                          /* tp_as_sequence */
-  0,                                          /* tp_as_mapping */
-  0,                                          /* tp_hash  */
-  0,                                          /* tp_call */
-  0,                                          /* tp_str */
-  0,                                          /* tp_getattro */
-  0,                                          /* tp_setattro */
-  0,                                          /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT,                         /* tp_flags */
-  "GDB event registry object",                /* tp_doc */
-  0,                                          /* tp_traverse */
-  0,                                          /* tp_clear */
-  0,                                          /* tp_richcompare */
-  0,                                          /* tp_weaklistoffset */
-  0,                                          /* tp_iter */
-  0,                                          /* tp_iternext */
-  eventregistry_object_methods,               /* tp_methods */
-  0,                                          /* tp_members */
-  0,                                          /* tp_getset */
-  0,                                          /* tp_base */
-  0,                                          /* tp_dict */
-  0,                                          /* tp_descr_get */
-  0,                                          /* tp_descr_set */
-  0,                                          /* tp_dictoffset */
-  0,                                          /* tp_init */
-  0                                           /* tp_alloc */
+PyTypeObject eventregistry_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.EventRegistry", /* tp_name */
+  sizeof (eventregistry_object),		       /* tp_basicsize */
+  0,						       /* tp_itemsize */
+  evregpy_dealloc,				       /* tp_dealloc */
+  0,						       /* tp_print */
+  0,						       /* tp_getattr */
+  0,						       /* tp_setattr */
+  0,						       /* tp_compare */
+  0,						       /* tp_repr */
+  0,						       /* tp_as_number */
+  0,						       /* tp_as_sequence */
+  0,						       /* tp_as_mapping */
+  0,						       /* tp_hash  */
+  0,						       /* tp_call */
+  0,						       /* tp_str */
+  0,						       /* tp_getattro */
+  0,						       /* tp_setattro */
+  0,						       /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT,				       /* tp_flags */
+  "GDB event registry object",			       /* tp_doc */
+  0,						       /* tp_traverse */
+  0,						       /* tp_clear */
+  0,						       /* tp_richcompare */
+  0,						       /* tp_weaklistoffset */
+  0,						       /* tp_iter */
+  0,						       /* tp_iternext */
+  eventregistry_object_methods,			       /* tp_methods */
+  0,						       /* tp_members */
+  0,						       /* tp_getset */
+  0,						       /* tp_base */
+  0,						       /* tp_dict */
+  0,						       /* tp_descr_get */
+  0,						       /* tp_descr_set */
+  0,						       /* tp_dictoffset */
+  0,						       /* tp_init */
+  0						       /* tp_alloc */
 };

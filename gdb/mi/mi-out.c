@@ -32,8 +32,7 @@
 /* Mark beginning of a table.  */
 
 void
-mi_ui_out::do_table_begin (int nr_cols, int nr_rows,
-			   const char *tblid)
+mi_ui_out::do_table_begin (int nr_cols, int nr_rows, const char *tblid)
 {
   open (tblid, ui_out_type_tuple);
   do_field_signed (-1, -1, ui_left, "nr_rows", nr_rows);
@@ -167,8 +166,8 @@ mi_ui_out::do_text (const char *string)
 }
 
 void
-mi_ui_out::do_message (const ui_file_style &style,
-		       const char *format, va_list args)
+mi_ui_out::do_message (const ui_file_style &style, const char *format,
+		       va_list args)
 {
 }
 
@@ -181,7 +180,6 @@ mi_ui_out::do_wrap_hint (int indent)
 void
 mi_ui_out::do_flush ()
 {
-
   gdb_flush (m_streams.back ());
 }
 
@@ -225,7 +223,7 @@ mi_ui_out::open (const char *name, ui_out_type type)
       break;
 
     default:
-      internal_error (_("bad switch"));
+      internal_error (_ ("bad switch"));
     }
 }
 
@@ -245,7 +243,7 @@ mi_ui_out::close (ui_out_type type)
       break;
 
     default:
-      internal_error (_("bad switch"));
+      internal_error (_ ("bad switch"));
     }
 
   m_suppress_field_separator = false;
@@ -321,25 +319,23 @@ mi_ui_out::version ()
 /* Constructor for an `mi_out_data' object.  */
 
 mi_ui_out::mi_ui_out (int mi_version)
-: ui_out (make_flags (mi_version)),
-  m_suppress_field_separator (false),
-  m_suppress_output (false),
-  m_mi_version (mi_version)
+  : ui_out (make_flags (mi_version)),
+    m_suppress_field_separator (false),
+    m_suppress_output (false),
+    m_mi_version (mi_version)
 {
   string_file *stream = new string_file ();
   m_streams.push_back (stream);
 }
 
-mi_ui_out::~mi_ui_out ()
-{
-}
+mi_ui_out::~mi_ui_out () {}
 
 /* See mi/mi-out.h.  */
 
 mi_ui_out *
 mi_out_new (const char *mi_version)
 {
-  if (streq (mi_version, INTERP_MI4) ||  streq (mi_version, INTERP_MI))
+  if (streq (mi_version, INTERP_MI4) || streq (mi_version, INTERP_MI))
     return new mi_ui_out (4);
 
   if (streq (mi_version, INTERP_MI3))

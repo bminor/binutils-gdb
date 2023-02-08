@@ -47,8 +47,7 @@ split_name (const char *name, split_style style)
 
     case split_style::UNDERSCORE:
       /* Handle the Ada encoded (aka mangled) form here.  */
-      for (const char *iter = strstr (name, "__");
-	   iter != nullptr;
+      for (const char *iter = strstr (name, "__"); iter != nullptr;
 	   iter = strstr (iter, "__"))
 	{
 	  result.emplace_back (&name[previous_len],
@@ -60,8 +59,7 @@ split_name (const char *name, split_style style)
 
     case split_style::DOT:
       /* D and Go-style names.  */
-      for (const char *iter = strchr (name, '.');
-	   iter != nullptr;
+      for (const char *iter = strchr (name, '.'); iter != nullptr;
 	   iter = strchr (iter, '.'))
 	{
 	  result.emplace_back (&name[previous_len],
@@ -78,4 +76,3 @@ split_name (const char *name, split_style style)
   result.emplace_back (&name[previous_len]);
   return result;
 }
-

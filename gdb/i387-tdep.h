@@ -27,7 +27,7 @@ struct type;
 struct ui_file;
 
 /* Number of i387 floating point registers.  */
-#define I387_NUM_REGS	16
+#define I387_NUM_REGS 16
 
 #define I387_ST0_REGNUM(tdep) ((tdep)->st0_regnum)
 #define I387_NUM_XMM_REGS(tdep) ((tdep)->num_xmm_regs)
@@ -65,15 +65,13 @@ struct ui_file;
 #define I387_XMM16_REGNUM(tdep) ((tdep)->xmm16_regnum)
 #define I387_MXCSR_REGNUM(tdep) \
   (I387_XMM0_REGNUM (tdep) + I387_NUM_XMM_REGS (tdep))
-#define I387_YMM0_REGNUM(tdep) (I387_MXCSR_REGNUM(tdep) + 1)
+#define I387_YMM0_REGNUM(tdep) (I387_MXCSR_REGNUM (tdep) + 1)
 #define I387_YMMENDH_REGNUM(tdep) \
   (I387_YMM0H_REGNUM (tdep) + I387_NUM_YMM_REGS (tdep))
 
-#define I387_MPXEND_REGNUM(tdep) \
-  (I387_BND0R_REGNUM (tdep) + I387_NUM_MPX_REGS)
+#define I387_MPXEND_REGNUM(tdep) (I387_BND0R_REGNUM (tdep) + I387_NUM_MPX_REGS)
 
-#define I387_KEND_REGNUM(tdep) \
-  (I387_K0_REGNUM (tdep) + I387_NUM_K_REGS)
+#define I387_KEND_REGNUM(tdep) (I387_K0_REGNUM (tdep) + I387_NUM_K_REGS)
 #define I387_ZMMENDH_REGNUM(tdep) \
   (I387_ZMM0H_REGNUM (tdep) + I387_NUM_ZMMH_REGS (tdep))
 #define I387_YMMH_AVX512_END_REGNUM(tdep) \
@@ -87,8 +85,7 @@ struct ui_file;
 /* Print out the i387 floating point state.  */
 
 extern void i387_print_float_info (struct gdbarch *gdbarch,
-				   struct ui_file *file,
-				   frame_info_ptr frame,
+				   struct ui_file *file, frame_info_ptr frame,
 				   const char *args);
 
 /* Return nonzero if a value of type TYPE stored in register REGNUM
@@ -109,12 +106,11 @@ extern int i387_register_to_value (frame_info_ptr frame, int regnum,
 
 extern void i387_value_to_register (frame_info_ptr frame, int regnum,
 				    struct type *type, const gdb_byte *from);
-
 
 /* Size of the memory area use by the 'fsave' and 'fxsave'
    instructions.  */
-#define I387_SIZEOF_FSAVE	108
-#define I387_SIZEOF_FXSAVE	512
+#define I387_SIZEOF_FSAVE 108
+#define I387_SIZEOF_FXSAVE 512
 
 /* Fill register REGNUM in REGCACHE with the appropriate value from
    *FSAVE.  This function masks off any of the reserved bits in
@@ -153,8 +149,8 @@ extern void i387_collect_fxsave (const struct regcache *regcache, int regnum,
 
 /* Similar to i387_collect_fxsave, but use XSAVE extended state.  */
 
-extern void i387_collect_xsave (const struct regcache *regcache,
-				int regnum, void *xsave, int gcore);
+extern void i387_collect_xsave (const struct regcache *regcache, int regnum,
+				void *xsave, int gcore);
 
 /* Extract a bitset from XSAVE indicating which features are available in
    the inferior, but not yet initialised.  */

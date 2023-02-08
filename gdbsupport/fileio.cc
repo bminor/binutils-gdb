@@ -29,48 +29,48 @@ host_to_fileio_error (int error)
 {
   switch (error)
     {
-      case EPERM:
-	return FILEIO_EPERM;
-      case ENOENT:
-	return FILEIO_ENOENT;
-      case EINTR:
-	return FILEIO_EINTR;
-      case EIO:
-	return FILEIO_EIO;
-      case EBADF:
-	return FILEIO_EBADF;
-      case EACCES:
-	return FILEIO_EACCES;
-      case EFAULT:
-	return FILEIO_EFAULT;
-      case EBUSY:
-	return FILEIO_EBUSY;
-      case EEXIST:
-	return FILEIO_EEXIST;
-      case ENODEV:
-	return FILEIO_ENODEV;
-      case ENOTDIR:
-	return FILEIO_ENOTDIR;
-      case EISDIR:
-	return FILEIO_EISDIR;
-      case EINVAL:
-	return FILEIO_EINVAL;
-      case ENFILE:
-	return FILEIO_ENFILE;
-      case EMFILE:
-	return FILEIO_EMFILE;
-      case EFBIG:
-	return FILEIO_EFBIG;
-      case ENOSPC:
-	return FILEIO_ENOSPC;
-      case ESPIPE:
-	return FILEIO_ESPIPE;
-      case EROFS:
-	return FILEIO_EROFS;
-      case ENOSYS:
-	return FILEIO_ENOSYS;
-      case ENAMETOOLONG:
-	return FILEIO_ENAMETOOLONG;
+    case EPERM:
+      return FILEIO_EPERM;
+    case ENOENT:
+      return FILEIO_ENOENT;
+    case EINTR:
+      return FILEIO_EINTR;
+    case EIO:
+      return FILEIO_EIO;
+    case EBADF:
+      return FILEIO_EBADF;
+    case EACCES:
+      return FILEIO_EACCES;
+    case EFAULT:
+      return FILEIO_EFAULT;
+    case EBUSY:
+      return FILEIO_EBUSY;
+    case EEXIST:
+      return FILEIO_EEXIST;
+    case ENODEV:
+      return FILEIO_ENODEV;
+    case ENOTDIR:
+      return FILEIO_ENOTDIR;
+    case EISDIR:
+      return FILEIO_EISDIR;
+    case EINVAL:
+      return FILEIO_EINVAL;
+    case ENFILE:
+      return FILEIO_ENFILE;
+    case EMFILE:
+      return FILEIO_EMFILE;
+    case EFBIG:
+      return FILEIO_EFBIG;
+    case ENOSPC:
+      return FILEIO_ENOSPC;
+    case ESPIPE:
+      return FILEIO_ESPIPE;
+    case EROFS:
+      return FILEIO_EROFS;
+    case ENOSYS:
+      return FILEIO_ENOSYS;
+    case ENAMETOOLONG:
+      return FILEIO_ENAMETOOLONG;
     }
   return FILEIO_EUNKNOWN;
 }
@@ -82,48 +82,48 @@ fileio_error_to_host (fileio_error errnum)
 {
   switch (errnum)
     {
-      case FILEIO_EPERM:
-	return EPERM;
-      case FILEIO_ENOENT:
-	return ENOENT;
-      case FILEIO_EINTR:
-	return EINTR;
-      case FILEIO_EIO:
-	return EIO;
-      case FILEIO_EBADF:
-	return EBADF;
-      case FILEIO_EACCES:
-	return EACCES;
-      case FILEIO_EFAULT:
-	return EFAULT;
-      case FILEIO_EBUSY:
-	return EBUSY;
-      case FILEIO_EEXIST:
-	return EEXIST;
-      case FILEIO_ENODEV:
-	return ENODEV;
-      case FILEIO_ENOTDIR:
-	return ENOTDIR;
-      case FILEIO_EISDIR:
-	return EISDIR;
-      case FILEIO_EINVAL:
-	return EINVAL;
-      case FILEIO_ENFILE:
-	return ENFILE;
-      case FILEIO_EMFILE:
-	return EMFILE;
-      case FILEIO_EFBIG:
-	return EFBIG;
-      case FILEIO_ENOSPC:
-	return ENOSPC;
-      case FILEIO_ESPIPE:
-	return ESPIPE;
-      case FILEIO_EROFS:
-	return EROFS;
-      case FILEIO_ENOSYS:
-	return ENOSYS;
-      case FILEIO_ENAMETOOLONG:
-	return ENAMETOOLONG;
+    case FILEIO_EPERM:
+      return EPERM;
+    case FILEIO_ENOENT:
+      return ENOENT;
+    case FILEIO_EINTR:
+      return EINTR;
+    case FILEIO_EIO:
+      return EIO;
+    case FILEIO_EBADF:
+      return EBADF;
+    case FILEIO_EACCES:
+      return EACCES;
+    case FILEIO_EFAULT:
+      return EFAULT;
+    case FILEIO_EBUSY:
+      return EBUSY;
+    case FILEIO_EEXIST:
+      return EEXIST;
+    case FILEIO_ENODEV:
+      return ENODEV;
+    case FILEIO_ENOTDIR:
+      return ENOTDIR;
+    case FILEIO_EISDIR:
+      return EISDIR;
+    case FILEIO_EINVAL:
+      return EINVAL;
+    case FILEIO_ENFILE:
+      return ENFILE;
+    case FILEIO_EMFILE:
+      return EMFILE;
+    case FILEIO_EFBIG:
+      return EFBIG;
+    case FILEIO_ENOSPC:
+      return ENOSPC;
+    case FILEIO_ESPIPE:
+      return ESPIPE;
+    case FILEIO_EROFS:
+      return EROFS;
+    case FILEIO_ENOSYS:
+      return ENOSYS;
+    case FILEIO_ENAMETOOLONG:
+      return ENAMETOOLONG;
     }
   return -1;
 }
@@ -152,7 +152,7 @@ fileio_to_host_openflags (int fileio_open_flags, int *open_flags_p)
     open_flags |= O_WRONLY;
   if (fileio_open_flags & FILEIO_O_RDWR)
     open_flags |= O_RDWR;
-  /* On systems supporting binary and text mode, always open files
+    /* On systems supporting binary and text mode, always open files
      in binary mode. */
 #ifdef O_BINARY
   open_flags |= O_BINARY;
@@ -298,9 +298,8 @@ host_to_fileio_stat (struct stat *st, struct fio_stat *fst)
   /* FIXME: This is correct for DJGPP, but other systems that don't
      have st_blocks, if any, might prefer 512 instead of st_blksize.
      (eliz, 30-12-2003)  */
-  host_to_fileio_ulong (((LONGEST) st->st_size + blksize - 1)
-			/ blksize,
-			fst->fst_blocks);
+  host_to_fileio_ulong (((LONGEST) st->st_size + blksize - 1) / blksize,
+                        fst->fst_blocks);
 #endif
   host_to_fileio_time (st->st_atime, fst->fst_atime);
   host_to_fileio_time (st->st_mtime, fst->fst_mtime);

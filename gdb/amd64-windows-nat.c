@@ -23,68 +23,40 @@
 #include <windows.h>
 
 #define context_offset(x) (offsetof (CONTEXT, x))
-const int amd64_mappings[] =
-{
-  context_offset (Rax),
-  context_offset (Rbx),
-  context_offset (Rcx),
-  context_offset (Rdx),
-  context_offset (Rsi),
-  context_offset (Rdi),
-  context_offset (Rbp),
-  context_offset (Rsp),
-  context_offset (R8),
-  context_offset (R9),
-  context_offset (R10),
-  context_offset (R11),
-  context_offset (R12),
-  context_offset (R13),
-  context_offset (R14),
-  context_offset (R15),
-  context_offset (Rip),
-  context_offset (EFlags),
-  context_offset (SegCs),
-  context_offset (SegSs),
-  context_offset (SegDs),
-  context_offset (SegEs),
-  context_offset (SegFs),
-  context_offset (SegGs),
-  context_offset (FloatSave.FloatRegisters[0]),
-  context_offset (FloatSave.FloatRegisters[1]),
-  context_offset (FloatSave.FloatRegisters[2]),
-  context_offset (FloatSave.FloatRegisters[3]),
-  context_offset (FloatSave.FloatRegisters[4]),
-  context_offset (FloatSave.FloatRegisters[5]),
-  context_offset (FloatSave.FloatRegisters[6]),
-  context_offset (FloatSave.FloatRegisters[7]),
-  context_offset (FloatSave.ControlWord),
-  context_offset (FloatSave.StatusWord),
-  context_offset (FloatSave.TagWord),
-  context_offset (FloatSave.ErrorSelector),
-  context_offset (FloatSave.ErrorOffset),
-  context_offset (FloatSave.DataSelector),
-  context_offset (FloatSave.DataOffset),
-  context_offset (FloatSave.ErrorSelector)
-  /* XMM0-7 */ ,
-  context_offset (Xmm0),
-  context_offset (Xmm1),
-  context_offset (Xmm2),
-  context_offset (Xmm3),
-  context_offset (Xmm4),
-  context_offset (Xmm5),
-  context_offset (Xmm6),
-  context_offset (Xmm7),
-  context_offset (Xmm8),
-  context_offset (Xmm9),
-  context_offset (Xmm10),
-  context_offset (Xmm11),
-  context_offset (Xmm12),
-  context_offset (Xmm13),
-  context_offset (Xmm14),
-  context_offset (Xmm15),
-  /* MXCSR */
-  context_offset (FloatSave.MxCsr)
-};
+const int amd64_mappings[]
+  = { context_offset (Rax), context_offset (Rbx), context_offset (Rcx),
+      context_offset (Rdx), context_offset (Rsi), context_offset (Rdi),
+      context_offset (Rbp), context_offset (Rsp), context_offset (R8),
+      context_offset (R9), context_offset (R10), context_offset (R11),
+      context_offset (R12), context_offset (R13), context_offset (R14),
+      context_offset (R15), context_offset (Rip), context_offset (EFlags),
+      context_offset (SegCs), context_offset (SegSs), context_offset (SegDs),
+      context_offset (SegEs), context_offset (SegFs), context_offset (SegGs),
+      context_offset (FloatSave.FloatRegisters[0]),
+      context_offset (FloatSave.FloatRegisters[1]),
+      context_offset (FloatSave.FloatRegisters[2]),
+      context_offset (FloatSave.FloatRegisters[3]),
+      context_offset (FloatSave.FloatRegisters[4]),
+      context_offset (FloatSave.FloatRegisters[5]),
+      context_offset (FloatSave.FloatRegisters[6]),
+      context_offset (FloatSave.FloatRegisters[7]),
+      context_offset (FloatSave.ControlWord),
+      context_offset (FloatSave.StatusWord),
+      context_offset (FloatSave.TagWord),
+      context_offset (FloatSave.ErrorSelector),
+      context_offset (FloatSave.ErrorOffset),
+      context_offset (FloatSave.DataSelector),
+      context_offset (FloatSave.DataOffset),
+      context_offset (FloatSave.ErrorSelector)
+      /* XMM0-7 */,
+      context_offset (Xmm0), context_offset (Xmm1), context_offset (Xmm2),
+      context_offset (Xmm3), context_offset (Xmm4), context_offset (Xmm5),
+      context_offset (Xmm6), context_offset (Xmm7), context_offset (Xmm8),
+      context_offset (Xmm9), context_offset (Xmm10), context_offset (Xmm11),
+      context_offset (Xmm12), context_offset (Xmm13), context_offset (Xmm14),
+      context_offset (Xmm15),
+      /* MXCSR */
+      context_offset (FloatSave.MxCsr) };
 #undef context_offset
 
 /* segment_register_p_ftype implementation for amd64.  */
@@ -96,6 +68,7 @@ amd64_windows_segment_register_p (int regnum)
 }
 
 void _initialize_amd64_windows_nat ();
+
 void
 _initialize_amd64_windows_nat ()
 {

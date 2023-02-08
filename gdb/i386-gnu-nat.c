@@ -45,17 +45,13 @@ extern "C"
 
 /* At REG_OFFSET[N] is the offset to the thread_state_t location where
    the GDB register N is stored.  */
-static int reg_offset[] =
-{
-  REG_OFFSET (eax), REG_OFFSET (ecx), REG_OFFSET (edx), REG_OFFSET (ebx),
-  REG_OFFSET (uesp), REG_OFFSET (ebp), REG_OFFSET (esi), REG_OFFSET (edi),
-  REG_OFFSET (eip), REG_OFFSET (efl), REG_OFFSET (cs), REG_OFFSET (ss),
-  REG_OFFSET (ds), REG_OFFSET (es), REG_OFFSET (fs), REG_OFFSET (gs)
-};
+static int reg_offset[]
+  = { REG_OFFSET (eax),	 REG_OFFSET (ecx), REG_OFFSET (edx), REG_OFFSET (ebx),
+      REG_OFFSET (uesp), REG_OFFSET (ebp), REG_OFFSET (esi), REG_OFFSET (edi),
+      REG_OFFSET (eip),	 REG_OFFSET (efl), REG_OFFSET (cs),  REG_OFFSET (ss),
+      REG_OFFSET (ds),	 REG_OFFSET (es),  REG_OFFSET (fs),  REG_OFFSET (gs) };
 
-#define REG_ADDR(state, regnum) ((char *)(state) + reg_offset[regnum])
-
-
+#define REG_ADDR(state, regnum) ((char *) (state) + reg_offset[regnum])
 
 /* The i386 GNU Hurd target.  */
 
@@ -87,7 +83,7 @@ fetch_fpregs (struct regcache *regcache, struct proc *thread)
 			  (thread_state_t) &state, &count);
   if (err)
     {
-      warning (_("Couldn't fetch floating-point state from %s"),
+      warning (_ ("Couldn't fetch floating-point state from %s"),
 	       proc_string (thread));
       return;
     }
@@ -116,7 +112,7 @@ i386_gnu_nat_target::fetch_registers (struct regcache *regcache, int regno)
 
   thread = inf_tid_to_thread (gnu_current_inf, ptid.lwp ());
   if (!thread)
-    error (_("Can't fetch registers from thread %s: No such thread"),
+    error (_ ("Can't fetch registers from thread %s: No such thread"),
 	   target_pid_to_str (ptid).c_str ());
 
   if (regno < I386_NUM_GREGS || regno == -1)
@@ -127,7 +123,7 @@ i386_gnu_nat_target::fetch_registers (struct regcache *regcache, int regno)
       state = proc_get_state (thread, 0);
       if (!state)
 	{
-	  warning (_("Couldn't fetch registers from %s"),
+	  warning (_ ("Couldn't fetch registers from %s"),
 		   proc_string (thread));
 	  return;
 	}
@@ -145,8 +141,7 @@ i386_gnu_nat_target::fetch_registers (struct regcache *regcache, int regno)
       else
 	{
 	  proc_debug (thread, "fetching register %s",
-		      gdbarch_register_name (regcache->arch (),
-					     regno));
+		      gdbarch_register_name (regcache->arch (), regno));
 
 	  regcache->raw_supply (regno, REG_ADDR (state, regno));
 	  thread->fetched_regs |= (1 << regno);
@@ -160,7 +155,6 @@ i386_gnu_nat_target::fetch_registers (struct regcache *regcache, int regno)
       fetch_fpregs (regcache, thread);
     }
 }
-
 
 /* Store the whole floating-point state into THREAD using information
    from the corresponding (pseudo) registers.  */
@@ -175,7 +169,7 @@ store_fpregs (const struct regcache *regcache, struct proc *thread, int regno)
 			  (thread_state_t) &state, &count);
   if (err)
     {
-      warning (_("Couldn't fetch floating-point state from %s"),
+      warning (_ ("Couldn't fetch floating-point state from %s"),
 	       proc_string (thread));
       return;
     }
@@ -188,7 +182,7 @@ store_fpregs (const struct regcache *regcache, struct proc *thread, int regno)
 			  (thread_state_t) &state, i386_FLOAT_STATE_COUNT);
   if (err)
     {
-      warning (_("Couldn't store floating-point state into %s"),
+      warning (_ ("Couldn't store floating-point state into %s"),
 	       proc_string (thread));
       return;
     }
@@ -207,7 +201,7 @@ i386_gnu_nat_target::store_registers (struct regcache *regcache, int regno)
 
   thread = inf_tid_to_thread (gnu_current_inf, ptid.lwp ());
   if (!thread)
-    error (_("Couldn't store registers into thread %s: No such thread"),
+    error (_ ("Couldn't store registers into thread %s: No such thread"),
 	   target_pid_to_str (ptid).c_str ());
 
   if (regno < I386_NUM_GREGS || regno == -1)
@@ -224,14 +218,14 @@ i386_gnu_nat_target::store_registers (struct regcache *regcache, int regno)
       state = proc_get_state (thread, 1);
       if (!state)
 	{
-	  warning (_("Couldn't store registers into %s"),
+	  warning (_ ("Couldn't store registers into %s"),
 		   proc_string (thread));
 	  return;
 	}
 
       /* Save the T bit.  We might try to restore the %eflags register
 	 below, but changing the T bit would seriously confuse GDB.  */
-      trace = ((struct i386_thread_state *)state)->efl & 0x100;
+      trace = ((struct i386_thread_state *) state)->efl & 0x100;
 
       if (!was_aborted && was_valid)
 	/* See which registers have changed after aborting the thread.  */
@@ -245,15 +239,16 @@ i386_gnu_nat_target::store_registers (struct regcache *regcache, int regno)
 			   register_size (gdbarch, check_regno)))
 	      /* Register CHECK_REGNO has changed!  Ack!  */
 	      {
-		warning (_("Register %s changed after the thread was aborted"),
-			 gdbarch_register_name (gdbarch, check_regno));
+		warning (
+		  _ ("Register %s changed after the thread was aborted"),
+		  gdbarch_register_name (gdbarch, check_regno));
 		if (regno >= 0 && regno != check_regno)
 		  /* Update GDB's copy of the register.  */
 		  regcache->raw_supply (check_regno,
 					REG_ADDR (state, check_regno));
 		else
-		  warning (_("... also writing this register!  "
-			     "Suspicious..."));
+		  warning (_ ("... also writing this register!  "
+			      "Suspicious..."));
 	      }
 	}
 
@@ -277,8 +272,8 @@ i386_gnu_nat_target::store_registers (struct regcache *regcache, int regno)
 	}
 
       /* Restore the T bit.  */
-      ((struct i386_thread_state *)state)->efl &= ~0x100;
-      ((struct i386_thread_state *)state)->efl |= trace;
+      ((struct i386_thread_state *) state)->efl &= ~0x100;
+      ((struct i386_thread_state *) state)->efl |= trace;
     }
 
   if (regno >= I386_NUM_GREGS || regno == -1)
@@ -289,7 +284,6 @@ i386_gnu_nat_target::store_registers (struct regcache *regcache, int regno)
     }
 }
 
-
 /* Support for debug registers.  */
 
 #ifdef i386_DEBUG_STATE
@@ -304,8 +298,7 @@ i386_gnu_dr_get (struct i386_debug_state *regs, struct proc *thread)
   err = thread_get_state (thread->port, i386_DEBUG_STATE,
 			  (thread_state_t) regs, &count);
   if (err != 0 || count != i386_DEBUG_STATE_COUNT)
-    warning (_("Couldn't fetch debug state from %s"),
-	     proc_string (thread));
+    warning (_ ("Couldn't fetch debug state from %s"), proc_string (thread));
 }
 
 /* Set debug registers for thread THREAD.  */
@@ -318,8 +311,7 @@ i386_gnu_dr_set (const struct i386_debug_state *regs, struct proc *thread)
   err = thread_set_state (thread->port, i386_DEBUG_STATE,
 			  (thread_state_t) regs, i386_DEBUG_STATE_COUNT);
   if (err != 0)
-    warning (_("Couldn't store debug state into %s"),
-	     proc_string (thread));
+    warning (_ ("Couldn't store debug state into %s"), proc_string (thread));
 }
 
 /* Set DR_CONTROL in THREAD.  */
@@ -348,8 +340,8 @@ i386_gnu_dr_set_control (unsigned long control)
 
 struct reg_addr
 {
-  int regnum;		/* Register number (zero based).  */
-  CORE_ADDR addr;	/* Address.  */
+  int regnum;	  /* Register number (zero based).  */
+  CORE_ADDR addr; /* Address.  */
 };
 
 /* Set address REGNUM (zero based) to ADDR in THREAD.  */
@@ -426,6 +418,7 @@ i386_gnu_dr_get_control (void)
 #endif /* i386_DEBUG_STATE */
 
 void _initialize_i386gnu_nat ();
+
 void
 _initialize_i386gnu_nat ()
 {

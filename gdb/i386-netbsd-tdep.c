@@ -34,66 +34,63 @@
 #include "solib-svr4.h"
 
 /* From <machine/reg.h>.  */
-static int i386nbsd_r_reg_offset[] =
-{
-  0 * 4,			/* %eax */
-  1 * 4,			/* %ecx */
-  2 * 4,			/* %edx */
-  3 * 4,			/* %ebx */
-  4 * 4,			/* %esp */
-  5 * 4,			/* %ebp */
-  6 * 4,			/* %esi */
-  7 * 4,			/* %edi */
-  8 * 4,			/* %eip */
-  9 * 4,			/* %eflags */
-  10 * 4,			/* %cs */
-  11 * 4,			/* %ss */
-  12 * 4,			/* %ds */
-  13 * 4,			/* %es */
-  14 * 4,			/* %fs */
-  15 * 4			/* %gs */
+static int i386nbsd_r_reg_offset[] = {
+  0 * 4,  /* %eax */
+  1 * 4,  /* %ecx */
+  2 * 4,  /* %edx */
+  3 * 4,  /* %ebx */
+  4 * 4,  /* %esp */
+  5 * 4,  /* %ebp */
+  6 * 4,  /* %esi */
+  7 * 4,  /* %edi */
+  8 * 4,  /* %eip */
+  9 * 4,  /* %eflags */
+  10 * 4, /* %cs */
+  11 * 4, /* %ss */
+  12 * 4, /* %ds */
+  13 * 4, /* %es */
+  14 * 4, /* %fs */
+  15 * 4  /* %gs */
 };
 
 /* From <machine/signal.h>.  */
-static int i386nbsd_sc_reg_offset[] =
-{
-  10 * 4,			/* %eax */
-  9 * 4,			/* %ecx */
-  8 * 4,			/* %edx */
-  7 * 4,			/* %ebx */
-  14 * 4,			/* %esp */
-  6 * 4,			/* %ebp */
-  5 * 4,			/* %esi */
-  4 * 4,			/* %edi */
-  11 * 4,			/* %eip */
-  13 * 4,			/* %eflags */
-  12 * 4,			/* %cs */
-  15 * 4,			/* %ss */
-  3 * 4,			/* %ds */
-  2 * 4,			/* %es */
-  1 * 4,			/* %fs */
-  0 * 4				/* %gs */
+static int i386nbsd_sc_reg_offset[] = {
+  10 * 4, /* %eax */
+  9 * 4,  /* %ecx */
+  8 * 4,  /* %edx */
+  7 * 4,  /* %ebx */
+  14 * 4, /* %esp */
+  6 * 4,  /* %ebp */
+  5 * 4,  /* %esi */
+  4 * 4,  /* %edi */
+  11 * 4, /* %eip */
+  13 * 4, /* %eflags */
+  12 * 4, /* %cs */
+  15 * 4, /* %ss */
+  3 * 4,  /* %ds */
+  2 * 4,  /* %es */
+  1 * 4,  /* %fs */
+  0 * 4	  /* %gs */
 };
 
 /* From <machine/mcontext.h>.  */
-static int i386nbsd_mc_reg_offset[] =
-{
-  11 * 4,			/* %eax */
-  10 * 4,			/* %ecx */
-  9 * 4,			/* %edx */
-  8 * 4,			/* %ebx */
-  7 * 4,			/* %esp */
-  6 * 4,			/* %ebp */
-  5 * 4,			/* %esi */
-  4 * 4,			/* %edi */
-  14 * 4,			/* %eip */
-  16 * 4,			/* %eflags */
-  15 * 4,			/* %cs */
-  18 * 4,			/* %ss */
-  3 * 4,			/* %ds */
-  2 * 4,			/* %es */
-  1 * 4,			/* %fs */
-  0 * 4				/* %gs */
+static int i386nbsd_mc_reg_offset[] = {
+  11 * 4, /* %eax */
+  10 * 4, /* %ecx */
+  9 * 4,  /* %edx */
+  8 * 4,  /* %ebx */
+  7 * 4,  /* %esp */
+  6 * 4,  /* %ebp */
+  5 * 4,  /* %esi */
+  4 * 4,  /* %edi */
+  14 * 4, /* %eip */
+  16 * 4, /* %eflags */
+  15 * 4, /* %cs */
+  18 * 4, /* %ss */
+  3 * 4,  /* %ds */
+  2 * 4,  /* %es */
+  1 * 4,  /* %fs */
+  0 * 4	  /* %gs */
 };
 
 static void i386nbsd_sigtramp_cache_init (const struct tramp_frame *,
@@ -101,231 +98,211 @@ static void i386nbsd_sigtramp_cache_init (const struct tramp_frame *,
 					  struct trad_frame_cache *,
 					  CORE_ADDR);
 
-static const struct tramp_frame i386nbsd_sigtramp_sc16 =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-   /* leal  0x10(%esp), %eax */
-   { 0x8d, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x10, ULONGEST_MAX },
+static const struct tramp_frame i386nbsd_sigtramp_sc16
+  = { SIGTRAMP_FRAME,
+      1,
+      { /* leal  0x10(%esp), %eax */
+	{ 0x8d, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x10, ULONGEST_MAX },
 
-   /* pushl %eax */
-   { 0x50, ULONGEST_MAX },
+	/* pushl %eax */
+	{ 0x50, ULONGEST_MAX },
 
-   /* pushl %eax */
-   { 0x50, ULONGEST_MAX },
+	/* pushl %eax */
+	{ 0x50, ULONGEST_MAX },
 
-   /* movl  $0x127, %eax		# __sigreturn14 */
-   { 0xb8, ULONGEST_MAX },
-   { 0x27, ULONGEST_MAX },
-   {0x01, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
+	/* movl  $0x127, %eax		# __sigreturn14 */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x27, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
 
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
 
-   /* movl  $0x1, %eax		# exit */
-   { 0xb8, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
+	/* movl  $0x1, %eax		# exit */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
 
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
 
-   { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  i386nbsd_sigtramp_cache_init
-};
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      i386nbsd_sigtramp_cache_init };
 
-static const struct tramp_frame i386nbsd_sigtramp_sc2 =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-   /* leal  0x0c(%esp), %eax */
-   { 0x8d, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x0c, ULONGEST_MAX },
-   /* movl  %eax, 0x4(%esp) */
-   { 0x89, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   /* movl  $0x127, %eax		# __sigreturn14 */
-   { 0xb8, ULONGEST_MAX },
-   { 0x27, ULONGEST_MAX },
-   {0x01, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
-   /* movl  %eax, 0x4(%esp) */
-   { 0x89, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   /* movl  $0x1, %eax */
-   { 0xb8, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
-   { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  i386nbsd_sigtramp_cache_init
-};
+static const struct tramp_frame i386nbsd_sigtramp_sc2
+  = { SIGTRAMP_FRAME,
+      1,
+      { /* leal  0x0c(%esp), %eax */
+	{ 0x8d, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x0c, ULONGEST_MAX },
+	/* movl  %eax, 0x4(%esp) */
+	{ 0x89, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	/* movl  $0x127, %eax		# __sigreturn14 */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x27, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	/* movl  %eax, 0x4(%esp) */
+	{ 0x89, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	/* movl  $0x1, %eax */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      i386nbsd_sigtramp_cache_init };
 
-static const struct tramp_frame i386nbsd_sigtramp_si2 =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-   /* movl  8(%esp),%eax */
-   { 0x8b, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x08, ULONGEST_MAX },
-   /* movl  %eax, 0x4(%esp) */
-   { 0x89, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   /* movl  $0x134, %eax            # setcontext */
-   { 0xb8, ULONGEST_MAX },
-   { 0x34, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX },
-   /* movl  %eax, 0x4(%esp) */
-   { 0x89, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   /* movl  $0x1, %eax */
-   { 0xb8, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX },
-   { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  i386nbsd_sigtramp_cache_init
-};
+static const struct tramp_frame i386nbsd_sigtramp_si2
+  = { SIGTRAMP_FRAME,
+      1,
+      { /* movl  8(%esp),%eax */
+	{ 0x8b, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x08, ULONGEST_MAX },
+	/* movl  %eax, 0x4(%esp) */
+	{ 0x89, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	/* movl  $0x134, %eax            # setcontext */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x34, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	/* movl  %eax, 0x4(%esp) */
+	{ 0x89, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	/* movl  $0x1, %eax */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      i386nbsd_sigtramp_cache_init };
 
-static const struct tramp_frame i386nbsd_sigtramp_si31 =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-   /* leal  0x8c(%esp), %eax */
-   { 0x8d, ULONGEST_MAX },
-   { 0x84, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x8c, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   /* movl  %eax, 0x4(%esp) */
-   { 0x89, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   /* movl  $0x134, %eax            # setcontext */
-   { 0xb8, ULONGEST_MAX },
-   { 0x34, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
-   /* movl  %eax, 0x4(%esp) */
-   { 0x89, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   /* movl  $0x1, %eax */
-   { 0xb8, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
-   { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  i386nbsd_sigtramp_cache_init
-};
+static const struct tramp_frame i386nbsd_sigtramp_si31
+  = { SIGTRAMP_FRAME,
+      1,
+      { /* leal  0x8c(%esp), %eax */
+	{ 0x8d, ULONGEST_MAX },
+	{ 0x84, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x8c, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* movl  %eax, 0x4(%esp) */
+	{ 0x89, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	/* movl  $0x134, %eax            # setcontext */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x34, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	/* movl  %eax, 0x4(%esp) */
+	{ 0x89, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	/* movl  $0x1, %eax */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      i386nbsd_sigtramp_cache_init };
 
-static const struct tramp_frame i386nbsd_sigtramp_si4 =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-   /* leal  0x8c(%esp), %eax */
-   { 0x8d, ULONGEST_MAX },
-   { 0x84, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x8c, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   /* movl  %eax, 0x4(%esp) */
-   { 0x89, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   /* movl  $0x134, %eax            # setcontext */
-   { 0xb8, ULONGEST_MAX },
-   { 0x34, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   { 0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
-   /* movl   $0xffffffff,0x4(%esp) */
-   { 0xc7, ULONGEST_MAX },
-   { 0x44, ULONGEST_MAX },
-   { 0x24, ULONGEST_MAX },
-   { 0x04, ULONGEST_MAX },
-   { 0xff, ULONGEST_MAX },
-   { 0xff, ULONGEST_MAX },
-   { 0xff, ULONGEST_MAX },
-   { 0xff, ULONGEST_MAX },
-   /* movl  $0x1, %eax */
-   { 0xb8, ULONGEST_MAX },
-   { 0x01, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   {0x00, ULONGEST_MAX },
-   /* int   $0x80 */
-   { 0xcd, ULONGEST_MAX },
-   { 0x80, ULONGEST_MAX},
-   { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  i386nbsd_sigtramp_cache_init
-};
+static const struct tramp_frame i386nbsd_sigtramp_si4
+  = { SIGTRAMP_FRAME,
+      1,
+      { /* leal  0x8c(%esp), %eax */
+	{ 0x8d, ULONGEST_MAX },
+	{ 0x84, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x8c, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* movl  %eax, 0x4(%esp) */
+	{ 0x89, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	/* movl  $0x134, %eax            # setcontext */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x34, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	/* movl   $0xffffffff,0x4(%esp) */
+	{ 0xc7, ULONGEST_MAX },
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x04, ULONGEST_MAX },
+	{ 0xff, ULONGEST_MAX },
+	{ 0xff, ULONGEST_MAX },
+	{ 0xff, ULONGEST_MAX },
+	{ 0xff, ULONGEST_MAX },
+	/* movl  $0x1, %eax */
+	{ 0xb8, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	/* int   $0x80 */
+	{ 0xcd, ULONGEST_MAX },
+	{ 0x80, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      i386nbsd_sigtramp_cache_init };
 
 static void
 i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
@@ -367,9 +344,8 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
   /* Construct the frame ID using the function start.  */
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
-
 
-static void 
+static void
 i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
@@ -388,7 +364,7 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = reg_struct_return;
 
   /* NetBSD uses tramp_frame sniffers for signal trampolines.  */
-  tdep->sigcontext_addr= 0;
+  tdep->sigcontext_addr = 0;
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;
   tdep->sigtramp_p = 0;
@@ -416,14 +392,15 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_elf_init_abi (info, gdbarch);
 
   /* NetBSD ELF uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
   /* NetBSD ELF uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;
 }
 
 void _initialize_i386nbsd_tdep ();
+
 void
 _initialize_i386nbsd_tdep ()
 {

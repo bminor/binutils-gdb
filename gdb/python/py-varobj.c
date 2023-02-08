@@ -72,8 +72,8 @@ py_varobj_iter::next ()
 
   gdbpy_enter_varobj enter_py (m_var);
 
-  scoped_restore set_options = make_scoped_restore (&gdbpy_current_print_options,
-						    &m_opts);
+  scoped_restore set_options
+    = make_scoped_restore (&gdbpy_current_print_options, &m_opts);
 
   gdbpy_ref<> item (PyIter_Next (m_iter));
 
@@ -94,8 +94,8 @@ py_varobj_iter::next ()
 	      return NULL;
 	    }
 
-	  std::string name_str = string_printf ("<error at %d>",
-						m_next_raw_index++);
+	  std::string name_str
+	    = string_printf ("<error at %d>", m_next_raw_index++);
 	  item.reset (Py_BuildValue ("(ss)", name_str.c_str (),
 				     value_str.get ()));
 	  if (item == NULL)
@@ -115,7 +115,7 @@ py_varobj_iter::next ()
   if (!PyArg_ParseTuple (item.get (), "sO", &name, &py_v))
     {
       gdbpy_print_stack ();
-      error (_("Invalid item from the child list"));
+      error (_ ("Invalid item from the child list"));
     }
 
   vitem = new varobj_item ();
@@ -152,22 +152,22 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer,
   if (!PyObject_HasAttr (printer, gdbpy_children_cst))
     return NULL;
 
-  scoped_restore set_options = make_scoped_restore (&gdbpy_current_print_options,
-						    opts);
+  scoped_restore set_options
+    = make_scoped_restore (&gdbpy_current_print_options, opts);
 
-  gdbpy_ref<> children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
-						    NULL));
+  gdbpy_ref<> children (PyObject_CallMethodObjArgs (printer,
+						    gdbpy_children_cst, NULL));
   if (children == NULL)
     {
       gdbpy_print_stack ();
-      error (_("Null value returned for children"));
+      error (_ ("Null value returned for children"));
     }
 
   gdbpy_ref<> iter (PyObject_GetIter (children.get ()));
   if (iter == NULL)
     {
       gdbpy_print_stack ();
-      error (_("Could not get children iterator"));
+      error (_ ("Could not get children iterator"));
     }
 
   return std::unique_ptr<varobj_iter> (new py_varobj_iter (var,

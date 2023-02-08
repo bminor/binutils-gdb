@@ -21,7 +21,7 @@
 #include "defs.h"
 #include "elf-none-tdep.h"
 #include "regset.h"
-#include "elf-bfd.h"            /* for elfcore_write_* */
+#include "elf-bfd.h" /* for elfcore_write_* */
 #include "inferior.h"
 #include "regcache.h"
 #include "gdbarch.h"
@@ -97,9 +97,8 @@ elf_none_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
     stop_signal = GDB_SIGNAL_0;
 
   if (signalled_thr != nullptr)
-    gcore_elf_build_thread_register_notes (gdbarch, signalled_thr,
-					   stop_signal, obfd, &note_data,
-					   note_size);
+    gcore_elf_build_thread_register_notes (gdbarch, signalled_thr, stop_signal,
+					   obfd, &note_data, note_size);
   for (thread_info *thr : current_inferior ()->non_exited_threads ())
     {
       if (thr == signalled_thr)
@@ -108,7 +107,6 @@ elf_none_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
       gcore_elf_build_thread_register_notes (gdbarch, thr, stop_signal, obfd,
 					     &note_data, note_size);
     }
-
 
   /* Target description.  */
   gcore_elf_make_tdesc_note (obfd, &note_data, note_size);

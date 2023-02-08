@@ -28,7 +28,6 @@
 #include "cp-abi.h"
 #include "target.h"
 #include "objfiles.h"
-
 
 /* A helper for c_textual_element_type.  This checks the name of the
    typedef.  This is bogus but it isn't apparent that the compiler
@@ -37,8 +36,7 @@
 static int
 textual_name (const char *name)
 {
-  return (!strcmp (name, "wchar_t")
-	  || !strcmp (name, "char16_t")
+  return (!strcmp (name, "wchar_t") || !strcmp (name, "char16_t")
 	  || !strcmp (name, "char32_t"));
 }
 
@@ -97,8 +95,7 @@ c_textual_element_type (struct type *type, char format)
     {
       /* Print this as a string if we can manage it.  For now, no wide
 	 character support.  */
-      if (true_type->code () == TYPE_CODE_INT
-	  && true_type->length () == 1)
+      if (true_type->code () == TYPE_CODE_INT && true_type->length () == 1)
 	return 1;
     }
   else
@@ -106,8 +103,7 @@ c_textual_element_type (struct type *type, char format)
       /* If a one-byte TYPE_CODE_INT is missing the not-a-character
 	 flag, then we treat it as text; otherwise, we assume it's
 	 being used as data.  */
-      if (true_type->code () == TYPE_CODE_INT
-	  && true_type->length () == 1
+      if (true_type->code () == TYPE_CODE_INT && true_type->length () == 1
 	  && !TYPE_NOTTEXT (true_type))
 	return 1;
     }
@@ -117,17 +113,8 @@ c_textual_element_type (struct type *type, char format)
 
 /* Decorations for C.  */
 
-static const struct generic_val_print_decorations c_decorations =
-{
-  "",
-  " + ",
-  "i",
-  "true",
-  "false",
-  "void",
-  "{",
-  "}"
-};
+static const struct generic_val_print_decorations c_decorations
+  = { "", " + ", "i", "true", "false", "void", "{", "}" };
 
 /* Print a pointer based on the type of its target.
 
@@ -154,8 +141,8 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
     }
 
   if (options->symbol_print)
-    want_space = print_address_demangle (options, gdbarch, address, stream,
-					 demangle);
+    want_space
+      = print_address_demangle (options, gdbarch, address, stream, demangle);
   else if (options->addressprint)
     {
       gdb_puts (paddress (gdbarch, address), stream);
@@ -170,18 +157,18 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
     {
       if (want_space)
 	gdb_puts (" ", stream);
-      val_print_string (unresolved_elttype, NULL, address, -1, stream, options);
+      val_print_string (unresolved_elttype, NULL, address, -1, stream,
+			options);
     }
   else if (cp_is_vtbl_member (type))
     {
       /* Print vtbl's nicely.  */
       CORE_ADDR vt_address = unpack_pointer (type, valaddr + embedded_offset);
-      struct bound_minimal_symbol msymbol =
-	lookup_minimal_symbol_by_pc (vt_address);
+      struct bound_minimal_symbol msymbol
+	= lookup_minimal_symbol_by_pc (vt_address);
 
       /* If 'symbol_print' is set, we did the work above.  */
-      if (!options->symbol_print
-	  && (msymbol.minsym != NULL)
+      if (!options->symbol_print && (msymbol.minsym != NULL)
 	  && (vt_address == msymbol.value_address ()))
 	{
 	  if (want_space)
@@ -204,8 +191,8 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	  if (msymbol.minsym != NULL)
 	    {
 	      const char *search_name = msymbol.minsym->search_name ();
-	      wsym = lookup_symbol_search_name (search_name, NULL,
-						VAR_DOMAIN).symbol;
+	      wsym = lookup_symbol_search_name (search_name, NULL, VAR_DOMAIN)
+		       .symbol;
 	    }
 
 	  if (wsym)
@@ -231,8 +218,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 /* c_value_print helper for TYPE_CODE_ARRAY.  */
 
 static void
-c_value_print_array (struct value *val,
-		     struct ui_file *stream, int recurse,
+c_value_print_array (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
   struct type *type = check_typedef (value_type (val));
@@ -248,15 +234,14 @@ c_value_print_array (struct value *val,
       enum bfd_endian byte_order = type_byte_order (type);
 
       if (!get_array_bounds (type, &low_bound, &high_bound))
-	error (_("Could not determine the array high bound"));
+	error (_ ("Could not determine the array high bound"));
 
       eltlen = elttype->length ();
       len = high_bound - low_bound + 1;
 
       /* Print arrays of textual chars with a string syntax, as
 	 long as the entire array is valid.  */
-      if (c_textual_element_type (unresolved_elttype,
-				  options->format)
+      if (c_textual_element_type (unresolved_elttype, options->format)
 	  && value_bytes_available (val, 0, type->length ())
 	  && !value_bits_any_optimized_out (val, 0,
 					    TARGET_CHAR_BIT * type->length ()))
@@ -271,10 +256,10 @@ c_value_print_array (struct value *val,
 	      unsigned int temp_len;
 
 	      for (temp_len = 0;
-		   (temp_len < len
-		    && temp_len < print_max_chars
+		   (temp_len < len && temp_len < print_max_chars
 		    && extract_unsigned_integer (valaddr + temp_len * eltlen,
-						 eltlen, byte_order) != 0);
+						 eltlen, byte_order)
+			 != 0);
 		   ++temp_len)
 		;
 
@@ -306,8 +291,7 @@ c_value_print_array (struct value *val,
 	  if (cp_is_vtbl_ptr_type (elttype))
 	    {
 	      i = 1;
-	      gdb_printf (stream, _("%d vtable entries"),
-			  len - 1);
+	      gdb_printf (stream, _ ("%d vtable entries"), len - 1);
 	    }
 	  value_print_array_elements (val, stream, recurse, options, i);
 	  gdb_printf (stream, "}");
@@ -316,8 +300,8 @@ c_value_print_array (struct value *val,
   else
     {
       /* Array of unspecified length: treat like pointer to first elt.  */
-      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
-			      0, address, stream, recurse, options);
+      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr, 0,
+			      address, stream, recurse, options);
     }
 }
 
@@ -352,8 +336,8 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
       struct type *elttype = check_typedef (unresolved_elttype);
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
-      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
-			      0, addr, stream, recurse, options);
+      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr, 0,
+			      addr, stream, recurse, options);
     }
 }
 
@@ -394,8 +378,8 @@ c_value_print_int (struct value *val, struct ui_file *stream,
     {
       struct value_print_options opts = *options;
 
-      opts.format = (options->format ? options->format
-		     : options->output_format);
+      opts.format
+	= (options->format ? options->format : options->output_format);
       value_print_scalar_formatted (val, &opts, 0, stream);
     }
   else
@@ -467,9 +451,8 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
     }
 }
 
-
 void
-c_value_print (struct value *val, struct ui_file *stream, 
+c_value_print (struct value *val, struct ui_file *stream,
 	       const struct value_print_options *options)
 {
   struct type *type, *real_type;
@@ -499,8 +482,7 @@ c_value_print (struct value *val, struct ui_file *stream,
       if (original_type->code () == TYPE_CODE_PTR
 	  && original_type->name () == NULL
 	  && original_type->target_type ()->name () != NULL
-	  && (strcmp (original_type->target_type ()->name (),
-		      "char") == 0
+	  && (strcmp (original_type->target_type ()->name (), "char") == 0
 	      || textual_name (original_type->target_type ()->name ())))
 	{
 	  /* Print nothing.  */
@@ -522,8 +504,8 @@ c_value_print (struct value *val, struct ui_file *stream,
 
 	  if (value_entirely_available (val))
 	    {
-	      real_type = value_rtti_indirect_type (val, &full, &top,
-						    &using_enc);
+	      real_type
+		= value_rtti_indirect_type (val, &full, &top, &using_enc);
 	      if (real_type)
 		{
 		  /* RTTI entry found.  */
@@ -564,8 +546,7 @@ c_value_print (struct value *val, struct ui_file *stream,
       if (real_type)
 	{
 	  /* We have RTTI information, so use it.  */
-	  val = value_full_object (val, real_type, 
-				   full, top, using_enc);
+	  val = value_full_object (val, real_type, full, top, using_enc);
 	  /* In a destructor we might see a real type that is a
 	     superclass of the object's type.  In this case it is
 	     better to leave the object as-is.  */
@@ -573,15 +554,13 @@ c_value_print (struct value *val, struct ui_file *stream,
 		&& (real_type->length ()
 		    < value_enclosing_type (val)->length ())))
 	    val = value_cast (real_type, val);
-	  gdb_printf (stream, "(%s%s) ",
-		      real_type->name (),
-		      full ? "" : _(" [incomplete object]"));
+	  gdb_printf (stream, "(%s%s) ", real_type->name (),
+		      full ? "" : _ (" [incomplete object]"));
 	}
       else if (type != check_typedef (value_enclosing_type (val)))
 	{
 	  /* No RTTI information, so let's do our best.  */
-	  gdb_printf (stream, "(%s ?) ",
-		      value_enclosing_type (val)->name ());
+	  gdb_printf (stream, "(%s ?) ", value_enclosing_type (val)->name ());
 	  val = value_cast (value_enclosing_type (val), val);
 	}
     }

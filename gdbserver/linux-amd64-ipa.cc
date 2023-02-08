@@ -49,26 +49,25 @@ extern const struct target_desc *tdesc_amd64_linux;
 #define FT_CR_RBP 16
 #define FT_CR_RSP 17
 
-static const int x86_64_ft_collect_regmap[] = {
-  FT_CR_RAX * 8, FT_CR_RBX * 8, FT_CR_RCX * 8, FT_CR_RDX * 8,
-  FT_CR_RSI * 8, FT_CR_RDI * 8, FT_CR_RBP * 8, FT_CR_RSP * 8,
-  FT_CR_R8 * 8,  FT_CR_R9 * 8,  FT_CR_R10 * 8, FT_CR_R11 * 8,
-  FT_CR_R12 * 8, FT_CR_R13 * 8, FT_CR_R14 * 8, FT_CR_R15 * 8,
-  FT_CR_RIP * 8, FT_CR_EFLAGS * 8
-};
+static const int x86_64_ft_collect_regmap[]
+  = { FT_CR_RAX * 8, FT_CR_RBX * 8,   FT_CR_RCX * 8, FT_CR_RDX * 8,
+      FT_CR_RSI * 8, FT_CR_RDI * 8,   FT_CR_RBP * 8, FT_CR_RSP * 8,
+      FT_CR_R8 * 8,  FT_CR_R9 * 8,    FT_CR_R10 * 8, FT_CR_R11 * 8,
+      FT_CR_R12 * 8, FT_CR_R13 * 8,   FT_CR_R14 * 8, FT_CR_R15 * 8,
+      FT_CR_RIP * 8, FT_CR_EFLAGS * 8 };
 
 #define X86_64_NUM_FT_COLLECT_GREGS \
-  (sizeof (x86_64_ft_collect_regmap) / sizeof(x86_64_ft_collect_regmap[0]))
+  (sizeof (x86_64_ft_collect_regmap) / sizeof (x86_64_ft_collect_regmap[0]))
 
 void
 supply_fast_tracepoint_registers (struct regcache *regcache,
-				  const unsigned char *buf)
+                                  const unsigned char *buf)
 {
   int i;
 
   for (i = 0; i < X86_64_NUM_FT_COLLECT_GREGS; i++)
     supply_register (regcache, i,
-		     ((char *) buf) + x86_64_ft_collect_regmap[i]);
+                     ((char *) buf) + x86_64_ft_collect_regmap[i]);
 }
 
 ULONGEST
@@ -89,39 +88,25 @@ get_raw_reg (const unsigned char *raw_regs, int regnum)
    contain RIP, but we know what it must have been (the marker
    address).  */
 
-#define ST_REGENTRY(REG)			\
-  {						\
-    offsetof (struct registers, REG),		\
-    sizeof (((struct registers *) NULL)->REG)	\
+#define ST_REGENTRY(REG)                        \
+  {                                             \
+    offsetof (struct registers, REG),           \
+      sizeof (((struct registers *) NULL)->REG) \
   }
 
 static struct
 {
   int offset;
   int size;
-} x86_64_st_collect_regmap[] =
-  {
-    ST_REGENTRY(rax),
-    ST_REGENTRY(rbx),
-    ST_REGENTRY(rcx),
-    ST_REGENTRY(rdx),
-    ST_REGENTRY(rsi),
-    ST_REGENTRY(rdi),
-    ST_REGENTRY(rbp),
-    ST_REGENTRY(rsp),
-    ST_REGENTRY(r8),
-    ST_REGENTRY(r9),
-    ST_REGENTRY(r10),
-    ST_REGENTRY(r11),
-    ST_REGENTRY(r12),
-    ST_REGENTRY(r13),
-    ST_REGENTRY(r14),
-    ST_REGENTRY(r15),
-    { -1, 0 },
-    ST_REGENTRY(rflags),
-    ST_REGENTRY(cs),
-    ST_REGENTRY(ss),
-  };
+} x86_64_st_collect_regmap[] = {
+  ST_REGENTRY (rax), ST_REGENTRY (rbx), ST_REGENTRY (rcx),
+  ST_REGENTRY (rdx), ST_REGENTRY (rsi), ST_REGENTRY (rdi),
+  ST_REGENTRY (rbp), ST_REGENTRY (rsp), ST_REGENTRY (r8),
+  ST_REGENTRY (r9),  ST_REGENTRY (r10), ST_REGENTRY (r11),
+  ST_REGENTRY (r12), ST_REGENTRY (r13), ST_REGENTRY (r14),
+  ST_REGENTRY (r15), { -1, 0 },         ST_REGENTRY (rflags),
+  ST_REGENTRY (cs),  ST_REGENTRY (ss),
+};
 
 #define X86_64_NUM_ST_COLLECT_GREGS \
   (sizeof (x86_64_st_collect_regmap) / sizeof (x86_64_st_collect_regmap[0]))
@@ -131,8 +116,7 @@ static struct
 
 void
 supply_static_tracepoint_registers (struct regcache *regcache,
-				    const unsigned char *buf,
-				    CORE_ADDR pc)
+                                    const unsigned char *buf, CORE_ADDR pc)
 {
   int i;
   unsigned long newpc = pc;
@@ -142,27 +126,26 @@ supply_static_tracepoint_registers (struct regcache *regcache,
   for (i = 0; i < X86_64_NUM_ST_COLLECT_GREGS; i++)
     if (x86_64_st_collect_regmap[i].offset != -1)
       {
-	switch (x86_64_st_collect_regmap[i].size)
-	  {
-	  case 8:
-	    supply_register (regcache, i,
-			     ((char *) buf)
-			     + x86_64_st_collect_regmap[i].offset);
-	    break;
-	  case 2:
-	    {
-	      unsigned long reg
-		= * (short *) (((char *) buf)
-			       + x86_64_st_collect_regmap[i].offset);
-	      reg &= 0xffff;
-	      supply_register (regcache, i, &reg);
-	    }
-	    break;
-	  default:
-	    internal_error ("unhandled register size: %d",
-			    x86_64_st_collect_regmap[i].size);
-	    break;
-	  }
+        switch (x86_64_st_collect_regmap[i].size)
+          {
+          case 8:
+            supply_register (regcache, i,
+                             ((char *) buf)
+                               + x86_64_st_collect_regmap[i].offset);
+            break;
+          case 2:
+            {
+              unsigned long reg = *(
+                short *) (((char *) buf) + x86_64_st_collect_regmap[i].offset);
+              reg &= 0xffff;
+              supply_register (regcache, i, &reg);
+            }
+            break;
+          default:
+            internal_error ("unhandled register size: %d",
+                            x86_64_st_collect_regmap[i].size);
+            break;
+          }
       }
 }
 
@@ -247,23 +230,22 @@ alloc_jump_pad_buffer (size_t size)
       void *res;
 
       /* No MAP_FIXED - we don't want to zap someone's mapping.  */
-      res = mmap ((void *) addr, size,
-		  PROT_READ | PROT_WRITE | PROT_EXEC,
-		  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+      res = mmap ((void *) addr, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
       /* If we got what we wanted, return.  */
       if ((uintptr_t) res == addr)
-	return res;
+        return res;
 
       /* If we got a mapping, but at a wrong address, undo it.  */
       if (res != MAP_FAILED)
-	munmap (res, size);
+        munmap (res, size);
     }
 
   return NULL;
 #else
   void *res = mmap (NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
-		    MAP_PRIVATE | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
+                    MAP_PRIVATE | MAP_ANONYMOUS | MAP_32BIT, -1, 0);
 
   if (res == MAP_FAILED)
     return NULL;

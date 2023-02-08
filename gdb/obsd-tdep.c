@@ -30,7 +30,7 @@ obsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct bound_minimal_symbol msym;
 
-  msym = lookup_minimal_symbol("_dl_bind", NULL, NULL);
+  msym = lookup_minimal_symbol ("_dl_bind", NULL, NULL);
   if (msym.minsym && msym.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());
   else
@@ -40,40 +40,40 @@ obsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* OpenBSD signal numbers.  From <sys/signal.h>. */
 
 enum
-  {
-    OBSD_SIGHUP = 1,
-    OBSD_SIGINT = 2,
-    OBSD_SIGQUIT = 3,
-    OBSD_SIGILL = 4,
-    OBSD_SIGTRAP = 5,
-    OBSD_SIGABRT = 6,
-    OBSD_SIGEMT = 7,
-    OBSD_SIGFPE = 8,
-    OBSD_SIGKILL = 9,
-    OBSD_SIGBUS = 10,
-    OBSD_SIGSEGV = 11,
-    OBSD_SIGSYS = 12,
-    OBSD_SIGPIPE = 13,
-    OBSD_SIGALRM = 14,
-    OBSD_SIGTERM = 15,
-    OBSD_SIGURG = 16,
-    OBSD_SIGSTOP = 17,
-    OBSD_SIGTSTP = 18,
-    OBSD_SIGCONT = 19,
-    OBSD_SIGCHLD = 20,
-    OBSD_SIGTTIN = 21,
-    OBSD_SIGTTOU = 22,
-    OBSD_SIGIO = 23,
-    OBSD_SIGXCPU = 24,
-    OBSD_SIGXFSZ = 25,
-    OBSD_SIGVTALRM = 26,
-    OBSD_SIGPROF = 27,
-    OBSD_SIGWINCH = 28,
-    OBSD_SIGINFO = 29,
-    OBSD_SIGUSR1 = 30,
-    OBSD_SIGUSR2 = 31,
-    OBSD_SIGTHR = 32,
-  };
+{
+  OBSD_SIGHUP = 1,
+  OBSD_SIGINT = 2,
+  OBSD_SIGQUIT = 3,
+  OBSD_SIGILL = 4,
+  OBSD_SIGTRAP = 5,
+  OBSD_SIGABRT = 6,
+  OBSD_SIGEMT = 7,
+  OBSD_SIGFPE = 8,
+  OBSD_SIGKILL = 9,
+  OBSD_SIGBUS = 10,
+  OBSD_SIGSEGV = 11,
+  OBSD_SIGSYS = 12,
+  OBSD_SIGPIPE = 13,
+  OBSD_SIGALRM = 14,
+  OBSD_SIGTERM = 15,
+  OBSD_SIGURG = 16,
+  OBSD_SIGSTOP = 17,
+  OBSD_SIGTSTP = 18,
+  OBSD_SIGCONT = 19,
+  OBSD_SIGCHLD = 20,
+  OBSD_SIGTTIN = 21,
+  OBSD_SIGTTOU = 22,
+  OBSD_SIGIO = 23,
+  OBSD_SIGXCPU = 24,
+  OBSD_SIGXFSZ = 25,
+  OBSD_SIGVTALRM = 26,
+  OBSD_SIGPROF = 27,
+  OBSD_SIGWINCH = 28,
+  OBSD_SIGINFO = 29,
+  OBSD_SIGUSR1 = 30,
+  OBSD_SIGUSR2 = 31,
+  OBSD_SIGTHR = 32,
+};
 
 /* Implement the "gdb_signal_from_target" gdbarch method.  */
 
@@ -185,8 +185,7 @@ obsd_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
 /* Implement the "gdb_signal_to_target" gdbarch method.  */
 
 static int
-obsd_gdb_signal_to_target (struct gdbarch *gdbarch,
-			   enum gdb_signal signal)
+obsd_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
 {
   switch (signal)
     {
@@ -293,10 +292,8 @@ obsd_gdb_signal_to_target (struct gdbarch *gdbarch,
 void
 obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  set_gdbarch_gdb_signal_from_target (gdbarch,
-				      obsd_gdb_signal_from_target);
-  set_gdbarch_gdb_signal_to_target (gdbarch,
-				    obsd_gdb_signal_to_target);
+  set_gdbarch_gdb_signal_from_target (gdbarch, obsd_gdb_signal_from_target);
+  set_gdbarch_gdb_signal_to_target (gdbarch, obsd_gdb_signal_to_target);
 
   set_gdbarch_auxv_parse (gdbarch, svr4_auxv_parse);
 }

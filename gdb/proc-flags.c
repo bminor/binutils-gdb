@@ -37,17 +37,17 @@
     following form.  These tables can be used to map numeric values to
     their symbolic names and to a string that describes their specific use.  */
 
-struct trans {
-  int value;                    /* The numeric value */
-  const char *name;             /* The equivalent symbolic value */
-  const char *desc;             /* Short description of value */
+struct trans
+{
+  int value;	    /* The numeric value */
+  const char *name; /* The equivalent symbolic value */
+  const char *desc; /* Short description of value */
 };
 
 /* Translate bits in the pr_flags member of the prstatus structure,
    into the names and desc information.  */
 
-static struct trans pr_flag_table[] =
-{
+static struct trans pr_flag_table[] = {
   /* lwp is stopped */
   { PR_STOPPED, "PR_STOPPED", "Process (LWP) is stopped" },
   /* lwp is stopped on an event of interest */

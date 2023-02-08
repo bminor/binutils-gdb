@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (SENTINEL_FRAME_H)
+#if !defined(SENTINEL_FRAME_H)
 #define SENTINEL_FRAME_H 1
 
 struct frame_unwind;

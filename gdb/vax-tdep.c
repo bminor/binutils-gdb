@@ -38,11 +38,9 @@
 static const char *
 vax_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  static const char *register_names[] =
-  {
-    "r0", "r1", "r2",  "r3",  "r4", "r5", "r6", "r7",
-    "r8", "r9", "r10", "r11", "ap", "fp", "sp", "pc",
-    "ps",
+  static const char *register_names[] = {
+    "r0", "r1",	 "r2",	"r3", "r4", "r5", "r6", "r7", "r8",
+    "r9", "r10", "r11", "ap", "fp", "sp", "pc", "ps",
   };
 
   gdb_static_assert (VAX_NUM_REGS == ARRAY_SIZE (register_names));
@@ -57,7 +55,7 @@ vax_register_type (struct gdbarch *gdbarch, int regnum)
 {
   return builtin_type (gdbarch)->builtin_int;
 }
-
+
 /* Core file support.  */
 
 /* Supply register REGNUM from the buffer specified by GREGS and LEN
@@ -80,11 +78,7 @@ vax_supply_gregset (const struct regset *regset, struct regcache *regcache,
 
 /* VAX register set.  */
 
-static const struct regset vax_gregset =
-{
-  NULL,
-  vax_supply_gregset
-};
+static const struct regset vax_gregset = { NULL, vax_supply_gregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -96,14 +90,14 @@ vax_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   cb (".reg", VAX_NUM_REGS * 4, VAX_NUM_REGS * 4, &vax_gregset, NULL, cb_data);
 }
-
+
 /* The VAX UNIX calling convention uses R1 to pass a structure return
    value address instead of passing it as a first (hidden) argument as
    the VMS calling convention suggests.  */
 
 static CORE_ADDR
-vax_store_arguments (struct regcache *regcache, int nargs,
-		     struct value **args, CORE_ADDR sp)
+vax_store_arguments (struct regcache *regcache, int nargs, struct value **args,
+		     CORE_ADDR sp)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -194,7 +188,6 @@ vax_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
   fp = get_frame_register_unsigned (this_frame, VAX_FP_REGNUM);
   return frame_id_build (fp, get_frame_pc (this_frame));
 }
-
 
 static enum return_value_convention
 vax_return_value (struct gdbarch *gdbarch, struct value *function,
@@ -204,8 +197,7 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
   int len = type->length ();
   gdb_byte buf[8];
 
-  if (type->code () == TYPE_CODE_STRUCT
-      || type->code () == TYPE_CODE_UNION
+  if (type->code () == TYPE_CODE_STRUCT || type->code () == TYPE_CODE_UNION
       || type->code () == TYPE_CODE_ARRAY)
     {
       /* The default on VAX is to return structures in static memory.
@@ -242,7 +234,6 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
-
 
 /* Use the program counter to determine the contents and size of a
    breakpoint instruction.  Return a pointer to a string of bytes that
@@ -253,7 +244,7 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
 constexpr gdb_byte vax_break_insn[] = { 3 };
 
 typedef BP_MANIPULATION (vax_break_insn) vax_breakpoint;
-
+
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
@@ -264,28 +255,27 @@ vax_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   gdb_byte op = read_memory_unsigned_integer (pc, 1, byte_order);
 
   if (op == 0x11)
-    pc += 2;			/* skip brb */
+    pc += 2; /* skip brb */
   if (op == 0x31)
-    pc += 3;			/* skip brw */
+    pc += 3; /* skip brw */
   if (op == 0xC2
       && read_memory_unsigned_integer (pc + 2, 1, byte_order) == 0x5E)
-    pc += 3;			/* skip subl2 */
+    pc += 3; /* skip subl2 */
   if (op == 0x9E
       && read_memory_unsigned_integer (pc + 1, 1, byte_order) == 0xAE
       && read_memory_unsigned_integer (pc + 3, 1, byte_order) == 0x5E)
-    pc += 4;			/* skip movab */
+    pc += 4; /* skip movab */
   if (op == 0x9E
       && read_memory_unsigned_integer (pc + 1, 1, byte_order) == 0xCE
       && read_memory_unsigned_integer (pc + 4, 1, byte_order) == 0x5E)
-    pc += 5;			/* skip movab */
+    pc += 5; /* skip movab */
   if (op == 0x9E
       && read_memory_unsigned_integer (pc + 1, 1, byte_order) == 0xEE
       && read_memory_unsigned_integer (pc + 6, 1, byte_order) == 0x5E)
-    pc += 7;			/* skip movab */
+    pc += 7; /* skip movab */
 
   return pc;
 }
-
 
 /* Unwinding the stack is relatively easy since the VAX has a
    dedicated frame pointer, and frames are set up automatically as the
@@ -378,25 +368,22 @@ vax_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static struct value *
-vax_frame_prev_register (frame_info_ptr this_frame,
-			 void **this_cache, int regnum)
+vax_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+			 int regnum)
 {
   struct vax_frame_cache *cache = vax_frame_cache (this_frame, this_cache);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
 
-static const struct frame_unwind vax_frame_unwind =
-{
-  "vax prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  vax_frame_this_id,
-  vax_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
-
+static const struct frame_unwind vax_frame_unwind
+  = { "vax prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      vax_frame_this_id,
+      vax_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 static CORE_ADDR
 vax_frame_base_address (frame_info_ptr this_frame, void **this_cache)
@@ -412,13 +399,9 @@ vax_frame_args_address (frame_info_ptr this_frame, void **this_cache)
   return get_frame_register_unsigned (this_frame, VAX_AP_REGNUM);
 }
 
-static const struct frame_base vax_frame_base =
-{
-  &vax_frame_unwind,
-  vax_frame_base_address,
-  vax_frame_base_address,
-  vax_frame_args_address
-};
+static const struct frame_base vax_frame_base
+  = { &vax_frame_unwind, vax_frame_base_address, vax_frame_base_address,
+      vax_frame_args_address };
 
 /* Return number of arguments for FRAME.  */
 
@@ -435,8 +418,6 @@ vax_frame_num_args (frame_info_ptr frame)
   args = get_frame_register_unsigned (frame, VAX_AP_REGNUM);
   return get_frame_memory_unsigned (frame, args, 1);
 }
-
-
 
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
@@ -470,8 +451,8 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, VAX_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, VAX_PS_REGNUM);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, vax_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (gdbarch,
+					    vax_iterate_over_regset_sections);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);
@@ -507,6 +488,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_vax_tdep ();
+
 void
 _initialize_vax_tdep ()
 {

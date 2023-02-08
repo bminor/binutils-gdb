@@ -37,8 +37,6 @@ record_producer (const char *producer)
   buildsym_compunit->record_producer (producer);
 }
 
-
-
 /* See buildsym.h.  */
 
 void
@@ -196,8 +194,8 @@ pop_context ()
 
 struct block *
 finish_block (struct symbol *symbol, struct pending_block *old_blocks,
-	      const struct dynamic_prop *static_link,
-	      CORE_ADDR start, CORE_ADDR end)
+	      const struct dynamic_prop *static_link, CORE_ADDR start,
+	      CORE_ADDR end)
 {
   gdb_assert (buildsym_compunit != nullptr);
   return buildsym_compunit->finish_block (symbol, old_blocks, static_link,

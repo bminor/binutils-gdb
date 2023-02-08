@@ -60,6 +60,7 @@ struct nat_siginfo_t
   union
   {
     int _pad[((128 / sizeof (int)) - 4)];
+
     /* kill() */
     struct
     {
@@ -98,6 +99,7 @@ struct nat_siginfo_t
     {
       nat_uptr_t _addr;
       short int _addr_lsb;
+
       struct
       {
 	nat_uptr_t _lower;
@@ -187,6 +189,7 @@ struct compat_siginfo_t
     {
       unsigned int _addr;
       short int _addr_lsb;
+
       struct
       {
 	unsigned int _lower;
@@ -293,7 +296,7 @@ struct __attribute__ ((__aligned__ (8))) compat_x32_siginfo_t
 #endif
 
 #ifndef SEGV_BNDERR
-#define SEGV_BNDERR	3
+#define SEGV_BNDERR 3
 #endif
 
 /* The type of the siginfo object the kernel returns in
@@ -333,8 +336,7 @@ compat_siginfo_from_siginfo (compat_siginfo_t *to, const siginfo_t *from)
 #ifndef __ILP32__
   /* The struct compat_x32_siginfo_t doesn't contain
      cpt_si_lower/cpt_si_upper.  */
-  else if (to->si_code == SEGV_BNDERR
-	   && to->si_signo == SIGSEGV)
+  else if (to->si_code == SEGV_BNDERR && to->si_signo == SIGSEGV)
     {
       to->cpt_si_addr = from_ptrace.cpt_si_addr;
       to->cpt_si_lower = from_ptrace.cpt_si_lower;
@@ -503,9 +505,6 @@ compat_x32_siginfo_from_siginfo (compat_x32_siginfo_t *to,
     }
 }
 
-
-
-
 /* Convert the compatible x32 siginfo into system siginfo.  */
 static void
 siginfo_from_compat_x32_siginfo (siginfo_t *to,
@@ -591,11 +590,9 @@ amd64_linux_siginfo_fixup_common (siginfo_t *ptrace, gdb_byte *inf,
   else if (mode == FIXUP_X32)
     {
       if (direction == 0)
-	compat_x32_siginfo_from_siginfo ((compat_x32_siginfo_t *) inf,
-					 ptrace);
+	compat_x32_siginfo_from_siginfo ((compat_x32_siginfo_t *) inf, ptrace);
       else
-	siginfo_from_compat_x32_siginfo (ptrace,
-					 (compat_x32_siginfo_t *) inf);
+	siginfo_from_compat_x32_siginfo (ptrace, (compat_x32_siginfo_t *) inf);
 
       return 1;
     }

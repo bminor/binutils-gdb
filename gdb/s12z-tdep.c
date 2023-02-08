@@ -39,37 +39,22 @@
    the CCW register.  */
 #define N_PHYSICAL_REGISTERS (S12Z_N_REGISTERS - 2)
 
-
 /*  A permutation of all the physical registers.   Indexing this array
     with an integer from gdb's internal representation will return the
     register enum.  */
-static const int reg_perm[N_PHYSICAL_REGISTERS] =
-  {
-   REG_D0,
-   REG_D1,
-   REG_D2,
-   REG_D3,
-   REG_D4,
-   REG_D5,
-   REG_D6,
-   REG_D7,
-   REG_X,
-   REG_Y,
-   REG_S,
-   REG_P,
-   REG_CCW
-  };
+static const int reg_perm[N_PHYSICAL_REGISTERS]
+  = { REG_D0, REG_D1, REG_D2, REG_D3, REG_D4, REG_D5, REG_D6,
+      REG_D7, REG_X,  REG_Y,  REG_S,  REG_P,  REG_CCW };
 
 /*  The inverse of the above permutation.  Indexing this
     array with a register enum (e.g. REG_D2) will return the register
     number in gdb's internal representation.  */
-static const int inv_reg_perm[N_PHYSICAL_REGISTERS] =
-  {
-   2, 3, 4, 5,      /* d2, d3, d4, d5 */
-   0, 1,            /* d0, d1 */
-   6, 7,            /* d6, d7 */
-   8, 9, 10, 11, 12 /* x, y, s, p, ccw */
-  };
+static const int inv_reg_perm[N_PHYSICAL_REGISTERS] = {
+  2, 3, 4,  5,	   /* d2, d3, d4, d5 */
+  0, 1,		   /* d0, d1 */
+  6, 7,		   /* d6, d7 */
+  8, 9, 10, 11, 12 /* x, y, s, p, ccw */
+};
 
 /*  Return the name of the register REGNUM.  */
 static const char *
@@ -92,8 +77,8 @@ s12z_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return prologue_end;
     }
 
-  warning (_("%s Failed to find end of prologue PC = %08x"),
-	   __FUNCTION__, (unsigned int) pc);
+  warning (_ ("%s Failed to find end of prologue PC = %08x"), __FUNCTION__,
+	   (unsigned int) pc);
 
   return pc;
 }
@@ -117,27 +102,36 @@ s12z_register_type (struct gdbarch *gdbarch, int reg_nr)
   return builtin_type (gdbarch)->builtin_int0;
 }
 
-
 static int
 s12z_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int num)
 {
   switch (num)
     {
-    case 15:      return REG_S;
-    case 7:       return REG_X;
-    case 8:       return REG_Y;
-    case 42:      return REG_D0;
-    case 43:      return REG_D1;
-    case 44:      return REG_D2;
-    case 45:      return REG_D3;
-    case 46:      return REG_D4;
-    case 47:      return REG_D5;
-    case 48:      return REG_D6;
-    case 49:      return REG_D7;
+    case 15:
+      return REG_S;
+    case 7:
+      return REG_X;
+    case 8:
+      return REG_Y;
+    case 42:
+      return REG_D0;
+    case 43:
+      return REG_D1;
+    case 44:
+      return REG_D2;
+    case 45:
+      return REG_D3;
+    case 46:
+      return REG_D4;
+    case 47:
+      return REG_D5;
+    case 48:
+      return REG_D6;
+    case 49:
+      return REG_D7;
     }
   return -1;
 }
-
 
 /* Support functions for frame handling.  */
 
@@ -146,8 +140,8 @@ s12z_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int num)
 struct mem_read_abstraction
 {
   struct mem_read_abstraction_base base; /* The parent struct.  */
-  bfd_vma memaddr;                  /* Where to read from.  */
-  struct disassemble_info* info;  /* The disassembler  to use for reading.  */
+  bfd_vma memaddr;			 /* Where to read from.  */
+  struct disassemble_info *info; /* The disassembler  to use for reading.  */
 };
 
 /* Advance the reader by one byte.  */
@@ -170,15 +164,13 @@ posn (struct mem_read_abstraction_base *b)
    It is the caller's responsibility to ensure that this is of at least N
    in size.  */
 static int
-abstract_read_memory (struct mem_read_abstraction_base *b,
-		      int offset,
+abstract_read_memory (struct mem_read_abstraction_base *b, int offset,
 		      size_t n, bfd_byte *bytes)
 {
   struct mem_read_abstraction *mra = (struct mem_read_abstraction *) b;
 
-  int status =
-    (*mra->info->read_memory_func) (mra->memaddr + offset,
-				    bytes, n, mra->info);
+  int status = (*mra->info->read_memory_func) (mra->memaddr + offset, bytes, n,
+					       mra->info);
 
   if (status != 0)
     {
@@ -189,7 +181,6 @@ abstract_read_memory (struct mem_read_abstraction_base *b,
   return 0;
 }
 
-
 /* Return the stack adjustment caused by a push or pull instruction.  */
 static int
 push_pull_get_stack_adjustment (int n_operands,
@@ -198,7 +189,7 @@ push_pull_get_stack_adjustment (int n_operands,
   int stack_adjustment = 0;
   gdb_assert (n_operands > 0);
   if (operands[0]->cl == OPND_CL_REGISTER_ALL)
-    stack_adjustment = 26;  /* All the regs are involved.  */
+    stack_adjustment = 26; /* All the regs are involved.  */
   else if (operands[0]->cl == OPND_CL_REGISTER_ALL16)
     stack_adjustment = 4 * 2; /* All four 16 bit regs are involved.  */
   else
@@ -231,7 +222,8 @@ push_pull_get_stack_adjustment (int n_operands,
 	    stack_adjustment += 1;
 	    break;
 	  default:
-	    gdb_assert_not_reached ("Invalid register in push/pull operation.");
+	    gdb_assert_not_reached (
+	      "Invalid register in push/pull operation.");
 	    break;
 	  }
       }
@@ -267,15 +259,15 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 
   /* Get the stack pointer if we have one (if there's no process executing
      yet we won't have a frame.  */
-  this_sp = (NULL == this_frame) ? 0 :
-    get_frame_register_unsigned (this_frame, REG_S);
+  this_sp = (NULL == this_frame)
+	      ? 0
+	      : get_frame_register_unsigned (this_frame, REG_S);
 
   /* Return early if GDB couldn't find the function.  */
   if (start_addr == 0)
     {
-      warning (_("Couldn't find function including address %s SP is %s"),
-	       paddress (gdbarch, this_pc),
-	       paddress (gdbarch, this_sp));
+      warning (_ ("Couldn't find function including address %s SP is %s"),
+	       paddress (gdbarch, this_pc), paddress (gdbarch, this_sp));
 
       /* JPB: 28-Apr-11.  This is a temporary patch, to get round GDB
 	 crashing right at the beginning.  Build the frame ID as best we
@@ -304,7 +296,7 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
      have executed the code.  Check we have a sane prologue size, and if
      zero we are frameless and can give up here.  */
   if (end_addr < start_addr)
-    error (_("end addr %s is less than start addr %s"),
+    error (_ ("end addr %s is less than start addr %s"),
 	   paddress (gdbarch, end_addr), paddress (gdbarch, start_addr));
 
   CORE_ADDR addr = start_addr; /* Where we have got to?  */
@@ -314,9 +306,9 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
   struct gdb_non_printing_memory_disassembler dis (gdbarch);
 
   struct mem_read_abstraction mra;
-  mra.base.read = (int (*)(mem_read_abstraction_base*,
-			   int, size_t, bfd_byte*)) abstract_read_memory;
-  mra.base.advance = advance ;
+  mra.base.read = (int (*) (mem_read_abstraction_base *, int, size_t,
+			    bfd_byte *)) abstract_read_memory;
+  mra.base.advance = advance;
   mra.base.posn = posn;
   mra.info = dis.disasm_info ();
 
@@ -327,9 +319,8 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
       int n_operands = 0;
       struct operand *operands[6];
       mra.memaddr = addr;
-      int n_bytes =
-	decode_s12z (&optr, &osize, &n_operands, operands,
-		     (mem_read_abstraction_base *) &mra);
+      int n_bytes = decode_s12z (&optr, &osize, &n_operands, operands,
+				 (mem_read_abstraction_base *) &mra);
 
       switch (optr)
 	{
@@ -366,14 +357,13 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 	      if ((reg == REG_S) && (operands[1]->cl == OPND_CL_MEMORY))
 		{
 		  const struct memory_operand *mo
-		    = (const struct memory_operand * ) operands[1];
-		  if (mo->n_regs == 1 && !mo->indirect
-		      && mo->regs[0] == REG_S
+		    = (const struct memory_operand *) operands[1];
+		  if (mo->n_regs == 1 && !mo->indirect && mo->regs[0] == REG_S
 		      && mo->mutation == OPND_RM_NONE)
 		    {
 		      /* LEA S, (xxx, S) -- Decrement the stack.   This is
 			 almost certainly the start of a frame.  */
-		      int simm = (signed char)  mo->base_offset;
+		      int simm = (signed char) mo->base_offset;
 		      frame_size -= simm;
 		    }
 		}
@@ -406,11 +396,9 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
       /* The stack pointer of the prev frame is frame_size greater
 	 than the stack pointer of this frame plus one address
 	 size (caused by the JSR or BSR).  */
-      trad_frame_set_reg_value (info, REG_S,
-				this_sp + frame_size + 3);
+      trad_frame_set_reg_value (info, REG_S, this_sp + frame_size + 3);
       trad_frame_set_reg_addr (info, REG_P, this_sp + frame_size);
     }
-
 
   /* Build the frame ID.  */
   trad_frame_set_id (info, frame_id_build (this_sp_for_id, start_addr));
@@ -420,23 +408,22 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 
 /* Implement the this_id function for the stub unwinder.  */
 static void
-s12z_frame_this_id (frame_info_ptr this_frame,
-		    void **prologue_cache, struct frame_id *this_id)
+s12z_frame_this_id (frame_info_ptr this_frame, void **prologue_cache,
+		    struct frame_id *this_id)
 {
-  struct trad_frame_cache *info = s12z_frame_cache (this_frame,
-						    prologue_cache);
+  struct trad_frame_cache *info
+    = s12z_frame_cache (this_frame, prologue_cache);
 
   trad_frame_get_id (info, this_id);
 }
 
-
 /* Implement the prev_register function for the stub unwinder.  */
 static struct value *
-s12z_frame_prev_register (frame_info_ptr this_frame,
-			  void **prologue_cache, int regnum)
+s12z_frame_prev_register (frame_info_ptr this_frame, void **prologue_cache,
+			  int regnum)
 {
-  struct trad_frame_cache *info = s12z_frame_cache (this_frame,
-						    prologue_cache);
+  struct trad_frame_cache *info
+    = s12z_frame_cache (this_frame, prologue_cache);
 
   return trad_frame_get_register (info, this_frame, regnum);
 }
@@ -453,8 +440,7 @@ static const struct frame_unwind s12z_frame_unwind = {
   NULL,
 };
 
-
-constexpr gdb_byte s12z_break_insn[] = {0x00};
+constexpr gdb_byte s12z_break_insn[] = { 0x00 };
 
 typedef BP_MANIPULATION (s12z_break_insn) s12z_breakpoint;
 
@@ -465,34 +451,26 @@ struct s12z_gdbarch_tdep : gdbarch_tdep_base
 /*  A vector of human readable characters representing the
     bits in the CCW register.  Unused bits are represented as '-'.
     Lowest significant bit comes first.  */
-static const char ccw_bits[] =
-  {
-   'C',  /* Carry  */
-   'V',  /* Two's Complement Overflow  */
-   'Z',  /* Zero  */
-   'N',  /* Negative  */
-   'I',  /* Interrupt  */
-   '-',
-   'X',  /* Non-Maskable Interrupt  */
-   'S',  /* STOP Disable  */
-   '0',  /*  Interrupt priority level */
-   '0',  /*  ditto  */
-   '0',  /*  ditto  */
-   '-',
-   '-',
-   '-',
-   '-',
-   'U'   /* User/Supervisor State.  */
-  };
+static const char ccw_bits[] = {
+  'C',			  /* Carry  */
+  'V',			  /* Two's Complement Overflow  */
+  'Z',			  /* Zero  */
+  'N',			  /* Negative  */
+  'I',			  /* Interrupt  */
+  '-', 'X',		  /* Non-Maskable Interrupt  */
+  'S',			  /* STOP Disable  */
+  '0',			  /*  Interrupt priority level */
+  '0',			  /*  ditto  */
+  '0',			  /*  ditto  */
+  '-', '-', '-', '-', 'U' /* User/Supervisor State.  */
+};
 
 /* Print a human readable representation of the CCW register.
    For example: "u----000SX-Inzvc" corresponds to the value
    0xD0.  */
 static void
-s12z_print_ccw_info (struct gdbarch *gdbarch,
-		     struct ui_file *file,
-		     frame_info_ptr frame,
-		     int reg)
+s12z_print_ccw_info (struct gdbarch *gdbarch, struct ui_file *file,
+		     frame_info_ptr frame, int reg)
 {
   struct value *v = value_of_register (reg, frame);
   const char *name = gdbarch_register_name (gdbarch, reg);
@@ -522,13 +500,11 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
 }
 
 static void
-s12z_print_registers_info (struct gdbarch *gdbarch,
-			    struct ui_file *file,
-			    frame_info_ptr frame,
-			    int regnum, int print_all)
+s12z_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
+			   frame_info_ptr frame, int regnum, int print_all)
 {
-  const int numregs = (gdbarch_num_regs (gdbarch)
-		       + gdbarch_num_pseudo_regs (gdbarch));
+  const int numregs
+    = (gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch));
 
   if (regnum == -1)
     {
@@ -548,18 +524,15 @@ s12z_print_registers_info (struct gdbarch *gdbarch,
     default_print_registers_info (gdbarch, file, frame, regnum, print_all);
 }
 
-
-
-
 static void
 s12z_extract_return_value (struct type *type, struct regcache *regcache,
-			      void *valbuf)
+			   void *valbuf)
 {
   int reg = -1;
 
   switch (type->length ())
     {
-    case 0:   /* Nothing to do */
+    case 0: /* Nothing to do */
       return;
 
     case 1:
@@ -579,7 +552,7 @@ s12z_extract_return_value (struct type *type, struct regcache *regcache,
       break;
 
     default:
-      error (_("bad size for return value"));
+      error (_ ("bad size for return value"));
       return;
     }
 
@@ -591,10 +564,8 @@ s12z_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (type->code () == TYPE_CODE_STRUCT
-      || type->code () == TYPE_CODE_UNION
-      || type->code () == TYPE_CODE_ARRAY
-      || type->length () > 4)
+  if (type->code () == TYPE_CODE_STRUCT || type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_ARRAY || type->length () > 4)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)
@@ -603,14 +574,13 @@ s12z_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-
 static void
 show_bdccsr_command (const char *args, int from_tty)
 {
   struct string_file output;
   target_rcmd ("bdccsr", &output);
 
-  gdb_printf ("The current BDCCSR value is %s\n", output.string().c_str());
+  gdb_printf ("The current BDCCSR value is %s\n", output.string ().c_str ());
 }
 
 static struct gdbarch *
@@ -620,7 +590,7 @@ s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     = gdbarch_alloc (&info, gdbarch_tdep_up (new s12z_gdbarch_tdep));
 
   add_cmd ("bdccsr", class_support, show_bdccsr_command,
-	   _("Show the current value of the microcontroller's BDCCSR."),
+	   _ ("Show the current value of the microcontroller's BDCCSR."),
 	   &maintenanceinfolist);
 
   /* Target data types.  */
@@ -636,13 +606,10 @@ s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, REG_P);
   set_gdbarch_sp_regnum (gdbarch, REG_S);
 
-
   set_gdbarch_print_registers_info (gdbarch, s12z_print_registers_info);
 
-  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
-				       s12z_breakpoint::kind_from_pc);
-  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
-				       s12z_breakpoint::bp_from_kind);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, s12z_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, s12z_breakpoint::bp_from_kind);
 
   set_gdbarch_num_regs (gdbarch, N_PHYSICAL_REGISTERS);
   set_gdbarch_register_name (gdbarch, s12z_register_name);
@@ -663,6 +630,7 @@ s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_s12z_tdep ();
+
 void
 _initialize_s12z_tdep ()
 {

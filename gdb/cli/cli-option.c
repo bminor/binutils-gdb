@@ -25,8 +25,10 @@
 #include "command.h"
 #include <vector>
 
-namespace gdb {
-namespace option {
+namespace gdb
+{
+namespace option
+{
 
 /* An option's value.  Which field is active depends on the option's
    type.  */
@@ -151,16 +153,16 @@ find_end_options_delimiter (const char *args)
 
 static void
 complete_on_options (gdb::array_view<const option_def_group> options_group,
-		     completion_tracker &tracker,
-		     const char *text, const char *word)
+		     completion_tracker &tracker, const char *text,
+		     const char *word)
 {
   size_t textlen = strlen (text);
   for (const auto &grp : options_group)
     for (const auto &opt : grp.options)
       if (strncmp (opt.name, text, textlen) == 0)
 	{
-	  tracker.add_completion
-	    (make_completion_match_str (opt.name, text, word));
+	  tracker.add_completion (make_completion_match_str (opt.name, text,
+							     word));
 	}
 }
 
@@ -179,8 +181,7 @@ complete_on_all_options (completion_tracker &tracker,
 
 static gdb::optional<option_def_and_value>
 parse_option (gdb::array_view<const option_def_group> options_group,
-	      process_options_mode mode,
-	      bool have_delimiter,
+	      process_options_mode mode, bool have_delimiter,
 	      const char **args,
 	      parse_option_completion_info *completion = nullptr)
 {
@@ -189,7 +190,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
   else if (**args != '-')
     {
       if (have_delimiter)
-	error (_("Unrecognized option at: %s"), *args);
+	error (_ ("Unrecognized option at: %s"), *args);
       return {};
     }
   else if (check_for_argument (args, "--"))
@@ -213,13 +214,12 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 		{
 		  if (completion != nullptr && arg[len] == '\0')
 		    {
-		      complete_on_options (options_group,
-					   completion->tracker,
+		      complete_on_options (options_group, completion->tracker,
 					   arg, completion->word);
 		      return {};
 		    }
 
-		  error (_("Ambiguous option at: -%s"), arg);
+		  error (_ ("Ambiguous option at: -%s"), arg);
 		}
 
 	      match = &o;
@@ -235,15 +235,15 @@ parse_option (gdb::array_view<const option_def_group> options_group,
   if (match == nullptr)
     {
       if (have_delimiter || mode != PROCESS_OPTIONS_UNKNOWN_IS_OPERAND)
-	error (_("Unrecognized option at: %s"), *args);
+	error (_ ("Unrecognized option at: %s"), *args);
 
       return {};
     }
 
   if (completion != nullptr && arg[len] == '\0')
     {
-      complete_on_options (options_group, completion->tracker,
-			   arg, completion->word);
+      complete_on_options (options_group, completion->tracker, arg,
+			   completion->word);
       return {};
     }
 
@@ -260,7 +260,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	  {
 	    option_value val;
 	    val.boolean = true;
-	    return option_def_and_value {*match, match_ctx, val};
+	    return option_def_and_value { *match, match_ctx, val };
 	  }
 
 	const char *val_str = *args;
@@ -272,11 +272,11 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 
 	    if (mode == PROCESS_OPTIONS_REQUIRE_DELIMITER)
 	      {
-		complete_on_enum (completion->tracker,
-				  boolean_enums, val_str, val_str);
+		complete_on_enum (completion->tracker, boolean_enums, val_str,
+				  val_str);
 		complete_on_all_options (completion->tracker, options_group);
 	      }
-	    return option_def_and_value {*match, match_ctx};
+	    return option_def_and_value { *match, match_ctx };
 	  }
 	else if (**args == '-')
 	  {
@@ -306,20 +306,20 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 		  {
 		    if (*end == '\0')
 		      {
-			complete_on_enum (completion->tracker,
-					  boolean_enums, val_str, val_str);
-			return option_def_and_value {*match, match_ctx};
+			complete_on_enum (completion->tracker, boolean_enums,
+					  val_str, val_str);
+			return option_def_and_value { *match, match_ctx };
 		      }
 		  }
 
 		if (have_delimiter)
-		  error (_("Value given for `-%s' is not a boolean: %.*s"),
+		  error (_ ("Value given for `-%s' is not a boolean: %.*s"),
 			 match->name, (int) (end - val_str), val_str);
 		/* The user didn't separate options from operands
 		   using "--", so treat this unrecognized value as the
 		   start of the operands.  This makes "frame apply all
 		   -past-main CMD" work.  */
-		return option_def_and_value {*match, match_ctx};
+		return option_def_and_value { *match, match_ctx };
 	      }
 	    else if (completion != nullptr && **args == '\0')
 	      {
@@ -339,11 +339,8 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 		   "p -object 1[TAB]" -> "p -object 1" (i.e., nothing happens).
 		*/
 		static const char *const all_boolean_enums[] = {
-		  "on", "off",
-		  "yes", "no",
-		  "enable", "disable",
-		  "0", "1",
-		  nullptr,
+		  "on",	     "off", "yes", "no",    "enable",
+		  "disable", "0",   "1",   nullptr,
 		};
 		complete_on_enum (completion->tracker, all_boolean_enums,
 				  val_str, val_str);
@@ -353,7 +350,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 
 	option_value val;
 	val.boolean = res;
-	return option_def_and_value {*match, match_ctx, val};
+	return option_def_and_value { *match, match_ctx, val };
       }
     case var_uinteger:
     case var_integer:
@@ -367,25 +364,23 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	       so that readline doesn't do a partial match.  */
 	    if (**args == '\0')
 	      {
-		completion->tracker.add_completion
-		  (make_unique_xstrdup ("NUMBER"));
+		completion->tracker.add_completion (
+		  make_unique_xstrdup ("NUMBER"));
 		for (const literal_def *l = match->extra_literals;
-		     l->literal != nullptr;
-		     l++)
-		  completion->tracker.add_completion
-		    (make_unique_xstrdup (l->literal));
+		     l->literal != nullptr; l++)
+		  completion->tracker.add_completion (
+		    make_unique_xstrdup (l->literal));
 		return {};
 	      }
 	    else
 	      {
 		bool completions = false;
 		for (const literal_def *l = match->extra_literals;
-		     l->literal != nullptr;
-		     l++)
+		     l->literal != nullptr; l++)
 		  if (startswith (l->literal, *args))
 		    {
-		      completion->tracker.add_completion
-			(make_unique_xstrdup (l->literal));
+		      completion->tracker.add_completion (
+			make_unique_xstrdup (l->literal));
 		      completions = true;
 		    }
 		if (completions)
@@ -393,15 +388,14 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	      }
 	  }
 
-	LONGEST v = parse_cli_var_integer (match->type,
-					   match->extra_literals,
+	LONGEST v = parse_cli_var_integer (match->type, match->extra_literals,
 					   args, false);
 	option_value val;
 	if (match->type == var_uinteger)
 	  val.uinteger = v;
 	else
 	  val.integer = v;
-	return option_def_and_value {*match, match_ctx, val};
+	return option_def_and_value { *match, match_ctx, val };
       }
     case var_enum:
       {
@@ -410,8 +404,8 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	    const char *after_arg = skip_to_space (*args);
 	    if (*after_arg == '\0')
 	      {
-		complete_on_enum (completion->tracker,
-				  match->enums, *args, *args);
+		complete_on_enum (completion->tracker, match->enums, *args,
+				  *args);
 		if (completion->tracker.have_completions ())
 		  return {};
 
@@ -432,7 +426,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 
 	option_value val;
 	val.enumeration = parse_cli_var_enum (args, match->enums);
-	return option_def_and_value {*match, match_ctx, val};
+	return option_def_and_value { *match, match_ctx, val };
       }
     case var_string:
       {
@@ -440,17 +434,17 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	  {
 	    /* Treat e.g., "maint test-options -string --" as if there
 	       was no argument after "-string".  */
-	    error (_("-%s requires an argument"), match->name);
+	    error (_ ("-%s requires an argument"), match->name);
 	  }
 
 	const char *arg_start = *args;
 	std::string str = extract_string_maybe_quoted (args);
 	if (*args == arg_start)
-	  error (_("-%s requires an argument"), match->name);
+	  error (_ ("-%s requires an argument"), match->name);
 
 	option_value val;
 	val.string = new std::string (std::move (str));
-	return option_def_and_value {*match, match_ctx, val};
+	return option_def_and_value { *match, match_ctx, val };
       }
 
     default:
@@ -464,8 +458,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 /* See cli-option.h.  */
 
 bool
-complete_options (completion_tracker &tracker,
-		  const char **args,
+complete_options (completion_tracker &tracker, const char **args,
 		  process_options_mode mode,
 		  gdb::array_view<const option_def_group> options_group)
 {
@@ -478,7 +471,7 @@ complete_options (completion_tracker &tracker,
 
   if (text[0] == '-' && (!have_delimiter || *delimiter == '\0'))
     {
-      parse_option_completion_info completion_info {nullptr, tracker};
+      parse_option_completion_info completion_info { nullptr, tracker };
 
       while (1)
 	{
@@ -497,16 +490,15 @@ complete_options (completion_tracker &tracker,
 	  else if (**args == '-')
 	    {
 	      gdb::optional<option_def_and_value> ov
-		= parse_option (options_group, mode, have_delimiter,
-				args, &completion_info);
+		= parse_option (options_group, mode, have_delimiter, args,
+				&completion_info);
 	      if (!ov && !tracker.have_completions ())
 		{
 		  tracker.advance_custom_word_point_by (*args - text);
 		  return mode == PROCESS_OPTIONS_REQUIRE_DELIMITER;
 		}
 
-	      if (ov
-		  && ov->option.type == var_boolean
+	      if (ov && ov->option.type == var_boolean
 		  && !ov->value.has_value ())
 		{
 		  /* Looked like a boolean option, but we failed to
@@ -529,13 +521,10 @@ complete_options (completion_tracker &tracker,
 		  (gdb) frame apply all -limit 10[TAB]
 
 		 we don't try to complete on command names.  */
-	      if (ov
-		  && !tracker.have_completions ()
-		  && **args == '\0'
+	      if (ov && !tracker.have_completions () && **args == '\0'
 		  && *args > text && !isspace ((*args)[-1]))
 		{
-		  tracker.advance_custom_word_point_by
-		    (*args - text);
+		  tracker.advance_custom_word_point_by (*args - text);
 		  return true;
 		}
 
@@ -546,16 +535,15 @@ complete_options (completion_tracker &tracker,
 	    }
 	  else
 	    {
-	      tracker.advance_custom_word_point_by
-		(completion_info.word - text);
+	      tracker.advance_custom_word_point_by (completion_info.word
+						    - text);
 
 	      /* If the command requires a delimiter, but we haven't
 		 seen one, then return true, so that the caller
 		 doesn't try to complete on whatever follows options,
 		 which for these commands should only be done if
 		 there's a delimiter.  */
-	      if (mode == PROCESS_OPTIONS_REQUIRE_DELIMITER
-		  && !have_delimiter)
+	      if (mode == PROCESS_OPTIONS_REQUIRE_DELIMITER && !have_delimiter)
 		{
 		  /* If we reached the end of the input string, then
 		     offer all options, since that's all the user can
@@ -570,8 +558,8 @@ complete_options (completion_tracker &tracker,
 
 	  if (tracker.have_completions ())
 	    {
-	      tracker.advance_custom_word_point_by
-		(completion_info.word - text);
+	      tracker.advance_custom_word_point_by (completion_info.word
+						    - text);
 	      return true;
 	    }
 	}
@@ -624,8 +612,7 @@ save_option_value_in_ctx (gdb::optional<option_def_and_value> &ov)
 /* See cli-option.h.  */
 
 bool
-process_options (const char **args,
-		 process_options_mode mode,
+process_options (const char **args, process_options_mode mode,
 		 gdb::array_view<const option_def_group> options_group)
 {
   if (*args == nullptr)
@@ -681,8 +668,7 @@ get_val_type_str (const option_def &opt, std::string &buffer)
 	buffer = "NUMBER";
 	if (opt.extra_literals != nullptr)
 	  for (const literal_def *l = opt.extra_literals;
-	       l->literal != nullptr;
-	       l++)
+	       l->literal != nullptr; l++)
 	    {
 	      buffer += '|';
 	      buffer += l->literal;
@@ -791,8 +777,7 @@ build_help (const char *help_tmpl,
 /* See cli-option.h.  */
 
 void
-add_setshow_cmds_for_options (command_class cmd_class,
-			      void *data,
+add_setshow_cmds_for_options (command_class cmd_class, void *data,
 			      gdb::array_view<const option_def> options,
 			      struct cmd_list_element **set_list,
 			      struct cmd_list_element **show_list)
@@ -804,48 +789,39 @@ add_setshow_cmds_for_options (command_class cmd_class,
 	  add_setshow_boolean_cmd (option.name, cmd_class,
 				   option.var_address.boolean (option, data),
 				   option.set_doc, option.show_doc,
-				   option.help_doc,
-				   nullptr, option.show_cmd_cb,
-				   set_list, show_list);
+				   option.help_doc, nullptr,
+				   option.show_cmd_cb, set_list, show_list);
 	}
       else if (option.type == var_uinteger)
 	{
 	  add_setshow_uinteger_cmd (option.name, cmd_class,
 				    option.var_address.uinteger (option, data),
-				    option.extra_literals,
-				    option.set_doc, option.show_doc,
-				    option.help_doc,
-				    nullptr, option.show_cmd_cb,
-				    set_list, show_list);
+				    option.extra_literals, option.set_doc,
+				    option.show_doc, option.help_doc, nullptr,
+				    option.show_cmd_cb, set_list, show_list);
 	}
       else if (option.type == var_integer)
 	{
 	  add_setshow_integer_cmd (option.name, cmd_class,
 				   option.var_address.integer (option, data),
-				   option.extra_literals,
-				   option.set_doc, option.show_doc,
-				   option.help_doc,
-				   nullptr, option.show_cmd_cb,
-				   set_list, show_list);
+				   option.extra_literals, option.set_doc,
+				   option.show_doc, option.help_doc, nullptr,
+				   option.show_cmd_cb, set_list, show_list);
 	}
       else if (option.type == var_pinteger)
 	{
 	  add_setshow_pinteger_cmd (option.name, cmd_class,
 				    option.var_address.integer (option, data),
-				    option.extra_literals,
-				    option.set_doc, option.show_doc,
-				    option.help_doc,
-				    nullptr, option.show_cmd_cb,
-				    set_list, show_list);
+				    option.extra_literals, option.set_doc,
+				    option.show_doc, option.help_doc, nullptr,
+				    option.show_cmd_cb, set_list, show_list);
 	}
       else if (option.type == var_enum)
 	{
-	  add_setshow_enum_cmd (option.name, cmd_class,
-				option.enums,
+	  add_setshow_enum_cmd (option.name, cmd_class, option.enums,
 				option.var_address.enumeration (option, data),
 				option.set_doc, option.show_doc,
-				option.help_doc,
-				nullptr, option.show_cmd_cb,
+				option.help_doc, nullptr, option.show_cmd_cb,
 				set_list, show_list);
 	}
       else if (option.type == var_string)
@@ -853,8 +829,7 @@ add_setshow_cmds_for_options (command_class cmd_class,
 	  add_setshow_string_cmd (option.name, cmd_class,
 				  option.var_address.string (option, data),
 				  option.set_doc, option.show_doc,
-				  option.help_doc,
-				  nullptr, option.show_cmd_cb,
+				  option.help_doc, nullptr, option.show_cmd_cb,
 				  set_list, show_list);
 	}
       else

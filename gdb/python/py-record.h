@@ -29,8 +29,8 @@ struct recpy_record_object
 {
   PyObject_HEAD
 
-  /* The thread this object refers to.  */
-  thread_info *thread;
+    /* The thread this object refers to.  */
+    thread_info *thread;
 
   /* The current recording method.  */
   enum record_method method;
@@ -43,8 +43,8 @@ struct recpy_element_object
 {
   PyObject_HEAD
 
-  /* The thread this object refers to.  */
-  thread_info *thread;
+    /* The thread this object refers to.  */
+    thread_info *thread;
 
   /* The current recording method.  */
   enum record_method method;
@@ -60,12 +60,12 @@ extern PyTypeObject recpy_insn_type;
 extern PyTypeObject recpy_func_type;
 
 /* Create a new gdb.RecordInstruction object.  */
-extern PyObject *recpy_insn_new (thread_info *thread, enum record_method method,
-				 Py_ssize_t number);
+extern PyObject *recpy_insn_new (thread_info *thread,
+				 enum record_method method, Py_ssize_t number);
 
 /* Create a new gdb.RecordFunctionSegment object.  */
-extern PyObject *recpy_func_new (thread_info *thread, enum record_method method,
-				 Py_ssize_t number);
+extern PyObject *recpy_func_new (thread_info *thread,
+				 enum record_method method, Py_ssize_t number);
 
 /* Create a new gdb.RecordGap object.  */
 extern PyObject *recpy_gap_new (int reason_code, const char *reason_string,

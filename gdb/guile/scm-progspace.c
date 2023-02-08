@@ -63,7 +63,7 @@ struct psscm_deleter
 };
 
 static const registry<program_space>::key<pspace_smob, psscm_deleter>
-     psscm_pspace_data_key;
+  psscm_pspace_data_key;
 
 /* Return the list of pretty-printers registered with P_SMOB.  */
 
@@ -72,7 +72,7 @@ psscm_pspace_smob_pretty_printers (const pspace_smob *p_smob)
 {
   return p_smob->pretty_printers;
 }
-
+
 /* Administrivia for progspace smobs.  */
 
 /* The smob "print" function for <gdb:progspace>.  */
@@ -88,9 +88,8 @@ psscm_print_pspace_smob (SCM self, SCM port, scm_print_state *pstate)
       struct objfile *objfile = p_smob->pspace->symfile_object_file;
 
       gdbscm_printf (port, "%s",
-		     objfile != NULL
-		     ? objfile_name (objfile)
-		     : "{no symfile}");
+		     objfile != NULL ? objfile_name (objfile)
+				     : "{no symfile}");
     }
   else
     scm_puts ("{invalid}", port);
@@ -109,8 +108,8 @@ psscm_print_pspace_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 psscm_make_pspace_smob (void)
 {
-  pspace_smob *p_smob = (pspace_smob *)
-    scm_gc_malloc (sizeof (pspace_smob), pspace_smob_name);
+  pspace_smob *p_smob
+    = (pspace_smob *) scm_gc_malloc (sizeof (pspace_smob), pspace_smob_name);
   SCM p_scm;
 
   p_smob->pspace = NULL;
@@ -188,8 +187,7 @@ psscm_get_pspace_arg_unsafe (SCM self, int arg_pos, const char *func_name)
    Throws an exception if SELF is not a <gdb:progspace> object.  */
 
 static pspace_smob *
-psscm_get_pspace_smob_arg_unsafe (SCM self, int arg_pos,
-				  const char *func_name)
+psscm_get_pspace_smob_arg_unsafe (SCM self, int arg_pos, const char *func_name)
 {
   SCM p_scm = psscm_get_pspace_arg_unsafe (self, arg_pos, func_name);
   pspace_smob *p_smob = (pspace_smob *) SCM_SMOB_DATA (p_scm);
@@ -219,12 +217,12 @@ psscm_get_valid_pspace_smob_arg_unsafe (SCM self, int arg_pos,
   if (!psscm_is_valid (p_smob))
     {
       gdbscm_invalid_object_error (func_name, arg_pos, self,
-				   _("<gdb:progspace>"));
+				   _ ("<gdb:progspace>"));
     }
 
   return p_smob;
 }
-
+
 /* Program space methods.  */
 
 /* (progspace-valid? <gdb:progspace>) -> boolean
@@ -315,8 +313,8 @@ gdbscm_set_progspace_pretty_printers_x (SCM self, SCM printers)
   pspace_smob *p_smob
     = psscm_get_pspace_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (printers)), printers,
-		   SCM_ARG2, FUNC_NAME, _("list"));
+  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (printers)), printers, SCM_ARG2,
+		   FUNC_NAME, _ ("list"));
 
   p_smob->pretty_printers = printers;
 
@@ -355,49 +353,43 @@ gdbscm_progspaces (void)
 
   return scm_reverse_x (result, SCM_EOL);
 }
-
+
 /* Initialize the Scheme program space support.  */
 
-static const scheme_function pspace_functions[] =
-{
-  { "progspace?", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_p),
-    "\
+static const scheme_function pspace_functions[]
+  = { { "progspace?", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_p), "\
 Return #t if the object is a <gdb:objfile> object." },
 
-  { "progspace-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_valid_p),
-    "\
+      { "progspace-valid?", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_progspace_valid_p), "\
 Return #t if the progspace is valid (hasn't been deleted from gdb)." },
 
-  { "progspace-filename", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_filename),
-    "\
+      { "progspace-filename", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_progspace_filename), "\
 Return the name of the main symbol file of the progspace." },
 
-  { "progspace-objfiles", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_objfiles),
-    "\
+      { "progspace-objfiles", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_progspace_objfiles), "\
 Return the list of objfiles associated with the progspace.\n\
 Objfiles that are separate debug objfiles are not included in the result.\n\
 The order of appearance of objfiles in the result is arbitrary." },
 
-  { "progspace-pretty-printers", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_progspace_pretty_printers),
-    "\
+      { "progspace-pretty-printers", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_progspace_pretty_printers), "\
 Return a list of pretty-printers of the progspace." },
 
-  { "set-progspace-pretty-printers!", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_progspace_pretty_printers_x),
-    "\
+      { "set-progspace-pretty-printers!", 2, 0, 0,
+	as_a_scm_t_subr (gdbscm_set_progspace_pretty_printers_x), "\
 Set the list of pretty-printers of the progspace." },
 
-  { "current-progspace", 0, 0, 0, as_a_scm_t_subr (gdbscm_current_progspace),
-    "\
+      { "current-progspace", 0, 0, 0,
+	as_a_scm_t_subr (gdbscm_current_progspace), "\
 Return the current program space if there is one or #f if there isn't one." },
 
-  { "progspaces", 0, 0, 0, as_a_scm_t_subr (gdbscm_progspaces),
-    "\
+      { "progspaces", 0, 0, 0, as_a_scm_t_subr (gdbscm_progspaces), "\
 Return a list of all program spaces." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_pspaces (void)

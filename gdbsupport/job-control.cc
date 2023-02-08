@@ -70,7 +70,7 @@ have_job_control ()
 {
   /* OK, figure out whether we have job control.  If termios is not
      available, leave job_control 0.  */
-#if defined (HAVE_TERMIOS_H)
+#if defined(HAVE_TERMIOS_H)
   /* Do all systems with termios have the POSIX way of identifying job
      control?  I hope so.  */
 #ifdef _POSIX_JOB_CONTROL
@@ -79,7 +79,7 @@ have_job_control ()
 #ifdef _SC_JOB_CONTROL
   job_control = sysconf (_SC_JOB_CONTROL);
 #else
-  job_control = 0;		/* Have to assume the worst.  */
+  job_control = 0; /* Have to assume the worst.  */
 #endif /* _SC_JOB_CONTROL */
 #endif /* _POSIX_JOB_CONTROL */
 #endif /* HAVE_TERMIOS_H */

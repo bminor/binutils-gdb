@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef PROGSPACE_H
 #define PROGSPACE_H
 
@@ -64,10 +63,7 @@ public:
   {
   }
 
-  objfile *operator* () const
-  {
-    return m_iter->get ();
-  }
+  objfile *operator* () const { return m_iter->get (); }
 
   unwrapping_objfile_iterator operator++ ()
   {
@@ -85,7 +81,6 @@ private:
   /* The underlying iterator.  */
   objfile_list::iterator m_iter;
 };
-
 
 /* A range that returns unwrapping_objfile_iterators.  */
 
@@ -208,9 +203,9 @@ struct program_space
      for (objfile *objf : pspace->objfiles ()) { ... }  */
   objfiles_range objfiles ()
   {
-    return objfiles_range
-      (unwrapping_objfile_iterator (objfiles_list.begin ()),
-       unwrapping_objfile_iterator (objfiles_list.end ()));
+    return objfiles_range (
+      unwrapping_objfile_iterator (objfiles_list.begin ()),
+      unwrapping_objfile_iterator (objfiles_list.end ()));
   }
 
   using objfiles_safe_range = basic_safe_range<objfiles_range>;
@@ -224,10 +219,9 @@ struct program_space
      deleted during iteration.  */
   objfiles_safe_range objfiles_safe ()
   {
-    return objfiles_safe_range
-      (objfiles_range
-	 (unwrapping_objfile_iterator (objfiles_list.begin ()),
-	  unwrapping_objfile_iterator (objfiles_list.end ())));
+    return objfiles_safe_range (
+      objfiles_range (unwrapping_objfile_iterator (objfiles_list.begin ()),
+		      unwrapping_objfile_iterator (objfiles_list.end ())));
   }
 
   /* Add OBJFILE to the list of objfiles, putting it just before
@@ -241,10 +235,7 @@ struct program_space
 
   /* Return true if there is more than one object file loaded; false
      otherwise.  */
-  bool multi_objfile_p () const
-  {
-    return objfiles_list.size () > 1;
-  }
+  bool multi_objfile_p () const { return objfiles_list.size () > 1; }
 
   /* Free all the objfiles associated with this program space.  */
   void free_all_objfiles ();
@@ -253,24 +244,17 @@ struct program_space
      program space.  Use it like:
 
      for (so_list *so : pspace->solibs ()) { ... }  */
-  so_list_range solibs () const
-  { return so_list_range (this->so_list); }
+  so_list_range solibs () const { return so_list_range (this->so_list); }
 
   /* Close and clear exec_bfd.  If we end up with no target sections
      to read memory from, this unpushes the exec_ops target.  */
   void exec_close ();
 
   /* Return the exec BFD for this program space.  */
-  bfd *exec_bfd () const
-  {
-    return ebfd.get ();
-  }
+  bfd *exec_bfd () const { return ebfd.get (); }
 
   /* Set the exec BFD for this program space to ABFD.  */
-  void set_exec_bfd (gdb_bfd_ref_ptr &&abfd)
-  {
-    ebfd = std::move (abfd);
-  }
+  void set_exec_bfd (gdb_bfd_ref_ptr &&abfd) { ebfd = std::move (abfd); }
 
   /* Reset saved solib data at the start of an solib event.  This lets
      us properly collect the data when calling solib_add, so it can then
@@ -286,24 +270,17 @@ struct program_space
 
   /* Add the sections array defined by SECTIONS to the
      current set of target sections.  */
-  void add_target_sections (void *owner,
-			    const target_section_table &sections);
+  void add_target_sections (void *owner, const target_section_table &sections);
 
   /* Add the sections of OBJFILE to the current set of target
      sections.  They are given OBJFILE as the "owner".  */
   void add_target_sections (struct objfile *objfile);
 
   /* Clear all target sections from M_TARGET_SECTIONS table.  */
-  void clear_target_sections ()
-  {
-    m_target_sections.clear ();
-  }
+  void clear_target_sections () { m_target_sections.clear (); }
 
   /* Return a reference to the M_TARGET_SECTIONS table.  */
-  target_section_table &target_sections ()
-  {
-    return m_target_sections;
-  }
+  target_section_table &target_sections () { return m_target_sections; }
 
   /* Unique ID number.  */
   int num = 0;
@@ -374,6 +351,7 @@ struct program_space
   registry<program_space> registry_fields;
 
 private:
+
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
   target_section_table m_target_sections;
@@ -389,20 +367,18 @@ struct address_space
   DISABLE_COPY_AND_ASSIGN (address_space);
 
   /* Returns the integer address space id of this address space.  */
-  int num () const
-  {
-    return m_num;
-  }
+  int num () const { return m_num; }
 
   /* Per aspace data-pointers required by other GDB modules.  */
   registry<address_space> registry_fields;
 
 private:
+
   int m_num;
 };
 
 /* The list of all program spaces.  There's always at least one.  */
-extern std::vector<struct program_space *>program_spaces;
+extern std::vector<struct program_space *> program_spaces;
 
 /* The current program space.  This is always non-null.  */
 extern struct program_space *current_program_space;
@@ -410,7 +386,7 @@ extern struct program_space *current_program_space;
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 extern struct program_space *clone_program_space (struct program_space *dest,
-						struct program_space *src);
+						  struct program_space *src);
 
 /* Sets PSPACE as the current program space.  This is usually used
    instead of set_current_space_and_thread when the current
@@ -427,16 +403,21 @@ extern void set_current_program_space (struct program_space *pspace);
 class scoped_restore_current_program_space
 {
 public:
+
   scoped_restore_current_program_space ()
     : m_saved_pspace (current_program_space)
-  {}
+  {
+  }
 
   ~scoped_restore_current_program_space ()
-  { set_current_program_space (m_saved_pspace); }
+  {
+    set_current_program_space (m_saved_pspace);
+  }
 
   DISABLE_COPY_AND_ASSIGN (scoped_restore_current_program_space);
 
 private:
+
   program_space *m_saved_pspace;
 };
 

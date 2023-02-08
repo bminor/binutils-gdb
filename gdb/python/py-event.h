@@ -27,8 +27,8 @@
 
 /* Declare all event types.  */
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \
-  extern PyTypeObject name##_event_object_type		    \
-	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+  extern PyTypeObject name##_event_object_type             \
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 #include "py-event-types.def"
 #undef GDB_PY_DEFINE_EVENT_TYPE
 
@@ -36,7 +36,7 @@ struct event_object
 {
   PyObject_HEAD
 
-  PyObject *dict;
+    PyObject *dict;
 };
 
 extern int emit_continue_event (ptid_t ptid);
@@ -53,13 +53,11 @@ enum inferior_call_kind
   INFERIOR_CALL_POST,
 };
 
-extern int emit_inferior_call_event (inferior_call_kind kind,
-				     ptid_t thread, CORE_ADDR addr);
-extern int emit_register_changed_event (frame_info_ptr frame,
-					int regnum);
+extern int emit_inferior_call_event (inferior_call_kind kind, ptid_t thread,
+				     CORE_ADDR addr);
+extern int emit_register_changed_event (frame_info_ptr frame, int regnum);
 extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
-extern int evpy_emit_event (PyObject *event,
-			    eventregistry_object *registry);
+extern int evpy_emit_event (PyObject *event, eventregistry_object *registry);
 
 extern gdbpy_ref<> create_event_object (PyTypeObject *py_type);
 
@@ -78,9 +76,9 @@ extern int emit_free_objfile_event (struct objfile *objfile);
 extern int emit_clear_objfiles_event (void);
 
 extern void evpy_dealloc (PyObject *self);
-extern int evpy_add_attribute (PyObject *event,
-			       const char *name, PyObject *attr)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+extern int
+evpy_add_attribute (PyObject *event, const char *name,
+		    PyObject *attr) CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_event_generic (PyTypeObject *type, const char *name)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 

@@ -19,7 +19,7 @@
 #ifndef SOLIST_H
 #define SOLIST_H
 
-#define SO_NAME_MAX_PATH_SIZE 512	/* FIXME: Should be dynamic */
+#define SO_NAME_MAX_PATH_SIZE 512 /* FIXME: Should be dynamic */
 /* For domain_enum domain.  */
 #include "symtab.h"
 #include "gdb_bfd.h"
@@ -37,7 +37,7 @@ struct so_list
      dynamic linker's tables in the inferior, and are initialized by
      current_sos.  */
 
-  struct so_list *next;	/* next structure in linked list */
+  struct so_list *next; /* next structure in linked list */
 
   /* A pointer to target specific link map information.  Often this
      will be a copy of struct link_map from the user process, but
@@ -65,7 +65,7 @@ struct so_list
      current_sos must initialize these fields to 0.  */
 
   bfd *abfd;
-  char symbols_loaded;	/* flag: symbols read in yet?  */
+  char symbols_loaded; /* flag: symbols read in yet?  */
 
   /* objfile with symbols for a loaded library.  Target memory is read from
      ABFD.  OBJFILE may be NULL either before symbols have been loaded, if
@@ -130,8 +130,7 @@ struct target_so_ops
      If TEMP_PATHNAME is non-NULL: If the file is successfully opened a
      pointer to a malloc'd and realpath'd copy of SONAME is stored there,
      otherwise NULL is stored there.  */
-  int (*find_and_open_solib) (const char *soname,
-			      unsigned o_flags,
+  int (*find_and_open_solib) (const char *soname, unsigned o_flags,
 			      gdb::unique_xmalloc_ptr<char> *temp_pathname);
 
   /* Given two so_list objects, one from the GDB thread list
@@ -146,8 +145,7 @@ struct target_so_ops
      handled correctly when the core file is loaded.  This only
      applies when the section would otherwise not be kept in the
      core file (in particular, for readonly sections).  */
-  int (*keep_data_in_core) (CORE_ADDR vaddr,
-			    unsigned long size);
+  int (*keep_data_in_core) (CORE_ADDR vaddr, unsigned long size);
 
   /* Enable or disable optional solib event breakpoints as
      appropriate.  This should be called whenever
@@ -171,10 +169,7 @@ void free_so (struct so_list *so);
 /* A deleter that calls free_so.  */
 struct so_deleter
 {
-  void operator() (struct so_list *so) const
-  {
-    free_so (so);
-  }
+  void operator() (struct so_list *so) const { free_so (so); }
 };
 
 /* A unique pointer to a so_list.  */

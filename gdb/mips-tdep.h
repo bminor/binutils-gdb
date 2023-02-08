@@ -27,40 +27,36 @@ struct gdbarch;
 
 /* All the possible MIPS ABIs.  */
 enum mips_abi
-  {
-    MIPS_ABI_UNKNOWN = 0,
-    MIPS_ABI_N32,
-    MIPS_ABI_O32,
-    MIPS_ABI_N64,
-    MIPS_ABI_O64,
-    MIPS_ABI_EABI32,
-    MIPS_ABI_EABI64,
-    MIPS_ABI_LAST
-  };
+{
+  MIPS_ABI_UNKNOWN = 0,
+  MIPS_ABI_N32,
+  MIPS_ABI_O32,
+  MIPS_ABI_N64,
+  MIPS_ABI_O64,
+  MIPS_ABI_EABI32,
+  MIPS_ABI_EABI64,
+  MIPS_ABI_LAST
+};
 
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi mips_abi (struct gdbarch *gdbarch);
 
 /* Base and compressed MIPS ISA variations.  */
 enum mips_isa
-  {
-    ISA_MIPS = -1,		/* mips_compression_string depends on it.  */
-    ISA_MIPS16,
-    ISA_MICROMIPS
-  };
+{
+  ISA_MIPS = -1, /* mips_compression_string depends on it.  */
+  ISA_MIPS16,
+  ISA_MICROMIPS
+};
 
 /* Corresponding MSYMBOL_TARGET_FLAG aliases.  */
-#define MSYMBOL_TARGET_FLAG_MIPS16(sym) \
-	(sym)->target_flag_1 ()
+#define MSYMBOL_TARGET_FLAG_MIPS16(sym) (sym)->target_flag_1 ()
 
-#define SET_MSYMBOL_TARGET_FLAG_MIPS16(sym) \
-	(sym)->set_target_flag_1 (true)
+#define SET_MSYMBOL_TARGET_FLAG_MIPS16(sym) (sym)->set_target_flag_1 (true)
 
-#define MSYMBOL_TARGET_FLAG_MICROMIPS(sym) \
-	(sym)->target_flag_2 ()
+#define MSYMBOL_TARGET_FLAG_MICROMIPS(sym) (sym)->target_flag_2 ()
 
-#define SET_MSYMBOL_TARGET_FLAG_MICROMIPS(sym) \
-	(sym)->set_target_flag_2 (true)
+#define SET_MSYMBOL_TARGET_FLAG_MICROMIPS(sym) (sym)->set_target_flag_2 (true)
 
 /* Return the MIPS ISA's register size.  Just a short cut to the BFD
    architecture's word size.  */
@@ -73,12 +69,12 @@ struct mips_regnum
   int fp0;
   int fp_implementation_revision;
   int fp_control_status;
-  int badvaddr;		/* Bad vaddr for addressing exception.  */
-  int cause;		/* Describes last exception.  */
-  int hi;		/* Multiply/divide temp.  */
-  int lo;		/* ...  */
-  int dspacc;		/* SmartMIPS/DSP accumulators.  */
-  int dspctl;		/* DSP control.  */
+  int badvaddr; /* Bad vaddr for addressing exception.  */
+  int cause;	/* Describes last exception.  */
+  int hi;	/* Multiply/divide temp.  */
+  int lo;	/* ...  */
+  int dspacc;	/* SmartMIPS/DSP accumulators.  */
+  int dspctl;	/* DSP control.  */
 };
 extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
 
@@ -87,9 +83,9 @@ extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
 
 enum mips_fpu_type
 {
-  MIPS_FPU_DOUBLE,		/* Full double precision floating point.  */
-  MIPS_FPU_SINGLE,		/* Single precision floating point (R4650).  */
-  MIPS_FPU_NONE			/* No floating point.  */
+  MIPS_FPU_DOUBLE, /* Full double precision floating point.  */
+  MIPS_FPU_SINGLE, /* Single precision floating point (R4650).  */
+  MIPS_FPU_NONE	   /* No floating point.  */
 };
 
 /* MIPS specific per-architecture information.  */
@@ -99,10 +95,22 @@ struct mips_gdbarch_tdep : gdbarch_tdep_base
   int elf_flags = 0;
 
   /* mips options */
-  enum mips_abi mips_abi {};
-  enum mips_abi found_abi {};
-  enum mips_isa mips_isa {};
-  enum mips_fpu_type mips_fpu_type {};
+  enum mips_abi mips_abi
+  {
+  };
+
+  enum mips_abi found_abi
+  {
+  };
+
+  enum mips_isa mips_isa
+  {
+  };
+
+  enum mips_fpu_type mips_fpu_type
+  {
+  };
+
   int mips_last_arg_regnum = 0;
   int mips_last_fp_arg_regnum = 0;
   int default_mask_address_p = 0;
@@ -114,7 +122,7 @@ struct mips_gdbarch_tdep : gdbarch_tdep_base
      add any that do not need to be public.  */
   const struct mips_regnum *regnum = nullptr;
   /* Register names table for the current register set.  */
-  const char * const *mips_processor_reg_names = nullptr;
+  const char *const *mips_processor_reg_names = nullptr;
 
   /* The size of register data available from the target, if known.
      This doesn't quite obsolete the manual
@@ -132,16 +140,16 @@ struct mips_gdbarch_tdep : gdbarch_tdep_base
 
 enum
 {
-  MIPS_ZERO_REGNUM = 0,		/* Read-only register, always 0.  */
+  MIPS_ZERO_REGNUM = 0, /* Read-only register, always 0.  */
   MIPS_AT_REGNUM = 1,
-  MIPS_V0_REGNUM = 2,		/* Function integer return value.  */
-  MIPS_A0_REGNUM = 4,		/* Loc of first arg during a subr call.  */
-  MIPS_S2_REGNUM = 18,		/* Contains return address in MIPS16 thunks. */
-  MIPS_T9_REGNUM = 25,		/* Contains address of callee in PIC.  */
+  MIPS_V0_REGNUM = 2,  /* Function integer return value.  */
+  MIPS_A0_REGNUM = 4,  /* Loc of first arg during a subr call.  */
+  MIPS_S2_REGNUM = 18, /* Contains return address in MIPS16 thunks. */
+  MIPS_T9_REGNUM = 25, /* Contains address of callee in PIC.  */
   MIPS_GP_REGNUM = 28,
   MIPS_SP_REGNUM = 29,
   MIPS_RA_REGNUM = 31,
-  MIPS_PS_REGNUM = 32,		/* Contains processor status.  */
+  MIPS_PS_REGNUM = 32, /* Contains processor status.  */
   MIPS_EMBED_LO_REGNUM = 33,
   MIPS_EMBED_HI_REGNUM = 34,
   MIPS_EMBED_BADVADDR_REGNUM = 35,
@@ -149,7 +157,7 @@ enum
   MIPS_EMBED_PC_REGNUM = 37,
   MIPS_EMBED_FP0_REGNUM = 38,
   MIPS_UNUSED_REGNUM = 73,	/* Never used, FIXME.  */
-  MIPS_FIRST_EMBED_REGNUM = 74,	/* First CP0 register for embedded use.  */
+  MIPS_FIRST_EMBED_REGNUM = 74, /* First CP0 register for embedded use.  */
   MIPS_PRID_REGNUM = 89,	/* Processor ID.  */
   MIPS_LAST_EMBED_REGNUM = 89	/* Last one.  */
 };
@@ -164,8 +172,8 @@ enum
 };
 
 /* Single step based on where the current instruction will take us.  */
-extern std::vector<CORE_ADDR> mips_software_single_step
-  (struct regcache *regcache);
+extern std::vector<CORE_ADDR>
+mips_software_single_step (struct regcache *regcache);
 
 /* Strip the ISA (compression) bit off from ADDR.  */
 extern CORE_ADDR mips_unmake_compact_addr (CORE_ADDR addr);

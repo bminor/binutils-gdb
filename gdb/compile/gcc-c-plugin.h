@@ -38,8 +38,8 @@ public:
 		      gcc_c_symbol_address_function *address_oracle,
 		      void *datum)
   {
-    m_context->c_ops->set_callbacks (m_context, binding_oracle,
-				     address_oracle, datum);
+    m_context->c_ops->set_callbacks (m_context, binding_oracle, address_oracle,
+				     datum);
   }
 
   /* Returns the interface version of the compiler plug-in.  */
@@ -64,6 +64,7 @@ public:
 #undef GCC_METHOD7
 
 private:
+
   /* The GCC C context.  */
   struct gcc_c_context *m_context;
 };

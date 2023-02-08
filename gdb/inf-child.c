@@ -39,11 +39,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-static const target_info inf_child_target_info = {
-  "native",
-  N_("Native process"),
-  N_("Native process (started by the \"run\" command).")
-};
+static const target_info inf_child_target_info
+  = { "native", N_ ("Native process"),
+      N_ ("Native process (started by the \"run\" command).") };
 
 const target_info &
 inf_child_target::info () const
@@ -59,15 +57,14 @@ host_status_to_waitstatus (int hoststatus)
   if (WIFEXITED (hoststatus))
     return target_waitstatus ().set_exited (WEXITSTATUS (hoststatus));
   else if (!WIFSTOPPED (hoststatus))
-    return target_waitstatus ().set_signalled
-      (gdb_signal_from_host (WTERMSIG (hoststatus)));
+    return target_waitstatus ().set_signalled (
+      gdb_signal_from_host (WTERMSIG (hoststatus)));
   else
-    return target_waitstatus ().set_stopped
-      (gdb_signal_from_host (WSTOPSIG (hoststatus)));
+    return target_waitstatus ().set_stopped (
+      gdb_signal_from_host (WSTOPSIG (hoststatus)));
 }
 
-inf_child_target::~inf_child_target ()
-{}
+inf_child_target::~inf_child_target () {}
 
 void
 inf_child_target::post_attach (int pid)
@@ -170,7 +167,7 @@ void
 inf_child_target::disconnect (const char *args, int from_tty)
 {
   if (args != NULL)
-    error (_("Argument given to \"disconnect\"."));
+    error (_ ("Argument given to \"disconnect\"."));
 
   /* This offers to detach/kill current inferiors, and then pops all
      targets.  */
@@ -310,7 +307,8 @@ inf_child_target::fileio_pread (int fd, gdb_byte *read_buf, int len,
 /* Implementation of to_fileio_fstat.  */
 
 int
-inf_child_target::fileio_fstat (int fd, struct stat *sb, fileio_error *target_errno)
+inf_child_target::fileio_fstat (int fd, struct stat *sb,
+				fileio_error *target_errno)
 {
   int ret;
 
@@ -358,7 +356,7 @@ inf_child_target::fileio_readlink (struct inferior *inf, const char *filename,
 {
   /* We support readlink only on systems that also provide a compile-time
      maximum path length (PATH_MAX), at least for now.  */
-#if defined (PATH_MAX)
+#if defined(PATH_MAX)
   char buf[PATH_MAX];
   int len;
 

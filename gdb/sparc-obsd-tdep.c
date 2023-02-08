@@ -68,8 +68,7 @@ sparc32obsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 }
 
 static struct sparc_frame_cache *
-sparc32obsd_sigtramp_frame_cache (frame_info_ptr this_frame,
-				  void **this_cache)
+sparc32obsd_sigtramp_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
   CORE_ADDR addr;
@@ -104,8 +103,8 @@ sparc32obsd_sigtramp_frame_this_id (frame_info_ptr this_frame,
 				    void **this_cache,
 				    struct frame_id *this_id)
 {
-  struct sparc_frame_cache *cache =
-    sparc32obsd_sigtramp_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc32obsd_sigtramp_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
@@ -114,8 +113,8 @@ static struct value *
 sparc32obsd_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 					  void **this_cache, int regnum)
 {
-  struct sparc_frame_cache *cache =
-    sparc32obsd_sigtramp_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc32obsd_sigtramp_frame_cache (this_frame, this_cache);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
@@ -134,26 +133,22 @@ sparc32obsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
   return 0;
 }
-static const struct frame_unwind sparc32obsd_sigtramp_frame_unwind =
-{
-  "sparc32 openbsd sigtramp",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  sparc32obsd_sigtramp_frame_this_id,
-  sparc32obsd_sigtramp_frame_prev_register,
-  NULL,
-  sparc32obsd_sigtramp_frame_sniffer
-};
-
-
+static const struct frame_unwind sparc32obsd_sigtramp_frame_unwind
+  = { "sparc32 openbsd sigtramp",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      sparc32obsd_sigtramp_frame_this_id,
+      sparc32obsd_sigtramp_frame_prev_register,
+      NULL,
+      sparc32obsd_sigtramp_frame_sniffer };
 
 /* Offset wthin the thread structure where we can find %fp and %i7.  */
-#define SPARC32OBSD_UTHREAD_FP_OFFSET	128
-#define SPARC32OBSD_UTHREAD_PC_OFFSET	132
+#define SPARC32OBSD_UTHREAD_FP_OFFSET 128
+#define SPARC32OBSD_UTHREAD_PC_OFFSET 132
 
 static void
-sparc32obsd_supply_uthread (struct regcache *regcache,
-			    int regnum, CORE_ADDR addr)
+sparc32obsd_supply_uthread (struct regcache *regcache, int regnum,
+			    CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -200,8 +195,8 @@ sparc32obsd_supply_uthread (struct regcache *regcache,
 }
 
 static void
-sparc32obsd_collect_uthread(const struct regcache *regcache,
-			    int regnum, CORE_ADDR addr)
+sparc32obsd_collect_uthread (const struct regcache *regcache, int regnum,
+			     CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -218,7 +213,7 @@ sparc32obsd_collect_uthread(const struct regcache *regcache,
       CORE_ADDR fp_addr = addr + SPARC32OBSD_UTHREAD_FP_OFFSET;
 
       regcache->raw_collect (SPARC_SP_REGNUM, buf);
-      write_memory (fp_addr,buf, 4);
+      write_memory (fp_addr, buf, 4);
     }
 
   if (regnum == SPARC32_PC_REGNUM || regnum == -1)
@@ -237,7 +232,6 @@ sparc32obsd_collect_uthread(const struct regcache *regcache,
   sp = extract_unsigned_integer (buf, 4, byte_order);
   sparc_collect_rwindow (regcache, sp, regnum);
 }
-
 
 static void
 sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -255,6 +249,7 @@ sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_sparc32obsd_tdep ();
+
 void
 _initialize_sparc32obsd_tdep ()
 {

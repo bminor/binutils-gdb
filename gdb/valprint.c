@@ -103,31 +103,30 @@ static void val_print_type_code_flags (struct type *type,
 /* Start print_max_depth at this value. */
 #define PRINT_MAX_DEPTH_DEFAULT 20
 
-struct value_print_options user_print_options =
-{
-  Val_prettyformat_default,	/* prettyformat */
-  false,			/* prettyformat_arrays */
-  false,			/* prettyformat_structs */
-  false,			/* vtblprint */
-  true,				/* unionprint */
-  true,				/* addressprint */
-  false,			/* nibblesprint */
-  false,			/* objectprint */
-  PRINT_MAX_DEFAULT,		/* print_max */
-  PRINT_MAX_CHARS_DEFAULT,	/* print_max_chars */
-  10,				/* repeat_count_threshold */
-  0,				/* output_format */
-  0,				/* format */
-  true,				/* memory_tag_violations */
-  false,			/* stop_print_at_null */
-  false,			/* print_array_indexes */
-  false,			/* deref_ref */
-  true,				/* static_field_print */
-  true,				/* pascal_static_field_print */
-  false,			/* raw */
-  false,			/* summary */
-  true,				/* symbol_print */
-  PRINT_MAX_DEPTH_DEFAULT,	/* max_depth */
+struct value_print_options user_print_options = {
+  Val_prettyformat_default, /* prettyformat */
+  false,		    /* prettyformat_arrays */
+  false,		    /* prettyformat_structs */
+  false,		    /* vtblprint */
+  true,			    /* unionprint */
+  true,			    /* addressprint */
+  false,		    /* nibblesprint */
+  false,		    /* objectprint */
+  PRINT_MAX_DEFAULT,	    /* print_max */
+  PRINT_MAX_CHARS_DEFAULT,  /* print_max_chars */
+  10,			    /* repeat_count_threshold */
+  0,			    /* output_format */
+  0,			    /* format */
+  true,			    /* memory_tag_violations */
+  false,		    /* stop_print_at_null */
+  false,		    /* print_array_indexes */
+  false,		    /* deref_ref */
+  true,			    /* static_field_print */
+  true,			    /* pascal_static_field_print */
+  false,		    /* raw */
+  false,		    /* summary */
+  true,			    /* symbol_print */
+  PRINT_MAX_DEPTH_DEFAULT,  /* max_depth */
 };
 
 /* Initialize *OPTS to be a copy of the user print options.  */
@@ -141,7 +140,7 @@ get_user_print_options (struct value_print_options *opts)
    pretty-formatting disabled.  */
 void
 get_no_prettyformat_print_options (struct value_print_options *opts)
-{  
+{
   *opts = user_print_options;
   opts->prettyformat = Val_no_prettyformat;
 }
@@ -149,8 +148,7 @@ get_no_prettyformat_print_options (struct value_print_options *opts)
 /* Initialize *OPTS to be a copy of the user print options, but using
    FORMAT as the formatting option.  */
 void
-get_formatted_print_options (struct value_print_options *opts,
-			     char format)
+get_formatted_print_options (struct value_print_options *opts, char format)
 {
   *opts = user_print_options;
   opts->format = format;
@@ -159,15 +157,15 @@ get_formatted_print_options (struct value_print_options *opts,
 /* Implement 'show print elements'.  */
 
 static void
-show_print_max (struct ui_file *file, int from_tty,
-		struct cmd_list_element *c, const char *value)
+show_print_max (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+		const char *value)
 {
-  gdb_printf
-    (file,
-     (user_print_options.print_max_chars != PRINT_MAX_CHARS_ELEMENTS
-      ? _("Limit on array elements to print is %s.\n")
-      : _("Limit on string chars or array elements to print is %s.\n")),
-     value);
+  gdb_printf (
+    file,
+    (user_print_options.print_max_chars != PRINT_MAX_CHARS_ELEMENTS
+       ? _ ("Limit on array elements to print is %s.\n")
+       : _ ("Limit on string chars or array elements to print is %s.\n")),
+    value);
 }
 
 /* Implement 'show print characters'.  */
@@ -176,30 +174,28 @@ static void
 show_print_max_chars (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Limit on string characters to print is %s.\n"),
-	      value);
+  gdb_printf (file, _ ("Limit on string characters to print is %s.\n"), value);
 }
 
 /* Default input and output radixes, and output format letter.  */
 
 unsigned input_radix = 10;
+
 static void
 show_input_radix (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Default input radix for entering numbers is %s.\n"),
+  gdb_printf (file, _ ("Default input radix for entering numbers is %s.\n"),
 	      value);
 }
 
 unsigned output_radix = 10;
+
 static void
 show_output_radix (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Default output radix for printing of values is %s.\n"),
+  gdb_printf (file, _ ("Default output radix for printing of values is %s.\n"),
 	      value);
 }
 
@@ -210,7 +206,7 @@ static void
 show_print_array_indexes (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Printing of array indexes is %s.\n"), value);
+  gdb_printf (file, _ ("Printing of array indexes is %s.\n"), value);
 }
 
 /* Print repeat counts if there are more than this many repetitions of an
@@ -221,7 +217,7 @@ static void
 show_repeat_count_threshold (struct ui_file *file, int from_tty,
 			     struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Threshold for repeated print elements is %s.\n"),
+  gdb_printf (file, _ ("Threshold for repeated print elements is %s.\n"),
 	      value);
 }
 
@@ -231,9 +227,7 @@ static void
 show_memory_tag_violations (struct ui_file *file, int from_tty,
 			    struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Printing of memory tag violations is %s.\n"),
-	      value);
+  gdb_printf (file, _ ("Printing of memory tag violations is %s.\n"), value);
 }
 
 /* If nonzero, stops printing of char arrays at first null.  */
@@ -243,8 +237,8 @@ show_stop_print_at_null (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
   gdb_printf (file,
-	      _("Printing of char arrays to stop "
-		"at first null char is %s.\n"),
+	      _ ("Printing of char arrays to stop "
+		 "at first null char is %s.\n"),
 	      value);
 }
 
@@ -252,18 +246,18 @@ show_stop_print_at_null (struct ui_file *file, int from_tty,
 
 static void
 show_prettyformat_structs (struct ui_file *file, int from_tty,
-			  struct cmd_list_element *c, const char *value)
+			   struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Pretty formatting of structures is %s.\n"), value);
+  gdb_printf (file, _ ("Pretty formatting of structures is %s.\n"), value);
 }
 
 /* Controls pretty printing of arrays.  */
 
 static void
 show_prettyformat_arrays (struct ui_file *file, int from_tty,
-			 struct cmd_list_element *c, const char *value)
+			  struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Pretty formatting of arrays is %s.\n"), value);
+  gdb_printf (file, _ ("Pretty formatting of arrays is %s.\n"), value);
 }
 
 /* If nonzero, causes unions inside structures or other unions to be
@@ -273,20 +267,17 @@ static void
 show_unionprint (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Printing of unions interior to structures is %s.\n"),
+  gdb_printf (file, _ ("Printing of unions interior to structures is %s.\n"),
 	      value);
 }
 
 /* Controls the format of printing binary values.  */
 
 static void
-show_nibbles (struct ui_file *file, int from_tty,
-		       struct cmd_list_element *c, const char *value)
+show_nibbles (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+	      const char *value)
 {
-  gdb_printf (file,
-	      _("Printing binary values in groups is %s.\n"),
-	      value);
+  gdb_printf (file, _ ("Printing binary values in groups is %s.\n"), value);
 }
 
 /* If nonzero, causes machine addresses to be printed in certain contexts.  */
@@ -295,19 +286,16 @@ static void
 show_addressprint (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Printing of addresses is %s.\n"), value);
+  gdb_printf (file, _ ("Printing of addresses is %s.\n"), value);
 }
 
 static void
 show_symbol_print (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Printing of symbols when printing pointers is %s.\n"),
+  gdb_printf (file, _ ("Printing of symbols when printing pointers is %s.\n"),
 	      value);
 }
-
-
 
 /* A helper function for val_print.  When printing in "summary" mode,
    we want to print scalar arguments, but not aggregate arguments.
@@ -343,17 +331,14 @@ static bool
 val_print_scalar_or_string_type_p (struct type *type,
 				   const struct language_defn *language)
 {
-  return (val_print_scalar_type_p (type)
-	  || language->is_string_type_p (type));
+  return (val_print_scalar_type_p (type) || language->is_string_type_p (type));
 }
 
 /* See valprint.h.  */
 
 int
-valprint_check_validity (struct ui_file *stream,
-			 struct type *type,
-			 LONGEST embedded_offset,
-			 const struct value *val)
+valprint_check_validity (struct ui_file *stream, struct type *type,
+			 LONGEST embedded_offset, const struct value *val)
 {
   type = check_typedef (type);
 
@@ -369,12 +354,10 @@ valprint_check_validity (struct ui_file *stream,
       return 0;
     }
 
-  if (type->code () != TYPE_CODE_UNION
-      && type->code () != TYPE_CODE_STRUCT
+  if (type->code () != TYPE_CODE_UNION && type->code () != TYPE_CODE_STRUCT
       && type->code () != TYPE_CODE_ARRAY)
     {
-      if (value_bits_any_optimized_out (val,
-					TARGET_CHAR_BIT * embedded_offset,
+      if (value_bits_any_optimized_out (val, TARGET_CHAR_BIT * embedded_offset,
 					TARGET_CHAR_BIT * type->length ()))
 	{
 	  val_print_optimized_out (val, stream);
@@ -392,11 +375,12 @@ valprint_check_validity (struct ui_file *stream,
 	      const struct value *deref_val = coerce_ref_if_computed (val);
 
 	      if (deref_val != NULL)
-		ref_is_addressable = value_lval_const (deref_val) == lval_memory;
+		ref_is_addressable
+		  = value_lval_const (deref_val) == lval_memory;
 	    }
 
 	  if (!is_ref || !ref_is_addressable)
-	    fputs_styled (_("<synthetic pointer>"), metadata_style.style (),
+	    fputs_styled (_ ("<synthetic pointer>"), metadata_style.style (),
 			  stream);
 
 	  /* C++ references should be valid even if they're synthetic.  */
@@ -419,25 +403,25 @@ val_print_optimized_out (const struct value *val, struct ui_file *stream)
   if (val != NULL && value_lval_const (val) == lval_register)
     val_print_not_saved (stream);
   else
-    fprintf_styled (stream, metadata_style.style (), _("<optimized out>"));
+    fprintf_styled (stream, metadata_style.style (), _ ("<optimized out>"));
 }
 
 void
 val_print_not_saved (struct ui_file *stream)
 {
-  fprintf_styled (stream, metadata_style.style (), _("<not saved>"));
+  fprintf_styled (stream, metadata_style.style (), _ ("<not saved>"));
 }
 
 void
 val_print_unavailable (struct ui_file *stream)
 {
-  fprintf_styled (stream, metadata_style.style (), _("<unavailable>"));
+  fprintf_styled (stream, metadata_style.style (), _ ("<unavailable>"));
 }
 
 void
 val_print_invalid_address (struct ui_file *stream)
 {
-  fprintf_styled (stream, metadata_style.style (), _("<invalid address>"));
+  fprintf_styled (stream, metadata_style.style (), _ ("<invalid address>"));
 }
 
 /* Print a pointer based on the type of its target.
@@ -470,11 +454,10 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 /* generic_val_print helper for TYPE_CODE_ARRAY.  */
 
 static void
-generic_val_print_array (struct value *val,
-			 struct ui_file *stream, int recurse,
-			 const struct value_print_options *options,
-			 const struct
-			     generic_val_print_decorations *decorations)
+generic_val_print_array (
+  struct value *val, struct ui_file *stream, int recurse,
+  const struct value_print_options *options,
+  const struct generic_val_print_decorations *decorations)
 {
   struct type *type = check_typedef (value_type (val));
   struct type *unresolved_elttype = type->target_type ();
@@ -485,7 +468,7 @@ generic_val_print_array (struct value *val,
       LONGEST low_bound, high_bound;
 
       if (!get_array_bounds (type, &low_bound, &high_bound))
-	error (_("Could not determine the array high bound"));
+	error (_ ("Could not determine the array high bound"));
 
       gdb_puts (decorations->array_start, stream);
       value_print_array_elements (val, stream, recurse, options, 0);
@@ -494,10 +477,9 @@ generic_val_print_array (struct value *val,
   else
     {
       /* Array of unspecified length: treat like pointer to first elt.  */
-      print_unpacked_pointer (type, elttype, value_address (val),
-			      stream, options);
+      print_unpacked_pointer (type, elttype, value_address (val), stream,
+			      options);
     }
-
 }
 
 /* generic_value_print helper for TYPE_CODE_PTR.  */
@@ -506,7 +488,6 @@ static void
 generic_value_print_ptr (struct value *val, struct ui_file *stream,
 			 const struct value_print_options *options)
 {
-
   if (options->format && options->format != 's')
     value_print_scalar_formatted (val, options, 0, stream);
   else
@@ -520,12 +501,11 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
     }
 }
 
-
 /* Print '@' followed by the address contained in ADDRESS_BUFFER.  */
 
 static void
 print_ref_address (struct type *type, const gdb_byte *address_buffer,
-		  int embedded_offset, struct ui_file *stream)
+		   int embedded_offset, struct ui_file *stream)
 {
   struct gdbarch *gdbarch = type->arch ();
 
@@ -560,8 +540,8 @@ get_value_addr_contents (struct value *deref_val)
 /* generic_val_print helper for TYPE_CODE_{RVALUE_,}REF.  */
 
 static void
-generic_val_print_ref (struct type *type,
-		       int embedded_offset, struct ui_file *stream, int recurse,
+generic_val_print_ref (struct type *type, int embedded_offset,
+		       struct ui_file *stream, int recurse,
 		       struct value *original_value,
 		       const struct value_print_options *options)
 {
@@ -571,10 +551,11 @@ generic_val_print_ref (struct type *type,
     = value_bits_synthetic_pointer (original_value,
 				    TARGET_CHAR_BIT * embedded_offset,
 				    TARGET_CHAR_BIT * type->length ());
-  const int must_coerce_ref = ((options->addressprint && value_is_synthetic)
-			       || options->deref_ref);
+  const int must_coerce_ref
+    = ((options->addressprint && value_is_synthetic) || options->deref_ref);
   const int type_is_defined = elttype->code () != TYPE_CODE_UNDEF;
-  const gdb_byte *valaddr = value_contents_for_printing (original_value).data ();
+  const gdb_byte *valaddr
+    = value_contents_for_printing (original_value).data ();
 
   if (must_coerce_ref && type_is_defined)
     {
@@ -586,8 +567,9 @@ generic_val_print_ref (struct type *type,
 	  gdb_assert (embedded_offset == 0);
 	}
       else
-	deref_val = value_at (type->target_type (),
-			      unpack_pointer (type, valaddr + embedded_offset));
+	deref_val
+	  = value_at (type->target_type (),
+		      unpack_pointer (type, valaddr + embedded_offset));
     }
   /* Else, original_value isn't a synthetic reference or we don't have to print
      the reference's contents.
@@ -604,8 +586,8 @@ generic_val_print_ref (struct type *type,
   if (options->addressprint)
     {
       const gdb_byte *address = (value_is_synthetic && type_is_defined
-				 ? get_value_addr_contents (deref_val)
-				 : valaddr);
+				   ? get_value_addr_contents (deref_val)
+				   : valaddr);
 
       print_ref_address (type, address, embedded_offset, stream);
 
@@ -711,9 +693,8 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 /* generic_val_print helper for TYPE_CODE_ENUM.  */
 
 static void
-generic_val_print_enum (struct type *type,
-			int embedded_offset, struct ui_file *stream,
-			struct value *original_value,
+generic_val_print_enum (struct type *type, int embedded_offset,
+			struct ui_file *stream, struct value *original_value,
 			const struct value_print_options *options)
 {
   LONGEST val;
@@ -722,7 +703,8 @@ generic_val_print_enum (struct type *type,
 
   gdb_assert (!options->format);
 
-  const gdb_byte *valaddr = value_contents_for_printing (original_value).data ();
+  const gdb_byte *valaddr
+    = value_contents_for_printing (original_value).data ();
 
   val = unpack_long (type, valaddr + embedded_offset * unit_size);
 
@@ -732,9 +714,8 @@ generic_val_print_enum (struct type *type,
 /* generic_val_print helper for TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
 
 static void
-generic_val_print_func (struct type *type,
-			int embedded_offset, CORE_ADDR address,
-			struct ui_file *stream,
+generic_val_print_func (struct type *type, int embedded_offset,
+			CORE_ADDR address, struct ui_file *stream,
 			struct value *original_value,
 			const struct value_print_options *options)
 {
@@ -755,16 +736,16 @@ generic_val_print_func (struct type *type,
 /* generic_value_print helper for TYPE_CODE_BOOL.  */
 
 static void
-generic_value_print_bool
-  (struct value *value, struct ui_file *stream,
-   const struct value_print_options *options,
-   const struct generic_val_print_decorations *decorations)
+generic_value_print_bool (
+  struct value *value, struct ui_file *stream,
+  const struct value_print_options *options,
+  const struct generic_val_print_decorations *decorations)
 {
   if (options->format || options->output_format)
     {
       struct value_print_options opts = *options;
-      opts.format = (options->format ? options->format
-		     : options->output_format);
+      opts.format
+	= (options->format ? options->format : options->output_format);
       value_print_scalar_formatted (value, &opts, 0, stream);
     }
   else
@@ -789,8 +770,7 @@ generic_value_print_int (struct value *val, struct ui_file *stream,
 {
   struct value_print_options opts = *options;
 
-  opts.format = (options->format ? options->format
-		 : options->output_format);
+  opts.format = (options->format ? options->format : options->output_format);
   value_print_scalar_formatted (val, &opts, 0, stream);
 }
 
@@ -804,8 +784,8 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
     {
       struct value_print_options opts = *options;
 
-      opts.format = (options->format ? options->format
-		     : options->output_format);
+      opts.format
+	= (options->format ? options->format : options->output_format);
       value_print_scalar_formatted (value, &opts, 0, stream);
     }
   else
@@ -833,7 +813,8 @@ generic_val_print_float (struct type *type, struct ui_file *stream,
 {
   gdb_assert (!options->format);
 
-  const gdb_byte *valaddr = value_contents_for_printing (original_value).data ();
+  const gdb_byte *valaddr
+    = value_contents_for_printing (original_value).data ();
 
   print_floating (valaddr, type, stream);
 }
@@ -866,10 +847,10 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
 /* generic_value_print helper for TYPE_CODE_COMPLEX.  */
 
 static void
-generic_value_print_complex (struct value *val, struct ui_file *stream,
-			     const struct value_print_options *options,
-			     const struct generic_val_print_decorations
-			       *decorations)
+generic_value_print_complex (
+  struct value *val, struct ui_file *stream,
+  const struct value_print_options *options,
+  const struct generic_val_print_decorations *decorations)
 {
   gdb_printf (stream, "%s", decorations->complex_prefix);
 
@@ -885,11 +866,10 @@ generic_value_print_complex (struct value *val, struct ui_file *stream,
 /* generic_value_print helper for TYPE_CODE_MEMBERPTR.  */
 
 static void
-generic_value_print_memberptr
-  (struct value *val, struct ui_file *stream,
-   int recurse,
-   const struct value_print_options *options,
-   const struct generic_val_print_decorations *decorations)
+generic_value_print_memberptr (
+  struct value *val, struct ui_file *stream, int recurse,
+  const struct value_print_options *options,
+  const struct generic_val_print_decorations *decorations)
 {
   if (!options->format)
     {
@@ -942,8 +922,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
-      generic_val_print_ref (type, 0, stream, recurse,
-			     val, options);
+      generic_val_print_ref (type, 0, stream, recurse, val, options);
       break;
 
     case TYPE_CODE_ENUM:
@@ -965,8 +944,8 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       if (options->format)
 	value_print_scalar_formatted (val, options, 0, stream);
       else
-	generic_val_print_func (type, 0, value_address (val), stream,
-				val, options);
+	generic_val_print_func (type, 0, value_address (val), stream, val,
+				options);
       break;
 
     case TYPE_CODE_BOOL:
@@ -1005,7 +984,8 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       /* This happens (without TYPE_STUB set) on systems which don't use
 	 dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
 	 and no complete type for struct foo in that file.  */
-      fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
+      fprintf_styled (stream, metadata_style.style (),
+		      _ ("<incomplete type>"));
       break;
 
     case TYPE_CODE_COMPLEX:
@@ -1020,8 +1000,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
     case TYPE_CODE_UNION:
     case TYPE_CODE_STRUCT:
     default:
-      error (_("Unhandled type code %d in symbol table."),
-	     type->code ());
+      error (_ ("Unhandled type code %d in symbol table."), type->code ());
     }
 }
 
@@ -1051,8 +1030,9 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
   struct type *real_type = check_typedef (type);
 
   if (local_opts.prettyformat == Val_prettyformat_default)
-    local_opts.prettyformat = (local_opts.prettyformat_structs
-			       ? Val_prettyformat : Val_no_prettyformat);
+    local_opts.prettyformat
+      = (local_opts.prettyformat_structs ? Val_prettyformat
+					 : Val_no_prettyformat);
 
   QUIT;
 
@@ -1062,7 +1042,8 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
 
   if (real_type->is_stub ())
     {
-      fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
+      fprintf_styled (stream, metadata_style.style (),
+		      _ ("<incomplete type>"));
       return;
     }
 
@@ -1096,7 +1077,7 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
   catch (const gdb_exception_error &except)
     {
       fprintf_styled (stream, metadata_style.style (),
-		      _("<error reading variable: %s>"), except.what ());
+		      _ ("<error reading variable: %s>"), except.what ());
     }
 }
 
@@ -1128,7 +1109,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
   if (val == 0)
     {
       fprintf_styled (stream, metadata_style.style (),
-		      _("<address of value unknown>"));
+		      _ ("<address of value unknown>"));
       return 0;
     }
 
@@ -1153,7 +1134,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
   if (value_type (val)->code () == TYPE_CODE_INTERNAL_FUNCTION)
     {
       fprintf_styled (stream, metadata_style.style (),
-		      _("<internal function %s>"),
+		      _ ("<internal function %s>"),
 		      value_internal_function_name (val));
       return 0;
     }
@@ -1200,9 +1181,8 @@ value_print (struct value *val, struct ui_file *stream,
 
   if (!options->raw)
     {
-      int r
-	= apply_ext_lang_val_pretty_printer (val, stream, 0, options,
-					     current_language);
+      int r = apply_ext_lang_val_pretty_printer (val, stream, 0, options,
+						 current_language);
 
       if (r)
 	return;
@@ -1227,8 +1207,8 @@ static void
 val_print_type_code_flags (struct type *type, struct value *original_value,
 			   int embedded_offset, struct ui_file *stream)
 {
-  const gdb_byte *valaddr = (value_contents_for_printing (original_value).data ()
-			     + embedded_offset);
+  const gdb_byte *valaddr
+    = (value_contents_for_printing (original_value).data () + embedded_offset);
   ULONGEST val = unpack_long (type, valaddr);
   int field, nfields = type->num_fields ();
   struct gdbarch *gdbarch = type->arch ();
@@ -1248,11 +1228,10 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 		 int.  */
 	      && TYPE_FIELD_BITSIZE (type, field) == 1)
 	    {
-	      if (val & ((ULONGEST)1 << type->field (field).loc_bitpos ()))
-		gdb_printf
-		  (stream, " %ps",
-		   styled_string (variable_name_style.style (),
-				  type->field (field).name ()));
+	      if (val & ((ULONGEST) 1 << type->field (field).loc_bitpos ()))
+		gdb_printf (stream, " %ps",
+			    styled_string (variable_name_style.style (),
+					   type->field (field).name ()));
 	    }
 	  else
 	    {
@@ -1279,8 +1258,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 void
 value_print_scalar_formatted (struct value *val,
 			      const struct value_print_options *options,
-			      int size,
-			      struct ui_file *stream)
+			      int size, struct ui_file *stream)
 {
   struct type *type = check_typedef (value_type (val));
 
@@ -1305,8 +1283,7 @@ value_print_scalar_formatted (struct value *val,
 
   /* A scalar object that does not have all bits available can't be
      printed, because all bits contribute to its representation.  */
-  if (value_bits_any_optimized_out (val, 0,
-				    TARGET_CHAR_BIT * type->length ()))
+  if (value_bits_any_optimized_out (val, 0, TARGET_CHAR_BIT * type->length ()))
     val_print_optimized_out (val, stream);
   else if (!value_bytes_available (val, 0, type->length ()))
     val_print_unavailable (stream);
@@ -1342,25 +1319,33 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
   switch (format)
     {
     case 'd':
-      val = int_string (val_long, 10, 1, 0, 1); break;
+      val = int_string (val_long, 10, 1, 0, 1);
+      break;
     case 'u':
-      val = int_string (val_long, 10, 0, 0, 1); break;
+      val = int_string (val_long, 10, 0, 0, 1);
+      break;
     case 'x':
-      val = int_string (val_long, 16, 0, 0, use_c_format); break;
+      val = int_string (val_long, 16, 0, 0, use_c_format);
+      break;
     case 'b':
-      val = int_string (val_long, 16, 0, 2, 1); break;
+      val = int_string (val_long, 16, 0, 2, 1);
+      break;
     case 'h':
-      val = int_string (val_long, 16, 0, 4, 1); break;
+      val = int_string (val_long, 16, 0, 4, 1);
+      break;
     case 'w':
-      val = int_string (val_long, 16, 0, 8, 1); break;
+      val = int_string (val_long, 16, 0, 8, 1);
+      break;
     case 'g':
-      val = int_string (val_long, 16, 0, 16, 1); break;
+      val = int_string (val_long, 16, 0, 16, 1);
+      break;
       break;
     case 'o':
-      val = int_string (val_long, 8, 0, 0, use_c_format); break;
+      val = int_string (val_long, 8, 0, 0, use_c_format);
+      break;
     default:
-      internal_error (_("failed internal consistency check"));
-    } 
+      internal_error (_ ("failed internal consistency check"));
+    }
   gdb_puts (val, stream);
 }
 
@@ -1381,7 +1366,7 @@ longest_to_int (LONGEST arg)
     {
       if (rtnval != arg)
 	{
-	  error (_("Value out of range."));
+	  error (_ ("Value out of range."));
 	}
     }
   return (rtnval);
@@ -1415,13 +1400,11 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
   const int mask = 0x080;
 
   if (options->nibblesprint)
-    digit_separator = current_language->get_digit_separator();
+    digit_separator = current_language->get_digit_separator ();
 
   if (byte_order == BFD_ENDIAN_BIG)
     {
-      for (p = valaddr;
-	   p < valaddr + len;
-	   p++)
+      for (p = valaddr; p < valaddr + len; p++)
 	{
 	  /* Every byte has 8 binary characters; peel off
 	     and print from the MSB end.  */
@@ -1452,9 +1435,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
     }
   else
     {
-      for (p = valaddr + len - 1;
-	   p >= valaddr;
-	   p--)
+      for (p = valaddr + len - 1; p >= valaddr; p--)
 	{
 	  for (i = 0; i < (HOST_CHAR_BIT * sizeof (*p)); i++)
 	    {
@@ -1526,20 +1507,20 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
    * left over bits at the end.
    */
 #define BITS_IN_OCTAL 3
-#define HIGH_ZERO     0340
-#define LOW_ZERO      0034
-#define CARRY_ZERO    0003
+#define HIGH_ZERO 0340
+#define LOW_ZERO 0034
+#define CARRY_ZERO 0003
   static_assert (HIGH_ZERO + LOW_ZERO + CARRY_ZERO == 0xff,
 		 "cycle zero constants are wrong");
-#define HIGH_ONE      0200
-#define MID_ONE       0160
-#define LOW_ONE       0016
-#define CARRY_ONE     0001
+#define HIGH_ONE 0200
+#define MID_ONE 0160
+#define LOW_ONE 0016
+#define CARRY_ONE 0001
   static_assert (HIGH_ONE + MID_ONE + LOW_ONE + CARRY_ONE == 0xff,
 		 "cycle one constants are wrong");
-#define HIGH_TWO      0300
-#define MID_TWO       0070
-#define LOW_TWO       0007
+#define HIGH_TWO 0300
+#define MID_TWO 0070
+#define LOW_TWO 0007
   static_assert (HIGH_TWO + MID_TWO + LOW_TWO == 0xff,
 		 "cycle two constants are wrong");
 
@@ -1553,9 +1534,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   bool seen_a_one = false;
   if (byte_order == BFD_ENDIAN_BIG)
     {
-      for (p = valaddr;
-	   p < valaddr + len;
-	   p++)
+      for (p = valaddr; p < valaddr + len; p++)
 	{
 	  switch (cycle)
 	    {
@@ -1594,7 +1573,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	      break;
 
 	    default:
-	      error (_("Internal error in octal conversion;"));
+	      error (_ ("Internal error in octal conversion;"));
 	    }
 
 	  cycle++;
@@ -1603,9 +1582,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
     }
   else
     {
-      for (p = valaddr + len - 1;
-	   p >= valaddr;
-	   p--)
+      for (p = valaddr + len - 1; p >= valaddr; p--)
 	{
 	  switch (cycle)
 	    {
@@ -1644,14 +1621,13 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	      break;
 
 	    default:
-	      error (_("Internal error in octal conversion;"));
+	      error (_ ("Internal error in octal conversion;"));
 	    }
 
 	  cycle++;
 	  cycle = cycle % BITS_IN_OCTAL;
 	}
     }
-
 }
 
 /* Possibly negate the integer represented by BYTES.  It contains LEN
@@ -1661,8 +1637,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 static bool
 maybe_negate_by_bytes (const gdb_byte *bytes, unsigned len,
-		       enum bfd_endian byte_order,
-		       gdb::byte_vector *out_vec)
+		       enum bfd_endian byte_order, gdb::byte_vector *out_vec)
 {
   gdb_byte sign_byte;
   gdb_assert (len > 0);
@@ -1705,15 +1680,14 @@ maybe_negate_by_bytes (const gdb_byte *bytes, unsigned len,
 
 void
 print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		     unsigned len, bool is_signed,
-		     enum bfd_endian byte_order)
+		     unsigned len, bool is_signed, enum bfd_endian byte_order)
 {
-#define TEN             10
-#define CARRY_OUT(  x ) ((x) / TEN)	/* extend char to int */
-#define CARRY_LEFT( x ) ((x) % TEN)
-#define SHIFT( x )      ((x) << 4)
-#define LOW_NIBBLE(  x ) ( (x) & 0x00F)
-#define HIGH_NIBBLE( x ) (((x) & 0x0F0) >> 4)
+#define TEN 10
+#define CARRY_OUT(x) ((x) / TEN) /* extend char to int */
+#define CARRY_LEFT(x) ((x) % TEN)
+#define SHIFT(x) ((x) << 4)
+#define LOW_NIBBLE(x) ((x) &0x00F)
+#define HIGH_NIBBLE(x) (((x) &0x0F0) >> 4)
 
   const gdb_byte *p;
   int carry;
@@ -1749,7 +1723,7 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
    * Outer loop is per nibble (hex digit) of input, from MSD end to
    * LSD end.
    */
-  decimal_digits = 0;		/* Number of decimal digits so far */
+  decimal_digits = 0; /* Number of decimal digits so far */
   p = (byte_order == BFD_ENDIAN_BIG) ? valaddr : valaddr + len - 1;
   flip = 0;
   while ((byte_order == BFD_ENDIAN_BIG) ? (p < valaddr + len) : (p >= valaddr))
@@ -1840,9 +1814,8 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
 
 void
-print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		 unsigned len, enum bfd_endian byte_order,
-		 bool zero_pad)
+print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr, unsigned len,
+		 enum bfd_endian byte_order, bool zero_pad)
 {
   const gdb_byte *p;
 
@@ -1860,9 +1833,7 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	}
 
       const gdb_byte *first = p;
-      for (;
-	   p < valaddr + len;
-	   p++)
+      for (; p < valaddr + len; p++)
 	{
 	  /* When not zero-padding, use a different format for the
 	     very first byte printed.  */
@@ -1885,9 +1856,7 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	}
 
       const gdb_byte *first = p;
-      for (;
-	   p >= valaddr;
-	   p--)
+      for (; p >= valaddr; p--)
 	{
 	  /* When not zero-padding, use a different format for the
 	     very first byte printed.  */
@@ -1904,12 +1873,12 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 void
 print_function_pointer_address (const struct value_print_options *options,
-				struct gdbarch *gdbarch,
-				CORE_ADDR address,
+				struct gdbarch *gdbarch, CORE_ADDR address,
 				struct ui_file *stream)
 {
-  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr
-    (gdbarch, address, current_inferior ()->top_target ());
+  CORE_ADDR func_addr
+    = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
+					  current_inferior ()->top_target ());
 
   /* If the function pointer is represented by a description, print
      the address of the description.  */
@@ -1922,17 +1891,16 @@ print_function_pointer_address (const struct value_print_options *options,
   print_address_demangle (options, gdbarch, func_addr, stream, demangle);
 }
 
-
 /* Print on STREAM using the given OPTIONS the index for the element
    at INDEX of an array whose index type is INDEX_TYPE.  */
-    
-void  
+
+void
 maybe_print_array_index (struct type *index_type, LONGEST index,
 			 struct ui_file *stream,
 			 const struct value_print_options *options)
 {
   if (!options->print_array_indexes)
-    return; 
+    return;
 
   current_language->print_array_index (index_type, index, stream, options);
 }
@@ -1979,7 +1947,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
     }
   else
     {
-      warning (_("unable to get bounds of array, assuming null array"));
+      warning (_ ("unable to get bounds of array, assuming null array"));
       low_bound = 0;
       len = 0;
     }
@@ -2006,12 +1974,11 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	  print_spaces (2 + 2 * recurse, stream);
 	}
       stream->wrap_here (2 + 2 * recurse);
-      maybe_print_array_index (index_type, i + low_bound,
-			       stream, options);
+      maybe_print_array_index (index_type, i + low_bound, stream, options);
 
-      struct value *element = value_from_component_bitsize (val, elttype,
-							    bit_stride * i,
-							    bit_stride);
+      struct value *element
+	= value_from_component_bitsize (val, elttype, bit_stride * i,
+					bit_stride);
       rep1 = i + 1;
       reps = 1;
       /* Only check for reps if repeat_count_threshold is not set to
@@ -2022,8 +1989,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	    {
 	      struct value *rep_elt
 		= value_from_component_bitsize (val, elttype,
-						rep1 * bit_stride,
-						bit_stride);
+						rep1 * bit_stride, bit_stride);
 	      if (!value_contents_eq (element, rep_elt))
 		break;
 	      ++reps;
@@ -2066,19 +2032,16 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 static int
 wchar_printable (gdb_wchar_t w)
 {
-  return (gdb_iswprint (w)
-	  || w == LCST ('\a') || w == LCST ('\b')
-	  || w == LCST ('\f') || w == LCST ('\n')
-	  || w == LCST ('\r') || w == LCST ('\t')
-	  || w == LCST ('\v'));
+  return (gdb_iswprint (w) || w == LCST ('\a') || w == LCST ('\b')
+	  || w == LCST ('\f') || w == LCST ('\n') || w == LCST ('\r')
+	  || w == LCST ('\t') || w == LCST ('\v'));
 }
 
 /* A helper function that converts the contents of STRING to wide
    characters and then appends them to OUTPUT.  */
 
 static void
-append_string_as_wide (const char *string,
-		       struct obstack *output)
+append_string_as_wide (const char *string, struct obstack *output)
 {
   for (; *string; ++string)
     {
@@ -2097,11 +2060,9 @@ append_string_as_wide (const char *string,
    escapes across calls.  */
 
 static void
-print_wchar (gdb_wint_t w, const gdb_byte *orig,
-	     int orig_len, int width,
-	     enum bfd_endian byte_order,
-	     struct obstack *output,
-	     int quoter, bool *need_escapep)
+print_wchar (gdb_wint_t w, const gdb_byte *orig, int orig_len, int width,
+	     enum bfd_endian byte_order, struct obstack *output, int quoter,
+	     bool *need_escapep)
 {
   bool need_escape = *need_escapep;
 
@@ -2111,79 +2072,78 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
      function wchar_printable will likely need updating too.  */
   switch (w)
     {
-      case LCST ('\a'):
-	obstack_grow_wstr (output, LCST ("\\a"));
-	break;
-      case LCST ('\b'):
-	obstack_grow_wstr (output, LCST ("\\b"));
-	break;
-      case LCST ('\f'):
-	obstack_grow_wstr (output, LCST ("\\f"));
-	break;
-      case LCST ('\n'):
-	obstack_grow_wstr (output, LCST ("\\n"));
-	break;
-      case LCST ('\r'):
-	obstack_grow_wstr (output, LCST ("\\r"));
-	break;
-      case LCST ('\t'):
-	obstack_grow_wstr (output, LCST ("\\t"));
-	break;
-      case LCST ('\v'):
-	obstack_grow_wstr (output, LCST ("\\v"));
-	break;
-      default:
-	{
-	  if (gdb_iswprint (w) && !(need_escape && gdb_iswxdigit (w)))
-	    {
-	      gdb_wchar_t wchar = w;
+    case LCST ('\a'):
+      obstack_grow_wstr (output, LCST ("\\a"));
+      break;
+    case LCST ('\b'):
+      obstack_grow_wstr (output, LCST ("\\b"));
+      break;
+    case LCST ('\f'):
+      obstack_grow_wstr (output, LCST ("\\f"));
+      break;
+    case LCST ('\n'):
+      obstack_grow_wstr (output, LCST ("\\n"));
+      break;
+    case LCST ('\r'):
+      obstack_grow_wstr (output, LCST ("\\r"));
+      break;
+    case LCST ('\t'):
+      obstack_grow_wstr (output, LCST ("\\t"));
+      break;
+    case LCST ('\v'):
+      obstack_grow_wstr (output, LCST ("\\v"));
+      break;
+    default:
+      {
+	if (gdb_iswprint (w) && !(need_escape && gdb_iswxdigit (w)))
+	  {
+	    gdb_wchar_t wchar = w;
 
-	      if (w == gdb_btowc (quoter) || w == LCST ('\\'))
-		obstack_grow_wstr (output, LCST ("\\"));
-	      obstack_grow (output, &wchar, sizeof (gdb_wchar_t));
-	    }
-	  else
-	    {
-	      int i;
+	    if (w == gdb_btowc (quoter) || w == LCST ('\\'))
+	      obstack_grow_wstr (output, LCST ("\\"));
+	    obstack_grow (output, &wchar, sizeof (gdb_wchar_t));
+	  }
+	else
+	  {
+	    int i;
 
-	      for (i = 0; i + width <= orig_len; i += width)
-		{
-		  char octal[30];
-		  ULONGEST value;
+	    for (i = 0; i + width <= orig_len; i += width)
+	      {
+		char octal[30];
+		ULONGEST value;
 
-		  value = extract_unsigned_integer (&orig[i], width,
-						  byte_order);
-		  /* If the value fits in 3 octal digits, print it that
+		value = extract_unsigned_integer (&orig[i], width, byte_order);
+		/* If the value fits in 3 octal digits, print it that
 		     way.  Otherwise, print it as a hex escape.  */
-		  if (value <= 0777)
-		    {
-		      xsnprintf (octal, sizeof (octal), "\\%.3o",
-				 (int) (value & 0777));
-		      *need_escapep = false;
-		    }
-		  else
-		    {
-		      xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
-		      /* A hex escape might require the next character
+		if (value <= 0777)
+		  {
+		    xsnprintf (octal, sizeof (octal), "\\%.3o",
+			       (int) (value & 0777));
+		    *need_escapep = false;
+		  }
+		else
+		  {
+		    xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
+		    /* A hex escape might require the next character
 			 to be escaped, because, unlike with octal,
 			 hex escapes have no length limit.  */
-		      *need_escapep = true;
-		    }
-		  append_string_as_wide (octal, output);
-		}
-	      /* If we somehow have extra bytes, print them now.  */
-	      while (i < orig_len)
-		{
-		  char octal[5];
+		    *need_escapep = true;
+		  }
+		append_string_as_wide (octal, output);
+	      }
+	    /* If we somehow have extra bytes, print them now.  */
+	    while (i < orig_len)
+	      {
+		char octal[5];
 
-		  xsnprintf (octal, sizeof (octal), "\\%.3o", orig[i] & 0xff);
-		  *need_escapep = false;
-		  append_string_as_wide (octal, output);
-		  ++i;
-		}
-	    }
-	  break;
-	}
+		xsnprintf (octal, sizeof (octal), "\\%.3o", orig[i] & 0xff);
+		*need_escapep = false;
+		append_string_as_wide (octal, output);
+		++i;
+	      }
+	  }
+	break;
+      }
     }
 }
 
@@ -2195,8 +2155,7 @@ void
 generic_emit_char (int c, struct type *type, struct ui_file *stream,
 		   int quoter, const char *encoding)
 {
-  enum bfd_endian byte_order
-    = type_byte_order (type);
+  enum bfd_endian byte_order = type_byte_order (type);
   gdb_byte *c_buf;
   bool need_escape = false;
 
@@ -2240,16 +2199,15 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 	  if (!print_escape)
 	    {
 	      for (i = 0; i < num_chars; ++i)
-		print_wchar (chars[i], buf, buflen,
-			     type->length (), byte_order,
-			     &wchar_buf, quoter, &need_escape);
+		print_wchar (chars[i], buf, buflen, type->length (),
+			     byte_order, &wchar_buf, quoter, &need_escape);
 	    }
 	}
 
       /* This handles the NUM_CHARS == 0 case as well.  */
       if (print_escape)
-	print_wchar (gdb_WEOF, buf, buflen, type->length (),
-		     byte_order, &wchar_buf, quoter, &need_escape);
+	print_wchar (gdb_WEOF, buf, buflen, type->length (), byte_order,
+		     &wchar_buf, quoter, &need_escape);
     }
 
   /* The output in the host encoding.  */
@@ -2328,9 +2286,9 @@ count_next_character (wchar_iterator *iter,
 		 2) Equality of non-converted character (num_chars == 0)  */
 	      if ((current->num_chars > 0
 		   && memcmp (current->chars, d.chars,
-			      WCHAR_BUFLEN (current->num_chars)) == 0)
-		  || (current->num_chars == 0
-		      && current->buflen == d.buflen
+			      WCHAR_BUFLEN (current->num_chars))
+			== 0)
+		  || (current->num_chars == 0 && current->buflen == d.buflen
 		      && memcmp (current->buf, d.buf, current->buflen) == 0))
 		++current->repeat_count;
 	      else
@@ -2353,15 +2311,24 @@ count_next_character (wchar_iterator *iter,
    is the user's print options.  */
 
 static void
-print_converted_chars_to_obstack (struct obstack *obstack,
-				  const std::vector<converted_character> &chars,
-				  int quote_char, int width,
-				  enum bfd_endian byte_order,
-				  const struct value_print_options *options)
+print_converted_chars_to_obstack (
+  struct obstack *obstack, const std::vector<converted_character> &chars,
+  int quote_char, int width, enum bfd_endian byte_order,
+  const struct value_print_options *options)
 {
   unsigned int idx;
   const converted_character *elem;
-  enum {START, SINGLE, REPEAT, INCOMPLETE, FINISH} state, last;
+
+  enum
+  {
+    START,
+    SINGLE,
+    REPEAT,
+    INCOMPLETE,
+    FINISH
+  } state,
+    last;
+
   gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
   bool need_escape = false;
 
@@ -2431,8 +2398,8 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	      print_wchar (gdb_WEOF, elem->buf, elem->buflen, width,
 			   byte_order, obstack, quote_char, &need_escape);
 	    obstack_grow_wstr (obstack, LCST ("'"));
-	    std::string s = string_printf (_(" <repeats %u times>"),
-					   elem->repeat_count);
+	    std::string s
+	      = string_printf (_ (" <repeats %u times>"), elem->repeat_count);
 	    for (j = 0; s[j]; ++j)
 	      {
 		gdb_wchar_t w = gdb_btowc (s[j]);
@@ -2510,10 +2477,10 @@ print_converted_chars_to_obstack (struct obstack *obstack,
    omitted.  */
 
 void
-generic_printstr (struct ui_file *stream, struct type *type, 
-		  const gdb_byte *string, unsigned int length, 
-		  const char *encoding, int force_ellipses,
-		  int quote_char, int c_style_terminator,
+generic_printstr (struct ui_file *stream, struct type *type,
+		  const gdb_byte *string, unsigned int length,
+		  const char *encoding, int force_ellipses, int quote_char,
+		  int c_style_terminator,
 		  const struct value_print_options *options)
 {
   enum bfd_endian byte_order = type_byte_order (type);
@@ -2529,8 +2496,8 @@ generic_printstr (struct ui_file *stream, struct type *type,
       for (i = 0; current_char; ++i)
 	{
 	  QUIT;
-	  current_char = extract_unsigned_integer (string + i * width,
-						   width, byte_order);
+	  current_char
+	    = extract_unsigned_integer (string + i * width, width, byte_order);
 	}
       length = i;
     }
@@ -2538,11 +2505,10 @@ generic_printstr (struct ui_file *stream, struct type *type,
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in
      traditional C style.  */
-  if (c_style_terminator
-      && !force_ellipses
-      && length > 0
-      && (extract_unsigned_integer (string + (length - 1) * width,
-				    width, byte_order) == 0))
+  if (c_style_terminator && !force_ellipses && length > 0
+      && (extract_unsigned_integer (string + (length - 1) * width, width,
+				    byte_order)
+	  == 0))
     length--;
 
   if (length == 0)
@@ -2617,17 +2583,17 @@ generic_printstr (struct ui_file *stream, struct type *type,
    assumed.  */
 
 int
-val_print_string (struct type *elttype, const char *encoding,
-		  CORE_ADDR addr, int len,
-		  struct ui_file *stream,
+val_print_string (struct type *elttype, const char *encoding, CORE_ADDR addr,
+		  int len, struct ui_file *stream,
 		  const struct value_print_options *options)
 {
-  int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero.  */
-  int err;			/* Non-zero if we got a bad read.  */
-  int found_nul;		/* Non-zero if we found the nul char.  */
-  unsigned int fetchlimit;	/* Maximum number of chars to print.  */
+  int force_ellipsis = 0;  /* Force ellipsis to be printed if nonzero.  */
+  int err;		   /* Non-zero if we got a bad read.  */
+  int found_nul;	   /* Non-zero if we found the nul char.  */
+  unsigned int fetchlimit; /* Maximum number of chars to print.  */
   int bytes_read;
-  gdb::unique_xmalloc_ptr<gdb_byte> buffer;	/* Dynamically growable fetch buffer.  */
+  gdb::unique_xmalloc_ptr<gdb_byte>
+    buffer; /* Dynamically growable fetch buffer.  */
   struct gdbarch *gdbarch = elttype->arch ();
   enum bfd_endian byte_order = type_byte_order (elttype);
   int width = elttype->length ();
@@ -2641,12 +2607,11 @@ val_print_string (struct type *elttype, const char *encoding,
      actually limits the fetch.  */
 
   unsigned int print_max_chars = get_print_max_chars (options);
-  fetchlimit = (len == -1
-		? print_max_chars
-		: std::min ((unsigned) len, print_max_chars));
+  fetchlimit = (len == -1 ? print_max_chars
+			  : std::min ((unsigned) len, print_max_chars));
 
-  err = target_read_string (addr, len, width, fetchlimit,
-			    &buffer, &bytes_read);
+  err
+    = target_read_string (addr, len, width, fetchlimit, &buffer, &bytes_read);
 
   addr += bytes_read;
 
@@ -2658,7 +2623,8 @@ val_print_string (struct type *elttype, const char *encoding,
   found_nul = 0;
   if (bytes_read >= width)
     found_nul = extract_unsigned_integer (buffer.get () + bytes_read - width,
-					  width, byte_order) == 0;
+					  width, byte_order)
+		== 0;
   if (len == -1 && !found_nul)
     {
       gdb_byte *peekbuf;
@@ -2686,16 +2652,15 @@ val_print_string (struct type *elttype, const char *encoding,
      and then the error message.  */
   if (err == 0 || bytes_read > 0)
     current_language->printstr (stream, elttype, buffer.get (),
-				bytes_read / width,
-				encoding, force_ellipsis, options);
+				bytes_read / width, encoding, force_ellipsis,
+				options);
 
   if (err != 0)
     {
       std::string str = memory_error_message (TARGET_XFER_E_IO, gdbarch, addr);
 
-      gdb_printf (stream, _("<error: %ps>"),
-		  styled_string (metadata_style.style (),
-				 str.c_str ()));
+      gdb_printf (stream, _ ("<error: %ps>"),
+		  styled_string (metadata_style.style (), str.c_str ()));
     }
 
   return (bytes_read / width);
@@ -2707,9 +2672,8 @@ static void
 show_print_max_depth (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Maximum print depth is %s.\n"), value);
+  gdb_printf (file, _ ("Maximum print depth is %s.\n"), value);
 }
-
 
 /* The 'set input-radix' command writes to this auxiliary variable.
    If the requested radix is valid, INPUT_RADIX is updated; otherwise,
@@ -2740,14 +2704,14 @@ set_input_radix_1 (int from_tty, unsigned radix)
   if (radix < 2)
     {
       input_radix_1 = input_radix;
-      error (_("Nonsense input radix ``decimal %u''; input radix unchanged."),
+      error (_ ("Nonsense input radix ``decimal %u''; input radix unchanged."),
 	     radix);
     }
   input_radix_1 = input_radix = radix;
   if (from_tty)
     {
-      gdb_printf (_("Input radix now set to "
-		    "decimal %u, hex %x, octal %o.\n"),
+      gdb_printf (_ ("Input radix now set to "
+		     "decimal %u, hex %x, octal %o.\n"),
 		  radix, radix, radix);
     }
 }
@@ -2772,25 +2736,25 @@ set_output_radix_1 (int from_tty, unsigned radix)
   switch (radix)
     {
     case 16:
-      user_print_options.output_format = 'x';	/* hex */
+      user_print_options.output_format = 'x'; /* hex */
       break;
     case 10:
-      user_print_options.output_format = 0;	/* decimal */
+      user_print_options.output_format = 0; /* decimal */
       break;
     case 8:
-      user_print_options.output_format = 'o';	/* octal */
+      user_print_options.output_format = 'o'; /* octal */
       break;
     default:
       output_radix_1 = output_radix;
-      error (_("Unsupported output radix ``decimal %u''; "
-	       "output radix unchanged."),
+      error (_ ("Unsupported output radix ``decimal %u''; "
+		"output radix unchanged."),
 	     radix);
     }
   output_radix_1 = output_radix = radix;
   if (from_tty)
     {
-      gdb_printf (_("Output radix now set to "
-		    "decimal %u, hex %x, octal %o.\n"),
+      gdb_printf (_ ("Output radix now set to "
+		     "decimal %u, hex %x, octal %o.\n"),
 		  radix, radix, radix);
     }
 }
@@ -2813,8 +2777,8 @@ set_radix (const char *arg, int from_tty)
   set_input_radix_1 (0, radix);
   if (from_tty)
     {
-      gdb_printf (_("Input and output radices now set to "
-		    "decimal %u, hex %x, octal %o.\n"),
+      gdb_printf (_ ("Input and output radices now set to "
+		     "decimal %u, hex %x, octal %o.\n"),
 		  radix, radix, radix);
     }
 }
@@ -2828,29 +2792,28 @@ show_radix (const char *arg, int from_tty)
     {
       if (input_radix == output_radix)
 	{
-	  gdb_printf (_("Input and output radices set to "
-			"decimal %u, hex %x, octal %o.\n"),
+	  gdb_printf (_ ("Input and output radices set to "
+			 "decimal %u, hex %x, octal %o.\n"),
 		      input_radix, input_radix, input_radix);
 	}
       else
 	{
-	  gdb_printf (_("Input radix set to decimal "
-			"%u, hex %x, octal %o.\n"),
+	  gdb_printf (_ ("Input radix set to decimal "
+			 "%u, hex %x, octal %o.\n"),
 		      input_radix, input_radix, input_radix);
-	  gdb_printf (_("Output radix set to decimal "
-			"%u, hex %x, octal %o.\n"),
+	  gdb_printf (_ ("Output radix set to decimal "
+			 "%u, hex %x, octal %o.\n"),
 		      output_radix, output_radix, output_radix);
 	}
     }
 }
-
 
 /* Controls printing of vtbl's.  */
 static void
-show_vtblprint (struct ui_file *file, int from_tty,
-		struct cmd_list_element *c, const char *value)
+show_vtblprint (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+		const char *value)
 {
-  gdb_printf (file, _("\
+  gdb_printf (file, _ ("\
 Printing of C++ virtual function tables is %s.\n"),
 	      value);
 }
@@ -2859,25 +2822,19 @@ Printing of C++ virtual function tables is %s.\n"),
    its vtables.  */
 static void
 show_objectprint (struct ui_file *file, int from_tty,
-		  struct cmd_list_element *c,
-		  const char *value)
+		  struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("\
+  gdb_printf (file, _ ("\
 Printing of object's derived type based on vtable info is %s.\n"),
 	      value);
 }
 
 static void
 show_static_field_print (struct ui_file *file, int from_tty,
-			 struct cmd_list_element *c,
-			 const char *value)
+			 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Printing of C++ static members is %s.\n"),
-	      value);
+  gdb_printf (file, _ ("Printing of C++ static members is %s.\n"), value);
 }
-
-
 
 /* A couple typedefs to make writing the options a bit more
    convenient.  */
@@ -2890,23 +2847,19 @@ using pinteger_option_def
 
 /* Extra literals supported with the `set print characters' and
    `print -characters' commands.  */
-static const literal_def print_characters_literals[] =
-  {
-    { "elements", PRINT_MAX_CHARS_ELEMENTS },
-    { "unlimited", PRINT_MAX_CHARS_UNLIMITED, 0 },
-    { nullptr }
-  };
+static const literal_def print_characters_literals[]
+  = { { "elements", PRINT_MAX_CHARS_ELEMENTS },
+      { "unlimited", PRINT_MAX_CHARS_UNLIMITED, 0 },
+      { nullptr } };
 
 /* Definitions of options for the "print" and "compile print"
    commands.  */
 static const gdb::option::option_def value_print_option_defs[] = {
 
   boolean_option_def {
-    "address",
-    [] (value_print_options *opt) { return &opt->addressprint; },
+    "address", [] (value_print_options *opt) { return &opt->addressprint; },
     show_addressprint, /* show_cmd_cb */
-    N_("Set printing of addresses."),
-    N_("Show printing of addresses."),
+    N_ ("Set printing of addresses."), N_ ("Show printing of addresses."),
     NULL, /* help_doc */
   },
 
@@ -2914,26 +2867,23 @@ static const gdb::option::option_def value_print_option_defs[] = {
     "array",
     [] (value_print_options *opt) { return &opt->prettyformat_arrays; },
     show_prettyformat_arrays, /* show_cmd_cb */
-    N_("Set pretty formatting of arrays."),
-    N_("Show pretty formatting of arrays."),
-    NULL, /* help_doc */
+    N_ ("Set pretty formatting of arrays."),
+    N_ ("Show pretty formatting of arrays."), NULL, /* help_doc */
   },
 
   boolean_option_def {
     "array-indexes",
     [] (value_print_options *opt) { return &opt->print_array_indexes; },
     show_print_array_indexes, /* show_cmd_cb */
-    N_("Set printing of array indexes."),
-    N_("Show printing of array indexes."),
-    NULL, /* help_doc */
+    N_ ("Set printing of array indexes."),
+    N_ ("Show printing of array indexes."), NULL, /* help_doc */
   },
 
   boolean_option_def {
-    "nibbles",
-    [] (value_print_options *opt) { return &opt->nibblesprint; },
+    "nibbles", [] (value_print_options *opt) { return &opt->nibblesprint; },
     show_nibbles, /* show_cmd_cb */
-    N_("Set whether to print binary values in groups of four bits."),
-    N_("Show whether to print binary values in groups of four bits."),
+    N_ ("Set whether to print binary values in groups of four bits."),
+    N_ ("Show whether to print binary values in groups of four bits."),
     NULL, /* help_doc */
   },
 
@@ -2942,10 +2892,10 @@ static const gdb::option::option_def value_print_option_defs[] = {
     [] (value_print_options *opt) { return &opt->print_max_chars; },
     print_characters_literals,
     show_print_max_chars, /* show_cmd_cb */
-    N_("Set limit on string chars to print."),
-    N_("Show limit on string chars to print."),
-    N_("\"elements\" causes the array element limit to be used.\n"
-       "\"unlimited\" causes there to be no limit."),
+    N_ ("Set limit on string chars to print."),
+    N_ ("Show limit on string chars to print."),
+    N_ ("\"elements\" causes the array element limit to be used.\n"
+	"\"unlimited\" causes there to be no limit."),
   },
 
   uinteger_option_def {
@@ -2953,32 +2903,30 @@ static const gdb::option::option_def value_print_option_defs[] = {
     [] (value_print_options *opt) { return &opt->print_max; },
     uinteger_unlimited_literals,
     show_print_max, /* show_cmd_cb */
-    N_("Set limit on array elements to print."),
-    N_("Show limit on array elements to print."),
-    N_("\"unlimited\" causes there to be no limit.\n"
-       "This setting also applies to string chars when \"print characters\"\n"
-       "is set to \"elements\"."),
+    N_ ("Set limit on array elements to print."),
+    N_ ("Show limit on array elements to print."),
+    N_ ("\"unlimited\" causes there to be no limit.\n"
+	"This setting also applies to string chars when \"print characters\"\n"
+	"is set to \"elements\"."),
   },
 
   pinteger_option_def {
-    "max-depth",
-    [] (value_print_options *opt) { return &opt->max_depth; },
-    pinteger_unlimited_literals,
-    show_print_max_depth, /* show_cmd_cb */
-    N_("Set maximum print depth for nested structures, unions and arrays."),
-    N_("Show maximum print depth for nested structures, unions, and arrays."),
-    N_("When structures, unions, or arrays are nested beyond this depth then they\n\
+    "max-depth", [] (value_print_options *opt) { return &opt->max_depth; },
+    pinteger_unlimited_literals, show_print_max_depth, /* show_cmd_cb */
+    N_ ("Set maximum print depth for nested structures, unions and arrays."),
+    N_ ("Show maximum print depth for nested structures, unions, and arrays."),
+    N_ (
+      "When structures, unions, or arrays are nested beyond this depth then they\n\
 will be replaced with either '{...}' or '(...)' depending on the language.\n\
-Use \"unlimited\" to print the complete structure.")
-  },
+Use \"unlimited\" to print the complete structure.") },
 
   boolean_option_def {
     "memory-tag-violations",
     [] (value_print_options *opt) { return &opt->memory_tag_violations; },
     show_memory_tag_violations, /* show_cmd_cb */
-    N_("Set printing of memory tag violations for pointers."),
-    N_("Show printing of memory tag violations for pointers."),
-    N_("Issue a warning when the printed value is a pointer\n\
+    N_ ("Set printing of memory tag violations for pointers."),
+    N_ ("Show printing of memory tag violations for pointers."),
+    N_ ("Issue a warning when the printed value is a pointer\n\
 whose logical tag doesn't match the allocation tag of the memory\n\
 location it points to."),
   },
@@ -2987,83 +2935,73 @@ location it points to."),
     "null-stop",
     [] (value_print_options *opt) { return &opt->stop_print_at_null; },
     show_stop_print_at_null, /* show_cmd_cb */
-    N_("Set printing of char arrays to stop at first null char."),
-    N_("Show printing of char arrays to stop at first null char."),
+    N_ ("Set printing of char arrays to stop at first null char."),
+    N_ ("Show printing of char arrays to stop at first null char."),
     NULL, /* help_doc */
   },
 
   boolean_option_def {
-    "object",
-    [] (value_print_options *opt) { return &opt->objectprint; },
+    "object", [] (value_print_options *opt) { return &opt->objectprint; },
     show_objectprint, /* show_cmd_cb */
-    _("Set printing of C++ virtual function tables."),
-    _("Show printing of C++ virtual function tables."),
-    NULL, /* help_doc */
+    _ ("Set printing of C++ virtual function tables."),
+    _ ("Show printing of C++ virtual function tables."), NULL, /* help_doc */
   },
 
   boolean_option_def {
     "pretty",
     [] (value_print_options *opt) { return &opt->prettyformat_structs; },
     show_prettyformat_structs, /* show_cmd_cb */
-    N_("Set pretty formatting of structures."),
-    N_("Show pretty formatting of structures."),
-    NULL, /* help_doc */
+    N_ ("Set pretty formatting of structures."),
+    N_ ("Show pretty formatting of structures."), NULL, /* help_doc */
   },
 
   boolean_option_def {
-    "raw-values",
-    [] (value_print_options *opt) { return &opt->raw; },
+    "raw-values", [] (value_print_options *opt) { return &opt->raw; },
     NULL, /* show_cmd_cb */
-    N_("Set whether to print values in raw form."),
-    N_("Show whether to print values in raw form."),
-    N_("If set, values are printed in raw form, bypassing any\n\
-pretty-printers for that value.")
-  },
+    N_ ("Set whether to print values in raw form."),
+    N_ ("Show whether to print values in raw form."),
+    N_ ("If set, values are printed in raw form, bypassing any\n\
+pretty-printers for that value.") },
 
   uinteger_option_def {
     "repeats",
     [] (value_print_options *opt) { return &opt->repeat_count_threshold; },
     uinteger_unlimited_literals,
     show_repeat_count_threshold, /* show_cmd_cb */
-    N_("Set threshold for repeated print elements."),
-    N_("Show threshold for repeated print elements."),
-    N_("\"unlimited\" causes all elements to be individually printed."),
+    N_ ("Set threshold for repeated print elements."),
+    N_ ("Show threshold for repeated print elements."),
+    N_ ("\"unlimited\" causes all elements to be individually printed."),
   },
 
   boolean_option_def {
     "static-members",
     [] (value_print_options *opt) { return &opt->static_field_print; },
     show_static_field_print, /* show_cmd_cb */
-    N_("Set printing of C++ static members."),
-    N_("Show printing of C++ static members."),
-    NULL, /* help_doc */
+    N_ ("Set printing of C++ static members."),
+    N_ ("Show printing of C++ static members."), NULL, /* help_doc */
   },
 
   boolean_option_def {
-    "symbol",
-    [] (value_print_options *opt) { return &opt->symbol_print; },
+    "symbol", [] (value_print_options *opt) { return &opt->symbol_print; },
     show_symbol_print, /* show_cmd_cb */
-    N_("Set printing of symbol names when printing pointers."),
-    N_("Show printing of symbol names when printing pointers."),
+    N_ ("Set printing of symbol names when printing pointers."),
+    N_ ("Show printing of symbol names when printing pointers."),
     NULL, /* help_doc */
   },
 
   boolean_option_def {
-    "union",
-    [] (value_print_options *opt) { return &opt->unionprint; },
+    "union", [] (value_print_options *opt) { return &opt->unionprint; },
     show_unionprint, /* show_cmd_cb */
-    N_("Set printing of unions interior to structures."),
-    N_("Show printing of unions interior to structures."),
+    N_ ("Set printing of unions interior to structures."),
+    N_ ("Show printing of unions interior to structures."),
     NULL, /* help_doc */
   },
 
   boolean_option_def {
-    "vtbl",
-    [] (value_print_options *opt) { return &opt->vtblprint; },
+    "vtbl", [] (value_print_options *opt) { return &opt->vtblprint; },
     show_vtblprint, /* show_cmd_cb */
-    N_("Set printing of C++ virtual function tables."),
-    N_("Show printing of C++ virtual function tables."),
-    NULL, /* help_doc */
+    N_ ("Set printing of C++ virtual function tables."),
+    N_ ("Show printing of C++ virtual function tables."), NULL, /* help_doc */
   },
 };
 
@@ -3072,7 +3010,7 @@ pretty-printers for that value.")
 gdb::option::option_def_group
 make_value_print_options_def_group (value_print_options *opts)
 {
-  return {{value_print_option_defs}, opts};
+  return { { value_print_option_defs }, opts };
 }
 
 #if GDB_SELF_TEST
@@ -3103,6 +3041,7 @@ test_print_flags (gdbarch *arch)
 #endif
 
 void _initialize_valprint ();
+
 void
 _initialize_valprint ()
 {
@@ -3110,45 +3049,43 @@ _initialize_valprint ()
   selftests::register_test_foreach_arch ("print-flags", test_print_flags);
 #endif
 
-  set_show_commands setshow_print_cmds
-    = add_setshow_prefix_cmd ("print", no_class,
-			      _("Generic command for setting how things print."),
-			      _("Generic command for showing print settings."),
-			      &setprintlist, &showprintlist,
-			      &setlist, &showlist);
+  set_show_commands setshow_print_cmds = add_setshow_prefix_cmd (
+    "print", no_class, _ ("Generic command for setting how things print."),
+    _ ("Generic command for showing print settings."), &setprintlist,
+    &showprintlist, &setlist, &showlist);
   add_alias_cmd ("p", setshow_print_cmds.set, no_class, 1, &setlist);
   /* Prefer set print to set prompt.  */
   add_alias_cmd ("pr", setshow_print_cmds.set, no_class, 1, &setlist);
   add_alias_cmd ("p", setshow_print_cmds.show, no_class, 1, &showlist);
   add_alias_cmd ("pr", setshow_print_cmds.show, no_class, 1, &showlist);
 
-  set_show_commands setshow_print_raw_cmds
-    = add_setshow_prefix_cmd
-	("raw", no_class,
-	 _("Generic command for setting what things to print in \"raw\" mode."),
-	 _("Generic command for showing \"print raw\" settings."),
-	 &setprintrawlist, &showprintrawlist, &setprintlist, &showprintlist);
+  set_show_commands setshow_print_raw_cmds = add_setshow_prefix_cmd (
+    "raw", no_class,
+    _ ("Generic command for setting what things to print in \"raw\" mode."),
+    _ ("Generic command for showing \"print raw\" settings."),
+    &setprintrawlist, &showprintrawlist, &setprintlist, &showprintlist);
   deprecate_cmd (setshow_print_raw_cmds.set, nullptr);
   deprecate_cmd (setshow_print_raw_cmds.show, nullptr);
 
-  gdb::option::add_setshow_cmds_for_options
-    (class_support, &user_print_options, value_print_option_defs,
-     &setprintlist, &showprintlist);
+  gdb::option::add_setshow_cmds_for_options (class_support,
+					     &user_print_options,
+					     value_print_option_defs,
+					     &setprintlist, &showprintlist);
 
   add_setshow_zuinteger_cmd ("input-radix", class_support, &input_radix_1,
-			     _("\
-Set default input radix for entering numbers."), _("\
-Show default input radix for entering numbers."), NULL,
-			     set_input_radix,
-			     show_input_radix,
-			     &setlist, &showlist);
+			     _ ("\
+Set default input radix for entering numbers."),
+			     _ ("\
+Show default input radix for entering numbers."),
+			     NULL, set_input_radix, show_input_radix, &setlist,
+			     &showlist);
 
   add_setshow_zuinteger_cmd ("output-radix", class_support, &output_radix_1,
-			     _("\
-Set default output radix for printing of values."), _("\
-Show default output radix for printing of values."), NULL,
-			     set_output_radix,
-			     show_output_radix,
+			     _ ("\
+Set default output radix for printing of values."),
+			     _ ("\
+Show default output radix for printing of values."),
+			     NULL, set_output_radix, show_output_radix,
 			     &setlist, &showlist);
 
   /* The "set radix" and "show radix" commands are special in that
@@ -3158,12 +3095,12 @@ Show default output radix for printing of values."), NULL,
      add_show_from_set() commands aren't really appropriate.  */
   /* FIXME: i18n: With the new add_setshow_integer command, that is no
      longer true - show can display anything.  */
-  add_cmd ("radix", class_support, set_radix, _("\
+  add_cmd ("radix", class_support, set_radix, _ ("\
 Set default input and output number radices.\n\
 Use 'set input-radix' or 'set output-radix' to independently set each.\n\
 Without an argument, sets both radices back to the default value of 10."),
 	   &setlist);
-  add_cmd ("radix", class_support, show_radix, _("\
+  add_cmd ("radix", class_support, show_radix, _ ("\
 Show the default input and output number radices.\n\
 Use 'show input-radix' or 'show output-radix' to independently show each."),
 	   &showlist);

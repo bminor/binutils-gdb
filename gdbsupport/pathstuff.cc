@@ -36,7 +36,7 @@ char *current_directory;
 gdb::unique_xmalloc_ptr<char>
 gdb_realpath (const char *filename)
 {
-/* On most hosts, we rely on canonicalize_file_name to compute
+  /* On most hosts, we rely on canonicalize_file_name to compute
    the FILENAME's realpath.
 
    But the situation is slightly more complex on Windows, due to some
@@ -59,7 +59,7 @@ gdb_realpath (const char *filename)
    does not exist locally), we rely instead on GetFullPathName to
    perform the canonicalization.  */
 
-#if defined (_WIN32)
+#if defined(_WIN32)
   {
     char buf[MAX_PATH];
     DWORD len = GetFullPathName (filename, MAX_PATH, buf, NULL);
@@ -169,7 +169,7 @@ child_path (const char *parent, const char *child)
 	 is nul due to CHILD containing the same path as PARENT, the
 	 IS_DIR_SEPARATOR check will fail here.  */
       if (!IS_DIR_SEPARATOR (child[parent_len]))
-	return NULL;
+        return NULL;
 
       /* The first child component starts after the separator after the
 	 common prefix.  */
@@ -181,7 +181,7 @@ child_path (const char *parent, const char *child)
   while (*child_component != '\0')
     {
       if (!IS_DIR_SEPARATOR (*child_component))
-	return child_component;
+        return child_component;
 
       child_component++;
     }
@@ -200,10 +200,10 @@ path_join (gdb::array_view<const char *> paths)
       const char *path = paths[i];
 
       if (i > 0)
-	gdb_assert (strlen (path) == 0 || !IS_ABSOLUTE_PATH (path));
+        gdb_assert (strlen (path) == 0 || !IS_ABSOLUTE_PATH (path));
 
       if (!ret.empty () && !IS_DIR_SEPARATOR (ret.back ()))
-	  ret += '/';
+        ret += '/';
 
       ret.append (path);
     }
@@ -219,7 +219,7 @@ contains_dir_separator (const char *path)
   for (; *path != '\0'; path++)
     {
       if (IS_DIR_SEPARATOR (*path))
-	return true;
+        return true;
     }
 
   return false;
@@ -251,7 +251,7 @@ get_standard_cache_dir ()
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       std::string abs = gdb_abspath (home);
-      return path_join (abs.c_str (), HOME_CACHE_DIR,  "gdb");
+      return path_join (abs.c_str (), HOME_CACHE_DIR, "gdb");
     }
 
 #ifdef WIN32
@@ -281,7 +281,7 @@ get_standard_temp_dir ()
   if (tmp != nullptr)
     return tmp;
 
-  error (_("Couldn't find temp dir path, both TMP and TEMP are unset."));
+  error (_ ("Couldn't find temp dir path, both TMP and TEMP are unset."));
 
 #else
   const char *tmp = getenv ("TMPDIR");
@@ -352,7 +352,7 @@ find_gdb_home_config_file (const char *name, struct stat *buf)
   if (!config_dir_file.empty ())
     {
       if (stat (config_dir_file.c_str (), buf) == 0)
-	return config_dir_file;
+        return config_dir_file;
     }
 
   const char *homedir = getenv ("HOME");
@@ -362,7 +362,7 @@ find_gdb_home_config_file (const char *name, struct stat *buf)
       std::string abs = gdb_abspath (homedir);
       std::string path = string_printf ("%s/%s", abs.c_str (), name);
       if (stat (path.c_str (), buf) == 0)
-	return path;
+        return path;
     }
 
   return {};

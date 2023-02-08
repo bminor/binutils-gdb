@@ -51,34 +51,31 @@ protected:
   virtual void do_field_signed (int fldno, int width, ui_align align,
 				const char *fldname, LONGEST value) override;
   virtual void do_field_unsigned (int fldno, int width, ui_align align,
-				  const char *fldname, ULONGEST value)
-    override;
+				  const char *fldname,
+				  ULONGEST value) override;
   virtual void do_field_skip (int fldno, int width, ui_align align,
 			      const char *fldname) override;
   virtual void do_field_string (int fldno, int width, ui_align align,
-				const char *fldname,
-				const char *string,
+				const char *fldname, const char *string,
 				const ui_file_style &style) override;
   virtual void do_field_fmt (int fldno, int width, ui_align align,
 			     const char *fldname, const ui_file_style &style,
-			     const char *format, va_list args)
-    override ATTRIBUTE_PRINTF (7, 0);
+			     const char *format, va_list args) override
+    ATTRIBUTE_PRINTF (7, 0);
   virtual void do_spaces (int numspaces) override;
   virtual void do_text (const char *string) override;
-  virtual void do_message (const ui_file_style &style,
-			   const char *format, va_list args) override
-    ATTRIBUTE_PRINTF (3,0);
+  virtual void do_message (const ui_file_style &style, const char *format,
+			   va_list args) override ATTRIBUTE_PRINTF (3, 0);
   virtual void do_wrap_hint (int indent) override;
   virtual void do_flush () override;
   virtual void do_redirect (struct ui_file *outstream) override;
 
   virtual void do_progress_start () override;
-  virtual void do_progress_notify (const std::string &, const char *,
-				   double, double) override;
+  virtual void do_progress_notify (const std::string &, const char *, double,
+				   double) override;
   virtual void do_progress_end () override;
 
-  bool suppress_output ()
-  { return m_suppress_output; }
+  bool suppress_output () { return m_suppress_output; }
 
 private:
 
@@ -98,8 +95,10 @@ private:
     std::chrono::steady_clock::time_point last_update;
 
     cli_progress_info ()
-      : pos (0), state (progress_update::START)
-    {}
+      : pos (0),
+	state (progress_update::START)
+    {
+    }
   };
 
   /* Stack of progress info.  */

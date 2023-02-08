@@ -52,51 +52,45 @@
 
 /* From <sys/regset.h>.  */
 static int amd64_sol2_gregset64_reg_offset[] = {
-  14 * 8,			/* %rax */
-  11 * 8,			/* %rbx */
-  13 * 8,			/* %rcx */
-  12 * 8,			/* %rdx */
-  9 * 8,			/* %rsi */
-  8 * 8,			/* %rdi */
-  10 * 8,			/* %rbp */
-  20 * 8,			/* %rsp */
-  7 * 8,			/* %r8 ...  */
-  6 * 8,
-  5 * 8,
-  4 * 8,
-  3 * 8,
-  2 * 8,
-  1 * 8,
-  0 * 8,			/* ... %r15 */
-  17 * 8,			/* %rip */
-  19 * 8,			/* %eflags */
-  18 * 8,			/* %cs */
-  21 * 8,			/* %ss */
-  25 * 8,			/* %ds */
-  24 * 8,			/* %es */
-  22 * 8,			/* %fs */
-  23 * 8			/* %gs */
+  14 * 8,					    /* %rax */
+  11 * 8,					    /* %rbx */
+  13 * 8,					    /* %rcx */
+  12 * 8,					    /* %rdx */
+  9 * 8,					    /* %rsi */
+  8 * 8,					    /* %rdi */
+  10 * 8,					    /* %rbp */
+  20 * 8,					    /* %rsp */
+  7 * 8,					    /* %r8 ...  */
+  6 * 8,  5 * 8, 4 * 8, 3 * 8, 2 * 8, 1 * 8, 0 * 8, /* ... %r15 */
+  17 * 8,					    /* %rip */
+  19 * 8,					    /* %eflags */
+  18 * 8,					    /* %cs */
+  21 * 8,					    /* %ss */
+  25 * 8,					    /* %ds */
+  24 * 8,					    /* %es */
+  22 * 8,					    /* %fs */
+  23 * 8					    /* %gs */
 };
 
 /* 32-bit registers are provided by Solaris in 64-bit format, so just
    give a subset of the list above.  */
 static int amd64_sol2_gregset32_reg_offset[] = {
-  14 * 8,			/* %eax */
-  13 * 8,			/* %ecx */
-  12 * 8,			/* %edx */
-  11 * 8,			/* %ebx */
-  20 * 8,			/* %esp */
-  10 * 8,			/* %ebp */
-  9 * 8,			/* %esi */
-  8 * 8,			/* %edi */
-  17 * 8,			/* %eip */
-  19 * 8,			/* %eflags */
-  18 * 8,			/* %cs */
-  21 * 8,			/* %ss */
-  25 * 8,			/* %ds */
-  24 * 8,			/* %es */
-  22 * 8,			/* %fs */
-  23 * 8			/* %gs */
+  14 * 8, /* %eax */
+  13 * 8, /* %ecx */
+  12 * 8, /* %edx */
+  11 * 8, /* %ebx */
+  20 * 8, /* %esp */
+  10 * 8, /* %ebp */
+  9 * 8,  /* %esi */
+  8 * 8,  /* %edi */
+  17 * 8, /* %eip */
+  19 * 8, /* %eflags */
+  18 * 8, /* %cs */
+  21 * 8, /* %ss */
+  25 * 8, /* %ds */
+  24 * 8, /* %es */
+  22 * 8, /* %fs */
+  23 * 8  /* %gs */
 };
 
 void
@@ -112,15 +106,14 @@ supply_fpregset (struct regcache *regcache, const prfpregset_t *fpregs)
 }
 
 void
-fill_gregset (const struct regcache *regcache,
-	      prgregset_t *gregs, int regnum)
+fill_gregset (const struct regcache *regcache, prgregset_t *gregs, int regnum)
 {
   amd64_collect_native_gregset (regcache, gregs, regnum);
 }
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       prfpregset_t *fpregs, int regnum)
+fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
+	       int regnum)
 {
   amd64_collect_fxsave (regcache, regnum, fpregs);
 }
@@ -176,24 +169,11 @@ fill_fpregset (const struct regcache *regcache,
 
 /* Mapping between the general-purpose registers in `/proc'
    format and GDB's register array layout.  */
-static int regmap[] =
-{
-  11	/* EAX */,
-  10	/* ECX */,
-  9	/* EDX */,
-  8	/* EBX */,
-  17	/* UESP */,
-  6	/* EBP */,
-  5	/* ESI */,
-  4	/* EDI */,
-  14	/* EIP */,
-  16	/* EFL */,
-  15	/* CS */,
-  18	/* SS */,
-  3	/* DS */,
-  2	/* ES */,
-  1	/* FS */,
-  0	/* GS */
+static int regmap[] = {
+  11 /* EAX */,	 10 /* ECX */, 9 /* EDX */, 8 /* EBX */,
+  17 /* UESP */, 6 /* EBP */,  5 /* ESI */, 4 /* EDI */,
+  14 /* EIP */,	 16 /* EFL */, 15 /* CS */, 18 /* SS */,
+  3 /* DS */,	 2 /* ES */,   1 /* FS */,  0 /* GS */
 };
 
 /* Fill GDB's register array with the general-purpose register values
@@ -214,8 +194,7 @@ supply_gregset (struct regcache *regcache, const gregset_t *gregsetp)
    do this for all registers.  */
 
 void
-fill_gregset (const struct regcache *regcache,
-	      gregset_t *gregsetp, int regnum)
+fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regnum)
 {
   greg_t *regp = (greg_t *) gregsetp;
   int i;
@@ -242,8 +221,8 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
    do this for all registers.  */
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp,
+	       int regno)
 {
   if (gdbarch_fp0_regnum (regcache->arch ()) == 0)
     return;
@@ -254,15 +233,16 @@ fill_fpregset (const struct regcache *regcache,
 #endif
 
 void _initialize_amd64_sol2_nat ();
+
 void
 _initialize_amd64_sol2_nat ()
 {
 #if PR_MODEL_NATIVE == PR_MODEL_LP64
   amd64_native_gregset32_reg_offset = amd64_sol2_gregset32_reg_offset;
-  amd64_native_gregset32_num_regs =
-    ARRAY_SIZE (amd64_sol2_gregset32_reg_offset);
+  amd64_native_gregset32_num_regs
+    = ARRAY_SIZE (amd64_sol2_gregset32_reg_offset);
   amd64_native_gregset64_reg_offset = amd64_sol2_gregset64_reg_offset;
-  amd64_native_gregset64_num_regs =
-    ARRAY_SIZE (amd64_sol2_gregset64_reg_offset);
+  amd64_native_gregset64_num_regs
+    = ARRAY_SIZE (amd64_sol2_gregset64_reg_offset);
 #endif
 }

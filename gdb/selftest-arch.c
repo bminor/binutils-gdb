@@ -24,9 +24,11 @@
 #include "selftest-arch.h"
 #include "arch-utils.h"
 
-namespace selftests {
+namespace selftests
+{
 
-static bool skip_arch (const char *arch)
+static bool
+skip_arch (const char *arch)
 {
   if (strcmp ("powerpc:EC603e", arch) == 0
       || strcmp ("powerpc:e500mc", arch) == 0
@@ -61,14 +63,12 @@ foreach_arch_test_generator (const std::string &name,
       info.bfd_arch_info = bfd_scan_arch (arch);
       info.osabi = GDB_OSABI_NONE;
 
-      auto test_fn
-	= ([=] ()
-	   {
-	     struct gdbarch *gdbarch = gdbarch_find_by_info (info);
-	     SELF_CHECK (gdbarch != NULL);
-	     function (gdbarch);
-	     reset ();
-	   });
+      auto test_fn = ([=] () {
+	struct gdbarch *gdbarch = gdbarch_find_by_info (info);
+	SELF_CHECK (gdbarch != NULL);
+	function (gdbarch);
+	reset ();
+      });
 
       std::string id;
 
@@ -77,7 +77,8 @@ foreach_arch_test_generator (const std::string &name,
 	/* Avoid avr::avr:1.  */
 	id = arch;
       else if (strncasecmp (info.bfd_arch_info->arch_name, arch,
-			    strlen (info.bfd_arch_info->arch_name)) == 0)
+			    strlen (info.bfd_arch_info->arch_name))
+	       == 0)
 	/* Avoid arm::arm.  */
 	id = arch;
       else
@@ -98,10 +99,9 @@ void
 register_test_foreach_arch (const std::string &name,
 			    self_test_foreach_arch_function *function)
 {
-  add_lazy_generator ([=] ()
-		      {
-		        return foreach_arch_test_generator (name, function);
-		      });
+  add_lazy_generator ([=] () {
+    return foreach_arch_test_generator (name, function);
+  });
 }
 
 void

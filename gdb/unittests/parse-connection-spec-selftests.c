@@ -31,8 +31,10 @@
 #include <netinet/tcp.h>
 #endif
 
-namespace selftests {
-namespace parse_connection_spec_tests {
+namespace selftests
+{
+namespace parse_connection_spec_tests
+{
 
 /* Auxiliary struct that holds info about a specific test for a
    connection spec.  */
@@ -66,9 +68,11 @@ struct parse_conn_test
 
 /* Initialize a full entry.  */
 #define INIT_ENTRY(ADDR, EXP_HOST, EXP_PORT, SHOULD_FAIL, EXP_AI_FAMILY, \
-		   EXP_AI_SOCKTYPE, EXP_AI_PROTOCOL)			\
-  { ADDR, { EXP_HOST, EXP_PORT }, SHOULD_FAIL, EXP_AI_FAMILY, \
-    EXP_AI_SOCKTYPE, EXP_AI_PROTOCOL }
+		   EXP_AI_SOCKTYPE, EXP_AI_PROTOCOL)                     \
+  {                                                                      \
+    ADDR, { EXP_HOST, EXP_PORT }, SHOULD_FAIL, EXP_AI_FAMILY,            \
+      EXP_AI_SOCKTYPE, EXP_AI_PROTOCOL                                   \
+  }
 
 /* Initialize an unprefixed entry.  In this case, we don't expect
    anything on the 'struct addrinfo' HINT.  */
@@ -82,121 +86,117 @@ struct parse_conn_test
 
 /* Initialize a prefixed entry.  */
 #define INIT_PREFIXED_ENTRY(ADDR, EXP_HOST, EXP_PORT, EXP_AI_FAMILY, \
-			    EXP_AI_SOCKTYPE, EXP_AI_PROTOCOL) \
-  INIT_ENTRY (ADDR, EXP_HOST, EXP_PORT, false, EXP_AI_FAMILY, \
+			    EXP_AI_SOCKTYPE, EXP_AI_PROTOCOL)        \
+  INIT_ENTRY (ADDR, EXP_HOST, EXP_PORT, false, EXP_AI_FAMILY,        \
 	      EXP_AI_SOCKTYPE, EXP_AI_PROTOCOL)
 
 /* Initialize an entry prefixed with "tcp4:".  */
-#define INIT_PREFIXED_IPV4_TCP(ADDR, EXP_HOST, EXP_PORT) \
+#define INIT_PREFIXED_IPV4_TCP(ADDR, EXP_HOST, EXP_PORT)               \
   INIT_PREFIXED_ENTRY (ADDR, EXP_HOST, EXP_PORT, AF_INET, SOCK_STREAM, \
 		       IPPROTO_TCP)
 
 /* Initialize an entry prefixed with "tcp6:".  */
-#define INIT_PREFIXED_IPV6_TCP(ADDR, EXP_HOST, EXP_PORT) \
+#define INIT_PREFIXED_IPV6_TCP(ADDR, EXP_HOST, EXP_PORT)                \
   INIT_PREFIXED_ENTRY (ADDR, EXP_HOST, EXP_PORT, AF_INET6, SOCK_STREAM, \
 		       IPPROTO_TCP)
 
 /* Initialize an entry prefixed with "udp4:".  */
-#define INIT_PREFIXED_IPV4_UDP(ADDR, EXP_HOST, EXP_PORT) \
+#define INIT_PREFIXED_IPV4_UDP(ADDR, EXP_HOST, EXP_PORT)              \
   INIT_PREFIXED_ENTRY (ADDR, EXP_HOST, EXP_PORT, AF_INET, SOCK_DGRAM, \
 		       IPPROTO_UDP)
 
 /* Initialize an entry prefixed with "udp6:".  */
-#define INIT_PREFIXED_IPV6_UDP(ADDR, EXP_HOST, EXP_PORT) \
+#define INIT_PREFIXED_IPV6_UDP(ADDR, EXP_HOST, EXP_PORT)               \
   INIT_PREFIXED_ENTRY (ADDR, EXP_HOST, EXP_PORT, AF_INET6, SOCK_DGRAM, \
 		       IPPROTO_UDP)
 
 /* Initialize a bogus entry, i.e., a connection spec that should
    fail.  */
-#define INIT_BOGUS_ENTRY(ADDR) \
-  INIT_ENTRY (ADDR, "", "", true, 0, 0, 0)
+#define INIT_BOGUS_ENTRY(ADDR) INIT_ENTRY (ADDR, "", "", true, 0, 0, 0)
 
 /* The variable which holds all of our tests.  */
 
-static const parse_conn_test conn_test[] =
-  {
-    /* Unprefixed addresses.  */
+static const parse_conn_test conn_test[] = {
+  /* Unprefixed addresses.  */
 
-    /* IPv4, host and port present.  */
-    INIT_UNPREFIXED_ENTRY ("127.0.0.1:1234", "127.0.0.1", "1234"),
-    /* IPv4, only host.  */
-    INIT_UNPREFIXED_ENTRY ("127.0.0.1", "127.0.0.1", ""),
-    /* IPv4, missing port.  */
-    INIT_UNPREFIXED_ENTRY ("127.0.0.1:", "127.0.0.1", ""),
+  /* IPv4, host and port present.  */
+  INIT_UNPREFIXED_ENTRY ("127.0.0.1:1234", "127.0.0.1", "1234"),
+  /* IPv4, only host.  */
+  INIT_UNPREFIXED_ENTRY ("127.0.0.1", "127.0.0.1", ""),
+  /* IPv4, missing port.  */
+  INIT_UNPREFIXED_ENTRY ("127.0.0.1:", "127.0.0.1", ""),
 
-    /* IPv6, host and port present, no brackets.  */
-    INIT_UNPREFIXED_ENTRY ("::1:1234", "::1", "1234"),
-    /* IPv6, missing port, no brackets.  */
-    INIT_UNPREFIXED_ENTRY ("::1:", "::1", ""),
-    /* IPv6, host and port present, with brackets.  */
-    INIT_UNPREFIXED_IPV6_ENTRY ("[::1]:1234", "::1", "1234"),
-    /* IPv6, only host, with brackets.  */
-    INIT_UNPREFIXED_IPV6_ENTRY ("[::1]", "::1", ""),
-    /* IPv6, missing port, with brackets.  */
-    INIT_UNPREFIXED_IPV6_ENTRY ("[::1]:", "::1", ""),
+  /* IPv6, host and port present, no brackets.  */
+  INIT_UNPREFIXED_ENTRY ("::1:1234", "::1", "1234"),
+  /* IPv6, missing port, no brackets.  */
+  INIT_UNPREFIXED_ENTRY ("::1:", "::1", ""),
+  /* IPv6, host and port present, with brackets.  */
+  INIT_UNPREFIXED_IPV6_ENTRY ("[::1]:1234", "::1", "1234"),
+  /* IPv6, only host, with brackets.  */
+  INIT_UNPREFIXED_IPV6_ENTRY ("[::1]", "::1", ""),
+  /* IPv6, missing port, with brackets.  */
+  INIT_UNPREFIXED_IPV6_ENTRY ("[::1]:", "::1", ""),
 
-    /* Unspecified, only port.  */
-    INIT_UNPREFIXED_ENTRY (":1234", "localhost", "1234"),
+  /* Unspecified, only port.  */
+  INIT_UNPREFIXED_ENTRY (":1234", "localhost", "1234"),
 
-    /* Prefixed addresses.  */
+  /* Prefixed addresses.  */
 
-    /* Prefixed "tcp4:" IPv4, host and port presents.  */
-    INIT_PREFIXED_IPV4_TCP ("tcp4:127.0.0.1:1234", "127.0.0.1", "1234"),
-    /* Prefixed "tcp4:" IPv4, only port.  */
-    INIT_PREFIXED_IPV4_TCP ("tcp4::1234", "localhost", "1234"),
-    /* Prefixed "tcp4:" IPv4, only host.  */
-    INIT_PREFIXED_IPV4_TCP ("tcp4:127.0.0.1", "127.0.0.1", ""),
-    /* Prefixed "tcp4:" IPv4, missing port.  */
-    INIT_PREFIXED_IPV4_TCP ("tcp4:127.0.0.1:", "127.0.0.1", ""),
+  /* Prefixed "tcp4:" IPv4, host and port presents.  */
+  INIT_PREFIXED_IPV4_TCP ("tcp4:127.0.0.1:1234", "127.0.0.1", "1234"),
+  /* Prefixed "tcp4:" IPv4, only port.  */
+  INIT_PREFIXED_IPV4_TCP ("tcp4::1234", "localhost", "1234"),
+  /* Prefixed "tcp4:" IPv4, only host.  */
+  INIT_PREFIXED_IPV4_TCP ("tcp4:127.0.0.1", "127.0.0.1", ""),
+  /* Prefixed "tcp4:" IPv4, missing port.  */
+  INIT_PREFIXED_IPV4_TCP ("tcp4:127.0.0.1:", "127.0.0.1", ""),
 
-    /* Prefixed "udp4:" IPv4, host and port present.  */
-    INIT_PREFIXED_IPV4_UDP ("udp4:127.0.0.1:1234", "127.0.0.1", "1234"),
-    /* Prefixed "udp4:" IPv4, only port.  */
-    INIT_PREFIXED_IPV4_UDP ("udp4::1234", "localhost", "1234"),
-    /* Prefixed "udp4:" IPv4, only host.  */
-    INIT_PREFIXED_IPV4_UDP ("udp4:127.0.0.1", "127.0.0.1", ""),
-    /* Prefixed "udp4:" IPv4, missing port.  */
-    INIT_PREFIXED_IPV4_UDP ("udp4:127.0.0.1:", "127.0.0.1", ""),
+  /* Prefixed "udp4:" IPv4, host and port present.  */
+  INIT_PREFIXED_IPV4_UDP ("udp4:127.0.0.1:1234", "127.0.0.1", "1234"),
+  /* Prefixed "udp4:" IPv4, only port.  */
+  INIT_PREFIXED_IPV4_UDP ("udp4::1234", "localhost", "1234"),
+  /* Prefixed "udp4:" IPv4, only host.  */
+  INIT_PREFIXED_IPV4_UDP ("udp4:127.0.0.1", "127.0.0.1", ""),
+  /* Prefixed "udp4:" IPv4, missing port.  */
+  INIT_PREFIXED_IPV4_UDP ("udp4:127.0.0.1:", "127.0.0.1", ""),
 
+  /* Prefixed "tcp6:" IPv6, host and port present.  */
+  INIT_PREFIXED_IPV6_TCP ("tcp6:::1:1234", "::1", "1234"),
+  /* Prefixed "tcp6:" IPv6, only port.  */
+  INIT_PREFIXED_IPV6_TCP ("tcp6::1234", "localhost", "1234"),
+  /* Prefixed "tcp6:" IPv6, only host.  */
+  //INIT_PREFIXED_IPV6_TCP ("tcp6:::1", "::1", ""),
+  /* Prefixed "tcp6:" IPv6, missing port.  */
+  INIT_PREFIXED_IPV6_TCP ("tcp6:::1:", "::1", ""),
 
-    /* Prefixed "tcp6:" IPv6, host and port present.  */
-    INIT_PREFIXED_IPV6_TCP ("tcp6:::1:1234", "::1", "1234"),
-    /* Prefixed "tcp6:" IPv6, only port.  */
-    INIT_PREFIXED_IPV6_TCP ("tcp6::1234", "localhost", "1234"),
-    /* Prefixed "tcp6:" IPv6, only host.  */
-    //INIT_PREFIXED_IPV6_TCP ("tcp6:::1", "::1", ""),
-    /* Prefixed "tcp6:" IPv6, missing port.  */
-    INIT_PREFIXED_IPV6_TCP ("tcp6:::1:", "::1", ""),
+  /* Prefixed "udp6:" IPv6, host and port present.  */
+  INIT_PREFIXED_IPV6_UDP ("udp6:::1:1234", "::1", "1234"),
+  /* Prefixed "udp6:" IPv6, only port.  */
+  INIT_PREFIXED_IPV6_UDP ("udp6::1234", "localhost", "1234"),
+  /* Prefixed "udp6:" IPv6, only host.  */
+  //INIT_PREFIXED_IPV6_UDP ("udp6:::1", "::1", ""),
+  /* Prefixed "udp6:" IPv6, missing port.  */
+  INIT_PREFIXED_IPV6_UDP ("udp6:::1:", "::1", ""),
 
-    /* Prefixed "udp6:" IPv6, host and port present.  */
-    INIT_PREFIXED_IPV6_UDP ("udp6:::1:1234", "::1", "1234"),
-    /* Prefixed "udp6:" IPv6, only port.  */
-    INIT_PREFIXED_IPV6_UDP ("udp6::1234", "localhost", "1234"),
-    /* Prefixed "udp6:" IPv6, only host.  */
-    //INIT_PREFIXED_IPV6_UDP ("udp6:::1", "::1", ""),
-    /* Prefixed "udp6:" IPv6, missing port.  */
-    INIT_PREFIXED_IPV6_UDP ("udp6:::1:", "::1", ""),
+  /* Prefixed "tcp6:" IPv6 with brackets, host and port present.  */
+  INIT_PREFIXED_IPV6_TCP ("tcp6:[::1]:1234", "::1", "1234"),
+  /* Prefixed "tcp6:" IPv6 with brackets, only host.  */
+  INIT_PREFIXED_IPV6_TCP ("tcp6:[::1]", "::1", ""),
+  /* Prefixed "tcp6:" IPv6 with brackets, missing port.  */
+  INIT_PREFIXED_IPV6_TCP ("tcp6:[::1]:", "::1", ""),
 
-    /* Prefixed "tcp6:" IPv6 with brackets, host and port present.  */
-    INIT_PREFIXED_IPV6_TCP ("tcp6:[::1]:1234", "::1", "1234"),
-    /* Prefixed "tcp6:" IPv6 with brackets, only host.  */
-    INIT_PREFIXED_IPV6_TCP ("tcp6:[::1]", "::1", ""),
-    /* Prefixed "tcp6:" IPv6 with brackets, missing port.  */
-    INIT_PREFIXED_IPV6_TCP ("tcp6:[::1]:", "::1", ""),
+  /* Prefixed "udp6:" IPv6 with brackets, host and port present.  */
+  INIT_PREFIXED_IPV6_UDP ("udp6:[::1]:1234", "::1", "1234"),
+  /* Prefixed "udp6:" IPv6 with brackets, only host.  */
+  INIT_PREFIXED_IPV6_UDP ("udp6:[::1]", "::1", ""),
+  /* Prefixed "udp6:" IPv6 with brackets, missing port.  */
+  INIT_PREFIXED_IPV6_UDP ("udp6:[::1]:", "::1", ""),
 
-    /* Prefixed "udp6:" IPv6 with brackets, host and port present.  */
-    INIT_PREFIXED_IPV6_UDP ("udp6:[::1]:1234", "::1", "1234"),
-    /* Prefixed "udp6:" IPv6 with brackets, only host.  */
-    INIT_PREFIXED_IPV6_UDP ("udp6:[::1]", "::1", ""),
-    /* Prefixed "udp6:" IPv6 with brackets, missing port.  */
-    INIT_PREFIXED_IPV6_UDP ("udp6:[::1]:", "::1", ""),
-
-
-    /* Bogus addresses.  */
-    INIT_BOGUS_ENTRY ("tcp6:[::1]123:44"),
-    INIT_BOGUS_ENTRY ("[::1"),
-    INIT_BOGUS_ENTRY ("tcp6:::1]:"),
-  };
+  /* Bogus addresses.  */
+  INIT_BOGUS_ENTRY ("tcp6:[::1]123:44"),
+  INIT_BOGUS_ENTRY ("[::1"),
+  INIT_BOGUS_ENTRY ("tcp6:::1]:"),
+};
 
 /* Test a connection spec C.  */
 
@@ -240,6 +240,7 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_parse_connection_spec_selftests ();
+
 void
 _initialize_parse_connection_spec_selftests ()
 {

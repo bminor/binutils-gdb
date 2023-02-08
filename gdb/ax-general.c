@@ -35,13 +35,13 @@ static void append_const (struct agent_expr *x, LONGEST val, int n);
 static LONGEST read_const (struct agent_expr *x, int o, int n);
 
 static void generic_ext (struct agent_expr *x, enum agent_op op, int n);
-
+
 /* Functions for building expressions.  */
 
 agent_expr::agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
 {
   this->len = 0;
-  this->size = 1;		/* Change this to a larger value once
+  this->size = 1; /* Change this to a larger value once
 				   reallocation code is tested.  */
   this->buf = (unsigned char *) xmalloc (this->size);
 
@@ -76,7 +76,6 @@ grow_expr (struct agent_expr *x, int n)
     }
 }
 
-
 /* Append the low N bytes of VAL as an N-byte integer to the
    expression X, in big-endian order.  */
 static void
@@ -93,7 +92,6 @@ append_const (struct agent_expr *x, LONGEST val, int n)
   x->len += n;
 }
 
-
 /* Extract an N-byte big-endian unsigned integer from expression X at
    offset O.  */
 static LONGEST
@@ -104,7 +102,7 @@ read_const (struct agent_expr *x, int o, int n)
 
   /* Make sure we're not reading off the end of the expression.  */
   if (o + n > x->len)
-    error (_("GDB bug: ax-general.c (read_const): incomplete constant"));
+    error (_ ("GDB bug: ax-general.c (read_const): incomplete constant"));
 
   for (i = 0; i < n; i++)
     accum = (accum << 8) | x->buf[o + i];
@@ -135,11 +133,10 @@ void
 ax_pick (struct agent_expr *x, int depth)
 {
   if (depth < 0 || depth > 255)
-    error (_("GDB bug: ax-general.c (ax_pick): stack depth out of range"));
+    error (_ ("GDB bug: ax-general.c (ax_pick): stack depth out of range"));
   ax_simple (x, aop_pick);
   append_const (x, 1, depth);
 }
-
 
 /* Append a sign-extension or zero-extension instruction to EXPR, to
    extend an N-bit value.  */
@@ -148,17 +145,16 @@ generic_ext (struct agent_expr *x, enum agent_op op, int n)
 {
   /* N must fit in a byte.  */
   if (n < 0 || n > 255)
-    error (_("GDB bug: ax-general.c (generic_ext): bit count out of range"));
+    error (_ ("GDB bug: ax-general.c (generic_ext): bit count out of range"));
   /* That had better be enough range.  */
   if (sizeof (LONGEST) * 8 > 255)
-    error (_("GDB bug: ax-general.c (generic_ext): "
-	     "opcode has inadequate range"));
+    error (_ ("GDB bug: ax-general.c (generic_ext): "
+	      "opcode has inadequate range"));
 
   grow_expr (x, 2);
   x->buf[x->len++] = op;
   x->buf[x->len++] = n;
 }
-
 
 /* Append a sign-extension instruction to EXPR, to extend an N-bit value.  */
 void
@@ -167,7 +163,6 @@ ax_ext (struct agent_expr *x, int n)
   generic_ext (x, aop_ext, n);
 }
 
-
 /* Append a zero-extension instruction to EXPR, to extend an N-bit value.  */
 void
 ax_zero_ext (struct agent_expr *x, int n)
@@ -175,21 +170,19 @@ ax_zero_ext (struct agent_expr *x, int n)
   generic_ext (x, aop_zero_ext, n);
 }
 
-
 /* Append a trace_quick instruction to EXPR, to record N bytes.  */
 void
 ax_trace_quick (struct agent_expr *x, int n)
 {
   /* N must fit in a byte.  */
   if (n < 0 || n > 255)
-    error (_("GDB bug: ax-general.c (ax_trace_quick): "
-	     "size out of range for trace_quick"));
+    error (_ ("GDB bug: ax-general.c (ax_trace_quick): "
+	      "size out of range for trace_quick"));
 
   grow_expr (x, 2);
   x->buf[x->len++] = aop_trace_quick;
   x->buf[x->len++] = n;
 }
-
 
 /* Append a goto op to EXPR.  OP is the actual op (must be aop_goto or
    aop_if_goto).  We assume we don't know the target offset yet,
@@ -218,20 +211,19 @@ ax_label (struct agent_expr *x, int patch, int target)
   /* Make sure the value is in range.  Don't accept 0xffff as an
      offset; that's our magic sentinel value for unpatched branches.  */
   if (target < 0 || target >= 0xffff)
-    error (_("GDB bug: ax-general.c (ax_label): label target out of range"));
+    error (_ ("GDB bug: ax-general.c (ax_label): label target out of range"));
 
   x->buf[patch] = (target >> 8) & 0xff;
   x->buf[patch + 1] = target & 0xff;
 }
-
 
 /* Assemble code to push a constant on the stack.  */
 void
 ax_const_l (struct agent_expr *x, LONGEST l)
 {
   static enum agent_op ops[]
-  =
-  {aop_const8, aop_const16, aop_const32, aop_const64};
+    = { aop_const8, aop_const16, aop_const32, aop_const64 };
+
   int size;
   int op;
 
@@ -259,15 +251,13 @@ ax_const_l (struct agent_expr *x, LONGEST l)
     ax_ext (x, size);
 }
 
-
 void
 ax_const_d (struct agent_expr *x, LONGEST d)
 {
   /* FIXME: floating-point support not present yet.  */
-  error (_("GDB bug: ax-general.c (ax_const_d): "
-	   "floating point not supported yet"));
+  error (_ ("GDB bug: ax-general.c (ax_const_d): "
+	    "floating point not supported yet"));
 }
-
 
 /* Assemble code to push the value of register number REG on the
    stack.  */
@@ -278,11 +268,11 @@ ax_reg (struct agent_expr *x, int reg)
     {
       /* This is a pseudo-register.  */
       if (!gdbarch_ax_pseudo_register_push_stack_p (x->gdbarch))
-	error (_("'%s' is a pseudo-register; "
-		 "GDB cannot yet trace its contents."),
+	error (_ ("'%s' is a pseudo-register; "
+		  "GDB cannot yet trace its contents."),
 	       user_reg_map_regnum_to_name (x->gdbarch, reg));
       if (gdbarch_ax_pseudo_register_push_stack (x->gdbarch, x, reg))
-	error (_("Trace '%s' failed."),
+	error (_ ("Trace '%s' failed."),
 	       user_reg_map_regnum_to_name (x->gdbarch, reg));
     }
   else
@@ -292,12 +282,12 @@ ax_reg (struct agent_expr *x, int reg)
 
       /* Make sure the register number is in range.  */
       if (reg < 0 || reg > 0xffff)
-	error (_("GDB bug: ax-general.c (ax_reg): "
-		 "register number out of range"));
+	error (_ ("GDB bug: ax-general.c (ax_reg): "
+		  "register number out of range"));
       grow_expr (x, 3);
       x->buf[x->len] = aop_reg;
       x->buf[x->len + 1] = (reg >> 8) & 0xff;
-      x->buf[x->len + 2] = (reg) & 0xff;
+      x->buf[x->len + 2] = (reg) &0xff;
       x->len += 3;
     }
 }
@@ -309,13 +299,14 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
 {
   /* Make sure the tsv number is in range.  */
   if (num < 0 || num > 0xffff)
-    internal_error (_("ax-general.c (ax_tsv): variable "
-		      "number is %d, out of range"), num);
+    internal_error (_ ("ax-general.c (ax_tsv): variable "
+		       "number is %d, out of range"),
+		    num);
 
   grow_expr (x, 3);
   x->buf[x->len] = op;
   x->buf[x->len + 1] = (num >> 8) & 0xff;
-  x->buf[x->len + 2] = (num) & 0xff;
+  x->buf[x->len + 2] = (num) &0xff;
   x->len += 3;
 }
 
@@ -331,8 +322,9 @@ ax_string (struct agent_expr *x, const char *str, int slen)
 
   /* Make sure the string length is reasonable.  */
   if (slen < 0 || slen > 0xffff)
-    internal_error (_("ax-general.c (ax_string): string "
-		      "length is %d, out of allowed range"), slen);
+    internal_error (_ ("ax-general.c (ax_string): string "
+		       "length is %d, out of allowed range"),
+		    slen);
 
   grow_expr (x, 2 + slen + 1);
   x->buf[x->len++] = ((slen + 1) >> 8) & 0xff;
@@ -341,21 +333,19 @@ ax_string (struct agent_expr *x, const char *str, int slen)
     x->buf[x->len++] = str[i];
   x->buf[x->len++] = '\0';
 }
-
-
 
 /* Functions for disassembling agent expressions, and otherwise
    debugging the expression compiler.  */
 
-struct aop_map aop_map[] =
-{
-  {0, 0, 0, 0, 0}
+struct aop_map aop_map[] = { { 0, 0, 0, 0, 0 }
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE) \
-  , { # NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED }
+  ,                                                             \
+  {                                                             \
+#NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED                  \
+  }
 #include "gdbsupport/ax.def"
 #undef DEFOP
 };
-
 
 /* Disassemble the expression EXPR, writing to F.  */
 void
@@ -363,33 +353,31 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 {
   int i;
 
-  gdb_printf (f, _("Scope: %s\n"), paddress (x->gdbarch, x->scope));
-  gdb_printf (f, _("Reg mask:"));
+  gdb_printf (f, _ ("Scope: %s\n"), paddress (x->gdbarch, x->scope));
+  gdb_printf (f, _ ("Reg mask:"));
   for (i = 0; i < x->reg_mask_len; ++i)
-    gdb_printf (f, _(" %02x"), x->reg_mask[i]);
-  gdb_printf (f, _("\n"));
+    gdb_printf (f, _ (" %02x"), x->reg_mask[i]);
+  gdb_printf (f, _ ("\n"));
 
   /* Check the size of the name array against the number of entries in
      the enum, to catch additions that people didn't sync.  */
-  if ((sizeof (aop_map) / sizeof (aop_map[0]))
-      != aop_last)
-    error (_("GDB bug: ax-general.c (ax_print): opcode map out of sync"));
+  if ((sizeof (aop_map) / sizeof (aop_map[0])) != aop_last)
+    error (_ ("GDB bug: ax-general.c (ax_print): opcode map out of sync"));
 
   for (i = 0; i < x->len;)
     {
       enum agent_op op = (enum agent_op) x->buf[i];
 
-      if (op >= (sizeof (aop_map) / sizeof (aop_map[0]))
-	  || !aop_map[op].name)
+      if (op >= (sizeof (aop_map) / sizeof (aop_map[0])) || !aop_map[op].name)
 	{
-	  gdb_printf (f, _("%3d  <bad opcode %02x>\n"), i, op);
+	  gdb_printf (f, _ ("%3d  <bad opcode %02x>\n"), i, op);
 	  i++;
 	  continue;
 	}
       if (i + 1 + aop_map[op].op_size > x->len)
 	{
-	  gdb_printf (f, _("%3d  <incomplete opcode %s>\n"),
-		      i, aop_map[op].name);
+	  gdb_printf (f, _ ("%3d  <incomplete opcode %s>\n"), i,
+		      aop_map[op].name);
 	  break;
 	}
 
@@ -410,8 +398,7 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 	  nargs = x->buf[i++];
 	  slen = x->buf[i++];
 	  slen = slen * 256 + x->buf[i++];
-	  gdb_printf (f, _(" \"%s\", %d args"),
-		      &(x->buf[i]), nargs);
+	  gdb_printf (f, _ (" \"%s\", %d args"), &(x->buf[i]), nargs);
 	  i += slen - 1;
 	}
       gdb_printf (f, "\n");
@@ -427,11 +414,11 @@ ax_reg_mask (struct agent_expr *ax, int reg)
     {
       /* This is a pseudo-register.  */
       if (!gdbarch_ax_pseudo_register_collect_p (ax->gdbarch))
-	error (_("'%s' is a pseudo-register; "
-		 "GDB cannot yet trace its contents."),
+	error (_ ("'%s' is a pseudo-register; "
+		  "GDB cannot yet trace its contents."),
 	       user_reg_map_regnum_to_name (ax->gdbarch, reg));
       if (gdbarch_ax_pseudo_register_collect (ax->gdbarch, ax, reg))
-	error (_("Trace '%s' failed."),
+	error (_ ("Trace '%s' failed."),
 	       user_reg_map_regnum_to_name (ax->gdbarch, reg));
     }
   else
@@ -539,8 +526,7 @@ ax_reqs (struct agent_expr *ax)
       /* For jump instructions, check that the target is a valid
 	 offset.  If it is, record the fact that that location is a
 	 jump target, and record the height we expect there.  */
-      if (aop_goto == op - aop_map
-	  || aop_if_goto == op - aop_map)
+      if (aop_goto == op - aop_map || aop_if_goto == op - aop_map)
 	{
 	  int target = read_const (ax, i + 1, 2);
 	  if (target < 0 || target >= ax->len)
@@ -567,8 +553,7 @@ ax_reqs (struct agent_expr *ax)
 
       /* For unconditional jumps with a successor, check that the
 	 successor is a target, and pick up its stack height.  */
-      if (aop_goto == op - aop_map
-	  && i + 3 < ax->len)
+      if (aop_goto == op - aop_map && i + 3 < ax->len)
 	{
 	  if (!targets[i + 3])
 	    {

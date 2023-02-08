@@ -137,8 +137,8 @@ enum prologue_value_kind
    A 'struct prologue_value' is a conservative approximation of the
    real value the register or stack slot will have.  */
 
-struct prologue_value {
-
+struct prologue_value
+{
   /* What sort of value is this?  This determines the interpretation
      of subsequent fields.  */
   enum prologue_value_kind kind;
@@ -151,7 +151,6 @@ struct prologue_value {
 
 typedef struct prologue_value pv_t;
 
-
 /* Return the unknown prologue value --- { pvk_unknown, ?, ? }.  */
 pv_t pv_unknown (void);
 
@@ -162,14 +161,12 @@ pv_t pv_constant (CORE_ADDR k);
    register REG, plus the constant K.  */
 pv_t pv_register (int reg, CORE_ADDR k);
 
-
 /* Return conservative approximations of the results of the following
    operations.  */
-pv_t pv_add (pv_t a, pv_t b);               /* a + b */
+pv_t pv_add (pv_t a, pv_t b);		    /* a + b */
 pv_t pv_add_constant (pv_t v, CORE_ADDR k); /* a + k */
-pv_t pv_subtract (pv_t a, pv_t b);          /* a - b */
-pv_t pv_logical_and (pv_t a, pv_t b);       /* a & b */
-
+pv_t pv_subtract (pv_t a, pv_t b);	    /* a - b */
+pv_t pv_logical_and (pv_t a, pv_t b);	    /* a & b */
 
 /* Return non-zero iff A and B are identical expressions.
 
@@ -183,7 +180,6 @@ pv_t pv_logical_and (pv_t a, pv_t b);       /* a & b */
    same.  */
 int pv_is_identical (pv_t a, pv_t b);
 
-
 /* Return non-zero if A is known to be a constant.  */
 int pv_is_constant (pv_t a);
 
@@ -191,19 +187,18 @@ int pv_is_constant (pv_t a);
    plus some constant, zero otherwise.  */
 int pv_is_register (pv_t a, int r);
 
-
 /* Return non-zero if A is the original value of register R plus the
    constant K.  */
 int pv_is_register_k (pv_t a, int r, CORE_ADDR k);
 
 /* A conservative boolean type, including "maybe", when we can't
    figure out whether something is true or not.  */
-enum pv_boolean {
+enum pv_boolean
+{
   pv_maybe,
   pv_definite_yes,
   pv_definite_no,
 };
-
 
 /* Decide whether a reference to SIZE bytes at ADDR refers exactly to
    an element of an array.  The array starts at ARRAY_ADDR, and has
@@ -215,11 +210,9 @@ enum pv_boolean {
    If the reference does touch the array, but doesn't fall exactly on
    an element boundary, or doesn't refer to the whole element, return
    pv_maybe.  */
-enum pv_boolean pv_is_array_ref (pv_t addr, CORE_ADDR size,
-				 pv_t array_addr, CORE_ADDR array_len,
-				 CORE_ADDR elt_size,
+enum pv_boolean pv_is_array_ref (pv_t addr, CORE_ADDR size, pv_t array_addr,
+				 CORE_ADDR array_len, CORE_ADDR elt_size,
 				 int *i);
-
 
 /* A 'pv_area' keeps track of values stored in a particular region of
    memory.  */
@@ -250,9 +243,7 @@ public:
      creating AREA, then we can't tell which values here the stored
      value might overlap, and we'll have to mark everything as
      unknown.  */
-  void store (pv_t addr,
-	      CORE_ADDR size,
-	      pv_t value);
+  void store (pv_t addr, CORE_ADDR size, pv_t value);
 
   /* Return the SIZE-byte value at ADDR in AREA.  This may return
      pv_unknown ().  */
@@ -282,12 +273,9 @@ public:
      instead, and collecting all your information in one pass.  */
   bool find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p);
 
-
   /* For every part of AREA whose value we know, apply FUNC to CLOSURE,
      the value's address, its size, and the value itself.  */
-  void scan (void (*func) (void *closure,
-			   pv_t addr,
-			   CORE_ADDR size,
+  void scan (void (*func) (void *closure, pv_t addr, CORE_ADDR size,
 			   pv_t value),
 	     void *closure);
 
@@ -311,9 +299,7 @@ private:
 
   /* Return non-zero if the SIZE bytes at OFFSET would overlap ENTRY;
      return zero otherwise.  AREA is the area to which ENTRY belongs.  */
-  int overlaps (struct area_entry *entry,
-		CORE_ADDR offset,
-		CORE_ADDR size);
+  int overlaps (struct area_entry *entry, CORE_ADDR offset, CORE_ADDR size);
 
   /* This area's base register.  */
   int m_base_reg;

@@ -66,10 +66,10 @@
 /* Define a series of is_XXX_insn functions to check if the value INSN
    is an instance of instruction XXX.  */
 #define DECLARE_INSN(INSN_NAME, INSN_MATCH, INSN_MASK) \
-static inline bool is_ ## INSN_NAME ## _insn (long insn) \
-{ \
-  return (insn & INSN_MASK) == INSN_MATCH; \
-}
+  static inline bool is_##INSN_NAME##_insn (long insn) \
+  {                                                    \
+    return (insn & INSN_MASK) == INSN_MATCH;           \
+  }
 #include "opcode/riscv-opc.h"
 #undef DECLARE_INSN
 
@@ -146,12 +146,14 @@ value_of_riscv_user_reg (frame_info_ptr frame, const void *baton)
 class riscv_pending_register_alias
 {
 public:
+
   /* Constructor.  */
 
   riscv_pending_register_alias (const char *name, const void *baton)
     : m_name (name),
       m_baton (baton)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* Convert this into a user register for GDBARCH.  */
 
@@ -161,6 +163,7 @@ public:
   }
 
 private:
+
   /* The name for this alias.  */
   const char *m_name;
 
@@ -177,7 +180,8 @@ struct riscv_register_feature
 {
   explicit riscv_register_feature (const char *feature_name)
     : m_feature_name (feature_name)
-  { /* Delete.  */ }
+  { /* Delete.  */
+  }
 
   riscv_register_feature () = delete;
   DISABLE_COPY_AND_ASSIGN (riscv_register_feature);
@@ -198,21 +202,20 @@ struct riscv_register_feature
        TDESC_DATA and add all its aliases to the ALIASES list.
        PREFER_FIRST_NAME_P is used when deciding which aliases to create.  */
     bool check (struct tdesc_arch_data *tdesc_data,
-		const struct tdesc_feature *feature,
-		bool prefer_first_name_p,
+		const struct tdesc_feature *feature, bool prefer_first_name_p,
 		std::vector<riscv_pending_register_alias> *aliases) const;
   };
 
   /* Return the name of this feature.  */
-  const char *name () const
-  { return m_feature_name; }
+  const char *name () const { return m_feature_name; }
 
 protected:
 
   /* Return a target description feature extracted from TDESC for this
      register feature.  Will return nullptr if there is no feature in TDESC
      with the name M_FEATURE_NAME.  */
-  const struct tdesc_feature *tdesc_feature (const struct target_desc *tdesc) const
+  const struct tdesc_feature *
+  tdesc_feature (const struct target_desc *tdesc) const
   {
     return tdesc_find_feature (tdesc, name ());
   }
@@ -231,16 +234,15 @@ private:
 /* See description in the class declaration above.  */
 
 bool
-riscv_register_feature::register_info::check
-	(struct tdesc_arch_data *tdesc_data,
-	 const struct tdesc_feature *feature,
-	 bool prefer_first_name_p,
-	 std::vector<riscv_pending_register_alias> *aliases) const
+riscv_register_feature::register_info::check (
+  struct tdesc_arch_data *tdesc_data, const struct tdesc_feature *feature,
+  bool prefer_first_name_p,
+  std::vector<riscv_pending_register_alias> *aliases) const
 {
   for (const char *name : this->names)
     {
-      bool found = tdesc_numbered_register (feature, tdesc_data,
-					    this->regnum, name);
+      bool found
+	= tdesc_numbered_register (feature, tdesc_data, this->regnum, name);
       if (found)
 	{
 	  /* We know that the target description mentions this
@@ -268,41 +270,39 @@ struct riscv_xreg_feature : public riscv_register_feature
   riscv_xreg_feature ()
     : riscv_register_feature (riscv_feature_name_cpu)
   {
-    m_registers =  {
-      { RISCV_ZERO_REGNUM + 0, { "zero", "x0" } },
-      { RISCV_ZERO_REGNUM + 1, { "ra", "x1" } },
-      { RISCV_ZERO_REGNUM + 2, { "sp", "x2" } },
-      { RISCV_ZERO_REGNUM + 3, { "gp", "x3" } },
-      { RISCV_ZERO_REGNUM + 4, { "tp", "x4" } },
-      { RISCV_ZERO_REGNUM + 5, { "t0", "x5" } },
-      { RISCV_ZERO_REGNUM + 6, { "t1", "x6" } },
-      { RISCV_ZERO_REGNUM + 7, { "t2", "x7" } },
-      { RISCV_ZERO_REGNUM + 8, { "fp", "x8", "s0" } },
-      { RISCV_ZERO_REGNUM + 9, { "s1", "x9" } },
-      { RISCV_ZERO_REGNUM + 10, { "a0", "x10" } },
-      { RISCV_ZERO_REGNUM + 11, { "a1", "x11" } },
-      { RISCV_ZERO_REGNUM + 12, { "a2", "x12" } },
-      { RISCV_ZERO_REGNUM + 13, { "a3", "x13" } },
-      { RISCV_ZERO_REGNUM + 14, { "a4", "x14" } },
-      { RISCV_ZERO_REGNUM + 15, { "a5", "x15" } },
-      { RISCV_ZERO_REGNUM + 16, { "a6", "x16" } },
-      { RISCV_ZERO_REGNUM + 17, { "a7", "x17" } },
-      { RISCV_ZERO_REGNUM + 18, { "s2", "x18" } },
-      { RISCV_ZERO_REGNUM + 19, { "s3", "x19" } },
-      { RISCV_ZERO_REGNUM + 20, { "s4", "x20" } },
-      { RISCV_ZERO_REGNUM + 21, { "s5", "x21" } },
-      { RISCV_ZERO_REGNUM + 22, { "s6", "x22" } },
-      { RISCV_ZERO_REGNUM + 23, { "s7", "x23" } },
-      { RISCV_ZERO_REGNUM + 24, { "s8", "x24" } },
-      { RISCV_ZERO_REGNUM + 25, { "s9", "x25" } },
-      { RISCV_ZERO_REGNUM + 26, { "s10", "x26" } },
-      { RISCV_ZERO_REGNUM + 27, { "s11", "x27" } },
-      { RISCV_ZERO_REGNUM + 28, { "t3", "x28" } },
-      { RISCV_ZERO_REGNUM + 29, { "t4", "x29" } },
-      { RISCV_ZERO_REGNUM + 30, { "t5", "x30" } },
-      { RISCV_ZERO_REGNUM + 31, { "t6", "x31" } },
-      { RISCV_ZERO_REGNUM + 32, { "pc" } }
-    };
+    m_registers = { { RISCV_ZERO_REGNUM + 0, { "zero", "x0" } },
+		    { RISCV_ZERO_REGNUM + 1, { "ra", "x1" } },
+		    { RISCV_ZERO_REGNUM + 2, { "sp", "x2" } },
+		    { RISCV_ZERO_REGNUM + 3, { "gp", "x3" } },
+		    { RISCV_ZERO_REGNUM + 4, { "tp", "x4" } },
+		    { RISCV_ZERO_REGNUM + 5, { "t0", "x5" } },
+		    { RISCV_ZERO_REGNUM + 6, { "t1", "x6" } },
+		    { RISCV_ZERO_REGNUM + 7, { "t2", "x7" } },
+		    { RISCV_ZERO_REGNUM + 8, { "fp", "x8", "s0" } },
+		    { RISCV_ZERO_REGNUM + 9, { "s1", "x9" } },
+		    { RISCV_ZERO_REGNUM + 10, { "a0", "x10" } },
+		    { RISCV_ZERO_REGNUM + 11, { "a1", "x11" } },
+		    { RISCV_ZERO_REGNUM + 12, { "a2", "x12" } },
+		    { RISCV_ZERO_REGNUM + 13, { "a3", "x13" } },
+		    { RISCV_ZERO_REGNUM + 14, { "a4", "x14" } },
+		    { RISCV_ZERO_REGNUM + 15, { "a5", "x15" } },
+		    { RISCV_ZERO_REGNUM + 16, { "a6", "x16" } },
+		    { RISCV_ZERO_REGNUM + 17, { "a7", "x17" } },
+		    { RISCV_ZERO_REGNUM + 18, { "s2", "x18" } },
+		    { RISCV_ZERO_REGNUM + 19, { "s3", "x19" } },
+		    { RISCV_ZERO_REGNUM + 20, { "s4", "x20" } },
+		    { RISCV_ZERO_REGNUM + 21, { "s5", "x21" } },
+		    { RISCV_ZERO_REGNUM + 22, { "s6", "x22" } },
+		    { RISCV_ZERO_REGNUM + 23, { "s7", "x23" } },
+		    { RISCV_ZERO_REGNUM + 24, { "s8", "x24" } },
+		    { RISCV_ZERO_REGNUM + 25, { "s9", "x25" } },
+		    { RISCV_ZERO_REGNUM + 26, { "s10", "x26" } },
+		    { RISCV_ZERO_REGNUM + 27, { "s11", "x27" } },
+		    { RISCV_ZERO_REGNUM + 28, { "t3", "x28" } },
+		    { RISCV_ZERO_REGNUM + 29, { "t4", "x29" } },
+		    { RISCV_ZERO_REGNUM + 30, { "t5", "x30" } },
+		    { RISCV_ZERO_REGNUM + 31, { "t6", "x31" } },
+		    { RISCV_ZERO_REGNUM + 32, { "pc" } } };
   }
 
   /* Return the preferred name for the register with gdb register number
@@ -365,7 +365,7 @@ struct riscv_freg_feature : public riscv_register_feature
   riscv_freg_feature ()
     : riscv_register_feature (riscv_feature_name_fpu)
   {
-    m_registers =  {
+    m_registers = {
       { RISCV_FIRST_FP_REGNUM + 0, { "ft0", "f0" } },
       { RISCV_FIRST_FP_REGNUM + 1, { "ft1", "f1" } },
       { RISCV_FIRST_FP_REGNUM + 2, { "ft2", "f2" } },
@@ -493,9 +493,7 @@ struct riscv_virtual_feature : public riscv_register_feature
   riscv_virtual_feature ()
     : riscv_register_feature (riscv_feature_name_virtual)
   {
-    m_registers =  {
-      { RISCV_PRIV_REGNUM, { "priv" } }
-    };
+    m_registers = { { RISCV_PRIV_REGNUM, { "priv" } } };
   }
 
   bool check (const struct target_desc *tdesc,
@@ -530,8 +528,8 @@ struct riscv_csr_feature : public riscv_register_feature
     : riscv_register_feature (riscv_feature_name_csr)
   {
     m_registers = {
-#define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER)		\
-      { RISCV_ ## VALUE ## _REGNUM, { # NAME } },
+#define DECLARE_CSR(NAME, VALUE, CLASS, DEFINE_VER, ABORT_VER) \
+  { RISCV_##VALUE##_REGNUM, { #NAME } },
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
     };
@@ -562,8 +560,7 @@ private:
   /* Complete RISCV_CSR_FEATURE, building the CSR alias names and adding them
      to the name list for each register.  */
 
-  void
-  riscv_create_csr_aliases ()
+  void riscv_create_csr_aliases ()
   {
     for (auto &reg : m_registers)
       {
@@ -585,39 +582,23 @@ struct riscv_vector_feature : public riscv_register_feature
   riscv_vector_feature ()
     : riscv_register_feature (riscv_feature_name_vector)
   {
-    m_registers =  {
-      { RISCV_V0_REGNUM + 0, { "v0" } },
-      { RISCV_V0_REGNUM + 1, { "v1" } },
-      { RISCV_V0_REGNUM + 2, { "v2" } },
-      { RISCV_V0_REGNUM + 3, { "v3" } },
-      { RISCV_V0_REGNUM + 4, { "v4" } },
-      { RISCV_V0_REGNUM + 5, { "v5" } },
-      { RISCV_V0_REGNUM + 6, { "v6" } },
-      { RISCV_V0_REGNUM + 7, { "v7" } },
-      { RISCV_V0_REGNUM + 8, { "v8" } },
-      { RISCV_V0_REGNUM + 9, { "v9" } },
-      { RISCV_V0_REGNUM + 10, { "v10" } },
-      { RISCV_V0_REGNUM + 11, { "v11" } },
-      { RISCV_V0_REGNUM + 12, { "v12" } },
-      { RISCV_V0_REGNUM + 13, { "v13" } },
-      { RISCV_V0_REGNUM + 14, { "v14" } },
-      { RISCV_V0_REGNUM + 15, { "v15" } },
-      { RISCV_V0_REGNUM + 16, { "v16" } },
-      { RISCV_V0_REGNUM + 17, { "v17" } },
-      { RISCV_V0_REGNUM + 18, { "v18" } },
-      { RISCV_V0_REGNUM + 19, { "v19" } },
-      { RISCV_V0_REGNUM + 20, { "v20" } },
-      { RISCV_V0_REGNUM + 21, { "v21" } },
-      { RISCV_V0_REGNUM + 22, { "v22" } },
-      { RISCV_V0_REGNUM + 23, { "v23" } },
-      { RISCV_V0_REGNUM + 24, { "v24" } },
-      { RISCV_V0_REGNUM + 25, { "v25" } },
-      { RISCV_V0_REGNUM + 26, { "v26" } },
-      { RISCV_V0_REGNUM + 27, { "v27" } },
-      { RISCV_V0_REGNUM + 28, { "v28" } },
-      { RISCV_V0_REGNUM + 29, { "v29" } },
-      { RISCV_V0_REGNUM + 30, { "v30" } },
-      { RISCV_V0_REGNUM + 31, { "v31" } },
+    m_registers = {
+      { RISCV_V0_REGNUM + 0, { "v0" } },   { RISCV_V0_REGNUM + 1, { "v1" } },
+      { RISCV_V0_REGNUM + 2, { "v2" } },   { RISCV_V0_REGNUM + 3, { "v3" } },
+      { RISCV_V0_REGNUM + 4, { "v4" } },   { RISCV_V0_REGNUM + 5, { "v5" } },
+      { RISCV_V0_REGNUM + 6, { "v6" } },   { RISCV_V0_REGNUM + 7, { "v7" } },
+      { RISCV_V0_REGNUM + 8, { "v8" } },   { RISCV_V0_REGNUM + 9, { "v9" } },
+      { RISCV_V0_REGNUM + 10, { "v10" } }, { RISCV_V0_REGNUM + 11, { "v11" } },
+      { RISCV_V0_REGNUM + 12, { "v12" } }, { RISCV_V0_REGNUM + 13, { "v13" } },
+      { RISCV_V0_REGNUM + 14, { "v14" } }, { RISCV_V0_REGNUM + 15, { "v15" } },
+      { RISCV_V0_REGNUM + 16, { "v16" } }, { RISCV_V0_REGNUM + 17, { "v17" } },
+      { RISCV_V0_REGNUM + 18, { "v18" } }, { RISCV_V0_REGNUM + 19, { "v19" } },
+      { RISCV_V0_REGNUM + 20, { "v20" } }, { RISCV_V0_REGNUM + 21, { "v21" } },
+      { RISCV_V0_REGNUM + 22, { "v22" } }, { RISCV_V0_REGNUM + 23, { "v23" } },
+      { RISCV_V0_REGNUM + 24, { "v24" } }, { RISCV_V0_REGNUM + 25, { "v25" } },
+      { RISCV_V0_REGNUM + 26, { "v26" } }, { RISCV_V0_REGNUM + 27, { "v27" } },
+      { RISCV_V0_REGNUM + 28, { "v28" } }, { RISCV_V0_REGNUM + 29, { "v29" } },
+      { RISCV_V0_REGNUM + 30, { "v30" } }, { RISCV_V0_REGNUM + 31, { "v31" } },
     };
   }
 
@@ -626,8 +607,7 @@ struct riscv_vector_feature : public riscv_register_feature
      RISCV_V0_REGNUM + 31.  */
   const char *register_name (int regnum) const
   {
-    gdb_assert (regnum >= RISCV_V0_REGNUM
-		&& regnum <= RISCV_V0_REGNUM + 31);
+    gdb_assert (regnum >= RISCV_V0_REGNUM && regnum <= RISCV_V0_REGNUM + 31);
     regnum -= RISCV_V0_REGNUM;
     return m_registers[regnum].names[0];
   }
@@ -697,12 +677,12 @@ static enum auto_boolean use_compressed_breakpoints;
 
 static void
 show_use_compressed_breakpoints (struct ui_file *file, int from_tty,
-				 struct cmd_list_element *c,
-				 const char *value)
+				 struct cmd_list_element *c, const char *value)
 {
   gdb_printf (file,
-	      _("Debugger's use of compressed breakpoints is set "
-		"to %s.\n"), value);
+	      _ ("Debugger's use of compressed breakpoints is set "
+		 "to %s.\n"),
+	      value);
 }
 
 /* The set and show lists for 'set riscv' and 'show riscv' prefixes.  */
@@ -719,12 +699,10 @@ static struct cmd_list_element *showdebugriscvcmdlist = NULL;
 
 static void
 show_riscv_debug_variable (struct ui_file *file, int from_tty,
-			   struct cmd_list_element *c,
-			   const char *value)
+			   struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("RiscV debug variable `%s' is set to: %s\n"),
-	      c->name, value);
+  gdb_printf (file, _ ("RiscV debug variable `%s' is set to: %s\n"), c->name,
+	      value);
 }
 
 /* See riscv-tdep.h.  */
@@ -794,8 +772,7 @@ riscv_has_fp_abi (struct gdbarch *gdbarch)
 static bool
 riscv_is_fp_regno_p (int regno)
 {
-  return (regno >= RISCV_FIRST_FP_REGNUM
-	  && regno <= RISCV_LAST_FP_REGNUM);
+  return (regno >= RISCV_FIRST_FP_REGNUM && regno <= RISCV_LAST_FP_REGNUM);
 }
 
 /* Implement the breakpoint_kind_from_pc gdbarch method.  */
@@ -828,11 +805,12 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 
       if (riscv_debug_breakpoints)
 	{
-	  const char *bp = (unaligned_p || riscv_insn_length (buf[0]) == 2
-			    ? "C.EBREAK" : "EBREAK");
+	  const char *bp
+	    = (unaligned_p || riscv_insn_length (buf[0]) == 2 ? "C.EBREAK"
+							      : "EBREAK");
 
-	  gdb_printf (gdb_stdlog, "Using %s for breakpoint at %s ",
-		      bp, paddress (gdbarch, *pcptr));
+	  gdb_printf (gdb_stdlog, "Using %s for breakpoint at %s ", bp,
+		      paddress (gdbarch, *pcptr));
 	  if (unaligned_p)
 	    gdb_printf (gdb_stdlog, "(unaligned address)\n");
 	  else
@@ -855,7 +833,12 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 static const gdb_byte *
 riscv_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
-  static const gdb_byte ebreak[] = { 0x73, 0x00, 0x10, 0x00, };
+  static const gdb_byte ebreak[] = {
+    0x73,
+    0x00,
+    0x10,
+    0x00,
+  };
   static const gdb_byte c_ebreak[] = { 0x02, 0x90 };
 
   *size = kind;
@@ -938,8 +921,8 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
 
 static enum register_status
 riscv_pseudo_register_read (struct gdbarch *gdbarch,
-			    readable_regcache *regcache,
-			    int regnum, gdb_byte *buf)
+			    readable_regcache *regcache, int regnum,
+			    gdb_byte *buf)
 {
   riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
 
@@ -1028,8 +1011,8 @@ riscv_fpreg_d_type (struct gdbarch *gdbarch)
 
       struct type *t;
 
-      t = arch_composite_type (gdbarch,
-			       "__gdb_builtin_type_fpreg_d", TYPE_CODE_UNION);
+      t = arch_composite_type (gdbarch, "__gdb_builtin_type_fpreg_d",
+			       TYPE_CODE_UNION);
       append_composite_type_field (t, "float", bt->builtin_float);
       append_composite_type_field (t, "double", bt->builtin_double);
       t->set_is_vector (true);
@@ -1062,33 +1045,25 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
 	 converts to 'double' on 64-bit).  In these cases its better to
 	 present the registers using a union type.  */
       int flen = riscv_isa_flen (gdbarch);
-      if (flen == 8
-	  && type->code () == TYPE_CODE_FLT
+      if (flen == 8 && type->code () == TYPE_CODE_FLT
 	  && type->length () == flen
 	  && (strcmp (type->name (), "builtin_type_ieee_double") == 0
 	      || strcmp (type->name (), "double") == 0))
 	type = riscv_fpreg_d_type (gdbarch);
     }
 
-  if ((regnum == gdbarch_pc_regnum (gdbarch)
-       || regnum == RISCV_RA_REGNUM
-       || regnum == RISCV_FP_REGNUM
-       || regnum == RISCV_SP_REGNUM
-       || regnum == RISCV_GP_REGNUM
-       || regnum == RISCV_TP_REGNUM)
-      && type->code () == TYPE_CODE_INT
-      && type->length () == xlen)
+  if ((regnum == gdbarch_pc_regnum (gdbarch) || regnum == RISCV_RA_REGNUM
+       || regnum == RISCV_FP_REGNUM || regnum == RISCV_SP_REGNUM
+       || regnum == RISCV_GP_REGNUM || regnum == RISCV_TP_REGNUM)
+      && type->code () == TYPE_CODE_INT && type->length () == xlen)
     {
       /* This spots the case where some interesting registers are defined
 	 as simple integers of the expected size, we force these registers
 	 to be pointers as we believe that is more useful.  */
-      if (regnum == gdbarch_pc_regnum (gdbarch)
-	  || regnum == RISCV_RA_REGNUM)
+      if (regnum == gdbarch_pc_regnum (gdbarch) || regnum == RISCV_RA_REGNUM)
 	type = builtin_type (gdbarch)->builtin_func_ptr;
-      else if (regnum == RISCV_FP_REGNUM
-	       || regnum == RISCV_SP_REGNUM
-	       || regnum == RISCV_GP_REGNUM
-	       || regnum == RISCV_TP_REGNUM)
+      else if (regnum == RISCV_FP_REGNUM || regnum == RISCV_SP_REGNUM
+	       || regnum == RISCV_GP_REGNUM || regnum == RISCV_TP_REGNUM)
 	type = builtin_type (gdbarch)->builtin_data_ptr;
     }
 
@@ -1099,16 +1074,18 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
    REGNUM.  */
 
 static void
-riscv_print_one_register_info (struct gdbarch *gdbarch,
-			       struct ui_file *file,
-			       frame_info_ptr frame,
-			       int regnum)
+riscv_print_one_register_info (struct gdbarch *gdbarch, struct ui_file *file,
+			       frame_info_ptr frame, int regnum)
 {
   const char *name = gdbarch_register_name (gdbarch, regnum);
   struct value *val;
   struct type *regtype;
   int print_raw_format;
-  enum tab_stops { value_column_1 = 15 };
+
+  enum tab_stops
+  {
+    value_column_1 = 15
+  };
 
   gdb_puts (name, file);
   print_spaces (value_column_1 - strlen (name), file);
@@ -1126,16 +1103,14 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       return;
     }
 
-  print_raw_format = (value_entirely_available (val)
-		      && !value_optimized_out (val));
+  print_raw_format
+    = (value_entirely_available (val) && !value_optimized_out (val));
 
   if (regtype->code () == TYPE_CODE_FLT
-      || (regtype->code () == TYPE_CODE_UNION
-	  && regtype->num_fields () == 2
+      || (regtype->code () == TYPE_CODE_UNION && regtype->num_fields () == 2
 	  && regtype->field (0).type ()->code () == TYPE_CODE_FLT
 	  && regtype->field (1).type ()->code () == TYPE_CODE_FLT)
-      || (regtype->code () == TYPE_CODE_UNION
-	  && regtype->num_fields () == 3
+      || (regtype->code () == TYPE_CODE_UNION && regtype->num_fields () == 3
 	  && regtype->field (0).type ()->code () == TYPE_CODE_FLT
 	  && regtype->field (1).type ()->code () == TYPE_CODE_FLT
 	  && regtype->field (2).type ()->code () == TYPE_CODE_FLT))
@@ -1184,22 +1159,14 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 			  "FS:%X MPP:%x HPP:%X SPP:%X MPIE:%X HPIE:%X "
 			  "SPIE:%X UPIE:%X MIE:%X HIE:%X SIE:%X UIE:%X",
 			  (int) ((d >> (xlen - 1)) & 0x1),
-			  (int) ((d >> 24) & 0x1f),
-			  (int) ((d >> 19) & 0x1),
-			  (int) ((d >> 18) & 0x1),
-			  (int) ((d >> 17) & 0x1),
-			  (int) ((d >> 15) & 0x3),
-			  (int) ((d >> 13) & 0x3),
-			  (int) ((d >> 11) & 0x3),
-			  (int) ((d >> 9) & 0x3),
-			  (int) ((d >> 8) & 0x1),
-			  (int) ((d >> 7) & 0x1),
-			  (int) ((d >> 6) & 0x1),
-			  (int) ((d >> 5) & 0x1),
-			  (int) ((d >> 4) & 0x1),
-			  (int) ((d >> 3) & 0x1),
-			  (int) ((d >> 2) & 0x1),
-			  (int) ((d >> 1) & 0x1),
+			  (int) ((d >> 24) & 0x1f), (int) ((d >> 19) & 0x1),
+			  (int) ((d >> 18) & 0x1), (int) ((d >> 17) & 0x1),
+			  (int) ((d >> 15) & 0x3), (int) ((d >> 13) & 0x3),
+			  (int) ((d >> 11) & 0x3), (int) ((d >> 9) & 0x3),
+			  (int) ((d >> 8) & 0x1), (int) ((d >> 7) & 0x1),
+			  (int) ((d >> 6) & 0x1), (int) ((d >> 5) & 0x1),
+			  (int) ((d >> 4) & 0x1), (int) ((d >> 3) & 0x1),
+			  (int) ((d >> 2) & 0x1), (int) ((d >> 1) & 0x1),
 			  (int) ((d >> 0) & 0x1));
 	    }
 	  else if (regnum == RISCV_CSR_MISA_REGNUM)
@@ -1234,36 +1201,31 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
 	      gdb_printf (file, "\t");
 	      if (regnum != tdep->frm_regnum)
-		gdb_printf (file,
-			    "NV:%d DZ:%d OF:%d UF:%d NX:%d",
-			    (int) ((d >> 4) & 0x1),
-			    (int) ((d >> 3) & 0x1),
-			    (int) ((d >> 2) & 0x1),
-			    (int) ((d >> 1) & 0x1),
+		gdb_printf (file, "NV:%d DZ:%d OF:%d UF:%d NX:%d",
+			    (int) ((d >> 4) & 0x1), (int) ((d >> 3) & 0x1),
+			    (int) ((d >> 2) & 0x1), (int) ((d >> 1) & 0x1),
 			    (int) ((d >> 0) & 0x1));
 
 	      if (regnum != tdep->fflags_regnum)
 		{
-		  static const char * const sfrm[] =
-		    {
-		      _("RNE (round to nearest; ties to even)"),
-		      _("RTZ (Round towards zero)"),
-		      _("RDN (Round down towards -INF)"),
-		      _("RUP (Round up towards +INF)"),
-		      _("RMM (Round to nearest; ties to max magnitude)"),
-		      _("INVALID[5]"),
-		      _("INVALID[6]"),
-		      /* A value of 0x7 indicates dynamic rounding mode when
+		  static const char *const sfrm[] = {
+		    _ ("RNE (round to nearest; ties to even)"),
+		    _ ("RTZ (Round towards zero)"),
+		    _ ("RDN (Round down towards -INF)"),
+		    _ ("RUP (Round up towards +INF)"),
+		    _ ("RMM (Round to nearest; ties to max magnitude)"),
+		    _ ("INVALID[5]"),
+		    _ ("INVALID[6]"),
+		    /* A value of 0x7 indicates dynamic rounding mode when
 			 used within an instructions rounding-mode field, but
 			 is invalid within the FRM register.  */
-		      _("INVALID[7] (Dynamic rounding mode)"),
-		    };
-		  int frm = ((regnum == RISCV_CSR_FCSR_REGNUM)
-			     ? (d >> 5) : d) & 0x7;
+		    _ ("INVALID[7] (Dynamic rounding mode)"),
+		  };
+		  int frm
+		    = ((regnum == RISCV_CSR_FCSR_REGNUM) ? (d >> 5) : d) & 0x7;
 
 		  gdb_printf (file, "%sFRM:%i [%s]",
-			      (regnum == RISCV_CSR_FCSR_REGNUM
-			       ? " " : ""),
+			      (regnum == RISCV_CSR_FCSR_REGNUM ? " " : ""),
 			      frm, sfrm[frm]);
 		}
 	    }
@@ -1277,15 +1239,10 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
 	      if (priv < 4)
 		{
-		  static const char * const sprv[] =
-		    {
-		      "User/Application",
-		      "Supervisor",
-		      "Hypervisor",
-		      "Machine"
-		    };
-		  gdb_printf (file, "\tprv:%d [%s]",
-			      priv, sprv[priv]);
+		  static const char *const sprv[]
+		    = { "User/Application", "Supervisor", "Hypervisor",
+			"Machine" };
+		  gdb_printf (file, "\tprv:%d [%s]", priv, sprv[priv]);
 		}
 	      else
 		gdb_printf (file, "\tprv:%d [INVALID]", priv);
@@ -1318,7 +1275,8 @@ riscv_is_regnum_a_named_csr (int regnum)
 
   switch (regnum)
     {
-#define DECLARE_CSR(name, num, class, define_ver, abort_ver) case RISCV_ ## num ## _REGNUM:
+#define DECLARE_CSR(name, num, class, define_ver, abort_ver) \
+  case RISCV_##num##_REGNUM:
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
       return true;
@@ -1336,15 +1294,15 @@ riscv_is_unknown_csr (struct gdbarch *gdbarch, int regnum)
 {
   riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
   return (regnum >= tdep->unknown_csrs_first_regnum
-	  && regnum < (tdep->unknown_csrs_first_regnum
-		       + tdep->unknown_csrs_count));
+	  && regnum
+	       < (tdep->unknown_csrs_first_regnum + tdep->unknown_csrs_count));
 }
 
 /* Implement the register_reggroup_p gdbarch method.  Is REGNUM a member
    of REGGROUP?  */
 
 static int
-riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
+riscv_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			   const struct reggroup *reggroup)
 {
   riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
@@ -1368,7 +1326,7 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
       if (riscv_is_unknown_csr (gdbarch, regnum))
 	{
 	  if (reggroup == restore_reggroup || reggroup == save_reggroup
-	       || reggroup == general_reggroup)
+	      || reggroup == general_reggroup)
 	    return 0;
 	  else if (reggroup == system_reggroup || reggroup == csr_reggroup)
 	    return 1;
@@ -1393,10 +1351,8 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
       return 0;
     }
   else if (reggroup == float_reggroup)
-    return (riscv_is_fp_regno_p (regnum)
-	    || regnum == RISCV_CSR_FCSR_REGNUM
-	    || regnum == tdep->fflags_regnum
-	    || regnum == tdep->frm_regnum);
+    return (riscv_is_fp_regno_p (regnum) || regnum == RISCV_CSR_FCSR_REGNUM
+	    || regnum == tdep->fflags_regnum || regnum == tdep->frm_regnum);
   else if (reggroup == general_reggroup)
     return regnum < RISCV_FIRST_FP_REGNUM;
   else if (reggroup == restore_reggroup || reggroup == save_reggroup)
@@ -1448,7 +1404,7 @@ riscv_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
 
   if (regnum == tdep->fflags_regnum || regnum == tdep->frm_regnum)
-   return builtin_type (gdbarch)->builtin_int32;
+    return builtin_type (gdbarch)->builtin_int32;
   else
     gdb_assert_not_reached ("unknown pseudo register number %d", regnum);
 }
@@ -1468,16 +1424,14 @@ riscv_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    'info registers' and 'info all-registers'.  */
 
 static void
-riscv_print_registers_info (struct gdbarch *gdbarch,
-			    struct ui_file *file,
-			    frame_info_ptr frame,
-			    int regnum, int print_all)
+riscv_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
+			    frame_info_ptr frame, int regnum, int print_all)
 {
   if (regnum != -1)
     {
       /* Print one specified register.  */
       if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
-	error (_("Not a valid register for the current processor type"));
+	error (_ ("Not a valid register for the current processor type"));
       riscv_print_one_register_info (gdbarch, file, frame, regnum);
     }
   else
@@ -1516,42 +1470,42 @@ public:
 
   /* Enum of all the opcodes that GDB cares about during the prologue scan.  */
   enum opcode
-    {
-      /* Unknown value is used at initialisation time.  */
-      UNKNOWN = 0,
+  {
+    /* Unknown value is used at initialisation time.  */
+    UNKNOWN = 0,
 
-      /* These instructions are all the ones we are interested in during the
+    /* These instructions are all the ones we are interested in during the
 	 prologue scan.  */
-      ADD,
-      ADDI,
-      ADDIW,
-      ADDW,
-      AUIPC,
-      LUI,
-      SD,
-      SW,
-      LD,
-      LW,
-      MV,
-      /* These are needed for software breakpoint support.  */
-      JAL,
-      JALR,
-      BEQ,
-      BNE,
-      BLT,
-      BGE,
-      BLTU,
-      BGEU,
-      /* These are needed for stepping over atomic sequences.  */
-      LR,
-      SC,
-      /* This instruction is used to do a syscall.  */
-      ECALL,
+    ADD,
+    ADDI,
+    ADDIW,
+    ADDW,
+    AUIPC,
+    LUI,
+    SD,
+    SW,
+    LD,
+    LW,
+    MV,
+    /* These are needed for software breakpoint support.  */
+    JAL,
+    JALR,
+    BEQ,
+    BNE,
+    BLT,
+    BGE,
+    BLTU,
+    BGEU,
+    /* These are needed for stepping over atomic sequences.  */
+    LR,
+    SC,
+    /* This instruction is used to do a syscall.  */
+    ECALL,
 
-      /* Other instructions are not interesting during the prologue scan, and
+    /* Other instructions are not interesting during the prologue scan, and
 	 are ignored.  */
-      OTHER
-    };
+    OTHER
+  };
 
   riscv_insn ()
     : m_length (0),
@@ -1566,34 +1520,28 @@ public:
   void decode (struct gdbarch *gdbarch, CORE_ADDR pc);
 
   /* Get the length of the instruction in bytes.  */
-  int length () const
-  { return m_length; }
+  int length () const { return m_length; }
 
   /* Get the opcode for this instruction.  */
-  enum opcode opcode () const
-  { return m_opcode; }
+  enum opcode opcode () const { return m_opcode; }
 
   /* Get destination register field for this instruction.  This is only
      valid if the OPCODE implies there is such a field for this
      instruction.  */
-  int rd () const
-  { return m_rd; }
+  int rd () const { return m_rd; }
 
   /* Get the RS1 register field for this instruction.  This is only valid
      if the OPCODE implies there is such a field for this instruction.  */
-  int rs1 () const
-  { return m_rs1; }
+  int rs1 () const { return m_rs1; }
 
   /* Get the RS2 register field for this instruction.  This is only valid
      if the OPCODE implies there is such a field for this instruction.  */
-  int rs2 () const
-  { return m_rs2; }
+  int rs2 () const { return m_rs2; }
 
   /* Get the immediate for this instruction in signed form.  This is only
      valid if the OPCODE implies there is such a field for this
      instruction.  */
-  int imm_signed () const
-  { return m_imm.s; }
+  int imm_signed () const { return m_imm.s; }
 
 private:
 
@@ -1726,8 +1674,8 @@ private:
 
   /* Fetch instruction from target memory at ADDR, return the content of
      the instruction, and update LEN with the instruction length.  */
-  static ULONGEST fetch_instruction (struct gdbarch *gdbarch,
-				     CORE_ADDR addr, int *len);
+  static ULONGEST fetch_instruction (struct gdbarch *gdbarch, CORE_ADDR addr,
+				     int *len);
 
   /* The length of the instruction in bytes.  Should be 2 or 4.  */
   int m_length;
@@ -1765,8 +1713,8 @@ private:
    instruction, and update LEN with the instruction length.  */
 
 ULONGEST
-riscv_insn::fetch_instruction (struct gdbarch *gdbarch,
-			       CORE_ADDR addr, int *len)
+riscv_insn::fetch_instruction (struct gdbarch *gdbarch, CORE_ADDR addr,
+			       int *len)
 {
   enum bfd_endian byte_order = gdbarch_byte_order_for_code (gdbarch);
   gdb_byte buf[RISCV_MAX_INSN_LEN];
@@ -1949,9 +1897,8 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
    can unwind register values when there is no DWARF information.  */
 
 static CORE_ADDR
-riscv_scan_prologue (struct gdbarch *gdbarch,
-		     CORE_ADDR start_pc, CORE_ADDR end_pc,
-		     struct riscv_unwind_cache *cache)
+riscv_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
+		     CORE_ADDR end_pc, struct riscv_unwind_cache *cache)
 {
   CORE_ADDR cur_pc, next_pc, after_prologue_pc;
   CORE_ADDR end_prologue_addr = 0;
@@ -1961,7 +1908,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
      that bound, then use an arbitrary large number as the upper bound.  */
   after_prologue_pc = skip_prologue_using_sal (gdbarch, start_pc);
   if (after_prologue_pc == 0)
-    after_prologue_pc = start_pc + 100;   /* Arbitrary large number.  */
+    after_prologue_pc = start_pc + 100; /* Arbitrary large number.  */
   if (after_prologue_pc < end_pc)
     end_pc = after_prologue_pc;
 
@@ -1971,11 +1918,9 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
   pv_area stack (RISCV_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   if (riscv_debug_unwinder)
-    gdb_printf
-      (gdb_stdlog,
-       "Prologue scan for function starting at %s (limit %s)\n",
-       core_addr_to_string (start_pc),
-       core_addr_to_string (end_pc));
+    gdb_printf (gdb_stdlog,
+		"Prologue scan for function starting at %s (limit %s)\n",
+		core_addr_to_string (start_pc), core_addr_to_string (end_pc));
 
   for (next_pc = cur_pc = start_pc; cur_pc < end_pc; cur_pc = next_pc)
     {
@@ -1990,8 +1935,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
       /* Look for common stack adjustment insns.  */
       if ((insn.opcode () == riscv_insn::ADDI
 	   || insn.opcode () == riscv_insn::ADDIW)
-	  && insn.rd () == RISCV_SP_REGNUM
-	  && insn.rs1 () == RISCV_SP_REGNUM)
+	  && insn.rd () == RISCV_SP_REGNUM && insn.rs1 () == RISCV_SP_REGNUM)
 	{
 	  /* Handle: addi sp, sp, -i
 	     or:     addiw sp, sp, -i  */
@@ -2000,10 +1944,9 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	  regs[insn.rd ()]
 	    = pv_add_constant (regs[insn.rs1 ()], insn.imm_signed ());
 	}
-      else if ((insn.opcode () == riscv_insn::SW
-		|| insn.opcode () == riscv_insn::SD)
-	       && (insn.rs1 () == RISCV_SP_REGNUM
-		   || insn.rs1 () == RISCV_FP_REGNUM))
+      else if (
+	(insn.opcode () == riscv_insn::SW || insn.opcode () == riscv_insn::SD)
+	&& (insn.rs1 () == RISCV_SP_REGNUM || insn.rs1 () == RISCV_FP_REGNUM))
 	{
 	  /* Handle: sw reg, offset(sp)
 	     or:     sd reg, offset(sp)
@@ -2013,8 +1956,8 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	  gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
 	  gdb_assert (insn.rs2 () < RISCV_NUM_INTEGER_REGS);
 	  stack.store (pv_add_constant (regs[insn.rs1 ()], insn.imm_signed ()),
-			(insn.opcode () == riscv_insn::SW ? 4 : 8),
-			regs[insn.rs2 ()]);
+		       (insn.opcode () == riscv_insn::SW ? 4 : 8),
+		       regs[insn.rs2 ()]);
 	}
       else if (insn.opcode () == riscv_insn::ADDI
 	       && insn.rd () == RISCV_FP_REGNUM
@@ -2144,8 +2087,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 		     the frame base address to the registers location on
 		     the stack, with a descending stack this means the
 		     offsets are always negative.  */
-		  gdb_printf (gdb_stdlog,
-			      "Register $%s at stack offset %s\n",
+		  gdb_printf (gdb_stdlog, "Register $%s at stack offset %s\n",
 			      gdbarch_register_name (gdbarch, i),
 			      plongest ((LONGEST) offset));
 		}
@@ -2222,10 +2164,8 @@ riscv_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
   int status = target_write_memory (*bp_addr, nop_insn, sizeof (nop_insn));
 
   if (riscv_debug_breakpoints || riscv_debug_infcall)
-    gdb_printf (gdb_stdlog,
-		"Writing %s-byte nop instruction to %s: %s\n",
-		plongest (sizeof (nop_insn)),
-		paddress (gdbarch, *bp_addr),
+    gdb_printf (gdb_stdlog, "Writing %s-byte nop instruction to %s: %s\n",
+		plongest (sizeof (nop_insn)), paddress (gdbarch, *bp_addr),
 		(status == 0 ? "success" : "failed"));
 
   return sp;
@@ -2272,18 +2212,18 @@ struct riscv_arg_info
   {
     /* What type of location this is.  */
     enum location_type
-      {
-       /* Argument passed in a register.  */
-       in_reg,
+    {
+      /* Argument passed in a register.  */
+      in_reg,
 
-       /* Argument passed as an on stack argument.  */
-       on_stack,
+      /* Argument passed as an on stack argument.  */
+      on_stack,
 
-       /* Argument passed by reference.  The second location is always
+      /* Argument passed by reference.  The second location is always
 	  valid for a BY_REF argument, and describes where the address
 	  of the BY_REF argument should be placed.  */
-       by_ref
-      } loc_type;
+      by_ref
+    } loc_type;
 
     /* Information that depends on the location type.  */
     union
@@ -2432,8 +2372,7 @@ riscv_arg_regs_available (struct riscv_arg_reg *reg)
 
 static bool
 riscv_assign_reg_location (struct riscv_arg_info::location *loc,
-			   struct riscv_arg_reg *reg,
-			   int length, int offset)
+			   struct riscv_arg_reg *reg, int length, int offset)
 {
   if (reg->next_regnum <= reg->last_regnum)
     {
@@ -2458,12 +2397,11 @@ riscv_assign_reg_location (struct riscv_arg_info::location *loc,
 
 static void
 riscv_assign_stack_location (struct riscv_arg_info::location *loc,
-			     struct riscv_memory_offsets *memory,
-			     int length, int align)
+			     struct riscv_memory_offsets *memory, int length,
+			     int align)
 {
   loc->loc_type = riscv_arg_info::location::on_stack;
-  memory->arg_offset
-    = align_up (memory->arg_offset, align);
+  memory->arg_offset = align_up (memory->arg_offset, align);
   loc->loc_data.offset = memory->arg_offset;
   memory->arg_offset += length;
   loc->c_length = length;
@@ -2495,8 +2433,7 @@ riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
       || ainfo->length > (2 * cinfo->xlen))
     {
       /* Argument is going to be passed by reference.  */
-      ainfo->argloc[0].loc_type
-	= riscv_arg_info::location::by_ref;
+      ainfo->argloc[0].loc_type = riscv_arg_info::location::by_ref;
       cinfo->memory.ref_offset
 	= align_up (cinfo->memory.ref_offset, ainfo->align);
       ainfo->argloc[0].loc_data.offset = cinfo->memory.ref_offset;
@@ -2506,12 +2443,10 @@ riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
       /* The second location for this argument is given over to holding the
 	 address of the by-reference data.  Pass 0 for the offset as this
 	 is not part of the actual argument value.  */
-      if (!riscv_assign_reg_location (&ainfo->argloc[1],
-				      &cinfo->int_regs,
+      if (!riscv_assign_reg_location (&ainfo->argloc[1], &cinfo->int_regs,
 				      cinfo->xlen, 0))
-	riscv_assign_stack_location (&ainfo->argloc[1],
-				     &cinfo->memory, cinfo->xlen,
-				     cinfo->xlen);
+	riscv_assign_stack_location (&ainfo->argloc[1], &cinfo->memory,
+				     cinfo->xlen, cinfo->xlen);
     }
   else
     {
@@ -2524,19 +2459,18 @@ riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
 	  && cinfo->int_regs.next_regnum & 1)
 	cinfo->int_regs.next_regnum++;
 
-      if (!riscv_assign_reg_location (&ainfo->argloc[0],
-				      &cinfo->int_regs, len, 0))
-	riscv_assign_stack_location (&ainfo->argloc[0],
-				     &cinfo->memory, len, align);
+      if (!riscv_assign_reg_location (&ainfo->argloc[0], &cinfo->int_regs, len,
+				      0))
+	riscv_assign_stack_location (&ainfo->argloc[0], &cinfo->memory, len,
+				     align);
 
       if (len < ainfo->length)
 	{
 	  len = ainfo->length - len;
-	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
-					  &cinfo->int_regs, len,
-					  cinfo->xlen))
-	    riscv_assign_stack_location (&ainfo->argloc[1],
-					 &cinfo->memory, len, cinfo->xlen);
+	  if (!riscv_assign_reg_location (&ainfo->argloc[1], &cinfo->int_regs,
+					  len, cinfo->xlen))
+	    riscv_assign_stack_location (&ainfo->argloc[1], &cinfo->memory,
+					 len, cinfo->xlen);
 	}
     }
 }
@@ -2552,8 +2486,7 @@ riscv_call_arg_scalar_float (struct riscv_arg_info *ainfo,
     return riscv_call_arg_scalar_int (ainfo, cinfo);
   else
     {
-      if (!riscv_assign_reg_location (&ainfo->argloc[0],
-				      &cinfo->float_regs,
+      if (!riscv_assign_reg_location (&ainfo->argloc[0], &cinfo->float_regs,
 				      ainfo->length, 0))
 	return riscv_call_arg_scalar_int (ainfo, cinfo);
     }
@@ -2594,6 +2527,7 @@ riscv_call_arg_complex_float (struct riscv_arg_info *ainfo,
 class riscv_struct_info
 {
 public:
+
   riscv_struct_info ()
     : m_number_of_fields (0),
       m_types { nullptr, nullptr },
@@ -2604,18 +2538,14 @@ public:
 
   /* Analyse TYPE descending into nested structures, count the number of
      scalar fields and record the types of the first two fields found.  */
-  void analyse (struct type *type)
-  {
-    analyse_inner (type, 0);
-  }
+  void analyse (struct type *type) { analyse_inner (type, 0); }
 
   /* The number of scalar fields found in the analysed type.  This is
      currently only accurate if the value returned is 0, 1, or 2 as the
      analysis stops counting when the number of fields is 3.  This is
      because the RiscV ABI only has special cases for 1 or 2 fields,
      anything else we just don't care about.  */
-  int number_of_fields () const
-  { return m_number_of_fields; }
+  int number_of_fields () const { return m_number_of_fields; }
 
   /* Return the type for scalar field INDEX within the analysed type.  Will
      return nullptr if there is no field at that index.  Only INDEX values
@@ -2638,6 +2568,7 @@ public:
   }
 
 private:
+
   /* The number of scalar fields found within the structure after recursing
      into nested structures.  */
   int m_number_of_fields;
@@ -2720,7 +2651,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 
       sinfo.analyse (ainfo->type);
       if (sinfo.number_of_fields () == 1
-	  && sinfo.field_type(0)->code () == TYPE_CODE_COMPLEX)
+	  && sinfo.field_type (0)->code () == TYPE_CODE_COMPLEX)
 	{
 	  /* The following is similar to RISCV_CALL_ARG_COMPLEX_FLOAT,
 	     except we use the type of the complex field instead of the
@@ -2734,9 +2665,9 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	      int len = sinfo.field_type (0)->length () / 2;
 	      int offset = sinfo.field_offset (0);
 
-	      result = riscv_assign_reg_location (&ainfo->argloc[0],
-						  &cinfo->float_regs, len,
-						  offset);
+	      result
+		= riscv_assign_reg_location (&ainfo->argloc[0],
+					     &cinfo->float_regs, len, offset);
 	      gdb_assert (result);
 
 	      result = riscv_assign_reg_location (&ainfo->argloc[1],
@@ -2750,7 +2681,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	}
 
       if (sinfo.number_of_fields () == 1
-	  && sinfo.field_type(0)->code () == TYPE_CODE_FLT)
+	  && sinfo.field_type (0)->code () == TYPE_CODE_FLT)
 	{
 	  /* The following is similar to RISCV_CALL_ARG_SCALAR_FLOAT,
 	     except we use the type of the first scalar field instead of
@@ -2765,17 +2696,16 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	      int len = sinfo.field_type (0)->length ();
 
 	      if (!riscv_assign_reg_location (&ainfo->argloc[0],
-					      &cinfo->float_regs,
-					      len, offset))
+					      &cinfo->float_regs, len, offset))
 		riscv_call_arg_scalar_int (ainfo, cinfo);
 	    }
 	  return;
 	}
 
       if (sinfo.number_of_fields () == 2
-	  && sinfo.field_type(0)->code () == TYPE_CODE_FLT
+	  && sinfo.field_type (0)->code () == TYPE_CODE_FLT
 	  && sinfo.field_type (0)->length () <= cinfo->flen
-	  && sinfo.field_type(1)->code () == TYPE_CODE_FLT
+	  && sinfo.field_type (1)->code () == TYPE_CODE_FLT
 	  && sinfo.field_type (1)->length () <= cinfo->flen
 	  && riscv_arg_regs_available (&cinfo->float_regs) >= 2)
 	{
@@ -2783,7 +2713,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	  int offset = sinfo.field_offset (0);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
 					  &cinfo->float_regs, len0, offset))
-	    error (_("failed during argument setup"));
+	    error (_ ("failed during argument setup"));
 
 	  int len1 = sinfo.field_type (1)->length ();
 	  offset = sinfo.field_offset (1);
@@ -2791,31 +2721,30 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 			       - sinfo.field_type (0)->length ()));
 
 	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
-					  &cinfo->float_regs,
-					  len1, offset))
-	    error (_("failed during argument setup"));
+					  &cinfo->float_regs, len1, offset))
+	    error (_ ("failed during argument setup"));
 	  return;
 	}
 
       if (sinfo.number_of_fields () == 2
 	  && riscv_arg_regs_available (&cinfo->int_regs) >= 1
-	  && (sinfo.field_type(0)->code () == TYPE_CODE_FLT
+	  && (sinfo.field_type (0)->code () == TYPE_CODE_FLT
 	      && sinfo.field_type (0)->length () <= cinfo->flen
 	      && is_integral_type (sinfo.field_type (1))
 	      && sinfo.field_type (1)->length () <= cinfo->xlen))
 	{
-	  int  len0 = sinfo.field_type (0)->length ();
+	  int len0 = sinfo.field_type (0)->length ();
 	  int offset = sinfo.field_offset (0);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
 					  &cinfo->float_regs, len0, offset))
-	    error (_("failed during argument setup"));
+	    error (_ ("failed during argument setup"));
 
 	  int len1 = sinfo.field_type (1)->length ();
 	  offset = sinfo.field_offset (1);
 	  gdb_assert (len1 <= cinfo->xlen);
-	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
-					  &cinfo->int_regs, len1, offset))
-	    error (_("failed during argument setup"));
+	  if (!riscv_assign_reg_location (&ainfo->argloc[1], &cinfo->int_regs,
+					  len1, offset))
+	    error (_ ("failed during argument setup"));
 	  return;
 	}
 
@@ -2823,7 +2752,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	  && riscv_arg_regs_available (&cinfo->int_regs) >= 1
 	  && (is_integral_type (sinfo.field_type (0))
 	      && sinfo.field_type (0)->length () <= cinfo->xlen
-	      && sinfo.field_type(1)->code () == TYPE_CODE_FLT
+	      && sinfo.field_type (1)->code () == TYPE_CODE_FLT
 	      && sinfo.field_type (1)->length () <= cinfo->flen))
 	{
 	  int len0 = sinfo.field_type (0)->length ();
@@ -2833,15 +2762,14 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	  gdb_assert (len1 <= cinfo->flen);
 
 	  int offset = sinfo.field_offset (0);
-	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
-					  &cinfo->int_regs, len0, offset))
-	    error (_("failed during argument setup"));
+	  if (!riscv_assign_reg_location (&ainfo->argloc[0], &cinfo->int_regs,
+					  len0, offset))
+	    error (_ ("failed during argument setup"));
 
 	  offset = sinfo.field_offset (1);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
-					  &cinfo->float_regs,
-					  len1, offset))
-	    error (_("failed during argument setup"));
+					  &cinfo->float_regs, len1, offset))
+	    error (_ ("failed during argument setup"));
 
 	  return;
 	}
@@ -2863,10 +2791,9 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
    After assigning a location to AINFO, CINFO will have been updated.  */
 
 static void
-riscv_arg_location (struct gdbarch *gdbarch,
-		    struct riscv_arg_info *ainfo,
-		    struct riscv_call_info *cinfo,
-		    struct type *type, bool is_unnamed)
+riscv_arg_location (struct gdbarch *gdbarch, struct riscv_arg_info *ainfo,
+		    struct riscv_call_info *cinfo, struct type *type,
+		    bool is_unnamed)
 {
   ainfo->type = type;
   ainfo->length = ainfo->type->length ();
@@ -2930,26 +2857,25 @@ riscv_arg_location (struct gdbarch *gdbarch,
 
 static void
 riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
-			  struct riscv_arg_info *info,
-			  CORE_ADDR sp_refs, CORE_ADDR sp_args)
+			  struct riscv_arg_info *info, CORE_ADDR sp_refs,
+			  CORE_ADDR sp_args)
 {
   gdb_printf (stream, "type: '%s', length: 0x%x, alignment: 0x%x",
 	      TYPE_SAFE_NAME (info->type), info->length, info->align);
   switch (info->argloc[0].loc_type)
     {
     case riscv_arg_info::location::in_reg:
-      gdb_printf
-	(stream, ", register %s",
-	 gdbarch_register_name (gdbarch, info->argloc[0].loc_data.regno));
+      gdb_printf (stream, ", register %s",
+		  gdbarch_register_name (gdbarch,
+					 info->argloc[0].loc_data.regno));
       if (info->argloc[0].c_length < info->length)
 	{
 	  switch (info->argloc[1].loc_type)
 	    {
 	    case riscv_arg_info::location::in_reg:
-	      gdb_printf
-		(stream, ", register %s",
-		 gdbarch_register_name (gdbarch,
-					info->argloc[1].loc_data.regno));
+	      gdb_printf (stream, ", register %s",
+			  gdbarch_register_name (
+			    gdbarch, info->argloc[1].loc_data.regno));
 	      break;
 
 	    case riscv_arg_info::location::on_stack:
@@ -2962,13 +2888,12 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
 	      /* The second location should never be a reference, any
 		 argument being passed by reference just places its address
 		 in the first location and is done.  */
-	      error (_("invalid argument location"));
+	      error (_ ("invalid argument location"));
 	      break;
 	    }
 
 	  if (info->argloc[1].c_offset > info->argloc[0].c_length)
-	    gdb_printf (stream, " (offset 0x%x)",
-			info->argloc[1].c_offset);
+	    gdb_printf (stream, " (offset 0x%x)", info->argloc[1].c_offset);
 	}
       break;
 
@@ -2978,23 +2903,22 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
       break;
 
     case riscv_arg_info::location::by_ref:
-      gdb_printf
-	(stream, ", by reference, data at offset 0x%x (%s)",
-	 info->argloc[0].loc_data.offset,
-	 core_addr_to_string (sp_refs + info->argloc[0].loc_data.offset));
-      if (info->argloc[1].loc_type
-	  == riscv_arg_info::location::in_reg)
-	gdb_printf
-	  (stream, ", address in register %s",
-	   gdbarch_register_name (gdbarch, info->argloc[1].loc_data.regno));
+      gdb_printf (stream, ", by reference, data at offset 0x%x (%s)",
+		  info->argloc[0].loc_data.offset,
+		  core_addr_to_string (sp_refs
+				       + info->argloc[0].loc_data.offset));
+      if (info->argloc[1].loc_type == riscv_arg_info::location::in_reg)
+	gdb_printf (stream, ", address in register %s",
+		    gdbarch_register_name (gdbarch,
+					   info->argloc[1].loc_data.regno));
       else
 	{
 	  gdb_assert (info->argloc[1].loc_type
 		      == riscv_arg_info::location::on_stack);
-	  gdb_printf
-	    (stream, ", address on stack at offset 0x%x (%s)",
-	     info->argloc[1].loc_data.offset,
-	     core_addr_to_string (sp_args + info->argloc[1].loc_data.offset));
+	  gdb_printf (stream, ", address on stack at offset 0x%x (%s)",
+		      info->argloc[1].loc_data.offset,
+		      core_addr_to_string (sp_args
+					   + info->argloc[1].loc_data.offset));
 	}
       break;
 
@@ -3012,7 +2936,7 @@ static void
 riscv_regcache_cooked_write (int regnum, const gdb_byte *data, int len,
 			     struct regcache *regcache, int flen)
 {
-  gdb_byte tmp [sizeof (ULONGEST)];
+  gdb_byte tmp[sizeof (ULONGEST)];
 
   /* FP values in FP registers must be NaN-boxed.  */
   if (riscv_is_fp_regno_p (regnum) && len < flen)
@@ -3026,13 +2950,9 @@ riscv_regcache_cooked_write (int regnum, const gdb_byte *data, int len,
 /* Implement the push dummy call gdbarch callback.  */
 
 static CORE_ADDR
-riscv_push_dummy_call (struct gdbarch *gdbarch,
-		       struct value *function,
-		       struct regcache *regcache,
-		       CORE_ADDR bp_addr,
-		       int nargs,
-		       struct value **args,
-		       CORE_ADDR sp,
+riscv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+		       struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		       struct value **args, CORE_ADDR sp,
 		       function_call_return_method return_method,
 		       CORE_ADDR struct_addr)
 {
@@ -3040,8 +2960,9 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
   CORE_ADDR sp_args, sp_refs;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  struct riscv_arg_info *arg_info =
-    (struct riscv_arg_info *) alloca (nargs * sizeof (struct riscv_arg_info));
+  struct riscv_arg_info *arg_info
+    = (struct riscv_arg_info *) alloca (nargs
+					* sizeof (struct riscv_arg_info));
 
   struct riscv_call_info call_info (gdbarch);
 
@@ -3082,21 +3003,20 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
       gdb_printf (gdb_stdlog, "dummy call args:\n");
       gdb_printf (gdb_stdlog, ": floating point ABI %s in use\n",
 		  (riscv_has_fp_abi (gdbarch) ? "is" : "is not"));
-      gdb_printf (gdb_stdlog, ": xlen: %d\n: flen: %d\n",
-		  call_info.xlen, call_info.flen);
+      gdb_printf (gdb_stdlog, ": xlen: %d\n: flen: %d\n", call_info.xlen,
+		  call_info.flen);
       if (return_method == return_method_struct)
-	gdb_printf (gdb_stdlog,
-		    "[*] struct return pointer in register $A0\n");
+	gdb_printf (gdb_stdlog, "[*] struct return pointer in register $A0\n");
       for (i = 0; i < nargs; ++i)
 	{
-	  struct riscv_arg_info *info = &arg_info [i];
+	  struct riscv_arg_info *info = &arg_info[i];
 
 	  gdb_printf (gdb_stdlog, "[%2d] ", i);
-	  riscv_print_arg_location (gdb_stdlog, gdbarch, info, sp_refs, sp_args);
+	  riscv_print_arg_location (gdb_stdlog, gdbarch, info, sp_refs,
+				    sp_args);
 	  gdb_printf (gdb_stdlog, "\n");
 	}
-      if (call_info.memory.arg_offset > 0
-	  || call_info.memory.ref_offset > 0)
+      if (call_info.memory.arg_offset > 0 || call_info.memory.ref_offset > 0)
 	{
 	  gdb_printf (gdb_stdlog, "              Original sp: %s\n",
 		      core_addr_to_string (osp));
@@ -3124,7 +3044,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
       CORE_ADDR dst;
       int second_arg_length = 0;
       const gdb_byte *second_arg_data;
-      struct riscv_arg_info *info = &arg_info [i];
+      struct riscv_arg_info *info = &arg_info[i];
 
       gdb_assert (info->length > 0);
 
@@ -3137,11 +3057,13 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	    riscv_regcache_cooked_write (info->argloc[0].loc_data.regno,
 					 (info->contents
 					  + info->argloc[0].c_offset),
-					 info->argloc[0].c_length,
-					 regcache, call_info.flen);
-	    second_arg_length =
-	      (((info->argloc[0].c_length + info->argloc[0].c_offset) < info->length)
-	       ? info->argloc[1].c_length : 0);
+					 info->argloc[0].c_length, regcache,
+					 call_info.flen);
+	    second_arg_length
+	      = (((info->argloc[0].c_length + info->argloc[0].c_offset)
+		  < info->length)
+		   ? info->argloc[1].c_length
+		   : 0);
 	    second_arg_data = info->contents + info->argloc[1].c_offset;
 	  }
 	  break;
@@ -3170,13 +3092,14 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	    {
 	    case riscv_arg_info::location::in_reg:
 	      {
-		gdb_assert ((riscv_is_fp_regno_p (info->argloc[1].loc_data.regno)
-			     && second_arg_length <= call_info.flen)
-			    || second_arg_length <= call_info.xlen);
+		gdb_assert (
+		  (riscv_is_fp_regno_p (info->argloc[1].loc_data.regno)
+		   && second_arg_length <= call_info.flen)
+		  || second_arg_length <= call_info.xlen);
 		riscv_regcache_cooked_write (info->argloc[1].loc_data.regno,
 					     second_arg_data,
-					     second_arg_length,
-					     regcache, call_info.flen);
+					     second_arg_length, regcache,
+					     call_info.flen);
 	      }
 	      break;
 
@@ -3194,7 +3117,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	      /* The second location should never be a reference, any
 		 argument being passed by reference just places its address
 		 in the first location and is done.  */
-	      error (_("invalid argument location"));
+	      error (_ ("invalid argument location"));
 	      break;
 	    }
 	}
@@ -3211,8 +3134,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
   /* Finally, update the stack pointer.  */
 
   if (riscv_debug_infcall > 0)
-    gdb_printf (gdb_stdlog, ": writing $sp = %s\n",
-		core_addr_to_string (sp));
+    gdb_printf (gdb_stdlog, ": writing $sp = %s\n", core_addr_to_string (sp));
   regcache_cooked_write_unsigned (regcache, RISCV_SP_REGNUM, sp);
 
   return sp;
@@ -3221,12 +3143,9 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 /* Implement the return_value gdbarch method.  */
 
 static enum return_value_convention
-riscv_return_value (struct gdbarch  *gdbarch,
-		    struct value *function,
-		    struct type *type,
-		    struct regcache *regcache,
-		    struct value **read_value,
-		    const gdb_byte *writebuf)
+riscv_return_value (struct gdbarch *gdbarch, struct value *function,
+		    struct type *type, struct regcache *regcache,
+		    struct value **read_value, const gdb_byte *writebuf)
 {
   struct riscv_call_info call_info (gdbarch);
   struct riscv_arg_info info;
@@ -3309,8 +3228,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	    if (readbuf)
 	      {
 		gdb_byte *ptr = readbuf + info.argloc[0].c_offset;
-		regcache->cooked_read_part (regnum, 0,
-					    info.argloc[0].c_length,
+		regcache->cooked_read_part (regnum, 0, info.argloc[0].c_length,
 					    ptr);
 	      }
 
@@ -3318,8 +3236,8 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	      {
 		const gdb_byte *ptr = writebuf + info.argloc[0].c_offset;
 		riscv_regcache_cooked_write (regnum, ptr,
-					     info.argloc[0].c_length,
-					     regcache, call_info.flen);
+					     info.argloc[0].c_length, regcache,
+					     call_info.flen);
 	      }
 
 	    /* A return value in register can have a second part in a
@@ -3332,7 +3250,8 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		    regnum = info.argloc[1].loc_data.regno;
 
 		    gdb_assert ((info.argloc[0].c_length
-				 + info.argloc[1].c_length) <= arg_len);
+				 + info.argloc[1].c_length)
+				<= arg_len);
 		    gdb_assert (info.argloc[1].c_length
 				<= register_size (gdbarch, regnum));
 
@@ -3348,16 +3267,16 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		      {
 			const gdb_byte *ptr
 			  = writebuf + info.argloc[1].c_offset;
-			riscv_regcache_cooked_write
-			  (regnum, ptr, info.argloc[1].c_length,
-			   regcache, call_info.flen);
+			riscv_regcache_cooked_write (regnum, ptr,
+						     info.argloc[1].c_length,
+						     regcache, call_info.flen);
 		      }
 		    break;
 
 		  case riscv_arg_info::location::by_ref:
 		  case riscv_arg_info::location::on_stack:
 		  default:
-		    error (_("invalid argument location"));
+		    error (_ ("invalid argument location"));
 		    break;
 		  }
 	      }
@@ -3369,8 +3288,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	  {
 	    ULONGEST addr;
 
-	    regcache_cooked_read_unsigned (regcache, RISCV_A0_REGNUM,
-					   &addr);
+	    regcache_cooked_read_unsigned (regcache, RISCV_A0_REGNUM, &addr);
 	    if (read_value != nullptr)
 	      {
 		abi_val = value_at_non_lval (type, addr);
@@ -3389,7 +3307,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 
 	case riscv_arg_info::location::on_stack:
 	default:
-	  error (_("invalid argument location"));
+	  error (_ ("invalid argument location"));
 	  break;
 	}
 
@@ -3426,7 +3344,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
       return RETURN_VALUE_ABI_PRESERVES_ADDRESS;
     case riscv_arg_info::location::on_stack:
     default:
-      error (_("invalid argument location"));
+      error (_ ("invalid argument location"));
     }
 }
 
@@ -3468,8 +3386,7 @@ riscv_frame_cache (frame_info_ptr this_frame, void **this_cache)
   if (riscv_debug_unwinder)
     gdb_printf (gdb_stdlog, "Frame base is %s ($%s + 0x%x)\n",
 		core_addr_to_string (cache->frame_base),
-		gdbarch_register_name (gdbarch,
-				       cache->frame_base_reg),
+		gdbarch_register_name (gdbarch, cache->frame_base_reg),
 		cache->frame_base_offset);
 
   /* The prologue scanner sets the address of registers stored to the stack
@@ -3503,8 +3420,7 @@ riscv_frame_cache (frame_info_ptr this_frame, void **this_cache)
 /* Implement the this_id callback for RiscV frame unwinder.  */
 
 static void
-riscv_frame_this_id (frame_info_ptr this_frame,
-		     void **prologue_cache,
+riscv_frame_this_id (frame_info_ptr this_frame, void **prologue_cache,
 		     struct frame_id *this_id)
 {
   struct riscv_unwind_cache *cache;
@@ -3524,8 +3440,7 @@ riscv_frame_this_id (frame_info_ptr this_frame,
 /* Implement the prev_register callback for RiscV frame unwinder.  */
 
 static struct value *
-riscv_frame_prev_register (frame_info_ptr this_frame,
-			   void **prologue_cache,
+riscv_frame_prev_register (frame_info_ptr this_frame, void **prologue_cache,
 			   int regnum)
 {
   struct riscv_unwind_cache *cache;
@@ -3538,17 +3453,16 @@ riscv_frame_prev_register (frame_info_ptr this_frame,
    are the fallback unwinder (DWARF unwinder is used first), we use the
    default frame sniffer, which always accepts the frame.  */
 
-static const struct frame_unwind riscv_frame_unwind =
-{
-  /*.name          =*/ "riscv prologue",
-  /*.type          =*/ NORMAL_FRAME,
-  /*.stop_reason   =*/ default_frame_unwind_stop_reason,
-  /*.this_id       =*/ riscv_frame_this_id,
-  /*.prev_register =*/ riscv_frame_prev_register,
-  /*.unwind_data   =*/ NULL,
-  /*.sniffer       =*/ default_frame_sniffer,
-  /*.dealloc_cache =*/ NULL,
-  /*.prev_arch     =*/ NULL,
+static const struct frame_unwind riscv_frame_unwind = {
+  /*.name          =*/"riscv prologue",
+  /*.type          =*/NORMAL_FRAME,
+  /*.stop_reason   =*/default_frame_unwind_stop_reason,
+  /*.this_id       =*/riscv_frame_this_id,
+  /*.prev_register =*/riscv_frame_prev_register,
+  /*.unwind_data   =*/NULL,
+  /*.sniffer       =*/default_frame_sniffer,
+  /*.dealloc_cache =*/NULL,
+  /*.prev_arch     =*/NULL,
 };
 
 /* Extract a set of required target features out of ABFD.  If ABFD is
@@ -3575,7 +3489,7 @@ riscv_features_from_bfd (const bfd *abfd)
       else if (eclass == ELFCLASS64)
 	features.xlen = 8;
       else
-	internal_error (_("unknown ELF header class %d"), eclass);
+	internal_error (_ ("unknown ELF header class %d"), eclass);
 
       if (e_flags & EF_RISCV_FLOAT_ABI_DOUBLE)
 	features.flen = 8;
@@ -3586,7 +3500,7 @@ riscv_features_from_bfd (const bfd *abfd)
 	{
 	  if (features.xlen == 8)
 	    {
-	      warning (_("64-bit ELF with RV32E flag set!  Assuming 32-bit"));
+	      warning (_ ("64-bit ELF with RV32E flag set!  Assuming 32-bit"));
 	      features.xlen = 4;
 	    }
 	  features.embedded = true;
@@ -3604,8 +3518,7 @@ static const struct target_desc *
 riscv_find_default_target_description (const struct gdbarch_info info)
 {
   /* Extract desired feature set from INFO.  */
-  struct riscv_gdbarch_features features
-    = riscv_features_from_bfd (info.abfd);
+  struct riscv_gdbarch_features features = riscv_features_from_bfd (info.abfd);
 
   /* If the XLEN field is still 0 then we got nothing useful from INFO.BFD,
      maybe there was no bfd object.  In this case we fall back to a minimal
@@ -3758,8 +3671,8 @@ riscv_tdesc_unknown_reg (struct gdbarch *gdbarch, tdesc_feature *feature,
       riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
       if (tdep->unknown_csrs_first_regnum == -1)
 	tdep->unknown_csrs_first_regnum = possible_regnum;
-      gdb_assert (tdep->unknown_csrs_first_regnum
-		  + tdep->unknown_csrs_count == possible_regnum);
+      gdb_assert (tdep->unknown_csrs_first_regnum + tdep->unknown_csrs_count
+		  == possible_regnum);
       tdep->unknown_csrs_count++;
       return possible_regnum;
     }
@@ -3788,8 +3701,7 @@ riscv_gnu_triplet_regexp (struct gdbarch *gdbarch)
    reading a binary file.  */
 
 static struct gdbarch *
-riscv_gdbarch_init (struct gdbarch_info info,
-		    struct gdbarch_list *arches)
+riscv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct riscv_gdbarch_features features;
   const struct target_desc *tdesc = info.target_desc;
@@ -3845,18 +3757,17 @@ riscv_gdbarch_init (struct gdbarch_info info,
      however, this has not been tested in GDB yet, so for now we require
      that the requested xlen match the targets xlen.  */
   if (abi_features.xlen != features.xlen)
-    error (_("bfd requires xlen %d, but target has xlen %d"),
-	    abi_features.xlen, features.xlen);
+    error (_ ("bfd requires xlen %d, but target has xlen %d"),
+	   abi_features.xlen, features.xlen);
   /* We do support running binaries compiled for 32-bit float on targets
      with 64-bit float, so we only complain if the binary requires more
      than the target has available.  */
   if (abi_features.flen > features.flen)
-    error (_("bfd requires flen %d, but target has flen %d"),
-	    abi_features.flen, features.flen);
+    error (_ ("bfd requires flen %d, but target has flen %d"),
+	   abi_features.flen, features.flen);
 
   /* Find a candidate among the list of pre-declared architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info); arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       /* Check that the feature set of the ARCHES matches the feature set
@@ -4035,8 +3946,7 @@ static CORE_ADDR
 riscv_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  const riscv_gdbarch_tdep *tdep
-    = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+  const riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
   struct riscv_insn insn;
   CORE_ADDR next_pc;
 
@@ -4167,11 +4077,11 @@ riscv_software_single_step (struct regcache *regcache)
   pc = regcache_read_pc (regcache);
 
   if (riscv_next_pc_atomic_sequence (regcache, pc, &next_pc))
-    return {next_pc};
+    return { next_pc };
 
   next_pc = riscv_next_pc (regcache, pc);
 
-  return {next_pc};
+  return { next_pc };
 }
 
 /* Create RISC-V specific reggroups.  */
@@ -4185,9 +4095,8 @@ riscv_init_reggroups ()
 /* See riscv-tdep.h.  */
 
 void
-riscv_supply_regset (const struct regset *regset,
-		     struct regcache *regcache, int regnum,
-		     const void *regs, size_t len)
+riscv_supply_regset (const struct regset *regset, struct regcache *regcache,
+		     int regnum, const void *regs, size_t len)
 {
   regcache->supply_regset (regset, regnum, regs, len);
 
@@ -4197,8 +4106,7 @@ riscv_supply_regset (const struct regset *regset,
   struct gdbarch *gdbarch = regcache->arch ();
   riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
 
-  if (regnum == -1
-      || regnum == tdep->fflags_regnum
+  if (regnum == -1 || regnum == tdep->fflags_regnum
       || regnum == tdep->frm_regnum)
     {
       int fcsr_regnum = RISCV_CSR_FCSR_REGNUM;
@@ -4239,7 +4147,7 @@ riscv_supply_regset (const struct regset *regset,
 	  if ((regnum == -1 || regnum == tdep->frm_regnum)
 	      && tdep->frm_regnum < gdbarch_num_regs (gdbarch))
 	    regcache->raw_supply_integer (tdep->frm_regnum,
-					  (gdb_byte *)&frm_val,
+					  (gdb_byte *) &frm_val,
 					  sizeof (fflags_val),
 					  /* is_signed */ false);
 	}
@@ -4247,6 +4155,7 @@ riscv_supply_regset (const struct regset *regset,
 }
 
 void _initialize_riscv_tdep ();
+
 void
 _initialize_riscv_tdep ()
 {
@@ -4257,71 +4166,71 @@ _initialize_riscv_tdep ()
   /* Add root prefix command for all "set debug riscv" and "show debug
      riscv" commands.  */
   add_setshow_prefix_cmd ("riscv", no_class,
-			  _("RISC-V specific debug commands."),
-			  _("RISC-V specific debug commands."),
+			  _ ("RISC-V specific debug commands."),
+			  _ ("RISC-V specific debug commands."),
 			  &setdebugriscvcmdlist, &showdebugriscvcmdlist,
 			  &setdebuglist, &showdebuglist);
 
   add_setshow_zuinteger_cmd ("breakpoints", class_maintenance,
-			     &riscv_debug_breakpoints,  _("\
-Set riscv breakpoint debugging."), _("\
-Show riscv breakpoint debugging."), _("\
+			     &riscv_debug_breakpoints, _ ("\
+Set riscv breakpoint debugging."),
+			     _ ("\
+Show riscv breakpoint debugging."),
+			     _ ("\
 When non-zero, print debugging information for the riscv specific parts\n\
 of the breakpoint mechanism."),
-			     NULL,
-			     show_riscv_debug_variable,
+			     NULL, show_riscv_debug_variable,
 			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
   add_setshow_zuinteger_cmd ("infcall", class_maintenance,
-			     &riscv_debug_infcall,  _("\
-Set riscv inferior call debugging."), _("\
-Show riscv inferior call debugging."), _("\
+			     &riscv_debug_infcall, _ ("\
+Set riscv inferior call debugging."),
+			     _ ("\
+Show riscv inferior call debugging."),
+			     _ ("\
 When non-zero, print debugging information for the riscv specific parts\n\
 of the inferior call mechanism."),
-			     NULL,
-			     show_riscv_debug_variable,
+			     NULL, show_riscv_debug_variable,
 			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
   add_setshow_zuinteger_cmd ("unwinder", class_maintenance,
-			     &riscv_debug_unwinder,  _("\
-Set riscv stack unwinding debugging."), _("\
-Show riscv stack unwinding debugging."), _("\
+			     &riscv_debug_unwinder, _ ("\
+Set riscv stack unwinding debugging."),
+			     _ ("\
+Show riscv stack unwinding debugging."),
+			     _ ("\
 When non-zero, print debugging information for the riscv specific parts\n\
 of the stack unwinding mechanism."),
-			     NULL,
-			     show_riscv_debug_variable,
+			     NULL, show_riscv_debug_variable,
 			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
   add_setshow_zuinteger_cmd ("gdbarch", class_maintenance,
-			     &riscv_debug_gdbarch,  _("\
-Set riscv gdbarch initialisation debugging."), _("\
-Show riscv gdbarch initialisation debugging."), _("\
+			     &riscv_debug_gdbarch, _ ("\
+Set riscv gdbarch initialisation debugging."),
+			     _ ("\
+Show riscv gdbarch initialisation debugging."),
+			     _ ("\
 When non-zero, print debugging information for the riscv gdbarch\n\
 initialisation process."),
-			     NULL,
-			     show_riscv_debug_variable,
+			     NULL, show_riscv_debug_variable,
 			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
   /* Add root prefix command for all "set riscv" and "show riscv" commands.  */
-  add_setshow_prefix_cmd ("riscv", no_class,
-			  _("RISC-V specific commands."),
-			  _("RISC-V specific commands."),
-			  &setriscvcmdlist, &showriscvcmdlist,
-			  &setlist, &showlist);
-
+  add_setshow_prefix_cmd ("riscv", no_class, _ ("RISC-V specific commands."),
+			  _ ("RISC-V specific commands."), &setriscvcmdlist,
+			  &showriscvcmdlist, &setlist, &showlist);
 
   use_compressed_breakpoints = AUTO_BOOLEAN_AUTO;
   add_setshow_auto_boolean_cmd ("use-compressed-breakpoints", no_class,
-				&use_compressed_breakpoints,
-				_("\
-Set debugger's use of compressed breakpoints."), _("	\
-Show debugger's use of compressed breakpoints."), _("\
+				&use_compressed_breakpoints, _ ("\
+Set debugger's use of compressed breakpoints."),
+				_ ("	\
+Show debugger's use of compressed breakpoints."),
+				_ ("\
 Debugging compressed code requires compressed breakpoints to be used. If\n\
 left to 'auto' then gdb will use them if the existing instruction is a\n\
 compressed instruction. If that doesn't give the correct behavior, then\n\
 this option can be used."),
-				NULL,
-				show_use_compressed_breakpoints,
-				&setriscvcmdlist,
-				&showriscvcmdlist);
+				NULL, show_use_compressed_breakpoints,
+				&setriscvcmdlist, &showriscvcmdlist);
 }

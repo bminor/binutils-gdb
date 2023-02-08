@@ -26,11 +26,10 @@
    location pointed to by ERRPTR if ERRPTR is non-null.  */
 
 static int
-partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
-		     int len, int *errptr)
+partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int *errptr)
 {
-  int nread;			/* Number of bytes actually read.  */
-  int errcode;			/* Error from last read.  */
+  int nread;   /* Number of bytes actually read.  */
+  int errcode; /* Error from last read.  */
 
   /* First try a complete read.  */
   errcode = target_read_memory (memaddr, myaddr, len);
@@ -64,12 +63,11 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 int
 target_read_string (CORE_ADDR addr, int len, int width,
 		    unsigned int fetchlimit,
-		    gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-		    int *bytes_read)
+		    gdb::unique_xmalloc_ptr<gdb_byte> *buffer, int *bytes_read)
 {
-  int errcode;			/* Errno returned from bad reads.  */
-  unsigned int nfetch;		/* Chars to fetch / chars fetched.  */
-  gdb_byte *bufptr;		/* Pointer to next available byte in
+  int errcode;	       /* Errno returned from bad reads.  */
+  unsigned int nfetch; /* Chars to fetch / chars fetched.  */
+  gdb_byte *bufptr;    /* Pointer to next available byte in
 				   buffer.  */
 
   /* Loop until we either have all the characters, or we encounter
@@ -87,16 +85,16 @@ target_read_string (CORE_ADDR addr, int len, int width,
       bufptr = buffer->get ();
 
       nfetch = partial_memory_read (addr, bufptr, fetchlen * width, &errcode)
-	/ width;
+	       / width;
       addr += nfetch * width;
       bufptr += nfetch * width;
     }
   else if (len == -1)
     {
       unsigned long bufsize = 0;
-      unsigned int chunksize;	/* Size of each fetch, in chars.  */
-      int found_nul;		/* Non-zero if we found the nul char.  */
-      gdb_byte *limit;		/* First location past end of fetch buffer.  */
+      unsigned int chunksize; /* Size of each fetch, in chars.  */
+      int found_nul;	      /* Non-zero if we found the nul char.  */
+      gdb_byte *limit;	      /* First location past end of fetch buffer.  */
 
       found_nul = 0;
       /* We are looking for a NUL terminator to end the fetching, so we
@@ -122,7 +120,7 @@ target_read_string (CORE_ADDR addr, int len, int width,
 
 	  /* Read as much as we can.  */
 	  nfetch = partial_memory_read (addr, bufptr, nfetch * width, &errcode)
-		    / width;
+		   / width;
 
 	  /* Scan this chunk for the null character that terminates the string
 	     to print.  If found, we don't need to fetch any more.  Note
@@ -151,12 +149,12 @@ target_read_string (CORE_ADDR addr, int len, int width,
 		}
 	    }
 	}
-      while (errcode == 0	/* no error */
-	     && bufptr - buffer->get () < fetchlimit * width	/* no overrun */
-	     && !found_nul);	/* haven't found NUL yet */
+      while (errcode == 0				     /* no error */
+	     && bufptr - buffer->get () < fetchlimit * width /* no overrun */
+	     && !found_nul); /* haven't found NUL yet */
     }
   else
-    {				/* Length of string is really 0!  */
+    { /* Length of string is really 0!  */
       /* We always allocate *buffer.  */
       buffer->reset ((gdb_byte *) xmalloc (1));
       bufptr = buffer->get ();

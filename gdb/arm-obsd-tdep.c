@@ -31,8 +31,7 @@
 static void
 armobsd_sigframe_init (const struct tramp_frame *self,
 		       frame_info_ptr this_frame,
-		       struct trad_frame_cache *cache,
-		       CORE_ADDR func)
+		       struct trad_frame_cache *cache, CORE_ADDR func)
 {
   CORE_ADDR sp, sigcontext_addr, addr;
   int regnum;
@@ -53,28 +52,22 @@ armobsd_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (cache, frame_id_build (sp, func));
 }
 
-static const struct tramp_frame armobsd_sigframe =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { 0xe28d0010, ULONGEST_MAX },		/* add     r0, sp, #16 */
-    { 0xef000067, ULONGEST_MAX },		/* swi     SYS_sigreturn */
-    { 0xef000001, ULONGEST_MAX },		/* swi     SYS_exit */
-    { 0xeafffffc, ULONGEST_MAX },		/* b       . - 8 */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  armobsd_sigframe_init
-};
-
+static const struct tramp_frame armobsd_sigframe
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0xe28d0010, ULONGEST_MAX }, /* add     r0, sp, #16 */
+	{ 0xef000067, ULONGEST_MAX }, /* swi     SYS_sigreturn */
+	{ 0xef000001, ULONGEST_MAX }, /* swi     SYS_exit */
+	{ 0xeafffffc, ULONGEST_MAX }, /* b       . - 8 */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      armobsd_sigframe_init };
 
 /* Override default thumb breakpoints.  */
-static const gdb_byte arm_obsd_thumb_le_breakpoint[] = {0xfe, 0xdf};
-static const gdb_byte arm_obsd_thumb_be_breakpoint[] = {0xdf, 0xfe};
+static const gdb_byte arm_obsd_thumb_le_breakpoint[] = { 0xfe, 0xdf };
+static const gdb_byte arm_obsd_thumb_be_breakpoint[] = { 0xdf, 0xfe };
 
 static void
-armobsd_init_abi (struct gdbarch_info info,
-		  struct gdbarch *gdbarch)
+armobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
@@ -84,15 +77,15 @@ armobsd_init_abi (struct gdbarch_info info,
   tramp_frame_prepend_unwinder (gdbarch, &armobsd_sigframe);
 
   /* OpenBSD/arm uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
   set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 
   tdep->jb_pc = 24;
   tdep->jb_elt_size = 4;
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, armbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, armbsd_iterate_over_regset_sections);
 
   /* OpenBSD/arm uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;
@@ -116,6 +109,7 @@ armobsd_init_abi (struct gdbarch_info info,
 }
 
 void _initialize_armobsd_tdep ();
+
 void
 _initialize_armobsd_tdep ()
 {

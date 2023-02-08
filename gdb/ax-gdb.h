@@ -19,7 +19,7 @@
 #ifndef AX_GDB_H
 #define AX_GDB_H
 
-#include "ax.h"  /* For agent_expr_up.  */
+#include "ax.h" /* For agent_expr_up.  */
 
 struct expression;
 
@@ -48,52 +48,49 @@ struct expression;
    this is all static analysis of the expression, i.e. analysis which
    doesn't depend on the contents of memory and registers.  */
 
-
 /* Different kinds of agent expression static values.  */
 enum axs_lvalue_kind
-  {
-    /* We generated code to compute the subexpression's value.
+{
+  /* We generated code to compute the subexpression's value.
        Constants and arithmetic operators yield this.  */
-    axs_rvalue,
+  axs_rvalue,
 
-    /* We generated code to yield the subexpression's value's address on
+  /* We generated code to yield the subexpression's value's address on
        the top of the stack.  If the caller needs an rvalue, it should
        call require_rvalue to produce the rvalue from this address.  */
-    axs_lvalue_memory,
+  axs_lvalue_memory,
 
-    /* We didn't generate any code, and the stack is undisturbed,
+  /* We didn't generate any code, and the stack is undisturbed,
        because the subexpression's value lives in a register; u.reg is
        the register number.  If the caller needs an rvalue, it should
        call require_rvalue to produce the rvalue from this register
        number.  */
-    axs_lvalue_register
-  };
+  axs_lvalue_register
+};
 
 /* Structure describing what we got from a subexpression.  Think of
    this as parallel to value.h's enum lval_type, except that we're
    describing a value which will exist when the expression is
    evaluated in the future, not a value we have in our hand.  */
 struct axs_value
-  {
-    enum axs_lvalue_kind kind;	/* see above */
+{
+  enum axs_lvalue_kind kind; /* see above */
 
-    /* The type of the subexpression.  Even if lvalue == axs_lvalue_memory,
+  /* The type of the subexpression.  Even if lvalue == axs_lvalue_memory,
        this is the type of the value itself; the value on the stack is a
        "pointer to" an object of this type.  */
-    struct type *type;
+  struct type *type;
 
-    /* If nonzero, this is a variable which does not actually exist in
+  /* If nonzero, this is a variable which does not actually exist in
        the program.  */
-    char optimized_out;
+  char optimized_out;
 
-    union
-      {
-	/* if kind == axs_lvalue_register, this is the register number */
-	int reg;
-      }
-    u;
-  };
-
+  union
+  {
+    /* if kind == axs_lvalue_register, this is the register number */
+    int reg;
+  } u;
+};
 
 /* Translating GDB expressions into agent expressions.  */
 
@@ -102,14 +99,12 @@ struct axs_value
    record the value of all memory touched by the expression, and leave
    no values on the stack.  The caller can then use the ax_reqs
    function to discover which registers the expression uses.  */
-extern agent_expr_up gen_trace_for_expr (CORE_ADDR, struct expression *,
-					 int);
+extern agent_expr_up gen_trace_for_expr (CORE_ADDR, struct expression *, int);
 
 extern agent_expr_up gen_trace_for_var (CORE_ADDR, struct gdbarch *,
 					struct symbol *, int);
 
-extern agent_expr_up gen_trace_for_return_address (CORE_ADDR,
-						   struct gdbarch *,
+extern agent_expr_up gen_trace_for_return_address (CORE_ADDR, struct gdbarch *,
 						   int);
 
 extern agent_expr_up gen_eval_for_expr (CORE_ADDR, struct expression *);
@@ -119,8 +114,8 @@ extern void gen_expr (struct expression *exp, union exp_element **pc,
 
 extern void require_rvalue (struct agent_expr *ax, struct axs_value *value);
 
-extern agent_expr_up gen_printf (CORE_ADDR, struct gdbarch *,
-				 CORE_ADDR, LONGEST, const char *, int,
-				 int, struct expression **);
+extern agent_expr_up gen_printf (CORE_ADDR, struct gdbarch *, CORE_ADDR,
+				 LONGEST, const char *, int, int,
+				 struct expression **);
 
 #endif /* AX_GDB_H */

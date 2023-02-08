@@ -47,15 +47,15 @@ enum target_waitkind
      value.related_pid.  I.e., if the child forks, value.related_pid
      is the parent's ID.  */
   TARGET_WAITKIND_FORKED,
- 
+
   /* The program has vforked.  A "related" process's PTID is in
      value.related_pid.  */
   TARGET_WAITKIND_VFORKED,
- 
+
   /* The program has exec'ed a new executable file.  The new file's
      pathname is pointed to by value.execd_pathname.  */
   TARGET_WAITKIND_EXECD,
-  
+
   /* The program had previously vforked, and now the child is done
      with the shared memory region, because it exec'ed or exited.
      Note that the event is reported to the vfork parent.  This is
@@ -87,11 +87,11 @@ enum target_waitkind
      function.  This way the event loop is responsive to other events,
      like for instance the user typing.  */
   TARGET_WAITKIND_IGNORE,
- 
+
   /* The target has run out of history information,
      and cannot run backward any further.  */
   TARGET_WAITKIND_NO_HISTORY,
- 
+
   /* There are no resumed children left in the program.  */
   TARGET_WAITKIND_NO_RESUMED,
 
@@ -107,12 +107,12 @@ enum target_waitkind
 static inline const char *
 target_waitkind_str (target_waitkind kind)
 {
-/* Make sure the compiler warns if a new TARGET_WAITKIND enumerator is added
+  /* Make sure the compiler warns if a new TARGET_WAITKIND enumerator is added
    but not handled here.  */
-DIAGNOSTIC_PUSH
-DIAGNOSTIC_ERROR_SWITCH
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_ERROR_SWITCH
   switch (kind)
-  {
+    {
     case TARGET_WAITKIND_EXITED:
       return "EXITED";
     case TARGET_WAITKIND_STOPPED:
@@ -145,8 +145,8 @@ DIAGNOSTIC_ERROR_SWITCH
       return "THREAD_CREATED";
     case TARGET_WAITKIND_THREAD_EXITED:
       return "THREAD_EXITED";
-  };
-DIAGNOSTIC_POP
+    };
+  DIAGNOSTIC_POP
 
   gdb_assert_not_reached ("invalid target_waitkind value: %d\n", (int) kind);
 }
@@ -212,10 +212,7 @@ struct target_waitstatus
 
   /* Destructor.  */
 
-  ~target_waitstatus ()
-  {
-    this->reset ();
-  }
+  ~target_waitstatus () { this->reset (); }
 
   /* Setters: set the wait status kind plus any associated data.  */
 
@@ -342,10 +339,7 @@ struct target_waitstatus
 
   /* Get the kind of this wait status.  */
 
-  target_waitkind kind () const
-  {
-    return m_kind;
-  }
+  target_waitkind kind () const { return m_kind; }
 
   /* Getters for the associated data.
 
@@ -394,6 +388,7 @@ struct target_waitstatus
   std::string to_string () const;
 
 private:
+
   /* Reset the wait status to its original state.  */
   void reset ()
   {
@@ -407,18 +402,18 @@ private:
 
   /* Additional information about the event.  */
   union
-    {
-      /* Exit status */
-      int exit_status;
-      /* Signal number */
-      enum gdb_signal sig;
-      /* Forked child pid */
-      ptid_t child_ptid;
-      /* execd pathname */
-      char *execd_pathname;
-      /* Syscall number */
-      int syscall_number;
-    } m_value {};
+  {
+    /* Exit status */
+    int exit_status;
+    /* Signal number */
+    enum gdb_signal sig;
+    /* Forked child pid */
+    ptid_t child_ptid;
+    /* execd pathname */
+    char *execd_pathname;
+    /* Syscall number */
+    int syscall_number;
+  } m_value {};
 };
 
 /* Extended reasons that can explain why a target/thread stopped for a

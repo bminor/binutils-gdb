@@ -32,42 +32,23 @@ struct tui_locator_window : public tui_win_info
 {
   tui_locator_window () = default;
 
-  const char *name () const override
-  {
-    return STATUS_NAME;
-  }
+  const char *name () const override { return STATUS_NAME; }
 
-  int max_height () const override
-  {
-    return 1;
-  }
+  int max_height () const override { return 1; }
 
-  int min_height () const override
-  {
-    return 1;
-  }
+  int min_height () const override { return 1; }
 
-  bool can_box () const override
-  {
-    return false;
-  }
+  bool can_box () const override { return false; }
 
-  bool can_focus () const override
-  {
-    return false;
-  }
+  bool can_focus () const override { return false; }
 
   void rerender () override;
 
 protected:
 
-  void do_scroll_vertical (int n) override
-  {
-  }
+  void do_scroll_vertical (int n) override {}
 
-  void do_scroll_horizontal (int n) override
-  {
-  }
+  void do_scroll_horizontal (int n) override {}
 
 private:
 

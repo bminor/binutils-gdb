@@ -29,31 +29,31 @@ struct expr_builder;
 /* For parsing of complicated types.
    An array should be preceded in the list by the size of the array.  */
 enum type_pieces
-  {
-    tp_end = -1, 
-    tp_pointer, 
-    tp_reference, 
-    tp_rvalue_reference,
-    tp_array, 
-    tp_function,
-    tp_function_with_arguments,
-    tp_const, 
-    tp_volatile, 
-    tp_space_identifier,
-    tp_atomic,
-    tp_restrict,
-    tp_type_stack,
-    tp_kind
-  };
+{
+  tp_end = -1,
+  tp_pointer,
+  tp_reference,
+  tp_rvalue_reference,
+  tp_array,
+  tp_function,
+  tp_function_with_arguments,
+  tp_const,
+  tp_volatile,
+  tp_space_identifier,
+  tp_atomic,
+  tp_restrict,
+  tp_type_stack,
+  tp_kind
+};
 
 /* The stack can contain either an enum type_pieces or an int.  */
 union type_stack_elt
-  {
-    enum type_pieces piece;
-    int int_val;
-    struct type_stack *stack_val;
-    std::vector<struct type *> *typelist_val;
-  };
+{
+  enum type_pieces piece;
+  int int_val;
+  struct type_stack *stack_val;
+  std::vector<struct type *> *typelist_val;
+};
 
 /* The type stack is an instance of this structure.  */
 
@@ -197,7 +197,6 @@ private:
     gdb_assert (slot <= m_elements.size ());
     m_elements.insert (m_elements.begin () + slot, element);
   }
-
 
   /* Elements on the stack.  */
   std::vector<union type_stack_elt> m_elements;

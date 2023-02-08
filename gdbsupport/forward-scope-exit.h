@@ -81,35 +81,28 @@ namespace detail
 template<typename Function, Function *function, typename Signature>
 struct forward_scope_exit;
 
-template<typename Function, Function *function,
-	 typename Res, typename... Args>
+template<typename Function, Function *function, typename Res, typename... Args>
 class forward_scope_exit<Function, function, Res (Args...)>
-  : public scope_exit_base<forward_scope_exit<Function,
-					      function,
-					      Res (Args...)>>
+  : public scope_exit_base<
+      forward_scope_exit<Function, function, Res (Args...)>>
 {
   /* For access to on_exit().  */
-  friend scope_exit_base<forward_scope_exit<Function,
-					    function,
-					    Res (Args...)>>;
+  friend scope_exit_base<
+    forward_scope_exit<Function, function, Res (Args...)>>;
 
 public:
-  explicit forward_scope_exit (Args ...args)
+  explicit forward_scope_exit (Args... args)
     : m_bind_function (function, args...)
   {
     /* Nothing.  */
   }
 
 private:
-  void on_exit ()
-  {
-    m_bind_function ();
-  }
+  void on_exit () { m_bind_function (); }
 
   /* The function and the arguments passed to the ctor, all packed in
      a std::bind.  */
-  decltype (std::bind (function, std::declval<Args> ()...))
-    m_bind_function;
+  decltype (std::bind (function, std::declval<Args> ()...)) m_bind_function;
 };
 
 } /* namespace detail */

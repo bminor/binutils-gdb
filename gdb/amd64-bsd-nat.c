@@ -34,7 +34,6 @@
 #include "x86-bsd-nat.h"
 #include "inf-ptrace.h"
 #include "amd64-bsd-nat.h"
-
 
 static PTRACE_TYPE_RET
 gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr,
@@ -65,7 +64,7 @@ amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (gdb_ptrace (PT_GETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_ ("Couldn't get registers"));
 
       amd64_supply_native_gregset (regcache, &regs, -1);
       if (regnum != -1)
@@ -77,7 +76,7 @@ amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       struct fpreg fpregs;
 
       if (gdb_ptrace (PT_GETFPREGS, ptid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
       amd64_supply_fxsave (regcache, -1, &fpregs);
     }
@@ -97,12 +96,12 @@ amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (gdb_ptrace (PT_GETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_ ("Couldn't get registers"));
 
       amd64_collect_native_gregset (regcache, &regs, regnum);
 
       if (gdb_ptrace (PT_SETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't write registers"));
+	perror_with_name (_ ("Couldn't write registers"));
 
       if (regnum != -1)
 	return;
@@ -113,11 +112,11 @@ amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       struct fpreg fpregs;
 
       if (gdb_ptrace (PT_GETFPREGS, ptid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
       amd64_collect_fxsave (regcache, regnum, &fpregs);
 
       if (gdb_ptrace (PT_SETFPREGS, ptid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't write floating point status"));
+	perror_with_name (_ ("Couldn't write floating point status"));
     }
 }

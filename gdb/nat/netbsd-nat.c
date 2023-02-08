@@ -38,7 +38,7 @@ const char *
 pid_to_exec_file (pid_t pid)
 {
   static char buf[PATH_MAX];
-  int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
+  int mib[4] = { CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME };
   size_t buflen = sizeof (buf);
   if (::sysctl (mib, ARRAY_SIZE (mib), buf, &buflen, NULL, 0) != 0)
     return NULL;
@@ -53,11 +53,11 @@ pid_to_exec_file (pid_t pid)
    and the number of threads does not change between two sysctl () calls.  */
 
 static bool
-netbsd_thread_lister (const pid_t pid,
-		      gdb::function_view<bool (const struct kinfo_lwp *)>
-		      callback)
+netbsd_thread_lister (
+  const pid_t pid,
+  gdb::function_view<bool (const struct kinfo_lwp *)> callback)
 {
-  int mib[5] = {CTL_KERN, KERN_LWP, pid, sizeof (struct kinfo_lwp), 0};
+  int mib[5] = { CTL_KERN, KERN_LWP, pid, sizeof (struct kinfo_lwp), 0 };
   size_t size;
 
   if (sysctl (mib, ARRAY_SIZE (mib), NULL, &size, NULL, 0) == -1 || size == 0)
@@ -65,8 +65,8 @@ netbsd_thread_lister (const pid_t pid,
 
   mib[4] = size / sizeof (size_t);
 
-  gdb::unique_xmalloc_ptr<struct kinfo_lwp[]> kl
-    ((struct kinfo_lwp *) xcalloc (size, 1));
+  gdb::unique_xmalloc_ptr<struct kinfo_lwp[]> kl ((struct kinfo_lwp *)
+						    xcalloc (size, 1));
 
   if (sysctl (mib, ARRAY_SIZE (mib), kl.get (), &size, NULL, 0) == -1
       || size == 0)
@@ -77,21 +77,19 @@ netbsd_thread_lister (const pid_t pid,
       struct kinfo_lwp *l = &kl[i];
 
       /* Return true if the specified thread is alive.  */
-      auto lwp_alive
-	= [] (struct kinfo_lwp *lwp)
+      auto lwp_alive = [] (struct kinfo_lwp *lwp) {
+	switch (lwp->l_stat)
 	  {
-	    switch (lwp->l_stat)
-	      {
-	      case LSSLEEP:
-	      case LSRUN:
-	      case LSONPROC:
-	      case LSSTOP:
-	      case LSSUSPENDED:
-		return true;
-	      default:
-		return false;
-	      }
-	  };
+	  case LSSLEEP:
+	  case LSRUN:
+	  case LSONPROC:
+	  case LSSTOP:
+	  case LSSUSPENDED:
+	    return true;
+	  default:
+	    return false;
+	  }
+      };
 
       /* Ignore embryonic or demised threads.  */
       if (!lwp_alive (l))
@@ -112,11 +110,7 @@ thread_alive (ptid_t ptid)
   pid_t pid = ptid.pid ();
   lwpid_t lwp = ptid.lwp ();
 
-  auto fn
-    = [=] (const struct kinfo_lwp *kl)
-      {
-	return kl->l_lid == lwp;
-      };
+  auto fn = [=] (const struct kinfo_lwp *kl) { return kl->l_lid == lwp; };
 
   return netbsd_thread_lister (pid, fn);
 }
@@ -131,16 +125,14 @@ thread_name (ptid_t ptid)
 
   static char buf[KI_LNAMELEN] = {};
 
-  auto fn
-    = [=] (const struct kinfo_lwp *kl)
+  auto fn = [=] (const struct kinfo_lwp *kl) {
+    if (kl->l_lid == lwp)
       {
-	if (kl->l_lid == lwp)
-	  {
-	    xsnprintf (buf, sizeof buf, "%s", kl->l_name);
-	    return true;
-	  }
-	return false;
-      };
+	xsnprintf (buf, sizeof buf, "%s", kl->l_name);
+	return true;
+      }
+    return false;
+  };
 
   if (netbsd_thread_lister (pid, fn))
     return buf;
@@ -153,13 +145,11 @@ thread_name (ptid_t ptid)
 void
 for_each_thread (pid_t pid, gdb::function_view<void (ptid_t)> callback)
 {
-  auto fn
-    = [=, &callback] (const struct kinfo_lwp *kl)
-      {
-	ptid_t ptid = ptid_t (pid, kl->l_lid, 0);
-	callback (ptid);
-	return false;
-      };
+  auto fn = [=, &callback] (const struct kinfo_lwp *kl) {
+    ptid_t ptid = ptid_t (pid, kl->l_lid, 0);
+    callback (ptid);
+    return false;
+  };
 
   netbsd_thread_lister (pid, fn);
 }
@@ -227,8 +217,8 @@ write_memory (pid_t pid, unsigned const char *writebuf, CORE_ADDR offset,
     {
       do
 	{
-	  io.piod_addr = (void *)(writebuf + bytes_written);
-	  io.piod_offs = (void *)(offset + bytes_written);
+	  io.piod_addr = (void *) (writebuf + bytes_written);
+	  io.piod_offs = (void *) (offset + bytes_written);
 
 	  errno = 0;
 	  int rv = ptrace (PT_IO, pid, &io, 0);
@@ -255,8 +245,8 @@ write_memory (pid_t pid, unsigned const char *writebuf, CORE_ADDR offset,
 /* See netbsd-nat.h.  */
 
 int
-read_memory (pid_t pid, unsigned char *readbuf, CORE_ADDR offset,
-	      size_t len, size_t *xfered_len)
+read_memory (pid_t pid, unsigned char *readbuf, CORE_ADDR offset, size_t len,
+	     size_t *xfered_len)
 {
   struct ptrace_io_desc io;
   io.piod_op = PIOD_READ_D;
@@ -269,7 +259,7 @@ read_memory (pid_t pid, unsigned char *readbuf, CORE_ADDR offset,
     {
       do
 	{
-	  io.piod_offs = (void *)(offset + bytes_read);
+	  io.piod_offs = (void *) (offset + bytes_read);
 	  io.piod_addr = readbuf + bytes_read;
 
 	  int rv = ptrace (PT_IO, pid, &io, 0);
@@ -290,4 +280,4 @@ read_memory (pid_t pid, unsigned char *readbuf, CORE_ADDR offset,
   return 0;
 }
 
-}
+} // namespace netbsd_nat

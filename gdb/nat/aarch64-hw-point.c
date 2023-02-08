@@ -24,7 +24,7 @@
 /* For kernel_supports_any_contiguous_range.  */
 #include "aarch64-linux-hw-point.h"
 #else
-#define	kernel_supports_any_contiguous_range	true
+#define kernel_supports_any_contiguous_range true
 #endif
 
 /* Number of hardware breakpoints/watchpoints the target supports.
@@ -67,7 +67,7 @@ aarch64_watchpoint_length (unsigned int ctrl)
     mask >>= 1;
 
   if (mask != 0)
-    error (_("Unexpected hardware watchpoint length register value 0x%x"),
+    error (_ ("Unexpected hardware watchpoint length register value 0x%x"),
 	   DR_CONTROL_MASK (ctrl));
 
   return retval;
@@ -78,7 +78,8 @@ aarch64_watchpoint_length (unsigned int ctrl)
    breakpoint/watchpoint control register.  */
 
 static unsigned int
-aarch64_point_encode_ctrl_reg (enum target_hw_bp_type type, int offset, int len)
+aarch64_point_encode_ctrl_reg (enum target_hw_bp_type type, int offset,
+			       int len)
 {
   unsigned int ctrl, ttype;
 
@@ -101,7 +102,7 @@ aarch64_point_encode_ctrl_reg (enum target_hw_bp_type type, int offset, int len)
       ttype = 0;
       break;
     default:
-      perror_with_name (_("Unrecognized breakpoint/watchpoint type"));
+      perror_with_name (_ ("Unrecognized breakpoint/watchpoint type"));
     }
 
   ctrl = ttype << 3;
@@ -137,8 +138,7 @@ aarch64_point_is_aligned (ptid_t ptid, int is_watchpoint, CORE_ADDR addr,
     alignment = AARCH64_HWP_ALIGNMENT;
   else
     {
-      struct regcache *regcache
-	= get_thread_regcache_for_ptid (ptid);
+      struct regcache *regcache = get_thread_regcache_for_ptid (ptid);
 
       /* Set alignment to 2 only if the current process is 32-bit,
 	 since thumb instruction can be 2-byte aligned.  Otherwise, set
@@ -152,10 +152,9 @@ aarch64_point_is_aligned (ptid_t ptid, int is_watchpoint, CORE_ADDR addr,
   if (addr & (alignment - 1))
     return 0;
 
-  if ((!kernel_supports_any_contiguous_range
-       && len != 8 && len != 4 && len != 2 && len != 1)
-      || (kernel_supports_any_contiguous_range
-	  && (len < 1 || len > 8)))
+  if ((!kernel_supports_any_contiguous_range && len != 8 && len != 4
+       && len != 2 && len != 1)
+      || (kernel_supports_any_contiguous_range && (len < 1 || len > 8)))
     return 0;
 
   return 1;
@@ -246,12 +245,12 @@ aarch64_align_watchpoint (CORE_ADDR addr, int len, CORE_ADDR *aligned_addr_p,
     {
       /* Find the smallest valid length that is large enough to
 	 accommodate this watchpoint.  */
-      static const unsigned char
-	aligned_len_array[AARCH64_HWP_MAX_LEN_PER_REG] =
-	{ 1, 2, 4, 4, 8, 8, 8, 8 };
+      static const unsigned char aligned_len_array[AARCH64_HWP_MAX_LEN_PER_REG]
+	= { 1, 2, 4, 4, 8, 8, 8, 8 };
 
       aligned_len = (kernel_supports_any_contiguous_range
-		     ? len : aligned_len_array[offset + len - 1]);
+		       ? len
+		       : aligned_len_array[offset + len - 1]);
       addr += len;
       len = 0;
     }
@@ -276,9 +275,8 @@ aarch64_align_watchpoint (CORE_ADDR addr, int len, CORE_ADDR *aligned_addr_p,
 static int
 aarch64_dr_state_insert_one_point (ptid_t ptid,
 				   struct aarch64_debug_reg_state *state,
-				   enum target_hw_bp_type type,
-				   CORE_ADDR addr, int offset, int len,
-				   CORE_ADDR addr_orig)
+				   enum target_hw_bp_type type, CORE_ADDR addr,
+				   int offset, int len, CORE_ADDR addr_orig)
 {
   int i, idx, num_regs, is_watchpoint;
   unsigned int ctrl, *dr_ctrl_p, *dr_ref_count;
@@ -357,9 +355,8 @@ aarch64_dr_state_insert_one_point (ptid_t ptid,
 static int
 aarch64_dr_state_remove_one_point (ptid_t ptid,
 				   struct aarch64_debug_reg_state *state,
-				   enum target_hw_bp_type type,
-				   CORE_ADDR addr, int offset, int len,
-				   CORE_ADDR addr_orig)
+				   enum target_hw_bp_type type, CORE_ADDR addr,
+				   int offset, int len, CORE_ADDR addr_orig)
 {
   int i, num_regs, is_watchpoint;
   unsigned int ctrl, *dr_ctrl_p, *dr_ref_count;
@@ -431,11 +428,11 @@ aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 	 However when GDB follows the parent process and detach breakpoints
 	 from child process, inferior_ptid is the child ptid, but the
 	 child inferior doesn't exist in GDB's view yet.  */
-      if (!aarch64_point_is_aligned (ptid, 0 /* is_watchpoint */ , addr, len))
+      if (!aarch64_point_is_aligned (ptid, 0 /* is_watchpoint */, addr, len))
 	return -1;
 
-      return aarch64_dr_state_insert_one_point (ptid, state, type, addr, 0, len,
-						-1);
+      return aarch64_dr_state_insert_one_point (ptid, state, type, addr, 0,
+						len, -1);
     }
   else
     return aarch64_dr_state_remove_one_point (ptid, state, type, addr, 0, len,
@@ -446,9 +443,8 @@ aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
    from that it is an aligned watchpoint to be handled.  */
 
 static int
-aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type,
-				   CORE_ADDR addr, int len, int is_insert,
-				   ptid_t ptid,
+aarch64_handle_aligned_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
+				   int len, int is_insert, ptid_t ptid,
 				   struct aarch64_debug_reg_state *state)
 {
   if (is_insert)
@@ -521,7 +517,7 @@ aarch64_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			   int len, int is_insert, ptid_t ptid,
 			   struct aarch64_debug_reg_state *state)
 {
-  if (aarch64_point_is_aligned (ptid, 1 /* is_watchpoint */ , addr, len))
+  if (aarch64_point_is_aligned (ptid, 1 /* is_watchpoint */, addr, len))
     return aarch64_handle_aligned_watchpoint (type, addr, len, is_insert, ptid,
 					      state);
   else
@@ -540,7 +536,8 @@ aarch64_any_set_debug_regs_state (aarch64_debug_reg_state *state,
     return false;
 
   const CORE_ADDR *addr = watchpoint ? state->dr_addr_wp : state->dr_addr_bp;
-  const unsigned int *ctrl = watchpoint ? state->dr_ctrl_wp : state->dr_ctrl_bp;
+  const unsigned int *ctrl
+    = watchpoint ? state->dr_ctrl_wp : state->dr_ctrl_bp;
 
   for (int i = 0; i < count; i++)
     if (addr[i] != 0 || ctrl[i] != 0)
@@ -553,32 +550,34 @@ aarch64_any_set_debug_regs_state (aarch64_debug_reg_state *state,
 
 void
 aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
-			      const char *func, CORE_ADDR addr,
-			      int len, enum target_hw_bp_type type)
+			      const char *func, CORE_ADDR addr, int len,
+			      enum target_hw_bp_type type)
 {
   int i;
 
   debug_printf ("%s", func);
   if (addr || len)
-    debug_printf (" (addr=0x%08lx, len=%d, type=%s)",
-		  (unsigned long) addr, len,
-		  type == hw_write ? "hw-write-watchpoint"
-		  : (type == hw_read ? "hw-read-watchpoint"
-		     : (type == hw_access ? "hw-access-watchpoint"
-			: (type == hw_execute ? "hw-breakpoint"
-			   : "??unknown??"))));
+    debug_printf (
+      " (addr=0x%08lx, len=%d, type=%s)", (unsigned long) addr, len,
+      type == hw_write
+	? "hw-write-watchpoint"
+	: (type == hw_read
+	     ? "hw-read-watchpoint"
+	     : (type == hw_access
+		  ? "hw-access-watchpoint"
+		  : (type == hw_execute ? "hw-breakpoint" : "??unknown??"))));
   debug_printf (":\n");
 
   debug_printf ("\tBREAKPOINTs:\n");
   for (i = 0; i < aarch64_num_bp_regs; i++)
-    debug_printf ("\tBP%d: addr=%s, ctrl=0x%08x, ref.count=%d\n",
-		  i, core_addr_to_string_nz (state->dr_addr_bp[i]),
+    debug_printf ("\tBP%d: addr=%s, ctrl=0x%08x, ref.count=%d\n", i,
+		  core_addr_to_string_nz (state->dr_addr_bp[i]),
 		  state->dr_ctrl_bp[i], state->dr_ref_count_bp[i]);
 
   debug_printf ("\tWATCHPOINTs:\n");
   for (i = 0; i < aarch64_num_wp_regs; i++)
-    debug_printf ("\tWP%d: addr=%s (orig=%s), ctrl=0x%08x, ref.count=%d\n",
-		  i, core_addr_to_string_nz (state->dr_addr_wp[i]),
+    debug_printf ("\tWP%d: addr=%s (orig=%s), ctrl=0x%08x, ref.count=%d\n", i,
+		  core_addr_to_string_nz (state->dr_addr_wp[i]),
 		  core_addr_to_string_nz (state->dr_addr_orig_wp[i]),
 		  state->dr_ctrl_wp[i], state->dr_ref_count_wp[i]);
 }

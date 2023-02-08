@@ -60,7 +60,7 @@ struct ofscm_deleter
 };
 
 static const registry<objfile>::key<objfile_smob, ofscm_deleter>
-     ofscm_objfile_data_key;
+  ofscm_objfile_data_key;
 
 /* Return the list of pretty-printers registered with O_SMOB.  */
 
@@ -69,7 +69,7 @@ ofscm_objfile_smob_pretty_printers (objfile_smob *o_smob)
 {
   return o_smob->pretty_printers;
 }
-
+
 /* Administrivia for objfile smobs.  */
 
 /* The smob "print" function for <gdb:objfile>.  */
@@ -81,9 +81,8 @@ ofscm_print_objfile_smob (SCM self, SCM port, scm_print_state *pstate)
 
   gdbscm_printf (port, "#<%s ", objfile_smob_name);
   gdbscm_printf (port, "%s",
-		 o_smob->objfile != NULL
-		 ? objfile_name (o_smob->objfile)
-		 : "{invalid}");
+		 o_smob->objfile != NULL ? objfile_name (o_smob->objfile)
+					 : "{invalid}");
   scm_puts (">", port);
 
   scm_remember_upto_here_1 (self);
@@ -99,8 +98,8 @@ ofscm_print_objfile_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 ofscm_make_objfile_smob (void)
 {
-  objfile_smob *o_smob = (objfile_smob *)
-    scm_gc_malloc (sizeof (objfile_smob), objfile_smob_name);
+  objfile_smob *o_smob = (objfile_smob *) scm_gc_malloc (sizeof (objfile_smob),
+							 objfile_smob_name);
   SCM o_scm;
 
   o_smob->objfile = NULL;
@@ -208,12 +207,12 @@ ofscm_get_valid_objfile_smob_arg_unsafe (SCM self, int arg_pos,
   if (!ofscm_is_valid (o_smob))
     {
       gdbscm_invalid_object_error (func_name, arg_pos, self,
-				   _("<gdb:objfile>"));
+				   _ ("<gdb:objfile>"));
     }
 
   return o_smob;
 }
-
+
 /* Objfile methods.  */
 
 /* (objfile-valid? <gdb:objfile>) -> boolean
@@ -275,14 +274,14 @@ gdbscm_set_objfile_pretty_printers_x (SCM self, SCM printers)
   objfile_smob *o_smob
     = ofscm_get_objfile_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (printers)), printers,
-		   SCM_ARG2, FUNC_NAME, _("list"));
+  SCM_ASSERT_TYPE (gdbscm_is_true (scm_list_p (printers)), printers, SCM_ARG2,
+		   FUNC_NAME, _ ("list"));
 
   o_smob->pretty_printers = printers;
 
   return SCM_UNSPECIFIED;
 }
-
+
 /* The "current" objfile.  This is set when gdb detects that a new
    objfile has been loaded.  It is only set for the duration of a call to
    gdbscm_source_objfile_script and gdbscm_execute_objfile_script; it is NULL
@@ -363,47 +362,40 @@ gdbscm_objfiles (void)
 
   return scm_reverse_x (result, SCM_EOL);
 }
-
+
 /* Initialize the Scheme objfile support.  */
 
-static const scheme_function objfile_functions[] =
-{
-  { "objfile?", 1, 0, 0, as_a_scm_t_subr (gdbscm_objfile_p),
-    "\
+static const scheme_function objfile_functions[]
+  = { { "objfile?", 1, 0, 0, as_a_scm_t_subr (gdbscm_objfile_p), "\
 Return #t if the object is a <gdb:objfile> object." },
 
-  { "objfile-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_objfile_valid_p),
-    "\
+      { "objfile-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_objfile_valid_p), "\
 Return #t if the objfile is valid (hasn't been deleted from gdb)." },
 
-  { "objfile-filename", 1, 0, 0, as_a_scm_t_subr (gdbscm_objfile_filename),
-    "\
+      { "objfile-filename", 1, 0, 0, as_a_scm_t_subr (gdbscm_objfile_filename),
+	"\
 Return the file name of the objfile." },
 
-  { "objfile-progspace", 1, 0, 0, as_a_scm_t_subr (gdbscm_objfile_progspace),
-    "\
+      { "objfile-progspace", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_objfile_progspace), "\
 Return the progspace that the objfile lives in." },
 
-  { "objfile-pretty-printers", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_objfile_pretty_printers),
-    "\
+      { "objfile-pretty-printers", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_objfile_pretty_printers), "\
 Return a list of pretty-printers of the objfile." },
 
-  { "set-objfile-pretty-printers!", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_objfile_pretty_printers_x),
-    "\
+      { "set-objfile-pretty-printers!", 2, 0, 0,
+	as_a_scm_t_subr (gdbscm_set_objfile_pretty_printers_x), "\
 Set the list of pretty-printers of the objfile." },
 
-  { "current-objfile", 0, 0, 0, as_a_scm_t_subr (gdbscm_get_current_objfile),
-    "\
+      { "current-objfile", 0, 0, 0,
+	as_a_scm_t_subr (gdbscm_get_current_objfile), "\
 Return the current objfile if there is one or #f if there isn't one." },
 
-  { "objfiles", 0, 0, 0, as_a_scm_t_subr (gdbscm_objfiles),
-    "\
+      { "objfiles", 0, 0, 0, as_a_scm_t_subr (gdbscm_objfiles), "\
 Return a list of all objfiles in the current program space." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_objfiles (void)

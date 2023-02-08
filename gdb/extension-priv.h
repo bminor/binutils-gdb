@@ -143,10 +143,10 @@ struct extension_language_ops
      This function has a bit of a funny name, since it actually applies
      recognizers, but this seemed clearer given the start_type_printers
      and free_type_printers functions.  */
-  enum ext_lang_rc (*apply_type_printers)
-    (const struct extension_language_defn *,
-     const struct ext_lang_type_printers *,
-     struct type *, char **prettied_type);
+  enum ext_lang_rc (*apply_type_printers) (
+    const struct extension_language_defn *,
+    const struct ext_lang_type_printers *, struct type *,
+    char **prettied_type);
 
   /* Called after a type has been printed to give the type pretty-printer
      mechanism an opportunity to clean up.  */
@@ -157,11 +157,11 @@ struct extension_language_ops
      to OPTIONS.  VAL is the object to print.  Returns EXT_LANG_RC_OK
      upon success, EXT_LANG_RC_NOP if the value is not recognized, and
      EXT_LANG_RC_ERROR if an error was encountered.  */
-  enum ext_lang_rc (*apply_val_pretty_printer)
-    (const struct extension_language_defn *,
-     struct value *val, struct ui_file *stream, int recurse,
-     const struct value_print_options *options,
-     const struct language_defn *language);
+  enum ext_lang_rc (*apply_val_pretty_printer) (
+    const struct extension_language_defn *, struct value *val,
+    struct ui_file *stream, int recurse,
+    const struct value_print_options *options,
+    const struct language_defn *language);
 
   /* GDB access to the "frame filter" feature.
      FRAME is the source frame to start frame-filter invocation.  FLAGS is an
@@ -177,11 +177,10 @@ struct extension_language_ops
      beginning of the slice of frames to print, and FRAME_HIGH is the
      upper limit of the frames to count.  Returns SCR_BT_ERROR on error,
      or SCR_BT_COMPLETED on success.  */
-  enum ext_lang_bt_status (*apply_frame_filter)
-    (const struct extension_language_defn *,
-     frame_info_ptr frame, frame_filter_flags flags,
-     enum ext_lang_frame_args args_type,
-     struct ui_out *out, int frame_low, int frame_high);
+  enum ext_lang_bt_status (*apply_frame_filter) (
+    const struct extension_language_defn *, frame_info_ptr frame,
+    frame_filter_flags flags, enum ext_lang_frame_args args_type,
+    struct ui_out *out, int frame_low, int frame_high);
 
   /* Update values held by the extension language when OBJFILE is discarded.
      New global types must be created for every such value, which must then be
@@ -207,8 +206,8 @@ struct extension_language_ops
      every extension language, even if another extension language has a
      "stop" method: other kinds of breakpoints may be implemented using
      this method, e.g., "finish breakpoints" in Python.  */
-  enum ext_lang_bp_stop (*breakpoint_cond_says_stop)
-    (const struct extension_language_defn *, struct breakpoint *);
+  enum ext_lang_bp_stop (*breakpoint_cond_says_stop) (
+    const struct extension_language_defn *, struct breakpoint *);
 
   /* The next two are used to connect GDB's SIGINT handling with the
      extension language's.
@@ -245,11 +244,9 @@ struct extension_language_ops
 
      This field may be NULL if the extension language does not support
      xmethods.  */
-  enum ext_lang_rc (*get_matching_xmethod_workers)
-    (const struct extension_language_defn *extlang,
-     struct type *obj_type,
-     const char *method_name,
-     std::vector<xmethod_worker_up> *dm_vec);
+  enum ext_lang_rc (*get_matching_xmethod_workers) (
+    const struct extension_language_defn *extlang, struct type *obj_type,
+    const char *method_name, std::vector<xmethod_worker_up> *dm_vec);
 
   /* Colorize a source file.  NAME is the source file's name, and
      CONTENTS is the contents of the file.  This should either return
@@ -275,8 +272,7 @@ struct extension_language_ops
      If no instruction can be disassembled then return an empty value and
      other extension languages will get a chance to perform the
      disassembly.  */
-  gdb::optional<int> (*print_insn) (struct gdbarch *gdbarch,
-				    CORE_ADDR address,
+  gdb::optional<int> (*print_insn) (struct gdbarch *gdbarch, CORE_ADDR address,
 				    struct disassemble_info *info);
 };
 
@@ -305,8 +301,8 @@ struct active_ext_lang_state
 
 extern const struct extension_language_defn *get_active_ext_lang (void);
 
-extern struct active_ext_lang_state *set_active_ext_lang
-  (const struct extension_language_defn *);
+extern struct active_ext_lang_state *
+set_active_ext_lang (const struct extension_language_defn *);
 
 extern void restore_active_ext_lang (struct active_ext_lang_state *previous);
 

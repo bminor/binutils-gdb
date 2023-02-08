@@ -23,10 +23,10 @@
 #include "gdbsupport/gdb_string_view.h"
 
 #if defined(__MINGW32__) && !defined(PRINTF_HAS_LONG_LONG)
-# define USE_PRINTF_I64 1
-# define PRINTF_HAS_LONG_LONG
+#define USE_PRINTF_I64 1
+#define PRINTF_HAS_LONG_LONG
 #else
-# define USE_PRINTF_I64 0
+#define USE_PRINTF_I64 0
 #endif
 
 /* The argclass represents the general type of data that goes with a
@@ -36,13 +36,22 @@
    classed as int_arg.  */
 
 enum argclass
-  {
-    literal_piece,
-    int_arg, long_arg, long_long_arg, size_t_arg, ptr_arg,
-    string_arg, wide_string_arg, wide_char_arg,
-    double_arg, long_double_arg,
-    dec32float_arg, dec64float_arg, dec128float_arg
-  };
+{
+  literal_piece,
+  int_arg,
+  long_arg,
+  long_long_arg,
+  size_t_arg,
+  ptr_arg,
+  string_arg,
+  wide_string_arg,
+  wide_char_arg,
+  double_arg,
+  long_double_arg,
+  dec32float_arg,
+  dec64float_arg,
+  dec128float_arg
+};
 
 /* A format piece is a section of the format string that may include a
    single print directive somewhere in it, and the associated class
@@ -60,7 +69,7 @@ struct format_piece
   bool operator== (const format_piece &other) const
   {
     return (this->argclass == other.argclass
-	    && gdb::string_view (this->string) == other.string);
+            && gdb::string_view (this->string) == other.string);
   }
 
   const char *string;
@@ -74,7 +83,6 @@ struct format_piece
 class format_pieces
 {
 public:
-
   format_pieces (const char **arg, bool gdb_extensions = false);
   ~format_pieces () = default;
 
@@ -82,18 +90,11 @@ public:
 
   typedef std::vector<format_piece>::iterator iterator;
 
-  iterator begin ()
-  {
-    return m_pieces.begin ();
-  }
+  iterator begin () { return m_pieces.begin (); }
 
-  iterator end ()
-  {
-    return m_pieces.end ();
-  }
+  iterator end () { return m_pieces.end (); }
 
 private:
-
   std::vector<format_piece> m_pieces;
   gdb::unique_xmalloc_ptr<char> m_storage;
 };

@@ -73,9 +73,7 @@ struct gdb_bfd_data
   {
   }
 
-  ~gdb_bfd_data ()
-  {
-  }
+  ~gdb_bfd_data () {}
 
   /* The reference count.  */
   int refc = 1;
@@ -131,11 +129,12 @@ static htab_t gdb_bfd_cache;
    modification time, and file size all match.  */
 
 static bool bfd_sharing = true;
+
 static void
-show_bfd_sharing  (struct ui_file *file, int from_tty,
-		   struct cmd_list_element *c, const char *value)
+show_bfd_sharing (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("BFD sharing is %s.\n"), value);
+  gdb_printf (file, _ ("BFD sharing is %s.\n"), value);
 }
 
 /* When true debugging of the bfd caches is enabled.  */
@@ -151,7 +150,7 @@ static void
 show_bfd_cache_debug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("BFD cache debugging is %s.\n"), value);
+  gdb_printf (file, _ ("BFD cache debugging is %s.\n"), value);
 }
 
 /* The type of an object being looked up in gdb_bfd_cache.  We use
@@ -194,10 +193,8 @@ eq_bfd (const void *a, const void *b)
     = (const struct gdb_bfd_cache_search *) b;
   struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
 
-  return (gdata->mtime == s->mtime
-	  && gdata->size == s->size
-	  && gdata->inode == s->inode
-	  && gdata->device_id == s->device_id
+  return (gdata->mtime == s->mtime && gdata->size == s->size
+	  && gdata->inode == s->inode && gdata->device_id == s->device_id
 	  && strcmp (bfd_get_filename (abfd), s->filename) == 0);
 }
 
@@ -233,19 +230,17 @@ struct target_buffer
   }
 
   /* Return the size of the in-memory BFD file.  */
-  ULONGEST size () const
-  { return m_size; }
+  ULONGEST size () const { return m_size; }
 
   /* Return the base address of the in-memory BFD file.  */
-  CORE_ADDR base () const
-  { return m_base; }
+  CORE_ADDR base () const { return m_base; }
 
   /* Return a generated filename for the in-memory BFD file.  The generated
      name will include the M_BASE value.  */
-  const char *filename () const
-  { return m_filename.get (); }
+  const char *filename () const { return m_filename.get (); }
 
 private:
+
   /* The base address of the in-memory BFD file.  */
   CORE_ADDR m_base;
 
@@ -309,7 +304,7 @@ mem_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
 static int
 mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 {
-  struct target_buffer *buffer = (struct target_buffer*) stream;
+  struct target_buffer *buffer = (struct target_buffer *) stream;
 
   memset (sb, 0, sizeof (struct stat));
   sb->st_size = buffer->size ();
@@ -324,11 +319,8 @@ gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
 {
   struct target_buffer *buffer = new target_buffer (addr, size);
 
-  return gdb_bfd_openr_iovec (buffer->filename (), target,
-			      mem_bfd_iovec_open,
-			      buffer,
-			      mem_bfd_iovec_pread,
-			      mem_bfd_iovec_close,
+  return gdb_bfd_openr_iovec (buffer->filename (), target, mem_bfd_iovec_open,
+			      buffer, mem_bfd_iovec_pread, mem_bfd_iovec_close,
 			      mem_bfd_iovec_stat);
 }
 
@@ -385,9 +377,8 @@ gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
     {
       QUIT;
 
-      bytes = target_fileio_pread (fd, (gdb_byte *) buf + pos,
-				   nbytes - pos, offset + pos,
-				   &target_errno);
+      bytes = target_fileio_pread (fd, (gdb_byte *) buf + pos, nbytes - pos,
+				   offset + pos, &target_errno);
       if (bytes == 0)
 	/* Success, but no bytes, means end-of-file.  */
 	break;
@@ -410,7 +401,7 @@ gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
 static void
 gdb_bfd_close_warning (const char *name, const char *reason)
 {
-  warning (_("cannot close \"%s\": %s"), name, reason);
+  warning (_ ("cannot close \"%s\": %s"), name, reason);
 }
 
 /* Wrapper for target_fileio_close suitable for passing as the
@@ -433,8 +424,7 @@ gdb_bfd_iovec_fileio_close (struct bfd *abfd, void *stream)
   catch (const gdb_exception &ex)
     {
       /* Also avoid crossing exceptions over bfd.  */
-      gdb_bfd_close_warning (bfd_get_filename (abfd),
-			     ex.message->c_str ());
+      gdb_bfd_close_warning (bfd_get_filename (abfd), ex.message->c_str ());
     }
 
   /* Zero means success.  */
@@ -445,8 +435,7 @@ gdb_bfd_iovec_fileio_close (struct bfd *abfd, void *stream)
    STAT_FUNC argument to gdb_bfd_openr_iovec.  */
 
 static int
-gdb_bfd_iovec_fileio_fstat (struct bfd *abfd, void *stream,
-			    struct stat *sb)
+gdb_bfd_iovec_fileio_fstat (struct bfd *abfd, void *stream, struct stat *sb)
 {
   int fd = *(int *) stream;
   fileio_error target_errno;
@@ -488,8 +477,7 @@ gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
 /* See gdb_bfd.h.  */
 
 gdb_bfd_ref_ptr
-gdb_bfd_open (const char *name, const char *target, int fd,
-	      bool warn_if_slow)
+gdb_bfd_open (const char *name, const char *target, int fd, bool warn_if_slow)
 {
   hashval_t hash;
   void **slot;
@@ -503,9 +491,9 @@ gdb_bfd_open (const char *name, const char *target, int fd,
 	{
 	  gdb_assert (fd == -1);
 
-	  gdb_bfd_open_closure open_closure { current_inferior (), warn_if_slow };
-	  return gdb_bfd_openr_iovec (name, target,
-				      gdb_bfd_iovec_fileio_open,
+	  gdb_bfd_open_closure open_closure { current_inferior (),
+					      warn_if_slow };
+	  return gdb_bfd_openr_iovec (name, target, gdb_bfd_iovec_fileio_open,
 				      &open_closure,
 				      gdb_bfd_iovec_fileio_pread,
 				      gdb_bfd_iovec_fileio_close,
@@ -516,8 +504,8 @@ gdb_bfd_open (const char *name, const char *target, int fd,
     }
 
   if (gdb_bfd_cache == NULL)
-    gdb_bfd_cache = htab_create_alloc (1, hash_bfd, eq_bfd, NULL,
-				       xcalloc, xfree);
+    gdb_bfd_cache
+      = htab_create_alloc (1, hash_bfd, eq_bfd, NULL, xcalloc, xfree);
 
   if (fd == -1)
     {
@@ -624,8 +612,7 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
   ret = bfd_close (abfd);
 
   if (!ret)
-    gdb_bfd_close_warning (name,
-			   bfd_errmsg (bfd_get_error ()));
+    gdb_bfd_close_warning (name, bfd_errmsg (bfd_get_error ()));
 
   return ret;
 }
@@ -697,15 +684,15 @@ gdb_bfd_unref (struct bfd *abfd)
       search.size = gdata->size;
       search.inode = gdata->inode;
       search.device_id = gdata->device_id;
-      slot = htab_find_slot_with_hash (gdb_bfd_cache, &search, hash,
-				       NO_INSERT);
+      slot
+	= htab_find_slot_with_hash (gdb_bfd_cache, &search, hash, NO_INSERT);
 
       if (slot && *slot)
 	htab_clear_slot (gdb_bfd_cache, slot);
     }
 
   delete gdata;
-  bfd_set_usrdata (abfd, NULL);  /* Paranoia.  */
+  bfd_set_usrdata (abfd, NULL); /* Paranoia.  */
 
   htab_remove_elt (all_bfds, abfd);
 
@@ -727,8 +714,8 @@ get_section_descriptor (asection *section)
 
   if (result == NULL)
     {
-      result = ((struct gdb_bfd_section_data *)
-		bfd_zalloc (section->owner, sizeof (*result)));
+      result = ((struct gdb_bfd_section_data *) bfd_zalloc (section->owner,
+							    sizeof (*result)));
       bfd_set_section_userdata (section, result);
     }
 
@@ -770,12 +757,12 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
       if (bfd_section_size (sectp) > 4 * pagesize)
 	{
 	  descriptor->size = bfd_section_size (sectp);
-	  descriptor->data = bfd_mmap (abfd, 0, descriptor->size, PROT_READ,
-				       MAP_PRIVATE, sectp->filepos,
-				       &descriptor->map_addr,
-				       &descriptor->map_len);
+	  descriptor->data
+	    = bfd_mmap (abfd, 0, descriptor->size, PROT_READ, MAP_PRIVATE,
+			sectp->filepos, &descriptor->map_addr,
+			&descriptor->map_len);
 
-	  if ((caddr_t)descriptor->data != MAP_FAILED)
+	  if ((caddr_t) descriptor->data != MAP_FAILED)
 	    {
 #if HAVE_POSIX_MADVISE
 	      posix_madvise (descriptor->map_addr, descriptor->map_len,
@@ -799,9 +786,8 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
   data = NULL;
   if (!bfd_get_full_section_contents (abfd, sectp, &data))
     {
-      warning (_("Can't read data for section '%s' in file '%s'"),
-	       bfd_section_name (sectp),
-	       bfd_get_filename (abfd));
+      warning (_ ("Can't read data for section '%s' in file '%s'"),
+	       bfd_section_name (sectp), bfd_get_filename (abfd));
       /* Set size to 0 to prevent further attempts to read the invalid
 	 section.  */
       *size = 0;
@@ -809,7 +795,7 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
     }
   descriptor->data = data;
 
- done:
+done:
   gdb_assert (descriptor->data != NULL);
   *size = descriptor->size;
   return (const gdb_byte *) descriptor->data;
@@ -826,7 +812,7 @@ get_file_crc (bfd *abfd, unsigned long *file_crc_return)
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     {
-      warning (_("Problem reading \"%s\" for CRC: %s"),
+      warning (_ ("Problem reading \"%s\" for CRC: %s"),
 	       bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
       return 0;
     }
@@ -839,7 +825,7 @@ get_file_crc (bfd *abfd, unsigned long *file_crc_return)
       count = bfd_bread (buffer, sizeof (buffer), abfd);
       if (count == (bfd_size_type) -1)
 	{
-	  warning (_("Problem reading \"%s\" for CRC: %s"),
+	  warning (_ ("Problem reading \"%s\" for CRC: %s"),
 		   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
 	  return 0;
 	}
@@ -866,8 +852,6 @@ gdb_bfd_crc (struct bfd *abfd, unsigned long *crc_out)
     *crc_out = gdata->crc;
   return gdata->crc_computed;
 }
-
-
 
 /* See gdb_bfd.h.  */
 
@@ -904,22 +888,16 @@ gdb_bfd_openw (const char *filename, const char *target)
 
 gdb_bfd_ref_ptr
 gdb_bfd_openr_iovec (const char *filename, const char *target,
-		     void *(*open_func) (struct bfd *nbfd,
-					 void *open_closure),
+		     void *(*open_func) (struct bfd *nbfd, void *open_closure),
 		     void *open_closure,
-		     file_ptr (*pread_func) (struct bfd *nbfd,
-					     void *stream,
-					     void *buf,
-					     file_ptr nbytes,
+		     file_ptr (*pread_func) (struct bfd *nbfd, void *stream,
+					     void *buf, file_ptr nbytes,
 					     file_ptr offset),
-		     int (*close_func) (struct bfd *nbfd,
-					void *stream),
-		     int (*stat_func) (struct bfd *abfd,
-				       void *stream,
+		     int (*close_func) (struct bfd *nbfd, void *stream),
+		     int (*stat_func) (struct bfd *abfd, void *stream,
 				       struct stat *sb))
 {
-  bfd *result = bfd_openr_iovec (filename, target,
-				 open_func, open_closure,
+  bfd *result = bfd_openr_iovec (filename, target, open_func, open_closure,
 				 pread_func, close_func, stat_func);
 
   return gdb_bfd_ref_ptr::new_reference (result);
@@ -969,8 +947,6 @@ gdb_bfd_record_inclusion (bfd *includer, bfd *includee)
   gdata = (struct gdb_bfd_data *) bfd_usrdata (includer);
   gdata->included_bfds.push_back (gdb_bfd_ref_ptr::new_reference (includee));
 }
-
-
 
 gdb_static_assert (ARRAY_SIZE (_bfd_std_section) == 4);
 
@@ -1038,8 +1014,8 @@ gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 				   section_size);
 }
 
-#define AMBIGUOUS_MESS1	".\nMatching formats:"
-#define AMBIGUOUS_MESS2	\
+#define AMBIGUOUS_MESS1 ".\nMatching formats:"
+#define AMBIGUOUS_MESS2 \
   ".\nUse \"set gnutarget format-name\" to specify the format."
 
 /* See gdb_bfd.h.  */
@@ -1148,11 +1124,11 @@ static bfd_error_handler_type default_bfd_error_handler;
    per-inferior basis.  */
 
 static void ATTRIBUTE_PRINTF (1, 0)
-gdb_bfd_error_handler (const char *fmt, va_list ap)
+  gdb_bfd_error_handler (const char *fmt, va_list ap)
 {
   va_list ap_copy;
 
-  va_copy(ap_copy, ap);
+  va_copy (ap_copy, ap);
   const std::string str = string_vprintf (fmt, ap_copy);
   va_end (ap_copy);
 
@@ -1167,37 +1143,34 @@ gdb_bfd_error_handler (const char *fmt, va_list ap)
 }
 
 void _initialize_gdb_bfd ();
+
 void
 _initialize_gdb_bfd ()
 {
-  all_bfds = htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer,
-				NULL, xcalloc, xfree);
+  all_bfds = htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer, NULL,
+				xcalloc, xfree);
 
-  add_cmd ("bfds", class_maintenance, maintenance_info_bfds, _("\
+  add_cmd ("bfds", class_maintenance, maintenance_info_bfds, _ ("\
 List the BFDs that are currently open."),
 	   &maintenanceinfolist);
 
-  add_setshow_boolean_cmd ("bfd-sharing", no_class,
-			   &bfd_sharing, _("\
-Set whether gdb will share bfds that appear to be the same file."), _("\
-Show whether gdb will share bfds that appear to be the same file."), _("\
+  add_setshow_boolean_cmd ("bfd-sharing", no_class, &bfd_sharing, _ ("\
+Set whether gdb will share bfds that appear to be the same file."),
+			   _ ("\
+Show whether gdb will share bfds that appear to be the same file."),
+			   _ ("\
 When enabled gdb will reuse existing bfds rather than reopening the\n\
 same file.  To decide if two files are the same then gdb compares the\n\
 filename, file size, file modification time, and file inode."),
-			   NULL,
-			   &show_bfd_sharing,
-			   &maintenance_set_cmdlist,
+			   NULL, &show_bfd_sharing, &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 
-  add_setshow_boolean_cmd ("bfd-cache", class_maintenance,
-			   &debug_bfd_cache,
-			   _("Set bfd cache debugging."),
-			   _("Show bfd cache debugging."),
-			   _("\
+  add_setshow_boolean_cmd ("bfd-cache", class_maintenance, &debug_bfd_cache,
+			   _ ("Set bfd cache debugging."),
+			   _ ("Show bfd cache debugging."), _ ("\
 When non-zero, bfd cache specific debugging is enabled."),
-			   NULL,
-			   &show_bfd_cache_debug,
-			   &setdebuglist, &showdebuglist);
+			   NULL, &show_bfd_cache_debug, &setdebuglist,
+			   &showdebuglist);
 
   /* Hook the BFD error/warning handler to limit amount of output.  */
   default_bfd_error_handler = bfd_set_error_handler (gdb_bfd_error_handler);

@@ -23,6 +23,6 @@
 #include "arch/aarch64.h"
 
 const target_desc *
-  aarch64_linux_read_description (const aarch64_features &features);
+aarch64_linux_read_description (const aarch64_features &features);
 
 #endif /* GDBSERVER_LINUX_AARCH64_TDESC_H */

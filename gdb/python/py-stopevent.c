@@ -48,11 +48,10 @@ emit_stop_event (struct bpstat *bs, enum gdb_signal stop_signal)
   /* Add any breakpoint set at this location to the list.  */
   for (current_bs = bs; current_bs != NULL; current_bs = current_bs->next)
     {
-      if (current_bs->breakpoint_at
-	  && current_bs->breakpoint_at->py_bp_object)
+      if (current_bs->breakpoint_at && current_bs->breakpoint_at->py_bp_object)
 	{
-	  PyObject *current_py_bp =
-	      (PyObject *) current_bs->breakpoint_at->py_bp_object;
+	  PyObject *current_py_bp
+	    = (PyObject *) current_bs->breakpoint_at->py_bp_object;
 
 	  if (list == NULL)
 	    {
@@ -71,15 +70,13 @@ emit_stop_event (struct bpstat *bs, enum gdb_signal stop_signal)
 
   if (list != NULL)
     {
-      stop_event_obj = create_breakpoint_event_object (list.get (),
-						       first_bp);
+      stop_event_obj = create_breakpoint_event_object (list.get (), first_bp);
       if (stop_event_obj == NULL)
 	return -1;
     }
 
   /* Check if the signal is "Signal 0" or "Trace/breakpoint trap".  */
-  if (stop_signal != GDB_SIGNAL_0
-      && stop_signal != GDB_SIGNAL_TRAP)
+  if (stop_signal != GDB_SIGNAL_0 && stop_signal != GDB_SIGNAL_TRAP)
     {
       stop_event_obj = create_signal_event_object (stop_signal);
       if (stop_event_obj == NULL)

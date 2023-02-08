@@ -30,7 +30,6 @@
 class mips_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
@@ -38,7 +37,6 @@ public:
   bool supports_z_point_type (char z_type) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -55,21 +53,21 @@ protected:
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
 
-  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
-  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
   bool low_stopped_by_watchpoint () override;
 
   CORE_ADDR low_stopped_data_address () override;
 
   void low_collect_ptrace_register (regcache *regcache, int regno,
-				    char *buf) override;
+                                    char *buf) override;
 
   void low_supply_ptrace_register (regcache *regcache, int regno,
-				   const char *buf) override;
+                                   const char *buf) override;
 
   arch_process_info *low_new_process () override;
 
@@ -138,46 +136,35 @@ union mips_register
 
 /* Return the ptrace ``address'' of register REGNO. */
 
-#define mips_base_regs							\
-  -1,  1,  2,  3,  4,  5,  6,  7,					\
-  8,  9,  10, 11, 12, 13, 14, 15,					\
-  16, 17, 18, 19, 20, 21, 22, 23,					\
-  24, 25, 26, 27, 28, 29, 30, 31,					\
-									\
-  -1, MMLO, MMHI, BADVADDR, CAUSE, PC,					\
-									\
-  FPR_BASE,      FPR_BASE + 1,  FPR_BASE + 2,  FPR_BASE + 3,		\
-  FPR_BASE + 4,  FPR_BASE + 5,  FPR_BASE + 6,  FPR_BASE + 7,		\
-  FPR_BASE + 8,  FPR_BASE + 9,  FPR_BASE + 10, FPR_BASE + 11,		\
-  FPR_BASE + 12, FPR_BASE + 13, FPR_BASE + 14, FPR_BASE + 15,		\
-  FPR_BASE + 16, FPR_BASE + 17, FPR_BASE + 18, FPR_BASE + 19,		\
-  FPR_BASE + 20, FPR_BASE + 21, FPR_BASE + 22, FPR_BASE + 23,		\
-  FPR_BASE + 24, FPR_BASE + 25, FPR_BASE + 26, FPR_BASE + 27,		\
-  FPR_BASE + 28, FPR_BASE + 29, FPR_BASE + 30, FPR_BASE + 31,		\
-  FPC_CSR, FPC_EIR
+#define mips_base_regs                                                       \
+  -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, \
+    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,                              \
+                                                                             \
+    -1, MMLO, MMHI, BADVADDR, CAUSE, PC,                                     \
+                                                                             \
+    FPR_BASE, FPR_BASE + 1, FPR_BASE + 2, FPR_BASE + 3, FPR_BASE + 4,        \
+    FPR_BASE + 5, FPR_BASE + 6, FPR_BASE + 7, FPR_BASE + 8, FPR_BASE + 9,    \
+    FPR_BASE + 10, FPR_BASE + 11, FPR_BASE + 12, FPR_BASE + 13,              \
+    FPR_BASE + 14, FPR_BASE + 15, FPR_BASE + 16, FPR_BASE + 17,              \
+    FPR_BASE + 18, FPR_BASE + 19, FPR_BASE + 20, FPR_BASE + 21,              \
+    FPR_BASE + 22, FPR_BASE + 23, FPR_BASE + 24, FPR_BASE + 25,              \
+    FPR_BASE + 26, FPR_BASE + 27, FPR_BASE + 28, FPR_BASE + 29,              \
+    FPR_BASE + 30, FPR_BASE + 31, FPC_CSR, FPC_EIR
 
-#define mips_dsp_regs							\
-  DSP_BASE,      DSP_BASE + 1,  DSP_BASE + 2,  DSP_BASE + 3,		\
-  DSP_BASE + 4,  DSP_BASE + 5,						\
-  DSP_CONTROL
+#define mips_dsp_regs                                               \
+  DSP_BASE, DSP_BASE + 1, DSP_BASE + 2, DSP_BASE + 3, DSP_BASE + 4, \
+    DSP_BASE + 5, DSP_CONTROL
 
-static int mips_regmap[mips_num_regs] = {
-  mips_base_regs,
-  0
-};
+static int mips_regmap[mips_num_regs] = { mips_base_regs, 0 };
 
-static int mips_dsp_regmap[mips_dsp_num_regs] = {
-  mips_base_regs,
-  mips_dsp_regs,
-  0
-};
+static int mips_dsp_regmap[mips_dsp_num_regs]
+  = { mips_base_regs, mips_dsp_regs, 0 };
 
 /* DSP registers are not in any regset and can only be accessed
    individually.  */
 
-static unsigned char mips_dsp_regset_bitmap[(mips_dsp_num_regs + 7) / 8] = {
-  0xfe, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x80
-};
+static unsigned char mips_dsp_regset_bitmap[(mips_dsp_num_regs + 7) / 8]
+  = { 0xfe, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x80 };
 
 static int have_dsp = -1;
 
@@ -194,17 +181,17 @@ mips_read_description (void)
       errno = 0;
       ptrace (PTRACE_PEEKUSER, pid, DSP_CONTROL, 0);
       switch (errno)
-	{
-	case 0:
-	  have_dsp = 1;
-	  break;
-	case EIO:
-	  have_dsp = 0;
-	  break;
-	default:
-	  perror_with_name ("ptrace");
-	  break;
-	}
+        {
+        case 0:
+          have_dsp = 1;
+          break;
+        case EIO:
+          have_dsp = 0;
+          break;
+        default:
+          perror_with_name ("ptrace");
+          break;
+        }
     }
 
   return have_dsp ? tdesc_mips_dsp_linux : tdesc_mips_linux;
@@ -435,7 +422,7 @@ mips_target::low_delete_thread (arch_lwp_info *arch_lwp)
 
 static void
 mips_add_watchpoint (struct arch_process_info *priv, CORE_ADDR addr, int len,
-		     enum target_hw_bp_type watch_type)
+                     enum target_hw_bp_type watch_type)
 {
   struct mips_watchpoint *new_watch;
   struct mips_watchpoint **pw;
@@ -455,18 +442,15 @@ mips_add_watchpoint (struct arch_process_info *priv, CORE_ADDR addr, int len,
 /* Hook to call when a new fork is attached.  */
 
 void
-mips_target::low_new_fork (process_info *parent,
-			   process_info *child)
+mips_target::low_new_fork (process_info *parent, process_info *child)
 {
   struct arch_process_info *parent_private;
   struct arch_process_info *child_private;
   struct mips_watchpoint *wp;
 
   /* These are allocated by linux_add_process.  */
-  gdb_assert (parent->priv != NULL
-	      && parent->priv->arch_private != NULL);
-  gdb_assert (child->priv != NULL
-	      && child->priv->arch_private != NULL);
+  gdb_assert (parent->priv != NULL && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL && child->priv->arch_private != NULL);
 
   /* Linux kernel before 2.6.33 commit
      72f674d203cd230426437cdcf7dd6f681dad8b0d
@@ -509,14 +493,15 @@ mips_target::low_prepare_to_resume (lwp_info *lwp)
       /* Only update the watch registers if we have set or unset a
 	 watchpoint already.  */
       if (mips_linux_watch_get_num_valid (&priv->watch_mirror) > 0)
-	{
-	  /* Write the mirrored watch register values.  */
-	  int tid = ptid.lwp ();
+        {
+          /* Write the mirrored watch register values.  */
+          int tid = ptid.lwp ();
 
-	  if (-1 == ptrace (PTRACE_SET_WATCH_REGS, tid,
-			    &priv->watch_mirror, NULL))
-	    perror_with_name ("Couldn't write watch register");
-	}
+          if (-1
+              == ptrace (PTRACE_SET_WATCH_REGS, tid, &priv->watch_mirror,
+                         NULL))
+            perror_with_name ("Couldn't write watch register");
+        }
 
       lwp->arch_private->watch_registers_changed = 0;
     }
@@ -540,8 +525,8 @@ mips_target::supports_z_point_type (char z_type)
    low_insert_point.  */
 
 int
-mips_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-			       int len, raw_breakpoint *bp)
+mips_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int len,
+                               raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
@@ -551,10 +536,8 @@ mips_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
   uint32_t irw;
 
   lwpid = lwpid_of (current_thread);
-  if (!mips_linux_read_watch_registers (lwpid,
-					&priv->watch_readback,
-					&priv->watch_readback_valid,
-					0))
+  if (!mips_linux_read_watch_registers (lwpid, &priv->watch_readback,
+                                        &priv->watch_readback_valid, 0))
     return -1;
 
   if (len <= 0)
@@ -585,8 +568,8 @@ mips_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
    low_remove_point.  */
 
 int
-mips_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-			       int len, raw_breakpoint *bp)
+mips_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int len,
+                               raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
@@ -604,25 +587,24 @@ mips_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   while ((w = *pw))
     {
       if (w->addr == addr && w->len == len && w->type == watch_type)
-	{
-	  *pw = w->next;
-	  free (w);
-	  deleted_one = 1;
-	  break;
-	}
+        {
+          *pw = w->next;
+          free (w);
+          deleted_one = 1;
+          break;
+        }
       pw = &(w->next);
     }
 
   if (!deleted_one)
-    return -1;  /* We don't know about it, fail doing nothing.  */
+    return -1; /* We don't know about it, fail doing nothing.  */
 
   /* At this point watch_readback is known to be valid because we
      could not have added the watch without reading it.  */
   gdb_assert (priv->watch_readback_valid == 1);
 
   priv->watch_mirror = priv->watch_readback;
-  mips_linux_watch_populate_regs (priv->current_watches,
-				  &priv->watch_mirror);
+  mips_linux_watch_populate_regs (priv->current_watches, &priv->watch_mirror);
 
   /* Only update the threads of this process.  */
   for_each_thread (proc->pid, update_watch_registers_callback);
@@ -643,17 +625,15 @@ mips_target::low_stopped_by_watchpoint ()
   int num_valid;
   long lwpid = lwpid_of (current_thread);
 
-  if (!mips_linux_read_watch_registers (lwpid,
-					&priv->watch_readback,
-					&priv->watch_readback_valid,
-					1))
+  if (!mips_linux_read_watch_registers (lwpid, &priv->watch_readback,
+                                        &priv->watch_readback_valid, 1))
     return 0;
 
   num_valid = mips_linux_watch_get_num_valid (&priv->watch_readback);
 
   for (n = 0; n < MAX_DEBUG_REGISTER && n < num_valid; n++)
     if (mips_linux_watch_get_watchhi (&priv->watch_readback, n)
-	& (R_MASK | W_MASK))
+        & (R_MASK | W_MASK))
       return true;
 
   return false;
@@ -677,44 +657,40 @@ mips_target::low_stopped_data_address ()
      address of a watchpoint request which overlaps the one that
      triggered.  */
 
-  if (!mips_linux_read_watch_registers (lwpid,
-					&priv->watch_readback,
-					&priv->watch_readback_valid,
-					0))
+  if (!mips_linux_read_watch_registers (lwpid, &priv->watch_readback,
+                                        &priv->watch_readback_valid, 0))
     return 0;
 
   num_valid = mips_linux_watch_get_num_valid (&priv->watch_readback);
 
   for (n = 0; n < MAX_DEBUG_REGISTER && n < num_valid; n++)
     if (mips_linux_watch_get_watchhi (&priv->watch_readback, n)
-	& (R_MASK | W_MASK))
+        & (R_MASK | W_MASK))
       {
-	CORE_ADDR t_low, t_hi;
-	int t_irw;
-	struct mips_watchpoint *watch;
+        CORE_ADDR t_low, t_hi;
+        int t_irw;
+        struct mips_watchpoint *watch;
 
-	t_low = mips_linux_watch_get_watchlo (&priv->watch_readback, n);
-	t_irw = t_low & IRW_MASK;
-	t_hi = (mips_linux_watch_get_watchhi (&priv->watch_readback, n)
-		| IRW_MASK);
-	t_low &= ~(CORE_ADDR)t_hi;
+        t_low = mips_linux_watch_get_watchlo (&priv->watch_readback, n);
+        t_irw = t_low & IRW_MASK;
+        t_hi = (mips_linux_watch_get_watchhi (&priv->watch_readback, n)
+                | IRW_MASK);
+        t_low &= ~(CORE_ADDR) t_hi;
 
-	for (watch = priv->current_watches;
-	     watch != NULL;
-	     watch = watch->next)
-	  {
-	    CORE_ADDR addr = watch->addr;
-	    CORE_ADDR last_byte = addr + watch->len - 1;
+        for (watch = priv->current_watches; watch != NULL; watch = watch->next)
+          {
+            CORE_ADDR addr = watch->addr;
+            CORE_ADDR last_byte = addr + watch->len - 1;
 
-	    if ((t_irw & mips_linux_watch_type_to_irw (watch->type)) == 0)
-	      {
-		/* Different type.  */
-		continue;
-	      }
-	    /* Check for overlap of even a single byte.  */
-	    if (last_byte >= t_low && addr <= t_low + t_hi)
-	      return addr;
-	  }
+            if ((t_irw & mips_linux_watch_type_to_irw (watch->type)) == 0)
+              {
+                /* Different type.  */
+                continue;
+              }
+            /* Check for overlap of even a single byte.  */
+            if (last_byte >= t_low && addr <= t_low + t_hi)
+              return addr;
+          }
       }
 
   /* Shouldn't happen.  */
@@ -724,8 +700,8 @@ mips_target::low_stopped_data_address ()
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph,
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;
@@ -733,14 +709,14 @@ ps_get_thread_area (struct ps_prochandle *ph,
   /* IDX is the bias from the thread pointer to the beginning of the
      thread descriptor.  It has to be subtracted due to implementation
      quirks in libthread_db.  */
-  *base = (void *) ((char *)*base - idx);
+  *base = (void *) ((char *) *base - idx);
 
   return PS_OK;
 }
 
 static void
-mips_collect_register (struct regcache *regcache,
-		       int use_64bit, int regno, union mips_register *reg)
+mips_collect_register (struct regcache *regcache, int use_64bit, int regno,
+                       union mips_register *reg)
 {
   union mips_register tmp_reg;
 
@@ -757,8 +733,8 @@ mips_collect_register (struct regcache *regcache,
 }
 
 static void
-mips_supply_register (struct regcache *regcache,
-		      int use_64bit, int regno, const union mips_register *reg)
+mips_supply_register (struct regcache *regcache, int use_64bit, int regno,
+                      const union mips_register *reg)
 {
   int offset = 0;
 
@@ -773,8 +749,8 @@ mips_supply_register (struct regcache *regcache,
 #ifdef HAVE_PTRACE_GETREGS
 
 static void
-mips_collect_register_32bit (struct regcache *regcache,
-			     int use_64bit, int regno, unsigned char *buf)
+mips_collect_register_32bit (struct regcache *regcache, int use_64bit,
+                             int regno, unsigned char *buf)
 {
   union mips_register tmp_reg;
   int reg32;
@@ -785,8 +761,8 @@ mips_collect_register_32bit (struct regcache *regcache,
 }
 
 static void
-mips_supply_register_32bit (struct regcache *regcache,
-			    int use_64bit, int regno, const unsigned char *buf)
+mips_supply_register_32bit (struct regcache *regcache, int use_64bit,
+                            int regno, const unsigned char *buf)
 {
   union mips_register tmp_reg;
   int reg32;
@@ -808,21 +784,21 @@ mips_fill_gregset (struct regcache *regcache, void *buf)
   for (i = 1; i < 32; i++)
     mips_collect_register (regcache, use_64bit, i, regset + i);
 
-  mips_collect_register (regcache, use_64bit,
-			 find_regno (tdesc, "lo"), regset + 32);
-  mips_collect_register (regcache, use_64bit,
-			 find_regno (tdesc, "hi"), regset + 33);
-  mips_collect_register (regcache, use_64bit,
-			 find_regno (tdesc, "pc"), regset + 34);
-  mips_collect_register (regcache, use_64bit,
-			 find_regno (tdesc, "badvaddr"), regset + 35);
-  mips_collect_register (regcache, use_64bit,
-			 find_regno (tdesc, "status"), regset + 36);
-  mips_collect_register (regcache, use_64bit,
-			 find_regno (tdesc, "cause"), regset + 37);
+  mips_collect_register (regcache, use_64bit, find_regno (tdesc, "lo"),
+                         regset + 32);
+  mips_collect_register (regcache, use_64bit, find_regno (tdesc, "hi"),
+                         regset + 33);
+  mips_collect_register (regcache, use_64bit, find_regno (tdesc, "pc"),
+                         regset + 34);
+  mips_collect_register (regcache, use_64bit, find_regno (tdesc, "badvaddr"),
+                         regset + 35);
+  mips_collect_register (regcache, use_64bit, find_regno (tdesc, "status"),
+                         regset + 36);
+  mips_collect_register (regcache, use_64bit, find_regno (tdesc, "cause"),
+                         regset + 37);
 
-  mips_collect_register (regcache, use_64bit,
-			 find_regno (tdesc, "restart"), regset + 0);
+  mips_collect_register (regcache, use_64bit, find_regno (tdesc, "restart"),
+                         regset + 0);
 }
 
 static void
@@ -839,20 +815,20 @@ mips_store_gregset (struct regcache *regcache, const void *buf)
     mips_supply_register (regcache, use_64bit, i, regset + i);
 
   mips_supply_register (regcache, use_64bit,
-			find_regno (regcache->tdesc, "lo"), regset + 32);
+                        find_regno (regcache->tdesc, "lo"), regset + 32);
   mips_supply_register (regcache, use_64bit,
-			find_regno (regcache->tdesc, "hi"), regset + 33);
+                        find_regno (regcache->tdesc, "hi"), regset + 33);
   mips_supply_register (regcache, use_64bit,
-			find_regno (regcache->tdesc, "pc"), regset + 34);
+                        find_regno (regcache->tdesc, "pc"), regset + 34);
   mips_supply_register (regcache, use_64bit,
-			find_regno (regcache->tdesc, "badvaddr"), regset + 35);
+                        find_regno (regcache->tdesc, "badvaddr"), regset + 35);
   mips_supply_register (regcache, use_64bit,
-			find_regno (regcache->tdesc, "status"), regset + 36);
+                        find_regno (regcache->tdesc, "status"), regset + 36);
   mips_supply_register (regcache, use_64bit,
-			find_regno (regcache->tdesc, "cause"), regset + 37);
+                        find_regno (regcache->tdesc, "cause"), regset + 37);
 
   mips_supply_register (regcache, use_64bit,
-			find_regno (regcache->tdesc, "restart"), regset + 0);
+                        find_regno (regcache->tdesc, "restart"), regset + 0);
 }
 
 static void
@@ -871,13 +847,14 @@ mips_fill_fpregset (struct regcache *regcache, void *buf)
       collect_register (regcache, first_fp + i, regset[i].buf);
     else
       collect_register (regcache, first_fp + i,
-			regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
+                        regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
   mips_collect_register_32bit (regcache, use_64bit,
-			       find_regno (regcache->tdesc, "fcsr"), regset[32].buf);
+                               find_regno (regcache->tdesc, "fcsr"),
+                               regset[32].buf);
   mips_collect_register_32bit (regcache, use_64bit,
-			       find_regno (regcache->tdesc, "fir"),
-			       regset[32].buf + 4);
+                               find_regno (regcache->tdesc, "fir"),
+                               regset[32].buf + 4);
 }
 
 static void
@@ -896,14 +873,14 @@ mips_store_fpregset (struct regcache *regcache, const void *buf)
       supply_register (regcache, first_fp + i, regset[i].buf);
     else
       supply_register (regcache, first_fp + i,
-		       regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
+                       regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
   mips_supply_register_32bit (regcache, use_64bit,
-			      find_regno (regcache->tdesc, "fcsr"),
-			      regset[32].buf);
+                              find_regno (regcache->tdesc, "fcsr"),
+                              regset[32].buf);
   mips_supply_register_32bit (regcache, use_64bit,
-			      find_regno (regcache->tdesc, "fir"),
-			      regset[32].buf + 4);
+                              find_regno (regcache->tdesc, "fir"),
+                              regset[32].buf + 4);
 }
 #endif /* HAVE_PTRACE_GETREGS */
 
@@ -911,7 +888,7 @@ mips_store_fpregset (struct regcache *regcache, const void *buf)
 
 void
 mips_target::low_collect_ptrace_register (regcache *regcache, int regno,
-					  char *buf)
+                                          char *buf)
 {
   int use_64bit = sizeof (PTRACE_XFER_TYPE) == 8;
 
@@ -930,7 +907,7 @@ mips_target::low_collect_ptrace_register (regcache *regcache, int regno,
 
 void
 mips_target::low_supply_ptrace_register (regcache *regcache, int regno,
-					 const char *buf)
+                                         const char *buf)
 {
   int use_64bit = sizeof (PTRACE_XFER_TYPE) == 8;
 
@@ -947,46 +924,36 @@ mips_target::low_supply_ptrace_register (regcache *regcache, int regno,
 
 static struct regset_info mips_regsets[] = {
 #ifdef HAVE_PTRACE_GETREGS
-  { PTRACE_GETREGS, PTRACE_SETREGS, 0, 38 * 8, GENERAL_REGS,
-    mips_fill_gregset, mips_store_gregset },
-  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, 33 * 8, FP_REGS,
-    mips_fill_fpregset, mips_store_fpregset },
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0, 38 * 8, GENERAL_REGS, mips_fill_gregset,
+    mips_store_gregset },
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, 33 * 8, FP_REGS, mips_fill_fpregset,
+    mips_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
   NULL_REGSET
 };
 
-static struct regsets_info mips_regsets_info =
-  {
-    mips_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct regsets_info mips_regsets_info = {
+  mips_regsets, /* regsets */
+  0,            /* num_regsets */
+  NULL,         /* disabled_regsets */
+};
 
-static struct usrregs_info mips_dsp_usrregs_info =
-  {
-    mips_dsp_num_regs,
-    mips_dsp_regmap,
-  };
+static struct usrregs_info mips_dsp_usrregs_info = {
+  mips_dsp_num_regs,
+  mips_dsp_regmap,
+};
 
-static struct usrregs_info mips_usrregs_info =
-  {
-    mips_num_regs,
-    mips_regmap,
-  };
+static struct usrregs_info mips_usrregs_info = {
+  mips_num_regs,
+  mips_regmap,
+};
 
-static struct regs_info dsp_regs_info =
-  {
-    mips_dsp_regset_bitmap,
-    &mips_dsp_usrregs_info,
-    &mips_regsets_info
-  };
+static struct regs_info dsp_regs_info
+  = { mips_dsp_regset_bitmap, &mips_dsp_usrregs_info, &mips_regsets_info };
 
-static struct regs_info myregs_info =
-  {
-    NULL, /* regset_bitmap */
-    &mips_usrregs_info,
-    &mips_regsets_info
-  };
+static struct regs_info myregs_info
+  = { NULL, /* regset_bitmap */
+      &mips_usrregs_info, &mips_regsets_info };
 
 const regs_info *
 mips_target::get_regs_info ()

@@ -31,40 +31,40 @@
    common ptrace requests.  */
 
 #ifdef HAVE_PTRACE_H
-# include <ptrace.h>
+#include <ptrace.h>
 #elif defined(HAVE_SYS_PTRACE_H)
-# include <sys/ptrace.h>
+#include <sys/ptrace.h>
 #endif
 
 /* No need to include <unistd.h> since it's already included by
    "defs.h".  */
 
 #ifndef PT_TRACE_ME
-# define PT_TRACE_ME	0
+#define PT_TRACE_ME 0
 #endif
 
 #ifndef PT_READ_I
-# define PT_READ_I	1	/* Read word in child's I space.  */
+#define PT_READ_I 1 /* Read word in child's I space.  */
 #endif
 
 #ifndef PT_READ_D
-# define PT_READ_D	2	/* Read word in child's D space.  */
+#define PT_READ_D 2 /* Read word in child's D space.  */
 #endif
 
 #ifndef PT_READ_U
-# define PT_READ_U	3	/* Read word in child's U space.  */
+#define PT_READ_U 3 /* Read word in child's U space.  */
 #endif
 
 #ifndef PT_WRITE_I
-# define PT_WRITE_I	4	/* Write word in child's I space.  */
+#define PT_WRITE_I 4 /* Write word in child's I space.  */
 #endif
 
 #ifndef PT_WRITE_D
-# define PT_WRITE_D	5	/* Write word in child's D space.  */
+#define PT_WRITE_D 5 /* Write word in child's D space.  */
 #endif
 
 #ifndef PT_WRITE_U
-# define PT_WRITE_U	6	/* Write word in child's U space.  */
+#define PT_WRITE_U 6 /* Write word in child's U space.  */
 #endif
 
 /* HP-UX doesn't define PT_CONTINUE and PT_STEP.  Instead of those two
@@ -73,37 +73,37 @@
    which apparently is what is wanted by the HP-UX native code.  */
 
 #ifndef PT_CONTINUE
-# ifdef PT_CONTIN1
-#  define PT_CONTINUE	PT_CONTIN1
-# else
-#  define PT_CONTINUE	7	/* Continue the child.  */
-# endif
+#ifdef PT_CONTIN1
+#define PT_CONTINUE PT_CONTIN1
+#else
+#define PT_CONTINUE 7 /* Continue the child.  */
+#endif
 #endif
 
 #ifndef PT_KILL
-# define PT_KILL	8	/* Kill the child process.  */
+#define PT_KILL 8 /* Kill the child process.  */
 #endif
 
 #ifndef PT_STEP
-# ifdef PT_SINGLE1
-#  define PT_STEP	PT_SINGLE1
-# else
-#  define PT_STEP	9	/* Single step the child.   */
-# endif
+#ifdef PT_SINGLE1
+#define PT_STEP PT_SINGLE1
+#else
+#define PT_STEP 9 /* Single step the child.   */
+#endif
 #endif
 
 /* Not all systems support attaching and detaching.   */
 
 #ifndef PT_ATTACH
-# ifdef PTRACE_ATTACH
-#  define PT_ATTACH PTRACE_ATTACH
-# endif
+#ifdef PTRACE_ATTACH
+#define PT_ATTACH PTRACE_ATTACH
+#endif
 #endif
 
 #ifndef PT_DETACH
-# ifdef PTRACE_DETACH
-#  define PT_DETACH PTRACE_DETACH
-# endif
+#ifdef PTRACE_DETACH
+#define PT_DETACH PTRACE_DETACH
+#endif
 #endif
 
 /* For systems such as HP/UX that do not provide PT_SYSCALL, define it
@@ -114,11 +114,11 @@
    and there is probably no special request that we would be required
    to use when resuming the execution of our program.  */
 #ifndef PT_SYSCALL
-# ifdef PTRACE_SYSCALL
-#  define PT_SYSCALL PTRACE_SYSCALL
+#ifdef PTRACE_SYSCALL
+#define PT_SYSCALL PTRACE_SYSCALL
 #else
-#  define PT_SYSCALL PT_CONTINUE
-# endif
+#define PT_SYSCALL PT_CONTINUE
+#endif
 #endif
 
 /* Some systems, at least AIX and HP-UX have a ptrace with five
@@ -127,19 +127,17 @@
    zero.  */
 
 #ifdef PTRACE_TYPE_ARG5
-# ifdef HAVE_PTRACE64
-#  define ptrace(request, pid, addr, data) \
-	  ptrace64 (request, pid, addr, data, 0)
-#  undef PTRACE_TYPE_ARG3
-#  define PTRACE_TYPE_ARG3 long long
-# else
-#  define ptrace(request, pid, addr, data) \
-	  ptrace (request, pid, addr, data, 0)
-# endif
+#ifdef HAVE_PTRACE64
+#define ptrace(request, pid, addr, data) ptrace64 (request, pid, addr, data, 0)
+#undef PTRACE_TYPE_ARG3
+#define PTRACE_TYPE_ARG3 long long
+#else
+#define ptrace(request, pid, addr, data) ptrace (request, pid, addr, data, 0)
+#endif
 #else
 /* Wrapper that avoids adding a pointless cast to all callers.  */
-# define ptrace(request, pid, addr, data) \
-	 ptrace ((PTRACE_TYPE_ARG1) request, pid, addr, data)
+#define ptrace(request, pid, addr, data) \
+  ptrace ((PTRACE_TYPE_ARG1) request, pid, addr, data)
 #endif
 
 #endif /* NAT_GDB_PTRACE_H */

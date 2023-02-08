@@ -35,30 +35,24 @@
 
 /* Register maps.  */
 
-static const struct regcache_map_entry arm_fbsd_gregmap[] =
-  {
-    { 13, ARM_A1_REGNUM, 4 }, /* r0 ... r12 */
-    { 1, ARM_SP_REGNUM, 4 },
-    { 1, ARM_LR_REGNUM, 4 },
-    { 1, ARM_PC_REGNUM, 4 },
-    { 1, ARM_PS_REGNUM, 4 },
-    { 0 }
-  };
+static const struct regcache_map_entry arm_fbsd_gregmap[]
+  = { { 13, ARM_A1_REGNUM, 4 }, /* r0 ... r12 */
+      { 1, ARM_SP_REGNUM, 4 },
+      { 1, ARM_LR_REGNUM, 4 },
+      { 1, ARM_PC_REGNUM, 4 },
+      { 1, ARM_PS_REGNUM, 4 },
+      { 0 } };
 
-static const struct regcache_map_entry arm_fbsd_vfpregmap[] =
-  {
-    { 32, ARM_D0_REGNUM, 8 }, /* d0 ... d31 */
-    { 1, ARM_FPSCR_REGNUM, 4 },
-    { 0 }
-  };
+static const struct regcache_map_entry arm_fbsd_vfpregmap[]
+  = { { 32, ARM_D0_REGNUM, 8 }, /* d0 ... d31 */
+      { 1, ARM_FPSCR_REGNUM, 4 },
+      { 0 } };
 
 /* Register numbers are relative to tdep->tls_regnum.  */
 
-static const struct regcache_map_entry arm_fbsd_tls_regmap[] =
-  {
-    { 1, 0, 4 },	/* tpidruro  */
-    { 0 }
-  };
+static const struct regcache_map_entry arm_fbsd_tls_regmap[]
+  = { { 1, 0, 4 }, /* tpidruro  */
+      { 0 } };
 
 /* In a signal frame, sp points to a 'struct sigframe' which is
    defined as:
@@ -97,72 +91,60 @@ static const struct regcache_map_entry arm_fbsd_tls_regmap[] =
    the sigframe, otherwise it is NULL.  There is no non-VFP floating
    point register state saved in the signal frame.  */
 
-#define ARM_SIGFRAME_UCONTEXT_OFFSET	64
-#define ARM_UCONTEXT_MCONTEXT_OFFSET	16
-#define ARM_MCONTEXT_VFP_PTR_OFFSET	72
+#define ARM_SIGFRAME_UCONTEXT_OFFSET 64
+#define ARM_UCONTEXT_MCONTEXT_OFFSET 16
+#define ARM_MCONTEXT_VFP_PTR_OFFSET 72
 
 /* Implement the "init" method of struct tramp_frame.  */
 
 static void
 arm_fbsd_sigframe_init (const struct tramp_frame *self,
 			frame_info_ptr this_frame,
-			struct trad_frame_cache *this_cache,
-			CORE_ADDR func)
+			struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
-  CORE_ADDR mcontext_addr = (sp
-			     + ARM_SIGFRAME_UCONTEXT_OFFSET
-			     + ARM_UCONTEXT_MCONTEXT_OFFSET);
+  CORE_ADDR mcontext_addr
+    = (sp + ARM_SIGFRAME_UCONTEXT_OFFSET + ARM_UCONTEXT_MCONTEXT_OFFSET);
   ULONGEST mcontext_vfp_addr;
 
   trad_frame_set_reg_regmap (this_cache, arm_fbsd_gregmap, mcontext_addr,
 			     regcache_map_entry_size (arm_fbsd_gregmap));
 
   if (safe_read_memory_unsigned_integer (mcontext_addr
-					 + ARM_MCONTEXT_VFP_PTR_OFFSET, 4,
-					 byte_order,
-					 &mcontext_vfp_addr)
+					   + ARM_MCONTEXT_VFP_PTR_OFFSET,
+					 4, byte_order, &mcontext_vfp_addr)
       && mcontext_vfp_addr != 0)
-    trad_frame_set_reg_regmap (this_cache, arm_fbsd_vfpregmap, mcontext_vfp_addr,
+    trad_frame_set_reg_regmap (this_cache, arm_fbsd_vfpregmap,
+			       mcontext_vfp_addr,
 			       regcache_map_entry_size (arm_fbsd_vfpregmap));
 
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-static const struct tramp_frame arm_fbsd_sigframe =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    {0xe1a0000d, ULONGEST_MAX},		/* mov  r0, sp  */
-    {0xe2800040, ULONGEST_MAX},		/* add  r0, r0, #SIGF_UC  */
-    {0xe59f700c, ULONGEST_MAX},		/* ldr  r7, [pc, #12]  */
-    {0xef0001a1, ULONGEST_MAX},		/* swi  SYS_sigreturn  */
-    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
-  },
-  arm_fbsd_sigframe_init
-};
+static const struct tramp_frame arm_fbsd_sigframe
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0xe1a0000d, ULONGEST_MAX }, /* mov  r0, sp  */
+	{ 0xe2800040, ULONGEST_MAX }, /* add  r0, r0, #SIGF_UC  */
+	{ 0xe59f700c, ULONGEST_MAX }, /* ldr  r7, [pc, #12]  */
+	{ 0xef0001a1, ULONGEST_MAX }, /* swi  SYS_sigreturn  */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      arm_fbsd_sigframe_init };
 
 /* Register set definitions.  */
 
-const struct regset arm_fbsd_gregset =
-  {
-    arm_fbsd_gregmap,
-    regcache_supply_regset, regcache_collect_regset
-  };
+const struct regset arm_fbsd_gregset
+  = { arm_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset };
 
-const struct regset arm_fbsd_vfpregset =
-  {
-    arm_fbsd_vfpregmap,
-    regcache_supply_regset, regcache_collect_regset
-  };
+const struct regset arm_fbsd_vfpregset
+  = { arm_fbsd_vfpregmap, regcache_supply_regset, regcache_collect_regset };
 
 static void
 arm_fbsd_supply_tls_regset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *buf, size_t size)
+			    struct regcache *regcache, int regnum,
+			    const void *buf, size_t size)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
@@ -172,8 +154,8 @@ arm_fbsd_supply_tls_regset (const struct regset *regset,
 
 static void
 arm_fbsd_collect_tls_regset (const struct regset *regset,
-			     const struct regcache *regcache,
-			     int regnum, void *buf, size_t size)
+			     const struct regcache *regcache, int regnum,
+			     void *buf, size_t size)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
@@ -181,11 +163,9 @@ arm_fbsd_collect_tls_regset (const struct regset *regset,
   regcache->collect_regset (regset, tdep->tls_regnum, regnum, buf, size);
 }
 
-const struct regset arm_fbsd_tls_regset =
-  {
-    arm_fbsd_tls_regmap,
-    arm_fbsd_supply_tls_regset, arm_fbsd_collect_tls_regset
-  };
+const struct regset arm_fbsd_tls_regset
+  = { arm_fbsd_tls_regmap, arm_fbsd_supply_tls_regset,
+      arm_fbsd_collect_tls_regset };
 
 /* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
@@ -222,7 +202,8 @@ arm_fbsd_read_description_auxv (const gdb::optional<gdb::byte_vector> &auxv,
 
   if (!auxv.has_value ()
       || target_auxv_search (*auxv, target, gdbarch, AT_FREEBSD_HWCAP,
-			     &arm_hwcap) != 1)
+			     &arm_hwcap)
+	   != 1)
     return arm_read_description (ARM_FP_TYPE_NONE, tls);
 
   if (arm_hwcap & HWCAP_VFP)
@@ -247,21 +228,20 @@ arm_fbsd_read_description_auxv (bool tls)
   gdb::optional<gdb::byte_vector> auxv = target_read_auxv ();
   return arm_fbsd_read_description_auxv (auxv,
 					 current_inferior ()->top_target (),
-					 current_inferior ()->gdbarch,
-					 tls);
+					 current_inferior ()->gdbarch, tls);
 }
 
 /* Implement the "core_read_description" gdbarch method.  */
 
 static const struct target_desc *
 arm_fbsd_core_read_description (struct gdbarch *gdbarch,
-				struct target_ops *target,
-				bfd *abfd)
+				struct target_ops *target, bfd *abfd)
 {
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
 
   gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
-  return arm_fbsd_read_description_auxv (auxv, target, gdbarch, tls != nullptr);
+  return arm_fbsd_read_description_auxv (auxv, target, gdbarch,
+					 tls != nullptr);
 }
 
 /* Implement the get_thread_local_address gdbarch method.  */
@@ -280,7 +260,7 @@ arm_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 
   ULONGEST tpidruro;
   if (regcache->cooked_read (tdep->tls_regnum, &tpidruro) != REG_VALID)
-    error (_("Unable to fetch %%tpidruro"));
+    error (_ ("Unable to fetch %%tpidruro"));
 
   /* %tpidruro points to the TCB whose first member is the dtv
       pointer.  */
@@ -303,14 +283,14 @@ arm_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch, &arm_fbsd_sigframe);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
   tdep->jb_pc = 24;
   tdep->jb_elt_size = 4;
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, arm_fbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, arm_fbsd_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch, arm_fbsd_core_read_description);
 
   if (tdep->tls_regnum > 0)
@@ -326,6 +306,7 @@ arm_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_arm_fbsd_tdep ();
+
 void
 _initialize_arm_fbsd_tdep ()
 {

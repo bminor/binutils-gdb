@@ -57,11 +57,11 @@
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
 #endif
-
 
 class m68k_linux_nat_target final : public linux_nat_target
 {
 public:
+
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -70,16 +70,13 @@ public:
 static m68k_linux_nat_target the_m68k_linux_nat_target;
 
 /* This table must line up with gdbarch_register_name in "m68k-tdep.c".  */
-static const int regmap[] =
-{
-  PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7,
-  PT_A0, PT_A1, PT_A2, PT_A3, PT_A4, PT_A5, PT_A6, PT_USP,
-  PT_SR, PT_PC,
-  /* PT_FP0, ..., PT_FP7 */
-  21, 24, 27, 30, 33, 36, 39, 42,
-  /* PT_FPCR, PT_FPSR, PT_FPIAR */
-  45, 46, 47
-};
+static const int regmap[]
+  = { PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7, PT_A0, PT_A1,
+      PT_A2, PT_A3, PT_A4, PT_A5, PT_A6, PT_USP, PT_SR, PT_PC,
+      /* PT_FP0, ..., PT_FP7 */
+      21, 24, 27, 30, 33, 36, 39, 42,
+      /* PT_FPCR, PT_FPSR, PT_FPIAR */
+      45, 46, 47 };
 
 /* Which ptrace request retrieves which registers?
    These apply to the corresponding SET requests as well.  */
@@ -105,9 +102,7 @@ static int have_ptrace_getregs =
 #else
   0
 #endif
-;
-
-
+  ;
 
 /* Fetching registers directly from the U area, one at a time.  */
 
@@ -130,9 +125,9 @@ fetch_register (struct regcache *regcache, int regno)
       memcpy (&buf[i], &val, sizeof (long));
       regaddr += sizeof (long);
       if (errno != 0)
-	error (_("Couldn't read register %s (#%d): %s."), 
-	       gdbarch_register_name (gdbarch, regno),
-	       regno, safe_strerror (errno));
+	error (_ ("Couldn't read register %s (#%d): %s."),
+	       gdbarch_register_name (gdbarch, regno), regno,
+	       safe_strerror (errno));
     }
   regcache->raw_supply (regno, buf);
 }
@@ -150,9 +145,7 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
     }
   else
     {
-      for (regno = 0;
-	   regno < gdbarch_num_regs (regcache->arch ());
-	   regno++)
+      for (regno = 0; regno < gdbarch_num_regs (regcache->arch ()); regno++)
 	{
 	  fetch_register (regcache, regno);
 	}
@@ -183,9 +176,9 @@ store_register (const struct regcache *regcache, int regno)
       ptrace (PTRACE_POKEUSER, tid, regaddr, val);
       regaddr += sizeof (long);
       if (errno != 0)
-	error (_("Couldn't write register %s (#%d): %s."),
-	       gdbarch_register_name (gdbarch, regno),
-	       regno, safe_strerror (errno));
+	error (_ ("Couldn't write register %s (#%d): %s."),
+	       gdbarch_register_name (gdbarch, regno), regno,
+	       safe_strerror (errno));
     }
 }
 
@@ -202,15 +195,13 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
     }
   else
     {
-      for (regno = 0;
-	   regno < gdbarch_num_regs (regcache->arch ());
-	   regno++)
+      for (regno = 0; regno < gdbarch_num_regs (regcache->arch ()); regno++)
 	{
 	  store_register (regcache, regno);
 	}
     }
 }
-
+
 /*  Given a pointer to a general register set in /proc format
    (elf_gregset_t *), unpack the register contents and supply
    them as gdb's idea of the current register values.  */
@@ -222,9 +213,7 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
   const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int regi;
 
-  for (regi = M68K_D0_REGNUM;
-       regi <= gdbarch_sp_regnum (gdbarch);
-       regi++)
+  for (regi = M68K_D0_REGNUM; regi <= gdbarch_sp_regnum (gdbarch); regi++)
     regcache->raw_supply (regi, &regp[regmap[regi]]);
   regcache->raw_supply (gdbarch_ps_regnum (gdbarch), &regp[PT_SR]);
   regcache->raw_supply (gdbarch_pc_regnum (gdbarch), &regp[PT_PC]);
@@ -234,8 +223,8 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
    *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
    do this for all registers.  */
 void
-fill_gregset (const struct regcache *regcache,
-	      elf_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache, elf_gregset_t *gregsetp,
+	      int regno)
 {
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
@@ -265,7 +254,7 @@ fetch_regs (struct regcache *regcache, int tid)
 	  return;
 	}
 
-      perror_with_name (_("Couldn't get registers"));
+      perror_with_name (_ ("Couldn't get registers"));
     }
 
   supply_gregset (regcache, (const elf_gregset_t *) &regs);
@@ -280,31 +269,32 @@ store_regs (const struct regcache *regcache, int tid, int regno)
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
   fill_gregset (regcache, &regs, regno);
 
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name (_("Couldn't write registers"));
+    perror_with_name (_ ("Couldn't write registers"));
 }
 
 #else
 
-static void fetch_regs (struct regcache *regcache, int tid)
+static void
+fetch_regs (struct regcache *regcache, int tid)
 {
 }
 
-static void store_regs (const struct regcache *regcache, int tid, int regno)
+static void
+store_regs (const struct regcache *regcache, int tid, int regno)
 {
 }
 
 #endif
 
-
 /* Transfering floating-point registers between GDB, inferiors and cores.  */
 
 /* What is the address of fpN within the floating-point register set F?  */
-#define FPREG_ADDR(f, n) (&(f)->fpregs[(n) * 3])
+#define FPREG_ADDR(f, n) (&(f)->fpregs[(n) *3])
 
 /* Fill GDB's register array with the floating-point register values in
    *FPREGSETP.  */
@@ -317,8 +307,9 @@ supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 
   for (regi = gdbarch_fp0_regnum (gdbarch);
        regi < gdbarch_fp0_regnum (gdbarch) + 8; regi++)
-    regcache->raw_supply
-      (regi, FPREG_ADDR (fpregsetp, regi - gdbarch_fp0_regnum (gdbarch)));
+    regcache->raw_supply (regi,
+			  FPREG_ADDR (fpregsetp,
+				      regi - gdbarch_fp0_regnum (gdbarch)));
   regcache->raw_supply (M68K_FPC_REGNUM, &fpregsetp->fpcntl[0]);
   regcache->raw_supply (M68K_FPS_REGNUM, &fpregsetp->fpcntl[1]);
   regcache->raw_supply (M68K_FPI_REGNUM, &fpregsetp->fpcntl[2]);
@@ -329,18 +320,18 @@ supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
    do this for all registers.  */
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       elf_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache, elf_fpregset_t *fpregsetp,
+	       int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int i;
 
   /* Fill in the floating-point registers.  */
-  for (i = gdbarch_fp0_regnum (gdbarch);
-       i < gdbarch_fp0_regnum (gdbarch) + 8; i++)
+  for (i = gdbarch_fp0_regnum (gdbarch); i < gdbarch_fp0_regnum (gdbarch) + 8;
+       i++)
     if (regno == -1 || regno == i)
-      regcache->raw_collect
-	(i, FPREG_ADDR (fpregsetp, i - gdbarch_fp0_regnum (gdbarch)));
+      regcache->raw_collect (i, FPREG_ADDR (fpregsetp,
+					    i - gdbarch_fp0_regnum (gdbarch)));
 
   /* Fill in the floating-point control registers.  */
   for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)
@@ -359,7 +350,7 @@ fetch_fpregs (struct regcache *regcache, int tid)
   elf_fpregset_t fpregs;
 
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
-    perror_with_name (_("Couldn't get floating point status"));
+    perror_with_name (_ ("Couldn't get floating point status"));
 
   supply_fpregset (regcache, (const elf_fpregset_t *) &fpregs);
 }
@@ -373,26 +364,28 @@ store_fpregs (const struct regcache *regcache, int tid, int regno)
   elf_fpregset_t fpregs;
 
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
-    perror_with_name (_("Couldn't get floating point status"));
+    perror_with_name (_ ("Couldn't get floating point status"));
 
   fill_fpregset (regcache, &fpregs, regno);
 
   if (ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs) < 0)
-    perror_with_name (_("Couldn't write floating point status"));
+    perror_with_name (_ ("Couldn't write floating point status"));
 }
 
 #else
 
-static void fetch_fpregs (struct regcache *regcache, int tid)
+static void
+fetch_fpregs (struct regcache *regcache, int tid)
 {
 }
 
-static void store_fpregs (const struct regcache *regcache, int tid, int regno)
+static void
+store_fpregs (const struct regcache *regcache, int tid, int regno)
 {
 }
 
 #endif
-
+
 /* Transferring arbitrary registers between GDB and inferior.  */
 
 /* Fetch register REGNO from the child process.  If REGNO is -1, do
@@ -406,7 +399,7 @@ m68k_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 
   /* Use the old method of peeking around in `struct user' if the
      GETREGS request isn't available.  */
-  if (! have_ptrace_getregs)
+  if (!have_ptrace_getregs)
     {
       old_fetch_inferior_registers (regcache, regno);
       return;
@@ -423,7 +416,7 @@ m68k_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       fetch_regs (regcache, tid);
 
       /* The call above might reset `have_ptrace_getregs'.  */
-      if (! have_ptrace_getregs)
+      if (!have_ptrace_getregs)
 	{
 	  old_fetch_inferior_registers (regcache, -1);
 	  return;
@@ -445,7 +438,7 @@ m68k_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (_("Got request for bad register number %d."), regno);
+  internal_error (_ ("Got request for bad register number %d."), regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -458,7 +451,7 @@ m68k_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 
   /* Use the old method of poking around in `struct user' if the
      SETREGS request isn't available.  */
-  if (! have_ptrace_getregs)
+  if (!have_ptrace_getregs)
     {
       old_store_inferior_registers (regcache, regno);
       return;
@@ -488,15 +481,14 @@ m68k_linux_nat_target::store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (_("Got request to store bad register number %d."), regno);
+  internal_error (_ ("Got request to store bad register number %d."), regno);
 }
-
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph, 
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+		    void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) < 0)
     return PS_ERR;
@@ -510,6 +502,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
 }
 
 void _initialize_m68k_linux_nat ();
+
 void
 _initialize_m68k_linux_nat ()
 {

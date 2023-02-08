@@ -32,15 +32,9 @@ template<typename T>
 class lazy_init
 {
 public:
-  void emplace ()
-  {
-    new (&m_u.obj) T ();
-  }
+  void emplace () { new (&m_u.obj) T (); }
 
-  void reset ()
-  {
-    m_u.obj.~T ();
-  }
+  void reset () { m_u.obj.~T (); }
 
 private:
   union u

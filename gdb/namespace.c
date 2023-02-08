@@ -36,14 +36,11 @@
    but the pointed to characters are not copied.  */
 
 void
-add_using_directive (struct using_direct **using_directives,
-		     const char *dest,
-		     const char *src,
-		     const char *alias,
+add_using_directive (struct using_direct **using_directives, const char *dest,
+		     const char *src, const char *alias,
 		     const char *declaration,
 		     const std::vector<const char *> &excludes,
-		     unsigned int decl_line,
-		     int copy_names,
+		     unsigned int decl_line, int copy_names,
 		     struct obstack *obstack)
 {
   struct using_direct *current;
@@ -86,8 +83,8 @@ add_using_directive (struct using_direct **using_directives,
       return;
     }
 
-  alloc_len = (sizeof(*newobj)
-	       + (excludes.size () * sizeof(*newobj->excludes)));
+  alloc_len
+    = (sizeof (*newobj) + (excludes.size () * sizeof (*newobj->excludes)));
   newobj = (struct using_direct *) obstack_alloc (obstack, alloc_len);
   memset (newobj, 0, sizeof (*newobj));
 
@@ -132,8 +129,7 @@ using_direct::valid_line (unsigned int boundary) const
     {
       CORE_ADDR curr_pc = get_frame_pc (get_selected_frame (nullptr));
       symtab_and_line curr_sal = find_pc_line (curr_pc, 0);
-      return (decl_line <= curr_sal.line)
-	     || (decl_line >= boundary);
+      return (decl_line <= curr_sal.line) || (decl_line >= boundary);
     }
   catch (const gdb_exception &ex)
     {

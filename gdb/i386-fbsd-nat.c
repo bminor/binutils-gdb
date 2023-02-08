@@ -37,6 +37,7 @@
 class i386_fbsd_nat_target final : public x86_fbsd_nat_target
 {
 public:
+
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
 
@@ -75,7 +76,7 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       register_t base;
 
       if (ptrace (PT_GETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't get segment register fs_base"));
+	perror_with_name (_ ("Couldn't get segment register fs_base"));
 
       regcache->raw_supply (I386_FSBASE_REGNUM, &base);
       if (regnum != -1)
@@ -88,7 +89,7 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       register_t base;
 
       if (ptrace (PT_GETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't get segment register gs_base"));
+	perror_with_name (_ ("Couldn't get segment register gs_base"));
 
       regcache->raw_supply (I386_GSBASE_REGNUM, &base);
       if (regnum != -1)
@@ -96,7 +97,7 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
     }
 #endif
 
-  /* There is no i386_fxsave_supplies or i386_xsave_supplies.
+    /* There is no i386_fxsave_supplies or i386_xsave_supplies.
      Instead, the earlier register sets return early if the request
      was for a specific register that was already satisified to avoid
      fetching the FPU/XSAVE state unnecessarily.  */
@@ -107,7 +108,7 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       void *xstateregs = alloca (xsave_len);
 
       if (ptrace (PT_GETXSTATE, pid, (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
-	perror_with_name (_("Couldn't get extended state status"));
+	perror_with_name (_ ("Couldn't get extended state status"));
 
       i387_supply_xsave (regcache, regnum, xstateregs);
       return;
@@ -117,8 +118,8 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
     {
       char xmmregs[I387_SIZEOF_FXSAVE];
 
-      if (ptrace(PT_GETXMMREGS, pid, (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
-	perror_with_name (_("Couldn't get XMM registers"));
+      if (ptrace (PT_GETXMMREGS, pid, (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
+	perror_with_name (_ ("Couldn't get XMM registers"));
 
       i387_supply_fxsave (regcache, regnum, xmmregs);
       return;
@@ -127,7 +128,7 @@ i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
   struct fpreg fpregs;
 
   if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-    perror_with_name (_("Couldn't get floating point status"));
+    perror_with_name (_ ("Couldn't get floating point status"));
 
   i387_supply_fsave (regcache, regnum, &fpregs);
 }
@@ -156,7 +157,7 @@ i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       regcache->raw_collect (I386_FSBASE_REGNUM, &base);
 
       if (ptrace (PT_SETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't write segment register fs_base"));
+	perror_with_name (_ ("Couldn't write segment register fs_base"));
       if (regnum != -1)
 	return;
     }
@@ -169,13 +170,13 @@ i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       regcache->raw_collect (I386_GSBASE_REGNUM, &base);
 
       if (ptrace (PT_SETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't write segment register gs_base"));
+	perror_with_name (_ ("Couldn't write segment register gs_base"));
       if (regnum != -1)
 	return;
     }
 #endif
 
-  /* There is no i386_fxsave_supplies or i386_xsave_supplies.
+    /* There is no i386_fxsave_supplies or i386_xsave_supplies.
      Instead, the earlier register sets return early if the request
      was for a specific register that was already satisified to avoid
      fetching the FPU/XSAVE state unnecessarily.  */
@@ -186,13 +187,13 @@ i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
       void *xstateregs = alloca (xsave_len);
 
       if (ptrace (PT_GETXSTATE, pid, (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
-	perror_with_name (_("Couldn't get extended state status"));
+	perror_with_name (_ ("Couldn't get extended state status"));
 
       i387_collect_xsave (regcache, regnum, xstateregs, 0);
 
       if (ptrace (PT_SETXSTATE, pid, (PTRACE_TYPE_ARG3) xstateregs, xsave_len)
 	  == -1)
-	perror_with_name (_("Couldn't write extended state status"));
+	perror_with_name (_ ("Couldn't write extended state status"));
       return;
     }
 #endif
@@ -200,25 +201,25 @@ i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
     {
       char xmmregs[I387_SIZEOF_FXSAVE];
 
-      if (ptrace(PT_GETXMMREGS, pid, (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
-	perror_with_name (_("Couldn't get XMM registers"));
+      if (ptrace (PT_GETXMMREGS, pid, (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
+	perror_with_name (_ ("Couldn't get XMM registers"));
 
       i387_collect_fxsave (regcache, regnum, xmmregs);
 
       if (ptrace (PT_SETXMMREGS, pid, (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
-	perror_with_name (_("Couldn't write XMM registers"));
+	perror_with_name (_ ("Couldn't write XMM registers"));
       return;
     }
 
   struct fpreg fpregs;
 
   if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-    perror_with_name (_("Couldn't get floating point status"));
+    perror_with_name (_ ("Couldn't get floating point status"));
 
   i387_collect_fsave (regcache, regnum, &fpregs);
 
   if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-    perror_with_name (_("Couldn't write floating point status"));
+    perror_with_name (_ ("Couldn't write floating point status"));
 }
 
 /* Resume execution of the inferior process.  If STEP is nonzero,
@@ -251,8 +252,7 @@ i386_fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 	 never goes through the kernel's trap() function which would
 	 normally clear it.  */
 
-      regcache_cooked_read_unsigned (regcache, I386_EFLAGS_REGNUM,
-				     &eflags);
+      regcache_cooked_read_unsigned (regcache, I386_EFLAGS_REGNUM, &eflags);
       if (eflags & 0x0100)
 	regcache_cooked_write_unsigned (regcache, I386_EFLAGS_REGNUM,
 					eflags & ~0x0100);
@@ -263,11 +263,9 @@ i386_fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   /* An addres of (caddr_t) 1 tells ptrace to continue from where it
      was.  (If GDB wanted it to start some other way, we have already
      written a new PC value to the child.)  */
-  if (ptrace (request, pid, (caddr_t) 1,
-	      gdb_signal_to_host (signal)) == -1)
+  if (ptrace (request, pid, (caddr_t) 1, gdb_signal_to_host (signal)) == -1)
     perror_with_name (("ptrace"));
 }
-
 
 /* Support for debugging kernel virtual memory images.  */
 
@@ -302,7 +300,6 @@ i386fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   return 1;
 }
-
 
 /* Implement the read_description method.  */
 
@@ -321,7 +318,8 @@ i386_fbsd_nat_target::read_description ()
       struct ptrace_xstate_info info;
 
       if (ptrace (PT_GETXSTATE_INFO, inferior_ptid.pid (),
-		  (PTRACE_TYPE_ARG3) &info, sizeof (info)) == 0)
+		  (PTRACE_TYPE_ARG3) &info, sizeof (info))
+	  == 0)
 	{
 	  xsave_len = info.xsave_len;
 	  xcr0 = info.xsave_mask;
@@ -338,7 +336,8 @@ i386_fbsd_nat_target::read_description ()
       char xmmregs[I387_SIZEOF_FXSAVE];
 
       if (ptrace (PT_GETXMMREGS, inferior_ptid.pid (),
-		  (PTRACE_TYPE_ARG3) xmmregs, 0) == 0)
+		  (PTRACE_TYPE_ARG3) xmmregs, 0)
+	  == 0)
 	have_ptrace_xmmregs = 1;
       xmm_probed = 1;
     }
@@ -350,6 +349,7 @@ i386_fbsd_nat_target::read_description ()
 }
 
 void _initialize_i386fbsd_nat ();
+
 void
 _initialize_i386fbsd_nat ()
 {

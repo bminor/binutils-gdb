@@ -47,13 +47,11 @@ be a compile-time error.  */
 /* Helper for SFINAE.  True if "T *" is memsettable.  I.e., if T is
    either void, or POD.  */
 template<typename T>
-struct IsMemsettable
-  : gdb::Or<std::is_void<T>,
-	    std::is_pod<T>>
-{};
+struct IsMemsettable : gdb::Or<std::is_void<T>, std::is_pod<T>>
+{
+};
 
-template <typename T,
-	  typename = gdb::Requires<gdb::Not<IsMemsettable<T>>>>
+template<typename T, typename = gdb::Requires<gdb::Not<IsMemsettable<T>>>>
 void *memset (T *s, int c, size_t n) = delete;
 
 #if HAVE_IS_TRIVIALLY_COPYABLE
@@ -64,23 +62,21 @@ void *memset (T *s, int c, size_t n) = delete;
 /* True if "T *" is relocatable.  I.e., copyable with memcpy/memmove.
    I.e., T is either trivially copyable, or void.  */
 template<typename T>
-struct IsRelocatable
-  : gdb::Or<std::is_void<T>,
-	    std::is_trivially_copyable<T>>
-{};
+struct IsRelocatable : gdb::Or<std::is_void<T>, std::is_trivially_copyable<T>>
+{
+};
 
 /* True if both source and destination are relocatable.  */
 
-template <typename D, typename S>
-using BothAreRelocatable
-  = gdb::And<IsRelocatable<D>, IsRelocatable<S>>;
+template<typename D, typename S>
+using BothAreRelocatable = gdb::And<IsRelocatable<D>, IsRelocatable<S>>;
 
-template <typename D, typename S,
-	  typename = gdb::Requires<gdb::Not<BothAreRelocatable<D, S>>>>
+template<typename D, typename S,
+         typename = gdb::Requires<gdb::Not<BothAreRelocatable<D, S>>>>
 void *memcpy (D *dest, const S *src, size_t n) = delete;
 
-template <typename D, typename S,
-	  typename = gdb::Requires<gdb::Not<BothAreRelocatable<D, S>>>>
+template<typename D, typename S,
+         typename = gdb::Requires<gdb::Not<BothAreRelocatable<D, S>>>>
 void *memmove (D *dest, const S *src, size_t n) = delete;
 
 #endif /* HAVE_IS_TRIVIALLY_COPYABLE */
@@ -98,7 +94,7 @@ using IsMallocable = std::true_type;
 template<typename T>
 using IsFreeable = gdb::Or<std::is_trivially_destructible<T>, std::is_void<T>>;
 
-template <typename T, typename = gdb::Requires<gdb::Not<IsFreeable<T>>>>
+template<typename T, typename = gdb::Requires<gdb::Not<IsFreeable<T>>>>
 void free (T *ptr) = delete;
 
 template<typename T>
@@ -111,7 +107,7 @@ data type.  Use operator new instead.");
 }
 
 #undef XNEW
-#define XNEW(T) xnew<T>()
+#define XNEW(T) xnew<T> ()
 
 template<typename T>
 static T *
@@ -123,7 +119,7 @@ data type.  Use operator new instead.");
 }
 
 #undef XCNEW
-#define XCNEW(T) xcnew<T>()
+#define XCNEW(T) xcnew<T> ()
 
 template<typename T>
 static void
@@ -191,7 +187,8 @@ xnewvar (size_t s)
 {
   static_assert (IsMallocable<T>::value, "Trying to use XNEWVAR with a \
 non-POD data type.");
-  return XNEWVAR (T, s);;
+  return XNEWVAR (T, s);
+  ;
 }
 
 #undef XNEWVAR

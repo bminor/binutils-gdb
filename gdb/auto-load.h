@@ -25,8 +25,10 @@ struct program_space;
 struct auto_load_pspace_info;
 struct extension_language_defn;
 
-namespace gdb {
-namespace observers {
+namespace gdb
+{
+namespace observers
+{
 struct token;
 } /* namespace observers */
 } /* namespace gdb */
@@ -51,7 +53,7 @@ extern bool auto_load_local_gdbinit_loaded;
 extern gdb::observers::token auto_load_new_objfile_observer_token;
 
 extern struct auto_load_pspace_info *
-  get_auto_load_pspace_data_for_loading (struct program_space *pspace);
+get_auto_load_pspace_data_for_loading (struct program_space *pspace);
 extern void auto_load_objfile_script (struct objfile *objfile,
 				      const struct extension_language_defn *);
 extern void load_auto_scripts_for_objfile (struct objfile *objfile);
@@ -75,7 +77,7 @@ extern bool file_is_auto_load_safe (const char *filename);
 
 /* Return true if auto-loading gdb scripts is enabled.  */
 
-extern bool auto_load_gdb_scripts_enabled
-  (const struct extension_language_defn *extlang);
+extern bool
+auto_load_gdb_scripts_enabled (const struct extension_language_defn *extlang);
 
 #endif /* AUTO_LOAD_H */

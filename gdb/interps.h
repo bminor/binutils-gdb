@@ -41,11 +41,11 @@ extern void interp_exec (struct interp *interp, const char *command);
 class interp
 {
 public:
+
   explicit interp (const char *name);
   virtual ~interp () = 0;
 
-  virtual void init (bool top_level)
-  {}
+  virtual void init (bool top_level) {}
 
   virtual void resume () = 0;
   virtual void suspend () = 0;
@@ -62,29 +62,27 @@ public:
      setup/cleanup that they might need when logging is enabled or
      disabled.  */
   virtual void set_logging (ui_file_up logfile, bool logging_redirect,
-			    bool debug_redirect) = 0;
+			    bool debug_redirect)
+    = 0;
 
   /* Called before starting an event loop, to give the interpreter a
      chance to e.g., print a prompt.  */
-  virtual void pre_command_loop ()
-  {}
+  virtual void pre_command_loop () {}
 
   /* Returns true if this interpreter supports using the readline
      library; false if it uses GDB's own simplified readline
      emulation.  */
-  virtual bool supports_command_editing ()
-  { return false; }
+  virtual bool supports_command_editing () { return false; }
 
-  const char *name () const
-  {
-    return m_name.get ();
-  }
+  const char *name () const { return m_name.get (); }
 
 private:
+
   /* This is the name in "-i=" and "set interpreter".  */
   gdb::unique_xmalloc_ptr<char> m_name;
 
 public:
+
   /* Interpreters are stored in a linked list, this is the next
      one...  */
   struct interp *next;
@@ -115,10 +113,7 @@ public:
   {
   }
 
-  ~scoped_restore_interp ()
-  {
-    set_interp (m_interp->name ());
-  }
+  ~scoped_restore_interp () { set_interp (m_interp->name ()); }
 
   scoped_restore_interp (const scoped_restore_interp &) = delete;
   scoped_restore_interp &operator= (const scoped_restore_interp &) = delete;
@@ -169,16 +164,15 @@ extern void interp_pre_command_loop (struct interp *interp);
    text.  */
 extern void interpreter_completer (struct cmd_list_element *ignore,
 				   completion_tracker &tracker,
-				   const char *text,
-				   const char *word);
+				   const char *text, const char *word);
 
 /* well-known interpreters */
-#define INTERP_CONSOLE		"console"
-#define INTERP_MI2             "mi2"
-#define INTERP_MI3             "mi3"
-#define INTERP_MI4             "mi4"
-#define INTERP_MI		"mi"
-#define INTERP_TUI		"tui"
-#define INTERP_INSIGHT		"insight"
+#define INTERP_CONSOLE "console"
+#define INTERP_MI2 "mi2"
+#define INTERP_MI3 "mi3"
+#define INTERP_MI4 "mi4"
+#define INTERP_MI "mi"
+#define INTERP_TUI "tui"
+#define INTERP_INSIGHT "insight"
 
 #endif

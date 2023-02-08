@@ -47,8 +47,8 @@
   builtin_type (gdbpy_enter::get_gdbarch ())->builtin_long_long
 
 /* Python's long type corresponds to C's long long type.  Unsigned version.  */
-#define builtin_type_upylong builtin_type \
-  (gdbpy_enter::get_gdbarch ())->builtin_unsigned_long_long
+#define builtin_type_upylong \
+  builtin_type (gdbpy_enter::get_gdbarch ())->builtin_unsigned_long_long
 
 #define builtin_type_pybool \
   language_bool_type (current_language, gdbpy_enter::get_gdbarch ())
@@ -56,9 +56,9 @@
 #define builtin_type_pychar \
   language_string_char_type (current_language, gdbpy_enter::get_gdbarch ())
 
-struct value_object {
-  PyObject_HEAD
-  struct value_object *next;
+struct value_object
+{
+  PyObject_HEAD struct value_object *next;
   struct value_object *prev;
   struct value *value;
   PyObject *address;
@@ -144,7 +144,7 @@ convert_buffer_and_type_to_value (PyObject *obj, struct type *type)
   Py_buffer_up buffer_up;
   Py_buffer py_buf;
 
-  if (PyObject_CheckBuffer (obj) 
+  if (PyObject_CheckBuffer (obj)
       && PyObject_GetBuffer (obj, &py_buf, PyBUF_SIMPLE) == 0)
     {
       /* Got a buffer, py_buf, out of obj.  Cause it to be released
@@ -154,14 +154,15 @@ convert_buffer_and_type_to_value (PyObject *obj, struct type *type)
   else
     {
       PyErr_SetString (PyExc_TypeError,
-		       _("Object must support the python buffer protocol."));
+		       _ ("Object must support the python buffer protocol."));
       return nullptr;
     }
 
   if (type->length () > py_buf.len)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("Size of type is larger than that of buffer object."));
+      PyErr_SetString (
+	PyExc_ValueError,
+	_ ("Size of type is larger than that of buffer object."));
       return nullptr;
     }
 
@@ -177,8 +178,8 @@ valpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   PyObject *val_obj = nullptr;
   PyObject *type_obj = nullptr;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwds, "O|O", keywords,
-					&val_obj, &type_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwds, "O|O", keywords, &val_obj,
+					&type_obj))
     return -1;
 
   struct type *type = nullptr;
@@ -188,7 +189,7 @@ valpy_init (PyObject *self, PyObject *args, PyObject *kwds)
       if (type == nullptr)
 	{
 	  PyErr_SetString (PyExc_TypeError,
-			   _("type argument must be a gdb.Type."));
+			   _ ("type argument must be a gdb.Type."));
 	  return -1;
 	}
     }
@@ -282,8 +283,8 @@ valpy_referenced_value (PyObject *self, PyObject *args)
 	  res_val = coerce_ref (self_val);
 	  break;
 	default:
-	  error(_("Trying to get the referenced value from a value which is "
-		  "neither a pointer nor a reference."));
+	  error (_ ("Trying to get the referenced value from a value which is "
+		    "neither a pointer nor a reference."));
 	}
 
       result = value_to_value_object (res_val);
@@ -490,13 +491,13 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
   static const char *keywords[] = { "encoding", "length", NULL };
   PyObject *str_obj = NULL;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG,
-					keywords, &user_encoding, &length))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG, keywords,
+					&user_encoding, &length))
     return NULL;
 
   if (length < -1)
     {
-      PyErr_SetString (PyExc_ValueError, _("Invalid length."));
+      PyErr_SetString (PyExc_ValueError, _ ("Invalid length."));
       return NULL;
     }
 
@@ -525,15 +526,15 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 	      length = array_length;
 	    else if (array_length == -1)
 	      {
-		type = lookup_array_range_type (realtype->target_type (),
-						0, length - 1);
+		type = lookup_array_range_type (realtype->target_type (), 0,
+						length - 1);
 	      }
 	    else if (length != array_length)
 	      {
 		/* We need to create a new array type with the
 		   specified length.  */
 		if (length > array_length)
-		  error (_("Length is larger than array size."));
+		  error (_ ("Length is larger than array size."));
 		type = lookup_array_range_type (realtype->target_type (),
 						low_bound,
 						low_bound + length - 1);
@@ -552,8 +553,8 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 	  break;
 	}
 
-      str_obj = gdbpy_create_lazy_string_object (addr, length, user_encoding,
-						 type);
+      str_obj
+	= gdbpy_create_lazy_string_object (addr, length, user_encoding, type);
     }
   catch (const gdb_exception &except)
     {
@@ -597,8 +598,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 
   encoding = (user_encoding && *user_encoding) ? user_encoding : la_encoding;
   return PyUnicode_Decode ((const char *) buffer.get (),
-			   length * char_type->length (),
-			   encoding, errors);
+			   length * char_type->length (), encoding, errors);
 }
 
 /* Given a Python object, copy its truth value to a C bool (the value
@@ -629,31 +629,30 @@ copy_py_bool_obj (bool *dest, PyObject *src_obj)
 static PyObject *
 valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 {
-  static const char *keywords[] =
-    {
-      /* Basic C/C++ options.  */
-      "raw",			/* See the /r option to print.  */
-      "pretty_arrays",		/* See set print array on|off.  */
-      "pretty_structs",		/* See set print pretty on|off.  */
-      "array_indexes",		/* See set print array-indexes on|off.  */
-      "symbols",		/* See set print symbol on|off.  */
-      "unions",			/* See set print union on|off.  */
-      "address",		/* See set print address on|off.  */
-      "styling",		/* Should we apply styling.  */
-      "nibbles",		/* See set print nibbles on|off.  */
-      "summary",		/* Summary mode for non-scalars.  */
-      /* C++ options.  */
-      "deref_refs",		/* No corresponding setting.  */
-      "actual_objects",		/* See set print object on|off.  */
-      "static_members",		/* See set print static-members on|off.  */
-      /* C non-bool options.  */
-      "max_characters", 	/* See set print characters N.  */
-      "max_elements", 		/* See set print elements N.  */
-      "max_depth",		/* See set print max-depth N.  */
-      "repeat_threshold",	/* See set print repeats.  */
-      "format",			/* The format passed to the print command.  */
-      NULL
-    };
+  static const char *keywords[]
+    = {			  /* Basic C/C++ options.  */
+	"raw",		  /* See the /r option to print.  */
+	"pretty_arrays",  /* See set print array on|off.  */
+	"pretty_structs", /* See set print pretty on|off.  */
+	"array_indexes",  /* See set print array-indexes on|off.  */
+	"symbols",	  /* See set print symbol on|off.  */
+	"unions",	  /* See set print union on|off.  */
+	"address",	  /* See set print address on|off.  */
+	"styling",	  /* Should we apply styling.  */
+	"nibbles",	  /* See set print nibbles on|off.  */
+	"summary",	  /* Summary mode for non-scalars.  */
+	/* C++ options.  */
+	"deref_refs",	  /* No corresponding setting.  */
+	"actual_objects", /* See set print object on|off.  */
+	"static_members", /* See set print static-members on|off.  */
+	/* C non-bool options.  */
+	"max_characters",   /* See set print characters N.  */
+	"max_elements",	    /* See set print elements N.  */
+	"max_depth",	    /* See set print max-depth N.  */
+	"repeat_threshold", /* See set print repeats.  */
+	"format",	    /* The format passed to the print command.  */
+	NULL
+      };
 
   /* This function has too many arguments to be useful as positionals, so
      the user should specify them all as keyword arguments.
@@ -668,9 +667,10 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       /* This matches the error message that Python 3.3 raises when
 	 passing positionals to functions expecting keyword-only
 	 arguments.  */
-      PyErr_Format (PyExc_TypeError,
-		    "format_string() takes 0 positional arguments but %zu were given",
-		    positional_count);
+      PyErr_Format (
+	PyExc_TypeError,
+	"format_string() takes 0 positional arguments but %zu were given",
+	positional_count);
       return NULL;
     }
 
@@ -694,28 +694,16 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *static_members_obj = NULL;
   PyObject *summary_obj = NULL;
   char *format = NULL;
-  if (!gdb_PyArg_ParseTupleAndKeywords (args,
-					kw,
-					"|O!O!O!O!O!O!O!O!O!O!O!O!O!IIIIs",
-					keywords,
-					&PyBool_Type, &raw_obj,
-					&PyBool_Type, &pretty_arrays_obj,
-					&PyBool_Type, &pretty_structs_obj,
-					&PyBool_Type, &array_indexes_obj,
-					&PyBool_Type, &symbols_obj,
-					&PyBool_Type, &unions_obj,
-					&PyBool_Type, &address_obj,
-					&PyBool_Type, &styling_obj,
-					&PyBool_Type, &nibbles_obj,
-					&PyBool_Type, &summary_obj,
-					&PyBool_Type, &deref_refs_obj,
-					&PyBool_Type, &actual_objects_obj,
-					&PyBool_Type, &static_members_obj,
-					&opts.print_max_chars,
-					&opts.print_max,
-					&opts.max_depth,
-					&opts.repeat_count_threshold,
-					&format))
+  if (!gdb_PyArg_ParseTupleAndKeywords (
+	args, kw, "|O!O!O!O!O!O!O!O!O!O!O!O!O!IIIIs", keywords, &PyBool_Type,
+	&raw_obj, &PyBool_Type, &pretty_arrays_obj, &PyBool_Type,
+	&pretty_structs_obj, &PyBool_Type, &array_indexes_obj, &PyBool_Type,
+	&symbols_obj, &PyBool_Type, &unions_obj, &PyBool_Type, &address_obj,
+	&PyBool_Type, &styling_obj, &PyBool_Type, &nibbles_obj, &PyBool_Type,
+	&summary_obj, &PyBool_Type, &deref_refs_obj, &PyBool_Type,
+	&actual_objects_obj, &PyBool_Type, &static_members_obj,
+	&opts.print_max_chars, &opts.print_max, &opts.max_depth,
+	&opts.repeat_count_threshold, &format))
     return NULL;
 
   /* Set boolean arguments.  */
@@ -761,8 +749,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 	{
 	  /* Mimic the message on standard Python ones for similar
 	     errors.  */
-	  PyErr_SetString (PyExc_ValueError,
-			   "a single character is required");
+	  PyErr_SetString (PyExc_ValueError, "a single character is required");
 	  return NULL;
 	}
     }
@@ -771,8 +758,8 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 
   try
     {
-      common_val_print (((value_object *) self)->value, &stb, 0,
-			&opts, current_language);
+      common_val_print (((value_object *) self)->value, &stb, 0, &opts,
+			current_language);
     }
   catch (const gdb_exception &except)
     {
@@ -790,14 +777,13 @@ valpy_do_cast (PyObject *self, PyObject *args, enum exp_opcode op)
   PyObject *type_obj, *result = NULL;
   struct type *type;
 
-  if (! PyArg_ParseTuple (args, "O", &type_obj))
+  if (!PyArg_ParseTuple (args, "O", &type_obj))
     return NULL;
 
   type = type_object_to_type (type_obj);
-  if (! type)
+  if (!type)
     {
-      PyErr_SetString (PyExc_RuntimeError,
-		       _("Argument must be a type."));
+      PyErr_SetString (PyExc_RuntimeError, _ ("Argument must be a type."));
       return NULL;
     }
 
@@ -856,7 +842,7 @@ valpy_length (PyObject *self)
 {
   /* We don't support getting the number of elements in a struct / class.  */
   PyErr_SetString (PyExc_NotImplementedError,
-		   _("Invalid operation on gdb.Value."));
+		   _ ("Invalid operation on gdb.Value."));
   return -1;
 }
 
@@ -877,9 +863,10 @@ value_has_field (struct value *v, PyObject *field)
   parent_type = type_object_to_type (type_object.get ());
   if (parent_type == NULL)
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("'parent_type' attribute of gdb.Field object is not a"
-			 "gdb.Type object."));
+      PyErr_SetString (
+	PyExc_TypeError,
+	_ ("'parent_type' attribute of gdb.Field object is not a"
+	   "gdb.Type object."));
       return -1;
     }
 
@@ -934,8 +921,8 @@ get_field_type (PyObject *field)
   ftype = type_object_to_type (ftype_obj.get ());
   if (ftype == NULL)
     PyErr_SetString (PyExc_TypeError,
-		     _("'type' attribute of gdb.Field object is not a "
-		       "gdb.Type object."));
+		     _ ("'type' attribute of gdb.Field object is not a "
+			"gdb.Type object."));
 
   return ftype;
 }
@@ -970,8 +957,8 @@ valpy_getitem (PyObject *self, PyObject *key)
       else if (valid_field == 0)
 	{
 	  PyErr_SetString (PyExc_TypeError,
-			   _("Invalid lookup for a field not contained in "
-			     "the value."));
+			   _ ("Invalid lookup for a field not contained in "
+			      "the value."));
 
 	  return NULL;
 	}
@@ -1003,8 +990,8 @@ valpy_getitem (PyObject *self, PyObject *key)
 	      if (!PyObject_HasAttrString (key, "bitpos"))
 		{
 		  PyErr_SetString (PyExc_AttributeError,
-				   _("gdb.Field object has no name and no "
-				     "'bitpos' attribute."));
+				   _ ("gdb.Field object has no name and no "
+				      "'bitpos' attribute."));
 
 		  return NULL;
 		}
@@ -1041,11 +1028,13 @@ valpy_getitem (PyObject *self, PyObject *key)
 	  if (val_type->code () == TYPE_CODE_PTR)
 	    res_val = value_cast (lookup_pointer_type (base_class_type), tmp);
 	  else if (val_type->code () == TYPE_CODE_REF)
-	    res_val = value_cast (lookup_lvalue_reference_type (base_class_type),
-				  tmp);
+	    res_val
+	      = value_cast (lookup_lvalue_reference_type (base_class_type),
+			    tmp);
 	  else if (val_type->code () == TYPE_CODE_RVALUE_REF)
-	    res_val = value_cast (lookup_rvalue_reference_type (base_class_type),
-				  tmp);
+	    res_val
+	      = value_cast (lookup_rvalue_reference_type (base_class_type),
+			    tmp);
 	  else
 	    res_val = value_cast (base_class_type, tmp);
 	}
@@ -1066,7 +1055,7 @@ valpy_getitem (PyObject *self, PyObject *key)
 	      type = check_typedef (value_type (tmp));
 	      if (type->code () != TYPE_CODE_ARRAY
 		  && type->code () != TYPE_CODE_PTR)
-		  error (_("Cannot subscript requested type."));
+		error (_ ("Cannot subscript requested type."));
 	      else
 		res_val = value_subscript (tmp, value_as_long (idx));
 	    }
@@ -1089,7 +1078,7 @@ static int
 valpy_setitem (PyObject *self, PyObject *key, PyObject *value)
 {
   PyErr_Format (PyExc_NotImplementedError,
-		_("Setting of struct elements is not currently supported."));
+		_ ("Setting of struct elements is not currently supported."));
   return -1;
 }
 
@@ -1116,14 +1105,14 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
   if (ftype->code () != TYPE_CODE_FUNC)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       _("Value is not callable (not TYPE_CODE_FUNC)."));
+		       _ ("Value is not callable (not TYPE_CODE_FUNC)."));
       return NULL;
     }
 
-  if (! PyTuple_Check (args))
+  if (!PyTuple_Check (args))
     {
       PyErr_SetString (PyExc_TypeError,
-		       _("Inferior arguments must be provided in a tuple."));
+		       _ ("Inferior arguments must be provided in a tuple."));
       return NULL;
     }
 
@@ -1177,8 +1166,8 @@ valpy_str (PyObject *self)
 
   try
     {
-      common_val_print (((value_object *) self)->value, &stb, 0,
-			&opts, current_language);
+      common_val_print (((value_object *) self)->value, &stb, 0, &opts,
+			current_language);
     }
   catch (const gdb_exception &except)
     {
@@ -1320,11 +1309,9 @@ valpy_binop_throw (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	rtype = STRIP_REFERENCE (rtype);
 
 	handled = 1;
-	if (ltype->code () == TYPE_CODE_PTR
-	    && is_integral_type (rtype))
+	if (ltype->code () == TYPE_CODE_PTR && is_integral_type (rtype))
 	  res_val = value_ptradd (arg1, value_as_long (arg2));
-	else if (rtype->code () == TYPE_CODE_PTR
-		 && is_integral_type (ltype))
+	else if (rtype->code () == TYPE_CODE_PTR && is_integral_type (ltype))
 	  res_val = value_ptradd (arg2, value_as_long (arg1));
 	else
 	  {
@@ -1344,14 +1331,12 @@ valpy_binop_throw (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	rtype = STRIP_REFERENCE (rtype);
 
 	handled = 1;
-	if (ltype->code () == TYPE_CODE_PTR
-	    && rtype->code () == TYPE_CODE_PTR)
+	if (ltype->code () == TYPE_CODE_PTR && rtype->code () == TYPE_CODE_PTR)
 	  /* A ptrdiff_t for the target would be preferable here.  */
 	  res_val = value_from_longest (builtin_type_pyint,
 					value_ptrdiff (arg1, arg2));
-	else if (ltype->code () == TYPE_CODE_PTR
-		 && is_integral_type (rtype))
-	  res_val = value_ptradd (arg1, - value_as_long (arg2));
+	else if (ltype->code () == TYPE_CODE_PTR && is_integral_type (rtype))
+	  res_val = value_ptradd (arg1, -value_as_long (arg2));
 	else
 	  {
 	    handled = 0;
@@ -1536,8 +1521,9 @@ valpy_nonzero (PyObject *self)
       if (is_integral_type (type) || type->code () == TYPE_CODE_PTR)
 	nonzero = !!value_as_long (self_value->value);
       else if (is_floating_value (self_value->value))
-	nonzero = !target_float_is_zero
-	  (value_contents (self_value->value).data (), type);
+	nonzero
+	  = !target_float_is_zero (value_contents (self_value->value).data (),
+				   type);
       else
 	/* All other values are True.  */
 	nonzero = 1;
@@ -1635,7 +1621,7 @@ valpy_richcompare_throw (PyObject *self, PyObject *other, int op)
       break;
     case Py_LE:
       result = value_less (value_self, value_other)
-	|| value_equal (value_self, value_other);
+	       || value_equal (value_self, value_other);
       break;
     case Py_EQ:
       result = value_equal (value_self, value_other);
@@ -1653,14 +1639,13 @@ valpy_richcompare_throw (PyObject *self, PyObject *other, int op)
     default:
       /* Can't happen.  */
       PyErr_SetString (PyExc_NotImplementedError,
-		       _("Invalid operation on gdb.Value."));
+		       _ ("Invalid operation on gdb.Value."));
       result = -1;
       break;
     }
 
   return result;
 }
-
 
 /* Implements comparison operations for value objects.  Returns NULL on error,
    with a python exception set.  */
@@ -1672,7 +1657,8 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
   if (other == Py_None)
     /* Comparing with None is special.  From what I can tell, in Python
        None is smaller than anything else.  */
-    switch (op) {
+    switch (op)
+      {
       case Py_LT:
       case Py_LE:
       case Py_EQ:
@@ -1684,9 +1670,9 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
       default:
 	/* Can't happen.  */
 	PyErr_SetString (PyExc_NotImplementedError,
-			 _("Invalid operation on gdb.Value."));
+			 _ ("Invalid operation on gdb.Value."));
 	return NULL;
-    }
+      }
 
   try
     {
@@ -1725,9 +1711,8 @@ valpy_long (PyObject *self)
 
       type = check_typedef (type);
 
-      if (!is_integral_type (type)
-	  && type->code () != TYPE_CODE_PTR)
-	error (_("Cannot convert value to long."));
+      if (!is_integral_type (type) && type->code () != TYPE_CODE_PTR)
+	error (_ ("Cannot convert value to long."));
 
       l = value_as_long (value);
     }
@@ -1764,7 +1749,7 @@ valpy_float (PyObject *self)
 	  d = value_as_long (value);
 	}
       else
-	error (_("Cannot convert value to float."));
+	error (_ ("Cannot convert value to float."));
     }
   catch (const gdb_exception &except)
     {
@@ -1826,7 +1811,7 @@ value_object_to_value (PyObject *self)
 {
   value_object *real;
 
-  if (! PyObject_TypeCheck (self, &value_object_type))
+  if (!PyObject_TypeCheck (self, &value_object_type))
     return NULL;
   real = (value_object *) self;
   return real->value;
@@ -1871,7 +1856,7 @@ convert_value_from_python (PyObject *obj)
 		      ULONGEST ul;
 
 		      ul = PyLong_AsUnsignedLongLong (obj);
-		      if (! PyErr_Occurred ())
+		      if (!PyErr_Occurred ())
 			value = value_from_ulongest (builtin_type_upylong, ul);
 		    }
 		  else
@@ -1888,7 +1873,7 @@ convert_value_from_python (PyObject *obj)
 	{
 	  double d = PyFloat_AsDouble (obj);
 
-	  if (! PyErr_Occurred ())
+	  if (!PyErr_Occurred ())
 	    value = value_from_host_double (builtin_type_pyfloat, d);
 	}
       else if (gdbpy_is_string (obj))
@@ -1905,12 +1890,12 @@ convert_value_from_python (PyObject *obj)
 	{
 	  PyObject *result;
 
-	  result = PyObject_CallMethodObjArgs (obj, gdbpy_value_cst,  NULL);
+	  result = PyObject_CallMethodObjArgs (obj, gdbpy_value_cst, NULL);
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
 	PyErr_Format (PyExc_TypeError,
-		      _("Could not convert Python object: %S."), obj);
+		      _ ("Could not convert Python object: %S."), obj);
     }
   catch (const gdb_exception &except)
     {
@@ -1926,7 +1911,7 @@ PyObject *
 gdbpy_history (PyObject *self, PyObject *args)
 {
   int i;
-  struct value *res_val = NULL;	  /* Initialize to appease gcc warning.  */
+  struct value *res_val = NULL; /* Initialize to appease gcc warning.  */
 
   if (!PyArg_ParseTuple (args, "i", &i))
     return NULL;
@@ -2071,36 +2056,32 @@ gdbpy_initialize_values (void)
 				 (PyObject *) &value_object_type);
 }
 
-
-
 static gdb_PyGetSetDef value_object_getset[] = {
-  { "address", valpy_get_address, NULL, "The address of the value.",
-    NULL },
+  { "address", valpy_get_address, NULL, "The address of the value.", NULL },
   { "is_optimized_out", valpy_get_is_optimized_out, NULL,
     "Boolean telling whether the value is optimized "
     "out (i.e., not available).",
     NULL },
   { "type", valpy_get_type, NULL, "Type of the value.", NULL },
-  { "dynamic_type", valpy_get_dynamic_type, NULL,
-    "Dynamic type of the value.", NULL },
+  { "dynamic_type", valpy_get_dynamic_type, NULL, "Dynamic type of the value.",
+    NULL },
   { "is_lazy", valpy_get_is_lazy, NULL,
     "Boolean telling whether the value is lazy (not fetched yet\n\
 from the inferior).  A lazy value is fetched when needed, or when\n\
-the \"fetch_lazy()\" method is called.", NULL },
-  {NULL}  /* Sentinel */
+the \"fetch_lazy()\" method is called.",
+    NULL },
+  { NULL } /* Sentinel */
 };
 
 static PyMethodDef value_object_methods[] = {
   { "cast", valpy_cast, METH_VARARGS, "Cast the value to the supplied type." },
   { "dynamic_cast", valpy_dynamic_cast, METH_VARARGS,
     "dynamic_cast (gdb.Type) -> gdb.Value\n\
-Cast the value to the supplied type, as if by the C++ dynamic_cast operator."
-  },
+Cast the value to the supplied type, as if by the C++ dynamic_cast operator." },
   { "reinterpret_cast", valpy_reinterpret_cast, METH_VARARGS,
     "reinterpret_cast (gdb.Type) -> gdb.Value\n\
 Cast the value to the supplied type, as if by the C++\n\
-reinterpret_cast operator."
-  },
+reinterpret_cast operator." },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
   { "referenced_value", valpy_referenced_value, METH_NOARGS,
     "Return the value referenced by a TYPE_CODE_REF or TYPE_CODE_PTR value." },
@@ -2120,94 +2101,86 @@ Return Unicode string representation of the value." },
   { "fetch_lazy", valpy_fetch_lazy, METH_NOARGS,
     "Fetches the value from the inferior, if it was lazy." },
   { "format_string", (PyCFunction) valpy_format_string,
-    METH_VARARGS | METH_KEYWORDS,
-    "format_string (...) -> string\n\
+    METH_VARARGS | METH_KEYWORDS, "format_string (...) -> string\n\
 Return a string representation of the value using the specified\n\
 formatting options" },
-  {NULL}  /* Sentinel */
+  { NULL } /* Sentinel */
 };
 
 static PyNumberMethods value_object_as_number = {
-  valpy_add,
-  valpy_subtract,
-  valpy_multiply,
-  valpy_remainder,
-  NULL,			      /* nb_divmod */
-  valpy_power,		      /* nb_power */
-  valpy_negative,	      /* nb_negative */
-  valpy_positive,	      /* nb_positive */
-  valpy_absolute,	      /* nb_absolute */
-  valpy_nonzero,	      /* nb_nonzero */
-  valpy_invert,		      /* nb_invert */
-  valpy_lsh,		      /* nb_lshift */
-  valpy_rsh,		      /* nb_rshift */
-  valpy_and,		      /* nb_and */
-  valpy_xor,		      /* nb_xor */
-  valpy_or,		      /* nb_or */
-  valpy_long,		      /* nb_int */
-  NULL,			      /* reserved */
-  valpy_float,		      /* nb_float */
-  NULL,                       /* nb_inplace_add */
-  NULL,                       /* nb_inplace_subtract */
-  NULL,                       /* nb_inplace_multiply */
-  NULL,                       /* nb_inplace_remainder */
-  NULL,                       /* nb_inplace_power */
-  NULL,                       /* nb_inplace_lshift */
-  NULL,                       /* nb_inplace_rshift */
-  NULL,                       /* nb_inplace_and */
-  NULL,                       /* nb_inplace_xor */
-  NULL,                       /* nb_inplace_or */
-  NULL,                       /* nb_floor_divide */
-  valpy_divide,               /* nb_true_divide */
-  NULL,			      /* nb_inplace_floor_divide */
-  NULL,			      /* nb_inplace_true_divide */
-  valpy_long,		      /* nb_index */
+  valpy_add,	  valpy_subtract, valpy_multiply, valpy_remainder,
+  NULL,		  /* nb_divmod */
+  valpy_power,	  /* nb_power */
+  valpy_negative, /* nb_negative */
+  valpy_positive, /* nb_positive */
+  valpy_absolute, /* nb_absolute */
+  valpy_nonzero,  /* nb_nonzero */
+  valpy_invert,	  /* nb_invert */
+  valpy_lsh,	  /* nb_lshift */
+  valpy_rsh,	  /* nb_rshift */
+  valpy_and,	  /* nb_and */
+  valpy_xor,	  /* nb_xor */
+  valpy_or,	  /* nb_or */
+  valpy_long,	  /* nb_int */
+  NULL,		  /* reserved */
+  valpy_float,	  /* nb_float */
+  NULL,		  /* nb_inplace_add */
+  NULL,		  /* nb_inplace_subtract */
+  NULL,		  /* nb_inplace_multiply */
+  NULL,		  /* nb_inplace_remainder */
+  NULL,		  /* nb_inplace_power */
+  NULL,		  /* nb_inplace_lshift */
+  NULL,		  /* nb_inplace_rshift */
+  NULL,		  /* nb_inplace_and */
+  NULL,		  /* nb_inplace_xor */
+  NULL,		  /* nb_inplace_or */
+  NULL,		  /* nb_floor_divide */
+  valpy_divide,	  /* nb_true_divide */
+  NULL,		  /* nb_inplace_floor_divide */
+  NULL,		  /* nb_inplace_true_divide */
+  valpy_long,	  /* nb_index */
 };
 
-static PyMappingMethods value_object_as_mapping = {
-  valpy_length,
-  valpy_getitem,
-  valpy_setitem
-};
+static PyMappingMethods value_object_as_mapping
+  = { valpy_length, valpy_getitem, valpy_setitem };
 
 PyTypeObject value_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Value",			  /*tp_name*/
-  sizeof (value_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  valpy_dealloc,		  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  &value_object_as_number,	  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  &value_object_as_mapping,	  /*tp_as_mapping*/
-  valpy_hash,		          /*tp_hash*/
-  valpy_call,	                  /*tp_call*/
-  valpy_str,			  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.Value", /*tp_name*/
+  sizeof (value_object),		       /*tp_basicsize*/
+  0,					       /*tp_itemsize*/
+  valpy_dealloc,			       /*tp_dealloc*/
+  0,					       /*tp_print*/
+  0,					       /*tp_getattr*/
+  0,					       /*tp_setattr*/
+  0,					       /*tp_compare*/
+  0,					       /*tp_repr*/
+  &value_object_as_number,		       /*tp_as_number*/
+  0,					       /*tp_as_sequence*/
+  &value_object_as_mapping,		       /*tp_as_mapping*/
+  valpy_hash,				       /*tp_hash*/
+  valpy_call,				       /*tp_call*/
+  valpy_str,				       /*tp_str*/
+  0,					       /*tp_getattro*/
+  0,					       /*tp_setattro*/
+  0,					       /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES
-  | Py_TPFLAGS_BASETYPE,	  /*tp_flags*/
-  "GDB value object",		  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  valpy_richcompare,		  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  value_object_methods,		  /* tp_methods */
-  0,				  /* tp_members */
-  value_object_getset,		  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  valpy_init,			  /* tp_init */
-  0,				  /* tp_alloc */
-  PyType_GenericNew,		  /* tp_new */
+    | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+  "GDB value object",	   /* tp_doc */
+  0,			   /* tp_traverse */
+  0,			   /* tp_clear */
+  valpy_richcompare,	   /* tp_richcompare */
+  0,			   /* tp_weaklistoffset */
+  0,			   /* tp_iter */
+  0,			   /* tp_iternext */
+  value_object_methods,	   /* tp_methods */
+  0,			   /* tp_members */
+  value_object_getset,	   /* tp_getset */
+  0,			   /* tp_base */
+  0,			   /* tp_dict */
+  0,			   /* tp_descr_get */
+  0,			   /* tp_descr_set */
+  0,			   /* tp_dictoffset */
+  valpy_init,		   /* tp_init */
+  0,			   /* tp_alloc */
+  PyType_GenericNew,	   /* tp_new */
 };

@@ -79,8 +79,7 @@ tui_win_info::refresh_window ()
 
 /* Draw a border arround the window.  */
 static void
-box_win (struct tui_win_info *win_info, 
-	 bool highlight_flag)
+box_win (struct tui_win_info *win_info, bool highlight_flag)
 {
   WINDOW *win;
   int attrs;
@@ -94,14 +93,12 @@ box_win (struct tui_win_info *win_info,
   /* tui_apply_style resets the style entirely, so be sure to call it
      before applying ATTRS.  */
   if (cli_styling)
-    tui_apply_style (win, (highlight_flag
-			   ? tui_active_border_style.style ()
-			   : tui_border_style.style ()));
+    tui_apply_style (win, (highlight_flag ? tui_active_border_style.style ()
+					  : tui_border_style.style ()));
   wattron (win, attrs);
 #ifdef HAVE_WBORDER
-  wborder (win, tui_border_vline, tui_border_vline,
-	   tui_border_hline, tui_border_hline,
-	   tui_border_ulcorner, tui_border_urcorner,
+  wborder (win, tui_border_vline, tui_border_vline, tui_border_hline,
+	   tui_border_hline, tui_border_ulcorner, tui_border_urcorner,
 	   tui_border_llcorner, tui_border_lrcorner);
 #else
   box (win, tui_border_vline, tui_border_hline);
@@ -117,8 +114,8 @@ box_win (struct tui_win_info *win_info,
       else
 	{
 	  std::string truncated
-	    = "..." + win_info->title.substr (win_info->title.size ()
-					      - max_len + 3);
+	    = "..."
+	      + win_info->title.substr (win_info->title.size () - max_len + 3);
 	  mvwaddstr (win, 0, 2, truncated.c_str ());
 	}
     }
@@ -126,13 +123,10 @@ box_win (struct tui_win_info *win_info,
   tui_apply_style (win, ui_file_style ());
 }
 
-
 void
 tui_unhighlight_win (struct tui_win_info *win_info)
 {
-  if (win_info != NULL 
-      && win_info->can_box ()
-      && win_info->handle != NULL)
+  if (win_info != NULL && win_info->can_box () && win_info->handle != NULL)
     {
       box_win (win_info, false);
       win_info->refresh_window ();
@@ -140,13 +134,10 @@ tui_unhighlight_win (struct tui_win_info *win_info)
     }
 }
 
-
 void
 tui_highlight_win (struct tui_win_info *win_info)
 {
-  if (win_info != NULL
-      && win_info->can_box ()
-      && win_info->handle != NULL)
+  if (win_info != NULL && win_info->can_box () && win_info->handle != NULL)
     {
       box_win (win_info, true);
       win_info->refresh_window ();

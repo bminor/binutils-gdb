@@ -40,13 +40,13 @@
 #endif
 
 #ifndef PTRACE_GETWMMXREGS
-# define PTRACE_GETWMMXREGS 18
-# define PTRACE_SETWMMXREGS 19
+#define PTRACE_GETWMMXREGS 18
+#define PTRACE_SETWMMXREGS 19
 #endif
 
 #ifndef PTRACE_GETVFPREGS
-# define PTRACE_GETVFPREGS 27
-# define PTRACE_SETVFPREGS 28
+#define PTRACE_GETVFPREGS 27
+#define PTRACE_SETVFPREGS 28
 #endif
 
 #ifndef PTRACE_GETHBPREGS
@@ -59,7 +59,6 @@
 class arm_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
@@ -75,7 +74,6 @@ public:
   bool supports_hardware_single_step () override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -92,11 +90,11 @@ protected:
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
 
-  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
-  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
   bool low_stopped_by_watchpoint () override;
 
@@ -220,11 +218,11 @@ struct arch_lwp_info
 };
 
 /* These are in <asm/elf.h> in current kernels.  */
-#define HWCAP_VFP       64
-#define HWCAP_IWMMXT    512
-#define HWCAP_NEON      4096
-#define HWCAP_VFPv3     8192
-#define HWCAP_VFPv3D16  16384
+#define HWCAP_VFP 64
+#define HWCAP_IWMMXT 512
+#define HWCAP_NEON 4096
+#define HWCAP_VFPv3 8192
+#define HWCAP_VFPv3D16 16384
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -232,20 +230,17 @@ struct arch_lwp_info
 
 #define arm_num_regs 26
 
-static int arm_regmap[] = {
-  0, 4, 8, 12, 16, 20, 24, 28,
-  32, 36, 40, 44, 48, 52, 56, 60,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  64
-};
+static int arm_regmap[]
+  = { 0,  4,  8,  12, 16, 20, 24, 28, 32, 36, 40, 44, 48,
+      52, 56, 60, -1, -1, -1, -1, -1, -1, -1, -1, -1, 64 };
 
 /* Forward declarations needed for get_next_pcs ops.  */
 static ULONGEST get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
-							   int len,
-							   int byte_order);
+                                                           int len,
+                                                           int byte_order);
 
 static CORE_ADDR get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
-						CORE_ADDR val);
+                                                CORE_ADDR val);
 
 static CORE_ADDR get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self);
 
@@ -284,7 +279,7 @@ arm_fill_wmmxregset (struct regcache *regcache, void *buf)
   /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
   for (int i = 0; i < 6; i++)
     collect_register (regcache, arm_num_regs + i + 16,
-		      (char *) buf + 16 * 8 + i * 4);
+                      (char *) buf + 16 * 8 + i * 4);
 }
 
 static void
@@ -299,7 +294,7 @@ arm_store_wmmxregset (struct regcache *regcache, const void *buf)
   /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
   for (int i = 0; i < 6; i++)
     supply_register (regcache, arm_num_regs + i + 16,
-		     (char *) buf + 16 * 8 + i * 4);
+                     (char *) buf + 16 * 8 + i * 4);
 }
 
 static void
@@ -314,11 +309,11 @@ arm_fill_vfpregset (struct regcache *regcache, void *buf)
       arm_fp_type fp_type = arm_linux_get_tdesc_fp_type (regcache->tdesc);
 
       if (fp_type == ARM_FP_TYPE_VFPV3)
-	num = 32;
+        num = 32;
       else if (fp_type == ARM_FP_TYPE_VFPV2)
-	num = 16;
+        num = 16;
       else
-	return;
+        return;
     }
 
   arm_fill_vfpregset_num (regcache, buf, num);
@@ -343,11 +338,11 @@ arm_store_vfpregset (struct regcache *regcache, const void *buf)
       arm_fp_type fp_type = arm_linux_get_tdesc_fp_type (regcache->tdesc);
 
       if (fp_type == ARM_FP_TYPE_VFPV3)
-	num = 32;
+        num = 32;
       else if (fp_type == ARM_FP_TYPE_VFPV2)
-	num = 16;
+        num = 16;
       else
-	return;
+        return;
     }
 
   arm_store_vfpregset_num (regcache, buf, num);
@@ -364,9 +359,8 @@ get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
    BYTE_ORDER is ignored and there to keep compatiblity with GDB's
    read_memory_unsigned_integer. */
 static ULONGEST
-get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
-					   int len,
-					   int byte_order)
+get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr, int len,
+                                           int byte_order)
 {
   ULONGEST res;
 
@@ -379,8 +373,8 @@ get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph,
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;
@@ -388,11 +382,10 @@ ps_get_thread_area (struct ps_prochandle *ph,
   /* IDX is the bias from the thread pointer to the beginning of the
      thread descriptor.  It has to be subtracted due to implementation
      quirks in libthread_db.  */
-  *base = (void *) ((char *)*base - idx);
+  *base = (void *) ((char *) *base - idx);
 
   return PS_OK;
 }
-
 
 /* Query Hardware Breakpoint information for the target we are attached to
    (using PID as ptrace argument) and set up arm_linux_hwbp_cap.  */
@@ -404,13 +397,13 @@ arm_linux_init_hwbp_cap (int pid)
   if (ptrace (PTRACE_GETHBPREGS, pid, 0, &val) < 0)
     return;
 
-  arm_linux_hwbp_cap.arch = (unsigned char)((val >> 24) & 0xff);
+  arm_linux_hwbp_cap.arch = (unsigned char) ((val >> 24) & 0xff);
   if (arm_linux_hwbp_cap.arch == 0)
     return;
 
-  arm_linux_hwbp_cap.max_wp_length = (unsigned char)((val >> 16) & 0xff);
-  arm_linux_hwbp_cap.wp_count = (unsigned char)((val >> 8) & 0xff);
-  arm_linux_hwbp_cap.bp_count = (unsigned char)(val & 0xff);
+  arm_linux_hwbp_cap.max_wp_length = (unsigned char) ((val >> 16) & 0xff);
+  arm_linux_hwbp_cap.wp_count = (unsigned char) ((val >> 8) & 0xff);
+  arm_linux_hwbp_cap.bp_count = (unsigned char) (val & 0xff);
 
   if (arm_linux_hwbp_cap.wp_count > MAX_WPTS)
     internal_error ("Unsupported number of watchpoints");
@@ -445,12 +438,11 @@ arm_linux_get_hw_watchpoint_max_length (void)
    */
 static arm_hwbp_control_t
 arm_hwbp_control_initialize (unsigned byte_address_select,
-			     arm_hwbp_type hwbp_type,
-			     int enable)
+                             arm_hwbp_type hwbp_type, int enable)
 {
   gdb_assert ((byte_address_select & ~0xffU) == 0);
   gdb_assert (hwbp_type != arm_hwbp_break
-	      || ((byte_address_select & 0xfU) != 0));
+              || ((byte_address_select & 0xfU) != 0));
 
   return (byte_address_select << 5) | (hwbp_type << 3) | (3 << 1) | enable;
 }
@@ -479,7 +471,7 @@ arm_hwbp_control_disable (arm_hwbp_control_t control)
 /* Are two break-/watch-points equal?  */
 static int
 arm_linux_hw_breakpoint_equal (const struct arm_linux_hw_breakpoint *p1,
-			       const struct arm_linux_hw_breakpoint *p2)
+                               const struct arm_linux_hw_breakpoint *p2)
 {
   return p1->address == p2->address && p1->control == p2->control;
 }
@@ -511,7 +503,7 @@ raw_bkpt_type_to_arm_hwbp_type (enum raw_bkpt_type raw_type)
    represents a breakpoint and 1 if type represents a watchpoint.  */
 static int
 arm_linux_hw_point_initialize (enum raw_bkpt_type raw_type, CORE_ADDR addr,
-			       int len, struct arm_linux_hw_breakpoint *p)
+                               int len, struct arm_linux_hw_breakpoint *p)
 {
   arm_hwbp_type hwbp_type;
   unsigned mask;
@@ -522,20 +514,20 @@ arm_linux_hw_point_initialize (enum raw_bkpt_type raw_type, CORE_ADDR addr,
     {
       /* For breakpoints, the length field encodes the mode.  */
       switch (len)
-	{
-	case 2:	 /* 16-bit Thumb mode breakpoint */
-	case 3:  /* 32-bit Thumb mode breakpoint */
-	  mask = 0x3;
-	  addr &= ~1;
-	  break;
-	case 4:  /* 32-bit ARM mode breakpoint */
-	  mask = 0xf;
-	  addr &= ~3;
-	  break;
-	default:
-	  /* Unsupported. */
-	  return -2;
-	}
+        {
+        case 2: /* 16-bit Thumb mode breakpoint */
+        case 3: /* 32-bit Thumb mode breakpoint */
+          mask = 0x3;
+          addr &= ~1;
+          break;
+        case 4: /* 32-bit ARM mode breakpoint */
+          mask = 0xf;
+          addr &= ~3;
+          break;
+        default:
+          /* Unsupported. */
+          return -2;
+        }
     }
   else
     {
@@ -544,17 +536,17 @@ arm_linux_hw_point_initialize (enum raw_bkpt_type raw_type, CORE_ADDR addr,
 
       /* Can not set watchpoints for zero or negative lengths.  */
       if (len <= 0)
-	return -2;
+        return -2;
       /* The current ptrace interface can only handle watchpoints that are a
 	 power of 2.  */
       if ((len & (len - 1)) != 0)
-	return -2;
+        return -2;
 
       /* Test that the range [ADDR, ADDR + LEN) fits into the largest address
 	 range covered by a watchpoint.  */
       aligned_addr = addr & ~(max_wp_length - 1);
       if (aligned_addr + max_wp_length < addr + len)
-	return -2;
+        return -2;
 
       mask = (1 << len) - 1;
     }
@@ -605,8 +597,8 @@ arm_target::supports_z_point_type (char z_type)
 
 /* Insert hardware break-/watchpoint.  */
 int
-arm_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-			      int len, raw_breakpoint *bp)
+arm_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int len,
+                              raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arm_linux_hw_breakpoint p, *pts;
@@ -633,15 +625,14 @@ arm_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
   for (i = 0; i < count; i++)
     if (!arm_hwbp_control_is_enabled (pts[i].control))
       {
-	pts[i] = p;
+        pts[i] = p;
 
-	/* Only update the threads of the current process.  */
-	for_each_thread (current_thread->id.pid (), [&] (thread_info *thread)
-	  {
-	    update_registers_callback (thread, watch, i);
-	  });
+        /* Only update the threads of the current process.  */
+        for_each_thread (current_thread->id.pid (), [&] (thread_info *thread) {
+          update_registers_callback (thread, watch, i);
+        });
 
-	return 0;
+        return 0;
       }
 
   /* We're out of watchpoints.  */
@@ -650,8 +641,8 @@ arm_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
 
 /* Remove hardware break-/watchpoint.  */
 int
-arm_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-			      int len, raw_breakpoint *bp)
+arm_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int len,
+                              raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arm_linux_hw_breakpoint p, *pts;
@@ -678,15 +669,14 @@ arm_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   for (i = 0; i < count; i++)
     if (arm_linux_hw_breakpoint_equal (&p, pts + i))
       {
-	pts[i].control = arm_hwbp_control_disable (pts[i].control);
+        pts[i].control = arm_hwbp_control_disable (pts[i].control);
 
-	/* Only update the threads of the current process.  */
-	for_each_thread (current_thread->id.pid (), [&] (thread_info *thread)
-	  {
-	    update_registers_callback (thread, watch, i);
-	  });
+        /* Only update the threads of the current process.  */
+        for_each_thread (current_thread->id.pid (), [&] (thread_info *thread) {
+          update_registers_callback (thread, watch, i);
+        });
 
-	return 0;
+        return 0;
       }
 
   /* No watchpoint matched.  */
@@ -785,10 +775,8 @@ arm_target::low_new_fork (process_info *parent, process_info *child)
   int i;
 
   /* These are allocated by linux_add_process.  */
-  gdb_assert (parent->priv != NULL
-	      && parent->priv->arch_private != NULL);
-  gdb_assert (child->priv != NULL
-	      && child->priv->arch_private != NULL);
+  gdb_assert (parent->priv != NULL && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL && child->priv->arch_private != NULL);
 
   parent_proc_info = parent->priv->arch_private;
   child_proc_info = child->priv->arch_private;
@@ -834,41 +822,45 @@ arm_target::low_prepare_to_resume (lwp_info *lwp)
   for (i = 0; i < arm_linux_get_hw_breakpoint_count (); i++)
     if (lwp_info->bpts_changed[i])
       {
-	errno = 0;
+        errno = 0;
 
-	if (arm_hwbp_control_is_enabled (proc_info->bpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid,
-		      (PTRACE_TYPE_ARG3) ((i << 1) + 1),
-		      &proc_info->bpts[i].address) < 0)
-	    perror_with_name ("Unexpected error setting breakpoint address");
+        if (arm_hwbp_control_is_enabled (proc_info->bpts[i].control))
+          if (ptrace (PTRACE_SETHBPREGS, pid,
+                      (PTRACE_TYPE_ARG3) ((i << 1) + 1),
+                      &proc_info->bpts[i].address)
+              < 0)
+            perror_with_name ("Unexpected error setting breakpoint address");
 
-	if (arm_hwbp_control_is_initialized (proc_info->bpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid,
-		      (PTRACE_TYPE_ARG3) ((i << 1) + 2),
-		      &proc_info->bpts[i].control) < 0)
-	    perror_with_name ("Unexpected error setting breakpoint");
+        if (arm_hwbp_control_is_initialized (proc_info->bpts[i].control))
+          if (ptrace (PTRACE_SETHBPREGS, pid,
+                      (PTRACE_TYPE_ARG3) ((i << 1) + 2),
+                      &proc_info->bpts[i].control)
+              < 0)
+            perror_with_name ("Unexpected error setting breakpoint");
 
-	lwp_info->bpts_changed[i] = 0;
+        lwp_info->bpts_changed[i] = 0;
       }
 
   for (i = 0; i < arm_linux_get_hw_watchpoint_count (); i++)
     if (lwp_info->wpts_changed[i])
       {
-	errno = 0;
+        errno = 0;
 
-	if (arm_hwbp_control_is_enabled (proc_info->wpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid,
-		      (PTRACE_TYPE_ARG3) -((i << 1) + 1),
-		      &proc_info->wpts[i].address) < 0)
-	    perror_with_name ("Unexpected error setting watchpoint address");
+        if (arm_hwbp_control_is_enabled (proc_info->wpts[i].control))
+          if (ptrace (PTRACE_SETHBPREGS, pid,
+                      (PTRACE_TYPE_ARG3) - ((i << 1) + 1),
+                      &proc_info->wpts[i].address)
+              < 0)
+            perror_with_name ("Unexpected error setting watchpoint address");
 
-	if (arm_hwbp_control_is_initialized (proc_info->wpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid,
-		      (PTRACE_TYPE_ARG3) -((i << 1) + 2),
-		      &proc_info->wpts[i].control) < 0)
-	    perror_with_name ("Unexpected error setting watchpoint");
+        if (arm_hwbp_control_is_initialized (proc_info->wpts[i].control))
+          if (ptrace (PTRACE_SETHBPREGS, pid,
+                      (PTRACE_TYPE_ARG3) - ((i << 1) + 2),
+                      &proc_info->wpts[i].control)
+              < 0)
+            perror_with_name ("Unexpected error setting watchpoint");
 
-	lwp_info->wpts_changed[i] = 0;
+        lwp_info->wpts_changed[i] = 0;
       }
 }
 
@@ -878,7 +870,7 @@ arm_target::low_prepare_to_resume (lwp_info *lwp)
    See arm-linux.h for stack layout details.  */
 static CORE_ADDR
 arm_sigreturn_next_pc (struct regcache *regcache, int svc_number,
-		       int *is_thumb)
+                       int *is_thumb)
 {
   unsigned long sp;
   unsigned long sp_data;
@@ -892,8 +884,10 @@ arm_sigreturn_next_pc (struct regcache *regcache, int svc_number,
   collect_register_by_name (regcache, "sp", &sp);
   the_target->read_memory (sp, (unsigned char *) &sp_data, 4);
 
-  pc_offset = arm_linux_sigreturn_next_pc_offset
-    (sp, sp_data, svc_number, __NR_sigreturn == svc_number ? 1 : 0);
+  pc_offset
+    = arm_linux_sigreturn_next_pc_offset (sp, sp_data, svc_number,
+                                          __NR_sigreturn == svc_number ? 1
+                                                                       : 0);
 
   the_target->read_memory (sp + pc_offset, (unsigned char *) &next_pc, 4);
 
@@ -928,14 +922,14 @@ get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
       target_read_memory (pc, (unsigned char *) &this_instr, 4);
       svc_operand = (0x00ffffff & this_instr);
 
-      if (svc_operand)  /* OABI.  */
-	{
-	  svc_number = svc_operand - 0x900000;
-	}
+      if (svc_operand) /* OABI.  */
+        {
+          svc_number = svc_operand - 0x900000;
+        }
       else /* EABI.  */
-	{
-	  collect_register (regcache, 7, &svc_number);
-	}
+        {
+          collect_register (regcache, 7, &svc_number);
+        }
 
       next_pc = pc + 4;
     }
@@ -971,16 +965,16 @@ arm_read_description (void)
       errno = 0;
       char *buf = (char *) alloca (ARM_VFP3_REGS_SIZE);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0 && errno == EIO)
-	return arm_linux_read_description (ARM_FP_TYPE_NONE);
+        return arm_linux_read_description (ARM_FP_TYPE_NONE);
 
       /* NEON implies either no VFP, or VFPv3-D32.  We only support
 	 it with VFP.  */
       if (arm_hwcap & HWCAP_NEON)
-	return aarch32_linux_read_description ();
+        return aarch32_linux_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-	return arm_linux_read_description (ARM_FP_TYPE_VFPV3);
+        return arm_linux_read_description (ARM_FP_TYPE_VFPV3);
       else
-	return arm_linux_read_description (ARM_FP_TYPE_VFPV2);
+        return arm_linux_read_description (ARM_FP_TYPE_VFPV2);
     }
 
   /* The default configuration uses legacy FPA registers, probably
@@ -1023,13 +1017,9 @@ arm_target::low_get_next_pcs (regcache *regcache)
 {
   struct arm_get_next_pcs next_pcs_ctx;
 
-  arm_get_next_pcs_ctor (&next_pcs_ctx,
-			 &get_next_pcs_ops,
-			 /* Byte order is ignored assumed as host.  */
-			 0,
-			 0,
-			 1,
-			 regcache);
+  arm_get_next_pcs_ctor (&next_pcs_ctx, &get_next_pcs_ops,
+                         /* Byte order is ignored assumed as host.  */
+                         0, 0, 1, regcache);
 
   return arm_get_next_pcs (&next_pcs_ctx);
 }
@@ -1063,57 +1053,51 @@ arm_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
       collect_register_by_name (regcache, "pc", &pc);
 
       if (read_memory (pc - 4, (unsigned char *) &insn, 4))
-	*sysno = UNKNOWN_SYSCALL;
+        *sysno = UNKNOWN_SYSCALL;
       else
-	{
-	  unsigned long svc_operand = (0x00ffffff & insn);
+        {
+          unsigned long svc_operand = (0x00ffffff & insn);
 
-	  if (svc_operand)
-	    {
-	      /* OABI */
-	      *sysno = svc_operand - 0x900000;
-	    }
-	  else
-	    {
-	      /* EABI */
-	      collect_register_by_name (regcache, "r7", sysno);
-	    }
-	}
+          if (svc_operand)
+            {
+              /* OABI */
+              *sysno = svc_operand - 0x900000;
+            }
+          else
+            {
+              /* EABI */
+              collect_register_by_name (regcache, "r7", sysno);
+            }
+        }
     }
 }
 
 /* Register sets without using PTRACE_GETREGSET.  */
 
-static struct regset_info arm_regsets[] = {
-  { PTRACE_GETREGS, PTRACE_SETREGS, 0,
-    ARM_CORE_REGS_SIZE + ARM_INT_REGISTER_SIZE, GENERAL_REGS,
-    arm_fill_gregset, arm_store_gregset },
-  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 0, IWMMXT_REGS_SIZE, EXTENDED_REGS,
-    arm_fill_wmmxregset, arm_store_wmmxregset },
-  { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 0, ARM_VFP3_REGS_SIZE, EXTENDED_REGS,
-    arm_fill_vfpregset, arm_store_vfpregset },
-  NULL_REGSET
+static struct regset_info arm_regsets[]
+  = { { PTRACE_GETREGS, PTRACE_SETREGS, 0,
+        ARM_CORE_REGS_SIZE + ARM_INT_REGISTER_SIZE, GENERAL_REGS,
+        arm_fill_gregset, arm_store_gregset },
+      { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 0, IWMMXT_REGS_SIZE,
+        EXTENDED_REGS, arm_fill_wmmxregset, arm_store_wmmxregset },
+      { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 0, ARM_VFP3_REGS_SIZE,
+        EXTENDED_REGS, arm_fill_vfpregset, arm_store_vfpregset },
+      NULL_REGSET };
+
+static struct regsets_info arm_regsets_info = {
+  arm_regsets, /* regsets */
+  0,           /* num_regsets */
+  NULL,        /* disabled_regsets */
 };
 
-static struct regsets_info arm_regsets_info =
-  {
-    arm_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct usrregs_info arm_usrregs_info = {
+  arm_num_regs,
+  arm_regmap,
+};
 
-static struct usrregs_info arm_usrregs_info =
-  {
-    arm_num_regs,
-    arm_regmap,
-  };
-
-static struct regs_info regs_info_arm =
-  {
-    NULL, /* regset_bitmap */
-    &arm_usrregs_info,
-    &arm_regsets_info
-  };
+static struct regs_info regs_info_arm
+  = { NULL, /* regset_bitmap */
+      &arm_usrregs_info, &arm_regsets_info };
 
 const regs_info *
 arm_target::get_regs_info ()
@@ -1122,7 +1106,7 @@ arm_target::get_regs_info ()
 
   if (have_ptrace_getregset == 1
       && (is_aarch32_linux_description (tdesc)
-	  || arm_linux_get_tdesc_fp_type (tdesc) == ARM_FP_TYPE_VFPV3))
+          || arm_linux_get_tdesc_fp_type (tdesc) == ARM_FP_TYPE_VFPV3))
     return &regs_info_aarch32;
 
   return &regs_info_arm;

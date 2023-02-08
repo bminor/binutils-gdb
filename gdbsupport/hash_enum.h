@@ -24,7 +24,8 @@
     http://www.open-std.org/jtc1/sc22/wg21/docs/lwg-defects.html#2148
 */
 
-namespace gdb {
+namespace gdb
+{
 
 /* Helper struct for hashing enum types.  */
 template<typename T>

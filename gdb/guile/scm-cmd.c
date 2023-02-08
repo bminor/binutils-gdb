@@ -108,8 +108,7 @@ struct cmdscm_completer
   completer_ftype *completer;
 };
 
-static const struct cmdscm_completer cmdscm_completers[] =
-{
+static const struct cmdscm_completer cmdscm_completers[] = {
   { "COMPLETE_NONE", noop_completer },
   { "COMPLETE_FILENAME", filename_completer },
   { "COMPLETE_LOCATION", location_completer },
@@ -118,11 +117,11 @@ static const struct cmdscm_completer cmdscm_completers[] =
   { "COMPLETE_EXPRESSION", expression_completer },
 };
 
-#define N_COMPLETERS (sizeof (cmdscm_completers) \
-		      / sizeof (cmdscm_completers[0]))
+#define N_COMPLETERS \
+  (sizeof (cmdscm_completers) / sizeof (cmdscm_completers[0]))
 
 static int cmdscm_is_valid (command_smob *);
-
+
 /* Administrivia for command smobs.  */
 
 /* The smob "print" function for <gdb:command>.  */
@@ -137,7 +136,7 @@ cmdscm_print_command_smob (SCM self, SCM port, scm_print_state *pstate)
   gdbscm_printf (port, " %s",
 		 c_smob->name != NULL ? c_smob->name : "{unnamed}");
 
-  if (! cmdscm_is_valid (c_smob))
+  if (!cmdscm_is_valid (c_smob))
     scm_puts (" {invalid}", port);
 
   scm_puts (">", port);
@@ -155,8 +154,8 @@ cmdscm_print_command_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 cmdscm_make_command_smob (void)
 {
-  command_smob *c_smob = (command_smob *)
-    scm_gc_malloc (sizeof (command_smob), command_smob_name);
+  command_smob *c_smob = (command_smob *) scm_gc_malloc (sizeof (command_smob),
+							 command_smob_name);
   SCM c_scm;
 
   memset (c_smob, 0, sizeof (*c_smob));
@@ -241,12 +240,12 @@ cmdscm_get_valid_command_smob_arg_unsafe (SCM self, int arg_pos,
   if (!cmdscm_is_valid (c_smob))
     {
       gdbscm_invalid_object_error (func_name, arg_pos, self,
-				   _("<gdb:command>"));
+				   _ ("<gdb:command>"));
     }
 
   return c_smob;
 }
-
+
 /* Scheme functions for GDB commands.  */
 
 /* (command-valid? <gdb:command>) -> boolean
@@ -275,7 +274,7 @@ gdbscm_dont_repeat (SCM self)
 
   return SCM_UNSPECIFIED;
 }
-
+
 /* The make-command function.  */
 
 /* Called if the gdb cmd_list_element is destroyed.  */
@@ -293,7 +292,7 @@ cmdscm_destroyer (struct cmd_list_element *self, void *context)
 static void
 cmdscm_function (const char *args, int from_tty, cmd_list_element *command)
 {
-  command_smob *c_smob/*obj*/ = (command_smob *) command->context ();
+  command_smob *c_smob /*obj*/ = (command_smob *) command->context ();
   SCM arg_scm, tty_scm, result;
 
   gdb_assert (c_smob != NULL);
@@ -302,12 +301,12 @@ cmdscm_function (const char *args, int from_tty, cmd_list_element *command)
     args = "";
   arg_scm = gdbscm_scm_from_string (args, strlen (args), host_charset (), 1);
   if (gdbscm_is_exception (arg_scm))
-    error (_("Could not convert arguments to Scheme string."));
+    error (_ ("Could not convert arguments to Scheme string."));
 
   tty_scm = scm_from_bool (from_tty);
 
-  result = gdbscm_safe_call_3 (c_smob->invoke, c_smob->containing_scm,
-			       arg_scm, tty_scm, gdbscm_user_error_p);
+  result = gdbscm_safe_call_3 (c_smob->invoke, c_smob->containing_scm, arg_scm,
+			       tty_scm, gdbscm_user_error_p);
 
   if (gdbscm_is_exception (result))
     {
@@ -323,7 +322,7 @@ cmdscm_function (const char *args, int from_tty, cmd_list_element *command)
       else
 	{
 	  gdbscm_print_gdb_exception (SCM_BOOL_F, result);
-	  error (_("Error occurred in Scheme-implemented GDB command."));
+	  error (_ ("Error occurred in Scheme-implemented GDB command."));
 	}
     }
 }
@@ -355,14 +354,13 @@ cmdscm_add_completion (SCM completion, completion_tracker &tracker)
   if (!scm_is_string (completion))
     {
       /* Inform the user, but otherwise ignore the entire result.  */
-      cmdscm_bad_completion_result (_("Bad text from completer: "),
+      cmdscm_bad_completion_result (_ ("Bad text from completer: "),
 				    completion);
       return 0;
     }
 
   gdb::unique_xmalloc_ptr<char> item
-    = gdbscm_scm_to_string (completion, NULL, host_charset (), 1,
-			    &except_scm);
+    = gdbscm_scm_to_string (completion, NULL, host_charset (), 1, &except_scm);
   if (item == NULL)
     {
       /* Inform the user, but otherwise ignore the entire result.  */
@@ -379,28 +377,26 @@ cmdscm_add_completion (SCM completion, completion_tracker &tracker)
 
 static void
 cmdscm_completer (struct cmd_list_element *command,
-		  completion_tracker &tracker,
-		  const char *text, const char *word)
+		  completion_tracker &tracker, const char *text,
+		  const char *word)
 {
-  command_smob *c_smob/*obj*/ = (command_smob *) command->context ();
+  command_smob *c_smob /*obj*/ = (command_smob *) command->context ();
   SCM completer_result_scm;
   SCM text_scm, word_scm;
 
   gdb_assert (c_smob != NULL);
   gdb_assert (gdbscm_is_procedure (c_smob->complete));
 
-  text_scm = gdbscm_scm_from_string (text, strlen (text), host_charset (),
-				     1);
+  text_scm = gdbscm_scm_from_string (text, strlen (text), host_charset (), 1);
   if (gdbscm_is_exception (text_scm))
-    error (_("Could not convert \"text\" argument to Scheme string."));
-  word_scm = gdbscm_scm_from_string (word, strlen (word), host_charset (),
-				     1);
+    error (_ ("Could not convert \"text\" argument to Scheme string."));
+  word_scm = gdbscm_scm_from_string (word, strlen (word), host_charset (), 1);
   if (gdbscm_is_exception (word_scm))
-    error (_("Could not convert \"word\" argument to Scheme string."));
+    error (_ ("Could not convert \"word\" argument to Scheme string."));
 
   completer_result_scm
-    = gdbscm_safe_call_3 (c_smob->complete, c_smob->containing_scm,
-			  text_scm, word_scm, NULL);
+    = gdbscm_safe_call_3 (c_smob->complete, c_smob->containing_scm, text_scm,
+			  word_scm, NULL);
 
   if (gdbscm_is_exception (completer_result_scm))
     {
@@ -446,7 +442,7 @@ cmdscm_completer (struct cmd_list_element *command,
   else
     {
       /* Inform the user, but otherwise ignore.  */
-      cmdscm_bad_completion_result (_("Bad completer result: "),
+      cmdscm_bad_completion_result (_ ("Bad completer result: "),
 				    completer_result_scm);
     }
 }
@@ -467,9 +463,8 @@ cmdscm_completer (struct cmd_list_element *command,
    On error a Scheme exception is thrown.  */
 
 char *
-gdbscm_parse_command_name (const char *name,
-			   const char *func_name, int arg_pos,
-			   struct cmd_list_element ***base_list,
+gdbscm_parse_command_name (const char *name, const char *func_name,
+			   int arg_pos, struct cmd_list_element ***base_list,
 			   struct cmd_list_element **start_list)
 {
   struct cmd_list_element *elt;
@@ -484,7 +479,7 @@ gdbscm_parse_command_name (const char *name,
     {
       gdbscm_out_of_range_error (func_name, arg_pos,
 				 gdbscm_scm_from_c_string (name),
-				 _("no command name found"));
+				 _ ("no command name found"));
     }
   lastchar = i;
 
@@ -512,8 +507,9 @@ gdbscm_parse_command_name (const char *name,
   elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, NULL, 1);
   if (elt == NULL || elt == CMD_LIST_AMBIGUOUS)
     {
-      msg = xstrprintf (_("could not find command prefix '%s'"),
-			prefix_text.get ()).release ();
+      msg = xstrprintf (_ ("could not find command prefix '%s'"),
+			prefix_text.get ())
+	      .release ();
       scm_dynwind_begin ((scm_t_dynwind_flags) 0);
       gdbscm_dynwind_xfree (msg);
       gdbscm_out_of_range_error (func_name, arg_pos,
@@ -526,8 +522,8 @@ gdbscm_parse_command_name (const char *name,
       return result.release ();
     }
 
-  msg = xstrprintf (_("'%s' is not a prefix command"),
-		    prefix_text.get ()).release ();
+  msg = xstrprintf (_ ("'%s' is not a prefix command"), prefix_text.get ())
+	  .release ();
   scm_dynwind_begin ((scm_t_dynwind_flags) 0);
   gdbscm_dynwind_xfree (msg);
   gdbscm_out_of_range_error (func_name, arg_pos,
@@ -535,8 +531,7 @@ gdbscm_parse_command_name (const char *name,
   /* NOTREACHED */
 }
 
-static const scheme_integer_constant command_classes[] =
-{
+static const scheme_integer_constant command_classes[] = {
   /* Note: alias and user are special; pseudo appears to be unused,
      and there is no reason to expose tui, I think.  */
   { "COMMAND_NONE", no_class },
@@ -647,10 +642,9 @@ gdbscm_canonicalize_command_name (const char *name, int want_trailing_space)
 static SCM
 gdbscm_make_command (SCM name_scm, SCM rest)
 {
-  const SCM keywords[] = {
-    invoke_keyword, command_class_keyword, completer_class_keyword,
-    prefix_p_keyword, doc_keyword, SCM_BOOL_F
-  };
+  const SCM keywords[]
+    = { invoke_keyword,	  command_class_keyword, completer_class_keyword,
+	prefix_p_keyword, doc_keyword,		 SCM_BOOL_F };
   int invoke_arg_pos = -1, command_class_arg_pos = 1;
   int completer_class_arg_pos = -1, is_prefix_arg_pos = -1;
   int doc_arg_pos = -1;
@@ -665,15 +659,14 @@ gdbscm_make_command (SCM name_scm, SCM rest)
   command_smob *c_smob;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, keywords, "s#OiOts",
-			      name_scm, &name, rest,
-			      &invoke_arg_pos, &invoke,
+			      name_scm, &name, rest, &invoke_arg_pos, &invoke,
 			      &command_class_arg_pos, &command_class,
 			      &completer_class_arg_pos, &completer_class,
-			      &is_prefix_arg_pos, &is_prefix,
-			      &doc_arg_pos, &doc);
+			      &is_prefix_arg_pos, &is_prefix, &doc_arg_pos,
+			      &doc);
 
   if (doc == NULL)
-    doc = xstrdup (_("This command is not documented."));
+    doc = xstrdup (_ ("This command is not documented."));
 
   s = name;
   name = gdbscm_canonicalize_command_name (s, is_prefix);
@@ -682,38 +675,36 @@ gdbscm_make_command (SCM name_scm, SCM rest)
   doc = gdbscm_gc_xstrdup (s);
   xfree (s);
 
-  if (is_prefix
-      ? name[0] == ' '
-      : name[0] == '\0')
+  if (is_prefix ? name[0] == ' ' : name[0] == '\0')
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, name_scm,
-				 _("no command name found"));
+				 _ ("no command name found"));
     }
 
   if (gdbscm_is_true (invoke))
     {
-      SCM_ASSERT_TYPE (gdbscm_is_procedure (invoke), invoke,
-		       invoke_arg_pos, FUNC_NAME, _("procedure"));
+      SCM_ASSERT_TYPE (gdbscm_is_procedure (invoke), invoke, invoke_arg_pos,
+		       FUNC_NAME, _ ("procedure"));
     }
 
   if (!gdbscm_valid_command_class_p (command_class))
     {
       gdbscm_out_of_range_error (FUNC_NAME, command_class_arg_pos,
 				 scm_from_int (command_class),
-				 _("invalid command class argument"));
+				 _ ("invalid command class argument"));
     }
 
   SCM_ASSERT_TYPE (gdbscm_is_false (completer_class)
-		   || scm_is_integer (completer_class)
-		   || gdbscm_is_procedure (completer_class),
+		     || scm_is_integer (completer_class)
+		     || gdbscm_is_procedure (completer_class),
 		   completer_class, completer_class_arg_pos, FUNC_NAME,
-		   _("integer or procedure"));
+		   _ ("integer or procedure"));
   if (scm_is_integer (completer_class)
       && !scm_is_signed_integer (completer_class, 0, N_COMPLETERS - 1))
     {
       gdbscm_out_of_range_error (FUNC_NAME, completer_class_arg_pos,
 				 completer_class,
-				 _("invalid completion type argument"));
+				 _ ("invalid completion type argument"));
     }
 
   c_scm = cmdscm_make_command_smob ();
@@ -742,7 +733,7 @@ gdbscm_register_command_x (SCM self)
   struct cmd_list_element *cmd = NULL;
 
   if (cmdscm_is_valid (c_smob))
-    scm_misc_error (FUNC_NAME, _("command is already registered"), SCM_EOL);
+    scm_misc_error (FUNC_NAME, _ ("command is already registered"), SCM_EOL);
 
   cmd_name = gdbscm_parse_command_name (c_smob->name, FUNC_NAME, SCM_ARG1,
 					&cmd_list, &cmdlist);
@@ -758,14 +749,14 @@ gdbscm_register_command_x (SCM self)
 	     sub-commands.  */
 	  int allow_unknown = gdbscm_is_true (c_smob->invoke);
 
-	  cmd = add_prefix_cmd (c_smob->cmd_name, c_smob->cmd_class,
-				NULL, c_smob->doc, &c_smob->sub_list,
-				allow_unknown, cmd_list);
+	  cmd = add_prefix_cmd (c_smob->cmd_name, c_smob->cmd_class, NULL,
+				c_smob->doc, &c_smob->sub_list, allow_unknown,
+				cmd_list);
 	}
       else
 	{
-	  cmd = add_cmd (c_smob->cmd_name, c_smob->cmd_class,
-			 c_smob->doc, cmd_list);
+	  cmd = add_cmd (c_smob->cmd_name, c_smob->cmd_class, c_smob->doc,
+			 cmd_list);
 	}
     }
   catch (const gdb_exception &except)
@@ -786,10 +777,10 @@ gdbscm_register_command_x (SCM self)
 
   if (gdbscm_is_true (c_smob->complete))
     {
-      set_cmd_completer (cmd,
-			 scm_is_integer (c_smob->complete)
-			 ? cmdscm_completers[scm_to_int (c_smob->complete)].completer
-			 : cmdscm_completer);
+      set_cmd_completer (
+	cmd, scm_is_integer (c_smob->complete)
+	       ? cmdscm_completers[scm_to_int (c_smob->complete)].completer
+	       : cmdscm_completer);
     }
 
   /* The owner of this command is not in GC-controlled memory, so we need
@@ -798,13 +789,11 @@ gdbscm_register_command_x (SCM self)
 
   return SCM_UNSPECIFIED;
 }
-
+
 /* Initialize the Scheme command support.  */
 
-static const scheme_function command_functions[] =
-{
-  { "make-command", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_command),
-    "\
+static const scheme_function command_functions[]
+  = { { "make-command", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_command), "\
 Make a GDB command object.\n\
 \n\
   Arguments: name [#:invoke lambda]\n\
@@ -824,27 +813,23 @@ Make a GDB command object.\n\
     doc: The \"doc string\" of the command.\n\
   Returns: <gdb:command> object" },
 
-  { "register-command!", 1, 0, 0, as_a_scm_t_subr (gdbscm_register_command_x),
-    "\
+      { "register-command!", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_register_command_x), "\
 Register a <gdb:command> object with GDB." },
 
-  { "command?", 1, 0, 0, as_a_scm_t_subr (gdbscm_command_p),
-    "\
+      { "command?", 1, 0, 0, as_a_scm_t_subr (gdbscm_command_p), "\
 Return #t if the object is a <gdb:command> object." },
 
-  { "command-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_command_valid_p),
-    "\
+      { "command-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_command_valid_p), "\
 Return #t if the <gdb:command> object is valid." },
 
-  { "dont-repeat", 1, 0, 0, as_a_scm_t_subr (gdbscm_dont_repeat),
-    "\
+      { "dont-repeat", 1, 0, 0, as_a_scm_t_subr (gdbscm_dont_repeat), "\
 Prevent command repetition when user enters an empty line.\n\
 \n\
   Arguments: <gdb:command>\n\
   Returns: unspecified" },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 /* Initialize the 'commands' code.  */
 

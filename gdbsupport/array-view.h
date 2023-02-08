@@ -64,23 +64,24 @@
    You can find unit tests covering the whole API in
    unittests/array-view-selftests.c.  */
 
-namespace gdb {
+namespace gdb
+{
 
-template <typename T>
+template<typename T>
 class array_view
 {
   /* True iff decayed T is the same as decayed U.  E.g., we want to
      say that 'T&' is the same as 'const T'.  */
-  template <typename U>
+  template<typename U>
   using IsDecayedT = typename std::is_same<typename std::decay<T>::type,
-					   typename std::decay<U>::type>;
+                                           typename std::decay<U>::type>;
 
   /* True iff decayed T is the same as decayed U, and 'U *' is
      implicitly convertible to 'T *'.  This is a requirement for
      several methods.  */
-  template <typename U>
-  using DecayedConvertible = gdb::And<IsDecayedT<U>,
-				      std::is_convertible<U *, T *>>;
+  template<typename U>
+  using DecayedConvertible
+    = gdb::And<IsDecayedT<U>, std::is_convertible<U *, T *>>;
 
 public:
   using value_type = T;
@@ -89,68 +90,66 @@ public:
   using size_type = size_t;
 
   /* Default construction creates an empty view.  */
-  constexpr array_view () noexcept
-    : m_array (nullptr), m_size (0)
-  {}
+  constexpr array_view () noexcept : m_array (nullptr), m_size (0) {}
 
   /* Create an array view over a single object of the type of an
      array_view element.  The created view as size==1.  This is
      templated on U to allow constructing a array_view<const T> over a
      (non-const) T.  The "convertible" requirement makes sure that you
      can't create an array_view<T> over a const T.  */
-  template<typename U,
-	   typename = Requires<DecayedConvertible<U>>>
-  constexpr array_view (U &elem) noexcept
-    : m_array (&elem), m_size (1)
-  {}
+  template<typename U, typename = Requires<DecayedConvertible<U>>>
+  constexpr array_view (U &elem) noexcept : m_array (&elem),
+                                            m_size (1)
+  {
+  }
 
   /* Same as above, for rvalue references.  */
-  template<typename U,
-	   typename = Requires<DecayedConvertible<U>>>
-  constexpr array_view (U &&elem) noexcept
-    : m_array (&elem), m_size (1)
-  {}
+  template<typename U, typename = Requires<DecayedConvertible<U>>>
+  constexpr array_view (U &&elem) noexcept : m_array (&elem),
+                                             m_size (1)
+  {
+  }
 
   /* Create an array view from a pointer to an array and an element
      count.  */
-  template<typename U,
-	   typename = Requires<DecayedConvertible<U>>>
+  template<typename U, typename = Requires<DecayedConvertible<U>>>
   constexpr array_view (U *array, size_t size) noexcept
-    : m_array (array), m_size (size)
-  {}
+    : m_array (array),
+      m_size (size)
+  {
+  }
 
   /* Create an array view from a range.  This is templated on both U
      an V to allow passing in a mix of 'const T *' and 'T *'.  */
-  template<typename U, typename V,
-	   typename = Requires<DecayedConvertible<U>>,
-	   typename = Requires<DecayedConvertible<V>>>
+  template<typename U, typename V, typename = Requires<DecayedConvertible<U>>,
+           typename = Requires<DecayedConvertible<V>>>
   constexpr array_view (U *begin, V *end) noexcept
-    : m_array (begin), m_size (end - begin)
-  {}
+    : m_array (begin),
+      m_size (end - begin)
+  {
+  }
 
   /* Create an array view from an array.  */
-  template<typename U, size_t Size,
-	   typename = Requires<DecayedConvertible<U>>>
+  template<typename U, size_t Size, typename = Requires<DecayedConvertible<U>>>
   constexpr array_view (U (&array)[Size]) noexcept
-    : m_array (array), m_size (Size)
-  {}
+    : m_array (array),
+      m_size (Size)
+  {
+  }
 
   /* Create an array view from a contiguous container.  E.g.,
      std::vector and std::array.  */
   template<typename Container,
-	   typename = Requires<gdb::Not<IsDecayedT<Container>>>,
-	   typename
-	     = Requires<DecayedConvertible
-			<typename std::remove_pointer
-			 <decltype (std::declval<Container> ().data ())
-			 >::type>>,
-	   typename
-	     = Requires<std::is_convertible
-			<decltype (std::declval<Container> ().size ()),
-			 size_type>>>
+           typename = Requires<gdb::Not<IsDecayedT<Container>>>,
+           typename = Requires<DecayedConvertible<typename std::remove_pointer<
+             decltype (std::declval<Container> ().data ())>::type>>,
+           typename = Requires<std::is_convertible<
+             decltype (std::declval<Container> ().size ()), size_type>>>
   constexpr array_view (Container &&c) noexcept
-    : m_array (c.data ()), m_size (c.size ())
-  {}
+    : m_array (c.data ()),
+      m_size (c.size ())
+  {
+  }
 
   /* Observer methods.  Some of these can't be constexpr until we
      require C++14.  */
@@ -184,12 +183,13 @@ public:
   /* Slice an array view.  */
 
   /* Return a new array view over SIZE elements starting at START.  */
-  constexpr array_view<T> slice (size_type start, size_type size) const noexcept
+  constexpr array_view<T> slice (size_type start,
+                                 size_type size) const noexcept
   {
 #if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
     gdb_assert (start + size <= m_size);
 #endif
-    return {m_array + start, size};
+    return { m_array + start, size };
   }
 
   /* Return a new array view over all the elements after START,
@@ -199,7 +199,7 @@ public:
 #if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
     gdb_assert (start <= m_size);
 #endif
-    return {m_array + start, size () - start};
+    return { m_array + start, size () - start };
   }
 
 private:
@@ -211,8 +211,9 @@ private:
 
    The two array views must have the same length.  */
 
-template <typename U, typename T>
-void copy (gdb::array_view<U> src, gdb::array_view<T> dest)
+template<typename U, typename T>
+void
+copy (gdb::array_view<U> src, gdb::array_view<T> dest)
 {
   gdb_assert (dest.size () == src.size ());
   if (dest.data () < src.data ())
@@ -225,7 +226,7 @@ void copy (gdb::array_view<U> src, gdb::array_view<T> dest)
    RHS have the same sizes, and whether each pair of elements of LHS
    and RHS at the same position compares equal.  */
 
-template <typename T>
+template<typename T>
 bool
 operator== (const gdb::array_view<T> &lhs, const gdb::array_view<T> &rhs)
 {
@@ -241,7 +242,7 @@ operator== (const gdb::array_view<T> &lhs, const gdb::array_view<T> &rhs)
 
 /* Compare two array_views for inequality.  */
 
-template <typename T>
+template<typename T>
 bool
 operator!= (const gdb::array_view<T> &lhs, const gdb::array_view<T> &rhs)
 {
@@ -287,7 +288,7 @@ template<typename U>
 constexpr inline array_view<U>
 make_array_view (U *array, size_t size) noexcept
 {
-  return {array, size};
+  return { array, size };
 }
 
 } /* namespace gdb */

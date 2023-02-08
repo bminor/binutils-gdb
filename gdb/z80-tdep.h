@@ -30,7 +30,7 @@ enum z80_regnum
   Z80_BC_REGNUM,
   Z80_DE_REGNUM,
   Z80_HL_REGNUM,
-  Z80_SP_REGNUM,	/* SPL on eZ80 CPU */
+  Z80_SP_REGNUM, /* SPL on eZ80 CPU */
   Z80_PC_REGNUM,
   Z80_IX_REGNUM,
   Z80_IY_REGNUM,
@@ -39,14 +39,14 @@ enum z80_regnum
   Z80_DEA_REGNUM,
   Z80_HLA_REGNUM,
   Z80_IR_REGNUM,
-/* eZ80 only registers */
-  Z80_SPS_REGNUM	/* SPS register of eZ80 CPU */
+  /* eZ80 only registers */
+  Z80_SPS_REGNUM /* SPS register of eZ80 CPU */
 };
 
-#define Z80_NUM_REGS	13
-#define Z80_REG_BYTES	(Z80_NUM_REGS*2)
+#define Z80_NUM_REGS 13
+#define Z80_REG_BYTES (Z80_NUM_REGS * 2)
 
-#define EZ80_NUM_REGS	(Z80_NUM_REGS + 1)
-#define EZ80_REG_BYTES	(EZ80_NUM_REGS*3)
+#define EZ80_NUM_REGS (Z80_NUM_REGS + 1)
+#define EZ80_REG_BYTES (EZ80_NUM_REGS * 3)
 
 #endif /* z80-tdep.h */

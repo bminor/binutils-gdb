@@ -31,8 +31,8 @@ struct pspace_object
 {
   PyObject_HEAD
 
-  /* The corresponding pspace.  */
-  struct program_space *pspace;
+    /* The corresponding pspace.  */
+    struct program_space *pspace;
 
   /* Dictionary holding user-added attributes.
      This is the __dict__ attribute of the object.  */
@@ -54,8 +54,8 @@ struct pspace_object
   PyObject *xmethods;
 };
 
-extern PyTypeObject pspace_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pspace_object");
+extern PyTypeObject
+  pspace_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pspace_object");
 
 /* Clear the PSPACE pointer in a Pspace object and remove the reference.  */
 struct pspace_deleter
@@ -80,18 +80,20 @@ struct pspace_deleter
 };
 
 static const registry<program_space>::key<pspace_object, pspace_deleter>
-     pspy_pspace_data_key;
+  pspy_pspace_data_key;
 
 /* Require that PSPACE_OBJ be a valid program space ID.  */
-#define PSPY_REQUIRE_VALID(pspace_obj)				\
-  do {								\
-    if (pspace_obj->pspace == nullptr)				\
-      {								\
-	PyErr_SetString (PyExc_RuntimeError,			\
-			 _("Program space no longer exists."));	\
-	return NULL;						\
-      }								\
-  } while (0)
+#define PSPY_REQUIRE_VALID(pspace_obj)                             \
+  do                                                               \
+    {                                                              \
+      if (pspace_obj->pspace == nullptr)                           \
+	{                                                          \
+	  PyErr_SetString (PyExc_RuntimeError,                     \
+			   _ ("Program space no longer exists.")); \
+	  return NULL;                                             \
+	}                                                          \
+    }                                                              \
+  while (0)
 
 /* An Objfile method which returns the objfile's file name, or None.  */
 
@@ -105,8 +107,8 @@ pspy_get_filename (PyObject *self, void *closure)
       struct objfile *objfile = obj->pspace->symfile_object_file;
 
       if (objfile)
-	return (host_string_to_python_string (objfile_name (objfile))
-		.release ());
+	return (
+	  host_string_to_python_string (objfile_name (objfile)).release ());
     }
   Py_RETURN_NONE;
 }
@@ -188,14 +190,14 @@ pspy_set_printers (PyObject *o, PyObject *value, void *ignore)
 {
   pspace_object *self = (pspace_object *) o;
 
-  if (! value)
+  if (!value)
     {
       PyErr_SetString (PyExc_TypeError,
 		       "cannot delete the pretty_printers attribute");
       return -1;
     }
 
-  if (! PyList_Check (value))
+  if (!PyList_Check (value))
     {
       PyErr_SetString (PyExc_TypeError,
 		       "the pretty_printers attribute must be a list");
@@ -227,14 +229,14 @@ pspy_set_frame_filters (PyObject *o, PyObject *frame, void *ignore)
 {
   pspace_object *self = (pspace_object *) o;
 
-  if (! frame)
+  if (!frame)
     {
       PyErr_SetString (PyExc_TypeError,
 		       "cannot delete the frame filter attribute");
       return -1;
     }
 
-  if (! PyDict_Check (frame))
+  if (!PyDict_Check (frame))
     {
       PyErr_SetString (PyExc_TypeError,
 		       "the frame filter attribute must be a dictionary");
@@ -318,14 +320,14 @@ pspy_set_type_printers (PyObject *o, PyObject *value, void *ignore)
 {
   pspace_object *self = (pspace_object *) o;
 
-  if (! value)
+  if (!value)
     {
       PyErr_SetString (PyExc_TypeError,
 		       "cannot delete the type_printers attribute");
       return -1;
     }
 
-  if (! PyList_Check (value))
+  if (!PyList_Check (value))
     {
       PyErr_SetString (PyExc_TypeError,
 		       "the type_printers attribute must be a list");
@@ -484,8 +486,6 @@ pspy_is_valid (PyObject *o, PyObject *args)
   Py_RETURN_TRUE;
 }
 
-
-
 /* Return a new reference to the Python object of type Pspace
    representing PSPACE.  If the object has already been created,
    return it.  Otherwise, create it.  Return NULL and set the Python
@@ -497,8 +497,8 @@ pspace_to_pspace_object (struct program_space *pspace)
   PyObject *result = (PyObject *) pspy_pspace_data_key.get (pspace);
   if (result == NULL)
     {
-      gdbpy_ref<pspace_object> object
-	((pspace_object *) PyObject_New (pspace_object, &pspace_object_type));
+      gdbpy_ref<pspace_object> object (
+	(pspace_object *) PyObject_New (pspace_object, &pspace_object_type));
       if (object == NULL)
 	return NULL;
       if (!pspy_initialize (object.get ()))
@@ -539,83 +539,73 @@ gdbpy_initialize_pspace (void)
 				 (PyObject *) &pspace_object_type);
 }
 
-
+static gdb_PyGetSetDef pspace_getset[]
+  = { { "__dict__", gdb_py_generic_dict, NULL,
+	"The __dict__ for this progspace.", &pspace_object_type },
+      { "filename", pspy_get_filename, NULL,
+	"The progspace's main filename, or None.", NULL },
+      { "pretty_printers", pspy_get_printers, pspy_set_printers,
+	"Pretty printers.", NULL },
+      { "frame_filters", pspy_get_frame_filters, pspy_set_frame_filters,
+	"Frame filters.", NULL },
+      { "frame_unwinders", pspy_get_frame_unwinders, pspy_set_frame_unwinders,
+	"Frame unwinders.", NULL },
+      { "type_printers", pspy_get_type_printers, pspy_set_type_printers,
+	"Type printers.", NULL },
+      { "xmethods", pspy_get_xmethods, NULL, "Debug methods.", NULL },
+      { NULL } };
 
-static gdb_PyGetSetDef pspace_getset[] =
-{
-  { "__dict__", gdb_py_generic_dict, NULL,
-    "The __dict__ for this progspace.", &pspace_object_type },
-  { "filename", pspy_get_filename, NULL,
-    "The progspace's main filename, or None.", NULL },
-  { "pretty_printers", pspy_get_printers, pspy_set_printers,
-    "Pretty printers.", NULL },
-  { "frame_filters", pspy_get_frame_filters, pspy_set_frame_filters,
-    "Frame filters.", NULL },
-  { "frame_unwinders", pspy_get_frame_unwinders, pspy_set_frame_unwinders,
-    "Frame unwinders.", NULL },
-  { "type_printers", pspy_get_type_printers, pspy_set_type_printers,
-    "Type printers.", NULL },
-  { "xmethods", pspy_get_xmethods, NULL,
-    "Debug methods.", NULL },
-  { NULL }
-};
-
-static PyMethodDef progspace_object_methods[] =
-{
-  { "objfiles", pspy_get_objfiles, METH_NOARGS,
-    "Return a sequence of objfiles associated to this program space." },
-  { "solib_name", pspy_solib_name, METH_VARARGS,
-    "solib_name (Long) -> String.\n\
+static PyMethodDef progspace_object_methods[]
+  = { { "objfiles", pspy_get_objfiles, METH_NOARGS,
+	"Return a sequence of objfiles associated to this program space." },
+      { "solib_name", pspy_solib_name, METH_VARARGS,
+	"solib_name (Long) -> String.\n\
 Return the name of the shared library holding a given address, or None." },
-  { "block_for_pc", pspy_block_for_pc, METH_VARARGS,
-    "Return the block containing the given pc value, or None." },
-  { "find_pc_line", pspy_find_pc_line, METH_VARARGS,
-    "find_pc_line (pc) -> Symtab_and_line.\n\
+      { "block_for_pc", pspy_block_for_pc, METH_VARARGS,
+	"Return the block containing the given pc value, or None." },
+      { "find_pc_line", pspy_find_pc_line, METH_VARARGS,
+	"find_pc_line (pc) -> Symtab_and_line.\n\
 Return the gdb.Symtab_and_line object corresponding to the pc value." },
-  { "is_valid", pspy_is_valid, METH_NOARGS,
-    "is_valid () -> Boolean.\n\
+      { "is_valid", pspy_is_valid, METH_NOARGS, "is_valid () -> Boolean.\n\
 Return true if this program space is valid, false if not." },
-  { NULL }
-};
+      { NULL } };
 
-PyTypeObject pspace_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Progspace",		  /*tp_name*/
-  sizeof (pspace_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  pspy_dealloc,			  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  0,				  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
-  "GDB progspace object",	  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  progspace_object_methods,	  /* tp_methods */
-  0,				  /* tp_members */
-  pspace_getset,		  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  offsetof (pspace_object, dict), /* tp_dictoffset */
-  0,				  /* tp_init */
-  0,				  /* tp_alloc */
-  pspy_new,			  /* tp_new */
+PyTypeObject pspace_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.Progspace", /*tp_name*/
+  sizeof (pspace_object),			   /*tp_basicsize*/
+  0,						   /*tp_itemsize*/
+  pspy_dealloc,					   /*tp_dealloc*/
+  0,						   /*tp_print*/
+  0,						   /*tp_getattr*/
+  0,						   /*tp_setattr*/
+  0,						   /*tp_compare*/
+  0,						   /*tp_repr*/
+  0,						   /*tp_as_number*/
+  0,						   /*tp_as_sequence*/
+  0,						   /*tp_as_mapping*/
+  0,						   /*tp_hash */
+  0,						   /*tp_call*/
+  0,						   /*tp_str*/
+  0,						   /*tp_getattro*/
+  0,						   /*tp_setattro*/
+  0,						   /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,				   /*tp_flags*/
+  "GDB progspace object",			   /* tp_doc */
+  0,						   /* tp_traverse */
+  0,						   /* tp_clear */
+  0,						   /* tp_richcompare */
+  0,						   /* tp_weaklistoffset */
+  0,						   /* tp_iter */
+  0,						   /* tp_iternext */
+  progspace_object_methods,			   /* tp_methods */
+  0,						   /* tp_members */
+  pspace_getset,				   /* tp_getset */
+  0,						   /* tp_base */
+  0,						   /* tp_dict */
+  0,						   /* tp_descr_get */
+  0,						   /* tp_descr_set */
+  offsetof (pspace_object, dict),		   /* tp_dictoffset */
+  0,						   /* tp_init */
+  0,						   /* tp_alloc */
+  pspy_new,					   /* tp_new */
 };

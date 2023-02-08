@@ -24,7 +24,7 @@
 
 /* Feature check for Memory Tagging Extension.  */
 #ifndef HWCAP2_MTE
-#define HWCAP2_MTE  (1 << 18)
+#define HWCAP2_MTE (1 << 18)
 #endif
 
 /* The MTE regset consists of a single 64-bit register.  */
@@ -38,8 +38,8 @@
 
 /* Memory tagging definitions.  */
 #ifndef SEGV_MTEAERR
-# define SEGV_MTEAERR 8
-# define SEGV_MTESERR 9
+#define SEGV_MTEAERR 8
+#define SEGV_MTESERR 9
 #endif
 
 /* Memory tag types for AArch64.  */

@@ -32,46 +32,45 @@
    counts, and allow to watch regions up to 16 bytes long
    (32 bytes on 64 bit hosts).  */
 
-
 #include "gdbsupport/break-common.h" /* target_hw_bp_type */
 
 /* Low-level function vector.  */
 
 struct x86_dr_low_type
-  {
-    /* Set the debug control (DR7) register to a given value for
+{
+  /* Set the debug control (DR7) register to a given value for
        all LWPs.  May be NULL if the debug control register cannot
        be set.  */
-    void (*set_control) (unsigned long);
+  void (*set_control) (unsigned long);
 
-    /* Put an address into one debug register for all LWPs.  May
+  /* Put an address into one debug register for all LWPs.  May
        be NULL if debug registers cannot be set*/
-    void (*set_addr) (int, CORE_ADDR);
+  void (*set_addr) (int, CORE_ADDR);
 
-    /* Return the address in a given debug register of the current
+  /* Return the address in a given debug register of the current
        LWP.  */
-    CORE_ADDR (*get_addr) (int);
+  CORE_ADDR (*get_addr) (int);
 
-    /* Return the value of the debug status (DR6) register for
+  /* Return the value of the debug status (DR6) register for
        current LWP.  */
-    unsigned long (*get_status) (void);
+  unsigned long (*get_status) (void);
 
-    /* Return the value of the debug control (DR7) register for
+  /* Return the value of the debug control (DR7) register for
        current LWP.  */
-    unsigned long (*get_control) (void);
+  unsigned long (*get_control) (void);
 
-    /* Number of bytes used for debug registers (4 or 8).  */
-    int debug_register_length;
-  };
+  /* Number of bytes used for debug registers (4 or 8).  */
+  int debug_register_length;
+};
 
 extern struct x86_dr_low_type x86_dr_low;
 
 /* Debug registers' indices.  */
 #define DR_FIRSTADDR 0
-#define DR_LASTADDR  3
-#define DR_NADDR     4	/* The number of debug address registers.  */
-#define DR_STATUS    6	/* Index of debug status register (DR6).  */
-#define DR_CONTROL   7	/* Index of debug control register (DR7).  */
+#define DR_LASTADDR 3
+#define DR_NADDR 4   /* The number of debug address registers.  */
+#define DR_STATUS 6  /* Index of debug status register (DR6).  */
+#define DR_CONTROL 7 /* Index of debug control register (DR7).  */
 
 /* Global state needed to track h/w watchpoints.  */
 
@@ -103,16 +102,14 @@ extern struct x86_debug_reg_state *x86_debug_reg_state (pid_t pid);
    of the type TYPE.  Return 0 on success, -1 on failure.  */
 extern int x86_dr_insert_watchpoint (struct x86_debug_reg_state *state,
 				     enum target_hw_bp_type type,
-				     CORE_ADDR addr,
-				     int len);
+				     CORE_ADDR addr, int len);
 
 /* Remove a watchpoint that watched the memory region which starts at
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
 extern int x86_dr_remove_watchpoint (struct x86_debug_reg_state *state,
 				     enum target_hw_bp_type type,
-				     CORE_ADDR addr,
-				     int len);
+				     CORE_ADDR addr, int len);
 
 /* Return non-zero if we can watch a memory region that starts at
    address ADDR and whose length is LEN bytes.  */

@@ -113,44 +113,69 @@
  *
  * external low-level support routines 
  */
-typedef void (*ExceptionHook)(int);   /* pointer to function with int parm */
-typedef void (*Function)();           /* pointer to a function */
+typedef void (*ExceptionHook) (int); /* pointer to function with int parm */
+typedef void (*Function) ();	     /* pointer to a function */
 
-extern void putDebugChar();	/* write a single character      */
-extern int getDebugChar();	/* read and return a single char */
+extern void putDebugChar (); /* write a single character      */
+extern int getDebugChar ();  /* read and return a single char */
 
-extern Function exceptionHandler();  /* assign an exception handler */
+extern Function exceptionHandler (); /* assign an exception handler */
 extern ExceptionHook exceptionHook;  /* hook variable for errors/exceptions */
 
 /************************/
 /* FORWARD DECLARATIONS */
 /************************/
-static void
-initializeRemcomErrorFrame ();
+static void initializeRemcomErrorFrame ();
 
 /************************************************************************/
 /* BUFMAX defines the maximum number of characters in inbound/outbound buffers*/
 /* at least NUMREGBYTES*2 are needed for register packets */
 #define BUFMAX 400
 
-static char initialized;  /* boolean flag. != 0 means we've been initialized */
+static char initialized; /* boolean flag. != 0 means we've been initialized */
 
-int     remote_debug;
-/*  debug >  0 prints ill-formed commands in valid packets & checksum errors */ 
+int remote_debug;
+/*  debug >  0 prints ill-formed commands in valid packets & checksum errors */
 
-static const char hexchars[]="0123456789abcdef";
+static const char hexchars[] = "0123456789abcdef";
 
 /* there are 180 bytes of registers on a 68020 w/68881      */
 /* many of the fpa registers are 12 byte (96 bit) registers */
 #define NUMREGBYTES 180
-enum regnames {D0,D1,D2,D3,D4,D5,D6,D7, 
-	       A0,A1,A2,A3,A4,A5,A6,A7, 
-	       PS,PC,
-	       FP0,FP1,FP2,FP3,FP4,FP5,FP6,FP7,
-	       FPCONTROL,FPSTATUS,FPIADDR
-	      };
 
-
+enum regnames
+{
+  D0,
+  D1,
+  D2,
+  D3,
+  D4,
+  D5,
+  D6,
+  D7,
+  A0,
+  A1,
+  A2,
+  A3,
+  A4,
+  A5,
+  A6,
+  A7,
+  PS,
+  PC,
+  FP0,
+  FP1,
+  FP2,
+  FP3,
+  FP4,
+  FP5,
+  FP6,
+  FP7,
+  FPCONTROL,
+  FPSTATUS,
+  FPIADDR
+};
+
 /* We keep a whole frame cache here.  "Why?", I hear you cry, "doesn't
    GDB handle that sort of thing?"  Well, yes, I believe the only
    reason for this cache is to save and restore floating point state
@@ -161,30 +186,30 @@ enum regnames {D0,D1,D2,D3,D4,D5,D6,D7,
 
 typedef struct FrameStruct
 {
-    struct FrameStruct  *previous;
-    int       exceptionPC;      /* pc value when this frame created */
-    int       exceptionVector;  /* cpu vector causing exception     */
-    short     frameSize;        /* size of cpu frame in words       */
-    short     sr;               /* for 68000, this not always sr    */
-    int       pc;
-    short     format;
-    int       fsaveHeader;
-    int       morejunk[0];        /* exception frame, fp save... */
+  struct FrameStruct *previous;
+  int exceptionPC;     /* pc value when this frame created */
+  int exceptionVector; /* cpu vector causing exception     */
+  short frameSize;     /* size of cpu frame in words       */
+  short sr;	       /* for 68000, this not always sr    */
+  int pc;
+  short format;
+  int fsaveHeader;
+  int morejunk[0]; /* exception frame, fp save... */
 } Frame;
 
 #define FRAMESIZE 500
-int   gdbFrameStack[FRAMESIZE];
+int gdbFrameStack[FRAMESIZE];
 static Frame *lastFrame;
 
 /*
  * these should not be static cuz they can be used outside this module
  */
-int registers[NUMREGBYTES/4];
+int registers[NUMREGBYTES / 4];
 int superStack;
 
 #define STACKSIZE 10000
-int remcomStack[STACKSIZE/sizeof(int)];
-static int* stackPtr = &remcomStack[STACKSIZE/sizeof(int) - 1];
+int remcomStack[STACKSIZE / sizeof (int)];
+static int *stackPtr = &remcomStack[STACKSIZE / sizeof (int) - 1];
 
 /*
  * In many cases, the system will want to continue exception processing
@@ -199,11 +224,13 @@ static ExceptionHook oldExceptionHook;
  * exception.  The following table is the number of WORDS used
  * for each exception format.
  */
-const short exceptionSize[] = { 4,4,6,4,4,4,4,4,29,10,16,46,12,4,4,4 };
+const short exceptionSize[]
+  = { 4, 4, 6, 4, 4, 4, 4, 4, 29, 10, 16, 46, 12, 4, 4, 4 };
 #endif
 
 #ifdef mc68332
-static const short exceptionSize[] = { 4,4,6,4,4,4,4,4,4,4,4,4,16,4,4,4 };
+static const short exceptionSize[]
+  = { 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 16, 4, 4, 4 };
 #endif
 
 /************* jump buffer used for setjmp/longjmp **************************/
@@ -214,11 +241,12 @@ jmp_buf remcomEnv;
 
 #ifdef __HAVE_68881__
 /* do an fsave, then remember the address to begin a restore from */
-#define SAVE_FP_REGS()    asm(" fsave   a0@-");		\
-			  asm(" fmovemx fp0-fp7,_registers+72");        \
-			  asm(" fmoveml fpcr/fpsr/fpi,_registers+168"); 
-#define RESTORE_FP_REGS()                              \
-asm("                                                \n\
+#define SAVE_FP_REGS()                    \
+  asm (" fsave   a0@-");                  \
+  asm (" fmovemx fp0-fp7,_registers+72"); \
+  asm (" fmoveml fpcr/fpsr/fpi,_registers+168");
+#define RESTORE_FP_REGS() \
+  asm ("                                                \n\
     fmoveml  _registers+168,fpcr/fpsr/fpi            \n\
     fmovemx  _registers+72,fp0-fp7                   \n\
     cmpl     #-1,a0@     |  skip frestore flag set ? \n\
@@ -232,8 +260,8 @@ skip_frestore:                                       \n\
 #define RESTORE_FP_REGS()
 #endif /* __HAVE_68881__ */
 
-void return_to_super();
-void return_to_user();
+void return_to_super ();
+void return_to_user ();
 
 asm("
 .text
@@ -256,9 +284,9 @@ return_to_any:
 	movew   a0@+,d0         /* get # of words in cpu frame */       
 	addw    d0,a0           /* point to end of data        */       
 	addw    d0,a0           /* point to end of data        */       
-	movel   a0,a1                                                   
-#                                                                       
-# copy the stack frame                                                  
+	movel   a0,a1
+#
+#copy the stack frame                                                  
 	subql   #1,d0                                                   
 copyUserLoop:                                                               
 	movew   a1@-,sp@-                                               
@@ -266,10 +294,10 @@ copyUserLoop:
 ");                                                                     
 	RESTORE_FP_REGS()                                              
    asm("   moveml  _registers,d0-d7/a0-a6");			        
-   asm("   rte");  /* pop and go! */                                    
+   asm("   rte");  /* pop and go! */
 
-#define DISABLE_INTERRUPTS()   asm("         oriw   #0x0700,sr");
-#define BREAKPOINT() asm("   trap #1");
+#define DISABLE_INTERRUPTS() asm ("         oriw   #0x0700,sr");
+#define BREAKPOINT() asm ("   trap #1");
 
 /* this function is called immediately when a level 7 interrupt occurs */
 /* if the previous interrupt level was 7 then we're already servicing  */
@@ -280,7 +308,7 @@ asm("
 .globl __debug_level7
 __debug_level7:
 	movew   d0,sp@-");
-#if defined (mc68020) || defined (mc68332)
+#if defined(mc68020) || defined(mc68332)
 asm("	movew   sp@(2),d0");
 #else
 asm("	movew   sp@(6),d0");
@@ -292,14 +320,14 @@ asm("	andiw   #0x700,d0
 	bra     __catchException
 _already7:
 	movew   sp@+,d0");
-#if !defined (mc68020) && !defined (mc68332)
+#if !defined(mc68020) && !defined(mc68332)
 asm("	lea     sp@(4),sp");     /* pull off 68000 return address */
 #endif
 asm("	rte");
 
 extern void _catchException ();
 
-#if defined (mc68020) || defined (mc68332)
+#if defined(mc68020) || defined(mc68332)
 /* This function is called when a 68020 exception occurs.  It saves
  * all the cpu and fpcp regs in the _registers array, creates a frame on a
  * linked list of frames which has the cpu and fpcp stack frames needed
@@ -333,7 +361,7 @@ asm("
 	movel   a4,a5@(68)      /* save pc in _regisers[]      	*/
 
 #
-# figure out how many bytes in the stack frame
+#figure out how many bytes in the stack frame
 	movew   sp@(6),d0	/* get '020 exception format	*/
 	movew   d0,d2           /* make a copy of format word   */
 	andiw   #0xf000,d0      /* mask off format type         */
@@ -347,13 +375,13 @@ asm("
 	movel   a0,a1           /* copy save pointer            */
 	subql   #1,d0           /* predecrement loop counter    */
 #
-# copy the frame
+#copy the frame
 saveFrameLoop:
 	movew  	sp@+,a1@+
 	dbf     d0,saveFrameLoop
 #
-# now that the stack has been clenaed,
-# save the a7 in use at time of exception
+#now that the stack has been clenaed,
+#save the a7 in use at time of exception
 	movel   sp,_superStack  /* save supervisor sp           */
 	andiw   #0x2000,d1      /* were we in supervisor mode ? */
 	beq     userMode       
@@ -365,19 +393,19 @@ userMode:
 a7saveDone:
 
 #
-# save size of frame
+#save size of frame
 	movew   d3,a0@-
 
 #
-# compute exception number
+#compute exception number
 	andl    #0xfff,d2   	/* mask off vector offset	*/
 	lsrw    #2,d2   	/* divide by 4 to get vect num	*/
 	movel   d2,a0@-         /* save it                      */
 #
-# save pc causing exception
+#save pc causing exception
 	movel   a4,a0@-
 #
-# save old frame link and set the new value
+#save old frame link and set the new value
 	movel	_lastFrame,a1	/* last frame pointer */
 	movel   a1,a0@-		/* save pointer to prev frame	*/
 	movel   a0,_lastFrame
@@ -450,7 +478,7 @@ saveDone:
 	movel   a4,a0@-         /* push exception pc            */
 
 #
-# save old frame link and set the new value
+#save old frame link and set the new value
 	movel	_lastFrame,a1	/* last frame pointer */
 	movel   a1,a0@-		/* save pointer to prev frame	*/
 	movel   a0,_lastFrame
@@ -486,10 +514,10 @@ _returnFromException (Frame * frame)
       frame = lastFrame;
       frame->frameSize = 4;
       frame->format = 0;
-      frame->fsaveHeader = -1;	/* restore regs, but we dont have fsave info */
+      frame->fsaveHeader = -1; /* restore regs, but we dont have fsave info */
     }
 
-#if !defined (mc68020) && !defined (mc68332)
+#if !defined(mc68020) && !defined(mc68332)
   /* a 68000 cannot use the internal info pushed onto a bus error
    * or address error frame when doing an RTE so don't put this info
    * onto the stack or the stack will creep every time this happens.
@@ -509,7 +537,7 @@ _returnFromException (Frame * frame)
       return_to_super ();
     }
   else
-    {				/* return to user mode */
+    { /* return to user mode */
       return_to_user ();
     }
 }
@@ -577,15 +605,16 @@ getpacket (void)
 	    {
 	      if (remote_debug)
 		{
-		  fprintf (stderr,
-			   "bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
-			   checksum, xmitcsum, buffer);
+		  fprintf (
+		    stderr,
+		    "bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
+		    checksum, xmitcsum, buffer);
 		}
-	      putDebugChar ('-');	/* failed checksum */
+	      putDebugChar ('-'); /* failed checksum */
 	    }
 	  else
 	    {
-	      putDebugChar ('+');	/* successful transfer */
+	      putDebugChar ('+'); /* successful transfer */
 
 	      /* if a sequence char is present, reply the sequence ID */
 	      if (buffer[2] == ':')
@@ -629,7 +658,6 @@ putpacket (buffer)
       putDebugChar ('#');
       putDebugChar (hexchars[checksum >> 4]);
       putDebugChar (hexchars[checksum % 16]);
-
     }
   while (getDebugChar () != '+');
 
@@ -703,34 +731,34 @@ computeSignal (exceptionVector)
     {
     case 2:
       sigval = 10;
-      break;			/* bus error           */
+      break; /* bus error           */
     case 3:
       sigval = 10;
-      break;			/* address error       */
+      break; /* address error       */
     case 4:
       sigval = 4;
-      break;			/* illegal instruction */
+      break; /* illegal instruction */
     case 5:
       sigval = 8;
-      break;			/* zero divide         */
+      break; /* zero divide         */
     case 6:
       sigval = 8;
-      break;			/* chk instruction     */
+      break; /* chk instruction     */
     case 7:
       sigval = 8;
-      break;			/* trapv instruction   */
+      break; /* trapv instruction   */
     case 8:
       sigval = 11;
-      break;			/* privilege violation */
+      break; /* privilege violation */
     case 9:
       sigval = 5;
-      break;			/* trace trap          */
+      break; /* trace trap          */
     case 10:
       sigval = 4;
-      break;			/* line 1010 emulator  */
+      break; /* line 1010 emulator  */
     case 11:
       sigval = 4;
-      break;			/* line 1111 emulator  */
+      break; /* line 1111 emulator  */
 
       /* Coprocessor protocol violation.  Using a standard MMU or FPU
 	 this cannot be triggered by software.  Call it a SIGBUS.  */
@@ -740,10 +768,10 @@ computeSignal (exceptionVector)
 
     case 31:
       sigval = 2;
-      break;			/* interrupt           */
+      break; /* interrupt           */
     case 33:
       sigval = 5;
-      break;			/* breakpoint          */
+      break; /* breakpoint          */
 
       /* This is a trap #8 instruction.  Apparently it is someone's software
 	 convention for some sort of SIGFPE condition.  Whose?  How many
@@ -751,31 +779,31 @@ computeSignal (exceptionVector)
 	 Is there a clean solution?  */
     case 40:
       sigval = 8;
-      break;			/* floating point err  */
+      break; /* floating point err  */
 
     case 48:
       sigval = 8;
-      break;			/* floating point err  */
+      break; /* floating point err  */
     case 49:
       sigval = 8;
-      break;			/* floating point err  */
+      break; /* floating point err  */
     case 50:
       sigval = 8;
-      break;			/* zero divide         */
+      break; /* zero divide         */
     case 51:
       sigval = 8;
-      break;			/* underflow           */
+      break; /* underflow           */
     case 52:
       sigval = 8;
-      break;			/* operand error       */
+      break; /* operand error       */
     case 53:
       sigval = 8;
-      break;			/* overflow            */
+      break; /* overflow            */
     case 54:
       sigval = 8;
-      break;			/* NAN                 */
+      break; /* NAN                 */
     default:
-      sigval = 7;		/* "software generated" */
+      sigval = 7; /* "software generated" */
     }
   return (sigval);
 }
@@ -822,8 +850,8 @@ handle_exception (int exceptionVector)
   Frame *frame;
 
   if (remote_debug)
-    printf ("vector=%d, sr=0x%x, pc=0x%x\n",
-	    exceptionVector, registers[PS], registers[PC]);
+    printf ("vector=%d, sr=0x%x, pc=0x%x\n", exceptionVector, registers[PS],
+	    registers[PC]);
 
   /* reply to host that an exception has occurred */
   sigval = computeSignal (exceptionVector);
@@ -849,12 +877,12 @@ handle_exception (int exceptionVector)
 	  remcomOutBuffer[3] = 0;
 	  break;
 	case 'd':
-	  remote_debug = !(remote_debug);	/* toggle debug flag */
+	  remote_debug = !(remote_debug); /* toggle debug flag */
 	  break;
-	case 'g':		/* return the value of the CPU registers */
+	case 'g': /* return the value of the CPU registers */
 	  mem2hex ((char *) registers, remcomOutBuffer, NUMREGBYTES);
 	  break;
-	case 'G':		/* set the value of the CPU registers - return OK */
+	case 'G': /* set the value of the CPU registers - return OK */
 	  hex2mem (ptr, (char *) registers, NUMREGBYTES);
 	  strcpy (remcomOutBuffer, "OK");
 	  break;
@@ -951,21 +979,21 @@ handle_exception (int exceptionVector)
 	  while (frame)
 	    {
 	      if (remote_debug)
-		printf ("frame at 0x%x has pc=0x%x, except#=%d\n",
-			frame, frame->exceptionPC, frame->exceptionVector);
+		printf ("frame at 0x%x has pc=0x%x, except#=%d\n", frame,
+			frame->exceptionPC, frame->exceptionVector);
 	      if (frame->exceptionPC == newPC)
-		break;		/* bingo! a match */
+		break; /* bingo! a match */
 	      /*
 	       * for a breakpoint instruction, the saved pc may
 	       * be off by two due to re-executing the instruction
 	       * replaced by the trap instruction.  Check for this.
 	       */
-	      if ((frame->exceptionVector == 33) &&
-		  (frame->exceptionPC == (newPC + 2)))
+	      if ((frame->exceptionVector == 33)
+		  && (frame->exceptionPC == (newPC + 2)))
 		break;
 	      if (frame == frame->previous)
 		{
-		  frame = 0;	/* no match found */
+		  frame = 0; /* no match found */
 		  break;
 		}
 	      frame = frame->previous;
@@ -979,16 +1007,16 @@ handle_exception (int exceptionVector)
 	   */
 	  if (frame)
 	    {
-	      if ((frame->exceptionVector != 9) &&
-		  (frame->exceptionVector != 31) &&
-		  (frame->exceptionVector != 33))
+	      if ((frame->exceptionVector != 9)
+		  && (frame->exceptionVector != 31)
+		  && (frame->exceptionVector != 33))
 		{
 		  /*
 		   * invoke the previous handler.
 		   */
 		  if (oldExceptionHook)
 		    (*oldExceptionHook) (frame->exceptionVector);
-		  newPC = registers[PC];	/* pc may have changed  */
+		  newPC = registers[PC]; /* pc may have changed  */
 		  if (newPC != frame->exceptionPC)
 		    {
 		      if (remote_debug)
@@ -997,7 +1025,7 @@ handle_exception (int exceptionVector)
 				frame->exceptionVector);
 		      /* re-use the last frame, we're skipping it (longjump?) */
 		      frame = (Frame *) 0;
-		      _returnFromException (frame);	/* this is a jump */
+		      _returnFromException (frame); /* this is a jump */
 		    }
 		}
 	    }
@@ -1019,17 +1047,17 @@ handle_exception (int exceptionVector)
 		}
 	      frame->previous = lastFrame;
 	      lastFrame = frame;
-	      frame = 0;	/* null so _return... will properly initialize it */
+	      frame = 0; /* null so _return... will properly initialize it */
 	    }
 
-	  _returnFromException (frame);	/* this is a jump */
+	  _returnFromException (frame); /* this is a jump */
 
 	  break;
 
 	  /* kill the program */
-	case 'k':		/* do nothing */
+	case 'k': /* do nothing */
 	  break;
-	}			/* switch */
+	} /* switch */
 
       /* reply to the request */
       putpacket (remcomOutBuffer);
@@ -1040,7 +1068,7 @@ handle_exception (int exceptionVector)
 void
 initializeRemcomErrorFrame (void)
 {
-  lastFrame = ((Frame *) & gdbFrameStack[FRAMESIZE - 1]) - 1;
+  lastFrame = ((Frame *) &gdbFrameStack[FRAMESIZE - 1]) - 1;
   lastFrame->previous = lastFrame;
 }
 

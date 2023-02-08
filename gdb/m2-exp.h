@@ -24,8 +24,7 @@
 
 extern struct value *eval_op_m2_high (struct type *expect_type,
 				      struct expression *exp,
-				      enum noside noside,
-				      struct value *arg1);
+				      enum noside noside, struct value *arg1);
 extern struct value *eval_op_m2_subscript (struct type *expect_type,
 					   struct expression *exp,
 					   enum noside noside,
@@ -36,24 +35,21 @@ namespace expr
 {
 
 /* The Modula-2 "HIGH" operation.  */
-class m2_unop_high_operation
-  : public tuple_holding_operation<operation_up>
+class m2_unop_high_operation : public tuple_holding_operation<operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *arg1 = std::get<0> (m_storage)->evaluate_with_coercion (exp,
-								   noside);
+    value *arg1
+      = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
     return eval_op_m2_high (expect_type, exp, noside, arg1);
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_HIGH; }
+  enum exp_opcode opcode () const override { return UNOP_HIGH; }
 };
 
 /* Subscripting for Modula-2.  */
@@ -64,19 +60,17 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    value *arg1 = std::get<0> (m_storage)->evaluate_with_coercion (exp,
-								   noside);
-    value *arg2 = std::get<1> (m_storage)->evaluate_with_coercion (exp,
-								   noside);
+    value *arg1
+      = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *arg2
+      = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
     return eval_op_m2_subscript (expect_type, exp, noside, arg1, arg2);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_SUBSCRIPT; }
+  enum exp_opcode opcode () const override { return BINOP_SUBSCRIPT; }
 };
 
 } /* namespace expr */

@@ -33,17 +33,16 @@
 #include "coff/sym.h"
 #include "coff/internal.h"
 #include "coff/ecoff.h"
-#include "libcoff.h"		/* Private BFD COFF information.  */
-#include "libecoff.h"		/* Private BFD ECOFF information.  */
+#include "libcoff.h"  /* Private BFD COFF information.  */
+#include "libecoff.h" /* Private BFD ECOFF information.  */
 #include "elf/common.h"
 #include "elf/internal.h"
 #include "elf/mips.h"
 
 #include "psymtab.h"
 
-static void
-read_alphacoff_dynamic_symtab (minimal_symbol_reader &,
-			       struct objfile *objfile);
+static void read_alphacoff_dynamic_symtab (minimal_symbol_reader &,
+					   struct objfile *objfile);
 
 /* Initialize anything that needs initializing when a completely new
    symbol file is specified (not just adding some symbols from another
@@ -65,7 +64,8 @@ mipscoff_symfile_init (struct objfile *objfile)
 /* Read a symbol file from a file.  */
 
 static void
-mipscoff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
+mipscoff_symfile_read (struct objfile *objfile,
+		       symfile_add_flags symfile_flags)
 {
   bfd *abfd = objfile->obfd.get ();
 
@@ -74,9 +74,10 @@ mipscoff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  if (!((*ecoff_backend (abfd)->debug_swap.read_debug_info)
-	(abfd, NULL, &ecoff_data (abfd)->debug_info)))
-    error (_("Error reading symbol table: %s"), bfd_errmsg (bfd_get_error ()));
+  if (!((*ecoff_backend (abfd)->debug_swap.read_debug_info) (
+	abfd, NULL, &ecoff_data (abfd)->debug_info)))
+    error (_ ("Error reading symbol table: %s"),
+	   bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (reader, objfile, &ecoff_backend (abfd)->debug_swap,
 			 &ecoff_data (abfd)->debug_info);
@@ -113,37 +114,37 @@ mipscoff_symfile_finish (struct objfile *objfile)
 
 typedef struct
 {
-  unsigned char st_name[4];	/* Symbol name, index in string table.  */
-  unsigned char st_pad[4];	/* Pad to long word boundary.  */
-  unsigned char st_value[8];	/* Value of the symbol.  */
-  unsigned char st_size[4];	/* Associated symbol size.  */
-  unsigned char st_info[1];	/* Type and binding attributes.  */
-  unsigned char st_other[1];	/* No defined meaning, 0.  */
-  unsigned char st_shndx[2];	/* Associated section index.  */
+  unsigned char st_name[4];  /* Symbol name, index in string table.  */
+  unsigned char st_pad[4];   /* Pad to long word boundary.  */
+  unsigned char st_value[8]; /* Value of the symbol.  */
+  unsigned char st_size[4];  /* Associated symbol size.  */
+  unsigned char st_info[1];  /* Type and binding attributes.  */
+  unsigned char st_other[1]; /* No defined meaning, 0.  */
+  unsigned char st_shndx[2]; /* Associated section index.  */
 } Elfalpha_External_Sym;
 
 /* Format of an alpha external ELF dynamic info structure.  */
 
 typedef struct
 {
-  unsigned char d_tag[4];	/* Tag.  */
-  unsigned char d_pad[4];	/* Pad to long word boundary.  */
+  unsigned char d_tag[4]; /* Tag.  */
+  unsigned char d_pad[4]; /* Pad to long word boundary.  */
+
   union
   {
-    unsigned char d_ptr[8];	/* Pointer value.  */
-    unsigned char d_val[4];	/* Integer value.  */
-  }
-  d_un;
+    unsigned char d_ptr[8]; /* Pointer value.  */
+    unsigned char d_val[4]; /* Integer value.  */
+  } d_un;
 } Elfalpha_External_Dyn;
 
 /* Struct to obtain the section pointers for alpha dynamic symbol info.  */
 
 struct alphacoff_dynsecinfo
 {
-  asection *sym_sect;		/* Section pointer for .dynsym section.  */
-  asection *str_sect;		/* Section pointer for .dynstr section.  */
-  asection *dyninfo_sect;	/* Section pointer for .dynamic section.  */
-  asection *got_sect;		/* Section pointer for .got section.  */
+  asection *sym_sect;	  /* Section pointer for .dynsym section.  */
+  asection *str_sect;	  /* Section pointer for .dynstr section.  */
+  asection *dyninfo_sect; /* Section pointer for .dynamic section.  */
+  asection *got_sect;	  /* Section pointer for .got section.  */
 };
 
 /* We are called once per section from read_alphacoff_dynamic_symtab.
@@ -165,7 +166,7 @@ alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, void *sip)
   else if (strcmp (sectp->name, ".dynamic") == 0)
     si->dyninfo_sect = sectp;
   else if (strcmp (sectp->name, ".got") == 0)
-      si->got_sect = sectp;
+    si->got_sect = sectp;
 }
 
 /* Scan an alpha dynamic symbol table for symbols of interest and add
@@ -193,9 +194,9 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
 
   /* Locate the dynamic symbols sections and read them in.  */
   memset ((char *) &si, 0, sizeof (si));
-  bfd_map_over_sections (abfd, alphacoff_locate_sections, (void *) & si);
-  if (si.sym_sect == NULL || si.str_sect == NULL
-      || si.dyninfo_sect == NULL || si.got_sect == NULL)
+  bfd_map_over_sections (abfd, alphacoff_locate_sections, (void *) &si);
+  if (si.sym_sect == NULL || si.str_sect == NULL || si.dyninfo_sect == NULL
+      || si.got_sect == NULL)
     return;
 
   gdb::byte_vector sym_sec (bfd_section_size (si.sym_sect));
@@ -219,9 +220,8 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
   /* Find the number of local GOT entries and the index for the
      first dynamic symbol in the GOT.  */
   for ((dyninfo_p = dyninfo_sec.data (),
-	dyninfo_end = dyninfo_p + dyninfo_sec.size ());
-       dyninfo_p < dyninfo_end;
-       dyninfo_p += sizeof (Elfalpha_External_Dyn))
+      dyninfo_end = dyninfo_p + dyninfo_sec.size ());
+       dyninfo_p < dyninfo_end; dyninfo_p += sizeof (Elfalpha_External_Dyn))
     {
       Elfalpha_External_Dyn *x_dynp = (Elfalpha_External_Dyn *) dyninfo_p;
       long dyn_tag;
@@ -252,8 +252,7 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
 
   /* Skip first symbol, which is a null dummy.  */
   for (i = 1, x_symp = (Elfalpha_External_Sym *) sym_sec.data () + 1;
-       i < sym_count;
-       i++, x_symp++)
+       i < sym_count; i++, x_symp++)
     {
       unsigned long strx;
       char *name;
@@ -304,16 +303,14 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
 	     them.  */
 	  if (sym_value == 0)
 	    {
-	      int got_entry_offset =
-		(i - dt_mips_gotsym + dt_mips_local_gotno) * got_entry_size;
+	      int got_entry_offset
+		= (i - dt_mips_gotsym + dt_mips_local_gotno) * got_entry_size;
 
-	      if (got_entry_offset < 0
-		  || got_entry_offset >= got_sec.size ())
+	      if (got_entry_offset < 0 || got_entry_offset >= got_sec.size ())
 		continue;
-	      sym_value =
-		bfd_h_get_64 (abfd,
-			      (bfd_byte *) (got_sec.data ()
-					    + got_entry_offset));
+	      sym_value
+		= bfd_h_get_64 (abfd, (bfd_byte *) (got_sec.data ()
+						    + got_entry_offset));
 	      if (sym_value == 0)
 		continue;
 	    }
@@ -364,20 +361,20 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
 
 /* Initialization.  */
 
-static const struct sym_fns ecoff_sym_fns =
-{
-  mipscoff_new_init,		/* init anything gbl to entire symtab */
-  mipscoff_symfile_init,	/* read initial info, setup for sym_read() */
-  mipscoff_symfile_read,	/* read a symbol file into symtab */
-  mipscoff_symfile_finish,	/* finished with file, cleanup */
-  default_symfile_offsets,	/* dummy FIXME til implem sym reloc */
-  default_symfile_segments,	/* Get segment information from a file.  */
+static const struct sym_fns ecoff_sym_fns = {
+  mipscoff_new_init,	    /* init anything gbl to entire symtab */
+  mipscoff_symfile_init,    /* read initial info, setup for sym_read() */
+  mipscoff_symfile_read,    /* read a symbol file into symtab */
+  mipscoff_symfile_finish,  /* finished with file, cleanup */
+  default_symfile_offsets,  /* dummy FIXME til implem sym reloc */
+  default_symfile_segments, /* Get segment information from a file.  */
   NULL,
-  default_symfile_relocate,	/* Relocate a debug section.  */
-  NULL,				/* sym_probe_fns */
+  default_symfile_relocate, /* Relocate a debug section.  */
+  NULL,			    /* sym_probe_fns */
 };
 
 void _initialize_mipsread ();
+
 void
 _initialize_mipsread ()
 {

@@ -26,13 +26,13 @@ struct frame_unwind;
 /* The tail call frame unwinder.  */
 
 extern void
-  dwarf2_tailcall_sniffer_first (frame_info_ptr this_frame,
-				 void **tailcall_cachep,
-				 const LONGEST *entry_cfa_sp_offsetp);
+dwarf2_tailcall_sniffer_first (frame_info_ptr this_frame,
+			       void **tailcall_cachep,
+			       const LONGEST *entry_cfa_sp_offsetp);
 
 extern struct value *
-  dwarf2_tailcall_prev_register_first (frame_info_ptr this_frame,
-				       void **tailcall_cachep, int regnum);
+dwarf2_tailcall_prev_register_first (frame_info_ptr this_frame,
+				     void **tailcall_cachep, int regnum);
 
 extern const struct frame_unwind dwarf2_tailcall_frame_unwind;
 

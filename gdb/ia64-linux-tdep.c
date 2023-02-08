@@ -36,7 +36,7 @@
    overly generous to allow for different pages sizes.  */
 
 #define GATE_AREA_START 0xa000000000000100LL
-#define GATE_AREA_END   0xa000000000020000LL
+#define GATE_AREA_END 0xa000000000020000LL
 
 /* Offset to sigcontext structure from frame of handler.  */
 #define IA64_LINUX_SIGCONTEXT_OFFSET 192
@@ -53,8 +53,8 @@ ia64_linux_pc_in_sigtramp (CORE_ADDR pc)
    sigcontext structure.  */
 
 static CORE_ADDR
-ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch,
-					CORE_ADDR sp, int regno)
+ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch, CORE_ADDR sp,
+					int regno)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[8];
@@ -74,32 +74,32 @@ ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch,
   else
     switch (regno)
       {
-      case IA64_IP_REGNUM :
+      case IA64_IP_REGNUM:
 	return sigcontext_addr + 40;
-      case IA64_CFM_REGNUM :
+      case IA64_CFM_REGNUM:
 	return sigcontext_addr + 48;
-      case IA64_PSR_REGNUM :
-	return sigcontext_addr + 56;		/* user mask only */
+      case IA64_PSR_REGNUM:
+	return sigcontext_addr + 56; /* user mask only */
       /* sc_ar_rsc is provided, from which we could compute bspstore, but
 	 I don't think it's worth it.  Anyway, if we want it, it's at offset
 	 64.  */
-      case IA64_BSP_REGNUM :
+      case IA64_BSP_REGNUM:
 	return sigcontext_addr + 72;
-      case IA64_RNAT_REGNUM :
+      case IA64_RNAT_REGNUM:
 	return sigcontext_addr + 80;
-      case IA64_CCV_REGNUM :
+      case IA64_CCV_REGNUM:
 	return sigcontext_addr + 88;
-      case IA64_UNAT_REGNUM :
+      case IA64_UNAT_REGNUM:
 	return sigcontext_addr + 96;
-      case IA64_FPSR_REGNUM :
+      case IA64_FPSR_REGNUM:
 	return sigcontext_addr + 104;
-      case IA64_PFS_REGNUM :
+      case IA64_PFS_REGNUM:
 	return sigcontext_addr + 112;
-      case IA64_LC_REGNUM :
+      case IA64_LC_REGNUM:
 	return sigcontext_addr + 120;
-      case IA64_PR_REGNUM :
+      case IA64_PR_REGNUM:
 	return sigcontext_addr + 128;
-      default :
+      default:
 	return 0;
       }
 }
@@ -128,55 +128,43 @@ static int
 ia64_linux_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
   return ((isdigit (*s) && s[1] == '[' && s[2] == 'r') /* Displacement.  */
-	  || *s == 'r' /* Register value.  */
-	  || isdigit (*s));  /* Literal number.  */
+	  || *s == 'r'				       /* Register value.  */
+	  || isdigit (*s));			       /* Literal number.  */
 }
 
 /* Core file support. */
 
-static const struct regcache_map_entry ia64_linux_gregmap[] =
-  {
-    { 32, IA64_GR0_REGNUM, 8 },	/* r0 ... r31 */
-    { 1, REGCACHE_MAP_SKIP, 8 }, /* FIXME: NAT collection bits? */
-    { 1, IA64_PR_REGNUM, 8 },
-    { 8, IA64_BR0_REGNUM, 8 },	/* b0 ... b7 */
-    { 1, IA64_IP_REGNUM, 8 },
-    { 1, IA64_CFM_REGNUM, 8 },
-    { 1, IA64_PSR_REGNUM, 8 },
-    { 1, IA64_RSC_REGNUM, 8 },
-    { 1, IA64_BSP_REGNUM, 8 },
-    { 1, IA64_BSPSTORE_REGNUM, 8 },
-    { 1, IA64_RNAT_REGNUM, 8 },
-    { 1, IA64_CCV_REGNUM, 8 },
-    { 1, IA64_UNAT_REGNUM, 8 },
-    { 1, IA64_FPSR_REGNUM, 8 },
-    { 1, IA64_PFS_REGNUM, 8 },
-    { 1, IA64_LC_REGNUM, 8 },
-    { 1, IA64_EC_REGNUM, 8 },
-    { 0 }
-  };
+static const struct regcache_map_entry ia64_linux_gregmap[]
+  = { { 32, IA64_GR0_REGNUM, 8 },  /* r0 ... r31 */
+      { 1, REGCACHE_MAP_SKIP, 8 }, /* FIXME: NAT collection bits? */
+      { 1, IA64_PR_REGNUM, 8 },	   { 8, IA64_BR0_REGNUM, 8 }, /* b0 ... b7 */
+      { 1, IA64_IP_REGNUM, 8 },	   { 1, IA64_CFM_REGNUM, 8 },
+      { 1, IA64_PSR_REGNUM, 8 },   { 1, IA64_RSC_REGNUM, 8 },
+      { 1, IA64_BSP_REGNUM, 8 },   { 1, IA64_BSPSTORE_REGNUM, 8 },
+      { 1, IA64_RNAT_REGNUM, 8 },  { 1, IA64_CCV_REGNUM, 8 },
+      { 1, IA64_UNAT_REGNUM, 8 },  { 1, IA64_FPSR_REGNUM, 8 },
+      { 1, IA64_PFS_REGNUM, 8 },   { 1, IA64_LC_REGNUM, 8 },
+      { 1, IA64_EC_REGNUM, 8 },	   { 0 } };
 
 /* Size of 'gregset_t', as defined by the Linux kernel.  Note that
    this is more than actually mapped in the regmap above.  */
 
 #define IA64_LINUX_GREGS_SIZE (128 * 8)
 
-static const struct regcache_map_entry ia64_linux_fpregmap[] =
-  {
-    { 128, IA64_FR0_REGNUM, 16 }, /* f0 ... f127 */
-    { 0 }
-  };
+static const struct regcache_map_entry ia64_linux_fpregmap[]
+  = { { 128, IA64_FR0_REGNUM, 16 }, /* f0 ... f127 */
+      { 0 } };
 
 #define IA64_LINUX_FPREGS_SIZE (128 * 16)
 
 static void
 ia64_linux_supply_fpregset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *regs, size_t len)
+			    struct regcache *regcache, int regnum,
+			    const void *regs, size_t len)
 {
   const gdb_byte f_zero[16] = { 0 };
-  const gdb_byte f_one[16] =
-    { 0, 0, 0, 0, 0, 0, 0, 0x80, 0xff, 0xff, 0, 0, 0, 0, 0, 0 };
+  const gdb_byte f_one[16]
+    = { 0, 0, 0, 0, 0, 0, 0, 0x80, 0xff, 0xff, 0, 0, 0, 0, 0, 0 };
 
   regcache_supply_regset (regset, regcache, regnum, regs, len);
 
@@ -189,17 +177,12 @@ ia64_linux_supply_fpregset (const struct regset *regset,
     regcache->raw_supply (IA64_FR1_REGNUM, f_one);
 }
 
-static const struct regset ia64_linux_gregset =
-  {
-    ia64_linux_gregmap,
-    regcache_supply_regset, regcache_collect_regset
-  };
+static const struct regset ia64_linux_gregset
+  = { ia64_linux_gregmap, regcache_supply_regset, regcache_collect_regset };
 
-static const struct regset ia64_linux_fpregset =
-  {
-    ia64_linux_fpregmap,
-    ia64_linux_supply_fpregset, regcache_collect_regset
-  };
+static const struct regset ia64_linux_fpregset
+  = { ia64_linux_fpregmap, ia64_linux_supply_fpregset,
+      regcache_collect_regset };
 
 static void
 ia64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
@@ -207,8 +190,8 @@ ia64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  cb (".reg", IA64_LINUX_GREGS_SIZE, IA64_LINUX_GREGS_SIZE, &ia64_linux_gregset,
-      NULL, cb_data);
+  cb (".reg", IA64_LINUX_GREGS_SIZE, IA64_LINUX_GREGS_SIZE,
+      &ia64_linux_gregset, NULL, cb_data);
   cb (".reg2", IA64_LINUX_FPREGS_SIZE, IA64_LINUX_FPREGS_SIZE,
       &ia64_linux_fpregset, NULL, cb_data);
 }
@@ -218,10 +201,10 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
   static const char *const stap_register_prefixes[] = { "r", NULL };
-  static const char *const stap_register_indirection_prefixes[] = { "[",
-								    NULL };
-  static const char *const stap_register_indirection_suffixes[] = { "]",
-								    NULL };
+  static const char *const stap_register_indirection_prefixes[]
+    = { "[", NULL };
+  static const char *const stap_register_indirection_suffixes[]
+    = { "]", NULL };
 
   linux_init_abi (info, gdbarch, 0);
 
@@ -236,29 +219,30 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 linux_lp64_fetch_link_map_offsets);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
 
   /* Core file support. */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, ia64_linux_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, ia64_linux_iterate_over_regset_sections);
 
   /* SystemTap related.  */
   set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
-  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
-					  stap_register_indirection_prefixes);
-  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
-					    stap_register_indirection_suffixes);
+  set_gdbarch_stap_register_indirection_prefixes (
+    gdbarch, stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes (
+    gdbarch, stap_register_indirection_suffixes);
   set_gdbarch_stap_gdb_register_prefix (gdbarch, "r");
   set_gdbarch_stap_is_single_operand (gdbarch,
 				      ia64_linux_stap_is_single_operand);
 }
 
 void _initialize_ia64_linux_tdep ();
+
 void
 _initialize_ia64_linux_tdep ()
 {

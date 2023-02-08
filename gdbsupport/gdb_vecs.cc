@@ -25,9 +25,9 @@
    STR into a char pointer vector.  */
 
 static void
-delim_string_to_char_ptr_vec_append
-  (std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *str,
-   char delimiter)
+delim_string_to_char_ptr_vec_append (
+  std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *str,
+  char delimiter)
 {
   do
     {
@@ -37,12 +37,12 @@ delim_string_to_char_ptr_vec_append
 
       next_field = strchr (str, delimiter);
       if (next_field == NULL)
-	this_len = strlen (str);
+        this_len = strlen (str);
       else
-	{
-	  this_len = next_field - str;
-	  next_field++;
-	}
+        {
+          this_len = next_field - str;
+          next_field++;
+        }
 
       this_field = (char *) xmalloc (this_len + 1);
       memcpy (this_field, str, this_len);
@@ -60,7 +60,7 @@ std::vector<gdb::unique_xmalloc_ptr<char>>
 delim_string_to_char_ptr_vec (const char *str, char delimiter)
 {
   std::vector<gdb::unique_xmalloc_ptr<char>> retval;
-  
+
   delim_string_to_char_ptr_vec_append (&retval, str, delimiter);
 
   return retval;
@@ -69,8 +69,8 @@ delim_string_to_char_ptr_vec (const char *str, char delimiter)
 /* See gdb_vecs.h.  */
 
 void
-dirnames_to_char_ptr_vec_append
-  (std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *dirnames)
+dirnames_to_char_ptr_vec_append (
+  std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *dirnames)
 {
   delim_string_to_char_ptr_vec_append (vecp, dirnames, DIRNAME_SEPARATOR);
 }
@@ -81,7 +81,7 @@ std::vector<gdb::unique_xmalloc_ptr<char>>
 dirnames_to_char_ptr_vec (const char *dirnames)
 {
   std::vector<gdb::unique_xmalloc_ptr<char>> retval;
-  
+
   dirnames_to_char_ptr_vec_append (&retval, dirnames);
 
   return retval;

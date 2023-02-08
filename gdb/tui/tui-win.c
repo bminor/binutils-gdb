@@ -64,49 +64,35 @@ static void tui_scroll_forward_command (const char *, int);
 static void tui_scroll_backward_command (const char *, int);
 static void tui_scroll_left_command (const char *, int);
 static void tui_scroll_right_command (const char *, int);
-static void parse_scrolling_args (const char *, 
-				  struct tui_win_info **, 
-				  int *);
-
+static void parse_scrolling_args (const char *, struct tui_win_info **, int *);
 
 #ifndef ACS_LRCORNER
-#  define ACS_LRCORNER '+'
+#define ACS_LRCORNER '+'
 #endif
 #ifndef ACS_LLCORNER
-#  define ACS_LLCORNER '+'
+#define ACS_LLCORNER '+'
 #endif
 #ifndef ACS_ULCORNER
-#  define ACS_ULCORNER '+'
+#define ACS_ULCORNER '+'
 #endif
 #ifndef ACS_URCORNER
-#  define ACS_URCORNER '+'
+#define ACS_URCORNER '+'
 #endif
 #ifndef ACS_HLINE
-#  define ACS_HLINE '-'
+#define ACS_HLINE '-'
 #endif
 #ifndef ACS_VLINE
-#  define ACS_VLINE '|'
+#define ACS_VLINE '|'
 #endif
 
 /* Possible values for tui-border-kind variable.  */
-static const char *const tui_border_kind_enums[] = {
-  "space",
-  "ascii",
-  "acs",
-  NULL
-};
+static const char *const tui_border_kind_enums[]
+  = { "space", "ascii", "acs", NULL };
 
 /* Possible values for tui-border-mode and tui-active-border-mode.  */
-static const char *const tui_border_mode_enums[] = {
-  "normal",
-  "standout",
-  "reverse",
-  "half",
-  "half-standout",
-  "bold",
-  "bold-standout",
-  NULL
-};
+static const char *const tui_border_mode_enums[]
+  = { "normal",	       "standout", "reverse",	    "half",
+      "half-standout", "bold",	   "bold-standout", NULL };
 
 struct tui_translate
 {
@@ -117,104 +103,93 @@ struct tui_translate
 /* Translation table for border-mode variables.
    The list of values must be terminated by a NULL.
    After the NULL value, an entry defines the default.  */
-static struct tui_translate tui_border_mode_translate[] = {
-  { "normal",		A_NORMAL },
-  { "standout",		A_STANDOUT },
-  { "reverse",		A_REVERSE },
-  { "half",		A_DIM },
-  { "half-standout",	A_DIM | A_STANDOUT },
-  { "bold",		A_BOLD },
-  { "bold-standout",	A_BOLD | A_STANDOUT },
-  { 0, 0 },
-  { "normal",		A_NORMAL }
-};
+static struct tui_translate tui_border_mode_translate[]
+  = { { "normal", A_NORMAL },
+      { "standout", A_STANDOUT },
+      { "reverse", A_REVERSE },
+      { "half", A_DIM },
+      { "half-standout", A_DIM | A_STANDOUT },
+      { "bold", A_BOLD },
+      { "bold-standout", A_BOLD | A_STANDOUT },
+      { 0, 0 },
+      { "normal", A_NORMAL } };
 
 /* Translation tables for border-kind, one for each border
    character (see wborder, border curses operations).
    -1 is used to indicate the ACS because ACS characters
    are determined at run time by curses (depends on terminal).  */
-static struct tui_translate tui_border_kind_translate_vline[] = {
-  { "space",    ' ' },
-  { "ascii",    '|' },
-  { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '|' }
-};
+static struct tui_translate tui_border_kind_translate_vline[]
+  = { { "space", ' ' },
+      { "ascii", '|' },
+      { "acs", -1 },
+      { 0, 0 },
+      { "ascii", '|' } };
 
-static struct tui_translate tui_border_kind_translate_hline[] = {
-  { "space",    ' ' },
-  { "ascii",    '-' },
-  { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '-' }
-};
+static struct tui_translate tui_border_kind_translate_hline[]
+  = { { "space", ' ' },
+      { "ascii", '-' },
+      { "acs", -1 },
+      { 0, 0 },
+      { "ascii", '-' } };
 
-static struct tui_translate tui_border_kind_translate_ulcorner[] = {
-  { "space",    ' ' },
-  { "ascii",    '+' },
-  { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
-};
+static struct tui_translate tui_border_kind_translate_ulcorner[]
+  = { { "space", ' ' },
+      { "ascii", '+' },
+      { "acs", -1 },
+      { 0, 0 },
+      { "ascii", '+' } };
 
-static struct tui_translate tui_border_kind_translate_urcorner[] = {
-  { "space",    ' ' },
-  { "ascii",    '+' },
-  { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
-};
+static struct tui_translate tui_border_kind_translate_urcorner[]
+  = { { "space", ' ' },
+      { "ascii", '+' },
+      { "acs", -1 },
+      { 0, 0 },
+      { "ascii", '+' } };
 
-static struct tui_translate tui_border_kind_translate_llcorner[] = {
-  { "space",    ' ' },
-  { "ascii",    '+' },
-  { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
-};
+static struct tui_translate tui_border_kind_translate_llcorner[]
+  = { { "space", ' ' },
+      { "ascii", '+' },
+      { "acs", -1 },
+      { 0, 0 },
+      { "ascii", '+' } };
 
-static struct tui_translate tui_border_kind_translate_lrcorner[] = {
-  { "space",    ' ' },
-  { "ascii",    '+' },
-  { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
-};
-
+static struct tui_translate tui_border_kind_translate_lrcorner[]
+  = { { "space", ' ' },
+      { "ascii", '+' },
+      { "acs", -1 },
+      { 0, 0 },
+      { "ascii", '+' } };
 
 /* Tui configuration variables controlled with set/show command.  */
 static const char *tui_active_border_mode = "bold-standout";
+
 static void
-show_tui_active_border_mode (struct ui_file *file,
-			     int from_tty,
-			     struct cmd_list_element *c, 
-			     const char *value)
+show_tui_active_border_mode (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("\
+  gdb_printf (file, _ ("\
 The attribute mode to use for the active TUI window border is \"%s\".\n"),
 	      value);
 }
 
 static const char *tui_border_mode = "normal";
+
 static void
-show_tui_border_mode (struct ui_file *file, 
-		      int from_tty,
-		      struct cmd_list_element *c, 
-		      const char *value)
+show_tui_border_mode (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("\
+  gdb_printf (file, _ ("\
 The attribute mode to use for the TUI window borders is \"%s\".\n"),
 	      value);
 }
 
 static const char *tui_border_kind = "acs";
+
 static void
-show_tui_border_kind (struct ui_file *file, 
-		      int from_tty,
-		      struct cmd_list_element *c, 
-		      const char *value)
+show_tui_border_kind (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("The kind of border for TUI windows is \"%s\".\n"),
+  gdb_printf (file, _ ("The kind of border for TUI windows is \"%s\".\n"),
 	      value);
 }
 
@@ -223,14 +198,12 @@ show_tui_border_kind (struct ui_file *file,
 bool style_tui_current_position = false;
 
 static void
-show_style_tui_current_position (ui_file *file,
-				 int from_tty,
-				 cmd_list_element *c,
-				 const char *value)
+show_style_tui_current_position (ui_file *file, int from_tty,
+				 cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("\
+  gdb_printf (file, _ ("\
 Styling the text highlighted by the TUI's current position indicator is %s.\n"),
-		    value);
+	      value);
 }
 
 static void
@@ -329,8 +302,8 @@ tui_get_cmd_list (void)
 {
   if (tuilist == 0)
     add_basic_prefix_cmd ("tui", class_tui,
-			  _("Text User Interface commands."),
-			  &tuilist, 0, &cmdlist);
+			  _ ("Text User Interface commands."), &tuilist, 0,
+			  &cmdlist);
   return &tuilist;
 }
 
@@ -338,14 +311,12 @@ tui_get_cmd_list (void)
    borders on the TUI display.  */
 
 static void
-tui_set_var_cmd (const char *null_args,
-		 int from_tty, struct cmd_list_element *c)
+tui_set_var_cmd (const char *null_args, int from_tty,
+		 struct cmd_list_element *c)
 {
   if (tui_update_variables () && tui_active)
     tui_rehighlight_all ();
 }
-
-
 
 /* True if TUI resizes should print a message.  This is used by the
    test suite.  */
@@ -356,10 +327,8 @@ static void
 show_tui_resize_message (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("TUI resize messaging is %s.\n"), value);
+  gdb_printf (file, _ ("TUI resize messaging is %s.\n"), value);
 }
-
-
 
 /* Generic window name completion function.  Complete window name pointed
    to by TEXT and WORD.
@@ -372,10 +341,9 @@ show_tui_resize_message (struct ui_file *file, int from_tty,
    name.  This is independent of EXCLUDE_CANNOT_FOCUS_P.  */
 
 static void
-window_name_completer (completion_tracker &tracker,
-		       bool include_next_prev_p,
-		       bool exclude_cannot_focus_p,
-		       const char *text, const char *word)
+window_name_completer (completion_tracker &tracker, bool include_next_prev_p,
+		       bool exclude_cannot_focus_p, const char *text,
+		       const char *word)
 {
   std::vector<const char *> completion_name_vec;
 
@@ -412,7 +380,6 @@ window_name_completer (completion_tracker &tracker,
       completion_name_vec.push_back ("prev");
     }
 
-
   completion_name_vec.push_back (NULL);
   complete_on_enum (tracker, completion_name_vec.data (), text, word);
 }
@@ -421,8 +388,7 @@ window_name_completer (completion_tracker &tracker,
    entered so far, WORD is the word currently being completed.  */
 
 static void
-focus_completer (struct cmd_list_element *ignore,
-		 completion_tracker &tracker,
+focus_completer (struct cmd_list_element *ignore, completion_tracker &tracker,
 		 const char *text, const char *word)
 {
   window_name_completer (tracker, true, true, text, word);
@@ -434,8 +400,8 @@ focus_completer (struct cmd_list_element *ignore,
 
 static void
 winheight_completer (struct cmd_list_element *ignore,
-		     completion_tracker &tracker,
-		     const char *text, const char *word)
+		     completion_tracker &tracker, const char *text,
+		     const char *word)
 {
   /* The first word is the window name.  That we can complete.  Subsequent
      words can't be completed.  */
@@ -465,7 +431,6 @@ tui_update_gdb_sizes (void)
   set_screen_width_and_height (width, height);
 }
 
-
 void
 tui_win_info::forward_scroll (int num_to_scroll)
 {
@@ -484,7 +449,6 @@ tui_win_info::backward_scroll (int num_to_scroll)
   do_scroll_vertical (-num_to_scroll);
 }
 
-
 void
 tui_win_info::left_scroll (int num_to_scroll)
 {
@@ -494,7 +458,6 @@ tui_win_info::left_scroll (int num_to_scroll)
   do_scroll_horizontal (num_to_scroll);
 }
 
-
 void
 tui_win_info::right_scroll (int num_to_scroll)
 {
@@ -503,7 +466,6 @@ tui_win_info::right_scroll (int num_to_scroll)
 
   do_scroll_horizontal (-num_to_scroll);
 }
-
 
 void
 tui_refresh_all_win (void)
@@ -534,7 +496,7 @@ tui_resize_all (void)
     {
 #ifdef HAVE_RESIZE_TERM
       resize_term (screenheight, screenwidth);
-#endif      
+#endif
       /* Turn keypad off while we resize.  */
       keypad (TUI_CMD_WIN->handle.get (), FALSE);
       tui_update_gdb_sizes ();
@@ -606,9 +568,8 @@ void
 tui_initialize_win (void)
 {
 #ifdef SIGWINCH
-  tui_sigwinch_token
-    = create_async_signal_handler (tui_async_resize_screen, NULL,
-				   "tui-sigwinch");
+  tui_sigwinch_token = create_async_signal_handler (tui_async_resize_screen,
+						    NULL, "tui-sigwinch");
 
   {
 #ifdef HAVE_SIGACTION
@@ -627,7 +588,6 @@ tui_initialize_win (void)
 #endif
 }
 
-
 static void
 tui_scroll_forward_command (const char *arg, int from_tty)
 {
@@ -642,7 +602,6 @@ tui_scroll_forward_command (const char *arg, int from_tty)
     parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
   win_to_scroll->forward_scroll (num_to_scroll);
 }
-
 
 static void
 tui_scroll_backward_command (const char *arg, int from_tty)
@@ -659,7 +618,6 @@ tui_scroll_backward_command (const char *arg, int from_tty)
   win_to_scroll->backward_scroll (num_to_scroll);
 }
 
-
 static void
 tui_scroll_left_command (const char *arg, int from_tty)
 {
@@ -672,7 +630,6 @@ tui_scroll_left_command (const char *arg, int from_tty)
   win_to_scroll->left_scroll (num_to_scroll);
 }
 
-
 static void
 tui_scroll_right_command (const char *arg, int from_tty)
 {
@@ -684,7 +641,6 @@ tui_scroll_right_command (const char *arg, int from_tty)
   parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
   win_to_scroll->right_scroll (num_to_scroll);
 }
-
 
 /* Answer the window represented by name.  */
 static struct tui_win_info *
@@ -701,8 +657,8 @@ tui_partial_win_by_name (gdb::string_view name)
       if (startswith (cur_name, name))
 	{
 	  if (best != nullptr)
-	    error (_("Window name \"%*s\" is ambiguous"),
-		   (int) name.size (), name.data ());
+	    error (_ ("Window name \"%*s\" is ambiguous"), (int) name.size (),
+		   name.data ());
 	  best = item;
 	}
     }
@@ -717,7 +673,7 @@ tui_set_focus_command (const char *arg, int from_tty)
   tui_enable ();
 
   if (arg == NULL)
-    error_no_arg (_("name of window to focus"));
+    error_no_arg (_ ("name of window to focus"));
 
   struct tui_win_info *win_info = NULL;
 
@@ -757,14 +713,14 @@ tui_set_focus_command (const char *arg, int from_tty)
       if (!matching_window_name.empty ())
 	{
 	  if (is_ambiguous)
-	    error (_("No windows matching \"%s\" in the current layout"),
+	    error (_ ("No windows matching \"%s\" in the current layout"),
 		   arg);
 	  else
-	    error (_("Window \"%s\" is not in the current layout"),
+	    error (_ ("Window \"%s\" is not in the current layout"),
 		   matching_window_name.c_str ());
 	}
       else
-	error (_("Unrecognized window name \"%s\""), arg);
+	error (_ ("Unrecognized window name \"%s\""), arg);
     }
 
   /* If a window is part of the current layout then it will have a
@@ -773,11 +729,10 @@ tui_set_focus_command (const char *arg, int from_tty)
   gdb_assert (win_info->is_visible ());
 
   if (!win_info->can_focus ())
-    error (_("Window \"%s\" cannot be focused"), arg);
+    error (_ ("Window \"%s\" cannot be focused"), arg);
 
   tui_set_win_focus_to (win_info);
-  gdb_printf (_("Focus set to %s window.\n"),
-	      tui_win_with_focus ()->name ());
+  gdb_printf (_ ("Focus set to %s window.\n"), tui_win_with_focus ()->name ());
 }
 
 static void
@@ -785,7 +740,7 @@ tui_all_windows_info (const char *arg, int from_tty)
 {
   if (!tui_active)
     {
-      gdb_printf (_("The TUI is not active.\n"));
+      gdb_printf (_ ("The TUI is not active.\n"));
       return;
     }
 
@@ -808,13 +763,12 @@ tui_all_windows_info (const char *arg, int from_tty)
 	uiout->field_signed ("lines", win_info->height);
 	uiout->field_signed ("columns", win_info->width);
 	if (win_with_focus == win_info)
-	  uiout->field_string ("focus", _("(has focus)"));
+	  uiout->field_string ("focus", _ ("(has focus)"));
 	else
 	  uiout->field_skip ("focus");
 	uiout->text ("\n");
       }
 }
-
 
 static void
 tui_refresh_all_command (const char *arg, int from_tty)
@@ -825,7 +779,7 @@ tui_refresh_all_command (const char *arg, int from_tty)
   tui_refresh_all_win ();
 }
 
-#define DEFAULT_TAB_LEN         8
+#define DEFAULT_TAB_LEN 8
 
 /* The tab width that should be used by the TUI.  */
 
@@ -851,13 +805,13 @@ update_tab_width ()
 /* Callback for "set tui tab-width".  */
 
 static void
-tui_set_tab_width (const char *ignore,
-		   int from_tty, struct cmd_list_element *c)
+tui_set_tab_width (const char *ignore, int from_tty,
+		   struct cmd_list_element *c)
 {
   if (internal_tab_width == 0)
     {
       internal_tab_width = tui_tab_width;
-      error (_("Tab width must not be 0"));
+      error (_ ("Tab width must not be 0"));
     }
 
   tui_tab_width = internal_tab_width;
@@ -870,8 +824,7 @@ static void
 tui_show_tab_width (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("TUI tab width is %s spaces.\n"), value);
-
+  gdb_printf (file, _ ("TUI tab width is %s spaces.\n"), value);
 }
 
 /* See tui-win.h.  */
@@ -894,7 +847,7 @@ static void
 tui_show_compact_source (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("TUI source window compactness is %s.\n"), value);
+  gdb_printf (file, _ ("TUI source window compactness is %s.\n"), value);
 }
 
 /* Set the tab width of the specified window.  */
@@ -909,7 +862,7 @@ tui_set_tab_width_command (const char *arg, int from_tty)
 
       ts = atoi (arg);
       if (ts <= 0)
-	warning (_("Tab widths greater than 0 must be specified."));
+	warning (_ ("Tab widths greater than 0 must be specified."));
       else
 	{
 	  internal_tab_width = ts;
@@ -939,7 +892,7 @@ tui_set_win_size (const char *arg, bool set_width_p)
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
   if (arg == NULL)
-    error_no_arg (_("name of window"));
+    error_no_arg (_ ("name of window"));
 
   const char *buf = arg;
   const char *buf_ptr = buf;
@@ -953,9 +906,9 @@ tui_set_win_size (const char *arg, bool set_width_p)
   win_info = tui_partial_win_by_name (wname);
 
   if (win_info == NULL)
-    error (_("Unrecognized window name \"%s\""), arg);
+    error (_ ("Unrecognized window name \"%s\""), arg);
   if (!win_info->is_visible ())
-    error (_("Window \"%s\" is not visible"), arg);
+    error (_ ("Window \"%s\" is not visible"), arg);
 
   /* Process the size.  */
   buf_ptr = skip_spaces (buf_ptr);
@@ -964,7 +917,8 @@ tui_set_win_size (const char *arg, bool set_width_p)
     {
       bool negate = false;
       bool fixed_size = true;
-      int input_no;;
+      int input_no;
+      ;
 
       if (*buf_ptr == '+' || *buf_ptr == '-')
 	{
@@ -1001,9 +955,9 @@ tui_set_win_size (const char *arg, bool set_width_p)
       else
 	{
 	  if (set_width_p)
-	    error (_("Invalid window width specified"));
+	    error (_ ("Invalid window width specified"));
 	  else
-	    error (_("Invalid window height specified"));
+	    error (_ ("Invalid window height specified"));
 	}
     }
 }
@@ -1043,8 +997,7 @@ tui_win_info::max_width () const
 }
 
 static void
-parse_scrolling_args (const char *arg, 
-		      struct tui_win_info **win_to_scroll,
+parse_scrolling_args (const char *arg, struct tui_win_info **win_to_scroll,
 		      int *num_to_scroll)
 {
   if (num_to_scroll)
@@ -1089,9 +1042,9 @@ parse_scrolling_args (const char *arg,
 	      *win_to_scroll = tui_partial_win_by_name (wname);
 
 	      if (*win_to_scroll == NULL)
-		error (_("Unrecognized window `%s'"), wname);
+		error (_ ("Unrecognized window `%s'"), wname);
 	      if (!(*win_to_scroll)->is_visible ())
-		error (_("Window is not visible"));
+		error (_ ("Window is not visible"));
 	      else if (*win_to_scroll == TUI_CMD_WIN)
 		*win_to_scroll = *(tui_source_windows ().begin ());
 	    }
@@ -1115,6 +1068,7 @@ tui_window_command (const char *args, int from_tty)
    manipulation.  */
 
 void _initialize_tui_win ();
+
 void
 _initialize_tui_win ()
 {
@@ -1123,31 +1077,28 @@ _initialize_tui_win ()
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
-  add_setshow_prefix_cmd ("tui", class_tui,
-			  _("TUI configuration variables."),
-			  _("TUI configuration variables."),
-			  &tui_setlist, &tui_showlist,
-			  &setlist, &showlist);
+  add_setshow_prefix_cmd ("tui", class_tui, _ ("TUI configuration variables."),
+			  _ ("TUI configuration variables."), &tui_setlist,
+			  &tui_showlist, &setlist, &showlist);
 
   cmd_list_element *refresh_cmd
     = add_cmd ("refresh", class_tui, tui_refresh_all_command,
-	       _("Refresh the terminal display."),
-	       tui_get_cmd_list ());
+	       _ ("Refresh the terminal display."), tui_get_cmd_list ());
   add_com_alias ("refresh", refresh_cmd, class_tui, 0);
 
   cmd_list_element *tabset_cmd
-    = add_com ("tabset", class_tui, tui_set_tab_width_command, _("\
+    = add_com ("tabset", class_tui, tui_set_tab_width_command, _ ("\
 Set the width (in characters) of tab stops.\n\
 Usage: tabset N"));
   deprecate_cmd (tabset_cmd, "set tui tab-width");
 
   /* Setup the 'tui window' list of command.  */
   add_prefix_cmd ("window", class_tui, tui_window_command,
-		  _("Text User Interface window commands."),
-		  &tui_window_cmds, 1, tui_get_cmd_list ());
+		  _ ("Text User Interface window commands."), &tui_window_cmds,
+		  1, tui_get_cmd_list ());
 
   cmd_list_element *winheight_cmd
-    = add_cmd ("height", class_tui, tui_set_win_height_command, _("\
+    = add_cmd ("height", class_tui, tui_set_win_height_command, _ ("\
 Set or modify the height of a specified window.\n\
 Usage: tui window height WINDOW-NAME [+ | -] NUM-LINES\n\
 Use \"info win\" to see the names of the windows currently being displayed."),
@@ -1157,7 +1108,7 @@ Use \"info win\" to see the names of the windows currently being displayed."),
   set_cmd_completer (winheight_cmd, winheight_completer);
 
   cmd_list_element *winwidth_cmd
-    = add_cmd ("width", class_tui, tui_set_win_width_command, _("\
+    = add_cmd ("width", class_tui, tui_set_win_width_command, _ ("\
 Set or modify the width of a specified window.\n\
 Usage: tui window width WINDOW-NAME [+ | -] NUM-LINES\n\
 Use \"info win\" to see the names of the windows currently being displayed."),
@@ -1165,11 +1116,10 @@ Use \"info win\" to see the names of the windows currently being displayed."),
   add_com_alias ("winwidth", winwidth_cmd, class_tui, 0);
   set_cmd_completer (winwidth_cmd, winheight_completer);
 
-  add_info ("win", tui_all_windows_info,
-	    _("List of all displayed windows.\n\
+  add_info ("win", tui_all_windows_info, _ ("List of all displayed windows.\n\
 Usage: info win"));
   cmd_list_element *focus_cmd
-    = add_cmd ("focus", class_tui, tui_set_focus_command, _("\
+    = add_cmd ("focus", class_tui, tui_set_focus_command, _ ("\
 Set focus to named window or next/prev window.\n\
 Usage: tui focus [WINDOW-NAME | next | prev]\n\
 Use \"info win\" to see the names of the windows currently being displayed."),
@@ -1177,22 +1127,22 @@ Use \"info win\" to see the names of the windows currently being displayed."),
   add_com_alias ("focus", focus_cmd, class_tui, 0);
   add_com_alias ("fs", focus_cmd, class_tui, 0);
   set_cmd_completer (focus_cmd, focus_completer);
-  add_com ("+", class_tui, tui_scroll_forward_command, _("\
+  add_com ("+", class_tui, tui_scroll_forward_command, _ ("\
 Scroll window forward.\n\
 Usage: + [N] [WIN]\n\
 Scroll window WIN N lines forwards.  Both WIN and N are optional, N\n\
 defaults to 1, and WIN defaults to the currently focused window."));
-  add_com ("-", class_tui, tui_scroll_backward_command, _("\
+  add_com ("-", class_tui, tui_scroll_backward_command, _ ("\
 Scroll window backward.\n\
 Usage: - [N] [WIN]\n\
 Scroll window WIN N lines backwards.  Both WIN and N are optional, N\n\
 defaults to 1, and WIN defaults to the currently focused window."));
-  add_com ("<", class_tui, tui_scroll_left_command, _("\
+  add_com ("<", class_tui, tui_scroll_left_command, _ ("\
 Scroll window text to the left.\n\
 Usage: < [N] [WIN]\n\
 Scroll window WIN N characters left.  Both WIN and N are optional, N\n\
 defaults to 1, and WIN defaults to the currently focused window."));
-  add_com (">", class_tui, tui_scroll_right_command, _("\
+  add_com (">", class_tui, tui_scroll_right_command, _ ("\
 Scroll window text to the right.\n\
 Usage: > [N] [WIN]\n\
 Scroll window WIN N characters right.  Both WIN and N are optional, N\n\
@@ -1200,21 +1150,24 @@ defaults to 1, and WIN defaults to the currently focused window."));
 
   /* Define the tui control variables.  */
   add_setshow_enum_cmd ("border-kind", no_class, tui_border_kind_enums,
-			&tui_border_kind, _("\
-Set the kind of border for TUI windows."), _("\
-Show the kind of border for TUI windows."), _("\
+			&tui_border_kind, _ ("\
+Set the kind of border for TUI windows."),
+			_ ("\
+Show the kind of border for TUI windows."),
+			_ ("\
 This variable controls the border of TUI windows:\n\
    space           use a white space\n\
    ascii           use ascii characters + - | for the border\n\
    acs             use the Alternate Character Set"),
-			tui_set_var_cmd,
-			show_tui_border_kind,
-			&tui_setlist, &tui_showlist);
+			tui_set_var_cmd, show_tui_border_kind, &tui_setlist,
+			&tui_showlist);
 
   add_setshow_enum_cmd ("border-mode", no_class, tui_border_mode_enums,
-			&tui_border_mode, _("\
-Set the attribute mode to use for the TUI window borders."), _("\
-Show the attribute mode to use for the TUI window borders."), _("\
+			&tui_border_mode, _ ("\
+Set the attribute mode to use for the TUI window borders."),
+			_ ("\
+Show the attribute mode to use for the TUI window borders."),
+			_ ("\
 This variable controls the attributes to use for the window borders:\n\
    normal          normal display\n\
    standout        use highlight mode of terminal\n\
@@ -1223,14 +1176,15 @@ This variable controls the attributes to use for the window borders:\n\
    half-standout   use half bright and standout mode\n\
    bold            use extra bright or bold\n\
    bold-standout   use extra bright or bold with standout mode"),
-			tui_set_var_cmd,
-			show_tui_border_mode,
-			&tui_setlist, &tui_showlist);
+			tui_set_var_cmd, show_tui_border_mode, &tui_setlist,
+			&tui_showlist);
 
   add_setshow_enum_cmd ("active-border-mode", no_class, tui_border_mode_enums,
-			&tui_active_border_mode, _("\
-Set the attribute mode to use for the active TUI window border."), _("\
-Show the attribute mode to use for the active TUI window border."), _("\
+			&tui_active_border_mode, _ ("\
+Set the attribute mode to use for the active TUI window border."),
+			_ ("\
+Show the attribute mode to use for the active TUI window border."),
+			_ ("\
 This variable controls the attributes to use for the active window border:\n\
    normal          normal display\n\
    standout        use highlight mode of terminal\n\
@@ -1239,32 +1193,34 @@ This variable controls the attributes to use for the active window border:\n\
    half-standout   use half bright and standout mode\n\
    bold            use extra bright or bold\n\
    bold-standout   use extra bright or bold with standout mode"),
-			tui_set_var_cmd,
-			show_tui_active_border_mode,
+			tui_set_var_cmd, show_tui_active_border_mode,
 			&tui_setlist, &tui_showlist);
 
-  add_setshow_zuinteger_cmd ("tab-width", no_class,
-			     &internal_tab_width, _("\
-Set the tab width, in characters, for the TUI."), _("\
-Show the tab witdh, in characters, for the TUI."), _("\
+  add_setshow_zuinteger_cmd ("tab-width", no_class, &internal_tab_width, _ ("\
+Set the tab width, in characters, for the TUI."),
+			     _ ("\
+Show the tab witdh, in characters, for the TUI."),
+			     _ ("\
 This variable controls how many spaces are used to display a tab character."),
 			     tui_set_tab_width, tui_show_tab_width,
 			     &tui_setlist, &tui_showlist);
 
   add_setshow_boolean_cmd ("tui-resize-message", class_maintenance,
-			   &resize_message, _("\
-Set TUI resize messaging."), _("\
-Show TUI resize messaging."), _("\
+			   &resize_message, _ ("\
+Set TUI resize messaging."),
+			   _ ("\
+Show TUI resize messaging."),
+			   _ ("\
 When enabled GDB will print a message when the terminal is resized."),
-			   nullptr,
-			   show_tui_resize_message,
+			   nullptr, show_tui_resize_message,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 
-  add_setshow_boolean_cmd ("compact-source", class_tui,
-			   &compact_source, _("\
-Set whether the TUI source window is compact."), _("\
-Show whether the TUI source window is compact."), _("\
+  add_setshow_boolean_cmd ("compact-source", class_tui, &compact_source, _ ("\
+Set whether the TUI source window is compact."),
+			   _ ("\
+Show whether the TUI source window is compact."),
+			   _ ("\
 This variable controls whether the TUI source window is shown\n\
 in a compact form.  The compact form puts the source closer to\n\
 the line numbers and uses less horizontal space."),
@@ -1272,16 +1228,15 @@ the line numbers and uses less horizontal space."),
 			   &tui_setlist, &tui_showlist);
 
   add_setshow_boolean_cmd ("tui-current-position", class_maintenance,
-			   &style_tui_current_position, _("\
+			   &style_tui_current_position, _ ("\
 Set whether to style text highlighted by the TUI's current position indicator."),
-			   _("\
+			   _ ("\
 Show whether to style text highlighted by the TUI's current position indicator."),
-			   _("\
+			   _ ("\
 When enabled, the source and assembly code highlighted by the TUI's current\n\
 position indicator is styled."),
 			   set_style_tui_current_position,
-			   show_style_tui_current_position,
-			   &style_set_list,
+			   show_style_tui_current_position, &style_set_list,
 			   &style_show_list);
 
   tui_border_style.changed.attach (tui_rehighlight_all, "tui-win");

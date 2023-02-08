@@ -34,7 +34,7 @@
    destructor could consume a signal raised due to actions done by
    some other thread.  */
 
-template <int Sig, bool ConsumePending>
+template<int Sig, bool ConsumePending>
 class scoped_ignore_signal
 {
 public:
@@ -57,34 +57,34 @@ public:
 #ifdef HAVE_SIGPROCMASK
     if (!m_was_blocked)
       {
-	sigset_t set;
+        sigset_t set;
 
-	sigemptyset (&set);
-	sigaddset (&set, Sig);
+        sigemptyset (&set);
+        sigaddset (&set, Sig);
 
-	/* If we got a pending Sig signal, consume it before
+        /* If we got a pending Sig signal, consume it before
 	   unblocking.  */
-	if (ConsumePending)
-	  {
+        if (ConsumePending)
+          {
 #ifdef HAVE_SIGTIMEDWAIT
-	    const timespec zero_timeout = {};
+            const timespec zero_timeout = {};
 
-	    sigtimedwait (&set, nullptr, &zero_timeout);
+            sigtimedwait (&set, nullptr, &zero_timeout);
 #else
-	    sigset_t pending;
+            sigset_t pending;
 
-	    sigpending (&pending);
-	    if (sigismember (&pending, Sig))
-	      {
-		int sig_found;
+            sigpending (&pending);
+            if (sigismember (&pending, Sig))
+              {
+                int sig_found;
 
-		sigwait (&set, &sig_found);
-		gdb_assert (sig_found == Sig);
-	      }
+                sigwait (&set, &sig_found);
+                gdb_assert (sig_found == Sig);
+              }
 #endif
-	  }
+          }
 
-	sigprocmask (SIG_UNBLOCK, &set, nullptr);
+        sigprocmask (SIG_UNBLOCK, &set, nullptr);
       }
 #else
     signal (Sig, m_osig);
@@ -105,10 +105,8 @@ struct scoped_ignore_signal_nop
 {
   /* Note, these can't both be "= default", because otherwise the
      compiler warns that variables of this type are not used.  */
-  scoped_ignore_signal_nop ()
-  {}
-  ~scoped_ignore_signal_nop ()
-  {}
+  scoped_ignore_signal_nop () {}
+  ~scoped_ignore_signal_nop () {}
   DISABLE_COPY_AND_ASSIGN (scoped_ignore_signal_nop);
 };
 

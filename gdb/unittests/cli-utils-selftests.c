@@ -21,8 +21,10 @@
 #include "cli/cli-utils.h"
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
-namespace cli_utils {
+namespace selftests
+{
+namespace cli_utils
+{
 
 static void
 test_number_or_range_parser ()
@@ -107,13 +109,13 @@ test_cli_utils ()
   selftests::cli_utils::test_number_or_range_parser ();
 }
 
-}
-}
+} // namespace cli_utils
+} // namespace selftests
 
 void _initialize_cli_utils_selftests ();
+
 void
 _initialize_cli_utils_selftests ()
 {
-  selftests::register_test ("cli_utils",
-			    selftests::cli_utils::test_cli_utils);
+  selftests::register_test ("cli_utils", selftests::cli_utils::test_cli_utils);
 }

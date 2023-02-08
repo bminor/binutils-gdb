@@ -103,6 +103,7 @@ arm_fbsd_nat_target::read_description ()
 }
 
 void _initialize_arm_fbsd_nat ();
+
 void
 _initialize_arm_fbsd_nat ()
 {

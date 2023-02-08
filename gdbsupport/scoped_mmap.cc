@@ -37,9 +37,10 @@ mmap_file (const char *filename)
 
   /* We can't map an empty file.  */
   if (size == 0)
-    error (_("file to mmap is empty"));
+    error (_ ("file to mmap is empty"));
 
-  scoped_mmap mmapped_file (nullptr, size, PROT_READ, MAP_PRIVATE, fd.get (), 0);
+  scoped_mmap mmapped_file (nullptr, size, PROT_READ, MAP_PRIVATE, fd.get (),
+                            0);
   if (mmapped_file.get () == MAP_FAILED)
     perror_with_name (("mmap"));
 

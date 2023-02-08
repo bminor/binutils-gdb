@@ -44,21 +44,20 @@
    format and GDB's register cache layout.  */
 
 /* From <x86/context.h>.  */
-static int i386nto_gregset_reg_offset[] =
-{
-  7 * 4,			/* %eax */
-  6 * 4,			/* %ecx */
-  5 * 4,			/* %edx */
-  4 * 4,			/* %ebx */
-  11 * 4,			/* %esp */
-  2 * 4,			/* %epb */
-  1 * 4,			/* %esi */
-  0 * 4,			/* %edi */
-  8 * 4,			/* %eip */
-  10 * 4,			/* %eflags */
-  9 * 4,			/* %cs */
-  12 * 4,			/* %ss */
-  -1				/* filler */
+static int i386nto_gregset_reg_offset[] = {
+  7 * 4,  /* %eax */
+  6 * 4,  /* %ecx */
+  5 * 4,  /* %edx */
+  4 * 4,  /* %ebx */
+  11 * 4, /* %esp */
+  2 * 4,  /* %epb */
+  1 * 4,  /* %esi */
+  0 * 4,  /* %edi */
+  8 * 4,  /* %eip */
+  10 * 4, /* %eflags */
+  9 * 4,  /* %cs */
+  12 * 4, /* %ss */
+  -1	  /* filler */
 };
 
 /* Given a GDB register number REGNUM, return the offset into
@@ -80,8 +79,8 @@ i386nto_supply_gregset (struct regcache *regcache, char *gpregs)
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
   gdb_assert (tdep->gregset_reg_offset == i386nto_gregset_reg_offset);
-  i386_gregset.supply_regset (&i386_gregset, regcache, -1,
-			      gpregs, NUM_GPREGS * 4);
+  i386_gregset.supply_regset (&i386_gregset, regcache, -1, gpregs,
+			      NUM_GPREGS * 4);
 }
 
 static void
@@ -119,12 +118,12 @@ i386nto_regset_id (int regno)
   else if (regno < I386_SSE_NUM_REGS)
     return NTO_REG_FLOAT; /* We store xmm registers in fxsave_area.  */
 
-  return -1;			/* Error.  */
+  return -1; /* Error.  */
 }
 
 static int
-i386nto_register_area (struct gdbarch *gdbarch,
-		       int regno, int regset, unsigned *off)
+i386nto_register_area (struct gdbarch *gdbarch, int regno, int regset,
+		       unsigned *off)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
@@ -308,8 +307,7 @@ init_i386nto_ops (void)
   nto_supply_regset = i386nto_supply_regset;
   nto_register_area = i386nto_register_area;
   nto_regset_fill = i386nto_regset_fill;
-  nto_fetch_link_map_offsets =
-    svr4_ilp32_fetch_link_map_offsets;
+  nto_fetch_link_map_offsets = svr4_ilp32_fetch_link_map_offsets;
 }
 
 static void
@@ -338,10 +336,10 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (i386nto_gregset_reg_offset);
 
   /* Setjmp()'s return PC saved in EDX (5).  */
-  tdep->jb_pc_offset = 20;	/* 5x32 bit ints in.  */
+  tdep->jb_pc_offset = 20; /* 5x32 bit ints in.  */
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
   /* Initialize this lazily, to avoid an initialization order
      dependency on solib-svr4.c's _initialize routine.  */
@@ -354,12 +352,10 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	= nto_relocate_section_addresses;
 
       /* Supply a nice function to find our solibs.  */
-      nto_svr4_so_ops.find_and_open_solib
-	= nto_find_and_open_solib;
+      nto_svr4_so_ops.find_and_open_solib = nto_find_and_open_solib;
 
       /* Our linker code is in libc.  */
-      nto_svr4_so_ops.in_dynsym_resolve_code
-	= nto_in_dynsym_resolve_code;
+      nto_svr4_so_ops.in_dynsym_resolve_code = nto_in_dynsym_resolve_code;
     }
   set_gdbarch_so_ops (gdbarch, &nto_svr4_so_ops);
 
@@ -368,6 +364,7 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_i386nto_tdep ();
+
 void
 _initialize_i386nto_tdep ()
 {

@@ -59,7 +59,6 @@ extern bool startup_with_shell;
 
 /* Compute command-line string given argument vector. This does the
    same shell processing as fork_inferior.  */
-extern std::string
-construct_inferior_arguments (gdb::array_view<char * const>);
+extern std::string construct_inferior_arguments (gdb::array_view<char *const>);
 
 #endif /* COMMON_COMMON_INFERIOR_H */

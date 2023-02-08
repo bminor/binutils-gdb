@@ -16,7 +16,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 typedef struct
 {
   int gdb_regnum;
@@ -31,9 +30,8 @@ typedef struct
 
 #define XTENSA_ELF_XTREG_SIZE 4
 
-const xtensa_regtable_t xtensa_regmap_table[] =
-{
+const xtensa_regtable_t xtensa_regmap_table[] = {
   /* gnum,gofs,cpofs,ofs,siz,cp, dbnum,  name */
-  {   44, 176,   0,   0,  4, -1, 0x020c, "scompare1" },
+  { 44, 176, 0, 0, 4, -1, 0x020c, "scompare1" },
   { 0 }
 };

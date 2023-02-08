@@ -17,10 +17,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (VALUE_H)
+#if !defined(VALUE_H)
 #define VALUE_H 1
 
-#include "frame.h"		/* For struct frame_id.  */
+#include "frame.h" /* For struct frame_id.  */
 #include "extension.h"
 #include "gdbsupport/gdb_ref_ptr.h"
 #include "gmp-utils.h"
@@ -104,15 +104,9 @@ extern void value_decref (struct value *val);
 
 struct value_ref_policy
 {
-  static void incref (struct value *ptr)
-  {
-    value_incref (ptr);
-  }
+  static void incref (struct value *ptr) { value_incref (ptr); }
 
-  static void decref (struct value *ptr)
-  {
-    value_decref (ptr);
-  }
+  static void decref (struct value *ptr) { value_decref (ptr); }
 };
 
 /* A gdb:;ref_ptr pointer to a struct value.  */
@@ -131,8 +125,7 @@ extern struct gdbarch *get_value_arch (const struct value *value);
    code should instead be creating a new value with the changed type
    (but possibly shared content).  */
 
-extern void deprecated_set_value_type (struct value *value,
-				       struct type *type);
+extern void deprecated_set_value_type (struct value *value, struct type *type);
 
 /* Only used for bitfields; number of bits contained in them.  */
 
@@ -275,8 +268,8 @@ struct lval_funcs
 
   /* If non-NULL, this is used to determine whether the indicated bits
      of VALUE are a synthetic pointer.  */
-  int (*check_synthetic_pointer) (const struct value *value,
-				  LONGEST offset, int length);
+  int (*check_synthetic_pointer) (const struct value *value, LONGEST offset,
+				  int length);
 
   /* Return a duplicate of VALUE's closure, for use in a new value.
      This may simply return the same closure, if VALUE's is
@@ -373,13 +366,14 @@ extern gdb::array_view<const gdb_byte> value_contents_all (struct value *);
 /* Like value_contents_all, but does not require that the returned
    bits be valid.  This should only be used in situations where you
    plan to check the validity manually.  */
-extern gdb::array_view<const gdb_byte> value_contents_for_printing (struct value *value);
+extern gdb::array_view<const gdb_byte>
+value_contents_for_printing (struct value *value);
 
 /* Like value_contents_for_printing, but accepts a constant value
    pointer.  Unlike value_contents_for_printing however, the pointed
    value must _not_ be lazy.  */
 extern gdb::array_view<const gdb_byte>
-  value_contents_for_printing_const (const struct value *value);
+value_contents_for_printing_const (const struct value *value);
 
 extern void value_fetch_lazy (struct value *val);
 
@@ -402,14 +396,14 @@ extern int value_entirely_optimized_out (struct value *value);
 /* Mark VALUE's content bytes starting at OFFSET and extending for
    LENGTH bytes as optimized out.  */
 
-extern void mark_value_bytes_optimized_out (struct value *value,
-					    int offset, int length);
+extern void mark_value_bytes_optimized_out (struct value *value, int offset,
+					    int length);
 
 /* Mark VALUE's content bits starting at OFFSET and extending for
    LENGTH bits as optimized out.  */
 
-extern void mark_value_bits_optimized_out (struct value *value,
-					   LONGEST offset, LONGEST length);
+extern void mark_value_bits_optimized_out (struct value *value, LONGEST offset,
+					   LONGEST length);
 
 /* Set or return field indicating whether a variable is initialized or
    not, based on debugging information supplied by the compiler.
@@ -476,11 +470,9 @@ extern struct value *coerce_ref_if_computed (const struct value *arg);
 
    It is a common implementation for coerce_ref and value_ind.  */
 
-extern struct value * readjust_indirect_value_type (struct value *value,
-						    struct type *enc_type,
-						    const struct type *original_type,
-						    struct value *original_val,
-						    CORE_ADDR original_value_address);
+extern struct value *readjust_indirect_value_type (
+  struct value *value, struct type *enc_type, const struct type *original_type,
+  struct value *original_val, CORE_ADDR original_value_address);
 
 /* Convert a REF to the object referenced.  */
 
@@ -504,16 +496,16 @@ extern int value_bits_synthetic_pointer (const struct value *value,
    nonzero if all bytes in the given range are available, zero if any
    byte is unavailable.  */
 
-extern int value_bytes_available (const struct value *value,
-				  LONGEST offset, LONGEST length);
+extern int value_bytes_available (const struct value *value, LONGEST offset,
+				  LONGEST length);
 
 /* Given a value, determine whether the contents bits starting at
    OFFSET and extending for LENGTH bits are available.  This returns
    nonzero if all bits in the given range are available, zero if any
    bit is unavailable.  */
 
-extern int value_bits_available (const struct value *value,
-				 LONGEST offset, LONGEST length);
+extern int value_bits_available (const struct value *value, LONGEST offset,
+				 LONGEST length);
 
 /* Like value_bytes_available, but return false if any byte in the
    whole object is unavailable.  */
@@ -526,14 +518,14 @@ extern int value_entirely_unavailable (struct value *value);
 /* Mark VALUE's content bytes starting at OFFSET and extending for
    LENGTH bytes as unavailable.  */
 
-extern void mark_value_bytes_unavailable (struct value *value,
-					  LONGEST offset, LONGEST length);
+extern void mark_value_bytes_unavailable (struct value *value, LONGEST offset,
+					  LONGEST length);
 
 /* Mark VALUE's content bits starting at OFFSET and extending for
    LENGTH bits as unavailable.  */
 
-extern void mark_value_bits_unavailable (struct value *value,
-					 LONGEST offset, LONGEST length);
+extern void mark_value_bits_unavailable (struct value *value, LONGEST offset,
+					 LONGEST length);
 
 /* Compare LENGTH bytes of VAL1's contents starting at OFFSET1 with
    LENGTH bytes of VAL2's contents starting at OFFSET2.
@@ -605,16 +597,14 @@ extern bool value_contents_eq (const struct value *val1,
    whether the memory is known to be stack memory.  */
 
 extern void read_value_memory (struct value *val, LONGEST bit_offset,
-			       int stack, CORE_ADDR memaddr,
-			       gdb_byte *buffer, size_t length);
+			       int stack, CORE_ADDR memaddr, gdb_byte *buffer,
+			       size_t length);
 
 /* Cast SCALAR_VALUE to the element type of VECTOR_TYPE, then replicate
    into each element of a new vector value with VECTOR_TYPE.  */
 
 struct value *value_vector_widen (struct value *scalar_value,
 				  struct type *vector_type);
-
-
 
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -638,8 +628,7 @@ extern LONGEST unpack_long (struct type *type, const gdb_byte *valaddr);
 extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
 
 extern LONGEST unpack_field_as_long (struct type *type,
-				     const gdb_byte *valaddr,
-				     int fieldno);
+				     const gdb_byte *valaddr, int fieldno);
 
 /* Unpack a bitfield of the specified FIELD_TYPE, from the object at
    VALADDR, and store the result in *RESULT.
@@ -658,16 +647,17 @@ extern LONGEST unpack_field_as_long (struct type *type,
    If the field is signed, we also do sign extension.  */
 
 extern LONGEST unpack_bits_as_long (struct type *field_type,
-				    const gdb_byte *valaddr,
-				    LONGEST bitpos, LONGEST bitsize);
+				    const gdb_byte *valaddr, LONGEST bitpos,
+				    LONGEST bitsize);
 
-extern int unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
-				LONGEST embedded_offset, int fieldno,
-				const struct value *val, LONGEST *result);
+extern int unpack_value_field_as_long (struct type *type,
+				       const gdb_byte *valaddr,
+				       LONGEST embedded_offset, int fieldno,
+				       const struct value *val,
+				       LONGEST *result);
 
-extern void unpack_value_bitfield (struct value *dest_val,
-				   LONGEST bitpos, LONGEST bitsize,
-				   const gdb_byte *valaddr,
+extern void unpack_value_bitfield (struct value *dest_val, LONGEST bitpos,
+				   LONGEST bitsize, const gdb_byte *valaddr,
 				   LONGEST embedded_offset,
 				   const struct value *val);
 
@@ -685,7 +675,6 @@ extern struct value *value_from_host_double (struct type *type, double d);
 extern struct value *value_from_history_ref (const char *, const char **);
 extern struct value *value_from_component (struct value *, struct type *,
 					   LONGEST);
-
 
 /* Create a new value by extracting it from WHOLE.  TYPE is the type
    of the new value.  BIT_OFFSET and BIT_LENGTH describe the offset
@@ -708,11 +697,11 @@ extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
    This can be important if the memory is "volatile".  */
 extern struct value *value_at_non_lval (struct type *type, CORE_ADDR addr);
 
-extern struct value *value_from_contents_and_address_unresolved
-     (struct type *, const gdb_byte *, CORE_ADDR);
-extern struct value *value_from_contents_and_address (struct type *,
-						      const gdb_byte *,
-						      CORE_ADDR);
+extern struct value *
+value_from_contents_and_address_unresolved (struct type *, const gdb_byte *,
+					    CORE_ADDR);
+extern struct value *
+value_from_contents_and_address (struct type *, const gdb_byte *, CORE_ADDR);
 extern struct value *value_from_contents (struct type *, const gdb_byte *);
 
 extern struct value *default_value_from_register (struct gdbarch *gdbarch,
@@ -726,8 +715,7 @@ extern void read_frame_register_value (struct value *value,
 extern struct value *value_from_register (struct type *type, int regnum,
 					  frame_info_ptr frame);
 
-extern CORE_ADDR address_from_register (int regnum,
-					frame_info_ptr frame);
+extern CORE_ADDR address_from_register (int regnum, frame_info_ptr frame);
 
 extern struct value *value_of_variable (struct symbol *var,
 					const struct block *b);
@@ -769,17 +757,14 @@ extern void value_free_to_mark (const struct value *mark);
    temporary values created during the lifetime of this object.  */
 class scoped_value_mark
 {
- public:
+public:
 
   scoped_value_mark ()
     : m_value (value_mark ())
   {
   }
 
-  ~scoped_value_mark ()
-  {
-    free_to_mark ();
-  }
+  ~scoped_value_mark () { free_to_mark (); }
 
   scoped_value_mark (scoped_value_mark &&other) = default;
 
@@ -795,7 +780,7 @@ class scoped_value_mark
       }
   }
 
- private:
+private:
 
   const struct value *m_value;
 };
@@ -834,8 +819,7 @@ extern struct value *value_addr (struct value *arg1);
 
 extern struct value *value_ref (struct value *arg1, enum type_code refcode);
 
-extern struct value *value_assign (struct value *toval,
-				   struct value *fromval);
+extern struct value *value_assign (struct value *toval, struct value *fromval);
 
 extern struct value *value_pos (struct value *arg1);
 
@@ -843,13 +827,12 @@ extern struct value *value_neg (struct value *arg1);
 
 extern struct value *value_complement (struct value *arg1);
 
-extern struct value *value_struct_elt (struct value **argp,
-				       gdb::optional<gdb::array_view <value *>> args,
-				       const char *name, int *static_memfuncp,
-				       const char *err);
+extern struct value *
+value_struct_elt (struct value **argp,
+		  gdb::optional<gdb::array_view<value *>> args,
+		  const char *name, int *static_memfuncp, const char *err);
 
-extern struct value *value_struct_elt_bitpos (struct value **argp,
-					      int bitpos,
+extern struct value *value_struct_elt_bitpos (struct value **argp, int bitpos,
 					      struct type *field_type,
 					      const char *err);
 
@@ -861,7 +844,12 @@ extern struct value *value_aggregate_elt (struct type *curtype,
 
 extern struct value *value_static_field (struct type *type, int fieldno);
 
-enum oload_search_type { NON_METHOD, METHOD, BOTH };
+enum oload_search_type
+{
+  NON_METHOD,
+  METHOD,
+  BOTH
+};
 
 extern int find_overload_match (gdb::array_view<value *> args,
 				const char *name,
@@ -876,7 +864,6 @@ extern struct value *value_field (struct value *arg1, int fieldno);
 extern struct value *value_primitive_field (struct value *arg1, LONGEST offset,
 					    int fieldno,
 					    struct type *arg_type);
-
 
 extern struct type *value_rtti_indirect_type (struct value *, int *, LONGEST *,
 					      int *);
@@ -939,9 +926,12 @@ extern value *evaluate_var_msym_value (enum noside noside,
 				       struct objfile *objfile,
 				       minimal_symbol *msymbol);
 
-namespace expr { class operation; };
-extern void fetch_subexp_value (struct expression *exp,
-				expr::operation *op,
+namespace expr
+{
+class operation;
+};
+
+extern void fetch_subexp_value (struct expression *exp, expr::operation *op,
 				struct value **valp, struct value **resultp,
 				std::vector<value_ref_ptr> *val_chain,
 				bool preserve_errors);
@@ -957,12 +947,11 @@ extern CORE_ADDR parse_and_eval_address (const char *exp);
 extern LONGEST parse_and_eval_long (const char *exp);
 
 extern void unop_promote (const struct language_defn *language,
-			  struct gdbarch *gdbarch,
-			  struct value **arg1);
+			  struct gdbarch *gdbarch, struct value **arg1);
 
 extern void binop_promote (const struct language_defn *language,
-			   struct gdbarch *gdbarch,
-			   struct value **arg1, struct value **arg2);
+			   struct gdbarch *gdbarch, struct value **arg1,
+			   struct value **arg2);
 
 extern struct value *access_value_history (int num);
 
@@ -984,8 +973,7 @@ extern void set_internalvar_string (struct internalvar *var,
 
 extern void clear_internalvar (struct internalvar *var);
 
-extern void set_internalvar_component (struct internalvar *var,
-				       LONGEST offset,
+extern void set_internalvar_component (struct internalvar *var, LONGEST offset,
 				       LONGEST bitpos, LONGEST bitsize,
 				       struct value *newvalue);
 
@@ -1005,8 +993,7 @@ struct internalvar_funcs
      the function is the same argument that was passed to
      `create_internalvar_type_lazy'.  */
 
-  struct value *(*make_value) (struct gdbarch *arch,
-			       struct internalvar *var,
+  struct value *(*make_value) (struct gdbarch *arch, struct internalvar *var,
 			       void *data);
 
   /* Update the agent expression EXPR with bytecode to compute the
@@ -1016,15 +1003,12 @@ struct internalvar_funcs
      NULL, then the internalvar cannot be compiled to an agent
      expression.  */
 
-  void (*compile_to_ax) (struct internalvar *var,
-			 struct agent_expr *expr,
-			 struct axs_value *value,
-			 void *data);
+  void (*compile_to_ax) (struct internalvar *var, struct agent_expr *expr,
+			 struct axs_value *value, void *data);
 };
 
-extern struct internalvar *create_internalvar_type_lazy (const char *name,
-				const struct internalvar_funcs *funcs,
-				void *data);
+extern struct internalvar *create_internalvar_type_lazy (
+  const char *name, const struct internalvar_funcs *funcs, void *data);
 
 /* Compile an internal variable to an agent expression.  VAR is the
    variable to compile; EXPR and VALUE are the agent expression we are
@@ -1071,8 +1055,7 @@ extern struct value *value_x_unop (struct value *arg1, enum exp_opcode op,
 extern struct value *value_fn_field (struct value **arg1p, struct fn_field *f,
 				     int j, struct type *type, LONGEST offset);
 
-extern int binop_types_user_defined_p (enum exp_opcode op,
-				       struct type *type1,
+extern int binop_types_user_defined_p (enum exp_opcode op, struct type *type1,
 				       struct type *type2);
 
 extern int binop_user_defined_p (enum exp_opcode op, struct value *arg1,
@@ -1086,8 +1069,8 @@ extern value_ref_ptr release_value (struct value *val);
 
 extern int record_latest_value (struct value *val);
 
-extern void modify_field (struct type *type, gdb_byte *addr,
-			  LONGEST fieldval, LONGEST bitpos, LONGEST bitsize);
+extern void modify_field (struct type *type, gdb_byte *addr, LONGEST fieldval,
+			  LONGEST bitpos, LONGEST bitsize);
 
 extern void type_print (struct type *type, const char *varstring,
 			struct ui_file *stream, int show);
@@ -1095,11 +1078,11 @@ extern void type_print (struct type *type, const char *varstring,
 extern std::string type_to_string (struct type *type);
 
 extern gdb_byte *baseclass_addr (struct type *type, int index,
-				 gdb_byte *valaddr,
-				 struct value **valuep, int *errp);
+				 gdb_byte *valaddr, struct value **valuep,
+				 int *errp);
 
-extern void print_longest (struct ui_file *stream, int format,
-			   int use_local, LONGEST val);
+extern void print_longest (struct ui_file *stream, int format, int use_local,
+			   LONGEST val);
 
 extern void print_floating (const gdb_byte *valaddr, struct type *type,
 			    struct ui_file *stream);
@@ -1113,24 +1096,21 @@ extern void value_print (struct value *val, struct ui_file *stream,
    are returned in reverse order of creation; that is, newest
    first.  */
 
-extern std::vector<value_ref_ptr> value_release_to_mark
-    (const struct value *mark);
+extern std::vector<value_ref_ptr>
+value_release_to_mark (const struct value *mark);
 
-extern void common_val_print (struct value *val,
-			      struct ui_file *stream, int recurse,
+extern void common_val_print (struct value *val, struct ui_file *stream,
+			      int recurse,
 			      const struct value_print_options *options,
 			      const struct language_defn *language);
 
 extern int val_print_string (struct type *elttype, const char *encoding,
-			     CORE_ADDR addr, int len,
-			     struct ui_file *stream,
+			     CORE_ADDR addr, int len, struct ui_file *stream,
 			     const struct value_print_options *options);
 
-extern void print_variable_and_value (const char *name,
-				      struct symbol *var,
+extern void print_variable_and_value (const char *name, struct symbol *var,
 				      frame_info_ptr frame,
-				      struct ui_file *stream,
-				      int indent);
+				      struct ui_file *stream, int indent);
 
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);
@@ -1179,11 +1159,9 @@ extern struct value *value_allocate_space_in_inferior (int);
 
 /* User function handler.  */
 
-typedef struct value *(*internal_function_fn) (struct gdbarch *gdbarch,
-					       const struct language_defn *language,
-					       void *cookie,
-					       int argc,
-					       struct value **argv);
+typedef struct value *(*internal_function_fn) (
+  struct gdbarch *gdbarch, const struct language_defn *language, void *cookie,
+  int argc, struct value **argv);
 
 /* Add a new internal function.  NAME is the name of the function; DOC
    is a documentation string describing the function.  HANDLER is
@@ -1192,20 +1170,18 @@ typedef struct value *(*internal_function_fn) (struct gdbarch *gdbarch,
    data".  */
 
 extern void add_internal_function (const char *name, const char *doc,
-				   internal_function_fn handler,
-				   void *cookie);
+				   internal_function_fn handler, void *cookie);
 
 /* This overload takes an allocated documentation string.  */
 
 extern void add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
 				   gdb::unique_xmalloc_ptr<char> &&doc,
-				   internal_function_fn handler,
-				   void *cookie);
+				   internal_function_fn handler, void *cookie);
 
 struct value *call_internal_function (struct gdbarch *gdbarch,
 				      const struct language_defn *language,
-				      struct value *function,
-				      int argc, struct value **argv);
+				      struct value *function, int argc,
+				      struct value **argv);
 
 const char *value_internal_function_name (struct value *);
 

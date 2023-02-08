@@ -44,8 +44,8 @@ struct inf_ptrace_target : public inf_child_target
 
   void kill () override;
 
-  void create_inferior (const char *, const std::string &,
-			char **, int) override;
+  void create_inferior (const char *, const std::string &, char **,
+			int) override;
 
   void mourn_inferior () override;
 
@@ -54,17 +54,14 @@ struct inf_ptrace_target : public inf_child_target
   std::string pid_to_str (ptid_t) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
-					const char *annex,
-					gdb_byte *readbuf,
+					const char *annex, gdb_byte *readbuf,
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
 
-  bool is_async_p () override
-  { return m_event_pipe.is_open (); }
+  bool is_async_p () override { return m_event_pipe.is_open (); }
 
-  int async_wait_fd () override
-  { return m_event_pipe.event_fd (); }
+  int async_wait_fd () override { return m_event_pipe.event_fd (); }
 
   /* Helper routine used from SIGCHLD handlers to signal the async
      event pipe.  */
@@ -75,15 +72,15 @@ struct inf_ptrace_target : public inf_child_target
   }
 
 protected:
+
   /* Helper routines for interacting with the async event pipe.  */
-  bool async_file_open ()
-  { return m_event_pipe.open_pipe (); }
-  void async_file_close ()
-  { m_event_pipe.close_pipe (); }
-  void async_file_flush ()
-  { m_event_pipe.flush (); }
-  void async_file_mark ()
-  { m_event_pipe.mark (); }
+  bool async_file_open () { return m_event_pipe.open_pipe (); }
+
+  void async_file_close () { m_event_pipe.close_pipe (); }
+
+  void async_file_flush () { m_event_pipe.flush (); }
+
+  void async_file_mark () { m_event_pipe.mark (); }
 
   /* Cleanup the inferior after a successful ptrace detach.  */
   void detach_success (inferior *inf);
@@ -100,6 +97,7 @@ protected:
   virtual void post_startup_inferior (ptid_t ptid) = 0;
 
 private:
+
   static event_pipe m_event_pipe;
 };
 

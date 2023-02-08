@@ -40,36 +40,29 @@
 
 /* Offsets into the struct x86_thread_state64 where we'll find the saved regs.
    From <mach/i386/thread_status.h> and amd64-tdep.h.  */
-int amd64_darwin_thread_state_reg_offset[] =
-{
-  0 * 8,			/* %rax */
-  1 * 8,			/* %rbx */
-  2 * 8,			/* %rcx */
-  3 * 8,			/* %rdx */
-  5 * 8,			/* %rsi */
-  4 * 8,			/* %rdi */
-  6 * 8,			/* %rbp */
-  7 * 8,			/* %rsp */
-  8 * 8,			/* %r8 ...  */
-  9 * 8,
-  10 * 8,
-  11 * 8,
-  12 * 8,
-  13 * 8,
-  14 * 8,
-  15 * 8,			/* ... %r15 */
-  16 * 8,			/* %rip */
-  17 * 8,			/* %rflags */
-  18 * 8,			/* %cs */
-  -1,				/* %ss */
-  -1,				/* %ds */
-  -1,				/* %es */
-  19 * 8,			/* %fs */
-  20 * 8			/* %gs */
+int amd64_darwin_thread_state_reg_offset[] = {
+  0 * 8,						  /* %rax */
+  1 * 8,						  /* %rbx */
+  2 * 8,						  /* %rcx */
+  3 * 8,						  /* %rdx */
+  5 * 8,						  /* %rsi */
+  4 * 8,						  /* %rdi */
+  6 * 8,						  /* %rbp */
+  7 * 8,						  /* %rsp */
+  8 * 8,						  /* %r8 ...  */
+  9 * 8,  10 * 8, 11 * 8, 12 * 8, 13 * 8, 14 * 8, 15 * 8, /* ... %r15 */
+  16 * 8,						  /* %rip */
+  17 * 8,						  /* %rflags */
+  18 * 8,						  /* %cs */
+  -1,							  /* %ss */
+  -1,							  /* %ds */
+  -1,							  /* %es */
+  19 * 8,						  /* %fs */
+  20 * 8						  /* %gs */
 };
 
-const int amd64_darwin_thread_state_num_regs = 
-  ARRAY_SIZE (amd64_darwin_thread_state_reg_offset);
+const int amd64_darwin_thread_state_num_regs
+  = ARRAY_SIZE (amd64_darwin_thread_state_reg_offset);
 
 /* Assuming THIS_FRAME is a Darwin sigtramp routine, return the
    address of the associated sigcontext structure.  */
@@ -117,9 +110,10 @@ x86_darwin_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_amd64_darwin_tdep ();
+
 void
 _initialize_amd64_darwin_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_DARWIN, x86_darwin_init_abi_64);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_DARWIN,
+			  x86_darwin_init_abi_64);
 }

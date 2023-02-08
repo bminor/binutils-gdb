@@ -40,8 +40,8 @@ static SCM length_symbol;
 class gdbscm_disassembler : public gdb_disassembler
 {
 public:
-  gdbscm_disassembler (struct gdbarch *gdbarch,
-		       struct ui_file *stream,
+
+  gdbscm_disassembler (struct gdbarch *gdbarch, struct ui_file *stream,
 		       SCM port, ULONGEST offset);
 
   SCM port;
@@ -59,19 +59,17 @@ struct gdbscm_disasm_read_data
   unsigned int length;
   gdbscm_disassembler *dinfo;
 };
-
+
 /* Subroutine of gdbscm_arch_disassemble to simplify it.
    Return the result for one instruction.  */
 
 static SCM
 dascm_make_insn (CORE_ADDR pc, const char *assembly, int insn_len)
 {
-  return scm_list_3 (scm_cons (address_symbol,
-			       gdbscm_scm_from_ulongest (pc)),
+  return scm_list_3 (scm_cons (address_symbol, gdbscm_scm_from_ulongest (pc)),
 		     scm_cons (asm_symbol,
 			       gdbscm_scm_from_c_string (assembly)),
-		     scm_cons (length_symbol,
-			       scm_from_int (insn_len)));
+		     scm_cons (length_symbol, scm_from_int (insn_len)));
 }
 
 /* Helper function for gdbscm_disasm_read_memory to safely read from a
@@ -126,10 +124,11 @@ gdbscm_disasm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
 }
 
 gdbscm_disassembler::gdbscm_disassembler (struct gdbarch *gdbarch,
-					  struct ui_file *stream,
-					  SCM port_, ULONGEST offset_)
+					  struct ui_file *stream, SCM port_,
+					  ULONGEST offset_)
   : gdb_disassembler (gdbarch, stream, gdbscm_disasm_read_memory),
-    port (port_), offset (offset_)
+    port (port_),
+    offset (offset_)
 {
 }
 
@@ -144,8 +143,8 @@ gdbscm_disassembler::gdbscm_disassembler (struct gdbarch *gdbarch,
    This is based on gdb_print_insn, see it for details.  */
 
 static int
-gdbscm_print_insn_from_port (struct gdbarch *gdbarch,
-			     SCM port, ULONGEST offset, CORE_ADDR memaddr,
+gdbscm_print_insn_from_port (struct gdbarch *gdbarch, SCM port,
+			     ULONGEST offset, CORE_ADDR memaddr,
 			     string_file *stream, int *branch_delay_insns)
 {
   gdbscm_disassembler di (gdbarch, stream, port, offset);
@@ -176,9 +175,8 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
   arch_smob *a_smob
     = arscm_get_arch_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct gdbarch *gdbarch = arscm_get_gdbarch (a_smob);
-  const SCM keywords[] = {
-    port_keyword, offset_keyword, size_keyword, count_keyword, SCM_BOOL_F
-  };
+  const SCM keywords[] = { port_keyword, offset_keyword, size_keyword,
+			   count_keyword, SCM_BOOL_F };
   int port_arg_pos = -1, offset_arg_pos = -1;
   int size_arg_pos = -1, count_arg_pos = -1;
   SCM port = SCM_BOOL_F;
@@ -193,11 +191,9 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
   SCM result;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, keywords, "U#OUuu",
-			      start_scm, &start_arg, rest,
-			      &port_arg_pos, &port,
-			      &offset_arg_pos, &offset,
-			      &size_arg_pos, &size,
-			      &count_arg_pos, &count);
+			      start_scm, &start_arg, rest, &port_arg_pos,
+			      &port, &offset_arg_pos, &offset, &size_arg_pos,
+			      &size, &count_arg_pos, &count);
   /* START is first stored in a ULONGEST because we don't have a format char
      for CORE_ADDR, and it's not really worth it to have one yet.  */
   start = start_arg;
@@ -205,18 +201,16 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
   if (port_arg_pos > 0)
     {
       SCM_ASSERT_TYPE (gdbscm_is_false (port)
-		       || gdbscm_is_true (scm_input_port_p (port)),
-		       port, port_arg_pos, FUNC_NAME, _("input port"));
+			 || gdbscm_is_true (scm_input_port_p (port)),
+		       port, port_arg_pos, FUNC_NAME, _ ("input port"));
     }
   using_port = gdbscm_is_true (port);
 
-  if (offset_arg_pos > 0
-      && (port_arg_pos < 0
-	  || gdbscm_is_false (port)))
+  if (offset_arg_pos > 0 && (port_arg_pos < 0 || gdbscm_is_false (port)))
     {
       gdbscm_out_of_range_error (FUNC_NAME, offset_arg_pos,
 				 gdbscm_scm_from_ulongest (offset),
-				 _("offset provided but port is missing"));
+				 _ ("offset provided but port is missing"));
     }
 
   if (size_arg_pos > 0)
@@ -227,10 +221,11 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 	 a nuisance we can relax things later.  */
       if (start + size < start)
 	{
-	  gdbscm_out_of_range_error (FUNC_NAME, 0,
-				scm_list_2 (gdbscm_scm_from_ulongest (start),
-					    gdbscm_scm_from_ulongest (size)),
-				     _("start+size overflows"));
+	  gdbscm_out_of_range_error (
+	    FUNC_NAME, 0,
+	    scm_list_2 (gdbscm_scm_from_ulongest (start),
+			gdbscm_scm_from_ulongest (size)),
+	    _ ("start+size overflows"));
 	}
       end = start + size - 1;
     }
@@ -242,7 +237,7 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 
   result = SCM_EOL;
 
-  for (pc = start, i = 0; pc <= end && i < count; )
+  for (pc = start, i = 0; pc <= end && i < count;)
     {
       int insn_len = 0;
       string_file buf;
@@ -264,8 +259,7 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 	}
 
       GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-      result = scm_cons (dascm_make_insn (pc, buf.c_str (), insn_len),
-			 result);
+      result = scm_cons (dascm_make_insn (pc, buf.c_str (), insn_len), result);
 
       pc += insn_len;
       i++;
@@ -273,13 +267,12 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 
   return scm_reverse_x (result, SCM_EOL);
 }
-
+
 /* Initialize the Scheme architecture support.  */
 
-static const scheme_function disasm_functions[] =
-{
-  { "arch-disassemble", 2, 0, 1, as_a_scm_t_subr (gdbscm_arch_disassemble),
-    "\
+static const scheme_function disasm_functions[]
+  = { { "arch-disassemble", 2, 0, 1, as_a_scm_t_subr (gdbscm_arch_disassemble),
+	"\
 Return list of disassembled instructions in memory.\n\
 \n\
   Arguments: <gdb:arch> start-address\n\
@@ -299,8 +292,7 @@ Return list of disassembled instructions in memory.\n\
     Each instruction in the result is an alist:\n\
       (('address . address) ('asm . disassembly) ('length . length))." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_disasm (void)

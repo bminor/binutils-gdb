@@ -114,11 +114,9 @@ extern CORE_ADDR gdb_bfd_lookup_symbol (bfd *abfd,
 
 /* Look up symbol from symbol table.  */
 
-extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
-						    int (*match_sym)
-						      (const asymbol *,
-						       const void *),
-						    const void *data);
+extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (
+  bfd *abfd, int (*match_sym) (const asymbol *, const void *),
+  const void *data);
 
 /* Scan for DESIRED_DYNTAG in .dynamic section of ABFD.  If DESIRED_DYNTAG is
    found, 1 is returned and the corresponding PTR and PTR_ADDR are set.  */
@@ -129,8 +127,8 @@ extern int gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd,
 /* If FILENAME refers to an ELF shared object then attempt to return the
    string referred to by its DT_SONAME tag.   */
 
-extern gdb::unique_xmalloc_ptr<char> gdb_bfd_read_elf_soname
-  (const char *filename);
+extern gdb::unique_xmalloc_ptr<char>
+gdb_bfd_read_elf_soname (const char *filename);
 
 /* Enable or disable optional solib event breakpoints as appropriate.  */
 
@@ -143,15 +141,14 @@ extern void handle_solib_event (void);
 /* Associate SONAME with BUILD_ID in ABFD's registry so that it can be
    retrieved with get_cbfd_soname_build_id.  */
 
-extern void set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd,
-				      const char *soname,
+extern void set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname,
 				      const bfd_build_id *build_id);
 
 /* If SONAME had a build-id associated with it in ABFD's registry by a
    previous call to set_cbfd_soname_build_id then return the build-id
    as a NULL-terminated hex string.  */
 
-extern gdb::unique_xmalloc_ptr<char> get_cbfd_soname_build_id
-  (gdb_bfd_ref_ptr abfd, const char *soname);
+extern gdb::unique_xmalloc_ptr<char>
+get_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname);
 
 #endif /* SOLIB_H */

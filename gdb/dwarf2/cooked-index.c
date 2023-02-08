@@ -51,18 +51,15 @@ int
 cooked_index_entry::compare (const char *stra, const char *strb,
 			     comparison_mode mode)
 {
-  auto munge = [] (char c) -> unsigned char
-    {
-      /* We want to sort '<' before any other printable character.
+  auto munge = [] (char c) -> unsigned char {
+    /* We want to sort '<' before any other printable character.
 	 So, rewrite '<' to something just before ' '.  */
-      if (c == '<')
-	return '\x1f';
-      return TOLOWER ((unsigned char) c);
-    };
+    if (c == '<')
+      return '\x1f';
+    return TOLOWER ((unsigned char) c);
+  };
 
-  while (*stra != '\0'
-	 && *strb != '\0'
-	 && (munge (*stra) == munge (*strb)))
+  while (*stra != '\0' && *strb != '\0' && (munge (*stra) == munge (*strb)))
     {
       ++stra;
       ++strb;
@@ -88,7 +85,8 @@ cooked_index_entry::compare (const char *stra, const char *strb,
 
 #if GDB_SELF_TEST
 
-namespace {
+namespace
+{
 
 void
 test_compare ()
@@ -98,60 +96,65 @@ test_compare ()
   const auto mode_sort = cooked_index_entry::SORT;
   const auto mode_complete = cooked_index_entry::COMPLETE;
 
-  SELF_CHECK (cooked_index_entry::compare ("abcd", "abcd",
-					   mode_compare) == 0);
-  SELF_CHECK (cooked_index_entry::compare ("abcd", "abcd",
-					   mode_complete) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "abcd", mode_compare) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "abcd", mode_complete)
+	      == 0);
 
-  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE",
-					   mode_compare) < 0);
-  SELF_CHECK (cooked_index_entry::compare ("ABCDE", "abcd",
-					   mode_compare) > 0);
-  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE",
-					   mode_complete) < 0);
-  SELF_CHECK (cooked_index_entry::compare ("ABCDE", "abcd",
-					   mode_complete) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE", mode_compare) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("ABCDE", "abcd", mode_compare) > 0);
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE", mode_complete)
+	      < 0);
+  SELF_CHECK (cooked_index_entry::compare ("ABCDE", "abcd", mode_complete)
+	      == 0);
 
-  SELF_CHECK (cooked_index_entry::compare ("name", "name<>",
-					   mode_compare) < 0);
-  SELF_CHECK (cooked_index_entry::compare ("name<>", "name",
-					   mode_compare) == 0);
-  SELF_CHECK (cooked_index_entry::compare ("name", "name<>",
-					   mode_complete) < 0);
-  SELF_CHECK (cooked_index_entry::compare ("name<>", "name",
-					   mode_complete) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("name", "name<>", mode_compare)
+	      < 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<>", "name", mode_compare)
+	      == 0);
+  SELF_CHECK (cooked_index_entry::compare ("name", "name<>", mode_complete)
+	      < 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<>", "name", mode_complete)
+	      == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<arg>",
-					   mode_compare) == 0);
+					   mode_compare)
+	      == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<ag>",
-					   mode_compare) > 0);
+					   mode_compare)
+	      > 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<arg>",
-					   mode_complete) == 0);
+					   mode_complete)
+	      == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<ag>",
-					   mode_complete) > 0);
+					   mode_complete)
+	      > 0);
 
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>",
-					   "name<arg<more>>",
-					   mode_compare) == 0);
+					   "name<arg<more>>", mode_compare)
+	      == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("name", "name<arg<more>>",
-					   mode_compare) < 0);
+					   mode_compare)
+	      < 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name",
-					   mode_compare) == 0);
+					   mode_compare)
+	      == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
-					   mode_compare) > 0);
+					   mode_compare)
+	      > 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
-					   mode_complete) == 0);
+					   mode_complete)
+	      == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("", "abcd", mode_compare) < 0);
   SELF_CHECK (cooked_index_entry::compare ("", "abcd", mode_complete) < 0);
   SELF_CHECK (cooked_index_entry::compare ("abcd", "", mode_compare) > 0);
   SELF_CHECK (cooked_index_entry::compare ("abcd", "", mode_complete) == 0);
 
-  SELF_CHECK (cooked_index_entry::compare ("func", "func<type>",
-					   mode_sort) < 0);
-  SELF_CHECK (cooked_index_entry::compare ("func<type>", "func1",
-					   mode_sort) < 0);
+  SELF_CHECK (cooked_index_entry::compare ("func", "func<type>", mode_sort)
+	      < 0);
+  SELF_CHECK (cooked_index_entry::compare ("func<type>", "func1", mode_sort)
+	      < 0);
 }
 
 } /* anonymous namespace */
@@ -209,16 +212,15 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 			 const cooked_index_entry *parent_entry,
 			 dwarf2_per_cu_data *per_cu)
 {
-  cooked_index_entry *result = create (die_offset, tag, flags, name,
-				       parent_entry, per_cu);
+  cooked_index_entry *result
+    = create (die_offset, tag, flags, name, parent_entry, per_cu);
   m_entries.push_back (result);
 
   /* An explicitly-tagged main program should always override the
      implicit "main" discovery.  */
   if ((flags & IS_MAIN) != 0)
     m_main = result;
-  else if (per_cu->lang () != language_ada
-	   && m_main == nullptr
+  else if (per_cu->lang () != language_ada && m_main == nullptr
 	   && strcmp (name, "main") == 0)
     m_main = result;
 
@@ -230,10 +232,9 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 void
 cooked_index_shard::finalize ()
 {
-  m_future = gdb::thread_pool::g_thread_pool->post_task ([this] ()
-    {
-      do_finalize ();
-    });
+  m_future = gdb::thread_pool::g_thread_pool->post_task ([this] () {
+    do_finalize ();
+  });
 }
 
 /* See cooked-index.h.  */
@@ -245,8 +246,8 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
   std::string canonical = ada_decode (entry->name, false, false);
   if (canonical.empty ())
     return {};
-  std::vector<gdb::string_view> names = split_name (canonical.c_str (),
-						    split_style::DOT);
+  std::vector<gdb::string_view> names
+    = split_name (canonical.c_str (), split_style::DOT);
   gdb::string_view tail = names.back ();
   names.pop_back ();
 
@@ -254,8 +255,8 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
   for (const auto &name : names)
     {
       uint32_t hashval = dwarf5_djb_hash (name);
-      void **slot = htab_find_slot_with_hash (gnat_entries, &name,
-					      hashval, INSERT);
+      void **slot
+	= htab_find_slot_with_hash (gnat_entries, &name, hashval, INSERT);
       /* CUs are processed in order, so we only need to check the most
 	 recent entry.  */
       cooked_index_entry *last = (cooked_index_entry *) *slot;
@@ -263,9 +264,8 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 	{
 	  gdb::unique_xmalloc_ptr<char> new_name
 	    = make_unique_xstrndup (name.data (), name.length ());
-	  last = create (entry->die_offset, DW_TAG_namespace,
-			 0, new_name.get (), parent,
-			 entry->per_cu);
+	  last = create (entry->die_offset, DW_TAG_namespace, 0,
+			 new_name.get (), parent, entry->per_cu);
 	  last->canonical = last->name;
 	  m_names.push_back (std::move (new_name));
 	  *slot = last;
@@ -283,18 +283,16 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 void
 cooked_index_shard::do_finalize ()
 {
-  auto hash_name_ptr = [] (const void *p)
-    {
-      const cooked_index_entry *entry = (const cooked_index_entry *) p;
-      return htab_hash_pointer (entry->name);
-    };
+  auto hash_name_ptr = [] (const void *p) {
+    const cooked_index_entry *entry = (const cooked_index_entry *) p;
+    return htab_hash_pointer (entry->name);
+  };
 
-  auto eq_name_ptr = [] (const void *a, const void *b) -> int
-    {
-      const cooked_index_entry *ea = (const cooked_index_entry *) a;
-      const cooked_index_entry *eb = (const cooked_index_entry *) b;
-      return ea->name == eb->name;
-    };
+  auto eq_name_ptr = [] (const void *a, const void *b) -> int {
+    const cooked_index_entry *ea = (const cooked_index_entry *) a;
+    const cooked_index_entry *eb = (const cooked_index_entry *) b;
+    return ea->name == eb->name;
+  };
 
   /* We can use pointer equality here because names come from
      .debug_str, which will normally be unique-ified by the linker.
@@ -303,22 +301,20 @@ cooked_index_shard::do_finalize ()
   htab_up seen_names (htab_create_alloc (10, hash_name_ptr, eq_name_ptr,
 					 nullptr, xcalloc, xfree));
 
-  auto hash_entry = [] (const void *e)
-    {
-      const cooked_index_entry *entry = (const cooked_index_entry *) e;
-      return dwarf5_djb_hash (entry->canonical);
-    };
+  auto hash_entry = [] (const void *e) {
+    const cooked_index_entry *entry = (const cooked_index_entry *) e;
+    return dwarf5_djb_hash (entry->canonical);
+  };
 
-  auto eq_entry = [] (const void *a, const void *b) -> int
-    {
-      const cooked_index_entry *ae = (const cooked_index_entry *) a;
-      const gdb::string_view *sv = (const gdb::string_view *) b;
-      return (strlen (ae->canonical) == sv->length ()
-	      && strncasecmp (ae->canonical, sv->data (), sv->length ()) == 0);
-    };
+  auto eq_entry = [] (const void *a, const void *b) -> int {
+    const cooked_index_entry *ae = (const cooked_index_entry *) a;
+    const gdb::string_view *sv = (const gdb::string_view *) b;
+    return (strlen (ae->canonical) == sv->length ()
+	    && strncasecmp (ae->canonical, sv->data (), sv->length ()) == 0);
+  };
 
-  htab_up gnat_entries (htab_create_alloc (10, hash_entry, eq_entry,
-					   nullptr, xcalloc, xfree));
+  htab_up gnat_entries (htab_create_alloc (10, hash_entry, eq_entry, nullptr,
+					   xcalloc, xfree));
 
   for (cooked_index_entry *entry : m_entries)
     {
@@ -340,14 +336,13 @@ cooked_index_shard::do_finalize ()
       else if (entry->per_cu->lang () == language_cplus
 	       || entry->per_cu->lang () == language_c)
 	{
-	  void **slot = htab_find_slot (seen_names.get (), entry,
-					INSERT);
+	  void **slot = htab_find_slot (seen_names.get (), entry, INSERT);
 	  if (*slot == nullptr)
 	    {
 	      gdb::unique_xmalloc_ptr<char> canon_name
 		= (entry->per_cu->lang () == language_cplus
-		   ? cp_canonicalize_string (entry->name)
-		   : c_canonicalize_name (entry->name));
+		     ? cp_canonicalize_string (entry->name)
+		     : c_canonicalize_name (entry->name));
 	      if (canon_name == nullptr)
 		entry->canonical = entry->name;
 	      else
@@ -370,10 +365,9 @@ cooked_index_shard::do_finalize ()
   m_names.shrink_to_fit ();
   m_entries.shrink_to_fit ();
   std::sort (m_entries.begin (), m_entries.end (),
-	     [] (const cooked_index_entry *a, const cooked_index_entry *b)
-	     {
-	       return *a < *b;
-	     });
+	     [] (const cooked_index_entry *a, const cooked_index_entry *b) {
+    return *a < *b;
+  });
 }
 
 /* See cooked-index.h.  */
@@ -383,22 +377,21 @@ cooked_index_shard::find (const std::string &name, bool completing) const
 {
   wait ();
 
-  cooked_index_entry::comparison_mode mode = (completing
-					      ? cooked_index_entry::COMPLETE
-					      : cooked_index_entry::MATCH);
+  cooked_index_entry::comparison_mode mode
+    = (completing ? cooked_index_entry::COMPLETE : cooked_index_entry::MATCH);
 
   auto lower = std::lower_bound (m_entries.cbegin (), m_entries.cend (), name,
 				 [=] (const cooked_index_entry *entry,
-				      const std::string &n)
-  {
-    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode) < 0;
+				      const std::string &n) {
+    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode)
+	   < 0;
   });
 
   auto upper = std::upper_bound (m_entries.cbegin (), m_entries.cend (), name,
 				 [=] (const std::string &n,
-				      const cooked_index_entry *entry)
-  {
-    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode) > 0;
+				      const cooked_index_entry *entry) {
+    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode)
+	   > 0;
   });
 
   return range (lower, upper);
@@ -459,8 +452,7 @@ cooked_index::get_main () const
     {
       const cooked_index_entry *entry = index->get_main ();
       if (result == nullptr
-	  || ((result->flags & IS_MAIN) == 0
-	      && entry != nullptr
+	  || ((result->flags & IS_MAIN) == 0 && entry != nullptr
 	      && (entry->flags & IS_MAIN) != 0))
 	result = entry;
     }
@@ -504,7 +496,7 @@ cooked_index::dump (gdbarch *arch) const
   const cooked_index_entry *main_entry = this->get_main ();
   if (main_entry != nullptr)
     gdb_printf ("  main: ((cooked_index_entry *) %p) [%s]\n", main_entry,
-		  main_entry->name);
+		main_entry->name);
   else
     gdb_printf ("  main: ((cooked_index_entry *) 0)\n");
 
@@ -520,31 +512,31 @@ cooked_index::dump (gdbarch *arch) const
       gdb_printf ("    [%zu] ((addrmap *) %p)\n", i, &addrmap);
       gdb_printf ("\n");
 
-      addrmap.foreach ([arch] (CORE_ADDR start_addr, const void *obj)
-	{
-	  QUIT;
+      addrmap.foreach ([arch] (CORE_ADDR start_addr, const void *obj) {
+	QUIT;
 
-	  const char *start_addr_str = paddress (arch, start_addr);
+	const char *start_addr_str = paddress (arch, start_addr);
 
-	  if (obj != nullptr)
-	    {
-	      const dwarf2_per_cu_data *per_cu
-		= static_cast<const dwarf2_per_cu_data *> (obj);
-	      gdb_printf ("      [%s] ((dwarf2_per_cu_data *) %p)\n",
-			  start_addr_str, per_cu);
-	    }
-	  else
-	    gdb_printf ("      [%s] ((dwarf2_per_cu_data *) 0)\n",
-			start_addr_str);
+	if (obj != nullptr)
+	  {
+	    const dwarf2_per_cu_data *per_cu
+	      = static_cast<const dwarf2_per_cu_data *> (obj);
+	    gdb_printf ("      [%s] ((dwarf2_per_cu_data *) %p)\n",
+			start_addr_str, per_cu);
+	  }
+	else
+	  gdb_printf ("      [%s] ((dwarf2_per_cu_data *) 0)\n",
+		      start_addr_str);
 
-	  return 0;
-	});
+	return 0;
+      });
 
       gdb_printf ("\n");
     }
 }
 
 void _initialize_cooked_index ();
+
 void
 _initialize_cooked_index ()
 {

@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "mi-getopt.h"
+
 /* See comments about mi_getopt and mi_getopt_silent in mi-getopt.h.
    When there is an unknown option, if ERROR_ON_UNKNOWN is true,
    throw an error, otherwise return -1.  */
@@ -33,7 +34,7 @@ mi_getopt_1 (const char *prefix, int argc, char **argv,
 
   /* We assume that argv/argc are ok.  */
   if (*oind > argc || *oind < 0)
-    internal_error (_("mi_getopt_long: oind out of bounds"));
+    internal_error (_ ("mi_getopt_long: oind out of bounds"));
   if (*oind == argc)
     return -1;
   arg = argv[*oind];
@@ -59,7 +60,7 @@ mi_getopt_1 (const char *prefix, int argc, char **argv,
 	{
 	  /* A non-simple oarg option.  */
 	  if (argc < *oind + 2)
-	    error (_("%s: Option %s requires an argument"), prefix, arg);
+	    error (_ ("%s: Option %s requires an argument"), prefix, arg);
 	  *oarg = argv[(*oind) + 1];
 	  *oind = (*oind) + 2;
 	  return opt->index;
@@ -73,16 +74,14 @@ mi_getopt_1 (const char *prefix, int argc, char **argv,
     }
 
   if (error_on_unknown)
-    error (_("%s: Unknown option ``%s''"), prefix, arg + 1);
+    error (_ ("%s: Unknown option ``%s''"), prefix, arg + 1);
   else
     return -1;
 }
 
 int
-mi_getopt (const char *prefix,
-	   int argc, char **argv,
-	   const struct mi_opt *opts,
-	   int *oind, char **oarg)
+mi_getopt (const char *prefix, int argc, char **argv,
+	   const struct mi_opt *opts, int *oind, char **oarg)
 {
   return mi_getopt_1 (prefix, argc, argv, opts, oind, oarg, 1);
 }
@@ -94,15 +93,12 @@ mi_getopt_allow_unknown (const char *prefix, int argc, char **argv,
   return mi_getopt_1 (prefix, argc, argv, opts, oind, oarg, 0);
 }
 
-int 
-mi_valid_noargs (const char *prefix, int argc, char **argv) 
+int
+mi_valid_noargs (const char *prefix, int argc, char **argv)
 {
   int oind = 0;
   char *oarg;
-  static const struct mi_opt opts[] =
-    {
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { 0, 0, 0 } };
 
   if (mi_getopt (prefix, argc, argv, opts, &oind, &oarg) == -1)
     return 1;

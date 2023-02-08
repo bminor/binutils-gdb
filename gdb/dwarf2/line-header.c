@@ -36,20 +36,17 @@ line_header::add_include_dir (const char *include_dir)
 	new_size = m_include_dirs.size ();
       else
 	new_size = m_include_dirs.size () + 1;
-      gdb_printf (gdb_stdlog, "Adding dir %zu: %s\n",
-		  new_size, include_dir);
+      gdb_printf (gdb_stdlog, "Adding dir %zu: %s\n", new_size, include_dir);
     }
   m_include_dirs.push_back (include_dir);
 }
 
 void
-line_header::add_file_name (const char *name,
-			    dir_index d_index,
-			    unsigned int mod_time,
-			    unsigned int length)
+line_header::add_file_name (const char *name, dir_index d_index,
+			    unsigned int mod_time, unsigned int length)
 {
   file_name_index index
-    = version >= 5 ? file_names_size (): file_names_size () + 1;
+    = version >= 5 ? file_names_size () : file_names_size () + 1;
 
   if (dwarf_line_debug >= 2)
     gdb_printf (gdb_stdlog, "Adding file %d: %s\n", index, name);
@@ -83,7 +80,7 @@ line_header::file_file_name (const file_entry &fe) const
 static void
 dwarf2_statement_list_fits_in_line_number_section_complaint (void)
 {
-  complaint (_("statement list doesn't fit in .debug_line section"));
+  complaint (_ ("statement list doesn't fit in .debug_line section"));
 }
 
 /* Cover function for read_initial_length.
@@ -107,7 +104,7 @@ read_checked_initial_length_and_offset (bfd *abfd, const gdb_byte *buf,
 	      || cu_header->initial_length_size == 12);
 
   if (cu_header->initial_length_size != *bytes_read)
-    complaint (_("intermixed 32-bit and 64-bit DWARF sections"));
+    complaint (_ ("intermixed 32-bit and 64-bit DWARF sections"));
 
   *offset_size = (*bytes_read == 4) ? 4 : 8;
   return length;
@@ -123,8 +120,7 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 			const gdb_byte **bufp, struct line_header *lh,
 			unsigned int offset_size,
 			void (*callback) (struct line_header *lh,
-					  const char *name,
-					  dir_index d_index,
+					  const char *name, dir_index d_index,
 					  unsigned int mod_time,
 					  unsigned int length))
 {
@@ -154,10 +150,11 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 
       for (formati = 0; formati < format_count; formati++)
 	{
-	  ULONGEST content_type = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  ULONGEST content_type
+	    = read_unsigned_leb128 (abfd, format, &bytes_read);
 	  format += bytes_read;
 
-	  ULONGEST form  = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  ULONGEST form = read_unsigned_leb128 (abfd, format, &bytes_read);
 	  format += bytes_read;
 
 	  gdb::optional<const char *> string;
@@ -236,7 +233,7 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 	    case DW_LNCT_MD5:
 	      break;
 	    default:
-	      complaint (_("Unknown format content type %s"),
+	      complaint (_ ("Unknown format content type %s"),
 			 pulongest (content_type));
 	    }
 	}
@@ -250,11 +247,11 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 /* See line-header.h.  */
 
 line_header_up
-dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
-			   dwarf2_per_objfile *per_objfile,
-			   struct dwarf2_section_info *section,
-			   const struct comp_unit_head *cu_header,
-			   const char *comp_dir)
+dwarf_decode_line_header (sect_offset sect_off, bool is_dwz,
+			  dwarf2_per_objfile *per_objfile,
+			  struct dwarf2_section_info *section,
+			  const struct comp_unit_head *cu_header,
+			  const char *comp_dir)
 {
   const gdb_byte *line_ptr;
   unsigned int bytes_read, offset_size;
@@ -298,7 +295,7 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
     {
       /* This is a version we don't understand.  The format could have
 	 changed in ways we don't handle properly so just punt.  */
-      complaint (_("unsupported version in .debug_line section"));
+      complaint (_ ("unsupported version in .debug_line section"));
       return NULL;
     }
   if (lh->version >= 5)
@@ -313,8 +310,8 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
       line_ptr += 1;
       if (segment_selector_size != 0)
 	{
-	  complaint (_("unsupported segment selector size %u "
-		       "in .debug_line section"),
+	  complaint (_ ("unsupported segment selector size %u "
+			"in .debug_line section"),
 		     segment_selector_size);
 	  return NULL;
 	}
@@ -337,8 +334,8 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
   if (lh->maximum_ops_per_instruction == 0)
     {
       lh->maximum_ops_per_instruction = 1;
-      complaint (_("invalid maximum_ops_per_instruction "
-		   "in `.debug_line' section"));
+      complaint (_ ("invalid maximum_ops_per_instruction "
+		    "in `.debug_line' section"));
     }
 
   lh->default_is_stmt = read_1_byte (abfd, line_ptr);
@@ -351,7 +348,7 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
   line_ptr += 1;
   lh->standard_opcode_lengths.reset (new unsigned char[lh->opcode_base]);
 
-  lh->standard_opcode_lengths[0] = 1;  /* This should never be used anyway.  */
+  lh->standard_opcode_lengths[0] = 1; /* This should never be used anyway.  */
   for (i = 1; i < lh->opcode_base; ++i)
     {
       lh->standard_opcode_lengths[i] = read_1_byte (abfd, line_ptr);
@@ -365,25 +362,24 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
 			      offset_size,
 			      [] (struct line_header *header, const char *name,
 				  dir_index d_index, unsigned int mod_time,
-				  unsigned int length)
-	{
-	  header->add_include_dir (name);
-	});
+				  unsigned int length) {
+	header->add_include_dir (name);
+      });
 
       /* Read file name table.  */
       read_formatted_entries (per_objfile, abfd, &line_ptr, lh.get (),
 			      offset_size,
 			      [] (struct line_header *header, const char *name,
 				  dir_index d_index, unsigned int mod_time,
-				  unsigned int length)
-	{
-	  header->add_file_name (name, d_index, mod_time, length);
-	});
+				  unsigned int length) {
+	header->add_file_name (name, d_index, mod_time, length);
+      });
     }
   else
     {
       /* Read directory table.  */
-      while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+      while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read))
+	     != NULL)
 	{
 	  line_ptr += bytes_read;
 	  lh->add_include_dir (cur_dir);
@@ -391,13 +387,15 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
       line_ptr += bytes_read;
 
       /* Read file name table.  */
-      while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+      while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read))
+	     != NULL)
 	{
 	  unsigned int mod_time, length;
 	  dir_index d_index;
 
 	  line_ptr += bytes_read;
-	  d_index = (dir_index) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  d_index
+	    = (dir_index) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
 	  mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
@@ -410,8 +408,8 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
     }
 
   if (line_ptr > (section->buffer + section->size))
-    complaint (_("line number info header doesn't "
-		 "fit in `.debug_line' section"));
+    complaint (_ ("line number info header doesn't "
+		  "fit in `.debug_line' section"));
 
   return lh;
 }

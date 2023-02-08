@@ -74,7 +74,7 @@ sync_error (FILE *fp, const char *desc, int expect, int got)
 {
   fprintf (stderr, "\n%s\n", desc);
   fprintf (stderr, "At logfile offset %ld, expected '0x%x' got '0x%x'\n",
-	   ftell (fp), expect, got);
+           ftell (fp), expect, got);
   fflush (stderr);
   exit (1);
 }
@@ -142,7 +142,7 @@ remote_open (const char *name)
   parsed_connection_spec parsed = parse_connection_spec (name, &hint);
 
   if (parsed.port_str.empty ())
-    error (_("Missing port on hostname '%s'"), name);
+    error (_ ("Missing port on hostname '%s'"), name);
 
 #ifdef USE_WIN32API
   if (!winsock_initialized)
@@ -155,13 +155,13 @@ remote_open (const char *name)
 #endif
 
   int r = getaddrinfo (parsed.host_str.c_str (), parsed.port_str.c_str (),
-		       &hint, &ainfo);
+                       &hint, &ainfo);
 
   if (r != 0)
     {
       fprintf (stderr, "%s:%s: cannot resolve name: %s\n",
-	       parsed.host_str.c_str (), parsed.port_str.c_str (),
-	       gai_strerror (r));
+               parsed.host_str.c_str (), parsed.port_str.c_str (),
+               gai_strerror (r));
       fflush (stderr);
       exit (1);
     }
@@ -175,7 +175,7 @@ remote_open (const char *name)
       tmp_desc = socket (p->ai_family, p->ai_socktype, p->ai_protocol);
 
       if (tmp_desc >= 0)
-	break;
+        break;
     }
 
   if (p == NULL)
@@ -183,8 +183,7 @@ remote_open (const char *name)
 
   /* Allow rapid reuse of this port. */
   tmp = 1;
-  setsockopt (tmp_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp,
-	      sizeof (tmp));
+  setsockopt (tmp_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp, sizeof (tmp));
 
   switch (p->ai_family)
     {
@@ -211,47 +210,47 @@ remote_open (const char *name)
       char orig_host[GDB_NI_MAX_ADDR], orig_port[GDB_NI_MAX_PORT];
 
       if (listen (tmp_desc, 1) != 0)
-	perror_with_name ("Can't listen on socket");
+        perror_with_name ("Can't listen on socket");
 
-      remote_desc_in = accept (tmp_desc, (struct sockaddr *) &sockaddr,
-			       &sockaddrsize);
+      remote_desc_in
+        = accept (tmp_desc, (struct sockaddr *) &sockaddr, &sockaddrsize);
 
       if (remote_desc_in == -1)
-	perror_with_name ("Accept failed");
+        perror_with_name ("Accept failed");
 
       /* Enable TCP keep alive process. */
       tmp = 1;
-      setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE,
-		  (char *) &tmp, sizeof (tmp));
+      setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp,
+                  sizeof (tmp));
 
       /* Tell TCP not to delay small packets.  This greatly speeds up
 	 interactive response. */
       tmp = 1;
-      setsockopt (remote_desc_in, IPPROTO_TCP, TCP_NODELAY,
-		  (char *) &tmp, sizeof (tmp));
+      setsockopt (remote_desc_in, IPPROTO_TCP, TCP_NODELAY, (char *) &tmp,
+                  sizeof (tmp));
 
-      if (getnameinfo ((struct sockaddr *) &sockaddr, sockaddrsize,
-		       orig_host, sizeof (orig_host),
-		       orig_port, sizeof (orig_port),
-		       NI_NUMERICHOST | NI_NUMERICSERV) == 0)
-	{
-	  fprintf (stderr, "Remote debugging from host %s, port %s\n",
-		   orig_host, orig_port);
-	  fflush (stderr);
-	}
+      if (getnameinfo ((struct sockaddr *) &sockaddr, sockaddrsize, orig_host,
+                       sizeof (orig_host), orig_port, sizeof (orig_port),
+                       NI_NUMERICHOST | NI_NUMERICSERV)
+          == 0)
+        {
+          fprintf (stderr, "Remote debugging from host %s, port %s\n",
+                   orig_host, orig_port);
+          fflush (stderr);
+        }
 
 #ifndef USE_WIN32API
-      close (tmp_desc);		/* No longer need this */
+      close (tmp_desc); /* No longer need this */
 
-      signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then
+      signal (SIGPIPE, SIG_IGN); /* If we don't do this, then
 					   gdbreplay simply exits when
 					   the remote side dies.  */
 #else
-      closesocket (tmp_desc);	/* No longer need this */
+      closesocket (tmp_desc); /* No longer need this */
 #endif
     }
 
-#if defined(F_SETFL) && defined (FASYNC)
+#if defined(F_SETFL) && defined(FASYNC)
   fcntl (remote_desc_in, F_SETFL, FASYNC);
 #endif
   remote_desc_out = remote_desc_in;
@@ -278,12 +277,12 @@ logchar (FILE *fp)
     case '\r':
       ch = fgetc (fp);
       if (ch == '\n')
-	ch = EOL;
+        ch = EOL;
       else
-	{
-	  ungetc (ch, fp);
-	  ch = '\r';
-	}
+        {
+          ungetc (ch, fp);
+          ch = '\r';
+        }
       fputc (ch == EOL ? '\n' : '\r', stderr);
       fflush (stderr);
       break;
@@ -295,41 +294,41 @@ logchar (FILE *fp)
       fputc (ch, stderr);
       fflush (stderr);
       switch (ch)
-	{
-	case '\\':
-	  break;
-	case 'b':
-	  ch = '\b';
-	  break;
-	case 'f':
-	  ch = '\f';
-	  break;
-	case 'n':
-	  ch = '\n';
-	  break;
-	case 'r':
-	  ch = '\r';
-	  break;
-	case 't':
-	  ch = '\t';
-	  break;
-	case 'v':
-	  ch = '\v';
-	  break;
-	case 'x':
-	  ch2 = fgetc (fp);
-	  fputc (ch2, stderr);
-	  fflush (stderr);
-	  ch = fromhex (ch2) << 4;
-	  ch2 = fgetc (fp);
-	  fputc (ch2, stderr);
-	  fflush (stderr);
-	  ch |= fromhex (ch2);
-	  break;
-	default:
-	  /* Treat any other char as just itself */
-	  break;
-	}
+        {
+        case '\\':
+          break;
+        case 'b':
+          ch = '\b';
+          break;
+        case 'f':
+          ch = '\f';
+          break;
+        case 'n':
+          ch = '\n';
+          break;
+        case 'r':
+          ch = '\r';
+          break;
+        case 't':
+          ch = '\t';
+          break;
+        case 'v':
+          ch = '\v';
+          break;
+        case 'x':
+          ch2 = fgetc (fp);
+          fputc (ch2, stderr);
+          fflush (stderr);
+          ch = fromhex (ch2) << 4;
+          ch2 = fgetc (fp);
+          fputc (ch2, stderr);
+          fflush (stderr);
+          ch |= fromhex (ch2);
+          break;
+        default:
+          /* Treat any other char as just itself */
+          break;
+        }
     default:
       break;
     }
@@ -359,23 +358,23 @@ expect (FILE *fp)
   if ((fromlog = logchar (fp)) != ' ')
     {
       sync_error (fp, "Sync error during gdb read of leading blank", ' ',
-		  fromlog);
+                  fromlog);
     }
   do
     {
       fromlog = logchar (fp);
       if (fromlog == EOL)
-	break;
+        break;
       fromgdb = gdbchar (remote_desc_in);
       if (fromgdb < 0)
-	remote_error ("Error during read from gdb");
+        remote_error ("Error during read from gdb");
     }
   while (fromlog == fromgdb);
 
   if (fromlog != EOL)
     {
       sync_error (fp, "Sync error during read of gdb packet from log", fromlog,
-		  fromgdb);
+                  fromgdb);
     }
 }
 
@@ -391,13 +390,13 @@ play (FILE *fp)
   if ((fromlog = logchar (fp)) != ' ')
     {
       sync_error (fp, "Sync error skipping blank during write to gdb", ' ',
-		  fromlog);
+                  fromlog);
     }
   while ((fromlog = logchar (fp)) != EOL)
     {
       ch = fromlog;
       if (write (remote_desc_out, &ch, 1) != 1)
-	remote_error ("Error during write to gdb");
+        remote_error ("Error during write to gdb");
     }
 }
 
@@ -405,11 +404,11 @@ static void
 gdbreplay_version (void)
 {
   printf ("GNU gdbreplay %s%s\n"
-	  "Copyright (C) 2023 Free Software Foundation, Inc.\n"
-	  "gdbreplay is free software, covered by "
-	  "the GNU General Public License.\n"
-	  "This gdbreplay was configured as \"%s\"\n",
-	  PKGVERSION, version, host_name);
+          "Copyright (C) 2023 Free Software Foundation, Inc.\n"
+          "gdbreplay is free software, covered by "
+          "the GNU General Public License.\n"
+          "This gdbreplay was configured as \"%s\"\n",
+          PKGVERSION, version, host_name);
 }
 
 static void
@@ -454,20 +453,21 @@ captured_main (int argc, char *argv[])
   while ((ch = logchar (fp)) != EOF)
     {
       switch (ch)
-	{
-	case 'w':
-	  /* data sent from gdb to gdbreplay, accept and match it */
-	  expect (fp);
-	  break;
-	case 'r':
-	  /* data sent from gdbreplay to gdb, play it */
-	  play (fp);
-	  break;
-	case 'c':
-	  /* Command executed by gdb */
-	  while ((ch = logchar (fp)) != EOL);
-	  break;
-	}
+        {
+        case 'w':
+          /* data sent from gdb to gdbreplay, accept and match it */
+          expect (fp);
+          break;
+        case 'r':
+          /* data sent from gdbreplay to gdb, play it */
+          play (fp);
+          break;
+        case 'c':
+          /* Command executed by gdb */
+          while ((ch = logchar (fp)) != EOL)
+            ;
+          break;
+        }
     }
   remote_close ();
   exit (0);
@@ -483,10 +483,10 @@ main (int argc, char *argv[])
   catch (const gdb_exception &exception)
     {
       if (exception.reason == RETURN_ERROR)
-	{
-	  fflush (stdout);
-	  fprintf (stderr, "%s\n", exception.what ());
-	}
+        {
+          fflush (stdout);
+          fprintf (stderr, "%s\n", exception.what ());
+        }
 
       exit (1);
     }

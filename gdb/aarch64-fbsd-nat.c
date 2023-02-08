@@ -38,7 +38,7 @@
 #include "inf-ptrace.h"
 
 #if __FreeBSD_version >= 1400005
-#define	HAVE_DBREG
+#define HAVE_DBREG
 
 #include <unordered_set>
 #endif
@@ -70,6 +70,7 @@ struct aarch64_fbsd_nat_target final : public fbsd_nat_target
   void low_prepare_to_resume (thread_info *) override;
 
 private:
+
   void probe_debug_regs (int pid);
   static bool debug_regs_probed;
 #endif
@@ -121,7 +122,7 @@ const struct target_desc *
 aarch64_fbsd_nat_target::read_description ()
 {
   aarch64_features features;
-  features.tls = have_regset (inferior_ptid, NT_ARM_TLS)? 1 : 0;
+  features.tls = have_regset (inferior_ptid, NT_ARM_TLS) ? 1 : 0;
   return aarch64_read_description (features);
 }
 
@@ -144,8 +145,7 @@ aarch64_fbsd_nat_target::stopped_data_address (CORE_ADDR *addr_p)
     return false;
 
   /* This must be a hardware breakpoint.  */
-  if (siginfo.si_signo != SIGTRAP
-      || siginfo.si_code != TRAP_TRACE
+  if (siginfo.si_signo != SIGTRAP || siginfo.si_code != TRAP_TRACE
       || siginfo.si_trapno != EXCP_WATCHPT_EL0)
     return false;
 
@@ -178,12 +178,11 @@ aarch64_fbsd_nat_target::stopped_by_hw_breakpoint ()
     return false;
 
   /* This must be a hardware breakpoint.  */
-  if (siginfo.si_signo != SIGTRAP
-      || siginfo.si_code != TRAP_TRACE
+  if (siginfo.si_signo != SIGTRAP || siginfo.si_code != TRAP_TRACE
       || siginfo.si_trapno != EXCP_WATCHPT_EL0)
     return false;
 
-  return !stopped_by_watchpoint();
+  return !stopped_by_watchpoint ();
 }
 
 /* Implement the "supports_stopped_by_hw_breakpoint" target_ops method.  */
@@ -207,7 +206,7 @@ aarch64_fbsd_nat_target::probe_debug_regs (int pid)
       aarch64_num_bp_regs = 0;
       aarch64_num_wp_regs = 0;
 
-      if (ptrace(PT_GETDBREGS, pid, (PTRACE_TYPE_ARG3) &reg, 0) == 0)
+      if (ptrace (PT_GETDBREGS, pid, (PTRACE_TYPE_ARG3) &reg, 0) == 0)
 	{
 	  switch (reg.db_debug_ver)
 	    {
@@ -223,16 +222,16 @@ aarch64_fbsd_nat_target::probe_debug_regs (int pid)
 	  aarch64_num_bp_regs = reg.db_nbkpts;
 	  if (aarch64_num_bp_regs > AARCH64_HBP_MAX_NUM)
 	    {
-	      warning (_("Unexpected number of hardware breakpoint registers"
-			 " reported by ptrace, got %d, expected %d."),
+	      warning (_ ("Unexpected number of hardware breakpoint registers"
+			  " reported by ptrace, got %d, expected %d."),
 		       aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
 	      aarch64_num_bp_regs = AARCH64_HBP_MAX_NUM;
 	    }
 	  aarch64_num_wp_regs = reg.db_nwtpts;
 	  if (aarch64_num_wp_regs > AARCH64_HWP_MAX_NUM)
 	    {
-	      warning (_("Unexpected number of hardware watchpoint registers"
-			 " reported by ptrace, got %d, expected %d."),
+	      warning (_ ("Unexpected number of hardware watchpoint registers"
+			  " reported by ptrace, got %d, expected %d."),
 		       aarch64_num_wp_regs, AARCH64_HWP_MAX_NUM);
 	      aarch64_num_wp_regs = AARCH64_HWP_MAX_NUM;
 	    }
@@ -288,8 +287,8 @@ aarch64_fbsd_nat_target::low_new_fork (ptid_t parent, pid_t child)
    current inferior.  */
 
 void
-aarch64_notify_debug_reg_change (ptid_t ptid,
-				 int is_watchpoint, unsigned int idx)
+aarch64_notify_debug_reg_change (ptid_t ptid, int is_watchpoint,
+				 unsigned int idx)
 {
   for (thread_info *tp : current_inferior ()->non_exited_threads ())
     {
@@ -303,7 +302,7 @@ aarch64_notify_debug_reg_change (ptid_t ptid,
 void
 aarch64_fbsd_nat_target::low_delete_thread (thread_info *tp)
 {
-  gdb_assert(tp->ptid.lwp_p ());
+  gdb_assert (tp->ptid.lwp_p ());
   aarch64_debug_pending_threads.erase (tp->ptid.lwp ());
 }
 
@@ -312,17 +311,17 @@ aarch64_fbsd_nat_target::low_delete_thread (thread_info *tp)
 void
 aarch64_fbsd_nat_target::low_prepare_to_resume (thread_info *tp)
 {
-  gdb_assert(tp->ptid.lwp_p ());
+  gdb_assert (tp->ptid.lwp_p ());
 
   if (aarch64_debug_pending_threads.erase (tp->ptid.lwp ()) == 0)
     return;
 
-  struct aarch64_debug_reg_state *state =
-    aarch64_lookup_debug_reg_state (tp->ptid.pid ());
-  gdb_assert(state != nullptr);
+  struct aarch64_debug_reg_state *state
+    = aarch64_lookup_debug_reg_state (tp->ptid.pid ());
+  gdb_assert (state != nullptr);
 
   struct dbreg reg;
-  memset (&reg, 0, sizeof(reg));
+  memset (&reg, 0, sizeof (reg));
   for (int i = 0; i < aarch64_num_bp_regs; i++)
     {
       reg.db_breakregs[i].dbr_addr = state->dr_addr_bp[i];
@@ -333,20 +332,21 @@ aarch64_fbsd_nat_target::low_prepare_to_resume (thread_info *tp)
       reg.db_watchregs[i].dbw_addr = state->dr_addr_wp[i];
       reg.db_watchregs[i].dbw_ctrl = state->dr_ctrl_wp[i];
     }
-  if (ptrace(PT_SETDBREGS, tp->ptid.lwp (), (PTRACE_TYPE_ARG3) &reg, 0) != 0)
-    error (_("Failed to set hardware debug registers"));
+  if (ptrace (PT_SETDBREGS, tp->ptid.lwp (), (PTRACE_TYPE_ARG3) &reg, 0) != 0)
+    error (_ ("Failed to set hardware debug registers"));
 }
 #else
 /* A stub that should never be called.  */
 void
-aarch64_notify_debug_reg_change (ptid_t ptid,
-				 int is_watchpoint, unsigned int idx)
+aarch64_notify_debug_reg_change (ptid_t ptid, int is_watchpoint,
+				 unsigned int idx)
 {
   gdb_assert (true);
 }
 #endif
 
 void _initialize_aarch64_fbsd_nat ();
+
 void
 _initialize_aarch64_fbsd_nat ()
 {

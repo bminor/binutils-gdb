@@ -38,7 +38,7 @@ static void
 show_auto_load_guile_scripts (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Auto-loading of Guile scripts is %s.\n"), value);
+  gdb_printf (file, _ ("Auto-loading of Guile scripts is %s.\n"), value);
 }
 
 /* See guile-internal.h.  */
@@ -56,14 +56,16 @@ info_auto_load_guile_scripts (const char *pattern, int from_tty)
 {
   auto_load_info_scripts (pattern, from_tty, &extension_language_guile);
 }
-
+
 void
 gdbscm_initialize_auto_load (void)
 {
   add_setshow_boolean_cmd ("guile-scripts", class_support,
-			   &auto_load_guile_scripts, _("\
-Set the debugger's behaviour regarding auto-loaded Guile scripts."), _("\
-Show the debugger's behaviour regarding auto-loaded Guile scripts."), _("\
+			   &auto_load_guile_scripts, _ ("\
+Set the debugger's behaviour regarding auto-loaded Guile scripts."),
+			   _ ("\
+Show the debugger's behaviour regarding auto-loaded Guile scripts."),
+			   _ ("\
 If enabled, auto-loaded Guile scripts are loaded when the debugger reads\n\
 an executable or shared library.\n\
 This options has security implications for untrusted inferiors."),
@@ -72,7 +74,7 @@ This options has security implications for untrusted inferiors."),
 			   auto_load_show_cmdlist_get ());
 
   add_cmd ("guile-scripts", class_info, info_auto_load_guile_scripts,
-	   _("Print the list of automatically loaded Guile scripts.\n\
+	   _ ("Print the list of automatically loaded Guile scripts.\n\
 Usage: info auto-load guile-scripts [REGEXP]"),
 	   auto_load_info_cmdlist_get ());
 }

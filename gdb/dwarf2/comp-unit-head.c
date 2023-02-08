@@ -50,8 +50,8 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   info_ptr += bytes_read;
   unsigned version = read_2_bytes (abfd, info_ptr);
   if (version < 2 || version > 5)
-    error (_("Dwarf Error: wrong version in compilation unit header "
-	   "(is %d, should be 2, 3, 4 or 5) [in module %s]"),
+    error (_ ("Dwarf Error: wrong version in compilation unit header "
+	      "(is %d, should be 2, 3, 4 or 5) [in module %s]"),
 	   version, filename);
   cu_header->version = version;
   info_ptr += 2;
@@ -65,12 +65,12 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 	cu_header->unit_type = DW_UT_type;
 	break;
       default:
-	internal_error (_("read_comp_unit_head: invalid section_kind"));
+	internal_error (_ ("read_comp_unit_head: invalid section_kind"));
       }
   else
     {
-      cu_header->unit_type = static_cast<enum dwarf_unit_type>
-						 (read_1_byte (abfd, info_ptr));
+      cu_header->unit_type
+	= static_cast<enum dwarf_unit_type> (read_1_byte (abfd, info_ptr));
       info_ptr += 1;
       switch (cu_header->unit_type)
 	{
@@ -79,20 +79,21 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 	case DW_UT_skeleton:
 	case DW_UT_split_compile:
 	  if (section_kind != rcuh_kind::COMPILE)
-	    error (_("Dwarf Error: wrong unit_type in compilation unit header "
-		   "(is %s, should be %s) [in module %s]"),
-		   dwarf_unit_type_name (cu_header->unit_type),
-		   dwarf_unit_type_name (DW_UT_type), filename);
+	    error (
+	      _ ("Dwarf Error: wrong unit_type in compilation unit header "
+		 "(is %s, should be %s) [in module %s]"),
+	      dwarf_unit_type_name (cu_header->unit_type),
+	      dwarf_unit_type_name (DW_UT_type), filename);
 	  break;
 	case DW_UT_type:
 	case DW_UT_split_type:
 	  section_kind = rcuh_kind::TYPE;
 	  break;
 	default:
-	  error (_("Dwarf Error: wrong unit_type in compilation unit header "
-		 "(is %#04x, should be one of: %s, %s, %s, %s or %s) "
-		 "[in module %s]"), cu_header->unit_type,
-		 dwarf_unit_type_name (DW_UT_compile),
+	  error (_ ("Dwarf Error: wrong unit_type in compilation unit header "
+		    "(is %#04x, should be one of: %s, %s, %s, %s or %s) "
+		    "[in module %s]"),
+		 cu_header->unit_type, dwarf_unit_type_name (DW_UT_compile),
 		 dwarf_unit_type_name (DW_UT_skeleton),
 		 dwarf_unit_type_name (DW_UT_split_compile),
 		 dwarf_unit_type_name (DW_UT_type),
@@ -112,12 +113,12 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
     }
   signed_addr = bfd_get_sign_extend_vma (abfd);
   if (signed_addr < 0)
-    internal_error (_("read_comp_unit_head: dwarf from non elf file"));
+    internal_error (_ ("read_comp_unit_head: dwarf from non elf file"));
   cu_header->signed_addr_p = signed_addr;
 
   bool header_has_signature = section_kind == rcuh_kind::TYPE
-    || cu_header->unit_type == DW_UT_skeleton
-    || cu_header->unit_type == DW_UT_split_compile;
+			      || cu_header->unit_type == DW_UT_skeleton
+			      || cu_header->unit_type == DW_UT_split_compile;
 
   if (header_has_signature)
     {
@@ -132,9 +133,9 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
       info_ptr += bytes_read;
       cu_header->type_cu_offset_in_tu = (cu_offset) type_offset;
       if (to_underlying (cu_header->type_cu_offset_in_tu) != type_offset)
-	error (_("Dwarf Error: Too big type_offset in compilation unit "
-	       "header (is %s) [in module %s]"), plongest (type_offset),
-	       filename);
+	error (_ ("Dwarf Error: Too big type_offset in compilation unit "
+		  "header (is %s) [in module %s]"),
+	       plongest (type_offset), filename);
     }
 
   return info_ptr;
@@ -154,20 +155,19 @@ error_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
 
   if (to_underlying (header->abbrev_sect_off)
       >= abbrev_section->get_size (per_objfile->objfile))
-    error (_("Dwarf Error: bad offset (%s) in compilation unit header "
-	   "(offset %s + 6) [in module %s]"),
+    error (_ ("Dwarf Error: bad offset (%s) in compilation unit header "
+	      "(offset %s + 6) [in module %s]"),
 	   sect_offset_str (header->abbrev_sect_off),
-	   sect_offset_str (header->sect_off),
-	   filename);
+	   sect_offset_str (header->sect_off), filename);
 
   /* Cast to ULONGEST to use 64-bit arithmetic when possible to
      avoid potential 32-bit overflow.  */
   if (((ULONGEST) header->sect_off + header->get_length_with_initial ())
       > section->size)
-    error (_("Dwarf Error: bad length (0x%x) in compilation unit header "
-	   "(offset %s + 0) [in module %s]"),
-	   header->get_length_without_initial (), sect_offset_str (header->sect_off),
-	   filename);
+    error (_ ("Dwarf Error: bad length (0x%x) in compilation unit header "
+	      "(offset %s + 0) [in module %s]"),
+	   header->get_length_without_initial (),
+	   sect_offset_str (header->sect_off), filename);
 }
 
 /* See comp-unit-head.h.  */
@@ -213,8 +213,9 @@ comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
 	  retval = bfd_get_signed_64 (abfd, buf);
 	  break;
 	default:
-	  internal_error (_("read_address: bad switch, signed [in module %s]"),
-			  bfd_get_filename (abfd));
+	  internal_error (
+	    _ ("read_address: bad switch, signed [in module %s]"),
+	    bfd_get_filename (abfd));
 	}
     }
   else
@@ -231,8 +232,8 @@ comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
 	  retval = bfd_get_64 (abfd, buf);
 	  break;
 	default:
-	  internal_error (_("read_address: bad switch, "
-			    "unsigned [in module %s]"),
+	  internal_error (_ ("read_address: bad switch, "
+			     "unsigned [in module %s]"),
 			  bfd_get_filename (abfd));
 	}
     }

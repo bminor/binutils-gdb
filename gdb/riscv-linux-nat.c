@@ -31,7 +31,7 @@
 
 /* Work around glibc header breakage causing ELF_NFPREG not to be usable.  */
 #ifndef NFPREG
-# define NFPREG 33
+#define NFPREG 33
 #endif
 
 /* RISC-V Linux native additions to the default linux support.  */
@@ -39,6 +39,7 @@
 class riscv_linux_nat_target final : public linux_nat_target
 {
 public:
+
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *regcache, int regnum) override;
   void store_registers (struct regcache *regcache, int regnum) override;
@@ -95,19 +96,19 @@ supply_fpregset_regnum (struct regcache *regcache, const prfpregset_t *fpregs,
 			int regnum)
 {
   int flen = register_size (regcache->arch (), RISCV_FIRST_FP_REGNUM);
+
   union
-    {
-      const prfpregset_t *fpregs;
-      const gdb_byte *buf;
-    }
-  fpbuf = { .fpregs = fpregs };
+  {
+    const prfpregset_t *fpregs;
+    const gdb_byte *buf;
+  } fpbuf = { .fpregs = fpregs };
+
   int i;
 
   if (regnum == -1)
     {
       /* We only support the FP registers and FCSR here.  */
-      for (i = RISCV_FIRST_FP_REGNUM;
-	   i <= RISCV_LAST_FP_REGNUM;
+      for (i = RISCV_FIRST_FP_REGNUM; i <= RISCV_LAST_FP_REGNUM;
 	   i++, fpbuf.buf += flen)
 	regcache->raw_supply (i, fpbuf.buf);
 
@@ -166,19 +167,19 @@ fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
 	       int regnum)
 {
   int flen = register_size (regcache->arch (), RISCV_FIRST_FP_REGNUM);
+
   union
-    {
-      prfpregset_t *fpregs;
-      gdb_byte *buf;
-    }
-  fpbuf = { .fpregs = fpregs };
+  {
+    prfpregset_t *fpregs;
+    gdb_byte *buf;
+  } fpbuf = { .fpregs = fpregs };
+
   int i;
 
   if (regnum == -1)
     {
       /* We only support the FP registers and FCSR here.  */
-      for (i = RISCV_FIRST_FP_REGNUM;
-	   i <= RISCV_LAST_FP_REGNUM;
+      for (i = RISCV_FIRST_FP_REGNUM; i <= RISCV_LAST_FP_REGNUM;
 	   i++, fpbuf.buf += flen)
 	regcache->raw_collect (i, fpbuf.buf);
 
@@ -214,7 +215,7 @@ riscv_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   int tid;
 
-  tid = get_ptrace_pid (regcache->ptid());
+  tid = get_ptrace_pid (regcache->ptid ());
 
   if ((regnum >= RISCV_ZERO_REGNUM && regnum <= RISCV_PC_REGNUM)
       || (regnum == -1))
@@ -225,35 +226,32 @@ riscv_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       iov.iov_base = &regs;
       iov.iov_len = sizeof (regs);
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, (PTRACE_TYPE_ARG3) &iov)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
       else
 	supply_gregset_regnum (regcache, &regs, regnum);
     }
 
-  if ((regnum >= RISCV_FIRST_FP_REGNUM
-       && regnum <= RISCV_LAST_FP_REGNUM)
-      || (regnum == RISCV_CSR_FCSR_REGNUM)
-      || (regnum == -1))
+  if ((regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
+      || (regnum == RISCV_CSR_FCSR_REGNUM) || (regnum == -1))
     {
       struct iovec iov;
       elf_fpregset_t regs;
 
       iov.iov_base = &regs;
-      iov.iov_len = ELF_NFPREG * register_size (regcache->arch (),
-						RISCV_FIRST_FP_REGNUM);
+      iov.iov_len = ELF_NFPREG
+		    * register_size (regcache->arch (), RISCV_FIRST_FP_REGNUM);
       gdb_assert (iov.iov_len <= sizeof (regs));
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, (PTRACE_TYPE_ARG3) &iov)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
       else
 	supply_fpregset_regnum (regcache, &regs, regnum);
     }
 
-  if ((regnum == RISCV_CSR_MISA_REGNUM)
-      || (regnum == -1))
+  if ((regnum == RISCV_CSR_MISA_REGNUM) || (regnum == -1))
     {
       /* TODO: Need to add a ptrace call for this.  */
       regcache->raw_supply_zeroed (RISCV_CSR_MISA_REGNUM);
@@ -282,42 +280,42 @@ riscv_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
       iov.iov_base = &regs;
       iov.iov_len = sizeof (regs);
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, (PTRACE_TYPE_ARG3) &iov)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
       else
 	{
 	  fill_gregset (regcache, &regs, regnum);
 
 	  if (ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS,
-		      (PTRACE_TYPE_ARG3) &iov) == -1)
-	    perror_with_name (_("Couldn't set registers"));
+		      (PTRACE_TYPE_ARG3) &iov)
+	      == -1)
+	    perror_with_name (_ ("Couldn't set registers"));
 	}
     }
 
-  if ((regnum >= RISCV_FIRST_FP_REGNUM
-       && regnum <= RISCV_LAST_FP_REGNUM)
-      || (regnum == RISCV_CSR_FCSR_REGNUM)
-      || (regnum == -1))
+  if ((regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
+      || (regnum == RISCV_CSR_FCSR_REGNUM) || (regnum == -1))
     {
       struct iovec iov;
       elf_fpregset_t regs;
 
       iov.iov_base = &regs;
-      iov.iov_len = ELF_NFPREG * register_size (regcache->arch (),
-						RISCV_FIRST_FP_REGNUM);
+      iov.iov_len = ELF_NFPREG
+		    * register_size (regcache->arch (), RISCV_FIRST_FP_REGNUM);
       gdb_assert (iov.iov_len <= sizeof (regs));
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, (PTRACE_TYPE_ARG3) &iov)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
       else
 	{
 	  fill_fpregset (regcache, &regs, regnum);
 
 	  if (ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET,
-		      (PTRACE_TYPE_ARG3) &iov) == -1)
-	    perror_with_name (_("Couldn't set registers"));
+		      (PTRACE_TYPE_ARG3) &iov)
+	      == -1)
+	    perror_with_name (_ ("Couldn't set registers"));
 	}
     }
 
@@ -328,6 +326,7 @@ riscv_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 /* Initialize RISC-V Linux native support.  */
 
 void _initialize_riscv_linux_nat ();
+
 void
 _initialize_riscv_linux_nat ()
 {

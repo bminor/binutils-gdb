@@ -21,8 +21,10 @@
 #include "gdbsupport/selftest.h"
 #include "ui-style.h"
 
-namespace selftests {
-namespace style {
+namespace selftests
+{
+namespace style
+{
 
 #define CHECK_RGB(R, G, B) \
   SELF_CHECK (rgb[0] == (R) && rgb[1] == (G) && rgb[2] == (B))
@@ -102,9 +104,9 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_style_selftest ();
+
 void
 _initialize_style_selftest ()
 {
-  selftests::register_test ("style",
-			    selftests::style::run_tests);
+  selftests::register_test ("style", selftests::style::run_tests);
 }

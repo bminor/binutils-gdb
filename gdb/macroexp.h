@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef MACROEXP_H
 #define MACROEXP_H
 
@@ -76,7 +75,6 @@ gdb::unique_xmalloc_ptr<char> macro_expand_next (const char **lexptr,
 int macro_is_whitespace (int c);
 int macro_is_identifier_nondigit (int c);
 int macro_is_digit (int c);
-
 
 /* Stringify STR according to C rules and return a null-terminated string.  */
 gdb::unique_xmalloc_ptr<char> macro_stringify (const char *str);

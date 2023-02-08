@@ -50,22 +50,22 @@ tic6x_register_sigcontext_offset (unsigned int regnum, struct gdbarch *gdbarch)
 
   if (regnum == TIC6X_A4_REGNUM || regnum == TIC6X_A4_REGNUM + 2
       || regnum == TIC6X_A4_REGNUM + 4)
-    return 4 * (regnum - TIC6X_A4_REGNUM + 2);	/* A4, A6, A8 */
+    return 4 * (regnum - TIC6X_A4_REGNUM + 2); /* A4, A6, A8 */
   else if (regnum == TIC6X_A5_REGNUM || regnum == TIC6X_A5_REGNUM + 2
 	   || regnum == TIC6X_A5_REGNUM + 4)
-    return 4 * (regnum - TIC6X_A5_REGNUM + 12);	/* A5, A7, A9 */
+    return 4 * (regnum - TIC6X_A5_REGNUM + 12); /* A5, A7, A9 */
   else if (regnum == TIC6X_B4_REGNUM || regnum == TIC6X_B4_REGNUM + 2
 	   || regnum == TIC6X_B4_REGNUM + 4)
-    return 4 * (regnum - TIC6X_B4_REGNUM + 3);	/* B4, B6, B8 */
+    return 4 * (regnum - TIC6X_B4_REGNUM + 3); /* B4, B6, B8 */
   else if (regnum == TIC6X_B5_REGNUM || regnum == TIC6X_B5_REGNUM + 2
 	   || regnum == TIC6X_B5_REGNUM + 4)
-    return 4 * (regnum - TIC6X_B5_REGNUM + 19);	/* B5, B7, B9 */
+    return 4 * (regnum - TIC6X_B5_REGNUM + 19); /* B5, B7, B9 */
   else if (regnum < TIC6X_A4_REGNUM)
-    return 4 * (regnum - 0 + 8);	/* A0 - A3 */
+    return 4 * (regnum - 0 + 8); /* A0 - A3 */
   else if (regnum >= TIC6X_B0_REGNUM && regnum < TIC6X_B4_REGNUM)
-    return 4 * (regnum - TIC6X_B0_REGNUM + 15);	/* B0 - B3 */
+    return 4 * (regnum - TIC6X_B0_REGNUM + 15); /* B0 - B3 */
   else if (regnum >= 34 && regnum < 34 + 32)
-    return 4 * (regnum - 34 + 23);	/* A16 - A31, B16 - B31 */
+    return 4 * (regnum - 34 + 23); /* A16 - A31, B16 - B31 */
   else if (regnum == TIC6X_PC_REGNUM)
     return 4 * (tdep->has_gp ? 55 : 23);
   else if (regnum == TIC6X_SP_REGNUM)
@@ -87,17 +87,17 @@ tic6x_linux_rt_sigreturn_init (const struct tramp_frame *self,
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, TIC6X_SP_REGNUM);
   /* The base of struct sigcontext is computed by examining the definition of
      struct rt_sigframe in linux kernel source arch/c6x/kernel/signal.c.  */
-  CORE_ADDR base = (sp + TIC6X_SP_RT_SIGFRAME
+  CORE_ADDR base = (sp
+		    + TIC6X_SP_RT_SIGFRAME
 		    /* Pointer type *pinfo and *puc in struct rt_sigframe.  */
-		    + 4 + 4
-		    + TIC6X_SIGINFO_SIZE
-		    + 4 + 4 /* uc_flags and *uc_link in struct ucontext.  */
+		    + 4 + 4 + TIC6X_SIGINFO_SIZE + 4
+		    + 4 /* uc_flags and *uc_link in struct ucontext.  */
 		    + TIC6X_STACK_T_SIZE);
   tic6x_gdbarch_tdep *tdep = gdbarch_tdep<tic6x_gdbarch_tdep> (gdbarch);
   unsigned int reg_offset;
   unsigned int i;
 
-  for (i = 0; i < 10; i++)	/* A0 - A9 */
+  for (i = 0; i < 10; i++) /* A0 - A9 */
     {
       reg_offset = tic6x_register_sigcontext_offset (i, gdbarch);
       gdb_assert (reg_offset != 0);
@@ -105,7 +105,7 @@ tic6x_linux_rt_sigreturn_init (const struct tramp_frame *self,
       trad_frame_set_reg_addr (this_cache, i, base + reg_offset);
     }
 
-  for (i = TIC6X_B0_REGNUM; i < TIC6X_B0_REGNUM + 10; i++)	/* B0 - B9 */
+  for (i = TIC6X_B0_REGNUM; i < TIC6X_B0_REGNUM + 10; i++) /* B0 - B9 */
     {
       reg_offset = tic6x_register_sigcontext_offset (i, gdbarch);
       gdb_assert (reg_offset != 0);
@@ -114,7 +114,7 @@ tic6x_linux_rt_sigreturn_init (const struct tramp_frame *self,
     }
 
   if (tdep->has_gp)
-    for (i = 34; i < 34 + 32; i++)	/* A16 - A31, B16 - B31 */
+    for (i = 34; i < 34 + 32; i++) /* A16 - A31, B16 - B31 */
       {
 	reg_offset = tic6x_register_sigcontext_offset (i, gdbarch);
 	gdb_assert (reg_offset != 0);
@@ -122,28 +122,24 @@ tic6x_linux_rt_sigreturn_init (const struct tramp_frame *self,
 	trad_frame_set_reg_addr (this_cache, i, base + reg_offset);
       }
 
-  trad_frame_set_reg_addr (this_cache, TIC6X_PC_REGNUM,
-			   base + tic6x_register_sigcontext_offset (TIC6X_PC_REGNUM,
-								    gdbarch));
-  trad_frame_set_reg_addr (this_cache, TIC6X_SP_REGNUM,
-			   base + tic6x_register_sigcontext_offset (TIC6X_SP_REGNUM,
-								    gdbarch));
+  trad_frame_set_reg_addr (
+    this_cache, TIC6X_PC_REGNUM,
+    base + tic6x_register_sigcontext_offset (TIC6X_PC_REGNUM, gdbarch));
+  trad_frame_set_reg_addr (
+    this_cache, TIC6X_SP_REGNUM,
+    base + tic6x_register_sigcontext_offset (TIC6X_SP_REGNUM, gdbarch));
 
   /* Save a frame ID.  */
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-static struct tramp_frame tic6x_linux_rt_sigreturn_tramp_frame =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    {0x000045aa, 0x0fffffff},	/* mvk .S2 139,b0 */
-    {0x10000000, ULONGEST_MAX},		/* swe */
-    {TRAMP_SENTINEL_INSN}
-  },
-  tic6x_linux_rt_sigreturn_init
-};
+static struct tramp_frame tic6x_linux_rt_sigreturn_tramp_frame
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0x000045aa, 0x0fffffff },   /* mvk .S2 139,b0 */
+	{ 0x10000000, ULONGEST_MAX }, /* swe */
+	{ TRAMP_SENTINEL_INSN } },
+      tic6x_linux_rt_sigreturn_init };
 
 /* When FRAME is at a syscall instruction, return the PC of the next
    instruction to be executed.  */
@@ -151,8 +147,8 @@ static struct tramp_frame tic6x_linux_rt_sigreturn_tramp_frame =
 static CORE_ADDR
 tic6x_linux_syscall_next_pc (frame_info_ptr frame)
 {
-  ULONGEST syscall_number = get_frame_register_unsigned (frame,
-							 TIC6X_B0_REGNUM);
+  ULONGEST syscall_number
+    = get_frame_register_unsigned (frame, TIC6X_B0_REGNUM);
   CORE_ADDR pc = get_frame_pc (frame);
 
   if (syscall_number == 139 /* rt_sigreturn */)
@@ -160,7 +156,6 @@ tic6x_linux_syscall_next_pc (frame_info_ptr frame)
 
   return pc + 4;
 }
-
 
 static void
 tic6x_uclinux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -205,6 +200,7 @@ tic6x_uclinux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_tic6x_linux_tdep ();
+
 void
 _initialize_tic6x_linux_tdep ()
 {

@@ -24,7 +24,6 @@
 #include "fbsd-nat.h"
 #include "sparc64-tdep.h"
 #include "sparc-nat.h"
-
 
 /* Support for debugging kernel virtual memory images.  */
 
@@ -63,6 +62,7 @@ sparc64fbsd_kvm_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 static sparc_target<fbsd_nat_target> the_sparc64_fbsd_nat_target;
 
 void _initialize_sparc64fbsd_nat ();
+
 void
 _initialize_sparc64fbsd_nat ()
 {

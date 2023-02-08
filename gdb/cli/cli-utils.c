@@ -28,21 +28,21 @@
 ULONGEST
 get_ulongest (const char **pp, int trailer)
 {
-  LONGEST retval = 0;	/* default */
+  LONGEST retval = 0; /* default */
   const char *p = *pp;
 
   if (*p == '$')
     {
       value *val = value_from_history_ref (p, &p);
 
-      if (val != NULL)	/* Value history reference */
+      if (val != NULL) /* Value history reference */
 	{
 	  if (value_type (val)->code () == TYPE_CODE_INT)
 	    retval = value_as_long (val);
 	  else
-	    error (_("History value must have integer type."));
+	    error (_ ("History value must have integer type."));
 	}
-      else	/* Convenience variable */
+      else /* Convenience variable */
 	{
 	  /* Internal variable.  Make a copy of the name, so we can
 	     null-terminate it to pass to lookup_internalvar().  */
@@ -51,8 +51,8 @@ get_ulongest (const char **pp, int trailer)
 	    p++;
 	  std::string varname (start, p - start);
 	  if (!get_internalvar_integer (lookup_internalvar (varname.c_str ()),
-				       &retval))
-	    error (_("Convenience variable $%s does not have integer value."),
+					&retval))
+	    error (_ ("Convenience variable $%s does not have integer value."),
 		   varname.c_str ());
 	}
     }
@@ -63,13 +63,13 @@ get_ulongest (const char **pp, int trailer)
       if (p == end)
 	{
 	  /* There is no number here.  (e.g. "cond a == b").  */
-	  error (_("Expected integer at: %s"), p);
+	  error (_ ("Expected integer at: %s"), p);
 	}
       p = end;
     }
 
   if (!(isspace (*p) || *p == '\0' || *p == trailer))
-    error (_("Trailing junk at: %s"), p);
+    error (_ ("Trailing junk at: %s"), p);
   p = skip_spaces (p);
   *pp = p;
   return retval;
@@ -80,7 +80,7 @@ get_ulongest (const char **pp, int trailer)
 int
 get_number_trailer (const char **pp, int trailer)
 {
-  int retval = 0;	/* default */
+  int retval = 0; /* default */
   const char *p = *pp;
   bool negative = false;
 
@@ -94,17 +94,17 @@ get_number_trailer (const char **pp, int trailer)
     {
       struct value *val = value_from_history_ref (p, &p);
 
-      if (val)	/* Value history reference */
+      if (val) /* Value history reference */
 	{
 	  if (value_type (val)->code () == TYPE_CODE_INT)
 	    retval = value_as_long (val);
 	  else
 	    {
-	      gdb_printf (_("History value must have integer type.\n"));
+	      gdb_printf (_ ("History value must have integer type.\n"));
 	      retval = 0;
 	    }
 	}
-      else	/* Convenience variable */
+      else /* Convenience variable */
 	{
 	  /* Internal variable.  Make a copy of the name, so we can
 	     null-terminate it to pass to lookup_internalvar().  */
@@ -122,8 +122,8 @@ get_number_trailer (const char **pp, int trailer)
 	    retval = (int) longest_val;
 	  else
 	    {
-	      gdb_printf (_("Convenience variable must "
-			    "have integer value.\n"));
+	      gdb_printf (_ ("Convenience variable must "
+			     "have integer value.\n"));
 	      retval = 0;
 	    }
 	}
@@ -137,7 +137,7 @@ get_number_trailer (const char **pp, int trailer)
 	/* There is no number here.  (e.g. "cond a == b").  */
 	{
 	  /* Skip non-numeric token.  */
-	  while (*p && !isspace((int) *p))
+	  while (*p && !isspace ((int) *p))
 	    ++p;
 	  /* Return zero, which caller must interpret as error.  */
 	  retval = 0;
@@ -185,19 +185,18 @@ report_unrecognized_option_error (const char *command, const char *args)
 {
   std::string option = extract_arg (&args);
 
-  error (_("Unrecognized option '%s' to %s command.  "
-	   "Try \"help %s\"."), option.c_str (),
-	 command, command);
+  error (_ ("Unrecognized option '%s' to %s command.  "
+	    "Try \"help %s\"."),
+	 option.c_str (), command, command);
 }
 
 /* See documentation in cli-utils.h.  */
 
 const char *
-info_print_args_help (const char *prefix,
-		      const char *entity_kind,
+info_print_args_help (const char *prefix, const char *entity_kind,
 		      bool document_n_flag)
 {
-  return xstrprintf (_("\
+  return xstrprintf (_ ("\
 %sIf NAMEREGEXP is provided, only prints the %s whose name\n\
 matches NAMEREGEXP.\n\
 If -t TYPEREGEXP is provided, only prints the %s whose type\n\
@@ -207,9 +206,11 @@ By default, the command might produce headers and/or messages indicating\n\
 why no %s can be printed.\n\
 The flag -q disables the production of these headers and messages.%s"),
 		     prefix, entity_kind, entity_kind, entity_kind,
-		     (document_n_flag ? _("\n\
+		     (document_n_flag ? _ ("\n\
 By default, the command will include non-debug symbols in the output;\n\
-these can be excluded using the -n flag.") : "")).release ();
+these can be excluded using the -n flag.")
+				      : ""))
+    .release ();
 }
 
 /* See documentation in cli-utils.h.  */
@@ -264,8 +265,7 @@ number_or_range_parser::get_number ()
 	 string as well.  */
       if (m_cur_tok[0] == '-'
 	  && !(isspace (m_cur_tok[-1])
-	       && (isalpha (m_cur_tok[1])
-		   || m_cur_tok[1] == '-'
+	       && (isalpha (m_cur_tok[1]) || m_cur_tok[1] == '-'
 		   || m_cur_tok[1] == '\0')))
 	{
 	  const char **temp;
@@ -279,7 +279,7 @@ number_or_range_parser::get_number ()
 	  m_end_value = ::get_number (temp);
 	  if (m_end_value < m_last_retval)
 	    {
-	      error (_("inverted range"));
+	      error (_ ("inverted range"));
 	    }
 	  else if (m_end_value == m_last_retval)
 	    {
@@ -295,13 +295,13 @@ number_or_range_parser::get_number ()
   else
     {
       if (isdigit (*(m_cur_tok + 1)))
-	error (_("negative value"));
+	error (_ ("negative value"));
       if (*(m_cur_tok + 1) == '$')
 	{
 	  /* Convenience variable.  */
 	  m_last_retval = ::get_number (&m_cur_tok);
 	  if (m_last_retval < 0)
-	    error (_("negative value"));
+	    error (_ ("negative value"));
 	}
     }
   return m_last_retval;
@@ -330,8 +330,7 @@ number_or_range_parser::finished () const
      or we are not in a range and not in front of an integer, negative
      integer, convenience var or negative convenience var.  */
   return (m_cur_tok == NULL || *m_cur_tok == '\0'
-	  || (!m_in_range
-	      && !(isdigit (*m_cur_tok) || *m_cur_tok == '$')
+	  || (!m_in_range && !(isdigit (*m_cur_tok) || *m_cur_tok == '$')
 	      && !(*m_cur_tok == '-'
 		   && (isdigit (m_cur_tok[1]) || m_cur_tok[1] == '$'))));
 }
@@ -353,13 +352,13 @@ number_is_in_list (const char *list, int number)
   number_or_range_parser parser (list);
 
   if (parser.finished ())
-    error (_("Arguments must be numbers or '$' variables."));
+    error (_ ("Arguments must be numbers or '$' variables."));
   while (!parser.finished ())
     {
       int gotnum = parser.get_number ();
 
       if (gotnum == 0)
-	error (_("Arguments must be numbers or '$' variables."));
+	error (_ ("Arguments must be numbers or '$' variables."));
       if (gotnum == number)
 	return 1;
     }
@@ -436,6 +435,5 @@ void
 validate_flags_qcs (const char *which_command, qcs_flags *flags)
 {
   if (flags->cont && flags->silent)
-    error (_("%s: -c and -s are mutually exclusive"), which_command);
+    error (_ ("%s: -c and -s are mutually exclusive"), which_command);
 }
-

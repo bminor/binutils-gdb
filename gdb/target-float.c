@@ -34,32 +34,42 @@
 class target_float_ops
 {
 public:
+
   virtual std::string to_string (const gdb_byte *addr, const struct type *type,
-				 const char *format) const = 0;
+				 const char *format) const
+    = 0;
   virtual bool from_string (gdb_byte *addr, const struct type *type,
-			    const std::string &string) const = 0;
+			    const std::string &string) const
+    = 0;
 
   virtual LONGEST to_longest (const gdb_byte *addr,
-			      const struct type *type) const = 0;
+			      const struct type *type) const
+    = 0;
   virtual void from_longest (gdb_byte *addr, const struct type *type,
-			     LONGEST val) const = 0;
+			     LONGEST val) const
+    = 0;
   virtual void from_ulongest (gdb_byte *addr, const struct type *type,
-			      ULONGEST val) const = 0;
+			      ULONGEST val) const
+    = 0;
   virtual double to_host_double (const gdb_byte *addr,
-				 const struct type *type) const = 0;
+				 const struct type *type) const
+    = 0;
   virtual void from_host_double (gdb_byte *addr, const struct type *type,
-				 double val) const = 0;
+				 double val) const
+    = 0;
   virtual void convert (const gdb_byte *from, const struct type *from_type,
-			gdb_byte *to, const struct type *to_type) const = 0;
+			gdb_byte *to, const struct type *to_type) const
+    = 0;
 
-  virtual void binop (enum exp_opcode opcode,
-		      const gdb_byte *x, const struct type *type_x,
-		      const gdb_byte *y, const struct type *type_y,
-		      gdb_byte *res, const struct type *type_res) const = 0;
+  virtual void binop (enum exp_opcode opcode, const gdb_byte *x,
+		      const struct type *type_x, const gdb_byte *y,
+		      const struct type *type_y, gdb_byte *res,
+		      const struct type *type_res) const
+    = 0;
   virtual int compare (const gdb_byte *x, const struct type *type_x,
-		       const gdb_byte *y, const struct type *type_y) const = 0;
+		       const gdb_byte *y, const struct type *type_y) const
+    = 0;
 };
-
 
 /* Helper routines operating on binary floating-point data.  */
 
@@ -69,7 +79,8 @@ public:
 /* Different kinds of floatformat numbers recognized by
    floatformat_classify.  To avoid portability issues, we use local
    values instead of the C99 macros (FP_NAN et cetera).  */
-enum float_kind {
+enum float_kind
+{
   float_nan,
   float_infinite,
   float_zero,
@@ -90,8 +101,7 @@ enum float_kind {
 static size_t
 floatformat_totalsize_bytes (const struct floatformat *fmt)
 {
-  return ((fmt->totalsize + FLOATFORMAT_CHAR_BIT - 1)
-	  / FLOATFORMAT_CHAR_BIT);
+  return ((fmt->totalsize + FLOATFORMAT_CHAR_BIT - 1) / FLOATFORMAT_CHAR_BIT);
 }
 
 /* Return the precision of the floating point format FMT.  */
@@ -130,8 +140,8 @@ floatformat_normalize_byteorder (const struct floatformat *fmt,
   words = fmt->totalsize / FLOATFORMAT_CHAR_BIT;
   words >>= 2;
 
-  swapout = (unsigned char *)to;
-  swapin = (const unsigned char *)from;
+  swapout = (unsigned char *) to;
+  swapin = (const unsigned char *) from;
 
   if (fmt->byteorder == floatformat_vax)
     {
@@ -196,8 +206,8 @@ get_field (const bfd_byte *data, enum floatformat_byteorders order,
   else
     {
       cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
-      cur_bitshift =
-	((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
+      cur_bitshift
+	= ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
     }
   if (cur_bitshift > -FLOATFORMAT_CHAR_BIT)
     result = *(data + cur_byte) >> (-cur_bitshift);
@@ -212,7 +222,7 @@ get_field (const bfd_byte *data, enum floatformat_byteorders order,
   /* Move towards the most significant part of the field.  */
   while (cur_bitshift < len)
     {
-      result |= (unsigned long)*(data + cur_byte) << cur_bitshift;
+      result |= (unsigned long) *(data + cur_byte) << cur_bitshift;
       cur_bitshift += FLOATFORMAT_CHAR_BIT;
       switch (order)
 	{
@@ -224,7 +234,7 @@ get_field (const bfd_byte *data, enum floatformat_byteorders order,
 	  break;
 	}
     }
-  if (len < sizeof(result) * FLOATFORMAT_CHAR_BIT)
+  if (len < sizeof (result) * FLOATFORMAT_CHAR_BIT)
     /* Mask out bits which are not part of the field.  */
     result &= ((1UL << len) - 1);
   return result;
@@ -256,16 +266,16 @@ put_field (unsigned char *data, enum floatformat_byteorders order,
   else
     {
       cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
-      cur_bitshift =
-	((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
+      cur_bitshift
+	= ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
     }
   if (cur_bitshift > -FLOATFORMAT_CHAR_BIT)
     {
-      *(data + cur_byte) &=
-	~(((1 << ((start + len) % FLOATFORMAT_CHAR_BIT)) - 1)
-	  << (-cur_bitshift));
-      *(data + cur_byte) |=
-	(stuff_to_put & ((1 << FLOATFORMAT_CHAR_BIT) - 1)) << (-cur_bitshift);
+      *(data + cur_byte)
+	&= ~(((1 << ((start + len) % FLOATFORMAT_CHAR_BIT)) - 1)
+	     << (-cur_bitshift));
+      *(data + cur_byte) |= (stuff_to_put & ((1 << FLOATFORMAT_CHAR_BIT) - 1))
+			    << (-cur_bitshift);
     }
   cur_bitshift += FLOATFORMAT_CHAR_BIT;
   if (order == floatformat_little)
@@ -279,8 +289,7 @@ put_field (unsigned char *data, enum floatformat_byteorders order,
       if (len - cur_bitshift < FLOATFORMAT_CHAR_BIT)
 	{
 	  /* This is the last byte.  */
-	  *(data + cur_byte) &=
-	    ~((1 << (len - cur_bitshift)) - 1);
+	  *(data + cur_byte) &= ~((1 << (len - cur_bitshift)) - 1);
 	  *(data + cur_byte) |= (stuff_to_put >> cur_bitshift);
 	}
       else
@@ -297,8 +306,7 @@ put_field (unsigned char *data, enum floatformat_byteorders order,
 /* Check if VAL (which is assumed to be a floating point number whose
    format is described by FMT) is negative.  */
 static int
-floatformat_is_negative (const struct floatformat *fmt,
-			 const bfd_byte *uval)
+floatformat_is_negative (const struct floatformat *fmt, const bfd_byte *uval)
 {
   enum floatformat_byteorders order;
   unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
@@ -322,8 +330,7 @@ floatformat_is_negative (const struct floatformat *fmt,
 
 /* Check if VAL is "not a number" (NaN) for FMT.  */
 static enum float_kind
-floatformat_classify (const struct floatformat *fmt,
-		      const bfd_byte *uval)
+floatformat_classify (const struct floatformat *fmt, const bfd_byte *uval)
 {
   long exponent;
   unsigned long mant;
@@ -349,8 +356,8 @@ floatformat_classify (const struct floatformat *fmt,
   if (order != fmt->byteorder)
     uval = newfrom;
 
-  exponent = get_field (uval, order, fmt->totalsize, fmt->exp_start,
-			fmt->exp_len);
+  exponent
+    = get_field (uval, order, fmt->totalsize, fmt->exp_start, fmt->exp_len);
 
   mant_bits_left = fmt->man_len;
   mant_off = fmt->man_start;
@@ -363,8 +370,7 @@ floatformat_classify (const struct floatformat *fmt,
       mant = get_field (uval, order, fmt->totalsize, mant_off, mant_bits);
 
       /* If there is an explicit integer bit, mask it off.  */
-      if (mant_off == fmt->man_start
-	  && fmt->intbit == floatformat_intbit_yes)
+      if (mant_off == fmt->man_start && fmt->intbit == floatformat_intbit_yes)
 	mant &= ~(1 << (mant_bits - 1));
 
       if (mant)
@@ -379,7 +385,7 @@ floatformat_classify (const struct floatformat *fmt,
 
   /* If exp_nan is not set, assume that inf, NaN, and subnormals are not
      supported.  */
-  if (! fmt->exp_nan)
+  if (!fmt->exp_nan)
     {
       if (mant_zero)
 	return float_zero;
@@ -410,8 +416,7 @@ floatformat_classify (const struct floatformat *fmt,
    point number whose format is described by FMT) into a hexadecimal
    and store it in a static string.  Return a pointer to that string.  */
 static const char *
-floatformat_mantissa (const struct floatformat *fmt,
-		      const bfd_byte *val)
+floatformat_mantissa (const struct floatformat *fmt, const bfd_byte *val)
 {
   unsigned char *uval = (unsigned char *) val;
   unsigned long mant;
@@ -442,7 +447,7 @@ floatformat_mantissa (const struct floatformat *fmt,
   if (order != fmt->byteorder)
     uval = newfrom;
 
-  if (! fmt->exp_nan)
+  if (!fmt->exp_nan)
     return 0;
 
   /* Make sure we have enough room to store the mantissa.  */
@@ -480,8 +485,8 @@ floatformat_mantissa (const struct floatformat *fmt,
    return a format appropriate to print the full precision of a target
    floating-point number of format FMT.  */
 static std::string
-floatformat_printf_format (const struct floatformat *fmt,
-			   const char *format, char length)
+floatformat_printf_format (const struct floatformat *fmt, const char *format,
+			   char length)
 {
   std::string host_format;
   char conversion;
@@ -532,9 +537,11 @@ floatformat_printf_format (const struct floatformat *fmt,
 /* Implementation of target_float_ops using the host floating-point type T
    as intermediate type.  */
 
-template<typename T> class host_float_ops : public target_float_ops
+template<typename T>
+class host_float_ops : public target_float_ops
 {
 public:
+
   std::string to_string (const gdb_byte *addr, const struct type *type,
 			 const char *format) const override;
   bool from_string (gdb_byte *addr, const struct type *type,
@@ -553,25 +560,24 @@ public:
   void convert (const gdb_byte *from, const struct type *from_type,
 		gdb_byte *to, const struct type *to_type) const override;
 
-  void binop (enum exp_opcode opcode,
-	      const gdb_byte *x, const struct type *type_x,
-	      const gdb_byte *y, const struct type *type_y,
-	      gdb_byte *res, const struct type *type_res) const override;
-  int compare (const gdb_byte *x, const struct type *type_x,
-	       const gdb_byte *y, const struct type *type_y) const override;
+  void binop (enum exp_opcode opcode, const gdb_byte *x,
+	      const struct type *type_x, const gdb_byte *y,
+	      const struct type *type_y, gdb_byte *res,
+	      const struct type *type_res) const override;
+  int compare (const gdb_byte *x, const struct type *type_x, const gdb_byte *y,
+	       const struct type *type_y) const override;
 
 private:
-  void from_target (const struct floatformat *fmt,
-		    const gdb_byte *from, T *to) const;
-  void from_target (const struct type *type,
-		    const gdb_byte *from, T *to) const;
 
-  void to_target (const struct type *type,
-		  const T *from, gdb_byte *to) const;
-  void to_target (const struct floatformat *fmt,
-		  const T *from, gdb_byte *to) const;
+  void from_target (const struct floatformat *fmt, const gdb_byte *from,
+		    T *to) const;
+  void from_target (const struct type *type, const gdb_byte *from,
+		    T *to) const;
+
+  void to_target (const struct type *type, const T *from, gdb_byte *to) const;
+  void to_target (const struct floatformat *fmt, const T *from,
+		  gdb_byte *to) const;
 };
-
 
 /* Convert TO/FROM target to the host floating-point format T.
 
@@ -595,7 +601,8 @@ static const struct floatformat *host_long_double_format
 
 /* Convert target floating-point value at FROM in format FMT to host
    floating-point format of type T.  */
-template<typename T> void
+template<typename T>
+void
 host_float_ops<T>::from_target (const struct floatformat *fmt,
 				const gdb_byte *from, T *to) const
 {
@@ -631,7 +638,7 @@ host_float_ops<T>::from_target (const struct floatformat *fmt,
   unsigned long mant;
   unsigned int mant_bits, mant_off;
   int mant_bits_left;
-  int special_exponent;		/* It's a NaN, denorm or zero.  */
+  int special_exponent; /* It's a NaN, denorm or zero.  */
   enum floatformat_byteorders order;
   unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
   enum float_kind kind;
@@ -647,7 +654,7 @@ host_float_ops<T>::from_target (const struct floatformat *fmt,
     {
       double dto;
 
-      floatformat_to_double	/* ARI: floatformat_to_double */
+      floatformat_to_double /* ARI: floatformat_to_double */
 	(fmt->split_half ? fmt->split_half : fmt, from, &dto);
       *to = (T) dto;
       return;
@@ -676,8 +683,8 @@ host_float_ops<T>::from_target (const struct floatformat *fmt,
       return;
     }
 
-  exponent = get_field (ufrom, order, fmt->totalsize, fmt->exp_start,
-			fmt->exp_len);
+  exponent
+    = get_field (ufrom, order, fmt->totalsize, fmt->exp_start, fmt->exp_len);
   /* Note that if exponent indicates a NaN, we can't really do anything useful
      (not knowing if the host has NaN's, or how to build one).  So it will
      end up as an infinity or something close; that is OK.  */
@@ -729,18 +736,20 @@ host_float_ops<T>::from_target (const struct floatformat *fmt,
   *to = dto;
 }
 
-template<typename T> void
-host_float_ops<T>::from_target (const struct type *type,
-				const gdb_byte *from, T *to) const
+template<typename T>
+void
+host_float_ops<T>::from_target (const struct type *type, const gdb_byte *from,
+				T *to) const
 {
   from_target (floatformat_from_type (type), from, to);
 }
 
 /* Convert host floating-point value of type T to target floating-point
    value in format FMT and store at TO.  */
-template<typename T> void
-host_float_ops<T>::to_target (const struct floatformat *fmt,
-			      const T *from, gdb_byte *to) const
+template<typename T>
+void
+host_float_ops<T>::to_target (const struct floatformat *fmt, const T *from,
+			      gdb_byte *to) const
 {
   gdb_assert (fmt != NULL);
 
@@ -808,15 +817,14 @@ host_float_ops<T>::to_target (const struct floatformat *fmt,
     }
 
   if (dfrom == 0)
-    goto finalize_byteorder;	/* Result is zero */
-  if (dfrom != dfrom)		/* Result is NaN */
+    goto finalize_byteorder; /* Result is zero */
+  if (dfrom != dfrom)	     /* Result is NaN */
     {
       /* From is NaN */
-      put_field (uto, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, fmt->exp_nan);
+      put_field (uto, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+		 fmt->exp_nan);
       /* Be sure it's not infinity, but NaN value is irrel.  */
-      put_field (uto, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 1);
+      put_field (uto, order, fmt->totalsize, fmt->man_start, fmt->man_len, 1);
       goto finalize_byteorder;
     }
 
@@ -827,14 +835,13 @@ host_float_ops<T>::to_target (const struct floatformat *fmt,
       dfrom = -dfrom;
     }
 
-  if (dfrom + dfrom == dfrom && dfrom != 0.0)	/* Result is Infinity.  */
+  if (dfrom + dfrom == dfrom && dfrom != 0.0) /* Result is Infinity.  */
     {
       /* Infinity exponent is same as NaN's.  */
-      put_field (uto, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, fmt->exp_nan);
+      put_field (uto, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+		 fmt->exp_nan);
       /* Infinity mantissa is all zeroes.  */
-      put_field (uto, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 0);
+      put_field (uto, order, fmt->totalsize, fmt->man_start, fmt->man_len, 0);
       goto finalize_byteorder;
     }
 
@@ -844,10 +851,8 @@ host_float_ops<T>::to_target (const struct floatformat *fmt,
     {
       /* The value is too small to be expressed in the destination
 	 type (not enough bits in the exponent.  Treat as 0.  */
-      put_field (uto, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, 0);
-      put_field (uto, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 0);
+      put_field (uto, order, fmt->totalsize, fmt->exp_start, fmt->exp_len, 0);
+      put_field (uto, order, fmt->totalsize, fmt->man_start, fmt->man_len, 0);
       goto finalize_byteorder;
     }
 
@@ -855,10 +860,9 @@ host_float_ops<T>::to_target (const struct floatformat *fmt,
     {
       /* The value is too large to fit into the destination.
 	 Treat as infinity.  */
-      put_field (uto, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, fmt->exp_nan);
-      put_field (uto, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 0);
+      put_field (uto, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+		 fmt->exp_nan);
+      put_field (uto, order, fmt->totalsize, fmt->man_start, fmt->man_len, 0);
       goto finalize_byteorder;
     }
 
@@ -904,21 +908,21 @@ host_float_ops<T>::to_target (const struct floatformat *fmt,
 	  mant_long >>= 32 - mant_bits;
 	}
 
-      put_field (uto, order, fmt->totalsize,
-		 mant_off, mant_bits, mant_long);
+      put_field (uto, order, fmt->totalsize, mant_off, mant_bits, mant_long);
       mant_off += mant_bits;
       mant_bits_left -= mant_bits;
     }
 
- finalize_byteorder:
+finalize_byteorder:
   /* Do we need to byte-swap the words in the result?  */
   if (order != fmt->byteorder)
     floatformat_normalize_byteorder (fmt, newto, to);
 }
 
-template<typename T> void
-host_float_ops<T>::to_target (const struct type *type,
-			      const T *from, gdb_byte *to) const
+template<typename T>
+void
+host_float_ops<T>::to_target (const struct type *type, const T *from,
+			      gdb_byte *to) const
 {
   /* Ensure possible padding bytes in the target buffer are zeroed out.  */
   memset (to, 0, type->length ());
@@ -928,15 +932,20 @@ host_float_ops<T>::to_target (const struct type *type,
 
 /* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
    to a string, optionally using the print format FORMAT.  */
-template<typename T> struct printf_length_modifier
+template<typename T>
+struct printf_length_modifier
 {
   static constexpr char value = 0;
 };
-template<> struct printf_length_modifier<long double>
+
+template<>
+struct printf_length_modifier<long double>
 {
   static constexpr char value = 'L';
 };
-template<typename T> std::string
+
+template<typename T>
+std::string
 host_float_ops<T>::to_string (const gdb_byte *addr, const struct type *type,
 			      const char *format) const
 {
@@ -956,19 +965,26 @@ host_float_ops<T>::to_string (const gdb_byte *addr, const struct type *type,
 
 /* Parse string IN into a target floating-number of type TYPE and
    store it as byte-stream ADDR.  Return whether parsing succeeded.  */
-template<typename T> struct scanf_length_modifier
+template<typename T>
+struct scanf_length_modifier
 {
   static constexpr char value = 0;
 };
-template<> struct scanf_length_modifier<double>
+
+template<>
+struct scanf_length_modifier<double>
 {
   static constexpr char value = 'l';
 };
-template<> struct scanf_length_modifier<long double>
+
+template<>
+struct scanf_length_modifier<long double>
 {
   static constexpr char value = 'L';
 };
-template<typename T> bool
+
+template<typename T>
+bool
 host_float_ops<T>::from_string (gdb_byte *addr, const struct type *type,
 				const std::string &in) const
 {
@@ -982,7 +998,7 @@ host_float_ops<T>::from_string (gdb_byte *addr, const struct type *type,
 
   DIAGNOSTIC_PUSH
   DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-  num = sscanf (in.c_str (), scan_format.c_str(), &host_float, &n);
+  num = sscanf (in.c_str (), scan_format.c_str (), &host_float, &n);
   DIAGNOSTIC_POP
 
   /* The sscanf man page suggests not making any assumptions on the effect
@@ -1001,13 +1017,14 @@ host_float_ops<T>::from_string (gdb_byte *addr, const struct type *type,
 
 /* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
    to an integer value (rounding towards zero).  */
-template<typename T> LONGEST
+template<typename T>
+LONGEST
 host_float_ops<T>::to_longest (const gdb_byte *addr,
 			       const struct type *type) const
 {
   T host_float;
   from_target (type, addr, &host_float);
-  T min_possible_range = static_cast<T>(std::numeric_limits<LONGEST>::min());
+  T min_possible_range = static_cast<T> (std::numeric_limits<LONGEST>::min ());
   T max_possible_range = -min_possible_range;
   /* host_float can be converted to an integer as long as it's in
      the range [min_possible_range, max_possible_range). If not, it is either
@@ -1016,14 +1033,15 @@ host_float_ops<T>::to_longest (const gdb_byte *addr,
   if (host_float < max_possible_range && host_float >= min_possible_range)
     return static_cast<LONGEST> (host_float);
   if (host_float < min_possible_range)
-    return std::numeric_limits<LONGEST>::min();
+    return std::numeric_limits<LONGEST>::min ();
   /* This line will be executed if host_float is NaN.  */
-  return std::numeric_limits<LONGEST>::max();
+  return std::numeric_limits<LONGEST>::max ();
 }
 
 /* Convert signed integer VAL to a target floating-number of type TYPE
    and store it as byte-stream ADDR.  */
-template<typename T> void
+template<typename T>
+void
 host_float_ops<T>::from_longest (gdb_byte *addr, const struct type *type,
 				 LONGEST val) const
 {
@@ -1033,7 +1051,8 @@ host_float_ops<T>::from_longest (gdb_byte *addr, const struct type *type,
 
 /* Convert unsigned integer VAL to a target floating-number of type TYPE
    and store it as byte-stream ADDR.  */
-template<typename T> void
+template<typename T>
+void
 host_float_ops<T>::from_ulongest (gdb_byte *addr, const struct type *type,
 				  ULONGEST val) const
 {
@@ -1043,7 +1062,8 @@ host_float_ops<T>::from_ulongest (gdb_byte *addr, const struct type *type,
 
 /* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
    to a floating-point value in the host "double" format.  */
-template<typename T> double
+template<typename T>
+double
 host_float_ops<T>::to_host_double (const gdb_byte *addr,
 				   const struct type *type) const
 {
@@ -1054,7 +1074,8 @@ host_float_ops<T>::to_host_double (const gdb_byte *addr,
 
 /* Convert floating-point value VAL in the host "double" format to a target
    floating-number of type TYPE and store it as byte-stream ADDR.  */
-template<typename T> void
+template<typename T>
+void
 host_float_ops<T>::from_host_double (gdb_byte *addr, const struct type *type,
 				     double val) const
 {
@@ -1065,11 +1086,10 @@ host_float_ops<T>::from_host_double (gdb_byte *addr, const struct type *type,
 /* Convert a floating-point number of type FROM_TYPE from the target
    byte-stream FROM to a floating-point number of type TO_TYPE, and
    store it to the target byte-stream TO.  */
-template<typename T> void
-host_float_ops<T>::convert (const gdb_byte *from,
-			    const struct type *from_type,
-			    gdb_byte *to,
-			    const struct type *to_type) const
+template<typename T>
+void
+host_float_ops<T>::convert (const gdb_byte *from, const struct type *from_type,
+			    gdb_byte *to, const struct type *to_type) const
 {
   T host_float;
   from_target (from_type, from, &host_float);
@@ -1080,11 +1100,12 @@ host_float_ops<T>::convert (const gdb_byte *from,
    target byte streams X and Y, interpreted as floating-point numbers of
    types TYPE_X and TYPE_Y, respectively.  Convert the result to format
    TYPE_RES and store it into the byte-stream RES.  */
-template<typename T> void
-host_float_ops<T>::binop (enum exp_opcode op,
-			  const gdb_byte *x, const struct type *type_x,
-			  const gdb_byte *y, const struct type *type_y,
-			  gdb_byte *res, const struct type *type_res) const
+template<typename T>
+void
+host_float_ops<T>::binop (enum exp_opcode op, const gdb_byte *x,
+			  const struct type *type_x, const gdb_byte *y,
+			  const struct type *type_y, gdb_byte *res,
+			  const struct type *type_res) const
 {
   T v1, v2, v = 0;
 
@@ -1093,41 +1114,40 @@ host_float_ops<T>::binop (enum exp_opcode op,
 
   switch (op)
     {
-      case BINOP_ADD:
-	v = v1 + v2;
-	break;
+    case BINOP_ADD:
+      v = v1 + v2;
+      break;
 
-      case BINOP_SUB:
-	v = v1 - v2;
-	break;
+    case BINOP_SUB:
+      v = v1 - v2;
+      break;
 
-      case BINOP_MUL:
-	v = v1 * v2;
-	break;
+    case BINOP_MUL:
+      v = v1 * v2;
+      break;
 
-      case BINOP_DIV:
-	v = v1 / v2;
-	break;
+    case BINOP_DIV:
+      v = v1 / v2;
+      break;
 
-      case BINOP_EXP:
-	errno = 0;
-	v = pow (v1, v2);
-	if (errno)
-	  error (_("Cannot perform exponentiation: %s"),
-		 safe_strerror (errno));
-	break;
+    case BINOP_EXP:
+      errno = 0;
+      v = pow (v1, v2);
+      if (errno)
+	error (_ ("Cannot perform exponentiation: %s"), safe_strerror (errno));
+      break;
 
-      case BINOP_MIN:
-	v = v1 < v2 ? v1 : v2;
-	break;
+    case BINOP_MIN:
+      v = v1 < v2 ? v1 : v2;
+      break;
 
-      case BINOP_MAX:
-	v = v1 > v2 ? v1 : v2;
-	break;
+    case BINOP_MAX:
+      v = v1 > v2 ? v1 : v2;
+      break;
 
-      default:
-	error (_("Integer-only operation on floating point number."));
-	break;
+    default:
+      error (_ ("Integer-only operation on floating point number."));
+      break;
     }
 
   to_target (type_res, &v, res);
@@ -1136,7 +1156,8 @@ host_float_ops<T>::binop (enum exp_opcode op,
 /* Compare the two target byte streams X and Y, interpreted as floating-point
    numbers of types TYPE_X and TYPE_Y, respectively.  Return zero if X and Y
    are equal, -1 if X is less than Y, and 1 otherwise.  */
-template<typename T> int
+template<typename T>
+int
 host_float_ops<T>::compare (const gdb_byte *x, const struct type *type_x,
 			    const gdb_byte *y, const struct type *type_y) const
 {
@@ -1152,7 +1173,6 @@ host_float_ops<T>::compare (const gdb_byte *x, const struct type *type_x,
   return 1;
 }
 
-
 /* Implementation of target_float_ops using the MPFR library
    mpfr_t as intermediate type.  */
 
@@ -1163,6 +1183,7 @@ host_float_ops<T>::compare (const gdb_byte *x, const struct type *type_x,
 class mpfr_float_ops : public target_float_ops
 {
 public:
+
   std::string to_string (const gdb_byte *addr, const struct type *type,
 			 const char *format) const override;
   bool from_string (gdb_byte *addr, const struct type *type,
@@ -1181,18 +1202,20 @@ public:
   void convert (const gdb_byte *from, const struct type *from_type,
 		gdb_byte *to, const struct type *to_type) const override;
 
-  void binop (enum exp_opcode opcode,
-	      const gdb_byte *x, const struct type *type_x,
-	      const gdb_byte *y, const struct type *type_y,
-	      gdb_byte *res, const struct type *type_res) const override;
-  int compare (const gdb_byte *x, const struct type *type_x,
-	       const gdb_byte *y, const struct type *type_y) const override;
+  void binop (enum exp_opcode opcode, const gdb_byte *x,
+	      const struct type *type_x, const gdb_byte *y,
+	      const struct type *type_y, gdb_byte *res,
+	      const struct type *type_res) const override;
+  int compare (const gdb_byte *x, const struct type *type_x, const gdb_byte *y,
+	       const struct type *type_y) const override;
 
 private:
+
   /* Local wrapper class to handle mpfr_t initialization and cleanup.  */
   class gdb_mpfr
   {
   public:
+
     mpfr_t val;
 
     gdb_mpfr (const struct type *type)
@@ -1206,23 +1229,19 @@ private:
       mpfr_init2 (val, mpfr_get_prec (source.val));
     }
 
-    ~gdb_mpfr ()
-    {
-      mpfr_clear (val);
-    }
+    ~gdb_mpfr () { mpfr_clear (val); }
   };
 
-  void from_target (const struct floatformat *fmt,
-		const gdb_byte *from, gdb_mpfr &to) const;
-  void from_target (const struct type *type,
-		const gdb_byte *from, gdb_mpfr &to) const;
+  void from_target (const struct floatformat *fmt, const gdb_byte *from,
+		    gdb_mpfr &to) const;
+  void from_target (const struct type *type, const gdb_byte *from,
+		    gdb_mpfr &to) const;
 
-  void to_target (const struct type *type,
-		  const gdb_mpfr &from, gdb_byte *to) const;
-  void to_target (const struct floatformat *fmt,
-		  const gdb_mpfr &from, gdb_byte *to) const;
+  void to_target (const struct type *type, const gdb_mpfr &from,
+		  gdb_byte *to) const;
+  void to_target (const struct floatformat *fmt, const gdb_mpfr &from,
+		  gdb_byte *to) const;
 };
-
 
 /* Convert TO/FROM target floating-point format to mpfr_t.  */
 
@@ -1235,7 +1254,7 @@ mpfr_float_ops::from_target (const struct floatformat *fmt,
   unsigned long mant;
   unsigned int mant_bits, mant_off;
   int mant_bits_left;
-  int special_exponent;		/* It's a NaN, denorm or zero.  */
+  int special_exponent; /* It's a NaN, denorm or zero.  */
   enum floatformat_byteorders order;
   unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
   enum float_kind kind;
@@ -1273,13 +1292,13 @@ mpfr_float_ops::from_target (const struct floatformat *fmt,
 	  return;
 	}
       from_target (fmt->split_half,
-	       from + fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2, bot);
+		   from + fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2, bot);
       mpfr_add (to.val, top.val, bot.val, MPFR_RNDN);
       return;
     }
 
-  exponent = get_field (from, order, fmt->totalsize, fmt->exp_start,
-			fmt->exp_len);
+  exponent
+    = get_field (from, order, fmt->totalsize, fmt->exp_start, fmt->exp_len);
   /* Note that if exponent indicates a NaN, we can't really do anything useful
      (not knowing if the host has NaN's, or how to build one).  So it will
      end up as an infinity or something close; that is OK.  */
@@ -1335,15 +1354,15 @@ mpfr_float_ops::from_target (const struct floatformat *fmt,
 }
 
 void
-mpfr_float_ops::from_target (const struct type *type,
-			     const gdb_byte *from, gdb_mpfr &to) const
+mpfr_float_ops::from_target (const struct type *type, const gdb_byte *from,
+			     gdb_mpfr &to) const
 {
   from_target (floatformat_from_type (type), from, to);
 }
 
 void
-mpfr_float_ops::to_target (const struct floatformat *fmt,
-			   const gdb_mpfr &from, gdb_byte *orig_to) const
+mpfr_float_ops::to_target (const struct floatformat *fmt, const gdb_mpfr &from,
+			   gdb_byte *orig_to) const
 {
   unsigned char *to = orig_to;
   mpfr_exp_t exponent;
@@ -1381,18 +1400,17 @@ mpfr_float_ops::to_target (const struct floatformat *fmt,
   gdb_mpfr tmp (from);
 
   if (mpfr_zero_p (from.val))
-    goto finalize_byteorder;	/* Result is zero */
+    goto finalize_byteorder; /* Result is zero */
 
   mpfr_set (tmp.val, from.val, MPFR_RNDN);
 
-  if (mpfr_nan_p (tmp.val))	/* Result is NaN */
+  if (mpfr_nan_p (tmp.val)) /* Result is NaN */
     {
       /* From is NaN */
-      put_field (to, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, fmt->exp_nan);
+      put_field (to, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+		 fmt->exp_nan);
       /* Be sure it's not infinity, but NaN value is irrel.  */
-      put_field (to, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 1);
+      put_field (to, order, fmt->totalsize, fmt->man_start, fmt->man_len, 1);
       goto finalize_byteorder;
     }
 
@@ -1403,14 +1421,13 @@ mpfr_float_ops::to_target (const struct floatformat *fmt,
       mpfr_neg (tmp.val, tmp.val, MPFR_RNDN);
     }
 
-  if (mpfr_inf_p (tmp.val))		/* Result is Infinity.  */
+  if (mpfr_inf_p (tmp.val)) /* Result is Infinity.  */
     {
       /* Infinity exponent is same as NaN's.  */
-      put_field (to, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, fmt->exp_nan);
+      put_field (to, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+		 fmt->exp_nan);
       /* Infinity mantissa is all zeroes.  */
-      put_field (to, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 0);
+      put_field (to, order, fmt->totalsize, fmt->man_start, fmt->man_len, 0);
       goto finalize_byteorder;
     }
 
@@ -1420,10 +1437,8 @@ mpfr_float_ops::to_target (const struct floatformat *fmt,
     {
       /* The value is too small to be expressed in the destination
 	 type (not enough bits in the exponent.  Treat as 0.  */
-      put_field (to, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, 0);
-      put_field (to, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 0);
+      put_field (to, order, fmt->totalsize, fmt->exp_start, fmt->exp_len, 0);
+      put_field (to, order, fmt->totalsize, fmt->man_start, fmt->man_len, 0);
       goto finalize_byteorder;
     }
 
@@ -1431,10 +1446,9 @@ mpfr_float_ops::to_target (const struct floatformat *fmt,
     {
       /* The value is too large to fit into the destination.
 	 Treat as infinity.  */
-      put_field (to, order, fmt->totalsize, fmt->exp_start,
-		 fmt->exp_len, fmt->exp_nan);
-      put_field (to, order, fmt->totalsize, fmt->man_start,
-		 fmt->man_len, 0);
+      put_field (to, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+		 fmt->exp_nan);
+      put_field (to, order, fmt->totalsize, fmt->man_start, fmt->man_len, 0);
       goto finalize_byteorder;
     }
 
@@ -1480,21 +1494,20 @@ mpfr_float_ops::to_target (const struct floatformat *fmt,
 	  mant_long >>= 32 - mant_bits;
 	}
 
-      put_field (to, order, fmt->totalsize,
-		 mant_off, mant_bits, mant_long);
+      put_field (to, order, fmt->totalsize, mant_off, mant_bits, mant_long);
       mant_off += mant_bits;
       mant_bits_left -= mant_bits;
     }
 
- finalize_byteorder:
+finalize_byteorder:
   /* Do we need to byte-swap the words in the result?  */
   if (order != fmt->byteorder)
     floatformat_normalize_byteorder (fmt, newto, orig_to);
 }
 
 void
-mpfr_float_ops::to_target (const struct type *type,
-			   const gdb_mpfr &from, gdb_byte *to) const
+mpfr_float_ops::to_target (const struct type *type, const gdb_mpfr &from,
+			   gdb_byte *to) const
 {
   /* Ensure possible padding bytes in the target buffer are zeroed out.  */
   memset (to, 0, type->length ());
@@ -1505,8 +1518,7 @@ mpfr_float_ops::to_target (const struct type *type,
 /* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
    to a string, optionally using the print format FORMAT.  */
 std::string
-mpfr_float_ops::to_string (const gdb_byte *addr,
-			   const struct type *type,
+mpfr_float_ops::to_string (const gdb_byte *addr, const struct type *type,
 			   const char *format) const
 {
   const struct floatformat *fmt = floatformat_from_type (type);
@@ -1523,13 +1535,13 @@ mpfr_float_ops::to_string (const gdb_byte *addr,
       enum float_kind kind = floatformat_classify (fmt, addr);
       if (kind == float_nan)
 	{
-	  const char *sign = floatformat_is_negative (fmt, addr)? "-" : "";
+	  const char *sign = floatformat_is_negative (fmt, addr) ? "-" : "";
 	  const char *mantissa = floatformat_mantissa (fmt, addr);
 	  return string_printf ("%snan(0x%s)", sign, mantissa);
 	}
       else if (kind == float_infinite)
 	{
-	  const char *sign = floatformat_is_negative (fmt, addr)? "-" : "";
+	  const char *sign = floatformat_is_negative (fmt, addr) ? "-" : "";
 	  return string_printf ("%sinf", sign);
 	}
     }
@@ -1550,8 +1562,7 @@ mpfr_float_ops::to_string (const gdb_byte *addr,
 /* Parse string STRING into a target floating-number of type TYPE and
    store it as byte-stream ADDR.  Return whether parsing succeeded.  */
 bool
-mpfr_float_ops::from_string (gdb_byte *addr,
-			     const struct type *type,
+mpfr_float_ops::from_string (gdb_byte *addr, const struct type *type,
 			     const std::string &in) const
 {
   gdb_mpfr tmp (type);
@@ -1581,8 +1592,7 @@ mpfr_float_ops::to_longest (const gdb_byte *addr,
 /* Convert signed integer VAL to a target floating-number of type TYPE
    and store it as byte-stream ADDR.  */
 void
-mpfr_float_ops::from_longest (gdb_byte *addr,
-			      const struct type *type,
+mpfr_float_ops::from_longest (gdb_byte *addr, const struct type *type,
 			      LONGEST val) const
 {
   gdb_mpfr tmp (type);
@@ -1593,8 +1603,7 @@ mpfr_float_ops::from_longest (gdb_byte *addr,
 /* Convert unsigned integer VAL to a target floating-number of type TYPE
    and store it as byte-stream ADDR.  */
 void
-mpfr_float_ops::from_ulongest (gdb_byte *addr,
-			       const struct type *type,
+mpfr_float_ops::from_ulongest (gdb_byte *addr, const struct type *type,
 			       ULONGEST val) const
 {
   gdb_mpfr tmp (type);
@@ -1616,8 +1625,7 @@ mpfr_float_ops::to_host_double (const gdb_byte *addr,
 /* Convert floating-point value VAL in the host "double" format to a target
    floating-number of type TYPE and store it as byte-stream ADDR.  */
 void
-mpfr_float_ops::from_host_double (gdb_byte *addr,
-				  const struct type *type,
+mpfr_float_ops::from_host_double (gdb_byte *addr, const struct type *type,
 				  double val) const
 {
   gdb_mpfr tmp (type);
@@ -1629,10 +1637,8 @@ mpfr_float_ops::from_host_double (gdb_byte *addr,
    byte-stream FROM to a floating-point number of type TO_TYPE, and
    store it to the target byte-stream TO.  */
 void
-mpfr_float_ops::convert (const gdb_byte *from,
-			 const struct type *from_type,
-			 gdb_byte *to,
-			 const struct type *to_type) const
+mpfr_float_ops::convert (const gdb_byte *from, const struct type *from_type,
+			 gdb_byte *to, const struct type *to_type) const
 {
   gdb_mpfr from_tmp (from_type), to_tmp (to_type);
   from_target (from_type, from, from_tmp);
@@ -1645,10 +1651,10 @@ mpfr_float_ops::convert (const gdb_byte *from,
    types TYPE_X and TYPE_Y, respectively.  Convert the result to type
    TYPE_RES and store it into the byte-stream RES.  */
 void
-mpfr_float_ops::binop (enum exp_opcode op,
-		       const gdb_byte *x, const struct type *type_x,
-		       const gdb_byte *y, const struct type *type_y,
-		       gdb_byte *res, const struct type *type_res) const
+mpfr_float_ops::binop (enum exp_opcode op, const gdb_byte *x,
+		       const struct type *type_x, const gdb_byte *y,
+		       const struct type *type_y, gdb_byte *res,
+		       const struct type *type_res) const
 {
   gdb_mpfr x_tmp (type_x), y_tmp (type_y), tmp (type_res);
 
@@ -1657,37 +1663,37 @@ mpfr_float_ops::binop (enum exp_opcode op,
 
   switch (op)
     {
-      case BINOP_ADD:
-	mpfr_add (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
-	break;
+    case BINOP_ADD:
+      mpfr_add (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+      break;
 
-      case BINOP_SUB:
-	mpfr_sub (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
-	break;
+    case BINOP_SUB:
+      mpfr_sub (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+      break;
 
-      case BINOP_MUL:
-	mpfr_mul (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
-	break;
+    case BINOP_MUL:
+      mpfr_mul (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+      break;
 
-      case BINOP_DIV:
-	mpfr_div (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
-	break;
+    case BINOP_DIV:
+      mpfr_div (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+      break;
 
-      case BINOP_EXP:
-	mpfr_pow (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
-	break;
+    case BINOP_EXP:
+      mpfr_pow (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+      break;
 
-      case BINOP_MIN:
-	mpfr_min (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
-	break;
+    case BINOP_MIN:
+      mpfr_min (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+      break;
 
-      case BINOP_MAX:
-	mpfr_max (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
-	break;
+    case BINOP_MAX:
+      mpfr_max (tmp.val, x_tmp.val, y_tmp.val, MPFR_RNDN);
+      break;
 
-      default:
-	error (_("Integer-only operation on floating point number."));
-	break;
+    default:
+      error (_ ("Integer-only operation on floating point number."));
+      break;
     }
 
   to_target (type_res, tmp, res);
@@ -1713,7 +1719,6 @@ mpfr_float_ops::compare (const gdb_byte *x, const struct type *type_x,
     return 1;
 }
 
-
 /* Helper routines operating on decimal floating-point data.  */
 
 /* Decimal floating point is one of the extension to IEEE 754, which is
@@ -1730,7 +1735,7 @@ mpfr_float_ops::compare (const gdb_byte *x, const struct type *type_x,
 
 /* When using decimal128, this is the maximum string length + 1
    (value comes from libdecnumber's DECIMAL128_String constant).  */
-#define MAX_DECIMAL_STRING  43
+#define MAX_DECIMAL_STRING 43
 
 /* In GDB, we are using an array of gdb_byte to represent decimal values.
    They are stored in host byte order.  This routine does the conversion if
@@ -1768,15 +1773,15 @@ set_decnumber_context (decContext *ctx, const struct type *type)
 
   switch (type->length ())
     {
-      case 4:
-	decContextDefault (ctx, DEC_INIT_DECIMAL32);
-	break;
-      case 8:
-	decContextDefault (ctx, DEC_INIT_DECIMAL64);
-	break;
-      case 16:
-	decContextDefault (ctx, DEC_INIT_DECIMAL128);
-	break;
+    case 4:
+      decContextDefault (ctx, DEC_INIT_DECIMAL32);
+      break;
+    case 8:
+      decContextDefault (ctx, DEC_INIT_DECIMAL64);
+      break;
+    case 16:
+      decContextDefault (ctx, DEC_INIT_DECIMAL128);
+      break;
     }
 
   ctx->traps = 0;
@@ -1795,7 +1800,7 @@ decimal_check_errors (decContext *ctx)
     {
       /* Leave only the error bits in the status flags.  */
       ctx->status &= DEC_IEEE_854_Invalid_operation;
-      error (_("Cannot perform operation: %s"),
+      error (_ ("Cannot perform operation: %s"),
 	     decContextStatusToString (ctx));
     }
 }
@@ -1803,8 +1808,8 @@ decimal_check_errors (decContext *ctx)
 /* Helper function to convert from libdecnumber's appropriate representation
    for computation to each size of decimal float.  */
 static void
-decimal_from_number (const decNumber *from,
-		     gdb_byte *to, const struct type *type)
+decimal_from_number (const decNumber *from, gdb_byte *to,
+		     const struct type *type)
 {
   gdb_byte dec[16];
 
@@ -1814,18 +1819,18 @@ decimal_from_number (const decNumber *from,
 
   switch (type->length ())
     {
-      case 4:
-	decimal32FromNumber ((decimal32 *) dec, from, &set);
-	break;
-      case 8:
-	decimal64FromNumber ((decimal64 *) dec, from, &set);
-	break;
-      case 16:
-	decimal128FromNumber ((decimal128 *) dec, from, &set);
-	break;
-      default:
-	error (_("Unknown decimal floating point type."));
-	break;
+    case 4:
+      decimal32FromNumber ((decimal32 *) dec, from, &set);
+      break;
+    case 8:
+      decimal64FromNumber ((decimal64 *) dec, from, &set);
+      break;
+    case 16:
+      decimal128FromNumber ((decimal128 *) dec, from, &set);
+      break;
+    default:
+      error (_ ("Unknown decimal floating point type."));
+      break;
     }
 
   match_endianness (dec, type, to);
@@ -1842,18 +1847,18 @@ decimal_to_number (const gdb_byte *addr, const struct type *type,
 
   switch (type->length ())
     {
-      case 4:
-	decimal32ToNumber ((decimal32 *) dec, to);
-	break;
-      case 8:
-	decimal64ToNumber ((decimal64 *) dec, to);
-	break;
-      case 16:
-	decimal128ToNumber ((decimal128 *) dec, to);
-	break;
-      default:
-	error (_("Unknown decimal floating point type."));
-	break;
+    case 4:
+      decimal32ToNumber ((decimal32 *) dec, to);
+      break;
+    case 8:
+      decimal64ToNumber ((decimal64 *) dec, to);
+      break;
+    case 16:
+      decimal128ToNumber ((decimal128 *) dec, to);
+      break;
+    default:
+      error (_ ("Unknown decimal floating point type."));
+      break;
     }
 }
 
@@ -1868,13 +1873,13 @@ decimal_is_zero (const gdb_byte *addr, const struct type *type)
   return decNumberIsZero (&number);
 }
 
-
 /* Implementation of target_float_ops using the libdecnumber decNumber type
    as intermediate format.  */
 
 class decimal_float_ops : public target_float_ops
 {
 public:
+
   std::string to_string (const gdb_byte *addr, const struct type *type,
 			 const char *format) const override;
   bool from_string (gdb_byte *addr, const struct type *type,
@@ -1886,6 +1891,7 @@ public:
 		     LONGEST val) const override;
   void from_ulongest (gdb_byte *addr, const struct type *type,
 		      ULONGEST val) const override;
+
   double to_host_double (const gdb_byte *addr,
 			 const struct type *type) const override
   {
@@ -1893,6 +1899,7 @@ public:
        types and the host double type.  */
     gdb_assert_not_reached ("invalid operation on decimal float");
   }
+
   void from_host_double (gdb_byte *addr, const struct type *type,
 			 double val) const override
   {
@@ -1900,15 +1907,16 @@ public:
        types and the host double type.  */
     gdb_assert_not_reached ("invalid operation on decimal float");
   }
+
   void convert (const gdb_byte *from, const struct type *from_type,
 		gdb_byte *to, const struct type *to_type) const override;
 
-  void binop (enum exp_opcode opcode,
-	      const gdb_byte *x, const struct type *type_x,
-	      const gdb_byte *y, const struct type *type_y,
-	      gdb_byte *res, const struct type *type_res) const override;
-  int compare (const gdb_byte *x, const struct type *type_x,
-	       const gdb_byte *y, const struct type *type_y) const override;
+  void binop (enum exp_opcode opcode, const gdb_byte *x,
+	      const struct type *type_x, const gdb_byte *y,
+	      const struct type *type_y, gdb_byte *res,
+	      const struct type *type_res) const override;
+  int compare (const gdb_byte *x, const struct type *type_x, const gdb_byte *y,
+	       const struct type *type_y) const override;
 };
 
 /* Convert decimal type to its string representation.  LEN is the length
@@ -1927,7 +1935,7 @@ decimal_float_ops::to_string (const gdb_byte *addr, const struct type *type,
       /* We don't handle format strings (yet).  If the host printf supports
 	 decimal floating point types, just use this.  Otherwise, fall back
 	 to printing the number while ignoring the format string.  */
-#if defined (PRINTF_HAS_DECFLOAT)
+#if defined(PRINTF_HAS_DECFLOAT)
       /* FIXME: This makes unwarranted assumptions about the host ABI!  */
       return string_printf (format, dec);
 #endif
@@ -1938,18 +1946,18 @@ decimal_float_ops::to_string (const gdb_byte *addr, const struct type *type,
 
   switch (type->length ())
     {
-      case 4:
-	decimal32ToString ((decimal32 *) dec, &result[0]);
-	break;
-      case 8:
-	decimal64ToString ((decimal64 *) dec, &result[0]);
-	break;
-      case 16:
-	decimal128ToString ((decimal128 *) dec, &result[0]);
-	break;
-      default:
-	error (_("Unknown decimal floating point type."));
-	break;
+    case 4:
+      decimal32ToString ((decimal32 *) dec, &result[0]);
+      break;
+    case 8:
+      decimal64ToString ((decimal64 *) dec, &result[0]);
+      break;
+    case 16:
+      decimal128ToString ((decimal128 *) dec, &result[0]);
+      break;
+    default:
+      error (_ ("Unknown decimal floating point type."));
+      break;
     }
 
   return result;
@@ -1969,18 +1977,18 @@ decimal_float_ops::from_string (gdb_byte *addr, const struct type *type,
 
   switch (type->length ())
     {
-      case 4:
-	decimal32FromString ((decimal32 *) dec, string.c_str (), &set);
-	break;
-      case 8:
-	decimal64FromString ((decimal64 *) dec, string.c_str (), &set);
-	break;
-      case 16:
-	decimal128FromString ((decimal128 *) dec, string.c_str (), &set);
-	break;
-      default:
-	error (_("Unknown decimal floating point type."));
-	break;
+    case 4:
+      decimal32FromString ((decimal32 *) dec, string.c_str (), &set);
+      break;
+    case 8:
+      decimal64FromString ((decimal64 *) dec, string.c_str (), &set);
+      break;
+    case 16:
+      decimal128FromString ((decimal128 *) dec, string.c_str (), &set);
+      break;
+    default:
+      error (_ ("Unknown decimal floating point type."));
+      break;
     }
 
   match_endianness (dec, type, addr);
@@ -2000,8 +2008,8 @@ decimal_float_ops::from_longest (gdb_byte *addr, const struct type *type,
 
   if ((int32_t) from != from)
     /* libdecnumber can convert only 32-bit integers.  */
-    error (_("Conversion of large integer to a "
-	     "decimal floating type is not supported."));
+    error (_ ("Conversion of large integer to a "
+	      "decimal floating type is not supported."));
 
   decNumberFromInt32 (&number, (int32_t) from);
 
@@ -2017,8 +2025,8 @@ decimal_float_ops::from_ulongest (gdb_byte *addr, const struct type *type,
 
   if ((uint32_t) from != from)
     /* libdecnumber can convert only 32-bit integers.  */
-    error (_("Conversion of large integer to a "
-	     "decimal floating type is not supported."));
+    error (_ ("Conversion of large integer to a "
+	      "decimal floating type is not supported."));
 
   decNumberFromUInt32 (&number, (uint32_t) from);
 
@@ -2040,10 +2048,10 @@ decimal_float_ops::to_longest (const gdb_byte *addr,
    and byte orders BYTE_ORDER_X and BYTE_ORDER_Y, and store value in
    RESULT with size LEN_RESULT and byte order BYTE_ORDER_RESULT.  */
 void
-decimal_float_ops::binop (enum exp_opcode op,
-			  const gdb_byte *x, const struct type *type_x,
-			  const gdb_byte *y, const struct type *type_y,
-			  gdb_byte *res, const struct type *type_res) const
+decimal_float_ops::binop (enum exp_opcode op, const gdb_byte *x,
+			  const struct type *type_x, const gdb_byte *y,
+			  const struct type *type_y, gdb_byte *res,
+			  const struct type *type_res) const
 {
   decContext set;
   decNumber number1, number2, number3;
@@ -2055,24 +2063,24 @@ decimal_float_ops::binop (enum exp_opcode op,
 
   switch (op)
     {
-      case BINOP_ADD:
-	decNumberAdd (&number3, &number1, &number2, &set);
-	break;
-      case BINOP_SUB:
-	decNumberSubtract (&number3, &number1, &number2, &set);
-	break;
-      case BINOP_MUL:
-	decNumberMultiply (&number3, &number1, &number2, &set);
-	break;
-      case BINOP_DIV:
-	decNumberDivide (&number3, &number1, &number2, &set);
-	break;
-      case BINOP_EXP:
-	decNumberPower (&number3, &number1, &number2, &set);
-	break;
-     default:
-	error (_("Operation not valid for decimal floating point number."));
-	break;
+    case BINOP_ADD:
+      decNumberAdd (&number3, &number1, &number2, &set);
+      break;
+    case BINOP_SUB:
+      decNumberSubtract (&number3, &number1, &number2, &set);
+      break;
+    case BINOP_MUL:
+      decNumberMultiply (&number3, &number1, &number2, &set);
+      break;
+    case BINOP_DIV:
+      decNumberDivide (&number3, &number1, &number2, &set);
+      break;
+    case BINOP_EXP:
+      decNumberPower (&number3, &number1, &number2, &set);
+      break;
+    default:
+      error (_ ("Operation not valid for decimal floating point number."));
+      break;
     }
 
   /* Check for errors in the DFP operation.  */
@@ -2105,7 +2113,7 @@ decimal_float_ops::compare (const gdb_byte *x, const struct type *type_x,
   decimal_check_errors (&set);
 
   if (decNumberIsNaN (&result))
-    error (_("Comparison with an invalid number (NaN)."));
+    error (_ ("Comparison with an invalid number (NaN)."));
   else if (decNumberIsZero (&result))
     return 0;
   else if (decNumberIsNegative (&result))
@@ -2126,7 +2134,6 @@ decimal_float_ops::convert (const gdb_byte *from, const struct type *from_type,
   decimal_from_number (&number, to, to_type);
 }
 
-
 /* Typed floating-point routines.  These routines operate on floating-point
    values in target format, represented by a byte buffer interpreted as a
    "struct type", which may be either a binary or decimal floating-point
@@ -2143,24 +2150,22 @@ target_float_same_category_p (const struct type *type1,
 
 /* Return whether TYPE1 and TYPE2 use the same floating-point format.  */
 static bool
-target_float_same_format_p (const struct type *type1,
-			    const struct type *type2)
+target_float_same_format_p (const struct type *type1, const struct type *type2)
 {
   if (!target_float_same_category_p (type1, type2))
     return false;
 
   switch (type1->code ())
     {
-      case TYPE_CODE_FLT:
-	return floatformat_from_type (type1) == floatformat_from_type (type2);
+    case TYPE_CODE_FLT:
+      return floatformat_from_type (type1) == floatformat_from_type (type2);
 
-      case TYPE_CODE_DECFLOAT:
-	return (type1->length () == type2->length ()
-		&& (type_byte_order (type1)
-		    == type_byte_order (type2)));
+    case TYPE_CODE_DECFLOAT:
+      return (type1->length () == type2->length ()
+	      && (type_byte_order (type1) == type_byte_order (type2)));
 
-      default:
-	gdb_assert_not_reached ("unexpected type code");
+    default:
+      gdb_assert_not_reached ("unexpected type code");
     }
 }
 
@@ -2171,14 +2176,14 @@ target_float_format_length (const struct type *type)
 {
   switch (type->code ())
     {
-      case TYPE_CODE_FLT:
-	return floatformat_totalsize_bytes (floatformat_from_type (type));
+    case TYPE_CODE_FLT:
+      return floatformat_totalsize_bytes (floatformat_from_type (type));
 
-      case TYPE_CODE_DECFLOAT:
-	return type->length ();
+    case TYPE_CODE_DECFLOAT:
+      return type->length ();
 
-      default:
-	gdb_assert_not_reached ("unexpected type code");
+    default:
+      gdb_assert_not_reached ("unexpected type code");
     }
 }
 
@@ -2203,30 +2208,30 @@ get_target_float_ops_kind (const struct type *type)
 {
   switch (type->code ())
     {
-      case TYPE_CODE_FLT:
-	{
-	  const struct floatformat *fmt = floatformat_from_type (type);
+    case TYPE_CODE_FLT:
+      {
+	const struct floatformat *fmt = floatformat_from_type (type);
 
-	  /* Binary floating-point formats matching a host format.  */
-	  if (fmt == host_float_format)
-	    return target_float_ops_kind::host_float;
-	  if (fmt == host_double_format)
-	    return target_float_ops_kind::host_double;
-	  if (fmt == host_long_double_format)
-	    return target_float_ops_kind::host_long_double;
+	/* Binary floating-point formats matching a host format.  */
+	if (fmt == host_float_format)
+	  return target_float_ops_kind::host_float;
+	if (fmt == host_double_format)
+	  return target_float_ops_kind::host_double;
+	if (fmt == host_long_double_format)
+	  return target_float_ops_kind::host_long_double;
 
-	  /* Any other binary floating-point format.  */
-	  return target_float_ops_kind::binary;
-	}
+	/* Any other binary floating-point format.  */
+	return target_float_ops_kind::binary;
+      }
 
-      case TYPE_CODE_DECFLOAT:
-	{
-	  /* Any decimal floating-point format.  */
-	  return target_float_ops_kind::decimal;
-	}
+    case TYPE_CODE_DECFLOAT:
+      {
+	/* Any decimal floating-point format.  */
+	return target_float_ops_kind::decimal;
+      }
 
-      default:
-	gdb_assert_not_reached ("unexpected type code");
+    default:
+      gdb_assert_not_reached ("unexpected type code");
     }
 }
 
@@ -2236,46 +2241,46 @@ get_target_float_ops (enum target_float_ops_kind kind)
 {
   switch (kind)
     {
-      /* If the type format matches one of the host floating-point
+    /* If the type format matches one of the host floating-point
 	 types, use that type as intermediate format.  */
-      case target_float_ops_kind::host_float:
-	{
-	  static host_float_ops<float> host_float_ops_float;
-	  return &host_float_ops_float;
-	}
+    case target_float_ops_kind::host_float:
+      {
+	static host_float_ops<float> host_float_ops_float;
+	return &host_float_ops_float;
+      }
 
-      case target_float_ops_kind::host_double:
-	{
-	  static host_float_ops<double> host_float_ops_double;
-	  return &host_float_ops_double;
-	}
+    case target_float_ops_kind::host_double:
+      {
+	static host_float_ops<double> host_float_ops_double;
+	return &host_float_ops_double;
+      }
 
-      case target_float_ops_kind::host_long_double:
-	{
-	  static host_float_ops<long double> host_float_ops_long_double;
-	  return &host_float_ops_long_double;
-	}
+    case target_float_ops_kind::host_long_double:
+      {
+	static host_float_ops<long double> host_float_ops_long_double;
+	return &host_float_ops_long_double;
+      }
 
-      /* For binary floating-point formats that do not match any host format,
+    /* For binary floating-point formats that do not match any host format,
 	 use mpfr_t as intermediate format to provide precise target-floating
 	 point emulation.  However, if the MPFR library is not available,
 	 use the largest host floating-point type as intermediate format.  */
-      case target_float_ops_kind::binary:
-	{
-	  static mpfr_float_ops binary_float_ops;
-	  return &binary_float_ops;
-	}
+    case target_float_ops_kind::binary:
+      {
+	static mpfr_float_ops binary_float_ops;
+	return &binary_float_ops;
+      }
 
-      /* For decimal floating-point types, always use the libdecnumber
+    /* For decimal floating-point types, always use the libdecnumber
 	 decNumber type as intermediate format.  */
-      case target_float_ops_kind::decimal:
-	{
-	  static decimal_float_ops decimal_float_ops;
-	  return &decimal_float_ops;
-	}
+    case target_float_ops_kind::decimal:
+      {
+	static decimal_float_ops decimal_float_ops;
+	return &decimal_float_ops;
+      }
 
-      default:
-	gdb_assert_not_reached ("unexpected target_float_ops_kind");
+    default:
+      gdb_assert_not_reached ("unexpected target_float_ops_kind");
     }
 }
 
@@ -2351,13 +2356,13 @@ target_float_to_string (const gdb_byte *addr, const struct type *type,
       enum float_kind kind = floatformat_classify (fmt, addr);
       if (kind == float_nan)
 	{
-	  const char *sign = floatformat_is_negative (fmt, addr)? "-" : "";
+	  const char *sign = floatformat_is_negative (fmt, addr) ? "-" : "";
 	  const char *mantissa = floatformat_mantissa (fmt, addr);
 	  return string_printf ("%snan(0x%s)", sign, mantissa);
 	}
       else if (kind == float_infinite)
 	{
-	  const char *sign = floatformat_is_negative (fmt, addr)? "-" : "";
+	  const char *sign = floatformat_is_negative (fmt, addr) ? "-" : "";
 	  return string_printf ("%sinf", sign);
 	}
     }
@@ -2408,8 +2413,7 @@ target_float_from_ulongest (gdb_byte *addr, const struct type *type,
 /* Convert the byte-stream ADDR, interpreted as floating-point type TYPE,
    to a floating-point value in the host "double" format.  */
 double
-target_float_to_host_double (const gdb_byte *addr,
-			     const struct type *type)
+target_float_to_host_double (const gdb_byte *addr, const struct type *type)
 {
   const target_float_ops *ops = get_target_float_ops (type);
   return ops->to_host_double (addr, type);
@@ -2464,10 +2468,10 @@ target_float_convert (const gdb_byte *from, const struct type *from_type,
    all decimal floating-point types.  Binary and decimal floating-point
    types cannot be mixed within a single operation.  */
 void
-target_float_binop (enum exp_opcode opcode,
-		    const gdb_byte *x, const struct type *type_x,
-		    const gdb_byte *y, const struct type *type_y,
-		    gdb_byte *res, const struct type *type_res)
+target_float_binop (enum exp_opcode opcode, const gdb_byte *x,
+		    const struct type *type_x, const gdb_byte *y,
+		    const struct type *type_y, gdb_byte *res,
+		    const struct type *type_res)
 {
   gdb_assert (target_float_same_category_p (type_x, type_res));
   gdb_assert (target_float_same_category_p (type_y, type_res));
@@ -2492,4 +2496,3 @@ target_float_compare (const gdb_byte *x, const struct type *type_x,
   const target_float_ops *ops = get_target_float_ops (type_x, type_y);
   return ops->compare (x, type_x, y, type_y);
 }
-

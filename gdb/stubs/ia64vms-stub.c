@@ -74,8 +74,8 @@
 /* Declared in lib$ots.  */
 extern void ots$fill (void *addr, size_t len, unsigned char b);
 extern void ots$move (void *dst, size_t len, const void *src);
-extern int ots$strcmp_eql (const void *str1, size_t str1len,
-			   const void *str2, size_t str2len);
+extern int ots$strcmp_eql (const void *str1, size_t str1len, const void *str2,
+			   size_t str2len);
 
 /* Stub port number.  */
 static unsigned int serv_port = 1234;
@@ -84,7 +84,7 @@ static unsigned int serv_port = 1234;
 struct dbgext_control_block
 {
   unsigned short dbgext$w_function_code;
-#define DBGEXT$K_NEXT_TASK	      3
+#define DBGEXT$K_NEXT_TASK 3
 #define DBGEXT$K_STOP_ALL_OTHER_TASKS 31
 #define DBGEXT$K_GET_REGS 33
   unsigned short dbgext$w_facility_id;
@@ -99,8 +99,8 @@ struct dbgext_control_block
   unsigned int dbgext$l_task_number;
   unsigned int dbgext$l_ada_flags;
   unsigned int dbgext$l_stop_value;
-#define dbgext$l_priority   dbgext$l_stop_value;
-#define dbgext$l_symb_addr  dbgext$l_stop_value;
+#define dbgext$l_priority dbgext$l_stop_value;
+#define dbgext$l_symb_addr dbgext$l_stop_value;
 #define dbgext$l_time_slice dbgext$l_stop_value;
   unsigned int dbgext$l_active_registers;
 };
@@ -130,28 +130,29 @@ struct debug_flag
 };
 
 /* Macro to define a debugging flag.  */
-#define DEBUG_FLAG_ENTRY(str) \
-  { { sizeof (str) - 1, DSC$K_DTYPE_T, DSC$K_CLASS_S, str }, 0}
+#define DEBUG_FLAG_ENTRY(str)                                  \
+  {                                                            \
+    { sizeof (str) - 1, DSC$K_DTYPE_T, DSC$K_CLASS_S, str }, 0 \
+  }
 
-static struct debug_flag debug_flags[] =
-{
+static struct debug_flag debug_flags[] = {
   /* Disp packets exchanged with gdb.  */
-  DEBUG_FLAG_ENTRY("packets"),
+  DEBUG_FLAG_ENTRY ("packets"),
 #define trace_pkt (debug_flags[0].val)
   /* Display entry point informations.  */
-  DEBUG_FLAG_ENTRY("entry"),
+  DEBUG_FLAG_ENTRY ("entry"),
 #define trace_entry (debug_flags[1].val)
   /* Be verbose about exceptions.  */
-  DEBUG_FLAG_ENTRY("excp"),
+  DEBUG_FLAG_ENTRY ("excp"),
 #define trace_excp (debug_flags[2].val)
   /* Be verbose about unwinding.  */
-  DEBUG_FLAG_ENTRY("unwind"),
+  DEBUG_FLAG_ENTRY ("unwind"),
 #define trace_unwind (debug_flags[3].val)
   /* Display image at startup.  */
-  DEBUG_FLAG_ENTRY("images"),
+  DEBUG_FLAG_ENTRY ("images"),
 #define trace_images (debug_flags[4].val)
   /* Display pthread_debug info.  */
-  DEBUG_FLAG_ENTRY("pthreaddbg")
+  DEBUG_FLAG_ENTRY ("pthreaddbg")
 #define trace_pthreaddbg (debug_flags[5].val)
 };
 
@@ -173,7 +174,7 @@ struct sockchar
 };
 
 /* Chain of images loaded.  */
-extern IMCB* ctl$gl_imglstptr;
+extern IMCB *ctl$gl_imglstptr;
 
 /* IA64 integer register representation.  */
 union ia64_ireg
@@ -183,74 +184,74 @@ union ia64_ireg
 };
 
 /* IA64 register numbers, as defined by ia64-tdep.h.  */
-#define IA64_GR0_REGNUM		0
-#define IA64_GR32_REGNUM	(IA64_GR0_REGNUM + 32)
+#define IA64_GR0_REGNUM 0
+#define IA64_GR32_REGNUM (IA64_GR0_REGNUM + 32)
 
 /* Floating point registers; 128 82-bit wide registers.  */
-#define IA64_FR0_REGNUM		128
+#define IA64_FR0_REGNUM 128
 
 /* Predicate registers; There are 64 of these one bit registers.  It'd
    be more convenient (implementation-wise) to use a single 64 bit
    word with all of these register in them.  Note that there's also a
    IA64_PR_REGNUM below which contains all the bits and is used for
    communicating the actual values to the target.  */
-#define IA64_PR0_REGNUM		256
+#define IA64_PR0_REGNUM 256
 
 /* Branch registers: 8 64-bit registers for holding branch targets.  */
-#define IA64_BR0_REGNUM		320
+#define IA64_BR0_REGNUM 320
 
 /* Virtual frame pointer; this matches IA64_FRAME_POINTER_REGNUM in
    gcc/config/ia64/ia64.h.  */
-#define IA64_VFP_REGNUM		328
+#define IA64_VFP_REGNUM 328
 
 /* Virtual return address pointer; this matches
    IA64_RETURN_ADDRESS_POINTER_REGNUM in gcc/config/ia64/ia64.h.  */
-#define IA64_VRAP_REGNUM	329
+#define IA64_VRAP_REGNUM 329
 
 /* Predicate registers: There are 64 of these 1-bit registers.  We
    define a single register which is used to communicate these values
    to/from the target.  We will somehow contrive to make it appear
    that IA64_PR0_REGNUM thru IA64_PR63_REGNUM hold the actual values.  */
-#define IA64_PR_REGNUM		330
+#define IA64_PR_REGNUM 330
 
 /* Instruction pointer: 64 bits wide.  */
-#define IA64_IP_REGNUM		331
+#define IA64_IP_REGNUM 331
 
 /* Process Status Register.  */
-#define IA64_PSR_REGNUM		332
+#define IA64_PSR_REGNUM 332
 
 /* Current Frame Marker (raw form may be the cr.ifs).  */
-#define IA64_CFM_REGNUM		333
+#define IA64_CFM_REGNUM 333
 
 /* Application registers; 128 64-bit wide registers possible, but some
    of them are reserved.  */
-#define IA64_AR0_REGNUM		334
-#define IA64_KR0_REGNUM		(IA64_AR0_REGNUM + 0)
-#define IA64_KR7_REGNUM		(IA64_KR0_REGNUM + 7)
+#define IA64_AR0_REGNUM 334
+#define IA64_KR0_REGNUM (IA64_AR0_REGNUM + 0)
+#define IA64_KR7_REGNUM (IA64_KR0_REGNUM + 7)
 
-#define IA64_RSC_REGNUM		(IA64_AR0_REGNUM + 16)
-#define IA64_BSP_REGNUM		(IA64_AR0_REGNUM + 17)
-#define IA64_BSPSTORE_REGNUM	(IA64_AR0_REGNUM + 18)
-#define IA64_RNAT_REGNUM	(IA64_AR0_REGNUM + 19)
-#define IA64_FCR_REGNUM		(IA64_AR0_REGNUM + 21)
-#define IA64_EFLAG_REGNUM	(IA64_AR0_REGNUM + 24)
-#define IA64_CSD_REGNUM		(IA64_AR0_REGNUM + 25)
-#define IA64_SSD_REGNUM		(IA64_AR0_REGNUM + 26)
-#define IA64_CFLG_REGNUM	(IA64_AR0_REGNUM + 27)
-#define IA64_FSR_REGNUM		(IA64_AR0_REGNUM + 28)
-#define IA64_FIR_REGNUM		(IA64_AR0_REGNUM + 29)
-#define IA64_FDR_REGNUM		(IA64_AR0_REGNUM + 30)
-#define IA64_CCV_REGNUM		(IA64_AR0_REGNUM + 32)
-#define IA64_UNAT_REGNUM	(IA64_AR0_REGNUM + 36)
-#define IA64_FPSR_REGNUM	(IA64_AR0_REGNUM + 40)
-#define IA64_ITC_REGNUM		(IA64_AR0_REGNUM + 44)
-#define IA64_PFS_REGNUM		(IA64_AR0_REGNUM + 64)
-#define IA64_LC_REGNUM		(IA64_AR0_REGNUM + 65)
-#define IA64_EC_REGNUM		(IA64_AR0_REGNUM + 66)
+#define IA64_RSC_REGNUM (IA64_AR0_REGNUM + 16)
+#define IA64_BSP_REGNUM (IA64_AR0_REGNUM + 17)
+#define IA64_BSPSTORE_REGNUM (IA64_AR0_REGNUM + 18)
+#define IA64_RNAT_REGNUM (IA64_AR0_REGNUM + 19)
+#define IA64_FCR_REGNUM (IA64_AR0_REGNUM + 21)
+#define IA64_EFLAG_REGNUM (IA64_AR0_REGNUM + 24)
+#define IA64_CSD_REGNUM (IA64_AR0_REGNUM + 25)
+#define IA64_SSD_REGNUM (IA64_AR0_REGNUM + 26)
+#define IA64_CFLG_REGNUM (IA64_AR0_REGNUM + 27)
+#define IA64_FSR_REGNUM (IA64_AR0_REGNUM + 28)
+#define IA64_FIR_REGNUM (IA64_AR0_REGNUM + 29)
+#define IA64_FDR_REGNUM (IA64_AR0_REGNUM + 30)
+#define IA64_CCV_REGNUM (IA64_AR0_REGNUM + 32)
+#define IA64_UNAT_REGNUM (IA64_AR0_REGNUM + 36)
+#define IA64_FPSR_REGNUM (IA64_AR0_REGNUM + 40)
+#define IA64_ITC_REGNUM (IA64_AR0_REGNUM + 44)
+#define IA64_PFS_REGNUM (IA64_AR0_REGNUM + 64)
+#define IA64_LC_REGNUM (IA64_AR0_REGNUM + 65)
+#define IA64_EC_REGNUM (IA64_AR0_REGNUM + 66)
 
 /* NAT (Not A Thing) Bits for the general registers; there are 128 of
    these.  */
-#define IA64_NAT0_REGNUM	462
+#define IA64_NAT0_REGNUM 462
 
 /* Process registers when a condition is caught.  */
 struct ia64_all_regs
@@ -295,14 +296,14 @@ term_raw_write (const char *str, unsigned int len)
   unsigned short status;
   struct _iosb iosb;
 
-  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-		     term_chan,           /* I/O channel.  */
-		     IO$_WRITEVBLK,       /* I/O function code.  */
-		     &iosb,               /* I/O status block.  */
-		     0,                   /* Ast service routine.  */
-		     0,                   /* Ast parameter.  */
-		     (char *)str,         /* P1 - buffer address.  */
-		     len,                 /* P2 - buffer length.  */
+  status = sys$qiow (EFN$C_ENF,	    /* Event flag.  */
+		     term_chan,	    /* I/O channel.  */
+		     IO$_WRITEVBLK, /* I/O function code.  */
+		     &iosb,	    /* I/O status block.  */
+		     0,		    /* Ast service routine.  */
+		     0,		    /* Ast parameter.  */
+		     (char *) str,  /* P1 - buffer address.  */
+		     len,	    /* P2 - buffer length.  */
 		     0, 0, 0, 0);
 
   if (status & STS$M_SUCCESS)
@@ -384,8 +385,8 @@ term_fao (const char *str, unsigned int str_len, ...)
   int i;
   __int64 *args;
   int status;
-  struct dsc$descriptor_s dstr =
-    { str_len, DSC$K_DTYPE_T, DSC$K_CLASS_S, (__char_ptr32)str };
+  struct dsc$descriptor_s dstr
+    = { str_len, DSC$K_DTYPE_T, DSC$K_CLASS_S, (__char_ptr32) str };
   char buf[128];
   $DESCRIPTOR (buf_desc, buf);
 
@@ -407,7 +408,7 @@ term_fao (const char *str, unsigned int str_len, ...)
 	    term_flush ();
 	}
     }
-      
+
   va_end (vargs);
 }
 
@@ -426,7 +427,7 @@ term_putnl (void)
 static void
 term_init (void)
 {
-  unsigned int status,i;
+  unsigned int status, i;
   unsigned short len;
   char resstring[LNM$C_NAMLENGTH];
   static const $DESCRIPTOR (tabdesc, "LNM$FILE_DEV");
@@ -442,11 +443,11 @@ term_init (void)
   item_lst[1].ile3$w_code = 0;
 
   /* Translate the logical name.  */
-  status = SYS$TRNLNM (0,          	  /* Attr of the logical name.  */
+  status = SYS$TRNLNM (0,		  /* Attr of the logical name.  */
 		       (void *) &tabdesc, /* Logical name table.  */
 		       (void *) &logdesc, /* Logical name.  */
-		       0,          /* Access mode.  */
-		       item_lst);  /* Item list.  */
+		       0,		  /* Access mode.  */
+		       item_lst);	  /* Item list.  */
   if (!(status & STS$M_SUCCESS))
     LIB$SIGNAL (status);
 
@@ -460,9 +461,9 @@ term_init (void)
     }
 
   /* Assign a channel.  */
-  status = sys$assign (&term_desc,   /* Device name.  */
-		       &term_chan,   /* I/O channel.  */
-		       0,            /* Access mode.  */
+  status = sys$assign (&term_desc, /* Device name.  */
+		       &term_chan, /* I/O channel.  */
+		       0,	   /* Access mode.  */
 		       0);
   if (!(status & STS$M_SUCCESS))
     LIB$SIGNAL (status);
@@ -508,7 +509,7 @@ sock_init (void)
   /* Initialize socket characteristics.  */
   listen_sockchar.prot = TCPIP$C_TCP;
   listen_sockchar.type = TCPIP$C_STREAM;
-  listen_sockchar.af   = TCPIP$C_AF_INET;
+  listen_sockchar.af = TCPIP$C_AF_INET;
 
   /* Assign I/O channels to network device.  */
   status = sys$assign ((void *) &inet_device, &listen_channel, 0, 0);
@@ -521,13 +522,13 @@ sock_init (void)
     }
 
   /* Create a listen socket.  */
-  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-		     listen_channel,      /* I/O channel.  */
-		     IO$_SETMODE,         /* I/O function code.  */
-		     &iosb,               /* I/O status block.  */
-		     0,                   /* Ast service routine.  */
-		     0,                   /* Ast parameter.  */
-		     &listen_sockchar,    /* P1 - socket characteristics.  */
+  status = sys$qiow (EFN$C_ENF,	       /* Event flag.  */
+		     listen_channel,   /* I/O channel.  */
+		     IO$_SETMODE,      /* I/O function code.  */
+		     &iosb,	       /* I/O status block.  */
+		     0,		       /* Ast service routine.  */
+		     0,		       /* Ast parameter.  */
+		     &listen_sockchar, /* P1 - socket characteristics.  */
 		     0, 0, 0, 0, 0);
   if (status & STS$M_SUCCESS)
     status = iosb.iosb$w_status;
@@ -539,25 +540,25 @@ sock_init (void)
 
   /* Set reuse address option.  */
   /* Initialize reuseaddr's item-list element.  */
-  reuseaddr_itemlst.ile2$w_length   = sizeof (optval);
-  reuseaddr_itemlst.ile2$w_code     = TCPIP$C_REUSEADDR;
+  reuseaddr_itemlst.ile2$w_length = sizeof (optval);
+  reuseaddr_itemlst.ile2$w_code = TCPIP$C_REUSEADDR;
   reuseaddr_itemlst.ile2$ps_bufaddr = &optval;
 
   /* Initialize setsockopt's item-list descriptor.  */
-  sockopt_itemlst.ile2$w_length   = sizeof (reuseaddr_itemlst);
-  sockopt_itemlst.ile2$w_code     = TCPIP$C_SOCKOPT;
+  sockopt_itemlst.ile2$w_length = sizeof (reuseaddr_itemlst);
+  sockopt_itemlst.ile2$w_code = TCPIP$C_SOCKOPT;
   sockopt_itemlst.ile2$ps_bufaddr = &reuseaddr_itemlst;
 
-  status = sys$qiow (EFN$C_ENF,       /* Event flag.  */
-		     listen_channel,  /* I/O channel.  */
-		     IO$_SETMODE,     /* I/O function code.  */
-		     &iosb,           /* I/O status block.  */
-		     0,               /* Ast service routine.  */
-		     0,               /* Ast parameter.  */
-		     0,               /* P1.  */
-		     0,               /* P2.  */
-		     0,               /* P3.  */
-		     0,               /* P4.  */
+  status = sys$qiow (EFN$C_ENF,			 /* Event flag.  */
+		     listen_channel,		 /* I/O channel.  */
+		     IO$_SETMODE,		 /* I/O function code.  */
+		     &iosb,			 /* I/O status block.  */
+		     0,				 /* Ast service routine.  */
+		     0,				 /* Ast parameter.  */
+		     0,				 /* P1.  */
+		     0,				 /* P2.  */
+		     0,				 /* P3.  */
+		     0,				 /* P4.  */
 		     (__int64) &sockopt_itemlst, /* P5 - socket options.  */
 		     0);
   if (status & STS$M_SUCCESS)
@@ -576,18 +577,18 @@ sock_init (void)
   serv_addr.sin_addr.s_addr = TCPIP$C_INADDR_ANY;
 
   /* Initialize server's item-list descriptor.  */
-  serv_itemlst.ile2$w_length   = sizeof (serv_addr);
-  serv_itemlst.ile2$w_code     = TCPIP$C_SOCK_NAME;
+  serv_itemlst.ile2$w_length = sizeof (serv_addr);
+  serv_itemlst.ile2$w_code = TCPIP$C_SOCK_NAME;
   serv_itemlst.ile2$ps_bufaddr = &serv_addr;
 
-  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-		     listen_channel,      /* I/O channel.  */
-		     IO$_SETMODE,         /* I/O function code.  */
-		     &iosb,               /* I/O status block.  */
-		     0,                   /* Ast service routine.  */
-		     0,                   /* Ast parameter.  */
-		     0,                   /* P1.  */
-		     0,                   /* P2.  */
+  status = sys$qiow (EFN$C_ENF,		      /* Event flag.  */
+		     listen_channel,	      /* I/O channel.  */
+		     IO$_SETMODE,	      /* I/O function code.  */
+		     &iosb,		      /* I/O status block.  */
+		     0,			      /* Ast service routine.  */
+		     0,			      /* Ast parameter.  */
+		     0,			      /* P1.  */
+		     0,			      /* P2.  */
 		     (__int64) &serv_itemlst, /* P3 - local socket name.  */
 		     0, 0, 0);
   if (status & STS$M_SUCCESS)
@@ -599,16 +600,16 @@ sock_init (void)
     }
 
   /* Set socket as a listen socket.  */
-  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-		     listen_channel,      /* I/O channel.  */
-		     IO$_SETMODE,         /* I/O function code.  */
-		     &iosb,               /* I/O status block.  */
-		     0,                   /* Ast service routine.  */
-		     0,                   /* Ast parameter.  */
-		     0,                   /* P1.  */
-		     0,                   /* P2.  */
-		     0,                   /* P3.  */
-		     1,                   /* P4 - connection backlog.  */
+  status = sys$qiow (EFN$C_ENF,	     /* Event flag.  */
+		     listen_channel, /* I/O channel.  */
+		     IO$_SETMODE,    /* I/O function code.  */
+		     &iosb,	     /* I/O status block.  */
+		     0,		     /* Ast service routine.  */
+		     0,		     /* Ast parameter.  */
+		     0,		     /* P1.  */
+		     0,		     /* P2.  */
+		     0,		     /* P3.  */
+		     1,		     /* P4 - connection backlog.  */
 		     0, 0);
   if (status & STS$M_SUCCESS)
     status = iosb.iosb$w_status;
@@ -622,15 +623,15 @@ sock_init (void)
   TERM_FAO ("Waiting for a client connection on port: !ZW!/",
 	    wordswap (serv_addr.sin_port));
 
-  status = sys$qiow (EFN$C_ENF,              /* Event flag.  */
-		     listen_channel,         /* I/O channel.  */
-		     IO$_ACCESS|IO$M_ACCEPT, /* I/O function code.  */
-		     &iosb,                  /* I/O status block.  */
-		     0,                      /* Ast service routine.  */
-		     0,                      /* Ast parameter.  */
-		     0,                      /* P1.  */
-		     0,                      /* P2.  */
-		     0,                      /* P3.  */
+  status = sys$qiow (EFN$C_ENF,		       /* Event flag.  */
+		     listen_channel,	       /* I/O channel.  */
+		     IO$_ACCESS | IO$M_ACCEPT, /* I/O function code.  */
+		     &iosb,		       /* I/O status block.  */
+		     0,			       /* Ast service routine.  */
+		     0,			       /* Ast parameter.  */
+		     0,			       /* P1.  */
+		     0,			       /* P2.  */
+		     0,			       /* P3.  */
 		     (__int64) &conn_channel, /* P4 - I/O channel for conn.  */
 		     0, 0);
 
@@ -647,17 +648,17 @@ sock_init (void)
   cli_itemlst.ile3$w_code = TCPIP$C_SOCK_NAME;
   cli_itemlst.ile3$ps_bufaddr = &cli_addr;
   cli_itemlst.ile3$ps_retlen_addr = &cli_addrlen;
-  ots$fill (&cli_addr, sizeof(cli_addr), 0);
-  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-		     conn_channel,        /* I/O channel.  */
-		     IO$_SENSEMODE,       /* I/O function code.  */
-		     &iosb,               /* I/O status block.  */
-		     0,                   /* Ast service routine.  */
-		     0,                   /* Ast parameter.  */
-		     0,                   /* P1.  */
-		     0,                   /* P2.  */
-		     0,                   /* P3.  */
-		     (__int64) &cli_itemlst,  /* P4 - peer socket name.  */
+  ots$fill (&cli_addr, sizeof (cli_addr), 0);
+  status = sys$qiow (EFN$C_ENF,		     /* Event flag.  */
+		     conn_channel,	     /* I/O channel.  */
+		     IO$_SENSEMODE,	     /* I/O function code.  */
+		     &iosb,		     /* I/O status block.  */
+		     0,			     /* Ast service routine.  */
+		     0,			     /* Ast parameter.  */
+		     0,			     /* P1.  */
+		     0,			     /* P2.  */
+		     0,			     /* P3.  */
+		     (__int64) &cli_itemlst, /* P4 - peer socket name.  */
 		     0, 0);
   if (status & STS$M_SUCCESS)
     status = iosb.iosb$w_status;
@@ -684,12 +685,12 @@ sock_close (void)
   unsigned int status;
 
   /* Close socket.  */
-  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-		     conn_channel,        /* I/O channel.  */
-		     IO$_DEACCESS,        /* I/O function code.  */
-		     &iosb,               /* I/O status block.  */
-		     0,                   /* Ast service routine.  */
-		     0,                   /* Ast parameter.  */
+  status = sys$qiow (EFN$C_ENF,	   /* Event flag.  */
+		     conn_channel, /* I/O channel.  */
+		     IO$_DEACCESS, /* I/O function code.  */
+		     &iosb,	   /* I/O status block.  */
+		     0,		   /* Ast service routine.  */
+		     0,		   /* Ast parameter.  */
 		     0, 0, 0, 0, 0, 0);
 
   if (status & STS$M_SUCCESS)
@@ -720,8 +721,8 @@ page_set_rw (unsigned __int64 startva, unsigned __int64 len,
   unsigned __int64 retva;
   unsigned __int64 retlen;
 
-  status = SYS$SETPRT_64 ((void *)startva, len, PSL$C_USER, PRT$C_UW,
-			  (void *)&retva, &retlen, oldprot);
+  status = SYS$SETPRT_64 ((void *) startva, len, PSL$C_USER, PRT$C_UW,
+			  (void *) &retva, &retlen, oldprot);
   return status;
 }
 
@@ -729,15 +730,15 @@ page_set_rw (unsigned __int64 startva, unsigned __int64 len,
 
 static void
 page_restore_rw (unsigned __int64 startva, unsigned __int64 len,
-		unsigned int prot)
+		 unsigned int prot)
 {
   unsigned int status;
   unsigned __int64 retva;
   unsigned __int64 retlen;
   unsigned int oldprot;
 
-  status = SYS$SETPRT_64 ((void *)startva, len, PSL$C_USER, prot,
-			  (void *)&retva, &retlen, &oldprot);
+  status = SYS$SETPRT_64 ((void *) startva, len, PSL$C_USER, prot,
+			  (void *) &retva, &retlen, &oldprot);
   if (!(status & STS$M_SUCCESS))
     LIB$SIGNAL (status);
 }
@@ -747,7 +748,7 @@ page_restore_rw (unsigned __int64 startva, unsigned __int64 len,
 static pthread_t
 get_teb (void)
 {
-  return (pthread_t)__getReg (_IA64_REG_TP);
+  return (pthread_t) __getReg (_IA64_REG_TP);
 }
 
 /* Enable thread scheduling if VAL is true.  */
@@ -768,8 +769,8 @@ set_thread_scheduling (int val)
   status = dbgext_func (&blk);
   if (!(status & STS$M_SUCCESS))
     {
-      TERM_FAO ("set_thread_scheduling error, val=!SL, status=!XL!/",
-		val, blk.dbgext$l_status);
+      TERM_FAO ("set_thread_scheduling error, val=!SL, status=!XL!/", val,
+		blk.dbgext$l_status);
       lib$signal (status);
     }
 
@@ -802,10 +803,8 @@ thread_next (unsigned int thr)
 /* Pthread Debug callbacks.  */
 
 static int
-read_callback (pthreadDebugClient_t context,
-	       pthreadDebugTargetAddr_t addr,
-	       pthreadDebugAddr_t buf,
-	       size_t size)
+read_callback (pthreadDebugClient_t context, pthreadDebugTargetAddr_t addr,
+	       pthreadDebugAddr_t buf, size_t size)
 {
   if (trace_pthreaddbg)
     TERM_FAO ("read_callback (!XH, !XH, !SL)!/", addr, buf, size);
@@ -814,10 +813,8 @@ read_callback (pthreadDebugClient_t context,
 }
 
 static int
-write_callback (pthreadDebugClient_t context,
-		pthreadDebugTargetAddr_t addr,
-		pthreadDebugLongConstAddr_t buf,
-		size_t size)
+write_callback (pthreadDebugClient_t context, pthreadDebugTargetAddr_t addr,
+		pthreadDebugLongConstAddr_t buf, size_t size)
 {
   if (trace_pthreaddbg)
     TERM_FAO ("write_callback (!XH, !XH, !SL)!/", addr, buf, size);
@@ -840,8 +837,7 @@ resume_callback (pthreadDebugClient_t context)
 }
 
 static int
-kthdinfo_callback (pthreadDebugClient_t context,
-		   pthreadDebugKId_t kid,
+kthdinfo_callback (pthreadDebugClient_t context, pthreadDebugKId_t kid,
 		   pthreadDebugKThreadInfo_p thread_info)
 {
   if (trace_pthreaddbg)
@@ -850,8 +846,7 @@ kthdinfo_callback (pthreadDebugClient_t context,
 }
 
 static int
-hold_callback (pthreadDebugClient_t context,
-	       pthreadDebugKId_t kid)
+hold_callback (pthreadDebugClient_t context, pthreadDebugKId_t kid)
 {
   if (trace_pthreaddbg)
     term_puts ("hold_callback");
@@ -859,8 +854,7 @@ hold_callback (pthreadDebugClient_t context,
 }
 
 static int
-unhold_callback (pthreadDebugClient_t context,
-		 pthreadDebugKId_t kid)
+unhold_callback (pthreadDebugClient_t context, pthreadDebugKId_t kid)
 {
   if (trace_pthreaddbg)
     term_puts ("unhold_callback");
@@ -868,8 +862,7 @@ unhold_callback (pthreadDebugClient_t context,
 }
 
 static int
-getfreg_callback (pthreadDebugClient_t context,
-		  pthreadDebugFregs_t *reg,
+getfreg_callback (pthreadDebugClient_t context, pthreadDebugFregs_t *reg,
 		  pthreadDebugKId_t kid)
 {
   if (trace_pthreaddbg)
@@ -878,8 +871,7 @@ getfreg_callback (pthreadDebugClient_t context,
 }
 
 static int
-setfreg_callback (pthreadDebugClient_t context,
-		  const pthreadDebugFregs_t *reg,
+setfreg_callback (pthreadDebugClient_t context, const pthreadDebugFregs_t *reg,
 		  pthreadDebugKId_t kid)
 {
   if (trace_pthreaddbg)
@@ -888,8 +880,7 @@ setfreg_callback (pthreadDebugClient_t context,
 }
 
 static int
-getreg_callback (pthreadDebugClient_t context,
-		 pthreadDebugRegs_t *reg,
+getreg_callback (pthreadDebugClient_t context, pthreadDebugRegs_t *reg,
 		 pthreadDebugKId_t kid)
 {
   if (trace_pthreaddbg)
@@ -898,8 +889,7 @@ getreg_callback (pthreadDebugClient_t context,
 }
 
 static int
-setreg_callback (pthreadDebugClient_t context,
-		 const pthreadDebugRegs_t *reg,
+setreg_callback (pthreadDebugClient_t context, const pthreadDebugRegs_t *reg,
 		 pthreadDebugKId_t kid)
 {
   if (trace_pthreaddbg)
@@ -908,8 +898,7 @@ setreg_callback (pthreadDebugClient_t context,
 }
 
 static int
-output_callback (pthreadDebugClient_t context, 
-		 pthreadDebugConstString_t line)
+output_callback (pthreadDebugClient_t context, pthreadDebugConstString_t line)
 {
   term_puts (line);
   term_putnl ();
@@ -917,8 +906,7 @@ output_callback (pthreadDebugClient_t context,
 }
 
 static int
-error_callback (pthreadDebugClient_t context, 
-		 pthreadDebugConstString_t line)
+error_callback (pthreadDebugClient_t context, pthreadDebugConstString_t line)
 {
   term_puts (line);
   term_putnl ();
@@ -938,8 +926,8 @@ malloc_callback (pthreadDebugClient_t caller_context, size_t size)
     LIB$SIGNAL (status);
   if (trace_pthreaddbg)
     TERM_FAO ("malloc_callback (!UL) -> !XA!/", size, res);
-  *(unsigned int *)res = len;
-  return (char *)res + 16;
+  *(unsigned int *) res = len;
+  return (char *) res + 16;
 }
 
 static void
@@ -949,8 +937,8 @@ free_callback (pthreadDebugClient_t caller_context, pthreadDebugAddr_t address)
   unsigned int res;
   int len;
 
-  res = (unsigned int)address - 16;
-  len = *(unsigned int *)res;
+  res = (unsigned int) address - 16;
+  len = *(unsigned int *) res;
   if (trace_pthreaddbg)
     TERM_FAO ("free_callback (!XA)!/", address);
   status = lib$free_vm (&len, &res, 0);
@@ -966,25 +954,13 @@ speckthd_callback (pthreadDebugClient_t caller_context,
   return ENOTSUP;
 }
 
-static pthreadDebugCallbacks_t pthread_debug_callbacks = {
-  PTHREAD_DEBUG_VERSION,
-  read_callback,
-  write_callback,
-  suspend_callback,
-  resume_callback,
-  kthdinfo_callback,
-  hold_callback,
-  unhold_callback,
-  getfreg_callback,
-  setfreg_callback,
-  getreg_callback,
-  setreg_callback,
-  output_callback,
-  error_callback,
-  malloc_callback,
-  free_callback,
-  speckthd_callback
-};
+static pthreadDebugCallbacks_t pthread_debug_callbacks
+  = { PTHREAD_DEBUG_VERSION, read_callback,    write_callback,
+      suspend_callback,	     resume_callback,  kthdinfo_callback,
+      hold_callback,	     unhold_callback,  getfreg_callback,
+      setfreg_callback,	     getreg_callback,  setreg_callback,
+      output_callback,	     error_callback,   malloc_callback,
+      free_callback,	     speckthd_callback };
 
 /* Name of the pthread shared library.  */
 static const $DESCRIPTOR (pthread_rtl_desc, "PTHREAD$RTL");
@@ -997,18 +973,20 @@ struct pthread_debug_entry
   __void_ptr32 func;
 };
 
-#define DEBUG_ENTRY(str) { sizeof(str) - 1, str, 0 }
+#define DEBUG_ENTRY(str)     \
+  {                          \
+    sizeof (str) - 1, str, 0 \
+  }
 
-static struct pthread_debug_entry pthread_debug_entries[] = {
-  DEBUG_ENTRY("pthreadDebugContextInit"),
-  DEBUG_ENTRY("pthreadDebugThdSeqInit"),
-  DEBUG_ENTRY("pthreadDebugThdSeqNext"),
-  DEBUG_ENTRY("pthreadDebugThdSeqDestroy"),
-  DEBUG_ENTRY("pthreadDebugThdGetInfo"),
-  DEBUG_ENTRY("pthreadDebugThdGetInfoAddr"),
-  DEBUG_ENTRY("pthreadDebugThdGetReg"),
-  DEBUG_ENTRY("pthreadDebugCmd")
-};
+static struct pthread_debug_entry pthread_debug_entries[]
+  = { DEBUG_ENTRY ("pthreadDebugContextInit"),
+      DEBUG_ENTRY ("pthreadDebugThdSeqInit"),
+      DEBUG_ENTRY ("pthreadDebugThdSeqNext"),
+      DEBUG_ENTRY ("pthreadDebugThdSeqDestroy"),
+      DEBUG_ENTRY ("pthreadDebugThdGetInfo"),
+      DEBUG_ENTRY ("pthreadDebugThdGetInfoAddr"),
+      DEBUG_ENTRY ("pthreadDebugThdGetReg"),
+      DEBUG_ENTRY ("pthreadDebugCmd") };
 
 /* Pthread debug context.  */
 static pthreadDebugContext_t debug_context;
@@ -1018,53 +996,47 @@ static pthreadDebugContext_t debug_context;
 static int
 pthread_debug_thd_seq_init (pthreadDebugId_t *id)
 {
-  return ((int (*)())pthread_debug_entries[1].func)
-    (debug_context, id);
+  return ((int (*) ()) pthread_debug_entries[1].func) (debug_context, id);
 }
 
 static int
 pthread_debug_thd_seq_next (pthreadDebugId_t *id)
 {
-  return ((int (*)())pthread_debug_entries[2].func)
-    (debug_context, id);
+  return ((int (*) ()) pthread_debug_entries[2].func) (debug_context, id);
 }
 
 static int
 pthread_debug_thd_seq_destroy (void)
 {
-  return ((int (*)())pthread_debug_entries[3].func)
-    (debug_context);
+  return ((int (*) ()) pthread_debug_entries[3].func) (debug_context);
 }
 
 static int
 pthread_debug_thd_get_info (pthreadDebugId_t id,
 			    pthreadDebugThreadInfo_t *info)
 {
-  return ((int (*)())pthread_debug_entries[4].func)
-    (debug_context, id, info);
+  return ((int (*) ()) pthread_debug_entries[4].func) (debug_context, id,
+						       info);
 }
 
 static int
-pthread_debug_thd_get_info_addr (pthread_t thr,
-				 pthreadDebugThreadInfo_t *info)
+pthread_debug_thd_get_info_addr (pthread_t thr, pthreadDebugThreadInfo_t *info)
 {
-  return ((int (*)())pthread_debug_entries[5].func)
-    (debug_context, thr, info);
+  return ((int (*) ()) pthread_debug_entries[5].func) (debug_context, thr,
+						       info);
 }
 
 static int
-pthread_debug_thd_get_reg (pthreadDebugId_t thr,
-			   pthreadDebugRegs_t *regs)
+pthread_debug_thd_get_reg (pthreadDebugId_t thr, pthreadDebugRegs_t *regs)
 {
-  return ((int (*)())pthread_debug_entries[6].func)
-    (debug_context, thr, regs);
+  return ((int (*) ()) pthread_debug_entries[6].func) (debug_context, thr,
+						       regs);
 }
 
 static int
 stub_pthread_debug_cmd (const char *cmd)
 {
-  return ((int (*)())pthread_debug_entries[7].func)
-    (debug_context, cmd);
+  return ((int (*) ()) pthread_debug_entries[7].func) (debug_context, cmd);
 }
 
 /* Show all the threads.  */
@@ -1109,15 +1081,14 @@ threads_init (void)
   int i;
   void *caller_context = 0;
 
-  status = lib$find_image_symbol
-    ((void *) &pthread_rtl_desc, (void *) &dbgext_desc,
-     (int *) &dbgext_func);
+  status = lib$find_image_symbol ((void *) &pthread_rtl_desc,
+				  (void *) &dbgext_desc, (int *) &dbgext_func);
   if (!(status & STS$M_SUCCESS))
     LIB$SIGNAL (status);
-  
-  status = lib$find_image_symbol
-    ((void *) &pthread_rtl_desc, (void *) &dbgsymtable_desc,
-     (int *) &dbg_symtable);
+
+  status = lib$find_image_symbol ((void *) &pthread_rtl_desc,
+				  (void *) &dbgsymtable_desc,
+				  (int *) &dbg_symtable);
   if (!(status & STS$M_SUCCESS))
     LIB$SIGNAL (status);
 
@@ -1126,21 +1097,20 @@ threads_init (void)
        i < sizeof (pthread_debug_entries) / sizeof (pthread_debug_entries[0]);
        i++)
     {
-      struct dsc$descriptor_s sym =
-	{ pthread_debug_entries[i].namelen,
-	  DSC$K_DTYPE_T, DSC$K_CLASS_S,
-	  pthread_debug_entries[i].name };
-      status = lib$find_image_symbol
-	((void *) &pthread_debug_desc, (void *) &sym,
-	 (int *) &pthread_debug_entries[i].func);
+      struct dsc$descriptor_s sym
+	= { pthread_debug_entries[i].namelen, DSC$K_DTYPE_T, DSC$K_CLASS_S,
+	    pthread_debug_entries[i].name };
+      status
+	= lib$find_image_symbol ((void *) &pthread_debug_desc, (void *) &sym,
+				 (int *) &pthread_debug_entries[i].func);
       if (!(status & STS$M_SUCCESS))
 	lib$signal (status);
     }
 
   if (trace_pthreaddbg)
     TERM_FAO ("debug symtable: !XH!/", dbg_symtable);
-  status = ((int (*)()) pthread_debug_entries[0].func)
-    (&caller_context, &pthread_debug_callbacks, dbg_symtable, &debug_context);
+  status = ((int (*) ()) pthread_debug_entries[0].func) (
+    &caller_context, &pthread_debug_callbacks, dbg_symtable, &debug_context);
   if (status != 0)
     TERM_FAO ("cannot initialize pthread_debug: !UL!/", status);
   TERM_FAO ("pthread debug done!/", 0);
@@ -1341,16 +1311,18 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
       return;
     }
   else if (pktlen > XFER_UIB_LEN
-      && ots$strcmp_eql (pkt, XFER_UIB_LEN, xfer_uib, XFER_UIB_LEN))
+	   && ots$strcmp_eql (pkt, XFER_UIB_LEN, xfer_uib, XFER_UIB_LEN))
     {
       /* Get unwind information block.  */
       unsigned __int64 pc;
       unsigned int pos = XFER_UIB_LEN;
       unsigned int off;
       unsigned int len;
+
       union
       {
 	unsigned char bytes[32];
+
 	struct
 	{
 	  unsigned __int64 code_start_va;
@@ -1359,6 +1331,7 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
 	  unsigned __int64 gp_value;
 	} data;
       } uei;
+
       int res;
       int i;
 
@@ -1392,8 +1365,8 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
       mem2bin (uei.bytes, sizeof (uei.bytes));
     }
   else if (pktlen == QFTHREADINFO_LEN
-	   && ots$strcmp_eql (pkt, QFTHREADINFO_LEN,
-			      qfthreadinfo, QFTHREADINFO_LEN))
+	   && ots$strcmp_eql (pkt, QFTHREADINFO_LEN, qfthreadinfo,
+			      QFTHREADINFO_LEN))
     {
       /* Get first thread(s).  */
       gdb_buf[0] = '$';
@@ -1410,8 +1383,8 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
       long2pkt (first_thread);
     }
   else if (pktlen == QSTHREADINFO_LEN
-	   && ots$strcmp_eql (pkt, QSTHREADINFO_LEN,
-			      qsthreadinfo, QSTHREADINFO_LEN))
+	   && ots$strcmp_eql (pkt, QSTHREADINFO_LEN, qsthreadinfo,
+			      QSTHREADINFO_LEN))
     {
       /* Get subsequent threads.  */
       gdb_buf[0] = '$';
@@ -1435,8 +1408,8 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
 	gdb_buf[1] = 'l';
     }
   else if (pktlen > QTHREADEXTRAINFO_LEN
-	   && ots$strcmp_eql (pkt, QTHREADEXTRAINFO_LEN,
-			      qthreadextrainfo, QTHREADEXTRAINFO_LEN))
+	   && ots$strcmp_eql (pkt, QTHREADEXTRAINFO_LEN, qthreadextrainfo,
+			      QTHREADEXTRAINFO_LEN))
     {
       /* Get extra info about a thread.  */
       pthread_t thr;
@@ -1459,18 +1432,17 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
 	}
       gdb_buf[0] = '$';
       gdb_blen = 1;
-      mem2hex ((const unsigned char *)"VMS-thread", 11);
+      mem2hex ((const unsigned char *) "VMS-thread", 11);
     }
   else if (pktlen > QSUPPORTED_LEN
-	   && ots$strcmp_eql (pkt, QSUPPORTED_LEN,
-			      qsupported, QSUPPORTED_LEN))
+	   && ots$strcmp_eql (pkt, QSUPPORTED_LEN, qsupported, QSUPPORTED_LEN))
     {
       /* Get supported features.  */
       pthread_t thr;
       unsigned int pos = QSUPPORTED_LEN;
       pthreadDebugThreadInfo_t info;
       int res;
-      
+
       /* Ignore gdb features.  */
       gdb_buf[0] = '$';
       gdb_blen = 1;
@@ -1483,7 +1455,7 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
       if (trace_pkt)
 	{
 	  term_puts ("unknown <: ");
-	  term_write ((char *)pkt, pktlen);
+	  term_write ((char *) pkt, pktlen);
 	  term_putnl ();
 	}
       return;
@@ -1512,7 +1484,7 @@ handle_v_packet (const unsigned char *pkt, unsigned int pktlen)
       if (trace_pkt)
 	{
 	  term_puts ("unknown <: ");
-	  term_write ((char *)pkt, pktlen);
+	  term_write ((char *) pkt, pktlen);
 	  term_putnl ();
 	}
       return 0;
@@ -1601,7 +1573,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
       if (len == 1)
 	{
 	  /* Clear psr.ss.  */
-	  excp_regs.psr.v &= ~(unsigned __int64)PSR$M_SS;
+	  excp_regs.psr.v &= ~(unsigned __int64) PSR$M_SS;
 	  return 1;
 	}
       else
@@ -1626,7 +1598,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
 	  int res;
 	  unsigned __int64 val;
 	  pthreadDebugThreadInfo_t info;
-	  
+
 	  pos++;
 	  val = pkt2val (pkt, &pos);
 	  if (pos != len)
@@ -1715,7 +1687,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
 
 	/* Transfer.  */
 	for (i = 0; i < l; i++)
-	  byte2hex (gdb_buf + 1 + 2 * i, ((unsigned char *)addr)[i]);
+	  byte2hex (gdb_buf + 1 + 2 * i, ((unsigned char *) addr)[i]);
 	gdb_blen += 2 * l;
       }
       break;
@@ -1764,7 +1736,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
 	  {
 	    int v = hex2byte (pkt + pos);
 	    pos += 2;
-	    ((unsigned char *)addr)[i] = v;
+	    ((unsigned char *) addr)[i] = v;
 	  }
 
 	/* Sync caches.  */
@@ -1826,7 +1798,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
       if (len == 1)
 	{
 	  /* Set psr.ss.  */
-	  excp_regs.psr.v |= (unsigned __int64)PSR$M_SS;
+	  excp_regs.psr.v |= (unsigned __int64) PSR$M_SS;
 	  return 1;
 	}
       else
@@ -1844,7 +1816,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
 	  int res;
 	  unsigned __int64 val;
 	  unsigned int fthr, thr;
-	  
+
 	  val = pkt2val (pkt, &pos);
 	  /* Default is error (but only after parsing is complete).  */
 	  packet_error (0);
@@ -1878,7 +1850,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
 	  if (has_threads)
 	    {
 	      pkt[len] = 0;
-	      stub_pthread_debug_cmd ((char *)pkt + 4);
+	      stub_pthread_debug_cmd ((char *) pkt + 4);
 	      packet_ok ();
 	    }
 	  else
@@ -1889,7 +1861,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
       if (trace_pkt)
 	{
 	  term_puts ("unknown <: ");
-	  term_write ((char *)pkt, len);
+	  term_write ((char *) pkt, len);
 	  term_putnl ();
 	}
       break;
@@ -1906,14 +1878,14 @@ sock_write (const unsigned char *buf, int len)
   unsigned int status;
 
   /* Write data to connection.  */
-  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-		     conn_channel,        /* I/O channel.  */
-		     IO$_WRITEVBLK,       /* I/O function code.  */
-		     &iosb,               /* I/O status block.  */
-		     0,                   /* Ast service routine.  */
-		     0,                   /* Ast parameter.  */
-		     (char *)buf,         /* P1 - buffer address.  */
-		     len,                 /* P2 - buffer length.  */
+  status = sys$qiow (EFN$C_ENF,	    /* Event flag.  */
+		     conn_channel,  /* I/O channel.  */
+		     IO$_WRITEVBLK, /* I/O function code.  */
+		     &iosb,	    /* I/O status block.  */
+		     0,		    /* Ast service routine.  */
+		     0,		    /* Ast parameter.  */
+		     (char *) buf,  /* P1 - buffer address.  */
+		     len,	    /* P2 - buffer length.  */
 		     0, 0, 0, 0);
   if (status & STS$M_SUCCESS)
     status = iosb.iosb$w_status;
@@ -1943,7 +1915,7 @@ send_pkt (void)
   if (trace_pkt > 1)
     {
       term_puts (">: ");
-      term_write ((char *)gdb_buf, gdb_blen + 3);
+      term_write ((char *) gdb_buf, gdb_blen + 3);
       term_putnl ();
     }
 }
@@ -1968,26 +1940,26 @@ one_command (void)
       while (1)
 	{
 	  /* Read data from connection.  */
-	  status = sys$qiow (EFN$C_ENF,           /* Event flag.  */
-			     conn_channel,        /* I/O channel.  */
-			     IO$_READVBLK,        /* I/O function code.  */
-			     &iosb,               /* I/O status block.  */
-			     0,                   /* Ast service routine.  */
-			     0,                   /* Ast parameter.  */
-			     gdb_buf + off,       /* P1 - buffer address.  */
+	  status = sys$qiow (EFN$C_ENF,	    /* Event flag.  */
+			     conn_channel,  /* I/O channel.  */
+			     IO$_READVBLK,  /* I/O function code.  */
+			     &iosb,	    /* I/O status block.  */
+			     0,		    /* Ast service routine.  */
+			     0,		    /* Ast parameter.  */
+			     gdb_buf + off, /* P1 - buffer address.  */
 			     sizeof (gdb_buf) - off, /* P2 - buffer leng.  */
 			     0, 0, 0, 0);
 	  if (status & STS$M_SUCCESS)
 	    status = iosb.iosb$w_status;
 	  if (!(status & STS$M_SUCCESS))
 	    {
-	      term_puts ("Failed to read data from connection\n" );
+	      term_puts ("Failed to read data from connection\n");
 	      LIB$SIGNAL (status);
 	    }
 
 #ifdef RAW_DUMP
 	  term_puts ("{: ");
-	  term_write ((char *)gdb_buf + off, iosb.iosb$w_bcnt);
+	  term_write ((char *) gdb_buf + off, iosb.iosb$w_bcnt);
 	  term_putnl ();
 #endif
 
@@ -2006,8 +1978,7 @@ one_command (void)
 		  continue;
 		}
 	      /* Search for '#'.  */
-	      for (sharp_off = dollar_off + 1;
-		   sharp_off < gdb_blen;
+	      for (sharp_off = dollar_off + 1; sharp_off < gdb_blen;
 		   sharp_off++)
 		if (gdb_buf[sharp_off] == '#')
 		  break;
@@ -2048,7 +2019,7 @@ one_command (void)
 	  }
 	else
 	  {
-	    sock_write ((const unsigned char *)"+", 1);
+	    sock_write ((const unsigned char *) "+", 1);
 	    break;
 	  }
       }
@@ -2057,14 +2028,15 @@ one_command (void)
   if (trace_pkt > 1)
     {
       term_puts ("<: ");
-      term_write ((char *)gdb_buf + dollar_off, sharp_off - dollar_off + 1);
+      term_write ((char *) gdb_buf + dollar_off, sharp_off - dollar_off + 1);
       term_putnl ();
     }
 
   cmd_off = dollar_off + 1;
   cmd_len = sharp_off - dollar_off - 1;
 
-  if (handle_packet (gdb_buf + dollar_off + 1, sharp_off - dollar_off - 1) == 1)
+  if (handle_packet (gdb_buf + dollar_off + 1, sharp_off - dollar_off - 1)
+      == 1)
     return 1;
 
   send_pkt ();
@@ -2087,8 +2059,8 @@ display_excp (struct chf64$signal_array *sig64, struct chf$mech_array *mech)
     {
       char msg2[160];
       unsigned short msg2len;
-      struct dsc$descriptor_s msg2_desc =
-	{ sizeof (msg2), DSC$K_DTYPE_T, DSC$K_CLASS_S, msg2};
+      struct dsc$descriptor_s msg2_desc
+	= { sizeof (msg2), DSC$K_DTYPE_T, DSC$K_CLASS_S, msg2 };
       msg_desc.dsc$w_length = msglen;
       status = SYS$FAOL_64 (&msg_desc, &msg2len, &msg2_desc,
 			    &sig64->chf64$q_sig_arg1);
@@ -2101,9 +2073,8 @@ display_excp (struct chf64$signal_array *sig64, struct chf$mech_array *mech)
 
   if (trace_excp > 1)
     {
-      TERM_FAO (" Frame: !XH, Depth: !4SL, Esf: !XH!/",
-		mech->chf$q_mch_frame, mech->chf$q_mch_depth,
-		mech->chf$q_mch_esf_addr);
+      TERM_FAO (" Frame: !XH, Depth: !4SL, Esf: !XH!/", mech->chf$q_mch_frame,
+		mech->chf$q_mch_depth, mech->chf$q_mch_esf_addr);
     }
 }
 
@@ -2112,10 +2083,9 @@ display_excp (struct chf64$signal_array *sig64, struct chf$mech_array *mech)
 static void
 read_all_registers (struct chf$mech_array *mech)
 {
-  struct _intstk *intstk =
-    (struct _intstk *)mech->chf$q_mch_esf_addr;
-  struct chf64$signal_array *sig64 =
-    (struct chf64$signal_array *)mech->chf$ph_mch_sig64_addr;
+  struct _intstk *intstk = (struct _intstk *) mech->chf$q_mch_esf_addr;
+  struct chf64$signal_array *sig64
+    = (struct chf64$signal_array *) mech->chf$ph_mch_sig64_addr;
   unsigned int cnt = sig64->chf64$w_sig_arg_count;
   unsigned __int64 pc = (&sig64->chf64$q_sig_name)[cnt - 2];
 
@@ -2144,7 +2114,7 @@ read_all_registers (struct chf$mech_array *mech)
   excp_regs.gr[9].v = intstk->intstk$q_r9;
   excp_regs.gr[10].v = intstk->intstk$q_r10;
   excp_regs.gr[11].v = intstk->intstk$q_r11;
-  excp_regs.gr[12].v = (unsigned __int64)intstk + intstk->intstk$l_stkalign;
+  excp_regs.gr[12].v = (unsigned __int64) intstk + intstk->intstk$l_stkalign;
   excp_regs.gr[13].v = intstk->intstk$q_r13;
   excp_regs.gr[14].v = intstk->intstk$q_r14;
   excp_regs.gr[15].v = intstk->intstk$q_r15;
@@ -2179,8 +2149,7 @@ read_all_registers (struct chf$mech_array *mech)
 static void
 write_all_registers (struct chf$mech_array *mech)
 {
-  struct _intstk *intstk =
-    (struct _intstk *)mech->chf$q_mch_esf_addr;
+  struct _intstk *intstk = (struct _intstk *) mech->chf$q_mch_esf_addr;
 
   intstk->intstk$q_ipsr = excp_regs.psr.v;
 }
@@ -2190,8 +2159,7 @@ write_all_registers (struct chf$mech_array *mech)
 static void
 do_debug (struct chf$mech_array *mech)
 {
-  struct _intstk *intstk =
-    (struct _intstk *)mech->chf$q_mch_esf_addr;
+  struct _intstk *intstk = (struct _intstk *) mech->chf$q_mch_esf_addr;
   unsigned int old_ast;
   unsigned int old_sch;
   unsigned int status;
@@ -2239,11 +2207,10 @@ do_debug (struct chf$mech_array *mech)
 /* The condition handler.  That's the core of the stub.  */
 
 static int
-excp_handler (struct chf$signal_array *sig,
-	      struct chf$mech_array *mech)
+excp_handler (struct chf$signal_array *sig, struct chf$mech_array *mech)
 {
-  struct chf64$signal_array *sig64 =
-    (struct chf64$signal_array *)mech->chf$ph_mch_sig64_addr;
+  struct chf64$signal_array *sig64
+    = (struct chf64$signal_array *) mech->chf$ph_mch_sig64_addr;
   unsigned int code = sig->chf$l_sig_name & STS$M_COND_ID;
   unsigned int cnt = sig64->chf64$w_sig_arg_count;
   unsigned __int64 pc;
@@ -2254,7 +2221,7 @@ excp_handler (struct chf$signal_array *sig,
   /* Completely ignore some conditions (signaled indirectly by this stub).  */
   switch (code)
     {
-    case LIB$_KEYNOTFOU & STS$M_COND_ID:
+    case LIB$_KEYNOTFOU &STS$M_COND_ID:
       return SS$_RESIGNAL_64;
     default:
       break;
@@ -2275,9 +2242,7 @@ excp_handler (struct chf$signal_array *sig,
     TERM_FAO ("excp_handler: code: !XL, pc=!XH!/", code, pc);
 
   /* If break on the entry point, restore the bundle.  */
-  if (code == (SS$_BREAK & STS$M_COND_ID)
-      && pc == entry_pc
-      && entry_pc != 0)
+  if (code == (SS$_BREAK & STS$M_COND_ID) && pc == entry_pc && entry_pc != 0)
     {
       static unsigned int entry_prot;
 
@@ -2285,32 +2250,31 @@ excp_handler (struct chf$signal_array *sig,
 	term_puts ("initial entry breakpoint\n");
       page_set_rw (entry_pc, 16, &entry_prot);
 
-      ots$move ((void *)entry_pc, 16, entry_saved);
+      ots$move ((void *) entry_pc, 16, entry_saved);
       __fc (entry_pc);
       page_restore_rw (entry_pc, 16, entry_prot);
     }
 
   switch (code)
     {
-    case SS$_ACCVIO & STS$M_COND_ID:
+    case SS$_ACCVIO &STS$M_COND_ID:
       if (trace_excp <= 1)
 	display_excp (sig64, mech);
       /* Fall through.  */
-    case SS$_BREAK  & STS$M_COND_ID:
-    case SS$_OPCDEC & STS$M_COND_ID:
-    case SS$_TBIT   & STS$M_COND_ID:
-    case SS$_DEBUG  & STS$M_COND_ID:
+    case SS$_BREAK &STS$M_COND_ID:
+    case SS$_OPCDEC &STS$M_COND_ID:
+    case SS$_TBIT &STS$M_COND_ID:
+    case SS$_DEBUG &STS$M_COND_ID:
       if (trace_excp > 1)
 	{
 	  int i;
-	  struct _intstk *intstk =
-	    (struct _intstk *)mech->chf$q_mch_esf_addr;
+	  struct _intstk *intstk = (struct _intstk *) mech->chf$q_mch_esf_addr;
 
 	  display_excp (sig64, mech);
 
 	  TERM_FAO (" intstk: !XH!/", intstk);
 	  for (i = 0; i < cnt + 1; i++)
-	    TERM_FAO ("   !XH!/", ((unsigned __int64 *)sig64)[i]);
+	    TERM_FAO ("   !XH!/", ((unsigned __int64 *) sig64)[i]);
 	}
       do_debug (mech);
       ret = SS$_CONTINUE_64;
@@ -2349,11 +2313,11 @@ trace_init (void)
   item_lst[1].ile3$w_code = 0;
 
   /* Translate the logical name.  */
-  status = SYS$TRNLNM (0,   		/* Attributes of the logical name.  */
-		       (void *)&tabdesc,       /* Logical name table.  */
-		       (void *)&logdesc,       /* Logical name.  */
-		       0,              	       /* Access mode.  */
-		       &item_lst);             /* Item list.  */
+  status = SYS$TRNLNM (0, /* Attributes of the logical name.  */
+		       (void *) &tabdesc, /* Logical name table.  */
+		       (void *) &logdesc, /* Logical name.  */
+		       0,		  /* Access mode.  */
+		       &item_lst);	  /* Item list.  */
   if (status == SS$_NOLOGNAM)
     return;
   if (!(status & STS$M_SUCCESS))
@@ -2371,8 +2335,9 @@ trace_init (void)
 	  sub_desc.dsc$w_length = i - start;
 
 	  for (j = 0; j < NBR_DEBUG_FLAGS; j++)
-	    if (str$case_blind_compare (&sub_desc, 
-					(void *)&debug_flags[j].name) == 0)
+	    if (str$case_blind_compare (&sub_desc,
+					(void *) &debug_flags[j].name)
+		== 0)
 	      {
 		debug_flags[j].val++;
 		break;
@@ -2391,13 +2356,11 @@ trace_init (void)
   term_putnl ();
 }
 
-
 /* Entry point.  */
 
 static int
-stub_start (unsigned __int64 *progxfer, void *cli_util,
-	    EIHD *imghdr, IFD *imgfile,
-	    unsigned int linkflag, unsigned int cliflag)
+stub_start (unsigned __int64 *progxfer, void *cli_util, EIHD *imghdr,
+	    IFD *imgfile, unsigned int linkflag, unsigned int cliflag)
 {
   static int initialized;
   int i;
@@ -2423,8 +2386,8 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 
   if (trace_entry && !is_attached)
     {
-      TERM_FAO ("xfer: !XH, imghdr: !XH, ifd: !XH!/",
-		progxfer, imghdr, imgfile);
+      TERM_FAO ("xfer: !XH, imghdr: !XH, ifd: !XH!/", progxfer, imghdr,
+		imgfile);
       for (i = -2; i < 8; i++)
 	TERM_FAO ("  at !2SW: !XH!/", i, progxfer[i]);
     }
@@ -2444,15 +2407,14 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 	      return 0;
 	    }
 	  else
-	    TERM_FAO ("Entry: !XH!/",entry_pc);
+	    TERM_FAO ("Entry: !XH!/", entry_pc);
 	}
     }
   else
     entry_pc = progxfer[0];
 
   has_threads = 0;
-  for (imcb = ctl$gl_imglstptr->imcb$l_flink;
-       imcb != ctl$gl_imglstptr;
+  for (imcb = ctl$gl_imglstptr->imcb$l_flink; imcb != ctl$gl_imglstptr;
        imcb = imcb->imcb$l_flink)
     {
       if (ots$strcmp_eql (pthread_rtl_desc.dsc$a_pointer,
@@ -2460,15 +2422,14 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 			  imcb->imcb$t_log_image_name + 1,
 			  imcb->imcb$t_log_image_name[0]))
 	has_threads = 1;
-			  
+
       if (trace_images)
 	{
 	  unsigned int j;
 	  LDRIMG *ldrimg = imcb->imcb$l_ldrimg;
 	  LDRISD *ldrisd;
 
-	  TERM_FAO ("!XA-!XA ",
-		    imcb->imcb$l_starting_address,
+	  TERM_FAO ("!XA-!XA ", imcb->imcb$l_starting_address,
 		    imcb->imcb$l_end_address);
 
 	  switch (imcb->imcb$b_act_code)
@@ -2485,8 +2446,7 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 	    default:
 	      term_puts ("????");
 	    }
-	  TERM_FAO (" !AD !40AC!/",
-		    1, "KESU" + (imcb->imcb$b_access_mode & 3),
+	  TERM_FAO (" !AD !40AC!/", 1, "KESU" + (imcb->imcb$b_access_mode & 3),
 		    imcb->imcb$t_log_image_name);
 
 	  if ((long) ldrimg < 0 || trace_images < 2)
@@ -2502,17 +2462,15 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 	      term_puts (flags & 0x01000000 ? " Prot" : "     ");
 	      term_puts (flags & 0x04000000 ? " Shrt" : "     ");
 	      term_puts (flags & 0x08000000 ? " Shrd" : "     ");
-	      TERM_FAO (" !XA-!XA!/",
-			ldrisd[j].ldrisd$p_base,
-			(unsigned __int64) ldrisd[j].ldrisd$p_base 
-			+ ldrisd[j].ldrisd$i_len - 1);
+	      TERM_FAO (" !XA-!XA!/", ldrisd[j].ldrisd$p_base,
+			(unsigned __int64) ldrisd[j].ldrisd$p_base
+			  + ldrisd[j].ldrisd$i_len - 1);
 	    }
 	  ldrisd = ldrimg->ldrimg$l_dyn_seg;
 	  if (ldrisd)
-	    TERM_FAO ("   dynamic            !XA-!XA!/",
-		      ldrisd->ldrisd$p_base,
-		      (unsigned __int64) ldrisd->ldrisd$p_base 
-		      + ldrisd->ldrisd$i_len - 1);
+	    TERM_FAO ("   dynamic            !XA-!XA!/", ldrisd->ldrisd$p_base,
+		      (unsigned __int64) ldrisd->ldrisd$p_base
+			+ ldrisd->ldrisd$i_len - 1);
 	}
     }
 
@@ -2543,13 +2501,12 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
       00 00 00 02 00 00 	            nop.i 0x0
       00 00 04 00       	            nop.i 0x0;;
     */
-    static const unsigned char initbp[16] =
-      { 0x01, 0x08, 0x00, 0x40, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x02, 0x00, 0x00,
-	0x00, 0x00, 0x04, 0x00 };
+    static const unsigned char initbp[16]
+      = { 0x01, 0x08, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00,
+	  0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00 };
     unsigned int entry_prot;
     unsigned int status;
-    
+
     status = page_set_rw (entry_pc, 16, &entry_prot);
 
     if (!(status & STS$M_SUCCESS))
@@ -2564,11 +2521,11 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 	else
 	  LIB$SIGNAL (status);
       }
-    
+
     if (entry_pc != 0)
       {
-	ots$move (entry_saved, 16, (void *)entry_pc);
-	ots$move ((void *)entry_pc, 16, (void *)initbp);
+	ots$move (entry_saved, 16, (void *) entry_pc);
+	ots$move ((void *) entry_pc, 16, (void *) initbp);
 	__fc (entry_pc);
 	page_restore_rw (entry_pc, 16, entry_prot);
       }
@@ -2597,5 +2554,5 @@ struct xfer_vector
 
 #pragma __extern_model save
 #pragma __extern_model strict_refdef "XFER_PSECT"
-struct xfer_vector xfer_vector = {0, 0, stub_start};
+struct xfer_vector xfer_vector = { 0, 0, stub_start };
 #pragma __extern_model restore

@@ -28,7 +28,7 @@
 #include "process-stratum-target.h"
 #include "value.h"
 #include "gdbcore.h"
-#include "inferior.h"          /* for get_exec_file */
+#include "inferior.h" /* for get_exec_file */
 #include "gdbthread.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/gdb_tilde_expand.h"
@@ -59,7 +59,7 @@ static struct pcb *bsd_kvm_paddr;
 
 /* Pointer to architecture-specific function that reconstructs the
    register state from PCB and supplies it to REGCACHE.  */
-static int (*bsd_kvm_supply_pcb)(struct regcache *regcache, struct pcb *pcb);
+static int (*bsd_kvm_supply_pcb) (struct regcache *regcache, struct pcb *pcb);
 
 /* This is the ptid we use while we're connected to kvm.  The kvm
    target currently doesn't export any view of the running processes,
@@ -68,27 +68,24 @@ static ptid_t bsd_kvm_ptid;
 
 /* The libkvm target.  */
 
-static const target_info bsd_kvm_target_info = {
-  "kvm",
-  N_("Kernel memory interface"),
-  N_("Use a kernel virtual memory image as a target.\n\
-Optionally specify the filename of a core dump.")
-};
+static const target_info bsd_kvm_target_info
+  = { "kvm", N_ ("Kernel memory interface"),
+      N_ ("Use a kernel virtual memory image as a target.\n\
+Optionally specify the filename of a core dump.") };
 
 class bsd_kvm_target final : public process_stratum_target
 {
 public:
+
   bsd_kvm_target () = default;
 
-  const target_info &info () const override
-  { return bsd_kvm_target_info; }
+  const target_info &info () const override { return bsd_kvm_target_info; }
 
   void close () override;
 
   void fetch_registers (struct regcache *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
-					const char *annex,
-					gdb_byte *readbuf,
+					const char *annex, gdb_byte *readbuf,
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
@@ -98,7 +95,9 @@ public:
   std::string pid_to_str (ptid_t) override;
 
   bool has_memory () override { return true; }
+
   bool has_stack () override { return true; }
+
   bool has_registers () override { return true; }
 };
 
@@ -148,7 +147,7 @@ bsd_kvm_target::close ()
   if (core_kd)
     {
       if (kvm_close (core_kd) == -1)
-	warning (("%s"), kvm_geterr(core_kd));
+	warning (("%s"), kvm_geterr (core_kd));
       core_kd = NULL;
     }
 
@@ -158,8 +157,8 @@ bsd_kvm_target::close ()
 }
 
 static LONGEST
-bsd_kvm_xfer_memory (CORE_ADDR addr, ULONGEST len,
-		     gdb_byte *readbuf, const gdb_byte *writebuf)
+bsd_kvm_xfer_memory (CORE_ADDR addr, ULONGEST len, gdb_byte *readbuf,
+		     const gdb_byte *writebuf)
 {
   ssize_t nbytes = len;
 
@@ -171,10 +170,10 @@ bsd_kvm_xfer_memory (CORE_ADDR addr, ULONGEST len,
 }
 
 enum target_xfer_status
-bsd_kvm_target::xfer_partial (enum target_object object,
-			      const char *annex, gdb_byte *readbuf,
-			      const gdb_byte *writebuf,
-			      ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+bsd_kvm_target::xfer_partial (enum target_object object, const char *annex,
+			      gdb_byte *readbuf, const gdb_byte *writebuf,
+			      ULONGEST offset, ULONGEST len,
+			      ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -202,10 +201,10 @@ void
 bsd_kvm_target::files_info ()
 {
   if (bsd_kvm_corefile != _PATH_MEM)
-    gdb_printf (_("\tUsing the kernel crash dump %s.\n"),
+    gdb_printf (_ ("\tUsing the kernel crash dump %s.\n"),
 		bsd_kvm_corefile.c_str ());
   else
-    gdb_printf (_("\tUsing the currently running kernel.\n"));
+    gdb_printf (_ ("\tUsing the currently running kernel.\n"));
 }
 
 /* Fetch process control block at address PADDR.  */
@@ -298,9 +297,8 @@ bsd_kvm_target::fetch_registers (struct regcache *regcache, int regnum)
 #endif
 
   /* i18n: PCB == "Process Control Block".  */
-  error (_("Cannot find a valid PCB"));
+  error (_ ("Cannot find a valid PCB"));
 }
-
 
 /* Kernel memory interface commands.  */
 struct cmd_list_element *bsd_kvm_cmdlist;
@@ -319,10 +317,10 @@ bsd_kvm_proc_cmd (const char *arg, int fromtty)
   CORE_ADDR addr;
 
   if (arg == NULL)
-    error_no_arg (_("proc address"));
+    error_no_arg (_ ("proc address"));
 
   if (core_kd == NULL)
-    error (_("No kernel memory image."));
+    error (_ ("No kernel memory image."));
 
   addr = parse_and_eval_address (arg);
 #ifdef HAVE_STRUCT_LWP
@@ -347,12 +345,12 @@ bsd_kvm_pcb_cmd (const char *arg, int fromtty)
 {
   if (arg == NULL)
     /* i18n: PCB == "Process Control Block".  */
-    error_no_arg (_("pcb address"));
+    error_no_arg (_ ("pcb address"));
 
   if (core_kd == NULL)
-    error (_("No kernel memory image."));
+    error (_ ("No kernel memory image."));
 
-  bsd_kvm_paddr = (struct pcb *)(u_long) parse_and_eval_address (arg);
+  bsd_kvm_paddr = (struct pcb *) (u_long) parse_and_eval_address (arg);
 
   target_fetch_registers (get_current_regcache (), -1);
 
@@ -377,24 +375,24 @@ bsd_kvm_target::pid_to_str (ptid_t ptid)
    block interpreter.  */
 
 void
-bsd_kvm_add_target (int (*supply_pcb)(struct regcache *, struct pcb *))
+bsd_kvm_add_target (int (*supply_pcb) (struct regcache *, struct pcb *))
 {
   gdb_assert (bsd_kvm_supply_pcb == NULL);
   bsd_kvm_supply_pcb = supply_pcb;
 
   add_target (bsd_kvm_target_info, bsd_kvm_target_open);
-  
-  add_prefix_cmd ("kvm", class_obscure, bsd_kvm_cmd, _("\
+
+  add_prefix_cmd ("kvm", class_obscure, bsd_kvm_cmd, _ ("\
 Generic command for manipulating the kernel memory interface."),
 		  &bsd_kvm_cmdlist, 0, &cmdlist);
 
 #ifndef HAVE_STRUCT_THREAD_TD_PCB
   add_cmd ("proc", class_obscure, bsd_kvm_proc_cmd,
-	   _("Set current context from proc address"), &bsd_kvm_cmdlist);
+	   _ ("Set current context from proc address"), &bsd_kvm_cmdlist);
 #endif
   add_cmd ("pcb", class_obscure, bsd_kvm_pcb_cmd,
 	   /* i18n: PCB == "Process Control Block".  */
-	   _("Set current context from pcb address"), &bsd_kvm_cmdlist);
+	   _ ("Set current context from pcb address"), &bsd_kvm_cmdlist);
 
   /* Some notes on the ptid usage on this target.
 

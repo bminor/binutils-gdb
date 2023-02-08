@@ -32,11 +32,11 @@
    older kernels without TRAP_BRKPT support did not report valid
    values on any architecture.  */
 #if (__FreeBSD_kernel_version >= 1102502) || (__FreeBSD_version >= 1102502)
-# define USE_SIGTRAP_SIGINFO
+#define USE_SIGTRAP_SIGINFO
 #elif defined(TRAP_BRKPT)
-# if !defined(__mips__) && !defined(__sparc64__)
-#  define USE_SIGTRAP_SIGINFO
-# endif
+#if !defined(__mips__) && !defined(__sparc64__)
+#define USE_SIGTRAP_SIGINFO
+#endif
 #endif
 
 /* A prototype FreeBSD target.  */
@@ -44,6 +44,7 @@
 class fbsd_nat_target : public inf_ptrace_target
 {
 public:
+
   const char *pid_to_exec_file (int pid) override;
 
   int find_memory_regions (find_memory_region_ftype func, void *data) override;
@@ -51,8 +52,7 @@ public:
   bool info_proc (const char *, enum info_proc_what) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
-					const char *annex,
-					gdb_byte *readbuf,
+					const char *annex, gdb_byte *readbuf,
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
@@ -71,10 +71,12 @@ public:
   void async (bool) override;
 
   thread_control_capabilities get_thread_control_capabilities () override
-  { return tc_schedlock; }
+  {
+    return tc_schedlock;
+  }
 
-  void create_inferior (const char *, const std::string &,
-			char **, int) override;
+  void create_inferior (const char *, const std::string &, char **,
+			int) override;
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
@@ -101,8 +103,8 @@ public:
   int remove_exec_catchpoint (int) override;
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
-  int set_syscall_catchpoint (int, bool, int, gdb::array_view<const int>)
-    override;
+  int set_syscall_catchpoint (int, bool, int,
+			      gdb::array_view<const int>) override;
 #endif
 
   bool supports_multi_process () override;
@@ -112,22 +114,20 @@ public:
   /* Methods meant to be overridden by arch-specific target
      classes.  */
 
-  virtual void low_new_fork (ptid_t parent, pid_t child)
-  {}
+  virtual void low_new_fork (ptid_t parent, pid_t child) {}
 
   /* The method to call, if any, when a thread is destroyed.  */
-  virtual void low_delete_thread (thread_info *)
-  {}
+  virtual void low_delete_thread (thread_info *) {}
 
   /* Hook to call prior to resuming a thread.  */
-  virtual void low_prepare_to_resume (thread_info *)
-  {}
+  virtual void low_prepare_to_resume (thread_info *) {}
 
 protected:
 
   void post_startup_inferior (ptid_t) override;
 
 private:
+
   ptid_t wait_1 (ptid_t, struct target_waitstatus *, target_wait_flags);
 
   /* Helper routines for use in fetch_registers and store_registers in
@@ -147,8 +147,8 @@ private:
      matching REGNUM.  */
 
   bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
-			   const struct regset *regset, int regbase, void *regs,
-			   size_t size);
+			   const struct regset *regset, int regbase,
+			   void *regs, size_t size);
 
   bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset,
@@ -167,10 +167,11 @@ private:
 		     size_t size);
 
 protected:
+
   /* Wrapper versions of the above helpers which accept a register set
      type such as 'struct reg' or 'struct fpreg'.  */
 
-  template <class Regset>
+  template<class Regset>
   bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   const struct regset *regset, int regbase = 0)
   {
@@ -179,7 +180,7 @@ protected:
 			       &regs, sizeof (regs));
   }
 
-  template <class Regset>
+  template<class Regset>
   bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset,
 			   int regbase = 0)
@@ -200,7 +201,7 @@ protected:
   /* Wrapper versions of the PT_GETREGSET and PT_REGSET helpers which
      accept a register set type.  */
 
-  template <class Regset>
+  template<class Regset>
   bool fetch_regset (struct regcache *regcache, int regnum, int note,
 		     const struct regset *regset, int regbase = 0)
   {
@@ -209,7 +210,7 @@ protected:
 			 sizeof (regs));
   }
 
-  template <class Regset>
+  template<class Regset>
   bool store_regset (struct regcache *regcache, int regnum, int note,
 		     const struct regset *regset, int regbase = 0)
   {

@@ -40,22 +40,21 @@
 
 #include "gdb_curses.h"
 
-#define PROC_PREFIX             "In: "
-#define LINE_PREFIX             "L"
-#define PC_PREFIX               "PC: "
+#define PROC_PREFIX "In: "
+#define LINE_PREFIX "L"
+#define PC_PREFIX "PC: "
 
 /* Strings to display in the TUI status line.  */
-#define SINGLE_KEY              "(SingleKey)"
+#define SINGLE_KEY "(SingleKey)"
 
 /* Minimum/Maximum length of some fields displayed in the TUI status
    line.  */
-#define MIN_LINE_WIDTH     4	/* Use at least 4 digits for line
+#define MIN_LINE_WIDTH \
+  4 /* Use at least 4 digits for line
 				   numbers.  */
-#define MIN_PROC_WIDTH    12
-#define MAX_TARGET_WIDTH  10
-#define MAX_PID_WIDTH     19
-
-
+#define MIN_PROC_WIDTH 12
+#define MAX_TARGET_WIDTH 10
+#define MAX_PID_WIDTH 19
 
 std::string
 tui_locator_window::make_status_line () const
@@ -100,24 +99,20 @@ tui_locator_window::make_status_line () const
   /* Translate PC address.  */
   struct gdbarch *gdbarch = tui_location.gdbarch ();
   CORE_ADDR addr = tui_location.addr ();
-  std::string pc_out (gdbarch
-		      ? paddress (gdbarch, addr)
-		      : "??");
+  std::string pc_out (gdbarch ? paddress (gdbarch, addr) : "??");
   const char *pc_buf = pc_out.c_str ();
   int pc_width = pc_out.size ();
 
   /* First determine the amount of proc name width we have available.
      The +1 are for a space separator between fields.
      The -1 are to take into account the \0 counted by sizeof.  */
-  proc_width = (status_size
-		- (target_width + 1)
-		- (pid_width + 1)
+  proc_width = (status_size - (target_width + 1) - (pid_width + 1)
 		- (sizeof (PROC_PREFIX) - 1 + 1)
 		- (sizeof (LINE_PREFIX) - 1 + line_width + 1)
 		- (sizeof (PC_PREFIX) - 1 + pc_width + 1)
 		- (tui_current_key_mode == TUI_SINGLE_KEY_MODE
-		   ? (sizeof (SINGLE_KEY) - 1 + 1)
-		   : 0));
+		     ? (sizeof (SINGLE_KEY) - 1 + 1)
+		     : 0));
 
   /* If there is no room to print the function name, try by removing
      some fields.  */
@@ -165,16 +160,15 @@ tui_locator_window::make_status_line () const
     {
       const std::string &proc_name = tui_location.proc_name ();
       if (proc_name.size () > proc_width)
-	string.printf ("%s%*.*s* ", PROC_PREFIX,
-		       1 - proc_width, proc_width - 1, proc_name.c_str ());
+	string.printf ("%s%*.*s* ", PROC_PREFIX, 1 - proc_width,
+		       proc_width - 1, proc_name.c_str ());
       else
-	string.printf ("%s%*.*s ", PROC_PREFIX,
-		       -proc_width, proc_width, proc_name.c_str ());
+	string.printf ("%s%*.*s ", PROC_PREFIX, -proc_width, proc_width,
+		       proc_name.c_str ());
     }
 
   if (line_width > 0)
-    string.printf ("%s%*.*s ", LINE_PREFIX,
-		   -line_width, line_width, line_buf);
+    string.printf ("%s%*.*s ", LINE_PREFIX, -line_width, line_width, line_buf);
   if (pc_width > 0)
     {
       string.puts (PC_PREFIX);
@@ -194,14 +188,14 @@ tui_locator_window::make_status_line () const
 /* Get a printable name for the function at the address.  The symbol
    name is demangled if demangling is turned on.  Returns a pointer to
    a static area holding the result.  */
-static char*
+static char *
 tui_get_function_from_frame (frame_info_ptr fi)
 {
   static char name[256];
   string_file stream;
 
-  print_address_symbolic (get_frame_arch (fi), get_frame_pc (fi),
-			  &stream, demangle, "");
+  print_address_symbolic (get_frame_arch (fi), get_frame_pc (fi), &stream,
+			  demangle, "");
 
   /* Use simple heuristics to isolate the function name.  The symbol
      can be demangled and we can have function parameters.  Remove
@@ -265,7 +259,7 @@ tui_show_frame_info (frame_info_ptr fi)
       if (get_frame_pc_if_available (fi, &sal.pc))
 	func_name = tui_get_function_from_frame (fi);
       else
-	func_name = _("<unavailable>");
+	func_name = _ ("<unavailable>");
 
       locator_changed_p
 	= tui_location.set_location (get_frame_arch (fi), sal, func_name);
@@ -316,11 +310,12 @@ tui_update_command (const char *arg, int from_tty)
    manipulation.  */
 
 void _initialize_tui_stack ();
+
 void
 _initialize_tui_stack ()
 {
   add_com ("update", class_tui, tui_update_command,
-	   _("Update the source window and locator to "
-	     "display the current execution point.\n\
+	   _ ("Update the source window and locator to "
+	      "display the current execution point.\n\
 Usage: update"));
 }

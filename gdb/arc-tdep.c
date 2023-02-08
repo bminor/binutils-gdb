@@ -138,165 +138,153 @@ static const char *ARC_AUX_FEATURE_NAME = "org.gnu.gdb.arc.aux";
 /* ARCv1 (ARC600, ARC601, ARC700) general core registers feature set.
    See also arc_update_acc_reg_names() for "accl/acch" names.  */
 
-static struct arc_register_feature arc_v1_core_reg_feature =
-{
-  ARC_CORE_FEATURE_NAME,
-  {
-    { ARC_R0_REGNUM + 0, { "r0" }, true },
-    { ARC_R0_REGNUM + 1, { "r1" }, true },
-    { ARC_R0_REGNUM + 2, { "r2" }, true },
-    { ARC_R0_REGNUM + 3, { "r3" }, true },
-    { ARC_R0_REGNUM + 4, { "r4" }, false },
-    { ARC_R0_REGNUM + 5, { "r5" }, false },
-    { ARC_R0_REGNUM + 6, { "r6" }, false },
-    { ARC_R0_REGNUM + 7, { "r7" }, false },
-    { ARC_R0_REGNUM + 8, { "r8" }, false },
-    { ARC_R0_REGNUM + 9, { "r9" }, false },
-    { ARC_R0_REGNUM + 10, { "r10" }, true },
-    { ARC_R0_REGNUM + 11, { "r11" }, true },
-    { ARC_R0_REGNUM + 12, { "r12" }, true },
-    { ARC_R0_REGNUM + 13, { "r13" }, true },
-    { ARC_R0_REGNUM + 14, { "r14" }, true },
-    { ARC_R0_REGNUM + 15, { "r15" }, true },
-    { ARC_R0_REGNUM + 16, { "r16" }, false },
-    { ARC_R0_REGNUM + 17, { "r17" }, false },
-    { ARC_R0_REGNUM + 18, { "r18" }, false },
-    { ARC_R0_REGNUM + 19, { "r19" }, false },
-    { ARC_R0_REGNUM + 20, { "r20" }, false },
-    { ARC_R0_REGNUM + 21, { "r21" }, false },
-    { ARC_R0_REGNUM + 22, { "r22" }, false },
-    { ARC_R0_REGNUM + 23, { "r23" }, false },
-    { ARC_R0_REGNUM + 24, { "r24" }, false },
-    { ARC_R0_REGNUM + 25, { "r25" }, false },
-    { ARC_R0_REGNUM + 26, { "gp" }, true },
-    { ARC_R0_REGNUM + 27, { "fp" }, true },
-    { ARC_R0_REGNUM + 28, { "sp" }, true },
-    { ARC_R0_REGNUM + 29, { "ilink1" }, false },
-    { ARC_R0_REGNUM + 30, { "ilink2" }, false },
-    { ARC_R0_REGNUM + 31, { "blink" }, true },
-    { ARC_R0_REGNUM + 32, { "r32" }, false },
-    { ARC_R0_REGNUM + 33, { "r33" }, false },
-    { ARC_R0_REGNUM + 34, { "r34" }, false },
-    { ARC_R0_REGNUM + 35, { "r35" }, false },
-    { ARC_R0_REGNUM + 36, { "r36" }, false },
-    { ARC_R0_REGNUM + 37, { "r37" }, false },
-    { ARC_R0_REGNUM + 38, { "r38" }, false },
-    { ARC_R0_REGNUM + 39, { "r39" }, false },
-    { ARC_R0_REGNUM + 40, { "r40" }, false },
-    { ARC_R0_REGNUM + 41, { "r41" }, false },
-    { ARC_R0_REGNUM + 42, { "r42" }, false },
-    { ARC_R0_REGNUM + 43, { "r43" }, false },
-    { ARC_R0_REGNUM + 44, { "r44" }, false },
-    { ARC_R0_REGNUM + 45, { "r45" }, false },
-    { ARC_R0_REGNUM + 46, { "r46" }, false },
-    { ARC_R0_REGNUM + 47, { "r47" }, false },
-    { ARC_R0_REGNUM + 48, { "r48" }, false },
-    { ARC_R0_REGNUM + 49, { "r49" }, false },
-    { ARC_R0_REGNUM + 50, { "r50" }, false },
-    { ARC_R0_REGNUM + 51, { "r51" }, false },
-    { ARC_R0_REGNUM + 52, { "r52" }, false },
-    { ARC_R0_REGNUM + 53, { "r53" }, false },
-    { ARC_R0_REGNUM + 54, { "r54" }, false },
-    { ARC_R0_REGNUM + 55, { "r55" }, false },
-    { ARC_R0_REGNUM + 56, { "r56" }, false },
-    { ARC_R0_REGNUM + 57, { "r57" }, false },
-    { ARC_R0_REGNUM + 58, { "r58", "accl" }, false },
-    { ARC_R0_REGNUM + 59, { "r59", "acch" }, false },
-    { ARC_R0_REGNUM + 60, { "lp_count" }, false },
-    { ARC_R0_REGNUM + 61, { "reserved" }, false },
-    { ARC_R0_REGNUM + 62, { "limm" }, false },
-    { ARC_R0_REGNUM + 63, { "pcl" }, true }
-  }
-};
+static struct arc_register_feature arc_v1_core_reg_feature
+  = { ARC_CORE_FEATURE_NAME,
+      { { ARC_R0_REGNUM + 0, { "r0" }, true },
+	{ ARC_R0_REGNUM + 1, { "r1" }, true },
+	{ ARC_R0_REGNUM + 2, { "r2" }, true },
+	{ ARC_R0_REGNUM + 3, { "r3" }, true },
+	{ ARC_R0_REGNUM + 4, { "r4" }, false },
+	{ ARC_R0_REGNUM + 5, { "r5" }, false },
+	{ ARC_R0_REGNUM + 6, { "r6" }, false },
+	{ ARC_R0_REGNUM + 7, { "r7" }, false },
+	{ ARC_R0_REGNUM + 8, { "r8" }, false },
+	{ ARC_R0_REGNUM + 9, { "r9" }, false },
+	{ ARC_R0_REGNUM + 10, { "r10" }, true },
+	{ ARC_R0_REGNUM + 11, { "r11" }, true },
+	{ ARC_R0_REGNUM + 12, { "r12" }, true },
+	{ ARC_R0_REGNUM + 13, { "r13" }, true },
+	{ ARC_R0_REGNUM + 14, { "r14" }, true },
+	{ ARC_R0_REGNUM + 15, { "r15" }, true },
+	{ ARC_R0_REGNUM + 16, { "r16" }, false },
+	{ ARC_R0_REGNUM + 17, { "r17" }, false },
+	{ ARC_R0_REGNUM + 18, { "r18" }, false },
+	{ ARC_R0_REGNUM + 19, { "r19" }, false },
+	{ ARC_R0_REGNUM + 20, { "r20" }, false },
+	{ ARC_R0_REGNUM + 21, { "r21" }, false },
+	{ ARC_R0_REGNUM + 22, { "r22" }, false },
+	{ ARC_R0_REGNUM + 23, { "r23" }, false },
+	{ ARC_R0_REGNUM + 24, { "r24" }, false },
+	{ ARC_R0_REGNUM + 25, { "r25" }, false },
+	{ ARC_R0_REGNUM + 26, { "gp" }, true },
+	{ ARC_R0_REGNUM + 27, { "fp" }, true },
+	{ ARC_R0_REGNUM + 28, { "sp" }, true },
+	{ ARC_R0_REGNUM + 29, { "ilink1" }, false },
+	{ ARC_R0_REGNUM + 30, { "ilink2" }, false },
+	{ ARC_R0_REGNUM + 31, { "blink" }, true },
+	{ ARC_R0_REGNUM + 32, { "r32" }, false },
+	{ ARC_R0_REGNUM + 33, { "r33" }, false },
+	{ ARC_R0_REGNUM + 34, { "r34" }, false },
+	{ ARC_R0_REGNUM + 35, { "r35" }, false },
+	{ ARC_R0_REGNUM + 36, { "r36" }, false },
+	{ ARC_R0_REGNUM + 37, { "r37" }, false },
+	{ ARC_R0_REGNUM + 38, { "r38" }, false },
+	{ ARC_R0_REGNUM + 39, { "r39" }, false },
+	{ ARC_R0_REGNUM + 40, { "r40" }, false },
+	{ ARC_R0_REGNUM + 41, { "r41" }, false },
+	{ ARC_R0_REGNUM + 42, { "r42" }, false },
+	{ ARC_R0_REGNUM + 43, { "r43" }, false },
+	{ ARC_R0_REGNUM + 44, { "r44" }, false },
+	{ ARC_R0_REGNUM + 45, { "r45" }, false },
+	{ ARC_R0_REGNUM + 46, { "r46" }, false },
+	{ ARC_R0_REGNUM + 47, { "r47" }, false },
+	{ ARC_R0_REGNUM + 48, { "r48" }, false },
+	{ ARC_R0_REGNUM + 49, { "r49" }, false },
+	{ ARC_R0_REGNUM + 50, { "r50" }, false },
+	{ ARC_R0_REGNUM + 51, { "r51" }, false },
+	{ ARC_R0_REGNUM + 52, { "r52" }, false },
+	{ ARC_R0_REGNUM + 53, { "r53" }, false },
+	{ ARC_R0_REGNUM + 54, { "r54" }, false },
+	{ ARC_R0_REGNUM + 55, { "r55" }, false },
+	{ ARC_R0_REGNUM + 56, { "r56" }, false },
+	{ ARC_R0_REGNUM + 57, { "r57" }, false },
+	{ ARC_R0_REGNUM + 58, { "r58", "accl" }, false },
+	{ ARC_R0_REGNUM + 59, { "r59", "acch" }, false },
+	{ ARC_R0_REGNUM + 60, { "lp_count" }, false },
+	{ ARC_R0_REGNUM + 61, { "reserved" }, false },
+	{ ARC_R0_REGNUM + 62, { "limm" }, false },
+	{ ARC_R0_REGNUM + 63, { "pcl" }, true } } };
 
 /* ARCv2 (ARCHS) general core registers feature set.  See also
    arc_update_acc_reg_names() for "accl/acch" names.  */
 
-static struct arc_register_feature arc_v2_core_reg_feature =
-{
-  ARC_CORE_FEATURE_NAME,
-  {
-    { ARC_R0_REGNUM + 0, { "r0" }, true },
-    { ARC_R0_REGNUM + 1, { "r1" }, true },
-    { ARC_R0_REGNUM + 2, { "r2" }, true },
-    { ARC_R0_REGNUM + 3, { "r3" }, true },
-    { ARC_R0_REGNUM + 4, { "r4" }, false },
-    { ARC_R0_REGNUM + 5, { "r5" }, false },
-    { ARC_R0_REGNUM + 6, { "r6" }, false },
-    { ARC_R0_REGNUM + 7, { "r7" }, false },
-    { ARC_R0_REGNUM + 8, { "r8" }, false },
-    { ARC_R0_REGNUM + 9, { "r9" }, false },
-    { ARC_R0_REGNUM + 10, { "r10" }, true },
-    { ARC_R0_REGNUM + 11, { "r11" }, true },
-    { ARC_R0_REGNUM + 12, { "r12" }, true },
-    { ARC_R0_REGNUM + 13, { "r13" }, true },
-    { ARC_R0_REGNUM + 14, { "r14" }, true },
-    { ARC_R0_REGNUM + 15, { "r15" }, true },
-    { ARC_R0_REGNUM + 16, { "r16" }, false },
-    { ARC_R0_REGNUM + 17, { "r17" }, false },
-    { ARC_R0_REGNUM + 18, { "r18" }, false },
-    { ARC_R0_REGNUM + 19, { "r19" }, false },
-    { ARC_R0_REGNUM + 20, { "r20" }, false },
-    { ARC_R0_REGNUM + 21, { "r21" }, false },
-    { ARC_R0_REGNUM + 22, { "r22" }, false },
-    { ARC_R0_REGNUM + 23, { "r23" }, false },
-    { ARC_R0_REGNUM + 24, { "r24" }, false },
-    { ARC_R0_REGNUM + 25, { "r25" }, false },
-    { ARC_R0_REGNUM + 26, { "gp" }, true },
-    { ARC_R0_REGNUM + 27, { "fp" }, true },
-    { ARC_R0_REGNUM + 28, { "sp" }, true },
-    { ARC_R0_REGNUM + 29, { "ilink" }, false },
-    { ARC_R0_REGNUM + 30, { "r30" }, true },
-    { ARC_R0_REGNUM + 31, { "blink" }, true },
-    { ARC_R0_REGNUM + 32, { "r32" }, false },
-    { ARC_R0_REGNUM + 33, { "r33" }, false },
-    { ARC_R0_REGNUM + 34, { "r34" }, false },
-    { ARC_R0_REGNUM + 35, { "r35" }, false },
-    { ARC_R0_REGNUM + 36, { "r36" }, false },
-    { ARC_R0_REGNUM + 37, { "r37" }, false },
-    { ARC_R0_REGNUM + 38, { "r38" }, false },
-    { ARC_R0_REGNUM + 39, { "r39" }, false },
-    { ARC_R0_REGNUM + 40, { "r40" }, false },
-    { ARC_R0_REGNUM + 41, { "r41" }, false },
-    { ARC_R0_REGNUM + 42, { "r42" }, false },
-    { ARC_R0_REGNUM + 43, { "r43" }, false },
-    { ARC_R0_REGNUM + 44, { "r44" }, false },
-    { ARC_R0_REGNUM + 45, { "r45" }, false },
-    { ARC_R0_REGNUM + 46, { "r46" }, false },
-    { ARC_R0_REGNUM + 47, { "r47" }, false },
-    { ARC_R0_REGNUM + 48, { "r48" }, false },
-    { ARC_R0_REGNUM + 49, { "r49" }, false },
-    { ARC_R0_REGNUM + 50, { "r50" }, false },
-    { ARC_R0_REGNUM + 51, { "r51" }, false },
-    { ARC_R0_REGNUM + 52, { "r52" }, false },
-    { ARC_R0_REGNUM + 53, { "r53" }, false },
-    { ARC_R0_REGNUM + 54, { "r54" }, false },
-    { ARC_R0_REGNUM + 55, { "r55" }, false },
-    { ARC_R0_REGNUM + 56, { "r56" }, false },
-    { ARC_R0_REGNUM + 57, { "r57" }, false },
-    { ARC_R0_REGNUM + 58, { "r58", "accl" }, false },
-    { ARC_R0_REGNUM + 59, { "r59", "acch" }, false },
-    { ARC_R0_REGNUM + 60, { "lp_count" }, false },
-    { ARC_R0_REGNUM + 61, { "reserved" }, false },
-    { ARC_R0_REGNUM + 62, { "limm" }, false },
-    { ARC_R0_REGNUM + 63, { "pcl" }, true }
-  }
-};
+static struct arc_register_feature arc_v2_core_reg_feature
+  = { ARC_CORE_FEATURE_NAME,
+      { { ARC_R0_REGNUM + 0, { "r0" }, true },
+	{ ARC_R0_REGNUM + 1, { "r1" }, true },
+	{ ARC_R0_REGNUM + 2, { "r2" }, true },
+	{ ARC_R0_REGNUM + 3, { "r3" }, true },
+	{ ARC_R0_REGNUM + 4, { "r4" }, false },
+	{ ARC_R0_REGNUM + 5, { "r5" }, false },
+	{ ARC_R0_REGNUM + 6, { "r6" }, false },
+	{ ARC_R0_REGNUM + 7, { "r7" }, false },
+	{ ARC_R0_REGNUM + 8, { "r8" }, false },
+	{ ARC_R0_REGNUM + 9, { "r9" }, false },
+	{ ARC_R0_REGNUM + 10, { "r10" }, true },
+	{ ARC_R0_REGNUM + 11, { "r11" }, true },
+	{ ARC_R0_REGNUM + 12, { "r12" }, true },
+	{ ARC_R0_REGNUM + 13, { "r13" }, true },
+	{ ARC_R0_REGNUM + 14, { "r14" }, true },
+	{ ARC_R0_REGNUM + 15, { "r15" }, true },
+	{ ARC_R0_REGNUM + 16, { "r16" }, false },
+	{ ARC_R0_REGNUM + 17, { "r17" }, false },
+	{ ARC_R0_REGNUM + 18, { "r18" }, false },
+	{ ARC_R0_REGNUM + 19, { "r19" }, false },
+	{ ARC_R0_REGNUM + 20, { "r20" }, false },
+	{ ARC_R0_REGNUM + 21, { "r21" }, false },
+	{ ARC_R0_REGNUM + 22, { "r22" }, false },
+	{ ARC_R0_REGNUM + 23, { "r23" }, false },
+	{ ARC_R0_REGNUM + 24, { "r24" }, false },
+	{ ARC_R0_REGNUM + 25, { "r25" }, false },
+	{ ARC_R0_REGNUM + 26, { "gp" }, true },
+	{ ARC_R0_REGNUM + 27, { "fp" }, true },
+	{ ARC_R0_REGNUM + 28, { "sp" }, true },
+	{ ARC_R0_REGNUM + 29, { "ilink" }, false },
+	{ ARC_R0_REGNUM + 30, { "r30" }, true },
+	{ ARC_R0_REGNUM + 31, { "blink" }, true },
+	{ ARC_R0_REGNUM + 32, { "r32" }, false },
+	{ ARC_R0_REGNUM + 33, { "r33" }, false },
+	{ ARC_R0_REGNUM + 34, { "r34" }, false },
+	{ ARC_R0_REGNUM + 35, { "r35" }, false },
+	{ ARC_R0_REGNUM + 36, { "r36" }, false },
+	{ ARC_R0_REGNUM + 37, { "r37" }, false },
+	{ ARC_R0_REGNUM + 38, { "r38" }, false },
+	{ ARC_R0_REGNUM + 39, { "r39" }, false },
+	{ ARC_R0_REGNUM + 40, { "r40" }, false },
+	{ ARC_R0_REGNUM + 41, { "r41" }, false },
+	{ ARC_R0_REGNUM + 42, { "r42" }, false },
+	{ ARC_R0_REGNUM + 43, { "r43" }, false },
+	{ ARC_R0_REGNUM + 44, { "r44" }, false },
+	{ ARC_R0_REGNUM + 45, { "r45" }, false },
+	{ ARC_R0_REGNUM + 46, { "r46" }, false },
+	{ ARC_R0_REGNUM + 47, { "r47" }, false },
+	{ ARC_R0_REGNUM + 48, { "r48" }, false },
+	{ ARC_R0_REGNUM + 49, { "r49" }, false },
+	{ ARC_R0_REGNUM + 50, { "r50" }, false },
+	{ ARC_R0_REGNUM + 51, { "r51" }, false },
+	{ ARC_R0_REGNUM + 52, { "r52" }, false },
+	{ ARC_R0_REGNUM + 53, { "r53" }, false },
+	{ ARC_R0_REGNUM + 54, { "r54" }, false },
+	{ ARC_R0_REGNUM + 55, { "r55" }, false },
+	{ ARC_R0_REGNUM + 56, { "r56" }, false },
+	{ ARC_R0_REGNUM + 57, { "r57" }, false },
+	{ ARC_R0_REGNUM + 58, { "r58", "accl" }, false },
+	{ ARC_R0_REGNUM + 59, { "r59", "acch" }, false },
+	{ ARC_R0_REGNUM + 60, { "lp_count" }, false },
+	{ ARC_R0_REGNUM + 61, { "reserved" }, false },
+	{ ARC_R0_REGNUM + 62, { "limm" }, false },
+	{ ARC_R0_REGNUM + 63, { "pcl" }, true } } };
 
 /* The common auxiliary registers feature set.  The REGNUM field
    must match the ARC_REGNUM enum in arc-tdep.h.  */
 
-static const struct arc_register_feature arc_common_aux_reg_feature =
-{
-  ARC_AUX_FEATURE_NAME,
-  {
-    { ARC_FIRST_AUX_REGNUM + 0, { "pc" }, true },
-    { ARC_FIRST_AUX_REGNUM + 1, { "status32" }, true },
-    { ARC_FIRST_AUX_REGNUM + 2, { "lp_start" }, false },
-    { ARC_FIRST_AUX_REGNUM + 3, { "lp_end" }, false },
-    { ARC_FIRST_AUX_REGNUM + 4, { "bta" }, false }
-  }
-};
+static const struct arc_register_feature arc_common_aux_reg_feature
+  = { ARC_AUX_FEATURE_NAME,
+      { { ARC_FIRST_AUX_REGNUM + 0, { "pc" }, true },
+	{ ARC_FIRST_AUX_REGNUM + 1, { "status32" }, true },
+	{ ARC_FIRST_AUX_REGNUM + 2, { "lp_start" }, false },
+	{ ARC_FIRST_AUX_REGNUM + 3, { "lp_end" }, false },
+	{ ARC_FIRST_AUX_REGNUM + 4, { "bta" }, false } } };
 
 static char *arc_disassembler_options = NULL;
 
@@ -324,8 +312,7 @@ arc_insn_get_operand_value (const struct arc_instruction &insn,
       struct regcache *regcache = get_current_regcache ();
       ULONGEST value;
       regcache_cooked_read_unsigned (regcache,
-				     insn.operands[operand_num].value,
-				     &value);
+				     insn.operands[operand_num].value, &value);
       return value;
     }
 }
@@ -352,8 +339,7 @@ arc_insn_get_operand_value_signed (const struct arc_instruction &insn,
       /* Value in instruction is a register number.  */
       struct regcache *regcache = get_current_regcache ();
       LONGEST value;
-      regcache_cooked_read_signed (regcache,
-				   insn.operands[operand_num].value,
+      regcache_cooked_read_signed (regcache, insn.operands[operand_num].value,
 				   &value);
       return value;
     }
@@ -441,8 +427,7 @@ arc_insn_get_branch_target (const struct arc_instruction &insn)
     }
   else if (insn.insn_class == EI)
     {
-      gdb_printf (gdb_stderr,
-		  "EI_S instruction is not supported by the GDB.");
+      gdb_printf (gdb_stderr, "EI_S instruction is not supported by the GDB.");
       return 0;
     }
   /* LEAVE_S: PC = BLINK.  */
@@ -602,8 +587,7 @@ arc_write_pc (struct regcache *regcache, CORE_ADDR new_pc)
 {
   struct gdbarch *gdbarch = regcache->arch ();
 
-  arc_debug_printf ("Writing PC, new value=%s",
-		    paddress (gdbarch, new_pc));
+  arc_debug_printf ("Writing PC, new value=%s", paddress (gdbarch, new_pc));
 
   regcache_cooked_write_unsigned (regcache, gdbarch_pc_regnum (gdbarch),
 				  new_pc);
@@ -650,8 +634,8 @@ arc_write_pc (struct regcache *regcache, CORE_ADDR new_pc)
    virtual FP.  */
 
 static void
-arc_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
-			   int *reg_ptr, LONGEST *offset_ptr)
+arc_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc, int *reg_ptr,
+			   LONGEST *offset_ptr)
 {
   *reg_ptr = gdbarch_sp_regnum (gdbarch);
   *offset_ptr = 0;
@@ -780,9 +764,8 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  unsigned int space = align_up (len, 4);
 
 	  memcpy (data, value_contents (args[i]).data (), (size_t) len);
-	  arc_debug_printf ("copying arg %d, val 0x%08x, len %d to mem",
-			    i, *((int *) value_contents (args[i]).data ()),
-			    len);
+	  arc_debug_printf ("copying arg %d, val 0x%08x, len %d to mem", i,
+			    *((int *) value_contents (args[i]).data ()), len);
 
 	  data += space;
 	}
@@ -916,8 +899,8 @@ arc_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 
       /* Get the return value from one register.  */
       regcache_cooked_read_unsigned (regcache, ARC_R0_REGNUM, &val);
-      store_unsigned_integer (valbuf, (int) len,
-			      gdbarch_byte_order (gdbarch), val);
+      store_unsigned_integer (valbuf, (int) len, gdbarch_byte_order (gdbarch),
+			      val);
 
       arc_debug_printf ("returning 0x%s", phex (val, ARC_REGISTER_SIZE));
     }
@@ -935,14 +918,12 @@ arc_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 			      (int) len - ARC_REGISTER_SIZE,
 			      gdbarch_byte_order (gdbarch), high);
 
-      arc_debug_printf ("returning 0x%s%s",
-			phex (high, ARC_REGISTER_SIZE),
+      arc_debug_printf ("returning 0x%s%s", phex (high, ARC_REGISTER_SIZE),
 			phex (low, ARC_REGISTER_SIZE));
     }
   else
-    error (_("arc: extract_return_value: type length %u too large"), len);
+    error (_ ("arc: extract_return_value: type length %u too large"), len);
 }
-
 
 /* Store the return value of a function into the registers/memory used to
    return it, according to the convention used by the ABI.
@@ -986,12 +967,11 @@ arc_store_return_value (struct gdbarch *gdbarch, struct type *type,
       regcache_cooked_write_unsigned (regcache, ARC_R0_REGNUM, low);
       regcache_cooked_write_unsigned (regcache, ARC_R1_REGNUM, high);
 
-      arc_debug_printf ("storing 0x%s%s",
-			phex (high, ARC_REGISTER_SIZE),
+      arc_debug_printf ("storing 0x%s%s", phex (high, ARC_REGISTER_SIZE),
 			phex (low, ARC_REGISTER_SIZE));
     }
   else
-    error (_("arc_store_return_value: type length too large."));
+    error (_ ("arc_store_return_value: type length too large."));
 }
 
 /* Implement the "get_longjmp_target" gdbarch method.  */
@@ -1005,7 +985,8 @@ arc_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
   arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
   int pc_offset = tdep->jb_pc * ARC_REGISTER_SIZE;
   gdb_byte buf[ARC_REGISTER_SIZE];
-  CORE_ADDR jb_addr = get_frame_register_unsigned (frame, ARC_FIRST_ARG_REGNUM);
+  CORE_ADDR jb_addr
+    = get_frame_register_unsigned (frame, ARC_FIRST_ARG_REGNUM);
 
   if (target_read_memory (jb_addr + pc_offset, buf, ARC_REGISTER_SIZE))
     return 0; /* Failed to read from memory.  */
@@ -1052,9 +1033,8 @@ arc_return_value (struct gdbarch *gdbarch, struct value *function,
       arc_extract_return_value (gdbarch, valtype, regcache, readbuf);
     }
 
-  return (is_struct_return
-	  ? RETURN_VALUE_STRUCT_CONVENTION
-	  : RETURN_VALUE_REGISTER_CONVENTION);
+  return (is_struct_return ? RETURN_VALUE_STRUCT_CONVENTION
+			   : RETURN_VALUE_REGISTER_CONVENTION);
 }
 
 /* Return the base address of the frame.  For ARC, the base address is the
@@ -1070,7 +1050,8 @@ arc_frame_base_address (frame_info_ptr this_frame, void **prologue_cache)
    either a register or a constant.  */
 
 static pv_t
-arc_pv_get_operand (pv_t *regs, const struct arc_instruction &insn, int operand)
+arc_pv_get_operand (pv_t *regs, const struct arc_instruction &insn,
+		    int operand)
 {
   if (insn.operands[operand].kind == ARC_OPERAND_KIND_REG)
     return regs[insn.operands[operand].value];
@@ -1083,8 +1064,9 @@ arc_pv_get_operand (pv_t *regs, const struct arc_instruction &insn, int operand)
    be updated.  */
 
 static bool
-arc_is_in_prologue (struct gdbarch *gdbarch, const struct arc_instruction &insn,
-		    pv_t *regs, struct pv_area *stack)
+arc_is_in_prologue (struct gdbarch *gdbarch,
+		    const struct arc_instruction &insn, pv_t *regs,
+		    struct pv_area *stack)
 {
   /* It might be that currently analyzed address doesn't contain an
      instruction, hence INSN is not valid.  It likely means that address points
@@ -1240,20 +1222,20 @@ arc_is_in_prologue (struct gdbarch *gdbarch, const struct arc_instruction &insn,
 
       bool is_fp_saved;
       if (insn.operands_count > 1)
-	is_fp_saved = (insn.operands[1].value  == ARC_FP_REGNUM);
+	is_fp_saved = (insn.operands[1].value == ARC_FP_REGNUM);
       else
 	is_fp_saved = false;
 
       bool is_blink_saved;
       if (insn.operands_count > 1)
-	is_blink_saved = (insn.operands[insn.operands_count - 1].value
-			  == ARC_BLINK_REGNUM);
+	is_blink_saved
+	  = (insn.operands[insn.operands_count - 1].value == ARC_BLINK_REGNUM);
       else
 	is_blink_saved = false;
 
       /* Amount of bytes to be allocated to store specified registers.  */
-      CORE_ADDR st_size = ((regs_saved + is_fp_saved + is_blink_saved)
-			   * ARC_REGISTER_SIZE);
+      CORE_ADDR st_size
+	= ((regs_saved + is_fp_saved + is_blink_saved) * ARC_REGISTER_SIZE);
       pv_t new_sp = pv_add_constant (regs[ARC_SP_REGNUM], -st_size);
 
       /* Assume that if the last register (closest to new SP) can be written,
@@ -1280,8 +1262,7 @@ arc_is_in_prologue (struct gdbarch *gdbarch, const struct arc_instruction &insn,
       if (is_blink_saved)
 	{
 	  addr = pv_add_constant (addr, -ARC_REGISTER_SIZE);
-	  stack->store (addr, ARC_REGISTER_SIZE,
-			regs[ARC_BLINK_REGNUM]);
+	  stack->store (addr, ARC_REGISTER_SIZE, regs[ARC_BLINK_REGNUM]);
 	}
 
       gdb_assert (pv_is_identical (addr, new_sp));
@@ -1439,8 +1420,9 @@ arc_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR entrypoint,
    limit will be rarely reached.  */
 
 const static int MAX_PROLOGUE_LENGTH
-  = 4 * (ARC_R25_REGNUM - ARC_R13_REGNUM + 1 + 2 + 1 + 6
-	 + ARC_LAST_ARG_REGNUM - ARC_FIRST_ARG_REGNUM + 1);
+  = 4
+    * (ARC_R25_REGNUM - ARC_R13_REGNUM + 1 + 2 + 1 + 6 + ARC_LAST_ARG_REGNUM
+       - ARC_FIRST_ARG_REGNUM + 1);
 
 /* Implement the "skip_prologue" gdbarch method.
 
@@ -1460,8 +1442,7 @@ arc_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (find_pc_partial_function (pc, &func_name, &func_addr, NULL))
     {
       /* Found a function.  */
-      CORE_ADDR postprologue_pc
-	= skip_prologue_using_sal (gdbarch, func_addr);
+      CORE_ADDR postprologue_pc = skip_prologue_using_sal (gdbarch, func_addr);
 
       if (postprologue_pc != 0)
 	return std::max (pc, postprologue_pc);
@@ -1597,15 +1578,13 @@ arc_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 
   if (kind == sizeof (arc_brk_le))
     {
-      return ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	      ? arc_brk_be
-	      : arc_brk_le);
+      return ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG) ? arc_brk_be
+							       : arc_brk_le);
     }
   else
     {
-      return ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	      ? arc_brk_s_be
-	      : arc_brk_s_le);
+      return ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG) ? arc_brk_s_be
+							       : arc_brk_s_le);
     }
 }
 
@@ -1635,7 +1614,7 @@ arc_print_frame_cache (struct gdbarch *gdbarch, const char *message,
 	arc_debug_printf ("saved register %s at %s %s",
 			  gdbarch_register_name (gdbarch, i),
 			  (addresses_known) ? "address" : "offset",
-			      paddress (gdbarch, cache->saved_regs[i].addr ()));
+			  paddress (gdbarch, cache->saved_regs[i].addr ()));
     }
 }
 
@@ -1687,8 +1666,8 @@ arc_make_frame_cache (frame_info_ptr this_frame)
   if (arc_debug)
     arc_print_frame_cache (gdbarch, "after prologue", cache, false);
 
-  CORE_ADDR unwound_fb = get_frame_register_unsigned (this_frame,
-						      cache->frame_base_reg);
+  CORE_ADDR unwound_fb
+    = get_frame_register_unsigned (this_frame, cache->frame_base_reg);
   if (unwound_fb == 0)
     return cache;
   cache->prev_sp = unwound_fb + cache->frame_base_offset;
@@ -1745,8 +1724,8 @@ arc_frame_this_id (frame_info_ptr this_frame, void **this_cache,
    */
   CORE_ADDR code_addr = get_frame_func (this_frame);
   if (code_addr == 0)
-    code_addr = get_frame_register_unsigned (this_frame,
-					     gdbarch_pc_regnum (gdbarch));
+    code_addr
+      = get_frame_register_unsigned (this_frame, gdbarch_pc_regnum (gdbarch));
 
   *this_id = frame_id_build (stack_addr, code_addr);
 }
@@ -1754,8 +1733,8 @@ arc_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 /* Implement the "prev_register" frame_unwind method.  */
 
 static struct value *
-arc_frame_prev_register (frame_info_ptr this_frame,
-			 void **this_cache, int regnum)
+arc_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+			 int regnum)
 {
   if (*this_cache == NULL)
     *this_cache = arc_make_frame_cache (this_frame);
@@ -1813,7 +1792,8 @@ arc_make_sigtramp_frame_cache (frame_info_ptr this_frame)
   arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (arch);
 
   /* Allocate new frame cache instance and space for saved register info.  */
-  struct arc_frame_cache *cache = FRAME_OBSTACK_ZALLOC (struct arc_frame_cache);
+  struct arc_frame_cache *cache
+    = FRAME_OBSTACK_ZALLOC (struct arc_frame_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Get the stack pointer and use it as the frame base.  */
@@ -1844,8 +1824,8 @@ arc_make_sigtramp_frame_cache (frame_info_ptr this_frame)
    frames.  */
 
 static void
-arc_sigtramp_frame_this_id (frame_info_ptr this_frame,
-			    void **this_cache, struct frame_id *this_id)
+arc_sigtramp_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+			    struct frame_id *this_id)
 {
   arc_debug_printf ("called");
 
@@ -1863,8 +1843,8 @@ arc_sigtramp_frame_this_id (frame_info_ptr this_frame,
 /* Get a register from a signal handler frame.  */
 
 static struct value *
-arc_sigtramp_frame_prev_register (frame_info_ptr this_frame,
-				  void **this_cache, int regnum)
+arc_sigtramp_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+				  int regnum)
 {
   arc_debug_printf ("regnum = %d", regnum);
 
@@ -1881,8 +1861,7 @@ arc_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			    frame_info_ptr this_frame,
-			    void **this_cache)
+			    frame_info_ptr this_frame, void **this_cache)
 {
   arc_debug_printf ("called");
 
@@ -1899,41 +1878,35 @@ arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
    the fallback unwinder, we use the default frame sniffer, which always
    accepts the frame.  */
 
-static const struct frame_unwind arc_frame_unwind = {
-  "arc prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  arc_frame_this_id,
-  arc_frame_prev_register,
-  NULL,
-  default_frame_sniffer,
-  NULL,
-  NULL
-};
+static const struct frame_unwind arc_frame_unwind
+  = { "arc prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      arc_frame_this_id,
+      arc_frame_prev_register,
+      NULL,
+      default_frame_sniffer,
+      NULL,
+      NULL };
 
 /* Structure defining the ARC signal frame unwind functions.  Custom
    sniffer is used, because this frame must be accepted only in the right
    context.  */
 
-static const struct frame_unwind arc_sigtramp_frame_unwind = {
-  "arc sigtramp",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  arc_sigtramp_frame_this_id,
-  arc_sigtramp_frame_prev_register,
-  NULL,
-  arc_sigtramp_frame_sniffer,
-  NULL,
-  NULL
-};
+static const struct frame_unwind arc_sigtramp_frame_unwind
+  = { "arc sigtramp",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      arc_sigtramp_frame_this_id,
+      arc_sigtramp_frame_prev_register,
+      NULL,
+      arc_sigtramp_frame_sniffer,
+      NULL,
+      NULL };
 
-
-static const struct frame_base arc_normal_base = {
-  &arc_frame_unwind,
-  arc_frame_base_address,
-  arc_frame_base_address,
-  arc_frame_base_address
-};
+static const struct frame_base arc_normal_base
+  = { &arc_frame_unwind, arc_frame_base_address, arc_frame_base_address,
+      arc_frame_base_address };
 
 static enum arc_isa
 mach_type_to_arc_isa (const unsigned long mach)
@@ -1947,7 +1920,7 @@ mach_type_to_arc_isa (const unsigned long mach)
     case bfd_mach_arc_arcv2:
       return ARC_ISA_ARCV2;
     default:
-	internal_error (_("unknown machine id %lu"), mach);
+      internal_error (_ ("unknown machine id %lu"), mach);
     }
 }
 
@@ -1972,7 +1945,7 @@ arc_arch_features_create (const bfd *abfd, const unsigned long mach)
       else if (eclass == ELFCLASS64)
 	reg_size = 8;
       else
-	internal_error (_("unknown ELF header class %d"), eclass);
+	internal_error (_ ("unknown ELF header class %d"), eclass);
     }
 
   /* MACH from a bfd_arch_info struct is used here.  It should be a safe
@@ -1997,8 +1970,8 @@ find_obsolete_core_names (const struct target_desc *tdesc)
     feat = tdesc_find_feature (tdesc, ARC_CORE_V2_OBSOLETE_FEATURE_NAME);
 
   if (feat == nullptr)
-    feat = tdesc_find_feature
-      (tdesc, ARC_CORE_V2_REDUCED_OBSOLETE_FEATURE_NAME);
+    feat
+      = tdesc_find_feature (tdesc, ARC_CORE_V2_REDUCED_OBSOLETE_FEATURE_NAME);
 
   return feat;
 }
@@ -2024,8 +1997,8 @@ determine_core_reg_feature_set (const unsigned long mach)
     case ARC_ISA_ARCV2:
       return &arc_v2_core_reg_feature;
     default:
-      gdb_assert_not_reached
-	("Unknown machine type to determine the core feature set.");
+      gdb_assert_not_reached (
+	"Unknown machine type to determine the core feature set.");
     }
 }
 
@@ -2051,10 +2024,8 @@ determine_aux_reg_feature_set ()
 static void
 arc_update_acc_reg_names (const int byte_order)
 {
-  const char *r58_alias
-    = byte_order == BFD_ENDIAN_LITTLE ? "accl" : "acch";
-  const char *r59_alias
-    = byte_order == BFD_ENDIAN_LITTLE ? "acch" : "accl";
+  const char *r58_alias = byte_order == BFD_ENDIAN_LITTLE ? "accl" : "acch";
+  const char *r59_alias = byte_order == BFD_ENDIAN_LITTLE ? "acch" : "accl";
 
   /* Subscript 1 must be OK because those registers have 2 names.  */
   arc_v1_core_reg_feature.registers[ARC_R58_REGNUM].names[1] = r58_alias;
@@ -2089,16 +2060,16 @@ arc_check_tdesc_feature (struct tdesc_arch_data *tdesc_data,
       if (!found && reg.required_p)
 	{
 	  std::ostringstream reg_names;
-	  for (std::size_t i = 0; i < reg.names.size(); ++i)
+	  for (std::size_t i = 0; i < reg.names.size (); ++i)
 	    {
 	      if (i == 0)
 		reg_names << "'" << reg.names[0] << "'";
 	      else
 		reg_names << " or '" << reg.names[0] << "'";
 	    }
-	  arc_print (_("Error: Cannot find required register(s) %s "
-		       "in feature '%s'.\n"), reg_names.str ().c_str (),
-		       feature->name.c_str ());
+	  arc_print (_ ("Error: Cannot find required register(s) %s "
+			"in feature '%s'.\n"),
+		     reg_names.str ().c_str (), feature->name.c_str ());
 	  return false;
 	}
     }
@@ -2122,15 +2093,16 @@ arc_check_for_hw_loops (const struct target_desc *tdesc,
     return false;
 
   bool hw_loop_p = false;
-  const auto lp_start_name =
-    aux_regset->registers[ARC_LP_START_REGNUM - ARC_FIRST_AUX_REGNUM].names[0];
-  const auto lp_end_name =
-    aux_regset->registers[ARC_LP_END_REGNUM - ARC_FIRST_AUX_REGNUM].names[0];
+  const auto lp_start_name
+    = aux_regset->registers[ARC_LP_START_REGNUM - ARC_FIRST_AUX_REGNUM]
+	.names[0];
+  const auto lp_end_name
+    = aux_regset->registers[ARC_LP_END_REGNUM - ARC_FIRST_AUX_REGNUM].names[0];
 
-  hw_loop_p = tdesc_numbered_register (feature_aux, data,
-				       ARC_LP_START_REGNUM, lp_start_name);
-  hw_loop_p &= tdesc_numbered_register (feature_aux, data,
-				       ARC_LP_END_REGNUM, lp_end_name);
+  hw_loop_p = tdesc_numbered_register (feature_aux, data, ARC_LP_START_REGNUM,
+				       lp_start_name);
+  hw_loop_p &= tdesc_numbered_register (feature_aux, data, ARC_LP_END_REGNUM,
+					lp_end_name);
 
   return hw_loop_p;
 }
@@ -2151,8 +2123,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
   if (!tdesc_has_registers (tdesc_loc))
     {
       arc_arch_features features
-	= arc_arch_features_create (info.abfd,
-				    info.bfd_arch_info->mach);
+	= arc_arch_features_create (info.abfd, info.bfd_arch_info->mach);
       tdesc_loc = arc_lookup_target_description (features);
     }
   gdb_assert (tdesc_loc != nullptr);
@@ -2172,15 +2143,17 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 
   if (feature_core == nullptr)
     {
-      arc_print (_("Error: Cannot find required feature '%s' in supplied "
-		   "target description.\n"), ARC_CORE_FEATURE_NAME);
+      arc_print (_ ("Error: Cannot find required feature '%s' in supplied "
+		    "target description.\n"),
+		 ARC_CORE_FEATURE_NAME);
       return false;
     }
 
   if (feature_aux == nullptr)
     {
-      arc_print (_("Error: Cannot find required feature '%s' in supplied "
-		   "target description.\n"), ARC_AUX_FEATURE_NAME);
+      arc_print (_ ("Error: Cannot find required feature '%s' in supplied "
+		    "target description.\n"),
+		 ARC_AUX_FEATURE_NAME);
       return false;
     }
 
@@ -2193,12 +2166,10 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 
   arc_update_acc_reg_names (info.byte_order);
 
-  bool valid_p = arc_check_tdesc_feature (tdesc_data_loc.get (),
-					  feature_core,
+  bool valid_p = arc_check_tdesc_feature (tdesc_data_loc.get (), feature_core,
 					  arc_core_reg_feature);
 
-  valid_p &= arc_check_tdesc_feature (tdesc_data_loc.get (),
-				      feature_aux,
+  valid_p &= arc_check_tdesc_feature (tdesc_data_loc.get (), feature_aux,
 				      arc_aux_reg_feature);
 
   if (!valid_p)
@@ -2288,7 +2259,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, ARC_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARC_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, ARC_STATUS32_REGNUM);
-  set_gdbarch_fp0_regnum (gdbarch, -1);	/* No FPU registers.  */
+  set_gdbarch_fp0_regnum (gdbarch, -1); /* No FPU registers.  */
 
   set_gdbarch_push_dummy_call (gdbarch, arc_push_dummy_call);
   set_gdbarch_push_dummy_code (gdbarch, arc_push_dummy_code);
@@ -2422,8 +2393,7 @@ arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 	      host_address_to_string (tdep->sigcontext_addr));
   gdb_printf (file, "arc_dump_tdep: sc_reg_offset = <%s>\n",
 	      host_address_to_string (tdep->sc_reg_offset));
-  gdb_printf (file, "arc_dump_tdep: sc_num_regs = %d\n",
-	      tdep->sc_num_regs);
+  gdb_printf (file, "arc_dump_tdep: sc_num_regs = %d\n", tdep->sc_num_regs);
 }
 
 /* This command accepts single argument - address of instruction to
@@ -2447,6 +2417,7 @@ dump_arc_instruction_command (const char *args, int from_tty)
 }
 
 void _initialize_arc_tdep ();
+
 void
 _initialize_arc_tdep ()
 {
@@ -2455,22 +2426,20 @@ _initialize_arc_tdep ()
   /* Register ARC-specific commands with gdb.  */
 
   /* Add root prefix command for "maintenance print arc" commands.  */
-  add_basic_prefix_cmd ("arc", class_maintenance,
-			_("ARC-specific maintenance commands for printing GDB "
-			  "internal state."),
-			&maintenance_print_arc_list,
-			0, &maintenanceprintlist);
+  add_basic_prefix_cmd (
+    "arc", class_maintenance,
+    _ ("ARC-specific maintenance commands for printing GDB "
+       "internal state."),
+    &maintenance_print_arc_list, 0, &maintenanceprintlist);
 
-  add_cmd ("arc-instruction", class_maintenance,
-	   dump_arc_instruction_command,
-	   _("Dump arc_instruction structure for specified address."),
+  add_cmd ("arc-instruction", class_maintenance, dump_arc_instruction_command,
+	   _ ("Dump arc_instruction structure for specified address."),
 	   &maintenance_print_arc_list);
 
   /* Debug internals for ARC GDB.  */
-  add_setshow_boolean_cmd ("arc", class_maintenance,
-			   &arc_debug,
-			   _("Set ARC specific debugging."),
-			   _("Show ARC specific debugging."),
-			   _("When set, ARC specific debugging is enabled."),
+  add_setshow_boolean_cmd ("arc", class_maintenance, &arc_debug,
+			   _ ("Set ARC specific debugging."),
+			   _ ("Show ARC specific debugging."),
+			   _ ("When set, ARC specific debugging is enabled."),
 			   NULL, NULL, &setdebuglist, &showdebuglist);
 }

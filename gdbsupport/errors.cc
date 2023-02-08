@@ -19,7 +19,7 @@
 
 #include "common-defs.h"
 #include "errors.h"
-#if defined (USE_WIN32API) || defined(__CYGWIN__)
+#if defined(USE_WIN32API) || defined(__CYGWIN__)
 #include <windows.h>
 #endif /* USE_WIN32API */
 
@@ -71,7 +71,7 @@ internal_warning_loc (const char *file, int line, const char *fmt, ...)
   va_end (ap);
 }
 
-#if defined (USE_WIN32API) || defined(__CYGWIN__)
+#if defined(USE_WIN32API) || defined(__CYGWIN__)
 
 /* See errors.h.  */
 
@@ -82,29 +82,23 @@ strwinerror (ULONGEST error)
   TCHAR *msgbuf;
   DWORD lasterr = GetLastError ();
   DWORD chars = FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM
-			       | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			       NULL,
-			       error,
-			       0, /* Default language */
-			       (LPTSTR) &msgbuf,
-			       0,
-			       NULL);
+                                 | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+                               NULL, error, 0, /* Default language */
+                               (LPTSTR) &msgbuf, 0, NULL);
   if (chars != 0)
     {
       /* If there is an \r\n appended, zap it.  */
-      if (chars >= 2
-	  && msgbuf[chars - 2] == '\r'
-	  && msgbuf[chars - 1] == '\n')
-	{
-	  chars -= 2;
-	  msgbuf[chars] = 0;
-	}
+      if (chars >= 2 && msgbuf[chars - 2] == '\r' && msgbuf[chars - 1] == '\n')
+        {
+          chars -= 2;
+          msgbuf[chars] = 0;
+        }
 
       if (chars > ARRAY_SIZE (buf) - 1)
-	{
-	  chars = ARRAY_SIZE (buf) - 1;
-	  msgbuf [chars] = 0;
-	}
+        {
+          chars = ARRAY_SIZE (buf) - 1;
+          msgbuf[chars] = 0;
+        }
 
 #ifdef UNICODE
       wcstombs (buf, msgbuf, chars + 1);

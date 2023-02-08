@@ -31,8 +31,8 @@
 #include "obsd-nat.h"
 
 /* Shorthand for some register numbers used below.  */
-#define MIPS_PC_REGNUM	MIPS_EMBED_PC_REGNUM
-#define MIPS_FP0_REGNUM	MIPS_EMBED_FP0_REGNUM
+#define MIPS_PC_REGNUM MIPS_EMBED_PC_REGNUM
+#define MIPS_FP0_REGNUM MIPS_EMBED_FP0_REGNUM
 #define MIPS_FSR_REGNUM MIPS_EMBED_FP0_REGNUM + 32
 
 struct mips64_obsd_nat_target final : public obsd_nat_target
@@ -62,8 +62,8 @@ mips64obsd_supply_gregset (struct regcache *regcache, const void *gregs)
    in GREGS.  */
 
 static void
-mips64obsd_collect_gregset (const struct regcache *regcache,
-			    void *gregs, int regnum)
+mips64obsd_collect_gregset (const struct regcache *regcache, void *gregs,
+			    int regnum)
 {
   char *regs = gregs;
   int i;
@@ -80,7 +80,6 @@ mips64obsd_collect_gregset (const struct regcache *regcache,
 	regcache->raw_collect (i, regs + (i + 2) * 8);
     }
 }
-
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
@@ -92,7 +91,7 @@ mips64_obsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
   pid_t pid = regcache->ptid ().pid ();
 
   if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
   mips64obsd_supply_gregset (regcache, &regs);
 }
@@ -107,15 +106,16 @@ mips64_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
   pid_t pid = regcache->ptid ().pid ();
 
   if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
   mips64obsd_collect_gregset (regcache, &regs, regnum);
 
   if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't write registers"));
+    perror_with_name (_ ("Couldn't write registers"));
 }
 
 void _initialize_mips64obsd_nat ();
+
 void
 _initialize_mips64obsd_nat ()
 {

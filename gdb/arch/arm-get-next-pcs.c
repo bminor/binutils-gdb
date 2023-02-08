@@ -28,10 +28,8 @@
 
 void
 arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
-		       struct arm_get_next_pcs_ops *ops,
-		       int byte_order,
-		       int byte_order_for_code,
-		       int has_thumb2_breakpoint,
+		       struct arm_get_next_pcs_ops *ops, int byte_order,
+		       int byte_order_for_code, int has_thumb2_breakpoint,
 		       struct regcache *regcache)
 {
   self->ops = ops;
@@ -50,7 +48,7 @@ static std::vector<CORE_ADDR>
 thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
-  CORE_ADDR breaks[2] = {CORE_ADDR_MAX, CORE_ADDR_MAX};
+  CORE_ADDR breaks[2] = { CORE_ADDR_MAX, CORE_ADDR_MAX };
   CORE_ADDR pc = regcache_read_pc (self->regcache);
   CORE_ADDR loc = pc;
   unsigned short insn1, insn2;
@@ -84,7 +82,7 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
      instructions.  */
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
-      insn1 = self->ops->read_mem_uint (loc, 2,byte_order_for_code);
+      insn1 = self->ops->read_mem_uint (loc, 2, byte_order_for_code);
       loc += 2;
 
       if (thumb_insn_size (insn1) != 4)
@@ -118,8 +116,7 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 	  /* Assume that there is at most one conditional branch in the
 	     atomic sequence.  If a conditional branch is found, put a
 	     breakpoint in its destination address.  */
-	  if ((insn1 & 0xf800) == 0xf000
-	      && (insn2 & 0xd000) == 0x8000
+	  if ((insn1 & 0xf800) == 0xf000 && (insn2 & 0xd000) == 0x8000
 	      && (insn1 & 0x0380) != 0x0380)
 	    {
 	      int sign, j1, j2, imm1, imm2;
@@ -166,8 +163,7 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
   /* Check for duplicated breakpoints.  Check also for a breakpoint
      placed (branch instruction's destination) anywhere in sequence.  */
   if (last_breakpoint
-      && (breaks[1] == breaks[0]
-	  || (breaks[1] >= pc && breaks[1] < loc)))
+      && (breaks[1] == breaks[0] || (breaks[1] >= pc && breaks[1] < loc)))
     last_breakpoint = 0;
 
   std::vector<CORE_ADDR> next_pcs;
@@ -188,7 +184,7 @@ static std::vector<CORE_ADDR>
 arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
-  CORE_ADDR breaks[2] = {CORE_ADDR_MAX, CORE_ADDR_MAX};
+  CORE_ADDR breaks[2] = { CORE_ADDR_MAX, CORE_ADDR_MAX };
   CORE_ADDR pc = regcache_read_pc (self->regcache);
   CORE_ADDR loc = pc;
   unsigned int insn;
@@ -248,8 +244,7 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
   /* Check for duplicated breakpoints.  Check also for a breakpoint
      placed (branch instruction's destination) anywhere in sequence.  */
   if (last_breakpoint
-      && (breaks[1] == breaks[0]
-	  || (breaks[1] >= pc && breaks[1] < loc)))
+      && (breaks[1] == breaks[0] || (breaks[1] >= pc && breaks[1] < loc)))
     last_breakpoint = 0;
 
   std::vector<CORE_ADDR> next_pcs;
@@ -269,9 +264,9 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
   int byte_order = self->byte_order;
   int byte_order_for_code = self->byte_order_for_code;
   CORE_ADDR pc = regcache_read_pc (self->regcache);
-  unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
+  unsigned long pc_val = ((unsigned long) pc) + 4; /* PC after prefetch */
   unsigned short inst1;
-  CORE_ADDR nextpc = pc + 2;		/* Default is next instruction.  */
+  CORE_ADDR nextpc = pc + 2; /* Default is next instruction.  */
   ULONGEST status, itstate;
   struct regcache *regcache = self->regcache;
   std::vector<CORE_ADDR> next_pcs;
@@ -310,9 +305,9 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	  itstate = inst1 & 0x00ff;
 	  pc += thumb_insn_size (inst1);
 
-	  while (itstate != 0 && ! condition_true (itstate >> 4, status))
+	  while (itstate != 0 && !condition_true (itstate >> 4, status))
 	    {
-	      inst1 = self->ops->read_mem_uint (pc, 2,byte_order_for_code);
+	      inst1 = self->ops->read_mem_uint (pc, 2, byte_order_for_code);
 	      pc += thumb_insn_size (inst1);
 	      itstate = thumb_advance_itstate (itstate);
 	    }
@@ -323,15 +318,16 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
       else if (itstate != 0)
 	{
 	  /* We are in a conditional block.  Check the condition.  */
-	  if (! condition_true (itstate >> 4, status))
+	  if (!condition_true (itstate >> 4, status))
 	    {
 	      /* Advance to the next executed instruction.  */
 	      pc += thumb_insn_size (inst1);
 	      itstate = thumb_advance_itstate (itstate);
 
-	      while (itstate != 0 && ! condition_true (itstate >> 4, status))
+	      while (itstate != 0 && !condition_true (itstate >> 4, status))
 		{
-		  inst1 = self->ops->read_mem_uint (pc, 2, byte_order_for_code);
+		  inst1
+		    = self->ops->read_mem_uint (pc, 2, byte_order_for_code);
 
 		  pc += thumb_insn_size (inst1);
 		  itstate = thumb_advance_itstate (itstate);
@@ -374,7 +370,8 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 		 the instruction after the IT block.  */
 	      do
 		{
-		  inst1 = self->ops->read_mem_uint (pc, 2, byte_order_for_code);
+		  inst1
+		    = self->ops->read_mem_uint (pc, 2, byte_order_for_code);
 		  pc += thumb_insn_size (inst1);
 		  itstate = thumb_advance_itstate (itstate);
 		}
@@ -391,7 +388,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
       /* We are in a conditional block.  Check the condition.  */
       int cond = itstate >> 4;
 
-      if (! condition_true (cond, status))
+      if (!condition_true (cond, status))
 	{
 	  /* Advance to the next instruction.  All the 32-bit
 	     instructions share a common prefix.  */
@@ -403,7 +400,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
       /* Otherwise, handle the instruction normally.  */
     }
 
-  if ((inst1 & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
+  if ((inst1 & 0xff00) == 0xbd00) /* pop {rlist, pc} */
     {
       CORE_ADDR sp;
 
@@ -414,17 +411,17 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
       sp = regcache_raw_get_unsigned (regcache, ARM_SP_REGNUM);
       nextpc = self->ops->read_mem_uint (sp + offset, 4, byte_order);
     }
-  else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
+  else if ((inst1 & 0xf000) == 0xd000) /* conditional branch */
     {
       unsigned long cond = bits (inst1, 8, 11);
-      if (cond == 0x0f)  /* 0x0f = SWI */
+      if (cond == 0x0f) /* 0x0f = SWI */
 	{
 	  nextpc = self->ops->syscall_next_pc (self);
 	}
       else if (cond != 0x0f && condition_true (cond, status))
 	nextpc = pc_val + (sbits (inst1, 0, 7) << 1);
     }
-  else if ((inst1 & 0xf800) == 0xe000)	/* unconditional branch */
+  else if ((inst1 & 0xf800) == 0xe000) /* unconditional branch */
     {
       nextpc = pc_val + (sbits (inst1, 0, 10) << 1);
     }
@@ -522,7 +519,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	  if (load_pc)
 	    {
 	      CORE_ADDR addr = regcache_raw_get_unsigned (regcache, rn);
-	      nextpc = self->ops->read_mem_uint	(addr + offset, 4, byte_order);
+	      nextpc = self->ops->read_mem_uint (addr + offset, 4, byte_order);
 	    }
 	}
       else if ((inst1 & 0xffef) == 0xea4f && (inst2 & 0xfff0) == 0x0f00)
@@ -569,8 +566,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	    load_pc = 0;
 
 	  if (load_pc)
-	    nextpc
-	      = self->ops->read_mem_uint (base, 4, byte_order);
+	    nextpc = self->ops->read_mem_uint (base, 4, byte_order);
 	}
       else if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf000)
 	{
@@ -579,12 +575,13 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 
 	  tbl_reg = bits (inst1, 0, 3);
 	  if (tbl_reg == 0x0f)
-	    table = pc + 4;  /* Regcache copy of PC isn't right yet.  */
+	    table = pc + 4; /* Regcache copy of PC isn't right yet.  */
 	  else
 	    table = regcache_raw_get_unsigned (regcache, tbl_reg);
 
 	  offset = regcache_raw_get_unsigned (regcache, bits (inst2, 0, 3));
-	  length = 2 * self->ops->read_mem_uint (table + offset, 1, byte_order);
+	  length
+	    = 2 * self->ops->read_mem_uint (table + offset, 1, byte_order);
 	  nextpc = pc_val + length;
 	}
       else if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf010)
@@ -594,23 +591,25 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 
 	  tbl_reg = bits (inst1, 0, 3);
 	  if (tbl_reg == 0x0f)
-	    table = pc + 4;  /* Regcache copy of PC isn't right yet.  */
+	    table = pc + 4; /* Regcache copy of PC isn't right yet.  */
 	  else
 	    table = regcache_raw_get_unsigned (regcache, tbl_reg);
 
-	  offset = 2 * regcache_raw_get_unsigned (regcache, bits (inst2, 0, 3));
-	  length = 2 * self->ops->read_mem_uint (table + offset, 2, byte_order);
+	  offset
+	    = 2 * regcache_raw_get_unsigned (regcache, bits (inst2, 0, 3));
+	  length
+	    = 2 * self->ops->read_mem_uint (table + offset, 2, byte_order);
 	  nextpc = pc_val + length;
 	}
     }
-  else if ((inst1 & 0xff00) == 0x4700)	/* bx REG, blx REG */
+  else if ((inst1 & 0xff00) == 0x4700) /* bx REG, blx REG */
     {
       if (bits (inst1, 3, 6) == 0x0f)
 	nextpc = UNMAKE_THUMB_ADDR (pc_val);
       else
 	nextpc = regcache_raw_get_unsigned (regcache, bits (inst1, 3, 6));
     }
-  else if ((inst1 & 0xff87) == 0x4687)	/* mov pc, REG */
+  else if ((inst1 & 0xff87) == 0x4687) /* mov pc, REG */
     {
       if (bits (inst1, 3, 6) == 0x0f)
 	nextpc = pc_val;
@@ -661,7 +660,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
   this_instr = self->ops->read_mem_uint (pc, 4, byte_order_for_code);
 
   status = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
-  nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
+  nextpc = (CORE_ADDR) (pc_val + 4); /* Default case */
 
   if (bits (this_instr, 28, 31) == INST_NV)
     switch (bits (this_instr, 24, 27))
@@ -680,7 +679,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
       case 0xe:
 	/* Coprocessor register transfer.  */
 	if (bits (this_instr, 12, 15) == 15)
-	  error (_("Invalid update to pc in instruction"));
+	  error (_ ("Invalid update to pc in instruction"));
 	break;
       }
   else if (condition_true (bits (this_instr, 28, 31), status))
@@ -688,7 +687,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
       switch (bits (this_instr, 24, 27))
 	{
 	case 0x0:
-	case 0x1:			/* data processing */
+	case 0x1: /* data processing */
 	case 0x2:
 	case 0x3:
 	  {
@@ -700,8 +699,8 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	      break;
 
 	    if (bits (this_instr, 22, 25) == 0
-		&& bits (this_instr, 4, 7) == 9)	/* multiply */
-	      error (_("Invalid update to pc in instruction"));
+		&& bits (this_instr, 4, 7) == 9) /* multiply */
+	      error (_ ("Invalid update to pc in instruction"));
 
 	    /* BX <reg>, BLX <reg> */
 	    if (bits (this_instr, 4, 27) == 0x12fff1
@@ -709,8 +708,8 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	      {
 		rn = bits (this_instr, 0, 3);
 		nextpc = ((rn == ARM_PC_REGNUM)
-			  ? (pc_val + 8)
-			  : regcache_raw_get_unsigned (regcache, rn));
+			    ? (pc_val + 8)
+			    : regcache_raw_get_unsigned (regcache, rn));
 
 		next_pcs.push_back (nextpc);
 		return next_pcs;
@@ -720,84 +719,84 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	    c = (status & FLAG_C) ? 1 : 0;
 	    rn = bits (this_instr, 16, 19);
 	    operand1 = ((rn == ARM_PC_REGNUM)
-			? (pc_val + 8)
-			: regcache_raw_get_unsigned (regcache, rn));
+			  ? (pc_val + 8)
+			  : regcache_raw_get_unsigned (regcache, rn));
 
 	    if (bit (this_instr, 25))
 	      {
 		unsigned long immval = bits (this_instr, 0, 7);
 		unsigned long rotate = 2 * bits (this_instr, 8, 11);
 		operand2 = ((immval >> rotate) | (immval << (32 - rotate)))
-		  & 0xffffffff;
+			   & 0xffffffff;
 	      }
-	    else		/* operand 2 is a shifted register.  */
-	      operand2 = shifted_reg_val (regcache, this_instr, c,
-					  pc_val, status);
+	    else /* operand 2 is a shifted register.  */
+	      operand2
+		= shifted_reg_val (regcache, this_instr, c, pc_val, status);
 
 	    switch (bits (this_instr, 21, 24))
 	      {
-	      case 0x0:	/*and */
+	      case 0x0: /*and */
 		result = operand1 & operand2;
 		break;
 
-	      case 0x1:	/*eor */
+	      case 0x1: /*eor */
 		result = operand1 ^ operand2;
 		break;
 
-	      case 0x2:	/*sub */
+	      case 0x2: /*sub */
 		result = operand1 - operand2;
 		break;
 
-	      case 0x3:	/*rsb */
+	      case 0x3: /*rsb */
 		result = operand2 - operand1;
 		break;
 
-	      case 0x4:	/*add */
+	      case 0x4: /*add */
 		result = operand1 + operand2;
 		break;
 
-	      case 0x5:	/*adc */
+	      case 0x5: /*adc */
 		result = operand1 + operand2 + c;
 		break;
 
-	      case 0x6:	/*sbc */
+	      case 0x6: /*sbc */
 		result = operand1 - operand2 + c;
 		break;
 
-	      case 0x7:	/*rsc */
+	      case 0x7: /*rsc */
 		result = operand2 - operand1 + c;
 		break;
 
 	      case 0x8:
 	      case 0x9:
 	      case 0xa:
-	      case 0xb:	/* tst, teq, cmp, cmn */
+	      case 0xb: /* tst, teq, cmp, cmn */
 		result = (unsigned long) nextpc;
 		break;
 
-	      case 0xc:	/*orr */
+	      case 0xc: /*orr */
 		result = operand1 | operand2;
 		break;
 
-	      case 0xd:	/*mov */
+	      case 0xd: /*mov */
 		/* Always step into a function.  */
 		result = operand2;
 		break;
 
-	      case 0xe:	/*bic */
+	      case 0xe: /*bic */
 		result = operand1 & ~operand2;
 		break;
 
-	      case 0xf:	/*mvn */
+	      case 0xf: /*mvn */
 		result = ~operand2;
 		break;
 	      }
-	      nextpc = self->ops->addr_bits_remove (self, result);
+	    nextpc = self->ops->addr_bits_remove (self, result);
 	    break;
 	  }
 
 	case 0x4:
-	case 0x5:		/* data transfer */
+	case 0x5: /* data transfer */
 	case 0x6:
 	case 0x7:
 	  if (bits (this_instr, 25, 27) == 0x3 && bit (this_instr, 4) == 1)
@@ -817,23 +816,23 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 		  unsigned long base;
 
 		  if (bit (this_instr, 22))
-		    error (_("Invalid update to pc in instruction"));
+		    error (_ ("Invalid update to pc in instruction"));
 
 		  /* byte write to PC */
 		  rn = bits (this_instr, 16, 19);
 		  base = ((rn == ARM_PC_REGNUM)
-			  ? (pc_val + 8)
-			  : regcache_raw_get_unsigned (regcache, rn));
+			    ? (pc_val + 8)
+			    : regcache_raw_get_unsigned (regcache, rn));
 
 		  if (bit (this_instr, 24))
 		    {
 		      /* pre-indexed */
 		      int c = (status & FLAG_C) ? 1 : 0;
-		      unsigned long offset =
-		      (bit (this_instr, 25)
-		       ? shifted_reg_val (regcache, this_instr, c,
-					  pc_val, status)
-		       : bits (this_instr, 0, 11));
+		      unsigned long offset
+			= (bit (this_instr, 25)
+			     ? shifted_reg_val (regcache, this_instr, c,
+						pc_val, status)
+			     : bits (this_instr, 0, 11));
 
 		      if (bit (this_instr, 23))
 			base += offset;
@@ -848,7 +847,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	  break;
 
 	case 0x8:
-	case 0x9:		/* block transfer */
+	case 0x9: /* block transfer */
 	  if (bit (this_instr, 20))
 	    {
 	      /* LDM */
@@ -866,21 +865,22 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 		      /* up */
 		      unsigned long reglist = bits (this_instr, 0, 14);
 		      offset = count_one_bits_l (reglist) * 4;
-		      if (bit (this_instr, 24))		/* pre */
+		      if (bit (this_instr, 24)) /* pre */
 			offset += 4;
 		    }
 		  else if (bit (this_instr, 24))
 		    offset = -4;
 
 		  rn_val_offset = rn_val + offset;
-		  nextpc = (CORE_ADDR) self->ops->read_mem_uint (rn_val_offset,
-								 4, byte_order);
+		  nextpc
+		    = (CORE_ADDR) self->ops->read_mem_uint (rn_val_offset, 4,
+							    byte_order);
 		}
 	    }
 	  break;
 
-	case 0xb:		/* branch & link */
-	case 0xa:		/* branch */
+	case 0xb: /* branch & link */
+	case 0xa: /* branch */
 	  {
 	    nextpc = BranchDest (pc, this_instr);
 	    break;
@@ -888,16 +888,16 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 
 	case 0xc:
 	case 0xd:
-	case 0xe:		/* coproc ops */
+	case 0xe: /* coproc ops */
 	  break;
-	case 0xf:		/* SWI */
+	case 0xf: /* SWI */
 	  {
 	    nextpc = self->ops->syscall_next_pc (self);
 	  }
 	  break;
 
 	default:
-	  error (_("Bad bit-field extraction"));
+	  error (_ ("Bad bit-field extraction"));
 	  return next_pcs;
 	}
     }

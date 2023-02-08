@@ -41,5 +41,4 @@
 
 #endif /* HAVE_SIGPROCMASK */
 
-
 #endif /* GDBSUPPORT_GDB_SIGMASK_H */

@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (GO_LANG_H)
+#if !defined(GO_LANG_H)
 #define GO_LANG_H 1
 
 struct type_print_options;
@@ -74,19 +74,19 @@ extern const struct builtin_go_type *builtin_go_type (struct gdbarch *);
 class go_language : public language_defn
 {
 public:
+
   go_language ()
     : language_defn (language_go)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* See language.h.  */
 
-  const char *name () const override
-  { return "go"; }
+  const char *name () const override { return "go"; }
 
   /* See language.h.  */
 
-  const char *natural_name () const override
-  { return "Go"; }
+  const char *natural_name () const override { return "Go"; }
 
   /* See language.h.  */
 
@@ -95,9 +95,9 @@ public:
 
   /* See language.h.  */
 
-  bool sniff_from_mangled_name
-       (const char *mangled, gdb::unique_xmalloc_ptr<char> *demangled)
-       const override
+  bool sniff_from_mangled_name (
+    const char *mangled,
+    gdb::unique_xmalloc_ptr<char> *demangled) const override
   {
     *demangled = demangle_symbol (mangled, 0);
     return *demangled != NULL;
@@ -116,9 +116,9 @@ public:
 
   /* See language.h.  */
 
-  void value_print_inner
-	(struct value *val, struct ui_file *stream, int recurse,
-	 const struct value_print_options *options) const override;
+  void
+  value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options) const override;
 
   /* See language.h.  */
 
@@ -135,8 +135,7 @@ public:
 
   /* See language.h.  */
 
-  bool store_sym_names_in_linkage_form_p () const override
-  { return true; }
+  bool store_sym_names_in_linkage_form_p () const override { return true; }
 };
 
 #endif /* !defined (GO_LANG_H) */

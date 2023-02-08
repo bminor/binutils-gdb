@@ -41,8 +41,6 @@ struct program_space *current_program_space;
 /* The last address space number assigned.  */
 static int highest_address_space_num;
 
-
-
 /* Create a new address space object, and add it to the list.  */
 
 address_space::address_space ()
@@ -76,8 +74,6 @@ init_address_spaces (void)
   highest_address_space_num = 0;
 }
 
-
-
 /* Remove a program space from the program spaces list.  */
 
 static void
@@ -85,8 +81,8 @@ remove_program_space (program_space *pspace)
 {
   gdb_assert (pspace != NULL);
 
-  auto iter = std::find (program_spaces.begin (), program_spaces.end (),
-			 pspace);
+  auto iter
+    = std::find (program_spaces.begin (), program_spaces.end (), pspace);
   gdb_assert (iter != program_spaces.end ());
   program_spaces.erase (iter);
 }
@@ -146,10 +142,9 @@ program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
   else
     {
       auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-				[=] (const std::unique_ptr<::objfile> &objf)
-				{
-				  return objf.get () == before;
-				});
+				[=] (const std::unique_ptr<::objfile> &objf) {
+	return objf.get () == before;
+      });
       gdb_assert (iter != objfiles_list.end ());
       objfiles_list.insert (iter, std::move (objfile));
     }
@@ -167,10 +162,9 @@ program_space::remove_objfile (struct objfile *objfile)
   reinit_frame_cache ();
 
   auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-			    [=] (const std::unique_ptr<::objfile> &objf)
-			    {
-			      return objf.get () == objfile;
-			    });
+			    [=] (const std::unique_ptr<::objfile> &objf) {
+    return objf.get () == objfile;
+  });
   gdb_assert (iter != objfiles_list.end ());
   objfiles_list.erase (iter);
 
@@ -324,13 +318,11 @@ print_program_space (struct ui_out *uiout, int requested)
 	    if (!printed_header)
 	      {
 		printed_header = 1;
-		gdb_printf ("\n\tBound inferiors: ID %d (%s)",
-			    inf->num,
+		gdb_printf ("\n\tBound inferiors: ID %d (%s)", inf->num,
 			    target_pid_to_str (ptid_t (inf->pid)).c_str ());
 	      }
 	    else
-	      gdb_printf (", ID %d (%s)",
-			  inf->num,
+	      gdb_printf (", ID %d (%s)", inf->num,
 			  target_pid_to_str (ptid_t (inf->pid)).c_str ());
 	  }
 
@@ -363,7 +355,7 @@ maintenance_info_program_spaces_command (const char *args, int from_tty)
     {
       requested = parse_and_eval_long (args);
       if (!valid_program_space_id (requested))
-	error (_("program space ID %d not known."), requested);
+	error (_ ("program space ID %d not known."), requested);
     }
 
   print_program_space (current_uiout, requested);
@@ -409,8 +401,6 @@ update_address_spaces (void)
       inf->aspace = inf->pspace->aspace;
 }
 
-
-
 /* See progspace.h.  */
 
 void
@@ -420,14 +410,12 @@ program_space::clear_solib_cache ()
   deleted_solibs.clear ();
 }
 
-
-
 void
 initialize_progspace (void)
 {
   add_cmd ("program-spaces", class_maintenance,
 	   maintenance_info_program_spaces_command,
-	   _("Info about currently known program spaces."),
+	   _ ("Info about currently known program spaces."),
 	   &maintenanceinfolist);
 
   /* There's always one program space.  Note that this function isn't

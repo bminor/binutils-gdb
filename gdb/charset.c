@@ -31,7 +31,7 @@
 #ifdef USE_WIN32API
 #include <windows.h>
 #endif
-
+
 /* How GDB's character set support works
 
    GDB has three global settings:
@@ -69,7 +69,6 @@
    GDB simply requires a capable iconv function.  Users on platforms
    without a suitable iconv can use the GNU iconv library.  */
 
-
 #ifdef PHONY_ICONV
 
 /* Provide a phony iconv that does as little as possible.  Also,
@@ -77,14 +76,14 @@
 
 #undef GDB_DEFAULT_HOST_CHARSET
 #ifdef USE_WIN32API
-# define GDB_DEFAULT_HOST_CHARSET "CP1252"
+#define GDB_DEFAULT_HOST_CHARSET "CP1252"
 #else
-# define GDB_DEFAULT_HOST_CHARSET "ISO-8859-1"
+#define GDB_DEFAULT_HOST_CHARSET "ISO-8859-1"
 #endif
-#define GDB_DEFAULT_TARGET_CHARSET GDB_DEFAULT_HOST_CHARSET 
+#define GDB_DEFAULT_TARGET_CHARSET GDB_DEFAULT_HOST_CHARSET
 #define GDB_DEFAULT_TARGET_WIDE_CHARSET "UTF-32"
 #undef DEFAULT_CHARSET_NAMES
-#define DEFAULT_CHARSET_NAMES GDB_DEFAULT_HOST_CHARSET ,
+#define DEFAULT_CHARSET_NAMES GDB_DEFAULT_HOST_CHARSET,
 
 #undef iconv_t
 #define iconv_t int
@@ -138,7 +137,7 @@ phony_iconv (iconv_t utf_flag, const char **inbuf, size_t *inbytesleft,
       while (*inbytesleft >= 4)
 	{
 	  unsigned long c
-	    = extract_unsigned_integer ((const gdb_byte *)*inbuf, 4, endian);
+	    = extract_unsigned_integer ((const gdb_byte *) *inbuf, 4, endian);
 
 	  if (c >= 256)
 	    {
@@ -212,9 +211,7 @@ gdb_iconv (iconv_t utf_flag, ICONV_CONST char **inbuf, size_t *inbytesleft,
 
 #endif /* PHONY_ICONV */
 
-
 /* The global lists of character sets and translations.  */
-
 
 #ifndef GDB_DEFAULT_TARGET_CHARSET
 #define GDB_DEFAULT_TARGET_CHARSET "ISO-8859-1"
@@ -226,60 +223,53 @@ gdb_iconv (iconv_t utf_flag, ICONV_CONST char **inbuf, size_t *inbytesleft,
 
 static const char *auto_host_charset_name = GDB_DEFAULT_HOST_CHARSET;
 static const char *host_charset_name = "auto";
+
 static void
 show_host_charset_name (struct ui_file *file, int from_tty,
-			struct cmd_list_element *c,
-			const char *value)
+			struct cmd_list_element *c, const char *value)
 {
   if (!strcmp (value, "auto"))
     gdb_printf (file,
-		_("The host character set is \"auto; currently %s\".\n"),
+		_ ("The host character set is \"auto; currently %s\".\n"),
 		auto_host_charset_name);
   else
-    gdb_printf (file, _("The host character set is \"%s\".\n"), value);
+    gdb_printf (file, _ ("The host character set is \"%s\".\n"), value);
 }
 
 static const char *target_charset_name = "auto";
+
 static void
 show_target_charset_name (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
   if (!strcmp (value, "auto"))
     gdb_printf (file,
-		_("The target character set is \"auto; "
-		  "currently %s\".\n"),
+		_ ("The target character set is \"auto; "
+		   "currently %s\".\n"),
 		gdbarch_auto_charset (get_current_arch ()));
   else
-    gdb_printf (file, _("The target character set is \"%s\".\n"),
-		value);
+    gdb_printf (file, _ ("The target character set is \"%s\".\n"), value);
 }
 
 static const char *target_wide_charset_name = "auto";
+
 static void
-show_target_wide_charset_name (struct ui_file *file, 
-			       int from_tty,
-			       struct cmd_list_element *c, 
-			       const char *value)
+show_target_wide_charset_name (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *c, const char *value)
 {
   if (!strcmp (value, "auto"))
     gdb_printf (file,
-		_("The target wide character set is \"auto; "
-		  "currently %s\".\n"),
+		_ ("The target wide character set is \"auto; "
+		   "currently %s\".\n"),
 		gdbarch_auto_wide_charset (get_current_arch ()));
   else
-    gdb_printf (file, _("The target wide character set is \"%s\".\n"),
-		value);
+    gdb_printf (file, _ ("The target wide character set is \"%s\".\n"), value);
 }
 
-static const char * const default_charset_names[] =
-{
-  DEFAULT_CHARSET_NAMES
-  0
-};
+static const char *const default_charset_names[] = { DEFAULT_CHARSET_NAMES 0 };
 
-static const char * const *charset_enum;
+static const char *const *charset_enum;
 
-
 /* If the target wide character set has big- or little-endian
    variants, these are the corresponding names.  */
 static const char *target_wide_charset_be_name;
@@ -318,8 +308,7 @@ set_be_le_names (struct gdbarch *gdbarch)
     {
       if (strncmp (target_wide, charset_enum[i], len))
 	continue;
-      if ((charset_enum[i][len] == 'B'
-	   || charset_enum[i][len] == 'L')
+      if ((charset_enum[i][len] == 'B' || charset_enum[i][len] == 'L')
 	  && charset_enum[i][len + 1] == 'E'
 	  && charset_enum[i][len + 2] == '\0')
 	{
@@ -329,7 +318,7 @@ set_be_le_names (struct gdbarch *gdbarch)
 	    target_wide_charset_le_name = charset_enum[i];
 	}
     }
-# endif  /* PHONY_ICONV */
+#endif /* PHONY_ICONV */
 }
 
 /* 'Set charset', 'set host-charset', 'set target-charset', 'set
@@ -348,13 +337,13 @@ validate (struct gdbarch *gdbarch)
 
   desc = iconv_open (target_wide_cset, host_cset);
   if (desc == (iconv_t) -1)
-    error (_("Cannot convert between character sets `%s' and `%s'"),
+    error (_ ("Cannot convert between character sets `%s' and `%s'"),
 	   target_wide_cset, host_cset);
   iconv_close (desc);
 
   desc = iconv_open (target_cset, host_cset);
   if (desc == (iconv_t) -1)
-    error (_("Cannot convert between character sets `%s' and `%s'"),
+    error (_ ("Cannot convert between character sets `%s' and `%s'"),
 	   target_cset, host_cset);
   iconv_close (desc);
 
@@ -364,7 +353,7 @@ validate (struct gdbarch *gdbarch)
 
 /* This is the sfunc for the 'set charset' command.  */
 static void
-set_charset_sfunc (const char *charset, int from_tty, 
+set_charset_sfunc (const char *charset, int from_tty,
 		   struct cmd_list_element *c)
 {
   /* CAREFUL: set the target charset here as well.  */
@@ -399,17 +388,14 @@ set_target_wide_charset_sfunc (const char *charset, int from_tty,
 
 /* sfunc for the 'show charset' command.  */
 static void
-show_charset (struct ui_file *file, int from_tty, 
-	      struct cmd_list_element *c,
+show_charset (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 	      const char *name)
 {
   show_host_charset_name (file, from_tty, c, host_charset_name);
   show_target_charset_name (file, from_tty, c, target_charset_name);
-  show_target_wide_charset_name (file, from_tty, c, 
-				 target_wide_charset_name);
+  show_target_wide_charset_name (file, from_tty, c, target_wide_charset_name);
 }
 
-
 /* Accessor functions.  */
 
 const char *
@@ -451,7 +437,6 @@ target_wide_charset (struct gdbarch *gdbarch)
   return target_wide_charset_name;
 }
 
-
 /* Host character set management.  For the time being, we assume that
    the host character set is some superset of ASCII.  */
 
@@ -463,7 +448,6 @@ host_letter_to_control_character (char c)
   return c & 0237;
 }
 
-
 /* Public character management functions.  */
 
 class iconv_wrapper
@@ -474,13 +458,10 @@ public:
   {
     m_desc = iconv_open (to, from);
     if (m_desc == (iconv_t) -1)
-      perror_with_name (_("Converting character sets"));
+      perror_with_name (_ ("Converting character sets"));
   }
 
-  ~iconv_wrapper ()
-  {
-    iconv_close (m_desc);
-  }
+  ~iconv_wrapper () { iconv_close (m_desc); }
 
   size_t convert (ICONV_CONST char **inp, size_t *inleft, char **outp,
 		  size_t *outleft)
@@ -545,8 +526,9 @@ convert_between_encodings (const char *from, const char *to,
 
 		/* Invalid input sequence.  */
 		if (translit == translit_none)
-		  error (_("Could not convert character "
-			   "to `%s' character set"), to);
+		  error (_ ("Could not convert character "
+			    "to `%s' character set"),
+			 to);
 
 		/* We emit escape sequence for the bytes, skip them,
 		   and try again.  */
@@ -576,26 +558,24 @@ convert_between_encodings (const char *from, const char *to,
 	      break;
 
 	    default:
-	      perror_with_name (_("Internal error while "
-				  "converting character sets"));
+	      perror_with_name (_ ("Internal error while "
+				   "converting character sets"));
 	    }
 	}
     }
 }
 
-
-
 /* Create a new iterator.  */
-wchar_iterator::wchar_iterator (const gdb_byte *input, size_t bytes, 
+wchar_iterator::wchar_iterator (const gdb_byte *input, size_t bytes,
 				const char *charset, size_t width)
-: m_input (input),
-  m_bytes (bytes),
-  m_width (width),
-  m_out (1)
+  : m_input (input),
+    m_bytes (bytes),
+    m_width (width),
+    m_out (1)
 {
   m_desc = iconv_open (INTERMEDIATE_ENCODING, charset);
   if (m_desc == (iconv_t) -1)
-    perror_with_name (_("Converting character sets"));
+    perror_with_name (_ ("Converting character sets"));
 }
 
 wchar_iterator::~wchar_iterator ()
@@ -606,8 +586,7 @@ wchar_iterator::~wchar_iterator ()
 
 int
 wchar_iterator::iterate (enum wchar_iterate_result *out_result,
-			 gdb_wchar_t **out_chars,
-			 const gdb_byte **ptr,
+			 gdb_wchar_t **out_chars, const gdb_byte **ptr,
 			 size_t *len)
 {
   size_t out_request;
@@ -639,7 +618,7 @@ wchar_iterator::iterate (enum wchar_iterate_result *out_result,
 		 converted a character; if so, return it.  */
 	      if (out_avail < out_request * sizeof (gdb_wchar_t))
 		break;
-	      
+
 	      /* Otherwise skip the first invalid character, and let
 		 the caller know about it.  */
 	      *out_result = wchar_iterate_invalid;
@@ -671,8 +650,8 @@ wchar_iterator::iterate (enum wchar_iterate_result *out_result,
 	      return 0;
 
 	    default:
-	      perror_with_name (_("Internal error while "
-				  "converting character sets"));
+	      perror_with_name (_ ("Internal error while "
+				   "converting character sets"));
 	    }
 	}
 
@@ -732,7 +711,7 @@ find_charset_names (void)
    So, configure may see libiconvlist but not iconvlist.  But, calling
    iconvlist is the right thing to do and will work.  Hence we do a
    check here but unconditionally call iconvlist below.  */
-#if defined (HAVE_ICONVLIST) || defined (HAVE_LIBICONVLIST)
+#if defined(HAVE_ICONVLIST) || defined(HAVE_LIBICONVLIST)
 
 /* A helper function that adds some character sets to the vector of
    all character sets.  This is a callback function for iconvlist.  */
@@ -768,14 +747,9 @@ ignore_line_p (const char *line)
 {
   /* This table is used to filter the output.  If this text appears
      anywhere in the line, it is ignored (strstr is used).  */
-  static const char * const ignore_lines[] =
-    {
-      "The following",
-      "not necessarily",
-      "the FROM and TO",
-      "listed with several",
-      NULL
-    };
+  static const char *const ignore_lines[]
+    = { "The following", "not necessarily", "the FROM and TO",
+	"listed with several", NULL };
   int i;
 
   for (i = 0; ignore_lines[i] != NULL; ++i)
@@ -808,10 +782,10 @@ find_charset_names (void)
 
 #ifdef ICONV_BIN
   {
-    std::string iconv_dir = relocate_gdb_directory (ICONV_BIN,
-						    ICONV_BIN_RELOCATABLE);
+    std::string iconv_dir
+      = relocate_gdb_directory (ICONV_BIN, ICONV_BIN_RELOCATABLE);
     iconv_program
-      = concat (iconv_dir.c_str(), SLASH_STRING, "iconv", (char *) NULL);
+      = concat (iconv_dir.c_str (), SLASH_STRING, "iconv", (char *) NULL);
   }
 #else
   iconv_program = xstrdup ("iconv");
@@ -824,9 +798,8 @@ find_charset_names (void)
   flags |= PEX_SEARCH;
 #endif
   /* Note that we simply ignore errors here.  */
-  if (!pex_run_in_environment (child, flags,
-			       args[0], const_cast<char **> (args),
-			       iconv_env.envp (),
+  if (!pex_run_in_environment (child, flags, args[0],
+			       const_cast<char **> (args), iconv_env.envp (),
 			       NULL, NULL, &err))
     {
       FILE *in = pex_read_output (child, 0);
@@ -876,7 +849,7 @@ find_charset_names (void)
 		;
 	      start = p;
 	      /* Find the next space, comma, or end-of-line.  */
-	      for ( ; *p && *p != ' ' && *p != ','; ++p)
+	      for (; *p && *p != ' ' && *p != ','; ++p)
 		;
 	      /* Ignore an empty result.  */
 	      if (p == start)
@@ -892,10 +865,9 @@ find_charset_names (void)
 	    }
 	}
 
-      if (pex_get_status (child, 1, &status)
-	  && WIFEXITED (status) && !WEXITSTATUS (status))
+      if (pex_get_status (child, 1, &status) && WIFEXITED (status)
+	  && !WEXITSTATUS (status))
 	fail = 0;
-
     }
 
   xfree (iconv_program);
@@ -928,7 +900,6 @@ default_auto_wide_charset (void)
   return GDB_DEFAULT_TARGET_WIDE_CHARSET;
 }
 
-
 #ifdef USE_INTERMEDIATE_ENCODING_FUNCTION
 /* Macro used for UTF or UCS endianness suffix.  */
 #if WORDS_BIGENDIAN
@@ -956,8 +927,8 @@ intermediate_encoding (void)
 
   if (stored_result)
     return stored_result;
-  result = xstrprintf ("UTF-%d%s", (int) (sizeof (gdb_wchar_t) * 8),
-		       ENDIAN_SUFFIX);
+  result
+    = xstrprintf ("UTF-%d%s", (int) (sizeof (gdb_wchar_t) * 8), ENDIAN_SUFFIX);
   /* Check that the name is supported by iconv_open.  */
   desc = iconv_open (result.get (), host_charset ());
   if (desc != (iconv_t) -1)
@@ -967,8 +938,7 @@ intermediate_encoding (void)
       return stored_result;
     }
   /* Second try, with UCS-2 type.  */
-  result = xstrprintf ("UCS-%d%s", (int) sizeof (gdb_wchar_t),
-		       ENDIAN_SUFFIX);
+  result = xstrprintf ("UCS-%d%s", (int) sizeof (gdb_wchar_t), ENDIAN_SUFFIX);
   /* Check that the name is supported by iconv_open.  */
   desc = iconv_open (result.get (), host_charset ());
   if (desc != (iconv_t) -1)
@@ -978,12 +948,13 @@ intermediate_encoding (void)
       return stored_result;
     }
   /* No valid charset found, generate error here.  */
-  error (_("Unable to find a valid charset for string conversions"));
+  error (_ ("Unable to find a valid charset for string conversions"));
 }
 
 #endif /* USE_INTERMEDIATE_ENCODING_FUNCTION */
 
 void _initialize_charset ();
+
 void
 _initialize_charset ()
 {
@@ -992,7 +963,7 @@ _initialize_charset ()
   find_charset_names ();
 
   if (charsets.charsets.size () > 1)
-    charset_enum = (const char * const *) charsets.charsets.data ();
+    charset_enum = (const char *const *) charsets.charsets.data ();
   else
     charset_enum = default_charset_names;
 
@@ -1008,13 +979,13 @@ _initialize_charset ()
   if (!strcmp (auto_host_charset_name, "646") || !*auto_host_charset_name)
     auto_host_charset_name = "ASCII";
   auto_target_charset_name = auto_host_charset_name;
-#elif defined (USE_WIN32API)
+#elif defined(USE_WIN32API)
   {
     /* "CP" + x<=5 digits + paranoia.  */
     static char w32_host_default_charset[16];
 
     snprintf (w32_host_default_charset, sizeof w32_host_default_charset,
-	      "CP%d", GetACP());
+	      "CP%d", GetACP ());
     auto_host_charset_name = w32_host_default_charset;
     auto_target_charset_name = auto_host_charset_name;
   }
@@ -1024,10 +995,12 @@ _initialize_charset ()
   /* Recall that the first element is always "auto".  */
   host_charset_name = charset_enum[0];
   gdb_assert (strcmp (host_charset_name, "auto") == 0);
-  add_setshow_enum_cmd ("charset", class_support,
-			charset_enum, &host_charset_name, _("\
-Set the host and target character sets."), _("\
-Show the host and target character sets."), _("\
+  add_setshow_enum_cmd ("charset", class_support, charset_enum,
+			&host_charset_name, _ ("\
+Set the host and target character sets."),
+			_ ("\
+Show the host and target character sets."),
+			_ ("\
 The `host character set' is the one used by the system GDB is running on.\n\
 The `target character set' is the one used by the program being debugged.\n\
 You may only use supersets of ASCII for your host character set; GDB does\n\
@@ -1036,45 +1009,46 @@ To see a list of the character sets GDB supports, type `set charset <TAB>'."),
 			/* Note that the sfunc below needs to set
 			   target_charset_name, because the 'set
 			   charset' command sets two variables.  */
-			set_charset_sfunc,
-			show_charset,
-			&setlist, &showlist);
+			set_charset_sfunc, show_charset, &setlist, &showlist);
 
-  add_setshow_enum_cmd ("host-charset", class_support,
-			charset_enum, &host_charset_name, _("\
-Set the host character set."), _("\
-Show the host character set."), _("\
+  add_setshow_enum_cmd ("host-charset", class_support, charset_enum,
+			&host_charset_name, _ ("\
+Set the host character set."),
+			_ ("\
+Show the host character set."),
+			_ ("\
 The `host character set' is the one used by the system GDB is running on.\n\
 You may only use supersets of ASCII for your host character set; GDB does\n\
 not support any others.\n\
 To see a list of the character sets GDB supports, type `set host-charset <TAB>'."),
-			set_host_charset_sfunc,
-			show_host_charset_name,
+			set_host_charset_sfunc, show_host_charset_name,
 			&setlist, &showlist);
 
   /* Recall that the first element is always "auto".  */
   target_charset_name = charset_enum[0];
   gdb_assert (strcmp (target_charset_name, "auto") == 0);
-  add_setshow_enum_cmd ("target-charset", class_support,
-			charset_enum, &target_charset_name, _("\
-Set the target character set."), _("\
-Show the target character set."), _("\
+  add_setshow_enum_cmd ("target-charset", class_support, charset_enum,
+			&target_charset_name, _ ("\
+Set the target character set."),
+			_ ("\
+Show the target character set."),
+			_ ("\
 The `target character set' is the one used by the program being debugged.\n\
 GDB translates characters and strings between the host and target\n\
 character sets as needed.\n\
 To see a list of the character sets GDB supports, type `set target-charset'<TAB>"),
-			set_target_charset_sfunc,
-			show_target_charset_name,
+			set_target_charset_sfunc, show_target_charset_name,
 			&setlist, &showlist);
 
   /* Recall that the first element is always "auto".  */
   target_wide_charset_name = charset_enum[0];
   gdb_assert (strcmp (target_wide_charset_name, "auto") == 0);
-  add_setshow_enum_cmd ("target-wide-charset", class_support,
-			charset_enum, &target_wide_charset_name,
-			_("\
-Set the target wide character set."), _("\
-Show the target wide character set."), _("\
+  add_setshow_enum_cmd ("target-wide-charset", class_support, charset_enum,
+			&target_wide_charset_name, _ ("\
+Set the target wide character set."),
+			_ ("\
+Show the target wide character set."),
+			_ ("\
 The `target wide character set' is the one used by the program being debugged.\
 \nIn particular it is the encoding used by `wchar_t'.\n\
 GDB translates characters and strings between the host and target\n\
@@ -1082,6 +1056,5 @@ character sets as needed.\n\
 To see a list of the character sets GDB supports, type\n\
 `set target-wide-charset'<TAB>"),
 			set_target_wide_charset_sfunc,
-			show_target_wide_charset_name,
-			&setlist, &showlist);
+			show_target_wide_charset_name, &setlist, &showlist);
 }

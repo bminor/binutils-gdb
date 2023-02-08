@@ -20,17 +20,8 @@
 #include "defs.h"
 #include "py-events.h"
 
-static struct PyModuleDef EventModuleDef =
-{
-  PyModuleDef_HEAD_INIT,
-  "_gdbevents",
-  NULL,
-  -1,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+static struct PyModuleDef EventModuleDef = {
+  PyModuleDef_HEAD_INIT, "_gdbevents", NULL, -1, NULL, NULL, NULL, NULL, NULL
 };
 
 /* Helper function to add a single event registry to the events
@@ -44,9 +35,8 @@ add_new_registry (eventregistry_object **registryp, const char *name)
   if (*registryp == NULL)
     return -1;
 
-  return gdb_pymodule_addobject (gdb_py_events.module,
-				 name,
-				 (PyObject *)(*registryp));
+  return gdb_pymodule_addobject (gdb_py_events.module, name,
+				 (PyObject *) (*registryp));
 }
 
 /* Create and populate the _gdbevents module.  Note that this is
@@ -59,8 +49,8 @@ gdbpy_events_mod_func ()
   if (gdb_py_events.module == nullptr)
     return nullptr;
 
-#define GDB_PY_DEFINE_EVENT(name)					\
-  if (add_new_registry (&gdb_py_events.name, #name) < 0)	\
+#define GDB_PY_DEFINE_EVENT(name)                        \
+  if (add_new_registry (&gdb_py_events.name, #name) < 0) \
     return nullptr;
 #include "py-all-events.def"
 #undef GDB_PY_DEFINE_EVENT

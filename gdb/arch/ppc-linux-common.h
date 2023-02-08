@@ -33,14 +33,14 @@ struct target_desc;
 #define PPC_LINUX_SIZEOF_PPRREGSET 8
 #define PPC_LINUX_SIZEOF_DSCRREGSET 8
 #define PPC_LINUX_SIZEOF_TARREGSET 8
-#define PPC_LINUX_SIZEOF_EBBREGSET (3*8)
-#define PPC_LINUX_SIZEOF_PMUREGSET (5*8)
-#define PPC_LINUX_SIZEOF_TM_SPRREGSET (3*8)
-#define PPC32_LINUX_SIZEOF_CGPRREGSET (48*4)
-#define PPC64_LINUX_SIZEOF_CGPRREGSET (48*8)
-#define PPC_LINUX_SIZEOF_CFPRREGSET (32*8+8)
-#define PPC_LINUX_SIZEOF_CVMXREGSET (34*16)
-#define PPC_LINUX_SIZEOF_CVSXREGSET (32*8)
+#define PPC_LINUX_SIZEOF_EBBREGSET (3 * 8)
+#define PPC_LINUX_SIZEOF_PMUREGSET (5 * 8)
+#define PPC_LINUX_SIZEOF_TM_SPRREGSET (3 * 8)
+#define PPC32_LINUX_SIZEOF_CGPRREGSET (48 * 4)
+#define PPC64_LINUX_SIZEOF_CGPRREGSET (48 * 8)
+#define PPC_LINUX_SIZEOF_CFPRREGSET (32 * 8 + 8)
+#define PPC_LINUX_SIZEOF_CVMXREGSET (34 * 16)
+#define PPC_LINUX_SIZEOF_CVSXREGSET (32 * 8)
 #define PPC_LINUX_SIZEOF_CPPRREGSET 8
 #define PPC_LINUX_SIZEOF_CDSCRREGSET 8
 #define PPC_LINUX_SIZEOF_CTARREGSET 8
@@ -62,17 +62,11 @@ struct ppc_linux_features
 
 /* Base value for ppc_linux_features variables.  */
 const struct ppc_linux_features ppc_linux_no_features = {
-  0,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
+  0, false, false, false, false, false, false,
 };
 
 /* Return a target description that matches FEATURES.  */
-const struct target_desc * ppc_linux_match_description
-(struct ppc_linux_features features);
+const struct target_desc *
+ppc_linux_match_description (struct ppc_linux_features features);
 
 #endif /* ARCH_PPC_LINUX_COMMON_H */

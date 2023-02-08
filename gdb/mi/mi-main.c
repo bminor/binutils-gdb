@@ -35,7 +35,7 @@
 #include "interps.h"
 #include "gdbsupport/event-loop.h"
 #include "event-top.h"
-#include "gdbcore.h"		/* For write_memory().  */
+#include "gdbcore.h" /* For write_memory().  */
 #include "value.h"
 #include "regcache.h"
 #include "frame.h"
@@ -64,9 +64,9 @@
 #include <map>
 
 enum
-  {
-    FROM_TTY = 0
-  };
+{
+  FROM_TTY = 0
+};
 
 /* Debug flag */
 static int mi_debug_p;
@@ -91,10 +91,10 @@ int mi_proceeded;
 
 static void mi_cmd_execute (struct mi_parse *parse);
 
-static void mi_execute_async_cli_command (const char *cli_command,
-					  char **argv, int argc);
+static void mi_execute_async_cli_command (const char *cli_command, char **argv,
+					  int argc);
 static bool register_changed_p (int regnum, readonly_detached_regcache *,
-			       readonly_detached_regcache *);
+				readonly_detached_regcache *);
 static void output_register (frame_info_ptr, int regnum, int format,
 			     int skip_unavailable);
 
@@ -112,7 +112,7 @@ set_mi_async_command (const char *args, int from_tty,
   if (have_live_inferiors ())
     {
       mi_async_1 = mi_async;
-      error (_("Cannot change this setting while the inferior is running."));
+      error (_ ("Cannot change this setting while the inferior is running."));
     }
 
   mi_async = mi_async_1;
@@ -120,12 +120,9 @@ set_mi_async_command (const char *args, int from_tty,
 
 static void
 show_mi_async_command (struct ui_file *file, int from_tty,
-		       struct cmd_list_element *c,
-		       const char *value)
+		       struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Whether MI is in asynchronous mode is %s.\n"),
-	      value);
+  gdb_printf (file, _ ("Whether MI is in asynchronous mode is %s.\n"), value);
 }
 
 /* A wrapper for target_can_async_p that takes the MI setting into
@@ -165,7 +162,7 @@ void
 mi_cmd_exec_next (const char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+  if (argc > 0 && strcmp (argv[0], "--reverse") == 0)
     mi_execute_async_cli_command ("reverse-next", argv + 1, argc - 1);
   else
     mi_execute_async_cli_command ("next", argv, argc);
@@ -175,7 +172,7 @@ void
 mi_cmd_exec_next_instruction (const char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+  if (argc > 0 && strcmp (argv[0], "--reverse") == 0)
     mi_execute_async_cli_command ("reverse-nexti", argv + 1, argc - 1);
   else
     mi_execute_async_cli_command ("nexti", argv, argc);
@@ -185,7 +182,7 @@ void
 mi_cmd_exec_step (const char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+  if (argc > 0 && strcmp (argv[0], "--reverse") == 0)
     mi_execute_async_cli_command ("reverse-step", argv + 1, argc - 1);
   else
     mi_execute_async_cli_command ("step", argv, argc);
@@ -195,7 +192,7 @@ void
 mi_cmd_exec_step_instruction (const char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+  if (argc > 0 && strcmp (argv[0], "--reverse") == 0)
     mi_execute_async_cli_command ("reverse-stepi", argv + 1, argc - 1);
   else
     mi_execute_async_cli_command ("stepi", argv, argc);
@@ -205,7 +202,7 @@ void
 mi_cmd_exec_finish (const char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+  if (argc > 0 && strcmp (argv[0], "--reverse") == 0)
     mi_execute_async_cli_command ("reverse-finish", argv + 1, argc - 1);
   else
     mi_execute_async_cli_command ("finish", argv, argc);
@@ -254,7 +251,7 @@ proceed_thread (struct thread_info *thread, int pid)
 static int
 proceed_thread_callback (struct thread_info *thread, void *arg)
 {
-  int pid = *(int *)arg;
+  int pid = *(int *) arg;
 
   proceed_thread (thread, pid);
   return 0;
@@ -263,8 +260,8 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 static void
 exec_continue (char **argv, int argc)
 {
-  prepare_execution_command (current_inferior ()->top_target (), mi_async_p ());
-
+  prepare_execution_command (current_inferior ()->top_target (),
+			     mi_async_p ());
 
   if (non_stop)
     {
@@ -277,8 +274,8 @@ exec_continue (char **argv, int argc)
       if (current_context->all || current_context->thread_group != -1)
 	{
 	  scoped_restore_current_thread restore_thread;
-	  scoped_disable_commit_resumed disable_commit_resumed
-	    ("MI continue all threads in non-stop");
+	  scoped_disable_commit_resumed disable_commit_resumed (
+	    "MI continue all threads in non-stop");
 	  int pid = 0;
 
 	  if (!current_context->all)
@@ -323,13 +320,14 @@ exec_reverse_continue (char **argv, int argc)
   enum exec_direction_kind dir = execution_direction;
 
   if (dir == EXEC_REVERSE)
-    error (_("Already in reverse mode."));
+    error (_ ("Already in reverse mode."));
 
   if (!target_can_execute_reverse ())
-    error (_("Target %s does not support this command."), target_shortname ());
+    error (_ ("Target %s does not support this command."),
+	   target_shortname ());
 
-  scoped_restore save_exec_dir = make_scoped_restore (&execution_direction,
-						      EXEC_REVERSE);
+  scoped_restore save_exec_dir
+    = make_scoped_restore (&execution_direction, EXEC_REVERSE);
   exec_continue (argv, argc);
 }
 
@@ -345,7 +343,7 @@ mi_cmd_exec_continue (const char *command, char **argv, int argc)
 static int
 interrupt_thread_callback (struct thread_info *thread, void *arg)
 {
-  int pid = *(int *)arg;
+  int pid = *(int *) arg;
 
   if (thread->state != THREAD_RUNNING)
     return 0;
@@ -383,8 +381,8 @@ mi_cmd_exec_interrupt (const char *command, char **argv, int argc)
     {
       struct inferior *inf = find_inferior_id (current_context->thread_group);
 
-      scoped_disable_commit_resumed disable_commit_resumed
-	("interrupting all threads of thread group");
+      scoped_disable_commit_resumed disable_commit_resumed (
+	"interrupting all threads of thread group");
 
       iterate_over_threads (interrupt_thread_callback, &inf->pid);
     }
@@ -413,14 +411,13 @@ run_one_inferior (inferior *inf, bool start_p)
     {
       thread_info *tp = any_thread_of_inferior (inf);
       if (tp == NULL)
-	error (_("Inferior has no threads."));
+	error (_ ("Inferior has no threads."));
 
       switch_to_thread (tp);
     }
   else
     switch_to_inferior_no_thread (inf);
-  mi_execute_cli_command (run_cmd, async_p,
-			  async_p ? "&" : NULL);
+  mi_execute_cli_command (run_cmd, async_p, async_p ? "&" : NULL);
 }
 
 void
@@ -430,14 +427,13 @@ mi_cmd_exec_run (const char *command, char **argv, int argc)
 
   /* Parse the command options.  */
   enum opt
-    {
-      START_OPT,
-    };
-  static const struct mi_opt opts[] =
-    {
-	{"-start", START_OPT, 0},
-	{NULL, 0, 0},
-    };
+  {
+    START_OPT,
+  };
+  static const struct mi_opt opts[] = {
+    { "-start", START_OPT, 0 },
+    { NULL, 0, 0 },
+  };
 
   int oind = 0;
   char *oarg;
@@ -459,7 +455,7 @@ mi_cmd_exec_run (const char *command, char **argv, int argc)
   /* This command does not accept any argument.  Make sure the user
      did not provide any.  */
   if (oind != argc)
-    error (_("Invalid argument: %s"), argv[oind]);
+    error (_ ("Invalid argument: %s"), argv[oind]);
 
   if (current_context->all)
     {
@@ -474,16 +470,14 @@ mi_cmd_exec_run (const char *command, char **argv, int argc)
       struct target_ops *run_target = find_run_target ();
       bool async_p = mi_async && target_can_async_p (run_target);
 
-      mi_execute_cli_command (run_cmd, async_p,
-			      async_p ? "&" : NULL);
+      mi_execute_cli_command (run_cmd, async_p, async_p ? "&" : NULL);
     }
 }
-
 
 static int
 find_thread_of_process (struct thread_info *ti, void *p)
 {
-  int pid = *(int *)p;
+  int pid = *(int *) p;
 
   if (ti->ptid.pid () == pid && ti->state != THREAD_EXITED)
     return 1;
@@ -495,7 +489,7 @@ void
 mi_cmd_target_detach (const char *command, char **argv, int argc)
 {
   if (argc != 0 && argc != 1)
-    error (_("Usage: -target-detach [pid | thread-group]"));
+    error (_ ("Usage: -target-detach [pid | thread-group]"));
 
   if (argc == 1)
     {
@@ -510,11 +504,11 @@ mi_cmd_target_detach (const char *command, char **argv, int argc)
 	  int id = strtoul (argv[0] + 1, &end, 0);
 
 	  if (*end != '\0')
-	    error (_("Invalid syntax of thread-group id '%s'"), argv[0]);
+	    error (_ ("Invalid syntax of thread-group id '%s'"), argv[0]);
 
 	  inf = find_inferior_id (id);
 	  if (!inf)
-	    error (_("Non-existent thread-group id '%d'"), id);
+	    error (_ ("Non-existent thread-group id '%d'"), id);
 
 	  pid = inf->pid;
 	}
@@ -524,14 +518,14 @@ mi_cmd_target_detach (const char *command, char **argv, int argc)
 	  pid = strtol (argv[0], &end, 10);
 
 	  if (*end != '\0')
-	    error (_("Invalid identifier '%s'"), argv[0]);
+	    error (_ ("Invalid identifier '%s'"), argv[0]);
 	}
 
       /* Pick any thread in the desired process.  Current
 	 target_detach detaches from the parent of inferior_ptid.  */
       tp = iterate_over_threads (find_thread_of_process, &pid);
       if (!tp)
-	error (_("Thread group is empty"));
+	error (_ ("Thread group is empty"));
 
       switch_to_thread (tp);
     }
@@ -549,12 +543,12 @@ void
 mi_cmd_thread_select (const char *command, char **argv, int argc)
 {
   if (argc != 1)
-    error (_("-thread-select: USAGE: threadnum."));
+    error (_ ("-thread-select: USAGE: threadnum."));
 
   int num = value_as_long (parse_and_eval (argv[0]));
   thread_info *thr = find_thread_global_id (num);
   if (thr == NULL)
-    error (_("Thread ID %d not known."), num);
+    error (_ ("Thread ID %d not known."), num);
 
   thread_select (argv[0], thr);
 
@@ -566,7 +560,7 @@ void
 mi_cmd_thread_list_ids (const char *command, char **argv, int argc)
 {
   if (argc != 0)
-    error (_("-thread-list-ids: No arguments required."));
+    error (_ ("-thread-list-ids: No arguments required."));
 
   int num = 0;
   int current_thread = -1;
@@ -595,7 +589,7 @@ void
 mi_cmd_thread_info (const char *command, char **argv, int argc)
 {
   if (argc != 0 && argc != 1)
-    error (_("Invalid MI command"));
+    error (_ ("Invalid MI command"));
 
   print_thread_info (current_uiout, argv[0], -1);
 }
@@ -684,7 +678,7 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
   char *p = cores.get ();
   char *saveptr;
 
-  for (p = strtok_r (p, ",", &saveptr); p;  p = strtok_r (NULL, ",", &saveptr))
+  for (p = strtok_r (p, ",", &saveptr); p; p = strtok_r (NULL, ",", &saveptr))
     uiout->field_string (NULL, p);
 }
 
@@ -775,22 +769,20 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
 
   enum opt
   {
-    AVAILABLE_OPT, RECURSE_OPT
+    AVAILABLE_OPT,
+    RECURSE_OPT
   };
-  static const struct mi_opt opts[] =
-    {
-      {"-available", AVAILABLE_OPT, 0},
-      {"-recurse", RECURSE_OPT, 1},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { "-available", AVAILABLE_OPT, 0 },
+					{ "-recurse", RECURSE_OPT, 1 },
+					{ 0, 0, 0 } };
 
   int oind = 0;
   char *oarg;
 
   while (1)
     {
-      int opt = mi_getopt ("-list-thread-groups", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-list-thread-groups", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -805,8 +797,8 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
 	  else if (strcmp (oarg, "1") == 0)
 	    recurse = 1;
 	  else
-	    error (_("only '0' and '1' are valid values "
-		     "for the '--recurse' option"));
+	    error (_ ("only '0' and '1' are valid values "
+		      "for the '--recurse' option"));
 	  break;
 	}
     }
@@ -817,12 +809,12 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
       int inf;
 
       if (*(argv[oind]) != 'i')
-	error (_("invalid syntax of group id '%s'"), argv[oind]);
+	error (_ ("invalid syntax of group id '%s'"), argv[oind]);
 
       inf = strtoul (argv[oind] + 1, &end, 0);
 
       if (*end != '\0')
-	error (_("invalid syntax of group id '%s'"), argv[oind]);
+	error (_ ("invalid syntax of group id '%s'"), argv[oind]);
       ids.insert (inf);
     }
 
@@ -837,7 +829,7 @@ mi_cmd_list_thread_groups (const char *command, char **argv, int argc)
       struct inferior *inf = find_inferior_id (id);
 
       if (!inf)
-	error (_("Non-existent thread group id '%d'"), id);
+	error (_ ("Non-existent thread group id '%d'"), id);
 
       print_thread_info (uiout, NULL, inf->pid);
     }
@@ -874,16 +866,15 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
 
   ui_out_emit_list list_emitter (uiout, "register-names");
 
-  if (argc == 0)		/* No args, just do all the regs.  */
+  if (argc == 0) /* No args, just do all the regs.  */
     {
-      for (regnum = 0;
-	   regnum < numregs;
-	   regnum++)
+      for (regnum = 0; regnum < numregs; regnum++)
 	{
 	  if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    uiout->field_string (NULL, "");
 	  else
-	    uiout->field_string (NULL, gdbarch_register_name (gdbarch, regnum));
+	    uiout->field_string (NULL,
+				 gdbarch_register_name (gdbarch, regnum));
 	}
     }
 
@@ -892,7 +883,7 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
     {
       regnum = atoi (argv[i]);
       if (regnum < 0 || regnum >= numregs)
-	error (_("bad register number"));
+	error (_ ("bad register number"));
 
       if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	uiout->field_string (NULL, "");
@@ -934,15 +925,12 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
   if (argc == 0)
     {
       /* No args, just do all the regs.  */
-      for (regnum = 0;
-	   regnum < numregs;
-	   regnum++)
+      for (regnum = 0; regnum < numregs; regnum++)
 	{
 	  if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
 
-	  if (register_changed_p (regnum, prev_regs.get (),
-				  this_regs.get ()))
+	  if (register_changed_p (regnum, prev_regs.get (), this_regs.get ()))
 	    uiout->field_signed (NULL, regnum);
 	}
     }
@@ -952,16 +940,14 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
     {
       regnum = atoi (argv[i]);
 
-      if (regnum >= 0
-	  && regnum < numregs
+      if (regnum >= 0 && regnum < numregs
 	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
 	{
-	  if (register_changed_p (regnum, prev_regs.get (),
-				  this_regs.get ()))
+	  if (register_changed_p (regnum, prev_regs.get (), this_regs.get ()))
 	    uiout->field_signed (NULL, regnum);
 	}
       else
-	error (_("bad register number"));
+	error (_ ("bad register number"));
     }
 }
 
@@ -1010,15 +996,13 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
   int i;
   int skip_unavailable = 0;
   int oind = 0;
+
   enum opt
   {
     SKIP_UNAVAILABLE,
   };
-  static const struct mi_opt opts[] =
-    {
-      {"-skip-unavailable", SKIP_UNAVAILABLE, 0},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[]
+    = { { "-skip-unavailable", SKIP_UNAVAILABLE, 0 }, { 0, 0, 0 } };
 
   /* Note that the test for a valid register must include checking the
      gdbarch_register_name because gdbarch_num_regs may be allocated
@@ -1030,8 +1014,8 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
   while (1)
     {
       char *oarg;
-      int opt = mi_getopt ("-data-list-register-values", argc, argv,
-			   opts, &oind, &oarg);
+      int opt = mi_getopt ("-data-list-register-values", argc, argv, opts,
+			   &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -1044,9 +1028,9 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
     }
 
   if (argc - oind < 1)
-    error (_("-data-list-register-values: Usage: "
-	     "-data-list-register-values [--skip-unavailable] <format>"
-	     " [<regnum1>...<regnumN>]"));
+    error (_ ("-data-list-register-values: Usage: "
+	      "-data-list-register-values [--skip-unavailable] <format>"
+	      " [<regnum1>...<regnumN>]"));
 
   format = (int) argv[oind][0];
 
@@ -1059,9 +1043,7 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
   if (argc - oind == 1)
     {
       /* No args, beside the format: do all the regs.  */
-      for (regnum = 0;
-	   regnum < numregs;
-	   regnum++)
+      for (regnum = 0; regnum < numregs; regnum++)
 	{
 	  if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
@@ -1075,12 +1057,11 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
     {
       regnum = atoi (argv[i]);
 
-      if (regnum >= 0
-	  && regnum < numregs
+      if (regnum >= 0 && regnum < numregs
 	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
 	output_register (frame, regnum, format, skip_unavailable);
       else
-	error (_("bad register number"));
+	error (_ ("bad register number"));
     }
 }
 
@@ -1139,18 +1120,18 @@ mi_cmd_data_write_register_values (const char *command, char **argv, int argc)
   numregs = gdbarch_num_cooked_regs (gdbarch);
 
   if (argc == 0)
-    error (_("-data-write-register-values: Usage: -data-write-register-"
-	     "values <format> [<regnum1> <value1>...<regnumN> <valueN>]"));
+    error (_ ("-data-write-register-values: Usage: -data-write-register-"
+	      "values <format> [<regnum1> <value1>...<regnumN> <valueN>]"));
 
   if (!target_has_registers ())
-    error (_("-data-write-register-values: No registers."));
+    error (_ ("-data-write-register-values: No registers."));
 
   if (!(argc - 1))
-    error (_("-data-write-register-values: No regs and values specified."));
+    error (_ ("-data-write-register-values: No regs and values specified."));
 
   if ((argc - 1) % 2)
-    error (_("-data-write-register-values: "
-	     "Regs and vals are not in pairs."));
+    error (_ ("-data-write-register-values: "
+	      "Regs and vals are not in pairs."));
 
   for (i = 1; i < argc; i = i + 2)
     {
@@ -1168,7 +1149,7 @@ mi_cmd_data_write_register_values (const char *command, char **argv, int argc)
 	  regcache_cooked_write_signed (regcache, regnum, value);
 	}
       else
-	error (_("bad register number"));
+	error (_ ("bad register number"));
     }
 }
 
@@ -1184,8 +1165,8 @@ mi_cmd_data_evaluate_expression (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
 
   if (argc != 1)
-    error (_("-data-evaluate-expression: "
-	     "Usage: -data-evaluate-expression expression"));
+    error (_ ("-data-evaluate-expression: "
+	      "Usage: -data-evaluate-expression expression"));
 
   expression_up expr = parse_expression (argv[0]);
 
@@ -1236,20 +1217,17 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
   long offset = 0;
   int oind = 0;
   char *oarg;
+
   enum opt
   {
     OFFSET_OPT
   };
-  static const struct mi_opt opts[] =
-    {
-      {"o", OFFSET_OPT, 1},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { "o", OFFSET_OPT, 1 }, { 0, 0, 0 } };
 
   while (1)
     {
-      int opt = mi_getopt ("-data-read-memory", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-data-read-memory", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -1264,8 +1242,8 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
   argc -= oind;
 
   if (argc < 5 || argc > 6)
-    error (_("-data-read-memory: Usage: "
-	     "ADDR WORD-FORMAT WORD-SIZE NR-ROWS NR-COLS [ASCHAR]."));
+    error (_ ("-data-read-memory: Usage: "
+	      "ADDR WORD-FORMAT WORD-SIZE NR-ROWS NR-COLS [ASCHAR]."));
 
   /* Extract all the arguments. */
 
@@ -1301,12 +1279,12 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
   /* The number of rows.  */
   nr_rows = atol (argv[3]);
   if (nr_rows <= 0)
-    error (_("-data-read-memory: invalid number of rows."));
+    error (_ ("-data-read-memory: invalid number of rows."));
 
   /* Number of bytes per row.  */
   nr_cols = atol (argv[4]);
   if (nr_cols <= 0)
-    error (_("-data-read-memory: invalid number of columns."));
+    error (_ ("-data-read-memory: invalid number of columns."));
 
   /* The un-printable character when printing ascii.  */
   if (argc == 6)
@@ -1319,11 +1297,11 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 
   gdb::byte_vector mbuf (total_bytes);
 
-  nr_bytes = target_read (current_inferior ()->top_target (),
-			  TARGET_OBJECT_MEMORY, NULL,
-			  mbuf.data (), addr, total_bytes);
+  nr_bytes
+    = target_read (current_inferior ()->top_target (), TARGET_OBJECT_MEMORY,
+		   NULL, mbuf.data (), addr, total_bytes);
   if (nr_bytes <= 0)
-    error (_("Unable to read memory."));
+    error (_ ("Unable to read memory."));
 
   /* Output the header information.  */
   uiout->field_core_addr ("addr", gdbarch, addr);
@@ -1342,8 +1320,7 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
     string_file stream;
 
     ui_out_emit_list list_emitter (uiout, "memory");
-    for (row = 0, row_byte = 0;
-	 row < nr_rows;
+    for (row = 0, row_byte = 0; row < nr_rows;
 	 row++, row_byte += nr_cols * word_size)
       {
 	int col;
@@ -1357,8 +1334,7 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 	{
 	  ui_out_emit_list list_data_emitter (uiout, "data");
 	  get_formatted_print_options (&print_opts, word_format);
-	  for (col = 0, col_byte = row_byte;
-	       col < nr_cols;
+	  for (col = 0, col_byte = row_byte; col < nr_cols;
 	       col++, col_byte += word_size)
 	    {
 	      if (col_byte + word_size > nr_bytes)
@@ -1380,8 +1356,8 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 	    int byte;
 
 	    stream.clear ();
-	    for (byte = row_byte;
-		 byte < row_byte + word_size * nr_cols; byte++)
+	    for (byte = row_byte; byte < row_byte + word_size * nr_cols;
+		 byte++)
 	      {
 		if (byte >= nr_bytes)
 		  stream.putc ('X');
@@ -1407,20 +1383,17 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
   int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
   int oind = 0;
   char *oarg;
+
   enum opt
   {
     OFFSET_OPT
   };
-  static const struct mi_opt opts[] =
-    {
-      {"o", OFFSET_OPT, 1},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { "o", OFFSET_OPT, 1 }, { 0, 0, 0 } };
 
   while (1)
     {
-      int opt = mi_getopt ("-data-read-memory-bytes", argc, argv, opts,
-			   &oind, &oarg);
+      int opt = mi_getopt ("-data-read-memory-bytes", argc, argv, opts, &oind,
+			   &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -1434,7 +1407,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
   argc -= oind;
 
   if (argc != 2)
-    error (_("Usage: [ -o OFFSET ] ADDR LENGTH."));
+    error (_ ("Usage: [ -o OFFSET ] ADDR LENGTH."));
 
   addr = parse_and_eval_address (argv[0]) + offset;
   length = atol (argv[1]);
@@ -1443,7 +1416,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
     = read_memory_robust (current_inferior ()->top_target (), addr, length);
 
   if (result.size () == 0)
-    error (_("Unable to read memory."));
+    error (_ ("Unable to read memory."));
 
   ui_out_emit_list list_emitter (uiout, "memory");
   for (const memory_read_result &read_result : result)
@@ -1454,9 +1427,9 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
       uiout->field_core_addr ("offset", gdbarch, read_result.begin - addr);
       uiout->field_core_addr ("end", gdbarch, read_result.end);
 
-      std::string data = bin2hex (read_result.data.get (),
-				  (read_result.end - read_result.begin)
-				  * unit_size);
+      std::string data
+	= bin2hex (read_result.data.get (),
+		   (read_result.end - read_result.begin) * unit_size);
       uiout->field_string ("contents", data);
     }
 }
@@ -1491,20 +1464,17 @@ mi_cmd_data_write_memory (const char *command, char **argv, int argc)
   long offset = 0;
   int oind = 0;
   char *oarg;
+
   enum opt
   {
     OFFSET_OPT
   };
-  static const struct mi_opt opts[] =
-    {
-      {"o", OFFSET_OPT, 1},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[] = { { "o", OFFSET_OPT, 1 }, { 0, 0, 0 } };
 
   while (1)
     {
-      int opt = mi_getopt ("-data-write-memory", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-data-write-memory", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -1519,8 +1489,8 @@ mi_cmd_data_write_memory (const char *command, char **argv, int argc)
   argc -= oind;
 
   if (argc != 4)
-    error (_("-data-write-memory: Usage: "
-	     "[-o COLUMN_OFFSET] ADDR FORMAT WORD-SIZE VALUE."));
+    error (_ ("-data-write-memory: Usage: "
+	      "[-o COLUMN_OFFSET] ADDR FORMAT WORD-SIZE VALUE."));
 
   /* Extract all the arguments.  */
   /* Start address of the memory dump.  */
@@ -1556,7 +1526,7 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
   int unit_size;
 
   if (argc != 2 && argc != 3)
-    error (_("Usage: ADDR DATA [COUNT]."));
+    error (_ ("Usage: ADDR DATA [COUNT]."));
 
   addr = parse_and_eval_address (argv[0]);
   cdata = argv[1];
@@ -1564,8 +1534,8 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
   unit_size = gdbarch_addressable_memory_unit_size (get_current_arch ());
 
   if (len_hex % (unit_size * 2) != 0)
-    error (_("Hex-encoded '%s' must represent an integral number of "
-	     "addressable memory units."),
+    error (_ ("Hex-encoded '%s' must represent an integral number of "
+	      "addressable memory units."),
 	   cdata);
 
   len_bytes = len_hex / 2;
@@ -1582,7 +1552,7 @@ mi_cmd_data_write_memory_bytes (const char *command, char **argv, int argc)
     {
       int x;
       if (sscanf (cdata + i * 2, "%02x", &x) != 1)
-	error (_("Invalid argument"));
+	error (_ ("Invalid argument"));
       databuf[i] = (gdb_byte) x;
     }
 
@@ -1633,8 +1603,8 @@ mi_cmd_enable_timings (const char *command, char **argv, int argc)
 
   return;
 
- usage_error:
-  error (_("-enable-timings: Usage: %s {yes|no}"), command);
+usage_error:
+  error (_ ("-enable-timings: Usage: %s {yes|no}"), command);
 }
 
 void
@@ -1663,7 +1633,7 @@ mi_cmd_list_features (const char *command, char **argv, int argc)
       return;
     }
 
-  error (_("-list-features should be passed no arguments"));
+  error (_ ("-list-features should be passed no arguments"));
 }
 
 void
@@ -1681,7 +1651,7 @@ mi_cmd_list_target_features (const char *command, char **argv, int argc)
       return;
     }
 
-  error (_("-list-target-features should be passed no arguments"));
+  error (_ ("-list-target-features should be passed no arguments"));
 }
 
 void
@@ -1691,14 +1661,13 @@ mi_cmd_add_inferior (const char *command, char **argv, int argc)
 
   /* Parse the command options.  */
   enum opt
-    {
-      NO_CONNECTION_OPT,
-    };
-  static const struct mi_opt opts[] =
-    {
-	{"-no-connection", NO_CONNECTION_OPT, 0},
-	{NULL, 0, 0},
-    };
+  {
+    NO_CONNECTION_OPT,
+  };
+  static const struct mi_opt opts[] = {
+    { "-no-connection", NO_CONNECTION_OPT, 0 },
+    { NULL, 0, 0 },
+  };
 
   int oind = 0;
   char *oarg;
@@ -1721,8 +1690,7 @@ mi_cmd_add_inferior (const char *command, char **argv, int argc)
 
   inferior *inf = add_inferior_with_spaces ();
 
-  switch_to_inferior_and_push_target (inf, no_connection,
-				      current_inferior ());
+  switch_to_inferior_and_push_target (inf, no_connection, current_inferior ());
 
   current_uiout->field_fmt ("inferior", "i%d", inf->num);
 
@@ -1743,17 +1711,17 @@ mi_cmd_remove_inferior (const char *command, char **argv, int argc)
   struct inferior *inf_to_remove;
 
   if (argc != 1)
-    error (_("-remove-inferior should be passed a single argument"));
+    error (_ ("-remove-inferior should be passed a single argument"));
 
   if (sscanf (argv[0], "i%d", &id) != 1)
-    error (_("the thread group id is syntactically invalid"));
+    error (_ ("the thread group id is syntactically invalid"));
 
   inf_to_remove = find_inferior_id (id);
   if (inf_to_remove == NULL)
-    error (_("the specified thread group does not exist"));
+    error (_ ("the specified thread group does not exist"));
 
   if (inf_to_remove->pid != 0)
-    error (_("cannot remove an active inferior"));
+    error (_ ("cannot remove an active inferior"));
 
   if (inf_to_remove == current_inferior ())
     {
@@ -1767,7 +1735,7 @@ mi_cmd_remove_inferior (const char *command, char **argv, int argc)
 	}
 
       if (new_inferior == NULL)
-	error (_("Cannot remove last inferior"));
+	error (_ ("Cannot remove last inferior"));
 
       set_current_inferior (new_inferior);
       if (new_inferior->pid != 0)
@@ -1781,8 +1749,6 @@ mi_cmd_remove_inferior (const char *command, char **argv, int argc)
 
   delete_inferior (inf_to_remove);
 }
-
-
 
 /* Execute a command within a safe environment.
    Return <0 for error; >=0 for ok.
@@ -1799,8 +1765,8 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
   if (do_timings)
     current_command_ts = context->cmd_start;
 
-  scoped_restore save_token = make_scoped_restore (&current_token,
-						   context->token);
+  scoped_restore save_token
+    = make_scoped_restore (&current_token, context->token);
 
   running_result_record_printed = 0;
   mi_proceeded = 0;
@@ -1809,8 +1775,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
     case MI_COMMAND:
       /* A MI command was read from the input stream.  */
       if (mi_debug_p)
-	gdb_printf (gdb_stdlog,
-		    " token=`%s' command=`%s' args=`%s'\n",
+	gdb_printf (gdb_stdlog, " token=`%s' command=`%s' args=`%s'\n",
 		    context->token, context->command, context->args);
 
       mi_cmd_execute (context);
@@ -1827,7 +1792,9 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	  /* There's no particularly good reason why target-connect results
 	     in not ^done.  Should kill ^connected for MI3.  */
 	  gdb_puts (strcmp (context->command, "target-select") == 0
-		    ? "^connected" : "^done", mi->raw_stdout);
+		      ? "^connected"
+		      : "^done",
+		    mi->raw_stdout);
 	  mi_out_put (uiout, mi->raw_stdout);
 	  mi_out_rewind (uiout);
 	  mi_print_timing_maybe (mi->raw_stdout);
@@ -1894,9 +1861,9 @@ mi_print_exception (const char *token, const struct gdb_exception &exception)
 
   switch (exception.error)
     {
-      case UNDEFINED_COMMAND_ERROR:
-	gdb_puts (",code=\"undefined-command\"", mi->raw_stdout);
-	break;
+    case UNDEFINED_COMMAND_ERROR:
+      gdb_puts (",code=\"undefined-command\"", mi->raw_stdout);
+      break;
     }
 
   gdb_puts ("\n", mi->raw_stdout);
@@ -1955,7 +1922,6 @@ mi_execute_command (const char *cmd, int from_tty)
 	}
 
       bpstat_do_actions ();
-
     }
 }
 
@@ -1995,14 +1961,15 @@ struct user_selected_context
        null_frame_id.  As comparing null_frame_id with itself always
        reports not-equal, we only do the equality test if we have something
        other than the innermost frame selected.  */
-    if (current_frame_level != -1
-	&& current_frame_id != m_previous_frame_id)
+    if (current_frame_level != -1 && current_frame_id != m_previous_frame_id)
       return true;
 
     /* Nothing changed!  */
     return false;
   }
+
 private:
+
   /* The previously selected thread.  This might be null_ptid if there was
      no previously selected thread.  */
   ptid_t m_previous_ptid;
@@ -2020,16 +1987,16 @@ mi_cmd_execute (struct mi_parse *parse)
   scoped_value_mark cleanup = prepare_execute_command ();
 
   if (parse->all && parse->thread_group != -1)
-    error (_("Cannot specify --thread-group together with --all"));
+    error (_ ("Cannot specify --thread-group together with --all"));
 
   if (parse->all && parse->thread != -1)
-    error (_("Cannot specify --thread together with --all"));
+    error (_ ("Cannot specify --thread together with --all"));
 
   if (parse->thread_group != -1 && parse->thread != -1)
-    error (_("Cannot specify --thread together with --thread-group"));
+    error (_ ("Cannot specify --thread together with --thread-group"));
 
   if (parse->frame != -1 && parse->thread == -1)
-    error (_("Cannot specify --frame without --thread"));
+    error (_ ("Cannot specify --frame without --thread"));
 
   if (parse->thread_group != -1)
     {
@@ -2037,7 +2004,7 @@ mi_cmd_execute (struct mi_parse *parse)
       struct thread_info *tp = 0;
 
       if (!inf)
-	error (_("Invalid thread group for the --thread-group option"));
+	error (_ ("Invalid thread group for the --thread-group option"));
 
       set_current_inferior (inf);
       /* This behaviour means that if --thread-group option identifies
@@ -2062,10 +2029,10 @@ mi_cmd_execute (struct mi_parse *parse)
       thread_info *tp = find_thread_global_id (parse->thread);
 
       if (tp == NULL)
-	error (_("Invalid thread id: %d"), parse->thread);
+	error (_ ("Invalid thread id: %d"), parse->thread);
 
       if (tp->state == THREAD_EXITED)
-	error (_("Thread id: %d has terminated"), parse->thread);
+	error (_ ("Thread id: %d has terminated"), parse->thread);
 
       if (parse->cmd->preserve_user_selected_context ())
 	thread_saver.emplace ();
@@ -2088,7 +2055,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	  select_frame (fid);
 	}
       else
-	error (_("Invalid frame id: %d"), frame);
+	error (_ ("Invalid frame id: %d"), frame);
     }
 
   gdb::optional<scoped_restore_current_language> lang_saver;
@@ -2109,8 +2076,8 @@ mi_cmd_execute (struct mi_parse *parse)
 
   if (!parse->cmd->preserve_user_selected_context ()
       && current_user_selected_context.has_changed ())
-    gdb::observers::user_selected_context_changed.notify
-      (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
+    gdb::observers::user_selected_context_changed.notify (
+      USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 }
 
 /* See mi-main.h.  */
@@ -2128,10 +2095,9 @@ mi_execute_cli_command (const char *cmd, bool args_p, const char *args)
 	gdb_assert (args == nullptr);
 
       if (mi_debug_p)
-	gdb_printf (gdb_stdlog, "cli=%s run=%s\n",
-		    cmd, run.c_str ());
+	gdb_printf (gdb_stdlog, "cli=%s run=%s\n", cmd, run.c_str ());
 
-      execute_command (run.c_str (), 0 /* from_tty */ );
+      execute_command (run.c_str (), 0 /* from_tty */);
     }
 }
 
@@ -2145,14 +2111,12 @@ mi_execute_async_cli_command (const char *cli_command, char **argv, int argc)
   if (mi_async_p ())
     run += "&";
 
-  execute_command (run.c_str (), 0 /* from_tty */ );
+  execute_command (run.c_str (), 0 /* from_tty */);
 }
 
 void
-mi_load_progress (const char *section_name,
-		  unsigned long sent_so_far,
-		  unsigned long total_section,
-		  unsigned long total_sent,
+mi_load_progress (const char *section_name, unsigned long sent_so_far,
+		  unsigned long total_section, unsigned long total_sent,
 		  unsigned long grand_total)
 {
   using namespace std::chrono;
@@ -2172,8 +2136,8 @@ mi_load_progress (const char *section_name,
   scoped_restore save_uiout
     = make_scoped_restore (&current_uiout, uiout.get ());
 
-  new_section = (previous_sect_name ?
-		 strcmp (previous_sect_name, section_name) : 1);
+  new_section
+    = (previous_sect_name ? strcmp (previous_sect_name, section_name) : 1);
   if (new_section)
     {
       xfree (previous_sect_name);
@@ -2251,10 +2215,9 @@ print_diff (struct ui_file *file, struct mi_timestamp *start,
   duration<double> utime = end->utime - start->utime;
   duration<double> stime = end->stime - start->stime;
 
-  gdb_printf
-    (file,
-     ",time={wallclock=\"%0.5f\",user=\"%0.5f\",system=\"%0.5f\"}",
-     wallclock.count (), utime.count (), stime.count ());
+  gdb_printf (file,
+	      ",time={wallclock=\"%0.5f\",user=\"%0.5f\",system=\"%0.5f\"}",
+	      wallclock.count (), utime.count (), stime.count ());
 }
 
 void
@@ -2265,11 +2228,11 @@ mi_cmd_trace_define_variable (const char *command, char **argv, int argc)
   char *name = 0;
 
   if (argc != 1 && argc != 2)
-    error (_("Usage: -trace-define-variable VARIABLE [VALUE]"));
+    error (_ ("Usage: -trace-define-variable VARIABLE [VALUE]"));
 
   name = argv[0];
   if (*name++ != '$')
-    error (_("Name of trace variable should start with '$'"));
+    error (_ ("Name of trace variable should start with '$'"));
 
   validate_trace_state_variable_name (name);
 
@@ -2287,7 +2250,7 @@ void
 mi_cmd_trace_list_variables (const char *command, char **argv, int argc)
 {
   if (argc != 0)
-    error (_("-trace-list-variables: no arguments allowed"));
+    error (_ ("-trace-list-variables: no arguments allowed"));
 
   tvariables_info_1 ();
 }
@@ -2298,7 +2261,7 @@ mi_cmd_trace_find (const char *command, char **argv, int argc)
   char *mode;
 
   if (argc == 0)
-    error (_("trace selection mode is required"));
+    error (_ ("trace selection mode is required"));
 
   mode = argv[0];
 
@@ -2313,56 +2276,55 @@ mi_cmd_trace_find (const char *command, char **argv, int argc)
   if (strcmp (mode, "frame-number") == 0)
     {
       if (argc != 2)
-	error (_("frame number is required"));
+	error (_ ("frame number is required"));
       tfind_1 (tfind_number, atoi (argv[1]), 0, 0, 0);
     }
   else if (strcmp (mode, "tracepoint-number") == 0)
     {
       if (argc != 2)
-	error (_("tracepoint number is required"));
+	error (_ ("tracepoint number is required"));
       tfind_1 (tfind_tp, atoi (argv[1]), 0, 0, 0);
     }
   else if (strcmp (mode, "pc") == 0)
     {
       if (argc != 2)
-	error (_("PC is required"));
+	error (_ ("PC is required"));
       tfind_1 (tfind_pc, 0, parse_and_eval_address (argv[1]), 0, 0);
     }
   else if (strcmp (mode, "pc-inside-range") == 0)
     {
       if (argc != 3)
-	error (_("Start and end PC are required"));
+	error (_ ("Start and end PC are required"));
       tfind_1 (tfind_range, 0, parse_and_eval_address (argv[1]),
 	       parse_and_eval_address (argv[2]), 0);
     }
   else if (strcmp (mode, "pc-outside-range") == 0)
     {
       if (argc != 3)
-	error (_("Start and end PC are required"));
+	error (_ ("Start and end PC are required"));
       tfind_1 (tfind_outside, 0, parse_and_eval_address (argv[1]),
 	       parse_and_eval_address (argv[2]), 0);
     }
   else if (strcmp (mode, "line") == 0)
     {
       if (argc != 2)
-	error (_("Line is required"));
+	error (_ ("Line is required"));
 
       std::vector<symtab_and_line> sals
-	= decode_line_with_current_source (argv[1],
-					   DECODE_LINE_FUNFIRSTLINE);
+	= decode_line_with_current_source (argv[1], DECODE_LINE_FUNFIRSTLINE);
       const symtab_and_line &sal = sals[0];
 
       if (sal.symtab == 0)
-	error (_("Could not find the specified line"));
+	error (_ ("Could not find the specified line"));
 
       CORE_ADDR start_pc, end_pc;
       if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
 	tfind_1 (tfind_range, 0, start_pc, end_pc - 1, 0);
       else
-	error (_("Could not find the specified line"));
+	error (_ ("Could not find the specified line"));
     }
   else
-    error (_("Invalid mode '%s'"), mode);
+    error (_ ("Invalid mode '%s'"), mode);
 
   if (has_stack_frames () || get_traceframe_number () >= 0)
     print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 1);
@@ -2379,19 +2341,15 @@ mi_cmd_trace_save (const char *command, char **argv, int argc)
 
   enum opt
   {
-    TARGET_SAVE_OPT, CTF_OPT
+    TARGET_SAVE_OPT,
+    CTF_OPT
   };
-  static const struct mi_opt opts[] =
-    {
-      {"r", TARGET_SAVE_OPT, 0},
-      {"ctf", CTF_OPT, 0},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[]
+    = { { "r", TARGET_SAVE_OPT, 0 }, { "ctf", CTF_OPT, 0 }, { 0, 0, 0 } };
 
   while (1)
     {
-      int opt = mi_getopt ("-trace-save", argc, argv, opts,
-			   &oind, &oarg);
+      int opt = mi_getopt ("-trace-save", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -2407,8 +2365,8 @@ mi_cmd_trace_save (const char *command, char **argv, int argc)
     }
 
   if (argc - oind != 1)
-    error (_("Exactly one argument required "
-	     "(file in which to save trace data)"));
+    error (_ ("Exactly one argument required "
+	      "(file in which to save trace data)"));
 
   filename = argv[oind];
 
@@ -2443,7 +2401,7 @@ void
 mi_cmd_ada_task_info (const char *command, char **argv, int argc)
 {
   if (argc != 0 && argc != 1)
-    error (_("Invalid MI command"));
+    error (_ ("Invalid MI command"));
 
   print_ada_task_info (current_uiout, argv[0], current_inferior ());
 }
@@ -2477,8 +2435,7 @@ print_variable_or_computed (const char *expression, enum print_values values)
       type = check_typedef (value_type (val));
       type_print (value_type (val), "", &stb, -1);
       uiout->field_stream ("type", stb);
-      if (type->code () != TYPE_CODE_ARRAY
-	  && type->code () != TYPE_CODE_STRUCT
+      if (type->code () != TYPE_CODE_ARRAY && type->code () != TYPE_CODE_STRUCT
 	  && type->code () != TYPE_CODE_UNION)
 	{
 	  struct value_print_options opts;
@@ -2518,6 +2475,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
   int registers_format = 'x';
   int memory_contents = 0;
   struct ui_out *uiout = current_uiout;
+
   enum opt
   {
     VAR_PRINT_VALUES,
@@ -2525,20 +2483,18 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
     REGISTERS_FORMAT,
     MEMORY_CONTENTS,
   };
-  static const struct mi_opt opts[] =
-    {
-      {"-var-print-values", VAR_PRINT_VALUES, 1},
-      {"-comp-print-values", COMP_PRINT_VALUES, 1},
-      {"-registers-format", REGISTERS_FORMAT, 1},
-      {"-memory-contents", MEMORY_CONTENTS, 0},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[]
+    = { { "-var-print-values", VAR_PRINT_VALUES, 1 },
+	{ "-comp-print-values", COMP_PRINT_VALUES, 1 },
+	{ "-registers-format", REGISTERS_FORMAT, 1 },
+	{ "-memory-contents", MEMORY_CONTENTS, 0 },
+	{ 0, 0, 0 } };
 
   while (1)
     {
       char *oarg;
-      int opt = mi_getopt ("-trace-frame-collected", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-trace-frame-collected", argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -2559,11 +2515,11 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
     }
 
   if (oind != argc)
-    error (_("Usage: -trace-frame-collected "
-	     "[--var-print-values PRINT_VALUES] "
-	     "[--comp-print-values PRINT_VALUES] "
-	     "[--registers-format FORMAT]"
-	     "[--memory-contents]"));
+    error (_ ("Usage: -trace-frame-collected "
+	      "[--var-print-values PRINT_VALUES] "
+	      "[--comp-print-values PRINT_VALUES] "
+	      "[--registers-format FORMAT]"
+	      "[--memory-contents]"));
 
   /* This throws an error is not inspecting a trace frame.  */
   tloc = get_traceframe_location (&stepping_frame);
@@ -2647,8 +2603,9 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	  {
 	    uiout->field_fmt ("name", "$%s", tsv->name.c_str ());
 
-	    tsv->value_known = target_get_trace_state_variable_value (tsv->number,
-								      &tsv->value);
+	    tsv->value_known
+	      = target_get_trace_state_variable_value (tsv->number,
+						       &tsv->value);
 	    uiout->field_signed ("current", tsv->value);
 	  }
 	else
@@ -2704,7 +2661,8 @@ mi_cmd_fix_multi_location_breakpoint_output (const char *command, char **argv,
 /* See mi/mi-main.h.  */
 
 void
-mi_cmd_fix_breakpoint_script_output (const char *command, char **argv, int argc)
+mi_cmd_fix_breakpoint_script_output (const char *command, char **argv,
+				     int argc)
 {
   fix_breakpoint_script_output_globally = true;
 }
@@ -2715,10 +2673,10 @@ void
 mi_cmd_complete (const char *command, char **argv, int argc)
 {
   if (argc != 1)
-    error (_("Usage: -complete COMMAND"));
+    error (_ ("Usage: -complete COMMAND"));
 
   if (max_completions == 0)
-    error (_("max-completions is zero, completion is disabled."));
+    error (_ ("max-completions is zero, completion is disabled."));
 
   int quote_char = '\0';
   const char *word;
@@ -2730,22 +2688,22 @@ mi_cmd_complete (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
 
   if (result.number_matches > 0)
-    uiout->field_fmt ("completion", "%s%s",
-		      arg_prefix.c_str (),result.match_list[0]);
+    uiout->field_fmt ("completion", "%s%s", arg_prefix.c_str (),
+		      result.match_list[0]);
 
   {
     ui_out_emit_list completions_emitter (uiout, "matches");
 
     if (result.number_matches == 1)
-      uiout->field_fmt (NULL, "%s%s",
-			arg_prefix.c_str (), result.match_list[0]);
+      uiout->field_fmt (NULL, "%s%s", arg_prefix.c_str (),
+			result.match_list[0]);
     else
       {
 	result.sort_match_list ();
 	for (size_t i = 0; i < result.number_matches; i++)
 	  {
-	    uiout->field_fmt (NULL, "%s%s",
-			      arg_prefix.c_str (), result.match_list[i + 1]);
+	    uiout->field_fmt (NULL, "%s%s", arg_prefix.c_str (),
+			      result.match_list[i + 1]);
 	  }
       }
   }
@@ -2753,24 +2711,25 @@ mi_cmd_complete (const char *command, char **argv, int argc)
 		       result.number_matches == max_completions ? "1" : "0");
 }
 
-
 void _initialize_mi_main ();
+
 void
 _initialize_mi_main ()
 {
   set_show_commands mi_async_cmds
-    = add_setshow_boolean_cmd ("mi-async", class_run,
-			       &mi_async_1, _("\
-Set whether MI asynchronous mode is enabled."), _("\
-Show whether MI asynchronous mode is enabled."), _("\
+    = add_setshow_boolean_cmd ("mi-async", class_run, &mi_async_1, _ ("\
+Set whether MI asynchronous mode is enabled."),
+			       _ ("\
+Show whether MI asynchronous mode is enabled."),
+			       _ ("\
 Tells GDB whether MI should be in asynchronous mode."),
-			       set_mi_async_command,
-			       show_mi_async_command,
+			       set_mi_async_command, show_mi_async_command,
 			       &setlist, &showlist);
 
   /* Alias old "target-async" to "mi-async".  */
   cmd_list_element *set_target_async_cmd
-    = add_alias_cmd ("target-async", mi_async_cmds.set, class_run, 0, &setlist);
+    = add_alias_cmd ("target-async", mi_async_cmds.set, class_run, 0,
+		     &setlist);
   deprecate_cmd (set_target_async_cmd, "set mi-async");
 
   cmd_list_element *show_target_async_cmd

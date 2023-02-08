@@ -26,8 +26,7 @@
    changed since the values were last written to the thread.  Nonzero
    indicates that a change has been made, zero indicates no change.  */
 
-extern void lwp_set_debug_registers_changed (struct lwp_info *lwp,
-					     int value);
+extern void lwp_set_debug_registers_changed (struct lwp_info *lwp, int value);
 
 /* Return nonzero if our local mirror of LWP's debug registers has
    been changed since the values were last written to the thread,

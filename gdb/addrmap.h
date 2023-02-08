@@ -83,15 +83,13 @@ struct addrmap
      semantics than to provide an interface which allows it to be
      implemented efficiently, but doesn't reveal too much of the
      representation.  */
-  virtual void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-			  void *obj) = 0;
+  virtual void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive, void *obj)
+    = 0;
 
   /* Return the object associated with ADDR in MAP.  */
-  const void *find (CORE_ADDR addr) const
-  { return this->do_find (addr); }
+  const void *find (CORE_ADDR addr) const { return this->do_find (addr); }
 
-  void *find (CORE_ADDR addr)
-  { return this->do_find (addr); }
+  void *find (CORE_ADDR addr) { return this->do_find (addr); }
 
   /* Relocate all the addresses in MAP by OFFSET.  (This can be applied
      to either mutable or immutable maps.)  */
@@ -102,13 +100,14 @@ struct addrmap
      immediately, and the value is returned.  Otherwise, this function
      returns 0.  */
   int foreach (addrmap_foreach_const_fn fn) const
-  { return this->do_foreach (fn); }
+  {
+    return this->do_foreach (fn);
+  }
 
-  int foreach (addrmap_foreach_fn fn)
-  { return this->do_foreach (fn); }
-
+  int foreach (addrmap_foreach_fn fn) { return this->do_foreach (fn); }
 
 private:
+
   /* Worker for find, implemented by sub-classes.  */
   virtual void *do_find (CORE_ADDR addr) const = 0;
 
@@ -119,8 +118,7 @@ private:
 struct addrmap_mutable;
 
 /* Fixed address maps.  */
-struct addrmap_fixed : public addrmap,
-		       public allocate_on_obstack
+struct addrmap_fixed : public addrmap, public allocate_on_obstack
 {
 public:
 
@@ -132,6 +130,7 @@ public:
   void relocate (CORE_ADDR offset) override;
 
 private:
+
   void *do_find (CORE_ADDR addr) const override;
   int do_foreach (addrmap_foreach_fn fn) const override;
 
@@ -170,6 +169,7 @@ public:
   void relocate (CORE_ADDR offset) override;
 
 private:
+
   void *do_find (CORE_ADDR addr) const override;
   int do_foreach (addrmap_foreach_fn fn) const override;
 
@@ -201,7 +201,6 @@ private:
   void splay_tree_remove (CORE_ADDR addr);
   void splay_tree_insert (CORE_ADDR key, void *value);
 };
-
 
 /* Dump the addrmap to OUTFILE.  If PAYLOAD is non-NULL, only dump any
    components that map to PAYLOAD.  (If PAYLOAD is NULL, the entire

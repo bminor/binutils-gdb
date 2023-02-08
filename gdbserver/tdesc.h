@@ -60,9 +60,7 @@ struct target_desc final : tdesc_element
   const char *osabi = NULL;
 
 public:
-  target_desc ()
-    : registers_size (0)
-  {}
+  target_desc () : registers_size (0) {}
 
   ~target_desc ();
 
@@ -80,13 +78,12 @@ public:
 /* Copy target description SRC to DEST.  */
 
 void copy_target_description (struct target_desc *dest,
-			      const struct target_desc *src);
+                              const struct target_desc *src);
 
 /* Initialize TDESC, and then set its expedite_regs field to
    EXPEDITE_REGS.  */
 
-void init_target_desc (struct target_desc *tdesc,
-		       const char **expedite_regs);
+void init_target_desc (struct target_desc *tdesc, const char **expedite_regs);
 
 /* Return the current inferior's target description.  Never returns
    NULL.  */
@@ -96,6 +93,6 @@ const struct target_desc *current_target_desc (void);
 /* Return true if TDESC contains the feature described by string FEATURE.
    Return false otherwise.  */
 bool tdesc_contains_feature (const target_desc *tdesc,
-			     const std::string &feature);
+                             const std::string &feature);
 
 #endif /* GDBSERVER_TDESC_H */

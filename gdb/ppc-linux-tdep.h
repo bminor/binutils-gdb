@@ -20,7 +20,7 @@
 #ifndef PPC_LINUX_TDEP_H
 #define PPC_LINUX_TDEP_H
 
-#include "ppc-tdep.h"  /* For PPC_NUM_REGS.  */
+#include "ppc-tdep.h" /* For PPC_NUM_REGS.  */
 
 struct regset;
 
@@ -38,13 +38,14 @@ const struct regset *ppc_linux_cgprregset (struct gdbarch *gdbarch);
 
 /* Get the checkpointed vector regset that matches the target byte
    order.  */
-const struct regset* ppc_linux_cvmxregset (struct gdbarch *gdbarch);
+const struct regset *ppc_linux_cvmxregset (struct gdbarch *gdbarch);
 
 /* Extra register number constants.  The Linux kernel stores a
    "trap" code and the original value of r3 into special "registers";
    these need to be saved and restored when performing an inferior
    call while the inferior was interrupted within a system call.  */
-enum {
+enum
+{
   PPC_ORIG_R3_REGNUM = PPC_NUM_REGS,
   PPC_TRAP_REGNUM,
 };

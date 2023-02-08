@@ -30,7 +30,6 @@ extern struct ppc_reg_offsets ppcobsd_fpreg_offsets;
 /* Register sets for OpenBSD/powerpc.  */
 extern const struct regset ppcobsd_gregset;
 extern const struct regset ppcobsd_fpregset;
-
 
 /* Supply register REGNUM in the general-purpose register set REGSET
    from the buffer specified by GREGS and LEN to register cache

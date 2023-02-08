@@ -60,7 +60,6 @@
 class aarch64_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
@@ -75,13 +74,13 @@ public:
 
   bool supports_fast_tracepoints () override;
 
-  int install_fast_tracepoint_jump_pad
-    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
-     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
-     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
-     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
-     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
-     char *err) override;
+  int install_fast_tracepoint_jump_pad (
+    CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+    CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+    CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+    unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+    CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+    char *err) override;
 
   int get_min_fast_tracepoint_insn_len () override;
 
@@ -89,14 +88,13 @@ public:
 
   bool supports_memory_tagging () override;
 
-  bool fetch_memtags (CORE_ADDR address, size_t len,
-		      gdb::byte_vector &tags, int type) override;
+  bool fetch_memtags (CORE_ADDR address, size_t len, gdb::byte_vector &tags,
+                      int type) override;
 
   bool store_memtags (CORE_ADDR address, size_t len,
-		      const gdb::byte_vector &tags, int type) override;
+                      const gdb::byte_vector &tags, int type) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -111,18 +109,18 @@ protected:
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
 
-  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
-  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-			int size, raw_breakpoint *bp) override;
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                        raw_breakpoint *bp) override;
 
   bool low_stopped_by_watchpoint () override;
 
   CORE_ADDR low_stopped_data_address () override;
 
   bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
-			  int direction) override;
+                          int direction) override;
 
   arch_process_info *low_new_process () override;
 
@@ -153,14 +151,14 @@ bool
 aarch64_target::low_cannot_fetch_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
-			  "is not implemented by the target");
+                          "is not implemented by the target");
 }
 
 bool
 aarch64_target::low_cannot_store_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_store_register "
-			  "is not implemented by the target");
+                          "is not implemented by the target");
 }
 
 void
@@ -259,9 +257,9 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
     return;
 
   supply_register (regcache, AARCH64_PAUTH_DMASK_REGNUM (pauth_base),
-		   &pauth_regset[0]);
+                   &pauth_regset[0]);
   supply_register (regcache, AARCH64_PAUTH_CMASK_REGNUM (pauth_base),
-		   &pauth_regset[1]);
+                   &pauth_regset[1]);
 }
 
 /* Fill BUF with the MTE registers from the regcache.  */
@@ -293,7 +291,7 @@ static void
 aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
 {
   gdb_byte *tls_buf = (gdb_byte *) buf;
-  int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
+  int tls_regnum = find_regno (regcache->tdesc, "tpidr");
 
   collect_register (regcache, tls_regnum, tls_buf);
 
@@ -310,7 +308,7 @@ static void
 aarch64_store_tlsregset (struct regcache *regcache, const void *buf)
 {
   gdb_byte *tls_buf = (gdb_byte *) buf;
-  int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
+  int tls_regnum = find_regno (regcache->tdesc, "tpidr");
 
   supply_register (regcache, tls_regnum, tls_buf);
 
@@ -354,7 +352,7 @@ aarch64_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 /* AArch64 BRK software debug mode instruction.
    This instruction needs to match gdb/aarch64-tdep.c
    (aarch64_default_breakpoint).  */
-static const gdb_byte aarch64_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
+static const gdb_byte aarch64_breakpoint[] = { 0x00, 0x00, 0x20, 0xd4 };
 
 /* Implementation of linux target ops method "low_breakpoint_at".  */
 
@@ -367,7 +365,7 @@ aarch64_target::low_breakpoint_at (CORE_ADDR where)
 
       read_memory (where, (unsigned char *) &insn, aarch64_breakpoint_len);
       if (memcmp (insn, aarch64_breakpoint, aarch64_breakpoint_len) == 0)
-	return true;
+        return true;
 
       return false;
     }
@@ -430,8 +428,8 @@ aarch64_target::supports_z_point_type (char z_type)
    the actual insertion will happen when threads are resumed.  */
 
 int
-aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-				  int len, raw_breakpoint *bp)
+aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int len,
+                                  raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
@@ -440,7 +438,7 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
 
   if (show_debug_regs)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
-	     (unsigned long) addr, len);
+             (unsigned long) addr, len);
 
   /* Determine the type from the raw breakpoint type.  */
   targ_type = raw_bkpt_type_to_target_hw_bp_type (type);
@@ -448,29 +446,27 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
   if (targ_type != hw_execute)
     {
       if (aarch64_region_ok_for_watchpoint (addr, len))
-	ret = aarch64_handle_watchpoint (targ_type, addr, len,
-					 1 /* is_insert */,
-					 current_lwp_ptid (), state);
+        ret
+          = aarch64_handle_watchpoint (targ_type, addr, len, 1 /* is_insert */,
+                                       current_lwp_ptid (), state);
       else
-	ret = -1;
+        ret = -1;
     }
   else
     {
       if (len == 3)
-	{
-	  /* LEN is 3 means the breakpoint is set on a 32-bit thumb
+        {
+          /* LEN is 3 means the breakpoint is set on a 32-bit thumb
 	     instruction.   Set it to 2 to correctly encode length bit
 	     mask in hardware/watchpoint control register.  */
-	  len = 2;
-	}
-      ret = aarch64_handle_breakpoint (targ_type, addr, len,
-				       1 /* is_insert */, current_lwp_ptid (),
-				       state);
+          len = 2;
+        }
+      ret = aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */,
+                                       current_lwp_ptid (), state);
     }
 
   if (show_debug_regs)
-    aarch64_show_debug_reg_state (state, "insert_point", addr, len,
-				  targ_type);
+    aarch64_show_debug_reg_state (state, "insert_point", addr, len, targ_type);
 
   return ret;
 }
@@ -481,8 +477,8 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
    the actual removal will be done when threads are resumed.  */
 
 int
-aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-				  int len, raw_breakpoint *bp)
+aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int len,
+                                  raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
@@ -491,33 +487,30 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 
   if (show_debug_regs)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
-	     (unsigned long) addr, len);
+             (unsigned long) addr, len);
 
   /* Determine the type from the raw breakpoint type.  */
   targ_type = raw_bkpt_type_to_target_hw_bp_type (type);
 
   /* Set up state pointers.  */
   if (targ_type != hw_execute)
-    ret =
-      aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */,
-				 current_lwp_ptid (), state);
+    ret = aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */,
+                                     current_lwp_ptid (), state);
   else
     {
       if (len == 3)
-	{
-	  /* LEN is 3 means the breakpoint is set on a 32-bit thumb
+        {
+          /* LEN is 3 means the breakpoint is set on a 32-bit thumb
 	     instruction.   Set it to 2 to correctly encode length bit
 	     mask in hardware/watchpoint control register.  */
-	  len = 2;
-	}
-      ret = aarch64_handle_breakpoint (targ_type, addr, len,
-				       0 /* is_insert */,  current_lwp_ptid (),
-				       state);
+          len = 2;
+        }
+      ret = aarch64_handle_breakpoint (targ_type, addr, len, 0 /* is_insert */,
+                                       current_lwp_ptid (), state);
     }
 
   if (show_debug_regs)
-    aarch64_show_debug_reg_state (state, "remove_point", addr, len,
-				  targ_type);
+    aarch64_show_debug_reg_state (state, "remove_point", addr, len, targ_type);
 
   return ret;
 }
@@ -531,7 +524,7 @@ aarch64_remove_non_address_bits (CORE_ADDR pointer)
 
   /* Check if PAC is available for this target.  */
   if (tdesc_contains_feature (current_process ()->tdesc,
-			      "org.gnu.gdb.aarch64.pauth"))
+                              "org.gnu.gdb.aarch64.pauth"))
     {
       /* Fetch the PAC masks.  These masks are per-process, so we can just
 	 fetch data from whatever thread we have at the moment.
@@ -540,8 +533,10 @@ aarch64_remove_non_address_bits (CORE_ADDR pointer)
 	 same, but this may change in the future.  */
 
       struct regcache *regs = get_thread_regcache (current_thread, 1);
-      CORE_ADDR dmask = regcache_raw_get_unsigned_by_name (regs, "pauth_dmask");
-      CORE_ADDR cmask = regcache_raw_get_unsigned_by_name (regs, "pauth_cmask");
+      CORE_ADDR dmask
+        = regcache_raw_get_unsigned_by_name (regs, "pauth_dmask");
+      CORE_ADDR cmask
+        = regcache_raw_get_unsigned_by_name (regs, "pauth_cmask");
       mask |= aarch64_mask_from_pac_registers (cmask, dmask);
     }
 
@@ -579,18 +574,19 @@ aarch64_target::low_stopped_data_address ()
   for (i = aarch64_num_wp_regs - 1; i >= 0; --i)
     {
       const unsigned int offset
-	= aarch64_watchpoint_offset (state->dr_ctrl_wp[i]);
-      const unsigned int len = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
+        = aarch64_watchpoint_offset (state->dr_ctrl_wp[i]);
+      const unsigned int len
+        = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
       const CORE_ADDR addr_watch = state->dr_addr_wp[i] + offset;
-      const CORE_ADDR addr_watch_aligned = align_down (state->dr_addr_wp[i], 8);
+      const CORE_ADDR addr_watch_aligned
+        = align_down (state->dr_addr_wp[i], 8);
       const CORE_ADDR addr_orig = state->dr_addr_orig_wp[i];
 
       if (state->dr_ref_count_wp[i]
-	  && DR_CONTROL_ENABLED (state->dr_ctrl_wp[i])
-	  && addr_trap >= addr_watch_aligned
-	  && addr_trap < addr_watch + len)
-	{
-	  /* ADDR_TRAP reports the first address of the memory range
+          && DR_CONTROL_ENABLED (state->dr_ctrl_wp[i])
+          && addr_trap >= addr_watch_aligned && addr_trap < addr_watch + len)
+        {
+          /* ADDR_TRAP reports the first address of the memory range
 	     accessed by the CPU, regardless of what was the memory
 	     range watched.  Thus, a large CPU access that straddles
 	     the ADDR_WATCH..ADDR_WATCH+LEN range may result in an
@@ -608,8 +604,8 @@ aarch64_target::low_stopped_data_address ()
 	     range.  ADDR_WATCH <= ADDR_TRAP < ADDR_ORIG is a false
 	     positive on kernels older than 4.10.  See PR
 	     external/20207.  */
-	  return addr_orig;
-	}
+          return addr_orig;
+        }
     }
 
   return (CORE_ADDR) 0;
@@ -626,28 +622,27 @@ aarch64_target::low_stopped_by_watchpoint ()
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph,
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
-  return aarch64_ps_get_thread_area (ph, lwpid, idx, base,
-				     is_64bit_tdesc ());
+  return aarch64_ps_get_thread_area (ph, lwpid, idx, base, is_64bit_tdesc ());
 }
 
 /* Implementation of linux target ops method "low_siginfo_fixup".  */
 
 bool
 aarch64_target::low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
-				   int direction)
+                                   int direction)
 {
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
     {
       if (direction == 0)
-	aarch64_compat_siginfo_from_siginfo ((struct compat_siginfo *) inf,
-					     native);
+        aarch64_compat_siginfo_from_siginfo ((struct compat_siginfo *) inf,
+                                             native);
       else
-	aarch64_siginfo_from_compat_siginfo (native,
-					     (struct compat_siginfo *) inf);
+        aarch64_siginfo_from_compat_siginfo (native,
+                                             (struct compat_siginfo *) inf);
 
       return true;
     }
@@ -690,14 +685,11 @@ aarch64_target::low_delete_thread (arch_lwp_info *arch_lwp)
 /* Implementation of linux target ops method "low_new_fork".  */
 
 void
-aarch64_target::low_new_fork (process_info *parent,
-			      process_info *child)
+aarch64_target::low_new_fork (process_info *parent, process_info *child)
 {
   /* These are allocated by linux_add_process.  */
-  gdb_assert (parent->priv != NULL
-	      && parent->priv->arch_private != NULL);
-  gdb_assert (child->priv != NULL
-	      && child->priv->arch_private != NULL);
+  gdb_assert (parent->priv != NULL && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL && child->priv->arch_private != NULL);
 
   /* Linux kernel before 2.6.33 commit
      72f674d203cd230426437cdcf7dd6f681dad8b0d
@@ -738,50 +730,39 @@ aarch64_sve_regs_copy_from_regcache (struct regcache *regcache, void *buf)
 
    Their sizes are set to 0 here, but they will be adjusted later depending
    on whether each register set is available or not.  */
-static struct regset_info aarch64_regsets[] =
-{
+static struct regset_info aarch64_regsets[] = {
   /* GPR registers.  */
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
-    0, GENERAL_REGS,
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS, 0, GENERAL_REGS,
     aarch64_fill_gregset, aarch64_store_gregset },
   /* Floating Point (FPU) registers.  */
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
-    0, FP_REGS,
-    aarch64_fill_fpregset, aarch64_store_fpregset
-  },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET, 0, FP_REGS,
+    aarch64_fill_fpregset, aarch64_store_fpregset },
   /* Scalable Vector Extension (SVE) registers.  */
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_SVE,
-    0, EXTENDED_REGS,
-    aarch64_sve_regs_copy_from_regcache, aarch64_sve_regs_copy_to_regcache
-  },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_SVE, 0, EXTENDED_REGS,
+    aarch64_sve_regs_copy_from_regcache, aarch64_sve_regs_copy_to_regcache },
   /* PAC registers.  */
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_PAC_MASK,
-    0, OPTIONAL_REGS,
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_PAC_MASK, 0, OPTIONAL_REGS,
     nullptr, aarch64_store_pauthregset },
   /* Tagged address control / MTE registers.  */
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TAGGED_ADDR_CTRL,
-    0, OPTIONAL_REGS,
-    aarch64_fill_mteregset, aarch64_store_mteregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TAGGED_ADDR_CTRL, 0,
+    OPTIONAL_REGS, aarch64_fill_mteregset, aarch64_store_mteregset },
   /* TLS register.  */
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TLS,
-    0, OPTIONAL_REGS,
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TLS, 0, OPTIONAL_REGS,
     aarch64_fill_tlsregset, aarch64_store_tlsregset },
   NULL_REGSET
 };
 
-static struct regsets_info aarch64_regsets_info =
-  {
-    aarch64_regsets, /* regsets */
-    0, /* num_regsets */
-    nullptr, /* disabled_regsets */
-  };
+static struct regsets_info aarch64_regsets_info = {
+  aarch64_regsets, /* regsets */
+  0,               /* num_regsets */
+  nullptr,         /* disabled_regsets */
+};
 
-static struct regs_info regs_info_aarch64 =
-  {
-    nullptr, /* regset_bitmap */
-    nullptr, /* usrregs */
-    &aarch64_regsets_info,
-  };
+static struct regs_info regs_info_aarch64 = {
+  nullptr, /* regset_bitmap */
+  nullptr, /* usrregs */
+  &aarch64_regsets_info,
+};
 
 /* Given FEATURES, adjust the available register sets by setting their
    sizes.  A size of 0 means the register set is disabled and won't be
@@ -795,35 +776,35 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
   for (regset = aarch64_regsets; regset->size >= 0; regset++)
     {
       switch (regset->nt_type)
-	{
-	case NT_PRSTATUS:
-	  /* General purpose registers are always present.  */
-	  regset->size = sizeof (struct user_pt_regs);
-	  break;
-	case NT_FPREGSET:
-	  /* This is unavailable when SVE is present.  */
-	  if (features.vq == 0)
-	    regset->size = sizeof (struct user_fpsimd_state);
-	  break;
-	case NT_ARM_SVE:
-	  if (features.vq > 0)
-	    regset->size = SVE_PT_SIZE (AARCH64_MAX_SVE_VQ, SVE_PT_REGS_SVE);
-	  break;
-	case NT_ARM_PAC_MASK:
-	  if (features.pauth)
-	    regset->size = AARCH64_PAUTH_REGS_SIZE;
-	  break;
-	case NT_ARM_TAGGED_ADDR_CTRL:
-	  if (features.mte)
-	    regset->size = AARCH64_LINUX_SIZEOF_MTE;
-	  break;
-	case NT_ARM_TLS:
-	  if (features.tls > 0)
-	    regset->size = AARCH64_TLS_REGISTER_SIZE * features.tls;
-	  break;
-	default:
-	  gdb_assert_not_reached ("Unknown register set found.");
-	}
+        {
+        case NT_PRSTATUS:
+          /* General purpose registers are always present.  */
+          regset->size = sizeof (struct user_pt_regs);
+          break;
+        case NT_FPREGSET:
+          /* This is unavailable when SVE is present.  */
+          if (features.vq == 0)
+            regset->size = sizeof (struct user_fpsimd_state);
+          break;
+        case NT_ARM_SVE:
+          if (features.vq > 0)
+            regset->size = SVE_PT_SIZE (AARCH64_MAX_SVE_VQ, SVE_PT_REGS_SVE);
+          break;
+        case NT_ARM_PAC_MASK:
+          if (features.pauth)
+            regset->size = AARCH64_PAUTH_REGS_SIZE;
+          break;
+        case NT_ARM_TAGGED_ADDR_CTRL:
+          if (features.mte)
+            regset->size = AARCH64_LINUX_SIZEOF_MTE;
+          break;
+        case NT_ARM_TLS:
+          if (features.tls > 0)
+            regset->size = AARCH64_TLS_REGISTER_SIZE * features.tls;
+          break;
+        default:
+          gdb_assert_not_reached ("Unknown register set found.");
+        }
     }
 }
 
@@ -965,10 +946,10 @@ struct aarch64_operand
 
   /* Value of the operand according to the type.  */
   union
-    {
-      uint32_t imm;
-      struct aarch64_register reg;
-    };
+  {
+    uint32_t imm;
+    struct aarch64_register reg;
+  };
 };
 
 /* List of registers that we are currently using, we can add more here as
@@ -1083,9 +1064,9 @@ postindex_memory_operand (int32_t index)
 enum aarch64_system_control_registers
 {
   /*          op0           op1           crn          crm          op2  */
-  NZCV =      (0x1 << 14) | (0x3 << 11) | (0x4 << 7) | (0x2 << 3) | 0x0,
-  FPSR =      (0x1 << 14) | (0x3 << 11) | (0x4 << 7) | (0x4 << 3) | 0x1,
-  FPCR =      (0x1 << 14) | (0x3 << 11) | (0x4 << 7) | (0x4 << 3) | 0x0,
+  NZCV = (0x1 << 14) | (0x3 << 11) | (0x4 << 7) | (0x2 << 3) | 0x0,
+  FPSR = (0x1 << 14) | (0x3 << 11) | (0x4 << 7) | (0x4 << 3) | 0x1,
+  FPCR = (0x1 << 14) | (0x3 << 11) | (0x4 << 7) | (0x4 << 3) | 0x0,
   TPIDR_EL0 = (0x1 << 14) | (0x3 << 11) | (0xd << 7) | (0x0 << 3) | 0x2
 };
 
@@ -1115,10 +1096,9 @@ emit_ret (uint32_t *buf, struct aarch64_register rn)
 
 static int
 emit_load_store_pair (uint32_t *buf, enum aarch64_opcodes opcode,
-		      struct aarch64_register rt,
-		      struct aarch64_register rt2,
-		      struct aarch64_register rn,
-		      struct aarch64_memory_operand operand)
+                      struct aarch64_register rt, struct aarch64_register rt2,
+                      struct aarch64_register rn,
+                      struct aarch64_memory_operand operand)
 {
   uint32_t opc;
   uint32_t pre_index;
@@ -1133,30 +1113,31 @@ emit_load_store_pair (uint32_t *buf, enum aarch64_opcodes opcode,
     {
     case MEMORY_OPERAND_OFFSET:
       {
-	pre_index = ENCODE (1, 1, 24);
-	write_back = ENCODE (0, 1, 23);
-	break;
+        pre_index = ENCODE (1, 1, 24);
+        write_back = ENCODE (0, 1, 23);
+        break;
       }
     case MEMORY_OPERAND_POSTINDEX:
       {
-	pre_index = ENCODE (0, 1, 24);
-	write_back = ENCODE (1, 1, 23);
-	break;
+        pre_index = ENCODE (0, 1, 24);
+        write_back = ENCODE (1, 1, 23);
+        break;
       }
     case MEMORY_OPERAND_PREINDEX:
       {
-	pre_index = ENCODE (1, 1, 24);
-	write_back = ENCODE (1, 1, 23);
-	break;
+        pre_index = ENCODE (1, 1, 24);
+        write_back = ENCODE (1, 1, 23);
+        break;
       }
     default:
       return 0;
     }
 
   return aarch64_emit_insn (buf, opcode | opc | pre_index | write_back
-			    | ENCODE (operand.index >> 3, 7, 15)
-			    | ENCODE (rt2.num, 5, 10)
-			    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+                                   | ENCODE (operand.index >> 3, 7, 15)
+                                   | ENCODE (rt2.num, 5, 10)
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a STP instruction into *BUF.
@@ -1172,8 +1153,8 @@ emit_load_store_pair (uint32_t *buf, enum aarch64_opcodes opcode,
 
 static int
 emit_stp (uint32_t *buf, struct aarch64_register rt,
-	  struct aarch64_register rt2, struct aarch64_register rn,
-	  struct aarch64_memory_operand operand)
+          struct aarch64_register rt2, struct aarch64_register rn,
+          struct aarch64_memory_operand operand)
 {
   return emit_load_store_pair (buf, STP, rt, rt2, rn, operand);
 }
@@ -1191,8 +1172,8 @@ emit_stp (uint32_t *buf, struct aarch64_register rt,
 
 static int
 emit_ldp (uint32_t *buf, struct aarch64_register rt,
-	  struct aarch64_register rt2, struct aarch64_register rn,
-	  struct aarch64_memory_operand operand)
+          struct aarch64_register rt2, struct aarch64_register rn,
+          struct aarch64_memory_operand operand)
 {
   return emit_load_store_pair (buf, LDP, rt, rt2, rn, operand);
 }
@@ -1208,15 +1189,16 @@ emit_ldp (uint32_t *buf, struct aarch64_register rt,
 
 static int
 emit_ldp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
-		   struct aarch64_register rn, int32_t offset)
+                   struct aarch64_register rn, int32_t offset)
 {
   uint32_t opc = ENCODE (2, 2, 30);
   uint32_t pre_index = ENCODE (1, 1, 24);
 
   return aarch64_emit_insn (buf, LDP_SIMD_VFP | opc | pre_index
-			    | ENCODE (offset >> 4, 7, 15)
-			    | ENCODE (rt2, 5, 10)
-			    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
+                                   | ENCODE (offset >> 4, 7, 15)
+                                   | ENCODE (rt2, 5, 10)
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rt, 5, 0));
 }
 
 /* Write a STP (SIMD&VFP) instruction using Q registers into *BUF.
@@ -1230,15 +1212,16 @@ emit_ldp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
 
 static int
 emit_stp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
-		   struct aarch64_register rn, int32_t offset)
+                   struct aarch64_register rn, int32_t offset)
 {
   uint32_t opc = ENCODE (2, 2, 30);
   uint32_t pre_index = ENCODE (1, 1, 24);
 
   return aarch64_emit_insn (buf, STP_SIMD_VFP | opc | pre_index
-			    | ENCODE (offset >> 4, 7, 15)
-			    | ENCODE (rt2, 5, 10)
-			    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
+                                   | ENCODE (offset >> 4, 7, 15)
+                                   | ENCODE (rt2, 5, 10)
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rt, 5, 0));
 }
 
 /* Write a LDRH instruction into *BUF.
@@ -1254,8 +1237,7 @@ emit_stp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
 
 static int
 emit_ldrh (uint32_t *buf, struct aarch64_register rt,
-	   struct aarch64_register rn,
-	   struct aarch64_memory_operand operand)
+           struct aarch64_register rn, struct aarch64_memory_operand operand)
 {
   return aarch64_emit_load_store (buf, 1, LDR, rt, rn, operand);
 }
@@ -1273,13 +1255,10 @@ emit_ldrh (uint32_t *buf, struct aarch64_register rt,
 
 static int
 emit_ldrb (uint32_t *buf, struct aarch64_register rt,
-	   struct aarch64_register rn,
-	   struct aarch64_memory_operand operand)
+           struct aarch64_register rn, struct aarch64_memory_operand operand)
 {
   return aarch64_emit_load_store (buf, 0, LDR, rt, rn, operand);
 }
-
-
 
 /* Write a STR instruction into *BUF.
 
@@ -1294,8 +1273,7 @@ emit_ldrb (uint32_t *buf, struct aarch64_register rt,
 
 static int
 emit_str (uint32_t *buf, struct aarch64_register rt,
-	  struct aarch64_register rn,
-	  struct aarch64_memory_operand operand)
+          struct aarch64_register rn, struct aarch64_memory_operand operand)
 {
   return aarch64_emit_load_store (buf, rt.is64 ? 3 : 2, STR, rt, rn, operand);
 }
@@ -1304,15 +1282,17 @@ emit_str (uint32_t *buf, struct aarch64_register rt,
 
 static int
 emit_load_store_exclusive (uint32_t *buf, uint32_t size,
-			   enum aarch64_opcodes opcode,
-			   struct aarch64_register rs,
-			   struct aarch64_register rt,
-			   struct aarch64_register rt2,
-			   struct aarch64_register rn)
+                           enum aarch64_opcodes opcode,
+                           struct aarch64_register rs,
+                           struct aarch64_register rt,
+                           struct aarch64_register rt2,
+                           struct aarch64_register rn)
 {
   return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30)
-			    | ENCODE (rs.num, 5, 16) | ENCODE (rt2.num, 5, 10)
-			    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+                                   | ENCODE (rs.num, 5, 16)
+                                   | ENCODE (rt2.num, 5, 10)
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a LAXR instruction into *BUF.
@@ -1324,10 +1304,10 @@ emit_load_store_exclusive (uint32_t *buf, uint32_t size,
 
 static int
 emit_ldaxr (uint32_t *buf, struct aarch64_register rt,
-	    struct aarch64_register rn)
+            struct aarch64_register rn)
 {
-  return emit_load_store_exclusive (buf, rt.is64 ? 3 : 2, LDAXR, xzr, rt,
-				    xzr, rn);
+  return emit_load_store_exclusive (buf, rt.is64 ? 3 : 2, LDAXR, xzr, rt, xzr,
+                                    rn);
 }
 
 /* Write a STXR instruction into *BUF.
@@ -1340,10 +1320,10 @@ emit_ldaxr (uint32_t *buf, struct aarch64_register rt,
 
 static int
 emit_stxr (uint32_t *buf, struct aarch64_register rs,
-	   struct aarch64_register rt, struct aarch64_register rn)
+           struct aarch64_register rt, struct aarch64_register rn)
 {
-  return emit_load_store_exclusive (buf, rt.is64 ? 3 : 2, STXR, rs, rt,
-				    xzr, rn);
+  return emit_load_store_exclusive (buf, rt.is64 ? 3 : 2, STXR, rs, rt, xzr,
+                                    rn);
 }
 
 /* Write a STLR instruction into *BUF.
@@ -1355,24 +1335,25 @@ emit_stxr (uint32_t *buf, struct aarch64_register rs,
 
 static int
 emit_stlr (uint32_t *buf, struct aarch64_register rt,
-	   struct aarch64_register rn)
+           struct aarch64_register rn)
 {
-  return emit_load_store_exclusive (buf, rt.is64 ? 3 : 2, STLR, xzr, rt,
-				    xzr, rn);
+  return emit_load_store_exclusive (buf, rt.is64 ? 3 : 2, STLR, xzr, rt, xzr,
+                                    rn);
 }
 
 /* Helper function for data processing instructions with register sources.  */
 
 static int
 emit_data_processing_reg (uint32_t *buf, uint32_t opcode,
-			  struct aarch64_register rd,
-			  struct aarch64_register rn,
-			  struct aarch64_register rm)
+                          struct aarch64_register rd,
+                          struct aarch64_register rn,
+                          struct aarch64_register rm)
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
   return aarch64_emit_insn (buf, opcode | size | ENCODE (rm.num, 5, 16)
-			    | ENCODE (rn.num, 5, 5) | ENCODE (rd.num, 5, 0));
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rd.num, 5, 0));
 }
 
 /* Helper function for data processing instructions taking either a register
@@ -1380,9 +1361,8 @@ emit_data_processing_reg (uint32_t *buf, uint32_t opcode,
 
 static int
 emit_data_processing (uint32_t *buf, enum aarch64_opcodes opcode,
-		      struct aarch64_register rd,
-		      struct aarch64_register rn,
-		      struct aarch64_operand operand)
+                      struct aarch64_register rd, struct aarch64_register rn,
+                      struct aarch64_operand operand)
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
   /* The opcode is different for register and immediate source operands.  */
@@ -1394,17 +1374,17 @@ emit_data_processing (uint32_t *buf, enum aarch64_opcodes opcode,
       operand_opcode = ENCODE (8, 4, 25);
 
       return aarch64_emit_insn (buf, opcode | operand_opcode | size
-				| ENCODE (operand.imm, 12, 10)
-				| ENCODE (rn.num, 5, 5)
-				| ENCODE (rd.num, 5, 0));
+                                       | ENCODE (operand.imm, 12, 10)
+                                       | ENCODE (rn.num, 5, 5)
+                                       | ENCODE (rd.num, 5, 0));
     }
   else
     {
       /* xxx0 101x xxxx xxxx xxxx xxxx xxxx xxxx */
       operand_opcode = ENCODE (5, 4, 25);
 
-      return emit_data_processing_reg (buf, opcode | operand_opcode, rd,
-				       rn, operand.reg);
+      return emit_data_processing_reg (buf, opcode | operand_opcode, rd, rn,
+                                       operand.reg);
     }
 }
 
@@ -1422,7 +1402,7 @@ emit_data_processing (uint32_t *buf, enum aarch64_opcodes opcode,
 
 static int
 emit_add (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rn, struct aarch64_operand operand)
+          struct aarch64_register rn, struct aarch64_operand operand)
 {
   return emit_data_processing (buf, ADD, rd, rn, operand);
 }
@@ -1440,7 +1420,7 @@ emit_add (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_sub (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rn, struct aarch64_operand operand)
+          struct aarch64_register rn, struct aarch64_operand operand)
 {
   return emit_data_processing (buf, SUB, rd, rn, operand);
 }
@@ -1461,7 +1441,7 @@ emit_sub (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_mov (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_operand operand)
+          struct aarch64_operand operand)
 {
   if (operand.type == OPERAND_IMMEDIATE)
     {
@@ -1470,8 +1450,8 @@ emit_mov (uint32_t *buf, struct aarch64_register rd,
       uint32_t shift = ENCODE (0, 2, 21);
 
       return aarch64_emit_insn (buf, MOV | size | shift
-				| ENCODE (operand.imm, 16, 5)
-				| ENCODE (rd.num, 5, 0));
+                                       | ENCODE (operand.imm, 16, 5)
+                                       | ENCODE (rd.num, 5, 0));
     }
   else
     return emit_add (buf, rd, operand.reg, immediate_operand (0));
@@ -1487,12 +1467,13 @@ emit_mov (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_movk (uint32_t *buf, struct aarch64_register rd, uint32_t imm,
-	   unsigned shift)
+           unsigned shift)
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
-  return aarch64_emit_insn (buf, MOVK | size | ENCODE (shift, 2, 21) |
-			    ENCODE (imm, 16, 5) | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, MOVK | size | ENCODE (shift, 2, 21)
+                                   | ENCODE (imm, 16, 5)
+                                   | ENCODE (rd.num, 5, 0));
 }
 
 /* Write instructions into *BUF in order to move ADDR into a register.
@@ -1541,7 +1522,7 @@ emit_mov_addr (uint32_t *buf, struct aarch64_register rd, CORE_ADDR addr)
 
 static int
 emit_subs (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, struct aarch64_operand operand)
+           struct aarch64_register rn, struct aarch64_operand operand)
 {
   return emit_data_processing (buf, SUBS, rd, rn, operand);
 }
@@ -1556,7 +1537,7 @@ emit_subs (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_cmp (uint32_t *buf, struct aarch64_register rn,
-	      struct aarch64_operand operand)
+          struct aarch64_operand operand)
 {
   return emit_subs (buf, xzr, rn, operand);
 }
@@ -1570,7 +1551,7 @@ emit_cmp (uint32_t *buf, struct aarch64_register rn,
 
 static int
 emit_and (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rn, struct aarch64_register rm)
+          struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, AND, rd, rn, rm);
 }
@@ -1584,7 +1565,7 @@ emit_and (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_orr (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rn, struct aarch64_register rm)
+          struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, ORR, rd, rn, rm);
 }
@@ -1598,7 +1579,7 @@ emit_orr (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_orn (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rn, struct aarch64_register rm)
+          struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, ORN, rd, rn, rm);
 }
@@ -1612,7 +1593,7 @@ emit_orn (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_eor (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rn, struct aarch64_register rm)
+          struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, EOR, rd, rn, rm);
 }
@@ -1628,7 +1609,7 @@ emit_eor (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_mvn (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rm)
+          struct aarch64_register rm)
 {
   return emit_orn (buf, rd, xzr, rm);
 }
@@ -1642,7 +1623,7 @@ emit_mvn (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_lslv (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, struct aarch64_register rm)
+           struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, LSLV, rd, rn, rm);
 }
@@ -1656,7 +1637,7 @@ emit_lslv (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_lsrv (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, struct aarch64_register rm)
+           struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, LSRV, rd, rn, rm);
 }
@@ -1670,7 +1651,7 @@ emit_lsrv (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_asrv (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, struct aarch64_register rm)
+           struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, ASRV, rd, rn, rm);
 }
@@ -1684,7 +1665,7 @@ emit_asrv (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_mul (uint32_t *buf, struct aarch64_register rd,
-	  struct aarch64_register rn, struct aarch64_register rm)
+          struct aarch64_register rn, struct aarch64_register rm)
 {
   return emit_data_processing_reg (buf, MUL, rd, rn, rm);
 }
@@ -1698,10 +1679,10 @@ emit_mul (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_mrs (uint32_t *buf, struct aarch64_register rt,
-	  enum aarch64_system_control_registers system_reg)
+          enum aarch64_system_control_registers system_reg)
 {
   return aarch64_emit_insn (buf, MRS | ENCODE (system_reg, 15, 5)
-			    | ENCODE (rt.num, 5, 0));
+                                   | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a MSR instruction into *BUF.  The register size is 64-bit.
@@ -1713,10 +1694,10 @@ emit_mrs (uint32_t *buf, struct aarch64_register rt,
 
 static int
 emit_msr (uint32_t *buf, enum aarch64_system_control_registers system_reg,
-	  struct aarch64_register rt)
+          struct aarch64_register rt)
 {
   return aarch64_emit_insn (buf, MSR | ENCODE (system_reg, 15, 5)
-			    | ENCODE (rt.num, 5, 0));
+                                   | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a SEVL instruction into *BUF.
@@ -1753,14 +1734,15 @@ emit_wfe (uint32_t *buf)
 
 static int
 emit_sbfm (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, uint32_t immr, uint32_t imms)
+           struct aarch64_register rn, uint32_t immr, uint32_t imms)
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
   uint32_t n = ENCODE (rd.is64, 1, 22);
 
   return aarch64_emit_insn (buf, SBFM | size | n | ENCODE (immr, 6, 16)
-			    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
-			    | ENCODE (rd.num, 5, 0));
+                                   | ENCODE (imms, 6, 10)
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a SBFX instruction into *BUF.
@@ -1779,7 +1761,7 @@ emit_sbfm (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_sbfx (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, uint32_t lsb, uint32_t width)
+           struct aarch64_register rn, uint32_t lsb, uint32_t width)
 {
   return emit_sbfm (buf, rd, rn, lsb, lsb + width - 1);
 }
@@ -1798,14 +1780,15 @@ emit_sbfx (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_ubfm (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, uint32_t immr, uint32_t imms)
+           struct aarch64_register rn, uint32_t immr, uint32_t imms)
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
   uint32_t n = ENCODE (rd.is64, 1, 22);
 
   return aarch64_emit_insn (buf, UBFM | size | n | ENCODE (immr, 6, 16)
-			    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
-			    | ENCODE (rd.num, 5, 0));
+                                   | ENCODE (imms, 6, 10)
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a UBFX instruction into *BUF.
@@ -1824,7 +1807,7 @@ emit_ubfm (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_ubfx (uint32_t *buf, struct aarch64_register rd,
-	   struct aarch64_register rn, uint32_t lsb, uint32_t width)
+           struct aarch64_register rn, uint32_t lsb, uint32_t width)
 {
   return emit_ubfm (buf, rd, rn, lsb, lsb + width - 1);
 }
@@ -1842,14 +1825,15 @@ emit_ubfx (uint32_t *buf, struct aarch64_register rd,
 
 static int
 emit_csinc (uint32_t *buf, struct aarch64_register rd,
-	    struct aarch64_register rn, struct aarch64_register rm,
-	    unsigned cond)
+            struct aarch64_register rn, struct aarch64_register rm,
+            unsigned cond)
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
   return aarch64_emit_insn (buf, CSINC | size | ENCODE (rm.num, 5, 16)
-			    | ENCODE (cond, 4, 12) | ENCODE (rn.num, 5, 5)
-			    | ENCODE (rd.num, 5, 0));
+                                   | ENCODE (cond, 4, 12)
+                                   | ENCODE (rn.num, 5, 5)
+                                   | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a CSET instruction into *BUF.
@@ -1919,7 +1903,7 @@ struct aarch64_insn_relocation_data
 
 static void
 aarch64_ftrace_insn_reloc_b (const int is_bl, const int32_t offset,
-			     struct aarch64_insn_data *data)
+                             struct aarch64_insn_data *data)
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
@@ -1934,7 +1918,7 @@ aarch64_ftrace_insn_reloc_b (const int is_bl, const int32_t offset,
 
 static void
 aarch64_ftrace_insn_reloc_b_cond (const unsigned cond, const int32_t offset,
-				  struct aarch64_insn_data *data)
+                                  struct aarch64_insn_data *data)
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
@@ -1943,8 +1927,8 @@ aarch64_ftrace_insn_reloc_b_cond (const unsigned cond, const int32_t offset,
 
   if (can_encode_int32 (new_offset, 21))
     {
-      insn_reloc->insn_ptr += emit_bcond (insn_reloc->insn_ptr, cond,
-					  new_offset);
+      insn_reloc->insn_ptr
+        += emit_bcond (insn_reloc->insn_ptr, cond, new_offset);
     }
   else if (can_encode_int32 (new_offset, 28))
     {
@@ -1970,8 +1954,8 @@ aarch64_ftrace_insn_reloc_b_cond (const unsigned cond, const int32_t offset,
 
 static void
 aarch64_ftrace_insn_reloc_cb (const int32_t offset, const int is_cbnz,
-			      const unsigned rn, int is64,
-			      struct aarch64_insn_data *data)
+                              const unsigned rn, int is64,
+                              struct aarch64_insn_data *data)
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
@@ -1980,8 +1964,9 @@ aarch64_ftrace_insn_reloc_cb (const int32_t offset, const int is_cbnz,
 
   if (can_encode_int32 (new_offset, 21))
     {
-      insn_reloc->insn_ptr += emit_cb (insn_reloc->insn_ptr, is_cbnz,
-				       aarch64_register (rn, is64), new_offset);
+      insn_reloc->insn_ptr
+        += emit_cb (insn_reloc->insn_ptr, is_cbnz, aarch64_register (rn, is64),
+                    new_offset);
     }
   else if (can_encode_int32 (new_offset, 28))
     {
@@ -1997,7 +1982,7 @@ aarch64_ftrace_insn_reloc_cb (const int32_t offset, const int is_cbnz,
 
       */
       insn_reloc->insn_ptr += emit_cb (insn_reloc->insn_ptr, is_cbnz,
-				       aarch64_register (rn, is64), 8);
+                                       aarch64_register (rn, is64), 8);
       insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
       insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, new_offset - 8);
     }
@@ -2007,8 +1992,8 @@ aarch64_ftrace_insn_reloc_cb (const int32_t offset, const int is_cbnz,
 
 static void
 aarch64_ftrace_insn_reloc_tb (const int32_t offset, int is_tbnz,
-			      const unsigned rt, unsigned bit,
-			      struct aarch64_insn_data *data)
+                              const unsigned rt, unsigned bit,
+                              struct aarch64_insn_data *data)
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
@@ -2018,7 +2003,7 @@ aarch64_ftrace_insn_reloc_tb (const int32_t offset, int is_tbnz,
   if (can_encode_int32 (new_offset, 16))
     {
       insn_reloc->insn_ptr += emit_tb (insn_reloc->insn_ptr, is_tbnz, bit,
-				       aarch64_register (rt, 1), new_offset);
+                                       aarch64_register (rt, 1), new_offset);
     }
   else if (can_encode_int32 (new_offset, 28))
     {
@@ -2034,10 +2019,9 @@ aarch64_ftrace_insn_reloc_tb (const int32_t offset, int is_tbnz,
 
       */
       insn_reloc->insn_ptr += emit_tb (insn_reloc->insn_ptr, is_tbnz, bit,
-				       aarch64_register (rt, 1), 8);
+                                       aarch64_register (rt, 1), 8);
       insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
-      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0,
-				      new_offset - 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, new_offset - 8);
     }
 }
 
@@ -2045,8 +2029,8 @@ aarch64_ftrace_insn_reloc_tb (const int32_t offset, int is_tbnz,
 
 static void
 aarch64_ftrace_insn_reloc_adr (const int32_t offset, const unsigned rd,
-			       const int is_adrp,
-			       struct aarch64_insn_data *data)
+                               const int is_adrp,
+                               struct aarch64_insn_data *data)
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
@@ -2057,28 +2041,28 @@ aarch64_ftrace_insn_reloc_adr (const int32_t offset, const unsigned rd,
   if (is_adrp)
     {
       /* Clear the lower 12 bits of the offset to get the 4K page.  */
-      insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
-					     aarch64_register (rd, 1),
-					     address & ~0xfff);
+      insn_reloc->insn_ptr
+        += emit_mov_addr (insn_reloc->insn_ptr, aarch64_register (rd, 1),
+                          address & ~0xfff);
     }
   else
     insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
-					   aarch64_register (rd, 1), address);
+                                           aarch64_register (rd, 1), address);
 }
 
 /* Implementation of aarch64_insn_visitor method "ldr_literal".  */
 
 static void
 aarch64_ftrace_insn_reloc_ldr_literal (const int32_t offset, const int is_sw,
-				       const unsigned rt, const int is64,
-				       struct aarch64_insn_data *data)
+                                       const unsigned rt, const int is64,
+                                       struct aarch64_insn_data *data)
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
   CORE_ADDR address = data->insn_addr + offset;
 
-  insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
-					 aarch64_register (rt, 1), address);
+  insn_reloc->insn_ptr
+    += emit_mov_addr (insn_reloc->insn_ptr, aarch64_register (rt, 1), address);
 
   /* We know exactly what address to load from, and what register we
      can use:
@@ -2092,22 +2076,20 @@ aarch64_ftrace_insn_reloc_ldr_literal (const int32_t offset, const int is_sw,
   */
 
   if (is_sw)
-    insn_reloc->insn_ptr += emit_ldrsw (insn_reloc->insn_ptr,
-					aarch64_register (rt, 1),
-					aarch64_register (rt, 1),
-					offset_memory_operand (0));
+    insn_reloc->insn_ptr
+      += emit_ldrsw (insn_reloc->insn_ptr, aarch64_register (rt, 1),
+                     aarch64_register (rt, 1), offset_memory_operand (0));
   else
-    insn_reloc->insn_ptr += emit_ldr (insn_reloc->insn_ptr,
-				      aarch64_register (rt, is64),
-				      aarch64_register (rt, 1),
-				      offset_memory_operand (0));
+    insn_reloc->insn_ptr
+      += emit_ldr (insn_reloc->insn_ptr, aarch64_register (rt, is64),
+                   aarch64_register (rt, 1), offset_memory_operand (0));
 }
 
 /* Implementation of aarch64_insn_visitor method "others".  */
 
 static void
 aarch64_ftrace_insn_reloc_others (const uint32_t insn,
-				  struct aarch64_insn_data *data)
+                                  struct aarch64_insn_data *data)
 {
   struct aarch64_insn_relocation_data *insn_reloc
     = (struct aarch64_insn_relocation_data *) data;
@@ -2117,14 +2099,10 @@ aarch64_ftrace_insn_reloc_others (const uint32_t insn,
   insn_reloc->insn_ptr += aarch64_emit_insn (insn_reloc->insn_ptr, insn);
 }
 
-static const struct aarch64_insn_visitor visitor =
-{
-  aarch64_ftrace_insn_reloc_b,
-  aarch64_ftrace_insn_reloc_b_cond,
-  aarch64_ftrace_insn_reloc_cb,
-  aarch64_ftrace_insn_reloc_tb,
-  aarch64_ftrace_insn_reloc_adr,
-  aarch64_ftrace_insn_reloc_ldr_literal,
+static const struct aarch64_insn_visitor visitor = {
+  aarch64_ftrace_insn_reloc_b,      aarch64_ftrace_insn_reloc_b_cond,
+  aarch64_ftrace_insn_reloc_cb,     aarch64_ftrace_insn_reloc_tb,
+  aarch64_ftrace_insn_reloc_adr,    aarch64_ftrace_insn_reloc_ldr_literal,
   aarch64_ftrace_insn_reloc_others,
 };
 
@@ -2138,13 +2116,12 @@ aarch64_target::supports_fast_tracepoints ()
    "install_fast_tracepoint_jump_pad".  */
 
 int
-aarch64_target::install_fast_tracepoint_jump_pad
-  (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
-   CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
-   CORE_ADDR *trampoline, ULONGEST *trampoline_size,
-   unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
-   CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
-   char *err)
+aarch64_target::install_fast_tracepoint_jump_pad (
+  CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector, CORE_ADDR lockaddr,
+  ULONGEST orig_size, CORE_ADDR *jump_entry, CORE_ADDR *trampoline,
+  ULONGEST *trampoline_size, unsigned char *jjump_pad_insn,
+  ULONGEST *jjump_pad_insn_size, CORE_ADDR *adjusted_insn_addr,
+  CORE_ADDR *adjusted_insn_addr_end, char *err)
 {
   uint32_t buf[256];
   uint32_t *p = buf;
@@ -2229,7 +2206,7 @@ aarch64_target::install_fast_tracepoint_jump_pad
   p += emit_sub (p, sp, sp, immediate_operand (31 * 16));
   for (i = 30; i >= 0; i -= 1)
     p += emit_str (p, aarch64_register (i, 1), sp,
-		   offset_memory_operand (i * 16));
+                   offset_memory_operand (i * 16));
 
   /* Make space for 5 more cells.
 
@@ -2237,7 +2214,6 @@ aarch64_target::install_fast_tracepoint_jump_pad
 
      */
   p += emit_sub (p, sp, sp, immediate_operand (5 * 16));
-
 
   /* Save SP:
 
@@ -2433,7 +2409,7 @@ aarch64_target::install_fast_tracepoint_jump_pad
      */
   for (i = 0; i <= 30; i += 1)
     p += emit_ldr (p, aarch64_register (i, 1), sp,
-		   offset_memory_operand (i * 16));
+                   offset_memory_operand (i * 16));
   p += emit_add (p, sp, sp, immediate_operand (31 * 16));
 
   /* Pop SIMD&FP registers:
@@ -2461,15 +2437,14 @@ aarch64_target::install_fast_tracepoint_jump_pad
   insn_data.insn_ptr = buf;
 
   aarch64_relocate_instruction (insn, &visitor,
-				(struct aarch64_insn_data *) &insn_data);
+                                (struct aarch64_insn_data *) &insn_data);
 
   /* We may not have been able to relocate the instruction.  */
   if (insn_data.insn_ptr == buf)
     {
-      sprintf (err,
-	       "E.Could not relocate instruction from %s to %s.",
-	       core_addr_to_string_nz (tpaddr),
-	       core_addr_to_string_nz (buildaddr));
+      sprintf (err, "E.Could not relocate instruction from %s to %s.",
+               core_addr_to_string_nz (tpaddr),
+               core_addr_to_string_nz (buildaddr));
       return 1;
     }
   else
@@ -2484,9 +2459,9 @@ aarch64_target::install_fast_tracepoint_jump_pad
   if (!can_encode_int32 (offset, 28))
     {
       sprintf (err,
-	       "E.Jump back from jump pad too far from tracepoint "
-	       "(offset 0x%" PRIx64 " cannot be encoded in 28 bits).",
-	       offset);
+               "E.Jump back from jump pad too far from tracepoint "
+               "(offset 0x%" PRIx64 " cannot be encoded in 28 bits).",
+               offset);
       return 1;
     }
 
@@ -2498,9 +2473,9 @@ aarch64_target::install_fast_tracepoint_jump_pad
   if (!can_encode_int32 (offset, 28))
     {
       sprintf (err,
-	       "E.Jump pad too far from tracepoint "
-	       "(offset 0x%" PRIx64 " cannot be encoded in 28 bits).",
-	       offset);
+               "E.Jump pad too far from tracepoint "
+               "(offset 0x%" PRIx64 " cannot be encoded in 28 bits).",
+               offset);
       return 1;
     }
 
@@ -2521,8 +2496,8 @@ emit_ops_insns (const uint32_t *start, int len)
 {
   CORE_ADDR buildaddr = current_insn_ptr;
 
-  threads_debug_printf ("Adding %d instrucions at %s",
-			len, paddress (buildaddr));
+  threads_debug_printf ("Adding %d instrucions at %s", len,
+                        paddress (buildaddr));
 
   append_insns (&buildaddr, len, start);
   current_insn_ptr = buildaddr;
@@ -2585,7 +2560,6 @@ aarch64_emit_prologue (void)
   p += emit_str (p, fp, sp, offset_memory_operand (2 * 8));
 
   p += emit_add (p, fp, sp, immediate_operand (2 * 8));
-
 
   emit_ops_insns (buf, p - buf);
 }
@@ -3203,44 +3177,25 @@ aarch64_emit_ge_got (int *offset_p, int *size_p)
   emit_ops_insns (buf, p - buf);
 }
 
-static struct emit_ops aarch64_emit_ops_impl =
-{
-  aarch64_emit_prologue,
-  aarch64_emit_epilogue,
-  aarch64_emit_add,
-  aarch64_emit_sub,
-  aarch64_emit_mul,
-  aarch64_emit_lsh,
-  aarch64_emit_rsh_signed,
-  aarch64_emit_rsh_unsigned,
-  aarch64_emit_ext,
-  aarch64_emit_log_not,
-  aarch64_emit_bit_and,
-  aarch64_emit_bit_or,
-  aarch64_emit_bit_xor,
-  aarch64_emit_bit_not,
-  aarch64_emit_equal,
-  aarch64_emit_less_signed,
-  aarch64_emit_less_unsigned,
-  aarch64_emit_ref,
-  aarch64_emit_if_goto,
-  aarch64_emit_goto,
-  aarch64_write_goto_address,
-  aarch64_emit_const,
-  aarch64_emit_call,
-  aarch64_emit_reg,
-  aarch64_emit_pop,
-  aarch64_emit_stack_flush,
-  aarch64_emit_zero_ext,
-  aarch64_emit_swap,
-  aarch64_emit_stack_adjust,
-  aarch64_emit_int_call_1,
-  aarch64_emit_void_call_2,
-  aarch64_emit_eq_goto,
-  aarch64_emit_ne_goto,
-  aarch64_emit_lt_goto,
-  aarch64_emit_le_goto,
-  aarch64_emit_gt_goto,
+static struct emit_ops aarch64_emit_ops_impl = {
+  aarch64_emit_prologue,      aarch64_emit_epilogue,
+  aarch64_emit_add,           aarch64_emit_sub,
+  aarch64_emit_mul,           aarch64_emit_lsh,
+  aarch64_emit_rsh_signed,    aarch64_emit_rsh_unsigned,
+  aarch64_emit_ext,           aarch64_emit_log_not,
+  aarch64_emit_bit_and,       aarch64_emit_bit_or,
+  aarch64_emit_bit_xor,       aarch64_emit_bit_not,
+  aarch64_emit_equal,         aarch64_emit_less_signed,
+  aarch64_emit_less_unsigned, aarch64_emit_ref,
+  aarch64_emit_if_goto,       aarch64_emit_goto,
+  aarch64_write_goto_address, aarch64_emit_const,
+  aarch64_emit_call,          aarch64_emit_reg,
+  aarch64_emit_pop,           aarch64_emit_stack_flush,
+  aarch64_emit_zero_ext,      aarch64_emit_swap,
+  aarch64_emit_stack_adjust,  aarch64_emit_int_call_1,
+  aarch64_emit_void_call_2,   aarch64_emit_eq_goto,
+  aarch64_emit_ne_goto,       aarch64_emit_lt_goto,
+  aarch64_emit_le_goto,       aarch64_emit_gt_goto,
   aarch64_emit_ge_got,
 };
 
@@ -3328,13 +3283,13 @@ aarch64_target::supports_memory_tagging ()
 
 bool
 aarch64_target::fetch_memtags (CORE_ADDR address, size_t len,
-			       gdb::byte_vector &tags, int type)
+                               gdb::byte_vector &tags, int type)
 {
   /* Allocation tags are per-process, so any tid is fine.  */
   int tid = lwpid_of (current_thread);
 
   /* Allocation tag?  */
-  if (type == static_cast <int> (aarch64_memtag_type::mte_allocation))
+  if (type == static_cast<int> (aarch64_memtag_type::mte_allocation))
     return aarch64_mte_fetch_memtags (tid, address, len, tags);
 
   return false;
@@ -3342,13 +3297,13 @@ aarch64_target::fetch_memtags (CORE_ADDR address, size_t len,
 
 bool
 aarch64_target::store_memtags (CORE_ADDR address, size_t len,
-			       const gdb::byte_vector &tags, int type)
+                               const gdb::byte_vector &tags, int type)
 {
   /* Allocation tags are per-process, so any tid is fine.  */
   int tid = lwpid_of (current_thread);
 
   /* Allocation tag?  */
-  if (type == static_cast <int> (aarch64_memtag_type::mte_allocation))
+  if (type == static_cast<int> (aarch64_memtag_type::mte_allocation))
     return aarch64_mte_store_memtags (tid, address, len, tags);
 
   return false;

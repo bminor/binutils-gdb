@@ -35,25 +35,25 @@ struct regcache;
    these values are "real" register numbers, and correspond to the
    general registers of the machine.  */
 
-#define ALPHA_V0_REGNUM	     0  /* Function integer return value */
-#define ALPHA_T7_REGNUM	     8  /* Return address register for OSF/1 __add* */
-#define ALPHA_S0_REGNUM      9	/* First saved register */
-#define ALPHA_GCC_FP_REGNUM 15  /* Used by gcc as frame register */
-#define ALPHA_A0_REGNUM     16  /* Loc of first arg during a subr call */
-#define ALPHA_T9_REGNUM     23  /* Return address register for OSF/1 __div* */
-#define ALPHA_RA_REGNUM     26  /* Contains return address value */
-#define ALPHA_T12_REGNUM    27  /* Contains start addr of current proc */
-#define ALPHA_GP_REGNUM     29  /* Contains the global pointer */
-#define ALPHA_SP_REGNUM     30  /* Contains address of top of stack */
-#define ALPHA_ZERO_REGNUM   31  /* Read-only register, always 0 */
-#define ALPHA_FP0_REGNUM    32  /* Floating point register 0 */
-#define ALPHA_FPA0_REGNUM   48  /* First float arg during a subr call */
-#define ALPHA_FPCR_REGNUM   63  /* Floating point control register */
-#define ALPHA_PC_REGNUM     64  /* Contains program counter */
-#define ALPHA_UNIQUE_REGNUM 66	/* PAL_rduniq value */
+#define ALPHA_V0_REGNUM 0      /* Function integer return value */
+#define ALPHA_T7_REGNUM 8      /* Return address register for OSF/1 __add* */
+#define ALPHA_S0_REGNUM 9      /* First saved register */
+#define ALPHA_GCC_FP_REGNUM 15 /* Used by gcc as frame register */
+#define ALPHA_A0_REGNUM 16     /* Loc of first arg during a subr call */
+#define ALPHA_T9_REGNUM 23     /* Return address register for OSF/1 __div* */
+#define ALPHA_RA_REGNUM 26     /* Contains return address value */
+#define ALPHA_T12_REGNUM 27    /* Contains start addr of current proc */
+#define ALPHA_GP_REGNUM 29     /* Contains the global pointer */
+#define ALPHA_SP_REGNUM 30     /* Contains address of top of stack */
+#define ALPHA_ZERO_REGNUM 31   /* Read-only register, always 0 */
+#define ALPHA_FP0_REGNUM 32    /* Floating point register 0 */
+#define ALPHA_FPA0_REGNUM 48   /* First float arg during a subr call */
+#define ALPHA_FPCR_REGNUM 63   /* Floating point control register */
+#define ALPHA_PC_REGNUM 64     /* Contains program counter */
+#define ALPHA_UNIQUE_REGNUM 66 /* PAL_rduniq value */
 
 /* Instruction size.  */
-#define ALPHA_INSN_SIZE	4
+#define ALPHA_INSN_SIZE 4
 
 /* The alpha has two different virtual pointers for arguments and locals.
    
@@ -67,12 +67,12 @@ struct regcache;
    
    The virtual local pointer is localoff bytes below the virtual frame
    pointer, the value of localoff is obtained from the PDR.  */
-#define ALPHA_NUM_ARG_REGS   6
+#define ALPHA_NUM_ARG_REGS 6
 
 /* Target-dependent structure in gdbarch.  */
 struct alpha_gdbarch_tdep : gdbarch_tdep_base
 {
-  CORE_ADDR vm_min_address = 0;	/* Used by alpha_heuristic_proc_start.  */
+  CORE_ADDR vm_min_address = 0; /* Used by alpha_heuristic_proc_start.  */
 
   /* If PC is inside a dynamically-generated signal trampoline function
      (i.e. one copied onto the user stack at run-time), return how many
@@ -88,7 +88,8 @@ struct alpha_gdbarch_tdep : gdbarch_tdep_base
      look at tramp-frame.h and other simpler per-architecture
      sigtramp unwinders.  */
   int (*pc_in_sigtramp) (struct gdbarch *gdbarch, CORE_ADDR pc,
-			 const char *name) = nullptr;
+			 const char *name)
+    = nullptr;
 
   /* If TYPE will be returned in memory, return true.  */
   int (*return_in_memory) (struct type *type) = nullptr;
@@ -98,15 +99,15 @@ struct alpha_gdbarch_tdep : gdbarch_tdep_base
   int sc_regs_offset = 0;
   int sc_fpregs_offset = 0;
 
-  int jb_pc = 0;			/* Offset to PC value in jump buffer.
+  int jb_pc = 0;	  /* Offset to PC value in jump buffer.
 				   If htis is negative, longjmp support
 				   will be disabled.  */
-  size_t jb_elt_size = 0;		/* And the size of each entry in the buf.  */
+  size_t jb_elt_size = 0; /* And the size of each entry in the buf.  */
 };
 
 extern unsigned int alpha_read_insn (struct gdbarch *gdbarch, CORE_ADDR pc);
-extern std::vector<CORE_ADDR> alpha_software_single_step
-  (struct regcache *regcache);
+extern std::vector<CORE_ADDR>
+alpha_software_single_step (struct regcache *regcache);
 extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
 
 extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);
@@ -114,11 +115,10 @@ extern void alpha_dwarf2_init_abi (struct gdbarch_info, struct gdbarch *);
 
 extern void alpha_supply_int_regs (struct regcache *, int, const void *,
 				   const void *, const void *);
-extern void alpha_fill_int_regs (const struct regcache *, int,
-				 void *, void *, void *);
-extern void alpha_supply_fp_regs (struct regcache *, int,
-				  const void *, const void *);
-extern void alpha_fill_fp_regs (const struct regcache *,
-				int, void *, void *);
+extern void alpha_fill_int_regs (const struct regcache *, int, void *, void *,
+				 void *);
+extern void alpha_supply_fp_regs (struct regcache *, int, const void *,
+				  const void *);
+extern void alpha_fill_fp_regs (const struct regcache *, int, void *, void *);
 
 #endif /* ALPHA_TDEP_H */

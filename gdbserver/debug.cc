@@ -19,7 +19,7 @@
 #include "server.h"
 #include <chrono>
 
-#if !defined (IN_PROCESS_AGENT)
+#if !defined(IN_PROCESS_AGENT)
 bool remote_debug = false;
 #endif
 
@@ -32,7 +32,7 @@ bool debug_threads;
 /* Include timestamps in debugging output.  */
 int debug_timestamp;
 
-#if !defined (IN_PROCESS_AGENT)
+#if !defined(IN_PROCESS_AGENT)
 
 /* See debug.h.  */
 
@@ -55,7 +55,7 @@ debug_set_output (const char *new_debug_file)
   if (fptr == nullptr)
     {
       debug_printf ("Cannot open %s for writing. %s. Switching to stderr.\n",
-		    new_debug_file, safe_strerror (errno));
+                    new_debug_file, safe_strerror (errno));
       return;
     }
 
@@ -76,7 +76,7 @@ int debug_print_depth = 0;
 void
 debug_vprintf (const char *format, va_list ap)
 {
-#if !defined (IN_PROCESS_AGENT)
+#if !defined(IN_PROCESS_AGENT)
   /* N.B. Not thread safe, and can't be used, as is, with IPA.  */
   static int new_line = 1;
 
@@ -86,15 +86,17 @@ debug_vprintf (const char *format, va_list ap)
 
       steady_clock::time_point now = steady_clock::now ();
       seconds s = duration_cast<seconds> (now.time_since_epoch ());
-      microseconds us = duration_cast<microseconds> (now.time_since_epoch ()) - s;
+      microseconds us
+        = duration_cast<microseconds> (now.time_since_epoch ()) - s;
 
-      fprintf (debug_file, "%ld.%06ld ", (long) s.count (), (long) us.count ());
+      fprintf (debug_file, "%ld.%06ld ", (long) s.count (),
+               (long) us.count ());
     }
 #endif
 
   vfprintf (debug_file, format, ap);
 
-#if !defined (IN_PROCESS_AGENT)
+#if !defined(IN_PROCESS_AGENT)
   if (*format)
     new_line = format[strlen (format) - 1] == '\n';
 #endif

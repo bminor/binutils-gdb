@@ -79,9 +79,8 @@ dicos_load_module_p (bfd *abfd, int header_size)
   storage_needed = bfd_get_symtab_upper_bound (abfd);
   if (storage_needed < 0)
     {
-      warning (_("Can't read elf symbols from %s: %s"),
-	       bfd_get_filename (abfd),
-	       bfd_errmsg (bfd_get_error ()));
+      warning (_ ("Can't read elf symbols from %s: %s"),
+	       bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
       return 0;
     }
 
@@ -93,16 +92,14 @@ dicos_load_module_p (bfd *abfd, int header_size)
       symcount = bfd_canonicalize_symtab (abfd, symbol_table);
 
       if (symcount < 0)
-	warning (_("Can't read elf symbols from %s: %s"),
-		 bfd_get_filename (abfd),
-		 bfd_errmsg (bfd_get_error ()));
+	warning (_ ("Can't read elf symbols from %s: %s"),
+		 bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
       else
 	{
 	  for (i = 0; i < symcount; i++)
 	    {
 	      asymbol *sym = symbol_table[i];
-	      if (sym->name != NULL
-		  && symname[0] == sym->name[0]
+	      if (sym->name != NULL && symname[0] == sym->name[0]
 		  && strcmp (symname + 1, sym->name + 1) == 0)
 		{
 		  ret = 1;

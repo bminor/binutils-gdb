@@ -65,15 +65,15 @@ decimal2str (const char *sign, ULONGEST addr, int width)
       xsnprintf (str, PRINT_CELL_SIZE, "%s%0*lu", sign, width, temp[0]);
       break;
     case 2:
-      xsnprintf (str, PRINT_CELL_SIZE, "%s%0*lu%09lu", sign, width,
-		 temp[1], temp[0]);
+      xsnprintf (str, PRINT_CELL_SIZE, "%s%0*lu%09lu", sign, width, temp[1],
+                 temp[0]);
       break;
     case 3:
       xsnprintf (str, PRINT_CELL_SIZE, "%s%0*lu%09lu%09lu", sign, width,
-		 temp[2], temp[1], temp[0]);
+                 temp[2], temp[1], temp[0]);
       break;
     default:
-      internal_error (_("failed internal consistency check"));
+      internal_error (_ ("failed internal consistency check"));
     }
 
   return str;
@@ -103,19 +103,20 @@ octal2str (ULONGEST addr, int width)
     {
     case 1:
       if (temp[0] == 0)
-	xsnprintf (str, PRINT_CELL_SIZE, "%*o", width, 0);
+        xsnprintf (str, PRINT_CELL_SIZE, "%*o", width, 0);
       else
-	xsnprintf (str, PRINT_CELL_SIZE, "0%0*lo", width, temp[0]);
+        xsnprintf (str, PRINT_CELL_SIZE, "0%0*lo", width, temp[0]);
       break;
     case 2:
-      xsnprintf (str, PRINT_CELL_SIZE, "0%0*lo%010lo", width, temp[1], temp[0]);
+      xsnprintf (str, PRINT_CELL_SIZE, "0%0*lo%010lo", width, temp[1],
+                 temp[0]);
       break;
     case 3:
-      xsnprintf (str, PRINT_CELL_SIZE, "0%0*lo%010lo%010lo", width,
-		 temp[2], temp[1], temp[0]);
+      xsnprintf (str, PRINT_CELL_SIZE, "0%0*lo%010lo%010lo", width, temp[2],
+                 temp[1], temp[0]);
       break;
     default:
-      internal_error (_("failed internal consistency check"));
+      internal_error (_ ("failed internal consistency check"));
     }
 
   return str;
@@ -155,8 +156,8 @@ phex (ULONGEST l, int sizeof_l)
     case 8:
       str = get_print_cell ();
       xsnprintf (str, PRINT_CELL_SIZE, "%08lx%08lx",
-		 (unsigned long) (l >> thirty_two),
-		 (unsigned long) (l & 0xffffffff));
+                 (unsigned long) (l >> thirty_two),
+                 (unsigned long) (l & 0xffffffff));
       break;
     case 4:
       str = get_print_cell ();
@@ -189,16 +190,16 @@ phex_nz (ULONGEST l, int sizeof_l)
     {
     case 8:
       {
-	unsigned long high = (unsigned long) (l >> thirty_two);
+        unsigned long high = (unsigned long) (l >> thirty_two);
 
-	str = get_print_cell ();
-	if (high == 0)
-	  xsnprintf (str, PRINT_CELL_SIZE, "%lx",
-		     (unsigned long) (l & 0xffffffff));
-	else
-	  xsnprintf (str, PRINT_CELL_SIZE, "%lx%08lx", high,
-		     (unsigned long) (l & 0xffffffff));
-	break;
+        str = get_print_cell ();
+        if (high == 0)
+          xsnprintf (str, PRINT_CELL_SIZE, "%lx",
+                     (unsigned long) (l & 0xffffffff));
+        else
+          xsnprintf (str, PRINT_CELL_SIZE, "%lx%08lx", high,
+                     (unsigned long) (l & 0xffffffff));
+        break;
       }
     case 4:
       str = get_print_cell ();
@@ -244,7 +245,7 @@ hex_string_custom (LONGEST num, int width)
   if (hex_len > width)
     width = hex_len;
   if (width + 2 >= PRINT_CELL_SIZE)
-    internal_error (_("\
+    internal_error (_ ("\
 hex_string_custom: insufficient space to store result"));
 
   strcpy (result_end - width - 2, "0x");
@@ -256,45 +257,44 @@ hex_string_custom: insufficient space to store result"));
 /* See print-utils.h.  */
 
 char *
-int_string (LONGEST val, int radix, int is_signed, int width,
-	    int use_c_format)
+int_string (LONGEST val, int radix, int is_signed, int width, int use_c_format)
 {
   switch (radix)
     {
     case 16:
       {
-	char *result;
+        char *result;
 
-	if (width == 0)
-	  result = hex_string (val);
-	else
-	  result = hex_string_custom (val, width);
-	if (! use_c_format)
-	  result += 2;
-	return result;
+        if (width == 0)
+          result = hex_string (val);
+        else
+          result = hex_string_custom (val, width);
+        if (!use_c_format)
+          result += 2;
+        return result;
       }
     case 10:
       {
-	if (is_signed && val < 0)
-	  /* Cast to unsigned before negating, to prevent runtime error:
+        if (is_signed && val < 0)
+          /* Cast to unsigned before negating, to prevent runtime error:
 	     negation of -9223372036854775808 cannot be represented in type
 	     'long int'; cast to an unsigned type to negate this value to
 	     itself.  */
-	  return decimal2str ("-", -(ULONGEST)val, width);
-	else
-	  return decimal2str ("", val, width);
+          return decimal2str ("-", -(ULONGEST) val, width);
+        else
+          return decimal2str ("", val, width);
       }
     case 8:
       {
-	char *result = octal2str (val, width);
+        char *result = octal2str (val, width);
 
-	if (use_c_format || val == 0)
-	  return result;
-	else
-	  return result + 1;
+        if (use_c_format || val == 0)
+          return result;
+        else
+          return result + 1;
       }
     default:
-      internal_error (_("failed internal consistency check"));
+      internal_error (_ ("failed internal consistency check"));
     }
 }
 
@@ -330,6 +330,6 @@ host_address_to_string_1 (const void *addr)
   char *str = get_print_cell ();
 
   xsnprintf (str, PRINT_CELL_SIZE, "0x%s",
-	     phex_nz ((uintptr_t) addr, sizeof (addr)));
+             phex_nz ((uintptr_t) addr, sizeof (addr)));
   return str;
 }

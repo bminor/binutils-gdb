@@ -43,6 +43,7 @@
 class any_static_probe_ops : public static_probe_ops
 {
 public:
+
   /* See probe.h.  */
   bool is_linespec (const char **linespecp) const override;
 
@@ -54,8 +55,8 @@ public:
   const char *type_name () const override;
 
   /* See probe.h.  */
-  std::vector<struct info_probe_column> gen_info_probes_table_header
-    () const override;
+  std::vector<struct info_probe_column>
+  gen_info_probes_table_header () const override;
 };
 
 /* Static operations associated with a generic probe.  */
@@ -68,10 +69,8 @@ const any_static_probe_ops any_static_probe_ops {};
 static void
 parse_probes_in_pspace (const static_probe_ops *spops,
 			struct program_space *search_pspace,
-			const char *objfile_namestr,
-			const char *provider,
-			const char *name,
-			std::vector<symtab_and_line> *result)
+			const char *objfile_namestr, const char *provider,
+			const char *name, std::vector<symtab_and_line> *result)
 {
   for (objfile *objfile : search_pspace->objfiles ())
     {
@@ -80,8 +79,8 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 
       if (objfile_namestr
 	  && FILENAME_CMP (objfile_name (objfile), objfile_namestr) != 0
-	  && FILENAME_CMP (lbasename (objfile_name (objfile)),
-			   objfile_namestr) != 0)
+	  && FILENAME_CMP (lbasename (objfile_name (objfile)), objfile_namestr)
+	       != 0)
 	continue;
 
       const std::vector<std::unique_ptr<probe>> &probes
@@ -128,12 +127,12 @@ parse_probes (const location_spec *locspec,
   cs = arg_start;
   const static_probe_ops *spops = probe_linespec_to_static_ops (&cs);
   if (spops == NULL)
-    error (_("'%s' is not a probe linespec"), arg_start);
+    error (_ ("'%s' is not a probe linespec"), arg_start);
 
   arg = (char *) cs;
   arg = skip_spaces (arg);
   if (!*arg)
-    error (_("argument to `%s' missing"), arg_start);
+    error (_ ("argument to `%s' missing"), arg_start);
 
   arg_end = skip_to_space (arg);
 
@@ -171,32 +170,32 @@ parse_probes (const location_spec *locspec,
     }
 
   if (*name == '\0')
-    error (_("no probe name specified"));
+    error (_ ("no probe name specified"));
   if (provider && *provider == '\0')
-    error (_("invalid provider name"));
+    error (_ ("invalid provider name"));
   if (objfile_namestr && *objfile_namestr == '\0')
-    error (_("invalid objfile name"));
+    error (_ ("invalid objfile name"));
 
   std::vector<symtab_and_line> result;
   if (search_pspace != NULL)
     {
-      parse_probes_in_pspace (spops, search_pspace, objfile_namestr,
-			      provider, name, &result);
+      parse_probes_in_pspace (spops, search_pspace, objfile_namestr, provider,
+			      name, &result);
     }
   else
     {
       for (struct program_space *pspace : program_spaces)
-	parse_probes_in_pspace (spops, pspace, objfile_namestr,
-				provider, name, &result);
+	parse_probes_in_pspace (spops, pspace, objfile_namestr, provider, name,
+				&result);
     }
 
   if (result.empty ())
     {
-      throw_error (NOT_FOUND_ERROR,
-		   _("No probe matching objfile=`%s', provider=`%s', name=`%s'"),
-		   objfile_namestr ? objfile_namestr : _("<any>"),
-		   provider ? provider : _("<any>"),
-		   name);
+      throw_error (
+	NOT_FOUND_ERROR,
+	_ ("No probe matching objfile=`%s', provider=`%s', name=`%s'"),
+	objfile_namestr ? objfile_namestr : _ ("<any>"),
+	provider ? provider : _ ("<any>"), name);
     }
 
   if (canonical)
@@ -268,8 +267,6 @@ find_probe_by_pc (CORE_ADDR pc)
   return result;
 }
 
-
-
 /* Make a vector of probes matching OBJNAME, PROVIDER, and PROBE_NAME.
    If SPOPS is not &any_static_probe_ops, only probes related to this
    specific static probe ops will match.  Each argument is a regexp,
@@ -284,17 +281,17 @@ collect_probes (const std::string &objname, const std::string &provider,
 
   if (!provider.empty ())
     prov_pat.emplace (provider.c_str (), REG_NOSUB,
-		      _("Invalid provider regexp"));
+		      _ ("Invalid provider regexp"));
   if (!probe_name.empty ())
     probe_pat.emplace (probe_name.c_str (), REG_NOSUB,
-		       _("Invalid probe regexp"));
+		       _ ("Invalid probe regexp"));
   if (!objname.empty ())
     obj_pat.emplace (objname.c_str (), REG_NOSUB,
-		     _("Invalid object file regexp"));
+		     _ ("Invalid object file regexp"));
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      if (! objfile->sf || ! objfile->sf->sym_probe_fns)
+      if (!objfile->sf || !objfile->sf->sym_probe_fns)
 	continue;
 
       if (obj_pat)
@@ -390,8 +387,8 @@ gen_ui_out_table_header_info (const std::vector<bound_probe> &probes,
 	    }
 	}
 
-      current_uiout->table_header (size_max, ui_left,
-				   column.field_name, column.print_name);
+      current_uiout->table_header (size_max, ui_left, column.field_name,
+				   column.print_name);
     }
 }
 
@@ -401,11 +398,11 @@ gen_ui_out_table_header_info (const std::vector<bound_probe> &probes,
 static void
 print_ui_out_not_applicables (const static_probe_ops *spops)
 {
-   std::vector<struct info_probe_column> headings
-     = spops->gen_info_probes_table_header ();
+  std::vector<struct info_probe_column> headings
+    = spops->gen_info_probes_table_header ();
 
   for (const info_probe_column &column : headings)
-    current_uiout->field_string (column.field_name, _("n/a"));
+    current_uiout->field_string (column.field_name, _ ("n/a"));
 }
 
 /* Helper function to print extra information about a probe and an objfile
@@ -419,8 +416,7 @@ print_ui_out_info (probe *probe)
   gdb_assert (probe != NULL);
   std::vector<struct info_probe_column> headings
     = probe->get_static_ops ()->gen_info_probes_table_header ();
-  std::vector<const char *> values
-    = probe->gen_info_probes_table_values ();
+  std::vector<const char *> values = probe->gen_info_probes_table_values ();
 
   gdb_assert (headings.size () == values.size ());
 
@@ -520,8 +516,7 @@ info_probes_for_spops (const char *arg, int from_tty,
     ui_out_extra_fields = get_number_extra_fields (spops);
 
   {
-    ui_out_emit_table table_emitter (current_uiout,
-				     5 + ui_out_extra_fields,
+    ui_out_emit_table table_emitter (current_uiout, 5 + ui_out_extra_fields,
 				     probes.size (), "StaticProbes");
 
     std::sort (probes.begin (), probes.end (), compare_probes);
@@ -537,17 +532,17 @@ info_probes_for_spops (const char *arg, int from_tty,
 
 	size_type = std::max (strlen (probe_type), size_type);
 	size_name = std::max (probe.prob->get_name ().size (), size_name);
-	size_provider = std::max (probe.prob->get_provider ().size (),
-				  size_provider);
-	size_objname = std::max (strlen (objfile_name (probe.objfile)),
-				 size_objname);
+	size_provider
+	  = std::max (probe.prob->get_provider ().size (), size_provider);
+	size_objname
+	  = std::max (strlen (objfile_name (probe.objfile)), size_objname);
       }
 
-    current_uiout->table_header (size_type, ui_left, "type", _("Type"));
+    current_uiout->table_header (size_type, ui_left, "type", _ ("Type"));
     current_uiout->table_header (size_provider, ui_left, "provider",
-				 _("Provider"));
-    current_uiout->table_header (size_name, ui_left, "name", _("Name"));
-    current_uiout->table_header (size_addr, ui_left, "addr", _("Where"));
+				 _ ("Provider"));
+    current_uiout->table_header (size_name, ui_left, "name", _ ("Name"));
+    current_uiout->table_header (size_addr, ui_left, "addr", _ ("Where"));
 
     if (spops == &any_static_probe_ops)
       {
@@ -561,7 +556,8 @@ info_probes_for_spops (const char *arg, int from_tty,
     else
       gen_ui_out_table_header_info (probes, spops);
 
-    current_uiout->table_header (size_objname, ui_left, "object", _("Object"));
+    current_uiout->table_header (size_objname, ui_left, "object",
+				 _ ("Object"));
     current_uiout->table_body ();
 
     for (const bound_probe &probe : probes)
@@ -573,9 +569,9 @@ info_probes_for_spops (const char *arg, int from_tty,
 	current_uiout->field_string ("type", probe_type);
 	current_uiout->field_string ("provider", probe.prob->get_provider ());
 	current_uiout->field_string ("name", probe.prob->get_name ());
-	current_uiout->field_core_addr ("addr", probe.prob->get_gdbarch (),
-					probe.prob->get_relocated_address
-					(probe.objfile));
+	current_uiout->field_core_addr (
+	  "addr", probe.prob->get_gdbarch (),
+	  probe.prob->get_relocated_address (probe.objfile));
 
 	if (spops == &any_static_probe_ops)
 	  {
@@ -590,8 +586,7 @@ info_probes_for_spops (const char *arg, int from_tty,
 	else
 	  print_ui_out_info (probe.prob);
 
-	current_uiout->field_string ("object",
-				     objfile_name (probe.objfile));
+	current_uiout->field_string ("object", objfile_name (probe.objfile));
 	current_uiout->text ("\n");
       }
 
@@ -599,7 +594,7 @@ info_probes_for_spops (const char *arg, int from_tty,
   }
 
   if (!any_found)
-    current_uiout->message (_("No probes matched.\n"));
+    current_uiout->message (_ ("No probes matched.\n"));
 }
 
 /* Implementation of the `info probes' command.  */
@@ -623,23 +618,23 @@ enable_probes_command (const char *arg, int from_tty)
     = collect_probes (objname, provider, probe_name, &any_static_probe_ops);
   if (probes.empty ())
     {
-      current_uiout->message (_("No probes matched.\n"));
+      current_uiout->message (_ ("No probes matched.\n"));
       return;
     }
 
   /* Enable the selected probes, provided their backends support the
      notion of enabling a probe.  */
-  for (const bound_probe &probe: probes)
+  for (const bound_probe &probe : probes)
     {
       if (probe.prob->get_static_ops ()->can_enable ())
 	{
 	  probe.prob->enable ();
-	  current_uiout->message (_("Probe %s:%s enabled.\n"),
+	  current_uiout->message (_ ("Probe %s:%s enabled.\n"),
 				  probe.prob->get_provider ().c_str (),
 				  probe.prob->get_name ().c_str ());
 	}
       else
-	current_uiout->message (_("Probe %s:%s cannot be enabled.\n"),
+	current_uiout->message (_ ("Probe %s:%s cannot be enabled.\n"),
 				probe.prob->get_provider ().c_str (),
 				probe.prob->get_name ().c_str ());
     }
@@ -658,7 +653,7 @@ disable_probes_command (const char *arg, int from_tty)
     = collect_probes (objname, provider, probe_name, &any_static_probe_ops);
   if (probes.empty ())
     {
-      current_uiout->message (_("No probes matched.\n"));
+      current_uiout->message (_ ("No probes matched.\n"));
       return;
     }
 
@@ -669,12 +664,12 @@ disable_probes_command (const char *arg, int from_tty)
       if (probe.prob->get_static_ops ()->can_enable ())
 	{
 	  probe.prob->disable ();
-	  current_uiout->message (_("Probe %s:%s disabled.\n"),
+	  current_uiout->message (_ ("Probe %s:%s disabled.\n"),
 				  probe.prob->get_provider ().c_str (),
 				  probe.prob->get_name ().c_str ());
 	}
       else
-	current_uiout->message (_("Probe %s:%s cannot be disabled.\n"),
+	current_uiout->message (_ ("Probe %s:%s cannot be disabled.\n"),
 				probe.prob->get_provider ().c_str (),
 				probe.prob->get_name ().c_str ());
     }
@@ -703,17 +698,13 @@ ignore_probe_p (const char *provider, const char *name,
   gdb::optional<compiled_regex> &re_obj
     = ignore_probes_obj_pat[ignore_probes_idx];
 
-  bool res
-    = ((!re_prov
-	|| re_prov->exec (provider, 0, NULL, 0) == 0)
-       && (!re_name
-	   || re_name->exec (name, 0, NULL, 0) == 0)
-       && (!re_obj
-	   || re_obj->exec (objfile_name, 0, NULL, 0) == 0));
+  bool res = ((!re_prov || re_prov->exec (provider, 0, NULL, 0) == 0)
+	      && (!re_name || re_name->exec (name, 0, NULL, 0) == 0)
+	      && (!re_obj || re_obj->exec (objfile_name, 0, NULL, 0) == 0));
 
   if (res && ignore_probes_verbose_p)
-    gdb_printf (gdb_stdlog, _("Ignoring %s probe %s %s in %s.\n"),
-		type, provider, name, objfile_name);
+    gdb_printf (gdb_stdlog, _ ("Ignoring %s probe %s %s in %s.\n"), type,
+		provider, name, objfile_name);
 
   return res;
 }
@@ -734,10 +725,10 @@ ignore_probes_command (const char *arg, int from_tty)
       if (strcmp (s.c_str (), "-reset") == 0)
 	{
 	  if (*idx != '\0')
-	    error (_("-reset: no arguments allowed"));
+	    error (_ ("-reset: no arguments allowed"));
 
 	  ignore_probes_p = false;
-	  gdb_printf (gdb_stdout, _("ignore-probes filter has been reset\n"));
+	  gdb_printf (gdb_stdout, _ ("ignore-probes filter has been reset\n"));
 	  return;
 	}
 
@@ -766,21 +757,22 @@ ignore_probes_command (const char *arg, int from_tty)
   re_obj.reset ();
   if (!ignore_provider.empty ())
     re_prov.emplace (ignore_provider.c_str (), REG_NOSUB,
-		     _("Invalid provider regexp"));
+		     _ ("Invalid provider regexp"));
   if (!ignore_probe_name.empty ())
     re_name.emplace (ignore_probe_name.c_str (), REG_NOSUB,
-		     _("Invalid probe regexp"));
+		     _ ("Invalid probe regexp"));
   if (!ignore_objname.empty ())
     re_obj.emplace (ignore_objname.c_str (), REG_NOSUB,
-		    _("Invalid object file regexp"));
+		    _ ("Invalid object file regexp"));
   ignore_probes_idx = new_ignore_probes_idx;
 
   ignore_probes_p = true;
   ignore_probes_verbose_p = verbose_p;
-  gdb_printf (gdb_stdout, _("ignore-probes filter has been set to:\n"));
-  gdb_printf (gdb_stdout, _("PROVIDER: '%s'\n"), ignore_provider.c_str ());
-  gdb_printf (gdb_stdout, _("PROBE_NAME: '%s'\n"), ignore_probe_name.c_str ());
-  gdb_printf (gdb_stdout, _("OBJNAME: '%s'\n"), ignore_objname.c_str ());
+  gdb_printf (gdb_stdout, _ ("ignore-probes filter has been set to:\n"));
+  gdb_printf (gdb_stdout, _ ("PROVIDER: '%s'\n"), ignore_provider.c_str ());
+  gdb_printf (gdb_stdout, _ ("PROBE_NAME: '%s'\n"),
+	      ignore_probe_name.c_str ());
+  gdb_printf (gdb_stdout, _ ("OBJNAME: '%s'\n"), ignore_objname.c_str ());
 }
 
 /* See comments in probe.h.  */
@@ -817,7 +809,8 @@ probe_linespec_to_static_ops (const char **linespecp)
 /* See comment in probe.h.  */
 
 int
-probe_is_linespec_by_keyword (const char **linespecp, const char *const *keywords)
+probe_is_linespec_by_keyword (const char **linespecp,
+			      const char *const *keywords)
 {
   const char *s = *linespecp;
   const char *const *csp;
@@ -880,8 +873,7 @@ info_probes_cmdlist_get (void)
   static struct cmd_list_element *info_probes_cmdlist;
 
   if (info_probes_cmdlist == NULL)
-    add_prefix_cmd ("probes", class_info, info_probes_command,
-		    _("\
+    add_prefix_cmd ("probes", class_info, info_probes_command, _ ("\
 Show available static probes.\n\
 Usage: info probes [all|TYPE [ARGS]]\n\
 TYPE specifies the type of the probe, and can be one of the following:\n\
@@ -890,21 +882,18 @@ If you specify TYPE, there may be additional arguments needed by the\n\
 subcommand.\n\
 If you do not specify any argument, or specify `all', then the command\n\
 will show information about all types of probes."),
-		    &info_probes_cmdlist, 0/*allow-unknown*/, &infolist);
+		    &info_probes_cmdlist, 0 /*allow-unknown*/, &infolist);
 
   return &info_probes_cmdlist;
 }
-
-
 
 /* This is called to compute the value of one of the $_probe_arg*
    convenience variables.  */
 
 static struct value *
-compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
-		   void *data)
+compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar, void *data)
 {
-  frame_info_ptr frame = get_selected_frame (_("No frame selected"));
+  frame_info_ptr frame = get_selected_frame (_ ("No frame selected"));
   CORE_ADDR pc = get_frame_pc (frame);
   int sel = (int) (uintptr_t) data;
   struct bound_probe pc_probe;
@@ -915,14 +904,14 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
 
   pc_probe = find_probe_by_pc (pc);
   if (pc_probe.prob == NULL)
-    error (_("No probe at PC %s"), core_addr_to_string (pc));
+    error (_ ("No probe at PC %s"), core_addr_to_string (pc));
 
   n_args = pc_probe.prob->get_argument_count (arch);
   if (sel == -1)
     return value_from_longest (builtin_type (arch)->builtin_int, n_args);
 
   if (sel >= n_args)
-    error (_("Invalid probe argument %d -- probe has %u arguments available"),
+    error (_ ("Invalid probe argument %d -- probe has %u arguments available"),
 	   sel, n_args);
 
   return pc_probe.prob->evaluate_argument (sel, frame);
@@ -945,7 +934,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
 
   pc_probe = find_probe_by_pc (pc);
   if (pc_probe.prob == NULL)
-    error (_("No probe at PC %s"), core_addr_to_string (pc));
+    error (_ ("No probe at PC %s"), core_addr_to_string (pc));
 
   n_args = pc_probe.prob->get_argument_count (expr->gdbarch);
 
@@ -959,22 +948,21 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
 
   gdb_assert (sel >= 0);
   if (sel >= n_args)
-    error (_("Invalid probe argument %d -- probe has %d arguments available"),
+    error (_ ("Invalid probe argument %d -- probe has %d arguments available"),
 	   sel, n_args);
 
   pc_probe.prob->compile_to_ax (expr, value, sel);
 }
 
-static const struct internalvar_funcs probe_funcs =
-{
+static const struct internalvar_funcs probe_funcs = {
   compute_probe_arg,
   compile_probe_arg,
 };
 
-
 std::vector<const static_probe_ops *> all_static_probe_ops;
 
 void _initialize_probe ();
+
 void
 _initialize_probe ()
 {
@@ -1007,12 +995,11 @@ _initialize_probe ()
   create_internalvar_type_lazy ("_probe_arg11", &probe_funcs,
 				(void *) (uintptr_t) 11);
 
-  add_cmd ("all", class_info, info_probes_command,
-	   _("\
+  add_cmd ("all", class_info, info_probes_command, _ ("\
 Show information about all type of probes."),
 	   info_probes_cmdlist_get ());
 
-  add_cmd ("probes", class_breakpoint, enable_probes_command, _("\
+  add_cmd ("probes", class_breakpoint, enable_probes_command, _ ("\
 Enable probes.\n\
 Usage: enable probes [PROVIDER [NAME [OBJECT]]]\n\
 Each argument is a regular expression, used to select probes.\n\
@@ -1023,7 +1010,7 @@ If you do not specify any argument then the command will enable\n\
 all defined probes."),
 	   &enablelist);
 
-  add_cmd ("probes", class_breakpoint, disable_probes_command, _("\
+  add_cmd ("probes", class_breakpoint, disable_probes_command, _ ("\
 Disable probes.\n\
 Usage: disable probes [PROVIDER [NAME [OBJECT]]]\n\
 Each argument is a regular expression, used to select probes.\n\
@@ -1034,7 +1021,7 @@ If you do not specify any argument then the command will disable\n\
 all defined probes."),
 	   &disablelist);
 
-  add_cmd ("ignore-probes", class_maintenance, ignore_probes_command, _("\
+  add_cmd ("ignore-probes", class_maintenance, ignore_probes_command, _ ("\
 Ignore probes.\n\
 Usage: maintenance ignore-probes [-v|-verbose] [PROVIDER [NAME [OBJECT]]]\n\
        maintenance ignore-probes -reset\n\

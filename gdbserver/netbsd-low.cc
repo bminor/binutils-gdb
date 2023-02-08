@@ -62,30 +62,31 @@ netbsd_ptrace_fun ()
   if (remote_connection_is_stdio ())
     {
       if (close (0) < 0)
-	trace_start_error_with_name (("close"));
+        trace_start_error_with_name (("close"));
       if (open ("/dev/null", O_RDONLY) < 0)
-	trace_start_error_with_name (("open"));
+        trace_start_error_with_name (("open"));
       if (dup2 (2, 1) < 0)
-	trace_start_error_with_name (("dup2"));
+        trace_start_error_with_name (("dup2"));
       if (write (2, "stdin/stdout redirected\n",
-		 sizeof ("stdin/stdout redirected\n") - 1) < 0)
-	{
-	  /* Errors ignored.  */
-	}
+                 sizeof ("stdin/stdout redirected\n") - 1)
+          < 0)
+        {
+          /* Errors ignored.  */
+        }
     }
 }
 
 /* Implement the create_inferior method of the target_ops vector.  */
 
 int
-netbsd_process_target::create_inferior (const char *program,
-					const std::vector<char *> &program_args)
+netbsd_process_target::create_inferior (
+  const char *program, const std::vector<char *> &program_args)
 {
   std::string str_program_args = construct_inferior_arguments (program_args);
 
   pid_t pid = fork_inferior (program, str_program_args.c_str (),
-			     get_environ ()->envp (), netbsd_ptrace_fun,
-			     nullptr, nullptr, nullptr, nullptr);
+                             get_environ ()->envp (), netbsd_ptrace_fun,
+                             nullptr, nullptr, nullptr, nullptr);
 
   add_process (pid, 0);
 
@@ -139,41 +140,39 @@ netbsd_process_target::resume (struct thread_resume *resume_info, size_t n)
   const lwpid_t lwp = resume_ptid.lwp ();
   regcache_invalidate_pid (pid);
 
-  auto fn
-    = [&] (ptid_t ptid)
+  auto fn = [&] (ptid_t ptid) {
+    if (step)
       {
-	if (step)
-	  {
-	    if (ptid.lwp () == lwp || n != 1)
-	      {
-		if (ptrace (PT_SETSTEP, pid, NULL, ptid.lwp ()) == -1)
-		  perror_with_name (("ptrace"));
-		if (ptrace (PT_RESUME, pid, NULL, ptid.lwp ()) == -1)
-		  perror_with_name (("ptrace"));
-	      }
-	    else
-	      {
-		if (ptrace (PT_CLEARSTEP, pid, NULL, ptid.lwp ()) == -1)
-		  perror_with_name (("ptrace"));
-		if (ptrace (PT_SUSPEND, pid, NULL, ptid.lwp ()) == -1)
-		  perror_with_name (("ptrace"));
-	      }
-	  }
-	else
-	  {
-	    if (ptrace (PT_CLEARSTEP, pid, NULL, ptid.lwp ()) == -1)
-	      perror_with_name (("ptrace"));
-	    if (ptrace (PT_RESUME, pid, NULL, ptid.lwp ()) == -1)
-	      perror_with_name (("ptrace"));
-	  }
-      };
+        if (ptid.lwp () == lwp || n != 1)
+          {
+            if (ptrace (PT_SETSTEP, pid, NULL, ptid.lwp ()) == -1)
+              perror_with_name (("ptrace"));
+            if (ptrace (PT_RESUME, pid, NULL, ptid.lwp ()) == -1)
+              perror_with_name (("ptrace"));
+          }
+        else
+          {
+            if (ptrace (PT_CLEARSTEP, pid, NULL, ptid.lwp ()) == -1)
+              perror_with_name (("ptrace"));
+            if (ptrace (PT_SUSPEND, pid, NULL, ptid.lwp ()) == -1)
+              perror_with_name (("ptrace"));
+          }
+      }
+    else
+      {
+        if (ptrace (PT_CLEARSTEP, pid, NULL, ptid.lwp ()) == -1)
+          perror_with_name (("ptrace"));
+        if (ptrace (PT_RESUME, pid, NULL, ptid.lwp ()) == -1)
+          perror_with_name (("ptrace"));
+      }
+  };
 
   netbsd_nat::for_each_thread (pid, fn);
 
   int request = gdb_catching_syscalls_p (pid) ? PT_CONTINUE : PT_SYSCALL;
 
   errno = 0;
-  ptrace (request, pid, (void *)1, signal);
+  ptrace (request, pid, (void *) 1, signal);
   if (errno)
     perror_with_name (("ptrace"));
 }
@@ -217,21 +216,19 @@ netbsd_store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 
 static pid_t
 netbsd_waitpid (ptid_t ptid, struct target_waitstatus *ourstatus,
-		target_wait_flags target_options)
+                target_wait_flags target_options)
 {
   int status;
   int options = (target_options & TARGET_WNOHANG) ? WNOHANG : 0;
 
-  pid_t pid
-    = gdb::handle_eintr (-1, ::waitpid, ptid.pid (), &status, options);
+  pid_t pid = gdb::handle_eintr (-1, ::waitpid, ptid.pid (), &status, options);
 
   if (pid == -1)
-    perror_with_name (_("Child process unexpectedly missing"));
+    perror_with_name (_ ("Child process unexpectedly missing"));
 
   netbsd_store_waitstatus (ourstatus, status);
   return pid;
 }
-
 
 /* Implement the wait target_ops method.
 
@@ -241,7 +238,7 @@ netbsd_waitpid (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 static ptid_t
 netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-	     target_wait_flags target_options)
+             target_wait_flags target_options)
 {
   pid_t pid = netbsd_waitpid (ptid, ourstatus, target_options);
   ptid_t wptid = ptid_t (pid);
@@ -298,14 +295,14 @@ netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 Ignore exited events for an unknown LWP.  */
       thread_info *thr = find_thread_ptid (wptid);
       if (thr == nullptr)
-	  ourstatus->set_spurious ();
+        ourstatus->set_spurious ();
       else
-	{
-	  /* NetBSD does not store an LWP exit status.  */
-	  ourstatus->set_thread_exited (0);
+        {
+          /* NetBSD does not store an LWP exit status.  */
+          ourstatus->set_thread_exited (0);
 
-	  remove_thread (thr);
-	}
+          remove_thread (thr);
+        }
       return wptid;
     }
 
@@ -319,40 +316,40 @@ netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 not yet reported their PTRACE_LWP_CREATE event.  Ignore
 	 born events for an already-known LWP.  */
       if (find_thread_ptid (wptid))
-	ourstatus->set_spurious ();
+        ourstatus->set_spurious ();
       else
-	{
-	  add_thread (wptid, NULL);
-	  ourstatus->set_thread_created ();
-	}
+        {
+          add_thread (wptid, NULL);
+          ourstatus->set_thread_created ();
+        }
       return wptid;
     }
 
   if (code == TRAP_EXEC)
     {
-      ourstatus->set_execd
-	(make_unique_xstrdup (netbsd_nat::pid_to_exec_file (pid)));
+      ourstatus->set_execd (
+        make_unique_xstrdup (netbsd_nat::pid_to_exec_file (pid)));
       return wptid;
     }
 
   if (code == TRAP_TRACE)
-      return wptid;
+    return wptid;
 
   if (code == TRAP_SCE || code == TRAP_SCX)
     {
       int sysnum = si->si_sysnum;
 
-      if (!netbsd_catch_this_syscall(sysnum))
-	{
-	  /* If the core isn't interested in this event, ignore it.  */
-	  ourstatus->set_spurious ();
-	  return wptid;
-	}
+      if (!netbsd_catch_this_syscall (sysnum))
+        {
+          /* If the core isn't interested in this event, ignore it.  */
+          ourstatus->set_spurious ();
+          return wptid;
+        }
 
       if (code == TRAP_SCE)
-	ourstatus->set_syscall_entry (sysnum);
+        ourstatus->set_syscall_entry (sysnum);
       else
-	ourstatus->set_syscall_return (sysnum);
+        ourstatus->set_syscall_return (sysnum);
 
       return wptid;
     }
@@ -379,7 +376,7 @@ netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 ptid_t
 netbsd_process_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			     target_wait_flags target_options)
+                             target_wait_flags target_options)
 {
   while (true)
     {
@@ -391,35 +388,35 @@ netbsd_process_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 This may also happen on attach, when an event is registered on a thread
 	 that was not fully initialized during the attach stage.  */
       if (wptid.lwp () != 0 && !find_thread_ptid (wptid)
-	  && ourstatus->kind () != TARGET_WAITKIND_THREAD_EXITED)
-	add_thread (wptid, nullptr);
+          && ourstatus->kind () != TARGET_WAITKIND_THREAD_EXITED)
+        add_thread (wptid, nullptr);
 
       switch (ourstatus->kind ())
-	{
-	case TARGET_WAITKIND_EXITED:
-	case TARGET_WAITKIND_STOPPED:
-	case TARGET_WAITKIND_SIGNALLED:
-	case TARGET_WAITKIND_FORKED:
-	case TARGET_WAITKIND_VFORKED:
-	case TARGET_WAITKIND_EXECD:
-	case TARGET_WAITKIND_VFORK_DONE:
-	case TARGET_WAITKIND_SYSCALL_ENTRY:
-	case TARGET_WAITKIND_SYSCALL_RETURN:
-	  /* Pass the result to the generic code.  */
-	  return wptid;
-	case TARGET_WAITKIND_THREAD_CREATED:
-	case TARGET_WAITKIND_THREAD_EXITED:
-	  /* The core needlessly stops on these events.  */
-	  /* FALLTHROUGH */
-	case TARGET_WAITKIND_SPURIOUS:
-	  /* Spurious events are unhandled by the gdbserver core.  */
-	  if (ptrace (PT_CONTINUE, current_process ()->pid, (void *) 1, 0)
-	      == -1)
-	    perror_with_name (("ptrace"));
-	  break;
-	default:
-	  error (("Unknown stopped status"));
-	}
+        {
+        case TARGET_WAITKIND_EXITED:
+        case TARGET_WAITKIND_STOPPED:
+        case TARGET_WAITKIND_SIGNALLED:
+        case TARGET_WAITKIND_FORKED:
+        case TARGET_WAITKIND_VFORKED:
+        case TARGET_WAITKIND_EXECD:
+        case TARGET_WAITKIND_VFORK_DONE:
+        case TARGET_WAITKIND_SYSCALL_ENTRY:
+        case TARGET_WAITKIND_SYSCALL_RETURN:
+          /* Pass the result to the generic code.  */
+          return wptid;
+        case TARGET_WAITKIND_THREAD_CREATED:
+        case TARGET_WAITKIND_THREAD_EXITED:
+          /* The core needlessly stops on these events.  */
+          /* FALLTHROUGH */
+        case TARGET_WAITKIND_SPURIOUS:
+          /* Spurious events are unhandled by the gdbserver core.  */
+          if (ptrace (PT_CONTINUE, current_process ()->pid, (void *) 1, 0)
+              == -1)
+            perror_with_name (("ptrace"));
+          break;
+        default:
+          error (("Unknown stopped status"));
+        }
     }
 }
 
@@ -491,9 +488,9 @@ netbsd_process_target::fetch_registers (struct regcache *regcache, int regno)
       std::vector<char> buf;
       buf.resize (regset->size);
       int res = ptrace (regset->get_request, inferior_ptid.pid (), buf.data (),
-			inferior_ptid.lwp ());
+                        inferior_ptid.lwp ());
       if (res == -1)
-	perror_with_name (("ptrace"));
+        perror_with_name (("ptrace"));
       regset->store_function (regcache, buf.data ());
       regset++;
     }
@@ -512,17 +509,17 @@ netbsd_process_target::store_registers (struct regcache *regcache, int regno)
       std::vector<char> buf;
       buf.resize (regset->size);
       int res = ptrace (regset->get_request, inferior_ptid.pid (), buf.data (),
-			inferior_ptid.lwp ());
+                        inferior_ptid.lwp ());
       if (res == -1)
-	perror_with_name (("ptrace"));
+        perror_with_name (("ptrace"));
 
       /* Then overlay our cached registers on that.  */
       regset->fill_function (regcache, buf.data ());
       /* Only now do we write the register set.  */
-      res = ptrace (regset->set_request, inferior_ptid.pid (), buf. data (),
-		    inferior_ptid.lwp ());
+      res = ptrace (regset->set_request, inferior_ptid.pid (), buf.data (),
+                    inferior_ptid.lwp ());
       if (res == -1)
-	perror_with_name (("ptrace"));
+        perror_with_name (("ptrace"));
       regset++;
     }
 }
@@ -531,7 +528,7 @@ netbsd_process_target::store_registers (struct regcache *regcache, int regno)
 
 int
 netbsd_process_target::read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
-				    int size)
+                                    int size)
 {
   pid_t pid = current_process ()->pid;
   return netbsd_nat::read_memory (pid, myaddr, memaddr, size, nullptr);
@@ -541,7 +538,7 @@ netbsd_process_target::read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
 
 int
 netbsd_process_target::write_memory (CORE_ADDR memaddr,
-				     const unsigned char *myaddr, int size)
+                                     const unsigned char *myaddr, int size)
 {
   pid_t pid = current_process ()->pid;
   return netbsd_nat::write_memory (pid, myaddr, memaddr, size, nullptr);
@@ -562,7 +559,7 @@ netbsd_process_target::request_interrupt ()
    and output arguments.  */
 
 static size_t
-netbsd_read_auxv(pid_t pid, void *offs, void *addr, size_t len)
+netbsd_read_auxv (pid_t pid, void *offs, void *addr, size_t len)
 {
   struct ptrace_io_desc pio;
 
@@ -582,7 +579,7 @@ netbsd_read_auxv(pid_t pid, void *offs, void *addr, size_t len)
 
 int
 netbsd_process_target::read_auxv (int pid, CORE_ADDR offset,
-				  unsigned char *myaddr, unsigned int len)
+                                  unsigned char *myaddr, unsigned int len)
 {
   return netbsd_read_auxv (pid, (void *) (intptr_t) offset, myaddr, len);
 }
@@ -607,7 +604,7 @@ netbsd_process_target::supports_z_point_type (char z_type)
 
 int
 netbsd_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		     int size, struct raw_breakpoint *bp)
+                                     int size, struct raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -626,7 +623,7 @@ netbsd_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 
 int
 netbsd_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-				     int size, struct raw_breakpoint *bp)
+                                     int size, struct raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -652,8 +649,8 @@ netbsd_process_target::stopped_by_sw_breakpoint ()
   if (ptrace (PT_GET_SIGINFO, pid, &psi, sizeof (psi)) == -1)
     perror_with_name (("ptrace"));
 
-  return psi.psi_siginfo.si_signo == SIGTRAP &&
-	 psi.psi_siginfo.si_code == TRAP_BRKPT;
+  return psi.psi_siginfo.si_signo == SIGTRAP
+         && psi.psi_siginfo.si_code == TRAP_BRKPT;
 }
 
 /* Implement the supports_stopped_by_sw_breakpoint target_ops method.  */
@@ -675,16 +672,18 @@ netbsd_process_target::supports_qxfer_siginfo ()
 /* Implement the qxfer_siginfo target_ops method.  */
 
 int
-netbsd_process_target::qxfer_siginfo (const char *annex, unsigned char *readbuf,
-				      unsigned const char *writebuf,
-				      CORE_ADDR offset, int len)
+netbsd_process_target::qxfer_siginfo (const char *annex,
+                                      unsigned char *readbuf,
+                                      unsigned const char *writebuf,
+                                      CORE_ADDR offset, int len)
 {
   if (current_thread == nullptr)
     return -1;
 
   pid_t pid = current_process ()->pid;
 
-  return netbsd_nat::qxfer_siginfo(pid, annex, readbuf, writebuf, offset, len);
+  return netbsd_nat::qxfer_siginfo (pid, annex, readbuf, writebuf, offset,
+                                    len);
 }
 
 /* Implement the supports_non_stop target_ops method.  */
@@ -737,12 +736,13 @@ netbsd_process_target::supports_disable_randomization ()
 
 /* Extract &phdr and num_phdr in the inferior.  Return 0 on success.  */
 
-template <typename T>
-int get_phdr_phnum_from_proc_auxv (const pid_t pid,
-				   CORE_ADDR *phdr_memaddr, int *num_phdr)
+template<typename T>
+int
+get_phdr_phnum_from_proc_auxv (const pid_t pid, CORE_ADDR *phdr_memaddr,
+                               int *num_phdr)
 {
-  typedef typename std::conditional<sizeof(T) == sizeof(int64_t),
-				    Aux64Info, Aux32Info>::type auxv_type;
+  typedef typename std::conditional<sizeof (T) == sizeof (int64_t), Aux64Info,
+                                    Aux32Info>::type auxv_type;
   const size_t auxv_size = sizeof (auxv_type);
   const size_t auxv_buf_size = 128 * sizeof (auxv_type);
 
@@ -754,31 +754,30 @@ int get_phdr_phnum_from_proc_auxv (const pid_t pid,
   *phdr_memaddr = 0;
   *num_phdr = 0;
 
-  for (char *buf = auxv_buf.data ();
-       buf < (auxv_buf.data () + auxv_buf_size);
+  for (char *buf = auxv_buf.data (); buf < (auxv_buf.data () + auxv_buf_size);
        buf += auxv_size)
     {
       auxv_type *const aux = (auxv_type *) buf;
 
       switch (aux->a_type)
-	{
-	case AT_PHDR:
-	  *phdr_memaddr = aux->a_v;
-	  break;
-	case AT_PHNUM:
-	  *num_phdr = aux->a_v;
-	  break;
-	}
+        {
+        case AT_PHDR:
+          *phdr_memaddr = aux->a_v;
+          break;
+        case AT_PHNUM:
+          *num_phdr = aux->a_v;
+          break;
+        }
 
       if (*phdr_memaddr != 0 && *num_phdr != 0)
-	break;
+        break;
     }
 
   if (*phdr_memaddr == 0 || *num_phdr == 0)
     {
       warning ("Unexpected missing AT_PHDR and/or AT_PHNUM: "
-	       "phdr_memaddr = %s, phdr_num = %d",
-	       core_addr_to_string (*phdr_memaddr), *num_phdr);
+               "phdr_memaddr = %s, phdr_num = %d",
+               core_addr_to_string (*phdr_memaddr), *num_phdr);
       return 2;
     }
 
@@ -787,12 +786,12 @@ int get_phdr_phnum_from_proc_auxv (const pid_t pid,
 
 /* Return &_DYNAMIC (via PT_DYNAMIC) in the inferior, or 0 if not present.  */
 
-template <typename T>
+template<typename T>
 static CORE_ADDR
 get_dynamic (const pid_t pid)
 {
-  typedef typename std::conditional<sizeof(T) == sizeof(int64_t),
-				    Elf64_Phdr, Elf32_Phdr>::type phdr_type;
+  typedef typename std::conditional<sizeof (T) == sizeof (int64_t), Elf64_Phdr,
+                                    Elf32_Phdr>::type phdr_type;
   const int phdr_size = sizeof (phdr_type);
 
   CORE_ADDR phdr_memaddr;
@@ -804,7 +803,7 @@ get_dynamic (const pid_t pid)
   phdr_buf.resize (num_phdr * phdr_size);
 
   if (netbsd_nat::read_memory (pid, phdr_buf.data (), phdr_memaddr,
-			       phdr_buf.size (), nullptr))
+                               phdr_buf.size (), nullptr))
     return 0;
 
   /* Compute relocation: it is expected to be 0 for "regular" executables,
@@ -815,7 +814,7 @@ get_dynamic (const pid_t pid)
       phdr_type *const p = (phdr_type *) (phdr_buf.data () + i * phdr_size);
 
       if (p->p_type == PT_PHDR)
-	relocation = phdr_memaddr - p->p_vaddr;
+        relocation = phdr_memaddr - p->p_vaddr;
     }
 
   if (relocation == -1)
@@ -838,7 +837,7 @@ get_dynamic (const pid_t pid)
       phdr_type *const p = (phdr_type *) (phdr_buf.data () + i * phdr_size);
 
       if (p->p_type == PT_DYNAMIC)
-	return p->p_vaddr + relocation;
+        return p->p_vaddr + relocation;
     }
 
   return 0;
@@ -849,14 +848,14 @@ get_dynamic (const pid_t pid)
    We look for DT_MIPS_RLD_MAP first.  MIPS executables use this instead of
    DT_DEBUG, although they sometimes contain an unused DT_DEBUG entry too.  */
 
-template <typename T>
+template<typename T>
 static CORE_ADDR
 get_r_debug (const pid_t pid)
 {
-  typedef typename std::conditional<sizeof(T) == sizeof(int64_t),
-				    Elf64_Dyn, Elf32_Dyn>::type dyn_type;
+  typedef typename std::conditional<sizeof (T) == sizeof (int64_t), Elf64_Dyn,
+                                    Elf32_Dyn>::type dyn_type;
   const int dyn_size = sizeof (dyn_type);
-  unsigned char buf[sizeof (dyn_type)];  /* The larger of the two.  */
+  unsigned char buf[sizeof (dyn_type)]; /* The larger of the two.  */
   CORE_ADDR map = -1;
 
   CORE_ADDR dynamic_memaddr = get_dynamic<T> (pid);
@@ -864,32 +863,32 @@ get_r_debug (const pid_t pid)
     return map;
 
   while (netbsd_nat::read_memory (pid, buf, dynamic_memaddr, dyn_size, nullptr)
-	 == 0)
+         == 0)
     {
       dyn_type *const dyn = (dyn_type *) buf;
 #if defined DT_MIPS_RLD_MAP
       union
       {
-	T map;
-	unsigned char buf[sizeof (T)];
-      }
-      rld_map;
+        T map;
+        unsigned char buf[sizeof (T)];
+      } rld_map;
 
       if (dyn->d_tag == DT_MIPS_RLD_MAP)
-	{
-	  if (netbsd_nat::read_memory (pid, rld_map.buf, dyn->d_un.d_val,
-				       sizeof (rld_map.buf), nullptr) == 0)
-	    return rld_map.map;
-	  else
-	    break;
-	}
-#endif  /* DT_MIPS_RLD_MAP */
+        {
+          if (netbsd_nat::read_memory (pid, rld_map.buf, dyn->d_un.d_val,
+                                       sizeof (rld_map.buf), nullptr)
+              == 0)
+            return rld_map.map;
+          else
+            break;
+        }
+#endif /* DT_MIPS_RLD_MAP */
 
       if (dyn->d_tag == DT_DEBUG && map == -1)
-	map = dyn->d_un.d_val;
+        map = dyn->d_un.d_val;
 
       if (dyn->d_tag == DT_NULL)
-	break;
+        break;
 
       dynamic_memaddr += dyn_size;
     }
@@ -914,27 +913,28 @@ read_one_ptr (const pid_t pid, CORE_ADDR memaddr, CORE_ADDR *ptr, int ptr_size)
     unsigned char uc;
   } addr;
 
-  int ret = netbsd_nat::read_memory (pid, &addr.uc, memaddr, ptr_size, nullptr);
+  int ret
+    = netbsd_nat::read_memory (pid, &addr.uc, memaddr, ptr_size, nullptr);
   if (ret == 0)
     {
       if (ptr_size == sizeof (CORE_ADDR))
-	*ptr = addr.core_addr;
+        *ptr = addr.core_addr;
       else if (ptr_size == sizeof (unsigned int))
-	*ptr = addr.ui;
+        *ptr = addr.ui;
       else
-	gdb_assert_not_reached ("unhandled pointer size");
+        gdb_assert_not_reached ("unhandled pointer size");
     }
   return ret;
 }
 
 /* Construct qXfer:libraries-svr4:read reply.  */
 
-template <typename T>
+template<typename T>
 int
 netbsd_qxfer_libraries_svr4 (const pid_t pid, const char *annex,
-			     unsigned char *readbuf,
-			     unsigned const char *writebuf,
-			     CORE_ADDR offset, int len)
+                             unsigned char *readbuf,
+                             unsigned const char *writebuf, CORE_ADDR offset,
+                             int len)
 {
   struct link_map_offsets
   {
@@ -960,57 +960,55 @@ netbsd_qxfer_libraries_svr4 (const pid_t pid, const char *annex,
     int l_prev_offset;
   };
 
-  static const struct link_map_offsets lmo_32bit_offsets =
-    {
-      0,     /* r_version offset. */
-      4,     /* r_debug.r_map offset.  */
-      0,     /* l_addr offset in link_map.  */
-      4,     /* l_name offset in link_map.  */
-      8,     /* l_ld offset in link_map.  */
-      12,    /* l_next offset in link_map.  */
-      16     /* l_prev offset in link_map.  */
-    };
+  static const struct link_map_offsets lmo_32bit_offsets = {
+    0,  /* r_version offset. */
+    4,  /* r_debug.r_map offset.  */
+    0,  /* l_addr offset in link_map.  */
+    4,  /* l_name offset in link_map.  */
+    8,  /* l_ld offset in link_map.  */
+    12, /* l_next offset in link_map.  */
+    16  /* l_prev offset in link_map.  */
+  };
 
-  static const struct link_map_offsets lmo_64bit_offsets =
-    {
-      0,     /* r_version offset. */
-      8,     /* r_debug.r_map offset.  */
-      0,     /* l_addr offset in link_map.  */
-      8,     /* l_name offset in link_map.  */
-      16,    /* l_ld offset in link_map.  */
-      24,    /* l_next offset in link_map.  */
-      32     /* l_prev offset in link_map.  */
-    };
+  static const struct link_map_offsets lmo_64bit_offsets = {
+    0,  /* r_version offset. */
+    8,  /* r_debug.r_map offset.  */
+    0,  /* l_addr offset in link_map.  */
+    8,  /* l_name offset in link_map.  */
+    16, /* l_ld offset in link_map.  */
+    24, /* l_next offset in link_map.  */
+    32  /* l_prev offset in link_map.  */
+  };
 
   CORE_ADDR lm_addr = 0, lm_prev = 0;
   CORE_ADDR l_name, l_addr, l_ld, l_next, l_prev;
   int header_done = 0;
 
   const struct link_map_offsets *lmo
-    = ((sizeof (T) == sizeof (int64_t))
-       ? &lmo_64bit_offsets : &lmo_32bit_offsets);
+    = ((sizeof (T) == sizeof (int64_t)) ? &lmo_64bit_offsets
+                                        : &lmo_32bit_offsets);
   int ptr_size = sizeof (T);
 
   while (annex[0] != '\0')
     {
       const char *sep = strchr (annex, '=');
       if (sep == nullptr)
-	break;
+        break;
 
       int name_len = sep - annex;
       CORE_ADDR *addrp;
       if (name_len == 5 && startswith (annex, "start"))
-	addrp = &lm_addr;
+        addrp = &lm_addr;
       else if (name_len == 4 && startswith (annex, "prev"))
-	addrp = &lm_prev;
+        addrp = &lm_prev;
       else
-	{
-	  annex = strchr (sep, ';');
-	  if (annex == nullptr)
-	    break;
-	  annex++;
-	  continue;
-	}
+        {
+          annex = strchr (sep, ';');
+          if (annex == nullptr)
+            break;
+          annex++;
+          continue;
+        }
 
       annex = decode_address_to_semicolon (addrp, sep + 1);
     }
@@ -1023,37 +1021,34 @@ netbsd_qxfer_libraries_svr4 (const pid_t pid, const char *annex,
 	 for this inferior - do not retry it.  Report it to GDB as
 	 E01, see for the reasons at the GDB solib-svr4.c side.  */
       if (r_debug == (CORE_ADDR) -1)
-	return -1;
+        return -1;
 
       if (r_debug != 0)
-	{
-	  CORE_ADDR map_offset = r_debug + lmo->r_map_offset;
-	  if (read_one_ptr (pid, map_offset, &lm_addr, ptr_size) != 0)
-	    warning ("unable to read r_map from %s",
-		     core_addr_to_string (map_offset));
-	}
+        {
+          CORE_ADDR map_offset = r_debug + lmo->r_map_offset;
+          if (read_one_ptr (pid, map_offset, &lm_addr, ptr_size) != 0)
+            warning ("unable to read r_map from %s",
+                     core_addr_to_string (map_offset));
+        }
     }
 
   std::string document = "<library-list-svr4 version=\"1.0\"";
 
-  while (lm_addr
-	 && read_one_ptr (pid, lm_addr + lmo->l_name_offset,
-			  &l_name, ptr_size) == 0
-	 && read_one_ptr (pid, lm_addr + lmo->l_addr_offset,
-			  &l_addr, ptr_size) == 0
-	 && read_one_ptr (pid, lm_addr + lmo->l_ld_offset,
-			  &l_ld, ptr_size) == 0
-	 && read_one_ptr (pid, lm_addr + lmo->l_prev_offset,
-			  &l_prev, ptr_size) == 0
-	 && read_one_ptr (pid, lm_addr + lmo->l_next_offset,
-			  &l_next, ptr_size) == 0)
+  while (
+    lm_addr
+    && read_one_ptr (pid, lm_addr + lmo->l_name_offset, &l_name, ptr_size) == 0
+    && read_one_ptr (pid, lm_addr + lmo->l_addr_offset, &l_addr, ptr_size) == 0
+    && read_one_ptr (pid, lm_addr + lmo->l_ld_offset, &l_ld, ptr_size) == 0
+    && read_one_ptr (pid, lm_addr + lmo->l_prev_offset, &l_prev, ptr_size) == 0
+    && read_one_ptr (pid, lm_addr + lmo->l_next_offset, &l_next, ptr_size)
+         == 0)
     {
       if (lm_prev != l_prev)
-	{
-	  warning ("Corrupted shared library list: 0x%lx != 0x%lx",
-		   (long) lm_prev, (long) l_prev);
-	  break;
-	}
+        {
+          warning ("Corrupted shared library list: 0x%lx != 0x%lx",
+                   (long) lm_prev, (long) l_prev);
+          break;
+        }
 
       /* Ignore the first entry even if it has valid name as the first entry
 	 corresponds to the main executable.  The first entry should not be
@@ -1062,35 +1057,36 @@ netbsd_qxfer_libraries_svr4 (const pid_t pid, const char *annex,
 	 executable does not have PT_DYNAMIC present and this function already
 	 exited above due to failed get_r_debug.  */
       if (lm_prev == 0)
-	string_appendf (document, " main-lm=\"0x%lx\"",
-			(unsigned long) lm_addr);
+        string_appendf (document, " main-lm=\"0x%lx\"",
+                        (unsigned long) lm_addr);
       else
-	{
-	  unsigned char libname[PATH_MAX];
+        {
+          unsigned char libname[PATH_MAX];
 
-	  /* Not checking for error because reading may stop before
+          /* Not checking for error because reading may stop before
 	     we've got PATH_MAX worth of characters.  */
-	  libname[0] = '\0';
-	  netbsd_nat::read_memory (pid, libname, l_name, sizeof (libname) - 1,
-				   nullptr);
-	  libname[sizeof (libname) - 1] = '\0';
-	  if (libname[0] != '\0')
-	    {
-	      if (!header_done)
-		{
-		  /* Terminate `<library-list-svr4'.  */
-		  document += '>';
-		  header_done = 1;
-		}
+          libname[0] = '\0';
+          netbsd_nat::read_memory (pid, libname, l_name, sizeof (libname) - 1,
+                                   nullptr);
+          libname[sizeof (libname) - 1] = '\0';
+          if (libname[0] != '\0')
+            {
+              if (!header_done)
+                {
+                  /* Terminate `<library-list-svr4'.  */
+                  document += '>';
+                  header_done = 1;
+                }
 
-	      string_appendf (document, "<library name=\"");
-	      xml_escape_text_append (document, (char *) libname);
-	      string_appendf (document, "\" lm=\"0x%lx\" "
-			      "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			      (unsigned long) lm_addr, (unsigned long) l_addr,
-			      (unsigned long) l_ld);
-	    }
-	}
+              string_appendf (document, "<library name=\"");
+              xml_escape_text_append (document, (char *) libname);
+              string_appendf (document,
+                              "\" lm=\"0x%lx\" "
+                              "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
+                              (unsigned long) lm_addr, (unsigned long) l_addr,
+                              (unsigned long) l_ld);
+            }
+        }
 
       lm_prev = lm_addr;
       lm_addr = l_next;
@@ -1136,8 +1132,7 @@ elf_64_file_p (const char *file)
   if (ret != sizeof (header))
     error ("Cannot read ELF file header: %s", file);
 
-  if (header.e_ident[EI_MAG0] != ELFMAG0
-      || header.e_ident[EI_MAG1] != ELFMAG1
+  if (header.e_ident[EI_MAG0] != ELFMAG0 || header.e_ident[EI_MAG1] != ELFMAG1
       || header.e_ident[EI_MAG2] != ELFMAG2
       || header.e_ident[EI_MAG3] != ELFMAG3)
     error ("Unrecognized ELF file header: %s", file);
@@ -1149,9 +1144,9 @@ elf_64_file_p (const char *file)
 
 int
 netbsd_process_target::qxfer_libraries_svr4 (const char *annex,
-					     unsigned char *readbuf,
-					     unsigned const char *writebuf,
-					     CORE_ADDR offset, int len)
+                                             unsigned char *readbuf,
+                                             unsigned const char *writebuf,
+                                             CORE_ADDR offset, int len)
 {
   if (writebuf != nullptr)
     return -2;
@@ -1163,11 +1158,11 @@ netbsd_process_target::qxfer_libraries_svr4 (const char *annex,
   bool is_elf64 = elf_64_file_p (netbsd_nat::pid_to_exec_file (pid));
 
   if (is_elf64)
-    return netbsd_qxfer_libraries_svr4<int64_t> (pid, annex, readbuf,
-						 writebuf, offset, len);
+    return netbsd_qxfer_libraries_svr4<int64_t> (pid, annex, readbuf, writebuf,
+                                                 offset, len);
   else
-    return netbsd_qxfer_libraries_svr4<int32_t> (pid, annex, readbuf,
-						 writebuf, offset, len);
+    return netbsd_qxfer_libraries_svr4<int32_t> (pid, annex, readbuf, writebuf,
+                                                 offset, len);
 }
 
 /* Implement the supports_qxfer_libraries_svr4 target_ops method.  */
@@ -1207,7 +1202,7 @@ netbsd_process_target::supports_hardware_single_step ()
 const gdb_byte *
 netbsd_process_target::sw_breakpoint_from_kind (int kind, int *size)
 {
-  static gdb_byte brkpt[PTRACE_BREAKPOINT_SIZE] = {*PTRACE_BREAKPOINT};
+  static gdb_byte brkpt[PTRACE_BREAKPOINT_SIZE] = { *PTRACE_BREAKPOINT };
 
   *size = PTRACE_BREAKPOINT_SIZE;
 

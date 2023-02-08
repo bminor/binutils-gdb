@@ -52,6 +52,7 @@ struct do_module_cleanup
    discarded.  */
 
 static dummy_frame_dtor_ftype do_module_cleanup;
+
 static void
 do_module_cleanup (void *arg, int registers_valid)
 {
@@ -70,8 +71,8 @@ do_module_cleanup (void *arg, int registers_valid)
 	  struct type *ptr_type
 	    = lookup_pointer_type (data->module->out_value_type);
 
-	  addr_value = value_from_pointer (ptr_type,
-					   data->module->out_value_addr);
+	  addr_value
+	    = value_from_pointer (ptr_type, data->module->out_value_addr);
 
 	  /* SCOPE_DATA would be stale unless EXECUTEDP != NULL.  */
 	  compile_print_value (value_ind (addr_value),
@@ -142,28 +143,29 @@ compile_object_run (compile_module_up &&module)
 
       gdb_assert (func_type->code () == TYPE_CODE_FUNC);
       func_val = value_from_pointer (lookup_pointer_type (func_type),
-				   func_sym->value_block ()->entry_pc ());
+				     func_sym->value_block ()->entry_pc ());
 
       vargs = XALLOCAVEC (struct value *, func_type->num_fields ());
       if (func_type->num_fields () >= 1)
 	{
 	  gdb_assert (regs_addr != 0);
-	  vargs[current_arg] = value_from_pointer
-			  (func_type->field (current_arg).type (), regs_addr);
+	  vargs[current_arg]
+	    = value_from_pointer (func_type->field (current_arg).type (),
+				  regs_addr);
 	  ++current_arg;
 	}
       if (func_type->num_fields () >= 2)
 	{
 	  gdb_assert (data->module->out_value_addr != 0);
-	  vargs[current_arg] = value_from_pointer
-	       (func_type->field (current_arg).type (),
-		data->module->out_value_addr);
+	  vargs[current_arg]
+	    = value_from_pointer (func_type->field (current_arg).type (),
+				  data->module->out_value_addr);
 	  ++current_arg;
 	}
       gdb_assert (current_arg == func_type->num_fields ());
       auto args = gdb::make_array_view (vargs, func_type->num_fields ());
-      call_function_by_hand_dummy (func_val, NULL, args,
-				   do_module_cleanup, data);
+      call_function_by_hand_dummy (func_val, NULL, args, do_module_cleanup,
+				   data);
     }
   catch (const gdb_exception_error &ex)
     {

@@ -21,20 +21,21 @@
 #include "utils.h"
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
-namespace utils {
+namespace selftests
+{
+namespace utils
+{
 
 static void
 test_substitute_path_component ()
 {
   auto test = [] (std::string s, const char *from, const char *to,
-		  const char *expected)
-    {
-      char *temp = xstrdup (s.c_str ());
-      substitute_path_component (&temp, from, to);
-      SELF_CHECK (strcmp (temp, expected) == 0);
-      xfree (temp);
-    };
+		  const char *expected) {
+    char *temp = xstrdup (s.c_str ());
+    substitute_path_component (&temp, from, to);
+    SELF_CHECK (strcmp (temp, expected) == 0);
+    xfree (temp);
+  };
 
   test ("/abc/$def/g", "abc", "xyz", "/xyz/$def/g");
   test ("abc/$def/g", "abc", "xyz", "xyz/$def/g");
@@ -48,10 +49,11 @@ test_substitute_path_component ()
   test ("/abc/$def/abc", "abc", "xyz", "/xyz/$def/xyz");
 }
 
-}
-}
+} // namespace utils
+} // namespace selftests
 
 void _initialize_utils_selftests ();
+
 void
 _initialize_utils_selftests ()
 {

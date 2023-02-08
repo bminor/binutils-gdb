@@ -52,6 +52,7 @@ enum cooked_index_flag_enum : unsigned char
      definition.  */
   IS_TYPE_DECLARATION = 16,
 };
+
 DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
 /* Return a string representation of FLAGS.  */
@@ -87,11 +88,9 @@ struct cooked_index_entry : public allocate_on_obstack
     if ((flags & IS_TYPE_DECLARATION) != 0)
       return false;
 
-    if ((search_flags & SEARCH_STATIC_BLOCK) != 0
-	&& (flags & IS_STATIC) != 0)
+    if ((search_flags & SEARCH_STATIC_BLOCK) != 0 && (flags & IS_STATIC) != 0)
       return true;
-    if ((search_flags & SEARCH_GLOBAL_BLOCK) != 0
-	&& (flags & IS_STATIC) == 0)
+    if ((search_flags & SEARCH_GLOBAL_BLOCK) != 0 && (flags & IS_STATIC) == 0)
       return true;
     return false;
   }
@@ -128,8 +127,7 @@ struct cooked_index_entry : public allocate_on_obstack
     switch (kind)
       {
       case VARIABLES_DOMAIN:
-	return (tag == DW_TAG_variable
-		|| tag == DW_TAG_constant
+	return (tag == DW_TAG_variable || tag == DW_TAG_constant
 		|| tag == DW_TAG_enumerator);
       case FUNCTIONS_DOMAIN:
 	return tag == DW_TAG_subprogram;
@@ -192,7 +190,7 @@ struct cooked_index_entry : public allocate_on_obstack
 		      comparison_mode mode);
 
   /* Compare two entries by canonical name.  */
-  bool operator< (const cooked_index_entry &other) const
+  bool operator<(const cooked_index_entry &other) const
   {
     return compare (canonical, other.canonical, SORT) < 0;
   }
@@ -235,14 +233,14 @@ class cooked_index;
 class cooked_index_shard
 {
 public:
+
   cooked_index_shard () = default;
   DISABLE_COPY_AND_ASSIGN (cooked_index_shard);
 
   /* Create a new cooked_index_entry and register it with this object.
      Entries are owned by this object.  The new item is returned.  */
   const cooked_index_entry *add (sect_offset die_offset, enum dwarf_tag tag,
-				 cooked_index_flag flags,
-				 const char *name,
+				 cooked_index_flag flags, const char *name,
 				 const cooked_index_entry *parent_entry,
 				 dwarf2_per_cu_data *per_cu);
 
@@ -259,16 +257,13 @@ public:
   void finalize ();
 
   /* Wait for this index's finalization to be complete.  */
-  void wait () const
-  {
-    m_future.wait ();
-  }
+  void wait () const { m_future.wait (); }
 
   friend class cooked_index;
 
   /* A simple range over part of m_entries.  */
   typedef iterator_range<std::vector<cooked_index_entry *>::const_iterator>
-       range;
+    range;
 
   /* Return a range of all the entries.  */
   range all_entries () const
@@ -286,10 +281,7 @@ private:
 
   /* Return the entry that is believed to represent the program's
      "main".  This will return NULL if no such entry is available.  */
-  const cooked_index_entry *get_main () const
-  {
-    return m_main;
-  }
+  const cooked_index_entry *get_main () const { return m_main; }
 
   /* Look up ADDR in the address map, and return either the
      corresponding CU, or nullptr if the address could not be
@@ -301,16 +293,13 @@ private:
 
   /* Create a new cooked_index_entry and register it with this object.
      Entries are owned by this object.  The new item is returned.  */
-  cooked_index_entry *create (sect_offset die_offset,
-			      enum dwarf_tag tag,
-			      cooked_index_flag flags,
-			      const char *name,
+  cooked_index_entry *create (sect_offset die_offset, enum dwarf_tag tag,
+			      cooked_index_flag flags, const char *name,
 			      const cooked_index_entry *parent_entry,
 			      dwarf2_per_cu_data *per_cu)
   {
-    return new (&m_storage) cooked_index_entry (die_offset, tag, flags,
-						name, parent_entry,
-						per_cu);
+    return new (&m_storage)
+      cooked_index_entry (die_offset, tag, flags, name, parent_entry, per_cu);
   }
 
   /* GNAT only emits mangled ("encoded") names in the DWARF, and does
@@ -318,8 +307,8 @@ private:
      to do lookups.  This function recreates that structure for an
      existing entry.  It returns the base name (last element) of the
      full decoded name.  */
-  gdb::unique_xmalloc_ptr<char> handle_gnat_encoded_entry
-       (cooked_index_entry *entry, htab_t gnat_entries);
+  gdb::unique_xmalloc_ptr<char>
+  handle_gnat_encoded_entry (cooked_index_entry *entry, htab_t gnat_entries);
 
   /* A helper method that does the work of 'finalize'.  */
   void do_finalize ();
@@ -408,10 +397,7 @@ public:
      "main".  This will return NULL if no such entry is available.  */
   const cooked_index_entry *get_main () const;
 
-  cooked_index *index_for_writing () override
-  {
-    return this;
-  }
+  cooked_index *index_for_writing () override { return this; }
 
   quick_symbol_functions_up make_quick_functions () const override;
 

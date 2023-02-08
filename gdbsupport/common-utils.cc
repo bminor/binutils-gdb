@@ -54,7 +54,7 @@ xstrvprintf (const char *format, va_list ap)
      status (the printed length) with a non-NULL buffer should never
      happen, but just to be sure.  */
   if (ret == NULL || status < 0)
-    internal_error (_("vasprintf call failed"));
+    internal_error (_ ("vasprintf call failed"));
   return gdb::unique_xmalloc_ptr<char> (ret);
 }
 
@@ -75,7 +75,7 @@ xsnprintf (char *str, size_t size, const char *format, ...)
 /* See documentation in common-utils.h.  */
 
 std::string
-string_printf (const char* fmt, ...)
+string_printf (const char *fmt, ...)
 {
   va_list vp;
   int size;
@@ -89,7 +89,7 @@ string_printf (const char* fmt, ...)
   /* C++11 and later guarantee std::string uses contiguous memory and
      always includes the terminating '\0'.  */
   va_start (vp, fmt);
-  vsprintf (&str[0], fmt, vp);	/* ARI: vsprintf */
+  vsprintf (&str[0], fmt, vp); /* ARI: vsprintf */
   va_end (vp);
 
   return str;
@@ -98,7 +98,7 @@ string_printf (const char* fmt, ...)
 /* See documentation in common-utils.h.  */
 
 std::string
-string_vprintf (const char* fmt, va_list args)
+string_vprintf (const char *fmt, va_list args)
 {
   va_list vp;
   size_t size;
@@ -116,7 +116,6 @@ string_vprintf (const char* fmt, va_list args)
   return str;
 }
 
-
 /* See documentation in common-utils.h.  */
 
 std::string &
@@ -130,7 +129,6 @@ string_appendf (std::string &str, const char *fmt, ...)
 
   return str;
 }
-
 
 /* See documentation in common-utils.h.  */
 
@@ -182,41 +180,41 @@ extract_string_maybe_quoted (const char **arg)
   while (*p != '\0')
     {
       if (ISSPACE (*p) && !squote && !dquote && !bsquote)
-	break;
+        break;
       else
-	{
-	  if (bsquote)
-	    {
-	      bsquote = false;
-	      result += *p;
-	    }
-	  else if (*p == '\\')
-	    bsquote = true;
-	  else if (squote)
-	    {
-	      if (*p == '\'')
-		squote = false;
-	      else
-		result += *p;
-	    }
-	  else if (dquote)
-	    {
-	      if (*p == '"')
-		dquote = false;
-	      else
-		result += *p;
-	    }
-	  else
-	    {
-	      if (*p == '\'')
-		squote = true;
-	      else if (*p == '"')
-		dquote = true;
-	      else
-		result += *p;
-	    }
-	  p++;
-	}
+        {
+          if (bsquote)
+            {
+              bsquote = false;
+              result += *p;
+            }
+          else if (*p == '\\')
+            bsquote = true;
+          else if (squote)
+            {
+              if (*p == '\'')
+                squote = false;
+              else
+                result += *p;
+            }
+          else if (dquote)
+            {
+              if (*p == '"')
+                dquote = false;
+              else
+                result += *p;
+            }
+          else
+            {
+              if (*p == '\'')
+                squote = true;
+              else if (*p == '"')
+                dquote = true;
+              else
+                result += *p;
+            }
+          p++;
+        }
     }
 
   *arg = p;
@@ -277,11 +275,11 @@ strtoulst (const char *num, const char **trailer, int base)
   if (base == 0 || base == 16)
     {
       if (num[i] == '0' && (num[i + 1] == 'x' || num[i + 1] == 'X'))
-	{
-	  i += 2;
-	  if (base == 0)
-	    base = 16;
-	}
+        {
+          i += 2;
+          if (base == 0)
+            base = 16;
+        }
     }
 
   if (base == 0 && num[i] == '0')
@@ -303,13 +301,13 @@ strtoulst (const char *num, const char **trailer, int base)
       high_part = high_part * base + (unsigned int) (result >> HIGH_BYTE_POSN);
       result &= ((ULONGEST) 1 << HIGH_BYTE_POSN) - 1;
       if (high_part > 0xff)
-	{
-	  errno = ERANGE;
-	  result = ~ (ULONGEST) 0;
-	  high_part = 0;
-	  minus = 0;
-	  break;
-	}
+        {
+          errno = ERANGE;
+          result = ~(ULONGEST) 0;
+          high_part = 0;
+          minus = 0;
+          break;
+        }
     }
 
   if (trailer != NULL)
@@ -383,7 +381,7 @@ ULONGEST
 align_up (ULONGEST v, int n)
 {
   /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
+  gdb_assert (n && (n & (n - 1)) == 0);
   return (v + n - 1) & -n;
 }
 
@@ -393,7 +391,7 @@ ULONGEST
 align_down (ULONGEST v, int n)
 {
   /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
+  gdb_assert (n && (n & (n - 1)) == 0);
   return (v & -n);
 }
 
@@ -409,7 +407,7 @@ fromhex (int a)
   else if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
   else
-    error (_("Invalid hex digit %d"), a);
+    error (_ ("Invalid hex digit %d"), a);
 }
 
 /* See gdbsupport/common-utils.h.  */
@@ -422,11 +420,11 @@ hex2bin (const char *hex, gdb_byte *bin, int count)
   for (i = 0; i < count; i++)
     {
       if (hex[0] == 0 || hex[1] == 0)
-	{
-	  /* Hex string is short, or of uneven length.
+        {
+          /* Hex string is short, or of uneven length.
 	     Return the count that has been converted so far.  */
-	  return i;
-	}
+          return i;
+        }
       *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
       hex += 2;
     }

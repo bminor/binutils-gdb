@@ -20,7 +20,7 @@
 #ifndef NAT_AMD64_LINUX_SIGINFO_H
 #define NAT_AMD64_LINUX_SIGINFO_H
 
-#include <signal.h>  /* For siginfo_t.  */
+#include <signal.h> /* For siginfo_t.  */
 
 /* When GDB is built as a 64-bit application on Linux, the
    PTRACE_GETSIGINFO data is always presented in 64-bit layout.  Since
@@ -40,13 +40,12 @@
 
      32 / X32 siginfo -> nat_siginfo -> buffer (to the kernel)  */
 
-
 /* Kind of siginfo fixup to be performed.  */
 
 enum amd64_siginfo_fixup_mode
 {
-  FIXUP_32 = 1,   /* Fixup for 32bit.  */
-  FIXUP_X32 = 2   /* Fixup for x32.  */
+  FIXUP_32 = 1, /* Fixup for 32bit.  */
+  FIXUP_X32 = 2 /* Fixup for x32.  */
 };
 
 /* Common code for performing the fixup of the siginfo.  */

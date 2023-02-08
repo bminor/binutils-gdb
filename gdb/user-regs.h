@@ -61,12 +61,11 @@ typedef struct value *(user_reg_read_ftype) (frame_info_ptr frame,
 extern struct value *value_of_user_reg (int regnum, frame_info_ptr frame);
 
 /* Add a builtin register (present in all architectures).  */
-extern void user_reg_add_builtin (const char *name,
-				  user_reg_read_ftype *read,
+extern void user_reg_add_builtin (const char *name, user_reg_read_ftype *read,
 				  const void *baton);
 
 /* Add a per-architecture frame register.  */
-extern void user_reg_add (struct gdbarch *gdbarch, const char *name, 
+extern void user_reg_add (struct gdbarch *gdbarch, const char *name,
 			  user_reg_read_ftype *read, const void *baton);
 
 #endif

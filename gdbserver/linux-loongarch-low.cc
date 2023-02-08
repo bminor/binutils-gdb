@@ -28,7 +28,6 @@
 class loongarch_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
@@ -36,7 +35,6 @@ public:
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -62,14 +60,14 @@ bool
 loongarch_target::low_cannot_fetch_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
-			  "is not implemented by the target");
+                          "is not implemented by the target");
 }
 
 bool
 loongarch_target::low_cannot_store_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_store_register "
-			  "is not implemented by the target");
+                          "is not implemented by the target");
 }
 
 /* Implementation of linux target ops method "low_arch_setup".  */
@@ -99,9 +97,12 @@ loongarch_fill_gregset (struct regcache *regcache, void *buf)
 
   for (i = 1; i < 32; i++)
     collect_register (regcache, i, *regset + i);
-  collect_register (regcache, LOONGARCH_ORIG_A0_REGNUM, *regset + LOONGARCH_ORIG_A0_REGNUM);
-  collect_register (regcache, LOONGARCH_PC_REGNUM, *regset + LOONGARCH_PC_REGNUM);
-  collect_register (regcache, LOONGARCH_BADV_REGNUM, *regset + LOONGARCH_BADV_REGNUM);
+  collect_register (regcache, LOONGARCH_ORIG_A0_REGNUM,
+                    *regset + LOONGARCH_ORIG_A0_REGNUM);
+  collect_register (regcache, LOONGARCH_PC_REGNUM,
+                    *regset + LOONGARCH_PC_REGNUM);
+  collect_register (regcache, LOONGARCH_BADV_REGNUM,
+                    *regset + LOONGARCH_BADV_REGNUM);
 }
 
 /* Supply GPRs from BUF into REGCACHE.  */
@@ -115,9 +116,12 @@ loongarch_store_gregset (struct regcache *regcache, const void *buf)
   supply_register_zeroed (regcache, 0);
   for (i = 1; i < 32; i++)
     supply_register (regcache, i, *regset + i);
-  supply_register (regcache, LOONGARCH_ORIG_A0_REGNUM, *regset + LOONGARCH_ORIG_A0_REGNUM);
-  supply_register (regcache, LOONGARCH_PC_REGNUM, *regset + LOONGARCH_PC_REGNUM);
-  supply_register (regcache, LOONGARCH_BADV_REGNUM, *regset + LOONGARCH_BADV_REGNUM);
+  supply_register (regcache, LOONGARCH_ORIG_A0_REGNUM,
+                   *regset + LOONGARCH_ORIG_A0_REGNUM);
+  supply_register (regcache, LOONGARCH_PC_REGNUM,
+                   *regset + LOONGARCH_PC_REGNUM);
+  supply_register (regcache, LOONGARCH_BADV_REGNUM,
+                   *regset + LOONGARCH_BADV_REGNUM);
 }
 
 /* Collect FPRs from REGCACHE into BUF.  */
@@ -131,19 +135,19 @@ loongarch_fill_fpregset (struct regcache *regcache, void *buf)
 
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
     {
-      regbuf = (gdb_byte *)buf + fprsize * i;
+      regbuf = (gdb_byte *) buf + fprsize * i;
       collect_register (regcache, LOONGARCH_FIRST_FP_REGNUM + i, regbuf);
     }
 
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FCC; i++)
     {
-      regbuf = (gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
-	fccsize * i;
+      regbuf = (gdb_byte *) buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET
+               + fccsize * i;
       collect_register (regcache, LOONGARCH_FIRST_FCC_REGNUM + i, regbuf);
     }
 
-  regbuf = (gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
-    fccsize * LOONGARCH_LINUX_NUM_FCC;
+  regbuf = (gdb_byte *) buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET
+           + fccsize * LOONGARCH_LINUX_NUM_FCC;
   collect_register (regcache, LOONGARCH_FCSR_REGNUM, regbuf);
 }
 
@@ -158,19 +162,19 @@ loongarch_store_fpregset (struct regcache *regcache, const void *buf)
 
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
     {
-      regbuf = (const gdb_byte *)buf + fprsize * i;
+      regbuf = (const gdb_byte *) buf + fprsize * i;
       supply_register (regcache, LOONGARCH_FIRST_FP_REGNUM + i, regbuf);
     }
 
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FCC; i++)
     {
-      regbuf = (const gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
-	fccsize * i;
+      regbuf = (const gdb_byte *) buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET
+               + fccsize * i;
       supply_register (regcache, LOONGARCH_FIRST_FCC_REGNUM + i, regbuf);
     }
 
-  regbuf = (const gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
-    fccsize * LOONGARCH_LINUX_NUM_FCC;
+  regbuf = (const gdb_byte *) buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET
+           + fccsize * LOONGARCH_LINUX_NUM_FCC;
   supply_register (regcache, LOONGARCH_FCSR_REGNUM, regbuf);
 }
 
@@ -184,20 +188,18 @@ static struct regset_info loongarch_regsets[] = {
 };
 
 /* LoongArch/Linux regset information.  */
-static struct regsets_info loongarch_regsets_info =
-  {
-    loongarch_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct regsets_info loongarch_regsets_info = {
+  loongarch_regsets, /* regsets */
+  0,                 /* num_regsets */
+  NULL,              /* disabled_regsets */
+};
 
 /* Definition of linux_target_ops data member "regs_info".  */
-static struct regs_info loongarch_regs =
-  {
-    NULL, /* regset_bitmap */
-    NULL, /* usrregs */
-    &loongarch_regsets_info,
-  };
+static struct regs_info loongarch_regs = {
+  NULL, /* regset_bitmap */
+  NULL, /* usrregs */
+  &loongarch_regsets_info,
+};
 
 /* Implementation of linux target ops method "get_regs_info".  */
 
@@ -251,7 +253,7 @@ loongarch_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
 /* LoongArch BRK software debug mode instruction.
    This instruction needs to match gdb/loongarch-tdep.c
    (loongarch_default_breakpoint).  */
-static const gdb_byte loongarch_breakpoint[] = {0x05, 0x00, 0x2a, 0x00};
+static const gdb_byte loongarch_breakpoint[] = { 0x05, 0x00, 0x2a, 0x00 };
 
 /* Implementation of target ops method "breakpoint_kind_from_pc".  */
 

@@ -60,8 +60,8 @@ struct regcache : public reg_buffer_common
 };
 
 struct regcache *init_register_cache (struct regcache *regcache,
-				      const struct target_desc *tdesc,
-				      unsigned char *regbuf);
+                                      const struct target_desc *tdesc,
+                                      unsigned char *regbuf);
 
 void regcache_cpy (struct regcache *dst, struct regcache *src);
 
@@ -113,7 +113,7 @@ int register_size (const struct target_desc *tdesc, int n);
 /* No throw version of find_regno.  If NAME is not a known register, return
    an empty value.  */
 gdb::optional<int> find_regno_no_throw (const struct target_desc *tdesc,
-					const char *name);
+                                        const char *name);
 
 int find_regno (const struct target_desc *tdesc, const char *name);
 
@@ -121,11 +121,11 @@ void supply_register (struct regcache *regcache, int n, const void *buf);
 
 void supply_register_zeroed (struct regcache *regcache, int n);
 
-void supply_register_by_name (struct regcache *regcache,
-			      const char *name, const void *buf);
+void supply_register_by_name (struct regcache *regcache, const char *name,
+                              const void *buf);
 
 void supply_register_by_name_zeroed (struct regcache *regcache,
-				     const char *name);
+                                     const char *name);
 
 void supply_regblock (struct regcache *regcache, const void *buf);
 
@@ -133,14 +133,14 @@ void collect_register (struct regcache *regcache, int n, void *buf);
 
 void collect_register_as_string (struct regcache *regcache, int n, char *buf);
 
-void collect_register_by_name (struct regcache *regcache,
-			       const char *name, void *buf);
+void collect_register_by_name (struct regcache *regcache, const char *name,
+                               void *buf);
 
 /* Read a raw register as an unsigned integer.  Convenience wrapper
    around regcache_raw_get_unsigned that takes a register name instead
    of a register number.  */
 
 ULONGEST regcache_raw_get_unsigned_by_name (struct regcache *regcache,
-					    const char *name);
+                                            const char *name);
 
 #endif /* GDBSERVER_REGCACHE_H */

@@ -27,7 +27,8 @@
    cardinal.  When there is no corresponding register, it returns a
    negative value.  */
 
-enum sim_regno {
+enum sim_regno
+{
   /* Normal sane architecture.  The simulator is known to not model
      this register.  */
   SIM_REGNO_DOES_NOT_EXIST = -1,

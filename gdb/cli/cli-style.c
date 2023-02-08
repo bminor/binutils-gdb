@@ -27,7 +27,7 @@
 
 /* True if styling is enabled.  */
 
-#if defined (__MSDOS__)
+#if defined(__MSDOS__)
 bool cli_styling = false;
 #else
 bool cli_styling = true;
@@ -44,27 +44,14 @@ bool source_styling = true;
 bool disassembler_styling = true;
 
 /* Name of colors; must correspond to ui_file_style::basic_color.  */
-static const char * const cli_colors[] = {
-  "none",
-  "black",
-  "red",
-  "green",
-  "yellow",
-  "blue",
-  "magenta",
-  "cyan",
-  "white",
-  nullptr
-};
+static const char *const cli_colors[]
+  = { "none", "black",	 "red",	 "green", "yellow",
+      "blue", "magenta", "cyan", "white", nullptr };
 
 /* Names of intensities; must correspond to
    ui_file_style::intensity.  */
-static const char * const cli_intensities[] = {
-  "normal",
-  "bold",
-  "dim",
-  nullptr
-};
+static const char *const cli_intensities[]
+  = { "normal", "bold", "dim", nullptr };
 
 /* See cli-style.h.  */
 
@@ -199,14 +186,13 @@ cli_style_option::do_set_value (const char *ignore, int from_tty,
    The style for which WHAT is shown is retrieved from CMD context.  */
 
 static void
-do_show (const char *what, struct ui_file *file,
-	 struct cmd_list_element *cmd,
+do_show (const char *what, struct ui_file *file, struct cmd_list_element *cmd,
 	 const char *value)
 {
   cli_style_option *cso = (cli_style_option *) cmd->context ();
-  gdb_puts (_("The "), file);
-  fprintf_styled (file, cso->style (), _("\"%s\" style"), cso->name ());
-  gdb_printf (file, _(" %s is: %s\n"), what, value);
+  gdb_puts (_ ("The "), file);
+  fprintf_styled (file, cso->style (), _ ("\"%s\" style"), cso->name ());
+  gdb_printf (file, _ (" %s is: %s\n"), what, value);
 }
 
 /* See cli-style.h.  */
@@ -216,7 +202,7 @@ cli_style_option::do_show_foreground (struct ui_file *file, int from_tty,
 				      struct cmd_list_element *cmd,
 				      const char *value)
 {
-  do_show (_("foreground color"), file, cmd, value);
+  do_show (_ ("foreground color"), file, cmd, value);
 }
 
 /* See cli-style.h.  */
@@ -226,7 +212,7 @@ cli_style_option::do_show_background (struct ui_file *file, int from_tty,
 				      struct cmd_list_element *cmd,
 				      const char *value)
 {
-  do_show (_("background color"), file, cmd, value);
+  do_show (_ ("background color"), file, cmd, value);
 }
 
 /* See cli-style.h.  */
@@ -236,7 +222,7 @@ cli_style_option::do_show_intensity (struct ui_file *file, int from_tty,
 				     struct cmd_list_element *cmd,
 				     const char *value)
 {
-  do_show (_("display intensity"), file, cmd, value);
+  do_show (_ ("display intensity"), file, cmd, value);
 }
 
 /* See cli-style.h.  */
@@ -254,41 +240,31 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 
   set_show_commands commands;
 
-  commands = add_setshow_enum_cmd
-    ("foreground", theclass, cli_colors,
-     &m_foreground,
-     _("Set the foreground color for this property."),
-     _("Show the foreground color for this property."),
-     nullptr,
-     do_set_value,
-     do_show_foreground,
-     &m_set_list, &m_show_list);
+  commands
+    = add_setshow_enum_cmd ("foreground", theclass, cli_colors, &m_foreground,
+			    _ ("Set the foreground color for this property."),
+			    _ ("Show the foreground color for this property."),
+			    nullptr, do_set_value, do_show_foreground,
+			    &m_set_list, &m_show_list);
   commands.set->set_context (this);
   commands.show->set_context (this);
 
-  commands = add_setshow_enum_cmd
-    ("background", theclass, cli_colors,
-     &m_background,
-     _("Set the background color for this property."),
-     _("Show the background color for this property."),
-     nullptr,
-     do_set_value,
-     do_show_background,
-     &m_set_list, &m_show_list);
+  commands
+    = add_setshow_enum_cmd ("background", theclass, cli_colors, &m_background,
+			    _ ("Set the background color for this property."),
+			    _ ("Show the background color for this property."),
+			    nullptr, do_set_value, do_show_background,
+			    &m_set_list, &m_show_list);
   commands.set->set_context (this);
   commands.show->set_context (this);
 
   if (!skip_intensity)
     {
-      commands = add_setshow_enum_cmd
-	("intensity", theclass, cli_intensities,
-	 &m_intensity,
-	 _("Set the display intensity for this property."),
-	 _("Show the display intensity for this property."),
-	 nullptr,
-	 do_set_value,
-	 do_show_intensity,
-	 &m_set_list, &m_show_list);
+      commands = add_setshow_enum_cmd (
+	"intensity", theclass, cli_intensities, &m_intensity,
+	_ ("Set the display intensity for this property."),
+	_ ("Show the display intensity for this property."), nullptr,
+	do_set_value, do_show_intensity, &m_set_list, &m_show_list);
       commands.set->set_context (this);
       commands.show->set_context (this);
     }
@@ -308,7 +284,7 @@ static cmd_list_element *style_disasm_set_list;
 static cmd_list_element *style_disasm_show_list;
 
 static void
-set_style_enabled  (const char *args, int from_tty, struct cmd_list_element *c)
+set_style_enabled (const char *args, int from_tty, struct cmd_list_element *c)
 {
   g_source_cache.clear ();
   gdb::observers::styling_changed.notify ();
@@ -319,9 +295,9 @@ show_style_enabled (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
   if (cli_styling)
-    gdb_printf (file, _("CLI output styling is enabled.\n"));
+    gdb_printf (file, _ ("CLI output styling is enabled.\n"));
   else
-    gdb_printf (file, _("CLI output styling is disabled.\n"));
+    gdb_printf (file, _ ("CLI output styling is disabled.\n"));
 }
 
 static void
@@ -329,9 +305,9 @@ show_style_sources (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
   if (source_styling)
-    gdb_printf (file, _("Source code styling is enabled.\n"));
+    gdb_printf (file, _ ("Source code styling is enabled.\n"));
   else
-    gdb_printf (file, _("Source code styling is disabled.\n"));
+    gdb_printf (file, _ ("Source code styling is disabled.\n"));
 }
 
 /* Implement 'show style disassembler'.  */
@@ -341,102 +317,107 @@ show_style_disassembler (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
   if (disassembler_styling)
-    gdb_printf (file, _("Disassembler output styling is enabled.\n"));
+    gdb_printf (file, _ ("Disassembler output styling is enabled.\n"));
   else
-    gdb_printf (file, _("Disassembler output styling is disabled.\n"));
+    gdb_printf (file, _ ("Disassembler output styling is disabled.\n"));
 }
 
 void _initialize_cli_style ();
+
 void
 _initialize_cli_style ()
 {
-  add_setshow_prefix_cmd ("style", no_class,
-			  _("\
+  add_setshow_prefix_cmd ("style", no_class, _ ("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-			  _("\
+			  _ ("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-			  &style_set_list, &style_show_list,
-			  &setlist, &showlist);
+			  &style_set_list, &style_show_list, &setlist,
+			  &showlist);
 
-  add_setshow_boolean_cmd ("enabled", no_class, &cli_styling, _("\
-Set whether CLI styling is enabled."), _("\
-Show whether CLI is enabled."), _("\
+  add_setshow_boolean_cmd ("enabled", no_class, &cli_styling, _ ("\
+Set whether CLI styling is enabled."),
+			   _ ("\
+Show whether CLI is enabled."),
+			   _ ("\
 If enabled, output to the terminal is styled."),
 			   set_style_enabled, show_style_enabled,
 			   &style_set_list, &style_show_list);
 
-  add_setshow_boolean_cmd ("sources", no_class, &source_styling, _("\
-Set whether source code styling is enabled."), _("\
-Show whether source code styling is enabled."), _("\
+  add_setshow_boolean_cmd (
+    "sources", no_class, &source_styling, _ ("\
+Set whether source code styling is enabled."),
+    _ ("\
+Show whether source code styling is enabled."),
+    _ (
+      "\
 If enabled, source code is styled.\n"
 #ifdef HAVE_SOURCE_HIGHLIGHT
-"Note that source styling only works if styling in general is enabled,\n\
+      "Note that source styling only works if styling in general is enabled,\n\
 see \"show style enabled\"."
 #else
-"Source highlighting may be disabled in this installation of gdb, because\n\
+      "Source highlighting may be disabled in this installation of gdb, because\n\
 it was not linked against GNU Source Highlight.  However, it might still be\n\
 available if the appropriate extension is available at runtime."
 #endif
-			   ), set_style_enabled, show_style_sources,
-			   &style_set_list, &style_show_list);
+      ),
+    set_style_enabled, show_style_sources, &style_set_list, &style_show_list);
 
-  add_setshow_prefix_cmd ("disassembler", no_class,
-			  _("\
+  add_setshow_prefix_cmd ("disassembler", no_class, _ ("\
 Style-specific settings for the disassembler.\n\
 Configure various disassembler style-related variables."),
-			  _("\
+			  _ ("\
 Style-specific settings for the disassembler.\n\
 Configure various disassembler style-related variables."),
 			  &style_disasm_set_list, &style_disasm_show_list,
 			  &style_set_list, &style_show_list);
 
-  add_setshow_boolean_cmd ("enabled", no_class, &disassembler_styling, _("\
-Set whether disassembler output styling is enabled."), _("\
-Show whether disassembler output styling is enabled."), _("\
+  add_setshow_boolean_cmd ("enabled", no_class, &disassembler_styling, _ ("\
+Set whether disassembler output styling is enabled."),
+			   _ ("\
+Show whether disassembler output styling is enabled."),
+			   _ ("\
 If enabled, disassembler output is styled.  Disassembler highlighting\n\
 requires the Python Pygments library, if this library is not available\n\
-then disassembler highlighting will not be possible."
-			   ), set_style_enabled, show_style_disassembler,
+then disassembler highlighting will not be possible."),
+			   set_style_enabled, show_style_disassembler,
 			   &style_disasm_set_list, &style_disasm_show_list);
 
-  file_name_style.add_setshow_commands (no_class, _("\
+  file_name_style.add_setshow_commands (no_class, _ ("\
 Filename display styling.\n\
 Configure filename colors and display intensity."),
 					&style_set_list, &style_show_list,
 					false);
 
   set_show_commands function_prefix_cmds
-    = function_name_style.add_setshow_commands (no_class, _("\
+    = function_name_style.add_setshow_commands (no_class, _ ("\
 Function name display styling.\n\
 Configure function name colors and display intensity"),
 						&style_set_list,
-						&style_show_list,
-						false);
+						&style_show_list, false);
 
-  variable_name_style.add_setshow_commands (no_class, _("\
+  variable_name_style.add_setshow_commands (no_class, _ ("\
 Variable name display styling.\n\
 Configure variable name colors and display intensity"),
 					    &style_set_list, &style_show_list,
 					    false);
 
   set_show_commands address_prefix_cmds
-    = address_style.add_setshow_commands (no_class, _("\
+    = address_style.add_setshow_commands (no_class, _ ("\
 Address display styling.\n\
 Configure address colors and display intensity"),
 					  &style_set_list, &style_show_list,
 					  false);
 
-  title_style.add_setshow_commands (no_class, _("\
+  title_style.add_setshow_commands (no_class, _ ("\
 Title display styling.\n\
 Configure title colors and display intensity\n\
 Some commands (such as \"apropos -v REGEXP\") use the title style to improve\n\
 readability."),
-				    &style_set_list, &style_show_list,
-				    false);
+				    &style_set_list, &style_show_list, false);
 
-  highlight_style.add_setshow_commands (no_class, _("\
+  highlight_style.add_setshow_commands (no_class, _ ("\
 Highlight display styling.\n\
 Configure highlight colors and display intensity\n\
 Some commands use the highlight style to draw the attention to a part\n\
@@ -444,7 +425,7 @@ of their output."),
 					&style_set_list, &style_show_list,
 					false);
 
-  metadata_style.add_setshow_commands (no_class, _("\
+  metadata_style.add_setshow_commands (no_class, _ ("\
 Metadata display styling.\n\
 Configure metadata colors and display intensity\n\
 The \"metadata\" style is used when GDB displays information about\n\
@@ -452,7 +433,7 @@ your data, for example \"<unavailable>\""),
 				       &style_set_list, &style_show_list,
 				       false);
 
-  tui_border_style.add_setshow_commands (no_class, _("\
+  tui_border_style.add_setshow_commands (no_class, _ ("\
 TUI border display styling.\n\
 Configure TUI border colors\n\
 The \"tui-border\" style is used when GDB displays the border of a\n\
@@ -460,22 +441,21 @@ TUI window that does not have the focus."),
 					 &style_set_list, &style_show_list,
 					 true);
 
-  tui_active_border_style.add_setshow_commands (no_class, _("\
+  tui_active_border_style.add_setshow_commands (no_class, _ ("\
 TUI active border display styling.\n\
 Configure TUI active border colors\n\
 The \"tui-active-border\" style is used when GDB displays the border of a\n\
 TUI window that does have the focus."),
 						&style_set_list,
-						&style_show_list,
-						true);
+						&style_show_list, true);
 
-  version_style.add_setshow_commands (no_class, _("\
+  version_style.add_setshow_commands (no_class, _ ("\
 Version string display styling.\n\
 Configure colors used to display the GDB version string."),
 				      &style_set_list, &style_show_list,
 				      false);
 
-  disasm_mnemonic_style.add_setshow_commands (no_class, _("\
+  disasm_mnemonic_style.add_setshow_commands (no_class, _ ("\
 Disassembler mnemonic display styling.\n\
 Configure the colors and display intensity for instruction mnemonics\n\
 in the disassembler output.  The \"disassembler mnemonic\" style is\n\
@@ -486,10 +466,9 @@ This style will only be used for targets that support libopcodes based\n\
 disassembler styling.  When Python Pygments based styling is used\n\
 then this style has no effect."),
 					      &style_disasm_set_list,
-					      &style_disasm_show_list,
-					      false);
+					      &style_disasm_show_list, false);
 
-  disasm_register_style.add_setshow_commands (no_class, _("\
+  disasm_register_style.add_setshow_commands (no_class, _ ("\
 Disassembler register display styling.\n\
 Configure the colors and display intensity for registers in the\n\
 disassembler output.\n\
@@ -498,10 +477,9 @@ This style will only be used for targets that support libopcodes based\n\
 disassembler styling.  When Python Pygments based styling is used\n\
 then this style has no effect."),
 					      &style_disasm_set_list,
-					      &style_disasm_show_list,
-					      false);
+					      &style_disasm_show_list, false);
 
-  disasm_immediate_style.add_setshow_commands (no_class, _("\
+  disasm_immediate_style.add_setshow_commands (no_class, _ ("\
 Disassembler immediate display styling.\n\
 Configure the colors and display intensity for immediates in the\n\
 disassembler output.  The \"disassembler immediate\" style is used for\n\
@@ -512,10 +490,9 @@ This style will only be used for targets that support libopcodes based\n\
 disassembler styling.  When Python Pygments based styling is used\n\
 then this style has no effect."),
 					       &style_disasm_set_list,
-					       &style_disasm_show_list,
-					       false);
+					       &style_disasm_show_list, false);
 
-  disasm_comment_style.add_setshow_commands (no_class, _("\
+  disasm_comment_style.add_setshow_commands (no_class, _ ("\
 Disassembler comment display styling.\n\
 Configure the colors and display intensity for comments in the\n\
 disassembler output.  The \"disassembler comment\" style is used for\n\
@@ -527,8 +504,7 @@ This style will only be used for targets that support libopcodes based\n\
 disassembler styling.  When Python Pygments based styling is used\n\
 then this style has no effect."),
 					     &style_disasm_set_list,
-					     &style_disasm_show_list,
-					     false);
+					     &style_disasm_show_list, false);
 
   /* Setup 'disassembler address' style and 'disassembler symbol' style,
      these are aliases for 'address' and 'function' styles respectively.  */

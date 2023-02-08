@@ -36,10 +36,11 @@ namespace selftests
 struct selftest
 {
   selftest (std::string name, std::function<void (void)> test)
-    : name { std::move (name) }, test { std::move (test) }
-  { }
-  bool operator< (const selftest &rhs) const
-  { return name < rhs.name; }
+    : name { std::move (name) },
+      test { std::move (test) }
+  {
+  }
+  bool operator<(const selftest &rhs) const { return name < rhs.name; }
 
   std::string name;
   std::function<void (void)> test;
@@ -60,7 +61,7 @@ extern bool run_verbose ();
 /* Register a new self-test.  */
 
 extern void register_test (const std::string &name,
-			   std::function<void(void)> function);
+                           std::function<void (void)> function);
 
 /* A selftest generator is a callback function used to delay the generation
    of selftests.  */
@@ -79,18 +80,20 @@ extern void add_lazy_generator (selftests_generator generator);
    element of FILTERS.  */
 
 extern void run_tests (gdb::array_view<const char *const> filters,
-		       bool verbose = false);
+                       bool verbose = false);
 
 /* Reset GDB or GDBserver's internal state.  */
 extern void reset ();
-}
+} // namespace selftests
 
 /* Check that VALUE is true, and, if not, throw an exception.  */
 
-#define SELF_CHECK(VALUE)						\
-  do {									\
-    if (!(VALUE))							\
-      error (_("self-test failed at %s:%d"), __FILE__, __LINE__);	\
-  } while (0)
+#define SELF_CHECK(VALUE)                                            \
+  do                                                                 \
+    {                                                                \
+      if (!(VALUE))                                                  \
+        error (_ ("self-test failed at %s:%d"), __FILE__, __LINE__); \
+    }                                                                \
+  while (0)
 
 #endif /* COMMON_SELFTEST_H */

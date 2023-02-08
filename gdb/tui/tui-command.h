@@ -31,24 +31,13 @@ struct tui_cmd_window : public tui_win_info
 
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
 
-  void refresh_window () override
-  {
-  }
+  void refresh_window () override {}
 
-  const char *name () const override
-  {
-    return CMD_NAME;
-  }
+  const char *name () const override { return CMD_NAME; }
 
-  bool can_scroll () const override
-  {
-    return false;
-  }
+  bool can_scroll () const override { return false; }
 
-  bool can_box () const override
-  {
-    return false;
-  }
+  bool can_box () const override { return false; }
 
   void resize (int height, int width, int origin_x, int origin_y) override;
 
@@ -61,13 +50,9 @@ struct tui_cmd_window : public tui_win_info
 
 protected:
 
-  void do_scroll_vertical (int num_to_scroll) override
-  {
-  }
+  void do_scroll_vertical (int num_to_scroll) override {}
 
-  void do_scroll_horizontal (int num_to_scroll) override
-  {
-  }
+  void do_scroll_horizontal (int num_to_scroll) override {}
 };
 
 /* Refresh the command window.  */

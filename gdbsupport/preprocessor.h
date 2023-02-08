@@ -21,7 +21,7 @@
 /* Generally useful preprocessor bits.  */
 
 /* Concatenate two tokens.  */
-#define CONCAT_1(a, b) a ## b
+#define CONCAT_1(a, b) a##b
 #define CONCAT(a, b) CONCAT_1 (a, b)
 
 /* Stringification.  */

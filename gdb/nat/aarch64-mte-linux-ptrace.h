@@ -23,11 +23,11 @@
 /* MTE allocation tag access */
 
 #ifndef PTRACE_PEEKMTETAGS
-#define PTRACE_PEEKMTETAGS	  33
+#define PTRACE_PEEKMTETAGS 33
 #endif
 
 #ifndef PTRACE_POKEMTETAGS
-#define PTRACE_POKEMTETAGS	  34
+#define PTRACE_POKEMTETAGS 34
 #endif
 
 /* Maximum number of tags to pass at once to the kernel.  */

@@ -20,9 +20,7 @@
 
 extern ULONGEST rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch,
 					   const gdb_byte *ldi_buf,
-					   gdb_byte *readbuf,
-					   ULONGEST offset,
-					   ULONGEST len,
-					   int close_ldinfo_fd);
+					   gdb_byte *readbuf, ULONGEST offset,
+					   ULONGEST len, int close_ldinfo_fd);
 
 #endif /* RS6000_AIX_TDEP_H */

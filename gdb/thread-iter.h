@@ -37,6 +37,7 @@ using inf_threads_iterator
 class all_threads_iterator
 {
 public:
+
   typedef all_threads_iterator self_type;
   typedef struct thread_info *value_type;
   typedef struct thread_info *&reference;
@@ -45,7 +46,9 @@ public:
   typedef int difference_type;
 
   /* Tag type.  */
-  struct begin_t {};
+  struct begin_t
+  {
+  };
 
   /* Create an iterator that points to the first thread of the first
      inferior.  */
@@ -54,7 +57,8 @@ public:
   /* Create a one-past-end iterator.  */
   all_threads_iterator ()
     : m_thr (nullptr)
-  {}
+  {
+  }
 
   thread_info *operator* () const { return m_thr; }
 
@@ -65,16 +69,22 @@ public:
   }
 
   bool operator== (const all_threads_iterator &other) const
-  { return m_thr == other.m_thr; }
+  {
+    return m_thr == other.m_thr;
+  }
 
   bool operator!= (const all_threads_iterator &other) const
-  { return m_thr != other.m_thr; }
+  {
+    return m_thr != other.m_thr;
+  }
 
 private:
+
   /* Advance to the next thread.  */
   void advance ();
 
 private:
+
   /* The current inferior and thread.  M_THR is NULL if we reached the
      end of the threads list of the last inferior.  */
   inferior *m_inf;
@@ -86,6 +96,7 @@ private:
 class all_matching_threads_iterator
 {
 public:
+
   typedef all_matching_threads_iterator self_type;
   typedef struct thread_info *value_type;
   typedef struct thread_info *&reference;
@@ -110,12 +121,17 @@ public:
   }
 
   bool operator== (const all_matching_threads_iterator &other) const
-  { return m_thr == other.m_thr; }
+  {
+    return m_thr == other.m_thr;
+  }
 
   bool operator!= (const all_matching_threads_iterator &other) const
-  { return m_thr != other.m_thr; }
+  {
+    return m_thr != other.m_thr;
+  }
 
 private:
+
   /* Advance to next thread, skipping filtered threads.  */
   void advance ();
 
@@ -123,6 +139,7 @@ private:
   bool m_inf_matches ();
 
 private:
+
   enum class mode
   {
     /* All threads, possibly filtered down to a single target.  */
@@ -167,13 +184,11 @@ using inf_non_exited_threads_iterator
 
 /* Iterate over all threads of all inferiors, safely.  */
 
-using all_threads_safe_iterator
-  = basic_safe_iterator<all_threads_iterator>;
+using all_threads_safe_iterator = basic_safe_iterator<all_threads_iterator>;
 
 /* Iterate over all threads of an inferior, safely.  */
 
-using safe_inf_threads_iterator
-  = basic_safe_iterator<inf_threads_iterator>;
+using safe_inf_threads_iterator = basic_safe_iterator<inf_threads_iterator>;
 
 /* A range adapter that makes it possible to iterate over all threads
    of an inferior with range-for.  */
@@ -203,20 +218,32 @@ using all_threads_safe_range = iterator_range<all_threads_safe_iterator>;
 struct all_matching_threads_range
 {
 public:
+
   all_matching_threads_range (process_stratum_target *filter_target,
 			      ptid_t filter_ptid)
-    : m_filter_target (filter_target), m_filter_ptid (filter_ptid)
-  {}
+    : m_filter_target (filter_target),
+      m_filter_ptid (filter_ptid)
+  {
+  }
+
   all_matching_threads_range ()
-    : m_filter_target (nullptr), m_filter_ptid (minus_one_ptid)
-  {}
+    : m_filter_target (nullptr),
+      m_filter_ptid (minus_one_ptid)
+  {
+  }
 
   all_matching_threads_iterator begin () const
-  { return all_matching_threads_iterator (m_filter_target, m_filter_ptid); }
+  {
+    return all_matching_threads_iterator (m_filter_target, m_filter_ptid);
+  }
+
   all_matching_threads_iterator end () const
-  { return all_matching_threads_iterator (); }
+  {
+    return all_matching_threads_iterator ();
+  }
 
 private:
+
   /* The filter.  */
   process_stratum_target *m_filter_target;
   ptid_t m_filter_ptid;
@@ -230,21 +257,32 @@ private:
 class all_non_exited_threads_range
 {
 public:
+
   all_non_exited_threads_range (process_stratum_target *filter_target,
 				ptid_t filter_ptid)
-    : m_filter_target (filter_target), m_filter_ptid (filter_ptid)
-  {}
+    : m_filter_target (filter_target),
+      m_filter_ptid (filter_ptid)
+  {
+  }
 
   all_non_exited_threads_range ()
-    : m_filter_target (nullptr), m_filter_ptid (minus_one_ptid)
-  {}
+    : m_filter_target (nullptr),
+      m_filter_ptid (minus_one_ptid)
+  {
+  }
 
   all_non_exited_threads_iterator begin () const
-  { return all_non_exited_threads_iterator (m_filter_target, m_filter_ptid); }
+  {
+    return all_non_exited_threads_iterator (m_filter_target, m_filter_ptid);
+  }
+
   all_non_exited_threads_iterator end () const
-  { return all_non_exited_threads_iterator (); }
+  {
+    return all_non_exited_threads_iterator ();
+  }
 
 private:
+
   process_stratum_target *m_filter_target;
   ptid_t m_filter_ptid;
 };

@@ -53,49 +53,49 @@ struct lm_info_svr4 : public lm_info_base
    in bytes unless otherwise specified.  */
 
 struct link_map_offsets
-  {
-    /* Offset and size of r_debug.r_version.  */
-    int r_version_offset, r_version_size;
+{
+  /* Offset and size of r_debug.r_version.  */
+  int r_version_offset, r_version_size;
 
-    /* Offset of r_debug.r_map.  */
-    int r_map_offset;
+  /* Offset of r_debug.r_map.  */
+  int r_map_offset;
 
-    /* Offset of r_debug.r_brk.  */
-    int r_brk_offset;
+  /* Offset of r_debug.r_brk.  */
+  int r_brk_offset;
 
-    /* Offset of r_debug.r_ldsomap.  */
-    int r_ldsomap_offset;
+  /* Offset of r_debug.r_ldsomap.  */
+  int r_ldsomap_offset;
 
-    /* Offset of r_debug_extended.r_next.  */
-    int r_next_offset;
+  /* Offset of r_debug_extended.r_next.  */
+  int r_next_offset;
 
-    /* Size of struct link_map (or equivalent), or at least enough of it
+  /* Size of struct link_map (or equivalent), or at least enough of it
        to be able to obtain the fields below.  */
-    int link_map_size;
+  int link_map_size;
 
-    /* Offset to l_addr field in struct link_map.  */
-    int l_addr_offset;
+  /* Offset to l_addr field in struct link_map.  */
+  int l_addr_offset;
 
-    /* Offset to l_ld field in struct link_map.  */
-    int l_ld_offset;
+  /* Offset to l_ld field in struct link_map.  */
+  int l_ld_offset;
 
-    /* Offset to l_next field in struct link_map.  */
-    int l_next_offset;
+  /* Offset to l_next field in struct link_map.  */
+  int l_next_offset;
 
-    /* Offset to l_prev field in struct link_map.  */
-    int l_prev_offset;
+  /* Offset to l_prev field in struct link_map.  */
+  int l_prev_offset;
 
-    /* Offset to l_name field in struct link_map.  */
-    int l_name_offset;
-  };
+  /* Offset to l_name field in struct link_map.  */
+  int l_name_offset;
+};
 
 /* set_solib_svr4_fetch_link_map_offsets() is intended to be called by
    a <arch>_gdbarch_init() function.  It is used to establish an
    architecture specific link_map_offsets fetcher for the architecture
    being defined.  */
 
-extern void set_solib_svr4_fetch_link_map_offsets
-  (struct gdbarch *gdbarch, struct link_map_offsets *(*func) (void));
+extern void set_solib_svr4_fetch_link_map_offsets (
+  struct gdbarch *gdbarch, struct link_map_offsets *(*func) (void) );
 
 /* This function is called by thread_db.c.  Return the address of the
    link map for the given objfile.  */

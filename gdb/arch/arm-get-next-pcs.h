@@ -55,10 +55,8 @@ struct arm_get_next_pcs
 
 /* Initialize arm_get_next_pcs.  */
 void arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
-			    struct arm_get_next_pcs_ops *ops,
-			    int byte_order,
-			    int byte_order_for_code,
-			    int has_thumb2_breakpoint,
+			    struct arm_get_next_pcs_ops *ops, int byte_order,
+			    int byte_order_for_code, int has_thumb2_breakpoint,
 			    struct regcache *regcache);
 
 /* Find the next possible PCs after the current instruction executes.  */

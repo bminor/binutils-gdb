@@ -33,10 +33,12 @@
 
 /* For compatibility with previous implementations of GDB on arm/NetBSD,
    override the default little-endian breakpoint.  */
-static const gdb_byte arm_nbsd_arm_le_breakpoint[] = {0x11, 0x00, 0x00, 0xe6};
-static const gdb_byte arm_nbsd_arm_be_breakpoint[] = {0xe6, 0x00, 0x00, 0x11};
-static const gdb_byte arm_nbsd_thumb_le_breakpoint[] = {0xfe, 0xde};
-static const gdb_byte arm_nbsd_thumb_be_breakpoint[] = {0xde, 0xfe};
+static const gdb_byte arm_nbsd_arm_le_breakpoint[]
+  = { 0x11, 0x00, 0x00, 0xe6 };
+static const gdb_byte arm_nbsd_arm_be_breakpoint[]
+  = { 0xe6, 0x00, 0x00, 0x11 };
+static const gdb_byte arm_nbsd_thumb_le_breakpoint[] = { 0xfe, 0xde };
+static const gdb_byte arm_nbsd_thumb_be_breakpoint[] = { 0xde, 0xfe };
 
 /* This matches struct reg from NetBSD's sys/arch/arm/include/reg.h:
    https://github.com/NetBSD/src/blob/7c13e6e6773bb171f4ed3ed53013e9d24b3c1eac/sys/arch/arm/include/reg.h#L39
@@ -51,10 +53,11 @@ struct arm_nbsd_reg
 };
 
 void
-arm_nbsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
-			 int regnum, const void *gregs, size_t len)
+arm_nbsd_supply_gregset (const struct regset *regset,
+			 struct regcache *regcache, int regnum,
+			 const void *gregs, size_t len)
 {
-  const arm_nbsd_reg *gregset = static_cast<const arm_nbsd_reg *>(gregs);
+  const arm_nbsd_reg *gregset = static_cast<const arm_nbsd_reg *> (gregs);
   gdb_assert (len >= sizeof (arm_nbsd_reg));
 
   /* Integer registers.  */
@@ -70,7 +73,8 @@ arm_nbsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
 
   if (regnum == -1 || regnum == ARM_PC_REGNUM)
     {
-      CORE_ADDR r_pc = gdbarch_addr_bits_remove (regcache->arch (), gregset->pc);
+      CORE_ADDR r_pc
+	= gdbarch_addr_bits_remove (regcache->arch (), gregset->pc);
       regcache->raw_supply (ARM_PC_REGNUM, (char *) &r_pc);
     }
 
@@ -84,12 +88,10 @@ arm_nbsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
 }
 
 static const struct regset arm_nbsd_regset = {
-  nullptr,
-  arm_nbsd_supply_gregset,
+  nullptr, arm_nbsd_supply_gregset,
   /* We don't need a collect function because we only use this reading registers
      (via iterate_over_regset_sections and fetch_regs/fetch_register).  */
-  nullptr,
-  0
+  nullptr, 0
 };
 
 static void
@@ -108,8 +110,7 @@ arm_nbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 static void
-arm_netbsd_init_abi_common (struct gdbarch_info info,
-			    struct gdbarch *gdbarch)
+arm_netbsd_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
@@ -131,21 +132,20 @@ arm_netbsd_init_abi_common (struct gdbarch_info info,
       break;
 
     default:
-      internal_error (_("arm_gdbarch_init: bad byte order for float format"));
+      internal_error (_ ("arm_gdbarch_init: bad byte order for float format"));
     }
 
   tdep->jb_pc = ARM_NBSD_JB_PC;
   tdep->jb_elt_size = ARM_NBSD_JB_ELEMENT_SIZE;
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, arm_nbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, arm_nbsd_iterate_over_regset_sections);
   /* Single stepping.  */
   set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
 }
 
 static void
-arm_netbsd_elf_init_abi (struct gdbarch_info info,
-			 struct gdbarch *gdbarch)
+arm_netbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
@@ -157,11 +157,12 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
     tdep->fp_model = ARM_FLOAT_SOFT_VFP;
 
   /* NetBSD ELF uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 }
 
 void _initialize_arm_netbsd_tdep ();
+
 void
 _initialize_arm_netbsd_tdep ()
 {

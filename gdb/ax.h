@@ -46,76 +46,75 @@
    is independent of symbolic information.  This means the agent can
    evaluate them on the fly without reference to data only available
    to the host GDB.  */
-
 
 /* Different kinds of flaws an agent expression might have, as
    detected by ax_reqs.  */
 enum agent_flaws
-  {
-    agent_flaw_none = 0,	/* code is good */
+{
+  agent_flaw_none = 0, /* code is good */
 
-    /* There is an invalid instruction in the stream.  */
-    agent_flaw_bad_instruction,
+  /* There is an invalid instruction in the stream.  */
+  agent_flaw_bad_instruction,
 
-    /* There is an incomplete instruction at the end of the expression.  */
-    agent_flaw_incomplete_instruction,
+  /* There is an incomplete instruction at the end of the expression.  */
+  agent_flaw_incomplete_instruction,
 
-    /* ax_reqs was unable to prove that every jump target is to a
+  /* ax_reqs was unable to prove that every jump target is to a
        valid offset.  Valid offsets are within the bounds of the
        expression, and to a valid instruction boundary.  */
-    agent_flaw_bad_jump,
+  agent_flaw_bad_jump,
 
-    /* ax_reqs was unable to prove to its satisfaction that, for each
+  /* ax_reqs was unable to prove to its satisfaction that, for each
        jump target location, the stack will have the same height whether
        that location is reached via a jump or by straight execution.  */
-    agent_flaw_height_mismatch,
+  agent_flaw_height_mismatch,
 
-    /* ax_reqs was unable to prove that every instruction following
+  /* ax_reqs was unable to prove that every instruction following
        an unconditional jump was the target of some other jump.  */
-    agent_flaw_hole
-  };
+  agent_flaw_hole
+};
 
 /* Agent expression data structures.  */
 
 /* A buffer containing a agent expression.  */
 struct agent_expr
-  {
-    /* Construct an empty agent expression.  */
-    explicit agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope);
+{
+  /* Construct an empty agent expression.  */
+  explicit agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope);
 
-    ~agent_expr ();
+  ~agent_expr ();
 
-    /* The bytes of the expression.  */
-    unsigned char *buf;
+  /* The bytes of the expression.  */
+  unsigned char *buf;
 
-    /* The number of bytecode in the expression.  */
-    int len;
+  /* The number of bytecode in the expression.  */
+  int len;
 
-    /* Allocated space available currently.  */
-    int size;
+  /* Allocated space available currently.  */
+  int size;
 
-    /* The target architecture assumed to be in effect.  */
-    struct gdbarch *gdbarch;
+  /* The target architecture assumed to be in effect.  */
+  struct gdbarch *gdbarch;
 
-    /* The address to which the expression applies.  */
-    CORE_ADDR scope;
+  /* The address to which the expression applies.  */
+  CORE_ADDR scope;
 
-    /* If the following is not equal to agent_flaw_none, the rest of the
+  /* If the following is not equal to agent_flaw_none, the rest of the
        information in this structure is suspect.  */
-    enum agent_flaws flaw;
+  enum agent_flaws flaw;
 
-    /* Number of elements left on stack at end; may be negative if expr
+  /* Number of elements left on stack at end; may be negative if expr
        only consumes elements.  */
-    int final_height;
+  int final_height;
 
-    /* Maximum and minimum stack height, relative to initial height.  */
-    int max_height, min_height;
+  /* Maximum and minimum stack height, relative to initial height.  */
+  int max_height, min_height;
 
-    /* Largest `ref' or `const' opcode used, in bits.  Zero means the
+  /* Largest `ref' or `const' opcode used, in bits.  Zero means the
        expression has no such instructions.  */
-    int max_data_size;
+  int max_data_size;
 
-    /* Bit vector of registers needed.  Register R is needed iff
+  /* Bit vector of registers needed.  Register R is needed iff
 
        reg_mask[R / 8] & (1 << (R % 8))
 
@@ -132,10 +131,10 @@ struct agent_expr
        compiler sets the mask bit and skips generating a bytecode whose
        result is going to be discarded anyway.
     */
-    int reg_mask_len;
-    unsigned char *reg_mask;
+  int reg_mask_len;
+  unsigned char *reg_mask;
 
-    /* For the data tracing facility, we need to insert `trace' bytecodes
+  /* For the data tracing facility, we need to insert `trace' bytecodes
        before each data fetch; this records all the memory that the
        expression touches in the course of evaluation, so that memory will
        be available when the user later tries to evaluate the expression
@@ -144,14 +143,14 @@ struct agent_expr
        Setting the flag 'tracing' to non-zero enables the code that
        emits the trace bytecodes at the appropriate points.  */
 
-    unsigned int tracing : 1;
+  unsigned int tracing : 1;
 
-    /* This indicates that pointers to chars should get an added
+  /* This indicates that pointers to chars should get an added
        tracenz bytecode to record nonzero bytes, up to a length that
        is the value of trace_string.  */
 
-    int trace_string;
-  };
+  int trace_string;
+};
 
 /* An agent_expr owning pointer.  */
 typedef std::unique_ptr<agent_expr> agent_expr_up;
@@ -159,15 +158,14 @@ typedef std::unique_ptr<agent_expr> agent_expr_up;
 /* The actual values of the various bytecode operations.  */
 
 enum agent_op
-  {
-#define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  \
-    aop_ ## NAME = VALUE,
+{
+
+#define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE) \
+  aop_##NAME = VALUE,
 #include "gdbsupport/ax.def"
 #undef DEFOP
-    aop_last
-  };
-
-
+  aop_last
+};
 
 /* Functions for building expressions.  */
 
@@ -223,23 +221,21 @@ extern void ax_tsv (struct agent_expr *expr, enum agent_op op, int num);
 
 /* Append a string to the bytecode stream.  */
 extern void ax_string (struct agent_expr *x, const char *str, int slen);
-
 
 /* Functions for printing out expressions, and otherwise debugging
    things.  */
 
 /* Disassemble the expression EXPR, writing to F.  */
-extern void ax_print (struct ui_file *f, struct agent_expr * EXPR);
+extern void ax_print (struct ui_file *f, struct agent_expr *EXPR);
 
 /* An entry in the opcode map.  */
 struct aop_map
-  {
-
-    /* The name of the opcode.  Null means that this entry is not a
+{
+  /* The name of the opcode.  Null means that this entry is not a
        valid opcode --- a hole in the opcode space.  */
-    const char *name;
+  const char *name;
 
-    /* All opcodes take no operands from the bytecode stream, or take
+  /* All opcodes take no operands from the bytecode stream, or take
        unsigned integers of various sizes.  If this is a positive number
        n, then the opcode is followed by an n-byte operand, which should
        be printed as an unsigned integer.  If this is zero, then the
@@ -248,15 +244,15 @@ struct aop_map
        If we get more complicated opcodes in the future, don't add other
        magic values of this; that's a crock.  Add an `enum encoding'
        field to this, or something like that.  */
-    int op_size;
+  int op_size;
 
-    /* The size of the data operated upon, in bits, for bytecodes that
+  /* The size of the data operated upon, in bits, for bytecodes that
        care about that (ref and const).  Zero for all others.  */
-    int data_size;
+  int data_size;
 
-    /* Number of stack elements consumed, and number produced.  */
-    int consumed, produced;
-  };
+  /* Number of stack elements consumed, and number produced.  */
+  int consumed, produced;
+};
 
 /* Map of the bytecodes, indexed by bytecode number.  */
 extern struct aop_map aop_map[];

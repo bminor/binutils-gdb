@@ -27,27 +27,28 @@
 /* RiscV register numbers.  */
 enum
 {
-  RISCV_ZERO_REGNUM = 0,	/* Read-only register, always 0.  */
-  RISCV_RA_REGNUM = 1,		/* Return Address.  */
-  RISCV_SP_REGNUM = 2,		/* Stack Pointer.  */
-  RISCV_GP_REGNUM = 3,		/* Global Pointer.  */
-  RISCV_TP_REGNUM = 4,		/* Thread Pointer.  */
-  RISCV_FP_REGNUM = 8,		/* Frame Pointer.  */
-  RISCV_A0_REGNUM = 10,		/* First argument.  */
-  RISCV_A1_REGNUM = 11,		/* Second argument.  */
-  RISCV_A7_REGNUM = 17,		/* Seventh argument.  */
-  RISCV_PC_REGNUM = 32,		/* Program Counter.  */
+  RISCV_ZERO_REGNUM = 0, /* Read-only register, always 0.  */
+  RISCV_RA_REGNUM = 1,	 /* Return Address.  */
+  RISCV_SP_REGNUM = 2,	 /* Stack Pointer.  */
+  RISCV_GP_REGNUM = 3,	 /* Global Pointer.  */
+  RISCV_TP_REGNUM = 4,	 /* Thread Pointer.  */
+  RISCV_FP_REGNUM = 8,	 /* Frame Pointer.  */
+  RISCV_A0_REGNUM = 10,	 /* First argument.  */
+  RISCV_A1_REGNUM = 11,	 /* Second argument.  */
+  RISCV_A7_REGNUM = 17,	 /* Seventh argument.  */
+  RISCV_PC_REGNUM = 32,	 /* Program Counter.  */
 
   RISCV_NUM_INTEGER_REGS = 32,
 
-  RISCV_FIRST_FP_REGNUM = 33,	/* First Floating Point Register */
+  RISCV_FIRST_FP_REGNUM = 33, /* First Floating Point Register */
   RISCV_FA0_REGNUM = 43,
   RISCV_FA1_REGNUM = RISCV_FA0_REGNUM + 1,
-  RISCV_LAST_FP_REGNUM = 64,	/* Last Floating Point Register */
+  RISCV_LAST_FP_REGNUM = 64, /* Last Floating Point Register */
 
-  RISCV_FIRST_CSR_REGNUM = 65,  /* First CSR */
+  RISCV_FIRST_CSR_REGNUM = 65, /* First CSR */
+
 #define DECLARE_CSR(name, num, class, define_version, abort_version) \
-  RISCV_ ## num ## _REGNUM = RISCV_FIRST_CSR_REGNUM + num,
+  RISCV_##num##_REGNUM = RISCV_FIRST_CSR_REGNUM + num,
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
   RISCV_LAST_CSR_REGNUM = 4160,
@@ -115,7 +116,6 @@ struct riscv_gdbarch_tdep : gdbarch_tdep_base
   CORE_ADDR (*syscall_next_pc) (frame_info_ptr frame) = nullptr;
 };
 
-
 /* Return the width in bytes  of the general purpose registers for GDBARCH.
    Possible return values are 4, 8, or 16 for RiscV variants RV32, RV64, or
    RV128.  */
@@ -151,8 +151,8 @@ extern int riscv_abi_flen (struct gdbarch *gdbarch);
 extern bool riscv_abi_embedded (struct gdbarch *gdbarch);
 
 /* Single step based on where the current instruction will take us.  */
-extern std::vector<CORE_ADDR> riscv_software_single_step
-  (struct regcache *regcache);
+extern std::vector<CORE_ADDR>
+riscv_software_single_step (struct regcache *regcache);
 
 /* Supply register REGNUM from the buffer REGS (length LEN) into
    REGCACHE.  REGSET describes the layout of the buffer.  If REGNUM is -1
@@ -174,8 +174,8 @@ extern std::vector<CORE_ADDR> riscv_software_single_step
    in use.  */
 
 extern void riscv_supply_regset (const struct regset *regset,
-				  struct regcache *regcache, int regnum,
-				  const void *regs, size_t len);
+				 struct regcache *regcache, int regnum,
+				 const void *regs, size_t len);
 
 /* The names of the RISC-V target description features.  */
 extern const char *riscv_feature_name_csr;

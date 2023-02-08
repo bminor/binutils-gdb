@@ -71,9 +71,8 @@ tui_location_tracker::set_location (struct symtab *symtab)
 bool
 tui_location_tracker::set_fullname (struct symtab *symtab)
 {
-  const char *fullname = (symtab == nullptr
-			  ? "??"
-			  : symtab_to_fullname (symtab));
+  const char *fullname
+    = (symtab == nullptr ? "??" : symtab_to_fullname (symtab));
   bool location_changed_p = fullname != m_full_name;
   m_full_name = std::string (fullname);
 

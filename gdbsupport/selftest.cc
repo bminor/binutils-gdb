@@ -38,8 +38,7 @@ static std::vector<selftests_generator> lazy_generators;
 /* See selftest.h.  */
 
 void
-register_test (const std::string &name,
-	       std::function<void(void)> function)
+register_test (const std::string &name, std::function<void (void)> function)
 {
   /* Check that no test with this name already exist.  */
   auto status = tests.emplace (name, std::move (function));
@@ -80,36 +79,35 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
       bool run = false;
 
       if (filters.empty ())
-	run = true;
+        run = true;
       else
-	{
-	  for (const char *filter : filters)
-	    {
-	      if (test.name.find (filter) != std::string::npos)
-		run = true;
-	    }
-	}
+        {
+          for (const char *filter : filters)
+            {
+              if (test.name.find (filter) != std::string::npos)
+                run = true;
+            }
+        }
 
       if (!run)
-	continue;
+        continue;
 
       try
-	{
-	  debug_printf (_("Running selftest %s.\n"), test.name.c_str ());
-	  ++ran;
-	  test.test ();
-	}
+        {
+          debug_printf (_ ("Running selftest %s.\n"), test.name.c_str ());
+          ++ran;
+          test.test ();
+        }
       catch (const gdb_exception_error &ex)
-	{
-	  ++failed;
-	  debug_printf ("Self test failed: %s\n", ex.what ());
-	}
+        {
+          ++failed;
+          debug_printf ("Self test failed: %s\n", ex.what ());
+        }
 
       reset ();
     }
 
-  debug_printf (_("Ran %d unit tests, %d failed\n"),
-		ran, failed);
+  debug_printf (_ ("Ran %d unit tests, %d failed\n"), ran, failed);
 }
 
 /* See selftest.h.  */

@@ -34,9 +34,7 @@ struct process_info_private;
 
 struct process_info
 {
-  process_info (int pid_, int attached_)
-  : pid (pid_), attached (attached_)
-  {}
+  process_info (int pid_, int attached_) : pid (pid_), attached (attached_) {}
 
   /* This process' pid.  */
   int pid;
@@ -103,7 +101,7 @@ extern std::list<process_info *> all_processes;
 
 /* Invoke FUNC for each process.  */
 
-template <typename Func>
+template<typename Func>
 static void
 for_each_process (Func func)
 {
@@ -121,7 +119,7 @@ for_each_process (Func func)
 /* Find the first process for which FUNC returns true.  Return NULL if no
    process satisfying FUNC is found.  */
 
-template <typename Func>
+template<typename Func>
 static process_info *
 find_process (Func func)
 {
@@ -133,7 +131,7 @@ find_process (Func func)
       next++;
 
       if (func (*cur))
-	return *cur;
+        return *cur;
 
       cur = next;
     }

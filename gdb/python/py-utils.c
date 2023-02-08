@@ -47,8 +47,7 @@ python_string_to_unicode (PyObject *obj)
     }
   else
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("Expected a string object."));
+      PyErr_SetString (PyExc_TypeError, _ ("Expected a string object."));
       unicode_str = NULL;
     }
 
@@ -67,8 +66,8 @@ unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
   if (string == NULL)
     return NULL;
 
-  return gdb::unique_xmalloc_ptr<char>
-    (xstrdup (PyBytes_AsString (string.get ())));
+  return gdb::unique_xmalloc_ptr<char> (
+    xstrdup (PyBytes_AsString (string.get ())));
 }
 
 /* Returns a PyObject with the contents of the given unicode string
@@ -89,9 +88,8 @@ unicode_to_encoded_python_string (PyObject *unicode_str, const char *charset)
 gdb::unique_xmalloc_ptr<char>
 unicode_to_target_string (PyObject *unicode_str)
 {
-  return (unicode_to_encoded_string
-	  (unicode_str,
-	   target_charset (gdbpy_enter::get_gdbarch ())));
+  return (unicode_to_encoded_string (
+    unicode_str, target_charset (gdbpy_enter::get_gdbarch ())));
 }
 
 /* Returns a PyObject with the contents of the given unicode string
@@ -101,9 +99,8 @@ unicode_to_target_string (PyObject *unicode_str)
 static gdbpy_ref<>
 unicode_to_target_python_string (PyObject *unicode_str)
 {
-  return (unicode_to_encoded_python_string
-	  (unicode_str,
-	   target_charset (gdbpy_enter::get_gdbarch ())));
+  return (unicode_to_encoded_python_string (
+    unicode_str, target_charset (gdbpy_enter::get_gdbarch ())));
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in
@@ -237,7 +234,6 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
 {
   if (gdbpy_is_value_object (obj))
     {
-
       try
 	{
 	  *addr = value_as_address (value_object_to_value (obj));
@@ -262,7 +258,7 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
       if (sizeof (val) > sizeof (CORE_ADDR) && ((CORE_ADDR) val) != val)
 	{
 	  PyErr_SetString (PyExc_ValueError,
-			   _("Overflow converting to address."));
+			   _ ("Overflow converting to address."));
 	  return -1;
 	}
 
@@ -301,10 +297,8 @@ int
 gdb_py_int_as_long (PyObject *obj, long *result)
 {
   *result = PyLong_AsLong (obj);
-  return ! (*result == -1 && PyErr_Occurred ());
+  return !(*result == -1 && PyErr_Occurred ());
 }
-
-
 
 /* Generic implementation of the __dict__ attribute for objects that
    have a dictionary.  The CLOSURE argument should be the type object.
@@ -318,7 +312,7 @@ gdb_py_generic_dict (PyObject *self, void *closure)
   char *raw_ptr;
 
   raw_ptr = (char *) self + type_obj->tp_dictoffset;
-  result = * (PyObject **) raw_ptr;
+  result = *(PyObject **) raw_ptr;
 
   Py_INCREF (result);
   return result;
@@ -351,9 +345,9 @@ gdbpy_error (const char *fmt, ...)
 
   const char *msg = str.c_str ();
   if (msg != nullptr && *msg != '\0')
-    error (_("Error occurred in Python: %s"), msg);
+    error (_ ("Error occurred in Python: %s"), msg);
   else
-    error (_("Error occurred in Python."));
+    error (_ ("Error occurred in Python."));
 }
 
 /* Handle a Python exception when the special gdb.GdbError treatment
@@ -372,9 +366,9 @@ gdbpy_handle_exception ()
     {
       /* An error occurred computing the string representation of the
 	 error message.  This is rare, but we should inform the user.  */
-      gdb_printf (_("An error occurred in Python "
-		    "and then another occurred computing the "
-		    "error message.\n"));
+      gdb_printf (_ ("An error occurred in Python "
+		     "and then another occurred computing the "
+		     "error message.\n"));
       gdbpy_print_stack ();
     }
 
@@ -387,15 +381,15 @@ gdbpy_handle_exception ()
 
   if (fetched_error.type_matches (PyExc_KeyboardInterrupt))
     throw_quit ("Quit");
-  else if (! fetched_error.type_matches (gdbpy_gdberror_exc)
-	   || msg == NULL || *msg == '\0')
+  else if (!fetched_error.type_matches (gdbpy_gdberror_exc) || msg == NULL
+	   || *msg == '\0')
     {
       fetched_error.restore ();
       gdbpy_print_stack ();
       if (msg != NULL && *msg != '\0')
-	error (_("Error occurred in Python: %s"), msg.get ());
+	error (_ ("Error occurred in Python: %s"), msg.get ());
       else
-	error (_("Error occurred in Python."));
+	error (_ ("Error occurred in Python."));
     }
   else
     error ("%s", msg.get ());
@@ -415,17 +409,17 @@ gdbpy_fix_doc_string_indentation (gdb::unique_xmalloc_ptr<char> doc)
     line_whitespace (size_t offset, int ws_count)
       : m_offset (offset),
 	m_ws_count (ws_count)
-    { /* Nothing.  */ }
+    { /* Nothing.  */
+    }
 
     /* The offset from the start of DOC.  */
-    size_t offset () const
-    { return m_offset; }
+    size_t offset () const { return m_offset; }
 
     /* The number of white-space characters at the start of this line.  */
-    int ws () const
-    { return m_ws_count; }
+    int ws () const { return m_ws_count; }
 
   private:
+
     /* The offset from the start of DOC to the first character of this
        line.  */
     size_t m_offset;
@@ -438,8 +432,7 @@ gdbpy_fix_doc_string_indentation (gdb::unique_xmalloc_ptr<char> doc)
   /* Count the number of white-space character starting at TXT.  We
      currently only count true single space characters, things like tabs,
      newlines, etc are not counted.  */
-  auto count_whitespace = [] (const char *txt) -> int
-  {
+  auto count_whitespace = [] (const char *txt) -> int {
     int count = 0;
 
     while (*txt == ' ')
@@ -559,8 +552,8 @@ gdbpy_fix_doc_string_indentation (gdb::unique_xmalloc_ptr<char> doc)
 		  || src[src_offset + ws_info[ws_info_offset].ws ()] == '\0')
 		src_offset += ws_info[ws_info_offset].ws ();
 	      else
-		src_offset += std::min (*min_whitespace,
-					ws_info[ws_info_offset].ws ());
+		src_offset
+		  += std::min (*min_whitespace, ws_info[ws_info_offset].ws ());
 
 	      /* If we skipped white-space, and are now at the end of the
 		 input, then we're done.  */

@@ -50,9 +50,9 @@ loongarch_fetch_instruction (CORE_ADDR pc)
 static bool
 loongarch_insn_is_uncond_branch (insn_t insn)
 {
-  if ((insn & 0xfc000000) == 0x4c000000		/* jirl  */
-      || (insn & 0xfc000000) == 0x50000000	/* b     */
-      || (insn & 0xfc000000) == 0x54000000)	/* bl    */
+  if ((insn & 0xfc000000) == 0x4c000000	    /* jirl  */
+      || (insn & 0xfc000000) == 0x50000000  /* b     */
+      || (insn & 0xfc000000) == 0x54000000) /* bl    */
     return true;
   return false;
 }
@@ -62,14 +62,14 @@ loongarch_insn_is_uncond_branch (insn_t insn)
 static bool
 loongarch_insn_is_cond_branch (insn_t insn)
 {
-  if ((insn & 0xfc000000) == 0x58000000		/* beq   */
-      || (insn & 0xfc000000) == 0x5c000000	/* bne   */
-      || (insn & 0xfc000000) == 0x60000000	/* blt   */
-      || (insn & 0xfc000000) == 0x64000000	/* bge	 */
-      || (insn & 0xfc000000) == 0x68000000	/* bltu  */
-      || (insn & 0xfc000000) == 0x6c000000	/* bgeu  */
-      || (insn & 0xfc000000) == 0x40000000	/* beqz  */
-      || (insn & 0xfc000000) == 0x44000000)	/* bnez  */
+  if ((insn & 0xfc000000) == 0x58000000	    /* beq   */
+      || (insn & 0xfc000000) == 0x5c000000  /* bne   */
+      || (insn & 0xfc000000) == 0x60000000  /* blt   */
+      || (insn & 0xfc000000) == 0x64000000  /* bge	 */
+      || (insn & 0xfc000000) == 0x68000000  /* bltu  */
+      || (insn & 0xfc000000) == 0x6c000000  /* bgeu  */
+      || (insn & 0xfc000000) == 0x40000000  /* beqz  */
+      || (insn & 0xfc000000) == 0x44000000) /* bnez  */
     return true;
   return false;
 }
@@ -90,8 +90,8 @@ loongarch_insn_is_branch (insn_t insn)
 static bool
 loongarch_insn_is_ll (insn_t insn)
 {
-  if ((insn & 0xff000000) == 0x20000000		/* ll.w  */
-      || (insn & 0xff000000) == 0x22000000)	/* ll.d  */
+  if ((insn & 0xff000000) == 0x20000000	    /* ll.w  */
+      || (insn & 0xff000000) == 0x22000000) /* ll.d  */
     return true;
   return false;
 }
@@ -101,8 +101,8 @@ loongarch_insn_is_ll (insn_t insn)
 static bool
 loongarch_insn_is_sc (insn_t insn)
 {
-  if ((insn & 0xff000000) == 0x21000000		/* sc.w  */
-      || (insn & 0xff000000) == 0x23000000)	/* sc.d  */
+  if ((insn & 0xff000000) == 0x21000000	    /* sc.w  */
+      || (insn & 0xff000000) == 0x23000000) /* sc.d  */
     return true;
   return false;
 }
@@ -118,8 +118,8 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   CORE_ADDR cur_pc = start_pc, prologue_end = 0;
   int32_t sp = LOONGARCH_SP_REGNUM;
   int32_t fp = LOONGARCH_FP_REGNUM;
-  int32_t reg_value[32] = {0};
-  int32_t reg_used[32] = {1, 0};
+  int32_t reg_value[32] = { 0 };
+  int32_t reg_used[32] = { 1, 0 };
 
   while (cur_pc < limit_pc)
     {
@@ -131,7 +131,7 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       int32_t si12 = loongarch_decode_imm ("10:12", insn, 1);
       int32_t si20 = loongarch_decode_imm ("5:20", insn, 1);
 
-      if ((insn & 0xffc00000) == 0x02c00000	/* addi.d sp,sp,si12  */
+      if ((insn & 0xffc00000) == 0x02c00000 /* addi.d sp,sp,si12  */
 	  && rd == sp && rj == sp && si12 < 0)
 	{
 	  prologue_end = cur_pc + insn_len;
@@ -213,7 +213,7 @@ loongarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      that bound, then use an arbitrary large number as the upper bound.  */
   CORE_ADDR limit_pc = skip_prologue_using_sal (gdbarch, pc);
   if (limit_pc == 0)
-    limit_pc = pc + 100;	/* Arbitrary large number.  */
+    limit_pc = pc + 100; /* Arbitrary large number.  */
 
   return loongarch_scan_prologue (gdbarch, pc, limit_pc, nullptr, nullptr);
 }
@@ -225,91 +225,107 @@ static CORE_ADDR
 loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  loongarch_gdbarch_tdep *tdep = gdbarch_tdep<loongarch_gdbarch_tdep> (gdbarch);
+  loongarch_gdbarch_tdep *tdep
+    = gdbarch_tdep<loongarch_gdbarch_tdep> (gdbarch);
   insn_t insn = loongarch_fetch_instruction (cur_pc);
   size_t insn_len = loongarch_insn_length (insn);
   CORE_ADDR next_pc = cur_pc + insn_len;
 
-  if ((insn & 0xfc000000) == 0x4c000000)		/* jirl rd, rj, offs16  */
+  if ((insn & 0xfc000000) == 0x4c000000) /* jirl rd, rj, offs16  */
     {
-      LONGEST rj = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rj
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("5:5", insn, 0));
       next_pc = rj + loongarch_decode_imm ("10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x50000000		/* b    offs26  */
-	   || (insn & 0xfc000000) == 0x54000000)	/* bl	offs26  */
+  else if ((insn & 0xfc000000) == 0x50000000	 /* b    offs26  */
+	   || (insn & 0xfc000000) == 0x54000000) /* bl	offs26  */
     {
       next_pc = cur_pc + loongarch_decode_imm ("0:10|10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x58000000)		/* beq	rj, rd, offs16  */
+  else if ((insn & 0xfc000000) == 0x58000000) /* beq	rj, rd, offs16  */
     {
-      LONGEST rj = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("5:5", insn, 0));
-      LONGEST rd = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("0:5", insn, 0));
+      LONGEST rj
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("0:5", insn, 0));
       if (rj == rd)
 	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x5c000000)		/* bne	rj, rd, offs16  */
+  else if ((insn & 0xfc000000) == 0x5c000000) /* bne	rj, rd, offs16  */
     {
-      LONGEST rj = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("5:5", insn, 0));
-      LONGEST rd = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("0:5", insn, 0));
+      LONGEST rj
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("0:5", insn, 0));
       if (rj != rd)
 	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x60000000)		/* blt	rj, rd, offs16  */
+  else if ((insn & 0xfc000000) == 0x60000000) /* blt	rj, rd, offs16  */
     {
-      LONGEST rj = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("5:5", insn, 0));
-      LONGEST rd = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("0:5", insn, 0));
+      LONGEST rj
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("0:5", insn, 0));
       if (rj < rd)
 	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x64000000)		/* bge	rj, rd, offs16  */
+  else if ((insn & 0xfc000000) == 0x64000000) /* bge	rj, rd, offs16  */
     {
-      LONGEST rj = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("5:5", insn, 0));
-      LONGEST rd = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("0:5", insn, 0));
+      LONGEST rj
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("0:5", insn, 0));
       if (rj >= rd)
 	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x68000000)		/* bltu	rj, rd, offs16  */
+  else if ((insn & 0xfc000000) == 0x68000000) /* bltu	rj, rd, offs16  */
     {
-      ULONGEST rj = regcache_raw_get_unsigned (regcache,
-		      loongarch_decode_imm ("5:5", insn, 0));
-      ULONGEST rd = regcache_raw_get_unsigned (regcache,
-		      loongarch_decode_imm ("0:5", insn, 0));
+      ULONGEST rj
+	= regcache_raw_get_unsigned (regcache,
+				     loongarch_decode_imm ("5:5", insn, 0));
+      ULONGEST rd
+	= regcache_raw_get_unsigned (regcache,
+				     loongarch_decode_imm ("0:5", insn, 0));
       if (rj < rd)
 	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x6c000000)		/* bgeu	rj, rd, offs16  */
+  else if ((insn & 0xfc000000) == 0x6c000000) /* bgeu	rj, rd, offs16  */
     {
-      ULONGEST rj = regcache_raw_get_unsigned (regcache,
-		      loongarch_decode_imm ("5:5", insn, 0));
-      ULONGEST rd = regcache_raw_get_unsigned (regcache,
-		      loongarch_decode_imm ("0:5", insn, 0));
+      ULONGEST rj
+	= regcache_raw_get_unsigned (regcache,
+				     loongarch_decode_imm ("5:5", insn, 0));
+      ULONGEST rd
+	= regcache_raw_get_unsigned (regcache,
+				     loongarch_decode_imm ("0:5", insn, 0));
       if (rj >= rd)
 	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x40000000)		/* beqz	rj, offs21  */
+  else if ((insn & 0xfc000000) == 0x40000000) /* beqz	rj, offs21  */
     {
-      LONGEST rj = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rj
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("5:5", insn, 0));
       if (rj == 0)
 	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
     }
-  else if ((insn & 0xfc000000) == 0x44000000)		/* bnez	rj, offs21  */
+  else if ((insn & 0xfc000000) == 0x44000000) /* bnez	rj, offs21  */
     {
-      LONGEST rj = regcache_raw_get_signed (regcache,
-		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rj
+	= regcache_raw_get_signed (regcache,
+				   loongarch_decode_imm ("5:5", insn, 0));
       if (rj != 0)
 	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
     }
-  else if ((insn & 0xffff8000) == 0x002b0000)		/* syscall  */
+  else if ((insn & 0xffff8000) == 0x002b0000) /* syscall  */
     {
       if (tdep->syscall_next_pc != nullptr)
 	next_pc = tdep->syscall_next_pc (get_current_frame ());
@@ -322,7 +338,8 @@ loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
    so look for the end of the sequence and put the breakpoint there.  */
 
 static std::vector<CORE_ADDR>
-loongarch_deal_with_atomic_sequence (struct regcache *regcache, CORE_ADDR cur_pc)
+loongarch_deal_with_atomic_sequence (struct regcache *regcache,
+				     CORE_ADDR cur_pc)
 {
   CORE_ADDR next_pc;
   std::vector<CORE_ADDR> next_pcs;
@@ -383,7 +400,7 @@ loongarch_software_single_step (struct regcache *regcache)
 
   CORE_ADDR next_pc = loongarch_next_pc (regcache, cur_pc);
 
-  return {next_pc};
+  return { next_pc };
 }
 
 /* Implement the frame_align gdbarch method.  */
@@ -487,8 +504,8 @@ pass_in_far (struct regcache *regcache, unsigned int far, const gdb_byte *val)
 /* Pass a value on the stack.  */
 
 static void
-pass_on_stack (struct regcache *regcache, const gdb_byte *val,
-	       size_t len, int align, gdb_byte **addr)
+pass_on_stack (struct regcache *regcache, const gdb_byte *val, size_t len,
+	       int align, gdb_byte **addr)
 {
   align = align_up (align, 8);
   if (align > 16)
@@ -504,8 +521,7 @@ pass_on_stack (struct regcache *regcache, const gdb_byte *val,
 /* Compute the numbers of struct member.  */
 
 static void
-compute_struct_member (struct type *type,
-		       unsigned int *fixed_point_members,
+compute_struct_member (struct type *type, unsigned int *fixed_point_members,
 		       unsigned int *floating_point_members,
 		       bool *first_member_is_fixed_point)
 {
@@ -519,17 +535,16 @@ compute_struct_member (struct type *type,
 	  || field_type->code () == TYPE_CODE_RANGE
 	  || field_type->code () == TYPE_CODE_ENUM
 	  || field_type->code () == TYPE_CODE_PTR)
-      {
-	(*fixed_point_members)++;
+	{
+	  (*fixed_point_members)++;
 
-	if (*floating_point_members == 0)
-	  *first_member_is_fixed_point = true;
-      }
+	  if (*floating_point_members == 0)
+	    *first_member_is_fixed_point = true;
+	}
       else if (field_type->code () == TYPE_CODE_FLT)
 	(*floating_point_members)++;
       else if (field_type->code () == TYPE_CODE_STRUCT)
-	compute_struct_member (field_type,
-			       fixed_point_members,
+	compute_struct_member (field_type, fixed_point_members,
 			       floating_point_members,
 			       first_member_is_fixed_point);
       else if (field_type->code () == TYPE_CODE_COMPLEX)
@@ -540,13 +555,9 @@ compute_struct_member (struct type *type,
 /* Implement the push_dummy_call gdbarch method.  */
 
 static CORE_ADDR
-loongarch_push_dummy_call (struct gdbarch *gdbarch,
-			   struct value *function,
-			   struct regcache *regcache,
-			   CORE_ADDR bp_addr,
-			   int nargs,
-			   struct value **args,
-			   CORE_ADDR sp,
+loongarch_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+			   struct regcache *regcache, CORE_ADDR bp_addr,
+			   int nargs, struct value **args, CORE_ADDR sp,
 			   function_call_return_method return_method,
 			   CORE_ADDR struct_addr)
 {
@@ -571,7 +582,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
       int align = type_align (type);
       enum type_code code = type->code ();
       struct type *func_type = check_typedef (value_type (function));
-      bool varargs = (func_type->has_varargs () && i >= func_type->num_fields ());
+      bool varargs
+	= (func_type->has_varargs () && i >= func_type->num_fields ());
 
       switch (code)
 	{
@@ -587,22 +599,26 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	       When passed in registers or on the stack,
 	       the unsigned integer scalars are zero-extended to GRLEN bits,
 	       and the signed integer scalars are sign-extended.  */
-	  if (type->is_unsigned ())
-	    {
-              ULONGEST data = extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
-	      if (gar > 0)
-		pass_in_gar (regcache, gar--, (gdb_byte *) &data);
-	      else
-		pass_on_stack (regcache, (gdb_byte *) &data, len, align, &addr);
-            }
-	  else
-	    {
-	      LONGEST data = extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
-	      if (gar > 0)
-		pass_in_gar (regcache, gar--, (gdb_byte *) &data);
-	      else
-		pass_on_stack (regcache, (gdb_byte *) &data, len, align, &addr);
-            }
+	    if (type->is_unsigned ())
+	      {
+		ULONGEST data
+		  = extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
+		if (gar > 0)
+		  pass_in_gar (regcache, gar--, (gdb_byte *) &data);
+		else
+		  pass_on_stack (regcache, (gdb_byte *) &data, len, align,
+				 &addr);
+	      }
+	    else
+	      {
+		LONGEST data
+		  = extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
+		if (gar > 0)
+		  pass_in_gar (regcache, gar--, (gdb_byte *) &data);
+		else
+		  pass_on_stack (regcache, (gdb_byte *) &data, len, align,
+				 &addr);
+	      }
 	  }
 	  break;
 	case TYPE_CODE_FLT:
@@ -625,7 +641,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		  else if (gar == 1)
 		    {
 		      pass_in_gar (regcache, gar--, val);
-		      pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+		      pass_on_stack (regcache, val + regsize, len - regsize,
+				     align, &addr);
 		    }
 		  else
 		    {
@@ -673,11 +690,11 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		 If no FAR is available, it's passed in GAR.
 		 If no GAR is available, it's passed on the stack.  */
 	      if (!varargs && far > 0)
-		  pass_in_far (regcache, far--, val);
+		pass_in_far (regcache, far--, val);
 	      else if (gar > 0)
-		  pass_in_gar (regcache, gar--, val);
+		pass_in_gar (regcache, gar--, val);
 	      else
-		  pass_on_stack (regcache, val, len, align, &addr);
+		pass_on_stack (regcache, val, len, align, &addr);
 	    }
 	  break;
 	case TYPE_CODE_STRUCT:
@@ -685,8 +702,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	    fixed_point_members = 0;
 	    floating_point_members = 0;
 	    first_member_is_fixed_point = false;
-	    compute_struct_member (type,
-				   &fixed_point_members,
+	    compute_struct_member (type, &fixed_point_members,
 				   &floating_point_members,
 				   &first_member_is_fixed_point);
 
@@ -704,7 +720,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		      pass_on_stack (regcache, val, len, align, &addr);
 		  }
 		/* The structure has only floating-point members.  */
-		else if (fixed_point_members == 0 && floating_point_members > 0)
+		else if (fixed_point_members == 0
+			 && floating_point_members > 0)
 		  {
 		    /* The structure has one floating-point member.
 		       The argument is passed in a FAR.
@@ -761,7 +778,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		       and the fixed-point member of the structure is passed in the GAR.
 		       If no floating-point register but one GAR is available, it's passed in GAR;
 		       If no GAR is available, it's passed on the stack.  */
-		    else if (floating_point_members == 1 && fixed_point_members == 1)
+		    else if (floating_point_members == 1
+			     && fixed_point_members == 1)
 		      {
 			if (!varargs && far > 0 && gar > 0)
 			  {
@@ -806,7 +824,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		    else if (gar == 1)
 		      {
 			pass_in_gar (regcache, gar--, val);
-			pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+			pass_on_stack (regcache, val + regsize, len - regsize,
+				       align, &addr);
 		      }
 		    else
 		      {
@@ -814,7 +833,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		      }
 		  }
 		/* The structure has only floating-point members.  */
-		else if (fixed_point_members == 0 && floating_point_members > 0)
+		else if (fixed_point_members == 0
+			 && floating_point_members > 0)
 		  {
 		    /* The structure has one long double member
 		       or one double member and two adjacent float members
@@ -827,9 +847,9 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		       and the high-order bits are on the stack,
 		       and passed on the stack if no GAR is available.  */
 		    if ((len == 16 && floating_point_members == 1)
-			 || (len == 16 && floating_point_members == 3)
-			 || (len == 12 && floating_point_members == 3)
-			 || (len == 16 && floating_point_members == 4))
+			|| (len == 16 && floating_point_members == 3)
+			|| (len == 12 && floating_point_members == 3)
+			|| (len == 16 && floating_point_members == 4))
 		      {
 			if (gar >= 2)
 			  {
@@ -841,12 +861,14 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 			    if (!varargs)
 			      {
 				pass_in_gar (regcache, gar--, val);
-				pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+				pass_on_stack (regcache, val + regsize,
+					       len - regsize, align, &addr);
 			      }
 			    else
 			      {
 				gar--;
-				pass_on_stack (regcache, val, len, align, &addr);
+				pass_on_stack (regcache, val, len, align,
+					       &addr);
 			      }
 			  }
 			else
@@ -883,7 +905,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 			else if (gar == 1)
 			  {
 			    pass_in_gar (regcache, gar--, val);
-			    pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+			    pass_on_stack (regcache, val + regsize,
+					   len - regsize, align, &addr);
 			  }
 			else
 			  {
@@ -895,7 +918,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		else if (fixed_point_members > 0 && floating_point_members > 0)
 		  {
 		    /* The structure has one floating-point member and one fixed-point member.  */
-		    if (floating_point_members == 1 && fixed_point_members == 1)
+		    if (floating_point_members == 1
+			&& fixed_point_members == 1)
 		      {
 			/* If one FAR and one GAR are available,
 			   the floating-point member of the structure is passed in the FAR,
@@ -919,17 +943,21 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 				pass_in_far (regcache, far--, val + regsize);
 			      }
 			  }
-			else if ((!varargs && far == 0 && gar >= 2) || (varargs && gar >= 2))
+			else if ((!varargs && far == 0 && gar >= 2)
+				 || (varargs && gar >= 2))
 			  {
 			    pass_in_gar (regcache, gar--, val);
 			    pass_in_gar (regcache, gar--, val + regsize);
 			  }
-			else if ((!varargs && far == 0 && gar == 1) || (varargs && gar == 1))
+			else if ((!varargs && far == 0 && gar == 1)
+				 || (varargs && gar == 1))
 			  {
 			    pass_in_gar (regcache, gar--, val);
-			    pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+			    pass_on_stack (regcache, val + regsize,
+					   len - regsize, align, &addr);
 			  }
-			else if ((!varargs && far == 0 && gar == 0) || (varargs && gar == 0))
+			else if ((!varargs && far == 0 && gar == 0)
+				 || (varargs && gar == 0))
 			  {
 			    pass_on_stack (regcache, val, len, align, &addr);
 			  }
@@ -951,7 +979,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 			else if (gar == 1)
 			  {
 			    pass_in_gar (regcache, gar--, val);
-			    pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+			    pass_on_stack (regcache, val + regsize,
+					   len - regsize, align, &addr);
 			  }
 			else
 			  {
@@ -962,7 +991,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	      }
 	    else if (len > 2 * regsize)
 	      {
-	        /* It's passed by reference and are replaced in the argument list with the address.
+		/* It's passed by reference and are replaced in the argument list with the address.
 		   If there is an available GAR, the reference is passed in the GAR,
 		   and passed on the stack if no GAR is available.  */
 		sp = align_down (sp - len, 16);
@@ -971,7 +1000,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		if (gar > 0)
 		  pass_in_gar (regcache, gar--, (const gdb_byte *) &sp);
 		else
-		  pass_on_stack (regcache, (const gdb_byte*) &sp, len, regsize, &addr);
+		  pass_on_stack (regcache, (const gdb_byte *) &sp, len,
+				 regsize, &addr);
 	      }
 	  }
 	  break;
@@ -1003,7 +1033,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	      else if (gar == 1)
 		{
 		  pass_in_gar (regcache, gar--, val);
-		  pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+		  pass_on_stack (regcache, val + regsize, len - regsize, align,
+				 &addr);
 		}
 	      else
 		{
@@ -1021,7 +1052,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	      if (gar > 0)
 		pass_in_gar (regcache, gar--, (const gdb_byte *) &sp);
 	      else
-		pass_on_stack (regcache, (const gdb_byte*) &sp, len, regsize, &addr);
+		pass_on_stack (regcache, (const gdb_byte *) &sp, len, regsize,
+			       &addr);
 	    }
 	  break;
 	case TYPE_CODE_COMPLEX:
@@ -1079,7 +1111,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		  else if (gar == 1)
 		    {
 		      pass_in_gar (regcache, gar--, val);
-		      pass_on_stack (regcache, val + align, len - align, align, &addr);
+		      pass_on_stack (regcache, val + align, len - align, align,
+				     &addr);
 		    }
 		  else
 		    {
@@ -1099,7 +1132,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		if (gar > 0)
 		  pass_in_gar (regcache, gar--, (const gdb_byte *) &sp);
 		else
-		  pass_on_stack (regcache, (const gdb_byte*) &sp, regsize, regsize, &addr);
+		  pass_on_stack (regcache, (const gdb_byte *) &sp, regsize,
+				 regsize, &addr);
 	      }
 	  }
 	  break;
@@ -1124,9 +1158,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 /* Partial transfer of a cooked register.  */
 
 static void
-loongarch_xfer_reg (struct regcache *regcache,
-		    int regnum, int len, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, size_t offset)
+loongarch_xfer_reg (struct regcache *regcache, int regnum, int len,
+		    gdb_byte *readbuf, const gdb_byte *writebuf, size_t offset)
 {
   if (readbuf)
     regcache->cooked_read_part (regnum, 0, len, readbuf + offset);
@@ -1173,12 +1206,14 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 	    gdb_byte buf[regsize];
 	    if (type->is_unsigned ())
 	      {
-		ULONGEST data = extract_unsigned_integer (writebuf, len, BFD_ENDIAN_LITTLE);
+		ULONGEST data = extract_unsigned_integer (writebuf, len,
+							  BFD_ENDIAN_LITTLE);
 		store_unsigned_integer (buf, regsize, BFD_ENDIAN_LITTLE, data);
 	      }
 	    else
 	      {
-		LONGEST data = extract_signed_integer (writebuf, len, BFD_ENDIAN_LITTLE);
+		LONGEST data
+		  = extract_signed_integer (writebuf, len, BFD_ENDIAN_LITTLE);
 		store_signed_integer (buf, regsize, BFD_ENDIAN_LITTLE, data);
 	      }
 	    loongarch_xfer_reg (regcache, a0, regsize, nullptr, buf, 0);
@@ -1193,7 +1228,8 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
       if (len == 2 * regsize)
 	{
 	  loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
-	  loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+	  loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf,
+			      regsize);
 	}
       /* float or double type.
 	 The return value is passed in f0.  */
@@ -1207,8 +1243,7 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 	fixed_point_members = 0;
 	floating_point_members = 0;
 	first_member_is_fixed_point = false;
-	compute_struct_member (type,
-			       &fixed_point_members,
+	compute_struct_member (type, &fixed_point_members,
 			       &floating_point_members,
 			       &first_member_is_fixed_point);
 
@@ -1227,14 +1262,17 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 		   The return value is passed in f0.  */
 		if (floating_point_members == 1)
 		  {
-		    loongarch_xfer_reg (regcache, f0, len, readbuf, writebuf, 0);
+		    loongarch_xfer_reg (regcache, f0, len, readbuf, writebuf,
+					0);
 		  }
 		/* The structure has two floating-point members.
 		   The return value is passed in f0 and f1.  */
 		else if (floating_point_members == 2)
 		  {
-		    loongarch_xfer_reg (regcache, f0, len / 2, readbuf, writebuf, 0);
-		    loongarch_xfer_reg (regcache, f1, len / 2, readbuf, writebuf, len / 2);
+		    loongarch_xfer_reg (regcache, f0, len / 2, readbuf,
+					writebuf, 0);
+		    loongarch_xfer_reg (regcache, f1, len / 2, readbuf,
+					writebuf, len / 2);
 		  }
 	      }
 	    /* The structure has both fixed-point and floating-point members.  */
@@ -1244,22 +1282,28 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 		   The return value is passed in a0.  */
 		if (floating_point_members == 1 && fixed_point_members > 1)
 		  {
-		    loongarch_xfer_reg (regcache, a0, len, readbuf, writebuf, 0);
+		    loongarch_xfer_reg (regcache, a0, len, readbuf, writebuf,
+					0);
 		  }
 		/* The structure has one float member and one fixed-point member.  */
-		else if (floating_point_members == 1 && fixed_point_members == 1)
+		else if (floating_point_members == 1
+			 && fixed_point_members == 1)
 		  {
 		    /* The return value is passed in f0 and a0 if the first member is floating-point.  */
 		    if (first_member_is_fixed_point == false)
 		      {
-			loongarch_xfer_reg (regcache, f0, regsize / 2, readbuf, writebuf, 0);
-			loongarch_xfer_reg (regcache, a0, regsize / 2, readbuf, writebuf, regsize / 2);
+			loongarch_xfer_reg (regcache, f0, regsize / 2, readbuf,
+					    writebuf, 0);
+			loongarch_xfer_reg (regcache, a0, regsize / 2, readbuf,
+					    writebuf, regsize / 2);
 		      }
 		    /* The return value is passed in a0 and f0 if the first member is fixed-point.  */
 		    else
 		      {
-			loongarch_xfer_reg (regcache, a0, regsize / 2, readbuf, writebuf, 0);
-			loongarch_xfer_reg (regcache, f0, regsize / 2, readbuf, writebuf, regsize / 2);
+			loongarch_xfer_reg (regcache, a0, regsize / 2, readbuf,
+					    writebuf, 0);
+			loongarch_xfer_reg (regcache, f0, regsize / 2, readbuf,
+					    writebuf, regsize / 2);
 		      }
 		  }
 	      }
@@ -1270,8 +1314,10 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 	    if (fixed_point_members > 0 && floating_point_members == 0)
 	      {
 		/* The return value is passed in a0 and a1.  */
-		loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
-		loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+		loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf,
+				    0);
+		loongarch_xfer_reg (regcache, a1, len - regsize, readbuf,
+				    writebuf, regsize);
 	      }
 	    /* The structure has only floating-point members.  */
 	    else if (fixed_point_members == 0 && floating_point_members > 0)
@@ -1285,8 +1331,10 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 		    || (len == 12 && floating_point_members == 3)
 		    || (len == 16 && floating_point_members == 4))
 		  {
-		    loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
-		    loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+		    loongarch_xfer_reg (regcache, a0, regsize, readbuf,
+					writebuf, 0);
+		    loongarch_xfer_reg (regcache, a1, len - regsize, readbuf,
+					writebuf, regsize);
 		  }
 		/* The structure has two double members
 		   or one double member and one float member.
@@ -1294,8 +1342,10 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 		else if ((len == 16 && floating_point_members == 2)
 			 || (len == 12 && floating_point_members == 2))
 		  {
-		    loongarch_xfer_reg (regcache, f0, regsize, readbuf, writebuf, 0);
-		    loongarch_xfer_reg (regcache, f1, len - regsize, readbuf, writebuf, regsize);
+		    loongarch_xfer_reg (regcache, f0, regsize, readbuf,
+					writebuf, 0);
+		    loongarch_xfer_reg (regcache, f1, len - regsize, readbuf,
+					writebuf, regsize);
 		  }
 	      }
 	    /* The structure has both fixed-point and floating-point members.  */
@@ -1307,21 +1357,27 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 		    /* The return value is passed in f0 and a0 if the first member is floating-point.  */
 		    if (first_member_is_fixed_point == false)
 		      {
-			loongarch_xfer_reg (regcache, f0, regsize, readbuf, writebuf, 0);
-			loongarch_xfer_reg (regcache, a0, len - regsize, readbuf, writebuf, regsize);
+			loongarch_xfer_reg (regcache, f0, regsize, readbuf,
+					    writebuf, 0);
+			loongarch_xfer_reg (regcache, a0, len - regsize,
+					    readbuf, writebuf, regsize);
 		      }
 		    /* The return value is passed in a0 and f0 if the first member is fixed-point.  */
 		    else
 		      {
-			loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
-			loongarch_xfer_reg (regcache, f0, len - regsize, readbuf, writebuf, regsize);
+			loongarch_xfer_reg (regcache, a0, regsize, readbuf,
+					    writebuf, 0);
+			loongarch_xfer_reg (regcache, f0, len - regsize,
+					    readbuf, writebuf, regsize);
 		      }
 		  }
 		else
 		  {
 		    /* The return value is passed in a0 and a1.  */
-		    loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
-		    loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+		    loongarch_xfer_reg (regcache, a0, regsize, readbuf,
+					writebuf, 0);
+		    loongarch_xfer_reg (regcache, a1, len - regsize, readbuf,
+					writebuf, regsize);
 		  }
 	      }
 	  }
@@ -1337,7 +1393,8 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* The return value is passed in a0 and a1.  */
 	  loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
-	  loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+	  loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf,
+			      regsize);
 	}
       break;
     case TYPE_CODE_COMPLEX:
@@ -1367,7 +1424,8 @@ loongarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int regnum)
     return -1;
 }
 
-static constexpr gdb_byte loongarch_default_breakpoint[] = {0x05, 0x00, 0x2a, 0x00};
+static constexpr gdb_byte loongarch_default_breakpoint[]
+  = { 0x05, 0x00, 0x2a, 0x00 };
 typedef BP_MANIPULATION (loongarch_default_breakpoint) loongarch_breakpoint;
 
 /* Extract a set of required target features out of ABFD.  If ABFD is nullptr
@@ -1394,7 +1452,7 @@ loongarch_features_from_bfd (const bfd *abfd)
       else if (eclass == ELFCLASS64)
 	features.xlen = 8;
       else
-	internal_error (_("unknown ELF header class %d"), eclass);
+	internal_error (_ ("unknown ELF header class %d"), eclass);
 
       if (EF_LOONGARCH_IS_SINGLE_FLOAT (e_flags))
 	features.fputype = SINGLE_FLOAT;
@@ -1452,16 +1510,19 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (feature_cpu == nullptr)
     return nullptr;
 
-
   /* Validate the description provides the mandatory base registers
      and allocate their numbers.  */
   bool valid_p = true;
   for (int i = 0; i < 32; i++)
-    valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
-					loongarch_r_normal_name[i] + 1);
-  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "orig_a0");
-  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "pc");
-  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "badv");
+    valid_p
+      &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
+				  loongarch_r_normal_name[i] + 1);
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
+				      "orig_a0");
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
+				      "pc");
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
+				      "badv");
   if (!valid_p)
     return nullptr;
 
@@ -1474,12 +1535,15 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      allocate their numbers.  */
   regnum = LOONGARCH_FIRST_FP_REGNUM;
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
-    valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
-					loongarch_f_normal_name[i] + 1);
+    valid_p
+      &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
+				  loongarch_f_normal_name[i] + 1);
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FCC; i++)
-    valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
-					loongarch_c_normal_name[i] + 1);
-  valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++, "fcsr");
+    valid_p
+      &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
+				  loongarch_c_normal_name[i] + 1);
+  valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
+				      "fcsr");
   if (!valid_p)
     return nullptr;
 
@@ -1510,8 +1574,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Find a candidate among the list of pre-declared architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != nullptr;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info); arches != nullptr;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       /* Check that the feature set of the ARCHES matches the feature set
@@ -1532,7 +1595,8 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* None found, so create a new architecture from the information provided.  */
   gdbarch *gdbarch
     = gdbarch_alloc (&info, gdbarch_tdep_up (new loongarch_gdbarch_tdep));
-  loongarch_gdbarch_tdep *tdep = gdbarch_tdep<loongarch_gdbarch_tdep> (gdbarch);
+  loongarch_gdbarch_tdep *tdep
+    = gdbarch_tdep<loongarch_gdbarch_tdep> (gdbarch);
 
   tdep->abi_features = abi_features;
 
@@ -1576,8 +1640,10 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   set_gdbarch_software_single_step (gdbarch, loongarch_software_single_step);
-  set_gdbarch_breakpoint_kind_from_pc (gdbarch, loongarch_breakpoint::kind_from_pc);
-  set_gdbarch_sw_breakpoint_from_kind (gdbarch, loongarch_breakpoint::bp_from_kind);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       loongarch_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       loongarch_breakpoint::bp_from_kind);
 
   /* Frame unwinders. Use DWARF debug info if available, otherwise use our own unwinder.  */
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, loongarch_dwarf2_reg_to_regnum);
@@ -1591,6 +1657,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_loongarch_tdep ();
+
 void
 _initialize_loongarch_tdep ()
 {

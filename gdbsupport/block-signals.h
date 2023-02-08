@@ -57,12 +57,11 @@ public:
   DISABLE_COPY_AND_ASSIGN (block_signals);
 
 private:
-
 #ifdef HAVE_SIGPROCMASK
   sigset_t m_old_mask;
 #endif
 };
 
-}
+} // namespace gdb
 
 #endif /* GDBSUPPORT_BLOCK_SIGNALS_H */

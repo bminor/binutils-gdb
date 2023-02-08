@@ -22,20 +22,19 @@
 #define BT_UTILS_H
 
 #ifdef HAVE_LIBBACKTRACE
-# include "backtrace.h"
-# include "backtrace-supported.h"
-# if BACKTRACE_SUPPORTED && (! BACKTRACE_USES_MALLOC)
-#  define GDB_PRINT_INTERNAL_BACKTRACE
-#  define GDB_PRINT_INTERNAL_BACKTRACE_USING_LIBBACKTRACE
-# endif
+#include "backtrace.h"
+#include "backtrace-supported.h"
+#if BACKTRACE_SUPPORTED && (!BACKTRACE_USES_MALLOC)
+#define GDB_PRINT_INTERNAL_BACKTRACE
+#define GDB_PRINT_INTERNAL_BACKTRACE_USING_LIBBACKTRACE
+#endif
 #endif
 
-#if defined HAVE_EXECINFO_H			\
-  && defined HAVE_EXECINFO_BACKTRACE		\
+#if defined HAVE_EXECINFO_H && defined HAVE_EXECINFO_BACKTRACE \
   && !defined GDB_PRINT_INTERNAL_BACKTRACE_USING_LIBBACKTRACE
-# include <execinfo.h>
-# define GDB_PRINT_INTERNAL_BACKTRACE
-# define GDB_PRINT_INTERNAL_BACKTRACE_USING_EXECINFO
+#include <execinfo.h>
+#define GDB_PRINT_INTERNAL_BACKTRACE
+#define GDB_PRINT_INTERNAL_BACKTRACE_USING_EXECINFO
 #endif
 
 /* Define GDB_PRINT_INTERNAL_BACKTRACE_INIT_ON.  This is a boolean value
@@ -46,9 +45,9 @@
    but if backtrace printing is not supported then this has the value
    false.  */
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
-# define GDB_PRINT_INTERNAL_BACKTRACE_INIT_ON true
+#define GDB_PRINT_INTERNAL_BACKTRACE_INIT_ON true
 #else
-# define GDB_PRINT_INTERNAL_BACKTRACE_INIT_ON false
+#define GDB_PRINT_INTERNAL_BACKTRACE_INIT_ON false
 #endif
 
 /* Print a backtrace of the current GDB process to the current

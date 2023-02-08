@@ -46,8 +46,7 @@ bool notif_debug = false;
 
 /* Supported clients of notifications.  */
 
-static const notif_client *const notifs[] =
-{
+static const notif_client *const notifs[] = {
   &notif_client_stop,
 };
 
@@ -57,14 +56,13 @@ gdb_static_assert (ARRAY_SIZE (notifs) == REMOTE_NOTIF_LAST);
    acknowledge.  */
 
 void
-remote_notif_ack (remote_target *remote,
-		  const notif_client *nc, const char *buf)
+remote_notif_ack (remote_target *remote, const notif_client *nc,
+		  const char *buf)
 {
   notif_event_up event = nc->alloc_event ();
 
   if (notif_debug)
-    gdb_printf (gdb_stdlog, "notif: ack '%s'\n",
-		nc->ack_command);
+    gdb_printf (gdb_stdlog, "notif: ack '%s'\n", nc->ack_command);
 
   nc->parse (remote, nc, buf, event.get ());
   nc->ack (remote, nc, buf, event.release ());
@@ -73,8 +71,8 @@ remote_notif_ack (remote_target *remote,
 /* Parse the BUF for the expected notification NC.  */
 
 struct notif_event *
-remote_notif_parse (remote_target *remote,
-		    const notif_client *nc, const char *buf)
+remote_notif_parse (remote_target *remote, const notif_client *nc,
+		    const char *buf)
 {
   notif_event_up event = nc->alloc_event ();
 
@@ -127,8 +125,7 @@ handle_notification (struct remote_notif_state *state, const char *buf)
     {
       const char *name = notifs[i]->name;
 
-      if (startswith (buf, name)
-	  && buf[strlen (name)] == ':')
+      if (startswith (buf, name) && buf[strlen (name)] == ':')
 	break;
     }
 
@@ -137,7 +134,7 @@ handle_notification (struct remote_notif_state *state, const char *buf)
   if (i == ARRAY_SIZE (notifs))
     return;
 
-  nc =  notifs[i];
+  nc = notifs[i];
 
   if (state->pending_event[nc->id] != NULL)
     {
@@ -145,8 +142,7 @@ handle_notification (struct remote_notif_state *state, const char *buf)
 	 reason thought we didn't, possibly due to timeout on its side.
 	 Just ignore it.  */
       if (notif_debug)
-	gdb_printf (gdb_stdlog,
-		    "notif: ignoring resent notification\n");
+	gdb_printf (gdb_stdlog, "notif: ignoring resent notification\n");
     }
   else
     {
@@ -202,8 +198,7 @@ handle_notification (struct remote_notif_state *state, const char *buf)
 	}
 
       if (notif_debug)
-	gdb_printf (gdb_stdlog,
-		    "notif: Notification '%s' captured\n",
+	gdb_printf (gdb_stdlog, "notif: Notification '%s' captured\n",
 		    nc->name);
     }
 }
@@ -241,16 +236,16 @@ remote_notif_state::~remote_notif_state ()
 }
 
 void _initialize_notif ();
+
 void
 _initialize_notif ()
 {
-  add_setshow_boolean_cmd ("notification", no_class, &notif_debug,
-			   _("\
-Set debugging of async remote notification."), _("\
-Show debugging of async remote notification."), _("\
+  add_setshow_boolean_cmd ("notification", no_class, &notif_debug, _ ("\
+Set debugging of async remote notification."),
+			   _ ("\
+Show debugging of async remote notification."),
+			   _ ("\
 When non-zero, debugging output about async remote notifications"
-" is enabled."),
-			   NULL,
-			   NULL,
-			   &setdebuglist, &showdebuglist);
+			      " is enabled."),
+			   NULL, NULL, &setdebuglist, &showdebuglist);
 }

@@ -22,7 +22,7 @@
 
 /* Return the Arm target description with fp registers FP_TYPE.  */
 
-const target_desc * arm_linux_read_description (arm_fp_type fp_type);
+const target_desc *arm_linux_read_description (arm_fp_type fp_type);
 
 /* For a target description TDESC, return its fp type.  */
 

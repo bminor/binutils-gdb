@@ -60,7 +60,7 @@ complaint_internal (const char *fmt, ...)
     (*deprecated_warning_hook) (fmt, args);
   else
     {
-      gdb_puts (_("During symbol reading: "), gdb_stderr);
+      gdb_puts (_ ("During symbol reading: "), gdb_stderr);
       gdb_vprintf (gdb_stderr, fmt, args);
       gdb_puts ("\n", gdb_stderr);
     }
@@ -111,7 +111,7 @@ complaint_interceptor::~complaint_interceptor ()
       if (m_saved_warning_hook)
 	wrap_warning_hook (m_saved_warning_hook, str.c_str ());
       else
-	gdb_printf (gdb_stderr, _("During symbol reading: %s\n"),
+	gdb_printf (gdb_stderr, _ ("During symbol reading: %s\n"),
 		    str.c_str ());
     }
 
@@ -134,13 +134,15 @@ static void
 complaints_show_value (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *cmd, const char *value)
 {
-  gdb_printf (file, _("Max number of complaints about incorrect"
-		      " symbols is %s.\n"),
+  gdb_printf (file,
+	      _ ("Max number of complaints about incorrect"
+		 " symbols is %s.\n"),
 	      value);
 }
 
 #if GDB_SELF_TEST
-namespace selftests {
+namespace selftests
+{
 
 /* Entry point for complaints unit tests.  */
 
@@ -151,25 +153,29 @@ test_complaints ()
   scoped_restore reset_counters = make_scoped_restore (&counters, tmp);
   scoped_restore reset_stop_whining = make_scoped_restore (&stop_whining, 2);
 
-#define CHECK_COMPLAINT(STR, CNT)					\
-  do									\
-    {									\
-      std::string output;						\
-      execute_fn_to_string (output, []() { complaint (STR); }, false);	\
-      std::string expected						\
-	= _("During symbol reading: ") + std::string (STR "\n");	\
-      SELF_CHECK (output == expected);					\
-      SELF_CHECK (counters[STR] == CNT);				\
-    } while (0)
+#define CHECK_COMPLAINT(STR, CNT)                                 \
+  do                                                              \
+    {                                                             \
+      std::string output;                                         \
+      execute_fn_to_string (                                      \
+	output, [] () { complaint (STR); }, false);               \
+      std::string expected                                        \
+	= _ ("During symbol reading: ") + std::string (STR "\n"); \
+      SELF_CHECK (output == expected);                            \
+      SELF_CHECK (counters[STR] == CNT);                          \
+    }                                                             \
+  while (0)
 
-#define CHECK_COMPLAINT_SILENT(STR, CNT)				\
-  do									\
-    {									\
-      std::string output;						\
-      execute_fn_to_string (output, []() { complaint (STR); }, false);	\
-      SELF_CHECK (output.empty ());					\
-      SELF_CHECK (counters[STR] == CNT);				\
-    } while (0)
+#define CHECK_COMPLAINT_SILENT(STR, CNT)            \
+  do                                                \
+    {                                               \
+      std::string output;                           \
+      execute_fn_to_string (                        \
+	output, [] () { complaint (STR); }, false); \
+      SELF_CHECK (output.empty ());                 \
+      SELF_CHECK (counters[STR] == CNT);            \
+    }                                               \
+  while (0)
 
   CHECK_COMPLAINT ("maintenance complaint 0", 1);
   CHECK_COMPLAINT ("maintenance complaint 0", 2);
@@ -182,20 +188,20 @@ test_complaints ()
 #undef CHECK_COMPLAINT_SILENT
 }
 
-
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
 void _initialize_complaints ();
+
 void
 _initialize_complaints ()
 {
-  add_setshow_zinteger_cmd ("complaints", class_support, 
-			    &stop_whining, _("\
-Set max number of complaints about incorrect symbols."), _("\
-Show max number of complaints about incorrect symbols."), NULL,
-			    NULL, complaints_show_value,
-			    &setlist, &showlist);
+  add_setshow_zinteger_cmd ("complaints", class_support, &stop_whining, _ ("\
+Set max number of complaints about incorrect symbols."),
+			    _ ("\
+Show max number of complaints about incorrect symbols."),
+			    NULL, NULL, complaints_show_value, &setlist,
+			    &showlist);
 
 #if GDB_SELF_TEST
   selftests::register_test ("complaints", selftests::test_complaints);

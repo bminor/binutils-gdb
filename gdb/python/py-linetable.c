@@ -20,32 +20,35 @@
 #include "defs.h"
 #include "python-internal.h"
 
-struct linetable_entry_object {
+struct linetable_entry_object
+{
   PyObject_HEAD
-  /* The line table source line.  */
-  int line;
+    /* The line table source line.  */
+    int line;
   /* The pc associated with the source line.  */
   CORE_ADDR pc;
 };
 
 extern PyTypeObject linetable_entry_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_entry_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_entry_object");
 
-struct linetable_object {
+struct linetable_object
+{
   PyObject_HEAD
-  /* The symtab python object.  We store the Python object here as the
+    /* The symtab python object.  We store the Python object here as the
      underlying symtab can become invalid, and we have to run validity
      checks on it.  */
-  PyObject *symtab;
+    PyObject *symtab;
 };
 
 extern PyTypeObject linetable_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_object");
 
-struct ltpy_iterator_object {
+struct ltpy_iterator_object
+{
   PyObject_HEAD
-  /* The current entry in the line table for the iterator  */
-  int current_index;
+    /* The current entry in the line table for the iterator  */
+    int current_index;
   /* Pointer back to the original source line table object.  Needed to
      check if the line table is still valid, and has not been invalidated
      when an object file has been freed.  */
@@ -53,7 +56,7 @@ struct ltpy_iterator_object {
 };
 
 extern PyTypeObject ltpy_iterator_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("ltpy_iterator_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("ltpy_iterator_object");
 
 /* Internal helper function to extract gdb.Symtab from a gdb.LineTable
    object.  */
@@ -66,17 +69,18 @@ get_symtab (PyObject *linetable)
   return lt->symtab;
 }
 
-#define LTPY_REQUIRE_VALID(lt_obj, symtab)				\
-  do {									\
-    symtab = symtab_object_to_symtab (get_symtab (lt_obj));		\
-    if (symtab == NULL)							\
-      {									\
-	  PyErr_SetString (PyExc_RuntimeError,				\
-			   _("Symbol Table in line table is invalid."));\
-	  return NULL;							\
-	}								\
-  } while (0)
-
+#define LTPY_REQUIRE_VALID(lt_obj, symtab)                                \
+  do                                                                      \
+    {                                                                     \
+      symtab = symtab_object_to_symtab (get_symtab (lt_obj));             \
+      if (symtab == NULL)                                                 \
+	{                                                                 \
+	  PyErr_SetString (PyExc_RuntimeError,                            \
+			   _ ("Symbol Table in line table is invalid.")); \
+	  return NULL;                                                    \
+	}                                                                 \
+    }                                                                     \
+  while (0)
 
 /* Helper function to create a line table object that wraps a
    gdb.Symtab object.  */
@@ -103,8 +107,7 @@ build_linetable_entry (int line, CORE_ADDR address)
 {
   linetable_entry_object *obj;
 
-  obj = PyObject_New (linetable_entry_object,
-		      &linetable_entry_object_type);
+  obj = PyObject_New (linetable_entry_object, &linetable_entry_object_type);
   if (obj != NULL)
     {
       obj->line = line;
@@ -161,7 +164,7 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
 
   LTPY_REQUIRE_VALID (self, symtab);
 
-  if (! PyArg_ParseTuple (args, GDB_PY_LL_ARG, &py_line))
+  if (!PyArg_ParseTuple (args, GDB_PY_LL_ARG, &py_line))
     return NULL;
 
   try
@@ -189,13 +192,13 @@ ltpy_has_line (PyObject *self, PyObject *args)
 
   LTPY_REQUIRE_VALID (self, symtab);
 
-  if (! PyArg_ParseTuple (args, GDB_PY_LL_ARG, &py_line))
+  if (!PyArg_ParseTuple (args, GDB_PY_LL_ARG, &py_line))
     return NULL;
 
   if (symtab->linetable () == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       _("Linetable information not found in symbol table"));
+		       _ ("Linetable information not found in symbol table"));
       return NULL;
     }
 
@@ -203,7 +206,7 @@ ltpy_has_line (PyObject *self, PyObject *args)
     {
       struct linetable_entry *item = &(symtab->linetable ()->item[index]);
       if (item->line == py_line)
-	  Py_RETURN_TRUE;
+	Py_RETURN_TRUE;
     }
 
   Py_RETURN_FALSE;
@@ -226,7 +229,7 @@ ltpy_get_all_source_lines (PyObject *self, PyObject *args)
   if (symtab->linetable () == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       _("Linetable information not found in symbol table"));
+		       _ ("Linetable information not found in symbol table"));
       return NULL;
     }
 
@@ -301,15 +304,18 @@ gdbpy_initialize_linetable (void)
   Py_INCREF (&ltpy_iterator_object_type);
 
   if (gdb_pymodule_addobject (gdb_module, "LineTable",
-			      (PyObject *) &linetable_object_type) < 0)
+			      (PyObject *) &linetable_object_type)
+      < 0)
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "LineTableEntry",
-			      (PyObject *) &linetable_entry_object_type) < 0)
+			      (PyObject *) &linetable_entry_object_type)
+      < 0)
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "LineTableIterator",
-			      (PyObject *) &ltpy_iterator_object_type) < 0)
+			      (PyObject *) &ltpy_iterator_object_type)
+      < 0)
     return -1;
 
   return 0;
@@ -351,8 +357,8 @@ ltpy_iter (PyObject *self)
 
   LTPY_REQUIRE_VALID (self, symtab);
 
-  ltpy_iter_obj = PyObject_New (ltpy_iterator_object,
-				&ltpy_iterator_object_type);
+  ltpy_iter_obj
+    = PyObject_New (ltpy_iterator_object, &ltpy_iterator_object_type);
   if (ltpy_iter_obj == NULL)
     return NULL;
 
@@ -446,147 +452,137 @@ ltpy_iter_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
-
-
 static PyMethodDef linetable_object_methods[] = {
-  { "line", ltpy_get_pcs_for_line, METH_VARARGS,
-    "line (lineno) -> Tuple\n\
+  { "line", ltpy_get_pcs_for_line, METH_VARARGS, "line (lineno) -> Tuple\n\
 Return executable locations for a given source line." },
-  { "has_line", ltpy_has_line, METH_VARARGS,
-    "has_line (lineno) -> Boolean\n\
+  { "has_line", ltpy_has_line, METH_VARARGS, "has_line (lineno) -> Boolean\n\
 Return TRUE if this line has executable information, FALSE if not." },
   { "source_lines", ltpy_get_all_source_lines, METH_NOARGS,
     "source_lines () -> List\n\
 Return a list of all executable source lines." },
-  { "is_valid", ltpy_is_valid, METH_NOARGS,
-    "is_valid () -> Boolean.\n\
+  { "is_valid", ltpy_is_valid, METH_NOARGS, "is_valid () -> Boolean.\n\
 Return True if this LineTable is valid, False if not." },
-  {NULL}  /* Sentinel */
+  { NULL } /* Sentinel */
 };
 
 PyTypeObject linetable_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.LineTable",	          /*tp_name*/
-  sizeof (linetable_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  ltpy_dealloc,                   /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  0,				  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,             /*tp_flags*/
-  "GDB line table object",	  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  ltpy_iter,			  /* tp_iter */
-  0,				  /* tp_iternext */
-  linetable_object_methods,	  /* tp_methods */
-  0,				  /* tp_members */
-  0,	                          /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,    			  /* tp_init */
-  0,				  /* tp_alloc */
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.LineTable", /*tp_name*/
+  sizeof (linetable_object),			   /*tp_basicsize*/
+  0,						   /*tp_itemsize*/
+  ltpy_dealloc,					   /*tp_dealloc*/
+  0,						   /*tp_print*/
+  0,						   /*tp_getattr*/
+  0,						   /*tp_setattr*/
+  0,						   /*tp_compare*/
+  0,						   /*tp_repr*/
+  0,						   /*tp_as_number*/
+  0,						   /*tp_as_sequence*/
+  0,						   /*tp_as_mapping*/
+  0,						   /*tp_hash */
+  0,						   /*tp_call*/
+  0,						   /*tp_str*/
+  0,						   /*tp_getattro*/
+  0,						   /*tp_setattro*/
+  0,						   /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,				   /*tp_flags*/
+  "GDB line table object",			   /* tp_doc */
+  0,						   /* tp_traverse */
+  0,						   /* tp_clear */
+  0,						   /* tp_richcompare */
+  0,						   /* tp_weaklistoffset */
+  ltpy_iter,					   /* tp_iter */
+  0,						   /* tp_iternext */
+  linetable_object_methods,			   /* tp_methods */
+  0,						   /* tp_members */
+  0,						   /* tp_getset */
+  0,						   /* tp_base */
+  0,						   /* tp_dict */
+  0,						   /* tp_descr_get */
+  0,						   /* tp_descr_set */
+  0,						   /* tp_dictoffset */
+  0,						   /* tp_init */
+  0,						   /* tp_alloc */
 };
 
 static PyMethodDef ltpy_iterator_methods[] = {
-  { "is_valid", ltpy_iter_is_valid, METH_NOARGS,
-    "is_valid () -> Boolean.\n\
+  { "is_valid", ltpy_iter_is_valid, METH_NOARGS, "is_valid () -> Boolean.\n\
 Return True if this LineTable iterator is valid, False if not." },
-  {NULL}  /* Sentinel */
+  { NULL } /* Sentinel */
 };
 
 PyTypeObject ltpy_iterator_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.LineTableIterator",		  /*tp_name*/
-  sizeof (ltpy_iterator_object),  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  ltpy_iterator_dealloc,	  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  0,				  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
-  "GDB line table iterator object",	      /*tp_doc */
-  0,				  /*tp_traverse */
-  0,				  /*tp_clear */
-  0,				  /*tp_richcompare */
-  0,				  /*tp_weaklistoffset */
-  ltpy_iterator,                  /*tp_iter */
-  ltpy_iternext,	          /*tp_iternext */
-  ltpy_iterator_methods           /*tp_methods */
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.LineTableIterator", /*tp_name*/
+  sizeof (ltpy_iterator_object),			   /*tp_basicsize*/
+  0,							   /*tp_itemsize*/
+  ltpy_iterator_dealloc,				   /*tp_dealloc*/
+  0,							   /*tp_print*/
+  0,							   /*tp_getattr*/
+  0,							   /*tp_setattr*/
+  0,							   /*tp_compare*/
+  0,							   /*tp_repr*/
+  0,							   /*tp_as_number*/
+  0,							   /*tp_as_sequence*/
+  0,							   /*tp_as_mapping*/
+  0,							   /*tp_hash */
+  0,							   /*tp_call*/
+  0,							   /*tp_str*/
+  0,							   /*tp_getattro*/
+  0,							   /*tp_setattro*/
+  0,							   /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,					   /*tp_flags*/
+  "GDB line table iterator object",			   /*tp_doc */
+  0,							   /*tp_traverse */
+  0,							   /*tp_clear */
+  0,							   /*tp_richcompare */
+  0,			/*tp_weaklistoffset */
+  ltpy_iterator,	/*tp_iter */
+  ltpy_iternext,	/*tp_iternext */
+  ltpy_iterator_methods /*tp_methods */
 };
 
-
 static gdb_PyGetSetDef linetable_entry_object_getset[] = {
-  { "line", ltpy_entry_get_line, NULL,
-    "The line number in the source file.", NULL },
-  { "pc", ltpy_entry_get_pc, NULL,
-    "The memory address for this line number.", NULL },
-  { NULL }  /* Sentinel */
+  { "line", ltpy_entry_get_line, NULL, "The line number in the source file.",
+    NULL },
+  { "pc", ltpy_entry_get_pc, NULL, "The memory address for this line number.",
+    NULL },
+  { NULL } /* Sentinel */
 };
 
 PyTypeObject linetable_entry_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.LineTableEntry",	          /*tp_name*/
-  sizeof (linetable_entry_object), /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  0,                              /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  0,				  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,             /*tp_flags*/
-  "GDB line table entry object",  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,			          /* tp_iter */
-  0,				  /* tp_iternext */
-  0,                              /* tp_methods */
-  0,				  /* tp_members */
-  linetable_entry_object_getset,  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,	                          /* tp_init */
-  0,				  /* tp_alloc */
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.LineTableEntry", /*tp_name*/
+  sizeof (linetable_entry_object),			/*tp_basicsize*/
+  0,							/*tp_itemsize*/
+  0,							/*tp_dealloc*/
+  0,							/*tp_print*/
+  0,							/*tp_getattr*/
+  0,							/*tp_setattr*/
+  0,							/*tp_compare*/
+  0,							/*tp_repr*/
+  0,							/*tp_as_number*/
+  0,							/*tp_as_sequence*/
+  0,							/*tp_as_mapping*/
+  0,							/*tp_hash */
+  0,							/*tp_call*/
+  0,							/*tp_str*/
+  0,							/*tp_getattro*/
+  0,							/*tp_setattro*/
+  0,							/*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,					/*tp_flags*/
+  "GDB line table entry object",			/* tp_doc */
+  0,							/* tp_traverse */
+  0,							/* tp_clear */
+  0,							/* tp_richcompare */
+  0,							/* tp_weaklistoffset */
+  0,							/* tp_iter */
+  0,							/* tp_iternext */
+  0,							/* tp_methods */
+  0,							/* tp_members */
+  linetable_entry_object_getset,			/* tp_getset */
+  0,							/* tp_base */
+  0,							/* tp_dict */
+  0,							/* tp_descr_get */
+  0,							/* tp_descr_set */
+  0,							/* tp_dictoffset */
+  0,							/* tp_init */
+  0,							/* tp_alloc */
 };

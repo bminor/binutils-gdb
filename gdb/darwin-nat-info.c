@@ -48,18 +48,21 @@
 #include <mach/mach_init.h>
 #include <mach/mach_vm.h>
 
-#define CHECK_ARGS(what, args) do { \
-  if ((NULL == args) || ((args[0] != '0') && (args[1] != 'x'))) \
-    error(_("%s must be specified with 0x..."), what);		\
-} while (0)
+#define CHECK_ARGS(what, args)                                      \
+  do                                                                \
+    {                                                               \
+      if ((NULL == args) || ((args[0] != '0') && (args[1] != 'x'))) \
+	error (_ ("%s must be specified with 0x..."), what);        \
+    }                                                               \
+  while (0)
 
 #define PRINT_FIELD(structure, field) \
-  gdb_printf(_(#field":\t%#lx\n"), (unsigned long) (structure)->field)
+  gdb_printf (_ (#field ":\t%#lx\n"), (unsigned long) (structure)->field)
 
-#define PRINT_TV_FIELD(structure, field) \
-  gdb_printf(_(#field":\t%u.%06u sec\n"),			\
-	     (unsigned) (structure)->field.seconds,		\
-	     (unsigned) (structure)->field.microseconds)
+#define PRINT_TV_FIELD(structure, field)             \
+  gdb_printf (_ (#field ":\t%u.%06u sec\n"),         \
+	      (unsigned) (structure)->field.seconds, \
+	      (unsigned) (structure)->field.microseconds)
 
 #define task_self mach_task_self
 #define task_by_unix_pid task_for_pid
@@ -83,24 +86,23 @@ info_mach_tasks_command (const char *args, int from_tty)
   sysctl (sysControl, 3, procInfo, &length, NULL, 0);
 
   count = (length / sizeof (struct kinfo_proc));
-  gdb_printf (_("%d processes:\n"), count);
+  gdb_printf (_ ("%d processes:\n"), count);
   for (index = 0; index < count; ++index)
     {
       kern_return_t result;
       mach_port_t taskPort;
 
-      result =
-	task_by_unix_pid (mach_task_self (), procInfo[index].kp_proc.p_pid,
-			  &taskPort);
+      result = task_by_unix_pid (mach_task_self (),
+				 procInfo[index].kp_proc.p_pid, &taskPort);
       if (KERN_SUCCESS == result)
 	{
-	  gdb_printf (_("    %s is %d has task %#x\n"),
+	  gdb_printf (_ ("    %s is %d has task %#x\n"),
 		      procInfo[index].kp_proc.p_comm,
 		      procInfo[index].kp_proc.p_pid, taskPort);
 	}
       else
 	{
-	  gdb_printf (_("    %s is %d unknown task port\n"),
+	  gdb_printf (_ ("    %s is %d unknown task port\n"),
 		      procInfo[index].kp_proc.p_comm,
 		      procInfo[index].kp_proc.p_pid);
 	}
@@ -118,7 +120,7 @@ get_task_from_args (const char *args)
   if (args == NULL || *args == 0)
     {
       if (inferior_ptid == null_ptid)
-	gdb_printf (_("No inferior running\n"));
+	gdb_printf (_ ("No inferior running\n"));
 
       darwin_inferior *priv = get_darwin_inferior (current_inferior ());
 
@@ -129,7 +131,7 @@ get_task_from_args (const char *args)
   task = strtoul (args, &eptr, 0);
   if (*eptr)
     {
-      gdb_printf (_("cannot parse task id '%s'\n"), args);
+      gdb_printf (_ ("cannot parse task id '%s'\n"), args);
       return TASK_NULL;
     }
   return task;
@@ -153,11 +155,10 @@ info_mach_task_command (const char *args, int from_tty)
   if (task == TASK_NULL)
     return;
 
-  gdb_printf (_("TASK_BASIC_INFO for 0x%x:\n"), task);
+  gdb_printf (_ ("TASK_BASIC_INFO for 0x%x:\n"), task);
   info_count = TASK_BASIC_INFO_COUNT;
-  result = task_info (task,
-		      TASK_BASIC_INFO,
-		      (task_info_t) & task_info_data.basic, &info_count);
+  result = task_info (task, TASK_BASIC_INFO,
+		      (task_info_t) &task_info_data.basic, &info_count);
   MACH_CHECK_ERROR (result);
 
   PRINT_FIELD (&task_info_data.basic, suspend_count);
@@ -165,11 +166,10 @@ info_mach_task_command (const char *args, int from_tty)
   PRINT_FIELD (&task_info_data.basic, resident_size);
   PRINT_TV_FIELD (&task_info_data.basic, user_time);
   PRINT_TV_FIELD (&task_info_data.basic, system_time);
-  gdb_printf (_("\nTASK_EVENTS_INFO:\n"));
+  gdb_printf (_ ("\nTASK_EVENTS_INFO:\n"));
   info_count = TASK_EVENTS_INFO_COUNT;
-  result = task_info (task,
-		      TASK_EVENTS_INFO,
-		      (task_info_t) & task_info_data.events, &info_count);
+  result = task_info (task, TASK_EVENTS_INFO,
+		      (task_info_t) &task_info_data.events, &info_count);
   MACH_CHECK_ERROR (result);
 
   PRINT_FIELD (&task_info_data.events, faults);
@@ -181,12 +181,10 @@ info_mach_task_command (const char *args, int from_tty)
   PRINT_FIELD (&task_info_data.events, cow_faults);
   PRINT_FIELD (&task_info_data.events, messages_sent);
   PRINT_FIELD (&task_info_data.events, messages_received);
-  gdb_printf (_("\nTASK_THREAD_TIMES_INFO:\n"));
+  gdb_printf (_ ("\nTASK_THREAD_TIMES_INFO:\n"));
   info_count = TASK_THREAD_TIMES_INFO_COUNT;
-  result = task_info (task,
-		      TASK_THREAD_TIMES_INFO,
-		      (task_info_t) & task_info_data.thread_times,
-		      &info_count);
+  result = task_info (task, TASK_THREAD_TIMES_INFO,
+		      (task_info_t) &task_info_data.thread_times, &info_count);
   MACH_CHECK_ERROR (result);
   PRINT_TV_FIELD (&task_info_data.thread_times, user_time);
   PRINT_TV_FIELD (&task_info_data.thread_times, system_time);
@@ -211,68 +209,68 @@ info_mach_ports_command (const char *args, int from_tty)
 
   gdb_assert (name_count == type_count);
 
-  gdb_printf (_("Ports for task 0x%x:\n"), task);
-  gdb_printf (_("port   type\n"));
+  gdb_printf (_ ("Ports for task 0x%x:\n"), task);
+  gdb_printf (_ ("port   type\n"));
   for (index = 0; index < name_count; ++index)
     {
       mach_port_t port = names[index];
       unsigned int j;
+
       struct type_descr
       {
 	mach_port_type_t type;
 	const char *name;
 	mach_port_right_t right;
       };
-      static struct type_descr descrs[] =
-	{
-	  {MACH_PORT_TYPE_SEND, "send", MACH_PORT_RIGHT_SEND},
-	  {MACH_PORT_TYPE_SEND_ONCE, "send-once", MACH_PORT_RIGHT_SEND_ONCE},
-	  {MACH_PORT_TYPE_RECEIVE, "receive", MACH_PORT_RIGHT_RECEIVE},
-	  {MACH_PORT_TYPE_PORT_SET, "port-set", MACH_PORT_RIGHT_PORT_SET},
-	  {MACH_PORT_TYPE_DEAD_NAME, "dead", MACH_PORT_RIGHT_DEAD_NAME}
-	};
+      static struct type_descr descrs[]
+	= { { MACH_PORT_TYPE_SEND, "send", MACH_PORT_RIGHT_SEND },
+	    { MACH_PORT_TYPE_SEND_ONCE, "send-once",
+	      MACH_PORT_RIGHT_SEND_ONCE },
+	    { MACH_PORT_TYPE_RECEIVE, "receive", MACH_PORT_RIGHT_RECEIVE },
+	    { MACH_PORT_TYPE_PORT_SET, "port-set", MACH_PORT_RIGHT_PORT_SET },
+	    { MACH_PORT_TYPE_DEAD_NAME, "dead", MACH_PORT_RIGHT_DEAD_NAME } };
 
-      gdb_printf (_("%04x: %08x "), port, types[index]);
-      for (j = 0; j < sizeof(descrs) / sizeof(*descrs); j++)
+      gdb_printf (_ ("%04x: %08x "), port, types[index]);
+      for (j = 0; j < sizeof (descrs) / sizeof (*descrs); j++)
 	if (types[index] & descrs[j].type)
 	  {
 	    mach_port_urefs_t ref;
 	    kern_return_t ret;
 
-	    gdb_printf (_(" %s("), descrs[j].name);
+	    gdb_printf (_ (" %s("), descrs[j].name);
 	    ret = mach_port_get_refs (task, port, descrs[j].right, &ref);
 	    if (ret != KERN_SUCCESS)
-	      gdb_printf (_("??"));
+	      gdb_printf (_ ("??"));
 	    else
-	      gdb_printf (_("%u"), ref);
-	    gdb_printf (_(" refs)"));
+	      gdb_printf (_ ("%u"), ref);
+	    gdb_printf (_ (" refs)"));
 	  }
-      
+
       if (task == task_self ())
 	{
-	  if (port == task_self())
-	    gdb_printf (_(" gdb-task"));
+	  if (port == task_self ())
+	    gdb_printf (_ (" gdb-task"));
 	  else if (port == darwin_host_self)
-	    gdb_printf (_(" host-self"));
+	    gdb_printf (_ (" host-self"));
 	  else if (port == darwin_ex_port)
-	    gdb_printf (_(" gdb-exception"));
+	    gdb_printf (_ (" gdb-exception"));
 	  else if (port == darwin_port_set)
-	    gdb_printf (_(" gdb-port_set"));
+	    gdb_printf (_ (" gdb-port_set"));
 	  else if (inferior_ptid != null_ptid)
 	    {
 	      struct inferior *inf = current_inferior ();
 	      darwin_inferior *priv = get_darwin_inferior (inf);
 
 	      if (port == priv->task)
-		gdb_printf (_(" inferior-task"));
+		gdb_printf (_ (" inferior-task"));
 	      else if (port == priv->notify_port)
-		gdb_printf (_(" inferior-notify"));
+		gdb_printf (_ (" inferior-notify"));
 	      else
 		{
 		  for (int k = 0; k < priv->exception_info.count; k++)
 		    if (port == priv->exception_info.ports[k])
 		      {
-			gdb_printf (_(" inferior-excp-port"));
+			gdb_printf (_ (" inferior-excp-port"));
 			break;
 		      }
 
@@ -280,16 +278,15 @@ info_mach_ports_command (const char *args, int from_tty)
 		    {
 		      if (port == t->gdb_port)
 			{
-			  gdb_printf (_(" inferior-thread for 0x%x"),
+			  gdb_printf (_ (" inferior-thread for 0x%x"),
 				      priv->task);
 			  break;
 			}
 		    }
-
 		}
 	    }
 	}
-      gdb_printf (_("\n"));
+      gdb_printf (_ ("\n"));
     }
 
   vm_deallocate (task_self (), (vm_address_t) names,
@@ -298,7 +295,6 @@ info_mach_ports_command (const char *args, int from_tty)
 		 (type_count * sizeof (mach_port_type_t)));
 }
 
-
 static void
 darwin_debug_port_info (task_t task, mach_port_t port)
 {
@@ -306,22 +302,22 @@ darwin_debug_port_info (task_t task, mach_port_t port)
   mach_port_status_t status;
   mach_msg_type_number_t len = sizeof (status);
 
-  kret = mach_port_get_attributes
-    (task, port, MACH_PORT_RECEIVE_STATUS, (mach_port_info_t)&status, &len);
+  kret = mach_port_get_attributes (task, port, MACH_PORT_RECEIVE_STATUS,
+				   (mach_port_info_t) &status, &len);
   MACH_CHECK_ERROR (kret);
 
-  gdb_printf (_("Port 0x%lx in task 0x%lx:\n"), (unsigned long) port,
+  gdb_printf (_ ("Port 0x%lx in task 0x%lx:\n"), (unsigned long) port,
 	      (unsigned long) task);
-  gdb_printf (_("  port set: 0x%x\n"), status.mps_pset);
-  gdb_printf (_("     seqno: 0x%x\n"), status.mps_seqno);
-  gdb_printf (_("   mscount: 0x%x\n"), status.mps_mscount);
-  gdb_printf (_("    qlimit: 0x%x\n"), status.mps_qlimit);
-  gdb_printf (_("  msgcount: 0x%x\n"), status.mps_msgcount);
-  gdb_printf (_("  sorights: 0x%x\n"), status.mps_sorights);
-  gdb_printf (_("   srights: 0x%x\n"), status.mps_srights);
-  gdb_printf (_(" pdrequest: 0x%x\n"), status.mps_pdrequest);
-  gdb_printf (_(" nsrequest: 0x%x\n"), status.mps_nsrequest);
-  gdb_printf (_("     flags: 0x%x\n"), status.mps_flags);
+  gdb_printf (_ ("  port set: 0x%x\n"), status.mps_pset);
+  gdb_printf (_ ("     seqno: 0x%x\n"), status.mps_seqno);
+  gdb_printf (_ ("   mscount: 0x%x\n"), status.mps_mscount);
+  gdb_printf (_ ("    qlimit: 0x%x\n"), status.mps_qlimit);
+  gdb_printf (_ ("  msgcount: 0x%x\n"), status.mps_msgcount);
+  gdb_printf (_ ("  sorights: 0x%x\n"), status.mps_sorights);
+  gdb_printf (_ ("   srights: 0x%x\n"), status.mps_srights);
+  gdb_printf (_ (" pdrequest: 0x%x\n"), status.mps_pdrequest);
+  gdb_printf (_ (" nsrequest: 0x%x\n"), status.mps_nsrequest);
+  gdb_printf (_ ("     flags: 0x%x\n"), status.mps_flags);
 }
 
 static void
@@ -330,7 +326,7 @@ info_mach_port_command (const char *args, int from_tty)
   task_t task;
   mach_port_t port;
 
-  CHECK_ARGS (_("Task and port"), args);
+  CHECK_ARGS (_ ("Task and port"), args);
   sscanf (args, "0x%x 0x%x", &task, &port);
 
   darwin_debug_port_info (task, port);
@@ -352,10 +348,10 @@ info_mach_threads_command (const char *args, int from_tty)
   result = task_threads (task, &threads, &thread_count);
   MACH_CHECK_ERROR (result);
 
-  gdb_printf (_("Threads in task %#x:\n"), task);
+  gdb_printf (_ ("Threads in task %#x:\n"), task);
   for (i = 0; i < thread_count; ++i)
     {
-      gdb_printf (_("    %#x\n"), threads[i]);
+      gdb_printf (_ ("    %#x\n"), threads[i]);
       mach_port_deallocate (task_self (), threads[i]);
     }
 
@@ -375,15 +371,13 @@ info_mach_thread_command (const char *args, int from_tty)
   kern_return_t result;
   unsigned int info_count;
 
-  CHECK_ARGS (_("Thread"), args);
+  CHECK_ARGS (_ ("Thread"), args);
   sscanf (args, "0x%x", &thread);
 
-  gdb_printf (_("THREAD_BASIC_INFO\n"));
+  gdb_printf (_ ("THREAD_BASIC_INFO\n"));
   info_count = THREAD_BASIC_INFO_COUNT;
-  result = thread_info (thread,
-			THREAD_BASIC_INFO,
-			(thread_info_t) & thread_info_data.basic,
-			&info_count);
+  result = thread_info (thread, THREAD_BASIC_INFO,
+			(thread_info_t) &thread_info_data.basic, &info_count);
   MACH_CHECK_ERROR (result);
 
 #if 0
@@ -429,13 +423,13 @@ unparse_inheritance (vm_inherit_t i)
   switch (i)
     {
     case VM_INHERIT_SHARE:
-      return _("share");
+      return _ ("share");
     case VM_INHERIT_COPY:
-      return _("copy ");
+      return _ ("copy ");
     case VM_INHERIT_NONE:
-      return _("none ");
+      return _ ("none ");
     default:
-      return _("???  ");
+      return _ ("???  ");
     }
 }
 
@@ -445,21 +439,21 @@ unparse_share_mode (unsigned char p)
   switch (p)
     {
     case SM_COW:
-      return _("cow");
+      return _ ("cow");
     case SM_PRIVATE:
-      return _("private");
+      return _ ("private");
     case SM_EMPTY:
-      return _("empty");
+      return _ ("empty");
     case SM_SHARED:
-      return _("shared");
+      return _ ("shared");
     case SM_TRUESHARED:
-      return _("true-shrd");
+      return _ ("true-shrd");
     case SM_PRIVATE_ALIASED:
-      return _("prv-alias");
+      return _ ("prv-alias");
     case SM_SHARED_ALIASED:
-      return _("shr-alias");
+      return _ ("shr-alias");
     default:
-      return _("???");
+      return _ ("???");
     }
 }
 
@@ -469,39 +463,39 @@ unparse_user_tag (unsigned int tag)
   switch (tag)
     {
     case 0:
-      return _("default");
+      return _ ("default");
     case VM_MEMORY_MALLOC:
-      return _("malloc");
+      return _ ("malloc");
     case VM_MEMORY_MALLOC_SMALL:
-      return _("malloc_small");
+      return _ ("malloc_small");
     case VM_MEMORY_MALLOC_LARGE:
-      return _("malloc_large");
+      return _ ("malloc_large");
     case VM_MEMORY_MALLOC_HUGE:
-      return _("malloc_huge");
+      return _ ("malloc_huge");
     case VM_MEMORY_SBRK:
-      return _("sbrk");
+      return _ ("sbrk");
     case VM_MEMORY_REALLOC:
-      return _("realloc");
+      return _ ("realloc");
     case VM_MEMORY_MALLOC_TINY:
-      return _("malloc_tiny");
+      return _ ("malloc_tiny");
     case VM_MEMORY_ANALYSIS_TOOL:
-      return _("analysis_tool");
+      return _ ("analysis_tool");
     case VM_MEMORY_MACH_MSG:
-      return _("mach_msg");
+      return _ ("mach_msg");
     case VM_MEMORY_IOKIT:
-      return _("iokit");
+      return _ ("iokit");
     case VM_MEMORY_STACK:
-      return _("stack");
+      return _ ("stack");
     case VM_MEMORY_GUARD:
-      return _("guard");
+      return _ ("guard");
     case VM_MEMORY_SHARED_PMAP:
-      return _("shared_pmap");
+      return _ ("shared_pmap");
     case VM_MEMORY_DYLIB:
-      return _("dylib");
+      return _ ("dylib");
     case VM_MEMORY_APPKIT:
-      return _("appkit");
+      return _ ("appkit");
     case VM_MEMORY_FOUNDATION:
-      return _("foundation");
+      return _ ("foundation");
     default:
       return NULL;
     }
@@ -526,7 +520,7 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 			 (vm_region_info_t) &info, &count, &object_name);
   if (kret != KERN_SUCCESS)
     {
-      gdb_printf (_("No memory regions."));
+      gdb_printf (_ ("No memory regions."));
       return;
     }
   memcpy (&prev_info, &info, sizeof (vm_region_basic_info_data_64_t));
@@ -548,9 +542,9 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
       if (!done)
 	{
 	  count = VM_REGION_BASIC_INFO_COUNT_64;
-	  kret =
-	    mach_vm_region (task, &address, &size, VM_REGION_BASIC_INFO_64,
-		 	      (vm_region_info_t) &info, &count, &object_name);
+	  kret
+	    = mach_vm_region (task, &address, &size, VM_REGION_BASIC_INFO_64,
+			      (vm_region_info_t) &info, &count, &object_name);
 	  if (kret != KERN_SUCCESS)
 	    {
 	      size = 0;
@@ -570,19 +564,19 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 
       if (print)
 	{
-	  gdb_printf (_("%s-%s %s/%s  %s %s %s"),
+	  gdb_printf (_ ("%s-%s %s/%s  %s %s %s"),
 		      paddress (target_gdbarch (), prev_address),
 		      paddress (target_gdbarch (), prev_address + prev_size),
 		      unparse_protection (prev_info.protection),
 		      unparse_protection (prev_info.max_protection),
 		      unparse_inheritance (prev_info.inheritance),
-		      prev_info.shared ? _("shrd") : _("priv"),
-		      prev_info.reserved ? _("reserved") : _("not-rsvd"));
+		      prev_info.shared ? _ ("shrd") : _ ("priv"),
+		      prev_info.reserved ? _ ("reserved") : _ ("not-rsvd"));
 
 	  if (nsubregions > 1)
-	    gdb_printf (_(" (%d sub-rgn)"), nsubregions);
+	    gdb_printf (_ (" (%d sub-rgn)"), nsubregions);
 
-	  gdb_printf (_("\n"));
+	  gdb_printf (_ ("\n"));
 
 	  prev_address = address;
 	  prev_size = size;
@@ -667,7 +661,7 @@ darwin_debug_regions_recurse (task_t task)
 			     unparse_share_mode (r_info.share_mode));
 	uiout->field_signed ("depth", r_depth);
 	uiout->field_string ("submap",
-			     r_info.is_submap ? _("sm ") : _("obj"));
+			     r_info.is_submap ? _ ("sm ") : _ ("obj"));
 	tag = unparse_user_tag (r_info.user_tag);
 	if (tag)
 	  uiout->field_string ("tag", tag);
@@ -684,7 +678,6 @@ darwin_debug_regions_recurse (task_t task)
     }
 }
 
-
 static void
 darwin_debug_region (task_t task, mach_vm_address_t address)
 {
@@ -699,7 +692,7 @@ info_mach_regions_command (const char *args, int from_tty)
   task = get_task_from_args (args);
   if (task == TASK_NULL)
     return;
-  
+
   darwin_debug_regions (task, 0, -1);
 }
 
@@ -711,7 +704,7 @@ info_mach_regions_recurse_command (const char *args, int from_tty)
   task = get_task_from_args (args);
   if (task == TASK_NULL)
     return;
-  
+
   darwin_debug_regions_recurse (task);
 }
 
@@ -731,7 +724,7 @@ info_mach_region_command (const char *exp, int from_tty)
   address = value_as_address (val);
 
   if (inferior_ptid == null_ptid)
-    error (_("Inferior not available"));
+    error (_ ("Inferior not available"));
 
   inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);
@@ -743,48 +736,48 @@ disp_exception (const darwin_exception_info *info)
 {
   int i;
 
-  gdb_printf (_("%d exceptions:\n"), info->count);
+  gdb_printf (_ ("%d exceptions:\n"), info->count);
   for (i = 0; i < info->count; i++)
     {
       exception_mask_t mask = info->masks[i];
 
-      gdb_printf (_("port 0x%04x, behavior: "), info->ports[i]);
+      gdb_printf (_ ("port 0x%04x, behavior: "), info->ports[i]);
       switch (info->behaviors[i])
 	{
 	case EXCEPTION_DEFAULT:
-	  gdb_printf (_("default"));
+	  gdb_printf (_ ("default"));
 	  break;
 	case EXCEPTION_STATE:
-	  gdb_printf (_("state"));
+	  gdb_printf (_ ("state"));
 	  break;
 	case EXCEPTION_STATE_IDENTITY:
-	  gdb_printf (_("state-identity"));
+	  gdb_printf (_ ("state-identity"));
 	  break;
 	default:
-	  gdb_printf (_("0x%x"), info->behaviors[i]);
+	  gdb_printf (_ ("0x%x"), info->behaviors[i]);
 	}
-      gdb_printf (_(", masks:"));
+      gdb_printf (_ (", masks:"));
       if (mask & EXC_MASK_BAD_ACCESS)
-	gdb_printf (_(" BAD_ACCESS"));
+	gdb_printf (_ (" BAD_ACCESS"));
       if (mask & EXC_MASK_BAD_INSTRUCTION)
-	gdb_printf (_(" BAD_INSTRUCTION"));
+	gdb_printf (_ (" BAD_INSTRUCTION"));
       if (mask & EXC_MASK_ARITHMETIC)
-	gdb_printf (_(" ARITHMETIC"));
+	gdb_printf (_ (" ARITHMETIC"));
       if (mask & EXC_MASK_EMULATION)
-	gdb_printf (_(" EMULATION"));
+	gdb_printf (_ (" EMULATION"));
       if (mask & EXC_MASK_SOFTWARE)
-	gdb_printf (_(" SOFTWARE"));
+	gdb_printf (_ (" SOFTWARE"));
       if (mask & EXC_MASK_BREAKPOINT)
-	gdb_printf (_(" BREAKPOINT"));
+	gdb_printf (_ (" BREAKPOINT"));
       if (mask & EXC_MASK_SYSCALL)
-	gdb_printf (_(" SYSCALL"));
+	gdb_printf (_ (" SYSCALL"));
       if (mask & EXC_MASK_MACH_SYSCALL)
-	gdb_printf (_(" MACH_SYSCALL"));
+	gdb_printf (_ (" MACH_SYSCALL"));
       if (mask & EXC_MASK_RPC_ALERT)
-	gdb_printf (_(" RPC_ALERT"));
+	gdb_printf (_ (" RPC_ALERT"));
       if (mask & EXC_MASK_CRASH)
-	gdb_printf (_(" CRASH"));
-      gdb_printf (_("\n"));
+	gdb_printf (_ (" CRASH"));
+      gdb_printf (_ ("\n"));
     }
 }
 
@@ -801,7 +794,7 @@ info_mach_exceptions_command (const char *args, int from_tty)
       if (strcmp (args, "saved") == 0)
 	{
 	  if (inferior_ptid == null_ptid)
-	    gdb_printf (_("No inferior running\n"));
+	    gdb_printf (_ ("No inferior running\n"));
 
 	  darwin_inferior *priv = get_darwin_inferior (current_inferior ());
 
@@ -811,57 +804,58 @@ info_mach_exceptions_command (const char *args, int from_tty)
       else if (strcmp (args, "host") == 0)
 	{
 	  /* FIXME: This needs a privileged host port!  */
-	  kret = host_get_exception_ports
-	    (darwin_host_self, EXC_MASK_ALL, info.masks,
-	     &info.count, info.ports, info.behaviors, info.flavors);
+	  kret = host_get_exception_ports (darwin_host_self, EXC_MASK_ALL,
+					   info.masks, &info.count, info.ports,
+					   info.behaviors, info.flavors);
 	  MACH_CHECK_ERROR (kret);
 	  disp_exception (&info);
 	}
       else
-	error (_("Parameter is saved, host or none"));
+	error (_ ("Parameter is saved, host or none"));
     }
   else
     {
       struct inferior *inf;
 
       if (inferior_ptid == null_ptid)
-	gdb_printf (_("No inferior running\n"));
+	gdb_printf (_ ("No inferior running\n"));
       inf = current_inferior ();
-      
+
       darwin_inferior *priv = get_darwin_inferior (inf);
 
-      kret = task_get_exception_ports
-	(priv->task, EXC_MASK_ALL, info.masks,
-	 &info.count, info.ports, info.behaviors, info.flavors);
+      kret = task_get_exception_ports (priv->task, EXC_MASK_ALL, info.masks,
+				       &info.count, info.ports, info.behaviors,
+				       info.flavors);
       MACH_CHECK_ERROR (kret);
       disp_exception (&info);
     }
 }
 
 void _initialize_darwin_info_commands ();
+
 void
 _initialize_darwin_info_commands ()
 {
   add_info ("mach-tasks", info_mach_tasks_command,
-	    _("Get list of tasks in system."));
+	    _ ("Get list of tasks in system."));
   add_info ("mach-ports", info_mach_ports_command,
-	    _("Get list of ports in a task."));
+	    _ ("Get list of ports in a task."));
   add_info ("mach-port", info_mach_port_command,
-	    _("Get info on a specific port."));
+	    _ ("Get info on a specific port."));
   add_info ("mach-task", info_mach_task_command,
-	    _("Get info on a specific task."));
+	    _ ("Get info on a specific task."));
   add_info ("mach-threads", info_mach_threads_command,
-	    _("Get list of threads in a task."));
+	    _ ("Get list of threads in a task."));
   add_info ("mach-thread", info_mach_thread_command,
-	    _("Get info on a specific thread."));
+	    _ ("Get info on a specific thread."));
 
   add_info ("mach-regions", info_mach_regions_command,
-	    _("Get information on all mach region for the task."));
+	    _ ("Get information on all mach region for the task."));
   add_info ("mach-regions-rec", info_mach_regions_recurse_command,
-	    _("Get information on all mach sub region for the task."));
+	    _ ("Get information on all mach sub region for the task."));
   add_info ("mach-region", info_mach_region_command,
-	    _("Get information on mach region at given address."));
+	    _ ("Get information on mach region at given address."));
 
   add_info ("mach-exceptions", info_mach_exceptions_command,
-	    _("Disp mach exceptions."));
+	    _ ("Disp mach exceptions."));
 }

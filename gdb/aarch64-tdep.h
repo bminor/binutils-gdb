@@ -18,7 +18,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef AARCH64_TDEP_H
 #define AARCH64_TDEP_H
 
@@ -32,22 +31,22 @@ struct gdbarch;
 struct regset;
 
 /* AArch64 Dwarf register numbering.  */
-#define AARCH64_DWARF_X0   0
-#define AARCH64_DWARF_SP  31
-#define AARCH64_DWARF_PC  32
-#define AARCH64_DWARF_RA_SIGN_STATE  34
-#define AARCH64_DWARF_V0  64
-#define AARCH64_DWARF_SVE_VG   46
-#define AARCH64_DWARF_SVE_FFR  47
-#define AARCH64_DWARF_SVE_P0   48
-#define AARCH64_DWARF_SVE_Z0   96
+#define AARCH64_DWARF_X0 0
+#define AARCH64_DWARF_SP 31
+#define AARCH64_DWARF_PC 32
+#define AARCH64_DWARF_RA_SIGN_STATE 34
+#define AARCH64_DWARF_V0 64
+#define AARCH64_DWARF_SVE_VG 46
+#define AARCH64_DWARF_SVE_FFR 47
+#define AARCH64_DWARF_SVE_P0 48
+#define AARCH64_DWARF_SVE_Z0 96
 
 /* Size of integer registers.  */
-#define X_REGISTER_SIZE  8
-#define B_REGISTER_SIZE  1
-#define H_REGISTER_SIZE  2
-#define S_REGISTER_SIZE  4
-#define D_REGISTER_SIZE  8
+#define X_REGISTER_SIZE 8
+#define B_REGISTER_SIZE 1
+#define H_REGISTER_SIZE 2
+#define S_REGISTER_SIZE 4
+#define D_REGISTER_SIZE 8
 #define Q_REGISTER_SIZE 16
 
 /* Total number of general (X) registers.  */
@@ -82,43 +81,32 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
 
   /* syscall record.  */
   int (*aarch64_syscall_record) (struct regcache *regcache,
-				 unsigned long svc_number) = nullptr;
+				 unsigned long svc_number)
+    = nullptr;
 
   /* The VQ value for SVE targets, or zero if SVE is not supported.  */
   uint64_t vq = 0;
 
   /* Returns true if the target supports SVE.  */
-  bool has_sve () const
-  {
-    return vq != 0;
-  }
+  bool has_sve () const { return vq != 0; }
 
   int pauth_reg_base = 0;
   int ra_sign_state_regnum = 0;
 
   /* Returns true if the target supports pauth.  */
-  bool has_pauth () const
-  {
-    return pauth_reg_base != -1;
-  }
+  bool has_pauth () const { return pauth_reg_base != -1; }
 
   /* First MTE register.  This is -1 if no MTE registers are available.  */
   int mte_reg_base = 0;
 
   /* Returns true if the target supports MTE.  */
-  bool has_mte () const
-  {
-    return mte_reg_base != -1;
-  }
+  bool has_mte () const { return mte_reg_base != -1; }
 
   /* TLS registers.  This is -1 if the TLS registers are not available.  */
   int tls_regnum_base = 0;
   int tls_register_count = 0;
 
-  bool has_tls() const
-  {
-    return tls_regnum_base != -1;
-  }
+  bool has_tls () const { return tls_regnum_base != -1; }
 
   /* The W pseudo-registers.  */
   int w_pseudo_base = 0;
@@ -130,12 +118,11 @@ aarch64_features
 aarch64_features_from_target_desc (const struct target_desc *tdesc);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
-			       struct regcache *regcache, CORE_ADDR addr);
+				   struct regcache *regcache, CORE_ADDR addr);
 
 displaced_step_copy_insn_closure_up
-  aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
-				    CORE_ADDR from, CORE_ADDR to,
-				    struct regcache *regs);
+aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from,
+				  CORE_ADDR to, struct regcache *regs);
 
 void aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 				   displaced_step_copy_insn_closure *dsc,

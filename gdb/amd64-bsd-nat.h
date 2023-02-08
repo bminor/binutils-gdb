@@ -34,11 +34,16 @@ template<typename BaseTarget>
 class amd64_bsd_nat_target : public x86bsd_nat_target<BaseTarget>
 {
 public:
+
   void fetch_registers (struct regcache *regcache, int regnum) override
-  { amd64bsd_fetch_inferior_registers (regcache, regnum); }
+  {
+    amd64bsd_fetch_inferior_registers (regcache, regnum);
+  }
 
   void store_registers (struct regcache *regcache, int regnum) override
-  { amd64bsd_store_inferior_registers (regcache, regnum); }
+  {
+    amd64bsd_store_inferior_registers (regcache, regnum);
+  }
 };
 
 #endif /* i386-bsd-nat.h */

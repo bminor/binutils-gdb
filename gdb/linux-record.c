@@ -30,61 +30,61 @@
    "sys_ptrace".  The values of these macros were obtained from Linux
    Kernel source.  */
 
-#define RECORD_PTRACE_PEEKTEXT	1
-#define RECORD_PTRACE_PEEKDATA	2
-#define RECORD_PTRACE_PEEKUSR	3
+#define RECORD_PTRACE_PEEKTEXT 1
+#define RECORD_PTRACE_PEEKDATA 2
+#define RECORD_PTRACE_PEEKUSR 3
 
 /* These macros are the values of the first argument of system call
    "sys_socketcall".  The values of these macros were obtained from
    Linux Kernel source.  */
 
-#define RECORD_SYS_SOCKET	1
-#define RECORD_SYS_BIND		2
-#define RECORD_SYS_CONNECT	3
-#define RECORD_SYS_LISTEN	4
-#define RECORD_SYS_ACCEPT	5
-#define RECORD_SYS_GETSOCKNAME	6
-#define RECORD_SYS_GETPEERNAME	7
-#define RECORD_SYS_SOCKETPAIR	8
-#define RECORD_SYS_SEND		9
-#define RECORD_SYS_RECV		10
-#define RECORD_SYS_SENDTO	11
-#define RECORD_SYS_RECVFROM	12
-#define RECORD_SYS_SHUTDOWN	13
-#define RECORD_SYS_SETSOCKOPT	14
-#define RECORD_SYS_GETSOCKOPT	15
-#define RECORD_SYS_SENDMSG	16
-#define RECORD_SYS_RECVMSG	17
+#define RECORD_SYS_SOCKET 1
+#define RECORD_SYS_BIND 2
+#define RECORD_SYS_CONNECT 3
+#define RECORD_SYS_LISTEN 4
+#define RECORD_SYS_ACCEPT 5
+#define RECORD_SYS_GETSOCKNAME 6
+#define RECORD_SYS_GETPEERNAME 7
+#define RECORD_SYS_SOCKETPAIR 8
+#define RECORD_SYS_SEND 9
+#define RECORD_SYS_RECV 10
+#define RECORD_SYS_SENDTO 11
+#define RECORD_SYS_RECVFROM 12
+#define RECORD_SYS_SHUTDOWN 13
+#define RECORD_SYS_SETSOCKOPT 14
+#define RECORD_SYS_GETSOCKOPT 15
+#define RECORD_SYS_SENDMSG 16
+#define RECORD_SYS_RECVMSG 17
 
 /* These macros are the values of the first argument of system call
    "sys_ipc".  The values of these macros were obtained from Linux
    Kernel source.  */
 
-#define RECORD_SEMOP		1
-#define RECORD_SEMGET		2
-#define RECORD_SEMCTL		3
-#define RECORD_SEMTIMEDOP	4
-#define RECORD_MSGSND		11
-#define RECORD_MSGRCV		12
-#define RECORD_MSGGET		13
-#define RECORD_MSGCTL		14
-#define RECORD_SHMAT		21
-#define RECORD_SHMDT		22
-#define RECORD_SHMGET		23
-#define RECORD_SHMCTL		24
+#define RECORD_SEMOP 1
+#define RECORD_SEMGET 2
+#define RECORD_SEMCTL 3
+#define RECORD_SEMTIMEDOP 4
+#define RECORD_MSGSND 11
+#define RECORD_MSGRCV 12
+#define RECORD_MSGGET 13
+#define RECORD_MSGCTL 14
+#define RECORD_SHMAT 21
+#define RECORD_SHMDT 22
+#define RECORD_SHMGET 23
+#define RECORD_SHMCTL 24
 
 /* These macros are the values of the first argument of system call
    "sys_quotactl".  The values of these macros were obtained from Linux
    Kernel source.  */
 
-#define RECORD_Q_GETFMT		0x800004
-#define RECORD_Q_GETINFO	0x800005
-#define RECORD_Q_GETQUOTA	0x800007
-#define RECORD_Q_XGETQSTAT	(('5' << 8) + 5)
-#define RECORD_Q_XGETQUOTA	(('3' << 8) + 3)
+#define RECORD_Q_GETFMT 0x800004
+#define RECORD_Q_GETINFO 0x800005
+#define RECORD_Q_GETQUOTA 0x800007
+#define RECORD_Q_XGETQSTAT (('5' << 8) + 5)
+#define RECORD_Q_XGETQUOTA (('3' << 8) + 3)
 
-#define OUTPUT_REG(val, num)      phex_nz ((val), \
-    gdbarch_register_type (regcache->arch (), (num))->length ())
+#define OUTPUT_REG(val, num) \
+  phex_nz ((val), gdbarch_register_type (regcache->arch (), (num))->length ())
 
 /* Record a memory area of length LEN pointed to by register
    REGNUM.  */
@@ -123,8 +123,7 @@ record_linux_sockaddr (struct regcache *regcache,
 	gdb_printf (gdb_stdlog,
 		    "Process record: error reading "
 		    "memory at addr = 0x%s len = %d.\n",
-		    phex_nz (len, tdep->size_pointer),
-		    tdep->size_int);
+		    phex_nz (len, tdep->size_pointer), tdep->size_int);
       return -1;
     }
   addrlen = (int) extract_unsigned_integer (a, tdep->size_int, byte_order);
@@ -138,8 +137,8 @@ record_linux_sockaddr (struct regcache *regcache,
 }
 
 static int
-record_linux_msghdr (struct regcache *regcache,
-		     struct linux_record_tdep *tdep, ULONGEST addr)
+record_linux_msghdr (struct regcache *regcache, struct linux_record_tdep *tdep,
+		     ULONGEST addr)
 {
   gdb_byte *a;
   struct gdbarch *gdbarch = regcache->arch ();
@@ -161,19 +160,16 @@ record_linux_msghdr (struct regcache *regcache,
 		    "Process record: error reading "
 		    "memory at addr = 0x%s "
 		    "len = %d.\n",
-		    phex_nz (addr, tdep->size_pointer),
-		    tdep->size_msghdr);
+		    phex_nz (addr, tdep->size_pointer), tdep->size_msghdr);
       return -1;
     }
 
   /* msg_name msg_namelen */
   addr = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
   a += tdep->size_pointer;
-  if (record_full_arch_list_add_mem
-      ((CORE_ADDR) addr,
-       (int) extract_unsigned_integer (a,
-				       tdep->size_int,
-				       byte_order)))
+  if (record_full_arch_list_add_mem (
+	(CORE_ADDR) addr,
+	(int) extract_unsigned_integer (a, tdep->size_int, byte_order)))
     return -1;
   /* We have read an int, but skip size_pointer bytes to account for alignment
      of the next field on 64-bit targets. */
@@ -185,8 +181,8 @@ record_linux_msghdr (struct regcache *regcache,
   if (addr)
     {
       ULONGEST i;
-      ULONGEST len = extract_unsigned_integer (a, tdep->size_size_t,
-					       byte_order);
+      ULONGEST len
+	= extract_unsigned_integer (a, tdep->size_size_t, byte_order);
       gdb_byte *iov = (gdb_byte *) alloca (tdep->size_iovec);
 
       for (i = 0; i < len; i++)
@@ -199,16 +195,16 @@ record_linux_msghdr (struct regcache *regcache,
 			    "reading memory at "
 			    "addr = 0x%s "
 			    "len = %d.\n",
-			    phex_nz (addr,tdep->size_pointer),
+			    phex_nz (addr, tdep->size_pointer),
 			    tdep->size_iovec);
 	      return -1;
 	    }
-	  tmpaddr = (CORE_ADDR) extract_unsigned_integer (iov,
-							  tdep->size_pointer,
-							  byte_order);
-	  tmpint = (int) extract_unsigned_integer (iov + tdep->size_pointer,
-						   tdep->size_size_t,
-						   byte_order);
+	  tmpaddr
+	    = (CORE_ADDR) extract_unsigned_integer (iov, tdep->size_pointer,
+						    byte_order);
+	  tmpint
+	    = (int) extract_unsigned_integer (iov + tdep->size_pointer,
+					      tdep->size_size_t, byte_order);
 	  if (record_full_arch_list_add_mem (tmpaddr, tmpint))
 	    return -1;
 	  addr += tdep->size_iovec;
@@ -239,8 +235,7 @@ record_linux_msghdr (struct regcache *regcache,
    Return -1 if something wrong.  */
 
 int
-record_linux_system_call (enum gdb_syscall syscall,
-			  struct regcache *regcache,
+record_linux_system_call (enum gdb_syscall syscall, struct regcache *regcache,
 			  struct linux_record_tdep *tdep)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -255,9 +250,9 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_exit:
-      if (yquery (_("The next instruction is syscall exit.  "
-		    "It will make the program exit.  "
-		    "Do you want to stop the program?")))
+      if (yquery (_ ("The next instruction is syscall exit.  "
+		     "It will make the program exit.  "
+		     "Do you want to stop the program?")))
 	return 1;
       break;
 
@@ -433,8 +428,7 @@ record_linux_system_call (enum gdb_syscall syscall,
 	       || tmpulongest == tdep->ioctl_TCGETA
 	       || tmpulongest == tdep->ioctl_TIOCGLCKTRMIOS)
 	{
-	  if (record_mem_at_reg (regcache, tdep->arg3,
-				 tdep->size_termios))
+	  if (record_mem_at_reg (regcache, tdep->arg3, tdep->size_termios))
 	    return -1;
 	}
       else if (tmpulongest == tdep->ioctl_TIOCGPGRP
@@ -457,8 +451,7 @@ record_linux_system_call (enum gdb_syscall syscall,
 	}
       else if (tmpulongest == tdep->ioctl_TIOCGWINSZ)
 	{
-	  if (record_mem_at_reg (regcache, tdep->arg3,
-				 tdep->size_winsize))
+	  if (record_mem_at_reg (regcache, tdep->arg3, tdep->size_winsize))
 	    return -1;
 	}
       else if (tmpulongest == tdep->ioctl_TIOCLINUX)
@@ -475,8 +468,7 @@ record_linux_system_call (enum gdb_syscall syscall,
 	}
       else if (tmpulongest == tdep->ioctl_TCGETS2)
 	{
-	  if (record_mem_at_reg (regcache, tdep->arg3,
-				 tdep->size_termios2))
+	  if (record_mem_at_reg (regcache, tdep->arg3, tdep->size_termios2))
 	    return -1;
 	}
       else if (tmpulongest == tdep->ioctl_FIOQSIZE)
@@ -499,15 +491,15 @@ record_linux_system_call (enum gdb_syscall syscall,
       else if (tmpulongest == tdep->ioctl_TIOCSERGSTRUCT)
 	{
 	  gdb_printf (gdb_stderr,
-		      _("Process record and replay target doesn't "
-			"support ioctl request TIOCSERGSTRUCT\n"));
+		      _ ("Process record and replay target doesn't "
+			 "support ioctl request TIOCSERGSTRUCT\n"));
 	  return 1;
 	}
       else
 	{
 	  gdb_printf (gdb_stderr,
-		      _("Process record and replay target doesn't "
-			"support ioctl request 0x%s.\n"),
+		      _ ("Process record and replay target doesn't "
+			 "support ioctl request 0x%s.\n"),
 		      OUTPUT_REG (tmpulongest, tdep->arg2));
 	  return 1;
 	}
@@ -530,8 +522,7 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_olduname:
-      if (record_mem_at_reg (regcache, tdep->arg1,
-			     tdep->size_oldold_utsname))
+      if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_oldold_utsname))
 	return -1;
       break;
 
@@ -551,8 +542,7 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_sigaction:
-      if (record_mem_at_reg (regcache, tdep->arg3,
-			     tdep->size_old_sigaction))
+      if (record_mem_at_reg (regcache, tdep->arg3, tdep->size_old_sigaction))
 	return -1;
       break;
 
@@ -564,8 +554,7 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_sigpending:
-      if (record_mem_at_reg (regcache, tdep->arg1,
-			     tdep->size_old_sigset_t))
+      if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_old_sigset_t))
 	return -1;
       break;
 
@@ -598,8 +587,7 @@ record_linux_system_call (enum gdb_syscall syscall,
 	{
 	  ULONGEST gidsetsize;
 
-	  regcache_raw_read_unsigned (regcache, tdep->arg1,
-				      &gidsetsize);
+	  regcache_raw_read_unsigned (regcache, tdep->arg1, &gidsetsize);
 	  tmpint = tdep->size_old_gid_t * (int) gidsetsize;
 	  if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest, tmpint))
 	    return -1;
@@ -615,8 +603,7 @@ record_linux_system_call (enum gdb_syscall syscall,
 	gdb_byte *a = (gdb_byte *) alloca (sz_sel_arg);
 	CORE_ADDR inp, outp, exp, tvp;
 
-	regcache_raw_read_unsigned (regcache, tdep->arg1,
-				    &tmpulongest);
+	regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
 	if (tmpulongest)
 	  {
 	    if (target_read_memory (tmpulongest, a, sz_sel_arg))
@@ -633,7 +620,8 @@ record_linux_system_call (enum gdb_syscall syscall,
 	    a += tdep->size_long;
 	    inp = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
 	    a += tdep->size_pointer;
-	    outp = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+	    outp
+	      = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
 	    a += tdep->size_pointer;
 	    exp = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
 	    a += tdep->size_pointer;
@@ -662,9 +650,9 @@ record_linux_system_call (enum gdb_syscall syscall,
       break;
 
     case gdb_sys_reboot:
-      if (yquery (_("The next instruction is syscall reboot.  "
-		    "It will restart the computer.  "
-		    "Do you want to stop the program?")))
+      if (yquery (_ ("The next instruction is syscall reboot.  "
+		     "It will restart the computer.  "
+		     "Do you want to stop the program?")))
 	return 1;
       break;
 
@@ -680,12 +668,11 @@ record_linux_system_call (enum gdb_syscall syscall,
       {
 	ULONGEST len;
 
-	regcache_raw_read_unsigned (regcache, tdep->arg1,
-				    &tmpulongest);
+	regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
 	regcache_raw_read_unsigned (regcache, tdep->arg2, &len);
 	if (record_full_memory_query)
 	  {
-	    if (yquery (_("\
+	    if (yquery (_ ("\
 The next instruction is syscall munmap.\n\
 It will free the memory addr = 0x%s len = %u.\n\
 It will make record target cannot record some memory change.\n\
@@ -802,8 +789,7 @@ Do you want to stop the program?"),
 	case RECORD_SYS_GETSOCKNAME:
 	case RECORD_SYS_GETPEERNAME:
 	  {
-	    regcache_raw_read_unsigned (regcache, tdep->arg2,
-					&tmpulongest);
+	    regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
 	    if (tmpulongest)
 	      {
 		gdb_byte *a = (gdb_byte *) alloca (tdep->size_ulong * 2);
@@ -821,9 +807,8 @@ Do you want to stop the program?"),
 				  tdep->size_ulong * 2);
 		    return -1;
 		  }
-		tmpulongest = extract_unsigned_integer (a,
-							tdep->size_ulong,
-							byte_order);
+		tmpulongest
+		  = extract_unsigned_integer (a, tdep->size_ulong, byte_order);
 		len = extract_unsigned_integer (a + tdep->size_ulong,
 						tdep->size_ulong, byte_order);
 		if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
@@ -836,8 +821,7 @@ Do you want to stop the program?"),
 	  {
 	    gdb_byte *a = (gdb_byte *) alloca (tdep->size_ulong);
 
-	    regcache_raw_read_unsigned (regcache, tdep->arg2,
-					&tmpulongest);
+	    regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
 	    if (tmpulongest)
 	      {
 		tmpulongest += tdep->size_ulong * 3;
@@ -864,8 +848,7 @@ Do you want to stop the program?"),
 	case RECORD_SYS_SENDTO:
 	  break;
 	case RECORD_SYS_RECVFROM:
-	  regcache_raw_read_unsigned (regcache, tdep->arg2,
-				      &tmpulongest);
+	  regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
 	  if (tmpulongest)
 	    {
 	      gdb_byte *a = (gdb_byte *) alloca (tdep->size_ulong * 2);
@@ -883,8 +866,8 @@ Do you want to stop the program?"),
 				tdep->size_ulong * 2);
 		  return -1;
 		}
-	      tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
-						      byte_order);
+	      tmpulongest
+		= extract_unsigned_integer (a, tdep->size_ulong, byte_order);
 	      len = extract_unsigned_integer (a + tdep->size_ulong,
 					      tdep->size_ulong, byte_order);
 	      if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
@@ -892,8 +875,7 @@ Do you want to stop the program?"),
 	    }
 	  break;
 	case RECORD_SYS_RECV:
-	  regcache_raw_read_unsigned (regcache, tdep->arg2,
-				      &tmpulongest);
+	  regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
 	  if (tmpulongest)
 	    {
 	      gdb_byte *a = (gdb_byte *) alloca (tdep->size_ulong * 2);
@@ -910,8 +892,8 @@ Do you want to stop the program?"),
 				tdep->size_ulong);
 		  return -1;
 		}
-	      tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
-						      byte_order);
+	      tmpulongest
+		= extract_unsigned_integer (a, tdep->size_ulong, byte_order);
 	      if (tmpulongest)
 		{
 		  a += tdep->size_ulong;
@@ -931,8 +913,7 @@ Do you want to stop the program?"),
 	    gdb_byte *a = (gdb_byte *) alloca (tdep->size_ulong * 2);
 	    gdb_byte *av = (gdb_byte *) alloca (tdep->size_int);
 
-	    regcache_raw_read_unsigned (regcache, tdep->arg2,
-					&tmpulongest);
+	    regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
 	    if (tmpulongest)
 	      {
 		tmpulongest += tdep->size_ulong * 3;
@@ -947,9 +928,9 @@ Do you want to stop the program?"),
 				  tdep->size_ulong * 2);
 		    return -1;
 		  }
-		tmpulongest = extract_unsigned_integer (a + tdep->size_ulong,
-							tdep->size_ulong,
-							byte_order);
+		tmpulongest
+		  = extract_unsigned_integer (a + tdep->size_ulong,
+					      tdep->size_ulong, byte_order);
 		if (tmpulongest)
 		  {
 		    if (target_read_memory ((CORE_ADDR) tmpulongest, av,
@@ -960,8 +941,7 @@ Do you want to stop the program?"),
 				      "Process record: error reading "
 				      "memory at addr = 0x%s "
 				      "len = %d.\n",
-				      phex_nz (tmpulongest,
-					       tdep->size_ulong),
+				      phex_nz (tmpulongest, tdep->size_ulong),
 				      tdep->size_int);
 			return -1;
 		      }
@@ -969,9 +949,9 @@ Do you want to stop the program?"),
 		      = (CORE_ADDR) extract_unsigned_integer (a,
 							      tdep->size_ulong,
 							      byte_order);
-		    tmpint = (int) extract_unsigned_integer (av,
-							     tdep->size_int,
-							     byte_order);
+		    tmpint
+		      = (int) extract_unsigned_integer (av, tdep->size_int,
+							byte_order);
 		    if (record_full_arch_list_add_mem (tmpaddr, tmpint))
 		      return -1;
 		    a += tdep->size_ulong;
@@ -992,8 +972,7 @@ Do you want to stop the program?"),
 	  {
 	    gdb_byte *a = (gdb_byte *) alloca (tdep->size_ulong);
 
-	    regcache_raw_read_unsigned (regcache, tdep->arg2,
-					&tmpulongest);
+	    regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
 	    if (tmpulongest)
 	      {
 		tmpulongest += tdep->size_ulong;
@@ -1008,8 +987,8 @@ Do you want to stop the program?"),
 				  tdep->size_ulong);
 		    return -1;
 		  }
-		tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
-							byte_order);
+		tmpulongest
+		  = extract_unsigned_integer (a, tdep->size_ulong, byte_order);
 		if (record_linux_msghdr (regcache, tdep, tmpulongest))
 		  return -1;
 	      }
@@ -1017,8 +996,8 @@ Do you want to stop the program?"),
 	  break;
 	default:
 	  gdb_printf (gdb_stderr,
-		      _("Process record and replay target "
-			"doesn't support socketcall call 0x%s\n"),
+		      _ ("Process record and replay target "
+			 "doesn't support socketcall call 0x%s\n"),
 		      OUTPUT_REG (tmpulongest, tdep->arg1));
 	  return -1;
 	  break;
@@ -1059,8 +1038,7 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_uname:
-      if (record_mem_at_reg (regcache, tdep->arg1,
-			     tdep->size_old_utsname))
+      if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_old_utsname))
 	return -1;
       break;
 
@@ -1148,8 +1126,7 @@ Do you want to stop the program?"),
 	  }
 	  break;
 	case RECORD_MSGCTL:
-	  if (record_mem_at_reg (regcache, tdep->arg5,
-				 tdep->size_msqid_ds))
+	  if (record_mem_at_reg (regcache, tdep->arg5, tdep->size_msqid_ds))
 	    return -1;
 	  break;
 	case RECORD_SHMAT:
@@ -1157,15 +1134,14 @@ Do you want to stop the program?"),
 	    return -1;
 	  break;
 	case RECORD_SHMCTL:
-	  if (record_mem_at_reg (regcache, tdep->arg5,
-				 tdep->size_shmid_ds))
+	  if (record_mem_at_reg (regcache, tdep->arg5, tdep->size_shmid_ds))
 	    return -1;
 	  break;
 	default:
 	  /* XXX RECORD_SEMCTL still not supported.  */
 	  gdb_printf (gdb_stderr,
-		      _("Process record and replay target doesn't "
-			"support ipc number %s\n"),
+		      _ ("Process record and replay target doesn't "
+			 "support ipc number %s\n"),
 		      pulongest (tmpulongest));
 	  break;
 	}
@@ -1178,8 +1154,7 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_newuname:
-      if (record_mem_at_reg (regcache, tdep->arg1,
-			     tdep->size_new_utsname))
+      if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_new_utsname))
 	return -1;
       break;
 
@@ -1204,8 +1179,7 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_sigprocmask:
-      if (record_mem_at_reg (regcache, tdep->arg3,
-			     tdep->size_old_sigset_t))
+      if (record_mem_at_reg (regcache, tdep->arg3, tdep->size_old_sigset_t))
 	return -1;
       break;
 
@@ -1225,13 +1199,11 @@ Do you want to stop the program?"),
 	    return -1;
 	  break;
 	case RECORD_Q_GETINFO:
-	  if (record_mem_at_reg (regcache, tdep->arg4,
-				 tdep->size_mem_dqinfo))
+	  if (record_mem_at_reg (regcache, tdep->arg4, tdep->size_mem_dqinfo))
 	    return -1;
 	  break;
 	case RECORD_Q_GETQUOTA:
-	  if (record_mem_at_reg (regcache, tdep->arg4,
-				 tdep->size_if_dqblk))
+	  if (record_mem_at_reg (regcache, tdep->arg4, tdep->size_if_dqblk))
 	    return -1;
 	  break;
 	case RECORD_Q_XGETQSTAT:
@@ -1362,10 +1334,8 @@ Do you want to stop the program?"),
 
     case gdb_sys_getresuid16:
       if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_old_uid_t)
-	  || record_mem_at_reg (regcache, tdep->arg2,
-				tdep->size_old_uid_t)
-	  || record_mem_at_reg (regcache, tdep->arg3,
-				tdep->size_old_uid_t))
+	  || record_mem_at_reg (regcache, tdep->arg2, tdep->size_old_uid_t)
+	  || record_mem_at_reg (regcache, tdep->arg3, tdep->size_old_uid_t))
 	return -1;
       break;
 
@@ -1406,10 +1376,8 @@ Do you want to stop the program?"),
 
     case gdb_sys_getresgid16:
       if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_old_gid_t)
-	  || record_mem_at_reg (regcache, tdep->arg2,
-				tdep->size_old_gid_t)
-	  || record_mem_at_reg (regcache, tdep->arg3,
-				tdep->size_old_gid_t))
+	  || record_mem_at_reg (regcache, tdep->arg2, tdep->size_old_gid_t)
+	  || record_mem_at_reg (regcache, tdep->arg3, tdep->size_old_gid_t))
 	return -1;
       break;
 
@@ -1448,7 +1416,7 @@ Do you want to stop the program?"),
 	{
 	  ULONGEST sigsetsize;
 
-	  regcache_raw_read_unsigned (regcache, tdep->arg2,&sigsetsize);
+	  regcache_raw_read_unsigned (regcache, tdep->arg2, &sigsetsize);
 	  if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
 					     (int) sigsetsize))
 	    return -1;
@@ -1470,7 +1438,7 @@ Do you want to stop the program?"),
 	{
 	  ULONGEST count;
 
-	  regcache_raw_read_unsigned (regcache, tdep->arg3,&count);
+	  regcache_raw_read_unsigned (regcache, tdep->arg3, &count);
 	  if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
 					     (int) count))
 	    return -1;
@@ -1495,8 +1463,7 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_capget:
-      if (record_mem_at_reg (regcache, tdep->arg2,
-			     tdep->size_cap_user_data_t))
+      if (record_mem_at_reg (regcache, tdep->arg2, tdep->size_cap_user_data_t))
 	return -1;
       break;
 
@@ -1552,8 +1519,7 @@ Do you want to stop the program?"),
 	{
 	  ULONGEST gidsetsize;
 
-	  regcache_raw_read_unsigned (regcache, tdep->arg1,
-				      &gidsetsize);
+	  regcache_raw_read_unsigned (regcache, tdep->arg1, &gidsetsize);
 	  tmpint = tdep->size_gid_t * (int) gidsetsize;
 	  if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest, tmpint))
 	    return -1;
@@ -1602,8 +1568,7 @@ Do you want to stop the program?"),
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest == tdep->fcntl_F_GETLK64)
 	{
-	  if (record_mem_at_reg (regcache, tdep->arg3,
-				 tdep->size_flock64))
+	  if (record_mem_at_reg (regcache, tdep->arg3, tdep->size_flock64))
 	    return -1;
 	}
       else if (tmpulongest != tdep->fcntl_F_SETLK64
@@ -1754,9 +1719,9 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_exit_group:
-      if (yquery (_("The next instruction is syscall exit_group.  "
-		    "It will make the program exit.  "
-		    "Do you want to stop the program?")))
+      if (yquery (_ ("The next instruction is syscall exit_group.  "
+		     "It will make the program exit.  "
+		     "Do you want to stop the program?")))
 	return 1;
       break;
 
@@ -1784,9 +1749,8 @@ Do you want to stop the program?"),
 	  ULONGEST maxevents;
 
 	  regcache_raw_read_unsigned (regcache, tdep->arg3, &maxevents);
-	  if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-					     (maxevents
-					      * tdep->size_epoll_event)))
+	  if (record_full_arch_list_add_mem (
+		(CORE_ADDR) tmpulongest, (maxevents * tdep->size_epoll_event)))
 	    return -1;
 	}
       break;
@@ -1905,8 +1869,7 @@ Do you want to stop the program?"),
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest == 6 || tmpulongest == 11)
 	{
-	  regcache_raw_read_unsigned (regcache, tdep->arg3,
-				      &tmpulongest);
+	  regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
 	  if (tmpulongest)
 	    {
 	      ULONGEST buflen;
@@ -2020,8 +1983,7 @@ Do you want to stop the program?"),
     case gdb_sys_getcpu:
       if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_int)
 	  || record_mem_at_reg (regcache, tdep->arg2, tdep->size_int)
-	  || record_mem_at_reg (regcache, tdep->arg3,
-				tdep->size_ulong * 2))
+	  || record_mem_at_reg (regcache, tdep->arg3, tdep->size_ulong * 2))
 	return -1;
       break;
 
@@ -2049,8 +2011,9 @@ Do you want to stop the program?"),
 
     default:
       gdb_printf (gdb_stderr,
-		  _("Process record and replay target doesn't "
-		    "support syscall number %d\n"), syscall);
+		  _ ("Process record and replay target doesn't "
+		     "support syscall number %d\n"),
+		  syscall);
       return -1;
       break;
     }

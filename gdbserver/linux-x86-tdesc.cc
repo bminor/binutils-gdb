@@ -36,28 +36,28 @@ xcr0_to_tdesc_idx (uint64_t xcr0, bool is_x32)
   if (xcr0 & X86_XSTATE_PKRU)
     {
       if (is_x32)
-	{
-	  /* No x32 MPX and PKU, fall back to avx_avx512.  */
-	  return X86_TDESC_AVX_AVX512;
-	}
+        {
+          /* No x32 MPX and PKU, fall back to avx_avx512.  */
+          return X86_TDESC_AVX_AVX512;
+        }
       else
-	return X86_TDESC_AVX_MPX_AVX512_PKU;
+        return X86_TDESC_AVX_MPX_AVX512_PKU;
     }
   else if (xcr0 & X86_XSTATE_AVX512)
     return X86_TDESC_AVX_AVX512;
   else if ((xcr0 & X86_XSTATE_AVX_MPX_MASK) == X86_XSTATE_AVX_MPX_MASK)
     {
       if (is_x32) /* No MPX on x32.  */
-	return X86_TDESC_AVX;
+        return X86_TDESC_AVX;
       else
-	return X86_TDESC_AVX_MPX;
+        return X86_TDESC_AVX_MPX;
     }
   else if (xcr0 & X86_XSTATE_MPX)
     {
       if (is_x32) /* No MPX on x32.  */
-	return X86_TDESC_AVX;
+        return X86_TDESC_AVX;
       else
-	return X86_TDESC_MPX;
+        return X86_TDESC_MPX;
     }
   else if (xcr0 & X86_XSTATE_AVX)
     return X86_TDESC_AVX;
@@ -71,7 +71,7 @@ xcr0_to_tdesc_idx (uint64_t xcr0, bool is_x32)
 
 #if defined __i386__ || !defined IN_PROCESS_AGENT
 
-static struct target_desc *i386_tdescs[X86_TDESC_LAST] = { };
+static struct target_desc *i386_tdescs[X86_TDESC_LAST] = {};
 
 /* Return the target description according to XCR0.  */
 
@@ -92,14 +92,15 @@ i386_linux_read_description (uint64_t xcr0)
       init_target_desc (*tdesc, i386_expedite_regs);
     }
 
-  return *tdesc;;
+  return *tdesc;
+  ;
 }
 #endif
 
 #ifdef __x86_64__
 
-static target_desc *amd64_tdescs[X86_TDESC_LAST] = { };
-static target_desc *x32_tdescs[X86_TDESC_LAST] = { };
+static target_desc *amd64_tdescs[X86_TDESC_LAST] = {};
+static target_desc *x32_tdescs[X86_TDESC_LAST] = {};
 
 const struct target_desc *
 amd64_linux_read_description (uint64_t xcr0, bool is_x32)
@@ -135,7 +136,7 @@ i386_get_ipa_tdesc_idx (const struct target_desc *tdesc)
   for (int i = 0; i < X86_TDESC_LAST; i++)
     {
       if (tdesc == i386_tdescs[i])
-	return i;
+        return i;
     }
 
   /* If none tdesc is found, return the one with minimum features.  */
@@ -149,12 +150,12 @@ amd64_get_ipa_tdesc_idx (const struct target_desc *tdesc)
   for (int i = 0; i < X86_TDESC_LAST; i++)
     {
       if (tdesc == amd64_tdescs[i])
-	return i;
+        return i;
     }
   for (int i = 0; i < X86_TDESC_LAST; i++)
     {
       if (tdesc == x32_tdescs[i])
-	return i;
+        return i;
     }
 
   return X86_TDESC_SSE;

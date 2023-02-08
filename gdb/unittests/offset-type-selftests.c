@@ -23,8 +23,10 @@
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/valid-expr.h"
 
-namespace selftests {
-namespace offset_type {
+namespace selftests
+{
+namespace offset_type
+{
 
 DEFINE_OFFSET_TYPE (off_A, unsigned int);
 DEFINE_OFFSET_TYPE (off_B, unsigned int);
@@ -38,7 +40,7 @@ DEFINE_OFFSET_TYPE (off_B, unsigned int);
      do compile and that they return the correct type.
 */
 
-#define CHECK_VALID(VALID, EXPR_TYPE, EXPR)		\
+#define CHECK_VALID(VALID, EXPR_TYPE, EXPR) \
   CHECK_VALID_EXPR_2 (off_A, off_B, VALID, EXPR_TYPE, EXPR)
 
 off_A lval_a {};
@@ -48,58 +50,58 @@ using undrl = std::underlying_type<off_A>::type;
 
 /* Offset +/- underlying.  */
 
-CHECK_VALID (true,  off_A,  off_A {} + undrl {});
-CHECK_VALID (true,  off_A,  off_A {} - undrl {});
-CHECK_VALID (true,  off_A,  undrl {} + off_A {});
-CHECK_VALID (true,  off_A,  undrl {} - off_A {});
+CHECK_VALID (true, off_A, off_A {} + undrl {});
+CHECK_VALID (true, off_A, off_A {} - undrl {});
+CHECK_VALID (true, off_A, undrl {} + off_A {});
+CHECK_VALID (true, off_A, undrl {} - off_A {});
 
 /* Add offset types.  Both same and different.  */
 
-CHECK_VALID (false, void,   off_A {} + off_A {});
-CHECK_VALID (false, void,   off_A {} + off_B {});
+CHECK_VALID (false, void, off_A {} + off_A {});
+CHECK_VALID (false, void, off_A {} + off_B {});
 
 /* Subtract offset types.  Both same and different.  */
 
-CHECK_VALID (false, void,   off_B {} - off_A {});
-CHECK_VALID (true,  undrl,  off_A {} - off_A {});
+CHECK_VALID (false, void, off_B {} - off_A {});
+CHECK_VALID (true, undrl, off_A {} - off_A {});
 
 /* Add/assign offset types.  Both same and different.  */
 
-CHECK_VALID (false, void,   lval_a += off_A {});
-CHECK_VALID (false, void,   lval_a += off_B {});
-CHECK_VALID (false, void,   lval_a -= off_A {});
-CHECK_VALID (false, void,   lval_a -= off_B {});
+CHECK_VALID (false, void, lval_a += off_A {});
+CHECK_VALID (false, void, lval_a += off_B {});
+CHECK_VALID (false, void, lval_a -= off_A {});
+CHECK_VALID (false, void, lval_a -= off_B {});
 
 /* operator OP+= (offset, underlying), lvalue ref on the lhs. */
 
-CHECK_VALID (true,  off_A&, lval_a += undrl {});
-CHECK_VALID (true,  off_A&, lval_a -= undrl {});
+CHECK_VALID (true, off_A &, lval_a += undrl {});
+CHECK_VALID (true, off_A &, lval_a -= undrl {});
 
 /* operator OP+= (offset, underlying), rvalue ref on the lhs. */
 
-CHECK_VALID (false, void,   off_A {} += undrl {});
-CHECK_VALID (false, void,   off_A {} -= undrl {});
+CHECK_VALID (false, void, off_A {} += undrl {});
+CHECK_VALID (false, void, off_A {} -= undrl {});
 
 /* Rel ops, with same type.  */
 
-CHECK_VALID (true,  bool,   off_A {} < off_A {});
-CHECK_VALID (true,  bool,   off_A {} > off_A {});
-CHECK_VALID (true,  bool,   off_A {} <= off_A {});
-CHECK_VALID (true,  bool,   off_A {} >= off_A {});
+CHECK_VALID (true, bool, off_A {} < off_A {});
+CHECK_VALID (true, bool, off_A {} > off_A {});
+CHECK_VALID (true, bool, off_A {} <= off_A {});
+CHECK_VALID (true, bool, off_A {} >= off_A {});
 
 /* Rel ops, with unrelated offset types.  */
 
-CHECK_VALID (false, void,   off_A {} < off_B {});
-CHECK_VALID (false, void,   off_A {} > off_B {});
-CHECK_VALID (false, void,   off_A {} <= off_B {});
-CHECK_VALID (false, void,   off_A {} >= off_B {});
+CHECK_VALID (false, void, off_A {} < off_B {});
+CHECK_VALID (false, void, off_A {} > off_B {});
+CHECK_VALID (false, void, off_A {} <= off_B {});
+CHECK_VALID (false, void, off_A {} >= off_B {});
 
 /* Rel ops, with unrelated types.  */
 
-CHECK_VALID (false, void,   off_A {} < undrl {});
-CHECK_VALID (false, void,   off_A {} > undrl {});
-CHECK_VALID (false, void,   off_A {} <= undrl {});
-CHECK_VALID (false, void,   off_A {} >= undrl {});
+CHECK_VALID (false, void, off_A {} < undrl {});
+CHECK_VALID (false, void, off_A {} > undrl {});
+CHECK_VALID (false, void, off_A {} <= undrl {});
+CHECK_VALID (false, void, off_A {} >= undrl {});
 
 static void
 run_tests ()
@@ -172,6 +174,7 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_offset_type_selftests ();
+
 void
 _initialize_offset_type_selftests ()
 {

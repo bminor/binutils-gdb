@@ -42,25 +42,18 @@ static objfile_script_sourcer_func source_gdb_objfile_script;
    This exists, in part, to support auto-loading ${prog}-gdb.gdb scripts.  */
 
 static const struct extension_language_script_ops
-  extension_language_gdb_script_ops =
-{
-  source_gdb_script,
-  source_gdb_objfile_script,
-  NULL, /* objfile_script_executor */
-  auto_load_gdb_scripts_enabled
-};
+  extension_language_gdb_script_ops
+  = { source_gdb_script, source_gdb_objfile_script,
+      NULL, /* objfile_script_executor */
+      auto_load_gdb_scripts_enabled };
 
-const struct extension_language_defn extension_language_gdb =
-{
-  EXT_LANG_GDB,
-  "gdb",
-  "GDB",
+const struct extension_language_defn extension_language_gdb = {
+  EXT_LANG_GDB, "gdb", "GDB",
 
   /* We fall back to interpreting a script as a GDB script if it doesn't
      match the other scripting languages, but for consistency's sake
      give it a formal suffix.  */
-  ".gdb",
-  "-gdb.gdb",
+  ".gdb", "-gdb.gdb",
 
   /* cli_control_type: This is never used: GDB's own scripting language
      has a variety of control types (if, while, etc.).  */
@@ -83,12 +76,12 @@ const struct extension_language_defn extension_language_gdb =
    pretty-printed value is the one that is used.  This algorithm is employed
    throughout.  */
 
-static const std::array<const extension_language_defn *, 2> extension_languages
-{
-  /* To preserve existing behaviour, python should always appear first.  */
-  &extension_language_python,
-  &extension_language_guile,
-};
+static const std::array<const extension_language_defn *, 2>
+  extension_languages {
+    /* To preserve existing behaviour, python should always appear first.  */
+    &extension_language_python,
+    &extension_language_guile,
+  };
 
 /* Return a pointer to the struct extension_language_defn object of
    extension language LANG.
@@ -173,18 +166,18 @@ ext_lang_initialized_p (const struct extension_language_defn *extlang)
 void
 throw_ext_lang_unsupported (const struct extension_language_defn *extlang)
 {
-  error (_("Scripting in the \"%s\" language is not supported"
-	   " in this copy of GDB."),
+  error (_ ("Scripting in the \"%s\" language is not supported"
+	    " in this copy of GDB."),
 	 ext_lang_capitalized_name (extlang));
 }
-
+
 /* Methods for GDB's own extension/scripting language.  */
 
 /* The extension_language_script_ops.script_sourcer "method".  */
 
 static void
-source_gdb_script (const struct extension_language_defn *extlang,
-		   FILE *stream, const char *file)
+source_gdb_script (const struct extension_language_defn *extlang, FILE *stream,
+		   const char *file)
 {
   script_from_file (stream, file);
 }
@@ -193,12 +186,12 @@ source_gdb_script (const struct extension_language_defn *extlang,
 
 static void
 source_gdb_objfile_script (const struct extension_language_defn *extlang,
-			   struct objfile *objfile,
-			   FILE *stream, const char *file)
+			   struct objfile *objfile, FILE *stream,
+			   const char *file)
 {
   script_from_file (stream, file);
 }
-
+
 /* Accessors for "public" attributes of struct extension_language.  */
 
 /* Return the "name" field of EXTLANG.  */
@@ -232,7 +225,7 @@ ext_lang_auto_load_suffix (const struct extension_language_defn *extlang)
 {
   return extlang->auto_load_suffix;
 }
-
+
 /* extension_language_script_ops wrappers.  */
 
 /* Return the script "sourcer" function for EXTLANG.
@@ -274,8 +267,8 @@ ext_lang_objfile_script_sourcer (const struct extension_language_defn *extlang)
    The extension language is not required to implement this function.  */
 
 objfile_script_executor_func *
-ext_lang_objfile_script_executor
-  (const struct extension_language_defn *extlang)
+ext_lang_objfile_script_executor (
+  const struct extension_language_defn *extlang)
 {
   if (extlang->script_ops == NULL)
     return NULL;
@@ -296,22 +289,20 @@ ext_lang_auto_load_enabled (const struct extension_language_defn *extlang)
 
   return extlang->script_ops->auto_load_enabled (extlang);
 }
-
 
 /* RAII class used to temporarily return SIG to its default handler.  */
 
 template<int SIG>
 struct scoped_default_signal
 {
-  scoped_default_signal ()
-  { m_old_sig_handler = signal (SIG, SIG_DFL); }
+  scoped_default_signal () { m_old_sig_handler = signal (SIG, SIG_DFL); }
 
-  ~scoped_default_signal ()
-  { signal (SIG, m_old_sig_handler); }
+  ~scoped_default_signal () { signal (SIG, m_old_sig_handler); }
 
   DISABLE_COPY_AND_ASSIGN (scoped_default_signal);
 
 private:
+
   /* The previous signal handler that needs to be restored.  */
   sighandler_t m_old_sig_handler;
 };
@@ -332,8 +323,7 @@ ext_lang_initialization (void)
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops != nullptr
-	  && extlang->ops->initialize != NULL)
+      if (extlang->ops != nullptr && extlang->ops->initialize != NULL)
 	{
 	  scoped_default_sigint set_sigint_to_default_handler;
 	  extlang->ops->initialize (extlang);
@@ -388,12 +378,11 @@ auto_load_ext_lang_scripts_for_objfile (struct objfile *objfile)
 
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops != nullptr
-	  && ext_lang_auto_load_enabled (extlang))
+      if (extlang->ops != nullptr && ext_lang_auto_load_enabled (extlang))
 	auto_load_objfile_script (objfile, extlang);
     }
 }
-
+
 /* Interface to type pretty-printers implemented in an extension language.  */
 
 /* Call this at the start when preparing to pretty-print a type.
@@ -407,8 +396,7 @@ ext_lang_type_printers::ext_lang_type_printers ()
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops != nullptr
-	  && extlang->ops->start_type_printers != NULL)
+      if (extlang->ops != nullptr && extlang->ops->start_type_printers != NULL)
 	extlang->ops->start_type_printers (extlang, this);
     }
 }
@@ -427,11 +415,10 @@ apply_ext_lang_type_printers (struct ext_lang_type_printers *printers,
       char *result = NULL;
       enum ext_lang_rc rc;
 
-      if (extlang->ops == nullptr
-	  || extlang->ops->apply_type_printers == NULL)
+      if (extlang->ops == nullptr || extlang->ops->apply_type_printers == NULL)
 	continue;
-      rc = extlang->ops->apply_type_printers (extlang, printers, type,
-					      &result);
+      rc
+	= extlang->ops->apply_type_printers (extlang, printers, type, &result);
       switch (rc)
 	{
 	case EXT_LANG_RC_OK:
@@ -453,12 +440,11 @@ ext_lang_type_printers::~ext_lang_type_printers ()
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops != nullptr
-	  && extlang->ops->free_type_printers != NULL)
+      if (extlang->ops != nullptr && extlang->ops->free_type_printers != NULL)
 	extlang->ops->free_type_printers (extlang, this);
     }
 }
-
+
 /* Try to pretty-print a value onto stdio stream STREAM according to
    OPTIONS.  VAL is the object to print.  Returns non-zero if the
    value was successfully pretty-printed.
@@ -474,8 +460,8 @@ ext_lang_type_printers::~ext_lang_type_printers ()
    errors that trigger an exception in the extension language.  */
 
 int
-apply_ext_lang_val_pretty_printer (struct value *val,
-				   struct ui_file *stream, int recurse,
+apply_ext_lang_val_pretty_printer (struct value *val, struct ui_file *stream,
+				   int recurse,
 				   const struct value_print_options *options,
 				   const struct language_defn *language)
 {
@@ -525,22 +511,19 @@ apply_ext_lang_val_pretty_printer (struct value *val,
    rather than trying filters in other extension languages.  */
 
 enum ext_lang_bt_status
-apply_ext_lang_frame_filter (frame_info_ptr frame,
-			     frame_filter_flags flags,
+apply_ext_lang_frame_filter (frame_info_ptr frame, frame_filter_flags flags,
 			     enum ext_lang_frame_args args_type,
-			     struct ui_out *out,
-			     int frame_low, int frame_high)
+			     struct ui_out *out, int frame_low, int frame_high)
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
       enum ext_lang_bt_status status;
 
-      if (extlang->ops == nullptr
-	  || extlang->ops->apply_frame_filter == NULL)
+      if (extlang->ops == nullptr || extlang->ops->apply_frame_filter == NULL)
 	continue;
-      status = extlang->ops->apply_frame_filter (extlang, frame, flags,
-					       args_type, out,
-					       frame_low, frame_high);
+      status
+	= extlang->ops->apply_frame_filter (extlang, frame, flags, args_type,
+					    out, frame_low, frame_high);
       /* We use the filters from the first extension language that has
 	 applicable filters.  Also, an error is reported immediately
 	 rather than continue trying.  */
@@ -564,8 +547,7 @@ preserve_ext_lang_values (struct objfile *objfile, htab_t copied_types)
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops != nullptr
-	  && extlang->ops->preserve_values != NULL)
+      if (extlang->ops != nullptr && extlang->ops->preserve_values != NULL)
 	extlang->ops->preserve_values (extlang, objfile, copied_types);
     }
 }
@@ -585,8 +567,7 @@ get_breakpoint_cond_ext_lang (struct breakpoint *b,
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops != nullptr
-	  && extlang->language != skip_lang
+      if (extlang->ops != nullptr && extlang->language != skip_lang
 	  && extlang->ops->breakpoint_has_cond != NULL
 	  && extlang->ops->breakpoint_has_cond (extlang, b))
 	return extlang;
@@ -629,7 +610,7 @@ breakpoint_ext_lang_cond_says_stop (struct breakpoint *b)
 
   return stop != EXT_LANG_BP_STOP_NO;
 }
-
+
 /* ^C/SIGINT support.
    This requires cooperation with the extension languages so the support
    is defined here.  */
@@ -684,7 +665,8 @@ install_gdb_sigint_handler (struct signal_handler *previous)
 }
 
 #if GDB_SELF_TEST
-namespace selftests {
+namespace selftests
+{
 void (*hook_set_active_ext_lang) () = nullptr;
 }
 #endif
@@ -808,8 +790,7 @@ check_quit_flag (void)
 
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops != nullptr
-	  && extlang->ops->check_quit_flag != NULL)
+      if (extlang->ops != nullptr && extlang->ops->check_quit_flag != NULL)
 	if (extlang->ops->check_quit_flag (extlang) != 0)
 	  result = 1;
     }
@@ -844,12 +825,12 @@ get_matching_xmethod_workers (struct type *type, const char *method_name,
 	  || extlang->ops->get_matching_xmethod_workers == NULL)
 	continue;
 
-      rc = extlang->ops->get_matching_xmethod_workers (extlang,
-						       type, method_name,
-						       workers);
+      rc = extlang->ops->get_matching_xmethod_workers (extlang, type,
+						       method_name, workers);
       if (rc == EXT_LANG_RC_ERROR)
-	error (_("Error while looking for matching xmethod workers "
-		 "defined in %s."), extlang->capitalized_name);
+	error (_ ("Error while looking for matching xmethod workers "
+		  "defined in %s."),
+	       extlang->capitalized_name);
     }
 }
 
@@ -862,8 +843,9 @@ xmethod_worker::get_arg_types ()
 
   ext_lang_rc rc = do_get_arg_types (&type_array);
   if (rc == EXT_LANG_RC_ERROR)
-    error (_("Error while looking for arg types of a xmethod worker "
-	     "defined in %s."), m_extlang->capitalized_name);
+    error (_ ("Error while looking for arg types of a xmethod worker "
+	      "defined in %s."),
+	   m_extlang->capitalized_name);
 
   return type_array;
 }
@@ -878,8 +860,9 @@ xmethod_worker::get_result_type (value *object, gdb::array_view<value *> args)
   ext_lang_rc rc = do_get_result_type (object, args, &result_type);
   if (rc == EXT_LANG_RC_ERROR)
     {
-      error (_("Error while fetching result type of an xmethod worker "
-	       "defined in %s."), m_extlang->capitalized_name);
+      error (_ ("Error while fetching result type of an xmethod worker "
+		"defined in %s."),
+	     m_extlang->capitalized_name);
     }
 
   return result_type;
@@ -894,8 +877,7 @@ ext_lang_colorize (const std::string &filename, const std::string &contents)
 
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops == nullptr
-	  || extlang->ops->colorize == nullptr)
+      if (extlang->ops == nullptr || extlang->ops->colorize == nullptr)
 	continue;
       result = extlang->ops->colorize (filename, contents);
       if (result.has_value ())
@@ -914,8 +896,7 @@ ext_lang_colorize_disasm (const std::string &content, gdbarch *gdbarch)
 
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops == nullptr
-	  || extlang->ops->colorize_disasm == nullptr)
+      if (extlang->ops == nullptr || extlang->ops->colorize_disasm == nullptr)
 	continue;
       result = extlang->ops->colorize_disasm (content, gdbarch);
       if (result.has_value ())
@@ -933,8 +914,7 @@ ext_lang_print_insn (struct gdbarch *gdbarch, CORE_ADDR address,
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops == nullptr
-	  || extlang->ops->print_insn == nullptr)
+      if (extlang->ops == nullptr || extlang->ops->print_insn == nullptr)
 	continue;
       gdb::optional<int> length
 	= extlang->ops->print_insn (gdbarch, address, info);
@@ -957,8 +937,7 @@ ext_lang_before_prompt (const char *current_gdb_prompt)
     {
       enum ext_lang_rc rc;
 
-      if (extlang->ops == nullptr
-	  || extlang->ops->before_prompt == NULL)
+      if (extlang->ops == nullptr || extlang->ops->before_prompt == NULL)
 	continue;
       rc = extlang->ops->before_prompt (extlang, current_gdb_prompt);
       switch (rc)
@@ -975,6 +954,7 @@ ext_lang_before_prompt (const char *current_gdb_prompt)
 }
 
 void _initialize_extension ();
+
 void
 _initialize_extension ()
 {

@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (D_LANG_H)
+#if !defined(D_LANG_H)
 #define D_LANG_H 1
 
 #include "symtab.h"
@@ -69,18 +69,17 @@ extern const struct builtin_d_type *builtin_d_type (struct gdbarch *);
 
 /* Defined in d-namespace.c  */
 
-extern struct block_symbol d_lookup_symbol_nonlocal (const struct language_defn *,
-						     const char *,
-						     const struct block *,
-						     const domain_enum);
+extern struct block_symbol
+d_lookup_symbol_nonlocal (const struct language_defn *, const char *,
+			  const struct block *, const domain_enum);
 
 extern struct block_symbol d_lookup_nested_symbol (struct type *, const char *,
 						   const struct block *);
 
 /* Implement la_value_print_inner for D.  */
 
-extern void d_value_print_inner (struct value *val,
-				 struct ui_file *stream, int recurse,
+extern void d_value_print_inner (struct value *val, struct ui_file *stream,
+				 int recurse,
 				 const struct value_print_options *options);
 
 #endif /* !defined (D_LANG_H) */

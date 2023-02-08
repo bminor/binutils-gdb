@@ -116,13 +116,9 @@
 const char test_options_enum_values_xxx[] = "xxx";
 const char test_options_enum_values_yyy[] = "yyy";
 const char test_options_enum_values_zzz[] = "zzz";
-static const char *const test_options_enum_values_choices[] =
-{
-  test_options_enum_values_xxx,
-  test_options_enum_values_yyy,
-  test_options_enum_values_zzz,
-  NULL
-};
+static const char *const test_options_enum_values_choices[]
+  = { test_options_enum_values_xxx, test_options_enum_values_yyy,
+      test_options_enum_values_zzz, NULL };
 
 /* Option data for the "maintenance test-options" commands.  */
 
@@ -146,21 +142,13 @@ struct test_options_opts
   void dump (ui_file *file, const char *args) const
   {
     gdb_printf (file,
-		_("-flag %d -xx1 %d -xx2 %d -bool %d "
-		  "-enum %s -uint-unl %s -pint-unl %s -string '%s' -- %s\n"),
-		flag_opt,
-		xx1_opt,
-		xx2_opt,
-		boolean_opt,
-		enum_opt,
-		(uint_unl_opt == UINT_MAX
-		 ? "unlimited"
-		 : pulongest (uint_unl_opt)),
-		(pint_unl_opt == -1
-		 ? "unlimited"
-		 : plongest (pint_unl_opt)),
-		string_opt.c_str (),
-		args);
+		_ ("-flag %d -xx1 %d -xx2 %d -bool %d "
+		   "-enum %s -uint-unl %s -pint-unl %s -string '%s' -- %s\n"),
+		flag_opt, xx1_opt, xx2_opt, boolean_opt, enum_opt,
+		(uint_unl_opt == UINT_MAX ? "unlimited"
+					  : pulongest (uint_unl_opt)),
+		(pint_unl_opt == -1 ? "unlimited" : plongest (pint_unl_opt)),
+		string_opt.c_str (), args);
   }
 };
 
@@ -172,7 +160,7 @@ static const gdb::option::option_def test_options_option_defs[] = {
   gdb::option::flag_option_def<test_options_opts> {
     "flag",
     [] (test_options_opts *opts) { return &opts->flag_opt; },
-    N_("A flag option."),
+    N_ ("A flag option."),
   },
 
   /* A couple flags with similar names, for "ambiguous option names"
@@ -180,12 +168,12 @@ static const gdb::option::option_def test_options_option_defs[] = {
   gdb::option::flag_option_def<test_options_opts> {
     "xx1",
     [] (test_options_opts *opts) { return &opts->xx1_opt; },
-    N_("A flag option."),
+    N_ ("A flag option."),
   },
   gdb::option::flag_option_def<test_options_opts> {
     "xx2",
     [] (test_options_opts *opts) { return &opts->xx2_opt; },
-    N_("A flag option."),
+    N_ ("A flag option."),
   },
 
   /* A boolean option.  */
@@ -193,7 +181,7 @@ static const gdb::option::option_def test_options_option_defs[] = {
     "bool",
     [] (test_options_opts *opts) { return &opts->boolean_opt; },
     nullptr, /* show_cmd_cb */
-    N_("A boolean option."),
+    N_ ("A boolean option."),
   },
 
   /* An enum option.  */
@@ -202,7 +190,7 @@ static const gdb::option::option_def test_options_option_defs[] = {
     test_options_enum_values_choices,
     [] (test_options_opts *opts) { return &opts->enum_opt; },
     nullptr, /* show_cmd_cb */
-    N_("An enum option."),
+    N_ ("An enum option."),
   },
 
   /* A uinteger + "unlimited" option.  */
@@ -211,20 +199,18 @@ static const gdb::option::option_def test_options_option_defs[] = {
     [] (test_options_opts *opts) { return &opts->uint_unl_opt; },
     uinteger_unlimited_literals,
     nullptr, /* show_cmd_cb */
-    N_("A uinteger option."),
+    N_ ("A uinteger option."),
     nullptr, /* show_doc */
-    N_("A help doc that spawns\nmultiple lines."),
+    N_ ("A help doc that spawns\nmultiple lines."),
   },
 
   /* A pinteger + "unlimited" option.  */
   gdb::option::pinteger_option_def<test_options_opts> {
     "pinteger-unlimited",
     [] (test_options_opts *opts) { return &opts->pint_unl_opt; },
-    pinteger_unlimited_literals,
-    nullptr, /* show_cmd_cb */
-    N_("A pinteger-unlimited option."),
-    nullptr, /* show_doc */
-    nullptr, /* help_doc */
+    pinteger_unlimited_literals, nullptr,	  /* show_cmd_cb */
+    N_ ("A pinteger-unlimited option."), nullptr, /* show_doc */
+    nullptr,					  /* help_doc */
   },
 
   /* A string option.  */
@@ -232,7 +218,7 @@ static const gdb::option::option_def test_options_option_defs[] = {
     "string",
     [] (test_options_opts *opts) { return &opts->string_opt; },
     nullptr, /* show_cmd_cb */
-    N_("A string option."),
+    N_ ("A string option."),
   },
 };
 
@@ -242,7 +228,7 @@ static const gdb::option::option_def test_options_option_defs[] = {
 static inline gdb::option::option_def_group
 make_test_options_options_def_group (test_options_opts *opts)
 {
-  return {{test_options_option_defs}, opts};
+  return { { test_options_option_defs }, opts };
 }
 
 /* Implementation of the "maintenance test-options
@@ -314,17 +300,16 @@ save_completion_result (const test_options_opts &opts, bool res,
    enumerator.  */
 
 static void
-maintenance_test_options_completer_mode (completion_tracker &tracker,
-					 const char *text,
-					 gdb::option::process_options_mode mode)
+maintenance_test_options_completer_mode (
+  completion_tracker &tracker, const char *text,
+  gdb::option::process_options_mode mode)
 {
   test_options_opts opts;
 
   try
     {
-      bool res = (gdb::option::complete_options
-		  (tracker, &text, mode,
-		   make_test_options_options_def_group (&opts)));
+      bool res = (gdb::option::complete_options (
+	tracker, &text, mode, make_test_options_options_def_group (&opts)));
 
       save_completion_result (opts, res, text);
     }
@@ -342,8 +327,8 @@ static void
 maintenance_test_options_require_delimiter_command (const char *args,
 						    int from_tty)
 {
-  maintenance_test_options_command_mode
-    (args, gdb::option::PROCESS_OPTIONS_REQUIRE_DELIMITER);
+  maintenance_test_options_command_mode (
+    args, gdb::option::PROCESS_OPTIONS_REQUIRE_DELIMITER);
 }
 
 /* Implementation of the "maintenance test-options
@@ -353,8 +338,8 @@ static void
 maintenance_test_options_unknown_is_error_command (const char *args,
 						   int from_tty)
 {
-  maintenance_test_options_command_mode
-    (args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR);
+  maintenance_test_options_command_mode (
+    args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR);
 }
 
 /* Implementation of the "maintenance test-options
@@ -364,66 +349,64 @@ static void
 maintenance_test_options_unknown_is_operand_command (const char *args,
 						     int from_tty)
 {
-  maintenance_test_options_command_mode
-    (args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND);
+  maintenance_test_options_command_mode (
+    args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND);
 }
 
 /* Completer for the "maintenance test-options require-delimiter"
    command.  */
 
 static void
-maintenance_test_options_require_delimiter_command_completer
-  (cmd_list_element *ignore, completion_tracker &tracker,
-   const char *text, const char *word)
+maintenance_test_options_require_delimiter_command_completer (
+  cmd_list_element *ignore, completion_tracker &tracker, const char *text,
+  const char *word)
 {
-  maintenance_test_options_completer_mode
-    (tracker, text, gdb::option::PROCESS_OPTIONS_REQUIRE_DELIMITER);
+  maintenance_test_options_completer_mode (
+    tracker, text, gdb::option::PROCESS_OPTIONS_REQUIRE_DELIMITER);
 }
 
 /* Completer for the "maintenance test-options unknown-is-error"
    command.  */
 
 static void
-maintenance_test_options_unknown_is_error_command_completer
-  (cmd_list_element *ignore, completion_tracker &tracker,
-   const char *text, const char *word)
+maintenance_test_options_unknown_is_error_command_completer (
+  cmd_list_element *ignore, completion_tracker &tracker, const char *text,
+  const char *word)
 {
-  maintenance_test_options_completer_mode
-    (tracker, text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR);
+  maintenance_test_options_completer_mode (
+    tracker, text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR);
 }
 
 /* Completer for the "maintenance test-options unknown-is-operand"
    command.  */
 
 static void
-maintenance_test_options_unknown_is_operand_command_completer
-  (cmd_list_element *ignore, completion_tracker &tracker,
-   const char *text, const char *word)
+maintenance_test_options_unknown_is_operand_command_completer (
+  cmd_list_element *ignore, completion_tracker &tracker, const char *text,
+  const char *word)
 {
-  maintenance_test_options_completer_mode
-    (tracker, text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND);
+  maintenance_test_options_completer_mode (
+    tracker, text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND);
 }
 
 /* Command list for maint test-options.  */
 static cmd_list_element *maintenance_test_options_list;
 
-
 void _initialize_maint_test_options ();
+
 void
 _initialize_maint_test_options ()
 {
   cmd_list_element *cmd;
 
-  add_basic_prefix_cmd ("test-options", no_class,
-			_("\
+  add_basic_prefix_cmd ("test-options", no_class, _ ("\
 Generic command for testing the options infrastructure."),
-			&maintenance_test_options_list,
-			0, &maintenancelist);
+			&maintenance_test_options_list, 0, &maintenancelist);
 
   const auto def_group = make_test_options_options_def_group (nullptr);
 
   static const std::string help_require_delim_str
-    = gdb::option::build_help (_("\
+    = gdb::option::build_help (_ ("\
 Command used for testing options processing.\n\
 Usage: maint test-options require-delimiter [[OPTION]... --] [OPERAND]...\n\
 \n\
@@ -435,7 +418,7 @@ to mark the end of option processing."),
 			       def_group);
 
   static const std::string help_unknown_is_error_str
-    = gdb::option::build_help (_("\
+    = gdb::option::build_help (_ ("\
 Command used for testing options processing.\n\
 Usage: maint test-options unknown-is-error [OPTION]... [OPERAND]...\n\
 \n\
@@ -444,7 +427,7 @@ Options:\n\
 			       def_group);
 
   static const std::string help_unknown_is_operand_str
-    = gdb::option::build_help (_("\
+    = gdb::option::build_help (_ ("\
 Command used for testing options processing.\n\
 Usage: maint test-options unknown-is-operand [OPTION]... [OPERAND]...\n\
 \n\
@@ -456,26 +439,25 @@ Options:\n\
 		 maintenance_test_options_require_delimiter_command,
 		 help_require_delim_str.c_str (),
 		 &maintenance_test_options_list);
-  set_cmd_completer_handle_brkchars
-    (cmd, maintenance_test_options_require_delimiter_command_completer);
+  set_cmd_completer_handle_brkchars (
+    cmd, maintenance_test_options_require_delimiter_command_completer);
 
   cmd = add_cmd ("unknown-is-error", class_maintenance,
 		 maintenance_test_options_unknown_is_error_command,
 		 help_unknown_is_error_str.c_str (),
 		 &maintenance_test_options_list);
-  set_cmd_completer_handle_brkchars
-    (cmd, maintenance_test_options_unknown_is_error_command_completer);
+  set_cmd_completer_handle_brkchars (
+    cmd, maintenance_test_options_unknown_is_error_command_completer);
 
   cmd = add_cmd ("unknown-is-operand", class_maintenance,
 		 maintenance_test_options_unknown_is_operand_command,
 		 help_unknown_is_operand_str.c_str (),
 		 &maintenance_test_options_list);
-  set_cmd_completer_handle_brkchars
-    (cmd, maintenance_test_options_unknown_is_operand_command_completer);
+  set_cmd_completer_handle_brkchars (
+    cmd, maintenance_test_options_unknown_is_operand_command_completer);
 
   add_cmd ("test-options-completion-result", class_maintenance,
-	   maintenance_show_test_options_completion_result,
-	   _("\
+	   maintenance_show_test_options_completion_result, _ ("\
 Show maintenance test-options completion result.\n\
 Shows the results of completing\n\
 \"maint test-options require-delimiter\",\n\

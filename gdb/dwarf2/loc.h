@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (DWARF2LOC_H)
+#if !defined(DWARF2LOC_H)
 #define DWARF2LOC_H
 
 #include "dwarf2/expr.h"
@@ -36,10 +36,9 @@ struct axs_value;
 extern unsigned int entry_values_debug;
 
 /* Find a particular location expression from a location list.  */
-const gdb_byte *dwarf2_find_location_expression
-  (struct dwarf2_loclist_baton *baton,
-   size_t *locexpr_length,
-   CORE_ADDR pc);
+const gdb_byte *
+dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
+				 size_t *locexpr_length, CORE_ADDR pc);
 
 /* Find the frame base information for FRAMEFUNC at PC.  START is an
    out parameter which is set to point to the DWARF expression to
@@ -64,11 +63,10 @@ value *compute_var_value (const char *name);
    Function always returns non-NULL, it throws NO_ENTRY_VALUE_ERROR
    otherwise.  */
 
-struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
-  (frame_info_ptr frame, enum call_site_parameter_kind kind,
-   union call_site_parameter_u kind_u, dwarf2_per_cu_data **per_cu_return,
-   dwarf2_per_objfile **per_objfile_return);
-
+struct call_site_parameter *dwarf_expr_reg_to_entry_parameter (
+  frame_info_ptr frame, enum call_site_parameter_kind kind,
+  union call_site_parameter_u kind_u, dwarf2_per_cu_data **per_cu_return,
+  dwarf2_per_objfile **per_objfile_return);
 
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the context
@@ -77,8 +75,7 @@ struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
 
 struct value *dwarf2_evaluate_loc_desc (struct type *type,
 					frame_info_ptr frame,
-					const gdb_byte *data,
-					size_t size,
+					const gdb_byte *data, size_t size,
 					dwarf2_per_cu_data *per_cu,
 					dwarf2_per_objfile *per_objfile,
 					bool as_lval = true);
@@ -143,8 +140,7 @@ void dwarf2_compile_property_to_c (string_file *stream,
 				   struct gdbarch *gdbarch,
 				   std::vector<bool> &registers_used,
 				   const struct dynamic_prop *prop,
-				   CORE_ADDR address,
-				   struct symbol *sym);
+				   CORE_ADDR address, struct symbol *sym);
 
 /* The symbol location baton types used by the DWARF-2 reader (i.e.
    SYMBOL_LOCATION_BATON for a LOC_COMPUTED symbol).  "struct
@@ -230,6 +226,7 @@ struct dwarf2_property_baton
      by value then it will be of PROPERTY_TYPE.  This field should never be
      NULL.  */
   struct type *property_type;
+
   union
   {
     /* Location expression either evaluated in the context of
@@ -253,19 +250,20 @@ extern const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs;
 /* Determined tail calls for constructing virtual tail call frames.  */
 
 struct call_site_chain
-  {
-    /* Initially CALLERS == CALLEES == LENGTH.  For partially ambiguous result
+{
+  /* Initially CALLERS == CALLEES == LENGTH.  For partially ambiguous result
        CALLERS + CALLEES < LENGTH.  */
-    int callers, callees, length;
+  int callers, callees, length;
 
-    /* Variably sized array with LENGTH elements.  Later [0..CALLERS-1] contain
+  /* Variably sized array with LENGTH elements.  Later [0..CALLERS-1] contain
        top (GDB "prev") sites and [LENGTH-CALLEES..LENGTH-1] contain bottom
        (GDB "next") sites.  One is interested primarily in the PC field.  */
-    struct call_site *call_site[1];
-  };
+  struct call_site *call_site[1];
+};
 
-extern gdb::unique_xmalloc_ptr<call_site_chain> call_site_find_chain
-  (struct gdbarch *gdbarch, CORE_ADDR caller_pc, CORE_ADDR callee_pc);
+extern gdb::unique_xmalloc_ptr<call_site_chain>
+call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
+		      CORE_ADDR callee_pc);
 
 /* A helper function to convert a DWARF register to an arch register.
    ARCH is the architecture.
@@ -291,10 +289,10 @@ extern void invalid_synthetic_pointer ();
 
 /* Fetch the value pointed to by a synthetic pointer.  */
 
-extern struct value *indirect_synthetic_pointer
-  (sect_offset die, LONGEST byte_offset, dwarf2_per_cu_data *per_cu,
-   dwarf2_per_objfile *per_objfile, frame_info_ptr frame,
-   struct type *type, bool resolve_abstract_p = false);
+extern struct value *indirect_synthetic_pointer (
+  sect_offset die, LONGEST byte_offset, dwarf2_per_cu_data *per_cu,
+  dwarf2_per_objfile *per_objfile, frame_info_ptr frame, struct type *type,
+  bool resolve_abstract_p = false);
 
 /* Read parameter of TYPE at (callee) FRAME's function entry.  KIND and KIND_U
    are used to match DW_AT_location at the caller's
@@ -303,8 +301,8 @@ extern struct value *indirect_synthetic_pointer
    Function always returns non-NULL value.  It throws NO_ENTRY_VALUE_ERROR if
    it cannot resolve the parameter for any reason.  */
 
-extern struct value *value_of_dwarf_reg_entry (struct type *type,
-					       struct frame_info_ptr frame,
-					       enum call_site_parameter_kind kind,
-					       union call_site_parameter_u kind_u);
+extern struct value *
+value_of_dwarf_reg_entry (struct type *type, struct frame_info_ptr frame,
+			  enum call_site_parameter_kind kind,
+			  union call_site_parameter_u kind_u);
 #endif /* DWARF2LOC_H */

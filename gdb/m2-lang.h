@@ -52,19 +52,19 @@ extern const struct builtin_m2_type *builtin_m2_type (struct gdbarch *gdbarch);
 class m2_language : public language_defn
 {
 public:
+
   m2_language ()
     : language_defn (language_m2)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* See language.h.  */
 
-  const char *name () const override
-  { return "modula-2"; }
+  const char *name () const override { return "modula-2"; }
 
   /* See language.h.  */
 
-  const char *natural_name () const override
-  { return "Modula-2"; }
+  const char *natural_name () const override { return "Modula-2"; }
 
   /* See language.h.  */
 
@@ -82,9 +82,9 @@ public:
 
   /* See language.h.  */
 
-  void value_print_inner (struct value *val, struct ui_file *stream,
-			  int recurse,
-			  const struct value_print_options *options) const override;
+  void
+  value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options) const override;
 
   /* See language.h.  */
 
@@ -92,8 +92,8 @@ public:
 
   /* See language.h.  */
 
-  void emitchar (int ch, struct type *chtype,
-		 struct ui_file *stream, int quoter) const override;
+  void emitchar (int ch, struct type *chtype, struct ui_file *stream,
+		 int quoter) const override;
 
   /* See language.h.  */
 
@@ -117,8 +117,7 @@ public:
   bool is_string_type_p (struct type *type) const override
   {
     type = check_typedef (type);
-    if (type->code () == TYPE_CODE_ARRAY
-	&& type->length () > 0
+    if (type->code () == TYPE_CODE_ARRAY && type->length () > 0
 	&& type->target_type ()->length () > 0)
       {
 	struct type *elttype = check_typedef (type->target_type ());
@@ -134,19 +133,16 @@ public:
 
   /* See language.h.  */
 
-  bool c_style_arrays_p () const override
-  { return false; }
+  bool c_style_arrays_p () const override { return false; }
 
   /* See language.h.  Despite not having C-style arrays, Modula-2 uses 0
      for its string lower bounds.  */
 
-  char string_lower_bound () const override
-  { return 0; }
+  char string_lower_bound () const override { return 0; }
 
   /* See language.h.  */
 
-  bool range_checking_on_by_default () const override
-  { return true; }
+  bool range_checking_on_by_default () const override { return true; }
 };
 
 #endif /* M2_LANG_H */

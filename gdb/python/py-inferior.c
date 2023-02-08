@@ -39,16 +39,16 @@ struct inferior_object
 {
   PyObject_HEAD
 
-  /* The inferior we represent.  */
-  struct inferior *inferior;
+    /* The inferior we represent.  */
+    struct inferior *inferior;
 
   /* thread_object instances under this inferior.  This owns a
      reference to each object it contains.  */
   thread_map_t *threads;
 };
 
-extern PyTypeObject inferior_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("inferior_object");
+extern PyTypeObject
+  inferior_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("inferior_object");
 
 /* Deleter to clean up when an inferior is removed.  */
 struct infpy_deleter
@@ -68,18 +68,20 @@ struct infpy_deleter
 };
 
 static const registry<inferior>::key<inferior_object, infpy_deleter>
-     infpy_inf_data_key;
+  infpy_inf_data_key;
 
 /* Require that INFERIOR be a valid inferior ID.  */
-#define INFPY_REQUIRE_VALID(Inferior)				\
-  do {								\
-    if (!Inferior->inferior)					\
-      {								\
-	PyErr_SetString (PyExc_RuntimeError,			\
-			 _("Inferior no longer exists."));	\
-	return NULL;						\
-      }								\
-  } while (0)
+#define INFPY_REQUIRE_VALID(Inferior)                         \
+  do                                                          \
+    {                                                         \
+      if (!Inferior->inferior)                                \
+	{                                                     \
+	  PyErr_SetString (PyExc_RuntimeError,                \
+			   _ ("Inferior no longer exists.")); \
+	  return NULL;                                        \
+	}                                                     \
+    }                                                         \
+  while (0)
 
 static void
 python_on_normal_stop (struct bpstat *bs, int print_frame)
@@ -141,7 +143,8 @@ python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
    'set' command). */
 
 static void
-python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len, const bfd_byte *data)
+python_on_memory_change (struct inferior *inferior, CORE_ADDR addr,
+			 ssize_t len, const bfd_byte *data)
 {
   gdbpy_enter enter_py (target_gdbarch ());
 
@@ -189,9 +192,8 @@ python_new_objfile (struct objfile *objfile)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (objfile != NULL
-			? objfile->arch ()
-			: target_gdbarch ());
+  gdbpy_enter enter_py (objfile != NULL ? objfile->arch ()
+					: target_gdbarch ());
 
   if (objfile == NULL)
     {
@@ -272,7 +274,8 @@ python_new_inferior (struct inferior *inf)
   gdbpy_ref<> event = create_event_object (&new_inferior_event_object_type);
   if (event == NULL
       || evpy_add_attribute (event.get (), "inferior",
-			     (PyObject *) inf_obj.get ()) < 0
+			     (PyObject *) inf_obj.get ())
+	   < 0
       || evpy_emit_event (event.get (), gdb_py_events.new_inferior) < 0)
     gdbpy_print_stack ();
 }
@@ -297,10 +300,12 @@ python_inferior_deleted (struct inferior *inf)
       return;
     }
 
-  gdbpy_ref<> event = create_event_object (&inferior_deleted_event_object_type);
+  gdbpy_ref<> event
+    = create_event_object (&inferior_deleted_event_object_type);
   if (event == NULL
       || evpy_add_attribute (event.get (), "inferior",
-			     (PyObject *) inf_obj.get ()) < 0
+			     (PyObject *) inf_obj.get ())
+	   < 0
       || evpy_emit_event (event.get (), gdb_py_events.inferior_deleted) < 0)
     gdbpy_print_stack ();
 }
@@ -314,11 +319,10 @@ thread_to_thread_object (thread_info *thr)
 
   auto thread_it = inf_obj->threads->find (thr);
   if (thread_it != inf_obj->threads->end ())
-    return gdbpy_ref<>::new_reference
-      ((PyObject *) (thread_it->second.get ()));
+    return gdbpy_ref<>::new_reference (
+      (PyObject *) (thread_it->second.get ()));
 
-  PyErr_SetString (PyExc_SystemError,
-		   _("could not find gdb thread object"));
+  PyErr_SetString (PyExc_SystemError, _ ("could not find gdb thread object"));
   return NULL;
 }
 
@@ -341,8 +345,8 @@ add_thread_object (struct thread_info *tp)
 
   inf_obj = (inferior_object *) thread_obj->inf_obj;
 
-  auto ins_result = inf_obj->threads->emplace
-    (thread_map_t::value_type (tp, std::move (thread_obj)));
+  auto ins_result = inf_obj->threads->emplace (
+    thread_map_t::value_type (tp, std::move (thread_obj)));
 
   if (!ins_result.second)
     return;
@@ -350,9 +354,9 @@ add_thread_object (struct thread_info *tp)
   if (evregpy_no_listeners_p (gdb_py_events.new_thread))
     return;
 
-  gdbpy_ref<> event = create_thread_event_object
-    (&new_thread_event_object_type,
-     (PyObject *) ins_result.first->second.get ());
+  gdbpy_ref<> event = create_thread_event_object (
+    &new_thread_event_object_type,
+    (PyObject *) ins_result.first->second.get ());
 
   if (event == NULL
       || evpy_emit_event (event.get (), gdb_py_events.new_thread) < 0)
@@ -530,8 +534,8 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *addr_obj, *length_obj;
   static const char *keywords[] = { "address", "length", NULL };
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OO", keywords,
-					&addr_obj, &length_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OO", keywords, &addr_obj,
+					&length_obj))
     return NULL;
 
   if (get_addr_from_python (addr_obj, &addr) < 0
@@ -548,7 +552,6 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-
 
   return gdbpy_buffer_to_membuf (std::move (buffer), addr, length);
 }
@@ -570,8 +573,8 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
   static const char *keywords[] = { "address", "buffer", "length", NULL };
   Py_buffer pybuf;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "Os*|O", keywords,
-					&addr_obj, &pybuf, &length_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "Os*|O", keywords, &addr_obj,
+					&pybuf, &length_obj))
     return NULL;
 
   Py_buffer_up buffer_up (&pybuf);
@@ -622,8 +625,7 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
   Py_buffer pybuf;
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OOs*", keywords,
-					&start_addr_obj, &length_obj,
-					&pybuf))
+					&start_addr_obj, &length_obj, &pybuf))
     return NULL;
 
   Py_buffer_up buffer_up (&pybuf);
@@ -638,23 +640,19 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 
   if (!length)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("Search range is empty."));
+      PyErr_SetString (PyExc_ValueError, _ ("Search range is empty."));
       return nullptr;
     }
   /* Watch for overflows.  */
-  else if (length > CORE_ADDR_MAX
-	   || (start_addr + length - 1) < start_addr)
+  else if (length > CORE_ADDR_MAX || (start_addr + length - 1) < start_addr)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("The search range is too large."));
+      PyErr_SetString (PyExc_ValueError, _ ("The search range is too large."));
       return nullptr;
     }
 
   try
     {
-      found = target_search_memory (start_addr, length,
-				    buffer, pattern_size,
+      found = target_search_memory (start_addr, length, buffer, pattern_size,
 				    &found_addr);
     }
   catch (gdb_exception &ex)
@@ -678,7 +676,7 @@ infpy_is_valid (PyObject *self, PyObject *args)
 {
   inferior_object *inf = (inferior_object *) self;
 
-  if (! inf->inferior)
+  if (!inf->inferior)
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
@@ -696,7 +694,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
 
   INFPY_REQUIRE_VALID (inf_obj);
 
-  if (! gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &handle_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &handle_obj))
     return NULL;
 
   const gdb_byte *bytes;
@@ -719,8 +717,9 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
     }
   else
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("Argument 'handle' must be a thread handle object."));
+      PyErr_SetString (
+	PyExc_TypeError,
+	_ ("Argument 'handle' must be a thread handle object."));
 
       return NULL;
     }
@@ -729,9 +728,8 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
     {
       struct thread_info *thread_info;
 
-      thread_info = find_thread_by_handle
-	(gdb::array_view<const gdb_byte> (bytes, bytes_len),
-	 inf_obj->inferior);
+      thread_info = find_thread_by_handle (
+	gdb::array_view<const gdb_byte> (bytes, bytes_len), inf_obj->inferior);
       if (thread_info != NULL)
 	return thread_to_thread_object (thread_info).release ();
     }
@@ -766,10 +764,9 @@ infpy_repr (PyObject *obj)
   if (inf == nullptr)
     return PyUnicode_FromString ("<gdb.Inferior (invalid)>");
 
-  return PyUnicode_FromFormat ("<gdb.Inferior num=%d, pid=%d>",
-			       inf->num, inf->pid);
+  return PyUnicode_FromFormat ("<gdb.Inferior num=%d, pid=%d>", inf->num,
+			       inf->pid);
 }
-
 
 static void
 infpy_dealloc (PyObject *obj)
@@ -798,8 +795,8 @@ infpy_dealloc (PyObject *obj)
 PyObject *
 gdbpy_selected_inferior (PyObject *self, PyObject *args)
 {
-  return ((PyObject *)
-	  inferior_to_inferior_object (current_inferior ()).release ());
+  return (
+    (PyObject *) inferior_to_inferior_object (current_inferior ()).release ());
 }
 
 int
@@ -809,7 +806,8 @@ gdbpy_initialize_inferior (void)
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "Inferior",
-			      (PyObject *) &inferior_object_type) < 0)
+			      (PyObject *) &inferior_object_type)
+      < 0)
     return -1;
 
   gdb::observers::new_thread.attach (add_thread_object, "py-inferior");
@@ -827,9 +825,9 @@ gdbpy_initialize_inferior (void)
   gdb::observers::inferior_exit.attach (python_inferior_exit, "py-inferior");
   /* Need to run after auto-load's new_objfile observer, so that
      auto-loaded pretty-printers are available.  */
-  gdb::observers::new_objfile.attach
-    (python_new_objfile, "py-inferior",
-     { &auto_load_new_objfile_observer_token });
+  gdb::observers::new_objfile.attach (
+    python_new_objfile, "py-inferior",
+    { &auto_load_new_objfile_observer_token });
   gdb::observers::free_objfile.attach (python_free_objfile, "py-inferior");
   gdb::observers::inferior_added.attach (python_new_inferior, "py-inferior");
   gdb::observers::inferior_removed.attach (python_inferior_deleted,
@@ -838,8 +836,7 @@ gdbpy_initialize_inferior (void)
   return 0;
 }
 
-static gdb_PyGetSetDef inferior_object_getset[] =
-{
+static gdb_PyGetSetDef inferior_object_getset[] = {
   { "num", infpy_get_num, NULL, "ID of inferior, as assigned by GDB.", NULL },
   { "connection", infpy_get_connection, NULL,
     "The gdb.TargetConnection for this inferior.", NULL },
@@ -853,20 +850,16 @@ static gdb_PyGetSetDef inferior_object_getset[] =
   { NULL }
 };
 
-static PyMethodDef inferior_object_methods[] =
-{
-  { "is_valid", infpy_is_valid, METH_NOARGS,
-    "is_valid () -> Boolean.\n\
+static PyMethodDef inferior_object_methods[] = {
+  { "is_valid", infpy_is_valid, METH_NOARGS, "is_valid () -> Boolean.\n\
 Return true if this inferior is valid, false if not." },
   { "threads", infpy_threads, METH_NOARGS,
     "Return all the threads of this inferior." },
   { "read_memory", (PyCFunction) infpy_read_memory,
-    METH_VARARGS | METH_KEYWORDS,
-    "read_memory (address, length) -> buffer\n\
+    METH_VARARGS | METH_KEYWORDS, "read_memory (address, length) -> buffer\n\
 Return a buffer object for reading from the inferior's memory." },
   { "write_memory", (PyCFunction) infpy_write_memory,
-    METH_VARARGS | METH_KEYWORDS,
-    "write_memory (address, buffer [, length])\n\
+    METH_VARARGS | METH_KEYWORDS, "write_memory (address, buffer [, length])\n\
 Write the given buffer object to the inferior's memory." },
   { "search_memory", (PyCFunction) infpy_search_memory,
     METH_VARARGS | METH_KEYWORDS,
@@ -888,43 +881,41 @@ Return architecture of this inferior." },
   { NULL }
 };
 
-PyTypeObject inferior_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Inferior",		  /* tp_name */
-  sizeof (inferior_object),	  /* tp_basicsize */
-  0,				  /* tp_itemsize */
-  infpy_dealloc,		  /* tp_dealloc */
-  0,				  /* tp_print */
-  0,				  /* tp_getattr */
-  0,				  /* tp_setattr */
-  0,				  /* tp_compare */
-  infpy_repr,			  /* tp_repr */
-  0,				  /* tp_as_number */
-  0,				  /* tp_as_sequence */
-  0,				  /* tp_as_mapping */
-  0,				  /* tp_hash  */
-  0,				  /* tp_call */
-  0,				  /* tp_str */
-  0,				  /* tp_getattro */
-  0,				  /* tp_setattro */
-  0,				  /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT,		  /* tp_flags */
-  "GDB inferior object",	  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  inferior_object_methods,	  /* tp_methods */
-  0,				  /* tp_members */
-  inferior_object_getset,	  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,				  /* tp_init */
-  0				  /* tp_alloc */
+PyTypeObject inferior_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.Inferior", /* tp_name */
+  sizeof (inferior_object),			  /* tp_basicsize */
+  0,						  /* tp_itemsize */
+  infpy_dealloc,				  /* tp_dealloc */
+  0,						  /* tp_print */
+  0,						  /* tp_getattr */
+  0,						  /* tp_setattr */
+  0,						  /* tp_compare */
+  infpy_repr,					  /* tp_repr */
+  0,						  /* tp_as_number */
+  0,						  /* tp_as_sequence */
+  0,						  /* tp_as_mapping */
+  0,						  /* tp_hash  */
+  0,						  /* tp_call */
+  0,						  /* tp_str */
+  0,						  /* tp_getattro */
+  0,						  /* tp_setattro */
+  0,						  /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT,				  /* tp_flags */
+  "GDB inferior object",			  /* tp_doc */
+  0,						  /* tp_traverse */
+  0,						  /* tp_clear */
+  0,						  /* tp_richcompare */
+  0,						  /* tp_weaklistoffset */
+  0,						  /* tp_iter */
+  0,						  /* tp_iternext */
+  inferior_object_methods,			  /* tp_methods */
+  0,						  /* tp_members */
+  inferior_object_getset,			  /* tp_getset */
+  0,						  /* tp_base */
+  0,						  /* tp_dict */
+  0,						  /* tp_descr_get */
+  0,						  /* tp_descr_set */
+  0,						  /* tp_dictoffset */
+  0,						  /* tp_init */
+  0						  /* tp_alloc */
 };

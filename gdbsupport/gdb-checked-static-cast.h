@@ -50,8 +50,8 @@ checked_static_cast (V *v)
      mistakes at compile time, this assert prevents anything other than
      downcasts, or casts to same type.  */
   static_assert (std::is_base_of<V, T_no_P>::value
-		 || std::is_base_of<T_no_P, V>::value,
-		 "types must be related");
+                   || std::is_base_of<T_no_P, V>::value,
+                 "types must be related");
 
 #ifdef DEVELOPMENT
   if (v == nullptr)
@@ -66,6 +66,6 @@ checked_static_cast (V *v)
   return result;
 }
 
-}
+} // namespace gdb
 
 #endif /* COMMON_GDB_CHECKED_DYNAMIC_CAST_H */

@@ -41,12 +41,12 @@ const char *target_wide_charset (struct gdbarch *gdbarch);
 /* These values are used to specify the type of transliteration done
    by convert_between_encodings.  */
 enum transliterations
-  {
-    /* Error on failure to convert.  */
-    translit_none,
-    /* Transliterate to host char.  */
-    translit_char
-  };
+{
+  /* Error on failure to convert.  */
+  translit_none,
+  /* Transliterate to host char.  */
+  translit_char
+};
 
 /* Convert between two encodings.
 
@@ -64,29 +64,27 @@ enum transliterations
    TRANSLIT specifies how invalid conversions should be handled.  */
 
 void convert_between_encodings (const char *from, const char *to,
-				const gdb_byte *bytes,
-				unsigned int num_bytes,
+				const gdb_byte *bytes, unsigned int num_bytes,
 				int width, struct obstack *output,
 				enum transliterations translit);
 
-
 /* These values are used by wchar_iterate to report errors.  */
 enum wchar_iterate_result
-  {
-    /* Ordinary return.  */
-    wchar_iterate_ok,
-    /* Invalid input sequence.  */
-    wchar_iterate_invalid,
-    /* Incomplete input sequence at the end of the input.  */
-    wchar_iterate_incomplete,
-    /* EOF.  */
-    wchar_iterate_eof
-  };
+{
+  /* Ordinary return.  */
+  wchar_iterate_ok,
+  /* Invalid input sequence.  */
+  wchar_iterate_invalid,
+  /* Incomplete input sequence at the end of the input.  */
+  wchar_iterate_incomplete,
+  /* EOF.  */
+  wchar_iterate_eof
+};
 
 /* An iterator that returns host wchar_t's from a target string.  */
 class wchar_iterator
 {
- public:
+public:
 
   /* Create a new character iterator which returns wchar_t's.  INPUT is
      the input buffer.  BYTES is the number of bytes in the input
@@ -126,7 +124,7 @@ class wchar_iterator
   int iterate (enum wchar_iterate_result *out_result, gdb_wchar_t **out_chars,
 	       const gdb_byte **ptr, size_t *len);
 
- private:
+private:
 
   /* The underlying iconv descriptor.  */
 #ifdef PHONY_ICONV
@@ -146,8 +144,6 @@ class wchar_iterator
   /* The output buffer.  */
   gdb::def_vector<gdb_wchar_t> m_out;
 };
-
-
 
 /* GDB needs to know a few details of its execution character set.
    This knowledge is isolated here and in charset.c.  */

@@ -46,7 +46,8 @@ gdb_dlsym (const gdb_dlhandle_up &handle, const char *symbol)
 void
 dlclose_deleter::operator() (void *handle) const
 {
-  gdb_assert_not_reached ("gdb_dlclose should not be called on this platform.");
+  gdb_assert_not_reached (
+    "gdb_dlclose should not be called on this platform.");
 }
 
 int
@@ -70,21 +71,20 @@ gdb_dlopen (const char *filename)
     return gdb_dlhandle_up (result);
 
 #ifdef HAVE_DLFCN_H
-  error (_("Could not load %s: %s"), filename, dlerror());
+  error (_ ("Could not load %s: %s"), filename, dlerror ());
 #else
   {
     LPVOID buffer;
     DWORD dw;
 
-    dw = GetLastError();
+    dw = GetLastError ();
 
-    FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-		   FORMAT_MESSAGE_IGNORE_INSERTS,
-		   NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		   (LPTSTR) &buffer,
-		   0, NULL);
+    FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM
+                     | FORMAT_MESSAGE_IGNORE_INSERTS,
+                   NULL, dw, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                   (LPTSTR) &buffer, 0, NULL);
 
-    error (_("Could not load %s: %s"), filename, (char *) buffer);
+    error (_ ("Could not load %s: %s"), filename, (char *) buffer);
   }
 #endif
 }

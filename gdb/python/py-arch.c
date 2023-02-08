@@ -23,28 +23,30 @@
 #include "disasm.h"
 #include "python-internal.h"
 
-struct arch_object {
-  PyObject_HEAD
-  struct gdbarch *gdbarch;
+struct arch_object
+{
+  PyObject_HEAD struct gdbarch *gdbarch;
 };
 
 static const registry<gdbarch>::key<PyObject, gdb::noop_deleter<PyObject>>
-     arch_object_data;
+  arch_object_data;
 
 /* Require a valid Architecture.  */
-#define ARCHPY_REQUIRE_VALID(arch_obj, arch)			\
-  do {								\
-    arch = arch_object_to_gdbarch (arch_obj);			\
-    if (arch == NULL)						\
-      {								\
-	PyErr_SetString (PyExc_RuntimeError,			\
-			 _("Architecture is invalid."));	\
-	return NULL;						\
-      }								\
-  } while (0)
+#define ARCHPY_REQUIRE_VALID(arch_obj, arch)                \
+  do                                                        \
+    {                                                       \
+      arch = arch_object_to_gdbarch (arch_obj);             \
+      if (arch == NULL)                                     \
+	{                                                   \
+	  PyErr_SetString (PyExc_RuntimeError,              \
+			   _ ("Architecture is invalid.")); \
+	  return NULL;                                      \
+	}                                                   \
+    }                                                       \
+  while (0)
 
-extern PyTypeObject arch_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("arch_object");
+extern PyTypeObject
+  arch_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("arch_object");
 
 /* Associates an arch_object with GDBARCH as gdbarch_data via the gdbarch
    post init registration mechanism (gdbarch_data_register_post_init).  */
@@ -135,9 +137,8 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 
   ARCHPY_REQUIRE_VALID (self, gdbarch);
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O|OO",
-					keywords, &start_obj, &end_obj,
-					&count_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O|OO", keywords, &start_obj,
+					&end_obj, &count_obj))
     return NULL;
 
   if (get_addr_from_python (start_obj, &start) < 0)
@@ -151,8 +152,8 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       if (end < start)
 	{
 	  PyErr_SetString (PyExc_ValueError,
-			   _("Argument 'end_pc' should be greater than or "
-			     "equal to the argument 'start_pc'."));
+			   _ ("Argument 'end_pc' should be greater than or "
+			      "equal to the argument 'start_pc'."));
 
 	  return NULL;
 	}
@@ -163,8 +164,8 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       if (PyErr_Occurred () || count < 0)
 	{
 	  PyErr_SetString (PyExc_TypeError,
-			   _("Argument 'count' should be an non-negative "
-			     "integer."));
+			   _ ("Argument 'count' should be an non-negative "
+			      "integer."));
 
 	  return NULL;
 	}
@@ -190,7 +191,7 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       if (insn_dict == NULL)
 	return NULL;
       if (PyList_Append (result_list.get (), insn_dict.get ()))
-	return NULL;  /* PyList_Append Sets the exception.  */
+	return NULL; /* PyList_Append Sets the exception.  */
 
       string_file stb;
 
@@ -208,8 +209,8 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       if (pc_obj == nullptr)
 	return nullptr;
 
-      gdbpy_ref<> asm_obj
-	(PyUnicode_FromString (!stb.empty () ? stb.c_str () : "<unknown>"));
+      gdbpy_ref<> asm_obj (PyUnicode_FromString (!stb.empty () ? stb.c_str ()
+							       : "<unknown>"));
       if (asm_obj == nullptr)
 	return nullptr;
 
@@ -241,8 +242,7 @@ archpy_registers (PyObject *self, PyObject *args, PyObject *kw)
   const char *group_name = NULL;
 
   /* Parse method arguments.  */
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|s", keywords,
-					&group_name))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|s", keywords, &group_name))
     return NULL;
 
   /* Extract the gdbarch from the self object.  */
@@ -273,13 +273,13 @@ archpy_integer_type (PyObject *self, PyObject *args, PyObject *kw)
   int size;
   PyObject *is_signed_obj = nullptr;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "i|O", keywords,
-					&size, &is_signed_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "i|O", keywords, &size,
+					&is_signed_obj))
     return nullptr;
 
   /* Assume signed by default.  */
-  bool is_signed = (is_signed_obj == nullptr
-		    || PyObject_IsTrue (is_signed_obj));
+  bool is_signed
+    = (is_signed_obj == nullptr || PyObject_IsTrue (is_signed_obj));
 
   struct gdbarch *gdbarch;
   ARCHPY_REQUIRE_VALID (self, gdbarch);
@@ -312,7 +312,7 @@ archpy_integer_type (PyObject *self, PyObject *args, PyObject *kw)
 
     default:
       PyErr_SetString (PyExc_ValueError,
-		       _("no integer type of that size is available"));
+		       _ ("no integer type of that size is available"));
       return nullptr;
     }
 
@@ -332,14 +332,14 @@ gdbpy_all_architecture_names (PyObject *self, PyObject *args)
   std::vector<const char *> name_list = gdbarch_printable_names ();
   for (const char *name : name_list)
     {
-      gdbpy_ref <> py_name (PyUnicode_FromString (name));
+      gdbpy_ref<> py_name (PyUnicode_FromString (name));
       if (py_name == nullptr)
 	return nullptr;
       if (PyList_Append (list.get (), py_name.get ()) < 0)
 	return nullptr;
     }
 
- return list.release ();
+  return list.release ();
 }
 
 /* Initializes the Architecture class in the gdb module.  */
@@ -355,9 +355,8 @@ gdbpy_initialize_arch (void)
 				 (PyObject *) &arch_object_type);
 }
 
-static PyMethodDef arch_object_methods [] = {
-  { "name", archpy_name, METH_NOARGS,
-    "name () -> String.\n\
+static PyMethodDef arch_object_methods[] = {
+  { "name", archpy_name, METH_NOARGS, "name () -> String.\n\
 Return the name of the architecture as a string value." },
   { "disassemble", (PyCFunction) archpy_disassemble,
     METH_VARARGS | METH_KEYWORDS,
@@ -365,58 +364,54 @@ Return the name of the architecture as a string value." },
 Return a list of at most COUNT disassembled instructions from START_PC to\n\
 END_PC." },
   { "integer_type", (PyCFunction) archpy_integer_type,
-    METH_VARARGS | METH_KEYWORDS,
-    "integer_type (size [, signed]) -> type\n\
+    METH_VARARGS | METH_KEYWORDS, "integer_type (size [, signed]) -> type\n\
 Return an integer Type corresponding to the given bitsize and signed-ness.\n\
 If not specified, the type defaults to signed." },
-  { "registers", (PyCFunction) archpy_registers,
-    METH_VARARGS | METH_KEYWORDS,
+  { "registers", (PyCFunction) archpy_registers, METH_VARARGS | METH_KEYWORDS,
     "registers ([ group-name ]) -> Iterator.\n\
 Return an iterator of register descriptors for the registers in register\n\
 group GROUP-NAME." },
-  { "register_groups", archpy_register_groups,
-    METH_NOARGS,
+  { "register_groups", archpy_register_groups, METH_NOARGS,
     "register_groups () -> Iterator.\n\
 Return an iterator over all of the register groups in this architecture." },
-  {NULL}  /* Sentinel */
+  { NULL } /* Sentinel */
 };
 
 PyTypeObject arch_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Architecture",                 /* tp_name */
-  sizeof (arch_object),               /* tp_basicsize */
-  0,                                  /* tp_itemsize */
-  0,                                  /* tp_dealloc */
-  0,                                  /* tp_print */
-  0,                                  /* tp_getattr */
-  0,                                  /* tp_setattr */
-  0,                                  /* tp_compare */
-  0,                                  /* tp_repr */
-  0,                                  /* tp_as_number */
-  0,                                  /* tp_as_sequence */
-  0,                                  /* tp_as_mapping */
-  0,                                  /* tp_hash  */
-  0,                                  /* tp_call */
-  0,                                  /* tp_str */
-  0,                                  /* tp_getattro */
-  0,                                  /* tp_setattro */
-  0,                                  /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT,                 /* tp_flags */
-  "GDB architecture object",          /* tp_doc */
-  0,                                  /* tp_traverse */
-  0,                                  /* tp_clear */
-  0,                                  /* tp_richcompare */
-  0,                                  /* tp_weaklistoffset */
-  0,                                  /* tp_iter */
-  0,                                  /* tp_iternext */
-  arch_object_methods,                /* tp_methods */
-  0,                                  /* tp_members */
-  0,                                  /* tp_getset */
-  0,                                  /* tp_base */
-  0,                                  /* tp_dict */
-  0,                                  /* tp_descr_get */
-  0,                                  /* tp_descr_set */
-  0,                                  /* tp_dictoffset */
-  0,                                  /* tp_init */
-  0,                                  /* tp_alloc */
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.Architecture", /* tp_name */
+  sizeof (arch_object),				      /* tp_basicsize */
+  0,						      /* tp_itemsize */
+  0,						      /* tp_dealloc */
+  0,						      /* tp_print */
+  0,						      /* tp_getattr */
+  0,						      /* tp_setattr */
+  0,						      /* tp_compare */
+  0,						      /* tp_repr */
+  0,						      /* tp_as_number */
+  0,						      /* tp_as_sequence */
+  0,						      /* tp_as_mapping */
+  0,						      /* tp_hash  */
+  0,						      /* tp_call */
+  0,						      /* tp_str */
+  0,						      /* tp_getattro */
+  0,						      /* tp_setattro */
+  0,						      /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT,				      /* tp_flags */
+  "GDB architecture object",			      /* tp_doc */
+  0,						      /* tp_traverse */
+  0,						      /* tp_clear */
+  0,						      /* tp_richcompare */
+  0,						      /* tp_weaklistoffset */
+  0,						      /* tp_iter */
+  0,						      /* tp_iternext */
+  arch_object_methods,				      /* tp_methods */
+  0,						      /* tp_members */
+  0,						      /* tp_getset */
+  0,						      /* tp_base */
+  0,						      /* tp_dict */
+  0,						      /* tp_descr_get */
+  0,						      /* tp_descr_set */
+  0,						      /* tp_dictoffset */
+  0,						      /* tp_init */
+  0,						      /* tp_alloc */
 };

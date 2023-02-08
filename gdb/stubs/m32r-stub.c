@@ -91,14 +91,13 @@
  *
  ****************************************************************************/
 
-
 /************************************************************************
  *
  * external low-level support routines
  */
-extern void putDebugChar ();	/* write a single character      */
-extern int getDebugChar ();	/* read and return a single char */
-extern void exceptionHandler ();	/* assign an exception handler   */
+extern void putDebugChar ();	 /* write a single character      */
+extern int getDebugChar ();	 /* read and return a single char */
+extern void exceptionHandler (); /* assign an exception handler   */
 
 /*****************************************************************************
  * BUFMAX defines the maximum number of characters in inbound/outbound buffers
@@ -106,7 +105,7 @@ extern void exceptionHandler ();	/* assign an exception handler   */
  */
 #define BUFMAX 400
 
-static char initialized;	/* boolean flag. != 0 means we've been initialized */
+static char initialized; /* boolean flag. != 0 means we've been initialized */
 
 int remote_debug;
 /*  debug >  0 prints ill-formed commands in valid packets & checksum errors */
@@ -117,10 +116,33 @@ static const unsigned char hexchars[] = "0123456789abcdef";
 
 /* Number of bytes of registers.  */
 #define NUMREGBYTES (NUMREGS * 4)
+
 enum regnames
-{ R0, R1, R2, R3, R4, R5, R6, R7,
-  R8, R9, R10, R11, R12, R13, R14, R15,
-  PSW, CBR, SPI, SPU, BPC, PC, ACCL, ACCH
+{
+  R0,
+  R1,
+  R2,
+  R3,
+  R4,
+  R5,
+  R6,
+  R7,
+  R8,
+  R9,
+  R10,
+  R11,
+  R12,
+  R13,
+  R14,
+  R15,
+  PSW,
+  CBR,
+  SPI,
+  SPU,
+  BPC,
+  PC,
+  ACCL,
+  ACCH
 };
 
 enum SYS_calls
@@ -158,7 +180,7 @@ static unsigned char remcomOutBuffer[BUFMAX];
 static int remcomStack[STACKSIZE / sizeof (int)];
 static int *stackPtr = &remcomStack[STACKSIZE / sizeof (int) - 1];
 
-static unsigned int save_vectors[18];	/* previous exception vectors */
+static unsigned int save_vectors[18]; /* previous exception vectors */
 
 /* Indicate to caller of mem2hex or hex2mem that there has been an error. */
 static volatile int mem_err = 0;
@@ -168,7 +190,7 @@ static volatile int mem_err = 0;
 int gdb_m32r_vector = -1;
 
 #if 0
-#include "syscall.h"		/* for SYS_exit, SYS_write etc. */
+#include "syscall.h" /* for SYS_exit, SYS_write etc. */
 #endif
 
 /* Global entry points:
@@ -215,7 +237,7 @@ handle_exception (int exceptionVector)
   int binary;
 
   if (!finish_from_step ())
-    return;			/* "false step": let the target continue */
+    return; /* "false step": let the target continue */
 
   gdb_m32r_vector = exceptionVector;
 
@@ -232,30 +254,30 @@ handle_exception (int exceptionVector)
 
   ptr = remcomOutBuffer;
 
-  *ptr++ = 'T';			/* notify gdb with signo, PC, FP and SP */
+  *ptr++ = 'T'; /* notify gdb with signo, PC, FP and SP */
   *ptr++ = hexchars[sigval >> 4];
   *ptr++ = hexchars[sigval & 0xf];
 
   *ptr++ = hexchars[PC >> 4];
   *ptr++ = hexchars[PC & 0xf];
   *ptr++ = ':';
-  ptr = mem2hex ((unsigned char *) &registers[PC], ptr, 4, 0);	/* PC */
+  ptr = mem2hex ((unsigned char *) &registers[PC], ptr, 4, 0); /* PC */
   *ptr++ = ';';
 
   *ptr++ = hexchars[R13 >> 4];
   *ptr++ = hexchars[R13 & 0xf];
   *ptr++ = ':';
-  ptr = mem2hex ((unsigned char *) &registers[R13], ptr, 4, 0);	/* FP */
+  ptr = mem2hex ((unsigned char *) &registers[R13], ptr, 4, 0); /* FP */
   *ptr++ = ';';
 
   *ptr++ = hexchars[R15 >> 4];
   *ptr++ = hexchars[R15 & 0xf];
   *ptr++ = ':';
-  ptr = mem2hex ((unsigned char *) &registers[R15], ptr, 4, 0);	/* SP */
+  ptr = mem2hex ((unsigned char *) &registers[R15], ptr, 4, 0); /* SP */
   *ptr++ = ';';
   *ptr++ = 0;
 
-  if (exceptionVector == 0)	/* simulated SYS call stuff */
+  if (exceptionVector == 0) /* simulated SYS call stuff */
     {
       mem2hex ((unsigned char *) &registers[PC], buf, 4, 0);
       switch (registers[R0])
@@ -279,11 +301,11 @@ handle_exception (int exceptionVector)
 	  gdb_error ("Target attempts SYS_read call at %s\n", buf);
 	  break;
 	case SYS_write:
-	  if (registers[R1] == 1 ||	/* write to stdout  */
-	      registers[R1] == 2)	/* write to stderr  */
-	    {			/* (we can do that) */
-	      registers[R0] =
-		gdb_write ((void *) registers[R2], registers[R3]);
+	  if (registers[R1] == 1 || /* write to stdout  */
+	      registers[R1] == 2)   /* write to stderr  */
+	    {			    /* (we can do that) */
+	      registers[R0]
+		= gdb_write ((void *) registers[R2], registers[R3]);
 	      return;
 	    }
 	  else
@@ -321,7 +343,7 @@ handle_exception (int exceptionVector)
       binary = 0;
       switch (*ptr++)
 	{
-	default:		/* Unknown code.  Return an empty reply message. */
+	default: /* Unknown code.  Return an empty reply message. */
 	  break;
 	case 'R':
 	  if (hexToInt (&ptr, &addr))
@@ -331,9 +353,9 @@ handle_exception (int exceptionVector)
 	case '!':
 	  strcpy (remcomOutBuffer, "OK");
 	  break;
-	case 'X':		/* XAA..AA,LLLL:<binary data>#cs */
+	case 'X': /* XAA..AA,LLLL:<binary data>#cs */
 	  binary = 1;
-	case 'M':		/* MAA..AA,LLLL: Write LLLL bytes at address AA.AA return OK */
+	case 'M': /* MAA..AA,LLLL: Write LLLL bytes at address AA.AA return OK */
 	  /* TRY TO READ '%x,%x:'.  IF SUCCEED, SET PTR = 0 */
 	  {
 	    if (hexToInt (&ptr, &addr))
@@ -363,7 +385,7 @@ handle_exception (int exceptionVector)
 	      }
 	  }
 	  break;
-	case 'm':		/* mAA..AA,LLLL  Read LLLL bytes at address AA..AA */
+	case 'm': /* mAA..AA,LLLL  Read LLLL bytes at address AA..AA */
 	  /* TRY TO READ %x,%x.  IF SUCCEED, SET PTR = 0 */
 	  if (hexToInt (&ptr, &addr))
 	    if (*(ptr++) == ',')
@@ -371,8 +393,7 @@ handle_exception (int exceptionVector)
 		{
 		  ptr = 0;
 		  mem_err = 0;
-		  mem2hex ((unsigned char *) addr, remcomOutBuffer, length,
-			   1);
+		  mem2hex ((unsigned char *) addr, remcomOutBuffer, length, 1);
 		  if (mem_err)
 		    {
 		      strcpy (remcomOutBuffer, "E03");
@@ -391,13 +412,13 @@ handle_exception (int exceptionVector)
 	  remcomOutBuffer[3] = 0;
 	  break;
 	case 'd':
-	  remote_debug = !(remote_debug);	/* toggle debug flag */
+	  remote_debug = !(remote_debug); /* toggle debug flag */
 	  break;
-	case 'g':		/* return the value of the CPU registers */
+	case 'g': /* return the value of the CPU registers */
 	  mem2hex ((unsigned char *) registers, remcomOutBuffer, NUMREGBYTES,
 		   0);
 	  break;
-	case 'P':		/* set the value of a single CPU register - return OK */
+	case 'P': /* set the value of a single CPU register - return OK */
 	  {
 	    int regno;
 
@@ -412,28 +433,30 @@ handle_exception (int exceptionVector)
 		   * make sure to keep the several stack pointers consistant.
 		   */
 		  stackmode = registers[PSW] & 0x80;
-		  if (regno == R15)	/* stack pointer changed */
-		    {		/* need to change SPI or SPU */
+		  if (regno == R15) /* stack pointer changed */
+		    {		    /* need to change SPI or SPU */
 		      if (stackmode == 0)
 			registers[SPI] = registers[R15];
 		      else
 			registers[SPU] = registers[R15];
 		    }
-		  else if (regno == SPU)	/* "user" stack pointer changed */
+		  else if (regno == SPU) /* "user" stack pointer changed */
 		    {
-		      if (stackmode != 0)	/* stack in user mode: copy SP */
+		      if (stackmode != 0) /* stack in user mode: copy SP */
 			registers[R15] = registers[SPU];
 		    }
-		  else if (regno == SPI)	/* "interrupt" stack pointer changed */
+		  else if (regno
+			   == SPI) /* "interrupt" stack pointer changed */
 		    {
-		      if (stackmode == 0)	/* stack in interrupt mode: copy SP */
+		      if (stackmode
+			  == 0) /* stack in interrupt mode: copy SP */
 			registers[R15] = registers[SPI];
 		    }
-		  else if (regno == PSW)	/* stack mode may have changed! */
-		    {		/* force SP to either SPU or SPI */
-		      if (stackmode == 0)	/* stack in user mode */
+		  else if (regno == PSW)  /* stack mode may have changed! */
+		    {			  /* force SP to either SPU or SPI */
+		      if (stackmode == 0) /* stack in user mode */
 			registers[R15] = registers[SPI];
-		      else	/* stack in interrupt mode */
+		      else /* stack in interrupt mode */
 			registers[R15] = registers[SPU];
 		    }
 		  strcpy (remcomOutBuffer, "OK");
@@ -442,53 +465,51 @@ handle_exception (int exceptionVector)
 	    strcpy (remcomOutBuffer, "E01");
 	    break;
 	  }
-	case 'G':		/* set the value of the CPU registers - return OK */
+	case 'G': /* set the value of the CPU registers - return OK */
 	  hex2mem (ptr, (unsigned char *) registers, NUMREGBYTES, 0);
 	  strcpy (remcomOutBuffer, "OK");
 	  break;
-	case 's':		/* sAA..AA      Step one instruction from AA..AA(optional) */
+	case 's': /* sAA..AA      Step one instruction from AA..AA(optional) */
 	  stepping = 1;
-	case 'c':		/* cAA..AA      Continue from address AA..AA(optional) */
+	case 'c': /* cAA..AA      Continue from address AA..AA(optional) */
 	  /* try to read optional parameter, pc unchanged if no parm */
 	  if (hexToInt (&ptr, &addr))
 	    registers[PC] = addr;
 
-	  if (stepping)		/* single-stepping */
+	  if (stepping) /* single-stepping */
 	    {
-	      if (!prepare_to_step (0))	/* set up for single-step */
+	      if (!prepare_to_step (0)) /* set up for single-step */
 		{
 		  /* prepare_to_step has already emulated the target insn:
 		     Send SIGTRAP to gdb, don't resume the target at all.  */
 		  ptr = remcomOutBuffer;
-		  *ptr++ = 'T';	/* Simulate stopping with SIGTRAP */
+		  *ptr++ = 'T'; /* Simulate stopping with SIGTRAP */
 		  *ptr++ = '0';
 		  *ptr++ = '5';
 
-		  *ptr++ = hexchars[PC >> 4];	/* send PC */
+		  *ptr++ = hexchars[PC >> 4]; /* send PC */
 		  *ptr++ = hexchars[PC & 0xf];
 		  *ptr++ = ':';
 		  ptr = mem2hex ((unsigned char *) &registers[PC], ptr, 4, 0);
 		  *ptr++ = ';';
 
-		  *ptr++ = hexchars[R13 >> 4];	/* send FP */
+		  *ptr++ = hexchars[R13 >> 4]; /* send FP */
 		  *ptr++ = hexchars[R13 & 0xf];
 		  *ptr++ = ':';
-		  ptr =
-		    mem2hex ((unsigned char *) &registers[R13], ptr, 4, 0);
+		  ptr = mem2hex ((unsigned char *) &registers[R13], ptr, 4, 0);
 		  *ptr++ = ';';
 
-		  *ptr++ = hexchars[R15 >> 4];	/* send SP */
+		  *ptr++ = hexchars[R15 >> 4]; /* send SP */
 		  *ptr++ = hexchars[R15 & 0xf];
 		  *ptr++ = ':';
-		  ptr =
-		    mem2hex ((unsigned char *) &registers[R15], ptr, 4, 0);
+		  ptr = mem2hex ((unsigned char *) &registers[R15], ptr, 4, 0);
 		  *ptr++ = ';';
 		  *ptr++ = 0;
 
 		  break;
 		}
 	    }
-	  else			/* continuing, not single-stepping */
+	  else /* continuing, not single-stepping */
 	    {
 	      /* OK, about to do a "continue".  First check to see if the 
 		 target pc is on an odd boundary (second instruction in the 
@@ -500,7 +521,7 @@ handle_exception (int exceptionVector)
 
 	  return;
 
-	case 'D':		/* Detach */
+	case 'D': /* Detach */
 #if 0
 	  /* I am interpreting this to mean, release the board from control 
 	     by the remote stub.  To do this, I am restoring the original
@@ -515,25 +536,24 @@ handle_exception (int exceptionVector)
 	  break;
 #endif
 	case 'q':
-	  if (*ptr++ == 'C' &&
-	      *ptr++ == 'R' && *ptr++ == 'C' && *ptr++ == ':')
+	  if (*ptr++ == 'C' && *ptr++ == 'R' && *ptr++ == 'C' && *ptr++ == ':')
 	    {
 	      unsigned long start, len, our_crc;
 
-	      if (hexToInt (&ptr, (int *) &start) &&
-		  *ptr++ == ',' && hexToInt (&ptr, (int *) &len))
+	      if (hexToInt (&ptr, (int *) &start) && *ptr++ == ','
+		  && hexToInt (&ptr, (int *) &len))
 		{
 		  remcomOutBuffer[0] = 'C';
 		  our_crc = crc32 ((unsigned char *) start, len, 0xffffffff);
-		  mem2hex ((char *) &our_crc,
-			   &remcomOutBuffer[1], sizeof (long), 0);
-		}		/* else do nothing */
-	    }			/* else do nothing */
+		  mem2hex ((char *) &our_crc, &remcomOutBuffer[1],
+			   sizeof (long), 0);
+		} /* else do nothing */
+	    }	  /* else do nothing */
 	  break;
 
-	case 'k':		/* kill the program */
+	case 'k': /* kill the program */
 	  continue;
-	}			/* switch */
+	} /* switch */
 
       /* reply to the request */
       putpacket (remcomOutBuffer);
@@ -637,11 +657,11 @@ getpacket (void)
 		  gdb_error ("sent count = %s\n", buf);
 		  gdb_error (" -- Bad buffer: \"%s\"\n", buffer);
 		}
-	      putDebugChar ('-');	/* failed checksum */
+	      putDebugChar ('-'); /* failed checksum */
 	    }
 	  else
 	    {
-	      putDebugChar ('+');	/* successful transfer */
+	      putDebugChar ('+'); /* successful transfer */
 
 	      /* if a sequence char is present, reply the sequence ID */
 	      if (buffer[2] == ':')
@@ -705,19 +725,19 @@ set_mem_err (void)
 static int
 mem_safe (unsigned char *addr)
 {
-#define BAD_RANGE_ONE_START	((unsigned char *) 0x600000)
-#define BAD_RANGE_ONE_END	((unsigned char *) 0xa00000)
-#define BAD_RANGE_TWO_START	((unsigned char *) 0xff680000)
-#define BAD_RANGE_TWO_END	((unsigned char *) 0xff800000)
+#define BAD_RANGE_ONE_START ((unsigned char *) 0x600000)
+#define BAD_RANGE_ONE_END ((unsigned char *) 0xa00000)
+#define BAD_RANGE_TWO_START ((unsigned char *) 0xff680000)
+#define BAD_RANGE_TWO_END ((unsigned char *) 0xff800000)
 
   if (addr < BAD_RANGE_ONE_START)
-    return 1;			/* safe */
+    return 1; /* safe */
   if (addr < BAD_RANGE_ONE_END)
-    return 0;			/* unsafe */
+    return 0; /* unsafe */
   if (addr < BAD_RANGE_TWO_START)
-    return 1;			/* safe */
+    return 1; /* safe */
   if (addr < BAD_RANGE_TWO_END)
-    return 0;			/* unsafe */
+    return 0; /* unsafe */
 }
 
 /* These are separate functions so that they are so short and sweet
@@ -822,9 +842,9 @@ bin2mem (unsigned char *buf, unsigned char *mem, int count, int may_fault)
 	{
 	  switch (*(buf + 1))
 	    {
-	    case 0x3:		/* # */
-	    case 0x4:		/* $ */
-	    case 0x5d:		/* escape char */
+	    case 0x3:  /* # */
+	    case 0x4:  /* $ */
+	    case 0x5d: /* escape char */
 	      buf++;
 	      *buf |= 0x20;
 	      break;
@@ -856,61 +876,61 @@ computeSignal (int exceptionVector)
     {
     case 0:
       sigval = 23;
-      break;			/* I/O trap                    */
+      break; /* I/O trap                    */
     case 1:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 2:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 3:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 4:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 5:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 6:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 7:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 8:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 9:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 10:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 11:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 12:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 13:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 14:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 15:
       sigval = 5;
-      break;			/* breakpoint                  */
+      break; /* breakpoint                  */
     case 16:
       sigval = 10;
-      break;			/* BUS ERROR (alignment)       */
+      break; /* BUS ERROR (alignment)       */
     case 17:
       sigval = 2;
-      break;			/* INTerrupt                   */
+      break; /* INTerrupt                   */
     default:
       sigval = 7;
-      break;			/* "software generated"        */
+      break; /* "software generated"        */
     }
   return (sigval);
 }
@@ -968,18 +988,18 @@ hexToInt (unsigned char **ptr, int *intValue)
 static int
 isShortBranch (unsigned char *instr)
 {
-  unsigned char instr0 = instr[0] & 0x7F;	/* mask off high bit */
+  unsigned char instr0 = instr[0] & 0x7F; /* mask off high bit */
 
-  if (instr0 == 0x10 && instr[1] == 0xB6)	/* RTE */
-    return 1;			/* return from trap or exception */
+  if (instr0 == 0x10 && instr[1] == 0xB6) /* RTE */
+    return 1;				  /* return from trap or exception */
 
-  if (instr0 == 0x1E || instr0 == 0x1F)	/* JL or JMP */
+  if (instr0 == 0x1E || instr0 == 0x1F) /* JL or JMP */
     if ((instr[1] & 0xF0) == 0xC0)
-      return 2;			/* jump thru a register */
+      return 2; /* jump thru a register */
 
-  if (instr0 == 0x7C || instr0 == 0x7D ||	/* BC, BNC, BL, BRA */
+  if (instr0 == 0x7C || instr0 == 0x7D || /* BC, BNC, BL, BRA */
       instr0 == 0x7E || instr0 == 0x7F)
-    return 3;			/* eight bit PC offset */
+    return 3; /* eight bit PC offset */
 
   return 0;
 }
@@ -987,18 +1007,18 @@ isShortBranch (unsigned char *instr)
 static int
 isLongBranch (unsigned char *instr)
 {
-  if (instr[0] == 0xFC || instr[0] == 0xFD ||	/* BRA, BNC, BL, BC */
-      instr[0] == 0xFE || instr[0] == 0xFF)	/* 24 bit relative */
+  if (instr[0] == 0xFC || instr[0] == 0xFD || /* BRA, BNC, BL, BC */
+      instr[0] == 0xFE || instr[0] == 0xFF)   /* 24 bit relative */
     return 4;
-  if ((instr[0] & 0xF0) == 0xB0)	/* 16 bit relative */
+  if ((instr[0] & 0xF0) == 0xB0) /* 16 bit relative */
     {
-      if ((instr[1] & 0xF0) == 0x00 ||	/* BNE, BEQ */
+      if ((instr[1] & 0xF0) == 0x00 || /* BNE, BEQ */
 	  (instr[1] & 0xF0) == 0x10)
 	return 5;
-      if (instr[0] == 0xB0)	/* BNEZ, BLTZ, BLEZ, BGTZ, BGEZ, BEQZ */
-	if ((instr[1] & 0xF0) == 0x80 || (instr[1] & 0xF0) == 0x90 ||
-	    (instr[1] & 0xF0) == 0xA0 || (instr[1] & 0xF0) == 0xB0 ||
-	    (instr[1] & 0xF0) == 0xC0 || (instr[1] & 0xF0) == 0xD0)
+      if (instr[0] == 0xB0) /* BNEZ, BLTZ, BLEZ, BGTZ, BGEZ, BEQZ */
+	if ((instr[1] & 0xF0) == 0x80 || (instr[1] & 0xF0) == 0x90
+	    || (instr[1] & 0xF0) == 0xA0 || (instr[1] & 0xF0) == 0xB0
+	    || (instr[1] & 0xF0) == 0xC0 || (instr[1] & 0xF0) == 0xD0)
 	  return 6;
     }
   return 0;
@@ -1008,7 +1028,7 @@ isLongBranch (unsigned char *instr)
    then it's a 2-byte instruction, else it's a 4-byte instruction.  */
 
 #define INSTRUCTION_SIZE(addr) \
-    ((((int) addr & 2) || (((unsigned char *) addr)[0] & 0x80) == 0) ? 2 : 4)
+  ((((int) addr & 2) || (((unsigned char *) addr)[0] & 0x80) == 0) ? 2 : 4)
 
 static int
 isBranch (unsigned char *instr)
@@ -1025,54 +1045,54 @@ willBranch (unsigned char *instr, int branchCode)
   switch (branchCode)
     {
     case 0:
-      return 0;			/* not a branch */
+      return 0; /* not a branch */
     case 1:
-      return 1;			/* RTE */
+      return 1; /* RTE */
     case 2:
-      return 1;			/* JL or JMP    */
-    case 3:			/* BC, BNC, BL, BRA (short) */
-    case 4:			/* BC, BNC, BL, BRA (long) */
+      return 1; /* JL or JMP    */
+    case 3:	/* BC, BNC, BL, BRA (short) */
+    case 4:	/* BC, BNC, BL, BRA (long) */
       switch (instr[0] & 0x0F)
 	{
-	case 0xC:		/* Branch if Condition Register */
+	case 0xC: /* Branch if Condition Register */
 	  return (registers[CBR] != 0);
-	case 0xD:		/* Branch if NOT Condition Register */
+	case 0xD: /* Branch if NOT Condition Register */
 	  return (registers[CBR] == 0);
-	case 0xE:		/* Branch and Link */
-	case 0xF:		/* Branch (unconditional) */
+	case 0xE: /* Branch and Link */
+	case 0xF: /* Branch (unconditional) */
 	  return 1;
-	default:		/* oops? */
+	default: /* oops? */
 	  return 0;
 	}
-    case 5:			/* BNE, BEQ */
+    case 5: /* BNE, BEQ */
       switch (instr[1] & 0xF0)
 	{
-	case 0x00:		/* Branch if r1 equal to r2 */
+	case 0x00: /* Branch if r1 equal to r2 */
 	  return (registers[instr[0] & 0x0F] == registers[instr[1] & 0x0F]);
-	case 0x10:		/* Branch if r1 NOT equal to r2 */
+	case 0x10: /* Branch if r1 NOT equal to r2 */
 	  return (registers[instr[0] & 0x0F] != registers[instr[1] & 0x0F]);
-	default:		/* oops? */
+	default: /* oops? */
 	  return 0;
 	}
-    case 6:			/* BNEZ, BLTZ, BLEZ, BGTZ, BGEZ ,BEQZ */
+    case 6: /* BNEZ, BLTZ, BLEZ, BGTZ, BGEZ ,BEQZ */
       switch (instr[1] & 0xF0)
 	{
-	case 0x80:		/* Branch if reg equal to zero */
+	case 0x80: /* Branch if reg equal to zero */
 	  return (registers[instr[1] & 0x0F] == 0);
-	case 0x90:		/* Branch if reg NOT equal to zero */
+	case 0x90: /* Branch if reg NOT equal to zero */
 	  return (registers[instr[1] & 0x0F] != 0);
-	case 0xA0:		/* Branch if reg less than zero */
+	case 0xA0: /* Branch if reg less than zero */
 	  return (registers[instr[1] & 0x0F] < 0);
-	case 0xB0:		/* Branch if reg greater or equal to zero */
+	case 0xB0: /* Branch if reg greater or equal to zero */
 	  return (registers[instr[1] & 0x0F] >= 0);
-	case 0xC0:		/* Branch if reg less than or equal to zero */
+	case 0xC0: /* Branch if reg less than or equal to zero */
 	  return (registers[instr[1] & 0x0F] <= 0);
-	case 0xD0:		/* Branch if reg greater than zero */
+	case 0xD0: /* Branch if reg greater than zero */
 	  return (registers[instr[1] & 0x0F] > 0);
-	default:		/* oops? */
+	default: /* oops? */
 	  return 0;
 	}
-    default:			/* oops? */
+    default: /* oops? */
       return 0;
     }
 }
@@ -1083,20 +1103,20 @@ branchDestination (unsigned char *instr, int branchCode)
   switch (branchCode)
     {
     default:
-    case 0:			/* not a branch */
+    case 0: /* not a branch */
       return 0;
-    case 1:			/* RTE */
-      return registers[BPC] & ~3;	/* pop BPC into PC */
-    case 2:			/* JL or JMP */
-      return registers[instr[1] & 0x0F] & ~3;	/* jump thru a register */
-    case 3:			/* BC, BNC, BL, BRA (short, 8-bit relative offset) */
+    case 1:				      /* RTE */
+      return registers[BPC] & ~3;	      /* pop BPC into PC */
+    case 2:				      /* JL or JMP */
+      return registers[instr[1] & 0x0F] & ~3; /* jump thru a register */
+    case 3: /* BC, BNC, BL, BRA (short, 8-bit relative offset) */
       return (((int) instr) & ~3) + ((char) instr[1] << 2);
-    case 4:			/* BC, BNC, BL, BRA (long, 24-bit relative offset) */
-      return ((int) instr +
-	      ((((char) instr[1] << 16) | (instr[2] << 8) | (instr[3])) <<
-	       2));
-    case 5:			/* BNE, BEQ (16-bit relative offset) */
-    case 6:			/* BNEZ, BLTZ, BLEZ, BGTZ, BGEZ ,BEQZ (ditto) */
+    case 4: /* BC, BNC, BL, BRA (long, 24-bit relative offset) */
+      return ((int) instr
+	      + ((((char) instr[1] << 16) | (instr[2] << 8) | (instr[3]))
+		 << 2));
+    case 5: /* BNE, BEQ (16-bit relative offset) */
+    case 6: /* BNEZ, BLTZ, BLEZ, BGTZ, BGEZ ,BEQZ (ditto) */
       return ((int) instr + ((((char) instr[2] << 8) | (instr[3])) << 2));
     }
 
@@ -1115,31 +1135,31 @@ branchSideEffects (unsigned char *instr, int branchCode)
 {
   switch (branchCode)
     {
-    case 1:			/* RTE */
-      return;			/* I <THINK> this is already handled... */
-    case 2:			/* JL (or JMP) */
-    case 3:			/* BL (or BC, BNC, BRA) */
+    case 1:   /* RTE */
+      return; /* I <THINK> this is already handled... */
+    case 2:   /* JL (or JMP) */
+    case 3:   /* BL (or BC, BNC, BRA) */
     case 4:
-      if ((instr[0] & 0x0F) == 0x0E)	/* branch/jump and link */
+      if ((instr[0] & 0x0F) == 0x0E) /* branch/jump and link */
 	registers[R14] = (registers[PC] & ~3) + 4;
       return;
-    default:			/* any other branch has no side effects */
+    default: /* any other branch has no side effects */
       return;
     }
 }
 
 static struct STEPPING_CONTEXT
 {
-  int stepping;			/* true when we've started a single-step */
-  unsigned long target_addr;	/* the instr we're trying to execute */
-  unsigned long target_size;	/* the size of the target instr */
-  unsigned long noop_addr;	/* where we've inserted a no-op, if any */
-  unsigned long trap1_addr;	/* the trap following the target instr */
-  unsigned long trap2_addr;	/* the trap at a branch destination, if any */
-  unsigned short noop_save;	/* instruction overwritten by our no-op */
-  unsigned short trap1_save;	/* instruction overwritten by trap1 */
-  unsigned short trap2_save;	/* instruction overwritten by trap2 */
-  unsigned short continue_p;	/* true if NOT returning to gdb after step */
+  int stepping;		     /* true when we've started a single-step */
+  unsigned long target_addr; /* the instr we're trying to execute */
+  unsigned long target_size; /* the size of the target instr */
+  unsigned long noop_addr;   /* where we've inserted a no-op, if any */
+  unsigned long trap1_addr;  /* the trap following the target instr */
+  unsigned long trap2_addr;  /* the trap at a branch destination, if any */
+  unsigned short noop_save;  /* instruction overwritten by our no-op */
+  unsigned short trap1_save; /* instruction overwritten by trap1 */
+  unsigned short trap2_save; /* instruction overwritten by trap2 */
+  unsigned short continue_p; /* true if NOT returning to gdb after step */
 } stepping;
 
 /* Function: prepare_to_step
@@ -1153,15 +1173,15 @@ static struct STEPPING_CONTEXT
 	    in which case we simply report to GDB that the instruction 
 	    has already been executed.  */
 
-#define TRAP1  0x10f1;		/* trap #1 instruction */
-#define NOOP   0x7000;		/* noop    instruction */
+#define TRAP1 0x10f1; /* trap #1 instruction */
+#define NOOP 0x7000;  /* noop    instruction */
 
 static unsigned short trap1 = TRAP1;
 static unsigned short noop = NOOP;
 
 static int
 prepare_to_step (continue_p)
-     int continue_p;		/* if this isn't REALLY a single-step (see below) */
+int continue_p; /* if this isn't REALLY a single-step (see below) */
 {
   unsigned long pc = registers[PC];
   int branchCode = isBranch ((unsigned char *) pc);
@@ -1173,16 +1193,16 @@ prepare_to_step (continue_p)
        p < ((unsigned char *) &stepping) + sizeof (stepping); p++)
     *p = 0;
 
-  if (branchCode != 0)		/* next instruction is a branch */
+  if (branchCode != 0) /* next instruction is a branch */
     {
       branchSideEffects ((unsigned char *) pc, branchCode);
       if (willBranch ((unsigned char *) pc, branchCode))
 	registers[PC] = branchDestination ((unsigned char *) pc, branchCode);
       else
 	registers[PC] = pc + INSTRUCTION_SIZE (pc);
-      return 0;			/* branch "executed" -- just notify GDB */
+      return 0; /* branch "executed" -- just notify GDB */
     }
-  else if (((int) pc & 2) != 0)	/* "second-slot" instruction */
+  else if (((int) pc & 2) != 0) /* "second-slot" instruction */
     {
       /* insert no-op before pc */
       stepping.noop_addr = pc - 2;
@@ -1193,7 +1213,7 @@ prepare_to_step (continue_p)
       stepping.trap1_save = *(unsigned short *) stepping.trap1_addr;
       *(unsigned short *) stepping.trap1_addr = trap1;
     }
-  else				/* "first-slot" instruction */
+  else /* "first-slot" instruction */
     {
       /* insert trap  after  pc */
       stepping.trap1_addr = pc + INSTRUCTION_SIZE (pc);
@@ -1205,7 +1225,7 @@ prepare_to_step (continue_p)
      one single-step before continuing, because the PC is on a half-word
      boundary.  There's no way to simply resume at such an address.  */
   stepping.continue_p = continue_p;
-  stepping.stepping = 1;	/* starting a single-step */
+  stepping.stepping = 1; /* starting a single-step */
   return 1;
 }
 
@@ -1223,39 +1243,39 @@ prepare_to_step (continue_p)
 static int
 finish_from_step (void)
 {
-  if (stepping.stepping)	/* anything to do? */
+  if (stepping.stepping) /* anything to do? */
     {
       int continue_p = stepping.continue_p;
       unsigned char *p;
 
-      if (stepping.noop_addr)	/* replace instr "under" our no-op */
+      if (stepping.noop_addr) /* replace instr "under" our no-op */
 	*(unsigned short *) stepping.noop_addr = stepping.noop_save;
-      if (stepping.trap1_addr)	/* replace instr "under" our trap  */
+      if (stepping.trap1_addr) /* replace instr "under" our trap  */
 	*(unsigned short *) stepping.trap1_addr = stepping.trap1_save;
-      if (stepping.trap2_addr)	/* ditto our other trap, if any    */
+      if (stepping.trap2_addr) /* ditto our other trap, if any    */
 	*(unsigned short *) stepping.trap2_addr = stepping.trap2_save;
 
-      for (p = (unsigned char *) &stepping;	/* zero out the stepping context */
+      for (p = (unsigned char *) &stepping; /* zero out the stepping context */
 	   p < ((unsigned char *) &stepping) + sizeof (stepping); p++)
 	*p = 0;
 
       return !(continue_p);
     }
-  else				/* we didn't single-step, therefore this must be a legitimate stop */
+  else /* we didn't single-step, therefore this must be a legitimate stop */
     return 1;
 }
 
 struct PSWreg
-{				/* separate out the bit flags in the PSW register */
-  int pad1:16;
-  int bsm:1;
-  int bie:1;
-  int pad2:5;
-  int bc:1;
-  int sm:1;
-  int ie:1;
-  int pad3:5;
-  int c:1;
+{ /* separate out the bit flags in the PSW register */
+  int pad1 : 16;
+  int bsm : 1;
+  int bie : 1;
+  int pad2 : 5;
+  int bc : 1;
+  int sm : 1;
+  int ie : 1;
+  int pad3 : 5;
+  int c : 1;
 } *psw;
 
 /* Upon entry the value for LR to save has been pushed.
@@ -1314,13 +1334,13 @@ stash_registers:\n\
 static void
 cleanup_stash (void)
 {
-  psw = (struct PSWreg *) &registers[PSW];	/* fields of PSW register */
-  psw->sm = psw->bsm;		/* fix up pre-trap values of psw fields */
+  psw = (struct PSWreg *) &registers[PSW]; /* fields of PSW register */
+  psw->sm = psw->bsm; /* fix up pre-trap values of psw fields */
   psw->ie = psw->bie;
   psw->c = psw->bc;
-  registers[CBR] = psw->bc;	/* fix up pre-trap "C" register */
+  registers[CBR] = psw->bc; /* fix up pre-trap "C" register */
 
-#if 0				/* FIXME: Was in previous version.  Necessary?
+#if 0 /* FIXME: Was in previous version.  Necessary?
 				   (Remember that we use the "rte" insn to return from the
 				   trap/interrupt so the values of bsm, bie, bc are important.  */
   psw->bsm = psw->bie = psw->bc = 0;	/* zero post-trap values */
@@ -1328,10 +1348,10 @@ cleanup_stash (void)
 
   /* FIXME: Copied from previous version.  This can probably be deleted
      since methinks stash_registers has already done this.  */
-  registers[PC] = registers[BPC];	/* pre-trap PC */
+  registers[PC] = registers[BPC]; /* pre-trap PC */
 
   /* FIXME: Copied from previous version.  Necessary?  */
-  if (psw->sm)			/* copy R15 into (psw->sm ? SPU : SPI) */
+  if (psw->sm) /* copy R15 into (psw->sm ? SPU : SPI) */
     registers[SPU] = registers[R15];
   else
     registers[SPI] = registers[R15];
@@ -1389,7 +1409,8 @@ process_exception (int num)
 	ld r15, @r1		; setup local stack (protect user stack)\n\
 	mv r0, %0\n\
 	bl handle_exception\n\
-	bl restore_and_return"::"r" (num):"r0", "r1");
+	bl restore_and_return" ::"r"(num)
+		: "r0", "r1");
 }
 
 void _catchException0 ();
@@ -1582,7 +1603,6 @@ _catchException17:\n\
 	ldi r0, #17\n\
 	bl process_exception");
 
-
 /* this function is used to set up exception handlers for tracing and
    breakpoints */
 void
@@ -1591,8 +1611,8 @@ set_debug_traps (void)
   /*  extern void remcomHandler(); */
   int i;
 
-  for (i = 0; i < 18; i++)	/* keep a copy of old vectors */
-    if (save_vectors[i] == 0)	/* only copy them the first time */
+  for (i = 0; i < 18; i++)    /* keep a copy of old vectors */
+    if (save_vectors[i] == 0) /* only copy them the first time */
       save_vectors[i] = getExceptionHandler (i);
 
   stackPtr = &remcomStack[STACKSIZE / sizeof (int) - 1];
@@ -1673,8 +1693,8 @@ gdb_write (char *data, int len)
   i = 0;
   while (i < len)
     {
-      for (cpy = buf + 1;
-	   i < len && cpy < buf + sizeof (remcomOutBuffer) - 3; i++)
+      for (cpy = buf + 1; i < len && cpy < buf + sizeof (remcomOutBuffer) - 3;
+	   i++)
 	{
 	  *cpy++ = hexchars[data[i] >> 4];
 	  *cpy++ = hexchars[data[i] & 0x0F];
@@ -1711,16 +1731,16 @@ gdb_error (char *format, char *parm)
       if (format && *format)
 	len = strlen (format);
       else
-	return;			/* empty input */
+	return; /* empty input */
 
       if (parm && *parm)
 	len += strlen (parm);
 
       for (cpy = buf; *format;)
 	{
-	  if (format[0] == '%' && format[1] == 's')	/* include second string */
+	  if (format[0] == '%' && format[1] == 's') /* include second string */
 	    {
-	      format += 2;	/* advance two chars instead of just one */
+	      format += 2; /* advance two chars instead of just one */
 	      while (parm && *parm)
 		*cpy++ = *parm++;
 	    }

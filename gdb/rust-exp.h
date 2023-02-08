@@ -27,39 +27,35 @@ extern struct value *eval_op_rust_complement (struct type *expect_type,
 					      enum noside noside,
 					      enum exp_opcode opcode,
 					      struct value *value);
-extern struct value *eval_op_rust_array (struct type *expect_type,
-					 struct expression *exp,
-					 enum noside noside,
-					 enum exp_opcode opcode,
-					 struct value *ncopies,
-					 struct value *elt);
+extern struct value *
+eval_op_rust_array (struct type *expect_type, struct expression *exp,
+		    enum noside noside, enum exp_opcode opcode,
+		    struct value *ncopies, struct value *elt);
 extern struct value *rust_subscript (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, bool for_addr,
 				     struct value *lhs, struct value *rhs);
 extern struct value *rust_range (struct type *expect_type,
-				 struct expression *exp,
-				 enum noside noside, enum range_flag kind,
-				 struct value *low, struct value *high);
+				 struct expression *exp, enum noside noside,
+				 enum range_flag kind, struct value *low,
+				 struct value *high);
 
 namespace expr
 {
 
-using rust_unop_compl_operation = unop_operation<UNOP_COMPLEMENT,
-						  eval_op_rust_complement>;
-using rust_array_operation = binop_operation<OP_RUST_ARRAY,
-					     eval_op_rust_array>;
+using rust_unop_compl_operation
+  = unop_operation<UNOP_COMPLEMENT, eval_op_rust_complement>;
+using rust_array_operation
+  = binop_operation<OP_RUST_ARRAY, eval_op_rust_array>;
 
 /* The Rust indirection operation.  */
-class rust_unop_ind_operation
-  : public unop_ind_operation
+class rust_unop_ind_operation : public unop_ind_operation
 {
 public:
 
   using unop_ind_operation::unop_ind_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 };
 
@@ -71,8 +67,7 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -80,8 +75,7 @@ public:
     return rust_subscript (expect_type, exp, noside, false, arg1, arg2);
   }
 
-  value *slice (struct type *expect_type,
-		struct expression *exp,
+  value *slice (struct type *expect_type, struct expression *exp,
 		enum noside noside)
   {
     value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -89,19 +83,16 @@ public:
     return rust_subscript (expect_type, exp, noside, true, arg1, arg2);
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_SUBSCRIPT; }
+  enum exp_opcode opcode () const override { return BINOP_SUBSCRIPT; }
 };
 
-class rust_unop_addr_operation
-  : public tuple_holding_operation<operation_up>
+class rust_unop_addr_operation : public tuple_holding_operation<operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     operation *oper = std::get<0> (m_storage).get ();
@@ -112,8 +103,7 @@ public:
     return oper->evaluate_for_address (exp, noside);
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_ADDR; }
+  enum exp_opcode opcode () const override { return UNOP_ADDR; }
 };
 
 /* The Rust range operators.  */
@@ -124,8 +114,7 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     auto kind = std::get<0> (m_storage);
@@ -138,63 +127,53 @@ public:
     return rust_range (expect_type, exp, noside, kind, low, high);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_RANGE; }
+  enum exp_opcode opcode () const override { return OP_RANGE; }
 };
 
 /* Tuple field reference (using an integer).  */
-class rust_struct_anon
-  : public tuple_holding_operation<int, operation_up>
+class rust_struct_anon : public tuple_holding_operation<int, operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return STRUCTOP_ANONYMOUS; }
+  enum exp_opcode opcode () const override { return STRUCTOP_ANONYMOUS; }
 };
 
 /* Structure (or union or enum) field reference.  */
-class rust_structop
-  : public structop_base_operation
+class rust_structop : public structop_base_operation
 {
 public:
 
   using structop_base_operation::structop_base_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  value *evaluate_funcall (struct type *expect_type,
-			   struct expression *exp,
+  value *evaluate_funcall (struct type *expect_type, struct expression *exp,
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override;
 
-  enum exp_opcode opcode () const override
-  { return STRUCTOP_STRUCT; }
+  enum exp_opcode opcode () const override { return STRUCTOP_STRUCT; }
 };
 
 /* Rust aggregate initialization.  */
 class rust_aggregate_operation
-  : public tuple_holding_operation<struct type *, operation_up,
-				   std::vector<std::pair<std::string,
-							 operation_up>>>
+  : public tuple_holding_operation<
+      struct type *, operation_up,
+      std::vector<std::pair<std::string, operation_up>>>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_AGGREGATE; }
+  enum exp_opcode opcode () const override { return OP_AGGREGATE; }
 };
 
 /* Rust parenthesized operation.  This is needed to distinguish
@@ -210,8 +189,7 @@ public:
   {
   }
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     return std::get<0> (m_storage)->evaluate (expect_type, exp, noside);

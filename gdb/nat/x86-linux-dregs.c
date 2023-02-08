@@ -49,7 +49,7 @@ x86_linux_dr_get (ptid_t ptid, int regnum)
   errno = 0;
   value = ptrace (PTRACE_PEEKUSER, tid, u_debugreg_offset (regnum), 0);
   if (errno != 0)
-    perror_with_name (_("Couldn't read debug register"));
+    perror_with_name (_ ("Couldn't read debug register"));
 
   return value;
 }
@@ -67,7 +67,7 @@ x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
   errno = 0;
   ptrace (PTRACE_POKEUSER, tid, u_debugreg_offset (regnum), value);
   if (errno != 0)
-    perror_with_name (_("Couldn't write debug register"));
+    perror_with_name (_ ("Couldn't write debug register"));
 }
 
 /* Callback for iterate_over_lwps.  Mark that our local mirror of
@@ -147,8 +147,7 @@ x86_linux_update_debug_registers (struct lwp_info *lwp)
 
   if (lwp_debug_registers_changed (lwp))
     {
-      struct x86_debug_reg_state *state
-	= x86_debug_reg_state (ptid.pid ());
+      struct x86_debug_reg_state *state = x86_debug_reg_state (ptid.pid ());
       int i;
 
       /* Prior to Linux kernel 2.6.33 commit
@@ -160,15 +159,15 @@ x86_linux_update_debug_registers (struct lwp_info *lwp)
       x86_linux_dr_set (ptid, DR_CONTROL, 0);
 
       ALL_DEBUG_ADDRESS_REGISTERS (i)
-	if (state->dr_ref_count[i] > 0)
-	  {
-	    x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
+      if (state->dr_ref_count[i] > 0)
+	{
+	  x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
 
-	    /* If we're setting a watchpoint, any change the inferior
+	  /* If we're setting a watchpoint, any change the inferior
 	       has made to its debug registers needs to be discarded
 	       to avoid x86_stopped_data_address getting confused.  */
-	    clear_status = 1;
-	  }
+	  clear_status = 1;
+	}
 
       /* If DR_CONTROL is supposed to be zero then it's already set.  */
       if (state->dr_control_mirror != 0)
@@ -177,7 +176,6 @@ x86_linux_update_debug_registers (struct lwp_info *lwp)
       lwp_set_debug_registers_changed (lwp, 0);
     }
 
-  if (clear_status
-      || lwp_stop_reason (lwp) == TARGET_STOPPED_BY_WATCHPOINT)
+  if (clear_status || lwp_stop_reason (lwp) == TARGET_STOPPED_BY_WATCHPOINT)
     x86_linux_dr_set (ptid, DR_STATUS, 0);
 }

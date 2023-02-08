@@ -80,9 +80,9 @@ vlscm_unop_gdbthrow (enum valscm_unary_opcode opcode, SCM x,
   scoped_value_mark free_values;
 
   SCM except_scm;
-  value *arg1 = vlscm_convert_value_from_scheme (func_name, SCM_ARG1, x,
-						 &except_scm, gdbarch,
-						 language);
+  value *arg1
+    = vlscm_convert_value_from_scheme (func_name, SCM_ARG1, x, &except_scm,
+				       gdbarch, language);
   if (arg1 == NULL)
     return except_scm;
 
@@ -96,8 +96,7 @@ vlscm_unop_gdbthrow (enum valscm_unary_opcode opcode, SCM x,
       {
 	struct type *type = language_bool_type (language, gdbarch);
 	res_val
-	  = value_from_longest (type,
-				(LONGEST) value_logical_not (arg1));
+	  = value_from_longest (type, (LONGEST) value_logical_not (arg1));
       }
       break;
     case VALSCM_NEG:
@@ -146,13 +145,13 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
 
   scoped_value_mark free_values;
 
-  arg1 = vlscm_convert_value_from_scheme (func_name, SCM_ARG1, x,
-					  &except_scm, gdbarch, language);
+  arg1 = vlscm_convert_value_from_scheme (func_name, SCM_ARG1, x, &except_scm,
+					  gdbarch, language);
   if (arg1 == NULL)
     return except_scm;
 
-  arg2 = vlscm_convert_value_from_scheme (func_name, SCM_ARG2, y,
-					  &except_scm, gdbarch, language);
+  arg2 = vlscm_convert_value_from_scheme (func_name, SCM_ARG2, y, &except_scm,
+					  gdbarch, language);
   if (arg2 == NULL)
     return except_scm;
 
@@ -168,11 +167,9 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
 	rtype = check_typedef (rtype);
 	rtype = STRIP_REFERENCE (rtype);
 
-	if (ltype->code () == TYPE_CODE_PTR
-	    && is_integral_type (rtype))
+	if (ltype->code () == TYPE_CODE_PTR && is_integral_type (rtype))
 	  res_val = value_ptradd (arg1, value_as_long (arg2));
-	else if (rtype->code () == TYPE_CODE_PTR
-		 && is_integral_type (ltype))
+	else if (rtype->code () == TYPE_CODE_PTR && is_integral_type (ltype))
 	  res_val = value_ptradd (arg2, value_as_long (arg1));
 	else
 	  res_val = value_binop (arg1, arg2, BINOP_ADD);
@@ -188,17 +185,14 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
 	rtype = check_typedef (rtype);
 	rtype = STRIP_REFERENCE (rtype);
 
-	if (ltype->code () == TYPE_CODE_PTR
-	    && rtype->code () == TYPE_CODE_PTR)
+	if (ltype->code () == TYPE_CODE_PTR && rtype->code () == TYPE_CODE_PTR)
 	  {
 	    /* A ptrdiff_t for the target would be preferable here.  */
-	    res_val
-	      = value_from_longest (builtin_type (gdbarch)->builtin_long,
-				    value_ptrdiff (arg1, arg2));
+	    res_val = value_from_longest (builtin_type (gdbarch)->builtin_long,
+					  value_ptrdiff (arg1, arg2));
 	  }
-	else if (ltype->code () == TYPE_CODE_PTR
-		 && is_integral_type (rtype))
-	  res_val = value_ptradd (arg1, - value_as_long (arg2));
+	else if (ltype->code () == TYPE_CODE_PTR && is_integral_type (rtype))
+	  res_val = value_ptradd (arg1, -value_as_long (arg2));
 	else
 	  res_val = value_binop (arg1, arg2, BINOP_SUB);
       }
@@ -416,53 +410,50 @@ gdbscm_value_logxor (SCM x, SCM y)
 static SCM
 vlscm_rich_compare (int op, SCM x, SCM y, const char *func_name)
 {
-  return gdbscm_wrap ([=]
-    {
-      struct gdbarch *gdbarch = get_current_arch ();
-      const struct language_defn *language = current_language;
-      SCM except_scm;
+  return gdbscm_wrap ([=] {
+    struct gdbarch *gdbarch = get_current_arch ();
+    const struct language_defn *language = current_language;
+    SCM except_scm;
 
-      scoped_value_mark free_values;
+    scoped_value_mark free_values;
 
-      value *v1
-	= vlscm_convert_value_from_scheme (func_name, SCM_ARG1, x,
-					   &except_scm, gdbarch, language);
-      if (v1 == NULL)
-	return except_scm;
+    value *v1
+      = vlscm_convert_value_from_scheme (func_name, SCM_ARG1, x, &except_scm,
+					 gdbarch, language);
+    if (v1 == NULL)
+      return except_scm;
 
-      value *v2
-	= vlscm_convert_value_from_scheme (func_name, SCM_ARG2, y,
-					   &except_scm, gdbarch, language);
-      if (v2 == NULL)
-	return except_scm;
+    value *v2
+      = vlscm_convert_value_from_scheme (func_name, SCM_ARG2, y, &except_scm,
+					 gdbarch, language);
+    if (v2 == NULL)
+      return except_scm;
 
-      int result;
-      switch (op)
-	{
-	case BINOP_LESS:
-	  result = value_less (v1, v2);
-	  break;
-	case BINOP_LEQ:
-	  result = (value_less (v1, v2)
-		    || value_equal (v1, v2));
-	  break;
-	case BINOP_EQUAL:
-	  result = value_equal (v1, v2);
-	  break;
-	case BINOP_NOTEQUAL:
-	  gdb_assert_not_reached ("not-equal not implemented");
-	case BINOP_GTR:
-	  result = value_less (v2, v1);
-	  break;
-	case BINOP_GEQ:
-	  result = (value_less (v2, v1)
-		    || value_equal (v1, v2));
-	  break;
-	default:
-	  gdb_assert_not_reached ("invalid <gdb:value> comparison");
-	}
-      return scm_from_bool (result);
-    });
+    int result;
+    switch (op)
+      {
+      case BINOP_LESS:
+	result = value_less (v1, v2);
+	break;
+      case BINOP_LEQ:
+	result = (value_less (v1, v2) || value_equal (v1, v2));
+	break;
+      case BINOP_EQUAL:
+	result = value_equal (v1, v2);
+	break;
+      case BINOP_NOTEQUAL:
+	gdb_assert_not_reached ("not-equal not implemented");
+      case BINOP_GTR:
+	result = value_less (v2, v1);
+	break;
+      case BINOP_GEQ:
+	result = (value_less (v2, v1) || value_equal (v1, v2));
+	break;
+      default:
+	gdb_assert_not_reached ("invalid <gdb:value> comparison");
+      }
+    return scm_from_bool (result);
+  });
 }
 
 /* (value=? x y) -> boolean
@@ -506,7 +497,7 @@ gdbscm_value_ge_p (SCM x, SCM y)
 {
   return vlscm_rich_compare (BINOP_GEQ, x, y, FUNC_NAME);
 }
-
+
 /* Subroutine of vlscm_convert_typed_value_from_scheme to simplify it.
    Convert OBJ, a Scheme number, to a <gdb:value> object.
    OBJ_ARG_POS is its position in the argument list, used in exception text.
@@ -531,10 +522,9 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	  ULONGEST max = get_unsigned_type_max (type);
 	  if (!scm_is_unsigned_integer (obj, 0, max))
 	    {
-	      *except_scmp
-		= gdbscm_make_out_of_range_error
-		    (func_name, obj_arg_pos, obj,
-		     _("value out of range for type"));
+	      *except_scmp = gdbscm_make_out_of_range_error (
+		func_name, obj_arg_pos, obj,
+		_ ("value out of range for type"));
 	      return NULL;
 	    }
 	  return value_from_longest (type, gdbscm_scm_to_ulongest (obj));
@@ -546,10 +536,9 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	  get_signed_type_minmax (type, &min, &max);
 	  if (!scm_is_signed_integer (obj, min, max))
 	    {
-	      *except_scmp
-		= gdbscm_make_out_of_range_error
-		    (func_name, obj_arg_pos, obj,
-		     _("value out of range for type"));
+	      *except_scmp = gdbscm_make_out_of_range_error (
+		func_name, obj_arg_pos, obj,
+		_ ("value out of range for type"));
 	      return NULL;
 	    }
 	  return value_from_longest (type, gdbscm_scm_to_longest (obj));
@@ -560,10 +549,8 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
       CORE_ADDR max = get_pointer_type_max (type);
       if (!scm_is_unsigned_integer (obj, 0, max))
 	{
-	  *except_scmp
-	    = gdbscm_make_out_of_range_error
-	        (func_name, obj_arg_pos, obj,
-		 _("value out of range for type"));
+	  *except_scmp = gdbscm_make_out_of_range_error (
+	    func_name, obj_arg_pos, obj, _ ("value out of range for type"));
 	  return NULL;
 	}
       return value_from_pointer (type, gdbscm_scm_to_ulongest (obj));
@@ -572,8 +559,8 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
     return value_from_host_double (type, scm_to_double (obj));
   else
     {
-      *except_scmp = gdbscm_make_type_error (func_name, obj_arg_pos, obj,
-					     NULL);
+      *except_scmp
+	= gdbscm_make_type_error (func_name, obj_arg_pos, obj, NULL);
       return NULL;
     }
 }
@@ -650,8 +637,9 @@ vlscm_convert_number (const char *func_name, int obj_arg_pos, SCM obj,
   else if (scm_is_real (obj))
     return value_from_host_double (bt->builtin_double, scm_to_double (obj));
 
-  *except_scmp = gdbscm_make_out_of_range_error (func_name, obj_arg_pos, obj,
-			_("value not a number representable on the target"));
+  *except_scmp = gdbscm_make_out_of_range_error (
+    func_name, obj_arg_pos, obj,
+    _ ("value not a number representable on the target"));
   return NULL;
 }
 
@@ -667,9 +655,9 @@ vlscm_convert_number (const char *func_name, int obj_arg_pos, SCM obj,
    object is stored in *EXCEPT_SCMP, and NULL is returned.  */
 
 static struct value *
-vlscm_convert_bytevector (SCM bv, struct type *type, SCM type_scm,
-			  int arg_pos, const char *func_name,
-			  SCM *except_scmp, struct gdbarch *gdbarch)
+vlscm_convert_bytevector (SCM bv, struct type *type, SCM type_scm, int arg_pos,
+			  const char *func_name, SCM *except_scmp,
+			  struct gdbarch *gdbarch)
 {
   LONGEST length = SCM_BYTEVECTOR_LENGTH (bv);
   struct value *value;
@@ -683,14 +671,14 @@ vlscm_convert_bytevector (SCM bv, struct type *type, SCM type_scm,
   type = check_typedef (type);
   if (type->length () != length)
     {
-      *except_scmp = gdbscm_make_out_of_range_error (func_name, arg_pos,
-						     type_scm,
-			_("size of type does not match size of bytevector"));
+      *except_scmp = gdbscm_make_out_of_range_error (
+	func_name, arg_pos, type_scm,
+	_ ("size of type does not match size of bytevector"));
       return NULL;
     }
 
-  value = value_from_contents (type,
-			       (gdb_byte *) SCM_BYTEVECTOR_CONTENTS (bv));
+  value
+    = value_from_contents (type, (gdb_byte *) SCM_BYTEVECTOR_CONTENTS (bv));
   return value;
 }
 
@@ -713,11 +701,9 @@ vlscm_convert_bytevector (SCM bv, struct type *type, SCM type_scm,
    Otherwise the new value is returned, added to the all_values chain.  */
 
 struct value *
-vlscm_convert_typed_value_from_scheme (const char *func_name,
-				       int obj_arg_pos, SCM obj,
-				       int type_arg_pos, SCM type_scm,
-				       struct type *type,
-				       SCM *except_scmp,
+vlscm_convert_typed_value_from_scheme (const char *func_name, int obj_arg_pos,
+				       SCM obj, int type_arg_pos, SCM type_scm,
+				       struct type *type, SCM *except_scmp,
 				       struct gdbarch *gdbarch,
 				       const struct language_defn *language)
 {
@@ -738,9 +724,9 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	{
 	  if (type != NULL)
 	    {
-	      except_scm = gdbscm_make_misc_error (func_name, type_arg_pos,
-						   type_scm,
-						   _("No type allowed"));
+	      except_scm
+		= gdbscm_make_misc_error (func_name, type_arg_pos, type_scm,
+					  _ ("No type allowed"));
 	      value = NULL;
 	    }
 	  else
@@ -748,24 +734,21 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	}
       else if (gdbscm_is_true (scm_bytevector_p (obj)))
 	{
-	  value = vlscm_convert_bytevector (obj, type, type_scm,
-					    obj_arg_pos, func_name,
-					    &except_scm, gdbarch);
+	  value = vlscm_convert_bytevector (obj, type, type_scm, obj_arg_pos,
+					    func_name, &except_scm, gdbarch);
 	}
-      else if (gdbscm_is_bool (obj)) 
+      else if (gdbscm_is_bool (obj))
 	{
-	  if (type != NULL
-	      && !is_integral_type (type))
+	  if (type != NULL && !is_integral_type (type))
 	    {
 	      except_scm = gdbscm_make_type_error (func_name, type_arg_pos,
 						   type_scm, NULL);
 	    }
 	  else
 	    {
-	      value = value_from_longest (type
-					  ? type
-					  : language_bool_type (language,
-								gdbarch),
+	      value = value_from_longest (type ? type
+					       : language_bool_type (language,
+								     gdbarch),
 					  gdbscm_is_true (obj));
 	    }
 	}
@@ -789,19 +772,17 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 
 	  if (type != NULL)
 	    {
-	      except_scm = gdbscm_make_misc_error (func_name, type_arg_pos,
-						   type_scm,
-						   _("No type allowed"));
+	      except_scm
+		= gdbscm_make_misc_error (func_name, type_arg_pos, type_scm,
+					  _ ("No type allowed"));
 	      value = NULL;
 	    }
 	  else
 	    {
 	      /* TODO: Provide option to specify conversion strategy.  */
 	      gdb::unique_xmalloc_ptr<char> s
-		= gdbscm_scm_to_string (obj, &len,
-					target_charset (gdbarch),
-					0 /*non-strict*/,
-					&except_scm);
+		= gdbscm_scm_to_string (obj, &len, target_charset (gdbarch),
+					0 /*non-strict*/, &except_scm);
 	      if (s != NULL)
 		value = value_cstring (s.get (), len,
 				       language_string_char_type (language,
@@ -814,22 +795,21 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	{
 	  if (type != NULL)
 	    {
-	      except_scm = gdbscm_make_misc_error (func_name, type_arg_pos,
-						   type_scm,
-						   _("No type allowed"));
+	      except_scm
+		= gdbscm_make_misc_error (func_name, type_arg_pos, type_scm,
+					  _ ("No type allowed"));
 	      value = NULL;
 	    }
 	  else
 	    {
 	      value = lsscm_safe_lazy_string_to_value (obj, obj_arg_pos,
-						       func_name,
-						       &except_scm);
+						       func_name, &except_scm);
 	    }
 	}
       else /* OBJ isn't anything we support.  */
 	{
-	  except_scm = gdbscm_make_type_error (func_name, obj_arg_pos, obj,
-					       NULL);
+	  except_scm
+	    = gdbscm_make_type_error (func_name, obj_arg_pos, obj, NULL);
 	  value = NULL;
 	}
     }
@@ -852,119 +832,93 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
    details.  */
 
 struct value *
-vlscm_convert_value_from_scheme (const char *func_name,
-				 int obj_arg_pos, SCM obj,
-				 SCM *except_scmp, struct gdbarch *gdbarch,
+vlscm_convert_value_from_scheme (const char *func_name, int obj_arg_pos,
+				 SCM obj, SCM *except_scmp,
+				 struct gdbarch *gdbarch,
 				 const struct language_defn *language)
 {
   return vlscm_convert_typed_value_from_scheme (func_name, obj_arg_pos, obj,
 						-1, SCM_UNDEFINED, NULL,
-						except_scmp,
-						gdbarch, language);
+						except_scmp, gdbarch,
+						language);
 }
-
+
 /* Initialize value math support.  */
 
-static const scheme_function math_functions[] =
-{
-  { "value-add", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_add),
-    "\
+static const scheme_function math_functions[]
+  = { { "value-add", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_add), "\
 Return a + b." },
 
-  { "value-sub", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_sub),
-    "\
+      { "value-sub", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_sub), "\
 Return a - b." },
 
-  { "value-mul", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_mul),
-    "\
+      { "value-mul", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_mul), "\
 Return a * b." },
 
-  { "value-div", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_div),
-    "\
+      { "value-div", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_div), "\
 Return a / b." },
 
-  { "value-rem", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_rem),
-    "\
+      { "value-rem", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_rem), "\
 Return a % b." },
 
-  { "value-mod", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_mod),
-    "\
+      { "value-mod", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_mod), "\
 Return a mod b.  See Knuth 1.2.4." },
 
-  { "value-pow", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_pow),
-    "\
+      { "value-pow", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_pow), "\
 Return pow (x, y)." },
 
-  { "value-not", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_not),
-    "\
+      { "value-not", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_not), "\
 Return !a." },
 
-  { "value-neg", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_neg),
-    "\
+      { "value-neg", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_neg), "\
 Return -a." },
 
-  { "value-pos", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_pos),
-    "\
+      { "value-pos", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_pos), "\
 Return a." },
 
-  { "value-abs", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_abs),
-    "\
+      { "value-abs", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_abs), "\
 Return abs (a)." },
 
-  { "value-lsh", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_lsh),
-    "\
+      { "value-lsh", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_lsh), "\
 Return a << b." },
 
-  { "value-rsh", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_rsh),
-    "\
+      { "value-rsh", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_rsh), "\
 Return a >> b." },
 
-  { "value-min", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_min),
-    "\
+      { "value-min", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_min), "\
 Return min (a, b)." },
 
-  { "value-max", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_max),
-    "\
+      { "value-max", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_max), "\
 Return max (a, b)." },
 
-  { "value-lognot", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_lognot),
-    "\
+      { "value-lognot", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_lognot), "\
 Return ~a." },
 
-  { "value-logand", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_logand),
-    "\
+      { "value-logand", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_logand), "\
 Return a & b." },
 
-  { "value-logior", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_logior),
-    "\
+      { "value-logior", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_logior), "\
 Return a | b." },
 
-  { "value-logxor", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_logxor),
-    "\
+      { "value-logxor", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_logxor), "\
 Return a ^ b." },
 
-  { "value=?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_eq_p),
-    "\
+      { "value=?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_eq_p), "\
 Return a == b." },
 
-  { "value<?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_lt_p),
-    "\
+      { "value<?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_lt_p), "\
 Return a < b." },
 
-  { "value<=?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_le_p),
-    "\
+      { "value<=?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_le_p), "\
 Return a <= b." },
 
-  { "value>?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_gt_p),
-    "\
+      { "value>?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_gt_p), "\
 Return a > b." },
 
-  { "value>=?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_ge_p),
-    "\
+      { "value>=?", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_ge_p), "\
 Return a >= b." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_math (void)

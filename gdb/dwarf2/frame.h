@@ -57,11 +57,11 @@ enum dwarf2_frame_reg_rule
 
   /* These aren't defined by the DWARF2 CFI specification, but are
      used internally by GDB.  */
-  DWARF2_FRAME_REG_FN,		/* Call a registered function.  */
-  DWARF2_FRAME_REG_RA,		/* Return Address.  */
-  DWARF2_FRAME_REG_RA_OFFSET,	/* Return Address with offset.  */
-  DWARF2_FRAME_REG_CFA,		/* Call Frame Address.  */
-  DWARF2_FRAME_REG_CFA_OFFSET	/* Call Frame Address with offset.  */
+  DWARF2_FRAME_REG_FN,	      /* Call a registered function.  */
+  DWARF2_FRAME_REG_RA,	      /* Return Address.  */
+  DWARF2_FRAME_REG_RA_OFFSET, /* Return Address with offset.  */
+  DWARF2_FRAME_REG_CFA,	      /* Call Frame Address.  */
+  DWARF2_FRAME_REG_CFA_OFFSET /* Call Frame Address with offset.  */
 };
 
 /* Register state.  */
@@ -73,14 +73,17 @@ struct dwarf2_frame_state_reg
 {
   /* Each register save state can be described in terms of a CFA slot,
      another register, or a location expression.  */
-  union {
+  union
+  {
     LONGEST offset;
     ULONGEST reg;
+
     struct
     {
       const gdb_byte *start;
       ULONGEST len;
     } exp;
+
     fn_prev_register fn;
   } loc;
   enum dwarf2_frame_reg_rule how;
@@ -96,22 +99,22 @@ enum cfa_how_kind
 struct dwarf2_frame_state_reg_info
 {
   dwarf2_frame_state_reg_info () = default;
-  ~dwarf2_frame_state_reg_info ()
-  {
-    delete prev;
-  }
+
+  ~dwarf2_frame_state_reg_info () { delete prev; }
 
   /* Copy constructor.  */
   dwarf2_frame_state_reg_info (const dwarf2_frame_state_reg_info &src)
-    : reg (src.reg), cfa_offset (src.cfa_offset),
-      cfa_reg (src.cfa_reg), cfa_how (src.cfa_how), cfa_exp (src.cfa_exp),
+    : reg (src.reg),
+      cfa_offset (src.cfa_offset),
+      cfa_reg (src.cfa_reg),
+      cfa_how (src.cfa_how),
+      cfa_exp (src.cfa_exp),
       prev (src.prev)
   {
   }
 
   /* Assignment operator for both move-assignment and copy-assignment.  */
-  dwarf2_frame_state_reg_info&
-  operator= (dwarf2_frame_state_reg_info rhs)
+  dwarf2_frame_state_reg_info &operator= (dwarf2_frame_state_reg_info rhs)
   {
     swap (*this, rhs);
     return *this;
@@ -119,8 +122,11 @@ struct dwarf2_frame_state_reg_info
 
   /* Move constructor.  */
   dwarf2_frame_state_reg_info (dwarf2_frame_state_reg_info &&rhs) noexcept
-    : reg (std::move (rhs.reg)), cfa_offset (rhs.cfa_offset),
-      cfa_reg (rhs.cfa_reg), cfa_how (rhs.cfa_how), cfa_exp (rhs.cfa_exp),
+    : reg (std::move (rhs.reg)),
+      cfa_offset (rhs.cfa_offset),
+      cfa_reg (rhs.cfa_reg),
+      cfa_how (rhs.cfa_how),
+      cfa_exp (rhs.cfa_exp),
       prev (rhs.prev)
   {
     rhs.prev = nullptr;
@@ -149,8 +155,9 @@ struct dwarf2_frame_state_reg_info
   struct dwarf2_frame_state_reg_info *prev = NULL;
 
 private:
-  friend void swap (dwarf2_frame_state_reg_info& lhs,
-		    dwarf2_frame_state_reg_info& rhs)
+
+  friend void swap (dwarf2_frame_state_reg_info &lhs,
+		    dwarf2_frame_state_reg_info &rhs)
   {
     using std::swap;
 
@@ -173,14 +180,18 @@ struct dwarf2_frame_state
 
   /* Each register save state can be described in terms of a CFA slot,
      another register, or a location expression.  */
-  struct dwarf2_frame_state_reg_info regs {};
+  struct dwarf2_frame_state_reg_info regs
+  {
+  };
 
   /* The PC described by the current frame state.  */
   CORE_ADDR pc;
 
   /* Initial register set from the CIE.
      Used to implement DW_CFA_restore.  */
-  struct dwarf2_frame_state_reg_info initial {};
+  struct dwarf2_frame_state_reg_info initial
+  {
+  };
 
   /* The information we care about from the CIE.  */
   const LONGEST data_align;
@@ -207,26 +218,23 @@ extern bool dwarf2_frame_unwinders_enabled_p;
 /* Set the architecture-specific register state initialization
    function for GDBARCH to INIT_REG.  */
 
-extern void dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
-				       void (*init_reg) (struct gdbarch *, int,
-					     struct dwarf2_frame_state_reg *,
-					     frame_info_ptr));
+extern void dwarf2_frame_set_init_reg (
+  struct gdbarch *gdbarch,
+  void (*init_reg) (struct gdbarch *, int, struct dwarf2_frame_state_reg *,
+		    frame_info_ptr));
 
 /* Set the architecture-specific signal trampoline recognition
    function for GDBARCH to SIGNAL_FRAME_P.  */
 
-extern void
-  dwarf2_frame_set_signal_frame_p (struct gdbarch *gdbarch,
-				   int (*signal_frame_p) (struct gdbarch *,
-							  frame_info_ptr));
+extern void dwarf2_frame_set_signal_frame_p (
+  struct gdbarch *gdbarch,
+  int (*signal_frame_p) (struct gdbarch *, frame_info_ptr));
 
 /* Set the architecture-specific adjustment of .eh_frame and .debug_frame
    register numbers.  */
 
-extern void
-  dwarf2_frame_set_adjust_regnum (struct gdbarch *gdbarch,
-				  int (*adjust_regnum) (struct gdbarch *,
-							int, int));
+extern void dwarf2_frame_set_adjust_regnum (
+  struct gdbarch *gdbarch, int (*adjust_regnum) (struct gdbarch *, int, int));
 
 /* Append the DWARF-2 frame unwinders to GDBARCH's list.  */
 
@@ -236,7 +244,7 @@ void dwarf2_append_unwinders (struct gdbarch *gdbarch);
    NULL if it can't be handled by the DWARF CFI frame unwinder.  */
 
 extern const struct frame_base *
-  dwarf2_frame_base_sniffer (frame_info_ptr this_frame);
+dwarf2_frame_base_sniffer (frame_info_ptr this_frame);
 
 /* Compute the DWARF CFA for a frame.  */
 
@@ -263,7 +271,6 @@ extern int dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 				  CORE_ADDR *text_offset_out,
 				  const gdb_byte **cfa_start_out,
 				  const gdb_byte **cfa_end_out);
-
 
 /* Allocate a new instance of the function unique data.
 

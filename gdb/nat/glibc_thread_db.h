@@ -27,7 +27,6 @@
 #include <sys/types.h>
 #include <sys/procfs.h>
 
-
 /* Error codes of the library.  */
 typedef enum
 {
@@ -54,10 +53,9 @@ typedef enum
   TD_NOXREGS,	  /* X register set not available for given thread.  */
   TD_TLSDEFER,	  /* Thread has not yet allocated TLS for given module.  */
   TD_NOTALLOC = TD_TLSDEFER,
-  TD_VERSION,	  /* Version if libpthread and libthread_db do not match.  */
-  TD_NOTLS	  /* There is no TLS segment in the given module.  */
+  TD_VERSION, /* Version if libpthread and libthread_db do not match.  */
+  TD_NOTLS    /* There is no TLS segment in the given module.  */
 } td_err_e;
-
 
 /* Possible thread states.  TD_THR_ANY_STATE is a pseudo-state used to
    select threads regardless of state in td_ta_thr_iter().  */
@@ -82,7 +80,6 @@ typedef enum
   TD_THR_SYSTEM
 } td_thr_type_e;
 
-
 /* Types of the debugging library.  */
 
 /* Handle for a process.  This type is opaque.  */
@@ -95,21 +92,18 @@ typedef struct td_thrhandle
   psaddr_t th_unique;
 } td_thrhandle_t;
 
-
 /* Forward declaration of a type defined by and for the dynamic linker.  */
 struct link_map;
 
-
 /* Flags for `td_ta_thr_iter'.  */
-#define TD_THR_ANY_USER_FLAGS	0xffffffff
-#define TD_THR_LOWEST_PRIORITY	-20
-#define TD_SIGNO_MASK		NULL
+#define TD_THR_ANY_USER_FLAGS 0xffffffff
+#define TD_THR_LOWEST_PRIORITY -20
+#define TD_SIGNO_MASK NULL
 
-
-#define TD_EVENTSIZE	2
-#define BT_UISHIFT	5 /* log base 2 of BT_NBIPUI, to extract word index */
-#define BT_NBIPUI	(1 << BT_UISHIFT)       /* n bits per uint */
-#define BT_UIMASK	(BT_NBIPUI - 1)         /* to extract bit index */
+#define TD_EVENTSIZE 2
+#define BT_UISHIFT 5 /* log base 2 of BT_NBIPUI, to extract word index */
+#define BT_NBIPUI (1 << BT_UISHIFT) /* n bits per uint */
+#define BT_UIMASK (BT_NBIPUI - 1)   /* to extract bit index */
 
 /* Bitmask of enabled events. */
 typedef struct td_thr_events
@@ -118,24 +112,26 @@ typedef struct td_thr_events
 } td_thr_events_t;
 
 /* Event set manipulation macros. */
-#define __td_eventmask(n) \
-  (UINT32_C (1) << (((n) - 1) & BT_UIMASK))
-#define __td_eventword(n) \
-  ((UINT32_C ((n) - 1)) >> BT_UISHIFT)
+#define __td_eventmask(n) (UINT32_C (1) << (((n) -1) & BT_UIMASK))
+#define __td_eventword(n) ((UINT32_C ((n) -1)) >> BT_UISHIFT)
 
-#define td_event_emptyset(setp) \
-  do {									      \
-    int __i;								      \
-    for (__i = TD_EVENTSIZE; __i > 0; --__i)				      \
-      (setp)->event_bits[__i - 1] = 0;					      \
-  } while (0)
+#define td_event_emptyset(setp)                \
+  do                                           \
+    {                                          \
+      int __i;                                 \
+      for (__i = TD_EVENTSIZE; __i > 0; --__i) \
+	(setp)->event_bits[__i - 1] = 0;       \
+    }                                          \
+  while (0)
 
-#define td_event_fillset(setp) \
-  do {									      \
-    int __i;								      \
-    for (__i = TD_EVENTSIZE; __i > 0; --__i)				      \
-      (setp)->event_bits[__i - 1] = UINT32_C (0xffffffff);		      \
-  } while (0)
+#define td_event_fillset(setp)                               \
+  do                                                         \
+    {                                                        \
+      int __i;                                               \
+      for (__i = TD_EVENTSIZE; __i > 0; --__i)               \
+	(setp)->event_bits[__i - 1] = UINT32_C (0xffffffff); \
+    }                                                        \
+  while (0)
 
 #define td_event_addset(setp, n) \
   (((setp)->event_bits[__td_eventword (n)]) |= __td_eventmask (n))
@@ -144,10 +140,10 @@ typedef struct td_thr_events
 #define td_eventismember(setp, n) \
   (__td_eventmask (n) & ((setp)->event_bits[__td_eventword (n)]))
 #if TD_EVENTSIZE == 2
-# define td_eventisempty(setp) \
+#define td_eventisempty(setp) \
   (!((setp)->event_bits[0]) && !((setp)->event_bits[1]))
 #else
-# error "td_eventisempty must be changed to match TD_EVENTSIZE"
+#error "td_eventisempty must be changed to match TD_EVENTSIZE"
 #endif
 
 /* Events reportable by the thread implementation.  */
@@ -171,77 +167,76 @@ typedef enum
   TD_TIMEOUT,			 /* Conditional variable wait timed out.  */
   TD_MIN_EVENT_NUM = TD_READY,
   TD_MAX_EVENT_NUM = TD_TIMEOUT,
-  TD_EVENTS_ENABLE = 31		/* Event reporting enabled.  */
+  TD_EVENTS_ENABLE = 31 /* Event reporting enabled.  */
 } td_event_e;
 
 /* Values representing the different ways events are reported.  */
 typedef enum
 {
-  NOTIFY_BPT,			/* User must insert breakpoint at u.bptaddr. */
-  NOTIFY_AUTOBPT,		/* Breakpoint at u.bptaddr is automatically
+  NOTIFY_BPT,	  /* User must insert breakpoint at u.bptaddr. */
+  NOTIFY_AUTOBPT, /* Breakpoint at u.bptaddr is automatically
 				   inserted.  */
-  NOTIFY_SYSCALL		/* System call u.syscallno will be invoked.  */
+  NOTIFY_SYSCALL  /* System call u.syscallno will be invoked.  */
 } td_notify_e;
 
 /* Description how event type is reported.  */
 typedef struct td_notify
 {
-  td_notify_e type;		/* Way the event is reported.  */
+  td_notify_e type; /* Way the event is reported.  */
+
   union
   {
-    psaddr_t bptaddr;		/* Address of breakpoint.  */
-    int syscallno;		/* Number of system call used.  */
+    psaddr_t bptaddr; /* Address of breakpoint.  */
+    int syscallno;    /* Number of system call used.  */
   } u;
 } td_notify_t;
 
 /* Structure used to report event.  */
 typedef struct td_event_msg
 {
-  td_event_e event;		/* Event type being reported.  */
-  const td_thrhandle_t *th_p;	/* Thread reporting the event.  */
+  td_event_e event;	      /* Event type being reported.  */
+  const td_thrhandle_t *th_p; /* Thread reporting the event.  */
+
   union
   {
-# if 0
+#if 0
     td_synchandle_t *sh;	/* Handle of synchronization object.  */
 #endif
-    uintptr_t data;		/* Event specific data.  */
+    uintptr_t data; /* Event specific data.  */
   } msg;
 } td_event_msg_t;
 
 /* Structure containing event data available in each thread structure.  */
 typedef struct
 {
-  td_thr_events_t eventmask;	/* Mask of enabled events.  */
-  td_event_e eventnum;		/* Number of last event.  */
-  void *eventdata;		/* Data associated with event.  */
+  td_thr_events_t eventmask; /* Mask of enabled events.  */
+  td_event_e eventnum;	     /* Number of last event.  */
+  void *eventdata;	     /* Data associated with event.  */
 } td_eventbuf_t;
-
 
 /* Gathered statistics about the process.  */
 typedef struct td_ta_stats
 {
-  int nthreads;       		/* Total number of threads in use.  */
-  int r_concurrency;		/* Concurrency level requested by user.  */
-  int nrunnable_num;		/* Average runnable threads, numerator.  */
-  int nrunnable_den;		/* Average runnable threads, denominator.  */
-  int a_concurrency_num;	/* Achieved concurrency level, numerator.  */
-  int a_concurrency_den;	/* Achieved concurrency level, denominator.  */
-  int nlwps_num;		/* Average number of processes in use,
+  int nthreads;		 /* Total number of threads in use.  */
+  int r_concurrency;	 /* Concurrency level requested by user.  */
+  int nrunnable_num;	 /* Average runnable threads, numerator.  */
+  int nrunnable_den;	 /* Average runnable threads, denominator.  */
+  int a_concurrency_num; /* Achieved concurrency level, numerator.  */
+  int a_concurrency_den; /* Achieved concurrency level, denominator.  */
+  int nlwps_num;	 /* Average number of processes in use,
 				   numerator.  */
-  int nlwps_den;		/* Average number of processes in use,
+  int nlwps_den;	 /* Average number of processes in use,
 				   denominator.  */
-  int nidle_num;		/* Average number of idling processes,
+  int nidle_num;	 /* Average number of idling processes,
 				   numerator.  */
-  int nidle_den;		/* Average number of idling processes,
+  int nidle_den;	 /* Average number of idling processes,
 				   denominator.  */
 } td_ta_stats_t;
-
 
 /* Since Sun's library is based on Solaris threads we have to define a few
    types to map them to POSIX threads.  */
 typedef pthread_t thread_t;
 typedef pthread_key_t thread_key_t;
-
 
 /* Callback for iteration over threads.  */
 typedef int td_thr_iter_f (const td_thrhandle_t *, void *);
@@ -249,45 +244,40 @@ typedef int td_thr_iter_f (const td_thrhandle_t *, void *);
 /* Callback for iteration over thread local data.  */
 typedef int td_key_iter_f (thread_key_t, void (*) (void *), void *);
 
-
-
 /* Forward declaration.  This has to be defined by the user.  */
 struct ps_prochandle;
-
 
 /* Information about the thread.  */
 typedef struct td_thrinfo
 {
-  td_thragent_t *ti_ta_p;		/* Process handle.  */
-  unsigned int ti_user_flags;		/* Unused.  */
-  thread_t ti_tid;			/* Thread ID returned by
+  td_thragent_t *ti_ta_p;	 /* Process handle.  */
+  unsigned int ti_user_flags;	 /* Unused.  */
+  thread_t ti_tid;		 /* Thread ID returned by
 					   pthread_create().  */
-  char *ti_tls;				/* Pointer to thread-local data.  */
-  psaddr_t ti_startfunc;		/* Start function passed to
+  char *ti_tls;			 /* Pointer to thread-local data.  */
+  psaddr_t ti_startfunc;	 /* Start function passed to
 					   pthread_create().  */
-  psaddr_t ti_stkbase;			/* Base of thread's stack.  */
-  long int ti_stksize;			/* Size of thread's stack.  */
-  psaddr_t ti_ro_area;			/* Unused.  */
-  int ti_ro_size;			/* Unused.  */
-  td_thr_state_e ti_state;		/* Thread state.  */
-  unsigned char ti_db_suspended;	/* Nonzero if suspended by debugger. */
-  td_thr_type_e ti_type;		/* Type of the thread (system vs
+  psaddr_t ti_stkbase;		 /* Base of thread's stack.  */
+  long int ti_stksize;		 /* Size of thread's stack.  */
+  psaddr_t ti_ro_area;		 /* Unused.  */
+  int ti_ro_size;		 /* Unused.  */
+  td_thr_state_e ti_state;	 /* Thread state.  */
+  unsigned char ti_db_suspended; /* Nonzero if suspended by debugger. */
+  td_thr_type_e ti_type;	 /* Type of the thread (system vs
 					   user thread).  */
-  intptr_t ti_pc;			/* Unused.  */
-  intptr_t ti_sp;			/* Unused.  */
-  short int ti_flags;			/* Unused.  */
-  int ti_pri;				/* Thread priority.  */
-  lwpid_t ti_lid;			/* Kernel PID for this thread.  */
-  sigset_t ti_sigmask;			/* Signal mask.  */
-  unsigned char ti_traceme;		/* Nonzero if event reporting
+  intptr_t ti_pc;		 /* Unused.  */
+  intptr_t ti_sp;		 /* Unused.  */
+  short int ti_flags;		 /* Unused.  */
+  int ti_pri;			 /* Thread priority.  */
+  lwpid_t ti_lid;		 /* Kernel PID for this thread.  */
+  sigset_t ti_sigmask;		 /* Signal mask.  */
+  unsigned char ti_traceme;	 /* Nonzero if event reporting
 					   enabled.  */
-  unsigned char ti_preemptflag;		/* Unused.  */
-  unsigned char ti_pirecflag;		/* Unused.  */
-  sigset_t ti_pending;			/* Set of pending signals.  */
-  td_thr_events_t ti_events;		/* Set of enabled events.  */
+  unsigned char ti_preemptflag;	 /* Unused.  */
+  unsigned char ti_pirecflag;	 /* Unused.  */
+  sigset_t ti_pending;		 /* Set of pending signals.  */
+  td_thr_events_t ti_events;	 /* Set of enabled events.  */
 } td_thrinfo_t;
-
-
 
 /* Prototypes for exported library functions.  */
 
@@ -324,7 +314,6 @@ extern td_err_e td_ta_map_id2thr (const td_thragent_t *__ta, pthread_t __pt,
 extern td_err_e td_ta_map_lwp2thr (const td_thragent_t *__ta, lwpid_t __lwpid,
 				   td_thrhandle_t *__th);
 
-
 /* Call for each thread in a process associated with TA the callback function
    CALLBACK.  */
 extern td_err_e td_ta_thr_iter (const td_thragent_t *__ta,
@@ -336,7 +325,6 @@ extern td_err_e td_ta_thr_iter (const td_thragent_t *__ta,
 /* Call for each defined thread local data entry the callback function KI.  */
 extern td_err_e td_ta_tsd_iter (const td_thragent_t *__ta, td_key_iter_f *__ki,
 				void *__p);
-
 
 /* Get event address for EVENT.  */
 extern td_err_e td_ta_event_addr (const td_thragent_t *__ta,
@@ -354,10 +342,8 @@ extern td_err_e td_ta_clear_event (const td_thragent_t *__ta,
 extern td_err_e td_ta_event_getmsg (const td_thragent_t *__ta,
 				    td_event_msg_t *__msg);
 
-
 /* Set suggested concurrency level for process associated with TA.  */
 extern td_err_e td_ta_setconcurrency (const td_thragent_t *__ta, int __level);
-
 
 /* Enable collecting statistics for process associated with TA.  */
 extern td_err_e td_ta_enable_stats (const td_thragent_t *__ta, int __enable);
@@ -368,7 +354,6 @@ extern td_err_e td_ta_reset_stats (const td_thragent_t *__ta);
 /* Retrieve statistics from process associated with TA.  */
 extern td_err_e td_ta_get_stats (const td_thragent_t *__ta,
 				 td_ta_stats_t *__statsp);
-
 
 /* Validate that TH is a thread handle.  */
 extern td_err_e td_thr_validate (const td_thrhandle_t *__th);
@@ -403,17 +388,14 @@ extern td_err_e td_thr_setgregs (const td_thrhandle_t *__th,
 extern td_err_e td_thr_setxregs (const td_thrhandle_t *__th,
 				 const void *__addr);
 
-
 /* Get address of the given module's TLS storage area for the given thread.  */
 extern td_err_e td_thr_tlsbase (const td_thrhandle_t *__th,
-				unsigned long int __modid,
-				psaddr_t *__base);
+				unsigned long int __modid, psaddr_t *__base);
 
 /* Get address of thread local variable.  */
 extern td_err_e td_thr_tls_get_addr (const td_thrhandle_t *__th,
 				     psaddr_t __map_address, size_t __offset,
 				     psaddr_t *__address);
-
 
 /* Enable reporting for EVENT for thread TH.  */
 extern td_err_e td_thr_event_enable (const td_thrhandle_t *__th, int __event);
@@ -430,10 +412,8 @@ extern td_err_e td_thr_clear_event (const td_thrhandle_t *__th,
 extern td_err_e td_thr_event_getmsg (const td_thrhandle_t *__th,
 				     td_event_msg_t *__msg);
 
-
 /* Set priority of thread TH.  */
 extern td_err_e td_thr_setprio (const td_thrhandle_t *__th, int __prio);
-
 
 /* Set pending signals for thread TH.  */
 extern td_err_e td_thr_setsigpending (const td_thrhandle_t *__th,
@@ -443,11 +423,9 @@ extern td_err_e td_thr_setsigpending (const td_thrhandle_t *__th,
 extern td_err_e td_thr_sigsetmask (const td_thrhandle_t *__th,
 				   const sigset_t *__ss);
 
-
 /* Return thread local data associated with key TK in thread TH.  */
 extern td_err_e td_thr_tsd (const td_thrhandle_t *__th,
 			    const thread_key_t __tk, void **__data);
-
 
 /* Suspend execution of thread TH.  */
 extern td_err_e td_thr_dbsuspend (const td_thrhandle_t *__th);

@@ -30,23 +30,23 @@
 
 enum netbsd_i386_gdb_regnum
 {
-  I386_EAX_REGNUM,              /* %eax */
-  I386_ECX_REGNUM,              /* %ecx */
-  I386_EDX_REGNUM,              /* %edx */
-  I386_EBX_REGNUM,              /* %ebx */
-  I386_ESP_REGNUM,              /* %esp */
-  I386_EBP_REGNUM,              /* %ebp */
-  I386_ESI_REGNUM,              /* %esi */
-  I386_EDI_REGNUM,              /* %edi */
-  I386_EIP_REGNUM,              /* %eip */
-  I386_EFLAGS_REGNUM,           /* %eflags */
-  I386_CS_REGNUM,               /* %cs */
-  I386_SS_REGNUM,               /* %ss */
-  I386_DS_REGNUM,               /* %ds */
-  I386_ES_REGNUM,               /* %es */
-  I386_FS_REGNUM,               /* %fs */
-  I386_GS_REGNUM,               /* %gs */
-  I386_ST0_REGNUM               /* %st(0) */
+  I386_EAX_REGNUM,    /* %eax */
+  I386_ECX_REGNUM,    /* %ecx */
+  I386_EDX_REGNUM,    /* %edx */
+  I386_EBX_REGNUM,    /* %ebx */
+  I386_ESP_REGNUM,    /* %esp */
+  I386_EBP_REGNUM,    /* %ebp */
+  I386_ESI_REGNUM,    /* %esi */
+  I386_EDI_REGNUM,    /* %edi */
+  I386_EIP_REGNUM,    /* %eip */
+  I386_EFLAGS_REGNUM, /* %eflags */
+  I386_CS_REGNUM,     /* %cs */
+  I386_SS_REGNUM,     /* %ss */
+  I386_DS_REGNUM,     /* %ds */
+  I386_ES_REGNUM,     /* %es */
+  I386_FS_REGNUM,     /* %fs */
+  I386_GS_REGNUM,     /* %gs */
+  I386_ST0_REGNUM     /* %st(0) */
 };
 
 /* The fill_function for the general-purpose register set.  */
@@ -56,9 +56,12 @@ netbsd_i386_fill_gregset (struct regcache *regcache, char *buf)
 {
   struct reg *r = (struct reg *) buf;
 
-#define netbsd_i386_collect_gp(regnum, fld) do {		\
-    collect_register (regcache, regnum, &r->r_##fld);		\
-  } while (0)
+#define netbsd_i386_collect_gp(regnum, fld)             \
+  do                                                    \
+    {                                                   \
+      collect_register (regcache, regnum, &r->r_##fld); \
+    }                                                   \
+  while (0)
 
   netbsd_i386_collect_gp (I386_EAX_REGNUM, eax);
   netbsd_i386_collect_gp (I386_EBX_REGNUM, ebx);
@@ -85,9 +88,12 @@ netbsd_i386_store_gregset (struct regcache *regcache, const char *buf)
 {
   struct reg *r = (struct reg *) buf;
 
-#define netbsd_i386_supply_gp(regnum, fld) do {		\
-    supply_register (regcache, regnum, &r->r_##fld);	\
-  } while(0)
+#define netbsd_i386_supply_gp(regnum, fld)             \
+  do                                                   \
+    {                                                  \
+      supply_register (regcache, regnum, &r->r_##fld); \
+    }                                                  \
+  while (0)
 
   netbsd_i386_supply_gp (I386_EAX_REGNUM, eax);
   netbsd_i386_supply_gp (I386_EBX_REGNUM, ebx);
@@ -109,13 +115,12 @@ netbsd_i386_store_gregset (struct regcache *regcache, const char *buf)
 
 /* Description of all the x86-netbsd register sets.  */
 
-static const struct netbsd_regset_info netbsd_target_regsets[] =
-{
+static const struct netbsd_regset_info netbsd_target_regsets[] = {
   /* General Purpose Registers.  */
-  {PT_GETREGS, PT_SETREGS, sizeof (struct reg),
-  netbsd_i386_fill_gregset, netbsd_i386_store_gregset},
+  { PT_GETREGS, PT_SETREGS, sizeof (struct reg), netbsd_i386_fill_gregset,
+    netbsd_i386_store_gregset },
   /* End of list marker.  */
-  {0, 0, -1, NULL, NULL }
+  { 0, 0, -1, NULL, NULL }
 };
 
 /* NetBSD target op definitions for the amd64 architecture.  */

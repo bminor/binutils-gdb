@@ -111,6 +111,7 @@ struct dwarf2_section_info
        section.  */
     struct dwarf2_section_info *containing_section;
   } s;
+
   /* Pointer to section data, only valid if readin.  */
   const gdb_byte *buffer;
   /* The size of the section, real or virtual.  */

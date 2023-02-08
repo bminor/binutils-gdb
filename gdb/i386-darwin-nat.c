@@ -72,13 +72,12 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	  unsigned int gp_count = x86_THREAD_STATE_COUNT;
 	  kern_return_t ret;
 
-	  ret = thread_get_state
-	    (current_thread, x86_THREAD_STATE, (thread_state_t) & gp_regs,
-	     &gp_count);
+	  ret = thread_get_state (current_thread, x86_THREAD_STATE,
+				  (thread_state_t) &gp_regs, &gp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      warning (_("Error calling thread_get_state for "
-			 "GP registers for thread 0x%lx\n"),
+	      warning (_ ("Error calling thread_get_state for "
+			  "GP registers for thread 0x%lx\n"),
 		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
@@ -97,13 +96,12 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	  unsigned int fp_count = x86_FLOAT_STATE_COUNT;
 	  kern_return_t ret;
 
-	  ret = thread_get_state
-	    (current_thread, x86_FLOAT_STATE, (thread_state_t) & fp_regs,
-	     &fp_count);
+	  ret = thread_get_state (current_thread, x86_FLOAT_STATE,
+				  (thread_state_t) &fp_regs, &fp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      warning (_("Error calling thread_get_state for "
-			 "float registers for thread 0x%lx\n"),
+	      warning (_ ("Error calling thread_get_state for "
+			  "float registers for thread 0x%lx\n"),
 		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
@@ -121,19 +119,19 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	  kern_return_t ret;
 	  int i;
 
-	  ret = thread_get_state
-	    (current_thread, x86_THREAD_STATE32, (thread_state_t) &gp_regs,
-	     &gp_count);
+	  ret = thread_get_state (current_thread, x86_THREAD_STATE32,
+				  (thread_state_t) &gp_regs, &gp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      warning (_("Error calling thread_get_state for "
-			 "GP registers for thread 0x%lx\n"),
+	      warning (_ ("Error calling thread_get_state for "
+			  "GP registers for thread 0x%lx\n"),
 		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    regcache->raw_supply
-	      (i, (char *) &gp_regs + i386_darwin_thread_state_reg_offset[i]);
+	    regcache->raw_supply (i,
+				  (char *) &gp_regs
+				    + i386_darwin_thread_state_reg_offset[i]);
 
 	  fetched++;
 	}
@@ -145,13 +143,12 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	  unsigned int fp_count = x86_FLOAT_STATE32_COUNT;
 	  kern_return_t ret;
 
-	  ret = thread_get_state
-	    (current_thread, x86_FLOAT_STATE32, (thread_state_t) &fp_regs,
-	     &fp_count);
+	  ret = thread_get_state (current_thread, x86_FLOAT_STATE32,
+				  (thread_state_t) &fp_regs, &fp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      warning (_("Error calling thread_get_state for "
-			 "float registers for thread 0x%lx\n"),
+	      warning (_ ("Error calling thread_get_state for "
+			  "float registers for thread 0x%lx\n"),
 		       (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
@@ -160,9 +157,9 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	}
     }
 
-  if (! fetched)
+  if (!fetched)
     {
-      warning (_("unknown register %d"), regno);
+      warning (_ ("unknown register %d"), regno);
       regcache->raw_supply (regno, NULL);
     }
 }
@@ -172,8 +169,7 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-i386_darwin_nat_target::store_registers (struct regcache *regcache,
-					 int regno)
+i386_darwin_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   thread_t current_thread = regcache->ptid ().tid ();
   struct gdbarch *gdbarch = regcache->arch ();
@@ -187,9 +183,8 @@ i386_darwin_nat_target::store_registers (struct regcache *regcache,
 	  kern_return_t ret;
 	  unsigned int gp_count = x86_THREAD_STATE_COUNT;
 
-	  ret = thread_get_state
-	    (current_thread, x86_THREAD_STATE, (thread_state_t) &gp_regs,
-	     &gp_count);
+	  ret = thread_get_state (current_thread, x86_THREAD_STATE,
+				  (thread_state_t) &gp_regs, &gp_count);
 	  MACH_CHECK_ERROR (ret);
 	  gdb_assert (gp_regs.tsh.flavor == x86_THREAD_STATE64);
 	  gdb_assert (gp_regs.tsh.count == x86_THREAD_STATE64_COUNT);
@@ -212,9 +207,8 @@ i386_darwin_nat_target::store_registers (struct regcache *regcache,
 	  kern_return_t ret;
 	  unsigned int fp_count = x86_FLOAT_STATE_COUNT;
 
-	  ret = thread_get_state
-	    (current_thread, x86_FLOAT_STATE, (thread_state_t) & fp_regs,
-	     &fp_count);
+	  ret = thread_get_state (current_thread, x86_FLOAT_STATE,
+				  (thread_state_t) &fp_regs, &fp_count);
 	  MACH_CHECK_ERROR (ret);
 	  gdb_assert (fp_regs.fsh.flavor == x86_FLOAT_STATE64);
 	  gdb_assert (fp_regs.fsh.count == x86_FLOAT_STATE64_COUNT);
@@ -222,7 +216,7 @@ i386_darwin_nat_target::store_registers (struct regcache *regcache,
 	  amd64_collect_fxsave (regcache, regno, &fp_regs.ufs.fs64.__fpu_fcw);
 
 	  ret = thread_set_state (current_thread, x86_FLOAT_STATE,
-				  (thread_state_t) & fp_regs,
+				  (thread_state_t) &fp_regs,
 				  x86_FLOAT_STATE_COUNT);
 	  MACH_CHECK_ERROR (ret);
 	}
@@ -237,15 +231,14 @@ i386_darwin_nat_target::store_registers (struct regcache *regcache,
 	  unsigned int gp_count = x86_THREAD_STATE32_COUNT;
 	  int i;
 
-	  ret = thread_get_state
-	    (current_thread, x86_THREAD_STATE32, (thread_state_t) &gp_regs,
-	     &gp_count);
+	  ret = thread_get_state (current_thread, x86_THREAD_STATE32,
+				  (thread_state_t) &gp_regs, &gp_count);
 	  MACH_CHECK_ERROR (ret);
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
 	    if (regno == -1 || regno == i)
-	      regcache->raw_collect
-		(i, (char *) &gp_regs + i386_darwin_thread_state_reg_offset[i]);
+	      regcache->raw_collect (
+		i, (char *) &gp_regs + i386_darwin_thread_state_reg_offset[i]);
 
 	  ret = thread_set_state (current_thread, x86_THREAD_STATE32,
 				  (thread_state_t) &gp_regs,
@@ -260,9 +253,8 @@ i386_darwin_nat_target::store_registers (struct regcache *regcache,
 	  unsigned int fp_count = x86_FLOAT_STATE32_COUNT;
 	  kern_return_t ret;
 
-	  ret = thread_get_state
-	    (current_thread, x86_FLOAT_STATE32, (thread_state_t) & fp_regs,
-	     &fp_count);
+	  ret = thread_get_state (current_thread, x86_FLOAT_STATE32,
+				  (thread_state_t) &fp_regs, &fp_count);
 	  MACH_CHECK_ERROR (ret);
 
 	  i387_collect_fxsave (regcache, regno, &fp_regs.__fpu_fcw);
@@ -495,11 +487,10 @@ darwin_check_osabi (darwin_inferior *inf, thread_t thread)
       info.byte_order = gdbarch_byte_order (target_gdbarch ());
       info.osabi = GDB_OSABI_DARWIN;
       if (gp_regs.tsh.flavor == x86_THREAD_STATE64)
-	info.bfd_arch_info = bfd_lookup_arch (bfd_arch_i386,
-					      bfd_mach_x86_64);
+	info.bfd_arch_info = bfd_lookup_arch (bfd_arch_i386, bfd_mach_x86_64);
       else
-	info.bfd_arch_info = bfd_lookup_arch (bfd_arch_i386,
-					      bfd_mach_i386_i386);
+	info.bfd_arch_info
+	  = bfd_lookup_arch (bfd_arch_i386, bfd_mach_i386_i386);
       gdbarch_update_p (info);
     }
 }
@@ -530,10 +521,9 @@ i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
       ULONGEST flags_addr;
       unsigned int eflags;
 
-      uctx_addr = read_memory_unsigned_integer
-		    (regs->uts.ts32.__esp + 4, 4, byte_order);
-      mctx_addr = read_memory_unsigned_integer
-		    (uctx_addr + 28, 4, byte_order);
+      uctx_addr = read_memory_unsigned_integer (regs->uts.ts32.__esp + 4, 4,
+						byte_order);
+      mctx_addr = read_memory_unsigned_integer (uctx_addr + 28, 4, byte_order);
 
       flags_addr = mctx_addr + 12 + 9 * 4;
       read_memory (flags_addr, (gdb_byte *) &eflags, 4);
@@ -562,8 +552,8 @@ amd64_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
       ULONGEST flags_addr;
       unsigned int rflags;
 
-      mctx_addr = read_memory_unsigned_integer
-		    (regs->uts.ts64.__rdi + 48, 8, byte_order);
+      mctx_addr = read_memory_unsigned_integer (regs->uts.ts64.__rdi + 48, 8,
+						byte_order);
       flags_addr = mctx_addr + 16 + 17 * 8;
 
       /* AMD64 is little endian.  */
@@ -584,12 +574,11 @@ darwin_set_sstep (thread_t thread, int enable)
   unsigned int count = x86_THREAD_STATE_COUNT;
   kern_return_t kret;
 
-  kret = thread_get_state (thread, x86_THREAD_STATE,
-			   (thread_state_t) &regs, &count);
+  kret = thread_get_state (thread, x86_THREAD_STATE, (thread_state_t) &regs,
+			   &count);
   if (kret != KERN_SUCCESS)
     {
-      warning (_("darwin_set_sstep: error %x, thread=%x\n"),
-	       kret, thread);
+      warning (_ ("darwin_set_sstep: error %x, thread=%x\n"), kret, thread);
       return;
     }
 
@@ -628,11 +617,12 @@ darwin_set_sstep (thread_t thread, int enable)
       break;
 #endif
     default:
-      error (_("darwin_set_sstep: unknown flavour: %d"), regs.tsh.flavor);
+      error (_ ("darwin_set_sstep: unknown flavour: %d"), regs.tsh.flavor);
     }
 }
 
 void _initialize_i386_darwin_nat ();
+
 void
 _initialize_i386_darwin_nat ()
 {

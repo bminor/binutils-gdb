@@ -30,8 +30,8 @@
 #include "target/waitstatus.h" /* For enum target_stop_reason.  */
 #include "gdbsupport/enum-flags.h"
 
-#if defined (HAVE_LIBIPT)
-#  include <intel-pt.h>
+#if defined(HAVE_LIBIPT)
+#include <intel-pt.h>
 #endif
 
 #include <vector>
@@ -61,6 +61,7 @@ enum btrace_insn_flag
   /* The instruction has been executed speculatively.  */
   BTRACE_INSN_FLAG_SPECULATIVE = (1 << 0)
 };
+
 DEF_ENUM_FLAGS_TYPE (enum btrace_insn_flag, btrace_insn_flags);
 
 /* A branch trace instruction.
@@ -93,6 +94,7 @@ enum btrace_function_flag
      if bfun_up_links_to_ret is clear.  */
   BFUN_UP_LINKS_TO_TAILCALL = (1 << 1)
 };
+
 DEF_ENUM_FLAGS_TYPE (enum btrace_function_flag, btrace_function_flags);
 
 /* Decode errors for the BTS recording format.  */
@@ -133,7 +135,10 @@ struct btrace_function
 {
   btrace_function (struct minimal_symbol *msym_, struct symbol *sym_,
 		   unsigned int number_, unsigned int insn_offset_, int level_)
-    : msym (msym_), sym (sym_), insn_offset (insn_offset_), number (number_),
+    : msym (msym_),
+      sym (sym_),
+      insn_offset (insn_offset_),
+      number (number_),
       level (level_)
   {
   }
@@ -248,9 +253,10 @@ enum btrace_thread_flag : unsigned
   /* The thread is to be stopped.  */
   BTHR_STOP = (1 << 4)
 };
+
 DEF_ENUM_FLAGS_TYPE (enum btrace_thread_flag, btrace_thread_flags);
 
-#if defined (HAVE_LIBIPT)
+#if defined(HAVE_LIBIPT)
 /* A packet.  */
 struct btrace_pt_packet
 {
@@ -292,7 +298,7 @@ struct btrace_maint_info
       struct btrace_maint_packet_history packet_history;
     } bts;
 
-#if defined (HAVE_LIBIPT)
+#if defined(HAVE_LIBIPT)
     /* BTRACE.DATA.FORMAT == BTRACE_FORMAT_PT  */
     struct
     {
@@ -366,7 +372,7 @@ extern void btrace_enable (struct thread_info *tp,
 /* Get the branch trace configuration for a thread.
    Return NULL if branch tracing is not enabled for that thread.  */
 extern const struct btrace_config *
-  btrace_conf (const struct btrace_thread_info *);
+btrace_conf (const struct btrace_thread_info *);
 
 /* Disable branch tracing for a thread.
    This will also delete the current branch trace data.  */
@@ -380,12 +386,12 @@ extern void btrace_teardown (struct thread_info *);
 /* Return a human readable error string for the given ERRCODE in FORMAT.
    The pointer will never be NULL and must not be freed.  */
 
-extern const char *btrace_decode_error (enum btrace_format format, int errcode);
+extern const char *btrace_decode_error (enum btrace_format format,
+					int errcode);
 
 /* Fetch the branch trace for a single thread.  If CPU is not NULL, assume
    CPU for trace decode.  */
-extern void btrace_fetch (struct thread_info *,
-			  const struct btrace_cpu *cpu);
+extern void btrace_fetch (struct thread_info *, const struct btrace_cpu *cpu);
 
 /* Clear the branch trace for a single thread.  */
 extern void btrace_clear (struct thread_info *);
@@ -397,13 +403,14 @@ extern void btrace_free_objfile (struct objfile *);
 extern void parse_xml_btrace (struct btrace_data *data, const char *xml);
 
 /* Parse a branch trace configuration xml document XML into CONF.  */
-extern void parse_xml_btrace_conf (struct btrace_config *conf, const char *xml);
+extern void parse_xml_btrace_conf (struct btrace_config *conf,
+				   const char *xml);
 
 /* Dereference a branch trace instruction iterator.  Return a pointer to the
    instruction the iterator points to.
    May return NULL if the iterator points to a gap in the trace.  */
 extern const struct btrace_insn *
-  btrace_insn_get (const struct btrace_insn_iterator *);
+btrace_insn_get (const struct btrace_insn_iterator *);
 
 /* Return the error code for a branch trace instruction iterator.  Returns zero
    if there is no error, i.e. the instruction is valid.  */
@@ -448,7 +455,7 @@ extern int btrace_find_insn_by_number (struct btrace_insn_iterator *,
    function the iterator points to or NULL if the iterator points past
    the end of the branch trace.  */
 extern const struct btrace_function *
-  btrace_call_get (const struct btrace_call_iterator *);
+btrace_call_get (const struct btrace_call_iterator *);
 
 /* Return the function number for a branch trace call iterator.
    Returns one past the maximum function number for the end iterator.

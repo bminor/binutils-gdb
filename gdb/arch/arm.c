@@ -88,7 +88,6 @@ condition_true (unsigned long cond, unsigned long status_reg)
   return 1;
 }
 
-
 /* See arm.h.  */
 
 int
@@ -123,7 +122,7 @@ arm_instruction_changes_pc (uint32_t this_instr)
       case 0xe:
 	/* Coprocessor register transfer.  */
 	if (bits (this_instr, 12, 15) == 15)
-	  error (_("Invalid update to pc in instruction"));
+	  error (_ ("Invalid update to pc in instruction"));
 	return 0;
       default:
 	return 0;
@@ -194,7 +193,7 @@ arm_instruction_changes_pc (uint32_t this_instr)
 	return 0;
 
       default:
-	internal_error (_("bad value in switch"));
+	internal_error (_ ("bad value in switch"));
       }
 }
 
@@ -203,27 +202,26 @@ arm_instruction_changes_pc (uint32_t this_instr)
 int
 thumb_instruction_changes_pc (unsigned short inst)
 {
-  if ((inst & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
+  if ((inst & 0xff00) == 0xbd00) /* pop {rlist, pc} */
     return 1;
 
-  if ((inst & 0xf000) == 0xd000)	/* conditional branch */
+  if ((inst & 0xf000) == 0xd000) /* conditional branch */
     return 1;
 
-  if ((inst & 0xf800) == 0xe000)	/* unconditional branch */
+  if ((inst & 0xf800) == 0xe000) /* unconditional branch */
     return 1;
 
-  if ((inst & 0xff00) == 0x4700)	/* bx REG, blx REG */
+  if ((inst & 0xff00) == 0x4700) /* bx REG, blx REG */
     return 1;
 
-  if ((inst & 0xff87) == 0x4687)	/* mov pc, REG */
+  if ((inst & 0xff87) == 0x4687) /* mov pc, REG */
     return 1;
 
-  if ((inst & 0xf500) == 0xb100)	/* CBNZ or CBZ.  */
+  if ((inst & 0xf500) == 0xb100) /* CBNZ or CBZ.  */
     return 1;
 
   return 0;
 }
-
 
 /* See arm.h.  */
 
@@ -322,8 +320,8 @@ thumb2_instruction_changes_pc (unsigned short inst1, unsigned short inst2)
 /* See arm.h.  */
 
 unsigned long
-shifted_reg_val (struct regcache *regcache, unsigned long inst,
-		 int carry, unsigned long pc_val, unsigned long status_reg)
+shifted_reg_val (struct regcache *regcache, unsigned long inst, int carry,
+		 unsigned long pc_val, unsigned long status_reg)
 {
   unsigned long res, shift;
   int rm = bits (inst, 0, 3);
@@ -332,35 +330,33 @@ shifted_reg_val (struct regcache *regcache, unsigned long inst,
   if (bit (inst, 4))
     {
       int rs = bits (inst, 8, 11);
-      shift = (rs == 15
-	       ? pc_val + 8
-	       : regcache_raw_get_unsigned (regcache, rs)) & 0xFF;
+      shift
+	= (rs == 15 ? pc_val + 8 : regcache_raw_get_unsigned (regcache, rs))
+	  & 0xFF;
     }
   else
     shift = bits (inst, 7, 11);
 
-  res = (rm == ARM_PC_REGNUM
-	 ? (pc_val + (bit (inst, 4) ? 12 : 8))
-	 : regcache_raw_get_unsigned (regcache, rm));
+  res = (rm == ARM_PC_REGNUM ? (pc_val + (bit (inst, 4) ? 12 : 8))
+			     : regcache_raw_get_unsigned (regcache, rm));
 
   switch (shifttype)
     {
-    case 0:			/* LSL */
+    case 0: /* LSL */
       res = shift >= 32 ? 0 : res << shift;
       break;
 
-    case 1:			/* LSR */
+    case 1: /* LSR */
       res = shift >= 32 ? 0 : res >> shift;
       break;
 
-    case 2:			/* ASR */
+    case 2: /* ASR */
       if (shift >= 32)
 	shift = 31;
-      res = ((res & 0x80000000L)
-	     ? ~((~res) >> shift) : res >> shift);
+      res = ((res & 0x80000000L) ? ~((~res) >> shift) : res >> shift);
       break;
 
-    case 3:			/* ROR/RRX */
+    case 3: /* ROR/RRX */
       shift &= 31;
       if (shift == 0)
 	res = (res >> 1) | (carry ? 0x80000000L : 0);
@@ -408,7 +404,7 @@ arm_create_target_description (arm_fp_type fp_type, bool tls)
       break;
 
     default:
-      error (_("Invalid Arm FP type: %d"), fp_type);
+      error (_ ("Invalid Arm FP type: %d"), fp_type);
     }
 
   if (tls)
@@ -457,7 +453,7 @@ arm_create_mprofile_target_description (arm_m_profile_type m_type)
       break;
 
     default:
-      error (_("Invalid Arm M type: %d"), m_type);
+      error (_ ("Invalid Arm M type: %d"), m_type);
     }
 
   return tdesc;

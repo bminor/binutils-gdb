@@ -30,9 +30,8 @@
    unsupported cpuid level.  Pointers may be non-null.  */
 
 static __inline int
-x86_cpuid (unsigned int __level,
-	    unsigned int *__eax, unsigned int *__ebx,
-	    unsigned int *__ecx, unsigned int *__edx)
+x86_cpuid (unsigned int __level, unsigned int *__eax, unsigned int *__ebx,
+	   unsigned int *__ecx, unsigned int *__edx)
 {
   unsigned int __scratch;
 
@@ -51,9 +50,8 @@ x86_cpuid (unsigned int __level,
 #else
 
 static __inline int
-x86_cpuid (unsigned int __level,
-	    unsigned int *__eax, unsigned int *__ebx,
-	    unsigned int *__ecx, unsigned int *__edx)
+x86_cpuid (unsigned int __level, unsigned int *__eax, unsigned int *__ebx,
+	   unsigned int *__ecx, unsigned int *__edx)
 {
   return 0;
 }

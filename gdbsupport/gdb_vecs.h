@@ -25,12 +25,12 @@
    You may modify the returned strings.  */
 
 extern std::vector<gdb::unique_xmalloc_ptr<char>>
-  delim_string_to_char_ptr_vec (const char *str, char delimiter);
+delim_string_to_char_ptr_vec (const char *str, char delimiter);
 
 /* Like dirnames_to_char_ptr_vec, but append the directories to *VECP.  */
 
-extern void dirnames_to_char_ptr_vec_append
-  (std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *dirnames);
+extern void dirnames_to_char_ptr_vec_append (
+  std::vector<gdb::unique_xmalloc_ptr<char>> *vecp, const char *dirnames);
 
 /* Split DIRNAMES by DIRNAME_SEPARATOR delimiter and return a list of all the
    elements in their original order.  For empty string ("") DIRNAMES return
@@ -39,12 +39,12 @@ extern void dirnames_to_char_ptr_vec_append
    You may modify the returned strings.  */
 
 extern std::vector<gdb::unique_xmalloc_ptr<char>>
-  dirnames_to_char_ptr_vec (const char *dirnames);
+dirnames_to_char_ptr_vec (const char *dirnames);
 
 /* Remove the element pointed by iterator IT from VEC, not preserving the order
    of the remaining elements.  Return the removed element.  */
 
-template <typename T>
+template<typename T>
 T
 unordered_remove (std::vector<T> &vec, typename std::vector<T>::iterator it)
 {
@@ -61,7 +61,7 @@ unordered_remove (std::vector<T> &vec, typename std::vector<T>::iterator it)
 /* Remove the element at position IX from VEC, not preserving the order of the
    remaining elements.  Return the removed element.  */
 
-template <typename T>
+template<typename T>
 T
 unordered_remove (std::vector<T> &vec, typename std::vector<T>::size_type ix)
 {
@@ -73,7 +73,7 @@ unordered_remove (std::vector<T> &vec, typename std::vector<T>::size_type ix)
 /* Remove the element at position IX from VEC, preserving the order the
    remaining elements.  Return the removed element.  */
 
-template <typename T>
+template<typename T>
 T
 ordered_remove (std::vector<T> &vec, typename std::vector<T>::size_type ix)
 {

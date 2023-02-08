@@ -20,15 +20,15 @@
 #ifndef S390_LINUX_TDEP_H
 #define S390_LINUX_TDEP_H
 
-#define S390_IS_GREGSET_REGNUM(i)					\
-  (((i) >= S390_PSWM_REGNUM && (i) <= S390_A15_REGNUM)			\
-   || ((i) >= S390_R0_UPPER_REGNUM && (i) <= S390_R15_UPPER_REGNUM)	\
+#define S390_IS_GREGSET_REGNUM(i)                                   \
+  (((i) >= S390_PSWM_REGNUM && (i) <= S390_A15_REGNUM)              \
+   || ((i) >= S390_R0_UPPER_REGNUM && (i) <= S390_R15_UPPER_REGNUM) \
    || (i) == S390_ORIG_R2_REGNUM)
 
-#define S390_IS_FPREGSET_REGNUM(i)			\
+#define S390_IS_FPREGSET_REGNUM(i) \
   ((i) >= S390_FPC_REGNUM && (i) <= S390_F15_REGNUM)
 
-#define S390_IS_TDBREGSET_REGNUM(i)				\
+#define S390_IS_TDBREGSET_REGNUM(i) \
   ((i) >= S390_TDB_DWORD0_REGNUM && (i) <= S390_TDB_R15_REGNUM)
 
 /* Core file register sets, defined in s390-linux-tdep.c.  */

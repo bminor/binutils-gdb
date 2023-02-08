@@ -49,7 +49,7 @@ extern void close_most_fds (void);
    close-on-exec flag set.  */
 
 extern scoped_fd gdb_open_cloexec (const char *filename, int flags,
-				   /* mode_t */ unsigned long mode);
+                                   /* mode_t */ unsigned long mode);
 
 /* Like mkstemp, but ensures that the file descriptor is
    close-on-exec.  */
@@ -66,7 +66,7 @@ gdb_mkostemp_cloexec (char *name_template, int flags = 0)
 
 static inline scoped_fd
 gdb_open_cloexec (const std::string &filename, int flags,
-		  /* mode_t */ unsigned long mode)
+                  /* mode_t */ unsigned long mode)
 {
   return gdb_open_cloexec (filename.c_str (), flags, mode);
 }
@@ -75,7 +75,7 @@ gdb_open_cloexec (const std::string &filename, int flags,
    close-on-exec flag set.  */
 
 extern gdb_file_up gdb_fopen_cloexec (const char *filename,
-				      const char *opentype);
+                                      const char *opentype);
 
 /* Convenience wrapper for the above, which takes the filename as an
    std::string.  */
@@ -90,7 +90,7 @@ gdb_fopen_cloexec (const std::string &filename, const char *opentype)
    have the close-on-exec flag set.  */
 
 extern int gdb_socketpair_cloexec (int domain, int style, int protocol,
-				   int filedes[2]);
+                                   int filedes[2]);
 
 /* Like 'socket', but ensures that the returned file descriptor has
    the close-on-exec flag set.  */
@@ -104,10 +104,7 @@ extern int gdb_pipe_cloexec (int filedes[2]);
 
 struct gdb_dir_deleter
 {
-  void operator() (DIR *dir) const
-  {
-    closedir (dir);
-  }
+  void operator() (DIR *dir) const { closedir (dir); }
 };
 
 /* A unique pointer to a DIR.  */
@@ -118,7 +115,6 @@ typedef std::unique_ptr<DIR, gdb_dir_deleter> gdb_dir_up;
    If the result is false then *ERRNO_PTR is set to a useful value assuming
    we're expecting a regular file.  */
 extern bool is_regular_file (const char *name, int *errno_ptr);
-
 
 /* A cheap (as in low-quality) recursive mkdir.  Try to create all the
    parents directories up to DIR and DIR itself.  Stop if we hit an

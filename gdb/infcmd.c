@@ -63,8 +63,9 @@ static void until_next_command (int);
 
 static void step_1 (int, int, const char *);
 
-#define ERROR_NO_INFERIOR \
-   if (!target_has_execution ()) error (_("The program is not being run."));
+#define ERROR_NO_INFERIOR       \
+  if (!target_has_execution ()) \
+    error (_ ("The program is not being run."));
 
 /* Scratch area where string containing arguments to give to the
    program will be stored by 'set args'.  As soon as anything is
@@ -99,12 +100,9 @@ enum stop_stack_kind stop_stack_dummy;
 
 int stopped_by_random_signal;
 
-
 /* Whether "finish" should print the value.  */
 
 static bool finish_print = true;
-
-
 
 static void
 set_inferior_tty_command (const char *args, int from_tty,
@@ -124,14 +122,15 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
   const std::string &inferior_tty = current_inferior ()->tty ();
 
   gdb_printf (file,
-	      _("Terminal for future runs of program being debugged "
-		"is \"%s\".\n"), inferior_tty.c_str ());
+	      _ ("Terminal for future runs of program being debugged "
+		 "is \"%s\".\n"),
+	      inferior_tty.c_str ());
 }
 
 void
 set_inferior_args_vector (int argc, char **argv)
 {
-  gdb::array_view<char * const> args (argv, argc);
+  gdb::array_view<char *const> args (argv, argc);
   std::string n = construct_inferior_arguments (args);
   current_inferior ()->set_args (std::move (n));
 }
@@ -183,18 +182,16 @@ show_cwd_command (struct ui_file *file, int from_tty,
   const std::string &cwd = current_inferior ()->cwd ();
 
   if (cwd.empty ())
-    gdb_printf (file,
-		_("\
+    gdb_printf (file, _ ("\
 You have not set the inferior's current working directory.\n\
 The inferior will inherit GDB's cwd if native debugging, or the remote\n\
 server's cwd if remote debugging.\n"));
   else
     gdb_printf (file,
-		_("Current working directory that will be used "
-		  "when starting the inferior is \"%s\".\n"),
+		_ ("Current working directory that will be used "
+		   "when starting the inferior is \"%s\".\n"),
 		cwd.c_str ());
 }
-
 
 /* This function strips the '&' character (indicating background
    execution) that is added as *the last* of the arguments ARGS of a
@@ -223,8 +220,7 @@ strip_bg_char (const char *args, int *bg_char_p)
 
       *bg_char_p = 1;
       if (p != args)
-	return gdb::unique_xmalloc_ptr<char>
-	  (savestring (args, p - args));
+	return gdb::unique_xmalloc_ptr<char> (savestring (args, p - args));
       else
 	return gdb::unique_xmalloc_ptr<char> (nullptr);
     }
@@ -240,8 +236,7 @@ strip_bg_char (const char *args, int *bg_char_p)
 void
 post_create_inferior (int from_tty)
 {
-
-  /* Be sure we own the terminal in case write operations are performed.  */ 
+  /* Be sure we own the terminal in case write operations are performed.  */
   target_terminal::ours_for_output ();
 
   infrun_debug_show_threads ("threads in the newly created inferior",
@@ -291,8 +286,8 @@ post_create_inferior (int from_tty)
 	     target has been initialized by solib_create_inferior_hook.  */
 
 	  if (info_verbose)
-	    warning (_("platform-specific solib_create_inferior_hook did "
-		       "not load initial shared libraries."));
+	    warning (_ ("platform-specific solib_create_inferior_hook did "
+			"not load initial shared libraries."));
 
 	  /* If the solist is global across processes, there's no need to
 	     refetch it here.  */
@@ -330,10 +325,11 @@ kill_if_already_running (int from_tty)
 	 restart it.  */
       target_require_runnable ();
 
-      if (from_tty
-	  && !query (_("The program being debugged has been started already.\n\
+      if (
+	from_tty
+	&& !query (_ ("The program being debugged has been started already.\n\
 Start it from the beginning? ")))
-	error (_("Program not restarted."));
+	error (_ ("Program not restarted."));
       target_kill ();
     }
 }
@@ -346,7 +342,7 @@ prepare_execution_command (struct target_ops *target, int background)
   /* If we get a request for running in the bg but the target
      doesn't support it, error out.  */
   if (background && !target_can_async_p (target))
-    error (_("Asynchronous execution not supported on this target."));
+    error (_ ("Asynchronous execution not supported on this target."));
 
   if (!background)
     {
@@ -361,16 +357,16 @@ prepare_execution_command (struct target_ops *target, int background)
 /* Determine how the new inferior will behave.  */
 
 enum run_how
-  {
-    /* Run program without any explicit stop during startup.  */
-    RUN_NORMAL,
+{
+  /* Run program without any explicit stop during startup.  */
+  RUN_NORMAL,
 
-    /* Stop at the beginning of the program's main function.  */
-    RUN_STOP_AT_MAIN,
+  /* Stop at the beginning of the program's main function.  */
+  RUN_STOP_AT_MAIN,
 
-    /* Stop at the first instruction of the program.  */
-    RUN_STOP_AT_FIRST_INSN
-  };
+  /* Stop at the first instruction of the program.  */
+  RUN_STOP_AT_FIRST_INSN
+};
 
 /* Implement the "run" command.  Force a stop during program start if
    requested by RUN_HOW.  */
@@ -417,7 +413,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   prepare_execution_command (run_target, async_exec);
 
   if (non_stop && !run_target->supports_non_stop ())
-    error (_("The target does not support running in non-stop mode."));
+    error (_ ("The target does not support running in non-stop mode."));
 
   /* Done.  Can now set breakpoints, change inferior args, etc.  */
 
@@ -429,13 +425,14 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 	 have proper inferior-specific breakpoint support, in the breakpoint
 	 machinery.  We could then avoid inserting a breakpoint in the program
 	 spaces unrelated to this inferior.  */
-      const char *op
-	= ((current_language->la_language == language_ada
-	    || current_language->la_language == language_pascal
-	    || current_language->la_language == language_m2) ? "=" : "==");
-      std::string arg = string_printf
-	("-qualified %s if $_inferior %s %d", main_name (), op,
-	 current_inferior ()->num);
+      const char *op = ((current_language->la_language == language_ada
+			 || current_language->la_language == language_pascal
+			 || current_language->la_language == language_m2)
+			  ? "="
+			  : "==");
+      std::string arg
+	= string_printf ("-qualified %s if $_inferior %s %d", main_name (), op,
+			 current_inferior ()->num);
       tbreak_command (arg.c_str (), 0);
     }
 
@@ -458,16 +455,14 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
       uiout->field_string (nullptr, "Starting program");
       uiout->text (": ");
       if (exec_file)
-	uiout->field_string ("execfile", exec_file,
-			     file_name_style.style ());
+	uiout->field_string ("execfile", exec_file, file_name_style.style ());
       uiout->spaces (1);
       uiout->field_string ("infargs", current_inferior ()->args ());
       uiout->text ("\n");
       uiout->flush ();
     }
 
-  run_target->create_inferior (exec_file,
-			       current_inferior ()->args (),
+  run_target->create_inferior (exec_file, current_inferior ()->args (),
 			       current_inferior ()->environment.envp (),
 			       from_tty);
   /* to_create_inferior should push the target, so after this point we
@@ -537,7 +532,7 @@ start_command (const char *args, int from_tty)
      minimal symbols for the location where to put the temporary
      breakpoint before starting.  */
   if (!have_minimal_symbols ())
-    error (_("No symbol table loaded.  Use the \"file\" command."));
+    error (_ ("No symbol table loaded.  Use the \"file\" command."));
 
   /* Run the program until reaching the main procedure...  */
   run_command_1 (args, from_tty, RUN_STOP_AT_MAIN);
@@ -550,7 +545,7 @@ static void
 starti_command (const char *args, int from_tty)
 {
   run_command_1 (args, from_tty, RUN_STOP_AT_FIRST_INSN);
-} 
+}
 
 static int
 proceed_thread_callback (struct thread_info *thread, void *arg)
@@ -579,9 +574,8 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 static void
 ensure_valid_thread (void)
 {
-  if (inferior_ptid == null_ptid
-      || inferior_thread ()->state == THREAD_EXITED)
-    error (_("Cannot execute this command without a live selected thread."));
+  if (inferior_ptid == null_ptid || inferior_thread ()->state == THREAD_EXITED)
+    error (_ ("Cannot execute this command without a live selected thread."));
 }
 
 /* If the user is looking at trace frames, any resumption of execution
@@ -592,7 +586,7 @@ static void
 ensure_not_tfind_mode (void)
 {
   if (get_traceframe_number () >= 0)
-    error (_("Cannot execute this command while looking at trace frames."));
+    error (_ ("Cannot execute this command while looking at trace frames."));
 }
 
 /* Throw an error indicating the current thread is running.  */
@@ -600,8 +594,8 @@ ensure_not_tfind_mode (void)
 static void
 error_is_running (void)
 {
-  error (_("Cannot execute this command while "
-	   "the selected thread is running."));
+  error (_ ("Cannot execute this command while "
+	    "the selected thread is running."));
 }
 
 /* Calls error_is_running if the current thread is running.  */
@@ -627,8 +621,8 @@ continue_1 (int all_threads)
       /* Backup current thread and selected frame and restore on scope
 	 exit.  */
       scoped_restore_current_thread restore_thread;
-      scoped_disable_commit_resumed disable_commit_resumed
-	("continue all threads in non-stop");
+      scoped_disable_commit_resumed disable_commit_resumed (
+	"continue all threads in non-stop");
 
       iterate_over_threads (proceed_thread_callback, nullptr);
 
@@ -687,11 +681,11 @@ continue_command (const char *args, int from_tty)
     }
 
   if (!non_stop && all_threads_p)
-    error (_("`-a' is meaningless in all-stop mode."));
+    error (_ ("`-a' is meaningless in all-stop mode."));
 
   if (args != nullptr && all_threads_p)
-    error (_("Can't resume all threads and specify "
-	     "proceed count simultaneously."));
+    error (_ ("Can't resume all threads and specify "
+	      "proceed count simultaneously."));
 
   /* If we have an argument left, set proceed count of breakpoint we
      stopped at.  */
@@ -718,9 +712,7 @@ continue_command (const char *args, int from_tty)
       while ((stat = bpstat_num (&bs, &num)) != 0)
 	if (stat > 0)
 	  {
-	    set_ignore_count (num,
-			      parse_and_eval_long (args) - 1,
-			      from_tty);
+	    set_ignore_count (num, parse_and_eval_long (args) - 1, from_tty);
 	    /* set_ignore_count prints a message ending with a period.
 	       So print two spaces before "Continuing.".  */
 	    if (from_tty)
@@ -730,8 +722,7 @@ continue_command (const char *args, int from_tty)
 
       if (!stopped && from_tty)
 	{
-	  gdb_printf
-	    ("Not stopped at any breakpoint; argument ignored.\n");
+	  gdb_printf ("Not stopped at any breakpoint; argument ignored.\n");
 	}
     }
 
@@ -747,11 +738,11 @@ continue_command (const char *args, int from_tty)
   prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (from_tty)
-    gdb_printf (_("Continuing.\n"));
+    gdb_printf (_ ("Continuing.\n"));
 
   continue_1 (all_threads_p);
 }
-
+
 /* Record in TP the starting point of a "step" or "next" command.  */
 
 static void
@@ -828,9 +819,9 @@ struct step_command_fsm : public thread_fsm
    allocated here is undone in the FSM's clean_up method.  */
 
 static void
-step_command_fsm_prepare (struct step_command_fsm *sm,
-			  int skip_subroutines, int single_inst,
-			  int count, struct thread_info *thread)
+step_command_fsm_prepare (struct step_command_fsm *sm, int skip_subroutines,
+			  int single_inst, int count,
+			  struct thread_info *thread)
 {
   sm->skip_subroutines = skip_subroutines;
   sm->single_inst = single_inst;
@@ -874,8 +865,8 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
   step_sm = new step_command_fsm (command_interp ());
   thr->set_thread_fsm (std::unique_ptr<thread_fsm> (step_sm));
 
-  step_command_fsm_prepare (step_sm, skip_subroutines,
-			    single_inst, count, thr);
+  step_command_fsm_prepare (step_sm, skip_subroutines, single_inst, count,
+			    thr);
 
   /* Do only one step for now, before returning control to the event
      loop.  Let the continuation figure out how many other steps we
@@ -958,8 +949,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	  CORE_ADDR pc;
 
 	  /* Step at an inlined function behaves like "down".  */
-	  if (!sm->skip_subroutines
-	      && inline_skipped_frames (tp))
+	  if (!sm->skip_subroutines && inline_skipped_frames (tp))
 	    {
 	      ptid_t resume_ptid;
 	      const char *fn = nullptr;
@@ -979,8 +969,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	      if (sym != nullptr)
 		fn = sym->print_name ();
 
-	      if (sal.line == 0
-		  || !function_name_is_marked_for_skip (fn, sal))
+	      if (sal.line == 0 || !function_name_is_marked_for_skip (fn, sal))
 		{
 		  sm->count--;
 		  return prepare_one_step (tp, sm);
@@ -988,8 +977,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	    }
 
 	  pc = get_frame_pc (frame);
-	  find_pc_line_pc_range (pc,
-				 &tp->control.step_range_start,
+	  find_pc_line_pc_range (pc, &tp->control.step_range_start,
 				 &tp->control.step_range_end);
 
 	  /* There's a problem in gcc (PR gcc/98780) that causes missing line
@@ -1020,12 +1008,13 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 
 	      if (find_pc_partial_function (pc, &name,
 					    &tp->control.step_range_start,
-					    &tp->control.step_range_end) == 0)
-		error (_("Cannot find bounds of current function"));
+					    &tp->control.step_range_end)
+		  == 0)
+		error (_ ("Cannot find bounds of current function"));
 
 	      target_terminal::ours_for_output ();
-	      gdb_printf (_("Single stepping until exit from function %s,"
-			    "\nwhich has no line number information.\n"),
+	      gdb_printf (_ ("Single stepping until exit from function %s,"
+			     "\nwhich has no line number information.\n"),
 			  name);
 	    }
 	}
@@ -1051,7 +1040,6 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
   return 1;
 }
 
-
 /* Continue program at specified address.  */
 
 static void
@@ -1075,29 +1063,29 @@ jump_command (const char *arg, int from_tty)
   prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (!arg)
-    error_no_arg (_("starting address"));
+    error_no_arg (_ ("starting address"));
 
   std::vector<symtab_and_line> sals
     = decode_line_with_last_displayed (arg, DECODE_LINE_FUNFIRSTLINE);
   if (sals.size () != 1)
-    error (_("Unreasonable jump request"));
+    error (_ ("Unreasonable jump request"));
 
   symtab_and_line &sal = sals[0];
 
   if (sal.symtab == 0 && sal.pc == 0)
-    error (_("No source file has been specified."));
+    error (_ ("No source file has been specified."));
 
-  resolve_sal_pc (&sal);	/* May error out.  */
+  resolve_sal_pc (&sal); /* May error out.  */
 
   /* See if we are trying to jump to another function.  */
   fn = get_frame_function (get_current_frame ());
   sfn = find_pc_function (sal.pc);
   if (fn != nullptr && sfn != fn)
     {
-      if (!query (_("Line %d is not in `%s'.  Jump anyway? "), sal.line,
+      if (!query (_ ("Line %d is not in `%s'.  Jump anyway? "), sal.line,
 		  fn->print_name ()))
 	{
-	  error (_("Not confirmed."));
+	  error (_ ("Not confirmed."));
 	  /* NOTREACHED */
 	}
     }
@@ -1107,13 +1095,12 @@ jump_command (const char *arg, int from_tty)
       struct obj_section *section;
 
       section = sfn->obj_section (sfn->objfile ());
-      if (section_is_overlay (section)
-	  && !section_is_mapped (section))
+      if (section_is_overlay (section) && !section_is_mapped (section))
 	{
-	  if (!query (_("WARNING!!!  Destination is in "
-			"unmapped overlay!  Jump anyway? ")))
+	  if (!query (_ ("WARNING!!!  Destination is in "
+			 "unmapped overlay!  Jump anyway? ")))
 	    {
-	      error (_("Not confirmed."));
+	      error (_ ("Not confirmed."));
 	      /* NOTREACHED */
 	    }
 	}
@@ -1123,7 +1110,7 @@ jump_command (const char *arg, int from_tty)
 
   if (from_tty)
     {
-      gdb_printf (_("Continuing at "));
+      gdb_printf (_ ("Continuing at "));
       gdb_puts (paddress (gdbarch, addr));
       gdb_printf (".\n");
     }
@@ -1131,7 +1118,7 @@ jump_command (const char *arg, int from_tty)
   clear_proceed_status (0);
   proceed (addr, GDB_SIGNAL_0);
 }
-
+
 /* Continue program giving it specified signal.  */
 
 static void
@@ -1140,7 +1127,7 @@ signal_command (const char *signum_exp, int from_tty)
   enum gdb_signal oursig;
   int async_exec;
 
-  dont_repeat ();		/* Too dangerous.  */
+  dont_repeat (); /* Too dangerous.  */
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
   ensure_valid_thread ();
@@ -1154,7 +1141,7 @@ signal_command (const char *signum_exp, int from_tty)
   prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (!signum_exp)
-    error_no_arg (_("signal number"));
+    error_no_arg (_ ("signal number"));
 
   /* It would be even slicker to make signal names be valid expressions,
      (the type could be "enum $signal" or some such), then the user could
@@ -1190,7 +1177,8 @@ signal_command (const char *signum_exp, int from_tty)
 
       thread_info *current = inferior_thread ();
 
-      for (thread_info *tp : all_non_exited_threads (resume_target, resume_ptid))
+      for (thread_info *tp :
+	   all_non_exited_threads (resume_target, resume_ptid))
 	{
 	  if (tp == current)
 	    continue;
@@ -1199,29 +1187,31 @@ signal_command (const char *signum_exp, int from_tty)
 	      && signal_pass_state (tp->stop_signal ()))
 	    {
 	      if (!must_confirm)
-		gdb_printf (_("Note:\n"));
-	      gdb_printf (_("  Thread %s previously stopped with signal %s, %s.\n"),
-			  print_thread_id (tp),
-			  gdb_signal_to_name (tp->stop_signal ()),
-			  gdb_signal_to_string (tp->stop_signal ()));
+		gdb_printf (_ ("Note:\n"));
+	      gdb_printf (
+		_ ("  Thread %s previously stopped with signal %s, %s.\n"),
+		print_thread_id (tp), gdb_signal_to_name (tp->stop_signal ()),
+		gdb_signal_to_string (tp->stop_signal ()));
 	      must_confirm = 1;
 	    }
 	}
 
       if (must_confirm
-	  && !query (_("Continuing thread %s (the current thread) with specified signal will\n"
-		       "still deliver the signals noted above to their respective threads.\n"
-		       "Continue anyway? "),
+	  && !query (_ ("Continuing thread %s (the current thread) with "
+			"specified signal will\n"
+			"still deliver the signals noted above to their "
+			"respective threads.\n"
+			"Continue anyway? "),
 		     print_thread_id (inferior_thread ())))
-	error (_("Not confirmed."));
+	error (_ ("Not confirmed."));
     }
 
   if (from_tty)
     {
       if (oursig == GDB_SIGNAL_0)
-	gdb_printf (_("Continuing with no signal.\n"));
+	gdb_printf (_ ("Continuing with no signal.\n"));
       else
-	gdb_printf (_("Continuing with signal %s.\n"),
+	gdb_printf (_ ("Continuing with signal %s.\n"),
 		    gdb_signal_to_name (oursig));
     }
 
@@ -1243,7 +1233,7 @@ queue_signal_command (const char *signum_exp, int from_tty)
   ensure_not_running ();
 
   if (signum_exp == nullptr)
-    error_no_arg (_("signal number"));
+    error_no_arg (_ ("signal number"));
 
   /* It would be even slicker to make signal names be valid expressions,
      (the type could be "enum $signal" or some such), then the user could
@@ -1261,9 +1251,8 @@ queue_signal_command (const char *signum_exp, int from_tty)
 	oursig = gdb_signal_from_command (num);
     }
 
-  if (oursig != GDB_SIGNAL_0
-      && !signal_pass_state (oursig))
-    error (_("Signal handling set to not pass this signal to the program."));
+  if (oursig != GDB_SIGNAL_0 && !signal_pass_state (oursig))
+    error (_ ("Signal handling set to not pass this signal to the program."));
 
   tp = inferior_thread ();
   tp->set_stop_signal (oursig);
@@ -1354,7 +1343,7 @@ until_next_command (int from_tty)
       struct bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
 
       if (msymbol.minsym == nullptr)
-	error (_("Execution is not within a known function."));
+	error (_ ("Execution is not within a known function."));
 
       tp->control.step_range_start = msymbol.value_address ();
       /* The upper-bound of step_range is exclusive.  In order to make PC
@@ -1454,7 +1443,7 @@ advance_command (const char *arg, int from_tty)
   ensure_not_running ();
 
   if (arg == nullptr)
-    error_no_arg (_("a location"));
+    error_no_arg (_ ("a location"));
 
   /* Find out whether we must run in the background.  */
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
@@ -1464,7 +1453,7 @@ advance_command (const char *arg, int from_tty)
 
   until_break_command (arg, from_tty, 1);
 }
-
+
 /* See inferior.h.  */
 
 struct value *
@@ -1480,8 +1469,8 @@ get_return_value (struct symbol *func_symbol, struct value *function)
 
   if (is_nocall_function (check_typedef (::value_type (function))))
     {
-      warning (_("Function '%s' does not follow the target calling "
-		 "convention, cannot determine its returned value."),
+      warning (_ ("Function '%s' does not follow the target calling "
+		  "convention, cannot determine its returned value."),
 	       func_symbol->print_name ());
 
       return nullptr;
@@ -1507,7 +1496,7 @@ get_return_value (struct symbol *func_symbol, struct value *function)
       value = nullptr;
       break;
     default:
-      internal_error (_("bad switch"));
+      internal_error (_ ("bad switch"));
     }
 
   return value;
@@ -1539,8 +1528,7 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
     {
       /* Print it.  */
       uiout->text ("Value returned is ");
-      uiout->field_fmt ("gdb-result-var", "$%d",
-			 rv->value_history_index);
+      uiout->field_fmt ("gdb-result-var", "$%d", rv->value_history_index);
       uiout->text (" = ");
 
       if (finish_print)
@@ -1553,7 +1541,7 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
 	  uiout->field_stream ("return-value", stb);
 	}
       else
-	uiout->field_string ("return-value", _("<not displayed>"),
+	uiout->field_string ("return-value", _ ("<not displayed>"),
 			     metadata_style.style ());
       uiout->text ("\n");
     }
@@ -1604,7 +1592,9 @@ struct finish_command_fsm : public thread_fsm
 
   /* If the FSM finishes successfully, this stores the function's
      return value.  */
-  struct return_value_info return_value_info {};
+  struct return_value_info return_value_info
+  {
+  };
 
   /* If the current function uses the "struct return convention",
      this holds the address at which the value being returned will
@@ -1634,15 +1624,15 @@ finish_command_fsm::should_stop (struct thread_info *tp)
   struct return_value_info *rv = &return_value_info;
 
   if (function != nullptr
-      && bpstat_find_breakpoint (tp->control.stop_bpstat,
-				 breakpoint.get ()) != nullptr)
+      && bpstat_find_breakpoint (tp->control.stop_bpstat, breakpoint.get ())
+	   != nullptr)
     {
       /* We're done.  */
       set_finished ();
 
       rv->type = function->type ()->target_type ();
       if (rv->type == nullptr)
-	internal_error (_("finish_command: function has no target type"));
+	internal_error (_ ("finish_command: function has no target type"));
 
       if (check_typedef (rv->type)->code () != TYPE_CODE_VOID)
 	{
@@ -1652,9 +1642,9 @@ finish_command_fsm::should_stop (struct thread_info *tp)
 
 	  if (return_buf != 0)
 	    /* Retrieve return value from the buffer where it was saved.  */
-	      rv->value = value_at (rv->type, return_buf);
+	    rv->value = value_at (rv->type, return_buf);
 	  else
-	      rv->value = get_return_value (function, func);
+	    rv->value = get_return_value (function, func);
 
 	  if (rv->value != nullptr)
 	    rv->value_history_index = record_latest_value (rv->value);
@@ -1714,7 +1704,7 @@ finish_backward (struct finish_command_fsm *sm)
   pc = get_frame_pc (get_current_frame ());
 
   if (find_pc_partial_function (pc, nullptr, &func_addr, nullptr) == 0)
-    error (_("Cannot find bounds of current function"));
+    error (_ ("Cannot find bounds of current function"));
 
   sal = find_pc_line (func_addr, 0);
 
@@ -1738,8 +1728,7 @@ finish_backward (struct finish_command_fsm *sm)
       symtab_and_line sr_sal;
       sr_sal.pc = sal.pc;
       sr_sal.pspace = get_frame_program_space (frame);
-      insert_step_resume_breakpoint_at_sal (gdbarch,
-					    sr_sal, null_frame_id);
+      insert_step_resume_breakpoint_at_sal (gdbarch, sr_sal, null_frame_id);
 
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
@@ -1766,9 +1755,9 @@ finish_forward (struct finish_command_fsm *sm, frame_info_ptr frame)
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
 
-  sm->breakpoint = set_momentary_breakpoint (gdbarch, sal,
-					     get_stack_frame_id (frame),
-					     bp_finish);
+  sm->breakpoint
+    = set_momentary_breakpoint (gdbarch, sal, get_stack_frame_id (frame),
+				bp_finish);
 
   /* set_momentary_breakpoint invalidates FRAME.  */
   frame = nullptr;
@@ -1828,11 +1817,11 @@ finish_command (const char *arg, int from_tty)
   prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (arg)
-    error (_("The \"finish\" command does not take any arguments."));
+    error (_ ("The \"finish\" command does not take any arguments."));
 
-  frame = get_prev_frame (get_selected_frame (_("No selected frame.")));
+  frame = get_prev_frame (get_selected_frame (_ ("No selected frame.")));
   if (frame == 0)
-    error (_("\"finish\" not meaningful in the outermost frame."));
+    error (_ ("\"finish\" not meaningful in the outermost frame."));
 
   clear_proceed_status (0);
 
@@ -1844,7 +1833,7 @@ finish_command (const char *arg, int from_tty)
 
   /* Finishing from an inline frame is completely different.  We don't
      try to show the "return value" - no way to locate it.  */
-  if (get_frame_type (get_selected_frame (_("No selected frame.")))
+  if (get_frame_type (get_selected_frame (_ ("No selected frame.")))
       == INLINE_FRAME)
     {
       /* Claim we are stepping in the calling frame.  An empty step
@@ -1861,7 +1850,7 @@ finish_command (const char *arg, int from_tty)
 	 source.  */
       if (from_tty)
 	{
-	  gdb_printf (_("Run till exit from "));
+	  gdb_printf (_ ("Run till exit from "));
 	  print_stack_frame (get_selected_frame (nullptr), 1, LOCATION, 0);
 	}
 
@@ -1872,7 +1861,7 @@ finish_command (const char *arg, int from_tty)
   /* Find the function we will return from.  */
   frame_info_ptr callee_frame = get_selected_frame (nullptr);
   sm->function = find_pc_function (get_frame_pc (callee_frame));
-  sm->return_buf = 0;    /* Initialize buffer address is not available.  */
+  sm->return_buf = 0; /* Initialize buffer address is not available.  */
 
   /* Determine the return convention.  If it is RETURN_VALUE_STRUCT_CONVENTION,
      attempt to determine the address of the return buffer.  */
@@ -1881,7 +1870,7 @@ finish_command (const char *arg, int from_tty)
       enum return_value_convention return_value;
       struct gdbarch *gdbarch = get_frame_arch (callee_frame);
 
-      struct type * val_type
+      struct type *val_type
 	= check_typedef (sm->function->type ()->target_type ());
 
       return_value
@@ -1892,8 +1881,8 @@ finish_command (const char *arg, int from_tty)
 
       if (return_value == RETURN_VALUE_STRUCT_CONVENTION
 	  && val_type->code () != TYPE_CODE_VOID)
-	sm->return_buf = gdbarch_get_return_buf_addr (gdbarch, val_type,
-						      callee_frame);
+	sm->return_buf
+	  = gdbarch_get_return_buf_addr (gdbarch, val_type, callee_frame);
     }
 
   /* Print info on the selected frame, including level number but not
@@ -1901,15 +1890,15 @@ finish_command (const char *arg, int from_tty)
   if (from_tty)
     {
       if (execution_direction == EXEC_REVERSE)
-	gdb_printf (_("Run back to call of "));
+	gdb_printf (_ ("Run back to call of "));
       else
 	{
 	  if (sm->function != nullptr && TYPE_NO_RETURN (sm->function->type ())
-	      && !query (_("warning: Function %s does not return normally.\n"
-			   "Try to finish anyway? "),
+	      && !query (_ ("warning: Function %s does not return normally.\n"
+			    "Try to finish anyway? "),
 			 sm->function->print_name ()))
-	    error (_("Not confirmed."));
-	  gdb_printf (_("Run till exit from "));
+	    error (_ ("Not confirmed."));
+	  gdb_printf (_ ("Run till exit from "));
 	}
 
       print_stack_frame (callee_frame, 1, LOCATION, 0);
@@ -1922,12 +1911,11 @@ finish_command (const char *arg, int from_tty)
       frame = skip_finish_frames (frame);
 
       if (frame == nullptr)
-	error (_("Cannot find the caller frame."));
+	error (_ ("Cannot find the caller frame."));
 
       finish_forward (sm, frame);
     }
 }
-
 
 static void
 info_program_command (const char *args, int from_tty)
@@ -1939,7 +1927,7 @@ info_program_command (const char *args, int from_tty)
 
   if (!target_has_execution ())
     {
-      gdb_printf (_("The program being debugged is not being run.\n"));
+      gdb_printf (_ ("The program being debugged is not being run.\n"));
       return;
     }
 
@@ -1952,23 +1940,23 @@ info_program_command (const char *args, int from_tty)
     get_last_target_status (&proc_target, &ptid, nullptr);
 
   if (ptid == null_ptid || ptid == minus_one_ptid)
-    error (_("No selected thread."));
+    error (_ ("No selected thread."));
 
   thread_info *tp = find_thread_ptid (proc_target, ptid);
 
   if (tp->state == THREAD_EXITED)
-    error (_("Invalid selected thread."));
+    error (_ ("Invalid selected thread."));
   else if (tp->state == THREAD_RUNNING)
-    error (_("Selected thread is running."));
+    error (_ ("Selected thread is running."));
 
   bs = tp->control.stop_bpstat;
   stat = bpstat_num (&bs, &num);
 
   target_files_info ();
-  gdb_printf (_("Program stopped at %s.\n"),
+  gdb_printf (_ ("Program stopped at %s.\n"),
 	      paddress (target_gdbarch (), tp->stop_pc ()));
   if (tp->control.stop_step)
-    gdb_printf (_("It stopped after being stepped.\n"));
+    gdb_printf (_ ("It stopped after being stepped.\n"));
   else if (stat != 0)
     {
       /* There may be several breakpoints in the same place, so this
@@ -1977,28 +1965,28 @@ info_program_command (const char *args, int from_tty)
 	{
 	  if (stat < 0)
 	    {
-	      gdb_printf (_("It stopped at a breakpoint "
-			    "that has since been deleted.\n"));
+	      gdb_printf (_ ("It stopped at a breakpoint "
+			     "that has since been deleted.\n"));
 	    }
 	  else
-	    gdb_printf (_("It stopped at breakpoint %d.\n"), num);
+	    gdb_printf (_ ("It stopped at breakpoint %d.\n"), num);
 	  stat = bpstat_num (&bs, &num);
 	}
     }
   else if (tp->stop_signal () != GDB_SIGNAL_0)
     {
-      gdb_printf (_("It stopped with signal %s, %s.\n"),
+      gdb_printf (_ ("It stopped with signal %s, %s.\n"),
 		  gdb_signal_to_name (tp->stop_signal ()),
 		  gdb_signal_to_string (tp->stop_signal ()));
     }
 
   if (from_tty)
     {
-      gdb_printf (_("Type \"info stack\" or \"info "
-		    "registers\" for more information.\n"));
+      gdb_printf (_ ("Type \"info stack\" or \"info "
+		     "registers\" for more information.\n"));
     }
 }
-
+
 static void
 environment_info (const char *var, int from_tty)
 {
@@ -2039,7 +2027,7 @@ set_environment_command (const char *arg, int from_tty)
   int nullset = 0;
 
   if (arg == 0)
-    error_no_arg (_("environment variable and value"));
+    error_no_arg (_ ("environment variable and value"));
 
   /* Find separation between variable name and value.  */
   p = (char *) strchr (arg, '=');
@@ -2063,13 +2051,13 @@ set_environment_command (const char *arg, int from_tty)
     p = val;
 
   if (p == arg)
-    error_no_arg (_("environment variable to set"));
+    error_no_arg (_ ("environment variable to set"));
 
   if (p == 0 || p[1] == 0)
     {
       nullset = 1;
       if (p == 0)
-	p = arg + strlen (arg);	/* So that savestring below will work.  */
+	p = arg + strlen (arg); /* So that savestring below will work.  */
     }
   else
     {
@@ -2085,8 +2073,8 @@ set_environment_command (const char *arg, int from_tty)
   std::string var (arg, p - arg);
   if (nullset)
     {
-      gdb_printf (_("Setting environment variable "
-		    "\"%s\" to null value.\n"),
+      gdb_printf (_ ("Setting environment variable "
+		     "\"%s\" to null value.\n"),
 		  var.c_str ());
       current_inferior ()->environment.set (var.c_str (), "");
     }
@@ -2101,7 +2089,7 @@ unset_environment_command (const char *var, int from_tty)
     {
       /* If there is no argument, delete all environment variables.
 	 Ask for confirmation if reading from the terminal.  */
-      if (!from_tty || query (_("Delete all environment variables? ")))
+      if (!from_tty || query (_ ("Delete all environment variables? ")))
 	current_inferior ()->environment.clear ();
     }
   else
@@ -2138,7 +2126,6 @@ path_command (const char *dirname, int from_tty)
   if (from_tty)
     path_info (nullptr, from_tty);
 }
-
 
 static void
 pad_to_column (string_file &stream, int col)
@@ -2154,26 +2141,26 @@ pad_to_column (string_file &stream, int col)
    fashion.  */
 
 static void
-default_print_one_register_info (struct ui_file *file,
-				 const char *name,
+default_print_one_register_info (struct ui_file *file, const char *name,
 				 struct value *val)
 {
   struct type *regtype = value_type (val);
   int print_raw_format;
   string_file format_stream;
+
   enum tab_stops
-    {
-      value_column_1 = 15,
-      /* Give enough room for "0x", 16 hex digits and two spaces in
+  {
+    value_column_1 = 15,
+    /* Give enough room for "0x", 16 hex digits and two spaces in
 	 preceding column.  */
-      value_column_2 = value_column_1 + 2 + 16 + 2,
-    };
+    value_column_2 = value_column_1 + 2 + 16 + 2,
+  };
 
   format_stream.puts (name);
   pad_to_column (format_stream, value_column_1);
 
-  print_raw_format = (value_entirely_available (val)
-		      && !value_optimized_out (val));
+  print_raw_format
+    = (value_entirely_available (val) && !value_optimized_out (val));
 
   /* If virtual format is floating, print it that way, and in raw
      hex.  */
@@ -2233,10 +2220,8 @@ default_print_one_register_info (struct ui_file *file,
    provide that format.  */
 
 void
-default_print_registers_info (struct gdbarch *gdbarch,
-			      struct ui_file *file,
-			      frame_info_ptr frame,
-			      int regnum, int print_all)
+default_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
+			      frame_info_ptr frame, int regnum, int print_all)
 {
   int i;
   const int numregs = gdbarch_num_cooked_regs (gdbarch);
@@ -2282,14 +2267,13 @@ registers_info (const char *addr_exp, int fpregs)
   struct gdbarch *gdbarch;
 
   if (!target_has_registers ())
-    error (_("The program has no registers now."));
+    error (_ ("The program has no registers now."));
   frame = get_selected_frame (nullptr);
   gdbarch = get_frame_arch (frame);
 
   if (!addr_exp)
     {
-      gdbarch_print_registers_info (gdbarch, gdb_stdout,
-				    frame, -1, fpregs);
+      gdbarch_print_registers_info (gdbarch, gdb_stdout, frame, -1, fpregs);
       return;
     }
 
@@ -2306,7 +2290,7 @@ registers_info (const char *addr_exp, int fpregs)
       if (addr_exp[0] == '$')
 	addr_exp++;
       if (isspace ((*addr_exp)) || (*addr_exp) == '\0')
-	error (_("Missing register name"));
+	error (_ ("Missing register name"));
 
       /* Find the start/end of this register name/num/group.  */
       start = addr_exp;
@@ -2328,19 +2312,17 @@ registers_info (const char *addr_exp, int fpregs)
 	    if (regnum >= gdbarch_num_cooked_regs (gdbarch))
 	      {
 		struct value *regval = value_of_user_reg (regnum, frame);
-		const char *regname = user_reg_map_regnum_to_name (gdbarch,
-								   regnum);
+		const char *regname
+		  = user_reg_map_regnum_to_name (gdbarch, regnum);
 
 		/* Print in the same fashion
 		   gdbarch_print_registers_info's default
 		   implementation prints.  */
-		default_print_one_register_info (gdb_stdout,
-						 regname,
-						 regval);
+		default_print_one_register_info (gdb_stdout, regname, regval);
 	      }
 	    else
-	      gdbarch_print_registers_info (gdbarch, gdb_stdout,
-					    frame, regnum, fpregs);
+	      gdbarch_print_registers_info (gdbarch, gdb_stdout, frame, regnum,
+					    fpregs);
 	    continue;
 	  }
       }
@@ -2363,13 +2345,11 @@ registers_info (const char *addr_exp, int fpregs)
 	  {
 	    int regnum;
 
-	    for (regnum = 0;
-		 regnum < gdbarch_num_cooked_regs (gdbarch);
+	    for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch);
 		 regnum++)
 	      {
 		if (gdbarch_register_reggroup_p (gdbarch, regnum, group))
-		  gdbarch_print_registers_info (gdbarch,
-						gdb_stdout, frame,
+		  gdbarch_print_registers_info (gdbarch, gdb_stdout, frame,
 						regnum, fpregs);
 	      }
 	    continue;
@@ -2377,7 +2357,7 @@ registers_info (const char *addr_exp, int fpregs)
       }
 
       /* Nothing matched.  */
-      error (_("Invalid register `%.*s'"), (int) (end - start), start);
+      error (_ ("Invalid register `%.*s'"), (int) (end - start), start);
     }
 }
 
@@ -2394,8 +2374,8 @@ info_registers_command (const char *addr_exp, int from_tty)
 }
 
 static void
-print_vector_info (struct ui_file *file,
-		   frame_info_ptr frame, const char *args)
+print_vector_info (struct ui_file *file, frame_info_ptr frame,
+		   const char *args)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -2423,11 +2403,11 @@ static void
 info_vector_command (const char *args, int from_tty)
 {
   if (!target_has_registers ())
-    error (_("The program has no registers now."));
+    error (_ ("The program has no registers now."));
 
   print_vector_info (gdb_stdout, get_selected_frame (nullptr), args);
 }
-
+
 /* Kill the inferior process.  Make us have no inferior.  */
 
 static void
@@ -2438,9 +2418,9 @@ kill_command (const char *arg, int from_tty)
      some targets don't have processes!  */
 
   if (inferior_ptid == null_ptid)
-    error (_("The program is not being run."));
-  if (!query (_("Kill the program being debugged? ")))
-    error (_("Not confirmed."));
+    error (_ ("The program is not being run."));
+  if (!query (_ ("Kill the program being debugged? ")))
+    error (_ ("Not confirmed."));
 
   int pid = current_inferior ()->pid;
   /* Save the pid as a string before killing the inferior, since that
@@ -2452,8 +2432,7 @@ kill_command (const char *arg, int from_tty)
   bfd_cache_close_all ();
 
   if (print_inferior_events)
-    gdb_printf (_("[Inferior %d (%s) killed]\n"),
-		infnum, pid_str.c_str ());
+    gdb_printf (_ ("[Inferior %d (%s) killed]\n"), infnum, pid_str.c_str ());
 }
 
 /* Used in `attach&' command.  Proceed threads of inferior INF iff
@@ -2471,8 +2450,7 @@ proceed_after_attach (inferior *inf)
   scoped_restore_current_thread restore_thread;
 
   for (thread_info *thread : inf->non_exited_threads ())
-    if (!thread->executing ()
-	&& !thread->stop_requested
+    if (!thread->executing () && !thread->stop_requested
 	&& thread->stop_signal () == GDB_SIGNAL_0)
       {
 	switch_to_thread (thread);
@@ -2579,7 +2557,8 @@ attach_post_wait (int from_tty, enum attach_post_wait_mode mode)
 	     stop.  For consistency, always select the thread with
 	     lowest GDB number, which should be the main thread, if it
 	     still exists.  */
-	  for (thread_info *thread : current_inferior ()->non_exited_threads ())
+	  for (thread_info *thread :
+	       current_inferior ()->non_exited_threads ())
 	    if (thread->inf->num < lowest->inf->num
 		|| thread->per_inf_num < lowest->per_inf_num)
 	      lowest = thread;
@@ -2606,7 +2585,7 @@ attach_command (const char *args, int from_tty)
   struct inferior *inferior = current_inferior ();
   enum attach_post_wait_mode mode;
 
-  dont_repeat ();		/* Not for the faint of heart */
+  dont_repeat (); /* Not for the faint of heart */
 
   scoped_disable_commit_resumed disable_commit_resumed ("attaching");
 
@@ -2616,10 +2595,10 @@ attach_command (const char *args, int from_tty)
     ;
   else if (target_has_execution ())
     {
-      if (query (_("A program is being debugged already.  Kill it? ")))
+      if (query (_ ("A program is being debugged already.  Kill it? ")))
 	target_kill ();
       else
-	error (_("Not killed."));
+	error (_ ("Not killed."));
     }
 
   /* Clean up any leftovers from other runs.  Some other things from
@@ -2634,7 +2613,7 @@ attach_command (const char *args, int from_tty)
   prepare_execution_command (attach_target, async_exec);
 
   if (non_stop && !attach_target->supports_non_stop ())
-    error (_("Cannot attach to this target in non-stop mode"));
+    error (_ ("Cannot attach to this target in non-stop mode"));
 
   attach_target->attach (args, from_tty);
   /* to_attach should push the target, so after this point we
@@ -2706,10 +2685,9 @@ attach_command (const char *args, int from_tty)
       inferior->control.stop_soon = STOP_QUIETLY_NO_SIGSTOP;
 
       /* Wait for stop.  */
-      inferior->add_continuation ([=] ()
-	{
-	  attach_post_wait (from_tty, mode);
-	});
+      inferior->add_continuation ([=] () {
+	attach_post_wait (from_tty, mode);
+      });
 
       /* Let infrun consider waiting for events out of this
 	 target.  */
@@ -2763,10 +2741,9 @@ notice_new_inferior (thread_info *thr, bool leave_running, int from_tty)
       inferior->control.stop_soon = STOP_QUIETLY_REMOTE;
 
       /* Wait for stop before proceeding.  */
-      inferior->add_continuation ([=] ()
-	{
-	  attach_post_wait (from_tty, mode);
-	});
+      inferior->add_continuation ([=] () {
+	attach_post_wait (from_tty, mode);
+      });
 
       return;
     }
@@ -2788,10 +2765,10 @@ notice_new_inferior (thread_info *thr, bool leave_running, int from_tty)
 void
 detach_command (const char *args, int from_tty)
 {
-  dont_repeat ();		/* Not for the faint of heart.  */
+  dont_repeat (); /* Not for the faint of heart.  */
 
   if (inferior_ptid == null_ptid)
-    error (_("The program is not being run."));
+    error (_ ("The program is not being run."));
 
   scoped_disable_commit_resumed disable_commit_resumed ("detaching");
 
@@ -2827,7 +2804,8 @@ detach_command (const char *args, int from_tty)
     deprecated_detach_hook ();
 
   if (!was_non_stop_p)
-    restart_after_all_stop_detach (as_process_stratum_target (target_ref.get ()));
+    restart_after_all_stop_detach (
+      as_process_stratum_target (target_ref.get ()));
 
   disable_commit_resumed.reset_and_commit ();
 }
@@ -2843,7 +2821,7 @@ detach_command (const char *args, int from_tty)
 static void
 disconnect_command (const char *args, int from_tty)
 {
-  dont_repeat ();		/* Not for the faint of heart.  */
+  dont_repeat (); /* Not for the faint of heart.  */
   query_if_trace_running (from_tty);
   disconnect_tracing ();
   target_disconnect (args, from_tty);
@@ -2869,8 +2847,7 @@ stop_current_target_threads_ns (ptid_t ptid)
      non-stop mode, as when debugging a multi-threaded application in
      all-stop mode, we will only get one stop event --- it's undefined
      which thread will report the event.  */
-  set_stop_requested (current_inferior ()->process_target (),
-		      ptid, 1);
+  set_stop_requested (current_inferior ()->process_target (), ptid, 1);
 }
 
 /* See inferior.h.  */
@@ -2914,10 +2891,9 @@ interrupt_command (const char *args, int from_tty)
     {
       int all_threads = 0;
 
-      dont_repeat ();		/* Not for the faint of heart.  */
+      dont_repeat (); /* Not for the faint of heart.  */
 
-      if (args != nullptr
-	  && startswith (args, "-a"))
+      if (args != nullptr && startswith (args, "-a"))
 	all_threads = 1;
 
       interrupt_target_1 (all_threads);
@@ -2943,7 +2919,7 @@ default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
     }
   if (!printed_something)
     gdb_printf (file, "No floating-point info "
-		"available for this processor.\n");
+		      "available for this processor.\n");
 }
 
 static void
@@ -2952,12 +2928,12 @@ info_float_command (const char *args, int from_tty)
   frame_info_ptr frame;
 
   if (!target_has_registers ())
-    error (_("The program has no registers now."));
+    error (_ ("The program has no registers now."));
 
   frame = get_selected_frame (nullptr);
   gdbarch_print_float_info (get_frame_arch (frame), gdb_stdout, frame, args);
 }
-
+
 /* Implement `info proc' family of commands.  */
 
 static void
@@ -2970,7 +2946,7 @@ info_proc_cmd_1 (const char *args, enum info_proc_what what, int from_tty)
       if (gdbarch_info_proc_p (gdbarch))
 	gdbarch_info_proc (gdbarch, args, what);
       else
-	error (_("Not supported on this target."));
+	error (_ ("Not supported on this target."));
     }
 }
 
@@ -3050,20 +3026,18 @@ info_proc_cmd_all (const char *args, int from_tty)
 
 static void
 show_print_finish (struct ui_file *file, int from_tty,
-		   struct cmd_list_element *c,
-		   const char *value)
+		   struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("\
+  gdb_printf (file, _ ("\
 Printing of return value after `finish' is %s.\n"),
 	      value);
 }
-
 
 /* This help string is used for the run, start, and starti commands.
    It is defined as a macro to prevent duplication.  */
 
 #define RUN_ARGS_HELP \
-"You may specify arguments to give it.\n\
+  "You may specify arguments to give it.\n\
 Args may include \"*\", or \"[...]\"; they are expanded using the\n\
 shell that will start the program (specified by the \"$SHELL\" environment\n\
 variable).  Input and output redirection with \">\", \"<\", or \">>\"\n\
@@ -3076,6 +3050,7 @@ use \"set args\" without arguments.\n\
 To start the inferior without using a shell, use \"set startup-with-shell off\"."
 
 void _initialize_infcmd ();
+
 void
 _initialize_infcmd ()
 {
@@ -3085,70 +3060,73 @@ _initialize_infcmd ()
 
   /* Add the filename of the terminal connected to inferior I/O.  */
   add_setshow_optional_filename_cmd ("inferior-tty", class_run,
-				     &inferior_io_terminal_scratch, _("\
-Set terminal for future runs of program being debugged."), _("\
-Show terminal for future runs of program being debugged."), _("\
+				     &inferior_io_terminal_scratch, _ ("\
+Set terminal for future runs of program being debugged."),
+				     _ ("\
+Show terminal for future runs of program being debugged."),
+				     _ ("\
 Usage: set inferior-tty [TTY]\n\n\
 If TTY is omitted, the default behavior of using the same terminal as GDB\n\
 is restored."),
 				     set_inferior_tty_command,
-				     show_inferior_tty_command,
-				     &setlist, &showlist);
+				     show_inferior_tty_command, &setlist,
+				     &showlist);
   cmd_name = "inferior-tty";
   c = lookup_cmd (&cmd_name, setlist, "", nullptr, -1, 1);
   gdb_assert (c != nullptr);
   add_alias_cmd ("tty", c, class_run, 0, &cmdlist);
 
   cmd_name = "args";
-  add_setshow_string_noescape_cmd (cmd_name, class_run,
-				   &inferior_args_scratch, _("\
-Set argument list to give program being debugged when it is started."), _("\
-Show argument list to give program being debugged when it is started."), _("\
+  add_setshow_string_noescape_cmd (cmd_name, class_run, &inferior_args_scratch,
+				   _ ("\
+Set argument list to give program being debugged when it is started."),
+				   _ ("\
+Show argument list to give program being debugged when it is started."),
+				   _ ("\
 Follow this command with any number of args, to be passed to the program."),
-				   set_args_command,
-				   show_args_command,
+				   set_args_command, show_args_command,
 				   &setlist, &showlist);
   c = lookup_cmd (&cmd_name, setlist, "", nullptr, -1, 1);
   gdb_assert (c != nullptr);
   set_cmd_completer (c, filename_completer);
 
   cmd_name = "cwd";
-  add_setshow_string_noescape_cmd (cmd_name, class_run,
-				   &inferior_cwd_scratch, _("\
+  add_setshow_string_noescape_cmd (cmd_name, class_run, &inferior_cwd_scratch,
+				   _ ("\
 Set the current working directory to be used when the inferior is started.\n\
 Changing this setting does not have any effect on inferiors that are\n\
 already running."),
-				   _("\
+				   _ ("\
 Show the current working directory that is used when the inferior is started."),
-				   _("\
+				   _ ("\
 Use this command to change the current working directory that will be used\n\
 when the inferior is started.  This setting does not affect GDB's current\n\
 working directory."),
-				   set_cwd_command,
-				   show_cwd_command,
-				   &setlist, &showlist);
+				   set_cwd_command, show_cwd_command, &setlist,
+				   &showlist);
   c = lookup_cmd (&cmd_name, setlist, "", nullptr, -1, 1);
   gdb_assert (c != nullptr);
   set_cmd_completer (c, filename_completer);
 
-  c = add_cmd ("environment", no_class, environment_info, _("\
+  c = add_cmd ("environment", no_class, environment_info, _ ("\
 The environment to give the program, or one variable's value.\n\
 With an argument VAR, prints the value of environment variable VAR to\n\
 give the program being debugged.  With no arguments, prints the entire\n\
-environment to be given to the program."), &showlist);
+environment to be given to the program."),
+	       &showlist);
   set_cmd_completer (c, noop_completer);
 
   add_basic_prefix_cmd ("unset", no_class,
-			_("Complement to certain \"set\" commands."),
+			_ ("Complement to certain \"set\" commands."),
 			&unsetlist, 0, &cmdlist);
 
-  c = add_cmd ("environment", class_run, unset_environment_command, _("\
+  c = add_cmd ("environment", class_run, unset_environment_command, _ ("\
 Cancel environment variable VAR for the program.\n\
 This does not affect the program until the next \"run\" command."),
 	       &unsetlist);
   set_cmd_completer (c, noop_completer);
 
-  c = add_cmd ("environment", class_run, set_environment_command, _("\
+  c = add_cmd ("environment", class_run, set_environment_command, _ ("\
 Set environment variable value to give the program.\n\
 Arguments are VAR VALUE where VAR is variable name and VALUE is value.\n\
 VALUES of environment variables are uninterpreted strings.\n\
@@ -3156,7 +3134,7 @@ This does not affect the program until the next \"run\" command."),
 	       &setlist);
   set_cmd_completer (c, noop_completer);
 
-  c = add_com ("path", class_files, path_command, _("\
+  c = add_com ("path", class_files, path_command, _ ("\
 Add directory DIR(s) to beginning of search path for object files.\n\
 $cwd in the path means the current working directory.\n\
 This path is equivalent to the $PATH shell variable.  It is a list of\n\
@@ -3165,7 +3143,7 @@ fully linked executable files and separately compiled object files as \
 needed."));
   set_cmd_completer (c, filename_completer);
 
-  c = add_cmd ("paths", no_class, path_info, _("\
+  c = add_cmd ("paths", no_class, path_info, _ ("\
 Current search path for finding object files.\n\
 $cwd in the path means the current working directory.\n\
 This path is equivalent to the $PATH shell variable.  It is a list of\n\
@@ -3176,10 +3154,10 @@ needed."),
   set_cmd_completer (c, noop_completer);
 
   add_prefix_cmd ("kill", class_run, kill_command,
-		  _("Kill execution of program being debugged."),
-		  &killlist, 0, &cmdlist);
+		  _ ("Kill execution of program being debugged."), &killlist,
+		  0, &cmdlist);
 
-  add_com ("attach", class_run, attach_command, _("\
+  add_com ("attach", class_run, attach_command, _ ("\
 Attach to a process or file outside of GDB.\n\
 This command attaches to another target, of the same type as your last\n\
 \"target\" command (\"info files\" will show your target stack).\n\
@@ -3192,18 +3170,18 @@ directory, or (if not found there) using the source file search path\n\
 (see the \"directory\" command).  You can also use the \"file\" command\n\
 to specify the program, and to load its symbol table."));
 
-  add_prefix_cmd ("detach", class_run, detach_command, _("\
+  add_prefix_cmd ("detach", class_run, detach_command, _ ("\
 Detach a process or file previously attached.\n\
 If a process, it is no longer traced, and it continues its execution.  If\n\
 you were debugging a file, the file is closed and gdb no longer accesses it."),
 		  &detachlist, 0, &cmdlist);
 
-  add_com ("disconnect", class_run, disconnect_command, _("\
+  add_com ("disconnect", class_run, disconnect_command, _ ("\
 Disconnect from a target.\n\
 The target will wait for another debugger to connect.  Not available for\n\
 all targets."));
 
-  c = add_com ("signal", class_run, signal_command, _("\
+  c = add_com ("signal", class_run, signal_command, _ ("\
 Continue program with the specified signal.\n\
 Usage: signal SIGNAL\n\
 The SIGNAL argument is processed the same as the handle command.\n\
@@ -3216,7 +3194,7 @@ In a multi-threaded program the signal is delivered to, or discarded from,\n\
 the current thread only."));
   set_cmd_completer (c, signal_completer);
 
-  c = add_com ("queue-signal", class_run, queue_signal_command, _("\
+  c = add_com ("queue-signal", class_run, queue_signal_command, _ ("\
 Queue a signal to be delivered to the current thread when it is resumed.\n\
 Usage: queue-signal SIGNAL\n\
 The SIGNAL argument is processed the same as the handle command.\n\
@@ -3231,7 +3209,7 @@ the current thread only."));
   set_cmd_completer (c, signal_completer);
 
   cmd_list_element *stepi_cmd
-    = add_com ("stepi", class_run, stepi_command, _("\
+    = add_com ("stepi", class_run, stepi_command, _ ("\
 Step one instruction exactly.\n\
 Usage: stepi [N]\n\
 Argument N means step N times (or till program stops for another \
@@ -3239,7 +3217,7 @@ reason)."));
   add_com_alias ("si", stepi_cmd, class_run, 0);
 
   cmd_list_element *nexti_cmd
-   = add_com ("nexti", class_run, nexti_command, _("\
+    = add_com ("nexti", class_run, nexti_command, _ ("\
 Step one instruction, but proceed through subroutine calls.\n\
 Usage: nexti [N]\n\
 Argument N means step N times (or till program stops for another \
@@ -3247,14 +3225,13 @@ reason)."));
   add_com_alias ("ni", nexti_cmd, class_run, 0);
 
   cmd_list_element *finish_cmd
-    = add_com ("finish", class_run, finish_command, _("\
+    = add_com ("finish", class_run, finish_command, _ ("\
 Execute until selected stack frame returns.\n\
 Usage: finish\n\
 Upon return, the value returned is printed and put in the value history."));
   add_com_alias ("fin", finish_cmd, class_run, 1);
 
-  cmd_list_element *next_cmd
-    = add_com ("next", class_run, next_command, _("\
+  cmd_list_element *next_cmd = add_com ("next", class_run, next_command, _ ("\
 Step program, proceeding through subroutine calls.\n\
 Usage: next [N]\n\
 Unlike \"step\", if the current source line calls a subroutine,\n\
@@ -3262,8 +3239,7 @@ this command does not enter the subroutine, but instead steps over\n\
 the call, in effect treating it as a single source line."));
   add_com_alias ("n", next_cmd, class_run, 1);
 
-  cmd_list_element *step_cmd
-    = add_com ("step", class_run, step_command, _("\
+  cmd_list_element *step_cmd = add_com ("step", class_run, step_command, _ ("\
 Step program until it reaches a different source line.\n\
 Usage: step [N]\n\
 Argument N means step N times (or till program stops for another \
@@ -3271,7 +3247,7 @@ reason)."));
   add_com_alias ("s", step_cmd, class_run, 1);
 
   cmd_list_element *until_cmd
-    = add_com ("until", class_run, until_command, _("\
+    = add_com ("until", class_run, until_command, _ ("\
 Execute until past the current line or past a LOCATION.\n\
 Execute until the program reaches a source line greater than the current\n\
 or a specified location (same args as break command) within the current \
@@ -3279,14 +3255,13 @@ frame."));
   set_cmd_completer (until_cmd, location_completer);
   add_com_alias ("u", until_cmd, class_run, 1);
 
-  c = add_com ("advance", class_run, advance_command, _("\
+  c = add_com ("advance", class_run, advance_command, _ ("\
 Continue the program up to the given location (same form as args for break \
 command).\n\
 Execution will also stop upon exit from the current stack frame."));
   set_cmd_completer (c, location_completer);
 
-  cmd_list_element *jump_cmd
-    = add_com ("jump", class_run, jump_command, _("\
+  cmd_list_element *jump_cmd = add_com ("jump", class_run, jump_command, _ ("\
 Continue program being debugged at specified line or address.\n\
 Usage: jump LOCATION\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
@@ -3295,7 +3270,7 @@ for an address to start at."));
   add_com_alias ("j", jump_cmd, class_run, 1);
 
   cmd_list_element *continue_cmd
-    = add_com ("continue", class_run, continue_command, _("\
+    = add_com ("continue", class_run, continue_command, _ ("\
 Continue program being debugged, after signal or breakpoint.\n\
 Usage: continue [N]\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
@@ -3309,31 +3284,27 @@ Specifying -a and an ignore count simultaneously is an error."));
   add_com_alias ("c", continue_cmd, class_run, 1);
   add_com_alias ("fg", continue_cmd, class_run, 1);
 
-  cmd_list_element *run_cmd
-    = add_com ("run", class_run, run_command, _("\
-Start debugged program.\n"
-RUN_ARGS_HELP));
+  cmd_list_element *run_cmd = add_com ("run", class_run, run_command, _ ("\
+Start debugged program.\n" RUN_ARGS_HELP));
   set_cmd_completer (run_cmd, filename_completer);
   add_com_alias ("r", run_cmd, class_run, 1);
 
-  c = add_com ("start", class_run, start_command, _("\
-Start the debugged program stopping at the beginning of the main procedure.\n"
-RUN_ARGS_HELP));
+  c = add_com ("start", class_run, start_command, _ ("\
+Start the debugged program stopping at the beginning of the main procedure.\n" RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
 
-  c = add_com ("starti", class_run, starti_command, _("\
-Start the debugged program stopping at the first instruction.\n"
-RUN_ARGS_HELP));
+  c = add_com ("starti", class_run, starti_command, _ ("\
+Start the debugged program stopping at the first instruction.\n" RUN_ARGS_HELP));
   set_cmd_completer (c, filename_completer);
 
   add_com ("interrupt", class_run, interrupt_command,
-	   _("Interrupt the execution of the debugged program.\n\
+	   _ ("Interrupt the execution of the debugged program.\n\
 If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\
 interrupt all running threads in non-stop mode, use the -a option."));
 
   cmd_list_element *info_registers_cmd
-    = add_info ("registers", info_registers_command, _("\
+    = add_info ("registers", info_registers_command, _ ("\
 List of integer registers and their contents, for selected stack frame.\n\
 One or more register names as argument means describe the given registers.\n\
 One or more register group names as argument means describe the registers\n\
@@ -3341,7 +3312,7 @@ in the named register groups."));
   add_info_alias ("r", info_registers_cmd, 1);
   set_cmd_completer (info_registers_cmd, reg_or_group_completer);
 
-  c = add_info ("all-registers", info_all_registers_command, _("\
+  c = add_info ("all-registers", info_all_registers_command, _ ("\
 List of all registers and their contents, for selected stack frame.\n\
 One or more register names as argument means describe the given registers.\n\
 One or more register group names as argument means describe the registers\n\
@@ -3349,58 +3320,55 @@ in the named register groups."));
   set_cmd_completer (c, reg_or_group_completer);
 
   add_info ("program", info_program_command,
-	    _("Execution status of the program."));
+	    _ ("Execution status of the program."));
 
   add_info ("float", info_float_command,
-	    _("Print the status of the floating point unit."));
+	    _ ("Print the status of the floating point unit."));
 
   add_info ("vector", info_vector_command,
-	    _("Print the status of the vector unit."));
+	    _ ("Print the status of the vector unit."));
 
-  add_prefix_cmd ("proc", class_info, info_proc_cmd,
-		  _("\
+  add_prefix_cmd ("proc", class_info, info_proc_cmd, _ ("\
 Show additional information about a process.\n\
 Specify any process id, or use the program being debugged by default."),
-		  &info_proc_cmdlist,
-		  1/*allow-unknown*/, &infolist);
+		  &info_proc_cmdlist, 1 /*allow-unknown*/, &infolist);
 
-  add_cmd ("mappings", class_info, info_proc_cmd_mappings, _("\
+  add_cmd ("mappings", class_info, info_proc_cmd_mappings, _ ("\
 List memory regions mapped by the specified process."),
 	   &info_proc_cmdlist);
 
-  add_cmd ("stat", class_info, info_proc_cmd_stat, _("\
+  add_cmd ("stat", class_info, info_proc_cmd_stat, _ ("\
 List process info from /proc/PID/stat."),
 	   &info_proc_cmdlist);
 
-  add_cmd ("status", class_info, info_proc_cmd_status, _("\
+  add_cmd ("status", class_info, info_proc_cmd_status, _ ("\
 List process info from /proc/PID/status."),
 	   &info_proc_cmdlist);
 
-  add_cmd ("cwd", class_info, info_proc_cmd_cwd, _("\
+  add_cmd ("cwd", class_info, info_proc_cmd_cwd, _ ("\
 List current working directory of the specified process."),
 	   &info_proc_cmdlist);
 
-  add_cmd ("cmdline", class_info, info_proc_cmd_cmdline, _("\
+  add_cmd ("cmdline", class_info, info_proc_cmd_cmdline, _ ("\
 List command line arguments of the specified process."),
 	   &info_proc_cmdlist);
 
-  add_cmd ("exe", class_info, info_proc_cmd_exe, _("\
+  add_cmd ("exe", class_info, info_proc_cmd_exe, _ ("\
 List absolute filename for executable of the specified process."),
 	   &info_proc_cmdlist);
 
-  add_cmd ("files", class_info, info_proc_cmd_files, _("\
+  add_cmd ("files", class_info, info_proc_cmd_files, _ ("\
 List files opened by the specified process."),
 	   &info_proc_cmdlist);
 
-  add_cmd ("all", class_info, info_proc_cmd_all, _("\
+  add_cmd ("all", class_info, info_proc_cmd_all, _ ("\
 List all available info about the specified process."),
 	   &info_proc_cmdlist);
 
-  add_setshow_boolean_cmd ("finish", class_support,
-			   &finish_print, _("\
-Set whether `finish' prints the return value."), _("\
-Show whether `finish' prints the return value."), nullptr,
-			   nullptr,
-			   show_print_finish,
-			   &setprintlist, &showprintlist);
+  add_setshow_boolean_cmd ("finish", class_support, &finish_print, _ ("\
+Set whether `finish' prints the return value."),
+			   _ ("\
+Show whether `finish' prints the return value."),
+			   nullptr, nullptr, show_print_finish, &setprintlist,
+			   &showprintlist);
 }

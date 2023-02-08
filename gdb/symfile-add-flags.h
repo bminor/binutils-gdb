@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (SYMFILE_ADD_FLAGS_H)
+#if !defined(SYMFILE_ADD_FLAGS_H)
 #define SYMFILE_ADD_FLAGS_H
 
 #include "gdbsupport/enum-flags.h"
@@ -27,30 +27,30 @@
    header dependencies.  */
 
 enum symfile_add_flag : unsigned
-  {
-    /* Be chatty about what you are doing.  */
-    SYMFILE_VERBOSE = 1 << 1,
+{
+  /* Be chatty about what you are doing.  */
+  SYMFILE_VERBOSE = 1 << 1,
 
-    /* This is the main symbol file (as opposed to symbol file for
+  /* This is the main symbol file (as opposed to symbol file for
        dynamically loaded code).  */
-    SYMFILE_MAINLINE = 1 << 2,
+  SYMFILE_MAINLINE = 1 << 2,
 
-    /* Do not call breakpoint_re_set when adding this symbol file.  */
-    SYMFILE_DEFER_BP_RESET = 1 << 3,
+  /* Do not call breakpoint_re_set when adding this symbol file.  */
+  SYMFILE_DEFER_BP_RESET = 1 << 3,
 
-    /* Do not immediately read symbols for this file.  By default,
+  /* Do not immediately read symbols for this file.  By default,
        symbols are read when the objfile is created.  */
-    SYMFILE_NO_READ = 1 << 4,
+  SYMFILE_NO_READ = 1 << 4,
 
-    /* The new objfile should be marked OBJF_NOT_FILENAME.  */
-    SYMFILE_NOT_FILENAME = 1 << 5,
+  /* The new objfile should be marked OBJF_NOT_FILENAME.  */
+  SYMFILE_NOT_FILENAME = 1 << 5,
 
-    /* If SYMFILE_VERBOSE (interpreted as from_tty) and SYMFILE_ALWAYS_CONFIRM,
+  /* If SYMFILE_VERBOSE (interpreted as from_tty) and SYMFILE_ALWAYS_CONFIRM,
        always ask user to confirm loading the symbol file.
        Without this flag, symbol_file_add_with_addrs asks a confirmation only
        for a main symbol file replacing a file having symbols.  */
-    SYMFILE_ALWAYS_CONFIRM = 1 << 6,
- };
+  SYMFILE_ALWAYS_CONFIRM = 1 << 6,
+};
 
 DEF_ENUM_FLAGS_TYPE (enum symfile_add_flag, symfile_add_flags);
 

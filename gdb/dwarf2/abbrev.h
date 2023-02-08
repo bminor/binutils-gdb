@@ -31,8 +31,8 @@
 
 struct attr_abbrev
 {
-  ENUM_BITFIELD(dwarf_attribute) name : 16;
-  ENUM_BITFIELD(dwarf_form) form : 16;
+  ENUM_BITFIELD (dwarf_attribute) name : 16;
+  ENUM_BITFIELD (dwarf_form) form : 16;
 
   /* It is valid only if FORM is DW_FORM_implicit_const.  */
   LONGEST implicit_const;
@@ -80,8 +80,7 @@ struct abbrev_table
     search.number = abbrev_number;
 
     return (struct abbrev_info *) htab_find_with_hash (m_abbrevs.get (),
-						       &search,
-						       abbrev_number);
+						       &search, abbrev_number);
   }
 
   /* Where the abbrev table came from.

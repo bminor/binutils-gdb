@@ -69,8 +69,8 @@ arm_fill_gregset (struct regcache *regcache, void *buf)
 
   collect_register (regcache, ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
   /* Keep reserved bits bit 20 to bit 23.  */
-  regs[ARM_CPSR_GREGNUM] = ((regs[ARM_CPSR_GREGNUM] & 0xff0fffff)
-			    | (cpsr & 0x00f00000));
+  regs[ARM_CPSR_GREGNUM]
+    = ((regs[ARM_CPSR_GREGNUM] & 0xff0fffff) | (cpsr & 0x00f00000));
 }
 
 /* Supply GP registers contents, stored in BUF, to REGCACHE.  */
@@ -142,29 +142,23 @@ arm_store_vfpregset (struct regcache *regcache, const void *buf)
 
 /* Register sets with using PTRACE_GETREGSET.  */
 
-static struct regset_info aarch32_regsets[] = {
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
-    ARM_CORE_REGS_SIZE + ARM_INT_REGISTER_SIZE, GENERAL_REGS,
-    arm_fill_gregset, arm_store_gregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_VFP, ARM_VFP3_REGS_SIZE,
-    EXTENDED_REGS,
-    arm_fill_vfpregset, arm_store_vfpregset },
-  NULL_REGSET
+static struct regset_info aarch32_regsets[]
+  = { { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
+        ARM_CORE_REGS_SIZE + ARM_INT_REGISTER_SIZE, GENERAL_REGS,
+        arm_fill_gregset, arm_store_gregset },
+      { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_VFP, ARM_VFP3_REGS_SIZE,
+        EXTENDED_REGS, arm_fill_vfpregset, arm_store_vfpregset },
+      NULL_REGSET };
+
+static struct regsets_info aarch32_regsets_info = {
+  aarch32_regsets, /* regsets */
+  0,               /* num_regsets */
+  NULL,            /* disabled_regsets */
 };
 
-static struct regsets_info aarch32_regsets_info =
-  {
-    aarch32_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
-
-struct regs_info regs_info_aarch32 =
-  {
-    NULL, /* regset_bitmap */
-    NULL, /* usrregs */
-    &aarch32_regsets_info
-  };
+struct regs_info regs_info_aarch32 = { NULL, /* regset_bitmap */
+                                       NULL, /* usrregs */
+                                       &aarch32_regsets_info };
 
 /* Returns 1 if the current instruction set is thumb, 0 otherwise.  */
 
@@ -194,14 +188,14 @@ arm_breakpoint_at (CORE_ADDR where)
 
       the_target->read_memory (where, (unsigned char *) &insn, 2);
       if (insn == thumb_breakpoint)
-	return 1;
+        return 1;
 
       if (insn == thumb2_breakpoint[0])
-	{
-	  the_target->read_memory (where + 2, (unsigned char *) &insn, 2);
-	  if (insn == thumb2_breakpoint[1])
-	    return 1;
-	}
+        {
+          the_target->read_memory (where + 2, (unsigned char *) &insn, 2);
+          if (insn == thumb2_breakpoint[1])
+            return 1;
+        }
     }
   else
     {
@@ -210,10 +204,10 @@ arm_breakpoint_at (CORE_ADDR where)
 
       the_target->read_memory (where, (unsigned char *) &insn, 4);
       if (insn == arm_abi_breakpoint)
-	return 1;
+        return 1;
 
       if (insn == arm_eabi_breakpoint)
-	return 1;
+        return 1;
     }
 
   return 0;
@@ -238,13 +232,13 @@ arm_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 
       /* Check whether we are replacing a thumb2 32-bit instruction.  */
       if (target_read_memory (*pcptr, buf, 2) == 0)
-	{
-	  unsigned short inst1 = 0;
+        {
+          unsigned short inst1 = 0;
 
-	  target_read_memory (*pcptr, (gdb_byte *) &inst1, 2);
-	  if (thumb_insn_size (inst1) == 4)
-	    return ARM_BP_KIND_THUMB2;
-	}
+          target_read_memory (*pcptr, (gdb_byte *) &inst1, 2);
+          if (thumb_insn_size (inst1) == 4)
+            return ARM_BP_KIND_THUMB2;
+        }
       return ARM_BP_KIND_THUMB;
     }
   else
@@ -254,7 +248,7 @@ arm_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 /*  Implementation of the linux_target_ops method "sw_breakpoint_from_kind".  */
 
 const gdb_byte *
-arm_sw_breakpoint_from_kind (int kind , int *size)
+arm_sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = arm_breakpoint_len;
   /* Define an ARM-mode breakpoint; we only set breakpoints in the C
@@ -264,17 +258,17 @@ arm_sw_breakpoint_from_kind (int kind , int *size)
      application.  */
   switch (kind)
     {
-      case ARM_BP_KIND_THUMB:
-	*size = thumb_breakpoint_len;
-	return (gdb_byte *) &thumb_breakpoint;
-      case ARM_BP_KIND_THUMB2:
-	*size = thumb2_breakpoint_len;
-	return (gdb_byte *) &thumb2_breakpoint;
-      case ARM_BP_KIND_ARM:
-	*size = arm_breakpoint_len;
-	return (const gdb_byte *) &arm_breakpoint;
-      default:
-       return NULL;
+    case ARM_BP_KIND_THUMB:
+      *size = thumb_breakpoint_len;
+      return (gdb_byte *) &thumb_breakpoint;
+    case ARM_BP_KIND_THUMB2:
+      *size = thumb2_breakpoint_len;
+      return (gdb_byte *) &thumb2_breakpoint;
+    case ARM_BP_KIND_ARM:
+      *size = arm_breakpoint_len;
+      return (const gdb_byte *) &arm_breakpoint;
+    default:
+      return NULL;
     }
   return NULL;
 }

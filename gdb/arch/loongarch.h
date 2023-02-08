@@ -25,20 +25,22 @@
 /* Register numbers of various important registers.  */
 enum loongarch_regnum
 {
-  LOONGARCH_RA_REGNUM = 1,		/* Return Address.  */
-  LOONGARCH_SP_REGNUM = 3,		/* Stack Pointer.  */
-  LOONGARCH_A0_REGNUM = 4,		/* First Argument/Return Value.  */
-  LOONGARCH_A7_REGNUM = 11,		/* Seventh Argument/Syscall Number.  */
-  LOONGARCH_FP_REGNUM = 22,		/* Frame Pointer.  */
-  LOONGARCH_ORIG_A0_REGNUM = 32,	/* Syscall's original arg0.  */
-  LOONGARCH_PC_REGNUM = 33,		/* Program Counter.  */
-  LOONGARCH_BADV_REGNUM = 34,		/* Bad Vaddr for Addressing Exception.  */
-  LOONGARCH_LINUX_NUM_GREGSET = 45,	/* 32 GPR, ORIG_A0, PC, BADV, RESERVED 10.  */
-  LOONGARCH_ARG_REGNUM = 8,            /* r4-r11: general-purpose argument registers.
+  LOONGARCH_RA_REGNUM = 1,	 /* Return Address.  */
+  LOONGARCH_SP_REGNUM = 3,	 /* Stack Pointer.  */
+  LOONGARCH_A0_REGNUM = 4,	 /* First Argument/Return Value.  */
+  LOONGARCH_A7_REGNUM = 11,	 /* Seventh Argument/Syscall Number.  */
+  LOONGARCH_FP_REGNUM = 22,	 /* Frame Pointer.  */
+  LOONGARCH_ORIG_A0_REGNUM = 32, /* Syscall's original arg0.  */
+  LOONGARCH_PC_REGNUM = 33,	 /* Program Counter.  */
+  LOONGARCH_BADV_REGNUM = 34,	 /* Bad Vaddr for Addressing Exception.  */
+  LOONGARCH_LINUX_NUM_GREGSET
+  = 45,			    /* 32 GPR, ORIG_A0, PC, BADV, RESERVED 10.  */
+  LOONGARCH_ARG_REGNUM = 8, /* r4-r11: general-purpose argument registers.
 					  f0-f7: floating-point argument registers.  */
   LOONGARCH_FIRST_FP_REGNUM = LOONGARCH_LINUX_NUM_GREGSET,
   LOONGARCH_LINUX_NUM_FPREGSET = 32,
-  LOONGARCH_FIRST_FCC_REGNUM = LOONGARCH_FIRST_FP_REGNUM + LOONGARCH_LINUX_NUM_FPREGSET,
+  LOONGARCH_FIRST_FCC_REGNUM
+  = LOONGARCH_FIRST_FP_REGNUM + LOONGARCH_LINUX_NUM_FPREGSET,
   LOONGARCH_LINUX_NUM_FCC = 8,
   LOONGARCH_FCSR_REGNUM = LOONGARCH_FIRST_FCC_REGNUM + LOONGARCH_LINUX_NUM_FCC,
 };
@@ -98,8 +100,8 @@ struct loongarch_gdbarch_features
    This is only used directly from the gdbserver where the created target
    description is modified after it is return.  */
 
-target_desc_up loongarch_create_target_description
-	(const struct loongarch_gdbarch_features features);
+target_desc_up loongarch_create_target_description (
+  const struct loongarch_gdbarch_features features);
 
 #else
 
@@ -110,8 +112,8 @@ target_desc_up loongarch_create_target_description
    GDBARCH_LIST_LOOKUP_BY_INFO performs a pointer comparison on target
    descriptions to find candidate gdbarch objects.  */
 
-const target_desc *loongarch_lookup_target_description
-	(const struct loongarch_gdbarch_features features);
+const target_desc *loongarch_lookup_target_description (
+  const struct loongarch_gdbarch_features features);
 
 #endif /* GDBSERVER */
 

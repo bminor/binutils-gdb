@@ -41,8 +41,8 @@ syscall_warn_user (void)
   if (!have_warned)
     {
       have_warned = 1;
-      warning (_("Can not parse XML syscalls information; XML support was "
-		 "disabled at compile time."));
+      warning (_ ("Can not parse XML syscalls information; XML support was "
+		  "disabled at compile time."));
     }
 }
 
@@ -53,8 +53,8 @@ set_xml_syscall_file_name (struct gdbarch *gdbarch, const char *name)
 }
 
 void
-get_syscall_by_number (struct gdbarch *gdbarch,
-		       int syscall_number, struct syscall *s)
+get_syscall_by_number (struct gdbarch *gdbarch, int syscall_number,
+		       struct syscall *s)
 {
   syscall_warn_user ();
   s->number = syscall_number;
@@ -97,8 +97,11 @@ get_syscall_group_names (struct gdbarch *gdbarch)
 struct syscall_desc
 {
   syscall_desc (int number_, std::string name_, std::string alias_)
-  : number (number_), name (name_), alias (alias_)
-  {}
+    : number (number_),
+      name (name_),
+      alias (alias_)
+  {
+  }
 
   /* The syscall number.  */
 
@@ -119,8 +122,9 @@ typedef std::unique_ptr<syscall_desc> syscall_desc_up;
 struct syscall_group_desc
 {
   syscall_group_desc (const std::string &name_)
-  : name (name_)
-  {}
+    : name (name_)
+  {
+  }
 
   /* The group name.  */
 
@@ -180,8 +184,7 @@ syscall_group_create_syscall_group_desc (struct syscalls_info *syscalls_info,
 
 static void
 syscall_group_add_syscall (struct syscalls_info *syscalls_info,
-			   struct syscall_desc *syscall,
-			   const char *group)
+			   struct syscall_desc *syscall, const char *group)
 {
   /* Search for an existing group.  */
   std::vector<syscall_group_desc_up>::iterator it
@@ -201,8 +204,8 @@ syscall_group_add_syscall (struct syscalls_info *syscalls_info,
     {
       /* No group was found with this name.  We must create a new
 	 one.  */
-      groupdesc = syscall_group_create_syscall_group_desc (syscalls_info,
-							   group);
+      groupdesc
+	= syscall_group_create_syscall_group_desc (syscalls_info, group);
     }
 
   groupdesc->syscalls.push_back (syscall);
@@ -213,8 +216,8 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
 			     const char *name, int number, const char *alias,
 			     char *groups)
 {
-  syscall_desc *sysdesc = new syscall_desc (number, name,
-					    alias != NULL ? alias : "");
+  syscall_desc *sysdesc
+    = new syscall_desc (number, name, alias != NULL ? alias : "");
 
   syscalls_info->syscalls.emplace_back (sysdesc);
 
@@ -222,8 +225,7 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
   if (groups != NULL)
     {
       char *saveptr;
-      for (char *group = strtok_r (groups, ",", &saveptr);
-	   group != NULL;
+      for (char *group = strtok_r (groups, ",", &saveptr); group != NULL;
 	   group = strtok_r (NULL, ",", &saveptr))
 	syscall_group_add_syscall (syscalls_info, sysdesc, group);
     }
@@ -232,11 +234,11 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
 /* Handle the start of a <syscall> element.  */
 static void
 syscall_start_syscall (struct gdb_xml_parser *parser,
-		       const struct gdb_xml_element *element,
-		       void *user_data,
+		       const struct gdb_xml_element *element, void *user_data,
 		       std::vector<gdb_xml_value> &attributes)
 {
-  struct syscall_parsing_data *data = (struct syscall_parsing_data *) user_data;
+  struct syscall_parsing_data *data
+    = (struct syscall_parsing_data *) user_data;
   /* syscall info.  */
   char *name = NULL;
   int number = 0;
@@ -248,13 +250,13 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
       if (strcmp (attr.name, "name") == 0)
 	name = (char *) attr.value.get ();
       else if (strcmp (attr.name, "number") == 0)
-	number = * (ULONGEST *) attr.value.get ();
+	number = *(ULONGEST *) attr.value.get ();
       else if (strcmp (attr.name, "alias") == 0)
 	alias = (char *) attr.value.get ();
       else if (strcmp (attr.name, "groups") == 0)
 	groups = (char *) attr.value.get ();
       else
-	internal_error (_("Unknown attribute name '%s'."), attr.name);
+	internal_error (_ ("Unknown attribute name '%s'."), attr.name);
     }
 
   gdb_assert (name);
@@ -262,28 +264,24 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
 			       groups);
 }
 
-
 /* The elements and attributes of an XML syscall document.  */
-static const struct gdb_xml_attribute syscall_attr[] = {
-  { "number", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
-  { "name", GDB_XML_AF_NONE, NULL, NULL },
-  { "alias", GDB_XML_AF_OPTIONAL, NULL, NULL },
-  { "groups", GDB_XML_AF_OPTIONAL, NULL, NULL },
-  { NULL, GDB_XML_AF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_attribute syscall_attr[]
+  = { { "number", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+      { "name", GDB_XML_AF_NONE, NULL, NULL },
+      { "alias", GDB_XML_AF_OPTIONAL, NULL, NULL },
+      { "groups", GDB_XML_AF_OPTIONAL, NULL, NULL },
+      { NULL, GDB_XML_AF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_element syscalls_info_children[] = {
-  { "syscall", syscall_attr, NULL,
-    GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
-    syscall_start_syscall, NULL },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_element syscalls_info_children[]
+  = { { "syscall", syscall_attr, NULL,
+	GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE, syscall_start_syscall,
+	NULL },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
-static const struct gdb_xml_element syselements[] = {
-  { "syscalls_info", NULL, syscalls_info_children,
-    GDB_XML_EF_NONE, NULL, NULL },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+static const struct gdb_xml_element syselements[]
+  = { { "syscalls_info", NULL, syscalls_info_children, GDB_XML_EF_NONE, NULL,
+	NULL },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
 static struct syscalls_info *
 syscall_parse_xml (const char *document, xml_fetch_another fetcher)
@@ -293,15 +291,16 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher)
 
   data.syscalls_info = sysinfo.get ();
 
-  if (gdb_xml_parse_quick (_("syscalls info"), NULL,
-			   syselements, document, &data) == 0)
+  if (gdb_xml_parse_quick (_ ("syscalls info"), NULL, syselements, document,
+			   &data)
+      == 0)
     {
       /* Parsed successfully.  */
       return sysinfo.release ();
     }
   else
     {
-      warning (_("Could not load XML syscalls info; ignoring"));
+      warning (_ ("Could not load XML syscalls info; ignoring"));
       return NULL;
     }
 }
@@ -316,15 +315,14 @@ xml_init_syscalls_info (const char *filename)
 {
   gdb::optional<gdb::char_vector> full_file
     = xml_fetch_content_from_file (filename,
-				   const_cast<char *>(gdb_datadir.c_str ()));
+				   const_cast<char *> (gdb_datadir.c_str ()));
   if (!full_file)
     return NULL;
 
   const std::string dirname = ldirname (filename);
-  auto fetch_another = [&dirname] (const char *name)
-    {
-      return xml_fetch_content_from_file (name, dirname.c_str ());
-    };
+  auto fetch_another = [&dirname] (const char *name) {
+    return xml_fetch_content_from_file (name, dirname.c_str ());
+  };
 
   return syscall_parse_xml (full_file->data (), fetch_another);
 }
@@ -340,7 +338,8 @@ init_syscalls_info (struct gdbarch *gdbarch)
   /* Should we re-read the XML info for this target?  */
   if (syscalls_info != NULL && !syscalls_info->my_gdb_datadir.empty ()
       && filename_cmp (syscalls_info->my_gdb_datadir.c_str (),
-		       gdb_datadir.c_str ()) != 0)
+		       gdb_datadir.c_str ())
+	   != 0)
     {
       /* The data-directory changed from the last time we used it.
 	 It means that we have to re-read the XML info.  */
@@ -364,14 +363,14 @@ init_syscalls_info (struct gdbarch *gdbarch)
   if (syscalls_info->syscalls.empty ())
     {
       if (xml_syscall_file != NULL)
-	warning (_("Could not load the syscall XML file `%s/%s'."),
+	warning (_ ("Could not load the syscall XML file `%s/%s'."),
 		 gdb_datadir.c_str (), xml_syscall_file);
       else
-	warning (_("There is no XML file to open."));
+	warning (_ ("There is no XML file to open."));
 
-      warning (_("GDB will not be able to display "
-		 "syscall names nor to verify if\n"
-		 "any provided syscall numbers are valid."));
+      warning (_ ("GDB will not be able to display "
+		  "syscall names nor to verify if\n"
+		  "any provided syscall numbers are valid."));
     }
 
   /* Saving the data-directory used to read this XML info.  */
@@ -422,13 +421,11 @@ xml_get_syscalls_by_name (struct gdbarch *gdbarch, const char *syscall_name,
 }
 
 static const char *
-xml_get_syscall_name (struct gdbarch *gdbarch,
-		      int syscall_number)
+xml_get_syscall_name (struct gdbarch *gdbarch, int syscall_number)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
 
-  if (syscalls_info == NULL
-      || syscall_number < 0)
+  if (syscalls_info == NULL || syscall_number < 0)
     return NULL;
 
   for (const syscall_desc_up &sysdesc : syscalls_info->syscalls)
@@ -498,7 +495,7 @@ xml_list_of_groups (struct gdbarch *gdbarch)
     return NULL;
 
   ngroups = syscalls_info->groups.size ();
-  names = (const char**) xmalloc ((ngroups + 1) * sizeof (char *));
+  names = (const char **) xmalloc ((ngroups + 1) * sizeof (char *));
 
   for (i = 0; i < syscalls_info->groups.size (); i++)
     names[i] = syscalls_info->groups[i]->name.c_str ();
@@ -515,8 +512,8 @@ set_xml_syscall_file_name (struct gdbarch *gdbarch, const char *name)
 }
 
 void
-get_syscall_by_number (struct gdbarch *gdbarch,
-		       int syscall_number, struct syscall *s)
+get_syscall_by_number (struct gdbarch *gdbarch, int syscall_number,
+		       struct syscall *s)
 {
   init_syscalls_info (gdbarch);
 

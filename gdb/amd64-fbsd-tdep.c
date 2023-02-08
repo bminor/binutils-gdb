@@ -35,105 +35,81 @@
 /* The general-purpose regset consists of 22 64-bit slots, most of
    which contain individual registers, but a few contain multiple
    16-bit segment registers.  */
-#define AMD64_FBSD_SIZEOF_GREGSET	(22 * 8)
+#define AMD64_FBSD_SIZEOF_GREGSET (22 * 8)
 
 /* The segment base register set consists of 2 64-bit registers.  */
-#define AMD64_FBSD_SIZEOF_SEGBASES_REGSET	(2 * 8)
+#define AMD64_FBSD_SIZEOF_SEGBASES_REGSET (2 * 8)
 
 /* Register maps.  */
 
-static const struct regcache_map_entry amd64_fbsd_gregmap[] =
-{
-  { 1, AMD64_R15_REGNUM, 0 },
-  { 1, AMD64_R14_REGNUM, 0 },
-  { 1, AMD64_R13_REGNUM, 0 },
-  { 1, AMD64_R12_REGNUM, 0 },
-  { 1, AMD64_R11_REGNUM, 0 },
-  { 1, AMD64_R10_REGNUM, 0 },
-  { 1, AMD64_R9_REGNUM, 0 },
-  { 1, AMD64_R8_REGNUM, 0 },
-  { 1, AMD64_RDI_REGNUM, 0 },
-  { 1, AMD64_RSI_REGNUM, 0 },
-  { 1, AMD64_RBP_REGNUM, 0 },
-  { 1, AMD64_RBX_REGNUM, 0 },
-  { 1, AMD64_RDX_REGNUM, 0 },
-  { 1, AMD64_RCX_REGNUM, 0 },
-  { 1, AMD64_RAX_REGNUM, 0 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* trapno */
-  { 1, AMD64_FS_REGNUM, 2 },
-  { 1, AMD64_GS_REGNUM, 2 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* err */
-  { 1, AMD64_ES_REGNUM, 2 },
-  { 1, AMD64_DS_REGNUM, 2 },
-  { 1, AMD64_RIP_REGNUM, 0 },
-  { 1, AMD64_CS_REGNUM, 8 },
-  { 1, AMD64_EFLAGS_REGNUM, 8 },
-  { 1, AMD64_RSP_REGNUM, 0 },
-  { 1, AMD64_SS_REGNUM, 8 },
-  { 0 }
-};
+static const struct regcache_map_entry amd64_fbsd_gregmap[]
+  = { { 1, AMD64_R15_REGNUM, 0 },    { 1, AMD64_R14_REGNUM, 0 },
+      { 1, AMD64_R13_REGNUM, 0 },    { 1, AMD64_R12_REGNUM, 0 },
+      { 1, AMD64_R11_REGNUM, 0 },    { 1, AMD64_R10_REGNUM, 0 },
+      { 1, AMD64_R9_REGNUM, 0 },     { 1, AMD64_R8_REGNUM, 0 },
+      { 1, AMD64_RDI_REGNUM, 0 },    { 1, AMD64_RSI_REGNUM, 0 },
+      { 1, AMD64_RBP_REGNUM, 0 },    { 1, AMD64_RBX_REGNUM, 0 },
+      { 1, AMD64_RDX_REGNUM, 0 },    { 1, AMD64_RCX_REGNUM, 0 },
+      { 1, AMD64_RAX_REGNUM, 0 },    { 1, REGCACHE_MAP_SKIP, 4 }, /* trapno */
+      { 1, AMD64_FS_REGNUM, 2 },     { 1, AMD64_GS_REGNUM, 2 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* err */
+      { 1, AMD64_ES_REGNUM, 2 },     { 1, AMD64_DS_REGNUM, 2 },
+      { 1, AMD64_RIP_REGNUM, 0 },    { 1, AMD64_CS_REGNUM, 8 },
+      { 1, AMD64_EFLAGS_REGNUM, 8 }, { 1, AMD64_RSP_REGNUM, 0 },
+      { 1, AMD64_SS_REGNUM, 8 },     { 0 } };
 
-static const struct regcache_map_entry amd64_fbsd_segbases_regmap[] =
-{
-  { 1, AMD64_FSBASE_REGNUM, 0 },
-  { 1, AMD64_GSBASE_REGNUM, 0 },
-  { 0 }
-};
+static const struct regcache_map_entry amd64_fbsd_segbases_regmap[]
+  = { { 1, AMD64_FSBASE_REGNUM, 0 }, { 1, AMD64_GSBASE_REGNUM, 0 }, { 0 } };
 
 /* This layout including fsbase and gsbase was adopted in FreeBSD
    8.0.  */
 
-static const struct regcache_map_entry amd64_fbsd_mcregmap[] =
-{
-  { 1, REGCACHE_MAP_SKIP, 8 },	/* mc_onstack */
-  { 1, AMD64_RDI_REGNUM, 0 },
-  { 1, AMD64_RSI_REGNUM, 0 },
-  { 1, AMD64_RDX_REGNUM, 0 },
-  { 1, AMD64_RCX_REGNUM, 0 },
-  { 1, AMD64_R8_REGNUM, 0 },
-  { 1, AMD64_R9_REGNUM, 0 },
-  { 1, AMD64_RAX_REGNUM, 0 },
-  { 1, AMD64_RBX_REGNUM, 0 },
-  { 1, AMD64_RBP_REGNUM, 0 },
-  { 1, AMD64_R10_REGNUM, 0 },
-  { 1, AMD64_R11_REGNUM, 0 },
-  { 1, AMD64_R12_REGNUM, 0 },
-  { 1, AMD64_R13_REGNUM, 0 },
-  { 1, AMD64_R14_REGNUM, 0 },
-  { 1, AMD64_R15_REGNUM, 0 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_trapno */
-  { 1, AMD64_FS_REGNUM, 2 },
-  { 1, AMD64_GS_REGNUM, 2 },
-  { 1, REGCACHE_MAP_SKIP, 8 },	/* mc_addr */
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_flags */
-  { 1, AMD64_ES_REGNUM, 2 },
-  { 1, AMD64_DS_REGNUM, 2 },
-  { 1, REGCACHE_MAP_SKIP, 8 },	/* mc_err */
-  { 1, AMD64_RIP_REGNUM, 0 },
-  { 1, AMD64_CS_REGNUM, 8 },
-  { 1, AMD64_EFLAGS_REGNUM, 8 },
-  { 1, AMD64_RSP_REGNUM, 0 },
-  { 1, AMD64_SS_REGNUM, 8 },
-  { 1, REGCACHE_MAP_SKIP, 8 },	/* mc_len */
-  { 1, REGCACHE_MAP_SKIP, 8 },	/* mc_fpformat */
-  { 1, REGCACHE_MAP_SKIP, 8 },	/* mc_ownedfp */
-  { 64, REGCACHE_MAP_SKIP, 8 },	/* mc_fpstate */
-  { 1, AMD64_FSBASE_REGNUM, 0 },
-  { 1, AMD64_GSBASE_REGNUM, 0 },
-  { 0 }
-};
+static const struct regcache_map_entry amd64_fbsd_mcregmap[]
+  = { { 1, REGCACHE_MAP_SKIP, 8 }, /* mc_onstack */
+      { 1, AMD64_RDI_REGNUM, 0 },
+      { 1, AMD64_RSI_REGNUM, 0 },
+      { 1, AMD64_RDX_REGNUM, 0 },
+      { 1, AMD64_RCX_REGNUM, 0 },
+      { 1, AMD64_R8_REGNUM, 0 },
+      { 1, AMD64_R9_REGNUM, 0 },
+      { 1, AMD64_RAX_REGNUM, 0 },
+      { 1, AMD64_RBX_REGNUM, 0 },
+      { 1, AMD64_RBP_REGNUM, 0 },
+      { 1, AMD64_R10_REGNUM, 0 },
+      { 1, AMD64_R11_REGNUM, 0 },
+      { 1, AMD64_R12_REGNUM, 0 },
+      { 1, AMD64_R13_REGNUM, 0 },
+      { 1, AMD64_R14_REGNUM, 0 },
+      { 1, AMD64_R15_REGNUM, 0 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* mc_trapno */
+      { 1, AMD64_FS_REGNUM, 2 },
+      { 1, AMD64_GS_REGNUM, 2 },
+      { 1, REGCACHE_MAP_SKIP, 8 }, /* mc_addr */
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* mc_flags */
+      { 1, AMD64_ES_REGNUM, 2 },
+      { 1, AMD64_DS_REGNUM, 2 },
+      { 1, REGCACHE_MAP_SKIP, 8 }, /* mc_err */
+      { 1, AMD64_RIP_REGNUM, 0 },
+      { 1, AMD64_CS_REGNUM, 8 },
+      { 1, AMD64_EFLAGS_REGNUM, 8 },
+      { 1, AMD64_RSP_REGNUM, 0 },
+      { 1, AMD64_SS_REGNUM, 8 },
+      { 1, REGCACHE_MAP_SKIP, 8 },  /* mc_len */
+      { 1, REGCACHE_MAP_SKIP, 8 },  /* mc_fpformat */
+      { 1, REGCACHE_MAP_SKIP, 8 },  /* mc_ownedfp */
+      { 64, REGCACHE_MAP_SKIP, 8 }, /* mc_fpstate */
+      { 1, AMD64_FSBASE_REGNUM, 0 },
+      { 1, AMD64_GSBASE_REGNUM, 0 },
+      { 0 } };
 
 /* Register set definitions.  */
 
-const struct regset amd64_fbsd_gregset =
-{
-  amd64_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset
-};
+const struct regset amd64_fbsd_gregset
+  = { amd64_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset };
 
-const struct regset amd64_fbsd_segbases_regset =
-{
-  amd64_fbsd_segbases_regmap, regcache_supply_regset, regcache_collect_regset
-};
+const struct regset amd64_fbsd_segbases_regset
+  = { amd64_fbsd_segbases_regmap, regcache_supply_regset,
+      regcache_collect_regset };
 
 /* Support for signal handlers.  */
 
@@ -161,23 +137,20 @@ const struct regset amd64_fbsd_segbases_regset =
    as the floating point or XSAVE state.  */
 
 /* NB: There is an 8 byte padding hole between sf_ahu and sf_uc. */
-#define AMD64_SIGFRAME_UCONTEXT_OFFSET 		16
-#define AMD64_UCONTEXT_MCONTEXT_OFFSET		16
-#define AMD64_SIZEOF_MCONTEXT_T			800
+#define AMD64_SIGFRAME_UCONTEXT_OFFSET 16
+#define AMD64_UCONTEXT_MCONTEXT_OFFSET 16
+#define AMD64_SIZEOF_MCONTEXT_T 800
 
 /* Implement the "init" method of struct tramp_frame.  */
 
 static void
 amd64_fbsd_sigframe_init (const struct tramp_frame *self,
 			  frame_info_ptr this_frame,
-			  struct trad_frame_cache *this_cache,
-			  CORE_ADDR func)
+			  struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, AMD64_RSP_REGNUM);
   CORE_ADDR mcontext_addr
-    = (sp
-       + AMD64_SIGFRAME_UCONTEXT_OFFSET
-       + AMD64_UCONTEXT_MCONTEXT_OFFSET);
+    = (sp + AMD64_SIGFRAME_UCONTEXT_OFFSET + AMD64_UCONTEXT_MCONTEXT_OFFSET);
 
   trad_frame_set_reg_regmap (this_cache, amd64_fbsd_mcregmap, mcontext_addr,
 			     AMD64_SIZEOF_MCONTEXT_T);
@@ -191,38 +164,33 @@ amd64_fbsd_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-static const struct tramp_frame amd64_fbsd_sigframe =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-    {0x48, ULONGEST_MAX},		/* lea	   SIGF_UC(%rsp),%rdi */
-    {0x8d, ULONGEST_MAX},
-    {0x7c, ULONGEST_MAX},
-    {0x24, ULONGEST_MAX},
-    {0x10, ULONGEST_MAX},
-    {0x6a, ULONGEST_MAX},		/* pushq   $0 */
-    {0x00, ULONGEST_MAX},
-    {0x48, ULONGEST_MAX},		/* movq	   $SYS_sigreturn,%rax */
-    {0xc7, ULONGEST_MAX},
-    {0xc0, ULONGEST_MAX},
-    {0xa1, ULONGEST_MAX},
-    {0x01, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x0f, ULONGEST_MAX},		/* syscall */
-    {0x05, ULONGEST_MAX},
-    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
-  },
-  amd64_fbsd_sigframe_init
-};
+static const struct tramp_frame amd64_fbsd_sigframe
+  = { SIGTRAMP_FRAME,
+      1,
+      { { 0x48, ULONGEST_MAX }, /* lea	   SIGF_UC(%rsp),%rdi */
+	{ 0x8d, ULONGEST_MAX },
+	{ 0x7c, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x10, ULONGEST_MAX },
+	{ 0x6a, ULONGEST_MAX }, /* pushq   $0 */
+	{ 0x00, ULONGEST_MAX },
+	{ 0x48, ULONGEST_MAX }, /* movq	   $SYS_sigreturn,%rax */
+	{ 0xc7, ULONGEST_MAX },
+	{ 0xc0, ULONGEST_MAX },
+	{ 0xa1, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x0f, ULONGEST_MAX }, /* syscall */
+	{ 0x05, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      amd64_fbsd_sigframe_init };
 
 /* Implement the core_read_description gdbarch method.  */
 
 static const struct target_desc *
 amd64fbsd_core_read_description (struct gdbarch *gdbarch,
-				 struct target_ops *target,
-				 bfd *abfd)
+				 struct target_ops *target, bfd *abfd)
 {
   return amd64_target_description (i386fbsd_core_read_xcr0 (abfd), true);
 }
@@ -241,18 +209,14 @@ amd64fbsd_supply_xstateregset (const struct regset *regset,
 
 static void
 amd64fbsd_collect_xstateregset (const struct regset *regset,
-				const struct regcache *regcache,
-				int regnum, void *xstateregs, size_t len)
+				const struct regcache *regcache, int regnum,
+				void *xstateregs, size_t len)
 {
   amd64_collect_xsave (regcache, regnum, xstateregs, 1);
 }
 
-static const struct regset amd64fbsd_xstateregset =
-  {
-    NULL,
-    amd64fbsd_supply_xstateregset,
-    amd64fbsd_collect_xstateregset
-  };
+static const struct regset amd64fbsd_xstateregset
+  = { NULL, amd64fbsd_supply_xstateregset, amd64fbsd_collect_xstateregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -271,8 +235,9 @@ amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg-x86-segbases", AMD64_FBSD_SIZEOF_SEGBASES_REGSET,
       AMD64_FBSD_SIZEOF_SEGBASES_REGSET, &amd64_fbsd_segbases_regset,
       "segment bases", cb_data);
-  cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0), X86_XSTATE_SIZE (tdep->xcr0),
-      &amd64fbsd_xstateregset, "XSAVE extended state", cb_data);
+  cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0),
+      X86_XSTATE_SIZE (tdep->xcr0), &amd64fbsd_xstateregset,
+      "XSAVE extended state", cb_data);
 }
 
 /* Implement the get_thread_local_address gdbarch method.  */
@@ -290,7 +255,7 @@ amd64fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 
   ULONGEST fsbase;
   if (regcache->cooked_read (AMD64_FSBASE_REGNUM, &fsbase) != REG_VALID)
-    error (_("Unable to fetch %%fsbase"));
+    error (_ ("Unable to fetch %%fsbase"));
 
   CORE_ADDR dtv_addr = fsbase + gdbarch_ptr_bit (gdbarch) / 8;
   return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
@@ -315,15 +280,14 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->xsave_xcr0_offset = I386_FBSD_XSAVE_XCR0_OFFSET;
 
   /* Iterate over core file register note sections.  */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, amd64fbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, amd64fbsd_iterate_over_regset_sections);
 
-  set_gdbarch_core_read_description (gdbarch,
-				     amd64fbsd_core_read_description);
+  set_gdbarch_core_read_description (gdbarch, amd64fbsd_core_read_description);
 
   /* FreeBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
@@ -332,9 +296,10 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_amd64fbsd_tdep ();
+
 void
 _initialize_amd64fbsd_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_FREEBSD, amd64fbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_FREEBSD,
+			  amd64fbsd_init_abi);
 }

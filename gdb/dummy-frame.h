@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (DUMMY_FRAME_H)
+#if !defined(DUMMY_FRAME_H)
 #define DUMMY_FRAME_H 1
 
 #include "frame.h"
@@ -35,8 +35,7 @@ class thread_info;
    frame's code.  */
 
 extern void dummy_frame_push (infcall_suspend_state *caller_state,
-			      const frame_id *dummy_id,
-			      thread_info *thread);
+			      const frame_id *dummy_id, thread_info *thread);
 
 /* Pop the dummy frame DUMMY_ID, restoring program state to that before the
    frame was created.
@@ -64,8 +63,7 @@ typedef void (dummy_frame_dtor_ftype) (void *data, int registers_valid);
    discarded.  Dummy frame with DUMMY_ID must exist.  Multiple
    destructors may be registered, they will be called in the reverse
    order of registrations (LIFO).  */
-extern void register_dummy_frame_dtor (frame_id dummy_id,
-				       thread_info *thread,
+extern void register_dummy_frame_dtor (frame_id dummy_id, thread_info *thread,
 				       dummy_frame_dtor_ftype *dtor,
 				       void *dtor_data);
 

@@ -25,8 +25,10 @@
 struct osdata_column
 {
   osdata_column (std::string &&name_, std::string &&value_)
-  : name (std::move (name_)), value (std::move (value_))
-  {}
+    : name (std::move (name_)),
+      value (std::move (value_))
+  {
+  }
 
   std::string name;
   std::string value;
@@ -40,8 +42,9 @@ struct osdata_item
 struct osdata
 {
   osdata (std::string &&type_)
-  : type (std::move (type_))
-  {}
+    : type (std::move (type_))
+  {
+  }
 
   std::string type;
   std::vector<osdata_item> items;

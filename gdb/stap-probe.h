@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (STAP_PROBE_H)
+#if !defined(STAP_PROBE_H)
 #define STAP_PROBE_H 1
 
 #include "parser-defs.h"
@@ -28,8 +28,7 @@
 struct stap_parse_info
 {
   stap_parse_info (const char *arg_, struct type *arg_type_,
-		   const struct language_defn *lang,
-		   struct gdbarch *gdbarch)
+		   const struct language_defn *lang, struct gdbarch *gdbarch)
     : arg (arg_),
       pstate (lang, gdbarch),
       saved_arg (arg_),

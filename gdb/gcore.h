@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (GCORE_H)
+#if !defined(GCORE_H)
 #define GCORE_H 1
 
 #include "gdb_bfd.h"

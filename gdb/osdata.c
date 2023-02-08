@@ -34,8 +34,8 @@ osdata_parse (const char *xml)
   if (!have_warned)
     {
       have_warned = 1;
-      warning (_("Can not parse XML OS data; XML support was disabled "
-		"at compile time"));
+      warning (_ ("Can not parse XML OS data; XML support was disabled "
+		  "at compile time"));
     }
 
   return NULL;
@@ -54,14 +54,13 @@ struct osdata_parsing_data
 
 static void
 osdata_start_osdata (struct gdb_xml_parser *parser,
-			const struct gdb_xml_element *element,
-			void *user_data,
-			std::vector<gdb_xml_value> &attributes)
+		     const struct gdb_xml_element *element, void *user_data,
+		     std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
 
   if (data->osdata != NULL)
-    gdb_xml_error (parser, _("Seen more than on osdata element"));
+    gdb_xml_error (parser, _ ("Seen more than on osdata element"));
 
   char *type = (char *) xml_find_attribute (attributes, "type")->value.get ();
   data->osdata.reset (new struct osdata (std::string (type)));
@@ -71,9 +70,8 @@ osdata_start_osdata (struct gdb_xml_parser *parser,
 
 static void
 osdata_start_item (struct gdb_xml_parser *parser,
-		  const struct gdb_xml_element *element,
-		  void *user_data,
-		  std::vector<gdb_xml_value> &attributes)
+		   const struct gdb_xml_element *element, void *user_data,
+		   std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
   data->osdata->items.emplace_back ();
@@ -83,9 +81,8 @@ osdata_start_item (struct gdb_xml_parser *parser,
 
 static void
 osdata_start_column (struct gdb_xml_parser *parser,
-		    const struct gdb_xml_element *element,
-		    void *user_data,
-		    std::vector<gdb_xml_value> &attributes)
+		     const struct gdb_xml_element *element, void *user_data,
+		     std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
   const char *name
@@ -98,8 +95,8 @@ osdata_start_column (struct gdb_xml_parser *parser,
 
 static void
 osdata_end_column (struct gdb_xml_parser *parser,
-		  const struct gdb_xml_element *element,
-		  void *user_data, const char *body_text)
+		   const struct gdb_xml_element *element, void *user_data,
+		   const char *body_text)
 {
   osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
   struct osdata *osdata = data->osdata.get ();
@@ -112,43 +109,38 @@ osdata_end_column (struct gdb_xml_parser *parser,
 /* The allowed elements and attributes for OS data object.
    The root element is a <osdata>.  */
 
-const struct gdb_xml_attribute column_attributes[] = {
-  { "name", GDB_XML_AF_NONE, NULL, NULL },
-  { NULL, GDB_XML_AF_NONE, NULL, NULL }
-};
+const struct gdb_xml_attribute column_attributes[]
+  = { { "name", GDB_XML_AF_NONE, NULL, NULL },
+      { NULL, GDB_XML_AF_NONE, NULL, NULL } };
 
-const struct gdb_xml_element item_children[] = {
-  { "column", column_attributes, NULL,
-    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
-    osdata_start_column, osdata_end_column },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+const struct gdb_xml_element item_children[]
+  = { { "column", column_attributes, NULL,
+	GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL, osdata_start_column,
+	osdata_end_column },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
-const struct gdb_xml_attribute osdata_attributes[] = {
-  { "type", GDB_XML_AF_NONE, NULL, NULL },
-  { NULL, GDB_XML_AF_NONE, NULL, NULL }
-};
+const struct gdb_xml_attribute osdata_attributes[]
+  = { { "type", GDB_XML_AF_NONE, NULL, NULL },
+      { NULL, GDB_XML_AF_NONE, NULL, NULL } };
 
-const struct gdb_xml_element osdata_children[] = {
-  { "item", NULL, item_children,
-    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
-    osdata_start_item, NULL },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+const struct gdb_xml_element osdata_children[]
+  = { { "item", NULL, item_children,
+	GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL, osdata_start_item, NULL },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
-const struct gdb_xml_element osdata_elements[] = {
-  { "osdata", osdata_attributes, osdata_children,
-    GDB_XML_EF_NONE, osdata_start_osdata, NULL },
-  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
-};
+const struct gdb_xml_element osdata_elements[]
+  = { { "osdata", osdata_attributes, osdata_children, GDB_XML_EF_NONE,
+	osdata_start_osdata, NULL },
+      { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL } };
 
 std::unique_ptr<osdata>
 osdata_parse (const char *xml)
 {
   osdata_parsing_data data;
 
-  if (gdb_xml_parse_quick (_("osdata"), "osdata.dtd",
-			   osdata_elements, xml, &data) == 0)
+  if (gdb_xml_parse_quick (_ ("osdata"), "osdata.dtd", osdata_elements, xml,
+			   &data)
+      == 0)
     {
       /* Parsed successfully, don't need to delete the result.  */
       return std::move (data.osdata);
@@ -169,16 +161,16 @@ get_osdata (const char *type)
       if ((*xml)[0] == '\0')
 	{
 	  if (type)
-	    warning (_("Empty data returned by target.  Wrong osdata type?"));
+	    warning (_ ("Empty data returned by target.  Wrong osdata type?"));
 	  else
-	    warning (_("Empty type list returned by target.  No type data?"));
+	    warning (_ ("Empty type list returned by target.  No type data?"));
 	}
       else
 	osdata = osdata_parse (xml->data ());
     }
 
   if (osdata == NULL)
-    error (_("Can not fetch data now."));
+    error (_ ("Can not fetch data now."));
 
   return osdata;
 }
@@ -209,8 +201,8 @@ info_osdata (const char *type)
   int nrows = osdata->items.size ();
 
   if (*type == '\0' && nrows == 0)
-    error (_("Available types of OS data not reported."));
-  
+    error (_ ("Available types of OS data not reported."));
+
   if (!osdata->items.empty ())
     {
       last = &osdata->items.back ();
@@ -251,8 +243,8 @@ info_osdata (const char *type)
 	    continue;
 
 	  snprintf (col_name, 32, "col%d", ix);
-	  uiout->table_header (10, ui_left,
-			       col_name, last->columns[ix].name.c_str ());
+	  uiout->table_header (10, ui_left, col_name,
+			       last->columns[ix].name.c_str ());
 	}
     }
 
@@ -261,24 +253,24 @@ info_osdata (const char *type)
   if (nrows != 0)
     {
       for (const osdata_item &item : osdata->items)
-       {
-	 {
-	   ui_out_emit_tuple tuple_emitter (uiout, "item");
+	{
+	  {
+	    ui_out_emit_tuple tuple_emitter (uiout, "item");
 
-	   for (int ix_cols = 0; ix_cols < item.columns.size (); ix_cols++)
-	     {
-	       char col_name[32];
+	    for (int ix_cols = 0; ix_cols < item.columns.size (); ix_cols++)
+	      {
+		char col_name[32];
 
-	       if (ix_cols == col_to_skip)
-		 continue;
+		if (ix_cols == col_to_skip)
+		  continue;
 
-	       snprintf (col_name, 32, "col%d", ix_cols);
-	       uiout->field_string (col_name, item.columns[ix_cols].value);
-	     }
-	 }
+		snprintf (col_name, 32, "col%d", ix_cols);
+		uiout->field_string (col_name, item.columns[ix_cols].value);
+	      }
+	  }
 
-	 uiout->text ("\n");
-       }
+	  uiout->text ("\n");
+	}
     }
 }
 
@@ -289,9 +281,9 @@ info_osdata_command (const char *arg, int from_tty)
 }
 
 void _initialize_osdata ();
+
 void
 _initialize_osdata ()
 {
-  add_info ("os", info_osdata_command,
-	   _("Show OS data ARG."));
+  add_info ("os", info_osdata_command, _ ("Show OS data ARG."));
 }

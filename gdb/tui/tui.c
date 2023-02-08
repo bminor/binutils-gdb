@@ -57,10 +57,10 @@ bool debug_tui = false;
 /* Implement 'show debug tui'.  */
 
 static void
-show_tui_debug (struct ui_file *file, int from_tty,
-		struct cmd_list_element *c, const char *value)
+show_tui_debug (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+		const char *value)
 {
-  gdb_printf (file, _("TUI debugging is \"%s\".\n"), value);
+  gdb_printf (file, _ ("TUI debugging is \"%s\".\n"), value);
 }
 
 /* This redefines CTRL if it is not already defined, so it must come
@@ -83,18 +83,10 @@ struct tui_char_command
 /* Key mapping to gdb commands when the TUI is using the single key
    mode.  */
 static const struct tui_char_command tui_commands[] = {
-  { 'c', "continue" },
-  { 'd', "down" },
-  { 'f', "finish" },
-  { 'n', "next" },
-  { 'o', "nexti" },
-  { 'r', "run" },
-  { 's', "step" },
-  { 'i', "stepi" },
-  { 'u', "up" },
-  { 'v', "info locals" },
-  { 'w', "where" },
-  { 0, 0 },
+  { 'c', "continue" },	  { 'd', "down" },  { 'f', "finish" },
+  { 'n', "next" },	  { 'o', "nexti" }, { 'r', "run" },
+  { 's', "step" },	  { 'i', "stepi" }, { 'u', "up" },
+  { 'v', "info locals" }, { 'w', "where" }, { 0, 0 },
 };
 
 static Keymap tui_keymap;
@@ -105,7 +97,6 @@ static Keymap tui_readline_standard_keymap;
 static int
 tui_rl_switch_mode (int notused1, int notused2)
 {
-
   /* Don't let exceptions escape.  We're in the middle of a readline
      callback that isn't prepared for that.  */
   try
@@ -245,7 +236,8 @@ tui_rl_next_keymap (int notused1, int notused2)
     tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   tui_set_key_mode (tui_current_key_mode == TUI_COMMAND_MODE
-		    ? TUI_SINGLE_KEY_MODE : TUI_COMMAND_MODE);
+		      ? TUI_SINGLE_KEY_MODE
+		      : TUI_COMMAND_MODE);
   return 0;
 }
 
@@ -270,8 +262,8 @@ void
 tui_set_key_mode (enum tui_key_mode mode)
 {
   tui_current_key_mode = mode;
-  rl_set_keymap (mode == TUI_SINGLE_KEY_MODE
-		 ? tui_keymap : tui_readline_standard_keymap);
+  rl_set_keymap (mode == TUI_SINGLE_KEY_MODE ? tui_keymap
+					     : tui_readline_standard_keymap);
   tui_show_locator_content ();
 }
 
@@ -308,7 +300,7 @@ tui_ensure_readline_initialized ()
   for (i = 0; tui_commands[i].cmd; i++)
     rl_bind_key_in_map (tui_commands[i].key, tui_rl_command_key, tui_keymap);
 
-  rl_generic_bind (ISKMAP, "\\C-x", (char*) tui_ctlx_keymap, tui_keymap);
+  rl_generic_bind (ISKMAP, "\\C-x", (char *) tui_ctlx_keymap, tui_keymap);
 
   /* Bind all other keys to tui_rl_command_mode so that we switch
      temporarily from SingleKey mode and can enter a gdb command.  */
@@ -380,7 +372,7 @@ tui_enable (void)
       WINDOW *w;
       SCREEN *s;
 #ifndef __MINGW32__
-       const char *cap;
+      const char *cap;
 #endif
       const char *interp;
 
@@ -388,12 +380,13 @@ tui_enable (void)
 	 MI), enabling curses will certainly lose.  */
       interp = top_level_interpreter ()->name ();
       if (strcmp (interp, INTERP_TUI) != 0)
-	error (_("Cannot enable the TUI when the interpreter is '%s'"), interp);
+	error (_ ("Cannot enable the TUI when the interpreter is '%s'"),
+	       interp);
 
       /* Don't try to setup curses (and print funny control
 	 characters) if we're not outputting to a terminal.  */
       if (!gdb_stderr->isatty ())
-	error (_("Cannot enable the TUI when output is not a terminal"));
+	error (_ ("Cannot enable the TUI when output is not a terminal"));
 
       s = newterm (NULL, stdout, stdin);
 #ifdef __MINGW32__
@@ -404,7 +397,7 @@ tui_enable (void)
 #endif
       if (s == NULL)
 	{
-	  error (_("Cannot enable the TUI: error opening terminal [TERM=%s]"),
+	  error (_ ("Cannot enable the TUI: error opening terminal [TERM=%s]"),
 		 gdb_getenv_term ());
 	}
       w = stdscr;
@@ -418,7 +411,7 @@ tui_enable (void)
 	  start_color ();
 	}
 
-      /* Check required terminal capabilities.  The MinGW port of
+	/* Check required terminal capabilities.  The MinGW port of
 	 ncurses does have them, but doesn't expose them through "cup".  */
 #ifndef __MINGW32__
       cap = tigetstr ((char *) "cup");
@@ -426,8 +419,8 @@ tui_enable (void)
 	{
 	  endwin ();
 	  delscreen (s);
-	  error (_("Cannot enable the TUI: "
-		   "terminal doesn't support cursor addressing [TERM=%s]"),
+	  error (_ ("Cannot enable the TUI: "
+		    "terminal doesn't support cursor addressing [TERM=%s]"),
 		 gdb_getenv_term ());
 	}
 #endif
@@ -441,8 +434,8 @@ tui_enable (void)
       cbreak ();
       noecho ();
       /* timeout (1); */
-      nodelay(w, FALSE);
-      nl();
+      nodelay (w, FALSE);
+      nl ();
       keypad (w, TRUE);
       tui_set_term_height_to (LINES);
       tui_set_term_width_to (COLS);
@@ -577,18 +570,18 @@ tui_is_window_visible (enum tui_win_type type)
 }
 
 bool
-tui_get_command_dimension (unsigned int *width, 
-			   unsigned int *height)
+tui_get_command_dimension (unsigned int *width, unsigned int *height)
 {
   if (!tui_active || (TUI_CMD_WIN == NULL))
     return false;
-  
+
   *width = TUI_CMD_WIN->width;
   *height = TUI_CMD_WIN->height;
   return true;
 }
 
 void _initialize_tui ();
+
 void
 _initialize_tui ()
 {
@@ -597,20 +590,21 @@ _initialize_tui ()
   tuicmd = tui_get_cmd_list ();
 
   add_cmd ("enable", class_tui, tui_enable_command,
-	   _("Enable TUI display mode.\n\
+	   _ ("Enable TUI display mode.\n\
 Usage: tui enable"),
 	   tuicmd);
   add_cmd ("disable", class_tui, tui_disable_command,
-	   _("Disable TUI display mode.\n\
+	   _ ("Disable TUI display mode.\n\
 Usage: tui disable"),
 	   tuicmd);
 
   /* Debug this tui internals.  */
-  add_setshow_boolean_cmd ("tui", class_maintenance, &debug_tui,  _("\
-Set tui debugging."), _("\
-Show tui debugging."), _("\
+  add_setshow_boolean_cmd ("tui", class_maintenance, &debug_tui, _ ("\
+Set tui debugging."),
+			   _ ("\
+Show tui debugging."),
+			   _ ("\
 When true, tui specific internal debugging is enabled."),
-			   NULL,
-			   show_tui_debug,
-			   &setdebuglist, &showdebuglist);
+			   NULL, show_tui_debug, &setdebuglist,
+			   &showdebuglist);
 }

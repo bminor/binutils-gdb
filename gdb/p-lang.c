@@ -87,7 +87,7 @@ pascal_main_name (void)
 /* See p-lang.h.  */
 
 int
-pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
+pascal_is_string_type (struct type *type, int *length_pos, int *length_size,
 		       int *string_pos, struct type **char_type,
 		       const char **arrayname)
 {
@@ -95,8 +95,7 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
     {
       /* Old Borland type pascal strings from Free Pascal Compiler.  */
       /* Two fields: length and st.  */
-      if (type->num_fields () == 2
-	  && type->field (0).name ()
+      if (type->num_fields () == 2 && type->field (0).name ()
 	  && strcmp (type->field (0).name (), "length") == 0
 	  && type->field (1).name ()
 	  && strcmp (type->field (1).name (), "st") == 0)
@@ -111,12 +110,11 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 	    *char_type = type->field (1).type ()->target_type ();
 	  if (arrayname)
 	    *arrayname = type->field (1).name ();
-	 return 2;
+	  return 2;
 	};
       /* GNU pascal strings.  */
       /* Three fields: Capacity, length and schema$ or _p_schema.  */
-      if (type->num_fields () == 3
-	  && type->field (0).name ()
+      if (type->num_fields () == 3 && type->field (0).name ()
 	  && strcmp (type->field (0).name (), "Capacity") == 0
 	  && type->field (1).name ()
 	  && strcmp (type->field (1).name (), "length") == 0)
@@ -137,7 +135,7 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 	    }
 	  if (arrayname)
 	    *arrayname = type->field (2).name ();
-	 return 3;
+	  return 3;
 	};
     }
   return 0;
@@ -183,20 +181,16 @@ pascal_language::printchar (int c, struct type *type,
     gdb_puts ("'", stream);
 }
 
-
-
 /* See language.h.  */
 
-void pascal_language::language_arch_info
-	(struct gdbarch *gdbarch, struct language_arch_info *lai) const
+void
+pascal_language::language_arch_info (struct gdbarch *gdbarch,
+				     struct language_arch_info *lai) const
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
 
   /* Helper function to allow shorter lines below.  */
-  auto add  = [&] (struct type * t)
-  {
-    lai->add_primitive_type (t);
-  };
+  auto add = [&] (struct type *t) { lai->add_primitive_type (t); };
 
   add (builtin->builtin_int);
   add (builtin->builtin_long);
@@ -244,7 +238,8 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
      style.  */
   if ((!force_ellipses) && length > 0
       && extract_unsigned_integer (string + (length - 1) * width, width,
-				   byte_order) == 0)
+				   byte_order)
+	   == 0)
     length--;
 
   if (length == 0)
@@ -271,14 +266,15 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 	  need_comma = 0;
 	}
 
-      current_char = extract_unsigned_integer (string + i * width, width,
-					       byte_order);
+      current_char
+	= extract_unsigned_integer (string + i * width, width, byte_order);
 
       rep1 = i + 1;
       reps = 1;
       while (rep1 < length
 	     && extract_unsigned_integer (string + rep1 * width, width,
-					  byte_order) == current_char)
+					  byte_order)
+		  == current_char)
 	{
 	  ++rep1;
 	  ++reps;
@@ -293,8 +289,7 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 	    }
 	  printchar (current_char, elttype, stream);
 	  gdb_printf (stream, " %p[<repeats %u times>%p]",
-		      metadata_style.style ().ptr (),
-		      reps, nullptr);
+		      metadata_style.style ().ptr (), reps, nullptr);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;

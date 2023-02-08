@@ -71,7 +71,6 @@ struct gdb_mpz
     mpz_swap (val, from.val);
   }
 
-  
   gdb_mpz &operator= (const gdb_mpz &from)
   {
     mpz_set (val, from.val);
@@ -94,7 +93,8 @@ struct gdb_mpz
   /* Convert VAL to an integer of the given type.
 
      The return type can signed or unsigned, with no size restriction.  */
-  template<typename T> T as_integer () const;
+  template<typename T>
+  T as_integer () const;
 
   /* Set VAL by importing the number stored in the byte array (BUF),
      using the given BYTE_ORDER.  The size of the data to read is
@@ -120,7 +120,8 @@ struct gdb_mpz
 private:
 
   /* Helper template for constructor and operator=.  */
-  template<typename T> void set (T src);
+  template<typename T>
+  void set (T src);
 
   /* Low-level function to export VAL into BUF as a number whose byte size
      is the size of BUF.
@@ -137,8 +138,8 @@ private:
 
     An error is raised if BUF is not large enough to contain the value
     being exported.  */
-  void safe_export (gdb::array_view<gdb_byte> buf,
-		    int endian, bool unsigned_p) const;
+  void safe_export (gdb::array_view<gdb_byte> buf, int endian,
+		    bool unsigned_p) const;
 };
 
 /* A class to make it easier to use GMP's mpq_t values within GDB.  */
@@ -255,9 +256,8 @@ template<typename T>
 void
 gdb_mpz::set (T src)
 {
-  mpz_import (val, 1 /* count */, -1 /* order */,
-	      sizeof (T) /* size */, 0 /* endian (0 = native) */,
-	      0 /* nails */, &src /* op */);
+  mpz_import (val, 1 /* count */, -1 /* order */, sizeof (T) /* size */,
+	      0 /* endian (0 = native) */, 0 /* nails */, &src /* op */);
   if (std::is_signed<T>::value && src < 0)
     {
       /* mpz_import does not handle the sign, so our value was imported
@@ -278,7 +278,7 @@ gdb_mpz::as_integer () const
 {
   T result;
 
-  this->safe_export ({(gdb_byte *) &result, sizeof (result)},
+  this->safe_export ({ (gdb_byte *) &result, sizeof (result) },
 		     0 /* endian (0 = native) */,
 		     !std::is_signed<T>::value /* unsigned_p */);
 

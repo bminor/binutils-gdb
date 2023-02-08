@@ -21,12 +21,13 @@
 #include "test-target.h"
 
 #if GDB_SELF_TEST
-namespace selftests {
+namespace selftests
+{
 
 static const target_info test_target_info = {
   "test",
-  N_("unit tests target"),
-  N_("You should never see this"),
+  N_ ("unit tests target"),
+  N_ ("You should never see this"),
 };
 
 const target_info &

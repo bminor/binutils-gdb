@@ -6,6 +6,7 @@
 #include "target-descriptions.h"
 
 const struct target_desc *tdesc_nds32;
+
 static void
 initialize_tdesc_nds32 (void)
 {

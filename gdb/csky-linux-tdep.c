@@ -33,45 +33,36 @@
 /* Functions, definitions, and data structures for C-Sky core file debug.  */
 
 /* General regset pc, r1, r0, psr, r2-r31 for CK810.  */
-#define SIZEOF_CSKY_GREGSET 34*4
+#define SIZEOF_CSKY_GREGSET 34 * 4
 /* Float regset fesr fsr fr0-fr31 for CK810.  */
-#define SIZEOF_CSKY_FREGSET 34*4
+#define SIZEOF_CSKY_FREGSET 34 * 4
 /* Float regset vr0~vr15 fr15~fr31, reserved for CK810 when kernel 4.x.  */
-#define SIZEOF_CSKY_FREGSET_K4X  400
+#define SIZEOF_CSKY_FREGSET_K4X 400
 
 /* Offset mapping table from core_section to regcache of general
    registers for ck810.  */
-static const int csky_gregset_offset[] =
-{
-  72,  1,  0, 89,  2,  /* pc, r1, r0, psr, r2.  */
-   3,  4,  5,  6,  7,  /* r3 ~ r32.  */
-   8,  9, 10, 11, 12,
-  13, 14, 15, 16, 17,
-  18, 19, 20, 21, 22,
-  23, 24, 25, 26, 27,
-  28, 29, 30, 31
-};
+static const int csky_gregset_offset[]
+  = { 72, 1,  0,  89, 2, /* pc, r1, r0, psr, r2.  */
+      3,  4,  5,  6,  7, /* r3 ~ r32.  */
+      8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+      20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
 
 /* Offset mapping table from core_section to regcache of float
    registers for ck810.  */
 
-static const int csky_fregset_offset[] =
-{
-  122, 123, 40, 41, 42,     /* fcr, fesr, fr0 ~ fr2.  */
-   43,  44, 45, 46, 47,     /* fr3 ~ fr15.  */
-   48,  49, 50, 51, 52,
-   53,  54, 55
-};
+static const int csky_fregset_offset[]
+  = { 122, 123, 40, 41, 42, /* fcr, fesr, fr0 ~ fr2.  */
+      43,  44,	45, 46, 47, /* fr3 ~ fr15.  */
+      48,  49,	50, 51, 52, 53, 54, 55 };
 
 /* Implement the supply_regset hook for GP registers in core files.  */
 
 static void
-csky_supply_gregset (const struct regset *regset,
-		     struct regcache *regcache, int regnum,
-		     const void *regs, size_t len)
+csky_supply_gregset (const struct regset *regset, struct regcache *regcache,
+		     int regnum, const void *regs, size_t len)
 {
   int i, gregset_num;
-  const gdb_byte *gregs = (const gdb_byte *) regs ;
+  const gdb_byte *gregs = (const gdb_byte *) regs;
 
   gdb_assert (len >= SIZEOF_CSKY_GREGSET);
   gregset_num = ARRAY_SIZE (csky_gregset_offset);
@@ -88,11 +79,11 @@ csky_supply_gregset (const struct regset *regset,
 
 static void
 csky_collect_gregset (const struct regset *regset,
-		      const struct regcache *regcache,
-		      int regnum, void *gregs_buf, size_t len)
+		      const struct regcache *regcache, int regnum,
+		      void *gregs_buf, size_t len)
 {
   int regno, gregset_num;
-  gdb_byte *gregs = (gdb_byte *) gregs_buf ;
+  gdb_byte *gregs = (gdb_byte *) gregs_buf;
 
   gdb_assert (len >= SIZEOF_CSKY_GREGSET);
   gregset_num = ARRAY_SIZE (csky_gregset_offset);
@@ -101,17 +92,15 @@ csky_collect_gregset (const struct regset *regset,
     {
       if ((regnum == csky_gregset_offset[regno] || regnum == -1)
 	  && csky_gregset_offset[regno] != -1)
-	regcache->raw_collect (regno,
-			       gregs + 4 + csky_gregset_offset[regno]);
+	regcache->raw_collect (regno, gregs + 4 + csky_gregset_offset[regno]);
     }
 }
 
 /* Implement the supply_regset hook for FP registers in core files.  */
 
 static void
-csky_supply_fregset (const struct regset *regset,
-		     struct regcache *regcache, int regnum,
-		     const void *regs, size_t len)
+csky_supply_fregset (const struct regset *regset, struct regcache *regcache,
+		     int regnum, const void *regs, size_t len)
 {
   int i;
   int offset = 0;
@@ -150,10 +139,10 @@ csky_supply_fregset (const struct regset *regset,
 	 In addition, for fr0~fr15, each FRx is the lower 64 bits of the
 	 corresponding VRx. So fr0~fr15 and vr0~vr15 regisetrs use the same
 	 offset.  */
-      int fcr_regno[] = {122, 123, 121}; /* fcr, fesr, fid.  */
+      int fcr_regno[] = { 122, 123, 121 }; /* fcr, fesr, fid.  */
 
       /* Supply vr0~vr15.  */
-      for (i = 0; i < 16; i ++)
+      for (i = 0; i < 16; i++)
 	{
 	  if (*gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)) != '\0')
 	    {
@@ -162,7 +151,7 @@ csky_supply_fregset (const struct regset *regset,
 	    }
 	}
       /* Supply fr0~fr15.  */
-      for (i = 0; i < 16; i ++)
+      for (i = 0; i < 16; i++)
 	{
 	  if (*gdbarch_register_name (gdbarch, (CSKY_FR0_REGNUM + i)) != '\0')
 	    {
@@ -171,7 +160,7 @@ csky_supply_fregset (const struct regset *regset,
 	    }
 	}
       /* Supply fr16~fr31.  */
-      for (i = 0; i < 16; i ++)
+      for (i = 0; i < 16; i++)
 	{
 	  if (*gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)) != '\0')
 	    {
@@ -179,8 +168,8 @@ csky_supply_fregset (const struct regset *regset,
 	      regcache->raw_supply (CSKY_FR16_REGNUM + i, fregs + offset);
 	    }
 	}
-     /* Supply fcr, fesr, fid.  */
-      for (i = 0; i < 3; i ++)
+      /* Supply fcr, fesr, fid.  */
+      for (i = 0; i < 3; i++)
 	{
 	  if (*gdbarch_register_name (gdbarch, fcr_regno[i]) != '\0')
 	    {
@@ -191,8 +180,9 @@ csky_supply_fregset (const struct regset *regset,
     }
   else
     {
-      warning (_("Unknow size %s of section .reg2, can not get value"
-		 " of float registers."), pulongest (len));
+      warning (_ ("Unknow size %s of section .reg2, can not get value"
+		  " of float registers."),
+	       pulongest (len));
     }
 }
 
@@ -200,12 +190,12 @@ csky_supply_fregset (const struct regset *regset,
 
 static void
 csky_collect_fregset (const struct regset *regset,
-		      const struct regcache *regcache,
-		      int regnum, void *fregs_buf, size_t len)
+		      const struct regcache *regcache, int regnum,
+		      void *fregs_buf, size_t len)
 {
   int regno;
   struct gdbarch *gdbarch = regcache->arch ();
-  gdb_byte *fregs = (gdb_byte *) fregs_buf ;
+  gdb_byte *fregs = (gdb_byte *) fregs_buf;
   int fregset_num = ARRAY_SIZE (csky_fregset_offset);
   int offset = 0;
 
@@ -215,7 +205,7 @@ csky_collect_fregset (const struct regset *regset,
       for (regno = 0; regno < fregset_num; regno++)
 	{
 	  if ((regnum == csky_fregset_offset[regno] || regnum == -1)
-	       && csky_fregset_offset[regno] != -1)
+	      && csky_fregset_offset[regno] != -1)
 	    {
 	      offset += register_size (gdbarch, csky_fregset_offset[regno]);
 	      regcache->raw_collect (regno, fregs + offset);
@@ -240,59 +230,52 @@ csky_collect_fregset (const struct regset *regset,
 	 corresponding VRx. So fr0~fr15 and vr0~vr15 regisetrs use the same$
 	 offset.  */
       int i = 0;
-      int fcr_regno[] = {122, 123, 121}; /* fcr, fesr, fid.  */
+      int fcr_regno[] = { 122, 123, 121 }; /* fcr, fesr, fid.  */
 
       /* Supply vr0~vr15.  */
-      for (i = 0; i < 16; i ++)
+      for (i = 0; i < 16; i++)
 	{
 	  if (*gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)) != '\0')
 	    {
 	      offset = 16 * i;
-	      regcache ->raw_collect (CSKY_VR0_REGNUM + i, fregs + offset);
+	      regcache->raw_collect (CSKY_VR0_REGNUM + i, fregs + offset);
 	    }
 	}
       /* Supply fr16~fr31.  */
-      for (i = 0; i < 16; i ++)
+      for (i = 0; i < 16; i++)
 	{
 	  if (*gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)) != '\0')
 	    {
 	      offset = (16 * 16) + (8 * i);
-	      regcache ->raw_collect (CSKY_FR16_REGNUM + i, fregs + offset);
+	      regcache->raw_collect (CSKY_FR16_REGNUM + i, fregs + offset);
 	    }
 	}
       /* Supply fcr, fesr, fid.  */
-      for (i = 0; i < 3; i ++)
+      for (i = 0; i < 3; i++)
 	{
 	  if (*gdbarch_register_name (gdbarch, fcr_regno[i]) != '\0')
 	    {
 	      offset = (16 * 16) + (16 * 8) + (4 * i);
-	      regcache ->raw_collect (fcr_regno[i], fregs + offset);
+	      regcache->raw_collect (fcr_regno[i], fregs + offset);
 	    }
 	}
     }
   else
     {
-      warning (_("Unknow size %s of section .reg2, will not set value"
-		 " of float registers."), pulongest (len));
+      warning (_ ("Unknow size %s of section .reg2, will not set value"
+		  " of float registers."),
+	       pulongest (len));
     }
 }
 
-static const struct regset csky_regset_general =
-{
-  NULL,
-  csky_supply_gregset,
-  csky_collect_gregset
-};
+static const struct regset csky_regset_general
+  = { NULL, csky_supply_gregset, csky_collect_gregset };
 
-static const struct regset csky_regset_float =
-{
-  NULL,
-  csky_supply_fregset,
-  csky_collect_fregset,
-  /* Allow .reg2 to have a different size, and the size of .reg2 should
+static const struct regset csky_regset_float
+  = { NULL, csky_supply_fregset, csky_collect_fregset,
+      /* Allow .reg2 to have a different size, and the size of .reg2 should
      always be bigger than SIZEOF_CSKY_FREGSET.  */
-  1
-};
+      1 };
 
 /* Iterate over core file register note sections.  */
 
@@ -318,13 +301,12 @@ csky_linux_rt_sigreturn_init (const struct tramp_frame *self,
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, 14);
 
   CORE_ADDR base = sp + CSKY_SIGINFO_OFFSET + CSKY_SIGINFO_SIZE
-		   + CSKY_UCONTEXT_SIGCONTEXT
-		   + CSKY_SIGCONTEXT_SC_USP
+		   + CSKY_UCONTEXT_SIGCONTEXT + CSKY_SIGCONTEXT_SC_USP
 		   + CSKY_SIGCONTEXT_SC_A0;
 
   /* Set addrs of R0 ~ R13.  */
   for (i = 0; i < 14; i++)
-   trad_frame_set_reg_addr (this_cache, i, base + i * 4);
+    trad_frame_set_reg_addr (this_cache, i, base + i * 4);
 
   /* Set addrs of SP(R14) and R15.  */
   trad_frame_set_reg_addr (this_cache, 14, base - 4);
@@ -332,7 +314,7 @@ csky_linux_rt_sigreturn_init (const struct tramp_frame *self,
 
   /* Set addrs of R16 ~ R31.  */
   for (i = 15; i < 31; i++)
-   trad_frame_set_reg_addr (this_cache, i, base + i * 4);
+    trad_frame_set_reg_addr (this_cache, i, base + i * 4);
 
   /* Set addrs of PSR and PC.  */
   trad_frame_set_reg_addr (this_cache, 89, base + 4 * 33);
@@ -341,17 +323,13 @@ csky_linux_rt_sigreturn_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-static struct tramp_frame
-csky_linux_rt_sigreturn_tramp_frame = {
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { CSKY_MOVI_R7_173, ULONGEST_MAX },
-    { CSKY_TRAP_0, ULONGEST_MAX },
-    { TRAMP_SENTINEL_INSN }
-  },
-  csky_linux_rt_sigreturn_init
-};
+static struct tramp_frame csky_linux_rt_sigreturn_tramp_frame
+  = { SIGTRAMP_FRAME,
+      4,
+      { { CSKY_MOVI_R7_173, ULONGEST_MAX },
+	{ CSKY_TRAP_0, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN } },
+      csky_linux_rt_sigreturn_init };
 
 static void
 csky_linux_rt_sigreturn_init_pt_regs (const struct tramp_frame *self,
@@ -363,8 +341,7 @@ csky_linux_rt_sigreturn_init_pt_regs (const struct tramp_frame *self,
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, CSKY_SP_REGNUM);
 
   CORE_ADDR base = sp + CSKY_SIGINFO_OFFSET + CSKY_SIGINFO_SIZE
-		   + CSKY_UCONTEXT_SIGCONTEXT
-		   + CSKY_SIGCONTEXT_PT_REGS_TLS;
+		   + CSKY_UCONTEXT_SIGCONTEXT + CSKY_SIGCONTEXT_PT_REGS_TLS;
 
   /* LR */
   trad_frame_set_reg_addr (this_cache, CSKY_R15_REGNUM, base);
@@ -385,18 +362,13 @@ csky_linux_rt_sigreturn_init_pt_regs (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-
-static struct tramp_frame
-csky_linux_rt_sigreturn_tramp_frame_kernel_4x = {
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { CSKY_MOVI_R7_139, ULONGEST_MAX },
-    { CSKY_TRAP_0, ULONGEST_MAX },
-    { TRAMP_SENTINEL_INSN }
-  },
-  csky_linux_rt_sigreturn_init_pt_regs
-};
+static struct tramp_frame csky_linux_rt_sigreturn_tramp_frame_kernel_4x
+  = { SIGTRAMP_FRAME,
+      4,
+      { { CSKY_MOVI_R7_139, ULONGEST_MAX },
+	{ CSKY_TRAP_0, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN } },
+      csky_linux_rt_sigreturn_init_pt_regs };
 
 /* Hook function for gdbarch_register_osabi.  */
 
@@ -421,13 +393,13 @@ csky_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Append tramp frame unwinder for SIGNAL.  */
 
-  tramp_frame_prepend_unwinder (gdbarch,
-				&csky_linux_rt_sigreturn_tramp_frame);
-  tramp_frame_prepend_unwinder (gdbarch,
-				&csky_linux_rt_sigreturn_tramp_frame_kernel_4x);
+  tramp_frame_prepend_unwinder (gdbarch, &csky_linux_rt_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (
+    gdbarch, &csky_linux_rt_sigreturn_tramp_frame_kernel_4x);
 }
 
 void _initialize_csky_linux_tdep ();
+
 void
 _initialize_csky_linux_tdep ()
 {

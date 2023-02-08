@@ -25,7 +25,8 @@
 struct obstack;
 struct compunit_symtab;
 
-namespace gdb {
+namespace gdb
+{
 struct bcache;
 }
 
@@ -73,7 +74,6 @@ struct bcache;
 
    In this interface, the first line of a file is numbered 1, not 0.
    This is the same convention the rest of GDB uses.  */
-
 
 /* A table of all the macro definitions for a given compilation unit.  */
 struct macro_table;
@@ -126,7 +126,6 @@ struct macro_definition;
 
 struct macro_source_file
 {
-
   /* The macro table for the compilation unit this source location is
      a part of.  */
   struct macro_table *table;
@@ -155,7 +154,6 @@ struct macro_source_file
   struct macro_source_file *next_included;
 };
 
-
 /* Create a new, empty macro table.  Allocate it in OBSTACK, or use
    xmalloc if OBSTACK is zero.  Use BCACHE to store all macro names,
    arguments, definitions, and anything else that might be the same
@@ -176,12 +174,10 @@ struct macro_table *new_macro_table (struct obstack *obstack,
 				     gdb::bcache *bcache,
 				     struct compunit_symtab *cust);
 
-
 /* Free TABLE, and any macro definitions, source file structures,
    etc. it owns.  This will raise an internal error if TABLE was
    allocated on an obstack, or if it uses a bcache.  */
 void free_macro_table (struct macro_table *table);
-
 
 /* Set FILENAME as the main source file of TABLE.  Return a source
    file structure describing that file; if we record the #definition
@@ -197,7 +193,6 @@ void free_macro_table (struct macro_table *table);
 struct macro_source_file *macro_set_main (struct macro_table *table,
 					  const char *filename);
 
-
 /* Return the main source file of the macro table TABLE.  */
 struct macro_source_file *macro_main (struct macro_table *table);
 
@@ -205,7 +200,6 @@ struct macro_source_file *macro_main (struct macro_table *table);
    be redefined without error.  Note that it invalid to call this if
    TABLE is allocated on an obstack.  */
 void macro_allow_redefinitions (struct macro_table *table);
-
 
 /* Record a #inclusion.
    Record in SOURCE's macro table that, at line number LINE in SOURCE,
@@ -219,8 +213,7 @@ void macro_allow_redefinitions (struct macro_table *table);
    The macro table makes its own copy of INCLUDED; the caller is
    responsible for freeing INCLUDED when it is no longer needed.  */
 struct macro_source_file *macro_include (struct macro_source_file *source,
-					 int line,
-					 const char *included);
+					 int line, const char *included);
 
 /* Define any special macros, like __FILE__ or __LINE__.  This should
    be called once, on the main source file.  */
@@ -233,10 +226,8 @@ void macro_define_special (struct macro_table *table);
    path.  e.g., `stdio.h', not `/usr/include/stdio.h'.  If NAME
    appears more than once in the inclusion tree, return the
    least-nested inclusion --- the one closest to the main source file.  */
-struct macro_source_file *macro_lookup_inclusion
-			  (struct macro_source_file *source,
-			   const char *name);
-
+struct macro_source_file *
+macro_lookup_inclusion (struct macro_source_file *source, const char *name);
 
 /* Record an object-like #definition (i.e., one with no parameter list).
    Record in SOURCE's macro table that, at line number LINE in SOURCE,
@@ -245,7 +236,6 @@ struct macro_source_file *macro_lookup_inclusion
    REPLACEMENT; the caller is responsible for freeing them.  */
 void macro_define_object (struct macro_source_file *source, int line,
 			  const char *name, const char *replacement);
-
 
 /* Record an function-like #definition (i.e., one with a parameter list).
 
@@ -260,7 +250,6 @@ void macro_define_object (struct macro_source_file *source, int line,
 void macro_define_function (struct macro_source_file *source, int line,
 			    const char *name, int argc, const char **argv,
 			    const char *replacement);
-
 
 /* Record an #undefinition.
    Record in SOURCE's macro table that, at line number LINE in SOURCE,
@@ -302,7 +291,7 @@ struct macro_definition
      `macro_object_like', then this is actually a `macro_special_kind'
      describing the macro.  */
   int argc : 30;
-  const char * const *argv;
+  const char *const *argv;
 
   /* The replacement string (body) of the macro.  For ordinary macros,
      this is in the table's bcache, if it has one.  For special macros
@@ -312,27 +301,23 @@ struct macro_definition
   const char *replacement;
 };
 
-
 /* Return a pointer to the macro definition for NAME in scope at line
    number LINE of SOURCE.  If LINE is -1, return the definition in
    effect at the end of the file.  The macro table owns the structure;
    the caller need not free it.  Return zero if NAME is not #defined
    at that point.  */
-struct macro_definition *macro_lookup_definition
-			 (struct macro_source_file *source,
-			  int line, const char *name);
-
+struct macro_definition *
+macro_lookup_definition (struct macro_source_file *source, int line,
+			 const char *name);
 
 /* Return the source location of the definition for NAME in scope at
    line number LINE of SOURCE.  Set *DEFINITION_LINE to the line
    number of the definition, and return a source file structure for
    the file.  Return zero if NAME has no definition in scope at that
    point, and leave *DEFINITION_LINE unchanged.  */
-struct macro_source_file *macro_definition_location
-			  (struct macro_source_file *source,
-			   int line,
-			   const char *name,
-			   int *definition_line);
+struct macro_source_file *
+macro_definition_location (struct macro_source_file *source, int line,
+			   const char *name, int *definition_line);
 
 /* Prototype for a callback callable when walking a macro table.  NAME
    is the name of the macro, and DEFINITION is the definition.  SOURCE
@@ -340,8 +325,7 @@ struct macro_source_file *macro_definition_location
    number of the SOURCE file where the macro was defined.  */
 typedef void (macro_callback_fn) (const char *name,
 				  const struct macro_definition *definition,
-				  struct macro_source_file *source,
-				  int line);
+				  struct macro_source_file *source, int line);
 
 /* Call the callable FN for each macro in the macro table TABLE.  */
 void macro_for_each (struct macro_table *table,

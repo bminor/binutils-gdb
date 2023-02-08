@@ -57,11 +57,7 @@ template<typename T>
 class future
 {
 public:
-
-  explicit future (T value)
-    : m_value (std::move (value))
-  {
-  }
+  explicit future (T value) : m_value (std::move (value)) {}
 
   future () = default;
   future (future &&other) = default;
@@ -69,12 +65,11 @@ public:
   future &operator= (future &&other) = default;
   future &operator= (const future &other) = delete;
 
-  void wait () const { }
+  void wait () const {}
 
   T get () { return std::move (m_value); }
 
 private:
-
   T m_value;
 };
 
@@ -84,12 +79,11 @@ template<>
 class future<void>
 {
 public:
-  void wait () const { }
-  void get () { }
+  void wait () const {}
+  void get () {}
 };
 
 #endif /* CXX_STD_THREAD */
-
 
 /* A thread pool.
 
@@ -150,7 +144,6 @@ public:
   }
 
 private:
-
   thread_pool () = default;
 
 #if CXX_STD_THREAD
@@ -180,6 +173,6 @@ private:
 #endif /* CXX_STD_THREAD */
 };
 
-}
+} // namespace gdb
 
 #endif /* GDBSUPPORT_THREAD_POOL_H */

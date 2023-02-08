@@ -70,7 +70,9 @@ struct darwin_thread_info : public private_thread_info
   bool signaled = false;
 
   /* The last exception received.  */
-  struct darwin_exception_msg event {};
+  struct darwin_exception_msg event
+  {
+  };
 };
 typedef struct darwin_thread_info darwin_thread_t;
 
@@ -78,8 +80,7 @@ typedef struct darwin_thread_info darwin_thread_t;
 
 class darwin_nat_target : public inf_child_target
 {
-  void create_inferior (const char *exec_file,
-			const std::string &allargs,
+  void create_inferior (const char *exec_file, const std::string &allargs,
 			char **env, int from_tty) override;
 
   void attach (const char *, int) override;
@@ -94,7 +95,7 @@ class darwin_nat_target : public inf_child_target
 
   void interrupt () override;
 
-  void resume (ptid_t, int , enum gdb_signal) override;
+  void resume (ptid_t, int, enum gdb_signal) override;
 
   bool thread_alive (ptid_t ptid) override;
 
@@ -103,8 +104,7 @@ class darwin_nat_target : public inf_child_target
   const char *pid_to_exec_file (int pid) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
-					const char *annex,
-					gdb_byte *readbuf,
+					const char *annex, gdb_byte *readbuf,
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
@@ -114,15 +114,13 @@ class darwin_nat_target : public inf_child_target
   ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
 private:
+
   ptid_t wait_1 (ptid_t, struct target_waitstatus *);
   void check_new_threads (inferior *inf);
-  int decode_exception_message (mach_msg_header_t *hdr,
-				inferior **pinf,
+  int decode_exception_message (mach_msg_header_t *hdr, inferior **pinf,
 				darwin_thread_t **pthread);
-  ptid_t decode_message (mach_msg_header_t *hdr,
-			 darwin_thread_t **pthread,
-			 inferior **pinf,
-			 target_waitstatus *status);
+  ptid_t decode_message (mach_msg_header_t *hdr, darwin_thread_t **pthread,
+			 inferior **pinf, target_waitstatus *status);
   void stop_inferior (inferior *inf);
   void init_thread_list (inferior *inf);
   void ptrace_him (int pid);

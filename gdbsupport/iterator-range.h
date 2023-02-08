@@ -22,7 +22,7 @@
 /* A wrapper that allows using ranged for-loops on a range described by two
    iterators.  */
 
-template <typename IteratorType>
+template<typename IteratorType>
 struct iterator_range
 {
   using iterator = IteratorType;
@@ -30,16 +30,18 @@ struct iterator_range
   /* Create an iterator_range using BEGIN as the begin iterator.
 
      Assume that the end iterator can be default-constructed.  */
-  template <typename... Args>
-  iterator_range (Args &&...args)
-    : m_begin (std::forward<Args> (args)...)
-  {}
+  template<typename... Args>
+  iterator_range (Args &&...args) : m_begin (std::forward<Args> (args)...)
+  {
+  }
 
   /* Create an iterator range using explicit BEGIN and END iterators.  */
-  template <typename... Args>
+  template<typename... Args>
   iterator_range (IteratorType begin, IteratorType end)
-    : m_begin (std::move (begin)), m_end (std::move (end))
-  {}
+    : m_begin (std::move (begin)),
+      m_end (std::move (end))
+  {
+  }
 
   /* Need these as the variadic constructor would be a better match
      otherwise.  */
@@ -47,15 +49,12 @@ struct iterator_range
   iterator_range (const iterator_range &) = default;
   iterator_range (iterator_range &&) = default;
 
-  IteratorType begin () const
-  { return m_begin; }
+  IteratorType begin () const { return m_begin; }
 
-  IteratorType end () const
-  { return m_end; }
+  IteratorType end () const { return m_end; }
 
   /* The number of items in this iterator_range.  */
-  std::size_t size () const
-  { return std::distance (m_begin, m_end); }
+  std::size_t size () const { return std::distance (m_begin, m_end); }
 
 private:
   IteratorType m_begin, m_end;

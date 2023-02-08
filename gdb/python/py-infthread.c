@@ -22,19 +22,21 @@
 #include "inferior.h"
 #include "python-internal.h"
 
-extern PyTypeObject thread_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
+extern PyTypeObject
+  thread_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
 
 /* Require that INFERIOR be a valid inferior ID.  */
-#define THPY_REQUIRE_VALID(Thread)				\
-  do {								\
-    if (!Thread->thread)					\
-      {								\
-	PyErr_SetString (PyExc_RuntimeError,			\
-			 _("Thread no longer exists."));	\
-	return NULL;						\
-      }								\
-  } while (0)
+#define THPY_REQUIRE_VALID(Thread)                          \
+  do                                                        \
+    {                                                       \
+      if (!Thread->thread)                                  \
+	{                                                   \
+	  PyErr_SetString (PyExc_RuntimeError,              \
+			   _ ("Thread no longer exists.")); \
+	  return NULL;                                      \
+	}                                                   \
+    }                                                       \
+  while (0)
 
 gdbpy_ref<thread_object>
 create_thread_object (struct thread_info *tp)
@@ -110,32 +112,31 @@ thpy_set_name (PyObject *self, PyObject *newvalue, void *ignore)
   thread_object *thread_obj = (thread_object *) self;
   gdb::unique_xmalloc_ptr<char> name;
 
-  if (! thread_obj->thread)
+  if (!thread_obj->thread)
     {
-      PyErr_SetString (PyExc_RuntimeError, _("Thread no longer exists."));
+      PyErr_SetString (PyExc_RuntimeError, _ ("Thread no longer exists."));
       return -1;
     }
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("Cannot delete `name' attribute."));
+      PyErr_SetString (PyExc_TypeError, _ ("Cannot delete `name' attribute."));
       return -1;
     }
   else if (newvalue == Py_None)
     {
       /* Nothing.  */
     }
-  else if (! gdbpy_is_string (newvalue))
+  else if (!gdbpy_is_string (newvalue))
     {
       PyErr_SetString (PyExc_TypeError,
-		       _("The value of `name' must be a string."));
+		       _ ("The value of `name' must be a string."));
       return -1;
     }
   else
     {
       name = python_string_to_host_string (newvalue);
-      if (! name)
+      if (!name)
 	return -1;
     }
 
@@ -277,7 +278,7 @@ thpy_is_valid (PyObject *self, PyObject *args)
 {
   thread_object *thread_obj = (thread_object *) self;
 
-  if (! thread_obj->thread)
+  if (!thread_obj->thread)
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
@@ -292,7 +293,7 @@ thpy_thread_handle (PyObject *self, PyObject *args)
   THPY_REQUIRE_VALID (thread_obj);
 
   gdb::byte_vector hv;
-  
+
   try
     {
       hv = target_thread_info_to_thread_handle (thread_obj->thread);
@@ -304,12 +305,12 @@ thpy_thread_handle (PyObject *self, PyObject *args)
 
   if (hv.size () == 0)
     {
-      PyErr_SetString (PyExc_RuntimeError, _("Thread handle not found."));
+      PyErr_SetString (PyExc_RuntimeError, _ ("Thread handle not found."));
       return NULL;
     }
 
-  PyObject *object = PyBytes_FromStringAndSize ((const char *) hv.data (),
-						hv.size());
+  PyObject *object
+    = PyBytes_FromStringAndSize ((const char *) hv.data (), hv.size ());
   return object;
 }
 
@@ -371,86 +372,75 @@ gdbpy_initialize_thread (void)
 				 (PyObject *) &thread_object_type);
 }
 
-static gdb_PyGetSetDef thread_object_getset[] =
-{
-  { "name", thpy_get_name, thpy_set_name,
-    "The name of the thread, as set by the user or the OS.", NULL },
-  { "details", thpy_get_details, NULL,
-    "A target specific string containing extra thread state details.",
-    NULL },
-  { "num", thpy_get_num, NULL,
-    "Per-inferior number of the thread, as assigned by GDB.", NULL },
-  { "global_num", thpy_get_global_num, NULL,
-    "Global number of the thread, as assigned by GDB.", NULL },
-  { "ptid", thpy_get_ptid, NULL, "ID of the thread, as assigned by the OS.",
-    NULL },
-  { "inferior", thpy_get_inferior, NULL,
-    "The Inferior object this thread belongs to.", NULL },
+static gdb_PyGetSetDef thread_object_getset[]
+  = { { "name", thpy_get_name, thpy_set_name,
+	"The name of the thread, as set by the user or the OS.", NULL },
+      { "details", thpy_get_details, NULL,
+	"A target specific string containing extra thread state details.",
+	NULL },
+      { "num", thpy_get_num, NULL,
+	"Per-inferior number of the thread, as assigned by GDB.", NULL },
+      { "global_num", thpy_get_global_num, NULL,
+	"Global number of the thread, as assigned by GDB.", NULL },
+      { "ptid", thpy_get_ptid, NULL,
+	"ID of the thread, as assigned by the OS.", NULL },
+      { "inferior", thpy_get_inferior, NULL,
+	"The Inferior object this thread belongs to.", NULL },
 
-  { NULL }
-};
+      { NULL } };
 
-static PyMethodDef thread_object_methods[] =
-{
-  { "is_valid", thpy_is_valid, METH_NOARGS,
-    "is_valid () -> Boolean.\n\
+static PyMethodDef thread_object_methods[] = {
+  { "is_valid", thpy_is_valid, METH_NOARGS, "is_valid () -> Boolean.\n\
 Return true if this inferior thread is valid, false if not." },
-  { "switch", thpy_switch, METH_NOARGS,
-    "switch ()\n\
+  { "switch", thpy_switch, METH_NOARGS, "switch ()\n\
 Makes this the GDB selected thread." },
-  { "is_stopped", thpy_is_stopped, METH_NOARGS,
-    "is_stopped () -> Boolean\n\
+  { "is_stopped", thpy_is_stopped, METH_NOARGS, "is_stopped () -> Boolean\n\
 Return whether the thread is stopped." },
-  { "is_running", thpy_is_running, METH_NOARGS,
-    "is_running () -> Boolean\n\
+  { "is_running", thpy_is_running, METH_NOARGS, "is_running () -> Boolean\n\
 Return whether the thread is running." },
-  { "is_exited", thpy_is_exited, METH_NOARGS,
-    "is_exited () -> Boolean\n\
+  { "is_exited", thpy_is_exited, METH_NOARGS, "is_exited () -> Boolean\n\
 Return whether the thread is exited." },
-  { "handle", thpy_thread_handle, METH_NOARGS,
-    "handle  () -> handle\n\
+  { "handle", thpy_thread_handle, METH_NOARGS, "handle  () -> handle\n\
 Return thread library specific handle for thread." },
 
   { NULL }
 };
 
-PyTypeObject thread_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.InferiorThread",		  /*tp_name*/
-  sizeof (thread_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  thpy_dealloc,			  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  0,				  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
-  "GDB thread object",		  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  thread_object_methods,	  /* tp_methods */
-  0,				  /* tp_members */
-  thread_object_getset,		  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,				  /* tp_init */
-  0				  /* tp_alloc */
+PyTypeObject thread_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.InferiorThread", /*tp_name*/
+  sizeof (thread_object),				/*tp_basicsize*/
+  0,							/*tp_itemsize*/
+  thpy_dealloc,						/*tp_dealloc*/
+  0,							/*tp_print*/
+  0,							/*tp_getattr*/
+  0,							/*tp_setattr*/
+  0,							/*tp_compare*/
+  0,							/*tp_repr*/
+  0,							/*tp_as_number*/
+  0,							/*tp_as_sequence*/
+  0,							/*tp_as_mapping*/
+  0,							/*tp_hash */
+  0,							/*tp_call*/
+  0,							/*tp_str*/
+  0,							/*tp_getattro*/
+  0,							/*tp_setattro*/
+  0,							/*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,					/*tp_flags*/
+  "GDB thread object",					/* tp_doc */
+  0,							/* tp_traverse */
+  0,							/* tp_clear */
+  0,							/* tp_richcompare */
+  0,							/* tp_weaklistoffset */
+  0,							/* tp_iter */
+  0,							/* tp_iternext */
+  thread_object_methods,				/* tp_methods */
+  0,							/* tp_members */
+  thread_object_getset,					/* tp_getset */
+  0,							/* tp_base */
+  0,							/* tp_dict */
+  0,							/* tp_descr_get */
+  0,							/* tp_descr_set */
+  0,							/* tp_dictoffset */
+  0,							/* tp_init */
+  0							/* tp_alloc */
 };

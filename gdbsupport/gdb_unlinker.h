@@ -30,10 +30,8 @@ namespace gdb
    the "keep" method.  */
 class unlinker
 {
- public:
-
-  unlinker (const char *filename) ATTRIBUTE_NONNULL (2)
-    : m_filename (filename)
+public:
+  unlinker (const char *filename) ATTRIBUTE_NONNULL (2) : m_filename (filename)
   {
     gdb_assert (filename != NULL);
   }
@@ -45,16 +43,12 @@ class unlinker
   }
 
   /* Keep the file, rather than unlink it.  */
-  void keep ()
-  {
-    m_filename = NULL;
-  }
+  void keep () { m_filename = NULL; }
 
- private:
-
+private:
   const char *m_filename;
 };
 
-}
+} // namespace gdb
 
 #endif /* COMMON_GDB_UNLINKER_H */

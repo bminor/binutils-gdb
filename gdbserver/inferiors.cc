@@ -65,9 +65,8 @@ get_first_thread (void)
 struct thread_info *
 find_thread_ptid (ptid_t ptid)
 {
-  return find_thread ([&] (thread_info *thread) {
-    return thread->id == ptid;
-  });
+  return find_thread (
+    [&] (thread_info *thread) { return thread->id == ptid; });
 }
 
 /* Find a thread associated with the given PROCESS, or NULL if no
@@ -84,9 +83,7 @@ find_thread_process (const struct process_info *const process)
 struct thread_info *
 find_any_thread_of_pid (int pid)
 {
-  return find_thread (pid, [] (thread_info *thread) {
-    return true;
-  });
+  return find_thread (pid, [] (thread_info *thread) { return true; });
 }
 
 static void
@@ -167,9 +164,8 @@ remove_process (struct process_info *process)
 process_info *
 find_process_pid (int pid)
 {
-  return find_process ([&] (process_info *process) {
-    return process->pid == pid;
-  });
+  return find_process (
+    [&] (process_info *process) { return process->pid == pid; });
 }
 
 /* Get the first process in the process list, or NULL if the list is empty.  */
@@ -189,9 +185,9 @@ get_first_process (void)
 int
 have_started_inferiors_p (void)
 {
-  return find_process ([] (process_info *process) {
-    return !process->attached;
-  }) != NULL;
+  return find_process (
+           [] (process_info *process) { return !process->attached; })
+         != NULL;
 }
 
 /* Return non-zero if there are any inferiors that we have attached to.  */
@@ -199,9 +195,9 @@ have_started_inferiors_p (void)
 int
 have_attached_inferiors_p (void)
 {
-  return find_process ([] (process_info *process) {
-    return process->attached;
-  }) != NULL;
+  return find_process (
+           [] (process_info *process) { return process->attached; })
+         != NULL;
 }
 
 struct process_info *

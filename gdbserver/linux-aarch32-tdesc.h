@@ -20,7 +20,7 @@
 
 /* Return the AArch32 target description.  */
 
-const target_desc * aarch32_linux_read_description ();
+const target_desc *aarch32_linux_read_description ();
 
 /* Return true if TDESC is the AArch32 target description.  */
 

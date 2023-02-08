@@ -27,17 +27,14 @@
 gdb_static_assert (sizeof (splay_tree_key) >= sizeof (CORE_ADDR *));
 gdb_static_assert (sizeof (splay_tree_value) >= sizeof (void *));
 
-
 /* Fixed address maps.  */
 
 void
-addrmap_fixed::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-			  void *obj)
+addrmap_fixed::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive, void *obj)
 {
   internal_error ("addrmap_fixed_set_empty: "
 		  "fixed addrmaps can't be changed\n");
 }
-
 
 void *
 addrmap_fixed::do_find (CORE_ADDR addr) const
@@ -70,7 +67,6 @@ addrmap_fixed::do_find (CORE_ADDR addr) const
   return bottom->value;
 }
 
-
 void
 addrmap_fixed::relocate (CORE_ADDR offset)
 {
@@ -79,7 +75,6 @@ addrmap_fixed::relocate (CORE_ADDR offset)
   for (i = 0; i < num_transitions; i++)
     transitions[i].addr += offset;
 }
-
 
 int
 addrmap_fixed::do_foreach (addrmap_foreach_fn fn) const
@@ -97,8 +92,6 @@ addrmap_fixed::do_foreach (addrmap_foreach_fn fn) const
   return 0;
 }
 
-
-
 /* Mutable address maps.  */
 
 /* Allocate a copy of CORE_ADDR.  */
@@ -111,7 +104,6 @@ addrmap_mutable::allocate_key (CORE_ADDR addr)
   return (splay_tree_key) key;
 }
 
-
 /* Type-correct wrappers for splay tree access.  */
 splay_tree_node
 addrmap_mutable::splay_tree_lookup (CORE_ADDR addr) const
@@ -119,13 +111,11 @@ addrmap_mutable::splay_tree_lookup (CORE_ADDR addr) const
   return ::splay_tree_lookup (tree, (splay_tree_key) &addr);
 }
 
-
 splay_tree_node
 addrmap_mutable::splay_tree_predecessor (CORE_ADDR addr) const
 {
   return ::splay_tree_predecessor (tree, (splay_tree_key) &addr);
 }
-
 
 splay_tree_node
 addrmap_mutable::splay_tree_successor (CORE_ADDR addr)
@@ -133,20 +123,17 @@ addrmap_mutable::splay_tree_successor (CORE_ADDR addr)
   return ::splay_tree_successor (tree, (splay_tree_key) &addr);
 }
 
-
 void
 addrmap_mutable::splay_tree_remove (CORE_ADDR addr)
 {
   ::splay_tree_remove (tree, (splay_tree_key) &addr);
 }
 
-
 static CORE_ADDR
 addrmap_node_key (splay_tree_node node)
 {
-  return * (CORE_ADDR *) node->key;
+  return *(CORE_ADDR *) node->key;
 }
-
 
 static void *
 addrmap_node_value (splay_tree_node node)
@@ -154,22 +141,17 @@ addrmap_node_value (splay_tree_node node)
   return (void *) node->value;
 }
 
-
 static void
 addrmap_node_set_value (splay_tree_node node, void *value)
 {
   node->value = (splay_tree_value) value;
 }
 
-
 void
 addrmap_mutable::splay_tree_insert (CORE_ADDR key, void *value)
 {
-  ::splay_tree_insert (tree,
-		       allocate_key (key),
-		       (splay_tree_value) value);
+  ::splay_tree_insert (tree, allocate_key (key), (splay_tree_value) value);
 }
-
 
 /* Without changing the mapping of any address, ensure that there is a
    tree node at ADDR, even if it would represent a "transition" from
@@ -179,13 +161,12 @@ addrmap_mutable::force_transition (CORE_ADDR addr)
 {
   splay_tree_node n = splay_tree_lookup (addr);
 
-  if (! n)
+  if (!n)
     {
       n = splay_tree_predecessor (addr);
       splay_tree_insert (addr, n ? addrmap_node_value (n) : NULL);
     }
 }
-
 
 void
 addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
@@ -216,7 +197,7 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
        n && addrmap_node_key (n) <= end_inclusive;
        n = splay_tree_successor (addrmap_node_key (n)))
     {
-      if (! addrmap_node_value (n))
+      if (!addrmap_node_value (n))
 	addrmap_node_set_value (n, obj);
     }
 
@@ -226,8 +207,9 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
   n = splay_tree_predecessor (start);
   prior_value = n ? addrmap_node_value (n) : NULL;
   for (n = splay_tree_lookup (start), gdb_assert (n);
-       n && (end_inclusive == CORE_ADDR_MAX
-	     || addrmap_node_key (n) <= end_inclusive + 1);
+       n
+       && (end_inclusive == CORE_ADDR_MAX
+	   || addrmap_node_key (n) <= end_inclusive + 1);
        n = next)
     {
       next = splay_tree_successor (addrmap_node_key (n));
@@ -237,7 +219,6 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 	prior_value = addrmap_node_value (n);
     }
 }
-
 
 void *
 addrmap_mutable::do_find (CORE_ADDR addr) const
@@ -259,51 +240,46 @@ addrmap_mutable::do_find (CORE_ADDR addr) const
   return nullptr;
 }
 
-
 addrmap_fixed::addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut)
 {
   size_t transition_count = 0;
 
   /* Count the number of transitions in the tree.  */
-  mut->foreach ([&] (CORE_ADDR start, void *obj)
-    {
-      ++transition_count;
-      return 0;
-    });
+  mut->foreach ([&] (CORE_ADDR start, void *obj) {
+    ++transition_count;
+    return 0;
+  });
 
   /* Include an extra entry for the transition at zero (which fixed
      maps have, but mutable maps do not.)  */
   transition_count++;
 
   num_transitions = 1;
-  transitions = XOBNEWVEC (obstack, struct addrmap_transition,
-			   transition_count);
+  transitions
+    = XOBNEWVEC (obstack, struct addrmap_transition, transition_count);
   transitions[0].addr = 0;
   transitions[0].value = NULL;
 
   /* Copy all entries from the splay tree to the array, in order 
      of increasing address.  */
-  mut->foreach ([&] (CORE_ADDR start, void *obj)
-    {
-      transitions[num_transitions].addr = start;
-      transitions[num_transitions].value = obj;
-      ++num_transitions;
-      return 0;
-    });
+  mut->foreach ([&] (CORE_ADDR start, void *obj) {
+    transitions[num_transitions].addr = start;
+    transitions[num_transitions].value = obj;
+    ++num_transitions;
+    return 0;
+  });
 
   /* We should have filled the array.  */
   gdb_assert (num_transitions == transition_count);
 }
 
-
 void
 addrmap_mutable::relocate (CORE_ADDR offset)
 {
   /* Not needed yet.  */
-  internal_error (_("addrmap_relocate is not implemented yet "
-		    "for mutable addrmaps"));
+  internal_error (_ ("addrmap_relocate is not implemented yet "
+		     "for mutable addrmaps"));
 }
-
 
 /* This is a splay_tree_foreach_fn.  */
 
@@ -315,20 +291,18 @@ addrmap_mutable_foreach_worker (splay_tree_node node, void *data)
   return (*fn) (addrmap_node_key (node), addrmap_node_value (node));
 }
 
-
 int
 addrmap_mutable::do_foreach (addrmap_foreach_fn fn) const
 {
   return splay_tree_foreach (tree, addrmap_mutable_foreach_worker, &fn);
 }
 
-
 /* Compare keys as CORE_ADDR * values.  */
 static int
 splay_compare_CORE_ADDR_ptr (splay_tree_key ak, splay_tree_key bk)
 {
-  CORE_ADDR a = * (CORE_ADDR *) ak;
-  CORE_ADDR b = * (CORE_ADDR *) bk;
+  CORE_ADDR a = *(CORE_ADDR *) ak;
+  CORE_ADDR b = *(CORE_ADDR *) bk;
 
   /* We can't just return a-b here, because of over/underflow.  */
   if (a < b)
@@ -338,7 +312,6 @@ splay_compare_CORE_ADDR_ptr (splay_tree_key ak, splay_tree_key bk)
   else
     return 1;
 }
-
 
 static void
 xfree_wrapper (splay_tree_key key)
@@ -357,7 +330,6 @@ addrmap_mutable::~addrmap_mutable ()
   splay_tree_delete (tree);
 }
 
-
 /* See addrmap.h.  */
 
 void
@@ -368,8 +340,7 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
      addrmap entry defines the end of the range).  */
   bool previous_matched = false;
 
-  auto callback = [&] (CORE_ADDR start_addr, const void *obj)
-  {
+  auto callback = [&] (CORE_ADDR start_addr, const void *obj) {
     QUIT;
 
     bool matches = payload == nullptr || payload == obj;
@@ -380,10 +351,8 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
       addr_str = "<ends here>";
 
     if (matches || previous_matched)
-      gdb_printf (outfile, "  %s%s %s\n",
-		  payload != nullptr ? "  " : "",
-		  core_addr_to_string (start_addr),
-		  addr_str);
+      gdb_printf (outfile, "  %s%s %s\n", payload != nullptr ? "  " : "",
+		  core_addr_to_string (start_addr), addr_str);
 
     previous_matched = matches;
 
@@ -394,24 +363,25 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
 }
 
 #if GDB_SELF_TEST
-namespace selftests {
+namespace selftests
+{
 
 /* Convert P to CORE_ADDR.  */
 
 static CORE_ADDR
 core_addr (void *p)
 {
-  return (CORE_ADDR)(uintptr_t)p;
+  return (CORE_ADDR) (uintptr_t) p;
 }
 
 /* Check that &ARRAY[LOW]..&ARRAY[HIGH] has VAL in MAP.  */
 
-#define CHECK_ADDRMAP_FIND(MAP, ARRAY, LOW, HIGH, VAL)			\
-  do									\
-    {									\
-      for (unsigned i = LOW; i <= HIGH; ++i)				\
-	SELF_CHECK (MAP->find (core_addr (&ARRAY[i])) == VAL);		\
-    }									\
+#define CHECK_ADDRMAP_FIND(MAP, ARRAY, LOW, HIGH, VAL)         \
+  do                                                           \
+    {                                                          \
+      for (unsigned i = LOW; i <= HIGH; ++i)                   \
+	SELF_CHECK (MAP->find (core_addr (&ARRAY[i])) == VAL); \
+    }                                                          \
   while (0)
 
 /* Entry point for addrmap unit tests.  */
@@ -449,18 +419,17 @@ test_addrmap ()
   CHECK_ADDRMAP_FIND (map2, array, 13, 19, nullptr);
 
   /* Iterate over both addrmaps.  */
-  auto callback = [&] (CORE_ADDR start_addr, void *obj)
-    {
-      if (start_addr == core_addr (nullptr))
-	SELF_CHECK (obj == nullptr);
-      else if (start_addr == core_addr (&array[10]))
-	SELF_CHECK (obj == val1);
-      else if (start_addr == core_addr (&array[13]))
-	SELF_CHECK (obj == nullptr);
-      else
-	SELF_CHECK (false);
-      return 0;
-    };
+  auto callback = [&] (CORE_ADDR start_addr, void *obj) {
+    if (start_addr == core_addr (nullptr))
+      SELF_CHECK (obj == nullptr);
+    else if (start_addr == core_addr (&array[10]))
+      SELF_CHECK (obj == val1);
+    else if (start_addr == core_addr (&array[13]))
+      SELF_CHECK (obj == nullptr);
+    else
+      SELF_CHECK (false);
+    return 0;
+  };
   SELF_CHECK (map->foreach (callback) == 0);
   SELF_CHECK (map2->foreach (callback) == 0);
 
@@ -482,6 +451,7 @@ test_addrmap ()
 #endif /* GDB_SELF_TEST */
 
 void _initialize_addrmap ();
+
 void
 _initialize_addrmap ()
 {

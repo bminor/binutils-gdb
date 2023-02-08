@@ -36,13 +36,11 @@
 class nios2_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -103,16 +101,10 @@ union nios2_register
 
 /* Return the ptrace ``address'' of register REGNO. */
 
-static int nios2_regmap[] = {
-  -1,  1,  2,  3,  4,  5,  6,  7,
-  8,  9,  10, 11, 12, 13, 14, 15,
-  16, 17, 18, 19, 20, 21, 22, 23,
-  24, 25, 26, 27, 28, 29, 30, 31,
-  32, 33, 34, 35, 36, 37, 38, 39,
-  40, 41, 42, 43, 44, 45, 46, 47,
-  48,
-  0
-};
+static int nios2_regmap[]
+  = { -1, 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
+      17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+      34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 0 };
 
 /* Implement the low_arch_setup linux target ops method.  */
 
@@ -188,8 +180,8 @@ nios2_target::low_breakpoint_at (CORE_ADDR where)
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph,
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;
@@ -206,7 +198,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
 
 static void
 nios2_collect_register (struct regcache *regcache, int regno,
-			union nios2_register *reg)
+                        union nios2_register *reg)
 {
   union nios2_register tmp_reg;
 
@@ -216,7 +208,7 @@ nios2_collect_register (struct regcache *regcache, int regno,
 
 static void
 nios2_supply_register (struct regcache *regcache, int regno,
-		       const union nios2_register *reg)
+                       const union nios2_register *reg)
 {
   supply_register (regcache, regno, reg->buf);
 }
@@ -243,33 +235,25 @@ nios2_store_gregset (struct regcache *regcache, const void *buf)
     nios2_supply_register (regcache, i, regset + i);
 }
 
-static struct regset_info nios2_regsets[] =
-{
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
-    nios2_num_regs * 4, GENERAL_REGS,
-    nios2_fill_gregset, nios2_store_gregset },
-  NULL_REGSET
+static struct regset_info nios2_regsets[]
+  = { { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS, nios2_num_regs * 4,
+        GENERAL_REGS, nios2_fill_gregset, nios2_store_gregset },
+      NULL_REGSET };
+
+static struct regsets_info nios2_regsets_info = {
+  nios2_regsets, /* regsets */
+  0,             /* num_regsets */
+  NULL,          /* disabled_regsets */
 };
 
-static struct regsets_info nios2_regsets_info =
-  {
-    nios2_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct usrregs_info nios2_usrregs_info = {
+  nios2_num_regs,
+  nios2_regmap,
+};
 
-static struct usrregs_info nios2_usrregs_info =
-  {
-    nios2_num_regs,
-    nios2_regmap,
-  };
-
-static struct regs_info myregs_info =
-  {
-    NULL, /* regset_bitmap */
-    &nios2_usrregs_info,
-    &nios2_regsets_info
-  };
+static struct regs_info myregs_info
+  = { NULL, /* regset_bitmap */
+      &nios2_usrregs_info, &nios2_regsets_info };
 
 const regs_info *
 nios2_target::get_regs_info ()

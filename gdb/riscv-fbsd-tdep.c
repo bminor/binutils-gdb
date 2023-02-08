@@ -30,40 +30,32 @@
 
 /* Register maps.  */
 
-static const struct regcache_map_entry riscv_fbsd_gregmap[] =
-  {
-    { 1, RISCV_RA_REGNUM, 0 },
-    { 1, RISCV_SP_REGNUM, 0 },
-    { 1, RISCV_GP_REGNUM, 0 },
-    { 1, RISCV_TP_REGNUM, 0 },
-    { 3, 5, 0 },		/* t0 - t2 */
-    { 4, 28, 0 },		/* t3 - t6 */
-    { 2, RISCV_FP_REGNUM, 0 },	/* s0 - s1 */
-    { 10, 18, 0 },		/* s2 - s11 */
-    { 8, RISCV_A0_REGNUM, 0 },	/* a0 - a7 */
-    { 1, RISCV_PC_REGNUM, 0 },
-    { 1, RISCV_CSR_SSTATUS_REGNUM, 0 },
-    { 0 }
-  };
+static const struct regcache_map_entry riscv_fbsd_gregmap[]
+  = { { 1, RISCV_RA_REGNUM, 0 },
+      { 1, RISCV_SP_REGNUM, 0 },
+      { 1, RISCV_GP_REGNUM, 0 },
+      { 1, RISCV_TP_REGNUM, 0 },
+      { 3, 5, 0 },		 /* t0 - t2 */
+      { 4, 28, 0 },		 /* t3 - t6 */
+      { 2, RISCV_FP_REGNUM, 0 }, /* s0 - s1 */
+      { 10, 18, 0 },		 /* s2 - s11 */
+      { 8, RISCV_A0_REGNUM, 0 }, /* a0 - a7 */
+      { 1, RISCV_PC_REGNUM, 0 },
+      { 1, RISCV_CSR_SSTATUS_REGNUM, 0 },
+      { 0 } };
 
-static const struct regcache_map_entry riscv_fbsd_fpregmap[] =
-  {
-    { 32, RISCV_FIRST_FP_REGNUM, 16 },
-    { 1, RISCV_CSR_FCSR_REGNUM, 8 },
-    { 0 }
-  };
+static const struct regcache_map_entry riscv_fbsd_fpregmap[]
+  = { { 32, RISCV_FIRST_FP_REGNUM, 16 },
+      { 1, RISCV_CSR_FCSR_REGNUM, 8 },
+      { 0 } };
 
 /* Register set definitions.  */
 
-const struct regset riscv_fbsd_gregset =
-  {
-    riscv_fbsd_gregmap, riscv_supply_regset, regcache_collect_regset
-  };
+const struct regset riscv_fbsd_gregset
+  = { riscv_fbsd_gregmap, riscv_supply_regset, regcache_collect_regset };
 
-const struct regset riscv_fbsd_fpregset =
-  {
-    riscv_fbsd_fpregmap, riscv_supply_regset, regcache_collect_regset
-  };
+const struct regset riscv_fbsd_fpregset
+  = { riscv_fbsd_fpregmap, riscv_supply_regset, regcache_collect_regset };
 
 /* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
@@ -74,8 +66,8 @@ riscv_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 const struct regcache *regcache)
 {
   cb (".reg", RISCV_FBSD_NUM_GREGS * riscv_isa_xlen (gdbarch),
-      RISCV_FBSD_NUM_GREGS * riscv_isa_xlen (gdbarch),
-      &riscv_fbsd_gregset, NULL, cb_data);
+      RISCV_FBSD_NUM_GREGS * riscv_isa_xlen (gdbarch), &riscv_fbsd_gregset,
+      NULL, cb_data);
   cb (".reg2", RISCV_FBSD_SIZEOF_FPREGSET, RISCV_FBSD_SIZEOF_FPREGSET,
       &riscv_fbsd_fpregset, NULL, cb_data);
 }
@@ -100,25 +92,22 @@ riscv_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
    by the floating point register set.  The floating point register
    set is only valid if the _MC_FP_VALID flag is set in mc_flags.  */
 
-#define RISCV_SIGFRAME_UCONTEXT_OFFSET 		80
-#define RISCV_UCONTEXT_MCONTEXT_OFFSET		16
-#define RISCV_MCONTEXT_FLAG_FP_VALID		0x1
+#define RISCV_SIGFRAME_UCONTEXT_OFFSET 80
+#define RISCV_UCONTEXT_MCONTEXT_OFFSET 16
+#define RISCV_MCONTEXT_FLAG_FP_VALID 0x1
 
 /* Implement the "init" method of struct tramp_frame.  */
 
 static void
 riscv_fbsd_sigframe_init (const struct tramp_frame *self,
 			  frame_info_ptr this_frame,
-			  struct trad_frame_cache *this_cache,
-			  CORE_ADDR func)
+			  struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, RISCV_SP_REGNUM);
   CORE_ADDR mcontext_addr
-    = (sp
-       + RISCV_SIGFRAME_UCONTEXT_OFFSET
-       + RISCV_UCONTEXT_MCONTEXT_OFFSET);
+    = (sp + RISCV_SIGFRAME_UCONTEXT_OFFSET + RISCV_UCONTEXT_MCONTEXT_OFFSET);
   gdb_byte buf[4];
 
   trad_frame_set_reg_regmap (this_cache, riscv_fbsd_gregmap, mcontext_addr,
@@ -126,8 +115,7 @@ riscv_fbsd_sigframe_init (const struct tramp_frame *self,
 
   CORE_ADDR fpregs_addr
     = mcontext_addr + RISCV_FBSD_NUM_GREGS * riscv_isa_xlen (gdbarch);
-  CORE_ADDR fp_flags_addr
-    = fpregs_addr + RISCV_FBSD_SIZEOF_FPREGSET;
+  CORE_ADDR fp_flags_addr = fpregs_addr + RISCV_FBSD_SIZEOF_FPREGSET;
   if (target_read_memory (fp_flags_addr, buf, 4) == 0
       && (extract_unsigned_integer (buf, 4, byte_order)
 	  & RISCV_MCONTEXT_FLAG_FP_VALID))
@@ -143,22 +131,18 @@ riscv_fbsd_sigframe_init (const struct tramp_frame *self,
    claim that all instructions are 16 bits and use two "slots" for
    32-bit instructions.  */
 
-static const struct tramp_frame riscv_fbsd_sigframe =
-{
-  SIGTRAMP_FRAME,
-  2,
-  {
-    {0x850a, ULONGEST_MAX},		/* mov  a0, sp  */
-    {0x0513, ULONGEST_MAX},		/* addi a0, a0, #SF_UC  */
-    {0x0505, ULONGEST_MAX},
-    {0x0293, ULONGEST_MAX},		/* li   t0, #SYS_sigreturn  */
-    {0x1a10, ULONGEST_MAX},
-    {0x0073, ULONGEST_MAX},		/* ecall  */
-    {0x0000, ULONGEST_MAX},
-    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
-  },
-  riscv_fbsd_sigframe_init
-};
+static const struct tramp_frame riscv_fbsd_sigframe
+  = { SIGTRAMP_FRAME,
+      2,
+      { { 0x850a, ULONGEST_MAX }, /* mov  a0, sp  */
+	{ 0x0513, ULONGEST_MAX }, /* addi a0, a0, #SF_UC  */
+	{ 0x0505, ULONGEST_MAX },
+	{ 0x0293, ULONGEST_MAX }, /* li   t0, #SYS_sigreturn  */
+	{ 0x1a10, ULONGEST_MAX },
+	{ 0x0073, ULONGEST_MAX }, /* ecall  */
+	{ 0x0000, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      riscv_fbsd_sigframe_init };
 
 /* Implement the "get_thread_local_address" gdbarch method.  */
 
@@ -175,7 +159,7 @@ riscv_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 
   ULONGEST tp;
   if (regcache->cooked_read (RISCV_TP_REGNUM, &tp) != REG_VALID)
-    error (_("Unable to fetch %%tp"));
+    error (_ ("Unable to fetch %%tp"));
 
   /* %tp points to the end of the TCB which contains two pointers.
       The first pointer in the TCB points to the DTV array.  */
@@ -193,15 +177,15 @@ riscv_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_software_single_step (gdbarch, riscv_software_single_step);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 (riscv_isa_xlen (gdbarch) == 4
-					  ? svr4_ilp32_fetch_link_map_offsets
-					  : svr4_lp64_fetch_link_map_offsets));
+  set_solib_svr4_fetch_link_map_offsets (
+    gdbarch,
+    (riscv_isa_xlen (gdbarch) == 4 ? svr4_ilp32_fetch_link_map_offsets
+				   : svr4_lp64_fetch_link_map_offsets));
 
   tramp_frame_prepend_unwinder (gdbarch, &riscv_fbsd_sigframe);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, riscv_fbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, riscv_fbsd_iterate_over_regset_sections);
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
@@ -210,6 +194,7 @@ riscv_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_riscv_fbsd_tdep ();
+
 void
 _initialize_riscv_fbsd_tdep ()
 {

@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (FRAME_BASE_H)
+#if !defined(FRAME_BASE_H)
 #define FRAME_BASE_H 1
 
 class frame_info_ptr;
@@ -68,7 +68,8 @@ struct frame_base
 /* Given THIS frame, return the frame base methods for THIS frame,
    or NULL if it can't handle THIS frame.  */
 
-typedef const struct frame_base *(frame_base_sniffer_ftype) (frame_info_ptr this_frame);
+typedef const struct frame_base *(
+  frame_base_sniffer_ftype) (frame_info_ptr this_frame);
 
 /* Append a frame base sniffer to the list.  The sniffers are polled
    in the order that they are appended.  */
@@ -86,6 +87,7 @@ extern void frame_base_set_default (struct gdbarch *gdbarch,
 /* Iterate through the list of frame base handlers until one returns
    an implementation.  */
 
-extern const struct frame_base *frame_base_find_by_frame (frame_info_ptr this_frame);
+extern const struct frame_base *
+frame_base_find_by_frame (frame_info_ptr this_frame);
 
 #endif

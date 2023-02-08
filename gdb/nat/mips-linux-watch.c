@@ -32,7 +32,7 @@ mips_linux_watch_get_irw_mask (struct pt_watch_regs *regs, int n)
     case pt_watch_style_mips64:
       return regs->mips64.watch_masks[n] & IRW_MASK;
     default:
-      internal_error (_("Unrecognized watch register style"));
+      internal_error (_ ("Unrecognized watch register style"));
     }
 }
 
@@ -49,7 +49,7 @@ get_reg_mask (struct pt_watch_regs *regs, int n)
     case pt_watch_style_mips64:
       return regs->mips64.watch_masks[n] & ~IRW_MASK;
     default:
-      internal_error (_("Unrecognized watch register style"));
+      internal_error (_ ("Unrecognized watch register style"));
     }
 }
 
@@ -65,7 +65,7 @@ mips_linux_watch_get_num_valid (struct pt_watch_regs *regs)
     case pt_watch_style_mips64:
       return regs->mips64.num_valid;
     default:
-      internal_error (_("Unrecognized watch register style"));
+      internal_error (_ ("Unrecognized watch register style"));
     }
 }
 
@@ -82,7 +82,7 @@ mips_linux_watch_get_watchlo (struct pt_watch_regs *regs, int n)
     case pt_watch_style_mips64:
       return regs->mips64.watchlo[n];
     default:
-      internal_error (_("Unrecognized watch register style"));
+      internal_error (_ ("Unrecognized watch register style"));
     }
 }
 
@@ -104,7 +104,7 @@ mips_linux_watch_set_watchlo (struct pt_watch_regs *regs, int n,
       regs->mips64.watchlo[n] = value;
       break;
     default:
-      internal_error (_("Unrecognized watch register style"));
+      internal_error (_ ("Unrecognized watch register style"));
     }
 }
 
@@ -121,7 +121,7 @@ mips_linux_watch_get_watchhi (struct pt_watch_regs *regs, int n)
     case pt_watch_style_mips64:
       return regs->mips64.watchhi[n];
     default:
-      internal_error (_("Unrecognized watch register style"));
+      internal_error (_ ("Unrecognized watch register style"));
     }
 }
 
@@ -141,7 +141,7 @@ mips_linux_watch_set_watchhi (struct pt_watch_regs *regs, int n,
       regs->mips64.watchhi[n] = value;
       break;
     default:
-      internal_error (_("Unrecognized watch register style"));
+      internal_error (_ ("Unrecognized watch register style"));
     }
 }
 
@@ -226,8 +226,8 @@ fill_mask (CORE_ADDR mask)
    is IRW.  Return 1 on success, 0 on failure.  */
 
 int
-mips_linux_watch_try_one_watch (struct pt_watch_regs *regs,
-				CORE_ADDR addr, int len, uint32_t irw)
+mips_linux_watch_try_one_watch (struct pt_watch_regs *regs, CORE_ADDR addr,
+				int len, uint32_t irw)
 {
   CORE_ADDR base_addr, last_byte, break_addr, segment_len;
   CORE_ADDR mask_bits, t_low;
@@ -259,8 +259,7 @@ mips_linux_watch_try_one_watch (struct pt_watch_regs *regs,
   for (i = 0; i < mips_linux_watch_get_num_valid (regs); i++)
     {
       t_low = mips_linux_watch_get_watchlo (regs, i);
-      if (t_low == 0
-	  && irw == (mips_linux_watch_get_irw_mask (regs, i) & irw))
+      if (t_low == 0 && irw == (mips_linux_watch_get_irw_mask (regs, i) & irw))
 	{
 	  if (mask_bits <= (get_reg_mask (regs, i) | IRW_MASK))
 	    {

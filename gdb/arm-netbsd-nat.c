@@ -39,6 +39,7 @@
 class arm_netbsd_nat_target final : public nbsd_nat_target
 {
 public:
+
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -56,7 +57,8 @@ arm_supply_vfpregset (struct regcache *regcache, struct fpreg *fpregset)
 
   struct vfpreg &vfp = fpregset->fpr_vfp;
   for (int regno = 0; regno <= tdep->vfp_register_count; regno++)
-    regcache->raw_supply (regno + ARM_D0_REGNUM, (char *) &vfp.vfp_regs[regno]);
+    regcache->raw_supply (regno + ARM_D0_REGNUM,
+			  (char *) &vfp.vfp_regs[regno]);
 
   regcache->raw_supply (ARM_FPSCR_REGNUM, (char *) &vfp.vfp_fpscr);
 }
@@ -73,7 +75,7 @@ fetch_register (struct regcache *regcache, int regno)
 
   if (ret < 0)
     {
-      warning (_("unable to fetch general register"));
+      warning (_ ("unable to fetch general register"));
       return;
     }
   arm_nbsd_supply_gregset (nullptr, regcache, regno, &inferior_registers,
@@ -93,7 +95,7 @@ fetch_fp_register (struct regcache *regcache, int regno)
 
   if (ret < 0)
     {
-      warning (_("unable to fetch floating-point register"));
+      warning (_ ("unable to fetch floating-point register"));
       return;
     }
 
@@ -107,7 +109,7 @@ fetch_fp_register (struct regcache *regcache, int regno)
 			    (char *) &vfp.vfp_regs[regno - ARM_D0_REGNUM]);
     }
   else
-    warning (_("Invalid register number."));
+    warning (_ ("Invalid register number."));
 }
 
 static void
@@ -123,7 +125,7 @@ fetch_fp_regs (struct regcache *regcache)
 
   if (ret < 0)
     {
-      warning (_("unable to fetch general registers"));
+      warning (_ ("unable to fetch general registers"));
       return;
     }
 
@@ -147,7 +149,6 @@ arm_netbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
     }
 }
 
-
 static void
 store_register (const struct regcache *regcache, int regno)
 {
@@ -161,7 +162,7 @@ store_register (const struct regcache *regcache, int regno)
 
   if (ret < 0)
     {
-      warning (_("unable to fetch general registers"));
+      warning (_ ("unable to fetch general registers"));
       return;
     }
 
@@ -184,10 +185,10 @@ store_register (const struct regcache *regcache, int regno)
 	  unsigned pc_val;
 
 	  regcache->raw_collect (ARM_PC_REGNUM, (char *) &pc_val);
-	  
+
 	  pc_val = gdbarch_addr_bits_remove (gdbarch, pc_val);
-	  inferior_registers.r_pc ^= gdbarch_addr_bits_remove
-				       (gdbarch, inferior_registers.r_pc);
+	  inferior_registers.r_pc
+	    ^= gdbarch_addr_bits_remove (gdbarch, inferior_registers.r_pc);
 	  inferior_registers.r_pc |= pc_val;
 	}
       break;
@@ -203,8 +204,8 @@ store_register (const struct regcache *regcache, int regno)
 	  regcache->raw_collect (ARM_PS_REGNUM, (char *) &psr_val);
 
 	  psr_val ^= gdbarch_addr_bits_remove (gdbarch, psr_val);
-	  inferior_registers.r_pc = gdbarch_addr_bits_remove
-				      (gdbarch, inferior_registers.r_pc);
+	  inferior_registers.r_pc
+	    = gdbarch_addr_bits_remove (gdbarch, inferior_registers.r_pc);
 	  inferior_registers.r_pc |= psr_val;
 	}
       break;
@@ -218,7 +219,7 @@ store_register (const struct regcache *regcache, int regno)
 		(PTRACE_TYPE_ARG3) &inferior_registers, lwp);
 
   if (ret < 0)
-    warning (_("unable to write register %d to inferior"), regno);
+    warning (_ ("unable to write register %d to inferior"), regno);
 }
 
 static void
@@ -229,7 +230,6 @@ store_regs (const struct regcache *regcache)
   int lwp = regcache->ptid ().lwp ();
   int ret;
   int regno;
-
 
   for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
     regcache->raw_collect (regno, (char *) &inferior_registers.r[regno]);
@@ -250,7 +250,7 @@ store_regs (const struct regcache *regcache)
 
       regcache->raw_collect (ARM_PC_REGNUM, (char *) &pc_val);
       regcache->raw_collect (ARM_PS_REGNUM, (char *) &psr_val);
-	  
+
       pc_val = gdbarch_addr_bits_remove (gdbarch, pc_val);
       psr_val ^= gdbarch_addr_bits_remove (gdbarch, psr_val);
 
@@ -261,7 +261,7 @@ store_regs (const struct regcache *regcache)
 		(PTRACE_TYPE_ARG3) &inferior_registers, lwp);
 
   if (ret < 0)
-    warning (_("unable to store general registers"));
+    warning (_ ("unable to store general registers"));
 }
 
 static void
@@ -275,7 +275,7 @@ store_fp_register (const struct regcache *regcache, int regno)
 
   if (ret < 0)
     {
-      warning (_("unable to fetch floating-point registers"));
+      warning (_ ("unable to fetch floating-point registers"));
       return;
     }
 
@@ -289,13 +289,13 @@ store_fp_register (const struct regcache *regcache, int regno)
 			     (char *) &vfp.vfp_regs[regno - ARM_D0_REGNUM]);
     }
   else
-    warning (_("Invalid register number."));
+    warning (_ ("Invalid register number."));
 
   ret = ptrace (PT_SETFPREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, lwp);
 
   if (ret < 0)
-    warning (_("unable to write register %d to inferior"), regno);
+    warning (_ ("unable to write register %d to inferior"), regno);
 }
 
 static void
@@ -308,17 +308,16 @@ store_fp_regs (const struct regcache *regcache)
 
   struct fpreg fpregs;
   for (int regno = 0; regno <= tdep->vfp_register_count; regno++)
-    regcache->raw_collect
-      (regno + ARM_D0_REGNUM, (char *) &fpregs.fpr_vfp.vfp_regs[regno]);
+    regcache->raw_collect (regno + ARM_D0_REGNUM,
+			   (char *) &fpregs.fpr_vfp.vfp_regs[regno]);
 
-  regcache->raw_collect (ARM_FPSCR_REGNUM,
-			 (char *) &fpregs.fpr_vfp.vfp_fpscr);
+  regcache->raw_collect (ARM_FPSCR_REGNUM, (char *) &fpregs.fpr_vfp.vfp_fpscr);
 
   int ret = ptrace (PT_SETFPREGS, regcache->ptid ().pid (),
 		    (PTRACE_TYPE_ARG3) &fpregs, lwp);
 
   if (ret < 0)
-    warning (_("unable to store floating-point registers"));
+    warning (_ ("unable to store floating-point registers"));
 }
 
 void
@@ -344,18 +343,18 @@ arm_netbsd_nat_target::read_description ()
   int flag;
   size_t len = sizeof (flag);
 
-  if (sysctlbyname("machdep.fpu_present", &flag, &len, NULL, 0) != 0
-      || !flag)
+  if (sysctlbyname ("machdep.fpu_present", &flag, &len, NULL, 0) != 0 || !flag)
     return arm_read_description (ARM_FP_TYPE_NONE, false);
 
-  len = sizeof(flag);
-  if (sysctlbyname("machdep.neon_present", &flag, &len, NULL, 0) == 0 && flag)
+  len = sizeof (flag);
+  if (sysctlbyname ("machdep.neon_present", &flag, &len, NULL, 0) == 0 && flag)
     return aarch32_read_description ();
 
   return arm_read_description (ARM_FP_TYPE_VFPV3, false);
 }
 
 void _initialize_arm_netbsd_nat ();
+
 void
 _initialize_arm_netbsd_nat ()
 {

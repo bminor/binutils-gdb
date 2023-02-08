@@ -59,7 +59,7 @@ static const int lda_opcode = 0x08;
 static const int stq_opcode = 0x2d;
 
 /* Branch instruction format */
-#define BR_RA(insn) MEM_RA(insn)
+#define BR_RA(insn) MEM_RA (insn)
 
 static const int br_opcode = 0x30;
 static const int bne_opcode = 0x3d;
@@ -67,14 +67,13 @@ static const int bne_opcode = 0x3d;
 /* Operate instruction format */
 #define OPR_FUNCTION(insn) ((insn & 0xfe0) >> 5)
 #define OPR_HAS_IMMEDIATE(insn) ((insn & 0x1000) == 0x1000)
-#define OPR_RA(insn) MEM_RA(insn)
+#define OPR_RA(insn) MEM_RA (insn)
 #define OPR_RC(insn) ((insn & 0x1f))
 #define OPR_LIT(insn) ((insn & 0x1fe000) >> 13)
 
 static const int subq_opcode = 0x10;
 static const int subq_function = 0x29;
 
-
 /* Return the name of the REGNO register.
 
    An empty name corresponds to a register number that used to
@@ -85,18 +84,15 @@ static const int subq_function = 0x29;
 static const char *
 alpha_register_name (struct gdbarch *gdbarch, int regno)
 {
-  static const char * const register_names[] =
-  {
-    "v0",   "t0",   "t1",   "t2",   "t3",   "t4",   "t5",   "t6",
-    "t7",   "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "fp",
-    "a0",   "a1",   "a2",   "a3",   "a4",   "a5",   "t8",   "t9",
-    "t10",  "t11",  "ra",   "t12",  "at",   "gp",   "sp",   "zero",
-    "f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
-    "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
-    "f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
-    "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "fpcr",
-    "pc",   "",     "unique"
-  };
+  static const char *const register_names[]
+    = { "v0",	"t0",  "t1",  "t2",    "t3",   "t4",  "t5",  "t6",  "t7",
+	"s0",	"s1",  "s2",  "s3",    "s4",   "s5",  "fp",  "a0",  "a1",
+	"a2",	"a3",  "a4",  "a5",    "t8",   "t9",  "t10", "t11", "ra",
+	"t12",	"at",  "gp",  "sp",    "zero", "f0",  "f1",  "f2",  "f3",
+	"f4",	"f5",  "f6",  "f7",    "f8",   "f9",  "f10", "f11", "f12",
+	"f13",	"f14", "f15", "f16",   "f17",  "f18", "f19", "f20", "f21",
+	"f22",	"f23", "f24", "f25",   "f26",  "f27", "f28", "f29", "f30",
+	"fpcr", "pc",  "",    "unique" };
 
   gdb_static_assert (ALPHA_NUM_REGS == ARRAY_SIZE (register_names));
   return register_names[regno];
@@ -182,8 +178,8 @@ alpha_lds (struct gdbarch *gdbarch, void *out, const void *in)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST mem
     = extract_unsigned_integer ((const gdb_byte *) in, 4, byte_order);
-  ULONGEST frac    = (mem >>  0) & 0x7fffff;
-  ULONGEST sign    = (mem >> 31) & 1;
+  ULONGEST frac = (mem >> 0) & 0x7fffff;
+  ULONGEST sign = (mem >> 31) & 1;
   ULONGEST exp_msb = (mem >> 30) & 1;
   ULONGEST exp_low = (mem >> 23) & 0x7f;
   ULONGEST exp, reg;
@@ -234,8 +230,8 @@ alpha_convert_register_p (struct gdbarch *gdbarch, int regno,
 
 static int
 alpha_register_to_value (frame_info_ptr frame, int regnum,
-			 struct type *valtype, gdb_byte *out,
-			int *optimizedp, int *unavailablep)
+			 struct type *valtype, gdb_byte *out, int *optimizedp,
+			 int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct value *value = get_frame_register_value (frame, regnum);
@@ -273,7 +269,6 @@ alpha_value_to_register (frame_info_ptr frame, int regnum,
   put_frame_register (frame, regnum, out);
 }
 
-
 /* The alpha passes the first six arguments in the registers, the rest on
    the stack.  The register arguments are stored in ARG_REG_BUFFER, and
    then moved into the register file; this simplifies the passing of a
@@ -288,20 +283,21 @@ alpha_value_to_register (frame_info_ptr frame, int regnum,
 
 static CORE_ADDR
 alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		       struct regcache *regcache, CORE_ADDR bp_addr,
-		       int nargs, struct value **args, CORE_ADDR sp,
+		       struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		       struct value **args, CORE_ADDR sp,
 		       function_call_return_method return_method,
 		       CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
   int accumulate_size = (return_method == return_method_struct) ? 8 : 0;
+
   struct alpha_arg
-    {
-      const gdb_byte *contents;
-      int len;
-      int offset;
-    };
+  {
+    const gdb_byte *contents;
+    int len;
+    int offset;
+  };
   struct alpha_arg *alpha_args = XALLOCAVEC (struct alpha_arg, nargs);
   struct alpha_arg *m_arg;
   gdb_byte arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
@@ -405,10 +401,10 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     required_arg_regs = ALPHA_NUM_ARG_REGS;
 
   /* Make room for the arguments on the stack.  */
-  if (accumulate_size < sizeof(arg_reg_buffer))
+  if (accumulate_size < sizeof (arg_reg_buffer))
     accumulate_size = 0;
   else
-    accumulate_size -= sizeof(arg_reg_buffer);
+    accumulate_size -= sizeof (arg_reg_buffer);
   sp -= accumulate_size;
 
   /* Keep sp aligned to a multiple of 16 as the ABI requires.  */
@@ -422,16 +418,16 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int len = m_arg->len;
 
       /* Copy the bytes destined for registers into arg_reg_buffer.  */
-      if (offset < sizeof(arg_reg_buffer))
+      if (offset < sizeof (arg_reg_buffer))
 	{
-	  if (offset + len <= sizeof(arg_reg_buffer))
+	  if (offset + len <= sizeof (arg_reg_buffer))
 	    {
 	      memcpy (arg_reg_buffer + offset, contents, len);
 	      continue;
 	    }
 	  else
 	    {
-	      int tlen = sizeof(arg_reg_buffer) - offset;
+	      int tlen = sizeof (arg_reg_buffer) - offset;
 	      memcpy (arg_reg_buffer + offset, contents, tlen);
 	      offset += tlen;
 	      contents += tlen;
@@ -440,11 +436,11 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
 
       /* Everything else goes to the stack.  */
-      write_memory (sp + offset - sizeof(arg_reg_buffer), contents, len);
+      write_memory (sp + offset - sizeof (arg_reg_buffer), contents, len);
     }
   if (return_method == return_method_struct)
-    store_unsigned_integer (arg_reg_buffer, ALPHA_REGISTER_SIZE,
-			    byte_order, struct_addr);
+    store_unsigned_integer (arg_reg_buffer, ALPHA_REGISTER_SIZE, byte_order,
+			    struct_addr);
 
   /* Load the argument registers.  */
   for (i = 0; i < required_arg_regs; i++)
@@ -493,7 +489,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (_("unknown floating point width"));
+	  internal_error (_ ("unknown floating point width"));
 	}
       break;
 
@@ -516,7 +512,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (_("unknown floating point width"));
+	  internal_error (_ ("unknown floating point width"));
 	}
       break;
 
@@ -557,10 +553,10 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  /* FIXME: 128-bit long doubles are returned like structures:
 	     by writing into indirect storage provided by the caller
 	     as the first argument.  */
-	  error (_("Cannot set a 128-bit long double return value."));
+	  error (_ ("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (_("unknown floating point width"));
+	  internal_error (_ ("unknown floating point width"));
 	}
       break;
 
@@ -581,10 +577,10 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  /* FIXME: 128-bit long doubles are returned like structures:
 	     by writing into indirect storage provided by the caller
 	     as the first argument.  */
-	  error (_("Cannot set a 128-bit long double return value."));
+	  error (_ ("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (_("unknown floating point width"));
+	  internal_error (_ ("unknown floating point width"));
 	}
       break;
 
@@ -608,8 +604,7 @@ alpha_return_value (struct gdbarch *gdbarch, struct value *function,
   enum type_code code = type->code ();
   alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
-  if ((code == TYPE_CODE_STRUCT
-       || code == TYPE_CODE_UNION
+  if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
        || code == TYPE_CODE_ARRAY)
       && tdep->return_in_memory (type))
     {
@@ -636,13 +631,11 @@ alpha_return_in_memory_always (struct type *type)
 {
   return 1;
 }
-
 
 constexpr gdb_byte alpha_break_insn[] = { 0x80, 0, 0, 0 }; /* call_pal bpt */
 
 typedef BP_MANIPULATION (alpha_break_insn) alpha_breakpoint;
 
-
 /* This returns the PC of the first insn after the prologue.
    If we can't find the prologue, then return 0.  */
 
@@ -722,23 +715,23 @@ alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       inst = alpha_read_insn (gdbarch, pc + offset);
 
-      if ((inst & 0xffff0000) == 0x27bb0000)	/* ldah $gp,n($t12) */
+      if ((inst & 0xffff0000) == 0x27bb0000) /* ldah $gp,n($t12) */
 	continue;
-      if ((inst & 0xffff0000) == 0x23bd0000)	/* lda $gp,n($gp) */
+      if ((inst & 0xffff0000) == 0x23bd0000) /* lda $gp,n($gp) */
 	continue;
-      if ((inst & 0xffff0000) == 0x23de0000)	/* lda $sp,n($sp) */
+      if ((inst & 0xffff0000) == 0x23de0000) /* lda $sp,n($sp) */
 	continue;
-      if ((inst & 0xffe01fff) == 0x43c0153e)	/* subq $sp,n,$sp */
-	continue;
-
-      if (((inst & 0xfc1f0000) == 0xb41e0000		/* stq reg,n($sp) */
-	   || (inst & 0xfc1f0000) == 0x9c1e0000)	/* stt reg,n($sp) */
-	  && (inst & 0x03e00000) != 0x03e00000)		/* reg != $zero */
+      if ((inst & 0xffe01fff) == 0x43c0153e) /* subq $sp,n,$sp */
 	continue;
 
-      if (inst == 0x47de040f)			/* bis sp,sp,fp */
+      if (((inst & 0xfc1f0000) == 0xb41e0000	 /* stq reg,n($sp) */
+	   || (inst & 0xfc1f0000) == 0x9c1e0000) /* stt reg,n($sp) */
+	  && (inst & 0x03e00000) != 0x03e00000)	 /* reg != $zero */
 	continue;
-      if (inst == 0x47fe040f)			/* bis zero,sp,fp */
+
+      if (inst == 0x47de040f) /* bis sp,sp,fp */
+	continue;
+      if (inst == 0x47fe040f) /* bis zero,sp,fp */
 	continue;
 
       break;
@@ -746,7 +739,6 @@ alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return pc + offset;
 }
 
-
 static const int ldl_l_opcode = 0x2a;
 static const int ldq_l_opcode = 0x2b;
 static const int stl_c_opcode = 0x2e;
@@ -760,19 +752,18 @@ static const int stq_c_opcode = 0x2f;
 static std::vector<CORE_ADDR>
 alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  CORE_ADDR breaks[2] = {CORE_ADDR_MAX, CORE_ADDR_MAX};
+  CORE_ADDR breaks[2] = { CORE_ADDR_MAX, CORE_ADDR_MAX };
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
   unsigned int insn = alpha_read_insn (gdbarch, loc);
   int insn_count;
   int index;
-  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
+  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
 
   /* Assume all atomic sequences start with a LDL_L/LDQ_L instruction.  */
-  if (INSN_OPCODE (insn) != ldl_l_opcode
-      && INSN_OPCODE (insn) != ldq_l_opcode)
+  if (INSN_OPCODE (insn) != ldl_l_opcode && INSN_OPCODE (insn) != ldq_l_opcode)
     return {};
 
   /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
@@ -807,8 +798,7 @@ alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
 
   /* Assume that the atomic sequence ends with a STL_C/STQ_C instruction.  */
-  if (INSN_OPCODE (insn) != stl_c_opcode
-      && INSN_OPCODE (insn) != stq_c_opcode)
+  if (INSN_OPCODE (insn) != stl_c_opcode && INSN_OPCODE (insn) != stq_c_opcode)
     return {};
 
   closing_insn = loc;
@@ -818,7 +808,7 @@ alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
   breaks[0] = loc;
 
   /* Check for duplicated breakpoints.  Check also for a breakpoint
-     placed (branch instruction's destination) anywhere in sequence.  */ 
+     placed (branch instruction's destination) anywhere in sequence.  */
   if (last_breakpoint
       && (breaks[1] == breaks[0]
 	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
@@ -832,7 +822,6 @@ alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
   return next_pcs;
 }
 
-
 /* Figure out where the longjmp will land.
    We expect the first arg to be a pointer to the jmp_buf structure from
    which we extract the PC (JB_PC) that we will land at.  The PC is copied
@@ -857,7 +846,6 @@ alpha_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
   return 1;
 }
 
-
 /* Frame unwinder for signal trampolines.  We use alpha tdep bits that
    describe the location and shape of the sigcontext structure.  After
    that, all registers are in memory, so it's easy.  */
@@ -894,7 +882,7 @@ alpha_sigtramp_frame_unwind_cache (frame_info_ptr this_frame,
 static CORE_ADDR
 alpha_sigtramp_register_address (struct gdbarch *gdbarch,
 				 CORE_ADDR sigcontext_addr, int regnum)
-{ 
+{
   alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
   if (regnum >= 0 && regnum < 32)
@@ -902,7 +890,7 @@ alpha_sigtramp_register_address (struct gdbarch *gdbarch,
   else if (regnum >= ALPHA_FP0_REGNUM && regnum < ALPHA_FP0_REGNUM + 32)
     return sigcontext_addr + tdep->sc_fpregs_offset + regnum * 8;
   else if (regnum == ALPHA_PC_REGNUM)
-    return sigcontext_addr + tdep->sc_pc_offset; 
+    return sigcontext_addr + tdep->sc_pc_offset;
 
   return 0;
 }
@@ -944,8 +932,8 @@ alpha_sigtramp_frame_this_id (frame_info_ptr this_frame,
   /* The stack address is trivially read from the sigcontext.  */
   stack_addr = alpha_sigtramp_register_address (gdbarch, info->sigcontext_addr,
 						ALPHA_SP_REGNUM);
-  stack_addr = get_frame_memory_unsigned (this_frame, stack_addr,
-					  ALPHA_REGISTER_SIZE);
+  stack_addr
+    = get_frame_memory_unsigned (this_frame, stack_addr, ALPHA_REGISTER_SIZE);
 
   *this_id = frame_id_build (stack_addr, code_addr);
 }
@@ -1006,18 +994,14 @@ alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind alpha_sigtramp_frame_unwind =
-{
-  "alpha sigtramp",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  alpha_sigtramp_frame_this_id,
-  alpha_sigtramp_frame_prev_register,
-  NULL,
-  alpha_sigtramp_frame_sniffer
-};
-
-
+static const struct frame_unwind alpha_sigtramp_frame_unwind
+  = { "alpha sigtramp",
+      SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,
+      alpha_sigtramp_frame_this_id,
+      alpha_sigtramp_frame_prev_register,
+      NULL,
+      alpha_sigtramp_frame_sniffer };
 
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
@@ -1049,8 +1033,7 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (func)
     return func;
 
-  if (heuristic_fence_post == -1
-      || fence < tdep->vm_min_address)
+  if (heuristic_fence_post == -1 || fence < tdep->vm_min_address)
     fence = tdep->vm_min_address;
 
   /* Search back for previous return; also stop at a 0, which might be
@@ -1061,12 +1044,12 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
       unsigned int insn = alpha_read_insn (gdbarch, pc);
       switch (insn)
 	{
-	case 0:			/* invalid insn */
-	case 0x6bfa8001:	/* ret $31,($26),1 */
+	case 0:		 /* invalid insn */
+	case 0x6bfa8001: /* ret $31,($26),1 */
 	  return last_non_nop;
 
-	case 0x2ffe0000:	/* unop: ldq_u $31,0($30) */
-	case 0x47ff041f:	/* nop: bis $31,$31,$31 */
+	case 0x2ffe0000: /* unop: ldq_u $31,0($30) */
+	case 0x47ff041f: /* nop: bis $31,$31,$31 */
 	  break;
 
 	default:
@@ -1085,15 +1068,17 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
       static int blurb_printed = 0;
 
       if (fence == tdep->vm_min_address)
-	warning (_("Hit beginning of text section without finding \
-enclosing function for address %s"), paddress (gdbarch, orig_pc));
+	warning (_ ("Hit beginning of text section without finding \
+enclosing function for address %s"),
+		 paddress (gdbarch, orig_pc));
       else
-	warning (_("Hit heuristic-fence-post without finding \
-enclosing function for address %s"), paddress (gdbarch, orig_pc));
+	warning (_ ("Hit heuristic-fence-post without finding \
+enclosing function for address %s"),
+		 paddress (gdbarch, orig_pc));
 
       if (!blurb_printed)
 	{
-	  gdb_printf (_("\
+	  gdb_printf (_ ("\
 This warning occurs if you are debugging a function without any symbols\n\
 (for example, in a stripped executable).  In that case, you may wish to\n\
 increase the size of the search with the `set heuristic-fence-post' command.\n\
@@ -1111,7 +1096,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
    something about the traditional layout of alpha stack frames.  */
 
 struct alpha_heuristic_unwind_cache
-{ 
+{
   CORE_ADDR vfp;
   CORE_ADDR start_pc;
   trad_frame_saved_reg *saved_regs;
@@ -1160,39 +1145,33 @@ alpha_heuristic_analyze_probing_loop (struct gdbarch *gdbarch, CORE_ADDR *pc,
 
   cur_pc += ALPHA_INSN_SIZE;
   insn = alpha_read_insn (gdbarch, cur_pc);
-  if (INSN_OPCODE (insn) != lda_opcode
-      || MEM_RB (insn) != ALPHA_SP_REGNUM)
+  if (INSN_OPCODE (insn) != lda_opcode || MEM_RB (insn) != ALPHA_SP_REGNUM)
     return;
   reg_probe = MEM_RA (insn);
   cur_frame_size -= MEM_DISP (insn);
 
   /* stq     zero,<immediate>(REG_PROBE) */
-  
+
   cur_pc += ALPHA_INSN_SIZE;
   insn = alpha_read_insn (gdbarch, cur_pc);
-  if (INSN_OPCODE (insn) != stq_opcode
-      || MEM_RA (insn) != 0x1f
+  if (INSN_OPCODE (insn) != stq_opcode || MEM_RA (insn) != 0x1f
       || MEM_RB (insn) != reg_probe)
     return;
-  
+
   /* subq    REG_INDEX,0x1,REG_INDEX */
 
   cur_pc += ALPHA_INSN_SIZE;
   insn = alpha_read_insn (gdbarch, cur_pc);
-  if (INSN_OPCODE (insn) != subq_opcode
-      || !OPR_HAS_IMMEDIATE (insn)
-      || OPR_FUNCTION (insn) != subq_function
-      || OPR_LIT(insn) != 1
-      || OPR_RA (insn) != reg_index
-      || OPR_RC (insn) != reg_index)
+  if (INSN_OPCODE (insn) != subq_opcode || !OPR_HAS_IMMEDIATE (insn)
+      || OPR_FUNCTION (insn) != subq_function || OPR_LIT (insn) != 1
+      || OPR_RA (insn) != reg_index || OPR_RC (insn) != reg_index)
     return;
-  
+
   /* lda     REG_PROBE,<immediate>(REG_PROBE) */
-  
+
   cur_pc += ALPHA_INSN_SIZE;
   insn = alpha_read_insn (gdbarch, cur_pc);
-  if (INSN_OPCODE (insn) != lda_opcode
-      || MEM_RA (insn) != reg_probe
+  if (INSN_OPCODE (insn) != lda_opcode || MEM_RA (insn) != reg_probe
       || MEM_RB (insn) != reg_probe)
     return;
   cur_frame_size -= MEM_DISP (insn) * nb_of_iterations;
@@ -1201,16 +1180,14 @@ alpha_heuristic_analyze_probing_loop (struct gdbarch *gdbarch, CORE_ADDR *pc,
 
   cur_pc += ALPHA_INSN_SIZE;
   insn = alpha_read_insn (gdbarch, cur_pc);
-  if (INSN_OPCODE (insn) != bne_opcode
-      || MEM_RA (insn) != reg_index)
+  if (INSN_OPCODE (insn) != bne_opcode || MEM_RA (insn) != reg_index)
     return;
 
   /* lda     sp,<immediate>(REG_PROBE) */
 
   cur_pc += ALPHA_INSN_SIZE;
   insn = alpha_read_insn (gdbarch, cur_pc);
-  if (INSN_OPCODE (insn) != lda_opcode
-      || MEM_RA (insn) != ALPHA_SP_REGNUM
+  if (INSN_OPCODE (insn) != lda_opcode || MEM_RA (insn) != ALPHA_SP_REGNUM
       || MEM_RB (insn) != reg_probe)
     return;
   cur_frame_size -= MEM_DISP (insn);
@@ -1257,7 +1234,7 @@ alpha_heuristic_frame_unwind_cache (frame_info_ptr this_frame,
 	{
 	  unsigned int word = alpha_read_insn (gdbarch, cur_pc);
 
-	  if ((word & 0xffff0000) == 0x23de0000)	/* lda $sp,n($sp) */
+	  if ((word & 0xffff0000) == 0x23de0000) /* lda $sp,n($sp) */
 	    {
 	      if (word & 0x8000)
 		{
@@ -1274,7 +1251,7 @@ alpha_heuristic_frame_unwind_cache (frame_info_ptr this_frame,
 		  break;
 		}
 	    }
-	  else if ((word & 0xfc1f0000) == 0xb41e0000)	/* stq reg,n($sp) */
+	  else if ((word & 0xfc1f0000) == 0xb41e0000) /* stq reg,n($sp) */
 	    {
 	      reg = (word & 0x03e00000) >> 21;
 
@@ -1323,18 +1300,16 @@ alpha_heuristic_frame_unwind_cache (frame_info_ptr this_frame,
 		 FIXME: Rewriting GDB to access the procedure descriptors,
 		 e.g. via the minimal symbol table, might obviate this
 		 hack.  */
-	      if (return_reg == -1
-		  && cur_pc < (start_pc + 80)
-		  && (reg == ALPHA_T7_REGNUM
-		      || reg == ALPHA_T9_REGNUM
+	      if (return_reg == -1 && cur_pc < (start_pc + 80)
+		  && (reg == ALPHA_T7_REGNUM || reg == ALPHA_T9_REGNUM
 		      || reg == ALPHA_RA_REGNUM))
 		return_reg = reg;
 	    }
-	  else if ((word & 0xffe0ffff) == 0x6be08001)	/* ret zero,reg,1 */
+	  else if ((word & 0xffe0ffff) == 0x6be08001) /* ret zero,reg,1 */
 	    return_reg = (word >> 16) & 0x1f;
-	  else if (word == 0x47de040f)			/* bis sp,sp,fp */
+	  else if (word == 0x47de040f) /* bis sp,sp,fp */
 	    frame_reg = ALPHA_GCC_FP_REGNUM;
-	  else if (word == 0x47fe040f)			/* bis zero,sp,fp */
+	  else if (word == 0x47fe040f) /* bis zero,sp,fp */
 	    frame_reg = ALPHA_GCC_FP_REGNUM;
 
 	  alpha_heuristic_analyze_probing_loop (gdbarch, &cur_pc, &frame_size);
@@ -1348,11 +1323,10 @@ alpha_heuristic_frame_unwind_cache (frame_info_ptr this_frame,
 	    {
 	      unsigned int word = alpha_read_insn (gdbarch, cur_pc);
 
-	      if ((word & 0xfc1f0000) == 0xb41e0000)	/* stq reg,n($sp) */
+	      if ((word & 0xfc1f0000) == 0xb41e0000) /* stq reg,n($sp) */
 		{
 		  reg = (word & 0x03e00000) >> 21;
-		  if (reg == ALPHA_T7_REGNUM
-		      || reg == ALPHA_T9_REGNUM
+		  if (reg == ALPHA_T7_REGNUM || reg == ALPHA_T9_REGNUM
 		      || reg == ALPHA_RA_REGNUM)
 		    {
 		      return_reg = reg;
@@ -1382,13 +1356,12 @@ alpha_heuristic_frame_unwind_cache (frame_info_ptr this_frame,
      one to the offsets to make all detected offsets non-zero.  */
   for (reg = 0; reg < ALPHA_NUM_REGS; ++reg)
     if (info->saved_regs[reg].is_addr ())
-      info->saved_regs[reg].set_addr (info->saved_regs[reg].addr ()
-				      + val - 1);
+      info->saved_regs[reg].set_addr (info->saved_regs[reg].addr () + val - 1);
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */
   if (!info->saved_regs[ALPHA_SP_REGNUM].is_addr ())
-   info->saved_regs[ALPHA_SP_REGNUM].set_value (info->vfp);
+    info->saved_regs[ALPHA_SP_REGNUM].set_value (info->vfp);
 
   return info;
 }
@@ -1421,20 +1394,18 @@ alpha_heuristic_frame_prev_register (frame_info_ptr this_frame,
      the correct place.  */
   if (regnum == ALPHA_PC_REGNUM)
     regnum = info->return_reg;
-  
+
   return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
-static const struct frame_unwind alpha_heuristic_frame_unwind =
-{
-  "alpha prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  alpha_heuristic_frame_this_id,
-  alpha_heuristic_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind alpha_heuristic_frame_unwind
+  = { "alpha prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      alpha_heuristic_frame_this_id,
+      alpha_heuristic_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 static CORE_ADDR
 alpha_heuristic_frame_base_address (frame_info_ptr this_frame,
@@ -1446,23 +1417,20 @@ alpha_heuristic_frame_base_address (frame_info_ptr this_frame,
   return info->vfp;
 }
 
-static const struct frame_base alpha_heuristic_frame_base = {
-  &alpha_heuristic_frame_unwind,
-  alpha_heuristic_frame_base_address,
-  alpha_heuristic_frame_base_address,
-  alpha_heuristic_frame_base_address
-};
+static const struct frame_base alpha_heuristic_frame_base
+  = { &alpha_heuristic_frame_unwind, alpha_heuristic_frame_base_address,
+      alpha_heuristic_frame_base_address, alpha_heuristic_frame_base_address };
 
 /* Just like reinit_frame_cache, but with the right arguments to be
    callable as an sfunc.  Used by the "set heuristic-fence-post" command.  */
 
 static void
-reinit_frame_cache_sfunc (const char *args,
-			  int from_tty, struct cmd_list_element *c)
+reinit_frame_cache_sfunc (const char *args, int from_tty,
+			  struct cmd_list_element *c)
 {
   reinit_frame_cache ();
 }
-
+
 /* Helper routines for alpha*-nat.c files to move register sets to and
    from core files.  The UNIQUE pointer is allowed to be NULL, as most
    targets don't supply this value in their core files.  */
@@ -1493,8 +1461,8 @@ alpha_supply_int_regs (struct regcache *regcache, int regno,
 }
 
 void
-alpha_fill_int_regs (const struct regcache *regcache,
-		     int regno, void *r0_r30, void *pc, void *unique)
+alpha_fill_int_regs (const struct regcache *regcache, int regno, void *r0_r30,
+		     void *pc, void *unique)
 {
   gdb_byte *regs = (gdb_byte *) r0_r30;
   int i;
@@ -1511,8 +1479,8 @@ alpha_fill_int_regs (const struct regcache *regcache,
 }
 
 void
-alpha_supply_fp_regs (struct regcache *regcache, int regno,
-		      const void *f0_f30, const void *fpcr)
+alpha_supply_fp_regs (struct regcache *regcache, int regno, const void *f0_f30,
+		      const void *fpcr)
 {
   const gdb_byte *regs = (const gdb_byte *) f0_f30;
   int i;
@@ -1526,8 +1494,8 @@ alpha_supply_fp_regs (struct regcache *regcache, int regno,
 }
 
 void
-alpha_fill_fp_regs (const struct regcache *regcache,
-		    int regno, void *f0_f30, void *fpcr)
+alpha_fill_fp_regs (const struct regcache *regcache, int regno, void *f0_f30,
+		    void *fpcr)
 {
   gdb_byte *regs = (gdb_byte *) f0_f30;
   int i;
@@ -1540,11 +1508,9 @@ alpha_fill_fp_regs (const struct regcache *regcache,
     regcache->raw_collect (ALPHA_FPCR_REGNUM, fpcr);
 }
 
-
-
 /* Return nonzero if the G_floating register value in REG is equal to
    zero for FP control instructions.  */
-   
+
 static int
 fp_register_zero_p (LONGEST reg)
 {
@@ -1596,13 +1562,13 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
     {
       /* Branch format: target PC is:
 	 (new PC) + (4 * sext(displacement))  */
-      if (op == 0x30		/* BR */
-	  || op == 0x34)	/* BSR */
+      if (op == 0x30	 /* BR */
+	  || op == 0x34) /* BSR */
 	{
- branch_taken:
+	branch_taken:
 	  offset = (insn & 0x001fffff);
 	  if (offset & 0x00100000)
-	    offset  |= 0xffe00000;
+	    offset |= 0xffe00000;
 	  offset *= ALPHA_INSN_SIZE;
 	  return (pc + ALPHA_INSN_SIZE + offset);
 	}
@@ -1611,76 +1577,76 @@ alpha_next_pc (struct regcache *regcache, CORE_ADDR pc)
       regno = (insn >> 21) & 0x1f;
       switch (op)
 	{
-	  case 0x31:              /* FBEQ */
-	  case 0x36:              /* FBGE */
-	  case 0x37:              /* FBGT */
-	  case 0x33:              /* FBLE */
-	  case 0x32:              /* FBLT */
-	  case 0x35:              /* FBNE */
-	    regno += gdbarch_fp0_regnum (gdbarch);
+	case 0x31: /* FBEQ */
+	case 0x36: /* FBGE */
+	case 0x37: /* FBGT */
+	case 0x33: /* FBLE */
+	case 0x32: /* FBLT */
+	case 0x35: /* FBNE */
+	  regno += gdbarch_fp0_regnum (gdbarch);
 	}
-      
+
       rav = regcache_raw_get_signed (regcache, regno);
 
       switch (op)
 	{
-	case 0x38:		/* BLBC */
+	case 0x38: /* BLBC */
 	  if ((rav & 1) == 0)
 	    goto branch_taken;
 	  break;
-	case 0x3c:		/* BLBS */
+	case 0x3c: /* BLBS */
 	  if (rav & 1)
 	    goto branch_taken;
 	  break;
-	case 0x39:		/* BEQ */
+	case 0x39: /* BEQ */
 	  if (rav == 0)
 	    goto branch_taken;
 	  break;
-	case 0x3d:		/* BNE */
+	case 0x3d: /* BNE */
 	  if (rav != 0)
 	    goto branch_taken;
 	  break;
-	case 0x3a:		/* BLT */
+	case 0x3a: /* BLT */
 	  if (rav < 0)
 	    goto branch_taken;
 	  break;
-	case 0x3b:		/* BLE */
+	case 0x3b: /* BLE */
 	  if (rav <= 0)
 	    goto branch_taken;
 	  break;
-	case 0x3f:		/* BGT */
+	case 0x3f: /* BGT */
 	  if (rav > 0)
 	    goto branch_taken;
 	  break;
-	case 0x3e:		/* BGE */
+	case 0x3e: /* BGE */
 	  if (rav >= 0)
 	    goto branch_taken;
 	  break;
 
-	/* Floating point branches.  */
-	
-	case 0x31:              /* FBEQ */
+	  /* Floating point branches.  */
+
+	case 0x31: /* FBEQ */
 	  if (fp_register_zero_p (rav))
 	    goto branch_taken;
 	  break;
-	case 0x36:              /* FBGE */
+	case 0x36: /* FBGE */
 	  if (fp_register_sign_bit (rav) == 0 || fp_register_zero_p (rav))
 	    goto branch_taken;
 	  break;
-	case 0x37:              /* FBGT */
-	  if (fp_register_sign_bit (rav) == 0 && ! fp_register_zero_p (rav))
+	case 0x37: /* FBGT */
+	  if (fp_register_sign_bit (rav) == 0 && !fp_register_zero_p (rav))
 	    goto branch_taken;
 	  break;
-	case 0x33:              /* FBLE */
+	case 0x33: /* FBLE */
 	  if (fp_register_sign_bit (rav) == 1 || fp_register_zero_p (rav))
 	    goto branch_taken;
 	  break;
-	case 0x32:              /* FBLT */
-	  if (fp_register_sign_bit (rav) == 1 && ! fp_register_zero_p (rav))
+	case 0x32: /* FBLT */
+	  if (fp_register_sign_bit (rav) == 1 && !fp_register_zero_p (rav))
 	    goto branch_taken;
 	  break;
-	case 0x35:              /* FBNE */
-	  if (! fp_register_zero_p (rav))
+	case 0x35: /* FBNE */
+	  if (!fp_register_zero_p (rav))
 	    goto branch_taken;
 	  break;
 	}
@@ -1704,10 +1670,9 @@ alpha_software_single_step (struct regcache *regcache)
     return next_pcs;
 
   CORE_ADDR next_pc = alpha_next_pc (regcache, pc);
-  return {next_pc};
+  return { next_pc };
 }
 
-
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -1737,7 +1702,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sc_regs_offset = 4 * 8;
   tdep->sc_fpregs_offset = tdep->sc_regs_offset + 32 * 8 + 8;
 
-  tdep->jb_pc = -1;	/* longjmp support not enabled by default.  */
+  tdep->jb_pc = -1; /* longjmp support not enabled by default.  */
 
   tdep->return_in_memory = alpha_return_in_memory_always;
 
@@ -1819,10 +1784,10 @@ alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_alpha_tdep ();
+
 void
 _initialize_alpha_tdep ()
 {
-
   gdbarch_register (bfd_arch_alpha, alpha_gdbarch_init, NULL);
 
   /* Let the user set the fence post for heuristic_proc_start.  */
@@ -1833,9 +1798,11 @@ _initialize_alpha_tdep ()
   /* We need to throw away the frame cache when we set this, since it
      might change our ability to get backtraces.  */
   add_setshow_zinteger_cmd ("heuristic-fence-post", class_support,
-			    &heuristic_fence_post, _("\
-Set the distance searched for the start of a function."), _("\
-Show the distance searched for the start of a function."), _("\
+			    &heuristic_fence_post, _ ("\
+Set the distance searched for the start of a function."),
+			    _ ("\
+Show the distance searched for the start of a function."),
+			    _ ("\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
 search.  The only need to set it is when debugging a stripped executable."),

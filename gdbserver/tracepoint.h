@@ -26,23 +26,23 @@
 void initialize_tracepoint (void);
 
 #if defined(__GNUC__)
-# define ATTR_USED __attribute__((used))
-# define ATTR_NOINLINE __attribute__((noinline))
+#define ATTR_USED __attribute__ ((used))
+#define ATTR_NOINLINE __attribute__ ((noinline))
 #else
-# define ATTR_USED
-# define ATTR_NOINLINE
+#define ATTR_USED
+#define ATTR_NOINLINE
 #endif
 
 /* How to make symbol public/exported.  */
 
 #if defined _WIN32 || defined __CYGWIN__
-# define EXPORTED_SYMBOL __declspec (dllexport)
+#define EXPORTED_SYMBOL __declspec (dllexport)
 #else
-# if __GNUC__ >= 4
-#  define EXPORTED_SYMBOL __attribute__ ((visibility ("default")))
-# else
-#  define EXPORTED_SYMBOL
-# endif
+#if __GNUC__ >= 4
+#define EXPORTED_SYMBOL __attribute__ ((visibility ("default")))
+#else
+#define EXPORTED_SYMBOL
+#endif
 #endif
 
 /* Use these to make sure the functions and variables the IPA needs to
@@ -58,13 +58,13 @@ void initialize_tracepoint (void);
    EXTERN_C_PUSH/EXTERN_C_POP around their definition.  */
 
 #ifdef IN_PROCESS_AGENT
-# define IP_AGENT_EXPORT_FUNC EXTERN_C EXPORTED_SYMBOL ATTR_NOINLINE ATTR_USED
-# define IP_AGENT_EXPORT_VAR EXPORTED_SYMBOL ATTR_USED
-# define IP_AGENT_EXPORT_VAR_DECL EXTERN_C EXPORTED_SYMBOL
+#define IP_AGENT_EXPORT_FUNC EXTERN_C EXPORTED_SYMBOL ATTR_NOINLINE ATTR_USED
+#define IP_AGENT_EXPORT_VAR EXPORTED_SYMBOL ATTR_USED
+#define IP_AGENT_EXPORT_VAR_DECL EXTERN_C EXPORTED_SYMBOL
 #else
-# define IP_AGENT_EXPORT_FUNC static
-# define IP_AGENT_EXPORT_VAR
-# define IP_AGENT_EXPORT_VAR_DECL extern
+#define IP_AGENT_EXPORT_FUNC static
+#define IP_AGENT_EXPORT_VAR
+#define IP_AGENT_EXPORT_VAR_DECL extern
 #endif
 
 IP_AGENT_EXPORT_VAR_DECL int tracing;
@@ -84,16 +84,13 @@ int tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc);
 void release_while_stepping_state_list (struct thread_info *tinfo);
 
 int in_readonly_region (CORE_ADDR addr, ULONGEST length);
-int traceframe_read_mem (int tfnum, CORE_ADDR addr,
-			 unsigned char *buf, ULONGEST length,
-			 ULONGEST *nbytes);
-int fetch_traceframe_registers (int tfnum,
-				struct regcache *regcache,
-				int regnum);
+int traceframe_read_mem (int tfnum, CORE_ADDR addr, unsigned char *buf,
+                         ULONGEST length, ULONGEST *nbytes);
+int fetch_traceframe_registers (int tfnum, struct regcache *regcache,
+                                int regnum);
 
-int traceframe_read_sdata (int tfnum, ULONGEST offset,
-			   unsigned char *buf, ULONGEST length,
-			   ULONGEST *nbytes);
+int traceframe_read_sdata (int tfnum, ULONGEST offset, unsigned char *buf,
+                           ULONGEST length, ULONGEST *nbytes);
 
 int traceframe_read_info (int tfnum, struct buffer *buffer);
 
@@ -128,9 +125,9 @@ enum class fast_tpoint_collect_result
   at_insn,
 };
 
-fast_tpoint_collect_result fast_tracepoint_collecting
-  (CORE_ADDR thread_area, CORE_ADDR stop_pc,
-   struct fast_tpoint_collect_status *status);
+fast_tpoint_collect_result
+fast_tracepoint_collecting (CORE_ADDR thread_area, CORE_ADDR stop_pc,
+                            struct fast_tpoint_collect_status *status);
 
 void force_unlock_trace_buffer (void);
 
@@ -140,12 +137,12 @@ int handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc);
 void initialize_low_tracepoint (void);
 const struct target_desc *get_ipa_tdesc (int idx);
 void supply_fast_tracepoint_registers (struct regcache *regcache,
-				       const unsigned char *regs);
+                                       const unsigned char *regs);
 void supply_static_tracepoint_registers (struct regcache *regcache,
-					 const unsigned char *regs,
-					 CORE_ADDR pc);
+                                         const unsigned char *regs,
+                                         CORE_ADDR pc);
 void set_trampoline_buffer_space (CORE_ADDR begin, CORE_ADDR end,
-				  char *errmsg);
+                                  char *errmsg);
 void *alloc_jump_pad_buffer (size_t size);
 #ifndef HAVE_GETAUXVAL
 unsigned long getauxval (unsigned long type);
@@ -164,9 +161,8 @@ struct eval_agent_expr_context;
 /* Do memory copies for bytecodes.  */
 /* Do the recording of memory blocks for actions and bytecodes.  */
 
-int agent_mem_read (struct eval_agent_expr_context *ctx,
-		    unsigned char *to, CORE_ADDR from,
-		    ULONGEST len);
+int agent_mem_read (struct eval_agent_expr_context *ctx, unsigned char *to,
+                    CORE_ADDR from, ULONGEST len);
 
 LONGEST agent_get_trace_state_variable_value (int num);
 void agent_set_trace_state_variable_value (int num, LONGEST val);
@@ -175,9 +171,7 @@ void agent_set_trace_state_variable_value (int num, LONGEST val);
 
 int agent_tsv_read (struct eval_agent_expr_context *ctx, int n);
 int agent_mem_read_string (struct eval_agent_expr_context *ctx,
-			   unsigned char *to,
-			   CORE_ADDR from,
-			   ULONGEST len);
+                           unsigned char *to, CORE_ADDR from, ULONGEST len);
 
 /* The prototype the get_raw_reg function in the IPA.  Each arch's
    bytecode compiler emits calls to this function.  */

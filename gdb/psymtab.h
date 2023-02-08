@@ -64,6 +64,7 @@ struct psymbol_bcache : public gdb::bcache
 class psymtab_storage
 {
 public:
+
   psymtab_storage () = default;
   ~psymtab_storage ();
 
@@ -109,11 +110,7 @@ public:
   /* A range adapter that makes it possible to iterate over all
      psymtabs in one objfile.  */
 
-  partial_symtab_range range ()
-  {
-    return partial_symtab_range (psymtabs);
-  }
-
+  partial_symtab_range range () { return partial_symtab_range (psymtabs); }
 
   /* Each objfile points to a linked list of partial symtabs derived from
      this file, one partial symtab structure for each compilation unit

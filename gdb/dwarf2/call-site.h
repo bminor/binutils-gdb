@@ -66,16 +66,16 @@ struct call_site_target
   }
 
   void set_loc_physname (const char *physname)
-    {
-      m_loc_kind = PHYSNAME;
-      m_loc.physname = physname;
-    }
+  {
+    m_loc_kind = PHYSNAME;
+    m_loc.physname = physname;
+  }
 
   void set_loc_dwarf_block (dwarf2_locexpr_baton *dwarf_block)
-    {
-      m_loc_kind = DWARF_BLOCK;
-      m_loc.dwarf_block = dwarf_block;
-    }
+  {
+    m_loc_kind = DWARF_BLOCK;
+    m_loc.dwarf_block = dwarf_block;
+  }
 
   void set_loc_array (unsigned length, const CORE_ADDR *data)
   {
@@ -107,6 +107,7 @@ private:
     const char *physname;
     /* DWARF block.  */
     struct dwarf2_locexpr_baton *dwarf_block;
+
     /* Array of addresses.  */
     struct
     {
@@ -165,31 +166,27 @@ struct call_site
 {
   call_site (CORE_ADDR pc, dwarf2_per_cu_data *per_cu,
 	     dwarf2_per_objfile *per_objfile)
-    : per_cu (per_cu), per_objfile (per_objfile), m_unrelocated_pc (pc)
-  {}
+    : per_cu (per_cu),
+      per_objfile (per_objfile),
+      m_unrelocated_pc (pc)
+  {
+  }
 
-  static int
-  eq (const call_site *a, const call_site *b)
+  static int eq (const call_site *a, const call_site *b)
   {
     return a->m_unrelocated_pc == b->m_unrelocated_pc;
   }
 
-  static hashval_t
-  hash (const call_site *a)
+  static hashval_t hash (const call_site *a) { return a->m_unrelocated_pc; }
+
+  static int eq (const void *a, const void *b)
   {
-    return a->m_unrelocated_pc;
+    return eq ((const call_site *) a, (const call_site *) b);
   }
 
-  static int
-  eq (const void *a, const void *b)
+  static hashval_t hash (const void *a)
   {
-    return eq ((const call_site *)a, (const call_site *)b);
-  }
-
-  static hashval_t
-  hash (const void *a)
-  {
-    return hash ((const call_site *)a);
+    return hash ((const call_site *) a);
   }
 
   /* Return the address of the first instruction after this call.  */
@@ -202,8 +199,7 @@ struct call_site
 
   void iterate_over_addresses (struct gdbarch *call_site_gdbarch,
 			       frame_info_ptr caller_frame,
-			       call_site_target::iterate_ftype callback)
-    const
+			       call_site_target::iterate_ftype callback) const
   {
     return target.iterate_over_addresses (call_site_gdbarch, this,
 					  caller_frame, callback);
@@ -216,7 +212,9 @@ struct call_site
   /* * Describe DW_AT_call_target.  Missing attribute uses
      FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
 
-  struct call_site_target target {};
+  struct call_site_target target
+  {
+  };
 
   /* * Size of the PARAMETER array.  */
 
@@ -232,10 +230,12 @@ struct call_site
   dwarf2_per_objfile *const per_objfile = nullptr;
 
 private:
+
   /* Unrelocated address of the first instruction after this call.  */
   const CORE_ADDR m_unrelocated_pc;
 
 public:
+
   /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */
 
   struct call_site_parameter parameter[];

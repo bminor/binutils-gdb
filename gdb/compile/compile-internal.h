@@ -60,21 +60,23 @@ extern int compile_register_name_demangle (struct gdbarch *gdbarch,
 class compile_file_names
 {
 public:
+
   compile_file_names (std::string source_file, std::string object_file)
-    : m_source_file (source_file), m_object_file (object_file)
-  {}
+    : m_source_file (source_file),
+      m_object_file (object_file)
+  {
+  }
 
   /* Provide read-only views only.  Return 'const char *' instead of
      std::string to avoid having to use c_str() everywhere in client
      code.  */
 
-  const char *source_file () const
-  { return m_source_file.c_str (); }
+  const char *source_file () const { return m_source_file.c_str (); }
 
-  const char *object_file () const
-  { return m_object_file.c_str (); }
+  const char *object_file () const { return m_object_file.c_str (); }
 
 private:
+
   /* Storage for the file names.  */
   std::string m_source_file;
   std::string m_object_file;

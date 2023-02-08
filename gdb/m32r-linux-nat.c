@@ -32,11 +32,11 @@
 #include "gregset.h"
 
 #include "m32r-tdep.h"
-
 
 class m32r_linux_nat_target final : public linux_nat_target
 {
 public:
+
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -50,11 +50,8 @@ static m32r_linux_nat_target the_m32r_linux_nat_target;
 
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register array layout.  */
-static int regmap[] = {
-  4, 5, 6, 7, 0, 1, 2, 8,
-  9, 10, 11, 12, 13, 24, 25, 23,
-  19, 19, 26, 23, 22, 20, 16, 15
-};
+static int regmap[] = { 4,  5,	6,  7,	0,  1,	2,  8,	9,  10, 11, 12,
+			13, 24, 25, 23, 19, 19, 26, 23, 22, 20, 16, 15 };
 
 #define PSW_REGMAP 19
 #define BBPSW_REGMAP 21
@@ -62,10 +59,8 @@ static int regmap[] = {
 #define SPI_REGMAP 26
 
 /* Doee (??) apply to the corresponding SET requests as well.  */
-#define GETREGS_SUPPLIES(regno) (0 <= (regno) \
-				 && (regno) <= M32R_LINUX_NUM_REGS)
-
-
+#define GETREGS_SUPPLIES(regno) \
+  (0 <= (regno) && (regno) <= M32R_LINUX_NUM_REGS)
 
 /* Transfering the general-purpose registers between GDB, inferiors
    and core files.  */
@@ -74,7 +69,7 @@ static int regmap[] = {
    in *GREGSETP.  */
 
 void
-supply_gregset (struct regcache *regcache, const elf_gregset_t * gregsetp)
+supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 {
   const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int i;
@@ -118,7 +113,7 @@ fetch_regs (struct regcache *regcache, int tid)
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
   supply_gregset (regcache, (const elf_gregset_t *) &regs);
 }
@@ -128,8 +123,8 @@ fetch_regs (struct regcache *regcache, int tid)
    do this for all registers.  */
 
 void
-fill_gregset (const struct regcache *regcache,
-	      elf_gregset_t * gregsetp, int regno)
+fill_gregset (const struct regcache *regcache, elf_gregset_t *gregsetp,
+	      int regno)
 {
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
@@ -167,15 +162,13 @@ store_regs (const struct regcache *regcache, int tid, int regno)
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
   fill_gregset (regcache, &regs, regno);
 
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name (_("Couldn't write registers"));
+    perror_with_name (_ ("Couldn't write registers"));
 }
-
-
 
 /* Transfering floating-point registers between GDB, inferiors and cores.  
    Since M32R has no floating-point registers, these functions do nothing.  */
@@ -186,12 +179,10 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregs)
 }
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       gdb_fpregset_t *fpregs, int regno)
+fill_fpregset (const struct regcache *regcache, gdb_fpregset_t *fpregs,
+	       int regno)
 {
 }
-
-
 
 /* Transferring arbitrary registers between GDB and inferior.  */
 
@@ -213,7 +204,7 @@ m32r_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (_("Got request for bad register number %d."), regno);
+  internal_error (_ ("Got request for bad register number %d."), regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -232,10 +223,11 @@ m32r_linux_nat_target::store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  internal_error (_("Got request to store bad register number %d."), regno);
+  internal_error (_ ("Got request to store bad register number %d."), regno);
 }
 
 void _initialize_m32r_linux_nat ();
+
 void
 _initialize_m32r_linux_nat ()
 {

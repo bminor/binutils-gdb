@@ -21,11 +21,11 @@
 #define COMMON_BREAK_COMMON_H
 
 enum target_hw_bp_type
-  {
-    hw_write   = 0, 		/* Common  HW watchpoint */
-    hw_read    = 1, 		/* Read    HW watchpoint */
-    hw_access  = 2, 		/* Access  HW watchpoint */
-    hw_execute = 3		/* Execute HW breakpoint */
-  };
+{
+  hw_write = 0,  /* Common  HW watchpoint */
+  hw_read = 1,   /* Read    HW watchpoint */
+  hw_access = 2, /* Access  HW watchpoint */
+  hw_execute = 3 /* Execute HW breakpoint */
+};
 
 #endif /* COMMON_BREAK_COMMON_H */

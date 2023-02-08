@@ -18,7 +18,8 @@
 #ifndef COMMON_DEFAULT_INIT_ALLOC_H
 #define COMMON_DEFAULT_INIT_ALLOC_H
 
-namespace gdb {
+namespace gdb
+{
 
 /* An allocator that default constructs using default-initialization
    rather than value-initialization.  The idea is to use this when you
@@ -54,9 +55,9 @@ public:
   /* .. and provide an override/overload for the case of default
      construction (i.e., no arguments).  This is where we construct
      with default-init.  */
-  template <typename U>
-  void construct (U *ptr)
-    noexcept (std::is_nothrow_default_constructible<U>::value)
+  template<typename U>
+  void
+  construct (U *ptr) noexcept (std::is_nothrow_default_constructible<U>::value)
   {
     ::new ((void *) ptr) U; /* default-init */
   }

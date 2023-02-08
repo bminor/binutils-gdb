@@ -88,7 +88,7 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
      targets.  We don't support creating vector features on native targets
      (yet).  */
   if (features.vlen != 0)
-    error (_("unable to create vector feature"));
+    error (_ ("unable to create vector feature"));
 
   return tdesc;
 }
@@ -107,9 +107,9 @@ struct riscv_gdbarch_features_hasher
 
 /* Cache of previously seen target descriptions, indexed by the feature set
    that created them.  */
-static std::unordered_map<riscv_gdbarch_features,
-			  const target_desc_up,
-			  riscv_gdbarch_features_hasher> riscv_tdesc_cache;
+static std::unordered_map<riscv_gdbarch_features, const target_desc_up,
+			  riscv_gdbarch_features_hasher>
+  riscv_tdesc_cache;
 
 /* See arch/riscv.h.  */
 

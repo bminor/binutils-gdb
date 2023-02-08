@@ -33,7 +33,6 @@
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
-
 
 /* Helper functions.  */
 
@@ -69,8 +68,8 @@ core_addr_to_ps_addr (CORE_ADDR addr)
    This is a helper function for ps_pdread and ps_pdwrite.  */
 
 static ps_err_e
-ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
-		gdb_byte *buf, size_t len, int write)
+ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr, gdb_byte *buf,
+		size_t len, int write)
 {
   scoped_restore_current_inferior restore_inferior;
   set_current_inferior (ph->thread->inf);
@@ -90,15 +89,14 @@ ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
     ret = target_read_memory (core_addr, buf, len);
   return (ret == 0 ? PS_OK : PS_ERR);
 }
-
 
 /* Search for the symbol named NAME within the object named OBJ within
    the target process PH.  If the symbol is found the address of the
    symbol is stored in SYM_ADDR.  */
 
 ps_err_e
-ps_pglobal_lookup (struct ps_prochandle *ph, const char *obj,
-		   const char *name, psaddr_t *sym_addr)
+ps_pglobal_lookup (struct ps_prochandle *ph, const char *obj, const char *name,
+		   psaddr_t *sym_addr)
 {
   inferior *inf = ph->thread->inf;
 
@@ -127,8 +125,8 @@ ps_pdread (struct ps_prochandle *ph, psaddr_t addr, void *buf, size_t size)
 /* Write SIZE bytes from BUF into the target process PH at address ADDR.  */
 
 ps_err_e
-ps_pdwrite (struct ps_prochandle *ph, psaddr_t addr,
-	    const void *buf, size_t size)
+ps_pdwrite (struct ps_prochandle *ph, psaddr_t addr, const void *buf,
+	    size_t size)
 {
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);
 }
@@ -143,8 +141,7 @@ get_ps_regcache (struct ps_prochandle *ph, lwpid_t lwpid)
 {
   inferior *inf = ph->thread->inf;
   return get_thread_arch_regcache (inf->process_target (),
-				   ptid_t (inf->pid, lwpid),
-				   inf->gdbarch);
+				   ptid_t (inf->pid, lwpid), inf->gdbarch);
 }
 
 /* Get the general registers of LWP LWPID within the target process PH
@@ -165,7 +162,8 @@ ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
    from GREGSET.  */
 
 ps_err_e
-ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid, const prgregset_t gregset)
+ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid,
+	     const prgregset_t gregset)
 {
   struct regcache *regcache = get_ps_regcache (ph, lwpid);
 
@@ -179,8 +177,7 @@ ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid, const prgregset_t gregset)
    process PH and store them in FPREGSET.  */
 
 ps_err_e
-ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
-	       prfpregset_t *fpregset)
+ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid, prfpregset_t *fpregset)
 {
   struct regcache *regcache = get_ps_regcache (ph, lwpid);
 
@@ -215,6 +212,7 @@ ps_getpid (struct ps_prochandle *ph)
 }
 
 void _initialize_proc_service ();
+
 void
 _initialize_proc_service ()
 {

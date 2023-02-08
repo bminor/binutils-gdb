@@ -113,31 +113,32 @@ amdgpu_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dwarf_reg)
 struct amd_dbgapi_register_type
 {
   enum class kind
-    {
-      INTEGER,
-      FLOAT,
-      DOUBLE,
-      VECTOR,
-      CODE_PTR,
-      FLAGS,
-      ENUM,
-    };
+  {
+    INTEGER,
+    FLOAT,
+    DOUBLE,
+    VECTOR,
+    CODE_PTR,
+    FLAGS,
+    ENUM,
+  };
 
   amd_dbgapi_register_type (kind kind, std::string lookup_name)
-    : m_kind (kind), m_lookup_name (std::move (lookup_name))
-  {}
+    : m_kind (kind),
+      m_lookup_name (std::move (lookup_name))
+  {
+  }
 
   virtual ~amd_dbgapi_register_type () = default;
 
   /* Return the type's kind.  */
-  kind kind () const
-  { return m_kind; }
+  kind kind () const { return m_kind; }
 
   /* Name to use for this type in the existing type map.  */
-  const std::string &lookup_name () const
-  { return m_lookup_name; }
+  const std::string &lookup_name () const { return m_lookup_name; }
 
 private:
+
   enum kind m_kind;
   std::string m_lookup_name;
 };
@@ -147,20 +148,21 @@ using amd_dbgapi_register_type_up = std::unique_ptr<amd_dbgapi_register_type>;
 struct amd_dbgapi_register_type_integer : public amd_dbgapi_register_type
 {
   amd_dbgapi_register_type_integer (bool is_unsigned, unsigned int bit_size)
-    : amd_dbgapi_register_type
-	(kind::INTEGER,
-	 string_printf ("%sint%d", is_unsigned ? "u" : "", bit_size)),
+    : amd_dbgapi_register_type (kind::INTEGER,
+				string_printf ("%sint%d",
+					       is_unsigned ? "u" : "",
+					       bit_size)),
       m_is_unsigned (is_unsigned),
       m_bit_size (bit_size)
-  {}
+  {
+  }
 
-  bool is_unsigned () const
-  { return m_is_unsigned; }
+  bool is_unsigned () const { return m_is_unsigned; }
 
-  unsigned int bit_size () const
-  { return m_bit_size; }
+  unsigned int bit_size () const { return m_bit_size; }
 
 private:
+
   bool m_is_unsigned;
   unsigned int m_bit_size;
 };
@@ -169,40 +171,46 @@ struct amd_dbgapi_register_type_float : public amd_dbgapi_register_type
 {
   amd_dbgapi_register_type_float ()
     : amd_dbgapi_register_type (kind::FLOAT, "float")
-  {}
+  {
+  }
 };
 
 struct amd_dbgapi_register_type_double : public amd_dbgapi_register_type
 {
   amd_dbgapi_register_type_double ()
     : amd_dbgapi_register_type (kind::DOUBLE, "double")
-  {}
+  {
+  }
 };
 
 struct amd_dbgapi_register_type_vector : public amd_dbgapi_register_type
 {
-  amd_dbgapi_register_type_vector (const amd_dbgapi_register_type &element_type,
-				   unsigned int count)
+  amd_dbgapi_register_type_vector (
+    const amd_dbgapi_register_type &element_type, unsigned int count)
     : amd_dbgapi_register_type (kind::VECTOR,
 				make_lookup_name (element_type, count)),
       m_element_type (element_type),
       m_count (count)
-  {}
+  {
+  }
 
   const amd_dbgapi_register_type &element_type () const
-  { return m_element_type; }
+  {
+    return m_element_type;
+  }
 
-  unsigned int count () const
-  { return m_count; }
+  unsigned int count () const { return m_count; }
 
-  static std::string make_lookup_name
-    (const amd_dbgapi_register_type &element_type, unsigned int count)
+  static std::string
+  make_lookup_name (const amd_dbgapi_register_type &element_type,
+		    unsigned int count)
   {
     return string_printf ("%s[%d]", element_type.lookup_name ().c_str (),
 			  count);
   }
 
 private:
+
   const amd_dbgapi_register_type &m_element_type;
   unsigned int m_count;
 };
@@ -211,7 +219,8 @@ struct amd_dbgapi_register_type_code_ptr : public amd_dbgapi_register_type
 {
   amd_dbgapi_register_type_code_ptr ()
     : amd_dbgapi_register_type (kind::CODE_PTR, "void (*)()")
-  {}
+  {
+  }
 };
 
 struct amd_dbgapi_register_type_flags : public amd_dbgapi_register_type
@@ -232,33 +241,31 @@ struct amd_dbgapi_register_type_flags : public amd_dbgapi_register_type
 				make_lookup_name (bit_size, name)),
       m_bit_size (bit_size),
       m_name (std::move (name))
-  {}
+  {
+  }
 
-  unsigned int bit_size () const
-  { return m_bit_size; }
+  unsigned int bit_size () const { return m_bit_size; }
 
   void add_field (std::string name, unsigned int bit_pos_start,
 		  unsigned int bit_pos_end,
 		  const amd_dbgapi_register_type *type)
   {
-    m_fields.push_back (field {std::move (name), bit_pos_start,
-			       bit_pos_end, type});
+    m_fields.push_back (field { std::move (name), bit_pos_start, bit_pos_end,
+				type });
   }
 
-  container_type::size_type size () const
-  { return m_fields.size (); }
+  container_type::size_type size () const { return m_fields.size (); }
 
   const field &operator[] (container_type::size_type pos) const
-  { return m_fields[pos]; }
+  {
+    return m_fields[pos];
+  }
 
-  const_iterator_type begin () const
-  { return m_fields.begin (); }
+  const_iterator_type begin () const { return m_fields.begin (); }
 
-  const_iterator_type end () const
-  { return m_fields.end (); }
+  const_iterator_type end () const { return m_fields.end (); }
 
-  const std::string &name () const
-  { return m_name; }
+  const std::string &name () const { return m_name; }
 
   static std::string make_lookup_name (int bits, gdb::string_view name)
   {
@@ -268,6 +275,7 @@ struct amd_dbgapi_register_type_flags : public amd_dbgapi_register_type
   }
 
 private:
+
   unsigned int m_bit_size;
   container_type m_fields;
   std::string m_name;
@@ -290,31 +298,30 @@ struct amd_dbgapi_register_type_enum : public amd_dbgapi_register_type
   amd_dbgapi_register_type_enum (gdb::string_view name)
     : amd_dbgapi_register_type (kind::ENUM, make_lookup_name (name)),
       m_name (name.data (), name.length ())
-  {}
+  {
+  }
 
-  void set_bit_size (int bit_size)
-  { m_bit_size = bit_size; }
+  void set_bit_size (int bit_size) { m_bit_size = bit_size; }
 
-  unsigned int bit_size () const
-  { return m_bit_size; }
+  unsigned int bit_size () const { return m_bit_size; }
 
   void add_enumerator (std::string name, ULONGEST value)
-  { m_enumerators.push_back (enumerator {std::move (name), value}); }
+  {
+    m_enumerators.push_back (enumerator { std::move (name), value });
+  }
 
-  container_type::size_type size () const
-  { return m_enumerators.size (); }
+  container_type::size_type size () const { return m_enumerators.size (); }
 
   const enumerator &operator[] (container_type::size_type pos) const
-  { return m_enumerators[pos]; }
+  {
+    return m_enumerators[pos];
+  }
 
-  const_iterator_type begin () const
-  { return m_enumerators.begin (); }
+  const_iterator_type begin () const { return m_enumerators.begin (); }
 
-  const_iterator_type end () const
-  { return m_enumerators.end (); }
+  const_iterator_type end () const { return m_enumerators.end (); }
 
-  const std::string &name () const
-  { return m_name; }
+  const std::string &name () const { return m_name; }
 
   static std::string make_lookup_name (gdb::string_view name)
   {
@@ -324,6 +331,7 @@ struct amd_dbgapi_register_type_enum : public amd_dbgapi_register_type
   }
 
 private:
+
   unsigned int m_bit_size = 32;
   container_type m_enumerators;
   std::string m_name;
@@ -344,7 +352,7 @@ try_strtoulst (gdb::string_view s)
   errno = 0;
   ULONGEST value = strtoulst (s.data (), nullptr, 0);
   if (errno != 0)
-    error (_("Failed to parse integer."));
+    error (_ ("Failed to parse integer."));
 
   return value;
 };
@@ -358,31 +366,29 @@ static const amd_dbgapi_register_type &
 parse_amd_dbgapi_register_type (gdb::string_view type_name,
 				amd_dbgapi_register_type_map &type_map);
 
-
 /* parse_amd_dbgapi_register_type helper for enum types.  */
 
 static void
-parse_amd_dbgapi_register_type_enum_fields
-  (amd_dbgapi_register_type_enum &enum_type, gdb::string_view fields)
+parse_amd_dbgapi_register_type_enum_fields (
+  amd_dbgapi_register_type_enum &enum_type, gdb::string_view fields)
 {
   compiled_regex regex (/* name */
-			"^(" IDENTIFIER ")"
-			WSOPT "=" WSOPT
+			"^(" IDENTIFIER ")" WSOPT "=" WSOPT
 			/* value */
-			"([0-9]+)"
-			WSOPT "(," WSOPT ")?",
+			"([0-9]+)" WSOPT "(," WSOPT ")?",
 			REG_EXTENDED,
-			_("Error in AMDGPU enum register type regex"));
+			_ ("Error in AMDGPU enum register type regex"));
   regmatch_t matches[4];
 
   while (!fields.empty ())
     {
       int res = regex.exec (fields.data (), ARRAY_SIZE (matches), matches, 0);
       if (res == REG_NOMATCH)
-	error (_("Failed to parse enum fields"));
+	error (_ ("Failed to parse enum fields"));
 
-      auto sv_from_match = [fields] (const regmatch_t &m)
-	{ return fields.substr (m.rm_so, m.rm_eo - m.rm_so); };
+      auto sv_from_match = [fields] (const regmatch_t &m) {
+	return fields.substr (m.rm_so, m.rm_eo - m.rm_so);
+      };
 
       gdb::string_view name = sv_from_match (matches[1]);
       gdb::string_view value_str = sv_from_match (matches[2]);
@@ -400,34 +406,35 @@ parse_amd_dbgapi_register_type_enum_fields
 /* parse_amd_dbgapi_register_type helper for flags types.  */
 
 static void
-parse_amd_dbgapi_register_type_flags_fields
-  (amd_dbgapi_register_type_flags &flags_type,
-   int bits, gdb::string_view name, gdb::string_view fields,
-   amd_dbgapi_register_type_map &type_map)
+parse_amd_dbgapi_register_type_flags_fields (
+  amd_dbgapi_register_type_flags &flags_type, int bits, gdb::string_view name,
+  gdb::string_view fields, amd_dbgapi_register_type_map &type_map)
 {
   gdb_assert (bits == 32 || bits == 64);
 
   std::string regex_str
     = string_printf (/* type */
-		     "^(bool|uint%d_t|enum" WS IDENTIFIER WSOPT "(\\{[^}]*})?)"
-		     WS
+		     "^(bool|uint%d_t|enum" WS IDENTIFIER WSOPT
+		     "(\\{[^}]*})?)" WS
 		     /* name */
 		     "(" IDENTIFIER ")" WSOPT
 		     /* bit position */
 		     "@([0-9]+)(-[0-9]+)?" WSOPT ";" WSOPT,
 		     bits);
-  compiled_regex regex (regex_str.c_str (), REG_EXTENDED,
-			_("Error in AMDGPU register type flags fields regex"));
+  compiled_regex regex (
+    regex_str.c_str (), REG_EXTENDED,
+    _ ("Error in AMDGPU register type flags fields regex"));
   regmatch_t matches[6];
 
   while (!fields.empty ())
     {
       int res = regex.exec (fields.data (), ARRAY_SIZE (matches), matches, 0);
       if (res == REG_NOMATCH)
-	error (_("Failed to parse flags type fields string"));
+	error (_ ("Failed to parse flags type fields string"));
 
-      auto sv_from_match = [fields] (const regmatch_t &m)
-	{ return fields.substr (m.rm_so, m.rm_eo - m.rm_so); };
+      auto sv_from_match = [fields] (const regmatch_t &m) {
+	return fields.substr (m.rm_so, m.rm_eo - m.rm_so);
+      };
 
       gdb::string_view field_type_str = sv_from_match (matches[1]);
       gdb::string_view field_name = sv_from_match (matches[3]);
@@ -435,19 +442,19 @@ parse_amd_dbgapi_register_type_flags_fields
       ULONGEST pos_begin = try_strtoulst (pos_begin_str);
 
       if (field_type_str == "bool")
-	flags_type.add_field (gdb::to_string (field_name), pos_begin, pos_begin,
-			      nullptr);
+	flags_type.add_field (gdb::to_string (field_name), pos_begin,
+			      pos_begin, nullptr);
       else
 	{
 	  if (matches[5].rm_so == -1)
-	    error (_("Missing end bit position"));
+	    error (_ ("Missing end bit position"));
 
 	  gdb::string_view pos_end_str = sv_from_match (matches[5]);
 	  ULONGEST pos_end = try_strtoulst (pos_end_str.substr (1));
 	  const amd_dbgapi_register_type &field_type
 	    = parse_amd_dbgapi_register_type (field_type_str, type_map);
-	  flags_type.add_field (gdb::to_string (field_name), pos_begin, pos_end,
-				&field_type);
+	  flags_type.add_field (gdb::to_string (field_name), pos_begin,
+				pos_end, &field_type);
 	}
 
       fields = fields.substr (matches[0].rm_eo);
@@ -469,7 +476,7 @@ parse_amd_dbgapi_register_type_scalar (gdb::string_view name,
 	  && kind != amd_dbgapi_register_type::kind::FLOAT
 	  && kind != amd_dbgapi_register_type::kind::DOUBLE
 	  && kind != amd_dbgapi_register_type::kind::CODE_PTR)
-	error (_("type mismatch"));
+	error (_ ("type mismatch"));
 
       return *it->second;
     }
@@ -490,7 +497,7 @@ parse_amd_dbgapi_register_type_scalar (gdb::string_view name,
   else if (name == "void (*)()")
     type.reset (new amd_dbgapi_register_type_code_ptr ());
   else
-    error (_("unknown type %s"), name_str.c_str ());
+    error (_ ("unknown type %s"), name_str.c_str ());
 
   auto insertion_pair = type_map.emplace (name, std::move (type));
   return *insertion_pair.first->second;
@@ -507,8 +514,9 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 				amd_dbgapi_register_type_map &type_map)
 {
   size_t pos_open_bracket = type_str.find_last_of ('[');
-  auto sv_from_match = [type_str] (const regmatch_t &m)
-    { return type_str.substr (m.rm_so, m.rm_eo - m.rm_so); };
+  auto sv_from_match = [type_str] (const regmatch_t &m) {
+    return type_str.substr (m.rm_so, m.rm_eo - m.rm_so);
+  };
 
   if (pos_open_bracket != gdb::string_view::npos)
     {
@@ -522,12 +530,13 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
       gdb_assert (pos_close_bracket != gdb::string_view::npos);
       gdb::string_view count_str_view
 	= type_str.substr (pos_open_bracket + 1,
-			    pos_close_bracket - pos_open_bracket);
+			   pos_close_bracket - pos_open_bracket);
       std::string count_str = gdb::to_string (count_str_view);
       unsigned int count = std::stoul (count_str);
 
       std::string lookup_name
-	= amd_dbgapi_register_type_vector::make_lookup_name (element_type, count);
+	= amd_dbgapi_register_type_vector::make_lookup_name (element_type,
+							     count);
       auto existing_type_it = type_map.find (lookup_name);
       if (existing_type_it != type_map.end ())
 	{
@@ -536,8 +545,8 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 	  return *existing_type_it->second;
 	}
 
-      amd_dbgapi_register_type_up type
-	(new amd_dbgapi_register_type_vector (element_type, count));
+      amd_dbgapi_register_type_up type (
+	new amd_dbgapi_register_type_vector (element_type, count));
       auto insertion_pair
 	= type_map.emplace (type->lookup_name (), std::move (type));
       return *insertion_pair.first->second;
@@ -546,16 +555,16 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
   if (type_str.find ("flags32_t") == 0 || type_str.find ("flags64_t") == 0)
     {
       /* Split 'type_str' into 4 tokens: "(type) (name) ({ (fields) })".  */
-      compiled_regex regex ("^(flags32_t|flags64_t)"
-			    WS "(" IDENTIFIER ")" WSOPT
-			    "(\\{" WSOPT "(.*)})?",
+      compiled_regex regex ("^(flags32_t|flags64_t)" WS "(" IDENTIFIER
+			    ")" WSOPT "(\\{" WSOPT "(.*)})?",
 			    REG_EXTENDED,
-			    _("Error in AMDGPU register type regex"));
+			    _ ("Error in AMDGPU register type regex"));
 
       regmatch_t matches[5];
-      int res = regex.exec (type_str.data (), ARRAY_SIZE (matches), matches, 0);
+      int res
+	= regex.exec (type_str.data (), ARRAY_SIZE (matches), matches, 0);
       if (res == REG_NOMATCH)
-	error (_("Failed to parse flags type string"));
+	error (_ ("Failed to parse flags type string"));
 
       gdb::string_view flags_keyword = sv_from_match (matches[1]);
       unsigned int bit_size = flags_keyword == "flags32_t" ? 32 : 64;
@@ -568,12 +577,12 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 	{
 	  /* No braces, lookup existing type.  */
 	  if (existing_type_it == type_map.end ())
-	    error (_("reference to unknown type %s."),
+	    error (_ ("reference to unknown type %s."),
 		   gdb::to_string (name).c_str ());
 
 	  if (existing_type_it->second->kind ()
 	      != amd_dbgapi_register_type::kind::FLAGS)
-	    error (_("type mismatch"));
+	    error (_ ("type mismatch"));
 
 	  return *existing_type_it->second;
 	}
@@ -581,34 +590,37 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 	{
 	  /* With braces, it's a definition.  */
 	  if (existing_type_it != type_map.end ())
-	    error (_("re-definition of type %s."),
+	    error (_ ("re-definition of type %s."),
 		   gdb::to_string (name).c_str ());
 
-	  amd_dbgapi_register_type_flags_up flags_type
-	    (new amd_dbgapi_register_type_flags (bit_size, name));
+	  amd_dbgapi_register_type_flags_up flags_type (
+	    new amd_dbgapi_register_type_flags (bit_size, name));
 	  gdb::string_view fields_without_braces = sv_from_match (matches[4]);
 
-	  parse_amd_dbgapi_register_type_flags_fields
-	    (*flags_type, bit_size, name, fields_without_braces, type_map);
+	  parse_amd_dbgapi_register_type_flags_fields (*flags_type, bit_size,
+						       name,
+						       fields_without_braces,
+						       type_map);
 
-	  auto insertion_pair
-	    = type_map.emplace (flags_type->lookup_name (),
-				std::move (flags_type));
+	  auto insertion_pair = type_map.emplace (flags_type->lookup_name (),
+						  std::move (flags_type));
 	  return *insertion_pair.first->second;
 	}
     }
 
   if (type_str.find ("enum") == 0)
     {
-      compiled_regex regex ("^enum" WS "(" IDENTIFIER ")" WSOPT "(\\{" WSOPT "([^}]*)})?",
+      compiled_regex regex ("^enum" WS "(" IDENTIFIER ")" WSOPT "(\\{" WSOPT
+			    "([^}]*)})?",
 			    REG_EXTENDED,
-			    _("Error in AMDGPU register type enum regex"));
+			    _ ("Error in AMDGPU register type enum regex"));
 
       /* Split 'type_name' into 3 tokens: "(name) ( { (fields) } )".  */
       regmatch_t matches[4];
-      int res = regex.exec (type_str.data (), ARRAY_SIZE (matches), matches, 0);
+      int res
+	= regex.exec (type_str.data (), ARRAY_SIZE (matches), matches, 0);
       if (res == REG_NOMATCH)
-	error (_("Failed to parse flags type string"));
+	error (_ ("Failed to parse flags type string"));
 
       gdb::string_view name = sv_from_match (matches[1]);
 
@@ -620,12 +632,12 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 	{
 	  /* No braces, lookup existing type.  */
 	  if (existing_type_it == type_map.end ())
-	    error (_("reference to unknown type %s"),
+	    error (_ ("reference to unknown type %s"),
 		   gdb::to_string (name).c_str ());
 
 	  if (existing_type_it->second->kind ()
 	      != amd_dbgapi_register_type::kind::ENUM)
-	    error (_("type mismatch"));
+	    error (_ ("type mismatch"));
 
 	  return *existing_type_it->second;
 	}
@@ -633,19 +645,18 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 	{
 	  /* With braces, it's a definition.  */
 	  if (existing_type_it != type_map.end ())
-	    error (_("re-definition of type %s"),
+	    error (_ ("re-definition of type %s"),
 		   gdb::to_string (name).c_str ());
 
-	  amd_dbgapi_register_type_enum_up enum_type
-	    (new amd_dbgapi_register_type_enum (name));
+	  amd_dbgapi_register_type_enum_up enum_type (
+	    new amd_dbgapi_register_type_enum (name));
 	  gdb::string_view fields_without_braces = sv_from_match (matches[3]);
 
-	  parse_amd_dbgapi_register_type_enum_fields
-	    (*enum_type, fields_without_braces);
+	  parse_amd_dbgapi_register_type_enum_fields (*enum_type,
+						      fields_without_braces);
 
-	  auto insertion_pair
-	    = type_map.emplace (enum_type->lookup_name (),
-				std::move (enum_type));
+	  auto insertion_pair = type_map.emplace (enum_type->lookup_name (),
+						  std::move (enum_type));
 	  return *insertion_pair.first->second;
 	}
     }
@@ -722,12 +733,13 @@ amd_dbgapi_register_type_to_gdb_type (const amd_dbgapi_register_type &type,
 	    else
 	      {
 		struct type *field_type
-		  = amd_dbgapi_register_type_to_gdb_type (*field.type, gdbarch);
+		  = amd_dbgapi_register_type_to_gdb_type (*field.type,
+							  gdbarch);
 		gdb_assert (field_type != nullptr);
-		append_flags_type_field
-		  (gdb_type, field.bit_pos_start,
-		   field.bit_pos_end - field.bit_pos_start + 1,
-		   field_type, field.name.c_str ());
+		append_flags_type_field (gdb_type, field.bit_pos_start,
+					 field.bit_pos_end
+					   - field.bit_pos_start + 1,
+					 field_type, field.name.c_str ());
 	      }
 	  }
 
@@ -743,9 +755,8 @@ amd_dbgapi_register_type_to_gdb_type (const amd_dbgapi_register_type &type,
 		       enum_type.name ().c_str ());
 
 	gdb_type->set_num_fields (enum_type.size ());
-	gdb_type->set_fields
-	  ((struct field *) TYPE_ZALLOC (gdb_type, (sizeof (struct field)
-						    * enum_type.size ())));
+	gdb_type->set_fields ((struct field *) TYPE_ZALLOC (
+	  gdb_type, (sizeof (struct field) * enum_type.size ())));
 	gdb_type->set_is_unsigned (true);
 
 	for (size_t i = 0; i < enum_type.size (); ++i)
@@ -779,7 +790,7 @@ amdgpu_register_type (struct gdbarch *gdbarch, int regnum)
 					AMD_DBGAPI_REGISTER_INFO_TYPE,
 					sizeof (bytes), &bytes);
       if (status != AMD_DBGAPI_STATUS_SUCCESS)
-	error (_("Failed to get register type from amd-dbgapi"));
+	error (_ ("Failed to get register type from amd-dbgapi"));
 
       gdb::unique_xmalloc_ptr<char> bytes_holder (bytes);
       amd_dbgapi_register_type_map type_map;
@@ -824,7 +835,8 @@ static const gdb_byte *
 amdgpu_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
   *size = kind;
-  return get_amdgpu_gdbarch_tdep (gdbarch)->breakpoint_instruction_bytes.get ();
+  return get_amdgpu_gdbarch_tdep (gdbarch)
+    ->breakpoint_instruction_bytes.get ();
 }
 
 struct amdgpu_frame_cache
@@ -933,8 +945,7 @@ print_insn_amdgpu (bfd_vma memaddr, struct disassemble_info *info)
 
   auto symbolizer = [] (amd_dbgapi_symbolizer_id_t symbolizer_id,
 			amd_dbgapi_global_address_t address,
-			char **symbol_text) -> amd_dbgapi_status_t
-  {
+			char **symbol_text) -> amd_dbgapi_status_t {
     gdb_disassemble_info *disasm_info
       = reinterpret_cast<gdb_disassemble_info *> (symbolizer_id);
     gdb_printing_disassembler *disasm
@@ -949,21 +960,20 @@ print_insn_amdgpu (bfd_vma memaddr, struct disassemble_info *info)
   };
   auto symbolizer_id = reinterpret_cast<amd_dbgapi_symbolizer_id_t> (di);
   char *instruction_text = nullptr;
-  status = amd_dbgapi_disassemble_instruction (architecture_id, memaddr,
-					       &instruction_size,
-					       buffer.data (),
-					       &instruction_text,
-					       symbolizer_id,
-					       symbolizer);
+  status
+    = amd_dbgapi_disassemble_instruction (architecture_id, memaddr,
+					  &instruction_size, buffer.data (),
+					  &instruction_text, symbolizer_id,
+					  symbolizer);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
     {
       size_t alignment;
-      status = amd_dbgapi_architecture_get_info
-	(architecture_id,
-	 AMD_DBGAPI_ARCHITECTURE_INFO_MINIMUM_INSTRUCTION_ALIGNMENT,
-	 sizeof (alignment), &alignment);
+      status = amd_dbgapi_architecture_get_info (
+	architecture_id,
+	AMD_DBGAPI_ARCHITECTURE_INFO_MINIMUM_INSTRUCTION_ALIGNMENT,
+	sizeof (alignment), &alignment);
       if (status != AMD_DBGAPI_STATUS_SUCCESS)
-	error (_("amd_dbgapi_architecture_get_info failed"));
+	error (_ ("amd_dbgapi_architecture_get_info failed"));
 
       info->fprintf_func (di, "<illegal instruction>");
 
@@ -996,8 +1006,7 @@ amdgpu_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
       /* Clang always emits a line note before the prologue and another
 	 one after.  We trust clang to emit usable line notes.  */
-      if (post_prologue_pc != 0
-	  && cust != nullptr
+      if (post_prologue_pc != 0 && cust != nullptr
 	  && cust->producer () != nullptr
 	  && producer_is_llvm (cust->producer ()))
 	return std::max (start_pc, post_prologue_pc);
@@ -1026,8 +1035,8 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  gdbarch_up gdbarch_u
-    (gdbarch_alloc (&info, gdbarch_tdep_up (new amdgpu_gdbarch_tdep)));
+  gdbarch_up gdbarch_u (
+    gdbarch_alloc (&info, gdbarch_tdep_up (new amdgpu_gdbarch_tdep)));
   gdbarch *gdbarch = gdbarch_u.get ();
   amdgpu_gdbarch_tdep *tdep = gdbarch_tdep<amdgpu_gdbarch_tdep> (gdbarch);
 
@@ -1061,10 +1070,9 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				   &architecture_id);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
     {
-      warning (_("Failed to get architecture from amd-dbgapi"));
+      warning (_ ("Failed to get architecture from amd-dbgapi"));
       return nullptr;
     }
-
 
   /* Add register groups.  */
   size_t register_class_count;
@@ -1074,7 +1082,7 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 							&register_class_ids);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
     {
-      warning (_("Failed to get register class list from amd-dbgapi"));
+      warning (_ ("Failed to get register class list from amd-dbgapi"));
       return nullptr;
     }
 
@@ -1084,12 +1092,12 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   for (size_t i = 0; i < register_class_count; ++i)
     {
       char *bytes;
-      status = amd_dbgapi_architecture_register_class_get_info
-	(register_class_ids[i], AMD_DBGAPI_REGISTER_CLASS_INFO_NAME,
-	 sizeof (bytes), &bytes);
+      status = amd_dbgapi_architecture_register_class_get_info (
+	register_class_ids[i], AMD_DBGAPI_REGISTER_CLASS_INFO_NAME,
+	sizeof (bytes), &bytes);
       if (status != AMD_DBGAPI_STATUS_SUCCESS)
 	{
-	  warning (_("Failed to get register class name from amd-dbgapi"));
+	  warning (_ ("Failed to get register class name from amd-dbgapi"));
 	  return nullptr;
 	}
 
@@ -1105,24 +1113,24 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	continue;
 
       /* Allocate the reggroup in the gdbarch.  */
-      reggroup_add
-	(gdbarch, reggroup_gdbarch_new (gdbarch, name.get (), USER_REGGROUP));
+      reggroup_add (gdbarch, reggroup_gdbarch_new (gdbarch, name.get (),
+						   USER_REGGROUP));
     }
 
   /* Add registers. */
   size_t register_count;
   amd_dbgapi_register_id_t *register_ids;
-  status = amd_dbgapi_architecture_register_list (architecture_id,
-						  &register_count,
-						  &register_ids);
+  status
+    = amd_dbgapi_architecture_register_list (architecture_id, &register_count,
+					     &register_ids);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
     {
-      warning (_("Failed to get register list from amd-dbgapi"));
+      warning (_ ("Failed to get register list from amd-dbgapi"));
       return nullptr;
     }
 
-  gdb::unique_xmalloc_ptr<amd_dbgapi_register_id_t> register_ids_holder
-    (register_ids);
+  gdb::unique_xmalloc_ptr<amd_dbgapi_register_id_t> register_ids_holder (
+    register_ids);
 
   tdep->register_ids.insert (tdep->register_ids.end (), &register_ids[0],
 			     &register_ids[register_count]);
@@ -1138,7 +1146,7 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					&register_properties)
 	  != AMD_DBGAPI_STATUS_SUCCESS)
 	{
-	  warning (_("Failed to get register properties from amd-dbgapi"));
+	  warning (_ ("Failed to get register properties from amd-dbgapi"));
 	  return nullptr;
 	}
     }
@@ -1179,12 +1187,12 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   amd_dbgapi_register_id_t pc_register_id;
-  status = amd_dbgapi_architecture_get_info
-    (architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_PC_REGISTER,
-     sizeof (pc_register_id), &pc_register_id);
+  status = amd_dbgapi_architecture_get_info (
+    architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_PC_REGISTER,
+    sizeof (pc_register_id), &pc_register_id);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
     {
-      warning (_("Failed to get PC register from amd-dbgapi"));
+      warning (_ ("Failed to get PC register from amd-dbgapi"));
       return nullptr;
     }
 
@@ -1203,29 +1211,29 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Disassembly.  */
   set_gdbarch_print_insn (gdbarch, print_insn_amdgpu);
 
- /* Instructions.  */
+  /* Instructions.  */
   amd_dbgapi_size_t max_insn_length = 0;
-  status = amd_dbgapi_architecture_get_info
-    (architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_LARGEST_INSTRUCTION_SIZE,
-     sizeof (max_insn_length), &max_insn_length);
+  status = amd_dbgapi_architecture_get_info (
+    architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_LARGEST_INSTRUCTION_SIZE,
+    sizeof (max_insn_length), &max_insn_length);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
-    error (_("amd_dbgapi_architecture_get_info failed"));
+    error (_ ("amd_dbgapi_architecture_get_info failed"));
 
   set_gdbarch_max_insn_length (gdbarch, max_insn_length);
 
-  status = amd_dbgapi_architecture_get_info
-    (architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_BREAKPOINT_INSTRUCTION_SIZE,
-     sizeof (tdep->breakpoint_instruction_size),
-     &tdep->breakpoint_instruction_size);
+  status = amd_dbgapi_architecture_get_info (
+    architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_BREAKPOINT_INSTRUCTION_SIZE,
+    sizeof (tdep->breakpoint_instruction_size),
+    &tdep->breakpoint_instruction_size);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
-    error (_("amd_dbgapi_architecture_get_info failed"));
+    error (_ ("amd_dbgapi_architecture_get_info failed"));
 
   gdb_byte *breakpoint_instruction_bytes;
-  status = amd_dbgapi_architecture_get_info
-    (architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_BREAKPOINT_INSTRUCTION,
-     sizeof (breakpoint_instruction_bytes), &breakpoint_instruction_bytes);
+  status = amd_dbgapi_architecture_get_info (
+    architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_BREAKPOINT_INSTRUCTION,
+    sizeof (breakpoint_instruction_bytes), &breakpoint_instruction_bytes);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
-    error (_("amd_dbgapi_architecture_get_info failed"));
+    error (_ ("amd_dbgapi_architecture_get_info failed"));
 
   tdep->breakpoint_instruction_bytes.reset (breakpoint_instruction_bytes);
 
@@ -1235,12 +1243,12 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       amdgpu_sw_breakpoint_from_kind);
 
   amd_dbgapi_size_t pc_adjust;
-  status = amd_dbgapi_architecture_get_info
-    (architecture_id,
-     AMD_DBGAPI_ARCHITECTURE_INFO_BREAKPOINT_INSTRUCTION_PC_ADJUST,
-     sizeof (pc_adjust), &pc_adjust);
+  status = amd_dbgapi_architecture_get_info (
+    architecture_id,
+    AMD_DBGAPI_ARCHITECTURE_INFO_BREAKPOINT_INSTRUCTION_PC_ADJUST,
+    sizeof (pc_adjust), &pc_adjust);
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
-    error (_("amd_dbgapi_architecture_get_info failed"));
+    error (_ ("amd_dbgapi_architecture_get_info failed"));
 
   set_gdbarch_decr_pc_after_break (gdbarch, pc_adjust);
 
@@ -1255,8 +1263,7 @@ amdgpu_register_type_parse_test ()
   {
     /* A type that exercises flags and enums, in particular looking up an
        existing enum type by name. */
-    const char *flags_type_str =
-      "flags32_t mode { \
+    const char *flags_type_str = "flags32_t mode { \
 	 enum fp_round { \
 	   NEAREST_EVEN = 0, \
 	   PLUS_INF  = 1, \
@@ -1302,27 +1309,27 @@ amdgpu_register_type_parse_test ()
 
     /* Check the two "FP_ROUND" fields.  */
     auto check_fp_round_field
-      = [] (const char *name, const amd_dbgapi_register_type_flags::field &field)
-	{
-	  gdb_assert (field.name == name);
-	  gdb_assert (field.type->kind ()
-		      == amd_dbgapi_register_type::kind::ENUM);
+      = [] (const char *name,
+	    const amd_dbgapi_register_type_flags::field &field) {
+      gdb_assert (field.name == name);
+      gdb_assert (field.type->kind () == amd_dbgapi_register_type::kind::ENUM);
 
-	  const auto &e
-	    = static_cast<const amd_dbgapi_register_type_enum &> (*field.type);
-	  gdb_assert (e.size () == 4);
-	  gdb_assert (e[0].name == "NEAREST_EVEN");
-	  gdb_assert (e[0].value == 0);
-	  gdb_assert (e[3].name == "ZERO");
-	  gdb_assert (e[3].value == 3);
-	};
+      const auto &e
+	= static_cast<const amd_dbgapi_register_type_enum &> (*field.type);
+      gdb_assert (e.size () == 4);
+      gdb_assert (e[0].name == "NEAREST_EVEN");
+      gdb_assert (e[0].value == 0);
+      gdb_assert (e[3].name == "ZERO");
+      gdb_assert (e[3].value == 3);
+    };
 
     check_fp_round_field ("FP_ROUND.32", f[0]);
     check_fp_round_field ("FP_ROUND.64_16", f[1]);
 
     /* Check the "CSP" field.  */
     gdb_assert (f[22].name == "CSP");
-    gdb_assert (f[22].type->kind () == amd_dbgapi_register_type::kind::INTEGER);
+    gdb_assert (f[22].type->kind ()
+		== amd_dbgapi_register_type::kind::INTEGER);
 
     const auto &i
       = static_cast<const amd_dbgapi_register_type_integer &> (*f[22].type);
@@ -1339,7 +1346,8 @@ amdgpu_register_type_parse_test ()
 
     gdb_assert (type.kind () == amd_dbgapi_register_type::kind::VECTOR);
 
-    const auto &v = static_cast<const amd_dbgapi_register_type_vector &> (type);
+    const auto &v
+      = static_cast<const amd_dbgapi_register_type_vector &> (type);
     gdb_assert (v.count () == 64);
 
     const auto &et = v.element_type ();

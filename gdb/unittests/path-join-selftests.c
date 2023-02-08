@@ -21,10 +21,12 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
-namespace path_join {
+namespace selftests
+{
+namespace path_join
+{
 
-template <typename ...Args>
+template<typename... Args>
 static void
 test_one (const char *expected, Args... paths)
 {
@@ -61,13 +63,13 @@ test ()
 #endif /* _WIN32 */
 }
 
-}
-}
+} // namespace path_join
+} // namespace selftests
 
 void _initialize_path_join_selftests ();
+
 void
 _initialize_path_join_selftests ()
 {
-  selftests::register_test ("path_join",
-			    selftests::path_join::test);
+  selftests::register_test ("path_join", selftests::path_join::test);
 }

@@ -24,7 +24,7 @@
 
 #include "gdbsupport/btrace-common.h"
 #if HAVE_LINUX_PERF_EVENT_H
-#  include <linux/perf_event.h>
+#include <linux/perf_event.h>
 #endif
 
 struct target_ops;
@@ -104,7 +104,7 @@ struct btrace_target_info
 
 /* See to_enable_btrace in target.h.  */
 extern struct btrace_target_info *
-  linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf);
+linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf);
 
 /* See to_disable_btrace in target.h.  */
 extern enum btrace_error linux_disable_btrace (struct btrace_target_info *ti);
@@ -116,6 +116,6 @@ extern enum btrace_error linux_read_btrace (struct btrace_data *btrace,
 
 /* See to_btrace_conf in target.h.  */
 extern const struct btrace_config *
-  linux_btrace_conf (const struct btrace_target_info *);
+linux_btrace_conf (const struct btrace_target_info *);
 
 #endif /* NAT_LINUX_BTRACE_H */

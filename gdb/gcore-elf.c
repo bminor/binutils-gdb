@@ -31,12 +31,15 @@
 
 struct gcore_elf_collect_regset_section_cb_data
 {
-  gcore_elf_collect_regset_section_cb_data
-	(struct gdbarch *gdbarch, const struct regcache *regcache,
-	 bfd *obfd, ptid_t ptid, gdb_signal stop_signal,
-	 gdb::unique_xmalloc_ptr<char> *note_data, int *note_size)
-    : gdbarch (gdbarch), regcache (regcache), obfd (obfd),
-      note_data (note_data), note_size (note_size),
+  gcore_elf_collect_regset_section_cb_data (
+    struct gdbarch *gdbarch, const struct regcache *regcache, bfd *obfd,
+    ptid_t ptid, gdb_signal stop_signal,
+    gdb::unique_xmalloc_ptr<char> *note_data, int *note_size)
+    : gdbarch (gdbarch),
+      regcache (regcache),
+      obfd (obfd),
+      note_data (note_data),
+      note_size (note_size),
       stop_signal (stop_signal)
   {
     /* The LWP is often not available for bare metal target, in which case
@@ -61,15 +64,15 @@ struct gcore_elf_collect_regset_section_cb_data
    regset in the core file note section.  */
 
 static void
-gcore_elf_collect_regset_section_cb (const char *sect_name,
-				     int supply_size, int collect_size,
+gcore_elf_collect_regset_section_cb (const char *sect_name, int supply_size,
+				     int collect_size,
 				     const struct regset *regset,
 				     const char *human_name, void *cb_data)
 {
   struct gcore_elf_collect_regset_section_cb_data *data
     = (struct gcore_elf_collect_regset_section_cb_data *) cb_data;
-  bool variable_size_section = (regset != nullptr
-				&& regset->flags & REGSET_VARIABLE_SIZE);
+  bool variable_size_section
+    = (regset != nullptr && regset->flags & REGSET_VARIABLE_SIZE);
 
   gdb_assert (variable_size_section || supply_size == collect_size);
 
@@ -87,16 +90,13 @@ gcore_elf_collect_regset_section_cb (const char *sect_name,
 
   /* PRSTATUS still needs to be treated specially.  */
   if (strcmp (sect_name, ".reg") == 0)
-    data->note_data->reset (elfcore_write_prstatus
-			    (data->obfd, data->note_data->release (),
-			     data->note_size, data->lwp,
-			     gdb_signal_to_host (data->stop_signal),
-			     buf.data ()));
+    data->note_data->reset (elfcore_write_prstatus (
+      data->obfd, data->note_data->release (), data->note_size, data->lwp,
+      gdb_signal_to_host (data->stop_signal), buf.data ()));
   else
-    data->note_data->reset (elfcore_write_register_note
-			    (data->obfd, data->note_data->release (),
-			     data->note_size, sect_name, buf.data (),
-			     collect_size));
+    data->note_data->reset (elfcore_write_register_note (
+      data->obfd, data->note_data->release (), data->note_size, sect_name,
+      buf.data (), collect_size));
 
   if (*data->note_data == nullptr)
     data->abort_iteration = true;
@@ -108,39 +108,40 @@ gcore_elf_collect_regset_section_cb (const char *sect_name,
    cause thread PTID to stop.  */
 
 static void
-gcore_elf_collect_thread_registers
-	(const struct regcache *regcache, ptid_t ptid, bfd *obfd,
-	 gdb::unique_xmalloc_ptr<char> *note_data, int *note_size,
-	 enum gdb_signal stop_signal)
+gcore_elf_collect_thread_registers (const struct regcache *regcache,
+				    ptid_t ptid, bfd *obfd,
+				    gdb::unique_xmalloc_ptr<char> *note_data,
+				    int *note_size,
+				    enum gdb_signal stop_signal)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  gcore_elf_collect_regset_section_cb_data data (gdbarch, regcache, obfd,
-						 ptid, stop_signal,
-						 note_data, note_size);
-  gdbarch_iterate_over_regset_sections
-    (gdbarch, gcore_elf_collect_regset_section_cb, &data, regcache);
+  gcore_elf_collect_regset_section_cb_data data (gdbarch, regcache, obfd, ptid,
+						 stop_signal, note_data,
+						 note_size);
+  gdbarch_iterate_over_regset_sections (gdbarch,
+					gcore_elf_collect_regset_section_cb,
+					&data, regcache);
 }
 
 /* See gcore-elf.h.  */
 
 void
-gcore_elf_build_thread_register_notes
-  (struct gdbarch *gdbarch, struct thread_info *info, gdb_signal stop_signal,
-   bfd *obfd, gdb::unique_xmalloc_ptr<char> *note_data, int *note_size)
+gcore_elf_build_thread_register_notes (
+  struct gdbarch *gdbarch, struct thread_info *info, gdb_signal stop_signal,
+  bfd *obfd, gdb::unique_xmalloc_ptr<char> *note_data, int *note_size)
 {
   struct regcache *regcache
-    = get_thread_arch_regcache (info->inf->process_target (),
-				info->ptid, gdbarch);
+    = get_thread_arch_regcache (info->inf->process_target (), info->ptid,
+				gdbarch);
   target_fetch_registers (regcache, -1);
-  gcore_elf_collect_thread_registers (regcache, info->ptid, obfd,
-				      note_data, note_size, stop_signal);
+  gcore_elf_collect_thread_registers (regcache, info->ptid, obfd, note_data,
+				      note_size, stop_signal);
 }
 
 /* See gcore-elf.h.  */
 
 void
-gcore_elf_make_tdesc_note (bfd *obfd,
-			   gdb::unique_xmalloc_ptr<char> *note_data,
+gcore_elf_make_tdesc_note (bfd *obfd, gdb::unique_xmalloc_ptr<char> *note_data,
 			   int *note_size)
 {
   /* Append the target description to the core file.  */
@@ -159,8 +160,7 @@ gcore_elf_make_tdesc_note (bfd *obfd,
       /* Now add the target description into the core file.  */
       note_data->reset (elfcore_write_register_note (obfd,
 						     note_data->release (),
-						     note_size,
-						     ".gdb-tdesc", tdesc_xml,
-						     tdesc_len));
+						     note_size, ".gdb-tdesc",
+						     tdesc_xml, tdesc_len));
     }
 }

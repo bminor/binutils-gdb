@@ -34,8 +34,6 @@
 #include "value.h"
 #include "gdbarch.h"
 
-
-
 /* Information about a given instruction.  */
 
 struct insn_info
@@ -80,7 +78,7 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 			    enum bfd_endian byte_order, unsigned int addr_size,
 			    const gdb_byte *op_ptr, const gdb_byte *op_end)
 {
-  const gdb_byte * const base = op_ptr;
+  const gdb_byte *const base = op_ptr;
   int stack_depth;
 
   op_ptr += start;
@@ -89,23 +87,23 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 
   while (op_ptr < op_end)
     {
-      enum dwarf_location_atom op = (enum dwarf_location_atom) *op_ptr;
+      enum dwarf_location_atom op = (enum dwarf_location_atom) * op_ptr;
       uint64_t reg;
       int64_t offset;
       int ndx = op_ptr - base;
 
-#define SET_CHECK_DEPTH(WHERE)				\
-      if ((*info)[WHERE].visited)				\
-	{						\
-	  if ((*info)[WHERE].depth != stack_depth)		\
-	    error (_("inconsistent stack depths"));	\
-	}						\
-      else						\
-	{						\
-	  /* Stack depth not set, so set it.  */	\
-	  (*info)[WHERE].visited = 1;			\
-	  (*info)[WHERE].depth = stack_depth;		\
-	}
+#define SET_CHECK_DEPTH(WHERE)                   \
+  if ((*info)[WHERE].visited)                    \
+    {                                            \
+      if ((*info)[WHERE].depth != stack_depth)   \
+	error (_ ("inconsistent stack depths")); \
+    }                                            \
+  else                                           \
+    {                                            \
+      /* Stack depth not set, so set it.  */     \
+      (*info)[WHERE].visited = 1;                \
+      (*info)[WHERE].depth = stack_depth;        \
+    }
 
       SET_CHECK_DEPTH (ndx);
 
@@ -361,7 +359,7 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  break;
 
 	default:
-	  error (_("unhandled DWARF op: %s"), get_DW_OP_name (op));
+	  error (_ ("unhandled DWARF op: %s"), get_DW_OP_name (op));
 	}
     }
 
@@ -388,9 +386,8 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 
 static int
 compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
-		     int *need_tempvar, int *is_tls,
-		     const gdb_byte *op_ptr, const gdb_byte *op_end,
-		     int initial_depth,
+		     int *need_tempvar, int *is_tls, const gdb_byte *op_ptr,
+		     const gdb_byte *op_end, int initial_depth,
 		     std::vector<struct insn_info> *info)
 {
   std::vector<int> to_do;
@@ -407,9 +404,8 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
       int ndx = to_do.back ();
       to_do.pop_back ();
 
-      compute_stack_depth_worker (ndx, need_tempvar, info, &to_do,
-				  byte_order, addr_size,
-				  op_ptr, op_end);
+      compute_stack_depth_worker (ndx, need_tempvar, info, &to_do, byte_order,
+				  addr_size, op_ptr, op_end);
     }
 
   stack_depth = 0;
@@ -425,8 +421,6 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
   return stack_depth + 1;
 }
 
-
-
 #define GCC_UINTPTR "__gdb_uintptr"
 #define GCC_INTPTR "__gdb_intptr"
 
@@ -435,8 +429,7 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 static void
 push (int indent, string_file *stream, ULONGEST l)
 {
-  gdb_printf (stream,
-	      "%*s__gdb_stack[++__gdb_tos] = (" GCC_UINTPTR ") %s;\n",
+  gdb_printf (stream, "%*s__gdb_stack[++__gdb_tos] = (" GCC_UINTPTR ") %s;\n",
 	      indent, "", hex_string (l));
 }
 
@@ -516,7 +509,7 @@ note_register (int regnum, std::vector<bool> &registers_used)
      compile it.  We would need a gdbarch method to handle this
      situation.  */
   if (regnum >= registers_used.size ())
-    error (_("Expression uses \"cooked\" register and cannot be compiled."));
+    error (_ ("Expression uses \"cooked\" register and cannot be compiled."));
   registers_used[regnum] = true;
 }
 
@@ -544,8 +537,8 @@ pushf_register_address (int indent, string_file *stream,
 
 static void
 pushf_register (int indent, string_file *stream,
-		std::vector<bool> &registers_used,
-		struct gdbarch *gdbarch, int regnum, uint64_t offset)
+		std::vector<bool> &registers_used, struct gdbarch *gdbarch,
+		int regnum, uint64_t offset)
 {
   std::string regname = compile_register_name_mangled (gdbarch, regnum);
 
@@ -590,14 +583,12 @@ pushf_register (int indent, string_file *stream,
 
 static void
 do_compile_dwarf_expr_to_c (int indent, string_file *stream,
-			    const char *type_name,
-			    const char *result_name,
+			    const char *type_name, const char *result_name,
 			    struct symbol *sym, CORE_ADDR pc,
 			    struct gdbarch *arch,
 			    std::vector<bool> &registers_used,
-			    unsigned int addr_size,
-			    const gdb_byte *op_ptr, const gdb_byte *op_end,
-			    CORE_ADDR *initial,
+			    unsigned int addr_size, const gdb_byte *op_ptr,
+			    const gdb_byte *op_end, CORE_ADDR *initial,
 			    dwarf2_per_cu_data *per_cu,
 			    dwarf2_per_objfile *per_objfile)
 {
@@ -606,7 +597,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
   static unsigned int scope;
 
   enum bfd_endian byte_order = gdbarch_byte_order (arch);
-  const gdb_byte * const base = op_ptr;
+  const gdb_byte *const base = op_ptr;
   int need_tempvar = 0;
   int is_tls = 0;
   std::vector<struct insn_info> info;
@@ -614,15 +605,14 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 
   ++scope;
 
-  gdb_printf (stream, "%*s__attribute__ ((unused)) %s %s;\n",
-	      indent, "", type_name, result_name);
+  gdb_printf (stream, "%*s__attribute__ ((unused)) %s %s;\n", indent, "",
+	      type_name, result_name);
   gdb_printf (stream, "%*s{\n", indent, "");
   indent += 2;
 
-  stack_depth = compute_stack_depth (byte_order, addr_size,
-				     &need_tempvar, &is_tls,
-				     op_ptr, op_end, initial != NULL,
-				     &info);
+  stack_depth
+    = compute_stack_depth (byte_order, addr_size, &need_tempvar, &is_tls,
+			   op_ptr, op_end, initial != NULL, &info);
 
   /* This is a hack until we can add a feature to glibc to let us
      properly generate code for TLS.  You might think we could emit
@@ -637,30 +627,29 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
       struct value *val;
 
       if (frame == NULL)
-	error (_("Symbol \"%s\" cannot be used because "
-		 "there is no selected frame"),
+	error (_ ("Symbol \"%s\" cannot be used because "
+		  "there is no selected frame"),
 	       sym->print_name ());
 
       val = read_var_value (sym, NULL, frame);
       if (VALUE_LVAL (val) != lval_memory)
-	error (_("Symbol \"%s\" cannot be used for compilation evaluation "
-		 "as its address has not been found."),
+	error (_ ("Symbol \"%s\" cannot be used for compilation evaluation "
+		  "as its address has not been found."),
 	       sym->print_name ());
 
-      warning (_("Symbol \"%s\" is thread-local and currently can only "
-		 "be referenced from the current thread in "
-		 "compiled code."),
+      warning (_ ("Symbol \"%s\" is thread-local and currently can only "
+		  "be referenced from the current thread in "
+		  "compiled code."),
 	       sym->print_name ());
 
-      gdb_printf (stream, "%*s%s = %s;\n",
-		  indent, "", result_name,
+      gdb_printf (stream, "%*s%s = %s;\n", indent, "", result_name,
 		  core_addr_to_string (value_address (val)));
       gdb_printf (stream, "%*s}\n", indent - 2, "");
       return;
     }
 
-  gdb_printf (stream, "%*s" GCC_UINTPTR " __gdb_stack[%d];\n",
-	      indent, "", stack_depth);
+  gdb_printf (stream, "%*s" GCC_UINTPTR " __gdb_stack[%d];\n", indent, "",
+	      stack_depth);
 
   if (need_tempvar)
     gdb_printf (stream, "%*s" GCC_UINTPTR " __gdb_tmp;\n", indent, "");
@@ -671,7 +660,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 
   while (op_ptr < op_end)
     {
-      enum dwarf_location_atom op = (enum dwarf_location_atom) *op_ptr;
+      enum dwarf_location_atom op = (enum dwarf_location_atom) * op_ptr;
       uint64_t uoffset, reg;
       int64_t offset;
 
@@ -821,9 +810,9 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	case DW_OP_reg30:
 	case DW_OP_reg31:
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
-	  pushf_register_address (indent, stream, registers_used, arch,
-				  dwarf_reg_to_regnum_or_error
-				    (arch, op - DW_OP_reg0));
+	  pushf_register_address (
+	    indent, stream, registers_used, arch,
+	    dwarf_reg_to_regnum_or_error (arch, op - DW_OP_reg0));
 	  break;
 
 	case DW_OP_regx:
@@ -890,15 +879,15 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	    b = block_for_pc (pc);
 
 	    if (!b)
-	      error (_("No block found for address"));
+	      error (_ ("No block found for address"));
 
 	    framefunc = block_linkage_function (b);
 
 	    if (!framefunc)
-	      error (_("No function found for block"));
+	      error (_ ("No function found for block"));
 
-	    func_get_frame_base_dwarf_block (framefunc, pc,
-					     &datastart, &datalen);
+	    func_get_frame_base_dwarf_block (framefunc, pc, &datastart,
+					     &datalen);
 
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 
@@ -907,12 +896,11 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	    xsnprintf (fb_name, sizeof (fb_name), "__frame_base_%ld",
 		       (long) (op_ptr - base));
 
-	    do_compile_dwarf_expr_to_c (indent, stream,
-					GCC_UINTPTR, fb_name,
-					sym, pc,
-					arch, registers_used, addr_size,
-					datastart, datastart + datalen,
-					NULL, per_cu, per_objfile);
+	    do_compile_dwarf_expr_to_c (indent, stream, GCC_UINTPTR, fb_name,
+					sym, pc, arch, registers_used,
+					addr_size, datastart,
+					datastart + datalen, NULL, per_cu,
+					per_objfile);
 
 	    pushf (indent, stream, "%s + %s", fb_name, hex_string (offset));
 	  }
@@ -933,15 +921,15 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	  break;
 
 	case DW_OP_swap:
-	  gdb_printf (stream,
-		      "%*s__gdb_tmp = __gdb_stack[__gdb_tos - 1];\n",
+	  gdb_printf (stream, "%*s__gdb_tmp = __gdb_stack[__gdb_tos - 1];\n",
 		      indent, "");
 	  gdb_printf (stream,
 		      "%*s__gdb_stack[__gdb_tos - 1] = "
 		      "__gdb_stack[__gdb_tos];\n",
 		      indent, "");
-	  gdb_printf (stream, ("%*s__gdb_stack[__gdb_tos] = "
-			       "__gdb_tmp;\n"),
+	  gdb_printf (stream,
+		      ("%*s__gdb_stack[__gdb_tos] = "
+		       "__gdb_tmp;\n"),
 		      indent, "");
 	  break;
 
@@ -950,8 +938,9 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	  break;
 
 	case DW_OP_rot:
-	  gdb_printf (stream, ("%*s__gdb_tmp = "
-			       "__gdb_stack[__gdb_tos];\n"),
+	  gdb_printf (stream,
+		      ("%*s__gdb_tmp = "
+		       "__gdb_stack[__gdb_tos];\n"),
 		      indent, "");
 	  gdb_printf (stream,
 		      "%*s__gdb_stack[__gdb_tos] = "
@@ -961,7 +950,8 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 		      "%*s__gdb_stack[__gdb_tos - 1] = "
 		      "__gdb_stack[__gdb_tos -2];\n",
 		      indent, "");
-	  gdb_printf (stream, "%*s__gdb_stack[__gdb_tos - 2] = "
+	  gdb_printf (stream,
+		      "%*s__gdb_stack[__gdb_tos - 2] = "
 		      "__gdb_tmp;\n",
 		      indent, "");
 	  break;
@@ -979,8 +969,8 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 
 	    mode = c_get_mode_for_size (size);
 	    if (mode == NULL)
-	      error (_("Unsupported size %d in %s"),
-		     size, get_DW_OP_name (op));
+	      error (_ ("Unsupported size %d in %s"), size,
+		     get_DW_OP_name (op));
 
 	    /* Cast to a pointer of the desired type, then
 	       dereference.  */
@@ -1013,9 +1003,10 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	  break;
 
 	case DW_OP_div:
-	  binary (indent, stream, ("((" GCC_INTPTR
-				   ") __gdb_stack[__gdb_tos-1]) / (("
-				   GCC_INTPTR ") __gdb_stack[__gdb_tos])"));
+	  binary (indent, stream,
+		  ("((" GCC_INTPTR
+		   ") __gdb_stack[__gdb_tos-1]) / ((" GCC_INTPTR
+		   ") __gdb_stack[__gdb_tos])"));
 	  break;
 
 	case DW_OP_shra:
@@ -1024,10 +1015,10 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 		  "__gdb_stack[__gdb_tos]");
 	  break;
 
-#define BINARY(OP)							\
-	  binary (indent, stream, "%s", "__gdb_stack[__gdb_tos-1] " #OP \
-				   " __gdb_stack[__gdb_tos]");	\
-	  break
+#define BINARY(OP)                                                    \
+  binary (indent, stream, "%s",                                       \
+	  "__gdb_stack[__gdb_tos-1] " #OP " __gdb_stack[__gdb_tos]"); \
+  break
 
 	case DW_OP_and:
 	  BINARY (&);
@@ -1049,12 +1040,11 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	  BINARY (^);
 #undef BINARY
 
-#define COMPARE(OP)							\
-	  binary (indent, stream,					\
-		  "(((" GCC_INTPTR ") __gdb_stack[__gdb_tos-1]) " #OP	\
-		  " ((" GCC_INTPTR					\
-		  ") __gdb_stack[__gdb_tos]))");			\
-	  break
+#define COMPARE(OP)                                           \
+  binary (indent, stream,                                     \
+	  "(((" GCC_INTPTR ") __gdb_stack[__gdb_tos-1]) " #OP \
+	  " ((" GCC_INTPTR ") __gdb_stack[__gdb_tos]))");     \
+  break
 
 	case DW_OP_le:
 	  COMPARE (<=);
@@ -1077,8 +1067,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	    LONGEST off;
 	    const gdb_byte *cfa_start, *cfa_end;
 
-	    if (dwarf2_fetch_cfa_info (arch, pc, per_cu,
-				       &regnum, &off,
+	    if (dwarf2_fetch_cfa_info (arch, pc, per_cu, &regnum, &off,
 				       &text_offset, &cfa_start, &cfa_end))
 	      {
 		/* Register.  */
@@ -1092,15 +1081,14 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 
 		/* Generate a unique-enough name, in case the CFA is
 		   computed multiple times in this expression.  */
-		xsnprintf (cfa_name, sizeof (cfa_name),
-			   "__cfa_%ld", (long) (op_ptr - base));
+		xsnprintf (cfa_name, sizeof (cfa_name), "__cfa_%ld",
+			   (long) (op_ptr - base));
 
-		do_compile_dwarf_expr_to_c (indent, stream,
-					    GCC_UINTPTR, cfa_name,
-					    sym, pc, arch, registers_used,
-					    addr_size,
-					    cfa_start, cfa_end,
-					    &text_offset, per_cu, per_objfile);
+		do_compile_dwarf_expr_to_c (indent, stream, GCC_UINTPTR,
+					    cfa_name, sym, pc, arch,
+					    registers_used, addr_size,
+					    cfa_start, cfa_end, &text_offset,
+					    per_cu, per_objfile);
 		pushf (indent, stream, "%s", cfa_name);
 	      }
 	  }
@@ -1130,12 +1118,12 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 	  break;
 
 	default:
-	  error (_("unhandled DWARF op: %s"), get_DW_OP_name (op));
+	  error (_ ("unhandled DWARF op: %s"), get_DW_OP_name (op));
 	}
     }
 
-  gdb_printf (stream, "%*s%s = __gdb_stack[__gdb_tos];\n",
-	      indent, "", result_name);
+  gdb_printf (stream, "%*s%s = __gdb_stack[__gdb_tos];\n", indent, "",
+	      result_name);
   gdb_printf (stream, "%*s}\n", indent - 2, "");
 }
 
@@ -1146,9 +1134,8 @@ compile_dwarf_expr_to_c (string_file *stream, const char *result_name,
 			 struct symbol *sym, CORE_ADDR pc,
 			 struct gdbarch *arch,
 			 std::vector<bool> &registers_used,
-			 unsigned int addr_size,
-			 const gdb_byte *op_ptr, const gdb_byte *op_end,
-			 dwarf2_per_cu_data *per_cu,
+			 unsigned int addr_size, const gdb_byte *op_ptr,
+			 const gdb_byte *op_end, dwarf2_per_cu_data *per_cu,
 			 dwarf2_per_objfile *per_objfile)
 {
   do_compile_dwarf_expr_to_c (2, stream, GCC_UINTPTR, result_name, sym, pc,
@@ -1159,19 +1146,15 @@ compile_dwarf_expr_to_c (string_file *stream, const char *result_name,
 /* See compile.h.  */
 
 void
-compile_dwarf_bounds_to_c (string_file *stream,
-			   const char *result_name,
-			   const struct dynamic_prop *prop,
-			   struct symbol *sym, CORE_ADDR pc,
-			   struct gdbarch *arch,
+compile_dwarf_bounds_to_c (string_file *stream, const char *result_name,
+			   const struct dynamic_prop *prop, struct symbol *sym,
+			   CORE_ADDR pc, struct gdbarch *arch,
 			   std::vector<bool> &registers_used,
-			   unsigned int addr_size,
-			   const gdb_byte *op_ptr, const gdb_byte *op_end,
-			   dwarf2_per_cu_data *per_cu,
+			   unsigned int addr_size, const gdb_byte *op_ptr,
+			   const gdb_byte *op_end, dwarf2_per_cu_data *per_cu,
 			   dwarf2_per_objfile *per_objfile)
 {
-  do_compile_dwarf_expr_to_c (2, stream, "unsigned long ", result_name,
-			      sym, pc, arch, registers_used,
-			      addr_size, op_ptr, op_end, NULL, per_cu,
-			      per_objfile);
+  do_compile_dwarf_expr_to_c (2, stream, "unsigned long ", result_name, sym,
+			      pc, arch, registers_used, addr_size, op_ptr,
+			      op_end, NULL, per_cu, per_objfile);
 }

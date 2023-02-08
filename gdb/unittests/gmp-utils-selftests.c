@@ -22,7 +22,8 @@
 
 #include <math.h>
 
-namespace selftests {
+namespace selftests
+{
 
 /* Perform a series of general tests of gdb_mpz's as_integer method.
 
@@ -172,7 +173,7 @@ store_and_read_back (T val, size_t buf_len, enum bfd_endian byte_order,
   mpz_set (actual.val, expected.val);
   mpz_sub_ui (actual.val, actual.val, 500);
 
-  actual.read ({buf, buf_len}, byte_order, !std::is_signed<T>::value);
+  actual.read ({ buf, buf_len }, byte_order, !std::is_signed<T>::value);
 }
 
 /* Test the gdb_mpz::read method over a reasonable range of values.
@@ -229,48 +230,48 @@ gdb_mpz_read_min_max ()
 
   LONGEST l_min = (LONGEST) 1 << (sizeof (LONGEST) * 8 - 1);
 
-  store_and_read_back (l_min, sizeof (LONGEST), BFD_ENDIAN_BIG,
-		       expected, actual);
+  store_and_read_back (l_min, sizeof (LONGEST), BFD_ENDIAN_BIG, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 
-  store_and_read_back (l_min, sizeof (LONGEST), BFD_ENDIAN_LITTLE,
-		       expected, actual);
+  store_and_read_back (l_min, sizeof (LONGEST), BFD_ENDIAN_LITTLE, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 
   /* Same with LONGEST_MAX.  */
 
   LONGEST l_max = LONGEST_MAX;
 
-  store_and_read_back (l_max, sizeof (LONGEST), BFD_ENDIAN_BIG,
-		       expected, actual);
+  store_and_read_back (l_max, sizeof (LONGEST), BFD_ENDIAN_BIG, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 
-  store_and_read_back (l_max, sizeof (LONGEST), BFD_ENDIAN_LITTLE,
-		       expected, actual);
+  store_and_read_back (l_max, sizeof (LONGEST), BFD_ENDIAN_LITTLE, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 
   /* Same with the smallest ULONGEST.  */
 
   ULONGEST ul_min = 0;
 
-  store_and_read_back (ul_min, sizeof (ULONGEST), BFD_ENDIAN_BIG,
-		       expected, actual);
+  store_and_read_back (ul_min, sizeof (ULONGEST), BFD_ENDIAN_BIG, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 
-  store_and_read_back (ul_min, sizeof (ULONGEST), BFD_ENDIAN_LITTLE,
-		       expected, actual);
+  store_and_read_back (ul_min, sizeof (ULONGEST), BFD_ENDIAN_LITTLE, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 
   /* Same with ULONGEST_MAX.  */
 
   ULONGEST ul_max = ULONGEST_MAX;
 
-  store_and_read_back (ul_max, sizeof (ULONGEST), BFD_ENDIAN_BIG,
-		       expected, actual);
+  store_and_read_back (ul_max, sizeof (ULONGEST), BFD_ENDIAN_BIG, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 
-  store_and_read_back (ul_max, sizeof (ULONGEST), BFD_ENDIAN_LITTLE,
-		       expected, actual);
+  store_and_read_back (ul_max, sizeof (ULONGEST), BFD_ENDIAN_LITTLE, expected,
+		       actual);
   SELF_CHECK (mpz_cmp (actual.val, expected.val) == 0);
 }
 
@@ -297,9 +298,9 @@ write_and_extract (T val, size_t buf_len, enum bfd_endian byte_order)
   SELF_CHECK (v.as_integer<T> () == val);
 
   gdb_byte *buf = (gdb_byte *) alloca (buf_len);
-  v.write ({buf, buf_len}, byte_order, !std::is_signed<T>::value);
+  v.write ({ buf, buf_len }, byte_order, !std::is_signed<T>::value);
 
-  return extract_integer<T> ({buf, buf_len}, byte_order);
+  return extract_integer<T> ({ buf, buf_len }, byte_order);
 }
 
 /* Test the gdb_mpz::write method over a reasonable range of values.
@@ -320,7 +321,7 @@ gdb_mpz_write_all_from_small ()
       SELF_CHECK (write_and_extract (l, buf_len, BFD_ENDIAN_LITTLE) == l);
     }
 
-    /* Do the same as above, but with an unsigned type.  */
+  /* Do the same as above, but with an unsigned type.  */
   ULONGEST ul_min = 0;
   ULONGEST ul_max = pow (2.0, buf_len * 8) - 1;
 
@@ -387,8 +388,7 @@ gdb_mpz_write_min_max ()
 
 static void
 read_fp_test (int unscaled, const gdb_mpq &scaling_factor,
-	      enum bfd_endian byte_order,
-	      gdb_mpq &expected, gdb_mpq &actual)
+	      enum bfd_endian byte_order, gdb_mpq &expected, gdb_mpq &actual)
 {
   /* For this kind of testing, we'll use a buffer the same size as
      our unscaled parameter.  */
@@ -396,7 +396,7 @@ read_fp_test (int unscaled, const gdb_mpq &scaling_factor,
   gdb_byte buf[len];
   store_signed_integer (buf, len, byte_order, unscaled);
 
-  actual.read_fixed_point ({buf, len}, byte_order, 0, scaling_factor);
+  actual.read_fixed_point ({ buf, len }, byte_order, 0, scaling_factor);
 
   mpq_set_si (expected.val, unscaled, 1);
   mpq_mul (expected.val, expected.val, scaling_factor.val);
@@ -451,8 +451,7 @@ gdb_mpq_read_fixed_point ()
 
 static LONGEST
 write_fp_test (int numerator, unsigned int denominator,
-	       const gdb_mpq &scaling_factor,
-	       enum bfd_endian byte_order)
+	       const gdb_mpq &scaling_factor, enum bfd_endian byte_order)
 {
   /* For this testing, we'll use a buffer the size of LONGEST.
      This is really an arbitrary decision, as long as the buffer
@@ -465,7 +464,7 @@ write_fp_test (int numerator, unsigned int denominator,
   gdb_mpq v;
   mpq_set_si (v.val, numerator, denominator);
   mpq_canonicalize (v.val);
-  v.write_fixed_point ({buf, len}, byte_order, 0, scaling_factor);
+  v.write_fixed_point ({ buf, len }, byte_order, 0, scaling_factor);
 
   return extract_unsigned_integer (buf, len, byte_order);
 }
@@ -499,7 +498,7 @@ gdb_mpq_write_fixed_point ()
   SELF_CHECK (write_fp_test (5, 3, scaling_factor, BFD_ENDIAN_LITTLE) == 5);
 }
 
-}
+} // namespace selftests
 
 void _initialize_gmp_utils_selftests ();
 

@@ -41,13 +41,33 @@ struct dwz_file
   }
 
   /* A dwz file can only contain a few sections.  */
-  struct dwarf2_section_info abbrev {};
-  struct dwarf2_section_info info {};
-  struct dwarf2_section_info str {};
-  struct dwarf2_section_info line {};
-  struct dwarf2_section_info macro {};
-  struct dwarf2_section_info gdb_index {};
-  struct dwarf2_section_info debug_names {};
+  struct dwarf2_section_info abbrev
+  {
+  };
+
+  struct dwarf2_section_info info
+  {
+  };
+
+  struct dwarf2_section_info str
+  {
+  };
+
+  struct dwarf2_section_info line
+  {
+  };
+
+  struct dwarf2_section_info macro
+  {
+  };
+
+  struct dwarf2_section_info gdb_index
+  {
+  };
+
+  struct dwarf2_section_info debug_names
+  {
+  };
 
   /* The dwz's BFD.  */
   gdb_bfd_ref_ptr dwz_bfd;

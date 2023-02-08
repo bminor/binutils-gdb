@@ -37,16 +37,14 @@
    registers appear in core files, which corresponds to the order
    of the register slots in the kernel's struct pt_regs.  */
 
-static const int reg_offsets[NIOS2_NUM_REGS] =
-{
-  -1,  8,  9, 10, 11, 12, 13, 14,	/* r0 - r7 */
-  0,  1,  2,  3,  4,  5,  6,  7,	/* r8 - r15 */
-  23, 24, 25, 26, 27, 28, 29, 30,	/* r16 - r23 */
-  -1, -1, 19, 18, 17, 21, -1, 16,	/* et bt gp sp fp ea sstatus ra */
-  21,					/* pc */
-  -1, 20, -1, -1, -1, -1, -1, -1,	/* status estatus ...  */
-  -1, -1, -1, -1, -1, -1, -1, -1
-};
+static const int reg_offsets[NIOS2_NUM_REGS]
+  = { -1, 8,  9,  10, 11, 12, 13, 14, /* r0 - r7 */
+      0,  1,  2,  3,  4,  5,  6,  7,  /* r8 - r15 */
+      23, 24, 25, 26, 27, 28, 29, 30, /* r16 - r23 */
+      -1, -1, 19, 18, 17, 21, -1, 16, /* et bt gp sp fp ea sstatus ra */
+      21,			      /* pc */
+      -1, 20, -1, -1, -1, -1, -1, -1, /* status estatus ...  */
+      -1, -1, -1, -1, -1, -1, -1, -1 };
 
 /* General register set size.  Should match sizeof (struct pt_regs) +
    sizeof (struct switch_stack) from the NIOS2 Linux kernel patch.  */
@@ -56,13 +54,12 @@ static const int reg_offsets[NIOS2_NUM_REGS] =
 /* Implement the supply_regset hook for core files.  */
 
 static void
-nios2_supply_gregset (const struct regset *regset,
-		      struct regcache *regcache,
+nios2_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		      int regnum, const void *gregs_buf, size_t len)
 {
   const gdb_byte *gregs = (const gdb_byte *) gregs_buf;
   int regno;
-  static const gdb_byte zero_buf[4] = {0, 0, 0, 0};
+  static const gdb_byte zero_buf[4] = { 0, 0, 0, 0 };
 
   for (regno = NIOS2_Z_REGNUM; regno <= NIOS2_MPUACC_REGNUM; regno++)
     if (regnum == -1 || regnum == regno)
@@ -78,8 +75,8 @@ nios2_supply_gregset (const struct regset *regset,
 
 static void
 nios2_collect_gregset (const struct regset *regset,
-		       const struct regcache *regcache,
-		       int regnum, void *gregs_buf, size_t len)
+		       const struct regcache *regcache, int regnum,
+		       void *gregs_buf, size_t len)
 {
   gdb_byte *gregs = (gdb_byte *) gregs_buf;
   int regno;
@@ -92,12 +89,8 @@ nios2_collect_gregset (const struct regset *regset,
       }
 }
 
-static const struct regset nios2_core_regset =
-{
-  NULL,
-  nios2_supply_gregset,
-  nios2_collect_gregset
-};
+static const struct regset nios2_core_regset
+  = { NULL, nios2_supply_gregset, nios2_collect_gregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -159,29 +152,23 @@ nios2_linux_rt_sigreturn_init (const struct tramp_frame *self,
      trap 0
    appropriately encoded for R1 or R2.  */
 
-static struct tramp_frame nios2_r1_linux_rt_sigreturn_tramp_frame =
-{
+static struct tramp_frame nios2_r1_linux_rt_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
-  {
-    { MATCH_R1_MOVI | SET_IW_I_B (2) | SET_IW_I_IMM16 (139), ULONGEST_MAX },
-    { MATCH_R1_TRAP | SET_IW_R_IMM5 (0), ULONGEST_MAX},
-    { TRAMP_SENTINEL_INSN }
-  },
+  { { MATCH_R1_MOVI | SET_IW_I_B (2) | SET_IW_I_IMM16 (139), ULONGEST_MAX },
+    { MATCH_R1_TRAP | SET_IW_R_IMM5 (0), ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN } },
   nios2_linux_rt_sigreturn_init
 };
 
-static struct tramp_frame nios2_r2_linux_rt_sigreturn_tramp_frame =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { MATCH_R2_MOVI | SET_IW_F2I16_B (2) | SET_IW_F2I16_IMM16 (139), ULONGEST_MAX },
-    { MATCH_R2_TRAP | SET_IW_X2L5_IMM5 (0), ULONGEST_MAX},
-    { TRAMP_SENTINEL_INSN }
-  },
-  nios2_linux_rt_sigreturn_init
-};
+static struct tramp_frame nios2_r2_linux_rt_sigreturn_tramp_frame
+  = { SIGTRAMP_FRAME,
+      4,
+      { { MATCH_R2_MOVI | SET_IW_F2I16_B (2) | SET_IW_F2I16_IMM16 (139),
+	  ULONGEST_MAX },
+	{ MATCH_R2_TRAP | SET_IW_X2L5_IMM5 (0), ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN } },
+      nios2_linux_rt_sigreturn_init };
 
 /* When FRAME is at a syscall instruction, return the PC of the next
    instruction to be executed.  */
@@ -231,8 +218,8 @@ nios2_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
   /* Core file support.  */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, nios2_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, nios2_iterate_over_regset_sections);
   /* Linux signal frame unwinders.  */
   if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_nios2r2)
     tramp_frame_prepend_unwinder (gdbarch,
@@ -249,15 +236,14 @@ nios2_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_nios2_linux_tdep ();
+
 void
 _initialize_nios2_linux_tdep ()
 {
-
   const struct bfd_arch_info *arch_info;
 
-  for (arch_info = bfd_lookup_arch (bfd_arch_nios2, 0);
-       arch_info != NULL;
+  for (arch_info = bfd_lookup_arch (bfd_arch_nios2, 0); arch_info != NULL;
        arch_info = arch_info->next)
-    gdbarch_register_osabi (bfd_arch_nios2, arch_info->mach,
-			    GDB_OSABI_LINUX, nios2_linux_init_abi);
+    gdbarch_register_osabi (bfd_arch_nios2, arch_info->mach, GDB_OSABI_LINUX,
+			    nios2_linux_init_abi);
 }

@@ -43,7 +43,6 @@ tui_win_resized ()
   return win_resized;
 }
 
-
 /* Set a whether the terminal window has been resized or not.  */
 void
 tui_set_win_resized_to (bool resized)
@@ -51,14 +50,12 @@ tui_set_win_resized_to (bool resized)
   win_resized = resized;
 }
 
-
 /* Answer the window with the logical focus.  */
 struct tui_win_info *
 tui_win_with_focus (void)
 {
   return win_with_focus;
 }
-
 
 /* Set the logical focus to win_info.  */
 void
@@ -72,14 +69,12 @@ tui_set_win_focus_to (struct tui_win_info *win_info)
     }
 }
 
-
 /* Accessor for the term_height.  */
 int
 tui_term_height (void)
 {
   return term_height;
 }
-
 
 /* Mutator for the term height.  */
 void
@@ -88,7 +83,6 @@ tui_set_term_height_to (int h)
   term_height = h;
 }
 
-
 /* Accessor for the term_width.  */
 int
 tui_term_width (void)
@@ -96,14 +90,12 @@ tui_term_width (void)
   return term_width;
 }
 
-
 /* Mutator for the term_width.  */
 void
 tui_set_term_width_to (int w)
 {
   term_width = w;
 }
-
 
 /* Answer the next window in the list, cycling back to the top if
    necessary.  */
@@ -128,7 +120,6 @@ tui_next_win (struct tui_win_info *cur_win)
   return *iter;
 }
 
-
 /* Answer the prev window in the list, cycling back to the bottom if
    necessary.  */
 struct tui_win_info *
@@ -151,7 +142,6 @@ tui_prev_win (struct tui_win_info *cur_win)
 
   return *iter;
 }
-
 
 void
 tui_win_info::rerender ()

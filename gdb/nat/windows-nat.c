@@ -74,9 +74,9 @@ DeleteProcThreadAttributeList_ftype *DeleteProcThreadAttributeList;
 
 /* Note that 'debug_events' must be locally defined in the relevant
    functions.  */
-#define DEBUG_EVENTS(fmt, ...) \
+#define DEBUG_EVENTS(fmt, ...)                                     \
   debug_prefixed_printf_cond (debug_events, "windows events", fmt, \
-			      ## __VA_ARGS__)
+			      ##__VA_ARGS__)
 
 void
 windows_thread_info::suspend ()
@@ -95,7 +95,7 @@ windows_thread_info::suspend ()
 	 We can get Invalid Handle (6) if the main thread
 	 has exited.  */
       if (err != ERROR_INVALID_HANDLE && err != ERROR_ACCESS_DENIED)
-	warning (_("SuspendThread (tid=0x%x) failed. (winerr %u: %s)"),
+	warning (_ ("SuspendThread (tid=0x%x) failed. (winerr %u: %s)"),
 		 (unsigned) tid, (unsigned) err, strwinerror (err));
       suspended = -1;
     }
@@ -113,8 +113,9 @@ windows_thread_info::resume ()
       if (ResumeThread (h) == (DWORD) -1)
 	{
 	  DWORD err = GetLastError ();
-	  warning (_("warning: ResumeThread (tid=0x%x) failed. (winerr %u: %s)"),
-		   (unsigned) tid, (unsigned) err, strwinerror (err));
+	  warning (
+	    _ ("warning: ResumeThread (tid=0x%x) failed. (winerr %u: %s)"),
+	    (unsigned) tid, (unsigned) err, strwinerror (err));
 	}
     }
   suspended = 0;
@@ -138,13 +139,12 @@ windows_thread_info::thread_name ()
 		 character.  It seems better to just reject bad
 		 conversions here.  */
 	      BOOL used_default = FALSE;
-	      gdb::unique_xmalloc_ptr<char> new_name
-		((char *) xmalloc (needed));
-	      if (WideCharToMultiByte (CP_ACP, 0, value, -1,
-				       new_name.get (), needed,
-				       nullptr, &used_default) == needed
-		  && !used_default
-		  && strlen (new_name.get ()) > 0)
+	      gdb::unique_xmalloc_ptr<char> new_name ((char *)
+							xmalloc (needed));
+	      if (WideCharToMultiByte (CP_ACP, 0, value, -1, new_name.get (),
+				       needed, nullptr, &used_default)
+		    == needed
+		  && !used_default && strlen (new_name.get ()) > 0)
 		name = std::move (new_name);
 	    }
 	  LocalFree (value);
@@ -176,8 +176,7 @@ windows_process_info::get_exec_module_filename (char *exe_name_ret,
 #ifdef __x86_64__
   if (wow64_process)
     {
-      if (!EnumProcessModulesEx (handle,
-				 &dh_buf, sizeof (HMODULE), &cbNeeded,
+      if (!EnumProcessModulesEx (handle, &dh_buf, sizeof (HMODULE), &cbNeeded,
 				 LIST_MODULES_32BIT)
 	  || !cbNeeded)
 	return 0;
@@ -185,13 +184,12 @@ windows_process_info::get_exec_module_filename (char *exe_name_ret,
   else
 #endif
     {
-      if (!EnumProcessModules (handle,
-			       &dh_buf, sizeof (HMODULE), &cbNeeded)
+      if (!EnumProcessModules (handle, &dh_buf, sizeof (HMODULE), &cbNeeded)
 	  || !cbNeeded)
 	return 0;
     }
 
-  /* We know the executable is always first in the list of modules,
+    /* We know the executable is always first in the list of modules,
      which we just fetched.  So no need to fetch more.  */
 
 #ifdef __CYGWIN__
@@ -199,32 +197,32 @@ windows_process_info::get_exec_module_filename (char *exe_name_ret,
     /* Cygwin prefers that the path be in /x/y/z format, so extract
        the filename into a temporary buffer first, and then convert it
        to POSIX format into the destination buffer.  */
-    wchar_t *pathbuf = (wchar_t *) alloca (exe_name_max_len * sizeof (wchar_t));
+    wchar_t *pathbuf
+      = (wchar_t *) alloca (exe_name_max_len * sizeof (wchar_t));
 
-    len = GetModuleFileNameEx (handle,
-			       dh_buf, pathbuf, exe_name_max_len);
+    len = GetModuleFileNameEx (handle, dh_buf, pathbuf, exe_name_max_len);
     if (len == 0)
       {
 	unsigned err = (unsigned) GetLastError ();
-	error (_("Error getting executable filename (error %u): %s"),
-	       err, strwinerror (err));
+	error (_ ("Error getting executable filename (error %u): %s"), err,
+	       strwinerror (err));
       }
     if (cygwin_conv_path (CCP_WIN_W_TO_POSIX, pathbuf, exe_name_ret,
-			  exe_name_max_len) < 0)
-      error (_("Error converting executable filename to POSIX: %d."), errno);
+			  exe_name_max_len)
+	< 0)
+      error (_ ("Error converting executable filename to POSIX: %d."), errno);
   }
 #else
-  len = GetModuleFileNameEx (handle,
-			     dh_buf, exe_name_ret, exe_name_max_len);
+  len = GetModuleFileNameEx (handle, dh_buf, exe_name_ret, exe_name_max_len);
   if (len == 0)
     {
       unsigned err = (unsigned) GetLastError ();
-      error (_("Error getting executable filename (error %u): %s"),
-	     err, strwinerror (err));
+      error (_ ("Error getting executable filename (error %u): %s"), err,
+	     strwinerror (err));
     }
 #endif
 
-    return 1;	/* success */
+  return 1; /* success */
 }
 
 const char *
@@ -237,10 +235,10 @@ windows_process_info::pid_to_exec_file (int pid)
   char procexe[sizeof ("/proc/4294967295/exe")];
 
   xsnprintf (procexe, sizeof (procexe), "/proc/%u/exe", pid);
-  nchars = readlink (procexe, path, sizeof(path));
+  nchars = readlink (procexe, path, sizeof (path));
   if (nchars > 0 && nchars < sizeof (path))
     {
-      path[nchars] = '\0';	/* Got it */
+      path[nchars] = '\0'; /* Got it */
       return path;
     }
 #endif
@@ -281,10 +279,9 @@ get_image_name (HANDLE h, void *address, int unicode)
 
   /* See if we could read the address of a string, and that the
      address isn't null.  */
-  if (!ReadProcessMemory (h, address,  &address_ptr,
-			  sizeof (address_ptr), &done)
-      || done != sizeof (address_ptr)
-      || !address_ptr)
+  if (!ReadProcessMemory (h, address, &address_ptr, sizeof (address_ptr),
+			  &done)
+      || done != sizeof (address_ptr) || !address_ptr)
     return NULL;
 
   /* Find the length of the string.  */
@@ -302,8 +299,8 @@ get_image_name (HANDLE h, void *address, int unicode)
 #ifdef __CYGWIN__
       wcstombs (buf, unicode_address, MAX_PATH);
 #else
-      WideCharToMultiByte (CP_ACP, 0, unicode_address, len, buf, sizeof buf,
-			   0, 0);
+      WideCharToMultiByte (CP_ACP, 0, unicode_address, len, buf, sizeof buf, 0,
+			   0);
 #endif
     }
 
@@ -328,9 +325,9 @@ windows_process_info::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
       if (named_thread_id == (DWORD) -1)
 	named_thread_id = current_event.dwThreadId;
 
-      named_thread = thread_rec (ptid_t (current_event.dwProcessId,
-					 named_thread_id, 0),
-				 DONT_INVALIDATE_CONTEXT);
+      named_thread
+	= thread_rec (ptid_t (current_event.dwProcessId, named_thread_id, 0),
+		      DONT_INVALIDATE_CONTEXT);
       if (named_thread != NULL)
 	{
 	  int thread_name_len;
@@ -359,10 +356,11 @@ handle_exception_result
 windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 					bool debug_exceptions)
 {
-#define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
-  debug_printf ("gdb: Target exception %s at %s\n", x, \
-    host_address_to_string (\
-      current_event.u.Exception.ExceptionRecord.ExceptionAddress))
+#define DEBUG_EXCEPTION_SIMPLE(x)                                 \
+  if (debug_exceptions)                                           \
+  debug_printf ("gdb: Target exception %s at %s\n", x,            \
+		host_address_to_string (current_event.u.Exception \
+					  .ExceptionRecord.ExceptionAddress))
 
   EXCEPTION_RECORD *rec = &current_event.u.Exception.ExceptionRecord;
   DWORD code = rec->ExceptionCode;
@@ -436,7 +434,8 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 	     on startup, first a BREAKPOINT for the 64bit ntdll.dll,
 	     then a WX86_BREAKPOINT for the 32bit ntdll.dll.
 	     Here we only care about the WX86_BREAKPOINT's.  */
-	  DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT - ignore_first_breakpoint");
+	  DEBUG_EXCEPTION_SIMPLE (
+	    "EXCEPTION_BREAKPOINT - ignore_first_breakpoint");
 	  ourstatus->set_spurious ();
 	  ignore_first_breakpoint = false;
 	  break;
@@ -494,13 +493,14 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 	  result = HANDLE_EXCEPTION_IGNORED;
 	  break;
 	}
-	/* treat improperly formed exception as unknown */
-	/* FALLTHROUGH */
+      /* treat improperly formed exception as unknown */
+      /* FALLTHROUGH */
     default:
       /* Treat unhandled first chance exceptions specially.  */
       if (current_event.u.Exception.dwFirstChance)
 	return HANDLE_EXCEPTION_UNHANDLED;
-      debug_printf ("gdb: unknown target exception 0x%08x at %s\n",
+      debug_printf (
+	"gdb: unknown target exception 0x%08x at %s\n",
 	(unsigned) current_event.u.Exception.ExceptionRecord.ExceptionCode,
 	host_address_to_string (
 	  current_event.u.Exception.ExceptionRecord.ExceptionAddress));
@@ -529,16 +529,17 @@ windows_process_info::add_dll (LPVOID load_addr)
 #ifdef __x86_64__
   if (wow64_process)
     {
-      if (EnumProcessModulesEx (handle, &dummy_hmodule,
-				sizeof (HMODULE), &cb_needed,
-				LIST_MODULES_32BIT) == 0)
+      if (EnumProcessModulesEx (handle, &dummy_hmodule, sizeof (HMODULE),
+				&cb_needed, LIST_MODULES_32BIT)
+	  == 0)
 	return;
     }
   else
 #endif
     {
-      if (EnumProcessModules (handle, &dummy_hmodule,
-			      sizeof (HMODULE), &cb_needed) == 0)
+      if (EnumProcessModules (handle, &dummy_hmodule, sizeof (HMODULE),
+			      &cb_needed)
+	  == 0)
 	return;
     }
 
@@ -549,16 +550,15 @@ windows_process_info::add_dll (LPVOID load_addr)
 #ifdef __x86_64__
   if (wow64_process)
     {
-      if (EnumProcessModulesEx (handle, hmodules,
-				cb_needed, &cb_needed,
-				LIST_MODULES_32BIT) == 0)
+      if (EnumProcessModulesEx (handle, hmodules, cb_needed, &cb_needed,
+				LIST_MODULES_32BIT)
+	  == 0)
 	return;
     }
   else
 #endif
     {
-      if (EnumProcessModules (handle, hmodules,
-			      cb_needed, &cb_needed) == 0)
+      if (EnumProcessModules (handle, hmodules, cb_needed, &cb_needed) == 0)
 	return;
     }
 
@@ -590,7 +590,6 @@ windows_process_info::add_dll (LPVOID load_addr)
 
 	  convert_syswow_dir = true;
 	}
-
     }
   for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
     {
@@ -602,12 +601,12 @@ windows_process_info::add_dll (LPVOID load_addr)
       char dll_name[MAX_PATH];
 #endif
       const char *name;
-      if (GetModuleInformation (handle, hmodules[i],
-				&mi, sizeof (mi)) == 0)
+      if (GetModuleInformation (handle, hmodules[i], &mi, sizeof (mi)) == 0)
 	continue;
 
-      if (GetModuleFileNameEx (handle, hmodules[i],
-			       dll_name, sizeof (dll_name)) == 0)
+      if (GetModuleFileNameEx (handle, hmodules[i], dll_name,
+			       sizeof (dll_name))
+	  == 0)
 	continue;
 #ifdef __USEWIDE
       wcstombs (dll_name_mb, dll_name, MAX_PATH);
@@ -625,7 +624,7 @@ windows_process_info::add_dll (LPVOID load_addr)
 	{
 	  syswow_dll_path = syswow_dir;
 	  syswow_dll_path += name + system_dir_len;
-	  name = syswow_dll_path.c_str();
+	  name = syswow_dll_path.c_str ();
 	}
 
       /* Record the DLL if either LOAD_ADDR is NULL or the address
@@ -702,8 +701,7 @@ gdb::optional<pending_stop>
 windows_process_info::fetch_pending_stop (bool debug_events)
 {
   gdb::optional<pending_stop> result;
-  for (auto iter = pending_stops.begin ();
-       iter != pending_stops.end ();
+  for (auto iter = pending_stops.begin (); iter != pending_stops.end ();
        ++iter)
     {
       if (desired_stop_thread_id == -1
@@ -731,12 +729,11 @@ continue_last_debug_event (DWORD continue_status, bool debug_events)
   DEBUG_EVENTS ("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s)",
 		(unsigned) last_wait_event.dwProcessId,
 		(unsigned) last_wait_event.dwThreadId,
-		continue_status == DBG_CONTINUE ?
-		"DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED");
+		continue_status == DBG_CONTINUE ? "DBG_CONTINUE"
+						: "DBG_EXCEPTION_NOT_HANDLED");
 
   return ContinueDebugEvent (last_wait_event.dwProcessId,
-			     last_wait_event.dwThreadId,
-			     continue_status);
+			     last_wait_event.dwThreadId, continue_status);
 }
 
 /* See nat/windows-nat.h.  */
@@ -759,10 +756,11 @@ wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout)
 /* Pick one of the symbols as a sentinel.  */
 #ifdef PROCESS_CREATION_MITIGATION_POLICY_FORCE_RELOCATE_IMAGES_ALWAYS_OFF
 
-static_assert ((PROCESS_CREATION_MITIGATION_POLICY_FORCE_RELOCATE_IMAGES_ALWAYS_OFF
-		| PROCESS_CREATION_MITIGATION_POLICY_BOTTOM_UP_ASLR_ALWAYS_OFF)
-	       == relocate_aslr_flags,
-	       "check that ASLR flag values are correct");
+static_assert (
+  (PROCESS_CREATION_MITIGATION_POLICY_FORCE_RELOCATE_IMAGES_ALWAYS_OFF
+   | PROCESS_CREATION_MITIGATION_POLICY_BOTTOM_UP_ASLR_ALWAYS_OFF)
+    == relocate_aslr_flags,
+  "check that ASLR flag values are correct");
 
 static_assert (PROC_THREAD_ATTRIBUTE_MITIGATION_POLICY == mitigation_policy,
 	       "check that mitigation policy value is correct");
@@ -779,11 +777,9 @@ static_assert (PROC_THREAD_ATTRIBUTE_MITIGATION_POLICY == mitigation_policy,
 template<typename FUNC, typename CHAR, typename INFO>
 BOOL
 create_process_wrapper (FUNC *do_create_process, const CHAR *image,
-			CHAR *command_line, DWORD flags,
-			void *environment, const CHAR *cur_dir,
-			bool no_randomization,
-			INFO *startup_info,
-			PROCESS_INFORMATION *process_info)
+			CHAR *command_line, DWORD flags, void *environment,
+			const CHAR *cur_dir, bool no_randomization,
+			INFO *startup_info, PROCESS_INFORMATION *process_info)
 {
   if (no_randomization && disable_randomization_available ())
     {
@@ -800,9 +796,9 @@ create_process_wrapper (FUNC *do_create_process, const CHAR *image,
 	    gdb_lpproc_thread_attribute_list lpAttributeList;
 	  };
 
-#	  ifndef EXTENDED_STARTUPINFO_PRESENT
-#	   define EXTENDED_STARTUPINFO_PRESENT 0x00080000
-#	  endif
+#ifndef EXTENDED_STARTUPINFO_PRESENT
+#define EXTENDED_STARTUPINFO_PRESENT 0x00080000
+#endif
 
 	  gdb_extended_info info_ex {};
 
@@ -815,28 +811,24 @@ create_process_wrapper (FUNC *do_create_process, const CHAR *image,
 	  InitializeProcThreadAttributeList (nullptr, 1, 0, &size);
 	  info_ex.lpAttributeList
 	    = (gdb_lpproc_thread_attribute_list) alloca (size);
-	  InitializeProcThreadAttributeList (info_ex.lpAttributeList,
-					     1, 0, &size);
+	  InitializeProcThreadAttributeList (info_ex.lpAttributeList, 1, 0,
+					     &size);
 
 	  gdb::optional<BOOL> return_value;
 	  DWORD attr_flags = relocate_aslr_flags;
 	  if (!UpdateProcThreadAttribute (info_ex.lpAttributeList, 0,
-					  mitigation_policy,
-					  &attr_flags,
-					  sizeof (attr_flags),
-					  nullptr, nullptr))
+					  mitigation_policy, &attr_flags,
+					  sizeof (attr_flags), nullptr,
+					  nullptr))
 	    tried_and_failed = true;
 	  else
 	    {
-	      BOOL result = do_create_process (image, command_line,
-					       nullptr, nullptr,
-					       TRUE,
-					       (flags
-						| EXTENDED_STARTUPINFO_PRESENT),
-					       environment,
-					       cur_dir,
-					       &info_ex.StartupInfo,
-					       process_info);
+	      BOOL result
+		= do_create_process (image, command_line, nullptr, nullptr,
+				     TRUE,
+				     (flags | EXTENDED_STARTUPINFO_PRESENT),
+				     environment, cur_dir,
+				     &info_ex.StartupInfo, process_info);
 	      if (result)
 		return_value = result;
 	      else if (GetLastError () == ERROR_INVALID_PARAMETER)
@@ -852,26 +844,22 @@ create_process_wrapper (FUNC *do_create_process, const CHAR *image,
 	}
     }
 
-  return do_create_process (image,
-			    command_line, /* command line */
-			    nullptr,	  /* Security */
-			    nullptr,	  /* thread */
-			    TRUE,	  /* inherit handles */
-			    flags,	  /* start flags */
-			    environment,  /* environment */
-			    cur_dir,	  /* current directory */
-			    startup_info,
-			    process_info);
+  return do_create_process (image, command_line, /* command line */
+			    nullptr,		 /* Security */
+			    nullptr,		 /* thread */
+			    TRUE,		 /* inherit handles */
+			    flags,		 /* start flags */
+			    environment,	 /* environment */
+			    cur_dir,		 /* current directory */
+			    startup_info, process_info);
 }
 
 /* See nat/windows-nat.h.  */
 
 BOOL
 create_process (const char *image, char *command_line, DWORD flags,
-		void *environment, const char *cur_dir,
-		bool no_randomization,
-		STARTUPINFOA *startup_info,
-		PROCESS_INFORMATION *process_info)
+		void *environment, const char *cur_dir, bool no_randomization,
+		STARTUPINFOA *startup_info, PROCESS_INFORMATION *process_info)
 {
   return create_process_wrapper (CreateProcessA, image, command_line, flags,
 				 environment, cur_dir, no_randomization,
@@ -885,8 +873,7 @@ create_process (const char *image, char *command_line, DWORD flags,
 BOOL
 create_process (const wchar_t *image, wchar_t *command_line, DWORD flags,
 		void *environment, const wchar_t *cur_dir,
-		bool no_randomization,
-		STARTUPINFOW *startup_info,
+		bool no_randomization, STARTUPINFOW *startup_info,
 		PROCESS_INFORMATION *process_info)
 {
   return create_process_wrapper (CreateProcessW, image, command_line, flags,
@@ -927,7 +914,7 @@ bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
   size.Y = 12;
   return size;
 }
- 
+
 /* See windows-nat.h.  */
 
 bool
@@ -946,8 +933,7 @@ initialize_loadable ()
   bool result = true;
   HMODULE hm = NULL;
 
-#define GPA(m, func)					\
-  func = (func ## _ftype *) GetProcAddress (m, #func)
+#define GPA(m, func) func = (func##_ftype *) GetProcAddress (m, #func)
 
   hm = LoadLibrary (TEXT ("kernel32.dll"));
   if (hm)
@@ -1000,8 +986,8 @@ initialize_loadable ()
       GPA (hm, GetModuleFileNameExW);
     }
 
-  if (!EnumProcessModules || !GetModuleInformation
-      || !GetModuleFileNameExA || !GetModuleFileNameExW)
+  if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameExA
+      || !GetModuleFileNameExW)
     {
       /* Set variables to dummy versions of these processes if the function
 	 wasn't found in psapi.dll.  */
@@ -1040,4 +1026,4 @@ initialize_loadable ()
   return result;
 }
 
-}
+} // namespace windows_nat

@@ -63,7 +63,8 @@ public:
      is preserved, otherwise, the TUI_CMD_WIN will resize just like any
      other window.  */
   virtual void apply (int x, int y, int width, int height,
-		      bool preserve_cmd_win_size_p) = 0;
+		      bool preserve_cmd_win_size_p)
+    = 0;
 
   /* Return the minimum and maximum height or width of this layout.
      HEIGHT is true to fetch height, false to fetch width.  */
@@ -79,10 +80,7 @@ public:
 
   /* Return the name of this layout's window, or nullptr if this
      layout does not represent a single window.  */
-  virtual const char *get_name () const
-  {
-    return nullptr;
-  }
+  virtual const char *get_name () const { return nullptr; }
 
   /* Set the height of the window named NAME to NEW_HEIGHT, updating
      the sizes of the other windows around it.  */
@@ -156,10 +154,7 @@ public:
   void apply (int x, int y, int width, int height,
 	      bool preserve_cmd_win_size_p) override;
 
-  const char *get_name () const override
-  {
-    return m_contents.c_str ();
-  }
+  const char *get_name () const override { return m_contents.c_str (); }
 
   tui_adjust_result set_height (const char *name, int new_height) override
   {
@@ -175,9 +170,7 @@ public:
 
   bool last_edge_has_border_p () const override;
 
-  void remove_windows (const char *name) override
-  {
-  }
+  void remove_windows (const char *name) override {}
 
   void replace_window (const char *name, const char *new_window) override;
 
@@ -354,12 +347,11 @@ extern void tui_adjust_window_height (struct tui_win_info *win,
 				      int new_height);
 
 /* Adjust the window width of WIN to NEW_WIDTH.  */
-extern void tui_adjust_window_width (struct tui_win_info *win,
-				     int new_width);
+extern void tui_adjust_window_width (struct tui_win_info *win, int new_width);
 
 /* The type of a function that is used to create a TUI window.  */
 
-typedef std::function<tui_win_info * (const char *name)> window_factory;
+typedef std::function<tui_win_info *(const char *name)> window_factory;
 
 /* The type for a data structure that maps a window name to that window's
    factory function.  */
@@ -382,7 +374,8 @@ struct known_window_names_iterator
 
   known_window_names_iterator (known_window_types_iterator &&iter)
     : m_iter (std::move (iter))
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   known_window_names_iterator &operator++ ()
   {
@@ -390,11 +383,12 @@ struct known_window_names_iterator
     return *this;
   }
 
-  const std::string &operator* () const
-  { return (*m_iter).first; }
+  const std::string &operator* () const { return (*m_iter).first; }
 
   bool operator!= (const known_window_names_iterator &other) const
-  { return m_iter != other.m_iter; }
+  {
+    return m_iter != other.m_iter;
+  }
 
 private:
 
@@ -405,8 +399,7 @@ private:
 /* A range adapter that makes it possible to iterate over the names of all
    known tui windows.  */
 
-using known_window_names_range
-  = iterator_range<known_window_names_iterator>;
+using known_window_names_range = iterator_range<known_window_names_iterator>;
 
 /* Return a range that can be used to walk over the name of all known tui
    windows in a range-for loop.  */

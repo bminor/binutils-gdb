@@ -53,12 +53,10 @@
 static const int i386obsd_page_size = 4096;
 
 /* Offset for sigreturn(2).  */
-static const int i386obsd_sigreturn_offset[] = {
-  0x0a,				/* OpenBSD 3.2 */
-  0x14,				/* OpenBSD 3.6 */
-  0x3a,				/* OpenBSD 3.8 */
-  -1
-};
+static const int i386obsd_sigreturn_offset[] = { 0x0a, /* OpenBSD 3.2 */
+						 0x14, /* OpenBSD 3.6 */
+						 0x3a, /* OpenBSD 3.8 */
+						 -1 };
 
 /* Return whether THIS_FRAME corresponds to an OpenBSD sigtramp
    routine.  */
@@ -69,11 +67,9 @@ i386obsd_sigtramp_p (frame_info_ptr this_frame)
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
   /* The call sequence invoking sigreturn(2).  */
-  const gdb_byte sigreturn[] =
-  {
-    0xb8,
-    0x67, 0x00, 0x00, 0x00,	/* movl $SYS_sigreturn, %eax */
-    0xcd, 0x80			/* int $0x80 */
+  const gdb_byte sigreturn[] = {
+    0xb8, 0x67, 0x00, 0x00, 0x00, /* movl $SYS_sigreturn, %eax */
+    0xcd, 0x80			  /* int $0x80 */
   };
   size_t buflen = sizeof sigreturn;
   const int *offset;
@@ -99,7 +95,7 @@ i386obsd_sigtramp_p (frame_info_ptr this_frame)
     {
       /* If we can't read the instructions, return zero.  */
       if (!safe_frame_unwind_memory (this_frame, start_pc + *offset,
-				     {buf, buflen}))
+				     { buf, buflen }))
 	return 0;
 
       /* Check for sigreturn(2).  */
@@ -109,86 +105,80 @@ i386obsd_sigtramp_p (frame_info_ptr this_frame)
 
   return 0;
 }
-
+
 /* Mapping between the general-purpose registers in `struct reg'
    format and GDB's register cache layout.  */
 
 /* From <machine/reg.h>.  */
-static int i386obsd_r_reg_offset[] =
-{
-  0 * 4,			/* %eax */
-  1 * 4,			/* %ecx */
-  2 * 4,			/* %edx */
-  3 * 4,			/* %ebx */
-  4 * 4,			/* %esp */
-  5 * 4,			/* %ebp */
-  6 * 4,			/* %esi */
-  7 * 4,			/* %edi */
-  8 * 4,			/* %eip */
-  9 * 4,			/* %eflags */
-  10 * 4,			/* %cs */
-  11 * 4,			/* %ss */
-  12 * 4,			/* %ds */
-  13 * 4,			/* %es */
-  14 * 4,			/* %fs */
-  15 * 4			/* %gs */
+static int i386obsd_r_reg_offset[] = {
+  0 * 4,  /* %eax */
+  1 * 4,  /* %ecx */
+  2 * 4,  /* %edx */
+  3 * 4,  /* %ebx */
+  4 * 4,  /* %esp */
+  5 * 4,  /* %ebp */
+  6 * 4,  /* %esi */
+  7 * 4,  /* %edi */
+  8 * 4,  /* %eip */
+  9 * 4,  /* %eflags */
+  10 * 4, /* %cs */
+  11 * 4, /* %ss */
+  12 * 4, /* %ds */
+  13 * 4, /* %es */
+  14 * 4, /* %fs */
+  15 * 4  /* %gs */
 };
-
-
 
 /* Sigtramp routine location for OpenBSD 3.1 and earlier releases.  */
 CORE_ADDR i386obsd_sigtramp_start_addr = 0xbfbfdf20;
 CORE_ADDR i386obsd_sigtramp_end_addr = 0xbfbfdff0;
 
 /* From <machine/signal.h>.  */
-int i386obsd_sc_reg_offset[I386_NUM_GREGS] =
-{
-  10 * 4,			/* %eax */
-  9 * 4,			/* %ecx */
-  8 * 4,			/* %edx */
-  7 * 4,			/* %ebx */
-  14 * 4,			/* %esp */
-  6 * 4,			/* %ebp */
-  5 * 4,			/* %esi */
-  4 * 4,			/* %edi */
-  11 * 4,			/* %eip */
-  13 * 4,			/* %eflags */
-  12 * 4,			/* %cs */
-  15 * 4,			/* %ss */
-  3 * 4,			/* %ds */
-  2 * 4,			/* %es */
-  1 * 4,			/* %fs */
-  0 * 4				/* %gs */
+int i386obsd_sc_reg_offset[I386_NUM_GREGS] = {
+  10 * 4, /* %eax */
+  9 * 4,  /* %ecx */
+  8 * 4,  /* %edx */
+  7 * 4,  /* %ebx */
+  14 * 4, /* %esp */
+  6 * 4,  /* %ebp */
+  5 * 4,  /* %esi */
+  4 * 4,  /* %edi */
+  11 * 4, /* %eip */
+  13 * 4, /* %eflags */
+  12 * 4, /* %cs */
+  15 * 4, /* %ss */
+  3 * 4,  /* %ds */
+  2 * 4,  /* %es */
+  1 * 4,  /* %fs */
+  0 * 4	  /* %gs */
 };
 
 /* From /usr/src/lib/libpthread/arch/i386/uthread_machdep.c.  */
-static int i386obsd_uthread_reg_offset[] =
-{
-  11 * 4,			/* %eax */
-  10 * 4,			/* %ecx */
-  9 * 4,			/* %edx */
-  8 * 4,			/* %ebx */
-  -1,				/* %esp */
-  6 * 4,			/* %ebp */
-  5 * 4,			/* %esi */
-  4 * 4,			/* %edi */
-  12 * 4,			/* %eip */
-  -1,				/* %eflags */
-  13 * 4,			/* %cs */
-  -1,				/* %ss */
-  3 * 4,			/* %ds */
-  2 * 4,			/* %es */
-  1 * 4,			/* %fs */
-  0 * 4				/* %gs */
+static int i386obsd_uthread_reg_offset[] = {
+  11 * 4, /* %eax */
+  10 * 4, /* %ecx */
+  9 * 4,  /* %edx */
+  8 * 4,  /* %ebx */
+  -1,	  /* %esp */
+  6 * 4,  /* %ebp */
+  5 * 4,  /* %esi */
+  4 * 4,  /* %edi */
+  12 * 4, /* %eip */
+  -1,	  /* %eflags */
+  13 * 4, /* %cs */
+  -1,	  /* %ss */
+  3 * 4,  /* %ds */
+  2 * 4,  /* %es */
+  1 * 4,  /* %fs */
+  0 * 4	  /* %gs */
 };
 
 /* Offset within the thread structure where we can find the saved
    stack pointer (%esp).  */
-#define I386OBSD_UTHREAD_ESP_OFFSET	176
+#define I386OBSD_UTHREAD_ESP_OFFSET 176
 
 static void
-i386obsd_supply_uthread (struct regcache *regcache,
-			 int regnum, CORE_ADDR addr)
+i386obsd_supply_uthread (struct regcache *regcache, int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -231,8 +221,8 @@ i386obsd_supply_uthread (struct regcache *regcache,
 }
 
 static void
-i386obsd_collect_uthread (const struct regcache *regcache,
-			  int regnum, CORE_ADDR addr)
+i386obsd_collect_uthread (const struct regcache *regcache, int regnum,
+			  CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -277,29 +267,28 @@ i386obsd_collect_uthread (const struct regcache *regcache,
 	}
     }
 }
-
+
 /* Kernel debugging support.  */
 
 /* From <machine/frame.h>.  Note that %esp and %ess are only saved in
    a trap frame when entering the kernel from user space.  */
-static int i386obsd_tf_reg_offset[] =
-{
-  10 * 4,			/* %eax */
-  9 * 4,			/* %ecx */
-  8 * 4,			/* %edx */
-  7 * 4,			/* %ebx */
-  -1,				/* %esp */
-  6 * 4,			/* %ebp */
-  5 * 4,			/* %esi */
-  4 * 4,			/* %edi */
-  13 * 4,			/* %eip */
-  15 * 4,			/* %eflags */
-  14 * 4,			/* %cs */
-  -1,				/* %ss */
-  3 * 4,			/* %ds */
-  2 * 4,			/* %es */
-  0 * 4,			/* %fs */
-  1 * 4				/* %gs */
+static int i386obsd_tf_reg_offset[] = {
+  10 * 4, /* %eax */
+  9 * 4,  /* %ecx */
+  8 * 4,  /* %edx */
+  7 * 4,  /* %ebx */
+  -1,	  /* %esp */
+  6 * 4,  /* %ebp */
+  5 * 4,  /* %esi */
+  4 * 4,  /* %edi */
+  13 * 4, /* %eip */
+  15 * 4, /* %eflags */
+  14 * 4, /* %cs */
+  -1,	  /* %ss */
+  3 * 4,  /* %ds */
+  2 * 4,  /* %es */
+  0 * 4,  /* %fs */
+  1 * 4	  /* %gs */
 };
 
 static struct trad_frame_cache *
@@ -324,7 +313,7 @@ i386obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 
   find_pc_partial_function (func, &name, NULL, NULL);
   if (name && startswith (name, "Xintr"))
-    addr = sp + 8;		/* It's an interrupt frame.  */
+    addr = sp + 8; /* It's an interrupt frame.  */
   else
     addr = sp;
 
@@ -350,21 +339,21 @@ i386obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static void
-i386obsd_trapframe_this_id (frame_info_ptr this_frame,
-			    void **this_cache, struct frame_id *this_id)
+i386obsd_trapframe_this_id (frame_info_ptr this_frame, void **this_cache,
+			    struct frame_id *this_id)
 {
-  struct trad_frame_cache *cache =
-    i386obsd_trapframe_cache (this_frame, this_cache);
-  
+  struct trad_frame_cache *cache
+    = i386obsd_trapframe_cache (this_frame, this_cache);
+
   trad_frame_get_id (cache, this_id);
 }
 
 static struct value *
-i386obsd_trapframe_prev_register (frame_info_ptr this_frame,
-				  void **this_cache, int regnum)
+i386obsd_trapframe_prev_register (frame_info_ptr this_frame, void **this_cache,
+				  int regnum)
 {
-  struct trad_frame_cache *cache =
-    i386obsd_trapframe_cache (this_frame, this_cache);
+  struct trad_frame_cache *cache
+    = i386obsd_trapframe_cache (this_frame, this_cache);
 
   return trad_frame_get_register (cache, this_frame, regnum);
 }
@@ -384,27 +373,21 @@ i386obsd_trapframe_sniffer (const struct frame_unwind *self,
     return 0;
 
   find_pc_partial_function (get_frame_pc (this_frame), &name, NULL, NULL);
-  return (name && (strcmp (name, "calltrap") == 0
-		   || strcmp (name, "syscall1") == 0
-		   || startswith (name, "Xintr")
-		   || startswith (name, "Xsoft")));
+  return (name
+	  && (strcmp (name, "calltrap") == 0 || strcmp (name, "syscall1") == 0
+	      || startswith (name, "Xintr") || startswith (name, "Xsoft")));
 }
 
-static const struct frame_unwind i386obsd_trapframe_unwind = {
-  "i386 openbsd trap",
-  /* FIXME: kettenis/20051219: This really is more like an interrupt
+static const struct frame_unwind i386obsd_trapframe_unwind
+  = { "i386 openbsd trap",
+      /* FIXME: kettenis/20051219: This really is more like an interrupt
      frame, but SIGTRAMP_FRAME would print <signal handler called>,
      which really is not what we want here.  */
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  i386obsd_trapframe_this_id,
-  i386obsd_trapframe_prev_register,
-  NULL,
-  i386obsd_trapframe_sniffer
-};
-
+      NORMAL_FRAME, default_frame_unwind_stop_reason,
+      i386obsd_trapframe_this_id, i386obsd_trapframe_prev_register, NULL,
+      i386obsd_trapframe_sniffer };
 
-static void 
+static void
 i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
@@ -440,11 +423,12 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_prepend_unwinder (gdbarch, &i386obsd_trapframe_unwind);
 
   /* OpenBSD ELF uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 }
 
 void _initialize_i386obsd_tdep ();
+
 void
 _initialize_i386obsd_tdep ()
 {

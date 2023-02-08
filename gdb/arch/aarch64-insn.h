@@ -32,15 +32,15 @@ extern bool aarch64_debug;
 #define submask(x) ((1L << ((x) + 1)) - 1)
 
 /* Extract the bitfield from OBJ starting at bit ST and ending at bit FN.  */
-#define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
+#define bits(obj, st, fn) (((obj) >> (st)) & submask ((fn) - (st)))
 
 /* Extract bit ST from OBJ.  */
-#define bit(obj,st) (((obj) >> (st)) & 1)
+#define bit(obj, st) (((obj) >> (st)) & 1)
 
 /* Extract the signed bitfield from OBJ starting at bit ST and ending at
    bit FN.  The result is sign-extended.  */
-#define sbits(obj,st,fn) \
-  ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
+#define sbits(obj, st, fn) \
+  ((long) (bits (obj, st, fn) | ((long) bit (obj, fn) * ~submask (fn - st))))
 
 /* Prologue analyzer helper macros.  */
 
@@ -59,80 +59,80 @@ enum aarch64_opcodes
   /* CBNZ           s011 0101 iiii iiii iiii iiii iiir rrrr */
   /* TBZ            b011 0110 bbbb biii iiii iiii iiir rrrr */
   /* TBNZ           b011 0111 bbbb biii iiii iiii iiir rrrr */
-  B               = 0x14000000,
-  BL              = 0x80000000 | B,
-  BCOND           = 0x40000000 | B,
-  CBZ             = 0x20000000 | B,
-  CBNZ            = 0x21000000 | B,
-  TBZ             = 0x36000000 | B,
-  TBNZ            = 0x37000000 | B,
+  B = 0x14000000,
+  BL = 0x80000000 | B,
+  BCOND = 0x40000000 | B,
+  CBZ = 0x20000000 | B,
+  CBNZ = 0x21000000 | B,
+  TBZ = 0x36000000 | B,
+  TBNZ = 0x37000000 | B,
   /* BR             1101 0110 0001 1111 0000 00rr rrr0 0000 */
   /* BLR            1101 0110 0011 1111 0000 00rr rrr0 0000 */
-  BR              = 0xd61f0000,
-  BLR             = 0xd63f0000,
+  BR = 0xd61f0000,
+  BLR = 0xd63f0000,
   /* RET            1101 0110 0101 1111 0000 00rr rrr0 0000 */
-  RET             = 0xd65f0000,
+  RET = 0xd65f0000,
   /* STP            s010 100o o0ii iiii irrr rrrr rrrr rrrr */
   /* LDP            s010 100o o1ii iiii irrr rrrr rrrr rrrr */
   /* STP (SIMD&VFP) ss10 110o o0ii iiii irrr rrrr rrrr rrrr */
   /* LDP (SIMD&VFP) ss10 110o o1ii iiii irrr rrrr rrrr rrrr */
-  STP             = 0x28000000,
-  LDP             = 0x28400000,
-  STP_SIMD_VFP    = 0x04000000 | STP,
-  LDP_SIMD_VFP    = 0x04000000 | LDP,
+  STP = 0x28000000,
+  LDP = 0x28400000,
+  STP_SIMD_VFP = 0x04000000 | STP,
+  LDP_SIMD_VFP = 0x04000000 | LDP,
   /* STR            ss11 100o 00xi iiii iiii xxrr rrrr rrrr */
   /* LDR            ss11 100o 01xi iiii iiii xxrr rrrr rrrr */
   /* LDRSW          1011 100o 10xi iiii iiii xxrr rrrr rrrr */
-  STR             = 0x38000000,
-  LDR             = 0x00400000 | STR,
-  LDRSW           = 0x80800000 | STR,
+  STR = 0x38000000,
+  LDR = 0x00400000 | STR,
+  LDRSW = 0x80800000 | STR,
   /* LDAXR          ss00 1000 0101 1111 1111 11rr rrrr rrrr */
-  LDAXR           = 0x085ffc00,
+  LDAXR = 0x085ffc00,
   /* STXR           ss00 1000 000r rrrr 0111 11rr rrrr rrrr */
-  STXR            = 0x08007c00,
+  STXR = 0x08007c00,
   /* STLR           ss00 1000 1001 1111 1111 11rr rrrr rrrr */
-  STLR            = 0x089ffc00,
+  STLR = 0x089ffc00,
   /* MOV            s101 0010 1xxi iiii iiii iiii iiir rrrr */
   /* MOVK           s111 0010 1xxi iiii iiii iiii iiir rrrr */
-  MOV             = 0x52800000,
-  MOVK            = 0x20000000 | MOV,
+  MOV = 0x52800000,
+  MOVK = 0x20000000 | MOV,
   /* ADD            s00o ooo1 xxxx xxxx xxxx xxxx xxxx xxxx */
   /* SUB            s10o ooo1 xxxx xxxx xxxx xxxx xxxx xxxx */
   /* SUBS           s11o ooo1 xxxx xxxx xxxx xxxx xxxx xxxx */
-  ADD             = 0x01000000,
-  SUB             = 0x40000000 | ADD,
-  SUBS            = 0x20000000 | SUB,
+  ADD = 0x01000000,
+  SUB = 0x40000000 | ADD,
+  SUBS = 0x20000000 | SUB,
   /* AND            s000 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
   /* ORR            s010 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
   /* ORN            s010 1010 xx1x xxxx xxxx xxxx xxxx xxxx */
   /* EOR            s100 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
-  AND             = 0x0a000000,
-  ORR             = 0x20000000 | AND,
-  ORN             = 0x00200000 | ORR,
-  EOR             = 0x40000000 | AND,
+  AND = 0x0a000000,
+  ORR = 0x20000000 | AND,
+  ORN = 0x00200000 | ORR,
+  EOR = 0x40000000 | AND,
   /* LSLV           s001 1010 110r rrrr 0010 00rr rrrr rrrr */
   /* LSRV           s001 1010 110r rrrr 0010 01rr rrrr rrrr */
   /* ASRV           s001 1010 110r rrrr 0010 10rr rrrr rrrr */
-  LSLV             = 0x1ac02000,
-  LSRV             = 0x00000400 | LSLV,
-  ASRV             = 0x00000800 | LSLV,
+  LSLV = 0x1ac02000,
+  LSRV = 0x00000400 | LSLV,
+  ASRV = 0x00000800 | LSLV,
   /* SBFM           s001 0011 0nii iiii iiii iirr rrrr rrrr */
-  SBFM            = 0x13000000,
+  SBFM = 0x13000000,
   /* UBFM           s101 0011 0nii iiii iiii iirr rrrr rrrr */
-  UBFM            = 0x40000000 | SBFM,
+  UBFM = 0x40000000 | SBFM,
   /* CSINC          s001 1010 100r rrrr cccc 01rr rrrr rrrr */
-  CSINC           = 0x9a800400,
+  CSINC = 0x9a800400,
   /* MUL            s001 1011 000r rrrr 0111 11rr rrrr rrrr */
-  MUL             = 0x1b007c00,
+  MUL = 0x1b007c00,
   /* MSR (register) 1101 0101 0001 oooo oooo oooo ooor rrrr */
   /* MRS            1101 0101 0011 oooo oooo oooo ooor rrrr */
-  MSR             = 0xd5100000,
-  MRS             = 0x00200000 | MSR,
+  MSR = 0xd5100000,
+  MRS = 0x00200000 | MSR,
   /* HINT           1101 0101 0000 0011 0010 oooo ooo1 1111 */
-  HINT            = 0xd503201f,
-  SEVL            = (5 << 5) | HINT,
-  WFE             = (2 << 5) | HINT,
-  NOP             = (0 << 5) | HINT,
+  HINT = 0xd503201f,
+  SEVL = (5 << 5) | HINT,
+  WFE = (2 << 5) | HINT,
+  NOP = (0 << 5) | HINT,
 };
 
 /* List of useful masks.  */
@@ -191,8 +191,8 @@ int aarch64_decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl,
 int aarch64_decode_bcond (CORE_ADDR addr, uint32_t insn, unsigned *cond,
 			  int32_t *offset);
 
-int aarch64_decode_cb (CORE_ADDR addr, uint32_t insn, int *is64,
-		       int *is_cbnz, unsigned *rn, int32_t *offset);
+int aarch64_decode_cb (CORE_ADDR addr, uint32_t insn, int *is64, int *is_cbnz,
+		       unsigned *rn, int32_t *offset);
 
 int aarch64_decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz,
 		       unsigned *bit, unsigned *rt, int32_t *imm);
@@ -221,18 +221,16 @@ struct aarch64_insn_visitor
 		  struct aarch64_insn_data *data);
 
   /* Visit instruction CBZ/CBNZ Rn, OFFSET.  */
-  void (*cb) (const int32_t offset, const int is_cbnz,
-	      const unsigned rn, int is64,
-	      struct aarch64_insn_data *data);
+  void (*cb) (const int32_t offset, const int is_cbnz, const unsigned rn,
+	      int is64, struct aarch64_insn_data *data);
 
   /* Visit instruction TBZ/TBNZ Rt, #BIT, OFFSET.  */
-  void (*tb) (const int32_t offset, int is_tbnz,
-	      const unsigned rt, unsigned bit,
-	      struct aarch64_insn_data *data);
+  void (*tb) (const int32_t offset, int is_tbnz, const unsigned rt,
+	      unsigned bit, struct aarch64_insn_data *data);
 
   /* Visit instruction ADR/ADRP Rd, OFFSET.  */
-  void (*adr) (const int32_t offset, const unsigned rd,
-	       const int is_adrp, struct aarch64_insn_data *data);
+  void (*adr) (const int32_t offset, const unsigned rd, const int is_adrp,
+	       struct aarch64_insn_data *data);
 
   /* Visit instruction LDR/LDRSW Rt, OFFSET.  */
   void (*ldr_literal) (const int32_t offset, const int is_sw,
@@ -247,7 +245,7 @@ void aarch64_relocate_instruction (uint32_t insn,
 				   const struct aarch64_insn_visitor *visitor,
 				   struct aarch64_insn_data *data);
 
-#define can_encode_int32(val, bits)			\
+#define can_encode_int32(val, bits) \
   (((val) >> (bits)) == 0 || ((val) >> (bits)) == -1)
 
 /* Write a B or BL instruction into *BUF.
@@ -272,10 +270,9 @@ void aarch64_relocate_instruction (uint32_t insn,
    byte-addressed but should be 4 bytes aligned.  It has a limited range of
    +/- 1MB (19 bits << 2).  */
 
-#define emit_bcond(buf, cond, offset)				\
-  aarch64_emit_insn (buf,					\
-		     BCOND | ENCODE ((offset) >> 2, 19, 5)	\
-		     | ENCODE ((cond), 4, 0))
+#define emit_bcond(buf, cond, offset)                           \
+  aarch64_emit_insn (buf, BCOND | ENCODE ((offset) >> 2, 19, 5) \
+			    | ENCODE ((cond), 4, 0))
 
 /* Write a CBZ or CBNZ instruction into *BUF.
 
@@ -288,12 +285,11 @@ void aarch64_relocate_instruction (uint32_t insn,
    byte-addressed but should be 4 bytes aligned.  It has a limited range of
    +/- 1MB (19 bits << 2).  */
 
-#define emit_cb(buf, is_cbnz, rt, offset)			\
-  aarch64_emit_insn (buf,					\
-		     ((is_cbnz) ? CBNZ : CBZ)			\
-		     | ENCODE (rt.is64, 1, 31)  /* sf */	\
-		     | ENCODE (offset >> 2, 19, 5) /* imm19 */	\
-		     | ENCODE (rt.num, 5, 0))
+#define emit_cb(buf, is_cbnz, rt, offset)                             \
+  aarch64_emit_insn (buf, ((is_cbnz) ? CBNZ : CBZ)                    \
+			    | ENCODE (rt.is64, 1, 31)	  /* sf */    \
+			    | ENCODE (offset >> 2, 19, 5) /* imm19 */ \
+			    | ENCODE (rt.num, 5, 0))
 
 /* Write a LDR instruction into *BUF.
 
@@ -320,9 +316,8 @@ void aarch64_relocate_instruction (uint32_t insn,
    OFFSET is the immediate to add to the base address.  It is limited to
    0 .. 16380 range (12 bits << 2).  */
 
-#define emit_ldrsw(buf, rt, rn, operand)		\
+#define emit_ldrsw(buf, rt, rn, operand) \
   aarch64_emit_load_store (buf, 3, LDRSW, rt, rn, operand)
-
 
 /* Write a TBZ or TBNZ instruction into *BUF.
 
@@ -336,13 +331,12 @@ void aarch64_relocate_instruction (uint32_t insn,
    byte-addressed but should be 4 bytes aligned.  It has a limited range of
    +/- 32KB (14 bits << 2).  */
 
-#define emit_tb(buf, is_tbnz, bit, rt, offset)		       \
-  aarch64_emit_insn (buf,				       \
-		     ((is_tbnz) ? TBNZ: TBZ)		       \
-		     | ENCODE (bit >> 5, 1, 31) /* b5 */       \
-		     | ENCODE (bit, 5, 19) /* b40 */	       \
-		     | ENCODE (offset >> 2, 14, 5) /* imm14 */ \
-		     | ENCODE (rt.num, 5, 0))
+#define emit_tb(buf, is_tbnz, bit, rt, offset)                        \
+  aarch64_emit_insn (buf, ((is_tbnz) ? TBNZ : TBZ)                    \
+			    | ENCODE (bit >> 5, 1, 31)	  /* b5 */    \
+			    | ENCODE (bit, 5, 19)	  /* b40 */   \
+			    | ENCODE (offset >> 2, 14, 5) /* imm14 */ \
+			    | ENCODE (rt.num, 5, 0))
 
 /* Write a NOP instruction into *BUF.  */
 

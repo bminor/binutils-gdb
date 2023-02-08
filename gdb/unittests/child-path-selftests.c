@@ -21,8 +21,10 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
-namespace child_path {
+namespace selftests
+{
+namespace child_path
+{
 
 /* Verify the result of a single child_path test.  */
 
@@ -56,14 +58,13 @@ test ()
   SELF_CHECK (child_path_check ("/one", "/onetwo/three", NULL));
 }
 
-}
-}
+} // namespace child_path
+} // namespace selftests
 
 void _initialize_child_path_selftests ();
+
 void
 _initialize_child_path_selftests ()
 {
-  selftests::register_test ("child_path",
-			    selftests::child_path::test);
+  selftests::register_test ("child_path", selftests::child_path::test);
 }
-

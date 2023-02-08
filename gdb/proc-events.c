@@ -45,17 +45,16 @@
 
 struct trans
 {
-  int value;                    /* The numeric value.  */
-  const char *name;             /* The equivalent symbolic value.  */
-  const char *desc;             /* Short description of value.  */
+  int value;	    /* The numeric value.  */
+  const char *name; /* The equivalent symbolic value.  */
+  const char *desc; /* Short description of value.  */
 };
-
 
 /* Pretty print syscalls.  */
 
 /* Syscall translation table.  */
 
-#define MAX_SYSCALLS 262	/* Pretty arbitrary.  */
+#define MAX_SYSCALLS 262 /* Pretty arbitrary.  */
 static const char *syscall_table[MAX_SYSCALLS];
 
 static void
@@ -557,23 +556,22 @@ proc_prettyprint_syscalls (sysset_t *sysset, int verbose)
 {
   proc_prettyfprint_syscalls (stdout, sysset, verbose);
 }
-
+
 /* Prettyprint signals.  */
 
 /* Signal translation table, ordered ANSI-standard signals first,
    other signals second, with signals in each block ordered by their
    numerical values on a typical POSIX platform.  */
 
-static struct trans signal_table[] = 
-{
-  { 0,      "<no signal>", "no signal" }, 
+static struct trans signal_table[] = {
+  { 0, "<no signal>", "no signal" },
 
   /* SIGINT, SIGILL, SIGABRT, SIGFPE, SIGSEGV and SIGTERM
      are ANSI-standard signals and are always available.  */
 
   { SIGINT, "SIGINT", "Interrupt (rubout)" },
-  { SIGILL, "SIGILL", "Illegal instruction" },	/* not reset when caught */
-  { SIGABRT, "SIGABRT", "used by abort()" },	/* replaces SIGIOT */
+  { SIGILL, "SIGILL", "Illegal instruction" }, /* not reset when caught */
+  { SIGABRT, "SIGABRT", "used by abort()" },   /* replaces SIGIOT */
   { SIGFPE, "SIGFPE", "Floating point exception" },
   { SIGSEGV, "SIGSEGV", "Segmentation violation" },
   { SIGTERM, "SIGTERM", "Software termination signal from kill" },
@@ -582,24 +580,24 @@ static struct trans signal_table[] =
 
   { SIGHUP, "SIGHUP", "Hangup" },
   { SIGQUIT, "SIGQUIT", "Quit (ASCII FS)" },
-  { SIGTRAP, "SIGTRAP", "Trace trap" },		/* not reset when caught */
+  { SIGTRAP, "SIGTRAP", "Trace trap" }, /* not reset when caught */
   { SIGIOT, "SIGIOT", "IOT instruction" },
   { SIGEMT, "SIGEMT", "EMT instruction" },
-  { SIGKILL, "SIGKILL", "Kill" },	/* Solaris: cannot be caught/ignored */
+  { SIGKILL, "SIGKILL", "Kill" }, /* Solaris: cannot be caught/ignored */
   { SIGBUS, "SIGBUS", "Bus error" },
   { SIGSYS, "SIGSYS", "Bad argument to system call" },
   { SIGPIPE, "SIGPIPE", "Write to pipe with no one to read it" },
   { SIGALRM, "SIGALRM", "Alarm clock" },
   { SIGUSR1, "SIGUSR1", "User defined signal 1" },
   { SIGUSR2, "SIGUSR2", "User defined signal 2" },
-  { SIGCHLD, "SIGCHLD", "Child status changed" },	/* Posix version */
-  { SIGCLD, "SIGCLD", "Child status changed" },		/* Solaris version */
+  { SIGCHLD, "SIGCHLD", "Child status changed" }, /* Posix version */
+  { SIGCLD, "SIGCLD", "Child status changed" },	  /* Solaris version */
   { SIGPWR, "SIGPWR", "Power-fail restart" },
   { SIGWINCH, "SIGWINCH", "Window size change" },
   { SIGURG, "SIGURG", "Urgent socket condition" },
   { SIGPOLL, "SIGPOLL", "Pollable event" },
   { SIGIO, "SIGIO", "Socket I/O possible" },	/* alias for SIGPOLL */
-  { SIGSTOP, "SIGSTOP", "Stop, not from tty" },	/* cannot be caught or
+  { SIGSTOP, "SIGSTOP", "Stop, not from tty" }, /* cannot be caught or
 						   ignored */
   { SIGTSTP, "SIGTSTP", "User stop from tty" },
   { SIGCONT, "SIGCONT", "Stopped process has been continued" },
@@ -669,14 +667,12 @@ proc_prettyprint_signalset (sigset_t *sigset, int verbose)
 {
   proc_prettyfprint_signalset (stdout, sigset, verbose);
 }
-
 
 /* Prettyprint faults.  */
 
 /* Fault translation table.  */
 
-static struct trans fault_table[] =
-{
+static struct trans fault_table[] = {
   { FLTILL, "FLTILL", "Illegal instruction" },
   { FLTPRIV, "FLTPRIV", "Privileged instruction" },
   { FLTBPT, "FLTBPT", "Breakpoint trap" },
@@ -718,8 +714,7 @@ proc_prettyfprint_fault (FILE *file, int faultno, int verbose)
 	return;
       }
 
-  fprintf (file, "Unknown hardware fault %d%c", 
-	   faultno, verbose ? '\n' : ' ');
+  fprintf (file, "Unknown hardware fault %d%c", faultno, verbose ? '\n' : ' ');
 }
 
 void
@@ -761,6 +756,7 @@ proc_prettyprint_actionset (struct sigaction *actions, int verbose)
 }
 
 void _initialize_proc_events ();
+
 void
 _initialize_proc_events ()
 {

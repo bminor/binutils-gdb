@@ -28,8 +28,7 @@
 /* Provide std::unordered_map::Hash for amd_dbgapi_register_id_t.  */
 struct register_id_hash
 {
-  size_t
-  operator() (const amd_dbgapi_register_id_t &register_id) const
+  size_t operator() (const amd_dbgapi_register_id_t &register_id) const
   {
     return std::hash<decltype (register_id.handle)> () (register_id.handle);
   }
@@ -38,9 +37,8 @@ struct register_id_hash
 /* Provide std::unordered_map::Equal for amd_dbgapi_register_id_t.  */
 struct register_id_equal_to
 {
-  bool
-  operator() (const amd_dbgapi_register_id_t &lhs,
-	      const amd_dbgapi_register_id_t &rhs) const
+  bool operator() (const amd_dbgapi_register_id_t &lhs,
+		   const amd_dbgapi_register_id_t &rhs) const
   {
     return std::equal_to<decltype (lhs.handle)> () (lhs.handle, rhs.handle);
   }

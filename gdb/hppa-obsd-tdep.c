@@ -29,11 +29,11 @@
 /* Core file support.  */
 
 /* Sizeof `struct reg' in <machine/reg.h>.  */
-#define HPPAOBSD_SIZEOF_GREGS	(34 * 4) /* OpenBSD 5.1 and earlier.  */
-#define HPPANBSD_SIZEOF_GREGS	(46 * 4) /* NetBSD and OpenBSD 5.2 and later.  */
+#define HPPAOBSD_SIZEOF_GREGS (34 * 4) /* OpenBSD 5.1 and earlier.  */
+#define HPPANBSD_SIZEOF_GREGS (46 * 4) /* NetBSD and OpenBSD 5.2 and later.  */
 
 /* Sizeof `struct fpreg' in <machine/reg.h>.  */
-#define HPPAOBSD_SIZEOF_FPREGS	(32 * 8)
+#define HPPAOBSD_SIZEOF_FPREGS (32 * 8)
 
 /* Supply register REGNUM from the buffer specified by GREGS and LEN
    in the general-purpose register set REGSET to register cache
@@ -41,8 +41,8 @@
 
 static void
 hppaobsd_supply_gregset (const struct regset *regset,
-			 struct regcache *regcache,
-			 int regnum, const void *gregs, size_t len)
+			 struct regcache *regcache, int regnum,
+			 const void *gregs, size_t len)
 {
   gdb_byte zero[4] = { 0 };
   const gdb_byte *regs = (const gdb_byte *) gregs;
@@ -111,8 +111,8 @@ hppaobsd_supply_gregset (const struct regset *regset,
 
 static void
 hppaobsd_supply_fpregset (const struct regset *regset,
-			  struct regcache *regcache,
-			  int regnum, const void *fpregs, size_t len)
+			  struct regcache *regcache, int regnum,
+			  const void *fpregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) fpregs;
   int i;
@@ -128,19 +128,11 @@ hppaobsd_supply_fpregset (const struct regset *regset,
 
 /* OpenBSD/hppa register sets.  */
 
-static const struct regset hppaobsd_gregset =
-{
-  NULL,
-  hppaobsd_supply_gregset,
-  NULL,
-  REGSET_VARIABLE_SIZE
-};
+static const struct regset hppaobsd_gregset
+  = { NULL, hppaobsd_supply_gregset, NULL, REGSET_VARIABLE_SIZE };
 
-static const struct regset hppaobsd_fpregset =
-{
-  NULL,
-  hppaobsd_supply_fpregset
-};
+static const struct regset hppaobsd_fpregset
+  = { NULL, hppaobsd_supply_fpregset };
 
 /* Iterate over supported core file register note sections. */
 
@@ -155,7 +147,6 @@ hppaobsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg2", HPPAOBSD_SIZEOF_FPREGS, HPPAOBSD_SIZEOF_FPREGS,
       &hppaobsd_fpregset, NULL, cb_data);
 }
-
 
 static void
 hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -164,11 +155,12 @@ hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   hppabsd_init_abi (info, gdbarch);
 
   /* Core file support.  */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, hppaobsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, hppaobsd_iterate_over_regset_sections);
 }
 
 void _initialize_hppabsd_tdep ();
+
 void
 _initialize_hppabsd_tdep ()
 {

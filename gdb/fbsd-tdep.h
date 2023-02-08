@@ -34,13 +34,10 @@ extern void fbsd_info_proc_files_header ();
    should contain pointers to the corresponding fields in a 'struct
    kinfo_file'. */
 
-extern void fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
-					LONGEST kf_offset, int kf_vnode_type,
-					int kf_sock_domain, int kf_sock_type,
-					int kf_sock_protocol,
-					const void *kf_sa_local,
-					const void *kf_sa_peer,
-					const void *kf_path);
+extern void fbsd_info_proc_files_entry (
+  int kf_type, int kf_fd, int kf_flags, LONGEST kf_offset, int kf_vnode_type,
+  int kf_sock_domain, int kf_sock_type, int kf_sock_protocol,
+  const void *kf_sa_local, const void *kf_sa_peer, const void *kf_path);
 
 /* Output the header for "info proc mappings".  ADDR_BIT is the size
    of a virtual address in bits.  */
@@ -56,8 +53,8 @@ extern void fbsd_info_proc_mappings_header (int addr_bit);
 
 extern void fbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
 					   ULONGEST kve_end,
-					   ULONGEST kve_offset,
-					   int kve_flags, int kve_protection,
+					   ULONGEST kve_offset, int kve_flags,
+					   int kve_protection,
 					   const void *kve_path);
 
 /* Helper function to fetch the address of a thread-local variable.

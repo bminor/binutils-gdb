@@ -37,7 +37,7 @@ static void
 show_auto_load_python_scripts (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Auto-loading of Python scripts is %s.\n"), value);
+  gdb_printf (file, _ ("Auto-loading of Python scripts is %s.\n"), value);
 }
 
 /* See python-internal.h.  */
@@ -55,14 +55,16 @@ info_auto_load_python_scripts (const char *pattern, int from_tty)
 {
   auto_load_info_scripts (pattern, from_tty, &extension_language_python);
 }
-
+
 int
 gdbpy_initialize_auto_load (void)
 {
   add_setshow_boolean_cmd ("python-scripts", class_support,
-			   &auto_load_python_scripts, _("\
-Set the debugger's behaviour regarding auto-loaded Python scripts."), _("\
-Show the debugger's behaviour regarding auto-loaded Python scripts."), _("\
+			   &auto_load_python_scripts, _ ("\
+Set the debugger's behaviour regarding auto-loaded Python scripts."),
+			   _ ("\
+Show the debugger's behaviour regarding auto-loaded Python scripts."),
+			   _ ("\
 If enabled, auto-loaded Python scripts are loaded when the debugger reads\n\
 an executable or shared library.\n\
 This options has security implications for untrusted inferiors."),
@@ -72,24 +74,25 @@ This options has security implications for untrusted inferiors."),
 
   set_show_commands auto_load_scripts_cmds
     = add_setshow_boolean_cmd ("auto-load-scripts", class_support,
-			       &auto_load_python_scripts, _("\
+			       &auto_load_python_scripts,
+			       _ ("\
 Set the debugger's behaviour regarding auto-loaded Python scripts, "
-								 "deprecated."),
-			       _("\
+				  "deprecated."),
+			       _ ("\
 Show the debugger's behaviour regarding auto-loaded Python scripts, "
-								 "deprecated."),
+				  "deprecated."),
 			       NULL, NULL, show_auto_load_python_scripts,
 			       &setlist, &showlist);
   deprecate_cmd (auto_load_scripts_cmds.set, "set auto-load python-scripts");
   deprecate_cmd (auto_load_scripts_cmds.show, "show auto-load python-scripts");
 
   add_cmd ("python-scripts", class_info, info_auto_load_python_scripts,
-	   _("Print the list of automatically loaded Python scripts.\n\
+	   _ ("Print the list of automatically loaded Python scripts.\n\
 Usage: info auto-load python-scripts [REGEXP]"),
 	   auto_load_info_cmdlist_get ());
 
   cmd_list_element *info_auto_load_scripts_cmd
-    = add_info ("auto-load-scripts", info_auto_load_python_scripts, _("\
+    = add_info ("auto-load-scripts", info_auto_load_python_scripts, _ ("\
 Print the list of automatically loaded Python scripts, deprecated."));
   deprecate_cmd (info_auto_load_scripts_cmd, "info auto-load python-scripts");
 

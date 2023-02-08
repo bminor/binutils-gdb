@@ -54,7 +54,7 @@
    that inherit this implement the on_exit() method, which is called
    from scope_exit_base's dtor.  */
 
-template <typename CRTP>
+template<typename CRTP>
 class scope_exit_base
 {
 public:
@@ -64,8 +64,8 @@ public:
   {
     if (!m_released)
       {
-	auto *self = static_cast<CRTP *> (this);
-	self->on_exit ();
+        auto *self = static_cast<CRTP *> (this);
+        self->on_exit ();
       }
   }
 
@@ -82,13 +82,9 @@ public:
 
   /* If this is called, then the wrapped function will not be called
      on destruction.  */
-  void release () noexcept
-  {
-    m_released = true;
-  }
+  void release () noexcept { m_released = true; }
 
 private:
-
   /* True if released.  Mutable because of the copy ctor hack
      above.  */
   mutable bool m_released = false;
@@ -103,16 +99,15 @@ class scope_exit : public scope_exit_base<scope_exit<EF>>
   friend scope_exit_base<scope_exit<EF>>;
 
 public:
-
   template<typename EFP,
-	   typename = gdb::Requires<std::is_constructible<EF, EFP>>>
+           typename = gdb::Requires<std::is_constructible<EF, EFP>>>
   scope_exit (EFP &&f)
-    try : m_exit_function ((!std::is_lvalue_reference<EFP>::value
-			    && std::is_nothrow_constructible<EF, EFP>::value)
-			   ? std::move (f)
-			   : f)
-  {
-  }
+  try : m_exit_function ((!std::is_lvalue_reference<EFP>::value
+                          && std::is_nothrow_constructible<EF, EFP>::value)
+                           ? std::move (f)
+                           : f)
+    {
+    }
   catch (...)
     {
       /* "If the initialization of exit_function throws an exception,
@@ -121,13 +116,12 @@ public:
     }
 
   template<typename EFP,
-	   typename = gdb::Requires<std::is_constructible<EF, EFP>>>
-  scope_exit (scope_exit &&rhs)
-    noexcept (std::is_nothrow_move_constructible<EF>::value
-	      || std::is_nothrow_copy_constructible<EF>::value)
-    : m_exit_function (std::is_nothrow_constructible<EFP>::value
-		       ? std::move (rhs)
-		       : rhs)
+           typename = gdb::Requires<std::is_constructible<EF, EFP>>>
+  scope_exit (scope_exit &&rhs) noexcept (
+    std::is_nothrow_move_constructible<EF>::value
+    || std::is_nothrow_copy_constructible<EF>::value)
+    : m_exit_function (
+      std::is_nothrow_constructible<EFP>::value ? std::move (rhs) : rhs)
   {
     rhs.release ();
   }
@@ -145,16 +139,13 @@ public:
   void operator= (scope_exit &&) = delete;
 
 private:
-  void on_exit ()
-  {
-    m_exit_function ();
-  }
+  void on_exit () { m_exit_function (); }
 
   /* The function to call on scope exit.  */
   EF m_exit_function;
 };
 
-template <typename EF>
+template<typename EF>
 scope_exit<typename std::decay<EF>::type>
 make_scope_exit (EF &&f)
 {
@@ -164,7 +155,9 @@ make_scope_exit (EF &&f)
 namespace detail
 {
 
-enum class scope_exit_lhs {};
+enum class scope_exit_lhs
+{
+};
 
 template<typename EF>
 scope_exit<typename std::decay<EF>::type>
@@ -173,7 +166,7 @@ operator+ (scope_exit_lhs, EF &&rhs)
   return scope_exit<typename std::decay<EF>::type> (std::forward<EF> (rhs));
 }
 
-}
+} // namespace detail
 
 /* Register a block of code to run on scope exit.  Note that the local
    context is captured by reference, which means you should be careful
@@ -181,6 +174,6 @@ operator+ (scope_exit_lhs, EF &&rhs)
    scope exit runs.  */
 
 #define SCOPE_EXIT \
-  auto CONCAT(scope_exit_, __LINE__) = ::detail::scope_exit_lhs () + [&] ()
+  auto CONCAT (scope_exit_, __LINE__) = ::detail::scope_exit_lhs () + [&]()
 
 #endif /* COMMON_SCOPE_EXIT_H */

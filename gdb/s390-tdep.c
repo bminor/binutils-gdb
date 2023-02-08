@@ -138,8 +138,7 @@ is_ri (bfd_byte *insn, int op1, int op2, unsigned int *r1, int *i2)
 /* Test for RIL instruction format.  See comment on is_ri for details.  */
 
 static int
-is_ril (bfd_byte *insn, int op1, int op2,
-	unsigned int *r1, int *i2)
+is_ril (bfd_byte *insn, int op1, int op2, unsigned int *r1, int *i2)
 {
   if (insn[0] == op1 && (insn[1] & 0xf) == op2)
     {
@@ -147,10 +146,9 @@ is_ril (bfd_byte *insn, int op1, int op2,
       /* i2 is a signed quantity.  If the host 'int' is 32 bits long,
 	 no sign extension is necessary, but we don't want to assume
 	 that.  */
-      *i2 = (((insn[2] << 24)
-	      | (insn[3] << 16)
-	      | (insn[4] << 8)
-	      | (insn[5])) ^ 0x80000000) - 0x80000000;
+      *i2 = (((insn[2] << 24) | (insn[3] << 16) | (insn[4] << 8) | (insn[5]))
+	     ^ 0x80000000)
+	    - 0x80000000;
       return 1;
     }
   else
@@ -191,8 +189,8 @@ is_rre (bfd_byte *insn, int op, unsigned int *r1, unsigned int *r2)
 /* Test for RS instruction format.  See comment on is_ri for details.  */
 
 static int
-is_rs (bfd_byte *insn, int op,
-       unsigned int *r1, unsigned int *r3, int *d2, unsigned int *b2)
+is_rs (bfd_byte *insn, int op, unsigned int *r1, unsigned int *r3, int *d2,
+       unsigned int *b2)
 {
   if (insn[0] == op)
     {
@@ -209,18 +207,17 @@ is_rs (bfd_byte *insn, int op,
 /* Test for RSY instruction format.  See comment on is_ri for details.  */
 
 static int
-is_rsy (bfd_byte *insn, int op1, int op2,
-	unsigned int *r1, unsigned int *r3, int *d2, unsigned int *b2)
+is_rsy (bfd_byte *insn, int op1, int op2, unsigned int *r1, unsigned int *r3,
+	int *d2, unsigned int *b2)
 {
-  if (insn[0] == op1
-      && insn[5] == op2)
+  if (insn[0] == op1 && insn[5] == op2)
     {
       *r1 = (insn[1] >> 4) & 0xf;
       *r3 = insn[1] & 0xf;
       *b2 = (insn[2] >> 4) & 0xf;
       /* The 'long displacement' is a 20-bit signed integer.  */
-      *d2 = ((((insn[2] & 0xf) << 8) | insn[3] | (insn[4] << 12))
-		^ 0x80000) - 0x80000;
+      *d2 = ((((insn[2] & 0xf) << 8) | insn[3] | (insn[4] << 12)) ^ 0x80000)
+	    - 0x80000;
       return 1;
     }
   else
@@ -230,8 +227,8 @@ is_rsy (bfd_byte *insn, int op1, int op2,
 /* Test for RX instruction format.  See comment on is_ri for details.  */
 
 static int
-is_rx (bfd_byte *insn, int op,
-       unsigned int *r1, int *d2, unsigned int *x2, unsigned int *b2)
+is_rx (bfd_byte *insn, int op, unsigned int *r1, int *d2, unsigned int *x2,
+       unsigned int *b2)
 {
   if (insn[0] == op)
     {
@@ -248,18 +245,17 @@ is_rx (bfd_byte *insn, int op,
 /* Test for RXY instruction format.  See comment on is_ri for details.  */
 
 static int
-is_rxy (bfd_byte *insn, int op1, int op2,
-	unsigned int *r1, int *d2, unsigned int *x2, unsigned int *b2)
+is_rxy (bfd_byte *insn, int op1, int op2, unsigned int *r1, int *d2,
+	unsigned int *x2, unsigned int *b2)
 {
-  if (insn[0] == op1
-      && insn[5] == op2)
+  if (insn[0] == op1 && insn[5] == op2)
     {
       *r1 = (insn[1] >> 4) & 0xf;
       *x2 = insn[1] & 0xf;
       *b2 = (insn[2] >> 4) & 0xf;
       /* The 'long displacement' is a 20-bit signed integer.  */
-      *d2 = ((((insn[2] & 0xf) << 8) | insn[3] | (insn[4] << 12))
-		^ 0x80000) - 0x80000;
+      *d2 = ((((insn[2] & 0xf) << 8) | insn[3] | (insn[4] << 12)) ^ 0x80000)
+	    - 0x80000;
       return 1;
     }
   else
@@ -358,13 +354,13 @@ s390_software_single_step (struct regcache *regcache)
     return {};
 
   insn = read_memory_integer (loc + 2, 2, byte_order);
-  if (insn != (uint16_t) -(len / 2))
+  if (insn != (uint16_t) - (len / 2))
     return {};
 
   loc += 4;
 
   /* Found it, step past the whole thing.  */
-  return {loc};
+  return { loc };
 }
 
 /* Displaced stepping.  */
@@ -428,13 +424,12 @@ typedef buf_displaced_step_copy_insn_closure
 /* Implementation of gdbarch_displaced_step_copy_insn.  */
 
 static displaced_step_copy_insn_closure_up
-s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
-			       CORE_ADDR from, CORE_ADDR to,
-			       struct regcache *regs)
+s390_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from,
+			       CORE_ADDR to, struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  std::unique_ptr<s390_displaced_step_copy_insn_closure> closure
-    (new s390_displaced_step_copy_insn_closure (len));
+  std::unique_ptr<s390_displaced_step_copy_insn_closure> closure (
+    new s390_displaced_step_copy_insn_closure (len));
   gdb_byte *buf = closure->buf.data ();
 
   read_memory (from, buf, len);
@@ -456,8 +451,10 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 	{
 	  /* Let the core fall back to stepping over the breakpoint
 	     in-line.  */
-	  displaced_debug_printf ("can't displaced step RIL instruction: offset "
-				  "%s out of range", plongest (offset));
+	  displaced_debug_printf (
+	    "can't displaced step RIL instruction: offset "
+	    "%s out of range",
+	    plongest (offset));
 
 	  return NULL;
 	}
@@ -467,8 +464,8 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   write_memory (to, buf, len);
 
-  displaced_debug_printf ("copy %s->%s: %s",
-			  paddress (gdbarch, from), paddress (gdbarch, to),
+  displaced_debug_printf ("copy %s->%s: %s", paddress (gdbarch, from),
+			  paddress (gdbarch, to),
 			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
@@ -481,8 +478,7 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 static void
 s390_displaced_step_fixup (struct gdbarch *gdbarch,
 			   displaced_step_copy_insn_closure *closure_,
-			   CORE_ADDR from, CORE_ADDR to,
-			   struct regcache *regs)
+			   CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   /* Our closure is a copy of the instruction.  */
   s390_displaced_step_copy_insn_closure *closure
@@ -511,8 +507,7 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 
   /* Handle absolute branch and save instructions.  */
   int op_basr_p = is_rr (insn, op_basr, &r1, &r2);
-  if (op_basr_p
-      || is_rx (insn, op_bas, &r1, &d2, &x2, &b2))
+  if (op_basr_p || is_rx (insn, op_bas, &r1, &d2, &x2, &b2))
     {
       /* Recompute saved return address in R1.  */
       regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
@@ -584,8 +579,8 @@ s390_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 
 /* Prologue analysis.  */
 
-struct s390_prologue_data {
-
+struct s390_prologue_data
+{
   /* The stack.  */
   struct pv_area *stack;
 
@@ -622,8 +617,8 @@ struct s390_prologue_data {
    means that r0 can't be used as either X2 or B2.  */
 
 static pv_t
-s390_addr (struct s390_prologue_data *data,
-	   int d2, unsigned int x2, unsigned int b2)
+s390_addr (struct s390_prologue_data *data, int d2, unsigned int x2,
+	   unsigned int b2)
 {
   pv_t result;
 
@@ -639,9 +634,8 @@ s390_addr (struct s390_prologue_data *data,
 /* Do a SIZE-byte store of VALUE to D2(X2,B2).  */
 
 static void
-s390_store (struct s390_prologue_data *data,
-	    int d2, unsigned int x2, unsigned int b2, CORE_ADDR size,
-	    pv_t value)
+s390_store (struct s390_prologue_data *data, int d2, unsigned int x2,
+	    unsigned int b2, CORE_ADDR size, pv_t value)
 {
   pv_t addr = s390_addr (data, d2, x2, b2);
   pv_t offset;
@@ -650,8 +644,7 @@ s390_store (struct s390_prologue_data *data,
   offset = pv_subtract (data->gpr[S390_SP_REGNUM - S390_R0_REGNUM], addr);
 
   if (pv_is_constant (offset) && offset.k == 0)
-    if (size == data->gpr_size
-	&& pv_is_register_k (value, S390_SP_REGNUM, 0))
+    if (size == data->gpr_size && pv_is_register_k (value, S390_SP_REGNUM, 0))
       {
 	data->back_chain_saved_p = 1;
 	return;
@@ -672,8 +665,8 @@ s390_store (struct s390_prologue_data *data,
 /* Do a SIZE-byte load from D2(X2,B2).  */
 
 static pv_t
-s390_load (struct s390_prologue_data *data,
-	   int d2, unsigned int x2, unsigned int b2, CORE_ADDR size)
+s390_load (struct s390_prologue_data *data, int d2, unsigned int x2,
+	   unsigned int b2, CORE_ADDR size)
 
 {
   pv_t addr = s390_addr (data, d2, x2, b2);
@@ -706,8 +699,8 @@ s390_load (struct s390_prologue_data *data,
    PROLOGUE_UNTYPED.  */
 
 static void
-s390_check_for_saved (void *data_untyped, pv_t addr,
-		      CORE_ADDR size, pv_t value)
+s390_check_for_saved (void *data_untyped, pv_t addr, CORE_ADDR size,
+		      pv_t value)
 {
   struct s390_prologue_data *data = (struct s390_prologue_data *) data_untyped;
   int i, offset;
@@ -724,8 +717,7 @@ s390_check_for_saved (void *data_untyped, pv_t addr,
   for (i = 0; i < S390_NUM_GPRS; i++)
     if (size == data->gpr_size
 	&& pv_is_register_k (value, S390_R0_REGNUM + i, 0))
-      if (data->gpr_slot[i] == 0
-	  || data->gpr_slot[i] > offset)
+      if (data->gpr_slot[i] == 0 || data->gpr_slot[i] > offset)
 	{
 	  data->gpr_slot[i] = offset;
 	  return;
@@ -734,8 +726,7 @@ s390_check_for_saved (void *data_untyped, pv_t addr,
   for (i = 0; i < S390_NUM_FPRS; i++)
     if (size == data->fpr_size
 	&& pv_is_register_k (value, S390_F0_REGNUM + i, 0))
-      if (data->fpr_slot[i] == 0
-	  || data->fpr_slot[i] > offset)
+      if (data->fpr_slot[i] == 0 || data->fpr_slot[i] > offset)
 	{
 	  data->fpr_slot[i] = offset;
 	  return;
@@ -749,10 +740,8 @@ s390_check_for_saved (void *data_untyped, pv_t addr,
    chain; or zero on error.  */
 
 static CORE_ADDR
-s390_analyze_prologue (struct gdbarch *gdbarch,
-		       CORE_ADDR start_pc,
-		       CORE_ADDR current_pc,
-		       struct s390_prologue_data *data)
+s390_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
+		       CORE_ADDR current_pc, struct s390_prologue_data *data)
 {
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
 
@@ -789,10 +778,10 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
       data->fpr[i] = pv_register (S390_F0_REGNUM + i, 0);
 
     for (i = 0; i < S390_NUM_GPRS; i++)
-      data->gpr_slot[i]  = 0;
+      data->gpr_slot[i] = 0;
 
     for (i = 0; i < S390_NUM_FPRS; i++)
-      data->fpr_slot[i]  = 0;
+      data->fpr_slot[i] = 0;
 
     data->back_chain_saved_p = 0;
   }
@@ -891,8 +880,8 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
       /* ALGFI r1, i2 --- add logical immediate (64-bit version).  */
       else if (is_ril (insn32, op1_alfi, op2_alfi, &r1, &i2)
 	       || is_ril (insn64, op1_algfi, op2_algfi, &r1, &i2))
-	data->gpr[r1] = pv_add_constant (data->gpr[r1],
-					 (CORE_ADDR)i2 & 0xffffffff);
+	data->gpr[r1]
+	  = pv_add_constant (data->gpr[r1], (CORE_ADDR) i2 & 0xffffffff);
 
       /* AR r1, r2 -- add register.  */
       /* AGR r1, r2 -- add register (64-bit version).  */
@@ -913,8 +902,8 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
       /* SLGFI r1, i2 --- subtract logical immediate (64-bit version).  */
       else if (is_ril (insn32, op1_slfi, op2_slfi, &r1, &i2)
 	       || is_ril (insn64, op1_slgfi, op2_slgfi, &r1, &i2))
-	data->gpr[r1] = pv_add_constant (data->gpr[r1],
-					 -((CORE_ADDR)i2 & 0xffffffff));
+	data->gpr[r1]
+	  = pv_add_constant (data->gpr[r1], -((CORE_ADDR) i2 & 0xffffffff));
 
       /* SR r1, r2 -- subtract register.  */
       /* SGR r1, r2 -- subtract register (64-bit version).  */
@@ -928,8 +917,9 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
       else if (is_rx (insn32, op_s, &r1, &d2, &x2, &b2)
 	       || is_rxy (insn32, op1_sy, op2_sy, &r1, &d2, &x2, &b2)
 	       || is_rxy (insn64, op1_sg, op2_sg, &r1, &d2, &x2, &b2))
-	data->gpr[r1] = pv_subtract (data->gpr[r1],
-				s390_load (data, d2, x2, b2, data->gpr_size));
+	data->gpr[r1]
+	  = pv_subtract (data->gpr[r1],
+			 s390_load (data, d2, x2, b2, data->gpr_size));
 
       /* LA r1, d2(x2, b2) --- load address.  */
       /* LAY r1, d2(x2, b2) --- load address (long-displacement version).  */
@@ -943,8 +933,7 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 
       /* BASR r1, 0 --- branch and save.
 	 Since r2 is zero, this saves the PC in r1, but doesn't branch.  */
-      else if (is_rr (insn, op_basr, &r1, &r2)
-	       && r2 == 0)
+      else if (is_rr (insn, op_basr, &r1, &r2) && r2 == 0)
 	data->gpr[r1] = pv_constant (next_pc);
 
       /* BRAS r1, i2 --- branch relative and save.  */
@@ -1000,11 +989,11 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 	pv_t sp = data->gpr[S390_SP_REGNUM - S390_R0_REGNUM];
 	pv_t fp = data->gpr[S390_FRAME_REGNUM - S390_R0_REGNUM];
 
-	if ((! pv_is_identical (pre_insn_sp, sp)
-	     && ! pv_is_register_k (sp, S390_SP_REGNUM, 0)
+	if ((!pv_is_identical (pre_insn_sp, sp)
+	     && !pv_is_register_k (sp, S390_SP_REGNUM, 0)
 	     && sp.kind != pvk_unknown)
-	    || (! pv_is_identical (pre_insn_fp, fp)
-		&& ! pv_is_register_k (fp, S390_FRAME_REGNUM, 0)
+	    || (!pv_is_identical (pre_insn_fp, fp)
+		&& !pv_is_register_k (fp, S390_FRAME_REGNUM, 0)
 		&& fp.kind != pvk_unknown)
 	    || pre_insn_back_chain_saved_p != data->back_chain_saved_p)
 	  result = next_pc;
@@ -1034,7 +1023,7 @@ s390_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return std::max (pc, post_prologue_pc);
     }
 
-  skip_pc = s390_analyze_prologue (gdbarch, pc, (CORE_ADDR)-1, &data);
+  skip_pc = s390_analyze_prologue (gdbarch, pc, (CORE_ADDR) -1, &data);
   return skip_pc ? skip_pc : pc;
 }
 
@@ -1073,8 +1062,7 @@ s390_register_call_saved (struct gdbarch *gdbarch, int regnum)
 
 static void
 s390_guess_tracepoint_registers (struct gdbarch *gdbarch,
-				 struct regcache *regcache,
-				 CORE_ADDR addr)
+				 struct regcache *regcache, CORE_ADDR addr)
 {
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   int sz = register_size (gdbarch, S390_PSWA_REGNUM);
@@ -1109,62 +1097,138 @@ s390_guess_tracepoint_registers (struct gdbarch *gdbarch,
 static const char *
 s390_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum >= S390_V0_LOWER_REGNUM
-      && regnum <= S390_V15_LOWER_REGNUM)
+  if (regnum >= S390_V0_LOWER_REGNUM && regnum <= S390_V15_LOWER_REGNUM)
     return "";
   return tdesc_register_name (gdbarch, regnum);
 }
 
 /* DWARF Register Mapping.  */
 
-static const short s390_dwarf_regmap[] =
-{
+static const short s390_dwarf_regmap[] = {
   /* 0-15: General Purpose Registers.  */
-  S390_R0_REGNUM, S390_R1_REGNUM, S390_R2_REGNUM, S390_R3_REGNUM,
-  S390_R4_REGNUM, S390_R5_REGNUM, S390_R6_REGNUM, S390_R7_REGNUM,
-  S390_R8_REGNUM, S390_R9_REGNUM, S390_R10_REGNUM, S390_R11_REGNUM,
-  S390_R12_REGNUM, S390_R13_REGNUM, S390_R14_REGNUM, S390_R15_REGNUM,
+  S390_R0_REGNUM,
+  S390_R1_REGNUM,
+  S390_R2_REGNUM,
+  S390_R3_REGNUM,
+  S390_R4_REGNUM,
+  S390_R5_REGNUM,
+  S390_R6_REGNUM,
+  S390_R7_REGNUM,
+  S390_R8_REGNUM,
+  S390_R9_REGNUM,
+  S390_R10_REGNUM,
+  S390_R11_REGNUM,
+  S390_R12_REGNUM,
+  S390_R13_REGNUM,
+  S390_R14_REGNUM,
+  S390_R15_REGNUM,
 
   /* 16-31: Floating Point Registers / Vector Registers 0-15. */
-  S390_F0_REGNUM, S390_F2_REGNUM, S390_F4_REGNUM, S390_F6_REGNUM,
-  S390_F1_REGNUM, S390_F3_REGNUM, S390_F5_REGNUM, S390_F7_REGNUM,
-  S390_F8_REGNUM, S390_F10_REGNUM, S390_F12_REGNUM, S390_F14_REGNUM,
-  S390_F9_REGNUM, S390_F11_REGNUM, S390_F13_REGNUM, S390_F15_REGNUM,
+  S390_F0_REGNUM,
+  S390_F2_REGNUM,
+  S390_F4_REGNUM,
+  S390_F6_REGNUM,
+  S390_F1_REGNUM,
+  S390_F3_REGNUM,
+  S390_F5_REGNUM,
+  S390_F7_REGNUM,
+  S390_F8_REGNUM,
+  S390_F10_REGNUM,
+  S390_F12_REGNUM,
+  S390_F14_REGNUM,
+  S390_F9_REGNUM,
+  S390_F11_REGNUM,
+  S390_F13_REGNUM,
+  S390_F15_REGNUM,
 
   /* 32-47: Control Registers (not mapped).  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
 
   /* 48-63: Access Registers.  */
-  S390_A0_REGNUM, S390_A1_REGNUM, S390_A2_REGNUM, S390_A3_REGNUM,
-  S390_A4_REGNUM, S390_A5_REGNUM, S390_A6_REGNUM, S390_A7_REGNUM,
-  S390_A8_REGNUM, S390_A9_REGNUM, S390_A10_REGNUM, S390_A11_REGNUM,
-  S390_A12_REGNUM, S390_A13_REGNUM, S390_A14_REGNUM, S390_A15_REGNUM,
+  S390_A0_REGNUM,
+  S390_A1_REGNUM,
+  S390_A2_REGNUM,
+  S390_A3_REGNUM,
+  S390_A4_REGNUM,
+  S390_A5_REGNUM,
+  S390_A6_REGNUM,
+  S390_A7_REGNUM,
+  S390_A8_REGNUM,
+  S390_A9_REGNUM,
+  S390_A10_REGNUM,
+  S390_A11_REGNUM,
+  S390_A12_REGNUM,
+  S390_A13_REGNUM,
+  S390_A14_REGNUM,
+  S390_A15_REGNUM,
 
   /* 64-65: Program Status Word.  */
   S390_PSWM_REGNUM,
   S390_PSWA_REGNUM,
 
   /* 66-67: Reserved.  */
-  -1, -1,
+  -1,
+  -1,
 
   /* 68-83: Vector Registers 16-31.  */
-  S390_V16_REGNUM, S390_V18_REGNUM, S390_V20_REGNUM, S390_V22_REGNUM,
-  S390_V17_REGNUM, S390_V19_REGNUM, S390_V21_REGNUM, S390_V23_REGNUM,
-  S390_V24_REGNUM, S390_V26_REGNUM, S390_V28_REGNUM, S390_V30_REGNUM,
-  S390_V25_REGNUM, S390_V27_REGNUM, S390_V29_REGNUM, S390_V31_REGNUM,
+  S390_V16_REGNUM,
+  S390_V18_REGNUM,
+  S390_V20_REGNUM,
+  S390_V22_REGNUM,
+  S390_V17_REGNUM,
+  S390_V19_REGNUM,
+  S390_V21_REGNUM,
+  S390_V23_REGNUM,
+  S390_V24_REGNUM,
+  S390_V26_REGNUM,
+  S390_V28_REGNUM,
+  S390_V30_REGNUM,
+  S390_V25_REGNUM,
+  S390_V27_REGNUM,
+  S390_V29_REGNUM,
+  S390_V31_REGNUM,
 
   /* End of "official" DWARF registers.  The remainder of the map is
      for GDB internal use only.  */
 
   /* GPR Lower Half Access.  */
-  S390_R0_REGNUM, S390_R1_REGNUM, S390_R2_REGNUM, S390_R3_REGNUM,
-  S390_R4_REGNUM, S390_R5_REGNUM, S390_R6_REGNUM, S390_R7_REGNUM,
-  S390_R8_REGNUM, S390_R9_REGNUM, S390_R10_REGNUM, S390_R11_REGNUM,
-  S390_R12_REGNUM, S390_R13_REGNUM, S390_R14_REGNUM, S390_R15_REGNUM,
+  S390_R0_REGNUM,
+  S390_R1_REGNUM,
+  S390_R2_REGNUM,
+  S390_R3_REGNUM,
+  S390_R4_REGNUM,
+  S390_R5_REGNUM,
+  S390_R6_REGNUM,
+  S390_R7_REGNUM,
+  S390_R8_REGNUM,
+  S390_R9_REGNUM,
+  S390_R10_REGNUM,
+  S390_R11_REGNUM,
+  S390_R12_REGNUM,
+  S390_R13_REGNUM,
+  S390_R14_REGNUM,
+  S390_R15_REGNUM,
 };
 
-enum { s390_dwarf_reg_r0l = ARRAY_SIZE (s390_dwarf_regmap) - 16 };
+enum
+{
+  s390_dwarf_reg_r0l = ARRAY_SIZE (s390_dwarf_regmap) - 16
+};
 
 /* Convert DWARF register number REG to the appropriate register
    number used by GDB.  */
@@ -1207,8 +1271,7 @@ s390_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 static int
 regnum_is_gpr_full (s390_gdbarch_tdep *tdep, int regnum)
 {
-  return (tdep->gpr_full_regnum != -1
-	  && regnum >= tdep->gpr_full_regnum
+  return (tdep->gpr_full_regnum != -1 && regnum >= tdep->gpr_full_regnum
 	  && regnum <= tdep->gpr_full_regnum + 15);
 }
 
@@ -1218,8 +1281,7 @@ regnum_is_gpr_full (s390_gdbarch_tdep *tdep, int regnum)
 static int
 regnum_is_vxr_full (s390_gdbarch_tdep *tdep, int regnum)
 {
-  return (tdep->v0_full_regnum != -1
-	  && regnum >= tdep->v0_full_regnum
+  return (tdep->v0_full_regnum != -1 && regnum >= tdep->v0_full_regnum
 	  && regnum <= tdep->v0_full_regnum + 15);
 }
 
@@ -1232,8 +1294,8 @@ s390_value_from_register (struct gdbarch *gdbarch, struct type *type,
 			  int regnum, struct frame_id frame_id)
 {
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
-  struct value *value = default_value_from_register (gdbarch, type,
-						     regnum, frame_id);
+  struct value *value
+    = default_value_from_register (gdbarch, type, regnum, frame_id);
   check_typedef (type);
 
   if ((regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM
@@ -1260,23 +1322,21 @@ s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 
   if (regnum_is_gpr_full (tdep, regnum))
     {
-      static const char *full_name[] = {
-	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
-      };
+      static const char *full_name[]
+	= { "r0", "r1", "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
+	    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15" };
       return full_name[regnum - tdep->gpr_full_regnum];
     }
 
   if (regnum_is_vxr_full (tdep, regnum))
     {
-      static const char *full_name[] = {
-	"v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7",
-	"v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15"
-      };
+      static const char *full_name[]
+	= { "v0", "v1", "v2",  "v3",  "v4",  "v5",  "v6",  "v7",
+	    "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15" };
       return full_name[regnum - tdep->v0_full_regnum];
     }
 
-  internal_error (_("invalid regnum"));
+  internal_error (_ ("invalid regnum"));
 }
 
 /* Implement pseudo_register_type tdesc method.  */
@@ -1299,14 +1359,15 @@ s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum_is_vxr_full (tdep, regnum))
     return tdesc_register_type (gdbarch, S390_V16_REGNUM);
 
-  internal_error (_("invalid regnum"));
+  internal_error (_ ("invalid regnum"));
 }
 
 /* Implement pseudo_register_read gdbarch method.  */
 
 static enum register_status
-s390_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
-			   int regnum, gdb_byte *buf)
+s390_pseudo_register_read (struct gdbarch *gdbarch,
+			   readable_regcache *regcache, int regnum,
+			   gdb_byte *buf)
 {
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1352,8 +1413,8 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 
       status = regcache->raw_read (S390_R0_REGNUM + regnum, &val);
       if (status == REG_VALID)
-	status = regcache->raw_read (S390_R0_UPPER_REGNUM + regnum,
-				     &val_upper);
+	status
+	  = regcache->raw_read (S390_R0_UPPER_REGNUM + regnum, &val_upper);
       if (status == REG_VALID)
 	{
 	  val |= val_upper << 32;
@@ -1374,7 +1435,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
       return status;
     }
 
-  internal_error (_("invalid regnum"));
+  internal_error (_ ("invalid regnum"));
 }
 
 /* Implement pseudo_register_write gdbarch method.  */
@@ -1405,9 +1466,9 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       val = extract_unsigned_integer (buf, regsize, byte_order);
       regcache_raw_read_unsigned (regcache, S390_PSWM_REGNUM, &psw);
       if (register_size (gdbarch, S390_PSWA_REGNUM) == 4)
-	val = (psw & ~((ULONGEST)3 << 12)) | ((val & 3) << 12);
+	val = (psw & ~((ULONGEST) 3 << 12)) | ((val & 3) << 12);
       else
-	val = (psw & ~((ULONGEST)3 << 44)) | ((val & 3) << 44);
+	val = (psw & ~((ULONGEST) 3 << 44)) | ((val & 3) << 44);
       regcache_raw_write_unsigned (regcache, S390_PSWM_REGNUM, val);
       return;
     }
@@ -1431,7 +1492,7 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       return;
     }
 
-  internal_error (_("invalid regnum"));
+  internal_error (_ ("invalid regnum"));
 }
 
 /* Register groups.  */
@@ -1493,7 +1554,7 @@ s390_ax_pseudo_register_collect (struct gdbarch *gdbarch,
     }
   else
     {
-      internal_error (_("invalid regnum"));
+      internal_error (_ ("invalid regnum"));
     }
   return 0;
 }
@@ -1539,7 +1600,7 @@ s390_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
     }
   else
     {
-      internal_error (_("invalid regnum"));
+      internal_error (_ ("invalid regnum"));
     }
   return 0;
 }
@@ -1549,9 +1610,8 @@ s390_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
    the full unwinder here, just collect the link register.  */
 
 static void
-s390_gen_return_address (struct gdbarch *gdbarch,
-			 struct agent_expr *ax, struct axs_value *value,
-			 CORE_ADDR scope)
+s390_gen_return_address (struct gdbarch *gdbarch, struct agent_expr *ax,
+			 struct axs_value *value, CORE_ADDR scope)
 {
   value->type = register_type (gdbarch, S390_R14_REGNUM);
   value->kind = axs_lvalue_register;
@@ -1710,12 +1770,9 @@ s390_function_arg_integer (struct type *type)
   if (type->length () > 8)
     return 0;
 
-  if (code == TYPE_CODE_INT
-      || code == TYPE_CODE_ENUM
-      || code == TYPE_CODE_RANGE
-      || code == TYPE_CODE_CHAR
-      || code == TYPE_CODE_BOOL
-      || code == TYPE_CODE_PTR
+  if (code == TYPE_CODE_INT || code == TYPE_CODE_ENUM
+      || code == TYPE_CODE_RANGE || code == TYPE_CODE_CHAR
+      || code == TYPE_CODE_BOOL || code == TYPE_CODE_PTR
       || TYPE_IS_REFERENCE (type))
     return 1;
 
@@ -1727,17 +1784,17 @@ s390_function_arg_integer (struct type *type)
    routines of s390_push_dummy_call.  */
 
 struct s390_arg_state
-  {
-    /* Register cache, or NULL, if we are in "preparation mode".  */
-    struct regcache *regcache;
-    /* Next available general/floating-point/vector register for
+{
+  /* Register cache, or NULL, if we are in "preparation mode".  */
+  struct regcache *regcache;
+  /* Next available general/floating-point/vector register for
        argument passing.  */
-    int gr, fr, vr;
-    /* Current pointer to copy area (grows downwards).  */
-    CORE_ADDR copy;
-    /* Current pointer to parameter area (grows upwards).  */
-    CORE_ADDR argp;
-  };
+  int gr, fr, vr;
+  /* Current pointer to copy area (grows downwards).  */
+  CORE_ADDR copy;
+  /* Current pointer to parameter area (grows upwards).  */
+  CORE_ADDR argp;
+};
 
 /* Prepare one argument ARG for a dummy call and update the argument
    passing state AS accordingly.  If the regcache field in AS is set,
@@ -1763,7 +1820,8 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	  /* When we store a single-precision value in an FP register,
 	     it occupies the leftmost bits.  */
 	  if (write_mode)
-	    as->regcache->cooked_write_part (S390_F0_REGNUM + as->fr, 0, length,
+	    as->regcache->cooked_write_part (S390_F0_REGNUM + as->fr, 0,
+					     length,
 					     value_contents (arg).data ());
 	  as->fr += 2;
 	}
@@ -1780,7 +1838,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
   else if (tdep->vector_abi == S390_VECTOR_ABI_128
 	   && s390_function_arg_vector (type))
     {
-      static const char use_vr[] = {24, 26, 28, 30, 25, 27, 29, 31};
+      static const char use_vr[] = { 24, 26, 28, 30, 25, 27, 29, 31 };
 
       if (!is_unnamed && as->vr < ARRAY_SIZE (use_vr))
 	{
@@ -1809,25 +1867,24 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	     memory word and sign- or zero-extend to full word size.
 	     This also applies to a struct or union.  */
 	  val = type->is_unsigned ()
-	    ? extract_unsigned_integer (value_contents (arg).data (),
-					length, byte_order)
-	    : extract_signed_integer (value_contents (arg).data (),
-				      length, byte_order);
+		  ? extract_unsigned_integer (value_contents (arg).data (),
+					      length, byte_order)
+		  : extract_signed_integer (value_contents (arg).data (),
+					    length, byte_order);
 	}
 
       if (as->gr <= 6)
 	{
 	  if (write_mode)
 	    regcache_cooked_write_unsigned (as->regcache,
-					    S390_R0_REGNUM + as->gr,
-					    val);
+					    S390_R0_REGNUM + as->gr, val);
 	  as->gr++;
 	}
       else
 	{
 	  if (write_mode)
-	    write_memory_unsigned_integer (as->argp, word_size,
-					   byte_order, val);
+	    write_memory_unsigned_integer (as->argp, word_size, byte_order,
+					   val);
 	  as->argp += word_size;
 	}
     }
@@ -1839,9 +1896,9 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	    {
 	      as->regcache->cooked_write (S390_R0_REGNUM + as->gr,
 					  value_contents (arg).data ());
-	      as->regcache->cooked_write
-		(S390_R0_REGNUM + as->gr + 1,
-		 value_contents (arg).data () + word_size);
+	      as->regcache->cooked_write (S390_R0_REGNUM + as->gr + 1,
+					  value_contents (arg).data ()
+					    + word_size);
 	    }
 	  as->gr += 2;
 	}
@@ -1869,15 +1926,14 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	{
 	  if (write_mode)
 	    regcache_cooked_write_unsigned (as->regcache,
-					    S390_R0_REGNUM + as->gr,
-					    as->copy);
+					    S390_R0_REGNUM + as->gr, as->copy);
 	  as->gr++;
 	}
       else
 	{
 	  if (write_mode)
-	    write_memory_unsigned_integer (as->argp, word_size,
-					   byte_order, as->copy);
+	    write_memory_unsigned_integer (as->argp, word_size, byte_order,
+					   as->copy);
 	  as->argp += word_size;
 	}
     }
@@ -1900,8 +1956,8 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 
 static CORE_ADDR
 s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		      struct regcache *regcache, CORE_ADDR bp_addr,
-		      int nargs, struct value **args, CORE_ADDR sp,
+		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		      struct value **args, CORE_ADDR sp,
 		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
@@ -1943,7 +1999,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      high bit set, which causes confusion elsewhere.  Note that if we
      error out here, stack and registers remain untouched.  */
   if (gdbarch_addr_bits_remove (gdbarch, new_sp) != new_sp)
-    error (_("Stack overflow"));
+    error (_ ("Stack overflow"));
 
   /* Pass the structure return address in general register 2.  */
   if (return_method == return_method_struct)
@@ -1988,8 +2044,7 @@ s390_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
   sp = gdbarch_addr_bits_remove (gdbarch, sp);
 
-  return frame_id_build (sp + 16*word_size + 32,
-			 get_frame_pc (this_frame));
+  return frame_id_build (sp + 16 * word_size + 32, get_frame_pc (this_frame));
 }
 
 /* Implement frame_align gdbarch method.  */
@@ -2007,8 +2062,8 @@ s390_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 static void
 s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
-			    struct regcache *regcache,
-			    gdb_byte *out, const gdb_byte *in)
+			    struct regcache *regcache, gdb_byte *out,
+			    const gdb_byte *in)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
@@ -2038,13 +2093,13 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 	regcache->cooked_read_part (S390_R2_REGNUM, word_size - length, length,
 				    out);
       else if (type->is_unsigned ())
-	regcache_cooked_write_unsigned
-	  (regcache, S390_R2_REGNUM,
-	   extract_unsigned_integer (in, length, byte_order));
+	regcache_cooked_write_unsigned (regcache, S390_R2_REGNUM,
+					extract_unsigned_integer (in, length,
+								  byte_order));
       else
-	regcache_cooked_write_signed
-	  (regcache, S390_R2_REGNUM,
-	   extract_signed_integer (in, length, byte_order));
+	regcache_cooked_write_signed (regcache, S390_R2_REGNUM,
+				      extract_signed_integer (in, length,
+							      byte_order));
     }
   else if (length == 2 * word_size)
     {
@@ -2061,15 +2116,15 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
     }
   else
-    internal_error (_("invalid return type"));
+    internal_error (_ ("invalid return type"));
 }
 
 /* Implement the 'return_value' gdbarch method.  */
 
 static enum return_value_convention
 s390_return_value (struct gdbarch *gdbarch, struct value *function,
-		   struct type *type, struct regcache *regcache,
-		   gdb_byte *out, const gdb_byte *in)
+		   struct type *type, struct regcache *regcache, gdb_byte *out,
+		   const gdb_byte *in)
 {
   enum return_value_convention rvc;
 
@@ -2085,16 +2140,15 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
     case TYPE_CODE_ARRAY:
       {
 	s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
-	rvc = (tdep->vector_abi == S390_VECTOR_ABI_128
-	       && type->length () <= 16 && type->is_vector ())
-	  ? RETURN_VALUE_REGISTER_CONVENTION
-	  : RETURN_VALUE_STRUCT_CONVENTION;
+	rvc = (tdep->vector_abi == S390_VECTOR_ABI_128 && type->length () <= 16
+	       && type->is_vector ())
+		? RETURN_VALUE_REGISTER_CONVENTION
+		: RETURN_VALUE_STRUCT_CONVENTION;
 	break;
       }
     default:
-      rvc = type->length () <= 8
-	? RETURN_VALUE_REGISTER_CONVENTION
-	: RETURN_VALUE_STRUCT_CONVENTION;
+      rvc = type->length () <= 8 ? RETURN_VALUE_REGISTER_CONVENTION
+				 : RETURN_VALUE_STRUCT_CONVENTION;
     }
 
   if (in != NULL || out != NULL)
@@ -2102,9 +2156,9 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
       if (rvc == RETURN_VALUE_REGISTER_CONVENTION)
 	s390_register_return_value (gdbarch, type, regcache, out, in);
       else if (in != NULL)
-	error (_("Cannot set function return value."));
+	error (_ ("Cannot set function return value."));
       else
-	error (_("Function return value unknown."));
+	error (_ ("Function return value unknown."));
     }
 
   return rvc;
@@ -2142,20 +2196,17 @@ s390_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   unsigned int r1, r3, b2;
   int d2;
 
-  if (word_size == 4
-      && !target_read_memory (pc - 4, insn, 4)
+  if (word_size == 4 && !target_read_memory (pc - 4, insn, 4)
       && is_rs (insn, op_lm, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
 
-  if (word_size == 4
-      && !target_read_memory (pc - 6, insn, 6)
+  if (word_size == 4 && !target_read_memory (pc - 6, insn, 6)
       && is_rsy (insn, op1_lmy, op2_lmy, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
 
-  if (word_size == 8
-      && !target_read_memory (pc - 6, insn, 6)
+  if (word_size == 8 && !target_read_memory (pc - 6, insn, 6)
       && is_rsy (insn, op1_lmg, op2_lmg, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
@@ -2304,8 +2355,7 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 
 struct value *
 s390_trad_frame_prev_register (frame_info_ptr this_frame,
-			       trad_frame_saved_reg saved_regs[],
-			       int regnum)
+			       trad_frame_saved_reg saved_regs[], int regnum)
 {
   if (regnum < S390_NUM_REGS)
     return trad_frame_get_prev_register (this_frame, saved_regs, regnum);
@@ -2315,8 +2365,8 @@ s390_trad_frame_prev_register (frame_info_ptr this_frame,
 
 /* Normal stack frames.  */
 
-struct s390_unwind_cache {
-
+struct s390_unwind_cache
+{
   CORE_ADDR func;
   CORE_ADDR frame_base;
   CORE_ADDR local_base;
@@ -2358,8 +2408,8 @@ s390_prologue_frame_unwind_cache (frame_info_ptr this_frame,
   func = info->func;
 
   /* Try to analyze the prologue.  */
-  result = s390_analyze_prologue (gdbarch, func,
-				  get_frame_pc (this_frame), &data);
+  result
+    = s390_analyze_prologue (gdbarch, func, get_frame_pc (this_frame), &data);
   if (!result)
     return 0;
 
@@ -2404,9 +2454,8 @@ s390_prologue_frame_unwind_cache (frame_info_ptr this_frame,
 	  struct s390_prologue_data data2;
 	  pv_t *sp2 = &data2.gpr[S390_SP_REGNUM - S390_R0_REGNUM];
 
-	  if (!(s390_analyze_prologue (gdbarch, func, (CORE_ADDR)-1, &data2)
-		&& pv_is_register (*sp2, S390_SP_REGNUM)
-		&& sp2->k != 0))
+	  if (!(s390_analyze_prologue (gdbarch, func, (CORE_ADDR) -1, &data2)
+		&& pv_is_register (*sp2, S390_SP_REGNUM) && sp2->k != 0))
 	    return 0;
 	}
     }
@@ -2451,7 +2500,7 @@ s390_prologue_frame_unwind_cache (frame_info_ptr this_frame,
      add back the frame size to arrive that the previous frame's
      stack pointer value.  */
   prev_sp = get_frame_register_unsigned (this_frame, frame_pointer) + size;
-  cfa = prev_sp + 16*word_size + 32;
+  cfa = prev_sp + 16 * word_size + 32;
 
   /* Set up ABI call-saved/call-clobbered registers.  */
   for (i = 0; i < S390_NUM_REGS; i++)
@@ -2483,8 +2532,7 @@ s390_prologue_frame_unwind_cache (frame_info_ptr this_frame,
      address to the PC.  However, if we actually stored to the
      save area, use that -- we might only think the function frameless
      because we're in the middle of the prologue ...  */
-  if (size == 0
-      && !info->saved_regs[S390_PSWA_REGNUM].is_addr ())
+  if (size == 0 && !info->saved_regs[S390_PSWA_REGNUM].is_addr ())
     {
       info->saved_regs[S390_PSWA_REGNUM].set_realreg (S390_RETADDR_REGNUM);
     }
@@ -2504,7 +2552,7 @@ s390_prologue_frame_unwind_cache (frame_info_ptr this_frame,
      and the top of the register save area as frame_base.  */
   if (prev_sp != -1)
     {
-      info->frame_base = prev_sp + 16*word_size + 32;
+      info->frame_base = prev_sp + 16 * word_size + 32;
       info->local_base = prev_sp - size;
     }
 
@@ -2545,15 +2593,16 @@ s390_backchain_frame_unwind_cache (frame_info_ptr this_frame,
      save area pointed to by the backchain in fact links back to
      the save area.  */
   if (backchain != 0
-      && safe_read_memory_integer (backchain + 15*word_size,
-				   word_size, byte_order, &sp)
-      && (CORE_ADDR)sp == backchain)
+      && safe_read_memory_integer (backchain + 15 * word_size, word_size,
+				   byte_order, &sp)
+      && (CORE_ADDR) sp == backchain)
     {
       /* We don't know which registers were saved, but it will have
 	 to be at least %r14 and %r15.  This will allow us to continue
 	 unwinding, but other prev-frame registers may be incorrect ...  */
-      info->saved_regs[S390_SP_REGNUM].set_addr (backchain + 15*word_size);
-      info->saved_regs[S390_RETADDR_REGNUM].set_addr (backchain + 14*word_size);
+      info->saved_regs[S390_SP_REGNUM].set_addr (backchain + 15 * word_size);
+      info->saved_regs[S390_RETADDR_REGNUM].set_addr (backchain
+						      + 14 * word_size);
 
       /* Function return will set PC to %r14.  */
       info->saved_regs[S390_PSWA_REGNUM]
@@ -2561,7 +2610,7 @@ s390_backchain_frame_unwind_cache (frame_info_ptr this_frame,
 
       /* We use the current value of the frame register as local_base,
 	 and the top of the register save area as frame_base.  */
-      info->frame_base = backchain + 16*word_size + 32;
+      info->frame_base = backchain + 16 * word_size + 32;
       info->local_base = reg;
     }
 
@@ -2572,8 +2621,7 @@ s390_backchain_frame_unwind_cache (frame_info_ptr this_frame,
    s390_frame_unwind and s390_frame_base.  */
 
 static struct s390_unwind_cache *
-s390_frame_unwind_cache (frame_info_ptr this_frame,
-			 void **this_prologue_cache)
+s390_frame_unwind_cache (frame_info_ptr this_frame, void **this_prologue_cache)
 {
   struct s390_unwind_cache *info;
 
@@ -2606,8 +2654,7 @@ s390_frame_unwind_cache (frame_info_ptr this_frame,
 /* Implement this_id frame_unwind method for s390_frame_unwind.  */
 
 static void
-s390_frame_this_id (frame_info_ptr this_frame,
-		    void **this_prologue_cache,
+s390_frame_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
 		    struct frame_id *this_id)
 {
   struct s390_unwind_cache *info
@@ -2637,15 +2684,14 @@ s390_frame_prev_register (frame_info_ptr this_frame,
 
 /* Default S390 frame unwinder.  */
 
-static const struct frame_unwind s390_frame_unwind = {
-  "s390 prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  s390_frame_this_id,
-  s390_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind s390_frame_unwind
+  = { "s390 prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      s390_frame_this_id,
+      s390_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 /* Code stubs and their stack frames.  For things like PLTs and NULL
    function calls (where there is no true frame and the return address
@@ -2681,7 +2727,7 @@ s390_stub_frame_unwind_cache (frame_info_ptr this_frame,
 
   /* Retrieve stack pointer and determine our frame base.  */
   reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
-  info->frame_base = reg + 16*word_size + 32;
+  info->frame_base = reg + 16 * word_size + 32;
 
   return info;
 }
@@ -2689,8 +2735,7 @@ s390_stub_frame_unwind_cache (frame_info_ptr this_frame,
 /* Implement this_id frame_unwind method for s390_stub_frame_unwind.  */
 
 static void
-s390_stub_frame_this_id (frame_info_ptr this_frame,
-			 void **this_prologue_cache,
+s390_stub_frame_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
 			 struct frame_id *this_id)
 {
   struct s390_stub_unwind_cache *info
@@ -2713,8 +2758,7 @@ s390_stub_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 s390_stub_frame_sniffer (const struct frame_unwind *self,
-			 frame_info_ptr this_frame,
-			 void **this_prologue_cache)
+			 frame_info_ptr this_frame, void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
   bfd_byte insn[S390_MAX_INSTR_SIZE];
@@ -2731,15 +2775,14 @@ s390_stub_frame_sniffer (const struct frame_unwind *self,
 
 /* S390 stub frame unwinder.  */
 
-static const struct frame_unwind s390_stub_frame_unwind = {
-  "s390 stub",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  s390_stub_frame_this_id,
-  s390_stub_frame_prev_register,
-  NULL,
-  s390_stub_frame_sniffer
-};
+static const struct frame_unwind s390_stub_frame_unwind
+  = { "s390 stub",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      s390_stub_frame_this_id,
+      s390_stub_frame_prev_register,
+      NULL,
+      s390_stub_frame_sniffer };
 
 /* Frame base handling.  */
 
@@ -2759,12 +2802,9 @@ s390_local_base_address (frame_info_ptr this_frame, void **this_cache)
   return info->local_base;
 }
 
-static const struct frame_base s390_frame_base = {
-  &s390_frame_unwind,
-  s390_frame_base_address,
-  s390_local_base_address,
-  s390_local_base_address
-};
+static const struct frame_base s390_frame_base
+  = { &s390_frame_unwind, s390_frame_base_address, s390_local_base_address,
+      s390_local_base_address };
 
 /* Process record-replay */
 
@@ -2807,11 +2847,12 @@ s390_record_address_mask (struct gdbarch *gdbarch, struct regcache *regcache,
    dh should be set to 0 if unused.  */
 
 static CORE_ADDR
-s390_record_calc_disp_common (struct gdbarch *gdbarch, struct regcache *regcache,
-			      ULONGEST x, uint16_t bd, int8_t dh)
+s390_record_calc_disp_common (struct gdbarch *gdbarch,
+			      struct regcache *regcache, ULONGEST x,
+			      uint16_t bd, int8_t dh)
 {
   uint8_t rb = bd >> 12 & 0xf;
-  int32_t d = (bd & 0xfff) | ((int32_t)dh << 12);
+  int32_t d = (bd & 0xfff) | ((int32_t) dh << 12);
   ULONGEST b;
   CORE_ADDR res = d + x;
   if (rb)
@@ -2864,12 +2905,14 @@ s390_record_calc_rl (struct gdbarch *gdbarch, struct regcache *regcache,
 		     CORE_ADDR addr, uint16_t i1, uint16_t i2)
 {
   int32_t ri = i1 << 16 | i2;
-  return s390_record_address_mask (gdbarch, regcache, addr + (LONGEST)ri * 2);
+  return s390_record_address_mask (gdbarch, regcache, addr + (LONGEST) ri * 2);
 }
 
 /* Population count helper.  */
 
-static int s390_popcnt (unsigned int x) {
+static int
+s390_popcnt (unsigned int x)
+{
   int res = 0;
   while (x)
     {
@@ -2940,7 +2983,7 @@ s390_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		     CORE_ADDR addr)
 {
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
-  uint16_t insn[3] = {0};
+  uint16_t insn[3] = { 0 };
   /* Instruction as bytes.  */
   uint8_t ibyte[6];
   /* Instruction as nibbles.  */
@@ -2964,24 +3007,24 @@ ex:
     insn[0] |= ex & 0xff;
   /* Two highest bits determine instruction size.  */
   if (insn[0] >= 0x4000)
-    insn[1] = read_memory_unsigned_integer (addr+2, 2, byte_order);
+    insn[1] = read_memory_unsigned_integer (addr + 2, 2, byte_order);
   else
     /* Not necessary, but avoids uninitialized variable warnings.  */
     insn[1] = 0;
   if (insn[0] >= 0xc000)
-    insn[2] = read_memory_unsigned_integer (addr+4, 2, byte_order);
+    insn[2] = read_memory_unsigned_integer (addr + 4, 2, byte_order);
   else
     insn[2] = 0;
   /* Split instruction into bytes and nibbles.  */
   for (i = 0; i < 3; i++)
     {
-      ibyte[i*2] = insn[i] >> 8 & 0xff;
-      ibyte[i*2+1] = insn[i] & 0xff;
+      ibyte[i * 2] = insn[i] >> 8 & 0xff;
+      ibyte[i * 2 + 1] = insn[i] & 0xff;
     }
   for (i = 0; i < 6; i++)
     {
-      inib[i*2] = ibyte[i] >> 4 & 0xf;
-      inib[i*2+1] = ibyte[i] & 0xf;
+      inib[i * 2] = ibyte[i] >> 4 & 0xf;
+      inib[i * 2 + 1] = ibyte[i] & 0xf;
     }
   /* Compute vector registers, if applicable.  */
   ivec[0] = (inib[9] >> 3 & 1) << 4 | inib[2];
@@ -2991,20 +3034,20 @@ ex:
 
   switch (ibyte[0])
     {
-    /* 0x00 undefined */
+      /* 0x00 undefined */
 
     case 0x01:
       /* E-format instruction */
       switch (ibyte[1])
 	{
-	/* 0x00 undefined */
-	/* 0x01 unsupported: PR - program return */
-	/* 0x02 unsupported: UPT */
-	/* 0x03 undefined */
-	/* 0x04 privileged: PTFF - perform timing facility function */
-	/* 0x05-0x06 undefined */
-	/* 0x07 privileged: SCKPF - set clock programmable field */
-	/* 0x08-0x09 undefined */
+	  /* 0x00 undefined */
+	  /* 0x01 unsupported: PR - program return */
+	  /* 0x02 unsupported: UPT */
+	  /* 0x03 undefined */
+	  /* 0x04 privileged: PTFF - perform timing facility function */
+	  /* 0x05-0x06 undefined */
+	  /* 0x07 privileged: SCKPF - set clock programmable field */
+	  /* 0x08-0x09 undefined */
 
 	case 0x0a: /* PFPO - perform floating point operation */
 	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM, &tmp);
@@ -3031,8 +3074,9 @@ ex:
 		    return -1;
 		  break;
 		default:
-		  gdb_printf (gdb_stdlog, "Warning: Unknown PFPO OFC %02x at %s.\n",
-			      ofc, paddress (gdbarch, addr));
+		  gdb_printf (gdb_stdlog,
+			      "Warning: Unknown PFPO OFC %02x at %s.\n", ofc,
+			      paddress (gdbarch, addr));
 		  return -1;
 		}
 
@@ -3053,17 +3097,17 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0x0f-0xfe undefined */
+	  /* 0x0f-0xfe undefined */
 
-	/* 0xff unsupported: TRAP */
+	  /* 0xff unsupported: TRAP */
 
 	default:
 	  goto UNKNOWN_OP;
 	}
       break;
 
-    /* 0x02 undefined */
-    /* 0x03 undefined */
+      /* 0x02 undefined */
+      /* 0x03 undefined */
 
     case 0x04: /* SPM - set program mask */
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
@@ -3091,8 +3135,8 @@ ex:
       /* No effect other than PC transfer.  */
       break;
 
-    /* 0x08 undefined */
-    /* 0x09 undefined */
+      /* 0x08 undefined */
+      /* 0x09 undefined */
 
     case 0x0a:
       /* SVC - supervisor call */
@@ -3103,7 +3147,7 @@ ex:
 	}
       else
 	{
-	  gdb_printf (gdb_stderr, _("no syscall record support\n"));
+	  gdb_printf (gdb_stderr, _ ("no syscall record support\n"));
 	  return -1;
 	}
       break;
@@ -3126,17 +3170,20 @@ ex:
     case 0x0e: /* MVCL - move long [interruptible] */
       regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2], &tmp);
       oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
-      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[2] | 1), &tmp);
+      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[2] | 1),
+				  &tmp);
       tmp &= 0xffffff;
       if (record_full_arch_list_add_mem (oaddr, tmp))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[2] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[3] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[3] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	return -1;
@@ -3146,11 +3193,13 @@ ex:
     case 0xa9: /* CLCLE - compare logical long extended [partial] */
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[2] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[3] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[3] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	return -1;
@@ -3226,7 +3275,8 @@ ex:
       /* 32-bit pair destination, no flags */
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[2] | 1)))
 	return -1;
       break;
 
@@ -3288,7 +3338,8 @@ ex:
       /* float pair destination, no flags */
       if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[2] | 2)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_F0_REGNUM + (inib[2] | 2)))
 	return -1;
       break;
 
@@ -3297,7 +3348,8 @@ ex:
       /* float pair destination + flags */
       if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[2] | 2)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_F0_REGNUM + (inib[2] | 2)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	return -1;
@@ -3325,7 +3377,8 @@ ex:
       addr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
       if (inib[2])
 	{
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2], &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2],
+				      &tmp);
 	  ex = tmp & 0xff;
 	}
       else
@@ -3363,24 +3416,25 @@ ex:
 	return -1;
       break;
 
-    /* 0x52 undefined */
-    /* 0x53 undefined */
+      /* 0x52 undefined */
+      /* 0x53 undefined */
 
-    /* 0x61-0x66 undefined */
+      /* 0x61-0x66 undefined */
 
-    /* 0x72-0x77 undefined */
+      /* 0x72-0x77 undefined */
 
-    /* 0x80 privileged: SSM - set system mask */
-    /* 0x81 undefined */
-    /* 0x82 privileged: LPSW - load PSW */
-    /* 0x83 privileged: diagnose */
+      /* 0x80 privileged: SSM - set system mask */
+      /* 0x81 undefined */
+      /* 0x82 privileged: LPSW - load PSW */
+      /* 0x83 privileged: diagnose */
 
     case 0x8e: /* SRDA - shift right double */
     case 0x8f: /* SLDA - shift left double */
       /* 32-bit pair destination + flags */
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[2] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	return -1;
@@ -3422,7 +3476,7 @@ ex:
 	return -1;
       break;
 
-    /* 0x99 privileged: TRACE */
+      /* 0x99 privileged: TRACE */
 
     case 0x9a: /* LAM - load access multiple */
       for (i = inib[2]; i != inib[3]; i++, i &= 0xf)
@@ -3432,8 +3486,8 @@ ex:
 	return -1;
       break;
 
-    /* 0x9c-0x9f privileged and obsolete (old I/O) */
-    /* 0xa0-0xa4 undefined */
+      /* 0x9c-0x9f privileged and obsolete (old I/O) */
+      /* 0xa0-0xa4 undefined */
 
     case 0xa5:
     case 0xa7:
@@ -3454,7 +3508,8 @@ ex:
 	case 0xa78: /* LHI - load halfword immediate */
 	case 0xa7c: /* MHI - multiply halfword immediate */
 	  /* 32-bit or native destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  break;
 
@@ -3475,7 +3530,8 @@ ex:
 	case 0xa5b: /* OILL - or immediate */
 	case 0xa7a: /* AHI - add halfword immediate */
 	  /* 32-bit destination + flags */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -3521,33 +3577,36 @@ ex:
 	}
       break;
 
-    /* 0xa6 undefined */
+      /* 0xa6 undefined */
 
     case 0xa8: /* MVCLE - move long extended [partial] */
       regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2], &tmp);
       oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
-      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[2] | 1), &tmp);
+      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[2] | 1),
+				  &tmp);
       if (record_full_arch_list_add_mem (oaddr, tmp))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[2] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[3] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[3] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	return -1;
       break;
 
-    /* 0xaa-0xab undefined */
-    /* 0xac privileged: STNSM - store then and system mask */
-    /* 0xad privileged: STOSM - store then or system mask */
-    /* 0xae privileged: SIGP - signal processor */
-    /* 0xaf unsupported: MC - monitor call */
-    /* 0xb0 undefined */
-    /* 0xb1 privileged: LRA - load real address */
+      /* 0xaa-0xab undefined */
+      /* 0xac privileged: STNSM - store then and system mask */
+      /* 0xad privileged: STOSM - store then or system mask */
+      /* 0xae privileged: SIGP - signal processor */
+      /* 0xaf unsupported: MC - monitor call */
+      /* 0xb0 undefined */
+      /* 0xb1 privileged: LRA - load real address */
 
     case 0xb2:
     case 0xb3:
@@ -3555,7 +3614,7 @@ ex:
       /* S/RRD/RRE/RRF/IE-format instruction */
       switch (insn[0])
 	{
-	/* 0xb200-0xb204 undefined or privileged */
+	  /* 0xb200-0xb204 undefined or privileged */
 
 	case 0xb205: /* STCK - store clock */
 	case 0xb27c: /* STCKF - store clock fast */
@@ -3566,9 +3625,9 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb206-0xb219 undefined, privileged, or unsupported */
-	/* 0xb21a unsupported: CFC */
-	/* 0xb21b-0xb221 undefined or privileged */
+	  /* 0xb206-0xb219 undefined, privileged, or unsupported */
+	  /* 0xb21a unsupported: CFC */
+	  /* 0xb21b-0xb221 undefined or privileged */
 
 	case 0xb222: /* IPM - insert program mask */
 	case 0xb24f: /* EAR - extract access */
@@ -3582,11 +3641,12 @@ ex:
 	case 0xb995: /* LLHR - load logical halfword */
 	case 0xb9f2: /* LOCR - load on condition */
 	  /* 32-bit gpr destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
 	  break;
 
-	/* 0xb223-0xb22c privileged or unsupported */
+	  /* 0xb223-0xb22c privileged or unsupported */
 
 	case 0xb22d: /* DXR - divide */
 	case 0xb325: /* LXDR - load lengthened */
@@ -3599,26 +3659,31 @@ ex:
 	case 0xb3c6: /* CXGR - convert from fixed */
 	case 0xb3fe: /* IEXTR - insert biased exponent */
 	  /* float pair destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[6] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[6] | 2)))
 	    return -1;
 	  break;
 
-	/* 0xb22e-0xb240 undefined, privileged, or unsupported */
+	  /* 0xb22e-0xb240 undefined, privileged, or unsupported */
 
 	case 0xb241: /* CKSM - checksum [partial] */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[7]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[7] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb242-0xb243 undefined */
+	  /* 0xb242-0xb243 undefined */
 
 	case 0xb244: /* SQDR - square root */
 	case 0xb245: /* SQER - square root */
@@ -3640,20 +3705,22 @@ ex:
 	case 0xb3c5: /* CDGR - convert from fixed */
 	case 0xb3f6: /* IEDTR - insert biased exponent */
 	  /* float destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
 	  break;
 
-	/* 0xb246-0xb24c: privileged or unsupported */
+	  /* 0xb246-0xb24c: privileged or unsupported */
 
 	case 0xb24d: /* CPYA - copy access */
 	case 0xb24e: /* SAR - set access */
-	  if (record_full_arch_list_add_reg (regcache, S390_A0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_A0_REGNUM + inib[6]))
 	    return -1;
 	  break;
 
-	/* 0xb250-0xb251 undefined or privileged */
-	/* 0xb253-0xb254 undefined or privileged */
+	  /* 0xb250-0xb251 undefined or privileged */
+	  /* 0xb253-0xb254 undefined or privileged */
 
 	case 0xb255: /* MVST - move string [partial] */
 	  {
@@ -3664,73 +3731,91 @@ ex:
 	    regcache_raw_read_unsigned (regcache, S390_R0_REGNUM, &tmp);
 	    end = tmp & 0xff;
 	    /* Get address of second operand.  */
-	    regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[7], &tmp);
+	    regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[7],
+					&tmp);
 	    oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
 	    /* Search for ending byte and compute length.  */
-	    do {
-	      num++;
-	      if (target_read_memory (oaddr, &cur, 1))
-		return -1;
-	      oaddr++;
-	    } while (cur != end);
+	    do
+	      {
+		num++;
+		if (target_read_memory (oaddr, &cur, 1))
+		  return -1;
+		oaddr++;
+	      }
+	    while (cur != end);
 	    /* Get address of first operand and record it.  */
-	    regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	    regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+					&tmp);
 	    oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
 	    if (record_full_arch_list_add_mem (oaddr, num))
 	      return -1;
 	    /* Record the registers.  */
-	    if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	    if (record_full_arch_list_add_reg (regcache,
+					       S390_R0_REGNUM + inib[6]))
 	      return -1;
-	    if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	    if (record_full_arch_list_add_reg (regcache,
+					       S390_R0_REGNUM + inib[7]))
 	      return -1;
 	    if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	      return -1;
 	  }
 	  break;
 
-	/* 0xb256 undefined */
+	  /* 0xb256 undefined */
 
 	case 0xb257: /* CUSE - compare until substring equal [interruptible] */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[6] | 1)))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[7]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[7] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb258-0xb25c undefined, privileged, or unsupported */
+	  /* 0xb258-0xb25c undefined, privileged, or unsupported */
 
 	case 0xb25d: /* CLST - compare logical string [partial] */
 	case 0xb25e: /* SRST - search string [partial] */
 	case 0xb9be: /* SRSTU - search string unicode [partial] */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[7]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb25f-0xb262 undefined */
+	  /* 0xb25f-0xb262 undefined */
 
 	case 0xb263: /* CMPSC - compression call [interruptible] */
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+				      &tmp);
 	  oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1), &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1),
+				      &tmp);
 	  if (record_full_arch_list_add_mem (oaddr, tmp))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[6] | 1)))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[7]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[7] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_R1_REGNUM))
 	    return -1;
@@ -3741,7 +3826,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb264-0xb277 undefined, privileged, or unsupported */
+	  /* 0xb264-0xb277 undefined, privileged, or unsupported */
 
 	case 0xb278: /* STCKE - store clock extended */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -3751,8 +3836,8 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb279-0xb27b undefined or unsupported */
-	/* 0xb27d-0xb298 undefined or privileged */
+	  /* 0xb279-0xb27b undefined or unsupported */
+	  /* 0xb27d-0xb298 undefined or privileged */
 
 	case 0xb299: /* SRNM - set rounding mode */
 	case 0xb2b8: /* SRNMB - set bfp rounding mode */
@@ -3770,7 +3855,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb29a-0xb29b undefined */
+	  /* 0xb29a-0xb29b undefined */
 
 	case 0xb29c: /* STFPC - store fpc */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -3778,17 +3863,21 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb29e-0xb2a4 undefined */
+	  /* 0xb29e-0xb2a4 undefined */
 
 	case 0xb2a5: /* TRE - translate extended [partial] */
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+				      &tmp);
 	  oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1), &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1),
+				      &tmp);
 	  if (record_full_arch_list_add_mem (oaddr, tmp))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[6] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -3800,24 +3889,30 @@ ex:
 	case 0xb9b1: /* CU24 - convert UTF-16 to UTF-32 [partial] */
 	case 0xb9b2: /* CU41 - convert UTF-32 to UTF-8 [partial] */
 	case 0xb9b3: /* CU42 - convert UTF-32 to UTF-16 [partial] */
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+				      &tmp);
 	  oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1), &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1),
+				      &tmp);
 	  if (record_full_arch_list_add_mem (oaddr, tmp))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[6] | 1)))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[7]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[7] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb2a8-0xb2af undefined */
+	  /* 0xb2a8-0xb2af undefined */
 
 	case 0xb2b0: /* STFLE - store facility list extended */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -3831,23 +3926,23 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb2b1-0xb2b7 undefined or privileged */
-	/* 0xb2ba-0xb2bc undefined */
-	/* 0xb2be-0xb2e7 undefined */
-	/* 0xb2e9-0xb2eb undefined */
-	/* 0xb2ed-0xb2f7 undefined */
-	/* 0xb2f8 unsupported: TEND */
-	/* 0xb2f9 undefined */
+	  /* 0xb2b1-0xb2b7 undefined or privileged */
+	  /* 0xb2ba-0xb2bc undefined */
+	  /* 0xb2be-0xb2e7 undefined */
+	  /* 0xb2e9-0xb2eb undefined */
+	  /* 0xb2ed-0xb2f7 undefined */
+	  /* 0xb2f8 unsupported: TEND */
+	  /* 0xb2f9 undefined */
 
 	case 0xb2e8: /* PPA - perform processor assist */
 	case 0xb2fa: /* NIAI - next instruction access intent */
 	  /* no visible effects */
 	  break;
 
-	/* 0xb2fb undefined */
-	/* 0xb2fc unsupported: TABORT */
-	/* 0xb2fd-0xb2fe undefined */
-	/* 0xb2ff unsupported: TRAP */
+	  /* 0xb2fb undefined */
+	  /* 0xb2fc unsupported: TABORT */
+	  /* 0xb2fd-0xb2fe undefined */
+	  /* 0xb2ff unsupported: TRAP */
 
 	case 0xb300: /* LPEBR - load positive */
 	case 0xb301: /* LNEBR - load negative */
@@ -3860,7 +3955,8 @@ ex:
 	case 0xb358: /* THDER - convert bfp to hfp */
 	case 0xb359: /* THDR - convert bfp to hfp */
 	  /* float destination + flags */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -3902,7 +3998,8 @@ ex:
 	case 0xb952: /* CDLGTR - convert from logical */
 	case 0xb953: /* CDLFTR - convert from logical */
 	  /* float destination + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
@@ -3932,9 +4029,11 @@ ex:
 	case 0xb95a: /* CXLGTR - convert from logical */
 	case 0xb95b: /* CXLFTR - convert from logical */
 	  /* float pair destination + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[6] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[6] | 2)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
@@ -3967,7 +4066,8 @@ ex:
 	case 0xb3d3: /* SDTR - subtract */
 	case 0xb3d6: /* LTDTR - load and test */
 	  /* float destination + flags + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -3980,14 +4080,15 @@ ex:
 	case 0xb31e: /* MADBR - multiply and add */
 	case 0xb31f: /* MSDBR - multiply and subtract */
 	  /* float destination [RRD] + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[4]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[4]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb320-0xb323 undefined */
-	/* 0xb327-0xb32d undefined */
+	  /* 0xb320-0xb323 undefined */
+	  /* 0xb327-0xb32d undefined */
 
 	case 0xb32e: /* MAER - multiply and add */
 	case 0xb32f: /* MSER - multiply and subtract */
@@ -3998,18 +4099,21 @@ ex:
 	case 0xb33e: /* MADR - multiply and add */
 	case 0xb33f: /* MSDR - multiply and subtract */
 	  /* float destination [RRD] */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[4]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[4]))
 	    return -1;
 	  break;
 
-	/* 0xb330-0xb335 undefined */
+	  /* 0xb330-0xb335 undefined */
 
 	case 0xb33a: /* MAYR - multiply and add unnormalized */
 	case 0xb33b: /* MYR - multiply unnormalized */
 	  /* float pair destination [RRD] */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[4]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[4]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[4] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[4] | 2)))
 	    return -1;
 	  break;
 
@@ -4021,9 +4125,11 @@ ex:
 	case 0xb362: /* LTXR - load and test */
 	case 0xb363: /* LCXR - load complement */
 	  /* float pair destination + flags */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[6] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[6] | 2)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4036,9 +4142,11 @@ ex:
 	case 0xb3db: /* SXTR - subtract */
 	case 0xb3de: /* LTXTR - load and test */
 	  /* float pair destination + flags + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[6] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[6] | 2)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4046,15 +4154,17 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb34e-0xb34f undefined */
-	/* 0xb352 undefined */
+	  /* 0xb34e-0xb34f undefined */
+	  /* 0xb352 undefined */
 
 	case 0xb353: /* DIEBR - divide to integer */
 	case 0xb35b: /* DIDBR - divide to integer */
 	  /* two float destinations + flags + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[4]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[4]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[6]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4062,12 +4172,12 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb354-0xb356 undefined */
-	/* 0xb35a undefined */
+	  /* 0xb354-0xb356 undefined */
+	  /* 0xb35a undefined */
 
-	/* 0xb35c-0xb35e undefined */
-	/* 0xb364 undefined */
-	/* 0xb368 undefined */
+	  /* 0xb35c-0xb35e undefined */
+	  /* 0xb364 undefined */
+	  /* 0xb368 undefined */
 
 	case 0xb369: /* CXR - compare */
 	case 0xb3f4: /* CEDTR - compare biased exponent */
@@ -4085,13 +4195,13 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb36a-0xb36f undefined */
-	/* 0xb377-0xb37e undefined */
-	/* 0xb380-0xb383 undefined */
-	/* 0xb386-0xb38b undefined */
-	/* 0xb38d-0xb38f undefined */
-	/* 0xb393 undefined */
-	/* 0xb397 undefined */
+	  /* 0xb36a-0xb36f undefined */
+	  /* 0xb377-0xb37e undefined */
+	  /* 0xb380-0xb383 undefined */
+	  /* 0xb386-0xb38b undefined */
+	  /* 0xb38d-0xb38f undefined */
+	  /* 0xb393 undefined */
+	  /* 0xb397 undefined */
 
 	case 0xb398: /* CFEBR - convert to fixed */
 	case 0xb399: /* CFDBR - convert to fixed */
@@ -4104,7 +4214,8 @@ ex:
 	case 0xb943: /* CLFDTR - convert to logical */
 	case 0xb94b: /* CLFXTR - convert to logical */
 	  /* 32-bit gpr destination + flags + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4112,11 +4223,11 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb39b undefined */
-	/* 0xb39f undefined */
+	  /* 0xb39b undefined */
+	  /* 0xb39f undefined */
 
-	/* 0xb3a3 undefined */
-	/* 0xb3a7 undefined */
+	  /* 0xb3a3 undefined */
+	  /* 0xb3a7 undefined */
 
 	case 0xb3a8: /* CGEBR - convert to fixed */
 	case 0xb3a9: /* CGDBR - convert to fixed */
@@ -4137,9 +4248,9 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb3ab undefined */
-	/* 0xb3af-0xb3b3 undefined */
-	/* 0xb3b7 undefined */
+	  /* 0xb3ab undefined */
+	  /* 0xb3af-0xb3b3 undefined */
+	  /* 0xb3b7 undefined */
 
 	case 0xb3b8: /* CFER - convert to fixed */
 	case 0xb3b9: /* CFDR - convert to fixed */
@@ -4155,7 +4266,8 @@ ex:
 	case 0xb9fa: /* ALRK - add logical */
 	case 0xb9fb: /* SLRK - subtract logical */
 	  /* 32-bit gpr destination + flags */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4214,10 +4326,10 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb3bb-0xb3c0 undefined */
-	/* 0xb3c2-0xb3c3 undefined */
-	/* 0xb3c7 undefined */
-	/* 0xb3cb-0xb3cc undefined */
+	  /* 0xb3bb-0xb3c0 undefined */
+	  /* 0xb3c2-0xb3c3 undefined */
+	  /* 0xb3c7 undefined */
+	  /* 0xb3cb-0xb3cc undefined */
 
 	case 0xb3cd: /* LGDR - load gr from fpr */
 	case 0xb3e2: /* CUDTR - convert to unsigned packed */
@@ -4244,8 +4356,8 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb3ce-0xb3cf undefined */
-	/* 0xb3e6 undefined */
+	  /* 0xb3ce-0xb3cf undefined */
+	  /* 0xb3e6 undefined */
 
 	case 0xb3ea: /* CUXTR - convert to unsigned packed */
 	case 0xb3eb: /* CSXTR - convert to signed packed */
@@ -4261,15 +4373,15 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb3ee undefined */
-	/* 0xb3f0 undefined */
-	/* 0xb3f8 undefined */
+	  /* 0xb3ee undefined */
+	  /* 0xb3f0 undefined */
+	  /* 0xb3f8 undefined */
 
-	/* 0xb905 privileged */
+	  /* 0xb905 privileged */
 
-	/* 0xb90e unsupported: EREGG */
+	  /* 0xb90e unsupported: EREGG */
 
-	/* 0xb915 undefined */
+	  /* 0xb915 undefined */
 
 	case 0xb91e: /* KMAC - compute message authentication code [partial] */
 	  regcache_raw_read_unsigned (regcache, S390_R1_REGNUM, &tmp);
@@ -4278,50 +4390,53 @@ ex:
 	  tmp &= 0xff;
 	  switch (tmp)
 	    {
-	      case 0x00: /* KMAC-Query */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x01: /* KMAC-DEA */
-	      case 0x02: /* KMAC-TDEA-128 */
-	      case 0x03: /* KMAC-TDEA-192 */
-	      case 0x09: /* KMAC-Encrypted-DEA */
-	      case 0x0a: /* KMAC-Encrypted-TDEA-128 */
-	      case 0x0b: /* KMAC-Encrypted-TDEA-192 */
-		if (record_full_arch_list_add_mem (oaddr, 8))
-		  return -1;
-		break;
-
-	      case 0x12: /* KMAC-AES-128 */
-	      case 0x13: /* KMAC-AES-192 */
-	      case 0x14: /* KMAC-AES-256 */
-	      case 0x1a: /* KMAC-Encrypted-AES-128 */
-	      case 0x1b: /* KMAC-Encrypted-AES-192 */
-	      case 0x1c: /* KMAC-Encrypted-AES-256 */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      default:
-		gdb_printf (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
-			    (int)tmp, paddress (gdbarch, addr));
+	    case 0x00: /* KMAC-Query */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
 		return -1;
+	      break;
+
+	    case 0x01: /* KMAC-DEA */
+	    case 0x02: /* KMAC-TDEA-128 */
+	    case 0x03: /* KMAC-TDEA-192 */
+	    case 0x09: /* KMAC-Encrypted-DEA */
+	    case 0x0a: /* KMAC-Encrypted-TDEA-128 */
+	    case 0x0b: /* KMAC-Encrypted-TDEA-192 */
+	      if (record_full_arch_list_add_mem (oaddr, 8))
+		return -1;
+	      break;
+
+	    case 0x12: /* KMAC-AES-128 */
+	    case 0x13: /* KMAC-AES-192 */
+	    case 0x14: /* KMAC-AES-256 */
+	    case 0x1a: /* KMAC-Encrypted-AES-128 */
+	    case 0x1b: /* KMAC-Encrypted-AES-192 */
+	    case 0x1c: /* KMAC-Encrypted-AES-256 */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
+		return -1;
+	      break;
+
+	    default:
+	      gdb_printf (gdb_stdlog,
+			  "Warning: Unknown KMAC function %02x at %s.\n",
+			  (int) tmp, paddress (gdbarch, addr));
+	      return -1;
 	    }
 	  if (tmp != 0)
 	    {
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[7]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[7] | 1)))
 		return -1;
 	    }
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb922-0xb924 undefined */
-	/* 0xb925 privileged */
-	/* 0xb928 privileged */
+	  /* 0xb922-0xb924 undefined */
+	  /* 0xb925 privileged */
+	  /* 0xb928 privileged */
 
 	case 0xb929: /* KMA - cipher message with authentication */
 	case 0xb92a: /* KMF - cipher message with cipher feedback [partial] */
@@ -4333,58 +4448,65 @@ ex:
 	  tmp &= 0x7f;
 	  switch (tmp)
 	    {
-	      case 0x00: /* KM*-Query */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x01: /* KM*-DEA */
-	      case 0x02: /* KM*-TDEA-128 */
-	      case 0x03: /* KM*-TDEA-192 */
-	      case 0x09: /* KM*-Encrypted-DEA */
-	      case 0x0a: /* KM*-Encrypted-TDEA-128 */
-	      case 0x0b: /* KM*-Encrypted-TDEA-192 */
-		if (record_full_arch_list_add_mem (oaddr, 8))
-		  return -1;
-		break;
-
-	      case 0x12: /* KM*-AES-128 */
-	      case 0x13: /* KM*-AES-192 */
-	      case 0x14: /* KM*-AES-256 */
-	      case 0x1a: /* KM*-Encrypted-AES-128 */
-	      case 0x1b: /* KM*-Encrypted-AES-192 */
-	      case 0x1c: /* KM*-Encrypted-AES-256 */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x43: /* KMC-PRNG */
-		/* Only valid for KMC.  */
-		if (insn[0] == 0xb92f)
-		  {
-		    if (record_full_arch_list_add_mem (oaddr, 8))
-		      return -1;
-		    break;
-		  }
-		/* For other instructions... */
-		/* Fall through.  */
-	      default:
-		gdb_printf (gdb_stdlog, "Warning: Unknown KM* function %02x at %s.\n",
-			    (int)tmp, paddress (gdbarch, addr));
+	    case 0x00: /* KM*-Query */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
 		return -1;
+	      break;
+
+	    case 0x01: /* KM*-DEA */
+	    case 0x02: /* KM*-TDEA-128 */
+	    case 0x03: /* KM*-TDEA-192 */
+	    case 0x09: /* KM*-Encrypted-DEA */
+	    case 0x0a: /* KM*-Encrypted-TDEA-128 */
+	    case 0x0b: /* KM*-Encrypted-TDEA-192 */
+	      if (record_full_arch_list_add_mem (oaddr, 8))
+		return -1;
+	      break;
+
+	    case 0x12: /* KM*-AES-128 */
+	    case 0x13: /* KM*-AES-192 */
+	    case 0x14: /* KM*-AES-256 */
+	    case 0x1a: /* KM*-Encrypted-AES-128 */
+	    case 0x1b: /* KM*-Encrypted-AES-192 */
+	    case 0x1c: /* KM*-Encrypted-AES-256 */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
+		return -1;
+	      break;
+
+	    case 0x43: /* KMC-PRNG */
+	      /* Only valid for KMC.  */
+	      if (insn[0] == 0xb92f)
+		{
+		  if (record_full_arch_list_add_mem (oaddr, 8))
+		    return -1;
+		  break;
+		}
+	      /* For other instructions... */
+	      /* Fall through.  */
+	    default:
+	      gdb_printf (gdb_stdlog,
+			  "Warning: Unknown KM* function %02x at %s.\n",
+			  (int) tmp, paddress (gdbarch, addr));
+	      return -1;
 	    }
 	  if (tmp != 0)
 	    {
-	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+					  &tmp);
 	      oaddr2 = s390_record_address_mask (gdbarch, regcache, tmp);
-	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[7] | 1), &tmp);
+	      regcache_raw_read_unsigned (regcache,
+					  S390_R0_REGNUM + (inib[7] | 1),
+					  &tmp);
 	      if (record_full_arch_list_add_mem (oaddr2, tmp))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[6]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[7]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[7] | 1)))
 		return -1;
 	    }
 	  if (tmp != 0 && insn[0] == 0xb929)
@@ -4392,8 +4514,8 @@ ex:
 	      if (record_full_arch_list_add_reg (regcache,
 						 S390_R0_REGNUM + inib[4]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache,
-						 S390_R0_REGNUM + (inib[4] | 1)))
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[4] | 1)))
 		return -1;
 	    }
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
@@ -4407,55 +4529,56 @@ ex:
 	  tmp &= 0x7f;
 	  switch (tmp)
 	    {
-	      case 0x00: /* PCC-Query */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x01: /* PCC-Compute-Last-Block-CMAC-Using-DEA */
-	      case 0x02: /* PCC-Compute-Last-Block-CMAC-Using-TDEA-128 */
-	      case 0x03: /* PCC-Compute-Last-Block-CMAC-Using-TDEA-192 */
-	      case 0x09: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-DEA */
-	      case 0x0a: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-TDEA-128 */
-	      case 0x0b: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-TDEA-192 */
-		if (record_full_arch_list_add_mem (oaddr + 0x10, 8))
-		  return -1;
-		break;
-
-	      case 0x12: /* PCC-Compute-Last-Block-CMAC-Using-AES-128 */
-	      case 0x13: /* PCC-Compute-Last-Block-CMAC-Using-AES-192 */
-	      case 0x14: /* PCC-Compute-Last-Block-CMAC-Using-AES-256 */
-	      case 0x1a: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-AES-128 */
-	      case 0x1b: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-AES-192 */
-	      case 0x1c: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-AES-256 */
-		if (record_full_arch_list_add_mem (oaddr + 0x18, 16))
-		  return -1;
-		break;
-
-	      case 0x32: /* PCC-Compute-XTS-Parameter-Using-AES-128 */
-		if (record_full_arch_list_add_mem (oaddr + 0x30, 32))
-		  return -1;
-		break;
-
-	      case 0x34: /* PCC-Compute-XTS-Parameter-Using-AES-256 */
-		if (record_full_arch_list_add_mem (oaddr + 0x40, 32))
-		  return -1;
-		break;
-
-	      case 0x3a: /* PCC-Compute-XTS-Parameter-Using-Encrypted-AES-128 */
-		if (record_full_arch_list_add_mem (oaddr + 0x50, 32))
-		  return -1;
-		break;
-
-	      case 0x3c: /* PCC-Compute-XTS-Parameter-Using-Encrypted-AES-256 */
-		if (record_full_arch_list_add_mem (oaddr + 0x60, 32))
-		  return -1;
-		break;
-
-	      default:
-		gdb_printf (gdb_stdlog, "Warning: Unknown PCC function %02x at %s.\n",
-			    (int)tmp, paddress (gdbarch, addr));
+	    case 0x00: /* PCC-Query */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
 		return -1;
+	      break;
+
+	    case 0x01: /* PCC-Compute-Last-Block-CMAC-Using-DEA */
+	    case 0x02: /* PCC-Compute-Last-Block-CMAC-Using-TDEA-128 */
+	    case 0x03: /* PCC-Compute-Last-Block-CMAC-Using-TDEA-192 */
+	    case 0x09: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-DEA */
+	    case 0x0a: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-TDEA-128 */
+	    case 0x0b: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-TDEA-192 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x10, 8))
+		return -1;
+	      break;
+
+	    case 0x12: /* PCC-Compute-Last-Block-CMAC-Using-AES-128 */
+	    case 0x13: /* PCC-Compute-Last-Block-CMAC-Using-AES-192 */
+	    case 0x14: /* PCC-Compute-Last-Block-CMAC-Using-AES-256 */
+	    case 0x1a: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-AES-128 */
+	    case 0x1b: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-AES-192 */
+	    case 0x1c: /* PCC-Compute-Last-Block-CMAC-Using-Encrypted-AES-256 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x18, 16))
+		return -1;
+	      break;
+
+	    case 0x32: /* PCC-Compute-XTS-Parameter-Using-AES-128 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x30, 32))
+		return -1;
+	      break;
+
+	    case 0x34: /* PCC-Compute-XTS-Parameter-Using-AES-256 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x40, 32))
+		return -1;
+	      break;
+
+	    case 0x3a: /* PCC-Compute-XTS-Parameter-Using-Encrypted-AES-128 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x50, 32))
+		return -1;
+	      break;
+
+	    case 0x3c: /* PCC-Compute-XTS-Parameter-Using-Encrypted-AES-256 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x60, 32))
+		return -1;
+	      break;
+
+	    default:
+	      gdb_printf (gdb_stdlog,
+			  "Warning: Unknown PCC function %02x at %s.\n",
+			  (int) tmp, paddress (gdbarch, addr));
+	      return -1;
 	    }
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4468,44 +4591,52 @@ ex:
 	  tmp &= 0x7f;
 	  switch (tmp)
 	    {
-	      case 0x00: /* KMCTR-Query */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x01: /* KMCTR-DEA */
-	      case 0x02: /* KMCTR-TDEA-128 */
-	      case 0x03: /* KMCTR-TDEA-192 */
-	      case 0x09: /* KMCTR-Encrypted-DEA */
-	      case 0x0a: /* KMCTR-Encrypted-TDEA-128 */
-	      case 0x0b: /* KMCTR-Encrypted-TDEA-192 */
-	      case 0x12: /* KMCTR-AES-128 */
-	      case 0x13: /* KMCTR-AES-192 */
-	      case 0x14: /* KMCTR-AES-256 */
-	      case 0x1a: /* KMCTR-Encrypted-AES-128 */
-	      case 0x1b: /* KMCTR-Encrypted-AES-192 */
-	      case 0x1c: /* KMCTR-Encrypted-AES-256 */
-		break;
-
-	      default:
-		gdb_printf (gdb_stdlog, "Warning: Unknown KMCTR function %02x at %s.\n",
-			    (int)tmp, paddress (gdbarch, addr));
+	    case 0x00: /* KMCTR-Query */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
 		return -1;
+	      break;
+
+	    case 0x01: /* KMCTR-DEA */
+	    case 0x02: /* KMCTR-TDEA-128 */
+	    case 0x03: /* KMCTR-TDEA-192 */
+	    case 0x09: /* KMCTR-Encrypted-DEA */
+	    case 0x0a: /* KMCTR-Encrypted-TDEA-128 */
+	    case 0x0b: /* KMCTR-Encrypted-TDEA-192 */
+	    case 0x12: /* KMCTR-AES-128 */
+	    case 0x13: /* KMCTR-AES-192 */
+	    case 0x14: /* KMCTR-AES-256 */
+	    case 0x1a: /* KMCTR-Encrypted-AES-128 */
+	    case 0x1b: /* KMCTR-Encrypted-AES-192 */
+	    case 0x1c: /* KMCTR-Encrypted-AES-256 */
+	      break;
+
+	    default:
+	      gdb_printf (gdb_stdlog,
+			  "Warning: Unknown KMCTR function %02x at %s.\n",
+			  (int) tmp, paddress (gdbarch, addr));
+	      return -1;
 	    }
 	  if (tmp != 0)
 	    {
-	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+					  &tmp);
 	      oaddr2 = s390_record_address_mask (gdbarch, regcache, tmp);
-	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[7] | 1), &tmp);
+	      regcache_raw_read_unsigned (regcache,
+					  S390_R0_REGNUM + (inib[7] | 1),
+					  &tmp);
 	      if (record_full_arch_list_add_mem (oaddr2, tmp))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[6]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[7]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[7] | 1)))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[4]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[4]))
 		return -1;
 	    }
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
@@ -4519,75 +4650,82 @@ ex:
 	  tmp &= 0x7f;
 	  switch (tmp)
 	    {
-	      case 0x00: /* KM-Query */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x01: /* KM-DEA */
-	      case 0x02: /* KM-TDEA-128 */
-	      case 0x03: /* KM-TDEA-192 */
-	      case 0x09: /* KM-Encrypted-DEA */
-	      case 0x0a: /* KM-Encrypted-TDEA-128 */
-	      case 0x0b: /* KM-Encrypted-TDEA-192 */
-	      case 0x12: /* KM-AES-128 */
-	      case 0x13: /* KM-AES-192 */
-	      case 0x14: /* KM-AES-256 */
-	      case 0x1a: /* KM-Encrypted-AES-128 */
-	      case 0x1b: /* KM-Encrypted-AES-192 */
-	      case 0x1c: /* KM-Encrypted-AES-256 */
-		break;
-
-	      case 0x32: /* KM-XTS-AES-128 */
-		if (record_full_arch_list_add_mem (oaddr + 0x10, 16))
-		  return -1;
-		break;
-
-	      case 0x34: /* KM-XTS-AES-256 */
-		if (record_full_arch_list_add_mem (oaddr + 0x20, 16))
-		  return -1;
-		break;
-
-	      case 0x3a: /* KM-XTS-Encrypted-AES-128 */
-		if (record_full_arch_list_add_mem (oaddr + 0x30, 16))
-		  return -1;
-		break;
-
-	      case 0x3c: /* KM-XTS-Encrypted-AES-256 */
-		if (record_full_arch_list_add_mem (oaddr + 0x40, 16))
-		  return -1;
-		break;
-
-	      default:
-		gdb_printf (gdb_stdlog, "Warning: Unknown KM function %02x at %s.\n",
-			    (int)tmp, paddress (gdbarch, addr));
+	    case 0x00: /* KM-Query */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
 		return -1;
+	      break;
+
+	    case 0x01: /* KM-DEA */
+	    case 0x02: /* KM-TDEA-128 */
+	    case 0x03: /* KM-TDEA-192 */
+	    case 0x09: /* KM-Encrypted-DEA */
+	    case 0x0a: /* KM-Encrypted-TDEA-128 */
+	    case 0x0b: /* KM-Encrypted-TDEA-192 */
+	    case 0x12: /* KM-AES-128 */
+	    case 0x13: /* KM-AES-192 */
+	    case 0x14: /* KM-AES-256 */
+	    case 0x1a: /* KM-Encrypted-AES-128 */
+	    case 0x1b: /* KM-Encrypted-AES-192 */
+	    case 0x1c: /* KM-Encrypted-AES-256 */
+	      break;
+
+	    case 0x32: /* KM-XTS-AES-128 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x10, 16))
+		return -1;
+	      break;
+
+	    case 0x34: /* KM-XTS-AES-256 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x20, 16))
+		return -1;
+	      break;
+
+	    case 0x3a: /* KM-XTS-Encrypted-AES-128 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x30, 16))
+		return -1;
+	      break;
+
+	    case 0x3c: /* KM-XTS-Encrypted-AES-256 */
+	      if (record_full_arch_list_add_mem (oaddr + 0x40, 16))
+		return -1;
+	      break;
+
+	    default:
+	      gdb_printf (gdb_stdlog,
+			  "Warning: Unknown KM function %02x at %s.\n",
+			  (int) tmp, paddress (gdbarch, addr));
+	      return -1;
 	    }
 	  if (tmp != 0)
 	    {
-	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+					  &tmp);
 	      oaddr2 = s390_record_address_mask (gdbarch, regcache, tmp);
-	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[7] | 1), &tmp);
+	      regcache_raw_read_unsigned (regcache,
+					  S390_R0_REGNUM + (inib[7] | 1),
+					  &tmp);
 	      if (record_full_arch_list_add_mem (oaddr2, tmp))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[6]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[7]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[7] | 1)))
 		return -1;
 	    }
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb932-0xb937 undefined */
+	  /* 0xb932-0xb937 undefined */
 
-	/* 0xb938 unsupported: SORTL - sort lists */
-	/* 0xb939 unsupported: DFLTCC - deflate conversion call */
-	/* 0xb93a unsupported: KDSA - compute dig. signature auth. */
+	  /* 0xb938 unsupported: SORTL - sort lists */
+	  /* 0xb939 unsupported: DFLTCC - deflate conversion call */
+	  /* 0xb93a unsupported: KDSA - compute dig. signature auth. */
 
-	/* 0xb93b undefined */
+	  /* 0xb93b undefined */
 
 	case 0xb93c: /* PPNO - perform pseudorandom number operation [partial] */
 	  regcache_raw_read_unsigned (regcache, S390_R1_REGNUM, &tmp);
@@ -4596,39 +4734,47 @@ ex:
 	  tmp &= 0xff;
 	  switch (tmp)
 	    {
-	      case 0x00: /* PPNO-Query */
-	      case 0x80: /* PPNO-Query */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x03: /* PPNO-SHA-512-DRNG - generate */
-		if (record_full_arch_list_add_mem (oaddr, 240))
-		  return -1;
-		regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
-		oaddr2 = s390_record_address_mask (gdbarch, regcache, tmp);
-		regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1), &tmp);
-		if (record_full_arch_list_add_mem (oaddr2, tmp))
-		  return -1;
-		if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
-		  return -1;
-		if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
-		  return -1;
-		break;
-
-	      case 0x83: /* PPNO-SHA-512-DRNG - seed */
-		if (record_full_arch_list_add_mem (oaddr, 240))
-		  return -1;
-		if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
-		  return -1;
-		if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
-		  return -1;
-		break;
-
-	      default:
-		gdb_printf (gdb_stdlog, "Warning: Unknown PPNO function %02x at %s.\n",
-			    (int)tmp, paddress (gdbarch, addr));
+	    case 0x00: /* PPNO-Query */
+	    case 0x80: /* PPNO-Query */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
 		return -1;
+	      break;
+
+	    case 0x03: /* PPNO-SHA-512-DRNG - generate */
+	      if (record_full_arch_list_add_mem (oaddr, 240))
+		return -1;
+	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+					  &tmp);
+	      oaddr2 = s390_record_address_mask (gdbarch, regcache, tmp);
+	      regcache_raw_read_unsigned (regcache,
+					  S390_R0_REGNUM + (inib[6] | 1),
+					  &tmp);
+	      if (record_full_arch_list_add_mem (oaddr2, tmp))
+		return -1;
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[6]))
+		return -1;
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[6] | 1)))
+		return -1;
+	      break;
+
+	    case 0x83: /* PPNO-SHA-512-DRNG - seed */
+	      if (record_full_arch_list_add_mem (oaddr, 240))
+		return -1;
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[7]))
+		return -1;
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[7] | 1)))
+		return -1;
+	      break;
+
+	    default:
+	      gdb_printf (gdb_stdlog,
+			  "Warning: Unknown PPNO function %02x at %s.\n",
+			  (int) tmp, paddress (gdbarch, addr));
+	      return -1;
 	    }
 	  /* DXC may be written */
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
@@ -4637,7 +4783,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb93d undefined */
+	  /* 0xb93d undefined */
 
 	case 0xb93e: /* KIMD - compute intermediate message digest [partial] */
 	case 0xb93f: /* KLMD - compute last message digest [partial] */
@@ -4647,60 +4793,63 @@ ex:
 	  tmp &= 0xff;
 	  switch (tmp)
 	    {
-	      case 0x00: /* K*MD-Query */
-		if (record_full_arch_list_add_mem (oaddr, 16))
-		  return -1;
-		break;
-
-	      case 0x01: /* K*MD-SHA-1 */
-		if (record_full_arch_list_add_mem (oaddr, 20))
-		  return -1;
-		break;
-
-	      case 0x02: /* K*MD-SHA-256 */
-		if (record_full_arch_list_add_mem (oaddr, 32))
-		  return -1;
-		break;
-
-	      case 0x03: /* K*MD-SHA-512 */
-		if (record_full_arch_list_add_mem (oaddr, 64))
-		  return -1;
-		break;
-
-	      case 0x41: /* KIMD-GHASH */
-		/* Only valid for KIMD.  */
-		if (insn[0] == 0xb93e)
-		  {
-		    if (record_full_arch_list_add_mem (oaddr, 16))
-		      return -1;
-		    break;
-		  }
-		/* For KLMD...  */
-		/* Fall through.  */
-	      default:
-		gdb_printf (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
-			    (int)tmp, paddress (gdbarch, addr));
+	    case 0x00: /* K*MD-Query */
+	      if (record_full_arch_list_add_mem (oaddr, 16))
 		return -1;
+	      break;
+
+	    case 0x01: /* K*MD-SHA-1 */
+	      if (record_full_arch_list_add_mem (oaddr, 20))
+		return -1;
+	      break;
+
+	    case 0x02: /* K*MD-SHA-256 */
+	      if (record_full_arch_list_add_mem (oaddr, 32))
+		return -1;
+	      break;
+
+	    case 0x03: /* K*MD-SHA-512 */
+	      if (record_full_arch_list_add_mem (oaddr, 64))
+		return -1;
+	      break;
+
+	    case 0x41: /* KIMD-GHASH */
+	      /* Only valid for KIMD.  */
+	      if (insn[0] == 0xb93e)
+		{
+		  if (record_full_arch_list_add_mem (oaddr, 16))
+		    return -1;
+		  break;
+		}
+	      /* For KLMD...  */
+	      /* Fall through.  */
+	    default:
+	      gdb_printf (gdb_stdlog,
+			  "Warning: Unknown KMAC function %02x at %s.\n",
+			  (int) tmp, paddress (gdbarch, addr));
+	      return -1;
 	    }
 	  if (tmp != 0)
 	    {
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[7]))
 		return -1;
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[7] | 1)))
+	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM
+							     + (inib[7] | 1)))
 		return -1;
 	    }
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb940 undefined */
-	/* 0xb944-0xb945 undefined */
-	/* 0xb947-0xb948 undefined */
-	/* 0xb94c-0xb950 undefined */
-	/* 0xb954-0xb958 undefined */
-	/* 0xb95c-0xb95f undefined */
-	/* 0xb962-0xb971 undefined */
-	/* 0xb974-0xb97f undefined */
+	  /* 0xb940 undefined */
+	  /* 0xb944-0xb945 undefined */
+	  /* 0xb947-0xb948 undefined */
+	  /* 0xb94c-0xb950 undefined */
+	  /* 0xb954-0xb958 undefined */
+	  /* 0xb95c-0xb95f undefined */
+	  /* 0xb962-0xb971 undefined */
+	  /* 0xb974-0xb97f undefined */
 
 	case 0xb983: /* FLOGR - find leftmost one */
 	  /* 64-bit gpr pair destination + flags */
@@ -4712,26 +4861,30 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb98a privileged */
-	/* 0xb98b-0xb98c undefined */
+	  /* 0xb98a privileged */
+	  /* 0xb98b-0xb98c undefined */
 
 	case 0xb98d: /* EPSW - extract psw */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
 	  if (inib[7])
-	    if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	    if (record_full_arch_list_add_reg (regcache,
+					       S390_R0_REGNUM + inib[7]))
 	      return -1;
 	  break;
 
-	/* 0xb98e-0xb98f privileged */
+	  /* 0xb98e-0xb98f privileged */
 
 	case 0xb990: /* TRTT - translate two to two [partial] */
 	case 0xb991: /* TRTO - translate two to one [partial] */
 	case 0xb992: /* TROT - translate one to two [partial] */
 	case 0xb993: /* TROO - translate one to one [partial] */
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6], &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[6],
+				      &tmp);
 	  oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1), &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[6] | 1),
+				      &tmp);
 	  /* tmp is source length, we want destination length.  Adjust.  */
 	  if (insn[0] == 0xb991)
 	    tmp >>= 1;
@@ -4739,11 +4892,14 @@ ex:
 	    tmp <<= 1;
 	  if (record_full_arch_list_add_mem (oaddr, tmp))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[6] | 1)))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[7]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4752,28 +4908,33 @@ ex:
 	case 0xb996: /* MLR - multiply logical */
 	case 0xb997: /* DLR - divide logical */
 	  /* 32-bit gpr pair destination  */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[6] | 1)))
 	    return -1;
 	  break;
 
-	/* 0xb99a-0xb9af unsupported, privileged, or undefined */
-	/* 0xb9b4-0xb9bc undefined */
+	  /* 0xb99a-0xb9af unsupported, privileged, or undefined */
+	  /* 0xb9b4-0xb9bc undefined */
 
 	case 0xb9bd: /* TRTRE - translate and test reverse extended [partial] */
 	case 0xb9bf: /* TRTE - translate and test extended [partial] */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[6]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[6]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[6] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[6] | 1)))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[7]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[7]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xb9c0-0xb9c7 undefined */
+	  /* 0xb9c0-0xb9c7 undefined */
 
 	case 0xb9c8: /* AHHHR - add high */
 	case 0xb9c9: /* SHHHR - subtract high */
@@ -4790,11 +4951,11 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb9cc undefined */
-	/* 0xb9ce undefined */
-	/* 0xb9d0-0xb9d7 undefined */
-	/* 0xb9dc undefined */
-	/* 0xb9de undefined */
+	  /* 0xb9cc undefined */
+	  /* 0xb9ce undefined */
+	  /* 0xb9d0-0xb9d7 undefined */
+	  /* 0xb9dc undefined */
+	  /* 0xb9de undefined */
 
 	case 0xb9e0: /* LOCFHR - load high on condition */
 	  /* 32-bit high gpr destination */
@@ -4802,23 +4963,23 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xb9e3 undefined */
-	/* 0xb9e5 undefined */
-	/* 0xb9ee-0xb9f1 undefined */
-	/* 0xb9f3 undefined */
-	/* 0xb9f5 undefined */
-	/* 0xb9fc undefined */
-	/* 0xb9fe -0xb9ff undefined */
+	  /* 0xb9e3 undefined */
+	  /* 0xb9e5 undefined */
+	  /* 0xb9ee-0xb9f1 undefined */
+	  /* 0xb9f3 undefined */
+	  /* 0xb9f5 undefined */
+	  /* 0xb9fc undefined */
+	  /* 0xb9fe -0xb9ff undefined */
 
 	default:
 	  goto UNKNOWN_OP;
 	}
       break;
 
-    /* 0xb4-0xb5 undefined */
-    /* 0xb6 privileged: STCTL - store control */
-    /* 0xb7 privileged: LCTL - load control */
-    /* 0xb8 undefined */
+      /* 0xb4-0xb5 undefined */
+      /* 0xb6 privileged: STCTL - store control */
+      /* 0xb7 privileged: LCTL - load control */
+      /* 0xb8 undefined */
 
     case 0xba: /* CS - compare and swap */
       oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -4836,13 +4997,14 @@ ex:
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
 	return -1;
-      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+      if (record_full_arch_list_add_reg (regcache,
+					 S390_R0_REGNUM + (inib[2] | 1)))
 	return -1;
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	return -1;
       break;
 
-    /* 0xbc undefined */
+      /* 0xbc undefined */
 
     case 0xbe: /* STCM - store characters under mask */
       oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -4866,7 +5028,8 @@ ex:
 	case 0xc45: /* LHRL - load halfword relative long */
 	case 0xc4d: /* LRL - load relative long */
 	  /* 32-bit or native gpr destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  break;
 
@@ -4884,7 +5047,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xc02-0xc03 undefined */
+	  /* 0xc02-0xc03 undefined */
 
 	case 0xc04: /* BRCL - branch relative on condition long */
 	case 0xc62: /* PFDRL - prefetch data relative long */
@@ -4909,7 +5072,8 @@ ex:
 	case 0xc29: /* AFI - add immediate */
 	case 0xc2b: /* ALFI - add logical immediate */
 	  /* 32-bit gpr destination + flags */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -4923,7 +5087,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xc22-0xc23 undefined */
+	  /* 0xc22-0xc23 undefined */
 
 	case 0xc24: /* SLGFI - subtract logical immediate */
 	case 0xc28: /* AGFI - add immediate */
@@ -4935,7 +5099,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xc26-0xc27 undefined */
+	  /* 0xc26-0xc27 undefined */
 
 	case 0xc2c: /* CGFI - compare immediate */
 	case 0xc2d: /* CFI - compare immediate */
@@ -4958,25 +5122,28 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xc40-0xc41 undefined */
-	/* 0xc43 undefined */
+	  /* 0xc40-0xc41 undefined */
+	  /* 0xc43 undefined */
 
 	case 0xc47: /* STHRL - store halfword relative long */
-	  oaddr = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
+	  oaddr
+	    = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
 	  if (record_full_arch_list_add_mem (oaddr, 2))
 	    return -1;
 	  break;
 
-	/* 0xc49-0xc4a undefined */
+	  /* 0xc49-0xc4a undefined */
 
 	case 0xc4b: /* STGRL - store relative long */
-	  oaddr = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
+	  oaddr
+	    = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
 	  break;
 
 	case 0xc4f: /* STRL - store relative long */
-	  oaddr = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
+	  oaddr
+	    = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
 	    return -1;
 	  break;
@@ -4988,10 +5155,12 @@ ex:
 			  paddress (gdbarch, addr));
 	      return -1;
 	    }
-	  addr = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
+	  addr
+	    = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
 	  if (inib[2])
 	    {
-	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2], &tmp);
+	      regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2],
+					  &tmp);
 	      ex = tmp & 0xff;
 	    }
 	  else
@@ -5000,23 +5169,23 @@ ex:
 	    }
 	  goto ex;
 
-	/* 0xc61 undefined */
-	/* 0xc63 undefined */
-	/* 0xc69 undefined */
-	/* 0xc6b undefined */
-	/* 0xcc0-0xcc5 undefined */
-	/* 0xcc7 undefined */
-	/* 0xcc9 undefined */
-	/* 0xccc undefined */
-	/* 0xcce undefined */
+	  /* 0xc61 undefined */
+	  /* 0xc63 undefined */
+	  /* 0xc69 undefined */
+	  /* 0xc6b undefined */
+	  /* 0xcc0-0xcc5 undefined */
+	  /* 0xcc7 undefined */
+	  /* 0xcc9 undefined */
+	  /* 0xccc undefined */
+	  /* 0xcce undefined */
 
 	default:
 	  goto UNKNOWN_OP;
 	}
       break;
 
-    /* 0xc1 undefined */
-    /* 0xc3 undefined */
+      /* 0xc1 undefined */
+      /* 0xc3 undefined */
 
     case 0xc5: /* BPRP - branch prediction relative preload */
     case 0xc7: /* BPP - branch prediction preload */
@@ -5027,7 +5196,7 @@ ex:
       /* SSF-format instruction */
       switch (ibyte[0] << 4 | inib[3])
 	{
-	/* 0xc80 unsupported */
+	  /* 0xc80 unsupported */
 
 	case 0xc81: /* ECTG - extract cpu time */
 	  if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
@@ -5049,41 +5218,44 @@ ex:
 	    oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
 	    switch (fc)
 	      {
-		case 0x00: /* 32-bit */
-		  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
-		    return -1;
-		  if (record_full_arch_list_add_mem (oaddr, 4))
-		    return -1;
-		  break;
-
-		case 0x01: /* 64-bit */
-		  if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
-		    return -1;
-		  if (record_full_arch_list_add_mem (oaddr, 8))
-		    return -1;
-		  break;
-
-		case 0x02: /* 128-bit */
-		  if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
-		    return -1;
-		  if (s390_record_gpr_g (gdbarch, regcache, inib[2] | 1))
-		    return -1;
-		  if (record_full_arch_list_add_mem (oaddr, 16))
-		    return -1;
-		  break;
-
-		default:
-		  gdb_printf (gdb_stdlog, "Warning: Unknown CSST FC %02x at %s.\n",
-			      fc, paddress (gdbarch, addr));
+	      case 0x00: /* 32-bit */
+		if (record_full_arch_list_add_reg (regcache,
+						   S390_R0_REGNUM + inib[2]))
 		  return -1;
+		if (record_full_arch_list_add_mem (oaddr, 4))
+		  return -1;
+		break;
+
+	      case 0x01: /* 64-bit */
+		if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
+		  return -1;
+		if (record_full_arch_list_add_mem (oaddr, 8))
+		  return -1;
+		break;
+
+	      case 0x02: /* 128-bit */
+		if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
+		  return -1;
+		if (s390_record_gpr_g (gdbarch, regcache, inib[2] | 1))
+		  return -1;
+		if (record_full_arch_list_add_mem (oaddr, 16))
+		  return -1;
+		break;
+
+	      default:
+		gdb_printf (gdb_stdlog,
+			    "Warning: Unknown CSST FC %02x at %s.\n", fc,
+			    paddress (gdbarch, addr));
+		return -1;
 	      }
 
 	    /* Second operand.  */
 	    oaddr2 = s390_record_calc_disp (gdbarch, regcache, 0, insn[2], 0);
 	    if (sc > 4)
 	      {
-		gdb_printf (gdb_stdlog, "Warning: Unknown CSST FC %02x at %s.\n",
-			    sc, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog,
+			    "Warning: Unknown CSST FC %02x at %s.\n", sc,
+			    paddress (gdbarch, addr));
 		return -1;
 	      }
 
@@ -5096,12 +5268,14 @@ ex:
 	  }
 	  break;
 
-	/* 0xc83 undefined */
+	  /* 0xc83 undefined */
 
 	case 0xc84: /* LPD - load pair disjoint */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[2] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -5116,15 +5290,15 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xc86-0xc8f undefined */
+	  /* 0xc86-0xc8f undefined */
 
 	default:
 	  goto UNKNOWN_OP;
 	}
       break;
 
-    /* 0xc9-0xcb undefined */
-    /* 0xcd-0xcf undefined */
+      /* 0xc9-0xcb undefined */
+      /* 0xcd-0xcf undefined */
 
     case 0xd0: /* TRTR - translate and test reversed */
     case 0xdd: /* TRT - translate and test */
@@ -5182,11 +5356,11 @@ ex:
 	return -1;
       break;
 
-    /* 0xd8 undefined */
-    /* 0xd9 unsupported: MVCK - move with key */
-    /* 0xda unsupported: MVCP - move to primary */
-    /* 0xdb unsupported: MVCS - move to secondary */
-    /* 0xe0 undefined */
+      /* 0xd8 undefined */
+      /* 0xd9 unsupported: MVCK - move with key */
+      /* 0xda unsupported: MVCP - move to primary */
+      /* 0xdb unsupported: MVCS - move to secondary */
+      /* 0xe0 undefined */
 
     case 0xe1: /* PKU - pack unicode */
     case 0xe9: /* PKA - pack ASCII */
@@ -5203,7 +5377,7 @@ ex:
       /* RXY/RXE/RXF/RSL/RSY/SIY/V*-format instruction */
       switch (ibyte[0] << 8 | ibyte[5])
 	{
-	/* 0xe300-0xe301 undefined */
+	  /* 0xe300-0xe301 undefined */
 
 	case 0xe302: /* LTG - load and test */
 	case 0xe308: /* AG - add */
@@ -5229,7 +5403,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe303 privileged */
+	  /* 0xe303 privileged */
 
 	case 0xe304: /* LG - load */
 	case 0xe30c: /* MSG - multiply single */
@@ -5258,17 +5432,18 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe305 undefined */
+	  /* 0xe305 undefined */
 
 	case 0xe306: /* CVBY - convert to binary */
 	  /* 32-bit or native gpr destination + FPC (DXC write) */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xe307 undefined */
+	  /* 0xe307 undefined */
 
 	case 0xe30d: /* DSG - divide single */
 	case 0xe31d: /* DSGF - divide single */
@@ -5291,7 +5466,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe310-0xe311 undefined */
+	  /* 0xe310-0xe311 undefined */
 
 	case 0xe312: /* LT - load and test */
 	case 0xe338: /* AGH - add halfword to 64 bit value */
@@ -5314,13 +5489,14 @@ ex:
 	case 0xebdc: /* SRAK - shift left single */
 	case 0xebdd: /* SLAK - shift left single */
 	  /* 32/64-bit gpr destination + flags */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xe313 privileged */
+	  /* 0xe313 privileged */
 
 	case 0xe31e: /* LRV - load reversed */
 	case 0xe31f: /* LRVH - load reversed */
@@ -5339,7 +5515,8 @@ ex:
 	case 0xebdf: /* SLLK - shift left single logical */
 	case 0xebf2: /* LOC - load on condition */
 	  /* 32-bit or native gpr destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  break;
 
@@ -5372,42 +5549,45 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe322-0xe323 undefined */
+	  /* 0xe322-0xe323 undefined */
 
 	case 0xe324: /* STG - store */
 	case 0xe325: /* NTSTG - nontransactional store */
 	case 0xe326: /* CVDY - convert to decimal */
 	case 0xe32f: /* STRVG - store reversed */
 	case 0xed67: /* STDY - store */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1],
+					 ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
 	  break;
 
-	/* 0xe327-0xe329 undefined */
-	/* 0xe32b-0xe32d undefined */
+	  /* 0xe327-0xe329 undefined */
+	  /* 0xe32b-0xe32d undefined */
 
 	case 0xe32e: /* CVDG - convert to decimal */
 	case 0xe38e: /* STPQ - store pair to quadword */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1],
+					 ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 16))
 	    return -1;
 	  break;
 
-	/* 0xe333 undefined */
-	/* 0xe335 undefined */
+	  /* 0xe333 undefined */
+	  /* 0xe335 undefined */
 
 	case 0xe336: /* PFD - prefetch data */
 	  break;
 
-	/* 0xe337 undefined */
-	/* 0xe33c-0xe33d undefined */
+	  /* 0xe337 undefined */
+	  /* 0xe33c-0xe33d undefined */
 
 	case 0xe33e: /* STRV - store reversed */
 	case 0xe350: /* STY - store */
 	case 0xe3cb: /* STFH - store high */
 	case 0xed66: /* STEY - store */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1],
+					 ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
 	    return -1;
 	  break;
@@ -5415,49 +5595,55 @@ ex:
 	case 0xe33f: /* STRVH - store reversed */
 	case 0xe370: /* STHY - store halfword */
 	case 0xe3c7: /* STHH - store halfword high */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1],
+					 ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 2))
 	    return -1;
 	  break;
 
-	/* 0xe340-0xe345 undefined */
+	  /* 0xe340-0xe345 undefined */
 
 	case 0xe347: /* BIC - branch indirect on condition */
 	  break;
 
-	/* 0xe348-0xe34f undefined */
-	/* 0xe352 undefined */
+	  /* 0xe348-0xe34f undefined */
+	  /* 0xe352 undefined */
 
 	case 0xe35c: /* MFY - multiply */
 	case 0xe396: /* ML - multiply logical */
 	case 0xe397: /* DL - divide logical */
 	  /* 32-bit gpr pair destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[2] | 1)))
 	    return -1;
 	  break;
 
-	/* 0xe35d undefined */
-	/* 0xe360-0xe36f undefined */
+	  /* 0xe35d undefined */
+	  /* 0xe360-0xe36f undefined */
 
 	case 0xe372: /* STCY - store character */
 	case 0xe3c3: /* STCH - store character high */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1],
+					 ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 1))
 	    return -1;
 	  break;
 
-	/* 0xe374 undefined */
+	  /* 0xe374 undefined */
 
 	case 0xe375: /* LAEY - load address extended */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_A0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_A0_REGNUM + inib[2]))
 	    return -1;
 	  break;
 
-	/* 0xe37d-0xe37f undefined */
+	  /* 0xe37d-0xe37f undefined */
 
 	case 0xe385: /* LGAT - load and trap */
 	case 0xe39c: /* LLGTAT - load logical thirty one bits and trap */
@@ -5472,20 +5658,21 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe38a-0xe38d undefined */
-	/* 0xe392-0xe393 undefined */
-	/* 0xe39a-0xe39b undefined */
-	/* 0xe39e undefined */
+	  /* 0xe38a-0xe38d undefined */
+	  /* 0xe392-0xe393 undefined */
+	  /* 0xe39a-0xe39b undefined */
+	  /* 0xe39e undefined */
 
 	case 0xe39f: /* LAT - load and trap */
 	  /* 32-bit gpr destination + fpc for possible DXC write */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xe3a0-0xe3bf undefined */
+	  /* 0xe3a0-0xe3bf undefined */
 
 	case 0xe3c0: /* LBH - load byte high */
 	case 0xe3c2: /* LLCH - load logical character high */
@@ -5498,8 +5685,8 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe3c1 undefined */
-	/* 0xe3c5 undefined */
+	  /* 0xe3c1 undefined */
+	  /* 0xe3c5 undefined */
 
 	case 0xe3c8: /* LFHAT - load high and trap */
 	  /* 32-bit high gpr destination + fpc for possible DXC write */
@@ -5509,10 +5696,10 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe3c9 undefined */
-	/* 0xe3cc undefined */
-	/* 0xe3ce undefined */
-	/* 0xe3d0-0xe3ff undefined */
+	  /* 0xe3c9 undefined */
+	  /* 0xe3cc undefined */
+	  /* 0xe3ce undefined */
+	  /* 0xe3d0-0xe3ff undefined */
 
 	case 0xe601: /* VLEBRH - vector load byte reversed element */
 	case 0xe602: /* VLEBRG - vector load byte reversed element */
@@ -5661,7 +5848,8 @@ ex:
 	  break;
 
 	case 0xe708: /* VSTEB - vector store element */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
 	  if (record_full_arch_list_add_mem (oaddr, 1))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
@@ -5670,7 +5858,8 @@ ex:
 
 	case 0xe609: /* VSTEBRH - vector store byte reversed element */
 	case 0xe709: /* VSTEH - vector store element */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
 	  if (record_full_arch_list_add_mem (oaddr, 2))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
@@ -5679,7 +5868,8 @@ ex:
 
 	case 0xe60a: /* VSTEBRG - vector store byte reversed element */
 	case 0xe70a: /* VSTEG - vector store element */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
@@ -5688,30 +5878,33 @@ ex:
 
 	case 0xe60b: /* VSTEBRF - vector store byte reversed element */
 	case 0xe70b: /* VSTEF - vector store element */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xe70c-0xe70d undefined */
+	  /* 0xe70c-0xe70d undefined */
 
 	case 0xe60e: /* VSTBR - vector store byte reversed elements */
 	case 0xe60f: /* VSTER - vector store elements reversed */
 	case 0xe70e: /* VST - vector store */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
 	  if (record_full_arch_list_add_mem (oaddr, 16))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xe70f-0xe711 undefined */
-	/* 0xe714-0xe719 undefined */
+	  /* 0xe70f-0xe711 undefined */
+	  /* 0xe714-0xe719 undefined */
 
 	case 0xe71a: /* VSCEG - vector scatter element */
-	  if (s390_record_calc_disp_vsce (gdbarch, regcache, ivec[1], inib[8], 8, insn[1], 0, &oaddr))
+	  if (s390_record_calc_disp_vsce (gdbarch, regcache, ivec[1], inib[8],
+					  8, insn[1], 0, &oaddr))
 	    return -1;
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
@@ -5720,7 +5913,8 @@ ex:
 	  break;
 
 	case 0xe71b: /* VSCEF - vector scatter element */
-	  if (s390_record_calc_disp_vsce (gdbarch, regcache, ivec[1], inib[8], 4, insn[1], 0, &oaddr))
+	  if (s390_record_calc_disp_vsce (gdbarch, regcache, ivec[1], inib[8],
+					  4, insn[1], 0, &oaddr))
 	    return -1;
 	  if (record_full_arch_list_add_mem (oaddr, 4))
 	    return -1;
@@ -5728,11 +5922,11 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe71c-0xe720 undefined */
-	/* 0xe723-0xe726 undefined */
-	/* 0xe728-0xe72f undefined */
-	/* 0xe731-0xe732 undefined */
-	/* 0xe734-0xe735 undefined */
+	  /* 0xe71c-0xe720 undefined */
+	  /* 0xe723-0xe726 undefined */
+	  /* 0xe728-0xe72f undefined */
+	  /* 0xe731-0xe732 undefined */
+	  /* 0xe734-0xe735 undefined */
 
 	case 0xe736: /* VLM - vector load multiple */
 	  for (i = ivec[0]; i != ivec[1]; i++, i &= 0x1f)
@@ -5744,8 +5938,8 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe739 undefined */
-	/* 0xe73b-0xe73d undefined */
+	  /* 0xe739 undefined */
+	  /* 0xe73b-0xe73d undefined */
 
 	case 0xe73e: /* VSTM - vector store multiple */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -5770,7 +5964,8 @@ ex:
 	case 0xe63f: /* VSTRLR - vector store rightmost with length */
 	case 0xe73f: /* VSTL - vector store with length */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[3], &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[3],
+				      &tmp);
 	  tmp &= 0xffffffffu;
 	  if (tmp > 15)
 	    tmp = 15;
@@ -5780,7 +5975,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe747-0xe749 undefined */
+	  /* 0xe747-0xe749 undefined */
 
 	case 0xe658: /* VCVD - vector convert to decimal 32 bit */
 	case 0xe659: /* VSRP - vector shift and round decimal */
@@ -5824,31 +6019,31 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe74b-0xe74c undefined */
-	/* 0xe74e-0xe74f undefined */
-	/* 0xe751 undefined */
-	/* 0xe754-0xe755 undefined */
-	/* 0xe757-0xe75b undefined */
-	/* 0xe75d-0xe75e undefined */
-	/* 0xe763 undefined */
-	/* 0xe771 undefined */
-	/* 0xe776 undefined */
-	/* 0xe779 undefined */
-	/* 0xe77b undefined */
-	/* 0xe783 undefined */
-	/* 0xe786-0xe789 undefined */
-	/* 0xe78b undefined */
-	/* 0xe790-0xe793 undefined */
-	/* 0xe796 undefined */
-	/* 0xe798-0xe79d undefined */
-	/* 0xe7a0 undefined */
-	/* 0xe7a8 undefined */
-	/* 0xe7b0-0xe7b3 undefined */
-	/* 0xe7b5-0xe7b7 undefined */
-	/* 0xe7ba undefined */
-	/* 0xe7be undefined */
-	/* 0xe7c6 undefined */
-	/* 0xe7c8-0xe7c9 undefined */
+	  /* 0xe74b-0xe74c undefined */
+	  /* 0xe74e-0xe74f undefined */
+	  /* 0xe751 undefined */
+	  /* 0xe754-0xe755 undefined */
+	  /* 0xe757-0xe75b undefined */
+	  /* 0xe75d-0xe75e undefined */
+	  /* 0xe763 undefined */
+	  /* 0xe771 undefined */
+	  /* 0xe776 undefined */
+	  /* 0xe779 undefined */
+	  /* 0xe77b undefined */
+	  /* 0xe783 undefined */
+	  /* 0xe786-0xe789 undefined */
+	  /* 0xe78b undefined */
+	  /* 0xe790-0xe793 undefined */
+	  /* 0xe796 undefined */
+	  /* 0xe798-0xe79d undefined */
+	  /* 0xe7a0 undefined */
+	  /* 0xe7a8 undefined */
+	  /* 0xe7b0-0xe7b3 undefined */
+	  /* 0xe7b5-0xe7b7 undefined */
+	  /* 0xe7ba undefined */
+	  /* 0xe7be undefined */
+	  /* 0xe7c6 undefined */
+	  /* 0xe7c8-0xe7c9 undefined */
 
 	case 0xe677: /* VCP - vector compare decimal */
 	case 0xe7ca: /* WFK - vector fp compare and signal scalar */
@@ -5867,20 +6062,20 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe7cd undefined */
-	/* 0xe7cf-0xe7d3 undefined */
-	/* 0xe7da undefined */
-	/* 0xe7dc-0xe7dd undefined */
-	/* 0xe7e0-0xe7e1 undefined */
-	/* 0xe7e4 undefined */
-	/* 0xe7e6 undefined */
-	/* 0xe7e9 undefined */
-	/* 0xe7ec-0xe7ed undefined */
-	/* 0xe7f4 undefined */
-	/* 0xe7f6 undefined */
-	/* 0xe7fa undefined */
+	  /* 0xe7cd undefined */
+	  /* 0xe7cf-0xe7d3 undefined */
+	  /* 0xe7da undefined */
+	  /* 0xe7dc-0xe7dd undefined */
+	  /* 0xe7e0-0xe7e1 undefined */
+	  /* 0xe7e4 undefined */
+	  /* 0xe7e6 undefined */
+	  /* 0xe7e9 undefined */
+	  /* 0xe7ec-0xe7ed undefined */
+	  /* 0xe7f4 undefined */
+	  /* 0xe7f6 undefined */
+	  /* 0xe7fa undefined */
 
-	/* 0xeb00-0xeb03 undefined */
+	  /* 0xeb00-0xeb03 undefined */
 
 	case 0xeb04: /* LMG - load multiple */
 	  for (i = inib[2]; i != inib[3]; i++, i &= 0xf)
@@ -5890,10 +6085,10 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xeb05-0xeb09 undefined */
-	/* 0xeb0e undefined */
-	/* 0xeb0f privileged: TRACG */
-	/* 0xeb10-0xeb13 undefined */
+	  /* 0xeb05-0xeb09 undefined */
+	  /* 0xeb0e undefined */
+	  /* 0xeb0f privileged: TRACG */
+	  /* 0xeb10-0xeb13 undefined */
 
 	case 0xeb14: /* CSY - compare and swap */
 	case 0xebf4: /* LAN - load and and */
@@ -5901,18 +6096,20 @@ ex:
 	case 0xebf7: /* LAX - load and xor */
 	case 0xebf8: /* LAA - load and add */
 	case 0xebfa: /* LAAL - load and add logical */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xeb15-0xeb1b undefined */
-	/* 0xeb1e-0xeb1f undefined */
-	/* 0xeb22 undefined */
+	  /* 0xeb15-0xeb1b undefined */
+	  /* 0xeb1e-0xeb1f undefined */
+	  /* 0xeb22 undefined */
 
 	case 0xeb23: /* CLT - compare logical and trap */
 	case 0xeb2b: /* CLGT - compare logical and trap */
@@ -5922,7 +6119,8 @@ ex:
 	  break;
 
 	case 0xeb24: /* STMG - store multiple */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (inib[2] <= inib[3])
 	    n = inib[3] - inib[2] + 1;
 	  else
@@ -5931,12 +6129,13 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xeb25 privileged */
+	  /* 0xeb25 privileged */
 
 	case 0xeb26: /* STMH - store multiple high */
 	case 0xeb90: /* STMY - store multiple */
 	case 0xeb9b: /* STAMY - store access multiple */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (inib[2] <= inib[3])
 	    n = inib[3] - inib[2] + 1;
 	  else
@@ -5945,17 +6144,18 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xeb27-0xeb2a undefined */
+	  /* 0xeb27-0xeb2a undefined */
 
 	case 0xeb2c: /* STCMH - store characters under mask */
 	case 0xeb2d: /* STCMY - store characters under mask */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, s390_popcnt (inib[3])))
 	    return -1;
 	  break;
 
-	/* 0xeb2e undefined */
-	/* 0xeb2f privileged */
+	  /* 0xeb2e undefined */
+	  /* 0xeb2f privileged */
 
 	case 0xeb30: /* CSG - compare and swap */
 	case 0xebe4: /* LANG - load and and */
@@ -5963,7 +6163,8 @@ ex:
 	case 0xebe7: /* LAXG - load and xor */
 	case 0xebe8: /* LAAG - load and add */
 	case 0xebea: /* LAALG - load and add logical */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
 	  if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
@@ -5973,21 +6174,25 @@ ex:
 	  break;
 
 	case 0xeb31: /* CDSY - compare double and swap */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[2] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xeb32-0xeb3d undefined */
+	  /* 0xeb32-0xeb3d undefined */
 
 	case 0xeb3e: /* CDSG - compare double and swap */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 16))
 	    return -1;
 	  if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
@@ -5998,12 +6203,13 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xeb3f-0xeb43 undefined */
-	/* 0xeb46-0xeb4b undefined */
-	/* 0xeb4d-0xeb50 undefined */
+	  /* 0xeb3f-0xeb43 undefined */
+	  /* 0xeb46-0xeb4b undefined */
+	  /* 0xeb4d-0xeb50 undefined */
 
 	case 0xeb52: /* MVIY - move */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 1))
 	    return -1;
 	  break;
@@ -6011,39 +6217,42 @@ ex:
 	case 0xeb54: /* NIY - and */
 	case 0xeb56: /* OIY - or */
 	case 0xeb57: /* XIY - xor */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 1))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xeb53 undefined */
-	/* 0xeb58-0xeb69 undefined */
+	  /* 0xeb53 undefined */
+	  /* 0xeb58-0xeb69 undefined */
 
 	case 0xeb6a: /* ASI - add immediate */
 	case 0xeb6e: /* ALSI - add immediate */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xeb6b-0xeb6d undefined */
-	/* 0xeb6f-0xeb79 undefined */
+	  /* 0xeb6b-0xeb6d undefined */
+	  /* 0xeb6f-0xeb79 undefined */
 
 	case 0xeb7a: /* AGSI - add immediate */
 	case 0xeb7e: /* ALGSI - add immediate */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xeb7b-0xeb7d undefined */
-	/* 0xeb7f undefined */
+	  /* 0xeb7b-0xeb7d undefined */
+	  /* 0xeb7f undefined */
 
 	case 0xeb80: /* ICMH - insert characters under mask */
 	  /* 32-bit high gpr destination + flags */
@@ -6053,40 +6262,50 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xeb82-0xeb8d undefined */
+	  /* 0xeb82-0xeb8d undefined */
 
 	case 0xeb8e: /* MVCLU - move long unicode [partial] */
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2], &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + inib[2],
+				      &tmp);
 	  oaddr = s390_record_address_mask (gdbarch, regcache, tmp);
-	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[2] | 1), &tmp);
+	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM + (inib[2] | 1),
+				      &tmp);
 	  if (record_full_arch_list_add_mem (oaddr, tmp))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[2] | 1)))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[3]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[3] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[3] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
 	case 0xeb8f: /* CLCLU - compare logical long unicode [partial] */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[2] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[2] | 1)))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[3]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + (inib[3] | 1)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + (inib[3] | 1)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xeb91-0xeb95 undefined */
+	  /* 0xeb91-0xeb95 undefined */
 
 	case 0xeb96: /* LMH - load multiple high */
 	  for (i = inib[2]; i != inib[3]; i++, i &= 0xf)
@@ -6096,50 +6315,54 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xeb97 undefined */
+	  /* 0xeb97 undefined */
 
 	case 0xeb98: /* LMY - load multiple */
 	  for (i = inib[2]; i != inib[3]; i++, i &= 0xf)
 	    if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + i))
 	      return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[3]))
 	    return -1;
 	  break;
 
-	/* 0xeb99 undefined */
+	  /* 0xeb99 undefined */
 
 	case 0xeb9a: /* LAMY - load access multiple */
 	  for (i = inib[2]; i != inib[3]; i++, i &= 0xf)
 	    if (record_full_arch_list_add_reg (regcache, S390_A0_REGNUM + i))
 	      return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_A0_REGNUM + inib[3]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_A0_REGNUM + inib[3]))
 	    return -1;
 	  break;
 
-	/* 0xeb9c-0xebbf undefined */
-	/* 0xebc1-0xebdb undefined */
+	  /* 0xeb9c-0xebbf undefined */
+	  /* 0xebc1-0xebdb undefined */
 
 	case 0xebe1: /* STOCFH - store high on condition */
 	case 0xebf3: /* STOC - store on condition */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
 	    return -1;
 	  break;
 
 	case 0xebe3: /* STOCG - store on condition */
-	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  oaddr
+	    = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
 	    return -1;
 	  break;
 
-	/* 0xebe5 undefined */
-	/* 0xebe9 undefined */
-	/* 0xebeb-0xebf1 undefined */
-	/* 0xebf5 undefined */
-	/* 0xebf9 undefined */
-	/* 0xebfb-0xebff undefined */
+	  /* 0xebe5 undefined */
+	  /* 0xebe9 undefined */
+	  /* 0xebeb-0xebf1 undefined */
+	  /* 0xebf5 undefined */
+	  /* 0xebf9 undefined */
+	  /* 0xebfb-0xebff undefined */
 
-	/* 0xed00-0xed03 undefined */
+	  /* 0xed00-0xed03 undefined */
 
 	case 0xed04: /* LDEB - load lengthened */
 	case 0xed0c: /* MDEB - multiply */
@@ -6150,7 +6373,8 @@ ex:
 	case 0xed1c: /* MDB - multiply */
 	case 0xed1d: /* DDB - divide */
 	  /* float destination + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
@@ -6160,9 +6384,11 @@ ex:
 	case 0xed06: /* LXEB - load lengthened */
 	case 0xed07: /* MXDB - multiply */
 	  /* float pair destination + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[2] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[2] | 2)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
@@ -6173,7 +6399,8 @@ ex:
 	case 0xed1a: /* ADB - add */
 	case 0xed1b: /* SDB - subtract */
 	  /* float destination + flags + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
@@ -6190,15 +6417,16 @@ ex:
 	case 0xedaa: /* CDZT - convert from zoned */
 	case 0xedae: /* CDPT - convert from packed */
 	  /* float destination [RXF] + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[8]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[8]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xed13 undefined */
-	/* 0xed16 undefined */
-	/* 0xed20-0xed23 undefined */
+	  /* 0xed13 undefined */
+	  /* 0xed16 undefined */
+	  /* 0xed20-0xed23 undefined */
 
 	case 0xed24: /* LDE - load lengthened */
 	case 0xed34: /* SQE - square root */
@@ -6207,20 +6435,23 @@ ex:
 	case 0xed64: /* LEY - load */
 	case 0xed65: /* LDY - load */
 	  /* float destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[2]))
 	    return -1;
 	  break;
 
 	case 0xed25: /* LXD - load lengthened */
 	case 0xed26: /* LXE - load lengthened */
 	  /* float pair destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[2]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[2] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[2] | 2)))
 	    return -1;
 	  break;
 
-	/* 0xed27-0xed2d undefined */
+	  /* 0xed27-0xed2d undefined */
 
 	case 0xed2e: /* MAE - multiply and add */
 	case 0xed2f: /* MSE - multiply and subtract */
@@ -6231,42 +6462,47 @@ ex:
 	case 0xed3e: /* MAD - multiply and add */
 	case 0xed3f: /* MSD - multiply and subtract */
 	  /* float destination [RXF] */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[8]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[8]))
 	    return -1;
 	  break;
 
-	/* 0xed30-0xed33 undefined */
-	/* 0xed36 undefined */
+	  /* 0xed30-0xed33 undefined */
+	  /* 0xed36 undefined */
 
 	case 0xed3a: /* MAY - multiply and add unnormalized */
 	case 0xed3b: /* MY - multiply unnormalized */
 	  /* float pair destination [RXF] */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[8]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[8]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[8] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[8] | 2)))
 	    return -1;
 	  break;
 
-	/* 0xed42-0xed47 undefined */
+	  /* 0xed42-0xed47 undefined */
 
 	case 0xed48: /* SLXT - shift significand left */
 	case 0xed49: /* SRXT - shift significand right */
 	case 0xedab: /* CXZT - convert from zoned */
 	case 0xedaf: /* CXPT - convert from packed */
 	  /* float pair destination [RXF] + fpc */
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[8]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + inib[8]))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[8] | 2)))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_F0_REGNUM + (inib[8] | 2)))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_FPC_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xed4a-0xed4f undefined */
-	/* 0xed52-0xed53 undefined */
-	/* 0xed56-0xed57 undefined */
-	/* 0xed5a-0xed63 undefined */
-	/* 0xed68-0xeda7 undefined */
+	  /* 0xed4a-0xed4f undefined */
+	  /* 0xed52-0xed53 undefined */
+	  /* 0xed56-0xed57 undefined */
+	  /* 0xed5a-0xed63 undefined */
+	  /* 0xed68-0xeda7 undefined */
 
 	case 0xeda8: /* CZDT - convert to zoned */
 	case 0xeda9: /* CZXT - convert to zoned */
@@ -6279,20 +6515,20 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xedb0-0xedff undefined */
+	  /* 0xedb0-0xedff undefined */
 
 	default:
 	  goto UNKNOWN_OP;
 	}
       break;
 
-    /* 0xe4 undefined */
+      /* 0xe4 undefined */
 
     case 0xe5:
       /* SSE/SIL-format instruction */
       switch (insn[0])
 	{
-	/* 0xe500-0xe509 undefined, privileged, or unsupported */
+	  /* 0xe500-0xe509 undefined, privileged, or unsupported */
 
 	case 0xe50a: /* MVCRL - move right to left */
 	  regcache_raw_read_unsigned (regcache, S390_R0_REGNUM, &tmp);
@@ -6301,7 +6537,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe50b-0xe543 undefined, privileged, or unsupported */
+	  /* 0xe50b-0xe543 undefined, privileged, or unsupported */
 
 	case 0xe544: /* MVHHI - move */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -6309,7 +6545,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe545-0xe547 undefined */
+	  /* 0xe545-0xe547 undefined */
 
 	case 0xe548: /* MVGHI - move */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -6317,7 +6553,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe549-0xe54b undefined */
+	  /* 0xe549-0xe54b undefined */
 
 	case 0xe54c: /* MVHI - move */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], 0);
@@ -6325,7 +6561,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe54d-0xe553 undefined */
+	  /* 0xe54d-0xe553 undefined */
 
 	case 0xe554: /* CHHSI - compare halfword immediate */
 	case 0xe555: /* CLHHSI - compare logical immediate */
@@ -6337,9 +6573,9 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xe556-0xe557 undefined */
-	/* 0xe55a-0xe55b undefined */
-	/* 0xe55e-0xe55f undefined */
+	  /* 0xe556-0xe557 undefined */
+	  /* 0xe55a-0xe55b undefined */
+	  /* 0xe55e-0xe55f undefined */
 
 	case 0xe560: /* TBEGIN - transaction begin */
 	  /* The transaction will be immediately aborted after this
@@ -6356,22 +6592,25 @@ ex:
 	  /* Transaction diagnostic block - supervisor.  */
 	  if (record_full_arch_list_add_reg (regcache, S390_TDB_DWORD0_REGNUM))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_TDB_ABORT_CODE_REGNUM))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_TDB_ABORT_CODE_REGNUM))
 	    return -1;
-	  if (record_full_arch_list_add_reg (regcache, S390_TDB_CONFLICT_TOKEN_REGNUM))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_TDB_CONFLICT_TOKEN_REGNUM))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_TDB_ATIA_REGNUM))
 	    return -1;
 	  for (i = 0; i < 16; i++)
-	    if (record_full_arch_list_add_reg (regcache, S390_TDB_R0_REGNUM + i))
+	    if (record_full_arch_list_add_reg (regcache,
+					       S390_TDB_R0_REGNUM + i))
 	      return -1;
 	  /* And flags.  */
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xe561 unsupported: TBEGINC */
-	/* 0xe562-0xe5ff undefined */
+	  /* 0xe561 unsupported: TBEGINC */
+	  /* 0xe562-0xe5ff undefined */
 
 	default:
 	  goto UNKNOWN_OP;
@@ -6382,16 +6621,17 @@ ex:
       /* RIE/RIS/RRS-format instruction */
       switch (ibyte[0] << 8 | ibyte[5])
 	{
-	/* 0xec00-0xec41 undefined */
+	  /* 0xec00-0xec41 undefined */
 
 	case 0xec42: /* LOCHI - load halfword immediate on condition */
 	case 0xec51: /* RISBLG - rotate then insert selected bits low */
 	  /* 32-bit or native gpr destination */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  break;
 
-	/* 0xec43 undefined */
+	  /* 0xec43 undefined */
 
 	case 0xec44: /* BRXHG - branch relative on index high */
 	case 0xec45: /* BRXLG - branch relative on index low or equal */
@@ -6402,7 +6642,7 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xec47-0xec4d undefined */
+	  /* 0xec47-0xec4d undefined */
 
 	case 0xec4e: /* LOCHHI - load halfword immediate on condition */
 	case 0xec5d: /* RISBHG - rotate then insert selected bits high */
@@ -6411,8 +6651,8 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xec4f-0xec50 undefined */
-	/* 0xec52-0xec53 undefined */
+	  /* 0xec4f-0xec50 undefined */
+	  /* 0xec52-0xec53 undefined */
 
 	case 0xec54: /* RNSBG - rotate then and selected bits */
 	case 0xec55: /* RISBG - rotate then insert selected bits */
@@ -6427,9 +6667,9 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xec58 undefined */
-	/* 0xec5a-0xec5c undefined */
-	/* 0xec5e-0xec63 undefined */
+	  /* 0xec58 undefined */
+	  /* 0xec5a-0xec5c undefined */
+	  /* 0xec5e-0xec63 undefined */
 
 	case 0xec64: /* CGRJ - compare and branch relative */
 	case 0xec65: /* CLGRJ - compare logical and branch relative */
@@ -6449,7 +6689,7 @@ ex:
 	case 0xecff: /* CLIB - compare logical immediate and branch */
 	  break;
 
-	/* 0xec66-0xec6f undefined */
+	  /* 0xec66-0xec6f undefined */
 
 	case 0xec70: /* CGIT - compare immediate and trap */
 	case 0xec71: /* CLGIT - compare logical immediate and trap */
@@ -6460,23 +6700,24 @@ ex:
 	    return -1;
 	  break;
 
-	/* 0xec74-0xec75 undefined */
-	/* 0xec78-0xec7b undefined */
+	  /* 0xec74-0xec75 undefined */
+	  /* 0xec78-0xec7b undefined */
 
-	/* 0xec80-0xecd7 undefined */
+	  /* 0xec80-0xecd7 undefined */
 
 	case 0xecd8: /* AHIK - add immediate */
 	case 0xecda: /* ALHSIK - add logical immediate */
 	  /* 32-bit gpr destination + flags */
-	  if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	  if (record_full_arch_list_add_reg (regcache,
+					     S390_R0_REGNUM + inib[2]))
 	    return -1;
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
 	    return -1;
 	  break;
 
-	/* 0xecdc-0xece3 undefined */
-	/* 0xece6-0xecf5 undefined */
-	/* 0xecf8-0xecfb undefined */
+	  /* 0xecdc-0xece3 undefined */
+	  /* 0xece6-0xecf5 undefined */
+	  /* 0xecf8-0xecfb undefined */
 
 	default:
 	  goto UNKNOWN_OP;
@@ -6495,10 +6736,12 @@ ex:
 	    {
 	    case 0x00: /* CL */
 	      /* op1c */
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[2]))
 		return -1;
 	      /* op3 */
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[3]))
 		return -1;
 	      break;
 
@@ -6531,7 +6774,8 @@ ex:
 
 	    case 0x08: /* DCS */
 	      /* op3c */
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[3]))
 		return -1;
 	      /* fallthru */
 	    case 0x0c: /* CSST */
@@ -6566,9 +6810,10 @@ ex:
 		return -1;
 	      /* fallthru */
 	    case 0x04: /* CS */
-CS:
+	    CS:
 	      /* op1c */
-	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[2]))
+	      if (record_full_arch_list_add_reg (regcache,
+						 S390_R0_REGNUM + inib[2]))
 		return -1;
 	      /* op2 */
 	      if (record_full_arch_list_add_mem (oaddr, 4))
@@ -6600,7 +6845,7 @@ CS:
 		return -1;
 	      /* fallthru */
 	    case 0x0d: /* CSSTG */
-CSSTG:
+	    CSSTG:
 	      /* op4 */
 	      if (target_read_memory (oaddr2 + 0x48, buf, 8))
 		return -1;
@@ -6655,7 +6900,7 @@ CSSTG:
 		return -1;
 	      /* fallthru */
 	    case 0x06: /* CSGR */
-CSGR:
+	    CSGR:
 	      /* op1c */
 	      if (s390_record_gpr_g (gdbarch, regcache, inib[2]))
 		return -1;
@@ -6689,7 +6934,7 @@ CSGR:
 		return -1;
 	      /* fallthru */
 	    case 0x0f: /* CSSTX */
-CSSTX:
+	    CSSTX:
 	      /* op4 */
 	      if (target_read_memory (oaddr2 + 0x48, buf, 8))
 		return -1;
@@ -6747,7 +6992,7 @@ CSSTX:
 	return -1;
       break;
 
-    /* 0xf4-0xf7 undefined */
+      /* 0xf4-0xf7 undefined */
 
     case 0xf9: /* CP - compare decimal */
       if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
@@ -6767,14 +7012,16 @@ CSSTX:
 	return -1;
       break;
 
-    /* 0xfe-0xff undefined */
+      /* 0xfe-0xff undefined */
 
     default:
-UNKNOWN_OP:
-      gdb_printf (gdb_stdlog, "Warning: Don't know how to record %04x "
-		  "at %s.\n", insn[0], paddress (gdbarch, addr));
+    UNKNOWN_OP:
+      gdb_printf (gdb_stdlog,
+		  "Warning: Don't know how to record %04x "
+		  "at %s.\n",
+		  insn[0], paddress (gdbarch, addr));
       return -1;
-  }
+    }
 
   if (record_full_arch_list_add_reg (regcache, S390_PSWA_REGNUM))
     return -1;
@@ -6813,71 +7060,67 @@ s390_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
   return ((isdigit (*s) && s[1] == '(' && s[2] == '%') /* Displacement
 							  or indirection.  */
-	  || *s == '%' /* Register access.  */
-	  || isdigit (*s)); /* Literal number.  */
+	  || *s == '%'				       /* Register access.  */
+	  || isdigit (*s));			       /* Literal number.  */
 }
 
 /* gdbarch init.  */
 
 /* Validate the range of registers.  NAMES must be known at compile time.  */
 
-#define s390_validate_reg_range(feature, tdesc_data, start, names)	\
-do									\
-{									\
-  for (int i = 0; i < ARRAY_SIZE (names); i++)				\
-    if (!tdesc_numbered_register (feature, tdesc_data, start + i, names[i])) \
-      return false;							\
-}									\
-while (0)
+#define s390_validate_reg_range(feature, tdesc_data, start, names)    \
+  do                                                                  \
+    {                                                                 \
+      for (int i = 0; i < ARRAY_SIZE (names); i++)                    \
+	if (!tdesc_numbered_register (feature, tdesc_data, start + i, \
+				      names[i]))                      \
+	  return false;                                               \
+    }                                                                 \
+  while (0)
 
 /* Validate the target description.  Also numbers registers contained in
    tdesc.  */
 
 static bool
-s390_tdesc_valid (s390_gdbarch_tdep *tdep,
-		  struct tdesc_arch_data *tdesc_data)
+s390_tdesc_valid (s390_gdbarch_tdep *tdep, struct tdesc_arch_data *tdesc_data)
 {
-  static const char *const psw[] = {
-    "pswm", "pswa"
-  };
-  static const char *const gprs[] = {
-    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
-  };
-  static const char *const fprs[] = {
-    "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-    "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15"
-  };
-  static const char *const acrs[] = {
-    "acr0", "acr1", "acr2", "acr3", "acr4", "acr5", "acr6", "acr7",
-    "acr8", "acr9", "acr10", "acr11", "acr12", "acr13", "acr14", "acr15"
-  };
-  static const char *const gprs_lower[] = {
-    "r0l", "r1l", "r2l", "r3l", "r4l", "r5l", "r6l", "r7l",
-    "r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l"
-  };
-  static const char *const gprs_upper[] = {
-    "r0h", "r1h", "r2h", "r3h", "r4h", "r5h", "r6h", "r7h",
-    "r8h", "r9h", "r10h", "r11h", "r12h", "r13h", "r14h", "r15h"
-  };
-  static const char *const tdb_regs[] = {
-    "tdb0", "tac", "tct", "atia",
-    "tr0", "tr1", "tr2", "tr3", "tr4", "tr5", "tr6", "tr7",
-    "tr8", "tr9", "tr10", "tr11", "tr12", "tr13", "tr14", "tr15"
-  };
+  static const char *const psw[] = { "pswm", "pswa" };
+  static const char *const gprs[]
+    = { "r0", "r1", "r2",  "r3",  "r4",	 "r5",	"r6",  "r7",
+	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15" };
+  static const char *const fprs[]
+    = { "f0", "f1", "f2",  "f3",  "f4",	 "f5",	"f6",  "f7",
+	"f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15" };
+  static const char *const acrs[]
+    = { "acr0", "acr1", "acr2",	 "acr3",  "acr4",  "acr5",  "acr6",  "acr7",
+	"acr8", "acr9", "acr10", "acr11", "acr12", "acr13", "acr14", "acr15" };
+  static const char *const gprs_lower[]
+    = { "r0l", "r1l", "r2l",  "r3l",  "r4l",  "r5l",  "r6l",  "r7l",
+	"r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l" };
+  static const char *const gprs_upper[]
+    = { "r0h", "r1h", "r2h",  "r3h",  "r4h",  "r5h",  "r6h",  "r7h",
+	"r8h", "r9h", "r10h", "r11h", "r12h", "r13h", "r14h", "r15h" };
+  static const char *const tdb_regs[]
+    = { "tdb0", "tac",	"tct",	"atia", "tr0",	"tr1", "tr2",
+	"tr3",	"tr4",	"tr5",	"tr6",	"tr7",	"tr8", "tr9",
+	"tr10", "tr11", "tr12", "tr13", "tr14", "tr15" };
   static const char *const vxrs_low[] = {
-    "v0l", "v1l", "v2l", "v3l", "v4l", "v5l", "v6l", "v7l", "v8l",
-    "v9l", "v10l", "v11l", "v12l", "v13l", "v14l", "v15l",
+    "v0l", "v1l", "v2l",  "v3l",  "v4l",  "v5l",  "v6l",  "v7l",
+    "v8l", "v9l", "v10l", "v11l", "v12l", "v13l", "v14l", "v15l",
   };
   static const char *const vxrs_high[] = {
-    "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24",
-    "v25", "v26", "v27", "v28", "v29", "v30", "v31",
+    "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
+    "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31",
   };
   static const char *const gs_cb[] = {
-    "gsd", "gssm", "gsepla",
+    "gsd",
+    "gssm",
+    "gsepla",
   };
   static const char *const gs_bc[] = {
-    "bc_gsd", "bc_gssm", "bc_gsepla",
+    "bc_gsd",
+    "bc_gssm",
+    "bc_gsepla",
   };
 
   const struct target_desc *tdesc = tdep->tdesc;
@@ -6927,11 +7170,11 @@ s390_tdesc_valid (s390_gdbarch_tdep *tdep,
   feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.linux");
   if (feature)
     {
-      tdesc_numbered_register (feature, tdesc_data,
-			       S390_ORIG_R2_REGNUM, "orig_r2");
+      tdesc_numbered_register (feature, tdesc_data, S390_ORIG_R2_REGNUM,
+			       "orig_r2");
 
-      if (tdesc_numbered_register (feature, tdesc_data,
-				   S390_LAST_BREAK_REGNUM, "last_break"))
+      if (tdesc_numbered_register (feature, tdesc_data, S390_LAST_BREAK_REGNUM,
+				   "last_break"))
 	tdep->have_linux_v1 = true;
 
       if (tdesc_numbered_register (feature, tdesc_data,
@@ -6976,8 +7219,7 @@ s390_tdesc_valid (s390_gdbarch_tdep *tdep,
     {
       if (!tdep->have_gs)
 	return false;
-      s390_validate_reg_range (feature, tdesc_data, S390_BC_GSD_REGNUM,
-			       gs_bc);
+      s390_validate_reg_range (feature, tdesc_data, S390_BC_GSD_REGNUM, gs_bc);
     }
 
   return true;
@@ -7020,10 +7262,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct target_desc *tdesc = info.target_desc;
   int first_pseudo_reg, last_pseudo_reg;
   static const char *const stap_register_prefixes[] = { "%", NULL };
-  static const char *const stap_register_indirection_prefixes[] = { "(",
-								    NULL };
-  static const char *const stap_register_indirection_suffixes[] = { ")",
-								    NULL };
+  static const char *const stap_register_indirection_prefixes[]
+    = { "(", NULL };
+  static const char *const stap_register_indirection_suffixes[]
+    = { ")", NULL };
 
   gdbarch *gdbarch = gdbarch_alloc (&info, s390_gdbarch_tdep_alloc ());
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
@@ -7053,7 +7295,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					s390_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
-  set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
+  set_gdbarch_displaced_step_hw_singlestep (gdbarch,
+					    s390_displaced_step_hw_singlestep);
   set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
   set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
 
@@ -7079,8 +7322,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					s390_pseudo_register_reggroup_p);
   set_gdbarch_ax_pseudo_register_collect (gdbarch,
 					  s390_ax_pseudo_register_collect);
-  set_gdbarch_ax_pseudo_register_push_stack
-      (gdbarch, s390_ax_pseudo_register_push_stack);
+  set_gdbarch_ax_pseudo_register_push_stack (
+    gdbarch, s390_ax_pseudo_register_push_stack);
   set_gdbarch_gen_return_address (gdbarch, s390_gen_return_address);
 
   /* Inferior function calls.  */
@@ -7111,19 +7354,19 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_address_class_type_flags (gdbarch,
 					    s390_address_class_type_flags);
-      set_gdbarch_address_class_type_flags_to_name (gdbarch,
-						    s390_address_class_type_flags_to_name);
-      set_gdbarch_address_class_name_to_type_flags (gdbarch,
-						    s390_address_class_name_to_type_flags);
+      set_gdbarch_address_class_type_flags_to_name (
+	gdbarch, s390_address_class_type_flags_to_name);
+      set_gdbarch_address_class_name_to_type_flags (
+	gdbarch, s390_address_class_name_to_type_flags);
       break;
     }
 
   /* SystemTap functions.  */
   set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
-  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
-					  stap_register_indirection_prefixes);
-  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
-					  stap_register_indirection_suffixes);
+  set_gdbarch_stap_register_indirection_prefixes (
+    gdbarch, stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes (
+    gdbarch, stap_register_indirection_suffixes);
 
   set_gdbarch_disassembler_options (gdbarch, &s390_disassembler_options);
   set_gdbarch_valid_disassembler_options (gdbarch,
@@ -7159,20 +7402,18 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return NULL;
     }
 
-  /* Determine vector ABI.  */
+    /* Determine vector ABI.  */
 #ifdef HAVE_ELF
-  if (tdep->have_vx
-      && info.abfd != NULL
-      && info.abfd->format == bfd_object
+  if (tdep->have_vx && info.abfd != NULL && info.abfd->format == bfd_object
       && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour
       && bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
-				   Tag_GNU_S390_ABI_Vector) == 2)
+				   Tag_GNU_S390_ABI_Vector)
+	   == 2)
     tdep->vector_abi = S390_VECTOR_ABI_128;
 #endif
 
   /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info); arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       s390_gdbarch_tdep *tmp
@@ -7222,6 +7463,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_s390_tdep ();
+
 void
 _initialize_s390_tdep ()
 {

@@ -15,7 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "gdbsupport/common-defs.h"
 #include "arc.h"
 #include <stdlib.h>
@@ -46,14 +45,14 @@ arc_create_target_description (const struct arc_arch_features &features)
   /* Architecture names here must match the ones in
      ARCH_INFO_STRUCT in bfd/cpu-arc.c.  */
   if (features.isa == ARC_ISA_ARCV1 && features.reg_size == 4)
-      arch_name = "arc:ARC700";
+    arch_name = "arc:ARC700";
   else if (features.isa == ARC_ISA_ARCV2 && features.reg_size == 4)
-      arch_name = "arc:ARCv2";
+    arch_name = "arc:ARCv2";
   else
     {
-      std::string msg = string_printf
-	("Cannot determine architecture: ISA=%d; bitness=%d",
-	 features.isa, 8 * features.reg_size);
+      std::string msg
+	= string_printf ("Cannot determine architecture: ISA=%d; bitness=%d",
+			 features.isa, 8 * features.reg_size);
       gdb_assert_not_reached ("%s", msg.c_str ());
     }
 
@@ -73,8 +72,9 @@ arc_create_target_description (const struct arc_arch_features &features)
       regnum = create_feature_arc_v2_aux (tdesc.get (), regnum);
       break;
     default:
-      std::string msg = string_printf
-	("Cannot choose target description XML: %d", features.isa);
+      std::string msg
+	= string_printf ("Cannot choose target description XML: %d",
+			 features.isa);
       gdb_assert_not_reached ("%s", msg.c_str ());
     }
 
@@ -86,8 +86,7 @@ arc_create_target_description (const struct arc_arch_features &features)
 /* Wrapper used by std::unordered_map to generate hash for features set.  */
 struct arc_arch_features_hasher
 {
-  std::size_t
-  operator() (const arc_arch_features &features) const noexcept
+  std::size_t operator() (const arc_arch_features &features) const noexcept
   {
     return features.hash ();
   }
@@ -95,9 +94,9 @@ struct arc_arch_features_hasher
 
 /* Cache of previously created target descriptions, indexed by the hash
    of the features set used to create them.  */
-static std::unordered_map<arc_arch_features,
-			  const target_desc_up,
-			  arc_arch_features_hasher> arc_tdesc_cache;
+static std::unordered_map<arc_arch_features, const target_desc_up,
+			  arc_arch_features_hasher>
+  arc_tdesc_cache;
 
 /* See arch/arc.h.  */
 
@@ -112,7 +111,6 @@ arc_lookup_target_description (const struct arc_arch_features &features)
     return it->second.get ();
 
   target_desc_up tdesc = arc_create_target_description (features);
-
 
   /* Add to the cache, and return a pointer borrowed from the
      target_desc_up.  This is safe as the cache (and the pointers

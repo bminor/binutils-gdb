@@ -17,8 +17,8 @@ struct trace_frame_write_ops
 
   /* Write an 'R' block.  Buffer BUF contains its contents and SIZE is
      its size.  */
-  void (*write_r_block) (struct trace_file_writer *self,
-			 gdb_byte *buf, int32_t size);
+  void (*write_r_block) (struct trace_file_writer *self, gdb_byte *buf,
+			 int32_t size);
 
   /* Write an 'M' block, the header and memory contents respectively.
      The header of 'M' block is composed of the start address and the
@@ -30,14 +30,14 @@ struct trace_frame_write_ops
      the operation to 'M' block to two operations.  */
   /* Write the head of 'M' block.  ADDR is the start address of
      collected memory and LENGTH is the length of memory contents.  */
-  void (*write_m_block_header) (struct trace_file_writer *self,
-				uint64_t addr, uint16_t length);
+  void (*write_m_block_header) (struct trace_file_writer *self, uint64_t addr,
+				uint16_t length);
   /* Write the memory contents of 'M' block.  Buffer BUF contains
      its contents and LENGTH is its length.  This method can be called
      multiple times to write large memory contents of a single 'M'
      block.  */
-  void (*write_m_block_memory) (struct trace_file_writer *self,
-				gdb_byte *buf, uint16_t length);
+  void (*write_m_block_memory) (struct trace_file_writer *self, gdb_byte *buf,
+				uint16_t length);
 
   /* Write a 'V' block.  NUM is the trace variable number and VAL is
      the value of the trace variable.  */
@@ -59,20 +59,17 @@ struct trace_file_write_ops
   /*  Save the data to file or directory NAME of desired format in
       target side.  Return true for success, otherwise return
       false.  */
-  int (*target_save) (struct trace_file_writer *self,
-		      const char *name);
+  int (*target_save) (struct trace_file_writer *self, const char *name);
 
   /* Write the trace buffers to file or directory NAME.  */
-  void (*start) (struct trace_file_writer *self,
-		 const char *name);
+  void (*start) (struct trace_file_writer *self, const char *name);
 
   /* Write the trace header.  */
   void (*write_header) (struct trace_file_writer *self);
 
   /* Write the type of block about registers.  SIZE is the size of
      all registers on the target.  */
-  void (*write_regblock_type) (struct trace_file_writer *self,
-			       int size);
+  void (*write_regblock_type) (struct trace_file_writer *self, int size);
 
   /* Write trace status TS.  */
   void (*write_status) (struct trace_file_writer *self,
@@ -94,8 +91,8 @@ struct trace_file_write_ops
 
   /* Write the data of trace buffer without parsing.  The content is
      in BUF and length is LEN.  */
-  void (*write_trace_buffer) (struct trace_file_writer *self,
-			      gdb_byte *buf, LONGEST len);
+  void (*write_trace_buffer) (struct trace_file_writer *self, gdb_byte *buf,
+			      LONGEST len);
 
   /* Operations to write trace frames.  The user of this field is
      responsible to parse the data of trace buffer.  Either field
@@ -120,6 +117,7 @@ extern struct trace_file_writer *tfile_trace_file_writer_new (void);
 class tracefile_target : public process_stratum_target
 {
 public:
+
   tracefile_target () = default;
 
   int get_trace_status (trace_status *ts) override;
@@ -127,7 +125,9 @@ public:
   bool has_memory () override;
   bool has_stack () override;
   bool has_registers () override;
+
   bool has_execution (inferior *inf) override { return false; }
+
   bool thread_alive (ptid_t ptid) override;
 };
 

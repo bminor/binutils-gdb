@@ -46,69 +46,69 @@ struct trad_frame_saved_reg;
 
 enum sparc64_regnum
 {
-  SPARC64_F32_REGNUM		/* %f32 */
+  SPARC64_F32_REGNUM /* %f32 */
   = SPARC_F0_REGNUM + 32,
-  SPARC64_F62_REGNUM		/* %f62 */
+  SPARC64_F62_REGNUM /* %f62 */
   = SPARC64_F32_REGNUM + 15,
-  SPARC64_PC_REGNUM,		/* %pc */
-  SPARC64_NPC_REGNUM,		/* %npc */
+  SPARC64_PC_REGNUM,  /* %pc */
+  SPARC64_NPC_REGNUM, /* %npc */
   SPARC64_STATE_REGNUM,
-  SPARC64_FSR_REGNUM,		/* %fsr */
-  SPARC64_FPRS_REGNUM,		/* %fprs */
-  SPARC64_Y_REGNUM,		/* %y */
+  SPARC64_FSR_REGNUM,  /* %fsr */
+  SPARC64_FPRS_REGNUM, /* %fprs */
+  SPARC64_Y_REGNUM,    /* %y */
 };
 
 /* Pseudo registers.  */
 enum sparc64_pseudo_regnum
 {
-  SPARC64_CWP_REGNUM = 0,	/* %cwp */
-  SPARC64_PSTATE_REGNUM,	/* %pstate */
-  SPARC64_ASI_REGNUM,		/* %asi */
-  SPARC64_CCR_REGNUM,		/* %ccr */
-  SPARC64_D0_REGNUM,		/* %d0 */
-  SPARC64_D10_REGNUM		/* %d10 */
+  SPARC64_CWP_REGNUM = 0, /* %cwp */
+  SPARC64_PSTATE_REGNUM,  /* %pstate */
+  SPARC64_ASI_REGNUM,	  /* %asi */
+  SPARC64_CCR_REGNUM,	  /* %ccr */
+  SPARC64_D0_REGNUM,	  /* %d0 */
+  SPARC64_D10_REGNUM	  /* %d10 */
   = SPARC64_D0_REGNUM + 5,
-  SPARC64_D30_REGNUM		/* %d30 */
+  SPARC64_D30_REGNUM /* %d30 */
   = SPARC64_D0_REGNUM + 15,
-  SPARC64_D32_REGNUM		/* %d32 */
+  SPARC64_D32_REGNUM /* %d32 */
   = SPARC64_D0_REGNUM + 16,
-  SPARC64_D62_REGNUM		/* %d62 */
+  SPARC64_D62_REGNUM /* %d62 */
   = SPARC64_D0_REGNUM + 31,
-  SPARC64_Q0_REGNUM,		/* %q0 */
-  SPARC64_Q8_REGNUM		/* %q8 */
+  SPARC64_Q0_REGNUM, /* %q0 */
+  SPARC64_Q8_REGNUM  /* %q8 */
   = SPARC64_Q0_REGNUM + 2,
-  SPARC64_Q28_REGNUM		/* %q28 */
+  SPARC64_Q28_REGNUM /* %q28 */
   = SPARC64_Q0_REGNUM + 7,
-  SPARC64_Q32_REGNUM		/* %q32 */
+  SPARC64_Q32_REGNUM /* %q32 */
   = SPARC64_Q0_REGNUM + 8,
-  SPARC64_Q60_REGNUM		/* %q60 */
+  SPARC64_Q60_REGNUM /* %q60 */
   = SPARC64_Q0_REGNUM + 15
 };
 
 /* Processor state bits.  */
-#define SPARC64_PSTATE_AG	0x001
-#define SPARC64_PSTATE_IE	0x002
-#define SPARC64_PSTATE_PRIV	0x004
-#define SPARC64_PSTATE_AM	0x008
-#define SPARC64_PSTATE_PEF	0x010
-#define SPARC64_PSTATE_RED	0x020
-#define SPARC64_PSTATE_TLE	0x100
-#define SPARC64_PSTATE_CLE	0x200
-#define SPARC64_PSTATE_PID0	0x400
-#define SPARC64_PSTATE_PID1	0x800
+#define SPARC64_PSTATE_AG 0x001
+#define SPARC64_PSTATE_IE 0x002
+#define SPARC64_PSTATE_PRIV 0x004
+#define SPARC64_PSTATE_AM 0x008
+#define SPARC64_PSTATE_PEF 0x010
+#define SPARC64_PSTATE_RED 0x020
+#define SPARC64_PSTATE_TLE 0x100
+#define SPARC64_PSTATE_CLE 0x200
+#define SPARC64_PSTATE_PID0 0x400
+#define SPARC64_PSTATE_PID1 0x800
 
 extern void sparc64_init_abi (struct gdbarch_info info,
 			      struct gdbarch *gdbarch);
 
 extern void sparc64_supply_gregset (const struct sparc_gregmap *gregmap,
-				    struct regcache *regcache,
-				    int regnum, const void *gregs);
+				    struct regcache *regcache, int regnum,
+				    const void *gregs);
 extern void sparc64_collect_gregset (const struct sparc_gregmap *gregmap,
 				     const struct regcache *regcache,
 				     int regnum, void *gregs);
 extern void sparc64_supply_fpregset (const struct sparc_fpregmap *fpregmap,
-				     struct regcache *regcache,
-				     int regnum, const void *fpregs);
+				     struct regcache *regcache, int regnum,
+				     const void *fpregs);
 extern void sparc64_collect_fpregset (const struct sparc_fpregmap *fpregmap,
 				      const struct regcache *regcache,
 				      int regnum, void *fpregs);
@@ -130,8 +130,8 @@ extern const struct sparc_gregmap sparc64fbsd_gregmap;
 extern const struct sparc_gregmap sparc64nbsd_gregmap;
 
 extern struct trad_frame_saved_reg *
-  sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
-				     frame_info_ptr next_frame);
+sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
+				   frame_info_ptr next_frame);
 
 extern const struct sparc_fpregmap sparc64_bsd_fpregmap;
 

@@ -64,19 +64,19 @@ struct token
 
 namespace detail
 {
-  /* Types that don't depend on any template parameter.  This saves a
+/* Types that don't depend on any template parameter.  This saves a
      bit of code and debug info size, compared to putting them inside
      class observable.  */
 
-  /* Use for sorting algorithm, to indicate which observer we have
+/* Use for sorting algorithm, to indicate which observer we have
      visited.  */
-  enum class visit_state
-  {
-    NOT_VISITED,
-    VISITING,
-    VISITED,
-  };
-}
+enum class visit_state
+{
+  NOT_VISITED,
+  VISITING,
+  VISITED,
+};
+} // namespace detail
 
 template<typename... T>
 class observable
@@ -88,9 +88,13 @@ private:
   struct observer
   {
     observer (const struct token *token, func_type func, const char *name,
-	      const std::vector<const struct token *> &dependencies)
-      : token (token), func (func), name (name), dependencies (dependencies)
-    {}
+              const std::vector<const struct token *> &dependencies)
+      : token (token),
+        func (func),
+        name (name),
+        dependencies (dependencies)
+    {
+    }
 
     const struct token *token;
     func_type func;
@@ -99,10 +103,7 @@ private:
   };
 
 public:
-  explicit observable (const char *name)
-    : m_name (name)
-  {
-  }
+  explicit observable (const char *name) : m_name (name) {}
 
   DISABLE_COPY_AND_ASSIGN (observable);
 
@@ -115,7 +116,7 @@ public:
      NAME is the name of the observer, used for debug output purposes.  Its
      lifetime must be at least as long as the observer is attached.  */
   void attach (const func_type &f, const char *name,
-	       const std::vector<const struct token *> &dependencies = {})
+               const std::vector<const struct token *> &dependencies = {})
   {
     attach (f, nullptr, name, dependencies);
   }
@@ -131,7 +132,7 @@ public:
      NAME is the name of the observer, used for debug output purposes.  Its
      lifetime must be at least as long as the observer is attached.  */
   void attach (const func_type &f, const token &t, const char *name,
-	       const std::vector<const struct token *> &dependencies = {})
+               const std::vector<const struct token *> &dependencies = {})
   {
     attach (f, &t, name, dependencies);
   }
@@ -141,15 +142,12 @@ public:
      calls.  */
   void detach (const token &t)
   {
-    auto iter = std::remove_if (m_observers.begin (),
-				m_observers.end (),
-				[&] (const observer &o)
-				{
-				  return o.token == &t;
-				});
+    auto iter
+      = std::remove_if (m_observers.begin (), m_observers.end (),
+                        [&] (const observer &o) { return o.token == &t; });
 
     observer_debug_printf ("Detaching observable %s from observer %s",
-			   iter->name, m_name);
+                           iter->name, m_name);
 
     m_observers.erase (iter, m_observers.end ());
   }
@@ -161,14 +159,13 @@ public:
 
     for (auto &&e : m_observers)
       {
-	OBSERVER_SCOPED_DEBUG_START_END ("calling observer %s of observable %s",
-					 e.name, m_name);
-	e.func (args...);
+        OBSERVER_SCOPED_DEBUG_START_END (
+          "calling observer %s of observable %s", e.name, m_name);
+        e.func (args...);
       }
   }
 
 private:
-
   std::vector<observer> m_observers;
   const char *m_name;
 
@@ -179,8 +176,8 @@ private:
 
      If the observer is already visited, do nothing.  */
   void visit_for_sorting (std::vector<observer> &sorted_observers,
-			  std::vector<detail::visit_state> &visit_states,
-			  int index)
+                          std::vector<detail::visit_state> &visit_states,
+                          int index)
   {
     if (visit_states[index] == detail::visit_state::VISITED)
       return;
@@ -193,10 +190,10 @@ private:
     /* For each dependency of this observer...  */
     for (const token *dep : m_observers[index].dependencies)
       {
-	/* ... find the observer that has token DEP.  If found, visit it.  */
+        /* ... find the observer that has token DEP.  If found, visit it.  */
         auto it_dep
-            = std::find_if (m_observers.begin (), m_observers.end (),
-                            [&] (observer o) { return o.token == dep; });
+          = std::find_if (m_observers.begin (), m_observers.end (),
+                          [&] (observer o) { return o.token == dep; });
         if (it_dep != m_observers.end ())
           {
             int i = std::distance (m_observers.begin (), it_dep);
@@ -216,8 +213,8 @@ private:
   void sort_observers ()
   {
     std::vector<observer> sorted_observers;
-    std::vector<detail::visit_state> visit_states
-      (m_observers.size (), detail::visit_state::NOT_VISITED);
+    std::vector<detail::visit_state>
+      visit_states (m_observers.size (), detail::visit_state::NOT_VISITED);
 
     for (size_t i = 0; i < m_observers.size (); i++)
       visit_for_sorting (sorted_observers, visit_states, i);
@@ -228,9 +225,8 @@ private:
   void attach (const func_type &f, const token *t, const char *name,
                const std::vector<const struct token *> &dependencies)
   {
-
-    observer_debug_printf ("Attaching observable %s to observer %s",
-                           name, m_name);
+    observer_debug_printf ("Attaching observable %s to observer %s", name,
+                           m_name);
 
     m_observers.emplace_back (t, f, name, dependencies);
 

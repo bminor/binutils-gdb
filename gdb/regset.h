@@ -27,9 +27,9 @@ struct regcache;
 
 typedef void (supply_regset_ftype) (const struct regset *, struct regcache *,
 				    int, const void *, size_t);
-typedef void (collect_regset_ftype) (const struct regset *, 
-				     const struct regcache *,
-				     int, void *, size_t);
+typedef void (collect_regset_ftype) (const struct regset *,
+				     const struct regcache *, int, void *,
+				     size_t);
 
 struct regset
 {
@@ -49,7 +49,8 @@ struct regset
 
 /* Values for a regset's 'flags' field.  */
 
-#define REGSET_VARIABLE_SIZE 1	/* Accept a larger regset section size
+#define REGSET_VARIABLE_SIZE \
+  1 /* Accept a larger regset section size
 				   in a core file without warning.  */
 
 #endif /* regset.h */

@@ -26,6 +26,7 @@
 class mi_console_file : public ui_file
 {
 public:
+
   /* Create a console that wraps the given output stream RAW with the
      string PREFIX and quoting it with QUOTE.  */
   mi_console_file (ui_file *raw, const char *prefix, char quote);
@@ -42,6 +43,7 @@ public:
   void write_async_safe (const char *buf, long length_buf) override;
 
 private:
+
   /* The wrapped raw output stream.  */
   ui_file *m_raw;
 

@@ -36,9 +36,8 @@ typedef void (sig_handler_func) (gdb_client_data);
 typedef void (async_event_handler_func) (gdb_client_data);
 
 extern struct async_signal_handler *
-  create_async_signal_handler (sig_handler_func *proc,
-			       gdb_client_data client_data,
-			       const char *name);
+create_async_signal_handler (sig_handler_func *proc,
+			     gdb_client_data client_data, const char *name);
 extern void delete_async_signal_handler (struct async_signal_handler **);
 
 /* Call the handler from HANDLER the next time through the event
@@ -48,7 +47,7 @@ extern void mark_async_signal_handler (struct async_signal_handler *handler);
 /* Returns true if HANDLER is marked ready.  */
 
 extern int
-  async_signal_handler_is_marked (struct async_signal_handler *handler);
+async_signal_handler_is_marked (struct async_signal_handler *handler);
 
 /* Mark HANDLER as NOT ready.  */
 
@@ -65,14 +64,13 @@ extern void clear_async_signal_handler (struct async_signal_handler *handler);
    handler.  */
 
 extern struct async_event_handler *
-  create_async_event_handler (async_event_handler_func *proc,
-			      gdb_client_data client_data,
-			      const char *name);
+create_async_event_handler (async_event_handler_func *proc,
+			    gdb_client_data client_data, const char *name);
 
 /* Remove the event source pointed by HANDLER_PTR created by
    CREATE_ASYNC_EVENT_HANDLER from the event loop, and release it.  */
 extern void
-  delete_async_event_handler (struct async_event_handler **handler_ptr);
+delete_async_event_handler (struct async_event_handler **handler_ptr);
 
 /* Call the handler from HANDLER the next time through the event
    loop.  */

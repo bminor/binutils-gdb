@@ -28,9 +28,7 @@
 
 struct notif_event
 {
-  virtual ~notif_event ()
-  {
-  }
+  virtual ~notif_event () {}
 
   /* No payload needed.  */
 };
@@ -62,7 +60,6 @@ int handle_notif_ack (char *own_buf, int packet_len);
 void notif_write_event (struct notif_server *notif, char *own_buf);
 
 void notif_push (struct notif_server *np, struct notif_event *event);
-void notif_event_enque (struct notif_server *notif,
-			struct notif_event *event);
+void notif_event_enque (struct notif_server *notif, struct notif_event *event);
 
 #endif /* GDBSERVER_NOTIF_H */

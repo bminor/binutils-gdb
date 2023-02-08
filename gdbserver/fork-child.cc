@@ -77,7 +77,7 @@ postfork_child_hook ()
 
   debug_setpgrp = gdb_setpgid ();
   if (debug_setpgrp == -1)
-    perror (_("setpgrp failed in child"));
+    perror (_ ("setpgrp failed in child"));
 }
 
 /* See nat/fork-inferior.h.  */
@@ -113,9 +113,8 @@ post_fork_inferior (int pid, const char *program)
      scoped_restore.  */
   proc->starting_up = true;
 
-  startup_inferior (the_target, pid,
-		    START_INFERIOR_TRAPS_EXPECTED,
-		    &cs.last_status, &cs.last_ptid);
+  startup_inferior (the_target, pid, START_INFERIOR_TRAPS_EXPECTED,
+                    &cs.last_status, &cs.last_ptid);
 
   /* If we get here, the process was successfully started.  */
   proc->starting_up = false;

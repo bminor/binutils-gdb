@@ -86,16 +86,16 @@ struct command_line
   struct command_line *next = nullptr;
   char *line;
   enum command_control_type control_type;
+
   union
+  {
+    struct
     {
-      struct
-	{
-	  enum compile_i_scope_types scope;
-	  void *scope_data;
-	}
-      compile;
-    }
-  control_u;
+      enum compile_i_scope_types scope;
+      void *scope_data;
+    } compile;
+  } control_u;
+
   /* * For composite commands, the nested lists of commands.  For
      example, for "if" command this will contain the then branch and
      the else branch, if that is available.  */
@@ -106,10 +106,7 @@ private:
 
   friend void free_command_lines (struct command_line **);
 
-  ~command_line ()
-  {
-    xfree (line);
-  }
+  ~command_line () { xfree (line); }
 };
 
 /* Prototype for a function to call to get one more input line.
@@ -118,22 +115,21 @@ private:
    in the passed-in buffer, and return a pointer to it.  Otherwise, it can
    simply ignore it.  */
 
-using read_next_line_ftype = gdb::function_view<const char * (std::string &)>;
+using read_next_line_ftype = gdb::function_view<const char *(std::string &)>;
 
-extern counted_command_line read_command_lines
-    (const char *, int, int, gdb::function_view<void (const char *)>);
-extern counted_command_line read_command_lines_1
-    (read_next_line_ftype, int, gdb::function_view<void (const char *)>);
-
+extern counted_command_line
+read_command_lines (const char *, int, int,
+		    gdb::function_view<void (const char *)>);
+extern counted_command_line
+read_command_lines_1 (read_next_line_ftype, int,
+		      gdb::function_view<void (const char *)>);
 
 /* Exported to cli/cli-cmds.c */
 
 extern void script_from_file (FILE *stream, const char *file);
 
-extern void show_user_1 (struct cmd_list_element *c,
-			 const char *prefix,
-			 const char *name,
-			 struct ui_file *stream);
+extern void show_user_1 (struct cmd_list_element *c, const char *prefix,
+			 const char *name, struct ui_file *stream);
 
 /* Execute the commands in CMDLINES.  */
 
@@ -144,27 +140,28 @@ extern void execute_control_commands (struct command_line *cmdlines,
    the returned string, do not display it to the screen.  BATCH_FLAG
    will be temporarily set to true.  */
 
-extern std::string execute_control_commands_to_string
-    (struct command_line *commands, int from_tty);
+extern std::string
+execute_control_commands_to_string (struct command_line *commands,
+				    int from_tty);
 
 /* Exported to gdb/breakpoint.c */
 
 extern enum command_control_type
-	execute_control_command (struct command_line *cmd,
-				 int from_tty = 0);
+execute_control_command (struct command_line *cmd, int from_tty = 0);
 
 extern enum command_control_type
-	execute_control_command_untraced (struct command_line *cmd);
+execute_control_command_untraced (struct command_line *cmd);
 
 extern counted_command_line get_command_line (enum command_control_type,
 					      const char *);
 
-extern void print_command_lines (struct ui_out *,
-				 struct command_line *, unsigned int);
+extern void print_command_lines (struct ui_out *, struct command_line *,
+				 unsigned int);
 
 /* Exported to gdb/infrun.c */
 
-extern void execute_user_command (struct cmd_list_element *c, const char *args);
+extern void execute_user_command (struct cmd_list_element *c,
+				  const char *args);
 
 /* If we're in a user-defined command, replace any $argc/$argN
    reference found in LINE with the arguments that were passed to the
@@ -174,8 +171,7 @@ extern std::string insert_user_defined_cmd_args (const char *line);
 
 /* Exported to top.c */
 
-extern void print_command_trace (const char *cmd, ...)
-  ATTRIBUTE_PRINTF (1, 2);
+extern void print_command_trace (const char *cmd, ...) ATTRIBUTE_PRINTF (1, 2);
 
 /* Exported to event-top.c */
 

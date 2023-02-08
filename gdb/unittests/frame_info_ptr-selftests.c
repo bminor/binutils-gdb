@@ -24,7 +24,8 @@
 #include "scoped-mock-context.h"
 #include "test-target.h"
 
-namespace selftests {
+namespace selftests
+{
 
 static void
 validate_user_created_frame (frame_id id)
@@ -50,8 +51,8 @@ user_created_frame_callee (frame_info_ptr frame)
 static void
 test_user_created_frame ()
 {
-  scoped_mock_context<test_target_ops> mock_context
-    (current_inferior ()->gdbarch);
+  scoped_mock_context<test_target_ops> mock_context (
+    current_inferior ()->gdbarch);
   frame_info_ptr frame = create_new_frame (0x1234, 0x5678);
 
   validate_user_created_frame (get_frame_id (frame));
@@ -68,6 +69,7 @@ test_user_created_frame ()
 } /* namespace selftests */
 
 void _initialize_frame_info_ptr_selftests ();
+
 void
 _initialize_frame_info_ptr_selftests ()
 {

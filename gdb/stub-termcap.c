@@ -19,19 +19,17 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "defs.h"
 
-extern "C" {
-
-/* -Wmissing-prototypes */
-extern int tgetent (char *buffer, char *termtype);
-extern int tgetnum (char *name);
-extern int tgetflag (char *name);
-extern char* tgetstr (char *name, char **area);
-extern int tputs (char *string, int nlines, int (*outfun) (int));
-extern char *tgoto (const char *cap, int col, int row);
-
+extern "C"
+{
+  /* -Wmissing-prototypes */
+  extern int tgetent (char *buffer, char *termtype);
+  extern int tgetnum (char *name);
+  extern int tgetflag (char *name);
+  extern char *tgetstr (char *name, char **area);
+  extern int tputs (char *string, int nlines, int (*outfun) (int));
+  extern char *tgoto (const char *cap, int col, int row);
 }
 
 /* These globals below are global termcap variables that readline
@@ -47,9 +45,9 @@ extern char *tgoto (const char *cap, int col, int row);
    file originally was Windows only, and we only needed this when we
    made it work on other hosts, it should be OK.  */
 #ifndef __MINGW32__
-char PC __attribute__((weak));
-char *BC __attribute__((weak));
-char *UP __attribute__((weak));
+char PC __attribute__ ((weak));
+char *BC __attribute__ ((weak));
+char *UP __attribute__ ((weak));
 #endif
 
 /* Each of the files below is a minimal implementation of the standard

@@ -23,19 +23,15 @@
 #include "expop.h"
 
 extern struct value *ada_unop_neg (struct type *expect_type,
-				   struct expression *exp,
-				   enum noside noside, enum exp_opcode op,
-				   struct value *arg1);
+				   struct expression *exp, enum noside noside,
+				   enum exp_opcode op, struct value *arg1);
 extern struct value *ada_atr_tag (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside, enum exp_opcode op,
-				  struct value *arg1);
+				  struct expression *exp, enum noside noside,
+				  enum exp_opcode op, struct value *arg1);
 extern struct value *ada_atr_size (struct type *expect_type,
-				   struct expression *exp,
-				   enum noside noside, enum exp_opcode op,
-				   struct value *arg1);
-extern struct value *ada_abs (struct type *expect_type,
-			      struct expression *exp,
+				   struct expression *exp, enum noside noside,
+				   enum exp_opcode op, struct value *arg1);
+extern struct value *ada_abs (struct type *expect_type, struct expression *exp,
 			      enum noside noside, enum exp_opcode op,
 			      struct value *arg1);
 extern struct value *ada_unop_in_range (struct type *expect_type,
@@ -51,30 +47,26 @@ extern struct value *ada_equal_binop (struct type *expect_type,
 				      enum noside noside, enum exp_opcode op,
 				      struct value *arg1, struct value *arg2);
 extern struct value *ada_ternop_slice (struct expression *exp,
-				       enum noside noside,
-				       struct value *array,
+				       enum noside noside, struct value *array,
 				       struct value *low_bound_val,
 				       struct value *high_bound_val);
 extern struct value *ada_binop_in_bounds (struct expression *exp,
 					  enum noside noside,
 					  struct value *arg1,
-					  struct value *arg2,
-					  int n);
+					  struct value *arg2, int n);
 extern struct value *ada_binop_minmax (struct type *expect_type,
 				       struct expression *exp,
 				       enum noside noside, enum exp_opcode op,
-				       struct value *arg1,
-				       struct value *arg2);
+				       struct value *arg1, struct value *arg2);
 extern struct value *ada_pos_atr (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside, enum exp_opcode op,
-				  struct value *arg);
+				  struct expression *exp, enum noside noside,
+				  enum exp_opcode op, struct value *arg);
 extern struct value *ada_val_atr (enum noside noside, struct type *type,
 				  struct value *arg);
 extern struct value *ada_binop_exp (struct type *expect_type,
-				    struct expression *exp,
-				    enum noside noside, enum exp_opcode op,
-				    struct value *arg1, struct value *arg2);
+				    struct expression *exp, enum noside noside,
+				    enum exp_opcode op, struct value *arg1,
+				    struct value *arg2);
 
 namespace expr
 {
@@ -90,11 +82,10 @@ struct ada_resolvable
      is the expected type of the expression, or nullptr if none is
      known.  This method should return true if the operation should be
      replaced by a function call with this object as the callee.  */
-  virtual bool resolve (struct expression *exp,
-			bool deprocedure_p,
-			bool parse_completion,
-			innermost_block_tracker *tracker,
-			struct type *context_type) = 0;
+  virtual bool
+  resolve (struct expression *exp, bool deprocedure_p, bool parse_completion,
+	   innermost_block_tracker *tracker, struct type *context_type)
+    = 0;
 
   /* Possibly replace this object with some other expression object.
      This is like 'resolve', but can return a replacement.
@@ -107,47 +98,40 @@ struct ada_resolvable
      This should either return a new object, or OWNER -- never
      nullptr.  */
 
-  virtual operation_up replace (operation_up &&owner,
-				struct expression *exp,
-				bool deprocedure_p,
-				bool parse_completion,
+  virtual operation_up replace (operation_up &&owner, struct expression *exp,
+				bool deprocedure_p, bool parse_completion,
 				innermost_block_tracker *tracker,
 				struct type *context_type);
 };
 
 /* In Ada, some generic operations must be wrapped with a handler that
    handles some Ada-specific type conversions.  */
-class ada_wrapped_operation
-  : public tuple_holding_operation<operation_up>
+class ada_wrapped_operation : public tuple_holding_operation<operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
-  { return std::get<0> (m_storage)->opcode (); }
+  {
+    return std::get<0> (m_storage)->opcode ();
+  }
 };
 
 /* An Ada string constant.  */
-class ada_string_operation
-  : public string_operation
+class ada_string_operation : public string_operation
 {
 public:
 
   using string_operation::string_operation;
 
   /* Return the underlying string.  */
-  const char *get_name () const
-  {
-    return std::get<0> (m_storage).c_str ();
-  }
+  const char *get_name () const { return std::get<0> (m_storage).c_str (); }
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 };
 
@@ -159,12 +143,10 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return UNOP_QUAL; }
+  enum exp_opcode opcode () const override { return UNOP_QUAL; }
 };
 
 /* Ternary in-range operator.  */
@@ -175,12 +157,10 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return TERNOP_IN_RANGE; }
+  enum exp_opcode opcode () const override { return TERNOP_IN_RANGE; }
 };
 
 using ada_neg_operation = unop_operation<UNOP_NEG, ada_unop_neg>;
@@ -197,17 +177,15 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    return ada_unop_in_range (expect_type, exp, noside, UNOP_IN_RANGE,
-			      val, std::get<1> (m_storage));
+    return ada_unop_in_range (expect_type, exp, noside, UNOP_IN_RANGE, val,
+			      std::get<1> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return UNOP_IN_RANGE; }
+  enum exp_opcode opcode () const override { return UNOP_IN_RANGE; }
 };
 
 /* The Ada + and - operators.  */
@@ -218,12 +196,10 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return std::get<0> (m_storage); }
+  enum exp_opcode opcode () const override { return std::get<0> (m_storage); }
 };
 
 using ada_binop_mul_operation = binop_operation<BINOP_MUL, ada_mult_binop>;
@@ -244,19 +220,17 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
-    value *arg2 = std::get<2> (m_storage)->evaluate (value_type (arg1),
-						     exp, noside);
+    value *arg2
+      = std::get<2> (m_storage)->evaluate (value_type (arg1), exp, noside);
     return ada_equal_binop (expect_type, exp, noside, std::get<0> (m_storage),
 			    arg1, arg2);
   }
 
-  enum exp_opcode opcode () const override
-  { return std::get<0> (m_storage); }
+  enum exp_opcode opcode () const override { return std::get<0> (m_storage); }
 };
 
 /* Bitwise operators for Ada.  */
@@ -268,8 +242,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -278,8 +251,7 @@ public:
     return value_cast (value_type (lhs), result);
   }
 
-  enum exp_opcode opcode () const override
-  { return OP; }
+  enum exp_opcode opcode () const override { return OP; }
 };
 
 using ada_bitwise_and_operation = ada_bitwise_operation<BINOP_BITWISE_AND>;
@@ -295,8 +267,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *array = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -305,13 +276,10 @@ public:
     return ada_ternop_slice (exp, noside, array, low, high);
   }
 
-  enum exp_opcode opcode () const override
-  { return TERNOP_SLICE; }
+  enum exp_opcode opcode () const override { return TERNOP_SLICE; }
 
-  bool resolve (struct expression *exp,
-		bool deprocedure_p,
-		bool parse_completion,
-		innermost_block_tracker *tracker,
+  bool resolve (struct expression *exp, bool deprocedure_p,
+		bool parse_completion, innermost_block_tracker *tracker,
 		struct type *context_type) override;
 };
 
@@ -323,8 +291,7 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
     value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
@@ -333,8 +300,7 @@ public:
 				std::get<2> (m_storage));
   }
 
-  enum exp_opcode opcode () const override
-  { return BINOP_IN_BOUNDS; }
+  enum exp_opcode opcode () const override { return BINOP_IN_BOUNDS; }
 };
 
 /* Implement several unary Ada OP_ATR_* operations.  */
@@ -345,37 +311,30 @@ public:
 
   using maybe_constant_operation::maybe_constant_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return std::get<1> (m_storage); }
+  enum exp_opcode opcode () const override { return std::get<1> (m_storage); }
 };
 
 /* Variant of var_value_operation for Ada.  */
-class ada_var_value_operation
-  : public var_value_operation, public ada_resolvable
+class ada_var_value_operation : public var_value_operation,
+				public ada_resolvable
 {
 public:
 
   using var_value_operation::var_value_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  value *evaluate_for_cast (struct type *expect_type,
-			    struct expression *exp,
+  value *evaluate_for_cast (struct type *expect_type, struct expression *exp,
 			    enum noside noside) override;
 
-  const block *get_block () const
-  { return std::get<0> (m_storage).block; }
+  const block *get_block () const { return std::get<0> (m_storage).block; }
 
-  bool resolve (struct expression *exp,
-		bool deprocedure_p,
-		bool parse_completion,
-		innermost_block_tracker *tracker,
+  bool resolve (struct expression *exp, bool deprocedure_p,
+		bool parse_completion, innermost_block_tracker *tracker,
 		struct type *context_type) override;
 
 protected:
@@ -384,15 +343,13 @@ protected:
 };
 
 /* Variant of var_msym_value_operation for Ada.  */
-class ada_var_msym_value_operation
-  : public var_msym_value_operation
+class ada_var_msym_value_operation : public var_msym_value_operation
 {
 public:
 
   using var_msym_value_operation::var_msym_value_operation;
 
-  value *evaluate_for_cast (struct type *expect_type,
-			    struct expression *exp,
+  value *evaluate_for_cast (struct type *expect_type, struct expression *exp,
 			    enum noside noside) override;
 
 protected:
@@ -408,47 +365,37 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_ATR_VAL; }
+  enum exp_opcode opcode () const override { return OP_ATR_VAL; }
 };
 
 /* The indirection operator for Ada.  */
-class ada_unop_ind_operation
-  : public unop_ind_base_operation
+class ada_unop_ind_operation : public unop_ind_base_operation
 {
 public:
 
   using unop_ind_base_operation::unop_ind_base_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 };
 
 /* Implement STRUCTOP_STRUCT for Ada.  */
-class ada_structop_operation
-  : public structop_base_operation
+class ada_structop_operation : public structop_base_operation
 {
 public:
 
   using structop_base_operation::structop_base_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return STRUCTOP_STRUCT; }
+  enum exp_opcode opcode () const override { return STRUCTOP_STRUCT; }
 
   /* Set the completion prefix.  */
-  void set_prefix (std::string &&prefix)
-  {
-    m_prefix = std::move (prefix);
-  }
+  void set_prefix (std::string &&prefix) { m_prefix = std::move (prefix); }
 
   bool complete (struct expression *exp, completion_tracker &tracker) override
   {
@@ -477,34 +424,27 @@ public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  bool resolve (struct expression *exp,
-		bool deprocedure_p,
-		bool parse_completion,
-		innermost_block_tracker *tracker,
+  bool resolve (struct expression *exp, bool deprocedure_p,
+		bool parse_completion, innermost_block_tracker *tracker,
 		struct type *context_type) override;
 
-  enum exp_opcode opcode () const override
-  { return OP_FUNCALL; }
+  enum exp_opcode opcode () const override { return OP_FUNCALL; }
 };
 
 /* An Ada assignment operation.  */
-class ada_assign_operation
-  : public assign_operation
+class ada_assign_operation : public assign_operation
 {
 public:
 
   using assign_operation::assign_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 
-  enum exp_opcode opcode () const override
-  { return BINOP_ASSIGN; }
+  enum exp_opcode opcode () const override { return BINOP_ASSIGN; }
 };
 
 /* This abstract class represents a single component in an Ada
@@ -517,10 +457,10 @@ public:
      being evaluated.  INDICES, LOW, and HIGH indicate which
      sub-components have already been assigned; INDICES should be
      updated by this call.  */
-  virtual void assign (struct value *container,
-		       struct value *lhs, struct expression *exp,
-		       std::vector<LONGEST> &indices,
-		       LONGEST low, LONGEST high) = 0;
+  virtual void assign (struct value *container, struct value *lhs,
+		       struct expression *exp, std::vector<LONGEST> &indices,
+		       LONGEST low, LONGEST high)
+    = 0;
 
   /* Same as operation::uses_objfile.  */
   virtual bool uses_objfile (struct objfile *objfile) = 0;
@@ -554,19 +494,16 @@ public:
      contents of LHS (unless == CONTAINER).  Returns the modified
      CONTAINER.  */
 
-  value *assign_aggregate (struct value *container,
-			   struct value *lhs,
+  value *assign_aggregate (struct value *container, struct value *lhs,
 			   struct expression *exp);
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override
   {
-    error (_("Aggregates only allowed on the right of an assignment"));
+    error (_ ("Aggregates only allowed on the right of an assignment"));
   }
 
-  enum exp_opcode opcode () const override
-  { return OP_AGGREGATE; }
+  enum exp_opcode opcode () const override { return OP_AGGREGATE; }
 };
 
 /* A component holding a vector of other components to assign.  */
@@ -579,9 +516,8 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
+  void assign (struct value *container, struct value *lhs,
+	       struct expression *exp, std::vector<LONGEST> &indices,
 	       LONGEST low, LONGEST high) override;
 
   bool uses_objfile (struct objfile *objfile) override;
@@ -605,9 +541,8 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
+  void assign (struct value *container, struct value *lhs,
+	       struct expression *exp, std::vector<LONGEST> &indices,
 	       LONGEST low, LONGEST high) override;
 
   bool uses_objfile (struct objfile *objfile) override;
@@ -630,9 +565,8 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
+  void assign (struct value *container, struct value *lhs,
+	       struct expression *exp, std::vector<LONGEST> &indices,
 	       LONGEST low, LONGEST high) override;
 
   bool uses_objfile (struct objfile *objfile) override;
@@ -653,12 +587,10 @@ public:
   /* Like ada_component::assign, but takes an operation as a
      parameter.  The operation is evaluated and then assigned into LHS
      according to the rules of the concrete implementation.  */
-  virtual void assign (struct value *container,
-		       struct value *lhs,
-		       struct expression *exp,
-		       std::vector<LONGEST> &indices,
-		       LONGEST low, LONGEST high,
-		       operation_up &op) = 0;
+  virtual void assign (struct value *container, struct value *lhs,
+		       struct expression *exp, std::vector<LONGEST> &indices,
+		       LONGEST low, LONGEST high, operation_up &op)
+    = 0;
 
   /* Same as operation::uses_objfile.  */
   virtual bool uses_objfile (struct objfile *objfile) = 0;
@@ -696,9 +628,8 @@ public:
     m_assocs = std::move (assoc);
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
+  void assign (struct value *container, struct value *lhs,
+	       struct expression *exp, std::vector<LONGEST> &indices,
 	       LONGEST low, LONGEST high) override;
 
   bool uses_objfile (struct objfile *objfile) override;
@@ -722,11 +653,9 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high,
-	       operation_up &op) override;
+  void assign (struct value *container, struct value *lhs,
+	       struct expression *exp, std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high, operation_up &op) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
@@ -750,11 +679,9 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high,
-	       operation_up &op) override;
+  void assign (struct value *container, struct value *lhs,
+	       struct expression *exp, std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high, operation_up &op) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
@@ -768,17 +695,14 @@ private:
 /* A character constant expression.  This is a separate operation so
    that it can participate in resolution, so that TYPE'(CST) can
    work correctly for enums with character enumerators.  */
-class ada_char_operation : public long_const_operation,
-			   public ada_resolvable
+class ada_char_operation : public long_const_operation, public ada_resolvable
 {
 public:
 
   using long_const_operation::long_const_operation;
 
-  bool resolve (struct expression *exp,
-		bool deprocedure_p,
-		bool parse_completion,
-		innermost_block_tracker *tracker,
+  bool resolve (struct expression *exp, bool deprocedure_p,
+		bool parse_completion, innermost_block_tracker *tracker,
 		struct type *context_type) override
   {
     /* This should never be called, because this class also implements
@@ -786,15 +710,12 @@ public:
     gdb_assert_not_reached ("unexpected call");
   }
 
-  operation_up replace (operation_up &&owner,
-			struct expression *exp,
-			bool deprocedure_p,
-			bool parse_completion,
+  operation_up replace (operation_up &&owner, struct expression *exp,
+			bool deprocedure_p, bool parse_completion,
 			innermost_block_tracker *tracker,
 			struct type *context_type) override;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 };
 
@@ -804,8 +725,7 @@ public:
 
   using concat_operation::concat_operation;
 
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
+  value *evaluate (struct type *expect_type, struct expression *exp,
 		   enum noside noside) override;
 };
 

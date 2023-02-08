@@ -44,10 +44,7 @@ struct partial_symbol
   }
 
   /* Return the unrelocated address of this partial symbol.  */
-  CORE_ADDR unrelocated_address () const
-  {
-    return ginfo.value_address ();
-  }
+  CORE_ADDR unrelocated_address () const { return ginfo.value_address (); }
 
   /* Return the address of this partial symbol, relocated according to
      the offsets provided in OBJFILE.  */
@@ -71,13 +68,13 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  ENUM_BITFIELD(domain_enum) domain : SYMBOL_DOMAIN_BITS;
+  ENUM_BITFIELD (domain_enum) domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class (for info_symbols).  Note that we don't allow
      synthetic "aclass" values here at present, simply because there's
      no need.  */
 
-  ENUM_BITFIELD(address_class) aclass : SYMBOL_ACLASS_BITS;
+  ENUM_BITFIELD (address_class) aclass : SYMBOL_ACLASS_BITS;
 };
 
 /* A convenience enum to give names to some constants used when
@@ -85,11 +82,11 @@ struct partial_symbol
    used elsewhere.  */
 
 enum psymtab_search_status
-  {
-    PST_NOT_SEARCHED,
-    PST_SEARCHED_AND_FOUND,
-    PST_SEARCHED_AND_NOT_FOUND
-  };
+{
+  PST_NOT_SEARCHED,
+  PST_SEARCHED_AND_FOUND,
+  PST_SEARCHED_AND_NOT_FOUND
+};
 
 /* Specify whether a partial psymbol should be allocated on the global
    list or the static list.  */
@@ -118,8 +115,7 @@ struct partial_symtab
      partial symtab will also be installed using
      psymtab_storage::install.  */
 
-  partial_symtab (const char *filename,
-		  psymtab_storage *partial_symtabs,
+  partial_symtab (const char *filename, psymtab_storage *partial_symtabs,
 		  objfile_per_bfd_storage *objfile_per_bfd)
     ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
 
@@ -127,15 +123,11 @@ struct partial_symtab
      from the ADDR argument, and sets the global- and
      static-offsets.  */
 
-  partial_symtab (const char *filename,
-		  psymtab_storage *partial_symtabs,
-		  objfile_per_bfd_storage *objfile_per_bfd,
-		  CORE_ADDR addr)
+  partial_symtab (const char *filename, psymtab_storage *partial_symtabs,
+		  objfile_per_bfd_storage *objfile_per_bfd, CORE_ADDR addr)
     ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
 
-  virtual ~partial_symtab ()
-  {
-  }
+  virtual ~partial_symtab () {}
 
   /* Psymtab expansion is done in two steps:
      - a call to read_symtab
@@ -168,20 +160,14 @@ struct partial_symtab
 
      Return nullptr if the compunit was not read in or if there was no
      symtab.  */
-  virtual struct compunit_symtab *get_compunit_symtab
-    (struct objfile *) const = 0;
+  virtual struct compunit_symtab *get_compunit_symtab (struct objfile *) const
+    = 0;
 
   /* Return the raw low text address of this partial_symtab.  */
-  CORE_ADDR raw_text_low () const
-  {
-    return m_text_low;
-  }
+  CORE_ADDR raw_text_low () const { return m_text_low; }
 
   /* Return the raw high text address of this partial_symtab.  */
-  CORE_ADDR raw_text_high () const
-  {
-    return m_text_high;
-  }
+  CORE_ADDR raw_text_high () const { return m_text_high; }
 
   /* Return the relocated low text address of this partial_symtab.  */
   CORE_ADDR text_low (struct objfile *objfile) const
@@ -234,25 +220,18 @@ struct partial_symtab
      LANGUAGE is the language from which the symbol originates.  This will
      influence, amongst other things, how the symbol name is demangled. */
 
-  void add_psymbol (gdb::string_view name,
-		    bool copy_name, domain_enum domain,
-		    enum address_class theclass,
-		    short section,
-		    psymbol_placement where,
-		    CORE_ADDR coreaddr,
-		    enum language language,
-		    psymtab_storage *partial_symtabs,
+  void add_psymbol (gdb::string_view name, bool copy_name, domain_enum domain,
+		    enum address_class theclass, short section,
+		    psymbol_placement where, CORE_ADDR coreaddr,
+		    enum language language, psymtab_storage *partial_symtabs,
 		    struct objfile *objfile);
 
   /* Add a symbol to this partial symbol table of OBJFILE.  The psymbol
      must be fully constructed, and the names must be set and intern'd
      as appropriate.  */
 
-  void add_psymbol (const partial_symbol &psym,
-		    psymbol_placement where,
-		    psymtab_storage *partial_symtabs,
-		    struct objfile *objfile);
-
+  void add_psymbol (const partial_symbol &psym, psymbol_placement where,
+		    psymtab_storage *partial_symtabs, struct objfile *objfile);
 
   /* Indicate that this partial symtab is complete.  */
 
@@ -362,25 +341,19 @@ struct partial_symtab
    object.  */
 struct standard_psymtab : public partial_symtab
 {
-  standard_psymtab (const char *filename,
-		    psymtab_storage *partial_symtabs,
+  standard_psymtab (const char *filename, psymtab_storage *partial_symtabs,
 		    objfile_per_bfd_storage *objfile_per_bfd)
     : partial_symtab (filename, partial_symtabs, objfile_per_bfd)
   {
   }
 
-  standard_psymtab (const char *filename,
-		    psymtab_storage *partial_symtabs,
-		    objfile_per_bfd_storage *objfile_per_bfd,
-		    CORE_ADDR addr)
+  standard_psymtab (const char *filename, psymtab_storage *partial_symtabs,
+		    objfile_per_bfd_storage *objfile_per_bfd, CORE_ADDR addr)
     : partial_symtab (filename, partial_symtabs, objfile_per_bfd, addr)
   {
   }
 
-  bool readin_p (struct objfile *) const override
-  {
-    return readin;
-  }
+  bool readin_p (struct objfile *) const override { return readin; }
 
   struct compunit_symtab *get_compunit_symtab (struct objfile *) const override
   {
@@ -404,17 +377,14 @@ struct standard_psymtab : public partial_symtab
 
 struct legacy_psymtab : public standard_psymtab
 {
-  legacy_psymtab (const char *filename,
-		  psymtab_storage *partial_symtabs,
+  legacy_psymtab (const char *filename, psymtab_storage *partial_symtabs,
 		  objfile_per_bfd_storage *objfile_per_bfd)
     : standard_psymtab (filename, partial_symtabs, objfile_per_bfd)
   {
   }
 
-  legacy_psymtab (const char *filename,
-		  psymtab_storage *partial_symtabs,
-		  objfile_per_bfd_storage *objfile_per_bfd,
-		  CORE_ADDR addr)
+  legacy_psymtab (const char *filename, psymtab_storage *partial_symtabs,
+		  objfile_per_bfd_storage *objfile_per_bfd, CORE_ADDR addr)
     : standard_psymtab (filename, partial_symtabs, objfile_per_bfd, addr)
   {
   }
@@ -453,7 +423,7 @@ struct legacy_psymtab : public standard_psymtab
    the tables can be kept by calling the "keep" method.  */
 class psymtab_discarder
 {
- public:
+public:
 
   psymtab_discarder (psymtab_storage *partial_symtabs)
     : m_partial_symtabs (partial_symtabs),
@@ -468,12 +438,9 @@ class psymtab_discarder
   }
 
   /* Keep any partial symbol tables that were built.  */
-  void keep ()
-  {
-    m_partial_symtabs = nullptr;
-  }
+  void keep () { m_partial_symtabs = nullptr; }
 
- private:
+private:
 
   /* The partial symbol storage object.  */
   psymtab_storage *m_partial_symtabs;
@@ -514,29 +481,26 @@ struct psymbol_functions : public quick_symbol_functions
 
   void expand_all_symtabs (struct objfile *objfile) override;
 
-  void expand_matching_symbols
-    (struct objfile *,
-     const lookup_name_info &lookup_name,
-     domain_enum domain,
-     int global,
-     symbol_compare_ftype *ordered_compare) override;
+  void expand_matching_symbols (
+    struct objfile *, const lookup_name_info &lookup_name, domain_enum domain,
+    int global, symbol_compare_ftype *ordered_compare) override;
 
-  bool expand_symtabs_matching
-    (struct objfile *objfile,
-     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-     const lookup_name_info *lookup_name,
-     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-     block_search_flags search_flags,
-     domain_enum domain,
-     enum search_domain kind) override;
+  bool expand_symtabs_matching (
+    struct objfile *objfile,
+    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+    const lookup_name_info *lookup_name,
+    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+    block_search_flags search_flags, domain_enum domain,
+    enum search_domain kind) override;
 
-  struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
+  struct compunit_symtab *find_pc_sect_compunit_symtab (
+    struct objfile *objfile, struct bound_minimal_symbol msymbol, CORE_ADDR pc,
+    struct obj_section *section, int warn_if_readin) override;
 
-  struct compunit_symtab *find_compunit_symtab_by_address
-    (struct objfile *objfile, CORE_ADDR address) override
+  struct compunit_symtab *
+  find_compunit_symtab_by_address (struct objfile *objfile,
+				   CORE_ADDR address) override
   {
     return nullptr;
   }
@@ -546,8 +510,8 @@ struct psymbol_functions : public quick_symbol_functions
 			     bool need_fullname) override;
 
   /* Return a range adapter for the psymtabs.  */
-  psymtab_storage::partial_symtab_range partial_symbols
-       (struct objfile *objfile);
+  psymtab_storage::partial_symtab_range
+  partial_symbols (struct objfile *objfile);
 
   /* Return the partial symbol storage associated with this
      object.  */
@@ -568,11 +532,10 @@ struct psymbol_functions : public quick_symbol_functions
      exactly matches PC, or, if we cannot find an exact match, the
      psymtab that contains a symbol whose address is closest to PC.  */
 
-  struct partial_symtab *find_pc_sect_psymtab
-       (struct objfile *objfile,
-	CORE_ADDR pc,
-	struct obj_section *section,
-	struct bound_minimal_symbol msymbol);
+  struct partial_symtab *
+  find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
+			struct obj_section *section,
+			struct bound_minimal_symbol msymbol);
 
 private:
 

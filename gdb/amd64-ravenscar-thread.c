@@ -41,8 +41,7 @@
       R15    : System.Address;
    end record;
 */
-static const int register_layout[] =
-{
+static const int register_layout[] = {
   /* RAX */ -1,
   /* RBX */ 3 * 8,
   /* RCX */ -1,

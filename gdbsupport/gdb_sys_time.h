@@ -31,8 +31,8 @@
    native 'select' and libiberty, simply undefine away gnulib's
    replacements.  */
 #if GNULIB_defined_struct_timeval
-# undef timeval
-# undef gettimeofday
+#undef timeval
+#undef gettimeofday
 #endif
 
 #endif /* COMMON_GDB_SYS_TIME_H */

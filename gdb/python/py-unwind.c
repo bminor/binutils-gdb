@@ -39,7 +39,7 @@ static void
 show_pyuw_debug (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Python unwinder debugging is %s.\n"), value);
+  gdb_printf (file, _ ("Python unwinder debugging is %s.\n"), value);
 }
 
 /* Print a "py-unwind" debug statement.  */
@@ -56,8 +56,8 @@ struct pending_frame_object
 {
   PyObject_HEAD
 
-  /* Frame we are unwinding.  */
-  frame_info_ptr frame_info;
+    /* Frame we are unwinding.  */
+    frame_info_ptr frame_info;
 
   /* Its architecture, passed by the sniffer caller.  */
   struct gdbarch *gdbarch;
@@ -84,8 +84,8 @@ struct unwind_info_object
 {
   PyObject_HEAD
 
-  /* gdb.PendingFrame for the frame we are unwinding.  */
-  PyObject *pending_frame;
+    /* gdb.PendingFrame for the frame we are unwinding.  */
+    PyObject *pending_frame;
 
   /* Its ID.  */
   struct frame_id frame_id;
@@ -112,10 +112,10 @@ struct cached_frame_info
 };
 
 extern PyTypeObject pending_frame_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pending_frame_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pending_frame_object");
 
 extern PyTypeObject unwind_info_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
 
 /* Convert gdb.Value instance to inferior's pointer.  Return 1 on success,
    0 on failure.  */
@@ -163,9 +163,9 @@ pyuw_object_attribute_to_pointer (PyObject *pyo, const char *attr_name,
 	  rc = pyuw_value_obj_to_pointer (pyo_value.get (), addr);
 	  if (!rc)
 	    PyErr_Format (
-		PyExc_ValueError,
-		_("The value of the '%s' attribute is not a pointer."),
-		attr_name);
+	      PyExc_ValueError,
+	      _ ("The value of the '%s' attribute is not a pointer."),
+	      attr_name);
 	}
     }
   return rc;
@@ -218,11 +218,10 @@ unwind_infopy_str (PyObject *self)
    Sets Python error and returns NULL on error.  */
 
 static PyObject *
-pyuw_create_unwind_info (PyObject *pyo_pending_frame,
-			 struct frame_id frame_id)
+pyuw_create_unwind_info (PyObject *pyo_pending_frame, struct frame_id frame_id)
 {
   unwind_info_object *unwind_info
-      = PyObject_New (unwind_info_object, &unwind_info_object_type);
+    = PyObject_New (unwind_info_object, &unwind_info_object_type);
 
   if (((pending_frame_object *) pyo_pending_frame)->frame_info == NULL)
     {
@@ -245,7 +244,7 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
 {
   unwind_info_object *unwind_info = (unwind_info_object *) self;
   pending_frame_object *pending_frame
-      = (pending_frame_object *) (unwind_info->pending_frame);
+    = (pending_frame_object *) (unwind_info->pending_frame);
   PyObject *pyo_reg_id;
   PyObject *pyo_reg_value;
   int regnum;
@@ -256,8 +255,8 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
 		       "UnwindInfo instance refers to a stale PendingFrame");
       return NULL;
     }
-  if (!PyArg_UnpackTuple (args, "previous_frame_register", 2, 2,
-			  &pyo_reg_id, &pyo_reg_value))
+  if (!PyArg_UnpackTuple (args, "previous_frame_register", 2, 2, &pyo_reg_id,
+			  &pyo_reg_value))
     return NULL;
   if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
     return nullptr;
@@ -286,7 +285,7 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
     size_t data_size;
 
     if (pyo_reg_value == NULL
-      || (value = value_object_to_value (pyo_reg_value)) == NULL)
+	|| (value = value_object_to_value (pyo_reg_value)) == NULL)
       {
 	PyErr_SetString (PyExc_ValueError, "Bad register value");
 	return NULL;
@@ -294,12 +293,11 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
     data_size = register_size (pending_frame->gdbarch, regnum);
     if (data_size != value_type (value)->length ())
       {
-	PyErr_Format (
-	    PyExc_ValueError,
-	    "The value of the register returned by the Python "
-	    "sniffer has unexpected size: %u instead of %u.",
-	    (unsigned) value_type (value)->length (),
-	    (unsigned) data_size);
+	PyErr_Format (PyExc_ValueError,
+		      "The value of the register returned by the Python "
+		      "sniffer has unexpected size: %u instead of %u.",
+		      (unsigned) value_type (value)->length (),
+		      (unsigned) data_size);
 	return NULL;
       }
   }
@@ -389,8 +387,7 @@ pending_framepy_read_register (PyObject *self, PyObject *args)
 	 handle the user register case.  */
       val = value_of_register (regnum, pending_frame->frame_info);
       if (val == NULL)
-	PyErr_Format (PyExc_ValueError,
-		      "Cannot read register %d from frame.",
+	PyErr_Format (PyExc_ValueError, "Cannot read register %d from frame.",
 		      regnum);
     }
   catch (const gdb_exception &except)
@@ -413,11 +410,11 @@ pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
   CORE_ADDR special;
 
   if (!PyArg_ParseTuple (args, "O:create_unwind_info", &pyo_frame_id))
-      return NULL;
+    return NULL;
   if (!pyuw_object_attribute_to_pointer (pyo_frame_id, "sp", &sp))
     {
       PyErr_SetString (PyExc_ValueError,
-		       _("frame_id should have 'sp' attribute."));
+		       _ ("frame_id should have 'sp' attribute."));
       return NULL;
     }
 
@@ -464,8 +461,9 @@ pending_framepy_level (PyObject *self, PyObject *args)
 
   if (pending_frame->frame_info == NULL)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       "Attempting to read stack level from stale PendingFrame");
+      PyErr_SetString (
+	PyExc_ValueError,
+	"Attempting to read stack level from stale PendingFrame");
       return NULL;
     }
   int level = frame_relative_level (pending_frame->frame_info);
@@ -485,8 +483,7 @@ pyuw_this_id (frame_info_ptr this_frame, void **cache_ptr,
 /* frame_unwind.prev_register.  */
 
 static struct value *
-pyuw_prev_register (frame_info_ptr this_frame, void **cache_ptr,
-		    int regnum)
+pyuw_prev_register (frame_info_ptr this_frame, void **cache_ptr, int regnum)
 {
   PYUW_SCOPED_DEBUG_ENTER_EXIT;
 
@@ -494,8 +491,8 @@ pyuw_prev_register (frame_info_ptr this_frame, void **cache_ptr,
   cached_reg_t *reg_info = cached_frame->reg;
   cached_reg_t *reg_info_end = reg_info + cached_frame->reg_count;
 
-  pyuw_debug_printf ("frame=%d, reg=%d",
-		     frame_relative_level (this_frame), regnum);
+  pyuw_debug_printf ("frame=%d, reg=%d", frame_relative_level (this_frame),
+		     regnum);
   for (; reg_info < reg_info_end; ++reg_info)
     {
       if (regnum == reg_info->num)
@@ -524,8 +521,8 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
 		     paddress (gdbarch, get_frame_pc (this_frame)));
 
   /* Create PendingFrame instance to pass to sniffers.  */
-  pending_frame_object *pfo = PyObject_New (pending_frame_object,
-					    &pending_frame_object_type);
+  pending_frame_object *pfo
+    = PyObject_New (pending_frame_object, &pending_frame_object_type);
   gdbpy_ref<> pyo_pending_frame ((PyObject *) pfo);
   if (pyo_pending_frame == NULL)
     {
@@ -533,12 +530,12 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
       return 0;
     }
   pfo->gdbarch = gdbarch;
-  scoped_restore invalidate_frame = make_scoped_restore (&pfo->frame_info,
-							 this_frame);
+  scoped_restore invalidate_frame
+    = make_scoped_restore (&pfo->frame_info, this_frame);
 
   /* Run unwinders.  */
   if (gdb_python_module == NULL
-      || ! PyObject_HasAttrString (gdb_python_module, "_execute_unwinders"))
+      || !PyObject_HasAttrString (gdb_python_module, "_execute_unwinders"))
     {
       PyErr_SetString (PyExc_NameError,
 		       "Installation error: gdb._execute_unwinders function "
@@ -555,9 +552,8 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
     }
 
   /* A (gdb.UnwindInfo, str) tuple, or None.  */
-  gdbpy_ref<> pyo_execute_ret
-    (PyObject_CallFunctionObjArgs (pyo_execute.get (),
-				   pyo_pending_frame.get (), NULL));
+  gdbpy_ref<> pyo_execute_ret (PyObject_CallFunctionObjArgs (
+    pyo_execute.get (), pyo_pending_frame.get (), NULL));
   if (pyo_execute_ret == nullptr)
     {
       /* If the unwinder is cancelled due to a Ctrl-C, then propagate
@@ -574,7 +570,8 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
 
   if (pyuw_debug)
     {
-      PyObject *pyo_unwinder_name = PyTuple_GET_ITEM (pyo_execute_ret.get (), 1);
+      PyObject *pyo_unwinder_name
+	= PyTuple_GET_ITEM (pyo_execute_ret.get (), 1);
       gdb::unique_xmalloc_ptr<char> name
 	= python_string_to_host_string (pyo_unwinder_name);
 
@@ -592,18 +589,16 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
   /* Received UnwindInfo, cache data.  */
   PyObject *pyo_unwind_info = PyTuple_GET_ITEM (pyo_execute_ret.get (), 0);
   if (PyObject_IsInstance (pyo_unwind_info,
-			   (PyObject *) &unwind_info_object_type) <= 0)
-    error (_("A Unwinder should return gdb.UnwindInfo instance."));
+			   (PyObject *) &unwind_info_object_type)
+      <= 0)
+    error (_ ("A Unwinder should return gdb.UnwindInfo instance."));
 
   {
-    unwind_info_object *unwind_info =
-      (unwind_info_object *) pyo_unwind_info;
+    unwind_info_object *unwind_info = (unwind_info_object *) pyo_unwind_info;
     int reg_count = unwind_info->saved_regs->size ();
 
-    cached_frame
-      = ((cached_frame_info *)
-	 xmalloc (sizeof (*cached_frame)
-		  + reg_count * sizeof (cached_frame->reg[0])));
+    cached_frame = ((cached_frame_info *) xmalloc (
+      sizeof (*cached_frame) + reg_count * sizeof (cached_frame->reg[0])));
     cached_frame->gdbarch = gdbarch;
     cached_frame->frame_id = unwind_info->frame_id;
     cached_frame->reg_count = reg_count;
@@ -623,8 +618,8 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
 	gdb_assert (data_size == value_type (value)->length ());
 
 	cached_frame->reg[i].data = (gdb_byte *) xmalloc (data_size);
-	memcpy (cached_frame->reg[i].data,
-		value_contents (value).data (), data_size);
+	memcpy (cached_frame->reg[i].data, value_contents (value).data (),
+		data_size);
       }
   }
 
@@ -662,12 +657,12 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
 {
   struct pyuw_gdbarch_data_type *data = pyuw_gdbarch_data.get (newarch);
   if (data == nullptr)
-    data= pyuw_gdbarch_data.emplace (newarch);
+    data = pyuw_gdbarch_data.emplace (newarch);
 
   if (!data->unwinder_registered)
     {
       struct frame_unwind *unwinder
-	  = GDBARCH_OBSTACK_ZALLOC (newarch, struct frame_unwind);
+	= GDBARCH_OBSTACK_ZALLOC (newarch, struct frame_unwind);
 
       unwinder->name = "python";
       unwinder->type = NORMAL_FRAME;
@@ -683,17 +678,16 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
 }
 
 void _initialize_py_unwind ();
+
 void
 _initialize_py_unwind ()
 {
-  add_setshow_boolean_cmd
-      ("py-unwind", class_maintenance, &pyuw_debug,
-	_("Set Python unwinder debugging."),
-	_("Show Python unwinder debugging."),
-	_("When on, Python unwinder debugging is enabled."),
-	NULL,
-	show_pyuw_debug,
-	&setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd (
+    "py-unwind", class_maintenance, &pyuw_debug,
+    _ ("Set Python unwinder debugging."),
+    _ ("Show Python unwinder debugging."),
+    _ ("When on, Python unwinder debugging is enabled."), NULL,
+    show_pyuw_debug, &setdebuglist, &showdebuglist);
 }
 
 /* Initialize unwind machinery.  */
@@ -714,115 +708,106 @@ gdbpy_initialize_unwind (void)
   if (PyType_Ready (&unwind_info_object_type) < 0)
     return -1;
   return gdb_pymodule_addobject (gdb_module, "UnwindInfo",
-      (PyObject *) &unwind_info_object_type);
+				 (PyObject *) &unwind_info_object_type);
 }
 
-static PyMethodDef pending_frame_object_methods[] =
-{
+static PyMethodDef pending_frame_object_methods[] = {
   { "read_register", pending_framepy_read_register, METH_VARARGS,
     "read_register (REG) -> gdb.Value\n"
     "Return the value of the REG in the frame." },
-  { "create_unwind_info",
-    pending_framepy_create_unwind_info, METH_VARARGS,
+  { "create_unwind_info", pending_framepy_create_unwind_info, METH_VARARGS,
     "create_unwind_info (FRAME_ID) -> gdb.UnwindInfo\n"
     "Construct UnwindInfo for this PendingFrame, using FRAME_ID\n"
     "to identify it." },
-  { "architecture",
-    pending_framepy_architecture, METH_NOARGS,
+  { "architecture", pending_framepy_architecture, METH_NOARGS,
     "architecture () -> gdb.Architecture\n"
     "The architecture for this PendingFrame." },
   { "level", pending_framepy_level, METH_NOARGS,
     "The stack level of this frame." },
-  {NULL}  /* Sentinel */
+  { NULL } /* Sentinel */
 };
 
-PyTypeObject pending_frame_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.PendingFrame",             /* tp_name */
-  sizeof (pending_frame_object),  /* tp_basicsize */
-  0,                              /* tp_itemsize */
-  0,                              /* tp_dealloc */
-  0,                              /* tp_print */
-  0,                              /* tp_getattr */
-  0,                              /* tp_setattr */
-  0,                              /* tp_compare */
-  0,                              /* tp_repr */
-  0,                              /* tp_as_number */
-  0,                              /* tp_as_sequence */
-  0,                              /* tp_as_mapping */
-  0,                              /* tp_hash  */
-  0,                              /* tp_call */
-  pending_framepy_str,            /* tp_str */
-  0,                              /* tp_getattro */
-  0,                              /* tp_setattro */
-  0,                              /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT,             /* tp_flags */
-  "GDB PendingFrame object",      /* tp_doc */
-  0,                              /* tp_traverse */
-  0,                              /* tp_clear */
-  0,                              /* tp_richcompare */
-  0,                              /* tp_weaklistoffset */
-  0,                              /* tp_iter */
-  0,                              /* tp_iternext */
-  pending_frame_object_methods,   /* tp_methods */
-  0,                              /* tp_members */
-  0,                              /* tp_getset */
-  0,                              /* tp_base */
-  0,                              /* tp_dict */
-  0,                              /* tp_descr_get */
-  0,                              /* tp_descr_set */
-  0,                              /* tp_dictoffset */
-  0,                              /* tp_init */
-  0,                              /* tp_alloc */
+PyTypeObject pending_frame_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.PendingFrame", /* tp_name */
+  sizeof (pending_frame_object),		      /* tp_basicsize */
+  0,						      /* tp_itemsize */
+  0,						      /* tp_dealloc */
+  0,						      /* tp_print */
+  0,						      /* tp_getattr */
+  0,						      /* tp_setattr */
+  0,						      /* tp_compare */
+  0,						      /* tp_repr */
+  0,						      /* tp_as_number */
+  0,						      /* tp_as_sequence */
+  0,						      /* tp_as_mapping */
+  0,						      /* tp_hash  */
+  0,						      /* tp_call */
+  pending_framepy_str,				      /* tp_str */
+  0,						      /* tp_getattro */
+  0,						      /* tp_setattro */
+  0,						      /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT,				      /* tp_flags */
+  "GDB PendingFrame object",			      /* tp_doc */
+  0,						      /* tp_traverse */
+  0,						      /* tp_clear */
+  0,						      /* tp_richcompare */
+  0,						      /* tp_weaklistoffset */
+  0,						      /* tp_iter */
+  0,						      /* tp_iternext */
+  pending_frame_object_methods,			      /* tp_methods */
+  0,						      /* tp_members */
+  0,						      /* tp_getset */
+  0,						      /* tp_base */
+  0,						      /* tp_dict */
+  0,						      /* tp_descr_get */
+  0,						      /* tp_descr_set */
+  0,						      /* tp_dictoffset */
+  0,						      /* tp_init */
+  0,						      /* tp_alloc */
 };
 
-static PyMethodDef unwind_info_object_methods[] =
-{
-  { "add_saved_register",
-    unwind_infopy_add_saved_register, METH_VARARGS,
+static PyMethodDef unwind_info_object_methods[] = {
+  { "add_saved_register", unwind_infopy_add_saved_register, METH_VARARGS,
     "add_saved_register (REG, VALUE) -> None\n"
     "Set the value of the REG in the previous frame to VALUE." },
-  { NULL }  /* Sentinel */
+  { NULL } /* Sentinel */
 };
 
-PyTypeObject unwind_info_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.UnwindInfo",               /* tp_name */
-  sizeof (unwind_info_object),    /* tp_basicsize */
-  0,                              /* tp_itemsize */
-  unwind_infopy_dealloc,          /* tp_dealloc */
-  0,                              /* tp_print */
-  0,                              /* tp_getattr */
-  0,                              /* tp_setattr */
-  0,                              /* tp_compare */
-  0,                              /* tp_repr */
-  0,                              /* tp_as_number */
-  0,                              /* tp_as_sequence */
-  0,                              /* tp_as_mapping */
-  0,                              /* tp_hash  */
-  0,                              /* tp_call */
-  unwind_infopy_str,              /* tp_str */
-  0,                              /* tp_getattro */
-  0,                              /* tp_setattro */
-  0,                              /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  /* tp_flags */
-  "GDB UnwindInfo object",        /* tp_doc */
-  0,                              /* tp_traverse */
-  0,                              /* tp_clear */
-  0,                              /* tp_richcompare */
-  0,                              /* tp_weaklistoffset */
-  0,                              /* tp_iter */
-  0,                              /* tp_iternext */
-  unwind_info_object_methods,     /* tp_methods */
-  0,                              /* tp_members */
-  0,                              /* tp_getset */
-  0,                              /* tp_base */
-  0,                              /* tp_dict */
-  0,                              /* tp_descr_get */
-  0,                              /* tp_descr_set */
-  0,                              /* tp_dictoffset */
-  0,                              /* tp_init */
-  0,                              /* tp_alloc */
+PyTypeObject unwind_info_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.UnwindInfo", /* tp_name */
+  sizeof (unwind_info_object),			    /* tp_basicsize */
+  0,						    /* tp_itemsize */
+  unwind_infopy_dealloc,			    /* tp_dealloc */
+  0,						    /* tp_print */
+  0,						    /* tp_getattr */
+  0,						    /* tp_setattr */
+  0,						    /* tp_compare */
+  0,						    /* tp_repr */
+  0,						    /* tp_as_number */
+  0,						    /* tp_as_sequence */
+  0,						    /* tp_as_mapping */
+  0,						    /* tp_hash  */
+  0,						    /* tp_call */
+  unwind_infopy_str,				    /* tp_str */
+  0,						    /* tp_getattro */
+  0,						    /* tp_setattro */
+  0,						    /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	    /* tp_flags */
+  "GDB UnwindInfo object",			    /* tp_doc */
+  0,						    /* tp_traverse */
+  0,						    /* tp_clear */
+  0,						    /* tp_richcompare */
+  0,						    /* tp_weaklistoffset */
+  0,						    /* tp_iter */
+  0,						    /* tp_iternext */
+  unwind_info_object_methods,			    /* tp_methods */
+  0,						    /* tp_members */
+  0,						    /* tp_getset */
+  0,						    /* tp_base */
+  0,						    /* tp_dict */
+  0,						    /* tp_descr_get */
+  0,						    /* tp_descr_set */
+  0,						    /* tp_dictoffset */
+  0,						    /* tp_init */
+  0,						    /* tp_alloc */
 };

@@ -21,9 +21,10 @@
 #include "gdbsupport/tdesc.h"
 
 tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
-		      int regnum, int save_restore_, const char *group_,
-		      int bitsize_, const char *type_)
-  : name (name_), target_regnum (regnum),
+                      int regnum, int save_restore_, const char *group_,
+                      int bitsize_, const char *type_)
+  : name (name_),
+    target_regnum (regnum),
     save_restore (save_restore_),
     group (group_ != NULL ? group_ : ""),
     bitsize (bitsize_),
@@ -35,30 +36,29 @@ tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
 }
 
 /* Predefined types.  */
-static tdesc_type_builtin tdesc_predefined_types[] =
-{
-  { "bool", TDESC_TYPE_BOOL },
-  { "int8", TDESC_TYPE_INT8 },
-  { "int16", TDESC_TYPE_INT16 },
-  { "int32", TDESC_TYPE_INT32 },
-  { "int64", TDESC_TYPE_INT64 },
-  { "int128", TDESC_TYPE_INT128 },
-  { "uint8", TDESC_TYPE_UINT8 },
-  { "uint16", TDESC_TYPE_UINT16 },
-  { "uint32", TDESC_TYPE_UINT32 },
-  { "uint64", TDESC_TYPE_UINT64 },
-  { "uint128", TDESC_TYPE_UINT128 },
-  { "code_ptr", TDESC_TYPE_CODE_PTR },
-  { "data_ptr", TDESC_TYPE_DATA_PTR },
-  { "ieee_half", TDESC_TYPE_IEEE_HALF },
-  { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
-  { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
-  { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },
-  { "i387_ext", TDESC_TYPE_I387_EXT },
-  { "bfloat16", TDESC_TYPE_BFLOAT16 }
-};
+static tdesc_type_builtin tdesc_predefined_types[]
+  = { { "bool", TDESC_TYPE_BOOL },
+      { "int8", TDESC_TYPE_INT8 },
+      { "int16", TDESC_TYPE_INT16 },
+      { "int32", TDESC_TYPE_INT32 },
+      { "int64", TDESC_TYPE_INT64 },
+      { "int128", TDESC_TYPE_INT128 },
+      { "uint8", TDESC_TYPE_UINT8 },
+      { "uint16", TDESC_TYPE_UINT16 },
+      { "uint32", TDESC_TYPE_UINT32 },
+      { "uint64", TDESC_TYPE_UINT64 },
+      { "uint128", TDESC_TYPE_UINT128 },
+      { "code_ptr", TDESC_TYPE_CODE_PTR },
+      { "data_ptr", TDESC_TYPE_DATA_PTR },
+      { "ieee_half", TDESC_TYPE_IEEE_HALF },
+      { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
+      { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
+      { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },
+      { "i387_ext", TDESC_TYPE_I387_EXT },
+      { "bfloat16", TDESC_TYPE_BFLOAT16 } };
 
-void tdesc_feature::accept (tdesc_element_visitor &v) const
+void
+tdesc_feature::accept (tdesc_element_visitor &v) const
 {
   v.visit_pre (this);
 
@@ -71,7 +71,8 @@ void tdesc_feature::accept (tdesc_element_visitor &v) const
   v.visit_post (this);
 }
 
-bool tdesc_feature::operator== (const tdesc_feature &other) const
+bool
+tdesc_feature::operator== (const tdesc_feature &other) const
 {
   if (name != other.name)
     return false;
@@ -85,8 +86,8 @@ bool tdesc_feature::operator== (const tdesc_feature &other) const
       const tdesc_reg_up &reg2 = other.registers[ix];
 
       if (reg1 != reg2 && *reg1 != *reg2)
-	return false;
-      }
+        return false;
+    }
 
   if (types.size () != other.types.size ())
     return false;
@@ -97,7 +98,7 @@ bool tdesc_feature::operator== (const tdesc_feature &other) const
       const tdesc_type_up &type2 = other.types[ix];
 
       if (type1 != type2 && *type1 != *type2)
-	return false;
+        return false;
     }
 
   return true;
@@ -136,12 +137,12 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
 /* See gdbsupport/tdesc.h.  */
 
 void
-tdesc_create_reg (struct tdesc_feature *feature, const char *name,
-		  int regnum, int save_restore, const char *group,
-		  int bitsize, const char *type)
+tdesc_create_reg (struct tdesc_feature *feature, const char *name, int regnum,
+                  int save_restore, const char *group, int bitsize,
+                  const char *type)
 {
-  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
-				  group, bitsize, type);
+  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore, group,
+                                  bitsize, type);
 
   feature->registers.emplace_back (reg);
 }
@@ -150,7 +151,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
-		     struct tdesc_type *field_type, int count)
+                     struct tdesc_type *field_type, int count)
 {
   tdesc_type_vector *type = new tdesc_type_vector (name, field_type, count);
   feature->types.emplace_back (type);
@@ -195,8 +196,7 @@ tdesc_create_union (struct tdesc_feature *feature, const char *name)
 /* See gdbsupport/tdesc.h.  */
 
 tdesc_type_with_fields *
-tdesc_create_flags (struct tdesc_feature *feature, const char *name,
-		    int size)
+tdesc_create_flags (struct tdesc_feature *feature, const char *name, int size)
 {
   gdb_assert (size > 0);
 
@@ -210,8 +210,7 @@ tdesc_create_flags (struct tdesc_feature *feature, const char *name,
 /* See gdbsupport/tdesc.h.  */
 
 tdesc_type_with_fields *
-tdesc_create_enum (struct tdesc_feature *feature, const char *name,
-		   int size)
+tdesc_create_enum (struct tdesc_feature *feature, const char *name, int size)
 {
   gdb_assert (size > 0);
 
@@ -226,10 +225,10 @@ tdesc_create_enum (struct tdesc_feature *feature, const char *name,
 
 void
 tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
-		 struct tdesc_type *field_type)
+                 struct tdesc_type *field_type)
 {
   gdb_assert (type->kind == TDESC_TYPE_UNION
-	      || type->kind == TDESC_TYPE_STRUCT);
+              || type->kind == TDESC_TYPE_STRUCT);
 
   /* Initialize start and end so we know this is not a bit-field
      when we print-c-tdesc.  */
@@ -240,10 +239,10 @@ tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
 
 void
 tdesc_add_typed_bitfield (tdesc_type_with_fields *type, const char *field_name,
-			  int start, int end, struct tdesc_type *field_type)
+                          int start, int end, struct tdesc_type *field_type)
 {
   gdb_assert (type->kind == TDESC_TYPE_STRUCT
-	      || type->kind == TDESC_TYPE_FLAGS);
+              || type->kind == TDESC_TYPE_FLAGS);
   gdb_assert (start >= 0 && end >= start);
 
   type->fields.emplace_back (field_name, field_type, start, end);
@@ -253,7 +252,7 @@ tdesc_add_typed_bitfield (tdesc_type_with_fields *type, const char *field_name,
 
 void
 tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
-		    int start, int end)
+                    int start, int end)
 {
   struct tdesc_type *field_type;
 
@@ -270,53 +269,56 @@ tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
 /* See gdbsupport/tdesc.h.  */
 
 void
-tdesc_add_flag (tdesc_type_with_fields *type, int start,
-		const char *flag_name)
+tdesc_add_flag (tdesc_type_with_fields *type, int start, const char *flag_name)
 {
   gdb_assert (type->kind == TDESC_TYPE_FLAGS
-	      || type->kind == TDESC_TYPE_STRUCT);
+              || type->kind == TDESC_TYPE_STRUCT);
 
   type->fields.emplace_back (flag_name,
-			     tdesc_predefined_type (TDESC_TYPE_BOOL),
-			     start, start);
+                             tdesc_predefined_type (TDESC_TYPE_BOOL), start,
+                             start);
 }
 
 /* See gdbsupport/tdesc.h.  */
 
 void
 tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
-		      const char *name)
+                      const char *name)
 {
   gdb_assert (type->kind == TDESC_TYPE_ENUM);
-  type->fields.emplace_back (name,
-			     tdesc_predefined_type (TDESC_TYPE_INT32),
-			     value, -1);
+  type->fields.emplace_back (name, tdesc_predefined_type (TDESC_TYPE_INT32),
+                             value, -1);
 }
 
-void print_xml_feature::visit_pre (const tdesc_feature *e)
+void
+print_xml_feature::visit_pre (const tdesc_feature *e)
 {
   add_line ("<feature name=\"%s\">", e->name.c_str ());
   indent (1);
 }
 
-void print_xml_feature::visit_post (const tdesc_feature *e)
+void
+print_xml_feature::visit_post (const tdesc_feature *e)
 {
   indent (-1);
   add_line ("</feature>");
 }
 
-void print_xml_feature::visit (const tdesc_type_builtin *t)
+void
+print_xml_feature::visit (const tdesc_type_builtin *t)
 {
-  error (_("xml output is not supported for type \"%s\"."), t->name.c_str ());
+  error (_ ("xml output is not supported for type \"%s\"."), t->name.c_str ());
 }
 
-void print_xml_feature::visit (const tdesc_type_vector *t)
+void
+print_xml_feature::visit (const tdesc_type_vector *t)
 {
-  add_line ("<vector id=\"%s\" type=\"%s\" count=\"%d\"/>",
-	    t->name.c_str (), t->element_type->name.c_str (), t->count);
+  add_line ("<vector id=\"%s\" type=\"%s\" count=\"%d\"/>", t->name.c_str (),
+            t->element_type->name.c_str (), t->count);
 }
 
-void print_xml_feature::visit (const tdesc_type_with_fields *t)
+void
+print_xml_feature::visit (const tdesc_type_with_fields *t)
 {
   const static char *types[] = { "struct", "union", "flags", "enum" };
 
@@ -324,68 +326,66 @@ void print_xml_feature::visit (const tdesc_type_with_fields *t)
 
   std::string tmp;
 
-  string_appendf (tmp,
-		  "<%s id=\"%s\"", types[t->kind - TDESC_TYPE_STRUCT],
-		  t->name.c_str ());
+  string_appendf (tmp, "<%s id=\"%s\"", types[t->kind - TDESC_TYPE_STRUCT],
+                  t->name.c_str ());
 
   switch (t->kind)
     {
     case TDESC_TYPE_STRUCT:
     case TDESC_TYPE_FLAGS:
       if (t->size > 0)
-	string_appendf (tmp, " size=\"%d\"", t->size);
+        string_appendf (tmp, " size=\"%d\"", t->size);
       string_appendf (tmp, ">");
       add_line (tmp);
 
       for (const tdesc_type_field &f : t->fields)
-	{
-	  tmp.clear ();
-	  string_appendf (tmp, "  <field name=\"%s\"", f.name.c_str ());
-	  if (f.start != -1)
-	    string_appendf (tmp, " start=\"%d\" end=\"%d\"", f.start,
-			    f.end);
-	  string_appendf (tmp, " type=\"%s\"/>",
-			  f.type->name.c_str ());
-	  add_line (tmp);
-	}
+        {
+          tmp.clear ();
+          string_appendf (tmp, "  <field name=\"%s\"", f.name.c_str ());
+          if (f.start != -1)
+            string_appendf (tmp, " start=\"%d\" end=\"%d\"", f.start, f.end);
+          string_appendf (tmp, " type=\"%s\"/>", f.type->name.c_str ());
+          add_line (tmp);
+        }
       break;
 
     case TDESC_TYPE_ENUM:
       if (t->size > 0)
-	string_appendf (tmp, " size=\"%d\"", t->size);
+        string_appendf (tmp, " size=\"%d\"", t->size);
       string_appendf (tmp, ">");
       add_line (tmp);
       /* The 'start' of the field is reused as the enum value.  The 'end'
 	 of the field is always set to -1 for enum values.  */
       for (const tdesc_type_field &f : t->fields)
-	add_line ("  <evalue name=\"%s\" value=\"%d\"/>",
-		  f.name.c_str (), f.start);
+        add_line ("  <evalue name=\"%s\" value=\"%d\"/>", f.name.c_str (),
+                  f.start);
       break;
 
     case TDESC_TYPE_UNION:
       string_appendf (tmp, ">");
       add_line (tmp);
       for (const tdesc_type_field &f : t->fields)
-	add_line ("  <field name=\"%s\" type=\"%s\"/>",
-		  f.name.c_str (), f.type->name.c_str ());
+        add_line ("  <field name=\"%s\" type=\"%s\"/>", f.name.c_str (),
+                  f.type->name.c_str ());
       break;
 
     default:
-      error (_("xml output is not supported for type \"%s\"."),
-	     t->name.c_str ());
+      error (_ ("xml output is not supported for type \"%s\"."),
+             t->name.c_str ());
     }
 
   add_line ("</%s>", types[t->kind - TDESC_TYPE_STRUCT]);
 }
 
-void print_xml_feature::visit (const tdesc_reg *r)
+void
+print_xml_feature::visit (const tdesc_reg *r)
 {
   std::string tmp;
 
   string_appendf (tmp,
-		  "<reg name=\"%s\" bitsize=\"%d\" type=\"%s\" regnum=\"%ld\"",
-		  r->name.c_str (), r->bitsize, r->type.c_str (),
-		  r->target_regnum);
+                  "<reg name=\"%s\" bitsize=\"%d\" type=\"%s\" regnum=\"%ld\"",
+                  r->name.c_str (), r->bitsize, r->type.c_str (),
+                  r->target_regnum);
 
   if (r->group.length () > 0)
     string_appendf (tmp, " group=\"%s\"", r->group.c_str ());
@@ -398,7 +398,8 @@ void print_xml_feature::visit (const tdesc_reg *r)
   add_line (tmp);
 }
 
-void print_xml_feature::visit_pre (const target_desc *e)
+void
+print_xml_feature::visit_pre (const target_desc *e)
 {
 #ifndef IN_PROCESS_AGENT
   add_line ("<?xml version=\"1.0\"?>");
@@ -406,8 +407,7 @@ void print_xml_feature::visit_pre (const target_desc *e)
   add_line ("<target>");
   indent (1);
   if (tdesc_architecture_name (e))
-    add_line ("<architecture>%s</architecture>",
-	      tdesc_architecture_name (e));
+    add_line ("<architecture>%s</architecture>", tdesc_architecture_name (e));
 
   const char *osabi = tdesc_osabi_name (e);
   if (osabi != nullptr)
@@ -417,11 +417,12 @@ void print_xml_feature::visit_pre (const target_desc *e)
     = tdesc_compatible_info_list (e);
   for (const auto &c : compatible_list)
     add_line ("<compatible>%s</compatible>",
-	      tdesc_compatible_info_arch_name (c));
+              tdesc_compatible_info_arch_name (c));
 #endif
 }
 
-void print_xml_feature::visit_post (const target_desc *e)
+void
+print_xml_feature::visit_post (const target_desc *e)
 {
   indent (-1);
   add_line ("</target>");

@@ -27,7 +27,7 @@ struct regcache;
    register CUPPLY_PCB as the architecture-specific process control
    block interpreter.  */
 
-extern void
-  bsd_kvm_add_target (int (*supply_pcb)(struct regcache *, struct pcb *));
+extern void bsd_kvm_add_target (int (*supply_pcb) (struct regcache *,
+						   struct pcb *));
 
 #endif /* bsd-kvm.h */

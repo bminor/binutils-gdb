@@ -85,8 +85,8 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 
 		  /* The NetBSD/OpenBSD ld.so doesn't relocate DT_PLTGOT, so
 		     we have to do it ourselves.  */
-		  pltgot = extract_unsigned_integer (buf, sizeof buf,
-						     byte_order);
+		  pltgot
+		    = extract_unsigned_integer (buf, sizeof buf, byte_order);
 		  pltgot += sec->objfile->text_section_offset ();
 
 		  return pltgot;
@@ -102,7 +102,6 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 
   return 0;
 }
-
 
 static void
 hppabsd_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
@@ -131,8 +130,8 @@ hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
 
   /* OpenBSD and NetBSD use SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
   /* Hook in the DWARF CFI frame unwinder.  */
   dwarf2_frame_set_init_reg (gdbarch, hppabsd_dwarf2_frame_init_reg);

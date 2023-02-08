@@ -27,28 +27,28 @@ extern bool debug_linux_namespaces;
 /* Enumeration of Linux namespace types.  */
 
 enum linux_ns_type
-  {
-    /* IPC namespace: System V IPC, POSIX message queues.  */
-    LINUX_NS_IPC,
+{
+  /* IPC namespace: System V IPC, POSIX message queues.  */
+  LINUX_NS_IPC,
 
-    /* Mount namespace: mount points.  */
-    LINUX_NS_MNT,
+  /* Mount namespace: mount points.  */
+  LINUX_NS_MNT,
 
-    /* Network namespace: network devices, stacks, ports, etc.  */
-    LINUX_NS_NET,
+  /* Network namespace: network devices, stacks, ports, etc.  */
+  LINUX_NS_NET,
 
-    /* PID namespace: process IDs.  */
-    LINUX_NS_PID,
+  /* PID namespace: process IDs.  */
+  LINUX_NS_PID,
 
-    /* User namespace: user and group IDs.  */
-    LINUX_NS_USER,
+  /* User namespace: user and group IDs.  */
+  LINUX_NS_USER,
 
-    /* UTS namespace: hostname and NIS domain name.  */
-    LINUX_NS_UTS,
+  /* UTS namespace: hostname and NIS domain name.  */
+  LINUX_NS_UTS,
 
-    /* Number of Linux namespaces.  */
-    NUM_LINUX_NS_TYPES
-  };
+  /* Number of Linux namespaces.  */
+  NUM_LINUX_NS_TYPES
+};
 
 /* Return nonzero if process PID has the same TYPE namespace as the
    calling process, or if the kernel does not support TYPE namespaces

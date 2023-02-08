@@ -36,12 +36,11 @@
 #include "remote.h"
 #include "gdbarch.h"
 
-
 /* eBPF registers.  */
 
 enum bpf_regnum
 {
-  BPF_R0_REGNUM,		/* return value */
+  BPF_R0_REGNUM, /* return value */
   BPF_R1_REGNUM,
   BPF_R2_REGNUM,
   BPF_R3_REGNUM,
@@ -51,18 +50,17 @@ enum bpf_regnum
   BPF_R7_REGNUM,
   BPF_R8_REGNUM,
   BPF_R9_REGNUM,
-  BPF_R10_REGNUM,		/* sp */
+  BPF_R10_REGNUM, /* sp */
   BPF_PC_REGNUM,
 };
 
-#define BPF_NUM_REGS	(BPF_PC_REGNUM + 1)
+#define BPF_NUM_REGS (BPF_PC_REGNUM + 1)
 
 /* Target-dependent structure in gdbarch.  */
 struct bpf_gdbarch_tdep : gdbarch_tdep_base
 {
 };
 
-
 /* Internal debugging facilities.  */
 
 /* When this is set to non-zero debugging information will be
@@ -73,20 +71,17 @@ static unsigned int bpf_debug_flag = 0;
 /* The show callback for 'show debug bpf'.  */
 
 static void
-show_bpf_debug (struct ui_file *file, int from_tty,
-		struct cmd_list_element *c, const char *value)
+show_bpf_debug (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+		const char *value)
 {
-  gdb_printf (file, _("Debugging of BPF is %s.\n"), value);
+  gdb_printf (file, _ ("Debugging of BPF is %s.\n"), value);
 }
 
-
 /* BPF registers.  */
 
-static const char *bpf_register_names[] =
-{
-  "r0",   "r1",  "r2",    "r3",   "r4",   "r5",   "r6",   "r7",
-  "r8",   "r9",  "r10",   "pc"
-};
+static const char *bpf_register_names[] = { "r0", "r1", "r2",  "r3",
+					    "r4", "r5", "r6",  "r7",
+					    "r8", "r9", "r10", "pc" };
 
 /* Return the name of register REGNUM.  */
 
@@ -128,21 +123,18 @@ bpf_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
   return default_print_insn (memaddr, info);
 }
 
-
 /* Return PC of first real instruction of the function starting at
    START_PC.  */
 
 static CORE_ADDR
 bpf_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  gdb_printf (gdb_stdlog,
-	      "Skipping prologue: start_pc=%s\n",
+  gdb_printf (gdb_stdlog, "Skipping prologue: start_pc=%s\n",
 	      paddress (gdbarch, start_pc));
   /* XXX: to be completed.  */
   return start_pc + 0;
 }
 
-
 /* Frame unwinder.
 
    XXX it is not clear how to unwind in eBPF, since the stack is not
@@ -154,8 +146,7 @@ bpf_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Given THIS_FRAME, return its ID.  */
 
 static void
-bpf_frame_this_id (frame_info_ptr this_frame,
-		   void **this_prologue_cache,
+bpf_frame_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
 		   struct frame_id *this_id)
 {
   /* Note that THIS_ID defaults to the outermost frame if we don't set
@@ -165,8 +156,7 @@ bpf_frame_this_id (frame_info_ptr this_frame,
 /* Return the reason why we can't unwind past THIS_FRAME.  */
 
 static enum unwind_stop_reason
-bpf_frame_unwind_stop_reason (frame_info_ptr this_frame,
-			      void **this_cache)
+bpf_frame_unwind_stop_reason (frame_info_ptr this_frame, void **this_cache)
 {
   return UNWIND_OUTERMOST;
 }
@@ -174,26 +164,23 @@ bpf_frame_unwind_stop_reason (frame_info_ptr this_frame,
 /* Ask THIS_FRAME to unwind its register.  */
 
 static struct value *
-bpf_frame_prev_register (frame_info_ptr this_frame,
-			 void **this_prologue_cache, int regnum)
+bpf_frame_prev_register (frame_info_ptr this_frame, void **this_prologue_cache,
+			 int regnum)
 {
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 /* Frame unwinder machinery for BPF.  */
 
-static const struct frame_unwind bpf_frame_unwind =
-{
-  "bpf prologue",
-  NORMAL_FRAME,
-  bpf_frame_unwind_stop_reason,
-  bpf_frame_this_id,
-  bpf_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind bpf_frame_unwind
+  = { "bpf prologue",
+      NORMAL_FRAME,
+      bpf_frame_unwind_stop_reason,
+      bpf_frame_this_id,
+      bpf_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
-
 /* Breakpoints.  */
 
 /* Enum describing the different kinds of breakpoints.  We currently
@@ -219,7 +206,7 @@ static const gdb_byte *
 bpf_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
   static unsigned char brkpt_insn[]
-    = {0x8c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    = { 0x8c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
   switch (kind)
     {
@@ -231,14 +218,13 @@ bpf_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-
 /* Assuming THIS_FRAME is a dummy frame, return its frame ID.  */
 
 static struct frame_id
 bpf_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 {
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame,
-					      gdbarch_sp_regnum (gdbarch));
+  CORE_ADDR sp
+    = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
   return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
@@ -246,8 +232,8 @@ bpf_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 
 static CORE_ADDR
 bpf_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		     struct regcache *regcache, CORE_ADDR bp_addr,
-		     int nargs, struct value **args, CORE_ADDR sp,
+		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		     struct value **args, CORE_ADDR sp,
 		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
@@ -307,7 +293,6 @@ bpf_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.  */
@@ -370,18 +355,17 @@ bpf_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 void _initialize_bpf_tdep ();
+
 void
 _initialize_bpf_tdep ()
 {
   gdbarch_register (bfd_arch_bpf, bpf_gdbarch_init);
 
   /* Add commands 'set/show debug bpf'.  */
-  add_setshow_zuinteger_cmd ("bpf", class_maintenance,
-			     &bpf_debug_flag,
-			     _("Set BPF debugging."),
-			     _("Show BPF debugging."),
-			     _("Enables BPF specific debugging output."),
-			     NULL,
-			     &show_bpf_debug,
-			     &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("bpf", class_maintenance, &bpf_debug_flag,
+			     _ ("Set BPF debugging."),
+			     _ ("Show BPF debugging."),
+			     _ ("Enables BPF specific debugging output."),
+			     NULL, &show_bpf_debug, &setdebuglist,
+			     &showdebuglist);
 }

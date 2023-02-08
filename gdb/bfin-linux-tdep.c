@@ -31,64 +31,63 @@
 
 /* From <asm/sigcontext.h>.  */
 
-#define SIGCONTEXT_OFFSET	168
+#define SIGCONTEXT_OFFSET 168
 
-static const int bfin_linux_sigcontext_reg_offset[BFIN_NUM_REGS] =
-{
-  0 * 4,	/* %r0 */
-  1 * 4,	/* %r1 */
-  2 * 4,	/* %r2 */
-  3 * 4,	/* %r3 */
-  4 * 4,	/* %r4 */
-  5 * 4,	/* %r5 */
-  6 * 4,	/* %r6 */
-  7 * 4,	/* %r7 */
-  8 * 4,	/* %p0 */
-  9 * 4,	/* %p1 */
-  10 * 4,	/* %p2 */
-  11 * 4,	/* %p3 */
-  12 * 4,	/* %p4 */
-  13 * 4,	/* %p5 */
-  14 * 4,	/* %sp */
-  23 * 4,	/* %fp */
-  24 * 4,	/* %i0 */
-  25 * 4,	/* %i1 */
-  26 * 4,	/* %i2 */
-  27 * 4,	/* %i3 */
-  28 * 4,	/* %m0 */
-  29 * 4,	/* %m1 */
-  30 * 4,	/* %m2 */
-  31 * 4,	/* %m3 */
-  36 * 4,	/* %b0 */
-  37 * 4,	/* %b1 */
-  38 * 4,	/* %b2 */
-  39 * 4,	/* %b3 */
-  32 * 4,	/* %l0 */
-  33 * 4,	/* %l1 */
-  34 * 4,	/* %l2 */
-  35 * 4,	/* %l3 */
-  17 * 4,	/* %a0x */
-  15 * 4,	/* %a0w */
-  18 * 4,	/* %a1x */
-  16 * 4,	/* %a1w */
-  19 * 4,	/* %astat */
-  20 * 4,	/* %rets */
-  40 * 4,	/* %lc0 */
-  42 * 4,	/* %lt0 */
-  44 * 4,	/* %lb0 */
-  41 * 4,	/* %lc1 */
-  43 * 4,	/* %lt1 */
-  45 * 4,	/* %lb1 */
-  -1,		/* %cycles */
-  -1,		/* %cycles2 */
-  -1,		/* %usp */
-  46 * 4,	/* %seqstat */
-  -1,		/* syscfg */
-  21 * 4,	/* %reti */
-  22 * 4,	/* %retx */
-  -1,		/* %retn */
-  -1,		/* %rete */
-  21 * 4,	/* %pc */
+static const int bfin_linux_sigcontext_reg_offset[BFIN_NUM_REGS] = {
+  0 * 4,  /* %r0 */
+  1 * 4,  /* %r1 */
+  2 * 4,  /* %r2 */
+  3 * 4,  /* %r3 */
+  4 * 4,  /* %r4 */
+  5 * 4,  /* %r5 */
+  6 * 4,  /* %r6 */
+  7 * 4,  /* %r7 */
+  8 * 4,  /* %p0 */
+  9 * 4,  /* %p1 */
+  10 * 4, /* %p2 */
+  11 * 4, /* %p3 */
+  12 * 4, /* %p4 */
+  13 * 4, /* %p5 */
+  14 * 4, /* %sp */
+  23 * 4, /* %fp */
+  24 * 4, /* %i0 */
+  25 * 4, /* %i1 */
+  26 * 4, /* %i2 */
+  27 * 4, /* %i3 */
+  28 * 4, /* %m0 */
+  29 * 4, /* %m1 */
+  30 * 4, /* %m2 */
+  31 * 4, /* %m3 */
+  36 * 4, /* %b0 */
+  37 * 4, /* %b1 */
+  38 * 4, /* %b2 */
+  39 * 4, /* %b3 */
+  32 * 4, /* %l0 */
+  33 * 4, /* %l1 */
+  34 * 4, /* %l2 */
+  35 * 4, /* %l3 */
+  17 * 4, /* %a0x */
+  15 * 4, /* %a0w */
+  18 * 4, /* %a1x */
+  16 * 4, /* %a1w */
+  19 * 4, /* %astat */
+  20 * 4, /* %rets */
+  40 * 4, /* %lc0 */
+  42 * 4, /* %lt0 */
+  44 * 4, /* %lb0 */
+  41 * 4, /* %lc1 */
+  43 * 4, /* %lt1 */
+  45 * 4, /* %lb1 */
+  -1,	  /* %cycles */
+  -1,	  /* %cycles2 */
+  -1,	  /* %usp */
+  46 * 4, /* %seqstat */
+  -1,	  /* syscfg */
+  21 * 4, /* %reti */
+  22 * 4, /* %retx */
+  -1,	  /* %retn */
+  -1,	  /* %rete */
+  21 * 4, /* %pc */
 };
 
 /* Signal trampolines.  */
@@ -96,8 +95,7 @@ static const int bfin_linux_sigcontext_reg_offset[BFIN_NUM_REGS] =
 static void
 bfin_linux_sigframe_init (const struct tramp_frame *self,
 			  frame_info_ptr this_frame,
-			  struct trad_frame_cache *this_cache,
-			  CORE_ADDR func)
+			  struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   CORE_ADDR sp = get_frame_sp (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -114,12 +112,11 @@ bfin_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (sp + 8, pc));
 }
 
-static const struct tramp_frame bfin_linux_sigframe =
-{
+static const struct tramp_frame bfin_linux_sigframe = {
   SIGTRAMP_FRAME,
   4,
   {
-    { 0x00ADE128, 0xffffffff },	/* P0 = __NR_rt_sigreturn; */
+    { 0x00ADE128, 0xffffffff }, /* P0 = __NR_rt_sigreturn; */
     { 0x00A0, 0xffff },		/* EXCPT 0; */
     { TRAMP_SENTINEL_INSN, ULONGEST_MAX },
   },
@@ -127,8 +124,7 @@ static const struct tramp_frame bfin_linux_sigframe =
 };
 
 static LONGEST
-bfin_linux_get_syscall_number (struct gdbarch *gdbarch,
-			       thread_info *thread)
+bfin_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 {
   struct regcache *regcache = get_thread_regcache (thread);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -157,11 +153,11 @@ bfin_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, "syscalls/bfin-linux.xml");
-  set_gdbarch_get_syscall_number (gdbarch,
-				  bfin_linux_get_syscall_number);
+  set_gdbarch_get_syscall_number (gdbarch, bfin_linux_get_syscall_number);
 }
 
 void _initialize_bfin_linux_tdep ();
+
 void
 _initialize_bfin_linux_tdep ()
 {

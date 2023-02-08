@@ -22,14 +22,14 @@
 
 #include <sys/personality.h>
 
-# if !HAVE_DECL_ADDR_NO_RANDOMIZE
-#  define ADDR_NO_RANDOMIZE 0x0040000
-# endif /* ! HAVE_DECL_ADDR_NO_RANDOMIZE */
+#if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#define ADDR_NO_RANDOMIZE 0x0040000
+#endif /* ! HAVE_DECL_ADDR_NO_RANDOMIZE */
 
 /* See comment on nat/linux-personality.h.  */
 
 maybe_disable_address_space_randomization::
-maybe_disable_address_space_randomization (int disable_randomization)
+  maybe_disable_address_space_randomization (int disable_randomization)
   : m_personality_set (false),
     m_personality_orig (0)
 {
@@ -42,22 +42,23 @@ maybe_disable_address_space_randomization (int disable_randomization)
 	  m_personality_set = true;
 	  personality (m_personality_orig | ADDR_NO_RANDOMIZE);
 	}
-      if (errno != 0 || (m_personality_set
-			 && !(personality (0xffffffff) & ADDR_NO_RANDOMIZE)))
-	warning (_("Error disabling address space randomization: %s"),
+      if (errno != 0
+	  || (m_personality_set
+	      && !(personality (0xffffffff) & ADDR_NO_RANDOMIZE)))
+	warning (_ ("Error disabling address space randomization: %s"),
 		 safe_strerror (errno));
     }
 }
 
 maybe_disable_address_space_randomization::
-~maybe_disable_address_space_randomization ()
+  ~maybe_disable_address_space_randomization ()
 {
   if (m_personality_set)
     {
       errno = 0;
       personality (m_personality_orig);
       if (errno != 0)
-	warning (_("Error restoring address space randomization: %s"),
+	warning (_ ("Error restoring address space randomization: %s"),
 		 safe_strerror (errno));
     }
 }

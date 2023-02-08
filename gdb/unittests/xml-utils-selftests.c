@@ -21,19 +21,24 @@
 #include "gdbsupport/xml-utils.h"
 #include "gdbsupport/selftest.h"
 
-namespace selftests {
-namespace xml_utils {
+namespace selftests
+{
+namespace xml_utils
+{
 
-static void test_xml_escape_text ()
+static void
+test_xml_escape_text ()
 {
   const char *input = "<this isn't=\"xml\"> &";
-  const char *expected_output = "&lt;this isn&apos;t=&quot;xml&quot;&gt; &amp;";
+  const char *expected_output
+    = "&lt;this isn&apos;t=&quot;xml&quot;&gt; &amp;";
   std::string actual_output = xml_escape_text (input);
 
   SELF_CHECK (actual_output == expected_output);
 }
 
-static void test_xml_escape_text_append ()
+static void
+test_xml_escape_text_append ()
 {
   /* Make sure that we do indeed append.  */
   std::string actual_output = "foo<xml>";
@@ -45,10 +50,11 @@ static void test_xml_escape_text_append ()
   SELF_CHECK (actual_output == expected_output);
 }
 
-}
-}
+} // namespace xml_utils
+} // namespace selftests
 
 void _initialize_xml_utils ();
+
 void
 _initialize_xml_utils ()
 {

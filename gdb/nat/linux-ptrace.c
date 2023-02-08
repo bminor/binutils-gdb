@@ -40,14 +40,13 @@ linux_ptrace_attach_fail_reason (pid_t pid)
   std::string result;
 
   if (tracerpid > 0)
-    string_appendf (result,
-		    _("process %d is already traced by process %d"),
+    string_appendf (result, _ ("process %d is already traced by process %d"),
 		    (int) pid, (int) tracerpid);
 
   if (linux_proc_pid_is_zombie_nowarn (pid))
     string_appendf (result,
-		    _("process %d is a zombie - the process has already "
-		      "terminated"),
+		    _ ("process %d is a zombie - the process has already "
+		       "terminated"),
 		    (int) pid);
 
   return result;
@@ -89,8 +88,8 @@ kill_child (pid_t child, const char *who)
 
   if (kill (child, SIGKILL) != 0)
     {
-      warning (_("%s: failed to kill child pid %ld %s"),
-	       who, (long) child, safe_strerror (errno));
+      warning (_ ("%s: failed to kill child pid %ld %s"), who, (long) child,
+	       safe_strerror (errno));
       return;
     }
 
@@ -98,15 +97,15 @@ kill_child (pid_t child, const char *who)
   got_pid = my_waitpid (child, &kill_status, 0);
   if (got_pid != child)
     {
-      warning (_("%s: "
-		 "kill waitpid returned %ld: %s"),
+      warning (_ ("%s: "
+		  "kill waitpid returned %ld: %s"),
 	       who, (long) got_pid, safe_strerror (errno));
       return;
     }
   if (!WIFSIGNALED (kill_status))
     {
-      warning (_("%s: "
-		 "kill status %d is not WIFSIGNALED!"),
+      warning (_ ("%s: "
+		  "kill status %d is not WIFSIGNALED!"),
 	       who, kill_status);
       return;
     }
@@ -127,12 +126,11 @@ linux_ptrace_test_ret_to_nx (void)
   int status;
   elf_gregset_t regs;
 
-  return_address
-    = (gdb_byte *) mmap (NULL, 2, PROT_READ | PROT_WRITE,
-			 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  return_address = (gdb_byte *) mmap (NULL, 2, PROT_READ | PROT_WRITE,
+				      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (return_address == MAP_FAILED)
     {
-      warning (_("linux_ptrace_test_ret_to_nx: Cannot mmap: %s"),
+      warning (_ ("linux_ptrace_test_ret_to_nx: Cannot mmap: %s"),
 	       safe_strerror (errno));
       return;
     }
@@ -144,7 +142,7 @@ linux_ptrace_test_ret_to_nx (void)
   switch (child)
     {
     case -1:
-      warning (_("linux_ptrace_test_ret_to_nx: Cannot fork: %s"),
+      warning (_ ("linux_ptrace_test_ret_to_nx: Cannot fork: %s"),
 	       safe_strerror (errno));
       return;
 
@@ -152,7 +150,7 @@ linux_ptrace_test_ret_to_nx (void)
       l = ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) NULL,
 		  (PTRACE_TYPE_ARG4) NULL);
       if (l != 0)
-	warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_TRACEME: %s"),
+	warning (_ ("linux_ptrace_test_ret_to_nx: Cannot PTRACE_TRACEME: %s"),
 		 safe_strerror (errno));
       else
 	{
@@ -161,16 +159,19 @@ linux_ptrace_test_ret_to_nx (void)
 			".globl linux_ptrace_test_ret_to_nx_instr;"
 			"linux_ptrace_test_ret_to_nx_instr:"
 			"ret"
-			: : "r" (return_address) : "memory");
+			:
+			: "r"(return_address)
+			: "memory");
 #elif defined __x86_64__
 	  asm volatile ("pushq %0;"
 			".globl linux_ptrace_test_ret_to_nx_instr;"
 			"linux_ptrace_test_ret_to_nx_instr:"
 			"ret"
-			: : "r" ((uint64_t) (uintptr_t) return_address)
+			:
+			: "r"((uint64_t) (uintptr_t) return_address)
 			: "memory");
 #else
-# error "!__i386__ && !__x86_64__"
+#error "!__i386__ && !__x86_64__"
 #endif
 	  gdb_assert_not_reached ("asm block did not terminate");
 	}
@@ -182,7 +183,7 @@ linux_ptrace_test_ret_to_nx (void)
   got_pid = waitpid (child, &status, 0);
   if (got_pid != child)
     {
-      warning (_("linux_ptrace_test_ret_to_nx: waitpid returned %ld: %s"),
+      warning (_ ("linux_ptrace_test_ret_to_nx: waitpid returned %ld: %s"),
 	       (long) got_pid, safe_strerror (errno));
       return;
     }
@@ -190,17 +191,18 @@ linux_ptrace_test_ret_to_nx (void)
   if (WIFSIGNALED (status))
     {
       if (WTERMSIG (status) != SIGKILL)
-	warning (_("linux_ptrace_test_ret_to_nx: WTERMSIG %d is not SIGKILL!"),
-		 (int) WTERMSIG (status));
+	warning (
+	  _ ("linux_ptrace_test_ret_to_nx: WTERMSIG %d is not SIGKILL!"),
+	  (int) WTERMSIG (status));
       else
-	warning (_("Cannot call inferior functions, Linux kernel PaX "
-		   "protection forbids return to non-executable pages!"));
+	warning (_ ("Cannot call inferior functions, Linux kernel PaX "
+		    "protection forbids return to non-executable pages!"));
       return;
     }
 
   if (!WIFSTOPPED (status))
     {
-      warning (_("linux_ptrace_test_ret_to_nx: status %d is not WIFSTOPPED!"),
+      warning (_ ("linux_ptrace_test_ret_to_nx: status %d is not WIFSTOPPED!"),
 	       status);
       kill_child (child, "linux_ptrace_test_ret_to_nx");
       return;
@@ -209,17 +211,18 @@ linux_ptrace_test_ret_to_nx (void)
   /* We may get SIGSEGV due to missing PROT_EXEC of the return_address.  */
   if (WSTOPSIG (status) != SIGTRAP && WSTOPSIG (status) != SIGSEGV)
     {
-      warning (_("linux_ptrace_test_ret_to_nx: "
-		 "WSTOPSIG %d is neither SIGTRAP nor SIGSEGV!"),
+      warning (_ ("linux_ptrace_test_ret_to_nx: "
+		  "WSTOPSIG %d is neither SIGTRAP nor SIGSEGV!"),
 	       (int) WSTOPSIG (status));
       kill_child (child, "linux_ptrace_test_ret_to_nx");
       return;
     }
 
   if (ptrace (PTRACE_GETREGS, child, (PTRACE_TYPE_ARG3) 0,
-	      (PTRACE_TYPE_ARG4) &regs) < 0)
+	      (PTRACE_TYPE_ARG4) &regs)
+      < 0)
     {
-      warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_GETREGS: %s"),
+      warning (_ ("linux_ptrace_test_ret_to_nx: Cannot PTRACE_GETREGS: %s"),
 	       safe_strerror (errno));
     }
 #if defined __i386__
@@ -227,7 +230,7 @@ linux_ptrace_test_ret_to_nx (void)
 #elif defined __x86_64__
   pc = (gdb_byte *) (uintptr_t) regs[RIP];
 #else
-# error "!__i386__ && !__x86_64__"
+#error "!__i386__ && !__x86_64__"
 #endif
 
   kill_child (child, "linux_ptrace_test_ret_to_nx");
@@ -247,13 +250,13 @@ linux_ptrace_test_ret_to_nx (void)
     }
 
   if ((void (*) (void)) pc != &linux_ptrace_test_ret_to_nx_instr)
-    warning (_("linux_ptrace_test_ret_to_nx: PC %p is neither near return "
-	       "address %p nor is the return instruction %p!"),
+    warning (_ ("linux_ptrace_test_ret_to_nx: PC %p is neither near return "
+		"address %p nor is the return instruction %p!"),
 	     pc, return_address, &linux_ptrace_test_ret_to_nx_instr);
   else
-    warning (_("Cannot call inferior functions on this system - "
-	       "Linux kernel with broken i386 NX (non-executable pages) "
-	       "support detected!"));
+    warning (_ ("Cannot call inferior functions on this system - "
+		"Linux kernel with broken i386 NX (non-executable pages) "
+		"support detected!"));
 #endif /* defined __i386__ || defined __x86_64__ */
 }
 
@@ -276,18 +279,18 @@ linux_fork_to_function (gdb_byte *child_stack, int (*function) (void *))
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)
 #define STACK_SIZE 4096
 
-    if (child_stack == NULL)
-      child_stack = (gdb_byte *) xmalloc (STACK_SIZE * 4);
+  if (child_stack == NULL)
+    child_stack = (gdb_byte *) xmalloc (STACK_SIZE * 4);
 
     /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
 #ifdef __ia64__
-      child_pid = __clone2 (function, child_stack, STACK_SIZE,
-			    CLONE_VM | SIGCHLD, child_stack + STACK_SIZE * 2);
-#else /* !__ia64__ */
-      child_pid = clone (function, child_stack + STACK_SIZE,
-			 CLONE_VM | SIGCHLD, child_stack + STACK_SIZE * 2);
+  child_pid = __clone2 (function, child_stack, STACK_SIZE, CLONE_VM | SIGCHLD,
+			child_stack + STACK_SIZE * 2);
+#else  /* !__ia64__ */
+  child_pid = clone (function, child_stack + STACK_SIZE, CLONE_VM | SIGCHLD,
+		     child_stack + STACK_SIZE * 2);
 #endif /* !__ia64__ */
-#else /* !defined(__UCLIBC) && defined(HAS_NOMMU) */
+#else  /* !defined(__UCLIBC) && defined(HAS_NOMMU) */
   child_pid = fork ();
 
   if (child_pid == 0)
@@ -327,12 +330,8 @@ linux_check_ptrace_features (void)
   /* Initialize the options.  We consider that these options are always
      supported.  */
   supported_ptrace_options
-    = (PTRACE_O_TRACESYSGOOD
-       | PTRACE_O_TRACECLONE
-       | PTRACE_O_TRACEFORK
-       | PTRACE_O_TRACEVFORK
-       | PTRACE_O_TRACEVFORKDONE
-       | PTRACE_O_TRACEEXEC);
+    = (PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK
+       | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEVFORKDONE | PTRACE_O_TRACEEXEC);
 
   /* Fork a child so we can do some testing.  The child will call
      linux_child_function and will get traced.  The child will
@@ -344,10 +343,10 @@ linux_check_ptrace_features (void)
   if (ret == -1)
     perror_with_name (("waitpid"));
   else if (ret != child_pid)
-    error (_("linux_check_ptrace_features: waitpid: unexpected result %d."),
+    error (_ ("linux_check_ptrace_features: waitpid: unexpected result %d."),
 	   ret);
-  if (! WIFSTOPPED (status))
-    error (_("linux_check_ptrace_features: waitpid: unexpected status %d."),
+  if (!WIFSTOPPED (status))
+    error (_ ("linux_check_ptrace_features: waitpid: unexpected status %d."),
 	   status);
 
   linux_test_for_exitkill (child_pid);
@@ -443,6 +442,5 @@ linux_wstatus_maybe_breakpoint (int wstat)
 	  && (WSTOPSIG (wstat) == SIGTRAP
 	      /* SIGILL and SIGSEGV are also treated as traps in case a
 		 breakpoint is inserted at the current PC.  */
-	      || WSTOPSIG (wstat) == SIGILL
-	      || WSTOPSIG (wstat) == SIGSEGV));
+	      || WSTOPSIG (wstat) == SIGILL || WSTOPSIG (wstat) == SIGSEGV));
 }

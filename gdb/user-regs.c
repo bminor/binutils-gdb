@@ -107,8 +107,7 @@ get_user_regs (struct gdbarch *gdbarch)
 
       struct obstack *obstack = gdbarch_obstack (gdbarch);
       regs->last = &regs->first;
-      for (user_reg *reg = builtin_user_regs.first;
-	   reg != NULL;
+      for (user_reg *reg = builtin_user_regs.first; reg != NULL;
 	   reg = reg->next)
 	append_user_reg (regs, reg->name, reg->xread, reg->baton,
 			 OBSTACK_ZALLOC (obstack, struct user_reg));
@@ -229,11 +228,12 @@ maintenance_print_user_registers (const char *args, int from_tty)
 }
 
 void _initialize_user_regs ();
+
 void
 _initialize_user_regs ()
 {
   add_cmd ("user-registers", class_maintenance,
 	   maintenance_print_user_registers,
-	   _("List the names of the current user registers."),
+	   _ ("List the names of the current user registers."),
 	   &maintenanceprintlist);
 }

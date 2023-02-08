@@ -82,6 +82,7 @@ extern void annotate_arg_end (void);
 struct annotate_arg_emitter
 {
   annotate_arg_emitter () { annotate_arg_begin (); }
+
   ~annotate_arg_emitter () { annotate_arg_end (); }
 
   DISABLE_COPY_AND_ASSIGN (annotate_arg_emitter);

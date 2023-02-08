@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "defs.h"
 #include "dummy-frame.h"
 #include "regcache.h"
@@ -44,8 +43,7 @@ struct dummy_frame_id
 /* Return whether dummy_frame_id *ID1 and *ID2 are equal.  */
 
 static int
-dummy_frame_id_eq (struct dummy_frame_id *id1,
-		   struct dummy_frame_id *id2)
+dummy_frame_id_eq (struct dummy_frame_id *id1, struct dummy_frame_id *id2)
 {
   return id1->id == id2->id && id1->thread == id2->thread;
 }
@@ -129,8 +127,8 @@ remove_dummy_frame (struct dummy_frame **dummy_ptr)
 static bool
 pop_dummy_frame_bpt (struct breakpoint *b, struct dummy_frame *dummy)
 {
-  if (b->thread == dummy->id.thread->global_num
-      && b->disposition == disp_del && b->frame_id == dummy->id.id)
+  if (b->thread == dummy->id.thread->global_num && b->disposition == disp_del
+      && b->frame_id == dummy->id.id)
     {
       while (b->related_breakpoint != b)
 	delete_breakpoint (b->related_breakpoint);
@@ -288,8 +286,7 @@ struct dummy_frame_cache
 
 static int
 dummy_frame_sniffer (const struct frame_unwind *self,
-		     frame_info_ptr this_frame,
-		     void **this_prologue_cache)
+		     frame_info_ptr this_frame, void **this_prologue_cache)
 {
   /* When unwinding a normal frame, the stack structure is determined
      by analyzing the frame's function's code (be it using brute force
@@ -298,7 +295,7 @@ dummy_frame_sniffer (const struct frame_unwind *self,
      entry point, or some random address on the stack.  Trying to use
      that PC to apply standard frame ID unwind techniques is just
      asking for trouble.  */
-  
+
   /* Don't bother unless there is at least one dummy frame.  */
   if (dummy_frame_stack != NULL)
     {
@@ -310,8 +307,7 @@ dummy_frame_sniffer (const struct frame_unwind *self,
       struct dummy_frame_id dummy_id = { this_id, inferior_thread () };
 
       /* Use that ID to find the corresponding cache entry.  */
-      for (dummyframe = dummy_frame_stack;
-	   dummyframe != NULL;
+      for (dummyframe = dummy_frame_stack; dummyframe != NULL;
 	   dummyframe = dummyframe->next)
 	{
 	  if (dummy_frame_id_eq (&dummyframe->id, &dummy_id))
@@ -319,8 +315,8 @@ dummy_frame_sniffer (const struct frame_unwind *self,
 	      struct dummy_frame_cache *cache;
 
 	      cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
-	      cache->prev_regcache = get_infcall_suspend_state_regcache
-						   (dummyframe->caller_state);
+	      cache->prev_regcache = get_infcall_suspend_state_regcache (
+		dummyframe->caller_state);
 	      cache->this_id = this_id;
 	      (*this_prologue_cache) = cache;
 	      return 1;
@@ -335,8 +331,7 @@ dummy_frame_sniffer (const struct frame_unwind *self,
 
 static struct value *
 dummy_frame_prev_register (frame_info_ptr this_frame,
-			   void **this_prologue_cache,
-			   int regnum)
+			   void **this_prologue_cache, int regnum)
 {
   struct dummy_frame_cache *cache
     = (struct dummy_frame_cache *) *this_prologue_cache;
@@ -353,8 +348,8 @@ dummy_frame_prev_register (frame_info_ptr this_frame,
   /* Use the regcache_cooked_read() method so that it, on the fly,
      constructs either a raw or pseudo register from the raw
      register cache.  */
-  cache->prev_regcache->cooked_read
-    (regnum, value_contents_writeable (reg_val).data ());
+  cache->prev_regcache->cooked_read (
+    regnum, value_contents_writeable (reg_val).data ());
   return reg_val;
 }
 
@@ -364,8 +359,7 @@ dummy_frame_prev_register (frame_info_ptr this_frame,
    dummy cache is located and saved in THIS_PROLOGUE_CACHE.  */
 
 static void
-dummy_frame_this_id (frame_info_ptr this_frame,
-		     void **this_prologue_cache,
+dummy_frame_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
 		     struct frame_id *this_id)
 {
   /* The dummy-frame sniffer always fills in the cache.  */
@@ -376,8 +370,7 @@ dummy_frame_this_id (frame_info_ptr this_frame,
   (*this_id) = cache->this_id;
 }
 
-const struct frame_unwind dummy_frame_unwind =
-{
+const struct frame_unwind dummy_frame_unwind = {
   "dummy",
   DUMMY_FRAME,
   default_frame_unwind_stop_reason,
@@ -405,8 +398,7 @@ fprint_dummy_frames (struct ui_file *file)
   struct dummy_frame *s;
 
   for (s = dummy_frame_stack; s != NULL; s = s->next)
-    gdb_printf (file, "%s: id=%s, ptid=%s\n",
-		host_address_to_string (s),
+    gdb_printf (file, "%s: id=%s, ptid=%s\n", host_address_to_string (s),
 		s->id.id.to_string ().c_str (),
 		s->id.thread->ptid.to_string ().c_str ());
 }
@@ -421,18 +413,20 @@ maintenance_print_dummy_frames (const char *args, int from_tty)
       stdio_file file;
 
       if (!file.open (args, "w"))
-	perror_with_name (_("maintenance print dummy-frames"));
+	perror_with_name (_ ("maintenance print dummy-frames"));
       fprint_dummy_frames (&file);
     }
 }
 
 void _initialize_dummy_frame ();
+
 void
 _initialize_dummy_frame ()
 {
   add_cmd ("dummy-frames", class_maintenance, maintenance_print_dummy_frames,
-	   _("Print the contents of the internal dummy-frame stack."),
+	   _ ("Print the contents of the internal dummy-frame stack."),
 	   &maintenanceprintlist);
 
-  gdb::observers::inferior_created.attach (cleanup_dummy_frames, "dummy-frame");
+  gdb::observers::inferior_created.attach (cleanup_dummy_frames,
+					   "dummy-frame");
 }

@@ -23,9 +23,9 @@
 struct regset;
 struct regcache;
 
-#define ARM_LINUX_SIZEOF_NWFPE (8 * ARM_FP_REGISTER_SIZE \
-				+ 2 * ARM_INT_REGISTER_SIZE \
-				+ 8 + ARM_INT_REGISTER_SIZE)
+#define ARM_LINUX_SIZEOF_NWFPE                              \
+  (8 * ARM_FP_REGISTER_SIZE + 2 * ARM_INT_REGISTER_SIZE + 8 \
+   + ARM_INT_REGISTER_SIZE)
 
 /* Support for register format used by the NWFPE FPA emulator.  Each
    register takes three words, where either the first one, two, or
@@ -41,11 +41,11 @@ struct regcache;
 #define NWFPE_INITFLAG_OFFSET (NWFPE_TAGS_OFFSET + 8)
 
 void arm_linux_supply_gregset (const struct regset *regset,
-			       struct regcache *regcache,
-			       int regnum, const void *gregs_buf, size_t len);
+			       struct regcache *regcache, int regnum,
+			       const void *gregs_buf, size_t len);
 void arm_linux_collect_gregset (const struct regset *regset,
-				const struct regcache *regcache,
-				int regnum, void *gregs_buf, size_t len);
+				const struct regcache *regcache, int regnum,
+				void *gregs_buf, size_t len);
 
 void supply_nwfpe_register (struct regcache *regcache, int regno,
 			    const gdb_byte *regs);
@@ -53,18 +53,18 @@ void collect_nwfpe_register (const struct regcache *regcache, int regno,
 			     gdb_byte *regs);
 
 void arm_linux_supply_nwfpe (const struct regset *regset,
-			     struct regcache *regcache,
-			     int regnum, const void *regs_buf, size_t len);
+			     struct regcache *regcache, int regnum,
+			     const void *regs_buf, size_t len);
 void arm_linux_collect_nwfpe (const struct regset *regset,
-			      const struct regcache *regcache,
-			      int regnum, void *regs_buf, size_t len);
+			      const struct regcache *regcache, int regnum,
+			      void *regs_buf, size_t len);
 
 /* ARM GNU/Linux HWCAP values.  These are in defined in
    <asm/elf.h> in current kernels.  */
-#define HWCAP_VFP       64
-#define HWCAP_IWMMXT    512
-#define HWCAP_NEON      4096
-#define HWCAP_VFPv3     8192
-#define HWCAP_VFPv3D16  16384
+#define HWCAP_VFP 64
+#define HWCAP_IWMMXT 512
+#define HWCAP_NEON 4096
+#define HWCAP_VFPv3 8192
+#define HWCAP_VFPv3D16 16384
 
 #endif /* ARM_LINUX_TDEP_H */

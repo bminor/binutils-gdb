@@ -28,8 +28,7 @@ py_get_event_thread (ptid_t ptid)
   if (non_stop)
     {
       thread_info *thread
-	= find_thread_ptid (current_inferior ()->process_target (),
-			    ptid);
+	= find_thread_ptid (current_inferior ()->process_target (), ptid);
       if (thread != nullptr)
 	return thread_to_thread_object (thread);
       PyErr_SetString (PyExc_RuntimeError, "Could not find event thread");
@@ -47,9 +46,8 @@ create_thread_event_object (PyTypeObject *py_type, PyObject *thread)
   if (thread_event_obj == NULL)
     return NULL;
 
-  if (evpy_add_attribute (thread_event_obj.get (),
-			  "inferior_thread",
-			  thread) < 0)
+  if (evpy_add_attribute (thread_event_obj.get (), "inferior_thread", thread)
+      < 0)
     return NULL;
 
   return thread_event_obj;

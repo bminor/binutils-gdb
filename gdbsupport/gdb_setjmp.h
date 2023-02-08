@@ -22,15 +22,15 @@
 #include <setjmp.h>
 
 #ifdef HAVE_SIGSETJMP
-#define SIGJMP_BUF		sigjmp_buf
-#define SIGSETJMP(buf,val)	sigsetjmp((buf), val)
-#define SIGLONGJMP(buf,val)	siglongjmp((buf), (val))
+#define SIGJMP_BUF sigjmp_buf
+#define SIGSETJMP(buf, val) sigsetjmp ((buf), val)
+#define SIGLONGJMP(buf, val) siglongjmp ((buf), (val))
 #else
-#define SIGJMP_BUF		jmp_buf
+#define SIGJMP_BUF jmp_buf
 /* We ignore val here because that's safer and avoids having to check
    whether _setjmp exists.  */
-#define SIGSETJMP(buf,val)	setjmp(buf)
-#define SIGLONGJMP(buf,val)	longjmp((buf), (val))
+#define SIGSETJMP(buf, val) setjmp (buf)
+#define SIGLONGJMP(buf, val) longjmp ((buf), (val))
 #endif
 
 #endif /* COMMON_GDB_SETJMP_H */

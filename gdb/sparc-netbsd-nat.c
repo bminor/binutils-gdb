@@ -58,6 +58,7 @@ sparc32nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 static sparc_target<inf_ptrace_target> the_sparc_nbsd_nat_target;
 
 void _initialize_sparcnbsd_nat ();
+
 void
 _initialize_sparcnbsd_nat ()
 {

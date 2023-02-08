@@ -73,16 +73,16 @@
    expose the required symbols.
 
    NOTE: this must be kept in sync with common.m4.  */
-#if defined (__MINGW32__) || defined (__CYGWIN__)
-# ifdef _WIN32_WINNT
-#  if _WIN32_WINNT < 0x0501
-#   undef _WIN32_WINNT
-#   define _WIN32_WINNT 0x0501
-#  endif
-# else
-#  define _WIN32_WINNT 0x0501
-# endif
-#endif	/* __MINGW32__ || __CYGWIN__ */
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+#ifdef _WIN32_WINNT
+#if _WIN32_WINNT < 0x0501
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
+#else
+#define _WIN32_WINNT 0x0501
+#endif
+#endif /* __MINGW32__ || __CYGWIN__ */
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -96,7 +96,7 @@
 #include <stdint.h>
 #include <string.h>
 #ifdef HAVE_STRINGS_H
-#include <strings.h>	/* for strcasecmp and strncasecmp */
+#include <strings.h> /* for strcasecmp and strncasecmp */
 #endif
 #include <errno.h>
 #if HAVE_ALLOCA_H
@@ -215,7 +215,9 @@
 #include "gdbsupport/poison.h"
 
 #define EXTERN_C extern "C"
-#define EXTERN_C_PUSH extern "C" {
+#define EXTERN_C_PUSH \
+  extern "C"          \
+  {
 #define EXTERN_C_POP }
 
 /* Pull in gdb::unique_xmalloc_ptr.  */
@@ -226,7 +228,7 @@
    that always returns a pointer to a 4MB section reserved for
    that.  */
 
-#if defined (HAVE_SBRK) && !__APPLE__
+#if defined(HAVE_SBRK) && !__APPLE__
 #define HAVE_USEFUL_SBRK 1
 #endif
 

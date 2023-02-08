@@ -23,7 +23,7 @@
    table in osabi.c.  */
 enum gdb_osabi
 {
-  GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
+  GDB_OSABI_UNKNOWN = 0, /* keep this zero */
   GDB_OSABI_NONE,
 
   GDB_OSABI_SVR4,
@@ -47,7 +47,7 @@ enum gdb_osabi
   GDB_OSABI_SDE,
   GDB_OSABI_PIKEOS,
 
-  GDB_OSABI_INVALID		/* keep this last */
+  GDB_OSABI_INVALID /* keep this last */
 };
 
 /* Register an OS ABI sniffer.  Each arch/flavour may have more than
@@ -55,17 +55,15 @@ enum gdb_osabi
    another.  The first sniffer to return something other than
    GDB_OSABI_UNKNOWN wins, so a sniffer should be careful to claim a file
    only if it knows for sure what it is.  */
-void gdbarch_register_osabi_sniffer (enum bfd_architecture,
-				     enum bfd_flavour,
-				     enum gdb_osabi (*)(bfd *));
+void gdbarch_register_osabi_sniffer (enum bfd_architecture, enum bfd_flavour,
+				     enum gdb_osabi (*) (bfd *));
 
 /* Register a handler for an OS ABI variant for a given architecture
    and machine type.  There should be only one handler for a given OS
    ABI for each architecture and machine type combination.  */
 void gdbarch_register_osabi (enum bfd_architecture, unsigned long,
 			     enum gdb_osabi,
-			     void (*)(struct gdbarch_info,
-				      struct gdbarch *));
+			     void (*) (struct gdbarch_info, struct gdbarch *));
 
 /* Lookup the OS ABI corresponding to the specified BFD.  */
 enum gdb_osabi gdbarch_lookup_osabi (bfd *);

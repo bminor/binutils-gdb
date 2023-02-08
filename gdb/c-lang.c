@@ -63,7 +63,7 @@ charset_for_string_type (c_string_type str_type, struct gdbarch *gdbarch)
       else
 	return "UTF-32LE";
     }
-  internal_error (_("unhandled c_string_type"));
+  internal_error (_ ("unhandled c_string_type"));
 }
 
 /* Classify ELTTYPE according to what kind of character it is.  Return
@@ -131,7 +131,7 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
   /* Punt.  */
   result = C_CHAR;
 
- done:
+done:
   if (encoding)
     *encoding = charset_for_string_type (result, gdbarch);
 
@@ -143,8 +143,8 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
    for printing characters and strings is language specific.  */
 
 void
-language_defn::emitchar (int c, struct type *type,
-			 struct ui_file *stream, int quoter) const
+language_defn::emitchar (int c, struct type *type, struct ui_file *stream,
+			 int quoter) const
 {
   const char *encoding;
 
@@ -156,7 +156,7 @@ language_defn::emitchar (int c, struct type *type,
 
 void
 language_defn::printchar (int c, struct type *type,
-			  struct ui_file * stream) const
+			  struct ui_file *stream) const
 {
   c_string_type str_type;
 
@@ -198,8 +198,7 @@ language_defn::printstr (struct ui_file *stream, struct type *type,
   const char *type_encoding;
   const char *encoding;
 
-  str_type = (classify_type (type, type->arch (), &type_encoding)
-	      & ~C_CHAR);
+  str_type = (classify_type (type, type->arch (), &type_encoding) & ~C_CHAR);
   switch (str_type)
     {
     case C_STRING:
@@ -240,16 +239,14 @@ language_defn::printstr (struct ui_file *stream, struct type *type,
 
 void
 c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-	      int *length, struct type **char_type,
-	      const char **charset)
+	      int *length, struct type **char_type, const char **charset)
 {
   int err, width;
   unsigned int fetchlimit;
   struct type *type = check_typedef (value_type (value));
   struct type *element_type = type->target_type ();
   int req_length = *length;
-  enum bfd_endian byte_order
-    = type_byte_order (type);
+  enum bfd_endian byte_order = type_byte_order (type);
 
   if (element_type == NULL)
     goto error;
@@ -263,8 +260,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 	{
 	  LONGEST low_bound, high_bound;
 
-	  get_discrete_bounds (type->field (0).type (),
-			       &low_bound, &high_bound);
+	  get_discrete_bounds (type->field (0).type (), &low_bound,
+			       &high_bound);
 	  fetchlimit = high_bound - low_bound + 1;
 	}
       else
@@ -276,7 +273,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
     /* We work only with arrays and pointers.  */
     goto error;
 
-  if (! c_textual_element_type (element_type, 0))
+  if (!c_textual_element_type (element_type, 0))
     goto error;
   classify_type (element_type, element_type->arch (), charset);
   width = element_type->length ();
@@ -294,25 +291,24 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
      C struct hack.  So, only do this if either no length was
      specified, or the length is within the existing bounds.  This
      avoids running off the end of the value's contents.  */
-  if ((VALUE_LVAL (value) == not_lval
-       || VALUE_LVAL (value) == lval_internalvar
+  if ((VALUE_LVAL (value) == not_lval || VALUE_LVAL (value) == lval_internalvar
        || type->code () == TYPE_CODE_ARRAY)
-      && fetchlimit != UINT_MAX
-      && (*length < 0 || *length <= fetchlimit))
+      && fetchlimit != UINT_MAX && (*length < 0 || *length <= fetchlimit))
     {
       int i;
       const gdb_byte *contents = value_contents (value).data ();
 
       /* If a length is specified, use that.  */
       if (*length >= 0)
-	i  = *length;
+	i = *length;
       else
 	/* Otherwise, look for a null character.  */
 	for (i = 0; i < fetchlimit; i++)
-	  if (extract_unsigned_integer (contents + i * width,
-					width, byte_order) == 0)
+	  if (extract_unsigned_integer (contents + i * width, width,
+					byte_order)
+	      == 0)
 	    break;
-  
+
       /* I is now either a user-defined length, the number of non-null
 	 characters, or FETCHLIMIT.  */
       *length = i * width;
@@ -329,8 +325,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  if (VALUE_LVAL (value) != lval_memory)
-	    error (_("Attempt to take address of value "
-		     "not located in memory."));
+	    error (_ ("Attempt to take address of value "
+		      "not located in memory."));
 	  addr = value_address (value);
 	}
       else
@@ -351,8 +347,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       if (*length > 0)
 	fetchlimit = UINT_MAX;
 
-      err = target_read_string (addr, *length, width, fetchlimit,
-				buffer, length);
+      err = target_read_string (addr, *length, width, fetchlimit, buffer,
+				length);
       if (err != 0)
 	memory_error (TARGET_XFER_E_IO, addr);
     }
@@ -364,34 +360,34 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
   if (req_length == -1)
     /* If the last character is null, subtract it from LENGTH.  */
     if (*length > 0
-	&& extract_unsigned_integer (buffer->get () + *length - width,
-				     width, byte_order) == 0)
+	&& extract_unsigned_integer (buffer->get () + *length - width, width,
+				     byte_order)
+	     == 0)
       *length -= width;
-  
+
   /* The read_string function will return the number of bytes read.
      If length returned from read_string was > 0, return the number of
      characters read by dividing the number of bytes by width.  */
   if (*length != 0)
-     *length = *length / width;
+    *length = *length / width;
 
   *char_type = element_type;
 
   return;
 
- error:
+error:
   {
     std::string type_str = type_to_string (type);
     if (!type_str.empty ())
       {
-	error (_("Trying to read string with inappropriate type `%s'."),
+	error (_ ("Trying to read string with inappropriate type `%s'."),
 	       type_str.c_str ());
       }
     else
-      error (_("Trying to read string with inappropriate type."));
+      error (_ ("Trying to read string with inappropriate type."));
   }
 }
 
-
 /* Evaluating C and C++ expressions.  */
 
 /* Convert a UCN.  The digits of the UCN start at P and extend no
@@ -417,8 +413,8 @@ convert_ucn (const char *p, const char *limit, const char *dest_charset,
       result >>= 8;
     }
 
-  convert_between_encodings ("UTF-32BE", dest_charset, data,
-			     4, 4, output, translit_none);
+  convert_between_encodings ("UTF-32BE", dest_charset, data, 4, 4, output,
+			     translit_none);
 
   return p;
 }
@@ -443,14 +439,13 @@ emit_numeric_character (struct type *type, unsigned long value,
    pointer to just after the final digit of the escape sequence.  */
 
 static const char *
-convert_octal (struct type *type, const char *p,
-	       const char *limit, struct obstack *output)
+convert_octal (struct type *type, const char *p, const char *limit,
+	       struct obstack *output)
 {
   int i;
   unsigned long value = 0;
 
-  for (i = 0;
-       i < 3 && p < limit && ISDIGIT (*p) && *p != '8' && *p != '9';
+  for (i = 0; i < 3 && p < limit && ISDIGIT (*p) && *p != '8' && *p != '9';
        ++i)
     {
       value = 8 * value + fromhex (*p);
@@ -468,8 +463,8 @@ convert_octal (struct type *type, const char *p,
    just after the final digit of the escape sequence.  */
 
 static const char *
-convert_hex (struct type *type, const char *p,
-	     const char *limit, struct obstack *output)
+convert_hex (struct type *type, const char *p, const char *limit,
+	     struct obstack *output)
 {
   unsigned long value = 0;
 
@@ -484,12 +479,14 @@ convert_hex (struct type *type, const char *p,
   return p;
 }
 
-#define ADVANCE					\
-  do {						\
-    ++p;					\
-    if (p == limit)				\
-      error (_("Malformed escape sequence"));	\
-  } while (0)
+#define ADVANCE                                  \
+  do                                             \
+    {                                            \
+      ++p;                                       \
+      if (p == limit)                            \
+	error (_ ("Malformed escape sequence")); \
+    }                                            \
+  while (0)
 
 /* Convert an escape sequence to a target format.  TYPE is the target
    character type to use, and DEST_CHARSET is the name of the target
@@ -499,8 +496,8 @@ convert_hex (struct type *type, const char *p,
    character of the escape sequence.  */
 
 static const char *
-convert_escape (struct type *type, const char *dest_charset,
-		const char *p, const char *limit, struct obstack *output)
+convert_escape (struct type *type, const char *dest_charset, const char *p,
+		const char *limit, struct obstack *output)
 {
   /* Skip the backslash.  */
   ADVANCE;
@@ -515,7 +512,7 @@ convert_escape (struct type *type, const char *dest_charset,
     case 'x':
       ADVANCE;
       if (!ISXDIGIT (*p))
-	error (_("\\x used with no following hex digits."));
+	error (_ ("\\x used with no following hex digits."));
       p = convert_hex (type, p, limit, output);
       break;
 
@@ -537,7 +534,7 @@ convert_escape (struct type *type, const char *dest_charset,
 
 	ADVANCE;
 	if (!ISXDIGIT (*p))
-	  error (_("\\u used with no following hex digits"));
+	  error (_ ("\\u used with no following hex digits"));
 	p = convert_ucn (p, limit, dest_charset, output, length);
       }
     }
@@ -582,8 +579,7 @@ namespace expr
 {
 
 value *
-c_string_operation::evaluate (struct type *expect_type,
-			      struct expression *exp,
+c_string_operation::evaluate (struct type *expect_type, struct expression *exp,
 			      enum noside noside)
 {
   struct type *type;
@@ -599,8 +595,7 @@ c_string_operation::evaluate (struct type *expect_type,
   switch (dest_type & ~C_CHAR)
     {
     case C_STRING:
-      type = language_string_char_type (exp->language_defn,
-					exp->gdbarch);
+      type = language_string_char_type (exp->language_defn, exp->gdbarch);
       break;
     case C_WIDE_STRING:
       type = lookup_typename (exp->language_defn, "wchar_t", NULL, 0);
@@ -612,7 +607,7 @@ c_string_operation::evaluate (struct type *expect_type,
       type = lookup_typename (exp->language_defn, "char32_t", NULL, 0);
       break;
     default:
-      internal_error (_("unhandled c_string_type"));
+      internal_error (_ ("unhandled c_string_type"));
     }
 
   /* Ensure TYPE_LENGTH is valid for TYPE.  */
@@ -623,8 +618,7 @@ c_string_operation::evaluate (struct type *expect_type,
      caller to cast.  */
   if (expect_type && expect_type->code () == TYPE_CODE_ARRAY)
     {
-      struct type *element_type
-	= check_typedef (expect_type->target_type ());
+      struct type *element_type = check_typedef (expect_type->target_type ());
 
       if (element_type->code () == TYPE_CODE_INT
 	  || element_type->code () == TYPE_CODE_CHAR)
@@ -637,16 +631,16 @@ c_string_operation::evaluate (struct type *expect_type,
   dest_charset = charset_for_string_type (dest_type, exp->gdbarch);
 
   for (const std::string &item : std::get<1> (m_storage))
-    parse_one_string (&output, item.c_str (), item.size (),
-		      dest_charset, type);
+    parse_one_string (&output, item.c_str (), item.size (), dest_charset,
+		      type);
 
   if ((dest_type & C_CHAR) != 0)
     {
       LONGEST value;
 
       if (obstack_object_size (&output) != type->length ())
-	error (_("Could not convert character "
-		 "constant to target character set"));
+	error (_ ("Could not convert character "
+		  "constant to target character set"));
       value = unpack_long (type, (gdb_byte *) obstack_base (&output));
       result = value_from_longest (type, value);
     }
@@ -663,15 +657,15 @@ c_string_operation::evaluate (struct type *expect_type,
 	  LONGEST low_bound, high_bound;
 	  int element_size = type->length ();
 
-	  if (!get_discrete_bounds (expect_type->index_type (),
-				    &low_bound, &high_bound))
+	  if (!get_discrete_bounds (expect_type->index_type (), &low_bound,
+				    &high_bound))
 	    {
 	      low_bound = 0;
 	      high_bound = (expect_type->length () / element_size) - 1;
 	    }
 	  if (obstack_object_size (&output) / element_size
 	      > (high_bound - low_bound + 1))
-	    error (_("Too many array elements"));
+	    error (_ ("Too many array elements"));
 
 	  result = allocate_value (expect_type);
 	  memcpy (value_contents_raw (result).data (), obstack_base (&output),
@@ -679,15 +673,13 @@ c_string_operation::evaluate (struct type *expect_type,
 	}
       else
 	result = value_cstring ((const char *) obstack_base (&output),
-				obstack_object_size (&output),
-				type);
+				obstack_object_size (&output), type);
     }
   return result;
 }
 
 } /* namespace expr */
 
-
 /* See c-lang.h.  */
 
 bool
@@ -706,8 +698,7 @@ c_is_string_type_p (struct type *type)
       {
 	/* See if target type looks like a string.  */
 	struct type *array_target_type = type->target_type ();
-	return (type->length () > 0
-		&& array_target_type->length () > 0
+	return (type->length () > 0 && array_target_type->length () > 0
 		&& c_textual_element_type (array_target_type, 0));
       }
     case TYPE_CODE_STRING:
@@ -724,33 +715,24 @@ c_is_string_type_p (struct type *type)
   return false;
 }
 
-
-
 /* See c-lang.h.  */
 
 gdb::unique_xmalloc_ptr<char>
 c_canonicalize_name (const char *name)
 {
-  if (strchr (name, ' ') != nullptr
-      || streq (name, "signed")
+  if (strchr (name, ' ') != nullptr || streq (name, "signed")
       || streq (name, "unsigned"))
     return cp_canonicalize_string (name);
   return nullptr;
 }
 
-
-
 void
-c_language_arch_info (struct gdbarch *gdbarch,
-		      struct language_arch_info *lai)
+c_language_arch_info (struct gdbarch *gdbarch, struct language_arch_info *lai)
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
 
   /* Helper function to allow shorter lines below.  */
-  auto add  = [&] (struct type * t)
-  {
-    lai->add_primitive_type (t);
-  };
+  auto add = [&] (struct type *t) { lai->add_primitive_type (t); };
 
   add (builtin->builtin_int);
   add (builtin->builtin_long);
@@ -782,19 +764,19 @@ c_language_arch_info (struct gdbarch *gdbarch,
 class c_language : public language_defn
 {
 public:
+
   c_language ()
     : language_defn (language_c)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* See language.h.  */
 
-  const char *name () const override
-  { return "c"; }
+  const char *name () const override { return "c"; }
 
   /* See language.h.  */
 
-  const char *natural_name () const override
-  { return "C"; }
+  const char *natural_name () const override { return "C"; }
 
   /* See language.h.  */
 
@@ -818,8 +800,7 @@ public:
   }
 
   /* See language.h.  */
-  std::string compute_program (compile_instance *inst,
-			       const char *input,
+  std::string compute_program (compile_instance *inst, const char *input,
 			       struct gdbarch *gdbarch,
 			       const struct block *expr_block,
 			       CORE_ADDR expr_pc) const override
@@ -829,10 +810,7 @@ public:
 
   /* See language.h.  */
 
-  bool can_print_type_offsets () const override
-  {
-    return true;
-  }
+  bool can_print_type_offsets () const override { return true; }
 
   /* See language.h.  */
 
@@ -845,13 +823,14 @@ public:
 
   /* See language.h.  */
 
-  bool store_sym_names_in_linkage_form_p () const override
-  { return true; }
+  bool store_sym_names_in_linkage_form_p () const override { return true; }
 
   /* See language.h.  */
 
   enum macro_expansion macro_expansion () const override
-  { return macro_expansion_c; }
+  {
+    return macro_expansion_c;
+  }
 };
 
 /* Single instance of the C language class.  */
@@ -863,23 +842,22 @@ static c_language c_language_defn;
 class cplus_language : public language_defn
 {
 public:
+
   cplus_language ()
     : language_defn (language_cplus)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* See language.h.  */
 
-  const char *name () const override
-  { return "c++"; }
+  const char *name () const override { return "c++"; }
 
   /* See language.h.  */
 
-  const char *natural_name () const override
-  { return "C++"; }
+  const char *natural_name () const override { return "C++"; }
 
   /* See language.h  */
-  const char *get_digit_separator () const override
-  { return "\'"; }
+  const char *get_digit_separator () const override { return "\'"; }
 
   /* See language.h.  */
 
@@ -892,8 +870,8 @@ public:
 
   /* See language.h.  */
 
-  struct language_pass_by_ref_info pass_by_reference_info
-	(struct type *type) const override
+  struct language_pass_by_ref_info
+  pass_by_reference_info (struct type *type) const override
   {
     return cp_pass_by_reference (type);
   }
@@ -905,10 +883,7 @@ public:
     const struct builtin_type *builtin = builtin_type (gdbarch);
 
     /* Helper function to allow shorter lines below.  */
-    auto add  = [&] (struct type * t)
-    {
-      lai->add_primitive_type (t);
-    };
+    auto add = [&] (struct type *t) { lai->add_primitive_type (t); };
 
     add (builtin->builtin_int);
     add (builtin->builtin_long);
@@ -952,8 +927,7 @@ public:
   }
 
   /* See language.h.  */
-  std::string compute_program (compile_instance *inst,
-			       const char *input,
+  std::string compute_program (compile_instance *inst, const char *input,
 			       struct gdbarch *gdbarch,
 			       const struct block *expr_block,
 			       CORE_ADDR expr_pc) const override
@@ -968,9 +942,9 @@ public:
   }
 
   /* See language.h.  */
-  bool sniff_from_mangled_name
-       (const char *mangled,
-	gdb::unique_xmalloc_ptr<char> *demangled) const override
+  bool sniff_from_mangled_name (
+    const char *mangled,
+    gdb::unique_xmalloc_ptr<char> *demangled) const override
   {
     *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
     return *demangled != NULL;
@@ -986,10 +960,7 @@ public:
 
   /* See language.h.  */
 
-  bool can_print_type_offsets () const override
-  {
-    return true;
-  }
+  bool can_print_type_offsets () const override { return true; }
 
   /* See language.h.  */
 
@@ -1002,8 +973,7 @@ public:
 
   /* See language.h.  */
 
-  CORE_ADDR skip_trampoline (frame_info_ptr fi,
-			     CORE_ADDR pc) const override
+  CORE_ADDR skip_trampoline (frame_info_ptr fi, CORE_ADDR pc) const override
   {
     return cplus_skip_trampoline (fi, pc);
   }
@@ -1017,34 +987,37 @@ public:
 
   /* See language.h.  */
 
-  struct block_symbol lookup_symbol_nonlocal
-	(const char *name, const struct block *block,
-	 const domain_enum domain) const override
+  struct block_symbol
+  lookup_symbol_nonlocal (const char *name, const struct block *block,
+			  const domain_enum domain) const override
   {
     return cp_lookup_symbol_nonlocal (this, name, block, domain);
   }
 
   /* See language.h.  */
 
-  const char *name_of_this () const override
-  { return "this"; }
+  const char *name_of_this () const override { return "this"; }
 
   /* See language.h.  */
 
   enum macro_expansion macro_expansion () const override
-  { return macro_expansion_c; }
+  {
+    return macro_expansion_c;
+  }
 
   /* See language.h.  */
 
   const struct lang_varobj_ops *varobj_ops () const override
-  { return &cplus_varobj_ops; }
+  {
+    return &cplus_varobj_ops;
+  }
 
 protected:
 
   /* See language.h.  */
 
-  symbol_name_matcher_ftype *get_symbol_name_matcher_inner
-	(const lookup_name_info &lookup_name) const override
+  symbol_name_matcher_ftype *get_symbol_name_matcher_inner (
+    const lookup_name_info &lookup_name) const override
   {
     return cp_get_symbol_name_matcher (lookup_name);
   }
@@ -1059,26 +1032,25 @@ static cplus_language cplus_language_defn;
 class asm_language : public language_defn
 {
 public:
+
   asm_language ()
     : language_defn (language_asm)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* See language.h.  */
 
-  const char *name () const override
-  { return "asm"; }
+  const char *name () const override { return "asm"; }
 
   /* See language.h.  */
 
-  const char *natural_name () const override
-  { return "Assembly"; }
+  const char *natural_name () const override { return "Assembly"; }
 
   /* See language.h.  */
 
   const std::vector<const char *> &filename_extensions () const override
   {
-    static const std::vector<const char *> extensions
-      = { ".s", ".sx", ".S" };
+    static const std::vector<const char *> extensions = { ".s", ".sx", ".S" };
     return extensions;
   }
 
@@ -1093,10 +1065,7 @@ public:
 
   /* See language.h.  */
 
-  bool can_print_type_offsets () const override
-  {
-    return true;
-  }
+  bool can_print_type_offsets () const override { return true; }
 
   /* See language.h.  */
 
@@ -1109,13 +1078,14 @@ public:
 
   /* See language.h.  */
 
-  bool store_sym_names_in_linkage_form_p () const override
-  { return true; }
+  bool store_sym_names_in_linkage_form_p () const override { return true; }
 
   /* See language.h.  */
 
   enum macro_expansion macro_expansion () const override
-  { return macro_expansion_c; }
+  {
+    return macro_expansion_c;
+  }
 };
 
 /* The single instance of the ASM language class.  */
@@ -1129,19 +1099,19 @@ static asm_language asm_language_defn;
 class minimal_language : public language_defn
 {
 public:
+
   minimal_language ()
     : language_defn (language_minimal)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* See language.h.  */
 
-  const char *name () const override
-  { return "minimal"; }
+  const char *name () const override { return "minimal"; }
 
   /* See language.h.  */
 
-  const char *natural_name () const override
-  { return "Minimal"; }
+  const char *natural_name () const override { return "Minimal"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
@@ -1152,10 +1122,7 @@ public:
 
   /* See language.h.  */
 
-  bool can_print_type_offsets () const override
-  {
-    return true;
-  }
+  bool can_print_type_offsets () const override { return true; }
 
   /* See language.h.  */
 
@@ -1168,13 +1135,14 @@ public:
 
   /* See language.h.  */
 
-  bool store_sym_names_in_linkage_form_p () const override
-  { return true; }
+  bool store_sym_names_in_linkage_form_p () const override { return true; }
 
   /* See language.h.  */
 
   enum macro_expansion macro_expansion () const override
-  { return macro_expansion_c; }
+  {
+    return macro_expansion_c;
+  }
 };
 
 /* The single instance of the minimal language class.  */

@@ -25,7 +25,7 @@
 
 /* * Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.  */
-#if !defined (TARGET_CHAR_BIT)
+#if !defined(TARGET_CHAR_BIT)
 #define TARGET_CHAR_BIT 8
 #endif
 
@@ -34,20 +34,20 @@
    the number of bits in a host char.  If not, use the same size
    as the target.  */
 
-#if defined (CHAR_BIT)
+#if defined(CHAR_BIT)
 #define HOST_CHAR_BIT CHAR_BIT
 #else
 #define HOST_CHAR_BIT TARGET_CHAR_BIT
 #endif
 
 #ifdef __MSDOS__
-# define CANT_FORK
-# define GLOBAL_CURDIR
-# define DIRNAME_SEPARATOR ';'
+#define CANT_FORK
+#define GLOBAL_CURDIR
+#define DIRNAME_SEPARATOR ';'
 #endif
 
-#if !defined (__CYGWIN__) && defined (_WIN32)
-# define DIRNAME_SEPARATOR ';'
+#if !defined(__CYGWIN__) && defined(_WIN32)
+#define DIRNAME_SEPARATOR ';'
 #endif
 
 #ifndef DIRNAME_SEPARATOR

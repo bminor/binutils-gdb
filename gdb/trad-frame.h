@@ -20,7 +20,7 @@
 #ifndef TRAD_FRAME_H
 #define TRAD_FRAME_H
 
-#include "frame.h"		/* For "struct frame_id".  */
+#include "frame.h" /* For "struct frame_id".  */
 
 class frame_info_ptr;
 struct regcache_map_entry;
@@ -49,8 +49,8 @@ void trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 void trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
 				const struct regcache_map_entry *regmap,
 				CORE_ADDR addr, size_t size);
-void trad_frame_set_reg_value (struct trad_frame_cache *this_cache,
-			       int regnum, LONGEST val);
+void trad_frame_set_reg_value (struct trad_frame_cache *this_cache, int regnum,
+			       LONGEST val);
 
 /* Given the cache in THIS_TRAD_CACHE, set the value of REGNUM to the bytes
    contained in BYTES with size SIZE.  */
@@ -58,9 +58,9 @@ void trad_frame_set_reg_value_bytes (struct trad_frame_cache *this_trad_cache,
 				     int regnum,
 				     gdb::array_view<const gdb_byte> bytes);
 
-struct value *trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
-				       frame_info_ptr this_frame,
-				       int regnum);
+struct value *
+trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
+			 frame_info_ptr this_frame, int regnum);
 
 /* Describes the kind of encoding a stored register has.  */
 enum class trad_frame_saved_reg_kind
@@ -106,10 +106,7 @@ struct trad_frame_saved_reg
   }
 
   /* Encode that the saved register's value is unknown.  */
-  void set_unknown ()
-  {
-    m_kind = trad_frame_saved_reg_kind::UNKNOWN;
-  }
+  void set_unknown () { m_kind = trad_frame_saved_reg_kind::UNKNOWN; }
 
   /* Encode that the saved register's value is stored as a sequence of bytes.
      This is useful when the value is larger than what primitive types
@@ -152,20 +149,14 @@ struct trad_frame_saved_reg
 
   /* Convenience functions, return true if the register has been
      encoded as specified.  Return false otherwise.  */
-  bool is_value () const
-  {
-    return m_kind == trad_frame_saved_reg_kind::VALUE;
-  }
+  bool is_value () const { return m_kind == trad_frame_saved_reg_kind::VALUE; }
 
   bool is_realreg () const
   {
     return m_kind == trad_frame_saved_reg_kind::REALREG;
   }
 
-  bool is_addr () const
-  {
-    return m_kind == trad_frame_saved_reg_kind::ADDR;
-  }
+  bool is_addr () const { return m_kind == trad_frame_saved_reg_kind::ADDR; }
 
   bool is_unknown () const
   {
@@ -181,7 +172,8 @@ private:
 
   trad_frame_saved_reg_kind m_kind;
 
-  union {
+  union
+  {
     LONGEST value;
     int realreg;
     LONGEST addr;
@@ -199,8 +191,9 @@ trad_frame_saved_reg *trad_frame_alloc_saved_regs (struct gdbarch *);
 
 /* Given the trad_frame info, return the location of the specified
    register.  */
-struct value *trad_frame_get_prev_register (frame_info_ptr this_frame,
-					    trad_frame_saved_reg this_saved_regs[],
-					    int regnum);
+struct value *
+trad_frame_get_prev_register (frame_info_ptr this_frame,
+			      trad_frame_saved_reg this_saved_regs[],
+			      int regnum);
 
 #endif

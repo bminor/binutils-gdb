@@ -45,8 +45,8 @@ aarch32_gp_regcache_supply (struct regcache *regcache, uint32_t *regs,
   else
     regcache->raw_supply (ARM_PS_REGNUM, &regs[ARM_PC_REGNUM]);
 
-  regs[ARM_PC_REGNUM] = gdbarch_addr_bits_remove
-			  (regcache->arch (), regs[ARM_PC_REGNUM]);
+  regs[ARM_PC_REGNUM]
+    = gdbarch_addr_bits_remove (regcache->arch (), regs[ARM_PC_REGNUM]);
   regcache->raw_supply (ARM_PC_REGNUM, &regs[ARM_PC_REGNUM]);
 }
 
@@ -72,8 +72,8 @@ aarch32_gp_regcache_collect (const struct regcache *regcache, uint32_t *regs,
 
       regcache->raw_collect (ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
       /* Keep reserved bits bit 20 to bit 23.  */
-      regs[ARM_CPSR_GREGNUM] = ((regs[ARM_CPSR_GREGNUM] & 0xff0fffff)
-				| (cpsr & 0x00f00000));
+      regs[ARM_CPSR_GREGNUM]
+	= ((regs[ARM_CPSR_GREGNUM] & 0xff0fffff) | (cpsr & 0x00f00000));
     }
 }
 

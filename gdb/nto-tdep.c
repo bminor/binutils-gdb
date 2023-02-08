@@ -34,7 +34,7 @@
 #include "source.h"
 #include "gdbsupport/pathstuff.h"
 
-#define QNX_NOTE_NAME	"QNX"
+#define QNX_NOTE_NAME "QNX"
 #define QNX_INFO_SECT_NAME "QNX_info"
 
 #ifdef __CYGWIN__
@@ -102,15 +102,18 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
   "%s/lib:%s/usr/lib:%s/usr/photon/lib:%s/usr/photon/dll:%s/lib/dll"
 
   nto_root = nto_target ();
-  if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name, "i386") == 0)
+  if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name, "i386")
+      == 0)
     {
       arch = "x86";
       endian = "";
     }
   else if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
-		   "rs6000") == 0
+		   "rs6000")
+	     == 0
 	   || strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
-		   "powerpc") == 0)
+		      "powerpc")
+		== 0)
     {
       arch = "ppc";
       endian = "be";
@@ -118,8 +121,8 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
   else
     {
       arch = gdbarch_bfd_arch_info (target_gdbarch ())->arch_name;
-      endian = gdbarch_byte_order (target_gdbarch ())
-	       == BFD_ENDIAN_BIG ? "be" : "le";
+      endian = gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG ? "be"
+									: "le";
     }
 
   /* In case nto_root is short, add strlen(solib)
@@ -162,15 +165,18 @@ nto_init_solib_absolute_prefix (void)
   const char *arch;
 
   nto_root = nto_target ();
-  if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name, "i386") == 0)
+  if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name, "i386")
+      == 0)
     {
       arch = "x86";
       endian = "";
     }
   else if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
-		   "rs6000") == 0
+		   "rs6000")
+	     == 0
 	   || strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
-		   "powerpc") == 0)
+		      "powerpc")
+		== 0)
     {
       arch = "ppc";
       endian = "be";
@@ -178,8 +184,8 @@ nto_init_solib_absolute_prefix (void)
   else
     {
       arch = gdbarch_bfd_arch_info (target_gdbarch ())->arch_name;
-      endian = gdbarch_byte_order (target_gdbarch ())
-	       == BFD_ENDIAN_BIG ? "be" : "le";
+      endian = gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG ? "be"
+									: "le";
     }
 
   xsnprintf (arch_path, sizeof (arch_path), "%s/%s%s", nto_root, arch, endian);
@@ -189,14 +195,15 @@ nto_init_solib_absolute_prefix (void)
 }
 
 char **
-nto_parse_redirection (char *pargv[], const char **pin, const char **pout, 
+nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
 		       const char **perr)
 {
   char **argv;
   const char *in, *out, *err, *p;
   int argc, i, n;
 
-  for (n = 0; pargv[n]; n++);
+  for (n = 0; pargv[n]; n++)
+    ;
   if (n == 0)
     return NULL;
   in = "";
@@ -348,36 +355,33 @@ nto_elf_osabi_sniffer (bfd *abfd)
 {
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  bfd_map_over_sections (abfd,
-			 nto_sniff_abi_note_section,
-			 &osabi);
+  bfd_map_over_sections (abfd, nto_sniff_abi_note_section, &osabi);
 
   return osabi;
 }
 
-static const char * const nto_thread_state_str[] =
-{
-  "DEAD",		/* 0  0x00 */
-  "RUNNING",	/* 1  0x01 */
-  "READY",	/* 2  0x02 */
-  "STOPPED",	/* 3  0x03 */
-  "SEND",		/* 4  0x04 */
-  "RECEIVE",	/* 5  0x05 */
-  "REPLY",	/* 6  0x06 */
-  "STACK",	/* 7  0x07 */
-  "WAITTHREAD",	/* 8  0x08 */
-  "WAITPAGE",	/* 9  0x09 */
-  "SIGSUSPEND",	/* 10 0x0a */
-  "SIGWAITINFO",	/* 11 0x0b */
-  "NANOSLEEP",	/* 12 0x0c */
-  "MUTEX",	/* 13 0x0d */
-  "CONDVAR",	/* 14 0x0e */
-  "JOIN",		/* 15 0x0f */
-  "INTR",		/* 16 0x10 */
-  "SEM",		/* 17 0x11 */
-  "WAITCTX",	/* 18 0x12 */
-  "NET_SEND",	/* 19 0x13 */
-  "NET_REPLY"	/* 20 0x14 */
+static const char *const nto_thread_state_str[] = {
+  "DEAD",	 /* 0  0x00 */
+  "RUNNING",	 /* 1  0x01 */
+  "READY",	 /* 2  0x02 */
+  "STOPPED",	 /* 3  0x03 */
+  "SEND",	 /* 4  0x04 */
+  "RECEIVE",	 /* 5  0x05 */
+  "REPLY",	 /* 6  0x06 */
+  "STACK",	 /* 7  0x07 */
+  "WAITTHREAD",	 /* 8  0x08 */
+  "WAITPAGE",	 /* 9  0x09 */
+  "SIGSUSPEND",	 /* 10 0x0a */
+  "SIGWAITINFO", /* 11 0x0b */
+  "NANOSLEEP",	 /* 12 0x0c */
+  "MUTEX",	 /* 13 0x0d */
+  "CONDVAR",	 /* 14 0x0e */
+  "JOIN",	 /* 15 0x0f */
+  "INTR",	 /* 16 0x10 */
+  "SEM",	 /* 17 0x11 */
+  "WAITCTX",	 /* 18 0x12 */
+  "NET_SEND",	 /* 19 0x13 */
+  "NET_REPLY"	 /* 20 0x14 */
 };
 
 const char *
@@ -388,7 +392,7 @@ nto_extra_thread_info (struct target_ops *self, struct thread_info *ti)
       nto_thread_info *priv = get_nto_thread_info (ti);
 
       if (priv->state < ARRAY_SIZE (nto_thread_state_str))
-	return nto_thread_state_str [priv->state];
+	return nto_thread_state_str[priv->state];
     }
   return "";
 }
@@ -466,8 +470,7 @@ nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack, gdb_byte *readbuf,
 
   /* Now loop over env table:  */
   anint = 0;
-  while (target_read_memory (initial_stack + data_ofs, targ64, ptr_size)
-	 == 0)
+  while (target_read_memory (initial_stack + data_ofs, targ64, ptr_size) == 0)
     {
       if (extract_unsigned_integer (targ64, ptr_size, byte_order) == 0)
 	anint = 1; /* Keep looping until non-null entry is found.  */
@@ -479,7 +482,7 @@ nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack, gdb_byte *readbuf,
 
   memset (readbuf, 0, len);
   buff = readbuf;
-  while (len_read <= len-sizeof_auxv_t)
+  while (len_read <= len - sizeof_auxv_t)
     {
       if (target_read_memory (initial_stack + len_read, buff, sizeof_auxv_t)
 	  == 0)

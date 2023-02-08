@@ -35,7 +35,7 @@ struct parser_state;
    then the results are wrong but this does not happen for Free Pascal nor
    for GPC.  */
 
-extern int pascal_is_string_type (struct type *type,int *length_pos,
+extern int pascal_is_string_type (struct type *type, int *length_pos,
 				  int *length_size, int *string_pos,
 				  struct type **char_type,
 				  const char **arrayname);
@@ -58,19 +58,19 @@ extern int pascal_object_is_vtbl_member (struct type *);
 class pascal_language : public language_defn
 {
 public:
+
   pascal_language ()
     : language_defn (language_pascal)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* See language.h.  */
 
-  const char *name () const override
-  { return "pascal"; }
+  const char *name () const override { return "pascal"; }
 
   /* See language.h.  */
 
-  const char *natural_name () const override
-  { return "Pascal"; }
+  const char *natural_name () const override { return "Pascal"; }
 
   /* See language.h.  */
 
@@ -99,9 +99,9 @@ public:
 
   /* See language.h.  */
 
-  void value_print_inner
-	(struct value *val, struct ui_file *stream, int recurse,
-	 const struct value_print_options *options) const override;
+  void
+  value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options) const override;
 
   /* See language.h.  */
 
@@ -109,8 +109,8 @@ public:
 
   /* See language.h.  */
 
-  void emitchar (int ch, struct type *chtype,
-		 struct ui_file *stream, int quoter) const override
+  void emitchar (int ch, struct type *chtype, struct ui_file *stream,
+		 int quoter) const override
   {
     int in_quotes = 0;
 
@@ -140,19 +140,18 @@ public:
 
   bool is_string_type_p (struct type *type) const override
   {
-    return pascal_is_string_type(type, nullptr, nullptr, nullptr,
-				 nullptr, nullptr) > 0;
+    return pascal_is_string_type (type, nullptr, nullptr, nullptr, nullptr,
+				  nullptr)
+	   > 0;
   }
 
   /* See language.h.  */
 
-  const char *name_of_this () const override
-  { return "this"; }
+  const char *name_of_this () const override { return "this"; }
 
   /* See language.h.  */
 
-  bool range_checking_on_by_default () const override
-  { return true; }
+  bool range_checking_on_by_default () const override { return true; }
 
 private:
 
@@ -181,23 +180,21 @@ private:
 			int level,
 			const struct type_print_options *flags) const;
 
-
   /* Print any array sizes, function arguments or close parentheses
      needed after the variable name (to describe its type).
      Args work like pascal_type_print_varspec_prefix.  */
 
-  void type_print_varspec_suffix (struct type *type, struct ui_file *stream,
-				  int show, int passed_a_ptr,
-				  int demangled_args,
-				  const struct type_print_options *flags) const;
+  void
+  type_print_varspec_suffix (struct type *type, struct ui_file *stream,
+			     int show, int passed_a_ptr, int demangled_args,
+			     const struct type_print_options *flags) const;
 
   /* Helper for pascal_language::type_print_varspec_suffix to print the
      suffix of a function or method.  */
 
-  void type_print_func_varspec_suffix
-	(struct type *type, struct ui_file *stream, int show,
-	 int passed_a_ptr, int demangled_args,
-	 const struct type_print_options *flags) const;
+  void type_print_func_varspec_suffix (
+    struct type *type, struct ui_file *stream, int show, int passed_a_ptr,
+    int demangled_args, const struct type_print_options *flags) const;
 
   /* Print any asterisks or open-parentheses needed before the
      variable name (to describe its type).
@@ -207,15 +204,16 @@ private:
      any typename for TYPE and show its details.
      SHOW is always zero on recursive calls.  */
 
-  void type_print_varspec_prefix
-	(struct type *type, struct ui_file *stream, int show,
-	 int passed_a_ptr, const struct type_print_options *flags) const;
+  void
+  type_print_varspec_prefix (struct type *type, struct ui_file *stream,
+			     int show, int passed_a_ptr,
+			     const struct type_print_options *flags) const;
 
   /* Print the function args from TYPE (a TYPE_CODE_FUNC) to STREAM taking
      FLAGS into account where appropriate.  */
 
-  void  print_func_args (struct type *type, struct ui_file *stream,
-			 const struct type_print_options *flags) const;
+  void print_func_args (struct type *type, struct ui_file *stream,
+			const struct type_print_options *flags) const;
 
   /* Print the Pascal method arguments for PHYSNAME and METHODNAME to the
      file STREAM.  */

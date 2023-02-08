@@ -24,8 +24,10 @@
 #include <unistd.h>
 #include <signal.h>
 
-namespace selftests {
-namespace scoped_ignore_sig {
+namespace selftests
+{
+namespace scoped_ignore_sig
+{
 
 #ifdef SIGPIPE
 
@@ -46,7 +48,10 @@ static void
 test_sigpipe ()
 {
   auto *osig = signal (SIGPIPE, handle_sigpipe);
-  SCOPE_EXIT { signal (SIGPIPE, osig); };
+  SCOPE_EXIT
+  {
+    signal (SIGPIPE, osig);
+  };
 
 #ifdef HAVE_SIGPROCMASK
   /* Make sure SIGPIPE isn't blocked.  */
@@ -54,7 +59,10 @@ test_sigpipe ()
   sigemptyset (&set);
   sigaddset (&set, SIGPIPE);
   sigprocmask (SIG_UNBLOCK, &set, &old_state);
-  SCOPE_EXIT { sigprocmask (SIG_SETMASK, &old_state, nullptr); };
+  SCOPE_EXIT
+  {
+    sigprocmask (SIG_SETMASK, &old_state, nullptr);
+  };
 #endif
 
   /* Create pipe, and close read end so that writes to the pipe fail
@@ -68,18 +76,19 @@ test_sigpipe ()
   SELF_CHECK (r == 0);
 
   close (fd[0]);
-  SCOPE_EXIT { close (fd[1]); };
+  SCOPE_EXIT
+  {
+    close (fd[1]);
+  };
 
   /* Check that writing to the pipe results in EPIPE.  EXPECT_SIG
      indicates whether a SIGPIPE signal is expected.  */
-  auto check_pipe_write = [&] (bool expect_sig)
-  {
+  auto check_pipe_write = [&] (bool expect_sig) {
     got_sigpipe = 0;
     errno = 0;
 
     r = write (fd[1], &c, 1);
-    SELF_CHECK (r == -1 && errno == EPIPE
-		&& got_sigpipe == expect_sig);
+    SELF_CHECK (r == -1 && errno == EPIPE && got_sigpipe == expect_sig);
   };
 
   /* Check that without a scoped_ignore_sigpipe in scope we indeed get
@@ -116,6 +125,7 @@ test_sigpipe ()
 } /* namespace selftests */
 
 void _initialize_scoped_ignore_signal_selftests ();
+
 void
 _initialize_scoped_ignore_signal_selftests ()
 {

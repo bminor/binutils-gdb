@@ -33,122 +33,141 @@
 
 enum xtensa_register_type_t
 {
-  xtRegisterTypeArRegfile = 1,	/* Register File ar0..arXX.  */
-  xtRegisterTypeSpecialReg,	/* CPU states, such as PS, Booleans, (rsr).  */
-  xtRegisterTypeUserReg,	/* User defined registers (rur).  */
-  xtRegisterTypeTieRegfile,	/* User define register files.  */
-  xtRegisterTypeTieState,	/* TIE States (mapped on user regs).  */
-  xtRegisterTypeMapped,		/* Mapped on Special Registers.  */
-  xtRegisterTypeUnmapped,	/* Special case of masked registers.  */
-  xtRegisterTypeWindow,		/* Live window registers (a0..a15).  */
-  xtRegisterTypeVirtual,	/* PC, FP.  */
+  xtRegisterTypeArRegfile = 1, /* Register File ar0..arXX.  */
+  xtRegisterTypeSpecialReg,    /* CPU states, such as PS, Booleans, (rsr).  */
+  xtRegisterTypeUserReg,       /* User defined registers (rur).  */
+  xtRegisterTypeTieRegfile,    /* User define register files.  */
+  xtRegisterTypeTieState,      /* TIE States (mapped on user regs).  */
+  xtRegisterTypeMapped,	       /* Mapped on Special Registers.  */
+  xtRegisterTypeUnmapped,      /* Special case of masked registers.  */
+  xtRegisterTypeWindow,	       /* Live window registers (a0..a15).  */
+  xtRegisterTypeVirtual,       /* PC, FP.  */
   xtRegisterTypeUnknown
 };
 
-
 /*  Xtensa register group.  */
 
-#define XTENSA_MAX_COPROCESSOR	0x10  /* Number of Xtensa coprocessors.  */
+#define XTENSA_MAX_COPROCESSOR 0x10 /* Number of Xtensa coprocessors.  */
 
 enum xtensa_register_group_t
 {
   xtRegisterGroupUnknown = 0,
-  xtRegisterGroupRegFile	= 0x0001,    /* Register files without ARx.  */
-  xtRegisterGroupAddrReg	= 0x0002,    /* ARx.  */
-  xtRegisterGroupSpecialReg	= 0x0004,    /* SRxx.  */
-  xtRegisterGroupUserReg	= 0x0008,    /* URxx.  */
-  xtRegisterGroupState 		= 0x0010,    /* States.  */
+  xtRegisterGroupRegFile = 0x0001,    /* Register files without ARx.  */
+  xtRegisterGroupAddrReg = 0x0002,    /* ARx.  */
+  xtRegisterGroupSpecialReg = 0x0004, /* SRxx.  */
+  xtRegisterGroupUserReg = 0x0008,    /* URxx.  */
+  xtRegisterGroupState = 0x0010,      /* States.  */
 
-  xtRegisterGroupGeneral	= 0x0100,    /* General registers, Ax, SR.  */
-  xtRegisterGroupUser		= 0x0200,    /* User registers.  */
-  xtRegisterGroupFloat		= 0x0400,    /* Floating Point.  */
-  xtRegisterGroupVectra		= 0x0800,    /* Vectra.  */
-  xtRegisterGroupSystem		= 0x1000,    /* System.  */
+  xtRegisterGroupGeneral = 0x0100, /* General registers, Ax, SR.  */
+  xtRegisterGroupUser = 0x0200,	   /* User registers.  */
+  xtRegisterGroupFloat = 0x0400,   /* Floating Point.  */
+  xtRegisterGroupVectra = 0x0800,  /* Vectra.  */
+  xtRegisterGroupSystem = 0x1000,  /* System.  */
 
-  xtRegisterGroupNCP	    = 0x00800000,    /* Non-CP non-base opt/custom.  */
-  xtRegisterGroupCP0	    = 0x01000000,    /* CP0.  */
-  xtRegisterGroupCP1	    = 0x02000000,    /* CP1.  */
-  xtRegisterGroupCP2	    = 0x04000000,    /* CP2.  */
-  xtRegisterGroupCP3	    = 0x08000000,    /* CP3.  */
-  xtRegisterGroupCP4	    = 0x10000000,    /* CP4.  */
-  xtRegisterGroupCP5	    = 0x20000000,    /* CP5.  */
-  xtRegisterGroupCP6	    = 0x40000000,    /* CP6.  */
-  xtRegisterGroupCP7	    = 0x80000000,    /* CP7.  */
+  xtRegisterGroupNCP = 0x00800000, /* Non-CP non-base opt/custom.  */
+  xtRegisterGroupCP0 = 0x01000000, /* CP0.  */
+  xtRegisterGroupCP1 = 0x02000000, /* CP1.  */
+  xtRegisterGroupCP2 = 0x04000000, /* CP2.  */
+  xtRegisterGroupCP3 = 0x08000000, /* CP3.  */
+  xtRegisterGroupCP4 = 0x10000000, /* CP4.  */
+  xtRegisterGroupCP5 = 0x20000000, /* CP5.  */
+  xtRegisterGroupCP6 = 0x40000000, /* CP6.  */
+  xtRegisterGroupCP7 = 0x80000000, /* CP7.  */
 
 };
-
 
 /*  Xtensa target flags.  */
 
 enum xtensa_target_flags_t
 {
-  xtTargetFlagsNonVisibleRegs	= 0x0001,
-  xtTargetFlagsUseFetchStore	= 0x0002,
+  xtTargetFlagsNonVisibleRegs = 0x0001,
+  xtTargetFlagsUseFetchStore = 0x0002,
 };
-
 
 /*  Mask.  */
 
-typedef struct 
+typedef struct
 {
   int reg_num;
   int bit_start;
   int bit_size;
 } xtensa_reg_mask_t;
 
-typedef struct 
+typedef struct
 {
   int count;
   xtensa_reg_mask_t *mask;
 } xtensa_mask_t;
 
-
 /*  Xtensa register representation.  */
 
-typedef struct 
+typedef struct
 {
-  const char *name;            	/* Register name.  */
-  int offset;             	/* Offset.  */
-  xtensa_register_type_t type;  /* Register type.  */
-  xtensa_register_group_t group;/* Register group.  */
-  struct type* ctype;		/* C-type.  */
-  int bit_size;  		/* The actual bit size in the target.  */
-  int byte_size;          	/* Actual space allocated in registers[].  */
-  int align;			/* Alignment for this register.  */
+  const char *name;		 /* Register name.  */
+  int offset;			 /* Offset.  */
+  xtensa_register_type_t type;	 /* Register type.  */
+  xtensa_register_group_t group; /* Register group.  */
+  struct type *ctype;		 /* C-type.  */
+  int bit_size;			 /* The actual bit size in the target.  */
+  int byte_size;		 /* Actual space allocated in registers[].  */
+  int align;			 /* Alignment for this register.  */
 
-  unsigned int target_number;	/* Register target number.  */
+  unsigned int target_number; /* Register target number.  */
 
-  int flags;			/* Flags.  */
-  int coprocessor;		/* Coprocessor num, -1 for non-CP, else -2.  */
+  int flags;	   /* Flags.  */
+  int coprocessor; /* Coprocessor num, -1 for non-CP, else -2.  */
 
-  const xtensa_mask_t *mask;	/* Register is a compilation of other regs.  */
-  const char *fetch;		/* Instruction sequence to fetch register.  */
-  const char *store;		/* Instruction sequence to store register.  */
+  const xtensa_mask_t *mask; /* Register is a compilation of other regs.  */
+  const char *fetch;	     /* Instruction sequence to fetch register.  */
+  const char *store;	     /* Instruction sequence to store register.  */
 } xtensa_register_t;
 
 /*  For xtensa-config.c to expand to the structure above.  */
-#define XTREG(index,ofs,bsz,sz,al,tnum,flg,cp,ty,gr,name,fet,sto,mas,ct,x,y) \
-       {#name, ofs, (xtensa_register_type_t) (ty), \
-	((xtensa_register_group_t) \
-	 ((gr) | ((xtRegisterGroupNCP >> 2) << (cp + 2)))), \
-	 ct, bsz, sz, al, tnum, flg, cp, mas, fet, sto},
-#define XTREG_END \
-  {0, 0, (xtensa_register_type_t) 0, (xtensa_register_group_t) 0,	\
-   0, 0, 0, 0, (unsigned) -1, 0, 0, 0, 0, 0},
+#define XTREG(index, ofs, bsz, sz, al, tnum, flg, cp, ty, gr, name, fet, sto, \
+	      mas, ct, x, y)                                                  \
+  { #name,                                                                    \
+    ofs,                                                                      \
+    (xtensa_register_type_t) (ty),                                            \
+    ((xtensa_register_group_t) ((gr)                                          \
+				| ((xtRegisterGroupNCP >> 2) << (cp + 2)))),  \
+    ct,                                                                       \
+    bsz,                                                                      \
+    sz,                                                                       \
+    al,                                                                       \
+    tnum,                                                                     \
+    flg,                                                                      \
+    cp,                                                                       \
+    mas,                                                                      \
+    fet,                                                                      \
+    sto },
+#define XTREG_END                \
+  { 0,                           \
+    0,                           \
+    (xtensa_register_type_t) 0,  \
+    (xtensa_register_group_t) 0, \
+    0,                           \
+    0,                           \
+    0,                           \
+    0,                           \
+    (unsigned) -1,               \
+    0,                           \
+    0,                           \
+    0,                           \
+    0,                           \
+    0 },
 
-#define XTENSA_REGISTER_FLAGS_PRIVILEGED	0x0001
-#define XTENSA_REGISTER_FLAGS_READABLE		0x0002
-#define XTENSA_REGISTER_FLAGS_WRITABLE		0x0004
-#define XTENSA_REGISTER_FLAGS_VOLATILE		0x0008
+#define XTENSA_REGISTER_FLAGS_PRIVILEGED 0x0001
+#define XTENSA_REGISTER_FLAGS_READABLE 0x0002
+#define XTENSA_REGISTER_FLAGS_WRITABLE 0x0004
+#define XTENSA_REGISTER_FLAGS_VOLATILE 0x0008
 
 /*  Call-ABI for stack frame.  */
 
 enum call_abi_t
 {
-  CallAbiDefault = 0,		/* Any 'callX' instructions; default stack.  */
-  CallAbiCall0Only,		/* Only 'call0' instructions; flat stack.  */
+  CallAbiDefault = 0, /* Any 'callX' instructions; default stack.  */
+  CallAbiCall0Only,   /* Only 'call0' instructions; flat stack.  */
 };
-
 
 struct ctype_cache
 {
@@ -158,11 +177,11 @@ struct ctype_cache
 };
 
 #ifndef XCHAL_NUM_CONTEXTS
-# define XCHAL_NUM_CONTEXTS	0
+#define XCHAL_NUM_CONTEXTS 0
 #endif
 
 #ifndef XCHAL_HAVE_EXCEPTIONS
-# define XCHAL_HAVE_EXCEPTIONS	1
+#define XCHAL_HAVE_EXCEPTIONS 1
 #endif
 
 /*  Xtensa-specific target dependencies.  */
@@ -171,7 +190,8 @@ struct xtensa_gdbarch_tdep : gdbarch_tdep_base
 {
   xtensa_gdbarch_tdep (xtensa_register_t *regmap)
     : regmap (regmap)
-  {}
+  {
+  }
 
   unsigned int target_flags = 0;
 
@@ -180,11 +200,11 @@ struct xtensa_gdbarch_tdep : gdbarch_tdep_base
   unsigned int spill_location = (unsigned int) -1;
   unsigned int spill_size = 0;
 
-  char *unused = nullptr;		/* Placeholder for compatibility.  */
+  char *unused = nullptr; /* Placeholder for compatibility.  */
 
   /* Calling convention.  */
-  call_abi_t call_abi = (XSHAL_ABI == XTHAL_ABI_CALL0
-			 ? CallAbiCall0Only : CallAbiDefault);
+  call_abi_t call_abi
+    = (XSHAL_ABI == XTHAL_ABI_CALL0 ? CallAbiCall0Only : CallAbiDefault);
 
   /* CPU configuration.  */
 
@@ -198,51 +218,54 @@ struct xtensa_gdbarch_tdep : gdbarch_tdep_base
   unsigned int isa_use_density_instructions = XCHAL_HAVE_DENSITY;
   unsigned int isa_use_exceptions = XCHAL_HAVE_EXCEPTIONS;
   unsigned int isa_use_ext_l32r = XSHAL_USE_ABSOLUTE_LITERALS;
-  unsigned int isa_max_insn_size = XCHAL_MAX_INSTRUCTION_SIZE;	/* Maximum instruction length.  */
-  unsigned int debug_num_ibreaks = XCHAL_NUM_IBREAK;	/* Number of IBREAKs.  */
+  unsigned int isa_max_insn_size
+    = XCHAL_MAX_INSTRUCTION_SIZE; /* Maximum instruction length.  */
+  unsigned int debug_num_ibreaks = XCHAL_NUM_IBREAK; /* Number of IBREAKs.  */
   unsigned int debug_num_dbreaks = XCHAL_NUM_DBREAK;
 
   /* Register map.  */
 
   xtensa_register_t *regmap;
 
-  unsigned int num_regs = 0;		/* Number of registers in register map.  */
-  unsigned int num_nopriv_regs = 0;	/* Number of non-privileged registers.  */
-  unsigned int num_pseudo_regs = 0;	/* Number of pseudo registers.  */
-  unsigned int num_aregs = XCHAL_NUM_AREGS;		/* Size of register file.  */
+  unsigned int num_regs = 0;	    /* Number of registers in register map.  */
+  unsigned int num_nopriv_regs = 0; /* Number of non-privileged registers.  */
+  unsigned int num_pseudo_regs = 0; /* Number of pseudo registers.  */
+  unsigned int num_aregs = XCHAL_NUM_AREGS; /* Size of register file.  */
   unsigned int num_contexts = XCHAL_NUM_CONTEXTS;
 
-  int ar_base = -1;		/* Register number for AR0.  */
-  int a0_base = -1;		/* Register number for A0 (pseudo).  */
-  int wb_regnum = -1;		/* Register number for WB.  */
-  int ws_regnum = -1;		/* Register number for WS.  */
-  int pc_regnum = -1;		/* Register number for PC.  */
-  int ps_regnum = -1;		/* Register number for PS.  */
-  int lbeg_regnum = -1;		/* Register numbers for count regs.  */
+  int ar_base = -1;	/* Register number for AR0.  */
+  int a0_base = -1;	/* Register number for A0 (pseudo).  */
+  int wb_regnum = -1;	/* Register number for WB.  */
+  int ws_regnum = -1;	/* Register number for WS.  */
+  int pc_regnum = -1;	/* Register number for PC.  */
+  int ps_regnum = -1;	/* Register number for PS.  */
+  int lbeg_regnum = -1; /* Register numbers for count regs.  */
   int lend_regnum = -1;
   int lcount_regnum = -1;
-  int sar_regnum = -1;		/* Register number of SAR.  */
-  int litbase_regnum = -1;	/* Register number of LITBASE.  */
-  int threadptr_regnum = -1;	/* Register number of THREADPTR.  */
+  int sar_regnum = -1;	     /* Register number of SAR.  */
+  int litbase_regnum = -1;   /* Register number of LITBASE.  */
+  int threadptr_regnum = -1; /* Register number of THREADPTR.  */
 
-  int interrupt_regnum = -1;	/* Register number for interrupt.  */
-  int interrupt2_regnum = -1;	/* Register number for interrupt2.  */
-  int cpenable_regnum = -1;	/* Register number for cpenable.  */
-  int debugcause_regnum = -1;	/* Register number for debugcause.  */
-  int exccause_regnum = -1;	/* Register number for exccause.  */
-  int excvaddr_regnum = -1;	/* Register number for excvaddr.  */
+  int interrupt_regnum = -1;  /* Register number for interrupt.  */
+  int interrupt2_regnum = -1; /* Register number for interrupt2.  */
+  int cpenable_regnum = -1;   /* Register number for cpenable.  */
+  int debugcause_regnum = -1; /* Register number for debugcause.  */
+  int exccause_regnum = -1;   /* Register number for exccause.  */
+  int excvaddr_regnum = -1;   /* Register number for excvaddr.  */
 
   int max_register_raw_size = 0;
   int max_register_virtual_size = 0;
-  unsigned long *fp_layout = nullptr;	/* Layout of custom/TIE regs in 'FP' area.  */
-  unsigned int fp_layout_bytes = 0;	/* Size of layout information (in bytes).  */
+  unsigned long *fp_layout
+    = nullptr; /* Layout of custom/TIE regs in 'FP' area.  */
+  unsigned int fp_layout_bytes
+    = 0; /* Size of layout information (in bytes).  */
   unsigned long *gregmap = nullptr;
 
   /* Cached register types.  */
   struct ctype_cache *type_entries = nullptr;
 };
 
-#define WB_SHIFT	  2
+#define WB_SHIFT 2
 
 /* We assign fixed numbers to the registers of the "current" window 
    (i.e., relative to WB).  The registers get remapped via the reg_map 

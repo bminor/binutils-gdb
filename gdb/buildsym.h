@@ -16,7 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (BUILDSYM_H)
+#if !defined(BUILDSYM_H)
 #define BUILDSYM_H 1
 
 #include "gdbsupport/gdb_obstack.h"
@@ -75,51 +75,50 @@ using subfile_up = std::unique_ptr<subfile>;
 #define PENDINGSIZE 100
 
 struct pending
-  {
-    struct pending *next;
-    int nsyms;
-    struct symbol *symbol[PENDINGSIZE];
-  };
+{
+  struct pending *next;
+  int nsyms;
+  struct symbol *symbol[PENDINGSIZE];
+};
 
 /* Stack representing unclosed lexical contexts (that will become
    blocks, eventually).  */
 
 struct context_stack
-  {
-    /* Outer locals at the time we entered */
+{
+  /* Outer locals at the time we entered */
 
-    struct pending *locals;
+  struct pending *locals;
 
-    /* Pending using directives at the time we entered.  */
+  /* Pending using directives at the time we entered.  */
 
-    struct using_direct *local_using_directives;
+  struct using_direct *local_using_directives;
 
-    /* Pointer into blocklist as of entry */
+  /* Pointer into blocklist as of entry */
 
-    struct pending_block *old_blocks;
+  struct pending_block *old_blocks;
 
-    /* Name of function, if any, defining context */
+  /* Name of function, if any, defining context */
 
-    struct symbol *name;
+  struct symbol *name;
 
-    /* Expression that computes the frame base of the lexically enclosing
+  /* Expression that computes the frame base of the lexically enclosing
        function, if any.  NULL otherwise.  */
 
-    struct dynamic_prop *static_link;
+  struct dynamic_prop *static_link;
 
-    /* PC where this context starts */
+  /* PC where this context starts */
 
-    CORE_ADDR start_addr;
+  CORE_ADDR start_addr;
 
-    /* Temp slot for exception handling.  */
+  /* Temp slot for exception handling.  */
 
-    CORE_ADDR end_addr;
+  CORE_ADDR end_addr;
 
-    /* For error-checking matching push/pop */
+  /* For error-checking matching push/pop */
 
-    int depth;
-
-  };
+  int depth;
+};
 
 /* Flags associated with a linetable entry.  */
 
@@ -132,8 +131,8 @@ enum linetable_entry_flag : unsigned
      instruction past a function prologue.  */
   LEF_PROLOGUE_END = 1 << 2,
 };
-DEF_ENUM_FLAGS_TYPE (enum linetable_entry_flag, linetable_entry_flags);
 
+DEF_ENUM_FLAGS_TYPE (enum linetable_entry_flag, linetable_entry_flags);
 
 /* Buildsym's counterpart to struct compunit_symtab.  */
 
@@ -158,7 +157,8 @@ struct buildsym_compunit
 		     const char *comp_dir_, enum language language_,
 		     CORE_ADDR last_addr)
     : buildsym_compunit (objfile_, name, comp_dir_, name, language_, last_addr)
-  {}
+  {
+  }
 
   /* Reopen an existing compunit_symtab so that additional symbols can
      be added to it.  Arguments are as for the main constructor.  CUST
@@ -186,10 +186,7 @@ struct buildsym_compunit
     m_last_source_file.reset (new_name);
   }
 
-  const char *get_last_source_file ()
-  {
-    return m_last_source_file.get ();
-  }
+  const char *get_last_source_file () { return m_last_source_file.get (); }
 
   struct macro_table *get_macro_table ();
 
@@ -213,8 +210,8 @@ struct buildsym_compunit
 			      const struct dynamic_prop *static_link,
 			      CORE_ADDR start, CORE_ADDR end);
 
-  void record_block_range (struct block *block,
-			   CORE_ADDR start, CORE_ADDR end_inclusive);
+  void record_block_range (struct block *block, CORE_ADDR start,
+			   CORE_ADDR end_inclusive);
 
   /* Start recording information about source code that comes from a source
      file.  This sets the current subfile, creating it if necessary.
@@ -228,10 +225,7 @@ struct buildsym_compunit
 
   /* Same as above, but passes NAME for NAME_FOR_ID.  */
 
-  void start_subfile (const char *name)
-  {
-    return start_subfile (name, name);
-  }
+  void start_subfile (const char *name) { return start_subfile (name, name); }
 
   void patch_subfile_names (struct subfile *subfile, const char *name);
 
@@ -242,20 +236,14 @@ struct buildsym_compunit
   void record_line (struct subfile *subfile, int line, CORE_ADDR pc,
 		    linetable_entry_flags flags);
 
-  struct compunit_symtab *get_compunit_symtab ()
-  {
-    return m_compunit_symtab;
-  }
+  struct compunit_symtab *get_compunit_symtab () { return m_compunit_symtab; }
 
   void set_last_source_start_addr (CORE_ADDR addr)
   {
     m_last_source_start_addr = addr;
   }
 
-  CORE_ADDR get_last_source_start_addr ()
-  {
-    return m_last_source_start_addr;
-  }
+  CORE_ADDR get_last_source_start_addr () { return m_last_source_start_addr; }
 
   struct using_direct **get_local_using_directives ()
   {
@@ -272,10 +260,7 @@ struct buildsym_compunit
     return &m_global_using_directives;
   }
 
-  bool outermost_context_p () const
-  {
-    return m_context_stack.empty ();
-  }
+  bool outermost_context_p () const { return m_context_stack.empty (); }
 
   struct context_stack *get_current_context_stack ()
   {
@@ -284,50 +269,31 @@ struct buildsym_compunit
     return &m_context_stack.back ();
   }
 
-  int get_context_stack_depth () const
-  {
-    return m_context_stack.size ();
-  }
+  int get_context_stack_depth () const { return m_context_stack.size (); }
 
-  struct subfile *get_current_subfile ()
-  {
-    return m_current_subfile;
-  }
+  struct subfile *get_current_subfile () { return m_current_subfile; }
 
-  struct pending **get_local_symbols ()
-  {
-    return &m_local_symbols;
-  }
+  struct pending **get_local_symbols () { return &m_local_symbols; }
 
-  struct pending **get_file_symbols ()
-  {
-    return &m_file_symbols;
-  }
+  struct pending **get_file_symbols () { return &m_file_symbols; }
 
-  struct pending **get_global_symbols ()
-  {
-    return &m_global_symbols;
-  }
+  struct pending **get_global_symbols () { return &m_global_symbols; }
 
-  void record_debugformat (const char *format)
-  {
-    m_debugformat = format;
-  }
+  void record_debugformat (const char *format) { m_debugformat = format; }
 
-  void record_producer (const char *producer)
-  {
-    m_producer = producer;
-  }
+  void record_producer (const char *producer) { m_producer = producer; }
 
   struct context_stack *push_context (int desc, CORE_ADDR valu);
 
   struct context_stack pop_context ();
 
-  struct block *end_compunit_symtab_get_static_block
-    (CORE_ADDR end_addr, int expandable, int required);
+  struct block *end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
+						      int expandable,
+						      int required);
 
-  struct compunit_symtab *end_compunit_symtab_from_static_block
-    (struct block *static_block, int expandable);
+  struct compunit_symtab *
+  end_compunit_symtab_from_static_block (struct block *static_block,
+					 int expandable);
 
   struct compunit_symtab *end_compunit_symtab (CORE_ADDR end_addr);
 
@@ -337,7 +303,8 @@ struct buildsym_compunit
 
 private:
 
-  void record_pending_block (struct block *block, struct pending_block *opblock);
+  void record_pending_block (struct block *block,
+			     struct pending_block *opblock);
 
   struct block *finish_block_internal (struct symbol *symbol,
 				       struct pending **listhead,
@@ -350,8 +317,9 @@ private:
 
   void watch_main_source_file_lossage ();
 
-  struct compunit_symtab *end_compunit_symtab_with_blockvector
-    (struct block *static_block, int expandable);
+  struct compunit_symtab *
+  end_compunit_symtab_with_blockvector (struct block *static_block,
+					int expandable);
 
   /* The objfile we're reading debug info from.  */
   struct objfile *m_objfile;
@@ -445,12 +413,10 @@ private:
   struct pending *m_local_symbols = nullptr;
 };
 
-
-
 extern void add_symbol_to_list (struct symbol *symbol,
 				struct pending **listhead);
 
-extern struct symbol *find_symbol_in_list (struct pending *list,
-					   char *name, int length);
+extern struct symbol *find_symbol_in_list (struct pending *list, char *name,
+					   int length);
 
 #endif /* defined (BUILDSYM_H) */

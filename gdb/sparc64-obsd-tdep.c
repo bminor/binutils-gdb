@@ -45,38 +45,34 @@
    match the ptrace(2) layout.  */
 
 /* From <machine/reg.h>.  */
-const struct sparc_gregmap sparc64obsd_gregmap =
-{
-  0 * 8,			/* "tstate" */
-  1 * 8,			/* %pc */
-  2 * 8,			/* %npc */
-  3 * 8,			/* %y */
-  -1,				/* %fprs */
-  -1,
-  5 * 8,			/* %g1 */
-  20 * 8,			/* %l0 */
-  4				/* sizeof (%y) */
+const struct sparc_gregmap sparc64obsd_gregmap = {
+  0 * 8,	 /* "tstate" */
+  1 * 8,	 /* %pc */
+  2 * 8,	 /* %npc */
+  3 * 8,	 /* %y */
+  -1,		 /* %fprs */
+  -1,	  5 * 8, /* %g1 */
+  20 * 8,	 /* %l0 */
+  4		 /* sizeof (%y) */
 };
 
-const struct sparc_gregmap sparc64obsd_core_gregmap =
-{
-  0 * 8,			/* "tstate" */
-  1 * 8,			/* %pc */
-  2 * 8,			/* %npc */
-  3 * 8,			/* %y */
-  -1,				/* %fprs */
-  -1,
-  7 * 8,			/* %g1 */
-  22 * 8,			/* %l0 */
-  4				/* sizeof (%y) */
+const struct sparc_gregmap sparc64obsd_core_gregmap = {
+  0 * 8,	 /* "tstate" */
+  1 * 8,	 /* %pc */
+  2 * 8,	 /* %npc */
+  3 * 8,	 /* %y */
+  -1,		 /* %fprs */
+  -1,	  7 * 8, /* %g1 */
+  22 * 8,	 /* %l0 */
+  4		 /* sizeof (%y) */
 };
 
 static void
 sparc64obsd_supply_gregset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *gregs, size_t len)
+			    struct regcache *regcache, int regnum,
+			    const void *gregs, size_t len)
 {
-  const void *fpregs = (char *)gregs + 288;
+  const void *fpregs = (char *) gregs + 288;
 
   if (len < 832)
     {
@@ -90,12 +86,11 @@ sparc64obsd_supply_gregset (const struct regset *regset,
 
 static void
 sparc64obsd_supply_fpregset (const struct regset *regset,
-			     struct regcache *regcache,
-			     int regnum, const void *fpregs, size_t len)
+			     struct regcache *regcache, int regnum,
+			     const void *fpregs, size_t len)
 {
   sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
-
 
 /* Signal trampolines.  */
 
@@ -114,12 +109,10 @@ sparc64obsd_supply_fpregset (const struct regset *regset,
 static const int sparc64obsd_page_size = 8192;
 
 /* Offset for sigreturn(2).  */
-static const int sparc64obsd_sigreturn_offset[] = {
-  0xf0,				/* OpenBSD 3.8 */
-  0xec,				/* OpenBSD 3.6 */
-  0xe8,				/* OpenBSD 3.2 */
-  -1
-};
+static const int sparc64obsd_sigreturn_offset[] = { 0xf0, /* OpenBSD 3.8 */
+						    0xec, /* OpenBSD 3.6 */
+						    0xe8, /* OpenBSD 3.2 */
+						    -1 };
 
 static int
 sparc64obsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
@@ -189,18 +182,18 @@ static void
 sparc64obsd_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 			   struct frame_id *this_id)
 {
-  struct sparc_frame_cache *cache =
-    sparc64obsd_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc64obsd_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
 static struct value *
-sparc64obsd_frame_prev_register (frame_info_ptr this_frame,
-				 void **this_cache, int regnum)
+sparc64obsd_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+				 int regnum)
 {
-  struct sparc_frame_cache *cache =
-    sparc64obsd_frame_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc64obsd_frame_cache (this_frame, this_cache);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
@@ -220,17 +213,12 @@ sparc64obsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind sparc64obsd_frame_unwind =
-{
-  "sparc64 openbsd sigtramp",
-  SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
-  sparc64obsd_frame_this_id,
-  sparc64obsd_frame_prev_register,
-  NULL,
-  sparc64obsd_sigtramp_frame_sniffer
-};
-
+static const struct frame_unwind sparc64obsd_frame_unwind
+  = { "sparc64 openbsd sigtramp",	 SIGTRAMP_FRAME,
+      default_frame_unwind_stop_reason,	 sparc64obsd_frame_this_id,
+      sparc64obsd_frame_prev_register,	 NULL,
+      sparc64obsd_sigtramp_frame_sniffer };
+
 /* Kernel debugging support.  */
 
 static struct sparc_frame_cache *
@@ -263,11 +251,11 @@ sparc64obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static void
-sparc64obsd_trapframe_this_id (frame_info_ptr this_frame,
-			       void **this_cache, struct frame_id *this_id)
+sparc64obsd_trapframe_this_id (frame_info_ptr this_frame, void **this_cache,
+			       struct frame_id *this_id)
 {
-  struct sparc_frame_cache *cache =
-    sparc64obsd_trapframe_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc64obsd_trapframe_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
@@ -276,16 +264,15 @@ static struct value *
 sparc64obsd_trapframe_prev_register (frame_info_ptr this_frame,
 				     void **this_cache, int regnum)
 {
-  struct sparc_frame_cache *cache =
-    sparc64obsd_trapframe_cache (this_frame, this_cache);
+  struct sparc_frame_cache *cache
+    = sparc64obsd_trapframe_cache (this_frame, this_cache);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
 
 static int
 sparc64obsd_trapframe_sniffer (const struct frame_unwind *self,
-			       frame_info_ptr this_frame,
-			       void **this_cache)
+			       frame_info_ptr this_frame, void **this_cache)
 {
   CORE_ADDR pc;
   ULONGEST pstate;
@@ -304,27 +291,24 @@ sparc64obsd_trapframe_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind sparc64obsd_trapframe_unwind =
-{
-  "sparc64 openbsd trap",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  sparc64obsd_trapframe_this_id,
-  sparc64obsd_trapframe_prev_register,
-  NULL,
-  sparc64obsd_trapframe_sniffer
-};
-
+static const struct frame_unwind sparc64obsd_trapframe_unwind
+  = { "sparc64 openbsd trap",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      sparc64obsd_trapframe_this_id,
+      sparc64obsd_trapframe_prev_register,
+      NULL,
+      sparc64obsd_trapframe_sniffer };
 
 /* Threads support.  */
 
 /* Offset wthin the thread structure where we can find %fp and %i7.  */
-#define SPARC64OBSD_UTHREAD_FP_OFFSET	232
-#define SPARC64OBSD_UTHREAD_PC_OFFSET	240
+#define SPARC64OBSD_UTHREAD_FP_OFFSET 232
+#define SPARC64OBSD_UTHREAD_PC_OFFSET 240
 
 static void
-sparc64obsd_supply_uthread (struct regcache *regcache,
-			    int regnum, CORE_ADDR addr)
+sparc64obsd_supply_uthread (struct regcache *regcache, int regnum,
+			    CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -371,8 +355,8 @@ sparc64obsd_supply_uthread (struct regcache *regcache,
 }
 
 static void
-sparc64obsd_collect_uthread(const struct regcache *regcache,
-			    int regnum, CORE_ADDR addr)
+sparc64obsd_collect_uthread (const struct regcache *regcache, int regnum,
+			     CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -389,7 +373,7 @@ sparc64obsd_collect_uthread(const struct regcache *regcache,
       CORE_ADDR fp_addr = addr + SPARC64OBSD_UTHREAD_FP_OFFSET;
 
       regcache->raw_collect (SPARC_SP_REGNUM, buf);
-      write_memory (fp_addr,buf, 8);
+      write_memory (fp_addr, buf, 8);
     }
 
   if (regnum == SPARC64_PC_REGNUM || regnum == -1)
@@ -408,17 +392,12 @@ sparc64obsd_collect_uthread(const struct regcache *regcache,
   sp = extract_unsigned_integer (buf, 8, byte_order);
   sparc_collect_rwindow (regcache, sp, regnum);
 }
-
 
-static const struct regset sparc64obsd_gregset =
-  {
-    NULL, sparc64obsd_supply_gregset, NULL
-  };
+static const struct regset sparc64obsd_gregset
+  = { NULL, sparc64obsd_supply_gregset, NULL };
 
-static const struct regset sparc64obsd_fpregset =
-  {
-    NULL, sparc64obsd_supply_fpregset, NULL
-  };
+static const struct regset sparc64obsd_fpregset
+  = { NULL, sparc64obsd_supply_fpregset, NULL };
 
 static void
 sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -440,8 +419,8 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   obsd_init_abi (info, gdbarch);
 
   /* OpenBSD/sparc64 has SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
   set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 
   /* OpenBSD provides a user-level threads implementation.  */
@@ -450,9 +429,10 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_sparc64obsd_tdep ();
+
 void
 _initialize_sparc64obsd_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
-			  GDB_OSABI_OPENBSD, sparc64obsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9, GDB_OSABI_OPENBSD,
+			  sparc64obsd_init_abi);
 }

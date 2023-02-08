@@ -25,7 +25,7 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"
-#include "symfile.h"		/* for overlay functions */
+#include "symfile.h" /* for overlay functions */
 #include "regcache.h"
 #include "user-regs.h"
 #include "block.h"
@@ -39,21 +39,22 @@
    LEN bytes long.  */
 
 #if TARGET_CHAR_BIT != 8 || HOST_CHAR_BIT != 8
-  /* 8 bit characters are a pretty safe assumption these days, so we
+/* 8 bit characters are a pretty safe assumption these days, so we
      assume it throughout all these swapping routines.  If we had to deal with
      9 bit characters, we would need to make len be in bits and would have
      to re-write these routines...  */
 you lose
 #endif
 
-template<typename T, typename>
-T
-extract_integer (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order)
+  template<typename T, typename>
+  T
+  extract_integer (gdb::array_view<const gdb_byte> buf,
+		   enum bfd_endian byte_order)
 {
   typename std::make_unsigned<T>::type retval = 0;
 
   if (buf.size () > (int) sizeof (T))
-    error (_("\
+    error (_ ("\
 That operation is not available on integers of more than %d bytes."),
 	   (int) sizeof (T));
 
@@ -91,8 +92,9 @@ That operation is not available on integers of more than %d bytes."),
 /* Explicit instantiations.  */
 template LONGEST extract_integer<LONGEST> (gdb::array_view<const gdb_byte> buf,
 					   enum bfd_endian byte_order);
-template ULONGEST extract_integer<ULONGEST>
-  (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order);
+template ULONGEST
+extract_integer<ULONGEST> (gdb::array_view<const gdb_byte> buf,
+			   enum bfd_endian byte_order);
 
 /* Sometimes a long long unsigned integer can be extracted as a
    LONGEST value.  This is done so that we can print these values
@@ -110,9 +112,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
   len = orig_len;
   if (byte_order == BFD_ENDIAN_BIG)
     {
-      for (p = addr;
-	   len > (int) sizeof (LONGEST) && p < addr + orig_len;
-	   p++)
+      for (p = addr; len > (int) sizeof (LONGEST) && p < addr + orig_len; p++)
 	{
 	  if (*p == 0)
 	    len--;
@@ -124,8 +124,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
   else
     {
       first_addr = addr;
-      for (p = addr + orig_len - 1;
-	   len > (int) sizeof (LONGEST) && p >= addr;
+      for (p = addr + orig_len - 1; len > (int) sizeof (LONGEST) && p >= addr;
 	   p--)
 	{
 	  if (*p == 0)
@@ -137,15 +136,13 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
 
   if (len <= (int) sizeof (LONGEST))
     {
-      *pval = (LONGEST) extract_unsigned_integer (first_addr,
-						  sizeof (LONGEST),
+      *pval = (LONGEST) extract_unsigned_integer (first_addr, sizeof (LONGEST),
 						  byte_order);
       return 1;
     }
 
   return 0;
 }
-
 
 /* Treat the bytes at BUF as a pointer of type TYPE, and return the
    address it represents.  */
@@ -160,8 +157,7 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
    target-format integer at ADDR which is LEN bytes long.  */
 template<typename T, typename>
 void
-store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
-	       T val)
+store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order, T val)
 {
   gdb_byte *p;
   gdb_byte *startaddr = addr;
@@ -189,12 +185,10 @@ store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
 
 /* Explicit instantiations.  */
 template void store_integer (gdb_byte *addr, int len,
-			     enum bfd_endian byte_order,
-			     LONGEST val);
+			     enum bfd_endian byte_order, LONGEST val);
 
 template void store_integer (gdb_byte *addr, int len,
-			     enum bfd_endian byte_order,
-			     ULONGEST val);
+			     enum bfd_endian byte_order, ULONGEST val);
 
 /* Store the address ADDR as a pointer of type TYPE at BUF, in target
    form.  */
@@ -305,8 +299,8 @@ value_of_register_lazy (frame_info_ptr frame, int regnum)
 /* Given a pointer of type TYPE in target form in BUF, return the
    address it represents.  */
 CORE_ADDR
-unsigned_pointer_to_address (struct gdbarch *gdbarch,
-			     struct type *type, const gdb_byte *buf)
+unsigned_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
+			     const gdb_byte *buf)
 {
   enum bfd_endian byte_order = type_byte_order (type);
 
@@ -314,8 +308,8 @@ unsigned_pointer_to_address (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-signed_pointer_to_address (struct gdbarch *gdbarch,
-			   struct type *type, const gdb_byte *buf)
+signed_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
+			   const gdb_byte *buf)
 {
   enum bfd_endian byte_order = type_byte_order (type);
 
@@ -341,7 +335,7 @@ address_to_signed_pointer (struct gdbarch *gdbarch, struct type *type,
 
   store_signed_integer (buf, type->length (), byte_order, addr);
 }
-
+
 /* See value.h.  */
 
 enum symbol_needs_kind
@@ -415,8 +409,7 @@ follow_static_link (frame_info_ptr frame,
 
       /* If we don't know how to compute FRAME's base address, don't give up:
 	 maybe the frame we are looking for is upper in the stack frame.  */
-      if (framefunc != NULL
-	  && SYMBOL_BLOCK_OPS (framefunc) != NULL
+      if (framefunc != NULL && SYMBOL_BLOCK_OPS (framefunc) != NULL
 	  && SYMBOL_BLOCK_OPS (framefunc)->get_frame_base != NULL
 	  && (SYMBOL_BLOCK_OPS (framefunc)->get_frame_base (framefunc, frame)
 	      == upper_frame_base))
@@ -532,14 +525,13 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       frame = block_innermost_frame (var_block);
       if (frame == NULL)
 	{
-	  if (var_block->function ()
-	      && !block_inlined_p (var_block)
+	  if (var_block->function () && !block_inlined_p (var_block)
 	      && var_block->function ()->print_name ())
-	    error (_("No frame is currently executing in block %s."),
+	    error (_ ("No frame is currently executing in block %s."),
 		   var_block->function ()->print_name ());
 	  else
-	    error (_("No frame is currently executing in specified"
-		     " block"));
+	    error (_ ("No frame is currently executing in specified"
+		      " block"));
 	}
     }
 
@@ -569,7 +561,7 @@ language_defn::read_var_value (struct symbol *var,
   if (sym_need == SYMBOL_NEEDS_FRAME)
     gdb_assert (frame != NULL);
   else if (sym_need == SYMBOL_NEEDS_REGISTERS && !target_has_registers ())
-    error (_("Cannot read `%s' without registers"), var->print_name ());
+    error (_ ("Cannot read `%s' without registers"), var->print_name ());
 
   if (frame != NULL)
     frame = get_hosting_frame (var, var_block, frame);
@@ -634,9 +626,8 @@ language_defn::read_var_value (struct symbol *var,
 
     case LOC_STATIC:
       if (overlay_debugging)
-	addr
-	  = symbol_overlayed_address (var->value_address (),
-				      var->obj_section (var->objfile ()));
+	addr = symbol_overlayed_address (var->value_address (),
+					 var->obj_section (var->objfile ()));
       else
 	addr = var->value_address ();
       break;
@@ -644,7 +635,7 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_ARG:
       addr = get_frame_args_address (frame);
       if (!addr)
-	error (_("Unknown argument list address for `%s'."),
+	error (_ ("Unknown argument list address for `%s'."),
 	       var->print_name ());
       addr += var->value_longest ();
       break;
@@ -656,7 +647,7 @@ language_defn::read_var_value (struct symbol *var,
 
 	argref = get_frame_args_address (frame);
 	if (!argref)
-	  error (_("Unknown argument list address for `%s'."),
+	  error (_ ("Unknown argument list address for `%s'."),
 		 var->print_name ());
 	argref += var->value_longest ();
 	ref = value_at (lookup_pointer_type (type), argref);
@@ -670,15 +661,14 @@ language_defn::read_var_value (struct symbol *var,
       break;
 
     case LOC_TYPEDEF:
-      error (_("Cannot look up value of a typedef `%s'."),
+      error (_ ("Cannot look up value of a typedef `%s'."),
 	     var->print_name ());
       break;
 
     case LOC_BLOCK:
       if (overlay_debugging)
-	addr = symbol_overlayed_address
-	  (var->value_block ()->entry_pc (),
-	   var->obj_section (var->objfile ()));
+	addr = symbol_overlayed_address (var->value_block ()->entry_pc (),
+					 var->obj_section (var->objfile ()));
       else
 	addr = var->value_block ()->entry_pc ();
       break;
@@ -686,18 +676,17 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_REGISTER:
     case LOC_REGPARM_ADDR:
       {
-	int regno = SYMBOL_REGISTER_OPS (var)
-		      ->register_number (var, get_frame_arch (frame));
+	int regno = SYMBOL_REGISTER_OPS (var)->register_number (
+	  var, get_frame_arch (frame));
 	struct value *regval;
 
 	if (var->aclass () == LOC_REGPARM_ADDR)
 	  {
-	    regval = value_from_register (lookup_pointer_type (type),
-					  regno,
-					  frame);
+	    regval
+	      = value_from_register (lookup_pointer_type (type), regno, frame);
 
 	    if (regval == NULL)
-	      error (_("Value of register variable not available for `%s'."),
+	      error (_ ("Value of register variable not available for `%s'."),
 		     var->print_name ());
 
 	    addr = value_as_address (regval);
@@ -707,7 +696,7 @@ language_defn::read_var_value (struct symbol *var,
 	    regval = value_from_register (type, regno, frame);
 
 	    if (regval == NULL)
-	      error (_("Value of register variable not available for `%s'."),
+	      error (_ ("Value of register variable not available for `%s'."),
 		     var->print_name ());
 	    return regval;
 	  }
@@ -722,31 +711,29 @@ language_defn::read_var_value (struct symbol *var,
 	struct obj_section *obj_section;
 	bound_minimal_symbol bmsym;
 
-	gdbarch_iterate_over_objfiles_in_search_order
-	  (var->arch (),
-	   [var, &bmsym] (objfile *objfile)
-	     {
-		bmsym = lookup_minimal_symbol (var->linkage_name (), nullptr,
-					       objfile);
+	gdbarch_iterate_over_objfiles_in_search_order (
+	  var->arch (),
+	  [var, &bmsym] (objfile *objfile) {
+	  bmsym
+	    = lookup_minimal_symbol (var->linkage_name (), nullptr, objfile);
 
-		/* Stop if a match is found.  */
-		return bmsym.minsym != nullptr;
-	     },
-	   var->objfile ());
+	  /* Stop if a match is found.  */
+	  return bmsym.minsym != nullptr;
+	  },
+	  var->objfile ());
 
 	/* If we can't find the minsym there's a problem in the symbol info.
 	   The symbol exists in the debug info, but it's missing in the minsym
 	   table.  */
 	if (bmsym.minsym == nullptr)
 	  {
-	    const char *flavour_name
-	      = objfile_flavour_name (var->objfile ());
+	    const char *flavour_name = objfile_flavour_name (var->objfile ());
 
 	    /* We can't get here unless we've opened the file, so flavour_name
 	       can't be NULL.  */
 	    gdb_assert (flavour_name != NULL);
-	    error (_("Missing %s symbol \"%s\"."),
-		   flavour_name, var->linkage_name ());
+	    error (_ ("Missing %s symbol \"%s\"."), flavour_name,
+		   var->linkage_name ());
 	  }
 
 	obj_section = bmsym.minsym->obj_section (bmsym.objfile);
@@ -754,9 +741,9 @@ language_defn::read_var_value (struct symbol *var,
 	   a TLS variable. */
 	if (obj_section == NULL
 	    || (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
-	   addr = bmsym.minsym->value_raw_address ();
+	  addr = bmsym.minsym->value_raw_address ();
 	else
-	   addr = bmsym.value_address ();
+	  addr = bmsym.value_address ();
 	if (overlay_debugging)
 	  addr = symbol_overlayed_address (addr, obj_section);
 	/* Determine address of TLS variable. */
@@ -772,7 +759,7 @@ language_defn::read_var_value (struct symbol *var,
       return allocate_optimized_out_value (type);
 
     default:
-      error (_("Cannot look up value of a botched symbol `%s'."),
+      error (_ ("Cannot look up value of a botched symbol `%s'."),
 	     var->print_name ());
       break;
     }
@@ -897,7 +884,8 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
 	 including the location.  */
       v = allocate_value (type);
       VALUE_LVAL (v) = lval_register;
-      VALUE_NEXT_FRAME_ID (v) = get_frame_id (get_next_frame_sentinel_okay (frame));
+      VALUE_NEXT_FRAME_ID (v)
+	= get_frame_id (get_next_frame_sentinel_okay (frame));
       VALUE_REGNUM (v) = regnum;
       ok = gdbarch_register_to_value (gdbarch, frame, regnum, type1,
 				      value_contents_raw (v).data (), &optim,
@@ -914,8 +902,8 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
   else
     {
       /* Construct the value.  */
-      v = gdbarch_value_from_register (gdbarch, type,
-				       regnum, get_frame_id (frame));
+      v = gdbarch_value_from_register (gdbarch, type, regnum,
+				       get_frame_id (frame));
 
       /* Get the data.  */
       read_frame_register_value (v, frame);
@@ -937,7 +925,7 @@ address_from_register (int regnum, frame_info_ptr frame)
   int regnum_max_excl = gdbarch_num_cooked_regs (gdbarch);
 
   if (regnum < 0 || regnum >= regnum_max_excl)
-    error (_("Invalid register #%d, expecting 0 <= # < %d"), regnum,
+    error (_ ("Invalid register #%d, expecting 0 <= # < %d"), regnum,
 	   regnum_max_excl);
 
   /* This routine may be called during early unwinding, at a time
@@ -954,8 +942,8 @@ address_from_register (int regnum, frame_info_ptr frame)
       gdb_byte *buf = (gdb_byte *) alloca (type->length ());
       int optim, unavail, ok;
 
-      ok = gdbarch_register_to_value (gdbarch, frame, regnum, type,
-				      buf, &optim, &unavail);
+      ok = gdbarch_register_to_value (gdbarch, frame, regnum, type, buf,
+				      &optim, &unavail);
       if (!ok)
 	{
 	  /* This function is used while computing a location expression.
@@ -987,8 +975,10 @@ address_from_register (int regnum, frame_info_ptr frame)
 }
 
 #if GDB_SELF_TEST
-namespace selftests {
-namespace findvar_tests {
+namespace selftests
+{
+namespace findvar_tests
+{
 
 /* Function to test copy_integer_to_size.  Store SOURCE_VAL with size
    SOURCE_SIZE to a buffer, making sure no sign extending happens at this
@@ -1002,7 +992,7 @@ static void
 do_cint_test (ULONGEST dest_valu, ULONGEST dest_vals, int dest_size,
 	      ULONGEST src_val, int src_size)
 {
-  for (int i = 0; i < 2 ; i++)
+  for (int i = 0; i < 2; i++)
     {
       gdb_byte srcbuf[sizeof (ULONGEST)] = {};
       gdb_byte destbuf[sizeof (ULONGEST)] = {};
@@ -1020,15 +1010,17 @@ do_cint_test (ULONGEST dest_valu, ULONGEST dest_vals, int dest_size,
       memset (destbuf, 0xaa, sizeof (destbuf));
       copy_integer_to_size (destbuf, dest_size, srcbuf, src_size, false,
 			    byte_order);
-      SELF_CHECK (dest_valu == extract_unsigned_integer (destbuf, dest_size,
-							 byte_order));
+      SELF_CHECK (dest_valu
+		  == extract_unsigned_integer (destbuf, dest_size,
+					       byte_order));
 
       /* Test signed.  */
       memset (destbuf, 0xaa, sizeof (destbuf));
       copy_integer_to_size (destbuf, dest_size, srcbuf, src_size, true,
 			    byte_order);
-      SELF_CHECK (dest_vals == extract_unsigned_integer (destbuf, dest_size,
-							 byte_order));
+      SELF_CHECK (dest_vals
+		  == extract_unsigned_integer (destbuf, dest_size,
+					       byte_order));
     }
 }
 
@@ -1062,18 +1054,19 @@ copy_integer_to_size_test ()
   do_cint_test (0xff2112345678, 0xffffff2112345678, 8, 0xffffff2112345678, 6);
 }
 
-} // namespace findvar_test
+} // namespace findvar_tests
 } // namespace selftests
 
 #endif
 
 void _initialize_findvar ();
+
 void
 _initialize_findvar ()
 {
 #if GDB_SELF_TEST
-  selftests::register_test
-    ("copy_integer_to_size",
-     selftests::findvar_tests::copy_integer_to_size_test);
+  selftests::register_test (
+    "copy_integer_to_size",
+    selftests::findvar_tests::copy_integer_to_size_test);
 #endif
 }

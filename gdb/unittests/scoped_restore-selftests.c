@@ -21,11 +21,18 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/scoped_restore.h"
 
-namespace selftests {
-namespace scoped_restore_tests {
+namespace selftests
+{
+namespace scoped_restore_tests
+{
 
-struct Base {};
-struct Derived : Base {};
+struct Base
+{
+};
+
+struct Derived : Base
+{
+};
 
 static int global;
 
@@ -104,6 +111,7 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_scoped_restore_selftests ();
+
 void
 _initialize_scoped_restore_selftests ()
 {

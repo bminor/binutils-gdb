@@ -41,7 +41,6 @@ enum cmd_types
 
 /* This structure records one command'd definition.  */
 
-
 struct cmd_list_element
 {
   cmd_list_element (const char *name_, enum command_class theclass_,
@@ -87,18 +86,15 @@ struct cmd_list_element
   std::vector<std::string> command_components () const;
 
   /* Return true if this command is an alias of another command.  */
-  bool is_alias () const
-  { return this->alias_target != nullptr; }
+  bool is_alias () const { return this->alias_target != nullptr; }
 
   /* Return true if this command is a prefix command.  */
-  bool is_prefix () const
-  { return this->subcommands != nullptr; }
+  bool is_prefix () const { return this->subcommands != nullptr; }
 
   /* Return true if this command is a "command class help" command.  For
      instance, a "stack" dummy command is registered so that one can do
      "help stack" and show help for all commands of the "stack" class.  */
-  bool is_command_class_help () const
-  { return this->func == nullptr; }
+  bool is_command_class_help () const { return this->func == nullptr; }
 
   void set_context (void *context)
   {
@@ -106,8 +102,7 @@ struct cmd_list_element
     m_context = context;
   }
 
-  void *context () const
-  { return m_context; }
+  void *context () const { return m_context; }
 
   /* Points to next command in this list.  */
   struct cmd_list_element *next = nullptr;
@@ -177,14 +172,13 @@ struct cmd_list_element
   /* The command's real callback.  At present func() bounces through
      to one of the below.  */
   union
-    {
-      /* Most commands don't need the cmd_list_element parameter passed to FUNC.
+  {
+    /* Most commands don't need the cmd_list_element parameter passed to FUNC.
 	 They therefore register a command of this type, which doesn't have the
 	 cmd_list_element parameter.  do_simple_func is installed as FUNC, and
 	 acts as a shim between the two.  */
-      cmd_simple_func_ftype *simple_func;
-    }
-  function;
+    cmd_simple_func_ftype *simple_func;
+  } function;
 
   /* Documentation of this command (or help topic).
      First line is brief documentation; remaining lines form, with it,
@@ -255,8 +249,7 @@ struct cmd_list_element
   struct cmd_list_element *alias_target = nullptr;
 
   /* Node to link aliases on an alias list.  */
-  using aliases_list_node_type
-    = intrusive_list_node<cmd_list_element>;
+  using aliases_list_node_type = intrusive_list_node<cmd_list_element>;
   aliases_list_node_type aliases_list_node;
 
   /* Linked list of all aliases of this command.  */
@@ -274,6 +267,7 @@ struct cmd_list_element
   bool *suppress_notification = nullptr;
 
 private:
+
   /* Local state (context) for this command.  This can be anything.  */
   void *m_context = nullptr;
 };
@@ -301,10 +295,10 @@ extern void print_doc_line (struct ui_file *stream, const char *str,
 			    bool for_value_prefix);
 
 /* The enums of boolean commands.  */
-extern const char * const boolean_enums[];
+extern const char *const boolean_enums[];
 
 /* The enums of auto-boolean commands.  */
-extern const char * const auto_boolean_enums[];
+extern const char *const auto_boolean_enums[];
 
 /* Verify whether a given cmd_list_element is a user-defined command.
    Return 1 if it is user-defined.  Return 0 otherwise.  */

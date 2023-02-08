@@ -16,7 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (TRACEPOINT_H)
+#if !defined(TRACEPOINT_H)
 #define TRACEPOINT_H 1
 
 #include "breakpoint.h"
@@ -49,8 +49,10 @@ typedef std::unique_ptr<traceframe_info> traceframe_info_up;
 struct trace_state_variable
 {
   trace_state_variable (std::string &&name_, int number_)
-  : name (name_), number (number_)
-  {}
+    : name (name_),
+      number (number_)
+  {
+  }
 
   /* The variable's name.  The user has to prefix with a dollar sign,
      but we don't store that internally.  */
@@ -73,21 +75,21 @@ struct trace_state_variable
   /* This is true for variables that are predefined and built into
      the target.  */
   int builtin = 0;
- };
+};
 
 /* The trace status encompasses various info about the general state
    of the tracing run.  */
 
 enum trace_stop_reason
-  {
-    trace_stop_reason_unknown,
-    trace_never_run,
-    trace_stop_command,
-    trace_buffer_full,
-    trace_disconnected,
-    tracepoint_passcount,
-    tracepoint_error
-  };
+{
+  trace_stop_reason_unknown,
+  trace_never_run,
+  trace_stop_command,
+  trace_buffer_full,
+  trace_disconnected,
+  tracepoint_passcount,
+  tracepoint_error
+};
 
 struct trace_status
 {
@@ -237,11 +239,13 @@ struct static_tracepoint_marker
 struct memrange
 {
   memrange (int type_, bfd_signed_vma start_, bfd_signed_vma end_)
-    : type (type_), start (start_), end (end_)
-  {}
+    : type (type_),
+      start (start_),
+      end (end_)
+  {
+  }
 
-  memrange ()
-  {}
+  memrange () {}
 
   /* memrange_absolute for absolute memory range, else basereg
      number.  */
@@ -253,6 +257,7 @@ struct memrange
 class collection_list
 {
 public:
+
   collection_list ();
 
   void add_wholly_collected (const char *print_name);
@@ -264,16 +269,12 @@ public:
 
   void add_remote_register (unsigned int regno);
   void add_ax_registers (struct agent_expr *aexpr);
-  void add_local_register (struct gdbarch *gdbarch,
-			   unsigned int regno,
+  void add_local_register (struct gdbarch *gdbarch, unsigned int regno,
 			   CORE_ADDR scope);
-  void add_memrange (struct gdbarch *gdbarch,
-		     int type, bfd_signed_vma base,
+  void add_memrange (struct gdbarch *gdbarch, int type, bfd_signed_vma base,
 		     unsigned long len, CORE_ADDR scope);
-  void collect_symbol (struct symbol *sym,
-		       struct gdbarch *gdbarch,
-		       long frame_regno, long frame_offset,
-		       CORE_ADDR scope,
+  void collect_symbol (struct symbol *sym, struct gdbarch *gdbarch,
+		       long frame_regno, long frame_offset, CORE_ADDR scope,
 		       int trace_string);
 
   void add_local_symbols (struct gdbarch *gdbarch, CORE_ADDR pc,
@@ -286,12 +287,14 @@ public:
   std::vector<std::string> stringify ();
 
   const std::vector<std::string> &wholly_collected ()
-  { return m_wholly_collected; }
+  {
+    return m_wholly_collected;
+  }
 
-  const std::vector<std::string> &computed ()
-  { return m_computed; }
+  const std::vector<std::string> &computed () { return m_computed; }
 
 private:
+
   /* We need the allocator zero-initialize the mask, so we don't use
      gdb::byte_vector.  */
   std::vector<unsigned char> m_regs_mask;
@@ -311,8 +314,8 @@ private:
 };
 
 extern void
-  parse_static_tracepoint_marker_definition (const char *line, const char **pp,
-					     static_tracepoint_marker *marker);
+parse_static_tracepoint_marker_definition (const char *line, const char **pp,
+					   static_tracepoint_marker *marker);
 
 /* Returns the current traceframe number.  */
 extern int get_traceframe_number (void);
@@ -357,15 +360,16 @@ extern void encode_actions_rsp (struct bp_location *tloc,
 extern void validate_actionline (const char *, struct breakpoint *);
 extern void validate_trace_state_variable_name (const char *name);
 
-extern struct trace_state_variable *find_trace_state_variable (const char *name);
 extern struct trace_state_variable *
-  find_trace_state_variable_by_number (int number);
+find_trace_state_variable (const char *name);
+extern struct trace_state_variable *
+find_trace_state_variable_by_number (int number);
 
-extern struct trace_state_variable *create_trace_state_variable (const char *name);
+extern struct trace_state_variable *
+create_trace_state_variable (const char *name);
 
-extern int encode_source_string (int num, ULONGEST addr,
-				 const char *srctype, const char *src,
-				 char *buf, int buf_size);
+extern int encode_source_string (int num, ULONGEST addr, const char *srctype,
+				 const char *src, char *buf, int buf_size);
 
 extern void parse_trace_status (const char *line, struct trace_status *ts);
 
@@ -374,7 +378,8 @@ extern void parse_tracepoint_status (const char *p, struct breakpoint *tp,
 
 extern void parse_tracepoint_definition (const char *line,
 					 struct uploaded_tp **utpp);
-extern void parse_tsv_definition (const char *line, struct uploaded_tsv **utsvp);
+extern void parse_tsv_definition (const char *line,
+				  struct uploaded_tsv **utsvp);
 
 extern struct uploaded_tp *get_uploaded_tp (int num, ULONGEST addr,
 					    struct uploaded_tp **utpp);
@@ -383,7 +388,8 @@ extern void free_uploaded_tps (struct uploaded_tp **utpp);
 extern struct uploaded_tsv *get_uploaded_tsv (int num,
 					      struct uploaded_tsv **utsvp);
 extern void free_uploaded_tsvs (struct uploaded_tsv **utsvp);
-extern struct tracepoint *create_tracepoint_from_upload (struct uploaded_tp *utp);
+extern struct tracepoint *
+create_tracepoint_from_upload (struct uploaded_tp *utp);
 extern void merge_uploaded_tracepoints (struct uploaded_tp **utpp);
 extern void merge_uploaded_trace_state_variables (struct uploaded_tsv **utsvp);
 
@@ -413,14 +419,11 @@ enum trace_find_type
   tfind_outside,
 };
 
-extern void tfind_1 (enum trace_find_type type, int num,
-		     CORE_ADDR addr1, CORE_ADDR addr2,
-		     int from_tty);
+extern void tfind_1 (enum trace_find_type type, int num, CORE_ADDR addr1,
+		     CORE_ADDR addr2, int from_tty);
 
-extern void trace_save_tfile (const char *filename,
-			      int target_does_save);
-extern void trace_save_ctf (const char *dirname,
-			    int target_does_save);
+extern void trace_save_tfile (const char *filename, int target_does_save);
+extern void trace_save_ctf (const char *dirname, int target_does_save);
 
 extern traceframe_info_up parse_traceframe_info (const char *tframe_info);
 
@@ -434,4 +437,4 @@ extern struct bp_location *get_traceframe_location (int *stepping_frame_p);
 /* Command element for the 'while-stepping' command.  */
 extern cmd_list_element *while_stepping_cmd_element;
 
-#endif	/* TRACEPOINT_H */
+#endif /* TRACEPOINT_H */

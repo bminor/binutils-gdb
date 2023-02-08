@@ -22,10 +22,10 @@
 
 enum mem_access_mode
 {
-  MEM_NONE,                     /* Memory that is not physically present.  */
-  MEM_RW,			/* read/write */
-  MEM_RO,			/* read only */
-  MEM_WO,			/* write only */
+  MEM_NONE, /* Memory that is not physically present.  */
+  MEM_RW,   /* read/write */
+  MEM_RO,   /* read only */
+  MEM_WO,   /* write only */
 
   /* Read/write, but special steps are required to write to it.  */
   MEM_FLASH
@@ -34,10 +34,10 @@ enum mem_access_mode
 enum mem_access_width
 {
   MEM_WIDTH_UNSPECIFIED,
-  MEM_WIDTH_8,			/*  8 bit accesses */
-  MEM_WIDTH_16,			/* 16  "      "    */
-  MEM_WIDTH_32,			/* 32  "      "    */
-  MEM_WIDTH_64			/* 64  "      "    */
+  MEM_WIDTH_8,	/*  8 bit accesses */
+  MEM_WIDTH_16, /* 16  "      "    */
+  MEM_WIDTH_32, /* 32  "      "    */
+  MEM_WIDTH_64	/* 64  "      "    */
 };
 
 /* The set of all attributes that can be set for a memory region.
@@ -49,8 +49,8 @@ enum mem_access_width
 
    FIXME: It would be useful if there was a mechanism for targets to
    add their own attributes.  For example, the number of wait states.  */
- 
-struct mem_attrib 
+
+struct mem_attrib
 {
   static mem_attrib unknown ()
   {
@@ -68,10 +68,10 @@ struct mem_attrib
 
   /* enables hardware breakpoints */
   int hwbreak = 0;
-  
+
   /* enables host-side caching of memory region data */
   int cache = 0;
-  
+
   /* Enables memory verification.  After a write, memory is re-read
      to verify that the write was successful.  */
   int verify = 0;
@@ -80,19 +80,22 @@ struct mem_attrib
   int blocksize = -1;
 };
 
-struct mem_region 
+struct mem_region
 {
   /* Create a mem_region with default attributes.  */
 
   mem_region (CORE_ADDR lo_, CORE_ADDR hi_)
-    : lo (lo_), hi (hi_)
-  {}
+    : lo (lo_),
+      hi (hi_)
+  {
+  }
 
   /* Create a mem_region with access mode MODE_, but otherwise default
      attributes.  */
 
   mem_region (CORE_ADDR lo_, CORE_ADDR hi_, mem_access_mode mode_)
-    : lo (lo_), hi (hi_)
+    : lo (lo_),
+      hi (hi_)
   {
     attrib.mode = mode_;
   }
@@ -100,13 +103,13 @@ struct mem_region
   /* Create a mem_region with attributes ATTRIB_.  */
 
   mem_region (CORE_ADDR lo_, CORE_ADDR hi_, const mem_attrib &attrib_)
-    : lo (lo_), hi (hi_), attrib (attrib_)
-  {}
-
-  bool operator< (const mem_region &other) const
+    : lo (lo_),
+      hi (hi_),
+      attrib (attrib_)
   {
-    return this->lo < other.lo;
   }
+
+  bool operator<(const mem_region &other) const { return this->lo < other.lo; }
 
   /* Lowest address in the region.  */
   CORE_ADDR lo;
@@ -129,4 +132,4 @@ extern struct mem_region *lookup_mem_region (CORE_ADDR);
 
 void invalidate_target_mem_regions (void);
 
-#endif	/* MEMATTR_H */
+#endif /* MEMATTR_H */

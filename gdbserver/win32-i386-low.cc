@@ -42,7 +42,8 @@ static struct x86_debug_reg_state debug_reg_state;
 static void
 update_debug_registers (thread_info *thread)
 {
-  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
+  windows_thread_info *th
+    = (windows_thread_info *) thread_target_data (thread);
 
   /* The actual update is done later just before resuming the lwp,
      we just mark that the registers need updating.  */
@@ -81,39 +82,39 @@ win32_get_current_dr (int dr)
   win32_require_context (th);
 
 #ifdef __x86_64__
-#define RET_DR(DR)				\
-  case DR:					\
-    return th->wow64_context.Dr ## DR
+#define RET_DR(DR) \
+  case DR:         \
+    return th->wow64_context.Dr##DR
 
   if (windows_process.wow64_process)
     {
       switch (dr)
-	{
-	  RET_DR (0);
-	  RET_DR (1);
-	  RET_DR (2);
-	  RET_DR (3);
-	  RET_DR (6);
-	  RET_DR (7);
-	}
+        {
+          RET_DR (0);
+          RET_DR (1);
+          RET_DR (2);
+          RET_DR (3);
+          RET_DR (6);
+          RET_DR (7);
+        }
     }
   else
 #undef RET_DR
 #endif
-#define RET_DR(DR)				\
-  case DR:					\
-    return th->context.Dr ## DR
+#define RET_DR(DR) \
+  case DR:         \
+    return th->context.Dr##DR
 
     {
       switch (dr)
-	{
-	  RET_DR (0);
-	  RET_DR (1);
-	  RET_DR (2);
-	  RET_DR (3);
-	  RET_DR (6);
-	  RET_DR (7);
-	}
+        {
+          RET_DR (0);
+          RET_DR (1);
+          RET_DR (2);
+          RET_DR (3);
+          RET_DR (6);
+          RET_DR (7);
+        }
     }
 
 #undef RET_DR
@@ -145,15 +146,10 @@ x86_dr_low_get_status (void)
 }
 
 /* Low-level function vector.  */
-struct x86_dr_low_type x86_dr_low =
-  {
-    x86_dr_low_set_control,
-    x86_dr_low_set_addr,
-    x86_dr_low_get_addr,
-    x86_dr_low_get_status,
-    x86_dr_low_get_control,
-    sizeof (void *),
-  };
+struct x86_dr_low_type x86_dr_low = {
+  x86_dr_low_set_control, x86_dr_low_set_addr,    x86_dr_low_get_addr,
+  x86_dr_low_get_status,  x86_dr_low_get_control, sizeof (void *),
+};
 
 /* Breakpoint/watchpoint support.  */
 
@@ -172,8 +168,8 @@ i386_supports_z_point_type (char z_type)
 }
 
 static int
-i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		   int size, struct raw_breakpoint *bp)
+i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                   struct raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -181,11 +177,11 @@ i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:
       {
-	enum target_hw_bp_type hw_type
-	  = raw_bkpt_type_to_target_hw_bp_type (type);
+        enum target_hw_bp_type hw_type
+          = raw_bkpt_type_to_target_hw_bp_type (type);
 
-	return x86_dr_insert_watchpoint (&debug_reg_state,
-					 hw_type, addr, size);
+        return x86_dr_insert_watchpoint (&debug_reg_state, hw_type, addr,
+                                         size);
       }
     default:
       /* Unsupported.  */
@@ -194,8 +190,8 @@ i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 }
 
 static int
-i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		   int size, struct raw_breakpoint *bp)
+i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                   struct raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -203,11 +199,11 @@ i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:
       {
-	enum target_hw_bp_type hw_type
-	  = raw_bkpt_type_to_target_hw_bp_type (type);
+        enum target_hw_bp_type hw_type
+          = raw_bkpt_type_to_target_hw_bp_type (type);
 
-	return x86_dr_remove_watchpoint (&debug_reg_state,
-					 hw_type, addr, size);
+        return x86_dr_remove_watchpoint (&debug_reg_state, hw_type, addr,
+                                         size);
       }
     default:
       /* Unsupported.  */
@@ -243,19 +239,17 @@ i386_get_thread_context (windows_thread_info *th)
      the system doesn't support extended registers.  */
   static DWORD extended_registers = CONTEXT_EXTENDED_REGISTERS;
 
- again:
+again:
 #ifdef __x86_64__
   if (windows_process.wow64_process)
-    th->wow64_context.ContextFlags = (CONTEXT_FULL
-				      | CONTEXT_FLOATING_POINT
-				      | CONTEXT_DEBUG_REGISTERS
-				      | extended_registers);
+    th->wow64_context.ContextFlags
+      = (CONTEXT_FULL | CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS
+         | extended_registers);
   else
 #endif
-    th->context.ContextFlags = (CONTEXT_FULL
-				| CONTEXT_FLOATING_POINT
-				| CONTEXT_DEBUG_REGISTERS
-				| extended_registers);
+    th->context.ContextFlags
+      = (CONTEXT_FULL | CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS
+         | extended_registers);
 
   BOOL ret;
 #ifdef __x86_64__
@@ -269,10 +263,10 @@ i386_get_thread_context (windows_thread_info *th)
       DWORD e = GetLastError ();
 
       if (extended_registers && e == ERROR_INVALID_PARAMETER)
-	{
-	  extended_registers = 0;
-	  goto again;
-	}
+        {
+          extended_registers = 0;
+          goto again;
+        }
 
       error ("GetThreadContext failure %ld\n", (long) e);
     }
@@ -289,26 +283,26 @@ i386_prepare_to_resume (windows_thread_info *th)
 
 #ifdef __x86_64__
       if (windows_process.wow64_process)
-	{
-	  th->wow64_context.Dr0 = dr->dr_mirror[0];
-	  th->wow64_context.Dr1 = dr->dr_mirror[1];
-	  th->wow64_context.Dr2 = dr->dr_mirror[2];
-	  th->wow64_context.Dr3 = dr->dr_mirror[3];
-	  /* th->wow64_context.Dr6 = dr->dr_status_mirror;
+        {
+          th->wow64_context.Dr0 = dr->dr_mirror[0];
+          th->wow64_context.Dr1 = dr->dr_mirror[1];
+          th->wow64_context.Dr2 = dr->dr_mirror[2];
+          th->wow64_context.Dr3 = dr->dr_mirror[3];
+          /* th->wow64_context.Dr6 = dr->dr_status_mirror;
 	     FIXME: should we set dr6 also ?? */
-	  th->wow64_context.Dr7 = dr->dr_control_mirror;
-	}
+          th->wow64_context.Dr7 = dr->dr_control_mirror;
+        }
       else
 #endif
-	{
-	  th->context.Dr0 = dr->dr_mirror[0];
-	  th->context.Dr1 = dr->dr_mirror[1];
-	  th->context.Dr2 = dr->dr_mirror[2];
-	  th->context.Dr3 = dr->dr_mirror[3];
-	  /* th->context.Dr6 = dr->dr_status_mirror;
+        {
+          th->context.Dr0 = dr->dr_mirror[0];
+          th->context.Dr1 = dr->dr_mirror[1];
+          th->context.Dr2 = dr->dr_mirror[2];
+          th->context.Dr3 = dr->dr_mirror[3];
+          /* th->context.Dr6 = dr->dr_status_mirror;
 	     FIXME: should we set dr6 also ?? */
-	  th->context.Dr7 = dr->dr_control_mirror;
-	}
+          th->context.Dr7 = dr->dr_control_mirror;
+        }
 
       th->debug_registers_changed = false;
     }
@@ -341,120 +335,80 @@ i386_single_step (windows_thread_info *th)
 #ifdef __x86_64__
 #define context_offset(x) (offsetof (WOW64_CONTEXT, x))
 #else
-#define context_offset(x) ((int)&(((CONTEXT *)NULL)->x))
+#define context_offset(x) ((int) &(((CONTEXT *) NULL)->x))
 #endif
-static const int i386_mappings[] = {
-  context_offset (Eax),
-  context_offset (Ecx),
-  context_offset (Edx),
-  context_offset (Ebx),
-  context_offset (Esp),
-  context_offset (Ebp),
-  context_offset (Esi),
-  context_offset (Edi),
-  context_offset (Eip),
-  context_offset (EFlags),
-  context_offset (SegCs),
-  context_offset (SegSs),
-  context_offset (SegDs),
-  context_offset (SegEs),
-  context_offset (SegFs),
-  context_offset (SegGs),
-  context_offset (FloatSave.RegisterArea[0 * 10]),
-  context_offset (FloatSave.RegisterArea[1 * 10]),
-  context_offset (FloatSave.RegisterArea[2 * 10]),
-  context_offset (FloatSave.RegisterArea[3 * 10]),
-  context_offset (FloatSave.RegisterArea[4 * 10]),
-  context_offset (FloatSave.RegisterArea[5 * 10]),
-  context_offset (FloatSave.RegisterArea[6 * 10]),
-  context_offset (FloatSave.RegisterArea[7 * 10]),
-  context_offset (FloatSave.ControlWord),
-  context_offset (FloatSave.StatusWord),
-  context_offset (FloatSave.TagWord),
-  context_offset (FloatSave.ErrorSelector),
-  context_offset (FloatSave.ErrorOffset),
-  context_offset (FloatSave.DataSelector),
-  context_offset (FloatSave.DataOffset),
-  context_offset (FloatSave.ErrorSelector),
-  /* XMM0-7 */
-  context_offset (ExtendedRegisters[10 * 16]),
-  context_offset (ExtendedRegisters[11 * 16]),
-  context_offset (ExtendedRegisters[12 * 16]),
-  context_offset (ExtendedRegisters[13 * 16]),
-  context_offset (ExtendedRegisters[14 * 16]),
-  context_offset (ExtendedRegisters[15 * 16]),
-  context_offset (ExtendedRegisters[16 * 16]),
-  context_offset (ExtendedRegisters[17 * 16]),
-  /* MXCSR */
-  context_offset (ExtendedRegisters[24])
-};
+static const int i386_mappings[]
+  = { context_offset (Eax), context_offset (Ecx), context_offset (Edx),
+      context_offset (Ebx), context_offset (Esp), context_offset (Ebp),
+      context_offset (Esi), context_offset (Edi), context_offset (Eip),
+      context_offset (EFlags), context_offset (SegCs), context_offset (SegSs),
+      context_offset (SegDs), context_offset (SegEs), context_offset (SegFs),
+      context_offset (SegGs), context_offset (FloatSave.RegisterArea[0 * 10]),
+      context_offset (FloatSave.RegisterArea[1 * 10]),
+      context_offset (FloatSave.RegisterArea[2 * 10]),
+      context_offset (FloatSave.RegisterArea[3 * 10]),
+      context_offset (FloatSave.RegisterArea[4 * 10]),
+      context_offset (FloatSave.RegisterArea[5 * 10]),
+      context_offset (FloatSave.RegisterArea[6 * 10]),
+      context_offset (FloatSave.RegisterArea[7 * 10]),
+      context_offset (FloatSave.ControlWord),
+      context_offset (FloatSave.StatusWord),
+      context_offset (FloatSave.TagWord),
+      context_offset (FloatSave.ErrorSelector),
+      context_offset (FloatSave.ErrorOffset),
+      context_offset (FloatSave.DataSelector),
+      context_offset (FloatSave.DataOffset),
+      context_offset (FloatSave.ErrorSelector),
+      /* XMM0-7 */
+      context_offset (ExtendedRegisters[10 * 16]),
+      context_offset (ExtendedRegisters[11 * 16]),
+      context_offset (ExtendedRegisters[12 * 16]),
+      context_offset (ExtendedRegisters[13 * 16]),
+      context_offset (ExtendedRegisters[14 * 16]),
+      context_offset (ExtendedRegisters[15 * 16]),
+      context_offset (ExtendedRegisters[16 * 16]),
+      context_offset (ExtendedRegisters[17 * 16]),
+      /* MXCSR */
+      context_offset (ExtendedRegisters[24]) };
 #undef context_offset
 
 #ifdef __x86_64__
 
 #define context_offset(x) (offsetof (CONTEXT, x))
-static const int amd64_mappings[] =
-{
-  context_offset (Rax),
-  context_offset (Rbx),
-  context_offset (Rcx),
-  context_offset (Rdx),
-  context_offset (Rsi),
-  context_offset (Rdi),
-  context_offset (Rbp),
-  context_offset (Rsp),
-  context_offset (R8),
-  context_offset (R9),
-  context_offset (R10),
-  context_offset (R11),
-  context_offset (R12),
-  context_offset (R13),
-  context_offset (R14),
-  context_offset (R15),
-  context_offset (Rip),
-  context_offset (EFlags),
-  context_offset (SegCs),
-  context_offset (SegSs),
-  context_offset (SegDs),
-  context_offset (SegEs),
-  context_offset (SegFs),
-  context_offset (SegGs),
-  context_offset (FloatSave.FloatRegisters[0]),
-  context_offset (FloatSave.FloatRegisters[1]),
-  context_offset (FloatSave.FloatRegisters[2]),
-  context_offset (FloatSave.FloatRegisters[3]),
-  context_offset (FloatSave.FloatRegisters[4]),
-  context_offset (FloatSave.FloatRegisters[5]),
-  context_offset (FloatSave.FloatRegisters[6]),
-  context_offset (FloatSave.FloatRegisters[7]),
-  context_offset (FloatSave.ControlWord),
-  context_offset (FloatSave.StatusWord),
-  context_offset (FloatSave.TagWord),
-  context_offset (FloatSave.ErrorSelector),
-  context_offset (FloatSave.ErrorOffset),
-  context_offset (FloatSave.DataSelector),
-  context_offset (FloatSave.DataOffset),
-  context_offset (FloatSave.ErrorSelector)
-  /* XMM0-7 */ ,
-  context_offset (Xmm0),
-  context_offset (Xmm1),
-  context_offset (Xmm2),
-  context_offset (Xmm3),
-  context_offset (Xmm4),
-  context_offset (Xmm5),
-  context_offset (Xmm6),
-  context_offset (Xmm7),
-  context_offset (Xmm8),
-  context_offset (Xmm9),
-  context_offset (Xmm10),
-  context_offset (Xmm11),
-  context_offset (Xmm12),
-  context_offset (Xmm13),
-  context_offset (Xmm14),
-  context_offset (Xmm15),
-  /* MXCSR */
-  context_offset (FloatSave.MxCsr)
-};
+static const int amd64_mappings[]
+  = { context_offset (Rax), context_offset (Rbx), context_offset (Rcx),
+      context_offset (Rdx), context_offset (Rsi), context_offset (Rdi),
+      context_offset (Rbp), context_offset (Rsp), context_offset (R8),
+      context_offset (R9), context_offset (R10), context_offset (R11),
+      context_offset (R12), context_offset (R13), context_offset (R14),
+      context_offset (R15), context_offset (Rip), context_offset (EFlags),
+      context_offset (SegCs), context_offset (SegSs), context_offset (SegDs),
+      context_offset (SegEs), context_offset (SegFs), context_offset (SegGs),
+      context_offset (FloatSave.FloatRegisters[0]),
+      context_offset (FloatSave.FloatRegisters[1]),
+      context_offset (FloatSave.FloatRegisters[2]),
+      context_offset (FloatSave.FloatRegisters[3]),
+      context_offset (FloatSave.FloatRegisters[4]),
+      context_offset (FloatSave.FloatRegisters[5]),
+      context_offset (FloatSave.FloatRegisters[6]),
+      context_offset (FloatSave.FloatRegisters[7]),
+      context_offset (FloatSave.ControlWord),
+      context_offset (FloatSave.StatusWord),
+      context_offset (FloatSave.TagWord),
+      context_offset (FloatSave.ErrorSelector),
+      context_offset (FloatSave.ErrorOffset),
+      context_offset (FloatSave.DataSelector),
+      context_offset (FloatSave.DataOffset),
+      context_offset (FloatSave.ErrorSelector)
+      /* XMM0-7 */,
+      context_offset (Xmm0), context_offset (Xmm1), context_offset (Xmm2),
+      context_offset (Xmm3), context_offset (Xmm4), context_offset (Xmm5),
+      context_offset (Xmm6), context_offset (Xmm7), context_offset (Xmm8),
+      context_offset (Xmm9), context_offset (Xmm10), context_offset (Xmm11),
+      context_offset (Xmm12), context_offset (Xmm13), context_offset (Xmm14),
+      context_offset (Xmm15),
+      /* MXCSR */
+      context_offset (FloatSave.MxCsr) };
 #undef context_offset
 
 #endif /* __x86_64__ */
@@ -462,7 +416,7 @@ static const int amd64_mappings[] =
 /* Fetch register from gdbserver regcache data.  */
 static void
 i386_fetch_inferior_register (struct regcache *regcache,
-			      windows_thread_info *th, int r)
+                              windows_thread_info *th, int r)
 {
   const int *mappings;
 #ifdef __x86_64__
@@ -498,7 +452,7 @@ i386_fetch_inferior_register (struct regcache *regcache,
 /* Store a new register value into the thread context of TH.  */
 static void
 i386_store_inferior_register (struct regcache *regcache,
-			      windows_thread_info *th, int r)
+                              windows_thread_info *th, int r)
 {
   const int *mappings;
 #ifdef __x86_64__
@@ -528,8 +482,8 @@ i386_arch_setup (void)
   struct target_desc *tdesc;
 
 #ifdef __x86_64__
-  tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
-					   false, false);
+  tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false, false,
+                                           false);
   init_target_desc (tdesc, amd64_expedite_regs);
   win32_tdesc = tdesc;
 #endif
@@ -602,24 +556,22 @@ i386_win32_set_pc (struct regcache *regcache, CORE_ADDR pc)
     }
 }
 
-struct win32_target_ops the_low_target = {
-  i386_arch_setup,
-  i386_win32_num_regs,
-  i386_initial_stuff,
-  i386_get_thread_context,
-  i386_prepare_to_resume,
-  i386_thread_added,
-  i386_fetch_inferior_register,
-  i386_store_inferior_register,
-  i386_single_step,
-  &i386_win32_breakpoint,
-  i386_win32_breakpoint_len,
-  1,
-  i386_win32_get_pc,
-  i386_win32_set_pc,
-  i386_supports_z_point_type,
-  i386_insert_point,
-  i386_remove_point,
-  x86_stopped_by_watchpoint,
-  x86_stopped_data_address
-};
+struct win32_target_ops the_low_target = { i386_arch_setup,
+                                           i386_win32_num_regs,
+                                           i386_initial_stuff,
+                                           i386_get_thread_context,
+                                           i386_prepare_to_resume,
+                                           i386_thread_added,
+                                           i386_fetch_inferior_register,
+                                           i386_store_inferior_register,
+                                           i386_single_step,
+                                           &i386_win32_breakpoint,
+                                           i386_win32_breakpoint_len,
+                                           1,
+                                           i386_win32_get_pc,
+                                           i386_win32_set_pc,
+                                           i386_supports_z_point_type,
+                                           i386_insert_point,
+                                           i386_remove_point,
+                                           x86_stopped_by_watchpoint,
+                                           x86_stopped_data_address };

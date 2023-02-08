@@ -54,7 +54,7 @@ get_thread_regcache (struct thread_info *thread, int fetch)
       switch_to_thread (thread);
       /* Invalidate all registers, to prevent stale left-overs.  */
       memset (regcache->register_status, REG_UNAVAILABLE,
-	      regcache->tdesc->reg_defs.size ());
+              regcache->tdesc->reg_defs.size ());
       fetch_inferior_registers (regcache, -1);
       regcache->registers_valid = 1;
     }
@@ -115,8 +115,7 @@ regcache_invalidate (void)
 
 struct regcache *
 init_register_cache (struct regcache *regcache,
-		     const struct target_desc *tdesc,
-		     unsigned char *regbuf)
+                     const struct target_desc *tdesc, unsigned char *regbuf)
 {
   if (regbuf == NULL)
     {
@@ -127,12 +126,12 @@ init_register_cache (struct regcache *regcache,
 	 garbage.  */
       regcache->tdesc = tdesc;
       regcache->registers
-	= (unsigned char *) xcalloc (1, tdesc->registers_size);
+        = (unsigned char *) xcalloc (1, tdesc->registers_size);
       regcache->registers_owned = 1;
       regcache->register_status
-	= (unsigned char *) xmalloc (tdesc->reg_defs.size ());
+        = (unsigned char *) xmalloc (tdesc->reg_defs.size ());
       memset ((void *) regcache->register_status, REG_UNAVAILABLE,
-	      tdesc->reg_defs.size ());
+              tdesc->reg_defs.size ());
 #else
       gdb_assert_not_reached ("can't allocate memory from the heap");
 #endif
@@ -170,7 +169,7 @@ free_register_cache (struct regcache *regcache)
   if (regcache)
     {
       if (regcache->registers_owned)
-	free (regcache->registers);
+        free (regcache->registers);
       free (regcache->register_status);
       delete regcache;
     }
@@ -189,7 +188,7 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
 #ifndef IN_PROCESS_AGENT
   if (dst->register_status != NULL && src->register_status != NULL)
     memcpy (dst->register_status, src->register_status,
-	    src->tdesc->reg_defs.size ());
+            src->tdesc->reg_defs.size ());
 #endif
   dst->registers_valid = src->registers_valid;
 }
@@ -216,15 +215,15 @@ registers_to_string (struct regcache *regcache, char *buf)
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
     {
       if (regcache->register_status[i] == REG_VALID)
-	{
-	  bin2hex (registers, buf, register_size (tdesc, i));
-	  buf += register_size (tdesc, i) * 2;
-	}
+        {
+          bin2hex (registers, buf, register_size (tdesc, i));
+          buf += register_size (tdesc, i) * 2;
+        }
       else
-	{
-	  memset (buf, 'x', register_size (tdesc, i) * 2);
-	  buf += register_size (tdesc, i) * 2;
-	}
+        {
+          memset (buf, 'x', register_size (tdesc, i) * 2);
+          buf += register_size (tdesc, i) * 2;
+        }
       registers += register_size (tdesc, i);
     }
   *buf = '\0';
@@ -240,9 +239,9 @@ registers_from_string (struct regcache *regcache, char *buf)
   if (len != tdesc->registers_size * 2)
     {
       warning ("Wrong sized register packet (expected %d bytes, got %d)",
-	       2 * tdesc->registers_size, len);
+               2 * tdesc->registers_size, len);
       if (len > tdesc->registers_size * 2)
-	len = tdesc->registers_size * 2;
+        len = tdesc->registers_size * 2;
     }
   hex2bin (buf, registers, len / 2);
 }
@@ -255,7 +254,7 @@ find_regno_no_throw (const struct target_desc *tdesc, const char *name)
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
     {
       if (strcmp (name, find_register_by_number (tdesc, i).name) == 0)
-	return i;
+        return i;
     }
   return {};
 }
@@ -316,7 +315,7 @@ static unsigned char *
 register_data (const struct regcache *regcache, int n)
 {
   return (regcache->registers
-	  + find_register_by_number (regcache->tdesc, n).offset / 8);
+          + find_register_by_number (regcache->tdesc, n).offset / 8);
 }
 
 void
@@ -335,7 +334,7 @@ regcache::raw_supply (int n, const void *buf)
       memcpy (register_data (this, n), buf, register_size (tdesc, n));
 #ifndef IN_PROCESS_AGENT
       if (register_status != NULL)
-	register_status[n] = REG_VALID;
+        register_status[n] = REG_VALID;
 #endif
     }
   else
@@ -343,7 +342,7 @@ regcache::raw_supply (int n, const void *buf)
       memset (register_data (this, n), 0, register_size (tdesc, n));
 #ifndef IN_PROCESS_AGENT
       if (register_status != NULL)
-	register_status[n] = REG_UNAVAILABLE;
+        register_status[n] = REG_UNAVAILABLE;
 #endif
     }
 }
@@ -353,8 +352,7 @@ regcache::raw_supply (int n, const void *buf)
 void
 supply_register_zeroed (struct regcache *regcache, int n)
 {
-  memset (register_data (regcache, n), 0,
-	  register_size (regcache->tdesc, n));
+  memset (register_data (regcache, n), 0, register_size (regcache->tdesc, n));
 #ifndef IN_PROCESS_AGENT
   if (regcache->register_status != NULL)
     regcache->register_status[n] = REG_VALID;
@@ -366,8 +364,7 @@ supply_register_zeroed (struct regcache *regcache, int n)
 /* Supply register called NAME with value zero to REGCACHE.  */
 
 void
-supply_register_by_name_zeroed (struct regcache *regcache,
-				const char *name)
+supply_register_by_name_zeroed (struct regcache *regcache, const char *name)
 {
   supply_register_zeroed (regcache, find_regno (regcache->tdesc, name));
 }
@@ -388,10 +385,10 @@ supply_regblock (struct regcache *regcache, const void *buf)
       memcpy (regcache->registers, buf, tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
       {
-	int i;
+        int i;
 
-	for (i = 0; i < tdesc->reg_defs.size (); i++)
-	  regcache->register_status[i] = REG_VALID;
+        for (i = 0; i < tdesc->reg_defs.size (); i++)
+          regcache->register_status[i] = REG_VALID;
       }
 #endif
     }
@@ -402,10 +399,10 @@ supply_regblock (struct regcache *regcache, const void *buf)
       memset (regcache->registers, 0, tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
       {
-	int i;
+        int i;
 
-	for (i = 0; i < tdesc->reg_defs.size (); i++)
-	  regcache->register_status[i] = REG_UNAVAILABLE;
+        for (i = 0; i < tdesc->reg_defs.size (); i++)
+          regcache->register_status[i] = REG_UNAVAILABLE;
       }
 #endif
     }
@@ -414,8 +411,8 @@ supply_regblock (struct regcache *regcache, const void *buf)
 #ifndef IN_PROCESS_AGENT
 
 void
-supply_register_by_name (struct regcache *regcache,
-			 const char *name, const void *buf)
+supply_register_by_name (struct regcache *regcache, const char *name,
+                         const void *buf)
 {
   supply_register (regcache, find_regno (regcache->tdesc, name), buf);
 }
@@ -438,7 +435,7 @@ regcache::raw_collect (int n, void *buf) const
 
 enum register_status
 regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
-			    ULONGEST *val)
+                            ULONGEST *val)
 {
   int size;
 
@@ -447,9 +444,9 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
   size = register_size (regcache->tdesc, regnum);
 
   if (size > (int) sizeof (ULONGEST))
-    error (_("That operation is not available on integers of more than"
-	    "%d bytes."),
-	  (int) sizeof (ULONGEST));
+    error (_ ("That operation is not available on integers of more than"
+              "%d bytes."),
+           (int) sizeof (ULONGEST));
 
   *val = 0;
   collect_register (regcache, regnum, val);
@@ -462,23 +459,22 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
 /* See regcache.h.  */
 
 ULONGEST
-regcache_raw_get_unsigned_by_name (struct regcache *regcache,
-				   const char *name)
+regcache_raw_get_unsigned_by_name (struct regcache *regcache, const char *name)
 {
   return regcache_raw_get_unsigned (regcache,
-				    find_regno (regcache->tdesc, name));
+                                    find_regno (regcache->tdesc, name));
 }
 
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
 {
   bin2hex (register_data (regcache, n), buf,
-	   register_size (regcache->tdesc, n));
+           register_size (regcache->tdesc, n));
 }
 
 void
-collect_register_by_name (struct regcache *regcache,
-			  const char *name, void *buf)
+collect_register_by_name (struct regcache *regcache, const char *name,
+                          void *buf)
 {
   collect_register (regcache, find_regno (regcache->tdesc, name), buf);
 }

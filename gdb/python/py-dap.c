@@ -37,18 +37,11 @@ public:
 
   void init (bool top_level) override;
 
-  void suspend () override
-  {
-  }
+  void suspend () override {}
 
-  void resume () override
-  {
-  }
+  void resume () override {}
 
-  void exec (const char *command) override
-  {
-    /* Just ignore it.  */
-  }
+  void exec (const char *command) override { /* Just ignore it.  */ }
 
   void set_logging (ui_file_up logfile, bool logging_redirect,
 		    bool debug_redirect) override
@@ -56,10 +49,7 @@ public:
     /* Just ignore it.  */
   }
 
-  ui_out *interp_ui_out () override
-  {
-    return m_ui_out.get ();
-  }
+  ui_out *interp_ui_out () override { return m_ui_out.get (); }
 
 private:
 
@@ -88,11 +78,11 @@ dap_interp::init (bool top_level)
 }
 
 void _initialize_py_interp ();
+
 void
 _initialize_py_interp ()
 {
-  interp_factory_register ("dap", [] (const char *name) -> interp *
-    {
-      return new dap_interp (name);
-    });
+  interp_factory_register ("dap", [] (const char *name) -> interp * {
+    return new dap_interp (name);
+  });
 }

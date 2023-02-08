@@ -60,8 +60,8 @@ supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
    register array. If REGNO is -1 do it for all registers.  */
 
 void
-fill_gregset (const struct regcache *regcache,
-	      gdb_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache, gdb_gregset_t *gregsetp,
+	      int regno)
 {
   const struct regset *regset = ppc_fbsd_gregset (sizeof (long));
 
@@ -74,25 +74,24 @@ fill_gregset (const struct regcache *regcache,
    in *FPREGSETP.  */
 
 void
-supply_fpregset (struct regcache *regcache, const gdb_fpregset_t * fpregsetp)
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
   const struct regset *regset = ppc_fbsd_fpregset ();
 
-  ppc_supply_fpregset (regset, regcache, -1,
-		       fpregsetp, sizeof (*fpregsetp));
+  ppc_supply_fpregset (regset, regcache, -1, fpregsetp, sizeof (*fpregsetp));
 }
 
 /* Fill register REGNO in *FGREGSETP with the value in GDB's
    register array. If REGNO is -1 do it for all registers.  */
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       gdb_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache, gdb_fpregset_t *fpregsetp,
+	       int regno)
 {
   const struct regset *regset = ppc_fbsd_fpregset ();
 
-  ppc_collect_fpregset (regset, regcache, regno,
-			fpregsetp, sizeof (*fpregsetp));
+  ppc_collect_fpregset (regset, regcache, regno, fpregsetp,
+			sizeof (*fpregsetp));
 }
 
 /* Returns true if PT_GETFPREGS fetches this register.  */
@@ -130,7 +129,7 @@ ppc_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
   pid_t pid = regcache->ptid ().lwp ();
 
   if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
   supply_gregset (regcache, &regs);
 
@@ -140,7 +139,7 @@ ppc_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
       gdb_fpregset_t fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get FP registers"));
+	perror_with_name (_ ("Couldn't get FP registers"));
 
       ppc_supply_fpregset (fpregset, regcache, regno, &fpregs, sizeof fpregs);
     }
@@ -156,24 +155,24 @@ ppc_fbsd_nat_target::store_registers (struct regcache *regcache, int regno)
   pid_t pid = regcache->ptid ().lwp ();
 
   if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
   fill_gregset (regcache, &regs, regno);
 
   if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't write registers"));
+    perror_with_name (_ ("Couldn't write registers"));
 
   if (regno == -1 || getfpregs_supplies (regcache->arch (), regno))
     {
       gdb_fpregset_t fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get FP registers"));
+	perror_with_name (_ ("Couldn't get FP registers"));
 
       fill_fpregset (regcache, &fpregs, regno);
 
       if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't set FP registers"));
+	perror_with_name (_ ("Couldn't set FP registers"));
     }
 }
 
@@ -202,6 +201,7 @@ ppcfbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 void _initialize_ppcfbsd_nat ();
+
 void
 _initialize_ppcfbsd_nat ()
 {

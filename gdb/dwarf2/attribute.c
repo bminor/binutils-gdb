@@ -67,14 +67,10 @@ bool
 attribute::form_is_string () const
 {
   return (form == DW_FORM_strp || form == DW_FORM_line_strp
-	  || form == DW_FORM_string
-	  || form == DW_FORM_strx
-	  || form == DW_FORM_strx1
-	  || form == DW_FORM_strx2
-	  || form == DW_FORM_strx3
-	  || form == DW_FORM_strx4
-	  || form == DW_FORM_GNU_str_index
-	  || form == DW_FORM_GNU_strp_alt);
+	  || form == DW_FORM_string || form == DW_FORM_strx
+	  || form == DW_FORM_strx1 || form == DW_FORM_strx2
+	  || form == DW_FORM_strx3 || form == DW_FORM_strx4
+	  || form == DW_FORM_GNU_str_index || form == DW_FORM_GNU_strp_alt);
 }
 
 /* See attribute.h.  */
@@ -93,12 +89,9 @@ attribute::as_string () const
 bool
 attribute::form_is_block () const
 {
-  return (form == DW_FORM_block1
-	  || form == DW_FORM_block2
-	  || form == DW_FORM_block4
-	  || form == DW_FORM_block
-	  || form == DW_FORM_exprloc
-	  || form == DW_FORM_data16);
+  return (form == DW_FORM_block1 || form == DW_FORM_block2
+	  || form == DW_FORM_block4 || form == DW_FORM_block
+	  || form == DW_FORM_exprloc || form == DW_FORM_data16);
 }
 
 /* See attribute.h.  */
@@ -106,10 +99,8 @@ attribute::form_is_block () const
 bool
 attribute::form_is_section_offset () const
 {
-  return (form == DW_FORM_data4
-	  || form == DW_FORM_data8
-	  || form == DW_FORM_sec_offset
-	  || form == DW_FORM_loclistx);
+  return (form == DW_FORM_data4 || form == DW_FORM_data8
+	  || form == DW_FORM_sec_offset || form == DW_FORM_loclistx);
 }
 
 /* See attribute.h.  */
@@ -137,7 +128,7 @@ attribute::form_is_constant () const
 void
 attribute::get_ref_die_offset_complaint () const
 {
-  complaint (_("unsupported die ref attribute form: '%s'"),
+  complaint (_ ("unsupported die ref attribute form: '%s'"),
 	     dwarf_form_name (form));
 }
 
@@ -148,16 +139,14 @@ attribute::constant_value (int default_value) const
 {
   if (form == DW_FORM_sdata || form == DW_FORM_implicit_const)
     return u.snd;
-  else if (form == DW_FORM_udata
-	   || form == DW_FORM_data1
-	   || form == DW_FORM_data2
-	   || form == DW_FORM_data4
+  else if (form == DW_FORM_udata || form == DW_FORM_data1
+	   || form == DW_FORM_data2 || form == DW_FORM_data4
 	   || form == DW_FORM_data8)
     return u.unsnd;
   else
     {
       /* For DW_FORM_data16 see attribute::form_is_constant.  */
-      complaint (_("Attribute value is not a constant (%s)"),
+      complaint (_ ("Attribute value is not a constant (%s)"),
 		 dwarf_form_name (form));
       return default_value;
     }
@@ -168,22 +157,14 @@ attribute::constant_value (int default_value) const
 bool
 attribute::form_is_unsigned () const
 {
-  return (form == DW_FORM_ref_addr
-	  || form == DW_FORM_GNU_ref_alt
-	  || form == DW_FORM_data2
-	  || form == DW_FORM_data4
-	  || form == DW_FORM_data8
-	  || form == DW_FORM_sec_offset
-	  || form == DW_FORM_data1
-	  || form == DW_FORM_flag
-	  || form == DW_FORM_flag_present
-	  || form == DW_FORM_udata
-	  || form == DW_FORM_rnglistx
-	  || form == DW_FORM_loclistx
-	  || form == DW_FORM_ref1
-	  || form == DW_FORM_ref2
-	  || form == DW_FORM_ref4
-	  || form == DW_FORM_ref8
+  return (form == DW_FORM_ref_addr || form == DW_FORM_GNU_ref_alt
+	  || form == DW_FORM_data2 || form == DW_FORM_data4
+	  || form == DW_FORM_data8 || form == DW_FORM_sec_offset
+	  || form == DW_FORM_data1 || form == DW_FORM_flag
+	  || form == DW_FORM_flag_present || form == DW_FORM_udata
+	  || form == DW_FORM_rnglistx || form == DW_FORM_loclistx
+	  || form == DW_FORM_ref1 || form == DW_FORM_ref2
+	  || form == DW_FORM_ref4 || form == DW_FORM_ref8
 	  || form == DW_FORM_ref_udata);
 }
 
@@ -200,16 +181,11 @@ attribute::form_is_signed () const
 bool
 attribute::form_requires_reprocessing () const
 {
-  return (form == DW_FORM_strx
-	  || form == DW_FORM_strx1
-	  || form == DW_FORM_strx2
-	  || form == DW_FORM_strx3
-	  || form == DW_FORM_strx4
-	  || form == DW_FORM_GNU_str_index
-	  || form == DW_FORM_addrx
-	  || form == DW_FORM_GNU_addr_index
-	  || form == DW_FORM_rnglistx
-	  || form == DW_FORM_loclistx);
+  return (form == DW_FORM_strx || form == DW_FORM_strx1
+	  || form == DW_FORM_strx2 || form == DW_FORM_strx3
+	  || form == DW_FORM_strx4 || form == DW_FORM_GNU_str_index
+	  || form == DW_FORM_addrx || form == DW_FORM_GNU_addr_index
+	  || form == DW_FORM_rnglistx || form == DW_FORM_loclistx);
 }
 
 /* See attribute.h.  */
@@ -230,7 +206,7 @@ attribute::defaulted () const
   /* If the form was not constant, we already complained in
      constant_value, so there's no need to complain again.  */
   if (form_is_constant ())
-    complaint (_("unrecognized DW_AT_defaulted value (%s)"),
+    complaint (_ ("unrecognized DW_AT_defaulted value (%s)"),
 	       plongest (value));
   return DW_DEFAULTED_no;
 }
@@ -253,7 +229,7 @@ attribute::as_virtuality () const
   /* If the form was not constant, we already complained in
      constant_value, so there's no need to complain again.  */
   if (form_is_constant ())
-    complaint (_("unrecognized DW_AT_virtuality value (%s)"),
+    complaint (_ ("unrecognized DW_AT_virtuality value (%s)"),
 	       plongest (value));
   return DW_VIRTUALITY_none;
 }

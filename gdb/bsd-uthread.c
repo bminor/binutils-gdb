@@ -33,16 +33,13 @@
 
 #include "bsd-uthread.h"
 
-static const target_info bsd_uthread_target_info = {
-  "bsd-uthreads",
-  N_("BSD user-level threads"),
-  N_("BSD user-level threads")
-};
+static const target_info bsd_uthread_target_info
+  = { "bsd-uthreads", N_ ("BSD user-level threads"),
+      N_ ("BSD user-level threads") };
 
 struct bsd_uthread_target final : public target_ops
 {
-  const target_info &info () const override
-  { return bsd_uthread_target_info; }
+  const target_info &info () const override { return bsd_uthread_target_info; }
 
   strata stratum () const override { return thread_stratum; }
 
@@ -66,17 +63,16 @@ struct bsd_uthread_target final : public target_ops
 };
 
 static bsd_uthread_target bsd_uthread_ops;
-
 
 /* Architecture-specific operations.  */
 
 struct bsd_uthread_ops
 {
   /* Supply registers for an inactive thread to a register cache.  */
-  void (*supply_uthread)(struct regcache *, int, CORE_ADDR) = nullptr;
+  void (*supply_uthread) (struct regcache *, int, CORE_ADDR) = nullptr;
 
   /* Collect registers for an inactive thread from a register cache.  */
-  void (*collect_uthread)(const struct regcache *, int, CORE_ADDR) = nullptr;
+  void (*collect_uthread) (const struct regcache *, int, CORE_ADDR) = nullptr;
 };
 
 /* Per-architecture data key.  */
@@ -96,8 +92,8 @@ get_bsd_uthread (struct gdbarch *gdbarch)
 
 void
 bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
-				void (*supply_uthread) (struct regcache *,
-							int, CORE_ADDR))
+				void (*supply_uthread) (struct regcache *, int,
+							CORE_ADDR))
 {
   struct bsd_uthread_ops *ops = get_bsd_uthread (gdbarch);
 
@@ -108,9 +104,9 @@ bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
    architecture GDBARCH to SUPPLY_UTHREAD.  */
 
 void
-bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
-			 void (*collect_uthread) (const struct regcache *,
-						  int, CORE_ADDR))
+bsd_uthread_set_collect_uthread (
+  struct gdbarch *gdbarch,
+  void (*collect_uthread) (const struct regcache *, int, CORE_ADDR))
 {
   struct bsd_uthread_ops *ops = get_bsd_uthread (gdbarch);
 
@@ -118,7 +114,7 @@ bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
 }
 
 /* Magic number to help recognize a valid thread structure.  */
-#define BSD_UTHREAD_PTHREAD_MAGIC	0xd09ba115
+#define BSD_UTHREAD_PTHREAD_MAGIC 0xd09ba115
 
 /* Check whether the thread structure at ADDR is valid.  */
 
@@ -129,12 +125,12 @@ bsd_uthread_check_magic (CORE_ADDR addr)
   ULONGEST magic = read_memory_unsigned_integer (addr, 4, byte_order);
 
   if (magic != BSD_UTHREAD_PTHREAD_MAGIC)
-    error (_("Bad magic"));
+    error (_ ("Bad magic"));
 }
 
 /* Thread states.  */
-#define BSD_UTHREAD_PS_RUNNING	0
-#define BSD_UTHREAD_PS_DEAD	18
+#define BSD_UTHREAD_PS_RUNNING 0
+#define BSD_UTHREAD_PS_DEAD 18
 
 /* Address of the pointer to the thread structure for the running
    thread.  */
@@ -205,28 +201,28 @@ bsd_uthread_activate (struct objfile *objfile)
   if (!ops->supply_uthread)
     return 0;
 
-  bsd_uthread_thread_run_addr =
-    bsd_uthread_lookup_address ("_thread_run", objfile);
+  bsd_uthread_thread_run_addr
+    = bsd_uthread_lookup_address ("_thread_run", objfile);
   if (bsd_uthread_thread_run_addr == 0)
     return 0;
 
-  bsd_uthread_thread_list_addr =
-    bsd_uthread_lookup_address ("_thread_list", objfile);
+  bsd_uthread_thread_list_addr
+    = bsd_uthread_lookup_address ("_thread_list", objfile);
   if (bsd_uthread_thread_list_addr == 0)
     return 0;
 
-  bsd_uthread_thread_state_offset =
-    bsd_uthread_lookup_offset ("_thread_state_offset", objfile);
+  bsd_uthread_thread_state_offset
+    = bsd_uthread_lookup_offset ("_thread_state_offset", objfile);
   if (bsd_uthread_thread_state_offset == 0)
     return 0;
 
-  bsd_uthread_thread_next_offset =
-    bsd_uthread_lookup_offset ("_thread_next_offset", objfile);
+  bsd_uthread_thread_next_offset
+    = bsd_uthread_lookup_offset ("_thread_next_offset", objfile);
   if (bsd_uthread_thread_next_offset == 0)
     return 0;
 
-  bsd_uthread_thread_ctx_offset =
-    bsd_uthread_lookup_offset ("_thread_ctx_offset", objfile);
+  bsd_uthread_thread_ctx_offset
+    = bsd_uthread_lookup_offset ("_thread_ctx_offset", objfile);
 
   current_inferior ()->push_target (&bsd_uthread_ops);
   bsd_uthread_active = 1;
@@ -266,17 +262,15 @@ bsd_uthread_inferior_created (inferior *inf)
 }
 
 /* Likely candidates for the threads library.  */
-static const char * const bsd_uthread_solib_names[] =
-{
-  "/usr/lib/libc_r.so",		/* FreeBSD */
-  "/usr/lib/libpthread.so",	/* OpenBSD */
-  NULL
-};
+static const char *const bsd_uthread_solib_names[]
+  = { "/usr/lib/libc_r.so",	/* FreeBSD */
+      "/usr/lib/libpthread.so", /* OpenBSD */
+      NULL };
 
 static void
 bsd_uthread_solib_loaded (struct so_list *so)
 {
-  const char * const *names = bsd_uthread_solib_names;
+  const char *const *names = bsd_uthread_solib_names;
 
   for (names = bsd_uthread_solib_names; *names; names++)
     {
@@ -410,8 +404,8 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
   /* If INFERIOR_PTID doesn't have a tid member yet, and we now have a
      ptid with tid set, then ptid is still the initial thread of
      the process.  Notify GDB core about it.  */
-  if (inferior_ptid.tid () == 0
-      && ptid.tid () != 0 && !in_thread_list (beneath, ptid))
+  if (inferior_ptid.tid () == 0 && ptid.tid () != 0
+      && !in_thread_list (beneath, ptid))
     thread_change_ptid (beneath, inferior_ptid, ptid);
 
   /* Don't let the core see a ptid without a corresponding thread.  */
@@ -483,29 +477,11 @@ bsd_uthread_target::update_thread_list ()
 }
 
 /* Possible states a thread can be in.  */
-static const char * const bsd_uthread_state[] =
-{
-  "RUNNING",
-  "SIGTHREAD",
-  "MUTEX_WAIT",
-  "COND_WAIT",
-  "FDLR_WAIT",
-  "FDLW_WAIT",
-  "FDR_WAIT",
-  "FDW_WAIT",
-  "FILE_WAIT",
-  "POLL_WAIT",
-  "SELECT_WAIT",
-  "SLEEP_WAIT",
-  "WAIT_WAIT",
-  "SIGSUSPEND",
-  "SIGWAIT",
-  "SPINBLOCK",
-  "JOIN",
-  "SUSPENDED",
-  "DEAD",
-  "DEADLOCK"
-};
+static const char *const bsd_uthread_state[]
+  = { "RUNNING",     "SIGTHREAD",  "MUTEX_WAIT", "COND_WAIT",  "FDLR_WAIT",
+      "FDLW_WAIT",   "FDR_WAIT",   "FDW_WAIT",	 "FILE_WAIT",  "POLL_WAIT",
+      "SELECT_WAIT", "SLEEP_WAIT", "WAIT_WAIT",	 "SIGSUSPEND", "SIGWAIT",
+      "SPINBLOCK",   "JOIN",	   "SUSPENDED",	 "DEAD",       "DEADLOCK" };
 
 /* Return a string describing th state of the thread specified by
    INFO.  */
@@ -533,14 +509,14 @@ std::string
 bsd_uthread_target::pid_to_str (ptid_t ptid)
 {
   if (ptid.tid () != 0)
-    return string_printf ("process %d, thread 0x%s",
-			  ptid.pid (),
+    return string_printf ("process %d, thread 0x%s", ptid.pid (),
 			  phex_nz (ptid.tid (), sizeof (ULONGEST)));
 
   return normal_pid_to_str (ptid);
 }
 
 void _initialize_bsd_uthread ();
+
 void
 _initialize_bsd_uthread ()
 {

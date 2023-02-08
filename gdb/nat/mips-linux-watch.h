@@ -27,10 +27,11 @@
    have hardware watchpoint-related structures.  Define them below.  */
 
 #ifndef PTRACE_GET_WATCH_REGS
-#  define PTRACE_GET_WATCH_REGS	0xd0
-#  define PTRACE_SET_WATCH_REGS	0xd1
+#define PTRACE_GET_WATCH_REGS 0xd0
+#define PTRACE_SET_WATCH_REGS 0xd1
 
-enum pt_watch_style {
+enum pt_watch_style
+{
   pt_watch_style_mips32,
   pt_watch_style_mips64
 };
@@ -67,6 +68,7 @@ struct mips64_watch_regs
 struct pt_watch_regs
 {
   enum pt_watch_style style;
+
   union
   {
     struct mips32_watch_regs mips32;
@@ -106,8 +108,8 @@ void mips_linux_watch_set_watchlo (struct pt_watch_regs *regs, int n,
 uint32_t mips_linux_watch_get_watchhi (struct pt_watch_regs *regs, int n);
 void mips_linux_watch_set_watchhi (struct pt_watch_regs *regs, int n,
 				   uint16_t value);
-int mips_linux_watch_try_one_watch (struct pt_watch_regs *regs,
-				    CORE_ADDR addr, int len, uint32_t irw);
+int mips_linux_watch_try_one_watch (struct pt_watch_regs *regs, CORE_ADDR addr,
+				    int len, uint32_t irw);
 void mips_linux_watch_populate_regs (struct mips_watchpoint *current_watches,
 				     struct pt_watch_regs *regs);
 uint32_t mips_linux_watch_type_to_irw (enum target_hw_bp_type type);

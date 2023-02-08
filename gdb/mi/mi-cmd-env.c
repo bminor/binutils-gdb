@@ -51,7 +51,7 @@ env_execute_cli_command (const char *cmd, const char *args)
 	run = xstrprintf ("%s %s", cmd, args);
       else
 	run.reset (xstrdup (cmd));
-      execute_command ( /*ui */ run.get (), 0 /*from_tty */ );
+      execute_command (/*ui */ run.get (), 0 /*from_tty */);
     }
 }
 
@@ -63,11 +63,11 @@ mi_cmd_env_pwd (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
 
   if (argc > 0)
-    error (_("-environment-pwd: No arguments allowed"));
-	  
+    error (_ ("-environment-pwd: No arguments allowed"));
+
   gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
   if (cwd == NULL)
-    error (_("-environment-pwd: error finding name of working directory: %s"),
+    error (_ ("-environment-pwd: error finding name of working directory: %s"),
 	   safe_strerror (errno));
 
   uiout->field_string ("cwd", cwd.get ());
@@ -79,8 +79,8 @@ void
 mi_cmd_env_cd (const char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
-    error (_("-environment-cd: Usage DIRECTORY"));
-	  
+    error (_ ("-environment-cd: Usage DIRECTORY"));
+
   env_execute_cli_command ("cd", argv[0]);
 }
 
@@ -106,22 +106,19 @@ mi_cmd_env_path (const char *command, char **argv, int argc)
   int oind = 0;
   int i;
   char *oarg;
+
   enum opt
-    {
-      RESET_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"r", RESET_OPT, 0},
-    { 0, 0, 0 }
+    RESET_OPT
   };
+  static const struct mi_opt opts[] = { { "r", RESET_OPT, 0 }, { 0, 0, 0 } };
 
   dont_repeat ();
 
   while (1)
     {
-      int opt = mi_getopt ("-environment-path", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-environment-path", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -171,22 +168,19 @@ mi_cmd_env_dir (const char *command, char **argv, int argc)
   int oind = 0;
   int reset = 0;
   char *oarg;
+
   enum opt
-    {
-      RESET_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"r", RESET_OPT, 0},
-    { 0, 0, 0 }
+    RESET_OPT
   };
+  static const struct mi_opt opts[] = { { "r", RESET_OPT, 0 }, { 0, 0, 0 } };
 
   dont_repeat ();
 
   while (1)
     {
-      int opt = mi_getopt ("-environment-directory", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-environment-directory", argc, argv, opts, &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -229,8 +223,8 @@ mi_cmd_inferior_tty_set (const char *command, char **argv, int argc)
 void
 mi_cmd_inferior_tty_show (const char *command, char **argv, int argc)
 {
-  if ( !mi_valid_noargs ("-inferior-tty-show", argc, argv))
-    error (_("-inferior-tty-show: Usage: No args"));
+  if (!mi_valid_noargs ("-inferior-tty-show", argc, argv))
+    error (_ ("-inferior-tty-show: Usage: No args"));
 
   const std::string &inferior_tty = current_inferior ()->tty ();
   if (!inferior_tty.empty ())
@@ -238,7 +232,8 @@ mi_cmd_inferior_tty_show (const char *command, char **argv, int argc)
 }
 
 void _initialize_mi_cmd_env ();
-void 
+
+void
 _initialize_mi_cmd_env ()
 {
   const char *env;

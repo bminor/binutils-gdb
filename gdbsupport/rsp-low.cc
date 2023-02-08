@@ -78,8 +78,8 @@ pack_hex_byte (char *pkt, int byte)
 /* See rsp-low.h.  */
 
 const char *
-unpack_varlen_hex (const char *buff,	/* packet to parse */
-		   ULONGEST *result)
+unpack_varlen_hex (const char *buff, /* packet to parse */
+                   ULONGEST *result)
 {
   int nibble;
   ULONGEST retval = 0;
@@ -113,11 +113,11 @@ hex2str (const char *hex, int count)
   for (size_t i = 0; i < count; ++i)
     {
       if (hex[0] == '\0' || hex[1] == '\0')
-	{
-	  /* Hex string is short, or of uneven length.  Return what we
+        {
+          /* Hex string is short, or of uneven length.  Return what we
 	     have so far.  */
-	  return ret;
-	}
+          return ret;
+        }
       ret += fromhex (hex[0]) * 16 + fromhex (hex[1]);
       hex += 2;
     }
@@ -170,8 +170,8 @@ needs_escaping (gdb_byte b)
 
 int
 remote_escape_output (const gdb_byte *buffer, int len_units, int unit_size,
-		      gdb_byte *out_buf, int *out_len_units,
-		      int out_maxlen_bytes)
+                      gdb_byte *out_buf, int *out_len_units,
+                      int out_maxlen_bytes)
 {
   int input_unit_index, output_byte_index = 0, byte_index_in_unit;
   int number_escape_bytes_needed;
@@ -179,42 +179,38 @@ remote_escape_output (const gdb_byte *buffer, int len_units, int unit_size,
   /* Try to copy integral addressable memory units until
      (1) we run out of space or
      (2) we copied all of them.  */
-  for (input_unit_index = 0;
-       input_unit_index < len_units;
-       input_unit_index++)
+  for (input_unit_index = 0; input_unit_index < len_units; input_unit_index++)
     {
       /* Find out how many escape bytes we need for this unit.  */
       number_escape_bytes_needed = 0;
-      for (byte_index_in_unit = 0;
-	   byte_index_in_unit < unit_size;
-	   byte_index_in_unit++)
-	{
-	  int idx = input_unit_index * unit_size + byte_index_in_unit;
-	  gdb_byte b = buffer[idx];
-	  if (needs_escaping (b))
-	    number_escape_bytes_needed++;
-	}
+      for (byte_index_in_unit = 0; byte_index_in_unit < unit_size;
+           byte_index_in_unit++)
+        {
+          int idx = input_unit_index * unit_size + byte_index_in_unit;
+          gdb_byte b = buffer[idx];
+          if (needs_escaping (b))
+            number_escape_bytes_needed++;
+        }
 
       /* Check if we have room to fit this escaped unit.  */
-      if (output_byte_index + unit_size + number_escape_bytes_needed >
-	    out_maxlen_bytes)
-	  break;
+      if (output_byte_index + unit_size + number_escape_bytes_needed
+          > out_maxlen_bytes)
+        break;
 
       /* Copy the unit byte per byte, adding escapes.  */
-      for (byte_index_in_unit = 0;
-	   byte_index_in_unit < unit_size;
-	   byte_index_in_unit++)
-	{
-	  int idx = input_unit_index * unit_size + byte_index_in_unit;
-	  gdb_byte b = buffer[idx];
-	  if (needs_escaping (b))
-	    {
-	      out_buf[output_byte_index++] = '}';
-	      out_buf[output_byte_index++] = b ^ 0x20;
-	    }
-	  else
-	    out_buf[output_byte_index++] = b;
-	}
+      for (byte_index_in_unit = 0; byte_index_in_unit < unit_size;
+           byte_index_in_unit++)
+        {
+          int idx = input_unit_index * unit_size + byte_index_in_unit;
+          gdb_byte b = buffer[idx];
+          if (needs_escaping (b))
+            {
+              out_buf[output_byte_index++] = '}';
+              out_buf[output_byte_index++] = b ^ 0x20;
+            }
+          else
+            out_buf[output_byte_index++] = b;
+        }
     }
 
   *out_len_units = input_unit_index;
@@ -224,8 +220,8 @@ remote_escape_output (const gdb_byte *buffer, int len_units, int unit_size,
 /* See rsp-low.h.  */
 
 int
-remote_unescape_input (const gdb_byte *buffer, int len,
-		       gdb_byte *out_buf, int out_maxlen)
+remote_unescape_input (const gdb_byte *buffer, int len, gdb_byte *out_buf,
+                       int out_maxlen)
 {
   int input_index, output_index;
   int escaped;
@@ -237,22 +233,21 @@ remote_unescape_input (const gdb_byte *buffer, int len,
       gdb_byte b = buffer[input_index];
 
       if (output_index + 1 > out_maxlen)
-	error (_("Received too much data from the target."));
+        error (_ ("Received too much data from the target."));
 
       if (escaped)
-	{
-	  out_buf[output_index++] = b ^ 0x20;
-	  escaped = 0;
-	}
+        {
+          out_buf[output_index++] = b ^ 0x20;
+          escaped = 0;
+        }
       else if (b == '}')
-	escaped = 1;
+        escaped = 1;
       else
-	out_buf[output_index++] = b;
+        out_buf[output_index++] = b;
     }
 
   if (escaped)
-    error (_("Unmatched escape character in target response."));
+    error (_ ("Unmatched escape character in target response."));
 
   return output_index;
 }
-

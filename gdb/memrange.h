@@ -27,18 +27,19 @@ struct mem_range
   mem_range () = default;
 
   mem_range (CORE_ADDR start_, int length_)
-  : start (start_), length (length_)
-  {}
+    : start (start_),
+      length (length_)
+  {
+  }
 
-  bool operator< (const mem_range &other) const
+  bool operator<(const mem_range &other) const
   {
     return this->start < other.start;
   }
 
   bool operator== (const mem_range &other) const
   {
-    return (this->start == other.start
-	    && this->length == other.length);
+    return (this->start == other.start && this->length == other.length);
   }
 
   /* Lowest address in the range.  */
@@ -51,8 +52,8 @@ struct mem_range
 /* Returns true if the ranges defined by [start1, start1+len1) and
    [start2, start2+len2) overlap.  */
 
-extern int mem_ranges_overlap (CORE_ADDR start1, int len1,
-			       CORE_ADDR start2, int len2);
+extern int mem_ranges_overlap (CORE_ADDR start1, int len1, CORE_ADDR start2,
+			       int len2);
 
 /* Returns true if ADDR is in RANGE.  */
 

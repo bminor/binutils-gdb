@@ -26,10 +26,8 @@
 /* Calculate the offset from stack pointer of the pc register on the stack
    in the case of a sigreturn or sigreturn_rt syscall.  */
 int
-arm_linux_sigreturn_next_pc_offset (unsigned long sp,
-				    unsigned long sp_data,
-				    unsigned long svc_number,
-				    int is_sigreturn)
+arm_linux_sigreturn_next_pc_offset (unsigned long sp, unsigned long sp_data,
+				    unsigned long svc_number, int is_sigreturn)
 {
   /* Offset of R0 register.  */
   int r0_offset = 0;
@@ -62,8 +60,7 @@ arm_linux_sigreturn_next_pc_offset (unsigned long sp,
    for arm-linux.  */
 
 CORE_ADDR
-arm_linux_get_next_pcs_fixup (struct arm_get_next_pcs *self,
-			      CORE_ADDR nextpc)
+arm_linux_get_next_pcs_fixup (struct arm_get_next_pcs *self, CORE_ADDR nextpc)
 {
   /* The Linux kernel offers some user-mode helpers in a high page.  We can
      not read this page (as of 2.6.23), and even if we could then we
@@ -119,7 +116,7 @@ arm_linux_get_next_pcs_fixup (struct arm_get_next_pcs *self,
 	    }
 	  else
 	    {
-	      if (bits (insn, 24, 27) == 0xb  /* BL <label> */
+	      if (bits (insn, 24, 27) == 0xb /* BL <label> */
 		  || bits (insn, 4, 27) == 0x12fff3 /* BLX Rm */)
 		bl_blx_p = 1;
 	    }

@@ -103,17 +103,17 @@ enum csky_regnum
 #define CSKY_CRBANK_NUM_REGS 32
 
 /* Tdesc registers essential check.  */
-#define CSKY_TDESC_REGS_PC_NUMBERED             (1 << 0)
-#define CSKY_TDESC_REGS_SP_NUMBERED             (1 << 1)
-#define CSKY_TDESC_REGS_LR_NUMBERED             (1 << 2)
-#define CSKY_TDESC_REGS_ESSENTIAL_VALUE         (7)
+#define CSKY_TDESC_REGS_PC_NUMBERED (1 << 0)
+#define CSKY_TDESC_REGS_SP_NUMBERED (1 << 1)
+#define CSKY_TDESC_REGS_LR_NUMBERED (1 << 2)
+#define CSKY_TDESC_REGS_ESSENTIAL_VALUE (7)
 
 /* For fr0~fr15, fr16~fr31, vr0~vr15 check.  */
-#define CSKY_FULL16_ONEHOT_VALUE   0xffff
+#define CSKY_FULL16_ONEHOT_VALUE 0xffff
 
 /* Define for CSKY FV pseudo regs for dwarf regs. */
-#define FV_PSEUDO_REGNO_FIRST  74
-#define FV_PSEUDO_REGNO_LAST   201
+#define FV_PSEUDO_REGNO_FIRST 74
+#define FV_PSEUDO_REGNO_LAST 201
 
 /* Number of processor registers w/o ICE registers.  */
 #define CSKY_NUM_REGS (CSKY_MAX_REGS - CSKY_CRBANK_NUM_REGS)
@@ -251,7 +251,7 @@ enum csky_regnum
 #define CSKY_32_IS_PUSH(insn) ((insn & 0xfffffe00) == 0xebe00000)
 #define CSKY_32_IS_PUSH_R29(insn) ((insn & 0x100) == 0x100)
 #define CSKY_32_IS_PUSH_R15(insn) ((insn & 0x10) == 0x10)
-#define CSKY_32_PUSH_LIST1(insn) (insn & 0xf)	 /* r4 - r11.  */
+#define CSKY_32_PUSH_LIST1(insn) (insn & 0xf)	      /* r4 - r11.  */
 #define CSKY_32_PUSH_LIST2(insn) ((insn & 0xe0) >> 5) /* r16 - r17.  */
 
 /* pop32.  */
@@ -285,7 +285,7 @@ enum csky_regnum
 /* subu sp, r4.  */
 #define CSKY_16_IS_SUBU4(x) ((x) == 0x6392)
 
-#define CSKY_16_IS_R4_ADJUSTER(x) \
+#define CSKY_16_IS_R4_ADJUSTER(x)                                        \
   (CSKY_16_IS_ADDI4 (x) || CSKY_16_IS_SUBI4 (x) || CSKY_16_IS_BSETI4 (x) \
    || CSKY_16_IS_BCLRI4 (x) || CSKY_16_IS_NOR4 (x) || CSKY_16_IS_LSLI4 (x))
 
@@ -319,12 +319,12 @@ enum csky_regnum
 /* subu32 sp, sp, r4.  */
 #define CSKY_32_IS_SUBU4(x) ((x) == 0xc48e008e)
 
-#define CSKY_32_IS_R4_ADJUSTER(x) \
+#define CSKY_32_IS_R4_ADJUSTER(x)                                        \
   (CSKY_32_IS_ADDI4 (x) || CSKY_32_IS_SUBI4 (x) || CSKY_32_IS_ROTLI4 (x) \
-   || CSKY_32_IS_IXH4 (x) || CSKY_32_IS_IXW4 (x) || CSKY_32_IS_NOR4 (x) \
+   || CSKY_32_IS_IXH4 (x) || CSKY_32_IS_IXW4 (x) || CSKY_32_IS_NOR4 (x)  \
    || CSKY_32_IS_BSETI4 (x) || CSKY_32_IS_BCLRI4 (x) || CSKY_32_IS_LISI4 (x))
 
-#define CSKY_IS_R4_ADJUSTER(x)						\
+#define CSKY_IS_R4_ADJUSTER(x) \
   (CSKY_32_IS_R4_ADJUSTER (x) || CSKY_16_IS_R4_ADJUSTER (x))
 #define CSKY_IS_SUBU4(x) (CSKY_32_IS_SUBU4 (x) || CSKY_16_IS_SUBU4 (x))
 
@@ -347,9 +347,9 @@ enum csky_regnum
 
 #define CSKY_16_IS_BR(insn) ((insn & 0xfc00) == 0x0400)
 #define CSKY_32_IS_BR(insn) ((insn & 0xffff0000) == 0xe8000000)
-#define CSKY_16_IS_MOV_FP_SP(insn) (insn == 0x6e3b)     /* mov r8, r14.  */
+#define CSKY_16_IS_MOV_FP_SP(insn) (insn == 0x6e3b)	/* mov r8, r14.  */
 #define CSKY_32_IS_MOV_FP_SP(insn) (insn == 0xc40e4828) /* mov r8, r14.  */
-#define CSKY_16_IS_MOV_SP_FP(insn) (insn == 0x6fa3)     /* mov r14, r8.  */
+#define CSKY_16_IS_MOV_SP_FP(insn) (insn == 0x6fa3)	/* mov r14, r8.  */
 #define CSKY_32_INSN_MASK 0xc000
 #define CSKY_BKPT_INSN 0x0
 #define CSKY_NUM_GREGS 32
@@ -380,14 +380,14 @@ enum csky_regnum
 #define CSKY_TRAP_0 0x2020c000
 
 /* Sizeof (tls) */
-#define CSKY_SIGCONTEXT_PT_REGS_TLS  4
+#define CSKY_SIGCONTEXT_PT_REGS_TLS 4
 
 /* Macro for kernel 4.x  */
 #define CSKY_MOVI_R7_139 0x008bea07
 
 /* Macro for check long branch.  */
-#define CSKY_JMPI_PC_4      0x1eac0
-#define CSKY_LRW_T1_PC_8    0x2ea8d
-#define CSKY_JMP_T1_VS_NOP  0x6c037834
+#define CSKY_JMPI_PC_4 0x1eac0
+#define CSKY_LRW_T1_PC_8 0x2ea8d
+#define CSKY_JMP_T1_VS_NOP 0x6c037834
 
 #endif

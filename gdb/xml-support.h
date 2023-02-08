@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #ifndef XML_SUPPORT_H
 #define XML_SUPPORT_H
 
@@ -41,16 +40,16 @@ const char *fetch_xml_builtin (const char *filename);
    to_xfer_partial handler, after converting object and annex to the
    appropriate filename.  */
 
-LONGEST xml_builtin_xfer_partial (const char *filename,
-				  gdb_byte *readbuf, const gdb_byte *writebuf,
-				  ULONGEST offset, LONGEST len);
+LONGEST xml_builtin_xfer_partial (const char *filename, gdb_byte *readbuf,
+				  const gdb_byte *writebuf, ULONGEST offset,
+				  LONGEST len);
 
 /* Support for XInclude.  */
 
 /* Callback to fetch a new XML file, based on the provided HREF.  */
 
-using xml_fetch_another = gdb::function_view<gdb::optional<gdb::char_vector>
-					     (const char * /* href */)>;
+using xml_fetch_another = gdb::function_view<
+  gdb::optional<gdb::char_vector> (const char * /* href */)>;
 
 /* Append the expansion of TEXT after processing <xi:include> tags in
    RESULT.  FETCHER will be called to retrieve any new files.  DEPTH
@@ -60,9 +59,9 @@ using xml_fetch_another = gdb::function_view<gdb::optional<gdb::char_vector>
    It may throw an exception, but does not for XML parsing
    problems.  */
 
-bool xml_process_xincludes (std::string &result,
-			    const char *name, const char *text,
-			    xml_fetch_another fetcher, int depth);
+bool xml_process_xincludes (std::string &result, const char *name,
+			    const char *text, xml_fetch_another fetcher,
+			    int depth);
 
 /* Simplified XML parser infrastructure.  */
 
@@ -71,8 +70,10 @@ bool xml_process_xincludes (std::string &result,
 struct gdb_xml_value
 {
   gdb_xml_value (const char *name_, void *value_)
-  : name (name_), value (value_)
-  {}
+    : name (name_),
+      value (value_)
+  {
+  }
 
   const char *name;
   gdb::unique_xmalloc_ptr<void> value;
@@ -102,7 +103,7 @@ typedef void *(gdb_xml_attribute_handler) (struct gdb_xml_parser *parser,
 enum gdb_xml_attribute_flag
 {
   GDB_XML_AF_NONE,
-  GDB_XML_AF_OPTIONAL = 1 << 0,  /* The attribute is optional.  */
+  GDB_XML_AF_OPTIONAL = 1 << 0, /* The attribute is optional.  */
 };
 
 /* An expected attribute and the handler to call when it is
@@ -123,8 +124,8 @@ struct gdb_xml_attribute
 enum gdb_xml_element_flag
 {
   GDB_XML_EF_NONE,
-  GDB_XML_EF_OPTIONAL = 1 << 0,  /* The element is optional.  */
-  GDB_XML_EF_REPEATABLE = 1 << 1,  /* The element is repeatable.  */
+  GDB_XML_EF_OPTIONAL = 1 << 0,	  /* The element is optional.  */
+  GDB_XML_EF_REPEATABLE = 1 << 1, /* The element is repeatable.  */
 };
 
 /* A handler called at the beginning of an element.
@@ -142,9 +143,9 @@ enum gdb_xml_element_flag
    fixed offsets can be used to find any non-optional attributes as
    long as no optional attributes precede them.  */
 
-typedef void (gdb_xml_element_start_handler)
-     (struct gdb_xml_parser *parser, const struct gdb_xml_element *element,
-      void *user_data, std::vector<gdb_xml_value> &attributes);
+typedef void (gdb_xml_element_start_handler) (
+  struct gdb_xml_parser *parser, const struct gdb_xml_element *element,
+  void *user_data, std::vector<gdb_xml_value> &attributes);
 
 /* A handler called at the end of an element.
 
@@ -152,9 +153,10 @@ typedef void (gdb_xml_element_start_handler)
    is any accumulated body text inside the element, with leading and
    trailing whitespace removed.  It will never be NULL.  */
 
-typedef void (gdb_xml_element_end_handler)
-     (struct gdb_xml_parser *, const struct gdb_xml_element *,
-      void *user_data, const char *body_text);
+typedef void (gdb_xml_element_end_handler) (struct gdb_xml_parser *,
+					    const struct gdb_xml_element *,
+					    void *user_data,
+					    const char *body_text);
 
 /* An expected element and the handlers to call when it is
    encountered.  Arrays of struct gdb_xml_element are terminated
@@ -191,14 +193,14 @@ void gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)
 /* Issue an error message from one of PARSER's handlers, and stop
    parsing.  */
 
-void gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
-  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
+void gdb_xml_error (struct gdb_xml_parser *parser, const char *format,
+		    ...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
 
 /* Find the attribute named NAME in the set of parsed attributes
    ATTRIBUTES.  Returns NULL if not found.  */
 
-struct gdb_xml_value *xml_find_attribute
-  (std::vector<gdb_xml_value> &attributes, const char *name);
+struct gdb_xml_value *
+xml_find_attribute (std::vector<gdb_xml_value> &attributes, const char *name);
 
 /* Parse an integer attribute into a ULONGEST.  */
 
@@ -230,7 +232,7 @@ ULONGEST gdb_xml_parse_ulongest (struct gdb_xml_parser *parser,
    the text.  If something goes wrong, return an uninstantiated optional
    and warn.  */
 
-extern gdb::optional<gdb::char_vector> xml_fetch_content_from_file
-    (const char *filename, const char *dirname);
+extern gdb::optional<gdb::char_vector>
+xml_fetch_content_from_file (const char *filename, const char *dirname);
 
 #endif

@@ -28,36 +28,33 @@ struct type;
 struct gdbarch_info;
 struct dwarf2_frame_state;
 
-template <size_t bp_size, const gdb_byte *break_insn>
+template<size_t bp_size, const gdb_byte *break_insn>
 struct bp_manipulation
 {
-  static int
-  kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+  static int kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
   {
     return bp_size;
   }
 
-  static const gdb_byte *
-  bp_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+  static const gdb_byte *bp_from_kind (struct gdbarch *gdbarch, int kind,
+				       int *size)
   {
     *size = kind;
     return break_insn;
   }
 };
 
-template <size_t bp_size,
-	  const gdb_byte *break_insn_little,
-	  const gdb_byte *break_insn_big>
+template<size_t bp_size, const gdb_byte *break_insn_little,
+	 const gdb_byte *break_insn_big>
 struct bp_manipulation_endian
 {
-  static int
-  kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+  static int kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
   {
     return bp_size;
   }
 
-  static const gdb_byte *
-  bp_from_kind (struct gdbarch *gdbarch, int kind, int *size)
+  static const gdb_byte *bp_from_kind (struct gdbarch *gdbarch, int kind,
+				       int *size)
   {
     *size = kind;
     if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -70,9 +67,9 @@ struct bp_manipulation_endian
 #define BP_MANIPULATION(BREAK_INSN) \
   bp_manipulation<sizeof (BREAK_INSN), BREAK_INSN>
 
-#define BP_MANIPULATION_ENDIAN(BREAK_INSN_LITTLE, BREAK_INSN_BIG) \
-  bp_manipulation_endian<sizeof (BREAK_INSN_LITTLE),		  \
-  BREAK_INSN_LITTLE, BREAK_INSN_BIG>
+#define BP_MANIPULATION_ENDIAN(BREAK_INSN_LITTLE, BREAK_INSN_BIG)       \
+  bp_manipulation_endian<sizeof (BREAK_INSN_LITTLE), BREAK_INSN_LITTLE, \
+			 BREAK_INSN_BIG>
 
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
 extern bool default_displaced_step_hw_singlestep (struct gdbarch *);
@@ -89,7 +86,8 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 /* Identity functions on a CORE_ADDR.  Just return the "addr".  */
 
 extern CORE_ADDR core_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr);
-extern gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr_identity;
+extern gdbarch_convert_from_func_ptr_addr_ftype
+  convert_from_func_ptr_addr_identity;
 
 /* No-op conversion of reg to regnum.  */
 
@@ -129,8 +127,8 @@ extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
 
 /* Default implementation of gdbarch_floatformat_for_type.  */
 extern const struct floatformat **
-  default_floatformat_for_type (struct gdbarch *gdbarch,
-				const char *name, int len);
+default_floatformat_for_type (struct gdbarch *gdbarch, const char *name,
+			      int len);
 
 /* Default implementation of gdbarch_remove_non_address_bits.  */
 CORE_ADDR default_remove_non_address_bits (struct gdbarch *gdbarch,
@@ -145,18 +143,16 @@ bool default_tagged_address_p (struct gdbarch *gdbarch, struct value *address);
 
 /* Default implementation of gdbarch_memtag_matches_p.  */
 extern bool default_memtag_matches_p (struct gdbarch *gdbarch,
-				       struct value *address);
+				      struct value *address);
 
 /* Default implementation of gdbarch_set_memtags.  */
-bool default_set_memtags (struct gdbarch *gdbarch,
-			  struct value *address, size_t length,
-			  const gdb::byte_vector &tags,
+bool default_set_memtags (struct gdbarch *gdbarch, struct value *address,
+			  size_t length, const gdb::byte_vector &tags,
 			  memtag_type tag_type);
 
 /* Default implementation of gdbarch_get_memtag.  */
 struct value *default_get_memtag (struct gdbarch *gdbarch,
-				  struct value *address,
-				  memtag_type tag_type);
+				  struct value *address, memtag_type tag_type);
 
 extern CORE_ADDR generic_skip_trampoline_code (frame_info_ptr frame,
 					       CORE_ADDR pc);
@@ -183,8 +179,7 @@ extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
 extern int generic_instruction_nullified (struct gdbarch *gdbarch,
 					  struct regcache *regcache);
 
-int default_remote_register_number (struct gdbarch *gdbarch,
-				    int regno);
+int default_remote_register_number (struct gdbarch *gdbarch, int regno);
 
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
@@ -227,9 +222,8 @@ extern const gdb_byte *default_breakpoint_from_pc (struct gdbarch *gdbarch,
 						   CORE_ADDR *pcptr,
 						   int *lenptr);
 
-extern int default_breakpoint_kind_from_current_state (struct gdbarch *gdbarch,
-						       struct regcache *regcache,
-						       CORE_ADDR *pcptr);
+extern int default_breakpoint_kind_from_current_state (
+  struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR *pcptr);
 
 extern void default_gen_return_address (struct gdbarch *gdbarch,
 					struct agent_expr *ax,
@@ -252,7 +246,8 @@ extern bool default_program_breakpoint_here_p (struct gdbarch *gdbarch,
 
 /* Do-nothing version of vsyscall_range.  Returns false.  */
 
-extern int default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range);
+extern int default_vsyscall_range (struct gdbarch *gdbarch,
+				   struct mem_range *range);
 
 /* Default way to advance the PC to the next instruction in order to
    skip a permanent breakpoint.  Increments the PC by the size of a
@@ -263,9 +258,9 @@ extern void default_skip_permanent_breakpoint (struct regcache *regcache);
 
 /* Symbols for gdbarch_infcall_mmap; their Linux PROT_* system
    definitions would be dependent on compilation host.  */
-#define GDB_MMAP_PROT_READ	0x1	/* Page can be read.  */
-#define GDB_MMAP_PROT_WRITE	0x2	/* Page can be written.  */
-#define GDB_MMAP_PROT_EXEC	0x4	/* Page can be executed.  */
+#define GDB_MMAP_PROT_READ 0x1	/* Page can be read.  */
+#define GDB_MMAP_PROT_WRITE 0x2 /* Page can be written.  */
+#define GDB_MMAP_PROT_EXEC 0x4	/* Page can be executed.  */
 
 extern CORE_ADDR default_infcall_mmap (CORE_ADDR size, unsigned prot);
 extern void default_infcall_munmap (CORE_ADDR addr, CORE_ADDR size);
@@ -287,8 +282,7 @@ extern CORE_ADDR gdbarch_skip_prologue_noexcept (gdbarch *gdbarch,
 
 /* Default implementation of gdbarch_in_indirect_branch_thunk that returns
    false.  */
-extern bool default_in_indirect_branch_thunk (gdbarch *gdbarch,
-					      CORE_ADDR pc);
+extern bool default_in_indirect_branch_thunk (gdbarch *gdbarch, CORE_ADDR pc);
 
 /* Default implementation of gdbarch type_align method.  */
 extern ULONGEST default_type_align (struct gdbarch *gdbarch,
@@ -299,19 +293,19 @@ extern std::string default_get_pc_address_flags (frame_info_ptr frame,
 						 CORE_ADDR pc);
 
 /* Default implementation of gdbarch read_core_file_mappings method.  */
-extern void default_read_core_file_mappings
-  (struct gdbarch *gdbarch,
-   struct bfd *cbfd,
-   read_core_file_mappings_pre_loop_ftype pre_loop_cb,
-   read_core_file_mappings_loop_ftype loop_cb);
+extern void default_read_core_file_mappings (
+  struct gdbarch *gdbarch, struct bfd *cbfd,
+  read_core_file_mappings_pre_loop_ftype pre_loop_cb,
+  read_core_file_mappings_loop_ftype loop_cb);
 
 /* Default implementation of gdbarch default_get_return_buf_addr method.  */
 extern CORE_ADDR default_get_return_buf_addr (struct type *val_typegdbarch,
 					      frame_info_ptr cur_frame);
 
-extern enum return_value_convention default_gdbarch_return_value
-     (struct gdbarch *gdbarch, struct value *function, struct type *valtype,
-      struct regcache *regcache, struct value **read_value,
-      const gdb_byte *writebuf);
+extern enum return_value_convention
+default_gdbarch_return_value (struct gdbarch *gdbarch, struct value *function,
+			      struct type *valtype, struct regcache *regcache,
+			      struct value **read_value,
+			      const gdb_byte *writebuf);
 
 #endif /* ARCH_UTILS_H */

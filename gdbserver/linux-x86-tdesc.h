@@ -25,7 +25,8 @@
    vs x32), it's sufficient to pass only the register set here.  This,
    together with the ABI known at IPA compile time, maps to a tdesc.  */
 
-enum x86_linux_tdesc {
+enum x86_linux_tdesc
+{
   X86_TDESC_MMX = 0,
   X86_TDESC_SSE = 1,
   X86_TDESC_AVX = 2,
@@ -48,7 +49,7 @@ const struct target_desc *i386_get_ipa_tdesc (int idx);
 
 #ifdef __x86_64__
 const struct target_desc *amd64_linux_read_description (uint64_t xcr0,
-							bool is_x32);
+                                                        bool is_x32);
 #endif
 
 const struct target_desc *i386_linux_read_description (uint64_t xcr0);

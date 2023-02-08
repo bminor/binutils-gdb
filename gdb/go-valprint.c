@@ -37,10 +37,8 @@
    gdb_assert (go_classify_struct_type (type) == GO_TYPE_STRING).  */
 
 static void
-print_go_string (struct type *type,
-		 LONGEST embedded_offset, CORE_ADDR address,
-		 struct ui_file *stream, int recurse,
-		 struct value *val,
+print_go_string (struct type *type, LONGEST embedded_offset, CORE_ADDR address,
+		 struct ui_file *stream, int recurse, struct value *val,
 		 const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = type->arch ();
@@ -54,14 +52,13 @@ print_go_string (struct type *type,
   LONGEST addr;
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
+  if (!unpack_value_field_as_long (type, valaddr, embedded_offset, 0, val,
+				   &addr))
+    error (_ ("Unable to read string address"));
 
-  if (! unpack_value_field_as_long (type, valaddr, embedded_offset, 0,
-				    val, &addr))
-    error (_("Unable to read string address"));
-
-  if (! unpack_value_field_as_long (type, valaddr, embedded_offset, 1,
-				    val, &length))
-    error (_("Unable to read string length"));
+  if (!unpack_value_field_as_long (type, valaddr, embedded_offset, 1, val,
+				   &length))
+    error (_ ("Unable to read string length"));
 
   /* TODO(dje): Print address of struct or actual string?  */
   if (options->addressprint)
@@ -72,9 +69,8 @@ print_go_string (struct type *type,
 
   if (length < 0)
     {
-      gdb_printf (_("<invalid length: %ps>"),
-		  styled_string (metadata_style.style (),
-				 plongest (addr)));
+      gdb_printf (_ ("<invalid length: %ps>"),
+		  styled_string (metadata_style.style (), plongest (addr)));
       return;
     }
 
@@ -87,37 +83,37 @@ print_go_string (struct type *type,
 /* See go-lang.h.  */
 
 void
-go_language::value_print_inner (struct value *val, struct ui_file *stream,
-				int recurse,
-				const struct value_print_options *options) const
+go_language::value_print_inner (
+  struct value *val, struct ui_file *stream, int recurse,
+  const struct value_print_options *options) const
 {
   struct type *type = check_typedef (value_type (val));
 
   switch (type->code ())
     {
-      case TYPE_CODE_STRUCT:
-	{
-	  enum go_type go_type = go_classify_struct_type (type);
+    case TYPE_CODE_STRUCT:
+      {
+	enum go_type go_type = go_classify_struct_type (type);
 
-	  switch (go_type)
-	    {
-	    case GO_TYPE_STRING:
-	      if (! options->raw)
-		{
-		  print_go_string (type, value_embedded_offset (val),
-				   value_address (val),
-				   stream, recurse, val, options);
-		  return;
-		}
-	      break;
-	    default:
-	      break;
-	    }
-	}
-	/* Fall through.  */
+	switch (go_type)
+	  {
+	  case GO_TYPE_STRING:
+	    if (!options->raw)
+	      {
+		print_go_string (type, value_embedded_offset (val),
+				 value_address (val), stream, recurse, val,
+				 options);
+		return;
+	      }
+	    break;
+	  default:
+	    break;
+	  }
+      }
+      /* Fall through.  */
 
-      default:
-	c_value_print_inner (val, stream, recurse, options);
-	break;
+    default:
+      c_value_print_inner (val, stream, recurse, options);
+      break;
     }
 }

@@ -34,10 +34,7 @@ struct tui_disasm_window : public tui_source_window_base
 
   DISABLE_COPY_AND_ASSIGN (tui_disasm_window);
 
-  const char *name () const override
-  {
-    return DISASSEM_NAME;
-  }
+  const char *name () const override { return DISASSEM_NAME; }
 
   bool location_matches_p (struct bp_location *loc, int line_no) override;
 
@@ -45,7 +42,7 @@ struct tui_disasm_window : public tui_source_window_base
 
   void erase_source_content () override
   {
-    do_erase_source_content (_("[ No Assembly Available ]"));
+    do_erase_source_content (_ ("[ No Assembly Available ]"));
   }
 
   void display_start_addr (struct gdbarch **gdbarch_p,
@@ -59,6 +56,7 @@ protected:
 		     const struct symtab_and_line &sal) override;
 
 private:
+
   /* Answer whether a particular line number or address is displayed
      in the current source window.  */
   bool addr_is_displayed (CORE_ADDR addr) const;

@@ -158,7 +158,7 @@ cache_find (frame_info_ptr fi)
       gdb_assert (fi != NULL);
     }
 
-  search.next_bottom_frame = fi.get();
+  search.next_bottom_frame = fi.get ();
   search.refc = 1;
   slot = htab_find_slot (cache_htab, &search, NO_INSERT);
   if (slot == NULL)
@@ -173,11 +173,11 @@ cache_find (frame_info_ptr fi)
    If THIS_FRAME is CACHE-> NEXT_BOTTOM_FRAME return -1.  */
 
 static int
-existing_next_levels (frame_info_ptr this_frame,
-		      struct tailcall_cache *cache)
+existing_next_levels (frame_info_ptr this_frame, struct tailcall_cache *cache)
 {
-  int retval = (frame_relative_level (this_frame)
-		- frame_relative_level (frame_info_ptr (cache->next_bottom_frame)) - 1);
+  int retval
+    = (frame_relative_level (this_frame)
+       - frame_relative_level (frame_info_ptr (cache->next_bottom_frame)) - 1);
 
   gdb_assert (retval >= -1);
 
@@ -223,8 +223,8 @@ tailcall_frame_this_id (frame_info_ptr this_frame, void **this_cache,
   *this_id = get_frame_id (next_frame);
   (*this_id).code_addr = get_frame_pc (this_frame);
   (*this_id).code_addr_p = true;
-  (*this_id).artificial_depth = (cache->chain_levels
-				 - existing_next_levels (this_frame, cache));
+  (*this_id).artificial_depth
+    = (cache->chain_levels - existing_next_levels (this_frame, cache));
   gdb_assert ((*this_id).artificial_depth > 0);
 }
 
@@ -294,8 +294,8 @@ dwarf2_tailcall_prev_register_first (frame_info_ptr this_frame,
    dwarf2_tailcall_prev_register_first.  */
 
 static struct value *
-tailcall_frame_prev_register (frame_info_ptr this_frame,
-			       void **this_cache, int regnum)
+tailcall_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+			      int regnum)
 {
   struct tailcall_cache *cache = (struct tailcall_cache *) *this_cache;
   struct value *val;
@@ -316,7 +316,7 @@ tailcall_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 tailcall_frame_sniffer (const struct frame_unwind *self,
-			 frame_info_ptr this_frame, void **this_cache)
+			frame_info_ptr this_frame, void **this_cache)
 {
   frame_info_ptr next_frame;
   int next_levels;
@@ -367,7 +367,7 @@ dwarf2_tailcall_sniffer_first (frame_info_ptr this_frame,
 			       void **tailcall_cachep,
 			       const LONGEST *entry_cfa_sp_offsetp)
 {
-  CORE_ADDR prev_pc = 0, prev_sp = 0;	/* GCC warning.  */
+  CORE_ADDR prev_pc = 0, prev_sp = 0; /* GCC warning.  */
   int prev_sp_p = 0;
   CORE_ADDR this_pc;
   struct gdbarch *prev_gdbarch;
@@ -461,7 +461,8 @@ static struct gdbarch *
 tailcall_frame_prev_arch (frame_info_ptr this_frame,
 			  void **this_prologue_cache)
 {
-  struct tailcall_cache *cache = (struct tailcall_cache *) *this_prologue_cache;
+  struct tailcall_cache *cache
+    = (struct tailcall_cache *) *this_prologue_cache;
 
   return get_frame_arch (frame_info_ptr (cache->next_bottom_frame));
 }
@@ -469,23 +470,22 @@ tailcall_frame_prev_arch (frame_info_ptr this_frame,
 /* Virtual tail call frame unwinder if dwarf2_tailcall_sniffer_first finds
    a chain to create.  */
 
-const struct frame_unwind dwarf2_tailcall_frame_unwind =
-{
-  "dwarf2 tailcall",
-  TAILCALL_FRAME,
-  default_frame_unwind_stop_reason,
-  tailcall_frame_this_id,
-  tailcall_frame_prev_register,
-  NULL,
-  tailcall_frame_sniffer,
-  tailcall_frame_dealloc_cache,
-  tailcall_frame_prev_arch
-};
+const struct frame_unwind dwarf2_tailcall_frame_unwind
+  = { "dwarf2 tailcall",
+      TAILCALL_FRAME,
+      default_frame_unwind_stop_reason,
+      tailcall_frame_this_id,
+      tailcall_frame_prev_register,
+      NULL,
+      tailcall_frame_sniffer,
+      tailcall_frame_dealloc_cache,
+      tailcall_frame_prev_arch };
 
 void _initialize_tailcall_frame ();
+
 void
 _initialize_tailcall_frame ()
 {
-  cache_htab = htab_create_alloc (50, cache_hash, cache_eq, NULL, xcalloc,
-				  xfree);
+  cache_htab
+    = htab_create_alloc (50, cache_hash, cache_eq, NULL, xcalloc, xfree);
 }

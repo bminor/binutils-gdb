@@ -30,13 +30,12 @@ struct regcache;
 struct thread_info
 {
   thread_info (ptid_t id, void *target_data)
-    : id (id), target_data (target_data)
-  {}
-
-  ~thread_info ()
+    : id (id),
+      target_data (target_data)
   {
-    free_register_cache (this->regcache_data);
   }
+
+  ~thread_info () { free_register_cache (this->regcache_data); }
 
   /* The id of this thread.  */
   ptid_t id;
@@ -100,7 +99,7 @@ struct thread_info *find_any_thread_of_pid (int pid);
 /* Find the first thread for which FUNC returns true.  Return NULL if no thread
    satisfying FUNC is found.  */
 
-template <typename Func>
+template<typename Func>
 static thread_info *
 find_thread (Func func)
 {
@@ -112,7 +111,7 @@ find_thread (Func func)
       next++;
 
       if (func (*cur))
-	return *cur;
+        return *cur;
 
       cur = next;
     }
@@ -122,20 +121,19 @@ find_thread (Func func)
 
 /* Like the above, but only consider threads with pid PID.  */
 
-template <typename Func>
+template<typename Func>
 static thread_info *
 find_thread (int pid, Func func)
 {
-  return find_thread ([&] (thread_info *thread)
-    {
-      return thread->id.pid () == pid && func (thread);
-    });
+  return find_thread ([&] (thread_info *thread) {
+    return thread->id.pid () == pid && func (thread);
+  });
 }
 
 /* Find the first thread that matches FILTER for which FUNC returns true.
    Return NULL if no thread satisfying these conditions is found.  */
 
-template <typename Func>
+template<typename Func>
 static thread_info *
 find_thread (ptid_t filter, Func func)
 {
@@ -146,7 +144,7 @@ find_thread (ptid_t filter, Func func)
 
 /* Invoke FUNC for each thread.  */
 
-template <typename Func>
+template<typename Func>
 static void
 for_each_thread (Func func)
 {
@@ -163,21 +161,20 @@ for_each_thread (Func func)
 
 /* Like the above, but only consider threads with pid PID.  */
 
-template <typename Func>
+template<typename Func>
 static void
 for_each_thread (int pid, Func func)
 {
-  for_each_thread ([&] (thread_info *thread)
-    {
-      if (pid == thread->id.pid ())
-	func (thread);
-    });
+  for_each_thread ([&] (thread_info *thread) {
+    if (pid == thread->id.pid ())
+      func (thread);
+  });
 }
 
 /* Find the a random thread for which FUNC (THREAD) returns true.  If
    no entry is found then return NULL.  */
 
-template <typename Func>
+template<typename Func>
 static thread_info *
 find_thread_in_random (Func func)
 {
@@ -194,8 +191,7 @@ find_thread_in_random (Func func)
     return NULL;
 
   /* Now randomly pick an entry out of those.  */
-  random_selector = (int)
-    ((count * (double) rand ()) / (RAND_MAX + 1.0));
+  random_selector = (int) ((count * (double) rand ()) / (RAND_MAX + 1.0));
 
   thread_info *thread = find_thread ([&] (thread_info *thr_arg) {
     return func (thr_arg) && (random_selector-- == 0);

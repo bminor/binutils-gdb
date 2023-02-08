@@ -30,11 +30,12 @@
 
 /* Python object for btrace record lists.  */
 
-struct btpy_list_object {
+struct btpy_list_object
+{
   PyObject_HEAD
 
-  /* The thread this list belongs to.  */
-  thread_info *thread;
+    /* The thread this list belongs to.  */
+    thread_info *thread;
 
   /* The first index being part of this list.  */
   Py_ssize_t first;
@@ -46,20 +47,18 @@ struct btpy_list_object {
   Py_ssize_t step;
 
   /* Either &BTPY_CALL_TYPE or &RECPY_INSN_TYPE.  */
-  PyTypeObject* element_type;
+  PyTypeObject *element_type;
 };
 
 /* Python type for btrace lists.  */
 
-static PyTypeObject btpy_list_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-};
+static PyTypeObject btpy_list_type = { PyVarObject_HEAD_INIT (NULL, 0) };
 
 /* Returns either a btrace_insn for the given Python gdb.RecordInstruction
    object or sets an appropriate Python exception and returns NULL.  */
 
 static const btrace_insn *
-btrace_insn_from_recpy_insn (const PyObject * const pyobject)
+btrace_insn_from_recpy_insn (const PyObject *const pyobject)
 {
   const btrace_insn *insn;
   const recpy_element_object *obj;
@@ -68,7 +67,7 @@ btrace_insn_from_recpy_insn (const PyObject * const pyobject)
 
   if (Py_TYPE (pyobject) != &recpy_insn_type)
     {
-      PyErr_Format (gdbpy_gdb_error, _("Must be gdb.RecordInstruction"));
+      PyErr_Format (gdbpy_gdb_error, _ ("Must be gdb.RecordInstruction"));
       return NULL;
     }
 
@@ -77,20 +76,20 @@ btrace_insn_from_recpy_insn (const PyObject * const pyobject)
 
   if (tinfo == NULL || btrace_is_empty (tinfo))
     {
-      PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
+      PyErr_Format (gdbpy_gdb_error, _ ("No such instruction."));
       return NULL;
     }
 
   if (btrace_find_insn_by_number (&iter, &tinfo->btrace, obj->number) == 0)
     {
-      PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
+      PyErr_Format (gdbpy_gdb_error, _ ("No such instruction."));
       return NULL;
     }
 
   insn = btrace_insn_get (&iter);
   if (insn == NULL)
     {
-      PyErr_Format (gdbpy_gdb_error, _("Not a valid instruction."));
+      PyErr_Format (gdbpy_gdb_error, _ ("Not a valid instruction."));
       return NULL;
     }
 
@@ -102,7 +101,7 @@ btrace_insn_from_recpy_insn (const PyObject * const pyobject)
    returns NULL.  */
 
 static const btrace_function *
-btrace_func_from_recpy_func (const PyObject * const pyobject)
+btrace_func_from_recpy_func (const PyObject *const pyobject)
 {
   const btrace_function *func;
   const recpy_element_object *obj;
@@ -111,7 +110,7 @@ btrace_func_from_recpy_func (const PyObject * const pyobject)
 
   if (Py_TYPE (pyobject) != &recpy_func_type)
     {
-      PyErr_Format (gdbpy_gdb_error, _("Must be gdb.RecordFunctionSegment"));
+      PyErr_Format (gdbpy_gdb_error, _ ("Must be gdb.RecordFunctionSegment"));
       return NULL;
     }
 
@@ -120,20 +119,20 @@ btrace_func_from_recpy_func (const PyObject * const pyobject)
 
   if (tinfo == NULL || btrace_is_empty (tinfo))
     {
-      PyErr_Format (gdbpy_gdb_error, _("No such function segment."));
+      PyErr_Format (gdbpy_gdb_error, _ ("No such function segment."));
       return NULL;
     }
 
   if (btrace_find_call_by_number (&iter, &tinfo->btrace, obj->number) == 0)
     {
-      PyErr_Format (gdbpy_gdb_error, _("No such function segment."));
+      PyErr_Format (gdbpy_gdb_error, _ ("No such function segment."));
       return NULL;
     }
 
   func = btrace_call_get (&iter);
   if (func == NULL)
     {
-      PyErr_Format (gdbpy_gdb_error, _("Not a valid function segment."));
+      PyErr_Format (gdbpy_gdb_error, _ ("Not a valid function segment."));
       return NULL;
     }
 
@@ -169,11 +168,11 @@ btpy_insn_or_gap_new (thread_info *tinfo, Py_ssize_t number)
 /* Create a new gdb.BtraceList object.  */
 
 static PyObject *
-btpy_list_new (thread_info *thread, Py_ssize_t first, Py_ssize_t last, Py_ssize_t step,
-	       PyTypeObject *element_type)
+btpy_list_new (thread_info *thread, Py_ssize_t first, Py_ssize_t last,
+	       Py_ssize_t step, PyTypeObject *element_type)
 {
-  btpy_list_object * const obj = PyObject_New (btpy_list_object,
-					       &btpy_list_type);
+  btpy_list_object *const obj
+    = PyObject_New (btpy_list_object, &btpy_list_type);
 
   if (obj == NULL)
     return NULL;
@@ -193,7 +192,7 @@ btpy_list_new (thread_info *thread, Py_ssize_t first, Py_ssize_t last, Py_ssize_
 PyObject *
 recpy_bt_insn_sal (PyObject *self, void *closure)
 {
-  const btrace_insn * const insn = btrace_insn_from_recpy_insn (self);
+  const btrace_insn *const insn = btrace_insn_from_recpy_insn (self);
   PyObject *result = NULL;
 
   if (insn == NULL)
@@ -217,7 +216,7 @@ recpy_bt_insn_sal (PyObject *self, void *closure)
 PyObject *
 recpy_bt_insn_pc (PyObject *self, void *closure)
 {
-  const btrace_insn * const insn = btrace_insn_from_recpy_insn (self);
+  const btrace_insn *const insn = btrace_insn_from_recpy_insn (self);
 
   if (insn == NULL)
     return NULL;
@@ -231,7 +230,7 @@ recpy_bt_insn_pc (PyObject *self, void *closure)
 PyObject *
 recpy_bt_insn_size (PyObject *self, void *closure)
 {
-  const btrace_insn * const insn = btrace_insn_from_recpy_insn (self);
+  const btrace_insn *const insn = btrace_insn_from_recpy_insn (self);
 
   if (insn == NULL)
     return NULL;
@@ -245,7 +244,7 @@ recpy_bt_insn_size (PyObject *self, void *closure)
 PyObject *
 recpy_bt_insn_is_speculative (PyObject *self, void *closure)
 {
-  const btrace_insn * const insn = btrace_insn_from_recpy_insn (self);
+  const btrace_insn *const insn = btrace_insn_from_recpy_insn (self);
 
   if (insn == NULL)
     return NULL;
@@ -262,7 +261,7 @@ recpy_bt_insn_is_speculative (PyObject *self, void *closure)
 PyObject *
 recpy_bt_insn_data (PyObject *self, void *closure)
 {
-  const btrace_insn * const insn = btrace_insn_from_recpy_insn (self);
+  const btrace_insn *const insn = btrace_insn_from_recpy_insn (self);
   gdb::byte_vector buffer;
   PyObject *object;
 
@@ -279,8 +278,8 @@ recpy_bt_insn_data (PyObject *self, void *closure)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  object = PyBytes_FromStringAndSize ((const char *) buffer.data (),
-				      insn->size);
+  object
+    = PyBytes_FromStringAndSize ((const char *) buffer.data (), insn->size);
 
   if (object == NULL)
     return NULL;
@@ -294,7 +293,7 @@ recpy_bt_insn_data (PyObject *self, void *closure)
 PyObject *
 recpy_bt_insn_decoded (PyObject *self, void *closure)
 {
-  const btrace_insn * const insn = btrace_insn_from_recpy_insn (self);
+  const btrace_insn *const insn = btrace_insn_from_recpy_insn (self);
   string_file strfile;
 
   if (insn == NULL)
@@ -310,7 +309,6 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
       return NULL;
     }
 
-
   return PyBytes_FromString (strfile.string ().c_str ());
 }
 
@@ -320,15 +318,15 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
 PyObject *
 recpy_bt_func_level (PyObject *self, void *closure)
 {
-  const btrace_function * const func = btrace_func_from_recpy_func (self);
+  const btrace_function *const func = btrace_func_from_recpy_func (self);
   thread_info *tinfo;
 
   if (func == NULL)
     return NULL;
 
   tinfo = ((recpy_element_object *) self)->thread;
-  return gdb_py_object_from_longest (tinfo->btrace.level
-				     + func->level).release ();
+  return gdb_py_object_from_longest (tinfo->btrace.level + func->level)
+    .release ();
 }
 
 /* Implementation of RecordFunctionSegment.symbol [gdb.Symbol] for btrace.
@@ -337,7 +335,7 @@ recpy_bt_func_level (PyObject *self, void *closure)
 PyObject *
 recpy_bt_func_symbol (PyObject *self, void *closure)
 {
-  const btrace_function * const func = btrace_func_from_recpy_func (self);
+  const btrace_function *const func = btrace_func_from_recpy_func (self);
 
   if (func == NULL)
     return NULL;
@@ -354,7 +352,7 @@ recpy_bt_func_symbol (PyObject *self, void *closure)
 PyObject *
 recpy_bt_func_instructions (PyObject *self, void *closure)
 {
-  const btrace_function * const func = btrace_func_from_recpy_func (self);
+  const btrace_function *const func = btrace_func_from_recpy_func (self);
   unsigned int len;
 
   if (func == NULL)
@@ -377,7 +375,7 @@ recpy_bt_func_instructions (PyObject *self, void *closure)
 PyObject *
 recpy_bt_func_up (PyObject *self, void *closure)
 {
-  const btrace_function * const func = btrace_func_from_recpy_func (self);
+  const btrace_function *const func = btrace_func_from_recpy_func (self);
 
   if (func == NULL)
     return NULL;
@@ -395,7 +393,7 @@ recpy_bt_func_up (PyObject *self, void *closure)
 PyObject *
 recpy_bt_func_prev (PyObject *self, void *closure)
 {
-  const btrace_function * const func = btrace_func_from_recpy_func (self);
+  const btrace_function *const func = btrace_func_from_recpy_func (self);
 
   if (func == NULL)
     return NULL;
@@ -413,7 +411,7 @@ recpy_bt_func_prev (PyObject *self, void *closure)
 PyObject *
 recpy_bt_func_next (PyObject *self, void *closure)
 {
-  const btrace_function * const func = btrace_func_from_recpy_func (self);
+  const btrace_function *const func = btrace_func_from_recpy_func (self);
 
   if (func == NULL)
     return NULL;
@@ -430,7 +428,7 @@ recpy_bt_func_next (PyObject *self, void *closure)
 static Py_ssize_t
 btpy_list_length (PyObject *self)
 {
-  const btpy_list_object * const obj = (btpy_list_object *) self;
+  const btpy_list_object *const obj = (btpy_list_object *) self;
   const Py_ssize_t distance = obj->last - obj->first;
   const Py_ssize_t result = distance / obj->step;
 
@@ -447,11 +445,11 @@ btpy_list_length (PyObject *self)
 static PyObject *
 btpy_list_item (PyObject *self, Py_ssize_t index)
 {
-  const btpy_list_object * const obj = (btpy_list_object *) self;
+  const btpy_list_object *const obj = (btpy_list_object *) self;
   Py_ssize_t number;
 
   if (index < 0 || index >= btpy_list_length (self))
-    return PyErr_Format (PyExc_IndexError, _("Index out of range: %zd."),
+    return PyErr_Format (PyExc_IndexError, _ ("Index out of range: %zd."),
 			 index);
 
   number = obj->first + (obj->step * index);
@@ -467,7 +465,7 @@ btpy_list_item (PyObject *self, Py_ssize_t index)
 static PyObject *
 btpy_list_slice (PyObject *self, PyObject *value)
 {
-  const btpy_list_object * const obj = (btpy_list_object *) self;
+  const btpy_list_object *const obj = (btpy_list_object *) self;
   const Py_ssize_t length = btpy_list_length (self);
   Py_ssize_t start, stop, step, slicelength;
 
@@ -483,10 +481,11 @@ btpy_list_slice (PyObject *self, PyObject *value)
     }
 
   if (!PySlice_Check (value))
-    return PyErr_Format (PyExc_TypeError, _("Index must be int or slice."));
+    return PyErr_Format (PyExc_TypeError, _ ("Index must be int or slice."));
 
-  if (0 != PySlice_GetIndicesEx (value, length, &start, &stop,
-				 &step, &slicelength))
+  if (0
+      != PySlice_GetIndicesEx (value, length, &start, &stop, &step,
+			       &slicelength))
     return NULL;
 
   return btpy_list_new (obj->thread, obj->first + obj->step * start,
@@ -500,8 +499,8 @@ btpy_list_slice (PyObject *self, PyObject *value)
 static LONGEST
 btpy_list_position (PyObject *self, PyObject *value)
 {
-  const btpy_list_object * const list_obj = (btpy_list_object *) self;
-  const recpy_element_object * const obj = (const recpy_element_object *) value;
+  const btpy_list_object *const list_obj = (btpy_list_object *) self;
+  const recpy_element_object *const obj = (const recpy_element_object *) value;
   Py_ssize_t index = obj->number;
 
   if (list_obj->element_type != Py_TYPE (value))
@@ -540,7 +539,7 @@ btpy_list_index (PyObject *self, PyObject *value)
   const LONGEST index = btpy_list_position (self, value);
 
   if (index < 0)
-    return PyErr_Format (PyExc_ValueError, _("Not in list."));
+    return PyErr_Format (PyExc_ValueError, _ ("Not in list."));
 
   return gdb_py_object_from_longest (index).release ();
 }
@@ -552,8 +551,8 @@ btpy_list_count (PyObject *self, PyObject *value)
 {
   /* We know that if an element is in the list, it is so exactly one time,
      enabling us to reuse the "is element of" check.  */
-  return gdb_py_object_from_longest (btpy_list_contains (self,
-							 value)).release ();
+  return gdb_py_object_from_longest (btpy_list_contains (self, value))
+    .release ();
 }
 
 /* Python rich compare function to allow for equality and inequality checks
@@ -562,8 +561,8 @@ btpy_list_count (PyObject *self, PyObject *value)
 static PyObject *
 btpy_list_richcompare (PyObject *self, PyObject *other, int op)
 {
-  const btpy_list_object * const obj1 = (btpy_list_object *) self;
-  const btpy_list_object * const obj2 = (btpy_list_object *) other;
+  const btpy_list_object *const obj1 = (btpy_list_object *) self;
+  const btpy_list_object *const obj2 = (btpy_list_object *) other;
 
   if (Py_TYPE (self) != Py_TYPE (other))
     {
@@ -572,12 +571,11 @@ btpy_list_richcompare (PyObject *self, PyObject *other, int op)
     }
 
   switch (op)
-  {
+    {
     case Py_EQ:
       if (obj1->thread == obj2->thread
 	  && obj1->element_type == obj2->element_type
-	  && obj1->first == obj2->first
-	  && obj1->last == obj2->last
+	  && obj1->first == obj2->first && obj1->last == obj2->last
 	  && obj1->step == obj2->step)
 	Py_RETURN_TRUE;
       else
@@ -586,8 +584,7 @@ btpy_list_richcompare (PyObject *self, PyObject *other, int op)
     case Py_NE:
       if (obj1->thread != obj2->thread
 	  || obj1->element_type != obj2->element_type
-	  || obj1->first != obj2->first
-	  || obj1->last != obj2->last
+	  || obj1->first != obj2->first || obj1->last != obj2->last
 	  || obj1->step != obj2->step)
 	Py_RETURN_TRUE;
       else
@@ -595,7 +592,7 @@ btpy_list_richcompare (PyObject *self, PyObject *other, int op)
 
     default:
       break;
-  }
+    }
 
   Py_INCREF (Py_NotImplemented);
   return Py_NotImplemented;
@@ -616,9 +613,9 @@ recpy_bt_method (PyObject *self, void *closure)
 PyObject *
 recpy_bt_format (PyObject *self, void *closure)
 {
-  const recpy_record_object * const record = (recpy_record_object *) self;
-  const struct thread_info * const tinfo = record->thread;
-  const struct btrace_config * config;
+  const recpy_record_object *const record = (recpy_record_object *) self;
+  const struct thread_info *const tinfo = record->thread;
+  const struct btrace_config *config;
 
   if (tinfo == NULL)
     Py_RETURN_NONE;
@@ -637,8 +634,8 @@ recpy_bt_format (PyObject *self, void *closure)
 PyObject *
 recpy_bt_replay_position (PyObject *self, void *closure)
 {
-  const recpy_record_object * const record = (recpy_record_object *) self;
-  thread_info * tinfo = record->thread;
+  const recpy_record_object *const record = (recpy_record_object *) self;
+  thread_info *tinfo = record->thread;
 
   if (tinfo == NULL)
     Py_RETURN_NONE;
@@ -656,7 +653,7 @@ recpy_bt_replay_position (PyObject *self, void *closure)
 PyObject *
 recpy_bt_begin (PyObject *self, void *closure)
 {
-  const recpy_record_object * const record = (recpy_record_object *) self;
+  const recpy_record_object *const record = (recpy_record_object *) self;
   thread_info *const tinfo = record->thread;
   struct btrace_insn_iterator iterator;
 
@@ -678,7 +675,7 @@ recpy_bt_begin (PyObject *self, void *closure)
 PyObject *
 recpy_bt_end (PyObject *self, void *closure)
 {
-  const recpy_record_object * const record = (recpy_record_object *) self;
+  const recpy_record_object *const record = (recpy_record_object *) self;
   thread_info *const tinfo = record->thread;
   struct btrace_insn_iterator iterator;
 
@@ -700,27 +697,27 @@ recpy_bt_end (PyObject *self, void *closure)
 PyObject *
 recpy_bt_instruction_history (PyObject *self, void *closure)
 {
-  const recpy_record_object * const record = (recpy_record_object *) self;
+  const recpy_record_object *const record = (recpy_record_object *) self;
   thread_info *const tinfo = record->thread;
   struct btrace_insn_iterator iterator;
   unsigned long first = 0;
   unsigned long last = 0;
 
-   if (tinfo == NULL)
-     Py_RETURN_NONE;
+  if (tinfo == NULL)
+    Py_RETURN_NONE;
 
-   btrace_fetch (tinfo, record_btrace_get_cpu ());
+  btrace_fetch (tinfo, record_btrace_get_cpu ());
 
-   if (btrace_is_empty (tinfo))
-     Py_RETURN_NONE;
+  if (btrace_is_empty (tinfo))
+    Py_RETURN_NONE;
 
-   btrace_insn_begin (&iterator, &tinfo->btrace);
-   first = btrace_insn_number (&iterator);
+  btrace_insn_begin (&iterator, &tinfo->btrace);
+  first = btrace_insn_number (&iterator);
 
-   btrace_insn_end (&iterator, &tinfo->btrace);
-   last = btrace_insn_number (&iterator);
+  btrace_insn_end (&iterator, &tinfo->btrace);
+  last = btrace_insn_number (&iterator);
 
-   return btpy_list_new (tinfo, first, last, 1, &recpy_insn_type);
+  return btpy_list_new (tinfo, first, last, 1, &recpy_insn_type);
 }
 
 /* Implementation of
@@ -729,7 +726,7 @@ recpy_bt_instruction_history (PyObject *self, void *closure)
 PyObject *
 recpy_bt_function_call_history (PyObject *self, void *closure)
 {
-  const recpy_record_object * const record = (recpy_record_object *) self;
+  const recpy_record_object *const record = (recpy_record_object *) self;
   thread_info *const tinfo = record->thread;
   struct btrace_call_iterator iterator;
   unsigned long first = 0;
@@ -757,19 +754,19 @@ recpy_bt_function_call_history (PyObject *self, void *closure)
 PyObject *
 recpy_bt_goto (PyObject *self, PyObject *args)
 {
-  const recpy_record_object * const record = (recpy_record_object *) self;
+  const recpy_record_object *const record = (recpy_record_object *) self;
   thread_info *const tinfo = record->thread;
   const recpy_element_object *obj;
   PyObject *parse_obj;
 
   if (tinfo == NULL || btrace_is_empty (tinfo))
-	return PyErr_Format (gdbpy_gdb_error, _("Empty branch trace."));
+    return PyErr_Format (gdbpy_gdb_error, _ ("Empty branch trace."));
 
   if (!PyArg_ParseTuple (args, "O", &parse_obj))
     return NULL;
 
   if (Py_TYPE (parse_obj) != &recpy_insn_type)
-    return PyErr_Format (PyExc_TypeError, _("Argument must be instruction."));
+    return PyErr_Format (PyExc_TypeError, _ ("Argument must be instruction."));
   obj = (const recpy_element_object *) parse_obj;
 
   try
@@ -793,26 +790,18 @@ recpy_bt_goto (PyObject *self, PyObject *args)
 
 /* BtraceList methods.  */
 
-static PyMethodDef btpy_list_methods[] =
-{
-  { "count", btpy_list_count, METH_O, "count number of occurrences"},
-  { "index", btpy_list_index, METH_O, "index of entry"},
-  {NULL}
-};
+static PyMethodDef btpy_list_methods[]
+  = { { "count", btpy_list_count, METH_O, "count number of occurrences" },
+      { "index", btpy_list_index, METH_O, "index of entry" },
+      { NULL } };
 
 /* BtraceList sequence methods.  */
 
-static PySequenceMethods btpy_list_sequence_methods =
-{
-  NULL
-};
+static PySequenceMethods btpy_list_sequence_methods = { NULL };
 
 /* BtraceList mapping methods.  Necessary for slicing.  */
 
-static PyMappingMethods btpy_list_mapping_methods =
-{
-  NULL
-};
+static PyMappingMethods btpy_list_mapping_methods = { NULL };
 
 /* Sets up the btrace record API.  */
 

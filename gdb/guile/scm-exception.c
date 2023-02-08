@@ -81,16 +81,16 @@ static SCM none_symbol;
 static SCM message_symbol;
 static SCM full_symbol;
 
-static const char percent_print_exception_message_name[] =
-  "%print-exception-message";
+static const char percent_print_exception_message_name[]
+  = "%print-exception-message";
 
 /* Variable containing %print-exception-message.
    It is not defined until late in initialization, after our init routine
    has run.  Cope by looking it up lazily.  */
 static SCM percent_print_exception_message_var = SCM_BOOL_F;
 
-static const char percent_print_exception_with_stack_name[] =
-  "%print-exception-with-stack";
+static const char percent_print_exception_with_stack_name[]
+  = "%print-exception-with-stack";
 
 /* Variable containing %print-exception-with-stack.
    It is not defined until late in initialization, after our init routine
@@ -100,7 +100,7 @@ static SCM percent_print_exception_with_stack_var = SCM_BOOL_F;
 /* Counter to keep track of the number of times we create a <gdb:exception>
    object, for performance monitoring purposes.  */
 static unsigned long gdbscm_exception_count = 0;
-
+
 /* Administrivia for exception smobs.  */
 
 /* The smob "print" function for <gdb:exception>.  */
@@ -127,8 +127,9 @@ exscm_print_exception_smob (SCM self, SCM port, scm_print_state *pstate)
 SCM
 gdbscm_make_exception (SCM key, SCM args)
 {
-  exception_smob *e_smob = (exception_smob *)
-    scm_gc_malloc (sizeof (exception_smob), exception_smob_name);
+  exception_smob *e_smob
+    = (exception_smob *) scm_gc_malloc (sizeof (exception_smob),
+					exception_smob_name);
   SCM smob;
 
   e_smob->key = key;
@@ -184,7 +185,7 @@ gdbscm_exception_args (SCM self)
   e_smob = (exception_smob *) SCM_SMOB_DATA (self);
   return e_smob->args;
 }
-
+
 /* Wrap an exception in a <gdb:exception> object that includes STACK.
    gdbscm_print_exception_with_stack knows how to unwrap it.  */
 
@@ -217,14 +218,13 @@ gdbscm_make_error_scm (SCM key, SCM subr, SCM message, SCM args, SCM data)
    See gdbscm_make_error_scm for a description of the arguments.  */
 
 SCM
-gdbscm_make_error (SCM key, const char *subr, const char *message,
-		   SCM args, SCM data)
+gdbscm_make_error (SCM key, const char *subr, const char *message, SCM args,
+		   SCM data)
 {
-  return gdbscm_make_error_scm
-    (key,
-     subr == NULL ? SCM_BOOL_F : scm_from_latin1_string (subr),
-     message == NULL ? SCM_BOOL_F : scm_from_latin1_string (message),
-     args, data);
+  return gdbscm_make_error_scm (
+    key, subr == NULL ? SCM_BOOL_F : scm_from_latin1_string (subr),
+    message == NULL ? SCM_BOOL_F : scm_from_latin1_string (message), args,
+    data);
 }
 
 /* Version of SCM_ASSERT_TYPE/scm_wrong_type_arg_msg that creates a
@@ -241,13 +241,13 @@ gdbscm_make_type_error (const char *subr, int arg_pos, SCM bad_value,
     {
       if (expected_type != NULL)
 	{
-	  msg = xstrprintf (_("Wrong type argument in position %d"
-			      " (expecting %s): ~S"),
+	  msg = xstrprintf (_ ("Wrong type argument in position %d"
+			       " (expecting %s): ~S"),
 			    arg_pos, expected_type);
 	}
       else
 	{
-	  msg = xstrprintf (_("Wrong type argument in position %d: ~S"),
+	  msg = xstrprintf (_ ("Wrong type argument in position %d: ~S"),
 			    arg_pos);
 	}
     }
@@ -255,11 +255,11 @@ gdbscm_make_type_error (const char *subr, int arg_pos, SCM bad_value,
     {
       if (expected_type != NULL)
 	{
-	  msg = xstrprintf (_("Wrong type argument (expecting %s): ~S"),
+	  msg = xstrprintf (_ ("Wrong type argument (expecting %s): ~S"),
 			    expected_type);
 	}
       else
-	msg = xstrprintf (_("Wrong type argument: ~S"));
+	msg = xstrprintf (_ ("Wrong type argument: ~S"));
     }
 
   result = gdbscm_make_error (scm_arg_type_key, subr, msg.get (),
@@ -285,18 +285,18 @@ gdbscm_make_arg_error (SCM key, const char *subr, int arg_pos, SCM bad_value,
     {
       if (arg_pos > 0)
 	{
-	  msg = xstrprintf (_("%s %s in position %d: ~S"),
-			    error_prefix, error, arg_pos);
+	  msg = xstrprintf (_ ("%s %s in position %d: ~S"), error_prefix,
+			    error, arg_pos);
 	}
       else
-	msg = xstrprintf (_("%s %s: ~S"), error_prefix, error);
+	msg = xstrprintf (_ ("%s %s: ~S"), error_prefix, error);
     }
   else
     {
       if (arg_pos > 0)
-	msg = xstrprintf (_("%s in position %d: ~S"), error, arg_pos);
+	msg = xstrprintf (_ ("%s in position %d: ~S"), error, arg_pos);
       else
-	msg = xstrprintf (_("%s: ~S"), error);
+	msg = xstrprintf (_ ("%s: ~S"), error);
     }
 
   result = gdbscm_make_error (key, subr, msg.get (), scm_list_1 (bad_value),
@@ -311,9 +311,9 @@ SCM
 gdbscm_make_invalid_object_error (const char *subr, int arg_pos, SCM bad_value,
 				  const char *object)
 {
-  return gdbscm_make_arg_error (gdbscm_invalid_object_error_symbol,
-				subr, arg_pos, bad_value,
-				_("Invalid object:"), object);
+  return gdbscm_make_arg_error (gdbscm_invalid_object_error_symbol, subr,
+				arg_pos, bad_value, _ ("Invalid object:"),
+				object);
 }
 
 /* Throw an invalid-object error.
@@ -335,9 +335,8 @@ SCM
 gdbscm_make_out_of_range_error (const char *subr, int arg_pos, SCM bad_value,
 				const char *error)
 {
-  return gdbscm_make_arg_error (scm_out_of_range_key,
-				subr, arg_pos, bad_value,
-				_("Out of range:"), error);
+  return gdbscm_make_arg_error (scm_out_of_range_key, subr, arg_pos, bad_value,
+				_ ("Out of range:"), error);
 }
 
 /* Throw an out-of-range error.
@@ -359,8 +358,8 @@ SCM
 gdbscm_make_misc_error (const char *subr, int arg_pos, SCM bad_value,
 			const char *error)
 {
-  return gdbscm_make_arg_error (scm_misc_error_key,
-				subr, arg_pos, bad_value, NULL, error);
+  return gdbscm_make_arg_error (scm_misc_error_key, subr, arg_pos, bad_value,
+				NULL, error);
 }
 
 /* Throw a misc-error error.  */
@@ -379,8 +378,7 @@ gdbscm_misc_error (const char *subr, int arg_pos, SCM bad_value,
 SCM
 gdbscm_make_memory_error (const char *subr, const char *msg, SCM args)
 {
-  return gdbscm_make_error (memory_error_symbol, subr, msg, args,
-			    SCM_EOL);
+  return gdbscm_make_error (memory_error_symbol, subr, msg, args, SCM_EOL);
 }
 
 /* Throw a gdb:memory-error exception.  */
@@ -433,7 +431,7 @@ gdbscm_scm_from_gdb_exception (const gdbscm_gdb_exception &exception)
   if (exception.reason == RETURN_QUIT)
     {
       /* Handle this specially to be consistent with top-repl.scm.  */
-      return gdbscm_make_error (signal_symbol, NULL, _("User interrupt"),
+      return gdbscm_make_error (signal_symbol, NULL, _ ("User interrupt"),
 				SCM_EOL, scm_list_1 (scm_from_int (SIGINT)));
     }
 
@@ -442,10 +440,9 @@ gdbscm_scm_from_gdb_exception (const gdbscm_gdb_exception &exception)
   else
     key = error_symbol;
 
-  return gdbscm_make_error (key, NULL, "~A",
-			    scm_list_1 (gdbscm_scm_from_c_string
-					(exception.message)),
-			    SCM_BOOL_F);
+  return gdbscm_make_error (
+    key, NULL, "~A", scm_list_1 (gdbscm_scm_from_c_string (exception.message)),
+    SCM_BOOL_F);
 }
 
 /* Convert a GDB exception to the appropriate Scheme exception and throw it.
@@ -489,8 +486,9 @@ gdbscm_print_exception_message (SCM port, SCM frame, SCM key, SCM args)
 	 that.  */
       if (gdbscm_is_false (percent_print_exception_message_var))
 	{
-	  gdbscm_printf (port, _("Error in Scheme exception printing,"
-				 " can't find %s.\n"),
+	  gdbscm_printf (port,
+			 _ ("Error in Scheme exception printing,"
+			    " can't find %s.\n"),
 			 percent_print_exception_message_name);
 	  return;
 	}
@@ -503,7 +501,7 @@ gdbscm_print_exception_message (SCM port, SCM frame, SCM key, SCM args)
      But don't use the exception printing machinery!  */
   if (gdbscm_is_exception (status))
     {
-      gdbscm_printf (port, _("Error in Scheme exception printing:\n"));
+      gdbscm_printf (port, _ ("Error in Scheme exception printing:\n"));
       scm_display (status, port);
       scm_newline (port);
     }
@@ -540,8 +538,9 @@ gdbscm_print_exception_with_stack (SCM port, SCM stack, SCM key, SCM args)
 	 that.  */
       if (gdbscm_is_false (percent_print_exception_with_stack_var))
 	{
-	  gdbscm_printf (port, _("Error in Scheme exception printing,"
-				 " can't find %s.\n"),
+	  gdbscm_printf (port,
+			 _ ("Error in Scheme exception printing,"
+			    " can't find %s.\n"),
 			 percent_print_exception_with_stack_name);
 	  return;
 	}
@@ -554,7 +553,7 @@ gdbscm_print_exception_with_stack (SCM port, SCM stack, SCM key, SCM args)
      But don't use the exception printing machinery!  */
   if (gdbscm_is_exception (status))
     {
-      gdbscm_printf (port, _("Error in Scheme exception printing:\n"));
+      gdbscm_printf (port, _ ("Error in Scheme exception printing:\n"));
       scm_display (status, port);
       scm_newline (port);
     }
@@ -590,8 +589,7 @@ gdbscm_exception_message_to_string (SCM exception)
 
   if (scm_is_eq (key, with_stack_error_symbol)
       /* Don't crash on a badly generated gdb:with-stack exception.  */
-      && scm_is_pair (args)
-      && scm_is_pair (scm_cdr (args)))
+      && scm_is_pair (args) && scm_is_pair (scm_cdr (args)))
     {
       key = scm_car (args);
       args = scm_cddr (args);
@@ -627,54 +625,44 @@ gdbscm_percent_exception_count (void)
 {
   return scm_from_ulong (gdbscm_exception_count);
 }
-
+
 /* Initialize the Scheme exception support.  */
 
-static const scheme_function exception_functions[] =
-{
-  { "make-exception", 2, 0, 0, as_a_scm_t_subr (gdbscm_make_exception),
-    "\
+static const scheme_function exception_functions[]
+  = { { "make-exception", 2, 0, 0, as_a_scm_t_subr (gdbscm_make_exception), "\
 Create a <gdb:exception> object.\n\
 \n\
   Arguments: key args\n\
     These are the standard key,args arguments of \"throw\"." },
 
-  { "exception?", 1, 0, 0, as_a_scm_t_subr (gdbscm_exception_p),
-    "\
+      { "exception?", 1, 0, 0, as_a_scm_t_subr (gdbscm_exception_p), "\
 Return #t if the object is a <gdb:exception> object." },
 
-  { "exception-key", 1, 0, 0, as_a_scm_t_subr (gdbscm_exception_key),
-    "\
+      { "exception-key", 1, 0, 0, as_a_scm_t_subr (gdbscm_exception_key), "\
 Return the exception's key." },
 
-  { "exception-args", 1, 0, 0, as_a_scm_t_subr (gdbscm_exception_args),
-    "\
+      { "exception-args", 1, 0, 0, as_a_scm_t_subr (gdbscm_exception_args), "\
 Return the exception's arg list." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
-static const scheme_function private_exception_functions[] =
-{
-  { "%exception-print-style", 0, 0, 0,
-    as_a_scm_t_subr (gdbscm_percent_exception_print_style),
-    "\
+static const scheme_function private_exception_functions[]
+  = { { "%exception-print-style", 0, 0, 0,
+	as_a_scm_t_subr (gdbscm_percent_exception_print_style), "\
 Return the value of the \"guile print-stack\" option." },
 
-  { "%exception-count", 0, 0, 0,
-    as_a_scm_t_subr (gdbscm_percent_exception_count),
-    "\
+      { "%exception-count", 0, 0, 0,
+	as_a_scm_t_subr (gdbscm_percent_exception_count), "\
 Return a count of the number of <gdb:exception> objects created.\n\
 This is for debugging purposes." },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_exceptions (void)
 {
-  exception_smob_tag = gdbscm_make_smob_type (exception_smob_name,
-					      sizeof (exception_smob));
+  exception_smob_tag
+    = gdbscm_make_smob_type (exception_smob_name, sizeof (exception_smob));
   scm_set_smob_print (exception_smob_tag, exscm_print_exception_smob);
 
   gdbscm_define_functions (exception_functions, 1);

@@ -32,15 +32,15 @@
    NULL.  */
 
 #define APPEND_TO_LIST(listpp, itemp, tailp) \
-	  do \
-	    { \
-	      if ((tailp) == NULL) \
-		*(listpp) = (itemp); \
-	      else \
-		(tailp)->next = (itemp); \
-	      (tailp) = (itemp); \
-	    } \
-	  while (0)
+  do                                         \
+    {                                        \
+      if ((tailp) == NULL)                   \
+        *(listpp) = (itemp);                 \
+      else                                   \
+        (tailp)->next = (itemp);             \
+      (tailp) = (itemp);                     \
+    }                                        \
+  while (0)
 
 /* GDB will never try to install multiple breakpoints at the same
    address.  However, we can see GDB requesting to insert a breakpoint
@@ -117,29 +117,29 @@ struct raw_breakpoint
 
 /* The type of a breakpoint.  */
 enum bkpt_type
-  {
-    /* A GDB breakpoint, requested with a Z0 packet.  */
-    gdb_breakpoint_Z0,
+{
+  /* A GDB breakpoint, requested with a Z0 packet.  */
+  gdb_breakpoint_Z0,
 
-    /* A GDB hardware breakpoint, requested with a Z1 packet.  */
-    gdb_breakpoint_Z1,
+  /* A GDB hardware breakpoint, requested with a Z1 packet.  */
+  gdb_breakpoint_Z1,
 
-    /* A GDB write watchpoint, requested with a Z2 packet.  */
-    gdb_breakpoint_Z2,
+  /* A GDB write watchpoint, requested with a Z2 packet.  */
+  gdb_breakpoint_Z2,
 
-    /* A GDB read watchpoint, requested with a Z3 packet.  */
-    gdb_breakpoint_Z3,
+  /* A GDB read watchpoint, requested with a Z3 packet.  */
+  gdb_breakpoint_Z3,
 
-    /* A GDB access watchpoint, requested with a Z4 packet.  */
-    gdb_breakpoint_Z4,
+  /* A GDB access watchpoint, requested with a Z4 packet.  */
+  gdb_breakpoint_Z4,
 
-    /* A software single-step breakpoint.  */
-    single_step_breakpoint,
+  /* A software single-step breakpoint.  */
+  single_step_breakpoint,
 
-    /* Any other breakpoint type that doesn't require specific
+  /* Any other breakpoint type that doesn't require specific
        treatment goes here.  E.g., an event breakpoint.  */
-    other_breakpoint,
-  };
+  other_breakpoint,
+};
 
 struct point_cond_list
 {
@@ -294,11 +294,9 @@ Z_packet_to_raw_bkpt_type (char z_type)
 static int
 is_gdb_breakpoint (enum bkpt_type type)
 {
-  return (type == gdb_breakpoint_Z0
-	  || type == gdb_breakpoint_Z1
-	  || type == gdb_breakpoint_Z2
-	  || type == gdb_breakpoint_Z3
-	  || type == gdb_breakpoint_Z4);
+  return (type == gdb_breakpoint_Z0 || type == gdb_breakpoint_Z1
+          || type == gdb_breakpoint_Z2 || type == gdb_breakpoint_Z3
+          || type == gdb_breakpoint_Z4);
 }
 
 bool
@@ -310,13 +308,13 @@ any_persistent_commands (process_info *proc)
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     {
       if (is_gdb_breakpoint (bp->type))
-	{
-	  struct gdb_breakpoint *gdb_bp = (struct gdb_breakpoint *) bp;
+        {
+          struct gdb_breakpoint *gdb_bp = (struct gdb_breakpoint *) bp;
 
-	  for (cl = gdb_bp->command_list; cl != NULL; cl = cl->next)
-	    if (cl->persistence)
-	      return true;
-	}
+          for (cl = gdb_bp->command_list; cl != NULL; cl = cl->next)
+            if (cl->persistence)
+              return true;
+        }
     }
 
   return false;
@@ -332,9 +330,7 @@ find_enabled_raw_code_breakpoint_at (CORE_ADDR addr, enum raw_bkpt_type type)
   struct raw_breakpoint *bp;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if (bp->pc == addr
-	&& bp->raw_type == type
-	&& bp->inserted >= 0)
+    if (bp->pc == addr && bp->raw_type == type && bp->inserted >= 0)
       return bp;
 
   return NULL;
@@ -371,18 +367,17 @@ insert_memory_breakpoint (struct raw_breakpoint *bp)
   if (err != 0)
     {
       threads_debug_printf ("Failed to read shadow memory of"
-			    " breakpoint at 0x%s (%s).",
-			    paddress (bp->pc), safe_strerror (err));
+                            " breakpoint at 0x%s (%s).",
+                            paddress (bp->pc), safe_strerror (err));
     }
   else
     {
       memcpy (bp->old_data, buf, bp_size (bp));
 
-      err = the_target->write_memory (bp->pc, bp_opcode (bp),
-				      bp_size (bp));
+      err = the_target->write_memory (bp->pc, bp_opcode (bp), bp_size (bp));
       if (err != 0)
-	threads_debug_printf ("Failed to insert breakpoint at 0x%s (%s).",
-			      paddress (bp->pc), safe_strerror (err));
+        threads_debug_printf ("Failed to insert breakpoint at 0x%s (%s).",
+                              paddress (bp->pc), safe_strerror (err));
     }
   return err != 0 ? -1 : 0;
 }
@@ -406,9 +401,9 @@ remove_memory_breakpoint (struct raw_breakpoint *bp)
   memcpy (buf, bp->old_data, bp_size (bp));
   err = target_write_memory (bp->pc, buf, bp_size (bp));
   if (err != 0)
-      threads_debug_printf ("Failed to uninsert raw breakpoint "
-			    "at 0x%s (%s) while deleting it.",
-			    paddress (bp->pc), safe_strerror (err));
+    threads_debug_printf ("Failed to uninsert raw breakpoint "
+                          "at 0x%s (%s) while deleting it.",
+                          paddress (bp->pc), safe_strerror (err));
 
   return err != 0 ? -1 : 0;
 }
@@ -419,7 +414,7 @@ remove_memory_breakpoint (struct raw_breakpoint *bp)
 
 static struct raw_breakpoint *
 set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
-		       int *err)
+                       int *err)
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp;
@@ -428,15 +423,14 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
     {
       bp = find_enabled_raw_code_breakpoint_at (where, type);
       if (bp != NULL && bp->kind != kind)
-	{
-	  /* A different kind than previously seen.  The previous
+        {
+          /* A different kind than previously seen.  The previous
 	     breakpoint must be gone then.  */
-	  threads_debug_printf
-	    ("Inconsistent breakpoint kind?  Was %d, now %d.",
-	     bp->kind, kind);
-	  bp->inserted = -1;
-	  bp = NULL;
-	}
+          threads_debug_printf (
+            "Inconsistent breakpoint kind?  Was %d, now %d.", bp->kind, kind);
+          bp->inserted = -1;
+          bp = NULL;
+        }
     }
   else
     bp = find_raw_breakpoint_at (where, type, kind);
@@ -455,12 +449,12 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
     {
       *err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
       if (*err != 0)
-	{
-	  threads_debug_printf ("Failed to insert breakpoint at 0x%s (%d).",
-				paddress (where), *err);
+        {
+          threads_debug_printf ("Failed to insert breakpoint at 0x%s (%d).",
+                                paddress (where), *err);
 
-	  return NULL;
-	}
+          return NULL;
+        }
 
       bp->inserted = 1;
     }
@@ -484,7 +478,6 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
    This means that a stopping breakpoint or tracepoint has higher
    "priority".  In turn, this allows having fast and slow tracepoints
    (and breakpoints) at the same address behave correctly.  */
-
 
 /* A fast tracepoint jump.  */
 
@@ -516,13 +509,10 @@ struct fast_tracepoint_jump
 };
 
 /* Fast tracepoint FP's jump instruction to insert.  */
-#define fast_tracepoint_jump_insn(fp) \
-  ((fp)->insn_and_shadow + 0)
+#define fast_tracepoint_jump_insn(fp) ((fp)->insn_and_shadow + 0)
 
 /* The shadow memory of fast tracepoint jump FP.  */
-#define fast_tracepoint_jump_shadow(fp) \
-  ((fp)->insn_and_shadow + (fp)->length)
-
+#define fast_tracepoint_jump_shadow(fp) ((fp)->insn_and_shadow + (fp)->length)
 
 /* Return the fast tracepoint jump set at WHERE.  */
 
@@ -560,16 +550,16 @@ delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
   while (bp)
     {
       if (bp == todel)
-	{
-	  if (--bp->refcount == 0)
-	    {
-	      struct fast_tracepoint_jump *prev_bp_link = *bp_link;
-	      unsigned char *buf;
+        {
+          if (--bp->refcount == 0)
+            {
+              struct fast_tracepoint_jump *prev_bp_link = *bp_link;
+              unsigned char *buf;
 
-	      /* Unlink it.  */
-	      *bp_link = bp->next;
+              /* Unlink it.  */
+              *bp_link = bp->next;
 
-	      /* Since there can be breakpoints inserted in the same
+              /* Since there can be breakpoints inserted in the same
 		 address range, we use `target_write_memory', which
 		 takes care of layering breakpoints on top of fast
 		 tracepoints, and on top of the buffer we pass it.
@@ -578,31 +568,31 @@ delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
 		 pass the current shadow contents, because
 		 target_write_memory updates any shadow memory with
 		 what we pass here, and we want that to be a nop.  */
-	      buf = (unsigned char *) alloca (bp->length);
-	      memcpy (buf, fast_tracepoint_jump_shadow (bp), bp->length);
-	      ret = target_write_memory (bp->pc, buf, bp->length);
-	      if (ret != 0)
-		{
-		  /* Something went wrong, relink the jump.  */
-		  *bp_link = prev_bp_link;
+              buf = (unsigned char *) alloca (bp->length);
+              memcpy (buf, fast_tracepoint_jump_shadow (bp), bp->length);
+              ret = target_write_memory (bp->pc, buf, bp->length);
+              if (ret != 0)
+                {
+                  /* Something went wrong, relink the jump.  */
+                  *bp_link = prev_bp_link;
 
-		  threads_debug_printf
-		    ("Failed to uninsert fast tracepoint jump "
-		     "at 0x%s (%s) while deleting it.",
-		     paddress (bp->pc), safe_strerror (ret));
-		  return ret;
-		}
+                  threads_debug_printf (
+                    "Failed to uninsert fast tracepoint jump "
+                    "at 0x%s (%s) while deleting it.",
+                    paddress (bp->pc), safe_strerror (ret));
+                  return ret;
+                }
 
-	      free (bp);
-	    }
+              free (bp);
+            }
 
-	  return 0;
-	}
+          return 0;
+        }
       else
-	{
-	  bp_link = &bp->next;
-	  bp = *bp_link;
-	}
+        {
+          bp_link = &bp->next;
+          bp = *bp_link;
+        }
     }
 
   warning ("Could not find fast tracepoint jump in list.");
@@ -616,8 +606,8 @@ inc_ref_fast_tracepoint_jump (struct fast_tracepoint_jump *jp)
 }
 
 struct fast_tracepoint_jump *
-set_fast_tracepoint_jump (CORE_ADDR where,
-			  unsigned char *insn, ULONGEST length)
+set_fast_tracepoint_jump (CORE_ADDR where, unsigned char *insn,
+                          ULONGEST length)
 {
   struct process_info *proc = current_process ();
   struct fast_tracepoint_jump *jp;
@@ -636,7 +626,8 @@ set_fast_tracepoint_jump (CORE_ADDR where,
   /* We don't, so create a new object.  Double the length, because the
      flexible array member holds both the jump insn, and the
      shadow.  */
-  jp = (struct fast_tracepoint_jump *) xcalloc (1, sizeof (*jp) + (length * 2));
+  jp
+    = (struct fast_tracepoint_jump *) xcalloc (1, sizeof (*jp) + (length * 2));
   jp->pc = where;
   jp->length = length;
   memcpy (fast_tracepoint_jump_insn (jp), insn, length);
@@ -650,8 +641,8 @@ set_fast_tracepoint_jump (CORE_ADDR where,
   if (err != 0)
     {
       threads_debug_printf ("Failed to read shadow memory of"
-			    " fast tracepoint at 0x%s (%s).",
-			    paddress (where), safe_strerror (err));
+                            " fast tracepoint at 0x%s (%s).",
+                            paddress (where), safe_strerror (err));
       free (jp);
       return NULL;
     }
@@ -673,9 +664,9 @@ set_fast_tracepoint_jump (CORE_ADDR where,
   err = target_write_memory (where, buf, length);
   if (err != 0)
     {
-      threads_debug_printf
-	("Failed to insert fast tracepoint jump at 0x%s (%s).",
-	 paddress (where), safe_strerror (err));
+      threads_debug_printf (
+        "Failed to insert fast tracepoint jump at 0x%s (%s).",
+        paddress (where), safe_strerror (err));
 
       /* Unlink it.  */
       proc->fast_tracepoint_jumps = jp->next;
@@ -699,8 +690,8 @@ uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
       /* This can happen when we remove all breakpoints while handling
 	 a step-over.  */
       threads_debug_printf ("Could not find fast tracepoint jump at 0x%s "
-			    "in list (uninserting).",
-			    paddress (pc));
+                            "in list (uninserting).",
+                            paddress (pc));
       return;
     }
 
@@ -723,13 +714,13 @@ uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
       memcpy (buf, fast_tracepoint_jump_shadow (jp), jp->length);
       err = target_write_memory (jp->pc, buf, jp->length);
       if (err != 0)
-	{
-	  jp->inserted = 1;
+        {
+          jp->inserted = 1;
 
-	  threads_debug_printf ("Failed to uninsert fast tracepoint jump at"
-				" 0x%s (%s).",
-				paddress (pc), safe_strerror (err));
-	}
+          threads_debug_printf ("Failed to uninsert fast tracepoint jump at"
+                                " 0x%s (%s).",
+                                paddress (pc), safe_strerror (err));
+        }
     }
 }
 
@@ -746,8 +737,8 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
       /* This can happen when we remove breakpoints when a tracepoint
 	 hit causes a tracing stop, while handling a step-over.  */
       threads_debug_printf ("Could not find fast tracepoint jump at 0x%s "
-			    "in list (reinserting).",
-			    paddress (where));
+                            "in list (reinserting).",
+                            paddress (where));
       return;
     }
 
@@ -772,8 +763,8 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
       jp->inserted = 0;
 
       threads_debug_printf ("Failed to reinsert fast tracepoint jump at"
-			    " 0x%s (%s).",
-			    paddress (where), safe_strerror (err));
+                            " 0x%s (%s).",
+                            paddress (where), safe_strerror (err));
     }
 }
 
@@ -786,8 +777,8 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
 
 static struct breakpoint *
 set_breakpoint (enum bkpt_type type, enum raw_bkpt_type raw_type,
-		CORE_ADDR where, int kind,
-		int (*handler) (CORE_ADDR), int *err)
+                CORE_ADDR where, int kind, int (*handler) (CORE_ADDR),
+                int *err)
 {
   struct process_info *proc = current_process ();
   struct breakpoint *bp;
@@ -818,7 +809,7 @@ set_breakpoint (enum bkpt_type type, enum raw_bkpt_type raw_type,
   else if (type == single_step_breakpoint)
     {
       struct single_step_breakpoint *ss_bp
-	= XCNEW (struct single_step_breakpoint);
+        = XCNEW (struct single_step_breakpoint);
 
       bp = (struct breakpoint *) ss_bp;
     }
@@ -838,15 +829,14 @@ set_breakpoint (enum bkpt_type type, enum raw_bkpt_type raw_type,
 
 static struct breakpoint *
 set_breakpoint_type_at (enum bkpt_type type, CORE_ADDR where,
-			int (*handler) (CORE_ADDR))
+                        int (*handler) (CORE_ADDR))
 {
   int err_ignored;
   CORE_ADDR placed_address = where;
   int breakpoint_kind = target_breakpoint_kind_from_pc (&placed_address);
 
-  return set_breakpoint (type, raw_bkpt_type_sw,
-			 placed_address, breakpoint_kind, handler,
-			 &err_ignored);
+  return set_breakpoint (type, raw_bkpt_type_sw, placed_address,
+                         breakpoint_kind, handler, &err_ignored);
 }
 
 /* See mem-break.h  */
@@ -856,7 +846,6 @@ set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
 {
   return set_breakpoint_type_at (other_breakpoint, where, handler);
 }
-
 
 static int
 delete_raw_breakpoint (struct process_info *proc, struct raw_breakpoint *todel)
@@ -870,37 +859,37 @@ delete_raw_breakpoint (struct process_info *proc, struct raw_breakpoint *todel)
   while (bp)
     {
       if (bp == todel)
-	{
-	  if (bp->inserted > 0)
-	    {
-	      struct raw_breakpoint *prev_bp_link = *bp_link;
+        {
+          if (bp->inserted > 0)
+            {
+              struct raw_breakpoint *prev_bp_link = *bp_link;
 
-	      *bp_link = bp->next;
+              *bp_link = bp->next;
 
-	      ret = the_target->remove_point (bp->raw_type, bp->pc,
-					      bp->kind, bp);
-	      if (ret != 0)
-		{
-		  /* Something went wrong, relink the breakpoint.  */
-		  *bp_link = prev_bp_link;
+              ret = the_target->remove_point (bp->raw_type, bp->pc, bp->kind,
+                                              bp);
+              if (ret != 0)
+                {
+                  /* Something went wrong, relink the breakpoint.  */
+                  *bp_link = prev_bp_link;
 
-		  threads_debug_printf ("Failed to uninsert raw breakpoint "
-					"at 0x%s while deleting it.",
-					paddress (bp->pc));
-		  return ret;
-		}
-	    }
-	  else
-	    *bp_link = bp->next;
+                  threads_debug_printf ("Failed to uninsert raw breakpoint "
+                                        "at 0x%s while deleting it.",
+                                        paddress (bp->pc));
+                  return ret;
+                }
+            }
+          else
+            *bp_link = bp->next;
 
-	  free (bp);
-	  return 0;
-	}
+          free (bp);
+          return 0;
+        }
       else
-	{
-	  bp_link = &bp->next;
-	  bp = *bp_link;
-	}
+        {
+          bp_link = &bp->next;
+          bp = *bp_link;
+        }
     }
 
   warning ("Could not find raw breakpoint in list.");
@@ -918,7 +907,7 @@ release_breakpoint (struct process_info *proc, struct breakpoint *bp)
     {
       ret = delete_raw_breakpoint (proc, bp->raw);
       if (ret != 0)
-	return ret;
+        return ret;
     }
   else
     bp->raw->refcount = newrefcount;
@@ -940,21 +929,21 @@ delete_breakpoint_1 (struct process_info *proc, struct breakpoint *todel)
   while (bp)
     {
       if (bp == todel)
-	{
-	  *bp_link = bp->next;
+        {
+          *bp_link = bp->next;
 
-	  err = release_breakpoint (proc, bp);
-	  if (err != 0)
-	    return err;
+          err = release_breakpoint (proc, bp);
+          if (err != 0)
+            return err;
 
-	  bp = *bp_link;
-	  return 0;
-	}
+          bp = *bp_link;
+          return 0;
+        }
       else
-	{
-	  bp_link = &bp->next;
-	  bp = *bp_link;
-	}
+        {
+          bp_link = &bp->next;
+          bp = *bp_link;
+        }
     }
 
   warning ("Could not find breakpoint in list.");
@@ -981,7 +970,7 @@ find_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind)
 
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     if (bp->type == type && bp->raw->pc == addr
-	&& (kind == -1 || bp->raw->kind == kind))
+        && (kind == -1 || bp->raw->kind == kind))
       return (struct gdb_breakpoint *) bp;
 
   return NULL;
@@ -991,7 +980,7 @@ static int
 z_type_supported (char z_type)
 {
   return (z_type >= '0' && z_type <= '4'
-	  && the_target->supports_z_point_type (z_type));
+          && the_target->supports_z_point_type (z_type));
 }
 
 /* Create a new GDB breakpoint of type Z_TYPE at ADDR with kind KIND.
@@ -1027,33 +1016,32 @@ set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind, int *err)
      Note this must be careful to not create a window where
      breakpoints are removed from the target, for non-stop, in case
      the target can poke at memory while the program is running.  */
-  if (z_type == Z_PACKET_SW_BP
-      || z_type == Z_PACKET_HW_BP)
+  if (z_type == Z_PACKET_SW_BP || z_type == Z_PACKET_HW_BP)
     {
       bp = find_gdb_breakpoint (z_type, addr, -1);
 
       if (bp != NULL)
-	{
-	  if (bp->base.raw->kind != kind)
-	    {
-	      /* A different kind than previously seen.  The previous
+        {
+          if (bp->base.raw->kind != kind)
+            {
+              /* A different kind than previously seen.  The previous
 		 breakpoint must be gone then.  */
-	      bp->base.raw->inserted = -1;
-	      delete_breakpoint ((struct breakpoint *) bp);
-	      bp = NULL;
-	    }
-	  else if (z_type == Z_PACKET_SW_BP)
-	    {
-	      /* Check if the breakpoint is actually gone from the
+              bp->base.raw->inserted = -1;
+              delete_breakpoint ((struct breakpoint *) bp);
+              bp = NULL;
+            }
+          else if (z_type == Z_PACKET_SW_BP)
+            {
+              /* Check if the breakpoint is actually gone from the
 		 target, due to an solib unload, for example.  Might
 		 as well validate _all_ breakpoints.  */
-	      validate_breakpoints ();
+              validate_breakpoints ();
 
-	      /* Breakpoints that don't pass validation are
+              /* Breakpoints that don't pass validation are
 		 deleted.  */
-	      bp = find_gdb_breakpoint (z_type, addr, -1);
-	    }
-	}
+              bp = find_gdb_breakpoint (z_type, addr, -1);
+            }
+        }
     }
   else
     {
@@ -1075,8 +1063,8 @@ set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind, int *err)
 
   raw_type = Z_packet_to_raw_bkpt_type (z_type);
   type = Z_packet_to_bkpt_type (z_type);
-  return (struct gdb_breakpoint *) set_breakpoint (type, raw_type, addr,
-						   kind, NULL, err);
+  return (struct gdb_breakpoint *) set_breakpoint (type, raw_type, addr, kind,
+                                                   NULL, err);
 }
 
 /* Delete a GDB breakpoint of type Z_TYPE and kind KIND previously
@@ -1165,7 +1153,7 @@ clear_breakpoint_conditions_and_commands (struct gdb_breakpoint *bp)
 
 static void
 add_condition_to_breakpoint (struct gdb_breakpoint *bp,
-			     struct agent_expr *condition)
+                             struct agent_expr *condition)
 {
   struct point_cond_list *new_cond;
 
@@ -1237,8 +1225,7 @@ gdb_condition_true_at_breakpoint_z_type (char z_type, CORE_ADDR addr)
 
      If we failed to evaluate the expression, TRUE is returned.  This
      forces GDB to reevaluate the conditions.  */
-  for (cl = bp->cond_list;
-       cl && !value && !err; cl = cl->next)
+  for (cl = bp->cond_list; cl && !value && !err; cl = cl->next)
     {
       /* Evaluate the condition.  */
       err = gdb_eval_agent_expr (&ctx, cl->cond, &value);
@@ -1255,14 +1242,14 @@ gdb_condition_true_at_breakpoint (CORE_ADDR where)
 {
   /* Only check code (software or hardware) breakpoints.  */
   return (gdb_condition_true_at_breakpoint_z_type (Z_PACKET_SW_BP, where)
-	  || gdb_condition_true_at_breakpoint_z_type (Z_PACKET_HW_BP, where));
+          || gdb_condition_true_at_breakpoint_z_type (Z_PACKET_HW_BP, where));
 }
 
 /* Add commands COMMANDS to GDBserver's breakpoint BP.  */
 
 static void
 add_commands_to_breakpoint (struct gdb_breakpoint *bp,
-			    struct agent_expr *commands, int persist)
+                            struct agent_expr *commands, int persist)
 {
   struct point_command_list *new_cmd;
 
@@ -1280,7 +1267,7 @@ add_commands_to_breakpoint (struct gdb_breakpoint *bp,
 
 int
 add_breakpoint_commands (struct gdb_breakpoint *bp, const char **command,
-			 int persist)
+                         int persist)
 {
   const char *actparm = *command;
   struct agent_expr *cmd;
@@ -1318,8 +1305,8 @@ gdb_no_commands_at_breakpoint_z_type (char z_type, CORE_ADDR addr)
     return 1;
 
   threads_debug_printf ("at 0x%s, type Z%c, bp command_list is 0x%s",
-			paddress (addr), z_type,
-			phex_nz ((uintptr_t) bp->command_list, 0));
+                        paddress (addr), z_type,
+                        phex_nz ((uintptr_t) bp->command_list, 0));
   return (bp->command_list == NULL);
 }
 
@@ -1331,7 +1318,7 @@ gdb_no_commands_at_breakpoint (CORE_ADDR where)
 {
   /* Only check code (software or hardware) breakpoints.  */
   return (gdb_no_commands_at_breakpoint_z_type (Z_PACKET_SW_BP, where)
-	  && gdb_no_commands_at_breakpoint_z_type (Z_PACKET_HW_BP, where));
+          && gdb_no_commands_at_breakpoint_z_type (Z_PACKET_HW_BP, where));
 }
 
 /* Run a breakpoint's commands.  Returns 0 if there was a problem
@@ -1354,15 +1341,14 @@ run_breakpoint_commands_z_type (char z_type, CORE_ADDR addr)
   ctx.tframe = NULL;
   ctx.tpoint = NULL;
 
-  for (cl = bp->command_list;
-       cl && !value && !err; cl = cl->next)
+  for (cl = bp->command_list; cl && !value && !err; cl = cl->next)
     {
       /* Run the command.  */
       err = gdb_eval_agent_expr (&ctx, cl->cmd, &value);
 
       /* If one command has a problem, stop digging the hole deeper.  */
       if (err)
-	return 0;
+        return 0;
     }
 
   return 1;
@@ -1384,7 +1370,7 @@ gdb_breakpoint_here (CORE_ADDR where)
 {
   /* Only check code (software or hardware) breakpoints.  */
   return (find_gdb_breakpoint (Z_PACKET_SW_BP, where, -1) != NULL
-	  || find_gdb_breakpoint (Z_PACKET_HW_BP, where, -1) != NULL);
+          || find_gdb_breakpoint (Z_PACKET_HW_BP, where, -1) != NULL);
 }
 
 void
@@ -1394,8 +1380,8 @@ set_single_step_breakpoint (CORE_ADDR stop_at, ptid_t ptid)
 
   gdb_assert (current_ptid.pid () == ptid.pid ());
 
-  bp = (struct single_step_breakpoint *) set_breakpoint_type_at (single_step_breakpoint,
-								stop_at, NULL);
+  bp = (struct single_step_breakpoint *)
+    set_breakpoint_type_at (single_step_breakpoint, stop_at, NULL);
   bp->ptid = ptid;
 }
 
@@ -1411,20 +1397,20 @@ delete_single_step_breakpoints (struct thread_info *thread)
   while (bp)
     {
       if (bp->type == single_step_breakpoint
-	  && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
-	{
-	  scoped_restore_current_thread restore_thread;
+          && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+        {
+          scoped_restore_current_thread restore_thread;
 
-	  switch_to_thread (thread);
-	  *bp_link = bp->next;
-	  release_breakpoint (proc, bp);
-	  bp = *bp_link;
-	}
+          switch_to_thread (thread);
+          *bp_link = bp->next;
+          release_breakpoint (proc, bp);
+          bp = *bp_link;
+        }
       else
-	{
-	  bp_link = &bp->next;
-	  bp = *bp_link;
-	}
+        {
+          bp_link = &bp->next;
+          bp = *bp_link;
+        }
     }
 }
 
@@ -1434,7 +1420,7 @@ uninsert_raw_breakpoint (struct raw_breakpoint *bp)
   if (bp->inserted < 0)
     {
       threads_debug_printf ("Breakpoint at %s is marked insert-disabled.",
-			    paddress (bp->pc));
+                            paddress (bp->pc));
     }
   else if (bp->inserted > 0)
     {
@@ -1444,12 +1430,12 @@ uninsert_raw_breakpoint (struct raw_breakpoint *bp)
 
       err = the_target->remove_point (bp->raw_type, bp->pc, bp->kind, bp);
       if (err != 0)
-	{
-	  bp->inserted = 1;
+        {
+          bp->inserted = 1;
 
-	  threads_debug_printf ("Failed to uninsert raw breakpoint at 0x%s.",
-				paddress (bp->pc));
-	}
+          threads_debug_printf ("Failed to uninsert raw breakpoint at 0x%s.",
+                                paddress (bp->pc));
+        }
     }
 }
 
@@ -1461,14 +1447,13 @@ uninsert_breakpoints_at (CORE_ADDR pc)
   int found = 0;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if ((bp->raw_type == raw_bkpt_type_sw
-	 || bp->raw_type == raw_bkpt_type_hw)
-	&& bp->pc == pc)
+    if ((bp->raw_type == raw_bkpt_type_sw || bp->raw_type == raw_bkpt_type_hw)
+        && bp->pc == pc)
       {
-	found = 1;
+        found = 1;
 
-	if (bp->inserted)
-	  uninsert_raw_breakpoint (bp);
+        if (bp->inserted)
+          uninsert_raw_breakpoint (bp);
       }
 
   if (!found)
@@ -1476,8 +1461,8 @@ uninsert_breakpoints_at (CORE_ADDR pc)
       /* This can happen when we remove all breakpoints while handling
 	 a step-over.  */
       threads_debug_printf ("Could not find breakpoint at 0x%s "
-			    "in list (uninserting).",
-			    paddress (pc));
+                            "in list (uninserting).",
+                            paddress (pc));
     }
 }
 
@@ -1488,9 +1473,8 @@ uninsert_all_breakpoints (void)
   struct raw_breakpoint *bp;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if ((bp->raw_type == raw_bkpt_type_sw
-	 || bp->raw_type == raw_bkpt_type_hw)
-	&& bp->inserted)
+    if ((bp->raw_type == raw_bkpt_type_sw || bp->raw_type == raw_bkpt_type_hw)
+        && bp->inserted)
       uninsert_raw_breakpoint (bp);
 }
 
@@ -1502,21 +1486,21 @@ uninsert_single_step_breakpoints (struct thread_info *thread)
 
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     {
-    if (bp->type == single_step_breakpoint
-	&& ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
-      {
-	gdb_assert (bp->raw->inserted > 0);
+      if (bp->type == single_step_breakpoint
+          && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+        {
+          gdb_assert (bp->raw->inserted > 0);
 
-	/* Only uninsert the raw breakpoint if it only belongs to a
+          /* Only uninsert the raw breakpoint if it only belongs to a
 	   reinsert breakpoint.  */
-	if (bp->raw->refcount == 1)
-	  {
-	    scoped_restore_current_thread restore_thread;
+          if (bp->raw->refcount == 1)
+            {
+              scoped_restore_current_thread restore_thread;
 
-	    switch_to_thread (thread);
-	    uninsert_raw_breakpoint (bp->raw);
-	  }
-      }
+              switch_to_thread (thread);
+              uninsert_raw_breakpoint (bp->raw);
+            }
+        }
     }
 }
 
@@ -1533,7 +1517,7 @@ reinsert_raw_breakpoint (struct raw_breakpoint *bp)
     bp->inserted = 1;
   else
     threads_debug_printf ("Failed to reinsert breakpoint at 0x%s (%d).",
-			  paddress (bp->pc), err);
+                          paddress (bp->pc), err);
 }
 
 void
@@ -1544,13 +1528,12 @@ reinsert_breakpoints_at (CORE_ADDR pc)
   int found = 0;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if ((bp->raw_type == raw_bkpt_type_sw
-	 || bp->raw_type == raw_bkpt_type_hw)
-	&& bp->pc == pc)
+    if ((bp->raw_type == raw_bkpt_type_sw || bp->raw_type == raw_bkpt_type_hw)
+        && bp->pc == pc)
       {
-	found = 1;
+        found = 1;
 
-	reinsert_raw_breakpoint (bp);
+        reinsert_raw_breakpoint (bp);
       }
 
   if (!found)
@@ -1558,8 +1541,8 @@ reinsert_breakpoints_at (CORE_ADDR pc)
       /* This can happen when we remove all breakpoints while handling
 	 a step-over.  */
       threads_debug_printf ("Could not find raw breakpoint at 0x%s "
-			    "in list (reinserting).",
-			    paddress (pc));
+                            "in list (reinserting).",
+                            paddress (pc));
     }
 }
 
@@ -1575,13 +1558,13 @@ has_single_step_breakpoints (struct thread_info *thread)
   while (bp)
     {
       if (bp->type == single_step_breakpoint
-	  && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
-	return 1;
+          && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+        return 1;
       else
-	{
-	  bp_link = &bp->next;
-	  bp = *bp_link;
-	}
+        {
+          bp_link = &bp->next;
+          bp = *bp_link;
+        }
     }
 
   return 0;
@@ -1594,9 +1577,8 @@ reinsert_all_breakpoints (void)
   struct raw_breakpoint *bp;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if ((bp->raw_type == raw_bkpt_type_sw
-	 || bp->raw_type == raw_bkpt_type_hw)
-	&& !bp->inserted)
+    if ((bp->raw_type == raw_bkpt_type_sw || bp->raw_type == raw_bkpt_type_hw)
+        && !bp->inserted)
       reinsert_raw_breakpoint (bp);
 }
 
@@ -1609,18 +1591,18 @@ reinsert_single_step_breakpoints (struct thread_info *thread)
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     {
       if (bp->type == single_step_breakpoint
-	  && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
-	{
-	  gdb_assert (bp->raw->inserted > 0);
+          && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+        {
+          gdb_assert (bp->raw->inserted > 0);
 
-	  if (bp->raw->refcount == 1)
-	    {
-	      scoped_restore_current_thread restore_thread;
+          if (bp->raw->refcount == 1)
+            {
+              scoped_restore_current_thread restore_thread;
 
-	      switch_to_thread (thread);
-	      reinsert_raw_breakpoint (bp->raw);
-	    }
-	}
+              switch_to_thread (thread);
+              reinsert_raw_breakpoint (bp->raw);
+            }
+        }
     }
 }
 
@@ -1638,31 +1620,31 @@ check_breakpoints (CORE_ADDR stop_pc)
       struct raw_breakpoint *raw = bp->raw;
 
       if ((raw->raw_type == raw_bkpt_type_sw
-	   || raw->raw_type == raw_bkpt_type_hw)
-	  && raw->pc == stop_pc)
-	{
-	  if (!raw->inserted)
-	    {
-	      warning ("Hit a removed breakpoint?");
-	      return;
-	    }
+           || raw->raw_type == raw_bkpt_type_hw)
+          && raw->pc == stop_pc)
+        {
+          if (!raw->inserted)
+            {
+              warning ("Hit a removed breakpoint?");
+              return;
+            }
 
-	  if (bp->type == other_breakpoint)
-	    {
-	      struct other_breakpoint *other_bp
-		= (struct other_breakpoint *) bp;
+          if (bp->type == other_breakpoint)
+            {
+              struct other_breakpoint *other_bp
+                = (struct other_breakpoint *) bp;
 
-	      if (other_bp->handler != NULL && (*other_bp->handler) (stop_pc))
-		{
-		  *bp_link = bp->next;
+              if (other_bp->handler != NULL && (*other_bp->handler) (stop_pc))
+                {
+                  *bp_link = bp->next;
 
-		  release_breakpoint (proc, bp);
+                  release_breakpoint (proc, bp);
 
-		  bp = *bp_link;
-		  continue;
-		}
-	    }
-	}
+                  bp = *bp_link;
+                  continue;
+                }
+            }
+        }
 
       bp_link = &bp->next;
       bp = *bp_link;
@@ -1676,9 +1658,8 @@ breakpoint_here (CORE_ADDR addr)
   struct raw_breakpoint *bp;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if ((bp->raw_type == raw_bkpt_type_sw
-	 || bp->raw_type == raw_bkpt_type_hw)
-	&& bp->pc == addr)
+    if ((bp->raw_type == raw_bkpt_type_sw || bp->raw_type == raw_bkpt_type_hw)
+        && bp->pc == addr)
       return 1;
 
   return 0;
@@ -1691,10 +1672,8 @@ breakpoint_inserted_here (CORE_ADDR addr)
   struct raw_breakpoint *bp;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if ((bp->raw_type == raw_bkpt_type_sw
-	 || bp->raw_type == raw_bkpt_type_hw)
-	&& bp->pc == addr
-	&& bp->inserted)
+    if ((bp->raw_type == raw_bkpt_type_sw || bp->raw_type == raw_bkpt_type_hw)
+        && bp->pc == addr && bp->inserted)
       return 1;
 
   return 0;
@@ -1709,9 +1688,7 @@ software_breakpoint_inserted_here (CORE_ADDR addr)
   struct raw_breakpoint *bp;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if (bp->raw_type == raw_bkpt_type_sw
-	&& bp->pc == addr
-	&& bp->inserted)
+    if (bp->raw_type == raw_bkpt_type_sw && bp->pc == addr && bp->inserted)
       return 1;
 
   return 0;
@@ -1726,9 +1703,7 @@ hardware_breakpoint_inserted_here (CORE_ADDR addr)
   struct raw_breakpoint *bp;
 
   for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
-    if (bp->raw_type == raw_bkpt_type_hw
-	&& bp->pc == addr
-	&& bp->inserted)
+    if (bp->raw_type == raw_bkpt_type_hw && bp->pc == addr && bp->inserted)
       return 1;
 
   return 0;
@@ -1743,9 +1718,8 @@ single_step_breakpoint_inserted_here (CORE_ADDR addr)
   struct breakpoint *bp;
 
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
-    if (bp->type == single_step_breakpoint
-	&& bp->raw->pc == addr
-	&& bp->raw->inserted)
+    if (bp->type == single_step_breakpoint && bp->raw->pc == addr
+        && bp->raw->inserted)
       return 1;
 
   return 0;
@@ -1782,12 +1756,12 @@ delete_disabled_breakpoints (void)
     {
       next = bp->next;
       if (bp->raw->inserted < 0)
-	{
-	  /* If single_step_breakpoints become disabled, that means the
+        {
+          /* If single_step_breakpoints become disabled, that means the
 	     manipulations (insertion and removal) of them are wrong.  */
-	  gdb_assert (bp->type != single_step_breakpoint);
-	  delete_breakpoint_1 (proc, bp);
-	}
+          gdb_assert (bp->type != single_step_breakpoint);
+          delete_breakpoint_1 (proc, bp);
+        }
     }
 }
 
@@ -1809,7 +1783,7 @@ validate_breakpoints (void)
       struct raw_breakpoint *raw = bp->raw;
 
       if (raw->raw_type == raw_bkpt_type_sw && raw->inserted > 0)
-	validate_inserted_breakpoint (raw);
+        validate_inserted_breakpoint (raw);
     }
 
   delete_disabled_breakpoints ();
@@ -1831,29 +1805,28 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
       int copy_offset, copy_len, buf_offset;
 
       gdb_assert (fast_tracepoint_jump_shadow (jp) >= buf + mem_len
-		  || buf >= fast_tracepoint_jump_shadow (jp) + (jp)->length);
+                  || buf >= fast_tracepoint_jump_shadow (jp) + (jp)->length);
 
       if (mem_addr >= bp_end)
-	continue;
+        continue;
       if (jp->pc >= mem_end)
-	continue;
+        continue;
 
       start = jp->pc;
       if (mem_addr > start)
-	start = mem_addr;
+        start = mem_addr;
 
       end = bp_end;
       if (end > mem_end)
-	end = mem_end;
+        end = mem_end;
 
       copy_len = end - start;
       copy_offset = start - jp->pc;
       buf_offset = start - mem_addr;
 
       if (jp->inserted)
-	memcpy (buf + buf_offset,
-		fast_tracepoint_jump_shadow (jp) + copy_offset,
-		copy_len);
+        memcpy (buf + buf_offset,
+                fast_tracepoint_jump_shadow (jp) + copy_offset, copy_len);
     }
 
   for (; bp != NULL; bp = bp->next)
@@ -1863,35 +1836,35 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
       int copy_offset, copy_len, buf_offset;
 
       if (bp->raw_type != raw_bkpt_type_sw)
-	continue;
+        continue;
 
       gdb_assert (bp->old_data >= buf + mem_len
-		  || buf >= &bp->old_data[sizeof (bp->old_data)]);
+                  || buf >= &bp->old_data[sizeof (bp->old_data)]);
 
       if (mem_addr >= bp_end)
-	continue;
+        continue;
       if (bp->pc >= mem_end)
-	continue;
+        continue;
 
       start = bp->pc;
       if (mem_addr > start)
-	start = mem_addr;
+        start = mem_addr;
 
       end = bp_end;
       if (end > mem_end)
-	end = mem_end;
+        end = mem_end;
 
       copy_len = end - start;
       copy_offset = start - bp->pc;
       buf_offset = start - mem_addr;
 
       if (bp->inserted > 0)
-	{
-	  if (validate_inserted_breakpoint (bp))
-	    memcpy (buf + buf_offset, bp->old_data + copy_offset, copy_len);
-	  else
-	    disabled_one = 1;
-	}
+        {
+          if (validate_inserted_breakpoint (bp))
+            memcpy (buf + buf_offset, bp->old_data + copy_offset, copy_len);
+          else
+            disabled_one = 1;
+        }
     }
 
   if (disabled_one)
@@ -1900,7 +1873,7 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 
 void
 check_mem_write (CORE_ADDR mem_addr, unsigned char *buf,
-		 const unsigned char *myaddr, int mem_len)
+                 const unsigned char *myaddr, int mem_len)
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp = proc->raw_breakpoints;
@@ -1917,32 +1890,33 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf,
       int copy_offset, copy_len, buf_offset;
 
       gdb_assert (fast_tracepoint_jump_shadow (jp) >= myaddr + mem_len
-		  || myaddr >= fast_tracepoint_jump_shadow (jp) + (jp)->length);
+                  || myaddr
+                       >= fast_tracepoint_jump_shadow (jp) + (jp)->length);
       gdb_assert (fast_tracepoint_jump_insn (jp) >= buf + mem_len
-		  || buf >= fast_tracepoint_jump_insn (jp) + (jp)->length);
+                  || buf >= fast_tracepoint_jump_insn (jp) + (jp)->length);
 
       if (mem_addr >= jp_end)
-	continue;
+        continue;
       if (jp->pc >= mem_end)
-	continue;
+        continue;
 
       start = jp->pc;
       if (mem_addr > start)
-	start = mem_addr;
+        start = mem_addr;
 
       end = jp_end;
       if (end > mem_end)
-	end = mem_end;
+        end = mem_end;
 
       copy_len = end - start;
       copy_offset = start - jp->pc;
       buf_offset = start - mem_addr;
 
       memcpy (fast_tracepoint_jump_shadow (jp) + copy_offset,
-	      myaddr + buf_offset, copy_len);
+              myaddr + buf_offset, copy_len);
       if (jp->inserted)
-	memcpy (buf + buf_offset,
-		fast_tracepoint_jump_insn (jp) + copy_offset, copy_len);
+        memcpy (buf + buf_offset, fast_tracepoint_jump_insn (jp) + copy_offset,
+                copy_len);
     }
 
   for (; bp != NULL; bp = bp->next)
@@ -1952,23 +1926,23 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf,
       int copy_offset, copy_len, buf_offset;
 
       if (bp->raw_type != raw_bkpt_type_sw)
-	continue;
+        continue;
 
       gdb_assert (bp->old_data >= myaddr + mem_len
-		  || myaddr >= &bp->old_data[sizeof (bp->old_data)]);
+                  || myaddr >= &bp->old_data[sizeof (bp->old_data)]);
 
       if (mem_addr >= bp_end)
-	continue;
+        continue;
       if (bp->pc >= mem_end)
-	continue;
+        continue;
 
       start = bp->pc;
       if (mem_addr > start)
-	start = mem_addr;
+        start = mem_addr;
 
       end = bp_end;
       if (end > mem_end)
-	end = mem_end;
+        end = mem_end;
 
       copy_len = end - start;
       copy_offset = start - bp->pc;
@@ -1976,12 +1950,12 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf,
 
       memcpy (bp->old_data + copy_offset, myaddr + buf_offset, copy_len);
       if (bp->inserted > 0)
-	{
-	  if (validate_inserted_breakpoint (bp))
-	    memcpy (buf + buf_offset, bp_opcode (bp) + copy_offset, copy_len);
-	  else
-	    disabled_one = 1;
-	}
+        {
+          if (validate_inserted_breakpoint (bp))
+            memcpy (buf + buf_offset, bp_opcode (bp) + copy_offset, copy_len);
+          else
+            disabled_one = 1;
+        }
     }
 
   if (disabled_one)
@@ -2070,24 +2044,22 @@ clone_one_breakpoint (const struct breakpoint *src, ptid_t ptid)
 
       /* Clone the condition list.  */
       for (current_cond = ((struct gdb_breakpoint *) src)->cond_list;
-	   current_cond != NULL;
-	   current_cond = current_cond->next)
-	{
-	  new_cond = XCNEW (struct point_cond_list);
-	  new_cond->cond = clone_agent_expr (current_cond->cond);
-	  APPEND_TO_LIST (&gdb_dest->cond_list, new_cond, cond_tail);
-	}
+           current_cond != NULL; current_cond = current_cond->next)
+        {
+          new_cond = XCNEW (struct point_cond_list);
+          new_cond->cond = clone_agent_expr (current_cond->cond);
+          APPEND_TO_LIST (&gdb_dest->cond_list, new_cond, cond_tail);
+        }
 
       /* Clone the command list.  */
       for (current_cmd = ((struct gdb_breakpoint *) src)->command_list;
-	   current_cmd != NULL;
-	   current_cmd = current_cmd->next)
-	{
-	  new_cmd = XCNEW (struct point_command_list);
-	  new_cmd->cmd = clone_agent_expr (current_cmd->cmd);
-	  new_cmd->persistence = current_cmd->persistence;
-	  APPEND_TO_LIST (&gdb_dest->command_list, new_cmd, cmd_tail);
-	}
+           current_cmd != NULL; current_cmd = current_cmd->next)
+        {
+          new_cmd = XCNEW (struct point_command_list);
+          new_cmd->cmd = clone_agent_expr (current_cmd->cmd);
+          new_cmd->persistence = current_cmd->persistence;
+          APPEND_TO_LIST (&gdb_dest->command_list, new_cmd, cmd_tail);
+        }
 
       dest = (struct breakpoint *) gdb_dest;
     }
@@ -2101,7 +2073,7 @@ clone_one_breakpoint (const struct breakpoint *src, ptid_t ptid)
   else if (src->type == single_step_breakpoint)
     {
       struct single_step_breakpoint *ss_dest
-	= XCNEW (struct single_step_breakpoint);
+        = XCNEW (struct single_step_breakpoint);
 
       dest = (struct breakpoint *) ss_dest;
       /* Since single-step breakpoint is thread specific, don't copy
@@ -2121,7 +2093,7 @@ clone_one_breakpoint (const struct breakpoint *src, ptid_t ptid)
 
 void
 clone_all_breakpoints (struct thread_info *child_thread,
-		       const struct thread_info *parent_thread)
+                       const struct thread_info *parent_thread)
 {
   const struct breakpoint *bp;
   struct breakpoint *new_bkpt;

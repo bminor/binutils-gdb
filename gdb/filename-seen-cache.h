@@ -29,6 +29,7 @@
 class filename_seen_cache
 {
 public:
+
   filename_seen_cache ();
 
   DISABLE_COPY_AND_ASSIGN (filename_seen_cache);
@@ -47,18 +48,18 @@ public:
      filename is passed as argument to CALLBACK.  */
   void traverse (gdb::function_view<void (const char *filename)> callback)
   {
-    auto erased_cb = [] (void **slot, void *info) -> int
-      {
-	auto filename = (const char *) *slot;
-	auto restored_cb = (decltype (callback) *) info;
-	(*restored_cb) (filename);
-	return 1;
-      };
+    auto erased_cb = [] (void **slot, void *info) -> int {
+      auto filename = (const char *) *slot;
+      auto restored_cb = (decltype (callback) *) info;
+      (*restored_cb) (filename);
+      return 1;
+    };
 
     htab_traverse_noresize (m_tab.get (), erased_cb, &callback);
   }
 
 private:
+
   /* Table of files seen so far.  */
   htab_up m_tab;
 };

@@ -33,6 +33,7 @@
 class or1k_linux_nat_target final : public linux_nat_target
 {
 public:
+
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *regcache, int regnum) override;
   void store_registers (struct regcache *regcache, int regnum) override;
@@ -117,8 +118,8 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregs)
 }
 
 void
-fill_fpregset (const struct regcache *regcache,
-	       gdb_fpregset_t *fpregs, int regno)
+fill_fpregset (const struct regcache *regcache, gdb_fpregset_t *fpregs,
+	       int regno)
 {
 }
 
@@ -138,11 +139,10 @@ or1k_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   int tid;
 
-  tid = get_ptrace_pid (regcache->ptid());
+  tid = get_ptrace_pid (regcache->ptid ());
 
   if ((regnum >= OR1K_ZERO_REGNUM && regnum < OR1K_MAX_GPR_REGS)
-      || (regnum == OR1K_NPC_REGNUM)
-      || (regnum == -1))
+      || (regnum == OR1K_NPC_REGNUM) || (regnum == -1))
     {
       struct iovec iov;
       elf_gregset_t regs;
@@ -150,9 +150,9 @@ or1k_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       iov.iov_base = &regs;
       iov.iov_len = sizeof (regs);
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, (PTRACE_TYPE_ARG3) &iov)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
       else
 	supply_gregset_regnum (regcache, &regs, regnum);
     }
@@ -172,8 +172,7 @@ or1k_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
   tid = get_ptrace_pid (regcache->ptid ());
 
   if ((regnum >= OR1K_ZERO_REGNUM && regnum < OR1K_MAX_GPR_REGS)
-      || (regnum == OR1K_NPC_REGNUM)
-      || (regnum == -1))
+      || (regnum == OR1K_NPC_REGNUM) || (regnum == -1))
     {
       struct iovec iov;
       elf_gregset_t regs;
@@ -181,16 +180,17 @@ or1k_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
       iov.iov_base = &regs;
       iov.iov_len = sizeof (regs);
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS,
-		  (PTRACE_TYPE_ARG3) &iov) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, (PTRACE_TYPE_ARG3) &iov)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
       else
 	{
 	  fill_gregset (regcache, &regs, regnum);
 
 	  if (ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS,
-		      (PTRACE_TYPE_ARG3) &iov) == -1)
-	    perror_with_name (_("Couldn't set registers"));
+		      (PTRACE_TYPE_ARG3) &iov)
+	      == -1)
+	    perror_with_name (_ ("Couldn't set registers"));
 	}
     }
 
@@ -201,6 +201,7 @@ or1k_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 /* Initialize OpenRISC Linux native support.  */
 
 void _initialize_or1k_linux_nat ();
+
 void
 _initialize_or1k_linux_nat ()
 {

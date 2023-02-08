@@ -87,8 +87,7 @@ struct stscm_deleter
   /* Helper function for stscm_del_objfile_symtabs to mark the symtab
      as invalid.  */
 
-  static int
-  stscm_mark_symtab_invalid (void **slot, void *info)
+  static int stscm_mark_symtab_invalid (void **slot, void *info)
   {
     symtab_smob *st_smob = (symtab_smob *) *slot;
 
@@ -105,8 +104,8 @@ struct stscm_deleter
 };
 
 static const registry<objfile>::key<htab, stscm_deleter>
-     stscm_objfile_data_key;
-
+  stscm_objfile_data_key;
+
 /* Administrivia for symtab smobs.  */
 
 /* Helper function to hash a symbol_smob.  */
@@ -127,8 +126,7 @@ stscm_eq_symtab_smob (const void *ap, const void *bp)
   const symtab_smob *a = (const symtab_smob *) ap;
   const symtab_smob *b = (const symtab_smob *) bp;
 
-  return (a->symtab == b->symtab
-	  && a->symtab != NULL);
+  return (a->symtab == b->symtab && a->symtab != NULL);
 }
 
 /* Return the struct symtab pointer -> SCM mapping table.
@@ -180,8 +178,8 @@ stscm_print_symtab_smob (SCM self, SCM port, scm_print_state *pstate)
   gdbscm_printf (port, "#<%s ", symtab_smob_name);
   gdbscm_printf (port, "%s",
 		 st_smob->symtab != NULL
-		 ? symtab_to_filename_for_display (st_smob->symtab)
-		 : "<invalid>");
+		   ? symtab_to_filename_for_display (st_smob->symtab)
+		   : "<invalid>");
   scm_puts (">", port);
 
   scm_remember_upto_here_1 (self);
@@ -195,8 +193,8 @@ stscm_print_symtab_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 stscm_make_symtab_smob (void)
 {
-  symtab_smob *st_smob = (symtab_smob *)
-    scm_gc_malloc (sizeof (symtab_smob), symtab_smob_name);
+  symtab_smob *st_smob
+    = (symtab_smob *) scm_gc_malloc (sizeof (symtab_smob), symtab_smob_name);
   SCM st_scm;
 
   st_smob->symtab = NULL;
@@ -244,7 +242,7 @@ stscm_scm_from_symtab (struct symtab *symtab)
   st_smob = (symtab_smob *) SCM_SMOB_DATA (st_scm);
   st_smob->symtab = symtab;
   gdbscm_fill_eqable_gsmob_ptr_slot (slot, &st_smob->base);
- 
+
   return st_scm;
 }
 
@@ -293,13 +291,12 @@ stscm_get_valid_symtab_smob_arg_unsafe (SCM self, int arg_pos,
   if (!stscm_is_valid (st_smob))
     {
       gdbscm_invalid_object_error (func_name, arg_pos, self,
-				   _("<gdb:symtab>"));
+				   _ ("<gdb:symtab>"));
     }
 
   return st_smob;
 }
 
-
 /* Symbol table methods.  */
 
 /* (symtab-valid? <gdb:symtab>) -> boolean
@@ -383,7 +380,7 @@ gdbscm_symtab_static_block (SCM self)
 
   return bkscm_scm_from_block (block, symtab->compunit ()->objfile ());
 }
-
+
 /* Administrivia for sal (symtab-and-line) smobs.  */
 
 /* The smob "print" function for <gdb:sal>.  */
@@ -508,13 +505,12 @@ stscm_get_valid_sal_smob_arg (SCM self, int arg_pos, const char *func_name)
 
   if (!stscm_sal_is_valid (s_smob))
     {
-      gdbscm_invalid_object_error (func_name, arg_pos, self,
-				   _("<gdb:sal>"));
+      gdbscm_invalid_object_error (func_name, arg_pos, self, _ ("<gdb:sal>"));
     }
 
   return s_smob;
 }
-
+
 /* sal methods */
 
 /* (sal-valid? <gdb:sal>) -> boolean
@@ -603,69 +599,54 @@ gdbscm_find_pc_line (SCM pc_scm)
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return stscm_scm_from_sal (sal);
 }
-
+
 /* Initialize the Scheme symbol support.  */
 
-static const scheme_function symtab_functions[] =
-{
-  { "symtab?", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_p),
-    "\
+static const scheme_function symtab_functions[] = {
+  { "symtab?", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_p), "\
 Return #t if the object is a <gdb:symtab> object." },
 
-  { "symtab-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_valid_p),
-    "\
+  { "symtab-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_valid_p), "\
 Return #t if the symtab still exists in GDB.\n\
 Symtabs are deleted when the corresponding objfile is freed." },
 
-  { "symtab-filename", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_filename),
-    "\
+  { "symtab-filename", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_filename), "\
 Return the symtab's source file name." },
 
-  { "symtab-fullname", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_fullname),
-    "\
+  { "symtab-fullname", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_fullname), "\
 Return the symtab's full source file name." },
 
-  { "symtab-objfile", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_objfile),
-    "\
+  { "symtab-objfile", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_objfile), "\
 Return the symtab's objfile." },
 
   { "symtab-global-block", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_symtab_global_block),
-    "\
+    as_a_scm_t_subr (gdbscm_symtab_global_block), "\
 Return the symtab's global block." },
 
   { "symtab-static-block", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_symtab_static_block),
-    "\
+    as_a_scm_t_subr (gdbscm_symtab_static_block), "\
 Return the symtab's static block." },
 
-  { "sal?", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_p),
-    "\
+  { "sal?", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_p), "\
 Return #t if the object is a <gdb:sal> (symtab-and-line) object." },
 
-  { "sal-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_valid_p),
-    "\
+  { "sal-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_valid_p), "\
 Return #t if the symtab for the sal still exists in GDB.\n\
 Symtabs are deleted when the corresponding objfile is freed." },
 
-  { "sal-symtab", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_symtab),
-    "\
+  { "sal-symtab", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_symtab), "\
 Return the sal's symtab." },
 
-  { "sal-line", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_line),
-    "\
+  { "sal-line", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_line), "\
 Return the sal's line number, or #f if there is none." },
 
-  { "sal-pc", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_pc),
-    "\
+  { "sal-pc", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_pc), "\
 Return the sal's address." },
 
-  { "sal-last", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_last),
-    "\
+  { "sal-last", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_last), "\
 Return the last address specified by the sal, or #f if there is none." },
 
-  { "find-pc-line", 1, 0, 0, as_a_scm_t_subr (gdbscm_find_pc_line),
-    "\
+  { "find-pc-line", 1, 0, 0, as_a_scm_t_subr (gdbscm_find_pc_line), "\
 Return the sal corresponding to the address, or #f if there isn't one.\n\
 \n\
   Arguments: address" },

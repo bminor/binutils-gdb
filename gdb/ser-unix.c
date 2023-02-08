@@ -35,18 +35,19 @@
 #include "gdbsupport/scoped_ignore_sigttou.h"
 
 struct hardwire_ttystate
-  {
-    struct termios termios;
-  };
+{
+  struct termios termios;
+};
 
 #ifdef CRTSCTS
 /* Boolean to explicitly enable or disable h/w flow control.  */
 static bool serial_hwflow;
+
 static void
 show_serial_hwflow (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Hardware flow control is %s.\n"), value);
+  gdb_printf (file, _ ("Hardware flow control is %s.\n"), value);
 }
 #endif
 
@@ -56,10 +57,8 @@ static int rate_to_code (int rate);
 static int hardwire_setbaudrate (struct serial *scb, int rate);
 static int hardwire_setparity (struct serial *scb, int parity);
 static void hardwire_close (struct serial *scb);
-static int get_tty_state (struct serial *scb,
-			  struct hardwire_ttystate * state);
-static int set_tty_state (struct serial *scb,
-			  struct hardwire_ttystate * state);
+static int get_tty_state (struct serial *scb, struct hardwire_ttystate *state);
+static int set_tty_state (struct serial *scb, struct hardwire_ttystate *state);
 static serial_ttystate hardwire_get_tty_state (struct serial *scb);
 static int hardwire_set_tty_state (struct serial *scb, serial_ttystate state);
 static void hardwire_print_tty_state (struct serial *, serial_ttystate,
@@ -135,19 +134,16 @@ hardwire_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 }
 
 static void
-hardwire_print_tty_state (struct serial *scb,
-			  serial_ttystate ttystate,
+hardwire_print_tty_state (struct serial *scb, serial_ttystate ttystate,
 			  struct ui_file *stream)
 {
   struct hardwire_ttystate *state = (struct hardwire_ttystate *) ttystate;
   int i;
 
   gdb_printf (stream, "c_iflag = 0x%x, c_oflag = 0x%x,\n",
-	      (int) state->termios.c_iflag,
-	      (int) state->termios.c_oflag);
+	      (int) state->termios.c_iflag, (int) state->termios.c_oflag);
   gdb_printf (stream, "c_cflag = 0x%x, c_lflag = 0x%x\n",
-	      (int) state->termios.c_cflag,
-	      (int) state->termios.c_lflag);
+	      (int) state->termios.c_cflag, (int) state->termios.c_lflag);
 #if 0
   /* This not in POSIX, and is not really documented by those systems
      which have it (at least not Sun).  */
@@ -241,97 +237,24 @@ static struct
 {
   int rate;
   int code;
-}
-baudtab[] =
-{
-  {
-    50, B50
-  }
-  ,
-  {
-    75, B75
-  }
-  ,
-  {
-    110, B110
-  }
-  ,
-  {
-    134, B134
-  }
-  ,
-  {
-    150, B150
-  }
-  ,
-  {
-    200, B200
-  }
-  ,
-  {
-    300, B300
-  }
-  ,
-  {
-    600, B600
-  }
-  ,
-  {
-    1200, B1200
-  }
-  ,
-  {
-    1800, B1800
-  }
-  ,
-  {
-    2400, B2400
-  }
-  ,
-  {
-    4800, B4800
-  }
-  ,
-  {
-    9600, B9600
-  }
-  ,
-  {
-    19200, B19200
-  }
-  ,
-  {
-    38400, B38400
-  }
-  ,
+} baudtab[] = {
+  { 50, B50 },	       { 75, B75 },	  { 110, B110 },     { 134, B134 },
+  { 150, B150 },       { 200, B200 },	  { 300, B300 },     { 600, B600 },
+  { 1200, B1200 },     { 1800, B1800 },	  { 2400, B2400 },   { 4800, B4800 },
+  { 9600, B9600 },     { 19200, B19200 }, { 38400, B38400 },
 #ifdef B57600
-  {
-    57600, B57600
-  }
-  ,
+  { 57600, B57600 },
 #endif
 #ifdef B115200
-  {
-    115200, B115200
-  }
-  ,
+  { 115200, B115200 },
 #endif
 #ifdef B230400
-  {
-    230400, B230400
-  }
-  ,
+  { 230400, B230400 },
 #endif
 #ifdef B460800
-  {
-    460800, B460800
-  }
-  ,
+  { 460800, B460800 },
 #endif
-  {
-    -1, -1
-  }
-  ,
+  { -1, -1 },
 };
 
 static int
@@ -351,23 +274,23 @@ rate_to_code (int rate)
 	    {
 	      if (i)
 		{
-		  warning (_("Invalid baud rate %d.  "
-			     "Closest values are %d and %d."),
+		  warning (_ ("Invalid baud rate %d.  "
+			      "Closest values are %d and %d."),
 			   rate, baudtab[i - 1].rate, baudtab[i].rate);
 		}
 	      else
 		{
-		  warning (_("Invalid baud rate %d.  Minimum value is %d."),
+		  warning (_ ("Invalid baud rate %d.  Minimum value is %d."),
 			   rate, baudtab[0].rate);
 		}
 	      return -1;
 	    }
 	}
     }
- 
+
   /* The requested speed was too large.  */
-  warning (_("Invalid baud rate %d.  Maximum value is %d."),
-	    rate, baudtab[i - 1].rate);
+  warning (_ ("Invalid baud rate %d.  Maximum value is %d."), rate,
+	   baudtab[i - 1].rate);
   return -1;
 }
 
@@ -376,7 +299,7 @@ hardwire_setbaudrate (struct serial *scb, int rate)
 {
   struct hardwire_ttystate state;
   int baud_code = rate_to_code (rate);
-  
+
   if (baud_code < 0)
     {
       /* The baud rate was not valid.
@@ -419,7 +342,7 @@ hardwire_setstopbits (struct serial *scb, int num)
   if (!newbit)
     state.termios.c_cflag &= ~CSTOPB;
   else
-    state.termios.c_cflag |= CSTOPB;	/* two bits */
+    state.termios.c_cflag |= CSTOPB; /* two bits */
 
   return set_tty_state (scb, &state);
 }
@@ -457,7 +380,6 @@ hardwire_setparity (struct serial *scb, int parity)
   return set_tty_state (scb, &state);
 }
 
-
 static void
 hardwire_close (struct serial *scb)
 {
@@ -467,52 +389,47 @@ hardwire_close (struct serial *scb)
   close (scb->fd);
   scb->fd = -1;
 }
-
-
 
 /* The hardwire ops.  */
 
-static const struct serial_ops hardwire_ops =
-{
-  "hardwire",
-  hardwire_open,
-  hardwire_close,
-  NULL,
-  ser_base_readchar,
-  ser_base_write,
-  hardwire_flush_output,
-  hardwire_flush_input,
-  hardwire_send_break,
-  hardwire_raw,
-  hardwire_get_tty_state,
-  hardwire_copy_tty_state,
-  hardwire_set_tty_state,
-  hardwire_print_tty_state,
-  hardwire_setbaudrate,
-  hardwire_setstopbits,
-  hardwire_setparity,
-  hardwire_drain_output,
-  ser_base_async,
-  ser_unix_read_prim,
-  ser_unix_write_prim
-};
+static const struct serial_ops hardwire_ops = { "hardwire",
+						hardwire_open,
+						hardwire_close,
+						NULL,
+						ser_base_readchar,
+						ser_base_write,
+						hardwire_flush_output,
+						hardwire_flush_input,
+						hardwire_send_break,
+						hardwire_raw,
+						hardwire_get_tty_state,
+						hardwire_copy_tty_state,
+						hardwire_set_tty_state,
+						hardwire_print_tty_state,
+						hardwire_setbaudrate,
+						hardwire_setstopbits,
+						hardwire_setparity,
+						hardwire_drain_output,
+						ser_base_async,
+						ser_unix_read_prim,
+						ser_unix_write_prim };
 
 void _initialize_ser_hardwire ();
+
 void
 _initialize_ser_hardwire ()
 {
   serial_add_interface (&hardwire_ops);
 
 #ifdef CRTSCTS
-  add_setshow_boolean_cmd ("remoteflow", no_class,
-			   &serial_hwflow, _("\
-Set use of hardware flow control for remote serial I/O."), _("\
-Show use of hardware flow control for remote serial I/O."), _("\
+  add_setshow_boolean_cmd ("remoteflow", no_class, &serial_hwflow, _ ("\
+Set use of hardware flow control for remote serial I/O."),
+			   _ ("\
+Show use of hardware flow control for remote serial I/O."),
+			   _ ("\
 Enable or disable hardware flow control (RTS/CTS) on the serial port\n\
 when debugging using remote targets."),
-			   NULL,
-			   show_serial_hwflow,
-			   &setlist, &showlist);
+			   NULL, show_serial_hwflow, &setlist, &showlist);
 #endif
 }
 

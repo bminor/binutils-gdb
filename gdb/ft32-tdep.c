@@ -43,10 +43,13 @@
 #include "sim/sim-ft32.h"
 #include <algorithm>
 
-#define RAM_BIAS  0x800000  /* Bias added to RAM addresses.  */
+#define RAM_BIAS 0x800000 /* Bias added to RAM addresses.  */
 
 /* Use an invalid address -1 as 'not available' marker.  */
-enum { REG_UNAVAIL = (CORE_ADDR) (-1) };
+enum
+{
+  REG_UNAVAIL = (CORE_ADDR) (-1)
+};
 
 struct ft32_frame_cache
 {
@@ -74,22 +77,17 @@ ft32_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   return sp & ~1;
 }
 
-
 constexpr gdb_byte ft32_break_insn[] = { 0x02, 0x00, 0x34, 0x00 };
 
 typedef BP_MANIPULATION (ft32_break_insn) ft32_breakpoint;
 
 /* FT32 register names.  */
 
-static const char *const ft32_register_names[] =
-{
-    "fp", "sp",
-    "r0", "r1", "r2", "r3",  "r4", "r5", "r6", "r7",
-    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-    "r16", "r17", "r18", "r19",  "r20", "r21", "r22", "r23",
-    "r24", "r25", "r26", "r27", "r28", "cc",
-    "pc"
-};
+static const char *const ft32_register_names[]
+  = { "fp",  "sp",  "r0",  "r1",  "r2",	 "r3",	"r4",  "r5",  "r6",
+      "r7",  "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
+      "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", "r24",
+      "r25", "r26", "r27", "r28", "cc",	 "pc" };
 
 /* Implement the "register_name" gdbarch method.  */
 
@@ -133,8 +131,7 @@ ft32_store_return_value (struct type *type, struct regcache *regcache,
   regcache_cooked_write_unsigned (regcache, FT32_R0_REGNUM, regval);
   if (len > 4)
     {
-      regval = extract_unsigned_integer (valbuf + 4,
-					 len - 4, byte_order);
+      regval = extract_unsigned_integer (valbuf + 4, len - 4, byte_order);
       regcache_cooked_write_unsigned (regcache, FT32_R1_REGNUM, regval);
     }
 }
@@ -143,8 +140,7 @@ ft32_store_return_value (struct type *type, struct regcache *regcache,
    a compressed instruction pair, return the expanded instruction.  */
 
 static ULONGEST
-ft32_fetch_instruction (CORE_ADDR a, int *isize,
-			enum bfd_endian byte_order)
+ft32_fetch_instruction (CORE_ADDR a, int *isize, enum bfd_endian byte_order)
 {
   unsigned int sc[2];
   ULONGEST inst;
@@ -166,8 +162,7 @@ ft32_fetch_instruction (CORE_ADDR a, int *isize,
 
 static CORE_ADDR
 ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
-		       struct ft32_frame_cache *cache,
-		       struct gdbarch *gdbarch)
+		       struct ft32_frame_cache *cache, struct gdbarch *gdbarch)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
@@ -175,7 +170,7 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   int isize = 0;
   int regnum, pushreg;
   struct bound_minimal_symbol msymbol;
-  const int first_saved_reg = 13;	/* The first saved register.  */
+  const int first_saved_reg = 13; /* The first saved register.  */
   /* PROLOGS are addresses of the subroutine prologs, PROLOGS[n]
      is the address of __prolog_$rN.
      __prolog_$rN pushes registers from 13 through n inclusive.
@@ -222,12 +217,11 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	    {
 	      if ((4 * (inst & 0x3ffff)) == prologs[regnum])
 		{
-		  for (pushreg = first_saved_reg; pushreg <= regnum;
-		       pushreg++)
+		  for (pushreg = first_saved_reg; pushreg <= regnum; pushreg++)
 		    {
 		      cache->framesize += 4;
-		      cache->saved_regs[FT32_R0_REGNUM + pushreg] =
-			cache->framesize;
+		      cache->saved_regs[FT32_R0_REGNUM + pushreg]
+			= cache->framesize;
 		    }
 		}
 	    }
@@ -239,8 +233,8 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   for (regnum = FT32_R0_REGNUM; regnum < FT32_PC_REGNUM; regnum++)
     {
       if (cache->saved_regs[regnum] != REG_UNAVAIL)
-	cache->saved_regs[regnum] =
-	  cache->framesize - cache->saved_regs[regnum];
+	cache->saved_regs[regnum]
+	  = cache->framesize - cache->saved_regs[regnum];
     }
   cache->saved_regs[FT32_PC_REGNUM] = cache->framesize;
 
@@ -294,8 +288,8 @@ ft32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 	  memset (&cache, 0, sizeof cache);
 
-	  plg_end = ft32_analyze_prologue (func_addr,
-					   func_end, &cache, gdbarch);
+	  plg_end
+	    = ft32_analyze_prologue (func_addr, func_end, &cache, gdbarch);
 	  /* Found a function.  */
 	  sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL).symbol;
 	  /* Don't use line number debug info for assembly source files.  */
@@ -323,12 +317,11 @@ ft32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    RAM appears at address RAM_BIAS, flash at address 0.  */
 
 static CORE_ADDR
-ft32_pointer_to_address (struct gdbarch *gdbarch,
-			 struct type *type, const gdb_byte *buf)
+ft32_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
+			 const gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  CORE_ADDR addr
-    = extract_unsigned_integer (buf, type->length (), byte_order);
+  CORE_ADDR addr = extract_unsigned_integer (buf, type->length (), byte_order);
 
   if (TYPE_ADDRESS_CLASS_1 (type))
     return addr;
@@ -356,7 +349,7 @@ ft32_address_class_type_flags (int byte_size, int dwarf2_addr_class)
 
    Convert a type_instance_flag_value to an address space qualifier.  */
 
-static const char*
+static const char *
 ft32_address_class_type_flags_to_name (struct gdbarch *gdbarch,
 				       type_instance_flags type_flags)
 {
@@ -372,7 +365,7 @@ ft32_address_class_type_flags_to_name (struct gdbarch *gdbarch,
 
 static bool
 ft32_address_class_name_to_type_flags (struct gdbarch *gdbarch,
-				       const char* name,
+				       const char *name,
 				       type_instance_flags *type_flags_ptr)
 {
   if (strcmp (name, "flash") == 0)
@@ -489,11 +482,11 @@ ft32_frame_cache (frame_info_ptr this_frame, void **this_cache)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-ft32_frame_this_id (frame_info_ptr this_frame,
-		    void **this_prologue_cache, struct frame_id *this_id)
+ft32_frame_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
+		    struct frame_id *this_id)
 {
-  struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
-						     this_prologue_cache);
+  struct ft32_frame_cache *cache
+    = ft32_frame_cache (this_frame, this_prologue_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -508,8 +501,8 @@ static struct value *
 ft32_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_prologue_cache, int regnum)
 {
-  struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
-						     this_prologue_cache);
+  struct ft32_frame_cache *cache
+    = ft32_frame_cache (this_frame, this_prologue_cache);
 
   gdb_assert (regnum >= 0);
 
@@ -517,41 +510,34 @@ ft32_frame_prev_register (frame_info_ptr this_frame,
     return frame_unwind_got_constant (this_frame, regnum, cache->saved_sp);
 
   if (regnum < FT32_NUM_REGS && cache->saved_regs[regnum] != REG_UNAVAIL)
-      return frame_unwind_got_memory (this_frame, regnum,
-				      RAM_BIAS | cache->saved_regs[regnum]);
+    return frame_unwind_got_memory (this_frame, regnum,
+				    RAM_BIAS | cache->saved_regs[regnum]);
 
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind ft32_frame_unwind =
-{
-  "ft32 prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  ft32_frame_this_id,
-  ft32_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind ft32_frame_unwind
+  = { "ft32 prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      ft32_frame_this_id,
+      ft32_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 /* Return the base address of this_frame.  */
 
 static CORE_ADDR
 ft32_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
-  struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
-						     this_cache);
+  struct ft32_frame_cache *cache = ft32_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
 
-static const struct frame_base ft32_frame_base =
-{
-  &ft32_frame_unwind,
-  ft32_frame_base_address,
-  ft32_frame_base_address,
-  ft32_frame_base_address
-};
+static const struct frame_base ft32_frame_base
+  = { &ft32_frame_unwind, ft32_frame_base_address, ft32_frame_base_address,
+      ft32_frame_base_address };
 
 /* Allocate and initialize the ft32 gdbarch object.  */
 
@@ -575,8 +561,8 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      be defined.  */
   void_type = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   func_void_type = make_function_type (void_type, NULL);
-  tdep->pc_type = arch_pointer_type (gdbarch, 4 * TARGET_CHAR_BIT, NULL,
-				     func_void_type);
+  tdep->pc_type
+    = arch_pointer_type (gdbarch, 4 * TARGET_CHAR_BIT, NULL, func_void_type);
   tdep->pc_type->set_instance_flags (tdep->pc_type->instance_flags ()
 				     | TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1);
 
@@ -607,11 +593,12 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Support simple overlay manager.  */
   set_gdbarch_overlay_update (gdbarch, simple_overlay_update);
 
-  set_gdbarch_address_class_type_flags (gdbarch, ft32_address_class_type_flags);
-  set_gdbarch_address_class_name_to_type_flags
-    (gdbarch, ft32_address_class_name_to_type_flags);
-  set_gdbarch_address_class_type_flags_to_name
-    (gdbarch, ft32_address_class_type_flags_to_name);
+  set_gdbarch_address_class_type_flags (gdbarch,
+					ft32_address_class_type_flags);
+  set_gdbarch_address_class_name_to_type_flags (
+    gdbarch, ft32_address_class_name_to_type_flags);
+  set_gdbarch_address_class_type_flags_to_name (
+    gdbarch, ft32_address_class_type_flags_to_name);
 
   return gdbarch;
 }
@@ -619,6 +606,7 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Register this machine's init routine.  */
 
 void _initialize_ft32_tdep ();
+
 void
 _initialize_ft32_tdep ()
 {

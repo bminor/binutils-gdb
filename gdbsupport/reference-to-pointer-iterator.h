@@ -26,7 +26,7 @@
    lists, which yield references, and the rest of GDB, which for legacy reasons
    expects to iterate on pointers.  */
 
-template <typename IteratorType>
+template<typename IteratorType>
 struct reference_to_pointer_iterator
 {
   using self_type = reference_to_pointer_iterator;
@@ -38,29 +38,32 @@ struct reference_to_pointer_iterator
 
   /* Construct a reference_to_pointer_iterator, passing args to the underyling
      iterator.  */
-  template <typename... Args>
+  template<typename... Args>
   reference_to_pointer_iterator (Args &&...args)
     : m_it (std::forward<Args> (args)...)
-  {}
+  {
+  }
 
   /* Create a past-the-end iterator.
 
      Assumes that default-constructing an underlying iterator creates a
      past-the-end iterator.  */
-  reference_to_pointer_iterator ()
-  {}
+  reference_to_pointer_iterator () {}
 
   /* Need these as the variadic constructor would be a better match
      otherwise.  */
   reference_to_pointer_iterator (reference_to_pointer_iterator &) = default;
-  reference_to_pointer_iterator (const reference_to_pointer_iterator &) = default;
+  reference_to_pointer_iterator (const reference_to_pointer_iterator &)
+    = default;
   reference_to_pointer_iterator (reference_to_pointer_iterator &&) = default;
 
-  reference_to_pointer_iterator &operator= (const reference_to_pointer_iterator &) = default;
-  reference_to_pointer_iterator &operator= (reference_to_pointer_iterator &&) = default;
+  reference_to_pointer_iterator &
+  operator= (const reference_to_pointer_iterator &)
+    = default;
+  reference_to_pointer_iterator &operator= (reference_to_pointer_iterator &&)
+    = default;
 
-  value_type operator* () const
-  { return &*m_it; }
+  value_type operator* () const { return &*m_it; }
 
   self_type &operator++ ()
   {
@@ -68,11 +71,9 @@ struct reference_to_pointer_iterator
     return *this;
   }
 
-  bool operator== (const self_type &other) const
-  { return m_it == other.m_it; }
+  bool operator== (const self_type &other) const { return m_it == other.m_it; }
 
-  bool operator!= (const self_type &other) const
-  { return m_it != other.m_it; }
+  bool operator!= (const self_type &other) const { return m_it != other.m_it; }
 
 private:
   /* The underlying iterator.  */

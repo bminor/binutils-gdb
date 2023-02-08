@@ -49,10 +49,9 @@ static void cp_print_static_field (struct type *, struct value *,
 				   struct ui_file *, int,
 				   const struct value_print_options *);
 
-static void cp_print_value (struct value *, struct ui_file *,
-			    int, const struct value_print_options *,
+static void cp_print_value (struct value *, struct ui_file *, int,
+			    const struct value_print_options *,
 			    struct type **);
-
 
 /* GCC versions after 2.4.5 use this.  */
 const char vtbl_ptr_name[] = "__vtbl_ptr_type";
@@ -82,19 +81,19 @@ cp_is_vtbl_member (struct type *type)
       if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  type = type->target_type ();
-	  if (type->code () == TYPE_CODE_STRUCT    /* if not using thunks */
-	      || type->code () == TYPE_CODE_PTR)   /* if using thunks */
+	  if (type->code () == TYPE_CODE_STRUCT	 /* if not using thunks */
+	      || type->code () == TYPE_CODE_PTR) /* if using thunks */
 	    {
 	      /* Virtual functions tables are full of pointers
 		 to virtual functions.  */
 	      return cp_is_vtbl_ptr_type (type);
 	    }
 	}
-      else if (type->code () == TYPE_CODE_STRUCT)  /* if not using thunks */
+      else if (type->code () == TYPE_CODE_STRUCT) /* if not using thunks */
 	{
 	  return cp_is_vtbl_ptr_type (type);
 	}
-      else if (type->code () == TYPE_CODE_PTR)     /* if using thunks */
+      else if (type->code () == TYPE_CODE_PTR) /* if using thunks */
 	{
 	  /* The type name of the thunk pointer is NULL when using
 	     dwarf2.  We could test for a pointer to a function, but
@@ -120,10 +119,9 @@ cp_is_vtbl_member (struct type *type)
    or zero if called from top level.  */
 
 void
-cp_print_value_fields (struct value *val, struct ui_file *stream,
-		       int recurse, const struct value_print_options *options,
-		       struct type **dont_print_vb,
-		       int dont_print_statmem)
+cp_print_value_fields (struct value *val, struct ui_file *stream, int recurse,
+		       const struct value_print_options *options,
+		       struct type **dont_print_vb, int dont_print_statmem)
 {
   int i, len, n_baseclasses;
   int fields_seen = 0;
@@ -139,8 +137,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
       if (obstack_object_size (&dont_print_statmem_obstack) > 0)
 	{
 	  obstack_free (&dont_print_statmem_obstack, NULL);
-	  obstack_begin (&dont_print_statmem_obstack,
-			 32 * sizeof (CORE_ADDR));
+	  obstack_begin (&dont_print_statmem_obstack, 32 * sizeof (CORE_ADDR));
 	}
       if (obstack_object_size (&dont_print_stat_array_obstack) > 0)
 	{
@@ -174,13 +171,13 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
       if (dont_print_statmem == 0)
 	{
-	  statmem_obstack_initial_size =
-	    obstack_object_size (&dont_print_statmem_obstack);
+	  statmem_obstack_initial_size
+	    = obstack_object_size (&dont_print_statmem_obstack);
 
 	  if (last_set_recurse != recurse)
 	    {
-	      stat_array_obstack_initial_size =
-		obstack_object_size (&dont_print_stat_array_obstack);
+	      stat_array_obstack_initial_size
+		= obstack_object_size (&dont_print_stat_array_obstack);
 
 	      last_set_recurse = recurse;
 	    }
@@ -230,8 +227,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	  if (field_is_static (&type->field (i)))
 	    {
 	      gdb_puts ("static ", stream);
-	      fprintf_symbol (stream,
-			      type->field (i).name (),
+	      fprintf_symbol (stream, type->field (i).name (),
 			      current_language->la_language,
 			      DMGL_PARAMS | DMGL_ANSI);
 	    }
@@ -270,11 +266,11 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		  fputs_styled ("<optimized out or zero length>",
 				metadata_style.style (), stream);
 		}
-	      else if (value_bits_synthetic_pointer
-			 (val, type->field (i).loc_bitpos (),
-			  TYPE_FIELD_BITSIZE (type, i)))
+	      else if (value_bits_synthetic_pointer (
+			 val, type->field (i).loc_bitpos (),
+			 TYPE_FIELD_BITSIZE (type, i)))
 		{
-		  fputs_styled (_("<synthetic pointer>"),
+		  fputs_styled (_ ("<synthetic pointer>"),
 				metadata_style.style (), stream);
 		}
 	      else
@@ -284,8 +280,8 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		  v = value_field_bitfield (type, i, valaddr,
 					    value_embedded_offset (val), val);
 
-		  common_val_print (v, stream, recurse + 1,
-				    opts, current_language);
+		  common_val_print (v, stream, recurse + 1, opts,
+				    current_language);
 		}
 	    }
 	  else
@@ -301,14 +297,13 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		    {
 		      struct value *v = value_static_field (type, i);
 
-		      cp_print_static_field (type->field (i).type (),
-					     v, stream, recurse + 1,
-					     opts);
+		      cp_print_static_field (type->field (i).type (), v,
+					     stream, recurse + 1, opts);
 		    }
 		  catch (const gdb_exception_error &ex)
 		    {
 		      fprintf_styled (stream, metadata_style.style (),
-				      _("<error reading variable: %s>"),
+				      _ ("<error reading variable: %s>"),
 				      ex.what ());
 		    }
 		}
@@ -322,9 +317,9 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		      CORE_ADDR addr;
 
 		      i_offset += value_embedded_offset (val);
-		      addr = extract_typed_address (valaddr + i_offset, i_type);
-		      print_function_pointer_address (opts,
-						      type->arch (),
+		      addr
+			= extract_typed_address (valaddr + i_offset, i_type);
+		      print_function_pointer_address (opts, type->arch (),
 						      addr, stream);
 		    }
 		}
@@ -341,8 +336,8 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
       if (dont_print_statmem == 0)
 	{
-	  size_t obstack_final_size =
-	   obstack_object_size (&dont_print_statmem_obstack);
+	  size_t obstack_final_size
+	    = obstack_object_size (&dont_print_statmem_obstack);
 
 	  if (obstack_final_size > statmem_obstack_initial_size)
 	    {
@@ -354,18 +349,17 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  if (last_set_recurse != recurse)
 	    {
-	      obstack_final_size =
-		obstack_object_size (&dont_print_stat_array_obstack);
+	      obstack_final_size
+		= obstack_object_size (&dont_print_stat_array_obstack);
 
 	      if (obstack_final_size > stat_array_obstack_initial_size)
 		{
-		  void *free_to_ptr =
-		    (char *) obstack_next_free (&dont_print_stat_array_obstack)
-		    - (obstack_final_size
-		       - stat_array_obstack_initial_size);
+		  void *free_to_ptr
+		    = (char *)
+			obstack_next_free (&dont_print_stat_array_obstack)
+		      - (obstack_final_size - stat_array_obstack_initial_size);
 
-		  obstack_free (&dont_print_stat_array_obstack,
-				free_to_ptr);
+		  obstack_free (&dont_print_stat_array_obstack, free_to_ptr);
 		}
 	      last_set_recurse = -1;
 	    }
@@ -376,7 +370,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	  gdb_printf (stream, "\n");
 	  print_spaces (2 * recurse, stream);
 	}
-    }				/* if there are data fields */
+    } /* if there are data fields */
 
   gdb_printf (stream, "}");
 }
@@ -385,8 +379,8 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
    virtual baseclasses.  */
 
 static void
-cp_print_value (struct value *val, struct ui_file *stream,
-		int recurse, const struct value_print_options *options,
+cp_print_value (struct value *val, struct ui_file *stream, int recurse,
+		const struct value_print_options *options,
 		struct type **dont_print_vb)
 {
   struct type *type = check_typedef (value_type (val));
@@ -419,8 +413,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	  struct type **first_dont_print
 	    = (struct type **) obstack_base (&dont_print_vb_obstack);
 
-	  int j = (struct type **)
-	    obstack_next_free (&dont_print_vb_obstack) - first_dont_print;
+	  int j = (struct type **) obstack_next_free (&dont_print_vb_obstack)
+		  - first_dont_print;
 
 	  while (--j >= 0)
 	    if (baseclass == first_dont_print[j])
@@ -431,9 +425,9 @@ cp_print_value (struct value *val, struct ui_file *stream,
 
       try
 	{
-	  boffset = baseclass_offset (type, i, valaddr,
-				      value_embedded_offset (val),
-				      address, val);
+	  boffset
+	    = baseclass_offset (type, i, valaddr, value_embedded_offset (val),
+				address, val);
 	}
       catch (const gdb_exception_error &ex)
 	{
@@ -456,11 +450,12 @@ cp_print_value (struct value *val, struct ui_file *stream,
 		  gdb::byte_vector buf (baseclass->length ());
 
 		  if (target_read_memory (address + boffset, buf.data (),
-					  baseclass->length ()) != 0)
+					  baseclass->length ())
+		      != 0)
 		    skip = 1;
-		  base_val = value_from_contents_and_address (baseclass,
-							      buf.data (),
-							      address + boffset);
+		  base_val
+		    = value_from_contents_and_address (baseclass, buf.data (),
+						       address + boffset);
 		  baseclass = value_type (base_val);
 		  boffset = 0;
 		}
@@ -498,8 +493,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	  if (!val_print_check_max_depth (stream, recurse, options,
 					  current_language))
 	    {
-	      struct value *baseclass_val = value_primitive_field (val, 0,
-								   i, type);
+	      struct value *baseclass_val
+		= value_primitive_field (val, 0, i, type);
 
 	      /* Attempt to run an extension language pretty-printer on the
 		 baseclass if possible.  */
@@ -510,16 +505,14 @@ cp_print_value (struct value *val, struct ui_file *stream,
 						       current_language);
 
 	      if (!result)
-		cp_print_value_fields (baseclass_val, stream, recurse, options,
-				       ((struct type **)
-					obstack_base (&dont_print_vb_obstack)),
-				       0);
+		cp_print_value_fields (
+		  baseclass_val, stream, recurse, options,
+		  ((struct type **) obstack_base (&dont_print_vb_obstack)), 0);
 	    }
 	}
       gdb_puts (", ", stream);
 
-    flush_it:
-      ;
+    flush_it:;
     }
 
   if (dont_print_vb == 0)
@@ -542,10 +535,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
    have the same meanings as in c_val_print.  */
 
 static void
-cp_print_static_field (struct type *type,
-		       struct value *val,
-		       struct ui_file *stream,
-		       int recurse,
+cp_print_static_field (struct type *type, struct value *val,
+		       struct ui_file *stream, int recurse,
 		       const struct value_print_options *options)
 {
   struct value_print_options opts;
@@ -566,14 +557,14 @@ cp_print_static_field (struct type *type,
       first_dont_print
 	= (CORE_ADDR *) obstack_base (&dont_print_statmem_obstack);
       i = obstack_object_size (&dont_print_statmem_obstack)
-	/ sizeof (CORE_ADDR);
+	  / sizeof (CORE_ADDR);
 
       while (--i >= 0)
 	{
 	  if (addr == first_dont_print[i])
 	    {
-	      fputs_styled (_("<same as static member of an already"
-			      " seen type>"),
+	      fputs_styled (_ ("<same as static member of an already"
+			       " seen type>"),
 			    metadata_style.style (), stream);
 	      return;
 	    }
@@ -594,21 +585,20 @@ cp_print_static_field (struct type *type,
       first_dont_print
 	= (struct type **) obstack_base (&dont_print_stat_array_obstack);
       i = obstack_object_size (&dont_print_stat_array_obstack)
-	/ sizeof (struct type *);
+	  / sizeof (struct type *);
 
       while (--i >= 0)
 	{
 	  if (target_type == first_dont_print[i])
 	    {
-	      fputs_styled (_("<same as static member of an already"
-			      " seen type>"),
+	      fputs_styled (_ ("<same as static member of an already"
+			       " seen type>"),
 			    metadata_style.style (), stream);
 	      return;
 	    }
 	}
 
-      obstack_grow (&dont_print_stat_array_obstack,
-		    (char *) &target_type,
+      obstack_grow (&dont_print_stat_array_obstack, (char *) &target_type,
 		    sizeof (struct type *));
     }
 
@@ -623,8 +613,7 @@ cp_print_static_field (struct type *type,
    start of some field, set *SELF to NULL.  */
 
 static void
-cp_find_class_member (struct type **self_p, int *fieldno,
-		      LONGEST offset)
+cp_find_class_member (struct type **self_p, int *fieldno, LONGEST offset)
 {
   struct type *self;
   unsigned int i;
@@ -678,9 +667,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
   LONGEST val;
   int fieldno;
 
-  val = extract_signed_integer (valaddr,
-				type->length (),
-				byte_order);
+  val = extract_signed_integer (valaddr, type->length (), byte_order);
 
   /* Pointers to data members are usually byte offsets into an object.
      Because a data member can have offset zero, and a NULL pointer to
@@ -769,19 +756,19 @@ test_print_fields (gdbarch *arch)
   string_file out;
   struct value_print_options opts;
   get_no_prettyformat_print_options (&opts);
-  cp_print_value_fields(val, &out, 0, &opts, NULL, 0);
+  cp_print_value_fields (val, &out, 0, &opts, NULL, 0);
   SELF_CHECK (out.string () == "{A = false, B = 5, C = true}");
 
-  out.clear();
+  out.clear ();
   opts.format = 'x';
-  cp_print_value_fields(val, &out, 0, &opts, NULL, 0);
+  cp_print_value_fields (val, &out, 0, &opts, NULL, 0);
   SELF_CHECK (out.string () == "{A = 0x0, B = 0x5, C = 0x1}");
 }
 
 #endif
 
-
 void _initialize_cp_valprint ();
+
 void
 _initialize_cp_valprint ()
 {
@@ -789,10 +776,7 @@ _initialize_cp_valprint ()
   selftests::register_test_foreach_arch ("print-fields", test_print_fields);
 #endif
 
-  obstack_begin (&dont_print_stat_array_obstack,
-		 32 * sizeof (struct type *));
-  obstack_begin (&dont_print_statmem_obstack,
-		 32 * sizeof (CORE_ADDR));
-  obstack_begin (&dont_print_vb_obstack,
-		 32 * sizeof (struct type *));
+  obstack_begin (&dont_print_stat_array_obstack, 32 * sizeof (struct type *));
+  obstack_begin (&dont_print_statmem_obstack, 32 * sizeof (CORE_ADDR));
+  obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
 }

@@ -20,8 +20,8 @@
 #ifndef ARM_NBSD_TDEP_H
 #define ARM_NBSD_TDEP_H
 
-void arm_nbsd_supply_gregset
-  (const struct regset *regset, struct regcache *regcache,
-   int regnum, const void *gregs, size_t len);
+void arm_nbsd_supply_gregset (const struct regset *regset,
+			      struct regcache *regcache, int regnum,
+			      const void *gregs, size_t len);
 
 #endif

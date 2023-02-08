@@ -33,14 +33,13 @@ type_stack::insert (enum type_pieces tp)
 
   gdb_assert (tp == tp_pointer || tp == tp_reference
 	      || tp == tp_rvalue_reference || tp == tp_const
-	      || tp == tp_volatile || tp == tp_restrict
-	      || tp == tp_atomic);
+	      || tp == tp_volatile || tp == tp_restrict || tp == tp_atomic);
 
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the qualifier above it.  Otherwise, simply
      push this on the top of the stack.  */
-  if (!m_elements.empty () && (tp == tp_const || tp == tp_volatile
-			       || tp == tp_restrict))
+  if (!m_elements.empty ()
+      && (tp == tp_const || tp == tp_volatile || tp == tp_restrict))
     slot = 1;
   else
     slot = 0;
@@ -68,8 +67,7 @@ type_stack::insert (struct expr_builder *pstate, const char *string)
   element.piece = tp_space_identifier;
   insert_into (slot, element);
   element.int_val
-    = address_space_name_to_type_instance_flags (pstate->gdbarch (),
-						 string);
+    = address_space_name_to_type_instance_flags (pstate->gdbarch (), string);
   insert_into (slot, element);
 }
 
@@ -147,16 +145,14 @@ type_stack::follow_types (struct type *follow_type)
 	follow_type = lookup_rvalue_reference_type (follow_type);
       process_qualifiers:
 	if (make_const)
-	  follow_type = make_cv_type (make_const,
-				      TYPE_VOLATILE (follow_type),
+	  follow_type = make_cv_type (make_const, TYPE_VOLATILE (follow_type),
 				      follow_type, 0);
 	if (make_volatile)
-	  follow_type = make_cv_type (TYPE_CONST (follow_type),
-				      make_volatile,
+	  follow_type = make_cv_type (TYPE_CONST (follow_type), make_volatile,
 				      follow_type, 0);
 	if (make_addr_space)
-	  follow_type = make_type_with_address_space (follow_type,
-						      make_addr_space);
+	  follow_type
+	    = make_type_with_address_space (follow_type, make_addr_space);
 	if (make_restrict)
 	  follow_type = make_restrict_type (follow_type);
 	if (make_atomic)
@@ -169,9 +165,9 @@ type_stack::follow_types (struct type *follow_type)
 	array_size = pop_int ();
 	/* FIXME-type-allocation: need a way to free this type when we are
 	   done with it.  */
-	follow_type =
-	  lookup_array_range_type (follow_type,
-				   0, array_size >= 0 ? array_size - 1 : 0);
+	follow_type
+	  = lookup_array_range_type (follow_type, 0,
+				     array_size >= 0 ? array_size - 1 : 0);
 	if (array_size < 0)
 	  follow_type->bounds ()->high.set_undefined ();
 	break;
@@ -186,8 +182,7 @@ type_stack::follow_types (struct type *follow_type)
 	  std::vector<struct type *> *args = pop_typelist ();
 
 	  follow_type
-	    = lookup_function_type_with_arguments (follow_type,
-						   args->size (),
+	    = lookup_function_type_with_arguments (follow_type, args->size (),
 						   args->data ());
 	}
 	break;

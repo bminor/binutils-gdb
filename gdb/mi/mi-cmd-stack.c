@@ -39,12 +39,16 @@
 #include "inferior.h"
 #include "observable.h"
 
-enum what_to_list { locals, arguments, all };
+enum what_to_list
+{
+  locals,
+  arguments,
+  all
+};
 
 static void list_args_or_locals (const frame_print_options &fp_opts,
 				 enum what_to_list what,
-				 enum print_values values,
-				 frame_info_ptr fi,
+				 enum print_values values, frame_info_ptr fi,
 				 int skip_unavailable);
 
 /* True if we want to allow Python-based frame filters.  */
@@ -54,25 +58,23 @@ void
 mi_cmd_enable_frame_filters (const char *command, char **argv, int argc)
 {
   if (argc != 0)
-    error (_("-enable-frame-filters: no arguments allowed"));
+    error (_ ("-enable-frame-filters: no arguments allowed"));
   frame_filters = 1;
 }
 
 /* Like apply_ext_lang_frame_filter, but take a print_values */
 
 static enum ext_lang_bt_status
-mi_apply_ext_lang_frame_filter (frame_info_ptr frame,
-				frame_filter_flags flags,
+mi_apply_ext_lang_frame_filter (frame_info_ptr frame, frame_filter_flags flags,
 				enum print_values print_values,
-				struct ui_out *out,
-				int frame_low, int frame_high)
+				struct ui_out *out, int frame_low,
+				int frame_high)
 {
   /* ext_lang_frame_args's MI options are compatible with MI print
      values.  */
   return apply_ext_lang_frame_filter (frame, flags,
 				      (enum ext_lang_frame_args) print_values,
-				      out,
-				      frame_low, frame_high);
+				      out, frame_low, frame_high);
 }
 
 /* Print a list of the stack frames.  Args can be none, in which case
@@ -91,23 +93,21 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
   int raw_arg = 0;
   int oind = 0;
+
   enum opt
-    {
-      NO_FRAME_FILTERS
-    };
-  static const struct mi_opt opts[] =
-    {
-      {"-no-frame-filters", NO_FRAME_FILTERS, 0},
-      { 0, 0, 0 }
-    };
+  {
+    NO_FRAME_FILTERS
+  };
+  static const struct mi_opt opts[]
+    = { { "-no-frame-filters", NO_FRAME_FILTERS, 0 }, { 0, 0, 0 } };
 
   /* Parse arguments.  In this instance we are just looking for
      --no-frame-filters.  */
   while (1)
     {
       char *oarg;
-      int opt = mi_getopt ("-stack-list-frames", argc, argv,
-			   opts, &oind, &oarg);
+      int opt
+	= mi_getopt ("-stack-list-frames", argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -121,7 +121,8 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
   /* After the last option is parsed, there should either be low -
      high range, or no further arguments.  */
   if ((argc - oind != 0) && (argc - oind != 2))
-    error (_("-stack-list-frames: Usage: [--no-frame-filters] [FRAME_LOW FRAME_HIGH]"));
+    error (_ ("-stack-list-frames: Usage: [--no-frame-filters] [FRAME_LOW "
+	      "FRAME_HIGH]"));
 
   /* If there is a range, set it.  */
   if (argc - oind == 2)
@@ -140,16 +141,16 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
   /* Let's position fi on the frame at which to start the
      display. Could be the innermost frame if the whole stack needs
      displaying, or if frame_low is 0.  */
-  for (i = 0, fi = get_current_frame ();
-       fi && i < frame_low;
-       i++, fi = get_prev_frame (fi));
+  for (i = 0, fi = get_current_frame (); fi && i < frame_low;
+       i++, fi = get_prev_frame (fi))
+    ;
 
   if (fi == NULL)
-    error (_("-stack-list-frames: Not enough frames in stack."));
+    error (_ ("-stack-list-frames: Not enough frames in stack."));
 
   ui_out_emit_list list_emitter (current_uiout, "stack");
 
-  if (! raw_arg && frame_filters)
+  if (!raw_arg && frame_filters)
     {
       frame_filter_flags flags = PRINT_LEVEL | PRINT_FRAME_INFO;
       int py_frame_low = frame_low;
@@ -161,25 +162,24 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
 	py_frame_low++;
 
       result = apply_ext_lang_frame_filter (get_current_frame (), flags,
-					    NO_VALUES,  current_uiout,
+					    NO_VALUES, current_uiout,
 					    py_frame_low, frame_high);
     }
 
   /* Run the inbuilt backtrace if there are no filters registered, or
      if "--no-frame-filters" has been specified from the command.  */
-  if (! frame_filters || raw_arg  || result == EXT_LANG_BT_NO_FILTERS)
+  if (!frame_filters || raw_arg || result == EXT_LANG_BT_NO_FILTERS)
     {
       /* Now let's print the frames up to frame_high, or until there are
 	 frames in the stack.  */
-      for (;
-	   fi && (i <= frame_high || frame_high == -1);
+      for (; fi && (i <= frame_high || frame_high == -1);
 	   i++, fi = get_prev_frame (fi))
 	{
 	  QUIT;
 	  /* Print the location and the address always, even for level 0.
 	     If args is 0, don't print the arguments.  */
-	  print_frame_info (user_frame_print_options,
-			    fi, 1, LOC_AND_ADDRESS, 0 /* args */, 0);
+	  print_frame_info (user_frame_print_options, fi, 1, LOC_AND_ADDRESS,
+			    0 /* args */, 0);
 	}
     }
 }
@@ -192,7 +192,7 @@ mi_cmd_stack_info_depth (const char *command, char **argv, int argc)
   frame_info_ptr fi;
 
   if (argc > 1)
-    error (_("-stack-info-depth: Usage: [MAX_DEPTH]"));
+    error (_ ("-stack-info-depth: Usage: [MAX_DEPTH]"));
 
   if (argc == 1)
     frame_high = atoi (argv[0]);
@@ -230,19 +230,17 @@ mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
 	NO_FRAME_FILTERS,
 	SKIP_UNAVAILABLE,
       };
-      static const struct mi_opt opts[] =
-	{
-	  {"-no-frame-filters", NO_FRAME_FILTERS, 0},
-	  {"-skip-unavailable", SKIP_UNAVAILABLE, 0},
-	  { 0, 0, 0 }
-	};
+      static const struct mi_opt opts[]
+	= { { "-no-frame-filters", NO_FRAME_FILTERS, 0 },
+	    { "-skip-unavailable", SKIP_UNAVAILABLE, 0 },
+	    { 0, 0, 0 } };
 
       while (1)
 	{
 	  char *oarg;
 	  /* Don't parse 'print-values' as an option.  */
-	  int opt = mi_getopt ("-stack-list-locals", argc - 1, argv,
-			       opts, &oind, &oarg);
+	  int opt = mi_getopt ("-stack-list-locals", argc - 1, argv, opts,
+			       &oind, &oarg);
 
 	  if (opt < 0)
 	    break;
@@ -261,28 +259,27 @@ mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
   /* After the last option is parsed, there should be only
      'print-values'.  */
   if (argc - oind != 1)
-    error (_("-stack-list-locals: Usage: [--no-frame-filters] "
-	     "[--skip-unavailable] PRINT_VALUES"));
+    error (_ ("-stack-list-locals: Usage: [--no-frame-filters] "
+	      "[--skip-unavailable] PRINT_VALUES"));
 
   frame = get_selected_frame (NULL);
   print_value = mi_parse_print_values (argv[oind]);
 
-   if (! raw_arg && frame_filters)
-     {
-       frame_filter_flags flags = PRINT_LEVEL | PRINT_LOCALS;
+  if (!raw_arg && frame_filters)
+    {
+      frame_filter_flags flags = PRINT_LEVEL | PRINT_LOCALS;
 
-       result = mi_apply_ext_lang_frame_filter (frame, flags, print_value,
-						current_uiout, 0, 0);
-     }
+      result = mi_apply_ext_lang_frame_filter (frame, flags, print_value,
+					       current_uiout, 0, 0);
+    }
 
-   /* Run the inbuilt backtrace if there are no filters registered, or
+  /* Run the inbuilt backtrace if there are no filters registered, or
       if "--no-frame-filters" has been specified from the command.  */
-   if (! frame_filters || raw_arg  || result == EXT_LANG_BT_NO_FILTERS)
-     {
-       list_args_or_locals (user_frame_print_options,
-			    locals, print_value, frame,
-			    skip_unavailable);
-     }
+  if (!frame_filters || raw_arg || result == EXT_LANG_BT_NO_FILTERS)
+    {
+      list_args_or_locals (user_frame_print_options, locals, print_value,
+			   frame, skip_unavailable);
+    }
 }
 
 /* Print a list of the arguments for the current frame.  With argument
@@ -302,23 +299,22 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
   int oind = 0;
   int skip_unavailable = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
+
   enum opt
   {
     NO_FRAME_FILTERS,
     SKIP_UNAVAILABLE,
   };
-  static const struct mi_opt opts[] =
-    {
-      {"-no-frame-filters", NO_FRAME_FILTERS, 0},
-      {"-skip-unavailable", SKIP_UNAVAILABLE, 0},
-      { 0, 0, 0 }
-    };
+  static const struct mi_opt opts[]
+    = { { "-no-frame-filters", NO_FRAME_FILTERS, 0 },
+	{ "-skip-unavailable", SKIP_UNAVAILABLE, 0 },
+	{ 0, 0, 0 } };
 
   while (1)
     {
       char *oarg;
-      int opt = mi_getopt_allow_unknown ("-stack-list-args", argc, argv,
-					 opts, &oind, &oarg);
+      int opt = mi_getopt_allow_unknown ("-stack-list-args", argc, argv, opts,
+					 &oind, &oarg);
 
       if (opt < 0)
 	break;
@@ -334,9 +330,9 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
     }
 
   if (argc - oind != 1 && argc - oind != 3)
-    error (_("-stack-list-arguments: Usage: "	\
-	     "[--no-frame-filters] [--skip-unavailable] "
-	     "PRINT_VALUES [FRAME_LOW FRAME_HIGH]"));
+    error (_ ("-stack-list-arguments: Usage: "
+	      "[--no-frame-filters] [--skip-unavailable] "
+	      "PRINT_VALUES [FRAME_LOW FRAME_HIGH]"));
 
   if (argc - oind == 3)
     {
@@ -356,16 +352,16 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
   /* Let's position fi on the frame at which to start the
      display. Could be the innermost frame if the whole stack needs
      displaying, or if frame_low is 0.  */
-  for (i = 0, fi = get_current_frame ();
-       fi && i < frame_low;
-       i++, fi = get_prev_frame (fi));
+  for (i = 0, fi = get_current_frame (); fi && i < frame_low;
+       i++, fi = get_prev_frame (fi))
+    ;
 
   if (fi == NULL)
-    error (_("-stack-list-arguments: Not enough frames in stack."));
+    error (_ ("-stack-list-arguments: Not enough frames in stack."));
 
   ui_out_emit_list list_emitter (uiout, "stack-args");
 
-  if (! raw_arg && frame_filters)
+  if (!raw_arg && frame_filters)
     {
       frame_filter_flags flags = PRINT_LEVEL | PRINT_ARGS;
       int py_frame_low = frame_low;
@@ -381,21 +377,20 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 					       py_frame_low, frame_high);
     }
 
-     /* Run the inbuilt backtrace if there are no filters registered, or
+  /* Run the inbuilt backtrace if there are no filters registered, or
       if "--no-frame-filters" has been specified from the command.  */
-   if (! frame_filters || raw_arg  || result == EXT_LANG_BT_NO_FILTERS)
-     {
+  if (!frame_filters || raw_arg || result == EXT_LANG_BT_NO_FILTERS)
+    {
       /* Now let's print the frames up to frame_high, or until there are
 	 frames in the stack.  */
-      for (;
-	   fi && (i <= frame_high || frame_high == -1);
+      for (; fi && (i <= frame_high || frame_high == -1);
 	   i++, fi = get_prev_frame (fi))
 	{
 	  QUIT;
 	  ui_out_emit_tuple tuple_emitter (uiout, "frame");
 	  uiout->field_signed ("level", i);
-	  list_args_or_locals (user_frame_print_options,
-			       arguments, print_values, fi, skip_unavailable);
+	  list_args_or_locals (user_frame_print_options, arguments,
+			       print_values, fi, skip_unavailable);
 	}
     }
 }
@@ -422,19 +417,17 @@ mi_cmd_stack_list_variables (const char *command, char **argv, int argc)
 	NO_FRAME_FILTERS,
 	SKIP_UNAVAILABLE,
       };
-      static const struct mi_opt opts[] =
-	{
-	  {"-no-frame-filters", NO_FRAME_FILTERS, 0},
-	  {"-skip-unavailable", SKIP_UNAVAILABLE, 0},
-	  { 0, 0, 0 }
-	};
+      static const struct mi_opt opts[]
+	= { { "-no-frame-filters", NO_FRAME_FILTERS, 0 },
+	    { "-skip-unavailable", SKIP_UNAVAILABLE, 0 },
+	    { 0, 0, 0 } };
 
       while (1)
 	{
 	  char *oarg;
 	  /* Don't parse 'print-values' as an option.  */
-	  int opt = mi_getopt ("-stack-list-variables", argc - 1,
-			       argv, opts, &oind, &oarg);
+	  int opt = mi_getopt ("-stack-list-variables", argc - 1, argv, opts,
+			       &oind, &oarg);
 	  if (opt < 0)
 	    break;
 	  switch ((enum opt) opt)
@@ -452,29 +445,27 @@ mi_cmd_stack_list_variables (const char *command, char **argv, int argc)
   /* After the last option is parsed, there should be only
      'print-values'.  */
   if (argc - oind != 1)
-    error (_("-stack-list-variables: Usage: [--no-frame-filters] " \
-	     "[--skip-unavailable] PRINT_VALUES"));
+    error (_ ("-stack-list-variables: Usage: [--no-frame-filters] "
+	      "[--skip-unavailable] PRINT_VALUES"));
 
-   frame = get_selected_frame (NULL);
-   print_value = mi_parse_print_values (argv[oind]);
+  frame = get_selected_frame (NULL);
+  print_value = mi_parse_print_values (argv[oind]);
 
-   if (! raw_arg && frame_filters)
-     {
-       frame_filter_flags flags = PRINT_LEVEL | PRINT_ARGS | PRINT_LOCALS;
+  if (!raw_arg && frame_filters)
+    {
+      frame_filter_flags flags = PRINT_LEVEL | PRINT_ARGS | PRINT_LOCALS;
 
-       result = mi_apply_ext_lang_frame_filter (frame, flags,
-						print_value,
-						current_uiout, 0, 0);
-     }
+      result = mi_apply_ext_lang_frame_filter (frame, flags, print_value,
+					       current_uiout, 0, 0);
+    }
 
-   /* Run the inbuilt backtrace if there are no filters registered, or
+  /* Run the inbuilt backtrace if there are no filters registered, or
       if "--no-frame-filters" has been specified from the command.  */
-   if (! frame_filters || raw_arg  || result == EXT_LANG_BT_NO_FILTERS)
-     {
-       list_args_or_locals (user_frame_print_options,
-			    all, print_value, frame,
-			    skip_unavailable);
-     }
+  if (!frame_filters || raw_arg || result == EXT_LANG_BT_NO_FILTERS)
+    {
+      list_args_or_locals (user_frame_print_options, all, print_value, frame,
+			   skip_unavailable);
+    }
 }
 
 /* Print single local or argument.  ARG must be already read in.  For
@@ -535,7 +526,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
   if (arg->val || arg->error)
     {
       if (arg->error)
-	stb.printf (_("<error reading variable: %s>"), arg->error.get ());
+	stb.printf (_ ("<error reading variable: %s>"), arg->error.get ());
       else
 	{
 	  try
@@ -549,8 +540,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	    }
 	  catch (const gdb_exception_error &except)
 	    {
-	      stb.printf (_("<error reading variable: %s>"),
-			  except.what ());
+	      stb.printf (_ ("<error reading variable: %s>"), except.what ());
 	    }
 	}
       uiout->field_stream ("value", stb);
@@ -602,24 +592,24 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	  switch (sym->aclass ())
 	    {
 	    default:
-	    case LOC_UNDEF:	/* catches errors        */
-	    case LOC_CONST:	/* constant              */
-	    case LOC_TYPEDEF:	/* local typedef         */
-	    case LOC_LABEL:	/* local label           */
-	    case LOC_BLOCK:	/* local function        */
-	    case LOC_CONST_BYTES:	/* loc. byte seq.        */
-	    case LOC_UNRESOLVED:	/* unresolved static     */
-	    case LOC_OPTIMIZED_OUT:	/* optimized out         */
+	    case LOC_UNDEF:	    /* catches errors        */
+	    case LOC_CONST:	    /* constant              */
+	    case LOC_TYPEDEF:	    /* local typedef         */
+	    case LOC_LABEL:	    /* local label           */
+	    case LOC_BLOCK:	    /* local function        */
+	    case LOC_CONST_BYTES:   /* loc. byte seq.        */
+	    case LOC_UNRESOLVED:    /* unresolved static     */
+	    case LOC_OPTIMIZED_OUT: /* optimized out         */
 	      print_me = 0;
 	      break;
 
-	    case LOC_ARG:	/* argument              */
-	    case LOC_REF_ARG:	/* reference arg         */
-	    case LOC_REGPARM_ADDR:	/* indirect register arg */
-	    case LOC_LOCAL:	/* stack local           */
-	    case LOC_STATIC:	/* static                */
-	    case LOC_REGISTER:	/* register              */
-	    case LOC_COMPUTED:	/* computed location     */
+	    case LOC_ARG:	   /* argument              */
+	    case LOC_REF_ARG:	   /* reference arg         */
+	    case LOC_REGPARM_ADDR: /* indirect register arg */
+	    case LOC_LOCAL:	   /* stack local           */
+	    case LOC_STATIC:	   /* static                */
+	    case LOC_REGISTER:	   /* register              */
+	    case LOC_COMPUTED:	   /* computed location     */
 	      if (what == all)
 		print_me = 1;
 	      else if (what == locals)
@@ -634,8 +624,9 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      struct frame_arg arg, entryarg;
 
 	      if (sym->is_argument ())
-		sym2 = lookup_symbol_search_name (sym->search_name (),
-						  block, VAR_DOMAIN).symbol;
+		sym2 = lookup_symbol_search_name (sym->search_name (), block,
+						  VAR_DOMAIN)
+			 .symbol;
 	      else
 		sym2 = sym;
 	      gdb_assert (sym2 != NULL);
@@ -726,9 +717,7 @@ parse_frame_specification (const char *frame_exp)
      what (s)he gets.  Still, give the highest one that matches.
      (NOTE: cagney/2004-10-29: Why highest, or outer-most, I don't
      know).  */
-  for (fid = get_current_frame ();
-       fid != NULL;
-       fid = get_prev_frame (fid))
+  for (fid = get_current_frame (); fid != NULL; fid = get_prev_frame (fid))
     {
       if (id == get_frame_id (fid))
 	{
@@ -737,8 +726,7 @@ parse_frame_specification (const char *frame_exp)
 	  while (1)
 	    {
 	      prev_frame = get_prev_frame (fid);
-	      if (!prev_frame
-		  || id != get_frame_id (prev_frame))
+	      if (!prev_frame || id != get_frame_id (prev_frame))
 		break;
 	      fid = prev_frame;
 	    }
@@ -757,7 +745,7 @@ void
 mi_cmd_stack_select_frame (const char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
-    error (_("-stack-select-frame: Usage: FRAME_SPEC"));
+    error (_ ("-stack-select-frame: Usage: FRAME_SPEC"));
   select_frame (parse_frame_specification (argv[0]));
 }
 
@@ -765,8 +753,8 @@ void
 mi_cmd_stack_info_frame (const char *command, char **argv, int argc)
 {
   if (argc > 0)
-    error (_("-stack-info-frame: No arguments allowed"));
+    error (_ ("-stack-info-frame: No arguments allowed"));
 
-  print_frame_info (user_frame_print_options,
-		    get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0, 1);
+  print_frame_info (user_frame_print_options, get_selected_frame (NULL), 1,
+		    LOC_AND_ADDRESS, 0, 1);
 }

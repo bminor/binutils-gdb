@@ -32,7 +32,6 @@
 #include "x86-bsd-nat.h"
 #include "i386-bsd-nat.h"
 #include "inf-ptrace.h"
-
 
 static PTRACE_TYPE_RET
 gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr,
@@ -60,42 +59,30 @@ gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr,
 /* At i386bsd_reg_offset[REGNUM] you'll find the offset in `struct
    reg' where the GDB register REGNUM is stored.  Unsupported
    registers are marked with `-1'.  */
-static int i386bsd_r_reg_offset[] =
-{
-  REG_OFFSET (r_eax),
-  REG_OFFSET (r_ecx),
-  REG_OFFSET (r_edx),
-  REG_OFFSET (r_ebx),
-  REG_OFFSET (r_esp),
-  REG_OFFSET (r_ebp),
-  REG_OFFSET (r_esi),
-  REG_OFFSET (r_edi),
-  REG_OFFSET (r_eip),
-  REG_OFFSET (r_eflags),
-  REG_OFFSET (r_cs),
-  REG_OFFSET (r_ss),
-  REG_OFFSET (r_ds),
-  REG_OFFSET (r_es),
+static int i386bsd_r_reg_offset[]
+  = { REG_OFFSET (r_eax),    REG_OFFSET (r_ecx), REG_OFFSET (r_edx),
+      REG_OFFSET (r_ebx),    REG_OFFSET (r_esp), REG_OFFSET (r_ebp),
+      REG_OFFSET (r_esi),    REG_OFFSET (r_edi), REG_OFFSET (r_eip),
+      REG_OFFSET (r_eflags), REG_OFFSET (r_cs),	 REG_OFFSET (r_ss),
+      REG_OFFSET (r_ds),     REG_OFFSET (r_es),
 #ifdef HAVE_STRUCT_REG_R_FS
-  REG_OFFSET (r_fs),
+      REG_OFFSET (r_fs),
 #else
   -1,
 #endif
 #ifdef HAVE_STRUCT_REG_R_GS
-  REG_OFFSET (r_gs)
+      REG_OFFSET (r_gs)
 #else
   -1
 #endif
-};
+    };
 
 /* Macro to determine if a register is fetched with PT_GETREGS.  */
-#define GETREGS_SUPPLIES(regnum) \
-  ((0 <= (regnum) && (regnum) <= 15))
+#define GETREGS_SUPPLIES(regnum) ((0 <= (regnum) && (regnum) <= 15))
 
 /* Set to 1 if the kernel supports PT_GETXMMREGS.  Initialized to -1
    so that we try PT_GETXMMREGS the first time around.  */
 static int have_ptrace_xmmregs = -1;
-
 
 /* Supply the general-purpose registers in GREGS, to REGCACHE.  */
 
@@ -119,8 +106,8 @@ i386bsd_supply_gregset (struct regcache *regcache, const void *gregs)
    registers.  */
 
 static void
-i386bsd_collect_gregset (const struct regcache *regcache,
-			 void *gregs, int regnum)
+i386bsd_collect_gregset (const struct regcache *regcache, void *gregs,
+			 int regnum)
 {
   char *regs = (char *) gregs;
   int i;
@@ -150,7 +137,7 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (gdb_ptrace (PT_GETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_ ("Couldn't get registers"));
 
       i386bsd_supply_gregset (regcache, &regs);
       if (regnum != -1)
@@ -163,8 +150,8 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       char xmmregs[512];
 
       if (have_ptrace_xmmregs != 0
-	  && gdb_ptrace(PT_GETXMMREGS, ptid,
-			(PTRACE_TYPE_ARG3) xmmregs, 0) == 0)
+	  && gdb_ptrace (PT_GETXMMREGS, ptid, (PTRACE_TYPE_ARG3) xmmregs, 0)
+	       == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 	  i387_supply_fxsave (regcache, -1, xmmregs);
@@ -172,9 +159,9 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       else
 	{
 	  have_ptrace_xmmregs = 0;
-	  if (gdb_ptrace (PT_GETFPREGS, ptid,
-			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	    perror_with_name (_("Couldn't get floating point status"));
+	  if (gdb_ptrace (PT_GETFPREGS, ptid, (PTRACE_TYPE_ARG3) &fpregs, 0)
+	      == -1)
+	    perror_with_name (_ ("Couldn't get floating point status"));
 
 	  i387_supply_fsave (regcache, -1, &fpregs);
 	}
@@ -194,12 +181,12 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (gdb_ptrace (PT_GETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_ ("Couldn't get registers"));
 
       i386bsd_collect_gregset (regcache, &regs, regnum);
 
       if (gdb_ptrace (PT_SETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't write registers"));
+	perror_with_name (_ ("Couldn't write registers"));
 
       if (regnum != -1)
 	return;
@@ -211,34 +198,35 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       char xmmregs[512];
 
       if (have_ptrace_xmmregs != 0
-	  && gdb_ptrace(PT_GETXMMREGS, ptid,
-			(PTRACE_TYPE_ARG3) xmmregs, 0) == 0)
+	  && gdb_ptrace (PT_GETXMMREGS, ptid, (PTRACE_TYPE_ARG3) xmmregs, 0)
+	       == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 
 	  i387_collect_fxsave (regcache, regnum, xmmregs);
 
-	  if (gdb_ptrace (PT_SETXMMREGS, ptid,
-			  (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
-	    perror_with_name (_("Couldn't write XMM registers"));
+	  if (gdb_ptrace (PT_SETXMMREGS, ptid, (PTRACE_TYPE_ARG3) xmmregs, 0)
+	      == -1)
+	    perror_with_name (_ ("Couldn't write XMM registers"));
 	}
       else
 	{
 	  have_ptrace_xmmregs = 0;
-	  if (gdb_ptrace (PT_GETFPREGS, ptid,
-			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	    perror_with_name (_("Couldn't get floating point status"));
+	  if (gdb_ptrace (PT_GETFPREGS, ptid, (PTRACE_TYPE_ARG3) &fpregs, 0)
+	      == -1)
+	    perror_with_name (_ ("Couldn't get floating point status"));
 
 	  i387_collect_fsave (regcache, regnum, &fpregs);
 
-	  if (gdb_ptrace (PT_SETFPREGS, ptid,
-			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	    perror_with_name (_("Couldn't write floating point status"));
+	  if (gdb_ptrace (PT_SETFPREGS, ptid, (PTRACE_TYPE_ARG3) &fpregs, 0)
+	      == -1)
+	    perror_with_name (_ ("Couldn't write floating point status"));
 	}
     }
 }
 
 void _initialize_i386bsd_nat ();
+
 void
 _initialize_i386bsd_nat ()
 {
@@ -248,7 +236,7 @@ _initialize_i386bsd_nat ()
      system header files and sysctl(3) to get at the relevant
      information.  */
 
-#if defined (OpenBSD)
+#if defined(OpenBSD)
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
 #endif
 
@@ -270,9 +258,9 @@ _initialize_i386bsd_nat ()
 
   if (SC_PC_OFFSET != offset)
     {
-      warning (_("\
+      warning (_ ("\
 offsetof (struct sigcontext, sc_pc) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>."), 
+Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_PC_OFFSET);
     }
 
@@ -283,7 +271,7 @@ Please report this to <bug-gdb@gnu.org>."),
 
   if (SC_SP_OFFSET != offset)
     {
-      warning (_("\
+      warning (_ ("\
 offsetof (struct sigcontext, sc_sp) yields %d instead of %d.\n\
 Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_SP_OFFSET);
@@ -296,7 +284,7 @@ Please report this to <bug-gdb@gnu.org>."),
 
   if (SC_FP_OFFSET != offset)
     {
-      warning (_("\
+      warning (_ ("\
 offsetof (struct sigcontext, sc_fp) yields %d instead of %d.\n\
 Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_FP_OFFSET);

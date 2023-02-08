@@ -43,9 +43,7 @@ struct btrace_block
   CORE_ADDR end;
 
   /* Simple constructor.  */
-  btrace_block (CORE_ADDR begin, CORE_ADDR end)
-    : begin (begin),
-      end (end)
+  btrace_block (CORE_ADDR begin, CORE_ADDR end) : begin (begin), end (end)
   {
     /* Nothing.  */
   }
@@ -172,19 +170,16 @@ struct btrace_data
 {
   btrace_data () = default;
 
-  ~btrace_data ()
-  {
-    fini ();
-  }
+  ~btrace_data () { fini (); }
 
   btrace_data &operator= (btrace_data &&other)
   {
     if (this != &other)
       {
-	fini ();
-	format = other.format;
-	variant = other.variant;
-	other.format = BTRACE_FORMAT_NONE;
+        fini ();
+        format = other.format;
+        variant = other.variant;
+        other.format = BTRACE_FORMAT_NONE;
       }
     return *this;
   }
@@ -207,7 +202,6 @@ struct btrace_data
   } variant;
 
 private:
-
   DISABLE_COPY_AND_ASSIGN (btrace_data);
 
   void fini ();
@@ -258,6 +252,6 @@ extern const char *btrace_format_short_string (enum btrace_format format);
    Both SRC and DST must use the same format.
    Returns zero on success; a negative number otherwise.  */
 extern int btrace_data_append (struct btrace_data *dst,
-			       const struct btrace_data *src);
+                               const struct btrace_data *src);
 
 #endif /* COMMON_BTRACE_COMMON_H */

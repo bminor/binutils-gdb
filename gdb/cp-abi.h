@@ -34,10 +34,10 @@ class frame_info_ptr;
    certainly be cleaner to carry this information explicitly in GDB's
    data structures than to derive it from the mangled name.  */
 
-
 /* Kinds of constructors.  All these values are guaranteed to be
    non-zero.  */
-enum ctor_kinds {
+enum ctor_kinds
+{
 
   /* Initialize a complete object, including virtual bases, using
      memory provided by caller.  */
@@ -55,10 +55,10 @@ enum ctor_kinds {
    of constructor it is.  */
 extern enum ctor_kinds is_constructor_name (const char *name);
 
-
 /* Kinds of destructors.  All these values are guaranteed to be
    non-zero.  */
-enum dtor_kinds {
+enum dtor_kinds
+{
 
   /* A destructor which finalizes the entire object, and then calls
      `delete' on its storage.  */
@@ -72,21 +72,18 @@ enum dtor_kinds {
      object.  */
   base_object_dtor
 };
-  
+
 /* Return non-zero iff NAME is the mangled name of a destructor.
    Actually, return an `enum dtor_kind' value describing what *kind*
    of destructor it is.  */
 extern enum dtor_kinds is_destructor_name (const char *name);
 
-
 /* Return non-zero iff NAME is the mangled name of a vtable.  */
 extern int is_vtable_name (const char *name);
-
 
 /* Return non-zero iff NAME is the un-mangled name of an operator,
    perhaps scoped within some class.  */
 extern int is_operator_name (const char *name);
-
 
 /* Return an object's virtual function as a value.
 
@@ -105,11 +102,8 @@ extern int is_operator_name (const char *name);
    this is the type containing F.  OFFSET is the offset of that base
    type within *VALUEP.  */
 extern struct value *value_virtual_fn_field (struct value **valuep,
-					     struct fn_field *f,
-					     int j,
-					     struct type *type,
-					     int offset);
-
+					     struct fn_field *f, int j,
+					     struct type *type, int offset);
 
 /* Try to find the run-time type of VALUE, using C++ run-time type
    information.  Return the run-time type, or zero if we can't figure
@@ -134,9 +128,8 @@ extern struct value *value_virtual_fn_field (struct value **valuep,
 
    FULL, TOP, and USING_ENC can each be zero, in which case we don't
    provide the corresponding piece of information.  */
-extern struct type *value_rtti_type (struct value *value,
-				     int *full, LONGEST *top,
-				     int *using_enc);
+extern struct type *value_rtti_type (struct value *value, int *full,
+				     LONGEST *top, int *using_enc);
 
 /* Compute the offset of the baseclass which is the INDEXth baseclass
    of class TYPE, for value at VALADDR (in host) at ADDRESS (in
@@ -144,17 +137,14 @@ extern struct type *value_rtti_type (struct value *value,
    contents of VAL.  The result is the offset of the baseclass value
    relative to (the address of)(ARG) + OFFSET.  */
 
-extern int baseclass_offset (struct type *type,
-			     int index, const gdb_byte *valaddr,
-			     LONGEST embedded_offset,
-			     CORE_ADDR address,
-			     const struct value *val);
+extern int baseclass_offset (struct type *type, int index,
+			     const gdb_byte *valaddr, LONGEST embedded_offset,
+			     CORE_ADDR address, const struct value *val);
 
 /* Describe the target of a pointer to method.  CONTENTS is the byte
    pattern representing the pointer to method.  TYPE is the pointer to
    method type.  STREAM is the stream to print it to.  */
-void cplus_print_method_ptr (const gdb_byte *contents,
-			     struct type *type,
+void cplus_print_method_ptr (const gdb_byte *contents, struct type *type,
 			     struct ui_file *stream);
 
 /* Return the size of a pointer to member function of type
@@ -204,14 +194,13 @@ extern std::string cplus_typename_from_type_info (struct value *value);
    address of the routine we are thunking to and continue to there
    instead.  */
 
-CORE_ADDR cplus_skip_trampoline (frame_info_ptr frame,
-				 CORE_ADDR stop_pc);
+CORE_ADDR cplus_skip_trampoline (frame_info_ptr frame, CORE_ADDR stop_pc);
 
 /* Return a struct that provides pass-by-reference information
    about the given TYPE.  */
 
-extern struct language_pass_by_ref_info cp_pass_by_reference
-  (struct type *type);
+extern struct language_pass_by_ref_info
+cp_pass_by_reference (struct type *type);
 
 struct cp_abi_ops
 {
@@ -225,23 +214,18 @@ struct cp_abi_ops
   enum dtor_kinds (*is_destructor_name) (const char *name);
   int (*is_vtable_name) (const char *name);
   int (*is_operator_name) (const char *name);
-  struct value *(*virtual_fn_field) (struct value **arg1p,
-				     struct fn_field * f,
-				     int j, struct type * type,
-				     int offset);
-  struct type *(*rtti_type) (struct value *v, int *full,
-			     LONGEST *top, int *using_enc);
+  struct value *(*virtual_fn_field) (struct value **arg1p, struct fn_field *f,
+				     int j, struct type *type, int offset);
+  struct type *(*rtti_type) (struct value *v, int *full, LONGEST *top,
+			     int *using_enc);
   int (*baseclass_offset) (struct type *type, int index,
 			   const bfd_byte *valaddr, LONGEST embedded_offset,
 			   CORE_ADDR address, const struct value *val);
-  void (*print_method_ptr) (const gdb_byte *contents,
-			    struct type *type,
+  void (*print_method_ptr) (const gdb_byte *contents, struct type *type,
 			    struct ui_file *stream);
   int (*method_ptr_size) (struct type *);
-  void (*make_method_ptr) (struct type *, gdb_byte *,
-			   CORE_ADDR, int);
-  struct value * (*method_ptr_to_value) (struct value **,
-					 struct value *);
+  void (*make_method_ptr) (struct type *, gdb_byte *, CORE_ADDR, int);
+  struct value *(*method_ptr_to_value) (struct value **, struct value *);
   void (*print_vtable) (struct value *);
   struct value *(*get_typeid) (struct value *value);
   struct type *(*get_typeid_type) (struct gdbarch *gdbarch);
@@ -250,7 +234,6 @@ struct cp_abi_ops
   CORE_ADDR (*skip_trampoline) (frame_info_ptr, CORE_ADDR);
   struct language_pass_by_ref_info (*pass_by_reference) (struct type *type);
 };
-
 
 extern int register_cp_abi (struct cp_abi_ops *abi);
 extern void set_cp_abi_as_auto_default (const char *short_name);

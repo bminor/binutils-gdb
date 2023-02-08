@@ -38,7 +38,8 @@
 #ifdef HAVE_LINUX_REGSETS
 typedef void (*regset_fill_func) (struct regcache *, void *);
 typedef void (*regset_store_func) (struct regcache *, const void *);
-enum regset_type {
+enum regset_type
+{
   GENERAL_REGS,
   FP_REGS,
   EXTENDED_REGS,
@@ -47,8 +48,10 @@ enum regset_type {
 
 /* The arch's regsets array initializer must be terminated with a NULL
    regset.  */
-#define NULL_REGSET \
-  { 0, 0, 0, -1, (enum regset_type) -1, NULL, NULL }
+#define NULL_REGSET                                 \
+  {                                                 \
+    0, 0, 0, -1, (enum regset_type) - 1, NULL, NULL \
+  }
 
 struct regset_info
 {
@@ -139,9 +142,8 @@ struct lwp_info;
 class linux_process_target : public process_stratum_target
 {
 public:
-
   int create_inferior (const char *program,
-		       const std::vector<char *> &program_args) override;
+                       const std::vector<char *> &program_args) override;
 
   void post_create_inferior () override;
 
@@ -160,17 +162,16 @@ public:
   void resume (thread_resume *resume_info, size_t n) override;
 
   ptid_t wait (ptid_t ptid, target_waitstatus *status,
-	       target_wait_flags options) override;
+               target_wait_flags options) override;
 
   void fetch_registers (regcache *regcache, int regno) override;
 
   void store_registers (regcache *regcache, int regno) override;
 
-  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
-		   int len) override;
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len) override;
 
   int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-		    int len) override;
+                    int len) override;
 
   void look_up_symbols () override;
 
@@ -179,13 +180,13 @@ public:
   bool supports_read_auxv () override;
 
   int read_auxv (int pid, CORE_ADDR offset, unsigned char *myaddr,
-		 unsigned int len) override;
+                 unsigned int len) override;
 
-  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, raw_breakpoint *bp) override;
+  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                    raw_breakpoint *bp) override;
 
-  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, raw_breakpoint *bp) override;
+  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                    raw_breakpoint *bp) override;
 
   bool stopped_by_sw_breakpoint () override;
 
@@ -208,19 +209,19 @@ public:
   bool supports_get_tls_address () override;
 
   int get_tls_address (thread_info *thread, CORE_ADDR offset,
-		       CORE_ADDR load_module, CORE_ADDR *address) override;
+                       CORE_ADDR load_module, CORE_ADDR *address) override;
 
   bool supports_qxfer_osdata () override;
 
   int qxfer_osdata (const char *annex, unsigned char *readbuf,
-		    unsigned const char *writebuf,
-		    CORE_ADDR offset, int len) override;
+                    unsigned const char *writebuf, CORE_ADDR offset,
+                    int len) override;
 
   bool supports_qxfer_siginfo () override;
 
   int qxfer_siginfo (const char *annex, unsigned char *readbuf,
-		     unsigned const char *writebuf,
-		     CORE_ADDR offset, int len) override;
+                     unsigned const char *writebuf, CORE_ADDR offset,
+                     int len) override;
 
   bool supports_non_stop () override;
 
@@ -245,8 +246,8 @@ public:
 #if defined PT_GETDSBT || defined PTRACE_GETFDPIC
   bool supports_read_loadmap () override;
 
-  int read_loadmap (const char *annex, CORE_ADDR offset,
-		    unsigned char *myaddr, unsigned int len) override;
+  int read_loadmap (const char *annex, CORE_ADDR offset, unsigned char *myaddr,
+                    unsigned int len) override;
 #endif
 
   CORE_ADDR read_pc (regcache *regcache) override;
@@ -267,10 +268,9 @@ public:
 
   bool supports_qxfer_libraries_svr4 () override;
 
-  int qxfer_libraries_svr4 (const char *annex,
-			    unsigned char *readbuf,
-			    unsigned const char *writebuf,
-			    CORE_ADDR offset, int len) override;
+  int qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
+                            unsigned const char *writebuf, CORE_ADDR offset,
+                            int len) override;
 
   bool supports_agent () override;
 
@@ -278,15 +278,14 @@ public:
   bool supports_btrace () override;
 
   btrace_target_info *enable_btrace (thread_info *tp,
-				     const btrace_config *conf) override;
+                                     const btrace_config *conf) override;
 
   int disable_btrace (btrace_target_info *tinfo) override;
 
   int read_btrace (btrace_target_info *tinfo, buffer *buf,
-		   enum btrace_read_type type) override;
+                   enum btrace_read_type type) override;
 
-  int read_btrace_conf (const btrace_target_info *tinfo,
-			buffer *buf) override;
+  int read_btrace_conf (const btrace_target_info *tinfo, buffer *buf) override;
 #endif
 
   bool supports_range_stepping () override;
@@ -298,18 +297,18 @@ public:
   bool supports_multifs () override;
 
   int multifs_open (int pid, const char *filename, int flags,
-		    mode_t mode) override;
+                    mode_t mode) override;
 
   int multifs_unlink (int pid, const char *filename) override;
 
   ssize_t multifs_readlink (int pid, const char *filename, char *buf,
-			    size_t bufsiz) override;
+                            size_t bufsiz) override;
 
   const char *thread_name (ptid_t thread) override;
 
 #if USE_THREAD_DB
   bool thread_handle (ptid_t ptid, gdb_byte **handle,
-		      int *handle_len) override;
+                      int *handle_len) override;
 #endif
 
   thread_info *thread_pending_parent (thread_info *thread) override;
@@ -322,7 +321,6 @@ public:
   virtual const regs_info *get_regs_info () = 0;
 
 private:
-
   /* Handle a GNU/Linux extended wait response.  If we see a clone,
      fork, or vfork event, we need to add the new LWP to our list
      (and return 0 so as not to report the trap to higher layers).
@@ -344,7 +342,7 @@ private:
      OPTIONS contains WNOHANG.  Return -1 if no unwaited-for children
      was found.  Return the PID of the stopped child otherwise.  */
   int wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
-			       int *wstatp, int options);
+                               int *wstatp, int options);
 
   /* Wait for an event from child(ren) PTID.  PTIDs can be:
      minus_one_ptid, to specify any child; a pid PTID, specifying all
@@ -360,7 +358,7 @@ private:
 
   /* Wait for process, returns status.  */
   ptid_t wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
-		 target_wait_flags target_options);
+                 target_wait_flags target_options);
 
   /* Stop all lwps that aren't stopped yet, except EXCEPT, if not NULL.
      If SUSPEND, then also increase the suspend count of every LWP,
@@ -416,11 +414,11 @@ private:
 #ifdef HAVE_LINUX_USRREGS
   /* Fetch one register.  */
   void fetch_register (const usrregs_info *usrregs, regcache *regcache,
-		       int regno);
+                       int regno);
 
   /* Store one register.  */
   void store_register (const usrregs_info *usrregs, regcache *regcache,
-		       int regno);
+                       int regno);
 #endif
 
   /* Fetch all registers, or just one, from the child process.
@@ -429,7 +427,7 @@ private:
      unless ALL is non-zero.
      Otherwise, REGNO specifies which register (so we can save time).  */
   void usr_fetch_inferior_registers (const regs_info *regs_info,
-				     regcache *regcache, int regno, int all);
+                                     regcache *regcache, int regno, int all);
 
   /* Store our register values back into the inferior.
      If REGNO is -1, do this for all registers, skipping any that are
@@ -437,7 +435,7 @@ private:
      unless ALL is non-zero.
      Otherwise, REGNO specifies which register (so we can save time).  */
   void usr_store_inferior_registers (const regs_info *regs_info,
-				     regcache *regcache, int regno, int all);
+                                     regcache *regcache, int regno, int all);
 
   /* Return the PC as read from the regcache of LWP, without any
      adjustment.  */
@@ -453,7 +451,7 @@ private:
   /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If
      SIGNAL is nonzero, give it that signal.  */
   void resume_one_lwp_throw (lwp_info *lwp, int step, int signal,
-			     siginfo_t *info);
+                             siginfo_t *info);
 
   /* Like resume_one_lwp_throw, but no error is thrown if the LWP
      disappears while we try to resume it.  */
@@ -512,7 +510,7 @@ private:
   /* Single step via hardware or software single step.
      Return 1 if hardware single stepping, 0 if software single stepping
      or can't single step.  */
-  int single_step (lwp_info* lwp);
+  int single_step (lwp_info *lwp);
 
   /* Return true if THREAD is doing hardware single step.  */
   bool maybe_hw_step (thread_info *thread);
@@ -539,7 +537,7 @@ private:
   /* Convert a native/host siginfo object, into/from the siginfo in the
      layout of the inferiors' architecture.  */
   void siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo,
-		      int direction);
+                      int direction);
 
   /* Add a process to the common process list, and set its private
      data.  */
@@ -550,7 +548,7 @@ private:
   process_info *add_linux_process_no_mem_file (int pid, int attached);
 
   /* Free resources associated to PROC and remove it.  */
-  void remove_linux_process (process_info *proc); 
+  void remove_linux_process (process_info *proc);
 
   /* Add a new thread.  */
   lwp_info *add_lwp (ptid_t ptid);
@@ -577,7 +575,7 @@ private: /* Back to private.  */
      process exit event, a thread exit event, or to suppress the
      event.  */
   ptid_t filter_exit_event (lwp_info *event_child,
-			    target_waitstatus *ourstatus);
+                            target_waitstatus *ourstatus);
 
   /* Returns true if THREAD is stopped in a jump pad, and we can't
      move it out, because we need to report the stop event to GDB.  For
@@ -587,8 +585,9 @@ private: /* Back to private.  */
 
   /* Convenience wrapper.  Returns information about LWP's fast tracepoint
      collection status.  */
-  fast_tpoint_collect_result linux_fast_tracepoint_collecting
-    (lwp_info *lwp, fast_tpoint_collect_status *status);
+  fast_tpoint_collect_result
+  linux_fast_tracepoint_collecting (lwp_info *lwp,
+                                    fast_tpoint_collect_status *status);
 
   /* This function should only be called if LWP got a SYSCALL_SIGTRAP.
      Fill *SYSNO with the syscall nr trapped.  */
@@ -635,11 +634,11 @@ protected:
 
   /* Breakpoint and watchpoint related functions.  See target.h for
      comments.  */
-  virtual int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
-				int size, raw_breakpoint *bp);
+  virtual int low_insert_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                                raw_breakpoint *bp);
 
-  virtual int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
-				int size, raw_breakpoint *bp);
+  virtual int low_remove_point (raw_bkpt_type type, CORE_ADDR addr, int size,
+                                raw_breakpoint *bp);
 
   virtual bool low_stopped_by_watchpoint ();
 
@@ -648,17 +647,17 @@ protected:
   /* Hooks to reformat register data for PEEKUSR/POKEUSR (in particular
      for registers smaller than an xfer unit).  */
   virtual void low_collect_ptrace_register (regcache *regcache, int regno,
-					    char *buf);
+                                            char *buf);
 
   virtual void low_supply_ptrace_register (regcache *regcache, int regno,
-					   const char *buf);
+                                           const char *buf);
 
   /* Hook to convert from target format to ptrace format and back.
      Returns true if any conversion was done; false otherwise.
      If DIRECTION is 1, then copy from INF to NATIVE.
      If DIRECTION is 0, copy from NATIVE to INF.  */
   virtual bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
-				  int direction);
+                                  int direction);
 
   /* Hook to call when a new process is created or attached to.
      If extra per-process architecture-specific data is needed,
@@ -712,9 +711,7 @@ extern linux_process_target *the_linux_target;
 
 struct pending_signal
 {
-  pending_signal (int signal)
-    : signal {signal}
-  {};
+  pending_signal (int signal) : signal { signal } {};
 
   int signal;
   siginfo_t info;
@@ -746,15 +743,14 @@ struct lwp_info
        at most.  So we can recognize who is the parent based on which one has
        a pending status.  */
     gdb_assert (!!this->status_pending_p
-		!= !!this->fork_relative->status_pending_p);
+                != !!this->fork_relative->status_pending_p);
 
     if (!this->fork_relative->status_pending_p)
       return nullptr;
 
-    const target_waitstatus &ws
-      = this->fork_relative->waitstatus;
+    const target_waitstatus &ws = this->fork_relative->waitstatus;
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
-		|| ws.kind () == TARGET_WAITKIND_VFORKED);
+                || ws.kind () == TARGET_WAITKIND_VFORKED);
 
     return this->fork_relative;
   }
@@ -773,14 +769,14 @@ struct lwp_info
        at most.  So we can recognize who is the parent based on which one has
        a pending status.  */
     gdb_assert (!!this->status_pending_p
-		!= !!this->fork_relative->status_pending_p);
+                != !!this->fork_relative->status_pending_p);
 
     if (!this->status_pending_p)
       return nullptr;
 
     const target_waitstatus &ws = this->waitstatus;
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
-		|| ws.kind () == TARGET_WAITKIND_VFORKED);
+                || ws.kind () == TARGET_WAITKIND_VFORKED);
 
     return this->fork_relative;
   }
@@ -858,7 +854,7 @@ struct lwp_info
      passed along the last resume request.  See 'struct
      thread_resume'.  */
   CORE_ADDR step_range_start = 0; /* Inclusive */
-  CORE_ADDR step_range_end = 0; /* Exclusive */
+  CORE_ADDR step_range_end = 0;   /* Exclusive */
 
   /* If this flag is set, we need to set the event request flags the
      next time we see this LWP stop.  */
@@ -928,14 +924,15 @@ void thread_db_detach (struct process_info *);
 void thread_db_mourn (struct process_info *);
 int thread_db_handle_monitor_command (char *);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
-			       CORE_ADDR load_module, CORE_ADDR *address);
+                               CORE_ADDR load_module, CORE_ADDR *address);
 int thread_db_look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 
 /* Called from linux-low.c when a clone event is detected.  Upon entry,
    both the clone and the parent should be stopped.  This function does
    whatever is required have the clone under thread_db's control.  */
 
-void thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid);
+void thread_db_notice_clone (struct thread_info *parent_thr,
+                             ptid_t child_ptid);
 
 bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 

@@ -32,7 +32,7 @@ enum openp_flag
   OPF_RETURN_REALPATH = 0x04,
 };
 
-DEF_ENUM_FLAGS_TYPE(openp_flag, openp_flags);
+DEF_ENUM_FLAGS_TYPE (openp_flag, openp_flags);
 
 extern int openp (const char *, openp_flags, const char *, int,
 		  gdb::unique_xmalloc_ptr<char> *);
@@ -69,16 +69,16 @@ extern void init_source_path (void);
    On Failure
      An invalid file descriptor is returned (the return value is negative).
      FULLNAME is set to NULL.  */
-extern scoped_fd find_and_open_source (const char *filename,
-				       const char *dirname,
-				       gdb::unique_xmalloc_ptr<char> *fullname);
+extern scoped_fd
+find_and_open_source (const char *filename, const char *dirname,
+		      gdb::unique_xmalloc_ptr<char> *fullname);
 
 /* A wrapper for find_and_open_source that returns the full name.  If
    the full name cannot be found, a full name is constructed based on
    the parameters, passing them through rewrite_source_path.  */
 
-extern gdb::unique_xmalloc_ptr<char> find_source_or_rewrite
-     (const char *filename, const char *dirname);
+extern gdb::unique_xmalloc_ptr<char>
+find_source_or_rewrite (const char *filename, const char *dirname);
 
 /* Open a source file given a symtab S.  Returns a file descriptor or
    negative number for error.  */
@@ -121,8 +121,8 @@ extern void set_default_source_symtab_and_line (void);
    (the returned sal pc and end fields are not valid.)
    and set the current default to whatever is in SAL.
    NOTE: The returned sal pc and end fields are not valid.  */
-extern symtab_and_line set_current_source_symtab_and_line
-  (const symtab_and_line &sal);
+extern symtab_and_line
+set_current_source_symtab_and_line (const symtab_and_line &sal);
 
 /* Reset any information stored about a default file and line to print.  */
 extern void clear_current_source_symtab_and_line (void);
@@ -132,13 +132,14 @@ extern void add_substitute_path_rule (const char *, const char *);
 
 /* Flags passed as 4th argument to print_source_lines.  */
 enum print_source_lines_flag
-  {
-    /* Do not print an error message.  */
-    PRINT_SOURCE_LINES_NOERROR = (1 << 0),
+{
+  /* Do not print an error message.  */
+  PRINT_SOURCE_LINES_NOERROR = (1 << 0),
 
-    /* Print the filename in front of the source lines.  */
-    PRINT_SOURCE_LINES_FILENAME = (1 << 1)
-  };
+  /* Print the filename in front of the source lines.  */
+  PRINT_SOURCE_LINES_FILENAME = (1 << 1)
+};
+
 DEF_ENUM_FLAGS_TYPE (enum print_source_lines_flag, print_source_lines_flags);
 
 /* Show source lines from the file of symtab S, starting with line
@@ -155,12 +156,13 @@ extern void print_source_lines (struct symtab *s, int line, int stopline,
 class source_lines_range
 {
 public:
+
   /* When constructing the range from a single line number, does the line
      range extend forward, or backward.  */
   enum direction
   {
-   FORWARD,
-   BACKWARD
+    FORWARD,
+    BACKWARD
   };
 
   /* Construct a SOURCE_LINES_RANGE starting at STARTLINE and extending in
@@ -174,15 +176,14 @@ public:
   explicit source_lines_range (int startline, int stopline)
     : m_startline (startline),
       m_stopline (stopline)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* Return the line to start listing from.  */
-  int startline () const
-  { return m_startline; }
+  int startline () const { return m_startline; }
 
   /* Return the line after the last line that should be listed.  */
-  int stopline () const
-  { return m_stopline; }
+  int stopline () const { return m_stopline; }
 
 private:
 

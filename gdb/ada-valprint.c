@@ -32,10 +32,8 @@
 
 static int print_field_values (struct value *, struct value *,
 			       struct ui_file *, int,
-			       const struct value_print_options *,
-			       int, const struct language_defn *);
-
-
+			       const struct value_print_options *, int,
+			       const struct language_defn *);
 
 /* Make TYPE unsigned if its range of values includes no negatives.  */
 static void
@@ -199,8 +197,8 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  if (check_typedef (value_type (v0))->length ()
 	      != check_typedef (value_type (v1))->length ())
 	    break;
-	  if (!value_contents_eq (v0, value_embedded_offset (v0),
-				  v1, value_embedded_offset (v1),
+	  if (!value_contents_eq (v0, value_embedded_offset (v0), v1,
+				  value_embedded_offset (v1),
 				  check_typedef (value_type (v0))->length ()))
 	    break;
 	}
@@ -212,10 +210,9 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  opts.deref_ref = false;
 	  common_val_print (v0, stream, recurse + 1, &opts, current_language);
 	  annotate_elt_rep (i - i0);
-	  gdb_printf (stream, _(" %p[<repeats %u times>%p]"),
+	  gdb_printf (stream, _ (" %p[<repeats %u times>%p]"),
 		      metadata_style.style ().ptr (), i - i0, nullptr);
 	  annotate_elt_rep_end ();
-
 	}
       else
 	{
@@ -237,8 +234,8 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		      gdb_printf (stream, ", ");
 		    }
 		  stream->wrap_here (2 + 2 * recurse);
-		  maybe_print_array_index (index_type, j + low,
-					   stream, options);
+		  maybe_print_array_index (index_type, j + low, stream,
+					   options);
 		}
 	      common_val_print (v0, stream, recurse + 1, &opts,
 				current_language);
@@ -259,8 +256,8 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
    of the character.  */
 
 void
-ada_emit_char (int c, struct type *type, struct ui_file *stream,
-	       int quoter, int type_len)
+ada_emit_char (int c, struct type *type, struct ui_file *stream, int quoter,
+	       int type_len)
 {
   /* If this character fits in the normal ASCII range, and is
      a printable character, then print the character as if it was
@@ -293,8 +290,8 @@ char_at (const gdb_byte *string, int i, int type_len,
   if (type_len == 1)
     return string[i];
   else
-    return (int) extract_unsigned_integer (string + type_len * i,
-					   type_len, byte_order);
+    return (int) extract_unsigned_integer (string + type_len * i, type_len,
+					   byte_order);
 }
 
 /* Print a floating-point value of type TYPE, pointed to in GDB by
@@ -345,8 +342,7 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
 	}
     }
 
-  if (pos == std::string::npos
-      && s.find ('.') == std::string::npos)
+  if (pos == std::string::npos && s.find ('.') == std::string::npos)
     {
       pos = s.find ('e');
       if (pos == std::string::npos)
@@ -386,7 +382,6 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 
   switch (type->code ())
     {
-
     case TYPE_CODE_ENUM:
       len = type->num_fields ();
       for (i = 0; i < len; i++)
@@ -438,11 +433,11 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_REF:
-      warning (_("internal error: unhandled type in ada_print_scalar"));
+      warning (_ ("internal error: unhandled type in ada_print_scalar"));
       break;
 
     default:
-      error (_("Invalid type code in symbol table."));
+      error (_ ("Invalid type code in symbol table."));
     }
 }
 
@@ -490,7 +485,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
       reps = 1;
       while (rep1 < length
 	     && char_at (string, rep1, type_len, byte_order)
-		== char_at (string, i, type_len, byte_order))
+		  == char_at (string, i, type_len, byte_order))
 	{
 	  rep1 += 1;
 	  reps += 1;
@@ -504,10 +499,10 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	      in_quotes = 0;
 	    }
 	  gdb_puts ("'", stream);
-	  ada_emit_char (char_at (string, i, type_len, byte_order),
-			 elttype, stream, '\'', type_len);
+	  ada_emit_char (char_at (string, i, type_len, byte_order), elttype,
+			 stream, '\'', type_len);
 	  gdb_puts ("'", stream);
-	  gdb_printf (stream, _(" %p[<repeats %u times>%p]"),
+	  gdb_printf (stream, _ (" %p[<repeats %u times>%p]"),
 		      metadata_style.style ().ptr (), reps, nullptr);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
@@ -520,8 +515,8 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	      gdb_puts ("\"", stream);
 	      in_quotes = 1;
 	    }
-	  ada_emit_char (char_at (string, i, type_len, byte_order),
-			 elttype, stream, '"', type_len);
+	  ada_emit_char (char_at (string, i, type_len, byte_order), elttype,
+			 stream, '"', type_len);
 	  things_printed += 1;
 	}
     }
@@ -546,11 +541,9 @@ ada_printstr (struct ui_file *stream, struct type *type,
 
 static int
 print_variant_part (struct value *value, int field_num,
-		    struct value *outer_value,
-		    struct ui_file *stream, int recurse,
-		    const struct value_print_options *options,
-		    int comma_needed,
-		    const struct language_defn *language)
+		    struct value *outer_value, struct ui_file *stream,
+		    int recurse, const struct value_print_options *options,
+		    int comma_needed, const struct language_defn *language)
 {
   struct type *type = value_type (value);
   struct type *var_type = type->field (field_num).type ();
@@ -583,8 +576,7 @@ static int
 print_field_values (struct value *value, struct value *outer_value,
 		    struct ui_file *stream, int recurse,
 		    const struct value_print_options *options,
-		    int comma_needed,
-		    const struct language_defn *language)
+		    int comma_needed, const struct language_defn *language)
 {
   int i, len;
 
@@ -598,19 +590,18 @@ print_field_values (struct value *value, struct value *outer_value,
 
       if (ada_is_wrapper_field (type, i))
 	{
-	  struct value *field_val = ada_value_primitive_field (value, 0,
-							       i, type);
-	  comma_needed =
-	    print_field_values (field_val, field_val,
-				stream, recurse, options,
-				comma_needed, language);
+	  struct value *field_val
+	    = ada_value_primitive_field (value, 0, i, type);
+	  comma_needed
+	    = print_field_values (field_val, field_val, stream, recurse,
+				  options, comma_needed, language);
 	  continue;
 	}
       else if (ada_is_variant_part (type, i))
 	{
-	  comma_needed =
-	    print_variant_part (value, i, outer_value, stream, recurse,
-				options, comma_needed, language);
+	  comma_needed
+	    = print_variant_part (value, i, outer_value, stream, recurse,
+				  options, comma_needed, language);
 	  continue;
 	}
 
@@ -642,7 +633,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	     order problems.  */
 	  if (HAVE_CPLUS_STRUCT (type) && TYPE_FIELD_IGNORE (type, i))
 	    {
-	      fputs_styled (_("<optimized out or zero length>"),
+	      fputs_styled (_ ("<optimized out or zero length>"),
 			    metadata_style.style (), stream);
 	    }
 	  else
@@ -653,11 +644,11 @@ print_field_values (struct value *value, struct value *outer_value,
 	      struct value_print_options opts;
 
 	      adjust_type_signedness (type->field (i).type ());
-	      v = ada_value_primitive_packed_val
-		    (value, nullptr,
-		     bit_pos / HOST_CHAR_BIT,
-		     bit_pos % HOST_CHAR_BIT,
-		     bit_size, type->field (i).type ());
+	      v = ada_value_primitive_packed_val (value, nullptr,
+						  bit_pos / HOST_CHAR_BIT,
+						  bit_pos % HOST_CHAR_BIT,
+						  bit_size,
+						  type->field (i).type ());
 	      opts = *options;
 	      opts.deref_ref = false;
 	      common_val_print (v, stream, recurse + 1, &opts, language);
@@ -683,8 +674,7 @@ print_field_values (struct value *value, struct value *outer_value,
 
 static void
 ada_val_print_string (struct type *type, const gdb_byte *valaddr,
-		      int offset_aligned,
-		      struct ui_file *stream, int recurse,
+		      int offset_aligned, struct ui_file *stream, int recurse,
 		      const struct value_print_options *options)
 {
   enum bfd_endian byte_order = type_byte_order (type);
@@ -711,24 +701,23 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
 
       /* Look for a NULL char.  */
       for (temp_len = 0;
-	   (temp_len < len
-	    && temp_len < print_max_chars
-	    && char_at (valaddr + offset_aligned,
-			temp_len, eltlen, byte_order) != 0);
-	   temp_len += 1);
+	   (temp_len < len && temp_len < print_max_chars
+	    && char_at (valaddr + offset_aligned, temp_len, eltlen, byte_order)
+		 != 0);
+	   temp_len += 1)
+	;
       len = temp_len;
     }
 
-  printstr (stream, elttype, valaddr + offset_aligned, len, 0,
-	    eltlen, options);
+  printstr (stream, elttype, valaddr + offset_aligned, len, 0, eltlen,
+	    options);
 }
 
 /* Implement Ada value_print'ing for the case where TYPE is a
    TYPE_CODE_PTR.  */
 
 static void
-ada_value_print_ptr (struct value *val,
-		     struct ui_file *stream, int recurse,
+ada_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
   if (!options->format
@@ -778,8 +767,8 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
     }
   else
     {
-      int format = (options->format ? options->format
-		    : options->output_format);
+      int format
+	= (options->format ? options->format : options->output_format);
 
       if (format)
 	{
@@ -857,8 +846,7 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
 
       if (name[0] == '\'')
 	gdb_printf (stream, "%ld %ps", (long) val,
-		    styled_string (variable_name_style.style (),
-				   name));
+		    styled_string (variable_name_style.style (), name));
       else
 	fputs_styled (name, variable_name_style.style (), stream);
     }
@@ -870,8 +858,7 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
    TYPE_CODE_STRUCT or TYPE_CODE_UNION.  */
 
 static void
-ada_val_print_struct_union (struct value *value,
-			    struct ui_file *stream,
+ada_val_print_struct_union (struct value *value, struct ui_file *stream,
 			    int recurse,
 			    const struct value_print_options *options)
 {
@@ -883,8 +870,9 @@ ada_val_print_struct_union (struct value *value,
 
   gdb_printf (stream, "(");
 
-  if (print_field_values (value, value, stream, recurse, options,
-			  0, language_def (language_ada)) != 0
+  if (print_field_values (value, value, stream, recurse, options, 0,
+			  language_def (language_ada))
+	!= 0
       && options->prettyformat)
     {
       gdb_printf (stream, "\n");
@@ -924,8 +912,8 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
     {
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
-      val_print_packed_array_elements (type, valaddr, offset_aligned,
-				       stream, recurse, options);
+      val_print_packed_array_elements (type, valaddr, offset_aligned, stream,
+				       recurse, options);
     }
   else
     value_print_array_elements (val, stream, recurse, options, 0);
@@ -936,8 +924,8 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
    a TYPE_CODE_REF.  */
 
 static void
-ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
-		   int offset, int offset_aligned, CORE_ADDR address,
+ada_val_print_ref (struct type *type, const gdb_byte *valaddr, int offset,
+		   int offset_aligned, CORE_ADDR address,
 		   struct ui_file *stream, int recurse,
 		   struct value *original_value,
 		   const struct value_print_options *options)
@@ -976,17 +964,16 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
       return;
     }
 
-  deref_val
-    = ada_value_ind (value_from_pointer (lookup_pointer_type (elttype),
-					 deref_val_int));
+  deref_val = ada_value_ind (value_from_pointer (lookup_pointer_type (elttype),
+						 deref_val_int));
   if (ada_is_tagged_type (value_type (deref_val), 1))
     deref_val = ada_tag_value_at_base_address (deref_val);
 
   if (value_lazy (deref_val))
     value_fetch_lazy (deref_val);
 
-  common_val_print (deref_val, stream, recurse + 1,
-		    options, language_def (language_ada));
+  common_val_print (deref_val, stream, recurse + 1, options,
+		    language_def (language_ada));
 }
 
 /* See the comment on ada_value_print.  This function differs in that
@@ -1076,8 +1063,7 @@ ada_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       return;
 
     case TYPE_CODE_REF:
-      ada_val_print_ref (type, valaddr, 0, 0,
-			 address, stream, recurse, val,
+      ada_val_print_ref (type, valaddr, 0, 0, address, stream, recurse, val,
 			 options);
       break;
     }

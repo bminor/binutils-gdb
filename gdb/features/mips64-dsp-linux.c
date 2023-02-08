@@ -6,6 +6,7 @@
 #include "target-descriptions.h"
 
 const struct target_desc *tdesc_mips64_dsp_linux;
+
 static void
 initialize_tdesc_mips64_dsp_linux (void)
 {

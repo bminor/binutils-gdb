@@ -99,16 +99,10 @@ struct location_spec
   }
 
   /* Set this location spec's string representation.  */
-  void set_string (std::string &&string)
-  {
-    m_as_string = std::move (string);
-  }
+  void set_string (std::string &&string) { m_as_string = std::move (string); }
 
   /* Return this location spec's type.  */
-  enum location_spec_type type () const
-  {
-    return m_type;
-  }
+  enum location_spec_type type () const { return m_type; }
 
 protected:
 
@@ -138,6 +132,7 @@ protected:
   mutable std::string m_as_string;
 
 private:
+
   /* The type of this location specification.  */
   enum location_spec_type m_type;
 };
@@ -162,6 +157,7 @@ struct linespec_location_spec : public location_spec
   char *spec_string = nullptr;
 
 protected:
+
   linespec_location_spec (const linespec_location_spec &other);
 
   std::string compute_string () const override;
@@ -180,6 +176,7 @@ struct address_location_spec : public location_spec
   CORE_ADDR address;
 
 protected:
+
   address_location_spec (const address_location_spec &other);
 
   std::string compute_string () const override;
@@ -212,8 +209,7 @@ struct explicit_location_spec : public location_spec
   char *function_name = nullptr;
 
   /* Whether the function name is fully-qualified or not.  */
-  symbol_name_match_type func_name_match_type
-    = symbol_name_match_type::WILD;
+  symbol_name_match_type func_name_match_type = symbol_name_match_type::WILD;
 
   /* The name of a label.  Malloc'd.  */
   char *label_name = nullptr;
@@ -224,6 +220,7 @@ struct explicit_location_spec : public location_spec
   struct line_offset line_offset;
 
 protected:
+
   explicit_location_spec (const explicit_location_spec &other);
 
   std::string compute_string () const override;
@@ -239,6 +236,7 @@ struct probe_location_spec : public location_spec
   bool empty_p () const override;
 
 protected:
+
   probe_location_spec (const probe_location_spec &other) = default;
 
   std::string compute_string () const override;
@@ -246,14 +244,15 @@ protected:
 
 /* Create a new linespec location spec.  */
 
-extern location_spec_up new_linespec_location_spec
-  (const char **linespec, symbol_name_match_type match_type);
+extern location_spec_up
+new_linespec_location_spec (const char **linespec,
+			    symbol_name_match_type match_type);
 
 /* Return the given location_spec as a linespec_location_spec.
    LOCSPEC must be of type LINESPEC_LOCATION_SPEC.  */
 
 extern const linespec_location_spec *
-  as_linespec_location_spec (const location_spec *locspec);
+as_linespec_location_spec (const location_spec *locspec);
 
 /* Create a new address location spec.
    ADDR is the address corresponding to this location_spec.
@@ -268,7 +267,7 @@ extern location_spec_up new_address_location_spec (CORE_ADDR addr,
    LOCSPEC must be of type ADDRESS_LOCATION_SPEC.  */
 
 const address_location_spec *
-  as_address_location_spec (const location_spec *locspec);
+as_address_location_spec (const location_spec *locspec);
 
 /* Create a new probe location.  */
 
@@ -278,7 +277,7 @@ extern location_spec_up new_probe_location_spec (std::string &&probe);
    cast to probe_location_spec.  */
 
 const probe_location_spec *
-  as_probe_location_spec (const location_spec *locspec);
+as_probe_location_spec (const location_spec *locspec);
 
 /* Create a new explicit location with explicit FUNCTION_NAME.  All
    other fields are defaulted.  */
@@ -286,8 +285,7 @@ const probe_location_spec *
 static inline location_spec_up
 new_explicit_location_spec_function (const char *function_name)
 {
-  explicit_location_spec *spec
-    = new explicit_location_spec ();
+  explicit_location_spec *spec = new explicit_location_spec ();
   spec->function_name
     = (function_name != nullptr ? xstrdup (function_name) : nullptr);
   return location_spec_up (spec);
@@ -297,9 +295,8 @@ new_explicit_location_spec_function (const char *function_name)
    cast to explicit_location_spec.  */
 
 const explicit_location_spec *
-  as_explicit_location_spec (const location_spec *locspec);
-explicit_location_spec *
-  as_explicit_location_spec (location_spec *locspec);
+as_explicit_location_spec (const location_spec *locspec);
+explicit_location_spec *as_explicit_location_spec (location_spec *locspec);
 
 /* Attempt to convert the input string in *ARGP into a location_spec.
    ARGP is advanced past any processed input.  Always returns a non-nullptr
@@ -317,18 +314,18 @@ explicit_location_spec *
    MATCH_TYPE should be either WILD or FULL.  If -q/--qualified is specified
    in the input string, it will take precedence over this parameter.  */
 
-extern location_spec_up string_to_location_spec
-  (const char **argp, const struct language_defn *language,
-   symbol_name_match_type match_type = symbol_name_match_type::WILD);
+extern location_spec_up string_to_location_spec (
+  const char **argp, const struct language_defn *language,
+  symbol_name_match_type match_type = symbol_name_match_type::WILD);
 
 /* Like string_to_location_spec, but does not attempt to parse
    explicit location specs.  MATCH_TYPE indicates how function names
    should be matched.  */
 
 extern location_spec_up
-  string_to_location_spec_basic (const char **argp,
-				 const struct language_defn *language,
-				 symbol_name_match_type match_type);
+string_to_location_spec_basic (const char **argp,
+			       const struct language_defn *language,
+			       symbol_name_match_type match_type);
 
 /* Structure filled in by string_to_explicit_location_spec to aid the
    completer.  */
@@ -363,8 +360,8 @@ struct explicit_completion_info
    is not NULL, this function will not throw any exceptions.  */
 
 extern location_spec_up
-  string_to_explicit_location_spec (const char **argp,
-				    const struct language_defn *language,
-				    explicit_completion_info *completion_info);
+string_to_explicit_location_spec (const char **argp,
+				  const struct language_defn *language,
+				  explicit_completion_info *completion_info);
 
 #endif /* LOCATION_H */

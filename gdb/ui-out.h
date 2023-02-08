@@ -41,12 +41,12 @@ extern struct ui_out **current_ui_current_uiout_ptr (void);
 
 /* alignment enum */
 enum ui_align
-  {
-    ui_left = -1,
-    ui_center,
-    ui_right,
-    ui_noalign
-  };
+{
+  ui_left = -1,
+  ui_center,
+  ui_right,
+  ui_noalign
+};
 
 /* flags enum */
 enum ui_out_flag
@@ -67,20 +67,20 @@ DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
    tuples.  */
 
 enum ui_out_type
-  {
-    ui_out_type_tuple,
-    ui_out_type_list
-  };
+{
+  ui_out_type_tuple,
+  ui_out_type_list
+};
 
 /* The possible kinds of fields.  */
 enum class field_kind
-  {
-    /* "FIELD_STRING" needs a funny name to avoid clashes with tokens
+{
+  /* "FIELD_STRING" needs a funny name to avoid clashes with tokens
        named "STRING".  See PR build/25250.  FIELD_SIGNED is given a
        similar name for consistency.  */
-    FIELD_SIGNED,
-    FIELD_STRING,
-  };
+  FIELD_SIGNED,
+  FIELD_STRING,
+};
 
 /* The base type of all fields that can be emitted using %pF.  */
 
@@ -102,8 +102,7 @@ struct signed_field_s : base_field_s
    it's not possible to pass a reference via va_args.  */
 
 static inline signed_field_s *
-signed_field (const char *name, LONGEST val,
-	      signed_field_s &&tmp = {})
+signed_field (const char *name, LONGEST val, signed_field_s &&tmp = {})
 {
   tmp.name = name;
   tmp.kind = field_kind::FIELD_SIGNED;
@@ -123,8 +122,7 @@ struct string_field_s : base_field_s
    it's not possible to pass a reference via va_args.  */
 
 static inline string_field_s *
-string_field (const char *name, const char *str,
-	      string_field_s &&tmp = {})
+string_field (const char *name, const char *str, string_field_s &&tmp = {})
 {
   tmp.name = name;
   tmp.kind = field_kind::FIELD_STRING;
@@ -158,7 +156,7 @@ styled_string (const ui_file_style &style, const char *str,
 
 class ui_out
 {
- public:
+public:
 
   explicit ui_out (ui_out_flags flags = 0);
   virtual ~ui_out ();
@@ -189,22 +187,24 @@ class ui_out
 			CORE_ADDR address);
   void field_string (const char *fldname, const char *string,
 		     const ui_file_style &style = ui_file_style ());
+
   void field_string (const char *fldname, const std::string &string,
 		     const ui_file_style &style = ui_file_style ())
   {
     field_string (fldname, string.c_str (), style);
   }
+
   void field_stream (const char *fldname, string_file &stream,
 		     const ui_file_style &style = ui_file_style ());
   void field_skip (const char *fldname);
   void field_fmt (const char *fldname, const char *format, ...)
     ATTRIBUTE_PRINTF (3, 4);
   void field_fmt (const char *fldname, const ui_file_style &style,
-		  const char *format, ...)
-    ATTRIBUTE_PRINTF (4, 5);
+		  const char *format, ...) ATTRIBUTE_PRINTF (4, 5);
 
   void spaces (int numspaces);
   void text (const char *string);
+
   void text (const std::string &string) { text (string.c_str ()); }
 
   /* Output a printf-style formatted string.  In addition to the usual
@@ -252,8 +252,8 @@ class ui_out
      because code in GDB that wants to print a host address should use
      host_address_to_string instead of %p.  */
   void message (const char *format, ...) ATTRIBUTE_PRINTF (2, 3);
-  void vmessage (const ui_file_style &in_style,
-		 const char *format, va_list args) ATTRIBUTE_PRINTF (3, 0);
+  void vmessage (const ui_file_style &in_style, const char *format,
+		 va_list args) ATTRIBUTE_PRINTF (3, 0);
 
   void wrap_hint (int indent);
 
@@ -282,6 +282,7 @@ class ui_out
   class progress_update
   {
   public:
+
     /* Represents the printing state of a progress update.  */
     enum state
     {
@@ -300,27 +301,25 @@ class ui_out
       m_uiout->do_progress_start ();
     }
 
-    ~progress_update ()
-    {
-
-    }
+    ~progress_update () {}
 
     progress_update (const progress_update &) = delete;
     progress_update &operator= (const progress_update &) = delete;
 
     /* Emit some progress for this progress meter.  Includes current
        amount of progress made and total amount in the display.  */
-    void update_progress (const std::string& msg, const char *unit,
-			  double cur, double total)
+    void update_progress (const std::string &msg, const char *unit, double cur,
+			  double total)
     {
       m_uiout->do_progress_notify (msg, unit, cur, total);
     }
 
     /* Emit some progress for this progress meter.  */
-    void update_progress (const std::string& msg)
+    void update_progress (const std::string &msg)
     {
       m_uiout->do_progress_notify (msg, "", -1, -1);
     }
+
   private:
 
     struct ui_out *m_uiout;
@@ -328,7 +327,7 @@ class ui_out
 
   virtual void do_progress_end () = 0;
 
- protected:
+protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows, const char *tblid)
     = 0;
@@ -336,45 +335,51 @@ class ui_out
   virtual void do_table_end () = 0;
   virtual void do_table_header (int width, ui_align align,
 				const std::string &col_name,
-				const std::string &col_hdr) = 0;
+				const std::string &col_hdr)
+    = 0;
 
   virtual void do_begin (ui_out_type type, const char *id) = 0;
   virtual void do_end (ui_out_type type) = 0;
   virtual void do_field_signed (int fldno, int width, ui_align align,
-				const char *fldname, LONGEST value) = 0;
+				const char *fldname, LONGEST value)
+    = 0;
   virtual void do_field_unsigned (int fldno, int width, ui_align align,
-				  const char *fldname, ULONGEST value) = 0;
+				  const char *fldname, ULONGEST value)
+    = 0;
   virtual void do_field_skip (int fldno, int width, ui_align align,
-			      const char *fldname) = 0;
+			      const char *fldname)
+    = 0;
   virtual void do_field_string (int fldno, int width, ui_align align,
 				const char *fldname, const char *string,
-				const ui_file_style &style) = 0;
+				const ui_file_style &style)
+    = 0;
   virtual void do_field_fmt (int fldno, int width, ui_align align,
 			     const char *fldname, const ui_file_style &style,
 			     const char *format, va_list args)
-    ATTRIBUTE_PRINTF (7, 0) = 0;
+    ATTRIBUTE_PRINTF (7, 0)
+    = 0;
   virtual void do_spaces (int numspaces) = 0;
   virtual void do_text (const char *string) = 0;
-  virtual void do_message (const ui_file_style &style,
-			   const char *format, va_list args)
-    ATTRIBUTE_PRINTF (3,0) = 0;
+  virtual void do_message (const ui_file_style &style, const char *format,
+			   va_list args) ATTRIBUTE_PRINTF (3, 0)
+    = 0;
   virtual void do_wrap_hint (int indent) = 0;
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
 
   virtual void do_progress_start () = 0;
-  virtual void do_progress_notify (const std::string &, const char *,
-				   double, double) = 0;
+  virtual void do_progress_notify (const std::string &, const char *, double,
+				   double)
+    = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */
 
-  virtual bool do_is_mi_like_p () const
-  { return false; }
+  virtual bool do_is_mi_like_p () const { return false; }
 
- private:
-  void call_do_message (const ui_file_style &style, const char *format,
-			...);
+private:
+
+  void call_do_message (const ui_file_style &style, const char *format, ...);
 
   ui_out_flags m_flags;
 
@@ -404,10 +409,7 @@ public:
     uiout->begin (Type, id);
   }
 
-  ~ui_out_emit_type ()
-  {
-    m_uiout->end (Type);
-  }
+  ~ui_out_emit_type () { m_uiout->end (Type); }
 
   DISABLE_COPY_AND_ASSIGN (ui_out_emit_type<Type>);
 
@@ -432,10 +434,7 @@ public:
     m_uiout->table_begin (nr_cols, nr_rows, tblid);
   }
 
-  ~ui_out_emit_table ()
-  {
-    m_uiout->table_end ();
-  }
+  ~ui_out_emit_table () { m_uiout->table_end (); }
 
   ui_out_emit_table (const ui_out_emit_table &) = delete;
   ui_out_emit_table &operator= (const ui_out_emit_table &) = delete;
@@ -458,15 +457,13 @@ public:
     m_uiout->redirect (stream);
   }
 
-  ~ui_out_redirect_pop ()
-  {
-    m_uiout->redirect (NULL);
-  }
+  ~ui_out_redirect_pop () { m_uiout->redirect (NULL); }
 
   ui_out_redirect_pop (const ui_out_redirect_pop &) = delete;
   ui_out_redirect_pop &operator= (const ui_out_redirect_pop &) = delete;
 
 private:
+
   struct ui_out *m_uiout;
 };
 

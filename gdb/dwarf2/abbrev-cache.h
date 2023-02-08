@@ -26,6 +26,7 @@
 class abbrev_cache
 {
 public:
+
   abbrev_cache ();
   DISABLE_COPY_AND_ASSIGN (abbrev_cache);
 

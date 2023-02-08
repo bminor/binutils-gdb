@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "defs.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
@@ -45,11 +44,11 @@ convert_array (compile_c_instance *context, struct type *type)
   element_type = context->convert_type (type->target_type ());
 
   if (range->bounds ()->low.kind () != PROP_CONST)
-    return context->plugin ().error (_("array type with non-constant"
-				       " lower bound is not supported"));
+    return context->plugin ().error (_ ("array type with non-constant"
+					" lower bound is not supported"));
   if (range->bounds ()->low.const_val () != 0)
-    return context->plugin ().error (_("cannot convert array type with "
-				       "non-zero lower bound to C"));
+    return context->plugin ().error (_ ("cannot convert array type with "
+					"non-zero lower bound to C"));
 
   if (range->bounds ()->high.kind () == PROP_LOCEXPR
       || range->bounds ()->high.kind () == PROP_LOCLIST)
@@ -57,8 +56,8 @@ convert_array (compile_c_instance *context, struct type *type)
       gcc_type result;
 
       if (type->is_vector ())
-	return context->plugin ().error (_("variably-sized vector type"
-					   " is not supported"));
+	return context->plugin ().error (_ ("variably-sized vector type"
+					    " is not supported"));
 
       std::string upper_bound
 	= c_get_range_decl_name (&range->bounds ()->high);
@@ -111,10 +110,8 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
       field_type = context->convert_type (type->field (i).type ());
       if (bitsize == 0)
 	bitsize = 8 * type->field (i).type ()->length ();
-      context->plugin ().build_add_field (result,
-					  type->field (i).name (),
-					  field_type,
-					  bitsize,
+      context->plugin ().build_add_field (result, type->field (i).name (),
+					  field_type, bitsize,
 					  type->field (i).loc_bitpos ());
     }
 
@@ -130,14 +127,14 @@ convert_enum (compile_c_instance *context, struct type *type)
   gcc_type int_type, result;
   int i;
 
-  int_type = context->plugin ().int_type_v0 (type->is_unsigned (),
-					     type->length ());
+  int_type
+    = context->plugin ().int_type_v0 (type->is_unsigned (), type->length ());
 
   result = context->plugin ().build_enum_type (int_type);
   for (i = 0; i < type->num_fields (); ++i)
     {
-      context->plugin ().build_add_enum_constant
-	(result, type->field (i).name (), type->field (i).loc_enumval ());
+      context->plugin ().build_add_enum_constant (
+	result, type->field (i).name (), type->field (i).loc_enumval ());
     }
 
   context->plugin ().finish_enum_type (result);
@@ -168,7 +165,7 @@ convert_func (compile_c_instance *context, struct type *type)
 	target_type = objfile_type (type->objfile_owner ())->builtin_int;
       else
 	target_type = builtin_type (type->arch_owner ())->builtin_int;
-      warning (_("function has unknown return type; assuming int"));
+      warning (_ ("function has unknown return type; assuming int"));
     }
 
   /* This approach means we can't make self-referential function
@@ -181,8 +178,8 @@ convert_func (compile_c_instance *context, struct type *type)
   for (i = 0; i < type->num_fields (); ++i)
     array.elements[i] = context->convert_type (type->field (i).type ());
 
-  result = context->plugin ().build_function_type (return_type,
-						   &array, is_varargs);
+  result
+    = context->plugin ().build_function_type (return_type, &array, is_varargs);
 
   return result;
 }
@@ -200,8 +197,7 @@ convert_int (compile_c_instance *context, struct type *type)
 	  return context->plugin ().char_type ();
 	}
       return context->plugin ().int_type (type->is_unsigned (),
-					  type->length (),
-					  type->name ());
+					  type->length (), type->name ());
     }
   else
     return context->plugin ().int_type_v0 (type->is_unsigned (),
@@ -214,8 +210,7 @@ static gcc_type
 convert_float (compile_c_instance *context, struct type *type)
 {
   if (context->plugin ().version () >= GCC_C_FE_VERSION_1)
-    return context->plugin ().float_type (type->length (),
-					  type->name ());
+    return context->plugin ().float_type (type->length (), type->name ());
   else
     return context->plugin ().float_type_v0 (type->length ());
 }
@@ -278,9 +273,10 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 {
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
-  if ((type->instance_flags () & (TYPE_INSTANCE_FLAG_CONST
-				  | TYPE_INSTANCE_FLAG_VOLATILE
-				  | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
+  if ((type->instance_flags ()
+       & (TYPE_INSTANCE_FLAG_CONST | TYPE_INSTANCE_FLAG_VOLATILE
+	  | TYPE_INSTANCE_FLAG_RESTRICT))
+      != 0)
     return convert_qualified (context, type);
 
   switch (type->code ())
@@ -327,22 +323,23 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 	  fallback = objfile_type (type->objfile_owner ())->builtin_int;
 	else
 	  fallback = builtin_type (type->arch_owner ())->builtin_int;
-	warning (_("variable has unknown type; assuming int"));
+	warning (_ ("variable has unknown type; assuming int"));
 	return convert_int (context, fallback);
       }
     }
 
-  return context->plugin ().error (_("cannot convert gdb type to gcc type"));
+  return context->plugin ().error (_ ("cannot convert gdb type to gcc type"));
 }
 
 /* Default compile flags for C.  */
 
-const char *compile_c_instance::m_default_cflags = "-std=gnu11"
-  /* Otherwise the .o file may need
+const char *compile_c_instance::m_default_cflags
+  = "-std=gnu11"
+    /* Otherwise the .o file may need
      "_Unwind_Resume" and
      "__gcc_personality_v0".  */
-  " -fno-exceptions"
-  " -Wno-implicit-function-declaration";
+    " -fno-exceptions"
+    " -Wno-implicit-function-declaration";
 
 /* See compile-c.h.  */
 
@@ -362,32 +359,44 @@ compile_c_instance::convert_type (struct type *type)
   return result;
 }
 
-
-
 /* C plug-in wrapper.  */
 
-#define FORWARD(OP,...) m_context->c_ops->OP(m_context, ##__VA_ARGS__)
-#define GCC_METHOD0(R, N) \
+#define FORWARD(OP, ...) m_context->c_ops->OP (m_context, ##__VA_ARGS__)
+#define GCC_METHOD0(R, N)    \
   R gcc_c_plugin::N () const \
-  { return FORWARD (N); }
-#define GCC_METHOD1(R, N, A) \
+  {                          \
+    return FORWARD (N);      \
+  }
+#define GCC_METHOD1(R, N, A)    \
   R gcc_c_plugin::N (A a) const \
-  { return FORWARD (N, a); }
-#define GCC_METHOD2(R, N, A, B) \
+  {                             \
+    return FORWARD (N, a);      \
+  }
+#define GCC_METHOD2(R, N, A, B)      \
   R gcc_c_plugin::N (A a, B b) const \
-  { return FORWARD (N, a, b); }
-#define GCC_METHOD3(R, N, A, B, C) \
-  R gcc_c_plugin::N (A a, B b, C c)  const \
-  { return FORWARD (N, a, b, c); }
-#define GCC_METHOD4(R, N, A, B, C, D) \
+  {                                  \
+    return FORWARD (N, a, b);        \
+  }
+#define GCC_METHOD3(R, N, A, B, C)        \
+  R gcc_c_plugin::N (A a, B b, C c) const \
+  {                                       \
+    return FORWARD (N, a, b, c);          \
+  }
+#define GCC_METHOD4(R, N, A, B, C, D)          \
   R gcc_c_plugin::N (A a, B b, C c, D d) const \
-  { return FORWARD (N, a, b, c, d); }
-#define GCC_METHOD5(R, N, A, B, C, D, E) \
+  {                                            \
+    return FORWARD (N, a, b, c, d);            \
+  }
+#define GCC_METHOD5(R, N, A, B, C, D, E)            \
   R gcc_c_plugin::N (A a, B b, C c, D d, E e) const \
-  { return FORWARD (N, a, b, c, d, e); }
-#define GCC_METHOD7(R, N, A, B, C, D, E, F, G) \
+  {                                                 \
+    return FORWARD (N, a, b, c, d, e);              \
+  }
+#define GCC_METHOD7(R, N, A, B, C, D, E, F, G)                \
   R gcc_c_plugin::N (A a, B b, C c, D d, E e, F f, G g) const \
-  { return FORWARD (N, a, b, c, d, e, f, g); }
+  {                                                           \
+    return FORWARD (N, a, b, c, d, e, f, g);                  \
+  }
 
 #include "gcc-c-fe.def"
 

@@ -33,74 +33,74 @@
    saved in function prologue.  */
 
 enum arc_regnum
-  {
-    /* Core registers.  */
-    ARC_R0_REGNUM = 0,
-    ARC_R1_REGNUM = 1,
-    ARC_R4_REGNUM = 4,
-    ARC_R7_REGNUM = 7,
-    ARC_R9_REGNUM = 9,
-    ARC_R13_REGNUM = 13,
-    ARC_R16_REGNUM = 16,
-    ARC_R25_REGNUM = 25,
-    /* Global data pointer.  */
-    ARC_GP_REGNUM,
-    /* Frame pointer.  */
-    ARC_FP_REGNUM,
-    /* Stack pointer.  */
-    ARC_SP_REGNUM,
-    /* Return address from interrupt.  */
-    ARC_ILINK_REGNUM,
-    ARC_R30_REGNUM,
-    /* Return address from function.  */
-    ARC_BLINK_REGNUM,
-    /* Accumulator registers.  */
-    ARC_R58_REGNUM = 58,
-    ARC_R59_REGNUM,
-    /* Zero-delay loop counter.  */
-    ARC_LP_COUNT_REGNUM = 60,
-    /* Reserved register number.  There should never be a register with such
+{
+  /* Core registers.  */
+  ARC_R0_REGNUM = 0,
+  ARC_R1_REGNUM = 1,
+  ARC_R4_REGNUM = 4,
+  ARC_R7_REGNUM = 7,
+  ARC_R9_REGNUM = 9,
+  ARC_R13_REGNUM = 13,
+  ARC_R16_REGNUM = 16,
+  ARC_R25_REGNUM = 25,
+  /* Global data pointer.  */
+  ARC_GP_REGNUM,
+  /* Frame pointer.  */
+  ARC_FP_REGNUM,
+  /* Stack pointer.  */
+  ARC_SP_REGNUM,
+  /* Return address from interrupt.  */
+  ARC_ILINK_REGNUM,
+  ARC_R30_REGNUM,
+  /* Return address from function.  */
+  ARC_BLINK_REGNUM,
+  /* Accumulator registers.  */
+  ARC_R58_REGNUM = 58,
+  ARC_R59_REGNUM,
+  /* Zero-delay loop counter.  */
+  ARC_LP_COUNT_REGNUM = 60,
+  /* Reserved register number.  There should never be a register with such
        number, this name is needed only for a sanity check in
       arc_cannot_(fetch|store)_register.  */
-    ARC_RESERVED_REGNUM,
-    /* Long-immediate value.  This is not a physical register - if instruction
+  ARC_RESERVED_REGNUM,
+  /* Long-immediate value.  This is not a physical register - if instruction
        has register 62 as an operand, then this operand is a literal value
        stored in the instruction memory right after the instruction itself.
        This value is required in this enumeration as an architectural number
        for instruction analysis.  */
-    ARC_LIMM_REGNUM,
-    /* Program counter, aligned to 4-bytes, read-only.  */
-    ARC_PCL_REGNUM,
-    ARC_LAST_CORE_REGNUM = ARC_PCL_REGNUM,
+  ARC_LIMM_REGNUM,
+  /* Program counter, aligned to 4-bytes, read-only.  */
+  ARC_PCL_REGNUM,
+  ARC_LAST_CORE_REGNUM = ARC_PCL_REGNUM,
 
-    /* AUX registers.  */
-    /* Actual program counter.  */
-    ARC_PC_REGNUM,
-    ARC_FIRST_AUX_REGNUM = ARC_PC_REGNUM,
-    /* Status register.  */
-    ARC_STATUS32_REGNUM,
-    /* Zero-delay loop start instruction.  */
-    ARC_LP_START_REGNUM,
-    /* Zero-delay loop next-after-last instruction.  */
-    ARC_LP_END_REGNUM,
-    /* Branch target address.  */
-    ARC_BTA_REGNUM,
-    /* Exception return address.  */
-    ARC_ERET_REGNUM,
-    ARC_LAST_AUX_REGNUM = ARC_ERET_REGNUM,
-    ARC_LAST_REGNUM = ARC_LAST_AUX_REGNUM,
+  /* AUX registers.  */
+  /* Actual program counter.  */
+  ARC_PC_REGNUM,
+  ARC_FIRST_AUX_REGNUM = ARC_PC_REGNUM,
+  /* Status register.  */
+  ARC_STATUS32_REGNUM,
+  /* Zero-delay loop start instruction.  */
+  ARC_LP_START_REGNUM,
+  /* Zero-delay loop next-after-last instruction.  */
+  ARC_LP_END_REGNUM,
+  /* Branch target address.  */
+  ARC_BTA_REGNUM,
+  /* Exception return address.  */
+  ARC_ERET_REGNUM,
+  ARC_LAST_AUX_REGNUM = ARC_ERET_REGNUM,
+  ARC_LAST_REGNUM = ARC_LAST_AUX_REGNUM,
 
-    /* Additional ABI constants.  */
-    ARC_FIRST_ARG_REGNUM = ARC_R0_REGNUM,
-    ARC_LAST_ARG_REGNUM = ARC_R7_REGNUM,
-    ARC_FIRST_CALLEE_SAVED_REGNUM = ARC_R13_REGNUM,
-    ARC_LAST_CALLEE_SAVED_REGNUM = ARC_R25_REGNUM,
-  };
+  /* Additional ABI constants.  */
+  ARC_FIRST_ARG_REGNUM = ARC_R0_REGNUM,
+  ARC_LAST_ARG_REGNUM = ARC_R7_REGNUM,
+  ARC_FIRST_CALLEE_SAVED_REGNUM = ARC_R13_REGNUM,
+  ARC_LAST_CALLEE_SAVED_REGNUM = ARC_R25_REGNUM,
+};
 
 /* Number of bytes in ARC register.  All ARC registers are considered 32-bit.
    Those registers, which are actually shorter has zero-on-read for extra bits.
    Longer registers are represented as pairs of 32-bit registers.  */
-#define ARC_REGISTER_SIZE  4
+#define ARC_REGISTER_SIZE 4
 
 /* STATUS32 register: hardware loops disabled bit.  */
 #define ARC_STATUS32_L_MASK (1 << 12)
@@ -169,13 +169,13 @@ arc_mach_is_arcv2 (struct gdbarch *gdbarch)
    number as "ARCv2".  */
 
 static inline bool
-arc_arch_is_hs (const struct bfd_arch_info* arch)
+arc_arch_is_hs (const struct bfd_arch_info *arch)
 {
   return startswith (arch->printable_name, "HS");
 }
 
 static inline bool
-arc_arch_is_em (const struct bfd_arch_info* arch)
+arc_arch_is_em (const struct bfd_arch_info *arch)
 {
   return startswith (arch->printable_name, "EM");
 }

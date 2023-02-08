@@ -30,7 +30,6 @@
 class csky_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
@@ -40,7 +39,6 @@ public:
   bool supports_hardware_single_step () override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -60,23 +58,27 @@ static csky_target the_csky_target;
 
 /* Return the ptrace "address" of register REGNO.  */
 static int csky_regmap[] = {
-   0*4,  1*4,  2*4,  3*4,  4*4,  5*4,  6*4,  7*4,
-   8*4,  9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4,
-  16*4, 17*4, 18*4, 19*4, 20*4, 21*4, 22*4, 23*4,
-  24*4, 25*4, 26*4, 27*4, 28*4, 29*4, 30*4, 31*4,
-    -1,   -1,   -1,   -1, 34*4, 35*4,   -1,   -1,
-  40*4, 42*4, 44*4, 46*4, 48*4, 50*4, 52*4, 54*4, /* fr0 ~ fr15, 64bit  */
-  56*4, 58*4, 60*4, 62*4, 64*4, 66*4, 68*4, 70*4,
-  72*4, 76*4, 80*4, 84*4, 88*4, 92*4, 96*4,100*4, /* vr0 ~ vr15, 128bit  */
- 104*4,108*4,112*4,116*4,120*4,124*4,128*4,132*4,
-  33*4,  /* pc  */
-    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-  32*4,   -1,   -1,   -1,   -1,   -1,   -1,   -1, /* psr  */
-    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-  73*4, 72*4, 74*4,   -1,   -1,   -1, 14*4,  /* fcr, fid, fesr, usp  */
+  0 * 4,   1 * 4,   2 * 4,   3 * 4,   4 * 4,   5 * 4,   6 * 4,
+  7 * 4,   8 * 4,   9 * 4,   10 * 4,  11 * 4,  12 * 4,  13 * 4,
+  14 * 4,  15 * 4,  16 * 4,  17 * 4,  18 * 4,  19 * 4,  20 * 4,
+  21 * 4,  22 * 4,  23 * 4,  24 * 4,  25 * 4,  26 * 4,  27 * 4,
+  28 * 4,  29 * 4,  30 * 4,  31 * 4,  -1,      -1,      -1,
+  -1,      34 * 4,  35 * 4,  -1,      -1,      40 * 4,  42 * 4,
+  44 * 4,  46 * 4,  48 * 4,  50 * 4,  52 * 4,  54 * 4, /* fr0 ~ fr15, 64bit  */
+  56 * 4,  58 * 4,  60 * 4,  62 * 4,  64 * 4,  66 * 4,  68 * 4,
+  70 * 4,  72 * 4,  76 * 4,  80 * 4,  84 * 4,  88 * 4,  92 * 4,
+  96 * 4,  100 * 4, /* vr0 ~ vr15, 128bit  */
+  104 * 4, 108 * 4, 112 * 4, 116 * 4, 120 * 4, 124 * 4, 128 * 4,
+  132 * 4, 33 * 4, /* pc  */
+  -1,      -1,      -1,      -1,      -1,      -1,      -1,
+  -1,      -1,      -1,      -1,      -1,      -1,      -1,
+  -1,      -1,      32 * 4,  -1,      -1,      -1,      -1,
+  -1,      -1,      -1, /* psr  */
+  -1,      -1,      -1,      -1,      -1,      -1,      -1,
+  -1,      -1,      -1,      -1,      -1,      -1,      -1,
+  -1,      -1,      -1,      -1,      -1,      -1,      -1,
+  -1,      -1,      -1,      73 * 4,  72 * 4,  74 * 4,  -1,
+  -1,      -1,      14 * 4, /* fcr, fid, fesr, usp  */
 };
 
 /* CSKY software breakpoint instruction code.  */
@@ -125,7 +127,6 @@ csky_target::low_set_pc (struct regcache *regcache, CORE_ADDR pc)
   supply_register_by_name (regcache, "pc", &new_pc);
 }
 
-
 void
 csky_target::low_arch_setup ()
 {
@@ -143,12 +144,13 @@ csky_target::low_arch_setup ()
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph,
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
   struct pt_regs regset;
-  if (ptrace (PTRACE_GETREGSET, lwpid,
-	      (PTRACE_TYPE_ARG3) (long) NT_PRSTATUS, &regset) != 0)
+  if (ptrace (PTRACE_GETREGSET, lwpid, (PTRACE_TYPE_ARG3) (long) NT_PRSTATUS,
+              &regset)
+      != 0)
     return PS_ERR;
 
   *base = (void *) regset.tls;
@@ -156,7 +158,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
   /* IDX is the bias from the thread pointer to the beginning of the
      thread descriptor.  It has to be subtracted due to implementation
      quirks in libthread_db.  */
-  *base = (void *) ((char *)*base - idx);
+  *base = (void *) ((char *) *base - idx);
 
   return PS_OK;
 }
@@ -167,9 +169,9 @@ static void
 csky_fill_pt_gregset (struct regcache *regcache, void *buf)
 {
   int i, base;
-  struct pt_regs *regset = (struct pt_regs *)buf;
+  struct pt_regs *regset = (struct pt_regs *) buf;
 
-  collect_register_by_name (regcache, "r15",  &regset->lr);
+  collect_register_by_name (regcache, "r15", &regset->lr);
   collect_register_by_name (regcache, "pc", &regset->pc);
   collect_register_by_name (regcache, "psr", &regset->sr);
   collect_register_by_name (regcache, "r14", &regset->usp);
@@ -182,11 +184,11 @@ csky_fill_pt_gregset (struct regcache *regcache, void *buf)
   base = find_regno (regcache->tdesc, "r4");
 
   for (i = 0; i < 10; i++)
-    collect_register (regcache, base + i,   &regset->regs[i]);
+    collect_register (regcache, base + i, &regset->regs[i]);
 
   base = find_regno (regcache->tdesc, "r16");
   for (i = 0; i < 16; i++)
-    collect_register (regcache, base + i,   &regset->exregs[i]);
+    collect_register (regcache, base + i, &regset->exregs[i]);
 
   collect_register_by_name (regcache, "hi", &regset->rhi);
   collect_register_by_name (regcache, "lo", &regset->rlo);
@@ -198,7 +200,7 @@ csky_store_pt_gregset (struct regcache *regcache, const void *buf)
   int i, base;
   const struct pt_regs *regset = (const struct pt_regs *) buf;
 
-  supply_register_by_name (regcache, "r15",  &regset->lr);
+  supply_register_by_name (regcache, "r15", &regset->lr);
   supply_register_by_name (regcache, "pc", &regset->pc);
   supply_register_by_name (regcache, "psr", &regset->sr);
   supply_register_by_name (regcache, "r14", &regset->usp);
@@ -211,11 +213,11 @@ csky_store_pt_gregset (struct regcache *regcache, const void *buf)
   base = find_regno (regcache->tdesc, "r4");
 
   for (i = 0; i < 10; i++)
-    supply_register (regcache, base + i,   &regset->regs[i]);
+    supply_register (regcache, base + i, &regset->regs[i]);
 
   base = find_regno (regcache->tdesc, "r16");
   for (i = 0; i < 16; i++)
-    supply_register (regcache, base + i,   &regset->exregs[i]);
+    supply_register (regcache, base + i, &regset->exregs[i]);
 
   supply_register_by_name (regcache, "hi", &regset->rhi);
   supply_register_by_name (regcache, "lo", &regset->rlo);
@@ -225,7 +227,7 @@ static void
 csky_fill_pt_vrregset (struct regcache *regcache, void *buf)
 {
   int i, base;
-  struct user_fp *regset = (struct user_fp *)buf;
+  struct user_fp *regset = (struct user_fp *) buf;
 
   base = find_regno (regcache->tdesc, "vr0");
 
@@ -236,12 +238,11 @@ csky_fill_pt_vrregset (struct regcache *regcache, void *buf)
   collect_register_by_name (regcache, "fid", &regset->fid);
 }
 
-
 static void
 csky_store_pt_vrregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
-  const struct user_fp *regset = (const struct user_fp *)buf;
+  const struct user_fp *regset = (const struct user_fp *) buf;
 
   base = find_regno (regcache->tdesc, "vr0");
 
@@ -258,30 +259,24 @@ csky_store_pt_vrregset (struct regcache *regcache, const void *buf)
 }
 
 struct regset_info csky_regsets[] = {
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS, sizeof(struct pt_regs),
-    GENERAL_REGS, csky_fill_pt_gregset, csky_store_pt_gregset},
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS, sizeof (struct pt_regs),
+    GENERAL_REGS, csky_fill_pt_gregset, csky_store_pt_gregset },
 
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET, sizeof(struct user_fp),
-    FP_REGS, csky_fill_pt_vrregset, csky_store_pt_vrregset},
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET, sizeof (struct user_fp),
+    FP_REGS, csky_fill_pt_vrregset, csky_store_pt_vrregset },
   NULL_REGSET
 };
 
-
-static struct regsets_info csky_regsets_info =
-{
+static struct regsets_info csky_regsets_info = {
   csky_regsets, /* Regsets  */
   0,            /* Num_regsets  */
   NULL,         /* Disabled_regsets  */
 };
 
-
-static struct regs_info csky_regs_info =
-{
-  NULL, /* FIXME: what's this  */
-  NULL, /* PEEKUSER/PORKUSR isn't supported by kernel > 4.x */
-  &csky_regsets_info
-};
-
+static struct regs_info csky_regs_info
+  = { NULL, /* FIXME: what's this  */
+      NULL, /* PEEKUSER/PORKUSR isn't supported by kernel > 4.x */
+      &csky_regsets_info };
 
 const regs_info *
 csky_target::get_regs_info ()

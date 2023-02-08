@@ -56,20 +56,18 @@ static bool use_gnu_source_highlight;
 /* The "maint show gnu-source-highlight enabled" command. */
 
 static void
-show_use_gnu_source_highlight_enabled  (struct ui_file *file, int from_tty,
-					struct cmd_list_element *c,
-					const char *value)
+show_use_gnu_source_highlight_enabled (struct ui_file *file, int from_tty,
+				       struct cmd_list_element *c,
+				       const char *value)
 {
-  gdb_printf (file,
-	      _("Use of GNU Source Highlight library is \"%s\".\n"),
+  gdb_printf (file, _ ("Use of GNU Source Highlight library is \"%s\".\n"),
 	      value);
 }
 
 /* The "maint set gnu-source-highlight enabled" command.  */
 
 static void
-set_use_gnu_source_highlight_enabled (const char *ignore_args,
-				      int from_tty,
+set_use_gnu_source_highlight_enabled (const char *ignore_args, int from_tty,
 				      struct cmd_list_element *c)
 {
 #ifndef HAVE_SOURCE_HIGHLIGHT
@@ -78,7 +76,7 @@ set_use_gnu_source_highlight_enabled (const char *ignore_args,
   if (use_gnu_source_highlight)
     {
       use_gnu_source_highlight = false;
-      error (_("the GNU Source Highlight library is not available"));
+      error (_ ("the GNU Source Highlight library is not available"));
     }
 #else
   /* We (might) have just changed how we style source code, discard any
@@ -114,12 +112,11 @@ source_cache::get_plain_source_lines (struct symtab *s,
     mtime = current_program_space->ebfd_mtime;
 
   if (mtime && mtime < st.st_mtime)
-    warning (_("Source file is more recent than executable."));
+    warning (_ ("Source file is more recent than executable."));
 
   std::vector<off_t> offsets;
   offsets.push_back (0);
-  for (size_t offset = lines.find ('\n');
-       offset != std::string::npos;
+  for (size_t offset = lines.find ('\n'); offset != std::string::npos;
        offset = lines.find ('\n', offset))
     {
       ++offset;
@@ -205,8 +202,7 @@ source_cache::ensure (struct symtab *s)
 	{
 	  /* This should always hold, because we create the file offsets
 	     when reading the file.  */
-	  gdb_assert (m_offset_cache.find (fullname)
-		      != m_offset_cache.end ());
+	  gdb_assert (m_offset_cache.find (fullname) != m_offset_cache.end ());
 	  /* Not strictly LRU, but at least ensure that the most
 	     recently used entry is always the last candidate for
 	     deletion.  Note that this property is relied upon by at
@@ -335,8 +331,7 @@ extract_lines (const std::string &text, int first_line, int last_line,
       if (lineno == last_line || pos == std::string::npos)
 	{
 	  /* A newline at the end does not start a new line.  */
-	  if (first_pos == std::string::npos
-	      || first_pos == text.size ())
+	  if (first_pos == std::string::npos || first_pos == text.size ())
 	    return false;
 	  if (pos == std::string::npos)
 	    pos = text.size ();
@@ -364,8 +359,8 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
   if (!ensure (s))
     return false;
 
-  return extract_lines (m_source_map.back ().contents,
-			first_line, last_line, lines);
+  return extract_lines (m_source_map.back ().contents, first_line, last_line,
+			lines);
 }
 
 /* Implement 'maint flush source-cache' command.  */
@@ -374,34 +369,34 @@ static void
 source_cache_flush_command (const char *command, int from_tty)
 {
   forget_cached_source_info ();
-  gdb_printf (_("Source cache flushed.\n"));
+  gdb_printf (_ ("Source cache flushed.\n"));
 }
 
 #if GDB_SELF_TEST
 namespace selftests
 {
-static void extract_lines_test ()
+static void
+extract_lines_test ()
 {
   std::string input_text = "abc\ndef\nghi\njkl\n";
   std::string result;
 
-  SELF_CHECK (extract_lines (input_text, 1, 1, &result)
-	      && result == "abc\n");
+  SELF_CHECK (extract_lines (input_text, 1, 1, &result) && result == "abc\n");
   SELF_CHECK (!extract_lines (input_text, 2, 1, &result));
   SELF_CHECK (extract_lines (input_text, 1, 2, &result)
 	      && result == "abc\ndef\n");
-  SELF_CHECK (extract_lines ("abc", 1, 1, &result)
-	      && result == "abc");
+  SELF_CHECK (extract_lines ("abc", 1, 1, &result) && result == "abc");
 }
-}
+} // namespace selftests
 #endif
 
 void _initialize_source_cache ();
+
 void
 _initialize_source_cache ()
 {
   add_cmd ("source-cache", class_maintenance, source_cache_flush_command,
-	   _("Force gdb to flush its source code cache."),
+	   _ ("Force gdb to flush its source code cache."),
 	   &maintenanceflushlist);
 
   /* All the 'maint set|show gnu-source-highlight' sub-commands.  */
@@ -410,18 +405,19 @@ _initialize_source_cache ()
 
   /* Adds 'maint set|show gnu-source-highlight'.  */
   add_setshow_prefix_cmd ("gnu-source-highlight", class_maintenance,
-			  _("Set gnu-source-highlight specific variables."),
-			  _("Show gnu-source-highlight specific variables."),
+			  _ ("Set gnu-source-highlight specific variables."),
+			  _ ("Show gnu-source-highlight specific variables."),
 			  &maint_set_gnu_source_highlight_cmdlist,
 			  &maint_show_gnu_source_highlight_cmdlist,
-			  &maintenance_set_cmdlist,
-			  &maintenance_show_cmdlist);
+			  &maintenance_set_cmdlist, &maintenance_show_cmdlist);
 
   /* Adds 'maint set|show gnu-source-highlight enabled'.  */
   add_setshow_boolean_cmd ("enabled", class_maintenance,
-			   &use_gnu_source_highlight, _("\
-Set whether the GNU Source Highlight library should be used."), _("\
-Show whether the GNU Source Highlight library is being used."),_("\
+			   &use_gnu_source_highlight, _ ("\
+Set whether the GNU Source Highlight library should be used."),
+			   _ ("\
+Show whether the GNU Source Highlight library is being used."),
+			   _ ("\
 When enabled, GDB will use the GNU Source Highlight library to apply\n\
 styling to source code lines that are shown."),
 			   set_use_gnu_source_highlight_enabled,

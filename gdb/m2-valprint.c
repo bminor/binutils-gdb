@@ -30,16 +30,14 @@
 #include "target.h"
 #include "cli/cli-style.h"
 
-static int print_unpacked_pointer (struct type *type,
-				   CORE_ADDR address, CORE_ADDR addr,
+static int print_unpacked_pointer (struct type *type, CORE_ADDR address,
+				   CORE_ADDR addr,
 				   const struct value_print_options *options,
 				   struct ui_file *stream);
-static void
-m2_print_array_contents (struct value *val,
-			 struct ui_file *stream, int recurse,
-			 const struct value_print_options *options,
-			 int len);
-
+static void m2_print_array_contents (struct value *val, struct ui_file *stream,
+				     int recurse,
+				     const struct value_print_options *options,
+				     int len);
 
 /* get_long_set_bounds - assigns the bounds of the long set to low and
 			 high.  */
@@ -59,7 +57,7 @@ get_long_set_bounds (struct type *type, LONGEST *low, LONGEST *high)
       *high = type->field (len - 1).type ()->bounds ()->high.const_val ();
       return 1;
     }
-  error (_("expecting long_set"));
+  error (_ ("expecting long_set"));
   return 0;
 }
 
@@ -68,10 +66,10 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 		   int embedded_offset, CORE_ADDR address,
 		   struct ui_file *stream)
 {
-  int empty_set        = 1;
-  int element_seen     = 0;
+  int empty_set = 1;
+  int element_seen = 0;
   LONGEST previous_low = 0;
-  LONGEST previous_high= 0;
+  LONGEST previous_high = 0;
   LONGEST i, low_bound, high_bound;
   LONGEST field_low, field_high;
   struct type *range;
@@ -90,8 +88,8 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
     }
   else
     {
-      fprintf_styled (stream, metadata_style.style (),
-		      " %s }", _("<unknown bounds of set>"));
+      fprintf_styled (stream, metadata_style.style (), " %s }",
+		      _ ("<unknown bounds of set>"));
       return;
     }
 
@@ -102,19 +100,20 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
       for (i = low_bound; i <= high_bound; i++)
 	{
 	  bitval = value_bit_index (type->field (field).type (),
-				    (type->field (field).loc_bitpos () / 8) +
-				    valaddr + embedded_offset, i);
+				    (type->field (field).loc_bitpos () / 8)
+				      + valaddr + embedded_offset,
+				    i);
 	  if (bitval < 0)
-	    error (_("bit test is out of range"));
+	    error (_ ("bit test is out of range"));
 	  else if (bitval > 0)
 	    {
 	      previous_high = i;
-	      if (! element_seen)
+	      if (!element_seen)
 		{
-		  if (! empty_set)
+		  if (!empty_set)
 		    gdb_printf (stream, ", ");
 		  print_type_scalar (target, i, stream);
-		  empty_set    = 0;
+		  empty_set = 0;
 		  element_seen = 1;
 		  previous_low = i;
 		}
@@ -124,9 +123,9 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	      /* bit is not set */
 	      if (element_seen)
 		{
-		  if (previous_low+1 < previous_high)
+		  if (previous_low + 1 < previous_high)
 		    gdb_printf (stream, "..");
-		  if (previous_low+1 < previous_high)
+		  if (previous_low + 1 < previous_high)
 		    print_type_scalar (target, previous_high, stream);
 		  element_seen = 0;
 		}
@@ -144,7 +143,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	}
       if (element_seen)
 	{
-	  if (previous_low+1 < previous_high)
+	  if (previous_low + 1 < previous_high)
 	    {
 	      gdb_printf (stream, "..");
 	      print_type_scalar (target, previous_high, stream);
@@ -156,8 +155,8 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 }
 
 static void
-m2_print_unbounded_array (struct value *value,
-			  struct ui_file *stream, int recurse,
+m2_print_unbounded_array (struct value *value, struct ui_file *stream,
+			  int recurse,
 			  const struct value_print_options *options)
 {
   CORE_ADDR addr;
@@ -168,21 +167,18 @@ m2_print_unbounded_array (struct value *value,
   const gdb_byte *valaddr = value_contents_for_printing (value).data ();
 
   addr = unpack_pointer (type->field (0).type (),
-			 (type->field (0).loc_bitpos () / 8) +
-			 valaddr);
+			 (type->field (0).loc_bitpos () / 8) + valaddr);
 
-  val = value_at_lazy (type->field (0).type ()->target_type (),
-		       addr);
+  val = value_at_lazy (type->field (0).type ()->target_type (), addr);
   len = unpack_field_as_long (type, valaddr, 1);
 
-  gdb_printf (stream, "{");  
+  gdb_printf (stream, "{");
   m2_print_array_contents (val, stream, recurse, options, len);
   gdb_printf (stream, ", HIGH = %d}", (int) len);
 }
 
 static int
-print_unpacked_pointer (struct type *type,
-			CORE_ADDR address, CORE_ADDR addr,
+print_unpacked_pointer (struct type *type, CORE_ADDR address, CORE_ADDR addr,
 			const struct value_print_options *options,
 			struct ui_file *stream)
 {
@@ -207,25 +203,21 @@ print_unpacked_pointer (struct type *type,
   /* For a pointer to char or unsigned char, also print the string
      pointed to, unless pointer is null.  */
 
-  if (elttype->length () == 1
-      && elttype->code () == TYPE_CODE_INT
-      && (options->format == 0 || options->format == 's')
-      && addr != 0)
+  if (elttype->length () == 1 && elttype->code () == TYPE_CODE_INT
+      && (options->format == 0 || options->format == 's') && addr != 0)
     {
       if (want_space)
 	gdb_puts (" ", stream);
-      return val_print_string (type->target_type (), NULL, addr, -1,
-			       stream, options);
+      return val_print_string (type->target_type (), NULL, addr, -1, stream,
+			       options);
     }
-  
+
   return 0;
 }
 
 static void
-print_variable_at_address (struct type *type,
-			   const gdb_byte *valaddr,
-			   struct ui_file *stream,
-			   int recurse,
+print_variable_at_address (struct type *type, const gdb_byte *valaddr,
+			   struct ui_file *stream, int recurse,
 			   const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = type->arch ();
@@ -235,18 +227,17 @@ print_variable_at_address (struct type *type,
   gdb_printf (stream, "[");
   gdb_puts (paddress (gdbarch, addr), stream);
   gdb_printf (stream, "] : ");
-  
+
   if (elttype->code () != TYPE_CODE_UNDEF)
     {
-      struct value *deref_val =
-	value_at (type->target_type (), unpack_pointer (type, valaddr));
+      struct value *deref_val
+	= value_at (type->target_type (), unpack_pointer (type, valaddr));
 
       common_val_print (deref_val, stream, recurse, options, current_language);
     }
   else
     gdb_puts ("???", stream);
 }
-
 
 /* m2_print_array_contents - prints out the contents of an
 			     array up to a max_print values.
@@ -255,22 +246,21 @@ print_variable_at_address (struct type *type,
 			     separated values.  */
 
 static void
-m2_print_array_contents (struct value *val,
-			 struct ui_file *stream, int recurse,
-			 const struct value_print_options *options,
-			 int len)
+m2_print_array_contents (struct value *val, struct ui_file *stream,
+			 int recurse,
+			 const struct value_print_options *options, int len)
 {
   struct type *type = check_typedef (value_type (val));
 
   if (type->length () > 0)
     {
       /* For an array of chars, print with string syntax.  */
-      if (type->length () == 1 &&
-	  ((type->code () == TYPE_CODE_INT)
-	   || ((current_language->la_language == language_m2)
-	       && (type->code () == TYPE_CODE_CHAR)))
+      if (type->length () == 1
+	  && ((type->code () == TYPE_CODE_INT)
+	      || ((current_language->la_language == language_m2)
+		  && (type->code () == TYPE_CODE_CHAR)))
 	  && (options->format == 0 || options->format == 's'))
-	val_print_string (type, NULL, value_address (val), len+1, stream,
+	val_print_string (type, NULL, value_address (val), len + 1, stream,
 			  options);
       else
 	{
@@ -283,24 +273,15 @@ m2_print_array_contents (struct value *val,
 
 /* Decorations for Modula 2.  */
 
-static const struct generic_val_print_decorations m2_decorations =
-{
-  "",
-  " + ",
-  " * I",
-  "TRUE",
-  "FALSE",
-  "void",
-  "{",
-  "}"
-};
+static const struct generic_val_print_decorations m2_decorations
+  = { "", " + ", " * I", "TRUE", "FALSE", "void", "{", "}" };
 
 /* See m2-lang.h.  */
 
 void
-m2_language::value_print_inner (struct value *val, struct ui_file *stream,
-				int recurse,
-				const struct value_print_options *options) const
+m2_language::value_print_inner (
+  struct value *val, struct ui_file *stream, int recurse,
+  const struct value_print_options *options) const
 {
   unsigned len;
   struct type *elttype;
@@ -317,10 +298,10 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
 	  elttype = check_typedef (type->target_type ());
 	  len = type->length () / elttype->length ();
 	  /* For an array of chars, print with string syntax.  */
-	  if (elttype->length () == 1 &&
-	      ((elttype->code () == TYPE_CODE_INT)
-	       || ((current_language->la_language == language_m2)
-		   && (elttype->code () == TYPE_CODE_CHAR)))
+	  if (elttype->length () == 1
+	      && ((elttype->code () == TYPE_CODE_INT)
+		  || ((current_language->la_language == language_m2)
+		      && (elttype->code () == TYPE_CODE_CHAR)))
 	      && (options->format == 0 || options->format == 's'))
 	    {
 	      /* If requested, look for the first null char and only print
@@ -331,22 +312,20 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
 		  unsigned int temp_len;
 
 		  /* Look for a NULL char.  */
-		  for (temp_len = 0;
-		       (valaddr[temp_len]
-			&& temp_len < len
-			&& temp_len < print_max_chars);
-		       temp_len++);
+		  for (temp_len = 0; (valaddr[temp_len] && temp_len < len
+				      && temp_len < print_max_chars);
+		       temp_len++)
+		    ;
 		  len = temp_len;
 		}
 
-	      printstr (stream, type->target_type (), valaddr, len,
-			NULL, 0, options);
+	      printstr (stream, type->target_type (), valaddr, len, NULL, 0,
+			options);
 	    }
 	  else
 	    {
 	      gdb_printf (stream, "{");
-	      value_print_array_elements (val, stream, recurse,
-					  options, 0);
+	      value_print_array_elements (val, stream, recurse, options, 0);
 	      gdb_printf (stream, "}");
 	    }
 	  break;
@@ -389,7 +368,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
       if (elttype->is_stub ())
 	{
 	  fprintf_styled (stream, metadata_style.style (),
-			  _("<incomplete type>"));
+			  _ ("<incomplete type>"));
 	  break;
 	}
       else
@@ -405,7 +384,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
 	maybe_bad_bstring:
 	  if (i < 0)
 	    {
-	      fputs_styled (_("<error value>"), metadata_style.style (),
+	      fputs_styled (_ ("<error value>"), metadata_style.style (),
 			    stream);
 	      goto done;
 	    }

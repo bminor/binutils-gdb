@@ -23,8 +23,10 @@
 
 #include "gdbsupport/gdb_tilde_expand.h"
 
-namespace selftests {
-namespace gdb_tilde_expand_tests {
+namespace selftests
+{
+namespace gdb_tilde_expand_tests
+{
 
 static void
 do_test ()
@@ -45,7 +47,7 @@ do_test ()
      does not exist, gdb_tilde expand must still be able to do the tilde
      expansion.  */
   SELF_CHECK (gdb_tilde_expand ("~/non/existent/directory")
-              == home + "/non/existent/directory");
+	      == home + "/non/existent/directory");
 
   /* gdb_tilde_expand only expands tilde and does not try to do any other
      substitution.  */
@@ -63,7 +65,7 @@ do_test ()
       const std::string user (c_user);
       SELF_CHECK (gdb_tilde_expand (("~" + user).c_str ()) == home);
       SELF_CHECK (gdb_tilde_expand (("~" + user + "/a/b").c_str ())
-                  == home + "/a/b");
+		  == home + "/a/b");
     }
 
   /* Check that an error is thrown when trying to expand home of a unknown
@@ -76,9 +78,9 @@ do_test ()
   catch (const gdb_exception_error &e)
     {
       SELF_CHECK (e.error == GENERIC_ERROR);
-      SELF_CHECK
-        (*e.message
-         == "Could not find a match for '~no_one_should_have_that_login'.");
+      SELF_CHECK (
+	*e.message
+	== "Could not find a match for '~no_one_should_have_that_login'.");
     }
 }
 
@@ -86,9 +88,10 @@ do_test ()
 } /* namespace selftests */
 
 void _initialize_gdb_tilde_expand_selftests ();
+
 void
 _initialize_gdb_tilde_expand_selftests ()
 {
-  selftests::register_test
-    ("gdb_tilde_expand", selftests::gdb_tilde_expand_tests::do_test);
+  selftests::register_test ("gdb_tilde_expand",
+			    selftests::gdb_tilde_expand_tests::do_test);
 }

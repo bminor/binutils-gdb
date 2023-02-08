@@ -6,13 +6,15 @@
 #include "target-descriptions.h"
 
 const struct target_desc *tdesc_microblaze;
+
 static void
 initialize_tdesc_microblaze (void)
 {
   target_desc_up result = allocate_target_description ();
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result.get (), "org.gnu.gdb.microblaze.core");
+  feature
+    = tdesc_create_feature (result.get (), "org.gnu.gdb.microblaze.core");
   tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "r1", 1, 1, NULL, 32, "data_ptr");
   tdesc_create_reg (feature, "r2", 2, 1, NULL, 32, "int");

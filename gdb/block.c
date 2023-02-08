@@ -68,8 +68,7 @@ block_gdbarch (const struct block *block)
 /* See block.h.  */
 
 bool
-contained_in (const struct block *a, const struct block *b,
-	      bool allow_nested)
+contained_in (const struct block *a, const struct block *b, bool allow_nested)
 {
   if (!a || !b)
     return false;
@@ -88,7 +87,6 @@ contained_in (const struct block *a, const struct block *b,
 
   return false;
 }
-
 
 /* Return the symbol for the function which contains a specified
    lexical block, described by a struct block BL.  The return value
@@ -240,11 +238,10 @@ call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
       /* DW_TAG_gnu_call_site will be missing just if GCC could not determine
 	 the call target.  */
       throw_error (NO_ENTRY_VALUE_ERROR,
-		   _("DW_OP_entry_value resolving cannot find "
-		     "DW_TAG_call_site %s in %s"),
+		   _ ("DW_OP_entry_value resolving cannot find "
+		      "DW_TAG_call_site %s in %s"),
 		   paddress (gdbarch, pc),
-		   (msym.minsym == NULL ? "???"
-		    : msym.minsym->print_name ()));
+		   (msym.minsym == NULL ? "???" : msym.minsym->print_name ()));
     }
 
   return cs;
@@ -257,8 +254,8 @@ call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
 const struct blockvector *
 blockvector_for_pc (CORE_ADDR pc, const struct block **pblock)
 {
-  return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc),
-				  pblock, NULL);
+  return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc), pblock,
+				  NULL);
 }
 
 /* Return the innermost lexical block containing the specified pc value
@@ -335,8 +332,7 @@ block_using (const struct block *block)
    has to be allocated correctly.)  */
 
 void
-block_set_using (struct block *block,
-		 struct using_direct *using_decl,
+block_set_using (struct block *block, struct using_direct *using_decl,
 		 struct obstack *obstack)
 {
   block_initialize_namespace (block, obstack);
@@ -452,8 +448,6 @@ get_block_compunit_symtab (const struct block *block)
   return gb->compunit_symtab;
 }
 
-
-
 /* Initialize a block iterator, either to iterate over a single block,
    or, for static and global blocks, all the included symtabs as
    well.  */
@@ -541,7 +535,7 @@ block_iterator_step (struct block_iterator *iterator, int first)
 
 	  /* Iteration is complete.  */
 	  if (cust == NULL)
-	    return  NULL;
+	    return NULL;
 
 	  block = cust->blockvector ()->block (iterator->which);
 	  sym = mdict_iterator_first (block->multidict (),
@@ -592,8 +586,7 @@ block_iterator_next (struct block_iterator *iterator)
 
 static struct symbol *
 block_iter_match_step (struct block_iterator *iterator,
-		       const lookup_name_info &name,
-		       int first)
+		       const lookup_name_info &name, int first)
 {
   struct symbol *sym;
 
@@ -609,7 +602,7 @@ block_iter_match_step (struct block_iterator *iterator,
 
 	  /* Iteration is complete.  */
 	  if (cust == NULL)
-	    return  NULL;
+	    return NULL;
 
 	  block = cust->blockvector ()->block (iterator->which);
 	  sym = mdict_iter_match_first (block->multidict (), name,
@@ -662,8 +655,7 @@ block_iter_match_next (const lookup_name_info &name,
 bool
 best_symbol (struct symbol *a, const domain_enum domain)
 {
-  return (a->domain () == domain
-	  && a->aclass () != LOC_UNRESOLVED);
+  return (a->domain () == domain && a->aclass () != LOC_UNRESOLVED);
 }
 
 /* See block.h.  */
@@ -726,8 +718,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 	     STRUCT vs VAR domain symbols.  So if a matching symbol is found,
 	     make sure there is no "better" matching symbol, i.e., one with
 	     exactly the same domain.  PR 16253.  */
-	  if (symbol_matches_domain (sym->language (),
-				     sym->domain (), domain))
+	  if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	    other = better_symbol (other, sym, domain);
 	}
       return other;
@@ -747,8 +738,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 
       ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
 	{
-	  if (symbol_matches_domain (sym->language (),
-				     sym->domain (), domain))
+	  if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	    {
 	      sym_found = sym;
 	      if (!sym->is_argument ())
@@ -757,7 +747,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 		}
 	    }
 	}
-      return (sym_found);	/* Will be NULL if not found.  */
+      return (sym_found); /* Will be NULL if not found.  */
     }
 }
 
@@ -779,8 +769,7 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
   other = NULL;
   for (sym = mdict_iter_match_first (block->multidict (), lookup_name,
 				     &mdict_iter);
-       sym != NULL;
-       sym = mdict_iter_match_next (lookup_name, &mdict_iter))
+       sym != NULL; sym = mdict_iter_match_next (lookup_name, &mdict_iter))
     {
       /* With the fix for PR gcc/debug/91507, we get for:
 	 ...
@@ -878,16 +867,14 @@ make_blockranges (struct objfile *objfile,
 		  const std::vector<blockrange> &rangevec)
 {
   struct blockranges *blr;
-  size_t n = rangevec.size();
+  size_t n = rangevec.size ();
 
-  blr = (struct blockranges *)
-    obstack_alloc (&objfile->objfile_obstack,
-		   sizeof (struct blockranges)
-		   + (n - 1) * sizeof (struct blockrange));
+  blr = (struct blockranges *) obstack_alloc (
+    &objfile->objfile_obstack,
+    sizeof (struct blockranges) + (n - 1) * sizeof (struct blockrange));
 
   blr->nranges = n;
   for (int i = 0; i < n; i++)
     blr->range[i] = rangevec[i];
   return blr;
 }
-

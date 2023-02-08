@@ -54,26 +54,19 @@ struct tui_data_window : public tui_win_info
 
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
-  const char *name () const override
-  {
-    return DATA_NAME;
-  }
+  const char *name () const override { return DATA_NAME; }
 
   void check_register_values (frame_info_ptr frame);
 
   void show_registers (const reggroup *group);
 
-  const reggroup *get_current_group () const
-  {
-    return m_current_group;
-  }
+  const reggroup *get_current_group () const { return m_current_group; }
 
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
-  void do_scroll_horizontal (int num_to_scroll) override
-  {
-  }
+
+  void do_scroll_horizontal (int num_to_scroll) override {}
 
   void rerender () override;
 
@@ -100,8 +93,7 @@ private:
      display off the end of the register display.  */
   void display_reg_element_at_line (int start_element_no, int start_line_no);
 
-  void show_register_group (const reggroup *group,
-			    frame_info_ptr frame,
+  void show_register_group (const reggroup *group, frame_info_ptr frame,
 			    bool refresh_values_only);
 
   /* Answer the number of the last line in the regs display.  If there

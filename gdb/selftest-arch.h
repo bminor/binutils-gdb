@@ -27,8 +27,8 @@ namespace selftests
 /* Register a selftest running FUNCTION for each arch supported by GDB. */
 
 extern void
-  register_test_foreach_arch (const std::string &name,
-			      self_test_foreach_arch_function *function);
-}
+register_test_foreach_arch (const std::string &name,
+			    self_test_foreach_arch_function *function);
+} // namespace selftests
 
 #endif /* SELFTEST_ARCH_H */

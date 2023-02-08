@@ -28,22 +28,22 @@
  * NS16550 UART registers
  */
 
-#define COM1ADDR	0x3f8
-#define COM2ADDR	0x2f8
-#define COM3ADDR	0x3e8
-#define COM4ADDR	0x3e0
+#define COM1ADDR 0x3f8
+#define COM2ADDR 0x2f8
+#define COM3ADDR 0x3e8
+#define COM4ADDR 0x3e0
 
-#define	com_data	0	/* data register (R/W) */
-#define	com_dlbl	0	/* divisor latch low (W) */
-#define	com_ier		1	/* interrupt enable (W) */
-#define	com_dlbh	1	/* divisor latch high (W) */
-#define	com_iir		2	/* interrupt identification (R) */
-#define	com_fifo	2	/* FIFO control (W) */
-#define	com_lctl	3	/* line control register (R/W) */
-#define	com_cfcr	3	/* line control register (R/W) */
-#define	com_mcr		4	/* modem control register (R/W) */
-#define	com_lsr		5	/* line status register (R/W) */
-#define	com_msr		6	/* modem status register (R/W) */
+#define com_data 0 /* data register (R/W) */
+#define com_dlbl 0 /* divisor latch low (W) */
+#define com_ier 1  /* interrupt enable (W) */
+#define com_dlbh 1 /* divisor latch high (W) */
+#define com_iir 2  /* interrupt identification (R) */
+#define com_fifo 2 /* FIFO control (W) */
+#define com_lctl 3 /* line control register (R/W) */
+#define com_cfcr 3 /* line control register (R/W) */
+#define com_mcr 4  /* modem control register (R/W) */
+#define com_lsr 5  /* line status register (R/W) */
+#define com_msr 6  /* modem status register (R/W) */
 
 /*
  * Constants for computing 16 bit baud rate divisor (lower byte
@@ -51,77 +51,76 @@
  * 1.8432 MHz / (16 * X) for X bps.  If the baud rate can't be set
  * to within +- (desired_rate*SPEED_TOLERANCE/1000) bps, we fail.
  */
-#define COMTICK		(1843200/16)
-#define SPEED_TOLERANCE	30	/* thousandths; real == desired +- 3.0% */
+#define COMTICK (1843200 / 16)
+#define SPEED_TOLERANCE 30 /* thousandths; real == desired +- 3.0% */
 
 /* interrupt enable register */
-#define	IER_ERXRDY	0x1	/* int on rx ready */
-#define	IER_ETXRDY	0x2	/* int on tx ready */
-#define	IER_ERLS	0x4	/* int on line status change */
-#define	IER_EMSC	0x8	/* int on modem status change */
+#define IER_ERXRDY 0x1 /* int on rx ready */
+#define IER_ETXRDY 0x2 /* int on tx ready */
+#define IER_ERLS 0x4   /* int on line status change */
+#define IER_EMSC 0x8   /* int on modem status change */
 
 /* interrupt identification register */
-#define	IIR_FIFO_MASK	0xc0	/* set if FIFOs are enabled */
-#define	IIR_IMASK	0xf	/* interrupt cause mask */
-#define	IIR_NOPEND	0x1	/* nothing pending */
-#define	IIR_RLS		0x6	/* receive line status */
-#define	IIR_RXRDY	0x4	/* receive ready */
-#define	IIR_RXTOUT	0xc	/* receive timeout */
-#define	IIR_TXRDY	0x2	/* transmit ready */
-#define	IIR_MLSC	0x0	/* modem status */
-
+#define IIR_FIFO_MASK 0xc0 /* set if FIFOs are enabled */
+#define IIR_IMASK 0xf	   /* interrupt cause mask */
+#define IIR_NOPEND 0x1	   /* nothing pending */
+#define IIR_RLS 0x6	   /* receive line status */
+#define IIR_RXRDY 0x4	   /* receive ready */
+#define IIR_RXTOUT 0xc	   /* receive timeout */
+#define IIR_TXRDY 0x2	   /* transmit ready */
+#define IIR_MLSC 0x0	   /* modem status */
 
 /* fifo control register */
-#define	FIFO_ENABLE	0x01	/* enable fifo */
-#define	FIFO_RCV_RST	0x02	/* reset receive fifo */
-#define	FIFO_XMT_RST	0x04	/* reset transmit fifo */
-#define	FIFO_DMA_MODE	0x08	/* enable dma mode */
-#define	FIFO_TRIGGER_1	0x00	/* trigger at 1 char */
-#define	FIFO_TRIGGER_4	0x40	/* trigger at 4 chars */
-#define	FIFO_TRIGGER_8	0x80	/* trigger at 8 chars */
-#define	FIFO_TRIGGER_14	0xc0	/* trigger at 14 chars */
+#define FIFO_ENABLE 0x01     /* enable fifo */
+#define FIFO_RCV_RST 0x02    /* reset receive fifo */
+#define FIFO_XMT_RST 0x04    /* reset transmit fifo */
+#define FIFO_DMA_MODE 0x08   /* enable dma mode */
+#define FIFO_TRIGGER_1 0x00  /* trigger at 1 char */
+#define FIFO_TRIGGER_4 0x40  /* trigger at 4 chars */
+#define FIFO_TRIGGER_8 0x80  /* trigger at 8 chars */
+#define FIFO_TRIGGER_14 0xc0 /* trigger at 14 chars */
 
 /* character format control register */
-#define	CFCR_DLAB	0x80	/* divisor latch */
-#define	CFCR_SBREAK	0x40	/* send break */
-#define	CFCR_PZERO	0x30	/* zero parity */
-#define	CFCR_PONE	0x20	/* one parity */
-#define	CFCR_PEVEN	0x10	/* even parity */
-#define	CFCR_PODD	0x00	/* odd parity */
-#define	CFCR_PENAB	0x08	/* parity enable */
-#define	CFCR_STOPB	0x04	/* 2 stop bits */
-#define	CFCR_8BITS	0x03	/* 8 data bits */
-#define	CFCR_7BITS	0x02	/* 7 data bits */
-#define	CFCR_6BITS	0x01	/* 6 data bits */
-#define	CFCR_5BITS	0x00	/* 5 data bits */
+#define CFCR_DLAB 0x80	 /* divisor latch */
+#define CFCR_SBREAK 0x40 /* send break */
+#define CFCR_PZERO 0x30	 /* zero parity */
+#define CFCR_PONE 0x20	 /* one parity */
+#define CFCR_PEVEN 0x10	 /* even parity */
+#define CFCR_PODD 0x00	 /* odd parity */
+#define CFCR_PENAB 0x08	 /* parity enable */
+#define CFCR_STOPB 0x04	 /* 2 stop bits */
+#define CFCR_8BITS 0x03	 /* 8 data bits */
+#define CFCR_7BITS 0x02	 /* 7 data bits */
+#define CFCR_6BITS 0x01	 /* 6 data bits */
+#define CFCR_5BITS 0x00	 /* 5 data bits */
 
 /* modem control register */
-#define	MCR_LOOPBACK	0x10	/* loopback */
-#define	MCR_IENABLE	0x08	/* output 2 = int enable */
-#define	MCR_DRS		0x04	/* output 1 = xxx */
-#define	MCR_RTS		0x02	/* enable RTS */
-#define	MCR_DTR		0x01	/* enable DTR */
+#define MCR_LOOPBACK 0x10 /* loopback */
+#define MCR_IENABLE 0x08  /* output 2 = int enable */
+#define MCR_DRS 0x04	  /* output 1 = xxx */
+#define MCR_RTS 0x02	  /* enable RTS */
+#define MCR_DTR 0x01	  /* enable DTR */
 
 /* line status register */
-#define	LSR_RCV_FIFO	0x80	/* error in receive fifo */
-#define	LSR_TSRE	0x40	/* transmitter empty */
-#define	LSR_TXRDY	0x20	/* transmitter ready */
-#define	LSR_BI		0x10	/* break detected */
-#define	LSR_FE		0x08	/* framing error */
-#define	LSR_PE		0x04	/* parity error */
-#define	LSR_OE		0x02	/* overrun error */
-#define	LSR_RXRDY	0x01	/* receiver ready */
-#define	LSR_RCV_MASK	0x1f
+#define LSR_RCV_FIFO 0x80 /* error in receive fifo */
+#define LSR_TSRE 0x40	  /* transmitter empty */
+#define LSR_TXRDY 0x20	  /* transmitter ready */
+#define LSR_BI 0x10	  /* break detected */
+#define LSR_FE 0x08	  /* framing error */
+#define LSR_PE 0x04	  /* parity error */
+#define LSR_OE 0x02	  /* overrun error */
+#define LSR_RXRDY 0x01	  /* receiver ready */
+#define LSR_RCV_MASK 0x1f
 
 /* modem status register */
-#define	MSR_DCD		0x80
-#define	MSR_RI		0x40
-#define	MSR_DSR		0x20
-#define	MSR_CTS		0x10
-#define	MSR_DDCD	0x08
-#define	MSR_TERI	0x04
-#define	MSR_DDSR	0x02
-#define	MSR_DCTS	0x01
+#define MSR_DCD 0x80
+#define MSR_RI 0x40
+#define MSR_DSR 0x20
+#define MSR_CTS 0x10
+#define MSR_DDCD 0x08
+#define MSR_TERI 0x04
+#define MSR_DDSR 0x02
+#define MSR_DCTS 0x01
 
 #include <time.h>
 #include <dos.h>
@@ -130,29 +129,26 @@
 typedef unsigned long u_long;
 
 /* 16550 rx fifo trigger point */
-#define FIFO_TRIGGER	FIFO_TRIGGER_4
+#define FIFO_TRIGGER FIFO_TRIGGER_4
 
 /* input buffer size */
-#define CBSIZE	4096
+#define CBSIZE 4096
 
-#define RAWHZ	18
+#define RAWHZ 18
 
 #ifdef DOS_STATS
-#define CNT_RX		16
-#define CNT_TX		17
-#define CNT_STRAY	18
-#define CNT_ORUN	19
-#define NCNT		20
+#define CNT_RX 16
+#define CNT_TX 17
+#define CNT_STRAY 18
+#define CNT_ORUN 19
+#define NCNT 20
 
 static int intrcnt;
 static size_t cnts[NCNT];
-static char *cntnames[NCNT] =
-{
+static char *cntnames[NCNT] = {
   /* h/w interrupt counts.  */
-  "mlsc", "nopend", "txrdy", "?3",
-  "rxrdy", "?5", "rls", "?7",
-  "?8", "?9", "?a", "?b",
-  "rxtout", "?d", "?e", "?f",
+  "mlsc", "nopend", "txrdy", "?3", "rxrdy", "?5", "rls", "?7", "?8", "?9",
+  "?a", "?b", "rxtout", "?d", "?e", "?f",
   /* s/w counts.  */
   "rxcnt", "txcnt", "stray", "swoflo"
 };
@@ -163,65 +159,48 @@ static char *cntnames[NCNT] =
 #endif
 
 /* Main interrupt controller port addresses.  */
-#define ICU_BASE	0x20
-#define ICU_OCW2	(ICU_BASE + 0)
-#define ICU_MASK	(ICU_BASE + 1)
+#define ICU_BASE 0x20
+#define ICU_OCW2 (ICU_BASE + 0)
+#define ICU_MASK (ICU_BASE + 1)
 
 /* Original interrupt controller mask register.  */
 unsigned char icu_oldmask;
 
 /* Maximum of 8 interrupts (we don't handle the slave icu yet).  */
-#define NINTR	8
+#define NINTR 8
 
 static struct intrupt
-  {
-    char inuse;
-    struct dos_ttystate *port;
-    _go32_dpmi_seginfo old_rmhandler;
-    _go32_dpmi_seginfo old_pmhandler;
-    _go32_dpmi_seginfo new_rmhandler;
-    _go32_dpmi_seginfo new_pmhandler;
-    _go32_dpmi_registers regs;
-  }
-intrupts[NINTR];
-
+{
+  char inuse;
+  struct dos_ttystate *port;
+  _go32_dpmi_seginfo old_rmhandler;
+  _go32_dpmi_seginfo old_pmhandler;
+  _go32_dpmi_seginfo new_rmhandler;
+  _go32_dpmi_seginfo new_pmhandler;
+  _go32_dpmi_registers regs;
+} intrupts[NINTR];
 
 static struct dos_ttystate
-  {
-    int base;
-    int irq;
-    int refcnt;
-    struct intrupt *intrupt;
-    int fifo;
-    int baudrate;
-    unsigned char cbuf[CBSIZE];
-    unsigned int first;
-    unsigned int count;
-    int txbusy;
-    unsigned char old_mcr;
-    int ferr;
-    int perr;
-    int oflo;
-    int msr;
-  }
-ports[4] =
 {
-  {
-    COM1ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
-  }
-  ,
-  {
-    COM2ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
-  }
-  ,
-  {
-    COM3ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
-  }
-  ,
-  {
-    COM4ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
-  }
-};
+  int base;
+  int irq;
+  int refcnt;
+  struct intrupt *intrupt;
+  int fifo;
+  int baudrate;
+  unsigned char cbuf[CBSIZE];
+  unsigned int first;
+  unsigned int count;
+  int txbusy;
+  unsigned char old_mcr;
+  int ferr;
+  int perr;
+  int oflo;
+  int msr;
+} ports[4] = { { COM1ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0 },
+	       { COM2ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0 },
+	       { COM3ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0 },
+	       { COM4ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0 } };
 
 static int dos_open (struct serial *scb, const char *name);
 static void dos_raw (struct serial *scb);
@@ -233,11 +212,10 @@ static serial_ttystate dos_get_tty_state (struct serial *scb);
 static int dos_set_tty_state (struct serial *scb, serial_ttystate state);
 static int dos_baudconv (int rate);
 
-#define inb(p,a)	inportb((p)->base + (a))
-#define outb(p,a,v)	outportb((p)->base + (a), (v))
-#define disable()	asm volatile ("cli");
-#define enable()	asm volatile ("sti");
-
+#define inb(p, a) inportb ((p)->base + (a))
+#define outb(p, a, v) outportb ((p)->base + (a), (v))
+#define disable() asm volatile ("cli");
+#define enable() asm volatile ("sti");
 
 static int
 dos_getc (volatile struct dos_ttystate *port)
@@ -255,7 +233,6 @@ dos_getc (volatile struct dos_ttystate *port)
   return c;
 }
 
-
 static int
 dos_putc (int c, struct dos_ttystate *port)
 {
@@ -265,8 +242,6 @@ dos_putc (int c, struct dos_ttystate *port)
   port->count++;
   return 0;
 }
-
-
 
 static void
 dos_comisr (int irq)
@@ -274,8 +249,8 @@ dos_comisr (int irq)
   struct dos_ttystate *port;
   unsigned char iir, lsr, c;
 
-  disable ();			/* Paranoia */
-  outportb (ICU_OCW2, 0x20);	/* End-Of-Interrupt */
+  disable ();		     /* Paranoia */
+  outportb (ICU_OCW2, 0x20); /* End-Of-Interrupt */
 #ifdef DOS_STATS
   ++intrcnt;
 #endif
@@ -284,7 +259,7 @@ dos_comisr (int irq)
   if (!port)
     {
       COUNT (CNT_STRAY);
-      return;			/* not open */
+      return; /* not open */
     }
 
   while (1)
@@ -292,7 +267,6 @@ dos_comisr (int irq)
       iir = inb (port, com_iir) & IIR_IMASK;
       switch (iir)
 	{
-
 	case IIR_RLS:
 	  lsr = inb (port, com_lsr);
 	  goto rx;
@@ -349,20 +323,22 @@ dos_comisr (int irq)
 }
 
 #define ISRNAME(x) dos_comisr##x
-#define ISR(x) static void ISRNAME(x)(void) {dos_comisr(x);}
+#define ISR(x)                   \
+  static void ISRNAME (x) (void) \
+  {                              \
+    dos_comisr (x);              \
+  }
 
+/* clang-format off */
 ISR (0) ISR (1) ISR (2) ISR (3) /* OK */
 ISR (4) ISR (5) ISR (6) ISR (7) /* OK */
+  /* clang-format on */
 
-typedef void (*isr_t) (void);
+  typedef void (*isr_t) (void);
 
-static isr_t isrs[NINTR] =
-  {
-       ISRNAME (0), ISRNAME (1), ISRNAME (2), ISRNAME (3),
-       ISRNAME (4), ISRNAME (5), ISRNAME (6), ISRNAME (7)
-  };
-
-
+static isr_t isrs[NINTR]
+  = { ISRNAME (0), ISRNAME (1), ISRNAME (2), ISRNAME (3),
+      ISRNAME (4), ISRNAME (5), ISRNAME (6), ISRNAME (7) };
 
 static struct intrupt *
 dos_hookirq (unsigned int irq)
@@ -419,7 +395,6 @@ dos_hookirq (unsigned int irq)
   return intr;
 }
 
-
 static void
 dos_unhookirq (struct intrupt *intr)
 {
@@ -444,8 +419,6 @@ dos_unhookirq (struct intrupt *intr)
   _go32_dpmi_free_iret_wrapper (&intr->new_pmhandler);
   intr->inuse = 0;
 }
-
-
 
 static int
 dos_open (struct serial *scb, const char *name)
@@ -490,7 +463,7 @@ dos_open (struct serial *scb, const char *name)
     {
       if ((inb (port, com_iir) & 0x38) == 0)
 	goto ok;
-      (void) inb (port, com_data);	/* clear recv */
+      (void) inb (port, com_data); /* clear recv */
     }
   errno = ENODEV;
   return -1;
@@ -551,7 +524,6 @@ ok:
   return 0;
 }
 
-
 static void
 dos_close (struct serial *scb)
 {
@@ -584,14 +556,11 @@ dos_close (struct serial *scb)
   /* Check for overflow errors.  */
   if (port->oflo)
     {
-      gdb_printf (gdb_stderr,
-		  "Serial input overruns occurred.\n");
+      gdb_printf (gdb_stderr, "Serial input overruns occurred.\n");
       gdb_printf (gdb_stderr, "This system %s handle %d baud.\n",
-		  port->fifo ? "cannot" : "needs a 16550 to",
-		  port->baudrate);
+		  port->fifo ? "cannot" : "needs a 16550 to", port->baudrate);
     }
 }
-
 
 /* Implementation of the serial_ops flush_output method.  */
 
@@ -641,7 +610,6 @@ dos_readchar (struct serial *scb, int timeout)
 
   return c;
 }
-
 
 static serial_ttystate
 dos_get_tty_state (struct serial *scb)
@@ -717,7 +685,7 @@ dos_baudconv (int rate)
   if (rate <= 0)
     return -1;
 
-#define divrnd(n, q)	(((n) * 2 / (q) + 1) / 2) /* Divide and round off.  */
+#define divrnd(n, q) (((n) *2 / (q) + 1) / 2) /* Divide and round off.  */
   x = divrnd (COMTICK, rate);
   if (x <= 0)
     return -1;
@@ -730,7 +698,6 @@ dos_baudconv (int rate)
 #undef divrnd
   return x;
 }
-
 
 static int
 dos_setbaudrate (struct serial *scb, int rate)
@@ -814,7 +781,7 @@ dos_write (struct serial *scb, const void *buf, size_t count)
       str += cnt;
       count -= cnt;
 #else
-      for ( ; cnt > 0; cnt--, count--)
+      for (; cnt > 0; cnt--, count--)
 	outportb (port->base + com_data, *str++);
 #endif
 #ifdef DOS_STATS
@@ -833,7 +800,6 @@ dos_write (struct serial *scb, const void *buf, size_t count)
     }
   return 0;
 }
-
 
 static int
 dos_sendbreak (struct serial *scb)
@@ -854,13 +820,11 @@ dos_sendbreak (struct serial *scb)
   return 0;
 }
 
-
-static const struct serial_ops dos_ops =
-{
+static const struct serial_ops dos_ops = {
   "hardwire",
   dos_open,
   dos_close,
-  NULL,				/* fdopen, not implemented */
+  NULL, /* fdopen, not implemented */
   dos_readchar,
   dos_write,
   dos_flush_output,
@@ -875,7 +839,7 @@ static const struct serial_ops dos_ops =
   dos_setstopbits,
   dos_setparity,
   dos_drain_output,
-  (void (*)(struct serial *, int))NULL	/* Change into async mode.  */
+  (void (*) (struct serial *, int)) NULL /* Change into async mode.  */
 };
 
 int
@@ -898,13 +862,13 @@ info_serial_command (const char *arg, int from_tty)
     {
       if (port->baudrate == 0)
 	continue;
-      gdb_printf ("Port:\tCOM%ld (%sactive)\n", (long)(port - ports) + 1,
+      gdb_printf ("Port:\tCOM%ld (%sactive)\n", (long) (port - ports) + 1,
 		  port->intrupt ? "" : "not ");
       gdb_printf ("Addr:\t0x%03x (irq %d)\n", port->base, port->irq);
       gdb_printf ("16550:\t%s\n", port->fifo ? "yes" : "no");
       gdb_printf ("Speed:\t%d baud\n", port->baudrate);
-      gdb_printf ("Errs:\tframing %d parity %d overflow %d\n\n",
-		  port->ferr, port->perr, port->oflo);
+      gdb_printf ("Errs:\tframing %d parity %d overflow %d\n\n", port->ferr,
+		  port->perr, port->oflo);
     }
 
 #ifdef DOS_STATS
@@ -916,6 +880,7 @@ info_serial_command (const char *arg, int from_tty)
 }
 
 void _initialize_ser_dos ();
+
 void
 _initialize_ser_dos ()
 {
@@ -925,66 +890,66 @@ _initialize_ser_dos ()
   icu_oldmask = inportb (ICU_MASK);
 
   /* Mark fixed motherboard irqs as inuse.  */
-  intrupts[0].inuse =		/* timer tick */
-    intrupts[1].inuse =		/* keyboard */
-    intrupts[2].inuse = 1;	/* slave icu */
+  intrupts[0].inuse =	   /* timer tick */
+    intrupts[1].inuse =	   /* keyboard */
+    intrupts[2].inuse = 1; /* slave icu */
 
-  add_setshow_zinteger_cmd ("com1base", class_obscure, &ports[0].base, _("\
-Set COM1 base i/o port address."), _("\
-Show COM1 base i/o port address."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com1base", class_obscure, &ports[0].base, _ ("\
+Set COM1 base i/o port address."),
+			    _ ("\
+Show COM1 base i/o port address."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("com1irq", class_obscure, &ports[0].irq, _("\
-Set COM1 interrupt request."), _("\
-Show COM1 interrupt request."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com1irq", class_obscure, &ports[0].irq, _ ("\
+Set COM1 interrupt request."),
+			    _ ("\
+Show COM1 interrupt request."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("com2base", class_obscure, &ports[1].base, _("\
-Set COM2 base i/o port address."), _("\
-Show COM2 base i/o port address."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com2base", class_obscure, &ports[1].base, _ ("\
+Set COM2 base i/o port address."),
+			    _ ("\
+Show COM2 base i/o port address."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("com2irq", class_obscure, &ports[1].irq, _("\
-Set COM2 interrupt request."), _("\
-Show COM2 interrupt request."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com2irq", class_obscure, &ports[1].irq, _ ("\
+Set COM2 interrupt request."),
+			    _ ("\
+Show COM2 interrupt request."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("com3base", class_obscure, &ports[2].base, _("\
-Set COM3 base i/o port address."), _("\
-Show COM3 base i/o port address."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com3base", class_obscure, &ports[2].base, _ ("\
+Set COM3 base i/o port address."),
+			    _ ("\
+Show COM3 base i/o port address."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("com3irq", class_obscure, &ports[2].irq, _("\
-Set COM3 interrupt request."), _("\
-Show COM3 interrupt request."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com3irq", class_obscure, &ports[2].irq, _ ("\
+Set COM3 interrupt request."),
+			    _ ("\
+Show COM3 interrupt request."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("com4base", class_obscure, &ports[3].base, _("\
-Set COM4 base i/o port address."), _("\
-Show COM4 base i/o port address."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com4base", class_obscure, &ports[3].base, _ ("\
+Set COM4 base i/o port address."),
+			    _ ("\
+Show COM4 base i/o port address."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("com4irq", class_obscure, &ports[3].irq, _("\
-Set COM4 interrupt request."), _("\
-Show COM4 interrupt request."), NULL,
-			    NULL,
-			    NULL, /* FIXME: i18n: */
+  add_setshow_zinteger_cmd ("com4irq", class_obscure, &ports[3].irq, _ ("\
+Set COM4 interrupt request."),
+			    _ ("\
+Show COM4 interrupt request."),
+			    NULL, NULL, NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
   add_info ("serial", info_serial_command,
-	    _("Print DOS serial port status."));
+	    _ ("Print DOS serial port status."));
 }

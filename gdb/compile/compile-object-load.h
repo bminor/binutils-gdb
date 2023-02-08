@@ -90,8 +90,8 @@ struct compile_module
 /* A unique pointer for a compile_module.  */
 typedef std::unique_ptr<compile_module> compile_module_up;
 
-extern compile_module_up compile_object_load
-  (const compile_file_names &fnames,
-   enum compile_i_scope_types scope, void *scope_data);
+extern compile_module_up compile_object_load (const compile_file_names &fnames,
+					      enum compile_i_scope_types scope,
+					      void *scope_data);
 
 #endif /* COMPILE_COMPILE_OBJECT_LOAD_H */

@@ -25,7 +25,7 @@
 #include <sys/un.h>
 
 #ifndef UNIX_PATH_MAX
-#define UNIX_PATH_MAX sizeof(((struct sockaddr_un *) NULL)->sun_path)
+#define UNIX_PATH_MAX sizeof (((struct sockaddr_un *) NULL)->sun_path)
 #endif
 
 /* Open an AF_UNIX socket.  */
@@ -37,9 +37,9 @@ uds_open (struct serial *scb, const char *name)
 
   if (strlen (name) > UNIX_PATH_MAX - 1)
     {
-      warning
-	(_("The socket name is too long.  It may be no longer than %s bytes."),
-	 pulongest (UNIX_PATH_MAX - 1L));
+      warning (
+	_ ("The socket name is too long.  It may be no longer than %s bytes."),
+	pulongest (UNIX_PATH_MAX - 1L));
       return -1;
     }
 
@@ -49,8 +49,8 @@ uds_open (struct serial *scb, const char *name)
 
   int sock = socket (AF_UNIX, SOCK_STREAM, 0);
 
-  if (connect (sock, (struct sockaddr *) &addr,
-	       sizeof (struct sockaddr_un)) < 0)
+  if (connect (sock, (struct sockaddr *) &addr, sizeof (struct sockaddr_un))
+      < 0)
     {
       close (sock);
       scb->fd = -1;
@@ -86,32 +86,30 @@ uds_write_prim (struct serial *scb, const void *buf, size_t count)
 
 /* The local socket ops.  */
 
-static const struct serial_ops uds_ops =
-{
-  "local",
-  uds_open,
-  uds_close,
-  NULL,
-  ser_base_readchar,
-  ser_base_write,
-  ser_base_flush_output,
-  ser_base_flush_input,
-  ser_base_send_break,
-  ser_base_raw,
-  ser_base_get_tty_state,
-  ser_base_copy_tty_state,
-  ser_base_set_tty_state,
-  ser_base_print_tty_state,
-  ser_base_setbaudrate,
-  ser_base_setstopbits,
-  ser_base_setparity,
-  ser_base_drain_output,
-  ser_base_async,
-  uds_read_prim,
-  uds_write_prim
-};
+static const struct serial_ops uds_ops = { "local",
+					   uds_open,
+					   uds_close,
+					   NULL,
+					   ser_base_readchar,
+					   ser_base_write,
+					   ser_base_flush_output,
+					   ser_base_flush_input,
+					   ser_base_send_break,
+					   ser_base_raw,
+					   ser_base_get_tty_state,
+					   ser_base_copy_tty_state,
+					   ser_base_set_tty_state,
+					   ser_base_print_tty_state,
+					   ser_base_setbaudrate,
+					   ser_base_setstopbits,
+					   ser_base_setparity,
+					   ser_base_drain_output,
+					   ser_base_async,
+					   uds_read_prim,
+					   uds_write_prim };
 
 void _initialize_ser_socket ();
+
 void
 _initialize_ser_socket ()
 {

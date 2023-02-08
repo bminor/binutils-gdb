@@ -33,17 +33,16 @@
 
 struct trans
 {
-  int value;                    /* The numeric value.  */
-  const char *name;                   /* The equivalent symbolic value.  */
-  const char *desc;                   /* Short description of value.  */
+  int value;	    /* The numeric value.  */
+  const char *name; /* The equivalent symbolic value.  */
+  const char *desc; /* Short description of value.  */
 };
 
 /* Translate values in the pr_why field of a `struct prstatus' or
    `struct lwpstatus'.  */
 
-static struct trans pr_why_table[] =
-{
-  { PR_REQUESTED, "PR_REQUESTED", 
+static struct trans pr_why_table[] = {
+  { PR_REQUESTED, "PR_REQUESTED",
     "Directed to stop by debugger via P(IO)CSTOP or P(IO)CWSTOP" },
   { PR_SIGNALLED, "PR_SIGNALLED", "Receipt of a traced signal" },
   { PR_SYSENTRY, "PR_SYSENTRY", "Entry to a traced system call" },
@@ -73,30 +72,31 @@ proc_prettyfprint_why (FILE *file, unsigned long why, unsigned long what,
 	if (verbose)
 	  fprintf (file, ": %s ", pr_why_table[i].desc);
 
-	switch (why) {
-	case PR_REQUESTED:
-	  break;		/* Nothing more to print.  */
-	case PR_SIGNALLED:
-	  proc_prettyfprint_signal (file, what, verbose);
-	  break;
-	case PR_FAULTED:
-	  proc_prettyfprint_fault (file, what, verbose);
-	  break;
-	case PR_SYSENTRY:
-	  fprintf (file, "Entry to ");
-	  proc_prettyfprint_syscall (file, what, verbose);
-	  break;
-	case PR_SYSEXIT:
-	  fprintf (file, "Exit from ");
-	  proc_prettyfprint_syscall (file, what, verbose);
-	  break;
-	case PR_JOBCONTROL:
-	  proc_prettyfprint_signal (file, what, verbose);
-	  break;
-	default:
-	  fprintf (file, "Unknown why %ld, what %ld\n", why, what);
-	  break;
-	}
+	switch (why)
+	  {
+	  case PR_REQUESTED:
+	    break; /* Nothing more to print.  */
+	  case PR_SIGNALLED:
+	    proc_prettyfprint_signal (file, what, verbose);
+	    break;
+	  case PR_FAULTED:
+	    proc_prettyfprint_fault (file, what, verbose);
+	    break;
+	  case PR_SYSENTRY:
+	    fprintf (file, "Entry to ");
+	    proc_prettyfprint_syscall (file, what, verbose);
+	    break;
+	  case PR_SYSEXIT:
+	    fprintf (file, "Exit from ");
+	    proc_prettyfprint_syscall (file, what, verbose);
+	    break;
+	  case PR_JOBCONTROL:
+	    proc_prettyfprint_signal (file, what, verbose);
+	    break;
+	  default:
+	    fprintf (file, "Unknown why %ld, what %ld\n", why, what);
+	    break;
+	  }
 	fprintf (file, "\n");
 
 	return;

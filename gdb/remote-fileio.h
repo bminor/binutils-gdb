@@ -29,19 +29,18 @@ struct remote_target;
 
 /* Unified interface to remote fileio, called in remote.c from
    remote_wait () and remote_async_wait ().  */
-extern void remote_fileio_request (remote_target *remote,
-				   char *buf, int ctrlc_pending_p);
+extern void remote_fileio_request (remote_target *remote, char *buf,
+				   int ctrlc_pending_p);
 
 /* Cleanup any remote fileio state.  */
 extern void remote_fileio_reset (void);
 
 /* Called from _initialize_remote ().  */
-extern void initialize_remote_fileio (
-  struct cmd_list_element **remote_set_cmdlist,
-  struct cmd_list_element **remote_show_cmdlist);
+extern void
+initialize_remote_fileio (struct cmd_list_element **remote_set_cmdlist,
+			  struct cmd_list_element **remote_show_cmdlist);
 
 /* Unpack a struct fio_stat.  */
-extern void remote_fileio_to_host_stat (struct fio_stat *fst,
-					struct stat *st);
+extern void remote_fileio_to_host_stat (struct fio_stat *fst, struct stat *st);
 
 #endif

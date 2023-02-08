@@ -62,7 +62,7 @@ buffer_init (struct buffer *buffer)
   memset (buffer, 0, sizeof (*buffer));
 }
 
-char*
+char *
 buffer_finish (struct buffer *buffer)
 {
   char *ret = buffer->buffer;
@@ -86,93 +86,92 @@ buffer_xml_printf (struct buffer *buffer, const char *format, ...)
   for (f = format; *f; f++)
     {
       if (percent)
-	{
-	  char buf[32];
-	  char *str = buf;
-	  const char *f_old = f;
-	  
-	  switch (*f)
-	    {
-	    case 's':
-	      str = va_arg (ap, char *);
-	      break;
-	    case 'd':
-	      sprintf (str, "%d", va_arg (ap, int));
-	      break;
-	    case 'u':
-	      sprintf (str, "%u", va_arg (ap, unsigned int));
-	      break;
-	    case 'x':
-	      sprintf (str, "%x", va_arg (ap, unsigned int));
-	      break;
-	    case 'o':
-	      sprintf (str, "%o", va_arg (ap, unsigned int));
-	      break;
-	    case 'l':
-	      f++;
-	      switch (*f)
-		{
-		case 'd':
-		  sprintf (str, "%ld", va_arg (ap, long));
-		  break;
-		case 'u':
-		  sprintf (str, "%lu", va_arg (ap, unsigned long));
-		  break;
-		case 'x':
-		  sprintf (str, "%lx", va_arg (ap, unsigned long));
-		  break;
-		case 'o':
-		  sprintf (str, "%lo", va_arg (ap, unsigned long));
-		  break;
-		case 'l':
-		  f++;
-		  switch (*f)
-		    {
-		    case 'd':
-		      sprintf (str, "%" PRId64,
-			       (int64_t) va_arg (ap, long long));
-		      break;
-		    case 'u':
-		      sprintf (str, "%" PRIu64,
-			       (uint64_t) va_arg (ap, unsigned long long));
-		      break;
-		    case 'x':
-		      sprintf (str, "%" PRIx64,
-			       (uint64_t) va_arg (ap, unsigned long long));
-		      break;
-		    case 'o':
-		      sprintf (str, "%" PRIo64,
-			       (uint64_t) va_arg (ap, unsigned long long));
-		      break;
-		    default:
-		      str = 0;
-		      break;
-		    }
-		  break;
-		default:
-		  str = 0;
-		  break;
-		}
-	      break;
-	    default:
-	      str = 0;
-	      break;
-	    }
+        {
+          char buf[32];
+          char *str = buf;
+          const char *f_old = f;
 
-	  if (str)
-	    {
-	      buffer_grow (buffer, prev, f_old - prev - 1);
-	      std::string p = xml_escape_text (str);
-	      buffer_grow_str (buffer, p.c_str ());
-	      prev = f + 1;
-	    }
-	  percent = 0;
-	}
+          switch (*f)
+            {
+            case 's':
+              str = va_arg (ap, char *);
+              break;
+            case 'd':
+              sprintf (str, "%d", va_arg (ap, int));
+              break;
+            case 'u':
+              sprintf (str, "%u", va_arg (ap, unsigned int));
+              break;
+            case 'x':
+              sprintf (str, "%x", va_arg (ap, unsigned int));
+              break;
+            case 'o':
+              sprintf (str, "%o", va_arg (ap, unsigned int));
+              break;
+            case 'l':
+              f++;
+              switch (*f)
+                {
+                case 'd':
+                  sprintf (str, "%ld", va_arg (ap, long));
+                  break;
+                case 'u':
+                  sprintf (str, "%lu", va_arg (ap, unsigned long));
+                  break;
+                case 'x':
+                  sprintf (str, "%lx", va_arg (ap, unsigned long));
+                  break;
+                case 'o':
+                  sprintf (str, "%lo", va_arg (ap, unsigned long));
+                  break;
+                case 'l':
+                  f++;
+                  switch (*f)
+                    {
+                    case 'd':
+                      sprintf (str, "%" PRId64,
+                               (int64_t) va_arg (ap, long long));
+                      break;
+                    case 'u':
+                      sprintf (str, "%" PRIu64,
+                               (uint64_t) va_arg (ap, unsigned long long));
+                      break;
+                    case 'x':
+                      sprintf (str, "%" PRIx64,
+                               (uint64_t) va_arg (ap, unsigned long long));
+                      break;
+                    case 'o':
+                      sprintf (str, "%" PRIo64,
+                               (uint64_t) va_arg (ap, unsigned long long));
+                      break;
+                    default:
+                      str = 0;
+                      break;
+                    }
+                  break;
+                default:
+                  str = 0;
+                  break;
+                }
+              break;
+            default:
+              str = 0;
+              break;
+            }
+
+          if (str)
+            {
+              buffer_grow (buffer, prev, f_old - prev - 1);
+              std::string p = xml_escape_text (str);
+              buffer_grow_str (buffer, p.c_str ());
+              prev = f + 1;
+            }
+          percent = 0;
+        }
       else if (*f == '%')
-	percent = 1;
+        percent = 1;
     }
 
   buffer_grow_str (buffer, prev);
   va_end (ap);
 }
-

@@ -27,10 +27,7 @@ template<typename T>
 class intrusive_list_node
 {
 public:
-  bool is_linked () const
-  {
-    return next != INTRUSIVE_LIST_UNLINKED_VALUE;
-  }
+  bool is_linked () const { return next != INTRUSIVE_LIST_UNLINKED_VALUE; }
 
 private:
   T *next = INTRUSIVE_LIST_UNLINKED_VALUE;
@@ -56,8 +53,7 @@ private:
 template<typename T>
 struct intrusive_base_node
 {
-  static intrusive_list_node<T> *as_node (T *elem)
-  { return elem; }
+  static intrusive_list_node<T> *as_node (T *elem) { return elem; }
 };
 
 /* For element types that keep the node as member field.  */
@@ -66,7 +62,9 @@ template<typename T, intrusive_list_node<T> T::*MemberNode>
 struct intrusive_member_node
 {
   static intrusive_list_node<T> *as_node (T *elem)
-  { return &(elem->*MemberNode); }
+  {
+    return &(elem->*MemberNode);
+  }
 };
 
 /* Common code for forward and reverse iterators.  */
@@ -86,30 +84,27 @@ struct intrusive_list_base_iterator
   using node_type = intrusive_list_node<T>;
 
   /* Create an iterator pointing to ELEM.  */
-  explicit intrusive_list_base_iterator (T *elem)
-    : m_elem (elem)
-  {}
+  explicit intrusive_list_base_iterator (T *elem) : m_elem (elem) {}
 
   /* Create a past-the-end iterator.  */
-  intrusive_list_base_iterator ()
-    : m_elem (nullptr)
-  {}
+  intrusive_list_base_iterator () : m_elem (nullptr) {}
 
-  reference operator* () const
-  { return *m_elem; }
+  reference operator* () const { return *m_elem; }
 
-  pointer operator-> () const
-  { return m_elem; }
+  pointer operator->() const { return m_elem; }
 
   bool operator== (const self_type &other) const
-  { return m_elem == other.m_elem; }
+  {
+    return m_elem == other.m_elem;
+  }
 
   bool operator!= (const self_type &other) const
-  { return m_elem != other.m_elem; }
+  {
+    return m_elem != other.m_elem;
+  }
 
 protected:
-  static node_type *as_node (T *elem)
-  { return AsNode::as_node (elem); }
+  static node_type *as_node (T *elem) { return AsNode::as_node (elem); }
 
   /* A past-end-the iterator points to the list's head.  */
   pointer m_elem;
@@ -119,11 +114,12 @@ protected:
 
 template<typename T, typename AsNode = intrusive_base_node<T>>
 struct intrusive_list_iterator
-  : public intrusive_list_base_iterator
-	     <T, AsNode, intrusive_list_iterator<T, AsNode>>
+  : public intrusive_list_base_iterator<T, AsNode,
+                                        intrusive_list_iterator<T, AsNode>>
 {
-  using base = intrusive_list_base_iterator
-		 <T, AsNode, intrusive_list_iterator<T, AsNode>>;
+  using base
+    = intrusive_list_base_iterator<T, AsNode,
+                                   intrusive_list_iterator<T, AsNode>>;
   using self_type = typename base::self_type;
   using node_type = typename base::node_type;
 
@@ -166,11 +162,12 @@ struct intrusive_list_iterator
 
 template<typename T, typename AsNode = intrusive_base_node<T>>
 struct intrusive_list_reverse_iterator
-  : public intrusive_list_base_iterator
-	     <T, AsNode, intrusive_list_reverse_iterator<T, AsNode>>
+  : public intrusive_list_base_iterator<
+      T, AsNode, intrusive_list_reverse_iterator<T, AsNode>>
 {
-  using base = intrusive_list_base_iterator
-		 <T, AsNode, intrusive_list_reverse_iterator<T, AsNode>>;
+  using base
+    = intrusive_list_base_iterator<T, AsNode,
+                                   intrusive_list_reverse_iterator<T, AsNode>>;
   using self_type = typename base::self_type;
 
   /* Inherit constructor and M_NODE visibility from base.  */
@@ -225,7 +222,7 @@ struct intrusive_list_reverse_iterator
 
    where `member` is the name of the member.  */
 
-template <typename T, typename AsNode = intrusive_base_node<T>>
+template<typename T, typename AsNode = intrusive_base_node<T>>
 class intrusive_list
 {
 public:
@@ -245,10 +242,7 @@ public:
 
   intrusive_list () = default;
 
-  ~intrusive_list ()
-  {
-    clear ();
-  }
+  ~intrusive_list () { clear (); }
 
   intrusive_list (intrusive_list &&other)
     : m_front (other.m_front),
@@ -274,10 +268,7 @@ public:
     std::swap (m_back, other.m_back);
   }
 
-  iterator iterator_to (reference value)
-  {
-    return iterator (&value);
-  }
+  iterator iterator_to (reference value) { return iterator (&value); }
 
   const_iterator iterator_to (const_reference value)
   {
@@ -369,8 +360,8 @@ public:
 
     if (this->empty ())
       {
-	*this = std::move (other);
-	return;
+        *this = std::move (other);
+        return;
       }
 
     /* [A ... B] + [C ... D] */
@@ -460,26 +451,26 @@ private:
 
     if (m_front == &elem)
       {
-	gdb_assert (elem_node->prev == nullptr);
-	m_front = elem_node->next;
+        gdb_assert (elem_node->prev == nullptr);
+        m_front = elem_node->next;
       }
     else
       {
-	gdb_assert (elem_node->prev != nullptr);
-	intrusive_list_node<T> *prev_node = as_node (elem_node->prev);
-	prev_node->next = elem_node->next;
+        gdb_assert (elem_node->prev != nullptr);
+        intrusive_list_node<T> *prev_node = as_node (elem_node->prev);
+        prev_node->next = elem_node->next;
       }
 
     if (m_back == &elem)
       {
-	gdb_assert (elem_node->next == nullptr);
-	m_back = elem_node->prev;
+        gdb_assert (elem_node->next == nullptr);
+        m_back = elem_node->prev;
       }
     else
       {
-	gdb_assert (elem_node->next != nullptr);
-	intrusive_list_node<T> *next_node = as_node (elem_node->next);
-	next_node->prev = elem_node->prev;
+        gdb_assert (elem_node->next != nullptr);
+        intrusive_list_node<T> *next_node = as_node (elem_node->next);
+        next_node->prev = elem_node->prev;
       }
 
     elem_node->next = INTRUSIVE_LIST_UNLINKED_VALUE;
@@ -513,51 +504,27 @@ public:
   {
     while (!this->empty ())
       {
-	pointer p = &front ();
-	pop_front ();
-	disposer (p);
+        pointer p = &front ();
+        pop_front ();
+        disposer (p);
       }
   }
 
-  bool empty () const
-  {
-    return m_front == nullptr;
-  }
+  bool empty () const { return m_front == nullptr; }
 
-  iterator begin () noexcept
-  {
-    return iterator (m_front);
-  }
+  iterator begin () noexcept { return iterator (m_front); }
 
-  const_iterator begin () const noexcept
-  {
-    return const_iterator (m_front);
-  }
+  const_iterator begin () const noexcept { return const_iterator (m_front); }
 
-  const_iterator cbegin () const noexcept
-  {
-    return const_iterator (m_front);
-  }
+  const_iterator cbegin () const noexcept { return const_iterator (m_front); }
 
-  iterator end () noexcept
-  {
-    return {};
-  }
+  iterator end () noexcept { return {}; }
 
-  const_iterator end () const noexcept
-  {
-    return {};
-  }
+  const_iterator end () const noexcept { return {}; }
 
-  const_iterator cend () const noexcept
-  {
-    return {};
-  }
+  const_iterator cend () const noexcept { return {}; }
 
-  reverse_iterator rbegin () noexcept
-  {
-    return reverse_iterator (m_back);
-  }
+  reverse_iterator rbegin () noexcept { return reverse_iterator (m_back); }
 
   const_reverse_iterator rbegin () const noexcept
   {
@@ -569,26 +536,14 @@ public:
     return const_reverse_iterator (m_back);
   }
 
-  reverse_iterator rend () noexcept
-  {
-    return {};
-  }
+  reverse_iterator rend () noexcept { return {}; }
 
-  const_reverse_iterator rend () const noexcept
-  {
-    return {};
-  }
+  const_reverse_iterator rend () const noexcept { return {}; }
 
-  const_reverse_iterator crend () const noexcept
-  {
-    return {};
-  }
+  const_reverse_iterator crend () const noexcept { return {}; }
 
 private:
-  static node_type *as_node (T *elem)
-  {
-    return AsNode::as_node (elem);
-  }
+  static node_type *as_node (T *elem) { return AsNode::as_node (elem); }
 
   T *m_front = nullptr;
   T *m_back = nullptr;

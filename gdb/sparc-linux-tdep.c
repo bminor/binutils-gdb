@@ -63,32 +63,24 @@ static void sparc32_linux_sigframe_init (const struct tramp_frame *self,
    the effect is to call the system call sigreturn.  This is unlikely
    to occur anywhere other than a signal trampoline.  */
 
-static const struct tramp_frame sparc32_linux_sigframe =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { 0x821020d8, ULONGEST_MAX },		/* mov __NR_sigreturn, %g1 */
-    { 0x91d02010, ULONGEST_MAX },		/* ta  0x10 */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  sparc32_linux_sigframe_init
-};
+static const struct tramp_frame sparc32_linux_sigframe
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0x821020d8, ULONGEST_MAX }, /* mov __NR_sigreturn, %g1 */
+	{ 0x91d02010, ULONGEST_MAX }, /* ta  0x10 */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      sparc32_linux_sigframe_init };
 
 /* The instruction sequence for RT signals is slightly different.  The
    effect is to call the system call rt_sigreturn.  */
 
-static const struct tramp_frame sparc32_linux_rt_sigframe =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { 0x82102065, ULONGEST_MAX },		/* mov __NR_rt_sigreturn, %g1 */
-    { 0x91d02010, ULONGEST_MAX },		/* ta  0x10 */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  sparc32_linux_sigframe_init
-};
+static const struct tramp_frame sparc32_linux_rt_sigframe
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0x82102065, ULONGEST_MAX }, /* mov __NR_rt_sigreturn, %g1 */
+	{ 0x91d02010, ULONGEST_MAX }, /* ta  0x10 */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      sparc32_linux_sigframe_init };
 
 /* This enum represents the signals' numbers on the SPARC
    architecture.  It just contains the signal definitions which are
@@ -98,22 +90,22 @@ static const struct tramp_frame sparc32_linux_rt_sigframe =
    from the Linux kernel tree.  */
 
 enum
-  {
-    SPARC_LINUX_SIGEMT = 7,
-    SPARC_LINUX_SIGBUS = 10,
-    SPARC_LINUX_SIGSYS = 12,
-    SPARC_LINUX_SIGURG = 16,
-    SPARC_LINUX_SIGSTOP = 17,
-    SPARC_LINUX_SIGTSTP = 18,
-    SPARC_LINUX_SIGCONT = 19,
-    SPARC_LINUX_SIGCHLD = 20,
-    SPARC_LINUX_SIGIO = 23,
-    SPARC_LINUX_SIGPOLL = SPARC_LINUX_SIGIO,
-    SPARC_LINUX_SIGLOST = 29,
-    SPARC_LINUX_SIGPWR = SPARC_LINUX_SIGLOST,
-    SPARC_LINUX_SIGUSR1 = 30,
-    SPARC_LINUX_SIGUSR2 = 31,
-  };
+{
+  SPARC_LINUX_SIGEMT = 7,
+  SPARC_LINUX_SIGBUS = 10,
+  SPARC_LINUX_SIGSYS = 12,
+  SPARC_LINUX_SIGURG = 16,
+  SPARC_LINUX_SIGSTOP = 17,
+  SPARC_LINUX_SIGTSTP = 18,
+  SPARC_LINUX_SIGCONT = 19,
+  SPARC_LINUX_SIGCHLD = 20,
+  SPARC_LINUX_SIGIO = 23,
+  SPARC_LINUX_SIGPOLL = SPARC_LINUX_SIGIO,
+  SPARC_LINUX_SIGLOST = 29,
+  SPARC_LINUX_SIGPWR = SPARC_LINUX_SIGLOST,
+  SPARC_LINUX_SIGUSR1 = 30,
+  SPARC_LINUX_SIGUSR2 = 31,
+};
 
 static void
 sparc32_linux_sigframe_init (const struct tramp_frame *self,
@@ -154,7 +146,7 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
     }
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
-
+
 /* Return the address of a system call's alternative return
    address.  */
 
@@ -196,29 +188,26 @@ sparc32_linux_step_trap (frame_info_ptr frame, unsigned long insn)
 
   return 0;
 }
-
 
-const struct sparc_gregmap sparc32_linux_core_gregmap =
-{
-  32 * 4,			/* %psr */
-  33 * 4,			/* %pc */
-  34 * 4,			/* %npc */
-  35 * 4,			/* %y */
-  -1,				/* %wim */
-  -1,				/* %tbr */
-  1 * 4,			/* %g1 */
-  16 * 4,			/* %l0 */
-  4,				/* y size */
+const struct sparc_gregmap sparc32_linux_core_gregmap = {
+  32 * 4, /* %psr */
+  33 * 4, /* %pc */
+  34 * 4, /* %npc */
+  35 * 4, /* %y */
+  -1,	  /* %wim */
+  -1,	  /* %tbr */
+  1 * 4,  /* %g1 */
+  16 * 4, /* %l0 */
+  4,	  /* y size */
 };
-
 
 static void
 sparc32_linux_supply_core_gregset (const struct regset *regset,
-				   struct regcache *regcache,
-				   int regnum, const void *gregs, size_t len)
+				   struct regcache *regcache, int regnum,
+				   const void *gregs, size_t len)
 {
-  sparc32_supply_gregset (&sparc32_linux_core_gregmap,
-			  regcache, regnum, gregs);
+  sparc32_supply_gregset (&sparc32_linux_core_gregmap, regcache, regnum,
+			  gregs);
 }
 
 static void
@@ -226,14 +215,14 @@ sparc32_linux_collect_core_gregset (const struct regset *regset,
 				    const struct regcache *regcache,
 				    int regnum, void *gregs, size_t len)
 {
-  sparc32_collect_gregset (&sparc32_linux_core_gregmap,
-			   regcache, regnum, gregs);
+  sparc32_collect_gregset (&sparc32_linux_core_gregmap, regcache, regnum,
+			   gregs);
 }
 
 static void
 sparc32_linux_supply_core_fpregset (const struct regset *regset,
-				    struct regcache *regcache,
-				    int regnum, const void *fpregs, size_t len)
+				    struct regcache *regcache, int regnum,
+				    const void *fpregs, size_t len)
 {
   sparc32_supply_fpregset (&sparc32_bsd_fpregmap, regcache, regnum, fpregs);
 }
@@ -248,7 +237,7 @@ sparc32_linux_collect_core_fpregset (const struct regset *regset,
 
 /* Set the program counter for process PTID to PC.  */
 
-#define PSR_SYSCALL	0x00004000
+#define PSR_SYSCALL 0x00004000
 
 static void
 sparc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
@@ -274,8 +263,7 @@ sparc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 static LONGEST
-sparc32_linux_get_syscall_number (struct gdbarch *gdbarch,
-				  thread_info *thread)
+sparc32_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 {
   struct regcache *regcache = get_thread_regcache (thread);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -298,8 +286,7 @@ sparc32_linux_get_syscall_number (struct gdbarch *gdbarch,
    gdbarch.h.  */
 
 static enum gdb_signal
-sparc32_linux_gdb_signal_from_target (struct gdbarch *gdbarch,
-				      int signal)
+sparc32_linux_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
 {
   switch (signal)
     {
@@ -402,21 +389,13 @@ sparc32_linux_gdb_signal_to_target (struct gdbarch *gdbarch,
   return linux_gdb_signal_to_target (gdbarch, signal);
 }
 
-
+static const struct regset sparc32_linux_gregset
+  = { NULL, sparc32_linux_supply_core_gregset,
+      sparc32_linux_collect_core_gregset };
 
-static const struct regset sparc32_linux_gregset =
-  {
-    NULL,
-    sparc32_linux_supply_core_gregset,
-    sparc32_linux_collect_core_gregset
-  };
-
-static const struct regset sparc32_linux_fpregset =
-  {
-    NULL,
-    sparc32_linux_supply_core_fpregset,
-    sparc32_linux_collect_core_fpregset
-  };
+static const struct regset sparc32_linux_fpregset
+  = { NULL, sparc32_linux_supply_core_fpregset,
+      sparc32_linux_collect_core_fpregset };
 
 static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -436,8 +415,8 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* GNU/Linux has SVR4-style shared libraries...  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 linux_ilp32_fetch_link_map_offsets);
 
   /* ...which means that we need some special handling when doing
      prologue analysis.  */
@@ -457,8 +436,7 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_SPARC32);
-  set_gdbarch_get_syscall_number (gdbarch,
-				  sparc32_linux_get_syscall_number);
+  set_gdbarch_get_syscall_number (gdbarch, sparc32_linux_get_syscall_number);
 
   set_gdbarch_gdb_signal_from_target (gdbarch,
 				      sparc32_linux_gdb_signal_from_target);
@@ -467,6 +445,7 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_sparc_linux_tdep ();
+
 void
 _initialize_sparc_linux_tdep ()
 {

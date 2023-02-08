@@ -30,7 +30,6 @@
 #include "complaints.h"
 #include "macroexp.h"
 
-
 /* The macro table structure.  */
 
 struct macro_table
@@ -76,8 +75,6 @@ struct macro_table
   splay_tree definitions;
 };
 
-
-
 /* Allocation and freeing functions.  */
 
 /* Allocate SIZE bytes of memory appropriately for the macro table T.
@@ -92,7 +89,6 @@ macro_alloc (int size, struct macro_table *t)
     return xmalloc (size);
 }
 
-
 static void
 macro_free (void *object, struct macro_table *t)
 {
@@ -105,7 +101,6 @@ macro_free (void *object, struct macro_table *t)
   else
     xfree (object);
 }
-
 
 /* If the macro table T has a bcache, then cache the LEN bytes at ADDR
    there, and return the cached copy.  Otherwise, just xmalloc a copy
@@ -124,7 +119,6 @@ macro_bcache (struct macro_table *t, const void *addr, int len)
     }
 }
 
-
 /* If the macro table T has a bcache, cache the null-terminated string
    S there, and return a pointer to the cached copy.  Otherwise,
    xmalloc a copy and return that.  */
@@ -133,7 +127,6 @@ macro_bcache_str (struct macro_table *t, const char *s)
 {
   return (const char *) macro_bcache (t, s, strlen (s) + 1);
 }
-
 
 /* Free a possibly bcached object OBJ.  That is, if the macro table T
    has a bcache, do nothing; otherwise, xfree OBJ.  */
@@ -150,8 +143,6 @@ macro_bcache_free (struct macro_table *t, void *obj)
     xfree (obj);
 }
 
-
-
 /* Macro tree keys, w/their comparison, allocation, and freeing functions.  */
 
 /* A key in the splay tree.  */
@@ -180,7 +171,6 @@ struct macro_key
   int end_line;
 };
 
-
 /* Return the #inclusion depth of the source file FILE.  This is the
    number of #inclusions it took to reach this file.  For the main
    source file, the #inclusion depth is zero; for a file it #includes
@@ -195,7 +185,6 @@ inclusion_depth (struct macro_source_file *file)
 
   return depth;
 }
-
 
 /* Compare two source locations (from the same compilation unit).
    This is part of the comparison function for the tree of
@@ -213,7 +202,7 @@ inclusion_depth (struct macro_source_file *file)
    sources, where all the #included files have been substituted into
    their places.  */
 static int
-compare_locations (struct macro_source_file *file1, int line1, 
+compare_locations (struct macro_source_file *file1, int line1,
 		   struct macro_source_file *file2, int line2)
 {
   /* We want to treat positions in an #included file as coming *after*
@@ -227,14 +216,14 @@ compare_locations (struct macro_source_file *file1, int line1,
 
   /* If a file is zero, that means "end of compilation unit."  Handle
      that specially.  */
-  if (! file1)
+  if (!file1)
     {
-      if (! file2)
+      if (!file2)
 	return 0;
       else
 	return 1;
     }
-  else if (! file2)
+  else if (!file2)
     return -1;
 
   /* If the two files are not the same, find their common ancestor in
@@ -292,7 +281,7 @@ compare_locations (struct macro_source_file *file1, int line1,
     {
       /* They can't both be from #included files.  Then we shouldn't
 	 have walked up this far.  */
-      gdb_assert (! included1 || ! included2);
+      gdb_assert (!included1 || !included2);
 
       /* Any #included position comes after a non-#included position
 	 with the same line number in the #including file.  */
@@ -307,7 +296,6 @@ compare_locations (struct macro_source_file *file1, int line1,
     return line1 - line2;
 }
 
-
 /* Compare a macro key KEY against NAME, the source file FILE, and
    line number LINE.
 
@@ -318,24 +306,21 @@ compare_locations (struct macro_source_file *file1, int line1,
    Return -1, 0, or 1 if key comes before, is identical to, or comes
    after NAME, FILE, and LINE.  */
 static int
-key_compare (struct macro_key *key,
-	     const char *name, struct macro_source_file *file, int line)
+key_compare (struct macro_key *key, const char *name,
+	     struct macro_source_file *file, int line)
 {
   int names = strcmp (key->name, name);
 
   if (names)
     return names;
 
-  return compare_locations (key->start_file, key->start_line,
-			    file, line);
+  return compare_locations (key->start_file, key->start_line, file, line);
 }
-
 
 /* The macro tree comparison function, typed for the splay tree
    library's happiness.  */
 static int
-macro_tree_compare (splay_tree_key untyped_key1,
-		    splay_tree_key untyped_key2)
+macro_tree_compare (splay_tree_key untyped_key1, splay_tree_key untyped_key2)
 {
   struct macro_key *key1 = (struct macro_key *) untyped_key1;
   struct macro_key *key2 = (struct macro_key *) untyped_key2;
@@ -343,15 +328,12 @@ macro_tree_compare (splay_tree_key untyped_key1,
   return key_compare (key1, key2->name, key2->start_file, key2->start_line);
 }
 
-
 /* Construct a new macro key node for a macro in table T whose name is
    NAME, and whose scope starts at LINE in FILE; register the name in
    the bcache.  */
 static struct macro_key *
-new_macro_key (struct macro_table *t,
-	       const char *name,
-	       struct macro_source_file *file,
-	       int line)
+new_macro_key (struct macro_table *t, const char *name,
+	       struct macro_source_file *file, int line)
 {
   struct macro_key *k = (struct macro_key *) macro_alloc (sizeof (*k), t);
 
@@ -365,7 +347,6 @@ new_macro_key (struct macro_table *t,
   return k;
 }
 
-
 static void
 macro_tree_delete_key (void *untyped_key)
 {
@@ -375,15 +356,11 @@ macro_tree_delete_key (void *untyped_key)
   macro_free (key, key->table);
 }
 
-
-
 /* Building and querying the tree of #included files.  */
-
 
 /* Allocate and initialize a new source file structure.  */
 static struct macro_source_file *
-new_source_file (struct macro_table *t,
-		 const char *filename)
+new_source_file (struct macro_table *t, const char *filename)
 {
   /* Get space for the source file structure itself.  */
   struct macro_source_file *f
@@ -396,7 +373,6 @@ new_source_file (struct macro_table *t,
 
   return f;
 }
-
 
 /* Free a source file, and all the source files it #included.  */
 static void
@@ -415,20 +391,17 @@ free_macro_source_file (struct macro_source_file *src)
   macro_free (src, src->table);
 }
 
-
 struct macro_source_file *
-macro_set_main (struct macro_table *t,
-		const char *filename)
+macro_set_main (struct macro_table *t, const char *filename)
 {
   /* You can't change a table's main source file.  What would that do
      to the tree?  */
-  gdb_assert (! t->main_source);
+  gdb_assert (!t->main_source);
 
   t->main_source = new_source_file (t, filename);
 
   return t->main_source;
 }
-
 
 struct macro_source_file *
 macro_main (struct macro_table *t)
@@ -438,18 +411,15 @@ macro_main (struct macro_table *t)
   return t->main_source;
 }
 
-
 void
 macro_allow_redefinitions (struct macro_table *t)
 {
-  gdb_assert (! t->obstack);
+  gdb_assert (!t->obstack);
   t->redef_ok = 1;
 }
 
-
 struct macro_source_file *
-macro_include (struct macro_source_file *source,
-	       int line,
+macro_include (struct macro_source_file *source, int line,
 	       const char *included)
 {
   struct macro_source_file *newobj;
@@ -458,8 +428,7 @@ macro_include (struct macro_source_file *source,
   /* Find the right position in SOURCE's `includes' list for the new
      file.  Skip inclusions at earlier lines, until we find one at the
      same line or later --- or until the end of the list.  */
-  for (link = &source->includes;
-       *link && (*link)->included_at_line < line;
+  for (link = &source->includes; *link && (*link)->included_at_line < line;
        link = &(*link)->next_included)
     ;
 
@@ -477,7 +446,7 @@ macro_include (struct macro_source_file *source,
 
       std::string link_fullname = macro_source_fullname (*link);
       std::string source_fullname = macro_source_fullname (source);
-      complaint (_("both `%s' and `%s' allegedly #included at %s:%d"),
+      complaint (_ ("both `%s' and `%s' allegedly #included at %s:%d"),
 		 included, link_fullname.c_str (), source_fullname.c_str (),
 		 line);
 
@@ -503,7 +472,6 @@ macro_include (struct macro_source_file *source,
   return newobj;
 }
 
-
 struct macro_source_file *
 macro_lookup_inclusion (struct macro_source_file *source, const char *name)
 {
@@ -526,7 +494,7 @@ macro_lookup_inclusion (struct macro_source_file *source, const char *name)
 	  {
 	    int result_depth = inclusion_depth (result);
 
-	    if (! best || result_depth < best_depth)
+	    if (!best || result_depth < best_depth)
 	      {
 		best = result;
 		best_depth = result_depth;
@@ -538,18 +506,13 @@ macro_lookup_inclusion (struct macro_source_file *source, const char *name)
   }
 }
 
-
-
 /* Registering and looking up macro definitions.  */
-
 
 /* Construct a definition for a macro in table T.  Cache all strings,
    and the macro_definition structure itself, in T's bcache.  */
 static struct macro_definition *
-new_macro_definition (struct macro_table *t,
-		      enum macro_kind kind,
-		      int argc, const char **argv,
-		      const char *replacement)
+new_macro_definition (struct macro_table *t, enum macro_kind kind, int argc,
+		      const char **argv, const char *replacement)
 {
   struct macro_definition *d
     = (struct macro_definition *) macro_alloc (sizeof (*d), t);
@@ -572,8 +535,8 @@ new_macro_definition (struct macro_table *t,
 	cached_argv[i] = macro_bcache_str (t, argv[i]);
 
       /* Now bcache the array of argument pointers itself.  */
-      d->argv = ((const char * const *)
-		 macro_bcache (t, cached_argv, cached_argv_size));
+      d->argv = ((const char *const *) macro_bcache (t, cached_argv,
+						     cached_argv_size));
     }
 
   /* We don't bcache the entire definition structure because it's got
@@ -596,7 +559,6 @@ new_macro_definition (struct macro_table *t,
   return d;
 }
 
-
 /* Free a macro definition.  */
 static void
 macro_tree_delete_value (void *untyped_definition)
@@ -612,18 +574,15 @@ macro_tree_delete_value (void *untyped_definition)
 	macro_bcache_free (t, (char *) d->argv[i]);
       macro_bcache_free (t, (char **) d->argv);
     }
-  
+
   macro_bcache_free (t, (char *) d->replacement);
   macro_free (d, t);
 }
 
-
 /* Find the splay tree node for the definition of NAME at LINE in
    SOURCE, or zero if there is none.  */
 static splay_tree_node
-find_definition (const char *name,
-		 struct macro_source_file *file,
-		 int line)
+find_definition (const char *name, struct macro_source_file *file, int line)
 {
   struct macro_table *t = file->table;
   splay_tree_node n;
@@ -637,7 +596,7 @@ find_definition (const char *name,
   query.end_file = NULL;
 
   n = splay_tree_lookup (t->definitions, (splay_tree_key) &query);
-  if (! n)
+  if (!n)
     {
       /* It's okay for us to do two queries like this: the real work
 	 of the searching is done when we splay, and splaying the tree
@@ -645,9 +604,9 @@ find_definition (const char *name,
 	 If this still bugs you, you could always just extend the
 	 splay tree library with a predecessor-or-equal operation, and
 	 use that.  */
-      splay_tree_node pred = splay_tree_predecessor (t->definitions,
-						     (splay_tree_key) &query);
-     
+      splay_tree_node pred
+	= splay_tree_predecessor (t->definitions, (splay_tree_key) &query);
+
       if (pred)
 	{
 	  /* Make sure this predecessor actually has the right name.
@@ -675,7 +634,6 @@ find_definition (const char *name,
     return 0;
 }
 
-
 /* If NAME already has a definition in scope at LINE in SOURCE, return
    the key.  If the old definition is different from the definition
    given by KIND, ARGC, ARGV, and REPLACEMENT, complain, too.
@@ -683,9 +641,8 @@ find_definition (const char *name,
    is `macro_function_like'.)  */
 static struct macro_key *
 check_for_redefinition (struct macro_source_file *source, int line,
-			const char *name, enum macro_kind kind,
-			int argc, const char **argv,
-			const char *replacement)
+			const char *name, enum macro_kind kind, int argc,
+			const char **argv, const char *replacement)
 {
   splay_tree_node n = find_definition (name, source, line);
 
@@ -721,16 +678,15 @@ check_for_redefinition (struct macro_source_file *source, int line,
 	    }
 	}
 
-      if (! same)
+      if (!same)
 	{
 	  std::string source_fullname = macro_source_fullname (source);
 	  std::string found_key_fullname
 	    = macro_source_fullname (found_key->start_file);
-	  complaint (_("macro `%s' redefined at %s:%d; "
-		       "original definition at %s:%d"),
+	  complaint (_ ("macro `%s' redefined at %s:%d; "
+			"original definition at %s:%d"),
 		     name, source_fullname.c_str (), line,
-		     found_key_fullname.c_str (),
-		     found_key->start_line);
+		     found_key_fullname.c_str (), found_key->start_line);
 	}
 
       return found_key;
@@ -747,18 +703,15 @@ check_for_redefinition (struct macro_source_file *source, int line,
 
 static void
 macro_define_internal (struct macro_source_file *source, int line,
-		       const char *name, enum macro_kind kind,
-		       int argc, const char **argv,
-		       const char *replacement)
+		       const char *name, enum macro_kind kind, int argc,
+		       const char **argv, const char *replacement)
 {
   struct macro_table *t = source->table;
   struct macro_key *k = NULL;
   struct macro_definition *d;
 
-  if (! t->redef_ok)
-    k = check_for_redefinition (source, line,
-				name, kind,
-				argc, argv,
+  if (!t->redef_ok)
+    k = check_for_redefinition (source, line, name, kind, argc, argv,
 				replacement);
 
   /* If we're redefining a symbol, and the existing key would be
@@ -771,7 +724,7 @@ macro_define_internal (struct macro_source_file *source, int line,
      case I know of where this arises is in GCC's output for
      predefined macros, and all the definitions are the same in that
      case.  */
-  if (k && ! key_compare (k, name, source, line))
+  if (k && !key_compare (k, name, source, line))
     return;
 
   k = new_macro_key (t, name, source, line);
@@ -786,10 +739,8 @@ macro_define_object_internal (struct macro_source_file *source, int line,
 			      const char *name, const char *replacement,
 			      enum macro_special_kind special_kind)
 {
-  macro_define_internal (source, line,
-			 name, macro_object_like,
-			 special_kind, NULL,
-			 replacement);
+  macro_define_internal (source, line, name, macro_object_like, special_kind,
+			 NULL, replacement);
 }
 
 void
@@ -816,15 +767,12 @@ macro_define_function (struct macro_source_file *source, int line,
 		       const char *name, int argc, const char **argv,
 		       const char *replacement)
 {
-  macro_define_internal (source, line,
-			 name, macro_function_like,
-			 argc, argv,
+  macro_define_internal (source, line, name, macro_function_like, argc, argv,
 			 replacement);
 }
 
 void
-macro_undef (struct macro_source_file *source, int line,
-	     const char *name)
+macro_undef (struct macro_source_file *source, int line, const char *name)
 {
   splay_tree_node n = find_definition (name, source, line);
 
@@ -836,8 +784,7 @@ macro_undef (struct macro_source_file *source, int line,
 	 we defined it, then just delete the entry altogether.  GCC
 	 4.1.2 will generate DWARF that says to do this if you pass it
 	 arguments like '-DFOO -UFOO -DFOO=2'.  */
-      if (source == key->start_file
-	  && line == key->start_line)
+      if (source == key->start_file && line == key->start_line)
 	splay_tree_remove (source->table->definitions, n->key);
 
       else
@@ -852,11 +799,10 @@ macro_undef (struct macro_source_file *source, int line,
 	    {
 	      std::string source_fullname = macro_source_fullname (source);
 	      std::string key_fullname = macro_source_fullname (key->end_file);
-	      complaint (_("macro '%s' is #undefined twice,"
-			   " at %s:%d and %s:%d"),
+	      complaint (_ ("macro '%s' is #undefined twice,"
+			    " at %s:%d and %s:%d"),
 			 name, source_fullname.c_str (), line,
-			 key_fullname.c_str (),
-			 key->end_line);
+			 key_fullname.c_str (), key->end_line);
 	    }
 
 	  /* Whether or not we've seen a prior #undefinition, wipe out
@@ -903,8 +849,8 @@ fixup_definition (const char *filename, int line, struct macro_definition *def)
 }
 
 struct macro_definition *
-macro_lookup_definition (struct macro_source_file *source,
-			 int line, const char *name)
+macro_lookup_definition (struct macro_source_file *source, int line,
+			 const char *name)
 {
   splay_tree_node n = find_definition (name, source, line);
 
@@ -918,12 +864,9 @@ macro_lookup_definition (struct macro_source_file *source,
     return 0;
 }
 
-
 struct macro_source_file *
-macro_definition_location (struct macro_source_file *source,
-			   int line,
-			   const char *name,
-			   int *definition_line)
+macro_definition_location (struct macro_source_file *source, int line,
+			   const char *name, int *definition_line)
 {
   splay_tree_node n = find_definition (name, source, line);
 
@@ -937,7 +880,6 @@ macro_definition_location (struct macro_source_file *source,
   else
     return 0;
 }
-
 
 /* The type for callback data for iterating the splay tree in
    macro_for_each and macro_for_each_in_scope.  Only the latter uses
@@ -991,11 +933,13 @@ foreach_macro_in_scope (splay_tree_node node, void *info)
 
   /* See if this macro is defined before the passed-in line, and
      extends past that line.  */
-  if (compare_locations (key->start_file, key->start_line,
-			 datum->file, datum->line) < 0
+  if (compare_locations (key->start_file, key->start_line, datum->file,
+			 datum->line)
+	< 0
       && (!key->end_file
-	  || compare_locations (key->end_file, key->end_line,
-				datum->file, datum->line) >= 0))
+	  || compare_locations (key->end_file, key->end_line, datum->file,
+				datum->line)
+	       >= 0))
     datum->fn (key->name, def, key->start_file, key->start_line);
   return 0;
 }
@@ -1010,14 +954,11 @@ macro_for_each_in_scope (struct macro_source_file *file, int line,
   datum.fn = fn;
   datum.file = file;
   datum.line = line;
-  splay_tree_foreach (file->table->definitions,
-		      foreach_macro_in_scope, &datum);
+  splay_tree_foreach (file->table->definitions, foreach_macro_in_scope,
+		      &datum);
 }
 
-
-
 /* Creating and freeing macro tables.  */
-
 
 struct macro_table *
 new_macro_table (struct obstack *obstack, gdb::bcache *b,
@@ -1037,17 +978,14 @@ new_macro_table (struct obstack *obstack, gdb::bcache *b,
   t->main_source = NULL;
   t->compunit_symtab = cust;
   t->redef_ok = 0;
-  t->definitions = (splay_tree_new_with_allocator
-		    (macro_tree_compare,
-		     ((splay_tree_delete_key_fn) macro_tree_delete_key),
-		     ((splay_tree_delete_value_fn) macro_tree_delete_value),
-		     ((splay_tree_allocate_fn) macro_alloc),
-		     ((splay_tree_deallocate_fn) macro_free),
-		     t));
-  
+  t->definitions = (splay_tree_new_with_allocator (
+    macro_tree_compare, ((splay_tree_delete_key_fn) macro_tree_delete_key),
+    ((splay_tree_delete_value_fn) macro_tree_delete_value),
+    ((splay_tree_allocate_fn) macro_alloc),
+    ((splay_tree_deallocate_fn) macro_free), t));
+
   return t;
 }
-
 
 void
 free_macro_table (struct macro_table *table)

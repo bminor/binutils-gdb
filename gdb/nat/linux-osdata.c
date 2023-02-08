@@ -45,14 +45,14 @@
    so that reading pid values embedded in /proc works
    consistently.  */
 
-typedef long long  PID_T;
+typedef long long PID_T;
 
 /* Define TIME_T to be at least as large as time_t, so that reading
    time values embedded in /proc works consistently.  */
 
 typedef long long TIME_T;
 
-#define MAX_PID_T_STRLEN  (sizeof ("-9223372036854775808") - 1)
+#define MAX_PID_T_STRLEN (sizeof ("-9223372036854775808") - 1)
 
 /* Returns the CPU core that thread PTID is currently running on.  */
 
@@ -64,8 +64,8 @@ linux_common_core_of_thread (ptid_t ptid)
   char filename[sizeof ("/proc//task//stat") + 2 * MAX_PID_T_STRLEN];
   int core;
 
-  sprintf (filename, "/proc/%lld/task/%lld/stat",
-	   (PID_T) ptid.pid (), (PID_T) ptid.lwp ());
+  sprintf (filename, "/proc/%lld/task/%lld/stat", (PID_T) ptid.pid (),
+	   (PID_T) ptid.lwp ());
 
   gdb::optional<std::string> content = read_text_file_to_string (filename);
   if (!content.has_value ())
@@ -122,7 +122,8 @@ command_from_pid (char *command, int maxlen, PID_T pid)
       if (items_read == 2 && pid == stat_pid)
 	{
 	  cmd[strlen (cmd) - 1] = '\0'; /* Remove trailing parenthesis.  */
-	  strncpy (command, cmd + 1, maxlen); /* Ignore leading parenthesis.  */
+	  strncpy (command, cmd + 1,
+		   maxlen); /* Ignore leading parenthesis.  */
 	}
     }
   else
@@ -155,7 +156,8 @@ commandline_from_pid (PID_T pid)
 
 	  if (read_bytes)
 	    {
-	      commandline = (char *) xrealloc (commandline, len + read_bytes + 1);
+	      commandline
+		= (char *) xrealloc (commandline, len + read_bytes + 1);
 	      memcpy (commandline + len, buf, read_bytes);
 	      len += read_bytes;
 	    }
@@ -250,13 +252,12 @@ get_cores_used_by_process (PID_T pid, int *cores, const int num_cores)
 	  PID_T tid;
 	  int core;
 
-	  if (!isdigit (dp->d_name[0])
-	      || NAMELEN (dp) > MAX_PID_T_STRLEN)
+	  if (!isdigit (dp->d_name[0]) || NAMELEN (dp) > MAX_PID_T_STRLEN)
 	    continue;
 
 	  sscanf (dp->d_name, "%lld", &tid);
-	  core = linux_common_core_of_thread (ptid_t ((pid_t) pid,
-						      (pid_t) tid));
+	  core
+	    = linux_common_core_of_thread (ptid_t ((pid_t) pid, (pid_t) tid));
 
 	  if (core >= 0 && core < num_cores)
 	    {
@@ -356,8 +357,7 @@ linux_xfer_osdata_processes ()
 	  std::string cores_str;
 	  int i;
 
-	  if (!isdigit (dp->d_name[0])
-	      || NAMELEN (dp) > MAX_PID_T_STRLEN)
+	  if (!isdigit (dp->d_name[0]) || NAMELEN (dp) > MAX_PID_T_STRLEN)
 	    continue;
 
 	  sscanf (dp->d_name, "%lld", &pid);
@@ -384,18 +384,15 @@ linux_xfer_osdata_processes ()
 
 	  xfree (cores);
 
-	  string_xml_appendf
-	    (buffer,
-	     "<item>"
-	     "<column name=\"pid\">%lld</column>"
-	     "<column name=\"user\">%s</column>"
-	     "<column name=\"command\">%s</column>"
-	     "<column name=\"cores\">%s</column>"
-	     "</item>",
-	     pid,
-	     user,
-	     command_line ? command_line : "",
-	     cores_str.c_str());
+	  string_xml_appendf (buffer,
+			      "<item>"
+			      "<column name=\"pid\">%lld</column>"
+			      "<column name=\"user\">%s</column>"
+			      "<column name=\"command\">%s</column>"
+			      "<column name=\"cores\">%s</column>"
+			      "</item>",
+			      pid, user, command_line ? command_line : "",
+			      cores_str.c_str ());
 
 	  xfree (command_line);
 	}
@@ -413,17 +410,16 @@ linux_xfer_osdata_processes ()
 struct pid_pgid_entry
 {
   pid_pgid_entry (PID_T pid_, PID_T pgid_)
-  : pid (pid_), pgid (pgid_)
-  {}
+    : pid (pid_),
+      pgid (pgid_)
+  {
+  }
 
   /* Return true if this pid is the leader of its process group.  */
 
-  bool is_leader () const
-  {
-    return pid == pgid;
-  }
+  bool is_leader () const { return pid == pgid; }
 
-  bool operator< (const pid_pgid_entry &other) const
+  bool operator<(const pid_pgid_entry &other) const
   {
     /* Sort by PGID.  */
     if (this->pgid != other.pgid)
@@ -467,8 +463,7 @@ linux_xfer_osdata_processgroups ()
 	{
 	  PID_T pid, pgid;
 
-	  if (!isdigit (dp->d_name[0])
-	      || NAMELEN (dp) > MAX_PID_T_STRLEN)
+	  if (!isdigit (dp->d_name[0]) || NAMELEN (dp) > MAX_PID_T_STRLEN)
 	    continue;
 
 	  sscanf (dp->d_name, "%lld", &pid);
@@ -493,18 +488,15 @@ linux_xfer_osdata_processgroups ()
 	  command_from_pid (leader_command, sizeof (leader_command), pgid);
 	  command_line = commandline_from_pid (pid);
 
-	  string_xml_appendf
-	    (buffer,
-	     "<item>"
-	     "<column name=\"pgid\">%lld</column>"
-	     "<column name=\"leader command\">%s</column>"
-	     "<column name=\"pid\">%lld</column>"
-	     "<column name=\"command line\">%s</column>"
-	     "</item>",
-	     pgid,
-	     leader_command,
-	     pid,
-	     command_line ? command_line : "");
+	  string_xml_appendf (buffer,
+			      "<item>"
+			      "<column name=\"pgid\">%lld</column>"
+			      "<column name=\"leader command\">%s</column>"
+			      "<column name=\"pid\">%lld</column>"
+			      "<column name=\"command line\">%s</column>"
+			      "</item>",
+			      pgid, leader_command, pid,
+			      command_line ? command_line : "");
 
 	  xfree (command_line);
 	}
@@ -538,10 +530,8 @@ linux_xfer_osdata_threads ()
 	      || NAMELEN (dp) > sizeof ("4294967295") - 1)
 	    continue;
 
-	  xsnprintf (procentry, sizeof (procentry), "/proc/%s",
-		     dp->d_name);
-	  if (stat (procentry, &statbuf) == 0
-	      && S_ISDIR (statbuf.st_mode))
+	  xsnprintf (procentry, sizeof (procentry), "/proc/%s", dp->d_name);
+	  if (stat (procentry, &statbuf) == 0 && S_ISDIR (statbuf.st_mode))
 	    {
 	      DIR *dirp2;
 	      PID_T pid;
@@ -571,18 +561,15 @@ linux_xfer_osdata_threads ()
 		      tid = atoi (dp2->d_name);
 		      core = linux_common_core_of_thread (ptid_t (pid, tid));
 
-		      string_xml_appendf
-			(buffer,
-			 "<item>"
-			 "<column name=\"pid\">%lld</column>"
-			 "<column name=\"command\">%s</column>"
-			 "<column name=\"tid\">%lld</column>"
-			 "<column name=\"core\">%d</column>"
-			 "</item>",
-			 pid,
-			 command,
-			 tid,
-			 core);
+		      string_xml_appendf (
+			buffer,
+			"<item>"
+			"<column name=\"pid\">%lld</column>"
+			"<column name=\"command\">%s</column>"
+			"<column name=\"tid\">%lld</column>"
+			"<column name=\"core\">%d</column>"
+			"</item>",
+			pid, command, tid, core);
 		    }
 
 		  closedir (dirp2);
@@ -648,10 +635,8 @@ linux_xfer_osdata_cpus ()
 		  first_item = 0;
 		}
 
-	      string_xml_appendf (buffer,
-				  "<column name=\"%s\">%s</column>",
-				  key,
-				  value);
+	      string_xml_appendf (buffer, "<column name=\"%s\">%s</column>",
+				  key, value);
 	    }
 	}
       while (!feof (fp.get ()));
@@ -688,10 +673,8 @@ linux_xfer_osdata_fds ()
 	      || NAMELEN (dp) > sizeof ("4294967295") - 1)
 	    continue;
 
-	  xsnprintf (procentry, sizeof (procentry), "/proc/%s",
-		     dp->d_name);
-	  if (stat (procentry, &statbuf) == 0
-	      && S_ISDIR (statbuf.st_mode))
+	  xsnprintf (procentry, sizeof (procentry), "/proc/%s", dp->d_name);
+	  if (stat (procentry, &statbuf) == 0 && S_ISDIR (statbuf.st_mode))
 	    {
 	      DIR *dirp2;
 	      PID_T pid;
@@ -700,8 +683,7 @@ linux_xfer_osdata_fds ()
 	      pid = atoi (dp->d_name);
 	      command_from_pid (command, sizeof (command), pid);
 
-	      std::string pathname
-		= string_printf ("/proc/%s/fd", dp->d_name);
+	      std::string pathname = string_printf ("/proc/%s/fd", dp->d_name);
 	      dirp2 = opendir (pathname.c_str ());
 
 	      if (dirp2)
@@ -719,23 +701,20 @@ linux_xfer_osdata_fds ()
 		      std::string fdname
 			= string_printf ("%s/%s", pathname.c_str (),
 					 dp2->d_name);
-		      rslt = readlink (fdname.c_str (), buf,
-				       sizeof (buf) - 1);
+		      rslt = readlink (fdname.c_str (), buf, sizeof (buf) - 1);
 		      if (rslt >= 0)
 			buf[rslt] = '\0';
 
-		      string_xml_appendf
-			(buffer,
-			 "<item>"
-			 "<column name=\"pid\">%s</column>"
-			 "<column name=\"command\">%s</column>"
-			 "<column name=\"file descriptor\">%s</column>"
-			 "<column name=\"name\">%s</column>"
-			 "</item>",
-			 dp->d_name,
-			 command,
-			 dp2->d_name,
-			 (rslt >= 0 ? buf : dp2->d_name));
+		      string_xml_appendf (
+			buffer,
+			"<item>"
+			"<column name=\"pid\">%s</column>"
+			"<column name=\"command\">%s</column>"
+			"<column name=\"file descriptor\">%s</column>"
+			"<column name=\"name\">%s</column>"
+			"</item>",
+			dp->d_name, command, dp2->d_name,
+			(rslt >= 0 ? buf : dp2->d_name));
 		    }
 
 		  closedir (dirp2);
@@ -757,7 +736,8 @@ static const char *
 format_socket_state (unsigned char state)
 {
   /* Copied from include/net/tcp_states.h in the Linux kernel sources.  */
-  enum {
+  enum
+  {
     TCP_ESTABLISHED = 1,
     TCP_SYN_SENT,
     TCP_SYN_RECV,
@@ -801,11 +781,11 @@ format_socket_state (unsigned char state)
 }
 
 union socket_addr
-  {
-    struct sockaddr sa;
-    struct sockaddr_in sin;
-    struct sockaddr_in6 sin6;
-  };
+{
+  struct sockaddr sa;
+  struct sockaddr_in sin;
+  struct sockaddr_in6 sin6;
+};
 
 /* Auxiliary function used by linux_xfer_osdata_isocket.  Formats
    information for all open internet sockets of type FAMILY on the
@@ -843,11 +823,10 @@ print_sockets (unsigned short family, int tcp, std::string &buffer)
 #endif
 
 	      result = sscanf (buf,
-			       "%*d: %32[0-9A-F]:%X %32[0-9A-F]:%X %X %*X:%*X %*X:%*X %*X %d %*d %*u %*s\n",
-			       local_address, &local_port,
-			       remote_address, &remote_port,
-			       &state,
-			       &uid);
+			       "%*d: %32[0-9A-F]:%X %32[0-9A-F]:%X %X %*X:%*X "
+			       "%*X:%*X %*X %d %*d %*u %*s\n",
+			       local_address, &local_port, remote_address,
+			       &remote_port, &state, &uid);
 
 	      if (result == 6)
 		{
@@ -894,46 +873,41 @@ print_sockets (unsigned short family, int tcp, std::string &buffer)
 
 		  locaddr.sa.sa_family = remaddr.sa.sa_family = family;
 
-		  result = getnameinfo (&locaddr.sa, addr_size,
-					local_address, sizeof (local_address),
-					local_service, sizeof (local_service),
+		  result = getnameinfo (&locaddr.sa, addr_size, local_address,
+					sizeof (local_address), local_service,
+					sizeof (local_service),
 					NI_NUMERICHOST | NI_NUMERICSERV
-					| (tcp ? 0 : NI_DGRAM));
+					  | (tcp ? 0 : NI_DGRAM));
 		  if (result)
 		    continue;
 
-		  result = getnameinfo (&remaddr.sa, addr_size,
-					remote_address,
-					sizeof (remote_address),
-					remote_service,
-					sizeof (remote_service),
-					NI_NUMERICHOST | NI_NUMERICSERV
-					| (tcp ? 0 : NI_DGRAM));
+		  result
+		    = getnameinfo (&remaddr.sa, addr_size, remote_address,
+				   sizeof (remote_address), remote_service,
+				   sizeof (remote_service),
+				   NI_NUMERICHOST | NI_NUMERICSERV
+				     | (tcp ? 0 : NI_DGRAM));
 		  if (result)
 		    continue;
 
 		  user_from_uid (user, sizeof (user), uid);
 
-		  string_xml_appendf
-		    (buffer,
-		     "<item>"
-		     "<column name=\"local address\">%s</column>"
-		     "<column name=\"local port\">%s</column>"
-		     "<column name=\"remote address\">%s</column>"
-		     "<column name=\"remote port\">%s</column>"
-		     "<column name=\"state\">%s</column>"
-		     "<column name=\"user\">%s</column>"
-		     "<column name=\"family\">%s</column>"
-		     "<column name=\"protocol\">%s</column>"
-		     "</item>",
-		     local_address,
-		     local_service,
-		     remote_address,
-		     remote_service,
-		     format_socket_state (state),
-		     user,
-		     (family == AF_INET) ? "INET" : "INET6",
-		     tcp ? "STREAM" : "DGRAM");
+		  string_xml_appendf (
+		    buffer,
+		    "<item>"
+		    "<column name=\"local address\">%s</column>"
+		    "<column name=\"local port\">%s</column>"
+		    "<column name=\"remote address\">%s</column>"
+		    "<column name=\"remote port\">%s</column>"
+		    "<column name=\"state\">%s</column>"
+		    "<column name=\"user\">%s</column>"
+		    "<column name=\"family\">%s</column>"
+		    "<column name=\"protocol\">%s</column>"
+		    "</item>",
+		    local_address, local_service, remote_address,
+		    remote_service, format_socket_state (state), user,
+		    (family == AF_INET) ? "INET" : "INET6",
+		    tcp ? "STREAM" : "DGRAM");
 		}
 	    }
 	}
@@ -1023,13 +997,10 @@ linux_xfer_osdata_shm ()
 	      unsigned int perms;
 	      int items_read;
 
-	      items_read = sscanf (buf,
-				   "%d %d %o %d %lld %lld %d %u %u %u %u %lld %lld %lld",
-				   &key, &shmid, &perms, &size,
-				   &cpid, &lpid,
-				   &nattch,
-				   &uid, &gid, &cuid, &cgid,
-				   &atime, &dtime, &ctime);
+	      items_read = sscanf (
+		buf, "%d %d %o %d %lld %lld %d %u %u %u %u %lld %lld %lld",
+		&key, &shmid, &perms, &size, &cpid, &lpid, &nattch, &uid, &gid,
+		&cuid, &cgid, &atime, &dtime, &ctime);
 
 	      if (items_read == 14)
 		{
@@ -1050,38 +1021,26 @@ linux_xfer_osdata_shm ()
 		  time_from_time_t (dtime_str, sizeof (dtime_str), dtime);
 		  time_from_time_t (ctime_str, sizeof (ctime_str), ctime);
 
-		  string_xml_appendf
-		    (buffer,
-		     "<item>"
-		     "<column name=\"key\">%d</column>"
-		     "<column name=\"shmid\">%d</column>"
-		     "<column name=\"permissions\">%o</column>"
-		     "<column name=\"size\">%d</column>"
-		     "<column name=\"creator command\">%s</column>"
-		     "<column name=\"last op. command\">%s</column>"
-		     "<column name=\"num attached\">%d</column>"
-		     "<column name=\"user\">%s</column>"
-		     "<column name=\"group\">%s</column>"
-		     "<column name=\"creator user\">%s</column>"
-		     "<column name=\"creator group\">%s</column>"
-		     "<column name=\"last shmat() time\">%s</column>"
-		     "<column name=\"last shmdt() time\">%s</column>"
-		     "<column name=\"last shmctl() time\">%s</column>"
-		     "</item>",
-		     key,
-		     shmid,
-		     perms,
-		     size,
-		     ccmd,
-		     lcmd,
-		     nattch,
-		     user,
-		     group,
-		     cuser,
-		     cgroup,
-		     atime_str,
-		     dtime_str,
-		     ctime_str);
+		  string_xml_appendf (
+		    buffer,
+		    "<item>"
+		    "<column name=\"key\">%d</column>"
+		    "<column name=\"shmid\">%d</column>"
+		    "<column name=\"permissions\">%o</column>"
+		    "<column name=\"size\">%d</column>"
+		    "<column name=\"creator command\">%s</column>"
+		    "<column name=\"last op. command\">%s</column>"
+		    "<column name=\"num attached\">%d</column>"
+		    "<column name=\"user\">%s</column>"
+		    "<column name=\"group\">%s</column>"
+		    "<column name=\"creator user\">%s</column>"
+		    "<column name=\"creator group\">%s</column>"
+		    "<column name=\"last shmat() time\">%s</column>"
+		    "<column name=\"last shmdt() time\">%s</column>"
+		    "<column name=\"last shmctl() time\">%s</column>"
+		    "</item>",
+		    key, shmid, perms, size, ccmd, lcmd, nattch, user, group,
+		    cuser, cgroup, atime_str, dtime_str, ctime_str);
 		}
 	    }
 	}
@@ -1118,11 +1077,9 @@ linux_xfer_osdata_sem ()
 	      TIME_T otime, ctime;
 	      int items_read;
 
-	      items_read = sscanf (buf,
-				   "%d %d %o %u %d %d %d %d %lld %lld",
-				   &key, &semid, &perms, &nsems,
-				   &uid, &gid, &cuid, &cgid,
-				   &otime, &ctime);
+	      items_read = sscanf (buf, "%d %d %o %u %d %d %d %d %lld %lld",
+				   &key, &semid, &perms, &nsems, &uid, &gid,
+				   &cuid, &cgid, &otime, &ctime);
 
 	      if (items_read == 10)
 		{
@@ -1138,30 +1095,22 @@ linux_xfer_osdata_sem ()
 		  time_from_time_t (otime_str, sizeof (otime_str), otime);
 		  time_from_time_t (ctime_str, sizeof (ctime_str), ctime);
 
-		  string_xml_appendf
-		    (buffer,
-		     "<item>"
-		     "<column name=\"key\">%d</column>"
-		     "<column name=\"semid\">%d</column>"
-		     "<column name=\"permissions\">%o</column>"
-		     "<column name=\"num semaphores\">%u</column>"
-		     "<column name=\"user\">%s</column>"
-		     "<column name=\"group\">%s</column>"
-		     "<column name=\"creator user\">%s</column>"
-		     "<column name=\"creator group\">%s</column>"
-		     "<column name=\"last semop() time\">%s</column>"
-		     "<column name=\"last semctl() time\">%s</column>"
-		     "</item>",
-		     key,
-		     semid,
-		     perms,
-		     nsems,
-		     user,
-		     group,
-		     cuser,
-		     cgroup,
-		     otime_str,
-		     ctime_str);
+		  string_xml_appendf (
+		    buffer,
+		    "<item>"
+		    "<column name=\"key\">%d</column>"
+		    "<column name=\"semid\">%d</column>"
+		    "<column name=\"permissions\">%o</column>"
+		    "<column name=\"num semaphores\">%u</column>"
+		    "<column name=\"user\">%s</column>"
+		    "<column name=\"group\">%s</column>"
+		    "<column name=\"creator user\">%s</column>"
+		    "<column name=\"creator group\">%s</column>"
+		    "<column name=\"last semop() time\">%s</column>"
+		    "<column name=\"last semctl() time\">%s</column>"
+		    "</item>",
+		    key, semid, perms, nsems, user, group, cuser, cgroup,
+		    otime_str, ctime_str);
 		}
 	    }
 	}
@@ -1199,11 +1148,10 @@ linux_xfer_osdata_msg ()
 	      TIME_T stime, rtime, ctime;
 	      int items_read;
 
-	      items_read = sscanf (buf,
-				   "%d %d %o %u %u %lld %lld %d %d %d %d %lld %lld %lld",
-				   &key, &msqid, &perms, &cbytes, &qnum,
-				   &lspid, &lrpid, &uid, &gid, &cuid, &cgid,
-				   &stime, &rtime, &ctime);
+	      items_read = sscanf (
+		buf, "%d %d %o %u %u %lld %lld %d %d %d %d %lld %lld %lld",
+		&key, &msqid, &perms, &cbytes, &qnum, &lspid, &lrpid, &uid,
+		&gid, &cuid, &cgid, &stime, &rtime, &ctime);
 
 	      if (items_read == 14)
 		{
@@ -1224,38 +1172,26 @@ linux_xfer_osdata_msg ()
 		  time_from_time_t (rtime_str, sizeof (rtime_str), rtime);
 		  time_from_time_t (ctime_str, sizeof (ctime_str), ctime);
 
-		  string_xml_appendf
-		    (buffer,
-		     "<item>"
-		     "<column name=\"key\">%d</column>"
-		     "<column name=\"msqid\">%d</column>"
-		     "<column name=\"permissions\">%o</column>"
-		     "<column name=\"num used bytes\">%u</column>"
-		     "<column name=\"num messages\">%u</column>"
-		     "<column name=\"last msgsnd() command\">%s</column>"
-		     "<column name=\"last msgrcv() command\">%s</column>"
-		     "<column name=\"user\">%s</column>"
-		     "<column name=\"group\">%s</column>"
-		     "<column name=\"creator user\">%s</column>"
-		     "<column name=\"creator group\">%s</column>"
-		     "<column name=\"last msgsnd() time\">%s</column>"
-		     "<column name=\"last msgrcv() time\">%s</column>"
-		     "<column name=\"last msgctl() time\">%s</column>"
-		     "</item>",
-		     key,
-		     msqid,
-		     perms,
-		     cbytes,
-		     qnum,
-		     lscmd,
-		     lrcmd,
-		     user,
-		     group,
-		     cuser,
-		     cgroup,
-		     stime_str,
-		     rtime_str,
-		     ctime_str);
+		  string_xml_appendf (
+		    buffer,
+		    "<item>"
+		    "<column name=\"key\">%d</column>"
+		    "<column name=\"msqid\">%d</column>"
+		    "<column name=\"permissions\">%o</column>"
+		    "<column name=\"num used bytes\">%u</column>"
+		    "<column name=\"num messages\">%u</column>"
+		    "<column name=\"last msgsnd() command\">%s</column>"
+		    "<column name=\"last msgrcv() command\">%s</column>"
+		    "<column name=\"user\">%s</column>"
+		    "<column name=\"group\">%s</column>"
+		    "<column name=\"creator user\">%s</column>"
+		    "<column name=\"creator group\">%s</column>"
+		    "<column name=\"last msgsnd() time\">%s</column>"
+		    "<column name=\"last msgrcv() time\">%s</column>"
+		    "<column name=\"last msgctl() time\">%s</column>"
+		    "</item>",
+		    key, msqid, perms, cbytes, qnum, lscmd, lrcmd, user, group,
+		    cuser, cgroup, stime_str, rtime_str, ctime_str);
 		}
 	    }
 	}
@@ -1328,11 +1264,7 @@ linux_xfer_osdata_modules ()
 				  "<column name=\"status\">%s</column>"
 				  "<column name=\"address\">%llx</column>"
 				  "</item>",
-				  name,
-				  size,
-				  uses,
-				  dependencies,
-				  status,
+				  name, size, uses, dependencies, status,
 				  address);
 	    }
 	}
@@ -1346,37 +1278,37 @@ linux_xfer_osdata_modules ()
 
 static std::string linux_xfer_osdata_info_os_types ();
 
-static struct osdata_type {
+static struct osdata_type
+{
   const char *type;
   const char *title;
   const char *description;
   std::string (*take_snapshot) ();
   std::string buffer;
-} osdata_table[] = {
-  { "types", "Types", "Listing of info os types you can list",
-    linux_xfer_osdata_info_os_types },
-  { "cpus", "CPUs", "Listing of all cpus/cores on the system",
-    linux_xfer_osdata_cpus },
-  { "files", "File descriptors", "Listing of all file descriptors",
-    linux_xfer_osdata_fds },
-  { "modules", "Kernel modules", "Listing of all loaded kernel modules",
-    linux_xfer_osdata_modules },
-  { "msg", "Message queues", "Listing of all message queues",
-    linux_xfer_osdata_msg },
-  { "processes", "Processes", "Listing of all processes",
-    linux_xfer_osdata_processes },
-  { "procgroups", "Process groups", "Listing of all process groups",
-    linux_xfer_osdata_processgroups },
-  { "semaphores", "Semaphores", "Listing of all semaphores",
-    linux_xfer_osdata_sem },
-  { "shm", "Shared-memory regions", "Listing of all shared-memory regions",
-    linux_xfer_osdata_shm },
-  { "sockets", "Sockets", "Listing of all internet-domain sockets",
-    linux_xfer_osdata_isockets },
-  { "threads", "Threads", "Listing of all threads",
-    linux_xfer_osdata_threads },
-  { NULL, NULL, NULL }
-};
+} osdata_table[]
+  = { { "types", "Types", "Listing of info os types you can list",
+	linux_xfer_osdata_info_os_types },
+      { "cpus", "CPUs", "Listing of all cpus/cores on the system",
+	linux_xfer_osdata_cpus },
+      { "files", "File descriptors", "Listing of all file descriptors",
+	linux_xfer_osdata_fds },
+      { "modules", "Kernel modules", "Listing of all loaded kernel modules",
+	linux_xfer_osdata_modules },
+      { "msg", "Message queues", "Listing of all message queues",
+	linux_xfer_osdata_msg },
+      { "processes", "Processes", "Listing of all processes",
+	linux_xfer_osdata_processes },
+      { "procgroups", "Process groups", "Listing of all process groups",
+	linux_xfer_osdata_processgroups },
+      { "semaphores", "Semaphores", "Listing of all semaphores",
+	linux_xfer_osdata_sem },
+      { "shm", "Shared-memory regions", "Listing of all shared-memory regions",
+	linux_xfer_osdata_shm },
+      { "sockets", "Sockets", "Listing of all internet-domain sockets",
+	linux_xfer_osdata_isockets },
+      { "threads", "Threads", "Listing of all threads",
+	linux_xfer_osdata_threads },
+      { NULL, NULL, NULL } };
 
 /* Collect data about all types info os can show in BUFFER.  */
 
@@ -1393,8 +1325,7 @@ linux_xfer_osdata_info_os_types ()
 			"<column name=\"Description\">%s</column>"
 			"<column name=\"Title\">%s</column>"
 			"</item>",
-			osdata_table[i].type,
-			osdata_table[i].description,
+			osdata_table[i].type, osdata_table[i].description,
 			osdata_table[i].title);
 
   buffer += "</osdata>\n";
@@ -1402,13 +1333,12 @@ linux_xfer_osdata_info_os_types ()
   return buffer;
 }
 
-
 /*  Copies up to LEN bytes in READBUF from offset OFFSET in OSD->BUFFER.
     If OFFSET is zero, first calls OSD->TAKE_SNAPSHOT.  */
 
 static LONGEST
-common_getter (struct osdata_type *osd,
-	       gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
+common_getter (struct osdata_type *osd, gdb_byte *readbuf, ULONGEST offset,
+	       ULONGEST len)
 {
   gdb_assert (readbuf);
 
@@ -1426,7 +1356,6 @@ common_getter (struct osdata_type *osd,
   memcpy (readbuf, &osd->buffer[offset], len);
 
   return len;
-
 }
 
 LONGEST
@@ -1435,8 +1364,7 @@ linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
 {
   if (!annex || *annex == '\0')
     {
-      return common_getter (&osdata_table[0],
-			    readbuf, offset, len);
+      return common_getter (&osdata_table[0], readbuf, offset, len);
     }
   else
     {
@@ -1445,8 +1373,7 @@ linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
       for (i = 0; osdata_table[i].type; ++i)
 	{
 	  if (strcmp (annex, osdata_table[i].type) == 0)
-	    return common_getter (&osdata_table[i],
-				  readbuf, offset, len);
+	    return common_getter (&osdata_table[i], readbuf, offset, len);
 	}
 
       return 0;

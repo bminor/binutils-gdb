@@ -49,17 +49,13 @@ amd64obsd_sigtramp_p (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR start_pc = (pc & ~(amd64obsd_page_size - 1));
-  const gdb_byte osigreturn[] =
-  {
-    0x48, 0xc7, 0xc0,
-    0x67, 0x00, 0x00, 0x00,	/* movq $SYS_sigreturn, %rax */
-    0xcd, 0x80			/* int $0x80 */
+  const gdb_byte osigreturn[] = {
+    0x48, 0xc7, 0xc0, 0x67, 0x00, 0x00, 0x00, /* movq $SYS_sigreturn, %rax */
+    0xcd, 0x80				      /* int $0x80 */
   };
-  const gdb_byte sigreturn[] =
-  {
-    0x48, 0xc7, 0xc0,
-    0x67, 0x00, 0x00, 0x00,	/* movq $SYS_sigreturn, %rax */
-    0x0f, 0x05			/* syscall */
+  const gdb_byte sigreturn[] = {
+    0x48, 0xc7, 0xc0, 0x67, 0x00, 0x00, 0x00, /* movq $SYS_sigreturn, %rax */
+    0x0f, 0x05				      /* syscall */
   };
   size_t buflen = (sizeof sigreturn) + 1;
   gdb_byte *buf;
@@ -78,7 +74,7 @@ amd64obsd_sigtramp_p (frame_info_ptr this_frame)
 
   /* If we can't read the instructions at START_PC, return zero.  */
   buf = (gdb_byte *) alloca ((sizeof sigreturn) + 1);
-  if (!safe_frame_unwind_memory (this_frame, start_pc + 6, {buf, buflen}))
+  if (!safe_frame_unwind_memory (this_frame, start_pc + 6, { buf, buflen }))
     return 0;
 
   /* Check for sigreturn(2).  Depending on how the assembler encoded
@@ -120,106 +116,85 @@ amd64obsd_sigcontext_addr (frame_info_ptr this_frame)
   else
     return get_frame_register_unsigned (this_frame, AMD64_RSP_REGNUM);
 }
-
+
 /* OpenBSD 3.5 or later.  */
 
 /* Mapping between the general-purpose registers in `struct reg'
    format and GDB's register cache layout.  */
 
 /* From <machine/reg.h>.  */
-int amd64obsd_r_reg_offset[] =
-{
-  14 * 8,			/* %rax */
-  13 * 8,			/* %rbx */
-  3 * 8,			/* %rcx */
-  2 * 8,			/* %rdx */
-  1 * 8,			/* %rsi */
-  0 * 8,			/* %rdi */
-  12 * 8,			/* %rbp */
-  15 * 8,			/* %rsp */
-  4 * 8,			/* %r8 ..  */
-  5 * 8,
-  6 * 8,
-  7 * 8,
-  8 * 8,
-  9 * 8,
-  10 * 8,
-  11 * 8,			/* ... %r15 */
-  16 * 8,			/* %rip */
-  17 * 8,			/* %eflags */
-  18 * 8,			/* %cs */
-  19 * 8,			/* %ss */
-  20 * 8,			/* %ds */
-  21 * 8,			/* %es */
-  22 * 8,			/* %fs */
-  23 * 8			/* %gs */
+int amd64obsd_r_reg_offset[] = {
+  14 * 8,					      /* %rax */
+  13 * 8,					      /* %rbx */
+  3 * 8,					      /* %rcx */
+  2 * 8,					      /* %rdx */
+  1 * 8,					      /* %rsi */
+  0 * 8,					      /* %rdi */
+  12 * 8,					      /* %rbp */
+  15 * 8,					      /* %rsp */
+  4 * 8,					      /* %r8 ..  */
+  5 * 8,  6 * 8, 7 * 8, 8 * 8, 9 * 8, 10 * 8, 11 * 8, /* ... %r15 */
+  16 * 8,					      /* %rip */
+  17 * 8,					      /* %eflags */
+  18 * 8,					      /* %cs */
+  19 * 8,					      /* %ss */
+  20 * 8,					      /* %ds */
+  21 * 8,					      /* %es */
+  22 * 8,					      /* %fs */
+  23 * 8					      /* %gs */
 };
 
 /* From <machine/signal.h>.  */
-static int amd64obsd_sc_reg_offset[] =
-{
-  14 * 8,			/* %rax */
-  13 * 8,			/* %rbx */
-  3 * 8,			/* %rcx */
-  2 * 8,			/* %rdx */
-  1 * 8,			/* %rsi */
-  0 * 8,			/* %rdi */
-  12 * 8,			/* %rbp */
-  24 * 8,			/* %rsp */
-  4 * 8,			/* %r8 ...  */
-  5 * 8,
-  6 * 8,
-  7 * 8,
-  8 * 8,
-  9 * 8,
-  10 * 8,
-  11 * 8,			/* ... %r15 */
-  21 * 8,			/* %rip */
-  23 * 8,			/* %eflags */
-  22 * 8,			/* %cs */
-  25 * 8,			/* %ss */
-  18 * 8,			/* %ds */
-  17 * 8,			/* %es */
-  16 * 8,			/* %fs */
-  15 * 8			/* %gs */
+static int amd64obsd_sc_reg_offset[] = {
+  14 * 8,					      /* %rax */
+  13 * 8,					      /* %rbx */
+  3 * 8,					      /* %rcx */
+  2 * 8,					      /* %rdx */
+  1 * 8,					      /* %rsi */
+  0 * 8,					      /* %rdi */
+  12 * 8,					      /* %rbp */
+  24 * 8,					      /* %rsp */
+  4 * 8,					      /* %r8 ...  */
+  5 * 8,  6 * 8, 7 * 8, 8 * 8, 9 * 8, 10 * 8, 11 * 8, /* ... %r15 */
+  21 * 8,					      /* %rip */
+  23 * 8,					      /* %eflags */
+  22 * 8,					      /* %cs */
+  25 * 8,					      /* %ss */
+  18 * 8,					      /* %ds */
+  17 * 8,					      /* %es */
+  16 * 8,					      /* %fs */
+  15 * 8					      /* %gs */
 };
 
 /* From /usr/src/lib/libpthread/arch/amd64/uthread_machdep.c.  */
-static int amd64obsd_uthread_reg_offset[] =
-{
-  19 * 8,			/* %rax */
-  16 * 8,			/* %rbx */
-  18 * 8,			/* %rcx */
-  17 * 8,			/* %rdx */
-  14 * 8,			/* %rsi */
-  13 * 8,			/* %rdi */
-  15 * 8,			/* %rbp */
-  -1,				/* %rsp */
-  12 * 8,			/* %r8 ...  */
-  11 * 8,
-  10 * 8,
-  9 * 8,
-  8 * 8,
-  7 * 8,
-  6 * 8,
-  5 * 8,			/* ... %r15 */
-  20 * 8,			/* %rip */
-  4 * 8,			/* %eflags */
-  21 * 8,			/* %cs */
-  -1,				/* %ss */
-  3 * 8,			/* %ds */
-  2 * 8,			/* %es */
-  1 * 8,			/* %fs */
-  0 * 8				/* %gs */
+static int amd64obsd_uthread_reg_offset[] = {
+  19 * 8,					     /* %rax */
+  16 * 8,					     /* %rbx */
+  18 * 8,					     /* %rcx */
+  17 * 8,					     /* %rdx */
+  14 * 8,					     /* %rsi */
+  13 * 8,					     /* %rdi */
+  15 * 8,					     /* %rbp */
+  -1,						     /* %rsp */
+  12 * 8,					     /* %r8 ...  */
+  11 * 8, 10 * 8, 9 * 8, 8 * 8, 7 * 8, 6 * 8, 5 * 8, /* ... %r15 */
+  20 * 8,					     /* %rip */
+  4 * 8,					     /* %eflags */
+  21 * 8,					     /* %cs */
+  -1,						     /* %ss */
+  3 * 8,					     /* %ds */
+  2 * 8,					     /* %es */
+  1 * 8,					     /* %fs */
+  0 * 8						     /* %gs */
 };
 
 /* Offset within the thread structure where we can find the saved
    stack pointer (%esp).  */
-#define AMD64OBSD_UTHREAD_RSP_OFFSET	400
+#define AMD64OBSD_UTHREAD_RSP_OFFSET 400
 
 static void
-amd64obsd_supply_uthread (struct regcache *regcache,
-			  int regnum, CORE_ADDR addr)
+amd64obsd_supply_uthread (struct regcache *regcache, int regnum,
+			  CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -262,8 +237,8 @@ amd64obsd_supply_uthread (struct regcache *regcache,
 }
 
 static void
-amd64obsd_collect_uthread (const struct regcache *regcache,
-			   int regnum, CORE_ADDR addr)
+amd64obsd_collect_uthread (const struct regcache *regcache, int regnum,
+			   CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -308,6 +283,7 @@ amd64obsd_collect_uthread (const struct regcache *regcache,
 	}
     }
 }
+
 /* Kernel debugging support.  */
 
 /* From <machine/frame.h>.  Easy since `struct trapframe' matches
@@ -336,7 +312,7 @@ amd64obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 
   find_pc_partial_function (func, &name, NULL, NULL);
   if (name && startswith (name, "Xintr"))
-    addr = sp + 8;		/* It's an interrupt frame.  */
+    addr = sp + 8; /* It's an interrupt frame.  */
   else
     addr = sp;
 
@@ -362,12 +338,12 @@ amd64obsd_trapframe_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static void
-amd64obsd_trapframe_this_id (frame_info_ptr this_frame,
-			     void **this_cache, struct frame_id *this_id)
+amd64obsd_trapframe_this_id (frame_info_ptr this_frame, void **this_cache,
+			     struct frame_id *this_id)
 {
-  struct trad_frame_cache *cache =
-    amd64obsd_trapframe_cache (this_frame, this_cache);
-  
+  struct trad_frame_cache *cache
+    = amd64obsd_trapframe_cache (this_frame, this_cache);
+
   trad_frame_get_id (cache, this_id);
 }
 
@@ -375,8 +351,8 @@ static struct value *
 amd64obsd_trapframe_prev_register (frame_info_ptr this_frame,
 				   void **this_cache, int regnum)
 {
-  struct trad_frame_cache *cache =
-    amd64obsd_trapframe_cache (this_frame, this_cache);
+  struct trad_frame_cache *cache
+    = amd64obsd_trapframe_cache (this_frame, this_cache);
 
   return trad_frame_get_register (cache, this_frame, regnum);
 }
@@ -396,14 +372,14 @@ amd64obsd_trapframe_sniffer (const struct frame_unwind *self,
     return 0;
 
   find_pc_partial_function (get_frame_pc (this_frame), &name, NULL, NULL);
-  return (name && ((strcmp (name, "calltrap") == 0)
-		   || (strcmp (name, "osyscall1") == 0)
-		   || (strcmp (name, "Xsyscall") == 0)
-		   || (startswith (name, "Xintr"))));
+  return (name
+	  && ((strcmp (name, "calltrap") == 0)
+	      || (strcmp (name, "osyscall1") == 0)
+	      || (strcmp (name, "Xsyscall") == 0)
+	      || (startswith (name, "Xintr"))));
 }
 
-static const struct frame_unwind amd64obsd_trapframe_unwind =
-{
+static const struct frame_unwind amd64obsd_trapframe_unwind = {
   /* FIXME: kettenis/20051219: This really is more like an interrupt
      frame, but SIGTRAMP_FRAME would print <signal handler called>,
      which really is not what we want here.  */
@@ -415,7 +391,6 @@ static const struct frame_unwind amd64obsd_trapframe_unwind =
   NULL,
   amd64obsd_trapframe_sniffer
 };
-
 
 static void
 amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -443,20 +418,21 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   bsd_uthread_set_collect_uthread (gdbarch, amd64obsd_collect_uthread);
 
   /* OpenBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
 
   /* Unwind kernel trap frames correctly.  */
   frame_unwind_prepend_unwinder (gdbarch, &amd64obsd_trapframe_unwind);
 }
 
 void _initialize_amd64obsd_tdep ();
+
 void
 _initialize_amd64obsd_tdep ()
 {
   /* The OpenBSD/amd64 native dependent code makes this assumption.  */
   gdb_assert (ARRAY_SIZE (amd64obsd_r_reg_offset) == AMD64_NUM_GREGS);
 
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_OPENBSD, amd64obsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_OPENBSD,
+			  amd64obsd_init_abi);
 }

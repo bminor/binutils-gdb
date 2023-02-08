@@ -35,13 +35,13 @@
 
 /* ADI specific si_code */
 #ifndef SEGV_ACCADI
-#define SEGV_ACCADI	3
+#define SEGV_ACCADI 3
 #endif
 #ifndef SEGV_ADIDERR
-#define SEGV_ADIDERR	4
+#define SEGV_ADIDERR 4
 #endif
 #ifndef SEGV_ADIPERR
-#define SEGV_ADIPERR	5
+#define SEGV_ADIPERR 5
 #endif
 
 /* The syscall's XML filename for sparc 64-bit.  */
@@ -59,17 +59,13 @@ static void sparc64_linux_sigframe_init (const struct tramp_frame *self,
 /* See sparc-linux-tdep.c for details.  Note that 64-bit binaries only
    use RT signals.  */
 
-static const struct tramp_frame sparc64_linux_rt_sigframe =
-{
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { 0x82102065, ULONGEST_MAX },		/* mov __NR_rt_sigreturn, %g1 */
-    { 0x91d0206d, ULONGEST_MAX },		/* ta  0x6d */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  sparc64_linux_sigframe_init
-};
+static const struct tramp_frame sparc64_linux_rt_sigframe
+  = { SIGTRAMP_FRAME,
+      4,
+      { { 0x82102065, ULONGEST_MAX }, /* mov __NR_rt_sigreturn, %g1 */
+	{ 0x91d0206d, ULONGEST_MAX }, /* ta  0x6d */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      sparc64_linux_sigframe_init };
 
 static void
 sparc64_linux_sigframe_init (const struct tramp_frame *self,
@@ -121,7 +117,8 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
    Displays information related to ADI memory corruptions.  */
 
 static void
-sparc64_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
+sparc64_linux_report_signal_info (struct gdbarch *gdbarch,
+				  struct ui_out *uiout,
 				  enum gdb_signal siggnal)
 {
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word != 64
@@ -147,31 +144,29 @@ sparc64_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
   /* Print out ADI event based on sig_code value */
   switch (si_code)
     {
-    case SEGV_ACCADI:	/* adi not enabled */
+    case SEGV_ACCADI: /* adi not enabled */
       uiout->text ("\n");
-      uiout->field_string ("sigcode-meaning", _("ADI disabled"));
-      uiout->text (_(" while accessing address "));
+      uiout->field_string ("sigcode-meaning", _ ("ADI disabled"));
+      uiout->text (_ (" while accessing address "));
       uiout->field_core_addr ("bound-access", gdbarch, addr);
       break;
-    case SEGV_ADIDERR:	/* disrupting mismatch */
+    case SEGV_ADIDERR: /* disrupting mismatch */
       uiout->text ("\n");
-      uiout->field_string ("sigcode-meaning", _("ADI deferred mismatch"));
-      uiout->text (_(" while accessing address "));
+      uiout->field_string ("sigcode-meaning", _ ("ADI deferred mismatch"));
+      uiout->text (_ (" while accessing address "));
       uiout->field_core_addr ("bound-access", gdbarch, addr);
       break;
-    case SEGV_ADIPERR:	/* precise mismatch */
+    case SEGV_ADIPERR: /* precise mismatch */
       uiout->text ("\n");
-      uiout->field_string ("sigcode-meaning", _("ADI precise mismatch"));
-      uiout->text (_(" while accessing address "));
+      uiout->field_string ("sigcode-meaning", _ ("ADI precise mismatch"));
+      uiout->text (_ (" while accessing address "));
       uiout->field_core_addr ("bound-access", gdbarch, addr);
       break;
     default:
       break;
     }
-
 }
 
-
 /* Return the address of a system call's alternative return
    address.  */
 
@@ -198,35 +193,32 @@ sparc64_linux_step_trap (frame_info_ptr frame, unsigned long insn)
 	 register save area.  The saved PC sits at a 136 byte offset
 	 into there.  */
 
-      return read_memory_unsigned_integer (sp + 192 + 128 + 136,
-					   8, byte_order);
+      return read_memory_unsigned_integer (sp + 192 + 128 + 136, 8,
+					   byte_order);
     }
 
   return 0;
 }
-
 
-const struct sparc_gregmap sparc64_linux_core_gregmap =
-{
-  32 * 8,			/* %tstate */
-  33 * 8,			/* %tpc */
-  34 * 8,			/* %tnpc */
-  35 * 8,			/* %y */
-  -1,				/* %wim */
-  -1,				/* %tbr */
-  1 * 8,			/* %g1 */
-  16 * 8,			/* %l0 */
-  8,				/* y size */
+const struct sparc_gregmap sparc64_linux_core_gregmap = {
+  32 * 8, /* %tstate */
+  33 * 8, /* %tpc */
+  34 * 8, /* %tnpc */
+  35 * 8, /* %y */
+  -1,	  /* %wim */
+  -1,	  /* %tbr */
+  1 * 8,  /* %g1 */
+  16 * 8, /* %l0 */
+  8,	  /* y size */
 };
-
 
 static void
 sparc64_linux_supply_core_gregset (const struct regset *regset,
-				   struct regcache *regcache,
-				   int regnum, const void *gregs, size_t len)
+				   struct regcache *regcache, int regnum,
+				   const void *gregs, size_t len)
 {
-  sparc64_supply_gregset (&sparc64_linux_core_gregmap,
-			  regcache, regnum, gregs);
+  sparc64_supply_gregset (&sparc64_linux_core_gregmap, regcache, regnum,
+			  gregs);
 }
 
 static void
@@ -234,14 +226,14 @@ sparc64_linux_collect_core_gregset (const struct regset *regset,
 				    const struct regcache *regcache,
 				    int regnum, void *gregs, size_t len)
 {
-  sparc64_collect_gregset (&sparc64_linux_core_gregmap,
-			   regcache, regnum, gregs);
+  sparc64_collect_gregset (&sparc64_linux_core_gregmap, regcache, regnum,
+			   gregs);
 }
 
 static void
 sparc64_linux_supply_core_fpregset (const struct regset *regset,
-				    struct regcache *regcache,
-				    int regnum, const void *fpregs, size_t len)
+				    struct regcache *regcache, int regnum,
+				    const void *fpregs, size_t len)
 {
   sparc64_supply_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
@@ -256,7 +248,7 @@ sparc64_linux_collect_core_fpregset (const struct regset *regset,
 
 /* Set the program counter for process PTID to PC.  */
 
-#define TSTATE_SYSCALL	0x0000000000000020ULL
+#define TSTATE_SYSCALL 0x0000000000000020ULL
 
 static void
 sparc64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
@@ -282,8 +274,7 @@ sparc64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 static LONGEST
-sparc64_linux_get_syscall_number (struct gdbarch *gdbarch,
-				  thread_info *thread)
+sparc64_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 {
   struct regcache *regcache = get_thread_regcache (thread);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -302,7 +293,6 @@ sparc64_linux_get_syscall_number (struct gdbarch *gdbarch,
   return ret;
 }
 
-
 /* Implement the "get_longjmp_target" gdbarch method.  */
 
 static int
@@ -339,27 +329,19 @@ sparc64_linux_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
   *pc = extract_unsigned_integer (buf, 8, gdbarch_byte_order (gdbarch));
 
   if (!sparc_is_annulled_branch_insn (*pc))
-      *pc += 4; /* delay slot insn  */
-  *pc += 4; /* call insn  */
+    *pc += 4; /* delay slot insn  */
+  *pc += 4;   /* call insn  */
 
   return 1;
 }
 
-
+static const struct regset sparc64_linux_gregset
+  = { NULL, sparc64_linux_supply_core_gregset,
+      sparc64_linux_collect_core_gregset };
 
-static const struct regset sparc64_linux_gregset =
-  {
-    NULL,
-    sparc64_linux_supply_core_gregset,
-    sparc64_linux_collect_core_gregset
-  };
-
-static const struct regset sparc64_linux_fpregset =
-  {
-    NULL,
-    sparc64_linux_supply_core_fpregset,
-    sparc64_linux_collect_core_fpregset
-  };
+static const struct regset sparc64_linux_fpregset
+  = { NULL, sparc64_linux_supply_core_fpregset,
+      sparc64_linux_collect_core_fpregset };
 
 static void
 sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -383,8 +365,8 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* GNU/Linux has SVR4-style shared libraries...  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 linux_lp64_fetch_link_map_offsets);
 
   /* ...which means that we need some special handling when doing
      prologue analysis.  */
@@ -404,15 +386,15 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_SPARC64);
-  set_gdbarch_get_syscall_number (gdbarch,
-				  sparc64_linux_get_syscall_number);
+  set_gdbarch_get_syscall_number (gdbarch, sparc64_linux_get_syscall_number);
   set_gdbarch_report_signal_info (gdbarch, sparc64_linux_report_signal_info);
 }
 
 void _initialize_sparc64_linux_tdep ();
+
 void
 _initialize_sparc64_linux_tdep ()
 {
-  gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
-			  GDB_OSABI_LINUX, sparc64_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9, GDB_OSABI_LINUX,
+			  sparc64_linux_init_abi);
 }

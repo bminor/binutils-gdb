@@ -30,14 +30,14 @@ namespace gdb
    xmalloc'ed memory.  */
 
 /* The deleter for std::unique_xmalloc_ptr.  Uses xfree.  */
-template <typename T>
+template<typename T>
 struct xfree_deleter
 {
   void operator() (T *ptr) const { xfree (ptr); }
 };
 
 /* Same, for arrays.  */
-template <typename T>
+template<typename T>
 struct xfree_deleter<T[]>
 {
   void operator() (T *ptr) const { xfree (ptr); }
@@ -46,14 +46,14 @@ struct xfree_deleter<T[]>
 /* Import the standard unique_ptr to our namespace with a custom
    deleter.  */
 
-template<typename T> using unique_xmalloc_ptr
-  = std::unique_ptr<T, xfree_deleter<T>>;
+template<typename T>
+using unique_xmalloc_ptr = std::unique_ptr<T, xfree_deleter<T>>;
 
 /* A no-op deleter.  */
 template<typename T>
 struct noop_deleter
 {
-  void operator() (T *ptr) const { }
+  void operator() (T *ptr) const {}
 };
 
 } /* namespace gdb */

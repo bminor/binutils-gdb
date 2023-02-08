@@ -32,6 +32,6 @@ struct objfile;
    object files.  This function must be provided by the client.  */
 
 extern int find_minimal_symbol_address (const char *name, CORE_ADDR *addr,
-					struct objfile *objfile);
+                                        struct objfile *objfile);
 
 #endif /* COMMON_SYMBOL_H */

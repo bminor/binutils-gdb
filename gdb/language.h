@@ -20,7 +20,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (LANGUAGE_H)
+#if !defined(LANGUAGE_H)
 #define LANGUAGE_H 1
 
 #include "symtab.h"
@@ -40,51 +40,47 @@ class compile_instance;
 struct completion_match_for_lcd;
 class innermost_block_tracker;
 
-#define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
+#define MAX_FORTRAN_DIMS 7 /* Maximum number of F77 array dims.  */
 
 /* range_check ==
    range_check_on:    Ranges are checked in GDB expressions, producing errors.
    range_check_warn:  Ranges are checked, producing warnings.
    range_check_off:   Ranges are not checked in GDB expressions.  */
 
-extern enum range_check
-  {
-    range_check_off, range_check_warn, range_check_on
-  }
-range_check;
+extern enum range_check {
+  range_check_off,
+  range_check_warn,
+  range_check_on
+} range_check;
 
 /* array_ordering ==
    array_row_major:     Arrays are in row major order.
    array_column_major:  Arrays are in column major order.  */
 
-extern enum array_ordering
-  {
-    array_row_major, array_column_major
-  } 
-array_ordering;
-
+extern enum array_ordering {
+  array_row_major,
+  array_column_major
+} array_ordering;
 
 /* case_sensitivity ==
    case_sensitive_on:   Case sensitivity in name matching is used.
    case_sensitive_off:  Case sensitivity in name matching is not used.  */
 
-extern enum case_sensitivity
-  {
-    case_sensitive_on, case_sensitive_off
-  }
-case_sensitivity;
-
+extern enum case_sensitivity {
+  case_sensitive_on,
+  case_sensitive_off
+} case_sensitivity;
 
 /* macro_expansion ==
    macro_expansion_no:  No macro expansion is available.
    macro_expansion_c:   C-like macro expansion is available.  */
 
 enum macro_expansion
-  {
-    macro_expansion_no, macro_expansion_c
-  };
+{
+  macro_expansion_no,
+  macro_expansion_c
+};
 
-
 /* Per architecture (OS/ABI) language information.  */
 
 struct language_arch_info
@@ -119,8 +115,7 @@ struct language_arch_info
   }
 
   /* Return the type for characters within a string.  */
-  struct type *string_char_type () const
-  { return m_string_char_type; }
+  struct type *string_char_type () const { return m_string_char_type; }
 
   /* Return the type to be used for booleans.  */
   struct type *bool_type () const;
@@ -139,13 +134,14 @@ struct language_arch_info
 
   /* Lookup a primitive type for which FILTER returns true.  Will return
      nullptr if no matching type is found.  */
-  struct type *lookup_primitive_type
-    (gdb::function_view<bool (struct type *)> filter);
+  struct type *
+  lookup_primitive_type (gdb::function_view<bool (struct type *)> filter);
 
   /* Lookup a primitive type called NAME and return the type as a symbol.
      LANG is the language for which type is being looked up.  */
   struct symbol *lookup_primitive_type_as_symbol (const char *name,
 						  enum language lang);
+
 private:
 
   /* A structure storing a type and a corresponding symbol.  The type is
@@ -156,16 +152,16 @@ private:
     /* Constructor.  */
     explicit type_and_symbol (struct type *type)
       : m_type (type)
-    { /* Nothing.  */ }
+    { /* Nothing.  */
+    }
 
     /* Default move constructor.  */
-    type_and_symbol (type_and_symbol&&) = default;
+    type_and_symbol (type_and_symbol &&) = default;
 
     DISABLE_COPY_AND_ASSIGN (type_and_symbol);
 
     /* Return the type from this object.  */
-    struct type *type () const
-    { return m_type; }
+    struct type *type () const { return m_type; }
 
     /* Create and return a symbol wrapping M_TYPE from this object.  */
     struct symbol *symbol (enum language lang)
@@ -176,6 +172,7 @@ private:
     }
 
   private:
+
     /* The type primitive type.  */
     struct type *m_type = nullptr;
 
@@ -284,10 +281,7 @@ struct language_defn
 
   /* Digit separator of the language.  */
 
-  virtual const char *get_digit_separator () const
-  {
-    return " ";
-  }
+  virtual const char *get_digit_separator () const { return " "; }
 
   /* Return a vector of file extensions for this language.  The extension
      must include the ".", like ".c".  If this language doesn't need to
@@ -303,8 +297,7 @@ struct language_defn
   /* Print the index of an element of an array.  This default
      implementation prints using C99 syntax.  */
 
-  virtual void print_array_index (struct type *index_type,
-				  LONGEST index_value,
+  virtual void print_array_index (struct type *index_type, LONGEST index_value,
 				  struct ui_file *stream,
 				  const value_print_options *options) const;
 
@@ -328,8 +321,8 @@ struct language_defn
      implementation returns a LANGUAGE_PASS_BY_REF_INFO initialised in its
      default state.  */
 
-  virtual struct language_pass_by_ref_info pass_by_reference_info
-	(struct type *type) const
+  virtual struct language_pass_by_ref_info
+  pass_by_reference_info (struct type *type) const
   {
     return {};
   }
@@ -345,7 +338,8 @@ struct language_defn
   /* The per-architecture (OS/ABI) language information.  */
 
   virtual void language_arch_info (struct gdbarch *,
-				   struct language_arch_info *) const = 0;
+				   struct language_arch_info *) const
+    = 0;
 
   /* Find the definition of the type with the given name.  */
 
@@ -367,10 +361,10 @@ struct language_defn
      This field may not be NULL.  If the language does not need any
      special processing here, 'iterate_over_symbols' should be
      used as the definition.  */
-  virtual bool iterate_over_symbols
-	(const struct block *block, const lookup_name_info &name,
-	 domain_enum domain,
-	 gdb::function_view<symbol_found_callback_ftype> callback) const
+  virtual bool iterate_over_symbols (
+    const struct block *block, const lookup_name_info &name,
+    domain_enum domain,
+    gdb::function_view<symbol_found_callback_ftype> callback) const
   {
     return ::iterate_over_symbols (block, name, domain, callback);
   }
@@ -386,8 +380,8 @@ struct language_defn
      cases, then this method is a non-overridable interface.  Languages
      should override GET_SYMBOL_NAME_MATCHER_INNER if they need to.  */
 
-  symbol_name_matcher_ftype *get_symbol_name_matcher
-	(const lookup_name_info &lookup_name) const;
+  symbol_name_matcher_ftype *
+  get_symbol_name_matcher (const lookup_name_info &lookup_name) const;
 
   /* If this language allows compilation from the gdb command line,
      then this method will return an instance of struct gcc_context
@@ -437,8 +431,9 @@ struct language_defn
 
      The resulting string should be of the form that will be
      installed into a symbol.  */
-  virtual bool sniff_from_mangled_name
-       (const char *mangled, gdb::unique_xmalloc_ptr<char> *demangled) const
+  virtual bool
+  sniff_from_mangled_name (const char *mangled,
+			   gdb::unique_xmalloc_ptr<char> *demangled) const
   {
     *demangled = nullptr;
     return false;
@@ -453,10 +448,7 @@ struct language_defn
 
   /* Return true if this class' implementation of print_type can
      handle the /o modifier.  */
-  virtual bool can_print_type_offsets () const
-  {
-    return false;
-  }
+  virtual bool can_print_type_offsets () const { return false; }
 
   /* Print TYPE to STREAM using syntax appropriate for this language.
      LEVEL is the depth to indent lines by.  VARSTRING, if not NULL or the
@@ -465,7 +457,8 @@ struct language_defn
 
   virtual void print_type (struct type *type, const char *varstring,
 			   struct ui_file *stream, int show, int level,
-			   const struct type_print_options *flags) const = 0;
+			   const struct type_print_options *flags) const
+    = 0;
 
   /* PC is possibly an unknown languages trampoline.
      If that PC falls in a trampoline belonging to this language, return
@@ -494,32 +487,30 @@ struct language_defn
      symbols should be examined; otherwise, only STRUCT_DOMAIN symbols
      whose type has a code of CODE should be matched.  */
 
-  virtual void collect_symbol_completion_matches
-	(completion_tracker &tracker,
-	 complete_symbol_mode mode,
-	 symbol_name_match_type name_match_type,
-	 const char *text,
-	 const char *word,
-	 enum type_code code) const
+  virtual void collect_symbol_completion_matches (
+    completion_tracker &tracker, complete_symbol_mode mode,
+    symbol_name_match_type name_match_type, const char *text, const char *word,
+    enum type_code code) const
   {
-    return default_collect_symbol_completion_matches_break_on
-      (tracker, mode, name_match_type, text, word, "", code);
+    return default_collect_symbol_completion_matches_break_on (tracker, mode,
+							       name_match_type,
+							       text, word, "",
+							       code);
   }
 
   /* This is a function that lookup_symbol will call when it gets to
      the part of symbol lookup where C looks up static and global
      variables.  This default implements the basic C lookup rules.  */
 
-  virtual struct block_symbol lookup_symbol_nonlocal
-	(const char *name,
-	 const struct block *block,
-	 const domain_enum domain) const;
+  virtual struct block_symbol
+  lookup_symbol_nonlocal (const char *name, const struct block *block,
+			  const domain_enum domain) const;
 
   /* Return an expression that can be used for a location
      watchpoint.  TYPE is a pointer type that points to the memory
      to watch, and ADDR is the address of the watched memory.  */
-  virtual gdb::unique_xmalloc_ptr<char> watch_location_expression
-	(struct type *type, CORE_ADDR addr) const;
+  virtual gdb::unique_xmalloc_ptr<char>
+  watch_location_expression (struct type *type, CORE_ADDR addr) const;
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
@@ -530,9 +521,9 @@ struct language_defn
 
   /* Print a value using syntax appropriate for this language.  RECURSE is
      the recursion depth.  It is zero-based.  */
-  virtual void value_print_inner
-	(struct value *val, struct ui_file *stream, int recurse,
-	 const struct value_print_options *options) const;
+  virtual void
+  value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options) const;
 
   /* Parser function.  */
 
@@ -541,13 +532,13 @@ struct language_defn
   /* Print the character CH (of type CHTYPE) on STREAM as part of the
      contents of a literal string whose delimiter is QUOTER.  */
 
-  virtual void emitchar (int ch, struct type *chtype,
-			 struct ui_file *stream, int quoter) const;
+  virtual void emitchar (int ch, struct type *chtype, struct ui_file *stream,
+			 int quoter) const;
 
   virtual void printchar (int ch, struct type *chtype,
-			  struct ui_file * stream) const;
+			  struct ui_file *stream) const;
 
-/* Print the character string STRING, printing at most LENGTH characters.
+  /* Print the character string STRING, printing at most LENGTH characters.
    Printing stops early if the number hits print_max_chars; repeat counts
    are printed as appropriate.  Print ellipses at the end if we
    had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
@@ -556,7 +547,6 @@ struct language_defn
 			 const gdb_byte *string, unsigned int length,
 			 const char *encoding, int force_ellipses,
 			 const struct value_print_options *options) const;
-
 
   /* Print a typedef using syntax appropriate for this language.
      TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
@@ -575,24 +565,21 @@ struct language_defn
      ideally be similar in style to the default; an opener, three '.', and
      a closer.  */
 
-  virtual const char *struct_too_deep_ellipsis () const
-  { return "{...}"; }
+  virtual const char *struct_too_deep_ellipsis () const { return "{...}"; }
 
   /* If this returns non-NULL then the string returned specifies the name
      of the implicit local variable that refers to the current object
      instance.  Return NULL (the default) for languages that have no name
      for the current object instance.  */
 
-  virtual const char *name_of_this () const
-  { return nullptr; }
+  virtual const char *name_of_this () const { return nullptr; }
 
   /* Return false if the language has first-class arrays.  Return true if
      there are no array values, and array objects decay to pointers, as in
      C.  The default is true as currently most supported languages behave
      in this manner.  */
 
-  virtual bool c_style_arrays_p () const
-  { return true; }
+  virtual bool c_style_arrays_p () const { return true; }
 
   /* Return the index to use for extracting the first element of a string,
      or as the lower bound when creating a new string.  The default of
@@ -600,7 +587,9 @@ struct language_defn
      supported languages except Modula-2.  */
 
   virtual char string_lower_bound () const
-  { return c_style_arrays_p () ? 0 : 1; }
+  {
+    return c_style_arrays_p () ? 0 : 1;
+  }
 
   /* Returns true if the symbols names should be stored in GDB's data
      structures for minimal/partial/full symbols using their linkage (aka
@@ -620,34 +609,37 @@ struct language_defn
      this function and return true, to prevent any accidental demangling
      through an unrelated language's demangler.  */
 
-  virtual bool store_sym_names_in_linkage_form_p () const
-  { return false; }
+  virtual bool store_sym_names_in_linkage_form_p () const { return false; }
 
   /* Default range checking preference.  The return value from this
      function provides the automatic setting for 'set check range'.  As a
      consequence a user is free to override this setting if they want.  */
 
-  virtual bool range_checking_on_by_default () const
-  { return false; }
+  virtual bool range_checking_on_by_default () const { return false; }
 
   /* Is this language case sensitive?  The return value from this function
      provides the automativ setting for 'set case-sensitive', as a
      consequence, a user is free to override this setting if they want.  */
 
   virtual enum case_sensitivity case_sensitivity () const
-  { return case_sensitive_on; }
-
+  {
+    return case_sensitive_on;
+  }
 
   /* Multi-dimensional array ordering.  */
 
   virtual enum array_ordering array_ordering () const
-  { return array_row_major; }
+  {
+    return array_row_major;
+  }
 
   /* Style of macro expansion, if any, supported by this language.  The
      default is no macro expansion.  */
 
   virtual enum macro_expansion macro_expansion () const
-  { return macro_expansion_no; }
+  {
+    return macro_expansion_no;
+  }
 
   /* Return a structure containing various operations on varobj specific
      for this language.  */
@@ -659,8 +651,8 @@ protected:
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
      See that method for a description of the arguments.  */
 
-  virtual symbol_name_matcher_ftype *get_symbol_name_matcher_inner
-	  (const lookup_name_info &lookup_name) const;
+  virtual symbol_name_matcher_ftype *
+  get_symbol_name_matcher_inner (const lookup_name_info &lookup_name) const;
 };
 
 /* Pointer to the language_defn for our current language.  This pointer
@@ -696,11 +688,10 @@ extern const char lang_frame_mismatch_warn[];
    of scope (e.g. stack frame)
    language_mode_manual: current_language set only by user.  */
 
-extern enum language_mode
-  {
-    language_mode_auto, language_mode_manual
-  }
-language_mode;
+extern enum language_mode {
+  language_mode_auto,
+  language_mode_manual
+} language_mode;
 
 /* Return the type that should be used for booleans for language L in
    GDBARCH.  */
@@ -730,20 +721,16 @@ struct type *language_lookup_primitive_type (const struct language_defn *l,
    lookup_primitive_type member function inside the language_arch_info
    class.  */
 
-struct type *language_lookup_primitive_type
-  (const struct language_defn *la,
-   struct gdbarch *gdbarch,
-   gdb::function_view<bool (struct type *)> filter);
+struct type *language_lookup_primitive_type (
+  const struct language_defn *la, struct gdbarch *gdbarch,
+  gdb::function_view<bool (struct type *)> filter);
 
 /* Wrapper around language_lookup_primitive_type to return the
    corresponding symbol.  */
 
-struct symbol *
-  language_lookup_primitive_type_as_symbol (const struct language_defn *l,
-					    struct gdbarch *gdbarch,
-					    const char *name);
+struct symbol *language_lookup_primitive_type_as_symbol (
+  const struct language_defn *l, struct gdbarch *gdbarch, const char *name);
 
-
 /* These macros define the behaviour of the expression 
    evaluator.  */
 
@@ -752,9 +739,9 @@ struct symbol *
 
 /* "cast" really means conversion.  */
 /* FIXME -- should be a setting in language_defn.  */
-#define CAST_IS_CONVERSION(LANG) ((LANG)->la_language == language_c  || \
-				  (LANG)->la_language == language_cplus || \
-				  (LANG)->la_language == language_objc)
+#define CAST_IS_CONVERSION(LANG)                                              \
+  ((LANG)->la_language == language_c || (LANG)->la_language == language_cplus \
+   || (LANG)->la_language == language_objc)
 
 /* Print out the current language settings: language, range and
    type checking.  */
@@ -762,7 +749,6 @@ struct symbol *
 extern void language_info ();
 
 extern enum language set_language (enum language);
-
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,
@@ -770,9 +756,8 @@ extern enum language set_language (enum language);
    and the "other representation" is '\141'.  The "other representation"
    is program language dependent.  */
 
-#define PRINT_LITERAL_FORM(c)		\
-  ((c) >= 0x20				\
-   && ((c) < 0x7F || (c) >= 0xA0)	\
+#define PRINT_LITERAL_FORM(c)                 \
+  ((c) >= 0x20 && ((c) < 0x7F || (c) >= 0xA0) \
    && (!sevenbit_strings || (c) < 0x80))
 
 /* Error messages */
@@ -792,26 +777,27 @@ extern const char *language_str (enum language);
 extern CORE_ADDR skip_language_trampoline (frame_info_ptr, CORE_ADDR pc);
 
 /* Return demangled language symbol, or NULL.  */
-extern gdb::unique_xmalloc_ptr<char> language_demangle
-     (const struct language_defn *current_language,
-      const char *mangled, int options);
+extern gdb::unique_xmalloc_ptr<char>
+language_demangle (const struct language_defn *current_language,
+		   const char *mangled, int options);
 
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */
-struct language_pass_by_ref_info language_pass_by_reference (struct type *type);
+struct language_pass_by_ref_info
+language_pass_by_reference (struct type *type);
 
 void c_get_string (struct value *value,
-		   gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-		   int *length, struct type **char_type,
-		   const char **charset);
+		   gdb::unique_xmalloc_ptr<gdb_byte> *buffer, int *length,
+		   struct type **char_type, const char **charset);
 
 /* Get LANG's symbol_name_matcher method for LOOKUP_NAME.  Returns
    default_symbol_name_matcher if not set.  LANG is used as a hint;
    the function may ignore it depending on the current language and
    LOOKUP_NAME.  Specifically, if the current language is Ada, this
    may return an Ada matcher regardless of LANG.  */
-symbol_name_matcher_ftype *get_symbol_name_matcher
-  (const language_defn *lang, const lookup_name_info &lookup_name);
+symbol_name_matcher_ftype *
+get_symbol_name_matcher (const language_defn *lang,
+			 const lookup_name_info &lookup_name);
 
 /* Save the current language and restore it upon destruction.  */
 
@@ -824,15 +810,13 @@ public:
   {
   }
 
-  ~scoped_restore_current_language ()
-  {
-    set_language (m_lang);
-  }
+  ~scoped_restore_current_language () { set_language (m_lang); }
 
   scoped_restore_current_language (const scoped_restore_current_language &)
-      = delete;
-  scoped_restore_current_language &operator=
-      (const scoped_restore_current_language &) = delete;
+    = delete;
+  scoped_restore_current_language &
+  operator= (const scoped_restore_current_language &)
+    = delete;
 
 private:
 
@@ -875,6 +859,7 @@ public:
   DISABLE_COPY_AND_ASSIGN (scoped_switch_to_sym_language_if_auto);
 
 private:
+
   bool m_switched;
   enum language m_lang;
 };

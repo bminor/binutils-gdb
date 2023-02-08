@@ -38,9 +38,12 @@ struct inline_state
 {
   inline_state (thread_info *thread_, int skipped_frames_, CORE_ADDR saved_pc_,
 		std::vector<symbol *> &&skipped_symbols_)
-    : thread (thread_), skipped_frames (skipped_frames_), saved_pc (saved_pc_),
+    : thread (thread_),
+      skipped_frames (skipped_frames_),
+      saved_pc (saved_pc_),
       skipped_symbols (std::move (skipped_symbols_))
-  {}
+  {
+  }
 
   /* The thread this data relates to.  It should be a currently
      stopped thread.  */
@@ -71,10 +74,9 @@ static struct inline_state *
 find_inline_frame_state (thread_info *thread)
 {
   auto state_it = std::find_if (inline_states.begin (), inline_states.end (),
-				[thread] (const inline_state &state)
-				  {
-				    return state.thread == thread;
-				  });
+				[thread] (const inline_state &state) {
+    return state.thread == thread;
+  });
 
   if (state_it == inline_states.end ())
     return nullptr;
@@ -104,12 +106,11 @@ clear_inline_frame_state (process_stratum_target *target, ptid_t filter_ptid)
 
   if (filter_ptid == minus_one_ptid || filter_ptid.is_pid ())
     {
-      auto matcher = [target, &filter_ptid] (const inline_state &state)
-	{
-	  thread_info *t = state.thread;
-	  return (t->inf->process_target () == target
-		  && t->ptid.matches (filter_ptid));
-	};
+      auto matcher = [target, &filter_ptid] (const inline_state &state) {
+	thread_info *t = state.thread;
+	return (t->inf->process_target () == target
+		&& t->ptid.matches (filter_ptid));
+      };
 
       auto it = std::remove_if (inline_states.begin (), inline_states.end (),
 				matcher);
@@ -119,16 +120,13 @@ clear_inline_frame_state (process_stratum_target *target, ptid_t filter_ptid)
       return;
     }
 
+  auto matcher = [target, &filter_ptid] (const inline_state &state) {
+    thread_info *t = state.thread;
+    return (t->inf->process_target () == target && filter_ptid == t->ptid);
+  };
 
-  auto matcher = [target, &filter_ptid] (const inline_state &state)
-    {
-      thread_info *t = state.thread;
-      return (t->inf->process_target () == target
-	      && filter_ptid == t->ptid);
-    };
-
-  auto it = std::find_if (inline_states.begin (), inline_states.end (),
-			  matcher);
+  auto it
+    = std::find_if (inline_states.begin (), inline_states.end (), matcher);
 
   if (it != inline_states.end ())
     unordered_remove (inline_states, it);
@@ -140,18 +138,16 @@ void
 clear_inline_frame_state (thread_info *thread)
 {
   auto it = std::find_if (inline_states.begin (), inline_states.end (),
-			  [thread] (const inline_state &state)
-			    {
-			      return thread == state.thread;
-			    });
+			  [thread] (const inline_state &state) {
+    return thread == state.thread;
+  });
 
   if (it != inline_states.end ())
     unordered_remove (inline_states, it);
 }
 
 static void
-inline_frame_this_id (frame_info_ptr this_frame,
-		      void **this_cache,
+inline_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		      struct frame_id *this_id)
 {
   struct symbol *func;
@@ -165,7 +161,7 @@ inline_frame_this_id (frame_info_ptr this_frame,
      comments in get_prev_frame_always_1.  */
   frame_info_ptr prev_frame = get_prev_frame_always (this_frame);
   if (prev_frame == nullptr)
-    error (_("failed to find previous frame when computing inline frame id"));
+    error (_ ("failed to find previous frame when computing inline frame id"));
   *this_id = get_frame_id (prev_frame);
 
   /* We need a valid frame ID, so we need to be based on a valid
@@ -208,8 +204,7 @@ inline_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 
 static int
 inline_frame_sniffer (const struct frame_unwind *self,
-		      frame_info_ptr this_frame,
-		      void **this_cache)
+		      frame_info_ptr this_frame, void **this_cache)
 {
   CORE_ADDR this_pc;
   const struct block *frame_block, *cur_block;
@@ -265,15 +260,14 @@ inline_frame_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
-const struct frame_unwind inline_frame_unwind = {
-  "inline",
-  INLINE_FRAME,
-  default_frame_unwind_stop_reason,
-  inline_frame_this_id,
-  inline_frame_prev_register,
-  NULL,
-  inline_frame_sniffer
-};
+const struct frame_unwind inline_frame_unwind
+  = { "inline",
+      INLINE_FRAME,
+      default_frame_unwind_stop_reason,
+      inline_frame_this_id,
+      inline_frame_prev_register,
+      NULL,
+      inline_frame_sniffer };
 
 /* Return non-zero if BLOCK, an inlined function block containing PC,
    has a group of contiguous instructions starting at PC (but not
@@ -313,8 +307,7 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat *stop_chain)
     {
       struct breakpoint *bpt = s->breakpoint_at;
 
-      if (bpt != NULL
-	  && (user_breakpoint_p (bpt) || bpt->type == bp_until))
+      if (bpt != NULL && (user_breakpoint_p (bpt) || bpt->type == bp_until))
 	{
 	  bp_location *loc = s->bp_location_at.get ();
 	  enum bp_loc_type t = loc->loc_type;

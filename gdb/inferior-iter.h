@@ -28,6 +28,7 @@
 class all_inferiors_iterator
 {
 public:
+
   typedef all_inferiors_iterator self_type;
   typedef struct inferior *value_type;
   typedef struct inferior *&reference;
@@ -38,7 +39,8 @@ public:
   /* Create an iterator pointing at HEAD.  */
   all_inferiors_iterator (process_stratum_target *proc_target,
 			  const intrusive_list<inferior> &list)
-    : m_proc_target (proc_target), m_inf_iter (list.begin ())
+    : m_proc_target (proc_target),
+      m_inf_iter (list.begin ())
   {
     intrusive_list<inferior>::iterator end;
 
@@ -51,7 +53,8 @@ public:
   /* Create a one-past-end iterator.  */
   all_inferiors_iterator ()
     : m_proc_target (nullptr)
-  {}
+  {
+  }
 
   all_inferiors_iterator &operator++ ()
   {
@@ -59,13 +62,15 @@ public:
     return *this;
   }
 
-  inferior *operator* () const
-  { return &*m_inf_iter; }
+  inferior *operator* () const { return &*m_inf_iter; }
 
   bool operator!= (const all_inferiors_iterator &other) const
-  { return m_inf_iter != other.m_inf_iter; }
+  {
+    return m_inf_iter != other.m_inf_iter;
+  }
 
 private:
+
   /* Advance to next inferior, skipping filtered inferiors.  */
   void advance ()
   {
@@ -104,10 +109,7 @@ using all_inferiors_range = iterator_range<all_inferiors_iterator>;
 
 struct exited_inferior_filter
 {
-  bool operator() (inferior *inf)
-  {
-    return inf->pid != 0;
-  }
+  bool operator() (inferior *inf) { return inf->pid != 0; }
 };
 
 /* Iterate over all non-exited inferiors.  */

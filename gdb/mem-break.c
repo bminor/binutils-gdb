@@ -71,7 +71,6 @@ default_memory_insert_breakpoint (struct gdbarch *gdbarch,
   return val;
 }
 
-
 int
 default_memory_remove_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
@@ -80,10 +79,9 @@ default_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
   gdbarch_sw_breakpoint_from_kind (gdbarch, bp_tgt->kind, &bplen);
 
-  return target_write_raw_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
-				  bplen);
+  return target_write_raw_memory (bp_tgt->placed_address,
+				  bp_tgt->shadow_contents, bplen);
 }
-
 
 int
 memory_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,

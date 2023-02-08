@@ -57,20 +57,18 @@ void
 unloaded_dll (process_info *proc, const char *name, CORE_ADDR base_addr)
 {
   gdb_assert (proc != nullptr);
-  auto pred = [&] (const dll_info &dll)
-    {
-      if (base_addr != UNSPECIFIED_CORE_ADDR
-	  && base_addr == dll.base_addr)
-	return true;
+  auto pred = [&] (const dll_info &dll) {
+    if (base_addr != UNSPECIFIED_CORE_ADDR && base_addr == dll.base_addr)
+      return true;
 
-      if (name != NULL && dll.name == name)
-	return true;
+    if (name != NULL && dll.name == name)
+      return true;
 
-      return false;
-    };
+    return false;
+  };
 
-  auto iter = std::find_if (proc->all_dlls.begin (), proc->all_dlls.end (),
-			    pred);
+  auto iter
+    = std::find_if (proc->all_dlls.begin (), proc->all_dlls.end (), pred);
 
   if (iter == proc->all_dlls.end ())
     /* For some inferiors we might get unloaded_dll events without having
@@ -94,8 +92,5 @@ unloaded_dll (process_info *proc, const char *name, CORE_ADDR base_addr)
 void
 clear_dlls (void)
 {
-  for_each_process ([] (process_info *proc)
-    {
-      proc->all_dlls.clear ();
-    });
+  for_each_process ([] (process_info *proc) { proc->all_dlls.clear (); });
 }

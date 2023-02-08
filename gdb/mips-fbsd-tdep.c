@@ -35,13 +35,13 @@
    first 38 follow the standard MIPS layout.  The 39th holds
    IC_INT_REG on RM7K and RM9K processors.  The 40th is a dummy for
    padding.  */
-#define MIPS_FBSD_NUM_GREGS	40
+#define MIPS_FBSD_NUM_GREGS 40
 
 /* Number of registers in `struct fpreg' from <machine/reg.h>.  The
    first 32 hold floating point registers.  33 holds the FSR.  The
    34th holds FIR on FreeBSD 12.0 and newer kernels.  On older kernels
    it was a zero-filled dummy for padding.  */
-#define MIPS_FBSD_NUM_FPREGS	34
+#define MIPS_FBSD_NUM_FPREGS 34
 
 /* Supply a single register.  The register size might not match, so use
    regcache->raw_supply_integer ().  */
@@ -78,15 +78,15 @@ mips_fbsd_supply_fpregs (struct regcache *regcache, int regnum,
   fp0num = mips_regnum (gdbarch)->fp0;
   for (i = 0; i <= 32; i++)
     if (regnum == fp0num + i || regnum == -1)
-      mips_fbsd_supply_reg (regcache, fp0num + i,
-			    regs + i * regsize, regsize);
+      mips_fbsd_supply_reg (regcache, fp0num + i, regs + i * regsize, regsize);
   if (regnum == mips_regnum (gdbarch)->fp_control_status || regnum == -1)
     mips_fbsd_supply_reg (regcache, mips_regnum (gdbarch)->fp_control_status,
 			  regs + 32 * regsize, regsize);
   if ((regnum == mips_regnum (gdbarch)->fp_implementation_revision
        || regnum == -1)
       && extract_unsigned_integer (regs + 33 * regsize, regsize,
-				   gdbarch_byte_order (gdbarch)) != 0)
+				   gdbarch_byte_order (gdbarch))
+	   != 0)
     mips_fbsd_supply_reg (regcache,
 			  mips_regnum (gdbarch)->fp_implementation_revision,
 			  regs + 33 * regsize, regsize);
@@ -124,8 +124,8 @@ mips_fbsd_collect_fpregs (const struct regcache *regcache, int regnum,
   fp0num = mips_regnum (gdbarch)->fp0;
   for (i = 0; i < 32; i++)
     if (regnum == fp0num + i || regnum == -1)
-      mips_fbsd_collect_reg (regcache, fp0num + i,
-			     regs + i * regsize, regsize);
+      mips_fbsd_collect_reg (regcache, fp0num + i, regs + i * regsize,
+			     regsize);
   if (regnum == mips_regnum (gdbarch)->fp_control_status || regnum == -1)
     mips_fbsd_collect_reg (regcache, mips_regnum (gdbarch)->fp_control_status,
 			   regs + 32 * regsize, regsize);
@@ -159,8 +159,8 @@ mips_fbsd_collect_gregs (const struct regcache *regcache, int regnum,
 
 static void
 mips_fbsd_supply_fpregset (const struct regset *regset,
-			   struct regcache *regcache,
-			   int regnum, const void *fpregs, size_t len)
+			   struct regcache *regcache, int regnum,
+			   const void *fpregs, size_t len)
 {
   size_t regsize = mips_abi_regsize (regcache->arch ());
 
@@ -176,8 +176,8 @@ mips_fbsd_supply_fpregset (const struct regset *regset,
 
 static void
 mips_fbsd_collect_fpregset (const struct regset *regset,
-			    const struct regcache *regcache,
-			    int regnum, void *fpregs, size_t len)
+			    const struct regcache *regcache, int regnum,
+			    void *fpregs, size_t len)
 {
   size_t regsize = mips_abi_regsize (regcache->arch ());
 
@@ -209,8 +209,8 @@ mips_fbsd_supply_gregset (const struct regset *regset,
 
 static void
 mips_fbsd_collect_gregset (const struct regset *regset,
-			   const struct regcache *regcache,
-			   int regnum, void *gregs, size_t len)
+			   const struct regcache *regcache, int regnum,
+			   void *gregs, size_t len)
 {
   size_t regsize = mips_abi_regsize (regcache->arch ());
 
@@ -221,15 +221,13 @@ mips_fbsd_collect_gregset (const struct regset *regset,
 
 /* FreeBSD/mips register sets.  */
 
-static const struct regset mips_fbsd_gregset =
-{
+static const struct regset mips_fbsd_gregset = {
   NULL,
   mips_fbsd_supply_gregset,
   mips_fbsd_collect_gregset,
 };
 
-static const struct regset mips_fbsd_fpregset =
-{
+static const struct regset mips_fbsd_fpregset = {
   NULL,
   mips_fbsd_supply_fpregset,
   mips_fbsd_collect_fpregset,
@@ -253,31 +251,30 @@ mips_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 /* Signal trampoline support.  */
 
-#define FBSD_SYS_sigreturn	417
+#define FBSD_SYS_sigreturn 417
 
 #define MIPS_INST_LI_V0_SIGRETURN 0x24020000 + FBSD_SYS_sigreturn
-#define MIPS_INST_SYSCALL	0x0000000c
-#define MIPS_INST_BREAK		0x0000000d
+#define MIPS_INST_SYSCALL 0x0000000c
+#define MIPS_INST_BREAK 0x0000000d
 
-#define O32_SIGFRAME_UCONTEXT_OFFSET	(16)
-#define O32_SIGSET_T_SIZE	(16)
+#define O32_SIGFRAME_UCONTEXT_OFFSET (16)
+#define O32_SIGSET_T_SIZE (16)
 
-#define O32_UCONTEXT_ONSTACK	(O32_SIGSET_T_SIZE)
-#define O32_UCONTEXT_PC		(O32_UCONTEXT_ONSTACK + 4)
-#define O32_UCONTEXT_REGS	(O32_UCONTEXT_PC + 4)
-#define O32_UCONTEXT_SR		(O32_UCONTEXT_REGS + 4 * 32)
-#define O32_UCONTEXT_LO		(O32_UCONTEXT_SR + 4)
-#define O32_UCONTEXT_HI		(O32_UCONTEXT_LO + 4)
-#define O32_UCONTEXT_FPUSED	(O32_UCONTEXT_HI + 4)
-#define O32_UCONTEXT_FPREGS	(O32_UCONTEXT_FPUSED + 4)
+#define O32_UCONTEXT_ONSTACK (O32_SIGSET_T_SIZE)
+#define O32_UCONTEXT_PC (O32_UCONTEXT_ONSTACK + 4)
+#define O32_UCONTEXT_REGS (O32_UCONTEXT_PC + 4)
+#define O32_UCONTEXT_SR (O32_UCONTEXT_REGS + 4 * 32)
+#define O32_UCONTEXT_LO (O32_UCONTEXT_SR + 4)
+#define O32_UCONTEXT_HI (O32_UCONTEXT_LO + 4)
+#define O32_UCONTEXT_FPUSED (O32_UCONTEXT_HI + 4)
+#define O32_UCONTEXT_FPREGS (O32_UCONTEXT_FPUSED + 4)
 
-#define O32_UCONTEXT_REG_SIZE	4
+#define O32_UCONTEXT_REG_SIZE 4
 
 static void
 mips_fbsd_sigframe_init (const struct tramp_frame *self,
 			 frame_info_ptr this_frame,
-			 struct trad_frame_cache *cache,
-			 CORE_ADDR func)
+			 struct trad_frame_cache *cache, CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -293,39 +290,32 @@ mips_fbsd_sigframe_init (const struct tramp_frame *self,
 
   /* PC.  */
   regnum = mips_regnum (gdbarch)->pc;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + O32_UCONTEXT_PC);
 
   /* GPRs.  */
   for (regnum = MIPS_ZERO_REGNUM, addr = ucontext_addr + O32_UCONTEXT_REGS;
        regnum <= MIPS_RA_REGNUM; regnum++, addr += O32_UCONTEXT_REG_SIZE)
-    trad_frame_set_reg_addr (cache,
-			     regnum + gdbarch_num_regs (gdbarch),
-			     addr);
+    trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch), addr);
 
   regnum = MIPS_PS_REGNUM;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + O32_UCONTEXT_SR);
 
   /* HI and LO.  */
   regnum = mips_regnum (gdbarch)->lo;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + O32_UCONTEXT_LO);
   regnum = mips_regnum (gdbarch)->hi;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + O32_UCONTEXT_HI);
 
   if (target_read_memory (ucontext_addr + O32_UCONTEXT_FPUSED, buf, 4) == 0
       && extract_unsigned_integer (buf, 4, byte_order) != 0)
     {
-      for (regnum = 0, addr = ucontext_addr + O32_UCONTEXT_FPREGS;
-	   regnum < 32; regnum++, addr += O32_UCONTEXT_REG_SIZE)
-	trad_frame_set_reg_addr (cache,
-				 regnum + gdbarch_fp0_regnum (gdbarch),
+      for (regnum = 0, addr = ucontext_addr + O32_UCONTEXT_FPREGS; regnum < 32;
+	   regnum++, addr += O32_UCONTEXT_REG_SIZE)
+	trad_frame_set_reg_addr (cache, regnum + gdbarch_fp0_regnum (gdbarch),
 				 addr);
       trad_frame_set_reg_addr (cache, mips_regnum (gdbarch)->fp_control_status,
 			       addr);
@@ -334,42 +324,38 @@ mips_fbsd_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (cache, frame_id_build (sp, func));
 }
 
-#define MIPS_INST_ADDIU_A0_SP_O32 (0x27a40000 \
-				   + O32_SIGFRAME_UCONTEXT_OFFSET)
+#define MIPS_INST_ADDIU_A0_SP_O32 (0x27a40000 + O32_SIGFRAME_UCONTEXT_OFFSET)
 
-static const struct tramp_frame mips_fbsd_sigframe =
-{
+static const struct tramp_frame mips_fbsd_sigframe = {
   SIGTRAMP_FRAME,
   MIPS_INSN32_SIZE,
-  {
-    { MIPS_INST_ADDIU_A0_SP_O32, ULONGEST_MAX },	/* addiu   a0, sp, SIGF_UC */
-    { MIPS_INST_LI_V0_SIGRETURN, ULONGEST_MAX },	/* li      v0, SYS_sigreturn */
-    { MIPS_INST_SYSCALL, ULONGEST_MAX },		/* syscall */
-    { MIPS_INST_BREAK, ULONGEST_MAX },		/* break */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
+  { { MIPS_INST_ADDIU_A0_SP_O32, ULONGEST_MAX }, /* addiu   a0, sp, SIGF_UC */
+    { MIPS_INST_LI_V0_SIGRETURN,
+      ULONGEST_MAX },			 /* li      v0, SYS_sigreturn */
+    { MIPS_INST_SYSCALL, ULONGEST_MAX }, /* syscall */
+    { MIPS_INST_BREAK, ULONGEST_MAX },	 /* break */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
   mips_fbsd_sigframe_init
 };
 
-#define N64_SIGFRAME_UCONTEXT_OFFSET	(32)
-#define N64_SIGSET_T_SIZE	(16)
+#define N64_SIGFRAME_UCONTEXT_OFFSET (32)
+#define N64_SIGSET_T_SIZE (16)
 
-#define N64_UCONTEXT_ONSTACK	(N64_SIGSET_T_SIZE)
-#define N64_UCONTEXT_PC		(N64_UCONTEXT_ONSTACK + 8)
-#define N64_UCONTEXT_REGS	(N64_UCONTEXT_PC + 8)
-#define N64_UCONTEXT_SR		(N64_UCONTEXT_REGS + 8 * 32)
-#define N64_UCONTEXT_LO		(N64_UCONTEXT_SR + 8)
-#define N64_UCONTEXT_HI		(N64_UCONTEXT_LO + 8)
-#define N64_UCONTEXT_FPUSED	(N64_UCONTEXT_HI + 8)
-#define N64_UCONTEXT_FPREGS	(N64_UCONTEXT_FPUSED + 8)
+#define N64_UCONTEXT_ONSTACK (N64_SIGSET_T_SIZE)
+#define N64_UCONTEXT_PC (N64_UCONTEXT_ONSTACK + 8)
+#define N64_UCONTEXT_REGS (N64_UCONTEXT_PC + 8)
+#define N64_UCONTEXT_SR (N64_UCONTEXT_REGS + 8 * 32)
+#define N64_UCONTEXT_LO (N64_UCONTEXT_SR + 8)
+#define N64_UCONTEXT_HI (N64_UCONTEXT_LO + 8)
+#define N64_UCONTEXT_FPUSED (N64_UCONTEXT_HI + 8)
+#define N64_UCONTEXT_FPREGS (N64_UCONTEXT_FPUSED + 8)
 
-#define N64_UCONTEXT_REG_SIZE	8
+#define N64_UCONTEXT_REG_SIZE 8
 
 static void
 mips64_fbsd_sigframe_init (const struct tramp_frame *self,
 			   frame_info_ptr this_frame,
-			   struct trad_frame_cache *cache,
-			   CORE_ADDR func)
+			   struct trad_frame_cache *cache, CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -385,39 +371,32 @@ mips64_fbsd_sigframe_init (const struct tramp_frame *self,
 
   /* PC.  */
   regnum = mips_regnum (gdbarch)->pc;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + N64_UCONTEXT_PC);
 
   /* GPRs.  */
   for (regnum = MIPS_ZERO_REGNUM, addr = ucontext_addr + N64_UCONTEXT_REGS;
        regnum <= MIPS_RA_REGNUM; regnum++, addr += N64_UCONTEXT_REG_SIZE)
-    trad_frame_set_reg_addr (cache,
-			     regnum + gdbarch_num_regs (gdbarch),
-			     addr);
+    trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch), addr);
 
   regnum = MIPS_PS_REGNUM;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + N64_UCONTEXT_SR);
 
   /* HI and LO.  */
   regnum = mips_regnum (gdbarch)->lo;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + N64_UCONTEXT_LO);
   regnum = mips_regnum (gdbarch)->hi;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   ucontext_addr + N64_UCONTEXT_HI);
 
   if (target_read_memory (ucontext_addr + N64_UCONTEXT_FPUSED, buf, 4) == 0
       && extract_unsigned_integer (buf, 4, byte_order) != 0)
     {
-      for (regnum = 0, addr = ucontext_addr + N64_UCONTEXT_FPREGS;
-	   regnum < 32; regnum++, addr += N64_UCONTEXT_REG_SIZE)
-	trad_frame_set_reg_addr (cache,
-				 regnum + gdbarch_fp0_regnum (gdbarch),
+      for (regnum = 0, addr = ucontext_addr + N64_UCONTEXT_FPREGS; regnum < 32;
+	   regnum++, addr += N64_UCONTEXT_REG_SIZE)
+	trad_frame_set_reg_addr (cache, regnum + gdbarch_fp0_regnum (gdbarch),
 				 addr);
       trad_frame_set_reg_addr (cache, mips_regnum (gdbarch)->fp_control_status,
 			       addr);
@@ -426,37 +405,31 @@ mips64_fbsd_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (cache, frame_id_build (sp, func));
 }
 
-#define MIPS_INST_ADDIU_A0_SP_N32 (0x27a40000 \
-				   + N64_SIGFRAME_UCONTEXT_OFFSET)
+#define MIPS_INST_ADDIU_A0_SP_N32 (0x27a40000 + N64_SIGFRAME_UCONTEXT_OFFSET)
 
-static const struct tramp_frame mipsn32_fbsd_sigframe =
-{
+static const struct tramp_frame mipsn32_fbsd_sigframe = {
   SIGTRAMP_FRAME,
   MIPS_INSN32_SIZE,
-  {
-    { MIPS_INST_ADDIU_A0_SP_N32, ULONGEST_MAX },	/* addiu   a0, sp, SIGF_UC */
-    { MIPS_INST_LI_V0_SIGRETURN, ULONGEST_MAX },	/* li      v0, SYS_sigreturn */
-    { MIPS_INST_SYSCALL, ULONGEST_MAX },		/* syscall */
-    { MIPS_INST_BREAK, ULONGEST_MAX },		/* break */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
+  { { MIPS_INST_ADDIU_A0_SP_N32, ULONGEST_MAX }, /* addiu   a0, sp, SIGF_UC */
+    { MIPS_INST_LI_V0_SIGRETURN,
+      ULONGEST_MAX },			 /* li      v0, SYS_sigreturn */
+    { MIPS_INST_SYSCALL, ULONGEST_MAX }, /* syscall */
+    { MIPS_INST_BREAK, ULONGEST_MAX },	 /* break */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
   mips64_fbsd_sigframe_init
 };
 
-#define MIPS_INST_DADDIU_A0_SP_N64 (0x67a40000 \
-				    + N64_SIGFRAME_UCONTEXT_OFFSET)
+#define MIPS_INST_DADDIU_A0_SP_N64 (0x67a40000 + N64_SIGFRAME_UCONTEXT_OFFSET)
 
-static const struct tramp_frame mips64_fbsd_sigframe =
-{
+static const struct tramp_frame mips64_fbsd_sigframe = {
   SIGTRAMP_FRAME,
   MIPS_INSN32_SIZE,
-  {
-    { MIPS_INST_DADDIU_A0_SP_N64, ULONGEST_MAX },	/* daddiu  a0, sp, SIGF_UC */
-    { MIPS_INST_LI_V0_SIGRETURN, ULONGEST_MAX },	/* li      v0, SYS_sigreturn */
-    { MIPS_INST_SYSCALL, ULONGEST_MAX },		/* syscall */
-    { MIPS_INST_BREAK, ULONGEST_MAX },		/* break */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
+  { { MIPS_INST_DADDIU_A0_SP_N64, ULONGEST_MAX }, /* daddiu  a0, sp, SIGF_UC */
+    { MIPS_INST_LI_V0_SIGRETURN,
+      ULONGEST_MAX },			 /* li      v0, SYS_sigreturn */
+    { MIPS_INST_SYSCALL, ULONGEST_MAX }, /* syscall */
+    { MIPS_INST_BREAK, ULONGEST_MAX },	 /* break */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
   mips64_fbsd_sigframe_init
 };
 
@@ -548,30 +521,31 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   switch (abi)
     {
-      case MIPS_ABI_O32:
-	tramp_frame_prepend_unwinder (gdbarch, &mips_fbsd_sigframe);
-	break;
-      case MIPS_ABI_N32:
-	tramp_frame_prepend_unwinder (gdbarch, &mipsn32_fbsd_sigframe);
-	break;
-      case MIPS_ABI_N64:
-	tramp_frame_prepend_unwinder (gdbarch, &mips64_fbsd_sigframe);
-	break;
+    case MIPS_ABI_O32:
+      tramp_frame_prepend_unwinder (gdbarch, &mips_fbsd_sigframe);
+      break;
+    case MIPS_ABI_N32:
+      tramp_frame_prepend_unwinder (gdbarch, &mipsn32_fbsd_sigframe);
+      break;
+    case MIPS_ABI_N64:
+      tramp_frame_prepend_unwinder (gdbarch, &mips64_fbsd_sigframe);
+      break;
     }
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, mips_fbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, mips_fbsd_iterate_over_regset_sections);
 
   set_gdbarch_skip_solib_resolver (gdbarch, mips_fbsd_skip_solib_resolver);
 
   /* FreeBSD/mips has SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, (gdbarch_ptr_bit (gdbarch) == 32 ?
-	       mips_fbsd_ilp32_fetch_link_map_offsets :
-	       mips_fbsd_lp64_fetch_link_map_offsets));
+  set_solib_svr4_fetch_link_map_offsets (
+    gdbarch,
+    (gdbarch_ptr_bit (gdbarch) == 32 ? mips_fbsd_ilp32_fetch_link_map_offsets
+				     : mips_fbsd_lp64_fetch_link_map_offsets));
 }
 
 void _initialize_mips_fbsd_tdep ();
+
 void
 _initialize_mips_fbsd_tdep ()
 {

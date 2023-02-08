@@ -104,7 +104,8 @@ tui_source_window::set_contents (struct gdbarch *arch,
       element->line_or_addr.u.line_no = cur_line_no;
       element->is_exec_point
 	= (filename_cmp (tui_location.full_name ().c_str (),
-			 symtab_to_fullname (s)) == 0
+			 symtab_to_fullname (s))
+	     == 0
 	   && cur_line_no == tui_location.line_no ());
 
       m_content[cur_line].line = std::move (text);
@@ -116,17 +117,15 @@ tui_source_window::set_contents (struct gdbarch *arch,
   return true;
 }
 
-
 /* Answer whether the source is currently displayed in the source
    window.  */
 bool
 tui_source_window::showing_source_p (const char *fullname) const
 {
   return (!m_content.empty ()
-	  && (filename_cmp (tui_location.full_name ().c_str (),
-			    fullname) == 0));
+	  && (filename_cmp (tui_location.full_name ().c_str (), fullname)
+	      == 0));
 }
-
 
 /* Scroll the source forward or backward vertically.  */
 void
@@ -168,8 +167,8 @@ tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
   return (m_content[line_no].line_or_addr.loa == LOA_LINE
 	  && m_content[line_no].line_or_addr.u.line_no == loc->line_number
 	  && loc->symtab != NULL
-	  && filename_cmp (m_fullname.get (),
-			   symtab_to_fullname (loc->symtab)) == 0);
+	  && filename_cmp (m_fullname.get (), symtab_to_fullname (loc->symtab))
+	       == 0);
 }
 
 /* See tui-source.h.  */
@@ -197,8 +196,8 @@ tui_source_window::maybe_update (frame_info_ptr fi, symtab_and_line sal)
   if (start_line <= 0)
     start_line = 1;
 
-  bool source_already_displayed = (sal.symtab != 0
-				   && showing_source_p (m_fullname.get ()));
+  bool source_already_displayed
+    = (sal.symtab != 0 && showing_source_p (m_fullname.get ()));
 
   if (!(source_already_displayed && line_is_displayed (sal.line)))
     {

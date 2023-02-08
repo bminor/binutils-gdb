@@ -59,8 +59,7 @@ public:
 extern struct block *finish_block (struct symbol *symbol,
 				   struct pending_block *old_blocks,
 				   const struct dynamic_prop *static_link,
-				   CORE_ADDR start,
-				   CORE_ADDR end);
+				   CORE_ADDR start, CORE_ADDR end);
 
 extern void start_subfile (const char *name);
 

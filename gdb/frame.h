@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (FRAME_H)
+#if !defined(FRAME_H)
 #define FRAME_H 1
 
 /* The following is the intended naming schema for frame functions.
@@ -85,12 +85,12 @@ struct frame_print_options;
 
 /* The frame object.  */
 
-
 /* Save and restore the currently selected frame.  */
 
 class scoped_restore_selected_frame
 {
 public:
+
   /* Save the currently selected frame.  */
   scoped_restore_selected_frame ();
 
@@ -151,8 +151,8 @@ extern struct frame_id frame_id_build_unavailable_stack (CORE_ADDR code_addr);
    address (typically the entry point).  SPECIAL_ADDR is the special
    identifier address.  */
 extern struct frame_id
-  frame_id_build_unavailable_stack_special (CORE_ADDR code_addr,
-					    CORE_ADDR special_addr);
+frame_id_build_unavailable_stack_special (CORE_ADDR code_addr,
+					  CORE_ADDR special_addr);
 
 /* Construct a wild card frame ID.  The parameter is the frame's constant
    stack address (typically the outer-bound).  The code address as well
@@ -205,19 +205,14 @@ enum frame_type
 class frame_info_ptr : public intrusive_list_node<frame_info_ptr>
 {
 public:
+
   /* Create a frame_info_ptr from a raw pointer.  */
   explicit frame_info_ptr (struct frame_info *ptr);
 
   /* Create a null frame_info_ptr.  */
-  frame_info_ptr ()
-  {
-    frame_list.push_back (*this);
-  }
+  frame_info_ptr () { frame_list.push_back (*this); }
 
-  frame_info_ptr (std::nullptr_t)
-  {
-    frame_list.push_back (*this);
-  }
+  frame_info_ptr (std::nullptr_t) { frame_list.push_back (*this); }
 
   frame_info_ptr (const frame_info_ptr &other)
     : m_ptr (other.m_ptr),
@@ -274,8 +269,7 @@ public:
     return *this;
   }
 
-  frame_info *operator-> () const
-  { return this->reinflate (); }
+  frame_info *operator->() const { return this->reinflate (); }
 
   /* Fetch the underlying pointer.  Note that new code should
      generally not use this -- avoid it if at all possible.  */
@@ -290,32 +284,21 @@ public:
   /* Return true if this object is empty (does not wrap a frame_info
      object).  */
 
-  bool is_null () const
-  {
-    return m_cached_level == this->invalid_level;
-  };
+  bool is_null () const { return m_cached_level == this->invalid_level; };
 
   /* This exists for compatibility with pre-existing code that checked
      a "frame_info *" using "!".  */
-  bool operator! () const
-  {
-    return this->is_null ();
-  }
+  bool operator!() const { return this->is_null (); }
 
   /* This exists for compatibility with pre-existing code that checked
      a "frame_info *" like "if (ptr)".  */
-  explicit operator bool () const
-  {
-    return !this->is_null ();
-  }
+  explicit operator bool () const { return !this->is_null (); }
 
   /* Invalidate this pointer.  */
-  void invalidate ()
-  {
-    m_ptr = nullptr;
-  }
+  void invalidate () { m_ptr = nullptr; }
 
 private:
+
   /* We sometimes need to construct frame_info_ptr objects around the
      sentinel_frame, which has level -1.  Therefore, make the invalid frame
      level value -2.  */
@@ -447,8 +430,8 @@ extern void select_frame (frame_info_ptr);
    get_selected_frame directly because this function does not create
    the selected-frame's frame_info object if it hasn't been created
    yet, and thus is more efficient and doesn't throw.  */
-extern void save_selected_frame (frame_id *frame_id, int *frame_level)
-  noexcept;
+extern void save_selected_frame (frame_id *frame_id,
+				 int *frame_level) noexcept;
 
 /* Restore selected frame as saved with save_selected_frame.
 
@@ -458,8 +441,8 @@ extern void save_selected_frame (frame_id *frame_id, int *frame_level)
 
    This function does not throw.  It is designed to be safe to called
    from the destructors of RAII types.  */
-extern void restore_selected_frame (frame_id frame_id, int frame_level)
-  noexcept;
+extern void restore_selected_frame (frame_id frame_id,
+				    int frame_level) noexcept;
 
 /* Given a FRAME, return the next (more inner, younger) or previous
    (more outer, older) frame.  */
@@ -631,7 +614,8 @@ extern const address_space *get_frame_address_space (frame_info_ptr);
 /* For frames where we can not unwind further, describe why.  */
 
 enum unwind_stop_reason
-  {
+{
+
 #define SET(name, description) name,
 #define FIRST_ENTRY(name) UNWIND_FIRST = name,
 #define LAST_ENTRY(name) UNWIND_LAST = name,
@@ -642,7 +626,7 @@ enum unwind_stop_reason
 #undef FIRST_ENTRY
 #undef LAST_ENTRY
 #undef FIRST_ERROR
-  };
+};
 
 /* Return the reason why we can't unwind past this frame.  */
 
@@ -671,9 +655,8 @@ const char *frame_stop_reason_string (frame_info_ptr);
    value.  */
 extern void frame_register_unwind (frame_info_ptr frame, int regnum,
 				   int *optimizedp, int *unavailablep,
-				   enum lval_type *lvalp,
-				   CORE_ADDR *addrp, int *realnump,
-				   gdb_byte *valuep);
+				   enum lval_type *lvalp, CORE_ADDR *addrp,
+				   int *realnump, gdb_byte *valuep);
 
 /* Fetch a register from this, or unwind a register from the next
    frame.  Note that the get_frame methods are wrappers to
@@ -681,32 +664,29 @@ extern void frame_register_unwind (frame_info_ptr frame, int regnum,
    fetch fails.  The value methods never return NULL, but usually
    do return a lazy value.  */
 
-extern void frame_unwind_register (frame_info_ptr next_frame,
-				   int regnum, gdb_byte *buf);
-extern void get_frame_register (frame_info_ptr frame,
-				int regnum, gdb_byte *buf);
+extern void frame_unwind_register (frame_info_ptr next_frame, int regnum,
+				   gdb_byte *buf);
+extern void get_frame_register (frame_info_ptr frame, int regnum,
+				gdb_byte *buf);
 
 struct value *frame_unwind_register_value (frame_info_ptr next_frame,
 					   int regnum);
-struct value *get_frame_register_value (frame_info_ptr frame,
-					int regnum);
+struct value *get_frame_register_value (frame_info_ptr frame, int regnum);
 
 extern LONGEST frame_unwind_register_signed (frame_info_ptr next_frame,
 					     int regnum);
-extern LONGEST get_frame_register_signed (frame_info_ptr frame,
-					  int regnum);
+extern LONGEST get_frame_register_signed (frame_info_ptr frame, int regnum);
 extern ULONGEST frame_unwind_register_unsigned (frame_info_ptr frame,
 						int regnum);
-extern ULONGEST get_frame_register_unsigned (frame_info_ptr frame,
-					     int regnum);
+extern ULONGEST get_frame_register_unsigned (frame_info_ptr frame, int regnum);
 
 /* Read a register from this, or unwind a register from the next
    frame.  Note that the read_frame methods are wrappers to
    get_frame_register_value, that do not throw if the result is
    optimized out or unavailable.  */
 
-extern bool read_frame_register_unsigned (frame_info_ptr frame,
-					  int regnum, ULONGEST *val);
+extern bool read_frame_register_unsigned (frame_info_ptr frame, int regnum,
+					  ULONGEST *val);
 
 /* The reverse.  Store a register value relative to the specified
    frame.  Note: this call makes the frame's state undefined.  The
@@ -761,7 +741,8 @@ extern ULONGEST get_frame_memory_unsigned (frame_info_ptr this_frame,
 
 /* Same as above, but return true zero when the entire memory read
    succeeds, false otherwise.  */
-extern bool safe_frame_unwind_memory (frame_info_ptr this_frame, CORE_ADDR addr,
+extern bool safe_frame_unwind_memory (frame_info_ptr this_frame,
+				      CORE_ADDR addr,
 				      gdb::array_view<gdb_byte> buffer);
 
 /* Return this frame's architecture.  */
@@ -773,7 +754,6 @@ extern struct gdbarch *frame_unwind_arch (frame_info_ptr next_frame);
 /* Return the previous frame's architecture, skipping inline functions.  */
 extern struct gdbarch *frame_unwind_caller_arch (frame_info_ptr frame);
 
-
 /* Values for the source flag to be used in print_frame_info ().
    For all the cases below, the address is never printed if
    'set print address' is off.  When 'set print address' is on,
@@ -781,22 +761,22 @@ extern struct gdbarch *frame_unwind_caller_arch (frame_info_ptr frame);
    beginning of the source line of the frame
    and PRINT_WHAT is != LOC_AND_ADDRESS.  */
 enum print_what
-  {
-    /* Print only the address, source line, like in stepi.  */
-    SRC_LINE = -1,
-    /* Print only the location, i.e. level, address,
+{
+  /* Print only the address, source line, like in stepi.  */
+  SRC_LINE = -1,
+  /* Print only the location, i.e. level, address,
        function, args (as controlled by 'set print frame-arguments'),
        file, line, line num.  */
-    LOCATION,
-    /* Print both of the above.  */
-    SRC_AND_LOC,
-    /* Print location only, print the address even if the program counter
+  LOCATION,
+  /* Print both of the above.  */
+  SRC_AND_LOC,
+  /* Print location only, print the address even if the program counter
        is at the beginning of the source line.  */
-    LOC_AND_ADDRESS,
-    /* Print only level and function,
+  LOC_AND_ADDRESS,
+  /* Print only level and function,
        i.e. location only, without address, file, line, line num.  */
-    SHORT_LOCATION
-  };
+  SHORT_LOCATION
+};
 
 /* Allocate zero initialized memory from the frame cache obstack.
    Appendices to the frame info (such as the unwind cache) should
@@ -805,13 +785,13 @@ enum print_what
 extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_ZALLOC(TYPE) \
   ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
-#define FRAME_OBSTACK_CALLOC(NUMBER,TYPE) \
+#define FRAME_OBSTACK_CALLOC(NUMBER, TYPE) \
   ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
 
 class readonly_detached_regcache;
 /* Create a regcache, and copy the frame's registers into it.  */
-std::unique_ptr<readonly_detached_regcache> frame_save_as_regcache
-    (frame_info_ptr this_frame);
+std::unique_ptr<readonly_detached_regcache>
+frame_save_as_regcache (frame_info_ptr this_frame);
 
 extern const struct block *get_frame_block (frame_info_ptr,
 					    CORE_ADDR *addr_in_block);
@@ -853,8 +833,8 @@ extern frame_info_ptr find_relative_frame (frame_info_ptr, int *);
 /* Wrapper over print_stack_frame modifying current_uiout with UIOUT for
    the function call.  */
 
-extern void print_stack_frame_to_uiout (struct ui_out *uiout,
-					frame_info_ptr, int print_level,
+extern void print_stack_frame_to_uiout (struct ui_out *uiout, frame_info_ptr,
+					int print_level,
 					enum print_what print_what,
 					int set_current_sal);
 
@@ -940,9 +920,8 @@ struct frame_arg
   const char *entry_kind = nullptr;
 };
 
-extern void read_frame_arg (const frame_print_options &fp_opts,
-			    symbol *sym, frame_info_ptr frame,
-			    struct frame_arg *argp,
+extern void read_frame_arg (const frame_print_options &fp_opts, symbol *sym,
+			    frame_info_ptr frame, struct frame_arg *argp,
 			    struct frame_arg *entryargp);
 extern void read_frame_local (struct symbol *sym, frame_info_ptr frame,
 			      struct frame_arg *argp);
@@ -1004,7 +983,8 @@ extern frame_info_ptr create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 /* Return true if the frame unwinder for frame FI is UNWINDER; false
    otherwise.  */
 
-extern bool frame_unwinder_is (frame_info_ptr fi, const frame_unwind *unwinder);
+extern bool frame_unwinder_is (frame_info_ptr fi,
+			       const frame_unwind *unwinder);
 
 /* Return the language of FRAME.  */
 
@@ -1056,6 +1036,5 @@ extern void set_frame_previous_pc_masked (frame_info_ptr frame);
 /* Get whether the PC value is masked for the given frame.  */
 
 extern bool get_frame_pc_masked (frame_info_ptr frame);
-
 
 #endif /* !defined (FRAME_H)  */

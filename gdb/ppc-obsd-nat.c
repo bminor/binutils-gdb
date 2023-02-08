@@ -85,26 +85,23 @@ ppc_obsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
   pid_t pid = regcache->ptid ().pid ();
 
   if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
-  ppc_supply_gregset (&ppcobsd_gregset, regcache, -1,
-		      &regs, sizeof regs);
+  ppc_supply_gregset (&ppcobsd_gregset, regcache, -1, &regs, sizeof regs);
 #ifndef PT_GETFPREGS
-  ppc_supply_fpregset (&ppcobsd_gregset, regcache, -1,
-		       &regs, sizeof regs);
+  ppc_supply_fpregset (&ppcobsd_gregset, regcache, -1, &regs, sizeof regs);
 #endif
 
 #ifdef PT_GETFPREGS
-  if (regnum == -1
-      || getfpregs_supplies (regcache->arch (), regnum))
+  if (regnum == -1 || getfpregs_supplies (regcache->arch (), regnum))
     {
       struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
-      ppc_supply_fpregset (&ppcobsd_fpregset, regcache, -1,
-			   &fpregs, sizeof fpregs);
+      ppc_supply_fpregset (&ppcobsd_fpregset, regcache, -1, &fpregs,
+			   sizeof fpregs);
     }
 #endif
 }
@@ -119,36 +116,33 @@ ppc_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
   pid_t pid = regcache->ptid ().pid ();
 
   if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't get registers"));
+    perror_with_name (_ ("Couldn't get registers"));
 
-  ppc_collect_gregset (&ppcobsd_gregset, regcache,
-		       regnum, &regs, sizeof regs);
+  ppc_collect_gregset (&ppcobsd_gregset, regcache, regnum, &regs, sizeof regs);
 #ifndef PT_GETFPREGS
-  ppc_collect_fpregset (&ppcobsd_gregset, regcache,
-			regnum, &regs, sizeof regs);
+  ppc_collect_fpregset (&ppcobsd_gregset, regcache, regnum, &regs,
+			sizeof regs);
 #endif
 
   if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name (_("Couldn't write registers"));
+    perror_with_name (_ ("Couldn't write registers"));
 
 #ifdef PT_GETFPREGS
-  if (regnum == -1
-      || getfpregs_supplies (regcache->arch (), regnum))
+  if (regnum == -1 || getfpregs_supplies (regcache->arch (), regnum))
     {
       struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
+	perror_with_name (_ ("Couldn't get floating point status"));
 
-      ppc_collect_fpregset (&ppcobsd_fpregset, regcache,
-			    regnum, &fpregs, sizeof fpregs);
+      ppc_collect_fpregset (&ppcobsd_fpregset, regcache, regnum, &fpregs,
+			    sizeof fpregs);
 
       if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't write floating point status"));
+	perror_with_name (_ ("Couldn't write floating point status"));
     }
 #endif
 }
-
 
 static int
 ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
@@ -172,14 +166,14 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if (pcb->pcb_sp == 0)
     return 0;
 
-  read_memory (pcb->pcb_sp, (gdb_byte *)&sf, sizeof sf);
+  read_memory (pcb->pcb_sp, (gdb_byte *) &sf, sizeof sf);
   regcache->raw_supply (gdbarch_sp_regnum (gdbarch), &sf.sp);
   regcache->raw_supply (tdep->ppc_cr_regnum, &sf.cr);
   regcache->raw_supply (tdep->ppc_gp0_regnum + 2, &sf.fixreg2);
   for (i = 0, regnum = tdep->ppc_gp0_regnum + 13; i < 19; i++, regnum++)
     regcache->raw_supply (regnum, &sf.fixreg[i]);
 
-  read_memory (sf.sp, (gdb_byte *)&cf, sizeof cf);
+  read_memory (sf.sp, (gdb_byte *) &cf, sizeof cf);
   regcache->raw_supply (gdbarch_pc_regnum (gdbarch), &cf.lr);
   regcache->raw_supply (tdep->ppc_gp0_regnum + 30, &cf.r30);
   regcache->raw_supply (tdep->ppc_gp0_regnum + 31, &cf.r31);
@@ -188,6 +182,7 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 void _initialize_ppcobsd_nat ();
+
 void
 _initialize_ppcobsd_nat ()
 {

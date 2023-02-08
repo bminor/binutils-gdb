@@ -38,13 +38,13 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
 
   if (argc != 1)
-    error (_("-symbol-list-lines: Usage: SOURCE_FILENAME"));
+    error (_ ("-symbol-list-lines: Usage: SOURCE_FILENAME"));
 
   filename = argv[0];
   s = lookup_symtab (filename);
 
   if (s == NULL)
-    error (_("-symbol-list-lines: Unknown source file name."));
+    error (_ ("-symbol-list-lines: Unknown source file name."));
 
   /* Now, dump the associated line table.  The pc addresses are
      already sorted by increasing values in the symbol table, so no
@@ -99,8 +99,7 @@ output_nondebug_symbol (ui_out *uiout,
   struct gdbarch *gdbarch = msymbol.objfile->arch ();
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-  uiout->field_core_addr ("address", gdbarch,
-			  msymbol.value_address ());
+  uiout->field_core_addr ("address", gdbarch, msymbol.value_address ());
   uiout->field_string ("name", msymbol.minsym->print_name ());
 }
 
@@ -142,8 +141,7 @@ mi_symbol_info (enum search_domain kind, const char *name_regexp,
 	  ui_out_emit_list symbols_list_emitter (uiout, "symbols");
 
 	  /* As long as we have debug symbols from this symtab...  */
-	  for (; (i < symbols.size ()
-		  && symbols[i].msymbol.minsym == nullptr
+	  for (; (i < symbols.size () && symbols[i].msymbol.minsym == nullptr
 		  && symbols[i].symbol->symtab () == symtab);
 	       ++i)
 	    {
@@ -177,7 +175,7 @@ parse_max_results_option (char *arg)
   char *ptr = arg;
   long long val = strtoll (arg, &ptr, 10);
   if (arg == ptr || *ptr != '\0' || val > SIZE_MAX || val < 0)
-    error (_("invalid value for --max-results argument"));
+    error (_ ("invalid value for --max-results argument"));
   size_t max_results = (size_t) val;
 
   return max_results;
@@ -195,17 +193,18 @@ mi_info_functions_or_variables (enum search_domain kind, char **argv, int argc)
   bool exclude_minsyms = true;
 
   enum opt
-    {
-     INCLUDE_NONDEBUG_OPT, TYPE_REGEXP_OPT, NAME_REGEXP_OPT, MAX_RESULTS_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"-include-nondebug" , INCLUDE_NONDEBUG_OPT, 0},
-    {"-type", TYPE_REGEXP_OPT, 1},
-    {"-name", NAME_REGEXP_OPT, 1},
-    {"-max-results", MAX_RESULTS_OPT, 1},
-    { 0, 0, 0 }
+    INCLUDE_NONDEBUG_OPT,
+    TYPE_REGEXP_OPT,
+    NAME_REGEXP_OPT,
+    MAX_RESULTS_OPT
   };
+  static const struct mi_opt opts[]
+    = { { "-include-nondebug", INCLUDE_NONDEBUG_OPT, 0 },
+	{ "-type", TYPE_REGEXP_OPT, 1 },
+	{ "-name", NAME_REGEXP_OPT, 1 },
+	{ "-max-results", MAX_RESULTS_OPT, 1 },
+	{ 0, 0, 0 } };
 
   int oind = 0;
   char *oarg = nullptr;
@@ -213,8 +212,8 @@ mi_info_functions_or_variables (enum search_domain kind, char **argv, int argc)
   while (1)
     {
       const char *cmd_string
-	= ((kind == FUNCTIONS_DOMAIN)
-	   ? "-symbol-info-functions" : "-symbol-info-variables");
+	= ((kind == FUNCTIONS_DOMAIN) ? "-symbol-info-functions"
+				      : "-symbol-info-variables");
       int opt = mi_getopt (cmd_string, argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
@@ -240,16 +239,16 @@ mi_info_functions_or_variables (enum search_domain kind, char **argv, int argc)
 
 /* Type for an iterator over a vector of module_symbol_search results.  */
 typedef std::vector<module_symbol_search>::const_iterator
-	module_symbol_search_iterator;
+  module_symbol_search_iterator;
 
 /* Helper for mi_info_module_functions_or_variables.  Display the results
    from ITER up to END or until we find a symbol that is in a different
    module, or in a different symtab than the first symbol we print.  Update
    and return the new value for ITER.  */
 static module_symbol_search_iterator
-output_module_symbols_in_single_module_and_file
-	(struct ui_out *uiout, module_symbol_search_iterator iter,
-	 const module_symbol_search_iterator end, enum search_domain kind)
+output_module_symbols_in_single_module_and_file (
+  struct ui_out *uiout, module_symbol_search_iterator iter,
+  const module_symbol_search_iterator end, enum search_domain kind)
 {
   /* The symbol for the module in which the first result resides.  */
   const symbol *first_module_symbol = iter->first.symbol;
@@ -267,12 +266,10 @@ output_module_symbols_in_single_module_and_file
 
   /* Repeatedly output result symbols until either we run out of symbols,
      we change module, or we change symtab.  */
-  for (; (iter != end
-	  && first_module_symbol == iter->first.symbol
+  for (; (iter != end && first_module_symbol == iter->first.symbol
 	  && first_symbtab == iter->second.symbol->symtab ());
        ++iter)
-    output_debug_symbol (uiout, kind, iter->second.symbol,
-			 iter->second.block);
+    output_debug_symbol (uiout, kind, iter->second.symbol, iter->second.block);
 
   return iter;
 }
@@ -282,9 +279,9 @@ output_module_symbols_in_single_module_and_file
    module than the first symbol we print.  Update and return the new value
    for ITER.  */
 static module_symbol_search_iterator
-output_module_symbols_in_single_module
-	(struct ui_out *uiout, module_symbol_search_iterator iter,
-	 const module_symbol_search_iterator end, enum search_domain kind)
+output_module_symbols_in_single_module (
+  struct ui_out *uiout, module_symbol_search_iterator iter,
+  const module_symbol_search_iterator end, enum search_domain kind)
 {
   gdb_assert (iter->first.symbol != nullptr);
   gdb_assert (iter->second.symbol != nullptr);
@@ -302,8 +299,8 @@ output_module_symbols_in_single_module
      print all results within a single file.  We keep calling the output
      function until we change module.  */
   while (iter != end && first_module_symbol == iter->first.symbol)
-    iter = output_module_symbols_in_single_module_and_file (uiout, iter,
-							    end, kind);
+    iter = output_module_symbols_in_single_module_and_file (uiout, iter, end,
+							    kind);
   return iter;
 }
 
@@ -312,8 +309,8 @@ output_module_symbols_in_single_module
    command line options passed to the MI command.  */
 
 static void
-mi_info_module_functions_or_variables (enum search_domain kind,
-					char **argv, int argc)
+mi_info_module_functions_or_variables (enum search_domain kind, char **argv,
+				       int argc)
 {
   const char *module_regexp = nullptr;
   const char *regexp = nullptr;
@@ -322,16 +319,15 @@ mi_info_module_functions_or_variables (enum search_domain kind,
   /* Process the command line options.  */
 
   enum opt
-    {
-     MODULE_REGEXP_OPT, TYPE_REGEXP_OPT, NAME_REGEXP_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"-module", MODULE_REGEXP_OPT, 1},
-    {"-type", TYPE_REGEXP_OPT, 1},
-    {"-name", NAME_REGEXP_OPT, 1},
-    { 0, 0, 0 }
+    MODULE_REGEXP_OPT,
+    TYPE_REGEXP_OPT,
+    NAME_REGEXP_OPT
   };
+  static const struct mi_opt opts[] = { { "-module", MODULE_REGEXP_OPT, 1 },
+					{ "-type", TYPE_REGEXP_OPT, 1 },
+					{ "-name", NAME_REGEXP_OPT, 1 },
+					{ 0, 0, 0 } };
 
   int oind = 0;
   char *oarg = nullptr;
@@ -339,9 +335,8 @@ mi_info_module_functions_or_variables (enum search_domain kind,
   while (1)
     {
       const char *cmd_string
-	= ((kind == FUNCTIONS_DOMAIN)
-	   ? "-symbol-info-module-functions"
-	   : "-symbol-info-module-variables");
+	= ((kind == FUNCTIONS_DOMAIN) ? "-symbol-info-module-functions"
+				      : "-symbol-info-module-variables");
       int opt = mi_getopt (cmd_string, argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
@@ -410,23 +405,21 @@ mi_cmd_symbol_info_modules (const char *command, char **argv, int argc)
   const char *regexp = nullptr;
 
   enum opt
-    {
-     NAME_REGEXP_OPT, MAX_RESULTS_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"-name", NAME_REGEXP_OPT, 1},
-    {"-max-results", MAX_RESULTS_OPT, 1},
-    { 0, 0, 0 }
+    NAME_REGEXP_OPT,
+    MAX_RESULTS_OPT
   };
+  static const struct mi_opt opts[] = { { "-name", NAME_REGEXP_OPT, 1 },
+					{ "-max-results", MAX_RESULTS_OPT, 1 },
+					{ 0, 0, 0 } };
 
   int oind = 0;
   char *oarg = nullptr;
 
   while (1)
     {
-      int opt = mi_getopt ("-symbol-info-modules", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-symbol-info-modules", argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -452,23 +445,21 @@ mi_cmd_symbol_info_types (const char *command, char **argv, int argc)
   const char *regexp = nullptr;
 
   enum opt
-    {
-     NAME_REGEXP_OPT, MAX_RESULTS_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"-name", NAME_REGEXP_OPT, 1},
-    {"-max-results", MAX_RESULTS_OPT, 1},
-    { 0, 0, 0 }
+    NAME_REGEXP_OPT,
+    MAX_RESULTS_OPT
   };
+  static const struct mi_opt opts[] = { { "-name", NAME_REGEXP_OPT, 1 },
+					{ "-max-results", MAX_RESULTS_OPT, 1 },
+					{ 0, 0, 0 } };
 
   int oind = 0;
   char *oarg = nullptr;
 
   while (true)
     {
-      int opt = mi_getopt ("-symbol-info-types", argc, argv, opts,
-			   &oind, &oarg);
+      int opt
+	= mi_getopt ("-symbol-info-types", argc, argv, opts, &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)

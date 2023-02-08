@@ -204,8 +204,8 @@ call_lseek (int fd, off_t offset, int whence)
 {
   char exp[80];
 
-  snprintf (&exp[0], sizeof (exp), "(long) lseek (%d, %ld, %d)",
-	    fd, (long) offset, whence);
+  snprintf (&exp[0], sizeof (exp), "(long) lseek (%d, %ld, %d)", fd,
+	    (long) offset, whence);
   return (off_t) parse_and_eval_long (&exp[0]);
 }
 
@@ -305,15 +305,17 @@ linux_fork_killall (void)
       pid_t pid = fi.ptid.pid ();
       int status;
       pid_t ret;
-      do {
-	/* Use SIGKILL instead of PTRACE_KILL because the former works even
+      do
+	{
+	  /* Use SIGKILL instead of PTRACE_KILL because the former works even
 	   if the thread is running, while the later doesn't.  */
-	kill (pid, SIGKILL);
-	ret = waitpid (pid, &status, 0);
-	/* We might get a SIGCHLD instead of an exit status.  This is
+	  kill (pid, SIGKILL);
+	  ret = waitpid (pid, &status, 0);
+	  /* We might get a SIGCHLD instead of an exit status.  This is
 	 aggravated by the first kill above - a child has just
 	 died.  MVS comment cut-and-pasted from linux-nat.  */
-      } while (ret == pid && WIFSTOPPED (status));
+	}
+      while (ret == pid && WIFSTOPPED (status));
     }
 
   /* Clear list, prepare to start fresh.  */
@@ -348,7 +350,7 @@ linux_fork_mourn_inferior (void)
 
   last = find_last_fork ();
   fork_load_infrun_state (last);
-  gdb_printf (_("[Switching to %s]\n"),
+  gdb_printf (_ ("[Switching to %s]\n"),
 	      target_pid_to_str (inferior_ptid).c_str ());
 
   /* If there's only one fork, switch back to non-fork mode.  */
@@ -368,7 +370,7 @@ linux_fork_detach (int from_tty)
      fork.  */
 
   if (ptrace (PTRACE_DETACH, inferior_ptid.pid (), 0, 0))
-    error (_("Unable to detach %s"),
+    error (_ ("Unable to detach %s"),
 	   target_pid_to_str (inferior_ptid).c_str ());
 
   delete_fork (inferior_ptid);
@@ -381,7 +383,7 @@ linux_fork_detach (int from_tty)
   fork_load_infrun_state (&fork_list.front ());
 
   if (from_tty)
-    gdb_printf (_("[Switching to %s]\n"),
+    gdb_printf (_ ("[Switching to %s]\n"),
 		target_pid_to_str (inferior_ptid).c_str ());
 
   /* If there's only one fork, switch back to non-fork mode.  */
@@ -396,6 +398,7 @@ linux_fork_detach (int from_tty)
 class scoped_switch_fork_info
 {
 public:
+
   /* Switch to the infrun state held on the fork_info identified by
      PPTID.  If PPTID is the current inferior then no switch is done.  */
   explicit scoped_switch_fork_info (ptid_t pptid)
@@ -432,9 +435,8 @@ public:
 	  }
 	catch (const gdb_exception &ex)
 	  {
-	    warning (_("Couldn't restore checkpoint state in %s: %s"),
-		     target_pid_to_str (m_oldfp->ptid).c_str (),
-		     ex.what ());
+	    warning (_ ("Couldn't restore checkpoint state in %s: %s"),
+		     target_pid_to_str (m_oldfp->ptid).c_str (), ex.what ());
 	  }
       }
   }
@@ -442,6 +444,7 @@ public:
   DISABLE_COPY_AND_ASSIGN (scoped_switch_fork_info);
 
 private:
+
   /* The fork_info for the previously selected infrun state, or nullptr if
      we were already in the desired state, and nothing needs to be
      restored.  */
@@ -470,7 +473,8 @@ inferior_call_waitpid (ptid_t pptid, int pid)
 
       /* Get the argv.  */
       argv[0] = value_from_longest (builtin_type (gdbarch)->builtin_int, pid);
-      argv[1] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr, 0);
+      argv[1]
+	= value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr, 0);
       argv[2] = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
 
       retv = call_function_by_hand (waitpid_fn, NULL, argv);
@@ -491,25 +495,25 @@ delete_checkpoint_command (const char *args, int from_tty)
   struct fork_info *fi;
 
   if (!args || !*args)
-    error (_("Requires argument (checkpoint id to delete)"));
+    error (_ ("Requires argument (checkpoint id to delete)"));
 
   ptid = fork_id_to_ptid (parse_and_eval_long (args));
   if (ptid == minus_one_ptid)
-    error (_("No such checkpoint id, %s"), args);
+    error (_ ("No such checkpoint id, %s"), args);
 
   if (ptid == inferior_ptid)
-    error (_("\
+    error (_ ("\
 Please switch to another checkpoint before deleting the current one"));
 
   if (ptrace (PTRACE_KILL, ptid.pid (), 0, 0))
-    error (_("Unable to kill pid %s"), target_pid_to_str (ptid).c_str ());
+    error (_ ("Unable to kill pid %s"), target_pid_to_str (ptid).c_str ());
 
   fi = find_fork_ptid (ptid);
   gdb_assert (fi);
   pptid = fi->parent_ptid;
 
   if (from_tty)
-    gdb_printf (_("Killed %s\n"), target_pid_to_str (ptid).c_str ());
+    gdb_printf (_ ("Killed %s\n"), target_pid_to_str (ptid).c_str ());
 
   delete_fork (ptid);
 
@@ -522,7 +526,7 @@ Please switch to another checkpoint before deleting the current one"));
       || (parent != NULL && parent->state == THREAD_STOPPED))
     {
       if (inferior_call_waitpid (pptid, ptid.pid ()))
-	warning (_("Unable to wait pid %s"),
+	warning (_ ("Unable to wait pid %s"),
 		 target_pid_to_str (ptid).c_str ());
     }
 }
@@ -533,21 +537,21 @@ detach_checkpoint_command (const char *args, int from_tty)
   ptid_t ptid;
 
   if (!args || !*args)
-    error (_("Requires argument (checkpoint id to detach)"));
+    error (_ ("Requires argument (checkpoint id to detach)"));
 
   ptid = fork_id_to_ptid (parse_and_eval_long (args));
   if (ptid == minus_one_ptid)
-    error (_("No such checkpoint id, %s"), args);
+    error (_ ("No such checkpoint id, %s"), args);
 
   if (ptid == inferior_ptid)
-    error (_("\
+    error (_ ("\
 Please switch to another checkpoint before detaching the current one"));
 
   if (ptrace (PTRACE_DETACH, ptid.pid (), 0, 0))
-    error (_("Unable to detach %s"), target_pid_to_str (ptid).c_str ());
+    error (_ ("Unable to detach %s"), target_pid_to_str (ptid).c_str ());
 
   if (from_tty)
-    gdb_printf (_("Detached %s\n"), target_pid_to_str (ptid).c_str ());
+    gdb_printf (_ ("Detached %s\n"), target_pid_to_str (ptid).c_str ());
 
   delete_fork (ptid);
 }
@@ -578,16 +582,16 @@ info_checkpoints_command (const char *arg, int from_tty)
       ULONGEST pc = fi.pc;
       gdb_printf ("%d %s", fi.num, target_pid_to_str (fi.ptid).c_str ());
       if (fi.num == 0)
-	gdb_printf (_(" (main process)"));
-      gdb_printf (_(" at "));
+	gdb_printf (_ (" (main process)"));
+      gdb_printf (_ (" at "));
       gdb_puts (paddress (gdbarch, pc));
 
       symtab_and_line sal = find_pc_line (pc, 0);
       if (sal.symtab)
-	gdb_printf (_(", file %s"),
+	gdb_printf (_ (", file %s"),
 		    symtab_to_filename_for_display (sal.symtab));
       if (sal.line)
-	gdb_printf (_(", line %d"), sal.line);
+	gdb_printf (_ (", line %d"), sal.line);
       if (!sal.symtab && !sal.line)
 	{
 	  struct bound_minimal_symbol msym;
@@ -602,9 +606,9 @@ info_checkpoints_command (const char *arg, int from_tty)
   if (printed == NULL)
     {
       if (requested > 0)
-	gdb_printf (_("No checkpoint number %d.\n"), requested);
+	gdb_printf (_ ("No checkpoint number %d.\n"), requested);
       else
-	gdb_printf (_("No checkpoints.\n"));
+	gdb_printf (_ ("No checkpoints.\n"));
     }
 }
 
@@ -644,14 +648,14 @@ checkpoint_command (const char *args, int from_tty)
   struct fork_info *fp;
   pid_t retpid;
 
-  if (!target_has_execution ()) 
-    error (_("The program is not being run."));
+  if (!target_has_execution ())
+    error (_ ("The program is not being run."));
 
   /* Ensure that the inferior is not multithreaded.  */
   update_thread_list ();
   if (inf_has_multiple_threads ())
-    error (_("checkpoint: can't checkpoint multiple threads."));
-  
+    error (_ ("checkpoint: can't checkpoint multiple threads."));
+
   /* Make the inferior fork, record its (and gdb's) state.  */
 
   if (lookup_minimal_symbol ("fork", NULL, NULL).minsym != NULL)
@@ -660,7 +664,7 @@ checkpoint_command (const char *args, int from_tty)
     if (lookup_minimal_symbol ("_fork", NULL, NULL).minsym != NULL)
       fork_fn = find_function_in_inferior ("fork", &fork_objf);
   if (!fork_fn)
-    error (_("checkpoint: can't find fork function in inferior."));
+    error (_ ("checkpoint: can't find fork function in inferior."));
 
   gdbarch = fork_objf->arch ();
   ret = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
@@ -673,8 +677,8 @@ checkpoint_command (const char *args, int from_tty)
     ret = call_function_by_hand (fork_fn, NULL, {});
   }
 
-  if (!ret)	/* Probably can't happen.  */
-    error (_("checkpoint: call_function_by_hand returned null."));
+  if (!ret) /* Probably can't happen.  */
+    error (_ ("checkpoint: call_function_by_hand returned null."));
 
   retpid = value_as_long (ret);
   get_last_target_status (nullptr, &last_target_ptid, &last_target_waitstatus);
@@ -685,20 +689,19 @@ checkpoint_command (const char *args, int from_tty)
     {
       int parent_pid;
 
-      gdb_printf (_("checkpoint %d: fork returned pid %ld.\n"),
+      gdb_printf (_ ("checkpoint %d: fork returned pid %ld.\n"),
 		  fp != NULL ? fp->num : -1, (long) retpid);
       if (info_verbose)
 	{
 	  parent_pid = last_target_ptid.lwp ();
 	  if (parent_pid == 0)
 	    parent_pid = last_target_ptid.pid ();
-	  gdb_printf (_("   gdb says parent = %ld.\n"),
-		      (long) parent_pid);
+	  gdb_printf (_ ("   gdb says parent = %ld.\n"), (long) parent_pid);
 	}
     }
 
   if (!fp)
-    error (_("Failed to find new fork"));
+    error (_ ("Failed to find new fork"));
 
   if (one_fork_p ())
     {
@@ -728,7 +731,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
   fork_load_infrun_state (newfp);
   insert_breakpoints ();
 
-  gdb_printf (_("Switching to %s\n"),
+  gdb_printf (_ ("Switching to %s\n"),
 	      target_pid_to_str (inferior_ptid).c_str ());
 
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
@@ -741,28 +744,29 @@ restart_command (const char *args, int from_tty)
   struct fork_info *fp;
 
   if (!args || !*args)
-    error (_("Requires argument (checkpoint id to restart)"));
+    error (_ ("Requires argument (checkpoint id to restart)"));
 
   if ((fp = find_fork_id (parse_and_eval_long (args))) == NULL)
-    error (_("Not found: checkpoint id %s"), args);
+    error (_ ("Not found: checkpoint id %s"), args);
 
   linux_fork_context (fp, from_tty);
 }
 
 void _initialize_linux_fork ();
+
 void
 _initialize_linux_fork ()
 {
   /* Checkpoint command: create a fork of the inferior process
      and set it aside for later debugging.  */
 
-  add_com ("checkpoint", class_obscure, checkpoint_command, _("\
+  add_com ("checkpoint", class_obscure, checkpoint_command, _ ("\
 Fork a duplicate process (experimental)."));
 
   /* Restart command: restore the context of a specified checkpoint
      process.  */
 
-  add_com ("restart", class_obscure, restart_command, _("\
+  add_com ("restart", class_obscure, restart_command, _ ("\
 Restore program context from a checkpoint.\n\
 Usage: restart N\n\
 Argument N is checkpoint ID, as displayed by 'info checkpoints'."));
@@ -770,14 +774,14 @@ Argument N is checkpoint ID, as displayed by 'info checkpoints'."));
   /* Delete checkpoint command: kill the process and remove it from
      the fork list.  */
 
-  add_cmd ("checkpoint", class_obscure, delete_checkpoint_command, _("\
+  add_cmd ("checkpoint", class_obscure, delete_checkpoint_command, _ ("\
 Delete a checkpoint (experimental)."),
 	   &deletelist);
 
   /* Detach checkpoint command: release the process to run independently,
      and remove it from the fork list.  */
 
-  add_cmd ("checkpoint", class_obscure, detach_checkpoint_command, _("\
+  add_cmd ("checkpoint", class_obscure, detach_checkpoint_command, _ ("\
 Detach from a checkpoint (experimental)."),
 	   &detachlist);
 
@@ -785,5 +789,5 @@ Detach from a checkpoint (experimental)."),
      currently under gdb's control.  */
 
   add_info ("checkpoints", info_checkpoints_command,
-	    _("IDs of currently known checkpoints."));
+	    _ ("IDs of currently known checkpoints."));
 }

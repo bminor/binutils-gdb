@@ -31,60 +31,43 @@
 #include "linux-tdep.h"
 #include "gdbarch.h"
 
-#define REGSx16(base) \
-  {(base),      0}, \
-  {(base) +  1, 4}, \
-  {(base) +  2, 8}, \
-  {(base) +  3, 12}, \
-  {(base) +  4, 16}, \
-  {(base) +  5, 20}, \
-  {(base) +  6, 24}, \
-  {(base) +  7, 28}, \
-  {(base) +  8, 32}, \
-  {(base) +  9, 36}, \
-  {(base) + 10, 40}, \
-  {(base) + 11, 44}, \
-  {(base) + 12, 48}, \
-  {(base) + 13, 52}, \
-  {(base) + 14, 56}, \
-  {(base) + 15, 60}
+#define REGSx16(base)                                                      \
+  { (base), 0 }, { (base) + 1, 4 }, { (base) + 2, 8 }, { (base) + 3, 12 }, \
+    { (base) + 4, 16 }, { (base) + 5, 20 }, { (base) + 6, 24 },            \
+    { (base) + 7, 28 }, { (base) + 8, 32 }, { (base) + 9, 36 },            \
+    { (base) + 10, 40 }, { (base) + 11, 44 }, { (base) + 12, 48 },         \
+    { (base) + 13, 52 }, { (base) + 14, 56 },                              \
+  {                                                                        \
+    (base) + 15, 60                                                        \
+  }
 
 /* Describe the contents of the .reg section of the core file.  */
 
-static const struct sh_corefile_regmap gregs_table[] =
-{
-  REGSx16 (R0_REGNUM),
-  {PC_REGNUM,   64},
-  {PR_REGNUM,   68},
-  {SR_REGNUM,   72},
-  {GBR_REGNUM,  76},
-  {MACH_REGNUM, 80},
-  {MACL_REGNUM, 84},
-  {-1 /* Terminator.  */, 0}
-};
+static const struct sh_corefile_regmap gregs_table[]
+  = { REGSx16 (R0_REGNUM), { PC_REGNUM, 64 },		{ PR_REGNUM, 68 },
+      { SR_REGNUM, 72 },   { GBR_REGNUM, 76 },		{ MACH_REGNUM, 80 },
+      { MACL_REGNUM, 84 }, { -1 /* Terminator.  */, 0 } };
 
 /* Describe the contents of the .reg2 section of the core file.  */
 
-static const struct sh_corefile_regmap fpregs_table[] =
-{
-  REGSx16 (FR0_REGNUM),
-  /* REGSx16 xfp_regs omitted.  */
-  {FPSCR_REGNUM, 128},
-  {FPUL_REGNUM,  132},
-  {-1 /* Terminator.  */, 0}
-};
+static const struct sh_corefile_regmap fpregs_table[]
+  = { REGSx16 (FR0_REGNUM),
+      /* REGSx16 xfp_regs omitted.  */
+      { FPSCR_REGNUM, 128 },
+      { FPUL_REGNUM, 132 },
+      { -1 /* Terminator.  */, 0 } };
 
 /* SH signal handler frame support.  */
 
 static void
 sh_linux_sigtramp_cache (frame_info_ptr this_frame,
-			 struct trad_frame_cache *this_cache,
-			 CORE_ADDR func, int regs_offset)
+			 struct trad_frame_cache *this_cache, CORE_ADDR func,
+			 int regs_offset)
 {
   int i;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  CORE_ADDR base = get_frame_register_unsigned (this_frame,
-						gdbarch_sp_regnum (gdbarch));
+  CORE_ADDR base
+    = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
   CORE_ADDR regs = base + regs_offset;
 
   for (i = 0; i < 18; i++)
@@ -115,8 +98,7 @@ sh_linux_sigtramp_cache (frame_info_ptr this_frame,
 static void
 sh_linux_sigreturn_init (const struct tramp_frame *self,
 			 frame_info_ptr this_frame,
-			 struct trad_frame_cache *this_cache,
-			 CORE_ADDR func)
+			 struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   /* SH 32-bit sigframe: sigcontext at start of sigframe,
      registers start after a single 'oldmask' word.  */
@@ -133,53 +115,47 @@ sh_linux_rt_sigreturn_init (const struct tramp_frame *self,
      we can find sigcontext embedded within a ucontext (offset 20 bytes).
      Then registers start after a single 'oldmask' word.  */
   sh_linux_sigtramp_cache (this_frame, this_cache, func,
-			   128 /* sizeof (struct siginfo)  */
-			   + 20 /* offsetof (struct ucontext, uc_mcontext) */
-			   + 4 /* oldmask word at start of sigcontext */);
+			   128	  /* sizeof (struct siginfo)  */
+			     + 20 /* offsetof (struct ucontext, uc_mcontext) */
+			     + 4 /* oldmask word at start of sigcontext */);
 }
 
 /* Instruction patterns.  */
-#define SH_MOVW     0x9305
-#define SH_TRAP     0xc300
-#define SH_OR_R0_R0 0x200b       
+#define SH_MOVW 0x9305
+#define SH_TRAP 0xc300
+#define SH_OR_R0_R0 0x200b
 
 /* SH sigreturn syscall numbers.  */
 #define SH_NR_SIGRETURN 0x0077
 #define SH_NR_RT_SIGRETURN 0x00ad
 
-static struct tramp_frame sh_linux_sigreturn_tramp_frame = {
-  SIGTRAMP_FRAME,
-  2,
-  {
-    { SH_MOVW, 0xffff },
-    { SH_TRAP, 0xff00 }, /* #imm argument part filtered out.  */
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_NR_SIGRETURN, 0xffff },
-    { TRAMP_SENTINEL_INSN }
-  },
-  sh_linux_sigreturn_init
-};
+static struct tramp_frame sh_linux_sigreturn_tramp_frame
+  = { SIGTRAMP_FRAME,
+      2,
+      { { SH_MOVW, 0xffff },
+	{ SH_TRAP, 0xff00 }, /* #imm argument part filtered out.  */
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_NR_SIGRETURN, 0xffff },
+	{ TRAMP_SENTINEL_INSN } },
+      sh_linux_sigreturn_init };
 
-static struct tramp_frame sh_linux_rt_sigreturn_tramp_frame = {
-  SIGTRAMP_FRAME,
-  2,
-  {
-    { SH_MOVW, 0xffff },
-    { SH_TRAP, 0xff00 }, /* #imm argument part filtered out.  */
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_OR_R0_R0, 0xffff },
-    { SH_NR_RT_SIGRETURN, 0xffff },
-    { TRAMP_SENTINEL_INSN }
-  },
-  sh_linux_rt_sigreturn_init
-};
+static struct tramp_frame sh_linux_rt_sigreturn_tramp_frame
+  = { SIGTRAMP_FRAME,
+      2,
+      { { SH_MOVW, 0xffff },
+	{ SH_TRAP, 0xff00 }, /* #imm argument part filtered out.  */
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_OR_R0_R0, 0xffff },
+	{ SH_NR_RT_SIGRETURN, 0xffff },
+	{ TRAMP_SENTINEL_INSN } },
+      sh_linux_rt_sigreturn_init };
 
 static void
 sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -188,8 +164,8 @@ sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 linux_ilp32_fetch_link_map_offsets);
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
@@ -209,6 +185,7 @@ sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_sh_linux_tdep ();
+
 void
 _initialize_sh_linux_tdep ()
 {

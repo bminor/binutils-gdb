@@ -31,8 +31,8 @@
 
 static void
 sparc64nbsd_supply_gregset (const struct sparc_gregmap *gregmap,
-			    struct regcache *regcache,
-			    int regnum, const void *gregs)
+			    struct regcache *regcache, int regnum,
+			    const void *gregs)
 {
   int sparc32 = (gdbarch_ptr_bit (regcache->arch ()) == 32);
 
@@ -44,8 +44,8 @@ sparc64nbsd_supply_gregset (const struct sparc_gregmap *gregmap,
 
 static void
 sparc64nbsd_collect_gregset (const struct sparc_gregmap *gregmap,
-			     const struct regcache *regcache,
-			     int regnum, void *gregs)
+			     const struct regcache *regcache, int regnum,
+			     void *gregs)
 {
   int sparc32 = (gdbarch_ptr_bit (regcache->arch ()) == 32);
 
@@ -57,8 +57,8 @@ sparc64nbsd_collect_gregset (const struct sparc_gregmap *gregmap,
 
 static void
 sparc64nbsd_supply_fpregset (const struct sparc_fpregmap *fpregmap,
-			     struct regcache *regcache,
-			     int regnum, const void *fpregs)
+			     struct regcache *regcache, int regnum,
+			     const void *fpregs)
 {
   int sparc32 = (gdbarch_ptr_bit (regcache->arch ()) == 32);
 
@@ -70,8 +70,8 @@ sparc64nbsd_supply_fpregset (const struct sparc_fpregmap *fpregmap,
 
 static void
 sparc64nbsd_collect_fpregset (const struct sparc_fpregmap *fpregmap,
-			      const struct regcache *regcache,
-			      int regnum, void *fpregs)
+			      const struct regcache *regcache, int regnum,
+			      void *fpregs)
 {
   int sparc32 = (gdbarch_ptr_bit (regcache->arch ()) == 32);
 
@@ -97,10 +97,8 @@ sparc64nbsd_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
     return 1;
 
   /* Control registers.  */
-  if (regnum == SPARC64_PC_REGNUM
-      || regnum == SPARC64_NPC_REGNUM
-      || regnum == SPARC64_STATE_REGNUM
-      || regnum == SPARC64_Y_REGNUM)
+  if (regnum == SPARC64_PC_REGNUM || regnum == SPARC64_NPC_REGNUM
+      || regnum == SPARC64_STATE_REGNUM || regnum == SPARC64_Y_REGNUM)
     return 1;
 
   return 0;
@@ -125,7 +123,6 @@ sparc64nbsd_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 
   return 0;
 }
-
 
 /* Support for debugging kernel virtual memory images.  */
 
@@ -153,8 +150,8 @@ sparc64nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   /* If the program counter is zero, this is probably a core dump, and
      we can get %pc from the stack.  */
   if (pcb->pcb_pc == 0)
-      read_memory(pcb->pcb_sp + BIAS - 176 + (11 * 8), 
-		  (gdb_byte *)&pcb->pcb_pc, sizeof pcb->pcb_pc);
+    read_memory (pcb->pcb_sp + BIAS - 176 + (11 * 8),
+		 (gdb_byte *) &pcb->pcb_pc, sizeof pcb->pcb_pc);
 
   regcache->raw_supply (SPARC_SP_REGNUM, &pcb->pcb_sp);
   regcache->raw_supply (SPARC64_PC_REGNUM, &pcb->pcb_pc);
@@ -171,6 +168,7 @@ sparc64nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 static sparc_target<inf_ptrace_target> the_sparc64_nbsd_nat_target;
 
 void _initialize_sparc64nbsd_nat ();
+
 void
 _initialize_sparc64nbsd_nat ()
 {

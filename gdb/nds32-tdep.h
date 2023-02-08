@@ -28,13 +28,13 @@ enum nds32_regnum
   /* General purpose registers.  */
   NDS32_R0_REGNUM = 0,
   NDS32_R5_REGNUM = 5,
-  NDS32_TA_REGNUM = 15,		/* Temporary register.  */
-  NDS32_FP_REGNUM = 28,		/* Frame pointer.  */
-  NDS32_GP_REGNUM = 29,		/* Global pointer.  */
-  NDS32_LP_REGNUM = 30,		/* Link pointer.  */
-  NDS32_SP_REGNUM = 31,		/* Stack pointer.  */
+  NDS32_TA_REGNUM = 15, /* Temporary register.  */
+  NDS32_FP_REGNUM = 28, /* Frame pointer.  */
+  NDS32_GP_REGNUM = 29, /* Global pointer.  */
+  NDS32_LP_REGNUM = 30, /* Link pointer.  */
+  NDS32_SP_REGNUM = 31, /* Stack pointer.  */
 
-  NDS32_PC_REGNUM = 32,		/* Program counter.  */
+  NDS32_PC_REGNUM = 32, /* Program counter.  */
 
   NDS32_NUM_REGS,
 

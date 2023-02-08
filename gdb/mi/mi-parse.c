@@ -42,40 +42,40 @@ mi_parse_escape (const char **string_ptr)
 
   switch (c)
     {
-      case '\n':
-	return -2;
-      case 0:
-	(*string_ptr)--;
-	return 0;
+    case '\n':
+      return -2;
+    case 0:
+      (*string_ptr)--;
+      return 0;
 
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-	{
-	  int i = fromhex (c);
-	  int count = 0;
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+      {
+	int i = fromhex (c);
+	int count = 0;
 
-	  while (++count < 3)
-	    {
-	      c = (**string_ptr);
-	      if (isdigit (c) && c != '8' && c != '9')
-		{
-		  (*string_ptr)++;
-		  i *= 8;
-		  i += fromhex (c);
-		}
-	      else
-		{
-		  break;
-		}
-	    }
-	  return i;
-	}
+	while (++count < 3)
+	  {
+	    c = (**string_ptr);
+	    if (isdigit (c) && c != '8' && c != '9')
+	      {
+		(*string_ptr)++;
+		i *= 8;
+		i += fromhex (c);
+	      }
+	    else
+	      {
+		break;
+	      }
+	  }
+	return i;
+      }
 
     case 'a':
       c = '\a';
@@ -180,7 +180,7 @@ mi_parse_argv (const char *args, struct mi_parse *parse)
 		len++;
 	      }
 	    arg[len] = '\0';
-	    chp++;		/* That closing quote.  */
+	    chp++; /* That closing quote.  */
 	    break;
 	  }
 	default:
@@ -262,7 +262,7 @@ mi_parse (const char *cmd, char **token)
 
   /* Extract the command.  */
   {
-    const char *tmp = chp + 1;	/* discard ``-'' */
+    const char *tmp = chp + 1; /* discard ``-'' */
 
     for (; *chp && !isspace (*chp); chp++)
       ;
@@ -274,8 +274,8 @@ mi_parse (const char *cmd, char **token)
   /* Find the command in the MI table.  */
   parse->cmd = mi_cmd_lookup (parse->command);
   if (parse->cmd == NULL)
-    throw_error (UNDEFINED_COMMAND_ERROR,
-		 _("Undefined MI command: %s"), parse->command);
+    throw_error (UNDEFINED_COMMAND_ERROR, _ ("Undefined MI command: %s"),
+		 parse->command);
 
   /* Skip white space following the command.  */
   chp = skip_spaces (chp);
@@ -314,10 +314,10 @@ mi_parse (const char *cmd, char **token)
 
 	  option = "--thread-group";
 	  if (parse->thread_group != -1)
-	    error (_("Duplicate '--thread-group' option"));
+	    error (_ ("Duplicate '--thread-group' option"));
 	  chp += tgs;
 	  if (*chp != 'i')
-	    error (_("Invalid thread group id"));
+	    error (_ ("Invalid thread group id"));
 	  chp += 1;
 	  parse->thread_group = strtol (chp, &endp, 10);
 	  chp = endp;
@@ -328,7 +328,7 @@ mi_parse (const char *cmd, char **token)
 
 	  option = "--thread";
 	  if (parse->thread != -1)
-	    error (_("Duplicate '--thread' option"));
+	    error (_ ("Duplicate '--thread' option"));
 	  chp += ts;
 	  parse->thread = strtol (chp, &endp, 10);
 	  chp = endp;
@@ -339,7 +339,7 @@ mi_parse (const char *cmd, char **token)
 
 	  option = "--frame";
 	  if (parse->frame != -1)
-	    error (_("Duplicate '--frame' option"));
+	    error (_ ("Duplicate '--frame' option"));
 	  chp += fs;
 	  parse->frame = strtol (chp, &endp, 10);
 	  chp = endp;
@@ -353,13 +353,13 @@ mi_parse (const char *cmd, char **token)
 	  parse->language = language_enum (lang_name.c_str ());
 	  if (parse->language == language_unknown
 	      || parse->language == language_auto)
-	    error (_("Invalid --language argument: %s"), lang_name.c_str ());
+	    error (_ ("Invalid --language argument: %s"), lang_name.c_str ());
 	}
       else
 	break;
 
       if (*chp != '\0' && !isspace (*chp))
-	error (_("Invalid value for the '%s' option"), option);
+	error (_ ("Invalid value for the '%s' option"), option);
       chp = skip_spaces (chp);
     }
 
@@ -374,17 +374,14 @@ mi_parse (const char *cmd, char **token)
 enum print_values
 mi_parse_print_values (const char *name)
 {
-   if (strcmp (name, "0") == 0
-       || strcmp (name, mi_no_values) == 0)
-     return PRINT_NO_VALUES;
-   else if (strcmp (name, "1") == 0
-	    || strcmp (name, mi_all_values) == 0)
-     return PRINT_ALL_VALUES;
-   else if (strcmp (name, "2") == 0
-	    || strcmp (name, mi_simple_values) == 0)
-     return PRINT_SIMPLE_VALUES;
-   else
-     error (_("Unknown value for PRINT_VALUES: must be: \
+  if (strcmp (name, "0") == 0 || strcmp (name, mi_no_values) == 0)
+    return PRINT_NO_VALUES;
+  else if (strcmp (name, "1") == 0 || strcmp (name, mi_all_values) == 0)
+    return PRINT_ALL_VALUES;
+  else if (strcmp (name, "2") == 0 || strcmp (name, mi_simple_values) == 0)
+    return PRINT_SIMPLE_VALUES;
+  else
+    error (_ ("Unknown value for PRINT_VALUES: must be: \
 0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
-	    mi_no_values, mi_all_values, mi_simple_values);
+	   mi_no_values, mi_all_values, mi_simple_values);
 }

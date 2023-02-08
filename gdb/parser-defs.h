@@ -20,7 +20,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (PARSER_DEFS_H)
+#if !defined(PARSER_DEFS_H)
 #define PARSER_DEFS_H 1
 
 #include "expression.h"
@@ -41,8 +41,7 @@ struct expr_builder
   /* Constructor.  LANG is the language used to parse the expression.
      And GDBARCH is the gdbarch to use during parsing.  */
 
-  expr_builder (const struct language_defn *lang,
-		struct gdbarch *gdbarch)
+  expr_builder (const struct language_defn *lang, struct gdbarch *gdbarch)
     : expout (new expression (lang, gdbarch))
   {
   }
@@ -58,24 +57,15 @@ struct expr_builder
 
   /* Return the gdbarch that was passed to the constructor.  */
 
-  struct gdbarch *gdbarch ()
-  {
-    return expout->gdbarch;
-  }
+  struct gdbarch *gdbarch () { return expout->gdbarch; }
 
   /* Return the language that was passed to the constructor.  */
 
-  const struct language_defn *language ()
-  {
-    return expout->language_defn;
-  }
+  const struct language_defn *language () { return expout->language_defn; }
 
   /* Set the root operation of the expression that is currently being
      built.  */
-  void set_operation (expr::operation_up &&op)
-  {
-    expout->op = std::move (op);
-  }
+  void set_operation (expr::operation_up &&op) { expout->op = std::move (op); }
 
   /* The expression related to this parser state.  */
 
@@ -91,8 +81,7 @@ struct expr_complete_structop : public expr_completion_base
   {
   }
 
-  bool complete (struct expression *exp,
-		 completion_tracker &tracker) override
+  bool complete (struct expression *exp, completion_tracker &tracker) override
   {
     return m_op->complete (exp, tracker);
   }
@@ -110,19 +99,16 @@ private:
 
 struct expr_complete_tag : public expr_completion_base
 {
-  expr_complete_tag (enum type_code code,
-		     gdb::unique_xmalloc_ptr<char> name)
+  expr_complete_tag (enum type_code code, gdb::unique_xmalloc_ptr<char> name)
     : m_code (code),
       m_name (std::move (name))
   {
     /* Parsers should enforce this statically.  */
-    gdb_assert (code == TYPE_CODE_ENUM
-		|| code == TYPE_CODE_UNION
+    gdb_assert (code == TYPE_CODE_ENUM || code == TYPE_CODE_UNION
 		|| code == TYPE_CODE_STRUCT);
   }
 
-  bool complete (struct expression *exp,
-		 completion_tracker &tracker) override;
+  bool complete (struct expression *exp, completion_tracker &tracker) override;
 
 private:
 
@@ -142,15 +128,10 @@ struct parser_state : public expr_builder
   /* Constructor.  LANG is the language used to parse the expression.
      And GDBARCH is the gdbarch to use during parsing.  */
 
-  parser_state (const struct language_defn *lang,
-		struct gdbarch *gdbarch,
-		const struct block *context_block,
-		CORE_ADDR context_pc,
-		int comma,
-		const char *input,
-		bool completion,
-		innermost_block_tracker *tracker,
-		bool void_p)
+  parser_state (const struct language_defn *lang, struct gdbarch *gdbarch,
+		const struct block *context_block, CORE_ADDR context_pc,
+		int comma, const char *input, bool completion,
+		innermost_block_tracker *tracker, bool void_p)
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
       expression_context_pc (context_pc),
@@ -267,7 +248,7 @@ struct parser_state : public expr_builder
   /* If this is nonzero, this block is used as the lexical context for
      symbol names.  */
 
-  const struct block * const expression_context_block;
+  const struct block *const expression_context_block;
 
   /* If expression_context_block is non-zero, then this is the PC
      within the block that we want to evaluate expressions at.  When
@@ -322,11 +303,13 @@ private:
 class innermost_block_tracker
 {
 public:
+
   innermost_block_tracker (innermost_block_tracker_types types
 			   = INNERMOST_BLOCK_FOR_SYMBOLS)
     : m_types (types),
       m_innermost_block (NULL)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* Update the stored innermost block if the new block B is more inner
      than the currently stored block, or if no block is stored yet.  The
@@ -345,12 +328,10 @@ public:
   /* Return the stored innermost block.  Can be nullptr if no symbols or
      registers were found during an expression parse, and so no innermost
      block was defined.  */
-  const struct block *block () const
-  {
-    return m_innermost_block;
-  }
+  const struct block *block () const { return m_innermost_block; }
 
 private:
+
   /* The type of innermost block being looked for.  */
   innermost_block_tracker_types m_types;
 
@@ -363,58 +344,57 @@ private:
    used, for example, for the names of symbols.  */
 
 struct stoken
-  {
-    /* Pointer to first byte of char-string or first bit of bit-string.  */
-    const char *ptr;
-    /* Length of string in bytes for char-string or bits for bit-string.  */
-    int length;
-  };
+{
+  /* Pointer to first byte of char-string or first bit of bit-string.  */
+  const char *ptr;
+  /* Length of string in bytes for char-string or bits for bit-string.  */
+  int length;
+};
 
 struct typed_stoken
-  {
-    /* A language-specific type field.  */
-    int type;
-    /* Pointer to first byte of char-string or first bit of bit-string.  */
-    char *ptr;
-    /* Length of string in bytes for char-string or bits for bit-string.  */
-    int length;
-  };
+{
+  /* A language-specific type field.  */
+  int type;
+  /* Pointer to first byte of char-string or first bit of bit-string.  */
+  char *ptr;
+  /* Length of string in bytes for char-string or bits for bit-string.  */
+  int length;
+};
 
 struct stoken_vector
-  {
-    int len;
-    struct typed_stoken *tokens;
-  };
+{
+  int len;
+  struct typed_stoken *tokens;
+};
 
 struct ttype
-  {
-    struct stoken stoken;
-    struct type *type;
-  };
+{
+  struct stoken stoken;
+  struct type *type;
+};
 
 struct symtoken
-  {
-    struct stoken stoken;
-    struct block_symbol sym;
-    int is_a_field_of_this;
-  };
+{
+  struct stoken stoken;
+  struct block_symbol sym;
+  int is_a_field_of_this;
+};
 
 struct objc_class_str
-  {
-    struct stoken stoken;
-    struct type *type;
-    int theclass;
-  };
+{
+  struct stoken stoken;
+  struct type *type;
+  int theclass;
+};
 
 extern const char *find_template_name_end (const char *);
 
 extern std::string copy_name (struct stoken);
 
-extern bool parse_float (const char *p, int len,
-			 const struct type *type, gdb_byte *data);
+extern bool parse_float (const char *p, int len, const struct type *type,
+			 gdb_byte *data);
 extern bool fits_in_type (int n_sign, ULONGEST n, int type_bits,
 			  bool type_signed_p);
-
 
 /* Function used to avoid direct calls to fprintf
    in the code generated by the bison parser.  */
@@ -422,4 +402,3 @@ extern bool fits_in_type (int n_sign, ULONGEST n, int type_bits,
 extern void parser_fprintf (FILE *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 #endif /* PARSER_DEFS_H */
-

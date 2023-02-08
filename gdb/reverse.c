@@ -41,11 +41,12 @@ exec_reverse_once (const char *cmd, const char *args, int from_tty)
   enum exec_direction_kind dir = execution_direction;
 
   if (dir == EXEC_REVERSE)
-    error (_("Already in reverse mode.  Use '%s' or 'set exec-dir forward'."),
+    error (_ ("Already in reverse mode.  Use '%s' or 'set exec-dir forward'."),
 	   cmd);
 
   if (!target_can_execute_reverse ())
-    error (_("Target %s does not support this command."), target_shortname ());
+    error (_ ("Target %s does not support this command."),
+	   target_shortname ());
 
   std::string reverse_command = string_printf ("%s %s", cmd, args ? args : "");
   scoped_restore restore_exec_dir
@@ -91,7 +92,8 @@ reverse_finish (const char *args, int from_tty)
 
 /* Data structures for a bookmark list.  */
 
-struct bookmark {
+struct bookmark
+{
   int number = 0;
   CORE_ADDR pc = 0;
   struct symtab_and_line sal;
@@ -119,7 +121,7 @@ save_bookmark_command (const char *args, int from_tty)
   dont_repeat ();
 
   if (bookmark_id == NULL)
-    error (_("target_get_bookmark failed."));
+    error (_ ("target_get_bookmark failed."));
 
   /* Set up a bookmark struct.  */
   all_bookmarks.emplace_back ();
@@ -130,7 +132,7 @@ save_bookmark_command (const char *args, int from_tty)
   b.sal.pspace = get_frame_program_space (get_current_frame ());
   b.opaque_data.reset (bookmark_id);
 
-  gdb_printf (_("Saved bookmark %d at %s\n"), b.number,
+  gdb_printf (_ ("Saved bookmark %d at %s\n"), b.number,
 	      paddress (gdbarch, b.sal.pc));
 }
 
@@ -140,8 +142,7 @@ static bool
 delete_one_bookmark (int num)
 {
   /* Find bookmark with corresponding number.  */
-  for (auto iter = all_bookmarks.begin ();
-       iter != all_bookmarks.end ();
+  for (auto iter = all_bookmarks.begin (); iter != all_bookmarks.end ();
        ++iter)
     {
       if (iter->number == num)
@@ -164,13 +165,13 @@ delete_bookmark_command (const char *args, int from_tty)
 {
   if (all_bookmarks.empty ())
     {
-      warning (_("No bookmarks."));
+      warning (_ ("No bookmarks."));
       return;
     }
 
   if (args == NULL || args[0] == '\0')
     {
-      if (from_tty && !query (_("Delete all bookmarks? ")))
+      if (from_tty && !query (_ ("Delete all bookmarks? ")))
 	return;
       delete_all_bookmarks ();
       return;
@@ -182,7 +183,7 @@ delete_bookmark_command (const char *args, int from_tty)
       int num = parser.get_number ();
       if (!delete_one_bookmark (num))
 	/* Not found.  */
-	warning (_("No bookmark #%d."), num);
+	warning (_ ("No bookmark #%d."), num);
     }
 }
 
@@ -195,10 +196,9 @@ goto_bookmark_command (const char *args, int from_tty)
   const char *p = args;
 
   if (args == NULL || args[0] == '\0')
-    error (_("Command requires an argument."));
+    error (_ ("Command requires an argument."));
 
-  if (startswith (args, "start")
-      || startswith (args, "begin")
+  if (startswith (args, "start") || startswith (args, "begin")
       || startswith (args, "end"))
     {
       /* Special case.  Give target opportunity to handle.  */
@@ -210,7 +210,7 @@ goto_bookmark_command (const char *args, int from_tty)
     {
       /* Special case -- quoted string.  Pass on to target.  */
       if (args[strlen (args) - 1] != args[0])
-	error (_("Unbalanced quotes: %s"), args);
+	error (_ ("Unbalanced quotes: %s"), args);
       target_goto_bookmark ((gdb_byte *) args, from_tty);
       return;
     }
@@ -219,7 +219,7 @@ goto_bookmark_command (const char *args, int from_tty)
   num = get_number (&args);
 
   if (num == 0)
-    error (_("goto-bookmark: invalid bookmark number '%s'."), p);
+    error (_ ("goto-bookmark: invalid bookmark number '%s'."), p);
 
   for (const bookmark &iter : all_bookmarks)
     {
@@ -231,7 +231,7 @@ goto_bookmark_command (const char *args, int from_tty)
 	}
     }
   /* Not found.  */
-  error (_("goto-bookmark: no bookmark found for '%s'."), p);
+  error (_ ("goto-bookmark: no bookmark found for '%s'."), p);
 }
 
 static int
@@ -244,10 +244,8 @@ bookmark_1 (int bnum)
     {
       if (bnum == -1 || bnum == iter.number)
 	{
-	  gdb_printf ("   %d       %s    '%s'\n",
-		      iter.number,
-		      paddress (gdbarch, iter.pc),
-		      iter.opaque_data.get ());
+	  gdb_printf ("   %d       %s    '%s'\n", iter.number,
+		      paddress (gdbarch, iter.pc), iter.opaque_data.get ());
 	  matched++;
 	}
     }
@@ -264,7 +262,7 @@ static void
 info_bookmarks_command (const char *args, int from_tty)
 {
   if (all_bookmarks.empty ())
-    gdb_printf (_("No bookmarks.\n"));
+    gdb_printf (_ ("No bookmarks.\n"));
   else if (args == NULL || *args == '\0')
     bookmark_1 (-1);
   else
@@ -279,17 +277,18 @@ info_bookmarks_command (const char *args, int from_tty)
 }
 
 void _initialize_reverse ();
+
 void
 _initialize_reverse ()
 {
   cmd_list_element *reverse_step_cmd
-   = add_com ("reverse-step", class_run, reverse_step, _("\
+    = add_com ("reverse-step", class_run, reverse_step, _ ("\
 Step program backward until it reaches the beginning of another source line.\n\
 Argument N means do this N times (or till program stops for another reason)."));
   add_com_alias ("rs", reverse_step_cmd, class_run, 1);
 
   cmd_list_element *reverse_next_cmd
-    = add_com ("reverse-next", class_run, reverse_next, _("\
+    = add_com ("reverse-next", class_run, reverse_next, _ ("\
 Step program backward, proceeding through subroutine calls.\n\
 Like the \"reverse-step\" command as long as subroutine calls do not happen;\n\
 when they do, the call is treated as one instruction.\n\
@@ -297,43 +296,43 @@ Argument N means do this N times (or till program stops for another reason)."));
   add_com_alias ("rn", reverse_next_cmd, class_run, 1);
 
   cmd_list_element *reverse_stepi_cmd
-    = add_com ("reverse-stepi", class_run, reverse_stepi, _("\
+    = add_com ("reverse-stepi", class_run, reverse_stepi, _ ("\
 Step backward exactly one instruction.\n\
 Argument N means do this N times (or till program stops for another reason)."));
   add_com_alias ("rsi", reverse_stepi_cmd, class_run, 0);
 
   cmd_list_element *reverse_nexti_cmd
-    = add_com ("reverse-nexti", class_run, reverse_nexti, _("\
+    = add_com ("reverse-nexti", class_run, reverse_nexti, _ ("\
 Step backward one instruction, but proceed through called subroutines.\n\
 Argument N means do this N times (or till program stops for another reason)."));
   add_com_alias ("rni", reverse_nexti_cmd, class_run, 0);
 
   cmd_list_element *reverse_continue_cmd
-    = add_com ("reverse-continue", class_run, reverse_continue, _("\
+    = add_com ("reverse-continue", class_run, reverse_continue, _ ("\
 Continue program being debugged but run it in reverse.\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
 which means to set the ignore count of that breakpoint to N - 1 (so that\n\
 the breakpoint won't break until the Nth time it is reached)."));
   add_com_alias ("rc", reverse_continue_cmd, class_run, 0);
 
-  add_com ("reverse-finish", class_run, reverse_finish, _("\
+  add_com ("reverse-finish", class_run, reverse_finish, _ ("\
 Execute backward until just before selected stack frame is called."));
 
-  add_com ("bookmark", class_bookmark, save_bookmark_command, _("\
+  add_com ("bookmark", class_bookmark, save_bookmark_command, _ ("\
 Set a bookmark in the program's execution history.\n\
 A bookmark represents a point in the execution history \n\
 that can be returned to at a later point in the debug session."));
-  add_info ("bookmarks", info_bookmarks_command, _("\
+  add_info ("bookmarks", info_bookmarks_command, _ ("\
 Status of user-settable bookmarks.\n\
 Bookmarks are user-settable markers representing a point in the \n\
 execution history that can be returned to later in the same debug \n\
 session."));
-  add_cmd ("bookmark", class_bookmark, delete_bookmark_command, _("\
+  add_cmd ("bookmark", class_bookmark, delete_bookmark_command, _ ("\
 Delete a bookmark from the bookmark list.\n\
 Argument is a bookmark number or numbers,\n\
  or no argument to delete all bookmarks."),
 	   &deletelist);
-  add_com ("goto-bookmark", class_bookmark, goto_bookmark_command, _("\
+  add_com ("goto-bookmark", class_bookmark, goto_bookmark_command, _ ("\
 Go to an earlier-bookmarked point in the program's execution history.\n\
 Argument is the bookmark number of a bookmark saved earlier by using \n\
 the 'bookmark' command, or the special arguments:\n\

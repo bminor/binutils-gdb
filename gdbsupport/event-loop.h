@@ -89,12 +89,11 @@ extern void delete_file_handler (int fd);
    If IS_UI is set, this file descriptor is used for a user interface.  */
 
 extern void add_file_handler (int fd, handler_func *proc,
-			      gdb_client_data client_data,
-			      std::string &&name, bool is_ui = false);
+                              gdb_client_data client_data, std::string &&name,
+                              bool is_ui = false);
 
-extern int create_timer (int milliseconds, 
-			 timer_handler_func *proc, 
-			 gdb_client_data client_data);
+extern int create_timer (int milliseconds, timer_handler_func *proc,
+                         gdb_client_data client_data);
 extern void delete_timer (int id);
 
 /* Must be defined by client.  */
@@ -128,21 +127,21 @@ extern debug_event_loop_kind debug_event_loop;
 
 /* Print an "event loop" debug statement.  */
 
-#define event_loop_debug_printf(fmt, ...) \
+#define event_loop_debug_printf(fmt, ...)                                     \
   debug_prefixed_printf_cond (debug_event_loop != debug_event_loop_kind::OFF, \
-			      "event-loop", fmt, ##__VA_ARGS__)
+                              "event-loop", fmt, ##__VA_ARGS__)
 
 /* Print an "event loop" debug statement that is know to come from a UI-related
    event (e.g. calling the event handler for the fd of the CLI).  */
 
-#define event_loop_ui_debug_printf(is_ui, fmt, ...) \
-  do \
-    { \
-      if (debug_event_loop == debug_event_loop_kind::ALL \
-	  || (debug_event_loop == debug_event_loop_kind::ALL_EXCEPT_UI \
-	      && !is_ui)) \
-	debug_prefixed_printf ("event-loop", __func__, fmt, ##__VA_ARGS__); \
-    } \
+#define event_loop_ui_debug_printf(is_ui, fmt, ...)                         \
+  do                                                                        \
+    {                                                                       \
+      if (debug_event_loop == debug_event_loop_kind::ALL                    \
+          || (debug_event_loop == debug_event_loop_kind::ALL_EXCEPT_UI      \
+              && !is_ui))                                                   \
+        debug_prefixed_printf ("event-loop", __func__, fmt, ##__VA_ARGS__); \
+    }                                                                       \
   while (0)
 
 #endif /* EVENT_LOOP_H */

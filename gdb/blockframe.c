@@ -127,7 +127,6 @@ get_frame_function (frame_info_ptr frame)
 
   return bl->function ();
 }
-
 
 /* Return the function containing pc value PC in section SECTION.
    Returns 0 if function is not known.  */
@@ -232,8 +231,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 
   mapped_pc = overlay_mapped_address (pc, section);
 
-  if (mapped_pc >= cache_pc_function_low
-      && mapped_pc < cache_pc_function_high
+  if (mapped_pc >= cache_pc_function_low && mapped_pc < cache_pc_function_high
       && section == cache_pc_function_section)
     goto return_cached_value;
 
@@ -254,8 +252,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
       f = find_pc_sect_function (mapped_pc, section);
       if (f != NULL
 	  && (msymbol.minsym == NULL
-	      || (f->value_block ()->entry_pc ()
-		  >= msymbol.value_address ())))
+	      || (f->value_block ()->entry_pc () >= msymbol.value_address ())))
 	{
 	  const struct block *b = f->value_block ();
 
@@ -298,7 +295,6 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 	      gdb_assert (found);
 	    }
 
-
 	  goto return_cached_value;
 	}
     }
@@ -332,7 +328,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
   cache_pc_function_high = minimal_symbol_upper_bound (msymbol);
   cache_pc_function_block = nullptr;
 
- return_cached_value:
+return_cached_value:
 
   if (address)
     {
@@ -354,8 +350,9 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 	     the overlay), we must actually convert (high - 1) and
 	     then add one to that.  */
 
-	  *endaddr = 1 + overlay_unmapped_address (cache_pc_function_high - 1,
-						   section);
+	  *endaddr
+	    = 1
+	      + overlay_unmapped_address (cache_pc_function_high - 1, section);
 	}
       else
 	*endaddr = cache_pc_function_high;
@@ -379,7 +376,6 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
     *name = r ? gsi->linkage_name () : nullptr;
   return r;
 }
-
 
 /* See symtab.h.  */
 
@@ -410,7 +406,8 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
 
       /* It's an internal error if we exit the above loop without finding
 	 the range.  */
-      internal_error (_("Entry block not found in find_function_entry_range_from_pc"));
+      internal_error (
+	_ ("Entry block not found in find_function_entry_range_from_pc"));
     }
 
   return status;
@@ -445,8 +442,7 @@ find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
 	 is the type of the pointed-to function.  */
       if (resolver_ret_type->code () == TYPE_CODE_PTR)
 	{
-	  struct type *resolved_type
-	    = resolver_ret_type->target_type ();
+	  struct type *resolved_type = resolver_ret_type->target_type ();
 	  if (check_typedef (resolved_type)->code () == TYPE_CODE_FUNC)
 	    return resolved_type;
 	}

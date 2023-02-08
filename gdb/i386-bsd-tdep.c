@@ -44,31 +44,29 @@ i386bsd_sigcontext_addr (frame_info_ptr this_frame)
 
   return read_memory_unsigned_integer (sp + 8, 4, byte_order);
 }
-
 
 /* Support for shared libraries.  */
 
 /* Traditional BSD (4.3 BSD, still used for BSDI and 386BSD).  */
 
 /* From <machine/signal.h>.  */
-int i386bsd_sc_reg_offset[] =
-{
-  -1,				/* %eax */
-  -1,				/* %ecx */
-  -1,				/* %edx */
-  -1,				/* %ebx */
-  8 + 0 * 4,			/* %esp */
-  8 + 1 * 4,			/* %ebp */
-  -1,				/* %esi */
-  -1,				/* %edi */
-  8 + 3 * 4,			/* %eip */
-  8 + 4 * 4,			/* %eflags */
-  -1,				/* %cs */
-  -1,				/* %ss */
-  -1,				/* %ds */
-  -1,				/* %es */
-  -1,				/* %fs */
-  -1				/* %gs */
+int i386bsd_sc_reg_offset[] = {
+  -1,	     /* %eax */
+  -1,	     /* %ecx */
+  -1,	     /* %edx */
+  -1,	     /* %ebx */
+  8 + 0 * 4, /* %esp */
+  8 + 1 * 4, /* %ebp */
+  -1,	     /* %esi */
+  -1,	     /* %edi */
+  8 + 3 * 4, /* %eip */
+  8 + 4 * 4, /* %eflags */
+  -1,	     /* %cs */
+  -1,	     /* %ss */
+  -1,	     /* %ds */
+  -1,	     /* %es */
+  -1,	     /* %fs */
+  -1	     /* %gs */
 };
 
 void
@@ -84,5 +82,3 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_reg_offset = i386bsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386bsd_sc_reg_offset);
 }
-
-

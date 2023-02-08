@@ -61,8 +61,8 @@ eq_abbrev (const void *lhs, const void *rhs)
 abbrev_table::abbrev_table (sect_offset off, struct dwarf2_section_info *sect)
   : sect_off (off),
     section (sect),
-    m_abbrevs (htab_create_alloc (20, hash_abbrev, eq_abbrev,
-				  nullptr, xcalloc, xfree))
+    m_abbrevs (htab_create_alloc (20, hash_abbrev, eq_abbrev, nullptr, xcalloc,
+				  xfree))
 {
 }
 
@@ -117,8 +117,7 @@ tag_interesting_for_index (dwarf_tag tag)
 /* Read in an abbrev table.  */
 
 abbrev_table_up
-abbrev_table::read (struct dwarf2_section_info *section,
-		    sect_offset sect_off)
+abbrev_table::read (struct dwarf2_section_info *section, sect_offset sect_off)
 {
   bfd *abfd = section->get_bfd_owner ();
   const gdb_byte *abbrev_ptr;
@@ -135,8 +134,8 @@ abbrev_table::read (struct dwarf2_section_info *section,
     {
       unsigned int bytes_read;
       /* Loop until we reach an abbrev number of 0.  */
-      unsigned int abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr,
-							 &bytes_read);
+      unsigned int abbrev_number
+	= read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
       if (abbrev_number == 0)
 	break;
       abbrev_ptr += bytes_read;
@@ -181,8 +180,8 @@ abbrev_table::read (struct dwarf2_section_info *section,
 	  abbrev_ptr += bytes_read;
 	  if (cur_attr.form == DW_FORM_implicit_const)
 	    {
-	      cur_attr.implicit_const = read_signed_leb128 (abfd, abbrev_ptr,
-							    &bytes_read);
+	      cur_attr.implicit_const
+		= read_signed_leb128 (abfd, abbrev_ptr, &bytes_read);
 	      abbrev_ptr += bytes_read;
 	    }
 	  else

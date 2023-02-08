@@ -24,13 +24,11 @@
 class m68k_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -88,26 +86,21 @@ extern const struct target_desc *tdesc_m68k;
 #define m68k_num_gregs 18
 
 /* This table must line up with REGISTER_NAMES in tm-m68k.h */
-static int m68k_regmap[] =
-{
+static int m68k_regmap[] = {
 #ifdef PT_D0
-  PT_D0 * 4, PT_D1 * 4, PT_D2 * 4, PT_D3 * 4,
-  PT_D4 * 4, PT_D5 * 4, PT_D6 * 4, PT_D7 * 4,
-  PT_A0 * 4, PT_A1 * 4, PT_A2 * 4, PT_A3 * 4,
-  PT_A4 * 4, PT_A5 * 4, PT_A6 * 4, PT_USP * 4,
-  PT_SR * 4, PT_PC * 4,
+  PT_D0 * 4,  PT_D1 * 4,  PT_D2 * 4,   PT_D3 * 4,   PT_D4 * 4,   PT_D5 * 4,
+  PT_D6 * 4,  PT_D7 * 4,  PT_A0 * 4,   PT_A1 * 4,   PT_A2 * 4,   PT_A3 * 4,
+  PT_A4 * 4,  PT_A5 * 4,  PT_A6 * 4,   PT_USP * 4,  PT_SR * 4,   PT_PC * 4,
 #else
-  14 * 4, 0 * 4, 1 * 4, 2 * 4, 3 * 4, 4 * 4, 5 * 4, 6 * 4,
-  7 * 4, 8 * 4, 9 * 4, 10 * 4, 11 * 4, 12 * 4, 13 * 4, 15 * 4,
-  17 * 4, 18 * 4,
+  14 * 4, 0 * 4,  1 * 4,  2 * 4,  3 * 4,  4 * 4,  5 * 4,  6 * 4,  7 * 4,
+  8 * 4,  9 * 4,  10 * 4, 11 * 4, 12 * 4, 13 * 4, 15 * 4, 17 * 4, 18 * 4,
 #endif
 #ifdef PT_FP0
-  PT_FP0 * 4, PT_FP1 * 4, PT_FP2 * 4, PT_FP3 * 4,
-  PT_FP4 * 4, PT_FP5 * 4, PT_FP6 * 4, PT_FP7 * 4,
-  PT_FPCR * 4, PT_FPSR * 4, PT_FPIAR * 4
+  PT_FP0 * 4, PT_FP1 * 4, PT_FP2 * 4,  PT_FP3 * 4,  PT_FP4 * 4,  PT_FP5 * 4,
+  PT_FP6 * 4, PT_FP7 * 4, PT_FPCR * 4, PT_FPSR * 4, PT_FPIAR * 4
 #else
-  21 * 4, 24 * 4, 27 * 4, 30 * 4, 33 * 4, 36 * 4,
-  39 * 4, 42 * 4, 45 * 4, 46 * 4, 47 * 4
+  21 * 4, 24 * 4, 27 * 4, 30 * 4, 33 * 4, 36 * 4, 39 * 4, 42 * 4, 45 * 4,
+  46 * 4, 47 * 4
 #endif
 };
 
@@ -151,8 +144,9 @@ m68k_fill_fpregset (struct regcache *regcache, void *buf)
   int i;
 
   for (i = m68k_num_gregs; i < m68k_num_regs; i++)
-    collect_register (regcache, i, ((char *) buf
-			 + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
+    collect_register (regcache, i,
+                      ((char *) buf
+                       + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
 }
 
 static void
@@ -161,19 +155,18 @@ m68k_store_fpregset (struct regcache *regcache, const void *buf)
   int i;
 
   for (i = m68k_num_gregs; i < m68k_num_regs; i++)
-    supply_register (regcache, i, ((const char *) buf
-			 + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
+    supply_register (regcache, i,
+                     ((const char *) buf
+                      + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
 }
 
 #endif /* HAVE_PTRACE_GETREGS */
 
 static struct regset_info m68k_regsets[] = {
 #ifdef HAVE_PTRACE_GETREGS
-  { PTRACE_GETREGS, PTRACE_SETREGS, 0, sizeof (elf_gregset_t),
-    GENERAL_REGS,
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0, sizeof (elf_gregset_t), GENERAL_REGS,
     m68k_fill_gregset, m68k_store_gregset },
-  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, sizeof (elf_fpregset_t),
-    FP_REGS,
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, sizeof (elf_fpregset_t), FP_REGS,
     m68k_fill_fpregset, m68k_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
   NULL_REGSET
@@ -209,8 +202,8 @@ m68k_target::low_breakpoint_at (CORE_ADDR pc)
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph,
-		    lwpid_t lwpid, int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;
@@ -218,31 +211,26 @@ ps_get_thread_area (struct ps_prochandle *ph,
   /* IDX is the bias from the thread pointer to the beginning of the
      thread descriptor.  It has to be subtracted due to implementation
      quirks in libthread_db.  */
-  *base = (void *) ((char *)*base - idx);
+  *base = (void *) ((char *) *base - idx);
 
   return PS_OK;
 }
 #endif /* PTRACE_GET_THREAD_AREA */
 
-static struct regsets_info m68k_regsets_info =
-  {
-    m68k_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct regsets_info m68k_regsets_info = {
+  m68k_regsets, /* regsets */
+  0,            /* num_regsets */
+  NULL,         /* disabled_regsets */
+};
 
-static struct usrregs_info m68k_usrregs_info =
-  {
-    m68k_num_regs,
-    m68k_regmap,
-  };
+static struct usrregs_info m68k_usrregs_info = {
+  m68k_num_regs,
+  m68k_regmap,
+};
 
-static struct regs_info myregs_info =
-  {
-    NULL, /* regset_bitmap */
-    &m68k_usrregs_info,
-    &m68k_regsets_info
-  };
+static struct regs_info myregs_info
+  = { NULL, /* regset_bitmap */
+      &m68k_usrregs_info, &m68k_regsets_info };
 
 const regs_info *
 m68k_target::get_regs_info ()

@@ -33,8 +33,8 @@ struct disasm_info_object
 {
   PyObject_HEAD
 
-  /* The architecture in which we are disassembling.  */
-  struct gdbarch *gdbarch;
+    /* The architecture in which we are disassembling.  */
+    struct gdbarch *gdbarch;
 
   /* The program_space in which we are disassembling.  */
   struct program_space *program_space;
@@ -54,7 +54,7 @@ struct disasm_info_object
 };
 
 extern PyTypeObject disasm_info_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_info_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_info_object");
 
 /* Implement gdb.disassembler.DisassemblerResult type, an object that holds
    the result of calling the disassembler.  This is mostly the length of
@@ -65,8 +65,8 @@ struct disasm_result_object
 {
   PyObject_HEAD
 
-  /* The length of the disassembled instruction in bytes.  */
-  int length;
+    /* The length of the disassembled instruction in bytes.  */
+    int length;
 
   /* A buffer which, when allocated, holds the disassembled content of an
      instruction.  */
@@ -74,7 +74,7 @@ struct disasm_result_object
 };
 
 extern PyTypeObject disasm_result_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_result_object");
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_result_object");
 
 /* When this is false we fast path out of gdbpy_print_insn, which should
    keep the performance impact of the Python disassembler down.  This is
@@ -94,11 +94,7 @@ struct gdbpy_disassembler : public gdb_printing_disassembler
   gdbpy_disassembler (disasm_info_object *obj, PyObject *memory_source);
 
   /* Get the DisassembleInfo object pointer.  */
-  disasm_info_object *
-  py_disasm_info () const
-  {
-    return m_disasm_info_object;
-  }
+  disasm_info_object *py_disasm_info () const { return m_disasm_info_object; }
 
   /* Callbacks used by disassemble_info.  */
   static void memory_error_func (int status, bfd_vma memaddr,
@@ -113,15 +109,14 @@ struct gdbpy_disassembler : public gdb_printing_disassembler
      memory error occurred.  The optional will only have a value if a
      memory error actually occurred.  */
   const gdb::optional<CORE_ADDR> &memory_error_address () const
-  { return m_memory_error_address; }
+  {
+    return m_memory_error_address;
+  }
 
   /* Return the content of the disassembler as a string.  The contents are
      moved out of the disassembler, so after this call the disassembler
      contents have been reset back to empty.  */
-  std::string release ()
-  {
-    return m_string_file.release ();
-  }
+  std::string release () { return m_string_file.release (); }
 
   /* If there is a Python exception stored in this disassembler then
      restore it (i.e. set the PyErr_* state), clear the exception within
@@ -215,14 +210,13 @@ disasm_info_init (PyObject *self, PyObject *args, PyObject *kwargs)
   static const char *keywords[] = { "info", NULL };
   PyObject *info_obj;
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "O!", keywords,
-					&disasm_info_object_type,
-					&info_obj))
+					&disasm_info_object_type, &info_obj))
     return -1;
 
   disasm_info_object *other = (disasm_info_object *) info_obj;
   disasm_info_object *info = (disasm_info_object *) self;
-  disasm_info_fill (info, other->gdbarch, other->program_space,
-		    other->address, other->gdb_info, other->next);
+  disasm_info_fill (info, other->gdbarch, other->program_space, other->address,
+		    other->gdb_info, other->next);
   other->next = info;
 
   /* As the OTHER object now holds a pointer to INFO we inc the ref count
@@ -273,15 +267,17 @@ disasmpy_set_memory_error_for_address (CORE_ADDR address)
 
 /* Ensure that a gdb.disassembler.DisassembleInfo is valid.  */
 
-#define DISASMPY_DISASM_INFO_REQUIRE_VALID(Info)			\
-  do {									\
-    if (!disasm_info_object_is_valid (Info))				\
-      {									\
-	PyErr_SetString (PyExc_RuntimeError,				\
-			 _("DisassembleInfo is no longer valid."));	\
-	return nullptr;							\
-      }									\
-  } while (0)
+#define DISASMPY_DISASM_INFO_REQUIRE_VALID(Info)                       \
+  do                                                                   \
+    {                                                                  \
+      if (!disasm_info_object_is_valid (Info))                         \
+	{                                                              \
+	  PyErr_SetString (PyExc_RuntimeError,                         \
+			   _ ("DisassembleInfo is no longer valid.")); \
+	  return nullptr;                                              \
+	}                                                              \
+    }                                                                  \
+  while (0)
 
 /* Initialise OBJ, a DisassemblerResult object with LENGTH and CONTENT.
    OBJ might already have been initialised, in which case any existing
@@ -342,7 +338,6 @@ disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 
   if (length == -1)
     {
-
       /* In an ideal world, every disassembler should always call the
 	 memory error function before returning a status of -1 as the only
 	 error a disassembler should encounter is a failure to read
@@ -365,7 +360,7 @@ disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	    PyErr_SetString (gdbpy_gdberror_exc, content.c_str ());
 	  else
 	    PyErr_SetString (gdbpy_gdberror_exc,
-			     _("Unknown disassembly error."));
+			     _ ("Unknown disassembly error."));
 	}
       return nullptr;
     }
@@ -380,8 +375,8 @@ disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
   /* Create a DisassemblerResult containing the results.  */
   std::string content = disassembler.release ();
   PyTypeObject *type = &disasm_result_object_type;
-  gdbpy_ref<disasm_result_object> res
-    ((disasm_result_object *) type->tp_alloc (type, 0));
+  gdbpy_ref<disasm_result_object> res ((disasm_result_object *)
+					 type->tp_alloc (type, 0));
   disasmpy_init_disassembler_result (res.get (), length, std::move (content));
   return reinterpret_cast<PyObject *> (res.release ());
 }
@@ -403,14 +398,14 @@ disasmpy_set_enabled (PyObject *self, PyObject *args, PyObject *kw)
 {
   PyObject *newstate;
   static const char *keywords[] = { "state", nullptr };
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords,
-					&newstate))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &newstate))
     return nullptr;
 
   if (!PyBool_Check (newstate))
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("The value passed to `_set_enabled' must be a boolean."));
+      PyErr_SetString (
+	PyExc_TypeError,
+	_ ("The value passed to `_set_enabled' must be a boolean."));
       return nullptr;
     }
 
@@ -435,8 +430,8 @@ disasmpy_info_read_memory (PyObject *self, PyObject *args, PyObject *kw)
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;
   static const char *keywords[] = { "length", "offset", nullptr };
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "L|L", keywords,
-					&length, &offset))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "L|L", keywords, &length,
+					&offset))
     return nullptr;
 
   /* The apparent address from which we are reading memory.  Note that in
@@ -454,7 +449,8 @@ disasmpy_info_read_memory (PyObject *self, PyObject *args, PyObject *kw)
      it to the user.  */
   disassemble_info *info = obj->gdb_info;
   if (info->read_memory_func ((bfd_vma) address, buffer.get (),
-			      (unsigned int) length, info) != 0)
+			      (unsigned int) length, info)
+      != 0)
     {
       disasmpy_set_memory_error_for_address (address);
       return nullptr;
@@ -535,8 +531,7 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
 
   /* Now call the DisassembleInfo.read_memory method.  This might have been
      overridden by the user.  */
-  gdbpy_ref<> result_obj (PyObject_CallMethod ((PyObject *) obj,
-					       "read_memory",
+  gdbpy_ref<> result_obj (PyObject_CallMethod ((PyObject *) obj, "read_memory",
 					       "KL", len, offset));
 
   /* Handle any exceptions.  */
@@ -565,10 +560,10 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
   /* Convert the result to a buffer.  */
   Py_buffer py_buff;
   if (!PyObject_CheckBuffer (result_obj.get ())
-      || PyObject_GetBuffer (result_obj.get(), &py_buff, PyBUF_CONTIG_RO) < 0)
+      || PyObject_GetBuffer (result_obj.get (), &py_buff, PyBUF_CONTIG_RO) < 0)
     {
       PyErr_Format (PyExc_TypeError,
-		    _("Result from read_memory is not a buffer"));
+		    _ ("Result from read_memory is not a buffer"));
       dis->store_exception (gdbpy_err_fetch ());
       return -1;
     }
@@ -581,7 +576,8 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
   if (py_buff.len != len)
     {
       PyErr_Format (PyExc_ValueError,
-		    _("Buffer returned from read_memory is sized %d instead of the expected %d"),
+		    _ ("Buffer returned from read_memory is sized %d instead "
+		       "of the expected %d"),
 		    py_buff.len, len);
       dis->store_exception (gdbpy_err_fetch ());
       return -1;
@@ -614,8 +610,7 @@ disasmpy_result_string (PyObject *self, void *closure)
   gdb_assert (obj->content != nullptr);
   gdb_assert (strlen (obj->content->c_str ()) > 0);
   gdb_assert (obj->length > 0);
-  return PyUnicode_Decode (obj->content->c_str (),
-			   obj->content->size (),
+  return PyUnicode_Decode (obj->content->c_str (), obj->content->size (),
 			   host_charset (), nullptr);
 }
 
@@ -629,21 +624,19 @@ disasmpy_result_init (PyObject *self, PyObject *args, PyObject *kwargs)
   static const char *keywords[] = { "length", "string", NULL };
   int length;
   const char *string;
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "is", keywords,
-					&length, &string))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "is", keywords, &length,
+					&string))
     return -1;
 
   if (length <= 0)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("Length must be greater than 0."));
+      PyErr_SetString (PyExc_ValueError, _ ("Length must be greater than 0."));
       return -1;
     }
 
   if (strlen (string) == 0)
     {
-      PyErr_SetString (PyExc_ValueError,
-		       _("String must not be empty."));
+      PyErr_SetString (PyExc_ValueError, _ ("String must not be empty."));
       return -1;
     }
 
@@ -681,12 +674,12 @@ gdbpy_disassembler::print_address_func (bfd_vma addr,
 
 gdbpy_disassembler::gdbpy_disassembler (disasm_info_object *obj,
 					PyObject *memory_source)
-  : gdb_printing_disassembler (obj->gdbarch, &m_string_file,
-			       read_memory_func, memory_error_func,
-			       print_address_func),
+  : gdb_printing_disassembler (obj->gdbarch, &m_string_file, read_memory_func,
+			       memory_error_func, print_address_func),
     m_disasm_info_object (obj),
     m_memory_source (memory_source)
-{ /* Nothing.  */ }
+{ /* Nothing.  */
+}
 
 /* A wrapper around a reference to a Python DisassembleInfo object, which
    ensures that the object is marked as invalid when we leave the enclosing
@@ -717,26 +710,20 @@ struct scoped_disasm_info_object
   {
     /* Invalidate the original DisassembleInfo object as well as any copies
        that the user might have made.  */
-    for (disasm_info_object *obj = m_disasm_info.get ();
-	 obj != nullptr;
+    for (disasm_info_object *obj = m_disasm_info.get (); obj != nullptr;
 	 obj = obj->next)
       obj->gdb_info = nullptr;
   }
 
   /* Return a pointer to the underlying disasm_info_object instance.  */
-  disasm_info_object *
-  get () const
-  {
-    return m_disasm_info.get ();
-  }
+  disasm_info_object *get () const { return m_disasm_info.get (); }
 
 private:
 
   /* Wrapper around the call to PyObject_New, this wrapper function can be
      called from the constructor initialization list, while PyObject_New, a
      macro, can't.  */
-  static disasm_info_object *
-  allocate_disasm_info_object ()
+  static disasm_info_object *allocate_disasm_info_object ()
   {
     return (disasm_info_object *) PyObject_New (disasm_info_object,
 						&disasm_info_object_type);
@@ -768,8 +755,8 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
   /* Import the gdb.disassembler module.  */
-  gdbpy_ref<> gdb_python_disassembler_module
-    (PyImport_ImportModule ("gdb.disassembler"));
+  gdbpy_ref<> gdb_python_disassembler_module (
+    PyImport_ImportModule ("gdb.disassembler"));
   if (gdb_python_disassembler_module == nullptr)
     {
       gdbpy_print_stack ();
@@ -778,9 +765,8 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 
   /* Get the _print_insn attribute from the module, this should be the
      function we are going to call to actually perform the disassembly.  */
-  gdbpy_ref<> hook
-    (PyObject_GetAttrString (gdb_python_disassembler_module.get (),
-			     "_print_insn"));
+  gdbpy_ref<> hook (PyObject_GetAttrString (
+    gdb_python_disassembler_module.get (), "_print_insn"));
   if (hook == nullptr)
     {
       gdbpy_print_stack ();
@@ -796,8 +782,7 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
      disassembly.  */
   PyObject *insn_disas_obj = (PyObject *) disasm_info;
   gdbpy_ref<> result (PyObject_CallFunctionObjArgs (hook.get (),
-						    insn_disas_obj,
-						    nullptr));
+						    insn_disas_obj, nullptr));
 
   if (result == nullptr)
     {
@@ -846,7 +831,6 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 	  gdbpy_print_stack ();
 	  return gdb::optional<int> (-1);
 	}
-
     }
   else if (result == Py_None)
     {
@@ -861,7 +845,7 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 			    (PyObject *) &disasm_result_object_type))
     {
       PyErr_SetString (PyExc_TypeError,
-		       _("Result is not a DisassemblerResult."));
+		       _ ("Result is not a DisassemblerResult."));
       gdbpy_print_stack ();
       return gdb::optional<int> (-1);
     }
@@ -883,7 +867,8 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
     }
   if (!gdbpy_is_string (string_obj.get ()))
     {
-      PyErr_SetString (PyExc_TypeError, _("String attribute is not a string."));
+      PyErr_SetString (PyExc_TypeError,
+		       _ ("String attribute is not a string."));
       gdbpy_print_stack ();
       return gdb::optional<int> (-1);
     }
@@ -903,22 +888,23 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
       return gdb::optional<int> (-1);
     }
 
-  long max_insn_length = (gdbarch_max_insn_length_p (gdbarch) ?
-			  gdbarch_max_insn_length (gdbarch) : INT_MAX);
+  long max_insn_length
+    = (gdbarch_max_insn_length_p (gdbarch) ? gdbarch_max_insn_length (gdbarch)
+					   : INT_MAX);
   if (length <= 0)
     {
-      PyErr_SetString
-	(PyExc_ValueError,
-	 _("Invalid length attribute: length must be greater than 0."));
+      PyErr_SetString (
+	PyExc_ValueError,
+	_ ("Invalid length attribute: length must be greater than 0."));
       gdbpy_print_stack ();
       return gdb::optional<int> (-1);
     }
   if (length > max_insn_length)
     {
-      PyErr_Format
-	(PyExc_ValueError,
-	 _("Invalid length attribute: length %d greater than architecture maximum of %d"),
-	 length, max_insn_length);
+      PyErr_Format (PyExc_ValueError,
+		    _ ("Invalid length attribute: length %d greater than "
+		       "architecture maximum of %d"),
+		    length, max_insn_length);
       gdbpy_print_stack ();
       return gdb::optional<int> (-1);
     }
@@ -926,7 +912,7 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
   if (strlen (string.get ()) == 0)
     {
       PyErr_SetString (PyExc_ValueError,
-		       _("String attribute must not be empty."));
+		       _ ("String attribute must not be empty."));
       gdbpy_print_stack ();
       return gdb::optional<int> (-1);
     }
@@ -957,20 +943,19 @@ static gdb_PyGetSetDef disasm_info_object_getset[] = {
     "Architecture to disassemble in", nullptr },
   { "progspace", disasmpy_info_progspace, nullptr,
     "Program space to disassemble in", nullptr },
-  { nullptr }   /* Sentinel */
+  { nullptr } /* Sentinel */
 };
 
 /* The methods of the gdb.disassembler.DisassembleInfo type.  */
 
 static PyMethodDef disasm_info_object_methods[] = {
   { "read_memory", (PyCFunction) disasmpy_info_read_memory,
-    METH_VARARGS | METH_KEYWORDS,
-    "read_memory (LEN, OFFSET = 0) -> Octets[]\n\
+    METH_VARARGS | METH_KEYWORDS, "read_memory (LEN, OFFSET = 0) -> Octets[]\n\
 Read LEN octets for the instruction to disassemble." },
   { "is_valid", disasmpy_info_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return true if this DisassembleInfo is valid, false if not." },
-  {nullptr}  /* Sentinel */
+  { nullptr } /* Sentinel */
 };
 
 /* The get/set attributes of the gdb.disassembler.DisassemblerResult type.  */
@@ -980,42 +965,37 @@ static gdb_PyGetSetDef disasm_result_object_getset[] = {
     "Length of the disassembled instruction.", nullptr },
   { "string", disasmpy_result_string, nullptr,
     "String representing the disassembled instruction.", nullptr },
-  { nullptr }   /* Sentinel */
+  { nullptr } /* Sentinel */
 };
 
 /* These are the methods we add into the _gdb.disassembler module, which
    are then imported into the gdb.disassembler module.  These are global
    functions that support performing disassembly.  */
 
-PyMethodDef python_disassembler_methods[] =
-{
-  { "builtin_disassemble", (PyCFunction) disasmpy_builtin_disassemble,
-    METH_VARARGS | METH_KEYWORDS,
-    "builtin_disassemble (INFO, MEMORY_SOURCE = None) -> None\n\
+PyMethodDef python_disassembler_methods[]
+  = { { "builtin_disassemble", (PyCFunction) disasmpy_builtin_disassemble,
+	METH_VARARGS | METH_KEYWORDS,
+	"builtin_disassemble (INFO, MEMORY_SOURCE = None) -> None\n\
 Disassemble using GDB's builtin disassembler.  INFO is an instance of\n\
 gdb.disassembler.DisassembleInfo.  The MEMORY_SOURCE, if not None, should\n\
 be an object with the read_memory method." },
-  { "_set_enabled", (PyCFunction) disasmpy_set_enabled,
-    METH_VARARGS | METH_KEYWORDS,
-    "_set_enabled (STATE) -> None\n\
+      { "_set_enabled", (PyCFunction) disasmpy_set_enabled,
+	METH_VARARGS | METH_KEYWORDS, "_set_enabled (STATE) -> None\n\
 Set whether GDB should call into the Python _print_insn code or not." },
-  {nullptr, nullptr, 0, nullptr}
-};
+      { nullptr, nullptr, 0, nullptr } };
 
 /* Structure to define the _gdb.disassembler module.  */
 
-static struct PyModuleDef python_disassembler_module_def =
-{
-  PyModuleDef_HEAD_INIT,
-  "_gdb.disassembler",
-  nullptr,
-  -1,
-  python_disassembler_methods,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr
-};
+static struct PyModuleDef python_disassembler_module_def
+  = { PyModuleDef_HEAD_INIT,
+      "_gdb.disassembler",
+      nullptr,
+      -1,
+      python_disassembler_methods,
+      nullptr,
+      nullptr,
+      nullptr,
+      nullptr };
 
 /* Called to initialize the Python structures in this file.  */
 
@@ -1028,7 +1008,7 @@ gdbpy_initialize_disasm ()
   gdb_disassembler_module = PyModule_Create (&python_disassembler_module_def);
   if (gdb_disassembler_module == nullptr)
     return -1;
-  PyModule_AddObject(gdb_module, "disassembler", gdb_disassembler_module);
+  PyModule_AddObject (gdb_module, "disassembler", gdb_disassembler_module);
 
   /* This is needed so that 'import _gdb.disassembler' will work.  */
   PyObject *dict = PyImport_GetModuleDict ();
@@ -1039,7 +1019,8 @@ gdbpy_initialize_disasm ()
     return -1;
 
   if (gdb_pymodule_addobject (gdb_disassembler_module, "DisassembleInfo",
-			      (PyObject *) &disasm_info_object_type) < 0)
+			      (PyObject *) &disasm_info_object_type)
+      < 0)
     return -1;
 
   disasm_result_object_type.tp_new = PyType_GenericNew;
@@ -1047,7 +1028,8 @@ gdbpy_initialize_disasm ()
     return -1;
 
   if (gdb_pymodule_addobject (gdb_disassembler_module, "DisassemblerResult",
-			      (PyObject *) &disasm_result_object_type) < 0)
+			      (PyObject *) &disasm_result_object_type)
+      < 0)
     return -1;
 
   return 0;
@@ -1056,83 +1038,83 @@ gdbpy_initialize_disasm ()
 /* Describe the gdb.disassembler.DisassembleInfo type.  */
 
 PyTypeObject disasm_info_object_type = {
-  PyVarObject_HEAD_INIT (nullptr, 0)
-  "gdb.disassembler.DisassembleInfo",		/*tp_name*/
-  sizeof (disasm_info_object),			/*tp_basicsize*/
-  0,						/*tp_itemsize*/
-  disasm_info_dealloc,				/*tp_dealloc*/
-  0,						/*tp_print*/
-  0,						/*tp_getattr*/
-  0,						/*tp_setattr*/
-  0,						/*tp_compare*/
-  0,						/*tp_repr*/
-  0,						/*tp_as_number*/
-  0,						/*tp_as_sequence*/
-  0,						/*tp_as_mapping*/
-  0,						/*tp_hash */
-  0,						/*tp_call*/
-  0,						/*tp_str*/
-  0,						/*tp_getattro*/
-  0,						/*tp_setattro*/
-  0,						/*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/*tp_flags*/
-  "GDB instruction disassembler object",	/* tp_doc */
-  0,						/* tp_traverse */
-  0,						/* tp_clear */
-  0,						/* tp_richcompare */
-  0,						/* tp_weaklistoffset */
-  0,						/* tp_iter */
-  0,						/* tp_iternext */
-  disasm_info_object_methods,			/* tp_methods */
-  0,						/* tp_members */
-  disasm_info_object_getset,			/* tp_getset */
-  0,						/* tp_base */
-  0,						/* tp_dict */
-  0,						/* tp_descr_get */
-  0,						/* tp_descr_set */
-  0,						/* tp_dictoffset */
-  disasm_info_init,				/* tp_init */
-  0,						/* tp_alloc */
+  PyVarObject_HEAD_INIT (nullptr,
+			 0) "gdb.disassembler.DisassembleInfo", /*tp_name*/
+  sizeof (disasm_info_object),		    /*tp_basicsize*/
+  0,					    /*tp_itemsize*/
+  disasm_info_dealloc,			    /*tp_dealloc*/
+  0,					    /*tp_print*/
+  0,					    /*tp_getattr*/
+  0,					    /*tp_setattr*/
+  0,					    /*tp_compare*/
+  0,					    /*tp_repr*/
+  0,					    /*tp_as_number*/
+  0,					    /*tp_as_sequence*/
+  0,					    /*tp_as_mapping*/
+  0,					    /*tp_hash */
+  0,					    /*tp_call*/
+  0,					    /*tp_str*/
+  0,					    /*tp_getattro*/
+  0,					    /*tp_setattro*/
+  0,					    /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+  "GDB instruction disassembler object",    /* tp_doc */
+  0,					    /* tp_traverse */
+  0,					    /* tp_clear */
+  0,					    /* tp_richcompare */
+  0,					    /* tp_weaklistoffset */
+  0,					    /* tp_iter */
+  0,					    /* tp_iternext */
+  disasm_info_object_methods,		    /* tp_methods */
+  0,					    /* tp_members */
+  disasm_info_object_getset,		    /* tp_getset */
+  0,					    /* tp_base */
+  0,					    /* tp_dict */
+  0,					    /* tp_descr_get */
+  0,					    /* tp_descr_set */
+  0,					    /* tp_dictoffset */
+  disasm_info_init,			    /* tp_init */
+  0,					    /* tp_alloc */
 };
 
 /* Describe the gdb.disassembler.DisassemblerResult type.  */
 
 PyTypeObject disasm_result_object_type = {
-  PyVarObject_HEAD_INIT (nullptr, 0)
-  "gdb.disassembler.DisassemblerResult",	/*tp_name*/
-  sizeof (disasm_result_object),		/*tp_basicsize*/
-  0,						/*tp_itemsize*/
-  disasmpy_dealloc_result,			/*tp_dealloc*/
-  0,						/*tp_print*/
-  0,						/*tp_getattr*/
-  0,						/*tp_setattr*/
-  0,						/*tp_compare*/
-  0,						/*tp_repr*/
-  0,						/*tp_as_number*/
-  0,						/*tp_as_sequence*/
-  0,						/*tp_as_mapping*/
-  0,						/*tp_hash */
-  0,						/*tp_call*/
-  0,						/*tp_str*/
-  0,						/*tp_getattro*/
-  0,						/*tp_setattro*/
-  0,						/*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/*tp_flags*/
-  "GDB object, representing a disassembler result",	/* tp_doc */
-  0,						/* tp_traverse */
-  0,						/* tp_clear */
-  0,						/* tp_richcompare */
-  0,						/* tp_weaklistoffset */
-  0,						/* tp_iter */
-  0,						/* tp_iternext */
-  0,						/* tp_methods */
-  0,						/* tp_members */
-  disasm_result_object_getset,			/* tp_getset */
-  0,						/* tp_base */
-  0,						/* tp_dict */
-  0,						/* tp_descr_get */
-  0,						/* tp_descr_set */
-  0,						/* tp_dictoffset */
-  disasmpy_result_init,				/* tp_init */
-  0,						/* tp_alloc */
+  PyVarObject_HEAD_INIT (nullptr,
+			 0) "gdb.disassembler.DisassemblerResult", /*tp_name*/
+  sizeof (disasm_result_object),		    /*tp_basicsize*/
+  0,						    /*tp_itemsize*/
+  disasmpy_dealloc_result,			    /*tp_dealloc*/
+  0,						    /*tp_print*/
+  0,						    /*tp_getattr*/
+  0,						    /*tp_setattr*/
+  0,						    /*tp_compare*/
+  0,						    /*tp_repr*/
+  0,						    /*tp_as_number*/
+  0,						    /*tp_as_sequence*/
+  0,						    /*tp_as_mapping*/
+  0,						    /*tp_hash */
+  0,						    /*tp_call*/
+  0,						    /*tp_str*/
+  0,						    /*tp_getattro*/
+  0,						    /*tp_setattro*/
+  0,						    /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	    /*tp_flags*/
+  "GDB object, representing a disassembler result", /* tp_doc */
+  0,						    /* tp_traverse */
+  0,						    /* tp_clear */
+  0,						    /* tp_richcompare */
+  0,						    /* tp_weaklistoffset */
+  0,						    /* tp_iter */
+  0,						    /* tp_iternext */
+  0,						    /* tp_methods */
+  0,						    /* tp_members */
+  disasm_result_object_getset,			    /* tp_getset */
+  0,						    /* tp_base */
+  0,						    /* tp_dict */
+  0,						    /* tp_descr_get */
+  0,						    /* tp_descr_set */
+  0,						    /* tp_dictoffset */
+  disasmpy_result_init,				    /* tp_init */
+  0,						    /* tp_alloc */
 };

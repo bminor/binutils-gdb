@@ -63,7 +63,7 @@ struct print_offset_data
 {
   /* Indicate if the offset an d size fields should be printed in decimal
      (default) or hexadecimal.  */
-  bool print_in_hex  = false;
+  bool print_in_hex = false;
 
   /* The offset to be applied to bitpos when PRINT_OFFSETS is true.
      This is needed for when we are printing nested structs and want
@@ -146,9 +146,8 @@ public:
 
 private:
 
-  static const char *find_global_typedef (const struct type_print_options *flags,
-					  struct type *t);
-
+  static const char *
+  find_global_typedef (const struct type_print_options *flags, struct type *t);
 
   /* The actual hash table.  */
   htab_up m_table;
@@ -157,8 +156,7 @@ private:
   auto_obstack m_storage;
 };
 
-
-void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
+void print_type_scalar (struct type *type, LONGEST, struct ui_file *);
 
 /* Assuming the TYPE is a fixed point type, print its type description
    on STREAM.  */

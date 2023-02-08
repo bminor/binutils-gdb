@@ -32,17 +32,17 @@ struct traceframe;
    agent expression evaluation.  */
 
 enum eval_result_type
-  {
-    expr_eval_no_error,
-    expr_eval_empty_expression,
-    expr_eval_empty_stack,
-    expr_eval_stack_overflow,
-    expr_eval_stack_underflow,
-    expr_eval_unhandled_opcode,
-    expr_eval_unrecognized_opcode,
-    expr_eval_divide_by_zero,
-    expr_eval_invalid_goto
-  };
+{
+  expr_eval_no_error,
+  expr_eval_empty_expression,
+  expr_eval_empty_stack,
+  expr_eval_stack_overflow,
+  expr_eval_stack_underflow,
+  expr_eval_unhandled_opcode,
+  expr_eval_unrecognized_opcode,
+  expr_eval_divide_by_zero,
+  expr_eval_invalid_goto
+};
 
 struct agent_expr
 {
@@ -81,10 +81,9 @@ struct eval_agent_expr_context
   struct tracepoint *tpoint;
 };
 
-enum eval_result_type
-  gdb_eval_agent_expr (struct eval_agent_expr_context *ctx,
-		       struct agent_expr *aexpr,
-		       ULONGEST *rslt);
+enum eval_result_type gdb_eval_agent_expr (struct eval_agent_expr_context *ctx,
+                                           struct agent_expr *aexpr,
+                                           ULONGEST *rslt);
 
 /* Bytecode compilation function vector.  */
 

@@ -53,13 +53,13 @@ struct win32_target_ops
 
   /* Fetch register from gdbserver regcache data.  */
   void (*fetch_inferior_register) (struct regcache *regcache,
-				   windows_nat::windows_thread_info *th,
-				   int r);
+                                   windows_nat::windows_thread_info *th,
+                                   int r);
 
   /* Store a new register value into the thread context of TH.  */
   void (*store_inferior_register) (struct regcache *regcache,
-				   windows_nat::windows_thread_info *th,
-				   int r);
+                                   windows_nat::windows_thread_info *th,
+                                   int r);
 
   void (*single_step) (windows_nat::windows_thread_info *th);
 
@@ -77,10 +77,10 @@ struct win32_target_ops
 
   /* Breakpoint/Watchpoint related functions.  See target.h for comments.  */
   int (*supports_z_point_type) (char z_type);
-  int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr,
-		       int size, struct raw_breakpoint *bp);
-  int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr,
-		       int size, struct raw_breakpoint *bp);
+  int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                       struct raw_breakpoint *bp);
+  int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                       struct raw_breakpoint *bp);
   int (*stopped_by_watchpoint) (void);
   CORE_ADDR (*stopped_data_address) (void);
 };
@@ -92,9 +92,8 @@ extern struct win32_target_ops the_low_target;
 class win32_process_target : public process_stratum_target
 {
 public:
-
   int create_inferior (const char *program,
-		       const std::vector<char *> &program_args) override;
+                       const std::vector<char *> &program_args) override;
 
   int attach (unsigned long pid) override;
 
@@ -111,27 +110,26 @@ public:
   void resume (thread_resume *resume_info, size_t n) override;
 
   ptid_t wait (ptid_t ptid, target_waitstatus *status,
-	       target_wait_flags options) override;
+               target_wait_flags options) override;
 
   void fetch_registers (regcache *regcache, int regno) override;
 
   void store_registers (regcache *regcache, int regno) override;
 
-  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
-		   int len) override;
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len) override;
 
   int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-		    int len) override;
+                    int len) override;
 
   void request_interrupt () override;
 
   bool supports_z_point_type (char z_type) override;
 
-  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, raw_breakpoint *bp) override;
+  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                    raw_breakpoint *bp) override;
 
-  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, raw_breakpoint *bp) override;
+  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr, int size,
+                    raw_breakpoint *bp) override;
 
   bool supports_hardware_single_step () override;
 
@@ -142,8 +140,8 @@ public:
   bool supports_qxfer_siginfo () override;
 
   int qxfer_siginfo (const char *annex, unsigned char *readbuf,
-		     unsigned const char *writebuf,
-		     CORE_ADDR offset, int len) override;
+                     unsigned const char *writebuf, CORE_ADDR offset,
+                     int len) override;
 
   bool supports_get_tib_address () override;
 
@@ -161,8 +159,7 @@ public:
 
   const char *thread_name (ptid_t thread) override;
 
-  bool supports_pid_to_exec_file () override
-  { return true; }
+  bool supports_pid_to_exec_file () override { return true; }
 
   const char *pid_to_exec_file (int pid) override;
 
@@ -174,10 +171,11 @@ public:
 
 struct gdbserver_windows_process : public windows_nat::windows_process_info
 {
-  windows_nat::windows_thread_info *thread_rec
-       (ptid_t ptid,
-	windows_nat::thread_disposition_type disposition) override;
-  int handle_output_debug_string (struct target_waitstatus *ourstatus) override;
+  windows_nat::windows_thread_info *
+  thread_rec (ptid_t ptid,
+              windows_nat::thread_disposition_type disposition) override;
+  int
+  handle_output_debug_string (struct target_waitstatus *ourstatus) override;
   void handle_load_dll (const char *dll_name, LPVOID base) override;
   void handle_unload_dll () override;
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;

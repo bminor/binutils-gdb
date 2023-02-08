@@ -25,34 +25,30 @@
 
 /* A target that wraps a BFD.  */
 
-static const target_info target_bfd_target_info = {
-  "bfd",
-  N_("BFD backed target"),
-  N_("You should never see this")
-};
+static const target_info target_bfd_target_info
+  = { "bfd", N_ ("BFD backed target"), N_ ("You should never see this") };
 
 class target_bfd : public target_ops
 {
 public:
+
   explicit target_bfd (const gdb_bfd_ref_ptr &bfd);
 
-  const target_info &info () const override
-  { return target_bfd_target_info; }
+  const target_info &info () const override { return target_bfd_target_info; }
 
   strata stratum () const override { return file_stratum; }
 
   void close () override;
 
-  target_xfer_status
-    xfer_partial (target_object object,
-		  const char *annex, gdb_byte *readbuf,
-		  const gdb_byte *writebuf,
-		  ULONGEST offset, ULONGEST len,
-		  ULONGEST *xfered_len) override;
+  target_xfer_status xfer_partial (target_object object, const char *annex,
+				   gdb_byte *readbuf, const gdb_byte *writebuf,
+				   ULONGEST offset, ULONGEST len,
+				   ULONGEST *xfered_len) override;
 
   const target_section_table *get_section_table () override;
 
 private:
+
   /* The BFD we're wrapping.  */
   gdb_bfd_ref_ptr m_bfd;
 
@@ -63,19 +59,16 @@ private:
 };
 
 target_xfer_status
-target_bfd::xfer_partial (target_object object,
-			  const char *annex, gdb_byte *readbuf,
-			  const gdb_byte *writebuf,
-			  ULONGEST offset, ULONGEST len,
-			  ULONGEST *xfered_len)
+target_bfd::xfer_partial (target_object object, const char *annex,
+			  gdb_byte *readbuf, const gdb_byte *writebuf,
+			  ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
       {
-	return section_table_xfer_memory_partial (readbuf, writebuf,
-						  offset, len, xfered_len,
-						  m_table);
+	return section_table_xfer_memory_partial (readbuf, writebuf, offset,
+						  len, xfered_len, m_table);
       }
     default:
       return TARGET_XFER_E_IO;

@@ -40,7 +40,7 @@ debug_printf (const char *fmt, ...)
 
 void
 debug_prefixed_printf (const char *module, const char *func,
-		       const char *format, ...)
+                       const char *format, ...)
 {
   va_list ap;
 
@@ -53,7 +53,7 @@ debug_prefixed_printf (const char *module, const char *func,
 
 void
 debug_prefixed_vprintf (const char *module, const char *func,
-			const char *format, va_list args)
+                        const char *format, va_list args)
 {
   if (func != nullptr)
     debug_printf ("%*s[%s] %s: ", debug_print_depth * 2, "", module, func);

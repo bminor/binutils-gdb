@@ -30,9 +30,8 @@ extern const struct bfd_build_id *build_id_bfd_get (bfd *abfd);
 /* Return true if ABFD has NT_GNU_BUILD_ID matching the CHECK value.
    Otherwise, issue a warning and return false.  */
 
-extern int build_id_verify (bfd *abfd,
-			    size_t check_len, const bfd_byte *check);
-
+extern int build_id_verify (bfd *abfd, size_t check_len,
+			    const bfd_byte *check);
 
 /* Find and open a BFD for a debuginfo file  given a build-id.  If no BFD
    can be found, return NULL.  */
@@ -57,8 +56,8 @@ extern gdb_bfd_ref_ptr build_id_to_exec_bfd (size_t build_id_len,
    however, if GDB fails to find suitable debug information using any
    approach, then any warnings will be printed.  */
 
-extern std::string find_separate_debug_file_by_buildid
-  (struct objfile *objfile, std::vector<std::string> *warnings_vector);
+extern std::string find_separate_debug_file_by_buildid (
+  struct objfile *objfile, std::vector<std::string> *warnings_vector);
 
 /* Return an hex-string representation of BUILD_ID.  */
 

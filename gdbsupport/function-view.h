@@ -193,9 +193,11 @@
   unittests/function-view-selftests.c.  */
 
 #include "invoke-result.h"
-namespace gdb {
+namespace gdb
+{
 
-namespace fv_detail {
+namespace fv_detail
+{
 /* Bits shared by all function_view instantiations that do not depend
    on the template parameters.  */
 
@@ -207,7 +209,7 @@ union erased_callable
   /* For function objects.  */
   void *data;
 
-    /* For function pointers.  */
+  /* For function pointers.  */
   void (*fn) ();
 };
 
@@ -222,32 +224,29 @@ template<typename Res, typename... Args>
 class function_view<Res (Args...)>
 {
   template<typename From, typename To>
-  using CompatibleReturnType
-    = Or<std::is_void<To>,
-	 std::is_same<From, To>,
-	 std::is_convertible<From, To>>;
+  using CompatibleReturnType = Or<std::is_void<To>, std::is_same<From, To>,
+                                  std::is_convertible<From, To>>;
 
   /* True if Func can be called with Args, and either the result is
      Res, convertible to Res or Res is void.  */
   template<typename Callable,
-	   typename Res2 = typename gdb::invoke_result<Callable &, Args...>::type>
+           typename Res2 =
+             typename gdb::invoke_result<Callable &, Args...>::type>
   struct IsCompatibleCallable : CompatibleReturnType<Res2, Res>
-  {};
+  {
+  };
 
   /* True if Callable is a function_view.  Used to avoid hijacking the
      copy ctor.  */
-  template <typename Callable>
+  template<typename Callable>
   struct IsFunctionView
     : std::is_same<function_view, typename std::decay<Callable>::type>
-  {};
+  {
+  };
 
- public:
-
+public:
   /* NULL by default.  */
-  constexpr function_view () noexcept
-    : m_erased_callable {},
-      m_invoker {}
-  {}
+  constexpr function_view () noexcept : m_erased_callable {}, m_invoker {} {}
 
   /* Default copy/assignment is fine.  */
   function_view (const function_view &) = default;
@@ -256,10 +255,9 @@ class function_view<Res (Args...)>
   /* This is the main entry point.  Use SFINAE to avoid hijacking the
      copy constructor and to ensure that the target type is
      compatible.  */
-  template
-    <typename Callable,
-     typename = Requires<Not<IsFunctionView<Callable>>>,
-     typename = Requires<IsCompatibleCallable<Callable>>>
+  template<typename Callable,
+           typename = Requires<Not<IsFunctionView<Callable>>>,
+           typename = Requires<IsCompatibleCallable<Callable>>>
   function_view (Callable &&callable) noexcept
   {
     bind (callable);
@@ -269,7 +267,8 @@ class function_view<Res (Args...)>
   constexpr function_view (std::nullptr_t) noexcept
     : m_erased_callable {},
       m_invoker {}
-  {}
+  {
+  }
 
   /* Clear a function_view.  */
   function_view &operator= (std::nullptr_t) noexcept
@@ -282,28 +281,30 @@ class function_view<Res (Args...)>
      we check M_INVOKER instead of M_ERASED_CALLABLE because we don't
      know which member of the union is active right now.  */
   constexpr explicit operator bool () const noexcept
-  { return m_invoker != nullptr; }
+  {
+    return m_invoker != nullptr;
+  }
 
   /* Call the callable.  */
-  Res operator () (Args... args) const
-  { return m_invoker (m_erased_callable, std::forward<Args> (args)...); }
+  Res operator() (Args... args) const
+  {
+    return m_invoker (m_erased_callable, std::forward<Args> (args)...);
+  }
 
- private:
-
+private:
   /* Bind this function_view to a compatible function object
      reference.  */
-  template <typename Callable>
+  template<typename Callable>
   void bind (Callable &callable) noexcept
   {
     m_erased_callable.data = (void *) std::addressof (callable);
-    m_invoker = [] (fv_detail::erased_callable ecall, Args... args)
-      noexcept (noexcept (callable (std::forward<Args> (args)...))) -> Res
-      {
-	auto &restored_callable = *static_cast<Callable *> (ecall.data);
-	/* The explicit cast to Res avoids a compile error when Res is
+    m_invoker = [] (fv_detail::erased_callable ecall, Args... args) noexcept (
+                  noexcept (callable (std::forward<Args> (args)...))) -> Res {
+      auto &restored_callable = *static_cast<Callable *> (ecall.data);
+      /* The explicit cast to Res avoids a compile error when Res is
 	   void and the callable returns non-void.  */
-	return (Res) restored_callable (std::forward<Args> (args)...);
-      };
+      return (Res) restored_callable (std::forward<Args> (args)...);
+    };
   }
 
   /* Bind this function_view to a compatible function pointer.
@@ -317,14 +318,13 @@ class function_view<Res (Args...)>
   void bind (Res2 (*fn) (Args2...)) noexcept
   {
     m_erased_callable.fn = reinterpret_cast<void (*) ()> (fn);
-    m_invoker = [] (fv_detail::erased_callable ecall, Args... args)
-      noexcept (noexcept (fn (std::forward<Args> (args)...))) -> Res
-      {
-	auto restored_fn = reinterpret_cast<Res2 (*) (Args2...)> (ecall.fn);
-	/* The explicit cast to Res avoids a compile error when Res is
+    m_invoker = [] (fv_detail::erased_callable ecall, Args... args) noexcept (
+                  noexcept (fn (std::forward<Args> (args)...))) -> Res {
+      auto restored_fn = reinterpret_cast<Res2 (*) (Args2...)> (ecall.fn);
+      /* The explicit cast to Res avoids a compile error when Res is
 	   void and the callable returns non-void.  */
-	return (Res) restored_fn (std::forward<Args> (args)...);
-      };
+      return (Res) restored_fn (std::forward<Args> (args)...);
+    };
   }
 
   /* Storage for the erased callable.  */
@@ -343,24 +343,33 @@ class function_view<Res (Args...)>
 template<typename Res, typename... Args>
 constexpr inline bool
 operator== (const function_view<Res (Args...)> &f, std::nullptr_t) noexcept
-{ return !static_cast<bool> (f); }
+{
+  return !static_cast<bool> (f);
+}
 
 template<typename Res, typename... Args>
 constexpr inline bool
 operator== (std::nullptr_t, const function_view<Res (Args...)> &f) noexcept
-{ return !static_cast<bool> (f); }
+{
+  return !static_cast<bool> (f);
+}
 
 template<typename Res, typename... Args>
 constexpr inline bool
 operator!= (const function_view<Res (Args...)> &f, std::nullptr_t) noexcept
-{ return static_cast<bool> (f); }
+{
+  return static_cast<bool> (f);
+}
 
 template<typename Res, typename... Args>
 constexpr inline bool
 operator!= (std::nullptr_t, const function_view<Res (Args...)> &f) noexcept
-{ return static_cast<bool> (f); }
+{
+  return static_cast<bool> (f);
+}
 
-namespace fv_detail {
+namespace fv_detail
+{
 
 /* Helper traits type to automatically find the right function_view
    type for a callable.  */
@@ -402,7 +411,7 @@ struct function_view_traits<Res (*&) (Args...)>
 
 /* Reference to const function pointers.  */
 template<typename Res, typename... Args>
-struct function_view_traits<Res (* const &) (Args...)>
+struct function_view_traits<Res (*const &) (Args...)>
   : function_view_traits<Res (Args...)>
 {
 };
@@ -429,8 +438,8 @@ struct function_view_traits<Res (Class::*) (Args...)>
    operator().  */
 template<typename FuncObj>
 struct function_view_traits
-  : function_view_traits <decltype
-			  (&std::remove_reference<FuncObj>::type::operator())>
+  : function_view_traits<
+      decltype (&std::remove_reference<FuncObj>::type::operator())>
 {
 };
 
@@ -439,8 +448,9 @@ struct function_view_traits
 /* Make a function_view from a callable.  Useful to automatically
    deduce the function_view's template argument type.  */
 template<typename Callable>
-auto make_function_view (Callable &&callable)
-  -> typename fv_detail::function_view_traits<Callable>::type
+auto
+make_function_view (Callable &&callable) ->
+  typename fv_detail::function_view_traits<Callable>::type
 {
   using fv = typename fv_detail::function_view_traits<Callable>::type;
   return fv (std::forward<Callable> (callable));

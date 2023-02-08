@@ -42,23 +42,23 @@ xml_escape_text_append (std::string &result, const char *text)
     switch (text[i])
       {
       case '\'':
-	result += "&apos;";
-	break;
+        result += "&apos;";
+        break;
       case '\"':
-	result += "&quot;";
-	break;
+        result += "&quot;";
+        break;
       case '&':
-	result += "&amp;";
-	break;
+        result += "&amp;";
+        break;
       case '<':
-	result += "&lt;";
-	break;
+        result += "&lt;";
+        break;
       case '>':
-	result += "&gt;";
-	break;
+        result += "&gt;";
+        break;
       default:
-	result += text[i];
-	break;
+        result += text[i];
+        break;
       }
 }
 
@@ -78,89 +78,89 @@ string_xml_appendf (std::string &buffer, const char *format, ...)
   for (f = format; *f; f++)
     {
       if (percent)
-	{
-	  char buf[32];
-	  char *str = buf;
-	  const char *f_old = f;
+        {
+          char buf[32];
+          char *str = buf;
+          const char *f_old = f;
 
-	  switch (*f)
-	    {
-	    case 's':
-	      str = va_arg (ap, char *);
-	      break;
-	    case 'd':
-	      sprintf (str, "%d", va_arg (ap, int));
-	      break;
-	    case 'u':
-	      sprintf (str, "%u", va_arg (ap, unsigned int));
-	      break;
-	    case 'x':
-	      sprintf (str, "%x", va_arg (ap, unsigned int));
-	      break;
-	    case 'o':
-	      sprintf (str, "%o", va_arg (ap, unsigned int));
-	      break;
-	    case 'l':
-	      f++;
-	      switch (*f)
-		{
-		case 'd':
-		  sprintf (str, "%ld", va_arg (ap, long));
-		  break;
-		case 'u':
-		  sprintf (str, "%lu", va_arg (ap, unsigned long));
-		  break;
-		case 'x':
-		  sprintf (str, "%lx", va_arg (ap, unsigned long));
-		  break;
-		case 'o':
-		  sprintf (str, "%lo", va_arg (ap, unsigned long));
-		  break;
-		case 'l':
-		  f++;
-		  switch (*f)
-		    {
-		    case 'd':
-		      sprintf (str, "%" PRId64,
-			       (int64_t) va_arg (ap, long long));
-		      break;
-		    case 'u':
-		      sprintf (str, "%" PRIu64,
-			       (uint64_t) va_arg (ap, unsigned long long));
-		      break;
-		    case 'x':
-		      sprintf (str, "%" PRIx64,
-			       (uint64_t) va_arg (ap, unsigned long long));
-		      break;
-		    case 'o':
-		      sprintf (str, "%" PRIo64,
-			       (uint64_t) va_arg (ap, unsigned long long));
-		      break;
-		    default:
-		      str = 0;
-		      break;
-		    }
-		  break;
-		default:
-		  str = 0;
-		  break;
-		}
-	      break;
-	    default:
-	      str = 0;
-	      break;
-	    }
+          switch (*f)
+            {
+            case 's':
+              str = va_arg (ap, char *);
+              break;
+            case 'd':
+              sprintf (str, "%d", va_arg (ap, int));
+              break;
+            case 'u':
+              sprintf (str, "%u", va_arg (ap, unsigned int));
+              break;
+            case 'x':
+              sprintf (str, "%x", va_arg (ap, unsigned int));
+              break;
+            case 'o':
+              sprintf (str, "%o", va_arg (ap, unsigned int));
+              break;
+            case 'l':
+              f++;
+              switch (*f)
+                {
+                case 'd':
+                  sprintf (str, "%ld", va_arg (ap, long));
+                  break;
+                case 'u':
+                  sprintf (str, "%lu", va_arg (ap, unsigned long));
+                  break;
+                case 'x':
+                  sprintf (str, "%lx", va_arg (ap, unsigned long));
+                  break;
+                case 'o':
+                  sprintf (str, "%lo", va_arg (ap, unsigned long));
+                  break;
+                case 'l':
+                  f++;
+                  switch (*f)
+                    {
+                    case 'd':
+                      sprintf (str, "%" PRId64,
+                               (int64_t) va_arg (ap, long long));
+                      break;
+                    case 'u':
+                      sprintf (str, "%" PRIu64,
+                               (uint64_t) va_arg (ap, unsigned long long));
+                      break;
+                    case 'x':
+                      sprintf (str, "%" PRIx64,
+                               (uint64_t) va_arg (ap, unsigned long long));
+                      break;
+                    case 'o':
+                      sprintf (str, "%" PRIo64,
+                               (uint64_t) va_arg (ap, unsigned long long));
+                      break;
+                    default:
+                      str = 0;
+                      break;
+                    }
+                  break;
+                default:
+                  str = 0;
+                  break;
+                }
+              break;
+            default:
+              str = 0;
+              break;
+            }
 
-	  if (str)
-	    {
-	      buffer.append (prev, f_old - prev - 1);
-	      xml_escape_text_append (buffer, str);
-	      prev = f + 1;
-	    }
-	  percent = 0;
-	}
+          if (str)
+            {
+              buffer.append (prev, f_old - prev - 1);
+              xml_escape_text_append (buffer, str);
+              prev = f + 1;
+            }
+          percent = 0;
+        }
       else if (*f == '%')
-	percent = 1;
+        percent = 1;
     }
 
   buffer.append (prev);

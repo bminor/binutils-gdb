@@ -27,7 +27,7 @@
 
 /* Work around glibc header breakage causing ELF_NFPREG not to be usable.  */
 #ifndef NFPREG
-# define NFPREG 33
+#define NFPREG 33
 #endif
 
 /* Linux target op definitions for the RISC-V architecture.  */
@@ -35,7 +35,6 @@
 class riscv_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
@@ -43,7 +42,6 @@ public:
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -69,14 +67,14 @@ bool
 riscv_target::low_cannot_fetch_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
-			  "is not implemented by the target");
+                          "is not implemented by the target");
 }
 
 bool
 riscv_target::low_cannot_store_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_store_register "
-			  "is not implemented by the target");
+                          "is not implemented by the target");
 }
 
 /* Implementation of linux target ops method "low_arch_setup".  */
@@ -162,37 +160,34 @@ riscv_store_fpregset (struct regcache *regcache, const void *buf)
    so define multiple regsets for them marking them all as OPTIONAL_REGS
    rather than FP_REGS, so that "regsets_fetch_inferior_registers" picks
    the right one according to size.  */
-static struct regset_info riscv_regsets[] = {
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
-    sizeof (elf_gregset_t), GENERAL_REGS,
-    riscv_fill_gregset, riscv_store_gregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
-    sizeof (struct __riscv_mc_q_ext_state), OPTIONAL_REGS,
-    riscv_fill_fpregset, riscv_store_fpregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
-    sizeof (struct __riscv_mc_d_ext_state), OPTIONAL_REGS,
-    riscv_fill_fpregset, riscv_store_fpregset },
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
-    sizeof (struct __riscv_mc_f_ext_state), OPTIONAL_REGS,
-    riscv_fill_fpregset, riscv_store_fpregset },
-  NULL_REGSET
-};
+static struct regset_info riscv_regsets[]
+  = { { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
+        sizeof (elf_gregset_t), GENERAL_REGS, riscv_fill_gregset,
+        riscv_store_gregset },
+      { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
+        sizeof (struct __riscv_mc_q_ext_state), OPTIONAL_REGS,
+        riscv_fill_fpregset, riscv_store_fpregset },
+      { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
+        sizeof (struct __riscv_mc_d_ext_state), OPTIONAL_REGS,
+        riscv_fill_fpregset, riscv_store_fpregset },
+      { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
+        sizeof (struct __riscv_mc_f_ext_state), OPTIONAL_REGS,
+        riscv_fill_fpregset, riscv_store_fpregset },
+      NULL_REGSET };
 
 /* RISC-V/Linux regset information.  */
-static struct regsets_info riscv_regsets_info =
-  {
-    riscv_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct regsets_info riscv_regsets_info = {
+  riscv_regsets, /* regsets */
+  0,             /* num_regsets */
+  NULL,          /* disabled_regsets */
+};
 
 /* Definition of linux_target_ops data member "regs_info".  */
-static struct regs_info riscv_regs =
-  {
-    NULL, /* regset_bitmap */
-    NULL, /* usrregs */
-    &riscv_regsets_info,
-  };
+static struct regs_info riscv_regs = {
+  NULL, /* regset_bitmap */
+  NULL, /* usrregs */
+  &riscv_regsets_info,
+};
 
 /* Implementation of linux target ops method "get_regs_info".  */
 
@@ -257,11 +252,10 @@ int
 riscv_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 {
   union
-    {
-      gdb_byte bytes[2];
-      uint16_t insn;
-    }
-  buf;
+  {
+    gdb_byte bytes[2];
+    uint16_t insn;
+  } buf;
 
   if (target_read_memory (*pcptr, buf.bytes, sizeof (buf.insn)) == 0
       && riscv_insn_length (buf.insn == sizeof (riscv_ibreakpoint)))
@@ -278,10 +272,10 @@ riscv_target::sw_breakpoint_from_kind (int kind, int *size)
   *size = kind;
   switch (kind)
     {
-      case sizeof (riscv_ibreakpoint):
-	return (const gdb_byte *) &riscv_ibreakpoint;
-      default:
-	return (const gdb_byte *) &riscv_cbreakpoint;
+    case sizeof (riscv_ibreakpoint):
+      return (const gdb_byte *) &riscv_ibreakpoint;
+    default:
+      return (const gdb_byte *) &riscv_cbreakpoint;
     }
 }
 
@@ -291,18 +285,18 @@ bool
 riscv_target::low_breakpoint_at (CORE_ADDR pc)
 {
   union
-    {
-      gdb_byte bytes[2];
-      uint16_t insn;
-    }
-  buf;
+  {
+    gdb_byte bytes[2];
+    uint16_t insn;
+  } buf;
 
   if (target_read_memory (pc, buf.bytes, sizeof (buf.insn)) == 0
       && (buf.insn == riscv_cbreakpoint
-	  || (buf.insn == riscv_ibreakpoint[0]
-	      && target_read_memory (pc + sizeof (buf.insn), buf.bytes,
-				     sizeof (buf.insn)) == 0
-	      && buf.insn == riscv_ibreakpoint[1])))
+          || (buf.insn == riscv_ibreakpoint[0]
+              && target_read_memory (pc + sizeof (buf.insn), buf.bytes,
+                                     sizeof (buf.insn))
+                   == 0
+              && buf.insn == riscv_ibreakpoint[1])))
     return true;
   else
     return false;

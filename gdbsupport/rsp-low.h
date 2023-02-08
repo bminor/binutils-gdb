@@ -67,8 +67,8 @@ extern std::string bin2hex (const gdb_byte *bin, int count);
    for the server side as well as the client.  */
 
 extern int remote_escape_output (const gdb_byte *buffer, int len_units,
-				 int unit_size, gdb_byte *out_buf,
-				 int *out_len_units, int out_maxlen_bytes);
+                                 int unit_size, gdb_byte *out_buf,
+                                 int *out_len_units, int out_maxlen_bytes);
 
 /* Convert BUFFER, escaped data LEN bytes long, into binary data
    in OUT_BUF.  Return the number of bytes written to OUT_BUF.
@@ -77,6 +77,6 @@ extern int remote_escape_output (const gdb_byte *buffer, int len_units,
    This function reverses remote_escape_output.  */
 
 extern int remote_unescape_input (const gdb_byte *buffer, int len,
-				  gdb_byte *out_buf, int out_maxlen);
+                                  gdb_byte *out_buf, int out_maxlen);
 
 #endif /* COMMON_RSP_LOW_H */

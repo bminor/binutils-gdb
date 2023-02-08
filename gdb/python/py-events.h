@@ -31,7 +31,7 @@ struct eventregistry_object
 {
   PyObject_HEAD
 
-  PyObject *callbacks;
+    PyObject *callbacks;
 };
 
 /* Struct holding references to event registries both in python and c.
@@ -39,13 +39,11 @@ struct eventregistry_object
 
 struct events_object
 {
-#define GDB_PY_DEFINE_EVENT(name)		\
-  eventregistry_object *name;
+#define GDB_PY_DEFINE_EVENT(name) eventregistry_object *name;
 #include "py-all-events.def"
 #undef GDB_PY_DEFINE_EVENT
 
   PyObject *module;
-
 };
 
 /* Python events singleton.  */

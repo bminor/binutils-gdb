@@ -37,7 +37,7 @@ enum ctor_kinds
 is_constructor_name (const char *name)
 {
   if ((current_cp_abi.is_constructor_name) == NULL)
-    error (_("ABI doesn't define required function is_constructor_name"));
+    error (_ ("ABI doesn't define required function is_constructor_name"));
   return (*current_cp_abi.is_constructor_name) (name);
 }
 
@@ -45,7 +45,7 @@ enum dtor_kinds
 is_destructor_name (const char *name)
 {
   if ((current_cp_abi.is_destructor_name) == NULL)
-    error (_("ABI doesn't define required function is_destructor_name"));
+    error (_ ("ABI doesn't define required function is_destructor_name"));
   return (*current_cp_abi.is_destructor_name) (name);
 }
 
@@ -53,7 +53,7 @@ int
 is_vtable_name (const char *name)
 {
   if ((current_cp_abi.is_vtable_name) == NULL)
-    error (_("ABI doesn't define required function is_vtable_name"));
+    error (_ ("ABI doesn't define required function is_vtable_name"));
   return (*current_cp_abi.is_vtable_name) (name);
 }
 
@@ -61,7 +61,7 @@ int
 is_operator_name (const char *name)
 {
   if ((current_cp_abi.is_operator_name) == NULL)
-    error (_("ABI doesn't define required function is_operator_name"));
+    error (_ ("ABI doesn't define required function is_operator_name"));
   return (*current_cp_abi.is_operator_name) (name);
 }
 
@@ -77,8 +77,7 @@ baseclass_offset (struct type *type, int index, const gdb_byte *valaddr,
   try
     {
       res = (*current_cp_abi.baseclass_offset) (type, index, valaddr,
-						embedded_offset,
-						address, val);
+						embedded_offset, address, val);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -86,27 +85,24 @@ baseclass_offset (struct type *type, int index, const gdb_byte *valaddr,
 	throw;
 
       throw_error (NOT_AVAILABLE_ERROR,
-		   _("Cannot determine virtual baseclass offset "
-		     "of incomplete object"));
+		   _ ("Cannot determine virtual baseclass offset "
+		      "of incomplete object"));
     }
 
   return res;
 }
 
 struct value *
-value_virtual_fn_field (struct value **arg1p,
-			struct fn_field *f, int j,
+value_virtual_fn_field (struct value **arg1p, struct fn_field *f, int j,
 			struct type *type, int offset)
 {
   if ((current_cp_abi.virtual_fn_field) == NULL)
     return NULL;
-  return (*current_cp_abi.virtual_fn_field) (arg1p, f, j,
-					     type, offset);
+  return (*current_cp_abi.virtual_fn_field) (arg1p, f, j, type, offset);
 }
 
 struct type *
-value_rtti_type (struct value *v, int *full,
-		 LONGEST *top, int *using_enc)
+value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
 {
   struct type *ret = NULL;
 
@@ -126,12 +122,11 @@ value_rtti_type (struct value *v, int *full,
 }
 
 void
-cplus_print_method_ptr (const gdb_byte *contents,
-			struct type *type,
+cplus_print_method_ptr (const gdb_byte *contents, struct type *type,
 			struct ui_file *stream)
 {
   if (current_cp_abi.print_method_ptr == NULL)
-    error (_("GDB does not support pointers to methods on this target"));
+    error (_ ("GDB does not support pointers to methods on this target"));
   (*current_cp_abi.print_method_ptr) (contents, type, stream);
 }
 
@@ -139,22 +134,21 @@ int
 cplus_method_ptr_size (struct type *to_type)
 {
   if (current_cp_abi.method_ptr_size == NULL)
-    error (_("GDB does not support pointers to methods on this target"));
+    error (_ ("GDB does not support pointers to methods on this target"));
   return (*current_cp_abi.method_ptr_size) (to_type);
 }
 
 void
-cplus_make_method_ptr (struct type *type, gdb_byte *contents,
-		       CORE_ADDR value, int is_virtual)
+cplus_make_method_ptr (struct type *type, gdb_byte *contents, CORE_ADDR value,
+		       int is_virtual)
 {
   if (current_cp_abi.make_method_ptr == NULL)
-    error (_("GDB does not support pointers to methods on this target"));
+    error (_ ("GDB does not support pointers to methods on this target"));
   (*current_cp_abi.make_method_ptr) (type, contents, value, is_virtual);
 }
 
 CORE_ADDR
-cplus_skip_trampoline (frame_info_ptr frame,
-		       CORE_ADDR stop_pc)
+cplus_skip_trampoline (frame_info_ptr frame, CORE_ADDR stop_pc)
 {
   if (current_cp_abi.skip_trampoline == NULL)
     return 0;
@@ -162,11 +156,10 @@ cplus_skip_trampoline (frame_info_ptr frame,
 }
 
 struct value *
-cplus_method_ptr_to_value (struct value **this_p,
-			   struct value *method_ptr)
+cplus_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
 {
   if (current_cp_abi.method_ptr_to_value == NULL)
-    error (_("GDB does not support pointers to methods on this target"));
+    error (_ ("GDB does not support pointers to methods on this target"));
   return (*current_cp_abi.method_ptr_to_value) (this_p, method_ptr);
 }
 
@@ -176,7 +169,7 @@ void
 cplus_print_vtable (struct value *value)
 {
   if (current_cp_abi.print_vtable == NULL)
-    error (_("GDB cannot print the vtable on this target"));
+    error (_ ("GDB cannot print the vtable on this target"));
   (*current_cp_abi.print_vtable) (value);
 }
 
@@ -186,7 +179,7 @@ struct value *
 cplus_typeid (struct value *value)
 {
   if (current_cp_abi.get_typeid == NULL)
-    error (_("GDB cannot find the typeid on this target"));
+    error (_ ("GDB cannot find the typeid on this target"));
   return (*current_cp_abi.get_typeid) (value);
 }
 
@@ -196,7 +189,7 @@ struct type *
 cplus_typeid_type (struct gdbarch *gdbarch)
 {
   if (current_cp_abi.get_typeid_type == NULL)
-    error (_("GDB cannot find the type for 'typeid' on this target"));
+    error (_ ("GDB cannot find the type for 'typeid' on this target"));
   return (*current_cp_abi.get_typeid_type) (gdbarch);
 }
 
@@ -206,7 +199,8 @@ struct type *
 cplus_type_from_type_info (struct value *value)
 {
   if (current_cp_abi.get_type_from_type_info == NULL)
-    error (_("GDB cannot find the type from a std::type_info on this target"));
+    error (
+      _ ("GDB cannot find the type from a std::type_info on this target"));
   return (*current_cp_abi.get_type_from_type_info) (value);
 }
 
@@ -216,8 +210,8 @@ std::string
 cplus_typename_from_type_info (struct value *value)
 {
   if (current_cp_abi.get_typename_from_type_info == NULL)
-    error (_("GDB cannot find the type name "
-	     "from a std::type_info on this target"));
+    error (_ ("GDB cannot find the type name "
+	      "from a std::type_info on this target"));
   return (*current_cp_abi.get_typename_from_type_info) (value);
 }
 
@@ -252,8 +246,8 @@ int
 register_cp_abi (struct cp_abi_ops *abi)
 {
   if (num_cp_abis == CP_ABI_MAX)
-    internal_error (_("Too many C++ ABIs, please increase "
-		      "CP_ABI_MAX in cp-abi.c"));
+    internal_error (_ ("Too many C++ ABIs, please increase "
+		       "CP_ABI_MAX in cp-abi.c"));
 
   cp_abis[num_cp_abis++] = abi;
 
@@ -268,8 +262,8 @@ set_cp_abi_as_auto_default (const char *short_name)
   struct cp_abi_ops *abi = find_cp_abi (short_name);
 
   if (abi == NULL)
-    internal_error (_("Cannot find C++ ABI \"%s\" to set it as auto default."),
-		    short_name);
+    internal_error (
+      _ ("Cannot find C++ ABI \"%s\" to set it as auto default."), short_name);
 
   xfree ((char *) auto_cp_abi.longname);
   xfree ((char *) auto_cp_abi.doc);
@@ -277,10 +271,11 @@ set_cp_abi_as_auto_default (const char *short_name)
   auto_cp_abi = *abi;
 
   auto_cp_abi.shortname = "auto";
-  auto_cp_abi.longname = xstrprintf ("currently \"%s\"",
-				     abi->shortname).release ();
-  auto_cp_abi.doc = xstrprintf ("Automatically selected; currently \"%s\"",
-				abi->shortname).release ();
+  auto_cp_abi.longname
+    = xstrprintf ("currently \"%s\"", abi->shortname).release ();
+  auto_cp_abi.doc
+    = xstrprintf ("Automatically selected; currently \"%s\"", abi->shortname)
+	.release ();
 
   /* Since we copy the current ABI into current_cp_abi instead of
      using a pointer, if auto is currently the default, we need to
@@ -345,14 +340,13 @@ set_cp_abi_cmd (const char *args, int from_tty)
     }
 
   if (!switch_to_cp_abi (args))
-    error (_("Could not find \"%s\" in ABI list"), args);
+    error (_ ("Could not find \"%s\" in ABI list"), args);
 }
 
 /* A completion function for "set cp-abi".  */
 
 static void
-cp_abi_completer (struct cmd_list_element *ignore,
-		  completion_tracker &tracker,
+cp_abi_completer (struct cmd_list_element *ignore, completion_tracker &tracker,
 		  const char *text, const char *word)
 {
   static const char **cp_abi_names;
@@ -386,6 +380,7 @@ show_cp_abi_cmd (const char *args, int from_tty)
 }
 
 void _initialize_cp_abi ();
+
 void
 _initialize_cp_abi ()
 {
@@ -394,13 +389,12 @@ _initialize_cp_abi ()
   register_cp_abi (&auto_cp_abi);
   switch_to_cp_abi ("auto");
 
-  c = add_cmd ("cp-abi", class_obscure, set_cp_abi_cmd, _("\
+  c = add_cmd ("cp-abi", class_obscure, set_cp_abi_cmd, _ ("\
 Set the ABI used for inspecting C++ objects.\n\
 \"set cp-abi\" with no arguments will list the available ABIs."),
 	       &setlist);
   set_cmd_completer (c, cp_abi_completer);
 
   add_cmd ("cp-abi", class_obscure, show_cp_abi_cmd,
-	   _("Show the ABI used for inspecting C++ objects."),
-	   &showlist);
+	   _ ("Show the ABI used for inspecting C++ objects."), &showlist);
 }

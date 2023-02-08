@@ -33,8 +33,7 @@
 /* This vector maps GDB's idea of a register's number into an address
    in the windows exception context vector.  */
 
-static int i386_windows_gregset_reg_offset[] =
-{
+static int i386_windows_gregset_reg_offset[] = {
   176, /* eax */
   172, /* ecx */
   168, /* edx */
@@ -55,11 +54,11 @@ static int i386_windows_gregset_reg_offset[] =
   144, /* fs */
   140, /* gs */
 
-  56, /* FloatSave.RegisterArea[0 * 10] */
-  66, /* FloatSave.RegisterArea[1 * 10] */
-  76, /* FloatSave.RegisterArea[2 * 10] */
-  86, /* FloatSave.RegisterArea[3 * 10] */
-  96, /* FloatSave.RegisterArea[4 * 10] */
+  56,  /* FloatSave.RegisterArea[0 * 10] */
+  66,  /* FloatSave.RegisterArea[1 * 10] */
+  76,  /* FloatSave.RegisterArea[2 * 10] */
+  86,  /* FloatSave.RegisterArea[3 * 10] */
+  96,  /* FloatSave.RegisterArea[4 * 10] */
   106, /* FloatSave.RegisterArea[5 * 10] */
   116, /* FloatSave.RegisterArea[6 * 10] */
   126, /* FloatSave.RegisterArea[7 * 10] */
@@ -120,8 +119,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* read_subroutine_type sets for non-static member functions the
      artificial flag of the first parameter ('this' pointer).  */
-  if (type->code () == TYPE_CODE_METHOD
-      && type->num_fields () > 0
+  if (type->code () == TYPE_CODE_METHOD && type->num_fields () > 0
       && TYPE_FIELD_ARTIFICIAL (type, 0)
       && type->field (0).type ()->code () == TYPE_CODE_PTR)
     thiscall = 1;
@@ -134,11 +132,13 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 /* Common parts for gdbarch initialization for Windows and Cygwin on i386.  */
 
 static void
-i386_windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
+i386_windows_init_abi_common (struct gdbarch_info info,
+			      struct gdbarch *gdbarch)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
-  set_gdbarch_skip_trampoline_code (gdbarch, i386_windows_skip_trampoline_code);
+  set_gdbarch_skip_trampoline_code (gdbarch,
+				    i386_windows_skip_trampoline_code);
 
   set_gdbarch_skip_main_prologue (gdbarch, i386_skip_main_prologue);
 
@@ -151,8 +151,8 @@ i386_windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_fpregset = 0;
 
   /* Core file support.  */
-  set_gdbarch_core_xfer_shared_libraries
-    (gdbarch, windows_core_xfer_shared_libraries);
+  set_gdbarch_core_xfer_shared_libraries (gdbarch,
+					  windows_core_xfer_shared_libraries);
   set_gdbarch_core_pid_to_str (gdbarch, windows_core_pid_to_str);
 
   set_gdbarch_auto_wide_charset (gdbarch, i386_windows_auto_wide_charset);
@@ -211,6 +211,7 @@ i386_cygwin_core_osabi_sniffer (bfd *abfd)
 }
 
 void _initialize_i386_windows_tdep ();
+
 void
 _initialize_i386_windows_tdep ()
 {

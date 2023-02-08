@@ -57,10 +57,10 @@
 
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
-#define HA_MAX_NUM_FLDS		4
+#define HA_MAX_NUM_FLDS 4
 
 /* All possible aarch64 target descriptors.  */
-static std::unordered_map <aarch64_features, target_desc *> tdesc_aarch64_map;
+static std::unordered_map<aarch64_features, target_desc *> tdesc_aarch64_map;
 
 /* The standard register names, and all the valid aliases for them.
    We're not adding fp here, that name is already taken, see
@@ -69,82 +69,57 @@ static const struct
 {
   const char *const name;
   int regnum;
-} aarch64_register_aliases[] =
-{
+} aarch64_register_aliases[] = {
   /* Link register alias for x30.  */
-  {"lr", AARCH64_LR_REGNUM},
+  { "lr", AARCH64_LR_REGNUM },
   /* SP is the canonical name for x31 according to aarch64_r_register_names,
      so we're adding an x31 alias for sp.  */
-  {"x31", AARCH64_SP_REGNUM},
+  { "x31", AARCH64_SP_REGNUM },
   /*  specials */
-  {"ip0", AARCH64_X0_REGNUM + 16},
-  {"ip1", AARCH64_X0_REGNUM + 17}
+  { "ip0", AARCH64_X0_REGNUM + 16 },
+  { "ip1", AARCH64_X0_REGNUM + 17 }
 };
 
 /* The required core 'R' registers.  */
-static const char *const aarch64_r_register_names[] =
-{
+static const char *const aarch64_r_register_names[] = {
   /* These registers must appear in consecutive RAW register number
      order and they must begin with AARCH64_X0_REGNUM! */
-  "x0", "x1", "x2", "x3",
-  "x4", "x5", "x6", "x7",
-  "x8", "x9", "x10", "x11",
-  "x12", "x13", "x14", "x15",
-  "x16", "x17", "x18", "x19",
-  "x20", "x21", "x22", "x23",
-  "x24", "x25", "x26", "x27",
-  "x28", "x29", "x30", "sp",
-  "pc", "cpsr"
+  "x0",	 "x1",	"x2",  "x3",  "x4",  "x5",  "x6",  "x7",  "x8",
+  "x9",	 "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17",
+  "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26",
+  "x27", "x28", "x29", "x30", "sp",  "pc",  "cpsr"
 };
 
 /* The FP/SIMD 'V' registers.  */
-static const char *const aarch64_v_register_names[] =
-{
+static const char *const aarch64_v_register_names[] = {
   /* These registers must appear in consecutive RAW register number
      order and they must begin with AARCH64_V0_REGNUM! */
-  "v0", "v1", "v2", "v3",
-  "v4", "v5", "v6", "v7",
-  "v8", "v9", "v10", "v11",
-  "v12", "v13", "v14", "v15",
-  "v16", "v17", "v18", "v19",
-  "v20", "v21", "v22", "v23",
-  "v24", "v25", "v26", "v27",
-  "v28", "v29", "v30", "v31",
-  "fpsr",
-  "fpcr"
+  "v0",	 "v1",	"v2",  "v3",  "v4",  "v5",   "v6",  "v7",  "v8",
+  "v9",	 "v10", "v11", "v12", "v13", "v14",  "v15", "v16", "v17",
+  "v18", "v19", "v20", "v21", "v22", "v23",  "v24", "v25", "v26",
+  "v27", "v28", "v29", "v30", "v31", "fpsr", "fpcr"
 };
 
 /* The SVE 'Z' and 'P' registers.  */
-static const char *const aarch64_sve_register_names[] =
-{
+static const char *const aarch64_sve_register_names[] = {
   /* These registers must appear in consecutive RAW register number
      order and they must begin with AARCH64_SVE_Z0_REGNUM! */
-  "z0", "z1", "z2", "z3",
-  "z4", "z5", "z6", "z7",
-  "z8", "z9", "z10", "z11",
-  "z12", "z13", "z14", "z15",
-  "z16", "z17", "z18", "z19",
-  "z20", "z21", "z22", "z23",
-  "z24", "z25", "z26", "z27",
-  "z28", "z29", "z30", "z31",
-  "fpsr", "fpcr",
-  "p0", "p1", "p2", "p3",
-  "p4", "p5", "p6", "p7",
-  "p8", "p9", "p10", "p11",
-  "p12", "p13", "p14", "p15",
-  "ffr", "vg"
+  "z0",	 "z1",	"z2",  "z3",  "z4",  "z5",   "z6",   "z7",  "z8",
+  "z9",	 "z10", "z11", "z12", "z13", "z14",  "z15",  "z16", "z17",
+  "z18", "z19", "z20", "z21", "z22", "z23",  "z24",  "z25", "z26",
+  "z27", "z28", "z29", "z30", "z31", "fpsr", "fpcr", "p0",  "p1",
+  "p2",	 "p3",	"p4",  "p5",  "p6",  "p7",   "p8",   "p9",  "p10",
+  "p11", "p12", "p13", "p14", "p15", "ffr",  "vg"
 };
 
-static const char *const aarch64_pauth_register_names[] =
-{
+static const char *const aarch64_pauth_register_names[] = {
   /* Authentication mask for data pointer.  */
   "pauth_dmask",
   /* Authentication mask for code pointer.  */
   "pauth_cmask"
 };
 
-static const char *const aarch64_mte_register_names[] =
-{
+static const char *const aarch64_mte_register_names[] = {
   /* Tag Control Register.  */
   "tag_ctl"
 };
@@ -187,28 +162,32 @@ static void
 show_aarch64_debug (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("AArch64 debugging is %s.\n"), value);
+  gdb_printf (file, _ ("AArch64 debugging is %s.\n"), value);
 }
 
-namespace {
+namespace
+{
 
 /* Abstract instruction reader.  */
 
 class abstract_instruction_reader
 {
 public:
+
   /* Read in one instruction.  */
   virtual ULONGEST read (CORE_ADDR memaddr, int len,
-			 enum bfd_endian byte_order) = 0;
+			 enum bfd_endian byte_order)
+    = 0;
 };
 
 /* Instruction reader from real target.  */
 
 class instruction_reader : public abstract_instruction_reader
 {
- public:
-  ULONGEST read (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
-    override
+public:
+
+  ULONGEST read (CORE_ADDR memaddr, int len,
+		 enum bfd_endian byte_order) override
   {
     return read_code_unsigned_integer (memaddr, len, byte_order);
   }
@@ -221,8 +200,8 @@ class instruction_reader : public abstract_instruction_reader
    THIS_FRAME.  */
 
 static CORE_ADDR
-aarch64_frame_unmask_lr (aarch64_gdbarch_tdep *tdep,
-			 frame_info_ptr this_frame, CORE_ADDR addr)
+aarch64_frame_unmask_lr (aarch64_gdbarch_tdep *tdep, frame_info_ptr this_frame,
+			 CORE_ADDR addr)
 {
   if (tdep->has_pauth ()
       && frame_unwind_register_unsigned (this_frame,
@@ -255,10 +234,10 @@ aarch64_get_pc_address_flags (frame_info_ptr frame, CORE_ADDR pc)
    clobber the stack frame unexpectedly, or an unknown instruction.  */
 
 static CORE_ADDR
-aarch64_analyze_prologue (struct gdbarch *gdbarch,
-			  CORE_ADDR start, CORE_ADDR limit,
+aarch64_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start,
+			  CORE_ADDR limit,
 			  struct aarch64_prologue_cache *cache,
-			  abstract_instruction_reader& reader)
+			  abstract_instruction_reader &reader)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int i;
@@ -299,13 +278,13 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
 	  if (inst.opcode->op == OP_ADD)
 	    {
-	      regs[rd] = pv_add_constant (regs[rn],
-					  inst.operands[2].imm.value);
+	      regs[rd]
+		= pv_add_constant (regs[rn], inst.operands[2].imm.value);
 	    }
 	  else
 	    {
-	      regs[rd] = pv_add_constant (regs[rn],
-					  -inst.operands[2].imm.value);
+	      regs[rd]
+		= pv_add_constant (regs[rn], -inst.operands[2].imm.value);
 	    }
 
 	  /* Did we move SP to FP?  */
@@ -374,8 +353,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rn);
 	  gdb_assert (inst.operands[2].type == AARCH64_OPND_Rm_SFT);
 
-	  if (inst.operands[2].shifter.amount == 0
-	      && rn == AARCH64_SP_REGNUM)
+	  if (inst.operands[2].shifter.amount == 0 && rn == AARCH64_SP_REGNUM)
 	    regs[rd] = regs[rm];
 	  else
 	    {
@@ -397,9 +375,9 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  gdb_assert (inst.operands[1].type == AARCH64_OPND_ADDR_SIMM9);
 	  gdb_assert (!inst.operands[1].addr.offset.is_reg);
 
-	  stack.store
-	    (pv_add_constant (regs[rn], inst.operands[1].addr.offset.imm),
-	     size, regs[rt]);
+	  stack.store (pv_add_constant (regs[rn],
+					inst.operands[1].addr.offset.imm),
+		       size, regs[rt]);
 
 	  /* Are we storing with SP as a base?  */
 	  if (rn == AARCH64_SP_REGNUM)
@@ -442,7 +420,8 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	    }
 
 	  stack.store (pv_add_constant (regs[rn], imm), size, regs[rt1]);
-	  stack.store (pv_add_constant (regs[rn], imm + size), size, regs[rt2]);
+	  stack.store (pv_add_constant (regs[rn], imm + size), size,
+		       regs[rt2]);
 
 	  if (inst.operands[2].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
@@ -452,7 +431,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  if (rn == AARCH64_SP_REGNUM && !inst.operands[2].addr.writeback)
 	    seen_stack_set = true;
 	}
-      else if ((inst.opcode->iclass == ldst_imm9 /* Signed immediate.  */
+      else if ((inst.opcode->iclass == ldst_imm9    /* Signed immediate.  */
 		|| (inst.opcode->iclass == ldst_pos /* Unsigned immediate.  */
 		    && (inst.opcode->op == OP_STR_POS
 			|| inst.opcode->op == OP_STRF_POS)))
@@ -490,7 +469,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  int ra_state_val = 0;
 
 	  if (insn == 0xd503233f /* paciasp.  */
-	      || insn == 0xd503237f  /* pacibsp.  */)
+	      || insn == 0xd503237f /* pacibsp.  */)
 	    {
 	      /* Return addresses are mangled.  */
 	      ra_state_val = 1;
@@ -563,8 +542,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       int regnum = gdbarch_num_regs (gdbarch);
       CORE_ADDR offset;
 
-      if (stack.find_reg (gdbarch, i + AARCH64_X_REGISTER_COUNT,
-			  &offset))
+      if (stack.find_reg (gdbarch, i + AARCH64_X_REGISTER_COUNT, &offset))
 	cache->saved_regs[i + regnum + AARCH64_D0_REGNUM].set_addr (offset);
     }
 
@@ -572,32 +550,35 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-aarch64_analyze_prologue (struct gdbarch *gdbarch,
-			  CORE_ADDR start, CORE_ADDR limit,
+aarch64_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start,
+			  CORE_ADDR limit,
 			  struct aarch64_prologue_cache *cache)
 {
   instruction_reader reader;
 
-  return aarch64_analyze_prologue (gdbarch, start, limit, cache,
-				   reader);
+  return aarch64_analyze_prologue (gdbarch, start, limit, cache, reader);
 }
 
 #if GDB_SELF_TEST
 
-namespace selftests {
+namespace selftests
+{
 
 /* Instruction reader from manually cooked instruction sequences.  */
 
 class instruction_reader_test : public abstract_instruction_reader
 {
 public:
+
   template<size_t SIZE>
   explicit instruction_reader_test (const uint32_t (&insns)[SIZE])
-  : m_insns (insns), m_insns_size (SIZE)
-  {}
+    : m_insns (insns),
+      m_insns_size (SIZE)
+  {
+  }
 
-  ULONGEST read (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
-    override
+  ULONGEST read (CORE_ADDR memaddr, int len,
+		 enum bfd_endian byte_order) override
   {
     SELF_CHECK (len == 4);
     SELF_CHECK (memaddr % 4 == 0);
@@ -607,6 +588,7 @@ public:
   }
 
 private:
+
   const uint32_t *m_insns;
   size_t m_insns_size;
 };
@@ -698,7 +680,6 @@ aarch64_analyze_prologue_test (void)
       {
 	int num_regs = gdbarch_num_regs (gdbarch);
 	int regnum = i + num_regs + AARCH64_D0_REGNUM;
-
 
 	if (i == 0)
 	  SELF_CHECK (cache.saved_regs[regnum].addr () == -24);
@@ -832,8 +813,8 @@ aarch64_analyze_prologue_test (void)
       instruction_reader_test reader (insns);
 
       trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
-      CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache,
-						reader);
+      CORE_ADDR end
+	= aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
 
       SELF_CHECK (end == 4 * 4);
       SELF_CHECK (cache.framereg == AARCH64_FP_REGNUM);
@@ -860,37 +841,36 @@ aarch64_analyze_prologue_test (void)
     }
 
   /* Test a prologue with a BTI instruction.  */
-    {
-      static const uint32_t insns[] = {
-	0xd503245f, /* bti */
-	0xa9bd7bfd, /* stp	x29, x30, [sp, #-48]! */
-	0x910003fd, /* mov	x29, sp */
-	0xf801c3f3, /* str	x19, [sp, #28] */
-	0xb9401fa0, /* ldr	x19, [x29, #28] */
-      };
-      instruction_reader_test reader (insns);
+  {
+    static const uint32_t insns[] = {
+      0xd503245f, /* bti */
+      0xa9bd7bfd, /* stp	x29, x30, [sp, #-48]! */
+      0x910003fd, /* mov	x29, sp */
+      0xf801c3f3, /* str	x19, [sp, #28] */
+      0xb9401fa0, /* ldr	x19, [x29, #28] */
+    };
+    instruction_reader_test reader (insns);
 
-      trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
-      CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache,
-						reader);
+    trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
+    CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
 
-      SELF_CHECK (end == 4 * 4);
-      SELF_CHECK (cache.framereg == AARCH64_FP_REGNUM);
-      SELF_CHECK (cache.framesize == 48);
+    SELF_CHECK (end == 4 * 4);
+    SELF_CHECK (cache.framereg == AARCH64_FP_REGNUM);
+    SELF_CHECK (cache.framesize == 48);
 
-      for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
-	{
-	  if (i == 19)
-	    SELF_CHECK (cache.saved_regs[i].addr () == -20);
-	  else if (i == AARCH64_FP_REGNUM)
-	    SELF_CHECK (cache.saved_regs[i].addr () == -48);
-	  else if (i == AARCH64_LR_REGNUM)
-	    SELF_CHECK (cache.saved_regs[i].addr () == -40);
-	  else
-	    SELF_CHECK (cache.saved_regs[i].is_realreg ()
-			&& cache.saved_regs[i].realreg () == i);
-	}
-    }
+    for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
+      {
+	if (i == 19)
+	  SELF_CHECK (cache.saved_regs[i].addr () == -20);
+	else if (i == AARCH64_FP_REGNUM)
+	  SELF_CHECK (cache.saved_regs[i].addr () == -48);
+	else if (i == AARCH64_LR_REGNUM)
+	  SELF_CHECK (cache.saved_regs[i].addr () == -40);
+	else
+	  SELF_CHECK (cache.saved_regs[i].is_realreg ()
+		      && cache.saved_regs[i].realreg () == i);
+      }
+  }
 }
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
@@ -923,7 +903,7 @@ aarch64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      upper bound.  */
   limit_pc = skip_prologue_using_sal (gdbarch, pc);
   if (limit_pc == 0)
-    limit_pc = pc + 128;	/* Magic.  */
+    limit_pc = pc + 128; /* Magic.  */
 
   /* Try disassembling prologue.  */
   return aarch64_analyze_prologue (gdbarch, pc, limit_pc, NULL);
@@ -1078,8 +1058,8 @@ aarch64_prologue_frame_unwind_stop_reason (frame_info_ptr this_frame,
    PC and the caller's SP when we were called.  */
 
 static void
-aarch64_prologue_this_id (frame_info_ptr this_frame,
-			  void **this_cache, struct frame_id *this_id)
+aarch64_prologue_this_id (frame_info_ptr this_frame, void **this_cache,
+			  struct frame_id *this_id)
 {
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
@@ -1093,8 +1073,8 @@ aarch64_prologue_this_id (frame_info_ptr this_frame,
 /* Implement the "prev_register" frame_unwind method.  */
 
 static struct value *
-aarch64_prologue_prev_register (frame_info_ptr this_frame,
-				void **this_cache, int prev_regnum)
+aarch64_prologue_prev_register (frame_info_ptr this_frame, void **this_cache,
+				int prev_regnum)
 {
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
@@ -1134,24 +1114,21 @@ aarch64_prologue_prev_register (frame_info_ptr this_frame,
 	 |          |<- SP
 	 +----------+  */
   if (prev_regnum == AARCH64_SP_REGNUM)
-    return frame_unwind_got_constant (this_frame, prev_regnum,
-				      cache->prev_sp);
+    return frame_unwind_got_constant (this_frame, prev_regnum, cache->prev_sp);
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs,
 				       prev_regnum);
 }
 
 /* AArch64 prologue unwinder.  */
-static frame_unwind aarch64_prologue_unwind =
-{
-  "aarch64 prologue",
-  NORMAL_FRAME,
-  aarch64_prologue_frame_unwind_stop_reason,
-  aarch64_prologue_this_id,
-  aarch64_prologue_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static frame_unwind aarch64_prologue_unwind
+  = { "aarch64 prologue",
+      NORMAL_FRAME,
+      aarch64_prologue_frame_unwind_stop_reason,
+      aarch64_prologue_this_id,
+      aarch64_prologue_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 /* Allocate and fill in *THIS_CACHE with information about the prologue of
    *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
@@ -1172,8 +1149,8 @@ aarch64_make_stub_cache (frame_info_ptr this_frame, void **this_cache)
 
   try
     {
-      cache->prev_sp = get_frame_register_unsigned (this_frame,
-						    AARCH64_SP_REGNUM);
+      cache->prev_sp
+	= get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
       cache->prev_pc = get_frame_pc (this_frame);
       cache->available_p = 1;
     }
@@ -1204,8 +1181,8 @@ aarch64_stub_frame_unwind_stop_reason (frame_info_ptr this_frame,
 /* Our frame ID for a stub frame is the current SP and LR.  */
 
 static void
-aarch64_stub_this_id (frame_info_ptr this_frame,
-		      void **this_cache, struct frame_id *this_id)
+aarch64_stub_this_id (frame_info_ptr this_frame, void **this_cache,
+		      struct frame_id *this_id)
 {
   struct aarch64_prologue_cache *cache
     = aarch64_make_stub_cache (this_frame, this_cache);
@@ -1237,16 +1214,14 @@ aarch64_stub_unwind_sniffer (const struct frame_unwind *self,
 }
 
 /* AArch64 stub unwinder.  */
-static frame_unwind aarch64_stub_unwind =
-{
-  "aarch64 stub",
-  NORMAL_FRAME,
-  aarch64_stub_frame_unwind_stop_reason,
-  aarch64_stub_this_id,
-  aarch64_prologue_prev_register,
-  NULL,
-  aarch64_stub_unwind_sniffer
-};
+static frame_unwind aarch64_stub_unwind
+  = { "aarch64 stub",
+      NORMAL_FRAME,
+      aarch64_stub_frame_unwind_stop_reason,
+      aarch64_stub_this_id,
+      aarch64_prologue_prev_register,
+      NULL,
+      aarch64_stub_unwind_sniffer };
 
 /* Return the frame base address of *THIS_FRAME.  */
 
@@ -1260,20 +1235,16 @@ aarch64_normal_frame_base (frame_info_ptr this_frame, void **this_cache)
 }
 
 /* AArch64 default frame base information.  */
-static frame_base aarch64_normal_base =
-{
-  &aarch64_prologue_unwind,
-  aarch64_normal_frame_base,
-  aarch64_normal_frame_base,
-  aarch64_normal_frame_base
-};
+static frame_base aarch64_normal_base
+  = { &aarch64_prologue_unwind, aarch64_normal_frame_base,
+      aarch64_normal_frame_base, aarch64_normal_frame_base };
 
 /* Return the value of the REGNUM register in the previous frame of
    *THIS_FRAME.  */
 
 static struct value *
-aarch64_dwarf2_prev_register (frame_info_ptr this_frame,
-			      void **this_cache, int regnum)
+aarch64_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
+			      int regnum)
 {
   gdbarch *arch = get_frame_arch (this_frame);
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (arch);
@@ -1287,7 +1258,7 @@ aarch64_dwarf2_prev_register (frame_info_ptr this_frame,
       return frame_unwind_got_constant (this_frame, regnum, lr);
 
     default:
-      internal_error (_("Unexpected register %d"), regnum);
+      internal_error (_ ("Unexpected register %d"), regnum);
     }
 }
 
@@ -1391,14 +1362,13 @@ aarch64_program_breakpoint_here_p (gdbarch *gdbarch, CORE_ADDR address)
 
   if (target_read_memory (address, target_mem, insn_len) == 0)
     {
-      uint32_t insn =
-	(uint32_t) extract_unsigned_integer (target_mem, insn_len,
-					     gdbarch_byte_order_for_code (gdbarch));
+      uint32_t insn = (uint32_t) extract_unsigned_integer (
+	target_mem, insn_len, gdbarch_byte_order_for_code (gdbarch));
 
       /* Check if INSN is a BRK instruction pattern.  There are multiple choices
 	 of such instructions with different immediate values.  Different OS'
 	 may use a different variation, but they have the same outcome.  */
-	return ((insn & BRK_INSN_MASK) == BRK_INSN_BASE);
+      return ((insn & BRK_INSN_MASK) == BRK_INSN_BASE);
     }
 
   return false;
@@ -1501,14 +1471,15 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	else
 	  {
 	    struct type *target_type = type->target_type ();
-	    int count = aapcs_is_vfp_call_or_return_candidate_1
-			  (target_type, fundamental_type);
+	    int count
+	      = aapcs_is_vfp_call_or_return_candidate_1 (target_type,
+							 fundamental_type);
 
 	    if (count == -1)
 	      return count;
 
 	    count *= (type->length () / target_type->length ());
-	      return count;
+	    return count;
 	  }
       }
 
@@ -1525,8 +1496,9 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 
 	    struct type *member = check_typedef (type->field (i).type ());
 
-	    int sub_count = aapcs_is_vfp_call_or_return_candidate_1
-			      (member, fundamental_type);
+	    int sub_count
+	      = aapcs_is_vfp_call_or_return_candidate_1 (member,
+							 fundamental_type);
 	    if (sub_count == -1)
 	      return -1;
 	    count += sub_count;
@@ -1535,7 +1507,8 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	/* Ensure there is no padding between the fields (allowing for empty
 	   zero length structs)  */
 	int ftype_length = (*fundamental_type == nullptr)
-			   ? 0 : (*fundamental_type)->length ();
+			     ? 0
+			     : (*fundamental_type)->length ();
 	if (count * ftype_length != type->length ())
 	  return -1;
 
@@ -1576,8 +1549,8 @@ aapcs_is_vfp_call_or_return_candidate (struct type *type, int *count,
 
   *fundamental_type = nullptr;
 
-  int ag_count = aapcs_is_vfp_call_or_return_candidate_1 (type,
-							  fundamental_type);
+  int ag_count
+    = aapcs_is_vfp_call_or_return_candidate_1 (type, fundamental_type);
 
   if (ag_count > 0 && ag_count <= HA_MAX_NUM_FLDS)
     {
@@ -1629,13 +1602,11 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
   while (len > 0)
     {
       int partial_len = len < X_REGISTER_SIZE ? len : X_REGISTER_SIZE;
-      CORE_ADDR regval = extract_unsigned_integer (buf, partial_len,
-						   byte_order);
-
+      CORE_ADDR regval
+	= extract_unsigned_integer (buf, partial_len, byte_order);
 
       /* Adjust sub-word struct/union args when big-endian.  */
-      if (byte_order == BFD_ENDIAN_BIG
-	  && partial_len < X_REGISTER_SIZE
+      if (byte_order == BFD_ENDIAN_BIG && partial_len < X_REGISTER_SIZE
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	regval <<= ((X_REGISTER_SIZE - partial_len) * TARGET_CHAR_BIT);
 
@@ -1656,10 +1627,8 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
    handle arguments spread across multiple registers.  */
 
 static int
-pass_in_v (struct gdbarch *gdbarch,
-	   struct regcache *regcache,
-	   struct aarch64_call_info *info,
-	   int len, const bfd_byte *buf)
+pass_in_v (struct gdbarch *gdbarch, struct regcache *regcache,
+	   struct aarch64_call_info *info, int len, const bfd_byte *buf)
 {
   if (info->nsrn < 8)
     {
@@ -1777,8 +1746,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 	const bfd_byte *buf = value_contents (arg).data ();
 	struct type *target_type = check_typedef (arg_type->target_type ());
 
-	if (!pass_in_v (gdbarch, regcache, info, target_type->length (),
-			buf))
+	if (!pass_in_v (gdbarch, regcache, info, target_type->length (), buf))
 	  return false;
 
 	return pass_in_v (gdbarch, regcache, info, target_type->length (),
@@ -1818,8 +1786,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 static CORE_ADDR
 aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			 struct regcache *regcache, CORE_ADDR bp_addr,
-			 int nargs,
-			 struct value **args, CORE_ADDR sp,
+			 int nargs, struct value **args, CORE_ADDR sp,
 			 function_call_return_method return_method,
 			 CORE_ADDR struct_addr)
 {
@@ -1860,10 +1827,10 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* The struct_return pointer occupies X8.  */
   if (return_method != return_method_normal)
     {
-      aarch64_debug_printf ("struct return in %s = 0x%s",
-			    gdbarch_register_name
-			      (gdbarch, AARCH64_STRUCT_RETURN_REGNUM),
-			    paddress (gdbarch, struct_addr));
+      aarch64_debug_printf (
+	"struct return in %s = 0x%s",
+	gdbarch_register_name (gdbarch, AARCH64_STRUCT_RETURN_REGNUM),
+	paddress (gdbarch, struct_addr));
 
       regcache_cooked_write_unsigned (regcache, AARCH64_STRUCT_RETURN_REGNUM,
 				      struct_addr);
@@ -2141,8 +2108,9 @@ aarch64_vnv_type (struct gdbarch *gdbarch)
       struct type *t = arch_composite_type (gdbarch, "__gdb_builtin_type_vnv",
 					    TYPE_CODE_UNION);
 
-      struct type *sub = arch_composite_type (gdbarch, "__gdb_builtin_type_vnd",
-				 TYPE_CODE_UNION);
+      struct type *sub
+	= arch_composite_type (gdbarch, "__gdb_builtin_type_vnd",
+			       TYPE_CODE_UNION);
       append_composite_type_field (sub, "f",
 				   init_vector_type (bt->builtin_double, 2));
       append_composite_type_field (sub, "u",
@@ -2247,7 +2215,7 @@ aarch64_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
 /* AArch64 BRK software debug mode instruction.
    Note that AArch64 code is always little-endian.
    1101.0100.0010.0000.0000.0000.0000.0000 = 0xd4200000.  */
-constexpr gdb_byte aarch64_default_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
+constexpr gdb_byte aarch64_default_breakpoint[] = { 0x00, 0x00, 0x20, 0xd4 };
 
 typedef BP_MANIPULATION (aarch64_default_breakpoint) aarch64_breakpoint;
 
@@ -2276,9 +2244,9 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  gdb_byte buf[register_size (gdbarch, regno)];
 	  gdb_assert (len <= sizeof (buf));
 
-	  aarch64_debug_printf
-	    ("read HFA or HVA return value element %d from %s",
-	     i + 1, gdbarch_register_name (gdbarch, regno));
+	  aarch64_debug_printf (
+	    "read HFA or HVA return value element %d from %s", i + 1,
+	    gdbarch_register_name (gdbarch, regno));
 
 	  regs->cooked_read (regno, buf);
 
@@ -2286,12 +2254,9 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  valbuf += len;
 	}
     }
-  else if (type->code () == TYPE_CODE_INT
-	   || type->code () == TYPE_CODE_CHAR
-	   || type->code () == TYPE_CODE_BOOL
-	   || type->code () == TYPE_CODE_PTR
-	   || TYPE_IS_REFERENCE (type)
-	   || type->code () == TYPE_CODE_ENUM)
+  else if (type->code () == TYPE_CODE_INT || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL || type->code () == TYPE_CODE_PTR
+	   || TYPE_IS_REFERENCE (type) || type->code () == TYPE_CODE_ENUM)
     {
       /* If the type is a plain integer, then the access is
 	 straight-forward.  Otherwise we have to play around a bit
@@ -2306,8 +2271,9 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	     anything special for small big-endian values.  */
 	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
 	  store_unsigned_integer (valbuf,
-				  (len > X_REGISTER_SIZE
-				   ? X_REGISTER_SIZE : len), byte_order, tmp);
+				  (len > X_REGISTER_SIZE ? X_REGISTER_SIZE
+							 : len),
+				  byte_order, tmp);
 	  len -= X_REGISTER_SIZE;
 	  valbuf += X_REGISTER_SIZE;
 	}
@@ -2330,7 +2296,6 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	}
     }
 }
-
 
 /* Will a function return an aggregate type in memory or in a
    register?  Return 0 if an aggregate type can be returned in a
@@ -2390,9 +2355,9 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  gdb_byte tmpbuf[register_size (gdbarch, regno)];
 	  gdb_assert (len <= sizeof (tmpbuf));
 
-	  aarch64_debug_printf
-	    ("write HFA or HVA return value element %d to %s",
-	     i + 1, gdbarch_register_name (gdbarch, regno));
+	  aarch64_debug_printf (
+	    "write HFA or HVA return value element %d to %s", i + 1,
+	    gdbarch_register_name (gdbarch, regno));
 
 	  memcpy (tmpbuf, valbuf,
 		  len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
@@ -2400,12 +2365,9 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  valbuf += len;
 	}
     }
-  else if (type->code () == TYPE_CODE_INT
-	   || type->code () == TYPE_CODE_CHAR
-	   || type->code () == TYPE_CODE_BOOL
-	   || type->code () == TYPE_CODE_PTR
-	   || TYPE_IS_REFERENCE (type)
-	   || type->code () == TYPE_CODE_ENUM)
+  else if (type->code () == TYPE_CODE_INT || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL || type->code () == TYPE_CODE_PTR
+	   || TYPE_IS_REFERENCE (type) || type->code () == TYPE_CODE_ENUM)
     {
       if (type->length () <= X_REGISTER_SIZE)
 	{
@@ -2526,15 +2488,13 @@ aarch64_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 /* Implement the "gen_return_address" gdbarch method.  */
 
 static void
-aarch64_gen_return_address (struct gdbarch *gdbarch,
-			    struct agent_expr *ax, struct axs_value *value,
-			    CORE_ADDR scope)
+aarch64_gen_return_address (struct gdbarch *gdbarch, struct agent_expr *ax,
+			    struct axs_value *value, CORE_ADDR scope)
 {
   value->type = register_type (gdbarch, AARCH64_LR_REGNUM);
   value->kind = axs_lvalue_register;
   value->u.reg = AARCH64_LR_REGNUM;
 }
-
 
 /* Return TRUE if REGNUM is a W pseudo-register number.  Return FALSE
    otherwise.  */
@@ -2559,77 +2519,47 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
   /* W pseudo-registers.  Bottom halves of the X registers.  */
-  static const char *const w_name[] =
-    {
-      "w0", "w1", "w2", "w3",
-      "w4", "w5", "w6", "w7",
-      "w8", "w9", "w10", "w11",
-      "w12", "w13", "w14", "w15",
-      "w16", "w17", "w18", "w19",
-      "w20", "w21", "w22", "w23",
-      "w24", "w25", "w26", "w27",
-      "w28", "w29", "w30",
-    };
+  static const char *const w_name[] = {
+    "w0",  "w1",  "w2",	 "w3",	"w4",  "w5",  "w6",  "w7",
+    "w8",  "w9",  "w10", "w11", "w12", "w13", "w14", "w15",
+    "w16", "w17", "w18", "w19", "w20", "w21", "w22", "w23",
+    "w24", "w25", "w26", "w27", "w28", "w29", "w30",
+  };
 
-  static const char *const q_name[] =
-    {
-      "q0", "q1", "q2", "q3",
-      "q4", "q5", "q6", "q7",
-      "q8", "q9", "q10", "q11",
-      "q12", "q13", "q14", "q15",
-      "q16", "q17", "q18", "q19",
-      "q20", "q21", "q22", "q23",
-      "q24", "q25", "q26", "q27",
-      "q28", "q29", "q30", "q31",
-    };
+  static const char *const q_name[] = {
+    "q0",  "q1",  "q2",	 "q3",	"q4",  "q5",  "q6",  "q7",
+    "q8",  "q9",  "q10", "q11", "q12", "q13", "q14", "q15",
+    "q16", "q17", "q18", "q19", "q20", "q21", "q22", "q23",
+    "q24", "q25", "q26", "q27", "q28", "q29", "q30", "q31",
+  };
 
-  static const char *const d_name[] =
-    {
-      "d0", "d1", "d2", "d3",
-      "d4", "d5", "d6", "d7",
-      "d8", "d9", "d10", "d11",
-      "d12", "d13", "d14", "d15",
-      "d16", "d17", "d18", "d19",
-      "d20", "d21", "d22", "d23",
-      "d24", "d25", "d26", "d27",
-      "d28", "d29", "d30", "d31",
-    };
+  static const char *const d_name[] = {
+    "d0",  "d1",  "d2",	 "d3",	"d4",  "d5",  "d6",  "d7",
+    "d8",  "d9",  "d10", "d11", "d12", "d13", "d14", "d15",
+    "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23",
+    "d24", "d25", "d26", "d27", "d28", "d29", "d30", "d31",
+  };
 
-  static const char *const s_name[] =
-    {
-      "s0", "s1", "s2", "s3",
-      "s4", "s5", "s6", "s7",
-      "s8", "s9", "s10", "s11",
-      "s12", "s13", "s14", "s15",
-      "s16", "s17", "s18", "s19",
-      "s20", "s21", "s22", "s23",
-      "s24", "s25", "s26", "s27",
-      "s28", "s29", "s30", "s31",
-    };
+  static const char *const s_name[] = {
+    "s0",  "s1",  "s2",	 "s3",	"s4",  "s5",  "s6",  "s7",
+    "s8",  "s9",  "s10", "s11", "s12", "s13", "s14", "s15",
+    "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23",
+    "s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31",
+  };
 
-  static const char *const h_name[] =
-    {
-      "h0", "h1", "h2", "h3",
-      "h4", "h5", "h6", "h7",
-      "h8", "h9", "h10", "h11",
-      "h12", "h13", "h14", "h15",
-      "h16", "h17", "h18", "h19",
-      "h20", "h21", "h22", "h23",
-      "h24", "h25", "h26", "h27",
-      "h28", "h29", "h30", "h31",
-    };
+  static const char *const h_name[] = {
+    "h0",  "h1",  "h2",	 "h3",	"h4",  "h5",  "h6",  "h7",
+    "h8",  "h9",  "h10", "h11", "h12", "h13", "h14", "h15",
+    "h16", "h17", "h18", "h19", "h20", "h21", "h22", "h23",
+    "h24", "h25", "h26", "h27", "h28", "h29", "h30", "h31",
+  };
 
-  static const char *const b_name[] =
-    {
-      "b0", "b1", "b2", "b3",
-      "b4", "b5", "b6", "b7",
-      "b8", "b9", "b10", "b11",
-      "b12", "b13", "b14", "b15",
-      "b16", "b17", "b18", "b19",
-      "b20", "b21", "b22", "b23",
-      "b24", "b25", "b26", "b27",
-      "b28", "b29", "b30", "b31",
-    };
+  static const char *const b_name[] = {
+    "b0",  "b1",  "b2",	 "b3",	"b4",  "b5",  "b6",  "b7",
+    "b8",  "b9",  "b10", "b11", "b12", "b13", "b14", "b15",
+    "b16", "b17", "b18", "b19", "b20", "b21", "b22", "b23",
+    "b24", "b25", "b26", "b27", "b28", "b29", "b30", "b31",
+  };
 
   int p_regnum = regnum - gdbarch_num_regs (gdbarch);
 
@@ -2654,17 +2584,12 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 
   if (tdep->has_sve ())
     {
-      static const char *const sve_v_name[] =
-	{
-	  "v0", "v1", "v2", "v3",
-	  "v4", "v5", "v6", "v7",
-	  "v8", "v9", "v10", "v11",
-	  "v12", "v13", "v14", "v15",
-	  "v16", "v17", "v18", "v19",
-	  "v20", "v21", "v22", "v23",
-	  "v24", "v25", "v26", "v27",
-	  "v28", "v29", "v30", "v31",
-	};
+      static const char *const sve_v_name[] = {
+	"v0",  "v1",  "v2",  "v3",  "v4",  "v5",  "v6",	 "v7",
+	"v8",  "v9",  "v10", "v11", "v12", "v13", "v14", "v15",
+	"v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
+	"v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31",
+      };
 
       if (p_regnum >= AARCH64_SVE_V0_REGNUM
 	  && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
@@ -2677,7 +2602,7 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return "";
 
-  internal_error (_("aarch64_pseudo_register_name: bad register number %d"),
+  internal_error (_ ("aarch64_pseudo_register_name: bad register number %d"),
 		  p_regnum);
 }
 
@@ -2716,7 +2641,7 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return builtin_type (gdbarch)->builtin_uint64;
 
-  internal_error (_("aarch64_pseudo_register_type: bad register number %d"),
+  internal_error (_ ("aarch64_pseudo_register_type: bad register number %d"),
 		  p_regnum);
 }
 
@@ -2772,16 +2697,17 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
     memcpy (value_contents_raw (result_value).data (), reg_buf, regsize);
 
   return result_value;
- }
+}
 
 /* Implement the "pseudo_register_read_value" gdbarch method.  */
 
 static struct value *
-aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
-			   int regnum)
+aarch64_pseudo_read_value (struct gdbarch *gdbarch,
+			   readable_regcache *regcache, int regnum)
 {
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
-  struct value *result_value = allocate_value (register_type (gdbarch, regnum));
+  struct value *result_value
+    = allocate_value (register_type (gdbarch, regnum));
 
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
@@ -2939,7 +2865,6 @@ value_of_aarch64_user_reg (frame_info_ptr frame, const void *baton)
 
   return value_of_register (*reg_p, frame);
 }
-
 
 /* Implement the "software_single_step" gdbarch method, needed to
    single step through atomic sequences on AArch64.  */
@@ -2957,19 +2882,18 @@ aarch64_software_single_step (struct regcache *regcache)
   CORE_ADDR closing_insn = 0;
 
   ULONGEST insn_from_memory;
-  if (!safe_read_memory_unsigned_integer (loc, insn_size,
-					  byte_order_for_code,
+  if (!safe_read_memory_unsigned_integer (loc, insn_size, byte_order_for_code,
 					  &insn_from_memory))
-  {
-    /* Assume we don't have a atomic sequence, as we couldn't read the
+    {
+      /* Assume we don't have a atomic sequence, as we couldn't read the
        instruction in this location.  */
-    return {};
-  }
+      return {};
+    }
 
   uint32_t insn = insn_from_memory;
   int index;
   int insn_count;
-  int bc_insn_count = 0; /* Conditional branch instruction count.  */
+  int bc_insn_count = 0;   /* Conditional branch instruction count.  */
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   aarch64_inst inst;
 
@@ -2987,11 +2911,11 @@ aarch64_software_single_step (struct regcache *regcache)
       if (!safe_read_memory_unsigned_integer (loc, insn_size,
 					      byte_order_for_code,
 					      &insn_from_memory))
-      {
-	/* Assume we don't have a atomic sequence, as we couldn't read the
+	{
+	  /* Assume we don't have a atomic sequence, as we couldn't read the
 	   instruction in this location.  */
-	return {};
-      }
+	  return {};
+	}
 
       insn = insn_from_memory;
       if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
@@ -3212,8 +3136,8 @@ aarch64_displaced_step_adr (const int32_t offset, const unsigned rd,
 				      address & ~0xfff);
     }
   else
-      regcache_cooked_write_unsigned (dsd->regs, AARCH64_X0_REGNUM + rd,
-				      address);
+    regcache_cooked_write_unsigned (dsd->regs, AARCH64_X0_REGNUM + rd,
+				    address);
 
   dsd->dsc->pc_adjust = 4;
   emit_nop (dsd->insn_buf);
@@ -3232,8 +3156,7 @@ aarch64_displaced_step_ldr_literal (const int32_t offset, const int is_sw,
   CORE_ADDR address = data->insn_addr + offset;
   struct aarch64_memory_operand zero = { MEMORY_OPERAND_OFFSET, 0 };
 
-  regcache_cooked_write_unsigned (dsd->regs, AARCH64_X0_REGNUM + rt,
-				  address);
+  regcache_cooked_write_unsigned (dsd->regs, AARCH64_X0_REGNUM + rt, address);
 
   if (is_sw)
     dsd->insn_count = emit_ldrsw (dsd->insn_buf, aarch64_register (rt, 1),
@@ -3273,23 +3196,18 @@ aarch64_displaced_step_others (const uint32_t insn,
     dsd->dsc->pc_adjust = 4;
 }
 
-static const struct aarch64_insn_visitor visitor =
-{
-  aarch64_displaced_step_b,
-  aarch64_displaced_step_b_cond,
-  aarch64_displaced_step_cb,
-  aarch64_displaced_step_tb,
-  aarch64_displaced_step_adr,
-  aarch64_displaced_step_ldr_literal,
+static const struct aarch64_insn_visitor visitor = {
+  aarch64_displaced_step_b,	 aarch64_displaced_step_b_cond,
+  aarch64_displaced_step_cb,	 aarch64_displaced_step_tb,
+  aarch64_displaced_step_adr,	 aarch64_displaced_step_ldr_literal,
   aarch64_displaced_step_others,
 };
 
 /* Implement the "displaced_step_copy_insn" gdbarch method.  */
 
 displaced_step_copy_insn_closure_up
-aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
-				  CORE_ADDR from, CORE_ADDR to,
-				  struct regcache *regs)
+aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from,
+				  CORE_ADDR to, struct regcache *regs)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   struct aarch64_displaced_step_data dsd;
@@ -3312,8 +3230,8 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
       return NULL;
     }
 
-  std::unique_ptr<aarch64_displaced_step_copy_insn_closure> dsc
-    (new aarch64_displaced_step_copy_insn_closure);
+  std::unique_ptr<aarch64_displaced_step_copy_insn_closure> dsc (
+    new aarch64_displaced_step_copy_insn_closure);
   dsd.base.insn_addr = from;
   dsd.new_addr = to;
   dsd.regs = regs;
@@ -3331,8 +3249,7 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 	 relocated instruction(s) there.  */
       for (i = 0; i < dsd.insn_count; i++)
 	{
-	  displaced_debug_printf ("writing insn %.8x at %s",
-				  dsd.insn_buf[i],
+	  displaced_debug_printf ("writing insn %.8x at %s", dsd.insn_buf[i],
 				  paddress (gdbarch, to + i * 4));
 
 	  write_memory_unsigned_integer (to + i * 4, 4, byte_order_for_code,
@@ -3381,7 +3298,8 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 	  dsc->pc_adjust = 4;
 	}
       else
-	gdb_assert_not_reached ("Unexpected PC value after displaced stepping");
+	gdb_assert_not_reached (
+	  "Unexpected PC value after displaced stepping");
 
       displaced_debug_printf ("[Conditional] pc_adjust after: %d",
 			      dsc->pc_adjust);
@@ -3399,7 +3317,8 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 	 took place.  */
       if ((pc - to) == 0)
 	{
-	  displaced_debug_printf ("PC did not move. Discarding PC adjustment.");
+	  displaced_debug_printf (
+	    "PC did not move. Discarding PC adjustment.");
 	  dsc->pc_adjust = 0;
 	}
 
@@ -3431,7 +3350,7 @@ const target_desc *
 aarch64_read_description (const aarch64_features &features)
 {
   if (features.vq > AARCH64_MAX_SVE_VQ)
-    error (_("VQ is %" PRIu64 ", maximum supported value is %d"), features.vq,
+    error (_ ("VQ is %" PRIu64 ", maximum supported value is %d"), features.vq,
 	   AARCH64_MAX_SVE_VQ);
 
   struct target_desc *tdesc = tdesc_aarch64_map[features];
@@ -3460,8 +3379,8 @@ aarch64_get_tdesc_vq (const struct target_desc *tdesc)
   if (feature_sve == nullptr)
     return 0;
 
-  uint64_t vl = tdesc_register_bitsize (feature_sve,
-					aarch64_sve_register_names[0]) / 8;
+  uint64_t vl
+    = tdesc_register_bitsize (feature_sve, aarch64_sve_register_names[0]) / 8;
   return sve_vq_from_vl (vl);
 }
 
@@ -3477,9 +3396,9 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
 
   features.vq = aarch64_get_tdesc_vq (tdesc);
   features.pauth
-      = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth") != nullptr);
+    = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth") != nullptr);
   features.mte
-      = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte") != nullptr);
+    = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte") != nullptr);
 
   const struct tdesc_feature *tls_feature
     = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.tls");
@@ -3555,8 +3474,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   uint64_t vq = aarch64_get_tdesc_vq (info.target_desc);
 
   if (vq > AARCH64_MAX_SVE_VQ)
-    internal_error (_("VQ out of bounds: %s (max %d)"),
-		    pulongest (vq), AARCH64_MAX_SVE_VQ);
+    internal_error (_ ("VQ out of bounds: %s (max %d)"), pulongest (vq),
+		    AARCH64_MAX_SVE_VQ);
 
   /* If there is already a candidate, use it.  */
   for (gdbarch_list *best_arch = gdbarch_list_lookup_by_info (arches, &info);
@@ -3576,7 +3495,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdesc = aarch64_read_description ({});
   gdb_assert (tdesc);
 
-  feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");
+  feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.core");
   feature_fpu = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpu");
   feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
   feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth");
@@ -3603,7 +3522,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (feature_fpu != nullptr)
     {
       if (feature_sve != nullptr)
-	error (_("Program contains both fpu and SVE features."));
+	error (_ ("Program contains both fpu and SVE features."));
 
       /* Validate the description provides the mandatory V registers
 	 and allocate their numbers.  */
@@ -3626,16 +3545,16 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    aarch64_sve_register_names[i]);
 
       num_regs = AARCH64_SVE_Z0_REGNUM + i;
-      num_pseudo_regs += 32;	/* add the Vn register pseudos.  */
+      num_pseudo_regs += 32; /* add the Vn register pseudos.  */
     }
 
   if (feature_fpu != nullptr || feature_sve != nullptr)
     {
-      num_pseudo_regs += 32;	/* add the Qn scalar register pseudos */
-      num_pseudo_regs += 32;	/* add the Dn scalar register pseudos */
-      num_pseudo_regs += 32;	/* add the Sn scalar register pseudos */
-      num_pseudo_regs += 32;	/* add the Hn scalar register pseudos */
-      num_pseudo_regs += 32;	/* add the Bn scalar register pseudos */
+      num_pseudo_regs += 32; /* add the Qn scalar register pseudos */
+      num_pseudo_regs += 32; /* add the Dn scalar register pseudos */
+      num_pseudo_regs += 32; /* add the Sn scalar register pseudos */
+      num_pseudo_regs += 32; /* add the Hn scalar register pseudos */
+      num_pseudo_regs += 32; /* add the Bn scalar register pseudos */
     }
 
   /* Add the TLS register.  */
@@ -3646,9 +3565,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       /* Look for the TLS registers.  tpidr is required, but tpidr2 is
 	 optional.  */
-      valid_p
-	= tdesc_numbered_register (feature_tls, tdesc_data.get (),
-				   first_tls_regnum, "tpidr");
+      valid_p = tdesc_numbered_register (feature_tls, tdesc_data.get (),
+					 first_tls_regnum, "tpidr");
 
       if (valid_p)
 	{
@@ -3667,8 +3585,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
       else
 	{
-	  warning (_("Provided TLS register feature doesn't contain "
-		     "required tpidr register."));
+	  warning (_ ("Provided TLS register feature doesn't contain "
+		      "required tpidr register."));
 	  return nullptr;
 	}
     }
@@ -3686,7 +3604,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    aarch64_pauth_register_names[i]);
 
       num_regs += i;
-      num_pseudo_regs += 1;	/* Count RA_STATE pseudo register.  */
+      num_pseudo_regs += 1; /* Count RA_STATE pseudo register.  */
     }
 
   /* Add the MTE registers.  */
@@ -3702,9 +3620,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       num_regs += i;
     }
-    /* W pseudo-registers */
-    int first_w_regnum = num_pseudo_regs;
-    num_pseudo_regs += 31;
+  /* W pseudo-registers */
+  int first_w_regnum = num_pseudo_regs;
+  num_pseudo_regs += 31;
 
   if (!valid_p)
     return nullptr;
@@ -3718,7 +3636,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* This should be low enough for everything.  */
   tdep->lowest_pc = 0x20;
-  tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
+  tdep->jb_pc = -1; /* Longjump support not enabled by default.  */
   tdep->jb_elt_size = 8;
   tdep->vq = vq;
   tdep->pauth_reg_base = first_pauth_regnum;
@@ -3775,7 +3693,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_type_align (gdbarch, aarch64_type_align);
 
   /* Detect whether PC is at a point where the stack has been destroyed.  */
-  set_gdbarch_stack_frame_destroyed_p (gdbarch, aarch64_stack_frame_destroyed_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch,
+				       aarch64_stack_frame_destroyed_p);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, aarch64_dwarf_reg_to_regnum);
@@ -3796,8 +3715,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   dwarf2_frame_set_init_reg (gdbarch, aarch64_dwarf2_frame_init_reg);
   /* Register DWARF CFA vendor handler.  */
-  set_gdbarch_execute_dwarf_cfa_vendor_op (gdbarch,
-					   aarch64_execute_dwarf_cfa_vendor_op);
+  set_gdbarch_execute_dwarf_cfa_vendor_op (
+    gdbarch, aarch64_execute_dwarf_cfa_vendor_op);
 
   /* Permanent/Program breakpoint handling.  */
   set_gdbarch_program_breakpoint_here_p (gdbarch,
@@ -3857,7 +3776,7 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s\n"),
+  gdb_printf (file, _ ("aarch64_dump_tdep: Lowest pc = 0x%s\n"),
 	      paddress (gdbarch, tdep->lowest_pc));
 }
 
@@ -3869,20 +3788,21 @@ static void aarch64_process_record_test (void);
 #endif
 
 void _initialize_aarch64_tdep ();
+
 void
 _initialize_aarch64_tdep ()
 {
-  gdbarch_register (bfd_arch_aarch64, aarch64_gdbarch_init,
-		    aarch64_dump_tdep);
+  gdbarch_register (bfd_arch_aarch64, aarch64_gdbarch_init, aarch64_dump_tdep);
 
   /* Debug this file's internals.  */
-  add_setshow_boolean_cmd ("aarch64", class_maintenance, &aarch64_debug, _("\
-Set AArch64 debugging."), _("\
-Show AArch64 debugging."), _("\
+  add_setshow_boolean_cmd ("aarch64", class_maintenance, &aarch64_debug, _ ("\
+Set AArch64 debugging."),
+			   _ ("\
+Show AArch64 debugging."),
+			   _ ("\
 When on, AArch64 specific debugging is enabled."),
-			    NULL,
-			    show_aarch64_debug,
-			    &setdebuglist, &showdebuglist);
+			   NULL, show_aarch64_debug, &setdebuglist,
+			   &showdebuglist);
 
 #if GDB_SELF_TEST
   selftests::register_test ("aarch64-analyze-prologue",
@@ -3894,37 +3814,37 @@ When on, AArch64 specific debugging is enabled."),
 
 /* AArch64 process record-replay related structures, defines etc.  */
 
-#define REG_ALLOC(REGS, LENGTH, RECORD_BUF) \
-	do  \
-	  { \
-	    unsigned int reg_len = LENGTH; \
-	    if (reg_len) \
-	      { \
-		REGS = XNEWVEC (uint32_t, reg_len); \
-		memcpy(&REGS[0], &RECORD_BUF[0], sizeof(uint32_t)*LENGTH); \
-	      } \
-	  } \
-	while (0)
+#define REG_ALLOC(REGS, LENGTH, RECORD_BUF)                              \
+  do                                                                     \
+    {                                                                    \
+      unsigned int reg_len = LENGTH;                                     \
+      if (reg_len)                                                       \
+	{                                                                \
+	  REGS = XNEWVEC (uint32_t, reg_len);                            \
+	  memcpy (&REGS[0], &RECORD_BUF[0], sizeof (uint32_t) * LENGTH); \
+	}                                                                \
+    }                                                                    \
+  while (0)
 
-#define MEM_ALLOC(MEMS, LENGTH, RECORD_BUF) \
-	do  \
-	  { \
-	    unsigned int mem_len = LENGTH; \
-	    if (mem_len) \
-	      { \
-		MEMS =  XNEWVEC (struct aarch64_mem_r, mem_len);  \
-		memcpy(MEMS, &RECORD_BUF[0], \
-		       sizeof(struct aarch64_mem_r) * LENGTH); \
-	      } \
-	  } \
-	  while (0)
+#define MEM_ALLOC(MEMS, LENGTH, RECORD_BUF)                \
+  do                                                       \
+    {                                                      \
+      unsigned int mem_len = LENGTH;                       \
+      if (mem_len)                                         \
+	{                                                  \
+	  MEMS = XNEWVEC (struct aarch64_mem_r, mem_len);  \
+	  memcpy (MEMS, &RECORD_BUF[0],                    \
+		  sizeof (struct aarch64_mem_r) * LENGTH); \
+	}                                                  \
+    }                                                      \
+  while (0)
 
 /* AArch64 record/replay structures and enumerations.  */
 
 struct aarch64_mem_r
 {
-  uint64_t len;    /* Record length.  */
-  uint64_t addr;   /* Memory address.  */
+  uint64_t len;	 /* Record length.  */
+  uint64_t addr; /* Memory address.  */
 };
 
 enum aarch64_record_result
@@ -3938,12 +3858,12 @@ struct aarch64_insn_decode_record
 {
   struct gdbarch *gdbarch;
   struct regcache *regcache;
-  CORE_ADDR this_addr;                 /* Address of insn to be recorded.  */
-  uint32_t aarch64_insn;               /* Insn to be recorded.  */
-  uint32_t mem_rec_count;              /* Count of memory records.  */
-  uint32_t reg_rec_count;              /* Count of register records.  */
-  uint32_t *aarch64_regs;              /* Registers to be recorded.  */
-  struct aarch64_mem_r *aarch64_mems;  /* Memory locations to be recorded.  */
+  CORE_ADDR this_addr;		      /* Address of insn to be recorded.  */
+  uint32_t aarch64_insn;	      /* Insn to be recorded.  */
+  uint32_t mem_rec_count;	      /* Count of memory records.  */
+  uint32_t reg_rec_count;	      /* Count of register records.  */
+  uint32_t *aarch64_regs;	      /* Registers to be recorded.  */
+  struct aarch64_mem_r *aarch64_mems; /* Memory locations to be recorded.  */
 };
 
 /* Record handler for data processing - register instructions.  */
@@ -4034,9 +3954,9 @@ aarch64_record_data_proc_imm (aarch64_insn_decode_record *aarch64_insn_r)
   insn_bit23 = bit (aarch64_insn_r->aarch64_insn, 23);
   insn_bits24_27 = bits (aarch64_insn_r->aarch64_insn, 24, 27);
 
-  if (insn_bits24_27 == 0x00                     /* PC rel addressing.  */
-     || insn_bits24_27 == 0x03                   /* Bitfield and Extract.  */
-     || (insn_bits24_27 == 0x02 && insn_bit23))  /* Move wide (immediate).  */
+  if (insn_bits24_27 == 0x00			 /* PC rel addressing.  */
+      || insn_bits24_27 == 0x03			 /* Bitfield and Extract.  */
+      || (insn_bits24_27 == 0x02 && insn_bit23)) /* Move wide (immediate).  */
     {
       record_buf[0] = reg_rd;
       aarch64_insn_r->reg_rec_count = 1;
@@ -4072,7 +3992,6 @@ aarch64_record_data_proc_imm (aarch64_insn_decode_record *aarch64_insn_r)
 static unsigned int
 aarch64_record_branch_except_sys (aarch64_insn_decode_record *aarch64_insn_r)
 {
-
   aarch64_gdbarch_tdep *tdep
     = gdbarch_tdep<aarch64_gdbarch_tdep> (aarch64_insn_r->gdbarch);
   uint8_t insn_bits24_27, insn_bits28_31, insn_bits22_23;
@@ -4123,7 +4042,7 @@ aarch64_record_branch_except_sys (aarch64_insn_decode_record *aarch64_insn_r)
 	    }
 	}
       /* Unconditional branch (register).  */
-      else if((insn_bits24_27 & 0x0e) == 0x06)
+      else if ((insn_bits24_27 & 0x0e) == 0x06)
 	{
 	  record_buf[aarch64_insn_r->reg_rec_count++] = AARCH64_PC_REGNUM;
 	  if (bits (aarch64_insn_r->aarch64_insn, 21, 22) == 0x01)
@@ -4176,8 +4095,8 @@ aarch64_record_asimd_load_store (aarch64_insn_decode_record *aarch64_insn_r)
     {
       uint8_t sindex, scale, selem, esize, replicate = 0;
       scale = opcode_bits >> 2;
-      selem = ((opcode_bits & 0x02) |
-	      bit (aarch64_insn_r->aarch64_insn, 21)) + 1;
+      selem
+	= ((opcode_bits & 0x02) | bit (aarch64_insn_r->aarch64_insn, 21)) + 1;
       switch (scale)
 	{
 	case 1:
@@ -4470,8 +4389,8 @@ aarch64_record_load_store (aarch64_insn_decode_record *aarch64_insn_r)
       if (record_debug)
 	{
 	  debug_printf ("Process record: load/store (unsigned immediate):"
-			" size %x V %d opc %x\n", size_bits, vector_flag,
-			opc);
+			" size %x V %d opc %x\n",
+			size_bits, vector_flag, opc);
 	}
 
       if (!ld_flag)
@@ -4508,18 +4427,19 @@ aarch64_record_load_store (aarch64_insn_decode_record *aarch64_insn_r)
 	  ld_flag = 0x01;
 	else
 	  ld_flag = 0x0;
+      else if (size_bits != 0x03)
+	ld_flag = 0x01;
       else
-	if (size_bits != 0x03)
-	  ld_flag = 0x01;
-	else
-	  return AARCH64_RECORD_UNKNOWN;
+	return AARCH64_RECORD_UNKNOWN;
 
       if (!ld_flag)
 	{
 	  ULONGEST reg_rm_val;
 
 	  regcache_raw_read_unsigned (aarch64_insn_r->regcache,
-		     bits (aarch64_insn_r->aarch64_insn, 16, 20), &reg_rm_val);
+				      bits (aarch64_insn_r->aarch64_insn, 16,
+					    20),
+				      &reg_rm_val);
 	  if (bit (aarch64_insn_r->aarch64_insn, 12))
 	    offset = reg_rm_val << size_bits;
 	  else
@@ -4556,17 +4476,17 @@ aarch64_record_load_store (aarch64_insn_decode_record *aarch64_insn_r)
 	  ld_flag = 0x01;
 	else
 	  ld_flag = 0x0;
+      else if (size_bits != 0x03)
+	ld_flag = 0x01;
       else
-	if (size_bits != 0x03)
-	  ld_flag = 0x01;
-	else
-	  return AARCH64_RECORD_UNKNOWN;
+	return AARCH64_RECORD_UNKNOWN;
 
       if (!ld_flag)
 	{
 	  uint16_t imm9_off;
 	  imm9_off = bits (aarch64_insn_r->aarch64_insn, 12, 20);
-	  offset = (imm9_off & 0x0100) ? (((~imm9_off) & 0x01ff) + 1) : imm9_off;
+	  offset
+	    = (imm9_off & 0x0100) ? (((~imm9_off) & 0x01ff) + 1) : imm9_off;
 	  datasize = 8 << size_bits;
 	  regcache_raw_read_unsigned (aarch64_insn_r->regcache, reg_rn,
 				      &address);
@@ -4801,7 +4721,8 @@ deallocate_reg_mem (aarch64_insn_decode_record *record)
 }
 
 #if GDB_SELF_TEST
-namespace selftests {
+namespace selftests
+{
 
 static void
 aarch64_process_record_test (void)
@@ -4852,8 +4773,7 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   memset (&aarch64_record, 0, sizeof (aarch64_insn_decode_record));
   target_read_memory (insn_addr, &buf[0], insn_size);
   aarch64_record.aarch64_insn
-    = (uint32_t) extract_unsigned_integer (&buf[0],
-					   insn_size,
+    = (uint32_t) extract_unsigned_integer (&buf[0], insn_size,
 					   gdbarch_byte_order (gdbarch));
   aarch64_record.regcache = regcache;
   aarch64_record.this_addr = insn_addr;
@@ -4863,10 +4783,9 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   if (ret == AARCH64_RECORD_UNSUPPORTED)
     {
       gdb_printf (gdb_stderr,
-		  _("Process record does not support instruction "
-		    "0x%0x at address %s.\n"),
-		  aarch64_record.aarch64_insn,
-		  paddress (gdbarch, insn_addr));
+		  _ ("Process record does not support instruction "
+		     "0x%0x at address %s.\n"),
+		  aarch64_record.aarch64_insn, paddress (gdbarch, insn_addr));
       ret = -1;
     }
 
@@ -4880,16 +4799,16 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 				     AARCH64_CPSR_REGNUM);
       if (aarch64_record.aarch64_regs)
 	for (rec_no = 0; rec_no < aarch64_record.reg_rec_count; rec_no++)
-	  if (record_full_arch_list_add_reg (aarch64_record.regcache,
-					     aarch64_record.aarch64_regs[rec_no]))
+	  if (record_full_arch_list_add_reg (
+		aarch64_record.regcache, aarch64_record.aarch64_regs[rec_no]))
 	    ret = -1;
 
       /* Record memories.  */
       if (aarch64_record.aarch64_mems)
 	for (rec_no = 0; rec_no < aarch64_record.mem_rec_count; rec_no++)
-	  if (record_full_arch_list_add_mem
-	      ((CORE_ADDR)aarch64_record.aarch64_mems[rec_no].addr,
-	       aarch64_record.aarch64_mems[rec_no].len))
+	  if (record_full_arch_list_add_mem (
+		(CORE_ADDR) aarch64_record.aarch64_mems[rec_no].addr,
+		aarch64_record.aarch64_mems[rec_no].len))
 	    ret = -1;
 
       if (record_full_arch_list_add_end ())

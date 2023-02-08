@@ -35,48 +35,75 @@
 
 enum gdb_regnum
 {
-  E_R0_REGNUM,  E_R1_REGNUM,  E_R2_REGNUM,  E_R3_REGNUM, 
-  E_R4_REGNUM,  E_R5_REGNUM,  E_R6_REGNUM,  E_R7_REGNUM, 
-  E_R8_REGNUM,  E_R9_REGNUM,  E_R10_REGNUM, E_R11_REGNUM, 
-  E_R12_REGNUM, E_R13_REGNUM, E_R14_REGNUM, E_R15_REGNUM, 
-  E_R16_REGNUM, E_R17_REGNUM, E_R18_REGNUM, E_R19_REGNUM, 
-  E_R20_REGNUM, E_R21_REGNUM, E_R22_REGNUM, E_R23_REGNUM, 
-  E_R24_REGNUM, E_R25_REGNUM, E_R26_REGNUM, E_R27_REGNUM, 
-  E_R28_REGNUM, E_R29_REGNUM, E_R30_REGNUM, E_R31_REGNUM, 
-  E_PC_REGNUM, 
-  E_LR_REGNUM        = E_R31_REGNUM, /* Link register.  */
-  E_SP_REGNUM        = E_R29_REGNUM, /* Stack pointer.  */
-  E_FP_REGNUM        = E_R27_REGNUM, /* Frame pointer.  */
-  E_FN_RETURN_REGNUM = E_R2_REGNUM,  /* Function return value register.  */
-  E_1ST_ARGREG       = E_R4_REGNUM,  /* 1st  function arg register.  */
-  E_LAST_ARGREG      = E_R11_REGNUM, /* Last function arg register.  */
-  E_NUM_REGS         = E_PC_REGNUM + 1
+  E_R0_REGNUM,
+  E_R1_REGNUM,
+  E_R2_REGNUM,
+  E_R3_REGNUM,
+  E_R4_REGNUM,
+  E_R5_REGNUM,
+  E_R6_REGNUM,
+  E_R7_REGNUM,
+  E_R8_REGNUM,
+  E_R9_REGNUM,
+  E_R10_REGNUM,
+  E_R11_REGNUM,
+  E_R12_REGNUM,
+  E_R13_REGNUM,
+  E_R14_REGNUM,
+  E_R15_REGNUM,
+  E_R16_REGNUM,
+  E_R17_REGNUM,
+  E_R18_REGNUM,
+  E_R19_REGNUM,
+  E_R20_REGNUM,
+  E_R21_REGNUM,
+  E_R22_REGNUM,
+  E_R23_REGNUM,
+  E_R24_REGNUM,
+  E_R25_REGNUM,
+  E_R26_REGNUM,
+  E_R27_REGNUM,
+  E_R28_REGNUM,
+  E_R29_REGNUM,
+  E_R30_REGNUM,
+  E_R31_REGNUM,
+  E_PC_REGNUM,
+  E_LR_REGNUM = E_R31_REGNUM,	    /* Link register.  */
+  E_SP_REGNUM = E_R29_REGNUM,	    /* Stack pointer.  */
+  E_FP_REGNUM = E_R27_REGNUM,	    /* Frame pointer.  */
+  E_FN_RETURN_REGNUM = E_R2_REGNUM, /* Function return value register.  */
+  E_1ST_ARGREG = E_R4_REGNUM,	    /* 1st  function arg register.  */
+  E_LAST_ARGREG = E_R11_REGNUM,	    /* Last function arg register.  */
+  E_NUM_REGS = E_PC_REGNUM + 1
 };
 
 /* Use an invalid address value as 'not available' marker.  */
-enum { REG_UNAVAIL = (CORE_ADDR) -1 };
+enum
+{
+  REG_UNAVAIL = (CORE_ADDR) -1
+};
 
 struct iq2000_frame_cache
 {
   /* Base address.  */
-  CORE_ADDR  base;
-  CORE_ADDR  pc;
-  LONGEST    framesize;
-  int        using_fp;
-  CORE_ADDR  saved_sp;
-  CORE_ADDR  saved_regs [E_NUM_REGS];
+  CORE_ADDR base;
+  CORE_ADDR pc;
+  LONGEST framesize;
+  int using_fp;
+  CORE_ADDR saved_sp;
+  CORE_ADDR saved_regs[E_NUM_REGS];
 };
 
 /* Harvard methods: */
 
 static CORE_ADDR
-insn_ptr_from_addr (CORE_ADDR addr)	/* CORE_ADDR to target pointer.  */
+insn_ptr_from_addr (CORE_ADDR addr) /* CORE_ADDR to target pointer.  */
 {
   return addr & 0x7fffffffL;
 }
 
 static CORE_ADDR
-insn_addr_from_ptr (CORE_ADDR ptr)	/* target_pointer to CORE_ADDR.  */
+insn_addr_from_ptr (CORE_ADDR ptr) /* target_pointer to CORE_ADDR.  */
 {
   return (ptr & 0x7fffffffL) | 0x80000000L;
 }
@@ -85,16 +112,14 @@ insn_addr_from_ptr (CORE_ADDR ptr)	/* target_pointer to CORE_ADDR.  */
    Convert a target pointer to an address in host (CORE_ADDR) format.  */
 
 static CORE_ADDR
-iq2000_pointer_to_address (struct gdbarch *gdbarch,
-			   struct type * type, const gdb_byte * buf)
+iq2000_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
+			   const gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target = type->target_type ()->code ();
-  CORE_ADDR addr
-    = extract_unsigned_integer (buf, type->length (), byte_order);
+  CORE_ADDR addr = extract_unsigned_integer (buf, type->length (), byte_order);
 
-  if (target == TYPE_CODE_FUNC
-      || target == TYPE_CODE_METHOD
+  if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD
       || TYPE_CODE_SPACE (type->target_type ()))
     addr = insn_addr_from_ptr (addr);
 
@@ -105,8 +130,8 @@ iq2000_pointer_to_address (struct gdbarch *gdbarch,
    Convert a host-format address (CORE_ADDR) into a target pointer.  */
 
 static void
-iq2000_address_to_pointer (struct gdbarch *gdbarch,
-			   struct type *type, gdb_byte *buf, CORE_ADDR addr)
+iq2000_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
+			   gdb_byte *buf, CORE_ADDR addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target = type->target_type ()->code ();
@@ -124,17 +149,11 @@ iq2000_address_to_pointer (struct gdbarch *gdbarch,
 static const char *
 iq2000_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  static const char * names[E_NUM_REGS] =
-    {
-      "r0",  "r1",  "r2",  "r3",  "r4",
-      "r5",  "r6",  "r7",  "r8",  "r9",
-      "r10", "r11", "r12", "r13", "r14",
-      "r15", "r16", "r17", "r18", "r19",
-      "r20", "r21", "r22", "r23", "r24",
-      "r25", "r26", "r27", "r28", "r29",
-      "r30", "r31",
-      "pc"
-    };
+  static const char *names[E_NUM_REGS]
+    = { "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",	 "r7",	"r8",
+	"r9",  "r10", "r11", "r12", "r13", "r14", "r15", "r16", "r17",
+	"r18", "r19", "r20", "r21", "r22", "r23", "r24", "r25", "r26",
+	"r27", "r28", "r29", "r30", "r31", "pc" };
   gdb_static_assert (ARRAY_SIZE (names) == E_NUM_REGS);
   return names[regnum];
 }
@@ -142,21 +161,21 @@ iq2000_register_name (struct gdbarch *gdbarch, int regnum)
 /* Prologue analysis methods:  */
 
 /* ADDIU insn (001001 rs(5) rt(5) imm(16)).  */
-#define INSN_IS_ADDIU(X)	(((X) & 0xfc000000) == 0x24000000) 
-#define ADDIU_REG_SRC(X)	(((X) & 0x03e00000) >> 21)
-#define ADDIU_REG_TGT(X)	(((X) & 0x001f0000) >> 16)
-#define ADDIU_IMMEDIATE(X)	((signed short) ((X) & 0x0000ffff))
+#define INSN_IS_ADDIU(X) (((X) &0xfc000000) == 0x24000000)
+#define ADDIU_REG_SRC(X) (((X) &0x03e00000) >> 21)
+#define ADDIU_REG_TGT(X) (((X) &0x001f0000) >> 16)
+#define ADDIU_IMMEDIATE(X) ((signed short) ((X) &0x0000ffff))
 
 /* "MOVE" (OR) insn (000000 rs(5) rt(5) rd(5) 00000 100101).  */
-#define INSN_IS_MOVE(X)		(((X) & 0xffe007ff) == 0x00000025)
-#define MOVE_REG_SRC(X)		(((X) & 0x001f0000) >> 16)
-#define MOVE_REG_TGT(X)		(((X) & 0x0000f800) >> 11)
+#define INSN_IS_MOVE(X) (((X) &0xffe007ff) == 0x00000025)
+#define MOVE_REG_SRC(X) (((X) &0x001f0000) >> 16)
+#define MOVE_REG_TGT(X) (((X) &0x0000f800) >> 11)
 
 /* STORE WORD insn (101011 rs(5) rt(5) offset(16)).  */
-#define INSN_IS_STORE_WORD(X)	(((X) & 0xfc000000) == 0xac000000)
-#define SW_REG_INDEX(X)		(((X) & 0x03e00000) >> 21)
-#define SW_REG_SRC(X)		(((X) & 0x001f0000) >> 16)
-#define SW_OFFSET(X)		((signed short) ((X) & 0x0000ffff))
+#define INSN_IS_STORE_WORD(X) (((X) &0xfc000000) == 0xac000000)
+#define SW_REG_INDEX(X) (((X) &0x03e00000) >> 21)
+#define SW_REG_SRC(X) (((X) &0x001f0000) >> 16)
+#define SW_OFFSET(X) ((signed short) ((X) &0x0000ffff))
 
 /* Function: find_last_line_symbol
 
@@ -195,10 +214,8 @@ find_last_line_symbol (CORE_ADDR start, CORE_ADDR end, int notcurrent)
    Returns the address of the first instruction after the prologue.  */
 
 static CORE_ADDR
-iq2000_scan_prologue (struct gdbarch *gdbarch,
-		      CORE_ADDR scan_start,
-		      CORE_ADDR scan_end,
-		      frame_info_ptr fi,
+iq2000_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR scan_start,
+		      CORE_ADDR scan_end, frame_info_ptr fi,
 		      struct iq2000_frame_cache *cache)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -220,7 +237,7 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
       if (fi)
 	sal = find_last_line_symbol (scan_start, scan_end, 0);
       else
-	sal.end = 0;	/* Avoid GCC false warning.  */
+	sal.end = 0; /* Avoid GCC false warning.  */
     }
 
   /* Saved registers:
@@ -229,7 +246,7 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
      offset can be zero, we must first initialize all the 
      saved regs to minus one (so we can later distinguish 
      between one that's not saved, and one that's saved at zero).  */
-  for (srcreg = 0; srcreg < E_NUM_REGS; srcreg ++)
+  for (srcreg = 0; srcreg < E_NUM_REGS; srcreg++)
     cache->saved_regs[srcreg] = -1;
   cache->using_fp = 0;
   cache->framesize = 0;
@@ -335,9 +352,9 @@ iq2000_init_frame_cache (struct iq2000_frame_cache *cache)
 static CORE_ADDR
 iq2000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  CORE_ADDR func_addr = 0 , func_end = 0;
+  CORE_ADDR func_addr = 0, func_end = 0;
 
-  if (find_pc_partial_function (pc, NULL, & func_addr, & func_end))
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
       struct symtab_and_line sal;
       struct iq2000_frame_cache cache;
@@ -394,8 +411,8 @@ static struct value *
 iq2000_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			    int regnum)
 {
-  struct iq2000_frame_cache *cache = iq2000_frame_cache (this_frame,
-							 this_cache);
+  struct iq2000_frame_cache *cache
+    = iq2000_frame_cache (this_frame, this_cache);
 
   if (regnum == E_SP_REGNUM && cache->saved_sp)
     return frame_unwind_got_constant (this_frame, regnum, cache->saved_sp);
@@ -414,47 +431,43 @@ static void
 iq2000_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		      struct frame_id *this_id)
 {
-  struct iq2000_frame_cache *cache = iq2000_frame_cache (this_frame,
-							 this_cache);
+  struct iq2000_frame_cache *cache
+    = iq2000_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
-  if (cache->base == 0) 
+  if (cache->base == 0)
     return;
 
   *this_id = frame_id_build (cache->saved_sp, cache->pc);
 }
 
-static const struct frame_unwind iq2000_frame_unwind = {
-  "iq2000 prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  iq2000_frame_this_id,
-  iq2000_frame_prev_register,
-  NULL,
-  default_frame_sniffer
-};
+static const struct frame_unwind iq2000_frame_unwind
+  = { "iq2000 prologue",
+      NORMAL_FRAME,
+      default_frame_unwind_stop_reason,
+      iq2000_frame_this_id,
+      iq2000_frame_prev_register,
+      NULL,
+      default_frame_sniffer };
 
 static CORE_ADDR
 iq2000_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
-  struct iq2000_frame_cache *cache = iq2000_frame_cache (this_frame,
-							 this_cache);
+  struct iq2000_frame_cache *cache
+    = iq2000_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
-  
-static const struct frame_base iq2000_frame_base = {
-  &iq2000_frame_unwind,
-  iq2000_frame_base_address,
-  iq2000_frame_base_address, 
-  iq2000_frame_base_address
-};
+
+static const struct frame_base iq2000_frame_base
+  = { &iq2000_frame_unwind, iq2000_frame_base_address,
+      iq2000_frame_base_address, iq2000_frame_base_address };
 
 static int
 iq2000_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   if ((*pcptr & 3) != 0)
-    error (_("breakpoint_from_pc: invalid breakpoint address 0x%lx"),
+    error (_ ("breakpoint_from_pc: invalid breakpoint address 0x%lx"),
 	   (long) *pcptr);
 
   return 4;
@@ -467,8 +480,8 @@ iq2000_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
   static const unsigned char little_breakpoint[] = { 0x0d, 0x00, 0x00, 0x00 };
   *size = kind;
 
-  return (gdbarch_byte_order (gdbarch)
-	  == BFD_ENDIAN_BIG) ? big_breakpoint : little_breakpoint;
+  return (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG) ? big_breakpoint
+							  : little_breakpoint;
 }
 
 /* Target function return value methods: */
@@ -600,8 +613,7 @@ iq2000_pass_8bytetype_by_address (struct type *type)
   while (type->code () == TYPE_CODE_TYPEDEF)
     type = type->target_type ();
   /* Non-struct and non-union types are always passed by value.  */
-  if (type->code () != TYPE_CODE_STRUCT
-      && type->code () != TYPE_CODE_UNION)
+  if (type->code () != TYPE_CODE_STRUCT && type->code () != TYPE_CODE_UNION)
     return 0;
   /* Structs with more than 1 field are always passed by address.  */
   if (type->num_fields () != 1)
@@ -615,8 +627,7 @@ iq2000_pass_8bytetype_by_address (struct type *type)
   while (ftype->code () == TYPE_CODE_TYPEDEF)
     ftype = ftype->target_type ();
   /* If field is int or float, pass by value.  */
-  if (ftype->code () == TYPE_CODE_FLT
-      || ftype->code () == TYPE_CODE_INT)
+  if (ftype->code () == TYPE_CODE_FLT || ftype->code () == TYPE_CODE_INT)
     return 0;
   /* Everything else, pass by address.  */
   return 1;
@@ -640,8 +651,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* First determine how much stack space we will need.  */
   for (i = 0, argreg = E_1ST_ARGREG + (return_method == return_method_struct);
-       i < nargs;
-       i++)
+       i < nargs; i++)
     {
       type = value_type (args[i]);
       typelen = type->length ();
@@ -665,12 +675,12 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* 8-byte arg goes into a register pair
 		 (must start with an even-numbered reg).  */
 	      if (((argreg - E_1ST_ARGREG) % 2) != 0)
-		argreg ++;
+		argreg++;
 	      argreg += 2;
 	    }
 	  else
 	    {
-	      argreg = E_LAST_ARGREG + 1;       /* no more argregs.  */
+	      argreg = E_LAST_ARGREG + 1; /* no more argregs.  */
 	      /* 8-byte arg goes on stack, must be 8-byte aligned.  */
 	      stackspace = ((stackspace + 7) & ~7);
 	      stackspace += 8;
@@ -693,10 +703,10 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Now copy params, in ascending order, into their assigned location
      (either in a register or on the stack).  */
 
-  sp -= (sp % 8);       /* align */
+  sp -= (sp % 8); /* align */
   struct_ptr = sp;
   sp -= stackspace;
-  sp -= (sp % 8);       /* align again */
+  sp -= (sp % 8); /* align again */
   stackspace = 0;
 
   argreg = E_1ST_ARGREG;
@@ -746,7 +756,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else
 	    {
 	      /* 8-byte arg goes on stack, must be 8-byte aligned.  */
-	      argreg = E_LAST_ARGREG + 1;       /* no more argregs.  */
+	      argreg = E_LAST_ARGREG + 1; /* no more argregs.  */
 	      stackspace = ((stackspace + 7) & ~7);
 	      write_memory (sp + stackspace, val, typelen);
 	      stackspace += 8;
@@ -796,32 +806,32 @@ iq2000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, NULL);
 
-  set_gdbarch_num_regs             (gdbarch, E_NUM_REGS);
-  set_gdbarch_num_pseudo_regs      (gdbarch, 0);
-  set_gdbarch_sp_regnum            (gdbarch, E_SP_REGNUM);
-  set_gdbarch_pc_regnum            (gdbarch, E_PC_REGNUM);
-  set_gdbarch_register_name        (gdbarch, iq2000_register_name);
-  set_gdbarch_address_to_pointer   (gdbarch, iq2000_address_to_pointer);
-  set_gdbarch_pointer_to_address   (gdbarch, iq2000_pointer_to_address);
-  set_gdbarch_ptr_bit              (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_short_bit            (gdbarch, 2 * TARGET_CHAR_BIT);
-  set_gdbarch_int_bit              (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_long_bit             (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_long_long_bit        (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_float_bit            (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_double_bit           (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_long_double_bit      (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_float_format         (gdbarch, floatformats_ieee_single);
-  set_gdbarch_double_format        (gdbarch, floatformats_ieee_double);
-  set_gdbarch_long_double_format   (gdbarch, floatformats_ieee_double);
-  set_gdbarch_return_value	   (gdbarch, iq2000_return_value);
+  set_gdbarch_num_regs (gdbarch, E_NUM_REGS);
+  set_gdbarch_num_pseudo_regs (gdbarch, 0);
+  set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
+  set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
+  set_gdbarch_register_name (gdbarch, iq2000_register_name);
+  set_gdbarch_address_to_pointer (gdbarch, iq2000_address_to_pointer);
+  set_gdbarch_pointer_to_address (gdbarch, iq2000_pointer_to_address);
+  set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+  set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
+  set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
+  set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
+  set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
+  set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
+  set_gdbarch_return_value (gdbarch, iq2000_return_value);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch,
 				       iq2000_breakpoint_kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch,
 				       iq2000_sw_breakpoint_from_kind);
-  set_gdbarch_frame_args_skip      (gdbarch, 0);
-  set_gdbarch_skip_prologue        (gdbarch, iq2000_skip_prologue);
-  set_gdbarch_inner_than           (gdbarch, core_addr_lessthan);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+  set_gdbarch_skip_prologue (gdbarch, iq2000_skip_prologue);
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_register_type (gdbarch, iq2000_register_type);
   set_gdbarch_frame_align (gdbarch, iq2000_frame_align);
   frame_base_set_default (gdbarch, &iq2000_frame_base);
@@ -840,6 +850,7 @@ iq2000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    Called by gdb at start-up.  */
 
 void _initialize_iq2000_tdep ();
+
 void
 _initialize_iq2000_tdep ()
 {

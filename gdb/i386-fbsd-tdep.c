@@ -33,90 +33,79 @@
 #include "inferior.h"
 
 /* The general-purpose regset consists of 19 32-bit slots.  */
-#define I386_FBSD_SIZEOF_GREGSET	(19 * 4)
+#define I386_FBSD_SIZEOF_GREGSET (19 * 4)
 
 /* The segment base register set consists of 2 32-bit registers.  */
-#define I386_FBSD_SIZEOF_SEGBASES_REGSET	(2 * 4)
+#define I386_FBSD_SIZEOF_SEGBASES_REGSET (2 * 4)
 
 /* Register maps.  */
 
-static const struct regcache_map_entry i386_fbsd_gregmap[] =
-{
-  { 1, I386_FS_REGNUM, 4 },
-  { 1, I386_ES_REGNUM, 4 },
-  { 1, I386_DS_REGNUM, 4 },
-  { 1, I386_EDI_REGNUM, 0 },
-  { 1, I386_ESI_REGNUM, 0 },
-  { 1, I386_EBP_REGNUM, 0 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* isp */
-  { 1, I386_EBX_REGNUM, 0 },
-  { 1, I386_EDX_REGNUM, 0 },
-  { 1, I386_ECX_REGNUM, 0 },
-  { 1, I386_EAX_REGNUM, 0 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* trapno */
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* err */
-  { 1, I386_EIP_REGNUM, 0 },
-  { 1, I386_CS_REGNUM, 4 },
-  { 1, I386_EFLAGS_REGNUM, 0 },
-  { 1, I386_ESP_REGNUM, 0 },
-  { 1, I386_SS_REGNUM, 4 },
-  { 1, I386_GS_REGNUM, 4 },
-  { 0 }
-};
+static const struct regcache_map_entry i386_fbsd_gregmap[]
+  = { { 1, I386_FS_REGNUM, 4 },
+      { 1, I386_ES_REGNUM, 4 },
+      { 1, I386_DS_REGNUM, 4 },
+      { 1, I386_EDI_REGNUM, 0 },
+      { 1, I386_ESI_REGNUM, 0 },
+      { 1, I386_EBP_REGNUM, 0 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* isp */
+      { 1, I386_EBX_REGNUM, 0 },
+      { 1, I386_EDX_REGNUM, 0 },
+      { 1, I386_ECX_REGNUM, 0 },
+      { 1, I386_EAX_REGNUM, 0 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* trapno */
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* err */
+      { 1, I386_EIP_REGNUM, 0 },
+      { 1, I386_CS_REGNUM, 4 },
+      { 1, I386_EFLAGS_REGNUM, 0 },
+      { 1, I386_ESP_REGNUM, 0 },
+      { 1, I386_SS_REGNUM, 4 },
+      { 1, I386_GS_REGNUM, 4 },
+      { 0 } };
 
-static const struct regcache_map_entry i386_fbsd_segbases_regmap[] =
-{
-  { 1, I386_FSBASE_REGNUM, 0 },
-  { 1, I386_GSBASE_REGNUM, 0 },
-  { 0 }
-};
+static const struct regcache_map_entry i386_fbsd_segbases_regmap[]
+  = { { 1, I386_FSBASE_REGNUM, 0 }, { 1, I386_GSBASE_REGNUM, 0 }, { 0 } };
 
 /* This layout including fsbase and gsbase was adopted in FreeBSD
    8.0.  */
 
-static const struct regcache_map_entry i386_fbsd_mcregmap[] =
-{
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_onstack */
-  { 1, I386_GS_REGNUM, 4 },
-  { 1, I386_FS_REGNUM, 4 },
-  { 1, I386_ES_REGNUM, 4 },
-  { 1, I386_DS_REGNUM, 4 },
-  { 1, I386_EDI_REGNUM, 0 },
-  { 1, I386_ESI_REGNUM, 0 },
-  { 1, I386_EBP_REGNUM, 0 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* isp */
-  { 1, I386_EBX_REGNUM, 0 },
-  { 1, I386_EDX_REGNUM, 0 },
-  { 1, I386_ECX_REGNUM, 0 },
-  { 1, I386_EAX_REGNUM, 0 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_trapno */
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_err */
-  { 1, I386_EIP_REGNUM, 0 },
-  { 1, I386_CS_REGNUM, 4 },
-  { 1, I386_EFLAGS_REGNUM, 0 },
-  { 1, I386_ESP_REGNUM, 0 },
-  { 1, I386_SS_REGNUM, 4 },
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_len */
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_fpformat */
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_ownedfp */
-  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_flags */
-  { 128, REGCACHE_MAP_SKIP, 4 },/* mc_fpstate */
-  { 1, I386_FSBASE_REGNUM, 0 },
-  { 1, I386_GSBASE_REGNUM, 0 },
-  { 0 }
-};
+static const struct regcache_map_entry i386_fbsd_mcregmap[]
+  = { { 1, REGCACHE_MAP_SKIP, 4 }, /* mc_onstack */
+      { 1, I386_GS_REGNUM, 4 },
+      { 1, I386_FS_REGNUM, 4 },
+      { 1, I386_ES_REGNUM, 4 },
+      { 1, I386_DS_REGNUM, 4 },
+      { 1, I386_EDI_REGNUM, 0 },
+      { 1, I386_ESI_REGNUM, 0 },
+      { 1, I386_EBP_REGNUM, 0 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* isp */
+      { 1, I386_EBX_REGNUM, 0 },
+      { 1, I386_EDX_REGNUM, 0 },
+      { 1, I386_ECX_REGNUM, 0 },
+      { 1, I386_EAX_REGNUM, 0 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* mc_trapno */
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* mc_err */
+      { 1, I386_EIP_REGNUM, 0 },
+      { 1, I386_CS_REGNUM, 4 },
+      { 1, I386_EFLAGS_REGNUM, 0 },
+      { 1, I386_ESP_REGNUM, 0 },
+      { 1, I386_SS_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4 },   /* mc_len */
+      { 1, REGCACHE_MAP_SKIP, 4 },   /* mc_fpformat */
+      { 1, REGCACHE_MAP_SKIP, 4 },   /* mc_ownedfp */
+      { 1, REGCACHE_MAP_SKIP, 4 },   /* mc_flags */
+      { 128, REGCACHE_MAP_SKIP, 4 }, /* mc_fpstate */
+      { 1, I386_FSBASE_REGNUM, 0 },
+      { 1, I386_GSBASE_REGNUM, 0 },
+      { 0 } };
 
 /* Register set definitions.  */
 
-const struct regset i386_fbsd_gregset =
-{
-  i386_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset
-};
+const struct regset i386_fbsd_gregset
+  = { i386_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset };
 
-const struct regset i386_fbsd_segbases_regset =
-{
-  i386_fbsd_segbases_regmap, regcache_supply_regset, regcache_collect_regset
-};
+const struct regset i386_fbsd_segbases_regset
+  = { i386_fbsd_segbases_regmap, regcache_supply_regset,
+      regcache_collect_regset };
 
 /* Support for signal handlers.  */
 
@@ -148,23 +137,20 @@ const struct regset i386_fbsd_segbases_regset =
    as the floating point or XSAVE state.  */
 
 /* NB: There is a 12 byte padding hole between sf_ahu and sf_uc. */
-#define I386_SIGFRAME_UCONTEXT_OFFSET 		32
-#define I386_UCONTEXT_MCONTEXT_OFFSET		16
-#define I386_SIZEOF_MCONTEXT_T			640
+#define I386_SIGFRAME_UCONTEXT_OFFSET 32
+#define I386_UCONTEXT_MCONTEXT_OFFSET 16
+#define I386_SIZEOF_MCONTEXT_T 640
 
 /* Implement the "init" method of struct tramp_frame.  */
 
 static void
 i386_fbsd_sigframe_init (const struct tramp_frame *self,
 			 frame_info_ptr this_frame,
-			 struct trad_frame_cache *this_cache,
-			 CORE_ADDR func)
+			 struct trad_frame_cache *this_cache, CORE_ADDR func)
 {
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
   CORE_ADDR mcontext_addr
-    = (sp
-       + I386_SIGFRAME_UCONTEXT_OFFSET
-       + I386_UCONTEXT_MCONTEXT_OFFSET);
+    = (sp + I386_SIGFRAME_UCONTEXT_OFFSET + I386_UCONTEXT_MCONTEXT_OFFSET);
 
   trad_frame_set_reg_regmap (this_cache, i386_fbsd_mcregmap, mcontext_addr,
 			     I386_SIZEOF_MCONTEXT_T);
@@ -178,68 +164,60 @@ i386_fbsd_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-static const struct tramp_frame i386_fbsd_sigframe =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-    {0x8d, ULONGEST_MAX},		/* lea     SIGF_UC(%esp),%eax */
-    {0x44, ULONGEST_MAX},
-    {0x24, ULONGEST_MAX},
-    {0x20, ULONGEST_MAX},
-    {0x50, ULONGEST_MAX},		/* pushl   %eax */
-    {0xf7, ULONGEST_MAX},		/* testl   $PSL_VM,UC_EFLAGS(%eax) */
-    {0x40, ULONGEST_MAX},
-    {0x54, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x02, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x75, ULONGEST_MAX},		/* jne	   +3 */
-    {0x03, ULONGEST_MAX},
-    {0x8e, ULONGEST_MAX},		/* mov	   UC_GS(%eax),%gs */
-    {0x68, ULONGEST_MAX},
-    {0x14, ULONGEST_MAX},
-    {0xb8, ULONGEST_MAX},		/* movl   $SYS_sigreturn,%eax */
-    {0xa1, ULONGEST_MAX},
-    {0x01, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x50, ULONGEST_MAX},		/* pushl   %eax */
-    {0xcd, ULONGEST_MAX},		/* int	   $0x80 */
-    {0x80, ULONGEST_MAX},
-    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
-  },
-  i386_fbsd_sigframe_init
-};
+static const struct tramp_frame i386_fbsd_sigframe
+  = { SIGTRAMP_FRAME,
+      1,
+      { { 0x8d, ULONGEST_MAX }, /* lea     SIGF_UC(%esp),%eax */
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x20, ULONGEST_MAX },
+	{ 0x50, ULONGEST_MAX }, /* pushl   %eax */
+	{ 0xf7, ULONGEST_MAX }, /* testl   $PSL_VM,UC_EFLAGS(%eax) */
+	{ 0x40, ULONGEST_MAX },
+	{ 0x54, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x02, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x75, ULONGEST_MAX }, /* jne	   +3 */
+	{ 0x03, ULONGEST_MAX },
+	{ 0x8e, ULONGEST_MAX }, /* mov	   UC_GS(%eax),%gs */
+	{ 0x68, ULONGEST_MAX },
+	{ 0x14, ULONGEST_MAX },
+	{ 0xb8, ULONGEST_MAX }, /* movl   $SYS_sigreturn,%eax */
+	{ 0xa1, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x50, ULONGEST_MAX }, /* pushl   %eax */
+	{ 0xcd, ULONGEST_MAX }, /* int	   $0x80 */
+	{ 0x80, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      i386_fbsd_sigframe_init };
 
 /* FreeBSD/i386 binaries running under an amd64 kernel use a different
    trampoline.  This trampoline differs from the i386 kernel trampoline
    in that it omits a middle section that conditionally restores
    %gs.  */
 
-static const struct tramp_frame i386_fbsd64_sigframe =
-{
-  SIGTRAMP_FRAME,
-  1,
-  {
-    {0x8d, ULONGEST_MAX},		/* lea     SIGF_UC(%esp),%eax */
-    {0x44, ULONGEST_MAX},
-    {0x24, ULONGEST_MAX},
-    {0x20, ULONGEST_MAX},
-    {0x50, ULONGEST_MAX},		/* pushl   %eax */
-    {0xb8, ULONGEST_MAX},		/* movl   $SYS_sigreturn,%eax */
-    {0xa1, ULONGEST_MAX},
-    {0x01, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x00, ULONGEST_MAX},
-    {0x50, ULONGEST_MAX},		/* pushl   %eax */
-    {0xcd, ULONGEST_MAX},		/* int	   $0x80 */
-    {0x80, ULONGEST_MAX},
-    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
-  },
-  i386_fbsd_sigframe_init
-};
+static const struct tramp_frame i386_fbsd64_sigframe
+  = { SIGTRAMP_FRAME,
+      1,
+      { { 0x8d, ULONGEST_MAX }, /* lea     SIGF_UC(%esp),%eax */
+	{ 0x44, ULONGEST_MAX },
+	{ 0x24, ULONGEST_MAX },
+	{ 0x20, ULONGEST_MAX },
+	{ 0x50, ULONGEST_MAX }, /* pushl   %eax */
+	{ 0xb8, ULONGEST_MAX }, /* movl   $SYS_sigreturn,%eax */
+	{ 0xa1, ULONGEST_MAX },
+	{ 0x01, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x00, ULONGEST_MAX },
+	{ 0x50, ULONGEST_MAX }, /* pushl   %eax */
+	{ 0xcd, ULONGEST_MAX }, /* int	   $0x80 */
+	{ 0x80, ULONGEST_MAX },
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      i386_fbsd_sigframe_init };
 
 /* Get XSAVE extended state xcr0 from core dump.  */
 
@@ -260,12 +238,11 @@ i386fbsd_core_read_xcr0 (bfd *abfd)
 	{
 	  char contents[8];
 
-	  if (! bfd_get_section_contents (abfd, xstate, contents,
-					  I386_FBSD_XSAVE_XCR0_OFFSET,
-					  8))
+	  if (!bfd_get_section_contents (abfd, xstate, contents,
+					 I386_FBSD_XSAVE_XCR0_OFFSET, 8))
 	    {
-	      warning (_("Couldn't read `xcr0' bytes from "
-			 "`.reg-xstate' section in core file."));
+	      warning (_ ("Couldn't read `xcr0' bytes from "
+			  "`.reg-xstate' section in core file."));
 	      return X86_XSTATE_SSE_MASK;
 	    }
 
@@ -282,8 +259,7 @@ i386fbsd_core_read_xcr0 (bfd *abfd)
 
 static const struct target_desc *
 i386fbsd_core_read_description (struct gdbarch *gdbarch,
-				struct target_ops *target,
-				bfd *abfd)
+				struct target_ops *target, bfd *abfd)
 {
   return i386_target_description (i386fbsd_core_read_xcr0 (abfd), true);
 }
@@ -302,20 +278,16 @@ i386fbsd_supply_xstateregset (const struct regset *regset,
 
 static void
 i386fbsd_collect_xstateregset (const struct regset *regset,
-			       const struct regcache *regcache,
-			       int regnum, void *xstateregs, size_t len)
+			       const struct regcache *regcache, int regnum,
+			       void *xstateregs, size_t len)
 {
   i387_collect_xsave (regcache, regnum, xstateregs, 1);
 }
 
 /* Register set definitions.  */
 
-static const struct regset i386fbsd_xstateregset =
-  {
-    NULL,
-    i386fbsd_supply_xstateregset,
-    i386fbsd_collect_xstateregset
-  };
+static const struct regset i386fbsd_xstateregset
+  = { NULL, i386fbsd_supply_xstateregset, i386fbsd_collect_xstateregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -356,7 +328,7 @@ i386fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 
   ULONGEST gsbase;
   if (regcache->cooked_read (I386_GSBASE_REGNUM, &gsbase) != REG_VALID)
-    error (_("Unable to fetch %%gsbase"));
+    error (_ ("Unable to fetch %%gsbase"));
 
   CORE_ADDR dtv_addr = gsbase + gdbarch_ptr_bit (gdbarch) / 8;
   return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
@@ -388,15 +360,14 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->xsave_xcr0_offset = I386_FBSD_XSAVE_XCR0_OFFSET;
 
   /* Iterate over core file register note sections.  */
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, i386fbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, i386fbsd_iterate_over_regset_sections);
 
-  set_gdbarch_core_read_description (gdbarch,
-				     i386fbsd_core_read_description);
+  set_gdbarch_core_read_description (gdbarch, i386fbsd_core_read_description);
 
   /* FreeBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
@@ -405,6 +376,7 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_i386fbsd_tdep ();
+
 void
 _initialize_i386fbsd_tdep ()
 {

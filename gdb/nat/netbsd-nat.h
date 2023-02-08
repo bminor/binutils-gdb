@@ -89,6 +89,6 @@ extern int write_memory (pid_t pid, unsigned const char *writebuf,
 
 extern int read_memory (pid_t pid, unsigned char *readbuf, CORE_ADDR offset,
 			size_t len, size_t *xfered_len);
-}
+} // namespace netbsd_nat
 
 #endif

@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "gdbsupport/gdb_obstack.h"
-#include "bfd.h"		/* Binary File Description */
+#include "bfd.h" /* Binary File Description */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -49,8 +49,7 @@ pascal_language::print_type (struct type *type, const char *varstring,
   if (show > 0)
     type = check_typedef (type);
 
-  if ((code == TYPE_CODE_FUNC
-       || code == TYPE_CODE_METHOD))
+  if ((code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD))
     {
       type_print_varspec_prefix (type, stream, show, 0, flags);
     }
@@ -58,14 +57,12 @@ pascal_language::print_type (struct type *type, const char *varstring,
   gdb_puts (varstring, stream);
 
   if ((varstring != NULL && *varstring != '\0')
-      && !(code == TYPE_CODE_FUNC
-	   || code == TYPE_CODE_METHOD))
+      && !(code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD))
     {
       gdb_puts (" : ", stream);
     }
 
-  if (!(code == TYPE_CODE_FUNC
-	|| code == TYPE_CODE_METHOD))
+  if (!(code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD))
     {
       type_print_varspec_prefix (type, stream, show, 0, flags);
     }
@@ -75,9 +72,7 @@ pascal_language::print_type (struct type *type, const char *varstring,
      so don't print an additional pair of ()'s.  */
 
   demangled_args = varstring ? strchr (varstring, '(') != NULL : 0;
-  type_print_varspec_suffix (type, stream, show, 0, demangled_args,
-				    flags);
-
+  type_print_varspec_suffix (type, stream, show, 0, demangled_args, flags);
 }
 
 /* See language.h.  */
@@ -167,10 +162,9 @@ pascal_language::type_print_method_args (const char *physname,
 /* See p-lang.h.  */
 
 void
-pascal_language::type_print_varspec_prefix (struct type *type,
-					    struct ui_file *stream,
-					    int show, int passed_a_ptr,
-					    const struct type_print_options *flags) const
+pascal_language::type_print_varspec_prefix (
+  struct type *type, struct ui_file *stream, int show, int passed_a_ptr,
+  const struct type_print_options *flags) const
 {
   if (type == 0)
     return;
@@ -184,9 +178,8 @@ pascal_language::type_print_varspec_prefix (struct type *type,
     {
     case TYPE_CODE_PTR:
       gdb_printf (stream, "^");
-      type_print_varspec_prefix (type->target_type (), stream, 0, 1,
-					flags);
-      break;			/* Pointer should be handled normally
+      type_print_varspec_prefix (type->target_type (), stream, 0, 1, flags);
+      break; /* Pointer should be handled normally
 				   in pascal.  */
 
     case TYPE_CODE_METHOD:
@@ -205,15 +198,14 @@ pascal_language::type_print_varspec_prefix (struct type *type,
       if (passed_a_ptr)
 	{
 	  gdb_printf (stream, " ");
-	  type_print_base (TYPE_SELF_TYPE (type),
-				  stream, 0, passed_a_ptr, flags);
+	  type_print_base (TYPE_SELF_TYPE (type), stream, 0, passed_a_ptr,
+			   flags);
 	  gdb_printf (stream, "::");
 	}
       break;
 
     case TYPE_CODE_REF:
-      type_print_varspec_prefix (type->target_type (), stream, 0, 1,
-				 flags);
+      type_print_varspec_prefix (type->target_type (), stream, 0, 1, flags);
       gdb_printf (stream, "&");
       break;
 
@@ -294,9 +286,10 @@ pascal_language::print_func_args (struct type *type, struct ui_file *stream,
 	  {
 	  gdb_printf (stream, "var ");
 	  } */
-      print_type (type->field (i).type (), ""	/* TYPE_FIELD_NAME
+      print_type (type->field (i).type (), "" /* TYPE_FIELD_NAME
 						   seems invalid!  */
-			 ,stream, -1, 0, flags);
+		  ,
+		  stream, -1, 0, flags);
     }
   if (len)
     {
@@ -307,38 +300,32 @@ pascal_language::print_func_args (struct type *type, struct ui_file *stream,
 /* See p-lang.h.  */
 
 void
-pascal_language::type_print_func_varspec_suffix  (struct type *type,
-						  struct ui_file *stream,
-						  int show, int passed_a_ptr,
-						  int demangled_args,
-						  const struct type_print_options *flags) const
+pascal_language::type_print_func_varspec_suffix (
+  struct type *type, struct ui_file *stream, int show, int passed_a_ptr,
+  int demangled_args, const struct type_print_options *flags) const
 {
   if (type->target_type () == NULL
       || type->target_type ()->code () != TYPE_CODE_VOID)
     {
       gdb_printf (stream, " : ");
-      type_print_varspec_prefix (type->target_type (),
-					stream, 0, 0, flags);
+      type_print_varspec_prefix (type->target_type (), stream, 0, 0, flags);
 
       if (type->target_type () == NULL)
 	type_print_unknown_return_type (stream);
       else
-	type_print_base (type->target_type (), stream, show, 0,
-				flags);
+	type_print_base (type->target_type (), stream, show, 0, flags);
 
-      type_print_varspec_suffix (type->target_type (), stream, 0,
-				 passed_a_ptr, 0, flags);
+      type_print_varspec_suffix (type->target_type (), stream, 0, passed_a_ptr,
+				 0, flags);
     }
 }
 
 /* See p-lang.h.  */
 
 void
-pascal_language::type_print_varspec_suffix (struct type *type,
-					    struct ui_file *stream,
-					    int show, int passed_a_ptr,
-					    int demangled_args,
-					    const struct type_print_options *flags) const
+pascal_language::type_print_varspec_suffix (
+  struct type *type, struct ui_file *stream, int show, int passed_a_ptr,
+  int demangled_args, const struct type_print_options *flags) const
 {
   if (type == 0)
     return;
@@ -359,14 +346,13 @@ pascal_language::type_print_varspec_suffix (struct type *type,
       if (passed_a_ptr)
 	gdb_printf (stream, ")");
       type_print_method_args ("", "", stream);
-      type_print_func_varspec_suffix (type, stream, show,
-					     passed_a_ptr, 0, flags);
+      type_print_func_varspec_suffix (type, stream, show, passed_a_ptr, 0,
+				      flags);
       break;
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      type_print_varspec_suffix (type->target_type (),
-				 stream, 0, 1, 0, flags);
+      type_print_varspec_suffix (type->target_type (), stream, 0, 1, 0, flags);
       break;
 
     case TYPE_CODE_FUNC:
@@ -374,8 +360,8 @@ pascal_language::type_print_varspec_suffix (struct type *type,
 	gdb_printf (stream, ")");
       if (!demangled_args)
 	print_func_args (type, stream, flags);
-      type_print_func_varspec_suffix (type, stream, show,
-					     passed_a_ptr, 0, flags);
+      type_print_func_varspec_suffix (type, stream, show, passed_a_ptr, 0,
+				      flags);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -406,17 +392,21 @@ pascal_language::type_print_varspec_suffix (struct type *type,
 /* See p-lang.h.  */
 
 void
-pascal_language::type_print_base (struct type *type, struct ui_file *stream, int show,
-				  int level, const struct type_print_options *flags) const
+pascal_language::type_print_base (struct type *type, struct ui_file *stream,
+				  int show, int level,
+				  const struct type_print_options *flags) const
 {
   int i;
   int len;
   LONGEST lastval;
+
   enum
-    {
-      s_none, s_public, s_private, s_protected
-    }
-  section_type;
+  {
+    s_none,
+    s_public,
+    s_private,
+    s_protected
+  } section_type;
 
   QUIT;
   stream->wrap_here (4);
@@ -430,15 +420,13 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
   if ((type->code () == TYPE_CODE_PTR)
       && (type->target_type ()->code () == TYPE_CODE_VOID))
     {
-      gdb_puts (type->name () ? type->name () : "pointer",
-		stream);
+      gdb_puts (type->name () ? type->name () : "pointer", stream);
       return;
     }
   /* When SHOW is zero or less, and there is a valid type name, then always
      just print the type name directly from the type.  */
 
-  if (show <= 0
-      && type->name () != NULL)
+  if (show <= 0 && type->name () != NULL)
     {
       gdb_puts (type->name (), stream);
       return;
@@ -451,8 +439,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
     case TYPE_CODE_TYPEDEF:
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      type_print_base (type->target_type (), stream, show, level,
-		       flags);
+      type_print_base (type->target_type (), stream, show, level, flags);
       break;
 
     case TYPE_CODE_ARRAY:
@@ -502,11 +489,9 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	  if ((type->num_fields () == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
 	      if (type->is_stub ())
-		gdb_printf (stream, "%*s<incomplete type>\n",
-			    level + 4, "");
+		gdb_printf (stream, "%*s<incomplete type>\n", level + 4, "");
 	      else
-		gdb_printf (stream, "%*s<no data fields>\n",
-			    level + 4, "");
+		gdb_printf (stream, "%*s<no data fields>\n", level + 4, "");
 	    }
 
 	  /* Start off with no specific section type, so we can print
@@ -537,8 +522,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		      if (section_type != s_protected)
 			{
 			  section_type = s_protected;
-			  gdb_printf (stream, "%*sprotected\n",
-				      level + 2, "");
+			  gdb_printf (stream, "%*sprotected\n", level + 2, "");
 			}
 		    }
 		  else if (TYPE_FIELD_PRIVATE (type, i))
@@ -546,8 +530,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		      if (section_type != s_private)
 			{
 			  section_type = s_private;
-			  gdb_printf (stream, "%*sprivate\n",
-				      level + 2, "");
+			  gdb_printf (stream, "%*sprivate\n", level + 2, "");
 			}
 		    }
 		  else
@@ -555,8 +538,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		      if (section_type != s_public)
 			{
 			  section_type = s_public;
-			  gdb_printf (stream, "%*spublic\n",
-				      level + 2, "");
+			  gdb_printf (stream, "%*spublic\n", level + 2, "");
 			}
 		    }
 		}
@@ -564,9 +546,8 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      print_spaces (level + 4, stream);
 	      if (field_is_static (&type->field (i)))
 		gdb_printf (stream, "static ");
-	      print_type (type->field (i).type (),
-				 type->field (i).name (),
-				 stream, show - 1, level + 4, flags);
+	      print_type (type->field (i).type (), type->field (i).name (),
+			  stream, show - 1, level + 4, flags);
 	      if (!field_is_static (&type->field (i))
 		  && TYPE_FIELD_PACKED (type, i))
 		{
@@ -575,8 +556,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		     unnamed fields.  This would lead to misleading
 		     results if the compiler does not put out fields
 		     for such things (I don't know what it does).  */
-		  gdb_printf (stream, " : %d",
-			      TYPE_FIELD_BITSIZE (type, i));
+		  gdb_printf (stream, " : %d", TYPE_FIELD_BITSIZE (type, i));
 		}
 	      gdb_printf (stream, ";\n");
 	    }
@@ -610,8 +590,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		      if (section_type != s_protected)
 			{
 			  section_type = s_protected;
-			  gdb_printf (stream, "%*sprotected\n",
-				      level + 2, "");
+			  gdb_printf (stream, "%*sprotected\n", level + 2, "");
 			}
 		    }
 		  else if (TYPE_FN_FIELD_PRIVATE (f, j))
@@ -619,8 +598,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		      if (section_type != s_private)
 			{
 			  section_type = s_private;
-			  gdb_printf (stream, "%*sprivate\n",
-				      level + 2, "");
+			  gdb_printf (stream, "%*sprivate\n", level + 2, "");
 			}
 		    }
 		  else
@@ -628,8 +606,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		      if (section_type != s_public)
 			{
 			  section_type = s_public;
-			  gdb_printf (stream, "%*spublic\n",
-				      level + 2, "");
+			  gdb_printf (stream, "%*spublic\n", level + 2, "");
 			}
 		    }
 
@@ -652,9 +629,10 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		    {
 		      gdb_printf (stream, "destructor  ");
 		    }
-		  else if (TYPE_FN_FIELD_TYPE (f, j)->target_type () != 0
-			   && (TYPE_FN_FIELD_TYPE(f, j)->target_type ()->code ()
-			       != TYPE_CODE_VOID))
+		  else if (
+		    TYPE_FN_FIELD_TYPE (f, j)->target_type () != 0
+		    && (TYPE_FN_FIELD_TYPE (f, j)->target_type ()->code ()
+			!= TYPE_CODE_VOID))
 		    {
 		      gdb_printf (stream, "function  ");
 		    }
@@ -667,7 +645,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		  type_print_method_args (physname, method_name, stream);
 
 		  if (TYPE_FN_FIELD_TYPE (f, j)->target_type () != 0
-		      && (TYPE_FN_FIELD_TYPE(f, j)->target_type ()->code ()
+		      && (TYPE_FN_FIELD_TYPE (f, j)->target_type ()->code ()
 			  != TYPE_CODE_VOID))
 		    {
 		      gdb_puts (" : ", stream);
@@ -715,8 +693,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      gdb_puts (type->field (i).name (), stream);
 	      if (lastval != type->field (i).loc_enumval ())
 		{
-		  gdb_printf (stream,
-			      " := %s",
+		  gdb_printf (stream, " := %s",
 			      plongest (type->field (i).loc_enumval ()));
 		  lastval = type->field (i).loc_enumval ();
 		}
@@ -751,8 +728,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 
     case TYPE_CODE_SET:
       gdb_puts ("set of ", stream);
-      print_type (type->index_type (), "", stream,
-			 show - 1, level, flags);
+      print_type (type->index_type (), "", stream, show - 1, level, flags);
       break;
 
     case TYPE_CODE_STRING:

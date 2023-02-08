@@ -19,11 +19,11 @@
 #include "server.h"
 
 #ifdef IN_PROCESS_AGENT
-#  define PREFIX "ipa: "
-#  define TOOLNAME "GDBserver in-process agent"
+#define PREFIX "ipa: "
+#define TOOLNAME "GDBserver in-process agent"
 #else
-#  define PREFIX "gdbserver: "
-#  define TOOLNAME "GDBserver"
+#define PREFIX "gdbserver: "
+#define TOOLNAME "GDBserver"
 #endif
 
 /* Generally useful subroutines used throughout the program.  */
@@ -46,8 +46,8 @@ void
 malloc_failure (long size)
 {
   fprintf (stderr,
-	   PREFIX "ran out of memory while trying to allocate %lu bytes\n",
-	   (unsigned long) size);
+           PREFIX "ran out of memory while trying to allocate %lu bytes\n",
+           (unsigned long) size);
   abort_or_exit ();
 }
 
@@ -101,8 +101,9 @@ vwarning (const char *string, va_list args)
 void
 internal_verror (const char *file, int line, const char *fmt, va_list args)
 {
-  fprintf (stderr,  "\
-%s:%d: A problem internal to " TOOLNAME " has been detected.\n", file, line);
+  fprintf (stderr, "\
+%s:%d: A problem internal to " TOOLNAME " has been detected.\n",
+           file, line);
   vfprintf (stderr, fmt, args);
   fprintf (stderr, "\n");
   abort_or_exit ();
@@ -113,8 +114,9 @@ internal_verror (const char *file, int line, const char *fmt, va_list args)
 void
 internal_vwarning (const char *file, int line, const char *fmt, va_list args)
 {
-  fprintf (stderr,  "\
-%s:%d: A problem internal to " TOOLNAME " has been detected.\n", file, line);
+  fprintf (stderr, "\
+%s:%d: A problem internal to " TOOLNAME " has been detected.\n",
+           file, line);
   vfprintf (stderr, fmt, args);
   fprintf (stderr, "\n");
 }

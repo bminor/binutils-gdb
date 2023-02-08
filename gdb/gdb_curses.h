@@ -39,21 +39,21 @@
 #define NOMACROS
 #define NCURSES_NOMACROS
 
-#if defined (HAVE_NCURSESW_NCURSES_H)
+#if defined(HAVE_NCURSESW_NCURSES_H)
 #include <ncursesw/ncurses.h>
-#elif defined (HAVE_NCURSES_NCURSES_H)
+#elif defined(HAVE_NCURSES_NCURSES_H)
 #include <ncurses/ncurses.h>
-#elif defined (HAVE_NCURSES_H)
+#elif defined(HAVE_NCURSES_H)
 #include <ncurses.h>
-#elif defined (HAVE_CURSESX_H)
+#elif defined(HAVE_CURSESX_H)
 #include <cursesX.h>
-#elif defined (HAVE_CURSES_H)
+#elif defined(HAVE_CURSES_H)
 #include <curses.h>
 #endif
 
-#if defined (HAVE_NCURSES_TERM_H)
+#if defined(HAVE_NCURSES_TERM_H)
 #include <ncurses/term.h>
-#elif defined (HAVE_TERM_H)
+#elif defined(HAVE_TERM_H)
 #include <term.h>
 #else
 /* On MinGW, a real termcap library is usually not present.  Stub versions

@@ -151,9 +151,7 @@ gdbscm_with_catch (void *data)
   struct with_catch_data *d = (struct with_catch_data *) data;
 
   d->catch_result
-    = scm_c_catch (SCM_BOOL_T,
-		   d->func, d->data,
-		   d->unwind_handler, d,
+    = scm_c_catch (SCM_BOOL_T, d->func, d->data, d->unwind_handler, d,
 		   d->pre_unwind_handler, d);
 
 #if HAVE_GUILE_MANUAL_FINALIZATION
@@ -177,7 +175,7 @@ gdbscm_with_guile (const char *(*func) (void *), void *data)
   c_data.func = func;
   c_data.data = data;
   /* Set this now in case an exception is thrown.  */
-  c_data.result = _("Error while executing Scheme code.");
+  c_data.result = _ ("Error while executing Scheme code.");
 
   catch_data.func = scscm_safe_call_body;
   catch_data.data = &c_data;
@@ -219,7 +217,7 @@ gdbscm_call_guile (SCM (*func) (void *), void *data,
 
   return catch_data.catch_result;
 }
-
+
 /* Utilities to safely call Scheme code, catching all exceptions, and
    preventing continuation capture.
    The result is the result of calling the function, or if an exception occurs
@@ -335,7 +333,7 @@ gdbscm_safe_apply_1 (SCM proc, SCM arg0, SCM rest, excp_matcher_func *ok_excps)
 
   return gdbscm_call_guile (scscm_apply_1_body, args, ok_excps);
 }
-
+
 /* Utilities to call Scheme code, not catching exceptions, and
    not preventing continuation capture.
    The result is the result of calling the function.
@@ -358,7 +356,7 @@ gdbscm_unsafe_call_1 (SCM proc, SCM arg0)
 {
   return scm_call_1 (proc, arg0);
 }
-
+
 /* Utilities for safely evaluating a Scheme expression string.  */
 
 struct eval_scheme_string_data
@@ -407,7 +405,7 @@ gdbscm_safe_eval_string (const char *string, int display_result)
     return make_unique_xstrdup (result);
   return NULL;
 }
-
+
 /* Utilities for safely loading Scheme scripts.  */
 
 /* Helper function for gdbscm_safe_source_scheme_script.  */
@@ -448,14 +446,13 @@ gdbscm_safe_source_script (const char *filename)
       filename = abs_filename.get ();
     }
 
-  result = gdbscm_with_guile (scscm_source_scheme_script,
-			      (void *) filename);
+  result = gdbscm_with_guile (scscm_source_scheme_script, (void *) filename);
 
   if (result != NULL)
     return make_unique_xstrdup (result);
   return NULL;
 }
-
+
 /* Utility for entering an interactive Guile repl.  */
 
 void

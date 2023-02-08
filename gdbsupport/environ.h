@@ -35,10 +35,7 @@ public:
     m_environ_vector.push_back (NULL);
   }
 
-  ~gdb_environ ()
-  {
-    clear ();
-  }
+  ~gdb_environ () { clear (); }
 
   /* Move constructor.  */
   gdb_environ (gdb_environ &&e)

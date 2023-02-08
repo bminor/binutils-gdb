@@ -29,76 +29,75 @@
    corresponding implementation dependent constants in one module. */
 
 /* open(2) flags */
-#define FILEIO_O_RDONLY           0x0
-#define FILEIO_O_WRONLY           0x1
-#define FILEIO_O_RDWR             0x2
-#define FILEIO_O_APPEND           0x8
-#define FILEIO_O_CREAT          0x200
-#define FILEIO_O_TRUNC          0x400
-#define FILEIO_O_EXCL           0x800
-#define FILEIO_O_SUPPORTED      (FILEIO_O_RDONLY | FILEIO_O_WRONLY| \
-				 FILEIO_O_RDWR   | FILEIO_O_APPEND| \
-				 FILEIO_O_CREAT  | FILEIO_O_TRUNC| \
-				 FILEIO_O_EXCL)
+#define FILEIO_O_RDONLY 0x0
+#define FILEIO_O_WRONLY 0x1
+#define FILEIO_O_RDWR 0x2
+#define FILEIO_O_APPEND 0x8
+#define FILEIO_O_CREAT 0x200
+#define FILEIO_O_TRUNC 0x400
+#define FILEIO_O_EXCL 0x800
+#define FILEIO_O_SUPPORTED                                             \
+  (FILEIO_O_RDONLY | FILEIO_O_WRONLY | FILEIO_O_RDWR | FILEIO_O_APPEND \
+   | FILEIO_O_CREAT | FILEIO_O_TRUNC | FILEIO_O_EXCL)
 
 /* mode_t bits */
-#define FILEIO_S_IFREG        0100000
-#define FILEIO_S_IFDIR         040000
-#define FILEIO_S_IFCHR         020000
-#define FILEIO_S_IRUSR           0400
-#define FILEIO_S_IWUSR           0200
-#define FILEIO_S_IXUSR           0100
-#define FILEIO_S_IRWXU           0700
-#define FILEIO_S_IRGRP            040
-#define FILEIO_S_IWGRP            020
-#define FILEIO_S_IXGRP            010
-#define FILEIO_S_IRWXG            070
-#define FILEIO_S_IROTH             04
-#define FILEIO_S_IWOTH             02
-#define FILEIO_S_IXOTH             01
-#define FILEIO_S_IRWXO             07
-#define FILEIO_S_SUPPORTED         (FILEIO_S_IFREG|FILEIO_S_IFDIR|  \
-				    FILEIO_S_IRWXU|FILEIO_S_IRWXG|  \
-                                    FILEIO_S_IRWXO)
+#define FILEIO_S_IFREG 0100000
+#define FILEIO_S_IFDIR 040000
+#define FILEIO_S_IFCHR 020000
+#define FILEIO_S_IRUSR 0400
+#define FILEIO_S_IWUSR 0200
+#define FILEIO_S_IXUSR 0100
+#define FILEIO_S_IRWXU 0700
+#define FILEIO_S_IRGRP 040
+#define FILEIO_S_IWGRP 020
+#define FILEIO_S_IXGRP 010
+#define FILEIO_S_IRWXG 070
+#define FILEIO_S_IROTH 04
+#define FILEIO_S_IWOTH 02
+#define FILEIO_S_IXOTH 01
+#define FILEIO_S_IRWXO 07
+#define FILEIO_S_SUPPORTED                                           \
+  (FILEIO_S_IFREG | FILEIO_S_IFDIR | FILEIO_S_IRWXU | FILEIO_S_IRWXG \
+   | FILEIO_S_IRWXO)
 
 /* lseek(2) flags */
-#define FILEIO_SEEK_SET             0
-#define FILEIO_SEEK_CUR             1
-#define FILEIO_SEEK_END             2
+#define FILEIO_SEEK_SET 0
+#define FILEIO_SEEK_CUR 1
+#define FILEIO_SEEK_END 2
 
 /* errno values */
 enum fileio_error
 {
-  FILEIO_SUCCESS      =    0,
-  FILEIO_EPERM        =    1,
-  FILEIO_ENOENT       =    2,
-  FILEIO_EINTR        =    4,
-  FILEIO_EIO          =    5,
-  FILEIO_EBADF        =    9,
-  FILEIO_EACCES       =   13,
-  FILEIO_EFAULT       =   14,
-  FILEIO_EBUSY        =   16,
-  FILEIO_EEXIST       =   17,
-  FILEIO_ENODEV       =   19,
-  FILEIO_ENOTDIR      =   20,
-  FILEIO_EISDIR       =   21,
-  FILEIO_EINVAL       =   22,
-  FILEIO_ENFILE       =   23,
-  FILEIO_EMFILE       =   24,
-  FILEIO_EFBIG        =   27,
-  FILEIO_ENOSPC       =   28,
-  FILEIO_ESPIPE       =   29,
-  FILEIO_EROFS        =   30,
-  FILEIO_ENOSYS       =   88,
-  FILEIO_ENAMETOOLONG =   91,
-  FILEIO_EUNKNOWN     = 9999,
+  FILEIO_SUCCESS = 0,
+  FILEIO_EPERM = 1,
+  FILEIO_ENOENT = 2,
+  FILEIO_EINTR = 4,
+  FILEIO_EIO = 5,
+  FILEIO_EBADF = 9,
+  FILEIO_EACCES = 13,
+  FILEIO_EFAULT = 14,
+  FILEIO_EBUSY = 16,
+  FILEIO_EEXIST = 17,
+  FILEIO_ENODEV = 19,
+  FILEIO_ENOTDIR = 20,
+  FILEIO_EISDIR = 21,
+  FILEIO_EINVAL = 22,
+  FILEIO_ENFILE = 23,
+  FILEIO_EMFILE = 24,
+  FILEIO_EFBIG = 27,
+  FILEIO_ENOSPC = 28,
+  FILEIO_ESPIPE = 29,
+  FILEIO_EROFS = 30,
+  FILEIO_ENOSYS = 88,
+  FILEIO_ENAMETOOLONG = 91,
+  FILEIO_EUNKNOWN = 9999,
 };
 
-#define FIO_INT_LEN   4
-#define FIO_UINT_LEN  4
-#define FIO_MODE_LEN  4
-#define FIO_TIME_LEN  4
-#define FIO_LONG_LEN  8
+#define FIO_INT_LEN 4
+#define FIO_UINT_LEN 4
+#define FIO_MODE_LEN 4
+#define FIO_TIME_LEN 4
+#define FIO_LONG_LEN 8
 #define FIO_ULONG_LEN 8
 
 typedef char fio_int_t[FIO_INT_LEN];
@@ -114,25 +113,25 @@ typedef char fio_ulong_t[FIO_ULONG_LEN];
 
 struct fio_stat
 {
-  fio_uint_t  fst_dev;
-  fio_uint_t  fst_ino;
-  fio_mode_t  fst_mode;
-  fio_uint_t  fst_nlink;
-  fio_uint_t  fst_uid;
-  fio_uint_t  fst_gid;
-  fio_uint_t  fst_rdev;
+  fio_uint_t fst_dev;
+  fio_uint_t fst_ino;
+  fio_mode_t fst_mode;
+  fio_uint_t fst_nlink;
+  fio_uint_t fst_uid;
+  fio_uint_t fst_gid;
+  fio_uint_t fst_rdev;
   fio_ulong_t fst_size;
   fio_ulong_t fst_blksize;
   fio_ulong_t fst_blocks;
-  fio_time_t  fst_atime;
-  fio_time_t  fst_mtime;
-  fio_time_t  fst_ctime;
+  fio_time_t fst_atime;
+  fio_time_t fst_mtime;
+  fio_time_t fst_ctime;
 };
 
 struct fio_timeval
 {
-  fio_time_t  ftv_sec;
-  fio_long_t  ftv_usec;
+  fio_time_t ftv_sec;
+  fio_long_t ftv_usec;
 };
 
 /* Convert a host-format errno value to a File-I/O error number.  */

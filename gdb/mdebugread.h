@@ -20,7 +20,7 @@
 #ifndef MDEBUGREAD_H
 #define MDEBUGREAD_H
 
-#include "coff/sym.h"		/* Needed for PDR below.  */
+#include "coff/sym.h" /* Needed for PDR below.  */
 #include "coff/symconst.h"
 
 /* Specific information about a procedure.  Architectures (ab)uses
@@ -28,8 +28,8 @@
 
 struct mdebug_extra_func_info
 {
-  long numargs;		/* Number of args to procedure (was iopt).  */
-  PDR pdr;		/* Procedure descriptor record.  */
+  long numargs; /* Number of args to procedure (was iopt).  */
+  PDR pdr;	/* Procedure descriptor record.  */
 };
 
 /* Special symbol found in blocks associated with routines.  We can
@@ -37,8 +37,7 @@ struct mdebug_extra_func_info
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 
-extern void mdebug_build_psymtabs (minimal_symbol_reader &,
-				   struct objfile *,
+extern void mdebug_build_psymtabs (minimal_symbol_reader &, struct objfile *,
 				   const struct ecoff_debug_swap *,
 				   struct ecoff_debug_info *);
 

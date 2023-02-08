@@ -22,7 +22,8 @@
 
 #include "gdbarch.h"
 
-enum {
+enum
+{
   E_D0_REGNUM = 0,
   E_D1_REGNUM = 1,
   E_D2_REGNUM = 2,
@@ -56,20 +57,22 @@ enum {
   E_FS0_REGNUM = 32
 };
 
-enum movm_register_bits {
+enum movm_register_bits
+{
   movm_exother_bit = 0x01,
-  movm_exreg1_bit  = 0x02,
-  movm_exreg0_bit  = 0x04,
-  movm_other_bit   = 0x08,
-  movm_a3_bit      = 0x10,
-  movm_a2_bit      = 0x20,
-  movm_d3_bit      = 0x40,
-  movm_d2_bit      = 0x80
+  movm_exreg1_bit = 0x02,
+  movm_exreg0_bit = 0x04,
+  movm_other_bit = 0x08,
+  movm_a3_bit = 0x10,
+  movm_a2_bit = 0x20,
+  movm_d3_bit = 0x40,
+  movm_d2_bit = 0x80
 };
 
 /* Values for frame_info.status.  */
 
-enum frame_kind {
+enum frame_kind
+{
   MY_FRAME_IN_SP = 0x1,
   MY_FRAME_IN_FP = 0x2,
   NO_MORE_FRAMES = 0x4

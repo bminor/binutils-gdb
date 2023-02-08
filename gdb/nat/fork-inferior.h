@@ -40,22 +40,17 @@ struct process_stratum_target;
 
 /* This function is NOT reentrant.  Some of the variables have been
    made static to ensure that they survive the vfork call.  */
-extern pid_t fork_inferior (const char *exec_file_arg,
-			    const std::string &allargs,
-			    char **env, void (*traceme_fun) (),
-			    gdb::function_view<void (int)> init_trace_fun,
-			    void (*pre_trace_fun) (),
-			    const char *shell_file_arg,
-			    void (*exec_fun) (const char *file,
-					      char * const *argv,
-					      char * const *env));
+extern pid_t fork_inferior (
+  const char *exec_file_arg, const std::string &allargs, char **env,
+  void (*traceme_fun) (), gdb::function_view<void (int)> init_trace_fun,
+  void (*pre_trace_fun) (), const char *shell_file_arg,
+  void (*exec_fun) (const char *file, char *const *argv, char *const *env));
 
 /* Accept NTRAPS traps from the inferior.
 
    Return the ptid of the inferior being started.  */
-extern ptid_t startup_inferior (process_stratum_target *proc_target,
-				pid_t pid, int ntraps,
-				struct target_waitstatus *mystatus,
+extern ptid_t startup_inferior (process_stratum_target *proc_target, pid_t pid,
+				int ntraps, struct target_waitstatus *mystatus,
 				ptid_t *myptid);
 
 /* Perform any necessary tasks before a fork/vfork takes place.  ARGS
@@ -78,13 +73,13 @@ extern void gdb_flush_out_err ();
 /* Report an error that happened when starting to trace the inferior
    (i.e., when the "traceme_fun" callback is called on fork_inferior)
    and bail out.  This function does not return.  */
-extern void trace_start_error (const char *fmt, ...)
-  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+extern void trace_start_error (const char *fmt, ...) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (1, 2);
 
 /* Like "trace_start_error", but the error message is constructed by
    combining STRING with the system error message for errno.  This
    function does not return.  */
-extern void trace_start_error_with_name (const char *string)
-  ATTRIBUTE_NORETURN;
+extern void
+trace_start_error_with_name (const char *string) ATTRIBUTE_NORETURN;
 
 #endif /* NAT_FORK_INFERIOR_H */

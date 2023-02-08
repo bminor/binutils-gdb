@@ -56,8 +56,8 @@
 /* Use this to mark an enum as flags enum.  It defines FLAGS_TYPE as
    enum_flags wrapper class for ENUM, and enables the global operator
    overloads for ENUM.  */
-#define DEF_ENUM_FLAGS_TYPE(enum_type, flags_type)	\
-  typedef enum_flags<enum_type> flags_type;		\
+#define DEF_ENUM_FLAGS_TYPE(enum_type, flags_type) \
+  typedef enum_flags<enum_type> flags_type;        \
   void is_enum_flags_enum_type (enum_type *)
 
 /* To enable the global enum_flags operators for enum, declare an
@@ -78,22 +78,57 @@
 /* Note that std::underlying_type<enum_type> is not what we want here,
    since that returns unsigned int even when the enum decays to signed
    int.  */
-template<int size, bool sign> class integer_for_size { typedef void type; };
-template<> struct integer_for_size<1, 0> { typedef uint8_t type; };
-template<> struct integer_for_size<2, 0> { typedef uint16_t type; };
-template<> struct integer_for_size<4, 0> { typedef uint32_t type; };
-template<> struct integer_for_size<8, 0> { typedef uint64_t type; };
-template<> struct integer_for_size<1, 1> { typedef int8_t type; };
-template<> struct integer_for_size<2, 1> { typedef int16_t type; };
-template<> struct integer_for_size<4, 1> { typedef int32_t type; };
-template<> struct integer_for_size<8, 1> { typedef int64_t type; };
+template<int size, bool sign>
+class integer_for_size
+{
+  typedef void type;
+};
+template<>
+struct integer_for_size<1, 0>
+{
+  typedef uint8_t type;
+};
+template<>
+struct integer_for_size<2, 0>
+{
+  typedef uint16_t type;
+};
+template<>
+struct integer_for_size<4, 0>
+{
+  typedef uint32_t type;
+};
+template<>
+struct integer_for_size<8, 0>
+{
+  typedef uint64_t type;
+};
+template<>
+struct integer_for_size<1, 1>
+{
+  typedef int8_t type;
+};
+template<>
+struct integer_for_size<2, 1>
+{
+  typedef int16_t type;
+};
+template<>
+struct integer_for_size<4, 1>
+{
+  typedef int32_t type;
+};
+template<>
+struct integer_for_size<8, 1>
+{
+  typedef int64_t type;
+};
 
 template<typename T>
 struct enum_underlying_type
 {
-  typedef typename
-    integer_for_size<sizeof (T), static_cast<bool>(T (-1) < T (0))>::type
-    type;
+  typedef typename integer_for_size<sizeof (T), static_cast<bool> (
+                                                  T (-1) < T (0))>::type type;
 };
 
 namespace enum_flags_detail
@@ -114,16 +149,16 @@ namespace enum_flags_detail
 struct zero_type;
 
 /* gdb::Requires trait helpers.  */
-template <typename enum_type>
+template<typename enum_type>
 using EnumIsUnsigned
   = std::is_unsigned<typename enum_underlying_type<enum_type>::type>;
-template <typename enum_type>
+template<typename enum_type>
 using EnumIsSigned
   = std::is_signed<typename enum_underlying_type<enum_type>::type>;
 
-}
+} // namespace enum_flags_detail
 
-template <typename E>
+template<typename E>
 class enum_flags
 {
 public:
@@ -139,24 +174,24 @@ public:
 
   /* Convenience for to_string implementations, to build a
      string_mapping array.  */
-#define MAP_ENUM_FLAG(ENUM_FLAG) { ENUM_FLAG, #ENUM_FLAG }
+#define MAP_ENUM_FLAG(ENUM_FLAG) \
+  {                              \
+    ENUM_FLAG, #ENUM_FLAG        \
+  }
 
 public:
   /* Allow default construction.  */
-  constexpr enum_flags ()
-    : m_enum_value ((enum_type) 0)
-  {}
+  constexpr enum_flags () : m_enum_value ((enum_type) 0) {}
 
   /* The default move/copy ctor/assignment do the right thing.  */
 
   /* If you get an error saying these two overloads are ambiguous,
      then you tried to mix values of different enum types.  */
-  constexpr enum_flags (enum_type e)
-    : m_enum_value (e)
-  {}
+  constexpr enum_flags (enum_type e) : m_enum_value (e) {}
   constexpr enum_flags (enum_flags_detail::zero_type *zero)
     : m_enum_value ((enum_type) 0)
-  {}
+  {
+  }
 
   enum_flags &operator&= (enum_flags e) &
   {
@@ -180,16 +215,10 @@ public:
   void operator^= (enum_flags e) && = delete;
 
   /* Like raw enums, allow conversion to the underlying type.  */
-  constexpr operator underlying_type () const
-  {
-    return m_enum_value;
-  }
+  constexpr operator underlying_type () const { return m_enum_value; }
 
   /* Get the underlying value as a raw enum.  */
-  constexpr enum_type raw () const
-  {
-    return m_enum_value;
-  }
+  constexpr enum_type raw () const { return m_enum_value; }
 
   /* Binary operations involving some unrelated type (which would be a
      bug) are implemented as non-members, and deleted.  */
@@ -212,7 +241,7 @@ private:
   enum_type m_enum_value;
 };
 
-template <typename E>
+template<typename E>
 using is_enum_flags_enum_type_t
   = decltype (is_enum_flags_enum_type (std::declval<E *> ()));
 
@@ -220,60 +249,69 @@ using is_enum_flags_enum_type_t
 
 /* Generate binary operators.  */
 
-#define ENUM_FLAGS_GEN_BINOP(OPERATOR_OP, OP)				\
-									\
-  /* Raw enum on both LHS/RHS.  Returns raw enum type.  */		\
-  template <typename enum_type,						\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_type							\
-  OPERATOR_OP (enum_type e1, enum_type e2)				\
-  {									\
-    using underlying = typename enum_flags<enum_type>::underlying_type;	\
-    return (enum_type) (underlying (e1) OP underlying (e2));		\
-  }									\
-									\
-  /* enum_flags on the LHS.  */						\
-  template <typename enum_type,						\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_flags<enum_type>					\
-  OPERATOR_OP (enum_flags<enum_type> e1, enum_type e2)			\
-  { return e1.raw () OP e2; }						\
-									\
-  /* enum_flags on the RHS.  */						\
-  template <typename enum_type,						\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_flags<enum_type>					\
-  OPERATOR_OP (enum_type e1, enum_flags<enum_type> e2)			\
-  { return e1 OP e2.raw (); }						\
-									\
-  /* enum_flags on both LHS/RHS.  */					\
-  template <typename enum_type,						\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_flags<enum_type>					\
-  OPERATOR_OP (enum_flags<enum_type> e1, enum_flags<enum_type> e2)	\
-  { return e1.raw () OP e2.raw (); }					\
-									\
-  /* Delete cases involving unrelated types.  */			\
-									\
-  template <typename enum_type, typename unrelated_type,		\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_flags<enum_type>					\
-  OPERATOR_OP (enum_type e1, unrelated_type e2) = delete;		\
-									\
-  template <typename enum_type, typename unrelated_type,		\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_flags<enum_type>					\
-  OPERATOR_OP (unrelated_type e1, enum_type e2) = delete;		\
-									\
-  template <typename enum_type, typename unrelated_type,		\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_flags<enum_type>					\
-  OPERATOR_OP (enum_flags<enum_type> e1, unrelated_type e2) = delete;	\
-									\
-  template <typename enum_type, typename unrelated_type,		\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_flags<enum_type>					\
-  OPERATOR_OP (unrelated_type e1, enum_flags<enum_type> e2) = delete;
+#define ENUM_FLAGS_GEN_BINOP(OPERATOR_OP, OP)                            \
+                                                                         \
+  /* Raw enum on both LHS/RHS.  Returns raw enum type.  */               \
+  template<typename enum_type,                                           \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_type OPERATOR_OP (enum_type e1, enum_type e2)           \
+  {                                                                      \
+    using underlying = typename enum_flags<enum_type>::underlying_type;  \
+    return (enum_type) (underlying (e1) OP underlying (e2));             \
+  }                                                                      \
+                                                                         \
+  /* enum_flags on the LHS.  */                                          \
+  template<typename enum_type,                                           \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_flags<enum_type> OPERATOR_OP (enum_flags<enum_type> e1, \
+                                               enum_type e2)             \
+  {                                                                      \
+    return e1.raw () OP e2;                                              \
+  }                                                                      \
+                                                                         \
+  /* enum_flags on the RHS.  */                                          \
+  template<typename enum_type,                                           \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_flags<enum_type> OPERATOR_OP (enum_type e1,             \
+                                               enum_flags<enum_type> e2) \
+  {                                                                      \
+    return e1 OP e2.raw ();                                              \
+  }                                                                      \
+                                                                         \
+  /* enum_flags on both LHS/RHS.  */                                     \
+  template<typename enum_type,                                           \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_flags<enum_type> OPERATOR_OP (enum_flags<enum_type> e1, \
+                                               enum_flags<enum_type> e2) \
+  {                                                                      \
+    return e1.raw () OP e2.raw ();                                       \
+  }                                                                      \
+                                                                         \
+  /* Delete cases involving unrelated types.  */                         \
+                                                                         \
+  template<typename enum_type, typename unrelated_type,                  \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_flags<enum_type> OPERATOR_OP (enum_type e1,             \
+                                               unrelated_type e2)        \
+    = delete;                                                            \
+                                                                         \
+  template<typename enum_type, typename unrelated_type,                  \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_flags<enum_type> OPERATOR_OP (unrelated_type e1,        \
+                                               enum_type e2)             \
+    = delete;                                                            \
+                                                                         \
+  template<typename enum_type, typename unrelated_type,                  \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_flags<enum_type> OPERATOR_OP (enum_flags<enum_type> e1, \
+                                               unrelated_type e2)        \
+    = delete;                                                            \
+                                                                         \
+  template<typename enum_type, typename unrelated_type,                  \
+           typename = is_enum_flags_enum_type_t<enum_type>>              \
+  constexpr enum_flags<enum_type> OPERATOR_OP (unrelated_type e1,        \
+                                               enum_flags<enum_type> e2) \
+    = delete;
 
 /* Generate non-member compound assignment operators.  Only the raw
    enum versions are defined here.  The enum_flags versions are
@@ -295,31 +333,30 @@ using is_enum_flags_enum_type_t
    If you really need to 'or' enumerators of different flag types,
    cast to integer first.
 */
-#define ENUM_FLAGS_GEN_COMPOUND_ASSIGN(OPERATOR_OP, OP)			\
-  /* lval reference version.  */					\
-  template <typename enum_type,						\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_type &							\
-  OPERATOR_OP (enum_type &e1, enum_type e2)				\
-  { return e1 = e1 OP e2; }						\
-									\
-  /* rval reference version.  */					\
-  template <typename enum_type,						\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  void									\
-  OPERATOR_OP (enum_type &&e1, enum_type e2) = delete;			\
-									\
-  /* Delete compound assignment from unrelated types.  */		\
-									\
-  template <typename enum_type, typename other_enum_type,		\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  constexpr enum_type &							\
-  OPERATOR_OP (enum_type &e1, other_enum_type e2) = delete;		\
-									\
-  template <typename enum_type, typename other_enum_type,		\
-	    typename = is_enum_flags_enum_type_t<enum_type>>		\
-  void									\
-  OPERATOR_OP (enum_type &&e1, other_enum_type e2) = delete;
+#define ENUM_FLAGS_GEN_COMPOUND_ASSIGN(OPERATOR_OP, OP)                \
+  /* lval reference version.  */                                       \
+  template<typename enum_type,                                         \
+           typename = is_enum_flags_enum_type_t<enum_type>>            \
+  constexpr enum_type &OPERATOR_OP (enum_type &e1, enum_type e2)       \
+  {                                                                    \
+    return e1 = e1 OP e2;                                              \
+  }                                                                    \
+                                                                       \
+  /* rval reference version.  */                                       \
+  template<typename enum_type,                                         \
+           typename = is_enum_flags_enum_type_t<enum_type>>            \
+  void OPERATOR_OP (enum_type &&e1, enum_type e2) = delete;            \
+                                                                       \
+  /* Delete compound assignment from unrelated types.  */              \
+                                                                       \
+  template<typename enum_type, typename other_enum_type,               \
+           typename = is_enum_flags_enum_type_t<enum_type>>            \
+  constexpr enum_type &OPERATOR_OP (enum_type &e1, other_enum_type e2) \
+    = delete;                                                          \
+                                                                       \
+  template<typename enum_type, typename other_enum_type,               \
+           typename = is_enum_flags_enum_type_t<enum_type>>            \
+  void OPERATOR_OP (enum_type &&e1, other_enum_type e2) = delete;
 
 ENUM_FLAGS_GEN_BINOP (operator|, |)
 ENUM_FLAGS_GEN_BINOP (operator&, &)
@@ -338,46 +375,50 @@ ENUM_FLAGS_GEN_COMPOUND_ASSIGN (operator^=, ^)
    convertion to underlying type too, would trigger the built-in 'bool
    operator==(unsigned, int)' operator.  */
 
-#define ENUM_FLAGS_GEN_COMP(OPERATOR_OP, OP)				\
-									\
-  /* enum_flags OP enum_flags */					\
-									\
-  template <typename enum_type>						\
-  constexpr bool							\
-  OPERATOR_OP (enum_flags<enum_type> lhs, enum_flags<enum_type> rhs)	\
-  { return lhs.raw () OP rhs.raw (); }					\
-									\
-  /* enum_flags OP other */						\
-									\
-  template <typename enum_type>						\
-  constexpr bool							\
-  OPERATOR_OP (enum_flags<enum_type> lhs, enum_type rhs)		\
-  { return lhs.raw () OP rhs; }						\
-									\
-  template <typename enum_type>						\
-  constexpr bool							\
-  OPERATOR_OP (enum_flags<enum_type> lhs, int rhs)			\
-  { return lhs.raw () OP rhs; }						\
-									\
-  template <typename enum_type, typename U>				\
-  constexpr bool							\
-  OPERATOR_OP (enum_flags<enum_type> lhs, U rhs) = delete;		\
-									\
-  /* other OP enum_flags */						\
-									\
-  template <typename enum_type>						\
-  constexpr bool							\
-  OPERATOR_OP (enum_type lhs, enum_flags<enum_type> rhs)		\
-  { return lhs OP rhs.raw (); }						\
-									\
-  template <typename enum_type>						\
-  constexpr bool							\
-  OPERATOR_OP (int lhs, enum_flags<enum_type> rhs)			\
-  { return lhs OP rhs.raw (); }						\
-									\
-  template <typename enum_type, typename U>				\
-  constexpr bool							\
-  OPERATOR_OP (U lhs, enum_flags<enum_type> rhs) = delete;
+#define ENUM_FLAGS_GEN_COMP(OPERATOR_OP, OP)                              \
+                                                                          \
+  /* enum_flags OP enum_flags */                                          \
+                                                                          \
+  template<typename enum_type>                                            \
+  constexpr bool OPERATOR_OP (enum_flags<enum_type> lhs,                  \
+                              enum_flags<enum_type> rhs)                  \
+  {                                                                       \
+    return lhs.raw () OP rhs.raw ();                                      \
+  }                                                                       \
+                                                                          \
+  /* enum_flags OP other */                                               \
+                                                                          \
+  template<typename enum_type>                                            \
+  constexpr bool OPERATOR_OP (enum_flags<enum_type> lhs, enum_type rhs)   \
+  {                                                                       \
+    return lhs.raw () OP rhs;                                             \
+  }                                                                       \
+                                                                          \
+  template<typename enum_type>                                            \
+  constexpr bool OPERATOR_OP (enum_flags<enum_type> lhs, int rhs)         \
+  {                                                                       \
+    return lhs.raw () OP rhs;                                             \
+  }                                                                       \
+                                                                          \
+  template<typename enum_type, typename U>                                \
+  constexpr bool OPERATOR_OP (enum_flags<enum_type> lhs, U rhs) = delete; \
+                                                                          \
+  /* other OP enum_flags */                                               \
+                                                                          \
+  template<typename enum_type>                                            \
+  constexpr bool OPERATOR_OP (enum_type lhs, enum_flags<enum_type> rhs)   \
+  {                                                                       \
+    return lhs OP rhs.raw ();                                             \
+  }                                                                       \
+                                                                          \
+  template<typename enum_type>                                            \
+  constexpr bool OPERATOR_OP (int lhs, enum_flags<enum_type> rhs)         \
+  {                                                                       \
+    return lhs OP rhs.raw ();                                             \
+  }                                                                       \
+                                                                          \
+  template<typename enum_type, typename U>                                \
+  constexpr bool OPERATOR_OP (U lhs, enum_flags<enum_type> rhs) = delete;
 
 ENUM_FLAGS_GEN_COMP (operator==, ==)
 ENUM_FLAGS_GEN_COMP (operator!=, !=)
@@ -388,54 +429,50 @@ ENUM_FLAGS_GEN_COMP (operator!=, !=)
    if it were not unsigned, undefined behavior could result.  However,
    asserting this in the class itself would require too many
    unnecessary changes to usages of otherwise OK enum types.  */
-template <typename enum_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>,
-	  typename
-	    = gdb::Requires<enum_flags_detail::EnumIsUnsigned<enum_type>>>
+template<typename enum_type, typename = is_enum_flags_enum_type_t<enum_type>,
+         typename
+         = gdb::Requires<enum_flags_detail::EnumIsUnsigned<enum_type>>>
 constexpr enum_type
-operator~ (enum_type e)
+operator~(enum_type e)
 {
   using underlying = typename enum_flags<enum_type>::underlying_type;
   return (enum_type) ~underlying (e);
 }
 
-template <typename enum_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>,
-	  typename = gdb::Requires<enum_flags_detail::EnumIsSigned<enum_type>>>
-constexpr void operator~ (enum_type e) = delete;
+template<typename enum_type, typename = is_enum_flags_enum_type_t<enum_type>,
+         typename = gdb::Requires<enum_flags_detail::EnumIsSigned<enum_type>>>
+constexpr void operator~(enum_type e) = delete;
 
-template <typename enum_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>,
-	  typename
-	    = gdb::Requires<enum_flags_detail::EnumIsUnsigned<enum_type>>>
+template<typename enum_type, typename = is_enum_flags_enum_type_t<enum_type>,
+         typename
+         = gdb::Requires<enum_flags_detail::EnumIsUnsigned<enum_type>>>
 constexpr enum_flags<enum_type>
-operator~ (enum_flags<enum_type> e)
+operator~(enum_flags<enum_type> e)
 {
   using underlying = typename enum_flags<enum_type>::underlying_type;
   return (enum_type) ~underlying (e);
 }
 
-template <typename enum_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>,
-	  typename = gdb::Requires<enum_flags_detail::EnumIsSigned<enum_type>>>
-constexpr void operator~ (enum_flags<enum_type> e) = delete;
+template<typename enum_type, typename = is_enum_flags_enum_type_t<enum_type>,
+         typename = gdb::Requires<enum_flags_detail::EnumIsSigned<enum_type>>>
+constexpr void operator~(enum_flags<enum_type> e) = delete;
 
 /* Delete operator<< and operator>>.  */
 
-template <typename enum_type, typename any_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>>
+template<typename enum_type, typename any_type,
+         typename = is_enum_flags_enum_type_t<enum_type>>
 void operator<< (const enum_type &, const any_type &) = delete;
 
-template <typename enum_type, typename any_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>>
+template<typename enum_type, typename any_type,
+         typename = is_enum_flags_enum_type_t<enum_type>>
 void operator<< (const enum_flags<enum_type> &, const any_type &) = delete;
 
-template <typename enum_type, typename any_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>>
+template<typename enum_type, typename any_type,
+         typename = is_enum_flags_enum_type_t<enum_type>>
 void operator>> (const enum_type &, const any_type &) = delete;
 
-template <typename enum_type, typename any_type,
-	  typename = is_enum_flags_enum_type_t<enum_type>>
+template<typename enum_type, typename any_type,
+         typename = is_enum_flags_enum_type_t<enum_type>>
 void operator>> (const enum_flags<enum_type> &, const any_type &) = delete;
 
 template<typename E>
@@ -451,20 +488,20 @@ enum_flags<E>::to_string (const string_mapping (&mapping)[N]) const
   for (const auto &entry : mapping)
     {
       if ((flags & entry.flag) != 0)
-	{
-	  /* Work with an unsigned version of the underlying type,
+        {
+          /* Work with an unsigned version of the underlying type,
 	     because if enum_type's underlying type is signed, op~
 	     won't be defined for it, and, bitwise operations on
 	     signed types are implementation defined.  */
-	  using uns = typename std::make_unsigned<underlying_type>::type;
-	  flags &= (enum_type) ~(uns) entry.flag;
+          using uns = typename std::make_unsigned<underlying_type>::type;
+          flags &= (enum_type) ~(uns) entry.flag;
 
-	  if (need_space)
-	    res += " ";
-	  res += entry.str;
+          if (need_space)
+            res += " ";
+          res += entry.str;
 
-	  need_space = true;
-	}
+          need_space = true;
+        }
     }
 
   /* If there were flags not included in the mapping, print them as
@@ -472,7 +509,7 @@ enum_flags<E>::to_string (const string_mapping (&mapping)[N]) const
   if (flags != 0)
     {
       if (need_space)
-	res += " ";
+        res += " ";
       res += hex_string (flags);
     }
 
@@ -485,8 +522,7 @@ enum_flags<E>::to_string (const string_mapping (&mapping)[N]) const
 
 /* In C, the flags type is just a typedef for the enum type.  */
 
-#define DEF_ENUM_FLAGS_TYPE(enum_type, flags_type) \
-  typedef enum_type flags_type
+#define DEF_ENUM_FLAGS_TYPE(enum_type, flags_type) typedef enum_type flags_type
 
 #endif /* __cplusplus */
 

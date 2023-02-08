@@ -187,17 +187,16 @@ msp430x_register_type (struct gdbarch *gdbarch, int reg_nr)
 static const char *
 msp430_register_name (struct gdbarch *gdbarch, int regnr)
 {
-  static const char *const reg_names[] = {
-    /* Raw registers.  */
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    /* Pseudo registers.  */
-    "pc", "sp", "sr", "cg", "r4", "r5", "r6", "r7",
-    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
-  };
+  static const char *const reg_names[]
+    = { /* Raw registers.  */
+	"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+	/* Pseudo registers.  */
+	"pc", "sp", "sr", "cg", "r4", "r5", "r6", "r7", "r8", "r9", "r10",
+	"r11", "r12", "r13", "r14", "r15"
+      };
 
-  gdb_static_assert (ARRAY_SIZE (reg_names) == (MSP430_NUM_REGS
-						+ MSP430_NUM_PSEUDO_REGS));
+  gdb_static_assert (ARRAY_SIZE (reg_names)
+		     == (MSP430_NUM_REGS + MSP430_NUM_PSEUDO_REGS));
   return reg_names[regnr];
 }
 
@@ -221,8 +220,8 @@ msp430_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 static enum register_status
 msp430_pseudo_register_read (struct gdbarch *gdbarch,
-			     readable_regcache *regcache,
-			     int regnum, gdb_byte *buffer)
+			     readable_regcache *regcache, int regnum,
+			     gdb_byte *buffer)
 {
   if (MSP430_NUM_REGS <= regnum && regnum < MSP430_NUM_TOTAL_REGS)
     {
@@ -246,8 +245,8 @@ msp430_pseudo_register_read (struct gdbarch *gdbarch,
 
 static void
 msp430_pseudo_register_write (struct gdbarch *gdbarch,
-			      struct regcache *regcache,
-			      int regnum, const gdb_byte *buffer)
+			      struct regcache *regcache, int regnum,
+			      const gdb_byte *buffer)
 {
   if (MSP430_NUM_REGS <= regnum && regnum < MSP430_NUM_TOTAL_REGS)
 
@@ -259,7 +258,6 @@ msp430_pseudo_register_write (struct gdbarch *gdbarch,
 
       val = extract_unsigned_integer (buffer, regsize, byte_order);
       regcache_raw_write_unsigned (regcache, raw_regnum, val);
-
     }
   else
     gdb_assert_not_reached ("invalid pseudo register number");
@@ -325,8 +323,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
 {
   struct msp430_prologue *result = (struct msp430_prologue *) result_untyped;
 
-  if (value.kind == pvk_register
-      && value.k == 0
+  if (value.kind == pvk_register && value.k == 0
       && pv_is_register (addr, MSP430_SP_REGNUM)
       && size == register_size (target_gdbarch (), value.reg))
     result->reg_offset[value.reg] = addr.k;
@@ -382,7 +379,7 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	  stack.store (reg[MSP430_SP_REGNUM], 2, reg[rsrc]);
 	  after_last_frame_setup_insn = next_pc;
 	}
-      else if (opc.id == MSO_push	/* PUSHM  */
+      else if (opc.id == MSO_push /* PUSHM  */
 	       && opc.op[0].type == MSP430_Operand_None
 	       && opc.op[1].type == MSP430_Operand_Register)
 	{
@@ -400,19 +397,17 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	    }
 	  after_last_frame_setup_insn = next_pc;
 	}
-      else if (opc.id == MSO_sub
-	       && opc.op[0].type == MSP430_Operand_Register
+      else if (opc.id == MSO_sub && opc.op[0].type == MSP430_Operand_Register
 	       && opc.op[0].reg == MSR_SP
 	       && opc.op[1].type == MSP430_Operand_Immediate)
 	{
 	  int addend = opc.op[1].addend;
 
-	  reg[MSP430_SP_REGNUM] = pv_add_constant (reg[MSP430_SP_REGNUM],
-						   -addend);
+	  reg[MSP430_SP_REGNUM]
+	    = pv_add_constant (reg[MSP430_SP_REGNUM], -addend);
 	  after_last_frame_setup_insn = next_pc;
 	}
-      else if (opc.id == MSO_mov
-	       && opc.op[0].type == MSP430_Operand_Immediate
+      else if (opc.id == MSO_mov && opc.op[0].type == MSP430_Operand_Immediate
 	       && 12 <= opc.op[0].reg && opc.op[0].reg <= 15)
 	after_last_frame_setup_insn = next_pc;
       else
@@ -474,9 +469,9 @@ msp430_analyze_frame_prologue (frame_info_ptr this_frame,
       if (!func_start)
 	stop_addr = func_start;
 
-      msp430_analyze_prologue (get_frame_arch (this_frame), func_start,
-			       stop_addr,
-			       (struct msp430_prologue *) *this_prologue_cache);
+      msp430_analyze_prologue (
+	get_frame_arch (this_frame), func_start, stop_addr,
+	(struct msp430_prologue *) *this_prologue_cache);
     }
 
   return (struct msp430_prologue *) *this_prologue_cache;
@@ -497,19 +492,19 @@ msp430_frame_base (frame_info_ptr this_frame, void **this_prologue_cache)
 /* Implement the "frame_this_id" method for unwinding frames.  */
 
 static void
-msp430_this_id (frame_info_ptr this_frame,
-		void **this_prologue_cache, struct frame_id *this_id)
+msp430_this_id (frame_info_ptr this_frame, void **this_prologue_cache,
+		struct frame_id *this_id)
 {
-  *this_id = frame_id_build (msp430_frame_base (this_frame,
-						this_prologue_cache),
-			     get_frame_func (this_frame));
+  *this_id
+    = frame_id_build (msp430_frame_base (this_frame, this_prologue_cache),
+		      get_frame_func (this_frame));
 }
 
 /* Implement the "frame_prev_register" method for unwinding frames.  */
 
 static struct value *
-msp430_prev_register (frame_info_ptr this_frame,
-		      void **this_prologue_cache, int regnum)
+msp430_prev_register (frame_info_ptr this_frame, void **this_prologue_cache,
+		      int regnum)
 {
   struct msp430_prologue *p
     = msp430_analyze_frame_prologue (this_frame, this_prologue_cache);
@@ -522,9 +517,9 @@ msp430_prev_register (frame_info_ptr this_frame,
      return a description of the stack slot holding it.  */
   else if (p->reg_offset[regnum] != 1)
     {
-      struct value *rv = frame_unwind_got_memory (this_frame, regnum,
-						  frame_base +
-						  p->reg_offset[regnum]);
+      struct value *rv
+	= frame_unwind_got_memory (this_frame, regnum,
+				   frame_base + p->reg_offset[regnum]);
 
       if (regnum == MSP430_PC_REGNUM)
 	{
@@ -542,12 +537,8 @@ msp430_prev_register (frame_info_ptr this_frame,
 }
 
 static const struct frame_unwind msp430_unwind = {
-  "msp430 prologue",
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  msp430_this_id,
-  msp430_prev_register,
-  NULL,
+  "msp430 prologue",	NORMAL_FRAME,	      default_frame_unwind_stop_reason,
+  msp430_this_id,	msp430_prev_register, NULL,
   default_frame_sniffer
 };
 
@@ -564,10 +555,8 @@ msp430_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 /* Implement the "return_value" gdbarch method.  */
 
 static enum return_value_convention
-msp430_return_value (struct gdbarch *gdbarch,
-		     struct value *function,
-		     struct type *valtype,
-		     struct regcache *regcache,
+msp430_return_value (struct gdbarch *gdbarch, struct value *function,
+		     struct type *valtype, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -575,8 +564,7 @@ msp430_return_value (struct gdbarch *gdbarch,
   msp430_gdbarch_tdep *tdep = gdbarch_tdep<msp430_gdbarch_tdep> (gdbarch);
   int code_model = tdep->code_model;
 
-  if (valtype->length () > 8
-      || valtype->code () == TYPE_CODE_STRUCT
+  if (valtype->length () > 8 || valtype->code () == TYPE_CODE_STRUCT
       || valtype->code () == TYPE_CODE_UNION)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
@@ -630,7 +618,6 @@ msp430_return_value (struct gdbarch *gdbarch,
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
-
 
 /* Implement the "frame_align" gdbarch method.  */
 
@@ -715,7 +702,6 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		current_arg_on_stack = 1;
 	    }
 
-
 	  for (offset = 0; offset < arg_size; offset += 2)
 	    {
 	      /* The condition below prevents 8 byte scalars from being split
@@ -723,9 +709,10 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		 splits once the stack has been written to.  */
 	      if (!current_arg_on_stack
 		  && (arg_reg
-		      + ((arg_size == 8 || args_on_stack)
-			 ? ((arg_size - offset) / 2 - 1)
-			 : 0) <= MSP430_R15_REGNUM))
+			+ ((arg_size == 8 || args_on_stack)
+			     ? ((arg_size - offset) / 2 - 1)
+			     : 0)
+		      <= MSP430_R15_REGNUM))
 		{
 		  int size = 2;
 
@@ -746,10 +733,10 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    }
 
 		  if (write_pass)
-		    regcache_cooked_write_unsigned (regcache, arg_reg,
-						    extract_unsigned_integer
-						    (arg_bits + offset, size,
-						     byte_order));
+		    regcache_cooked_write_unsigned (
+		      regcache, arg_reg,
+		      extract_unsigned_integer (arg_bits + offset, size,
+						byte_order));
 
 		  arg_reg++;
 		}
@@ -795,11 +782,9 @@ static const char msp430_epilog_name_prefix[] = "__mspabi_func_epilog_";
 /* Implement the "in_return_stub" gdbarch method.  */
 
 static int
-msp430_in_return_stub (struct gdbarch *gdbarch, CORE_ADDR pc,
-		       const char *name)
+msp430_in_return_stub (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name)
 {
-  return (name != NULL
-	  && startswith (name, msp430_epilog_name_prefix));
+  return (name != NULL && startswith (name, msp430_epilog_name_prefix));
 }
 
 /* Implement the "skip_trampoline_code" gdbarch method.  */
@@ -822,9 +807,9 @@ msp430_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
     {
       CORE_ADDR sp = get_frame_register_unsigned (frame, MSP430_SP_REGNUM);
 
-      return read_memory_integer
-	(sp + 2 * (stub_name[strlen (msp430_epilog_name_prefix)] - '0'),
-	 2, gdbarch_byte_order (gdbarch));
+      return read_memory_integer (
+	sp + 2 * (stub_name[strlen (msp430_epilog_name_prefix)] - '0'), 2,
+	gdbarch_byte_order (gdbarch));
     }
 
   return pc;
@@ -864,7 +849,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    code_model = MSP_LARGE_CODE_MODEL;
 	    break;
 	  default:
-	    internal_error (_("Unknown msp430x code memory model"));
+	    internal_error (_ ("Unknown msp430x code memory model"));
 	    break;
 	  }
 	break;
@@ -887,7 +872,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
 	/* Fall through.  */
       default:
-	error (_("Unknown msp430 isa"));
+	error (_ ("Unknown msp430 isa"));
 	break;
       }
   else
@@ -896,18 +881,15 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       code_model = MSP_SMALL_CODE_MODEL;
     }
 
-
   /* Try to find the architecture in the list of already defined
      architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info); arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       msp430_gdbarch_tdep *candidate_tdep
 	= gdbarch_tdep<msp430_gdbarch_tdep> (arches->gdbarch);
 
-      if (candidate_tdep->elf_flags != elf_flags
-	  || candidate_tdep->isa != isa
+      if (candidate_tdep->elf_flags != elf_flags || candidate_tdep->isa != isa
 	  || candidate_tdep->code_model != code_model)
 	continue;
 
@@ -951,7 +933,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 16);
       set_gdbarch_addr_bit (gdbarch, 16);
     }
-  else				/* MSP_LARGE_CODE_MODEL */
+  else /* MSP_LARGE_CODE_MODEL */
     {
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_addr_bit (gdbarch, 32);
@@ -995,6 +977,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Register the initialization routine.  */
 
 void _initialize_msp430_tdep ();
+
 void
 _initialize_msp430_tdep ()
 {

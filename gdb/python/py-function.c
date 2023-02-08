@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 #include "defs.h"
 #include "value.h"
 #include "python-internal.h"
@@ -28,10 +27,8 @@
 #include "expression.h"
 #include "language.h"
 
-extern PyTypeObject fnpy_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
-
-
+extern PyTypeObject
+  fnpy_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
 
 /* Return a reference to a tuple ARGC elements long.  Each element of the
    tuple is a PyObject converted from the corresponding element of ARGV.  */
@@ -79,7 +76,7 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
       gdbpy_ref<> callable (PyObject_GetAttrString ((PyObject *) cookie,
 						    "invoke"));
       if (callable == NULL)
-	error (_("No method named 'invoke' in object."));
+	error (_ ("No method named 'invoke' in object."));
 
       result.reset (PyObject_Call (callable.get (), args.get (), NULL));
     }
@@ -91,7 +88,7 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
   if (value == NULL)
     {
       gdbpy_print_stack ();
-      error (_("Error while executing Python code."));
+      error (_ ("Error while executing Python code."));
     }
 
   return value;
@@ -106,7 +103,7 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   const char *name;
   gdb::unique_xmalloc_ptr<char> docstring;
 
-  if (! PyArg_ParseTuple (args, "s", &name))
+  if (!PyArg_ParseTuple (args, "s", &name))
     return -1;
 
   gdbpy_ref<> self_ref = gdbpy_ref<>::new_reference (self);
@@ -124,8 +121,8 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 	    }
 	}
     }
-  if (! docstring)
-    docstring.reset (xstrdup (_("This function is not documented.")));
+  if (!docstring)
+    docstring.reset (xstrdup (_ ("This function is not documented.")));
 
   add_internal_function (make_unique_xstrdup (name), std::move (docstring),
 			 fnpy_call, self_ref.release ());
@@ -145,45 +142,41 @@ gdbpy_initialize_functions (void)
 				 (PyObject *) &fnpy_object_type);
 }
 
-
-
-PyTypeObject fnpy_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Function",		  /*tp_name*/
-  sizeof (PyObject),		  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  0,				  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  0,				  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  "GDB function object",	  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  0,				  /* tp_methods */
-  0,				  /* tp_members */
-  0,				  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  fnpy_init,			  /* tp_init */
-  0,				  /* tp_alloc */
+PyTypeObject fnpy_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.Function", /*tp_name*/
+  sizeof (PyObject),				  /*tp_basicsize*/
+  0,						  /*tp_itemsize*/
+  0,						  /*tp_dealloc*/
+  0,						  /*tp_print*/
+  0,						  /*tp_getattr*/
+  0,						  /*tp_setattr*/
+  0,						  /*tp_compare*/
+  0,						  /*tp_repr*/
+  0,						  /*tp_as_number*/
+  0,						  /*tp_as_sequence*/
+  0,						  /*tp_as_mapping*/
+  0,						  /*tp_hash */
+  0,						  /*tp_call*/
+  0,						  /*tp_str*/
+  0,						  /*tp_getattro*/
+  0,						  /*tp_setattro*/
+  0,						  /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	  /*tp_flags*/
+  "GDB function object",			  /* tp_doc */
+  0,						  /* tp_traverse */
+  0,						  /* tp_clear */
+  0,						  /* tp_richcompare */
+  0,						  /* tp_weaklistoffset */
+  0,						  /* tp_iter */
+  0,						  /* tp_iternext */
+  0,						  /* tp_methods */
+  0,						  /* tp_members */
+  0,						  /* tp_getset */
+  0,						  /* tp_base */
+  0,						  /* tp_dict */
+  0,						  /* tp_descr_get */
+  0,						  /* tp_descr_set */
+  0,						  /* tp_dictoffset */
+  fnpy_init,					  /* tp_init */
+  0,						  /* tp_alloc */
 };

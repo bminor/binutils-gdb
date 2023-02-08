@@ -44,9 +44,10 @@
 static int
 sol2_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 {
-  return (name && (strcmp (name, "sigacthandler") == 0
-		   || strcmp (name, "ucbsigvechandler") == 0
-		   || strcmp (name, "__sighndlr") == 0));
+  return (name
+	  && (strcmp (name, "sigacthandler") == 0
+	      || strcmp (name, "ucbsigvechandler") == 0
+	      || strcmp (name, "__sighndlr") == 0));
 }
 
 /* Return whether THIS_FRAME corresponds to a Solaris sigtramp routine.  */
@@ -66,7 +67,7 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct bound_minimal_symbol msym;
 
-  msym = lookup_minimal_symbol("elf_bndr", NULL, NULL);
+  msym = lookup_minimal_symbol ("elf_bndr", NULL, NULL);
   if (msym.minsym && msym.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 

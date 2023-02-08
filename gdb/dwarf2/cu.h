@@ -83,16 +83,10 @@ struct dwarf2_cu
   void mark ();
 
   /* Clear the mark on this CU.  */
-  void clear_mark ()
-  {
-    m_mark = false;
-  }
+  void clear_mark () { m_mark = false; }
 
   /* True if this CU has been marked.  */
-  bool is_marked () const
-  {
-    return m_mark;
-  }
+  bool is_marked () const { return m_mark; }
 
   /* Add a dependence relationship from this cu to REF_PER_CU.  */
   void add_dependence (struct dwarf2_per_cu_data *ref_per_cu);
@@ -115,6 +109,7 @@ struct dwarf2_cu
   const char *producer = nullptr;
 
 private:
+
   /* The symtab builder for this CU.  This is only non-NULL when full
      symbols are being read.  */
   std::unique_ptr<buildsym_compunit> m_builder;
@@ -125,6 +120,7 @@ private:
   htab_t m_dependencies = nullptr;
 
 public:
+
   /* The generic symbol table building routines have separate lists for
      file scope symbols and all all other scopes (local scopes).  So
      we need to select the right one to pass to add_symbol_to_list().

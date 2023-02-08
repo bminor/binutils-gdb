@@ -20,7 +20,7 @@
 
 #include "tui/tui.h"
 #include "tui/tui.h"
-#include "gdb_curses.h"	/* For WINDOW.  */
+#include "gdb_curses.h" /* For WINDOW.  */
 #include "observable.h"
 
 /* Class used to track the current location that the TUI is displaying.  An
@@ -36,32 +36,26 @@ struct tui_location_tracker
      if any of the locator's fields were actually changed, and false
      otherwise.  */
   bool set_location (struct gdbarch *gdbarch,
-		     const struct symtab_and_line &sal,
-		     const char *procname);
+		     const struct symtab_and_line &sal, const char *procname);
 
   /* Update the current location with the with the provided argument.
      Return true if any of the fields actually changed, otherwise false.  */
   bool set_location (struct symtab *symtab);
 
   /* Return the address of the current location.  */
-  CORE_ADDR addr () const
-  { return m_addr; }
+  CORE_ADDR addr () const { return m_addr; }
 
   /* Return the architecture for the current location.  */
-  struct gdbarch *gdbarch () const
-  { return m_gdbarch; }
+  struct gdbarch *gdbarch () const { return m_gdbarch; }
 
   /* Return the full name of the file containing the current location.  */
-  const std::string &full_name () const
-  { return m_full_name; }
+  const std::string &full_name () const { return m_full_name; }
 
   /* Return the name of the function containing the current location.  */
-  const std::string &proc_name () const
-  { return m_proc_name; }
+  const std::string &proc_name () const { return m_proc_name; }
 
   /* Return the line number for the current location.  */
-  int line_no () const
-  { return m_line_no; }
+  int line_no () const { return m_line_no; }
 
 private:
 

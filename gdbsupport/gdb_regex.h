@@ -19,7 +19,7 @@
 #ifndef GDB_REGEX_H
 #define GDB_REGEX_H 1
 
-# include "xregex.h"
+#include "xregex.h"
 
 /* A compiled regex.  This is mainly a wrapper around regex_t.  The
    the constructor throws on regcomp error and the destructor is
@@ -31,8 +31,7 @@ class compiled_regex
 public:
   /* Compile a regexp and throw an exception on error, including
      MESSAGE.  REGEX and MESSAGE must not be NULL.  */
-  compiled_regex (const char *regex, int cflags,
-		  const char *message)
+  compiled_regex (const char *regex, int cflags, const char *message)
     ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (4);
 
   ~compiled_regex ();
@@ -40,14 +39,13 @@ public:
   DISABLE_COPY_AND_ASSIGN (compiled_regex);
 
   /* Wrapper around ::regexec.  */
-  int exec (const char *string,
-	    size_t nmatch, regmatch_t pmatch[],
-	    int eflags) const;
+  int exec (const char *string, size_t nmatch, regmatch_t pmatch[],
+            int eflags) const;
 
   /* Wrapper around ::re_search.  (Not const because re_search's
      regex_t parameter isn't either.)  */
-  int search (const char *string, int size, int startpos,
-	      int range, struct re_registers *regs);
+  int search (const char *string, int size, int startpos, int range,
+              struct re_registers *regs);
 
 private:
   /* The compiled pattern.  */

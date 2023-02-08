@@ -21,7 +21,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (GDBCMD_H)
+#if !defined(GDBCMD_H)
 #define GDBCMD_H 1
 
 #include "command.h"
@@ -34,7 +34,8 @@ extern void execute_command (const char *, int);
 /* Run FN.  Sends its output to FILE, do not display it to the screen.
    The global BATCH_FLAG will be temporarily set to true.  */
 
-extern void execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn);
+extern void execute_fn_to_ui_file (struct ui_file *file,
+				   std::function<void (void)> fn);
 
 /* Run FN.  Capture its output into the returned string, do not display it
    to the screen.  The global BATCH_FLAG will temporarily be set to true.
@@ -43,12 +44,13 @@ extern void execute_fn_to_ui_file (struct ui_file *file, std::function<void(void
    (e.g. no styling).  */
 
 extern void execute_fn_to_string (std::string &res,
-				  std::function<void(void)> fn, bool term_out);
+				  std::function<void (void)> fn,
+				  bool term_out);
 
 /* As execute_fn_to_ui_file, but run execute_command for P and FROM_TTY.  */
 
-extern void execute_command_to_ui_file (struct ui_file *file,
-					const char *p, int from_tty);
+extern void execute_command_to_ui_file (struct ui_file *file, const char *p,
+					int from_tty);
 
 /* As execute_fn_to_string, but run execute_command for P and FROM_TTY.  */
 
@@ -57,13 +59,13 @@ extern void execute_command_to_string (std::string &res, const char *p,
 
 /* As execute_command_to_string, but ignore resulting string.  */
 
-extern void execute_command_to_string (const char *p,
-				       int from_tty, bool term_out);
+extern void execute_command_to_string (const char *p, int from_tty,
+				       bool term_out);
 
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
-extern void print_command_lines (struct ui_out *,
-				 struct command_line *, unsigned int);
+extern void print_command_lines (struct ui_out *, struct command_line *,
+				 unsigned int);
 
 /* Chains containing all defined "set/show style" subcommands.  */
 extern struct cmd_list_element *style_set_list;

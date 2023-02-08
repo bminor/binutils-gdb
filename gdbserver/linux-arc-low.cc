@@ -33,8 +33,8 @@
 #endif
 
 /* The encoding of the instruction "TRAP_S 1" (endianness agnostic).  */
-#define TRAP_S_1_OPCODE	0x783e
-#define TRAP_S_1_SIZE	2
+#define TRAP_S_1_OPCODE 0x783e
+#define TRAP_S_1_SIZE 2
 
 /* Using a mere "uint16_t arc_linux_traps_s = TRAP_S_1_OPCODE" would
    work as well, because the endianness will end up correctly when
@@ -45,11 +45,11 @@
 #if defined(__BIG_ENDIAN__)
 /* 0x78, 0x3e.  */
 static gdb_byte arc_linux_trap_s[TRAP_S_1_SIZE]
-	= {TRAP_S_1_OPCODE >> 8, TRAP_S_1_OPCODE & 0xFF};
+  = { TRAP_S_1_OPCODE >> 8, TRAP_S_1_OPCODE & 0xFF };
 #else
 /* 0x3e, 0x78.  */
 static gdb_byte arc_linux_trap_s[TRAP_S_1_SIZE]
-	= {TRAP_S_1_OPCODE && 0xFF, TRAP_S_1_OPCODE >> 8};
+  = { TRAP_S_1_OPCODE && 0xFF, TRAP_S_1_OPCODE >> 8 };
 #endif
 
 /* Linux target op definitions for the ARC architecture.
@@ -60,13 +60,11 @@ static gdb_byte arc_linux_trap_s[TRAP_S_1_SIZE]
 class arc_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -233,7 +231,8 @@ arc_fill_gregset (struct regcache *regcache, void *buf)
 static void
 arc_store_gregset (struct regcache *regcache, const void *buf)
 {
-  const struct user_regs_struct *regbuf = (const struct user_regs_struct *) buf;
+  const struct user_regs_struct *regbuf
+    = (const struct user_regs_struct *) buf;
 
   /* Core registers.  */
   supply_register_by_name (regcache, "r0", &(regbuf->scratch.r0));
@@ -296,8 +295,7 @@ arc_store_gregset (struct regcache *regcache, const void *buf)
    If found, return true; false, otherwise.  */
 
 static bool
-is_reg_name_available_p (const struct target_desc *tdesc,
-			 const char *name)
+is_reg_name_available_p (const struct target_desc *tdesc, const char *name)
 {
   for (const gdb::reg &reg : tdesc->reg_defs)
     if (strcmp (name, reg.name) == 0)
@@ -348,8 +346,8 @@ arc_store_v2_regset (struct regcache *regcache, const void *buf)
    linux-arm-low.c.  */
 
 ps_err_e
-ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid,
-		    int idx, void **base)
+ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+                    void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, nullptr, base) != 0)
     return PS_ERR;
@@ -362,34 +360,26 @@ ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid,
   return PS_OK;
 }
 
-static struct regset_info arc_regsets[] =
-{
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
-    sizeof (struct user_regs_struct), GENERAL_REGS,
-    arc_fill_gregset, arc_store_gregset
-  },
+static struct regset_info arc_regsets[]
+  = { { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
+        sizeof (struct user_regs_struct), GENERAL_REGS, arc_fill_gregset,
+        arc_store_gregset },
 #ifdef ARC_HAS_V2_REGSET
-  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARC_V2,
-    sizeof (struct user_regs_arcv2), GENERAL_REGS,
-    arc_fill_v2_regset, arc_store_v2_regset
-  },
+      { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARC_V2,
+        sizeof (struct user_regs_arcv2), GENERAL_REGS, arc_fill_v2_regset,
+        arc_store_v2_regset },
 #endif
-  NULL_REGSET
+      NULL_REGSET };
+
+static struct regsets_info arc_regsets_info = {
+  arc_regsets, /* regsets */
+  0,           /* num_regsets */
+  nullptr,     /* disabled regsets */
 };
 
-static struct regsets_info arc_regsets_info =
-{
-  arc_regsets,	/* regsets */
-  0,		/* num_regsets */
-  nullptr,	/* disabled regsets */
-};
-
-static struct regs_info arc_regs_info =
-{
-  nullptr,	/* regset_bitmap */
-  nullptr,	/* usrregs */
-  &arc_regsets_info
-};
+static struct regs_info arc_regs_info = { nullptr, /* regset_bitmap */
+                                          nullptr, /* usrregs */
+                                          &arc_regsets_info };
 
 const regs_info *
 arc_target::get_regs_info ()

@@ -23,11 +23,13 @@
 #include <array>
 #include <vector>
 
-namespace selftests {
-namespace array_view_tests {
+namespace selftests
+{
+namespace array_view_tests
+{
 
 /* Triviality checks.  */
-#define CHECK_TRAIT(TRAIT)			\
+#define CHECK_TRAIT(TRAIT) \
   static_assert (std::TRAIT<gdb::array_view<gdb_byte>>::value, "")
 
 #if HAVE_IS_TRIVIALLY_COPYABLE
@@ -61,31 +63,42 @@ check_convertible ()
 
   return (true
 	  /* immutable array_view */
-	  &&  is_convertible<const T (&) [1],	array_view<const T>> ()
-	  &&  is_convertible<T (&) [1], 	array_view<const T>> ()
-	  &&  is_convertible<const T, 		array_view<const T>> ()
-	  &&  is_convertible<T, 		array_view<const T>> ()
+	  && is_convertible<const T (&)[1], array_view<const T>> ()
+	  && is_convertible<T (&)[1], array_view<const T>> ()
+	  && is_convertible<const T, array_view<const T>> ()
+	  && is_convertible<T, array_view<const T>> ()
 
 	  /* mutable array_view */
-	  &&  is_convertible<T (&) [1], 	array_view<T>> ()
-	  && !is_convertible<const T (&) [1],	array_view<T>> ()
-	  &&  is_convertible<T, 		array_view<T>> ()
-	  && !is_convertible<const T,		array_view<T>> ()
+	  && is_convertible<T (&)[1], array_view<T>> ()
+	  && !is_convertible<const T (&)[1], array_view<T>> ()
+	  && is_convertible<T, array_view<T>> ()
+	  && !is_convertible<const T, array_view<T>> ()
 
 	  /* While float is implicitly convertible to gdb_byte, we
 	     don't want implicit float->array_view<gdb_byte>
 	     conversion.  */
-	  && !is_convertible<float, 		array_view<const T>> ()
-	  && !is_convertible<float, 		array_view<T>> ());
+	  && !is_convertible<float, array_view<const T>> ()
+	  && !is_convertible<float, array_view<T>> ());
 }
 
 static_assert (check_convertible (), "");
 
 namespace no_slicing
 {
-struct A { int i; };
-struct B : A { int j; };
-struct C : A { int l; };
+struct A
+{
+  int i;
+};
+
+struct B : A
+{
+  int j;
+};
+
+struct C : A
+{
+  int l;
+};
 
 /* Check that there's no array->view conversion for arrays of derived types or
    subclasses.  */
@@ -98,48 +111,49 @@ check ()
 
 	  /* array->view  */
 
-	  &&  is_convertible <A (&)[1], array_view<A>> ()
-	  && !is_convertible <B (&)[1], array_view<A>> ()
-	  && !is_convertible <C (&)[1], array_view<A>> ()
+	  && is_convertible<A (&)[1], array_view<A>> ()
+	  && !is_convertible<B (&)[1], array_view<A>> ()
+	  && !is_convertible<C (&)[1], array_view<A>> ()
 
-	  && !is_convertible <A (&)[1], array_view<B>> ()
-	  &&  is_convertible <B (&)[1], array_view<B>> ()
-	  && !is_convertible <C (&)[1], array_view<B>> ()
+	  && !is_convertible<A (&)[1], array_view<B>> ()
+	  && is_convertible<B (&)[1], array_view<B>> ()
+	  && !is_convertible<C (&)[1], array_view<B>> ()
 
 	  /* elem->view  */
 
-	  &&  is_convertible <A, array_view<A>> ()
-	  && !is_convertible <B, array_view<A>> ()
-	  && !is_convertible <C, array_view<A>> ()
+	  && is_convertible<A, array_view<A>> ()
+	  && !is_convertible<B, array_view<A>> ()
+	  && !is_convertible<C, array_view<A>> ()
 
-	  && !is_convertible <A, array_view<B>> ()
-	  &&  is_convertible <B, array_view<B>> ()
-	  && !is_convertible <C, array_view<B>> ());
+	  && !is_convertible<A, array_view<B>> ()
+	  && is_convertible<B, array_view<B>> ()
+	  && !is_convertible<C, array_view<B>> ());
 }
 
 /* Check that there's no container->view conversion for containers of derived
    types or subclasses.  */
 
-template<template<typename ...> class Container>
+template<template<typename...> class Container>
 static constexpr bool
 check_ctor_from_container ()
 {
   using gdb::array_view;
 
-  return (    is_convertible <Container<A>, array_view<A>> ()
-	  && !is_convertible <Container<B>, array_view<A>> ()
-	  && !is_convertible <Container<C>, array_view<A>> ()
+  return (is_convertible<Container<A>, array_view<A>> ()
+	  && !is_convertible<Container<B>, array_view<A>> ()
+	  && !is_convertible<Container<C>, array_view<A>> ()
 
-	  && !is_convertible <Container<A>, array_view<B>> ()
-	  &&  is_convertible <Container<B>, array_view<B>> ()
-	  && !is_convertible <Container<C>, array_view<B>> ());
+	  && !is_convertible<Container<A>, array_view<B>> ()
+	  && is_convertible<Container<B>, array_view<B>> ()
+	  && !is_convertible<Container<C>, array_view<B>> ());
 }
 
 } /* namespace no_slicing */
 
 /* std::array with only one template argument, so we can pass it to
    check_ctor_from_container.  */
-template<typename T> using StdArray1 = std::array<T, 1>;
+template<typename T>
+using StdArray1 = std::array<T, 1>;
 
 static_assert (no_slicing::check (), "");
 static_assert (no_slicing::check_ctor_from_container<std::vector> (), "");
@@ -156,9 +170,8 @@ check_convertible_from_std_vector ()
 
   /* Note there's no such thing as std::vector<const T>.  */
 
-  return (true
-	  &&  is_convertible <std::vector<T>, array_view<T>> ()
-	  &&  is_convertible <std::vector<T>, array_view<const T>> ());
+  return (true && is_convertible<std::vector<T>, array_view<T>> ()
+	  && is_convertible<std::vector<T>, array_view<const T>> ());
 }
 
 static_assert (check_convertible_from_std_vector (), "");
@@ -173,11 +186,10 @@ check_convertible_from_std_array ()
 
   /* Note: a non-const T view can't refer to a const T array.  */
 
-  return (true
-	  &&  is_convertible <std::array<T, 1>,		array_view<T>> ()
-	  &&  is_convertible <std::array<T, 1>,		array_view<const T>> ()
-	  && !is_convertible <std::array<const T, 1>,	array_view<T>> ()
-	  &&  is_convertible <std::array<const T, 1>,	array_view<const T>> ());
+  return (true && is_convertible<std::array<T, 1>, array_view<T>> ()
+	  && is_convertible<std::array<T, 1>, array_view<const T>> ()
+	  && !is_convertible<std::array<const T, 1>, array_view<T>> ()
+	  && is_convertible<std::array<const T, 1>, array_view<const T>> ());
 }
 
 static_assert (check_convertible_from_std_array (), "");
@@ -253,7 +265,7 @@ template<typename T>
 static void
 check_ptr_size_ctor ()
 {
-  T data[] = {0x11, 0x22, 0x33, 0x44};
+  T data[] = { 0x11, 0x22, 0x33, 0x44 };
 
   gdb::array_view<T> view (data + 1, 2);
 
@@ -288,18 +300,22 @@ require_not_constructible ()
 static void
 check_ptr_size_ctor2 ()
 {
-  struct A {};
+  struct A
+  {
+  };
+
   A an_a;
 
   A *array[] = { &an_a };
-  const A * const carray[] = { &an_a };
+  const A *const carray[] = { &an_a };
 
-  gdb::array_view<A *> v1 = {array, ARRAY_SIZE (array)};
-  gdb::array_view<A *> v2 = {array, (char) ARRAY_SIZE (array)};
-  gdb::array_view<A * const> v3 = {array, ARRAY_SIZE (array)};
-  gdb::array_view<const A * const> cv1 = {carray, ARRAY_SIZE (carray)};
+  gdb::array_view<A *> v1 = { array, ARRAY_SIZE (array) };
+  gdb::array_view<A *> v2 = { array, (char) ARRAY_SIZE (array) };
+  gdb::array_view<A *const> v3 = { array, ARRAY_SIZE (array) };
+  gdb::array_view<const A *const> cv1 = { carray, ARRAY_SIZE (carray) };
 
-  require_not_constructible<gdb::array_view<A *>, decltype (carray), size_t> ();
+  require_not_constructible<gdb::array_view<A *>, decltype (carray),
+			    size_t> ();
 
   SELF_CHECK (v1[0] == array[0]);
   SELF_CHECK (v2[0] == array[0]);
@@ -323,7 +339,7 @@ template<typename T>
 static void
 check_ptr_ptr_ctor ()
 {
-  T data[] = {0x11, 0x22, 0x33, 0x44};
+  T data[] = { 0x11, 0x22, 0x33, 0x44 };
 
   gdb::array_view<T> view (data + 1, data + 3);
 
@@ -333,7 +349,7 @@ check_ptr_ptr_ctor ()
   SELF_CHECK (view[0] == data[1]);
   SELF_CHECK (view[1] == data[2]);
 
-  gdb_byte array[] = {0x11, 0x22, 0x33, 0x44};
+  gdb_byte array[] = { 0x11, 0x22, 0x33, 0x44 };
   const gdb_byte *p1 = array;
   gdb_byte *p2 = array + ARRAY_SIZE (array);
   gdb::array_view<const gdb_byte> view2 (p1, p2);
@@ -344,7 +360,7 @@ check_ptr_ptr_ctor ()
 static void
 check_ptr_ptr_mixed_cv ()
 {
-  gdb_byte array[] = {0x11, 0x22, 0x33, 0x44};
+  gdb_byte array[] = { 0x11, 0x22, 0x33, 0x44 };
   const gdb_byte *cp = array;
   gdb_byte *p = array;
   gdb::array_view<const gdb_byte> view1 (cp, p);
@@ -360,7 +376,7 @@ template<typename T>
 static void
 check_range_for ()
 {
-  T data[] = {1, 2, 3, 4};
+  T data[] = { 1, 2, 3, 4 };
   gdb::array_view<T> view (data);
 
   typename std::decay<T>::type sum = 0;
@@ -387,8 +403,8 @@ run_tests ()
     static_assert (view2.data () == nullptr, "");
   }
 
-  std::vector<gdb_byte> vec = {0x11, 0x22, 0x33, 0x44 };
-  std::array<gdb_byte, 4> array = {{0x11, 0x22, 0x33, 0x44}};
+  std::vector<gdb_byte> vec = { 0x11, 0x22, 0x33, 0x44 };
+  std::array<gdb_byte, 4> array = { { 0x11, 0x22, 0x33, 0x44 } };
 
   /* Various tests of views over std::vector.  */
   {
@@ -429,7 +445,7 @@ run_tests ()
 
   /* Test copy/move ctor and mutable->immutable conversion.  */
   {
-    gdb_byte data[] = {0x11, 0x22, 0x33, 0x44};
+    gdb_byte data[] = { 0x11, 0x22, 0x33, 0x44 };
     gdb::array_view<gdb_byte> view1 = data;
     gdb::array_view<gdb_byte> view2 = view1;
     gdb::array_view<gdb_byte> view3 = std::move (view1);
@@ -446,7 +462,7 @@ run_tests ()
 
   /* Same, but op=(view).  */
   {
-    gdb_byte data[] = {0x55, 0x66, 0x77, 0x88};
+    gdb_byte data[] = { 0x55, 0x66, 0x77, 0x88 };
     gdb::array_view<gdb_byte> view1;
     gdb::array_view<gdb_byte> view2;
     gdb::array_view<gdb_byte> view3;
@@ -470,7 +486,7 @@ run_tests ()
 
   /* op[] */
   {
-    std::vector<gdb_byte> vec2 = {0x11, 0x22};
+    std::vector<gdb_byte> vec2 = { 0x11, 0x22 };
     gdb::array_view<gdb_byte> view = vec2;
     gdb::array_view<const gdb_byte> cview = vec2;
 
@@ -512,7 +528,7 @@ run_tests ()
 
   /* gdb::make_array_view, int length.  */
   {
-    gdb_byte data[] = {0x55, 0x66, 0x77, 0x88};
+    gdb_byte data[] = { 0x55, 0x66, 0x77, 0x88 };
     int len = sizeof (data) / sizeof (data[0]);
     auto view = gdb::make_array_view (data, len);
 
@@ -525,7 +541,7 @@ run_tests ()
 
   /* Test slicing.  */
   {
-    gdb_byte data[] = {0x55, 0x66, 0x77, 0x88, 0x99};
+    gdb_byte data[] = { 0x55, 0x66, 0x77, 0x88, 0x99 };
     gdb::array_view<gdb_byte> view = data;
 
     {
@@ -546,13 +562,13 @@ run_tests ()
   }
 }
 
-template <typename T>
+template<typename T>
 void
 run_copy_test ()
 {
   /* Test non-overlapping copy.  */
   {
-    const std::vector<T> src_v = {1, 2, 3, 4};
+    const std::vector<T> src_v = { 1, 2, 3, 4 };
     std::vector<T> dest_v (4, -1);
 
     SELF_CHECK (dest_v != src_v);
@@ -562,37 +578,34 @@ run_copy_test ()
 
   /* Test overlapping copy, where the source is before the destination.  */
   {
-    std::vector<T> vec = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::vector<T> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
     gdb::array_view<T> v = vec;
 
-    copy (v.slice (1, 4),
-	  v.slice (2, 4));
+    copy (v.slice (1, 4), v.slice (2, 4));
 
-    std::vector<T> expected = {1, 2, 2, 3, 4, 5, 7, 8};
+    std::vector<T> expected = { 1, 2, 2, 3, 4, 5, 7, 8 };
     SELF_CHECK (vec == expected);
   }
 
   /* Test overlapping copy, where the source is after the destination.  */
   {
-    std::vector<T> vec = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::vector<T> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
     gdb::array_view<T> v = vec;
 
-    copy (v.slice (2, 4),
-	  v.slice (1, 4));
+    copy (v.slice (2, 4), v.slice (1, 4));
 
-    std::vector<T> expected = {1, 3, 4, 5, 6, 6, 7, 8};
+    std::vector<T> expected = { 1, 3, 4, 5, 6, 6, 7, 8 };
     SELF_CHECK (vec == expected);
   }
 
   /* Test overlapping copy, where the source is the same as the destination.  */
   {
-    std::vector<T> vec = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::vector<T> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
     gdb::array_view<T> v = vec;
 
-    copy (v.slice (2, 4),
-	  v.slice (2, 4));
+    copy (v.slice (2, 4), v.slice (2, 4));
 
-    std::vector<T> expected = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::vector<T> expected = { 1, 2, 3, 4, 5, 6, 7, 8 };
     SELF_CHECK (vec == expected);
   }
 }
@@ -606,7 +619,8 @@ struct foo
      array_view<foo>.  */
   foo (int n)
     : n (n)
-  {}
+  {
+  }
 
   /* Needed to avoid -Wdeprecated-copy-with-user-provided-copy error with
      Clang.  */
@@ -618,10 +632,7 @@ struct foo
     this->n_assign_op_called++;
   }
 
-  bool operator==(const foo &other) const
-  {
-    return this->n == other.n;
-  }
+  bool operator== (const foo &other) const { return this->n == other.n; }
 
   int n;
 
@@ -652,6 +663,7 @@ run_copy_tests ()
 } /* namespace selftests */
 
 void _initialize_array_view_selftests ();
+
 void
 _initialize_array_view_selftests ()
 {

@@ -27,9 +27,7 @@
 
 struct notif_event
 {
-  virtual ~notif_event ()
-  {
-  }
+  virtual ~notif_event () {}
 };
 
 /* A unique pointer holding a notif_event.  */
@@ -59,15 +57,13 @@ struct notif_client
   /* Parse BUF to get the expected event and update EVENT.  This
      function may throw exception if contents in BUF is not the
      expected event.  */
-  void (*parse) (remote_target *remote,
-		 const notif_client *self, const char *buf,
-		 struct notif_event *event);
+  void (*parse) (remote_target *remote, const notif_client *self,
+		 const char *buf, struct notif_event *event);
 
   /* Send field <ack_command> to remote, and do some checking.  If
      something wrong, throw an exception.  */
-  void (*ack) (remote_target *remote,
-	       const notif_client *self, const char *buf,
-	       struct notif_event *event);
+  void (*ack) (remote_target *remote, const notif_client *self,
+	       const char *buf, struct notif_event *event);
 
   /* Check this notification client can get pending events in
      'remote_notif_process'.  */

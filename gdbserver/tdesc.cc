@@ -27,7 +27,8 @@ target_desc::~target_desc ()
   xfree ((char *) osabi);
 }
 
-bool target_desc::operator== (const target_desc &other) const
+bool
+target_desc::operator== (const target_desc &other) const
 {
   if (reg_defs != other.reg_defs)
     return false;
@@ -37,7 +38,7 @@ bool target_desc::operator== (const target_desc &other) const
   for (; expedite_regs[i] != NULL; i++)
     {
       if (strcmp (expedite_regs[i], other.expedite_regs[i]) != 0)
-	return false;
+        return false;
     }
   if (other.expedite_regs[i] != NULL)
     return false;
@@ -47,7 +48,8 @@ bool target_desc::operator== (const target_desc &other) const
 
 #endif
 
-void target_desc::accept (tdesc_element_visitor &v) const
+void
+target_desc::accept (tdesc_element_visitor &v) const
 {
 #ifndef IN_PROCESS_AGENT
   v.visit_pre (this);
@@ -60,8 +62,7 @@ void target_desc::accept (tdesc_element_visitor &v) const
 }
 
 void
-init_target_desc (struct target_desc *tdesc,
-		  const char **expedite_regs)
+init_target_desc (struct target_desc *tdesc, const char **expedite_regs)
 {
   int offset = 0;
 
@@ -69,17 +70,17 @@ init_target_desc (struct target_desc *tdesc,
   for (const tdesc_feature_up &feature : tdesc->features)
     for (const tdesc_reg_up &treg : feature->registers)
       {
-	int regnum = treg->target_regnum;
+        int regnum = treg->target_regnum;
 
-	/* Register number will increase (possibly with gaps) or be zero.  */
-	gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
+        /* Register number will increase (possibly with gaps) or be zero.  */
+        gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
 
-	if (regnum != 0)
-	  tdesc->reg_defs.resize (regnum, gdb::reg (offset));
+        if (regnum != 0)
+          tdesc->reg_defs.resize (regnum, gdb::reg (offset));
 
-	tdesc->reg_defs.emplace_back (treg->name.c_str (), offset,
-				      treg->bitsize);
-	offset += treg->bitsize;
+        tdesc->reg_defs.emplace_back (treg->name.c_str (), offset,
+                                      treg->bitsize);
+        offset += treg->bitsize;
       }
 
   tdesc->registers_size = offset / 8;
@@ -111,11 +112,13 @@ target_desc_deleter::operator() (struct target_desc *target_desc) const
 
 #ifndef IN_PROCESS_AGENT
 
-static const struct target_desc default_description {};
+static const struct target_desc default_description
+{
+};
 
 void
 copy_target_description (struct target_desc *dest,
-			 const struct target_desc *src)
+                         const struct target_desc *src)
 {
   dest->reg_defs = src->reg_defs;
   dest->expedite_regs = src->expedite_regs;
@@ -134,7 +137,9 @@ current_target_desc (void)
 
 /* An empty structure.  */
 
-struct tdesc_compatible_info { };
+struct tdesc_compatible_info
+{
+};
 
 /* See gdbsupport/tdesc.h.  */
 
@@ -164,8 +169,7 @@ tdesc_architecture_name (const struct target_desc *target_desc)
 /* See gdbsupport/tdesc.h.  */
 
 void
-set_tdesc_architecture (struct target_desc *target_desc,
-			const char *name)
+set_tdesc_architecture (struct target_desc *target_desc, const char *name)
 {
   target_desc->arch = xstrdup (name);
 }
@@ -193,8 +197,7 @@ tdesc_get_features_xml (const target_desc *tdesc)
 {
   /* Either .xmltarget or .features is not NULL.  */
   gdb_assert (tdesc->xmltarget != NULL
-	      || (!tdesc->features.empty ()
-		  && tdesc->arch != NULL));
+              || (!tdesc->features.empty () && tdesc->arch != NULL));
 
   if (tdesc->xmltarget == NULL)
     {
@@ -228,7 +231,7 @@ tdesc_contains_feature (const target_desc *tdesc, const std::string &feature)
   for (const tdesc_feature_up &f : tdesc->features)
     {
       if (f->name == feature)
-	return true;
+        return true;
     }
 
   return false;

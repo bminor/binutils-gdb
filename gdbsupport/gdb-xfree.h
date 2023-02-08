@@ -23,7 +23,7 @@
 /* GDB uses this instead of 'free', it detects when it is called on an
    invalid type.  */
 
-template <typename T>
+template<typename T>
 static void
 xfree (T *ptr)
 {
@@ -32,9 +32,9 @@ data type.  Use operator delete instead.");
 
   if (ptr != NULL)
 #ifdef GNULIB_NAMESPACE
-    GNULIB_NAMESPACE::free (ptr);	/* ARI: free */
+    GNULIB_NAMESPACE::free (ptr); /* ARI: free */
 #else
-    free (ptr);				/* ARI: free */
+    free (ptr); /* ARI: free */
 #endif
 }
 

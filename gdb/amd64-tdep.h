@@ -32,39 +32,39 @@ struct regcache;
 
 enum amd64_regnum
 {
-  AMD64_RAX_REGNUM,		/* %rax */
-  AMD64_RBX_REGNUM,		/* %rbx */
-  AMD64_RCX_REGNUM,		/* %rcx */
-  AMD64_RDX_REGNUM,		/* %rdx */
-  AMD64_RSI_REGNUM,		/* %rsi */
-  AMD64_RDI_REGNUM,		/* %rdi */
-  AMD64_RBP_REGNUM,		/* %rbp */
-  AMD64_RSP_REGNUM,		/* %rsp */
-  AMD64_R8_REGNUM,		/* %r8 */
-  AMD64_R9_REGNUM,		/* %r9 */
-  AMD64_R10_REGNUM,		/* %r10 */
-  AMD64_R11_REGNUM,		/* %r11 */
-  AMD64_R12_REGNUM,		/* %r12 */
-  AMD64_R13_REGNUM,		/* %r13 */
-  AMD64_R14_REGNUM,		/* %r14 */
-  AMD64_R15_REGNUM,		/* %r15 */
-  AMD64_RIP_REGNUM,		/* %rip */
-  AMD64_EFLAGS_REGNUM,		/* %eflags */
-  AMD64_CS_REGNUM,		/* %cs */
-  AMD64_SS_REGNUM,		/* %ss */
-  AMD64_DS_REGNUM,		/* %ds */
-  AMD64_ES_REGNUM,		/* %es */
-  AMD64_FS_REGNUM,		/* %fs */
-  AMD64_GS_REGNUM,		/* %gs */
-  AMD64_ST0_REGNUM = 24,	/* %st0 */
-  AMD64_ST1_REGNUM,		/* %st1 */
+  AMD64_RAX_REGNUM,	 /* %rax */
+  AMD64_RBX_REGNUM,	 /* %rbx */
+  AMD64_RCX_REGNUM,	 /* %rcx */
+  AMD64_RDX_REGNUM,	 /* %rdx */
+  AMD64_RSI_REGNUM,	 /* %rsi */
+  AMD64_RDI_REGNUM,	 /* %rdi */
+  AMD64_RBP_REGNUM,	 /* %rbp */
+  AMD64_RSP_REGNUM,	 /* %rsp */
+  AMD64_R8_REGNUM,	 /* %r8 */
+  AMD64_R9_REGNUM,	 /* %r9 */
+  AMD64_R10_REGNUM,	 /* %r10 */
+  AMD64_R11_REGNUM,	 /* %r11 */
+  AMD64_R12_REGNUM,	 /* %r12 */
+  AMD64_R13_REGNUM,	 /* %r13 */
+  AMD64_R14_REGNUM,	 /* %r14 */
+  AMD64_R15_REGNUM,	 /* %r15 */
+  AMD64_RIP_REGNUM,	 /* %rip */
+  AMD64_EFLAGS_REGNUM,	 /* %eflags */
+  AMD64_CS_REGNUM,	 /* %cs */
+  AMD64_SS_REGNUM,	 /* %ss */
+  AMD64_DS_REGNUM,	 /* %ds */
+  AMD64_ES_REGNUM,	 /* %es */
+  AMD64_FS_REGNUM,	 /* %fs */
+  AMD64_GS_REGNUM,	 /* %gs */
+  AMD64_ST0_REGNUM = 24, /* %st0 */
+  AMD64_ST1_REGNUM,	 /* %st1 */
   AMD64_FCTRL_REGNUM = AMD64_ST0_REGNUM + 8,
   AMD64_FSTAT_REGNUM = AMD64_ST0_REGNUM + 9,
   AMD64_FTAG_REGNUM = AMD64_ST0_REGNUM + 10,
-  AMD64_XMM0_REGNUM = 40,	/* %xmm0 */
-  AMD64_XMM1_REGNUM,		/* %xmm1 */
+  AMD64_XMM0_REGNUM = 40, /* %xmm0 */
+  AMD64_XMM1_REGNUM,	  /* %xmm1 */
   AMD64_MXCSR_REGNUM = AMD64_XMM0_REGNUM + 16,
-  AMD64_YMM0H_REGNUM,		/* %ymm0h */
+  AMD64_YMM0H_REGNUM, /* %ymm0h */
   AMD64_YMM15H_REGNUM = AMD64_YMM0H_REGNUM + 15,
   AMD64_BND0R_REGNUM = AMD64_YMM15H_REGNUM + 1,
   AMD64_BND3R_REGNUM = AMD64_BND0R_REGNUM + 3,
@@ -84,21 +84,20 @@ enum amd64_regnum
 };
 
 /* Number of general purpose registers.  */
-#define AMD64_NUM_GREGS		24
+#define AMD64_NUM_GREGS 24
 
-#define AMD64_NUM_REGS		(AMD64_GSBASE_REGNUM + 1)
+#define AMD64_NUM_REGS (AMD64_GSBASE_REGNUM + 1)
 
-extern displaced_step_copy_insn_closure_up amd64_displaced_step_copy_insn
-  (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
-   struct regcache *regs);
-extern void amd64_displaced_step_fixup
-  (struct gdbarch *gdbarch, displaced_step_copy_insn_closure *closure,
-   CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+extern displaced_step_copy_insn_closure_up
+amd64_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from,
+				CORE_ADDR to, struct regcache *regs);
+extern void amd64_displaced_step_fixup (
+  struct gdbarch *gdbarch, displaced_step_copy_insn_closure *closure,
+  CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
 
 /* Initialize the ABI for amd64.  Uses DEFAULT_TDESC as fallback
    tdesc, if INFO does not specify one.  */
-extern void amd64_init_abi (struct gdbarch_info info,
-			    struct gdbarch *gdbarch,
+extern void amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 			    const target_desc *default_tdesc);
 
 /* Initialize the ABI for x32.  Uses DEFAULT_TDESC as fallback tdesc,
@@ -129,9 +128,9 @@ extern void amd64_supply_xsave (struct regcache *regcache, int regnum,
 extern void amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 				  void *fxsave);
 /* Similar to amd64_collect_fxsave, but use XSAVE extended state.  */
-extern void amd64_collect_xsave (const struct regcache *regcache,
-				 int regnum, void *xsave, int gcore);
-
+extern void amd64_collect_xsave (const struct regcache *regcache, int regnum,
+				 void *xsave, int gcore);
+
 /* Floating-point register set. */
 extern const struct regset amd64_fpregset;
 

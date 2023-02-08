@@ -24,10 +24,11 @@
    it's sufficient to pass only the register set here.  This, together with
    the ABI known at IPA compile time, maps to a tdesc.  */
 
-enum ppc_linux_tdesc {
+enum ppc_linux_tdesc
+{
   PPC_TDESC_BASE,
   PPC_TDESC_ALTIVEC,
-  PPC_TDESC_CELL,  /* No longer used, but kept to avoid ABI changes.  */
+  PPC_TDESC_CELL, /* No longer used, but kept to avoid ABI changes.  */
   PPC_TDESC_VSX,
   PPC_TDESC_ISA205,
   PPC_TDESC_ISA205_ALTIVEC,

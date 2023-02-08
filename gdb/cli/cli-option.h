@@ -26,8 +26,10 @@
 #include <string>
 #include "command.h"
 
-namespace gdb {
-namespace option {
+namespace gdb
+{
+namespace option
+{
 
 /* A type-erased option definition.  The actual type of the option is
    stored in the TYPE field.  Client code cannot define objects of
@@ -38,7 +40,9 @@ struct option_def
 {
   /* The ctor is protected because you're supposed to construct using
      one of bool_option_def, etc. below.  */
+
 protected:
+
   typedef void *(erased_get_var_address_ftype) ();
 
   /* Construct an option.  NAME_ is the option's name.  VAR_TYPE_
@@ -47,22 +51,25 @@ protected:
      SHOW_CMD_CB_ is a pointer to callback for the "show" command that
      is installed for this option.  SET_DOC_, SHOW_DOC_, HELP_DOC_ are
      used to create the option's "set/show" commands.  */
-  constexpr option_def (const char *name_,
-			var_types var_type_,
+  constexpr option_def (const char *name_, var_types var_type_,
 			const literal_def *extra_literals_,
 			erased_get_var_address_ftype *erased_get_var_address_,
-			show_value_ftype *show_cmd_cb_,
-			const char *set_doc_,
-			const char *show_doc_,
-			const char *help_doc_)
-    : name (name_), type (var_type_), extra_literals (extra_literals_),
+			show_value_ftype *show_cmd_cb_, const char *set_doc_,
+			const char *show_doc_, const char *help_doc_)
+    : name (name_),
+      type (var_type_),
+      extra_literals (extra_literals_),
       erased_get_var_address (erased_get_var_address_),
       var_address {},
       show_cmd_cb (show_cmd_cb_),
-      set_doc (set_doc_), show_doc (show_doc_), help_doc (help_doc_)
-  {}
+      set_doc (set_doc_),
+      show_doc (show_doc_),
+      help_doc (help_doc_)
+  {
+  }
 
 public:
+
   /* The option's name.  */
   const char *name;
 
@@ -85,14 +92,13 @@ public:
      object that groups the option variables from which the callback
      returns the address of some member.  */
   union
-    {
-      bool *(*boolean) (const option_def &, void *ctx);
-      unsigned int *(*uinteger) (const option_def &, void *ctx);
-      int *(*integer) (const option_def &, void *ctx);
-      const char **(*enumeration) (const option_def &, void *ctx);
-      std::string *(*string) (const option_def &, void *ctx);
-    }
-  var_address;
+  {
+    bool *(*boolean) (const option_def &, void *ctx);
+    unsigned int *(*uinteger) (const option_def &, void *ctx);
+    int *(*integer) (const option_def &, void *ctx);
+    const char **(*enumeration) (const option_def &, void *ctx);
+    std::string *(*string) (const option_def &, void *ctx);
+  } var_address;
 
   /* Pointer to null terminated list of enumerated values (like argv).
      Only used by var_enum options.  */
@@ -116,10 +122,7 @@ public:
   /* Convenience method that returns THIS as an option_def.  Useful
      when you're putting an option_def subclass in an option_def
      array_view.  */
-  const option_def &def () const
-  {
-    return *this;
-  }
+  const option_def &def () const { return *this; }
 };
 
 namespace detail
@@ -160,14 +163,12 @@ struct boolean_option_def : option_def
 {
   boolean_option_def (const char *long_option_,
 		      bool *(*get_var_address_cb_) (Context *),
-		      show_value_ftype *show_cmd_cb_,
-		      const char *set_doc_,
+		      show_value_ftype *show_cmd_cb_, const char *set_doc_,
 		      const char *show_doc_ = nullptr,
 		      const char *help_doc_ = nullptr)
     : option_def (long_option_, var_boolean, nullptr,
 		  (erased_get_var_address_ftype *) get_var_address_cb_,
-		  show_cmd_cb_,
-		  set_doc_, show_doc_, help_doc_)
+		  show_cmd_cb_, set_doc_, show_doc_, help_doc_)
   {
     var_address.boolean = detail::get_var_address<bool, Context>;
   }
@@ -181,23 +182,18 @@ template<typename Context = bool>
 struct flag_option_def : boolean_option_def<Context>
 {
   flag_option_def (const char *long_option_,
-		     bool *(*var_address_cb_) (Context *),
-		     const char *set_doc_,
-		     const char *help_doc_ = nullptr)
-    : boolean_option_def<Context> (long_option_,
-				   var_address_cb_,
-				   NULL,
+		   bool *(*var_address_cb_) (Context *), const char *set_doc_,
+		   const char *help_doc_ = nullptr)
+    : boolean_option_def<Context> (long_option_, var_address_cb_, NULL,
 				   set_doc_, NULL, help_doc_)
   {
     this->have_argument = false;
   }
 
-  flag_option_def (const char *long_option_,
-		     const char *set_doc_,
-		     const char *help_doc_ = nullptr)
+  flag_option_def (const char *long_option_, const char *set_doc_,
+		   const char *help_doc_ = nullptr)
     : boolean_option_def<Context> (long_option_,
-				   gdb::option::detail::return_self,
-				   NULL,
+				   gdb::option::detail::return_self, NULL,
 				   set_doc_, nullptr, help_doc_)
   {
     this->have_argument = false;
@@ -212,27 +208,25 @@ struct uinteger_option_def : option_def
   uinteger_option_def (const char *long_option_,
 		       unsigned int *(*get_var_address_cb_) (Context *),
 		       const literal_def *extra_literals_,
-		       show_value_ftype *show_cmd_cb_,
-		       const char *set_doc_,
+		       show_value_ftype *show_cmd_cb_, const char *set_doc_,
 		       const char *show_doc_ = nullptr,
 		       const char *help_doc_ = nullptr)
     : option_def (long_option_, var_uinteger, extra_literals_,
 		  (erased_get_var_address_ftype *) get_var_address_cb_,
-		  show_cmd_cb_,
-		  set_doc_, show_doc_, help_doc_)
+		  show_cmd_cb_, set_doc_, show_doc_, help_doc_)
   {
     var_address.uinteger = detail::get_var_address<unsigned int, Context>;
   }
 
   uinteger_option_def (const char *long_option_,
 		       unsigned int *(*get_var_address_cb_) (Context *),
-		       show_value_ftype *show_cmd_cb_,
-		       const char *set_doc_,
+		       show_value_ftype *show_cmd_cb_, const char *set_doc_,
 		       const char *show_doc_ = nullptr,
 		       const char *help_doc_ = nullptr)
     : uinteger_option_def (long_option_, get_var_address_cb_, nullptr,
 			   show_cmd_cb_, set_doc_, show_doc_, help_doc_)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 };
 
 /* A var_pinteger command line option.  */
@@ -243,27 +237,25 @@ struct pinteger_option_def : option_def
   pinteger_option_def (const char *long_option_,
 		       int *(*get_var_address_cb_) (Context *),
 		       const literal_def *extra_literals_,
-		       show_value_ftype *show_cmd_cb_,
-		       const char *set_doc_,
+		       show_value_ftype *show_cmd_cb_, const char *set_doc_,
 		       const char *show_doc_ = nullptr,
 		       const char *help_doc_ = nullptr)
     : option_def (long_option_, var_pinteger, extra_literals_,
 		  (erased_get_var_address_ftype *) get_var_address_cb_,
-		  show_cmd_cb_,
-		  set_doc_, show_doc_, help_doc_)
+		  show_cmd_cb_, set_doc_, show_doc_, help_doc_)
   {
     var_address.integer = detail::get_var_address<int, Context>;
   }
 
   pinteger_option_def (const char *long_option_,
 		       int *(*get_var_address_cb_) (Context *),
-		       show_value_ftype *show_cmd_cb_,
-		       const char *set_doc_,
+		       show_value_ftype *show_cmd_cb_, const char *set_doc_,
 		       const char *show_doc_ = nullptr,
 		       const char *help_doc_ = nullptr)
     : pinteger_option_def (long_option_, get_var_address_cb_, nullptr,
 			   show_cmd_cb_, set_doc_, show_doc_, help_doc_)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 };
 
 /* An var_enum command line option.  */
@@ -271,17 +263,14 @@ struct pinteger_option_def : option_def
 template<typename Context>
 struct enum_option_def : option_def
 {
-  enum_option_def (const char *long_option_,
-		   const char *const *enumlist,
+  enum_option_def (const char *long_option_, const char *const *enumlist,
 		   const char **(*get_var_address_cb_) (Context *),
-		   show_value_ftype *show_cmd_cb_,
-		   const char *set_doc_,
+		   show_value_ftype *show_cmd_cb_, const char *set_doc_,
 		   const char *show_doc_ = nullptr,
 		   const char *help_doc_ = nullptr)
     : option_def (long_option_, var_enum, nullptr,
 		  (erased_get_var_address_ftype *) get_var_address_cb_,
-		  show_cmd_cb_,
-		  set_doc_, show_doc_, help_doc_)
+		  show_cmd_cb_, set_doc_, show_doc_, help_doc_)
   {
     var_address.enumeration = detail::get_var_address<const char *, Context>;
     this->enums = enumlist;
@@ -295,14 +284,12 @@ struct string_option_def : option_def
 {
   string_option_def (const char *long_option_,
 		     std::string *(*get_var_address_cb_) (Context *),
-		     show_value_ftype *show_cmd_cb_,
-		     const char *set_doc_,
+		     show_value_ftype *show_cmd_cb_, const char *set_doc_,
 		     const char *show_doc_ = nullptr,
 		     const char *help_doc_ = nullptr)
     : option_def (long_option_, var_string, nullptr,
 		  (erased_get_var_address_ftype *) get_var_address_cb_,
-		  show_cmd_cb_,
-		  set_doc_, show_doc_, help_doc_)
+		  show_cmd_cb_, set_doc_, show_doc_, help_doc_)
   {
     var_address.enumeration = detail::get_var_address<const char *, Context>;
   }
@@ -341,40 +328,39 @@ enum process_options_mode
    if the string has been fully parsed and there are no operands to
    handle by the caller.  Return false if options were parsed, and
    *ARGS now points at the first operand.  */
-extern bool process_options
-  (const char **args,
-   process_options_mode mode,
-   gdb::array_view<const option_def_group> options_group);
+extern bool
+process_options (const char **args, process_options_mode mode,
+		 gdb::array_view<const option_def_group> options_group);
 
 /* Complete ARGS on options listed by OPTIONS_GROUP.  Returns true if
    the string has been fully parsed and there are no operands to
    handle by the caller.  Return false if options were parsed, and
    *ARGS now points at the first operand.  */
-extern bool complete_options
-  (completion_tracker &tracker,
-   const char **args,
-   process_options_mode mode,
-   gdb::array_view<const option_def_group> options_group);
+extern bool
+complete_options (completion_tracker &tracker, const char **args,
+		  process_options_mode mode,
+		  gdb::array_view<const option_def_group> options_group);
 
 /* Complete on all options listed by OPTIONS_GROUP.  */
-extern void
-  complete_on_all_options (completion_tracker &tracker,
-			   gdb::array_view<const option_def_group> options_group);
+extern void complete_on_all_options (
+  completion_tracker &tracker,
+  gdb::array_view<const option_def_group> options_group);
 
 /* Return a string with the result of replacing %OPTIONS% in HELP_TMLP
    with an auto-generated "help" string fragment for all the options
    in OPTIONS_GROUP.  */
-extern std::string build_help
-  (const char *help_tmpl,
-   gdb::array_view<const option_def_group> options_group);
+extern std::string
+build_help (const char *help_tmpl,
+	    gdb::array_view<const option_def_group> options_group);
 
 /* Install set/show commands for options defined in OPTIONS.  DATA is
    a pointer to the structure that holds the data associated with the
    OPTIONS array.  */
-extern void add_setshow_cmds_for_options (command_class cmd_class, void *data,
-					  gdb::array_view<const option_def> options,
-					  struct cmd_list_element **set_list,
-					  struct cmd_list_element **show_list);
+extern void
+add_setshow_cmds_for_options (command_class cmd_class, void *data,
+			      gdb::array_view<const option_def> options,
+			      struct cmd_list_element **set_list,
+			      struct cmd_list_element **show_list);
 
 } /* namespace option */
 } /* namespace gdb */

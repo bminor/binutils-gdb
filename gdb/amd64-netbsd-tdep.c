@@ -59,39 +59,32 @@ amd64nbsd_mcontext_addr (frame_info_ptr this_frame)
   /* The mcontext structure lives as offset 56 in `struct ucontext'.  */
   return addr + 56;
 }
-
+
 /* NetBSD 2.0 or later.  */
 
 /* Mapping between the general-purpose registers in `struct reg'
    format and GDB's register cache layout.  */
 
 /* From <machine/reg.h>.  */
-int amd64nbsd_r_reg_offset[] =
-{
-  14 * 8,			/* %rax */
-  13 * 8,			/* %rbx */
-  3 * 8,			/* %rcx */
-  2 * 8,			/* %rdx */
-  1 * 8,			/* %rsi */
-  0 * 8,			/* %rdi */
-  12 * 8,			/* %rbp */
-  24 * 8,			/* %rsp */
-  4 * 8,			/* %r8 ..  */
-  5 * 8,
-  6 * 8,
-  7 * 8,
-  8 * 8,
-  9 * 8,
-  10 * 8,
-  11 * 8,			/* ... %r15 */
-  21 * 8,			/* %rip */
-  23 * 8,			/* %eflags */
-  22 * 8,			/* %cs */
-  25 * 8,			/* %ss */
-  18 * 8,			/* %ds */
-  17 * 8,			/* %es */
-  16 * 8,			/* %fs */
-  15 * 8			/* %gs */
+int amd64nbsd_r_reg_offset[] = {
+  14 * 8,					      /* %rax */
+  13 * 8,					      /* %rbx */
+  3 * 8,					      /* %rcx */
+  2 * 8,					      /* %rdx */
+  1 * 8,					      /* %rsi */
+  0 * 8,					      /* %rdi */
+  12 * 8,					      /* %rbp */
+  24 * 8,					      /* %rsp */
+  4 * 8,					      /* %r8 ..  */
+  5 * 8,  6 * 8, 7 * 8, 8 * 8, 9 * 8, 10 * 8, 11 * 8, /* ... %r15 */
+  21 * 8,					      /* %rip */
+  23 * 8,					      /* %eflags */
+  22 * 8,					      /* %cs */
+  25 * 8,					      /* %ss */
+  18 * 8,					      /* %ds */
+  17 * 8,					      /* %es */
+  16 * 8,					      /* %fs */
+  15 * 8					      /* %gs */
 };
 
 static void
@@ -117,17 +110,18 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (amd64nbsd_r_reg_offset);
 
   /* NetBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
 }
 
 void _initialize_amd64nbsd_tdep ();
+
 void
 _initialize_amd64nbsd_tdep ()
 {
   /* The NetBSD/amd64 native dependent code makes this assumption.  */
   gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == AMD64_NUM_GREGS);
 
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-			  GDB_OSABI_NETBSD, amd64nbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_NETBSD,
+			  amd64nbsd_init_abi);
 }

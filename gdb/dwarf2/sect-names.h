@@ -28,7 +28,8 @@
    It doesn't make sense to have a NULL NORMAL field but a non-NULL COMPRESSED
    field.  */
 
-struct dwarf2_section_names {
+struct dwarf2_section_names
+{
   const char *normal;
   const char *compressed;
 
@@ -47,7 +48,8 @@ struct dwarf2_section_names {
    update all instances of dwarf2_debug_sections if you add a field to this
    structure.  It is always safe to use { NULL, NULL } in this case.  */
 
-struct dwarf2_debug_sections {
+struct dwarf2_debug_sections
+{
   struct dwarf2_section_names info;
   struct dwarf2_section_names abbrev;
   struct dwarf2_section_names line;

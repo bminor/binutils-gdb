@@ -36,7 +36,7 @@ gdb_internal_backtrace_set_cmd (const char *args, int from_tty,
   if (c->var->get<bool> ())
     {
       c->var->set<bool> (false);
-      error (_("support for this feature is not compiled into GDB"));
+      error (_ ("support for this feature is not compiled into GDB"));
     }
 #endif
 }
@@ -54,8 +54,7 @@ libbacktrace_error (void *data, const char *errmsg, int errnum)
   if (errnum < 0)
     return;
 
-  const auto sig_write = [] (const char *msg) -> void
-  {
+  const auto sig_write = [] (const char *msg) -> void {
     gdb_stderr->write_async_safe (msg, strlen (msg));
   };
 
@@ -75,11 +74,10 @@ libbacktrace_error (void *data, const char *errmsg, int errnum)
 /* Callback used by libbacktrace to print a single stack frame.  */
 
 static int
-libbacktrace_print (void *data, uintptr_t pc, const char *filename,
-		    int lineno, const char *function)
+libbacktrace_print (void *data, uintptr_t pc, const char *filename, int lineno,
+		    const char *function)
 {
-  const auto sig_write = [] (const char *msg) -> void
-  {
+  const auto sig_write = [] (const char *msg) -> void {
     gdb_stderr->write_async_safe (msg, strlen (msg));
   };
 
@@ -129,8 +127,7 @@ gdb_internal_backtrace_1 ()
 static void
 gdb_internal_backtrace_1 ()
 {
-  const auto sig_write = [] (const char *msg) -> void
-  {
+  const auto sig_write = [] (const char *msg) -> void {
     gdb_stderr->write_async_safe (msg, strlen (msg));
   };
 
@@ -140,7 +137,7 @@ gdb_internal_backtrace_1 ()
 
   backtrace_symbols_fd (buffer, frames, gdb_stderr->fd ());
   if (frames == ARRAY_SIZE (buffer))
-    sig_write (_("Backtrace might be incomplete.\n"));
+    sig_write (_ ("Backtrace might be incomplete.\n"));
 }
 
 #else
@@ -157,17 +154,16 @@ gdb_internal_backtrace ()
     return;
 
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
-  const auto sig_write = [] (const char *msg) -> void
-  {
+  const auto sig_write = [] (const char *msg) -> void {
     gdb_stderr->write_async_safe (msg, strlen (msg));
   };
 
-  sig_write (_("----- Backtrace -----\n"));
+  sig_write (_ ("----- Backtrace -----\n"));
 
   if (gdb_stderr->fd () > -1)
     gdb_internal_backtrace_1 ();
   else
-    sig_write (_("Backtrace unavailable\n"));
+    sig_write (_ ("Backtrace unavailable\n"));
 
   sig_write ("---------------------\n");
 #endif

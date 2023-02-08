@@ -208,7 +208,7 @@ aarch64_siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
 	default:
 	  to->si_pid = from->cpt_si_pid;
 	  to->si_uid = from->cpt_si_uid;
-	  to->si_ptr = (void* ) (intptr_t) from->cpt_si_ptr;
+	  to->si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
 	  break;
 	}
     }
@@ -218,9 +218,8 @@ aarch64_siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
    storage (or its descriptor).  */
 
 ps_err_e
-aarch64_ps_get_thread_area (struct ps_prochandle *ph,
-			    lwpid_t lwpid, int idx, void **base,
-			    int is_64bit_p)
+aarch64_ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
+			    void **base, int is_64bit_p)
 {
   struct iovec iovec;
   uint64_t reg64;

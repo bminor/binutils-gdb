@@ -45,8 +45,8 @@ struct language_defn;
    OBSTACK; the environment is initialized from SYMBOL_LIST.  */
 
 extern struct multidictionary *
-  mdict_create_hashed (struct obstack *obstack,
-		       const struct pending *symbol_list);
+mdict_create_hashed (struct obstack *obstack,
+		     const struct pending *symbol_list);
 
 /* Create a multi-language dictionary of symbols, implemented
    via a hashtable that grows as necessary.  The initial dictionary of
@@ -54,7 +54,7 @@ extern struct multidictionary *
    Call mdict_free() when you're done with it.  */
 
 extern struct multidictionary *
-  mdict_create_hashed_expandable (enum language language);
+mdict_create_hashed_expandable (enum language language);
 
 /* Create a multi-language dictionary of symbols, implemented
    via a fixed-size array.  All memory it uses is allocated on
@@ -63,8 +63,8 @@ extern struct multidictionary *
    SYMBOL_LIST.  */
 
 extern struct multidictionary *
-  mdict_create_linear (struct obstack *obstack,
-		       const struct pending *symbol_list);
+mdict_create_linear (struct obstack *obstack,
+		     const struct pending *symbol_list);
 
 /* Create a multi-language dictionary of symbols, implemented
    via an array that grows as necessary.  The multidictionary initially
@@ -72,7 +72,7 @@ extern struct multidictionary *
    call mdict_add_symbol().  Call mdict_free() when you're done with it.  */
 
 extern struct multidictionary *
-  mdict_create_linear_expandable (enum language language);
+mdict_create_linear_expandable (enum language language);
 
 /* The functions providing the interface to multi-language dictionaries.
    Note that the most common parts of the interface, namely symbol lookup,
@@ -127,8 +127,8 @@ struct mdict_iterator
    return that first symbol, or NULL if MDICT is empty.  */
 
 extern struct symbol *
-  mdict_iterator_first (const struct multidictionary *mdict,
-			struct mdict_iterator *miterator);
+mdict_iterator_first (const struct multidictionary *mdict,
+		      struct mdict_iterator *miterator);
 
 /* Advance MITERATOR, and return the next symbol, or NULL if there are
    no more symbols.  Don't call this if you've previously received
@@ -144,9 +144,9 @@ extern struct symbol *mdict_iterator_next (struct mdict_iterator *miterator);
    if there are no such symbols.  */
 
 extern struct symbol *
-  mdict_iter_match_first (const struct multidictionary *mdict,
-			  const lookup_name_info &name,
-			  struct mdict_iterator *miterator);
+mdict_iter_match_first (const struct multidictionary *mdict,
+			const lookup_name_info &name,
+			struct mdict_iterator *miterator);
 
 /* Advance MITERATOR to point at the next symbol in MDICT whose
    search_name () is NAME, as tested using COMPARE (see
@@ -171,9 +171,8 @@ extern int mdict_size (const struct multidictionary *mdict);
    It's implemented as a single loop, so you can terminate the loop
    early by a break if you desire.  */
 
-#define ALL_DICT_SYMBOLS(dict, iter, sym)			\
-	for ((sym) = mdict_iterator_first ((dict), &(iter));	\
-	     (sym);						\
-	     (sym) = mdict_iterator_next (&(iter)))
+#define ALL_DICT_SYMBOLS(dict, iter, sym)                     \
+  for ((sym) = mdict_iterator_first ((dict), &(iter)); (sym); \
+       (sym) = mdict_iterator_next (&(iter)))
 
 #endif /* DICTIONARY_H */

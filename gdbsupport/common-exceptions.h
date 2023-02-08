@@ -31,14 +31,14 @@
    use as the return value from an initial setjmp().  */
 
 enum return_reason
-  {
-    /* User interrupt.  */
-    RETURN_QUIT = -2,
-    /* Any other error.  */
-    RETURN_ERROR
-  };
+{
+  /* User interrupt.  */
+  RETURN_QUIT = -2,
+  /* Any other error.  */
+  RETURN_ERROR
+};
 
-#define RETURN_MASK(reason)	(1 << (int)(-reason))
+#define RETURN_MASK(reason) (1 << (int) (-reason))
 
 typedef enum
 {
@@ -49,7 +49,8 @@ typedef enum
 
 /* Describe all exceptions.  */
 
-enum errors {
+enum errors
+{
   GDB_NO_ERROR,
 
   /* Any generic error, the corresponding text is in
@@ -113,21 +114,14 @@ enum errors {
 
 struct gdb_exception
 {
-  gdb_exception ()
-    : reason ((enum return_reason) 0),
-      error (GDB_NO_ERROR)
+  gdb_exception () : reason ((enum return_reason) 0), error (GDB_NO_ERROR) {}
+
+  gdb_exception (enum return_reason r, enum errors e) : reason (r), error (e)
   {
   }
 
-  gdb_exception (enum return_reason r, enum errors e)
-    : reason (r),
-      error (e)
-  {
-  }
-
-  gdb_exception (enum return_reason r, enum errors e,
-		 const char *fmt, va_list ap)
-    ATTRIBUTE_PRINTF (4, 0)
+  gdb_exception (enum return_reason r, enum errors e, const char *fmt,
+                 va_list ap) ATTRIBUTE_PRINTF (4, 0)
     : reason (r),
       error (e),
       message (std::make_shared<std::string> (string_vprintf (fmt, ap)))
@@ -161,10 +155,7 @@ struct gdb_exception
 
   /* Return the contents of the exception message, as a C string.  The
      string remains owned by the exception object.  */
-  const char *what () const noexcept
-  {
-    return message->c_str ();
-  }
+  const char *what () const noexcept { return message->c_str (); }
 
   /* Compare two exceptions.  */
   bool operator== (const gdb_exception &other) const
@@ -172,9 +163,8 @@ struct gdb_exception
     const char *msg1 = message == nullptr ? "" : what ();
     const char *msg2 = other.message == nullptr ? "" : other.what ();
 
-    return (reason == other.reason
-	    && error == other.error
-	    && strcmp (msg1, msg2) == 0);
+    return (reason == other.reason && error == other.error
+            && strcmp (msg1, msg2) == 0);
   }
 
   /* Compare two exceptions.  */
@@ -199,12 +189,12 @@ struct hash<gdb_exception>
   {
     size_t result = exc.reason + exc.error;
     if (exc.message != nullptr)
-      result += std::hash<std::string> {} (*exc.message);
+      result += std::hash<std::string> {}(*exc.message);
     return result;
   }
 };
 
-}
+} // namespace std
 
 /* Functions to drive the sjlj-based exceptions state machine.  Though
    declared here by necessity, these functions should be considered
@@ -243,22 +233,20 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
    need to cross third-party library code compiled without exceptions
    support (e.g., readline).  */
 
-#define TRY_SJLJ \
-     { \
-       jmp_buf *buf = \
-	 exceptions_state_mc_init (); \
-       setjmp (*buf); \
-     } \
-     while (exceptions_state_mc_action_iter ()) \
-       while (exceptions_state_mc_action_iter_1 ())
+#define TRY_SJLJ                                \
+  {                                             \
+    jmp_buf *buf = exceptions_state_mc_init (); \
+    setjmp (*buf);                              \
+  }                                             \
+  while (exceptions_state_mc_action_iter ())    \
+    while (exceptions_state_mc_action_iter_1 ())
 
-#define CATCH_SJLJ(EXCEPTION, MASK)				\
-  {							\
-    struct gdb_exception EXCEPTION;				\
+#define CATCH_SJLJ(EXCEPTION, MASK) \
+  {                                 \
+    struct gdb_exception EXCEPTION; \
     if (exceptions_state_mc_catch (&(EXCEPTION), MASK))
 
-#define END_CATCH_SJLJ				\
-  }
+#define END_CATCH_SJLJ }
 
 /* The exception types client code may catch.  They're just shims
    around gdb_exception that add nothing but type info.  Which is used
@@ -281,8 +269,7 @@ struct gdb_exception_error : public gdb_exception
 
 struct gdb_exception_quit : public gdb_exception
 {
-  gdb_exception_quit (const char *fmt, va_list ap)
-    ATTRIBUTE_PRINTF (2, 0)
+  gdb_exception_quit (const char *fmt, va_list ap) ATTRIBUTE_PRINTF (2, 0)
     : gdb_exception (RETURN_QUIT, GDB_NO_ERROR, fmt, ap)
   {
   }
@@ -300,9 +287,7 @@ struct gdb_exception_quit : public gdb_exception
    allocation error to be caught by all the CATCH/RETURN_MASK_ALL
    spread around the codebase.  */
 
-struct gdb_quit_bad_alloc
-  : public gdb_exception_quit,
-    public std::bad_alloc
+struct gdb_quit_bad_alloc : public gdb_exception_quit, public std::bad_alloc
 {
   explicit gdb_quit_bad_alloc (gdb_exception &&ex) noexcept
     : gdb_exception_quit (std::move (ex)),
@@ -316,25 +301,25 @@ struct gdb_quit_bad_alloc
 /* Throw an exception (as described by "struct gdb_exception"),
    landing in the inner most containing exception handler established
    using TRY/CATCH.  */
-extern void throw_exception (gdb_exception &&exception)
-     ATTRIBUTE_NORETURN;
+extern void throw_exception (gdb_exception &&exception) ATTRIBUTE_NORETURN;
 
 /* Throw an exception by executing a LONG JUMP to the inner most
    containing exception handler established using TRY_SJLJ.  Necessary
    in some cases where we need to throw GDB exceptions across
    third-party library code (e.g., readline).  */
 extern void throw_exception_sjlj (const struct gdb_exception &exception)
-     ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN;
 
 /* Convenience wrappers around throw_exception that throw GDB
    errors.  */
-extern void throw_verror (enum errors, const char *fmt, va_list ap)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
-extern void throw_vquit (const char *fmt, va_list ap)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
-extern void throw_error (enum errors error, const char *fmt, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
-extern void throw_quit (const char *fmt, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+extern void throw_verror (enum errors, const char *fmt,
+                          va_list ap) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (2, 0);
+extern void throw_vquit (const char *fmt, va_list ap) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (1, 0);
+extern void throw_error (enum errors error, const char *fmt,
+                         ...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
+extern void throw_quit (const char *fmt, ...) ATTRIBUTE_NORETURN
+  ATTRIBUTE_PRINTF (1, 2);
 
 #endif /* COMMON_COMMON_EXCEPTIONS_H */

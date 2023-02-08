@@ -24,13 +24,12 @@
    contains getters for four elements: "pc" (int), "data" (buffer), "decode"
    (str) and "size" (int) that must be overridden by sub classes.  */
 
-PyTypeObject py_insn_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-};
+PyTypeObject py_insn_type = { PyVarObject_HEAD_INIT (NULL, 0) };
 
 /* Python instruction object.  */
 
-struct py_insn_obj {
+struct py_insn_obj
+{
   PyObject_HEAD
 };
 
@@ -39,19 +38,17 @@ struct py_insn_obj {
 static PyObject *
 py_insn_getter (PyObject *self, void *closure)
 {
-  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+  return PyErr_Format (PyExc_NotImplementedError, _ ("Not implemented."));
 }
 
 /* Instruction members.  */
 
-static gdb_PyGetSetDef py_insn_getset[] =
-{
-  { "pc", py_insn_getter, NULL, "instruction address", NULL},
-  { "data", py_insn_getter, NULL, "instruction memory", NULL},
-  { "decoded", py_insn_getter, NULL, "decoded instruction", NULL},
-  { "size", py_insn_getter, NULL, "instruction size in bytes", NULL},
-  {NULL}
-};
+static gdb_PyGetSetDef py_insn_getset[]
+  = { { "pc", py_insn_getter, NULL, "instruction address", NULL },
+      { "data", py_insn_getter, NULL, "instruction memory", NULL },
+      { "decoded", py_insn_getter, NULL, "decoded instruction", NULL },
+      { "size", py_insn_getter, NULL, "instruction size in bytes", NULL },
+      { NULL } };
 
 /* See py-instruction.h.  */
 

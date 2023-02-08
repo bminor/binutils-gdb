@@ -21,7 +21,7 @@
 #define SER_UNIX_H
 
 extern int ser_unix_read_prim (struct serial *scb, size_t count);
-extern int ser_unix_write_prim (struct serial *scb, const void *buf, 
+extern int ser_unix_write_prim (struct serial *scb, const void *buf,
 				size_t count);
 
 #endif

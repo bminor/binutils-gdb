@@ -30,7 +30,7 @@ namespace observers
 
 bool observer_debug = false;
 
-#define DEFINE_OBSERVABLE(name) decltype (name) name (# name)
+#define DEFINE_OBSERVABLE(name) decltype (name) name (#name)
 
 DEFINE_OBSERVABLE (normal_stop);
 DEFINE_OBSERVABLE (signal_received);
@@ -90,19 +90,21 @@ static void
 show_observer_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Observer debugging is %s.\n"), value);
+  gdb_printf (file, _ ("Observer debugging is %s.\n"), value);
 }
 
 void _initialize_observer ();
+
 void
 _initialize_observer ()
 {
   add_setshow_boolean_cmd ("observer", class_maintenance,
-			   &gdb::observers::observer_debug, _("\
-Set observer debugging."), _("\
-Show observer debugging."), _("\
+			   &gdb::observers::observer_debug, _ ("\
+Set observer debugging."),
+			   _ ("\
+Show observer debugging."),
+			   _ ("\
 When non-zero, observer debugging is enabled."),
-			   NULL,
-			   show_observer_debug,
-			   &setdebuglist, &showdebuglist);
+			   NULL, show_observer_debug, &setdebuglist,
+			   &showdebuglist);
 }

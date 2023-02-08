@@ -107,6 +107,7 @@ is_main_thread ()
 }
 
 void _initialize_run_on_main_thread ();
+
 void
 _initialize_run_on_main_thread ()
 {

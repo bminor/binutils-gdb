@@ -53,9 +53,9 @@ struct cmd_list_element *set_record_cmdlist = NULL;
 struct cmd_list_element *show_record_cmdlist = NULL;
 struct cmd_list_element *info_record_cmdlist = NULL;
 
-#define DEBUG(msg, args...)						\
-  if (record_debug)							\
-    gdb_printf (gdb_stdlog, "record: " msg "\n", ##args)
+#define DEBUG(msg, args...) \
+  if (record_debug)         \
+  gdb_printf (gdb_stdlog, "record: " msg "\n", ##args)
 
 /* See record.h.  */
 
@@ -74,8 +74,8 @@ require_record_target (void)
 
   t = find_record_target ();
   if (t == NULL)
-    error (_("No recording is currently active.\n"
-	     "Use the \"record full\" or \"record btrace\" command first."));
+    error (_ ("No recording is currently active.\n"
+	      "Use the \"record full\" or \"record btrace\" command first."));
 
   return t;
 }
@@ -87,8 +87,8 @@ record_preopen (void)
 {
   /* Check if a record target is already running.  */
   if (find_record_target () != NULL)
-    error (_("The process is already being recorded.  Use \"record stop\" to "
-	     "stop recording first."));
+    error (_ ("The process is already being recorded.  Use \"record stop\" to "
+	      "stop recording first."));
 }
 
 /* See record.h.  */
@@ -101,14 +101,14 @@ record_start (const char *method, const char *format, int from_tty)
       if (format == NULL)
 	execute_command_to_string ("record", from_tty, false);
       else
-	error (_("Invalid format."));
+	error (_ ("Invalid format."));
     }
   else if (strcmp (method, "full") == 0)
     {
       if (format == NULL)
 	execute_command_to_string ("record full", from_tty, false);
       else
-	error (_("Invalid format."));
+	error (_ ("Invalid format."));
     }
   else if (strcmp (method, "btrace") == 0)
     {
@@ -119,10 +119,10 @@ record_start (const char *method, const char *format, int from_tty)
       else if (strcmp (format, "pt") == 0)
 	execute_command_to_string ("record btrace pt", from_tty, false);
       else
-	error (_("Invalid format."));
+	error (_ ("Invalid format."));
     }
   else
-    error (_("Invalid method."));
+    error (_ ("Invalid method."));
 }
 
 /* See record.h.  */
@@ -136,9 +136,8 @@ record_stop (int from_tty)
 /* See record.h.  */
 
 int
-record_read_memory (struct gdbarch *gdbarch,
-		    CORE_ADDR memaddr, gdb_byte *myaddr,
-		    ssize_t len)
+record_read_memory (struct gdbarch *gdbarch, CORE_ADDR memaddr,
+		    gdb_byte *myaddr, ssize_t len)
 {
   int ret = target_read_memory (memaddr, myaddr, len);
 
@@ -234,8 +233,7 @@ record_kill (struct target_ops *t)
 /* See record.h.  */
 
 int
-record_check_stopped_by_breakpoint (const address_space *aspace,
-				    CORE_ADDR pc,
+record_check_stopped_by_breakpoint (const address_space *aspace, CORE_ADDR pc,
 				    enum target_stop_reason *reason)
 {
   if (breakpoint_inserted_here_p (aspace, pc))
@@ -257,8 +255,7 @@ static void
 show_record_debug (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Debugging of process record target is %s.\n"),
-	      value);
+  gdb_printf (file, _ ("Debugging of process record target is %s.\n"), value);
 }
 
 /* Alias for "target record".  */
@@ -279,20 +276,21 @@ cmd_record_delete (const char *args, int from_tty)
 
   if (!target_record_is_replaying (inferior_ptid))
     {
-      gdb_printf (_("Already at end of record list.\n"));
+      gdb_printf (_ ("Already at end of record list.\n"));
       return;
     }
 
   if (!target_supports_delete_record ())
     {
-      gdb_printf (_("The current record target does not support "
-		    "this operation.\n"));
+      gdb_printf (_ ("The current record target does not support "
+		     "this operation.\n"));
       return;
     }
 
-  if (!from_tty || query (_("Delete the log from this point forward "
-			    "and begin to record the running message "
-			    "at current PC?")))
+  if (!from_tty
+      || query (_ ("Delete the log from this point forward "
+		   "and begin to record the running message "
+		   "at current PC?")))
     target_delete_record ();
 }
 
@@ -308,12 +306,11 @@ cmd_record_stop (const char *args, int from_tty)
   record_stop (t);
   record_unpush (t);
 
-  gdb_printf (_("Process record is stopped and all execution "
-		"logs are deleted.\n"));
+  gdb_printf (_ ("Process record is stopped and all execution "
+		 "logs are deleted.\n"));
 
   gdb::observers::record_changed.notify (current_inferior (), 0, NULL, NULL);
 }
-
 
 /* The "info record" command.  */
 
@@ -325,11 +322,11 @@ info_record_command (const char *args, int from_tty)
   t = find_record_target ();
   if (t == NULL)
     {
-      gdb_printf (_("No recording is currently active.\n"));
+      gdb_printf (_ ("No recording is currently active.\n"));
       return;
     }
 
-  gdb_printf (_("Active record target: %s\n"), t->shortname ());
+  gdb_printf (_ ("Active record target: %s\n"), t->shortname ());
   t->info_record ();
 }
 
@@ -349,7 +346,7 @@ cmd_record_save (const char *args, int from_tty)
     {
       /* Default recfile name is "gdb_record.PID".  */
       xsnprintf (recfilename_buffer, sizeof (recfilename_buffer),
-		"gdb_record.%d", inferior_ptid.pid ());
+		 "gdb_record.%d", inferior_ptid.pid ());
       recfilename = recfilename_buffer;
     }
 
@@ -364,7 +361,7 @@ record_goto (const char *arg)
   ULONGEST insn;
 
   if (arg == NULL || *arg == '\0')
-    error (_("Command requires an argument (insn number to go to)."));
+    error (_ ("Command requires an argument (insn number to go to)."));
 
   insn = parse_and_eval_long (arg);
 
@@ -389,7 +386,7 @@ static void
 cmd_record_goto_begin (const char *arg, int from_tty)
 {
   if (arg != NULL && *arg != '\0')
-    error (_("Junk after argument: %s."), arg);
+    error (_ ("Junk after argument: %s."), arg);
 
   require_record_target ();
   target_goto_record_begin ();
@@ -401,7 +398,7 @@ static void
 cmd_record_goto_end (const char *arg, int from_tty)
 {
   if (arg != NULL && *arg != '\0')
-    error (_("Junk after argument: %s."), arg);
+    error (_ ("Junk after argument: %s."), arg);
 
   require_record_target ();
   target_goto_record_end ();
@@ -419,7 +416,7 @@ get_insn_number (const char **arg)
   pos = skip_spaces (begin);
 
   if (!isdigit (*pos))
-    error (_("Expected positive number, got: %s."), pos);
+    error (_ ("Expected positive number, got: %s."), pos);
 
   number = strtoulst (pos, &end, 10);
 
@@ -439,7 +436,7 @@ get_context_size (const char **arg)
   pos = skip_spaces (*arg);
 
   if (!isdigit (*pos))
-    error (_("Expected positive number, got: %s."), pos);
+    error (_ ("Expected positive number, got: %s."), pos);
 
   long result = strtol (pos, &end, 10);
   *arg = end;
@@ -452,7 +449,7 @@ static void
 no_chunk (const char *arg)
 {
   if (*arg != 0)
-    error (_("Junk after argument: %s."), arg);
+    error (_ ("Junk after argument: %s."), arg);
 }
 
 /* Read instruction-history modifiers from an argument string.  */
@@ -474,7 +471,7 @@ get_insn_history_modifiers (const char **arg)
       ++args;
 
       if (*args == '\0')
-	error (_("Missing modifier."));
+	error (_ ("Missing modifier."));
 
       for (; *args; ++args)
 	{
@@ -504,7 +501,7 @@ get_insn_history_modifiers (const char **arg)
 	      modifiers |= DISASSEMBLY_OMIT_PC;
 	      break;
 	    default:
-	      error (_("Invalid modifier: %c."), *args);
+	      error (_ ("Invalid modifier: %c."), *args);
 	    }
 	}
 
@@ -615,7 +612,7 @@ get_call_history_modifiers (const char **arg)
       ++args;
 
       if (*args == '\0')
-	error (_("Missing modifier."));
+	error (_ ("Missing modifier."));
 
       for (; *args; ++args)
 	{
@@ -637,7 +634,7 @@ get_call_history_modifiers (const char **arg)
 	      modifiers |= RECORD_PRINT_INDENT_CALLS;
 	      break;
 	    default:
-	      error (_("Invalid modifier: %c."), *args);
+	      error (_ ("Invalid modifier: %c."), *args);
 	    }
 	}
 
@@ -727,7 +724,7 @@ validate_history_size (unsigned int *command_var, unsigned int *setting)
 
       /* Restore previous value.  */
       *command_var = *setting;
-      error (_("integer %u out of range"), new_value);
+      error (_ ("integer %u out of range"), new_value);
     }
 
   /* Commit new value.  */
@@ -759,98 +756,98 @@ set_record_call_history_size (const char *args, int from_tty,
 }
 
 void _initialize_record ();
+
 void
 _initialize_record ()
 {
   struct cmd_list_element *c;
 
   add_setshow_zuinteger_cmd ("record", no_class, &record_debug,
-			     _("Set debugging of record/replay feature."),
-			     _("Show debugging of record/replay feature."),
-			     _("When enabled, debugging output for "
-			       "record/replay feature is displayed."),
+			     _ ("Set debugging of record/replay feature."),
+			     _ ("Show debugging of record/replay feature."),
+			     _ ("When enabled, debugging output for "
+				"record/replay feature is displayed."),
 			     NULL, show_record_debug, &setdebuglist,
 			     &showdebuglist);
 
   add_setshow_uinteger_cmd ("instruction-history-size", no_class,
-			    &record_insn_history_size_setshow_var, _("\
-Set number of instructions to print in \"record instruction-history\"."), _("\
-Show number of instructions to print in \"record instruction-history\"."), _("\
+			    &record_insn_history_size_setshow_var, _ ("\
+Set number of instructions to print in \"record instruction-history\"."),
+			    _ ("\
+Show number of instructions to print in \"record instruction-history\"."),
+			    _ ("\
 A size of \"unlimited\" means unlimited instructions.  The default is 10."),
 			    set_record_insn_history_size, NULL,
 			    &set_record_cmdlist, &show_record_cmdlist);
 
   add_setshow_uinteger_cmd ("function-call-history-size", no_class,
-			    &record_call_history_size_setshow_var, _("\
-Set number of function to print in \"record function-call-history\"."), _("\
-Show number of functions to print in \"record function-call-history\"."), _("\
+			    &record_call_history_size_setshow_var, _ ("\
+Set number of function to print in \"record function-call-history\"."),
+			    _ ("\
+Show number of functions to print in \"record function-call-history\"."),
+			    _ ("\
 A size of \"unlimited\" means unlimited lines.  The default is 10."),
 			    set_record_call_history_size, NULL,
 			    &set_record_cmdlist, &show_record_cmdlist);
 
   cmd_list_element *record_cmd
     = add_prefix_cmd ("record", class_obscure, cmd_record_start,
-		      _("Start recording."),
-		      &record_cmdlist, 0, &cmdlist);
+		      _ ("Start recording."), &record_cmdlist, 0, &cmdlist);
   set_cmd_completer (record_cmd, filename_completer);
 
   add_com_alias ("rec", record_cmd, class_obscure, 1);
 
   set_show_commands setshow_record_cmds
     = add_setshow_prefix_cmd ("record", class_support,
-			      _("Set record options."),
-			      _("Show record options."),
-			      &set_record_cmdlist, &show_record_cmdlist,
-			      &setlist, &showlist);
-
+			      _ ("Set record options."),
+			      _ ("Show record options."), &set_record_cmdlist,
+			      &show_record_cmdlist, &setlist, &showlist);
 
   add_alias_cmd ("rec", setshow_record_cmds.set, class_obscure, 1, &setlist);
   add_alias_cmd ("rec", setshow_record_cmds.show, class_obscure, 1, &showlist);
 
   cmd_list_element *info_record_cmd
     = add_prefix_cmd ("record", class_support, info_record_command,
-		      _("Info record options."), &info_record_cmdlist,
-		      0, &infolist);
+		      _ ("Info record options."), &info_record_cmdlist, 0,
+		      &infolist);
   add_alias_cmd ("rec", info_record_cmd, class_obscure, 1, &infolist);
 
   c = add_cmd ("save", class_obscure, cmd_record_save,
-	       _("Save the execution log to a file.\n\
+	       _ ("Save the execution log to a file.\n\
 Usage: record save [FILENAME]\n\
 Default filename is 'gdb_record.PROCESS_ID'."),
 	       &record_cmdlist);
   set_cmd_completer (c, filename_completer);
 
   cmd_list_element *record_delete_cmd
-    =  add_cmd ("delete", class_obscure, cmd_record_delete,
-		_("Delete the rest of execution log and start recording it \
+    = add_cmd ("delete", class_obscure, cmd_record_delete,
+	       _ ("Delete the rest of execution log and start recording it \
 anew."),
-	    &record_cmdlist);
+	       &record_cmdlist);
   add_alias_cmd ("d", record_delete_cmd, class_obscure, 1, &record_cmdlist);
   add_alias_cmd ("del", record_delete_cmd, class_obscure, 1, &record_cmdlist);
 
   cmd_list_element *record_stop_cmd
     = add_cmd ("stop", class_obscure, cmd_record_stop,
-	       _("Stop the record/replay target."),
-	       &record_cmdlist);
+	       _ ("Stop the record/replay target."), &record_cmdlist);
   add_alias_cmd ("s", record_stop_cmd, class_obscure, 1, &record_cmdlist);
 
-  add_prefix_cmd ("goto", class_obscure, cmd_record_goto, _("\
+  add_prefix_cmd ("goto", class_obscure, cmd_record_goto, _ ("\
 Restore the program to its state at instruction number N.\n\
 Argument is instruction number, as shown by 'info record'."),
 		  &record_goto_cmdlist, 1, &record_cmdlist);
 
   cmd_list_element *record_goto_begin_cmd
     = add_cmd ("begin", class_obscure, cmd_record_goto_begin,
-	       _("Go to the beginning of the execution log."),
+	       _ ("Go to the beginning of the execution log."),
 	       &record_goto_cmdlist);
   add_alias_cmd ("start", record_goto_begin_cmd, class_obscure, 1,
 		 &record_goto_cmdlist);
 
   add_cmd ("end", class_obscure, cmd_record_goto_end,
-	   _("Go to the end of the execution log."),
-	   &record_goto_cmdlist);
+	   _ ("Go to the end of the execution log."), &record_goto_cmdlist);
 
-  add_cmd ("instruction-history", class_obscure, cmd_record_insn_history, _("\
+  add_cmd ("instruction-history", class_obscure, cmd_record_insn_history, _ ("\
 Print disassembled instructions stored in the execution log.\n\
 With a /m or /s modifier, source lines are included (if available).\n\
 With a /r modifier, raw instructions in hex are included.\n\
@@ -870,7 +867,8 @@ The number of instructions to disassemble can be defined with \"set record \
 instruction-history-size\"."),
 	   &record_cmdlist);
 
-  add_cmd ("function-call-history", class_obscure, cmd_record_call_history, _("\
+  add_cmd ("function-call-history", class_obscure, cmd_record_call_history,
+	   _ ("\
 Prints the execution history at function granularity.\n\
 It prints one line for each sequence of instructions that belong to the same \
 function.\n\

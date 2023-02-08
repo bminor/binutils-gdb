@@ -48,7 +48,7 @@ gregset_info (void)
   while (regsets_info->regsets[i].size != -1)
     {
       if (regsets_info->regsets[i].type == GENERAL_REGS)
-	break;
+        break;
       i++;
     }
 
@@ -61,8 +61,8 @@ gregset_info (void)
    symbol is stored in SYM_ADDR.  */
 
 ps_err_e
-ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
-		   const char *name, psaddr_t *sym_addr)
+ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj, const char *name,
+                   psaddr_t *sym_addr)
 {
   CORE_ADDR addr;
 
@@ -77,8 +77,8 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
    them into BUF.  */
 
 ps_err_e
-ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
-	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
+ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr, gdb_ps_read_buf_t buf,
+           gdb_ps_size_t size)
 {
   if (read_inferior_memory ((uintptr_t) addr, (gdb_byte *) buf, size) != 0)
     return PS_ERR;
@@ -88,8 +88,8 @@ ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 /* Write SIZE bytes from BUF into the target process PH at address ADDR.  */
 
 ps_err_e
-ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
-	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
+ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr, gdb_ps_write_buf_t buf,
+            gdb_ps_size_t size)
 {
   if (target_write_memory ((uintptr_t) addr, (const gdb_byte *) buf, size)
       != 0)
@@ -146,7 +146,8 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prfpregset_t *fpregset)
    process PH from FPREGSET.  */
 
 ps_err_e
-ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prfpregset_t *fpregset)
+ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
+               const prfpregset_t *fpregset)
 {
   /* Unneeded.  */
   return PS_ERR;

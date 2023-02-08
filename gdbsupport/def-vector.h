@@ -21,15 +21,16 @@
 #include <vector>
 #include "gdbsupport/default-init-alloc.h"
 
-namespace gdb {
+namespace gdb
+{
 
 /* A vector that uses an allocator that default constructs using
    default-initialization rather than value-initialization.  The idea
    is to use this when you don't want zero-initialization of elements
    of vectors of trivial types.  E.g., byte buffers.  */
 
-template<typename T> using def_vector
-  = std::vector<T, gdb::default_init_allocator<T>>;
+template<typename T>
+using def_vector = std::vector<T, gdb::default_init_allocator<T>>;
 
 } /* namespace gdb */
 

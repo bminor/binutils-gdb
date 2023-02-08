@@ -39,10 +39,8 @@ sparc64_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
     return 1;
 
   /* Control registers.  */
-  if (regnum == SPARC64_PC_REGNUM
-      || regnum == SPARC64_NPC_REGNUM
-      || regnum == SPARC64_STATE_REGNUM
-      || regnum == SPARC64_Y_REGNUM
+  if (regnum == SPARC64_PC_REGNUM || regnum == SPARC64_NPC_REGNUM
+      || regnum == SPARC64_STATE_REGNUM || regnum == SPARC64_Y_REGNUM
       || regnum == SPARC64_FPRS_REGNUM)
     return 1;
 
@@ -70,6 +68,7 @@ sparc64_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 }
 
 void _initialize_sparc64_nat ();
+
 void
 _initialize_sparc64_nat ()
 {

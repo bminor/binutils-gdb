@@ -24,10 +24,7 @@
 /* A deleter for a hash table.  */
 struct htab_deleter
 {
-  void operator() (htab *ptr) const
-  {
-    htab_delete (ptr);
-  }
+  void operator() (htab *ptr) const { htab_delete (ptr); }
 };
 
 /* A unique_ptr wrapper for htab_t.  */

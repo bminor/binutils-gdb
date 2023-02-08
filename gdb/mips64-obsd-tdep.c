@@ -54,11 +54,8 @@ mips64obsd_supply_gregset (const struct regset *regset,
 
 /* OpenBSD/mips64 register set.  */
 
-static const struct regset mips64obsd_gregset =
-{
-  NULL,
-  mips64obsd_supply_gregset
-};
+static const struct regset mips64obsd_gregset
+  = { NULL, mips64obsd_supply_gregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -71,15 +68,13 @@ mips64obsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg", MIPS64OBSD_NUM_REGS * 8, MIPS64OBSD_NUM_REGS * 8,
       &mips64obsd_gregset, NULL, cb_data);
 }
-
 
 /* Signal trampolines.  */
 
 static void
 mips64obsd_sigframe_init (const struct tramp_frame *self,
 			  frame_info_ptr this_frame,
-			  struct trad_frame_cache *cache,
-			  CORE_ADDR func)
+			  struct trad_frame_cache *cache, CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR sp, sigcontext_addr, addr;
@@ -93,25 +88,20 @@ mips64obsd_sigframe_init (const struct tramp_frame *self,
 
   /* PC.  */
   regnum = mips_regnum (gdbarch)->pc;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
-			    sigcontext_addr + 16);
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
+			   sigcontext_addr + 16);
 
   /* GPRs.  */
   for (regnum = MIPS_AT_REGNUM, addr = sigcontext_addr + 32;
        regnum <= MIPS_RA_REGNUM; regnum++, addr += 8)
-    trad_frame_set_reg_addr (cache,
-			     regnum + gdbarch_num_regs (gdbarch),
-			     addr);
+    trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch), addr);
 
   /* HI and LO.  */
   regnum = mips_regnum (gdbarch)->lo;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   sigcontext_addr + 280);
   regnum = mips_regnum (gdbarch)->hi;
-  trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (gdbarch),
+  trad_frame_set_reg_addr (cache, regnum + gdbarch_num_regs (gdbarch),
 			   sigcontext_addr + 288);
 
   /* TODO: Handle the floating-point registers.  */
@@ -119,43 +109,39 @@ mips64obsd_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (cache, frame_id_build (sp, func));
 }
 
-static const struct tramp_frame mips64obsd_sigframe =
-{
-  SIGTRAMP_FRAME,
-  MIPS_INSN32_SIZE,
-  {
-    { 0x67a40020, ULONGEST_MAX },		/* daddiu  a0,sp,32 */
-    { 0x24020067, ULONGEST_MAX },		/* li      v0,103 */
-    { 0x0000000c, ULONGEST_MAX },		/* syscall */
-    { 0x0000000d, ULONGEST_MAX },		/* break */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  mips64obsd_sigframe_init
-};
+static const struct tramp_frame mips64obsd_sigframe
+  = { SIGTRAMP_FRAME,
+      MIPS_INSN32_SIZE,
+      { { 0x67a40020, ULONGEST_MAX }, /* daddiu  a0,sp,32 */
+	{ 0x24020067, ULONGEST_MAX }, /* li      v0,103 */
+	{ 0x0000000c, ULONGEST_MAX }, /* syscall */
+	{ 0x0000000d, ULONGEST_MAX }, /* break */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      mips64obsd_sigframe_init };
 
-
 static void
 mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* OpenBSD/mips64 only supports the n64 ABI, but the braindamaged
      way GDB works, forces us to pretend we can handle them all.  */
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, mips64obsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, mips64obsd_iterate_over_regset_sections);
 
   tramp_frame_prepend_unwinder (gdbarch, &mips64obsd_sigframe);
 
   set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
 
-  obsd_init_abi(info, gdbarch);
+  obsd_init_abi (info, gdbarch);
 
   /* OpenBSD/mips64 has SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_lp64_fetch_link_map_offsets);
 }
 
 void _initialize_mips64obsd_tdep ();
+
 void
 _initialize_mips64obsd_tdep ()
 {

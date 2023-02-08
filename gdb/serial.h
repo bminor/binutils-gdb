@@ -106,13 +106,14 @@ extern void serial_un_fdopen (struct serial *scb);
    one of the following codes.  Note that all error return-codes are
    guaranteed to be < 0.  */
 
-enum serial_rc {
-  SERIAL_ERROR = -1,	/* General error.  */
-  SERIAL_TIMEOUT = -2,	/* Timeout or data-not-ready during read.
+enum serial_rc
+{
+  SERIAL_ERROR = -1,   /* General error.  */
+  SERIAL_TIMEOUT = -2, /* Timeout or data-not-ready during read.
 			   Unfortunately, through
 			   deprecated_ui_loop_hook (), this can also
 			   be a QUIT indication.  */
-  SERIAL_EOF = -3	/* General end-of-file or remote target
+  SERIAL_EOF = -3      /* General end-of-file or remote target
 			   connection closed, indication.  Includes
 			   things like the line dropping dead.  */
 };
@@ -126,8 +127,8 @@ extern int serial_write (struct serial *scb, const void *buf, size_t count);
 
 /* Write a printf style string onto the serial port.  */
 
-extern void serial_printf (struct serial *desc, 
-			   const char *,...) ATTRIBUTE_PRINTF (2, 3);
+extern void serial_printf (struct serial *desc, const char *, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 /* Allow pending output to drain.  */
 
@@ -186,14 +187,14 @@ extern int serial_setbaudrate (struct serial *scb, int rate);
    success, -1 for failure.  */
 
 #define SERIAL_1_STOPBITS 1
-#define SERIAL_1_AND_A_HALF_STOPBITS 2	/* 1.5 bits, snicker...  */
+#define SERIAL_1_AND_A_HALF_STOPBITS 2 /* 1.5 bits, snicker...  */
 #define SERIAL_2_STOPBITS 3
 
 extern int serial_setstopbits (struct serial *scb, int num);
 
-#define GDBPARITY_NONE     0
-#define GDBPARITY_ODD      1
-#define GDBPARITY_EVEN     2
+#define GDBPARITY_NONE 0
+#define GDBPARITY_ODD 1
+#define GDBPARITY_EVEN 2
 
 /* Set parity for serial port. Returns 0 for success, -1 for failure.  */
 
@@ -214,8 +215,8 @@ extern int serial_is_async_p (struct serial *scb);
    callback.  */
 
 typedef void (serial_event_ftype) (struct serial *scb, void *context);
-extern void serial_async (struct serial *scb,
-			  serial_event_ftype *handler, void *context);
+extern void serial_async (struct serial *scb, serial_event_ftype *handler,
+			  void *context);
 
 /* Trace/debug mechanism.
 
@@ -226,90 +227,88 @@ extern void serial_debug (struct serial *scb, int debug_p);
 
 extern int serial_debug_p (struct serial *scb);
 
-
 /* Details of an instance of a serial object.  */
 
 struct serial
-  {
-    /* serial objects are ref counted (but not the underlying
+{
+  /* serial objects are ref counted (but not the underlying
        connection, just the object's lifetime in memory).  */
-    int refcnt;
+  int refcnt;
 
-    int fd;			/* File descriptor */
-    /* File descriptor for a separate error stream that should be
+  int fd; /* File descriptor */
+  /* File descriptor for a separate error stream that should be
        immediately forwarded to gdb_stderr.  This may be -1.
        If != -1, this descriptor should be non-blocking or
        ops->avail should be non-NULL.  */
-    int error_fd;               
-    const struct serial_ops *ops; /* Function vector */
-    void *state;       		/* Local context info for open FD */
-    serial_ttystate ttystate;	/* Not used (yet) */
-    int bufcnt;			/* Amount of data remaining in receive
+  int error_fd;
+  const struct serial_ops *ops; /* Function vector */
+  void *state;			/* Local context info for open FD */
+  serial_ttystate ttystate;	/* Not used (yet) */
+  int bufcnt;			/* Amount of data remaining in receive
 				   buffer.  -ve for sticky errors.  */
-    unsigned char *bufp;	/* Current byte */
-    unsigned char buf[BUFSIZ];	/* Da buffer itself */
-    char *name;			/* The name of the device or host */
-    struct serial *next;	/* Pointer to the next `struct serial *' */
-    int debug_p;		/* Trace this serial devices operation.  */
-    int async_state;		/* Async internal state.  */
-    void *async_context;	/* Async event thread's context */
-    serial_event_ftype *async_handler;/* Async event handler */
-  };
+  unsigned char *bufp;		/* Current byte */
+  unsigned char buf[BUFSIZ];	/* Da buffer itself */
+  char *name;			/* The name of the device or host */
+  struct serial *next;		/* Pointer to the next `struct serial *' */
+  int debug_p;			/* Trace this serial devices operation.  */
+  int async_state;		/* Async internal state.  */
+  void *async_context;		/* Async event thread's context */
+  serial_event_ftype *async_handler; /* Async event handler */
+};
 
 struct serial_ops
-  {
-    const char *name;
-    int (*open) (struct serial *, const char *name);
-    void (*close) (struct serial *);
-    int (*fdopen) (struct serial *, int fd);
-    int (*readchar) (struct serial *, int timeout);
-    int (*write) (struct serial *, const void *buf, size_t count);
-    /* Discard pending output */
-    int (*flush_output) (struct serial *);
-    /* Discard pending input */
-    int (*flush_input) (struct serial *);
-    int (*send_break) (struct serial *);
-    void (*go_raw) (struct serial *);
-    serial_ttystate (*get_tty_state) (struct serial *);
-    serial_ttystate (*copy_tty_state) (struct serial *, serial_ttystate);
-    int (*set_tty_state) (struct serial *, serial_ttystate);
-    void (*print_tty_state) (struct serial *, serial_ttystate,
-			     struct ui_file *);
-    int (*setbaudrate) (struct serial *, int rate);
-    int (*setstopbits) (struct serial *, int num);
-    /* Set the value PARITY as parity setting for serial object.
+{
+  const char *name;
+  int (*open) (struct serial *, const char *name);
+  void (*close) (struct serial *);
+  int (*fdopen) (struct serial *, int fd);
+  int (*readchar) (struct serial *, int timeout);
+  int (*write) (struct serial *, const void *buf, size_t count);
+  /* Discard pending output */
+  int (*flush_output) (struct serial *);
+  /* Discard pending input */
+  int (*flush_input) (struct serial *);
+  int (*send_break) (struct serial *);
+  void (*go_raw) (struct serial *);
+  serial_ttystate (*get_tty_state) (struct serial *);
+  serial_ttystate (*copy_tty_state) (struct serial *, serial_ttystate);
+  int (*set_tty_state) (struct serial *, serial_ttystate);
+  void (*print_tty_state) (struct serial *, serial_ttystate, struct ui_file *);
+  int (*setbaudrate) (struct serial *, int rate);
+  int (*setstopbits) (struct serial *, int num);
+  /* Set the value PARITY as parity setting for serial object.
        Return 0 in the case of success.  */
-    int (*setparity) (struct serial *, int parity);
-    /* Wait for output to drain.  */
-    int (*drain_output) (struct serial *);
-    /* Change the serial device into/out of asynchronous mode, call
+  int (*setparity) (struct serial *, int parity);
+  /* Wait for output to drain.  */
+  int (*drain_output) (struct serial *);
+  /* Change the serial device into/out of asynchronous mode, call
        the specified function when ever there is something
        interesting.  */
-    void (*async) (struct serial *scb, int async_p);
-    /* Perform a low-level read operation, reading (at most) COUNT
+  void (*async) (struct serial *scb, int async_p);
+  /* Perform a low-level read operation, reading (at most) COUNT
        bytes into SCB->BUF.  Return zero at end of file.  */
-    int (*read_prim)(struct serial *scb, size_t count);
-    /* Perform a low-level write operation, writing (at most) COUNT
+  int (*read_prim) (struct serial *scb, size_t count);
+  /* Perform a low-level write operation, writing (at most) COUNT
        bytes from BUF.  */
-    int (*write_prim)(struct serial *scb, const void *buf, size_t count);
-    /* Return that number of bytes that can be read from FD
+  int (*write_prim) (struct serial *scb, const void *buf, size_t count);
+  /* Return that number of bytes that can be read from FD
        without blocking.  Return value of -1 means that the
        read will not block even if less that requested bytes
        are available.  */
-    int (*avail)(struct serial *scb, int fd);
+  int (*avail) (struct serial *scb, int fd);
 
 #ifdef USE_WIN32API
-    /* Return a handle to wait on, indicating available data from SCB
+  /* Return a handle to wait on, indicating available data from SCB
        when signaled, in *READ.  Return a handle indicating errors
        in *EXCEPT.  */
-    void (*wait_handle) (struct serial *scb, HANDLE *read, HANDLE *except);
-    void (*done_wait_handle) (struct serial *scb);
+  void (*wait_handle) (struct serial *scb, HANDLE *read, HANDLE *except);
+  void (*done_wait_handle) (struct serial *scb);
 #endif /* USE_WIN32API */
-  };
+};
 
 /* Add a new serial interface to the interface list.  */
 
-extern void serial_add_interface (const struct serial_ops * optable);
+extern void serial_add_interface (const struct serial_ops *optable);
 
 /* File in which to record the remote debugging session.  */
 

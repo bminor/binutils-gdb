@@ -67,7 +67,8 @@ struct block_syms_progress_smob
 };
 
 static const char block_smob_name[] = "gdb:block";
-static const char block_syms_progress_smob_name[] = "gdb:block-symbols-iterator";
+static const char block_syms_progress_smob_name[]
+  = "gdb:block-symbols-iterator";
 
 /* The tag Guile knows the block smobs by.  */
 static scm_t_bits block_smob_tag;
@@ -85,8 +86,7 @@ struct bkscm_deleter
   /* Helper function for bkscm_del_objfile_blocks to mark the block
      as invalid.  */
 
-  static int
-  bkscm_mark_block_invalid (void **slot, void *info)
+  static int bkscm_mark_block_invalid (void **slot, void *info)
   {
     block_smob *b_smob = (block_smob *) *slot;
 
@@ -104,8 +104,8 @@ struct bkscm_deleter
 };
 
 static const registry<objfile>::key<htab, bkscm_deleter>
-     bkscm_objfile_data_key;
-
+  bkscm_objfile_data_key;
+
 /* Administrivia for block smobs.  */
 
 /* Helper function to hash a block_smob.  */
@@ -126,8 +126,7 @@ bkscm_eq_block_smob (const void *ap, const void *bp)
   const block_smob *a = (const block_smob *) ap;
   const block_smob *b = (const block_smob *) bp;
 
-  return (a->block == b->block
-	  && a->block != NULL);
+  return (a->block == b->block && a->block != NULL);
 }
 
 /* Return the struct block pointer -> SCM mapping table.
@@ -187,8 +186,8 @@ bkscm_print_block_smob (SCM self, SCM port, scm_print_state *pstate)
   if (b->function () != NULL)
     gdbscm_printf (port, " %s", b->function ()->print_name ());
 
-  gdbscm_printf (port, " %s-%s",
-		 hex_string (b->start ()), hex_string (b->end ()));
+  gdbscm_printf (port, " %s-%s", hex_string (b->start ()),
+		 hex_string (b->end ()));
 
   scm_puts (">", port);
 
@@ -203,8 +202,8 @@ bkscm_print_block_smob (SCM self, SCM port, scm_print_state *pstate)
 static SCM
 bkscm_make_block_smob (void)
 {
-  block_smob *b_smob = (block_smob *)
-    scm_gc_malloc (sizeof (block_smob), block_smob_name);
+  block_smob *b_smob
+    = (block_smob *) scm_gc_malloc (sizeof (block_smob), block_smob_name);
   SCM b_scm;
 
   b_smob->block = NULL;
@@ -304,7 +303,7 @@ bkscm_get_valid_block_smob_arg_unsafe (SCM self, int arg_pos,
   if (!bkscm_is_valid (b_smob))
     {
       gdbscm_invalid_object_error (func_name, arg_pos, self,
-				   _("<gdb:block>"));
+				   _ ("<gdb:block>"));
     }
 
   return b_smob;
@@ -321,8 +320,8 @@ bkscm_get_valid_block (SCM scm, int arg_pos, const char *func_name, SCM *excp)
 
   if (!bkscm_is_block (scm))
     {
-      *excp = gdbscm_make_type_error (func_name, arg_pos, scm,
-				      block_smob_name);
+      *excp
+	= gdbscm_make_type_error (func_name, arg_pos, scm, block_smob_name);
       return NULL;
     }
 
@@ -330,7 +329,7 @@ bkscm_get_valid_block (SCM scm, int arg_pos, const char *func_name, SCM *excp)
   if (!bkscm_is_valid (b_smob))
     {
       *excp = gdbscm_make_invalid_object_error (func_name, arg_pos, scm,
-						_("<gdb:block>"));
+						_ ("<gdb:block>"));
       return NULL;
     }
 
@@ -354,7 +353,6 @@ bkscm_scm_to_block (SCM block_scm, int arg_pos, const char *func_name,
   return NULL;
 }
 
-
 /* Block methods.  */
 
 /* (block-valid? <gdb:block>) -> boolean
@@ -519,7 +517,7 @@ gdbscm_block_symbols (SCM self)
 
   return scm_reverse_x (result, SCM_EOL);
 }
-
+
 /* The <gdb:block-symbols-iterator> object,
    for iterating over all symbols in a block.  */
 
@@ -543,17 +541,17 @@ bkscm_print_block_syms_progress_smob (SCM self, SCM port,
 	  {
 	    struct compunit_symtab *cust;
 
-	    gdbscm_printf (port, " %s", 
-			   i_smob->iter.which == GLOBAL_BLOCK
-			   ? "global" : "static");
+	    gdbscm_printf (port, " %s",
+			   i_smob->iter.which == GLOBAL_BLOCK ? "global"
+							      : "static");
 	    if (i_smob->iter.idx != -1)
 	      gdbscm_printf (port, " @%d", i_smob->iter.idx);
-	    cust = (i_smob->iter.idx == -1
-		    ? i_smob->iter.d.compunit_symtab
-		    : i_smob->iter.d.compunit_symtab->includes[i_smob->iter.idx]);
-	    gdbscm_printf (port, " %s",
-			   symtab_to_filename_for_display
-			     (cust->primary_filetab ()));
+	    cust = (i_smob->iter.idx == -1 ? i_smob->iter.d.compunit_symtab
+					   : i_smob->iter.d.compunit_symtab
+					       ->includes[i_smob->iter.idx]);
+	    gdbscm_printf (
+	      port, " %s",
+	      symtab_to_filename_for_display (cust->primary_filetab ()));
 	    break;
 	  }
 	case FIRST_LOCAL_BLOCK:
@@ -641,15 +639,14 @@ gdbscm_block_next_symbol_x (SCM self)
   iter_smob = (iterator_smob *) SCM_SMOB_DATA (iter_scm);
 
   block_scm = itscm_iterator_smob_object (iter_smob);
-  b_smob = bkscm_get_valid_block_smob_arg_unsafe (block_scm,
-						  SCM_ARG1, FUNC_NAME);
+  b_smob
+    = bkscm_get_valid_block_smob_arg_unsafe (block_scm, SCM_ARG1, FUNC_NAME);
   block = b_smob->block;
 
   progress = itscm_iterator_smob_progress (iter_smob);
 
-  SCM_ASSERT_TYPE (bkscm_is_block_syms_progress (progress),
-		   progress, SCM_ARG1, FUNC_NAME,
-		   block_syms_progress_smob_name);
+  SCM_ASSERT_TYPE (bkscm_is_block_syms_progress (progress), progress, SCM_ARG1,
+		   FUNC_NAME, block_syms_progress_smob_name);
   p_smob = (block_syms_progress_smob *) SCM_SMOB_DATA (progress);
 
   if (!p_smob->initialized_p)
@@ -665,7 +662,7 @@ gdbscm_block_next_symbol_x (SCM self)
 
   return syscm_scm_from_symbol (sym);
 }
-
+
 /* (lookup-block address) -> <gdb:block>
    Returns the innermost lexical block containing the specified pc value,
    or #f if there is none.  */
@@ -696,83 +693,70 @@ gdbscm_lookup_block (SCM pc_scm)
   if (cust == NULL || cust->objfile () == NULL)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, pc_scm,
-				 _("cannot locate object file for block"));
+				 _ ("cannot locate object file for block"));
     }
 
   if (block != NULL)
     return bkscm_scm_from_block (block, cust->objfile ());
   return SCM_BOOL_F;
 }
-
+
 /* Initialize the Scheme block support.  */
 
-static const scheme_function block_functions[] =
-{
-  { "block?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_p),
-    "\
+static const scheme_function block_functions[]
+  = { { "block?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_p), "\
 Return #t if the object is a <gdb:block> object." },
 
-  { "block-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_valid_p),
-    "\
+      { "block-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_valid_p), "\
 Return #t if the block is valid.\n\
 A block becomes invalid when its objfile is freed." },
 
-  { "block-start", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_start),
-    "\
+      { "block-start", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_start), "\
 Return the start address of the block." },
 
-  { "block-end", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_end),
-    "\
+      { "block-end", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_end), "\
 Return the end address of the block." },
 
-  { "block-function", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_function),
-    "\
+      { "block-function", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_function), "\
 Return the gdb:symbol object of the function containing the block\n\
 or #f if the block does not live in any function." },
 
-  { "block-superblock", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_superblock),
-    "\
+      { "block-superblock", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_superblock),
+	"\
 Return the superblock (parent block) of the block." },
 
-  { "block-global-block", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_global_block),
-    "\
+      { "block-global-block", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_block_global_block), "\
 Return the global block of the block." },
 
-  { "block-static-block", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_static_block),
-    "\
+      { "block-static-block", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_block_static_block), "\
 Return the static block of the block." },
 
-  { "block-global?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_global_p),
-    "\
+      { "block-global?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_global_p), "\
 Return #t if block is a global block." },
 
-  { "block-static?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_static_p),
-    "\
+      { "block-static?", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_static_p), "\
 Return #t if block is a static block." },
 
-  { "block-symbols", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_symbols),
-    "\
+      { "block-symbols", 1, 0, 0, as_a_scm_t_subr (gdbscm_block_symbols), "\
 Return a list of all symbols (as <gdb:symbol> objects) in the block." },
 
-  { "make-block-symbols-iterator", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_make_block_syms_iter),
-    "\
+      { "make-block-symbols-iterator", 1, 0, 0,
+	as_a_scm_t_subr (gdbscm_make_block_syms_iter), "\
 Return a <gdb:iterator> object for iterating over all symbols in the block." },
 
-  { "block-symbols-progress?", 1, 0, 0,
-    as_a_scm_t_subr (bkscm_block_syms_progress_p),
-    "\
+      { "block-symbols-progress?", 1, 0, 0,
+	as_a_scm_t_subr (bkscm_block_syms_progress_p), "\
 Return #t if the object is a <gdb:block-symbols-progress> object." },
 
-  { "lookup-block", 1, 0, 0, as_a_scm_t_subr (gdbscm_lookup_block),
-    "\
+      { "lookup-block", 1, 0, 0, as_a_scm_t_subr (gdbscm_lookup_block), "\
 Return the innermost GDB block containing the address or #f if none found.\n\
 \n\
   Arguments:\n\
     address: the address to lookup" },
 
-  END_FUNCTIONS
-};
+      END_FUNCTIONS };
 
 void
 gdbscm_initialize_blocks (void)

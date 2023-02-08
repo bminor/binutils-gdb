@@ -31,12 +31,10 @@
 typedef bool target_read_memory_ftype (CORE_ADDR, gdb_byte *, size_t);
 
 /* Utility implementation of searching memory.  */
-extern int simple_search_memory
-  (gdb::function_view<target_read_memory_ftype> read_memory,
-   CORE_ADDR start_addr,
-   ULONGEST search_space_len,
-   const gdb_byte *pattern,
-   ULONGEST pattern_len,
-   CORE_ADDR *found_addrp);
+extern int
+simple_search_memory (gdb::function_view<target_read_memory_ftype> read_memory,
+                      CORE_ADDR start_addr, ULONGEST search_space_len,
+                      const gdb_byte *pattern, ULONGEST pattern_len,
+                      CORE_ADDR *found_addrp);
 
 #endif /* COMMON_SEARCH_H */

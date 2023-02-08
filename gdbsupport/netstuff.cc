@@ -50,41 +50,40 @@ parse_connection_spec_without_prefix (std::string spec, struct addrinfo *hint)
      - ai_family is not AF_INET, and
        - spec[0] is '[', or
        - the number of ':' on spec is greater than 1.  */
-  bool is_ipv6 = (hint->ai_family == AF_INET6
-		  || (hint->ai_family != AF_INET
-		      && (spec[0] == '['
-			  || std::count (spec.begin (),
-					 spec.end (), ':') > 1)));
+  bool is_ipv6
+    = (hint->ai_family == AF_INET6
+       || (hint->ai_family != AF_INET
+           && (spec[0] == '['
+               || std::count (spec.begin (), spec.end (), ':') > 1)));
 
   if (is_ipv6)
     {
       if (spec[0] == '[')
-	{
-	  /* IPv6 addresses can be written as '[ADDR]:PORT', and we
+        {
+          /* IPv6 addresses can be written as '[ADDR]:PORT', and we
 	     support this notation.  */
-	  size_t close_bracket_pos = spec.find_first_of (']');
+          size_t close_bracket_pos = spec.find_first_of (']');
 
-	  if (close_bracket_pos == std::string::npos)
-	    error (_("Missing close bracket in hostname '%s'"),
-		   spec.c_str ());
+          if (close_bracket_pos == std::string::npos)
+            error (_ ("Missing close bracket in hostname '%s'"),
+                   spec.c_str ());
 
-	  hint->ai_family = AF_INET6;
+          hint->ai_family = AF_INET6;
 
-	  const char c = spec[close_bracket_pos + 1];
+          const char c = spec[close_bracket_pos + 1];
 
-	  if (c == '\0')
-	    last_colon_pos = std::string::npos;
-	  else if (c != ':')
-	    error (_("Invalid cruft after close bracket in '%s'"),
-		   spec.c_str ());
+          if (c == '\0')
+            last_colon_pos = std::string::npos;
+          else if (c != ':')
+            error (_ ("Invalid cruft after close bracket in '%s'"),
+                   spec.c_str ());
 
-	  /* Erase both '[' and ']'.  */
-	  spec.erase (0, 1);
-	  spec.erase (close_bracket_pos - 1, 1);
-	}
+          /* Erase both '[' and ']'.  */
+          spec.erase (0, 1);
+          spec.erase (close_bracket_pos - 1, 1);
+        }
       else if (spec.find_first_of (']') != std::string::npos)
-	error (_("Missing open bracket in hostname '%s'"),
-	       spec.c_str ());
+        error (_ ("Missing open bracket in hostname '%s'"), spec.c_str ());
     }
 
   if (last_colon_pos == 0)
@@ -119,35 +118,31 @@ parse_connection_spec (const char *spec, struct addrinfo *hint)
   /* Struct to hold the association between valid prefixes, their
      family and socktype.  */
   struct host_prefix
-    {
-      /* The prefix.  */
-      const char *prefix;
+  {
+    /* The prefix.  */
+    const char *prefix;
 
-      /* The 'ai_family'.  */
-      int family;
+    /* The 'ai_family'.  */
+    int family;
 
-      /* The 'ai_socktype'.  */
-      int socktype;
-    };
-  static const struct host_prefix prefixes[] =
-    {
-      { "udp:",  AF_UNSPEC, SOCK_DGRAM },
-      { "tcp:",  AF_UNSPEC, SOCK_STREAM },
-      { "udp4:", AF_INET,   SOCK_DGRAM },
-      { "tcp4:", AF_INET,   SOCK_STREAM },
-      { "udp6:", AF_INET6,  SOCK_DGRAM },
-      { "tcp6:", AF_INET6,  SOCK_STREAM },
-    };
+    /* The 'ai_socktype'.  */
+    int socktype;
+  };
+  static const struct host_prefix prefixes[] = {
+    { "udp:", AF_UNSPEC, SOCK_DGRAM }, { "tcp:", AF_UNSPEC, SOCK_STREAM },
+    { "udp4:", AF_INET, SOCK_DGRAM },  { "tcp4:", AF_INET, SOCK_STREAM },
+    { "udp6:", AF_INET6, SOCK_DGRAM }, { "tcp6:", AF_INET6, SOCK_STREAM },
+  };
 
   for (const host_prefix prefix : prefixes)
     if (startswith (spec, prefix.prefix))
       {
-	spec += strlen (prefix.prefix);
-	hint->ai_family = prefix.family;
-	hint->ai_socktype = prefix.socktype;
-	hint->ai_protocol
-	  = hint->ai_socktype == SOCK_DGRAM ? IPPROTO_UDP : IPPROTO_TCP;
-	break;
+        spec += strlen (prefix.prefix);
+        hint->ai_family = prefix.family;
+        hint->ai_socktype = prefix.socktype;
+        hint->ai_protocol
+          = hint->ai_socktype == SOCK_DGRAM ? IPPROTO_UDP : IPPROTO_TCP;
+        break;
       }
 
   return parse_connection_spec_without_prefix (spec, hint);

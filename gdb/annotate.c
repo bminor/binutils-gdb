@@ -29,14 +29,12 @@
 #include "source.h"
 #include "objfiles.h"
 #include "source-cache.h"
-
 
 /* Prototypes for local functions.  */
 
 static void print_value_flags (struct type *);
 
 static void breakpoint_changed (struct breakpoint *b);
-
 
 void (*deprecated_annotate_signalled_hook) (void);
 void (*deprecated_annotate_signal_hook) (void);
@@ -161,7 +159,7 @@ annotate_signal (void)
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032signal\n"));
 }
-
+
 void
 annotate_breakpoints_headers (void)
 {
@@ -274,7 +272,7 @@ annotate_field_end (void)
   if (annotation_level == 2)
     printf_unfiltered (("\n\032\032field-end\n"));
 }
-
+
 void
 annotate_quit (void)
 {
@@ -448,8 +446,7 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
 	return false;
 
       annotate_source (s->fullname, line, (int) (*offsets)[line - 1],
-		       mid_statement, s->compunit ()->objfile ()->arch (),
-		       pc);
+		       mid_statement, s->compunit ()->objfile ()->arch (), pc);
 
       /* Update the current symtab and line.  */
       symtab_and_line sal;
@@ -464,13 +461,12 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
   return false;
 }
 
-
 void
 annotate_frame_begin (int level, struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   if (annotation_level > 1)
-    printf_unfiltered (("\n\032\032frame-begin %d %s\n"),
-		       level, paddress (gdbarch, pc));
+    printf_unfiltered (("\n\032\032frame-begin %d %s\n"), level,
+		       paddress (gdbarch, pc));
 }
 
 void
@@ -563,7 +559,7 @@ annotate_frame_end (void)
   if (annotation_level == 2)
     printf_unfiltered (("\n\032\032frame-end\n"));
 }
-
+
 void
 annotate_array_section_begin (int idx, struct type *elttype)
 {
@@ -624,6 +620,7 @@ breakpoint_changed (struct breakpoint *b)
 }
 
 void _initialize_annotate ();
+
 void
 _initialize_annotate ()
 {

@@ -34,7 +34,8 @@ mi_console_file::mi_console_file (ui_file *raw, const char *prefix, char quote)
   : m_raw (raw),
     m_prefix (prefix),
     m_quote (quote)
-{}
+{
+}
 
 void
 mi_console_file::write (const char *buf, long length_buf)

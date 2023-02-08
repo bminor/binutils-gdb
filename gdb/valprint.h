@@ -120,13 +120,14 @@ static inline unsigned int
 get_print_max_chars (const struct value_print_options *options)
 {
   return (options->print_max_chars != PRINT_MAX_CHARS_ELEMENTS
-	  ? options->print_max_chars : options->print_max);
+	    ? options->print_max_chars
+	    : options->print_max);
 }
 
 /* Create an option_def_group for the value_print options, with OPTS
    as context.  */
-extern gdb::option::option_def_group make_value_print_options_def_group
-  (value_print_options *opts);
+extern gdb::option::option_def_group
+make_value_print_options_def_group (value_print_options *opts);
 
 /* The global print options set by the user.  In general this should
    not be directly accessed, except by set/show commands.  Ordinary
@@ -149,7 +150,6 @@ extern void maybe_print_array_index (struct type *index_type, LONGEST index,
 				     struct ui_file *stream,
 				     const struct value_print_options *);
 
-
 /* Print elements of an array.  */
 
 extern void value_print_array_elements (struct value *, struct ui_file *, int,
@@ -162,9 +162,10 @@ extern void value_print_array_elements (struct value *, struct ui_file *, int,
    This is how the elements of an array or structure are printed
    with a format.  */
 
-extern void value_print_scalar_formatted
-  (struct value *val, const struct value_print_options *options,
-   int size, struct ui_file *stream);
+extern void
+value_print_scalar_formatted (struct value *val,
+			      const struct value_print_options *options,
+			      int size, struct ui_file *stream);
 
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
 				unsigned int, enum bfd_endian, bool,
@@ -176,13 +177,13 @@ extern void print_octal_chars (struct ui_file *, const gdb_byte *,
 extern void print_decimal_chars (struct ui_file *, const gdb_byte *,
 				 unsigned int, bool, enum bfd_endian);
 
-extern void print_hex_chars (struct ui_file *, const gdb_byte *,
-			     unsigned int, enum bfd_endian, bool);
+extern void print_hex_chars (struct ui_file *, const gdb_byte *, unsigned int,
+			     enum bfd_endian, bool);
 
-extern void print_function_pointer_address (const struct value_print_options *options,
-					    struct gdbarch *gdbarch,
-					    CORE_ADDR address,
-					    struct ui_file *stream);
+extern void
+print_function_pointer_address (const struct value_print_options *options,
+				struct gdbarch *gdbarch, CORE_ADDR address,
+				struct ui_file *stream);
 
 /* Helper function to check the validity of some bits of a value.
 
@@ -234,23 +235,23 @@ struct generic_val_print_decorations
   const char *array_end;
 };
 
-
 /* Print a value in a generic way.  VAL is the value, STREAM is where
    to print it, RECURSE is the recursion depth, OPTIONS describe how
    the printing should be done, and D is the language-specific
    decorations object.  Note that structs and unions cannot be printed
    by this function.  */
 
-extern void generic_value_print (struct value *val, struct ui_file *stream,
-				 int recurse,
-				 const struct value_print_options *options,
-				 const struct generic_val_print_decorations *d);
+extern void
+generic_value_print (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options,
+		     const struct generic_val_print_decorations *d);
 
-extern void generic_emit_char (int c, struct type *type, struct ui_file *stream,
-			       int quoter, const char *encoding);
+extern void generic_emit_char (int c, struct type *type,
+			       struct ui_file *stream, int quoter,
+			       const char *encoding);
 
-extern void generic_printstr (struct ui_file *stream, struct type *type, 
-			      const gdb_byte *string, unsigned int length, 
+extern void generic_printstr (struct ui_file *stream, struct type *type,
+			      const gdb_byte *string, unsigned int length,
 			      const char *encoding, int force_ellipses,
 			      int quote_char, int c_style_terminator,
 			      const struct value_print_options *options);
@@ -264,16 +265,16 @@ extern void output_command (const char *args, int from_tty);
 extern int val_print_scalar_type_p (struct type *type);
 
 struct format_data
-  {
-    int count;
-    char format;
-    char size;
-    bool print_tags;
+{
+  int count;
+  char format;
+  char size;
+  bool print_tags;
 
-    /* True if the value should be printed raw -- that is, bypassing
+  /* True if the value should be printed raw -- that is, bypassing
        python-based formatters.  */
-    unsigned char raw;
-  };
+  unsigned char raw;
+};
 
 extern void print_command_parse_format (const char **expp, const char *cmdname,
 					value_print_options *opts);
@@ -299,14 +300,11 @@ extern void print_command_completer (struct cmd_list_element *ignore,
    0 in case of success, when all the info in the OUT parameters is
    valid.  Return 1 otherwise.  */
 
-extern int build_address_symbolic (struct gdbarch *,
-				   CORE_ADDR addr,
+extern int build_address_symbolic (struct gdbarch *, CORE_ADDR addr,
 				   bool do_demangle,
 				   bool prefer_sym_over_minsym,
-				   std::string *name,
-				   int *offset,
-				   std::string *filename,
-				   int *line,
+				   std::string *name, int *offset,
+				   std::string *filename, int *line,
 				   int *unmapped);
 
 /* Check to see if RECURSE is greater than or equal to the allowed
@@ -320,10 +318,10 @@ extern bool val_print_check_max_depth (struct ui_file *stream, int recurse,
 
 /* Like common_val_print, but call value_check_printable first.  */
 
-extern void common_val_print_checked
-  (struct value *val,
-   struct ui_file *stream, int recurse,
-   const struct value_print_options *options,
-   const struct language_defn *language);
+extern void
+common_val_print_checked (struct value *val, struct ui_file *stream,
+			  int recurse,
+			  const struct value_print_options *options,
+			  const struct language_defn *language);
 
 #endif

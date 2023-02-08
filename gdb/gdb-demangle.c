@@ -19,7 +19,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 /*  This file contains support code for C++ demangling that is common
    to a styles of demangling, and GDB specific.  */
 
@@ -47,12 +46,12 @@
 bool demangle = true;
 
 static void
-show_demangle (struct ui_file *file, int from_tty,
-	       struct cmd_list_element *c, const char *value)
+show_demangle (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+	       const char *value)
 {
   gdb_printf (file,
-	      _("Demangling of encoded C++/ObjC names "
-		"when displaying symbols is %s.\n"),
+	      _ ("Demangling of encoded C++/ObjC names "
+		 "when displaying symbols is %s.\n"),
 	      value);
 }
 
@@ -64,8 +63,8 @@ show_asm_demangle (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
   gdb_printf (file,
-	      _("Demangling of C++/ObjC names in "
-		"disassembly listings is %s.\n"),
+	      _ ("Demangling of C++/ObjC names in "
+		 "disassembly listings is %s.\n"),
 	      value);
 }
 
@@ -79,11 +78,12 @@ static const char *current_demangling_style_string;
    _initialize_demangler from libiberty_demanglers[] array.  */
 
 static const char **demangling_style_names;
+
 static void
-show_demangling_style_names(struct ui_file *file, int from_tty,
-			    struct cmd_list_element *c, const char *value)
+show_demangling_style_names (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("The current C++ demangling style is \"%s\".\n"),
+  gdb_printf (file, _ ("The current C++ demangling style is \"%s\".\n"),
 	      value);
 }
 
@@ -104,8 +104,8 @@ show_demangling_style_names(struct ui_file *file, int from_tty,
    a malloc'd string, even if it is a null-string.  */
 
 static void
-set_demangling_command (const char *ignore,
-			int from_tty, struct cmd_list_element *c)
+set_demangling_command (const char *ignore, int from_tty,
+			struct cmd_list_element *c)
 {
   const struct demangler_engine *dem;
   int i;
@@ -116,11 +116,10 @@ set_demangling_command (const char *ignore,
      If we match, update the current demangling style enum.  */
 
   for (dem = libiberty_demanglers, i = 0;
-       dem->demangling_style != unknown_demangling; 
-       dem++)
+       dem->demangling_style != unknown_demangling; dem++)
     {
-      if (strcmp (current_demangling_style_string,
-		  dem->demangling_style_name) == 0)
+      if (strcmp (current_demangling_style_string, dem->demangling_style_name)
+	  == 0)
 	{
 	  current_demangling_style = dem->demangling_style;
 	  current_demangling_style_string = demangling_style_names[i];
@@ -145,7 +144,7 @@ set_demangling_command (const char *ignore,
    meaning.  We don't currently try to handle '_' because the precise forms
    of the names are different on those targets.  */
 
-static char cplus_markers[] = {'$', '.', '\0'};
+static char cplus_markers[] = { '$', '.', '\0' };
 
 /* See documentation in gdb-demangle.h.  */
 
@@ -169,8 +168,7 @@ demangle_command (const char *args, int from_tty)
   arg_start = arg_buf.c_str ();
 
   std::string lang_name;
-  while (processing_args
-	 && *arg_start == '-')
+  while (processing_args && *arg_start == '-')
     {
       const char *p = skip_to_space (arg_start);
 
@@ -187,7 +185,7 @@ demangle_command (const char *args, int from_tty)
   name = arg_start;
 
   if (*name == '\0')
-    error (_("Usage: demangle [-l LANGUAGE] [--] NAME"));
+    error (_ ("Usage: demangle [-l LANGUAGE] [--] NAME"));
 
   if (!lang_name.empty ())
     {
@@ -195,7 +193,7 @@ demangle_command (const char *args, int from_tty)
 
       lang_enum = language_enum (lang_name.c_str ());
       if (lang_enum == language_unknown)
-	error (_("Unknown language \"%s\""), lang_name.c_str ());
+	error (_ ("Unknown language \"%s\""), lang_name.c_str ());
       lang = language_def (lang_enum);
     }
   else
@@ -206,10 +204,11 @@ demangle_command (const char *args, int from_tty)
   if (demangled != NULL)
     gdb_printf ("%s\n", demangled.get ());
   else
-    error (_("Can't demangle \"%s\""), name);
+    error (_ ("Can't demangle \"%s\""), name);
 }
 
 void _initialize_gdb_demangle ();
+
 void
 _initialize_gdb_demangle ()
 {
@@ -218,12 +217,11 @@ _initialize_gdb_demangle ()
   /* Fill the demangling_style_names[] array, and set the default
      demangling style chosen at compilation time.  */
   for (ndems = 0;
-       libiberty_demanglers[ndems].demangling_style != unknown_demangling; 
+       libiberty_demanglers[ndems].demangling_style != unknown_demangling;
        ndems++)
     ;
   demangling_style_names = XCNEWVEC (const char *, ndems + 1);
-  for (i = 0;
-       libiberty_demanglers[i].demangling_style != unknown_demangling; 
+  for (i = 0; libiberty_demanglers[i].demangling_style != unknown_demangling;
        i++)
     {
       demangling_style_names[i]
@@ -234,31 +232,32 @@ _initialize_gdb_demangle ()
 	current_demangling_style_string = demangling_style_names[i];
     }
 
-  add_setshow_boolean_cmd ("demangle", class_support, &demangle, _("\
-Set demangling of encoded C++/ObjC names when displaying symbols."), _("\
-Show demangling of encoded C++/ObjC names when displaying symbols."), NULL,
-			   NULL,
-			   show_demangle,
-			   &setprintlist, &showprintlist);
+  add_setshow_boolean_cmd ("demangle", class_support, &demangle, _ ("\
+Set demangling of encoded C++/ObjC names when displaying symbols."),
+			   _ ("\
+Show demangling of encoded C++/ObjC names when displaying symbols."),
+			   NULL, NULL, show_demangle, &setprintlist,
+			   &showprintlist);
 
-  add_setshow_boolean_cmd ("asm-demangle", class_support, &asm_demangle, _("\
-Set demangling of C++/ObjC names in disassembly listings."), _("\
-Show demangling of C++/ObjC names in disassembly listings."), NULL,
-			   NULL,
-			   show_asm_demangle,
-			   &setprintlist, &showprintlist);
+  add_setshow_boolean_cmd ("asm-demangle", class_support, &asm_demangle, _ ("\
+Set demangling of C++/ObjC names in disassembly listings."),
+			   _ ("\
+Show demangling of C++/ObjC names in disassembly listings."),
+			   NULL, NULL, show_asm_demangle, &setprintlist,
+			   &showprintlist);
 
   add_setshow_enum_cmd ("demangle-style", class_support,
 			demangling_style_names,
-			&current_demangling_style_string, _("\
-Set the current C++ demangling style."), _("\
-Show the current C++ demangling style."), _("\
+			&current_demangling_style_string, _ ("\
+Set the current C++ demangling style."),
+			_ ("\
+Show the current C++ demangling style."),
+			_ ("\
 Use `set demangle-style' without arguments for a list of demangling styles."),
-			set_demangling_command,
-			show_demangling_style_names,
+			set_demangling_command, show_demangling_style_names,
 			&setlist, &showlist);
 
-  add_cmd ("demangle", class_support, demangle_command, _("\
+  add_cmd ("demangle", class_support, demangle_command, _ ("\
 Demangle a mangled name.\n\
 Usage: demangle [-l LANGUAGE] [--] NAME\n\
 If LANGUAGE is not specified, NAME is demangled in the current language."),

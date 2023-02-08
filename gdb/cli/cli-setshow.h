@@ -40,15 +40,13 @@ extern int parse_cli_boolean_value (const char **arg);
    would parse "-obj --" as part of the expression as well.  */
 extern LONGEST parse_cli_var_integer (var_types var_type,
 				      const literal_def *extra_literals,
-				      const char **arg,
-				      bool expression);
+				      const char **arg, bool expression);
 
 /* Parse ARG, an option to a var_enum variable.  ENUM is a
    null-terminated array of possible values. Either returns the parsed
    value on success or throws an error.  ARG is advanced past the
    parsed value.  */
-const char *parse_cli_var_enum (const char **args,
-				const char *const *enums);
+const char *parse_cli_var_enum (const char **args, const char *const *enums);
 
 extern void do_set_command (const char *arg, int from_tty,
 			    struct cmd_list_element *c);

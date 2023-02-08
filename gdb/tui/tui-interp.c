@@ -42,9 +42,11 @@ static bool tui_start_enabled = false;
 class tui_interp final : public cli_interp_base
 {
 public:
+
   explicit tui_interp (const char *name)
     : cli_interp_base (name)
-  {}
+  {
+  }
 
   void init (bool top_level) override;
   void resume () override;
@@ -152,9 +154,8 @@ tui_interp::interp_ui_out ()
 void
 tui_interp::exec (const char *command_str)
 {
-  internal_error (_("tui_exec called"));
+  internal_error (_ ("tui_exec called"));
 }
-
 
 /* Factory for TUI interpreters.  */
 
@@ -165,6 +166,7 @@ tui_interp_factory (const char *name)
 }
 
 void _initialize_tui_interp ();
+
 void
 _initialize_tui_interp ()
 {

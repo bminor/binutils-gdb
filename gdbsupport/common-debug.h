@@ -33,27 +33,28 @@ extern bool show_debug_regs;
 /* Print a formatted message to the appropriate channel for
    debugging output for the client.  */
 
-extern void debug_printf (const char *format, ...)
-     ATTRIBUTE_PRINTF (1, 2);
+extern void debug_printf (const char *format, ...) ATTRIBUTE_PRINTF (1, 2);
 
 /* Print a formatted message to the appropriate channel for
    debugging output for the client.  This function must be
    provided by the client.  */
 
 extern void debug_vprintf (const char *format, va_list ap)
-     ATTRIBUTE_PRINTF (1, 0);
+  ATTRIBUTE_PRINTF (1, 0);
 
 /* Print a debug statement prefixed with the module and function name, and
    with a newline at the end.  */
 
-extern void ATTRIBUTE_PRINTF (3, 4) debug_prefixed_printf
-  (const char *module, const char *func, const char *format, ...);
+extern void ATTRIBUTE_PRINTF (3, 4)
+  debug_prefixed_printf (const char *module, const char *func,
+                         const char *format, ...);
 
 /* Print a debug statement prefixed with the module and function name, and
    with a newline at the end.  */
 
-extern void ATTRIBUTE_PRINTF (3, 0) debug_prefixed_vprintf
-  (const char *module, const char *func, const char *format, va_list args);
+extern void ATTRIBUTE_PRINTF (3, 0)
+  debug_prefixed_vprintf (const char *module, const char *func,
+                          const char *format, va_list args);
 
 /* Helper to define "_debug_print" macros.
 
@@ -64,19 +65,20 @@ extern void ATTRIBUTE_PRINTF (3, 0) debug_prefixed_vprintf
    forwarded to debug_prefixed_printf.  */
 
 #define debug_prefixed_printf_cond(debug_enabled_cond, module, fmt, ...) \
-  do \
-    { \
-      if (debug_enabled_cond) \
-	debug_prefixed_printf (module, __func__, fmt, ##__VA_ARGS__); \
-    } \
+  do                                                                     \
+    {                                                                    \
+      if (debug_enabled_cond)                                            \
+        debug_prefixed_printf (module, __func__, fmt, ##__VA_ARGS__);    \
+    }                                                                    \
   while (0)
 
-#define debug_prefixed_printf_cond_nofunc(debug_enabled_cond, module, fmt, ...) \
-  do \
-    { \
-      if (debug_enabled_cond) \
-	debug_prefixed_printf (module, nullptr, fmt, ##__VA_ARGS__); \
-    } \
+#define debug_prefixed_printf_cond_nofunc(debug_enabled_cond, module, fmt, \
+                                          ...)                             \
+  do                                                                       \
+    {                                                                      \
+      if (debug_enabled_cond)                                              \
+        debug_prefixed_printf (module, nullptr, fmt, ##__VA_ARGS__);       \
+    }                                                                      \
   while (0)
 
 /* Nesting depth of scoped_debug_start_end objects.  */
@@ -110,10 +112,9 @@ struct scoped_debug_start_end
      for the message on exit.  */
 
   scoped_debug_start_end (PT &debug_enabled, const char *module,
-			  const char *func, const char *start_prefix,
-			  const char *end_prefix, const char *fmt,
-			  va_list args)
-    ATTRIBUTE_NULL_PRINTF (7, 0)
+                          const char *func, const char *start_prefix,
+                          const char *end_prefix, const char *fmt,
+                          va_list args) ATTRIBUTE_NULL_PRINTF (7, 0)
     : m_debug_enabled (debug_enabled),
       m_module (module),
       m_func (func),
@@ -122,17 +123,17 @@ struct scoped_debug_start_end
   {
     if (is_debug_enabled ())
       {
-	if (fmt != nullptr)
-	  {
-	    m_msg = string_vprintf (fmt, args);
-	    debug_prefixed_printf (m_module, m_func, "%s: %s",
-				   start_prefix, m_msg->c_str ());
-	  }
-	else
-	  debug_prefixed_printf (m_module, m_func, "%s", start_prefix);
+        if (fmt != nullptr)
+          {
+            m_msg = string_vprintf (fmt, args);
+            debug_prefixed_printf (m_module, m_func, "%s: %s", start_prefix,
+                                   m_msg->c_str ());
+          }
+        else
+          debug_prefixed_printf (m_module, m_func, "%s", start_prefix);
 
-	++debug_print_depth;
-	m_must_decrement_print_depth = true;
+        ++debug_print_depth;
+        m_must_decrement_print_depth = true;
       }
   }
 
@@ -159,33 +160,34 @@ struct scoped_debug_start_end
 
     if (m_must_decrement_print_depth)
       {
-	gdb_assert (debug_print_depth > 0);
-	--debug_print_depth;
+        gdb_assert (debug_print_depth > 0);
+        --debug_print_depth;
       }
 
     if (is_debug_enabled ())
       {
-	if (m_with_format)
-	  {
-	    if (m_msg.has_value ())
-	      debug_prefixed_printf (m_module, m_func, "%s: %s",
-				     m_end_prefix, m_msg->c_str ());
-	    else
-	      {
-		/* A format string was passed to the constructor, but debug
+        if (m_with_format)
+          {
+            if (m_msg.has_value ())
+              debug_prefixed_printf (m_module, m_func, "%s: %s", m_end_prefix,
+                                     m_msg->c_str ());
+            else
+              {
+                /* A format string was passed to the constructor, but debug
 		   control variable wasn't set at the time, so we don't have the
 		   rendering of the format string.  */
-		debug_prefixed_printf (m_module, m_func, "%s: <%s debugging was not enabled on entry>",
-				       m_end_prefix, m_module);
-	      }
-	  }
-	else
-	  debug_prefixed_printf (m_module, m_func, "%s", m_end_prefix);
+                debug_prefixed_printf (
+                  m_module, m_func,
+                  "%s: <%s debugging was not enabled on entry>", m_end_prefix,
+                  m_module);
+              }
+          }
+        else
+          debug_prefixed_printf (m_module, m_func, "%s", m_end_prefix);
       }
   }
 
 private:
-
   /* This function is specialized based on the type PT.  Returns true if
      M_DEBUG_ENABLED indicates this debug setting is enabled, otherwise,
      return false.  */
@@ -240,14 +242,14 @@ scoped_debug_start_end<bool &>::is_debug_enabled () const
 
 template<typename PT>
 static inline scoped_debug_start_end<PT &> ATTRIBUTE_NULL_PRINTF (6, 7)
-make_scoped_debug_start_end (PT &&pred, const char *module, const char *func,
-			     const char *start_prefix,
-			     const char *end_prefix, const char *fmt, ...)
+  make_scoped_debug_start_end (PT &&pred, const char *module, const char *func,
+                               const char *start_prefix,
+                               const char *end_prefix, const char *fmt, ...)
 {
   va_list args;
   va_start (args, fmt);
   auto res = scoped_debug_start_end<PT &> (pred, module, func, start_prefix,
-					   end_prefix, fmt, args);
+                                           end_prefix, fmt, args);
   va_end (args);
 
   return res;
@@ -255,20 +257,18 @@ make_scoped_debug_start_end (PT &&pred, const char *module, const char *func,
 
 /* Helper to define a module-specific start/end debug macro.  */
 
-#define scoped_debug_start_end(debug_enabled, module, fmt, ...)		\
-  auto CONCAT(scoped_debug_start_end, __LINE__)				\
-    = make_scoped_debug_start_end (debug_enabled, module, 	\
-				   __func__, "start", "end",	\
-				   fmt, ##__VA_ARGS__)
+#define scoped_debug_start_end(debug_enabled, module, fmt, ...)              \
+  auto CONCAT (scoped_debug_start_end, __LINE__)                             \
+    = make_scoped_debug_start_end (debug_enabled, module, __func__, "start", \
+                                   "end", fmt, ##__VA_ARGS__)
 
 /* Helper to define a module-specific enter/exit debug macro.  This is a special
    case of `scoped_debug_start_end` where the start and end messages are "enter"
    and "exit", to denote entry and exit of a function.  */
 
-#define scoped_debug_enter_exit(debug_enabled, module)	\
-  auto CONCAT(scoped_debug_start_end, __LINE__)				\
-    = make_scoped_debug_start_end (debug_enabled, module, 	\
-				   __func__, "enter", "exit",	\
-				   nullptr)
+#define scoped_debug_enter_exit(debug_enabled, module)                       \
+  auto CONCAT (scoped_debug_start_end, __LINE__)                             \
+    = make_scoped_debug_start_end (debug_enabled, module, __func__, "enter", \
+                                   "exit", nullptr)
 
 #endif /* COMMON_COMMON_DEBUG_H */

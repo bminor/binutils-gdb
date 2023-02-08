@@ -25,7 +25,7 @@
 /* The general-purpose regset consists of 30 X registers, plus LR, SP,
    ELR, and SPSR registers.  SPSR is 32 bits but the structure is
    padded to 64 bit alignment.  */
-#define AARCH64_FBSD_SIZEOF_GREGSET  (34 * X_REGISTER_SIZE)
+#define AARCH64_FBSD_SIZEOF_GREGSET (34 * X_REGISTER_SIZE)
 
 /* The fp regset consists of 32 V registers, plus FPSR and FPCR which
    are 4 bytes wide each, and the whole structure is padded to 128 bit
@@ -33,7 +33,7 @@
 #define AARCH64_FBSD_SIZEOF_FPREGSET (33 * V_REGISTER_SIZE)
 
 /* The TLS regset consists of a single register.  */
-#define	AARCH64_FBSD_SIZEOF_TLSREGSET (X_REGISTER_SIZE)
+#define AARCH64_FBSD_SIZEOF_TLSREGSET (X_REGISTER_SIZE)
 
 extern const struct regset aarch64_fbsd_gregset;
 extern const struct regset aarch64_fbsd_fpregset;

@@ -39,15 +39,15 @@
 
 typedef td_err_e (td_init_ftype) (void);
 
-typedef td_err_e (td_ta_new_ftype) (struct ps_prochandle * ps,
+typedef td_err_e (td_ta_new_ftype) (struct ps_prochandle *ps,
 				    td_thragent_t **ta);
 typedef td_err_e (td_ta_delete_ftype) (td_thragent_t *ta_p);
 typedef td_err_e (td_ta_map_lwp2thr_ftype) (const td_thragent_t *ta,
 					    lwpid_t lwpid, td_thrhandle_t *th);
 typedef td_err_e (td_ta_thr_iter_ftype) (const td_thragent_t *ta,
-					 td_thr_iter_f *callback, void *cbdata_p,
-					 td_thr_state_e state, int ti_pri,
-					 sigset_t *ti_sigmask_p,
+					 td_thr_iter_f *callback,
+					 void *cbdata_p, td_thr_state_e state,
+					 int ti_pri, sigset_t *ti_sigmask_p,
 					 unsigned int ti_user_flags);
 typedef td_err_e (td_ta_event_addr_ftype) (const td_thragent_t *ta,
 					   td_event_e event, td_notify_t *ptr);
@@ -65,12 +65,13 @@ typedef td_err_e (td_thr_event_enable_ftype) (const td_thrhandle_t *th,
 
 typedef td_err_e (td_thr_tls_get_addr_ftype) (const td_thrhandle_t *th,
 					      psaddr_t map_address,
-					      size_t offset, psaddr_t *address);
+					      size_t offset,
+					      psaddr_t *address);
 typedef td_err_e (td_thr_tlsbase_ftype) (const td_thrhandle_t *th,
 					 unsigned long int modid,
 					 psaddr_t *base);
 
-typedef const char ** (td_symbol_list_ftype) (void);
+typedef const char **(td_symbol_list_ftype) (void);
 typedef td_err_e (td_ta_delete_ftype) (td_thragent_t *);
 
 #endif /* NAT_GDB_THREAD_DB_H */

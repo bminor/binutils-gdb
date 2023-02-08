@@ -41,7 +41,8 @@ struct file_entry
       d_index (d_index_),
       mod_time (mod_time_),
       length (length_)
-  {}
+  {
+  }
 
   /* Return the include directory at D_INDEX stored in LH.  Returns
      NULL if D_INDEX is out of bounds.  */
@@ -74,15 +75,18 @@ struct line_header
      unit in the context of which we are reading this line header, or nullptr
      if unknown or not applicable.  */
   explicit line_header (const char *comp_dir)
-    : offset_in_dwz {}, m_comp_dir (comp_dir)
-  {}
+    : offset_in_dwz {},
+      m_comp_dir (comp_dir)
+  {
+  }
 
   /* This constructor should only be used to create line_header intances to do
      hash table lookups.  */
   line_header (sect_offset sect_off, bool offset_in_dwz)
     : sect_off (sect_off),
       offset_in_dwz (offset_in_dwz)
-  {}
+  {
+  }
 
   /* Add an entry to the include directory table.  */
   void add_include_dir (const char *include_dir);
@@ -136,11 +140,10 @@ struct line_header
   /* The indexes are 0-based in DWARF 5 and 1-based in DWARF 4. Therefore,
      this method should only be used to iterate through all file entries in an
      index-agnostic manner.  */
-  std::vector<file_entry> &file_names ()
-  { return m_file_names; }
+  std::vector<file_entry> &file_names () { return m_file_names; }
+
   /* A const overload of the same.  */
-  const std::vector<file_entry> &file_names () const
-  { return m_file_names; }
+  const std::vector<file_entry> &file_names () const { return m_file_names; }
 
   /* Offset of line number information in .debug_line section.  */
   sect_offset sect_off {};
@@ -162,8 +165,7 @@ struct line_header
      element is standard_opcode_lengths[opcode_base - 1].  */
   std::unique_ptr<unsigned char[]> standard_opcode_lengths;
 
-  int file_names_size () const
-  { return m_file_names.size(); }
+  int file_names_size () const { return m_file_names.size (); }
 
   /* The start and end of the statement program following this
      header.  These point into dwarf2_per_objfile->line_buffer.  */
@@ -177,10 +179,10 @@ struct line_header
 
   /* Return the compilation directory of the compilation unit in the context of
      which this line header is read.  Return nullptr if non applicable.  */
-  const char *comp_dir () const
-  { return m_comp_dir; }
+  const char *comp_dir () const { return m_comp_dir; }
 
- private:
+private:
+
   /* The include_directories table.  Note these are observing
      pointers.  The memory is owned by debug_line_buffer.  */
   std::vector<const char *> m_include_dirs;
@@ -212,9 +214,9 @@ file_entry::include_dir (const line_header *lh) const
    the returned object point into the dwarf line section buffer,
    and must not be freed.  */
 
-extern line_header_up dwarf_decode_line_header
-  (sect_offset sect_off, bool is_dwz, dwarf2_per_objfile *per_objfile,
-   struct dwarf2_section_info *section, const struct comp_unit_head *cu_header,
-   const char *comp_dir);
+extern line_header_up dwarf_decode_line_header (
+  sect_offset sect_off, bool is_dwz, dwarf2_per_objfile *per_objfile,
+  struct dwarf2_section_info *section, const struct comp_unit_head *cu_header,
+  const char *comp_dir);
 
 #endif /* DWARF2_LINE_HEADER_H */

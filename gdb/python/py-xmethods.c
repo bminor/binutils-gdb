@@ -115,10 +115,9 @@ invoke_match_method (PyObject *matcher, PyObject *py_obj_type,
 /* Implementation of get_matching_xmethod_workers for Python.  */
 
 enum ext_lang_rc
-gdbpy_get_matching_xmethod_workers
-  (const struct extension_language_defn *extlang,
-   struct type *obj_type, const char *method_name,
-   std::vector<xmethod_worker_up> *dm_vec)
+gdbpy_get_matching_xmethod_workers (
+  const struct extension_language_defn *extlang, struct type *obj_type,
+  const char *method_name, std::vector<xmethod_worker_up> *dm_vec)
 {
   gdb_assert (obj_type != NULL && method_name != NULL);
 
@@ -268,8 +267,8 @@ gdbpy_get_matching_xmethod_workers
 		  break;
 		}
 
-	      worker = new python_xmethod_worker (py_worker.get (),
-						  py_type.get ());
+	      worker
+		= new python_xmethod_worker (py_worker.get (), py_type.get ());
 
 	      dm_vec->emplace_back (worker);
 	    }
@@ -278,8 +277,8 @@ gdbpy_get_matching_xmethod_workers
 	{
 	  struct xmethod_worker *worker;
 
-	  worker = new python_xmethod_worker (match_result.get (),
-					      py_type.get ());
+	  worker
+	    = new python_xmethod_worker (match_result.get (), py_type.get ());
 	  dm_vec->emplace_back (worker);
 	}
     }
@@ -299,17 +298,16 @@ python_xmethod_worker::do_get_arg_types (std::vector<type *> *arg_types)
   int i = 1, arg_count;
   gdbpy_ref<> list_iter;
 
-  gdbpy_ref<> get_arg_types_method
-    (PyObject_GetAttrString (m_py_worker, get_arg_types_method_name));
+  gdbpy_ref<> get_arg_types_method (
+    PyObject_GetAttrString (m_py_worker, get_arg_types_method_name));
   if (get_arg_types_method == NULL)
     {
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref<> py_argtype_list
-    (PyObject_CallMethodObjArgs (m_py_worker, py_get_arg_types_method_name,
-				 NULL));
+  gdbpy_ref<> py_argtype_list (PyObject_CallMethodObjArgs (
+    m_py_worker, py_get_arg_types_method_name, NULL));
   if (py_argtype_list == NULL)
     {
       gdbpy_print_stack ();
@@ -359,9 +357,9 @@ python_xmethod_worker::do_get_arg_types (std::vector<type *> *arg_types)
 	  if (arg_type == NULL)
 	    {
 	      PyErr_SetString (PyExc_TypeError,
-			       _("Arg type returned by the get_arg_types "
-				 "method of a debug method worker object is "
-				 "not a gdb.Type object."));
+			       _ ("Arg type returned by the get_arg_types "
+				  "method of a debug method worker object is "
+				  "not a gdb.Type object."));
 	      return EXT_LANG_RC_ERROR;
 	    }
 
@@ -378,9 +376,9 @@ python_xmethod_worker::do_get_arg_types (std::vector<type *> *arg_types)
       if (arg_type == NULL)
 	{
 	  PyErr_SetString (PyExc_TypeError,
-			   _("Arg type returned by the get_arg_types method "
-			     "of an xmethod worker object is not a gdb.Type "
-			     "object."));
+			   _ ("Arg type returned by the get_arg_types method "
+			      "of an xmethod worker object is not a gdb.Type "
+			      "object."));
 	  return EXT_LANG_RC_ERROR;
 	}
       else
@@ -394,8 +392,7 @@ python_xmethod_worker::do_get_arg_types (std::vector<type *> *arg_types)
      be a 'const' value.  Hence, create a 'const' variant of the 'this' pointer
      type.  */
   obj_type = type_object_to_type (m_this_type);
-  (*arg_types)[0] = make_cv_type (1, 0, lookup_pointer_type (obj_type),
-				  NULL);
+  (*arg_types)[0] = make_cv_type (1, 0, lookup_pointer_type (obj_type), NULL);
 
   return EXT_LANG_RC_OK;
 }
@@ -414,8 +411,8 @@ python_xmethod_worker::do_get_result_type (value *obj,
 
   /* First see if there is a get_result_type method.
      If not this could be an old xmethod (pre 7.9.1).  */
-  gdbpy_ref<> get_result_type_method
-    (PyObject_GetAttrString (m_py_worker, get_result_type_method_name));
+  gdbpy_ref<> get_result_type_method (
+    PyObject_GetAttrString (m_py_worker, get_result_type_method_name));
   if (get_result_type_method == NULL)
     {
       PyErr_Clear ();
@@ -475,8 +472,8 @@ python_xmethod_worker::do_get_result_type (value *obj,
       PyTuple_SET_ITEM (py_arg_tuple.get (), i + 1, py_value_arg);
     }
 
-  gdbpy_ref<> py_result_type
-    (PyObject_CallObject (get_result_type_method.get (), py_arg_tuple.get ()));
+  gdbpy_ref<> py_result_type (
+    PyObject_CallObject (get_result_type_method.get (), py_arg_tuple.get ()));
   if (py_result_type == NULL)
     {
       gdbpy_print_stack ();
@@ -487,8 +484,8 @@ python_xmethod_worker::do_get_result_type (value *obj,
   if (*result_type_ptr == NULL)
     {
       PyErr_SetString (PyExc_TypeError,
-		       _("Type returned by the get_result_type method of an"
-			 " xmethod worker object is not a gdb.Type object."));
+		       _ ("Type returned by the get_result_type method of an"
+			  " xmethod worker object is not a gdb.Type object."));
       gdbpy_print_stack ();
       return EXT_LANG_RC_ERROR;
     }
@@ -534,14 +531,14 @@ python_xmethod_worker::invoke (struct value *obj,
   if (py_value_obj == NULL)
     {
       gdbpy_print_stack ();
-      error (_("Error while executing Python code."));
+      error (_ ("Error while executing Python code."));
     }
 
   gdbpy_ref<> py_arg_tuple (PyTuple_New (args.size () + 1));
   if (py_arg_tuple == NULL)
     {
       gdbpy_print_stack ();
-      error (_("Error while executing Python code."));
+      error (_ ("Error while executing Python code."));
     }
 
   /* PyTuple_SET_ITEM steals the reference of the element, hence the
@@ -555,7 +552,7 @@ python_xmethod_worker::invoke (struct value *obj,
       if (py_value_arg == NULL)
 	{
 	  gdbpy_print_stack ();
-	  error (_("Error while executing Python code."));
+	  error (_ ("Error while executing Python code."));
 	}
 
       PyTuple_SET_ITEM (py_arg_tuple.get (), i + 1, py_value_arg);
@@ -566,7 +563,7 @@ python_xmethod_worker::invoke (struct value *obj,
   if (py_result == NULL)
     {
       gdbpy_print_stack ();
-      error (_("Error while executing Python code."));
+      error (_ ("Error while executing Python code."));
     }
 
   if (py_result != Py_None)
@@ -575,22 +572,23 @@ python_xmethod_worker::invoke (struct value *obj,
       if (res == NULL)
 	{
 	  gdbpy_print_stack ();
-	  error (_("Error while executing Python code."));
+	  error (_ ("Error while executing Python code."));
 	}
     }
   else
     {
-      res = allocate_value (lookup_typename (current_language,
-					     "void", NULL, 0));
+      res
+	= allocate_value (lookup_typename (current_language, "void", NULL, 0));
     }
 
   return res;
 }
 
 python_xmethod_worker::python_xmethod_worker (PyObject *py_worker,
-					       PyObject *this_type)
-: xmethod_worker (&extension_language_python),
-  m_py_worker (py_worker), m_this_type (this_type)
+					      PyObject *this_type)
+  : xmethod_worker (&extension_language_python),
+    m_py_worker (py_worker),
+    m_this_type (this_type)
 {
   gdb_assert (m_py_worker != NULL && m_this_type != NULL);
 

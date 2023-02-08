@@ -39,7 +39,7 @@ static void
 show_pymicmd_debug (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Python MI command debugging is %s.\n"), value);
+  gdb_printf (file, _ ("Python MI command debugging is %s.\n"), value);
 }
 
 /* Print a "py-micmd" debug statement.  */
@@ -60,10 +60,10 @@ struct micmdpy_object
 {
   PyObject_HEAD
 
-  /* The object representing this command in the MI command table.  This
+    /* The object representing this command in the MI command table.  This
      pointer can be nullptr if the command is not currently installed into
      the MI command table (see gdb.MICommand.installed property).  */
-  struct mi_command_py *mi_command;
+    struct mi_command_py *mi_command;
 
   /* The string representing the name of this command, without the leading
      dash.  This string is never nullptr once the Python object has been
@@ -147,8 +147,8 @@ struct mi_command_py : public mi_command
        than changing the value of mi_command::m_name (which is not accessible
        from here) to point to the name owned by the new object, swap the names
        of the two objects, since we know they are identical strings.  */
-    gdb_assert (strcmp (new_pyobj->mi_command_name,
-			m_pyobj->mi_command_name) == 0);
+    gdb_assert (strcmp (new_pyobj->mi_command_name, m_pyobj->mi_command_name)
+		== 0);
     std::swap (new_pyobj->mi_command_name, m_pyobj->mi_command_name);
 
     /* Take a reference to the new object, drop the reference to the current
@@ -157,17 +157,18 @@ struct mi_command_py : public mi_command
   }
 
   /* Called when the MI command is invoked.  */
-  virtual void invoke(struct mi_parse *parse) const override;
+  virtual void invoke (struct mi_parse *parse) const override;
 
 private:
+
   /* The Python object representing this MI command.  */
   gdbpy_ref<micmdpy_object> m_pyobj;
 };
 
 using mi_command_py_up = std::unique_ptr<mi_command_py>;
 
-extern PyTypeObject micmdpy_object_type
-	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("micmdpy_object");
+extern PyTypeObject
+  micmdpy_object_type CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("micmdpy_object");
 
 /* Holds a Python object containing the string 'invoke'.  */
 
@@ -194,7 +195,7 @@ py_object_to_mi_key (PyObject *key_obj)
       if (key_repr_string == nullptr)
 	gdbpy_handle_exception ();
 
-      gdbpy_error (_("non-string object used as key: %s"),
+      gdbpy_error (_ ("non-string object used as key: %s"),
 		   key_repr_string.get ());
     }
 
@@ -205,8 +206,7 @@ py_object_to_mi_key (PyObject *key_obj)
 
   /* Predicate function, returns true if NAME is a valid field name for use
      in MI result output, otherwise, returns false.  */
-  auto is_valid_key_name = [] (const char *name) -> bool
-  {
+  auto is_valid_key_name = [] (const char *name) -> bool {
     gdb_assert (name != nullptr);
 
     if (*name == '\0' || !isalpha (*name))
@@ -222,9 +222,9 @@ py_object_to_mi_key (PyObject *key_obj)
   if (!is_valid_key_name (key_string.get ()))
     {
       if (*key_string.get () == '\0')
-	gdbpy_error (_("Invalid empty key in MI result"));
+	gdbpy_error (_ ("Invalid empty key in MI result"));
       else
-	gdbpy_error (_("Invalid key in MI result: %s"), key_string.get ());
+	gdbpy_error (_ ("Invalid key in MI result: %s"), key_string.get ());
     }
 
   return key_string;
@@ -256,8 +256,7 @@ serialize_mi_result_1 (PyObject *result, const char *field_name)
       ui_out_emit_tuple tuple_emitter (uiout, field_name);
       while (PyDict_Next (result, &pos, &key, &value))
 	{
-	  gdb::unique_xmalloc_ptr<char> key_string
-	    (py_object_to_mi_key (key));
+	  gdb::unique_xmalloc_ptr<char> key_string (py_object_to_mi_key (key));
 	  serialize_mi_result_1 (value, key_string.get ());
 	}
     }
@@ -269,7 +268,7 @@ serialize_mi_result_1 (PyObject *result, const char *field_name)
 	gdbpy_handle_exception ();
       for (Py_ssize_t i = 0; i < len; ++i)
 	{
-          gdbpy_ref<> item (PySequence_ITEM (result, i));
+	  gdbpy_ref<> item (PySequence_ITEM (result, i));
 	  if (item == nullptr)
 	    gdbpy_handle_exception ();
 	  serialize_mi_result_1 (item.get (), nullptr);
@@ -318,14 +317,13 @@ serialize_mi_result (PyObject *result)
   /* At the top-level, the result must be a dictionary.  */
 
   if (!PyDict_Check (result))
-    gdbpy_error (_("Result from invoke must be a dictionary"));
+    gdbpy_error (_ ("Result from invoke must be a dictionary"));
 
   PyObject *key, *value;
   Py_ssize_t pos = 0;
   while (PyDict_Next (result, &pos, &key, &value))
     {
-      gdb::unique_xmalloc_ptr<char> key_string
-	(py_object_to_mi_key (key));
+      gdb::unique_xmalloc_ptr<char> key_string (py_object_to_mi_key (key));
       serialize_mi_result_1 (value, key_string.get ());
     }
 }
@@ -343,8 +341,8 @@ mi_command_py::invoke (struct mi_parse *parse) const
   mi_parse_argv (parse->args, parse);
 
   if (parse->argv == nullptr)
-    error (_("Problem parsing arguments: %s %s"), parse->command, parse->args);
-
+    error (_ ("Problem parsing arguments: %s %s"), parse->command,
+	   parse->args);
 
   gdbpy_enter enter_py;
 
@@ -365,9 +363,8 @@ mi_command_py::invoke (struct mi_parse *parse) const
 
   gdb_assert (this->m_pyobj != nullptr);
   gdb_assert (PyErr_Occurred () == nullptr);
-  gdbpy_ref<> result
-    (PyObject_CallMethodObjArgs ((PyObject *) this->m_pyobj.get (), invoke_cst,
-				 argobj.get (), nullptr));
+  gdbpy_ref<> result (PyObject_CallMethodObjArgs (
+    (PyObject *) this->m_pyobj.get (), invoke_cst, argobj.get (), nullptr));
   if (result == nullptr)
     gdbpy_handle_exception ();
 
@@ -454,7 +451,7 @@ micmdpy_install_command (micmdpy_object *obj)
       /* There is already an MI command registered with that name, and it's not
          a Python one.  Forbid replacing a non-Python MI command.  */
       PyErr_SetString (PyExc_RuntimeError,
-		       _("unable to add command, name is already in use"));
+		       _ ("unable to add command, name is already in use"));
       return -1;
     }
 
@@ -491,22 +488,21 @@ micmdpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   static const char *keywords[] = { "name", nullptr };
   const char *name;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "s", keywords,
-					&name))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "s", keywords, &name))
     return -1;
 
   /* Validate command name */
   const int name_len = strlen (name);
   if (name_len == 0)
     {
-      PyErr_SetString (PyExc_ValueError, _("MI command name is empty."));
+      PyErr_SetString (PyExc_ValueError, _ ("MI command name is empty."));
       return -1;
     }
   else if ((name_len < 2) || (name[0] != '-') || !isalnum (name[1]))
     {
       PyErr_SetString (PyExc_ValueError,
-		       _("MI command name does not start with '-'"
-			 " followed by at least one letter or digit."));
+		       _ ("MI command name does not start with '-'"
+			  " followed by at least one letter or digit."));
       return -1;
     }
   else
@@ -515,10 +511,10 @@ micmdpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	{
 	  if (!isalnum (name[i]) && name[i] != '-')
 	    {
-	      PyErr_Format
-		(PyExc_ValueError,
-		 _("MI command name contains invalid character: %c."),
-		 name[i]);
+	      PyErr_Format (
+		PyExc_ValueError,
+		_ ("MI command name contains invalid character: %c."),
+		name[i]);
 	      return -1;
 	    }
 	}
@@ -542,9 +538,9 @@ micmdpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	 an excessive restriction.  */
       if (strcmp (cmd->mi_command_name, name) != 0)
 	{
-	  PyErr_SetString
-	    (PyExc_ValueError,
-	     _("can't reinitialize object with a different command name"));
+	  PyErr_SetString (
+	    PyExc_ValueError,
+	    _ ("can't reinitialize object with a different command name"));
 	  return -1;
 	}
 
@@ -577,7 +573,8 @@ micmdpy_dealloc (PyObject *obj)
      be nullptr.  */
   pymicmd_debug_printf ("obj = %p, name = %s", cmd,
 			(cmd->mi_command_name == nullptr
-			 ? "(null)" : cmd->mi_command_name));
+			   ? "(null)"
+			   : cmd->mi_command_name));
 
   /* As the mi_command_py object holds a reference to the micmdpy_object,
      the only way the dealloc function can be called is if the mi_command_py
@@ -620,10 +617,9 @@ gdbpy_finalize_micommands ()
   /* mi_command_py objects hold references to micmdpy_object objects.  They must
      be dropped before the Python interpreter is finalized.  Do so by removing
      those MI command entries, thus deleting the mi_command_py objects.  */
-  remove_mi_cmd_entries ([] (mi_command *cmd)
-    {
-      return as_mi_command_py (cmd) != nullptr;
-    });
+  remove_mi_cmd_entries ([] (mi_command *cmd) {
+    return as_mi_command_py (cmd) != nullptr;
+  });
 }
 
 /* Get the gdb.MICommand.name attribute, returns a string, the name of this
@@ -680,60 +676,59 @@ static gdb_PyGetSetDef micmdpy_object_getset[] = {
   { "name", micmdpy_get_name, nullptr, "The command's name.", nullptr },
   { "installed", micmdpy_get_installed, micmdpy_set_installed,
     "Is this command installed for use.", nullptr },
-  { nullptr }	/* Sentinel.  */
+  { nullptr } /* Sentinel.  */
 };
 
 /* The gdb.MICommand descriptor.  */
 
 PyTypeObject micmdpy_object_type = {
   PyVarObject_HEAD_INIT (nullptr, 0) "gdb.MICommand", /*tp_name */
-  sizeof (micmdpy_object),			   /*tp_basicsize */
-  0,						   /*tp_itemsize */
-  micmdpy_dealloc,				   /*tp_dealloc */
-  0,						   /*tp_print */
-  0,						   /*tp_getattr */
-  0,						   /*tp_setattr */
-  0,						   /*tp_compare */
-  0,						   /*tp_repr */
-  0,						   /*tp_as_number */
-  0,						   /*tp_as_sequence */
-  0,						   /*tp_as_mapping */
-  0,						   /*tp_hash */
-  0,						   /*tp_call */
-  0,						   /*tp_str */
-  0,						   /*tp_getattro */
-  0,						   /*tp_setattro */
-  0,						   /*tp_as_buffer */
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/*tp_flags */
-  "GDB mi-command object",			   /* tp_doc */
-  0,						   /* tp_traverse */
-  0,						   /* tp_clear */
-  0,						   /* tp_richcompare */
-  0,						   /* tp_weaklistoffset */
-  0,						   /* tp_iter */
-  0,						   /* tp_iternext */
-  0,						   /* tp_methods */
-  0,						   /* tp_members */
-  micmdpy_object_getset,			   /* tp_getset */
-  0,						   /* tp_base */
-  0,						   /* tp_dict */
-  0,						   /* tp_descr_get */
-  0,						   /* tp_descr_set */
-  0,						   /* tp_dictoffset */
-  micmdpy_init,					   /* tp_init */
-  0,						   /* tp_alloc */
+  sizeof (micmdpy_object),			      /*tp_basicsize */
+  0,						      /*tp_itemsize */
+  micmdpy_dealloc,				      /*tp_dealloc */
+  0,						      /*tp_print */
+  0,						      /*tp_getattr */
+  0,						      /*tp_setattr */
+  0,						      /*tp_compare */
+  0,						      /*tp_repr */
+  0,						      /*tp_as_number */
+  0,						      /*tp_as_sequence */
+  0,						      /*tp_as_mapping */
+  0,						      /*tp_hash */
+  0,						      /*tp_call */
+  0,						      /*tp_str */
+  0,						      /*tp_getattro */
+  0,						      /*tp_setattro */
+  0,						      /*tp_as_buffer */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	      /*tp_flags */
+  "GDB mi-command object",			      /* tp_doc */
+  0,						      /* tp_traverse */
+  0,						      /* tp_clear */
+  0,						      /* tp_richcompare */
+  0,						      /* tp_weaklistoffset */
+  0,						      /* tp_iter */
+  0,						      /* tp_iternext */
+  0,						      /* tp_methods */
+  0,						      /* tp_members */
+  micmdpy_object_getset,			      /* tp_getset */
+  0,						      /* tp_base */
+  0,						      /* tp_dict */
+  0,						      /* tp_descr_get */
+  0,						      /* tp_descr_set */
+  0,						      /* tp_dictoffset */
+  micmdpy_init,					      /* tp_init */
+  0,						      /* tp_alloc */
 };
 
 void _initialize_py_micmd ();
+
 void
 _initialize_py_micmd ()
 {
-  add_setshow_boolean_cmd
-    ("py-micmd", class_maintenance, &pymicmd_debug,
-     _("Set Python micmd debugging."),
-     _("Show Python micmd debugging."),
-     _("When on, Python micmd debugging is enabled."),
-     nullptr,
-     show_pymicmd_debug,
-     &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd ("py-micmd", class_maintenance, &pymicmd_debug,
+			   _ ("Set Python micmd debugging."),
+			   _ ("Show Python micmd debugging."),
+			   _ ("When on, Python micmd debugging is enabled."),
+			   nullptr, show_pymicmd_debug, &setdebuglist,
+			   &showdebuglist);
 }

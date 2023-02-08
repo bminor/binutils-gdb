@@ -32,15 +32,13 @@ class scoped_mmap
 public:
   scoped_mmap () noexcept : m_mem (MAP_FAILED), m_length (0) {}
   scoped_mmap (void *addr, size_t length, int prot, int flags, int fd,
-	       off_t offset) noexcept : m_length (length)
+               off_t offset) noexcept
+    : m_length (length)
   {
     m_mem = mmap (addr, m_length, prot, flags, fd, offset);
   }
 
-  ~scoped_mmap ()
-  {
-    destroy ();
-  }
+  ~scoped_mmap () { destroy (); }
 
   scoped_mmap (scoped_mmap &&rhs) noexcept
     : m_mem (rhs.m_mem),
@@ -61,7 +59,7 @@ public:
   }
 
   void reset (void *addr, size_t length, int prot, int flags, int fd,
-	      off_t offset) noexcept
+              off_t offset) noexcept
   {
     destroy ();
 

@@ -21,8 +21,10 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/search.h"
 
-namespace selftests {
-namespace search_memory_tests {
+namespace selftests
+{
+namespace search_memory_tests
+{
 
 static void
 run_tests ()
@@ -34,22 +36,21 @@ run_tests ()
 
   bool read_fully = false;
   bool read_off_end = false;
-  auto read_memory = [&] (CORE_ADDR from, gdb_byte *out, size_t len)
-    {
-      if (from + len > data.size ())
-	read_off_end = true;
-      else
-	memcpy (out, &data[from], len);
-      if (from + len == data.size ())
-	read_fully = true;
-      return true;
-    };
+  auto read_memory = [&] (CORE_ADDR from, gdb_byte *out, size_t len) {
+    if (from + len > data.size ())
+      read_off_end = true;
+    else
+      memcpy (out, &data[from], len);
+    if (from + len == data.size ())
+      read_fully = true;
+    return true;
+  };
 
   gdb_byte pattern = 'x';
 
   CORE_ADDR addr = 0;
-  int result = simple_search_memory (read_memory, 0, data.size (),
-				     &pattern, 1, &addr);
+  int result
+    = simple_search_memory (read_memory, 0, data.size (), &pattern, 1, &addr);
   /* In this case we don't care if read_fully was set or not.  */
   SELF_CHECK (result == 1);
   SELF_CHECK (!read_off_end);
@@ -59,8 +60,8 @@ run_tests ()
   read_fully = false;
   read_off_end = false;
   pattern = 'q';
-  result = simple_search_memory (read_memory, 0, data.size (),
-				 &pattern, 1, &addr);
+  result
+    = simple_search_memory (read_memory, 0, data.size (), &pattern, 1, &addr);
   SELF_CHECK (result == 0);
   SELF_CHECK (!read_off_end);
   SELF_CHECK (read_fully);
@@ -74,11 +75,10 @@ run_tests ()
   const CORE_ADDR found_addr = 0x837bac8;
   memcpy (&data[found_addr - base_addr], wpattern, sizeof (wpattern));
 
-  auto read_memory_2 = [&] (CORE_ADDR from, gdb_byte *out, size_t len)
-    {
-      memcpy (out, &data[from - base_addr], len);
-      return true;
-    };
+  auto read_memory_2 = [&] (CORE_ADDR from, gdb_byte *out, size_t len) {
+    memcpy (out, &data[from - base_addr], len);
+    return true;
+  };
 
   result = simple_search_memory (read_memory_2, base_addr, data.size (),
 				 wpattern, sizeof (wpattern), &addr);
@@ -89,8 +89,8 @@ run_tests ()
 } /* namespace search_memory_tests */
 } /* namespace selftests */
 
-
 void _initialize_search_memory_selftests ();
+
 void
 _initialize_search_memory_selftests ()
 {

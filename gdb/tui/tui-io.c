@@ -66,8 +66,7 @@ key_is_start_sequence (int ch)
 
 /* Use definition from readline 4.3.  */
 #undef CTRL_CHAR
-#define CTRL_CHAR(c) \
-     ((c) < control_character_threshold && (((c) & 0x80) == 0))
+#define CTRL_CHAR(c) ((c) < control_character_threshold && (((c) &0x80) == 0))
 
 /* This file controls the IO interactions between gdb and curses.
    When the TUI is enabled, gdb has two modes a curses and a standard
@@ -191,7 +190,7 @@ struct color_pair
   int fg;
   int bg;
 
-  bool operator< (const color_pair &o) const
+  bool operator<(const color_pair &o) const
   {
     return fg < o.fg || (fg == o.fg && bg < o.bg);
   }
@@ -205,16 +204,9 @@ static std::map<color_pair, int> color_pair_map;
 /* This is indexed by ANSI color offset from the base color, and holds
    the corresponding curses color constant.  */
 
-static const int curses_colors[] = {
-  COLOR_BLACK,
-  COLOR_RED,
-  COLOR_GREEN,
-  COLOR_YELLOW,
-  COLOR_BLUE,
-  COLOR_MAGENTA,
-  COLOR_CYAN,
-  COLOR_WHITE
-};
+static const int curses_colors[]
+  = { COLOR_BLACK, COLOR_RED,	  COLOR_GREEN, COLOR_YELLOW,
+      COLOR_BLUE,  COLOR_MAGENTA, COLOR_CYAN,  COLOR_WHITE };
 
 /* Given a color, find its index.  */
 
@@ -238,7 +230,8 @@ get_color (const ui_file_style::color &color, int *result)
 	  color.get_rgb (rgb);
 	  /* We store RGB as 0..255, but curses wants 0..1000.  */
 	  if (init_color (next, rgb[0] * 1000 / 255, rgb[1] * 1000 / 255,
-			  rgb[2] * 1000 / 255) == ERR)
+			  rgb[2] * 1000 / 255)
+	      == ERR)
 	    return false;
 	  color_map[color] = next;
 	  *result = next;
@@ -587,7 +580,7 @@ tui_redisplay_readline (void)
     prompt = "";
   else
     prompt = rl_display_prompt;
-  
+
   c_pos = -1;
   c_line = -1;
   w = TUI_CMD_WIN->handle.get ();
@@ -602,7 +595,7 @@ tui_redisplay_readline (void)
   for (in = 0; in <= rl_end; in++)
     {
       unsigned char c;
-      
+
       if (in == rl_point)
 	{
 	  getyx (w, c_line, c_pos);
@@ -625,7 +618,8 @@ tui_redisplay_readline (void)
 	    {
 	      waddch (w, ' ');
 	      col++;
-	    } while ((col % 8) != 0);
+	    }
+	  while ((col % 8) != 0);
 	}
       else
 	{
@@ -645,7 +639,7 @@ tui_redisplay_readline (void)
   TUI_CMD_WIN->start_line -= height - 1;
 
   wrefresh (w);
-  fflush(stdout);
+  fflush (stdout);
 }
 
 /* Readline callback to prepare the terminal.  It is called once each
@@ -924,11 +918,11 @@ tui_initialize_io (void)
      readline output in a pipe, read that pipe and output the content
      in the curses command window.  */
   if (gdb_pipe_cloexec (tui_readline_pipe) != 0)
-    error (_("Cannot create pipe for readline"));
+    error (_ ("Cannot create pipe for readline"));
 
   tui_rl_outstream = fdopen (tui_readline_pipe[1], "w");
   if (tui_rl_outstream == 0)
-    error (_("Cannot redirect readline output"));
+    error (_ ("Cannot redirect readline output"));
 
   setvbuf (tui_rl_outstream, NULL, _IOLBF, 0);
 
@@ -947,12 +941,11 @@ tui_initialize_io (void)
 #ifdef __MINGW32__
   /* MS-Windows port of ncurses doesn't support default foreground and
      background colors, so we must record the default colors at startup.  */
-  HANDLE hstdout = (HANDLE)_get_osfhandle (fileno (stdout));
+  HANDLE hstdout = (HANDLE) _get_osfhandle (fileno (stdout));
   DWORD cmode;
   CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-  if (hstdout != INVALID_HANDLE_VALUE
-      && GetConsoleMode (hstdout, &cmode) != 0
+  if (hstdout != INVALID_HANDLE_VALUE && GetConsoleMode (hstdout, &cmode) != 0
       && GetConsoleScreenBufferInfo (hstdout, &csbi))
     ncurses_norm_attr = csbi.wAttributes;
 #endif
@@ -970,16 +963,16 @@ tui_dispatch_mouse_event ()
     return;
 
   for (tui_win_info *wi : all_tui_windows ())
-    if (mev.x > wi->x && mev.x < wi->x + wi->width - 1
-	&& mev.y > wi->y && mev.y < wi->y + wi->height - 1)
+    if (mev.x > wi->x && mev.x < wi->x + wi->width - 1 && mev.y > wi->y
+	&& mev.y < wi->y + wi->height - 1)
       {
 	if ((mev.bstate & BUTTON1_CLICKED) != 0
 	    || (mev.bstate & BUTTON2_CLICKED) != 0
 	    || (mev.bstate & BUTTON3_CLICKED) != 0)
 	  {
-	    int button = (mev.bstate & BUTTON1_CLICKED) != 0 ? 1
-	      :         ((mev.bstate & BUTTON2_CLICKED) != 0 ? 2
-			 : 3);
+	    int button = (mev.bstate & BUTTON1_CLICKED) != 0
+			   ? 1
+			   : ((mev.bstate & BUTTON2_CLICKED) != 0 ? 2 : 3);
 	    wi->click (mev.x - wi->x - 1, mev.y - wi->y - 1, button);
 	  }
 #ifdef BUTTON5_PRESSED
@@ -1172,7 +1165,7 @@ tui_getc_1 (FILE *fp)
 	case KEY_END:
 	  return start_sequence ("\033[F");
 
-	/* del and ins are unfortunately not hardcoded in readline for
+	  /* del and ins are unfortunately not hardcoded in readline for
 	   all systems.  */
 
 	case KEY_DC: /* del */

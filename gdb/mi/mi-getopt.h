@@ -24,11 +24,11 @@
    requires an argument.  INDEX is returned to identify the option.  */
 
 struct mi_opt
-  {
-    const char *name;
-    int index;
-    int arg_p;
-  };
+{
+  const char *name;
+  int index;
+  int arg_p;
+};
 
 /* Like getopt() but with simpler semantics.
 
@@ -52,9 +52,9 @@ struct mi_opt
 
 extern int mi_getopt (const char *prefix, int argc, char **argv,
 		      const struct mi_opt *opt, int *optind, char **optarg);
-extern int mi_getopt_allow_unknown (const char *prefix, int argc,
-				    char **argv, const struct mi_opt *opts,
-				    int *oind, char **oarg);
+extern int mi_getopt_allow_unknown (const char *prefix, int argc, char **argv,
+				    const struct mi_opt *opts, int *oind,
+				    char **oarg);
 
 /* mi_valid_noargs determines if ARGC/ARGV are a valid set of
    parameters to satisfy an MI function that is not supposed to

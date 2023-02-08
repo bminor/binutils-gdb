@@ -39,6 +39,7 @@ extern gcc_c_symbol_address_function gcc_symbol_address;
 class compile_c_instance : public compile_instance
 {
 public:
+
   explicit compile_c_instance (struct gcc_c_context *gcc_c)
     : compile_instance (&gcc_c->base, m_default_cflags),
       m_plugin (gcc_c)
@@ -55,6 +56,7 @@ public:
   gcc_c_plugin &plugin () { return m_plugin; }
 
 private:
+
   /* Default compiler flags for C.  */
   static const char *m_default_cflags;
 
@@ -67,13 +69,9 @@ private:
    register number, where each element indicates if the corresponding
    register is needed to compute a local variable.  */
 
-extern std::vector<bool>
-  generate_c_for_variable_locations
-     (compile_instance *compiler,
-      string_file *stream,
-      struct gdbarch *gdbarch,
-      const struct block *block,
-      CORE_ADDR pc);
+extern std::vector<bool> generate_c_for_variable_locations (
+  compile_instance *compiler, string_file *stream, struct gdbarch *gdbarch,
+  const struct block *block, CORE_ADDR pc);
 
 /* Get the GCC mode attribute value for a given type size.  */
 
@@ -91,6 +89,6 @@ extern std::string c_get_range_decl_name (const struct dynamic_prop *prop);
    address.  */
 
 extern gdb::unique_xmalloc_ptr<char>
-  c_symbol_substitution_name (struct symbol *sym);
+c_symbol_substitution_name (struct symbol *sym);
 
 #endif /* COMPILE_COMPILE_C_H */

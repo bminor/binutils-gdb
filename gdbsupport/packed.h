@@ -39,9 +39,9 @@
 /* Clang targeting Windows does not support attribute gcc_struct, so
    we use the alternative byte array implemention there. */
 #if defined _WIN32 && defined __clang__
-# define PACKED_USE_ARRAY 1
+#define PACKED_USE_ARRAY 1
 #else
-# define PACKED_USE_ARRAY 0
+#define PACKED_USE_ARRAY 0
 #endif
 
 /* For the preferred implementation, we need gcc_struct on Windows, as
@@ -49,9 +49,9 @@
    what we want.  Clang targeting Windows does not support attribute
    gcc_struct.  */
 #if !PACKED_USE_ARRAY && defined _WIN32 && !defined __clang__
-# define ATTRIBUTE_GCC_STRUCT __attribute__((__gcc_struct__))
+#define ATTRIBUTE_GCC_STRUCT __attribute__ ((__gcc_struct__))
 #else
-# define ATTRIBUTE_GCC_STRUCT
+#define ATTRIBUTE_GCC_STRUCT
 #endif
 
 template<typename T, size_t Bytes = sizeof (T)>
@@ -68,8 +68,8 @@ public:
     ULONGEST tmp = val;
     for (int i = (Bytes - 1); i >= 0; --i)
       {
-	m_bytes[i] = (gdb_byte) tmp;
-	tmp >>= HOST_CHAR_BIT;
+        m_bytes[i] = (gdb_byte) tmp;
+        tmp >>= HOST_CHAR_BIT;
       }
 #else
     m_val = val;
@@ -95,10 +95,10 @@ public:
     ULONGEST tmp = 0;
     for (int i = 0;;)
       {
-	tmp |= m_bytes[i];
-	if (++i == Bytes)
-	  break;
-	tmp <<= HOST_CHAR_BIT;
+        tmp |= m_bytes[i];
+        if (++i == Bytes)
+          break;
+        tmp <<= HOST_CHAR_BIT;
       }
     return (T) tmp;
 #else
@@ -110,7 +110,7 @@ private:
 #if PACKED_USE_ARRAY
   gdb_byte m_bytes[Bytes];
 #else
-  T m_val : (Bytes * HOST_CHAR_BIT) ATTRIBUTE_PACKED;
+  T m_val : (Bytes *HOST_CHAR_BIT) ATTRIBUTE_PACKED;
 #endif
 };
 
@@ -122,38 +122,38 @@ private:
    conversions to go from T to packed<T> to std::atomic<packed<T>>
    (and back), and C++ only does one.  */
 
-#define PACKED_ATOMIC_OP(OP)						\
-  template<typename T, size_t Bytes>					\
-  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,		\
-		    const std::atomic<packed<T, Bytes>> &rhs)		\
-  {									\
-    return lhs.load () OP rhs.load ();					\
-  }									\
-									\
-  template<typename T, size_t Bytes>					\
-  bool operator OP (T lhs, const std::atomic<packed<T, Bytes>> &rhs)	\
-  {									\
-    return lhs OP rhs.load ();						\
-  }									\
-									\
-  template<typename T, size_t Bytes>					\
-  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs, T rhs)	\
-  {									\
-    return lhs.load () OP rhs;						\
-  }									\
-									\
-  template<typename T, size_t Bytes>					\
-  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,		\
-		    packed<T, Bytes> rhs)				\
-  {									\
-    return lhs.load () OP rhs;						\
-  }									\
-									\
-  template<typename T, size_t Bytes>					\
-  bool operator OP (packed<T, Bytes> lhs,				\
-		    const std::atomic<packed<T, Bytes>> &rhs)		\
-  {									\
-    return lhs OP rhs.load ();						\
+#define PACKED_ATOMIC_OP(OP)                                         \
+  template<typename T, size_t Bytes>                                 \
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,        \
+                    const std::atomic<packed<T, Bytes>> &rhs)        \
+  {                                                                  \
+    return lhs.load () OP rhs.load ();                               \
+  }                                                                  \
+                                                                     \
+  template<typename T, size_t Bytes>                                 \
+  bool operator OP (T lhs, const std::atomic<packed<T, Bytes>> &rhs) \
+  {                                                                  \
+    return lhs OP rhs.load ();                                       \
+  }                                                                  \
+                                                                     \
+  template<typename T, size_t Bytes>                                 \
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs, T rhs) \
+  {                                                                  \
+    return lhs.load () OP rhs;                                       \
+  }                                                                  \
+                                                                     \
+  template<typename T, size_t Bytes>                                 \
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,        \
+                    packed<T, Bytes> rhs)                            \
+  {                                                                  \
+    return lhs.load () OP rhs;                                       \
+  }                                                                  \
+                                                                     \
+  template<typename T, size_t Bytes>                                 \
+  bool operator OP (packed<T, Bytes> lhs,                            \
+                    const std::atomic<packed<T, Bytes>> &rhs)        \
+  {                                                                  \
+    return lhs OP rhs.load ();                                       \
   }
 
 PACKED_ATOMIC_OP (==)

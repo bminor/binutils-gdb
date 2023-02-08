@@ -62,10 +62,10 @@ create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
    register number. */
 
 static gdbpy_ref<>
-create_register_changed_event_object (frame_info_ptr frame, 
-				      int regnum)
+create_register_changed_event_object (frame_info_ptr frame, int regnum)
 {
-  gdbpy_ref<> event = create_event_object (&register_changed_event_object_type);
+  gdbpy_ref<> event
+    = create_event_object (&register_changed_event_object_type);
   if (event == NULL)
     return NULL;
 

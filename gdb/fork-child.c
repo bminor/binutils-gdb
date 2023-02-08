@@ -109,7 +109,7 @@ postfork_child_hook ()
 	 in a separate process group.  */
       debug_setpgrp = gdb_setpgid ();
       if (debug_setpgrp == -1)
-	perror (_("setpgrp failed in child"));
+	perror (_ ("setpgrp failed in child"));
     }
 
   /* Ask the tty subsystem to switch to the one we specified
@@ -149,32 +149,29 @@ static void
 show_startup_with_shell (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file,
-	      _("Use of shell to start subprocesses is %s.\n"),
-	      value);
+  gdb_printf (file, _ ("Use of shell to start subprocesses is %s.\n"), value);
 }
 
 void _initialize_fork_child ();
+
 void
 _initialize_fork_child ()
 {
-  add_setshow_filename_cmd ("exec-wrapper", class_run, &exec_wrapper, _("\
+  add_setshow_filename_cmd ("exec-wrapper", class_run, &exec_wrapper, _ ("\
 Set a wrapper for running programs.\n\
 The wrapper prepares the system and environment for the new program."),
-			    _("\
-Show the wrapper for running programs."), NULL,
-			    NULL, NULL,
-			    &setlist, &showlist);
+			    _ ("\
+Show the wrapper for running programs."),
+			    NULL, NULL, NULL, &setlist, &showlist);
 
   add_cmd ("exec-wrapper", class_run, unset_exec_wrapper_command,
-	   _("Disable use of an execution wrapper."),
-	   &unsetlist);
+	   _ ("Disable use of an execution wrapper."), &unsetlist);
 
   add_setshow_boolean_cmd ("startup-with-shell", class_support,
-			   &startup_with_shell, _("\
-Set use of shell to start subprocesses.  The default is on."), _("\
-Show use of shell to start subprocesses."), NULL,
-			   NULL,
-			   show_startup_with_shell,
-			   &setlist, &showlist);
+			   &startup_with_shell, _ ("\
+Set use of shell to start subprocesses.  The default is on."),
+			   _ ("\
+Show use of shell to start subprocesses."),
+			   NULL, NULL, show_startup_with_shell, &setlist,
+			   &showlist);
 }

@@ -77,18 +77,22 @@ trace_vdebug (const char *fmt, ...)
   va_end (ap);
 }
 
-#define trace_debug(fmt, args...)	\
-  do {						\
-    if (debug_threads)				\
-      trace_vdebug ((fmt), ##args);		\
-  } while (0)
+#define trace_debug(fmt, args...)     \
+  do                                  \
+    {                                 \
+      if (debug_threads)              \
+        trace_vdebug ((fmt), ##args); \
+    }                                 \
+  while (0)
 
 #else
 
-#define trace_debug(fmt, args...)	\
-  do {						\
-      threads_debug_printf ((fmt), ##args);	\
-  } while (0)
+#define trace_debug(fmt, args...)           \
+  do                                        \
+    {                                       \
+      threads_debug_printf ((fmt), ##args); \
+    }                                       \
+  while (0)
 
 #endif
 
@@ -96,40 +100,43 @@ trace_vdebug (const char *fmt, ...)
    that need exporting are defined in this module.  Note that all
    these symbols must be tagged with IP_AGENT_EXPORT_*.  */
 #ifdef IN_PROCESS_AGENT
-# define gdb_tp_heap_buffer IPA_SYM_EXPORTED_NAME (gdb_tp_heap_buffer)
-# define gdb_jump_pad_buffer IPA_SYM_EXPORTED_NAME (gdb_jump_pad_buffer)
-# define gdb_jump_pad_buffer_end IPA_SYM_EXPORTED_NAME (gdb_jump_pad_buffer_end)
-# define gdb_trampoline_buffer IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer)
-# define gdb_trampoline_buffer_end IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_end)
-# define gdb_trampoline_buffer_error IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_error)
-# define collecting IPA_SYM_EXPORTED_NAME (collecting)
-# define gdb_collect_ptr IPA_SYM_EXPORTED_NAME (gdb_collect_ptr)
-# define stop_tracing IPA_SYM_EXPORTED_NAME (stop_tracing)
-# define flush_trace_buffer IPA_SYM_EXPORTED_NAME (flush_trace_buffer)
-# define about_to_request_buffer_space IPA_SYM_EXPORTED_NAME (about_to_request_buffer_space)
-# define trace_buffer_is_full IPA_SYM_EXPORTED_NAME (trace_buffer_is_full)
-# define stopping_tracepoint IPA_SYM_EXPORTED_NAME (stopping_tracepoint)
-# define expr_eval_result IPA_SYM_EXPORTED_NAME (expr_eval_result)
-# define error_tracepoint IPA_SYM_EXPORTED_NAME (error_tracepoint)
-# define tracepoints IPA_SYM_EXPORTED_NAME (tracepoints)
-# define tracing IPA_SYM_EXPORTED_NAME (tracing)
-# define trace_buffer_ctrl IPA_SYM_EXPORTED_NAME (trace_buffer_ctrl)
-# define trace_buffer_ctrl_curr IPA_SYM_EXPORTED_NAME (trace_buffer_ctrl_curr)
-# define trace_buffer_lo IPA_SYM_EXPORTED_NAME (trace_buffer_lo)
-# define trace_buffer_hi IPA_SYM_EXPORTED_NAME (trace_buffer_hi)
-# define traceframe_read_count IPA_SYM_EXPORTED_NAME (traceframe_read_count)
-# define traceframe_write_count IPA_SYM_EXPORTED_NAME (traceframe_write_count)
-# define traceframes_created IPA_SYM_EXPORTED_NAME (traceframes_created)
-# define trace_state_variables IPA_SYM_EXPORTED_NAME (trace_state_variables)
-# define get_raw_reg_ptr IPA_SYM_EXPORTED_NAME (get_raw_reg_ptr)
-# define get_trace_state_variable_value_ptr \
+#define gdb_tp_heap_buffer IPA_SYM_EXPORTED_NAME (gdb_tp_heap_buffer)
+#define gdb_jump_pad_buffer IPA_SYM_EXPORTED_NAME (gdb_jump_pad_buffer)
+#define gdb_jump_pad_buffer_end IPA_SYM_EXPORTED_NAME (gdb_jump_pad_buffer_end)
+#define gdb_trampoline_buffer IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer)
+#define gdb_trampoline_buffer_end \
+  IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_end)
+#define gdb_trampoline_buffer_error \
+  IPA_SYM_EXPORTED_NAME (gdb_trampoline_buffer_error)
+#define collecting IPA_SYM_EXPORTED_NAME (collecting)
+#define gdb_collect_ptr IPA_SYM_EXPORTED_NAME (gdb_collect_ptr)
+#define stop_tracing IPA_SYM_EXPORTED_NAME (stop_tracing)
+#define flush_trace_buffer IPA_SYM_EXPORTED_NAME (flush_trace_buffer)
+#define about_to_request_buffer_space \
+  IPA_SYM_EXPORTED_NAME (about_to_request_buffer_space)
+#define trace_buffer_is_full IPA_SYM_EXPORTED_NAME (trace_buffer_is_full)
+#define stopping_tracepoint IPA_SYM_EXPORTED_NAME (stopping_tracepoint)
+#define expr_eval_result IPA_SYM_EXPORTED_NAME (expr_eval_result)
+#define error_tracepoint IPA_SYM_EXPORTED_NAME (error_tracepoint)
+#define tracepoints IPA_SYM_EXPORTED_NAME (tracepoints)
+#define tracing IPA_SYM_EXPORTED_NAME (tracing)
+#define trace_buffer_ctrl IPA_SYM_EXPORTED_NAME (trace_buffer_ctrl)
+#define trace_buffer_ctrl_curr IPA_SYM_EXPORTED_NAME (trace_buffer_ctrl_curr)
+#define trace_buffer_lo IPA_SYM_EXPORTED_NAME (trace_buffer_lo)
+#define trace_buffer_hi IPA_SYM_EXPORTED_NAME (trace_buffer_hi)
+#define traceframe_read_count IPA_SYM_EXPORTED_NAME (traceframe_read_count)
+#define traceframe_write_count IPA_SYM_EXPORTED_NAME (traceframe_write_count)
+#define traceframes_created IPA_SYM_EXPORTED_NAME (traceframes_created)
+#define trace_state_variables IPA_SYM_EXPORTED_NAME (trace_state_variables)
+#define get_raw_reg_ptr IPA_SYM_EXPORTED_NAME (get_raw_reg_ptr)
+#define get_trace_state_variable_value_ptr \
   IPA_SYM_EXPORTED_NAME (get_trace_state_variable_value_ptr)
-# define set_trace_state_variable_value_ptr \
+#define set_trace_state_variable_value_ptr \
   IPA_SYM_EXPORTED_NAME (set_trace_state_variable_value_ptr)
-# define ust_loaded IPA_SYM_EXPORTED_NAME (ust_loaded)
-# define helper_thread_id IPA_SYM_EXPORTED_NAME (helper_thread_id)
-# define cmd_buf IPA_SYM_EXPORTED_NAME (cmd_buf)
-# define ipa_tdesc_idx IPA_SYM_EXPORTED_NAME (ipa_tdesc_idx)
+#define ust_loaded IPA_SYM_EXPORTED_NAME (ust_loaded)
+#define helper_thread_id IPA_SYM_EXPORTED_NAME (helper_thread_id)
+#define cmd_buf IPA_SYM_EXPORTED_NAME (cmd_buf)
+#define ipa_tdesc_idx IPA_SYM_EXPORTED_NAME (ipa_tdesc_idx)
 #endif
 
 #ifndef IN_PROCESS_AGENT
@@ -175,36 +182,36 @@ static struct
   const char *name;
   int offset;
 } symbol_list[] = {
-  IPA_SYM(gdb_tp_heap_buffer),
-  IPA_SYM(gdb_jump_pad_buffer),
-  IPA_SYM(gdb_jump_pad_buffer_end),
-  IPA_SYM(gdb_trampoline_buffer),
-  IPA_SYM(gdb_trampoline_buffer_end),
-  IPA_SYM(gdb_trampoline_buffer_error),
-  IPA_SYM(collecting),
-  IPA_SYM(gdb_collect_ptr),
-  IPA_SYM(stop_tracing),
-  IPA_SYM(flush_trace_buffer),
-  IPA_SYM(about_to_request_buffer_space),
-  IPA_SYM(trace_buffer_is_full),
-  IPA_SYM(stopping_tracepoint),
-  IPA_SYM(expr_eval_result),
-  IPA_SYM(error_tracepoint),
-  IPA_SYM(tracepoints),
-  IPA_SYM(tracing),
-  IPA_SYM(trace_buffer_ctrl),
-  IPA_SYM(trace_buffer_ctrl_curr),
-  IPA_SYM(trace_buffer_lo),
-  IPA_SYM(trace_buffer_hi),
-  IPA_SYM(traceframe_read_count),
-  IPA_SYM(traceframe_write_count),
-  IPA_SYM(traceframes_created),
-  IPA_SYM(trace_state_variables),
-  IPA_SYM(get_raw_reg_ptr),
-  IPA_SYM(get_trace_state_variable_value_ptr),
-  IPA_SYM(set_trace_state_variable_value_ptr),
-  IPA_SYM(ust_loaded),
-  IPA_SYM(ipa_tdesc_idx),
+  IPA_SYM (gdb_tp_heap_buffer),
+  IPA_SYM (gdb_jump_pad_buffer),
+  IPA_SYM (gdb_jump_pad_buffer_end),
+  IPA_SYM (gdb_trampoline_buffer),
+  IPA_SYM (gdb_trampoline_buffer_end),
+  IPA_SYM (gdb_trampoline_buffer_error),
+  IPA_SYM (collecting),
+  IPA_SYM (gdb_collect_ptr),
+  IPA_SYM (stop_tracing),
+  IPA_SYM (flush_trace_buffer),
+  IPA_SYM (about_to_request_buffer_space),
+  IPA_SYM (trace_buffer_is_full),
+  IPA_SYM (stopping_tracepoint),
+  IPA_SYM (expr_eval_result),
+  IPA_SYM (error_tracepoint),
+  IPA_SYM (tracepoints),
+  IPA_SYM (tracing),
+  IPA_SYM (trace_buffer_ctrl),
+  IPA_SYM (trace_buffer_ctrl_curr),
+  IPA_SYM (trace_buffer_lo),
+  IPA_SYM (trace_buffer_hi),
+  IPA_SYM (traceframe_read_count),
+  IPA_SYM (traceframe_write_count),
+  IPA_SYM (traceframes_created),
+  IPA_SYM (trace_state_variables),
+  IPA_SYM (get_raw_reg_ptr),
+  IPA_SYM (get_trace_state_variable_value_ptr),
+  IPA_SYM (set_trace_state_variable_value_ptr),
+  IPA_SYM (ust_loaded),
+  IPA_SYM (ipa_tdesc_idx),
 };
 
 static struct ipa_sym_addresses ipa_sym_addrs;
@@ -231,10 +238,10 @@ in_process_agent_supports_ust (void)
       /* Agent understands static tracepoint, then check whether UST is in
 	 fact loaded in the inferior.  */
       if (read_inferior_integer (ipa_sym_addrs.addr_ust_loaded, &loaded))
-	{
-	  warning ("Error reading ust_loaded in lib");
-	  return 0;
-	}
+        {
+          warning ("Error reading ust_loaded in lib");
+          return 0;
+        }
 
       return loaded;
     }
@@ -245,9 +252,8 @@ in_process_agent_supports_ust (void)
 static void
 write_e_ipa_not_loaded (char *buffer)
 {
-  sprintf (buffer,
-	   "E.In-process agent library not loaded in process.  "
-	   "Fast and static tracepoints unavailable.");
+  sprintf (buffer, "E.In-process agent library not loaded in process.  "
+                   "Fast and static tracepoints unavailable.");
 }
 
 /* Write an error to BUFFER indicating that UST isn't loaded in the
@@ -257,9 +263,8 @@ static void
 write_e_ust_not_loaded (char *buffer)
 {
 #ifdef HAVE_UST
-  sprintf (buffer,
-	   "E.UST library not loaded in process.  "
-	   "Static tracepoints unavailable.");
+  sprintf (buffer, "E.UST library not loaded in process.  "
+                   "Static tracepoints unavailable.");
 #else
   sprintf (buffer, "E.GDBserver was built without static tracepoints support");
 #endif
@@ -315,14 +320,14 @@ tracepoint_look_up_symbols (void)
 
   for (i = 0; i < sizeof (symbol_list) / sizeof (symbol_list[0]); i++)
     {
-      CORE_ADDR *addrp =
-	(CORE_ADDR *) ((char *) &ipa_sym_addrs + symbol_list[i].offset);
+      CORE_ADDR *addrp
+        = (CORE_ADDR *) ((char *) &ipa_sym_addrs + symbol_list[i].offset);
 
       if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
-	{
-	  threads_debug_printf ("symbol `%s' not found", symbol_list[i].name);
-	  return;
-	}
+        {
+          threads_debug_printf ("symbol `%s' not found", symbol_list[i].name);
+          return;
+        }
     }
 
   agent_look_up_symbols (NULL);
@@ -359,9 +364,13 @@ read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
    to not inline said functions.  */
 
 #if defined(__GNUC__)
-#  define UNKNOWN_SIDE_EFFECTS() asm ("")
+#define UNKNOWN_SIDE_EFFECTS() asm ("")
 #else
-#  define UNKNOWN_SIDE_EFFECTS() do {} while (0)
+#define UNKNOWN_SIDE_EFFECTS() \
+  do                           \
+    {                          \
+    }                          \
+  while (0)
 #endif
 
 /* This is needed for -Wmissing-declarations.  */
@@ -371,7 +380,7 @@ IP_AGENT_EXPORT_FUNC void
 stop_tracing (void)
 {
   /* GDBserver places breakpoint here.  */
-  UNKNOWN_SIDE_EFFECTS();
+  UNKNOWN_SIDE_EFFECTS ();
 }
 
 /* This is needed for -Wmissing-declarations.  */
@@ -381,7 +390,7 @@ IP_AGENT_EXPORT_FUNC void
 flush_trace_buffer (void)
 {
   /* GDBserver places breakpoint here.  */
-  UNKNOWN_SIDE_EFFECTS();
+  UNKNOWN_SIDE_EFFECTS ();
 }
 
 #endif
@@ -391,7 +400,7 @@ static int
 tracepoint_handler (CORE_ADDR address)
 {
   trace_debug ("tracepoint_handler: tracepoint at 0x%s hit",
-	       paddress (address));
+               paddress (address));
   return 0;
 }
 
@@ -411,8 +420,7 @@ static int run_inferior_command (char *cmd, int len);
 static int
 read_inferior_integer (CORE_ADDR symaddr, int *val)
 {
-  return read_inferior_memory (symaddr, (unsigned char *) val,
-			       sizeof (*val));
+  return read_inferior_memory (symaddr, (unsigned char *) val, sizeof (*val));
 }
 
 struct tracepoint;
@@ -421,8 +429,7 @@ static int tracepoint_send_agent (struct tracepoint *tpoint);
 static int
 read_inferior_uinteger (CORE_ADDR symaddr, unsigned int *val)
 {
-  return read_inferior_memory (symaddr, (unsigned char *) val,
-			       sizeof (*val));
+  return read_inferior_memory (symaddr, (unsigned char *) val, sizeof (*val));
 }
 
 static int
@@ -440,8 +447,7 @@ static int
 write_inferior_data_pointer (CORE_ADDR symaddr, CORE_ADDR val)
 {
   void *pval = (void *) (uintptr_t) val;
-  return target_write_memory (symaddr,
-				(unsigned char *) &pval, sizeof (pval));
+  return target_write_memory (symaddr, (unsigned char *) &pval, sizeof (pval));
 }
 
 static int
@@ -464,11 +470,13 @@ write_inferior_uinteger (CORE_ADDR symaddr, unsigned int val)
 
 static CORE_ADDR target_malloc (ULONGEST size);
 
-#define COPY_FIELD_TO_BUF(BUF, OBJ, FIELD)	\
-  do {							\
-    memcpy (BUF, &(OBJ)->FIELD, sizeof ((OBJ)->FIELD)); \
-    BUF += sizeof ((OBJ)->FIELD);			\
-  } while (0)
+#define COPY_FIELD_TO_BUF(BUF, OBJ, FIELD)                \
+  do                                                      \
+    {                                                     \
+      memcpy (BUF, &(OBJ)->FIELD, sizeof ((OBJ)->FIELD)); \
+      BUF += sizeof ((OBJ)->FIELD);                       \
+    }                                                     \
+  while (0)
 
 #endif
 
@@ -518,7 +526,7 @@ m_tracepoint_action_download (const struct tracepoint_action *action)
   CORE_ADDR ipa_action = target_malloc (sizeof (struct collect_memory_action));
 
   target_write_memory (ipa_action, (unsigned char *) action,
-			 sizeof (struct collect_memory_action));
+                       sizeof (struct collect_memory_action));
 
   return ipa_action;
 }
@@ -538,10 +546,11 @@ m_tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
 static CORE_ADDR
 r_tracepoint_action_download (const struct tracepoint_action *action)
 {
-  CORE_ADDR ipa_action = target_malloc (sizeof (struct collect_registers_action));
+  CORE_ADDR ipa_action
+    = target_malloc (sizeof (struct collect_registers_action));
 
   target_write_memory (ipa_action, (unsigned char *) action,
-			 sizeof (struct collect_registers_action));
+                       sizeof (struct collect_registers_action));
 
   return ipa_action;
 }
@@ -561,11 +570,11 @@ x_tracepoint_action_download (const struct tracepoint_action *action)
   CORE_ADDR expr;
 
   target_write_memory (ipa_action, (unsigned char *) action,
-			 sizeof (struct eval_expr_action));
+                       sizeof (struct eval_expr_action));
   expr = download_agent_expr (((struct eval_expr_action *) action)->expr);
   write_inferior_data_pointer (ipa_action
-			       + offsetof (struct eval_expr_action, expr),
-			       expr);
+                                 + offsetof (struct eval_expr_action, expr),
+                               expr);
 
   return ipa_action;
 }
@@ -586,7 +595,7 @@ agent_expr_send (char *p, const struct agent_expr *aexpr)
   else
     {
       memcpy (p, &aexpr->length, 4);
-      p +=4;
+      p += 4;
 
       memcpy (p, aexpr->bytes, aexpr->length);
       p += aexpr->length;
@@ -595,7 +604,7 @@ agent_expr_send (char *p, const struct agent_expr *aexpr)
 }
 
 static char *
-x_tracepoint_action_send ( char *buffer, const struct tracepoint_action *action)
+x_tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
 {
   struct eval_expr_action *eaction = (struct eval_expr_action *) action;
 
@@ -609,7 +618,7 @@ l_tracepoint_action_download (const struct tracepoint_action *action)
     = target_malloc (sizeof (struct collect_static_trace_data_action));
 
   target_write_memory (ipa_action, (unsigned char *) action,
-			 sizeof (struct collect_static_trace_data_action));
+                       sizeof (struct collect_static_trace_data_action));
 
   return ipa_action;
 }
@@ -690,8 +699,7 @@ enum tracepoint_type
 
 struct tracepoint_hit_ctx;
 
-typedef enum eval_result_type (*condfn) (unsigned char *,
-					 ULONGEST *);
+typedef enum eval_result_type (*condfn) (unsigned char *, ULONGEST *);
 
 /* The definition of a tracepoint.  */
 
@@ -797,7 +805,6 @@ struct tracepoint
      NULL if we haven't inserted it yet.  */
   void *handle;
 #endif
-
 };
 
 #ifndef IN_PROCESS_AGENT
@@ -857,17 +864,12 @@ EXTERN_C_POP
 
 static struct tracepoint *last_tracepoint;
 
-static const char * const eval_result_names[] =
-  {
-    "terror:in the attic",  /* this should never be reported */
-    "terror:empty expression",
-    "terror:empty stack",
-    "terror:stack overflow",
-    "terror:stack underflow",
-    "terror:unhandled opcode",
-    "terror:unrecognized opcode",
-    "terror:divide by zero"
-  };
+static const char *const eval_result_names[]
+  = { "terror:in the attic", /* this should never be reported */
+      "terror:empty expression", "terror:empty stack",
+      "terror:stack overflow",   "terror:stack underflow",
+      "terror:unhandled opcode", "terror:unrecognized opcode",
+      "terror:divide by zero" };
 
 #endif
 
@@ -939,11 +941,11 @@ IP_AGENT_EXPORT_VAR struct trace_state_variable *trace_state_variables;
    free space ends up in two parts at opposite ends of the buffer.  */
 
 #ifndef ATTR_PACKED
-#  if defined(__GNUC__)
-#    define ATTR_PACKED __attribute__ ((packed))
-#  else
-#    define ATTR_PACKED /* nothing */
-#  endif
+#if defined(__GNUC__)
+#define ATTR_PACKED __attribute__ ((packed))
+#else
+#define ATTR_PACKED /* nothing */
+#endif
 #endif
 
 /* The data collected at a tracepoint hit.  This object should be as
@@ -1040,7 +1042,6 @@ struct ipa_trace_buffer_control
   uintptr_t end_free;
   uintptr_t wrap;
 };
-
 
 /* We have possibly both GDBserver and an inferior thread accessing
    the same IPA trace buffer memory.  The IPA is the producer (tries
@@ -1139,13 +1140,13 @@ A GDBserver update of `trace_buffer_ctrl_curr' does:
    for the counters described below.  The cleared bits are used to
    hold the index of the items of the `trace_buffer_ctrl' array that
    is "current".  */
-#define GDBSERVER_FLUSH_COUNT_MASK        0xfffffff0
+#define GDBSERVER_FLUSH_COUNT_MASK 0xfffffff0
 
 /* `trace_buffer_ctrl_curr' contains two counters.  The `previous'
    counter, and the `current' counter.  */
 
-#define GDBSERVER_FLUSH_COUNT_MASK_PREV   0x7ff00000
-#define GDBSERVER_FLUSH_COUNT_MASK_CURR   0x0007ff00
+#define GDBSERVER_FLUSH_COUNT_MASK_PREV 0x7ff00000
+#define GDBSERVER_FLUSH_COUNT_MASK_CURR 0x0007ff00
 
 /* When GDBserver update the IP agent's `trace_buffer_ctrl_curr', it
    always stamps this bit as set.  */
@@ -1155,7 +1156,7 @@ A GDBserver update of `trace_buffer_ctrl_curr' does:
 IP_AGENT_EXPORT_VAR struct trace_buffer_control trace_buffer_ctrl[3];
 IP_AGENT_EXPORT_VAR unsigned int trace_buffer_ctrl_curr;
 
-# define TRACE_BUFFER_CTRL_CURR \
+#define TRACE_BUFFER_CTRL_CURR \
   (trace_buffer_ctrl_curr & ~GDBSERVER_FLUSH_COUNT_MASK)
 
 #else
@@ -1165,7 +1166,7 @@ IP_AGENT_EXPORT_VAR unsigned int trace_buffer_ctrl_curr;
    that the rest of the code base doesn't need to care for the
    difference.  */
 static trace_buffer_control trace_buffer_ctrl[1];
-# define TRACE_BUFFER_CTRL_CURR 0
+#define TRACE_BUFFER_CTRL_CURR 0
 #endif
 
 /* These are convenience macros used to access the current trace
@@ -1175,7 +1176,6 @@ static trace_buffer_control trace_buffer_ctrl[1];
 #define trace_buffer_end_free \
   (trace_buffer_ctrl[TRACE_BUFFER_CTRL_CURR].end_free)
 #define trace_buffer_wrap (trace_buffer_ctrl[TRACE_BUFFER_CTRL_CURR].wrap)
-
 
 /* Macro that returns a pointer to the first traceframe in the buffer.  */
 
@@ -1188,11 +1188,11 @@ static trace_buffer_control trace_buffer_ctrl[1];
 #define NEXT_TRACEFRAME_1(TF) \
   (((unsigned char *) (TF)) + sizeof (struct traceframe) + (TF)->data_size)
 
-#define NEXT_TRACEFRAME(TF) \
-  ((struct traceframe *) (NEXT_TRACEFRAME_1 (TF)  \
-			  - ((NEXT_TRACEFRAME_1 (TF) >= trace_buffer_wrap) \
-			     ? (trace_buffer_wrap - trace_buffer_lo)	\
-			     : 0)))
+#define NEXT_TRACEFRAME(TF)                                                \
+  ((struct traceframe *) (NEXT_TRACEFRAME_1 (TF)                           \
+                          - ((NEXT_TRACEFRAME_1 (TF) >= trace_buffer_wrap) \
+                               ? (trace_buffer_wrap - trace_buffer_lo)     \
+                               : 0)))
 
 /* The difference between these counters represents the total number
    of complete traceframes present in the trace buffer.  The IP agent
@@ -1351,7 +1351,7 @@ static int traceframe_read_tsv (int num, LONGEST *val);
 #endif
 
 static int condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-					 struct tracepoint *tpoint);
+                                         struct tracepoint *tpoint);
 
 #ifndef IN_PROCESS_AGENT
 static void clear_readonly_regions (void);
@@ -1359,20 +1359,20 @@ static void clear_installed_tracepoints (void);
 #endif
 
 static void collect_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-					CORE_ADDR stop_pc,
-					struct tracepoint *tpoint);
+                                        CORE_ADDR stop_pc,
+                                        struct tracepoint *tpoint);
 #ifndef IN_PROCESS_AGENT
 static void collect_data_at_step (struct tracepoint_hit_ctx *ctx,
-				  CORE_ADDR stop_pc,
-				  struct tracepoint *tpoint, int current_step);
+                                  CORE_ADDR stop_pc, struct tracepoint *tpoint,
+                                  int current_step);
 static void compile_tracepoint_condition (struct tracepoint *tpoint,
-					  CORE_ADDR *jump_entry);
+                                          CORE_ADDR *jump_entry);
 #endif
 static void do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-				     CORE_ADDR stop_pc,
-				     struct tracepoint *tpoint,
-				     struct traceframe *tframe,
-				     struct tracepoint_action *taction);
+                                     CORE_ADDR stop_pc,
+                                     struct tracepoint *tpoint,
+                                     struct traceframe *tframe,
+                                     struct tracepoint_action *taction);
 
 #ifndef IN_PROCESS_AGENT
 static struct tracepoint *fast_tracepoint_from_ipa_tpoint_address (CORE_ADDR);
@@ -1381,15 +1381,19 @@ static void install_tracepoint (struct tracepoint *, char *own_buf);
 static void download_tracepoint (struct tracepoint *);
 static int install_fast_tracepoint (struct tracepoint *, char *errbuf);
 static void clone_fast_tracepoint (struct tracepoint *to,
-				   const struct tracepoint *from);
+                                   const struct tracepoint *from);
 #endif
 
 static LONGEST get_timestamp (void);
 
 #if defined(__GNUC__)
-#  define memory_barrier() asm volatile ("" : : : "memory")
+#define memory_barrier() asm volatile ("" : : : "memory")
 #else
-#  define memory_barrier() do {} while (0)
+#define memory_barrier() \
+  do                     \
+    {                    \
+    }                    \
+  while (0)
 #endif
 
 /* We only build the IPA if this builtin is supported, and there are
@@ -1402,16 +1406,15 @@ static LONGEST get_timestamp (void);
 
 static void
 record_tracepoint_error (struct tracepoint *tpoint, const char *which,
-			 enum eval_result_type rtype)
+                         enum eval_result_type rtype)
 {
-  trace_debug ("Tracepoint %d at %s %s eval reports error %d",
-	       tpoint->number, paddress (tpoint->address), which, rtype);
+  trace_debug ("Tracepoint %d at %s %s eval reports error %d", tpoint->number,
+               paddress (tpoint->address), which, rtype);
 
 #ifdef IN_PROCESS_AGENT
   /* Only record the first error we get.  */
-  if (cmpxchg (&expr_eval_result,
-	       expr_eval_no_error,
-	       rtype) != expr_eval_no_error)
+  if (cmpxchg (&expr_eval_result, expr_eval_no_error, rtype)
+      != expr_eval_no_error)
     return;
 #else
   if (expr_eval_result != expr_eval_no_error)
@@ -1448,9 +1451,9 @@ clear_inferior_trace_buffer (void)
   struct ipa_trace_buffer_control ipa_trace_buffer_ctrl;
 
   read_inferior_data_pointer (ipa_sym_addrs.addr_trace_buffer_lo,
-			      &ipa_trace_buffer_lo);
+                              &ipa_trace_buffer_lo);
   read_inferior_data_pointer (ipa_sym_addrs.addr_trace_buffer_hi,
-			      &ipa_trace_buffer_hi);
+                              &ipa_trace_buffer_hi);
 
   ipa_trace_buffer_ctrl.start = ipa_trace_buffer_lo;
   ipa_trace_buffer_ctrl.free = ipa_trace_buffer_lo;
@@ -1459,15 +1462,14 @@ clear_inferior_trace_buffer (void)
 
   /* A traceframe with zeroed fields marks the end of trace data.  */
   target_write_memory (ipa_sym_addrs.addr_trace_buffer_ctrl,
-			 (unsigned char *) &ipa_trace_buffer_ctrl,
-			 sizeof (ipa_trace_buffer_ctrl));
+                       (unsigned char *) &ipa_trace_buffer_ctrl,
+                       sizeof (ipa_trace_buffer_ctrl));
 
   write_inferior_uinteger (ipa_sym_addrs.addr_trace_buffer_ctrl_curr, 0);
 
   /* A traceframe with zeroed fields marks the end of trace data.  */
-  target_write_memory (ipa_trace_buffer_lo,
-			 (unsigned char *) &ipa_traceframe,
-			 sizeof (ipa_traceframe));
+  target_write_memory (ipa_trace_buffer_lo, (unsigned char *) &ipa_traceframe,
+                       sizeof (ipa_traceframe));
 
   write_inferior_uinteger (ipa_sym_addrs.addr_traceframe_write_count, 0);
   write_inferior_uinteger (ipa_sym_addrs.addr_traceframe_read_count, 0);
@@ -1485,8 +1487,9 @@ init_trace_buffer (LONGEST bufsize)
 
   /* Make sure to internally allocate at least space for the EOB
      marker.  */
-  alloc_size = (bufsize < TRACEFRAME_EOB_MARKER_SIZE
-		? TRACEFRAME_EOB_MARKER_SIZE : bufsize);
+  alloc_size
+    = (bufsize < TRACEFRAME_EOB_MARKER_SIZE ? TRACEFRAME_EOB_MARKER_SIZE
+                                            : bufsize);
   trace_buffer_lo = (unsigned char *) xrealloc (trace_buffer_lo, alloc_size);
 
   trace_buffer_hi = trace_buffer_lo + trace_buffer_size;
@@ -1504,7 +1507,7 @@ about_to_request_buffer_space (void)
 {
   /* GDBserver places breakpoint here while it goes about to flush
      data at random times.  */
-  UNKNOWN_SIDE_EFFECTS();
+  UNKNOWN_SIDE_EFFECTS ();
 }
 
 #endif
@@ -1528,14 +1531,14 @@ trace_buffer_alloc (size_t amt)
   unsigned char *new_start;
 #endif
 
-  trace_debug ("Want to allocate %ld+%ld bytes in trace buffer",
-	       (long) amt, (long) sizeof (struct traceframe));
+  trace_debug ("Want to allocate %ld+%ld bytes in trace buffer", (long) amt,
+               (long) sizeof (struct traceframe));
 
   /* Account for the EOB marker.  */
   amt += TRACEFRAME_EOB_MARKER_SIZE;
 
 #ifdef IN_PROCESS_AGENT
- again:
+again:
   memory_barrier ();
 
   /* Read the current token and extract the index to try to write to,
@@ -1551,8 +1554,7 @@ trace_buffer_alloc (size_t amt)
   /* Start out with a copy of the current state.  GDBserver may be
      midway writing to the PREV_FILTERED TBC, but, that's OK, we won't
      be able to commit anyway if that happens.  */
-  trace_buffer_ctrl[curr]
-    = trace_buffer_ctrl[prev_filtered];
+  trace_buffer_ctrl[curr] = trace_buffer_ctrl[prev_filtered];
   trace_debug ("trying curr=%u", curr);
 #else
   /* The GDBserver's agent doesn't need all that syncing, and always
@@ -1565,12 +1567,11 @@ trace_buffer_alloc (size_t amt)
      especially for the small trace buffer sizes that are useful for
      testing.  */
   trace_debug ("Trace buffer [%d] start=%d free=%d endfree=%d wrap=%d hi=%d",
-	       curr,
-	       (int) (tbctrl->start - trace_buffer_lo),
-	       (int) (tbctrl->free - trace_buffer_lo),
-	       (int) (tbctrl->end_free - trace_buffer_lo),
-	       (int) (tbctrl->wrap - trace_buffer_lo),
-	       (int) (trace_buffer_hi - trace_buffer_lo));
+               curr, (int) (tbctrl->start - trace_buffer_lo),
+               (int) (tbctrl->free - trace_buffer_lo),
+               (int) (tbctrl->end_free - trace_buffer_lo),
+               (int) (tbctrl->wrap - trace_buffer_lo),
+               (int) (trace_buffer_hi - trace_buffer_lo));
 
   /* The algorithm here is to keep trying to get a contiguous block of
      the requested size, possibly discarding older traceframes to free
@@ -1582,25 +1583,25 @@ trace_buffer_alloc (size_t amt)
     {
       /* First, if we have two free parts, try the upper one first.  */
       if (tbctrl->end_free < tbctrl->free)
-	{
-	  if (tbctrl->free + amt <= trace_buffer_hi)
-	    /* We have enough in the upper part.  */
-	    break;
-	  else
-	    {
-	      /* Our high part of free space wasn't enough.  Give up
+        {
+          if (tbctrl->free + amt <= trace_buffer_hi)
+            /* We have enough in the upper part.  */
+            break;
+          else
+            {
+              /* Our high part of free space wasn't enough.  Give up
 		 on it for now, set wraparound.  We will recover the
 		 space later, if/when the wrapped-around traceframe is
 		 discarded.  */
-	      trace_debug ("Upper part too small, setting wraparound");
-	      tbctrl->wrap = tbctrl->free;
-	      tbctrl->free = trace_buffer_lo;
-	    }
-	}
+              trace_debug ("Upper part too small, setting wraparound");
+              tbctrl->wrap = tbctrl->free;
+              tbctrl->free = trace_buffer_lo;
+            }
+        }
 
       /* The normal case.  */
       if (tbctrl->free + amt <= tbctrl->end_free)
-	break;
+        break;
 
 #ifdef IN_PROCESS_AGENT
       /* The IP Agent's buffer is always circular.  It isn't used
@@ -1611,10 +1612,10 @@ trace_buffer_alloc (size_t amt)
       flush_trace_buffer ();
       memory_barrier ();
       if (tracing)
-	{
-	  trace_debug ("gdbserver flushed buffer, retrying");
-	  goto again;
-	}
+        {
+          trace_debug ("gdbserver flushed buffer, retrying");
+          goto again;
+        }
 
       /* GDBserver cancelled the tracing.  Bail out as well.  */
       return NULL;
@@ -1622,10 +1623,10 @@ trace_buffer_alloc (size_t amt)
       /* If we're here, then neither part is big enough, and
 	 non-circular trace buffers are now full.  */
       if (!circular_trace_buffer)
-	{
-	  trace_debug ("Not enough space in the trace buffer");
-	  return NULL;
-	}
+        {
+          trace_debug ("Not enough space in the trace buffer");
+          return NULL;
+        }
 
       trace_debug ("Need more space in the trace buffer");
 
@@ -1633,13 +1634,13 @@ trace_buffer_alloc (size_t amt)
 	 oldest traceframe and see if that helps.  */
       oldest = FIRST_TRACEFRAME ();
       if (oldest->tpnum == 0)
-	{
-	  /* Not good; we have no traceframes to free.  Perhaps we're
+        {
+          /* Not good; we have no traceframes to free.  Perhaps we're
 	     asking for a block that is larger than the buffer?  In
 	     any case, give up.  */
-	  trace_debug ("No traceframes to discard");
-	  return NULL;
-	}
+          trace_debug ("No traceframes to discard");
+          return NULL;
+        }
 
       /* We don't run this code in the in-process agent currently.
 	 E.g., we could leave the in-process agent in autonomous
@@ -1652,22 +1653,21 @@ trace_buffer_alloc (size_t amt)
       /* If we freed the traceframe that wrapped around, go back
 	 to the non-wrap case.  */
       if (new_start < tbctrl->start)
-	{
-	  trace_debug ("Discarding past the wraparound");
-	  tbctrl->wrap = trace_buffer_hi;
-	}
+        {
+          trace_debug ("Discarding past the wraparound");
+          tbctrl->wrap = trace_buffer_hi;
+        }
       tbctrl->start = new_start;
       tbctrl->end_free = tbctrl->start;
 
       trace_debug ("Discarded a traceframe\n"
-		   "Trace buffer [%d], start=%d free=%d "
-		   "endfree=%d wrap=%d hi=%d",
-		   curr,
-		   (int) (tbctrl->start - trace_buffer_lo),
-		   (int) (tbctrl->free - trace_buffer_lo),
-		   (int) (tbctrl->end_free - trace_buffer_lo),
-		   (int) (tbctrl->wrap - trace_buffer_lo),
-		   (int) (trace_buffer_hi - trace_buffer_lo));
+                   "Trace buffer [%d], start=%d free=%d "
+                   "endfree=%d wrap=%d hi=%d",
+                   curr, (int) (tbctrl->start - trace_buffer_lo),
+                   (int) (tbctrl->free - trace_buffer_lo),
+                   (int) (tbctrl->end_free - trace_buffer_lo),
+                   (int) (tbctrl->wrap - trace_buffer_lo),
+                   (int) (trace_buffer_hi - trace_buffer_lo));
 
       /* Now go back around the loop.  The discard might have resulted
 	 in either one or two pieces of free space, so we want to try
@@ -1691,18 +1691,17 @@ trace_buffer_alloc (size_t amt)
 #ifdef IN_PROCESS_AGENT
   /* Build the tentative token.  */
   commit_count = (((prev & GDBSERVER_FLUSH_COUNT_MASK_CURR) + 0x100)
-		  & GDBSERVER_FLUSH_COUNT_MASK_CURR);
-  commit = (((prev & GDBSERVER_FLUSH_COUNT_MASK_CURR) << 12)
-	    | commit_count
-	    | curr);
+                  & GDBSERVER_FLUSH_COUNT_MASK_CURR);
+  commit
+    = (((prev & GDBSERVER_FLUSH_COUNT_MASK_CURR) << 12) | commit_count | curr);
 
   /* Try to commit it.  */
   readout = cmpxchg (&trace_buffer_ctrl_curr, prev, commit);
   if (readout != prev)
     {
       trace_debug ("GDBserver has touched the trace buffer, restarting."
-		   " (prev=%08x, commit=%08x, readout=%08x)",
-		   prev, commit, readout);
+                   " (prev=%08x, commit=%08x, readout=%08x)",
+                   prev, commit, readout);
       goto again;
     }
 
@@ -1725,19 +1724,19 @@ trace_buffer_alloc (size_t amt)
     refetch = trace_buffer_ctrl_curr;
 
     if (refetch == commit
-	|| ((refetch & GDBSERVER_FLUSH_COUNT_MASK_PREV) >> 12) == commit_count)
+        || ((refetch & GDBSERVER_FLUSH_COUNT_MASK_PREV) >> 12) == commit_count)
       {
-	/* effective */
-	trace_debug ("change is effective: (prev=%08x, commit=%08x, "
-		     "readout=%08x, refetch=%08x)",
-		     prev, commit, readout, refetch);
+        /* effective */
+        trace_debug ("change is effective: (prev=%08x, commit=%08x, "
+                     "readout=%08x, refetch=%08x)",
+                     prev, commit, readout, refetch);
       }
     else
       {
-	trace_debug ("GDBserver has touched the trace buffer, not effective."
-		     " (prev=%08x, commit=%08x, readout=%08x, refetch=%08x)",
-		     prev, commit, readout, refetch);
-	goto again;
+        trace_debug ("GDBserver has touched the trace buffer, not effective."
+                     " (prev=%08x, commit=%08x, readout=%08x, refetch=%08x)",
+                     prev, commit, readout, refetch);
+        goto again;
       }
   }
 #endif
@@ -1756,13 +1755,12 @@ trace_buffer_alloc (size_t amt)
     {
       trace_debug ("Allocated %d bytes", (int) amt);
       trace_debug ("Trace buffer [%d] start=%d free=%d "
-		   "endfree=%d wrap=%d hi=%d",
-		   curr,
-		   (int) (tbctrl->start - trace_buffer_lo),
-		   (int) (tbctrl->free - trace_buffer_lo),
-		   (int) (tbctrl->end_free - trace_buffer_lo),
-		   (int) (tbctrl->wrap - trace_buffer_lo),
-		   (int) (trace_buffer_hi - trace_buffer_lo));
+                   "endfree=%d wrap=%d hi=%d",
+                   curr, (int) (tbctrl->start - trace_buffer_lo),
+                   (int) (tbctrl->free - trace_buffer_lo),
+                   (int) (tbctrl->end_free - trace_buffer_lo),
+                   (int) (tbctrl->wrap - trace_buffer_lo),
+                   (int) (trace_buffer_hi - trace_buffer_lo));
     }
 
   return rslt;
@@ -1780,7 +1778,7 @@ free_space (void)
     return trace_buffer_end_free - trace_buffer_free;
   else
     return ((trace_buffer_end_free - trace_buffer_lo)
-	    + (trace_buffer_hi - trace_buffer_free));
+            + (trace_buffer_hi - trace_buffer_free));
 }
 
 /* An 'S' in continuation packets indicates remainder are for
@@ -1876,9 +1874,9 @@ remove_tracepoint (struct tracepoint *tpoint)
   if (tp)
     {
       if (tp_prev)
-	tp_prev->next = tp->next;
+        tp_prev->next = tp->next;
       else
-	tracepoints = tp->next;
+        tracepoints = tp->next;
 
       xfree (tp);
     }
@@ -1928,112 +1926,109 @@ add_tracepoint_action (struct tracepoint *tpoint, const char *packet)
       struct tracepoint_action *action = NULL;
 
       switch (*act)
-	{
-	case 'M':
-	  {
-	    struct collect_memory_action *maction =
-	      XNEW (struct collect_memory_action);
-	    ULONGEST basereg;
-	    int is_neg;
+        {
+        case 'M':
+          {
+            struct collect_memory_action *maction
+              = XNEW (struct collect_memory_action);
+            ULONGEST basereg;
+            int is_neg;
 
-	    maction->base.type = *act;
-	    action = &maction->base;
+            maction->base.type = *act;
+            action = &maction->base;
 
-	    ++act;
-	    is_neg = (*act == '-');
-	    if (*act == '-')
-	      ++act;
-	    act = unpack_varlen_hex (act, &basereg);
-	    ++act;
-	    act = unpack_varlen_hex (act, &maction->addr);
-	    ++act;
-	    act = unpack_varlen_hex (act, &maction->len);
-	    maction->basereg = (is_neg
-				? - (int) basereg
-				: (int) basereg);
-	    trace_debug ("Want to collect %s bytes at 0x%s (basereg %d)",
-			 pulongest (maction->len),
-			 paddress (maction->addr), maction->basereg);
-	    break;
-	  }
-	case 'R':
-	  {
-	    struct collect_registers_action *raction =
-	      XNEW (struct collect_registers_action);
+            ++act;
+            is_neg = (*act == '-');
+            if (*act == '-')
+              ++act;
+            act = unpack_varlen_hex (act, &basereg);
+            ++act;
+            act = unpack_varlen_hex (act, &maction->addr);
+            ++act;
+            act = unpack_varlen_hex (act, &maction->len);
+            maction->basereg = (is_neg ? -(int) basereg : (int) basereg);
+            trace_debug ("Want to collect %s bytes at 0x%s (basereg %d)",
+                         pulongest (maction->len), paddress (maction->addr),
+                         maction->basereg);
+            break;
+          }
+        case 'R':
+          {
+            struct collect_registers_action *raction
+              = XNEW (struct collect_registers_action);
 
-	    raction->base.type = *act;
-	    action = &raction->base;
+            raction->base.type = *act;
+            action = &raction->base;
 
-	    trace_debug ("Want to collect registers");
-	    ++act;
-	    /* skip past hex digits of mask for now */
-	    while (isxdigit(*act))
-	      ++act;
-	    break;
-	  }
-	case 'L':
-	  {
-	    struct collect_static_trace_data_action *raction =
-	      XNEW (struct collect_static_trace_data_action);
+            trace_debug ("Want to collect registers");
+            ++act;
+            /* skip past hex digits of mask for now */
+            while (isxdigit (*act))
+              ++act;
+            break;
+          }
+        case 'L':
+          {
+            struct collect_static_trace_data_action *raction
+              = XNEW (struct collect_static_trace_data_action);
 
-	    raction->base.type = *act;
-	    action = &raction->base;
+            raction->base.type = *act;
+            action = &raction->base;
 
-	    trace_debug ("Want to collect static trace data");
-	    ++act;
-	    break;
-	  }
-	case 'S':
-	  trace_debug ("Unexpected step action, ignoring");
-	  ++act;
-	  break;
-	case 'X':
-	  {
-	    struct eval_expr_action *xaction = XNEW (struct eval_expr_action);
+            trace_debug ("Want to collect static trace data");
+            ++act;
+            break;
+          }
+        case 'S':
+          trace_debug ("Unexpected step action, ignoring");
+          ++act;
+          break;
+        case 'X':
+          {
+            struct eval_expr_action *xaction = XNEW (struct eval_expr_action);
 
-	    xaction->base.type = *act;
-	    action = &xaction->base;
+            xaction->base.type = *act;
+            action = &xaction->base;
 
-	    trace_debug ("Want to evaluate expression");
-	    xaction->expr = gdb_parse_agent_expr (&act);
-	    break;
-	  }
-	default:
-	  trace_debug ("unknown trace action '%c', ignoring...", *act);
-	  break;
-	case '-':
-	  break;
-	}
+            trace_debug ("Want to evaluate expression");
+            xaction->expr = gdb_parse_agent_expr (&act);
+            break;
+          }
+        default:
+          trace_debug ("unknown trace action '%c', ignoring...", *act);
+          break;
+        case '-':
+          break;
+        }
 
       if (action == NULL)
-	break;
+        break;
 
       if (seen_step_action_flag)
-	{
-	  tpoint->num_step_actions++;
+        {
+          tpoint->num_step_actions++;
 
-	  tpoint->step_actions
-	    = XRESIZEVEC (struct tracepoint_action *, tpoint->step_actions,
-			  tpoint->num_step_actions);
-	  tpoint->step_actions_str
-	    = XRESIZEVEC (char *, tpoint->step_actions_str,
-			  tpoint->num_step_actions);
-	  tpoint->step_actions[tpoint->num_step_actions - 1] = action;
-	  tpoint->step_actions_str[tpoint->num_step_actions - 1]
-	    = savestring (act_start, act - act_start);
-	}
+          tpoint->step_actions
+            = XRESIZEVEC (struct tracepoint_action *, tpoint->step_actions,
+                          tpoint->num_step_actions);
+          tpoint->step_actions_str
+            = XRESIZEVEC (char *, tpoint->step_actions_str,
+                          tpoint->num_step_actions);
+          tpoint->step_actions[tpoint->num_step_actions - 1] = action;
+          tpoint->step_actions_str[tpoint->num_step_actions - 1]
+            = savestring (act_start, act - act_start);
+        }
       else
-	{
-	  tpoint->numactions++;
-	  tpoint->actions
-	    = XRESIZEVEC (struct tracepoint_action *, tpoint->actions,
-			  tpoint->numactions);
-	  tpoint->actions_str
-	    = XRESIZEVEC (char *, tpoint->actions_str, tpoint->numactions);
-	  tpoint->actions[tpoint->numactions - 1] = action;
-	  tpoint->actions_str[tpoint->numactions - 1]
-	    = savestring (act_start, act - act_start);
-	}
+        {
+          tpoint->numactions++;
+          tpoint->actions = XRESIZEVEC (struct tracepoint_action *,
+                                        tpoint->actions, tpoint->numactions);
+          tpoint->actions_str
+            = XRESIZEVEC (char *, tpoint->actions_str, tpoint->numactions);
+          tpoint->actions[tpoint->numactions - 1] = action;
+          tpoint->actions_str[tpoint->numactions - 1]
+            = savestring (act_start, act - act_start);
+        }
     }
 }
 
@@ -2117,15 +2112,15 @@ get_trace_state_variable_value (int num)
   if (tsv->getter)
     tsv->value = (tsv->getter) ();
 
-  trace_debug ("get_trace_state_variable_value(%d) ==> %s",
-	       num, plongest (tsv->value));
+  trace_debug ("get_trace_state_variable_value(%d) ==> %s", num,
+               plongest (tsv->value));
 
   return tsv->value;
 }
 
 /* This is needed for -Wmissing-declarations.  */
 IP_AGENT_EXPORT_FUNC void set_trace_state_variable_value (int num,
-							  LONGEST val);
+                                                          LONGEST val);
 
 IP_AGENT_EXPORT_FUNC void
 set_trace_state_variable_value (int num, LONGEST val)
@@ -2209,8 +2204,8 @@ add_traceframe (struct tracepoint *tpoint)
 /* Add a block to the traceframe currently being worked on.  */
 
 static unsigned char *
-add_traceframe_block (struct traceframe *tframe,
-		      struct tracepoint *tpoint, int amt)
+add_traceframe_block (struct traceframe *tframe, struct tracepoint *tpoint,
+                      int amt)
 {
   unsigned char *block;
 
@@ -2250,12 +2245,11 @@ find_traceframe (int num)
   struct traceframe *tframe;
   int tfnum = 0;
 
-  for (tframe = FIRST_TRACEFRAME ();
-       tframe->tpnum != 0;
+  for (tframe = FIRST_TRACEFRAME (); tframe->tpnum != 0;
        tframe = NEXT_TRACEFRAME (tframe))
     {
       if (tfnum == num)
-	return tframe;
+        return tframe;
       ++tfnum;
     }
 
@@ -2284,7 +2278,7 @@ get_traceframe_address (struct traceframe *tframe)
 
 static struct traceframe *
 find_next_traceframe_in_range (CORE_ADDR lo, CORE_ADDR hi, int inside_p,
-			       int *tfnump)
+                               int *tfnump)
 {
   client_state &cs = get_client_state ();
   struct traceframe *tframe;
@@ -2302,10 +2296,9 @@ find_next_traceframe_in_range (CORE_ADDR lo, CORE_ADDR hi, int inside_p,
   for (; tframe->tpnum != 0; tframe = NEXT_TRACEFRAME (tframe))
     {
       tfaddr = get_traceframe_address (tframe);
-      if (inside_p
-	  ? (lo <= tfaddr && tfaddr <= hi)
-	  : (lo > tfaddr || tfaddr > hi))
-	return tframe;
+      if (inside_p ? (lo <= tfaddr && tfaddr <= hi)
+                   : (lo > tfaddr || tfaddr > hi))
+        return tframe;
       ++*tfnump;
     }
 
@@ -2335,7 +2328,7 @@ find_next_traceframe_by_tracepoint (int num, int *tfnump)
   for (; tframe->tpnum != 0; tframe = NEXT_TRACEFRAME (tframe))
     {
       if (tframe->tpnum == num)
-	return tframe;
+        return tframe;
       ++*tfnump;
     }
 
@@ -2383,21 +2376,21 @@ cmd_qtinit (char *packet)
     {
       trace_debug ("Looking at var %d", tsv->number);
       if (tsv->getter == NULL)
-	{
-	  next = tsv->next;
-	  if (prev)
-	    prev->next = next;
-	  else
-	    trace_state_variables = next;
-	  trace_debug ("Deleting var %d", tsv->number);
-	  free (tsv);
-	  tsv = next;
-	}
+        {
+          next = tsv->next;
+          if (prev)
+            prev->next = next;
+          else
+            trace_state_variables = next;
+          trace_debug ("Deleting var %d", tsv->number);
+          free (tsv);
+          tsv = next;
+        }
       else
-	{
-	  prev = tsv;
-	  tsv = tsv->next;
-	}
+        {
+          prev = tsv;
+          tsv = tsv->next;
+        }
     }
 
   clear_trace_buffer ();
@@ -2437,45 +2430,43 @@ clear_installed_tracepoints (void)
       /* Catch the case where we might try to remove a tracepoint that
 	 was never actually installed.  */
       if (tpoint->handle == NULL)
-	{
-	  trace_debug ("Tracepoint %d at 0x%s was "
-		       "never installed, nothing to clear",
-		       tpoint->number, paddress (tpoint->address));
-	  continue;
-	}
+        {
+          trace_debug ("Tracepoint %d at 0x%s was "
+                       "never installed, nothing to clear",
+                       tpoint->number, paddress (tpoint->address));
+          continue;
+        }
 
       switch (tpoint->type)
-	{
-	case trap_tracepoint:
-	  {
-	    struct breakpoint *bp
-	      = (struct breakpoint *) tpoint->handle;
+        {
+        case trap_tracepoint:
+          {
+            struct breakpoint *bp = (struct breakpoint *) tpoint->handle;
 
-	    delete_breakpoint (bp);
-	  }
-	  break;
-	case fast_tracepoint:
-	  {
-	    struct fast_tracepoint_jump *jump
-	      = (struct fast_tracepoint_jump *) tpoint->handle;
+            delete_breakpoint (bp);
+          }
+          break;
+        case fast_tracepoint:
+          {
+            struct fast_tracepoint_jump *jump
+              = (struct fast_tracepoint_jump *) tpoint->handle;
 
-	    delete_fast_tracepoint_jump (jump);
-	  }
-	  break;
-	case static_tracepoint:
-	  if (prev_stpoint != NULL
-	      && prev_stpoint->address == tpoint->address)
-	    /* Nothing to do.  We already unprobed a tracepoint set at
+            delete_fast_tracepoint_jump (jump);
+          }
+          break;
+        case static_tracepoint:
+          if (prev_stpoint != NULL && prev_stpoint->address == tpoint->address)
+            /* Nothing to do.  We already unprobed a tracepoint set at
 	       this marker address (and there can only be one probe
 	       per marker).  */
-	    ;
-	  else
-	    {
-	      unprobe_marker_at (tpoint->address);
-	      prev_stpoint = tpoint;
-	    }
-	  break;
-	}
+            ;
+          else
+            {
+              unprobe_marker_at (tpoint->address);
+              prev_stpoint = tpoint;
+            }
+          break;
+        }
 
       tpoint->handle = NULL;
     }
@@ -2519,13 +2510,13 @@ cmd_qtdp (char *own_buf)
     {
       /* Duplicate tracepoints are never allowed.  */
       if (tpoint)
-	{
-	  trace_debug ("Tracepoint error: tracepoint %d"
-		       " at 0x%s already exists",
-		       (int) num, paddress (addr));
-	  write_enn (own_buf);
-	  return;
-	}
+        {
+          trace_debug ("Tracepoint error: tracepoint %d"
+                       " at 0x%s already exists",
+                       (int) num, paddress (addr));
+          write_enn (own_buf);
+          return;
+        }
 
       tpoint = add_tracepoint (num, addr);
 
@@ -2539,50 +2530,51 @@ cmd_qtdp (char *own_buf)
       tpoint->pass_count = count;
       /* See if we have any of the additional optional fields.  */
       while (*packet == ':')
-	{
-	  ++packet;
-	  if (*packet == 'F')
-	    {
-	      tpoint->type = fast_tracepoint;
-	      ++packet;
-	      packet = unpack_varlen_hex (packet, &count);
-	      tpoint->orig_size = count;
-	    }
-	  else if (*packet == 'S')
-	    {
-	      tpoint->type = static_tracepoint;
-	      ++packet;
-	    }
-	  else if (*packet == 'X')
-	    {
-	      tpoint->cond = gdb_parse_agent_expr (&packet);
-	    }
-	  else if (*packet == '-')
-	    break;
-	  else if (*packet == '\0')
-	    break;
-	  else
-	    trace_debug ("Unknown optional tracepoint field");
-	}
+        {
+          ++packet;
+          if (*packet == 'F')
+            {
+              tpoint->type = fast_tracepoint;
+              ++packet;
+              packet = unpack_varlen_hex (packet, &count);
+              tpoint->orig_size = count;
+            }
+          else if (*packet == 'S')
+            {
+              tpoint->type = static_tracepoint;
+              ++packet;
+            }
+          else if (*packet == 'X')
+            {
+              tpoint->cond = gdb_parse_agent_expr (&packet);
+            }
+          else if (*packet == '-')
+            break;
+          else if (*packet == '\0')
+            break;
+          else
+            trace_debug ("Unknown optional tracepoint field");
+        }
       if (*packet == '-')
-	{
-	  trail_hyphen = 1;
-	  trace_debug ("Also has actions\n");
-	}
+        {
+          trail_hyphen = 1;
+          trace_debug ("Also has actions\n");
+        }
 
       trace_debug ("Defined %stracepoint %d at 0x%s, "
-		   "enabled %d step %" PRIu64 " pass %" PRIu64,
-		   tpoint->type == fast_tracepoint ? "fast "
-		   : tpoint->type == static_tracepoint ? "static " : "",
-		   tpoint->number, paddress (tpoint->address), tpoint->enabled,
-		   tpoint->step_count, tpoint->pass_count);
+                   "enabled %d step %" PRIu64 " pass %" PRIu64,
+                   tpoint->type == fast_tracepoint     ? "fast "
+                   : tpoint->type == static_tracepoint ? "static "
+                                                       : "",
+                   tpoint->number, paddress (tpoint->address), tpoint->enabled,
+                   tpoint->step_count, tpoint->pass_count);
     }
   else if (tpoint)
     add_tracepoint_action (tpoint, packet);
   else
     {
       trace_debug ("Tracepoint error: tracepoint %d at 0x%s not found",
-		   (int) num, paddress (addr));
+                   (int) num, paddress (addr));
       write_enn (own_buf);
       return;
     }
@@ -2605,52 +2597,51 @@ cmd_qtdp (char *own_buf)
       /* Freeze threads.  */
       target_pause_all (true);
 
-
       if (tpoint->type != trap_tracepoint)
-	{
-	  /* Find another fast or static tracepoint at the same address.  */
-	  for (tp = tracepoints; tp; tp = tp->next)
-	    {
-	      if (tp->address == tpoint->address && tp->type == tpoint->type
-		  && tp->number != tpoint->number)
-		break;
-	    }
+        {
+          /* Find another fast or static tracepoint at the same address.  */
+          for (tp = tracepoints; tp; tp = tp->next)
+            {
+              if (tp->address == tpoint->address && tp->type == tpoint->type
+                  && tp->number != tpoint->number)
+                break;
+            }
 
-	  /* TPOINT is installed at the same address as TP.  */
-	  if (tp)
-	    {
-	      if (tpoint->type == fast_tracepoint)
-		clone_fast_tracepoint (tpoint, tp);
-	      else if (tpoint->type == static_tracepoint)
-		tpoint->handle = (void *) -1;
-	    }
-	}
+          /* TPOINT is installed at the same address as TP.  */
+          if (tp)
+            {
+              if (tpoint->type == fast_tracepoint)
+                clone_fast_tracepoint (tpoint, tp);
+              else if (tpoint->type == static_tracepoint)
+                tpoint->handle = (void *) -1;
+            }
+        }
 
       if (use_agent && tpoint->type == fast_tracepoint
-	  && agent_capability_check (AGENT_CAPA_FAST_TRACE))
-	{
-	  /* Download and install fast tracepoint by agent.  */
-	  if (tracepoint_send_agent (tpoint) == 0)
-	    write_ok (own_buf);
-	  else
-	    {
-	      write_enn (own_buf);
-	      remove_tracepoint (tpoint);
-	    }
-	}
+          && agent_capability_check (AGENT_CAPA_FAST_TRACE))
+        {
+          /* Download and install fast tracepoint by agent.  */
+          if (tracepoint_send_agent (tpoint) == 0)
+            write_ok (own_buf);
+          else
+            {
+              write_enn (own_buf);
+              remove_tracepoint (tpoint);
+            }
+        }
       else
-	{
-	  download_tracepoint (tpoint);
+        {
+          download_tracepoint (tpoint);
 
-	  if (tpoint->type == trap_tracepoint || tp == NULL)
-	    {
-	      install_tracepoint (tpoint, own_buf);
-	      if (strcmp (own_buf, "OK") != 0)
-		remove_tracepoint (tpoint);
-	    }
-	  else
-	    write_ok (own_buf);
-	}
+          if (tpoint->type == trap_tracepoint || tp == NULL)
+            {
+              install_tracepoint (tpoint, own_buf);
+              if (strcmp (own_buf, "OK") != 0)
+                remove_tracepoint (tpoint);
+            }
+          else
+            write_ok (own_buf);
+        }
 
       target_unpause_all (true);
       return;
@@ -2683,7 +2674,7 @@ cmd_qtdpsrc (char *own_buf)
   if (!tpoint)
     {
       trace_debug ("Tracepoint error: tracepoint %d at 0x%s not found",
-		   (int) num, paddress (addr));
+                   (int) num, paddress (addr));
       write_enn (own_buf);
       return;
     }
@@ -2712,7 +2703,7 @@ cmd_qtdpsrc (char *own_buf)
   if (tpoint->source_strings)
     {
       for (last = tpoint->source_strings; last->next; last = last->next)
-	;
+        ;
       last->next = newlast;
     }
   else
@@ -2770,41 +2761,40 @@ cmd_qtenable_disable (char *own_buf, int enable)
   if (tp)
     {
       if ((enable && tp->enabled) || (!enable && !tp->enabled))
-	{
-	  trace_debug ("Tracepoint %d at 0x%s is already %s",
-		       (int) num, paddress (addr),
-		       enable ? "enabled" : "disabled");
-	  write_ok (own_buf);
-	  return;
-	}
+        {
+          trace_debug ("Tracepoint %d at 0x%s is already %s", (int) num,
+                       paddress (addr), enable ? "enabled" : "disabled");
+          write_ok (own_buf);
+          return;
+        }
 
       trace_debug ("%s tracepoint %d at 0x%s",
-		   enable ? "Enabling" : "Disabling",
-		   (int) num, paddress (addr));
+                   enable ? "Enabling" : "Disabling", (int) num,
+                   paddress (addr));
 
       tp->enabled = enable;
 
       if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
-	{
-	  int offset = offsetof (struct tracepoint, enabled);
-	  CORE_ADDR obj_addr = tp->obj_addr_on_target + offset;
+        {
+          int offset = offsetof (struct tracepoint, enabled);
+          CORE_ADDR obj_addr = tp->obj_addr_on_target + offset;
 
-	  int ret = write_inferior_int8 (obj_addr, enable);
-	  if (ret)
-	    {
-	      trace_debug ("Cannot write enabled flag into "
-			   "inferior process memory");
-	      write_enn (own_buf);
-	      return;
-	    }
-	}
+          int ret = write_inferior_int8 (obj_addr, enable);
+          if (ret)
+            {
+              trace_debug ("Cannot write enabled flag into "
+                           "inferior process memory");
+              write_enn (own_buf);
+              return;
+            }
+        }
 
       write_ok (own_buf);
     }
   else
     {
-      trace_debug ("Tracepoint %d at 0x%s not found",
-		   (int) num, paddress (addr));
+      trace_debug ("Tracepoint %d at 0x%s not found", (int) num,
+                   paddress (addr));
       write_enn (own_buf);
     }
 }
@@ -2825,10 +2815,10 @@ cmd_qtv (char *own_buf)
     {
       err = traceframe_read_tsv ((int) num, &val);
       if (err)
-	{
-	  strcpy (own_buf, "U");
-	  return;
-	}
+        {
+          strcpy (own_buf, "U");
+          return;
+        }
     }
   /* Only make tsv's be undefined before the first trace run.  After a
      trace run is over, the user might want to see the last value of
@@ -2878,9 +2868,9 @@ cmd_qtro (char *own_buf)
 
   while (*packet == ':')
     {
-      ++packet;  /* skip a colon */
+      ++packet; /* skip a colon */
       packet = unpack_varlen_hex (packet, &start);
-      ++packet;  /* skip a comma */
+      ++packet; /* skip a comma */
       packet = unpack_varlen_hex (packet, &end);
 
       roreg = XNEW (struct readonly_region);
@@ -2889,7 +2879,7 @@ cmd_qtro (char *own_buf)
       roreg->next = readonly_regions;
       readonly_regions = roreg;
       trace_debug ("Added readonly region from 0x%s to 0x%s",
-		   paddress (roreg->start), paddress (roreg->end));
+                   paddress (roreg->start), paddress (roreg->end));
     }
 
   write_ok (own_buf);
@@ -2921,10 +2911,10 @@ get_jump_space_head (void)
   if (gdb_jump_pad_head == 0)
     {
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_jump_pad_buffer,
-				      &gdb_jump_pad_head))
-	{
-	  internal_error ("error extracting jump_pad_buffer");
-	}
+                                      &gdb_jump_pad_head))
+        {
+          internal_error ("error extracting jump_pad_buffer");
+        }
     }
 
   return gdb_jump_pad_head;
@@ -2935,8 +2925,8 @@ get_jump_space_head (void)
 static void
 claim_jump_space (ULONGEST used)
 {
-  trace_debug ("claim_jump_space reserves %s bytes at %s",
-	       pulongest (used), paddress (gdb_jump_pad_head));
+  trace_debug ("claim_jump_space reserves %s bytes at %s", pulongest (used),
+               paddress (gdb_jump_pad_head));
   gdb_jump_pad_head += used;
 }
 
@@ -2953,16 +2943,17 @@ claim_trampoline_space (ULONGEST used, CORE_ADDR *trampoline)
   if (!trampoline_buffer_head)
     {
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer,
-				      &trampoline_buffer_tail))
-	{
-	  internal_error ("error extracting trampoline_buffer");
-	}
+                                      &trampoline_buffer_tail))
+        {
+          internal_error ("error extracting trampoline_buffer");
+        }
 
-      if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
-				      &trampoline_buffer_head))
-	{
-	  internal_error ("error extracting trampoline_buffer_end");
-	}
+      if (read_inferior_data_pointer (ipa_sym_addrs
+                                        .addr_gdb_trampoline_buffer_end,
+                                      &trampoline_buffer_head))
+        {
+          internal_error ("error extracting trampoline_buffer_end");
+        }
     }
 
   /* Start claiming space from the top of the trampoline space.  If
@@ -2972,14 +2963,14 @@ claim_trampoline_space (ULONGEST used, CORE_ADDR *trampoline)
   if (trampoline_buffer_head - trampoline_buffer_tail < used)
     {
       trace_debug ("claim_trampoline_space failed to reserve %s bytes",
-		   pulongest (used));
+                   pulongest (used));
       return 0;
     }
 
   trampoline_buffer_head -= used;
 
   trace_debug ("claim_trampoline_space reserves %s bytes at %s",
-	       pulongest (used), paddress (trampoline_buffer_head));
+               pulongest (used), paddress (trampoline_buffer_head));
 
   *trampoline = trampoline_buffer_head;
   return 1;
@@ -2994,20 +2985,20 @@ have_fast_tracepoint_trampoline_buffer (char *buf)
   CORE_ADDR trampoline_end, errbuf;
 
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
-				  &trampoline_end))
+                                  &trampoline_end))
     {
       internal_error ("error extracting trampoline_buffer_end");
     }
-  
+
   if (buf)
     {
       buf[0] = '\0';
       strcpy (buf, "was claiming");
-      if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_error,
-				  &errbuf))
-	{
-	  internal_error ("error extracting errbuf");
-	}
+      if (read_inferior_data_pointer (
+            ipa_sym_addrs.addr_gdb_trampoline_buffer_error, &errbuf))
+        {
+          internal_error ("error extracting errbuf");
+        }
 
       read_inferior_memory (errbuf, (unsigned char *) buf, 100);
     }
@@ -3033,10 +3024,10 @@ probe_marker_at (CORE_ADDR address, char *errout)
   if (err == 0)
     {
       if (*cmd == 'E')
-	{
-	  strcpy (errout, cmd);
-	  return -1;
-	}
+        {
+          strcpy (errout, cmd);
+          return -1;
+        }
     }
 
   return err;
@@ -3078,12 +3069,12 @@ install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
   if (tpoint->orig_size < target_get_min_fast_tracepoint_insn_len ())
     {
       trace_debug ("Requested a fast tracepoint on an instruction "
-		   "that is of less than the minimum length.");
+                   "that is of less than the minimum length.");
       return 0;
     }
 
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_collect_ptr,
-				  &collect))
+                                  &collect))
     {
       error ("error extracting gdb_collect_ptr");
       return 1;
@@ -3095,18 +3086,23 @@ install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
   trampoline_size = 0;
 
   /* Install the jump pad.  */
-  err = target_install_fast_tracepoint_jump_pad
-    (tpoint->obj_addr_on_target, tpoint->address, collect,
-     ipa_sym_addrs.addr_collecting, tpoint->orig_size, &jentry,
-     &trampoline, &trampoline_size, fjump, &fjump_size,
-     &tpoint->adjusted_insn_addr, &tpoint->adjusted_insn_addr_end, errbuf);
+  err
+    = target_install_fast_tracepoint_jump_pad (tpoint->obj_addr_on_target,
+                                               tpoint->address, collect,
+                                               ipa_sym_addrs.addr_collecting,
+                                               tpoint->orig_size, &jentry,
+                                               &trampoline, &trampoline_size,
+                                               fjump, &fjump_size,
+                                               &tpoint->adjusted_insn_addr,
+                                               &tpoint->adjusted_insn_addr_end,
+                                               errbuf);
 
   if (err)
     return 1;
 
   /* Wire it in.  */
-  tpoint->handle = set_fast_tracepoint_jump (tpoint->address, fjump,
-					     fjump_size);
+  tpoint->handle
+    = set_fast_tracepoint_jump (tpoint->address, fjump, fjump_size);
 
   if (tpoint->handle != NULL)
     {
@@ -3123,7 +3119,6 @@ install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
   return 0;
 }
 
-
 /* Install tracepoint TPOINT, and write reply message in OWN_BUF.  */
 
 static void
@@ -3138,36 +3133,35 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
 	 ahead and install the trap.  The breakpoints module
 	 handles duplicated breakpoints, and the memory read
 	 routine handles un-patching traps from memory reads.  */
-      tpoint->handle = set_breakpoint_at (tpoint->address,
-					  tracepoint_handler);
+      tpoint->handle = set_breakpoint_at (tpoint->address, tracepoint_handler);
     }
-  else if (tpoint->type == fast_tracepoint || tpoint->type == static_tracepoint)
+  else if (tpoint->type == fast_tracepoint
+           || tpoint->type == static_tracepoint)
     {
       if (!agent_loaded_p ())
-	{
-	  trace_debug ("Requested a %s tracepoint, but fast "
-		       "tracepoints aren't supported.",
-		       tpoint->type == static_tracepoint ? "static" : "fast");
-	  write_e_ipa_not_loaded (own_buf);
-	  return;
-	}
+        {
+          trace_debug ("Requested a %s tracepoint, but fast "
+                       "tracepoints aren't supported.",
+                       tpoint->type == static_tracepoint ? "static" : "fast");
+          write_e_ipa_not_loaded (own_buf);
+          return;
+        }
       if (tpoint->type == static_tracepoint
-	  && !in_process_agent_supports_ust ())
-	{
-	  trace_debug ("Requested a static tracepoint, but static "
-		       "tracepoints are not supported.");
-	  write_e_ust_not_loaded (own_buf);
-	  return;
-	}
+          && !in_process_agent_supports_ust ())
+        {
+          trace_debug ("Requested a static tracepoint, but static "
+                       "tracepoints are not supported.");
+          write_e_ust_not_loaded (own_buf);
+          return;
+        }
 
       if (tpoint->type == fast_tracepoint)
-	install_fast_tracepoint (tpoint, own_buf);
+        install_fast_tracepoint (tpoint, own_buf);
       else
-	{
-	  if (probe_marker_at (tpoint->address, own_buf) == 0)
-	    tpoint->handle = (void *) -1;
-	}
-
+        {
+          if (probe_marker_at (tpoint->address, own_buf) == 0)
+            tpoint->handle = (void *) -1;
+        }
     }
   else
     internal_error ("Unknown tracepoint type");
@@ -3175,7 +3169,7 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
   if (tpoint->handle == NULL)
     {
       if (*own_buf == '\0')
-	write_enn (own_buf);
+        write_enn (own_buf);
     }
   else
     write_ok (own_buf);
@@ -3219,8 +3213,8 @@ cmd_qtstart (char *packet)
     {
       /* Tell IPA about the correct tdesc.  */
       if (write_inferior_integer (ipa_sym_addrs.addr_ipa_tdesc_idx,
-				  target_get_ipa_tdesc_idx ()))
-	error ("Error setting ipa_tdesc_idx variable in lib");
+                                  target_get_ipa_tdesc_idx ()))
+        error ("Error setting ipa_tdesc_idx variable in lib");
     }
 
   /* Start out empty.  */
@@ -3235,103 +3229,105 @@ cmd_qtstart (char *packet)
       tpoint->traceframe_usage = 0;
 
       if (tpoint->type == trap_tracepoint)
-	{
-	  /* Tracepoints are installed as memory breakpoints.  Just go
+        {
+          /* Tracepoints are installed as memory breakpoints.  Just go
 	     ahead and install the trap.  The breakpoints module
 	     handles duplicated breakpoints, and the memory read
 	     routine handles un-patching traps from memory reads.  */
-	  tpoint->handle = set_breakpoint_at (tpoint->address,
-					      tracepoint_handler);
-	}
+          tpoint->handle
+            = set_breakpoint_at (tpoint->address, tracepoint_handler);
+        }
       else if (tpoint->type == fast_tracepoint
-	       || tpoint->type == static_tracepoint)
-	{
-	  if (maybe_write_ipa_not_loaded (packet))
-	    {
-	      trace_debug ("Requested a %s tracepoint, but fast "
-			   "tracepoints aren't supported.",
-			   tpoint->type == static_tracepoint
-			   ? "static" : "fast");
-	      break;
-	    }
+               || tpoint->type == static_tracepoint)
+        {
+          if (maybe_write_ipa_not_loaded (packet))
+            {
+              trace_debug ("Requested a %s tracepoint, but fast "
+                           "tracepoints aren't supported.",
+                           tpoint->type == static_tracepoint ? "static"
+                                                             : "fast");
+              break;
+            }
 
-	  if (tpoint->type == fast_tracepoint)
-	    {
-	      int use_agent_p
-		= use_agent && agent_capability_check (AGENT_CAPA_FAST_TRACE);
+          if (tpoint->type == fast_tracepoint)
+            {
+              int use_agent_p
+                = use_agent && agent_capability_check (AGENT_CAPA_FAST_TRACE);
 
-	      if (prev_ftpoint != NULL
-		  && prev_ftpoint->address == tpoint->address)
-		{
-		  if (use_agent_p)
-		    tracepoint_send_agent (tpoint);
-		  else
-		    download_tracepoint_1 (tpoint);
+              if (prev_ftpoint != NULL
+                  && prev_ftpoint->address == tpoint->address)
+                {
+                  if (use_agent_p)
+                    tracepoint_send_agent (tpoint);
+                  else
+                    download_tracepoint_1 (tpoint);
 
-		  clone_fast_tracepoint (tpoint, prev_ftpoint);
-		}
-	      else
-		{
-		  /* Tracepoint is installed successfully?  */
-		  int installed = 0;
+                  clone_fast_tracepoint (tpoint, prev_ftpoint);
+                }
+              else
+                {
+                  /* Tracepoint is installed successfully?  */
+                  int installed = 0;
 
-		  /* Download and install fast tracepoint by agent.  */
-		  if (use_agent_p)
-		    installed = !tracepoint_send_agent (tpoint);
-		  else
-		    {
-		      download_tracepoint_1 (tpoint);
-		      installed = !install_fast_tracepoint (tpoint, packet);
-		    }
+                  /* Download and install fast tracepoint by agent.  */
+                  if (use_agent_p)
+                    installed = !tracepoint_send_agent (tpoint);
+                  else
+                    {
+                      download_tracepoint_1 (tpoint);
+                      installed = !install_fast_tracepoint (tpoint, packet);
+                    }
 
-		  if (installed)
-		    prev_ftpoint = tpoint;
-		}
-	    }
-	  else
-	    {
-	      if (!in_process_agent_supports_ust ())
-		{
-		  trace_debug ("Requested a static tracepoint, but static "
-			       "tracepoints are not supported.");
-		  break;
-		}
+                  if (installed)
+                    prev_ftpoint = tpoint;
+                }
+            }
+          else
+            {
+              if (!in_process_agent_supports_ust ())
+                {
+                  trace_debug ("Requested a static tracepoint, but static "
+                               "tracepoints are not supported.");
+                  break;
+                }
 
-	      download_tracepoint_1 (tpoint);
-	      /* Can only probe a given marker once.  */
-	      if (prev_stpoint != NULL
-		  && prev_stpoint->address == tpoint->address)
-		tpoint->handle = (void *) -1;
-	      else
-		{
-		  if (probe_marker_at (tpoint->address, packet) == 0)
-		    {
-		      tpoint->handle = (void *) -1;
+              download_tracepoint_1 (tpoint);
+              /* Can only probe a given marker once.  */
+              if (prev_stpoint != NULL
+                  && prev_stpoint->address == tpoint->address)
+                tpoint->handle = (void *) -1;
+              else
+                {
+                  if (probe_marker_at (tpoint->address, packet) == 0)
+                    {
+                      tpoint->handle = (void *) -1;
 
-		      /* So that we can handle multiple static tracepoints
+                      /* So that we can handle multiple static tracepoints
 			 at the same address easily.  */
-		      prev_stpoint = tpoint;
-		    }
-		}
-	    }
+                      prev_stpoint = tpoint;
+                    }
+                }
+            }
 
-	  prev_tpptr = tpptr;
-	  tpptr = tpoint->obj_addr_on_target;
+          prev_tpptr = tpptr;
+          tpptr = tpoint->obj_addr_on_target;
 
-	  if (tpoint == tracepoints)
-	    /* First object in list, set the head pointer in the
+          if (tpoint == tracepoints)
+            /* First object in list, set the head pointer in the
 	       inferior.  */
-	    write_inferior_data_pointer (ipa_sym_addrs.addr_tracepoints, tpptr);
-	  else
-	    write_inferior_data_pointer (prev_tpptr
-					 + offsetof (struct tracepoint, next),
-					 tpptr);
-	}
+            write_inferior_data_pointer (ipa_sym_addrs.addr_tracepoints,
+                                         tpptr);
+          else
+            write_inferior_data_pointer (prev_tpptr
+                                           + offsetof (struct tracepoint,
+                                                       next),
+                                         tpptr);
+        }
 
       /* Any failure in the inner loop is sufficient cause to give
 	 up.  */
       if (tpoint->handle == NULL)
-	break;
+        break;
     }
 
   /* Any error in tracepoint insertion is unacceptable; better to
@@ -3341,7 +3337,7 @@ cmd_qtstart (char *packet)
     {
       clear_installed_tracepoints ();
       if (*packet == '\0')
-	write_enn (packet);
+        write_enn (packet);
       target_unpause_all (true);
       return;
     }
@@ -3358,33 +3354,33 @@ cmd_qtstart (char *packet)
   if (agent_loaded_p ())
     {
       if (write_inferior_integer (ipa_sym_addrs.addr_tracing, 1))
-	{
-	  internal_error ("Error setting tracing variable in lib");
-	}
+        {
+          internal_error ("Error setting tracing variable in lib");
+        }
 
       if (write_inferior_data_pointer (ipa_sym_addrs.addr_stopping_tracepoint,
-				       0))
-	{
-	  internal_error ("Error clearing stopping_tracepoint variable"
-			  " in lib");
-	}
+                                       0))
+        {
+          internal_error ("Error clearing stopping_tracepoint variable"
+                          " in lib");
+        }
 
       if (write_inferior_integer (ipa_sym_addrs.addr_trace_buffer_is_full, 0))
-	{
-	  internal_error ("Error clearing trace_buffer_is_full variable"
-			  " in lib");
-	}
+        {
+          internal_error ("Error clearing trace_buffer_is_full variable"
+                          " in lib");
+        }
 
       stop_tracing_bkpt = set_breakpoint_at (ipa_sym_addrs.addr_stop_tracing,
-					     stop_tracing_handler);
+                                             stop_tracing_handler);
       if (stop_tracing_bkpt == NULL)
-	error ("Error setting stop_tracing breakpoint");
+        error ("Error setting stop_tracing breakpoint");
 
       flush_trace_buffer_bkpt
-	= set_breakpoint_at (ipa_sym_addrs.addr_flush_trace_buffer,
-			     flush_trace_buffer_handler);
+        = set_breakpoint_at (ipa_sym_addrs.addr_flush_trace_buffer,
+                             flush_trace_buffer_handler);
       if (flush_trace_buffer_bkpt == NULL)
-	error ("Error setting flush_trace_buffer breakpoint");
+        error ("Error setting flush_trace_buffer breakpoint");
     }
 
   target_unpause_all (true);
@@ -3422,9 +3418,9 @@ stop_tracing (void)
   if (agent_loaded_p ())
     {
       if (write_inferior_integer (ipa_sym_addrs.addr_tracing, 0))
-	{
-	  internal_error ("Error clearing tracing variable in lib");
-	}
+        {
+          internal_error ("Error clearing tracing variable in lib");
+        }
     }
 
   tracing_stop_time = get_timestamp ();
@@ -3433,9 +3429,9 @@ stop_tracing (void)
   if (stopping_tracepoint)
     {
       trace_debug ("Stopping the trace because "
-		   "tracepoint %d was hit %" PRIu64 " times",
-		   stopping_tracepoint->number,
-		   stopping_tracepoint->pass_count);
+                   "tracepoint %d was hit %" PRIu64 " times",
+                   stopping_tracepoint->number,
+                   stopping_tracepoint->pass_count);
       tracing_stop_reason = "tpasscount";
       tracing_stop_tpnum = stopping_tracepoint->number;
     }
@@ -3559,7 +3555,7 @@ cmd_qtframe (char *own_buf)
       ++packet;
       unpack_varlen_hex (packet, &hi);
       trace_debug ("Want to find next traceframe in the range 0x%s to 0x%s",
-		   paddress (lo), paddress (hi));
+                   paddress (lo), paddress (hi));
       tframe = find_next_traceframe_in_range (lo, hi, 1, &tfnum);
     }
   else if (startswith (packet, "outside:"))
@@ -3569,8 +3565,8 @@ cmd_qtframe (char *own_buf)
       ++packet;
       unpack_varlen_hex (packet, &hi);
       trace_debug ("Want to find next traceframe "
-		   "outside the range 0x%s to 0x%s",
-		   paddress (lo), paddress (hi));
+                   "outside the range 0x%s to 0x%s",
+                   paddress (lo), paddress (hi));
       tframe = find_next_traceframe_in_range (lo, hi, 0, &tfnum);
     }
   else if (startswith (packet, "tdp:"))
@@ -3586,12 +3582,12 @@ cmd_qtframe (char *own_buf)
       unpack_varlen_hex (packet, &frame);
       tfnum = (int) frame;
       if (tfnum == -1)
-	{
-	  trace_debug ("Want to stop looking at traceframes");
-	  cs.current_traceframe = -1;
-	  write_ok (own_buf);
-	  return;
-	}
+        {
+          trace_debug ("Want to stop looking at traceframes");
+          cs.current_traceframe = -1;
+          write_ok (own_buf);
+          return;
+        }
       trace_debug ("Want to look at traceframe %d", tfnum);
       tframe = find_traceframe (tfnum);
     }
@@ -3631,8 +3627,8 @@ cmd_qtstatus (char *packet)
   buf3 = (char *) alloca (slen * 2 + 1);
   bin2hex ((gdb_byte *) str, buf3, slen);
 
-  trace_debug ("Returning trace status as %d, stop reason %s",
-	       tracing, tracing_stop_reason);
+  trace_debug ("Returning trace status as %d, stop reason %s", tracing,
+               tracing_stop_reason);
 
   if (agent_loaded_p ())
     {
@@ -3641,7 +3637,7 @@ cmd_qtstatus (char *packet)
       upload_fast_traceframes ();
 
       target_unpause_all (true);
-   }
+    }
 
   stop_reason_rsp = (char *) tracing_stop_reason;
 
@@ -3657,7 +3653,7 @@ cmd_qtstatus (char *packet)
       result_name = stop_reason_rsp + strlen ("terror:");
       hexstr_len = strlen (result_name) * 2;
       p = stop_reason_rsp
-	= (char *) alloca (strlen ("terror:") + hexstr_len + 1);
+        = (char *) alloca (strlen ("terror:") + hexstr_len + 1);
       strcpy (p, "terror:");
       p += strlen (p);
       bin2hex ((gdb_byte *) result_name, p, strlen (result_name));
@@ -3666,29 +3662,28 @@ cmd_qtstatus (char *packet)
   /* If this was a forced stop, include any stop note that was supplied.  */
   if (strcmp (stop_reason_rsp, "tstop") == 0)
     {
-      stop_reason_rsp = (char *) alloca (strlen ("tstop:") + strlen (buf3) + 1);
+      stop_reason_rsp
+        = (char *) alloca (strlen ("tstop:") + strlen (buf3) + 1);
       strcpy (stop_reason_rsp, "tstop:");
       strcat (stop_reason_rsp, buf3);
     }
 
   sprintf (packet,
-	   "T%d;"
-	   "%s:%x;"
-	   "tframes:%x;tcreated:%x;"
-	   "tfree:%x;tsize:%s;"
-	   "circular:%d;"
-	   "disconn:%d;"
-	   "starttime:%s;stoptime:%s;"
-	   "username:%s;notes:%s:",
-	   tracing ? 1 : 0,
-	   stop_reason_rsp, tracing_stop_tpnum,
-	   traceframe_count, traceframes_created,
-	   free_space (), phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
-	   circular_trace_buffer,
-	   disconnected_tracing,
-	   phex_nz (tracing_start_time, sizeof (tracing_start_time)),
-	   phex_nz (tracing_stop_time, sizeof (tracing_stop_time)),
-	   buf1, buf2);
+           "T%d;"
+           "%s:%x;"
+           "tframes:%x;tcreated:%x;"
+           "tfree:%x;tsize:%s;"
+           "circular:%d;"
+           "disconn:%d;"
+           "starttime:%s;stoptime:%s;"
+           "username:%s;notes:%s:",
+           tracing ? 1 : 0, stop_reason_rsp, tracing_stop_tpnum,
+           traceframe_count, traceframes_created, free_space (),
+           phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
+           circular_trace_buffer, disconnected_tracing,
+           phex_nz (tracing_start_time, sizeof (tracing_start_time)),
+           phex_nz (tracing_stop_time, sizeof (tracing_stop_time)), buf1,
+           buf2);
 }
 
 static void
@@ -3710,13 +3705,13 @@ cmd_qtp (char *own_buf)
   if (!tpoint)
     {
       trace_debug ("Tracepoint error: tracepoint %d at 0x%s not found",
-		   (int) num, paddress (addr));
+                   (int) num, paddress (addr));
       write_enn (own_buf);
       return;
     }
 
   sprintf (own_buf, "V%" PRIu64 ":%" PRIu64 "", tpoint->hit_count,
-	   tpoint->traceframe_usage);
+           tpoint->traceframe_usage);
 }
 
 /* State variables to help return all the tracepoint bits.  */
@@ -3735,9 +3730,8 @@ response_tracepoint (char *packet, struct tracepoint *tpoint)
   char *buf;
 
   sprintf (packet, "T%x:%s:%c:%" PRIx64 ":%" PRIx64, tpoint->number,
-	   paddress (tpoint->address),
-	   (tpoint->enabled ? 'E' : 'D'), tpoint->step_count,
-	   tpoint->pass_count);
+           paddress (tpoint->address), (tpoint->enabled ? 'E' : 'D'),
+           tpoint->step_count, tpoint->pass_count);
   if (tpoint->type == fast_tracepoint)
     sprintf (packet + strlen (packet), ":F%x", tpoint->orig_size);
   else if (tpoint->type == static_tracepoint)
@@ -3746,8 +3740,7 @@ response_tracepoint (char *packet, struct tracepoint *tpoint)
   if (tpoint->cond)
     {
       buf = gdb_unparse_agent_expr (tpoint->cond);
-      sprintf (packet + strlen (packet), ":X%x,%s",
-	       tpoint->cond->length, buf);
+      sprintf (packet + strlen (packet), ":X%x,%s", tpoint->cond->length, buf);
       free (buf);
     }
 }
@@ -3759,20 +3752,19 @@ response_tracepoint (char *packet, struct tracepoint *tpoint)
    per-packet.  */
 
 static void
-response_action (char *packet, struct tracepoint *tpoint,
-		 char *taction, int step)
+response_action (char *packet, struct tracepoint *tpoint, char *taction,
+                 int step)
 {
-  sprintf (packet, "%c%x:%s:%s",
-	   (step ? 'S' : 'A'), tpoint->number, paddress (tpoint->address),
-	   taction);
+  sprintf (packet, "%c%x:%s:%s", (step ? 'S' : 'A'), tpoint->number,
+           paddress (tpoint->address), taction);
 }
 
 /* Compose a response that is an imitation of the syntax by which the
    tracepoint source piece was originally downloaded.  */
 
 static void
-response_source (char *packet,
-		 struct tracepoint *tpoint, struct source_string *src)
+response_source (char *packet, struct tracepoint *tpoint,
+                 struct source_string *src)
 {
   char *buf;
   int len;
@@ -3781,9 +3773,8 @@ response_source (char *packet,
   buf = (char *) alloca (len * 2 + 1);
   bin2hex ((gdb_byte *) src->str, buf, len);
 
-  sprintf (packet, "Z%x:%s:%s:%x:%x:%s",
-	   tpoint->number, paddress (tpoint->address),
-	   src->type, 0, len, buf);
+  sprintf (packet, "Z%x:%s:%s:%x:%x:%s", tpoint->number,
+           paddress (tpoint->address), src->type, 0, len, buf);
 }
 
 /* Return the first piece of tracepoint definition, and initialize the
@@ -3823,24 +3814,23 @@ cmd_qtsp (char *packet)
     }
   else if (cur_action < cur_tpoint->numactions)
     {
-      response_action (packet, cur_tpoint,
-		       cur_tpoint->actions_str[cur_action], 0);
+      response_action (packet, cur_tpoint, cur_tpoint->actions_str[cur_action],
+                       0);
       ++cur_action;
     }
   else if (cur_step_action < cur_tpoint->num_step_actions)
     {
       response_action (packet, cur_tpoint,
-		       cur_tpoint->step_actions_str[cur_step_action], 1);
+                       cur_tpoint->step_actions_str[cur_step_action], 1);
       ++cur_step_action;
     }
-  else if ((cur_source_string
-	    ? cur_source_string->next
-	    : cur_tpoint->source_strings))
+  else if ((cur_source_string ? cur_source_string->next
+                              : cur_tpoint->source_strings))
     {
       if (cur_source_string)
-	cur_source_string = cur_source_string->next;
+        cur_source_string = cur_source_string->next;
       else
-	cur_source_string = cur_tpoint->source_strings;
+        cur_source_string = cur_tpoint->source_strings;
       response_source (packet, cur_tpoint, cur_source_string);
     }
   else
@@ -3849,9 +3839,9 @@ cmd_qtsp (char *packet)
       cur_action = cur_step_action = 0;
       cur_source_string = NULL;
       if (cur_tpoint)
-	response_tracepoint (packet, cur_tpoint);
+        response_tracepoint (packet, cur_tpoint);
       else
-	strcpy (packet, "l");
+        strcpy (packet, "l");
     }
 }
 
@@ -3872,7 +3862,7 @@ response_tsv (char *packet, struct trace_state_variable *tsv)
     }
 
   sprintf (packet, "%x:%s:%x:%s", tsv->number, phex_nz (tsv->initial_value, 0),
-	   tsv->getter ? 1 : 0, buf);
+           tsv->getter ? 1 : 0, buf);
 }
 
 /* Return the first trace state variable definition, and initialize
@@ -3902,9 +3892,9 @@ cmd_qtsv (char *packet)
     {
       cur_tsv = cur_tsv->next;
       if (cur_tsv)
-	response_tsv (packet, cur_tsv);
+        response_tsv (packet, cur_tsv);
       else
-	strcpy (packet, "l");
+        strcpy (packet, "l");
     }
   else
     strcpy (packet, "l");
@@ -3993,8 +3983,8 @@ cmd_qtbuffer (char *own_buf)
   ++packet; /* skip a comma */
   unpack_varlen_hex (packet, &num);
 
-  trace_debug ("Want to get trace buffer, %d bytes at offset 0x%s",
-	       (int) num, phex_nz (offset, 0));
+  trace_debug ("Want to get trace buffer, %d bytes at offset 0x%s", (int) num,
+               phex_nz (offset, 0));
 
   tot = (trace_buffer_hi - trace_buffer_lo) - free_space ();
 
@@ -4023,7 +4013,7 @@ cmd_qtbuffer (char *own_buf)
     num = tot - offset;
 
   /* Trim to available packet size.  */
-  if (num >= (PBUFSIZ - 16) / 2 )
+  if (num >= (PBUFSIZ - 16) / 2)
     num = (PBUFSIZ - 16) / 2;
 
   bin2hex (tbp, own_buf, num);
@@ -4040,7 +4030,7 @@ cmd_bigqtbuffer_circular (char *own_buf)
   unpack_varlen_hex (packet, &val);
   circular_trace_buffer = val;
   trace_debug ("Trace buffer is now %s",
-	       circular_trace_buffer ? "circular" : "linear");
+               circular_trace_buffer ? "circular" : "linear");
   write_ok (own_buf);
 }
 
@@ -4070,8 +4060,7 @@ cmd_bigqtbuffer_size (char *own_buf)
     }
 
   init_trace_buffer (sval);
-  trace_debug ("Trace buffer is now %s bytes",
-	       plongest (trace_buffer_size));
+  trace_debug ("Trace buffer is now %s bytes", plongest (trace_buffer_size));
   write_ok (own_buf);
 }
 
@@ -4087,49 +4076,49 @@ cmd_qtnotes (char *own_buf)
   while (*packet)
     {
       if (startswith (packet, "user:"))
-	{
-	  packet += strlen ("user:");
-	  saved = packet;
-	  packet = strchr (packet, ';');
-	  nbytes = (packet - saved) / 2;
-	  user = (char *) xmalloc (nbytes + 1);
-	  nbytes = hex2bin (saved, (gdb_byte *) user, nbytes);
-	  user[nbytes] = '\0';
-	  ++packet; /* skip the semicolon */
-	  trace_debug ("User is '%s'", user);
-	  xfree (tracing_user_name);
-	  tracing_user_name = user;
-	}
+        {
+          packet += strlen ("user:");
+          saved = packet;
+          packet = strchr (packet, ';');
+          nbytes = (packet - saved) / 2;
+          user = (char *) xmalloc (nbytes + 1);
+          nbytes = hex2bin (saved, (gdb_byte *) user, nbytes);
+          user[nbytes] = '\0';
+          ++packet; /* skip the semicolon */
+          trace_debug ("User is '%s'", user);
+          xfree (tracing_user_name);
+          tracing_user_name = user;
+        }
       else if (startswith (packet, "notes:"))
-	{
-	  packet += strlen ("notes:");
-	  saved = packet;
-	  packet = strchr (packet, ';');
-	  nbytes = (packet - saved) / 2;
-	  notes = (char *) xmalloc (nbytes + 1);
-	  nbytes = hex2bin (saved, (gdb_byte *) notes, nbytes);
-	  notes[nbytes] = '\0';
-	  ++packet; /* skip the semicolon */
-	  trace_debug ("Notes is '%s'", notes);
-	  xfree (tracing_notes);
-	  tracing_notes = notes;
-	}
+        {
+          packet += strlen ("notes:");
+          saved = packet;
+          packet = strchr (packet, ';');
+          nbytes = (packet - saved) / 2;
+          notes = (char *) xmalloc (nbytes + 1);
+          nbytes = hex2bin (saved, (gdb_byte *) notes, nbytes);
+          notes[nbytes] = '\0';
+          ++packet; /* skip the semicolon */
+          trace_debug ("Notes is '%s'", notes);
+          xfree (tracing_notes);
+          tracing_notes = notes;
+        }
       else if (startswith (packet, "tstop:"))
-	{
-	  packet += strlen ("tstop:");
-	  saved = packet;
-	  packet = strchr (packet, ';');
-	  nbytes = (packet - saved) / 2;
-	  stopnote = (char *) xmalloc (nbytes + 1);
-	  nbytes = hex2bin (saved, (gdb_byte *) stopnote, nbytes);
-	  stopnote[nbytes] = '\0';
-	  ++packet; /* skip the semicolon */
-	  trace_debug ("tstop note is '%s'", stopnote);
-	  xfree (tracing_stop_note);
-	  tracing_stop_note = stopnote;
-	}
+        {
+          packet += strlen ("tstop:");
+          saved = packet;
+          packet = strchr (packet, ';');
+          nbytes = (packet - saved) / 2;
+          stopnote = (char *) xmalloc (nbytes + 1);
+          nbytes = hex2bin (saved, (gdb_byte *) stopnote, nbytes);
+          stopnote[nbytes] = '\0';
+          ++packet; /* skip the semicolon */
+          trace_debug ("tstop note is '%s'", stopnote);
+          xfree (tracing_stop_note);
+          tracing_stop_note = stopnote;
+        }
       else
-	break;
+        break;
     }
 
   write_ok (own_buf);
@@ -4302,8 +4291,8 @@ handle_tracepoint_query (char *packet)
    action covering the whole range.  */
 
 static void
-add_while_stepping_state (struct thread_info *tinfo,
-			  int tp_number, CORE_ADDR tp_address)
+add_while_stepping_state (struct thread_info *tinfo, int tp_number,
+                          CORE_ADDR tp_address)
 {
   struct wstep_state *wstep = XNEW (struct wstep_state);
 
@@ -4378,8 +4367,8 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
   wstep_link = &tinfo->while_stepping;
 
   trace_debug ("Thread %s finished a single-step for tracepoint %d at 0x%s",
-	       target_pid_to_str (tinfo->id).c_str (),
-	       wstep->tp_number, paddress (wstep->tp_address));
+               target_pid_to_str (tinfo->id).c_str (), wstep->tp_number,
+               paddress (wstep->tp_address));
 
   ctx.base.type = trap_tracepoint;
   ctx.regcache = get_thread_regcache (tinfo, 1);
@@ -4388,59 +4377,57 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
     {
       tpoint = find_tracepoint (wstep->tp_number, wstep->tp_address);
       if (tpoint == NULL)
-	{
-	  trace_debug ("NO TRACEPOINT %d at 0x%s FOR THREAD %s!",
-		       wstep->tp_number, paddress (wstep->tp_address),
-		       target_pid_to_str (tinfo->id).c_str ());
+        {
+          trace_debug ("NO TRACEPOINT %d at 0x%s FOR THREAD %s!",
+                       wstep->tp_number, paddress (wstep->tp_address),
+                       target_pid_to_str (tinfo->id).c_str ());
 
-	  /* Unlink.  */
-	  *wstep_link = wstep->next;
-	  release_while_stepping_state (wstep);
-	  wstep = *wstep_link;
-	  continue;
-	}
+          /* Unlink.  */
+          *wstep_link = wstep->next;
+          release_while_stepping_state (wstep);
+          wstep = *wstep_link;
+          continue;
+        }
 
       /* We've just finished one step.  */
       ++wstep->current_step;
 
       /* Collect data.  */
-      collect_data_at_step ((struct tracepoint_hit_ctx *) &ctx,
-			    stop_pc, tpoint, wstep->current_step);
+      collect_data_at_step ((struct tracepoint_hit_ctx *) &ctx, stop_pc,
+                            tpoint, wstep->current_step);
 
       if (wstep->current_step >= tpoint->step_count)
-	{
-	  /* The requested numbers of steps have occurred.  */
-	  trace_debug ("Thread %s done stepping for tracepoint %d at 0x%s",
-		       target_pid_to_str (tinfo->id).c_str (),
-		       wstep->tp_number, paddress (wstep->tp_address));
+        {
+          /* The requested numbers of steps have occurred.  */
+          trace_debug ("Thread %s done stepping for tracepoint %d at 0x%s",
+                       target_pid_to_str (tinfo->id).c_str (),
+                       wstep->tp_number, paddress (wstep->tp_address));
 
-	  /* Unlink the wstep.  */
-	  *wstep_link = wstep->next;
-	  release_while_stepping_state (wstep);
-	  wstep = *wstep_link;
+          /* Unlink the wstep.  */
+          *wstep_link = wstep->next;
+          release_while_stepping_state (wstep);
+          wstep = *wstep_link;
 
-	  /* Only check the hit count now, which ensure that we do all
+          /* Only check the hit count now, which ensure that we do all
 	     our stepping before stopping the run.  */
-	  if (tpoint->pass_count > 0
-	      && tpoint->hit_count >= tpoint->pass_count
-	      && stopping_tracepoint == NULL)
-	    stopping_tracepoint = tpoint;
-	}
+          if (tpoint->pass_count > 0 && tpoint->hit_count >= tpoint->pass_count
+              && stopping_tracepoint == NULL)
+            stopping_tracepoint = tpoint;
+        }
       else
-	{
-	  /* Keep single-stepping until the requested numbers of steps
+        {
+          /* Keep single-stepping until the requested numbers of steps
 	     have occurred.  */
-	  wstep_link = &wstep->next;
-	  wstep = *wstep_link;
-	}
+          wstep_link = &wstep->next;
+          wstep = *wstep_link;
+        }
 
-      if (stopping_tracepoint
-	  || trace_buffer_is_full
-	  || expr_eval_result != expr_eval_no_error)
-	{
-	  stop_tracing ();
-	  break;
-	}
+      if (stopping_tracepoint || trace_buffer_is_full
+          || expr_eval_result != expr_eval_no_error)
+        {
+          stop_tracing ();
+          break;
+        }
     }
 
   return 1;
@@ -4473,49 +4460,48 @@ handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
       trace_debug ("lib stopped at stop_tracing");
 
       read_inferior_integer (ipa_sym_addrs.addr_trace_buffer_is_full,
-			     &ipa_trace_buffer_is_full);
+                             &ipa_trace_buffer_is_full);
 
       read_inferior_data_pointer (ipa_sym_addrs.addr_stopping_tracepoint,
-				  &ipa_stopping_tracepoint);
+                                  &ipa_stopping_tracepoint);
       write_inferior_data_pointer (ipa_sym_addrs.addr_stopping_tracepoint, 0);
 
       read_inferior_data_pointer (ipa_sym_addrs.addr_error_tracepoint,
-				  &ipa_error_tracepoint);
+                                  &ipa_error_tracepoint);
       write_inferior_data_pointer (ipa_sym_addrs.addr_error_tracepoint, 0);
 
       read_inferior_integer (ipa_sym_addrs.addr_expr_eval_result,
-			     &ipa_expr_eval_result);
+                             &ipa_expr_eval_result);
       write_inferior_integer (ipa_sym_addrs.addr_expr_eval_result, 0);
 
       trace_debug ("lib: trace_buffer_is_full: %d, "
-		   "stopping_tracepoint: %s, "
-		   "ipa_expr_eval_result: %d, "
-		   "error_tracepoint: %s, ",
-		   ipa_trace_buffer_is_full,
-		   paddress (ipa_stopping_tracepoint),
-		   ipa_expr_eval_result,
-		   paddress (ipa_error_tracepoint));
+                   "stopping_tracepoint: %s, "
+                   "ipa_expr_eval_result: %d, "
+                   "error_tracepoint: %s, ",
+                   ipa_trace_buffer_is_full,
+                   paddress (ipa_stopping_tracepoint), ipa_expr_eval_result,
+                   paddress (ipa_error_tracepoint));
 
       if (ipa_trace_buffer_is_full)
-	trace_debug ("lib stopped due to full buffer.");
+        trace_debug ("lib stopped due to full buffer.");
 
       if (ipa_stopping_tracepoint)
-	trace_debug ("lib stopped due to tpoint");
+        trace_debug ("lib stopped due to tpoint");
 
       if (ipa_error_tracepoint)
-	trace_debug ("lib stopped due to error");
+        trace_debug ("lib stopped due to error");
 
       if (ipa_stopping_tracepoint != 0)
-	{
-	  stopping_tracepoint
-	    = fast_tracepoint_from_ipa_tpoint_address (ipa_stopping_tracepoint);
-	}
+        {
+          stopping_tracepoint = fast_tracepoint_from_ipa_tpoint_address (
+            ipa_stopping_tracepoint);
+        }
       else if (ipa_expr_eval_result != expr_eval_no_error)
-	{
-	  expr_eval_result = ipa_expr_eval_result;
-	  error_tracepoint
-	    = fast_tracepoint_from_ipa_tpoint_address (ipa_error_tracepoint);
-	}
+        {
+          expr_eval_result = ipa_expr_eval_result;
+          error_tracepoint
+            = fast_tracepoint_from_ipa_tpoint_address (ipa_error_tracepoint);
+        }
       stop_tracing ();
       return 1;
     }
@@ -4554,36 +4540,35 @@ tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	 and probes will be executed in program.  So static tracepoints
 	 are collected there.   */
       if (tpoint->enabled && stop_pc == tpoint->address
-	  && tpoint->type != static_tracepoint)
-	{
-	  trace_debug ("Thread %s at address of tracepoint %d at 0x%s",
-		       target_pid_to_str (tinfo->id).c_str (),
-		       tpoint->number, paddress (tpoint->address));
+          && tpoint->type != static_tracepoint)
+        {
+          trace_debug ("Thread %s at address of tracepoint %d at 0x%s",
+                       target_pid_to_str (tinfo->id).c_str (), tpoint->number,
+                       paddress (tpoint->address));
 
-	  /* Test the condition if present, and collect if true.  */
-	  if (!tpoint->cond
-	      || (condition_true_at_tracepoint
-		  ((struct tracepoint_hit_ctx *) &ctx, tpoint)))
-	    collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-					stop_pc, tpoint);
+          /* Test the condition if present, and collect if true.  */
+          if (!tpoint->cond
+              || (condition_true_at_tracepoint (
+                (struct tracepoint_hit_ctx *) &ctx, tpoint)))
+            collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
+                                        stop_pc, tpoint);
 
-	  if (stopping_tracepoint
-	      || trace_buffer_is_full
-	      || expr_eval_result != expr_eval_no_error)
-	    {
-	      stop_tracing ();
-	    }
-	  /* If the tracepoint had a 'while-stepping' action, then set
+          if (stopping_tracepoint || trace_buffer_is_full
+              || expr_eval_result != expr_eval_no_error)
+            {
+              stop_tracing ();
+            }
+          /* If the tracepoint had a 'while-stepping' action, then set
 	     the thread to collect this tracepoint on the following
 	     single-steps.  */
-	  else if (tpoint->step_count > 0)
-	    {
-	      add_while_stepping_state (tinfo,
-					tpoint->number, tpoint->address);
-	    }
+          else if (tpoint->step_count > 0)
+            {
+              add_while_stepping_state (tinfo, tpoint->number,
+                                        tpoint->address);
+            }
 
-	  ret = 1;
-	}
+          ret = 1;
+        }
     }
 
   return ret;
@@ -4594,7 +4579,7 @@ tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc)
 #if defined IN_PROCESS_AGENT && defined HAVE_UST
 struct ust_marker_data;
 static void collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-					    struct traceframe *tframe);
+                                            struct traceframe *tframe);
 #endif
 
 /* Create a trace frame for the hit of the given tracepoint in the
@@ -4602,7 +4587,7 @@ static void collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 
 static void
 collect_data_at_tracepoint (struct tracepoint_hit_ctx *ctx, CORE_ADDR stop_pc,
-			    struct tracepoint *tpoint)
+                            struct tracepoint *tpoint)
 {
   struct traceframe *tframe;
   int acti;
@@ -4614,30 +4599,28 @@ collect_data_at_tracepoint (struct tracepoint_hit_ctx *ctx, CORE_ADDR stop_pc,
      later, and finish the collection for this hit.  This test is only
      for nonstepping tracepoints, stepping tracepoints test at the end
      of their while-stepping loop.  */
-  if (tpoint->pass_count > 0
-      && tpoint->hit_count >= tpoint->pass_count
-      && tpoint->step_count == 0
-      && stopping_tracepoint == NULL)
+  if (tpoint->pass_count > 0 && tpoint->hit_count >= tpoint->pass_count
+      && tpoint->step_count == 0 && stopping_tracepoint == NULL)
     stopping_tracepoint = tpoint;
 
   trace_debug ("Making new traceframe for tracepoint %d at 0x%s, hit %" PRIu64,
-	       tpoint->number, paddress (tpoint->address), tpoint->hit_count);
+               tpoint->number, paddress (tpoint->address), tpoint->hit_count);
 
   tframe = add_traceframe (tpoint);
 
   if (tframe)
     {
       for (acti = 0; acti < tpoint->numactions; ++acti)
-	{
+        {
 #ifndef IN_PROCESS_AGENT
-	  trace_debug ("Tracepoint %d at 0x%s about to do action '%s'",
-		       tpoint->number, paddress (tpoint->address),
-		       tpoint->actions_str[acti]);
+          trace_debug ("Tracepoint %d at 0x%s about to do action '%s'",
+                       tpoint->number, paddress (tpoint->address),
+                       tpoint->actions_str[acti]);
 #endif
 
-	  do_action_at_tracepoint (ctx, stop_pc, tpoint, tframe,
-				   tpoint->actions[acti]);
-	}
+          do_action_at_tracepoint (ctx, stop_pc, tpoint, tframe,
+                                   tpoint->actions[acti]);
+        }
 
       finish_traceframe (tframe);
     }
@@ -4649,32 +4632,30 @@ collect_data_at_tracepoint (struct tracepoint_hit_ctx *ctx, CORE_ADDR stop_pc,
 #ifndef IN_PROCESS_AGENT
 
 static void
-collect_data_at_step (struct tracepoint_hit_ctx *ctx,
-		      CORE_ADDR stop_pc,
-		      struct tracepoint *tpoint, int current_step)
+collect_data_at_step (struct tracepoint_hit_ctx *ctx, CORE_ADDR stop_pc,
+                      struct tracepoint *tpoint, int current_step)
 {
   struct traceframe *tframe;
   int acti;
 
   trace_debug ("Making new step traceframe for "
-	       "tracepoint %d at 0x%s, step %d of %" PRIu64 ", hit %" PRIu64,
-	       tpoint->number, paddress (tpoint->address),
-	       current_step, tpoint->step_count,
-	       tpoint->hit_count);
+               "tracepoint %d at 0x%s, step %d of %" PRIu64 ", hit %" PRIu64,
+               tpoint->number, paddress (tpoint->address), current_step,
+               tpoint->step_count, tpoint->hit_count);
 
   tframe = add_traceframe (tpoint);
 
   if (tframe)
     {
       for (acti = 0; acti < tpoint->num_step_actions; ++acti)
-	{
-	  trace_debug ("Tracepoint %d at 0x%s about to do step action '%s'",
-		       tpoint->number, paddress (tpoint->address),
-		       tpoint->step_actions_str[acti]);
+        {
+          trace_debug ("Tracepoint %d at 0x%s about to do step action '%s'",
+                       tpoint->number, paddress (tpoint->address),
+                       tpoint->step_actions_str[acti]);
 
-	  do_action_at_tracepoint (ctx, stop_pc, tpoint, tframe,
-				   tpoint->step_actions[acti]);
-	}
+          do_action_at_tracepoint (ctx, stop_pc, tpoint, tframe,
+                                   tpoint->step_actions[acti]);
+        }
 
       finish_traceframe (tframe);
     }
@@ -4704,32 +4685,32 @@ get_context_regcache (struct tracepoint_hit_ctx *ctx)
     {
       struct fast_tracepoint_ctx *fctx = (struct fast_tracepoint_ctx *) ctx;
       if (!fctx->regcache_initted)
-	{
-	  fctx->regcache_initted = 1;
-	  init_register_cache (&fctx->regcache, ipa_tdesc, fctx->regspace);
-	  supply_regblock (&fctx->regcache, NULL);
-	  supply_fast_tracepoint_registers (&fctx->regcache, fctx->regs);
-	}
+        {
+          fctx->regcache_initted = 1;
+          init_register_cache (&fctx->regcache, ipa_tdesc, fctx->regspace);
+          supply_regblock (&fctx->regcache, NULL);
+          supply_fast_tracepoint_registers (&fctx->regcache, fctx->regs);
+        }
       regcache = &fctx->regcache;
     }
 #ifdef HAVE_UST
   if (ctx->type == static_tracepoint)
     {
       struct static_tracepoint_ctx *sctx
-	= (struct static_tracepoint_ctx *) ctx;
+        = (struct static_tracepoint_ctx *) ctx;
 
       if (!sctx->regcache_initted)
-	{
-	  sctx->regcache_initted = 1;
-	  init_register_cache (&sctx->regcache, ipa_tdesc, sctx->regspace);
-	  supply_regblock (&sctx->regcache, NULL);
-	  /* Pass down the tracepoint address, because REGS doesn't
+        {
+          sctx->regcache_initted = 1;
+          init_register_cache (&sctx->regcache, ipa_tdesc, sctx->regspace);
+          supply_regblock (&sctx->regcache, NULL);
+          /* Pass down the tracepoint address, because REGS doesn't
 	     include the PC, but we know what it must have been.  */
-	  supply_static_tracepoint_registers (&sctx->regcache,
-					      (const unsigned char *)
-					      sctx->regs,
-					      sctx->tpoint->address);
-	}
+          supply_static_tracepoint_registers (&sctx->regcache,
+                                              (const unsigned char *)
+                                                sctx->regs,
+                                              sctx->tpoint->address);
+        }
       regcache = &sctx->regcache;
     }
 #endif
@@ -4747,11 +4728,9 @@ get_context_regcache (struct tracepoint_hit_ctx *ctx)
 }
 
 static void
-do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-			 CORE_ADDR stop_pc,
-			 struct tracepoint *tpoint,
-			 struct traceframe *tframe,
-			 struct tracepoint_action *taction)
+do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx, CORE_ADDR stop_pc,
+                         struct tracepoint *tpoint, struct traceframe *tframe,
+                         struct tracepoint_action *taction)
 {
   enum eval_result_type err;
 
@@ -4759,54 +4738,54 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
     {
     case 'M':
       {
-	struct collect_memory_action *maction;
-	struct eval_agent_expr_context ax_ctx;
+        struct collect_memory_action *maction;
+        struct eval_agent_expr_context ax_ctx;
 
-	maction = (struct collect_memory_action *) taction;
-	ax_ctx.regcache = NULL;
-	ax_ctx.tframe = tframe;
-	ax_ctx.tpoint = tpoint;
+        maction = (struct collect_memory_action *) taction;
+        ax_ctx.regcache = NULL;
+        ax_ctx.tframe = tframe;
+        ax_ctx.tpoint = tpoint;
 
-	trace_debug ("Want to collect %s bytes at 0x%s (basereg %d)",
-		     pulongest (maction->len),
-		     paddress (maction->addr), maction->basereg);
-	/* (should use basereg) */
-	agent_mem_read (&ax_ctx, NULL, (CORE_ADDR) maction->addr,
-			maction->len);
-	break;
+        trace_debug ("Want to collect %s bytes at 0x%s (basereg %d)",
+                     pulongest (maction->len), paddress (maction->addr),
+                     maction->basereg);
+        /* (should use basereg) */
+        agent_mem_read (&ax_ctx, NULL, (CORE_ADDR) maction->addr,
+                        maction->len);
+        break;
       }
     case 'R':
       {
-	unsigned char *regspace;
-	struct regcache tregcache;
-	struct regcache *context_regcache;
-	int regcache_size;
+        unsigned char *regspace;
+        struct regcache tregcache;
+        struct regcache *context_regcache;
+        int regcache_size;
 
-	trace_debug ("Want to collect registers");
+        trace_debug ("Want to collect registers");
 
-	context_regcache = get_context_regcache (ctx);
-	regcache_size = register_cache_size (context_regcache->tdesc);
+        context_regcache = get_context_regcache (ctx);
+        regcache_size = register_cache_size (context_regcache->tdesc);
 
-	/* Collect all registers for now.  */
-	regspace = add_traceframe_block (tframe, tpoint, 1 + regcache_size);
-	if (regspace == NULL)
-	  {
-	    trace_debug ("Trace buffer block allocation failed, skipping");
-	    break;
-	  }
-	/* Identify a register block.  */
-	*regspace = 'R';
+        /* Collect all registers for now.  */
+        regspace = add_traceframe_block (tframe, tpoint, 1 + regcache_size);
+        if (regspace == NULL)
+          {
+            trace_debug ("Trace buffer block allocation failed, skipping");
+            break;
+          }
+        /* Identify a register block.  */
+        *regspace = 'R';
 
-	/* Wrap the regblock in a register cache (in the stack, we
+        /* Wrap the regblock in a register cache (in the stack, we
 	   don't want to malloc here).  */
-	init_register_cache (&tregcache, context_regcache->tdesc,
-			     regspace + 1);
+        init_register_cache (&tregcache, context_regcache->tdesc,
+                             regspace + 1);
 
-	/* Copy the register data to the regblock.  */
-	regcache_cpy (&tregcache, context_regcache);
+        /* Copy the register data to the regblock.  */
+        regcache_cpy (&tregcache, context_regcache);
 
 #ifndef IN_PROCESS_AGENT
-	/* On some platforms, trap-based tracepoints will have the PC
+        /* On some platforms, trap-based tracepoints will have the PC
 	   pointing to the next instruction after the trap, but we
 	   don't want the user or GDB trying to guess whether the
 	   saved PC needs adjusting; so always record the adjusted
@@ -4816,44 +4795,43 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 	   in-process lib (but not if GDBserver is collecting one
 	   preemptively), since the PC had already been adjusted to
 	   contain the tracepoint's address by the jump pad.  */
-	trace_debug ("Storing stop pc (0x%s) in regblock",
-		     paddress (stop_pc));
+        trace_debug ("Storing stop pc (0x%s) in regblock", paddress (stop_pc));
 
-	/* This changes the regblock, not the thread's
+        /* This changes the regblock, not the thread's
 	   regcache.  */
-	regcache_write_pc (&tregcache, stop_pc);
+        regcache_write_pc (&tregcache, stop_pc);
 #endif
       }
       break;
     case 'X':
       {
-	struct eval_expr_action *eaction;
-	struct eval_agent_expr_context ax_ctx;
+        struct eval_expr_action *eaction;
+        struct eval_agent_expr_context ax_ctx;
 
-	eaction = (struct eval_expr_action *) taction;
-	ax_ctx.regcache = get_context_regcache (ctx);
-	ax_ctx.tframe = tframe;
-	ax_ctx.tpoint = tpoint;
+        eaction = (struct eval_expr_action *) taction;
+        ax_ctx.regcache = get_context_regcache (ctx);
+        ax_ctx.tframe = tframe;
+        ax_ctx.tpoint = tpoint;
 
-	trace_debug ("Want to evaluate expression");
+        trace_debug ("Want to evaluate expression");
 
-	err = gdb_eval_agent_expr (&ax_ctx, eaction->expr, NULL);
+        err = gdb_eval_agent_expr (&ax_ctx, eaction->expr, NULL);
 
-	if (err != expr_eval_no_error)
-	  {
-	    record_tracepoint_error (tpoint, "action expression", err);
-	    return;
-	  }
+        if (err != expr_eval_no_error)
+          {
+            record_tracepoint_error (tpoint, "action expression", err);
+            return;
+          }
       }
       break;
     case 'L':
       {
 #if defined IN_PROCESS_AGENT && defined HAVE_UST
-	trace_debug ("Want to collect static trace data");
-	collect_ust_data_at_tracepoint (ctx, tframe);
+        trace_debug ("Want to collect static trace data");
+        collect_ust_data_at_tracepoint (ctx, tframe);
 #else
-	trace_debug ("warning: collecting static trace data, "
-		     "but static tracepoints are not supported");
+        trace_debug ("warning: collecting static trace data, "
+                     "but static tracepoints are not supported");
 #endif
       }
       break;
@@ -4865,7 +4843,7 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 
 static int
 condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-			      struct tracepoint *tpoint)
+                              struct tracepoint *tpoint)
 {
   ULONGEST value = 0;
   enum eval_result_type err;
@@ -4888,7 +4866,8 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   if (tpoint->compiled_cond)
     {
       struct fast_tracepoint_ctx *fctx = (struct fast_tracepoint_ctx *) ctx;
-      err = ((condfn) (uintptr_t) (tpoint->compiled_cond)) (fctx->regs, &value);
+      err
+        = ((condfn) (uintptr_t) (tpoint->compiled_cond)) (fctx->regs, &value);
     }
   else
 #endif
@@ -4908,9 +4887,8 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
       return 0;
     }
 
-  trace_debug ("Tracepoint %d at 0x%s condition evals to %s",
-	       tpoint->number, paddress (tpoint->address),
-	       pulongest (value));
+  trace_debug ("Tracepoint %d at 0x%s condition evals to %s", tpoint->number,
+               paddress (tpoint->address), pulongest (value));
   return (value ? 1 : 0);
 }
 
@@ -4918,8 +4896,8 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 /* Do the recording of memory blocks for actions and bytecodes.  */
 
 int
-agent_mem_read (struct eval_agent_expr_context *ctx,
-		unsigned char *to, CORE_ADDR from, ULONGEST len)
+agent_mem_read (struct eval_agent_expr_context *ctx, unsigned char *to,
+                CORE_ADDR from, ULONGEST len)
 {
   unsigned char *mspace;
   ULONGEST remaining = len;
@@ -4941,7 +4919,7 @@ agent_mem_read (struct eval_agent_expr_context *ctx,
       sp = 1 + sizeof (from) + sizeof (blocklen) + blocklen;
       mspace = add_traceframe_block (ctx->tframe, ctx->tpoint, sp);
       if (mspace == NULL)
-	return 1;
+        return 1;
       /* Identify block as a memory block.  */
       *mspace = 'M';
       ++mspace;
@@ -4960,8 +4938,8 @@ agent_mem_read (struct eval_agent_expr_context *ctx,
 }
 
 int
-agent_mem_read_string (struct eval_agent_expr_context *ctx,
-		       unsigned char *to, CORE_ADDR from, ULONGEST len)
+agent_mem_read_string (struct eval_agent_expr_context *ctx, unsigned char *to,
+                       CORE_ADDR from, ULONGEST len)
 {
   unsigned char *buf, *mspace;
   ULONGEST remaining = len;
@@ -4980,28 +4958,28 @@ agent_mem_read_string (struct eval_agent_expr_context *ctx,
 	 harder to wrap correctly for the circular case, etc).  */
       buf = (unsigned char *) xmalloc (blocklen + 1);
       for (i = 0; i < blocklen; ++i)
-	{
-	  /* Read the string one byte at a time, in case the string is
+        {
+          /* Read the string one byte at a time, in case the string is
 	     at the end of a valid memory area - we don't want a
 	     correctly-terminated string to engender segvio
 	     complaints.  */
-	  read_inferior_memory (from + i, buf + i, 1);
+          read_inferior_memory (from + i, buf + i, 1);
 
-	  if (buf[i] == '\0')
-	    {
-	      blocklen = i + 1;
-	      /* Make sure outer loop stops now too.  */
-	      remaining = blocklen;
-	      break;
-	    }
-	}
+          if (buf[i] == '\0')
+            {
+              blocklen = i + 1;
+              /* Make sure outer loop stops now too.  */
+              remaining = blocklen;
+              break;
+            }
+        }
       sp = 1 + sizeof (from) + sizeof (blocklen) + blocklen;
       mspace = add_traceframe_block (ctx->tframe, ctx->tpoint, sp);
       if (mspace == NULL)
-	{
-	  xfree (buf);
-	  return 1;
-	}
+        {
+          xfree (buf);
+          return 1;
+        }
       /* Identify block as a memory block.  */
       *mspace = 'M';
       ++mspace;
@@ -5028,7 +5006,7 @@ agent_tsv_read (struct eval_agent_expr_context *ctx, int n)
   LONGEST val;
 
   vspace = add_traceframe_block (ctx->tframe, ctx->tpoint,
-				 1 + sizeof (n) + sizeof (LONGEST));
+                                 1 + sizeof (n) + sizeof (LONGEST));
   if (vspace == NULL)
     return 1;
   /* Identify block as a variable.  */
@@ -5066,11 +5044,10 @@ match_blocktype (char blocktype, unsigned char *dataptr, void *data)
 
 static unsigned char *
 traceframe_walk_blocks (unsigned char *database, unsigned int datasize,
-			int tfnum,
-			int (*callback) (char blocktype,
-					 unsigned char *dataptr,
-					 void *data),
-			void *data)
+                        int tfnum,
+                        int (*callback) (char blocktype,
+                                         unsigned char *dataptr, void *data),
+                        void *data)
 {
   unsigned char *dataptr;
 
@@ -5082,52 +5059,51 @@ traceframe_walk_blocks (unsigned char *database, unsigned int datasize,
 
   /* Iterate through a traceframe's blocks, looking for a block of the
      requested type.  */
-  for (dataptr = database;
-       dataptr < database + datasize;
+  for (dataptr = database; dataptr < database + datasize;
        /* nothing */)
     {
       char blocktype;
       unsigned short mlen;
 
       if (dataptr == trace_buffer_wrap)
-	{
-	  /* Adjust to reflect wrapping part of the frame around to
+        {
+          /* Adjust to reflect wrapping part of the frame around to
 	     the beginning.  */
-	  datasize = dataptr - database;
-	  dataptr = database = trace_buffer_lo;
-	}
+          datasize = dataptr - database;
+          dataptr = database = trace_buffer_lo;
+        }
 
       blocktype = *dataptr++;
 
       if ((*callback) (blocktype, dataptr, data))
-	return dataptr;
+        return dataptr;
 
       switch (blocktype)
-	{
-	case 'R':
-	  /* Skip over the registers block.  */
-	  dataptr += current_target_desc ()->registers_size;
-	  break;
-	case 'M':
-	  /* Skip over the memory block.  */
-	  dataptr += sizeof (CORE_ADDR);
-	  memcpy (&mlen, dataptr, sizeof (mlen));
-	  dataptr += (sizeof (mlen) + mlen);
-	  break;
-	case 'V':
-	  /* Skip over the TSV block.  */
-	  dataptr += (sizeof (int) + sizeof (LONGEST));
-	  break;
-	case 'S':
-	  /* Skip over the static trace data block.  */
-	  memcpy (&mlen, dataptr, sizeof (mlen));
-	  dataptr += (sizeof (mlen) + mlen);
-	  break;
-	default:
-	  trace_debug ("traceframe %d has unknown block type 0x%x",
-		       tfnum, blocktype);
-	  return NULL;
-	}
+        {
+        case 'R':
+          /* Skip over the registers block.  */
+          dataptr += current_target_desc ()->registers_size;
+          break;
+        case 'M':
+          /* Skip over the memory block.  */
+          dataptr += sizeof (CORE_ADDR);
+          memcpy (&mlen, dataptr, sizeof (mlen));
+          dataptr += (sizeof (mlen) + mlen);
+          break;
+        case 'V':
+          /* Skip over the TSV block.  */
+          dataptr += (sizeof (int) + sizeof (LONGEST));
+          break;
+        case 'S':
+          /* Skip over the static trace data block.  */
+          memcpy (&mlen, dataptr, sizeof (mlen));
+          dataptr += (sizeof (mlen) + mlen);
+          break;
+        default:
+          trace_debug ("traceframe %d has unknown block type 0x%x", tfnum,
+                       blocktype);
+          return NULL;
+        }
     }
 
   return NULL;
@@ -5139,10 +5115,10 @@ traceframe_walk_blocks (unsigned char *database, unsigned int datasize,
 
 static unsigned char *
 traceframe_find_block_type (unsigned char *database, unsigned int datasize,
-			    int tfnum, char type_wanted)
+                            int tfnum, char type_wanted)
 {
-  return traceframe_walk_blocks (database, datasize, tfnum,
-				 match_blocktype, &type_wanted);
+  return traceframe_walk_blocks (database, datasize, tfnum, match_blocktype,
+                                 &type_wanted);
 }
 
 static unsigned char *
@@ -5150,9 +5126,8 @@ traceframe_find_regblock (struct traceframe *tframe, int tfnum)
 {
   unsigned char *regblock;
 
-  regblock = traceframe_find_block_type (tframe->data,
-					 tframe->data_size,
-					 tfnum, 'R');
+  regblock
+    = traceframe_find_block_type (tframe->data, tframe->data_size, tfnum, 'R');
 
   if (regblock == NULL)
     trace_debug ("traceframe %d has no register data", tfnum);
@@ -5188,7 +5163,7 @@ fetch_traceframe_registers (int tfnum, struct regcache *regcache, int regnum)
 	 tracepoints.  */
       tpoint = find_next_tracepoint_by_number (NULL, tframe->tpnum);
       if (tpoint != NULL)
-	regcache_write_pc (regcache, tpoint->address);
+        regcache_write_pc (regcache, tpoint->address);
     }
   else
     supply_regblock (regcache, dataptr);
@@ -5214,9 +5189,8 @@ traceframe_get_pc (struct traceframe *tframe)
 /* Read a requested block of memory from a trace frame.  */
 
 int
-traceframe_read_mem (int tfnum, CORE_ADDR addr,
-		     unsigned char *buf, ULONGEST length,
-		     ULONGEST *nbytes)
+traceframe_read_mem (int tfnum, CORE_ADDR addr, unsigned char *buf,
+                     ULONGEST length, ULONGEST *nbytes)
 {
   struct traceframe *tframe;
   unsigned char *database, *dataptr;
@@ -5238,38 +5212,39 @@ traceframe_read_mem (int tfnum, CORE_ADDR addr,
   database = dataptr = &tframe->data[0];
 
   /* Iterate through a traceframe's blocks, looking for memory.  */
-  while ((dataptr = traceframe_find_block_type (dataptr,
-						datasize
-						- (dataptr - database),
-						tfnum, 'M')) != NULL)
+  while (
+    (dataptr
+     = traceframe_find_block_type (dataptr, datasize - (dataptr - database),
+                                   tfnum, 'M'))
+    != NULL)
     {
       memcpy (&maddr, dataptr, sizeof (maddr));
       dataptr += sizeof (maddr);
       memcpy (&mlen, dataptr, sizeof (mlen));
       dataptr += sizeof (mlen);
-      trace_debug ("traceframe %d has %d bytes at %s",
-		   tfnum, mlen, paddress (maddr));
+      trace_debug ("traceframe %d has %d bytes at %s", tfnum, mlen,
+                   paddress (maddr));
 
       /* If the block includes the first part of the desired range,
 	 return as much it has; GDB will re-request the remainder,
 	 which might be in a different block of this trace frame.  */
       if (maddr <= addr && addr < (maddr + mlen))
-	{
-	  ULONGEST amt = (maddr + mlen) - addr;
-	  if (amt > length)
-	    amt = length;
+        {
+          ULONGEST amt = (maddr + mlen) - addr;
+          if (amt > length)
+            amt = length;
 
-	  memcpy (buf, dataptr + (addr - maddr), amt);
-	  *nbytes = amt;
-	  return 0;
-	}
+          memcpy (buf, dataptr + (addr - maddr), amt);
+          *nbytes = amt;
+          return 0;
+        }
 
       /* Skip over this block.  */
       dataptr += mlen;
     }
 
   trace_debug ("traceframe %d has no memory data for the desired region",
-	       tfnum);
+               tfnum);
 
   *nbytes = 0;
   return 0;
@@ -5309,10 +5284,11 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
 
   /* Iterate through a traceframe's blocks, looking for the last
      matched tsv.  */
-  while ((dataptr = traceframe_find_block_type (dataptr,
-						datasize
-						- (dataptr - database),
-						tfnum, 'V')) != NULL)
+  while (
+    (dataptr
+     = traceframe_find_block_type (dataptr, datasize - (dataptr - database),
+                                   tfnum, 'V'))
+    != NULL)
     {
       memcpy (&vnum, dataptr, sizeof (vnum));
       dataptr += sizeof (vnum);
@@ -5321,18 +5297,17 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
 
       /* Check that this is the variable we want.  */
       if (tsvnum == vnum)
-	{
-	  memcpy (val, dataptr, sizeof (*val));
-	  found = 1;
-	}
+        {
+          memcpy (val, dataptr, sizeof (*val));
+          found = 1;
+        }
 
       /* Skip over this block.  */
       dataptr += sizeof (LONGEST);
     }
 
   if (!found)
-    trace_debug ("traceframe %d has no data for variable %d",
-		 tfnum, tsvnum);
+    trace_debug ("traceframe %d has no data for variable %d", tfnum, tsvnum);
   return !found;
 }
 
@@ -5340,9 +5315,8 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
    frame.  */
 
 int
-traceframe_read_sdata (int tfnum, ULONGEST offset,
-		       unsigned char *buf, ULONGEST length,
-		       ULONGEST *nbytes)
+traceframe_read_sdata (int tfnum, ULONGEST offset, unsigned char *buf,
+                       ULONGEST length, ULONGEST *nbytes)
 {
   struct traceframe *tframe;
   unsigned char *database, *dataptr;
@@ -5364,22 +5338,21 @@ traceframe_read_sdata (int tfnum, ULONGEST offset,
 
   /* Iterate through a traceframe's blocks, looking for static
      tracepoint data.  */
-  dataptr = traceframe_find_block_type (database, datasize,
-					tfnum, 'S');
+  dataptr = traceframe_find_block_type (database, datasize, tfnum, 'S');
   if (dataptr != NULL)
     {
       memcpy (&mlen, dataptr, sizeof (mlen));
       dataptr += sizeof (mlen);
       if (offset < mlen)
-	{
-	  if (offset + length > mlen)
-	    length = mlen - offset;
+        {
+          if (offset + length > mlen)
+            length = mlen - offset;
 
-	  memcpy (buf, dataptr, length);
-	  *nbytes = length;
-	}
+          memcpy (buf, dataptr, length);
+          *nbytes = length;
+        }
       else
-	*nbytes = 0;
+        *nbytes = 0;
       return 0;
     }
 
@@ -5402,35 +5375,35 @@ build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
     {
     case 'M':
       {
-	unsigned short mlen;
-	CORE_ADDR maddr;
+        unsigned short mlen;
+        CORE_ADDR maddr;
 
-	memcpy (&maddr, dataptr, sizeof (maddr));
-	dataptr += sizeof (maddr);
-	memcpy (&mlen, dataptr, sizeof (mlen));
-	dataptr += sizeof (mlen);
-	buffer_xml_printf (buffer,
-			   "<memory start=\"0x%s\" length=\"0x%s\"/>\n",
-			   paddress (maddr), phex_nz (mlen, sizeof (mlen)));
-	break;
+        memcpy (&maddr, dataptr, sizeof (maddr));
+        dataptr += sizeof (maddr);
+        memcpy (&mlen, dataptr, sizeof (mlen));
+        dataptr += sizeof (mlen);
+        buffer_xml_printf (buffer,
+                           "<memory start=\"0x%s\" length=\"0x%s\"/>\n",
+                           paddress (maddr), phex_nz (mlen, sizeof (mlen)));
+        break;
       }
     case 'V':
       {
-	int vnum;
+        int vnum;
 
-	memcpy (&vnum, dataptr, sizeof (vnum));
-	buffer_xml_printf (buffer, "<tvar id=\"%d\"/>\n", vnum);
-	break;
+        memcpy (&vnum, dataptr, sizeof (vnum));
+        buffer_xml_printf (buffer, "<tvar id=\"%d\"/>\n", vnum);
+        break;
       }
     case 'R':
     case 'S':
       {
-	break;
+        break;
       }
     default:
       warning ("Unhandled trace block type (%d) '%c ' "
-	       "while building trace frame info.",
-	       blocktype, blocktype);
+               "while building trace frame info.",
+               blocktype, blocktype);
       break;
     }
 
@@ -5456,8 +5429,8 @@ traceframe_read_info (int tfnum, struct buffer *buffer)
     }
 
   buffer_grow_str (buffer, "<traceframe-info>\n");
-  traceframe_walk_blocks (tframe->data, tframe->data_size,
-			  tfnum, build_traceframe_info_xml, buffer);
+  traceframe_walk_blocks (tframe->data, tframe->data_size, tfnum,
+                          build_traceframe_info_xml, buffer);
   buffer_grow_str0 (buffer, "</traceframe-info>\n");
   return 0;
 }
@@ -5472,7 +5445,7 @@ fast_tracepoint_from_jump_pad_address (CORE_ADDR pc)
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     if (tpoint->type == fast_tracepoint)
       if (tpoint->jump_pad <= pc && pc < tpoint->jump_pad_end)
-	return tpoint;
+        return tpoint;
 
   return NULL;
 }
@@ -5486,9 +5459,9 @@ fast_tracepoint_from_trampoline_address (CORE_ADDR pc)
 
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
-      if (tpoint->type == fast_tracepoint
-	  && tpoint->trampoline <= pc && pc < tpoint->trampoline_end)
-	return tpoint;
+      if (tpoint->type == fast_tracepoint && tpoint->trampoline <= pc
+          && pc < tpoint->trampoline_end)
+        return tpoint;
     }
 
   return NULL;
@@ -5506,7 +5479,7 @@ fast_tracepoint_from_ipa_tpoint_address (CORE_ADDR ipa_tpoint_obj)
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     if (tpoint->type == fast_tracepoint)
       if (tpoint->obj_addr_on_target == ipa_tpoint_obj)
-	return tpoint;
+        return tpoint;
 
   return NULL;
 }
@@ -5550,9 +5523,8 @@ force_unlock_trace_buffer (void)
    single-step it until this function returns 0.  */
 
 fast_tpoint_collect_result
-fast_tracepoint_collecting (CORE_ADDR thread_area,
-			    CORE_ADDR stop_pc,
-			    struct fast_tpoint_collect_status *status)
+fast_tracepoint_collecting (CORE_ADDR thread_area, CORE_ADDR stop_pc,
+                            struct fast_tpoint_collect_status *status)
 {
   CORE_ADDR ipa_collecting;
   CORE_ADDR ipa_gdb_jump_pad_buffer, ipa_gdb_jump_pad_buffer_end;
@@ -5584,29 +5556,29 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
       in the jump pad.  Single-step the thread until it leaves the
       jump pad.  */
 
- again:
+again:
   tpoint = NULL;
   needs_breakpoint = 0;
   trace_debug ("fast_tracepoint_collecting");
 
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_jump_pad_buffer,
-				  &ipa_gdb_jump_pad_buffer))
+                                  &ipa_gdb_jump_pad_buffer))
     {
       internal_error ("error extracting `gdb_jump_pad_buffer'");
     }
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_jump_pad_buffer_end,
-				  &ipa_gdb_jump_pad_buffer_end))
+                                  &ipa_gdb_jump_pad_buffer_end))
     {
       internal_error ("error extracting `gdb_jump_pad_buffer_end'");
     }
 
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer,
-				  &ipa_gdb_trampoline_buffer))
+                                  &ipa_gdb_trampoline_buffer))
     {
       internal_error ("error extracting `gdb_trampoline_buffer'");
     }
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
-				  &ipa_gdb_trampoline_buffer_end))
+                                  &ipa_gdb_trampoline_buffer_end))
     {
       internal_error ("error extracting `gdb_trampoline_buffer_end'");
     }
@@ -5618,45 +5590,44 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 	 matching the jump pad address back to the tracepoint.  */
       tpoint = fast_tracepoint_from_jump_pad_address (stop_pc);
       if (tpoint == NULL)
-	{
-	  warning ("in jump pad, but no matching tpoint?");
-	  return fast_tpoint_collect_result::not_collecting;
-	}
+        {
+          warning ("in jump pad, but no matching tpoint?");
+          return fast_tpoint_collect_result::not_collecting;
+        }
       else
-	{
-	  trace_debug ("in jump pad of tpoint (%d, %s); jump_pad(%s, %s); "
-		       "adj_insn(%s, %s)",
-		       tpoint->number, paddress (tpoint->address),
-		       paddress (tpoint->jump_pad),
-		       paddress (tpoint->jump_pad_end),
-		       paddress (tpoint->adjusted_insn_addr),
-		       paddress (tpoint->adjusted_insn_addr_end));
-	}
+        {
+          trace_debug ("in jump pad of tpoint (%d, %s); jump_pad(%s, %s); "
+                       "adj_insn(%s, %s)",
+                       tpoint->number, paddress (tpoint->address),
+                       paddress (tpoint->jump_pad),
+                       paddress (tpoint->jump_pad_end),
+                       paddress (tpoint->adjusted_insn_addr),
+                       paddress (tpoint->adjusted_insn_addr_end));
+        }
 
       /* Definitely in the jump pad.  May or may not need
 	 fast-exit-jump-pad breakpoint.  */
-      if (tpoint->jump_pad <= stop_pc
-	  && stop_pc < tpoint->adjusted_insn_addr)
-	needs_breakpoint =  1;
+      if (tpoint->jump_pad <= stop_pc && stop_pc < tpoint->adjusted_insn_addr)
+        needs_breakpoint = 1;
     }
   else if (ipa_gdb_trampoline_buffer <= stop_pc
-	   && stop_pc < ipa_gdb_trampoline_buffer_end)
+           && stop_pc < ipa_gdb_trampoline_buffer_end)
     {
       /* We can tell which tracepoint(s) the thread is collecting by
 	 matching the trampoline address back to the tracepoint.  */
       tpoint = fast_tracepoint_from_trampoline_address (stop_pc);
       if (tpoint == NULL)
-	{
-	  warning ("in trampoline, but no matching tpoint?");
-	  return fast_tpoint_collect_result::not_collecting;
-	}
+        {
+          warning ("in trampoline, but no matching tpoint?");
+          return fast_tpoint_collect_result::not_collecting;
+        }
       else
-	{
-	  trace_debug ("in trampoline of tpoint (%d, %s); trampoline(%s, %s)",
-		       tpoint->number, paddress (tpoint->address),
-		       paddress (tpoint->trampoline),
-		       paddress (tpoint->trampoline_end));
-	}
+        {
+          trace_debug ("in trampoline of tpoint (%d, %s); trampoline(%s, %s)",
+                       tpoint->number, paddress (tpoint->address),
+                       paddress (tpoint->trampoline),
+                       paddress (tpoint->trampoline_end));
+        }
 
       /* Have not reached jump pad yet, but treat the trampoline as a
 	 part of the jump pad that is before the adjusted original
@@ -5672,42 +5643,43 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 	 lock to find out.  */
 
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_collecting,
-				      &ipa_collecting))
-	{
-	  trace_debug ("fast_tracepoint_collecting:"
-		       " failed reading 'collecting' in the inferior");
-	  return fast_tpoint_collect_result::not_collecting;
-	}
+                                      &ipa_collecting))
+        {
+          trace_debug ("fast_tracepoint_collecting:"
+                       " failed reading 'collecting' in the inferior");
+          return fast_tpoint_collect_result::not_collecting;
+        }
 
       if (!ipa_collecting)
-	{
-	  trace_debug ("fast_tracepoint_collecting: not collecting"
-		       " (and nobody is).");
-	  return fast_tpoint_collect_result::not_collecting;
-	}
+        {
+          trace_debug ("fast_tracepoint_collecting: not collecting"
+                       " (and nobody is).");
+          return fast_tpoint_collect_result::not_collecting;
+        }
 
       /* Some thread is collecting.  Check which.  */
       if (read_inferior_memory (ipa_collecting,
-				(unsigned char *) &ipa_collecting_obj,
-				sizeof (ipa_collecting_obj)) != 0)
-	goto again;
+                                (unsigned char *) &ipa_collecting_obj,
+                                sizeof (ipa_collecting_obj))
+          != 0)
+        goto again;
 
       if (ipa_collecting_obj.thread_area != thread_area)
-	{
-	  trace_debug ("fast_tracepoint_collecting: not collecting "
-		       "(another thread is)");
-	  return fast_tpoint_collect_result::not_collecting;
-	}
+        {
+          trace_debug ("fast_tracepoint_collecting: not collecting "
+                       "(another thread is)");
+          return fast_tpoint_collect_result::not_collecting;
+        }
 
       tpoint
-	= fast_tracepoint_from_ipa_tpoint_address (ipa_collecting_obj.tpoint);
+        = fast_tracepoint_from_ipa_tpoint_address (ipa_collecting_obj.tpoint);
       if (tpoint == NULL)
-	{
-	  warning ("fast_tracepoint_collecting: collecting, "
-		   "but tpoint %s not found?",
-		   paddress ((CORE_ADDR) ipa_collecting_obj.tpoint));
-	  return fast_tpoint_collect_result::not_collecting;
-	}
+        {
+          warning ("fast_tracepoint_collecting: collecting, "
+                   "but tpoint %s not found?",
+                   paddress ((CORE_ADDR) ipa_collecting_obj.tpoint));
+          return fast_tpoint_collect_result::not_collecting;
+        }
 
       /* The thread is within `gdb_collect', skip over the rest of
 	 fast tracepoint collection quickly using a breakpoint.  */
@@ -5731,7 +5703,7 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 
       trace_debug ("\
 fast_tracepoint_collecting, returning continue-until-break at %s",
-		   paddress (tpoint->adjusted_insn_addr));
+                   paddress (tpoint->adjusted_insn_addr));
 
       return fast_tpoint_collect_result::before_insn; /* continue */
     }
@@ -5740,9 +5712,9 @@ fast_tracepoint_collecting, returning continue-until-break at %s",
       /* Just single-step until exiting the jump pad.  */
 
       trace_debug ("fast_tracepoint_collecting, returning "
-		   "need-single-step (%s-%s)",
-		   paddress (tpoint->adjusted_insn_addr),
-		   paddress (tpoint->adjusted_insn_addr_end));
+                   "need-single-step (%s-%s)",
+                   paddress (tpoint->adjusted_insn_addr),
+                   paddress (tpoint->adjusted_insn_addr_end));
 
       return fast_tpoint_collect_result::at_insn; /* single-step */
     }
@@ -5763,7 +5735,7 @@ EXTERN_C_POP
 
 /* This is needed for -Wmissing-declarations.  */
 IP_AGENT_EXPORT_FUNC void gdb_collect (struct tracepoint *tpoint,
-				       unsigned char *regs);
+                                       unsigned char *regs);
 
 /* This routine, called from the jump pad (in asm) is designed to be
    called from the jump pads of fast tracepoints, thus it is on the
@@ -5797,44 +5769,43 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
        ctx.tpoint = ctx.tpoint->next)
     {
       if (!ctx.tpoint->enabled)
-	continue;
+        continue;
 
       /* Multiple tracepoints of different types, such as fast tracepoint and
 	 static tracepoint, can be set at the same address.  */
       if (ctx.tpoint->type != tpoint->type)
-	continue;
+        continue;
 
       /* Test the condition if present, and collect if true.  */
       if (ctx.tpoint->cond == NULL
-	  || condition_true_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-					   ctx.tpoint))
-	{
-	  collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				      ctx.tpoint->address, ctx.tpoint);
+          || condition_true_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
+                                           ctx.tpoint))
+        {
+          collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
+                                      ctx.tpoint->address, ctx.tpoint);
 
-	  /* Note that this will cause original insns to be written back
+          /* Note that this will cause original insns to be written back
 	     to where we jumped from, but that's OK because we're jumping
 	     back to the next whole instruction.  This will go badly if
 	     instruction restoration is not atomic though.  */
-	  if (stopping_tracepoint
-	      || trace_buffer_is_full
-	      || expr_eval_result != expr_eval_no_error)
-	    {
-	      stop_tracing ();
-	      break;
-	    }
-	}
+          if (stopping_tracepoint || trace_buffer_is_full
+              || expr_eval_result != expr_eval_no_error)
+            {
+              stop_tracing ();
+              break;
+            }
+        }
       else
-	{
-	  /* If there was a condition and it evaluated to false, the only
+        {
+          /* If there was a condition and it evaluated to false, the only
 	     way we would stop tracing is if there was an error during
 	     condition expression evaluation.  */
-	  if (expr_eval_result != expr_eval_no_error)
-	    {
-	      stop_tracing ();
-	      break;
-	    }
-	}
+          if (expr_eval_result != expr_eval_no_error)
+            {
+              stop_tracing ();
+              break;
+            }
+        }
     }
 }
 
@@ -5852,9 +5823,11 @@ EXTERN_C_PUSH
 IP_AGENT_EXPORT_VAR gdb_collect_ptr_type gdb_collect_ptr = gdb_collect;
 IP_AGENT_EXPORT_VAR get_raw_reg_ptr_type get_raw_reg_ptr = get_raw_reg;
 IP_AGENT_EXPORT_VAR get_trace_state_variable_value_ptr_type
-  get_trace_state_variable_value_ptr = get_trace_state_variable_value;
+  get_trace_state_variable_value_ptr
+  = get_trace_state_variable_value;
 IP_AGENT_EXPORT_VAR set_trace_state_variable_value_ptr_type
-  set_trace_state_variable_value_ptr = set_trace_state_variable_value;
+  set_trace_state_variable_value_ptr
+  = set_trace_state_variable_value;
 EXTERN_C_POP
 
 #endif
@@ -5878,7 +5851,7 @@ get_get_tsv_func_addr (void)
 {
   CORE_ADDR res;
   if (read_inferior_data_pointer (
-	ipa_sym_addrs.addr_get_trace_state_variable_value_ptr, &res))
+        ipa_sym_addrs.addr_get_trace_state_variable_value_ptr, &res))
     {
       error ("error extracting get_trace_state_variable_value_ptr");
       return 0;
@@ -5891,7 +5864,7 @@ get_set_tsv_func_addr (void)
 {
   CORE_ADDR res;
   if (read_inferior_data_pointer (
-	ipa_sym_addrs.addr_set_trace_state_variable_value_ptr, &res))
+        ipa_sym_addrs.addr_set_trace_state_variable_value_ptr, &res))
     {
       error ("error extracting set_trace_state_variable_value_ptr");
       return 0;
@@ -5900,14 +5873,13 @@ get_set_tsv_func_addr (void)
 }
 
 static void
-compile_tracepoint_condition (struct tracepoint *tpoint,
-			      CORE_ADDR *jump_entry)
+compile_tracepoint_condition (struct tracepoint *tpoint, CORE_ADDR *jump_entry)
 {
   CORE_ADDR entry_point = *jump_entry;
   enum eval_result_type err;
 
   trace_debug ("Starting condition compilation for tracepoint %d\n",
-	       tpoint->number);
+               tpoint->number);
 
   /* Initialize the global pointer to the code being built.  */
   current_insn_ptr = *jump_entry;
@@ -5924,7 +5896,7 @@ compile_tracepoint_condition (struct tracepoint *tpoint,
       tpoint->compiled_cond = entry_point;
 
       trace_debug ("Condition compilation for tracepoint %d complete\n",
-		   tpoint->number);
+                   tpoint->number);
     }
   else
     {
@@ -5933,8 +5905,8 @@ compile_tracepoint_condition (struct tracepoint *tpoint,
       tpoint->compiled_cond = 0;
 
       trace_debug ("Condition compilation for tracepoint %d failed, "
-		   "error code %d",
-		   tpoint->number, err);
+                   "error code %d",
+                   tpoint->number, err);
     }
 
   /* Update the code pointer passed in.  Note that we do this even if
@@ -5965,10 +5937,10 @@ target_malloc (ULONGEST size)
     {
       /* We have the pointer *address*, need what it points to.  */
       if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_tp_heap_buffer,
-				      &target_tp_heap))
-	{
-	  internal_error ("couldn't get target heap head pointer");
-	}
+                                      &target_tp_heap))
+        {
+          internal_error ("couldn't get target heap head pointer");
+        }
     }
 
   ptr = target_tp_heap;
@@ -5991,14 +5963,14 @@ download_agent_expr (struct agent_expr *expr)
 
   expr_bytes = target_malloc (expr->length);
   write_inferior_data_pointer (expr_addr + offsetof (struct agent_expr, bytes),
-			       expr_bytes);
+                               expr_bytes);
   target_write_memory (expr_bytes, expr->bytes, expr->length);
 
   return expr_addr;
 }
 
 /* Align V up to N bits.  */
-#define UALIGN(V, N) (((V) + ((N) - 1)) & ~((N) - 1))
+#define UALIGN(V, N) (((V) + ((N) -1)) & ~((N) -1))
 
 /* Sync tracepoint with IPA, but leave maintenance of linked list to caller.  */
 
@@ -6009,7 +5981,7 @@ download_tracepoint_1 (struct tracepoint *tpoint)
   CORE_ADDR tpptr = 0;
 
   gdb_assert (tpoint->type == fast_tracepoint
-	      || tpoint->type == static_tracepoint);
+              || tpoint->type == static_tracepoint);
 
   if (tpoint->cond != NULL && target_emit_ops () != NULL)
     {
@@ -6018,14 +5990,14 @@ download_tracepoint_1 (struct tracepoint *tpoint)
       jentry = jump_entry = get_jump_space_head ();
 
       if (tpoint->cond != NULL)
-	{
-	  /* Pad to 8-byte alignment. (needed?)  */
-	  /* Actually this should be left for the target to
+        {
+          /* Pad to 8-byte alignment. (needed?)  */
+          /* Actually this should be left for the target to
 	     decide.  */
-	  jentry = UALIGN (jentry, 8);
+          jentry = UALIGN (jentry, 8);
 
-	  compile_tracepoint_condition (tpoint, &jentry);
-	}
+          compile_tracepoint_condition (tpoint, &jentry);
+        }
 
       /* Pad to 8-byte alignment.  */
       jentry = UALIGN (jentry, 8);
@@ -6046,12 +6018,11 @@ download_tracepoint_1 (struct tracepoint *tpoint)
   target_tracepoint.hit_count = 0;
 
   target_write_memory (tpptr, (unsigned char *) &target_tracepoint,
-			 sizeof (target_tracepoint));
+                       sizeof (target_tracepoint));
 
   if (tpoint->cond)
-    write_inferior_data_pointer (tpptr
-				 + offsetof (struct tracepoint, cond),
-				 download_agent_expr (tpoint->cond));
+    write_inferior_data_pointer (tpptr + offsetof (struct tracepoint, cond),
+                                 download_agent_expr (tpoint->cond));
 
   if (tpoint->numactions)
     {
@@ -6060,22 +6031,22 @@ download_tracepoint_1 (struct tracepoint *tpoint)
 
       /* The pointers array.  */
       actions_array
-	= target_malloc (sizeof (*tpoint->actions) * tpoint->numactions);
-      write_inferior_data_pointer (tpptr + offsetof (struct tracepoint,
-						     actions),
-				   actions_array);
+        = target_malloc (sizeof (*tpoint->actions) * tpoint->numactions);
+      write_inferior_data_pointer (tpptr
+                                     + offsetof (struct tracepoint, actions),
+                                   actions_array);
 
       /* Now for each pointer, download the action.  */
       for (i = 0; i < tpoint->numactions; i++)
-	{
-	  struct tracepoint_action *action = tpoint->actions[i];
-	  CORE_ADDR ipa_action = tracepoint_action_download (action);
+        {
+          struct tracepoint_action *action = tpoint->actions[i];
+          CORE_ADDR ipa_action = tracepoint_action_download (action);
 
-	  if (ipa_action != 0)
-	    write_inferior_data_pointer (actions_array
-					 + i * sizeof (*tpoint->actions),
-					 ipa_action);
-	}
+          if (ipa_action != 0)
+            write_inferior_data_pointer (actions_array
+                                           + i * sizeof (*tpoint->actions),
+                                         ipa_action);
+        }
     }
 }
 
@@ -6140,17 +6111,17 @@ tracepoint_send_agent (struct tracepoint *tpoint)
 
   /* The value of tracepoint's target address is stored in BUF.  */
   memcpy (&tpoint->obj_addr_on_target,
-	  &buf[IPA_PROTO_FAST_TRACE_ADDR_ON_TARGET], 8);
+          &buf[IPA_PROTO_FAST_TRACE_ADDR_ON_TARGET], 8);
 
   if (tpoint->type == fast_tracepoint)
     {
       unsigned char *insn
-	= (unsigned char *) &buf[IPA_PROTO_FAST_TRACE_FJUMP_INSN];
+        = (unsigned char *) &buf[IPA_PROTO_FAST_TRACE_FJUMP_INSN];
       int fjump_size;
 
-     trace_debug ("agent: read from cmd_buf 0x%x 0x%x\n",
-		  (unsigned int) tpoint->obj_addr_on_target,
-		  (unsigned int) gdb_jump_pad_head);
+      trace_debug ("agent: read from cmd_buf 0x%x 0x%x\n",
+                   (unsigned int) tpoint->obj_addr_on_target,
+                   (unsigned int) gdb_jump_pad_head);
 
       memcpy (&gdb_jump_pad_head, &buf[IPA_PROTO_FAST_TRACE_JUMP_PAD], 8);
 
@@ -6158,7 +6129,7 @@ tracepoint_send_agent (struct tracepoint *tpoint)
       memcpy (&fjump_size, &buf[IPA_PROTO_FAST_TRACE_FJUMP_SIZE], 4);
       /* Wire it in.  */
       tpoint->handle
-	= set_fast_tracepoint_jump (tpoint->address, insn, fjump_size);
+        = set_fast_tracepoint_jump (tpoint->address, insn, fjump_size);
     }
 
   return 0;
@@ -6169,8 +6140,7 @@ download_tracepoint (struct tracepoint *tpoint)
 {
   struct tracepoint *tp, *tp_prev;
 
-  if (tpoint->type != fast_tracepoint
-      && tpoint->type != static_tracepoint)
+  if (tpoint->type != fast_tracepoint && tpoint->type != static_tracepoint)
     return;
 
   download_tracepoint_1 (tpoint);
@@ -6181,7 +6151,7 @@ download_tracepoint (struct tracepoint *tpoint)
   for (tp = tracepoints; tp != tpoint; tp = tp->next)
     {
       if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
-	tp_prev = tp;
+        tp_prev = tp;
     }
 
   if (tp_prev)
@@ -6190,27 +6160,26 @@ download_tracepoint (struct tracepoint *tpoint)
 
       /* Insert TPOINT after TP_PREV in IPA.  */
       if (read_inferior_data_pointer (tp_prev->obj_addr_on_target
-				      + offsetof (struct tracepoint, next),
-				      &tp_prev_target_next_addr))
-	{
-	  internal_error ("error reading `tp_prev->next'");
-	}
+                                        + offsetof (struct tracepoint, next),
+                                      &tp_prev_target_next_addr))
+        {
+          internal_error ("error reading `tp_prev->next'");
+        }
 
       /* tpoint->next = tp_prev->next */
       write_inferior_data_pointer (tpoint->obj_addr_on_target
-				   + offsetof (struct tracepoint, next),
-				   tp_prev_target_next_addr);
+                                     + offsetof (struct tracepoint, next),
+                                   tp_prev_target_next_addr);
       /* tp_prev->next = tpoint */
       write_inferior_data_pointer (tp_prev->obj_addr_on_target
-				   + offsetof (struct tracepoint, next),
-				   tpoint->obj_addr_on_target);
+                                     + offsetof (struct tracepoint, next),
+                                   tpoint->obj_addr_on_target);
     }
   else
     /* First object in list, set the head pointer in the
        inferior.  */
     write_inferior_data_pointer (ipa_sym_addrs.addr_tracepoints,
-				 tpoint->obj_addr_on_target);
-
+                                 tpoint->obj_addr_on_target);
 }
 
 static void
@@ -6229,7 +6198,7 @@ download_trace_state_variables (void)
       /* TSV's with a getter have been initialized equally in both the
 	 inferior and GDBserver.  Skip them.  */
       if (tsv->getter != NULL)
-	continue;
+        continue;
 
       target_tsv = *tsv;
 
@@ -6237,39 +6206,34 @@ download_trace_state_variables (void)
       ptr = target_malloc (sizeof (*tsv));
 
       if (tsv == trace_state_variables)
-	{
-	  /* First object in list, set the head pointer in the
+        {
+          /* First object in list, set the head pointer in the
 	     inferior.  */
 
-	  write_inferior_data_pointer (ipa_sym_addrs.addr_trace_state_variables,
-				       ptr);
-	}
+          write_inferior_data_pointer (
+            ipa_sym_addrs.addr_trace_state_variables, ptr);
+        }
       else
-	{
-	  write_inferior_data_pointer (prev_ptr
-				       + offsetof (struct trace_state_variable,
-						   next),
-				       ptr);
-	}
+        {
+          write_inferior_data_pointer (
+            prev_ptr + offsetof (struct trace_state_variable, next), ptr);
+        }
 
       /* Write the whole object.  We'll fix up its pointers in a bit.
 	 Assume no next, fixup when needed.  */
       target_tsv.next = NULL;
 
       target_write_memory (ptr, (unsigned char *) &target_tsv,
-			     sizeof (target_tsv));
+                           sizeof (target_tsv));
 
       if (tsv->name != NULL)
-	{
-	  size_t size = strlen (tsv->name) + 1;
-	  CORE_ADDR name_addr = target_malloc (size);
-	  target_write_memory (name_addr,
-				 (unsigned char *) tsv->name, size);
-	  write_inferior_data_pointer (ptr
-				       + offsetof (struct trace_state_variable,
-						   name),
-				       name_addr);
-	}
+        {
+          size_t size = strlen (tsv->name) + 1;
+          CORE_ADDR name_addr = target_malloc (size);
+          target_write_memory (name_addr, (unsigned char *) tsv->name, size);
+          write_inferior_data_pointer (
+            ptr + offsetof (struct trace_state_variable, name), name_addr);
+        }
 
       gdb_assert (tsv->getter == NULL);
     }
@@ -6278,8 +6242,9 @@ download_trace_state_variables (void)
     {
       /* Fixup the next pointer in the last item in the list.  */
       write_inferior_data_pointer (prev_ptr
-				   + offsetof (struct trace_state_variable,
-					       next), 0);
+                                     + offsetof (struct trace_state_variable,
+                                                 next),
+                                   0);
     }
 }
 
@@ -6305,7 +6270,7 @@ upload_fast_traceframes (void)
   CORE_ADDR ipa_trace_buffer_hi;
 
   if (read_inferior_uinteger (ipa_sym_addrs.addr_traceframe_read_count,
-			      &ipa_traceframe_read_count_racy))
+                              &ipa_traceframe_read_count_racy))
     {
       /* This will happen in most targets if the current thread is
 	 running.  */
@@ -6313,24 +6278,24 @@ upload_fast_traceframes (void)
     }
 
   if (read_inferior_uinteger (ipa_sym_addrs.addr_traceframe_write_count,
-			      &ipa_traceframe_write_count_racy))
+                              &ipa_traceframe_write_count_racy))
     return;
 
   trace_debug ("ipa_traceframe_count (racy area): %d (w=%d, r=%d)",
-	       ipa_traceframe_write_count_racy
-	       - ipa_traceframe_read_count_racy,
-	       ipa_traceframe_write_count_racy,
-	       ipa_traceframe_read_count_racy);
+               ipa_traceframe_write_count_racy
+                 - ipa_traceframe_read_count_racy,
+               ipa_traceframe_write_count_racy,
+               ipa_traceframe_read_count_racy);
 
   if (ipa_traceframe_write_count_racy == ipa_traceframe_read_count_racy)
     return;
 
   about_to_request_buffer_space_bkpt
     = set_breakpoint_at (ipa_sym_addrs.addr_about_to_request_buffer_space,
-			 NULL);
+                         NULL);
 
   if (read_inferior_uinteger (ipa_sym_addrs.addr_trace_buffer_ctrl_curr,
-			      &ipa_trace_buffer_ctrl_curr))
+                              &ipa_trace_buffer_ctrl_curr))
     return;
 
   ipa_trace_buffer_ctrl_curr_old = ipa_trace_buffer_ctrl_curr;
@@ -6346,18 +6311,15 @@ upload_fast_traceframes (void)
     counter = (prev + 0x100) & GDBSERVER_FLUSH_COUNT_MASK_CURR;
 
     ipa_trace_buffer_ctrl_curr = (GDBSERVER_UPDATED_FLUSH_COUNT_BIT
-				  | (prev << 12)
-				  | counter
-				  | curr_tbctrl_idx);
+                                  | (prev << 12) | counter | curr_tbctrl_idx);
   }
 
   if (write_inferior_uinteger (ipa_sym_addrs.addr_trace_buffer_ctrl_curr,
-			       ipa_trace_buffer_ctrl_curr))
+                               ipa_trace_buffer_ctrl_curr))
     return;
 
-  trace_debug ("Lib: Committed %08x -> %08x",
-	       ipa_trace_buffer_ctrl_curr_old,
-	       ipa_trace_buffer_ctrl_curr);
+  trace_debug ("Lib: Committed %08x -> %08x", ipa_trace_buffer_ctrl_curr_old,
+               ipa_trace_buffer_ctrl_curr);
 
   /* Re-read these, now that we've installed the
      `about_to_request_buffer_space' breakpoint/lock.  A thread could
@@ -6369,21 +6331,21 @@ upload_fast_traceframes (void)
      nesting), which would break the IP agent's "effective" detection
      (see trace_alloc_trace_buffer).  */
   if (read_inferior_uinteger (ipa_sym_addrs.addr_traceframe_read_count,
-			      &ipa_traceframe_read_count))
+                              &ipa_traceframe_read_count))
     return;
   if (read_inferior_uinteger (ipa_sym_addrs.addr_traceframe_write_count,
-			      &ipa_traceframe_write_count))
+                              &ipa_traceframe_write_count))
     return;
 
   if (debug_threads)
     {
       trace_debug ("ipa_traceframe_count (blocked area): %d (w=%d, r=%d)",
-		   ipa_traceframe_write_count - ipa_traceframe_read_count,
-		   ipa_traceframe_write_count, ipa_traceframe_read_count);
+                   ipa_traceframe_write_count - ipa_traceframe_read_count,
+                   ipa_traceframe_write_count, ipa_traceframe_read_count);
 
       if (ipa_traceframe_write_count != ipa_traceframe_write_count_racy
-	  || ipa_traceframe_read_count != ipa_traceframe_read_count_racy)
-	trace_debug ("note that ipa_traceframe_count's parts changed");
+          || ipa_traceframe_read_count != ipa_traceframe_read_count_racy)
+        trace_debug ("note that ipa_traceframe_count's parts changed");
     }
 
   /* Get the address of the current TBC object (the IP agent has an
@@ -6394,41 +6356,41 @@ upload_fast_traceframes (void)
     += sizeof (struct ipa_trace_buffer_control) * curr_tbctrl_idx;
 
   if (read_inferior_memory (ipa_trace_buffer_ctrl_addr,
-			    (unsigned char *) &ipa_trace_buffer_ctrl,
-			    sizeof (struct ipa_trace_buffer_control)))
+                            (unsigned char *) &ipa_trace_buffer_ctrl,
+                            sizeof (struct ipa_trace_buffer_control)))
     return;
 
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_trace_buffer_lo,
-				  &ipa_trace_buffer_lo))
+                                  &ipa_trace_buffer_lo))
     return;
   if (read_inferior_data_pointer (ipa_sym_addrs.addr_trace_buffer_hi,
-				  &ipa_trace_buffer_hi))
+                                  &ipa_trace_buffer_hi))
     return;
 
   /* Offsets are easier to grok for debugging than raw addresses,
      especially for the small trace buffer sizes that are useful for
      testing.  */
   trace_debug ("Lib: Trace buffer [%d] start=%d free=%d "
-	       "endfree=%d wrap=%d hi=%d",
-	       curr_tbctrl_idx,
-	       (int) (ipa_trace_buffer_ctrl.start - ipa_trace_buffer_lo),
-	       (int) (ipa_trace_buffer_ctrl.free - ipa_trace_buffer_lo),
-	       (int) (ipa_trace_buffer_ctrl.end_free - ipa_trace_buffer_lo),
-	       (int) (ipa_trace_buffer_ctrl.wrap - ipa_trace_buffer_lo),
-	       (int) (ipa_trace_buffer_hi - ipa_trace_buffer_lo));
+               "endfree=%d wrap=%d hi=%d",
+               curr_tbctrl_idx,
+               (int) (ipa_trace_buffer_ctrl.start - ipa_trace_buffer_lo),
+               (int) (ipa_trace_buffer_ctrl.free - ipa_trace_buffer_lo),
+               (int) (ipa_trace_buffer_ctrl.end_free - ipa_trace_buffer_lo),
+               (int) (ipa_trace_buffer_ctrl.wrap - ipa_trace_buffer_lo),
+               (int) (ipa_trace_buffer_hi - ipa_trace_buffer_lo));
 
   /* Note that the IPA's buffer is always circular.  */
 
 #define IPA_FIRST_TRACEFRAME() (ipa_trace_buffer_ctrl.start)
 
-#define IPA_NEXT_TRACEFRAME_1(TF, TFOBJ)		\
+#define IPA_NEXT_TRACEFRAME_1(TF, TFOBJ) \
   ((TF) + sizeof (struct traceframe) + (TFOBJ)->data_size)
 
-#define IPA_NEXT_TRACEFRAME(TF, TFOBJ)					\
-  (IPA_NEXT_TRACEFRAME_1 (TF, TFOBJ)					\
+#define IPA_NEXT_TRACEFRAME(TF, TFOBJ)                                  \
+  (IPA_NEXT_TRACEFRAME_1 (TF, TFOBJ)                                    \
    - ((IPA_NEXT_TRACEFRAME_1 (TF, TFOBJ) >= ipa_trace_buffer_ctrl.wrap) \
-      ? (ipa_trace_buffer_ctrl.wrap - ipa_trace_buffer_lo)		\
-      : 0))
+        ? (ipa_trace_buffer_ctrl.wrap - ipa_trace_buffer_lo)            \
+        : 0))
 
   tf = IPA_FIRST_TRACEFRAME ();
 
@@ -6440,16 +6402,16 @@ upload_fast_traceframes (void)
       struct traceframe ipa_tframe;
 
       if (read_inferior_memory (tf, (unsigned char *) &ipa_tframe,
-				offsetof (struct traceframe, data)))
-	error ("Uploading: couldn't read traceframe at %s\n", paddress (tf));
+                                offsetof (struct traceframe, data)))
+        error ("Uploading: couldn't read traceframe at %s\n", paddress (tf));
 
       if (ipa_tframe.tpnum == 0)
-	{
-	  internal_error ("Uploading: No (more) fast traceframes, but"
-			  " ipa_traceframe_count == %u??\n",
-			  ipa_traceframe_write_count
-			  - ipa_traceframe_read_count);
-	}
+        {
+          internal_error ("Uploading: No (more) fast traceframes, but"
+                          " ipa_traceframe_count == %u??\n",
+                          ipa_traceframe_write_count
+                            - ipa_traceframe_read_count);
+        }
 
       /* Note that this will be incorrect for multi-location
 	 tracepoints...  */
@@ -6457,80 +6419,77 @@ upload_fast_traceframes (void)
 
       tframe = add_traceframe (tpoint);
       if (tframe == NULL)
-	{
-	  trace_buffer_is_full = 1;
-	  trace_debug ("Uploading: trace buffer is full");
-	}
+        {
+          trace_buffer_is_full = 1;
+          trace_debug ("Uploading: trace buffer is full");
+        }
       else
-	{
-	  /* Copy the whole set of blocks in one go for now.  FIXME:
+        {
+          /* Copy the whole set of blocks in one go for now.  FIXME:
 	     split this in smaller blocks.  */
-	  block = add_traceframe_block (tframe, tpoint,
-					ipa_tframe.data_size);
-	  if (block != NULL)
-	    {
-	      if (read_inferior_memory (tf
-					+ offsetof (struct traceframe, data),
-					block, ipa_tframe.data_size))
-		error ("Uploading: Couldn't read traceframe data at %s\n",
-		       paddress (tf + offsetof (struct traceframe, data)));
-	    }
+          block = add_traceframe_block (tframe, tpoint, ipa_tframe.data_size);
+          if (block != NULL)
+            {
+              if (read_inferior_memory (tf
+                                          + offsetof (struct traceframe, data),
+                                        block, ipa_tframe.data_size))
+                error ("Uploading: Couldn't read traceframe data at %s\n",
+                       paddress (tf + offsetof (struct traceframe, data)));
+            }
 
-	  trace_debug ("Uploading: traceframe didn't fit");
-	  finish_traceframe (tframe);
-	}
+          trace_debug ("Uploading: traceframe didn't fit");
+          finish_traceframe (tframe);
+        }
 
       tf = IPA_NEXT_TRACEFRAME (tf, &ipa_tframe);
 
       /* If we freed the traceframe that wrapped around, go back
 	 to the non-wrap case.  */
       if (tf < ipa_trace_buffer_ctrl.start)
-	{
-	  trace_debug ("Lib: Discarding past the wraparound");
-	  ipa_trace_buffer_ctrl.wrap = ipa_trace_buffer_hi;
-	}
+        {
+          trace_debug ("Lib: Discarding past the wraparound");
+          ipa_trace_buffer_ctrl.wrap = ipa_trace_buffer_hi;
+        }
       ipa_trace_buffer_ctrl.start = tf;
       ipa_trace_buffer_ctrl.end_free = ipa_trace_buffer_ctrl.start;
       ++ipa_traceframe_read_count;
 
       if (ipa_trace_buffer_ctrl.start == ipa_trace_buffer_ctrl.free
-	  && ipa_trace_buffer_ctrl.start == ipa_trace_buffer_ctrl.end_free)
-	{
-	  trace_debug ("Lib: buffer is fully empty.  "
-		       "Trace buffer [%d] start=%d free=%d endfree=%d",
-		       curr_tbctrl_idx,
-		       (int) (ipa_trace_buffer_ctrl.start
-			      - ipa_trace_buffer_lo),
-		       (int) (ipa_trace_buffer_ctrl.free
-			      - ipa_trace_buffer_lo),
-		       (int) (ipa_trace_buffer_ctrl.end_free
-			      - ipa_trace_buffer_lo));
+          && ipa_trace_buffer_ctrl.start == ipa_trace_buffer_ctrl.end_free)
+        {
+          trace_debug (
+            "Lib: buffer is fully empty.  "
+            "Trace buffer [%d] start=%d free=%d endfree=%d",
+            curr_tbctrl_idx,
+            (int) (ipa_trace_buffer_ctrl.start - ipa_trace_buffer_lo),
+            (int) (ipa_trace_buffer_ctrl.free - ipa_trace_buffer_lo),
+            (int) (ipa_trace_buffer_ctrl.end_free - ipa_trace_buffer_lo));
 
-	  ipa_trace_buffer_ctrl.start = ipa_trace_buffer_lo;
-	  ipa_trace_buffer_ctrl.free = ipa_trace_buffer_lo;
-	  ipa_trace_buffer_ctrl.end_free = ipa_trace_buffer_hi;
-	  ipa_trace_buffer_ctrl.wrap = ipa_trace_buffer_hi;
-	}
+          ipa_trace_buffer_ctrl.start = ipa_trace_buffer_lo;
+          ipa_trace_buffer_ctrl.free = ipa_trace_buffer_lo;
+          ipa_trace_buffer_ctrl.end_free = ipa_trace_buffer_hi;
+          ipa_trace_buffer_ctrl.wrap = ipa_trace_buffer_hi;
+        }
 
       trace_debug ("Uploaded a traceframe\n"
-		   "Lib: Trace buffer [%d] start=%d free=%d "
-		   "endfree=%d wrap=%d hi=%d",
-		   curr_tbctrl_idx,
-		   (int) (ipa_trace_buffer_ctrl.start - ipa_trace_buffer_lo),
-		   (int) (ipa_trace_buffer_ctrl.free - ipa_trace_buffer_lo),
-		   (int) (ipa_trace_buffer_ctrl.end_free
-			  - ipa_trace_buffer_lo),
-		   (int) (ipa_trace_buffer_ctrl.wrap - ipa_trace_buffer_lo),
-		   (int) (ipa_trace_buffer_hi - ipa_trace_buffer_lo));
+                   "Lib: Trace buffer [%d] start=%d free=%d "
+                   "endfree=%d wrap=%d hi=%d",
+                   curr_tbctrl_idx,
+                   (int) (ipa_trace_buffer_ctrl.start - ipa_trace_buffer_lo),
+                   (int) (ipa_trace_buffer_ctrl.free - ipa_trace_buffer_lo),
+                   (int) (ipa_trace_buffer_ctrl.end_free
+                          - ipa_trace_buffer_lo),
+                   (int) (ipa_trace_buffer_ctrl.wrap - ipa_trace_buffer_lo),
+                   (int) (ipa_trace_buffer_hi - ipa_trace_buffer_lo));
     }
 
   if (target_write_memory (ipa_trace_buffer_ctrl_addr,
-			     (unsigned char *) &ipa_trace_buffer_ctrl,
-			     sizeof (struct ipa_trace_buffer_control)))
+                           (unsigned char *) &ipa_trace_buffer_ctrl,
+                           sizeof (struct ipa_trace_buffer_control)))
     return;
 
   write_inferior_integer (ipa_sym_addrs.addr_traceframe_read_count,
-			  ipa_traceframe_read_count);
+                          ipa_traceframe_read_count);
 
   trace_debug ("Done uploading traceframes [%d]\n", curr_tbctrl_idx);
 
@@ -6563,8 +6522,8 @@ IP_AGENT_EXPORT_VAR char cmd_buf[IPA_CMD_BUF_SIZE];
 #include <ust/ust.h>
 #undef tracepoint
 
-extern int serialize_to_text (char *outbuf, int bufsize,
-			      const char *fmt, va_list ap);
+extern int serialize_to_text (char *outbuf, int bufsize, const char *fmt,
+                              va_list ap);
 
 #define GDB_PROBE_NAME "gdb"
 
@@ -6575,16 +6534,16 @@ extern int serialize_to_text (char *outbuf, int bufsize,
 
 static struct
 {
-  int (*serialize_to_text) (char *outbuf, int bufsize,
-			    const char *fmt, va_list ap);
+  int (*serialize_to_text) (char *outbuf, int bufsize, const char *fmt,
+                            va_list ap);
 
   int (*ltt_probe_register) (struct ltt_available_probe *pdata);
   int (*ltt_probe_unregister) (struct ltt_available_probe *pdata);
 
   int (*ltt_marker_connect) (const char *channel, const char *mname,
-			     const char *pname);
+                             const char *pname);
   int (*ltt_marker_disconnect) (const char *channel, const char *mname,
-				const char *pname);
+                                const char *pname);
 
   void (*marker_iter_start) (struct marker_iter *iter);
   void (*marker_iter_next) (struct marker_iter *iter);
@@ -6597,14 +6556,15 @@ static struct
 /* Cast through typeof to catch incompatible API changes.  Since UST
    only builds with gcc, we can freely use gcc extensions here
    too.  */
-#define GET_UST_SYM(SYM)					\
-  do								\
-    {								\
-      if (ust_ops.SYM == NULL)					\
-	ust_ops.SYM = (typeof (&SYM)) dlsym (RTLD_DEFAULT, #SYM);	\
-      if (ust_ops.SYM == NULL)					\
-	return 0;						\
-    } while (0)
+#define GET_UST_SYM(SYM)                                          \
+  do                                                              \
+    {                                                             \
+      if (ust_ops.SYM == NULL)                                    \
+        ust_ops.SYM = (typeof (&SYM)) dlsym (RTLD_DEFAULT, #SYM); \
+      if (ust_ops.SYM == NULL)                                    \
+        return 0;                                                 \
+    }                                                             \
+  while (0)
 
 #define USTF(SYM) ust_ops.SYM
 
@@ -6640,10 +6600,10 @@ ust_marker_to_static_tracepoint (const struct marker *mdata)
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
       if (tpoint->type != static_tracepoint)
-	continue;
+        continue;
 
       if (tpoint->address == (uintptr_t) mdata->location)
-	return tpoint;
+        return tpoint;
     }
 
   return NULL;
@@ -6656,8 +6616,8 @@ ust_marker_to_static_tracepoint (const struct marker *mdata)
 
 static void
 gdb_probe (const struct marker *mdata, void *probe_private,
-	   struct registers *regs, void *call_private,
-	   const char *fmt, va_list *args)
+           struct registers *regs, void *call_private, const char *fmt,
+           va_list *args)
 {
   struct tracepoint *tpoint;
   struct static_tracepoint_ctx ctx;
@@ -6690,9 +6650,9 @@ gdb_probe (const struct marker *mdata, void *probe_private,
   if (tpoint == NULL)
     {
       trace_debug ("gdb_probe: marker not known: "
-		   "loc:0x%p, ch:\"%s\",n:\"%s\",f:\"%s\"",
-		   mdata->location, mdata->channel,
-		   mdata->name, mdata->format);
+                   "loc:0x%p, ch:\"%s\",n:\"%s\",f:\"%s\"",
+                   mdata->location, mdata->channel, mdata->name,
+                   mdata->format);
       return;
     }
 
@@ -6705,22 +6665,20 @@ gdb_probe (const struct marker *mdata, void *probe_private,
   ctx.tpoint = tpoint;
 
   trace_debug ("gdb_probe: collecting marker: "
-	       "loc:0x%p, ch:\"%s\",n:\"%s\",f:\"%s\"",
-	       mdata->location, mdata->channel,
-	       mdata->name, mdata->format);
+               "loc:0x%p, ch:\"%s\",n:\"%s\",f:\"%s\"",
+               mdata->location, mdata->channel, mdata->name, mdata->format);
 
   /* Test the condition if present, and collect if true.  */
   if (tpoint->cond == NULL
       || condition_true_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				       tpoint))
+                                       tpoint))
     {
       collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				  tpoint->address, tpoint);
+                                  tpoint->address, tpoint);
 
-      if (stopping_tracepoint
-	  || trace_buffer_is_full
-	  || expr_eval_result != expr_eval_no_error)
-	stop_tracing ();
+      if (stopping_tracepoint || trace_buffer_is_full
+          || expr_eval_result != expr_eval_no_error)
+        stop_tracing ();
     }
   else
     {
@@ -6728,7 +6686,7 @@ gdb_probe (const struct marker *mdata, void *probe_private,
 	 way we would stop tracing is if there was an error during
 	 condition expression evaluation.  */
       if (expr_eval_result != expr_eval_no_error)
-	stop_tracing ();
+        stop_tracing ();
     }
 }
 
@@ -6744,7 +6702,7 @@ gdb_probe (const struct marker *mdata, void *probe_private,
 
 static void
 collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-				struct traceframe *tframe)
+                                struct traceframe *tframe)
 {
   struct static_tracepoint_ctx *umd = (struct static_tracepoint_ctx *) ctx;
   unsigned char *bufspace;
@@ -6755,19 +6713,19 @@ collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   if (umd == NULL)
     {
       trace_debug ("Wanted to collect static trace data, "
-		   "but there's no static trace data");
+                   "but there's no static trace data");
       return;
     }
 
   va_copy (copy, *umd->args);
-  size = USTF(serialize_to_text) (NULL, 0, umd->fmt, copy);
+  size = USTF (serialize_to_text) (NULL, 0, umd->fmt, copy);
   va_end (copy);
 
   trace_debug ("Want to collect ust data");
 
   /* 'S' + size + string */
   bufspace = add_traceframe_block (tframe, umd->tpoint,
-				   1 + sizeof (blocklen) + size + 1);
+                                   1 + sizeof (blocklen) + size + 1);
   if (bufspace == NULL)
     {
       trace_debug ("Trace buffer block allocation failed, skipping");
@@ -6781,21 +6739,20 @@ collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   memcpy (bufspace + 1, &blocklen, sizeof (blocklen));
 
   va_copy (copy, *umd->args);
-  USTF(serialize_to_text) ((char *) bufspace + 1 + sizeof (blocklen),
-			   size + 1, umd->fmt, copy);
+  USTF (serialize_to_text)
+  ((char *) bufspace + 1 + sizeof (blocklen), size + 1, umd->fmt, copy);
   va_end (copy);
 
   trace_debug ("Storing static tracepoint data in regblock: %s",
-	       bufspace + 1 + sizeof (blocklen));
+               bufspace + 1 + sizeof (blocklen));
 }
 
 /* The probe to register with lttng/ust.  */
-static struct ltt_available_probe gdb_ust_probe =
-  {
-    GDB_PROBE_NAME,
-    NULL,
-    gdb_probe,
-  };
+static struct ltt_available_probe gdb_ust_probe = {
+  GDB_PROBE_NAME,
+  NULL,
+  gdb_probe,
+};
 
 #endif /* HAVE_UST */
 #endif /* IN_PROCESS_AGENT */
@@ -6834,7 +6791,7 @@ run_inferior_command (char *cmd, int len)
 #include <sys/un.h>
 
 #ifndef UNIX_PATH_MAX
-#define UNIX_PATH_MAX sizeof(((struct sockaddr_un *) NULL)->sun_path)
+#define UNIX_PATH_MAX sizeof (((struct sockaddr_un *) NULL)->sun_path)
 #endif
 
 /* Where we put the socked used for synchronization.  */
@@ -6863,7 +6820,8 @@ init_named_socket (const char *name)
 
   if (strlen (name) >= ARRAY_SIZE (addr.sun_path))
     {
-      warning ("socket name too long for sockaddr_un::sun_path field: %s", name);
+      warning ("socket name too long for sockaddr_un::sun_path field: %s",
+               name);
       return -1;
     }
 
@@ -6875,11 +6833,11 @@ init_named_socket (const char *name)
       /* File exists.  */
       result = unlink (name);
       if (result == -1)
-	{
-	  warning ("unlink failed: %s", safe_strerror (errno));
-	  close (fd);
-	  return -1;
-	}
+        {
+          warning ("unlink failed: %s", safe_strerror (errno));
+          close (fd);
+          return -1;
+        }
       warning ("socket %s already exists; overwriting", name);
     }
 
@@ -6910,7 +6868,7 @@ gdb_agent_socket_init (void)
   int result, fd;
 
   result = snprintf (agent_socket_name, UNIX_PATH_MAX, "%s/gdb_ust%d",
-		     SOCK_DIR, getpid ());
+                     SOCK_DIR, getpid ());
   if (result >= UNIX_PATH_MAX)
     {
       trace_debug ("string overflow allocating socket name");
@@ -6920,8 +6878,9 @@ gdb_agent_socket_init (void)
   fd = init_named_socket (agent_socket_name);
   if (fd < 0)
     warning ("Error initializing named socket (%s) for communication with the "
-	     "ust helper thread. Check that directory exists and that it "
-	     "is writable.", agent_socket_name);
+             "ust helper thread. Check that directory exists and that it "
+             "is writable.",
+             agent_socket_name);
 
   return fd;
 }
@@ -6938,8 +6897,8 @@ first_marker (void)
 {
   struct marker_iter iter;
 
-  USTF(marker_iter_reset) (&iter);
-  USTF(marker_iter_start) (&iter);
+  USTF (marker_iter_reset) (&iter);
+  USTF (marker_iter_start) (&iter);
 
   return iter.marker;
 }
@@ -6951,16 +6910,16 @@ next_marker (const struct marker *m)
 {
   struct marker_iter iter;
 
-  USTF(marker_iter_reset) (&iter);
-  USTF(marker_iter_start) (&iter);
+  USTF (marker_iter_reset) (&iter);
+  USTF (marker_iter_start) (&iter);
 
-  for (; iter.marker != NULL; USTF(marker_iter_next) (&iter))
+  for (; iter.marker != NULL; USTF (marker_iter_next) (&iter))
     {
       if (iter.marker == m)
-	{
-	  USTF(marker_iter_next) (&iter);
-	  return iter.marker;
-	}
+        {
+          USTF (marker_iter_next) (&iter);
+          return iter.marker;
+        }
     }
 
   return NULL;
@@ -6988,8 +6947,7 @@ response_ust_marker (char *packet, const struct marker *st)
 
   next_st = next_marker (st);
 
-  tmp = xmalloc (strlen (st->channel) + 1 +
-		 strlen (st->name) + 1);
+  tmp = xmalloc (strlen (st->channel) + 1 + strlen (st->name) + 1);
   sprintf (tmp, "%s/%s", st->channel, st->name);
 
   strid = cstr_to_hexstr (tmp);
@@ -6997,10 +6955,8 @@ response_ust_marker (char *packet, const struct marker *st)
 
   format = cstr_to_hexstr (st->format);
 
-  sprintf (packet, "m%s:%s:%s",
-	   paddress ((uintptr_t) st->location),
-	   strid,
-	   format);
+  sprintf (packet, "m%s:%s:%s", paddress ((uintptr_t) st->location), strid,
+           format);
 
   free (strid);
   free (format);
@@ -7046,20 +7002,20 @@ unprobe_marker_at (char *packet)
 
   p = unpack_varlen_hex (p, &address);
 
-  USTF(marker_iter_reset) (&iter);
-  USTF(marker_iter_start) (&iter);
-  for (; iter.marker != NULL; USTF(marker_iter_next) (&iter))
-    if ((uintptr_t ) iter.marker->location == address)
+  USTF (marker_iter_reset) (&iter);
+  USTF (marker_iter_start) (&iter);
+  for (; iter.marker != NULL; USTF (marker_iter_next) (&iter))
+    if ((uintptr_t) iter.marker->location == address)
       {
-	int result;
+        int result;
 
-	result = USTF(ltt_marker_disconnect) (iter.marker->channel,
-					      iter.marker->name,
-					      GDB_PROBE_NAME);
-	if (result < 0)
-	  warning ("could not disable marker %s/%s",
-		   iter.marker->channel, iter.marker->name);
-	break;
+        result
+          = USTF (ltt_marker_disconnect) (iter.marker->channel,
+                                          iter.marker->name, GDB_PROBE_NAME);
+        if (result < 0)
+          warning ("could not disable marker %s/%s", iter.marker->channel,
+                   iter.marker->name);
+        break;
       }
 }
 
@@ -7077,34 +7033,33 @@ probe_marker_at (char *packet)
 
   p = unpack_varlen_hex (p, &address);
 
-  USTF(marker_iter_reset) (&iter);
+  USTF (marker_iter_reset) (&iter);
 
-  for (USTF(marker_iter_start) (&iter), m = iter.marker;
-       m != NULL;
-       USTF(marker_iter_next) (&iter), m = iter.marker)
-    if ((uintptr_t ) m->location == address)
+  for (USTF (marker_iter_start) (&iter), m = iter.marker; m != NULL;
+       USTF (marker_iter_next) (&iter), m = iter.marker)
+    if ((uintptr_t) m->location == address)
       {
-	int result;
+        int result;
 
-	trace_debug ("found marker for address.  "
-		     "ltt_marker_connect (marker = %s/%s)",
-		     m->channel, m->name);
+        trace_debug ("found marker for address.  "
+                     "ltt_marker_connect (marker = %s/%s)",
+                     m->channel, m->name);
 
-	result = USTF(ltt_marker_connect) (m->channel, m->name,
-					   GDB_PROBE_NAME);
-	if (result && result != -EEXIST)
-	  trace_debug ("ltt_marker_connect (marker = %s/%s, errno = %d)",
-		       m->channel, m->name, -result);
+        result
+          = USTF (ltt_marker_connect) (m->channel, m->name, GDB_PROBE_NAME);
+        if (result && result != -EEXIST)
+          trace_debug ("ltt_marker_connect (marker = %s/%s, errno = %d)",
+                       m->channel, m->name, -result);
 
-	if (result < 0)
-	  {
-	    sprintf (packet, "E.could not connect marker: channel=%s, name=%s",
-		     m->channel, m->name);
-	    return -1;
-	  }
+        if (result < 0)
+          {
+            sprintf (packet, "E.could not connect marker: channel=%s, name=%s",
+                     m->channel, m->name);
+            return -1;
+          }
 
-	strcpy (packet, "OK");
-	return 0;
+        strcpy (packet, "OK");
+        return 0;
       }
 
   sprintf (packet, "E.no marker found at 0x%s", paddress (address));
@@ -7123,15 +7078,14 @@ cmd_qtstmat (char *packet)
 
   p = unpack_varlen_hex (p, &address);
 
-  USTF(marker_iter_reset) (&iter);
+  USTF (marker_iter_reset) (&iter);
 
-  for (USTF(marker_iter_start) (&iter), m = iter.marker;
-       m != NULL;
-       USTF(marker_iter_next) (&iter), m = iter.marker)
-    if ((uintptr_t ) m->location == address)
+  for (USTF (marker_iter_start) (&iter), m = iter.marker; m != NULL;
+       USTF (marker_iter_next) (&iter), m = iter.marker)
+    if ((uintptr_t) m->location == address)
       {
-	response_ust_marker (packet, m);
-	return 0;
+        response_ust_marker (packet, m);
+        return 0;
       }
 
   strcpy (packet, "l");
@@ -7144,7 +7098,7 @@ gdb_ust_init (void)
   if (!dlsym_ust ())
     return;
 
-  USTF(ltt_probe_register) (&gdb_ust_probe);
+  USTF (ltt_probe_register) (&gdb_ust_probe);
 }
 
 #endif /* HAVE_UST */
@@ -7171,100 +7125,101 @@ gdb_agent_helper_thread (void *arg)
       listen_fd = gdb_agent_socket_init ();
 
       if (helper_thread_id == 0)
-	helper_thread_id = syscall (SYS_gettid);
+        helper_thread_id = syscall (SYS_gettid);
 
       if (listen_fd == -1)
-	{
-	  warning ("could not create sync socket");
-	  break;
-	}
+        {
+          warning ("could not create sync socket");
+          break;
+        }
 
       while (1)
-	{
-	  socklen_t tmp;
-	  struct sockaddr_un sockaddr;
-	  int fd;
-	  char buf[1];
-	  int ret;
-	  int stop_loop = 0;
+        {
+          socklen_t tmp;
+          struct sockaddr_un sockaddr;
+          int fd;
+          char buf[1];
+          int ret;
+          int stop_loop = 0;
 
-	  tmp = sizeof (sockaddr);
+          tmp = sizeof (sockaddr);
 
-	  do
-	    {
-	      fd = accept (listen_fd, (struct sockaddr *) &sockaddr, &tmp);
-	    }
-	  /* It seems an ERESTARTSYS can escape out of accept.  */
-	  while (fd == -512 || (fd == -1 && errno == EINTR));
+          do
+            {
+              fd = accept (listen_fd, (struct sockaddr *) &sockaddr, &tmp);
+            }
+          /* It seems an ERESTARTSYS can escape out of accept.  */
+          while (fd == -512 || (fd == -1 && errno == EINTR));
 
-	  if (fd < 0)
-	    {
-	      warning ("Accept returned %d, error: %s",
-		       fd, safe_strerror (errno));
-	      break;
-	    }
+          if (fd < 0)
+            {
+              warning ("Accept returned %d, error: %s", fd,
+                       safe_strerror (errno));
+              break;
+            }
 
-	  do
-	    {
-	      ret = read (fd, buf, 1);
-	    } while (ret == -1 && errno == EINTR);
+          do
+            {
+              ret = read (fd, buf, 1);
+            }
+          while (ret == -1 && errno == EINTR);
 
-	  if (ret == -1)
-	    {
-	      warning ("reading socket (fd=%d) failed with %s",
-		       fd, safe_strerror (errno));
-	      close (fd);
-	      break;
-	    }
+          if (ret == -1)
+            {
+              warning ("reading socket (fd=%d) failed with %s", fd,
+                       safe_strerror (errno));
+              close (fd);
+              break;
+            }
 
-	  if (cmd_buf[0])
-	    {
-	      if (startswith (cmd_buf, "close"))
-		{
-		  stop_loop = 1;
-		}
+          if (cmd_buf[0])
+            {
+              if (startswith (cmd_buf, "close"))
+                {
+                  stop_loop = 1;
+                }
 #ifdef HAVE_UST
-	      else if (strcmp ("qTfSTM", cmd_buf) == 0)
-		{
-		  cmd_qtfstm (cmd_buf);
-		}
-	      else if (strcmp ("qTsSTM", cmd_buf) == 0)
-		{
-		  cmd_qtsstm (cmd_buf);
-		}
-	      else if (startswith (cmd_buf, "unprobe_marker_at:"))
-		{
-		  unprobe_marker_at (cmd_buf);
-		}
-	      else if (startswith (cmd_buf, "probe_marker_at:"))
-		{
-		  probe_marker_at (cmd_buf);
-		}
-	      else if (startswith (cmd_buf, "qTSTMat:"))
-		{
-		  cmd_qtstmat (cmd_buf);
-		}
+              else if (strcmp ("qTfSTM", cmd_buf) == 0)
+                {
+                  cmd_qtfstm (cmd_buf);
+                }
+              else if (strcmp ("qTsSTM", cmd_buf) == 0)
+                {
+                  cmd_qtsstm (cmd_buf);
+                }
+              else if (startswith (cmd_buf, "unprobe_marker_at:"))
+                {
+                  unprobe_marker_at (cmd_buf);
+                }
+              else if (startswith (cmd_buf, "probe_marker_at:"))
+                {
+                  probe_marker_at (cmd_buf);
+                }
+              else if (startswith (cmd_buf, "qTSTMat:"))
+                {
+                  cmd_qtstmat (cmd_buf);
+                }
 #endif /* HAVE_UST */
-	    }
+            }
 
-	  /* Fix compiler's warning: ignoring return value of 'write'.  */
-	  ret = write (fd, buf, 1);
-	  close (fd);
+          /* Fix compiler's warning: ignoring return value of 'write'.  */
+          ret = write (fd, buf, 1);
+          close (fd);
 
-	  if (stop_loop)
-	    {
-	      close (listen_fd);
-	      unlink (agent_socket_name);
+          if (stop_loop)
+            {
+              close (listen_fd);
+              unlink (agent_socket_name);
 
-	      /* Sleep endlessly to wait the whole inferior stops.  This
+              /* Sleep endlessly to wait the whole inferior stops.  This
 		 thread can not exit because GDB or GDBserver may still need
 		 'current_thread' (representing this thread) to access
 		 inferior memory.  Otherwise, this thread exits earlier than
 		 other threads, and 'current_thread' is set to NULL.  */
-	      while (1)
-		sleep (10);
-	    }
-	}
+              while (1)
+                sleep (10);
+            }
+        }
     }
 
   return NULL;
@@ -7293,10 +7248,7 @@ gdb_agent_init (void)
   if (res)
     perror_with_name ("pthread_sigmask (1)");
 
-  res = pthread_create (&thread,
-			NULL,
-			gdb_agent_helper_thread,
-			NULL);
+  res = pthread_create (&thread, NULL, gdb_agent_helper_thread, NULL);
 
   res = pthread_sigmask (SIG_SETMASK, &orig_mask, NULL);
   if (res)
@@ -7334,8 +7286,7 @@ set_trampoline_buffer_space (CORE_ADDR begin, CORE_ADDR end, char *errmsg)
     strcpy (gdb_trampoline_buffer_error, "no buffer passed");
 }
 
-static void __attribute__ ((constructor))
-initialize_tracepoint_ftlib (void)
+static void __attribute__ ((constructor)) initialize_tracepoint_ftlib (void)
 {
   initialize_tracepoint ();
 
@@ -7359,10 +7310,10 @@ getauxval (unsigned long type)
   while (fread (data, sizeof (data), 1, f) > 0)
     {
       if (data[0] == type)
-	{
-	  value = data[1];
-	  break;
-	}
+        {
+          value = data[1];
+          break;
+        }
     }
 
   fclose (f);

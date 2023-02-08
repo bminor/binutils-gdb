@@ -30,19 +30,19 @@
 /* Flags in the 'kve_protection' field in struct kinfo_vmentry.  These
    match the KVME_PROT_* constants in <sys/sysctl.h>.  */
 
-#define	KINFO_VME_PROT_READ	0x00000001
-#define	KINFO_VME_PROT_WRITE	0x00000002
-#define	KINFO_VME_PROT_EXEC	0x00000004
+#define KINFO_VME_PROT_READ 0x00000001
+#define KINFO_VME_PROT_WRITE 0x00000002
+#define KINFO_VME_PROT_EXEC 0x00000004
 
 /* Flags in the 'kve_flags' field in struct kinfo_vmentry.  These
    match the KVME_FLAG_* constants in <sys/sysctl.h>.  */
 
-#define	KINFO_VME_FLAG_COW		0x00000001
-#define	KINFO_VME_FLAG_NEEDS_COPY	0x00000002
-#define	KINFO_VME_FLAG_NOCOREDUMP	0x00000004
-#define	KINFO_VME_FLAG_PAGEABLE		0x00000008
-#define	KINFO_VME_FLAG_GROWS_UP		0x00000010
-#define	KINFO_VME_FLAG_GROWS_DOWN	0x00000020
+#define KINFO_VME_FLAG_COW 0x00000001
+#define KINFO_VME_FLAG_NEEDS_COPY 0x00000002
+#define KINFO_VME_FLAG_NOCOREDUMP 0x00000004
+#define KINFO_VME_FLAG_PAGEABLE 0x00000008
+#define KINFO_VME_FLAG_GROWS_UP 0x00000010
+#define KINFO_VME_FLAG_GROWS_DOWN 0x00000020
 
 /* FIXME: kettenis/20060115: We should really eliminate the next two
    functions completely.  */
@@ -65,49 +65,48 @@ nbsd_pc_in_sigtramp (CORE_ADDR pc, const char *func_name)
   /* Check for libc-provided signal trampoline.  All such trampolines
      have function names which begin with "__sigtramp".  */
 
-  return (func_name != NULL
-	  && startswith (func_name, "__sigtramp"));
+  return (func_name != NULL && startswith (func_name, "__sigtramp"));
 }
 
 /* This enum is derived from NETBSD's <sys/signal.h>.  */
 
 enum
-  {
-   NBSD_SIGHUP = 1,
-   NBSD_SIGINT = 2,
-   NBSD_SIGQUIT = 3,
-   NBSD_SIGILL = 4,
-   NBSD_SIGTRAP = 5,
-   NBSD_SIGABRT = 6,
-   NBSD_SIGEMT = 7,
-   NBSD_SIGFPE = 8,
-   NBSD_SIGKILL = 9,
-   NBSD_SIGBUS = 10,
-   NBSD_SIGSEGV = 11,
-   NBSD_SIGSYS = 12,
-   NBSD_SIGPIPE = 13,
-   NBSD_SIGALRM = 14,
-   NBSD_SIGTERM = 15,
-   NBSD_SIGURG = 16,
-   NBSD_SIGSTOP = 17,
-   NBSD_SIGTSTP = 18,
-   NBSD_SIGCONT = 19,
-   NBSD_SIGCHLD = 20,
-   NBSD_SIGTTIN = 21,
-   NBSD_SIGTTOU = 22,
-   NBSD_SIGIO = 23,
-   NBSD_SIGXCPU = 24,
-   NBSD_SIGXFSZ = 25,
-   NBSD_SIGVTALRM = 26,
-   NBSD_SIGPROF = 27,
-   NBSD_SIGWINCH = 28,
-   NBSD_SIGINFO = 29,
-   NBSD_SIGUSR1 = 30,
-   NBSD_SIGUSR2 = 31,
-   NBSD_SIGPWR = 32,
-   NBSD_SIGRTMIN = 33,
-   NBSD_SIGRTMAX = 63,
-  };
+{
+  NBSD_SIGHUP = 1,
+  NBSD_SIGINT = 2,
+  NBSD_SIGQUIT = 3,
+  NBSD_SIGILL = 4,
+  NBSD_SIGTRAP = 5,
+  NBSD_SIGABRT = 6,
+  NBSD_SIGEMT = 7,
+  NBSD_SIGFPE = 8,
+  NBSD_SIGKILL = 9,
+  NBSD_SIGBUS = 10,
+  NBSD_SIGSEGV = 11,
+  NBSD_SIGSYS = 12,
+  NBSD_SIGPIPE = 13,
+  NBSD_SIGALRM = 14,
+  NBSD_SIGTERM = 15,
+  NBSD_SIGURG = 16,
+  NBSD_SIGSTOP = 17,
+  NBSD_SIGTSTP = 18,
+  NBSD_SIGCONT = 19,
+  NBSD_SIGCHLD = 20,
+  NBSD_SIGTTIN = 21,
+  NBSD_SIGTTOU = 22,
+  NBSD_SIGIO = 23,
+  NBSD_SIGXCPU = 24,
+  NBSD_SIGXFSZ = 25,
+  NBSD_SIGVTALRM = 26,
+  NBSD_SIGPROF = 27,
+  NBSD_SIGWINCH = 28,
+  NBSD_SIGINFO = 29,
+  NBSD_SIGUSR1 = 30,
+  NBSD_SIGUSR2 = 31,
+  NBSD_SIGPWR = 32,
+  NBSD_SIGRTMIN = 33,
+  NBSD_SIGRTMAX = 63,
+};
 
 /* Implement the "gdb_signal_from_target" gdbarch method.  */
 
@@ -237,8 +236,7 @@ nbsd_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
 /* Implement the "gdb_signal_to_target" gdbarch method.  */
 
 static int
-nbsd_gdb_signal_to_target (struct gdbarch *gdbarch,
-		enum gdb_signal signal)
+nbsd_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
 {
   switch (signal)
     {
@@ -348,8 +346,7 @@ nbsd_gdb_signal_to_target (struct gdbarch *gdbarch,
       return NBSD_SIGRTMAX;
     }
 
-  if (signal >= GDB_SIGNAL_REALTIME_34
-      && signal <= GDB_SIGNAL_REALTIME_62)
+  if (signal >= GDB_SIGNAL_REALTIME_34 && signal <= GDB_SIGNAL_REALTIME_62)
     {
       int offset = signal - GDB_SIGNAL_REALTIME_32;
 
@@ -379,7 +376,7 @@ struct nbsd_gdbarch_data
 };
 
 static const registry<gdbarch>::key<nbsd_gdbarch_data>
-     nbsd_gdbarch_data_handle;
+  nbsd_gdbarch_data_handle;
 
 static struct nbsd_gdbarch_data *
 get_nbsd_gdbarch_data (struct gdbarch *gdbarch)
@@ -430,8 +427,7 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
 
   /* lwpid_t */
   type *lwpid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-				int32_type->length () * char_bits,
-				"lwpid_t");
+				int32_type->length () * char_bits, "lwpid_t");
   lwpid_type->set_target_type (int32_type);
 
   /* union sigval */
@@ -482,11 +478,9 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
   /* _syscall */
   t = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (t, "_sysnum", int_type);
-  append_composite_type_field (t, "_retval",
-			       init_vector_type (int_type, 2));
+  append_composite_type_field (t, "_retval", init_vector_type (int_type, 2));
   append_composite_type_field (t, "_error", int_type);
-  append_composite_type_field (t, "_args",
-			       init_vector_type (uint64_type, 8));
+  append_composite_type_field (t, "_args", init_vector_type (uint64_type, 8));
   append_composite_type_field (reason_type, "_syscall", t);
 
   /* _ptrace_state */
@@ -522,19 +516,15 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
 void
 nbsd_info_proc_mappings_header (int addr_bit)
 {
-  gdb_printf (_("Mapped address spaces:\n\n"));
+  gdb_printf (_ ("Mapped address spaces:\n\n"));
   if (addr_bit == 64)
     {
-      gdb_printf ("  %18s %18s %10s %10s %9s %s\n",
-		  "Start Addr",
-		  "  End Addr",
+      gdb_printf ("  %18s %18s %10s %10s %9s %s\n", "Start Addr", "  End Addr",
 		  "      Size", "    Offset", "Flags  ", "File");
     }
   else
     {
-      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n",
-		  "Start Addr",
-		  "  End Addr",
+      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n", "Start Addr", "  End Addr",
 		  "      Size", "    Offset", "Flags  ", "File");
     }
 }
@@ -554,8 +544,9 @@ nbsd_vm_map_entry_flags (int kve_flags, int kve_protection)
   vm_flags[4] = (kve_flags & KINFO_VME_FLAG_COW) ? 'C' : '-';
   vm_flags[5] = (kve_flags & KINFO_VME_FLAG_NEEDS_COPY) ? 'N' : '-';
   vm_flags[6] = (kve_flags & KINFO_VME_FLAG_PAGEABLE) ? 'P' : '-';
-  vm_flags[7] = (kve_flags & KINFO_VME_FLAG_GROWS_UP) ? 'U'
-    : (kve_flags & KINFO_VME_FLAG_GROWS_DOWN) ? 'D' : '-';
+  vm_flags[7] = (kve_flags & KINFO_VME_FLAG_GROWS_UP)	  ? 'U'
+		: (kve_flags & KINFO_VME_FLAG_GROWS_DOWN) ? 'D'
+							  : '-';
   vm_flags[8] = '\0';
 
   return vm_flags;
@@ -569,20 +560,16 @@ nbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
 {
   if (addr_bit == 64)
     {
-      gdb_printf ("  %18s %18s %10s %10s %9s %s\n",
-		  hex_string (kve_start),
-		  hex_string (kve_end),
-		  hex_string (kve_end - kve_start),
+      gdb_printf ("  %18s %18s %10s %10s %9s %s\n", hex_string (kve_start),
+		  hex_string (kve_end), hex_string (kve_end - kve_start),
 		  hex_string (kve_offset),
 		  nbsd_vm_map_entry_flags (kve_flags, kve_protection),
 		  kve_path);
     }
   else
     {
-      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n",
-		  hex_string (kve_start),
-		  hex_string (kve_end),
-		  hex_string (kve_end - kve_start),
+      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n", hex_string (kve_start),
+		  hex_string (kve_end), hex_string (kve_end - kve_start),
 		  hex_string (kve_offset),
 		  nbsd_vm_map_entry_flags (kve_flags, kve_protection),
 		  kve_path);
@@ -594,14 +581,13 @@ nbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
 static LONGEST
 nbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 {
-
   /* NetBSD doesn't use gdbarch_get_syscall_number since NetBSD
      native targets fetch the system call number from the
      'si_sysnum' member of siginfo_t in nbsd_nat_target::wait.
      However, system call catching requires this function to be
      set.  */
 
-  internal_error (_("nbsd_get_sycall_number called"));
+  internal_error (_ ("nbsd_get_sycall_number called"));
 }
 
 /* See netbsd-tdep.h.  */

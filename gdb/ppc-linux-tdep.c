@@ -250,7 +250,7 @@ static enum return_value_convention
 ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *valtype, struct regcache *regcache,
 			struct value **read_value, const gdb_byte *writebuf)
-{  
+{
   gdb_byte *readbuf = nullptr;
   if (read_value != nullptr)
     {
@@ -269,36 +269,30 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 }
 
 /* PLT stub in an executable.  */
-static const struct ppc_insn_pattern powerpc32_plt_stub[] =
-  {
-    { 0xffff0000, 0x3d600000, 0 },	/* lis   r11, xxxx	 */
-    { 0xffff0000, 0x816b0000, 0 },	/* lwz   r11, xxxx(r11)  */
-    { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
-    { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
-    {          0,          0, 0 }
-  };
+static const struct ppc_insn_pattern powerpc32_plt_stub[]
+  = { { 0xffff0000, 0x3d600000, 0 }, /* lis   r11, xxxx	 */
+      { 0xffff0000, 0x816b0000, 0 }, /* lwz   r11, xxxx(r11)  */
+      { 0xffffffff, 0x7d6903a6, 0 }, /* mtctr r11		 */
+      { 0xffffffff, 0x4e800420, 0 }, /* bctr			 */
+      { 0, 0, 0 } };
 
 /* PLT stubs in a shared library or PIE.
    The first variant is used when the PLT entry is within +/-32k of
    the GOT pointer (r30).  */
-static const struct ppc_insn_pattern powerpc32_plt_stub_so_1[] =
-  {
-    { 0xffff0000, 0x817e0000, 0 },	/* lwz   r11, xxxx(r30)  */
-    { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
-    { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
-    {          0,          0, 0 }
-  };
+static const struct ppc_insn_pattern powerpc32_plt_stub_so_1[]
+  = { { 0xffff0000, 0x817e0000, 0 }, /* lwz   r11, xxxx(r30)  */
+      { 0xffffffff, 0x7d6903a6, 0 }, /* mtctr r11		 */
+      { 0xffffffff, 0x4e800420, 0 }, /* bctr			 */
+      { 0, 0, 0 } };
 
 /* The second variant is used when the PLT entry is more than +/-32k
    from the GOT pointer (r30).  */
-static const struct ppc_insn_pattern powerpc32_plt_stub_so_2[] =
-  {
-    { 0xffff0000, 0x3d7e0000, 0 },	/* addis r11, r30, xxxx  */
-    { 0xffff0000, 0x816b0000, 0 },	/* lwz   r11, xxxx(r11)  */
-    { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
-    { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
-    {          0,          0, 0 }
-  };
+static const struct ppc_insn_pattern powerpc32_plt_stub_so_2[]
+  = { { 0xffff0000, 0x3d7e0000, 0 }, /* addis r11, r30, xxxx  */
+      { 0xffff0000, 0x816b0000, 0 }, /* lwz   r11, xxxx(r11)  */
+      { 0xffffffff, 0x7d6903a6, 0 }, /* mtctr r11		 */
+      { 0xffffffff, 0x4e800420, 0 }, /* bctr			 */
+      { 0, 0, 0 } };
 
 /* The max number of insns we check using ppc_insns_match_pattern.  */
 #define POWERPC32_PLT_CHECK_LEN (ARRAY_SIZE (powerpc32_plt_stub) - 1)
@@ -348,7 +342,7 @@ ppc_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
   /* When reverse-debugging, scan backward to check whether we are
      in the middle of trampoline code.  */
   if (execution_direction == EXEC_REVERSE)
-    scan_limit = 4;	/* At most 4 instructions.  */
+    scan_limit = 4; /* At most 4 instructions.  */
 
   for (i = 0; i < scan_limit; i++)
     {
@@ -399,8 +393,8 @@ ppc_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
 
 static void
 ppc_linux_supply_gregset (const struct regset *regset,
-			  struct regcache *regcache,
-			  int regnum, const void *gregs, size_t len)
+			  struct regcache *regcache, int regnum,
+			  const void *gregs, size_t len)
 {
   const struct ppc_reg_offsets *offsets
     = (const struct ppc_reg_offsets *) regset->regmap;
@@ -425,8 +419,8 @@ ppc_linux_supply_gregset (const struct regset *regset,
 
 static void
 ppc_linux_collect_gregset (const struct regset *regset,
-			   const struct regcache *regcache,
-			   int regnum, void *gregs, size_t len)
+			   const struct regcache *regcache, int regnum,
+			   void *gregs, size_t len)
 {
   const struct ppc_reg_offsets *offsets
     = (const struct ppc_reg_offsets *) regset->regmap;
@@ -454,211 +448,146 @@ ppc_linux_collect_gregset (const struct regset *regset,
 }
 
 /* Regset descriptions.  */
-static const struct ppc_reg_offsets ppc32_linux_reg_offsets =
-  {
-    /* General-purpose registers.  */
-    /* .r0_offset = */ 0,
-    /* .gpr_size = */ 4,
-    /* .xr_size = */ 4,
-    /* .pc_offset = */ 128,
-    /* .ps_offset = */ 132,
-    /* .cr_offset = */ 152,
-    /* .lr_offset = */ 144,
-    /* .ctr_offset = */ 140,
-    /* .xer_offset = */ 148,
-    /* .mq_offset = */ 156,
+static const struct ppc_reg_offsets ppc32_linux_reg_offsets = {
+  /* General-purpose registers.  */
+  /* .r0_offset = */ 0,
+  /* .gpr_size = */ 4,
+  /* .xr_size = */ 4,
+  /* .pc_offset = */ 128,
+  /* .ps_offset = */ 132,
+  /* .cr_offset = */ 152,
+  /* .lr_offset = */ 144,
+  /* .ctr_offset = */ 140,
+  /* .xer_offset = */ 148,
+  /* .mq_offset = */ 156,
 
-    /* Floating-point registers.  */
-    /* .f0_offset = */ 0,
-    /* .fpscr_offset = */ 256,
-    /* .fpscr_size = */ 8
-  };
-
-static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
-  {
-    /* General-purpose registers.  */
-    /* .r0_offset = */ 0,
-    /* .gpr_size = */ 8,
-    /* .xr_size = */ 8,
-    /* .pc_offset = */ 256,
-    /* .ps_offset = */ 264,
-    /* .cr_offset = */ 304,
-    /* .lr_offset = */ 288,
-    /* .ctr_offset = */ 280,
-    /* .xer_offset = */ 296,
-    /* .mq_offset = */ 312,
-
-    /* Floating-point registers.  */
-    /* .f0_offset = */ 0,
-    /* .fpscr_offset = */ 256,
-    /* .fpscr_size = */ 8
-  };
-
-static const struct regset ppc32_linux_gregset = {
-  &ppc32_linux_reg_offsets,
-  ppc_linux_supply_gregset,
-  ppc_linux_collect_gregset
+  /* Floating-point registers.  */
+  /* .f0_offset = */ 0,
+  /* .fpscr_offset = */ 256,
+  /* .fpscr_size = */ 8
 };
 
-static const struct regset ppc64_linux_gregset = {
-  &ppc64_linux_reg_offsets,
-  ppc_linux_supply_gregset,
-  ppc_linux_collect_gregset
+static const struct ppc_reg_offsets ppc64_linux_reg_offsets = {
+  /* General-purpose registers.  */
+  /* .r0_offset = */ 0,
+  /* .gpr_size = */ 8,
+  /* .xr_size = */ 8,
+  /* .pc_offset = */ 256,
+  /* .ps_offset = */ 264,
+  /* .cr_offset = */ 304,
+  /* .lr_offset = */ 288,
+  /* .ctr_offset = */ 280,
+  /* .xer_offset = */ 296,
+  /* .mq_offset = */ 312,
+
+  /* Floating-point registers.  */
+  /* .f0_offset = */ 0,
+  /* .fpscr_offset = */ 256,
+  /* .fpscr_size = */ 8
 };
 
-static const struct regset ppc32_linux_fpregset = {
-  &ppc32_linux_reg_offsets,
-  ppc_supply_fpregset,
-  ppc_collect_fpregset
-};
+static const struct regset ppc32_linux_gregset
+  = { &ppc32_linux_reg_offsets, ppc_linux_supply_gregset,
+      ppc_linux_collect_gregset };
 
-static const struct regcache_map_entry ppc32_le_linux_vrregmap[] =
-  {
-      { 32, PPC_VR0_REGNUM, 16 },
-      { 1, PPC_VSCR_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 12 },
-      { 1, PPC_VRSAVE_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 12 },
-      { 0 }
-  };
+static const struct regset ppc64_linux_gregset
+  = { &ppc64_linux_reg_offsets, ppc_linux_supply_gregset,
+      ppc_linux_collect_gregset };
 
-static const struct regcache_map_entry ppc32_be_linux_vrregmap[] =
-  {
-      { 32, PPC_VR0_REGNUM, 16 },
-      { 1, REGCACHE_MAP_SKIP, 12},
-      { 1, PPC_VSCR_REGNUM, 4 },
-      { 1, PPC_VRSAVE_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 12 },
-      { 0 }
-  };
+static const struct regset ppc32_linux_fpregset
+  = { &ppc32_linux_reg_offsets, ppc_supply_fpregset, ppc_collect_fpregset };
 
-static const struct regset ppc32_le_linux_vrregset = {
-  ppc32_le_linux_vrregmap,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+static const struct regcache_map_entry ppc32_le_linux_vrregmap[]
+  = { { 32, PPC_VR0_REGNUM, 16 },   { 1, PPC_VSCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 }, { 1, PPC_VRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 }, { 0 } };
 
-static const struct regset ppc32_be_linux_vrregset = {
-  ppc32_be_linux_vrregmap,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+static const struct regcache_map_entry ppc32_be_linux_vrregmap[]
+  = { { 32, PPC_VR0_REGNUM, 16 },   { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_VSCR_REGNUM, 4 },    { 1, PPC_VRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 }, { 0 } };
 
-static const struct regcache_map_entry ppc32_linux_vsxregmap[] =
-  {
-      { 32, PPC_VSR0_UPPER_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regset ppc32_le_linux_vrregset
+  = { ppc32_le_linux_vrregmap, regcache_supply_regset,
+      regcache_collect_regset };
 
-static const struct regset ppc32_linux_vsxregset = {
-  ppc32_linux_vsxregmap,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+static const struct regset ppc32_be_linux_vrregset
+  = { ppc32_be_linux_vrregmap, regcache_supply_regset,
+      regcache_collect_regset };
+
+static const struct regcache_map_entry ppc32_linux_vsxregmap[]
+  = { { 32, PPC_VSR0_UPPER_REGNUM, 8 }, { 0 } };
+
+static const struct regset ppc32_linux_vsxregset
+  = { ppc32_linux_vsxregmap, regcache_supply_regset, regcache_collect_regset };
 
 /* Program Priorty Register regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_ppr[] =
-  {
-      { 1, PPC_PPR_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_ppr[]
+  = { { 1, PPC_PPR_REGNUM, 8 }, { 0 } };
 
 /* Program Priorty Register regset.  */
 
-const struct regset ppc32_linux_pprregset = {
-  ppc32_regmap_ppr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_pprregset
+  = { ppc32_regmap_ppr, regcache_supply_regset, regcache_collect_regset };
 
 /* Data Stream Control Register regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_dscr[] =
-  {
-      { 1, PPC_DSCR_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_dscr[]
+  = { { 1, PPC_DSCR_REGNUM, 8 }, { 0 } };
 
 /* Data Stream Control Register regset.  */
 
-const struct regset ppc32_linux_dscrregset = {
-  ppc32_regmap_dscr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_dscrregset
+  = { ppc32_regmap_dscr, regcache_supply_regset, regcache_collect_regset };
 
 /* Target Address Register regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_tar[] =
-  {
-      { 1, PPC_TAR_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_tar[]
+  = { { 1, PPC_TAR_REGNUM, 8 }, { 0 } };
 
 /* Target Address Register regset.  */
 
-const struct regset ppc32_linux_tarregset = {
-  ppc32_regmap_tar,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_tarregset
+  = { ppc32_regmap_tar, regcache_supply_regset, regcache_collect_regset };
 
 /* Event-Based Branching regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_ebb[] =
-  {
-      { 1, PPC_EBBRR_REGNUM, 8 },
+static const struct regcache_map_entry ppc32_regmap_ebb[]
+  = { { 1, PPC_EBBRR_REGNUM, 8 },
       { 1, PPC_EBBHR_REGNUM, 8 },
       { 1, PPC_BESCR_REGNUM, 8 },
-      { 0 }
-  };
+      { 0 } };
 
 /* Event-Based Branching regset.  */
 
-const struct regset ppc32_linux_ebbregset = {
-  ppc32_regmap_ebb,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_ebbregset
+  = { ppc32_regmap_ebb, regcache_supply_regset, regcache_collect_regset };
 
 /* Performance Monitoring Unit regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_pmu[] =
-  {
-      { 1, PPC_SIAR_REGNUM, 8 },
-      { 1, PPC_SDAR_REGNUM, 8 },
-      { 1, PPC_SIER_REGNUM, 8 },
-      { 1, PPC_MMCR2_REGNUM, 8 },
-      { 1, PPC_MMCR0_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_pmu[]
+  = { { 1, PPC_SIAR_REGNUM, 8 },  { 1, PPC_SDAR_REGNUM, 8 },
+      { 1, PPC_SIER_REGNUM, 8 },  { 1, PPC_MMCR2_REGNUM, 8 },
+      { 1, PPC_MMCR0_REGNUM, 8 }, { 0 } };
 
 /* Performance Monitoring Unit regset.  */
 
-const struct regset ppc32_linux_pmuregset = {
-  ppc32_regmap_pmu,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_pmuregset
+  = { ppc32_regmap_pmu, regcache_supply_regset, regcache_collect_regset };
 
 /* Hardware Transactional Memory special-purpose register regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_tm_spr[] =
-  {
-      { 1, PPC_TFHAR_REGNUM, 8 },
+static const struct regcache_map_entry ppc32_regmap_tm_spr[]
+  = { { 1, PPC_TFHAR_REGNUM, 8 },
       { 1, PPC_TEXASR_REGNUM, 8 },
       { 1, PPC_TFIAR_REGNUM, 8 },
-      { 0 }
-  };
+      { 0 } };
 
 /* Hardware Transactional Memory special-purpose register regset.  */
 
-const struct regset ppc32_linux_tm_sprregset = {
-  ppc32_regmap_tm_spr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_tm_sprregset
+  = { ppc32_regmap_tm_spr, regcache_supply_regset, regcache_collect_regset };
 
 /* Regmaps for the Hardware Transactional Memory checkpointed
    general-purpose regsets for 32-bit, 64-bit big-endian, and 64-bit
@@ -681,45 +610,39 @@ const struct regset ppc32_linux_tm_sprregset = {
    when writing the regset to the inferior (with
    PTRACE_SETREGSET).  */
 
-static const struct regcache_map_entry ppc32_regmap_cgpr[] =
-  {
-      { 32, PPC_CR0_REGNUM, 4 },
+static const struct regcache_map_entry ppc32_regmap_cgpr[]
+  = { { 32, PPC_CR0_REGNUM, 4 },
       { 3, REGCACHE_MAP_SKIP, 4 }, /* nip, msr, orig_gpr3.  */
       { 1, PPC_CCTR_REGNUM, 4 },
       { 1, PPC_CLR_REGNUM, 4 },
       { 1, PPC_CXER_REGNUM, 4 },
       { 1, PPC_CCR_REGNUM, 4 },
       { 9, REGCACHE_MAP_SKIP, 4 }, /* All the rest.  */
-      { 0 }
-  };
+      { 0 } };
 
-static const struct regcache_map_entry ppc64_le_regmap_cgpr[] =
-  {
-      { 32, PPC_CR0_REGNUM, 8 },
+static const struct regcache_map_entry ppc64_le_regmap_cgpr[]
+  = { { 32, PPC_CR0_REGNUM, 8 },
       { 3, REGCACHE_MAP_SKIP, 8 },
       { 1, PPC_CCTR_REGNUM, 8 },
       { 1, PPC_CLR_REGNUM, 8 },
       { 1, PPC_CXER_REGNUM, 4 },
       { 1, REGCACHE_MAP_SKIP, 4 }, /* CXER padding.  */
       { 1, PPC_CCR_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 4}, /* CCR padding.  */
-      { 9, REGCACHE_MAP_SKIP, 8},
-      { 0 }
-  };
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* CCR padding.  */
+      { 9, REGCACHE_MAP_SKIP, 8 },
+      { 0 } };
 
-static const struct regcache_map_entry ppc64_be_regmap_cgpr[] =
-  {
-      { 32, PPC_CR0_REGNUM, 8 },
+static const struct regcache_map_entry ppc64_be_regmap_cgpr[]
+  = { { 32, PPC_CR0_REGNUM, 8 },
       { 3, REGCACHE_MAP_SKIP, 8 },
       { 1, PPC_CCTR_REGNUM, 8 },
       { 1, PPC_CLR_REGNUM, 8 },
-      { 1, REGCACHE_MAP_SKIP, 4}, /* CXER padding.  */
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* CXER padding.  */
       { 1, PPC_CXER_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 4}, /* CCR padding.  */
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* CCR padding.  */
       { 1, PPC_CCR_REGNUM, 4 },
-      { 9, REGCACHE_MAP_SKIP, 8},
-      { 0 }
-  };
+      { 9, REGCACHE_MAP_SKIP, 8 },
+      { 0 } };
 
 /* Regsets for the Hardware Transactional Memory checkpointed
    general-purpose registers for 32-bit, 64-bit big-endian, and 64-bit
@@ -730,150 +653,94 @@ static const struct regcache_map_entry ppc64_be_regmap_cgpr[] =
    used, so we set the variable size flag in the corresponding regset
    to accept this case.  */
 
-static const struct regset ppc32_linux_cgprregset = {
-  ppc32_regmap_cgpr,
-  regcache_supply_regset,
-  regcache_collect_regset,
-  REGSET_VARIABLE_SIZE
-};
+static const struct regset ppc32_linux_cgprregset
+  = { ppc32_regmap_cgpr, regcache_supply_regset, regcache_collect_regset,
+      REGSET_VARIABLE_SIZE };
 
-static const struct regset ppc64_be_linux_cgprregset = {
-  ppc64_be_regmap_cgpr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+static const struct regset ppc64_be_linux_cgprregset
+  = { ppc64_be_regmap_cgpr, regcache_supply_regset, regcache_collect_regset };
 
-static const struct regset ppc64_le_linux_cgprregset = {
-  ppc64_le_regmap_cgpr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+static const struct regset ppc64_le_linux_cgprregset
+  = { ppc64_le_regmap_cgpr, regcache_supply_regset, regcache_collect_regset };
 
 /* Hardware Transactional Memory checkpointed floating-point regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_cfpr[] =
-  {
-      { 32, PPC_CF0_REGNUM, 8 },
-      { 1, PPC_CFPSCR_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_cfpr[]
+  = { { 32, PPC_CF0_REGNUM, 8 }, { 1, PPC_CFPSCR_REGNUM, 8 }, { 0 } };
 
 /* Hardware Transactional Memory checkpointed floating-point regset.  */
 
-const struct regset ppc32_linux_cfprregset = {
-  ppc32_regmap_cfpr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_cfprregset
+  = { ppc32_regmap_cfpr, regcache_supply_regset, regcache_collect_regset };
 
 /* Regmaps for the Hardware Transactional Memory checkpointed vector
    regsets, for big and little endian targets.  The position of the
    4-byte VSCR in its 16-byte field depends on the endianness.  */
 
-static const struct regcache_map_entry ppc32_le_regmap_cvmx[] =
-  {
-      { 32, PPC_CVR0_REGNUM, 16 },
-      { 1, PPC_CVSCR_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 12 },
-      { 1, PPC_CVRSAVE_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 12 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_le_regmap_cvmx[]
+  = { { 32, PPC_CVR0_REGNUM, 16 },  { 1, PPC_CVSCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 }, { 1, PPC_CVRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 }, { 0 } };
 
-static const struct regcache_map_entry ppc32_be_regmap_cvmx[] =
-  {
-      { 32, PPC_CVR0_REGNUM, 16 },
-      { 1, REGCACHE_MAP_SKIP, 12 },
-      { 1, PPC_CVSCR_REGNUM, 4 },
-      { 1, PPC_CVRSAVE_REGNUM, 4 },
-      { 1, REGCACHE_MAP_SKIP, 12},
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_be_regmap_cvmx[]
+  = { { 32, PPC_CVR0_REGNUM, 16 },  { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_CVSCR_REGNUM, 4 },   { 1, PPC_CVRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 }, { 0 } };
 
 /* Hardware Transactional Memory checkpointed vector regsets, for little
    and big endian targets.  */
 
-static const struct regset ppc32_le_linux_cvmxregset = {
-  ppc32_le_regmap_cvmx,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+static const struct regset ppc32_le_linux_cvmxregset
+  = { ppc32_le_regmap_cvmx, regcache_supply_regset, regcache_collect_regset };
 
-static const struct regset ppc32_be_linux_cvmxregset = {
-  ppc32_be_regmap_cvmx,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+static const struct regset ppc32_be_linux_cvmxregset
+  = { ppc32_be_regmap_cvmx, regcache_supply_regset, regcache_collect_regset };
 
 /* Hardware Transactional Memory checkpointed vector-scalar regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_cvsx[] =
-  {
-      { 32, PPC_CVSR0_UPPER_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_cvsx[]
+  = { { 32, PPC_CVSR0_UPPER_REGNUM, 8 }, { 0 } };
 
 /* Hardware Transactional Memory checkpointed vector-scalar regset.  */
 
-const struct regset ppc32_linux_cvsxregset = {
-  ppc32_regmap_cvsx,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_cvsxregset
+  = { ppc32_regmap_cvsx, regcache_supply_regset, regcache_collect_regset };
 
 /* Hardware Transactional Memory checkpointed Program Priority Register
    regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_cppr[] =
-  {
-      { 1, PPC_CPPR_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_cppr[]
+  = { { 1, PPC_CPPR_REGNUM, 8 }, { 0 } };
 
 /* Hardware Transactional Memory checkpointed Program Priority Register
    regset.  */
 
-const struct regset ppc32_linux_cpprregset = {
-  ppc32_regmap_cppr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_cpprregset
+  = { ppc32_regmap_cppr, regcache_supply_regset, regcache_collect_regset };
 
 /* Hardware Transactional Memory checkpointed Data Stream Control
    Register regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_cdscr[] =
-  {
-      { 1, PPC_CDSCR_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_cdscr[]
+  = { { 1, PPC_CDSCR_REGNUM, 8 }, { 0 } };
 
 /* Hardware Transactional Memory checkpointed Data Stream Control
    Register regset.  */
 
-const struct regset ppc32_linux_cdscrregset = {
-  ppc32_regmap_cdscr,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_cdscrregset
+  = { ppc32_regmap_cdscr, regcache_supply_regset, regcache_collect_regset };
 
 /* Hardware Transactional Memory checkpointed Target Address Register
    regmap.  */
 
-static const struct regcache_map_entry ppc32_regmap_ctar[] =
-  {
-      { 1, PPC_CTAR_REGNUM, 8 },
-      { 0 }
-  };
+static const struct regcache_map_entry ppc32_regmap_ctar[]
+  = { { 1, PPC_CTAR_REGNUM, 8 }, { 0 } };
 
 /* Hardware Transactional Memory checkpointed Target Address Register
    regset.  */
 
-const struct regset ppc32_linux_ctarregset = {
-  ppc32_regmap_ctar,
-  regcache_supply_regset,
-  regcache_collect_regset
-};
+const struct regset ppc32_linux_ctarregset
+  = { ppc32_regmap_ctar, regcache_supply_regset, regcache_collect_regset };
 
 const struct regset *
 ppc_linux_gregset (int wordsize)
@@ -941,8 +808,8 @@ ppc_linux_cvmxregset (struct gdbarch *gdbarch)
 
 static void
 ppc_linux_collect_core_cpgrregset (const struct regset *regset,
-				   const struct regcache *regcache,
-				   int regnum, void *buf, size_t len)
+				   const struct regcache *regcache, int regnum,
+				   void *buf, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
@@ -973,15 +840,17 @@ ppc_linux_collect_core_cpgrregset (const struct regset *regset,
      4-bytes long.  We use raw_collect_integer which handles
      differences in the sizes for the source and destination buffers
      for both endian modes.  */
-  (regcache->raw_collect_integer
-   (PPC_TFHAR_REGNUM, ((gdb_byte *) buf) + pt_offset * tdep->wordsize,
-    tdep->wordsize, false));
+  (regcache->raw_collect_integer (PPC_TFHAR_REGNUM,
+				  ((gdb_byte *) buf)
+				    + pt_offset * tdep->wordsize,
+				  tdep->wordsize, false));
 
   pt_offset = 33;
 
-  (regcache->raw_collect_integer
-   (PPC_MSR_REGNUM, ((gdb_byte *) buf) + pt_offset * tdep->wordsize,
-    tdep->wordsize, false));
+  (regcache->raw_collect_integer (PPC_MSR_REGNUM,
+				  ((gdb_byte *) buf)
+				    + pt_offset * tdep->wordsize,
+				  tdep->wordsize, false));
 }
 
 /* Iterate over supported core file register note sections. */
@@ -1018,19 +887,16 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	&ppc32_linux_vsxregset, "POWER7 VSX", cb_data);
 
   if (have_ppr)
-    cb (".reg-ppc-ppr", PPC_LINUX_SIZEOF_PPRREGSET,
-	PPC_LINUX_SIZEOF_PPRREGSET,
+    cb (".reg-ppc-ppr", PPC_LINUX_SIZEOF_PPRREGSET, PPC_LINUX_SIZEOF_PPRREGSET,
 	&ppc32_linux_pprregset, "Priority Program Register", cb_data);
 
   if (have_dscr)
     cb (".reg-ppc-dscr", PPC_LINUX_SIZEOF_DSCRREGSET,
-	PPC_LINUX_SIZEOF_DSCRREGSET,
-	&ppc32_linux_dscrregset, "Data Stream Control Register",
-	cb_data);
+	PPC_LINUX_SIZEOF_DSCRREGSET, &ppc32_linux_dscrregset,
+	"Data Stream Control Register", cb_data);
 
   if (have_tar)
-    cb (".reg-ppc-tar", PPC_LINUX_SIZEOF_TARREGSET,
-	PPC_LINUX_SIZEOF_TARREGSET,
+    cb (".reg-ppc-tar", PPC_LINUX_SIZEOF_TARREGSET, PPC_LINUX_SIZEOF_TARREGSET,
 	&ppc32_linux_tarregset, "Target Address Register", cb_data);
 
   /* EBB registers are unavailable when ptrace returns ENODATA.  Check
@@ -1039,22 +905,17 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
     if (regcache == NULL
 	|| REG_VALID == regcache->get_register_status (PPC_BESCR_REGNUM))
       cb (".reg-ppc-ebb", PPC_LINUX_SIZEOF_EBBREGSET,
-	  PPC_LINUX_SIZEOF_EBBREGSET,
-	  &ppc32_linux_ebbregset, "Event-based Branching Registers",
-	  cb_data);
+	  PPC_LINUX_SIZEOF_EBBREGSET, &ppc32_linux_ebbregset,
+	  "Event-based Branching Registers", cb_data);
 
   if (tdep->ppc_mmcr0_regnum != -1)
-    cb (".reg-ppc-pmu", PPC_LINUX_SIZEOF_PMUREGSET,
-	PPC_LINUX_SIZEOF_PMUREGSET,
-	&ppc32_linux_pmuregset, "Performance Monitor Registers",
-	cb_data);
+    cb (".reg-ppc-pmu", PPC_LINUX_SIZEOF_PMUREGSET, PPC_LINUX_SIZEOF_PMUREGSET,
+	&ppc32_linux_pmuregset, "Performance Monitor Registers", cb_data);
 
   if (tdep->have_htm_spr)
     cb (".reg-ppc-tm-spr", PPC_LINUX_SIZEOF_TM_SPRREGSET,
-	PPC_LINUX_SIZEOF_TM_SPRREGSET,
-	&ppc32_linux_tm_sprregset,
-	"Hardware Transactional Memory Special Purpose Registers",
-	cb_data);
+	PPC_LINUX_SIZEOF_TM_SPRREGSET, &ppc32_linux_tm_sprregset,
+	"Hardware Transactional Memory Special Purpose Registers", cb_data);
 
   /* Checkpointed registers can be unavailable, don't call back if
      we are generating a core file.  */
@@ -1065,16 +926,15 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	 access to the HTM SPRs, because we need TFHAR to fill the
 	 "checkpointed" NIP slot.  We can read a core file without it
 	 since GDB is not aware of this NIP as a visible register.  */
-      if (regcache == NULL ||
-	  (REG_VALID == regcache->get_register_status (PPC_CR0_REGNUM)
-	   && tdep->have_htm_spr))
+      if (regcache == NULL
+	  || (REG_VALID == regcache->get_register_status (PPC_CR0_REGNUM)
+	      && tdep->have_htm_spr))
 	{
-	  int cgpr_size = (tdep->wordsize == 4?
-			   PPC32_LINUX_SIZEOF_CGPRREGSET
-			   : PPC64_LINUX_SIZEOF_CGPRREGSET);
+	  int cgpr_size
+	    = (tdep->wordsize == 4 ? PPC32_LINUX_SIZEOF_CGPRREGSET
+				   : PPC64_LINUX_SIZEOF_CGPRREGSET);
 
-	  const struct regset *cgprregset =
-	    ppc_linux_cgprregset (gdbarch);
+	  const struct regset *cgprregset = ppc_linux_cgprregset (gdbarch);
 
 	  if (regcache != NULL)
 	    {
@@ -1083,16 +943,12 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	      core_cgprregset.collect_regset
 		= ppc_linux_collect_core_cpgrregset;
 
-	      cb (".reg-ppc-tm-cgpr",
-		  cgpr_size, cgpr_size,
-		  &core_cgprregset,
+	      cb (".reg-ppc-tm-cgpr", cgpr_size, cgpr_size, &core_cgprregset,
 		  "Checkpointed General Purpose Registers", cb_data);
 	    }
 	  else
 	    {
-	      cb (".reg-ppc-tm-cgpr",
-		  cgpr_size, cgpr_size,
-		  cgprregset,
+	      cb (".reg-ppc-tm-cgpr", cgpr_size, cgpr_size, cgprregset,
 		  "Checkpointed General Purpose Registers", cb_data);
 	    }
 	}
@@ -1100,76 +956,68 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
   if (tdep->have_htm_fpu)
     {
-      if (regcache == NULL ||
-	  REG_VALID == regcache->get_register_status (PPC_CF0_REGNUM))
+      if (regcache == NULL
+	  || REG_VALID == regcache->get_register_status (PPC_CF0_REGNUM))
 	cb (".reg-ppc-tm-cfpr", PPC_LINUX_SIZEOF_CFPRREGSET,
-	    PPC_LINUX_SIZEOF_CFPRREGSET,
-	    &ppc32_linux_cfprregset,
+	    PPC_LINUX_SIZEOF_CFPRREGSET, &ppc32_linux_cfprregset,
 	    "Checkpointed Floating Point Registers", cb_data);
     }
 
   if (tdep->have_htm_altivec)
     {
-      if (regcache == NULL ||
-	  REG_VALID == regcache->get_register_status (PPC_CVR0_REGNUM))
+      if (regcache == NULL
+	  || REG_VALID == regcache->get_register_status (PPC_CVR0_REGNUM))
 	{
-	  const struct regset *cvmxregset =
-	    ppc_linux_cvmxregset (gdbarch);
+	  const struct regset *cvmxregset = ppc_linux_cvmxregset (gdbarch);
 
 	  cb (".reg-ppc-tm-cvmx", PPC_LINUX_SIZEOF_CVMXREGSET,
-	      PPC_LINUX_SIZEOF_CVMXREGSET,
-	      cvmxregset,
+	      PPC_LINUX_SIZEOF_CVMXREGSET, cvmxregset,
 	      "Checkpointed Altivec (VMX) Registers", cb_data);
 	}
     }
 
   if (tdep->have_htm_vsx)
     {
-      if (regcache == NULL ||
-	  (REG_VALID
-	   == regcache->get_register_status (PPC_CVSR0_UPPER_REGNUM)))
+      if (regcache == NULL
+	  || (REG_VALID
+	      == regcache->get_register_status (PPC_CVSR0_UPPER_REGNUM)))
 	cb (".reg-ppc-tm-cvsx", PPC_LINUX_SIZEOF_CVSXREGSET,
-	    PPC_LINUX_SIZEOF_CVSXREGSET,
-	    &ppc32_linux_cvsxregset,
+	    PPC_LINUX_SIZEOF_CVSXREGSET, &ppc32_linux_cvsxregset,
 	    "Checkpointed VSX Registers", cb_data);
     }
 
   if (tdep->ppc_cppr_regnum != -1)
     {
-      if (regcache == NULL ||
-	  REG_VALID == regcache->get_register_status (PPC_CPPR_REGNUM))
+      if (regcache == NULL
+	  || REG_VALID == regcache->get_register_status (PPC_CPPR_REGNUM))
 	cb (".reg-ppc-tm-cppr", PPC_LINUX_SIZEOF_CPPRREGSET,
-	    PPC_LINUX_SIZEOF_CPPRREGSET,
-	    &ppc32_linux_cpprregset,
+	    PPC_LINUX_SIZEOF_CPPRREGSET, &ppc32_linux_cpprregset,
 	    "Checkpointed Priority Program Register", cb_data);
     }
 
   if (tdep->ppc_cdscr_regnum != -1)
     {
-      if (regcache == NULL ||
-	  REG_VALID == regcache->get_register_status (PPC_CDSCR_REGNUM))
+      if (regcache == NULL
+	  || REG_VALID == regcache->get_register_status (PPC_CDSCR_REGNUM))
 	cb (".reg-ppc-tm-cdscr", PPC_LINUX_SIZEOF_CDSCRREGSET,
-	    PPC_LINUX_SIZEOF_CDSCRREGSET,
-	    &ppc32_linux_cdscrregset,
+	    PPC_LINUX_SIZEOF_CDSCRREGSET, &ppc32_linux_cdscrregset,
 	    "Checkpointed Data Stream Control Register", cb_data);
     }
 
   if (tdep->ppc_ctar_regnum)
     {
-      if ( regcache == NULL ||
-	   REG_VALID == regcache->get_register_status (PPC_CTAR_REGNUM))
+      if (regcache == NULL
+	  || REG_VALID == regcache->get_register_status (PPC_CTAR_REGNUM))
 	cb (".reg-ppc-tm-ctar", PPC_LINUX_SIZEOF_CTARREGSET,
-	    PPC_LINUX_SIZEOF_CTARREGSET,
-	    &ppc32_linux_ctarregset,
+	    PPC_LINUX_SIZEOF_CTARREGSET, &ppc32_linux_ctarregset,
 	    "Checkpointed Target Address Register", cb_data);
     }
 }
 
 static void
 ppc_linux_sigtramp_cache (frame_info_ptr this_frame,
-			  struct trad_frame_cache *this_cache,
-			  CORE_ADDR func, LONGEST offset,
-			  int bias)
+			  struct trad_frame_cache *this_cache, CORE_ADDR func,
+			  LONGEST offset, int bias)
 {
   CORE_ADDR base;
   CORE_ADDR regs;
@@ -1180,8 +1028,7 @@ ppc_linux_sigtramp_cache (frame_info_ptr this_frame,
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  base = get_frame_register_unsigned (this_frame,
-				      gdbarch_sp_regnum (gdbarch));
+  base = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
   if (bias > 0 && get_frame_pc (this_frame) != func)
     /* See below, some signal trampolines increment the stack as their
        first instruction, need to compensate for that.  */
@@ -1198,11 +1045,10 @@ ppc_linux_sigtramp_cache (frame_info_ptr this_frame,
   for (i = 0; i < 32; i++)
     {
       int regnum = i + tdep->ppc_gp0_regnum;
-      trad_frame_set_reg_addr (this_cache,
-			       regnum, gpregs + i * tdep->wordsize);
+      trad_frame_set_reg_addr (this_cache, regnum,
+			       gpregs + i * tdep->wordsize);
     }
-  trad_frame_set_reg_addr (this_cache,
-			   gdbarch_pc_regnum (gdbarch),
+  trad_frame_set_reg_addr (this_cache, gdbarch_pc_regnum (gdbarch),
 			   gpregs + 32 * tdep->wordsize);
   trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum,
 			   gpregs + 35 * tdep->wordsize);
@@ -1231,7 +1077,7 @@ ppc_linux_sigtramp_cache (frame_info_ptr this_frame,
 				   fpregs + i * tdep->wordsize);
 	}
       trad_frame_set_reg_addr (this_cache, tdep->ppc_fpscr_regnum,
-			 fpregs + 32 * tdep->wordsize);
+			       fpregs + 32 * tdep->wordsize);
     }
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
@@ -1244,7 +1090,7 @@ ppc32_linux_sigaction_cache_init (const struct tramp_frame *self,
 {
   ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0xd0 /* Offset to ucontext_t.  */
-			    + 0x30 /* Offset to .reg.  */,
+			      + 0x30 /* Offset to .reg.  */,
 			    0);
 }
 
@@ -1256,7 +1102,7 @@ ppc64_linux_sigaction_cache_init (const struct tramp_frame *self,
 {
   ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0x80 /* Offset to ucontext_t.  */
-			    + 0xe0 /* Offset to .reg.  */,
+			      + 0xe0 /* Offset to .reg.  */,
 			    128);
 }
 
@@ -1268,7 +1114,7 @@ ppc32_linux_sighandler_cache_init (const struct tramp_frame *self,
 {
   ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0x40 /* Offset to ucontext_t.  */
-			    + 0x1c /* Offset to .reg.  */,
+			      + 0x1c /* Offset to .reg.  */,
 			    0);
 }
 
@@ -1280,52 +1126,48 @@ ppc64_linux_sighandler_cache_init (const struct tramp_frame *self,
 {
   ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0x80 /* Offset to struct sigcontext.  */
-			    + 0x38 /* Offset to .reg.  */,
+			      + 0x38 /* Offset to .reg.  */,
 			    128);
 }
 
-static struct tramp_frame ppc32_linux_sigaction_tramp_frame = {
-  SIGTRAMP_FRAME,
-  4,
-  { 
-    { 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
-    { 0x44000002, ULONGEST_MAX }, /* sc */
-    { TRAMP_SENTINEL_INSN },
-  },
-  ppc32_linux_sigaction_cache_init
-};
-static struct tramp_frame ppc64_linux_sigaction_tramp_frame = {
-  SIGTRAMP_FRAME,
-  4,
-  {
-    { 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
-    { 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
-    { 0x44000002, ULONGEST_MAX }, /* sc */
-    { TRAMP_SENTINEL_INSN },
-  },
-  ppc64_linux_sigaction_cache_init
-};
-static struct tramp_frame ppc32_linux_sighandler_tramp_frame = {
-  SIGTRAMP_FRAME,
-  4,
-  { 
-    { 0x38000077, ULONGEST_MAX }, /* li r0,119 */
-    { 0x44000002, ULONGEST_MAX }, /* sc */
-    { TRAMP_SENTINEL_INSN },
-  },
-  ppc32_linux_sighandler_cache_init
-};
-static struct tramp_frame ppc64_linux_sighandler_tramp_frame = {
-  SIGTRAMP_FRAME,
-  4,
-  { 
-    { 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
-    { 0x38000077, ULONGEST_MAX }, /* li r0,119 */
-    { 0x44000002, ULONGEST_MAX }, /* sc */
-    { TRAMP_SENTINEL_INSN },
-  },
-  ppc64_linux_sighandler_cache_init
-};
+static struct tramp_frame ppc32_linux_sigaction_tramp_frame
+  = { SIGTRAMP_FRAME,
+      4,
+      {
+	{ 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ TRAMP_SENTINEL_INSN },
+      },
+      ppc32_linux_sigaction_cache_init };
+static struct tramp_frame ppc64_linux_sigaction_tramp_frame
+  = { SIGTRAMP_FRAME,
+      4,
+      {
+	{ 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
+	{ 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ TRAMP_SENTINEL_INSN },
+      },
+      ppc64_linux_sigaction_cache_init };
+static struct tramp_frame ppc32_linux_sighandler_tramp_frame
+  = { SIGTRAMP_FRAME,
+      4,
+      {
+	{ 0x38000077, ULONGEST_MAX }, /* li r0,119 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ TRAMP_SENTINEL_INSN },
+      },
+      ppc32_linux_sighandler_cache_init };
+static struct tramp_frame ppc64_linux_sighandler_tramp_frame
+  = { SIGTRAMP_FRAME,
+      4,
+      {
+	{ 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
+	{ 0x38000077, ULONGEST_MAX }, /* li r0,119 */
+	{ 0x44000002, ULONGEST_MAX }, /* sc */
+	{ TRAMP_SENTINEL_INSN },
+      },
+      ppc64_linux_sighandler_cache_init };
 
 /* Return 1 if PPC_ORIG_R3_REGNUM and PPC_TRAP_REGNUM are usable.  */
 int
@@ -1344,8 +1186,7 @@ ppc_linux_trap_reg_p (struct gdbarch *gdbarch)
 /* Return the current system call's number present in the
    r0 register.  When the function fails, it returns -1.  */
 static LONGEST
-ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
-			      thread_info *thread)
+ppc_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 {
   struct regcache *regcache = get_thread_regcache (thread);
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
@@ -1384,19 +1225,19 @@ ppc_canonicalize_syscall (int syscall, int wordsize)
 
   if (syscall <= 165)
     result = syscall;
-  else if (syscall >= 167 && syscall <= 190)	/* Skip query_module 166 */
+  else if (syscall >= 167 && syscall <= 190) /* Skip query_module 166 */
     result = syscall + 1;
-  else if (syscall >= 192 && syscall <= 197)	/* mmap2 */
+  else if (syscall >= 192 && syscall <= 197) /* mmap2 */
     result = syscall;
-  else if (syscall == 208)			/* tkill */
+  else if (syscall == 208) /* tkill */
     result = gdb_sys_tkill;
-  else if (syscall >= 207 && syscall <= 220)	/* gettid */
+  else if (syscall >= 207 && syscall <= 220) /* gettid */
     result = syscall + 224 - 207;
-  else if (syscall >= 234 && syscall <= 239)	/* exit_group */
+  else if (syscall >= 234 && syscall <= 239) /* exit_group */
     result = syscall + 252 - 234;
-  else if (syscall >= 240 && syscall <= 248)	/* timer_create */
+  else if (syscall >= 240 && syscall <= 248) /* timer_create */
     result = syscall += 259 - 240;
-  else if (syscall >= 250 && syscall <= 251)	/* tgkill */
+  else if (syscall >= 250 && syscall <= 251) /* tgkill */
     result = syscall + 270 - 250;
   else if (syscall == 286)
     result = gdb_sys_openat;
@@ -1439,42 +1280,40 @@ ppc_linux_syscall_record (struct regcache *regcache)
   if (syscall_gdb < 0)
     {
       gdb_printf (gdb_stderr,
-		  _("Process record and replay target doesn't "
-		    "support syscall number %d\n"), (int) scnum);
+		  _ ("Process record and replay target doesn't "
+		     "support syscall number %d\n"),
+		  (int) scnum);
       return 0;
     }
 
-  if (syscall_gdb == gdb_sys_sigreturn
-      || syscall_gdb == gdb_sys_rt_sigreturn)
-   {
-     int i, j;
-     int regsets[] = { tdep->ppc_gp0_regnum,
-		       tdep->ppc_fp0_regnum,
-		       tdep->ppc_vr0_regnum,
-		       tdep->ppc_vsr0_upper_regnum };
+  if (syscall_gdb == gdb_sys_sigreturn || syscall_gdb == gdb_sys_rt_sigreturn)
+    {
+      int i, j;
+      int regsets[] = { tdep->ppc_gp0_regnum, tdep->ppc_fp0_regnum,
+			tdep->ppc_vr0_regnum, tdep->ppc_vsr0_upper_regnum };
 
-     for (j = 0; j < 4; j++)
-       {
-	 if (regsets[j] == -1)
-	   continue;
-	 for (i = 0; i < 32; i++)
-	   {
-	     if (record_full_arch_list_add_reg (regcache, regsets[j] + i))
-	       return -1;
-	   }
-       }
+      for (j = 0; j < 4; j++)
+	{
+	  if (regsets[j] == -1)
+	    continue;
+	  for (i = 0; i < 32; i++)
+	    {
+	      if (record_full_arch_list_add_reg (regcache, regsets[j] + i))
+		return -1;
+	    }
+	}
 
-     if (record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum))
-       return -1;
-     if (record_full_arch_list_add_reg (regcache, tdep->ppc_ctr_regnum))
-       return -1;
-     if (record_full_arch_list_add_reg (regcache, tdep->ppc_lr_regnum))
-       return -1;
-     if (record_full_arch_list_add_reg (regcache, tdep->ppc_xer_regnum))
-       return -1;
+      if (record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum))
+	return -1;
+      if (record_full_arch_list_add_reg (regcache, tdep->ppc_ctr_regnum))
+	return -1;
+      if (record_full_arch_list_add_reg (regcache, tdep->ppc_lr_regnum))
+	return -1;
+      if (record_full_arch_list_add_reg (regcache, tdep->ppc_xer_regnum))
+	return -1;
 
-     return 0;
-   }
+      return 0;
+    }
 
   if (tdep->wordsize == 8)
     ret = record_linux_system_call (syscall_gdb, regcache,
@@ -1544,7 +1383,8 @@ ppc_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
   sp -= SIGNAL_FRAMESIZE;
   sp -= sizeof_rt_sigframe;
 
-  if (record_full_arch_list_add_mem (sp, SIGNAL_FRAMESIZE + sizeof_rt_sigframe))
+  if (record_full_arch_list_add_mem (sp,
+				     SIGNAL_FRAMESIZE + sizeof_rt_sigframe))
     return -1;
 
   if (record_full_arch_list_add_end ())
@@ -1574,8 +1414,7 @@ ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 
 static const struct target_desc *
 ppc_linux_core_read_description (struct gdbarch *gdbarch,
-				 struct target_ops *target,
-				 bfd *abfd)
+				 struct target_ops *target, bfd *abfd)
 {
   struct ppc_linux_features features = ppc_linux_no_features;
   asection *altivec = bfd_get_section_by_name (abfd, ".reg-ppc-vmx");
@@ -1587,7 +1426,7 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   asection *pmu = bfd_get_section_by_name (abfd, ".reg-ppc-pmu");
   asection *htmspr = bfd_get_section_by_name (abfd, ".reg-ppc-tm-spr");
 
-  if (! section)
+  if (!section)
     return NULL;
 
   switch (bfd_section_size (section))
@@ -1632,7 +1471,6 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   return ppc_linux_match_description (features);
 }
 
-
 /* Implementation of `gdbarch_elf_make_msymbol_special', as defined in
    gdbarch.h.  This implementation is used for the ELFv2 ABI only.  */
 
@@ -1644,7 +1482,7 @@ ppc_elfv2_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
        trampoline) do not have a local entry point.  */
     return;
 
-  elf_symbol_type *elf_sym = (elf_symbol_type *)sym;
+  elf_symbol_type *elf_sym = (elf_symbol_type *) sym;
 
   /* If the symbol is marked as having a local entry point, set a target
      flag in the msymbol.  We currently only support local entry point
@@ -1694,9 +1532,9 @@ ppc_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
   return (*s == 'i' /* Literal number.  */
 	  || (isdigit (*s) && s[1] == '('
-	      && isdigit (s[2])) /* Displacement.  */
+	      && isdigit (s[2]))	   /* Displacement.  */
 	  || (*s == '(' && isdigit (s[1])) /* Register indirection.  */
-	  || isdigit (*s)); /* Register value.  */
+	  || isdigit (*s));		   /* Register value.  */
 }
 
 /* Implementation of `gdbarch_stap_parse_special_token', as defined in
@@ -1734,8 +1572,8 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
       regname[len] = '\0';
 
       if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
-	error (_("Invalid register name `%s' on expression `%s'."),
-	       regname, p->saved_arg);
+	error (_ ("Invalid register name `%s' on expression `%s'."), regname,
+	       p->saved_arg);
 
       p->arg = s;
 
@@ -1758,7 +1596,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   /* The values for TCGETS, TCSETS, TCSETSW, TCSETSF are based on the
      size of struct termios in the kernel source.
      include/uapi/asm-generic/termbits.h  */
-#define SIZE_OF_STRUCT_TERMIOS  0x2c
+#define SIZE_OF_STRUCT_TERMIOS 0x2c
 
   /* Simply return if it had been initialized.  */
   if (record_tdep->size_pointer != 0)
@@ -1818,7 +1656,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_stat64 = 104;
       record_tdep->size_gid_t = 4;
       record_tdep->size_uid_t = 4;
-      record_tdep->size_PAGE_SIZE = 0x10000;	/* 64KB */
+      record_tdep->size_PAGE_SIZE = 0x10000; /* 64KB */
       record_tdep->size_flock64 = 32;
       record_tdep->size_io_event = 32;
       record_tdep->size_iocb = 64;
@@ -1885,7 +1723,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_stat64 = 104;
       record_tdep->size_gid_t = 4;
       record_tdep->size_uid_t = 4;
-      record_tdep->size_PAGE_SIZE = 0x10000;	/* 64KB */
+      record_tdep->size_PAGE_SIZE = 0x10000; /* 64KB */
       record_tdep->size_flock64 = 32;
       record_tdep->size_io_event = 32;
       record_tdep->size_iocb = 64;
@@ -1902,7 +1740,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_time_t = 4;
     }
   else
-    internal_error (_("unexpected wordsize"));
+    internal_error (_ ("unexpected wordsize"));
 
   /* These values are the second argument of system call "sys_fcntl"
      and "sys_fcntl64".  They are obtained from Linux Kernel source.  */
@@ -1987,13 +1825,11 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
    If no suitable type is found, return NULL.  */
 
 static const struct floatformat **
-ppc_floatformat_for_type (struct gdbarch *gdbarch,
-			  const char *name, int len)
+ppc_floatformat_for_type (struct gdbarch *gdbarch, const char *name, int len)
 {
   if (len == 128 && name)
     {
-      if (strcmp (name, "__float128") == 0
-	  || strcmp (name, "_Float128") == 0
+      if (strcmp (name, "__float128") == 0 || strcmp (name, "_Float128") == 0
 	  || strcmp (name, "_Float64x") == 0
 	  || strcmp (name, "complex _Float128") == 0
 	  || strcmp (name, "complex _Float64x") == 0)
@@ -2039,8 +1875,8 @@ ppc64_linux_gcc_target_options (struct gdbarch *gdbarch)
 }
 
 static displaced_step_prepare_status
-ppc_linux_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
-				   CORE_ADDR &displaced_pc)
+ppc_linux_displaced_step_prepare (gdbarch *arch, thread_info *thread,
+				  CORE_ADDR &displaced_pc)
 {
   ppc_inferior_data *per_inferior = get_ppc_per_inferior (thread->inf);
   if (!per_inferior->disp_step_buf.has_value ())
@@ -2056,16 +1892,15 @@ ppc_linux_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
 }
 
 static void
-ppc_linux_init_abi (struct gdbarch_info info,
-		    struct gdbarch *gdbarch)
+ppc_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
   static const char *const stap_integer_prefixes[] = { "i", NULL };
-  static const char *const stap_register_indirection_prefixes[] = { "(",
-								    NULL };
-  static const char *const stap_register_indirection_suffixes[] = { ")",
-								    NULL };
+  static const char *const stap_register_indirection_prefixes[]
+    = { "(", NULL };
+  static const char *const stap_register_indirection_suffixes[]
+    = { ")", NULL };
 
   linux_init_abi (info, gdbarch, 0);
 
@@ -2091,14 +1926,13 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
   /* SystemTap functions.  */
   set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);
-  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
-					  stap_register_indirection_prefixes);
-  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
-					  stap_register_indirection_suffixes);
+  set_gdbarch_stap_register_indirection_prefixes (
+    gdbarch, stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes (
+    gdbarch, stap_register_indirection_suffixes);
   set_gdbarch_stap_gdb_register_prefix (gdbarch, "r");
   set_gdbarch_stap_is_single_operand (gdbarch, ppc_stap_is_single_operand);
-  set_gdbarch_stap_parse_special_token (gdbarch,
-					ppc_stap_parse_special_token);
+  set_gdbarch_stap_parse_special_token (gdbarch, ppc_stap_parse_special_token);
 
   if (tdep->wordsize == 4)
     {
@@ -2112,13 +1946,13 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_return_value_as_value (gdbarch, ppc_linux_return_value);
       set_gdbarch_return_value (gdbarch, nullptr);
 
-      set_gdbarch_memory_remove_breakpoint (gdbarch,
-					    ppc_linux_memory_remove_breakpoint);
+      set_gdbarch_memory_remove_breakpoint (
+	gdbarch, ppc_linux_memory_remove_breakpoint);
 
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc_skip_trampoline_code);
-      set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, linux_ilp32_fetch_link_map_offsets);
+      set_solib_svr4_fetch_link_map_offsets (
+	gdbarch, linux_ilp32_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC);
@@ -2139,38 +1973,38 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	{
 	  powerpc_so_ops = svr4_so_ops;
 	  /* Override dynamic resolve function.  */
-	  powerpc_so_ops.in_dynsym_resolve_code =
-	    powerpc_linux_in_dynsym_resolve_code;
+	  powerpc_so_ops.in_dynsym_resolve_code
+	    = powerpc_linux_in_dynsym_resolve_code;
 	}
       set_gdbarch_so_ops (gdbarch, &powerpc_so_ops);
 
       set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
     }
-  
+
   if (tdep->wordsize == 8)
     {
       if (tdep->elf_abi == POWERPC_ELF_V1)
 	{
 	  /* Handle PPC GNU/Linux 64-bit function pointers (which are really
 	     function descriptors).  */
-	  set_gdbarch_convert_from_func_ptr_addr
-	    (gdbarch, ppc64_convert_from_func_ptr_addr);
+	  set_gdbarch_convert_from_func_ptr_addr (
+	    gdbarch, ppc64_convert_from_func_ptr_addr);
 
-	  set_gdbarch_elf_make_msymbol_special
-	    (gdbarch, ppc64_elf_make_msymbol_special);
+	  set_gdbarch_elf_make_msymbol_special (
+	    gdbarch, ppc64_elf_make_msymbol_special);
 	}
       else
 	{
-	  set_gdbarch_elf_make_msymbol_special
-	    (gdbarch, ppc_elfv2_elf_make_msymbol_special);
+	  set_gdbarch_elf_make_msymbol_special (
+	    gdbarch, ppc_elfv2_elf_make_msymbol_special);
 
 	  set_gdbarch_skip_entrypoint (gdbarch, ppc_elfv2_skip_entrypoint);
 	}
 
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
-      set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, linux_lp64_fetch_link_map_offsets);
+      set_solib_svr4_fetch_link_map_offsets (
+	gdbarch, linux_lp64_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC64);
@@ -2186,7 +2020,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpcle");
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
-     /* Set compiler triplet.  */
+      /* Set compiler triplet.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
 	set_gdbarch_gnu_triplet_regexp (gdbarch, ppc64le_gnu_triplet_regexp);
       else
@@ -2196,8 +2030,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
     }
 
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
-  set_gdbarch_iterate_over_regset_sections (gdbarch,
-					    ppc_linux_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, ppc_linux_iterate_over_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
@@ -2214,14 +2048,14 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_num_regs (gdbarch, PPC_TRAP_REGNUM + 1);
 
       /* If they are present, then assign them to the reserved number.  */
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.power.linux");
+      feature
+	= tdesc_find_feature (info.target_desc, "org.gnu.gdb.power.linux");
       if (feature != NULL)
 	{
-	  tdesc_numbered_register (feature, tdesc_data,
-				   PPC_ORIG_R3_REGNUM, "orig_r3");
-	  tdesc_numbered_register (feature, tdesc_data,
-				   PPC_TRAP_REGNUM, "trap");
+	  tdesc_numbered_register (feature, tdesc_data, PPC_ORIG_R3_REGNUM,
+				   "orig_r3");
+	  tdesc_numbered_register (feature, tdesc_data, PPC_TRAP_REGNUM,
+				   "trap");
 	}
     }
 
@@ -2236,21 +2070,21 @@ ppc_linux_init_abi (struct gdbarch_info info,
   /* Setup displaced stepping.  */
   set_gdbarch_displaced_step_prepare (gdbarch,
 				      ppc_linux_displaced_step_prepare);
-
 }
 
 void _initialize_ppc_linux_tdep ();
+
 void
 _initialize_ppc_linux_tdep ()
 {
   /* Register for all sub-families of the POWER/PowerPC: 32-bit and
      64-bit PowerPC, and the older rs6k.  */
   gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_LINUX,
-			 ppc_linux_init_abi);
+			  ppc_linux_init_abi);
   gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc64, GDB_OSABI_LINUX,
-			 ppc_linux_init_abi);
+			  ppc_linux_init_abi);
   gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
-			 ppc_linux_init_abi);
+			  ppc_linux_init_abi);
 
   /* Initialize the Linux target descriptions.  */
   initialize_tdesc_powerpc_32l ();

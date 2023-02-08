@@ -28,31 +28,30 @@ struct sparc_fpregmap;
 extern const struct sparc_gregmap *sparc_gregmap;
 extern const struct sparc_fpregmap *sparc_fpregmap;
 extern void (*sparc_supply_gregset) (const struct sparc_gregmap *,
-				     struct regcache *, int , const void *);
+				     struct regcache *, int, const void *);
 extern void (*sparc_collect_gregset) (const struct sparc_gregmap *,
 				      const struct regcache *, int, void *);
 extern void (*sparc_supply_fpregset) (const struct sparc_fpregmap *,
-				      struct regcache *, int , const void *);
+				      struct regcache *, int, const void *);
 extern void (*sparc_collect_fpregset) (const struct sparc_fpregmap *,
-				       const struct regcache *, int , void *);
+				       const struct regcache *, int, void *);
 extern int (*sparc_gregset_supplies_p) (struct gdbarch *gdbarch, int);
 extern int (*sparc_fpregset_supplies_p) (struct gdbarch *gdbarch, int);
 
 extern int sparc32_gregset_supplies_p (struct gdbarch *gdbarch, int regnum);
 extern int sparc32_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum);
 
-extern void sparc_fetch_inferior_registers (process_stratum_target *proc_target,
-					    regcache *, int);
-extern void sparc_store_inferior_registers (process_stratum_target *proc_target,
-					    regcache *, int);
+extern void
+sparc_fetch_inferior_registers (process_stratum_target *proc_target,
+				regcache *, int);
+extern void
+sparc_store_inferior_registers (process_stratum_target *proc_target,
+				regcache *, int);
 
-extern target_xfer_status sparc_xfer_wcookie (enum target_object object,
-					      const char *annex,
-					      gdb_byte *readbuf,
-					      const gdb_byte *writebuf,
-					      ULONGEST offset,
-					      ULONGEST len,
-					      ULONGEST *xfered_len);
+extern target_xfer_status
+sparc_xfer_wcookie (enum target_object object, const char *annex,
+		    gdb_byte *readbuf, const gdb_byte *writebuf,
+		    ULONGEST offset, ULONGEST len, ULONGEST *xfered_len);
 
 /* A prototype generic SPARC target.  The client can override
    it with local methods.  */
@@ -61,24 +60,27 @@ template<typename BaseTarget>
 struct sparc_target : public BaseTarget
 {
   void fetch_registers (struct regcache *regcache, int regnum) override
-  { sparc_fetch_inferior_registers (this, regcache, regnum); }
+  {
+    sparc_fetch_inferior_registers (this, regcache, regnum);
+  }
 
   void store_registers (struct regcache *regcache, int regnum) override
-  { sparc_store_inferior_registers (this, regcache, regnum); }
+  {
+    sparc_store_inferior_registers (this, regcache, regnum);
+  }
 
   enum target_xfer_status xfer_partial (enum target_object object,
-					const char *annex,
-					gdb_byte *readbuf,
+					const char *annex, gdb_byte *readbuf,
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override
   {
     if (object == TARGET_OBJECT_WCOOKIE)
-      return sparc_xfer_wcookie (object, annex, readbuf, writebuf,
-				 offset, len, xfered_len);
+      return sparc_xfer_wcookie (object, annex, readbuf, writebuf, offset, len,
+				 xfered_len);
 
-    return BaseTarget::xfer_partial (object, annex, readbuf, writebuf,
-				     offset, len, xfered_len);
+    return BaseTarget::xfer_partial (object, annex, readbuf, writebuf, offset,
+				     len, xfered_len);
   }
 };
 

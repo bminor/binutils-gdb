@@ -30,11 +30,9 @@
 
 null_file null_stream;
 
-ui_file::ui_file ()
-{}
+ui_file::ui_file () {}
 
-ui_file::~ui_file ()
-{}
+ui_file::~ui_file () {}
 
 void
 ui_file::printf (const char *format, ...)
@@ -106,12 +104,12 @@ ui_file::printchar (int c, int quoter, bool async_safe)
   char buf[4];
   int out = 0;
 
-  c &= 0xFF;			/* Avoid sign bit follies */
+  c &= 0xFF; /* Avoid sign bit follies */
 
   if (c < 0x20			 /* Low control chars */
       || (c >= 0x7F && c < 0xA0) /* DEL, High controls */
       || (sevenbit_strings && c >= 0x80))
-    {				/* high order bit set */
+    { /* high order bit set */
       buf[out++] = '\\';
 
       switch (c)
@@ -159,8 +157,6 @@ ui_file::printchar (int c, int quoter, bool async_safe)
     this->write (buf, out);
 }
 
-
-
 void
 null_file::write (const char *buf, long sizeof_buf)
 {
@@ -178,8 +174,6 @@ null_file::write_async_safe (const char *buf, long sizeof_buf)
 {
   /* Discard the request.  */
 }
-
-
 
 /* true if the gdb terminal supports styling, and styling is enabled.  */
 
@@ -205,10 +199,7 @@ term_cli_styling ()
   return true;
 }
 
-
-
-string_file::~string_file ()
-{}
+string_file::~string_file () {}
 
 void
 string_file::write (const char *buf, long length_buf)
@@ -232,8 +223,6 @@ string_file::can_emit_style_escape ()
   return m_term_out && term_cli_styling ();
 }
 
-
-
 stdio_file::stdio_file (FILE *file, bool close_p)
 {
   set_stream (file);
@@ -244,7 +233,8 @@ stdio_file::stdio_file ()
   : m_file (NULL),
     m_fd (-1),
     m_close_p (false)
-{}
+{
+}
 
 stdio_file::~stdio_file ()
 {
@@ -352,11 +342,8 @@ stdio_file::isatty ()
 bool
 stdio_file::can_emit_style_escape ()
 {
-  return (this->isatty ()
-	  && term_cli_styling ());
+  return (this->isatty () && term_cli_styling ());
 }
-
-
 
 /* This is the implementation of ui_file method 'write' for stderr.
    gdb_stdout is flushed before writing to gdb_stderr.  */
@@ -380,18 +367,16 @@ stderr_file::puts (const char *linebuffer)
 
 stderr_file::stderr_file (FILE *stream)
   : stdio_file (stream)
-{}
-
-
+{
+}
 
 tee_file::tee_file (ui_file *one, ui_file *two)
   : m_one (one),
     m_two (two)
-{}
-
-tee_file::~tee_file ()
 {
 }
+
+tee_file::~tee_file () {}
 
 void
 tee_file::flush ()
@@ -440,8 +425,7 @@ tee_file::term_out ()
 bool
 tee_file::can_emit_style_escape ()
 {
-  return (m_one->term_out ()
-	  && term_cli_styling ());
+  return (m_one->term_out () && term_cli_styling ());
 }
 
 /* See ui-file.h.  */
@@ -488,10 +472,11 @@ timestamped_file::write (const char *buf, long len)
 
 	  steady_clock::time_point now = steady_clock::now ();
 	  seconds s = duration_cast<seconds> (now.time_since_epoch ());
-	  microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
-	  std::string timestamp = string_printf ("%ld.%06ld ",
-						 (long) s.count (),
-						 (long) us.count ());
+	  microseconds us
+	    = duration_cast<microseconds> (now.time_since_epoch () - s);
+	  std::string timestamp
+	    = string_printf ("%ld.%06ld ", (long) s.count (),
+			     (long) us.count ());
 	  m_stream->puts (timestamp.c_str ());
 	}
 

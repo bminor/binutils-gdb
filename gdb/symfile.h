@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (SYMFILE_H)
+#if !defined(SYMFILE_H)
 #define SYMFILE_H
 
 /* This file requires that you first include "bfd.h".  */
@@ -80,8 +80,10 @@ struct symfile_segment_data
   struct segment
   {
     segment (CORE_ADDR base, CORE_ADDR size)
-      : base (base), size (size)
-    {}
+      : base (base),
+	size (size)
+    {
+    }
 
     /* The original base address the segment.  */
     CORE_ADDR base;
@@ -109,8 +111,8 @@ using symfile_segment_data_up = std::unique_ptr<symfile_segment_data>;
 struct sym_probe_fns
 {
   /* If non-NULL, return a reference to vector of probe objects.  */
-  const std::vector<std::unique_ptr<probe>> &(*sym_get_probes)
-    (struct objfile *);
+  const std::vector<std::unique_ptr<probe>> &(*sym_get_probes) (
+    struct objfile *);
 };
 
 /* Structure to keep track of symbol reading functions for various
@@ -142,7 +144,6 @@ struct sym_fns
      particular objfile.  */
 
   void (*sym_finish) (struct objfile *);
-
 
   /* This function produces a file-dependent section_offsets
      structure, allocated in the objfile's storage.
@@ -176,13 +177,13 @@ struct sym_fns
 };
 
 extern section_addr_info
-  build_section_addr_info_from_objfile (const struct objfile *objfile);
+build_section_addr_info_from_objfile (const struct objfile *objfile);
 
-extern void relative_addr_info_to_section_offsets
-  (section_offsets &section_offsets, const section_addr_info &addrs);
+extern void
+relative_addr_info_to_section_offsets (section_offsets &section_offsets,
+				       const section_addr_info &addrs);
 
-extern void addr_info_make_relative (section_addr_info *addrs,
-				     bfd *abfd);
+extern void addr_info_make_relative (section_addr_info *addrs, bfd *abfd);
 
 /* The default version of sym_fns.sym_offsets for readers that don't
    do anything special.  */
@@ -201,8 +202,8 @@ extern symfile_segment_data_up default_symfile_segments (bfd *abfd);
 extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
 					   asection *sectp, bfd_byte *buf);
 
-extern struct symtab *allocate_symtab
-  (struct compunit_symtab *cust, const char *filename, const char *id)
+extern struct symtab *allocate_symtab (struct compunit_symtab *cust,
+				       const char *filename, const char *id)
   ATTRIBUTE_NONNULL (1);
 
 /* Same as the above, but passes FILENAME for ID.  */
@@ -233,10 +234,10 @@ extern void add_filename_language (const char *ext, enum language lang);
 extern struct objfile *symbol_file_add (const char *, symfile_add_flags,
 					section_addr_info *, objfile_flags);
 
-extern struct objfile *symbol_file_add_from_bfd (const gdb_bfd_ref_ptr &,
-						 const char *, symfile_add_flags,
-						 section_addr_info *,
-						 objfile_flags, struct objfile *parent);
+extern struct objfile *
+symbol_file_add_from_bfd (const gdb_bfd_ref_ptr &, const char *,
+			  symfile_add_flags, section_addr_info *,
+			  objfile_flags, struct objfile *parent);
 
 extern void symbol_file_add_separate (const gdb_bfd_ref_ptr &, const char *,
 				      symfile_add_flags, struct objfile *);
@@ -247,16 +248,16 @@ extern void symbol_file_add_separate (const gdb_bfd_ref_ptr &, const char *,
    Any warnings generated as part of this lookup are added to
    WARNINGS_VECTOR, one std::string per warning.  */
 
-extern std::string find_separate_debug_file_by_debuglink
-  (struct objfile *objfile, std::vector<std::string> *warnings_vector);
+extern std::string find_separate_debug_file_by_debuglink (
+  struct objfile *objfile, std::vector<std::string> *warnings_vector);
 
 /* Build (allocate and populate) a section_addr_info struct from an
    existing section table.  */
 
 extern section_addr_info
-    build_section_addr_info_from_section_table (const target_section_table &table);
+build_section_addr_info_from_section_table (const target_section_table &table);
 
-			/*   Variables   */
+/*   Variables   */
 
 /* If true, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
@@ -281,12 +282,12 @@ extern int get_section_index (struct objfile *, const char *);
 extern int print_symbol_loading_p (int from_tty, int mainline, int full);
 
 /* Utility functions for overlay sections: */
-extern enum overlay_debugging_state
-{
+extern enum overlay_debugging_state {
   ovly_off,
   ovly_on,
   ovly_auto
 } overlay_debugging;
+
 extern int overlay_cache_invalid;
 
 /* Return the "mapped" overlay section containing the PC.  */
@@ -330,21 +331,19 @@ extern void simple_overlay_update (struct obj_section *);
 extern bfd_byte *symfile_relocate_debug_section (struct objfile *, asection *,
 						 bfd_byte *);
 
-extern int symfile_map_offsets_to_segments (bfd *,
-					    const struct symfile_segment_data *,
-					    section_offsets &,
-					    int, const CORE_ADDR *);
+extern int
+symfile_map_offsets_to_segments (bfd *, const struct symfile_segment_data *,
+				 section_offsets &, int, const CORE_ADDR *);
 symfile_segment_data_up get_symfile_segment_data (bfd *abfd);
 
 extern scoped_restore_tmpl<int> increment_reading_symtab (void);
 
-bool expand_symtabs_matching
-  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   block_search_flags search_flags,
-   enum search_domain kind);
+bool expand_symtabs_matching (
+  gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+  const lookup_name_info &lookup_name,
+  gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+  gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+  block_search_flags search_flags, enum search_domain kind);
 
 void map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
 			   bool need_fullname);

@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (FRAME_UNWIND_H)
+#if !defined(FRAME_UNWIND_H)
 #define FRAME_UNWIND_H 1
 
 struct frame_data;
@@ -28,7 +28,7 @@ struct gdbarch;
 struct regcache;
 struct value;
 
-#include "frame.h"		/* For enum frame_type.  */
+#include "frame.h" /* For enum frame_type.  */
 
 /* The following unwind functions assume a chain of frames forming the
    sequence: (outer) prev <-> this <-> next (inner).  All the
@@ -53,8 +53,8 @@ typedef int (frame_sniffer_ftype) (const struct frame_unwind *self,
 				   frame_info_ptr this_frame,
 				   void **this_prologue_cache);
 
-typedef enum unwind_stop_reason (frame_unwind_stop_reason_ftype)
-  (frame_info_ptr this_frame, void **this_prologue_cache);
+typedef enum unwind_stop_reason (frame_unwind_stop_reason_ftype) (
+  frame_info_ptr this_frame, void **this_prologue_cache);
 
 /* A default frame sniffer which always accepts the frame.  Used by
    fallback prologue unwinders.  */
@@ -67,8 +67,8 @@ int default_frame_sniffer (const struct frame_unwind *self,
    unwindable.  */
 
 enum unwind_stop_reason
-  default_frame_unwind_stop_reason (frame_info_ptr this_frame,
-				    void **this_cache);
+default_frame_unwind_stop_reason (frame_info_ptr this_frame,
+				  void **this_cache);
 
 /* A default unwind_pc callback that simply unwinds the register identified
    by GDBARCH_PC_REGNUM.  */
@@ -140,14 +140,13 @@ typedef void (frame_this_id_ftype) (frame_info_ptr this_frame,
    with the other unwind methods.  Memory for that cache should be
    allocated using FRAME_OBSTACK_ZALLOC().  */
 
-typedef struct value * (frame_prev_register_ftype)
-  (frame_info_ptr this_frame, void **this_prologue_cache,
-   int regnum);
+typedef struct value *(frame_prev_register_ftype) (frame_info_ptr this_frame,
+						   void **this_prologue_cache,
+						   int regnum);
 
 /* Deallocate extra memory associated with the frame cache if any.  */
 
-typedef void (frame_dealloc_cache_ftype) (frame_info *self,
-					  void *this_cache);
+typedef void (frame_dealloc_cache_ftype) (frame_info *self, void *this_cache);
 
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
    use THIS frame, and implicitly the NEXT frame's register unwind
@@ -201,8 +200,7 @@ extern void frame_unwind_find_by_frame (frame_info_ptr this_frame,
 
 /* Return a value which indicates that FRAME did not save REGNUM.  */
 
-struct value *frame_unwind_got_optimized (frame_info_ptr frame,
-					  int regnum);
+struct value *frame_unwind_got_optimized (frame_info_ptr frame, int regnum);
 
 /* Return a value which indicates that FRAME copied REGNUM into
    register NEW_REGNUM.  */

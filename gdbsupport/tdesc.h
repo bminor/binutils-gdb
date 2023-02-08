@@ -31,29 +31,21 @@ struct target_desc;
 class tdesc_element_visitor
 {
 public:
-  virtual void visit_pre (const target_desc *e)
-  {}
+  virtual void visit_pre (const target_desc *e) {}
 
-  virtual void visit_post (const target_desc *e)
-  {}
+  virtual void visit_post (const target_desc *e) {}
 
-  virtual void visit_pre (const tdesc_feature *e)
-  {}
+  virtual void visit_pre (const tdesc_feature *e) {}
 
-  virtual void visit_post (const tdesc_feature *e)
-  {}
+  virtual void visit_post (const tdesc_feature *e) {}
 
-  virtual void visit (const tdesc_type_builtin *e)
-  {}
+  virtual void visit (const tdesc_type_builtin *e) {}
 
-  virtual void visit (const tdesc_type_vector *e)
-  {}
+  virtual void visit (const tdesc_type_vector *e) {}
 
-  virtual void visit (const tdesc_type_with_fields *e)
-  {}
+  virtual void visit (const tdesc_type_with_fields *e) {}
 
-  virtual void visit (const tdesc_reg *e)
-  {}
+  virtual void visit (const tdesc_reg *e) {}
 };
 
 class tdesc_element
@@ -67,8 +59,8 @@ public:
 struct tdesc_reg : tdesc_element
 {
   tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
-	     int regnum, int save_restore_, const char *group_,
-	     int bitsize_, const char *type_);
+             int regnum, int save_restore_, const char *group_, int bitsize_,
+             const char *type_);
 
   virtual ~tdesc_reg () = default;
 
@@ -108,25 +100,16 @@ struct tdesc_reg : tdesc_element
   /* The target-described type corresponding to TYPE, if found.  */
   struct tdesc_type *tdesc_type;
 
-  void accept (tdesc_element_visitor &v) const override
-  {
-    v.visit (this);
-  }
+  void accept (tdesc_element_visitor &v) const override { v.visit (this); }
 
   bool operator== (const tdesc_reg &other) const
   {
-    return (name == other.name
-       && target_regnum == other.target_regnum
-       && save_restore == other.save_restore
-       && bitsize == other.bitsize
-       && group == other.group
-       && type == other.type);
+    return (name == other.name && target_regnum == other.target_regnum
+            && save_restore == other.save_restore && bitsize == other.bitsize
+            && group == other.group && type == other.type);
   }
 
-  bool operator!= (const tdesc_reg &other) const
-  {
-    return !(*this == other);
-  }
+  bool operator!= (const tdesc_reg &other) const { return !(*this == other); }
 };
 
 typedef std::unique_ptr<tdesc_reg> tdesc_reg_up;
@@ -143,14 +126,14 @@ typedef std::unique_ptr<tdesc_compatible_info> tdesc_compatible_info_up;
 /* Return a vector of compatibility information pointers from the target
    description TARGET_DESC.  */
 
-const std::vector<tdesc_compatible_info_up> &tdesc_compatible_info_list
-	(const target_desc *target_desc);
+const std::vector<tdesc_compatible_info_up> &
+tdesc_compatible_info_list (const target_desc *target_desc);
 
 /* Return the architecture name from a compatibility information
    COMPATIBLE.  */
 
-const char *tdesc_compatible_info_arch_name
-	(const tdesc_compatible_info_up &compatible);
+const char *
+tdesc_compatible_info_arch_name (const tdesc_compatible_info_up &compatible);
 
 enum tdesc_type_kind
 {
@@ -186,8 +169,10 @@ enum tdesc_type_kind
 struct tdesc_type : tdesc_element
 {
   tdesc_type (const std::string &name_, enum tdesc_type_kind kind_)
-    : name (name_), kind (kind_)
-  {}
+    : name (name_),
+      kind (kind_)
+  {
+  }
 
   virtual ~tdesc_type () = default;
 
@@ -204,10 +189,7 @@ struct tdesc_type : tdesc_element
     return name == other.name && kind == other.kind;
   }
 
-  bool operator!= (const tdesc_type &other) const
-  {
-    return !(*this == other);
-  }
+  bool operator!= (const tdesc_type &other) const { return !(*this == other); }
 };
 
 typedef std::unique_ptr<tdesc_type> tdesc_type_up;
@@ -215,13 +197,11 @@ typedef std::unique_ptr<tdesc_type> tdesc_type_up;
 struct tdesc_type_builtin : tdesc_type
 {
   tdesc_type_builtin (const std::string &name, enum tdesc_type_kind kind)
-  : tdesc_type (name, kind)
-  {}
-
-  void accept (tdesc_element_visitor &v) const override
+    : tdesc_type (name, kind)
   {
-    v.visit (this);
   }
+
+  void accept (tdesc_element_visitor &v) const override { v.visit (this); }
 };
 
 /* tdesc_type for vector types.  */
@@ -229,15 +209,14 @@ struct tdesc_type_builtin : tdesc_type
 struct tdesc_type_vector : tdesc_type
 {
   tdesc_type_vector (const std::string &name, tdesc_type *element_type_,
-		     int count_)
-  : tdesc_type (name, TDESC_TYPE_VECTOR),
-    element_type (element_type_), count (count_)
-  {}
-
-  void accept (tdesc_element_visitor &v) const override
+                     int count_)
+    : tdesc_type (name, TDESC_TYPE_VECTOR),
+      element_type (element_type_),
+      count (count_)
   {
-    v.visit (this);
   }
+
+  void accept (tdesc_element_visitor &v) const override { v.visit (this); }
 
   struct tdesc_type *element_type;
   int count;
@@ -247,10 +226,14 @@ struct tdesc_type_vector : tdesc_type
 
 struct tdesc_type_field
 {
-  tdesc_type_field (const std::string &name_, tdesc_type *type_,
-		    int start_, int end_)
-  : name (name_), type (type_), start (start_), end (end_)
-  {}
+  tdesc_type_field (const std::string &name_, tdesc_type *type_, int start_,
+                    int end_)
+    : name (name_),
+      type (type_),
+      start (start_),
+      end (end_)
+  {
+  }
 
   std::string name;
   struct tdesc_type *type;
@@ -265,14 +248,13 @@ struct tdesc_type_field
 struct tdesc_type_with_fields : tdesc_type
 {
   tdesc_type_with_fields (const std::string &name, tdesc_type_kind kind,
-			  int size_ = 0)
-  : tdesc_type (name, kind), size (size_)
-  {}
-
-  void accept (tdesc_element_visitor &v) const override
+                          int size_ = 0)
+    : tdesc_type (name, kind),
+      size (size_)
   {
-    v.visit (this);
   }
+
+  void accept (tdesc_element_visitor &v) const override { v.visit (this); }
 
   std::vector<tdesc_type_field> fields;
   int size;
@@ -283,9 +265,7 @@ struct tdesc_type_with_fields : tdesc_type
 
 struct tdesc_feature : tdesc_element
 {
-  tdesc_feature (const std::string &name_)
-    : name (name_)
-  {}
+  tdesc_feature (const std::string &name_) : name (name_) {}
 
   virtual ~tdesc_feature () = default;
 
@@ -331,8 +311,7 @@ typedef std::unique_ptr<target_desc, target_desc_deleter> target_desc_up;
 target_desc_up allocate_target_description (void);
 
 /* Set TARGET_DESC's architecture by NAME.  */
-void set_tdesc_architecture (target_desc *target_desc,
-			     const char *name);
+void set_tdesc_architecture (target_desc *target_desc, const char *name);
 
 /* Return the architecture associated with this target description as a string,
    or NULL if no architecture was specified.  */
@@ -348,47 +327,44 @@ const char *tdesc_osabi_name (const struct target_desc *target_desc);
 /* Return the type associated with ID in the context of FEATURE, or
    NULL if none.  */
 struct tdesc_type *tdesc_named_type (const struct tdesc_feature *feature,
-				     const char *id);
+                                     const char *id);
 
 /* Return the created feature named NAME in target description TDESC.  */
 struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
-					    const char *name);
+                                            const char *name);
 
 /* Return the created vector tdesc_type named NAME in FEATURE.  */
 struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
-					const char *name,
-					struct tdesc_type *field_type,
-					int count);
+                                        const char *name,
+                                        struct tdesc_type *field_type,
+                                        int count);
 
 /* Return the created struct tdesc_type named NAME in FEATURE.  */
 tdesc_type_with_fields *tdesc_create_struct (struct tdesc_feature *feature,
-					     const char *name);
+                                             const char *name);
 
 /* Return the created union tdesc_type named NAME in FEATURE.  */
 tdesc_type_with_fields *tdesc_create_union (struct tdesc_feature *feature,
-					    const char *name);
+                                            const char *name);
 
 /* Return the created flags tdesc_type named NAME in FEATURE.  */
 tdesc_type_with_fields *tdesc_create_flags (struct tdesc_feature *feature,
-					    const char *name,
-					    int size);
+                                            const char *name, int size);
 
 /* Return the created enum tdesc_type named NAME in FEATURE.  */
 tdesc_type_with_fields *tdesc_create_enum (struct tdesc_feature *feature,
-					   const char *name,
-					   int size);
+                                           const char *name, int size);
 
 /* Add a new field to TYPE.  FIELD_NAME is its name, and FIELD_TYPE is
    its type.  */
 void tdesc_add_field (tdesc_type_with_fields *type, const char *field_name,
-		      struct tdesc_type *field_type);
+                      struct tdesc_type *field_type);
 
 /* Add a new bitfield to TYPE, with range START to END.  FIELD_NAME is its name,
    and FIELD_TYPE is its type.  */
 void tdesc_add_typed_bitfield (tdesc_type_with_fields *type,
-			       const char *field_name,
-			       int start, int end,
-			       struct tdesc_type *field_type);
+                               const char *field_name, int start, int end,
+                               struct tdesc_type *field_type);
 
 /* Set the total length of TYPE.  Structs which contain bitfields may
    omit the reserved bits, so the end of the last field may not
@@ -399,21 +375,21 @@ void tdesc_set_struct_size (tdesc_type_with_fields *type, int size);
    Untyped bitfields become either uint32 or uint64 depending on the size
    of the underlying type.  */
 void tdesc_add_bitfield (tdesc_type_with_fields *type, const char *field_name,
-			 int start, int end);
+                         int start, int end);
 
 /* A flag is just a typed(bool) single-bit bitfield.
    This function is kept to minimize changes in generated files.  */
 void tdesc_add_flag (tdesc_type_with_fields *type, int start,
-		     const char *flag_name);
+                     const char *flag_name);
 
 /* Add field with VALUE and NAME to the enum TYPE.  */
 void tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
-			   const char *name);
+                           const char *name);
 
 /* Create a register in feature FEATURE.  */
 void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
-		       int regnum, int save_restore, const char *group,
-		       int bitsize, const char *type);
+                       int regnum, int save_restore, const char *group,
+                       int bitsize, const char *type);
 
 /* Return the tdesc in string XML format.  */
 
@@ -424,10 +400,7 @@ const char *tdesc_get_features_xml (const target_desc *tdesc);
 class print_xml_feature : public tdesc_element_visitor
 {
 public:
-  print_xml_feature (std::string *buffer_)
-    : m_buffer (buffer_),
-      m_depth (0)
-  {}
+  print_xml_feature (std::string *buffer_) : m_buffer (buffer_), m_depth (0) {}
 
   void visit_pre (const target_desc *e) override;
   void visit_post (const target_desc *e) override;
@@ -439,15 +412,11 @@ public:
   void visit (const tdesc_reg *reg) override;
 
 private:
-
   /* Called with a positive value of ADJUST when we move inside an element,
      for example inside <target>, and with a negative value when we leave
      the element.  In this class this function does nothing, but a
      sub-class can override this to track the current level of nesting.  */
-  void indent (int adjust)
-  {
-    m_depth += (adjust * 2);
-  }
+  void indent (int adjust) { m_depth += (adjust * 2); }
 
   /* Functions to add lines to the output buffer M_BUFFER.  Each of these
      functions appends a newline, so don't include one in the strings being

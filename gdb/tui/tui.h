@@ -33,8 +33,7 @@ extern bool debug_tui;
 
 /* Print "tui" enter/exit debug statements.  */
 
-#define TUI_SCOPED_DEBUG_ENTER_EXIT \
-  scoped_debug_enter_exit (debug_tui, "tui")
+#define TUI_SCOPED_DEBUG_ENTER_EXIT scoped_debug_enter_exit (debug_tui, "tui")
 
 #define TUI_SCOPED_DEBUG_START_END(fmt, ...) \
   scoped_debug_start_end (debug_tui, "tui", fmt, ##__VA_ARGS__)
@@ -60,8 +59,8 @@ enum tui_win_type
   MAX_MAJOR_WINDOWS,
 };
 
-extern CORE_ADDR tui_get_low_disassembly_address (struct gdbarch *,
-						  CORE_ADDR, CORE_ADDR);
+extern CORE_ADDR tui_get_low_disassembly_address (struct gdbarch *, CORE_ADDR,
+						  CORE_ADDR);
 extern void tui_show_assembly (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern bool tui_is_window_visible (enum tui_win_type type);
 extern bool tui_get_command_dimension (unsigned int *width,

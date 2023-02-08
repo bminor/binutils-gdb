@@ -37,13 +37,13 @@ struct connection_object
 {
   PyObject_HEAD
 
-  /* The process target that represents this connection.   When a
+    /* The process target that represents this connection.   When a
      connection_object is created this field will always point at a valid
      target.  Later, if GDB stops using this target (the target is popped
      from all target stacks) then this field is set to nullptr, which
      indicates that this Python object is now in the invalid state (see
      the is_valid() method below).  */
-  struct process_stratum_target *target;
+    struct process_stratum_target *target;
 };
 
 extern PyTypeObject connection_object_type
@@ -53,21 +53,23 @@ extern PyTypeObject remote_connection_object_type
   CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("remote_connection_object");
 
 /* Require that CONNECTION be valid.  */
-#define CONNPY_REQUIRE_VALID(connection)			\
-  do {								\
-    if (connection->target == nullptr)				\
-      {								\
-	PyErr_SetString (PyExc_RuntimeError,			\
-			 _("Connection no longer exists."));	\
-	return nullptr;						\
-      }								\
-  } while (0)
+#define CONNPY_REQUIRE_VALID(connection)                        \
+  do                                                            \
+    {                                                           \
+      if (connection->target == nullptr)                        \
+	{                                                       \
+	  PyErr_SetString (PyExc_RuntimeError,                  \
+			   _ ("Connection no longer exists.")); \
+	  return nullptr;                                       \
+	}                                                       \
+    }                                                           \
+  while (0)
 
 /* A map between process_stratum targets and the Python object representing
    them.  We actually hold a gdbpy_ref around the Python object so that
    reference counts are handled correctly when entries are deleted.  */
-static std::map<process_stratum_target *,
-		gdbpy_ref<connection_object>> all_connection_objects;
+static std::map<process_stratum_target *, gdbpy_ref<connection_object>>
+  all_connection_objects;
 
 /* Return a reference to a gdb.TargetConnection object for TARGET.  If
    TARGET is nullptr then a reference to None is returned.
@@ -82,7 +84,7 @@ target_to_connection_object (process_stratum_target *target)
   if (target == nullptr)
     return gdbpy_ref<>::new_reference (Py_None);
 
-  gdbpy_ref <connection_object> conn_obj;
+  gdbpy_ref<connection_object> conn_obj;
   auto conn_obj_iter = all_connection_objects.find (target);
   if (conn_obj_iter == all_connection_objects.end ())
     {
@@ -141,8 +143,7 @@ static int
 emit_connection_event (process_stratum_target *target,
 		       eventregistry_object *registry)
 {
-  gdbpy_ref<> event_obj
-    = create_event_object (&connection_event_object_type);
+  gdbpy_ref<> event_obj = create_event_object (&connection_event_object_type);
   if (event_obj == nullptr)
     return -1;
 
@@ -170,7 +171,7 @@ connpy_connection_removed (process_stratum_target *target)
   auto conn_obj_iter = all_connection_objects.find (target);
   if (conn_obj_iter != all_connection_objects.end ())
     {
-      gdbpy_ref <connection_object> conn_obj = conn_obj_iter->second;
+      gdbpy_ref<connection_object> conn_obj = conn_obj_iter->second;
       conn_obj->target = nullptr;
       all_connection_objects.erase (target);
     }
@@ -206,10 +207,10 @@ connpy_repr (PyObject *obj)
   if (target == nullptr)
     return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (obj)->tp_name);
 
-  return PyUnicode_FromFormat ("<%s num=%d, what=\"%s\">",
-			       Py_TYPE (obj)->tp_name,
-			       target->connection_number,
-			       make_target_connection_string (target).c_str ());
+  return PyUnicode_FromFormat (
+    "<%s num=%d, what=\"%s\">", Py_TYPE (obj)->tp_name,
+    target->connection_number,
+    make_target_connection_string (target).c_str ());
 }
 
 /* Implementation of gdb.TargetConnection.is_valid() -> Boolean.  Returns
@@ -292,14 +293,16 @@ gdbpy_initialize_connection (void)
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "TargetConnection",
-			      (PyObject *) &connection_object_type) < 0)
+			      (PyObject *) &connection_object_type)
+      < 0)
     return -1;
 
   if (PyType_Ready (&remote_connection_object_type) < 0)
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "RemoteTargetConnection",
-			      (PyObject *) &remote_connection_object_type) < 0)
+			      (PyObject *) &remote_connection_object_type)
+      < 0)
     return -1;
 
   return 0;
@@ -315,12 +318,14 @@ struct py_send_packet_callbacks : public send_remote_packet_callbacks
 
   py_send_packet_callbacks ()
     : m_result (nullptr)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* There's nothing to do when the packet is sent.  */
 
   void sending (gdb::array_view<const char> &buf) override
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* When the result is returned create a Python object and assign this
      into M_RESULT.  If for any reason we can't create a Python object to
@@ -353,10 +358,7 @@ struct py_send_packet_callbacks : public send_remote_packet_callbacks
      Python functions that might clear the error state, or rely on an error
      not being set will cause undefined behaviour.  */
 
-  gdbpy_ref<> result () const
-  {
-    return m_result;
-  }
+  gdbpy_ref<> result () const { return m_result; }
 
 private:
 
@@ -377,11 +379,10 @@ connpy_send_packet (PyObject *self, PyObject *args, PyObject *kw)
 
   CONNPY_REQUIRE_VALID (conn);
 
-  static const char *keywords[] = {"packet", nullptr};
+  static const char *keywords[] = { "packet", nullptr };
   PyObject *packet_obj;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords,
-					&packet_obj))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &packet_obj))
     return nullptr;
 
   /* If the packet is a unicode string then convert it to a bytes object.  */
@@ -397,21 +398,21 @@ connpy_send_packet (PyObject *self, PyObject *args, PyObject *kw)
   /* Check the packet is now a bytes object.  */
   if (!PyBytes_Check (packet_obj))
     {
-      PyErr_SetString (PyExc_TypeError, _("Packet is not a bytes object"));
+      PyErr_SetString (PyExc_TypeError, _ ("Packet is not a bytes object"));
       return nullptr;
     }
 
   Py_ssize_t packet_len = 0;
   char *packet_str_nonconst = nullptr;
-  if (PyBytes_AsStringAndSize (packet_obj, &packet_str_nonconst,
-			       &packet_len) < 0)
+  if (PyBytes_AsStringAndSize (packet_obj, &packet_str_nonconst, &packet_len)
+      < 0)
     return nullptr;
   const char *packet_str = packet_str_nonconst;
   gdb_assert (packet_str != nullptr);
 
   if (packet_len == 0)
     {
-      PyErr_SetString (PyExc_ValueError, _("Packet must not be empty"));
+      PyErr_SetString (PyExc_ValueError, _ ("Packet must not be empty"));
       return nullptr;
     }
 
@@ -440,6 +441,7 @@ connpy_send_packet (PyObject *self, PyObject *args, PyObject *kw)
 /* Global initialization for this file.  */
 
 void _initialize_py_connection ();
+
 void
 _initialize_py_connection ()
 {
@@ -449,122 +451,110 @@ _initialize_py_connection ()
 
 /* Methods for the gdb.TargetConnection object type.  */
 
-static PyMethodDef connection_object_methods[] =
-{
-  { "is_valid", connpy_is_valid, METH_NOARGS,
-    "is_valid () -> Boolean.\n\
+static PyMethodDef connection_object_methods[]
+  = { { "is_valid", connpy_is_valid, METH_NOARGS, "is_valid () -> Boolean.\n\
 Return true if this TargetConnection is valid, false if not." },
-  { NULL }
-};
+      { NULL } };
 
 /* Methods for the gdb.RemoteTargetConnection object type.  */
 
-static PyMethodDef remote_connection_object_methods[] =
-{
-  { "send_packet", (PyCFunction) connpy_send_packet,
-    METH_VARARGS | METH_KEYWORDS,
-    "send_packet (PACKET) -> Bytes\n\
+static PyMethodDef remote_connection_object_methods[]
+  = { { "send_packet", (PyCFunction) connpy_send_packet,
+	METH_VARARGS | METH_KEYWORDS, "send_packet (PACKET) -> Bytes\n\
 Send PACKET to a remote target, return the reply as a bytes array." },
-  { NULL }
-};
+      { NULL } };
 
 /* Attributes for the gdb.TargetConnection object type.  */
 
-static gdb_PyGetSetDef connection_object_getset[] =
-{
-  { "num", connpy_get_connection_num, NULL,
-    "ID number of this connection, as assigned by GDB.", NULL },
-  { "type", connpy_get_connection_type, NULL,
-    "A short string that is the name for this connection type.", NULL },
-  { "description", connpy_get_description, NULL,
-    "A longer string describing this connection type.", NULL },
-  { "details", connpy_get_connection_details, NULL,
-    "A string containing additional connection details.", NULL },
-  { NULL }
-};
+static gdb_PyGetSetDef connection_object_getset[]
+  = { { "num", connpy_get_connection_num, NULL,
+	"ID number of this connection, as assigned by GDB.", NULL },
+      { "type", connpy_get_connection_type, NULL,
+	"A short string that is the name for this connection type.", NULL },
+      { "description", connpy_get_description, NULL,
+	"A longer string describing this connection type.", NULL },
+      { "details", connpy_get_connection_details, NULL,
+	"A string containing additional connection details.", NULL },
+      { NULL } };
 
 /* Define the gdb.TargetConnection object type.  */
 
-PyTypeObject connection_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.TargetConnection",	  /* tp_name */
-  sizeof (connection_object),	  /* tp_basicsize */
-  0,				  /* tp_itemsize */
-  connpy_connection_dealloc,	  /* tp_dealloc */
-  0,				  /* tp_print */
-  0,				  /* tp_getattr */
-  0,				  /* tp_setattr */
-  0,				  /* tp_compare */
-  connpy_repr,			  /* tp_repr */
-  0,				  /* tp_as_number */
-  0,				  /* tp_as_sequence */
-  0,				  /* tp_as_mapping */
-  0,				  /* tp_hash  */
-  0,				  /* tp_call */
-  0,				  /* tp_str */
-  0,				  /* tp_getattro */
-  0,				  /* tp_setattro */
-  0,				  /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
-  "GDB target connection object", /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  connection_object_methods,	  /* tp_methods */
-  0,				  /* tp_members */
-  connection_object_getset,	  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,				  /* tp_init */
-  0				  /* tp_alloc */
+PyTypeObject connection_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.TargetConnection", /* tp_name */
+  sizeof (connection_object),				  /* tp_basicsize */
+  0,							  /* tp_itemsize */
+  connpy_connection_dealloc,				  /* tp_dealloc */
+  0,							  /* tp_print */
+  0,							  /* tp_getattr */
+  0,							  /* tp_setattr */
+  0,							  /* tp_compare */
+  connpy_repr,						  /* tp_repr */
+  0,							  /* tp_as_number */
+  0,							  /* tp_as_sequence */
+  0,							  /* tp_as_mapping */
+  0,							  /* tp_hash  */
+  0,							  /* tp_call */
+  0,							  /* tp_str */
+  0,							  /* tp_getattro */
+  0,							  /* tp_setattro */
+  0,							  /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,		  /* tp_flags */
+  "GDB target connection object",			  /* tp_doc */
+  0,							  /* tp_traverse */
+  0,							  /* tp_clear */
+  0,							  /* tp_richcompare */
+  0,			     /* tp_weaklistoffset */
+  0,			     /* tp_iter */
+  0,			     /* tp_iternext */
+  connection_object_methods, /* tp_methods */
+  0,			     /* tp_members */
+  connection_object_getset,  /* tp_getset */
+  0,			     /* tp_base */
+  0,			     /* tp_dict */
+  0,			     /* tp_descr_get */
+  0,			     /* tp_descr_set */
+  0,			     /* tp_dictoffset */
+  0,			     /* tp_init */
+  0			     /* tp_alloc */
 };
 
 /* Define the gdb.RemoteTargetConnection object type.  */
 
-PyTypeObject remote_connection_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.RemoteTargetConnection",	  /* tp_name */
-  sizeof (connection_object),	  /* tp_basicsize */
-  0,				  /* tp_itemsize */
-  connpy_connection_dealloc,	  /* tp_dealloc */
-  0,				  /* tp_print */
-  0,				  /* tp_getattr */
-  0,				  /* tp_setattr */
-  0,				  /* tp_compare */
-  connpy_repr,			  /* tp_repr */
-  0,				  /* tp_as_number */
-  0,				  /* tp_as_sequence */
-  0,				  /* tp_as_mapping */
-  0,				  /* tp_hash  */
-  0,				  /* tp_call */
-  0,				  /* tp_str */
-  0,				  /* tp_getattro */
-  0,				  /* tp_setattro */
-  0,				  /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT,		  /* tp_flags */
-  "GDB remote target connection object",	  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  remote_connection_object_methods,	  /* tp_methods */
-  0,				  /* tp_members */
-  0,				  /* tp_getset */
-  &connection_object_type,	  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,				  /* tp_init */
-  0				  /* tp_alloc */
+PyTypeObject remote_connection_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.RemoteTargetConnection", /* tp_name */
+  sizeof (connection_object),		 /* tp_basicsize */
+  0,					 /* tp_itemsize */
+  connpy_connection_dealloc,		 /* tp_dealloc */
+  0,					 /* tp_print */
+  0,					 /* tp_getattr */
+  0,					 /* tp_setattr */
+  0,					 /* tp_compare */
+  connpy_repr,				 /* tp_repr */
+  0,					 /* tp_as_number */
+  0,					 /* tp_as_sequence */
+  0,					 /* tp_as_mapping */
+  0,					 /* tp_hash  */
+  0,					 /* tp_call */
+  0,					 /* tp_str */
+  0,					 /* tp_getattro */
+  0,					 /* tp_setattro */
+  0,					 /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT,			 /* tp_flags */
+  "GDB remote target connection object", /* tp_doc */
+  0,					 /* tp_traverse */
+  0,					 /* tp_clear */
+  0,					 /* tp_richcompare */
+  0,					 /* tp_weaklistoffset */
+  0,					 /* tp_iter */
+  0,					 /* tp_iternext */
+  remote_connection_object_methods,	 /* tp_methods */
+  0,					 /* tp_members */
+  0,					 /* tp_getset */
+  &connection_object_type,		 /* tp_base */
+  0,					 /* tp_dict */
+  0,					 /* tp_descr_get */
+  0,					 /* tp_descr_set */
+  0,					 /* tp_dictoffset */
+  0,					 /* tp_init */
+  0					 /* tp_alloc */
 };

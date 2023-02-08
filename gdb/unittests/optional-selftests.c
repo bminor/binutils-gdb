@@ -34,8 +34,10 @@
    gdb::optional.  */
 #define GDB_OPTIONAL
 
-namespace selftests {
-namespace optional {
+namespace selftests
+{
+namespace optional
+{
 
 /* The actual tests live in separate files, which were originally
    copied over from libstdc++'s testsuite.  To preserve the structure
@@ -88,6 +90,7 @@ run_tests ()
 } /* namespace selftests */
 
 void _initialize_optional_selftests ();
+
 void
 _initialize_optional_selftests ()
 {

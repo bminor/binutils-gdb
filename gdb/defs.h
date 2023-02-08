@@ -22,7 +22,7 @@
 #define DEFS_H
 
 #ifdef GDBSERVER
-#  error gdbserver should not include gdb/defs.h
+#error gdbserver should not include gdb/defs.h
 #endif
 
 #include "gdbsupport/common-defs.h"
@@ -69,33 +69,32 @@
    accept.  */
 
 enum compile_i_scope_types
-  {
-    COMPILE_I_INVALID_SCOPE,
+{
+  COMPILE_I_INVALID_SCOPE,
 
-    /* A simple scope.  Wrap an expression into a simple scope that
+  /* A simple scope.  Wrap an expression into a simple scope that
        takes no arguments, returns no value, and uses the generic
        function name "_gdb_expr". */
 
-    COMPILE_I_SIMPLE_SCOPE,
+  COMPILE_I_SIMPLE_SCOPE,
 
-    /* Do not wrap the expression,
+  /* Do not wrap the expression,
        it has to provide function "_gdb_expr" on its own.  */
-    COMPILE_I_RAW_SCOPE,
+  COMPILE_I_RAW_SCOPE,
 
-    /* A printable expression scope.  Wrap an expression into a scope
+  /* A printable expression scope.  Wrap an expression into a scope
        suitable for the "compile print" command.  It uses the generic
        function name "_gdb_expr".  COMPILE_I_PRINT_ADDRESS_SCOPE variant
        is the usual one, taking address of the object.
        COMPILE_I_PRINT_VALUE_SCOPE is needed for arrays where the array
        name already specifies its address.  See get_out_value_type.  */
-    COMPILE_I_PRINT_ADDRESS_SCOPE,
-    COMPILE_I_PRINT_VALUE_SCOPE,
-  };
-
+  COMPILE_I_PRINT_ADDRESS_SCOPE,
+  COMPILE_I_PRINT_VALUE_SCOPE,
+};
 
 template<typename T>
-using RequireLongest = gdb::Requires<gdb::Or<std::is_same<T, LONGEST>,
-					     std::is_same<T, ULONGEST>>>;
+using RequireLongest = gdb::Requires<
+  gdb::Or<std::is_same<T, LONGEST>, std::is_same<T, ULONGEST>>>;
 
 /* Just in case they're not defined in stdio.h.  */
 
@@ -208,24 +207,24 @@ extern void quit_serial_event_clear (void);
    'languages' array in language.c.)  */
 
 enum language
-  {
-    language_unknown,		/* Language not known */
-    language_auto,		/* Placeholder for automatic setting */
-    language_c,			/* C */
-    language_objc,		/* Objective-C */
-    language_cplus,		/* C++ */
-    language_d,			/* D */
-    language_go,		/* Go */
-    language_fortran,		/* Fortran */
-    language_m2,		/* Modula-2 */
-    language_asm,		/* Assembly language */
-    language_pascal,		/* Pascal */
-    language_opencl,		/* OpenCL */
-    language_rust,		/* Rust */
-    language_minimal,		/* All other languages, minimal support only */
-    language_ada,		/* Ada */
-    nr_languages
-  };
+{
+  language_unknown, /* Language not known */
+  language_auto,    /* Placeholder for automatic setting */
+  language_c,	    /* C */
+  language_objc,    /* Objective-C */
+  language_cplus,   /* C++ */
+  language_d,	    /* D */
+  language_go,	    /* Go */
+  language_fortran, /* Fortran */
+  language_m2,	    /* Modula-2 */
+  language_asm,	    /* Assembly language */
+  language_pascal,  /* Pascal */
+  language_opencl,  /* OpenCL */
+  language_rust,    /* Rust */
+  language_minimal, /* All other languages, minimal support only */
+  language_ada,	    /* Ada */
+  nr_languages
+};
 
 /* The number of bits needed to represent all languages, with enough
    padding to allow for reasonable growth.  */
@@ -236,11 +235,11 @@ gdb_static_assert (nr_languages <= (1 << LANGUAGE_BITS));
 #define LANGUAGE_BYTES ((LANGUAGE_BITS + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
 
 enum precision_type
-  {
-    single_precision,
-    double_precision,
-    unspecified_precision
-  };
+{
+  single_precision,
+  double_precision,
+  unspecified_precision
+};
 
 /* * A generic, not quite boolean, enumeration.  This is used for
    set/show commands in which the options are on/off/automatic.  */
@@ -292,13 +291,12 @@ struct value;
 
 /* This really belong in utils.c (path-utils.c?), but it references some
    globals that are currently only available to main.c.  */
-extern std::string relocate_gdb_directory (const char *initial, bool relocatable);
+extern std::string relocate_gdb_directory (const char *initial,
+					   bool relocatable);
 
-
 /* Annotation stuff.  */
 
-extern int annotation_level;	/* in stack.c */
-
+extern int annotation_level; /* in stack.c */
 
 /* From regex.c or libc.  BSD 4.4 declares this with the argument type as
    "const char *" in unistd.h, so we can't declare the argument
@@ -330,8 +328,7 @@ extern bool info_verbose;
 extern void set_next_address (struct gdbarch *, CORE_ADDR);
 
 extern int print_address_symbolic (struct gdbarch *, CORE_ADDR,
-				   struct ui_file *, int,
-				   const char *);
+				   struct ui_file *, int, const char *);
 
 extern void print_address (struct gdbarch *, CORE_ADDR, struct ui_file *);
 extern const char *pc_prefix (CORE_ADDR);
@@ -357,55 +354,55 @@ typedef int (*find_memory_region_ftype) (CORE_ADDR addr, unsigned long size,
    value.h, but needs to be here for the same reason.  */
 
 enum lval_type
-  {
-    /* * Not an lval.  */
-    not_lval,
-    /* * In memory.  */
-    lval_memory,
-    /* * In a register.  Registers are relative to a frame.  */
-    lval_register,
-    /* * In a gdb internal variable.  */
-    lval_internalvar,
-    /* * Value encapsulates a callable defined in an extension language.  */
-    lval_xcallable,
-    /* * Part of a gdb internal variable (structure field).  */
-    lval_internalvar_component,
-    /* * Value's bits are fetched and stored using functions provided
+{
+  /* * Not an lval.  */
+  not_lval,
+  /* * In memory.  */
+  lval_memory,
+  /* * In a register.  Registers are relative to a frame.  */
+  lval_register,
+  /* * In a gdb internal variable.  */
+  lval_internalvar,
+  /* * Value encapsulates a callable defined in an extension language.  */
+  lval_xcallable,
+  /* * Part of a gdb internal variable (structure field).  */
+  lval_internalvar_component,
+  /* * Value's bits are fetched and stored using functions provided
        by its creator.  */
-    lval_computed
-  };
+  lval_computed
+};
 
 /* * Parameters of the "info proc" command.  */
 
 enum info_proc_what
-  {
-    /* * Display the default cmdline, cwd and exe outputs.  */
-    IP_MINIMAL,
+{
+  /* * Display the default cmdline, cwd and exe outputs.  */
+  IP_MINIMAL,
 
-    /* * Display `info proc mappings'.  */
-    IP_MAPPINGS,
+  /* * Display `info proc mappings'.  */
+  IP_MAPPINGS,
 
-    /* * Display `info proc status'.  */
-    IP_STATUS,
+  /* * Display `info proc status'.  */
+  IP_STATUS,
 
-    /* * Display `info proc stat'.  */
-    IP_STAT,
+  /* * Display `info proc stat'.  */
+  IP_STAT,
 
-    /* * Display `info proc cmdline'.  */
-    IP_CMDLINE,
+  /* * Display `info proc cmdline'.  */
+  IP_CMDLINE,
 
-    /* * Display `info proc exe'.  */
-    IP_EXE,
+  /* * Display `info proc exe'.  */
+  IP_EXE,
 
-    /* * Display `info proc cwd'.  */
-    IP_CWD,
+  /* * Display `info proc cwd'.  */
+  IP_CWD,
 
-    /* * Display `info proc files'.  */
-    IP_FILES,
+  /* * Display `info proc files'.  */
+  IP_FILES,
 
-    /* * Display all of the above.  */
-    IP_ALL
-  };
+  /* * Display all of the above.  */
+  IP_ALL
+};
 
 /* * Default radixes for input and output.  Only some values supported.  */
 extern unsigned input_radix;
@@ -418,12 +415,12 @@ extern unsigned output_radix;
    value.h.  */
 
 enum val_prettyformat
-  {
-    Val_no_prettyformat = 0,
-    Val_prettyformat,
-    /* * Use the default setting which the user has specified.  */
-    Val_prettyformat_default
-  };
+{
+  Val_no_prettyformat = 0,
+  Val_prettyformat,
+  /* * Use the default setting which the user has specified.  */
+  Val_prettyformat_default
+};
 
 /* * Optional native machine support.  Non-native (and possibly pure
    multi-arch) targets do not need a "nm.h" file.  This will be a
@@ -443,38 +440,38 @@ enum val_prettyformat
    4.x and 4.3BSD.  This assumption means these systems are no longer
    supported.  */
 #ifndef FOPEN_RB
-# include "fopen-bin.h"
+#include "fopen-bin.h"
 #endif
 
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).
    FIXME: Assumes 2's complement arithmetic.  */
 
-#if !defined (UINT_MAX)
-#define	UINT_MAX ((unsigned int)(~0))	    /* 0xFFFFFFFF for 32-bits */
+#if !defined(UINT_MAX)
+#define UINT_MAX ((unsigned int) (~0)) /* 0xFFFFFFFF for 32-bits */
 #endif
 
-#if !defined (INT_MAX)
-#define	INT_MAX ((int)(UINT_MAX >> 1))	    /* 0x7FFFFFFF for 32-bits */
+#if !defined(INT_MAX)
+#define INT_MAX ((int) (UINT_MAX >> 1)) /* 0x7FFFFFFF for 32-bits */
 #endif
 
-#if !defined (INT_MIN)
-#define INT_MIN ((int)((int) ~0 ^ INT_MAX)) /* 0x80000000 for 32-bits */
+#if !defined(INT_MIN)
+#define INT_MIN ((int) ((int) ~0 ^ INT_MAX)) /* 0x80000000 for 32-bits */
 #endif
 
-#if !defined (ULONG_MAX)
-#define	ULONG_MAX ((unsigned long)(~0L))    /* 0xFFFFFFFF for 32-bits */
+#if !defined(ULONG_MAX)
+#define ULONG_MAX ((unsigned long) (~0L)) /* 0xFFFFFFFF for 32-bits */
 #endif
 
-#if !defined (LONG_MAX)
-#define	LONG_MAX ((long)(ULONG_MAX >> 1))   /* 0x7FFFFFFF for 32-bits */
+#if !defined(LONG_MAX)
+#define LONG_MAX ((long) (ULONG_MAX >> 1)) /* 0x7FFFFFFF for 32-bits */
 #endif
 
-#if !defined (ULONGEST_MAX)
-#define	ULONGEST_MAX (~(ULONGEST)0)        /* 0xFFFFFFFFFFFFFFFF for 64-bits */
+#if !defined(ULONGEST_MAX)
+#define ULONGEST_MAX (~(ULONGEST) 0) /* 0xFFFFFFFFFFFFFFFF for 64-bits */
 #endif
 
-#if !defined (LONGEST_MAX)                 /* 0x7FFFFFFFFFFFFFFF for 64-bits */
-#define	LONGEST_MAX ((LONGEST)(ULONGEST_MAX >> 1))
+#if !defined(LONGEST_MAX) /* 0x7FFFFFFFFFFFFFFF for 64-bits */
+#define LONGEST_MAX ((LONGEST) (ULONGEST_MAX >> 1))
 #endif
 
 /* * Convert a LONGEST to an int.  This is used in contexts (e.g. number of
@@ -505,7 +502,8 @@ enum symbol_needs_kind
 /* In findvar.c.  */
 
 template<typename T, typename = RequireLongest<T>>
-T extract_integer (gdb::array_view<const gdb_byte>, enum bfd_endian byte_order);
+T extract_integer (gdb::array_view<const gdb_byte>,
+		   enum bfd_endian byte_order);
 
 static inline LONGEST
 extract_signed_integer (gdb::array_view<const gdb_byte> buf,
@@ -551,15 +549,15 @@ extern void store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
 			   T val);
 
 static inline void
-store_signed_integer (gdb_byte *addr, int len,
-		      enum bfd_endian byte_order, LONGEST val)
+store_signed_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
+		      LONGEST val)
 {
   return store_integer (addr, len, byte_order, val);
 }
 
 static inline void
-store_unsigned_integer (gdb_byte *addr, int len,
-			enum bfd_endian byte_order, ULONGEST val)
+store_unsigned_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
+			ULONGEST val)
 {
   return store_integer (addr, len, byte_order, val);
 }
@@ -581,20 +579,20 @@ extern void (*deprecated_post_add_symbol_hook) (void);
 extern void (*selected_frame_level_changed_hook) (int);
 extern int (*deprecated_ui_loop_hook) (int signo);
 extern void (*deprecated_show_load_progress) (const char *section,
-					      unsigned long section_sent, 
-					      unsigned long section_size, 
-					      unsigned long total_sent, 
+					      unsigned long section_sent,
+					      unsigned long section_size,
+					      unsigned long total_sent,
 					      unsigned long total_size);
-extern void (*deprecated_print_frame_info_listing_hook) (struct symtab * s,
+extern void (*deprecated_print_frame_info_listing_hook) (struct symtab *s,
 							 int line,
 							 int stopline,
 							 int noerror);
 extern int (*deprecated_query_hook) (const char *, va_list)
-     ATTRIBUTE_FPTR_PRINTF(1,0);
+  ATTRIBUTE_FPTR_PRINTF (1, 0);
 extern void (*deprecated_warning_hook) (const char *, va_list)
-     ATTRIBUTE_FPTR_PRINTF(1,0);
-extern void (*deprecated_readline_begin_hook) (const char *, ...)
-     ATTRIBUTE_FPTR_PRINTF_1;
+  ATTRIBUTE_FPTR_PRINTF (1, 0);
+extern void (*deprecated_readline_begin_hook) (const char *,
+					       ...) ATTRIBUTE_FPTR_PRINTF_1;
 extern char *(*deprecated_readline_hook) (const char *);
 extern void (*deprecated_readline_end_hook) (void);
 extern void (*deprecated_context_hook) (int);
@@ -604,7 +602,7 @@ extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 
 extern void (*deprecated_attach_hook) (void);
 extern void (*deprecated_detach_hook) (void);
-extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
+extern void (*deprecated_call_command_hook) (struct cmd_list_element *c,
 					     const char *cmd, int from_tty);
 
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
@@ -613,11 +611,11 @@ extern int (*deprecated_ui_load_progress_hook) (const char *section,
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
 #ifndef ISATTY
-#define ISATTY(FP)	(isatty (fileno (FP)))
+#define ISATTY(FP) (isatty (fileno (FP)))
 #endif
 
 /* * A width that can achieve a better legibility for GDB MI mode.  */
-#define GDB_MI_MSG_WIDTH  80
+#define GDB_MI_MSG_WIDTH 80
 
 /* From progspace.c */
 
@@ -636,16 +634,17 @@ enum block_enum
 /* User selection used in observable.h and multiple print functions.  */
 
 enum user_selected_what_flag
-  {
-    /* Inferior selected.  */
-    USER_SELECTED_INFERIOR = 1 << 1,
+{
+  /* Inferior selected.  */
+  USER_SELECTED_INFERIOR = 1 << 1,
 
-    /* Thread selected.  */
-    USER_SELECTED_THREAD = 1 << 2,
+  /* Thread selected.  */
+  USER_SELECTED_THREAD = 1 << 2,
 
-    /* Frame selected.  */
-    USER_SELECTED_FRAME = 1 << 3
-  };
+  /* Frame selected.  */
+  USER_SELECTED_FRAME = 1 << 3
+};
+
 DEF_ENUM_FLAGS_TYPE (enum user_selected_what_flag, user_selected_what);
 
 #include "utils.h"

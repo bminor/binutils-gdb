@@ -27,6 +27,7 @@
 class ui_file
 {
 public:
+
   ui_file ();
   virtual ~ui_file () = 0;
 
@@ -67,37 +68,35 @@ public:
      are rarely used, no point in having both for a rarely used
      interface.  */
   virtual void write_async_safe (const char *buf, long length_buf)
-  { gdb_assert_not_reached ("write_async_safe"); }
+  {
+    gdb_assert_not_reached ("write_async_safe");
+  }
 
   /* Some ui_files override this to provide a efficient implementation
      that avoids a strlen.  */
-  virtual void puts (const char *str)
-  { this->write (str, strlen (str)); }
+  virtual void puts (const char *str) { this->write (str, strlen (str)); }
 
   virtual long read (char *buf, long length_buf)
-  { gdb_assert_not_reached ("can't read from this file type"); }
+  {
+    gdb_assert_not_reached ("can't read from this file type");
+  }
 
-  virtual bool isatty ()
-  { return false; }
+  virtual bool isatty () { return false; }
 
   /* true indicates terminal output behaviour such as cli_styling.
      This default implementation indicates to do terminal output
      behaviour if the UI_FILE is a tty.  A derived class can override
      TERM_OUT to have cli_styling behaviour without being a tty.  */
-  virtual bool term_out ()
-  { return isatty (); }
+  virtual bool term_out () { return isatty (); }
 
   /* true if ANSI escapes can be used on STREAM.  */
-  virtual bool can_emit_style_escape ()
-  { return false; }
+  virtual bool can_emit_style_escape () { return false; }
 
-  virtual void flush ()
-  {}
+  virtual void flush () {}
 
   /* If this object has an underlying file descriptor, then return it.
      Otherwise, return -1.  */
-  virtual int fd () const
-  { return -1; }
+  virtual int fd () const { return -1; }
 
   /* Indicate that if the next sequence of characters overflows the
      line, a newline should be inserted here rather than when it hits
@@ -114,9 +113,7 @@ public:
      This routine is guaranteed to force out any output which has been
      squirreled away in the wrap_buffer, so wrap_here (0) can be
      used to force out output from the wrap_buffer.  */
-  virtual void wrap_here (int indent)
-  {
-  }
+  virtual void wrap_here (int indent) {}
 
   /* Emit an ANSI style escape for STYLE.  */
   virtual void emit_style_escape (const ui_file_style &style);
@@ -127,10 +124,7 @@ public:
   /* Print STR, bypassing any paging that might be done by this
      ui_file.  Note that nearly no code should call this -- it's
      intended for use by gdb_printf, but nothing else.  */
-  virtual void puts_unfiltered (const char *str)
-  {
-    this->puts (str);
-  }
+  virtual void puts_unfiltered (const char *str) { this->puts (str); }
 
 protected:
 
@@ -152,6 +146,7 @@ typedef std::unique_ptr<ui_file> ui_file_up;
 class null_file : public ui_file
 {
 public:
+
   void write (const char *buf, long length_buf) override;
   void write_async_safe (const char *buf, long sizeof_buf) override;
   void puts (const char *str) override;
@@ -168,13 +163,16 @@ extern int gdb_console_fputs (const char *, FILE *);
 class string_file : public ui_file
 {
 public:
+
   /* Construct a string_file to collect 'raw' output, i.e. without
      'terminal' behaviour such as cli_styling.  */
-  string_file () : m_term_out (false) {};
+  string_file ()
+    : m_term_out (false) {};
   /* If TERM_OUT, construct a string_file with terminal output behaviour
      such as cli_styling)
      else collect 'raw' output like the previous constructor.  */
-  explicit string_file (bool term_out) : m_term_out (term_out) {};
+  explicit string_file (bool term_out)
+    : m_term_out (term_out) {};
   ~string_file () override;
 
   /* Override ui_file methods.  */
@@ -182,7 +180,9 @@ public:
   void write (const char *buf, long length_buf) override;
 
   long read (char *buf, long length_buf) override
-  { gdb_assert_not_reached ("a string_file is not readable"); }
+  {
+    gdb_assert_not_reached ("a string_file is not readable");
+  }
 
   bool term_out () override;
   bool can_emit_style_escape () override;
@@ -215,12 +215,17 @@ public:
   /* Provide a few convenience methods with the same API as the
      underlying std::string.  */
   const char *data () const { return m_string.data (); }
+
   const char *c_str () const { return m_string.c_str (); }
+
   size_t size () const { return m_string.size (); }
+
   bool empty () const { return m_string.empty (); }
+
   void clear () { return m_string.clear (); }
 
 private:
+
   /* The internal buffer.  */
   std::string m_string;
 
@@ -235,6 +240,7 @@ private:
 class stdio_file : public ui_file
 {
 public:
+
   /* Create a ui_file from a previously opened FILE.  CLOSE_P
      indicates whether the underlying file should be closed when the
      stdio_file is destroyed.  */
@@ -266,10 +272,10 @@ public:
   bool can_emit_style_escape () override;
 
   /* Return the underlying file descriptor.  */
-  int fd () const override
-  { return m_fd; }
+  int fd () const override { return m_fd; }
 
 private:
+
   /* Sets the internal stream to FILE, and saves the FILE's file
      descriptor in M_FD.  */
   void set_stream (FILE *file);
@@ -316,6 +322,7 @@ typedef std::unique_ptr<stdio_file> stdio_file_up;
 class stderr_file : public stdio_file
 {
 public:
+
   explicit stderr_file (FILE *stream);
 
   /* Override the output routines to flush gdb_stdout before deferring
@@ -329,6 +336,7 @@ public:
 class tee_file : public ui_file
 {
 public:
+
   /* Create a file which writes to both ONE and TWO.  Ownership of
      both files is up to the user.  */
   tee_file (ui_file *one, ui_file *two);
@@ -362,6 +370,7 @@ public:
   }
 
 private:
+
   /* The two underlying ui_files.  */
   ui_file *m_one;
   ui_file *m_two;
@@ -373,22 +382,17 @@ private:
 class no_terminal_escape_file : public stdio_file
 {
 public:
-  no_terminal_escape_file ()
-  {
-  }
+
+  no_terminal_escape_file () {}
 
   /* Like the stdio_file methods, but these filter out terminal escape
      sequences.  */
   void write (const char *buf, long length_buf) override;
   void puts (const char *linebuffer) override;
 
-  void emit_style_escape (const ui_file_style &style) override
-  {
-  }
+  void emit_style_escape (const ui_file_style &style) override {}
 
-  void reset_style () override
-  {
-  }
+  void reset_style () override {}
 };
 
 /* A base class for ui_file types that wrap another ui_file.  */
@@ -397,36 +401,38 @@ class wrapped_file : public ui_file
 {
 public:
 
-  bool isatty () override
-  { return m_stream->isatty (); }
+  bool isatty () override { return m_stream->isatty (); }
 
-  bool term_out () override
-  { return m_stream->term_out (); }
+  bool term_out () override { return m_stream->term_out (); }
 
   bool can_emit_style_escape () override
-  { return m_stream->can_emit_style_escape (); }
+  {
+    return m_stream->can_emit_style_escape ();
+  }
 
-  void flush () override
-  { m_stream->flush (); }
+  void flush () override { m_stream->flush (); }
 
-  void wrap_here (int indent) override
-  { m_stream->wrap_here (indent); }
+  void wrap_here (int indent) override { m_stream->wrap_here (indent); }
 
   void emit_style_escape (const ui_file_style &style) override
-  { m_stream->emit_style_escape (style); }
+  {
+    m_stream->emit_style_escape (style);
+  }
 
   /* Rest the current output style to the empty style.  */
-  void reset_style () override
-  { m_stream->reset_style (); }
+  void reset_style () override { m_stream->reset_style (); }
 
-  int fd () const override
-  { return m_stream->fd (); }
+  int fd () const override { return m_stream->fd (); }
 
   void puts_unfiltered (const char *str) override
-  { m_stream->puts_unfiltered (str); }
+  {
+    m_stream->puts_unfiltered (str);
+  }
 
   void write_async_safe (const char *buf, long length_buf) override
-  { return m_stream->write_async_safe (buf, length_buf); }
+  {
+    return m_stream->write_async_safe (buf, length_buf);
+  }
 
 protected:
 
@@ -448,6 +454,7 @@ protected:
 class timestamped_file : public wrapped_file
 {
 public:
+
   explicit timestamped_file (ui_file *stream)
     : wrapped_file (stream)
   {

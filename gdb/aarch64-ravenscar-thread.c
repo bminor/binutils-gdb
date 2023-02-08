@@ -30,48 +30,94 @@
 
 /* See aarch64-tdep.h for register numbers.  */
 
-static const int aarch64_context_offsets[] =
-{
+static const int aarch64_context_offsets[] = {
   /* X0 - X28 */
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, NO_OFFSET,
-  NO_OFFSET, NO_OFFSET, NO_OFFSET, 0,
-  8,         16,        24,        32,
-  40,        48,        56,        64,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  NO_OFFSET,
+  0,
+  8,
+  16,
+  24,
+  32,
+  40,
+  48,
+  56,
+  64,
   72,
 
   /* FP, LR, SP, PC, CPSR */
   /* Note that as task switch is synchronous, PC is in fact the LR here */
-  80,        88,        96,        88,
+  80,
+  88,
+  96,
+  88,
   NO_OFFSET,
 
   /* V0 - V31 */
-  128,       144,       160,       176,
-  192,       208,       224,       240,
-  256,       272,       288,       304,
-  320,       336,       352,       368,
-  384,       400,       416,       432,
-  448,       464,       480,       496,
-  512,       528,       544,       560,
-  576,       592,       608,       624,
+  128,
+  144,
+  160,
+  176,
+  192,
+  208,
+  224,
+  240,
+  256,
+  272,
+  288,
+  304,
+  320,
+  336,
+  352,
+  368,
+  384,
+  400,
+  416,
+  432,
+  448,
+  464,
+  480,
+  496,
+  512,
+  528,
+  544,
+  560,
+  576,
+  592,
+  608,
+  624,
 
   /* FPSR, FPCR */
-  112,       116,
+  112,
+  116,
 };
 
 #define V_INIT_OFFSET 640
 
 /* The ravenscar_arch_ops vector for most Aarch64 targets.  */
 
-static struct ravenscar_arch_ops aarch64_ravenscar_ops
-     (aarch64_context_offsets,
-      -1, -1,
-      V_INIT_OFFSET,
-      /* The FPU context buffer starts with the FPSR register.  */
-      aarch64_context_offsets[AARCH64_FPSR_REGNUM],
-      AARCH64_V0_REGNUM, AARCH64_FPCR_REGNUM);
+static struct ravenscar_arch_ops aarch64_ravenscar_ops (
+  aarch64_context_offsets, -1, -1, V_INIT_OFFSET,
+  /* The FPU context buffer starts with the FPSR register.  */
+  aarch64_context_offsets[AARCH64_FPSR_REGNUM], AARCH64_V0_REGNUM,
+  AARCH64_FPCR_REGNUM);
 
 /* Register aarch64_ravenscar_ops in GDBARCH.  */
 

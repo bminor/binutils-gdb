@@ -57,8 +57,7 @@ evpy_add_attribute (PyObject *event, const char *name, PyObject *attr)
 int
 gdbpy_initialize_event (void)
 {
-  return gdbpy_initialize_event_generic (&event_object_type,
-					 "Event");
+  return gdbpy_initialize_event_generic (&event_object_type, "Event");
 }
 
 /* Initialize the given event type.  If BASE is not NULL it will
@@ -66,8 +65,7 @@ gdbpy_initialize_event (void)
   Returns 0 if initialization was successful -1 otherwise.  */
 
 int
-gdbpy_initialize_event_generic (PyTypeObject *type,
-				const char *name)
+gdbpy_initialize_event_generic (PyTypeObject *type, const char *name)
 {
   if (PyType_Ready (type) < 0)
     return -1;
@@ -75,13 +73,11 @@ gdbpy_initialize_event_generic (PyTypeObject *type,
   return gdb_pymodule_addobject (gdb_module, name, (PyObject *) type);
 }
 
-
 /* Notify the list of listens that the given EVENT has occurred.
    returns 0 if emit is successful -1 otherwise.  */
 
 int
-evpy_emit_event (PyObject *event,
-		 eventregistry_object *registry)
+evpy_emit_event (PyObject *event, eventregistry_object *registry)
 {
   Py_ssize_t i;
 
@@ -114,50 +110,46 @@ evpy_emit_event (PyObject *event,
   return 0;
 }
 
-static gdb_PyGetSetDef event_object_getset[] =
-{
-  { "__dict__", gdb_py_generic_dict, NULL,
-    "The __dict__ for this event.", &event_object_type },
-  { NULL }
-};
+static gdb_PyGetSetDef event_object_getset[]
+  = { { "__dict__", gdb_py_generic_dict, NULL, "The __dict__ for this event.",
+	&event_object_type },
+      { NULL } };
 
-PyTypeObject event_object_type =
-{
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Event",                                /* tp_name */
-  sizeof (event_object),                      /* tp_basicsize */
-  0,                                          /* tp_itemsize */
-  evpy_dealloc,                               /* tp_dealloc */
-  0,                                          /* tp_print */
-  0,                                          /* tp_getattr */
-  0,                                          /* tp_setattr */
-  0,                                          /* tp_compare */
-  0,                                          /* tp_repr */
-  0,                                          /* tp_as_number */
-  0,                                          /* tp_as_sequence */
-  0,                                          /* tp_as_mapping */
-  0,                                          /* tp_hash  */
-  0,                                          /* tp_call */
-  0,                                          /* tp_str */
-  0,                                          /* tp_getattro */
-  0,                                          /* tp_setattro */
-  0,                                          /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */
-  "GDB event object",                         /* tp_doc */
-  0,                                          /* tp_traverse */
-  0,                                          /* tp_clear */
-  0,                                          /* tp_richcompare */
-  0,                                          /* tp_weaklistoffset */
-  0,                                          /* tp_iter */
-  0,                                          /* tp_iternext */
-  0,                                          /* tp_methods */
-  0,                                          /* tp_members */
-  event_object_getset,			      /* tp_getset */
-  0,                                          /* tp_base */
-  0,                                          /* tp_dict */
-  0,                                          /* tp_descr_get */
-  0,                                          /* tp_descr_set */
-  offsetof (event_object, dict),              /* tp_dictoffset */
-  0,                                          /* tp_init */
-  0                                           /* tp_alloc */
+PyTypeObject event_object_type = {
+  PyVarObject_HEAD_INIT (NULL, 0) "gdb.Event", /* tp_name */
+  sizeof (event_object),		       /* tp_basicsize */
+  0,					       /* tp_itemsize */
+  evpy_dealloc,				       /* tp_dealloc */
+  0,					       /* tp_print */
+  0,					       /* tp_getattr */
+  0,					       /* tp_setattr */
+  0,					       /* tp_compare */
+  0,					       /* tp_repr */
+  0,					       /* tp_as_number */
+  0,					       /* tp_as_sequence */
+  0,					       /* tp_as_mapping */
+  0,					       /* tp_hash  */
+  0,					       /* tp_call */
+  0,					       /* tp_str */
+  0,					       /* tp_getattro */
+  0,					       /* tp_setattro */
+  0,					       /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,    /* tp_flags */
+  "GDB event object",			       /* tp_doc */
+  0,					       /* tp_traverse */
+  0,					       /* tp_clear */
+  0,					       /* tp_richcompare */
+  0,					       /* tp_weaklistoffset */
+  0,					       /* tp_iter */
+  0,					       /* tp_iternext */
+  0,					       /* tp_methods */
+  0,					       /* tp_members */
+  event_object_getset,			       /* tp_getset */
+  0,					       /* tp_base */
+  0,					       /* tp_dict */
+  0,					       /* tp_descr_get */
+  0,					       /* tp_descr_set */
+  offsetof (event_object, dict),	       /* tp_dictoffset */
+  0,					       /* tp_init */
+  0					       /* tp_alloc */
 };

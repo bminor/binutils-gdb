@@ -41,8 +41,7 @@ tilegx_linux_sigframe_init (const struct tramp_frame *self,
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, 54);
 
   /* Base address of register save area.  */
-  CORE_ADDR base = sp
-		   + 16    /* Skip ABI_SAVE_AREA.  */
+  CORE_ADDR base = sp + 16 /* Skip ABI_SAVE_AREA.  */
 		   + 128   /* Skip SIGINFO.  */
 		   + 40;   /* Skip UCONTEXT.  */
 
@@ -55,44 +54,35 @@ tilegx_linux_sigframe_init (const struct tramp_frame *self,
     trad_frame_set_reg_addr (this_cache, i, base + i * 8);
 
   trad_frame_set_reg_value (this_cache, 64,
-			    get_frame_memory_unsigned (this_frame, prev_pc, 8));
+			    get_frame_memory_unsigned (this_frame, prev_pc,
+						       8));
 
   /* Save a frame ID.  */
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
-static const struct tramp_frame tilegx_linux_rt_sigframe =
-{
-  SIGTRAMP_FRAME,
-  8,
-  {
-    { 0x00045fe551483000ULL, ULONGEST_MAX }, /* { moveli r10, 139 } */
-    { 0x286b180051485000ULL, ULONGEST_MAX }, /* { swint1 } */
-    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
-  },
-  tilegx_linux_sigframe_init
-};
+static const struct tramp_frame tilegx_linux_rt_sigframe
+  = { SIGTRAMP_FRAME,
+      8,
+      { { 0x00045fe551483000ULL, ULONGEST_MAX }, /* { moveli r10, 139 } */
+	{ 0x286b180051485000ULL, ULONGEST_MAX }, /* { swint1 } */
+	{ TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
+      tilegx_linux_sigframe_init };
 
 /* Register map; must match struct pt_regs in "ptrace.h".  */
 
-static const struct regcache_map_entry tilegx_linux_regmap[] =
-  {
-    { TILEGX_NUM_EASY_REGS, TILEGX_FIRST_EASY_REGNUM, 8 },
-    { 1, TILEGX_PC_REGNUM, 8 },
-    { 1, TILEGX_FAULTNUM_REGNUM, 8 },
-    { 0 }
-  };
+static const struct regcache_map_entry tilegx_linux_regmap[]
+  = { { TILEGX_NUM_EASY_REGS, TILEGX_FIRST_EASY_REGNUM, 8 },
+      { 1, TILEGX_PC_REGNUM, 8 },
+      { 1, TILEGX_FAULTNUM_REGNUM, 8 },
+      { 0 } };
 
 #define TILEGX_LINUX_SIZEOF_GREGSET (64 * 8)
 
 /* TILE-Gx Linux kernel register set.  */
 
-static const struct regset tilegx_linux_regset =
-{
-  tilegx_linux_regmap,
-  regcache_supply_regset, regcache_collect_regset
-};
-
+static const struct regset tilegx_linux_regset
+  = { tilegx_linux_regmap, regcache_supply_regset, regcache_collect_regset };
 
 static void
 tilegx_iterate_over_regset_sections (struct gdbarch *gdbarch,
@@ -115,8 +105,8 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch, &tilegx_linux_rt_sigframe);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, tilegx_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, tilegx_iterate_over_regset_sections);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   if (arch_size == 32)
@@ -136,6 +126,7 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 void _initialize_tilegx_linux_tdep ();
+
 void
 _initialize_tilegx_linux_tdep ()
 {

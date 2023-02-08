@@ -59,8 +59,9 @@ extern std::unique_ptr<gdb_byte[]> aarch64_sve_get_sveregs (int tid);
 /* Put the registers from linux structure buf into register buffer.  Assumes the
    vector lengths in the register buffer match the size in the kernel.  */
 
-extern void aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
-					      const void *buf);
+extern void
+aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
+				  const void *buf);
 
 /* Put the registers from register buffer into linux structure buf.  Assumes the
    vector lengths in the register buffer match the size in the kernel.  */

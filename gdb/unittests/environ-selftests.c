@@ -30,8 +30,10 @@ set_contains (const std::set<std::string> &set, std::string key)
   return set.find (key) != set.end ();
 }
 
-namespace selftests {
-namespace gdb_environ_tests {
+namespace selftests
+{
+namespace gdb_environ_tests
+{
 
 /* Test if the vector is initialized in a correct way.  */
 
@@ -270,7 +272,7 @@ run_tests ()
 {
   /* Set a test environment variable.  */
   if (setenv ("GDB_SELFTEST_ENVIRON", "1", 1) != 0)
-    error (_("Could not set environment variable for testing."));
+    error (_ ("Could not set environment variable for testing."));
 
   test_vector_initialization ();
 
@@ -295,10 +297,11 @@ run_tests ()
 
   test_self_move ();
 }
-} /* namespace gdb_environ */
+} // namespace gdb_environ_tests
 } /* namespace selftests */
 
 void _initialize_environ_selftests ();
+
 void
 _initialize_environ_selftests ()
 {

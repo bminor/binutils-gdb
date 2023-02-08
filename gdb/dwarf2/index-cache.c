@@ -37,9 +37,9 @@
 /* When set to true, show debug messages about the index cache.  */
 static bool debug_index_cache = false;
 
-#define index_cache_debug(FMT, ...)					       \
-  debug_prefixed_printf_cond_nofunc (debug_index_cache, "index-cache", \
-				     FMT, ## __VA_ARGS__)
+#define index_cache_debug(FMT, ...)                                         \
+  debug_prefixed_printf_cond_nofunc (debug_index_cache, "index-cache", FMT, \
+				     ##__VA_ARGS__)
 
 /* The index cache directory, used for "set/show index-cache directory".  */
 static std::string index_cache_directory;
@@ -104,8 +104,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
   const bfd_build_id *build_id = build_id_bfd_get (obj->obfd.get ());
   if (build_id == nullptr)
     {
-      index_cache_debug ("objfile %s has no build id",
-			 objfile_name (obj));
+      index_cache_debug ("objfile %s has no build id", objfile_name (obj));
       return;
     }
 
@@ -118,7 +117,8 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
   if (dwz != nullptr)
     {
-      const bfd_build_id *dwz_build_id = build_id_bfd_get (dwz->dwz_bfd.get ());
+      const bfd_build_id *dwz_build_id
+	= build_id_bfd_get (dwz->dwz_bfd.get ());
 
       if (dwz_build_id == nullptr)
 	{
@@ -133,7 +133,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
   if (m_dir.empty ())
     {
-      warning (_("The index cache directory name is empty, skipping store."));
+      warning (_ ("The index cache directory name is empty, skipping store."));
       return;
     }
 
@@ -142,7 +142,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
       /* Try to create the containing directory.  */
       if (!mkdir_recursive (m_dir.c_str ()))
 	{
-	  warning (_("index cache: could not make cache directory: %s"),
+	  warning (_ ("index cache: could not make cache directory: %s"),
 		   safe_strerror (errno));
 	  return;
 	}
@@ -152,9 +152,8 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
-      write_dwarf_index (per_objfile, m_dir.c_str (),
-			 build_id_str.c_str (), dwz_build_id_ptr,
-			 dw_index_kind::GDB_INDEX);
+      write_dwarf_index (per_objfile, m_dir.c_str (), build_id_str.c_str (),
+			 dwz_build_id_ptr, dw_index_kind::GDB_INDEX);
     }
   catch (const gdb_exception_error &except)
     {
@@ -173,7 +172,8 @@ struct index_cache_resource_mmap final : public index_cache_resource
      file doesn't exist. */
   index_cache_resource_mmap (const char *filename)
     : mapping (mmap_file (filename))
-  {}
+  {
+  }
 
   scoped_mmap mapping;
 };
@@ -189,8 +189,8 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 
   if (m_dir.empty ())
     {
-      warning (_("The index cache directory name is empty, skipping cache "
-		 "lookup."));
+      warning (_ ("The index cache directory name is empty, skipping cache "
+		  "lookup."));
       return {};
     }
 
@@ -199,8 +199,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 
   try
     {
-      index_cache_debug ("trying to read %s",
-			 filename.c_str ());
+      index_cache_debug ("trying to read %s", filename.c_str ());
 
       /* Try to map that file.  */
       index_cache_resource_mmap *mmap_resource
@@ -209,14 +208,14 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
       /* Yay, it worked!  Hand the resource to the caller.  */
       resource->reset (mmap_resource);
 
-      return gdb::array_view<const gdb_byte>
-	  ((const gdb_byte *) mmap_resource->mapping.get (),
-	   mmap_resource->mapping.size ());
+      return gdb::array_view<const gdb_byte> ((const gdb_byte *)
+						mmap_resource->mapping.get (),
+					      mmap_resource->mapping.size ());
     }
   catch (const gdb_exception_error &except)
     {
-      index_cache_debug ("couldn't read %s: %s",
-			 filename.c_str (), except.what ());
+      index_cache_debug ("couldn't read %s: %s", filename.c_str (),
+			 except.what ());
     }
 
   return {};
@@ -262,9 +261,8 @@ show_index_cache_command (const char *arg, int from_tty)
   cmd_show_list (show_index_cache_prefix_list, from_tty);
 
   gdb_printf ("\n");
-  gdb_printf
-    (_("The index cache is currently %s.\n"),
-     global_index_cache.enabled () ? _("enabled") : _("disabled"));
+  gdb_printf (_ ("The index cache is currently %s.\n"),
+	      global_index_cache.enabled () ? _ ("enabled") : _ ("disabled"));
 }
 
 /* "set/show index-cache enabled" set callback.  */
@@ -292,7 +290,7 @@ static void
 show_index_cache_enabled_command (ui_file *stream, int from_tty,
 				  cmd_list_element *cmd, const char *value)
 {
-  gdb_printf (stream, _("The index cache is %s.\n"), value);
+  gdb_printf (stream, _ ("The index cache is %s.\n"), value);
 }
 
 /* "set index-cache directory" handler.  */
@@ -321,13 +319,14 @@ show_index_cache_stats_command (const char *arg, int from_tty)
       gdb_printf ("\n");
     }
 
-  gdb_printf (_("%s  Cache hits (this session): %u\n"),
-	      indent, global_index_cache.n_hits ());
-  gdb_printf (_("%sCache misses (this session): %u\n"),
-	      indent, global_index_cache.n_misses ());
+  gdb_printf (_ ("%s  Cache hits (this session): %u\n"), indent,
+	      global_index_cache.n_hits ());
+  gdb_printf (_ ("%sCache misses (this session): %u\n"), indent,
+	      global_index_cache.n_misses ());
 }
 
 void _initialize_index_cache ();
+
 void
 _initialize_index_cache ()
 {
@@ -339,30 +338,27 @@ _initialize_index_cache ()
       global_index_cache.set_directory (std::move (cache_dir));
     }
   else
-    warning (_("Couldn't determine a path for the index cache directory."));
+    warning (_ ("Couldn't determine a path for the index cache directory."));
 
   /* set index-cache */
   add_basic_prefix_cmd ("index-cache", class_files,
-			_("Set index-cache options."),
-			&set_index_cache_prefix_list,
-			false, &setlist);
+			_ ("Set index-cache options."),
+			&set_index_cache_prefix_list, false, &setlist);
 
   /* show index-cache */
   add_prefix_cmd ("index-cache", class_files, show_index_cache_command,
-		  _("Show index-cache options."), &show_index_cache_prefix_list,
-		  false, &showlist);
+		  _ ("Show index-cache options."),
+		  &show_index_cache_prefix_list, false, &showlist);
 
   /* set/show index-cache enabled */
   set_show_commands setshow_index_cache_enabled_cmds
-    = add_setshow_boolean_cmd ("enabled", class_files,
-			       _("Enable the index cache."),
-			       _("Show whether the index cache is enabled."),
-			       _("When on, enable the use of the index cache."),
-			       set_index_cache_enabled_command,
-			       get_index_cache_enabled_command,
-			       show_index_cache_enabled_command,
-			       &set_index_cache_prefix_list,
-			       &show_index_cache_prefix_list);
+    = add_setshow_boolean_cmd (
+      "enabled", class_files, _ ("Enable the index cache."),
+      _ ("Show whether the index cache is enabled."),
+      _ ("When on, enable the use of the index cache."),
+      set_index_cache_enabled_command, get_index_cache_enabled_command,
+      show_index_cache_enabled_command, &set_index_cache_prefix_list,
+      &show_index_cache_prefix_list);
 
   /* set index-cache on */
   cmd_list_element *set_index_cache_on_cmd
@@ -380,25 +376,23 @@ _initialize_index_cache ()
 
   /* set index-cache directory */
   add_setshow_filename_cmd ("directory", class_files, &index_cache_directory,
-			    _("Set the directory of the index cache."),
-			    _("Show the directory of the index cache."),
-			    NULL,
+			    _ ("Set the directory of the index cache."),
+			    _ ("Show the directory of the index cache."), NULL,
 			    set_index_cache_directory_command, NULL,
 			    &set_index_cache_prefix_list,
 			    &show_index_cache_prefix_list);
 
   /* show index-cache stats */
   add_cmd ("stats", class_files, show_index_cache_stats_command,
-	   _("Show some stats about the index cache."),
+	   _ ("Show some stats about the index cache."),
 	   &show_index_cache_prefix_list);
 
   /* set debug index-cache */
   add_setshow_boolean_cmd ("index-cache", class_maintenance,
 			   &debug_index_cache,
-			   _("Set display of index-cache debug messages."),
-			   _("Show display of index-cache debug messages."),
-			   _("\
+			   _ ("Set display of index-cache debug messages."),
+			   _ ("Show display of index-cache debug messages."),
+			   _ ("\
 When non-zero, debugging output for the index cache is displayed."),
-			    NULL, NULL,
-			    &setdebuglist, &showdebuglist);
+			   NULL, NULL, &setdebuglist, &showdebuglist);
 }

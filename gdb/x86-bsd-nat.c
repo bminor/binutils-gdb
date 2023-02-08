@@ -31,7 +31,6 @@
 #include "x86-nat.h"
 #include "x86-bsd-nat.h"
 #include "inf-ptrace.h"
-
 
 /* Support for debug registers.  */
 
@@ -67,7 +66,7 @@ x86bsd_dr_get (ptid_t ptid, int regnum)
   struct dbreg dbregs;
 
   if (gdb_ptrace (PT_GETDBREGS, ptid, (PTRACE_TYPE_ARG3) &dbregs) == -1)
-    perror_with_name (_("Couldn't read debug registers"));
+    perror_with_name (_ ("Couldn't read debug registers"));
 
   return DBREG_DRX ((&dbregs), regnum);
 }
@@ -78,7 +77,7 @@ x86bsd_dr_set (ptid_t ptid, int regnum, unsigned long value)
   struct dbreg dbregs;
 
   if (gdb_ptrace (PT_GETDBREGS, ptid, (PTRACE_TYPE_ARG3) &dbregs) == -1)
-    perror_with_name (_("Couldn't get debug registers"));
+    perror_with_name (_ ("Couldn't get debug registers"));
 
   /* For some mysterious reason, some of the reserved bits in the
      debug control register get set.  Mask these off, otherwise the
@@ -89,9 +88,9 @@ x86bsd_dr_set (ptid_t ptid, int regnum, unsigned long value)
 
   for (thread_info *thread : current_inferior ()->non_exited_threads ())
     {
-      if (gdb_ptrace (PT_SETDBREGS, thread->ptid,
-		      (PTRACE_TYPE_ARG3) &dbregs) == -1)
-	perror_with_name (_("Couldn't write debug registers"));
+      if (gdb_ptrace (PT_SETDBREGS, thread->ptid, (PTRACE_TYPE_ARG3) &dbregs)
+	  == -1)
+	perror_with_name (_ ("Couldn't write debug registers"));
     }
 }
 
@@ -130,6 +129,7 @@ x86bsd_dr_get_control (void)
 #endif /* PT_GETDBREGS */
 
 void _initialize_x86_bsd_nat ();
+
 void
 _initialize_x86_bsd_nat ()
 {

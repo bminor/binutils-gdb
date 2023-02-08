@@ -43,7 +43,8 @@ gdb_environ::operator= (gdb_environ &&e)
 
 /* See gdbsupport/environ.h.  */
 
-gdb_environ gdb_environ::from_host_environ ()
+gdb_environ
+gdb_environ::from_host_environ ()
 {
   extern char **environ;
   gdb_environ e;
@@ -55,7 +56,7 @@ gdb_environ gdb_environ::from_host_environ ()
     {
       /* Make sure we add the element before the last (NULL).  */
       e.m_environ_vector.insert (e.m_environ_vector.end () - 1,
-				 xstrdup (environ[i]));
+                                 xstrdup (environ[i]));
     }
 
   return e;
@@ -137,8 +138,7 @@ gdb_environ::unset (const char *var, bool update_unset_list)
   /* We iterate until '.end () - 1' because the last element is
      always NULL.  */
   for (it_env = m_environ_vector.begin ();
-       it_env != m_environ_vector.end () - 1;
-       ++it_env)
+       it_env != m_environ_vector.end () - 1; ++it_env)
     if (match_var_in_string (*it_env, var, len))
       break;
 

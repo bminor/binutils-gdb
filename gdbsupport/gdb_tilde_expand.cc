@@ -31,37 +31,27 @@ public:
   /* Construct a "gdb_glob" object by calling "glob" with the provided
      parameters.  This function can throw if "glob" fails.  */
   gdb_glob (const char *pattern, int flags,
-	    int (*errfunc) (const char *epath, int eerrno))
+            int (*errfunc) (const char *epath, int eerrno))
   {
     int ret = glob (pattern, flags, errfunc, &m_glob);
 
     if (ret != 0)
       {
-	if (ret == GLOB_NOMATCH)
-	  error (_("Could not find a match for '%s'."), pattern);
-	else
-	  error (_("glob could not process pattern '%s'."),
-		 pattern);
+        if (ret == GLOB_NOMATCH)
+          error (_ ("Could not find a match for '%s'."), pattern);
+        else
+          error (_ ("glob could not process pattern '%s'."), pattern);
       }
   }
 
   /* Destroy the object and free M_GLOB.  */
-  ~gdb_glob ()
-  {
-    globfree (&m_glob);
-  }
+  ~gdb_glob () { globfree (&m_glob); }
 
   /* Return the GL_PATHC component of M_GLOB.  */
-  int pathc () const
-  {
-    return m_glob.gl_pathc;
-  }
+  int pathc () const { return m_glob.gl_pathc; }
 
   /* Return the GL_PATHV component of M_GLOB.  */
-  char **pathv () const
-  {
-    return m_glob.gl_pathv;
-  }
+  char **pathv () const { return m_glob.gl_pathv; }
 
 private:
   /* The actual glob object we're dealing with.  */
@@ -89,11 +79,9 @@ gdb_tilde_expand (const char *dir)
 
   /* Look for the first dir separator (if any) and split d around it.  */
   const auto first_sep
-    = std::find_if (d.cbegin (), d.cend(),
-                    [] (const char c) -> bool
-                    {
-                      return IS_DIR_SEPARATOR (c);
-                    });
+    = std::find_if (d.cbegin (), d.cend (), [] (const char c) -> bool {
+        return IS_DIR_SEPARATOR (c);
+      });
   const std::string to_expand (d.cbegin (), first_sep);
   const std::string remainder (first_sep, d.cend ());
 

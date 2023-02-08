@@ -44,10 +44,10 @@ cris_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 					 linux_ilp32_fetch_link_map_offsets);
-
 }
 
 void _initialize_cris_linux_tdep ();
+
 void
 _initialize_cris_linux_tdep ()
 {

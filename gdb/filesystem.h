@@ -28,23 +28,22 @@ extern const char *target_file_system_kind;
 /* Same as IS_DIR_SEPARATOR but with file system kind KIND's
    semantics, instead of host semantics.  */
 
-#define IS_TARGET_DIR_SEPARATOR(kind, c)				\
+#define IS_TARGET_DIR_SEPARATOR(kind, c)                             \
   (((kind) == file_system_kind_dos_based) ? IS_DOS_DIR_SEPARATOR (c) \
-   : IS_UNIX_DIR_SEPARATOR (c))
+					  : IS_UNIX_DIR_SEPARATOR (c))
 
 /* Same as IS_ABSOLUTE_PATH but with file system kind KIND's
    semantics, instead of host semantics.  */
 
-#define IS_TARGET_ABSOLUTE_PATH(kind, p)				\
+#define IS_TARGET_ABSOLUTE_PATH(kind, p)                             \
   (((kind) == file_system_kind_dos_based) ? IS_DOS_ABSOLUTE_PATH (p) \
-   : IS_UNIX_ABSOLUTE_PATH (p))
+					  : IS_UNIX_ABSOLUTE_PATH (p))
 
 /* Same as HAS_DRIVE_SPEC but with file system kind KIND's semantics,
    instead of host semantics.  */
 
-#define HAS_TARGET_DRIVE_SPEC(kind, p)					\
-  (((kind) == file_system_kind_dos_based) ? HAS_DOS_DRIVE_SPEC (p) \
-   : 0)
+#define HAS_TARGET_DRIVE_SPEC(kind, p) \
+  (((kind) == file_system_kind_dos_based) ? HAS_DOS_DRIVE_SPEC (p) : 0)
 
 /* Same as lbasename, but with file system kind KIND's semantics,
    instead of host semantics.  */

@@ -58,7 +58,7 @@ arm_linux_get_tdesc_fp_type (const target_desc *tdesc)
   for (int i = ARM_FP_TYPE_NONE; i < ARM_FP_TYPE_INVALID; i++)
     {
       if (tdesc == tdesc_arm_list[i])
-	return (arm_fp_type) i;
+        return (arm_fp_type) i;
     }
 
   return ARM_FP_TYPE_INVALID;

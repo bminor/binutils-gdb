@@ -30,6 +30,7 @@
 class fortran_array_offset_calculator
 {
 public:
+
   /* Create a new offset calculator for TYPE, which is either an array or a
      string.  */
   explicit fortran_array_offset_calculator (struct type *type)
@@ -38,7 +39,7 @@ public:
     type = check_typedef (type);
     if (type->code () != TYPE_CODE_ARRAY
 	&& (type->code () != TYPE_CODE_STRING))
-      error (_("can only compute offsets for arrays and strings"));
+      error (_ ("can only compute offsets for arrays and strings"));
 
     /* Get the range, and extract the bounds.  */
     struct type *range_type = type->index_type ();
@@ -111,8 +112,7 @@ struct fortran_array_walker_base_impl
      SHOULD_CONTINUE is false then this function must also return false,
      the function is still called though in case extra work needs to be
      done as part of the stopping process.  */
-  bool continue_walking (bool should_continue)
-  { return should_continue; }
+  bool continue_walking (bool should_continue) { return should_continue; }
 
   /* Called when GDB starts iterating over a dimension of the array.  The
      argument INDEX_TYPE is the type of the index used to address elements
@@ -122,7 +122,8 @@ struct fortran_array_walker_base_impl
      For a concrete example of how this function is called see the comment
      on process_element below.  */
   void start_dimension (struct type *index_type, LONGEST nelts, bool inner_p)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* Called when GDB finishes iterating over a dimension of the array.  The
      argument INNER_P is true for the inner most dimension (the dimension
@@ -131,7 +132,8 @@ struct fortran_array_walker_base_impl
      dimension.  For a concrete example of how this function is called
      see the comment on process_element below.  */
   void finish_dimension (bool inner_p, bool last_p)
-  { /* Nothing.  */ }
+  { /* Nothing.  */
+  }
 
   /* Called when processing dimensions of the array other than the
      innermost one.  WALK_1 is the walker to normally call, ELT_TYPE is
@@ -140,10 +142,9 @@ struct fortran_array_walker_base_impl
      value of the index the current element is at in the upper dimension.
      Finally LAST_P is true only when this is the last element that will
      be processed in this dimension.  */
-  void process_dimension (gdb::function_view<void (struct type *,
-						   int, bool)> walk_1,
-			  struct type *elt_type, LONGEST elt_off,
-			  LONGEST index, bool last_p)
+  void process_dimension (
+    gdb::function_view<void (struct type *, int, bool)> walk_1,
+    struct type *elt_type, LONGEST elt_off, LONGEST index, bool last_p)
   {
     walk_1 (elt_type, elt_off, last_p);
   }
@@ -172,9 +173,10 @@ struct fortran_array_walker_base_impl
          process_element (TYPE, OFFSET, true);
        finish_dimension (true, true);
      finish_dimension (false, true);  */
-  void process_element (struct type *elt_type, LONGEST elt_off,
-			LONGEST index, bool last_p)
-  { /* Nothing.  */ }
+  void process_element (struct type *elt_type, LONGEST elt_off, LONGEST index,
+			bool last_p)
+  { /* Nothing.  */
+  }
 };
 
 /* A class to wrap up the process of iterating over a multi-dimensional
@@ -187,36 +189,34 @@ class fortran_array_walker
   /* Ensure that Impl is derived from the required base class.  This just
      ensures that all of the required API methods are available and have a
      sensible default implementation.  */
-  gdb_static_assert ((std::is_base_of<fortran_array_walker_base_impl,Impl>::value));
+  gdb_static_assert (
+    (std::is_base_of<fortran_array_walker_base_impl, Impl>::value));
 
 public:
+
   /* Create a new array walker.  TYPE is the type of the array being walked
      over, and ADDRESS is the base address for the object of TYPE in
      memory.  All other arguments are forwarded to the constructor of the
      template parameter class IMPL.  */
-  template <typename ...Args>
-  fortran_array_walker (struct type *type, CORE_ADDR address,
-			Args... args)
+  template<typename... Args>
+  fortran_array_walker (struct type *type, CORE_ADDR address, Args... args)
     : m_type (type),
       m_address (address),
       m_impl (type, address, args...),
       m_ndimensions (calc_f77_array_dims (m_type)),
       m_nss (0)
-  { /* Nothing.  */ }
-
-  /* Walk the array.  */
-  void
-  walk ()
-  {
-    walk_1 (m_type, 0, false);
+  { /* Nothing.  */
   }
 
+  /* Walk the array.  */
+  void walk () { walk_1 (m_type, 0, false); }
+
 private:
+
   /* The core of the array walking algorithm.  TYPE is the type of
      the current dimension being processed and OFFSET is the offset
      (in bytes) for the start of this dimension.  */
-  void
-  walk_1 (struct type *type, int offset, bool last_p)
+  void walk_1 (struct type *type, int offset, bool last_p)
   {
     /* Extract the range, and get lower and upper bounds.  */
     struct type *range_type = check_typedef (type)->index_type ();
@@ -241,19 +241,16 @@ private:
 	/* For dimensions other than the inner most, walk each element and
 	   recurse while peeling off one more dimension of the array.  */
 	for (LONGEST i = lowerbound;
-	     m_impl.continue_walking (i < upperbound + 1);
-	     i++)
+	     m_impl.continue_walking (i < upperbound + 1); i++)
 	  {
 	    /* Use the index and the stride to work out a new offset.  */
 	    LONGEST new_offset = offset + calc.index_offset (i);
 
 	    /* Now print the lower dimension.  */
-	    m_impl.process_dimension
-	      ([this] (struct type *w_type, int w_offset, bool w_last_p) -> void
-		{
-		  this->walk_1 (w_type, w_offset, w_last_p);
-		},
-	       subarray_type, new_offset, i, i == upperbound);
+	    m_impl.process_dimension (
+	      [this] (struct type *w_type, int w_offset, bool w_last_p)
+		-> void { this->walk_1 (w_type, w_offset, w_last_p); },
+	      subarray_type, new_offset, i, i == upperbound);
 	  }
       }
     else
@@ -263,8 +260,7 @@ private:
 	/* For the inner most dimension of the array, process each element
 	   within this dimension.  */
 	for (LONGEST i = lowerbound;
-	     m_impl.continue_walking (i < upperbound + 1);
-	     i++)
+	     m_impl.continue_walking (i < upperbound + 1); i++)
 	  {
 	    LONGEST elt_off = offset + calc.index_offset (i);
 

@@ -19,7 +19,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (DWARF2EXPR_H)
+#if !defined(DWARF2EXPR_H)
 #define DWARF2EXPR_H
 
 #include "leb128.h"
@@ -103,8 +103,10 @@ struct dwarf_expr_piece
 struct dwarf_stack_value
 {
   dwarf_stack_value (struct value *value_, int in_stack_memory_)
-  : value (value_), in_stack_memory (in_stack_memory_)
-  {}
+    : value (value_),
+      in_stack_memory (in_stack_memory_)
+  {
+  }
 
   struct value *value;
 
@@ -119,8 +121,7 @@ struct dwarf_stack_value
    its current state and its callbacks.  */
 struct dwarf_expr_context
 {
-  dwarf_expr_context (dwarf2_per_objfile *per_objfile,
-		      int addr_size);
+  dwarf_expr_context (dwarf2_per_objfile *per_objfile, int addr_size);
   virtual ~dwarf_expr_context () = default;
 
   void push_address (CORE_ADDR value, bool in_stack_memory);
@@ -144,6 +145,7 @@ struct dwarf_expr_context
 		   LONGEST subobj_offset = 0);
 
 private:
+
   /* The stack of values.  */
   std::vector<dwarf_stack_value> m_stack;
 
@@ -278,8 +280,7 @@ int dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
    purposes.  */
 
 static inline const gdb_byte *
-gdb_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-		  uint64_t *r)
+gdb_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end, uint64_t *r)
 {
   size_t bytes_read = read_uleb128_to_uint64 (buf, buf_end, r);
 
@@ -289,8 +290,7 @@ gdb_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
 }
 
 static inline const gdb_byte *
-gdb_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-		  int64_t *r)
+gdb_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, int64_t *r)
 {
   size_t bytes_read = read_sleb128_to_int64 (buf, buf_end, r);
 
@@ -309,13 +309,11 @@ gdb_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
   return buf + bytes_read;
 }
 
-extern const gdb_byte *safe_read_uleb128 (const gdb_byte *buf,
-					  const gdb_byte *buf_end,
-					  uint64_t *r);
+extern const gdb_byte *
+safe_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end, uint64_t *r);
 
 extern const gdb_byte *safe_read_sleb128 (const gdb_byte *buf,
-					  const gdb_byte *buf_end,
-					  int64_t *r);
+					  const gdb_byte *buf_end, int64_t *r);
 
 extern const gdb_byte *safe_skip_leb128 (const gdb_byte *buf,
 					 const gdb_byte *buf_end);

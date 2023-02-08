@@ -64,10 +64,7 @@ struct dwarf_scanner_base
   /* An ad hoc version check.  This is needed for .gdb_index to check
      whether a version 8 or above index is in use.  Returns true if
      the index is usable, false otherwise.  */
-  virtual bool version_check () const
-  {
-    return true;
-  }
+  virtual bool version_check () const { return true; }
 
   /* This is called when writing an index.  For a cooked index, it
      will return 'this' as a cooked index.  For other forms, it will
@@ -94,8 +91,9 @@ struct mapped_index_base : public dwarf_scanner_base
   virtual size_t symbol_name_count () const = 0;
 
   /* Get the name of the symbol at IDX in the symbol table.  */
-  virtual const char *symbol_name_at
-    (offset_type idx, dwarf2_per_objfile *per_objfile) const = 0;
+  virtual const char *symbol_name_at (offset_type idx,
+				      dwarf2_per_objfile *per_objfile) const
+    = 0;
 
   /* Return whether the name at IDX in the symbol table should be
      ignored.  */
@@ -113,13 +111,13 @@ struct mapped_index_base : public dwarf_scanner_base
      vector.  */
   std::pair<std::vector<name_component>::const_iterator,
 	    std::vector<name_component>::const_iterator>
-    find_name_components_bounds (const lookup_name_info &ln_no_params,
-				 enum language lang,
-				 dwarf2_per_objfile *per_objfile) const;
+  find_name_components_bounds (const lookup_name_info &ln_no_params,
+			       enum language lang,
+			       dwarf2_per_objfile *per_objfile) const;
 
   cooked_index *index_for_writing () override
   {
-    error (_("Cannot use an index to create the index"));
+    error (_ ("Cannot use an index to create the index"));
   }
 };
 

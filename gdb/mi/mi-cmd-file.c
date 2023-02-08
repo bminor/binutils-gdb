@@ -38,9 +38,9 @@ mi_cmd_file_list_exec_source_file (const char *command, char **argv, int argc)
 {
   struct symtab_and_line st;
   struct ui_out *uiout = current_uiout;
-  
+
   if (!mi_valid_noargs ("-file-list-exec-source-file", argc, argv))
-    error (_("-file-list-exec-source-file: Usage: No args"));
+    error (_ ("-file-list-exec-source-file: Usage: No args"));
 
   /* Set the default file and line, also get them.  */
   set_default_source_symtab_and_line ();
@@ -50,7 +50,7 @@ mi_cmd_file_list_exec_source_file (const char *command, char **argv, int argc)
      need to be tested for NULL.  The documentation in symtab.h
      suggests it will always be correct.  */
   if (!st.symtab)
-    error (_("-file-list-exec-source-file: No symtab"));
+    error (_ ("-file-list-exec-source-file: No symtab"));
 
   /* Print to the user the line, filename and fullname.  */
   uiout->field_signed ("line", st.line);
@@ -68,18 +68,16 @@ void
 mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 {
   enum opt
-    {
-      GROUP_BY_OBJFILE_OPT,
-      MATCH_BASENAME_OPT,
-      MATCH_DIRNAME_OPT
-    };
-  static const struct mi_opt opts[] =
   {
-    {"-group-by-objfile", GROUP_BY_OBJFILE_OPT, 0},
-    {"-basename", MATCH_BASENAME_OPT, 0},
-    {"-dirname", MATCH_DIRNAME_OPT, 0},
-    { 0, 0, 0 }
+    GROUP_BY_OBJFILE_OPT,
+    MATCH_BASENAME_OPT,
+    MATCH_DIRNAME_OPT
   };
+  static const struct mi_opt opts[]
+    = { { "-group-by-objfile", GROUP_BY_OBJFILE_OPT, 0 },
+	{ "-basename", MATCH_BASENAME_OPT, 0 },
+	{ "-dirname", MATCH_DIRNAME_OPT, 0 },
+	{ 0, 0, 0 } };
 
   /* Parse arguments.  */
   int oind = 0;
@@ -91,8 +89,8 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 
   while (1)
     {
-      int opt = mi_getopt ("-file-list-exec-source-files", argc, argv,
-			   opts, &oind, &oarg);
+      int opt = mi_getopt ("-file-list-exec-source-files", argc, argv, opts,
+			   &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -110,7 +108,8 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
     }
 
   if ((argc - oind > 1) || (match_on_basename && match_on_dirname))
-    error (_("-file-list-exec-source-files: Usage: [--group-by-objfile] [--basename | --dirname] [--] REGEXP"));
+    error (_ ("-file-list-exec-source-files: Usage: [--group-by-objfile] "
+	      "[--basename | --dirname] [--] REGEXP"));
 
   const char *regexp = nullptr;
   if (argc - oind == 1)
@@ -145,7 +144,7 @@ mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
       pattern = argv[0];
       break;
     default:
-      error (_("Usage: -file-list-shared-libraries [REGEXP]"));
+      error (_ ("Usage: -file-list-shared-libraries [REGEXP]"));
     }
 
   if (pattern != NULL)
@@ -153,7 +152,7 @@ mi_cmd_file_list_shared_libraries (const char *command, char **argv, int argc)
       const char *re_err = re_comp (pattern);
 
       if (re_err != NULL)
-	error (_("Invalid regexp: %s"), re_err);
+	error (_ ("Invalid regexp: %s"), re_err);
     }
 
   update_solib_list (1);

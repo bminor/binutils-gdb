@@ -90,10 +90,8 @@ ada_varobj_scalar_image (struct type *type, LONGEST val)
    corresponding to the field number FIELDNO.  */
 
 static void
-ada_varobj_struct_elt (struct value *parent_value,
-		       struct type *parent_type,
-		       int fieldno,
-		       struct value **child_value,
+ada_varobj_struct_elt (struct value *parent_value, struct type *parent_type,
+		       int fieldno, struct value **child_value,
 		       struct type **child_type)
 {
   struct value *value = NULL;
@@ -118,10 +116,8 @@ ada_varobj_struct_elt (struct value *parent_value,
    to the dereferenced value.  */
 
 static void
-ada_varobj_ind (struct value *parent_value,
-		struct type *parent_type,
-		struct value **child_value,
-		struct type **child_type)
+ada_varobj_ind (struct value *parent_value, struct type *parent_type,
+		struct value **child_value, struct type **child_type)
 {
   struct value *value = NULL;
   struct type *type = NULL;
@@ -167,8 +163,7 @@ ada_varobj_ind (struct value *parent_value,
 
 static void
 ada_varobj_simple_array_elt (struct value *parent_value,
-			     struct type *parent_type,
-			     int elt_index,
+			     struct type *parent_type, int elt_index,
 			     struct value **child_value,
 			     struct type **child_type)
 {
@@ -177,8 +172,8 @@ ada_varobj_simple_array_elt (struct value *parent_value,
 
   if (parent_value)
     {
-      struct value *index_value =
-	value_from_longest (parent_type->index_type (), elt_index);
+      struct value *index_value
+	= value_from_longest (parent_type->index_type (), elt_index);
 
       value = ada_value_subscript (parent_value, 1, &index_value);
       type = value_type (value);
@@ -199,18 +194,16 @@ ada_varobj_simple_array_elt (struct value *parent_value,
    The replacement is performed in place.  */
 
 static void
-ada_varobj_adjust_for_child_access (struct value **value,
-				    struct type **type)
+ada_varobj_adjust_for_child_access (struct value **value, struct type **type)
 {
-   /* Pointers to struct/union types are special: Instead of having
+  /* Pointers to struct/union types are special: Instead of having
       one child (the struct), their children are the components of
       the struct/union type.  We handle this situation by dereferencing
       the (value, type) couple.  */
   if ((*type)->code () == TYPE_CODE_PTR
       && ((*type)->target_type ()->code () == TYPE_CODE_STRUCT
 	  || (*type)->target_type ()->code () == TYPE_CODE_UNION)
-      && *value != nullptr
-      && value_as_address (*value) != 0
+      && *value != nullptr && value_as_address (*value) != 0
       && !ada_is_array_descriptor_type ((*type)->target_type ())
       && !ada_is_constrained_packed_array_type ((*type)->target_type ()))
     ada_varobj_ind (*value, *type, value, type);
@@ -235,8 +228,7 @@ ada_varobj_get_array_number_of_children (struct value *parent_value,
 {
   LONGEST lo, hi;
 
-  if (parent_value == NULL
-      && is_dynamic_type (parent_type->index_type ()))
+  if (parent_value == NULL && is_dynamic_type (parent_type->index_type ()))
     {
       /* This happens when listing the children of an object
 	 which does not exist in memory (Eg: when requesting
@@ -250,7 +242,7 @@ ada_varobj_get_array_number_of_children (struct value *parent_value,
   if (!get_array_bounds (parent_type, &lo, &hi))
     {
       /* Could not get the array bounds.  Pretend this is an empty array.  */
-      warning (_("unable to get bounds of array, assuming null array"));
+      warning (_ ("unable to get bounds of array, assuming null array"));
       return 0;
     }
 
@@ -285,8 +277,8 @@ ada_varobj_get_struct_number_of_children (struct value *parent_value,
 	  struct value *elt_value;
 	  struct type *elt_type;
 
-	  ada_varobj_struct_elt (parent_value, parent_type, i,
-				 &elt_value, &elt_type);
+	  ada_varobj_struct_elt (parent_value, parent_type, i, &elt_value,
+				 &elt_type);
 	  if (ada_is_tagged_type (elt_type, 0))
 	    {
 	      /* We must not use ada_varobj_get_number_of_children
@@ -297,11 +289,13 @@ ada_varobj_get_struct_number_of_children (struct value *parent_value,
 		 real type, which happens to be the parent_type, and
 		 leads to an infinite loop (because the element gets
 		 fixed back into the parent).  */
-	      n_children += ada_varobj_get_struct_number_of_children
-		(elt_value, elt_type);
+	      n_children
+		+= ada_varobj_get_struct_number_of_children (elt_value,
+							     elt_type);
 	    }
 	  else
-	    n_children += ada_varobj_get_number_of_children (elt_value, elt_type);
+	    n_children
+	      += ada_varobj_get_number_of_children (elt_value, elt_type);
 	}
       else if (ada_is_variant_part (parent_type, i))
 	{
@@ -360,8 +354,7 @@ ada_varobj_get_number_of_children (struct value *parent_value,
     return 1;
 
   if (parent_type->code () == TYPE_CODE_ARRAY)
-    return ada_varobj_get_array_number_of_children (parent_value,
-						    parent_type);
+    return ada_varobj_get_array_number_of_children (parent_value, parent_type);
 
   if (parent_type->code () == TYPE_CODE_STRUCT
       || parent_type->code () == TYPE_CODE_UNION)
@@ -369,8 +362,7 @@ ada_varobj_get_number_of_children (struct value *parent_value,
 						     parent_type);
 
   if (parent_type->code () == TYPE_CODE_PTR)
-    return ada_varobj_get_ptr_number_of_children (parent_value,
-						  parent_type);
+    return ada_varobj_get_ptr_number_of_children (parent_value, parent_type);
 
   /* All other types have no child.  */
   return 0;
@@ -397,29 +389,21 @@ ada_varobj_get_number_of_children (struct value *parent_value,
 
   PARENT_NAME is the name of the parent, and should never be NULL.  */
 
-static void ada_varobj_describe_child (struct value *parent_value,
-				       struct type *parent_type,
-				       const char *parent_name,
-				       const char *parent_path_expr,
-				       int child_index,
-				       std::string *child_name,
-				       struct value **child_value,
-				       struct type **child_type,
-				       std::string *child_path_expr);
+static void ada_varobj_describe_child (
+  struct value *parent_value, struct type *parent_type,
+  const char *parent_name, const char *parent_path_expr, int child_index,
+  std::string *child_name, struct value **child_value,
+  struct type **child_type, std::string *child_path_expr);
 
 /* Same as ada_varobj_describe_child, but limited to struct/union
    objects.  */
 
 static void
-ada_varobj_describe_struct_child (struct value *parent_value,
-				  struct type *parent_type,
-				  const char *parent_name,
-				  const char *parent_path_expr,
-				  int child_index,
-				  std::string *child_name,
-				  struct value **child_value,
-				  struct type **child_type,
-				  std::string *child_path_expr)
+ada_varobj_describe_struct_child (
+  struct value *parent_value, struct type *parent_type,
+  const char *parent_name, const char *parent_path_expr, int child_index,
+  std::string *child_name, struct value **child_value,
+  struct type **child_type, std::string *child_path_expr)
 {
   int fieldno;
   int childno = 0;
@@ -446,12 +430,13 @@ ada_varobj_describe_struct_child (struct value *parent_value,
 		 For tagged types, we must be careful to not call
 		 ada_varobj_get_number_of_children, to prevent our
 		 element from being fixed back into the parent.  */
-	      elt_n_children = ada_varobj_get_struct_number_of_children
-		(elt_value, elt_type);
+	      elt_n_children
+		= ada_varobj_get_struct_number_of_children (elt_value,
+							    elt_type);
 	    }
 	  else
-	    elt_n_children =
-	      ada_varobj_get_number_of_children (elt_value, elt_type);
+	    elt_n_children
+	      = ada_varobj_get_number_of_children (elt_value, elt_type);
 
 	  /* Is the child we're looking for one of the children
 	     of this wrapper field?  */
@@ -463,17 +448,17 @@ ada_varobj_describe_struct_child (struct value *parent_value,
 		     For tagged types, we must be careful to not call
 		     ada_varobj_describe_child, to prevent our element
 		     from being fixed back into the parent.  */
-		  ada_varobj_describe_struct_child
-		    (elt_value, elt_type, parent_name, parent_path_expr,
-		     child_index - childno, child_name, child_value,
-		     child_type, child_path_expr);
+		  ada_varobj_describe_struct_child (
+		    elt_value, elt_type, parent_name, parent_path_expr,
+		    child_index - childno, child_name, child_value, child_type,
+		    child_path_expr);
 		}
 	      else
-		ada_varobj_describe_child (elt_value, elt_type,
-					   parent_name, parent_path_expr,
-					   child_index - childno,
-					   child_name, child_value,
-					   child_type, child_path_expr);
+		ada_varobj_describe_child (elt_value, elt_type, parent_name,
+					   parent_path_expr,
+					   child_index - childno, child_name,
+					   child_value, child_type,
+					   child_path_expr);
 	      return;
 	    }
 
@@ -513,8 +498,8 @@ ada_varobj_describe_struct_child (struct value *parent_value,
 				   child_value, NULL);
 
 	  if (child_type)
-	    ada_varobj_struct_elt (parent_value, parent_type, fieldno,
-				   NULL, child_type);
+	    ada_varobj_struct_elt (parent_value, parent_type, fieldno, NULL,
+				   child_type);
 
 	  if (child_path_expr)
 	    {
@@ -525,9 +510,8 @@ ada_varobj_describe_struct_child (struct value *parent_value,
 	      const char *field_name = parent_type->field (fieldno).name ();
 	      int child_name_len = ada_name_prefix_len (field_name);
 
-	      *child_path_expr =
-		string_printf ("(%s).%.*s", parent_path_expr,
-			       child_name_len, field_name);
+	      *child_path_expr = string_printf ("(%s).%.*s", parent_path_expr,
+						child_name_len, field_name);
 	    }
 
 	  return;
@@ -550,15 +534,11 @@ ada_varobj_describe_struct_child (struct value *parent_value,
    child.  */
 
 static void
-ada_varobj_describe_ptr_child (struct value *parent_value,
-			       struct type *parent_type,
-			       const char *parent_name,
-			       const char *parent_path_expr,
-			       int child_index,
-			       std::string *child_name,
-			       struct value **child_value,
-			       struct type **child_type,
-			       std::string *child_path_expr)
+ada_varobj_describe_ptr_child (
+  struct value *parent_value, struct type *parent_type,
+  const char *parent_name, const char *parent_path_expr, int child_index,
+  std::string *child_name, struct value **child_value,
+  struct type **child_type, std::string *child_path_expr)
 {
   if (child_name)
     *child_name = string_printf ("%s.all", parent_name);
@@ -580,15 +560,11 @@ ada_varobj_describe_ptr_child (struct value *parent_value,
    This is done by ada_varobj_describe_child before calling us.  */
 
 static void
-ada_varobj_describe_simple_array_child (struct value *parent_value,
-					struct type *parent_type,
-					const char *parent_name,
-					const char *parent_path_expr,
-					int child_index,
-					std::string *child_name,
-					struct value **child_value,
-					struct type **child_type,
-					std::string *child_path_expr)
+ada_varobj_describe_simple_array_child (
+  struct value *parent_value, struct type *parent_type,
+  const char *parent_name, const char *parent_path_expr, int child_index,
+  std::string *child_name, struct value **child_value,
+  struct type **child_type, std::string *child_path_expr)
 {
   struct type *index_type;
   int real_index;
@@ -606,8 +582,8 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 				 child_value, NULL);
 
   if (child_type)
-    ada_varobj_simple_array_elt (parent_value, parent_type, real_index,
-				 NULL, child_type);
+    ada_varobj_simple_array_elt (parent_value, parent_type, real_index, NULL,
+				 child_type);
 
   if (child_path_expr)
     {
@@ -648,13 +624,13 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 	}
 
       if (index_type_name != NULL)
-	*child_path_expr =
-	  string_printf ("(%s)(%.*s'(%s))", parent_path_expr,
-			 ada_name_prefix_len (index_type_name),
-			 index_type_name, index_img.c_str ());
+	*child_path_expr
+	  = string_printf ("(%s)(%.*s'(%s))", parent_path_expr,
+			   ada_name_prefix_len (index_type_name),
+			   index_type_name, index_img.c_str ());
       else
-	*child_path_expr =
-	  string_printf ("(%s)(%s)", parent_path_expr, index_img.c_str ());
+	*child_path_expr
+	  = string_printf ("(%s)(%s)", parent_path_expr, index_img.c_str ());
     }
 }
 
@@ -662,12 +638,9 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 
 static void
 ada_varobj_describe_child (struct value *parent_value,
-			   struct type *parent_type,
-			   const char *parent_name,
-			   const char *parent_path_expr,
-			   int child_index,
-			   std::string *child_name,
-			   struct value **child_value,
+			   struct type *parent_type, const char *parent_name,
+			   const char *parent_path_expr, int child_index,
+			   std::string *child_name, struct value **child_value,
 			   struct type **child_type,
 			   std::string *child_path_expr)
 {
@@ -691,41 +664,37 @@ ada_varobj_describe_child (struct value *parent_value,
 
   if (ada_is_access_to_unconstrained_array (parent_type))
     {
-      ada_varobj_describe_ptr_child (parent_value, parent_type,
-				     parent_name, parent_path_expr,
-				     child_index, child_name,
-				     child_value, child_type,
-				     child_path_expr);
+      ada_varobj_describe_ptr_child (parent_value, parent_type, parent_name,
+				     parent_path_expr, child_index, child_name,
+				     child_value, child_type, child_path_expr);
       return;
     }
 
   if (parent_type->code () == TYPE_CODE_ARRAY)
     {
-      ada_varobj_describe_simple_array_child
-	(parent_value, parent_type, parent_name, parent_path_expr,
-	 child_index, child_name, child_value, child_type,
-	 child_path_expr);
+      ada_varobj_describe_simple_array_child (parent_value, parent_type,
+					      parent_name, parent_path_expr,
+					      child_index, child_name,
+					      child_value, child_type,
+					      child_path_expr);
       return;
     }
 
   if (parent_type->code () == TYPE_CODE_STRUCT
       || parent_type->code () == TYPE_CODE_UNION)
     {
-      ada_varobj_describe_struct_child (parent_value, parent_type,
-					parent_name, parent_path_expr,
-					child_index, child_name,
-					child_value, child_type,
+      ada_varobj_describe_struct_child (parent_value, parent_type, parent_name,
+					parent_path_expr, child_index,
+					child_name, child_value, child_type,
 					child_path_expr);
       return;
     }
 
   if (parent_type->code () == TYPE_CODE_PTR)
     {
-      ada_varobj_describe_ptr_child (parent_value, parent_type,
-				     parent_name, parent_path_expr,
-				     child_index, child_name,
-				     child_value, child_type,
-				     child_path_expr);
+      ada_varobj_describe_ptr_child (parent_value, parent_type, parent_name,
+				     parent_path_expr, child_index, child_name,
+				     child_value, child_type, child_path_expr);
       return;
     }
 
@@ -745,9 +714,8 @@ ada_varobj_get_name_of_child (struct value *parent_value,
 {
   std::string child_name;
 
-  ada_varobj_describe_child (parent_value, parent_type, parent_name,
-			     NULL, child_index, &child_name, NULL,
-			     NULL, NULL);
+  ada_varobj_describe_child (parent_value, parent_type, parent_name, NULL,
+			     child_index, &child_name, NULL, NULL, NULL);
   return child_name;
 }
 
@@ -766,8 +734,8 @@ ada_varobj_get_path_expr_of_child (struct value *parent_value,
   std::string child_path_expr;
 
   ada_varobj_describe_child (parent_value, parent_type, parent_name,
-			     parent_path_expr, child_index, NULL,
-			     NULL, NULL, &child_path_expr);
+			     parent_path_expr, child_index, NULL, NULL, NULL,
+			     &child_path_expr);
 
   return child_path_expr;
 }
@@ -782,9 +750,8 @@ ada_varobj_get_value_of_child (struct value *parent_value,
 {
   struct value *child_value;
 
-  ada_varobj_describe_child (parent_value, parent_type, parent_name,
-			     NULL, child_index, NULL, &child_value,
-			     NULL, NULL);
+  ada_varobj_describe_child (parent_value, parent_type, parent_name, NULL,
+			     child_index, NULL, &child_value, NULL, NULL);
 
   return child_value;
 }
@@ -794,8 +761,7 @@ ada_varobj_get_value_of_child (struct value *parent_value,
 
 static struct type *
 ada_varobj_get_type_of_child (struct value *parent_value,
-			      struct type *parent_type,
-			      int child_index)
+			      struct type *parent_type, int child_index)
 {
   struct type *child_type;
 
@@ -831,8 +797,7 @@ ada_varobj_get_value_image (struct value *value,
    The result should be deallocated after use using xfree.  */
 
 static std::string
-ada_varobj_get_value_of_array_variable (struct value *value,
-					struct type *type,
+ada_varobj_get_value_of_array_variable (struct value *value, struct type *type,
 					struct value_print_options *opts)
 {
   const int numchild = ada_varobj_get_array_number_of_children (value, type);
@@ -841,8 +806,7 @@ ada_varobj_get_value_of_array_variable (struct value *value,
      Otherwise, the only other way to inspect the contents of the string
      is by looking at the value of each element, as in any other array,
      which is not very convenient...  */
-  if (value
-      && ada_is_string_type (type)
+  if (value && ada_is_string_type (type)
       && (opts->format == 0 || opts->format == 's'))
     {
       std::string str = ada_varobj_get_value_image (value, opts);
@@ -856,8 +820,7 @@ ada_varobj_get_value_of_array_variable (struct value *value,
    the given print options OPTS as our formatting options.  */
 
 static std::string
-ada_varobj_get_value_of_variable (struct value *value,
-				  struct type *type,
+ada_varobj_get_value_of_variable (struct value *value, struct type *type,
 				  struct value_print_options *opts)
 {
   ada_varobj_decode_var (&value, &type);
@@ -904,11 +867,9 @@ ada_path_expr_of_child (const struct varobj *child)
   const struct varobj *parent = child->parent;
   const char *parent_path_expr = varobj_get_path_expr (parent);
 
-  return ada_varobj_get_path_expr_of_child (parent->value.get (),
-					    parent->type,
+  return ada_varobj_get_path_expr_of_child (parent->value.get (), parent->type,
 					    parent->name.c_str (),
-					    parent_path_expr,
-					    child->index);
+					    parent_path_expr, child->index);
 }
 
 static struct value *
@@ -942,8 +903,8 @@ ada_value_of_variable (const struct varobj *var,
 static bool
 ada_value_is_changeable_p (const struct varobj *var)
 {
-  struct type *type = (var->value != nullptr
-		       ? value_type (var->value.get ()) : var->type);
+  struct type *type
+    = (var->value != nullptr ? value_type (var->value.get ()) : var->type);
 
   if (type->code () == TYPE_CODE_REF)
     type = type->target_type ();
@@ -996,8 +957,7 @@ ada_value_has_mutated (const struct varobj *var, struct value *new_val,
 
   varobj_restrict_range (var->children, &from, &to);
   for (int i = from; i < to; i++)
-    if (ada_varobj_get_name_of_child (new_val, new_type,
-				      var->name.c_str (), i)
+    if (ada_varobj_get_name_of_child (new_val, new_type, var->name.c_str (), i)
 	!= var->children[i]->name)
       return true;
 
@@ -1006,16 +966,9 @@ ada_value_has_mutated (const struct varobj *var, struct value *new_val,
 
 /* varobj operations for ada.  */
 
-const struct lang_varobj_ops ada_varobj_ops =
-{
-  ada_number_of_children,
-  ada_name_of_variable,
-  ada_name_of_child,
-  ada_path_expr_of_child,
-  ada_value_of_child,
-  ada_type_of_child,
-  ada_value_of_variable,
-  ada_value_is_changeable_p,
-  ada_value_has_mutated,
-  varobj_default_is_path_expr_parent
-};
+const struct lang_varobj_ops ada_varobj_ops
+  = { ada_number_of_children, ada_name_of_variable,
+      ada_name_of_child,      ada_path_expr_of_child,
+      ada_value_of_child,     ada_type_of_child,
+      ada_value_of_variable,  ada_value_is_changeable_p,
+      ada_value_has_mutated,  varobj_default_is_path_expr_parent };

@@ -25,11 +25,8 @@
 struct ravenscar_arch_ops
 {
   ravenscar_arch_ops (gdb::array_view<const int> offsets_,
-		      int first_stack = -1,
-		      int last_stack = -1,
-		      int v_init = -1,
-		      int fpu_offset = -1,
-		      int first_fp = -1,
+		      int first_stack = -1, int last_stack = -1,
+		      int v_init = -1, int fpu_offset = -1, int first_fp = -1,
 		      int last_fp = -1)
     : offsets (offsets_),
       first_stack_register (first_stack),
@@ -51,8 +48,7 @@ struct ravenscar_arch_ops
 
   /* Return true if this architecture implements on-demand floating
      point.  */
-  bool on_demand_fp () const
-  { return v_init_offset != -1; }
+  bool on_demand_fp () const { return v_init_offset != -1; }
 
   /* Return true if REGNUM is a floating-point register for this
      target.  If this target does not use the on-demand FP scheme,
@@ -118,12 +114,10 @@ private:
 
   /* Helper function to supply one register.  */
   void supply_one_register (struct regcache *regcache, int regnum,
-			    CORE_ADDR descriptor,
-			    CORE_ADDR stack_base) const;
+			    CORE_ADDR descriptor, CORE_ADDR stack_base) const;
   /* Helper function to store one register.  */
   void store_one_register (struct regcache *regcache, int regnum,
-			   CORE_ADDR descriptor,
-			   CORE_ADDR stack_base) const;
+			   CORE_ADDR descriptor, CORE_ADDR stack_base) const;
   /* Helper function to find stack address where registers are stored.
      This must be called with the stack pointer already supplied in
      the register cache.  */

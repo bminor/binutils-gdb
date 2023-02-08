@@ -22,8 +22,10 @@
 
 #include "gdbsupport/gdb_vecs.h"
 
-namespace selftests {
-namespace vector_utils_tests {
+namespace selftests
+{
+namespace vector_utils_tests
+{
 
 static void
 unordered_remove_tests ()
@@ -38,19 +40,16 @@ unordered_remove_tests ()
   {
     std::vector<void *> var;
 
-    obj() = default;
+    obj () = default;
 
     /* gcc complains if we provide an assignment operator but no copy
        constructor, so provide one even if don't really care for this test.  */
-    obj(const obj &other)
-    {
-      this->var = other.var;
-    }
+    obj (const obj &other) { this->var = other.var; }
 
     obj &operator= (const obj &other)
     {
       if (this == &other)
-	error (_("detected self move assign"));
+	error (_ ("detected self move assign"));
       this->var = other.var;
       return *this;
     }
@@ -64,13 +63,13 @@ unordered_remove_tests ()
 }
 
 } /* namespace vector_utils_tests */
-} /* amespace selftests */
+} // namespace selftests
 
 void _initialize_vec_utils_selftests ();
+
 void
 _initialize_vec_utils_selftests ()
 {
-  selftests::register_test
-    ("unordered_remove",
-     selftests::vector_utils_tests::unordered_remove_tests);
+  selftests::register_test (
+    "unordered_remove", selftests::vector_utils_tests::unordered_remove_tests);
 }

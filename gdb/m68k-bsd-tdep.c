@@ -33,16 +33,16 @@
 /* Core file support.  */
 
 /* Sizeof `struct reg' in <machine/reg.h>.  */
-#define M68KBSD_SIZEOF_GREGS	(18 * 4)
+#define M68KBSD_SIZEOF_GREGS (18 * 4)
 
 /* Sizeof `struct fpreg' in <machine/reg.h.  */
-#define M68KBSD_SIZEOF_FPREGS	(((8 * 3) + 3) * 4)
+#define M68KBSD_SIZEOF_FPREGS (((8 * 3) + 3) * 4)
 
 int
 m68kbsd_fpreg_offset (struct gdbarch *gdbarch, int regnum)
 {
   int fp_len = gdbarch_register_type (gdbarch, regnum)->length ();
-  
+
   if (regnum >= M68K_FPC_REGNUM)
     return 8 * fp_len + (regnum - M68K_FPC_REGNUM) * 4;
 
@@ -55,8 +55,8 @@ m68kbsd_fpreg_offset (struct gdbarch *gdbarch, int regnum)
 
 static void
 m68kbsd_supply_fpregset (const struct regset *regset,
-			 struct regcache *regcache,
-			 int regnum, const void *fpregs, size_t len)
+			 struct regcache *regcache, int regnum,
+			 const void *fpregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   const gdb_byte *regs = (const gdb_byte *) fpregs;
@@ -76,8 +76,7 @@ m68kbsd_supply_fpregset (const struct regset *regset,
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
-m68kbsd_supply_gregset (const struct regset *regset,
-			struct regcache *regcache,
+m68kbsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
 			int regnum, const void *gregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
@@ -101,19 +100,11 @@ m68kbsd_supply_gregset (const struct regset *regset,
 
 /* Motorola 68000 register sets.  */
 
-static const struct regset m68kbsd_gregset =
-{
-  NULL,
-  m68kbsd_supply_gregset,
-  NULL,
-  REGSET_VARIABLE_SIZE
-};
+static const struct regset m68kbsd_gregset
+  = { NULL, m68kbsd_supply_gregset, NULL, REGSET_VARIABLE_SIZE };
 
-static const struct regset m68kbsd_fpregset =
-{
-  NULL,
-  m68kbsd_supply_fpregset
-};
+static const struct regset m68kbsd_fpregset
+  = { NULL, m68kbsd_supply_fpregset };
 
 /* Iterate over core file register note sections.  */
 
@@ -128,7 +119,6 @@ m68kbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg2", M68KBSD_SIZEOF_FPREGS, M68KBSD_SIZEOF_FPREGS, &m68kbsd_fpregset,
       NULL, cb_data);
 }
-
 
 static void
 m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -140,19 +130,20 @@ m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
-  set_gdbarch_iterate_over_regset_sections
-    (gdbarch, m68kbsd_iterate_over_regset_sections);
+  set_gdbarch_iterate_over_regset_sections (
+    gdbarch, m68kbsd_iterate_over_regset_sections);
 
   /* NetBSD ELF uses the SVR4 ABI.  */
   m68k_svr4_init_abi (info, gdbarch);
   tdep->struct_return = pcc_struct_return;
 
   /* NetBSD ELF uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
 }
 
 void _initialize_m68kbsd_tdep ();
+
 void
 _initialize_m68kbsd_tdep ()
 {

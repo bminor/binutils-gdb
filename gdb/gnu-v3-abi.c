@@ -41,7 +41,6 @@ static struct cp_abi_ops gnu_v3_abi_ops;
 
 static const registry<gdbarch>::key<struct type> std_type_info_gdbarch_data;
 
-
 static int
 gnuv3_is_vtable_name (const char *name)
 {
@@ -53,7 +52,6 @@ gnuv3_is_operator_name (const char *name)
 {
   return startswith (name, CP_OPERATOR_STR);
 }
-
 
 /* To help us find the components of a vtable, we build ourselves a
    GDB type object representing the vtable structure.  Following the
@@ -94,15 +92,14 @@ gnuv3_is_operator_name (const char *name)
    appropriately for the architecture.  */
 static const registry<gdbarch>::key<struct type> vtable_type_gdbarch_data;
 
-
 /* Human-readable names for the numbers of the fields above.  */
-enum {
+enum
+{
   vtable_field_vcall_and_vbase_offsets,
   vtable_field_offset_to_top,
   vtable_field_type_info,
   vtable_field_virtual_functions
 };
-
 
 /* Return a GDB type representing `struct gdb_gnu_v3_abi_vtable',
    described above, laid out appropriately for ARCH.
@@ -120,10 +117,8 @@ get_gdb_vtable_type (struct gdbarch *arch)
   if (result != nullptr)
     return result;
 
-  struct type *void_ptr_type
-    = builtin_type (arch)->builtin_data_ptr;
-  struct type *ptr_to_void_fn_type
-    = builtin_type (arch)->builtin_func_ptr;
+  struct type *void_ptr_type = builtin_type (arch)->builtin_data_ptr;
+  struct type *ptr_to_void_fn_type = builtin_type (arch)->builtin_func_ptr;
 
   /* ARCH can't give us the true ptrdiff_t type, so we guess.  */
   struct type *ptrdiff_type
@@ -181,7 +176,6 @@ get_gdb_vtable_type (struct gdbarch *arch)
   return result;
 }
 
-
 /* Return the ptrdiff_t type used in the vtable type.  */
 static struct type *
 vtable_ptrdiff_type (struct gdbarch *gdbarch)
@@ -203,7 +197,6 @@ vtable_address_point_offset (struct gdbarch *gdbarch)
   return (vtable_type->field (vtable_field_virtual_functions).loc_bitpos ()
 	  / TARGET_CHAR_BIT);
 }
-
 
 /* Determine whether structure TYPE is a dynamic class.  Cache the
    result.  */
@@ -255,8 +248,8 @@ gnuv3_dynamic_class (struct type *type)
    architecture, or NULL if CONTAINER does not have a vtable.  */
 
 static struct value *
-gnuv3_get_vtable (struct gdbarch *gdbarch,
-		  struct type *container_type, CORE_ADDR container_addr)
+gnuv3_get_vtable (struct gdbarch *gdbarch, struct type *container_type,
+		  CORE_ADDR container_addr)
 {
   struct type *vtable_type = get_gdb_vtable_type (gdbarch);
   struct type *vtable_pointer_type;
@@ -289,13 +282,12 @@ gnuv3_get_vtable (struct gdbarch *gdbarch,
      than the address point.  */
   return value_at_lazy (vtable_type,
 			vtable_address
-			- vtable_address_point_offset (gdbarch));
+			  - vtable_address_point_offset (gdbarch));
 }
 
-
 static struct type *
-gnuv3_rtti_type (struct value *value,
-		 int *full_p, LONGEST *top_p, int *using_enc_p)
+gnuv3_rtti_type (struct value *value, int *full_p, LONGEST *top_p,
+		 int *using_enc_p)
 {
   struct gdbarch *gdbarch;
   struct type *values_type = check_typedef (value_type (value));
@@ -326,10 +318,11 @@ gnuv3_rtti_type (struct value *value,
   /* Find the linker symbol for this vtable.  */
   vtable_symbol
     = lookup_minimal_symbol_by_pc (value_address (vtable)
-				   + value_embedded_offset (vtable)).minsym;
-  if (! vtable_symbol)
+				   + value_embedded_offset (vtable))
+	.minsym;
+  if (!vtable_symbol)
     return NULL;
-  
+
   /* The symbol's demangled name should be something like "vtable for
      CLASS", where CLASS is the name of the run-time type of VALUE.
      If we didn't like this approach, we could instead look in the
@@ -339,10 +332,10 @@ gnuv3_rtti_type (struct value *value,
   if (vtable_symbol_name == NULL
       || !startswith (vtable_symbol_name, "vtable for "))
     {
-      warning (_("can't find linker symbol for virtual table for `%s' value"),
+      warning (_ ("can't find linker symbol for virtual table for `%s' value"),
 	       TYPE_SAFE_NAME (values_type));
       if (vtable_symbol_name)
-	warning (_("  found `%s' instead"), vtable_symbol_name);
+	warning (_ ("  found `%s' instead"), vtable_symbol_name);
       return NULL;
     }
   class_name = vtable_symbol_name + 11;
@@ -371,11 +364,11 @@ gnuv3_rtti_type (struct value *value,
     = value_as_long (value_field (vtable, vtable_field_offset_to_top));
 
   if (full_p)
-    *full_p = (- offset_to_top == value_embedded_offset (value)
+    *full_p = (-offset_to_top == value_embedded_offset (value)
 	       && (value_enclosing_type (value)->length ()
 		   >= run_time_type->length ()));
   if (top_p)
-    *top_p = - offset_to_top;
+    *top_p = -offset_to_top;
   return run_time_type;
 }
 
@@ -415,8 +408,7 @@ gnuv3_get_virtual_fn (struct gdbarch *gdbarch, struct value *container,
    for a description of the arguments.  */
 
 static struct value *
-gnuv3_virtual_fn_field (struct value **value_p,
-			struct fn_field *f, int j,
+gnuv3_virtual_fn_field (struct value **value_p, struct fn_field *f, int j,
 			struct type *vfn_base, int offset)
 {
   struct type *values_type = check_typedef (value_type (*value_p));
@@ -424,7 +416,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
 
   /* Some simple sanity checks.  */
   if (values_type->code () != TYPE_CODE_STRUCT)
-    error (_("Only classes can have virtual functions."));
+    error (_ ("Only classes can have virtual functions."));
 
   /* Determine architecture.  */
   gdbarch = values_type->arch ();
@@ -448,9 +440,9 @@ gnuv3_virtual_fn_field (struct value **value_p,
    -1 is returned on error.  */
 
 static int
-gnuv3_baseclass_offset (struct type *type, int index,
-			const bfd_byte *valaddr, LONGEST embedded_offset,
-			CORE_ADDR address, const struct value *val)
+gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
+			LONGEST embedded_offset, CORE_ADDR address,
+			const struct value *val)
 {
   struct gdbarch *gdbarch;
   struct type *ptr_type;
@@ -471,8 +463,7 @@ gnuv3_baseclass_offset (struct type *type, int index,
   if (type->field (index).loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
     {
       struct dwarf2_property_baton baton;
-      baton.property_type
-	= lookup_pointer_type (type->field (index).type ());
+      baton.property_type = lookup_pointer_type (type->field (index).type ());
       baton.locexpr = *type->field (index).loc_dwarf_block ();
 
       struct dynamic_prop prop;
@@ -487,7 +478,7 @@ gnuv3_baseclass_offset (struct type *type, int index,
 
       CORE_ADDR result;
       if (dwarf2_evaluate_property (&prop, nullptr, &addr_stack, &result,
-				    {addr_stack.addr}))
+				    { addr_stack.addr }))
 	return (int) (result - addr_stack.addr);
     }
 
@@ -497,12 +488,12 @@ gnuv3_baseclass_offset (struct type *type, int index,
      complete inheritance graph based on the debug info.  Neither is
      worthwhile.  */
   cur_base_offset = TYPE_BASECLASS_BITPOS (type, index) / 8;
-  if (cur_base_offset >= - vtable_address_point_offset (gdbarch))
-    error (_("Expected a negative vbase offset (old compiler?)"));
+  if (cur_base_offset >= -vtable_address_point_offset (gdbarch))
+    error (_ ("Expected a negative vbase offset (old compiler?)"));
 
   cur_base_offset = cur_base_offset + vtable_address_point_offset (gdbarch);
-  if ((- cur_base_offset) % ptr_type->length () != 0)
-    error (_("Misaligned vbase offset."));
+  if ((-cur_base_offset) % ptr_type->length () != 0)
+    error (_ ("Misaligned vbase offset."));
   cur_base_offset = cur_base_offset / ((int) ptr_type->length ());
 
   vtable = gnuv3_get_vtable (gdbarch, type, address + embedded_offset);
@@ -567,10 +558,8 @@ gnuv3_find_method_in (struct type *domain, CORE_ADDR voffset,
 /* Decode GNU v3 method pointer.  */
 
 static int
-gnuv3_decode_method_ptr (struct gdbarch *gdbarch,
-			 const gdb_byte *contents,
-			 CORE_ADDR *value_p,
-			 LONGEST *adjustment_p)
+gnuv3_decode_method_ptr (struct gdbarch *gdbarch, const gdb_byte *contents,
+			 CORE_ADDR *value_p, LONGEST *adjustment_p)
 {
   struct type *funcptr_type = builtin_type (gdbarch)->builtin_func_ptr;
   struct type *offset_type = vtable_ptrdiff_type (gdbarch);
@@ -586,11 +575,11 @@ gnuv3_decode_method_ptr (struct gdbarch *gdbarch,
      yet know which case we have, so we extract the value under both
      interpretations and choose the right one later on.  */
   ptr_value = extract_typed_address (contents, funcptr_type);
-  voffset = extract_signed_integer (contents,
-				    funcptr_type->length (), byte_order);
+  voffset
+    = extract_signed_integer (contents, funcptr_type->length (), byte_order);
   contents += funcptr_type->length ();
-  adjustment = extract_signed_integer (contents,
-				       offset_type->length (), byte_order);
+  adjustment
+    = extract_signed_integer (contents, offset_type->length (), byte_order);
 
   if (!gdbarch_vbit_in_delta (gdbarch))
     {
@@ -603,7 +592,7 @@ gnuv3_decode_method_ptr (struct gdbarch *gdbarch,
       adjustment = adjustment >> 1;
     }
 
-  *value_p = vbit? voffset : ptr_value;
+  *value_p = vbit ? voffset : ptr_value;
   *adjustment_p = adjustment;
   return vbit;
 }
@@ -611,8 +600,7 @@ gnuv3_decode_method_ptr (struct gdbarch *gdbarch,
 /* GNU v3 implementation of cplus_print_method_ptr.  */
 
 static void
-gnuv3_print_method_ptr (const gdb_byte *contents,
-			struct type *type,
+gnuv3_print_method_ptr (const gdb_byte *contents, struct type *type,
 			struct ui_file *stream)
 {
   struct type *self_type = TYPE_SELF_TYPE (type);
@@ -700,8 +688,8 @@ gnuv3_method_ptr_size (struct type *type)
 /* GNU v3 implementation of cplus_make_method_ptr.  */
 
 static void
-gnuv3_make_method_ptr (struct type *type, gdb_byte *contents,
-		       CORE_ADDR value, int is_virtual)
+gnuv3_make_method_ptr (struct type *type, gdb_byte *contents, CORE_ADDR value,
+		       int is_virtual)
 {
   struct gdbarch *gdbarch = type->arch ();
   int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
@@ -777,8 +765,8 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
       LONGEST voffset;
 
       voffset = ptr_value / vtable_ptrdiff_type (gdbarch)->length ();
-      return gnuv3_get_virtual_fn (gdbarch, value_ind (*this_p),
-				   method_type, voffset);
+      return gnuv3_get_virtual_fn (gdbarch, value_ind (*this_p), method_type,
+				   voffset);
     }
   else
     return value_from_pointer (lookup_pointer_type (method_type), ptr_value);
@@ -825,10 +813,10 @@ static bool
 compare_value_and_voffset (const struct value_and_voffset *va,
 			   const struct value_and_voffset *vb)
 {
-  CORE_ADDR addra = (value_address (va->value)
-		     + value_embedded_offset (va->value));
-  CORE_ADDR addrb = (value_address (vb->value)
-		     + value_embedded_offset (vb->value));
+  CORE_ADDR addra
+    = (value_address (va->value) + value_embedded_offset (va->value));
+  CORE_ADDR addrb
+    = (value_address (vb->value) + value_embedded_offset (vb->value));
 
   return addra < addrb;
 }
@@ -898,23 +886,21 @@ compute_vtable_size (htab_t offset_hash,
 
 static void
 print_one_vtable (struct gdbarch *gdbarch, struct value *value,
-		  int max_voffset,
-		  struct value_print_options *opts)
+		  int max_voffset, struct value_print_options *opts)
 {
   int i;
   struct type *type = check_typedef (value_type (value));
   struct value *vtable;
   CORE_ADDR vt_addr;
 
-  vtable = gnuv3_get_vtable (gdbarch, type,
-			     value_address (value)
-			     + value_embedded_offset (value));
-  vt_addr = value_address (value_field (vtable,
-					vtable_field_virtual_functions));
+  vtable
+    = gnuv3_get_vtable (gdbarch, type,
+			value_address (value) + value_embedded_offset (value));
+  vt_addr
+    = value_address (value_field (vtable, vtable_field_virtual_functions));
 
-  gdb_printf (_("vtable for '%s' @ %s (subobject @ %s):\n"),
-	      TYPE_SAFE_NAME (type),
-	      paddress (gdbarch, vt_addr),
+  gdb_printf (_ ("vtable for '%s' @ %s (subobject @ %s):\n"),
+	      TYPE_SAFE_NAME (type), paddress (gdbarch, vt_addr),
 	      paddress (gdbarch, (value_address (value)
 				  + value_embedded_offset (value))));
 
@@ -941,7 +927,7 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
       catch (const gdb_exception_error &ex)
 	{
 	  fprintf_styled (gdb_stdout, metadata_style.style (),
-			  _("<error: %s>"), ex.what ());
+			  _ ("<error: %s>"), ex.what ());
 	  got_error = 1;
 	}
 
@@ -988,13 +974,13 @@ gnuv3_print_vtable (struct value *value)
 
   if (!vtable)
     {
-      gdb_printf (_("This object does not have a virtual function table\n"));
+      gdb_printf (_ ("This object does not have a virtual function table\n"));
       return;
     }
 
   htab_up offset_hash (htab_create_alloc (1, hash_value_and_voffset,
-					  eq_value_and_voffset,
-					  xfree, xcalloc, xfree));
+					  eq_value_and_voffset, xfree, xcalloc,
+					  xfree));
   std::vector<value_and_voffset *> result_vec;
 
   compute_vtable_size (offset_hash.get (), &result_vec, value);
@@ -1026,10 +1012,8 @@ build_std_type_info_type (struct gdbarch *arch)
   struct type *t;
   struct field *field_list, *field;
   int offset;
-  struct type *void_ptr_type
-    = builtin_type (arch)->builtin_data_ptr;
-  struct type *char_type
-    = builtin_type (arch)->builtin_char;
+  struct type *void_ptr_type = builtin_type (arch)->builtin_data_ptr;
+  struct type *char_type = builtin_type (arch)->builtin_char;
   struct type *char_ptr_type
     = make_pointer_type (make_cv_type (1, 0, char_type, NULL), NULL);
 
@@ -1070,8 +1054,8 @@ gnuv3_get_typeid_type (struct gdbarch *gdbarch)
   struct symbol *typeinfo;
   struct type *typeinfo_type;
 
-  typeinfo = lookup_symbol ("std::type_info", NULL, STRUCT_DOMAIN,
-			    NULL).symbol;
+  typeinfo
+    = lookup_symbol ("std::type_info", NULL, STRUCT_DOMAIN, NULL).symbol;
   if (typeinfo == NULL)
     {
       typeinfo_type = std_type_info_gdbarch_data.get (gdbarch);
@@ -1118,32 +1102,30 @@ gnuv3_get_typeid (struct value *value)
 
   type_name = type_to_string (type);
   if (type_name.empty ())
-    error (_("cannot find typeinfo for unnamed type"));
+    error (_ ("cannot find typeinfo for unnamed type"));
 
   /* We need to canonicalize the type name here, because we do lookups
      using the demangled name, and so we must match the format it
      uses.  E.g., GDB tends to use "const char *" as a type name, but
      the demangler uses "char const *".  */
   canonical = cp_canonicalize_string (type_name.c_str ());
-  const char *name = (canonical == nullptr
-		      ? type_name.c_str ()
-		      : canonical.get ());
+  const char *name
+    = (canonical == nullptr ? type_name.c_str () : canonical.get ());
 
   typeinfo_type = gnuv3_get_typeid_type (gdbarch);
 
   /* We check for lval_memory because in the "typeid (type-id)" case,
      the type is passed via a not_lval value object.  */
   if (type->code () == TYPE_CODE_STRUCT
-      && value_lval_const (value) == lval_memory
-      && gnuv3_dynamic_class (type))
+      && value_lval_const (value) == lval_memory && gnuv3_dynamic_class (type))
     {
       struct value *vtable, *typeinfo_value;
-      CORE_ADDR address = value_address (value) + value_embedded_offset (value);
+      CORE_ADDR address
+	= value_address (value) + value_embedded_offset (value);
 
       vtable = gnuv3_get_vtable (gdbarch, type, address);
       if (vtable == NULL)
-	error (_("cannot find typeinfo for object of type '%s'"),
-	       name);
+	error (_ ("cannot find typeinfo for object of type '%s'"), name);
       typeinfo_value = value_field (vtable, vtable_field_type_info);
       result = value_ind (value_cast (make_pointer_type (typeinfo_type, NULL),
 				      typeinfo_value));
@@ -1155,7 +1137,7 @@ gnuv3_get_typeid (struct value *value)
 	= lookup_minimal_symbol (sym_name.c_str (), NULL, NULL);
 
       if (minsym.minsym == NULL)
-	error (_("could not find typeinfo symbol for '%s'"), name);
+	error (_ ("could not find typeinfo symbol for '%s'"), name);
 
       result = value_at_lazy (typeinfo_type, minsym.value_address ());
     }
@@ -1178,15 +1160,15 @@ gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
   addr = value_as_address (type_info_ptr);
   typeinfo_sym = lookup_minimal_symbol_by_pc (addr);
   if (typeinfo_sym.minsym == NULL)
-    error (_("could not find minimal symbol for typeinfo address %s"),
+    error (_ ("could not find minimal symbol for typeinfo address %s"),
 	   paddress (gdbarch, addr));
 
 #define TYPEINFO_PREFIX "typeinfo for "
 #define TYPEINFO_PREFIX_LEN (sizeof (TYPEINFO_PREFIX) - 1)
   symname = typeinfo_sym.minsym->demangled_name ();
-  if (symname == NULL || strncmp (symname, TYPEINFO_PREFIX,
-				  TYPEINFO_PREFIX_LEN))
-    error (_("typeinfo symbol '%s' has unexpected name"),
+  if (symname == NULL
+      || strncmp (symname, TYPEINFO_PREFIX, TYPEINFO_PREFIX_LEN))
+    error (_ ("typeinfo symbol '%s' has unexpected name"),
 	   typeinfo_sym.minsym->linkage_name ());
   class_name = symname + TYPEINFO_PREFIX_LEN;
 
@@ -1215,7 +1197,7 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
 /* Determine if we are currently in a C++ thunk.  If so, get the address
    of the routine we are thunking to and continue to there instead.  */
 
-static CORE_ADDR 
+static CORE_ADDR
 gnuv3_skip_trampoline (frame_info_ptr frame, CORE_ADDR stop_pc)
 {
   CORE_ADDR real_stop_pc, method_stop_pc, func_addr;
@@ -1223,7 +1205,7 @@ gnuv3_skip_trampoline (frame_info_ptr frame, CORE_ADDR stop_pc)
   struct bound_minimal_symbol thunk_sym, fn_sym;
   struct obj_section *section;
   const char *thunk_name, *fn_name;
-  
+
   real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = stop_pc;
@@ -1252,13 +1234,13 @@ gnuv3_skip_trampoline (frame_info_ptr frame, CORE_ADDR stop_pc)
      (powerpc 64 for example).  Make sure to retrieve the address
      of the real function from the function descriptor before passing on
      the address to other layers of GDB.  */
-  func_addr = gdbarch_convert_from_func_ptr_addr
-    (gdbarch, method_stop_pc, current_inferior ()->top_target ());
+  func_addr
+    = gdbarch_convert_from_func_ptr_addr (gdbarch, method_stop_pc,
+					  current_inferior ()->top_target ());
   if (func_addr != 0)
     method_stop_pc = func_addr;
 
-  real_stop_pc = gdbarch_skip_trampoline_code
-		   (gdbarch, frame, method_stop_pc);
+  real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, method_stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = method_stop_pc;
 
@@ -1328,8 +1310,7 @@ is_implicit_def (definition_style def)
 
 static bool
 is_copy_or_move_constructor_type (struct type *class_type,
-				  struct type *method_type,
-				  type_code expected)
+				  struct type *method_type, type_code expected)
 {
   /* The method should take at least two arguments...  */
   if (method_type->num_fields () < 2)
@@ -1369,8 +1350,7 @@ is_copy_or_move_constructor_type (struct type *class_type,
 /* Return true if METHOD_TYPE is a copy ctor type for CLASS_TYPE.  */
 
 static bool
-is_copy_constructor_type (struct type *class_type,
-			  struct type *method_type)
+is_copy_constructor_type (struct type *class_type, struct type *method_type)
 {
   return is_copy_or_move_constructor_type (class_type, method_type,
 					   TYPE_CODE_REF);
@@ -1379,8 +1359,7 @@ is_copy_constructor_type (struct type *class_type,
 /* Return true if METHOD_TYPE is a move ctor type for CLASS_TYPE.  */
 
 static bool
-is_move_constructor_type (struct type *class_type,
-			  struct type *method_type)
+is_move_constructor_type (struct type *class_type, struct type *method_type)
 {
   return is_copy_or_move_constructor_type (class_type, method_type,
 					   TYPE_CODE_RVALUE_REF);
@@ -1422,8 +1401,7 @@ gnuv3_pass_by_reference (struct type *type)
   definition_style mctor_def = DOES_NOT_EXIST_IN_SOURCE;
 
   /* We're only interested in things that can have methods.  */
-  if (type->code () != TYPE_CODE_STRUCT
-      && type->code () != TYPE_CODE_UNION)
+  if (type->code () != TYPE_CODE_STRUCT && type->code () != TYPE_CODE_UNION)
     return info;
 
   /* The compiler may have emitted the calling convention attribute.
@@ -1502,9 +1480,8 @@ gnuv3_pass_by_reference (struct type *type)
 	  }
       }
 
-  bool cctor_implicitly_deleted
-    = (mctor_def != DOES_NOT_EXIST_IN_SOURCE
-       && cctor_def == DOES_NOT_EXIST_IN_SOURCE);
+  bool cctor_implicitly_deleted = (mctor_def != DOES_NOT_EXIST_IN_SOURCE
+				   && cctor_def == DOES_NOT_EXIST_IN_SOURCE);
 
   bool cctor_explicitly_deleted = (cctor_def == DELETED);
 
@@ -1517,12 +1494,10 @@ gnuv3_pass_by_reference (struct type *type)
   info.trivially_destructible = is_implicit_def (dtor_def);
 
   info.trivially_copy_constructible
-    = (is_implicit_def (cctor_def)
-       && !is_dynamic);
+    = (is_implicit_def (cctor_def) && !is_dynamic);
 
   info.trivially_copyable
-    = (info.trivially_copy_constructible
-       && info.trivially_destructible
+    = (info.trivially_copy_constructible && info.trivially_destructible
        && !is_user_provided_def (mctor_def));
 
   /* Even if all the constructors and destructors were artificial, one
@@ -1573,10 +1548,10 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.shortname = "gnu-v3";
   gnu_v3_abi_ops.longname = "GNU G++ Version 3 ABI";
   gnu_v3_abi_ops.doc = "G++ Version 3 ABI";
-  gnu_v3_abi_ops.is_destructor_name =
-    (enum dtor_kinds (*) (const char *))is_gnu_v3_mangled_dtor;
-  gnu_v3_abi_ops.is_constructor_name =
-    (enum ctor_kinds (*) (const char *))is_gnu_v3_mangled_ctor;
+  gnu_v3_abi_ops.is_destructor_name
+    = (enum dtor_kinds (*) (const char *)) is_gnu_v3_mangled_dtor;
+  gnu_v3_abi_ops.is_constructor_name
+    = (enum ctor_kinds (*) (const char *)) is_gnu_v3_mangled_ctor;
   gnu_v3_abi_ops.is_vtable_name = gnuv3_is_vtable_name;
   gnu_v3_abi_ops.is_operator_name = gnuv3_is_operator_name;
   gnu_v3_abi_ops.rtti_type = gnuv3_rtti_type;
@@ -1597,6 +1572,7 @@ init_gnuv3_ops (void)
 }
 
 void _initialize_gnu_v3_abi ();
+
 void
 _initialize_gnu_v3_abi ()
 {

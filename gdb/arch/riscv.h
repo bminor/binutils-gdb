@@ -67,9 +67,8 @@ struct riscv_gdbarch_features
   /* Equality operator.  */
   bool operator== (const struct riscv_gdbarch_features &rhs) const
   {
-    return (xlen == rhs.xlen && flen == rhs.flen
-	    && embedded == rhs.embedded && vlen == rhs.vlen
-	    && has_fflags_reg == rhs.has_fflags_reg
+    return (xlen == rhs.xlen && flen == rhs.flen && embedded == rhs.embedded
+	    && vlen == rhs.vlen && has_fflags_reg == rhs.has_fflags_reg
 	    && has_frm_reg == rhs.has_frm_reg
 	    && has_fcsr_reg == rhs.has_fcsr_reg);
   }
@@ -83,13 +82,10 @@ struct riscv_gdbarch_features
   /* Used by std::unordered_map to hash feature sets.  */
   std::size_t hash () const noexcept
   {
-    std::size_t val = ((embedded ? 1 : 0) << 10
-		       | (has_fflags_reg ? 1 : 0) << 11
-		       | (has_frm_reg ? 1 : 0) << 12
-		       | (has_fcsr_reg ? 1 : 0) << 13
-		       | (xlen & 0x1f) << 5
-		       | (flen & 0x1f) << 0
-		       | (vlen & 0xfff) << 14);
+    std::size_t val
+      = ((embedded ? 1 : 0) << 10 | (has_fflags_reg ? 1 : 0) << 11
+	 | (has_frm_reg ? 1 : 0) << 12 | (has_fcsr_reg ? 1 : 0) << 13
+	 | (xlen & 0x1f) << 5 | (flen & 0x1f) << 0 | (vlen & 0xfff) << 14);
     return val;
   }
 };
@@ -100,8 +96,8 @@ struct riscv_gdbarch_features
    This is only used directly from the gdbserver where the created target
    description is modified after it is return.  */
 
-target_desc_up riscv_create_target_description
-	(const struct riscv_gdbarch_features features);
+target_desc_up
+riscv_create_target_description (const struct riscv_gdbarch_features features);
 
 #else
 
@@ -112,10 +108,9 @@ target_desc_up riscv_create_target_description
    GDBARCH_LIST_LOOKUP_BY_INFO performs a pointer comparison on target
    descriptions to find candidate gdbarch objects.  */
 
-const target_desc *riscv_lookup_target_description
-	(const struct riscv_gdbarch_features features);
+const target_desc *
+riscv_lookup_target_description (const struct riscv_gdbarch_features features);
 
 #endif /* GDBSERVER */
-
 
 #endif /* ARCH_RISCV_H */

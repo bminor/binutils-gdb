@@ -71,15 +71,14 @@ extern std::string path_join (gdb::array_view<const char *> paths);
 
 /* Same as the above, but accept paths as distinct parameters.  */
 
-template<typename ...Args>
+template<typename... Args>
 std::string
 path_join (Args... paths)
 {
   /* It doesn't make sense to join less than two paths.  */
-  gdb_static_assert (sizeof... (Args) >= 2);
+  gdb_static_assert (sizeof...(Args) >= 2);
 
-  std::array<const char *, sizeof... (Args)> path_array
-    { paths... };
+  std::array<const char *, sizeof...(Args)> path_array { paths... };
 
   return path_join (gdb::array_view<const char *> (path_array));
 }
@@ -147,7 +146,7 @@ extern std::string get_standard_config_filename (const char *filename);
    '~/.config/gdb/gdbinit' and then '~/.gdbinit'.  */
 
 extern std::string find_gdb_home_config_file (const char *name,
-					      struct stat *buf);
+                                              struct stat *buf);
 
 /* Return the file name of the user's shell.  Normally this comes from
    the SHELL environment variable.  */

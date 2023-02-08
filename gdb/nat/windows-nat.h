@@ -101,7 +101,6 @@ struct windows_thread_info
   gdb::unique_xmalloc_ptr<char> name;
 };
 
-
 /* Possible values to pass to 'thread_rec'.  */
 enum thread_disposition_type
 {
@@ -177,14 +176,14 @@ struct windows_process_info
   bool ignore_first_breakpoint = false;
 #endif
 
-
   /* Find a thread record given a thread id.  THREAD_DISPOSITION
      controls whether the thread is suspended, and whether the context
      is invalidated.
 
      This function must be supplied by the embedding application.  */
   virtual windows_thread_info *thread_rec (ptid_t ptid,
-					   thread_disposition_type disposition) = 0;
+					   thread_disposition_type disposition)
+    = 0;
 
   /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  Updates
      OURSTATUS and returns the thread id if this represents a thread
@@ -194,7 +193,8 @@ struct windows_process_info
      a Cygwin signal.  Otherwise just print the string as a warning.
 
      This function must be supplied by the embedding application.  */
-  virtual int handle_output_debug_string (struct target_waitstatus *ourstatus) = 0;
+  virtual int handle_output_debug_string (struct target_waitstatus *ourstatus)
+    = 0;
 
   /* Handle a DLL load event.
 
@@ -224,8 +224,9 @@ struct windows_process_info
 
   virtual bool handle_access_violation (const EXCEPTION_RECORD *rec) = 0;
 
-  handle_exception_result handle_exception
-       (struct target_waitstatus *ourstatus, bool debug_exceptions);
+  handle_exception_result
+  handle_exception (struct target_waitstatus *ourstatus,
+		    bool debug_exceptions);
 
   /* Call to indicate that a DLL was loaded.  */
 
@@ -298,52 +299,48 @@ extern BOOL wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout);
    "disable randomization" feature can be implemented in a single
    place.  */
 
-extern BOOL create_process (const char *image, char *command_line,
-			    DWORD flags, void *environment,
-			    const char *cur_dir,
-			    bool no_randomization,
-			    STARTUPINFOA *startup_info,
+extern BOOL create_process (const char *image, char *command_line, DWORD flags,
+			    void *environment, const char *cur_dir,
+			    bool no_randomization, STARTUPINFOA *startup_info,
 			    PROCESS_INFORMATION *process_info);
 #ifdef __CYGWIN__
 extern BOOL create_process (const wchar_t *image, wchar_t *command_line,
 			    DWORD flags, void *environment,
-			    const wchar_t *cur_dir,
-			    bool no_randomization,
+			    const wchar_t *cur_dir, bool no_randomization,
 			    STARTUPINFOW *startup_info,
 			    PROCESS_INFORMATION *process_info);
 #endif /* __CYGWIN__ */
 
-#define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
-#define DebugActiveProcessStop		dyn_DebugActiveProcessStop
-#define DebugBreakProcess		dyn_DebugBreakProcess
-#define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
+#define AdjustTokenPrivileges dyn_AdjustTokenPrivileges
+#define DebugActiveProcessStop dyn_DebugActiveProcessStop
+#define DebugBreakProcess dyn_DebugBreakProcess
+#define DebugSetProcessKillOnExit dyn_DebugSetProcessKillOnExit
 #undef EnumProcessModules
-#define EnumProcessModules		dyn_EnumProcessModules
+#define EnumProcessModules dyn_EnumProcessModules
 #undef EnumProcessModulesEx
-#define EnumProcessModulesEx		dyn_EnumProcessModulesEx
+#define EnumProcessModulesEx dyn_EnumProcessModulesEx
 #undef GetModuleInformation
-#define GetModuleInformation		dyn_GetModuleInformation
+#define GetModuleInformation dyn_GetModuleInformation
 #undef GetModuleFileNameExA
-#define GetModuleFileNameExA		dyn_GetModuleFileNameExA
+#define GetModuleFileNameExA dyn_GetModuleFileNameExA
 #undef GetModuleFileNameExW
-#define GetModuleFileNameExW		dyn_GetModuleFileNameExW
-#define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
-#define OpenProcessToken		dyn_OpenProcessToken
-#define GetConsoleFontSize		dyn_GetConsoleFontSize
-#define GetCurrentConsoleFont		dyn_GetCurrentConsoleFont
-#define Wow64SuspendThread		dyn_Wow64SuspendThread
-#define Wow64GetThreadContext		dyn_Wow64GetThreadContext
-#define Wow64SetThreadContext		dyn_Wow64SetThreadContext
-#define Wow64GetThreadSelectorEntry	dyn_Wow64GetThreadSelectorEntry
-#define GenerateConsoleCtrlEvent	dyn_GenerateConsoleCtrlEvent
+#define GetModuleFileNameExW dyn_GetModuleFileNameExW
+#define LookupPrivilegeValueA dyn_LookupPrivilegeValueA
+#define OpenProcessToken dyn_OpenProcessToken
+#define GetConsoleFontSize dyn_GetConsoleFontSize
+#define GetCurrentConsoleFont dyn_GetCurrentConsoleFont
+#define Wow64SuspendThread dyn_Wow64SuspendThread
+#define Wow64GetThreadContext dyn_Wow64GetThreadContext
+#define Wow64SetThreadContext dyn_Wow64SetThreadContext
+#define Wow64GetThreadSelectorEntry dyn_Wow64GetThreadSelectorEntry
+#define GenerateConsoleCtrlEvent dyn_GenerateConsoleCtrlEvent
 #define InitializeProcThreadAttributeList dyn_InitializeProcThreadAttributeList
 #define UpdateProcThreadAttribute dyn_UpdateProcThreadAttribute
 #define DeleteProcThreadAttributeList dyn_DeleteProcThreadAttributeList
 
 typedef BOOL WINAPI (AdjustTokenPrivileges_ftype) (HANDLE, BOOL,
-						   PTOKEN_PRIVILEGES,
-						   DWORD, PTOKEN_PRIVILEGES,
-						   PDWORD);
+						   PTOKEN_PRIVILEGES, DWORD,
+						   PTOKEN_PRIVILEGES, PDWORD);
 extern AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
 
 typedef BOOL WINAPI (DebugActiveProcessStop_ftype) (DWORD);
@@ -370,11 +367,11 @@ typedef BOOL WINAPI (GetModuleInformation_ftype) (HANDLE, HMODULE,
 extern GetModuleInformation_ftype *GetModuleInformation;
 
 typedef DWORD WINAPI (GetModuleFileNameExA_ftype) (HANDLE, HMODULE, LPSTR,
-						  DWORD);
+						   DWORD);
 extern GetModuleFileNameExA_ftype *GetModuleFileNameExA;
 
-typedef DWORD WINAPI (GetModuleFileNameExW_ftype) (HANDLE, HMODULE,
-						   LPWSTR, DWORD);
+typedef DWORD WINAPI (GetModuleFileNameExW_ftype) (HANDLE, HMODULE, LPWSTR,
+						   DWORD);
 extern GetModuleFileNameExW_ftype *GetModuleFileNameExW;
 
 typedef BOOL WINAPI (LookupPrivilegeValueA_ftype) (LPCSTR, LPCSTR, PLUID);
@@ -413,19 +410,20 @@ extern GenerateConsoleCtrlEvent_ftype *GenerateConsoleCtrlEvent;
    Windows 8.  */
 typedef void *gdb_lpproc_thread_attribute_list;
 
-typedef BOOL WINAPI (InitializeProcThreadAttributeList_ftype)
-     (gdb_lpproc_thread_attribute_list lpAttributeList,
-      DWORD dwAttributeCount, DWORD dwFlags, PSIZE_T lpSize);
-extern InitializeProcThreadAttributeList_ftype *InitializeProcThreadAttributeList;
+typedef BOOL WINAPI (InitializeProcThreadAttributeList_ftype) (
+  gdb_lpproc_thread_attribute_list lpAttributeList, DWORD dwAttributeCount,
+  DWORD dwFlags, PSIZE_T lpSize);
+extern InitializeProcThreadAttributeList_ftype
+  *InitializeProcThreadAttributeList;
 
-typedef BOOL WINAPI (UpdateProcThreadAttribute_ftype)
-     (gdb_lpproc_thread_attribute_list lpAttributeList,
-      DWORD dwFlags, DWORD_PTR Attribute, PVOID lpValue, SIZE_T cbSize,
-      PVOID lpPreviousValue, PSIZE_T lpReturnSize);
+typedef BOOL WINAPI (UpdateProcThreadAttribute_ftype) (
+  gdb_lpproc_thread_attribute_list lpAttributeList, DWORD dwFlags,
+  DWORD_PTR Attribute, PVOID lpValue, SIZE_T cbSize, PVOID lpPreviousValue,
+  PSIZE_T lpReturnSize);
 extern UpdateProcThreadAttribute_ftype *UpdateProcThreadAttribute;
 
-typedef void WINAPI (DeleteProcThreadAttributeList_ftype)
-     (gdb_lpproc_thread_attribute_list lpAttributeList);
+typedef void WINAPI (DeleteProcThreadAttributeList_ftype) (
+  gdb_lpproc_thread_attribute_list lpAttributeList);
 extern DeleteProcThreadAttributeList_ftype *DeleteProcThreadAttributeList;
 
 /* Return true if it's possible to disable randomization on this
@@ -438,6 +436,6 @@ extern bool disable_randomization_available ();
 
 extern bool initialize_loadable ();
 
-}
+} // namespace windows_nat
 
 #endif

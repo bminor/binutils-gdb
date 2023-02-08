@@ -37,7 +37,7 @@
 #define PPC_FEATURE_BOOKE 0x00008000
 #endif
 #ifndef PPC_FEATURE_HAS_DFP
-#define PPC_FEATURE_HAS_DFP	0x00000400  /* Decimal Floating Point.  */
+#define PPC_FEATURE_HAS_DFP 0x00000400 /* Decimal Floating Point.  */
 #endif
 #ifndef PPC_FEATURE_HAS_VSX
 #define PPC_FEATURE_HAS_VSX 0x00000080

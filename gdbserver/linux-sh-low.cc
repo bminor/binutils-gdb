@@ -24,13 +24,11 @@
 class sh_target : public linux_process_target
 {
 public:
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
 protected:
-
   void low_arch_setup () override;
 
   bool low_cannot_fetch_register (int regno) override;
@@ -82,17 +80,49 @@ extern const struct target_desc *tdesc_sh;
 
 /* Currently, don't check/send MQ.  */
 static int sh_regmap[] = {
- 0,	4,	8,	12,	16,	20,	24,	28,
- 32,	36,	40,	44,	48,	52,	56,	60,
+  0,
+  4,
+  8,
+  12,
+  16,
+  20,
+  24,
+  28,
+  32,
+  36,
+  40,
+  44,
+  48,
+  52,
+  56,
+  60,
 
- REG_PC*4,   REG_PR*4,   REG_GBR*4,  -1,
- REG_MACH*4, REG_MACL*4, REG_SR*4,
- REG_FPUL*4, REG_FPSCR*4,
+  REG_PC * 4,
+  REG_PR * 4,
+  REG_GBR * 4,
+  -1,
+  REG_MACH * 4,
+  REG_MACL * 4,
+  REG_SR * 4,
+  REG_FPUL * 4,
+  REG_FPSCR * 4,
 
- REG_FPREG0*4+0,   REG_FPREG0*4+4,   REG_FPREG0*4+8,   REG_FPREG0*4+12,
- REG_FPREG0*4+16,  REG_FPREG0*4+20,  REG_FPREG0*4+24,  REG_FPREG0*4+28,
- REG_FPREG0*4+32,  REG_FPREG0*4+36,  REG_FPREG0*4+40,  REG_FPREG0*4+44,
- REG_FPREG0*4+48,  REG_FPREG0*4+52,  REG_FPREG0*4+56,  REG_FPREG0*4+60,
+  REG_FPREG0 * 4 + 0,
+  REG_FPREG0 * 4 + 4,
+  REG_FPREG0 * 4 + 8,
+  REG_FPREG0 * 4 + 12,
+  REG_FPREG0 * 4 + 16,
+  REG_FPREG0 * 4 + 20,
+  REG_FPREG0 * 4 + 24,
+  REG_FPREG0 * 4 + 28,
+  REG_FPREG0 * 4 + 32,
+  REG_FPREG0 * 4 + 36,
+  REG_FPREG0 * 4 + 40,
+  REG_FPREG0 * 4 + 44,
+  REG_FPREG0 * 4 + 48,
+  REG_FPREG0 * 4 + 52,
+  REG_FPREG0 * 4 + 56,
+  REG_FPREG0 * 4 + 60,
 };
 
 bool
@@ -137,7 +167,8 @@ sh_target::low_breakpoint_at (CORE_ADDR where)
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
-static void sh_fill_gregset (struct regcache *regcache, void *buf)
+static void
+sh_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
@@ -146,30 +177,22 @@ static void sh_fill_gregset (struct regcache *regcache, void *buf)
       collect_register (regcache, i, (char *) buf + sh_regmap[i]);
 }
 
-static struct regset_info sh_regsets[] = {
-  { 0, 0, 0, 0, GENERAL_REGS, sh_fill_gregset, NULL },
-  NULL_REGSET
+static struct regset_info sh_regsets[]
+  = { { 0, 0, 0, 0, GENERAL_REGS, sh_fill_gregset, NULL }, NULL_REGSET };
+
+static struct regsets_info sh_regsets_info = {
+  sh_regsets, /* regsets */
+  0,          /* num_regsets */
+  NULL,       /* disabled_regsets */
 };
 
-static struct regsets_info sh_regsets_info =
-  {
-    sh_regsets, /* regsets */
-    0, /* num_regsets */
-    NULL, /* disabled_regsets */
-  };
+static struct usrregs_info sh_usrregs_info = {
+  sh_num_regs,
+  sh_regmap,
+};
 
-static struct usrregs_info sh_usrregs_info =
-  {
-    sh_num_regs,
-    sh_regmap,
-  };
-
-static struct regs_info myregs_info =
-  {
-    NULL, /* regset_bitmap */
-    &sh_usrregs_info,
-    &sh_regsets_info
-  };
+static struct regs_info myregs_info = { NULL, /* regset_bitmap */
+                                        &sh_usrregs_info, &sh_regsets_info };
 
 const regs_info *
 sh_target::get_regs_info ()

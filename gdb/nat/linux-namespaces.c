@@ -97,8 +97,7 @@ linux_ns_filename (struct linux_ns *ns, int pid)
   static char filename[PATH_MAX];
 
   gdb_assert (pid > 0);
-  xsnprintf (filename, sizeof (filename), "/proc/%d/ns/%s", pid,
-	     ns->filename);
+  xsnprintf (filename, sizeof (filename), "/proc/%d/ns/%s", pid, ns->filename);
 
   return filename;
 }
@@ -109,15 +108,9 @@ linux_ns_filename (struct linux_ns *ns, int pid)
 static struct linux_ns *
 linux_ns_get_namespace (enum linux_ns_type type)
 {
-  static struct linux_ns namespaces[NUM_LINUX_NS_TYPES] =
-    {
-      { "ipc" },
-      { "mnt" },
-      { "net" },
-      { "pid" },
-      { "user" },
-      { "uts" },
-    };
+  static struct linux_ns namespaces[NUM_LINUX_NS_TYPES] = {
+    { "ipc" }, { "mnt" }, { "net" }, { "pid" }, { "user" }, { "uts" },
+  };
   struct linux_ns *ns;
 
   gdb_assert (type >= 0 && type < NUM_LINUX_NS_TYPES);
@@ -220,58 +213,57 @@ linux_ns_same (pid_t pid, enum linux_ns_type type)
 /* Mount namespace helper message types.  */
 
 enum mnsh_msg_type
-  {
-    /* A communication error occurred.  Receipt of this message
+{
+  /* A communication error occurred.  Receipt of this message
        by either end will cause an assertion failure in the main
        process.  */
-    MNSH_MSG_ERROR,
+  MNSH_MSG_ERROR,
 
-    /* Requests, sent from the main process to the helper.  */
+  /* Requests, sent from the main process to the helper.  */
 
-    /* A request that the helper call setns.  Arguments should
+  /* A request that the helper call setns.  Arguments should
        be passed in FD and INT1.  Helper should respond with a
        MNSH_RET_INT.  */
-    MNSH_REQ_SETNS,
+  MNSH_REQ_SETNS,
 
-    /* A request that the helper call open.  Arguments should
+  /* A request that the helper call open.  Arguments should
        be passed in BUF, INT1 and INT2.  The filename (in BUF)
        should include a terminating NUL character.  The helper
        should respond with a MNSH_RET_FD.  */
-    MNSH_REQ_OPEN,
+  MNSH_REQ_OPEN,
 
-    /* A request that the helper call unlink.  The single
+  /* A request that the helper call unlink.  The single
        argument (the filename) should be passed in BUF, and
        should include a terminating NUL character.  The helper
        should respond with a MNSH_RET_INT.  */
-    MNSH_REQ_UNLINK,
+  MNSH_REQ_UNLINK,
 
-    /* A request that the helper call readlink.  The single
+  /* A request that the helper call readlink.  The single
        argument (the filename) should be passed in BUF, and
        should include a terminating NUL character.  The helper
        should respond with a MNSH_RET_INTSTR.  */
-    MNSH_REQ_READLINK,
+  MNSH_REQ_READLINK,
 
-    /* Responses, sent to the main process from the helper.  */
+  /* Responses, sent to the main process from the helper.  */
 
-    /* Return an integer in INT1 and errno in INT2.  */
-    MNSH_RET_INT,
+  /* Return an integer in INT1 and errno in INT2.  */
+  MNSH_RET_INT,
 
-    /* Return a file descriptor in FD if one was opened or an
+  /* Return a file descriptor in FD if one was opened or an
        integer in INT1 otherwise.  Return errno in INT2.  */
-    MNSH_RET_FD,
+  MNSH_RET_FD,
 
-    /* Return an integer in INT1, errno in INT2, and optionally
+  /* Return an integer in INT1, errno in INT2, and optionally
        some data in BUF.  */
-    MNSH_RET_INTSTR,
-  };
+  MNSH_RET_INTSTR,
+};
 
 /* Print a string representation of a message using debug_printf.
    This function is not async-signal-safe so should never be
    called from the helper.  */
 
 static void
-mnsh_debug_print_message (enum mnsh_msg_type type,
-			  int fd, int int1, int int2,
+mnsh_debug_print_message (enum mnsh_msg_type type, int fd, int int1, int int2,
 			  const void *buf, int bufsiz)
 {
   gdb_byte *c = (gdb_byte *) buf;
@@ -334,9 +326,8 @@ static void mnsh_maybe_mourn_peer (void);
    main process and the helper so must be async-signal-safe.  */
 
 static ssize_t
-mnsh_send_message (int sock, enum mnsh_msg_type type,
-		   int fd, int int1, int int2,
-		   const void *buf, int bufsiz)
+mnsh_send_message (int sock, enum mnsh_msg_type type, int fd, int int1,
+		   int int2, const void *buf, int bufsiz)
 {
   struct msghdr msg;
   struct iovec iov[4];
@@ -363,7 +354,7 @@ mnsh_send_message (int sock, enum mnsh_msg_type type,
       memcpy (iov[3].iov_base, buf, bufsiz);
       iov[3].iov_len = bufsiz;
 
-      msg.msg_iovlen ++;
+      msg.msg_iovlen++;
     }
 
   /* Attach FD if supplied.  */
@@ -409,9 +400,8 @@ mnsh_send_message (int sock, enum mnsh_msg_type type,
    async-signal-safe.  */
 
 static ssize_t
-mnsh_recv_message (int sock, enum mnsh_msg_type *type,
-		   int *fd, int *int1, int *int2,
-		   void *buf, int bufsiz)
+mnsh_recv_message (int sock, enum mnsh_msg_type *type, int *fd, int *int1,
+		   int *int2, void *buf, int bufsiz)
 {
   struct msghdr msg;
   struct iovec iov[4];
@@ -469,10 +459,8 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
 
   /* Unpack the file descriptor if supplied.  */
   cmsg = CMSG_FIRSTHDR (&msg);
-  if (cmsg != NULL
-      && cmsg->cmsg_len == CMSG_LEN (sizeof (int))
-      && cmsg->cmsg_level == SOL_SOCKET
-      && cmsg->cmsg_type == SCM_RIGHTS)
+  if (cmsg != NULL && cmsg->cmsg_len == CMSG_LEN (sizeof (int))
+      && cmsg->cmsg_level == SOL_SOCKET && cmsg->cmsg_type == SCM_RIGHTS)
     memcpy (fd, CMSG_DATA (cmsg), sizeof (int));
   else
     *fd = -1;
@@ -494,15 +482,12 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
 #define mnsh_return_int(sock, result, error) \
   mnsh_send_message (sock, MNSH_RET_INT, -1, result, error, NULL, 0)
 
-#define mnsh_return_fd(sock, fd, error) \
-  mnsh_send_message (sock, MNSH_RET_FD, \
-		     (fd) < 0 ? -1 : (fd), \
-		     (fd) < 0 ? (fd) : 0, \
-		     error, NULL, 0)
+#define mnsh_return_fd(sock, fd, error)                       \
+  mnsh_send_message (sock, MNSH_RET_FD, (fd) < 0 ? -1 : (fd), \
+		     (fd) < 0 ? (fd) : 0, error, NULL, 0)
 
 #define mnsh_return_intstr(sock, result, buf, bufsiz, error) \
-  mnsh_send_message (sock, MNSH_RET_INTSTR, -1, result, error, \
-		     buf, bufsiz)
+  mnsh_send_message (sock, MNSH_RET_INTSTR, -1, result, error, buf, bufsiz)
 
 /* Handle a MNSH_REQ_SETNS message.  Must be async-signal-safe.  */
 
@@ -517,8 +502,7 @@ mnsh_handle_setns (int sock, int fd, int nstype)
 /* Handle a MNSH_REQ_OPEN message.  Must be async-signal-safe.  */
 
 static ssize_t
-mnsh_handle_open (int sock, const char *filename,
-		  int flags, mode_t mode)
+mnsh_handle_open (int sock, const char *filename, int flags, mode_t mode)
 {
   scoped_fd fd = gdb_open_cloexec (filename, flags, mode);
   return mnsh_return_fd (sock, fd.get (), errno);
@@ -542,9 +526,7 @@ mnsh_handle_readlink (int sock, const char *filename)
   char buf[PATH_MAX];
   int len = readlink (filename, buf, sizeof (buf));
 
-  return mnsh_return_intstr (sock, len,
-			     buf, len < 0 ? 0 : len,
-			     errno);
+  return mnsh_return_intstr (sock, len, buf, len < 0 ? 0 : len, errno);
 }
 
 /* The helper process.  Never returns.  Must be async-signal-safe.  */
@@ -561,9 +543,8 @@ mnsh_main (int sock)
       char buf[PATH_MAX];
       ssize_t size, response = -1;
 
-      size = mnsh_recv_message (sock, &type,
-				&fd, &int1, &int2,
-				buf, sizeof (buf));
+      size = mnsh_recv_message (sock, &type, &fd, &int1, &int2, buf,
+				sizeof (buf));
 
       if (size >= 0 && size < sizeof (buf))
 	{
@@ -604,8 +585,7 @@ mnsh_main (int sock)
 	  if (size < 0)
 	    size = 0;
 
-	  mnsh_send_message (sock, MNSH_MSG_ERROR,
-			     -1, int1, int2, buf, size);
+	  mnsh_send_message (sock, MNSH_MSG_ERROR, -1, int1, int2, buf, size);
 	}
     }
 }
@@ -732,23 +712,23 @@ mnsh_maybe_mourn_peer (void)
       else if (pid == -1)
 	{
 	  if (errno == ECHILD)
-	    warning (_("mount namespace helper vanished?"));
+	    warning (_ ("mount namespace helper vanished?"));
 	  else
-	    internal_warning (_("unhandled error %d"), errno);
+	    internal_warning (_ ("unhandled error %d"), errno);
 	}
       else if (pid == helper->pid)
 	{
 	  if (WIFEXITED (status))
-	    warning (_("mount namespace helper exited with status %d"),
+	    warning (_ ("mount namespace helper exited with status %d"),
 		     WEXITSTATUS (status));
 	  else if (WIFSIGNALED (status))
-	    warning (_("mount namespace helper killed by signal %d"),
+	    warning (_ ("mount namespace helper killed by signal %d"),
 		     WTERMSIG (status));
 	  else
-	    internal_warning (_("unhandled status %d"), status);
+	    internal_warning (_ ("unhandled status %d"), status);
 	}
       else
-	internal_warning (_("unknown pid %d"), pid);
+	internal_warning (_ ("unknown pid %d"), pid);
 
       /* Something unrecoverable happened.  */
       helper->pid = -1;
@@ -758,20 +738,19 @@ mnsh_maybe_mourn_peer (void)
 /* Shortcuts for sending messages to the helper.  */
 
 #define mnsh_send_setns(helper, fd, nstype) \
-  mnsh_send_message (helper->sock, MNSH_REQ_SETNS, fd, nstype, 0, \
-		     NULL, 0)
+  mnsh_send_message (helper->sock, MNSH_REQ_SETNS, fd, nstype, 0, NULL, 0)
 
-#define mnsh_send_open(helper, filename, flags, mode) \
-  mnsh_send_message (helper->sock, MNSH_REQ_OPEN, -1, flags, mode, \
-		     filename, strlen (filename) + 1)
+#define mnsh_send_open(helper, filename, flags, mode)                        \
+  mnsh_send_message (helper->sock, MNSH_REQ_OPEN, -1, flags, mode, filename, \
+		     strlen (filename) + 1)
 
-#define mnsh_send_unlink(helper, filename) \
-  mnsh_send_message (helper->sock, MNSH_REQ_UNLINK, -1, 0, 0, \
-		     filename, strlen (filename) + 1)
+#define mnsh_send_unlink(helper, filename)                              \
+  mnsh_send_message (helper->sock, MNSH_REQ_UNLINK, -1, 0, 0, filename, \
+		     strlen (filename) + 1)
 
-#define mnsh_send_readlink(helper, filename) \
-  mnsh_send_message (helper->sock, MNSH_REQ_READLINK, -1, 0, 0, \
-		     filename, strlen (filename) + 1)
+#define mnsh_send_readlink(helper, filename)                              \
+  mnsh_send_message (helper->sock, MNSH_REQ_READLINK, -1, 0, 0, filename, \
+		     strlen (filename) + 1)
 
 /* Receive a message from the helper.  Issue an assertion failure if
    the message isn't a correctly-formatted MNSH_RET_INT.  Set RESULT
@@ -786,9 +765,8 @@ mnsh_recv_int (struct linux_mnsh *helper, int *result, int *error)
   ssize_t size;
   int fd;
 
-  size = mnsh_recv_message (helper->sock, &type, &fd,
-			    result, error,
-			    buf, sizeof (buf));
+  size = mnsh_recv_message (helper->sock, &type, &fd, result, error, buf,
+			    sizeof (buf));
   if (size < 0)
     return -1;
 
@@ -812,9 +790,8 @@ mnsh_recv_fd (struct linux_mnsh *helper, int *fd, int *error)
   ssize_t size;
   int result;
 
-  size = mnsh_recv_message (helper->sock, &type, fd,
-			    &result, error,
-			    buf, sizeof (buf));
+  size = mnsh_recv_message (helper->sock, &type, fd, &result, error, buf,
+			    sizeof (buf));
   if (size < 0)
     return -1;
 
@@ -837,17 +814,15 @@ mnsh_recv_fd (struct linux_mnsh *helper, int *fd, int *error)
    Set errno and return -1 on error.  */
 
 static ssize_t
-mnsh_recv_intstr (struct linux_mnsh *helper,
-		  int *result, int *error,
+mnsh_recv_intstr (struct linux_mnsh *helper, int *result, int *error,
 		  void *buf, int bufsiz)
 {
   enum mnsh_msg_type type;
   ssize_t size;
   int fd;
 
-  size = mnsh_recv_message (helper->sock, &type, &fd,
-			    result, error,
-			    buf, bufsiz);
+  size
+    = mnsh_recv_message (helper->sock, &type, &fd, result, error, buf, bufsiz);
 
   if (size < 0)
     return -1;
@@ -861,18 +836,18 @@ mnsh_recv_intstr (struct linux_mnsh *helper,
 /* Return values for linux_mntns_access_fs.  */
 
 enum mnsh_fs_code
-  {
-    /* Something went wrong, errno is set.  */
-    MNSH_FS_ERROR = -1,
+{
+  /* Something went wrong, errno is set.  */
+  MNSH_FS_ERROR = -1,
 
-    /* The main process is in the correct mount namespace.
+  /* The main process is in the correct mount namespace.
        The caller should access the filesystem directly.  */
-    MNSH_FS_DIRECT,
+  MNSH_FS_DIRECT,
 
-    /* The helper is in the correct mount namespace.
+  /* The helper is in the correct mount namespace.
        The caller should access the filesystem via the helper.  */
-    MNSH_FS_HELPER
-  };
+  MNSH_FS_HELPER
+};
 
 /* Return a value indicating how the caller should access the
    mount namespace of process PID.  */
@@ -898,11 +873,11 @@ linux_mntns_access_fs (pid_t pid)
     return MNSH_FS_ERROR;
 
   SCOPE_EXIT
-    {
-      int save_errno = errno;
-      close (fd);
-      errno = save_errno;
-    };
+  {
+    int save_errno = errno;
+    close (fd);
+    errno = save_errno;
+  };
 
   if (fstat (fd, &sb) != 0)
     return MNSH_FS_ERROR;
@@ -948,8 +923,8 @@ linux_mntns_access_fs (pid_t pid)
 /* See nat/linux-namespaces.h.  */
 
 int
-linux_mntns_open_cloexec (pid_t pid, const char *filename,
-			  int flags, mode_t mode)
+linux_mntns_open_cloexec (pid_t pid, const char *filename, int flags,
+			  mode_t mode)
 {
   enum mnsh_fs_code access = linux_mntns_access_fs (pid);
   struct linux_mnsh *helper;
@@ -1015,8 +990,8 @@ linux_mntns_unlink (pid_t pid, const char *filename)
 /* See nat/linux-namespaces.h.  */
 
 ssize_t
-linux_mntns_readlink (pid_t pid, const char *filename,
-		      char *buf, size_t bufsiz)
+linux_mntns_readlink (pid_t pid, const char *filename, char *buf,
+		      size_t bufsiz)
 {
   enum mnsh_fs_code access = linux_mntns_access_fs (pid);
   struct linux_mnsh *helper;

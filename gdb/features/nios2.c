@@ -6,6 +6,7 @@
 #include "target-descriptions.h"
 
 const struct target_desc *tdesc_nios2;
+
 static void
 initialize_tdesc_nios2 (void)
 {

@@ -40,14 +40,14 @@ struct sh_nbsd_nat_target final : public nbsd_nat_target
 static sh_nbsd_nat_target the_sh_nbsd_nat_target;
 
 /* Determine if PT_GETREGS fetches this register.  */
-#define GETREGS_SUPPLIES(gdbarch, regno) \
-  (((regno) >= R0_REGNUM && (regno) <= (R0_REGNUM + 15)) \
-|| (regno) == gdbarch_pc_regnum (gdbarch) || (regno) == PR_REGNUM \
-|| (regno) == MACH_REGNUM || (regno) == MACL_REGNUM \
-|| (regno) == SR_REGNUM)
+#define GETREGS_SUPPLIES(gdbarch, regno)                             \
+  (((regno) >= R0_REGNUM && (regno) <= (R0_REGNUM + 15))             \
+   || (regno) == gdbarch_pc_regnum (gdbarch) || (regno) == PR_REGNUM \
+   || (regno) == MACH_REGNUM || (regno) == MACL_REGNUM               \
+   || (regno) == SR_REGNUM)
 
 /* Sizeof `struct reg' in <machine/reg.h>.  */
-#define SHNBSD_SIZEOF_GREGS	(21 * 4)
+#define SHNBSD_SIZEOF_GREGS (21 * 4)
 
 void
 sh_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
@@ -59,9 +59,9 @@ sh_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
     {
       struct reg inferior_registers;
 
-      if (ptrace (PT_GETREGS, pid,
-		  (PTRACE_TYPE_ARG3) &inferior_registers, lwp) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &inferior_registers, lwp)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
 
       sh_corefile_supply_regset (&sh_corefile_gregset, regcache, regno,
 				 (char *) &inferior_registers,
@@ -82,17 +82,17 @@ sh_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
     {
       struct reg inferior_registers;
 
-      if (ptrace (PT_GETREGS, pid,
-		  (PTRACE_TYPE_ARG3) &inferior_registers, lwp) == -1)
-	perror_with_name (_("Couldn't get registers"));
+      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &inferior_registers, lwp)
+	  == -1)
+	perror_with_name (_ ("Couldn't get registers"));
 
       sh_corefile_collect_regset (&sh_corefile_gregset, regcache, regno,
 				  (char *) &inferior_registers,
 				  SHNBSD_SIZEOF_GREGS);
 
-      if (ptrace (PT_SETREGS, pid,
-		  (PTRACE_TYPE_ARG3) &inferior_registers, lwp) == -1)
-	perror_with_name (_("Couldn't set registers"));
+      if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &inferior_registers, lwp)
+	  == -1)
+	perror_with_name (_ ("Couldn't set registers"));
 
       if (regno != -1)
 	return;
@@ -100,6 +100,7 @@ sh_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
 }
 
 void _initialize_shnbsd_nat ();
+
 void
 _initialize_shnbsd_nat ()
 {
