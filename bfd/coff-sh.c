@@ -905,12 +905,7 @@ sh_relax_section (bfd *abfd,
 	 the linker is run.  */
 
       coff_section_data (abfd, sec)->relocs = internal_relocs;
-      coff_section_data (abfd, sec)->keep_relocs = true;
-
       coff_section_data (abfd, sec)->contents = contents;
-      coff_section_data (abfd, sec)->keep_contents = true;
-
-      obj_coff_keep_syms (abfd) = true;
 
       /* Replace the jsr with a bsr.  */
 
@@ -1027,12 +1022,7 @@ sh_relax_section (bfd *abfd,
       if (swapped)
 	{
 	  coff_section_data (abfd, sec)->relocs = internal_relocs;
-	  coff_section_data (abfd, sec)->keep_relocs = true;
-
 	  coff_section_data (abfd, sec)->contents = contents;
-	  coff_section_data (abfd, sec)->keep_contents = true;
-
-	  obj_coff_keep_syms (abfd) = true;
 	}
     }
 
@@ -1435,8 +1425,6 @@ sh_relax_delete_bytes (bfd *abfd,
 	      if (val > addr && val < toaddr)
 		bfd_put_32 (abfd, val - count,
 			    ocontents + irelscan->r_vaddr - o->vma);
-
-	      coff_section_data (abfd, o)->keep_contents = true;
 	    }
 	}
     }
