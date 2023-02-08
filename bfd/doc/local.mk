@@ -83,7 +83,7 @@ MKDOC = %D%/chew$(EXEEXT_FOR_BUILD)
 $(MKDOC): %D%/chew.stamp ; @true
 %D%/chew.stamp: $(srcdir)/%D%/chew.c %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(CC_FOR_BUILD) -o %D%/chw$$$$$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
-	  $(LDFLAGS_FOR_BUILD) $(H_CFLAGS) \
+	  $(LDFLAGS_FOR_BUILD) \
 	  -I. -I$(srcdir) -I%D% -I$(srcdir)/../include -I$(srcdir)/../intl -I../intl \
 	  $(srcdir)/%D%/chew.c && \
 	$(SHELL) $(srcdir)/../move-if-change \
