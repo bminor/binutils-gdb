@@ -996,7 +996,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	}	    
       else
 	input_line_pointer++;
-      SKIP_WHITESPACE ();
+      SKIP_ALL_WHITESPACE ();
       /* Here with input_line_pointer -> char after "(...)".  */
       return segment;
 
