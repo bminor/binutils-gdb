@@ -1083,7 +1083,10 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
 
   if (!bfd_get_section_contents (abfd, sec, uncompressed_buffer,
 				 0, uncompressed_size))
-    return false;
+    {
+      free (uncompressed_buffer);
+      return false;
+    }
 
   sec->contents = uncompressed_buffer;
   if (bfd_compress_section_contents (abfd, sec) == 0)
