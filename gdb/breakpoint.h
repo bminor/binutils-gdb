@@ -802,9 +802,9 @@ struct breakpoint
      care.  */
   int thread = -1;
 
-  /* Ada task number for task-specific breakpoint, or 0 if don't
+  /* Ada task number for task-specific breakpoint, or -1 if don't
      care.  */
-  int task = 0;
+  int task = -1;
 
   /* Count of the number of times this breakpoint was taken, dumped
      with the info, but not used for anything else.  Useful for seeing
@@ -1680,9 +1680,9 @@ extern void breakpoint_set_silent (struct breakpoint *b, int silent);
 
 extern void breakpoint_set_thread (struct breakpoint *b, int thread);
 
-/* Set the task for this breakpoint.  If TASK is 0, make the breakpoint
-   work for any task.  Passing a value other than 0 for TASK should only be
-   done if b->thread is -1; it is not valid to try and set both a thread
+/* Set the task for this breakpoint.  If TASK is -1, make the breakpoint
+   work for any task.  Passing a value other than -1 for TASK should only
+   be done if b->thread is -1; it is not valid to try and set both a thread
    and task restriction on a breakpoint.  */
 
 extern void breakpoint_set_task (struct breakpoint *b, int task);

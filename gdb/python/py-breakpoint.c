@@ -271,7 +271,7 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
 	  return -1;
 	}
 
-      if (self_bp->bp->task != 0)
+      if (self_bp->bp->task != -1)
 	{
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("Cannot set both task and thread attributes."));
@@ -337,7 +337,7 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 	}
     }
   else if (newvalue == Py_None)
-    id = 0;
+    id = -1;
   else
     {
       PyErr_SetString (PyExc_TypeError,
@@ -711,7 +711,7 @@ bppy_get_task (PyObject *self, void *closure)
 
   BPPY_REQUIRE_VALID (self_bp);
 
-  if (self_bp->bp->task == 0)
+  if (self_bp->bp->task == -1)
     Py_RETURN_NONE;
 
   return gdb_py_object_from_longest (self_bp->bp->task).release ();
