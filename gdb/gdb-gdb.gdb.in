@@ -16,11 +16,6 @@ if !$gdb_init_done
     return
   end
 
-  dir @srcdir@/../libiberty
-  dir @srcdir@/../bfd
-  dir @srcdir@
-  dir .
-
   # Commands below are not fully compatible with wrapping into an 'if' block.
 end
 
