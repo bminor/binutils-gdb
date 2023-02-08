@@ -50,16 +50,21 @@ gdb_test "watch j task 1 task 3" "You can specify only one task\\."
 # breakpoint in the list that matched the triggered-breakpoint's
 # address, no matter which task it was specific to.
 gdb_test "break break_me task 1" "Breakpoint .* at .*"
+set bp_number [get_integer_valueof "\$bpnum" "INVALID" \
+		   "get number of breakpoint for task 1"]
 gdb_test "info breakpoints" "foo.adb:${decimal}\r\n\\s+stop only in task 1" \
     "check info breakpoints for task 1 breakpoint"
 
 # Now, insert a breakpoint that should stop only if task 3 stops, and
-# extract its number.
-gdb_breakpoint "break_me task 3" message
-set bp_number [get_integer_valueof "\$bpnum" -1]
-if {$bp_number < 0} {
-    return
-}
+# extract its number.  Use gdb_test here so that we can validate that
+# the 'Breakpoint ... also set at' line correctly includes the task
+# number of the previous breakpoint.
+gdb_test "break break_me task 3" \
+    [multi_line \
+	 "Note: breakpoint $bp_number \\(task 1\\) also set at pc $hex\\." \
+	 "Breakpoint $decimal at $hex: \[^\r\n\]+"]
+set bp_number [get_integer_valueof "\$bpnum" "INVALID" \
+		   "get number of breakpoint for task 3"]
 gdb_test "info breakpoints" "foo.adb:${decimal}\r\n\\s+stop only in task 3" \
     "check info breakpoints for task 3 breakpoint"
 

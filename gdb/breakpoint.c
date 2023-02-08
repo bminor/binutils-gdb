@@ -7049,6 +7049,8 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
 		struct thread_info *thr = find_thread_global_id (b->thread);
 		gdb_printf (" (thread %s)", print_thread_id (thr));
 	      }
+	    else if (b->task != 0)
+	      gdb_printf (" (task %d)", b->task);
 	    gdb_printf ("%s%s ",
 			((b->enable_state == bp_disabled
 			  || b->enable_state == bp_call_disabled)
