@@ -970,22 +970,24 @@ static PyObject *
 gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 {
   const char *expr_str;
-  struct value *result = NULL;
 
   if (!PyArg_ParseTuple (args, "s", &expr_str))
     return NULL;
 
+  PyObject *result = nullptr;
   try
     {
       gdbpy_allow_threads allow_threads;
-      result = parse_and_eval (expr_str);
+      scoped_value_mark free_values;
+      struct value *val = parse_and_eval (expr_str);
+      result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return value_to_value_object (result);
+  return result;
 }
 
 /* Implementation of gdb.invalidate_cached_frames.  */

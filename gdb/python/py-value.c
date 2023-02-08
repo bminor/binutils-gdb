@@ -1559,18 +1559,20 @@ valpy_nonzero (PyObject *self)
 static PyObject *
 valpy_invert (PyObject *self)
 {
-  struct value *val = NULL;
+  PyObject *result = nullptr;
 
   try
     {
-      val = value_complement (((value_object *) self)->value);
+      scoped_value_mark free_values;
+      struct value *val = value_complement (((value_object *) self)->value);
+      result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return value_to_value_object (val);
+  return result;
 }
 
 /* Implements left shift for value objects.  */
@@ -1774,32 +1776,10 @@ valpy_float (PyObject *self)
   return PyFloat_FromDouble (d);
 }
 
-/* Returns an object for a value which is released from the all_values chain,
-   so its lifetime is not bound to the execution of a command.  */
-PyObject *
-value_to_value_object (struct value *val)
-{
-  value_object *val_obj;
-
-  val_obj = PyObject_New (value_object, &value_object_type);
-  if (val_obj != NULL)
-    {
-      val_obj->value = release_value (val).release ();
-      val_obj->next = nullptr;
-      val_obj->prev = nullptr;
-      val_obj->address = NULL;
-      val_obj->type = NULL;
-      val_obj->dynamic_type = NULL;
-      note_value (val_obj);
-    }
-
-  return (PyObject *) val_obj;
-}
-
-/* Returns an object for a value, but without releasing it from the
+/* Returns an object for a value, without releasing it from the
    all_values chain.  */
 PyObject *
-value_to_value_object_no_release (struct value *val)
+value_to_value_object (struct value *val)
 {
   value_object *val_obj;
 
@@ -1926,21 +1906,23 @@ PyObject *
 gdbpy_history (PyObject *self, PyObject *args)
 {
   int i;
-  struct value *res_val = NULL;	  /* Initialize to appease gcc warning.  */
 
   if (!PyArg_ParseTuple (args, "i", &i))
     return NULL;
 
+  PyObject *result = nullptr;
   try
     {
-      res_val = access_value_history (i);
+      scoped_value_mark free_values;
+      struct value *res_val = access_value_history (i);
+      result = value_to_value_object (res_val);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return value_to_value_object (res_val);
+  return result;
 }
 
 /* Add a gdb.Value into GDB's history, and return (as an integer) the
@@ -1988,15 +1970,23 @@ gdbpy_convenience_variable (PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple (args, "s", &varname))
     return NULL;
 
+  PyObject *result = nullptr;
+  bool found = false;
   try
     {
       struct internalvar *var = lookup_only_internalvar (varname);
 
       if (var != NULL)
 	{
+	  scoped_value_mark free_values;
 	  res_val = value_of_internalvar (gdbpy_enter::get_gdbarch (), var);
 	  if (res_val->type ()->code () == TYPE_CODE_VOID)
 	    res_val = NULL;
+	  else
+	    {
+	      found = true;
+	      result = value_to_value_object (res_val);
+	    }
 	}
     }
   catch (const gdb_exception &except)
@@ -2004,10 +1994,10 @@ gdbpy_convenience_variable (PyObject *self, PyObject *args)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (res_val == NULL)
+  if (result == nullptr && !found)
     Py_RETURN_NONE;
 
-  return value_to_value_object (res_val);
+  return result;
 }
 
 /* Set the value of a convenience variable.  */

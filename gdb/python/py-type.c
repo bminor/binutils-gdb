@@ -957,7 +957,6 @@ typy_template_argument (PyObject *self, PyObject *args)
   const struct block *block = NULL;
   PyObject *block_obj = NULL;
   struct symbol *sym;
-  struct value *val = NULL;
 
   if (! PyArg_ParseTuple (args, "i|O", &argno, &block_obj))
     return NULL;
@@ -1014,16 +1013,19 @@ typy_template_argument (PyObject *self, PyObject *args)
       return NULL;
     }
 
+  PyObject *result = nullptr;
   try
     {
-      val = value_of_variable (sym, block);
+      scoped_value_mark free_values;
+      struct value *val = value_of_variable (sym, block);
+      result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return value_to_value_object (val);
+  return result;
 }
 
 static PyObject *
@@ -1189,6 +1191,7 @@ typy_optimized_out (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
+  scoped_value_mark free_values;
   return value_to_value_object (value::allocate_optimized_out (type));
 }
 

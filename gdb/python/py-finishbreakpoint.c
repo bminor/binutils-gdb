@@ -112,6 +112,8 @@ bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 
   try
     {
+      scoped_value_mark free_values;
+
       struct symbol *func_symbol =
 	symbol_object_to_symbol (self_finishbp->func_symbol);
       struct value *function =
@@ -258,6 +260,8 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	      /* Remember only non-void return types.  */
 	      if (ret_type->code () != TYPE_CODE_VOID)
 		{
+		  scoped_value_mark free_values;
+
 		  /* Ignore Python errors at this stage.  */
 		  value *func_value = read_var_value (function, NULL, frame);
 		  self_bpfinish->function_value

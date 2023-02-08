@@ -241,12 +241,13 @@ static PyObject *
 frapy_read_register (PyObject *self, PyObject *args)
 {
   PyObject *pyo_reg_id;
-  struct value *val = NULL;
+  PyObject *result = nullptr;
 
   if (!PyArg_UnpackTuple (args, "read_register", 1, 1, &pyo_reg_id))
     return NULL;
   try
     {
+      scoped_value_mark free_values;
       frame_info_ptr frame;
       int regnum;
 
@@ -257,17 +258,19 @@ frapy_read_register (PyObject *self, PyObject *args)
 	return nullptr;
 
       gdb_assert (regnum >= 0);
-      val = value_of_register (regnum, frame);
+      struct value *val = value_of_register (regnum, frame);
 
       if (val == NULL)
 	PyErr_SetString (PyExc_ValueError, _("Can't read register."));
+      else
+	result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return val == NULL ? NULL : value_to_value_object (val);
+  return result;
 }
 
 /* Implementation of gdb.Frame.block (self) -> gdb.Block.
@@ -482,7 +485,6 @@ frapy_read_var (PyObject *self, PyObject *args)
   PyObject *sym_obj, *block_obj = NULL;
   struct symbol *var = NULL;	/* gcc-4.3.2 false warning.  */
   const struct block *block = NULL;
-  struct value *val = NULL;
 
   if (!PyArg_ParseTuple (args, "O|O", &sym_obj, &block_obj))
     return NULL;
@@ -540,18 +542,21 @@ frapy_read_var (PyObject *self, PyObject *args)
       return NULL;
     }
 
+  PyObject *result = nullptr;
   try
     {
       FRAPY_REQUIRE_VALID (self, frame);
 
-      val = read_var_value (var, block, frame);
+      scoped_value_mark free_values;
+      struct value *val = read_var_value (var, block, frame);
+      result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return value_to_value_object (val);
+  return result;
 }
 
 /* Select this frame.  */

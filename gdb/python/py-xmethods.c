@@ -423,6 +423,7 @@ python_xmethod_worker::do_get_result_type (value *obj,
       return EXT_LANG_RC_OK;
     }
 
+  scoped_value_mark free_values;
   obj_type = check_typedef (obj->type ());
   this_type = check_typedef (type_object_to_type (m_this_type));
   if (obj_type->code () == TYPE_CODE_PTR)

@@ -365,7 +365,6 @@ static PyObject *
 pending_framepy_read_register (PyObject *self, PyObject *args)
 {
   pending_frame_object *pending_frame = (pending_frame_object *) self;
-  struct value *val = NULL;
   int regnum;
   PyObject *pyo_reg_id;
 
@@ -380,25 +379,31 @@ pending_framepy_read_register (PyObject *self, PyObject *args)
   if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
     return nullptr;
 
+  PyObject *result = nullptr;
   try
     {
+      scoped_value_mark free_values;
+
       /* Fetch the value associated with a register, whether it's
 	 a real register or a so called "user" register, like "pc",
 	 which maps to a real register.  In the past,
 	 get_frame_register_value() was used here, which did not
 	 handle the user register case.  */
-      val = value_of_register (regnum, pending_frame->frame_info);
+      struct value *val = value_of_register (regnum,
+					     pending_frame->frame_info);
       if (val == NULL)
 	PyErr_Format (PyExc_ValueError,
 		      "Cannot read register %d from frame.",
 		      regnum);
+      else
+	result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return val == NULL ? NULL : value_to_value_object (val);
+  return result;
 }
 
 /* Implementation of

@@ -590,7 +590,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 
   gdbpy_enter enter_py (gdbarch, language);
 
-  gdbpy_ref<> val_obj (value_to_value_object_no_release (value));
+  gdbpy_ref<> val_obj (value_to_value_object (value));
   if (val_obj == NULL)
     {
       print_stack_unless_memory_error (stream);

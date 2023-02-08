@@ -267,7 +267,6 @@ sympy_value (PyObject *self, PyObject *args)
   struct symbol *symbol = NULL;
   frame_info_ptr frame_info = NULL;
   PyObject *frame_obj = NULL;
-  struct value *value = NULL;
 
   if (!PyArg_ParseTuple (args, "|O", &frame_obj))
     return NULL;
@@ -285,6 +284,7 @@ sympy_value (PyObject *self, PyObject *args)
       return NULL;
     }
 
+  PyObject *result = nullptr;
   try
     {
       if (frame_obj != NULL)
@@ -301,14 +301,16 @@ sympy_value (PyObject *self, PyObject *args)
 	 was found, so we have no block to pass to read_var_value.  This will
 	 yield an incorrect value when symbol is not local to FRAME_INFO (this
 	 can happen with nested functions).  */
-      value = read_var_value (symbol, NULL, frame_info);
+      scoped_value_mark free_values;
+      struct value *value = read_var_value (symbol, NULL, frame_info);
+      result = value_to_value_object (value);
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return value_to_value_object (value);
+  return result;
 }
 
 /* Given a symbol, and a symbol_object that has previously been
