@@ -1841,7 +1841,6 @@ DESCRIPTION
 	header.  Use bfd_arch_bits_per_address for number of bits in
 	the architecture address.
 
-RETURNS
 	Returns the arch size in bits if known, <<-1>> otherwise.
 */
 
@@ -1869,7 +1868,6 @@ DESCRIPTION
 	return an address sign extended to fill a bfd_vma when this is
 	the case.
 
-RETURNS
 	Returns <<1>> if the target architecture is known to sign
 	extend addresses, <<0>> if the target architecture is known to
 	not sign extend addresses, and <<-1>> otherwise.
@@ -1921,7 +1919,6 @@ SYNOPSIS
 DESCRIPTION
 	Make @var{vma} the entry point of output BFD @var{abfd}.
 
-RETURNS
 	Returns <<TRUE>> on success, <<FALSE>> otherwise.
 */
 
@@ -2485,9 +2482,6 @@ SYNOPSIS
 DESCRIPTION
 	Returns the maximum page size, in bytes, as determined by
 	emulation.
-
-RETURNS
-	Returns the maximum page size in bytes for ELF, 0 otherwise.
 */
 
 bfd_vma
@@ -2513,9 +2507,6 @@ SYNOPSIS
 DESCRIPTION
 	Returns the common page size, in bytes, as determined by
 	emulation.
-
-RETURNS
-	Returns the common page size in bytes for ELF, 0 otherwise.
 */
 
 bfd_vma

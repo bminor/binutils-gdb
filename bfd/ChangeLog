@@ -1,5 +1,11 @@
 2023-02-07  Tom Tromey  <tom@tromey.com>
 
+	* bfd.c, cache.c, compress.c, opncls.c: Remove RETURNS from
+	documentation comments.
+	* doc/doc.str, doc/proto.str (RETURNS): Remove.
+
+2023-02-07  Tom Tromey  <tom@tromey.com>
+
 	* syms.c (bfd_decode_symclass, bfd_is_undefined_symclass)
 	(bfd_symbol_info): Reorder documentation comment.
 	* doc/doc.str (synopsis_seen): New variable.

@@ -124,9 +124,6 @@ variable synopsis_seen
 	0 synopsis_seen !
 	;
 
-: RETURNS
-	"@strong{Returns}@*\n" catstr subhead ;
-
 : INTERNAL_FUNCTION
 	func ;
 

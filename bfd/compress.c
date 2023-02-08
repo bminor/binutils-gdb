@@ -263,9 +263,6 @@ SYNOPSIS
 
 DESCRIPTION
 	Return the size of the compression header of SEC in ABFD.
-
-RETURNS
-	Return the size of the compression header in bytes.
 */
 
 int

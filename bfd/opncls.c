@@ -798,7 +798,6 @@ DESCRIPTION
 	The file descriptor associated with the BFD is closed (even
 	if it was passed in to BFD by <<bfd_fdopenr>>).
 
-RETURNS
 	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.
 */
 
@@ -829,7 +828,6 @@ DESCRIPTION
 
 	All memory attached to the BFD is released.
 
-RETURNS
 	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.
 */
 
@@ -903,7 +901,6 @@ DESCRIPTION
 	by converting the BFD to BFD_IN_MEMORY.  It's assumed that
 	you will call <<bfd_make_readable>> on this bfd later.
 
-RETURNS
 	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.
 */
 
@@ -949,7 +946,6 @@ DESCRIPTION
 	contents out to the memory buffer, then reversing the
 	direction.
 
-RETURNS
 	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.  */
 
 bool
@@ -1097,7 +1093,6 @@ DESCRIPTION
 	Advances the previously computed @var{crc} value by computing
 	and adding in the crc32 for @var{len} bytes of @var{buf}.
 
-RETURNS
 	Return the updated CRC32 value.
 */
 
@@ -1185,11 +1180,10 @@ DESCRIPTION
 	this routine is used as a @code{get_func_type} function, but it
 	is expected to be an unsigned long pointer.
 
-RETURNS
-	The filename of the associated debug information file, or NULL
-	if there is no such file.  If the filename was found then the
-	contents of @var{crc32_out} are updated to hold the corresponding
-	CRC32 value for the file.
+	Returns the filename of the associated debug information file,
+	or NULL if there is no such file.  If the filename was found
+	then the contents of @var{crc32_out} are updated to hold the
+	corresponding CRC32 value for the file.
 
 	The returned filename is allocated with @code{malloc}; freeing
 	it is the responsibility of the caller.
@@ -1251,11 +1245,10 @@ DESCRIPTION
 	Extracts the filename and CRC32 value for any separate debug
 	information file associated with @var{abfd}.
 
-RETURNS
-	The filename of the associated debug information file, or NULL
-	if there is no such file.  If the filename was found then the
-	contents of @var{crc32_out} are updated to hold the corresponding
-	CRC32 value for the file.
+	Returns the filename of the associated debug information file,
+	or NULL if there is no such file.  If the filename was found
+	then the contents of @var{crc32_out} are updated to hold the
+	corresponding CRC32 value for the file.
 
 	The returned filename is allocated with @code{malloc}; freeing
 	it is the responsibility of the caller.
@@ -1423,7 +1416,6 @@ DESCRIPTION
 	functions.  It is generally used to implement build-id-like
 	matching in the callback functions.
 
-RETURNS
 	Returns the filename of the first file to be found which
 	receives a TRUE result from the @var{check} function.
 	Returns NULL if no valid file could be found.
@@ -1607,10 +1599,10 @@ DESCRIPTION
 	If @var{dir} is NULL, the search will take place starting at
 	the current directory.
 
-RETURNS
-	<<NULL>> on any errors or failure to locate the .debug file,
-	otherwise a pointer to a heap-allocated string containing the
-	filename.  The caller is responsible for freeing this string.
+	Returns <<NULL>> on any errors or failure to locate the .debug
+	file, otherwise a pointer to a heap-allocated string
+	containing the filename.  The caller is responsible for
+	freeing this string.
 */
 
 char *
@@ -1656,10 +1648,10 @@ DESCRIPTION
 	If @var{dir} is NULL, the search will take place starting at
 	the current directory.
 
-RETURNS
-	<<NULL>> on any errors or failure to locate the debug file,
-	otherwise a pointer to a heap-allocated string containing the
-	filename.  The caller is responsible for freeing this string.
+	Returns <<NULL>> on any errors or failure to locate the debug
+	file, otherwise a pointer to a heap-allocated string
+	containing the filename.  The caller is responsible for
+	freeing this string.
 */
 
 char *
@@ -1684,7 +1676,6 @@ DESCRIPTION
 	section is sized to be big enough to contain a link to the specified
 	@var{filename}.
 
-RETURNS
 	A pointer to the new section is returned if all is ok.  Otherwise
 	<<NULL>> is returned and bfd_error is set.
 */
@@ -1752,7 +1743,6 @@ DESCRIPTION
 	specified @var{filename}.  The filename should be relative to the
 	current directory.
 
-RETURNS
 	<<TRUE>> is returned if all is ok.  Otherwise <<FALSE>> is returned
 	and bfd_error is set.
 */
@@ -1841,7 +1831,6 @@ DESCRIPTION
 	for it, using memory allocated to @var{abfd}, and this is then
 	attached to the @var{abfd}.
 
-RETURNS
 	Returns a pointer to the build-id structure if a build-id could be
 	found.  If no build-id is found NULL is returned and error code is
 	set.
@@ -1942,7 +1931,6 @@ DESCRIPTION
 	from it.  The path is computed as .build-id/NN/NN+NN.debug where
 	NNNN+NN is the build-id value as a hexadecimal string.
 
-RETURNS
 	Returns the constructed filename or NULL upon error.
 	It is the caller's responsibility to free the memory used to hold the
 	filename.
@@ -2004,7 +1992,6 @@ DESCRIPTION
 	Checks to see if @var{name} is a readable file and if its build-id
 	matches @var{buildid}.
 
-RETURNS
 	Returns TRUE if the file exists, is readable, and contains a
 	build-id which matches the build-id pointed at by
 	@var{build_id_p} (which is really a @code{struct bfd_build_id **}).
@@ -2071,10 +2058,10 @@ DESCRIPTION
 	If @var{dir} is NULL, the search will take place starting at
 	the current directory.
 
-RETURNS
-	<<NULL>> on any errors or failure to locate the debug file,
-	otherwise a pointer to a heap-allocated string containing the
-	filename.  The caller is responsible for freeing this string.
+	Returns <<NULL>> on any errors or failure to locate the debug
+	file, otherwise a pointer to a heap-allocated string
+	containing the filename.  The caller is responsible for
+	freeing this string.
 */
 
 char *

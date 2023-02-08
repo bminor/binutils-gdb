@@ -144,7 +144,6 @@
 : INTERNAL_DEFINITION internal ;
 : DESCRIPTION ignore ;
 : FUNCTION external ;
-: RETURNS ignore ;
 : TYPEDEF external ;
 : INTERNAL_FUNCTION internal ;
 : INTERNAL internal ;

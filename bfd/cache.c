@@ -521,7 +521,6 @@ DESCRIPTION
 	Remove the BFD @var{abfd} from the cache. If the attached file is open,
 	then close it too.
 
-RETURNS
 	<<FALSE>> is returned if closing the file fails, <<TRUE>> is
 	returned if all is well.
 */
@@ -550,7 +549,6 @@ DESCRIPTION
 	Remove all BFDs from the cache. If the attached file is open,
 	then close it too.
 
-RETURNS
 	<<FALSE>> is returned if closing one of the file fails, <<TRUE>> is
 	returned if all is well.
 */
