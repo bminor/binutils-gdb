@@ -354,7 +354,7 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 }
 
 #endif
-/* *INDENT-OFF* */
+
 /* Linenos are processed on a file-by-file basis.
 
    Two reasons:
@@ -406,7 +406,6 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
    on when we come the end of the compilation unit.
    Include table (inclTable) and process_linenos() handle
    that.  */
-/* *INDENT-ON* */
 
 
 /* Given a line table with function entries are marked, arrange its

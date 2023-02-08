@@ -852,7 +852,6 @@ static const struct tramp_frame micromips_linux_n64_rt_sigframe = {
   micromips_linux_sigframe_validate
 };
 
-/* *INDENT-OFF* */
 /* The unwinder for o32 signal frames.  The legacy structures look
    like this:
 
@@ -927,7 +926,6 @@ static const struct tramp_frame micromips_linux_n64_rt_sigframe = {
      struct sigcontext uc_mcontext;
      sigset_t          uc_sigmask;
    };  */
-/* *INDENT-ON* */
 
 #define SIGFRAME_SIGCONTEXT_OFFSET   (6 * 4)
 
@@ -1066,7 +1064,6 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
 }
 
-/* *INDENT-OFF* */
 /* For N32/N64 things look different.  There is no non-rt signal frame.
 
   struct rt_sigframe_n32 {
@@ -1122,7 +1119,6 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
   That is the post-2.6.12 definition of the 64-bit sigcontext; before
   then, there were no hi1-hi3 or lo1-lo3.  Cause and badvaddr were
   included too.  */
-/* *INDENT-ON* */
 
 #define N32_STACK_T_SIZE		STACK_T_SIZE
 #define N64_STACK_T_SIZE		(2 * 8 + 4)

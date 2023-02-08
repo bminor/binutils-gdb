@@ -2992,7 +2992,6 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
     }
   return 1;
 }
-/* *INDENT-OFF* */
 /* The stabs for C++ derived classes contain baseclass information which
    is marked by a '!' character after the total size.  This function is
    called when we encounter the baseclass marker, and slurps up all the
@@ -3016,7 +3015,6 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
 	Type number of base class ____________________________________|
 
   Return 1 for success, 0 for (error-type-inducing) failure.  */
-/* *INDENT-ON* */
 
 
 

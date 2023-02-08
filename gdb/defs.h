@@ -1,5 +1,3 @@
-/* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
-		      for now.  */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright (C) 1986-2023 Free Software Foundation, Inc.
 

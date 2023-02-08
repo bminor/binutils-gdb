@@ -178,7 +178,6 @@ struct ppc_hw_breakpoint
 
    The layout is like this (where x is the actual value of the vscr reg): */
 
-/* *INDENT-OFF* */
 /*
 Big-Endian:
    |.|.|.|.|.....|.|.|.|.||.|.|.|x||.|
@@ -189,7 +188,6 @@ Little-Endian:
    <------->     <-------><-------><->
      VR0           VR31     VSCR    VRSAVE
 */
-/* *INDENT-ON* */
 
 typedef char gdb_vrregset_t[PPC_LINUX_SIZEOF_VRREGSET];
 
@@ -628,7 +626,6 @@ private:
 
 static ppc_linux_nat_target the_ppc_linux_nat_target;
 
-/* *INDENT-OFF* */
 /* registers layout, as presented by the ptrace interface:
 PT_R0, PT_R1, PT_R2, PT_R3, PT_R4, PT_R5, PT_R6, PT_R7,
 PT_R8, PT_R9, PT_R10, PT_R11, PT_R12, PT_R13, PT_R14, PT_R15,
@@ -643,7 +640,6 @@ PT_FPR0 + 40, PT_FPR0 + 42, PT_FPR0 + 44, PT_FPR0 + 46,
 PT_FPR0 + 48, PT_FPR0 + 50, PT_FPR0 + 52, PT_FPR0 + 54,
 PT_FPR0 + 56, PT_FPR0 + 58, PT_FPR0 + 60, PT_FPR0 + 62,
 PT_NIP, PT_MSR, PT_CCR, PT_LNK, PT_CTR, PT_XER, PT_MQ */
-/* *INDENT_ON * */
 
 static int
 ppc_register_u_addr (struct gdbarch *gdbarch, int regno)

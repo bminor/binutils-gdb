@@ -1846,7 +1846,6 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 				 target_arm_instruction_reader ());
 }
 
-/* *INDENT-OFF* */
 /* Function: thumb_scan_prologue (helper function for arm_scan_prologue)
    This function decodes a Thumb function prologue to determine:
      1) the size of the stack frame
@@ -1866,7 +1865,6 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    
    The comments for thumb_skip_prolog() describe the algorithm we use
    to detect the end of the prolog.  */
-/* *INDENT-ON* */
 
 static void
 thumb_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR prev_pc,

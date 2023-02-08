@@ -1633,7 +1633,6 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	     address at runtime, can appear to save more than one link
 	     register vis:
 
-	     *INDENT-OFF*
 	     stwu r1,-304(r1)
 	     mflr r3
 	     bl 0xff570d0 (blrl)
@@ -1642,7 +1641,6 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	     stw r31,300(r1)
 	     stw r3,308(r1);
 	     ...
-	     *INDENT-ON*
 
 	     remember just the first one, but skip over additional
 	     ones.  */

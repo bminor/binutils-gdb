@@ -25,7 +25,7 @@ def copyright(tool, description):
             if line.startswith("# Copyright (C) "):
                 dateline = line[1:].strip()
                 break
-    return f"""/* *INDENT-OFF* */ /* THIS FILE IS GENERATED -*- buffer-read-only: t -*- */
+    return f"""/* THIS FILE IS GENERATED -*- buffer-read-only: t -*- */
 /* vi:set ro: */
 
 /* {description}

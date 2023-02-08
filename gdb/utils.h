@@ -1,5 +1,3 @@
-/* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
-		      for now.  */
 /* I/O, string, cleanup, and other random utilities for GDB.
    Copyright (C) 1986-2023 Free Software Foundation, Inc.
 

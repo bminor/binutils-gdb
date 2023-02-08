@@ -154,7 +154,6 @@ static void load_npx (void);	/* Restore the FPU of the debugged program.  */
 
 /* ------------------------------------------------------------------------- */
 /* Store the contents of the NPX in the global variable `npx'.  */
-/* *INDENT-OFF* */
 
 static void
 save_npx (void)
@@ -175,7 +174,6 @@ save_npx (void)
 :     "%eax");
 }
 
-/* *INDENT-ON* */
 
 
 /* ------------------------------------------------------------------------- */
