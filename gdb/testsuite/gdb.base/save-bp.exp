@@ -89,3 +89,19 @@ gdb_test_sequence "info break" "info break" [list				\
   "\[\r\n\]+\[ \t\]+printf"							\
   "\[\r\n\]+$disabled_row_start main at \[^\r\n\]*$srcfile:$loc_bp8"		\
 ]
+
+# Copy the saved breakpoints file to the local machine (if necessary),
+# and then check its contents.
+if {[is_remote host]} {
+    set bps [remote_upload host bps [standard_output_file bps]]
+}
+set fh [open $bps]
+set lines [split [read $fh] "\n"]
+close $fh
+
+with_test_prefix "in bps file" {
+    gdb_assert {[lsearch -regexp $lines "break ${srcfile}:${loc_bp2}$"] != -1} \
+	"check for general breakpoint"
+    gdb_assert {[lsearch -regexp $lines "break ${srcfile}:${loc_bp3} thread 1\\.1"] != -1} \
+	"check for thread-specific breakpoint"
+}

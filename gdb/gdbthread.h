@@ -661,6 +661,10 @@ extern int show_inferior_qualified_tids (void);
    circular static buffer, NUMCELLS deep.  */
 const char *print_thread_id (struct thread_info *thr);
 
+/* Like print_thread_id, but always prints the inferior-qualified form,
+   even when there is only a single inferior.  */
+const char *print_full_thread_id (struct thread_info *thr);
+
 /* Boolean test for an already-known ptid.  */
 extern bool in_thread_list (process_stratum_target *targ, ptid_t ptid);
 

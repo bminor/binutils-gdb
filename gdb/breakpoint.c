@@ -14142,7 +14142,10 @@ void
 breakpoint::print_recreate_thread (struct ui_file *fp) const
 {
   if (thread != -1)
-    gdb_printf (fp, " thread %d", thread);
+    {
+      struct thread_info *thr = find_thread_global_id (thread);
+      gdb_printf (fp, " thread %s", print_full_thread_id (thr));
+    }
 
   if (task != -1)
     gdb_printf (fp, " task %d", task);

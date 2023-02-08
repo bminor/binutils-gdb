@@ -1431,14 +1431,25 @@ show_inferior_qualified_tids (void)
 const char *
 print_thread_id (struct thread_info *thr)
 {
-  gdb_assert (thr != nullptr);
+  if (show_inferior_qualified_tids ())
+    return print_full_thread_id (thr);
 
   char *s = get_print_cell ();
 
-  if (show_inferior_qualified_tids ())
-    xsnprintf (s, PRINT_CELL_SIZE, "%d.%d", thr->inf->num, thr->per_inf_num);
-  else
-    xsnprintf (s, PRINT_CELL_SIZE, "%d", thr->per_inf_num);
+  gdb_assert (thr != nullptr);
+  xsnprintf (s, PRINT_CELL_SIZE, "%d", thr->per_inf_num);
+  return s;
+}
+
+/* See gdbthread.h.  */
+
+const char *
+print_full_thread_id (struct thread_info *thr)
+{
+  char *s = get_print_cell ();
+
+  gdb_assert (thr != nullptr);
+  xsnprintf (s, PRINT_CELL_SIZE, "%d.%d", thr->inf->num, thr->per_inf_num);
   return s;
 }
 
