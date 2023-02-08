@@ -16,6 +16,9 @@
 -  along with this program; if not, write to the Free Software
 -  Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+-  True if SYNOPSIS was seen.
+variable synopsis_seen
+
 : DOCDD
 	skip_past_newline
 	get_stuff_in_command kill_bogus_lines catstr
@@ -48,14 +51,12 @@
 
 : SYNOPSIS
 	skip_past_newline
-	"@strong{Synopsis}\n" catstr
-	"@example\n" catstr
+	1 synopsis_seen !
+	"@deftypefn {Function} " catstr
 	get_stuff_in_command  
 	kill_bogus_lines
 	indent
 	catstr
-	"@end example\n" catstr
-
 	;
 
 : func
@@ -118,7 +119,10 @@
 
 	
 : DESCRIPTION 
-	"@strong{Description}@*\n" catstr subhead ;
+	subhead
+	"@end deftypefn\n" synopsis_seen @ catstrif
+	0 synopsis_seen !
+	;
 
 : RETURNS
 	"@strong{Returns}@*\n" catstr subhead ;

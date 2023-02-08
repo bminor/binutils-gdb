@@ -31,6 +31,9 @@
    You define new words thus:
    : <newword> <oldwords> ;
 
+   Variables are defined using:
+   variable NAME
+
 */
 
 /* Primitives provided by the program:
@@ -67,6 +70,7 @@
 	outputdots - strip out lines without leading dots
 	maybecatstr - do catstr if internal_mode == internal_wanted, discard
 		value in any case
+	catstrif - do catstr if top of integer stack is nonzero
 	translatecomments - turn {* and *} into comment delimiters
 	kill_bogus_lines - get rid of extra newlines
 	indent
@@ -1015,6 +1019,20 @@ maybecatstr (void)
   pc++;
 }
 
+static void
+catstrif (void)
+{
+  int cond = isp[0];
+  isp--;
+  icheck_range ();
+  if (cond)
+    catstr (tos - 1, tos);
+  delete_string (tos);
+  tos--;
+  check_range ();
+  pc++;
+}
+
 char *
 nextword (char *string, char **word)
 {
@@ -1307,6 +1325,17 @@ compile (char *string)
 	  free (word);
 	  string = nextword (string, &word);
 	}
+      else if (strcmp (word, "variable") == 0)
+	{
+	  free (word);
+	  string = nextword (string, &word);
+	  if (!string)
+	    continue;
+	  intptr_t *loc = xmalloc (sizeof (intptr_t));
+	  *loc = 0;
+	  add_intrinsic_variable (word, loc);
+	  string = nextword (string, &word);
+	}
       else
 	{
 	  fprintf (stderr, "syntax error at %s\n", string - 1);
@@ -1444,6 +1473,7 @@ main (int ac, char *av[])
   add_intrinsic ("swap", swap);
   add_intrinsic ("outputdots", outputdots);
   add_intrinsic ("maybecatstr", maybecatstr);
+  add_intrinsic ("catstrif", catstrif);
   add_intrinsic ("translatecomments", translatecomments);
   add_intrinsic ("kill_bogus_lines", kill_bogus_lines);
   add_intrinsic ("indent", indent);

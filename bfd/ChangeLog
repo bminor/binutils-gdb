@@ -1,5 +1,16 @@
 2023-02-07  Tom Tromey  <tom@tromey.com>
 
+	* syms.c (bfd_decode_symclass, bfd_is_undefined_symclass)
+	(bfd_symbol_info): Reorder documentation comment.
+	* doc/doc.str (synopsis_seen): New variable.
+	(SYNOPSIS): Set synopsis_seen.  Emit @deftypefn.
+	(DESCRIPTION): Use synopsis_seen.
+	* doc/chew.c (catstrif): New function.
+	(main): Add catstrif intrinsic.
+	(compile): Recognize "variable" command.
+
+2023-02-07  Tom Tromey  <tom@tromey.com>
+
 	* doc/proto.str (external, internal, ifinternal, ENUMEQ, ENUMDOC):
 	Update.
 	* doc/chew.c (internalmode): Remove.

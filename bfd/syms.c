@@ -642,12 +642,12 @@ decode_section_type (const struct bfd_section *section)
 FUNCTION
 	bfd_decode_symclass
 
+SYNOPSIS
+	int bfd_decode_symclass (asymbol *symbol);
+
 DESCRIPTION
 	Return a character corresponding to the symbol
 	class of @var{symbol}, or '?' for an unknown class.
-
-SYNOPSIS
-	int bfd_decode_symclass (asymbol *symbol);
 */
 int
 bfd_decode_symclass (asymbol *symbol)
@@ -725,13 +725,13 @@ bfd_decode_symclass (asymbol *symbol)
 FUNCTION
 	bfd_is_undefined_symclass
 
+SYNOPSIS
+	bool bfd_is_undefined_symclass (int symclass);
+
 DESCRIPTION
 	Returns non-zero if the class symbol returned by
 	bfd_decode_symclass represents an undefined symbol.
 	Returns zero otherwise.
-
-SYNOPSIS
-	bool bfd_is_undefined_symclass (int symclass);
 */
 
 bool
@@ -744,13 +744,13 @@ bfd_is_undefined_symclass (int symclass)
 FUNCTION
 	bfd_symbol_info
 
+SYNOPSIS
+	void bfd_symbol_info (asymbol *symbol, symbol_info *ret);
+
 DESCRIPTION
 	Fill in the basic info about symbol that nm needs.
 	Additional info may be added by the back-ends after
 	calling this function.
-
-SYNOPSIS
-	void bfd_symbol_info (asymbol *symbol, symbol_info *ret);
 */
 
 void
