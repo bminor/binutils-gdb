@@ -5382,7 +5382,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	{
 	  /* Check that we did previously find some debug information
 	     before attempting to make use of it.  */
-	  if (stash->f.bfd_ptr != NULL)
+	  if (stash->f.dwarf_info_size != 0)
 	    {
 	      if (do_place && !place_sections (abfd, stash))
 		return false;
