@@ -2174,6 +2174,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos,
   nbfd->iostream = bim;
   nbfd->iovec = &_bfd_memory_iovec;
   nbfd->origin = 0;
+  nbfd->size = 0;
   BFD_ASSERT (! nbfd->cacheable);
 
   return nbfd;

@@ -987,6 +987,7 @@ bfd_make_readable (bfd *abfd)
   abfd->symcount = 0;
   abfd->outsymbols = 0;
   abfd->tdata.any = 0;
+  abfd->size = 0;
 
   bfd_section_list_clear (abfd);
   bfd_check_format (abfd, bfd_object);
