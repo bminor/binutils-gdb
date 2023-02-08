@@ -1621,13 +1621,17 @@ just use the @code{shell} command.
 @cindex shell escape
 @item shell @var{command-string}
 @itemx !@var{command-string}
-Invoke a standard shell to execute @var{command-string}.
+Invoke a shell to execute @var{command-string}.
 Note that no space is needed between @code{!} and @var{command-string}.
 On GNU and Unix systems, the environment variable @env{SHELL}, if it
 exists, determines which shell to run.  Otherwise @value{GDBN} uses
 the default shell (@file{/bin/sh} on GNU and Unix systems,
 @file{cmd.exe} on MS-Windows, @file{COMMAND.COM} on MS-DOS, etc.).
 @end table
+
+You may also invoke shell commands from expressions, using the
+@code{$_shell} convenience function.  @xref{$_shell convenience
+function}.
 
 The utility @code{make} is often needed in development environments.
 You do not have to use the @code{shell} command for this purpose in
@@ -12976,6 +12980,60 @@ Like the @code{$_gdb_setting_str} function, but works with
 @item $_gdb_maint_setting (@var{setting})
 Like the @code{$_gdb_setting} function, but works with
 @code{maintenance set} variables.
+
+@anchor{$_shell convenience function}
+@findex $_shell@r{, convenience function}
+@item $_shell (@var{command-string})
+
+Invoke a shell to execute @var{command-string}.  @var{command-string}
+must be a string.  The shell runs on the host machine, the machine
+@value{GDBN} is running on.  Returns the command's exit status.  On
+Unix systems, a command which exits with a zero exit status has
+succeeded, and non-zero exit status indicates failure.  When a command
+terminates on a fatal signal whose number is @var{N}, @value{GDBN}
+uses the value 128+@var{N} as the exit status, as is standard in Unix
+shells.  Note that @var{N} is a host signal number, not a target
+signal number.  If you're native debugging, they will be the same, but
+if cross debugging, the host vs target signal numbers may be
+completely unrelated.  Please consult your host operating system's
+documentation for the mapping between host signal numbers and signal
+names.  The shell to run is determined in the same way as for the
+@code{shell} command.  @xref{Shell Commands, ,Shell Commands}.
+
+@smallexample
+(@value{GDBP}) print $_shell("true")
+$1 = 0
+(@value{GDBP}) print $_shell("false")
+$2 = 1
+(@value{GDBP}) p $_shell("echo hello")
+hello
+$3 = 0
+(@value{GDBP}) p $_shell("foobar")
+bash: line 1: foobar: command not found
+$4 = 127
+@end smallexample
+
+This may also be useful in breakpoint conditions.  For example:
+
+@smallexample
+(@value{GDBP}) break function if $_shell("some command") == 0
+@end smallexample
+
+In this scenario, you'll want to make sure that the shell command you
+run in the breakpoint condition takes the least amount of time
+possible.  For example, avoid running a command that may block
+indefinitely, or that sleeps for a while before exiting.  Prefer a
+command or script which analyzes some state and exits immediately.
+This is important because the debugged program stops for the
+breakpoint every time, and then @value{GDBN} evaluates the breakpoint
+condition.  If the condition is false, the program is re-resumed
+transparently, without informing you of the stop.  A quick shell
+command thus avoids significantly slowing down the debugged program
+unnecessarily.
+
+Note: unlike the @code{shell} command, the @code{$_shell} convenience
+function does not affect the @code{$_shell_exitcode} and
+@code{$_shell_exitsignal} convenience variables.
 
 @end table
 

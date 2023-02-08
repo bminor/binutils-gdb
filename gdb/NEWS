@@ -68,6 +68,16 @@ maintenance info frame-unwinders
   List the frame unwinders currently in effect, starting with the highest
   priority.
 
+* New convenience function "$_shell", to execute a shell command and
+  return the result.  This lets you run shell commands in expressions.
+  Some examples:
+
+   (gdb) p $_shell("true")
+   $1 = 0
+   (gdb) p $_shell("false")
+   $2 = 1
+   (gdb) break func if $_shell("some command") == 0
+
 * MI changes
 
 ** mi now reports 'no-history' as a stop reason when hitting the end of the
