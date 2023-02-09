@@ -73,6 +73,7 @@
 #include "test-target.h"
 #include "gdbsupport/common-debug.h"
 #include "gdbsupport/buildargv.h"
+#include "extension.h"
 
 /* Prototypes for local functions */
 
@@ -4177,6 +4178,14 @@ fetch_inferior_event ()
      handled.  */
   scoped_restore restore_quit_handler
     = make_scoped_restore (&quit_handler, infrun_quit_handler);
+
+  /* Make sure a SIGINT does not interrupt an extension language while
+     we're handling an event.  That could interrupt a Python unwinder
+     or a Python observer or some such.  A Ctrl-C should either be
+     forwarded to the inferior if the inferior has the terminal, or,
+     if GDB has the terminal, should interrupt the command the user is
+     typing in the CLI.  */
+  scoped_disable_cooperative_sigint_handling restore_coop_sigint;
 
   /* End up with readline processing input, if necessary.  */
   {

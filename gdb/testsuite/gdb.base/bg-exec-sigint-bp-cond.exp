@@ -26,7 +26,10 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
 # SIGINT to GDB, and ensures that that doesn't make the breakpoint hit
 # cause a premature stop.  This emulates pressing Ctrl-C just while
 # GDB is evaluating the breakpoint condition.
-proc test {} {
+#
+# AFTER_KILL_COND is appended to the breakpoint condition, after "kill
+# -SIGINT $gdb_pid".
+proc test { {after_kill_cond ""} } {
     clean_restart $::binfile
 
     if {![runto_main]} {
@@ -48,7 +51,7 @@ proc test {} {
     # emulates pressing Ctrl-C just while GDB is evaluating the breakpoint
     # condition.
     gdb_test \
-	"break foo if \$hit_count\+\+ == $num_hits || \$_shell(\"kill -SIGINT $gdb_pid\") != 0" \
+	"break foo if \$hit_count\+\+ == $num_hits || \$_shell(\"kill -SIGINT $gdb_pid\") != 0 $after_kill_cond" \
 	"Breakpoint .*" \
 	"break foo if <condition>"
 
@@ -74,4 +77,22 @@ proc test {} {
     }
 }
 
-test
+# Test without writing to memory after killing GDB.  This does not
+# take any Python path at the time of writing.
+with_test_prefix "no force memory write" {
+    test
+}
+
+# Writing to memory from the condition makes GDB enter Python for
+# reporting a memory changed event.  Thus this tests that GDB doesn't
+# forward the SIGINT to Python, interrupting Python, causing the
+# breakpoint to prematurely stop like:
+#
+#  c&
+#  Continuing.
+#  (gdb) Error in testing breakpoint condition:
+#  Quit
+#
+with_test_prefix "force memory write" {
+    test " || (global = 0)"
+}

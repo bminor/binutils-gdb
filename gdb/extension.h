@@ -343,4 +343,20 @@ extern void (*hook_set_active_ext_lang) ();
 }
 #endif
 
+/* Temporarily disable cooperative SIGINT handling.  Needed when we
+   don't want a SIGINT to interrupt the currently active extension
+   language.  */
+class scoped_disable_cooperative_sigint_handling
+{
+public:
+  scoped_disable_cooperative_sigint_handling ();
+  ~scoped_disable_cooperative_sigint_handling ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_disable_cooperative_sigint_handling);
+
+private:
+  struct active_ext_lang_state *m_prev_active_ext_lang_state;
+  bool m_prev_cooperative_sigint_handling_disabled;
+};
+
 #endif /* EXTENSION_H */

@@ -681,6 +681,35 @@ void (*hook_set_active_ext_lang) () = nullptr;
 }
 #endif
 
+/* True if cooperative SIGINT handling is disabled.  This is needed so
+   that calls to set_active_ext_lang do not re-enable cooperative
+   handling, which if enabled would make set_quit_flag store the
+   SIGINT in an extension language.  */
+static bool cooperative_sigint_handling_disabled = false;
+
+scoped_disable_cooperative_sigint_handling::scoped_disable_cooperative_sigint_handling ()
+{
+  /* Force the active extension language to the GDB scripting
+     language.  This ensures that a previously saved SIGINT is moved
+     to the quit_flag global, as well as ensures that future SIGINTs
+     are also saved in the global.  */
+  m_prev_active_ext_lang_state
+    = set_active_ext_lang (&extension_language_gdb);
+
+  /* Set the "cooperative SIGINT handling disabled" global flag, so
+     that a future call to set_active_ext_lang does not re-enable
+     cooperative mode.  */
+  m_prev_cooperative_sigint_handling_disabled
+    = cooperative_sigint_handling_disabled;
+  cooperative_sigint_handling_disabled = true;
+}
+
+scoped_disable_cooperative_sigint_handling::~scoped_disable_cooperative_sigint_handling ()
+{
+  cooperative_sigint_handling_disabled = m_prev_cooperative_sigint_handling_disabled;
+  restore_active_ext_lang (m_prev_active_ext_lang_state);
+}
+
 /* Set the currently active extension language to NOW_ACTIVE.
    The result is a pointer to a malloc'd block of memory to pass to
    restore_active_ext_lang.
@@ -702,7 +731,15 @@ void (*hook_set_active_ext_lang) () = nullptr;
    check_quit_flag is not called, the original SIGINT will be thrown.
    Non-cooperative extension languages are free to install their own SIGINT
    handler but the original must be restored upon return, either itself
-   or via restore_active_ext_lang.  */
+   or via restore_active_ext_lang.
+
+   If cooperative SIGINT handling is force-disabled (e.g., we're in
+   the middle of handling an inferior event), then we don't actually
+   record NOW_ACTIVE as the current active extension language, so that
+   set_quit_flag saves the SIGINT in the global quit flag instead of
+   in the extension language.  The caller does not need to concern
+   itself about this, though.  The currently active extension language
+   concept only exists for cooperative SIGINT handling.  */
 
 struct active_ext_lang_state *
 set_active_ext_lang (const struct extension_language_defn *now_active)
@@ -711,6 +748,22 @@ set_active_ext_lang (const struct extension_language_defn *now_active)
   if (selftests::hook_set_active_ext_lang)
     selftests::hook_set_active_ext_lang ();
 #endif
+
+  /* If cooperative SIGINT handling was previously force-disabled,
+     make sure to not re-enable it (as NOW_ACTIVE could be a language
+     that supports cooperative SIGINT handling).  */
+  if (cooperative_sigint_handling_disabled)
+    {
+      /* Ensure set_quit_flag saves SIGINT in the quit_flag
+	 global.  */
+      gdb_assert (active_ext_lang->ops == nullptr
+		  || active_ext_lang->ops->check_quit_flag == nullptr);
+
+      /* The only thing the caller can do with the result is pass it
+	 to restore_active_ext_lang, which expects NULL when
+	 cooperative SIGINT handling is disabled.  */
+      return nullptr;
+    }
 
   struct active_ext_lang_state *previous
     = XCNEW (struct active_ext_lang_state);
@@ -743,6 +796,13 @@ set_active_ext_lang (const struct extension_language_defn *now_active)
 void
 restore_active_ext_lang (struct active_ext_lang_state *previous)
 {
+  if (cooperative_sigint_handling_disabled)
+    {
+      /* See set_active_ext_lang.  */
+      gdb_assert (previous == nullptr);
+      return;
+    }
+
   active_ext_lang = previous->ext_lang;
 
   if (target_terminal::is_ours ())
