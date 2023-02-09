@@ -265,10 +265,8 @@ frame_addr_hash_eq (const void *a, const void *b)
 /* Deletion function for the frame cache hash table.  */
 
 static void
-frame_info_del (void *frame_v)
+frame_info_del (frame_info *frame)
 {
-  frame_info *frame = (frame_info *) frame_v;
-
   if (frame->prologue_cache != nullptr
       && frame->unwind->dealloc_cache != nullptr)
     frame->unwind->dealloc_cache (frame, frame->prologue_cache);
@@ -284,10 +282,13 @@ frame_info_del (void *frame_v)
 static void
 frame_stash_create (void)
 {
-  frame_stash = htab_create (100,
-			     frame_addr_hash,
-			     frame_addr_hash_eq,
-			     frame_info_del);
+  frame_stash = htab_create
+    (100, frame_addr_hash, frame_addr_hash_eq,
+     [] (void *p)
+       {
+	 auto frame = static_cast<frame_info *> (p);
+	 frame_info_del (frame);
+       });
 }
 
 /* Internal function to add a frame to the frame_stash hash table.
@@ -2105,7 +2106,19 @@ reinit_frame_cache (void)
   invalidate_selected_frame ();
 
   /* Invalidate cache.  */
-  sentinel_frame = NULL;
+  if (sentinel_frame != nullptr)
+    {
+      /* If frame 0's id is not computed, it is not in the frame stash, so its
+	 dealloc functions will not be called when emptying the frash stash.
+	 Call frame_info_del manually in that case.  */
+      frame_info *current_frame = sentinel_frame->prev;
+      if (current_frame != nullptr
+	  && current_frame->this_id.p == frame_id_status::NOT_COMPUTED)
+	frame_info_del (current_frame);
+
+      sentinel_frame = nullptr;
+    }
+
   frame_stash_invalidate ();
 
   /* Since we can't really be sure what the first object allocated was.  */
