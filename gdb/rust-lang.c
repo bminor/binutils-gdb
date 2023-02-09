@@ -495,7 +495,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
     }
 
   bool first_field = true;
-  for (int j = 0; j < variant_type->num_fields (); j++)
+  for (int j = 0; j < nfields; j++)
     {
       if (!first_field)
 	gdb_puts (", ", stream);
