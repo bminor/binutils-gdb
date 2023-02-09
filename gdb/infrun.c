@@ -4105,6 +4105,44 @@ all_uis_on_sync_execution_starting (void)
     }
 }
 
+/* A quit_handler callback installed while we're handling inferior
+   events.  */
+
+static void
+infrun_quit_handler ()
+{
+  if (target_terminal::is_ours ())
+    {
+      /* Do nothing.
+
+	 default_quit_handler would throw a quit in this case, but if
+	 we're handling an event while we have the terminal, it means
+	 the target is running a background execution command, and
+	 thus when users press Ctrl-C, they're wanting to interrupt
+	 whatever command they were executing in the command line.
+	 E.g.:
+
+	  (gdb) c&
+	  (gdb) foo bar whatever<ctrl-c>
+
+	 That Ctrl-C should clear the input line, not interrupt event
+	 handling if it happens that the user types Ctrl-C at just the
+	 "wrong" time!
+
+	 It's as-if background event handling was handled by a
+	 separate background thread.
+
+	 To be clear, the Ctrl-C is not lost -- it will be processed
+	 by the next QUIT call once we're out of fetch_inferior_event
+	 again.  */
+    }
+  else
+    {
+      if (check_quit_flag ())
+	target_pass_ctrlc ();
+    }
+}
+
 /* Asynchronous version of wait_for_inferior.  It is called by the
    event loop whenever a change of state is detected on the file
    descriptor corresponding to the target.  It can be called more than
@@ -4132,6 +4170,13 @@ fetch_inferior_event ()
      exit and could leave GDB in a half-baked state.  */
   scoped_restore save_pagination
     = make_scoped_restore (&pagination_enabled, false);
+
+  /* Install a quit handler that does nothing if we have the terminal
+     (meaning the target is running a background execution command),
+     so that Ctrl-C never interrupts GDB before the event is fully
+     handled.  */
+  scoped_restore restore_quit_handler
+    = make_scoped_restore (&quit_handler, infrun_quit_handler);
 
   /* End up with readline processing input, if necessary.  */
   {
