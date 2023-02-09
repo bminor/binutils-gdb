@@ -30,6 +30,8 @@
 /* All possible aarch64 target descriptors.  */
 static std::unordered_map<aarch64_features, target_desc *> tdesc_aarch64_map;
 
+static std::vector<const char *> expedited_registers;
+
 /* Create the aarch64 target description.  */
 
 const target_desc *
@@ -44,15 +46,20 @@ aarch64_linux_read_description (const aarch64_features &features)
   if (tdesc == NULL)
     {
       tdesc = aarch64_create_target_description (features);
+      expedited_registers.clear ();
 
-      static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
-      static const char *expedite_regs_aarch64_sve[] = { "x29", "sp", "pc",
-							 "vg", NULL };
+      /* Configure the expedited registers.  By default we include x29, sp and
+	 pc.  */
+      expedited_registers.push_back ("x29");
+      expedited_registers.push_back ("sp");
+      expedited_registers.push_back ("pc");
 
-      if (features.vq == 0)
-	init_target_desc (tdesc, expedite_regs_aarch64);
-      else
-	init_target_desc (tdesc, expedite_regs_aarch64_sve);
+      if (features.vq > 0)
+	expedited_registers.push_back ("vg");
+
+      expedited_registers.push_back (nullptr);
+
+      init_target_desc (tdesc, (const char **) expedited_registers.data ());
 
       tdesc_aarch64_map[features] = tdesc;
     }
