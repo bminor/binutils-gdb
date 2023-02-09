@@ -205,5 +205,45 @@ save_vars { env(TERM) } {
 	    "p 7" ".* = 7" \
 	    "p 8" ".* = 8" \
 	    "p 9" ".* = 9"
+
+	# Test sending a long command to GDB, a command that requires
+	# multiple terminal lines.  Long ago there was a readline bug
+	# that would cause GDB to crash in this situation.  We force
+	# the bug by setting up a narrow terminal width, and then
+	# sending a long command.
+	clean_restart
+
+	# The number of characters to send in the command.  We
+	# actually send a few more than this; this total is really the
+	# extra characters we add on after sending the command name.
+	set char_total 4500
+	set char_sent 0
+
+	# Adjust the terminal width.
+	gdb_test_no_output "set width 7"
+
+	# Send the command prefix, then lots of additional characters
+	# that create a really long command that wraps over multiple
+	# lines.
+	send_gdb "help X"
+	gdb_test_multiple "" "send long command to GDB" {
+	    -re "X" {
+		incr char_sent
+		if {$char_sent <= $char_total} {
+		    send_gdb "X"
+		    exp_continue
+		}
+	    }
+	    -re "\[ \b\r\n\]" {
+		exp_continue
+	    }
+	}
+
+	# Send the final newline so that GDB will process the command.
+	# Check GDB returns a suitable error.
+	send_gdb "\n"
+	gdb_test "" \
+	    "Undefined command: \"X+\"\\.  Try \"help\"\\." \
+	    "All the characters transferred"
     }
 }
