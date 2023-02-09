@@ -208,6 +208,9 @@ proc test_python_helper {} {
 		    " cplus_stuff = $hex}"]
     gdb_test -prompt $outer_prompt_re "print *type->main_type" $answer
 
+    # Test the htab_t pretty-printer.
+    gdb_test -prompt $outer_prompt_re "print all_bfds" "htab_t with ${::decimal} elements = \\{${::hex}.*\\}"
+
     return 0
 }
 
