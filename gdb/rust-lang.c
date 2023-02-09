@@ -470,7 +470,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
     }
 
   int variant_fieldno = rust_enum_variant (type);
-  val = value_field (val, variant_fieldno);
+  val = val->primitive_field (0, variant_fieldno, type);
   struct type *variant_type = type->field (variant_fieldno).type ();
 
   int nfields = variant_type->num_fields ();
