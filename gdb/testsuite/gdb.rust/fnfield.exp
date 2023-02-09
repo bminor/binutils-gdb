@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test trait object printing.
+# Test calls of function-value fields.
 
 load_lib rust-support.exp
 require allow_rust_tests
