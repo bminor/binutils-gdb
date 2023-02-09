@@ -1,3 +1,11 @@
+2023-02-09  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf-mode.el: Bump version to 1.8.
+	(dwarf-insert-substructure): Tighten regexp.
+	(dwarf-refresh-all): New defun.
+	(dwarf-mode-map): Bind "A" to dwarf-refresh-all.
+	(dwarf-mode): Remove old FIXME.
+
 2023-02-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 30080
