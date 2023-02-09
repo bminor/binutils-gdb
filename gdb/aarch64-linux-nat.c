@@ -56,6 +56,8 @@
 
 #include "nat/aarch64-mte-linux-ptrace.h"
 
+#include <string.h>
+
 #ifndef TRAP_HWBKPT
 #define TRAP_HWBKPT 0x0004
 #endif
@@ -445,7 +447,9 @@ fetch_tlsregs_from_thread (struct regcache *regcache)
   gdb_assert (regno != -1);
   gdb_assert (tdep->tls_register_count > 0);
 
-  uint64_t tpidrs[tdep->tls_register_count] = { 0 };
+  uint64_t tpidrs[tdep->tls_register_count];
+  memset(tpidrs, 0, sizeof(tpidrs));
+
   struct iovec iovec;
   iovec.iov_base = tpidrs;
   iovec.iov_len = sizeof (tpidrs);
@@ -471,7 +475,8 @@ store_tlsregs_to_thread (struct regcache *regcache)
   gdb_assert (regno != -1);
   gdb_assert (tdep->tls_register_count > 0);
 
-  uint64_t tpidrs[tdep->tls_register_count] = { 0 };
+  uint64_t tpidrs[tdep->tls_register_count];
+  memset(tpidrs, 0, sizeof(tpidrs));
 
   for (int i = 0; i < tdep->tls_register_count; i++)
     {
