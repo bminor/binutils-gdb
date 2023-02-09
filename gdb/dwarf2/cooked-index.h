@@ -355,7 +355,7 @@ public:
   explicit cooked_index (vec_type &&vec);
   DISABLE_COPY_AND_ASSIGN (cooked_index);
 
-  /* Wait until the finalization of the entire cooked_index_vector is
+  /* Wait until the finalization of the entire cooked_index is
      done.  */
   void wait () const
   {
