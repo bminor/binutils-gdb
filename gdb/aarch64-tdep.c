@@ -2783,7 +2783,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
   struct value *result_value = value::allocate (register_type (gdbarch, regnum));
 
-  VALUE_LVAL (result_value) = lval_register;
+  result_value->set_lval (lval_register);
   VALUE_REGNUM (result_value) = regnum;
 
   if (is_w_pseudo_register (gdbarch, regnum))

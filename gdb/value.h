@@ -335,6 +335,10 @@ public:
   enum lval_type lval () const
   { return m_lval; }
 
+  /* Set the 'lval' of this value.  */
+  void set_lval (lval_type val)
+  { m_lval = val; }
+
   /* Set or return field indicating whether a variable is initialized or
      not, based on debugging information supplied by the compiler.
      1 = initialized; 0 = uninitialized.  */

@@ -923,7 +923,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
     name_at_pc = NULL;
 
   function = value::allocate (func_func_type);
-  VALUE_LVAL (function) = lval_memory;
+  function->set_lval (lval_memory);
   function->set_address (pc);
 
   /* STT_GNU_IFUNC resolver functions usually receive the HWCAP vector as
@@ -1034,7 +1034,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
   gdb_assert (b->loc->next == NULL);
 
   func_func = value::allocate (func_func_type);
-  VALUE_LVAL (func_func) = lval_memory;
+  func_func->set_lval (lval_memory);
   func_func->set_address (b->loc->related_address);
 
   value = value::allocate (value_type);

@@ -744,7 +744,7 @@ readable_regcache::cooked_read_value (int regnum)
       struct value *result;
 
       result = value::allocate (register_type (m_descr->gdbarch, regnum));
-      VALUE_LVAL (result) = lval_register;
+      result->set_lval (lval_register);
       VALUE_REGNUM (result) = regnum;
 
       /* It is more efficient in general to do this delegation in this

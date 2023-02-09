@@ -1024,7 +1024,7 @@ struct value *
 value_at_non_lval (struct type *type, CORE_ADDR addr)
 {
   struct value *result = value_at (type, addr);
-  VALUE_LVAL (result) = not_lval;
+  result->set_lval (not_lval);
   return result;
 }
 
@@ -1373,7 +1373,7 @@ value_repeat (struct value *arg1, int count)
 
   val = allocate_repeat_value (arg1->enclosing_type (), count);
 
-  VALUE_LVAL (val) = lval_memory;
+  val->set_lval (lval_memory);
   val->set_address (arg1->address ());
 
   read_value_memory (val, 0, val->stack (), val->address (),

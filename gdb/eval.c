@@ -2879,7 +2879,7 @@ var_msym_value_operation::evaluate_for_cast (struct type *to_type,
     {
       if (val->lazy ())
 	val->fetch_lazy ();
-      VALUE_LVAL (val) = not_lval;
+      val->set_lval (not_lval);
     }
   return val;
 }
@@ -2900,7 +2900,7 @@ var_value_operation::evaluate_for_cast (struct type *to_type,
     {
       if (val->lazy ())
 	val->fetch_lazy ();
-      VALUE_LVAL (val) = not_lval;
+      val->set_lval (not_lval);
     }
   return val;
 }

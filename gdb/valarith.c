@@ -192,7 +192,7 @@ value_subscript (struct value *array, LONGEST index)
 	{
 	  struct value *val = value::allocate (elt_type);
 	  val->mark_bytes_unavailable (0, elt_size);
-	  VALUE_LVAL (val) = lval_memory;
+	  val->set_lval (lval_memory);
 	  val->set_address (array->address () + elt_size * index);
 	  return val;
 	}

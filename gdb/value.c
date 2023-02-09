@@ -975,7 +975,7 @@ value::allocate_computed (struct type *type,
 {
   struct value *v = value::allocate_lazy (type);
 
-  VALUE_LVAL (v) = lval_computed;
+  v->set_lval (lval_computed);
   v->m_location.computed.funcs = funcs;
   v->m_location.computed.closure = closure;
 
@@ -1478,7 +1478,7 @@ value::copy () const
 
   val = value::allocate_lazy (encl_type);
   val->m_type = m_type;
-  VALUE_LVAL (val) = m_lval;
+  val->set_lval (m_lval);
   val->m_location = m_location;
   val->m_offset = m_offset;
   val->m_bitpos = m_bitpos;
@@ -1583,9 +1583,9 @@ value::set_component_location (const struct value *whole)
   gdb_assert (whole->m_lval != lval_xcallable);
 
   if (whole->m_lval == lval_internalvar)
-    VALUE_LVAL (this) = lval_internalvar_component;
+    m_lval = lval_internalvar_component;
   else
-    VALUE_LVAL (this) = whole->m_lval;
+    m_lval = whole->m_lval;
 
   m_location = whole->m_location;
   if (whole->m_lval == lval_computed)
@@ -1629,7 +1629,7 @@ value::set_component_location (const struct value *whole)
       if (VALUE_LVAL (this) == lval_internalvar_component)
 	{
 	  gdb_assert (lazy ());
-	  VALUE_LVAL (this) = lval_memory;
+	  m_lval = lval_memory;
 	}
       else
 	gdb_assert (VALUE_LVAL (this) == lval_memory);
@@ -2067,7 +2067,7 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
   if (var->kind != INTERNALVAR_MAKE_VALUE
       && val->lval () != lval_computed)
     {
-      VALUE_LVAL (val) = lval_internalvar;
+      val->set_lval (lval_internalvar);
       VALUE_INTERNALVAR (val) = var;
     }
 
@@ -2987,7 +2987,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
     }
 
   v = value::allocate (ftype);
-  VALUE_LVAL (v) = lval_memory;
+  v->set_lval (lval_memory);
   if (sym)
     {
       v->set_address (sym->value_block ()->entry_pc ());
@@ -3333,7 +3333,7 @@ value::zero (struct type *type, enum lval_type lv)
 {
   struct value *val = value::allocate_lazy (type);
 
-  VALUE_LVAL (val) = (lv == lval_computed ? not_lval : lv);
+  val->set_lval (lv == lval_computed ? not_lval : lv);
   val->m_is_zero = true;
   return val;
 }
@@ -3408,7 +3408,7 @@ value_from_contents_and_address_unresolved (struct type *type,
     v = value::allocate_lazy (type);
   else
     v = value_from_contents (type, valaddr);
-  VALUE_LVAL (v) = lval_memory;
+  v->set_lval (lval_memory);
   v->set_address (address);
   return v;
 }
@@ -3437,7 +3437,7 @@ value_from_contents_and_address (struct type *type,
   if (TYPE_DATA_LOCATION (resolved_type_no_typedef) != NULL
       && TYPE_DATA_LOCATION_KIND (resolved_type_no_typedef) == PROP_CONST)
     address = TYPE_DATA_LOCATION_ADDR (resolved_type_no_typedef);
-  VALUE_LVAL (v) = lval_memory;
+  v->set_lval (lval_memory);
   v->set_address (address);
   return v;
 }

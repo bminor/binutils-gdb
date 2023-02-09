@@ -295,7 +295,7 @@ value_of_register_lazy (frame_info_ptr frame, int regnum)
   gdb_assert (frame_id_p (get_frame_id (next_frame)));
 
   reg_val = value::allocate_lazy (register_type (gdbarch, regnum));
-  VALUE_LVAL (reg_val) = lval_register;
+  reg_val->set_lval (lval_register);
   VALUE_REGNUM (reg_val) = regnum;
   VALUE_NEXT_FRAME_ID (reg_val) = get_frame_id (next_frame);
 
@@ -589,7 +589,7 @@ language_defn::read_var_value (struct symbol *var,
       v = value::allocate (type);
       store_signed_integer (v->contents_raw ().data (), type->length (),
 			    type_byte_order (type), var->value_longest ());
-      VALUE_LVAL (v) = not_lval;
+      v->set_lval (not_lval);
       return v;
 
     case LOC_LABEL:
@@ -616,7 +616,7 @@ language_defn::read_var_value (struct symbol *var,
 	struct type *void_ptr_type
 	  = builtin_type (var->arch ())->builtin_data_ptr;
 	v = value_cast_pointers (void_ptr_type, v, 0);
-	VALUE_LVAL (v) = not_lval;
+	v->set_lval (not_lval);
 	return v;
       }
 
@@ -629,7 +629,7 @@ language_defn::read_var_value (struct symbol *var,
       v = value::allocate (type);
       memcpy (v->contents_raw ().data (), var->value_bytes (),
 	      type->length ());
-      VALUE_LVAL (v) = not_lval;
+      v->set_lval (not_lval);
       return v;
 
     case LOC_STATIC:
@@ -804,7 +804,7 @@ default_value_from_register (struct gdbarch *gdbarch, struct type *type,
   struct value *value = value::allocate (type);
   frame_info_ptr frame;
 
-  VALUE_LVAL (value) = lval_register;
+  value->set_lval (lval_register);
   frame = frame_find_by_id (frame_id);
 
   if (frame == NULL)
@@ -896,7 +896,7 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
 	 is that gdbarch_register_to_value populates the entire value
 	 including the location.  */
       v = value::allocate (type);
-      VALUE_LVAL (v) = lval_register;
+      v->set_lval (lval_register);
       VALUE_NEXT_FRAME_ID (v) = get_frame_id (get_next_frame_sentinel_okay (frame));
       VALUE_REGNUM (v) = regnum;
       ok = gdbarch_register_to_value (gdbarch, frame, regnum, type1,

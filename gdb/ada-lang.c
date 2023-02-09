@@ -4356,7 +4356,7 @@ ensure_lval (struct value *val)
       const CORE_ADDR addr =
 	value_as_long (value_allocate_space_in_inferior (len));
 
-      VALUE_LVAL (val) = lval_memory;
+      val->set_lval (lval_memory);
       val->set_address (addr);
       write_memory (addr, val->contents ().data (), len);
     }
@@ -10854,7 +10854,7 @@ ada_var_msym_value_operation::evaluate_for_cast (struct type *expect_type,
     {
       if (val->lazy ())
 	val->fetch_lazy ();
-      VALUE_LVAL (val) = not_lval;
+      val->set_lval (not_lval);
     }
   return val;
 }
@@ -10876,7 +10876,7 @@ ada_var_value_operation::evaluate_for_cast (struct type *expect_type,
     {
       if (val->lazy ())
 	val->fetch_lazy ();
-      VALUE_LVAL (val) = not_lval;
+      val->set_lval (not_lval);
     }
   return val;
 }
