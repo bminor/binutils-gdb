@@ -216,7 +216,7 @@ static bool xcoff_mark (struct bfd_link_info *, asection *);
 
 /* Read the contents of a section.  */
 
-static bool
+static bfd_byte *
 xcoff_get_section_contents (bfd *abfd, asection *sec)
 {
   if (coff_section_data (abfd, sec) == NULL)
@@ -225,22 +225,22 @@ xcoff_get_section_contents (bfd *abfd, asection *sec)
 
       sec->used_by_bfd = bfd_zalloc (abfd, amt);
       if (sec->used_by_bfd == NULL)
-	return false;
+       return NULL;
     }
 
-  if (coff_section_data (abfd, sec)->contents == NULL)
+  bfd_byte *contents = coff_section_data (abfd, sec)->contents;
+  if (contents == NULL)
     {
-      bfd_byte *contents;
-
-      if (! bfd_malloc_and_get_section (abfd, sec, &contents))
+      if (bfd_malloc_and_get_section (abfd, sec, &contents))
+	coff_section_data (abfd, sec)->contents = contents;
+      else
 	{
 	  free (contents);
-	  return false;
+	  contents = NULL;
 	}
-      coff_section_data (abfd, sec)->contents = contents;
     }
 
-  return true;
+  return contents;
 }
 
 /* Get the size required to hold the dynamic symbols.  */
@@ -265,9 +265,9 @@ _bfd_xcoff_get_dynamic_symtab_upper_bound (bfd *abfd)
       return -1;
     }
 
-  if (! xcoff_get_section_contents (abfd, lsec))
+  contents = xcoff_get_section_contents (abfd, lsec);
+  if (!contents)
     return -1;
-  contents = coff_section_data (abfd, lsec)->contents;
 
   bfd_xcoff_swap_ldhdr_in (abfd, (void *) contents, &ldhdr);
 
@@ -299,11 +299,9 @@ _bfd_xcoff_canonicalize_dynamic_symtab (bfd *abfd, asymbol **psyms)
       return -1;
     }
 
-  if (! xcoff_get_section_contents (abfd, lsec))
+  contents = xcoff_get_section_contents (abfd, lsec);
+  if (!contents)
     return -1;
-  contents = coff_section_data (abfd, lsec)->contents;
-
-  coff_section_data (abfd, lsec)->keep_contents = true;
 
   bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
@@ -386,9 +384,9 @@ _bfd_xcoff_get_dynamic_reloc_upper_bound (bfd *abfd)
       return -1;
     }
 
-  if (! xcoff_get_section_contents (abfd, lsec))
+  contents = xcoff_get_section_contents (abfd, lsec);
+  if (!contents)
     return -1;
-  contents = coff_section_data (abfd, lsec)->contents;
 
   bfd_xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) contents, &ldhdr);
 
@@ -421,9 +419,9 @@ _bfd_xcoff_canonicalize_dynamic_reloc (bfd *abfd,
       return -1;
     }
 
-  if (! xcoff_get_section_contents (abfd, lsec))
+  contents = xcoff_get_section_contents (abfd, lsec);
+  if (!contents)
     return -1;
-  contents = coff_section_data (abfd, lsec)->contents;
 
   bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
@@ -915,9 +913,9 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
       return false;
     }
 
-  if (! xcoff_get_section_contents (abfd, lsec))
+  contents = xcoff_get_section_contents (abfd, lsec);
+  if (!contents)
     return false;
-  contents = coff_section_data (abfd, lsec)->contents;
 
   /* Remove the sections from this object, so that they do not get
      included in the link.  */
@@ -1044,11 +1042,8 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (contents != NULL && ! coff_section_data (abfd, lsec)->keep_contents)
-    {
-      free (coff_section_data (abfd, lsec)->contents);
-      coff_section_data (abfd, lsec)->contents = NULL;
-    }
+  free (contents);
+  coff_section_data (abfd, lsec)->contents = NULL;
 
   /* Record this file in the import files.  */
   n = bfd_alloc (abfd, (bfd_size_type) sizeof (struct xcoff_import_file));
@@ -2306,8 +2301,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  /* If we are not keeping memory, free the reloc information.  */
 	  if (! info->keep_memory
-	      && coff_section_data (abfd, o) != NULL
-	      && ! coff_section_data (abfd, o)->keep_relocs)
+	      && coff_section_data (abfd, o) != NULL)
 	    {
 	      free (coff_section_data (abfd, o)->relocs);
 	      coff_section_data (abfd, o)->relocs = NULL;
@@ -2383,9 +2377,9 @@ xcoff_link_check_dynamic_ar_symbols (bfd *abfd,
     /* There are no symbols, so don't try to include it.  */
     return true;
 
-  if (! xcoff_get_section_contents (abfd, lsec))
+  contents = xcoff_get_section_contents (abfd, lsec);
+  if (!contents)
     return false;
-  contents = coff_section_data (abfd, lsec)->contents;
 
   bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
@@ -2434,12 +2428,9 @@ xcoff_link_check_dynamic_ar_symbols (bfd *abfd,
 	}
     }
 
-  /* We do not need this shared object.  */
-  if (contents != NULL && ! coff_section_data (abfd, lsec)->keep_contents)
-    {
-      free (coff_section_data (abfd, lsec)->contents);
-      coff_section_data (abfd, lsec)->contents = NULL;
-    }
+  /* We do not need this shared object's .loader section.  */
+  free (contents);
+  coff_section_data (abfd, lsec)->contents = NULL;
 
   return true;
 }
@@ -3142,8 +3133,7 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 	}
 
       if (! info->keep_memory
-	  && coff_section_data (sec->owner, sec) != NULL
-	  && ! coff_section_data (sec->owner, sec)->keep_relocs)
+	  && coff_section_data (sec->owner, sec) != NULL)
 	{
 	  free (coff_section_data (sec->owner, sec)->relocs);
 	  coff_section_data (sec->owner, sec)->relocs = NULL;
