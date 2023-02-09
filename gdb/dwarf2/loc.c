@@ -684,7 +684,7 @@ call_site_target::iterate_over_addresses
 					dwarf_block->per_cu,
 					dwarf_block->per_objfile);
 	/* DW_AT_call_target is a DWARF expression, not a DWARF location.  */
-	if (VALUE_LVAL (val) == lval_memory)
+	if (val->lval () == lval_memory)
 	  callback (val->address ());
 	else
 	  callback (value_as_address (val));
@@ -1612,11 +1612,11 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   if (result->optimized_out ())
     return 0;
 
-  if (VALUE_LVAL (result) == lval_memory)
+  if (result->lval () == lval_memory)
     *valp = result->address ();
   else
     {
-      if (VALUE_LVAL (result) == not_lval)
+      if (result->lval () == not_lval)
 	*is_reference = false;
 
       *valp = value_as_address (result);

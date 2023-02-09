@@ -230,7 +230,7 @@ dump_value_to_file (const char *cmd, const char *mode, const char *file_format)
     {
       CORE_ADDR vaddr;
 
-      if (VALUE_LVAL (val))
+      if (val->lval ())
 	{
 	  vaddr = val->address ();
 	}

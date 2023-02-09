@@ -846,7 +846,7 @@ read_frame_register_value (struct value *value, frame_info_ptr frame)
   int regnum = VALUE_REGNUM (value);
   int len = type_length_units (check_typedef (value->type ()));
 
-  gdb_assert (VALUE_LVAL (value) == lval_register);
+  gdb_assert (value->lval () == lval_register);
 
   /* Skip registers wholly inside of REG_OFFSET.  */
   while (reg_offset >= register_size (gdbarch, regnum))

@@ -1889,7 +1889,7 @@ public:
        expected type.  This avoids a weird case where re-assigning a
        string or array to an internal variable could error with "Too
        many array elements".  */
-    struct type *xtype = (VALUE_LVAL (lhs) == lval_internalvar
+    struct type *xtype = (lhs->lval () == lval_internalvar
 			  ? nullptr
 			  : lhs->type ());
     value *rhs = std::get<1> (m_storage)->evaluate (xtype, exp, noside);

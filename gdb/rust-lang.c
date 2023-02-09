@@ -1204,7 +1204,7 @@ rust_subscript (struct type *expect_type, struct expression *exp,
       else
 	new_type = base_type;
 
-      return value::zero (new_type, VALUE_LVAL (lhs));
+      return value::zero (new_type, lhs->lval ());
     }
   else
     {
@@ -1470,7 +1470,7 @@ rust_structop::evaluate (struct type *expect_type,
   else
     result = value_struct_elt (&lhs, {}, field_name, NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    result = value::zero (result->type (), VALUE_LVAL (result));
+    result = value::zero (result->type (), result->lval ());
   return result;
 }
 

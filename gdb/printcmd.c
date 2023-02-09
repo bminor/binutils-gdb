@@ -297,7 +297,7 @@ print_formatted (struct value *val, int size,
   struct type *type = check_typedef (val->type ());
   int len = type->length ();
 
-  if (VALUE_LVAL (val) == lval_memory)
+  if (val->lval () == lval_memory)
     next_address = val->address () + len;
 
   if (size)
@@ -1904,7 +1904,7 @@ x_command (const char *exp, int from_tty)
       /* In rvalue contexts, such as this, functions are coerced into
 	 pointers to functions.  This makes "x/i main" work.  */
       if (val->type ()->code () == TYPE_CODE_FUNC
-	   && VALUE_LVAL (val) == lval_memory)
+	  && val->lval () == lval_memory)
 	next_address = val->address ();
       else
 	next_address = value_as_address (val);
@@ -2446,7 +2446,7 @@ printf_c_string (struct ui_file *stream, const char *format,
   const gdb_byte *str;
 
   if (value->type ()->code () != TYPE_CODE_PTR
-      && VALUE_LVAL (value) == lval_internalvar
+      && value->lval () == lval_internalvar
       && c_is_string_type_p (value->type ()))
     {
       size_t len = value->type ()->length ();
@@ -2518,7 +2518,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 					 "wchar_t", NULL, 0);
   int wcwidth = wctype->length ();
 
-  if (VALUE_LVAL (value) == lval_internalvar
+  if (value->lval () == lval_internalvar
       && c_is_string_type_p (value->type ()))
     {
       str = value->contents ().data ();

@@ -294,8 +294,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
      C struct hack.  So, only do this if either no length was
      specified, or the length is within the existing bounds.  This
      avoids running off the end of the value's contents.  */
-  if ((VALUE_LVAL (value) == not_lval
-       || VALUE_LVAL (value) == lval_internalvar
+  if ((value->lval () == not_lval
+       || value->lval () == lval_internalvar
        || type->code () == TYPE_CODE_ARRAY)
       && fetchlimit != UINT_MAX
       && (*length < 0 || *length <= fetchlimit))
@@ -328,7 +328,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       CORE_ADDR addr;
       if (type->code () == TYPE_CODE_ARRAY)
 	{
-	  if (VALUE_LVAL (value) != lval_memory)
+	  if (value->lval () != lval_memory)
 	    error (_("Attempt to take address of value "
 		     "not located in memory."));
 	  addr = value->address ();

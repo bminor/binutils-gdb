@@ -930,7 +930,7 @@ frame_find_by_id (struct frame_id id)
      and get_prev_frame performs a series of checks that are relatively
      expensive).  This optimization is particularly useful when this function
      is called from another function (such as value_fetch_lazy, case
-     VALUE_LVAL (val) == lval_register) which already loops over all frames,
+     val->lval () == lval_register) which already loops over all frames,
      making the overall behavior O(n^2).  */
   frame = frame_stash_find (id);
   if (frame)
@@ -1191,7 +1191,7 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
 
   *optimizedp = value->optimized_out ();
   *unavailablep = !value->entirely_available ();
-  *lvalp = VALUE_LVAL (value);
+  *lvalp = value->lval ();
   *addrp = value->address ();
   if (*lvalp == lval_register)
     *realnump = VALUE_REGNUM (value);
@@ -1296,10 +1296,10 @@ frame_unwind_register_value (frame_info_ptr next_frame, int regnum)
 	}
       else
 	{
-	  if (VALUE_LVAL (value) == lval_register)
+	  if (value->lval () == lval_register)
 	    gdb_printf (&debug_file, " register=%d",
 			VALUE_REGNUM (value));
-	  else if (VALUE_LVAL (value) == lval_memory)
+	  else if (value->lval () == lval_memory)
 	    gdb_printf (&debug_file, " address=%s",
 			paddress (gdbarch,
 				  value->address ()));

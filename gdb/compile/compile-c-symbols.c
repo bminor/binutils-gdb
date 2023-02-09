@@ -156,7 +156,7 @@ convert_one_symbol (compile_c_instance *context,
 	      }
 
 	    val = read_var_value (sym.symbol, sym.block, frame);
-	    if (VALUE_LVAL (val) != lval_memory)
+	    if (val->lval () != lval_memory)
 	      error (_("Symbol \"%s\" cannot be used for compilation "
 		       "evaluation as its address has not been found."),
 		     sym.symbol->print_name ());

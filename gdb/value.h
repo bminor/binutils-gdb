@@ -329,9 +329,6 @@ public:
      uses.  */
   void *computed_closure () const;
 
-  enum lval_type *deprecated_lval_hack ()
-  { return &m_lval; }
-
   enum lval_type lval () const
   { return m_lval; }
 
@@ -951,13 +948,6 @@ struct lval_funcs
    out.  */
 
 extern void error_value_optimized_out (void);
-
-/* While the following fields are per- VALUE .CONTENT .PIECE (i.e., a
-   single value might have multiple LVALs), this hacked interface is
-   limited to just the first PIECE.  Expect further change.  */
-/* Type of value; either not an lval, or one of the various different
-   possible kinds of lval.  */
-#define VALUE_LVAL(val) (*((val)->deprecated_lval_hack ()))
 
 /* Pointer to internal variable.  */
 #define VALUE_INTERNALVAR(val) (*((val)->deprecated_internalvar_hack ()))

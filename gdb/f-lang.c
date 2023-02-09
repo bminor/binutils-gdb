@@ -1363,7 +1363,7 @@ fortran_undetermined::value_subarray (value *array,
 	  if (index < lb
 	      || (dim_type->index_type ()->bounds ()->high.kind () != PROP_UNDEFINED
 		  && index > ub)
-	      || (VALUE_LVAL (array) != lval_memory
+	      || (array->lval () != lval_memory
 		  && dim_type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED))
 	    {
 	      if (type_not_associated (dim_type))
@@ -1460,7 +1460,7 @@ fortran_undetermined::value_subarray (value *array,
     }
   else
     {
-      if (VALUE_LVAL (array) == lval_memory)
+      if (array->lval () == lval_memory)
 	{
 	  /* If the value we're taking a slice from is not yet loaded, or
 	     the requested slice is outside the values content range then
@@ -1637,7 +1637,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
 	    = gdb::make_array_view (valaddr, elt_type->length ());
 	  elt_type = resolve_dynamic_type (elt_type, view, address);
 	}
-      elt = value::zero (elt_type, VALUE_LVAL (elt));
+      elt = value::zero (elt_type, elt->lval ());
     }
 
   return elt;
@@ -1872,7 +1872,7 @@ fortran_argument_convert (struct value *value, bool is_artificial)
     {
       /* If the value is not in the inferior e.g. registers values,
 	 convenience variables and user input.  */
-      if (VALUE_LVAL (value) != lval_memory)
+      if (value->lval () != lval_memory)
 	{
 	  struct type *type = value->type ();
 	  const int length = type->length ();

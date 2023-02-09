@@ -4908,7 +4908,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 
   if (TYPE_IS_REFERENCE (parm) && value != NULL)
     {
-      if (VALUE_LVAL (value) == not_lval)
+      if (value->lval () == not_lval)
 	{
 	  /* Rvalues should preferably bind to rvalue references or const
 	     lvalue references.  */

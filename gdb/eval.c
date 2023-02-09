@@ -1224,7 +1224,7 @@ eval_op_structop_struct (struct type *expect_type, struct expression *exp,
   struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    arg3 = value::zero (arg3->type (), VALUE_LVAL (arg3));
+    arg3 = value::zero (arg3->type (), arg3->lval ());
   return arg3;
 }
 
@@ -1280,7 +1280,7 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
   struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure pointer");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    arg3 = value::zero (arg3->type (), VALUE_LVAL (arg3));
+    arg3 = value::zero (arg3->type (), arg3->lval ());
   return arg3;
 }
 
@@ -1447,7 +1447,7 @@ eval_op_subscript (struct type *expect_type, struct expression *exp,
 	}
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value::zero (type->target_type (), VALUE_LVAL (arg1));
+	return value::zero (type->target_type (), arg1->lval ());
       else
 	return value_subscript (arg1, value_as_long (arg2));
     }
@@ -2590,7 +2590,7 @@ evaluate_subexp_for_address_base (struct expression *exp, enum noside noside,
       if (TYPE_IS_REFERENCE (type))
 	return value::zero (lookup_pointer_type (type->target_type ()),
 			   not_lval);
-      else if (VALUE_LVAL (x) == lval_memory || value_must_coerce_to_target (x))
+      else if (x->lval () == lval_memory || value_must_coerce_to_target (x))
 	return value::zero (lookup_pointer_type (x->type ()),
 			   not_lval);
       else
@@ -2875,7 +2875,7 @@ var_msym_value_operation::evaluate_for_cast (struct type *to_type,
   val = value_cast (to_type, val);
 
   /* Don't allow e.g. '&(int)var_with_no_debug_info'.  */
-  if (VALUE_LVAL (val) == lval_memory)
+  if (val->lval () == lval_memory)
     {
       if (val->lazy ())
 	val->fetch_lazy ();
@@ -2896,7 +2896,7 @@ var_value_operation::evaluate_for_cast (struct type *to_type,
   val = value_cast (to_type, val);
 
   /* Don't allow e.g. '&(int)var_with_no_debug_info'.  */
-  if (VALUE_LVAL (val) == lval_memory)
+  if (val->lval () == lval_memory)
     {
       if (val->lazy ())
 	val->fetch_lazy ();

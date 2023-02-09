@@ -149,14 +149,14 @@ static struct cmd_list_element *functionlist;
 
 value::~value ()
 {
-  if (VALUE_LVAL (this) == lval_computed)
+  if (this->lval () == lval_computed)
     {
       const struct lval_funcs *funcs = m_location.computed.funcs;
 
       if (funcs->free_closure)
 	funcs->free_closure (this);
     }
-  else if (VALUE_LVAL (this) == lval_xcallable)
+  else if (this->lval () == lval_xcallable)
     delete m_location.xm_worker;
 }
 
@@ -1262,9 +1262,9 @@ value::optimized_out ()
     {
       /* See if we can compute the result without fetching the
 	 value.  */
-      if (VALUE_LVAL (this) == lval_memory)
+      if (this->lval () == lval_memory)
 	return false;
-      else if (VALUE_LVAL (this) == lval_computed)
+      else if (this->lval () == lval_computed)
 	{
 	  const struct lval_funcs *funcs = m_location.computed.funcs;
 
@@ -1515,7 +1515,7 @@ value::copy () const
       gdb::copy (arg_view, val_contents);
     }
 
-  if (VALUE_LVAL (val) == lval_computed)
+  if (val->lval () == lval_computed)
     {
       const struct lval_funcs *funcs = val->m_location.computed.funcs;
 
@@ -1549,7 +1549,7 @@ make_cv_value (int cnst, int voltl, struct value *v)
 struct value *
 value::non_lval ()
 {
-  if (VALUE_LVAL (this) != not_lval)
+  if (this->lval () != not_lval)
     {
       struct type *enc_type = enclosing_type ();
       struct value *val = value::allocate (enc_type);
@@ -1568,7 +1568,7 @@ value::non_lval ()
 void
 value::force_lval (CORE_ADDR addr)
 {
-  gdb_assert (VALUE_LVAL (this) == not_lval);
+  gdb_assert (this->lval () == not_lval);
 
   write_memory (addr, contents_raw ().data (), type ()->length ());
   m_lval = lval_memory;
@@ -1626,13 +1626,13 @@ value::set_component_location (const struct value *whole)
          carry around both the parent value contents, and the contents of
          any dynamic fields within the parent.  This is a substantial
          change to how values work in GDB.  */
-      if (VALUE_LVAL (this) == lval_internalvar_component)
+      if (this->lval () == lval_internalvar_component)
 	{
 	  gdb_assert (lazy ());
 	  m_lval = lval_memory;
 	}
       else
-	gdb_assert (VALUE_LVAL (this) == lval_memory);
+	gdb_assert (this->lval () == lval_memory);
       set_address (TYPE_DATA_LOCATION_ADDR (type));
     }
 }
@@ -2159,7 +2159,7 @@ set_internalvar (struct internalvar *var, struct value *val)
       break;
 
     case TYPE_CODE_INTERNAL_FUNCTION:
-      gdb_assert (VALUE_LVAL (val) == lval_internalvar);
+      gdb_assert (val->lval () == lval_internalvar);
       new_kind = INTERNALVAR_FUNCTION;
       get_internalvar_function (VALUE_INTERNALVAR (val),
 				&new_data.fn.function);
@@ -2282,7 +2282,7 @@ value_internal_function_name (struct value *val)
   struct internal_function *ifn;
   int result;
 
-  gdb_assert (VALUE_LVAL (val) == lval_internalvar);
+  gdb_assert (val->lval () == lval_internalvar);
   result = get_internalvar_function (VALUE_INTERNALVAR (val), &ifn);
   gdb_assert (result);
 
@@ -2297,7 +2297,7 @@ call_internal_function (struct gdbarch *gdbarch,
   struct internal_function *ifn;
   int result;
 
-  gdb_assert (VALUE_LVAL (func) == lval_internalvar);
+  gdb_assert (func->lval () == lval_internalvar);
   result = get_internalvar_function (VALUE_INTERNALVAR (func), &ifn);
   gdb_assert (result);
 
@@ -2888,7 +2888,7 @@ value::primitive_field (LONGEST offset, int fieldno, struct type *arg_type)
       LONGEST boffset;
 
       /* Lazy register values with offsets are not supported.  */
-      if (VALUE_LVAL (this) == lval_register && lazy ())
+      if (this->lval () == lval_register && lazy ())
 	fetch_lazy ();
 
       /* We special case virtual inheritance here because this
@@ -2932,7 +2932,7 @@ value::primitive_field (LONGEST offset, int fieldno, struct type *arg_type)
 		 / (HOST_CHAR_BIT * unit_size));
 
       /* Lazy register values with offsets are not supported.  */
-      if (VALUE_LVAL (this) == lval_register && lazy ())
+      if (this->lval () == lval_register && lazy ())
 	fetch_lazy ();
 
       if (lazy ())
@@ -3526,7 +3526,7 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
 {
   struct value *v;
 
-  if (VALUE_LVAL (whole) == lval_memory && whole->lazy ())
+  if (whole->lval () == lval_memory && whole->lazy ())
     v = value::allocate_lazy (type);
   else
     {
@@ -3761,7 +3761,7 @@ value::fetch_lazy_register ()
      refer to the entire register.  */
   gdb_assert (offset () == 0);
 
-  while (VALUE_LVAL (new_val) == lval_register && new_val->lazy ())
+  while (new_val->lval () == lval_register && new_val->lazy ())
     {
       struct frame_id next_frame_id = VALUE_NEXT_FRAME_ID (new_val);
 
@@ -3796,7 +3796,7 @@ value::fetch_lazy_register ()
 	 sniffer trying to unwind), bypassing its validations.  In
 	 any case, it should always be an internal error to end up
 	 in this situation.  */
-      if (VALUE_LVAL (new_val) == lval_register
+      if (new_val->lval () == lval_register
 	  && new_val->lazy ()
 	  && VALUE_NEXT_FRAME_ID (new_val) == next_frame_id)
 	internal_error (_("infinite loop while fetching a register"));
@@ -3840,10 +3840,10 @@ value::fetch_lazy_register ()
 	  int i;
 	  gdb::array_view<const gdb_byte> buf = new_val->contents ();
 
-	  if (VALUE_LVAL (new_val) == lval_register)
+	  if (new_val->lval () == lval_register)
 	    gdb_printf (&debug_file, " register=%d",
 			VALUE_REGNUM (new_val));
-	  else if (VALUE_LVAL (new_val) == lval_memory)
+	  else if (new_val->lval () == lval_memory)
 	    gdb_printf (&debug_file, " address=%s",
 			paddress (gdbarch,
 				  new_val->address ()));
@@ -3883,11 +3883,11 @@ value::fetch_lazy ()
     }
   else if (bitsize ())
     fetch_lazy_bitfield ();
-  else if (VALUE_LVAL (this) == lval_memory)
+  else if (this->lval () == lval_memory)
     fetch_lazy_memory ();
-  else if (VALUE_LVAL (this) == lval_register)
+  else if (this->lval () == lval_register)
     fetch_lazy_register ();
-  else if (VALUE_LVAL (this) == lval_computed
+  else if (this->lval () == lval_computed
 	   && computed_funcs ()->read != NULL)
     computed_funcs ()->read (this);
   else

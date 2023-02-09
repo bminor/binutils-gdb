@@ -104,7 +104,7 @@ eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
       }
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value::zero (type->target_type (), VALUE_LVAL (arg1));
+    return value::zero (type->target_type (), arg1->lval ());
   else
     return value_subscript (arg1, value_as_long (arg2));
 }

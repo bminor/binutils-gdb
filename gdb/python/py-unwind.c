@@ -272,7 +272,7 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
     {
       struct value *user_reg_value
 	= value_of_user_reg (regnum, pending_frame->frame_info);
-      if (VALUE_LVAL (user_reg_value) == lval_register)
+      if (user_reg_value->lval () == lval_register)
 	regnum = VALUE_REGNUM (user_reg_value);
       if (regnum >= gdbarch_num_cooked_regs (pending_frame->gdbarch))
 	{

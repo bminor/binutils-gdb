@@ -2455,9 +2455,9 @@ ppc_linux_nat_target::num_memory_accesses (const std::vector<value_ref_ptr>
       struct value *v = iter.get ();
 
       /* Constants and values from the history are fine.  */
-      if (VALUE_LVAL (v) == not_lval || v->->deprecated_modifiable () == 0)
+      if (v->lval () == not_lval || v->->deprecated_modifiable () == 0)
 	continue;
-      else if (VALUE_LVAL (v) == lval_memory)
+      else if (v->lval () == lval_memory)
 	{
 	  /* A lazy memory lvalue is one that GDB never needed to fetch;
 	     we either just used its address (e.g., `a' in `a.b') or
@@ -2509,7 +2509,7 @@ ppc_linux_nat_target::check_condition (CORE_ADDR watch_addr,
     return 0;
 
   if (num_accesses_left == 1 && num_accesses_right == 0
-      && VALUE_LVAL (left_val) == lval_memory
+      && left_val->lval () == lval_memory
       && left_val->address () == watch_addr)
     {
       *data_value = value_as_long (right_val);
@@ -2519,7 +2519,7 @@ ppc_linux_nat_target::check_condition (CORE_ADDR watch_addr,
       *len = check_typedef (left_val->type ())->length ();
     }
   else if (num_accesses_left == 0 && num_accesses_right == 1
-	   && VALUE_LVAL (right_val) == lval_memory
+	   && right_val->lval () == lval_memory
 	   && right_val->address () == watch_addr)
     {
       *data_value = value_as_long (left_val);

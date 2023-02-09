@@ -1710,7 +1710,7 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 
 	if (!value->optimized_out () && value->entirely_available ())
 	  {
-	    if (VALUE_LVAL (value) == not_lval)
+	    if (value->lval () == not_lval)
 	      {
 		CORE_ADDR sp;
 		enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1723,13 +1723,13 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 		gdb_puts (paddress (gdbarch, sp));
 		gdb_printf ("\n");
 	      }
-	    else if (VALUE_LVAL (value) == lval_memory)
+	    else if (value->lval () == lval_memory)
 	      {
 		gdb_printf (" Previous frame's sp at ");
 		gdb_puts (paddress (gdbarch, value->address ()));
 		gdb_printf ("\n");
 	      }
-	    else if (VALUE_LVAL (value) == lval_register)
+	    else if (value->lval () == lval_register)
 	      {
 		gdb_printf (" Previous frame's sp in %s\n",
 			    gdbarch_register_name (gdbarch,

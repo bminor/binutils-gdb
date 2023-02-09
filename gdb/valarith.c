@@ -93,7 +93,7 @@ value_ptradd (struct value *arg1, LONGEST arg2)
 
   result = value_from_pointer (valptrtype,
 			       value_as_address (arg1) + sz * arg2);
-  if (VALUE_LVAL (result) != lval_internalvar)
+  if (result->lval () != lval_internalvar)
     result->set_component_location (arg1);
   return result;
 }
@@ -159,7 +159,7 @@ value_subscript (struct value *array, LONGEST index)
       if (!lowerbound.has_value ())
 	lowerbound = 0;
 
-      if (VALUE_LVAL (array) != lval_memory)
+      if (array->lval () != lval_memory)
 	return value_subscripted_rvalue (array, index, *lowerbound);
 
       gdb::optional<LONGEST> upperbound
@@ -235,7 +235,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index,
   if (index < lowerbound
       || (!array_upper_bound_undefined
 	  && elt_offs >= type_length_units (array_type))
-      || (VALUE_LVAL (array) != lval_memory && array_upper_bound_undefined))
+      || (array->lval () != lval_memory && array_upper_bound_undefined))
     {
       if (type_not_associated (array_type))
 	error (_("no such vector element (vector not associated)"));
@@ -532,7 +532,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 
 	      if (return_type == NULL)
 		error (_("Xmethod is missing return type."));
-	      return value::zero (return_type, VALUE_LVAL (arg1));
+	      return value::zero (return_type, arg1->lval ());
 	    }
 	  return argvec[0]->call_xmethod (argvec.slice (1));
 	}
@@ -541,7 +541,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	  struct type *return_type;
 
 	  return_type = check_typedef (argvec[0]->type ())->target_type ();
-	  return value::zero (return_type, VALUE_LVAL (arg1));
+	  return value::zero (return_type, arg1->lval ());
 	}
       return call_function_by_hand (argvec[0], NULL,
 				    argvec.slice (1, 2 - static_memfuncp));
@@ -645,7 +645,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 
 	      if (return_type == NULL)
 		error (_("Xmethod is missing return type."));
-	      return value::zero (return_type, VALUE_LVAL (arg1));
+	      return value::zero (return_type, arg1->lval ());
 	    }
 	  return argvec[0]->call_xmethod (argvec[1]);
 	}
@@ -654,7 +654,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	  struct type *return_type;
 
 	  return_type = check_typedef (argvec[0]->type ())->target_type ();
-	  return value::zero (return_type, VALUE_LVAL (arg1));
+	  return value::zero (return_type, arg1->lval ());
 	}
       return call_function_by_hand (argvec[0], NULL,
 				    argvec.slice (1, nargs));

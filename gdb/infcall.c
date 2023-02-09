@@ -343,7 +343,7 @@ find_function_addr (struct value *function,
 	  int found_descriptor = 0;
 
 	  funaddr = 0;	/* pacify "gcc -Werror" */
-	  if (VALUE_LVAL (function) == lval_memory)
+	  if (function->lval () == lval_memory)
 	    {
 	      CORE_ADDR nfunaddr;
 
