@@ -649,7 +649,8 @@ wild_sort (lang_wild_statement_type *wild,
 	 looking at the sections for this file.  */
 
       /* Find the correct node to append this section.  */
-      if (compare_section (sec->spec.sorted, section, (*tree)->section) < 0)
+      if (sec && sec->spec.sorted != none && sec->spec.sorted != by_none
+	  && compare_section (sec->spec.sorted, section, (*tree)->section) < 0)
 	tree = &((*tree)->left);
       else
 	tree = &((*tree)->right);
