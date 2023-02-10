@@ -33,6 +33,7 @@
 #include "ansidecl.h"
 #include "sframe-api.h"
 #include "sframe-backtrace-api.h"
+#include "sframe-backtrace-regs.h"
 
 #ifndef PT_SFRAME
 #define PT_SFRAME 0x6474e554		/* FIXME.  */
@@ -41,7 +42,7 @@
 #define _sf_printflike_(string_index, first_to_check) ATTRIBUTE_PRINTF (1, 2)
 
 static bool _sframe_unwind_debug;	/* Control for printing out debug info.  */
-static int no_of_entries = NUM_OF_DSOS;
+static const int no_of_entries = NUM_OF_DSOS;
 
 /* SFrame decode data for the main module or a DSO.  */
 struct sframe_decode_data
@@ -460,7 +461,7 @@ sframe_unwind (struct sframe_unwind_info *sf, void **ra_lst,
   sframe_decoder_ctx *ctx;
   int cfa_offset, rfp_offset, errnum, i, count;
   sframe_frame_row_entry fred, *frep = &fred;
-  uint64_t pc, rfp, rsp, cfi_vma;
+  uint64_t pc, rfp, rsp, ra, cfi_vma;
   ucontext_t context, *cp = &context;
 
   if (sf == NULL || ra_lst == NULL || ra_size == NULL)
@@ -477,18 +478,10 @@ sframe_unwind (struct sframe_unwind_info *sf, void **ra_lst,
     }
   sframe_bt_set_errno (errp, SFRAME_BT_OK);
 
-#if defined (__x86_64__)
-  pc = cp->uc_mcontext.gregs[REG_RIP];
-  rsp = cp->uc_mcontext.gregs[REG_RSP];
-  rfp = cp->uc_mcontext.gregs[REG_RBP];
-#elif defined (__aarch64__)
-#define UNWIND_AARCH64_X29		29	/* 64-bit frame pointer.  */
-#define UNWIND_AARCH64_X30		30	/* 64-bit link pointer.  */
-  pc = cp->uc_mcontext.pc;
-  rsp = cp->uc_mcontext.sp;
-  rfp = cp->uc_mcontext.regs[UNWIND_AARCH64_X29];
-  uint64_t ra = cp->uc_mcontext.regs[UNWIND_AARCH64_X30];
-#endif
+  pc = get_context_pc (cp);
+  rsp = get_context_rsp (cp);
+  rfp = get_context_rfp (cp);
+  ra = get_context_ra (cp);
 
   /* Load and set up the decoder.  */
   ctx = sframe_load_ctx (sf, pc);
