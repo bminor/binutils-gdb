@@ -29,8 +29,6 @@ proc test_ptype_internal_function {} {
 	if {$lang == "unknown"} {
 	    gdb_test "ptype \$_isvoid" \
 		"expression parsing not implemented for language \"Unknown\""
-	} elseif {$lang == "ada"} {
-	    gdb_test "ptype \$_isvoid" "<<internal function>>"
 	} else {
 	    gdb_test "ptype \$_isvoid" "<internal function>"
 	}
