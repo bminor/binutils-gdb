@@ -1242,6 +1242,11 @@ print_command_parse_format (const char **expp, const char *cmdname,
 void
 print_value (value *val, const value_print_options &opts)
 {
+  /* This setting allows large arrays to be printed by limiting the
+     number of elements that are loaded into GDB's memory; we only
+     need to load as many array elements as we plan to print.  */
+  scoped_array_length_limiting limit_large_arrays (opts.print_max);
+
   int histindex = record_latest_value (val);
 
   annotate_value_history_begin (histindex, value_type (val));
@@ -1301,6 +1306,11 @@ process_print_command_args (const char *args, value_print_options *print_opts,
 
   if (exp != nullptr && *exp)
     {
+      /* This setting allows large arrays to be printed by limiting the
+	 number of elements that are loaded into GDB's memory; we only
+	 need to load as many array elements as we plan to print.  */
+      scoped_array_length_limiting limit_large_arrays (print_opts->print_max);
+
       /* VOIDPRINT is true to indicate that we do want to print a void
 	 value, so invert it for parse_expression.  */
       expression_up expr = parse_expression (exp, nullptr, !voidprint);
@@ -1489,6 +1499,12 @@ output_command (const char *exp, int from_tty)
 
   get_formatted_print_options (&opts, format);
   opts.raw = fmt.raw;
+
+  /* This setting allows large arrays to be printed by limiting the
+     number of elements that are loaded into GDB's memory; we only
+     need to load as many array elements as we plan to print.  */
+  scoped_array_length_limiting limit_large_arrays (opts.print_max);
+
   print_formatted (val, fmt.size, &opts, gdb_stdout);
 
   annotate_value_end ();

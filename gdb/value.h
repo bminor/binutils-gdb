@@ -1228,4 +1228,21 @@ extern void finalize_values ();
    of floating-point, fixed-point, or integer type.  */
 extern gdb_mpq value_to_gdb_mpq (struct value *value);
 
+/* While an instance of this class is live, and array values that are
+   created, that are larger than max_value_size, will be restricted in size
+   to a particular number of elements.  */
+
+struct scoped_array_length_limiting
+{
+  /* Limit any large array values to only contain ELEMENTS elements.  */
+  scoped_array_length_limiting (int elements);
+
+  /* Restore the previous array value limit.  */
+  ~scoped_array_length_limiting ();
+
+private:
+  /* Used to hold the previous array value element limit.  */
+  gdb::optional<int> m_old_value;
+};
+
 #endif /* !defined (VALUE_H) */

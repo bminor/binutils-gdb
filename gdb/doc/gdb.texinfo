@@ -11759,6 +11759,14 @@ When @value{GDBN} starts, this limit is set to 200.
 Setting @var{number-of-elements} to @code{unlimited} or zero means
 that the number of elements to print is unlimited.
 
+When printing very large arrays, whose size is greater than
+@code{max-value-size} (@pxref{set max-value-size,,max-value-size}),
+if the @code{print elements} is set such that the size of the elements
+being printed is less than or equal to @code{max-value-size}, then
+@value{GDBN} will print the array (up to the @code{print elements} limit),
+and only @code{max-value-size} worth of data will be added into the value
+history (@pxref{Value History, ,Value History}).
+
 @item show print elements
 Display the number of elements of a large array that @value{GDBN} will print.
 
@@ -14174,6 +14182,7 @@ may indicate a value that is incorrectly large, this in turn may cause
 @value{GDBN} to try and allocate an overly large amount of memory.
 
 @table @code
+@anchor{set max-value-size}
 @kindex set max-value-size
 @item set max-value-size @var{bytes}
 @itemx set max-value-size unlimited

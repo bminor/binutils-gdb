@@ -44,6 +44,12 @@
   keyword already gave an error when used multiple times with the
   watch command, this remains unchanged.
 
+* The 'set print elements' setting now helps when printing large arrays.
+  If an array would otherwise exceed max-value-size, but 'print elements'
+  is set such that the size of elements to print is less than or equal
+  to 'max-value-size', GDB will now still print the array, however only
+  'max-value-size' worth of data will be added into the value history.
+
 * New commands
 
 maintenance print record-instruction [ N ]

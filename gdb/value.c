@@ -373,6 +373,14 @@ struct value
      treated pretty much the same, except not-saved registers have a
      different string representation and related error strings.  */
   std::vector<range> optimized_out;
+
+  /* This is only non-zero for values of TYPE_CODE_ARRAY and if the size of
+     the array in inferior memory is greater than max_value_size.  If these
+     conditions are met then, when the value is loaded from the inferior
+     GDB will only load a portion of the array into memory, and
+     limited_length will be set to indicate the length in octets that were
+     loaded from the inferior.  */
+  ULONGEST limited_length = 0;
 };
 
 /* See value.h.  */
@@ -1053,6 +1061,94 @@ check_type_length_before_alloc (const struct type *type)
     }
 }
 
+/* When this has a value, it is used to limit the number of array elements
+   of an array that are loaded into memory when an array value is made
+   non-lazy.  */
+static gdb::optional<int> array_length_limiting_element_count;
+
+/* See value.h.  */
+scoped_array_length_limiting::scoped_array_length_limiting (int elements)
+{
+  m_old_value = array_length_limiting_element_count;
+  array_length_limiting_element_count.emplace (elements);
+}
+
+/* See value.h.  */
+scoped_array_length_limiting::~scoped_array_length_limiting ()
+{
+  array_length_limiting_element_count = m_old_value;
+}
+
+/* Find the inner element type for ARRAY_TYPE.  */
+
+static struct type *
+find_array_element_type (struct type *array_type)
+{
+  array_type = check_typedef (array_type);
+  gdb_assert (array_type->code () == TYPE_CODE_ARRAY);
+
+  if (current_language->la_language == language_fortran)
+    while (array_type->code () == TYPE_CODE_ARRAY)
+      {
+	array_type = array_type->target_type ();
+	array_type = check_typedef (array_type);
+      }
+  else
+    {
+      array_type = array_type->target_type ();
+      array_type = check_typedef (array_type);
+    }
+
+  return array_type;
+}
+
+/* Return the limited length of ARRAY_TYPE, which must be of
+   TYPE_CODE_ARRAY.  This function can only be called when the global
+   ARRAY_LENGTH_LIMITING_ELEMENT_COUNT has a value.
+
+   The limited length of an array is the smallest of either (1) the total
+   size of the array type, or (2) the array target type multiplies by the
+   array_length_limiting_element_count.  */
+
+static ULONGEST
+calculate_limited_array_length (struct type *array_type)
+{
+  gdb_assert (array_length_limiting_element_count.has_value ());
+
+  array_type = check_typedef (array_type);
+  gdb_assert (array_type->code () == TYPE_CODE_ARRAY);
+
+  struct type *elm_type = find_array_element_type (array_type);
+  ULONGEST len = (elm_type->length ()
+		  * (*array_length_limiting_element_count));
+  len = std::min (len, array_type->length ());
+
+  return len;
+}
+
+/* Try to limit ourselves to only fetching the limited number of
+   elements.  However, if this limited number of elements still
+   puts us over max_value_size, then we still refuse it and
+   return failure here, which will ultimately throw an error.  */
+
+static bool
+set_limited_array_length (struct value *val)
+{
+  ULONGEST limit = val->limited_length;
+  ULONGEST len = value_type (val)->length ();
+
+  if (array_length_limiting_element_count.has_value ())
+    len = calculate_limited_array_length (value_type (val));
+
+  if (limit != 0 && len > limit)
+    len = limit;
+  if (len > max_value_size)
+    return false;
+
+  val->limited_length = max_value_size;
+  return true;
+}
+
 /* Allocate the contents of VAL if it has not been allocated yet.
    If CHECK_SIZE is true, then apply the usual max-value-size checks.  */
 
@@ -1061,10 +1157,26 @@ allocate_value_contents (struct value *val, bool check_size)
 {
   if (!val->contents)
     {
+      struct type *enclosing_type = value_enclosing_type (val);
+      ULONGEST len = enclosing_type->length ();
+
       if (check_size)
-	check_type_length_before_alloc (val->enclosing_type);
-      val->contents.reset
-	((gdb_byte *) xzalloc (val->enclosing_type->length ()));
+	{
+	  /* If we are allocating the contents of an array, which
+	     is greater in size than max_value_size, and there is
+	     an element limit in effect, then we can possibly try
+	     to load only a sub-set of the array contents into
+	     GDB's memory.  */
+	  if (value_type (val) == enclosing_type
+	      && value_type (val)->code () == TYPE_CODE_ARRAY
+	      && len > max_value_size
+	      && set_limited_array_length (val))
+	    len = val->limited_length;
+	  else
+	    check_type_length_before_alloc (enclosing_type);
+	}
+
+      val->contents.reset ((gdb_byte *) xzalloc (len));
     }
 }
 
@@ -1791,10 +1903,7 @@ value_copy (const value *arg)
   struct type *encl_type = value_enclosing_type (arg);
   struct value *val;
 
-  if (value_lazy (arg))
-    val = allocate_value_lazy (encl_type);
-  else
-    val = allocate_value (encl_type, false);
+  val = allocate_value_lazy (encl_type);
   val->type = arg->type;
   VALUE_LVAL (val) = arg->lval;
   val->location = arg->location;
@@ -1811,17 +1920,28 @@ value_copy (const value *arg)
   val->initialized = arg->initialized;
   val->unavailable = arg->unavailable;
   val->optimized_out = arg->optimized_out;
+  val->parent = arg->parent;
+  val->limited_length = arg->limited_length;
 
-  if (!value_lazy (val) && !value_entirely_optimized_out (val))
+  if (!value_lazy (val)
+      && !(value_entirely_optimized_out (val)
+	   || value_entirely_unavailable (val)))
     {
+      ULONGEST length = val->limited_length;
+      if (length == 0)
+	length = value_enclosing_type (val)->length ();
+
       gdb_assert (arg->contents != nullptr);
-      ULONGEST length = value_enclosing_type (arg)->length ();
       const auto &arg_view
 	= gdb::make_array_view (arg->contents.get (), length);
-      copy (arg_view, value_contents_all_raw (val));
+
+      allocate_value_contents (val, false);
+      gdb::array_view<gdb_byte> val_contents
+	= value_contents_all_raw (val).slice (0, length);
+
+      copy (arg_view, val_contents);
     }
 
-  val->parent = arg->parent;
   if (VALUE_LVAL (val) == lval_computed)
     {
       const struct lval_funcs *funcs = val->location.computed.funcs;
@@ -1955,12 +2075,34 @@ set_value_component_location (struct value *component,
 int
 record_latest_value (struct value *val)
 {
+  struct type *enclosing_type = value_enclosing_type (val);
+  struct type *type = value_type (val);
+
   /* We don't want this value to have anything to do with the inferior anymore.
      In particular, "set $1 = 50" should not affect the variable from which
      the value was taken, and fast watchpoints should be able to assume that
      a value on the value history never changes.  */
   if (value_lazy (val))
-    value_fetch_lazy (val);
+    {
+      /* We know that this is a _huge_ array, any attempt to fetch this
+	 is going to cause GDB to throw an error.  However, to allow
+	 the array to still be displayed we fetch its contents up to
+	 `max_value_size' and mark anything beyond "unavailable" in
+	 the history.  */
+      if (type->code () == TYPE_CODE_ARRAY
+	  && type->length () > max_value_size
+	  && array_length_limiting_element_count.has_value ()
+	  && enclosing_type == type
+	  && calculate_limited_array_length (type) <= max_value_size)
+	val->limited_length = max_value_size;
+
+      value_fetch_lazy (val);
+    }
+
+  ULONGEST limit = val->limited_length;
+  if (limit != 0)
+    mark_value_bytes_unavailable (val, limit,
+				  enclosing_type->length () - limit);
 
   /* Mark the value as recorded in the history for the availability check.  */
   val->in_history = true;
@@ -4060,10 +4202,23 @@ value_fetch_lazy_memory (struct value *val)
   CORE_ADDR addr = value_address (val);
   struct type *type = check_typedef (value_enclosing_type (val));
 
-  if (type->length ())
-      read_value_memory (val, 0, value_stack (val),
-			 addr, value_contents_all_raw (val).data (),
-			 type_length_units (type));
+  /* Figure out how much we should copy from memory.  Usually, this is just
+     the size of the type, but, for arrays, we might only be loading a
+     small part of the array (this is only done for very large arrays).  */
+  int len = 0;
+  if (val->limited_length > 0)
+    {
+      gdb_assert (value_type (val)->code () == TYPE_CODE_ARRAY);
+      len = val->limited_length;
+    }
+  else if (type->length () > 0)
+    len = type_length_units (type);
+
+  gdb_assert (len >= 0);
+
+  if (len > 0)
+    read_value_memory (val, 0, value_stack (val), addr,
+		       value_contents_all_raw (val).data (), len);
 }
 
 /* Helper for value_fetch_lazy when the value is in a register.  */

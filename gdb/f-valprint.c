@@ -261,10 +261,20 @@ public:
     size_t dim_indx = m_dimension - 1;
     struct type *elt_type_prev = m_elt_type_prev;
     LONGEST elt_off_prev = m_elt_off_prev;
-    bool repeated = (m_options->repeat_count_threshold < UINT_MAX
-		     && elt_type_prev != nullptr
-		     && value_contents_eq (m_val, elt_off_prev, m_val, elt_off,
-					   elt_type->length ()));
+    bool repeated = false;
+
+    if (m_options->repeat_count_threshold < UINT_MAX
+	&& elt_type_prev != nullptr)
+      {
+	struct value *e_val = value_from_component (m_val, elt_type, elt_off);
+	struct value *e_prev = value_from_component (m_val, elt_type,
+						     elt_off_prev);
+	repeated = ((value_entirely_available (e_prev)
+		     && value_entirely_available (e_val)
+		     && value_contents_eq (e_prev, e_val))
+		    || (value_entirely_unavailable (e_prev)
+			&& value_entirely_unavailable (e_val)));
+      }
 
     if (repeated)
       m_nrepeats++;
@@ -333,7 +343,7 @@ private:
      have been sliced and we do not want to compare any memory contents
      present between the slices requested.  */
   bool
-  dimension_contents_eq (const struct value *val, struct type *type,
+  dimension_contents_eq (struct value *val, struct type *type,
 			 LONGEST offset1, LONGEST offset2)
   {
     if (type->code () == TYPE_CODE_ARRAY
@@ -362,8 +372,16 @@ private:
 	return true;
       }
     else
-      return value_contents_eq (val, offset1, val, offset2,
-				type->length ());
+      {
+	struct value *e_val1 = value_from_component (val, type, offset1);
+	struct value *e_val2 = value_from_component (val, type, offset2);
+
+	return ((value_entirely_available (e_val1)
+		 && value_entirely_available (e_val2)
+		 && value_contents_eq (e_val1, e_val2))
+		|| (value_entirely_unavailable (e_val1)
+		    && value_entirely_unavailable (e_val2)));
+      }
   }
 
   /* The number of elements printed so far.  */

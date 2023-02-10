@@ -2018,13 +2018,21 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	 UINT_MAX (unlimited).  */
       if (options->repeat_count_threshold < UINT_MAX)
 	{
+	  bool unavailable = value_entirely_unavailable (element);
+	  bool available = value_entirely_available (element);
+
 	  while (rep1 < len)
 	    {
 	      struct value *rep_elt
 		= value_from_component_bitsize (val, elttype,
 						rep1 * bit_stride,
 						bit_stride);
-	      if (!value_contents_eq (element, rep_elt))
+	      bool repeated = ((available
+				&& value_entirely_available (rep_elt)
+				&& value_contents_eq (element, rep_elt))
+			       || (unavailable
+				   && value_entirely_unavailable (rep_elt)));
+	      if (!repeated)
 		break;
 	      ++reps;
 	      ++rep1;
