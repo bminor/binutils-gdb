@@ -82,6 +82,9 @@ proc do_test { with_probes } {
 	gdb_assert { !$have_longjmp_probe }
     }
 
+    # When using these line numbers in break linespecs, prefix each of these
+    # with "$subdir/$srcfile:" to avoid referring to a glibc file when stopped
+    # in __libc_siglongjmp or similar.
     set bp_miss_step_1 [gdb_get_line_number "miss_step_1"]
     set bp_miss_step_2 [gdb_get_line_number "miss_step_2"]
 
@@ -104,13 +107,13 @@ proc do_test { with_probes } {
 	with_test_prefix setup {
 	    delete_breakpoints
 
-	    gdb_test "break $bp_start_test_1" \
+	    gdb_test "break $::subdir/$::srcfile:$bp_start_test_1" \
 		"Breakpoint.*at.* file .*$::srcfile, line.*$bp_start_test_1.*" \
 		"breakpoint at pattern start"
 	    gdb_test "continue" "patt1.*" "continue to breakpoint at pattern start"
 
 	    # set safe-net break
-	    gdb_test "break $bp_miss_step_1" \
+	    gdb_test "break $::subdir/$::srcfile:$bp_miss_step_1" \
 		"Breakpoint.*at.* file .*$::srcfile, line.*$bp_miss_step_1.*" \
 		"breakpoint at safety net"
 	}
@@ -151,13 +154,13 @@ proc do_test { with_probes } {
 	with_test_prefix setup {
 	    delete_breakpoints
 
-	    gdb_test "break $bp_start_test_2" \
+	    gdb_test "break $::subdir/$::srcfile:$bp_start_test_2" \
 		"Breakpoint.*at.* file .*$::srcfile, line.*$bp_start_test_2.*" \
 		"breakpoint at pattern start"
 	    gdb_test "continue" "patt2.*" "continue to breakpoint at pattern start"
 
 	    # set safe-net break
-	    gdb_test "break $bp_miss_step_2" \
+	    gdb_test "break $::subdir/$::srcfile:$bp_miss_step_2" \
 		"Breakpoint.*at.* file .*$::srcfile, line.*$bp_miss_step_2.*" \
 		"breakpoint at safety net"
 	}
@@ -198,7 +201,7 @@ proc do_test { with_probes } {
 	with_test_prefix setup {
 	    delete_breakpoints
 
-	    gdb_test "break $bp_start_test_3" \
+	    gdb_test "break $::subdir/$::srcfile:$bp_start_test_3" \
 		"Breakpoint.*at.* file .*$::srcfile, line.*$bp_start_test_3.*" \
 		"breakpoint at pattern start"
 	    gdb_test "continue" "patt3.*" "continue to breakpoint at pattern start"
