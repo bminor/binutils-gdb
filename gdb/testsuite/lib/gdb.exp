@@ -1395,6 +1395,8 @@ proc gdb_test_multiline { name args } {
 #   have any effect if -prompt is specified.
 # -lbl specifies that line-by-line matching will be used.
 # -nopass specifies that a PASS should not be issued.
+# -nonl specifies that no \r\n sequence is expected between PATTERN
+#   and the gdb prompt.
 #
 # Returns:
 #    1 if the test failed,
@@ -1410,6 +1412,7 @@ proc gdb_test { args } {
 	{no-prompt-anchor}
 	{lbl}
 	{nopass}
+	{nonl}
     }
 
     lassign $args command pattern message question response
@@ -1424,12 +1427,13 @@ proc gdb_test { args } {
     }
 
     set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
+    set nl [expr ${nonl} ? {""} : {"\[\r\n\]+"}]
 
     set saw_question 0
 
     set user_code {}
     lappend user_code {
-	-re "\[\r\n\]*(?:$pattern)\[\r\n\]+$prompt" {
+	-re "\[\r\n\]*(?:$pattern)$nl$prompt" {
 	    if { $question != "" & !$saw_question} {
 		fail $message
 	    } elseif {!$nopass} {
