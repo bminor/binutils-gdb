@@ -378,6 +378,7 @@ cooked_index_shard::do_finalize ()
 		  entry->canonical = canon_name.get ();
 		  m_names.push_back (std::move (canon_name));
 		}
+	      *slot = entry;
 	    }
 	  else
 	    {
