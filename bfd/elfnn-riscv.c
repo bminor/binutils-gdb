@@ -4754,9 +4754,9 @@ bfd_elfNN_riscv_set_data_segment_info (struct bfd_link_info *info,
 
 /* Relax a section.
 
-   Pass 0: Shortens code sequences for LUI/CALL/TPREL/PCREL relocs.
-   Pass 1: Deletes the bytes that PCREL relaxation in pass 0 made obsolete.
-   Pass 2: Which cannot be disabled, handles code alignment directives.  */
+   Pass 0: Shortens code sequences for LUI/CALL/TPREL/PCREL relocs and
+	   deletes the obsolete bytes.
+   Pass 1: Which cannot be disabled, handles code alignment directives.  */
 
 static bool
 _bfd_riscv_relax_section (bfd *abfd, asection *sec,
