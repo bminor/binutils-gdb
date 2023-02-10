@@ -2135,16 +2135,15 @@ operand_size_match (const insn_template *t)
     return match;
 
   /* Check reverse.  */
-  gas_assert ((i.operands >= 2 && i.operands <= 3)
-	      || t->opcode_modifier.vexsources);
+  gas_assert (i.operands >= 2);
 
   for (j = 0; j < i.operands; j++)
     {
       unsigned int given = i.operands - j - 1;
 
-      /* For 4-operand and XOP insns VEX.W controls just the first two
+      /* For FMA4 and XOP insns VEX.W controls just the first two
 	 register operands.  */
-      if (t->opcode_modifier.vexsources || t->cpu_flags.bitfield.cpuxop)
+      if (t->cpu_flags.bitfield.cpufma4 || t->cpu_flags.bitfield.cpuxop)
 	given = j < 2 ? 1 - j : j;
 
       if (t->operand_types[j].bitfield.class == Reg
@@ -4665,7 +4664,7 @@ load_insn_p (void)
 
   /* Check fake imm8 operand and 3 source operands.  */
   if ((i.tm.opcode_modifier.immext
-       || i.tm.opcode_modifier.vexsources == VEX3SOURCES)
+       || i.reg_operands + i.mem_operands == 4)
       && i.types[dest].bitfield.imm8)
     dest--;
 
@@ -6933,7 +6932,7 @@ match_template (char mnem_suffix)
 	      if (!(size_match & MATCH_REVERSE))
 		continue;
 	      /* Try reversing direction of operands.  */
-	      j = t->opcode_modifier.vexsources
+	      j = t->cpu_flags.bitfield.cpufma4
 		  || t->cpu_flags.bitfield.cpuxop ? 1 : i.operands - 1;
 	      overlap0 = operand_type_and (i.types[0], operand_types[j]);
 	      overlap1 = operand_type_and (i.types[j], operand_types[0]);
@@ -6968,7 +6967,7 @@ match_template (char mnem_suffix)
 		      && (intel_syntax || intel_mnemonic))
 		    found_reverse_match |= Opcode_FloatR;
 		}
-	      else if (t->opcode_modifier.vexsources
+	      else if (t->cpu_flags.bitfield.cpufma4
 		       || t->cpu_flags.bitfield.cpuxop)
 		{
 		  found_reverse_match = Opcode_VexW;
@@ -7930,7 +7929,6 @@ process_operands (void)
       if (i.tm.operand_types[0].bitfield.instance == Accum
 	  && i.tm.operand_types[0].bitfield.xmmword)
 	{
-	  gas_assert (i.tm.opcode_modifier.vexsources == VEX3SOURCES);
 	  /* Keep xmm0 for instructions with VEX prefix and 3
 	     sources.  */
 	  i.tm.operand_types[0].bitfield.instance = InstanceNone;
@@ -7941,9 +7939,7 @@ process_operands (void)
 
       if (i.tm.opcode_modifier.operandconstraint == IMPLICIT_1ST_XMM0)
 	{
-	  gas_assert ((MAX_OPERANDS - 1) > dupl
-		      && (i.tm.opcode_modifier.vexsources
-			  == VEX3SOURCES));
+	  gas_assert ((MAX_OPERANDS - 1) > dupl);
 
 	  /* Add the implicit xmm0 for instructions with VEX prefix
 	     and 3 sources.  */
@@ -8168,9 +8164,8 @@ build_modrm_byte (void)
 {
   const reg_entry *default_seg = NULL;
   unsigned int source, dest;
-  int vex_3_sources;
+  bool vex_3_sources = (i.reg_operands + i.mem_operands == 4);
 
-  vex_3_sources = i.tm.opcode_modifier.vexsources == VEX3SOURCES;
   if (vex_3_sources)
     {
       unsigned int nds, reg_slot;
@@ -8186,9 +8181,7 @@ build_modrm_byte (void)
 	 ZMM register.
 	 2. 4 operands: 4 register operands or 3 register operands
 	 plus 1 memory operand, with VexXDS.  */
-      gas_assert ((i.reg_operands == 4
-		   || (i.reg_operands == 3 && i.mem_operands == 1))
-		  && i.tm.opcode_modifier.vexvvvv == VEXXDS
+      gas_assert (i.tm.opcode_modifier.vexvvvv == VEXXDS
 		  && i.tm.opcode_modifier.vexw
 		  && i.tm.operand_types[dest].bitfield.class == RegSIMD);
 

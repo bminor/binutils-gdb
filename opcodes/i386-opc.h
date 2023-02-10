@@ -617,12 +617,6 @@ enum
 #define PREFIX_0XF3	2
 #define PREFIX_0XF2	3
   OpcodePrefix,
-  /* number of VEX source operands:
-     0: <= 2 source operands.
-     2: 3 source operands.
-   */
-#define VEX3SOURCES	2
-  VexSources,
   /* Instruction with a mandatory SIB byte:
 	1: 128bit vector register.
 	2: 256bit vector register.
@@ -736,7 +730,6 @@ typedef struct i386_opcode_modifier
   unsigned int vexvvvv:2;
   unsigned int vexw:2;
   unsigned int opcodeprefix:2;
-  unsigned int vexsources:2;
   unsigned int sib:3;
   unsigned int sse2avx:1;
   unsigned int evex:3;
