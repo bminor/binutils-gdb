@@ -33,8 +33,9 @@
    source file path is `/my/source/foo.c`, then SRC_PATH should be
    `/my/build/../source/foo.c`.
 
-   If the file is successfully retrieved, its path on the local machine
-   is stored in DESTNAME.  If GDB is not built with debuginfod, this
+   If the file is successfully retrieved, return a file descriptor and store
+   the file's local path in DESTNAME.  If unsuccessful, print an error message
+   and return a negative errno.  If GDB is not built with debuginfod, this
    function returns -ENOSYS.  */
 
 extern scoped_fd
@@ -51,8 +52,9 @@ debuginfod_source_query (const unsigned char *build_id,
    FILENAME should be the name or path of the main binary associated with
    the separate debug info.  It is used for printing messages to the user.
 
-   If the file is successfully retrieved, its path on the local machine
-   is stored in DESTNAME.  If GDB is not built with debuginfod, this
+   If the file is successfully retrieved, return a file descriptor and store
+   the file's local path in DESTNAME.  If unsuccessful, print an error message
+   and return a negative errno.  If GDB is not built with debuginfod, this
    function returns -ENOSYS.  */
 
 extern scoped_fd
@@ -69,8 +71,9 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
    FILENAME should be the name or path associated with the executable.
    It is used for printing messages to the user.
 
-   If the file is successfully retrieved, its path on the local machine
-   is stored in DESTNAME.  If GDB is not built with debuginfod, this
+   If the file is successfully retrieved, return a file descriptor and store
+   the file's local path in DESTNAME.  If unsuccessful, print an error message
+   and return a negative errno.  If GDB is not built with debuginfod, this
    function returns -ENOSYS.  */
 
 extern scoped_fd debuginfod_exec_query (const unsigned char *build_id,

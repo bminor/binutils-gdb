@@ -95,7 +95,7 @@ source_cache::get_plain_source_lines (struct symtab *s,
 {
   scoped_fd desc (open_source_file (s));
   if (desc.get () < 0)
-    perror_with_name (symtab_to_filename_for_display (s));
+    perror_with_name (symtab_to_filename_for_display (s), -desc.get ());
 
   struct stat st;
   if (fstat (desc.get (), &st) < 0)

@@ -67,7 +67,8 @@ extern void init_source_path (void);
      The caller is responsible for freeing FULLNAME.
 
    On Failure
-     An invalid file descriptor is returned (the return value is negative).
+     An invalid file descriptor is returned.  The value of this file
+     descriptor is a negative errno indicating the reason for the failure.
      FULLNAME is set to NULL.  */
 extern scoped_fd find_and_open_source (const char *filename,
 				       const char *dirname,
@@ -81,7 +82,7 @@ extern gdb::unique_xmalloc_ptr<char> find_source_or_rewrite
      (const char *filename, const char *dirname);
 
 /* Open a source file given a symtab S.  Returns a file descriptor or
-   negative number for error.  */
+   negative errno indicating the reason for the failure.  */
 extern scoped_fd open_source_file (struct symtab *s);
 
 extern gdb::unique_xmalloc_ptr<char> rewrite_source_path (const char *path);

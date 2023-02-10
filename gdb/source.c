@@ -1069,7 +1069,7 @@ find_and_open_source (const char *filename,
      the attempt to read this source file failed.  GDB will then display
      the filename and line number instead.  */
   if (!source_open)
-    return scoped_fd (-1);
+    return scoped_fd (-ECANCELED);
 
   /* Quick way out if we already know its full name.  */
   if (*fullname)
@@ -1160,11 +1160,15 @@ find_and_open_source (const char *filename,
 			OPEN_MODE, fullname);
     }
 
+  /* If the file wasn't found, then openp will have set errno accordingly.  */
+  if (result < 0)
+    result = -errno;
+
   return scoped_fd (result);
 }
 
 /* Open a source file given a symtab S.  Returns a file descriptor or
-   negative number for error.  
+   negative errno for error.
    
    This function is a convenience function to find_and_open_source.  */
 
@@ -1172,7 +1176,7 @@ scoped_fd
 open_source_file (struct symtab *s)
 {
   if (!s)
-    return scoped_fd (-1);
+    return scoped_fd (-EINVAL);
 
   gdb::unique_xmalloc_ptr<char> fullname (s->fullname);
   s->fullname = NULL;
@@ -1200,10 +1204,21 @@ open_source_file (struct symtab *s)
 
 	  /* Query debuginfod for the source file.  */
 	  if (build_id != nullptr && !srcpath.empty ())
-	    fd = debuginfod_source_query (build_id->data,
-					  build_id->size,
-					  srcpath.c_str (),
-					  &fullname);
+	    {
+	      scoped_fd query_fd
+		= debuginfod_source_query (build_id->data,
+					   build_id->size,
+					   srcpath.c_str (),
+					   &fullname);
+
+	      /* Don't return a negative errno from debuginfod_source_query.
+		 It handles the reporting of its own errors.  */
+	      if (query_fd.get () >= 0)
+		{
+		  s->fullname = fullname.release ();
+		  return query_fd;
+		}
+	    }
 	}
     }
 
@@ -1306,6 +1321,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 			 print_source_lines_flags flags)
 {
   bool noprint = false;
+  int errcode = ENOENT;
   int nlines = stopline - line;
   struct ui_out *uiout = current_uiout;
 
@@ -1336,7 +1352,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  scoped_fd desc = open_source_file (s);
 	  last_source_error = desc.get () < 0;
 	  if (last_source_error)
-	    noprint = true;
+	    {
+	      noprint = true;
+	      errcode = -desc.get ();
+	    }
 	}
     }
   else
@@ -1354,7 +1373,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  char *name = (char *) alloca (len);
 
 	  xsnprintf (name, len, "%d\t%s", line, filename);
-	  print_sys_errmsg (name, errno);
+	  print_sys_errmsg (name, errcode);
 	}
       else
 	{
@@ -1627,7 +1646,8 @@ search_command_helper (const char *regex, int from_tty, bool forward)
 
   scoped_fd desc (open_source_file (loc->symtab ()));
   if (desc.get () < 0)
-    perror_with_name (symtab_to_filename_for_display (loc->symtab ()));
+    perror_with_name (symtab_to_filename_for_display (loc->symtab ()),
+		      -desc.get ());
 
   int line = (forward
 	      ? last_line_listed + 1
