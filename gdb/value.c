@@ -1034,29 +1034,40 @@ check_type_length_before_alloc (const struct type *type)
     }
 }
 
-/* Allocate the contents of VAL if it has not been allocated yet.  */
+/* Allocate the contents of VAL if it has not been allocated yet.
+   If CHECK_SIZE is true, then apply the usual max-value-size checks.  */
 
 static void
-allocate_value_contents (struct value *val)
+allocate_value_contents (struct value *val, bool check_size)
 {
   if (!val->contents)
     {
-      check_type_length_before_alloc (val->enclosing_type);
+      if (check_size)
+	check_type_length_before_alloc (val->enclosing_type);
       val->contents.reset
 	((gdb_byte *) xzalloc (val->enclosing_type->length ()));
     }
 }
 
-/* Allocate a  value  and its contents for type TYPE.  */
+/* Allocate a value and its contents for type TYPE.  If CHECK_SIZE is true,
+   then apply the usual max-value-size checks.  */
+
+static struct value *
+allocate_value (struct type *type, bool check_size)
+{
+  struct value *val = allocate_value_lazy (type);
+
+  allocate_value_contents (val, check_size);
+  val->lazy = 0;
+  return val;
+}
+
+/* Allocate a value and its contents for type TYPE.  */
 
 struct value *
 allocate_value (struct type *type)
 {
-  struct value *val = allocate_value_lazy (type);
-
-  allocate_value_contents (val);
-  val->lazy = 0;
-  return val;
+  return allocate_value (type, true);
 }
 
 /* Allocate a  value  that has the correct length
@@ -1169,7 +1180,7 @@ value_contents_raw (struct value *value)
   struct gdbarch *arch = get_value_arch (value);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
-  allocate_value_contents (value);
+  allocate_value_contents (value, true);
 
   ULONGEST length = value_type (value)->length ();
   return gdb::make_array_view
@@ -1179,7 +1190,7 @@ value_contents_raw (struct value *value)
 gdb::array_view<gdb_byte>
 value_contents_all_raw (struct value *value)
 {
-  allocate_value_contents (value);
+  allocate_value_contents (value, true);
 
   ULONGEST length = value_enclosing_type (value)->length ();
   return gdb::make_array_view (value->contents.get (), length);
@@ -1752,9 +1763,8 @@ value_release_to_mark (const struct value *mark)
   return result;
 }
 
-/* Return a copy of the value ARG.
-   It contains the same contents, for same memory address,
-   but it's a different block of storage.  */
+/* Return a copy of the value ARG.  It contains the same contents,
+   for the same memory address, but it's a different block of storage.  */
 
 struct value *
 value_copy (const value *arg)
@@ -1765,7 +1775,7 @@ value_copy (const value *arg)
   if (value_lazy (arg))
     val = allocate_value_lazy (encl_type);
   else
-    val = allocate_value (encl_type);
+    val = allocate_value (encl_type, false);
   val->type = arg->type;
   VALUE_LVAL (val) = arg->lval;
   val->location = arg->location;
@@ -4162,7 +4172,7 @@ void
 value_fetch_lazy (struct value *val)
 {
   gdb_assert (value_lazy (val));
-  allocate_value_contents (val);
+  allocate_value_contents (val, true);
   /* A value is either lazy, or fully fetched.  The
      availability/validity is only established as we try to fetch a
      value.  */

@@ -39,6 +39,11 @@ def A_geta(obj):
     return obj["a"]
 
 
+def A_getarray(obj):
+    print("From Python <A_getarray>:")
+    return obj["array"]
+
+
 def A_getarrayind(obj, index):
     print("From Python <A_getarrayind>:")
     return obj["array"][index]
@@ -48,12 +53,18 @@ def A_indexoper(obj, index):
     return obj["array"][index].reference_value()
 
 
+def B_getarray(obj):
+    print("From Python <B_getarray>:")
+    return obj["array"].const_value()
+
+
 def B_indexoper(obj, index):
     return obj["array"][index].const_value().reference_value()
 
 
 type_A = gdb.parse_and_eval("(dop::A *) 0").type.target()
 type_B = gdb.parse_and_eval("(dop::B *) 0").type.target()
+type_array = gdb.parse_and_eval("(int[10] *) 0").type.target()
 type_int = gdb.parse_and_eval("(int *) 0").type.target()
 
 
@@ -211,10 +222,16 @@ global_dm_list = [
     SimpleXMethodMatcher(r"plus_plus_A", r"^dop::A$", r"operator\+\+", plus_plus_A),
     SimpleXMethodMatcher(r"A_geta", r"^dop::A$", r"^geta$", A_geta),
     SimpleXMethodMatcher(
+        r"A_getarray", r"^dop::A$", r"^getarray$", A_getarray, type_array
+    ),
+    SimpleXMethodMatcher(
         r"A_getarrayind", r"^dop::A$", r"^getarrayind$", A_getarrayind, type_int
     ),
     SimpleXMethodMatcher(
         r"A_indexoper", r"^dop::A$", r"operator\[\]", A_indexoper, type_int
+    ),
+    SimpleXMethodMatcher(
+        r"B_getarray", r"^dop::B$", r"^getarray$", B_getarray, type_array
     ),
     SimpleXMethodMatcher(
         r"B_indexoper", r"^dop::B$", r"operator\[\]", B_indexoper, type_int

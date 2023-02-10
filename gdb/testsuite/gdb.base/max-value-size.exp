@@ -53,6 +53,9 @@ proc do_value_printing { max_value_size test_prefix } {
 	    gdb_test "p/d one_hundred" " = \\{0 <repeats 100 times>\\}"
 	}
 	gdb_test "p/d one_hundred \[99\]" " = 0"
+	# Verify that accessing value history is undisturbed.
+	gdb_test "p/d \$2" " = \\{0 <repeats 100 times>\\}"
+	gdb_test "p/d \$2 \[99\]" " = 0"
     }
 }
 
