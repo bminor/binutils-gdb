@@ -52,6 +52,9 @@ gdb_test "p a_geta" ".* = 1" "before: a_geta 1"
 gdb_test "p ++a1" "No symbol.*" "before: ++a1"
 gdb_test "p a1.getarrayind(5)" "Couldn't find method.*" \
   "before: a1.getarrayind(5)"
+gdb_test "ptype a1.getarrayind" \
+    "There is no member or method named getarrayind\\." \
+    "before: ptype a1.getarrayind"
 
 gdb_test "p a_ptr->geta()" ".* = 60" "before: a_ptr->geta()"
 gdb_test "p b_geta" ".* = 1" "before: b_geta 1"
@@ -97,6 +100,10 @@ gdb_test "p a1.geta()" "From Python <A_geta>.*5" "after: a1.geta()"
 gdb_test "p ++a1" "From Python <plus_plus_A>.*6" "after: ++a1"
 gdb_test "p a1.getarrayind(5)" "From Python <A_getarrayind>.*5" \
   "after: a1.getarrayind(5)"
+gdb_test "ptype a1.getarrayind" \
+  "There is no member or method named getarrayind\\." \
+  "after: ptype a1.getarrayind"
+
 gdb_test "p a1\[6\]" ".*int &.*6" "after a1\[\]"
 gdb_test "p b1\[7\]" ".*const int &.*7" "after b1\[\]"
 # Note the following test.  Xmethods on dynamc types are not looked up
