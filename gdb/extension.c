@@ -647,14 +647,6 @@ static int quit_flag;
 static const struct extension_language_defn *active_ext_lang
   = &extension_language_gdb;
 
-/* Return the currently active extension language.  */
-
-const struct extension_language_defn *
-get_active_ext_lang (void)
-{
-  return active_ext_lang;
-}
-
 /* Install a SIGINT handler.  */
 
 static void

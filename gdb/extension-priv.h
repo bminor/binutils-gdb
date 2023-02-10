@@ -303,8 +303,6 @@ struct active_ext_lang_state
   struct signal_handler sigint_handler;
 };
 
-extern const struct extension_language_defn *get_active_ext_lang (void);
-
 extern struct active_ext_lang_state *set_active_ext_lang
   (const struct extension_language_defn *);
 
