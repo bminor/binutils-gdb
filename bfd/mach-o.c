@@ -526,6 +526,15 @@ bfd_mach_o_section_get_nbr_indirect (bfd *abfd, bfd_mach_o_section *sec)
 {
   unsigned int elsz;
 
+  /* FIXME: This array is set by the assembler but does not seem to be
+     set anywhere for objcopy.  Since bfd_mach_o_build_dysymtab will
+     not fill in output bfd_mach_o_dysymtab_command indirect_syms when
+     this array is NULL we may as well return zero for the size.
+     This is enough to stop objcopy allocating huge amounts of memory
+     for indirect symbols in fuzzed object files.  */
+  if (sec->indirect_syms == NULL)
+    return 0;
+
   elsz = bfd_mach_o_section_get_entry_size (abfd, sec);
   if (elsz == 0)
     return 0;
