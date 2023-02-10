@@ -439,9 +439,9 @@ frame_id::to_string () const
   return res;
 }
 
-/* Return a string representation of TYPE.  */
+/* See frame.h.  */
 
-static const char *
+const char *
 frame_type_str (frame_type type)
 {
   switch (type)

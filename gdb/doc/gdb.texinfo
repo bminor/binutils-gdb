@@ -40986,6 +40986,10 @@ with the DWARF frame unwinders enabled.
 If DWARF frame unwinders are not supported for a particular target
 architecture, then enabling this flag does not cause them to be used.
 
+@kindex maint info frame-unwinders
+@item maint info frame-unwinders
+List the frame unwinders currently in effect, starting with the highest priority.
+
 @kindex maint set worker-threads
 @kindex maint show worker-threads
 @item maint set worker-threads

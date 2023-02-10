@@ -203,6 +203,10 @@ enum frame_type
   SENTINEL_FRAME
 };
 
+/* Return a string representation of TYPE.  */
+
+extern const char *frame_type_str (frame_type type);
+
 /* A wrapper for "frame_info *".  frame_info objects are invalidated
    whenever reinit_frame_cache is called.  This class arranges to
    invalidate the pointer when appropriate.  This is done to help

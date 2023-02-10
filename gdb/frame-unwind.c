@@ -28,6 +28,7 @@
 #include "target.h"
 #include "gdbarch.h"
 #include "dwarf2/frame-tailcall.h"
+#include "cli/cli-cmds.h"
 
 struct frame_unwind_table_entry
 {
@@ -336,4 +337,35 @@ frame_unwind_got_address (frame_info_ptr frame, int regnum,
   pack_long (value_contents_writeable (reg_val).data (),
 	     register_type (gdbarch, regnum), addr);
   return reg_val;
+}
+
+/* Implement "maintenance info frame-unwinders" command.  */
+
+static void
+maintenance_info_frame_unwinders (const char *args, int from_tty)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
+
+  for (struct frame_unwind_table_entry *entry = table->list; entry != NULL;
+       entry = entry->next)
+    {
+      const char *name = entry->unwinder->name;
+      const char *type = frame_type_str (entry->unwinder->type);
+
+      gdb_printf (gdb_stdout, "%-16s\t%-16s\n", name, type);
+    }
+}
+
+void _initialize_frame_unwind ();
+void
+_initialize_frame_unwind ()
+{
+  /* Add "maint info frame-unwinders".  */
+  add_cmd ("frame-unwinders",
+	   class_maintenance,
+	   maintenance_info_frame_unwinders,
+	   _("List the frame unwinders currently in effect, "
+	     "starting with the highest priority."),
+	   &maintenanceinfolist);
 }
