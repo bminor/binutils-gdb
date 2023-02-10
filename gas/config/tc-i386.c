@@ -3487,8 +3487,7 @@ want_disp32 (const insn_template *t)
 {
   return flag_code != CODE_64BIT
 	 || i.prefix[ADDR_PREFIX]
-	 || (t->base_opcode == 0x8d
-	     && t->opcode_modifier.opcodespace == SPACE_BASE
+	 || (t->mnem_off == MN_lea
 	     && (!i.types[1].bitfield.qword
 		|| t->opcode_modifier.size == SIZE32));
 }
@@ -4096,8 +4095,7 @@ optimize_encoding (void)
 {
   unsigned int j;
 
-  if (i.tm.opcode_modifier.opcodespace == SPACE_BASE
-      && i.tm.base_opcode == 0x8d)
+  if (i.tm.mnem_off == MN_lea)
     {
       /* Optimize: -O:
 	   lea symbol, %rN    -> mov $symbol, %rN
@@ -4245,15 +4243,12 @@ optimize_encoding (void)
     }
 
   if (optimize_for_space
-      && i.tm.opcode_modifier.opcodespace == SPACE_BASE
+      && i.tm.mnem_off == MN_test
       && i.reg_operands == 1
       && i.imm_operands == 1
       && !i.types[1].bitfield.byte
       && i.op[0].imms->X_op == O_constant
-      && fits_in_imm7 (i.op[0].imms->X_add_number)
-      && (i.tm.base_opcode == 0xa8
-	  || (i.tm.base_opcode == 0xf6
-	      && i.tm.extension_opcode == 0x0)))
+      && fits_in_imm7 (i.op[0].imms->X_add_number))
     {
       /* Optimize: -Os:
 	   test $imm7, %r64/%r32/%r16  -> test $imm7, %r8
@@ -4286,12 +4281,11 @@ optimize_encoding (void)
 		     && i.tm.extension_opcode == None
 		     && fits_in_unsigned_long (i.op[0].imms->X_add_number))
 		    || (fits_in_imm31 (i.op[0].imms->X_add_number)
-			&& ((i.tm.base_opcode == 0x24
-			     || i.tm.base_opcode == 0xa8)
+			&& (i.tm.base_opcode == 0x24
 			    || (i.tm.base_opcode == 0x80
 				&& i.tm.extension_opcode == 0x4)
-			    || ((i.tm.base_opcode == 0xf6
-				 || (i.tm.base_opcode | 1) == 0xc7)
+			    || i.tm.mnem_off == MN_test
+			    || ((i.tm.base_opcode | 1) == 0xc7
 				&& i.tm.extension_opcode == 0x0)))
 		    || (fits_in_imm7 (i.op[0].imms->X_add_number)
 			&& i.tm.base_opcode == 0x83
@@ -4299,11 +4293,9 @@ optimize_encoding (void)
 	       || (i.types[0].bitfield.qword
 		   && ((i.reg_operands == 2
 			&& i.op[0].regs == i.op[1].regs
-			&& (i.tm.base_opcode == 0x30
-			    || i.tm.base_opcode == 0x28))
-		       || (i.reg_operands == 1
-			   && i.operands == 1
-			   && i.tm.base_opcode == 0x30)))))
+			&& (i.tm.mnem_off == MN_xor
+			    || i.tm.mnem_off == MN_sub))
+		       || i.tm.mnem_off == MN_clr))))
     {
       /* Optimize: -O:
 	   andq $imm31, %r64   -> andl $imm31, %r32
@@ -4328,7 +4320,7 @@ optimize_encoding (void)
 	}
       i.types[1].bitfield.dword = 1;
       i.types[1].bitfield.qword = 0;
-      if (i.tm.base_opcode == 0xb8 || (i.tm.base_opcode | 1) == 0xc7)
+      if (i.tm.mnem_off == MN_mov || i.tm.mnem_off == MN_lea)
 	{
 	  /* Handle
 	       movq $imm31, %r64   -> movl $imm31, %r32
@@ -4351,11 +4343,9 @@ optimize_encoding (void)
     }
   else if (optimize > 1
 	   && !optimize_for_space
-	   && i.tm.opcode_modifier.opcodespace == SPACE_BASE
 	   && i.reg_operands == 2
 	   && i.op[0].regs == i.op[1].regs
-	   && ((i.tm.base_opcode & ~(Opcode_D | 1)) == 0x8
-	       || (i.tm.base_opcode & ~(Opcode_D | 1)) == 0x20)
+	   && (i.tm.mnem_off == MN_and || i.tm.mnem_off == MN_or)
 	   && (flag_code != CODE_64BIT || !i.types[0].bitfield.dword))
     {
       /* Optimize: -O2:
@@ -4580,12 +4570,7 @@ load_insn_p (void)
 
   if (any_vex_p)
     {
-      /* vldmxcsr.  */
-      if (i.tm.base_opcode == 0xae
-	  && i.tm.opcode_modifier.vex
-	  && i.tm.opcode_modifier.opcodespace == SPACE_0F
-	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_NONE
-	  && i.tm.extension_opcode == 2)
+      if (i.tm.mnem_off == MN_vldmxcsr)
 	return 1;
     }
   else if (i.tm.opcode_modifier.opcodespace == SPACE_BASE)
@@ -4699,9 +4684,7 @@ load_insn_p (void)
 	  || (base_opcode | 2) == 0x87))
     return 1;
 
-  /* xadd.  */
-  if (i.tm.opcode_modifier.opcodespace == SPACE_0F
-      && base_opcode == 0xc1)
+  if (i.tm.mnem_off == MN_xadd)
     return 1;
 
   /* Check for load instruction.  */
@@ -5361,12 +5344,8 @@ md_assemble (char *line)
       i.rex &= REX_OPCODE;
     }
 
-  /* Handle conversion of 'int $3' --> special int3 insn.  XOP or FMA4
-     instructions may define INT_OPCODE as well, so avoid this corner
-     case for those instructions that use MODRM.  */
-  if (i.tm.opcode_modifier.opcodespace == SPACE_BASE
-      && i.tm.base_opcode == INT_OPCODE
-      && !i.tm.opcode_modifier.modrm
+  /* Handle conversion of 'int $3' --> special int3 insn.  */
+  if (i.tm.mnem_off == MN_int
       && i.op[0].imms->X_add_number == 3)
     {
       i.tm.base_opcode = INT3_OPCODE;
@@ -5476,10 +5455,7 @@ static INLINE bool q_suffix_allowed(const insn_template *t)
 	 || (t->opcode_modifier.opcodespace == SPACE_BASE
 	     && t->base_opcode == 0xdf
 	     && (t->extension_opcode & 1)) /* fild / fistp / fisttp */
-	 || (t->opcode_modifier.opcodespace == SPACE_0F
-	     && t->base_opcode == 0xc7
-	     && t->opcode_modifier.opcodeprefix == PREFIX_NONE
-	     && t->extension_opcode == 1) /* cmpxchg8b */;
+	 || t->mnem_off == MN_cmpxchg8b;
 }
 
 static const char *
@@ -7201,7 +7177,7 @@ check_string (void)
 static int
 process_suffix (void)
 {
-  bool is_crc32 = false, is_movx = false;
+  bool is_movx = false;
 
   /* If matched instruction specifies an explicit instruction mnemonic
      suffix, use it.  */
@@ -7224,11 +7200,6 @@ process_suffix (void)
 		    && i.tm.base_opcode == 0x63
 		    && i.tm.cpu_flags.bitfield.cpu64);
 
-      /* CRC32 */
-      is_crc32 = (i.tm.base_opcode == 0xf0
-		  && i.tm.opcode_modifier.opcodespace == SPACE_0F38
-		  && i.tm.opcode_modifier.opcodeprefix == PREFIX_0XF2);
-
       /* movsx/movzx want only their source operand considered here, for the
 	 ambiguity checking below.  The suffix will be replaced afterwards
 	 to represent the destination (register).  */
@@ -7236,7 +7207,7 @@ process_suffix (void)
 	--i.operands;
 
       /* crc32 needs REX.W set regardless of suffix / source operand size.  */
-      if (is_crc32 && i.tm.operand_types[1].bitfield.qword)
+      if (i.tm.mnem_off == MN_crc32 && i.tm.operand_types[1].bitfield.qword)
         i.rex |= REX_W;
 
       /* If there's no instruction mnemonic suffix we try to invent one
@@ -7247,7 +7218,7 @@ process_suffix (void)
 	     Destination register type is more significant than source
 	     register type.  crc32 in SSE4.2 prefers source register
 	     type. */
-	  unsigned int op = is_crc32 ? 1 : i.operands;
+	  unsigned int op = i.tm.mnem_off == MN_crc32 ? 1 : i.operands;
 
 	  while (op--)
 	    if (i.tm.operand_types[op].bitfield.instance == InstanceNone
@@ -7571,8 +7542,7 @@ process_suffix (void)
 		      /* InOutPortReg */
 		      || i.tm.operand_types[0].bitfield.instance == RegD
 		      || i.tm.operand_types[1].bitfield.instance == RegD
-		      /* CRC32 */
-		      || is_crc32))))
+		      || i.tm.mnem_off == MN_crc32))))
 	i.tm.base_opcode |= 1;
       break;
     }
@@ -7691,10 +7661,7 @@ check_byte_reg (void)
 	continue;
 
       /* crc32 only wants its source operand checked here.  */
-      if (i.tm.base_opcode == 0xf0
-	  && i.tm.opcode_modifier.opcodespace == SPACE_0F38
-	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_0XF2
-	  && op != 0)
+      if (i.tm.mnem_off == MN_crc32 && op != 0)
 	continue;
 
       /* Any other register is bad.  */
@@ -8160,9 +8127,7 @@ process_operands (void)
     }
 
   if ((i.seg[0] || i.prefix[SEG_PREFIX])
-      && i.tm.base_opcode == 0x8d /* lea */
-      && i.tm.opcode_modifier.opcodespace == SPACE_BASE
-      && !is_any_vex_encoding(&i.tm))
+      && i.tm.mnem_off == MN_lea)
     {
       if (!quiet_warnings)
 	as_warn (_("segment override on `%s' is ineffectual"), insn_name (&i.tm));
@@ -9089,7 +9054,7 @@ output_jump (void)
       break;
 
     case 2:
-      if (i.tm.base_opcode == 0xc7f8)
+      if (i.tm.mnem_off == MN_xbegin)
 	fixP->fx_signed = 1;
       break;
 
@@ -9601,10 +9566,8 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
 
       if ((i.xstate & xstate_mmx)
-	  || (i.tm.opcode_modifier.opcodespace == SPACE_0F
-	      && !is_any_vex_encoding (&i.tm)
-	      && (i.tm.base_opcode == 0x77 /* emms */
-		  || i.tm.base_opcode == 0x0e /* femms */)))
+	  || i.tm.mnem_off == MN_emms
+	  || i.tm.mnem_off == MN_femms)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
 
       if (i.index_reg)
@@ -9648,10 +9611,7 @@ output_insn (void)
       if (x86_feature_2_used
 	  || i.tm.cpu_flags.bitfield.cpucmov
 	  || i.tm.cpu_flags.bitfield.cpusyscall
-	  || (i.tm.opcode_modifier.opcodespace == SPACE_0F
-	      && i.tm.base_opcode == 0xc7
-	      && i.tm.opcode_modifier.opcodeprefix == PREFIX_NONE
-	      && i.tm.extension_opcode == 1) /* cmpxchg8b */)
+	  || i.tm.mnem_off == MN_cmpxchg8b)
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_BASELINE;
       if (i.tm.cpu_flags.bitfield.cpusse3
 	  || i.tm.cpu_flags.bitfield.cpussse3
@@ -11503,12 +11463,9 @@ i386_index_check (const char *operand_string)
 	    goto bad_address;
 
 	  /* bndmk, bndldx, bndstx and mandatory non-vector SIB have special restrictions. */
-	  if ((t->opcode_modifier.opcodeprefix == PREFIX_0XF3
-	       && t->opcode_modifier.opcodespace == SPACE_0F
-	       && t->base_opcode == 0x1b)
-	      || (t->opcode_modifier.opcodeprefix == PREFIX_NONE
-		  && t->opcode_modifier.opcodespace == SPACE_0F
-		  && (t->base_opcode & ~1) == 0x1a)
+	  if (t->mnem_off == MN_bndmk
+	      || t->mnem_off == MN_bndldx
+	      || t->mnem_off == MN_bndstx
 	      || t->opcode_modifier.sib == SIBMEM)
 	    {
 	      /* They cannot use RIP-relative addressing. */
@@ -11519,9 +11476,7 @@ i386_index_check (const char *operand_string)
 		}
 
 	      /* bndldx and bndstx ignore their scale factor. */
-	      if (t->opcode_modifier.opcodeprefix == PREFIX_NONE
-		  && t->opcode_modifier.opcodespace == SPACE_0F
-		  && (t->base_opcode & ~1) == 0x1a
+	      if ((t->mnem_off == MN_bndldx || t->mnem_off == MN_bndstx)
 		  && i.log2_scale_factor)
 		as_warn (_("register scaling is being ignored here"));
 	    }
