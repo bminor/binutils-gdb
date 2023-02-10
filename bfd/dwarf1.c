@@ -510,7 +510,8 @@ _bfd_dwarf1_find_nearest_line (bfd *abfd,
 	return false;
 
       msec = bfd_get_section_by_name (abfd, ".debug");
-      if (! msec)
+      if (! msec
+	  || (msec->flags & SEC_HAS_CONTENTS) == 0)
 	/* No dwarf1 info.  Note that at this point the stash
 	   has been allocated, but contains zeros, this lets
 	   future calls to this function fail quicker.  */
