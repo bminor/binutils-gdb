@@ -526,7 +526,7 @@ mmo_object_p (bfd *abfd)
      important as all of the symbol information can only be 256k.  */
   abfd->tdata.mmo_data->max_symbol_length = (b[2] * 256 + b[3]) * 4;
   abfd->tdata.mmo_data->lop_stab_symbol
-    = bfd_malloc (abfd->tdata.mmo_data->max_symbol_length + 1);
+    = bfd_alloc (abfd, abfd->tdata.mmo_data->max_symbol_length + 1);
 
   if (abfd->tdata.mmo_data->lop_stab_symbol == NULL)
     {
@@ -539,7 +539,7 @@ mmo_object_p (bfd *abfd)
 
   /* Read in everything.  */
   if (! mmo_scan (abfd))
-    goto bad_format_free;
+    goto bad_format;
 
   if (abfd->symcount > 0)
     abfd->flags |= HAS_SYMS;
@@ -548,12 +548,10 @@ mmo_object_p (bfd *abfd)
      arches (not recommended due to its small-size limitations).  Look at
      the ELF format for how to make it target-generic.  */
   if (! bfd_default_set_arch_mach (abfd, bfd_arch_mmix, 0))
-    goto bad_format_free;
+    goto bad_format;
 
   return _bfd_no_cleanup;
 
- bad_format_free:
-  free (abfd->tdata.mmo_data->lop_stab_symbol);
  bad_format:
   bfd_set_error (bfd_error_wrong_format);
  bad_final:
@@ -1128,8 +1126,8 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
 
   /* We allocate a buffer here for the advertised size, with head room for
      tetrabyte alignment.  */
-  loc = bfd_zmalloc (section_length + 3
-		     + sizeof (struct mmo_data_list_struct));
+  loc = bfd_zalloc (abfd, (section_length + 3
+			   + sizeof (struct mmo_data_list_struct)));
   if (loc == NULL)
     goto format_error;
 
@@ -1888,6 +1886,7 @@ mmo_scan (bfd *abfd)
 			   " was already entered as `%s'\n"),
 			 abfd, y, fname, file_names[y]);
 		      bfd_set_error (bfd_error_bad_value);
+		      free (fname);
 		      goto error_return;
 		    }
 
