@@ -943,7 +943,7 @@ static bool
 ada_value_is_changeable_p (const struct varobj *var)
 {
   struct type *type = (var->value != nullptr
-		       ? var->value.get ()->type () : var->type);
+		       ? var->value->type () : var->type);
 
   if (type->code () == TYPE_CODE_REF)
     type = type->target_type ();

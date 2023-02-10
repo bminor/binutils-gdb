@@ -1347,7 +1347,7 @@ value::address () const
   if (m_lval != lval_memory)
     return 0;
   if (m_parent != NULL)
-    return m_parent.get ()->address () + m_offset;
+    return m_parent->address () + m_offset;
   if (NULL != TYPE_DATA_LOCATION (type ()))
     {
       gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (type ()));
@@ -1707,7 +1707,7 @@ access_value_history (int num)
 
   absnum--;
 
-  return value_history[absnum].get ()->copy ();
+  return value_history[absnum]->copy ();
 }
 
 /* See value.h.  */
@@ -2400,7 +2400,7 @@ preserve_one_varobj (struct varobj *varobj, struct objfile *objfile,
     }
 
   if (varobj->value != nullptr)
-    varobj->value.get ()->preserve (objfile, copied_types);
+    varobj->value->preserve (objfile, copied_types);
 }
 
 /* Update the internal variables and value history when OBJFILE is
@@ -2419,7 +2419,7 @@ preserve_values (struct objfile *objfile)
   htab_up copied_types = create_copied_types_hash ();
 
   for (const value_ref_ptr &item : value_history)
-    item.get ()->preserve (objfile, copied_types.get ());
+    item->preserve (objfile, copied_types.get ());
 
   for (var = internalvars; var; var = var->next)
     preserve_one_internalvar (var, objfile, copied_types.get ());
@@ -4097,10 +4097,10 @@ test_value_copy ()
   /* Verify that we can copy an entirely optimized out value, that may not have
      its contents allocated.  */
   value_ref_ptr val = release_value (value::allocate_optimized_out (type));
-  value_ref_ptr copy = release_value (val.get ()->copy ());
+  value_ref_ptr copy = release_value (val->copy ());
 
-  SELF_CHECK (val.get ()->entirely_optimized_out ());
-  SELF_CHECK (copy.get ()->entirely_optimized_out ());
+  SELF_CHECK (val->entirely_optimized_out ());
+  SELF_CHECK (copy->entirely_optimized_out ());
 }
 
 } /* namespace selftests */

@@ -504,7 +504,7 @@ varobj_set_display_format (struct varobj *var,
     }
 
   if (varobj_value_is_changeable_p (var) 
-      && var->value != nullptr && !var->value.get ()->lazy ())
+      && var->value != nullptr && !var->value->lazy ())
     {
       var->print_value = varobj_value_get_print_value (var->value.get (),
 						       var->format, var);
@@ -1007,7 +1007,7 @@ varobj_set_value (struct varobj *var, const char *expression)
   gdb_assert (varobj_value_is_changeable_p (var));
 
   /* The value of a changeable variable object must not be lazy.  */
-  gdb_assert (!var->value.get ()->lazy ());
+  gdb_assert (!var->value->lazy ());
 
   /* Need to coerce the input.  We want to check if the
      value of the variable object will be different
@@ -1312,7 +1312,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	{
 	  /* Try to compare the values.  That requires that both
 	     values are non-lazy.  */
-	  if (var->not_fetched && var->value.get ()->lazy ())
+	  if (var->not_fetched && var->value->lazy ())
 	    {
 	      /* This is a frozen varobj and the value was never read.
 		 Presumably, UI shows some "never read" indicator.
@@ -1330,7 +1330,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	    }
 	  else
 	    {
-	      gdb_assert (!var->value.get ()->lazy ());
+	      gdb_assert (!var->value->lazy ());
 	      gdb_assert (!value->lazy ());
 
 	      gdb_assert (!var->print_value.empty () && !print_value.empty ());
@@ -1370,7 +1370,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
     }
   var->print_value = print_value;
 
-  gdb_assert (var->value == nullptr || var->value.get ()->type ());
+  gdb_assert (var->value == nullptr || var->value->type ());
 
   return changed;
 }
@@ -1886,7 +1886,7 @@ varobj_get_value_type (const struct varobj *var)
   struct type *type;
 
   if (var->value != nullptr)
-    type = var->value.get ()->type ();
+    type = var->value->type ();
   else
     type = var->type;
 
@@ -2270,7 +2270,7 @@ varobj_editable_p (const struct varobj *var)
   struct type *type;
 
   if (!(var->root->is_valid && var->value != nullptr
-	&& var->value.get ()->lval ()))
+	&& var->value->lval ()))
     return false;
 
   type = varobj_get_value_type (var);

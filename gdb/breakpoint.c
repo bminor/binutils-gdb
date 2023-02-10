@@ -4415,7 +4415,7 @@ bpstat::bpstat (const bpstat &other)
     print_it (other.print_it)
 {
   if (other.old_val != NULL)
-    old_val = release_value (other.old_val.get ()->copy ());
+    old_val = release_value (other.old_val->copy ());
 }
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
@@ -10316,7 +10316,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   w->cond_exp_valid_block = cond_exp_valid_block;
   if (just_location)
     {
-      struct type *t = val.get ()->type ();
+      struct type *t = val->type ();
       CORE_ADDR addr = value_as_address (val.get ());
 
       w->exp_string_reparse
