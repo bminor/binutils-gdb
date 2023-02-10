@@ -430,7 +430,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Vex),
   BITFIELD (VexVVVV),
   BITFIELD (VexW),
-  BITFIELD (OpcodeSpace),
   BITFIELD (OpcodePrefix),
   BITFIELD (VexSources),
   BITFIELD (SIB),
@@ -957,10 +956,24 @@ get_element_size (char **opnd, int lineno)
 
 static void
 process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
-			      unsigned int prefix, char **opnd, int lineno)
+			      unsigned int prefix, const char *extension_opcode,
+			      char **opnd, int lineno)
 {
   char *str, *next, *last;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
+  static const char *const spaces[] = {
+#define SPACE(n) [SPACE_##n] = #n
+    SPACE(BASE),
+    SPACE(0F),
+    SPACE(0F38),
+    SPACE(0F3A),
+    SPACE(EVEXMAP5),
+    SPACE(EVEXMAP6),
+    SPACE(XOP08),
+    SPACE(XOP09),
+    SPACE(XOP0A),
+#undef SPACE
+  };
 
   active_isstring = 0;
 
@@ -978,6 +991,34 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 	  if (str)
 	    {
 	      int val = 1;
+
+	      if (strncmp(str, "OpcodeSpace", 11) == 0)
+		{
+		  char *end;
+
+		  if (str[11] != '=')
+		    fail ("%s:%d: Missing value for `OpcodeSpace'\n",
+			  filename, lineno);
+
+		  val = strtol (str + 12, &end, 0);
+		  if (*end)
+		    fail ("%s:%d: Bogus value `%s' for `OpcodeSpace'\n",
+			  filename, lineno, end);
+
+		  if (space)
+		    {
+		      if (val != space)
+			fail ("%s:%d: Conflicting opcode space specifications\n",
+			      filename, lineno);
+		      fprintf (stderr,
+			       "%s:%d: Warning: redundant opcode space specification\n",
+			       filename, lineno);
+		    }
+
+		  space = val;
+		  continue;
+		}
+
 	      if (strcasecmp(str, "Broadcast") == 0)
 		val = get_element_size (opnd, lineno) + BYTE_BROADCAST;
 	      else if (strcasecmp(str, "Disp8MemShift") == 0)
@@ -1000,19 +1041,6 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 	      if (strcasecmp(str, "No_qSuf") == 0)
 		bwlq_suf &= ~8;
 	    }
-	}
-
-      if (space)
-	{
-	  if (!modifiers[OpcodeSpace].value)
-	    modifiers[OpcodeSpace].value = space;
-	  else if (modifiers[OpcodeSpace].value != space)
-	    fail ("%s:%d: Conflicting opcode space specifications\n",
-		  filename, lineno);
-	  else
-	    fprintf (stderr,
-		     "%s:%d: Warning: redundant opcode space specification\n",
-		     filename, lineno);
 	}
 
       if (prefix)
@@ -1038,6 +1066,13 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 		 "%s: %d: W modifier without Word/Dword/Qword operand(s)\n",
 		 filename, lineno);
     }
+
+  if (space >= ARRAY_SIZE (spaces) || !spaces[space])
+    fail ("%s:%d: Unknown opcode space %u\n", filename, lineno, space);
+
+  fprintf (table, " SPACE_%s, %s,\n",
+	   spaces[space], extension_opcode ? extension_opcode : "None");
+
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
 }
 
@@ -1257,13 +1292,12 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	  filename, lineno, name, 2 * length, opcode);
 
   ident = mkident (name);
-  fprintf (table, "  { MN_%s, 0x%0*llx%s, %lu, %s,\n",
-	   ident, 2 * (int)length, opcode, end, i,
-	   extension_opcode ? extension_opcode : "None");
+  fprintf (table, "  { MN_%s, 0x%0*llx%s, %u,",
+	   ident, 2 * (int)length, opcode, end, i);
   free (ident);
 
   process_i386_opcode_modifier (table, opcode_modifier, space, prefix,
-				operand_types, lineno);
+				extension_opcode, operand_types, lineno);
 
   process_i386_cpu_flag (table, cpu_flags, NULL, ",", "    ", lineno, CpuMax);
 

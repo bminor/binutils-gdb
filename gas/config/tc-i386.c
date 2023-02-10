@@ -3203,8 +3203,8 @@ pte (insn_template *t)
   fprintf (stdout, " %d operands ", t->operands);
   if (opc_pfx[t->opcode_modifier.opcodeprefix])
     fprintf (stdout, "pfx %x ", opc_pfx[t->opcode_modifier.opcodeprefix]);
-  if (opc_spc[t->opcode_modifier.opcodespace])
-    fprintf (stdout, "space %s ", opc_spc[t->opcode_modifier.opcodespace]);
+  if (opc_spc[t->opcode_space])
+    fprintf (stdout, "space %s ", opc_spc[t->opcode_space]);
   fprintf (stdout, "opcode %x ", t->base_opcode);
   if (t->extension_opcode != None)
     fprintf (stdout, "ext %x ", t->extension_opcode);
@@ -3587,7 +3587,7 @@ build_vex_prefix (const insn_template *t)
       && i.dir_encoding == dir_encoding_default
       && i.operands == i.reg_operands
       && operand_type_equal (&i.types[0], &i.types[i.operands - 1])
-      && i.tm.opcode_modifier.opcodespace == SPACE_0F
+      && i.tm.opcode_space == SPACE_0F
       && (i.tm.opcode_modifier.load || i.tm.opcode_modifier.d)
       && i.rex == REX_B)
     {
@@ -3633,7 +3633,7 @@ build_vex_prefix (const insn_template *t)
       union i386_op temp_op;
       i386_operand_type temp_type;
 
-      gas_assert (i.tm.opcode_modifier.opcodespace == SPACE_0F);
+      gas_assert (i.tm.opcode_space == SPACE_0F);
       gas_assert (!i.tm.opcode_modifier.sae);
       gas_assert (operand_type_equal (&i.types[i.operands - 2],
                                       &i.types[i.operands - 3]));
@@ -3686,7 +3686,7 @@ build_vex_prefix (const insn_template *t)
   /* Use 2-byte VEX prefix if possible.  */
   if (w == 0
       && i.vec_encoding != vex_encoding_vex3
-      && i.tm.opcode_modifier.opcodespace == SPACE_0F
+      && i.tm.opcode_space == SPACE_0F
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
       /* 2-byte VEX prefix.  */
@@ -3707,7 +3707,7 @@ build_vex_prefix (const insn_template *t)
       /* 3-byte VEX prefix.  */
       i.vex.length = 3;
 
-      switch (i.tm.opcode_modifier.opcodespace)
+      switch (i.tm.opcode_space)
 	{
 	case SPACE_0F:
 	case SPACE_0F38:
@@ -3725,7 +3725,7 @@ build_vex_prefix (const insn_template *t)
 
       /* The high 3 bits of the second VEX byte are 1's compliment
 	 of RXB bits from REX.  */
-      i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_modifier.opcodespace;
+      i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_space;
 
       i.vex.bytes[2] = (w << 7
 			| register_specifier << 3
@@ -3860,9 +3860,9 @@ build_evex_prefix (void)
 
   /* The high 3 bits of the second EVEX byte are 1's compliment of RXB
      bits from REX.  */
-  gas_assert (i.tm.opcode_modifier.opcodespace >= SPACE_0F);
-  gas_assert (i.tm.opcode_modifier.opcodespace <= SPACE_EVEXMAP6);
-  i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_modifier.opcodespace;
+  gas_assert (i.tm.opcode_space >= SPACE_0F);
+  gas_assert (i.tm.opcode_space <= SPACE_EVEXMAP6);
+  i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_space;
 
   /* The fifth bit of the second EVEX byte is 1's compliment of the
      REX_R bit in VREX.  */
@@ -4072,14 +4072,14 @@ encode_with_unaligned_vector_move (void)
     case 0x28:	/* Load instructions.  */
     case 0x29:	/* Store instructions.  */
       /* movaps/movapd/vmovaps/vmovapd.  */
-      if (i.tm.opcode_modifier.opcodespace == SPACE_0F
+      if (i.tm.opcode_space == SPACE_0F
 	  && i.tm.opcode_modifier.opcodeprefix <= PREFIX_0X66)
 	i.tm.base_opcode = 0x10 | (i.tm.base_opcode & 1);
       break;
     case 0x6f:	/* Load instructions.  */
     case 0x7f:	/* Store instructions.  */
       /* movdqa/vmovdqa/vmovdqa64/vmovdqa32. */
-      if (i.tm.opcode_modifier.opcodespace == SPACE_0F
+      if (i.tm.opcode_space == SPACE_0F
 	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66)
 	i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
       break;
@@ -4221,7 +4221,7 @@ optimize_encoding (void)
 	    {
 	      if (flag_code != CODE_32BIT)
 		return;
-	      i.tm.opcode_modifier.opcodespace = SPACE_0F;
+	      i.tm.opcode_space = SPACE_0F;
 	      i.tm.base_opcode = 0xb7;
 	    }
 	  else
@@ -4272,7 +4272,7 @@ optimize_encoding (void)
 	}
     }
   else if (flag_code == CODE_64BIT
-	   && i.tm.opcode_modifier.opcodespace == SPACE_BASE
+	   && i.tm.opcode_space == SPACE_BASE
 	   && ((i.types[1].bitfield.qword
 		&& i.reg_operands == 1
 		&& i.imm_operands == 1
@@ -4374,7 +4374,7 @@ optimize_encoding (void)
 		       || i.tm.cpu_flags.bitfield.cpuavx512vl
 		       || (i.tm.operand_types[2].bitfield.zmmword
 			   && i.types[2].bitfield.ymmword))))
-	   && i.tm.opcode_modifier.opcodespace == SPACE_0F
+	   && i.tm.opcode_space == SPACE_0F
 	   && ((i.tm.base_opcode | 2) == 0x57
 	       || i.tm.base_opcode == 0xdf
 	       || i.tm.base_opcode == 0xef
@@ -4545,7 +4545,7 @@ load_insn_p (void)
 	return 1;
     }
 
-  if (i.tm.opcode_modifier.opcodespace == SPACE_BASE)
+  if (i.tm.opcode_space == SPACE_BASE)
     {
       /* popf, popa.   */
       if (i.tm.base_opcode == 0x9d
@@ -4573,7 +4573,7 @@ load_insn_p (void)
       if (i.tm.mnem_off == MN_vldmxcsr)
 	return 1;
     }
-  else if (i.tm.opcode_modifier.opcodespace == SPACE_BASE)
+  else if (i.tm.opcode_space == SPACE_BASE)
     {
       /* test, not, neg, mul, imul, div, idiv.  */
       if (base_opcode == 0xf7 && i.tm.extension_opcode != 1)
@@ -4632,7 +4632,7 @@ load_insn_p (void)
 	  return 1;
 	}
     }
-  else if (i.tm.opcode_modifier.opcodespace == SPACE_0F)
+  else if (i.tm.opcode_space == SPACE_0F)
     {
       /* bt, bts, btr, btc.  */
       if (i.tm.base_opcode == 0xba
@@ -4670,7 +4670,7 @@ load_insn_p (void)
     dest--;
 
   /* add, or, adc, sbb, and, sub, xor, cmp, test, xchg.  */
-  if (i.tm.opcode_modifier.opcodespace == SPACE_BASE
+  if (i.tm.opcode_space == SPACE_BASE
       && ((base_opcode | 0x38) == 0x39
 	  || (base_opcode | 2) == 0x87))
     return 1;
@@ -4719,7 +4719,7 @@ insert_lfence_before (void)
 {
   char *p;
 
-  if (i.tm.opcode_modifier.opcodespace != SPACE_BASE)
+  if (i.tm.opcode_space != SPACE_BASE)
     return;
 
   if (i.tm.base_opcode == 0xff
@@ -4841,9 +4841,9 @@ static INLINE bool may_need_pass2 (const insn_template *t)
   return t->opcode_modifier.sse2avx
 	 /* Note that all SSE2AVX templates have at least one operand.  */
 	 ? t->operand_types[t->operands - 1].bitfield.class == RegSIMD
-	 : (t->opcode_modifier.opcodespace == SPACE_0F
+	 : (t->opcode_space == SPACE_0F
 	    && (t->base_opcode | 1) == 0xbf)
-	   || (t->opcode_modifier.opcodespace == SPACE_BASE
+	   || (t->opcode_space == SPACE_BASE
 	       && t->base_opcode == 0x63);
 }
 
@@ -5116,8 +5116,8 @@ md_assemble (char *line)
   if (sse_check != check_none
       /* The opcode space check isn't strictly needed; it's there only to
 	 bypass the logic below when easily possible.  */
-      && t->opcode_modifier.opcodespace >= SPACE_0F
-      && t->opcode_modifier.opcodespace <= SPACE_0F3A
+      && t->opcode_space >= SPACE_0F
+      && t->opcode_space <= SPACE_0F3A
       && !i.tm.cpu_flags.bitfield.cpusse4a
       && !is_any_vex_encoding (t))
     {
@@ -5240,7 +5240,7 @@ md_assemble (char *line)
      instructions (base opcodes: 0x6c, 0x6e, 0xec, 0xee).  */
   if (i.input_output_operand
       && ((i.tm.base_opcode | 0x82) != 0xee
-	  || i.tm.opcode_modifier.opcodespace != SPACE_BASE))
+	  || i.tm.opcode_space != SPACE_BASE))
     {
       as_bad (_("input/output port address isn't allowed with `%s'"),
 	      insn_name (&i.tm));
@@ -5441,7 +5441,7 @@ md_assemble (char *line)
 static INLINE bool q_suffix_allowed(const insn_template *t)
 {
   return flag_code == CODE_64BIT
-	 || (t->opcode_modifier.opcodespace == SPACE_BASE
+	 || (t->opcode_space == SPACE_BASE
 	     && t->base_opcode == 0xdf
 	     && (t->extension_opcode & 1)) /* fild / fistp / fisttp */
 	 || t->mnem_off == MN_cmpxchg8b;
@@ -5678,7 +5678,7 @@ parse_insn (const char *line, char *mnemonic)
 		  if (current_templates != NULL
 		      /* MOVS or CMPS */
 		      && (current_templates->start->base_opcode | 2) == 0xa6
-		      && current_templates->start->opcode_modifier.opcodespace
+		      && current_templates->start->opcode_space
 			 == SPACE_BASE
 		      && mnem_p[-2] == 's')
 		    {
@@ -6853,14 +6853,14 @@ match_template (char mnem_suffix)
 	     zero-extend %eax to %rax.  */
 	  if (flag_code == CODE_64BIT
 	      && t->base_opcode == 0x90
-	      && t->opcode_modifier.opcodespace == SPACE_BASE
+	      && t->opcode_space == SPACE_BASE
 	      && i.types[0].bitfield.instance == Accum
 	      && i.types[0].bitfield.dword
 	      && i.types[1].bitfield.instance == Accum)
 	    continue;
 
 	  if (t->base_opcode == MOV_AX_DISP32
-	      && t->opcode_modifier.opcodespace == SPACE_BASE
+	      && t->opcode_space == SPACE_BASE
 	      && t->mnem_off != MN_movabs)
 	    {
 	      /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
@@ -6972,8 +6972,8 @@ match_template (char mnem_suffix)
 		  found_reverse_match = Opcode_VexW;
 		  goto check_operands_345;
 		}
-	      else if (t->opcode_modifier.opcodespace != SPACE_BASE
-		       && (t->opcode_modifier.opcodespace != SPACE_0F
+	      else if (t->opcode_space != SPACE_BASE
+		       && (t->opcode_space != SPACE_0F
 			   /* MOV to/from CR/DR/TR, as an exception, follow
 			      the base opcode space encoding model.  */
 			   || (t->base_opcode | 7) != 0x27))
@@ -7183,9 +7183,9 @@ process_suffix (void)
       unsigned int numop = i.operands;
 
       /* MOVSX/MOVZX */
-      is_movx = (i.tm.opcode_modifier.opcodespace == SPACE_0F
+      is_movx = (i.tm.opcode_space == SPACE_0F
 		 && (i.tm.base_opcode | 8) == 0xbe)
-		|| (i.tm.opcode_modifier.opcodespace == SPACE_BASE
+		|| (i.tm.opcode_space == SPACE_BASE
 		    && i.tm.base_opcode == 0x63
 		    && i.tm.cpu_flags.bitfield.cpu64);
 
@@ -7289,7 +7289,7 @@ process_suffix (void)
 	   && (i.tm.opcode_modifier.jump == JUMP_ABSOLUTE
 	       || i.tm.opcode_modifier.jump == JUMP_BYTE
 	       || i.tm.opcode_modifier.jump == JUMP_INTERSEGMENT
-	       || (i.tm.opcode_modifier.opcodespace == SPACE_0F
+	       || (i.tm.opcode_space == SPACE_0F
 		   && i.tm.base_opcode == 0x01 /* [ls][gi]dt */
 		   && i.tm.extension_opcode <= 3)))
     {
@@ -7511,7 +7511,7 @@ process_suffix (void)
 	     need rex64. */
 	  && ! (i.operands == 2
 		&& i.tm.base_opcode == 0x90
-		&& i.tm.opcode_modifier.opcodespace == SPACE_BASE
+		&& i.tm.opcode_space == SPACE_BASE
 		&& i.types[0].bitfield.instance == Accum
 		&& i.types[0].bitfield.qword
 		&& i.types[1].bitfield.instance == Accum))
@@ -8083,14 +8083,14 @@ process_operands (void)
 	  return 0;
 	}
       if (i.op[0].regs->reg_num > 3
-	  && i.tm.opcode_modifier.opcodespace == SPACE_BASE )
+	  && i.tm.opcode_space == SPACE_BASE )
 	{
 	  i.tm.base_opcode ^= (POP_SEG_SHORT ^ POP_SEG386_SHORT) & 0xff;
-	  i.tm.opcode_modifier.opcodespace = SPACE_0F;
+	  i.tm.opcode_space = SPACE_0F;
 	}
       i.tm.base_opcode |= (i.op[0].regs->reg_num << 3);
     }
-  else if (i.tm.opcode_modifier.opcodespace == SPACE_BASE
+  else if (i.tm.opcode_space == SPACE_BASE
 	   && (i.tm.base_opcode & ~3) == MOV_AX_DISP32)
     {
       default_seg = reg_ds;
@@ -9325,7 +9325,7 @@ maybe_fused_with_jcc_p (enum mf_cmp_kind* mf_cmp_p)
     return 0;
 
   /* No opcodes outside of base encoding space.  */
-  if (i.tm.opcode_modifier.opcodespace != SPACE_BASE)
+  if (i.tm.opcode_space != SPACE_BASE)
     return 0;
 
   /* add, sub without add/sub m, imm.  */
@@ -9449,7 +9449,7 @@ add_branch_padding_frag_p (enum align_branch_kind *branch_p,
   if (!align_branch_power
       || now_seg == absolute_section
       || !cpu_arch_flags.bitfield.cpui386
-      || i.tm.opcode_modifier.opcodespace != SPACE_BASE)
+      || i.tm.opcode_space != SPACE_BASE)
     return 0;
 
   add_padding = 0;
@@ -9611,7 +9611,7 @@ output_insn (void)
 	  /* LAHF-SAHF insns in 64-bit mode.  */
 	  || (flag_code == CODE_64BIT
 	      && (i.tm.base_opcode | 1) == 0x9f
-	      && i.tm.opcode_modifier.opcodespace == SPACE_BASE))
+	      && i.tm.opcode_space == SPACE_BASE))
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V2;
       if (i.tm.cpu_flags.bitfield.cpuavx
 	  || i.tm.cpu_flags.bitfield.cpuavx2
@@ -9870,7 +9870,7 @@ output_insn (void)
       /* Now the opcode; be careful about word order here!  */
       j = i.opcode_length;
       if (!i.vex.length)
-	switch (i.tm.opcode_modifier.opcodespace)
+	switch (i.tm.opcode_space)
 	  {
 	  case SPACE_BASE:
 	    break;
@@ -9895,11 +9895,11 @@ output_insn (void)
 	{
 	  p = frag_more (j);
 	  if (!i.vex.length
-	      && i.tm.opcode_modifier.opcodespace != SPACE_BASE)
+	      && i.tm.opcode_space != SPACE_BASE)
 	    {
 	      *p++ = 0x0f;
-	      if (i.tm.opcode_modifier.opcodespace != SPACE_0F)
-		*p++ = i.tm.opcode_modifier.opcodespace == SPACE_0F38
+	      if (i.tm.opcode_space != SPACE_0F)
+		*p++ = i.tm.opcode_space == SPACE_0F38
 		       ? 0x38 : 0x3a;
 	    }
 
@@ -9971,7 +9971,7 @@ output_insn (void)
 
 	      /* Count prefixes for extended opcode maps.  */
 	      if (!i.vex.length)
-		switch (i.tm.opcode_modifier.opcodespace)
+		switch (i.tm.opcode_space)
 		  {
 		  case SPACE_BASE:
 		    break;
@@ -10209,7 +10209,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 			  && i.rm.regmem == 5))
 		  && (i.rm.mode == 2
 		      || (i.rm.mode == 0 && i.rm.regmem == 5))
-		  && i.tm.opcode_modifier.opcodespace == SPACE_BASE
+		  && i.tm.opcode_space == SPACE_BASE
 		  && ((i.operands == 1
 		       && i.tm.base_opcode == 0xff
 		       && (i.rm.reg == 2 || i.rm.reg == 4))

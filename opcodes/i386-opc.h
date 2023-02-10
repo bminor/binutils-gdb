@@ -605,28 +605,6 @@ enum
 #define VEXW1	2
 #define VEXWIG	3
   VexW,
-  /* Opcode encoding space (values chosen to be usable directly in
-     VEX/XOP mmmmm and EVEX mm fields):
-     0: Base opcode space.
-     1: 0F opcode prefix / space.
-     2: 0F38 opcode prefix / space.
-     3: 0F3A opcode prefix / space.
-     5: EVEXMAP5 opcode prefix / space.
-     6: EVEXMAP6 opcode prefix / space.
-     8: XOP 08 opcode space.
-     9: XOP 09 opcode space.
-     A: XOP 0A opcode space.
-   */
-#define SPACE_BASE	0
-#define SPACE_0F	1
-#define SPACE_0F38	2
-#define SPACE_0F3A	3
-#define SPACE_EVEXMAP5	5
-#define SPACE_EVEXMAP6	6
-#define SPACE_XOP08	8
-#define SPACE_XOP09	9
-#define SPACE_XOP0A	0xA
-  OpcodeSpace,
   /* Opcode prefix (values chosen to be usable directly in
      VEX/XOP/EVEX pp fields):
      0: None
@@ -759,7 +737,6 @@ typedef struct i386_opcode_modifier
   unsigned int vex:2;
   unsigned int vexvvvv:2;
   unsigned int vexw:2;
-  unsigned int opcodespace:4;
   unsigned int opcodeprefix:2;
   unsigned int vexsources:2;
   unsigned int sib:3;
@@ -942,8 +919,29 @@ typedef struct insn_template
   /* how many operands */
   unsigned int operands:3;
 
-  /* spare bits */
-  unsigned int :4;
+  /* opcode space */
+  unsigned int opcode_space:4;
+  /* Opcode encoding space (values chosen to be usable directly in
+     VEX/XOP mmmmm and EVEX mm fields):
+     0: Base opcode space.
+     1: 0F opcode prefix / space.
+     2: 0F38 opcode prefix / space.
+     3: 0F3A opcode prefix / space.
+     5: EVEXMAP5 opcode prefix / space.
+     6: EVEXMAP6 opcode prefix / space.
+     8: XOP 08 opcode space.
+     9: XOP 09 opcode space.
+     A: XOP 0A opcode space.
+   */
+#define SPACE_BASE	0
+#define SPACE_0F	1
+#define SPACE_0F38	2
+#define SPACE_0F3A	3
+#define SPACE_EVEXMAP5	5
+#define SPACE_EVEXMAP6	6
+#define SPACE_XOP08	8
+#define SPACE_XOP09	9
+#define SPACE_XOP0A	0xA
 
 /* (Fake) base opcode value for pseudo prefixes.  */
 #define PSEUDO_PREFIX 0
