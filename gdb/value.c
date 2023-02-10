@@ -185,6 +185,7 @@ struct value
       initialized (1),
       stack (0),
       is_zero (false),
+      in_history (false),
       type (type_),
       enclosing_type (type_)
   {
@@ -238,6 +239,9 @@ struct value
   /* True if this is a zero value, created by 'value_zero'; false
      otherwise.  */
   bool is_zero : 1;
+
+  /* True if this a value recorded in value history; false otherwise.  */
+  bool in_history : 1;
 
   /* Location of value (if lval).  */
   union
@@ -385,7 +389,13 @@ value_bits_available (const struct value *value,
 {
   gdb_assert (!value->lazy);
 
-  return !ranges_contain (value->unavailable, offset, length);
+  /* Don't pretend we have anything available there in the history beyond
+     the boundaries of the value recorded.  It's not like inferior memory
+     where there is actual stuff underneath.  */
+  ULONGEST val_len = TARGET_CHAR_BIT * value_enclosing_type (value)->length ();
+  return !((value->in_history
+	    && (offset < 0 || offset + length > val_len))
+	   || ranges_contain (value->unavailable, offset, length));
 }
 
 int
@@ -1797,6 +1807,7 @@ value_copy (const value *arg)
   val->modifiable = arg->modifiable;
   val->stack = arg->stack;
   val->is_zero = arg->is_zero;
+  val->in_history = arg->in_history;
   val->initialized = arg->initialized;
   val->unavailable = arg->unavailable;
   val->optimized_out = arg->optimized_out;
@@ -1950,6 +1961,10 @@ record_latest_value (struct value *val)
      a value on the value history never changes.  */
   if (value_lazy (val))
     value_fetch_lazy (val);
+
+  /* Mark the value as recorded in the history for the availability check.  */
+  val->in_history = true;
+
   /* We preserve VALUE_LVAL so that the user can find out where it was fetched
      from.  This is a bit dubious, because then *&$1 does not just return $1
      but the current contents of that location.  c'est la vie...  */

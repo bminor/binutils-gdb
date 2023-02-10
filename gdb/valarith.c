@@ -182,6 +182,21 @@ value_subscript (struct value *array, LONGEST index)
 	}
 
       index -= *lowerbound;
+
+      /* Do not try to dereference a pointer to an unavailable value.
+	 Instead mock up a new one and give it the original address.  */
+      struct type *elt_type = check_typedef (tarray->target_type ());
+      LONGEST elt_size = type_length_units (elt_type);
+      if (!value_lazy (array)
+	  && !value_bytes_available (array, elt_size * index, elt_size))
+	{
+	  struct value *val = allocate_value (elt_type);
+	  mark_value_bytes_unavailable (val, 0, elt_size);
+	  VALUE_LVAL (val) = lval_memory;
+	  set_value_address (val, value_address (array) + elt_size * index);
+	  return val;
+	}
+
       array = value_coerce_array (array);
     }
 
