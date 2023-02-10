@@ -8620,17 +8620,11 @@ build_modrm_byte (void)
 
       if (i.tm.opcode_modifier.vexsources == XOP2SOURCES)
 	{
-	  if (operand_type_check (i.types[0], imm))
-	    i.vex.register_specifier = NULL;
+	  /* VEX.vvvv encodes one of the sources.  */
+	  if (i.tm.opcode_modifier.vexw == VEXW0)
+	    i.vex.register_specifier = i.op[0].regs;
 	  else
-	    {
-	      /* VEX.vvvv encodes one of the sources when the first
-		 operand is not an immediate.  */
-	      if (i.tm.opcode_modifier.vexw == VEXW0)
-		i.vex.register_specifier = i.op[0].regs;
-	      else
-		i.vex.register_specifier = i.op[1].regs;
-	    }
+	    i.vex.register_specifier = i.op[1].regs;
 
 	  /* Destination is a XMM register encoded in the ModRM.reg
 	     and VEX.R bit.  */

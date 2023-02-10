@@ -1877,7 +1877,7 @@ vpmadcsswd, 0xa6, XOP, Modrm|SpaceXOP08|VexSources=2|VexVVVV=1|VexW=1|NoSuf|Vex,
 vpmadcswd, 0xb6, XOP, Modrm|SpaceXOP08|VexSources=2|VexVVVV=1|VexW=1|NoSuf|Vex, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM, RegXMM }
 vpperm, 0xa3, XOP, D|Modrm|SpaceXOP08|VexSources=2|VexVVVV|VexW0|NoSuf|Vex, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM, RegXMM }
 vprot<xop>, 0x90 | <xop:opc>, XOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
-vprot<xop>, 0xc0 | <xop:opc>, XOP, Modrm|Vex128|SpaceXOP08|VexW0|VexSources=1|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+vprot<xop>, 0xc0 | <xop:opc>, XOP, Modrm|Vex128|SpaceXOP08|VexW0|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 vpsha<xop>, 0x98 | <xop:opc>, XOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
 vpshl<xop>, 0x94 | <xop:opc>, XOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
 
