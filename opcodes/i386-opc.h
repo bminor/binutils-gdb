@@ -619,10 +619,8 @@ enum
   OpcodePrefix,
   /* number of VEX source operands:
      0: <= 2 source operands.
-     1: 2 XOP source operands.
      2: 3 source operands.
    */
-#define XOP2SOURCES	1
 #define VEX3SOURCES	2
   VexSources,
   /* Instruction with a mandatory SIB byte:

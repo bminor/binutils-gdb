@@ -2142,9 +2142,9 @@ operand_size_match (const insn_template *t)
     {
       unsigned int given = i.operands - j - 1;
 
-      /* For 4- and 5-operand insns VEX.W controls just the first two
+      /* For 4-operand and XOP insns VEX.W controls just the first two
 	 register operands.  */
-      if (t->opcode_modifier.vexsources)
+      if (t->opcode_modifier.vexsources || t->cpu_flags.bitfield.cpuxop)
 	given = j < 2 ? 1 - j : j;
 
       if (t->operand_types[j].bitfield.class == Reg
@@ -6933,7 +6933,8 @@ match_template (char mnem_suffix)
 	      if (!(size_match & MATCH_REVERSE))
 		continue;
 	      /* Try reversing direction of operands.  */
-	      j = t->opcode_modifier.vexsources ? 1 : i.operands - 1;
+	      j = t->opcode_modifier.vexsources
+		  || t->cpu_flags.bitfield.cpuxop ? 1 : i.operands - 1;
 	      overlap0 = operand_type_and (i.types[0], operand_types[j]);
 	      overlap1 = operand_type_and (i.types[j], operand_types[0]);
 	      overlap2 = operand_type_and (i.types[1], operand_types[1]);
@@ -6967,7 +6968,8 @@ match_template (char mnem_suffix)
 		      && (intel_syntax || intel_mnemonic))
 		    found_reverse_match |= Opcode_FloatR;
 		}
-	      else if (t->opcode_modifier.vexsources)
+	      else if (t->opcode_modifier.vexsources
+		       || t->cpu_flags.bitfield.cpuxop)
 		{
 		  found_reverse_match = Opcode_VexW;
 		  goto check_operands_345;
@@ -8618,35 +8620,7 @@ build_modrm_byte (void)
       else
 	mem = ~0;
 
-      if (i.tm.opcode_modifier.vexsources == XOP2SOURCES)
-	{
-	  /* VEX.vvvv encodes one of the sources.  */
-	  if (i.tm.opcode_modifier.vexw == VEXW0)
-	    i.vex.register_specifier = i.op[0].regs;
-	  else
-	    i.vex.register_specifier = i.op[1].regs;
-
-	  /* Destination is a XMM register encoded in the ModRM.reg
-	     and VEX.R bit.  */
-	  i.rm.reg = i.op[2].regs->reg_num;
-	  if ((i.op[2].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_R;
-
-	  /* ModRM.rm and VEX.B encodes the other source.  */
-	  if (!i.mem_operands)
-	    {
-	      i.rm.mode = 3;
-
-	      if (i.tm.opcode_modifier.vexw == VEXW0)
-		i.rm.regmem = i.op[1].regs->reg_num;
-	      else
-		i.rm.regmem = i.op[0].regs->reg_num;
-
-	      if ((i.op[1].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_B;
-	    }
-	}
-      else if (i.tm.opcode_modifier.vexvvvv == VEXLWP)
+      if (i.tm.opcode_modifier.vexvvvv == VEXLWP)
 	{
 	  i.vex.register_specifier = i.op[2].regs;
 	  if (!i.mem_operands)
