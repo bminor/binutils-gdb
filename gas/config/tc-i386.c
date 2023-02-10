@@ -4576,8 +4576,7 @@ load_insn_p (void)
   else if (i.tm.opcode_modifier.opcodespace == SPACE_BASE)
     {
       /* test, not, neg, mul, imul, div, idiv.  */
-      if ((i.tm.base_opcode == 0xf6 || i.tm.base_opcode == 0xf7)
-	  && i.tm.extension_opcode != 1)
+      if (base_opcode == 0xf7 && i.tm.extension_opcode != 1)
 	return 1;
 
       /* inc, dec.  */
@@ -4589,13 +4588,12 @@ load_insn_p (void)
 	return 1;
 
       /* rol, ror, rcl, rcr, shl/sal, shr, sar. */
-      if ((base_opcode == 0xc1
-	   || (i.tm.base_opcode >= 0xd0 && i.tm.base_opcode <= 0xd3))
+      if ((base_opcode == 0xc1 || (base_opcode | 2) == 0xd3)
 	  && i.tm.extension_opcode != 6)
 	return 1;
 
       /* Check for x87 instructions.  */
-      if (base_opcode >= 0xd8 && base_opcode <= 0xdf)
+      if ((base_opcode | 6) == 0xdf)
 	{
 	  /* Skip fst, fstp, fstenv, fstcw.  */
 	  if (i.tm.base_opcode == 0xd9
@@ -4638,7 +4636,7 @@ load_insn_p (void)
     {
       /* bt, bts, btr, btc.  */
       if (i.tm.base_opcode == 0xba
-	  && (i.tm.extension_opcode >= 4 && i.tm.extension_opcode <= 7))
+	  && (i.tm.extension_opcode | 3) == 7)
 	return 1;
 
       /* cmpxchg8b, cmpxchg16b, xrstors, vmptrld.  */
@@ -4673,14 +4671,7 @@ load_insn_p (void)
 
   /* add, or, adc, sbb, and, sub, xor, cmp, test, xchg.  */
   if (i.tm.opcode_modifier.opcodespace == SPACE_BASE
-      && (base_opcode == 0x1
-	  || base_opcode == 0x9
-	  || base_opcode == 0x11
-	  || base_opcode == 0x19
-	  || base_opcode == 0x21
-	  || base_opcode == 0x29
-	  || base_opcode == 0x31
-	  || base_opcode == 0x39
+      && ((base_opcode | 0x38) == 0x39
 	  || (base_opcode | 2) == 0x87))
     return 1;
 
@@ -4708,8 +4699,7 @@ insert_lfence_after (void)
 	 chosen by the adversary using an LVI method,
 	 then this data-dependent behavior may leak some aspect
 	 of the secret.  */
-      if (((i.tm.base_opcode | 0x1) == 0xa7
-	   || (i.tm.base_opcode | 0x1) == 0xaf)
+      if (((i.tm.base_opcode | 0x9) == 0xaf)
 	  && i.prefix[REP_PREFIX])
 	{
 	    as_warn (_("`%s` changes flags which would affect control flow behavior"),
@@ -4779,8 +4769,7 @@ insert_lfence_before (void)
 
   /* Output or/not/shl and lfence before near ret.  */
   if (lfence_before_ret != lfence_before_ret_none
-      && (i.tm.base_opcode == 0xc2
-	  || i.tm.base_opcode == 0xc3))
+      && (i.tm.base_opcode | 1) == 0xc3)
     {
       if (last_insn.kind != last_insn_other
 	  && last_insn.seg == now_seg)
