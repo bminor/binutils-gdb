@@ -74,7 +74,7 @@ struct range
   LONGEST offset;
 
   /* Length of the range.  */
-  LONGEST length;
+  ULONGEST length;
 
   /* Returns true if THIS is strictly less than OTHER, useful for
      searching.  We keep ranges sorted by offset and coalesce
@@ -97,10 +97,10 @@ struct range
    [offset2, offset2+len2) overlap.  */
 
 static int
-ranges_overlap (LONGEST offset1, LONGEST len1,
-		LONGEST offset2, LONGEST len2)
+ranges_overlap (LONGEST offset1, ULONGEST len1,
+		LONGEST offset2, ULONGEST len2)
 {
-  ULONGEST h, l;
+  LONGEST h, l;
 
   l = std::max (offset1, offset2);
   h = std::min (offset1 + len1, offset2 + len2);
@@ -112,7 +112,7 @@ ranges_overlap (LONGEST offset1, LONGEST len1,
 
 static int
 ranges_contain (const std::vector<range> &ranges, LONGEST offset,
-		LONGEST length)
+		ULONGEST length)
 {
   range what;
 
@@ -380,7 +380,8 @@ get_value_arch (const struct value *value)
 }
 
 int
-value_bits_available (const struct value *value, LONGEST offset, LONGEST length)
+value_bits_available (const struct value *value,
+		      LONGEST offset, ULONGEST length)
 {
   gdb_assert (!value->lazy);
 
@@ -389,8 +390,16 @@ value_bits_available (const struct value *value, LONGEST offset, LONGEST length)
 
 int
 value_bytes_available (const struct value *value,
-		       LONGEST offset, LONGEST length)
+		       LONGEST offset, ULONGEST length)
 {
+  ULONGEST sign = (1ULL << (sizeof (ULONGEST) * 8 - 1)) / TARGET_CHAR_BIT;
+  ULONGEST mask = (sign << 1) - 1;
+
+  if (offset != ((offset & mask) ^ sign) - sign
+      || length != ((length & mask) ^ sign) - sign
+      || (length > 0 && (~offset & (offset + length - 1) & sign) != 0))
+    error (_("Integer overflow in data location calculation"));
+
   return value_bits_available (value,
 			       offset * TARGET_CHAR_BIT,
 			       length * TARGET_CHAR_BIT);
@@ -460,7 +469,7 @@ value_entirely_optimized_out (struct value *value)
 
 static void
 insert_into_bit_range_vector (std::vector<range> *vectorp,
-			      LONGEST offset, LONGEST length)
+			      LONGEST offset, ULONGEST length)
 {
   range newr;
 
@@ -558,8 +567,8 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
       if (ranges_overlap (bef.offset, bef.length, offset, length))
 	{
 	  /* #1 */
-	  ULONGEST l = std::min (bef.offset, offset);
-	  ULONGEST h = std::max (bef.offset + bef.length, offset + length);
+	  LONGEST l = std::min (bef.offset, offset);
+	  LONGEST h = std::max (bef.offset + bef.length, offset + length);
 
 	  bef.offset = l;
 	  bef.length = h - l;
@@ -600,7 +609,7 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
 	  struct range &r = *i;
 	  if (r.offset <= t.offset + t.length)
 	    {
-	      ULONGEST l, h;
+	      LONGEST l, h;
 
 	      l = std::min (t.offset, r.offset);
 	      h = std::max (t.offset + t.length, r.offset + r.length);
@@ -626,14 +635,14 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
 
 void
 mark_value_bits_unavailable (struct value *value,
-			     LONGEST offset, LONGEST length)
+			     LONGEST offset, ULONGEST length)
 {
   insert_into_bit_range_vector (&value->unavailable, offset, length);
 }
 
 void
 mark_value_bytes_unavailable (struct value *value,
-			      LONGEST offset, LONGEST length)
+			      LONGEST offset, ULONGEST length)
 {
   mark_value_bits_unavailable (value,
 			       offset * TARGET_CHAR_BIT,
@@ -786,7 +795,7 @@ static int
 find_first_range_overlap_and_match (struct ranges_and_idx *rp1,
 				    struct ranges_and_idx *rp2,
 				    LONGEST offset1, LONGEST offset2,
-				    LONGEST length, ULONGEST *l, ULONGEST *h)
+				    ULONGEST length, ULONGEST *l, ULONGEST *h)
 {
   rp1->idx = find_first_range_overlap (rp1->ranges, rp1->idx,
 				       offset1, length);
@@ -1306,14 +1315,14 @@ value_contents_all (struct value *value)
 static void
 ranges_copy_adjusted (std::vector<range> *dst_range, int dst_bit_offset,
 		      const std::vector<range> &src_range, int src_bit_offset,
-		      int bit_length)
+		      unsigned int bit_length)
 {
   for (const range &r : src_range)
     {
-      ULONGEST h, l;
+      LONGEST h, l;
 
       l = std::max (r.offset, (LONGEST) src_bit_offset);
-      h = std::min (r.offset + r.length,
+      h = std::min ((LONGEST) (r.offset + r.length),
 		    (LONGEST) src_bit_offset + bit_length);
 
       if (l < h)

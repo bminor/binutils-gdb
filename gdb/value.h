@@ -505,7 +505,7 @@ extern int value_bits_synthetic_pointer (const struct value *value,
    byte is unavailable.  */
 
 extern int value_bytes_available (const struct value *value,
-				  LONGEST offset, LONGEST length);
+				  LONGEST offset, ULONGEST length);
 
 /* Given a value, determine whether the contents bits starting at
    OFFSET and extending for LENGTH bits are available.  This returns
@@ -513,7 +513,7 @@ extern int value_bytes_available (const struct value *value,
    bit is unavailable.  */
 
 extern int value_bits_available (const struct value *value,
-				 LONGEST offset, LONGEST length);
+				 LONGEST offset, ULONGEST length);
 
 /* Like value_bytes_available, but return false if any byte in the
    whole object is unavailable.  */
@@ -527,13 +527,13 @@ extern int value_entirely_unavailable (struct value *value);
    LENGTH bytes as unavailable.  */
 
 extern void mark_value_bytes_unavailable (struct value *value,
-					  LONGEST offset, LONGEST length);
+					  LONGEST offset, ULONGEST length);
 
 /* Mark VALUE's content bits starting at OFFSET and extending for
    LENGTH bits as unavailable.  */
 
 extern void mark_value_bits_unavailable (struct value *value,
-					 LONGEST offset, LONGEST length);
+					 LONGEST offset, ULONGEST length);
 
 /* Compare LENGTH bytes of VAL1's contents starting at OFFSET1 with
    LENGTH bytes of VAL2's contents starting at OFFSET2.
