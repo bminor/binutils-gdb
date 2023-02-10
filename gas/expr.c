@@ -573,10 +573,6 @@ integer_constant (int radix, expressionS *expressionP)
 	  symbolP = symbol_find (name);
 	  if ((symbolP != NULL) && (S_IS_DEFINED (symbolP)))
 	    {
-	      /* Local labels are never absolute.  Don't waste time
-		 checking absoluteness.  */
-	      know (SEG_NORMAL (S_GET_SEGMENT (symbolP)));
-
 	      expressionP->X_op = O_symbol;
 	      expressionP->X_add_symbol = symbolP;
 	    }
@@ -604,11 +600,6 @@ integer_constant (int radix, expressionS *expressionP)
 	  name = fb_label_name (number, 1);
 	  symbolP = symbol_find_or_make (name);
 	  /* We have no need to check symbol properties.  */
-#ifndef many_segments
-	  /* Since "know" puts its arg into a "string", we
-	     can't have newlines in the argument.  */
-	  know (S_GET_SEGMENT (symbolP) == undefined_section || S_GET_SEGMENT (symbolP) == text_section || S_GET_SEGMENT (symbolP) == data_section);
-#endif
 	  expressionP->X_op = O_symbol;
 	  expressionP->X_add_symbol = symbolP;
 	  expressionP->X_add_number = 0;
