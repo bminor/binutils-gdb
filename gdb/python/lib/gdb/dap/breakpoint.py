@@ -1,4 +1,4 @@
-# Copyright 2022 Free Software Foundation, Inc.
+# Copyright 2022, 2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ def _set_breakpoints(kind, specs):
 
 
 @request("setBreakpoints")
-def set_breakpoint(source, *, breakpoints=[], **args):
+def set_breakpoint(*, source, breakpoints=[], **args):
     if "path" not in source:
         result = []
     else:
@@ -108,7 +108,7 @@ def set_breakpoint(source, *, breakpoints=[], **args):
 
 @request("setFunctionBreakpoints")
 @capability("supportsFunctionBreakpoints")
-def set_fn_breakpoint(breakpoints, **args):
+def set_fn_breakpoint(*, breakpoints, **args):
     specs = []
     for bp in breakpoints:
         specs.append(

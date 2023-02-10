@@ -1,4 +1,4 @@
-# Copyright 2022 Free Software Foundation, Inc.
+# Copyright 2022, 2023 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ def _evaluate(expr, frame_id):
 # FIXME return a structured response using pretty-printers / varobj
 # FIXME supportsVariableType handling
 @request("evaluate")
-def eval_request(expression, *, frameId=None, **args):
+def eval_request(*, expression, frameId=None, **args):
     result = send_gdb_with_response(lambda: _evaluate(expression, frameId))
     return {
         "result": result,
