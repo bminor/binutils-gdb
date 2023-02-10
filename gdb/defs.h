@@ -37,7 +37,7 @@
 #include "bfd.h"
 
 #include <sys/types.h>
-#include <limits.h>
+#include <climits>
 
 /* The libdecnumber library, on which GDB depends, includes a header file
    called gstdint.h instead of relying directly on stdint.h.  GDB, on the
@@ -444,37 +444,6 @@ enum val_prettyformat
    supported.  */
 #ifndef FOPEN_RB
 # include "fopen-bin.h"
-#endif
-
-/* Defaults for system-wide constants (if not defined by xm.h, we fake it).
-   FIXME: Assumes 2's complement arithmetic.  */
-
-#if !defined (UINT_MAX)
-#define	UINT_MAX ((unsigned int)(~0))	    /* 0xFFFFFFFF for 32-bits */
-#endif
-
-#if !defined (INT_MAX)
-#define	INT_MAX ((int)(UINT_MAX >> 1))	    /* 0x7FFFFFFF for 32-bits */
-#endif
-
-#if !defined (INT_MIN)
-#define INT_MIN ((int)((int) ~0 ^ INT_MAX)) /* 0x80000000 for 32-bits */
-#endif
-
-#if !defined (ULONG_MAX)
-#define	ULONG_MAX ((unsigned long)(~0L))    /* 0xFFFFFFFF for 32-bits */
-#endif
-
-#if !defined (LONG_MAX)
-#define	LONG_MAX ((long)(ULONG_MAX >> 1))   /* 0x7FFFFFFF for 32-bits */
-#endif
-
-#if !defined (ULONGEST_MAX)
-#define	ULONGEST_MAX (~(ULONGEST)0)        /* 0xFFFFFFFFFFFFFFFF for 64-bits */
-#endif
-
-#if !defined (LONGEST_MAX)                 /* 0x7FFFFFFFFFFFFFFF for 64-bits */
-#define	LONGEST_MAX ((LONGEST)(ULONGEST_MAX >> 1))
 #endif
 
 /* * Convert a LONGEST to an int.  This is used in contexts (e.g. number of

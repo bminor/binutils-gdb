@@ -52,7 +52,6 @@ extern "C"
 #include "defs.h"
 
 #include <ctype.h>
-#include <limits.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/ptrace.h>
