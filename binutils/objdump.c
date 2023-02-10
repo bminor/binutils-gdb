@@ -3685,15 +3685,18 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
    next_sym
   } loop_until;
 
-  /* Sections that do not contain machine
-     code are not normally disassembled.  */
-  if (! disassemble_all
-      && only_list == NULL
-      && ((section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
-	  != (SEC_CODE | SEC_HAS_CONTENTS)))
-    return;
+  if (only_list == NULL)
+    {
+      /* Sections that do not contain machine
+	 code are not normally disassembled.  */
+      if ((section->flags & SEC_HAS_CONTENTS) == 0)
+	return;
 
-  if (! process_section_p (section))
+      if (! disassemble_all
+	  && (section->flags & SEC_CODE) == 0)
+	return;
+    }
+  else if (!process_section_p (section))
     return;
 
   datasize = bfd_section_size (section);
@@ -4970,10 +4973,12 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
   int count;
   int width;
 
-  if (! process_section_p (section))
-    return;
-
-  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+  if (only_list == NULL)
+    {
+      if ((section->flags & SEC_HAS_CONTENTS) == 0)
+	return;
+    }
+  else if (!process_section_p (section))
     return;
 
   if ((datasize = bfd_section_size (section)) == 0)

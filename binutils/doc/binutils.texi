@@ -2407,8 +2407,9 @@ used when disassembling.
 
 @item -D
 @itemx --disassemble-all
-Like @option{-d}, but disassemble the contents of all sections, not just
-those expected to contain instructions.
+Like @option{-d}, but disassemble the contents of all non-empty
+non-bss sections, not just those expected to contain instructions.
+@option{-j} may be used to select specific sections.
 
 This option also has a subtle effect on the disassembly of
 instructions in code sections.  When option @option{-d} is in effect
@@ -2502,7 +2503,8 @@ for specification with @option{-b} or @option{-m}.
 @item -j @var{name}
 @itemx --section=@var{name}
 @cindex section information
-Display information only for section @var{name}.
+Display information for section @var{name}.  This option may be
+specified multiple times.
 
 @item -L
 @itemx --process-links
@@ -2775,8 +2777,9 @@ disassembly.
 @itemx --full-contents
 @cindex sections, full contents
 @cindex object file sections
-Display the full contents of any sections requested.  By default all
-non-empty sections are displayed.
+Display the full contents of sections, often used in combination with
+@option{-j} to request specific sections.  By default all non-empty
+non-bss sections are displayed.
 
 @item -S
 @itemx --source
