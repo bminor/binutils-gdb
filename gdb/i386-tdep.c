@@ -8613,7 +8613,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      appended to the list first, so that it supercedes the DWARF
      unwinder in function epilogues (where the DWARF unwinder
      currently fails).  */
-  frame_unwind_append_unwinder (gdbarch, &i386_epilogue_frame_unwind);
+  if (info.bfd_arch_info->bits_per_word == 32)
+    frame_unwind_append_unwinder (gdbarch, &i386_epilogue_frame_unwind);
 
   /* Hook in the DWARF CFI frame unwinder.  This unwinder is appended
      to the list before the prologue-based unwinders, so that DWARF
@@ -8792,9 +8793,12 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep-> bnd0_regnum = -1;
 
   /* Hook in the legacy prologue-based unwinders last (fallback).  */
-  frame_unwind_append_unwinder (gdbarch, &i386_stack_tramp_frame_unwind);
-  frame_unwind_append_unwinder (gdbarch, &i386_sigtramp_frame_unwind);
-  frame_unwind_append_unwinder (gdbarch, &i386_frame_unwind);
+  if (info.bfd_arch_info->bits_per_word == 32)
+    {
+      frame_unwind_append_unwinder (gdbarch, &i386_stack_tramp_frame_unwind);
+      frame_unwind_append_unwinder (gdbarch, &i386_sigtramp_frame_unwind);
+      frame_unwind_append_unwinder (gdbarch, &i386_frame_unwind);
+    }
 
   /* If we have a register mapping, enable the generic core file
      support, unless it has already been enabled.  */
