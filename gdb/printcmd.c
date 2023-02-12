@@ -1247,7 +1247,7 @@ print_value (value *val, const value_print_options &opts)
      need to load as many array elements as we plan to print.  */
   scoped_array_length_limiting limit_large_arrays (opts.print_max);
 
-  int histindex = record_latest_value (val);
+  int histindex = val->record_latest ();
 
   annotate_value_history_begin (histindex, val->type ());
 

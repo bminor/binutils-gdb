@@ -1330,7 +1330,7 @@ gdbscm_history_append_x (SCM value)
     = vlscm_get_value_smob_arg_unsafe (value, SCM_ARG1, FUNC_NAME);
   return gdbscm_wrap ([=]
     {
-      return scm_from_int (record_latest_value (v_smob->value));
+      return scm_from_int (v_smob->value->record_latest ());
     });
 }
 

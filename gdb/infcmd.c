@@ -1657,7 +1657,7 @@ finish_command_fsm::should_stop (struct thread_info *tp)
 	      rv->value = get_return_value (function, func);
 
 	  if (rv->value != nullptr)
-	    rv->value_history_index = record_latest_value (rv->value);
+	    rv->value_history_index = rv->value->record_latest ();
 	}
     }
   else if (tp->control.stop_step)

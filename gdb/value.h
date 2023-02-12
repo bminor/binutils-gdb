@@ -605,6 +605,9 @@ public:
 					LONGEST bit_offset,
 					LONGEST bit_length);
 
+  /* Record this value on the value history, and return its location
+     in the history.  The value is removed from the value chain.  */
+  int record_latest ();
 
   /* Type of value; either not an lval, or one of the various
      different possible kinds of lval.  */
@@ -1450,8 +1453,6 @@ extern int unop_user_defined_p (enum exp_opcode op, struct value *arg1);
 extern int destructor_name_p (const char *name, struct type *type);
 
 extern value_ref_ptr release_value (struct value *val);
-
-extern int record_latest_value (struct value *val);
 
 extern void modify_field (struct type *type, gdb_byte *addr,
 			  LONGEST fieldval, LONGEST bitpos, LONGEST bitsize);

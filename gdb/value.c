@@ -1643,46 +1643,42 @@ value::set_component_location (const struct value *whole)
    Returns the absolute history index of the entry.  */
 
 int
-record_latest_value (struct value *val)
+value::record_latest ()
 {
-  struct type *enclosing_type = val->enclosing_type ();
-  struct type *type = val->type ();
-
   /* We don't want this value to have anything to do with the inferior anymore.
      In particular, "set $1 = 50" should not affect the variable from which
      the value was taken, and fast watchpoints should be able to assume that
      a value on the value history never changes.  */
-  if (val->lazy ())
+  if (lazy ())
     {
       /* We know that this is a _huge_ array, any attempt to fetch this
 	 is going to cause GDB to throw an error.  However, to allow
 	 the array to still be displayed we fetch its contents up to
 	 `max_value_size' and mark anything beyond "unavailable" in
 	 the history.  */
-      if (type->code () == TYPE_CODE_ARRAY
-	  && type->length () > max_value_size
+      if (m_type->code () == TYPE_CODE_ARRAY
+	  && m_type->length () > max_value_size
 	  && array_length_limiting_element_count.has_value ()
-	  && enclosing_type == type
-	  && calculate_limited_array_length (type) <= max_value_size)
-	val->m_limited_length = max_value_size;
+	  && m_enclosing_type == m_type
+	  && calculate_limited_array_length (m_type) <= max_value_size)
+	m_limited_length = max_value_size;
 
-      val->fetch_lazy ();
+      fetch_lazy ();
     }
 
-  ULONGEST limit = val->m_limited_length;
+  ULONGEST limit = m_limited_length;
   if (limit != 0)
-    val->mark_bytes_unavailable (limit,
-				 enclosing_type->length () - limit);
+    mark_bytes_unavailable (limit, m_enclosing_type->length () - limit);
 
   /* Mark the value as recorded in the history for the availability check.  */
-  val->m_in_history = true;
+  m_in_history = true;
 
   /* We preserve VALUE_LVAL so that the user can find out where it was fetched
      from.  This is a bit dubious, because then *&$1 does not just return $1
      but the current contents of that location.  c'est la vie...  */
-  val->set_modifiable (0);
+  set_modifiable (0);
 
-  value_history.push_back (release_value (val));
+  value_history.push_back (release_value (this));
 
   return value_history.size ();
 }

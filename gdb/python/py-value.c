@@ -1959,7 +1959,7 @@ gdbpy_add_history (PyObject *self, PyObject *args)
 
   try
     {
-      int idx = record_latest_value (value);
+      int idx = value->record_latest ();
       return gdb_py_object_from_longest (idx).release ();
     }
   catch (const gdb_exception &except)

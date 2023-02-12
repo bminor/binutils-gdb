@@ -2437,7 +2437,7 @@ dump_arc_instruction_command (const char *args, int from_tty)
     val = evaluate_expression (parse_expression (args).get ());
   else
     val = access_value_history (0);
-  record_latest_value (val);
+  val->record_latest ();
 
   CORE_ADDR address = value_as_address (val);
   struct arc_instruction insn;
