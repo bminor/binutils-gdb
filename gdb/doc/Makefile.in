@@ -121,6 +121,11 @@ PDFTEX = pdftex
 # Program to generate Postscript files from DVI files.
 DVIPS = dvips
 
+# Readline includes.
+READLINE_SYSTEM_DOC_INCLUDES =
+READLINE_INTREE_DOC_INCLUDES = $(READLINE_DIR)/rluser.texi $(READLINE_DIR)/hsuser.texi
+READLINE_DOC_SOURCE_INCLUDES = @READLINE_DOC_SOURCE_INCLUDES@
+
 # Main GDB manual
 # Note that this unconditionally includes the readline texi files,
 # even when --with-system-readline is used.  This is harmless because
@@ -129,8 +134,7 @@ GDB_DOC_SOURCE_INCLUDES = \
 	$(srcdir)/fdl.texi \
 	$(srcdir)/gpl.texi \
 	$(srcdir)/agentexpr.texi \
-	$(READLINE_DIR)/rluser.texi \
-	$(READLINE_DIR)/hsuser.texi
+	$(READLINE_DOC_SOURCE_INCLUDES)
 GDB_DOC_BUILD_INCLUDES = \
 	gdb-cfg.texi \
 	GDBvn.texi
