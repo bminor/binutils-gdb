@@ -896,9 +896,13 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
       (*swap_ext_in) (abfd, (void *) eraw_src, &internal_esym);
 
       /* PR 17512: file: 3372-1000-0.004.  */
-      if (internal_esym.asym.iss >= ecoff_data (abfd)->debug_info.symbolic_header.issExtMax
+      HDRR *symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
+      if (internal_esym.asym.iss >= symhdr->issExtMax
 	  || internal_esym.asym.iss < 0)
-	return false;
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
 
       internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ssext
 				   + internal_esym.asym.iss);
@@ -909,17 +913,13 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
 	return false;
 
       /* The alpha uses a negative ifd field for section symbols.  */
-      if (internal_esym.ifd >= 0)
-	{
-	  /* PR 17512: file: 3372-1983-0.004.  */
-	  if (internal_esym.ifd >= ecoff_data (abfd)->debug_info.symbolic_header.ifdMax)
-	    internal_ptr->fdr = NULL;
-	  else
-	    internal_ptr->fdr = (ecoff_data (abfd)->debug_info.fdr
-				 + internal_esym.ifd);
-	}
-      else
+      /* PR 17512: file: 3372-1983-0.004.  */
+      if (internal_esym.ifd >= symhdr->ifdMax
+	  || internal_esym.ifd < 0)
 	internal_ptr->fdr = NULL;
+      else
+	internal_ptr->fdr = (ecoff_data (abfd)->debug_info.fdr
+			     + internal_esym.ifd);
       internal_ptr->local = false;
       internal_ptr->native = (void *) eraw_src;
     }
@@ -943,6 +943,14 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
 	  SYMR internal_sym;
 
 	  (*swap_sym_in) (abfd, (void *) lraw_src, &internal_sym);
+
+	  HDRR *symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
+	  if (internal_sym.iss >= symhdr->issMax
+	      || internal_sym.iss < 0)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
 	  internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ss
 				       + fdr_ptr->issBase
 				       + internal_sym.iss);
