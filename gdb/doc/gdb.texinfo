@@ -12832,8 +12832,8 @@ These functions do not require @value{GDBN} to be configured with
 
 @table @code
 
-@item $_isvoid (@var{expr})
 @findex $_isvoid@r{, convenience function}
+@item $_isvoid (@var{expr})
 Return one if the expression @var{expr} is @code{void}.  Otherwise it
 returns zero.
 
@@ -12888,8 +12888,8 @@ $3 = void
 $4 = 1
 @end smallexample
 
-@item $_gdb_setting_str (@var{setting})
 @findex $_gdb_setting_str@r{, convenience function}
+@item $_gdb_setting_str (@var{setting})
 Return the value of the @value{GDBN} @var{setting} as a string.
 @var{setting} is any setting that can be used in a @code{set} or
 @code{show} command (@pxref{Controlling GDB}).
@@ -12904,8 +12904,8 @@ $2 = "30"
 (@value{GDBP})
 @end smallexample
 
-@item $_gdb_setting (@var{setting})
 @findex $_gdb_setting@r{, convenience function}
+@item $_gdb_setting (@var{setting})
 Return the value of the @value{GDBN} @var{setting}.
 The type of the returned value depends on the setting.
 
@@ -12967,13 +12967,13 @@ Other setting types (enum, filename, optional filename, string, string noescape)
 are returned as string values.
 
 
-@item $_gdb_maint_setting_str (@var{setting})
 @findex $_gdb_maint_setting_str@r{, convenience function}
+@item $_gdb_maint_setting_str (@var{setting})
 Like the @code{$_gdb_setting_str} function, but works with
 @code{maintenance set} variables.
 
-@item $_gdb_maint_setting (@var{setting})
 @findex $_gdb_maint_setting@r{, convenience function}
+@item $_gdb_maint_setting (@var{setting})
 Like the @code{$_gdb_setting} function, but works with
 @code{maintenance set} variables.
 
@@ -12984,30 +12984,30 @@ The following functions require @value{GDBN} to be configured with
 
 @table @code
 
-@item $_memeq(@var{buf1}, @var{buf2}, @var{length})
 @findex $_memeq@r{, convenience function}
+@item $_memeq(@var{buf1}, @var{buf2}, @var{length})
 Returns one if the @var{length} bytes at the addresses given by
 @var{buf1} and @var{buf2} are equal.
 Otherwise it returns zero.
 
-@item $_regex(@var{str}, @var{regex})
 @findex $_regex@r{, convenience function}
+@item $_regex(@var{str}, @var{regex})
 Returns one if the string @var{str} matches the regular expression
 @var{regex}.  Otherwise it returns zero.
 The syntax of the regular expression is that specified by @code{Python}'s
 regular expression support.
 
-@item $_streq(@var{str1}, @var{str2})
 @findex $_streq@r{, convenience function}
+@item $_streq(@var{str1}, @var{str2})
 Returns one if the strings @var{str1} and @var{str2} are equal.
 Otherwise it returns zero.
 
-@item $_strlen(@var{str})
 @findex $_strlen@r{, convenience function}
+@item $_strlen(@var{str})
 Returns the length of string @var{str}.
 
-@item $_caller_is(@var{name}@r{[}, @var{number_of_frames}@r{]})
 @findex $_caller_is@r{, convenience function}
+@item $_caller_is(@var{name}@r{[}, @var{number_of_frames}@r{]})
 Returns one if the calling function's name is equal to @var{name}.
 Otherwise it returns zero.
 
@@ -13033,8 +13033,8 @@ $1 = 1
 $1 = 1
 @end smallexample
 
-@item $_caller_matches(@var{regexp}@r{[}, @var{number_of_frames}@r{]})
 @findex $_caller_matches@r{, convenience function}
+@item $_caller_matches(@var{regexp}@r{[}, @var{number_of_frames}@r{]})
 Returns one if the calling function's name matches the regular expression
 @var{regexp}.  Otherwise it returns zero.
 
@@ -13042,8 +13042,8 @@ If the optional argument @var{number_of_frames} is provided,
 it is the number of frames up in the stack to look.
 The default is 1.
 
-@item $_any_caller_is(@var{name}@r{[}, @var{number_of_frames}@r{]})
 @findex $_any_caller_is@r{, convenience function}
+@item $_any_caller_is(@var{name}@r{[}, @var{number_of_frames}@r{]})
 Returns one if any calling function's name is equal to @var{name}.
 Otherwise it returns zero.
 
@@ -13056,8 +13056,8 @@ checks all stack frames from the immediate caller to the frame specified
 by @var{number_of_frames}, whereas @code{$_caller_is} only checks the
 frame specified by @var{number_of_frames}.
 
-@item $_any_caller_matches(@var{regexp}@r{[}, @var{number_of_frames}@r{]})
 @findex $_any_caller_matches@r{, convenience function}
+@item $_any_caller_matches(@var{regexp}@r{[}, @var{number_of_frames}@r{]})
 Returns one if any calling function's name matches the regular expression
 @var{regexp}.  Otherwise it returns zero.
 
@@ -13070,8 +13070,8 @@ checks all stack frames from the immediate caller to the frame specified
 by @var{number_of_frames}, whereas @code{$_caller_matches} only checks the
 frame specified by @var{number_of_frames}.
 
-@item $_as_string(@var{value})
 @findex $_as_string@r{, convenience function}
+@item $_as_string(@var{value})
 Return the string representation of @var{value}.
 
 This function is useful to obtain the textual label (enumerator) of an
@@ -13083,10 +13083,10 @@ an enumerated type:
 Visiting node of type NODE_INTEGER
 @end smallexample
 
-@item $_cimag(@var{value})
-@itemx $_creal(@var{value})
 @findex $_cimag@r{, convenience function}
 @findex $_creal@r{, convenience function}
+@item $_cimag(@var{value})
+@itemx $_creal(@var{value})
 Return the imaginary (@code{$_cimag}) or real (@code{$_creal}) part of
 the complex number @var{value}.
 
@@ -24269,15 +24269,15 @@ The debugging stub for your architecture supplies these three
 subroutines:
 
 @table @code
-@item set_debug_traps
 @findex set_debug_traps
+@item set_debug_traps
 @cindex remote serial stub, initialization
 This routine arranges for @code{handle_exception} to run when your
 program stops.  You must call this subroutine explicitly in your
 program's startup code.
 
-@item handle_exception
 @findex handle_exception
+@item handle_exception
 @cindex remote serial stub, main routine
 This is the central workhorse, but your program never calls it
 explicitly---the setup code arranges for @code{handle_exception} to
@@ -24324,14 +24324,14 @@ First of all you need to tell the stub how to communicate with the
 serial port.
 
 @table @code
-@item int getDebugChar()
 @findex getDebugChar
+@item int getDebugChar()
 Write this subroutine to read a single character from the serial port.
 It may be identical to @code{getchar} for your target system; a
 different name is used to allow you to distinguish the two if you wish.
 
-@item void putDebugChar(int)
 @findex putDebugChar
+@item void putDebugChar(int)
 Write this subroutine to write a single character to the serial port.
 It may be identical to @code{putchar} for your target system; a
 different name is used to allow you to distinguish the two if you wish.
@@ -24353,8 +24353,8 @@ is to just execute a breakpoint instruction (the ``dirty'' part is that
 Other routines you need to supply are:
 
 @table @code
-@item void exceptionHandler (int @var{exception_number}, void *@var{exception_address})
 @findex exceptionHandler
+@item void exceptionHandler (int @var{exception_number}, void *@var{exception_address})
 Write this function to install @var{exception_address} in the exception
 handling tables.  You need to do this because the stub does not have any
 way of knowing what the exception handling tables on your target system
@@ -24375,8 +24375,8 @@ should be at privilege level 0 (the most privileged level).  The
 @sc{sparc} and 68k stubs are able to mask interrupts themselves without
 help from @code{exceptionHandler}.
 
-@item void flush_i_cache()
 @findex flush_i_cache
+@item void flush_i_cache()
 On @sc{sparc} and @sc{sparclite} only, write this subroutine to flush the
 instruction cache, if any, on your target machine.  If there is no
 instruction cache, this subroutine may be a no-op.
@@ -24389,8 +24389,8 @@ function to make certain that the state of your program is stable.
 You must also make sure this library routine is available:
 
 @table @code
-@item void *memset(void *, int, int)
 @findex memset
+@item void *memset(void *, int, int)
 This is the standard library function @code{memset} that sets an area of
 memory to a known value.  If you have one of the free versions of
 @code{libc.a}, @code{memset} can be found there; otherwise, you must
@@ -31077,8 +31077,8 @@ In addition to a number of out-of-band notifications, the response to a
 The synchronous operation was successful, @code{@var{results}} are the return
 values.
 
-@item "^running"
 @findex ^running
+@item "^running"
 This result record is equivalent to @samp{^done}.  Historically, it
 was output instead of @samp{^done} if the command has resumed the
 target.  This behaviour is maintained for backward compatibility, but
@@ -31086,12 +31086,12 @@ all frontends should treat @samp{^done} and @samp{^running}
 identically and rely on the @samp{*running} output record to determine
 which threads are resumed.
 
-@item "^connected"
 @findex ^connected
+@item "^connected"
 @value{GDBN} has connected to a remote target.
 
-@item "^error" "," "msg=" @var{c-string} [ "," "code=" @var{c-string} ]
 @findex ^error
+@item "^error" "," "msg=" @var{c-string} [ "," "code=" @var{c-string} ]
 The operation failed.  The @code{msg=@var{c-string}} variable contains
 the corresponding error message.
 
@@ -31104,8 +31104,8 @@ error condition.  At present, only one error code is defined:
 Indicates that the command causing the error does not exist.
 @end table
 
-@item "^exit"
 @findex ^exit
+@item "^exit"
 @value{GDBN} has terminated.
 
 @end table
@@ -31761,8 +31761,8 @@ not been implemented yet and these are labeled N.A.@: (not available).
 This section documents @sc{gdb/mi} commands for manipulating
 breakpoints.
 
-@subheading The @code{-break-after} Command
 @findex -break-after
+@subheading The @code{-break-after} Command
 
 @subsubheading Synopsis
 
@@ -31808,12 +31808,12 @@ line="5",thread-groups=["i1"],times="0",ignore="3"@}]@}
 @end smallexample
 
 @ignore
-@subheading The @code{-break-catch} Command
 @findex -break-catch
+@subheading The @code{-break-catch} Command
 @end ignore
 
-@subheading The @code{-break-commands} Command
 @findex -break-commands
+@subheading The @code{-break-commands} Command
 
 @subsubheading Synopsis
 
@@ -31847,8 +31847,8 @@ times="0"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-break-condition} Command
 @findex -break-condition
+@subheading The @code{-break-condition} Command
 
 @subsubheading Synopsis
 
@@ -31889,8 +31889,8 @@ line="5",cond="1",thread-groups=["i1"],times="0",ignore="3"@}]@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-break-delete} Command
 @findex -break-delete
+@subheading The @code{-break-delete} Command
 
 @subsubheading Synopsis
 
@@ -31924,8 +31924,8 @@ body=[]@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-break-disable} Command
 @findex -break-disable
+@subheading The @code{-break-disable} Command
 
 @subsubheading Synopsis
 
@@ -31961,8 +31961,8 @@ line="5",thread-groups=["i1"],times="0"@}]@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-break-enable} Command
 @findex -break-enable
+@subheading The @code{-break-enable} Command
 
 @subsubheading Synopsis
 
@@ -31997,8 +31997,8 @@ line="5",thread-groups=["i1"],times="0"@}]@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-break-info} Command
 @findex -break-info
+@subheading The @code{-break-info} Command
 
 @subsubheading Synopsis
 
@@ -32020,9 +32020,9 @@ The corresponding @value{GDBN} command is @samp{info break @var{breakpoint}}.
 @subsubheading Example
 N.A.
 
-@subheading The @code{-break-insert} Command
 @findex -break-insert
 @anchor{-break-insert}
+@subheading The @code{-break-insert} Command
 
 @subsubheading Synopsis
 
@@ -32143,8 +32143,8 @@ times="0"@}]@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-dprintf-insert} Command
 @findex -dprintf-insert
+@subheading The @code{-dprintf-insert} Command
 
 @subsubheading Synopsis
 
@@ -32217,8 +32217,8 @@ original-location="mi-dprintf.c:26"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-break-list} Command
 @findex -break-list
+@subheading The @code{-break-list} Command
 
 @subsubheading Synopsis
 
@@ -32293,8 +32293,8 @@ body=[]@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-break-passcount} Command
 @findex -break-passcount
+@subheading The @code{-break-passcount} Command
 
 @subsubheading Synopsis
 
@@ -32307,8 +32307,8 @@ Set the passcount for tracepoint @var{tracepoint-number} to
 is not a tracepoint, error is emitted.  This corresponds to CLI
 command @samp{passcount}.
 
-@subheading The @code{-break-watch} Command
 @findex -break-watch
+@subheading The @code{-break-watch} Command
 
 @subsubheading Synopsis
 
@@ -32476,8 +32476,8 @@ catchpoints.
 @node Shared Library GDB/MI Catchpoint Commands
 @subsection Shared Library @sc{gdb/mi} Catchpoints
 
-@subheading The @code{-catch-load} Command
 @findex -catch-load
+@subheading The @code{-catch-load} Command
 
 @subsubheading Synopsis
 
@@ -32506,8 +32506,8 @@ what="load of library matching foo.so",catch-type="load",times="0"@}
 @end smallexample
 
 
-@subheading The @code{-catch-unload} Command
 @findex -catch-unload
+@subheading The @code{-catch-unload} Command
 
 @subsubheading Synopsis
 
@@ -32540,8 +32540,8 @@ what="load of library matching bar.so",catch-type="unload",times="0"@}
 The following @sc{gdb/mi} commands can be used to create catchpoints
 that stop the execution when Ada exceptions are being raised.
 
-@subheading The @code{-catch-assert} Command
 @findex -catch-assert
+@subheading The @code{-catch-assert} Command
 
 @subsubheading Synopsis
 
@@ -32577,8 +32577,8 @@ original-location="__gnat_debug_raise_assert_failure"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-catch-exception} Command
 @findex -catch-exception
+@subheading The @code{-catch-exception} Command
 
 @subsubheading Synopsis
 
@@ -32626,8 +32626,8 @@ times="0",original-location="__gnat_debug_raise_exception"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-catch-handlers} Command
 @findex -catch-handlers
+@subheading The @code{-catch-handlers} Command
 
 @subsubheading Synopsis
 
@@ -32677,8 +32677,8 @@ The following @sc{gdb/mi} commands can be used to create catchpoints
 that stop the execution when C@t{++} exceptions are being throw, rethrown,
 or caught.
 
-@subheading The @code{-catch-throw} Command
 @findex -catch-throw
+@subheading The @code{-catch-throw} Command
 
 @subsubheading Synopsis
 
@@ -32721,8 +32721,8 @@ and @samp{tcatch throw} (@pxref{Set Catchpoints}).
 (gdb)
 @end smallexample
 
-@subheading The @code{-catch-rethrow} Command
 @findex -catch-rethrow
+@subheading The @code{-catch-rethrow} Command
 
 @subsubheading Synopsis
 
@@ -32765,8 +32765,8 @@ and @samp{tcatch rethrow} (@pxref{Set Catchpoints}).
 (gdb)
 @end smallexample
 
-@subheading The @code{-catch-catch} Command
 @findex -catch-catch
+@subheading The @code{-catch-catch} Command
 
 @subsubheading Synopsis
 
@@ -32813,8 +32813,8 @@ and @samp{tcatch catch} (@pxref{Set Catchpoints}).
 @node GDB/MI Program Context
 @section @sc{gdb/mi}  Program Context
 
-@subheading The @code{-exec-arguments} Command
 @findex -exec-arguments
+@subheading The @code{-exec-arguments} Command
 
 
 @subsubheading Synopsis
@@ -32841,8 +32841,8 @@ The corresponding @value{GDBN} command is @samp{set args}.
 
 
 @ignore
-@subheading The @code{-exec-show-arguments} Command
 @findex -exec-show-arguments
+@subheading The @code{-exec-show-arguments} Command
 
 @subsubheading Synopsis
 
@@ -32861,8 +32861,8 @@ N.A.
 @end ignore
 
 
-@subheading The @code{-environment-cd} Command
 @findex -environment-cd
+@subheading The @code{-environment-cd} Command
 
 @subsubheading Synopsis
 
@@ -32886,8 +32886,8 @@ The corresponding @value{GDBN} command is @samp{cd}.
 @end smallexample
 
 
-@subheading The @code{-environment-directory} Command
 @findex -environment-directory
+@subheading The @code{-environment-directory} Command
 
 @subsubheading Synopsis
 
@@ -32935,8 +32935,8 @@ The corresponding @value{GDBN} command is @samp{dir}.
 @end smallexample
 
 
-@subheading The @code{-environment-path} Command
 @findex -environment-path
+@subheading The @code{-environment-path} Command
 
 @subsubheading Synopsis
 
@@ -32983,8 +32983,8 @@ The corresponding @value{GDBN} command is @samp{path}.
 @end smallexample
 
 
-@subheading The @code{-environment-pwd} Command
 @findex -environment-pwd
+@subheading The @code{-environment-pwd} Command
 
 @subsubheading Synopsis
 
@@ -33012,8 +33012,8 @@ The corresponding @value{GDBN} command is @samp{pwd}.
 @section @sc{gdb/mi} Thread Commands
 
 
-@subheading The @code{-thread-info} Command
 @findex -thread-info
+@subheading The @code{-thread-info} Command
 
 @subsubheading Synopsis
 
@@ -33066,8 +33066,8 @@ current-thread-id="1"
 (gdb)
 @end smallexample
 
-@subheading The @code{-thread-list-ids} Command
 @findex -thread-list-ids
+@subheading The @code{-thread-list-ids} Command
 
 @subsubheading Synopsis
 
@@ -33097,8 +33097,8 @@ current-thread-id="1",number-of-threads="3"
 @end smallexample
 
 
-@subheading The @code{-thread-select} Command
 @findex -thread-select
+@subheading The @code{-thread-select} Command
 
 @subsubheading Synopsis
 
@@ -33144,8 +33144,8 @@ args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
 @node GDB/MI Ada Tasking Commands
 @section @sc{gdb/mi} Ada Tasking Commands
 
-@subheading The @code{-ada-task-info} Command
 @findex -ada-task-info
+@subheading The @code{-ada-task-info} Command
 
 @subsubheading Synopsis
 
@@ -33227,8 +33227,8 @@ record @samp{*stopped}.  Currently @value{GDBN} only really executes
 asynchronously with remote targets and this interaction is mimicked in
 other cases.
 
-@subheading The @code{-exec-continue} Command
 @findex -exec-continue
+@subheading The @code{-exec-continue} Command
 
 @subsubheading Synopsis
 
@@ -33289,8 +33289,8 @@ line="13",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-exec-finish} Command
 @findex -exec-finish
+@subheading The @code{-exec-finish} Command
 
 @subsubheading Synopsis
 
@@ -33339,8 +33339,8 @@ gdb-result-var="$1",return-value="0"
 @end smallexample
 
 
-@subheading The @code{-exec-interrupt} Command
 @findex -exec-interrupt
+@subheading The @code{-exec-interrupt} Command
 
 @subsubheading Synopsis
 
@@ -33390,8 +33390,8 @@ fullname="/home/foo/bar/try.c",line="13",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-exec-jump} Command
 @findex -exec-jump
+@subheading The @code{-exec-jump} Command
 
 @subsubheading Synopsis
 
@@ -33416,8 +33416,8 @@ The corresponding @value{GDBN} command is @samp{jump}.
 @end smallexample
 
 
-@subheading The @code{-exec-next} Command
 @findex -exec-next
+@subheading The @code{-exec-next} Command
 
 @subsubheading Synopsis
 
@@ -33450,8 +33450,8 @@ The corresponding @value{GDBN} command is @samp{next}.
 @end smallexample
 
 
-@subheading The @code{-exec-next-instruction} Command
 @findex -exec-next-instruction
+@subheading The @code{-exec-next-instruction} Command
 
 @subsubheading Synopsis
 
@@ -33488,8 +33488,8 @@ addr="0x000100d4",line="5",file="hello.c"
 @end smallexample
 
 
-@subheading The @code{-exec-return} Command
 @findex -exec-return
+@subheading The @code{-exec-return} Command
 
 @subsubheading Synopsis
 
@@ -33535,8 +33535,8 @@ arch="i386:x86_64"@}
 @end smallexample
 
 
-@subheading The @code{-exec-run} Command
 @findex -exec-run
+@subheading The @code{-exec-run} Command
 
 @subsubheading Synopsis
 
@@ -33619,8 +33619,8 @@ signal-meaning="Interrupt"
 @c @subheading -exec-signal
 
 
-@subheading The @code{-exec-step} Command
 @findex -exec-step
+@subheading The @code{-exec-step} Command
 
 @subsubheading Synopsis
 
@@ -33665,8 +33665,8 @@ Regular stepping:
 @end smallexample
 
 
-@subheading The @code{-exec-step-instruction} Command
 @findex -exec-step-instruction
+@subheading The @code{-exec-step-instruction} Command
 
 @subsubheading Synopsis
 
@@ -33709,8 +33709,8 @@ fullname="/home/foo/bar/try.c",line="10",arch="i386:x86_64"@}
 @end smallexample
 
 
-@subheading The @code{-exec-until} Command
 @findex -exec-until
+@subheading The @code{-exec-until} Command
 
 @subsubheading Synopsis
 
@@ -33750,8 +33750,8 @@ Is this going away????
 @node GDB/MI Stack Manipulation
 @section @sc{gdb/mi} Stack Manipulation Commands
 
-@subheading The @code{-enable-frame-filters} Command
 @findex -enable-frame-filters
+@subheading The @code{-enable-frame-filters} Command
 
 @smallexample
 -enable-frame-filters
@@ -33767,8 +33767,8 @@ Once enabled, this feature cannot be disabled.
 Note that if Python support has not been compiled into @value{GDBN},
 this command will still succeed (and do nothing).
 
-@subheading The @code{-stack-info-frame} Command
 @findex -stack-info-frame
+@subheading The @code{-stack-info-frame} Command
 
 @subsubheading Synopsis
 
@@ -33795,8 +33795,8 @@ arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-stack-info-depth} Command
 @findex -stack-info-depth
+@subheading The @code{-stack-info-depth} Command
 
 @subsubheading Synopsis
 
@@ -33835,8 +33835,8 @@ For a stack with frame levels 0 through 11:
 @end smallexample
 
 @anchor{-stack-list-arguments}
-@subheading The @code{-stack-list-arguments} Command
 @findex -stack-list-arguments
+@subheading The @code{-stack-list-arguments} Command
 
 @subsubheading Synopsis
 
@@ -33940,8 +33940,8 @@ args=[@{name="intarg",value="2"@},
 
 
 @anchor{-stack-list-frames}
-@subheading The @code{-stack-list-frames} Command
 @findex -stack-list-frames
+@subheading The @code{-stack-list-frames} Command
 
 @subsubheading Synopsis
 
@@ -34064,9 +34064,9 @@ Show a single frame:
 @end smallexample
 
 
-@subheading The @code{-stack-list-locals} Command
 @findex -stack-list-locals
 @anchor{-stack-list-locals}
+@subheading The @code{-stack-list-locals} Command
 
 @subsubheading Synopsis
 
@@ -34113,8 +34113,8 @@ This command is deprecated in favor of the
 @end smallexample
 
 @anchor{-stack-list-variables}
-@subheading The @code{-stack-list-variables} Command
 @findex -stack-list-variables
+@subheading The @code{-stack-list-variables} Command
 
 @subsubheading Synopsis
 
@@ -34144,8 +34144,8 @@ available arguments and local variables are still displayed, however.
 @end smallexample
 
 
-@subheading The @code{-stack-select-frame} Command
 @findex -stack-select-frame
+@subheading The @code{-stack-select-frame} Command
 
 @subsubheading Synopsis
 
@@ -34341,8 +34341,8 @@ how it can be used.
 
 @subheading Description And Use of Operations on Variable Objects
 
-@subheading The @code{-enable-pretty-printing} Command
 @findex -enable-pretty-printing
+@subheading The @code{-enable-pretty-printing} Command
 
 @smallexample
 -enable-pretty-printing
@@ -34358,8 +34358,8 @@ Once enabled, this feature cannot be disabled.
 Note that if Python support has not been compiled into @value{GDBN},
 this command will still succeed (and do nothing).
 
-@subheading The @code{-var-create} Command
 @findex -var-create
+@subheading The @code{-var-create} Command
 
 @subsubheading Synopsis
 
@@ -34458,8 +34458,8 @@ Typical output will look like this:
 @end smallexample
 
 
-@subheading The @code{-var-delete} Command
 @findex -var-delete
+@subheading The @code{-var-delete} Command
 
 @subsubheading Synopsis
 
@@ -34473,8 +34473,8 @@ With the @samp{-c} option, just deletes the children.
 Returns an error if the object @var{name} is not found.
 
 
-@subheading The @code{-var-set-format} Command
 @findex -var-set-format
+@subheading The @code{-var-set-format} Command
 
 @subsubheading Synopsis
 
@@ -34505,8 +34505,8 @@ zero-hexadecimal format.
 For a variable with children, the format is set only on the 
 variable itself, and the children are not affected.  
 
-@subheading The @code{-var-show-format} Command
 @findex -var-show-format
+@subheading The @code{-var-show-format} Command
 
 @subsubheading Synopsis
 
@@ -34522,8 +34522,8 @@ Returns the format used to display the value of the object @var{name}.
 @end smallexample
 
 
-@subheading The @code{-var-info-num-children} Command
 @findex -var-info-num-children
+@subheading The @code{-var-info-num-children} Command
 
 @subsubheading Synopsis
 
@@ -34542,8 +34542,8 @@ It will return the current number of children, but more children may
 be available.
 
 
-@subheading The @code{-var-list-children} Command
 @findex -var-list-children
+@subheading The @code{-var-list-children} Command
 
 @subsubheading Synopsis
 
@@ -34659,8 +34659,8 @@ remaining after the end of the selected range.
 @end smallexample
 
 
-@subheading The @code{-var-info-type} Command
 @findex -var-info-type
+@subheading The @code{-var-info-type} Command
 
 @subsubheading Synopsis
 
@@ -34677,8 +34677,8 @@ returned as a string in the same format as it is output by the
 @end smallexample
 
 
-@subheading The @code{-var-info-expression} Command
 @findex -var-info-expression
+@subheading The @code{-var-info-expression} Command
 
 @subsubheading Synopsis
 
@@ -34706,8 +34706,8 @@ Note that the output of the @code{-var-list-children} command also
 includes those expressions, so the @code{-var-info-expression} command
 is of limited use.
 
-@subheading The @code{-var-info-path-expression} Command
 @findex -var-info-path-expression
+@subheading The @code{-var-info-path-expression} Command
 
 @subsubheading Synopsis
 
@@ -34735,8 +34735,8 @@ For example, suppose @code{C} is a C@t{++} class, derived from class
 ^done,path_expr=((Base)c).m_size)
 @end smallexample
 
-@subheading The @code{-var-show-attributes} Command
 @findex -var-show-attributes
+@subheading The @code{-var-show-attributes} Command
 
 @subsubheading Synopsis
 
@@ -34753,8 +34753,8 @@ List attributes of the specified variable object @var{name}:
 @noindent
 where @var{attr} is @code{@{ @{ editable | noneditable @} | TBD @}}.
 
-@subheading The @code{-var-evaluate-expression} Command
 @findex -var-evaluate-expression
+@subheading The @code{-var-evaluate-expression} Command
 
 @subsubheading Synopsis
 
@@ -34777,8 +34777,8 @@ can be changed using the @code{-var-set-format} command.
 Note that one must invoke @code{-var-list-children} for a variable
 before the value of a child variable can be evaluated.
 
-@subheading The @code{-var-assign} Command
 @findex -var-assign
+@subheading The @code{-var-assign} Command
 
 @subsubheading Synopsis
 
@@ -34803,8 +34803,8 @@ subsequent @code{-var-update} list.
 (gdb)
 @end smallexample
 
-@subheading The @code{-var-update} Command
 @findex -var-update
+@subheading The @code{-var-update} Command
 
 @subsubheading Synopsis
 
@@ -34931,9 +34931,9 @@ type_changed="false"@}]
 (gdb)
 @end smallexample
 
-@subheading The @code{-var-set-frozen} Command
 @findex -var-set-frozen
 @anchor{-var-set-frozen}
+@subheading The @code{-var-set-frozen} Command
 
 @subsubheading Synopsis
 
@@ -34962,9 +34962,9 @@ Unfreezing a variable does not update it, only subsequent
 (gdb)
 @end smallexample
 
-@subheading The @code{-var-set-update-range} command
 @findex -var-set-update-range
 @anchor{-var-set-update-range}
+@subheading The @code{-var-set-update-range} command
 
 @subsubheading Synopsis
 
@@ -34988,9 +34988,9 @@ children will be reported.  Otherwise, children starting at @var{from}
 ^done
 @end smallexample
 
-@subheading The @code{-var-set-visualizer} command
 @findex -var-set-visualizer
 @anchor{-var-set-visualizer}
+@subheading The @code{-var-set-visualizer} command
 
 @subsubheading Synopsis
 
@@ -35067,8 +35067,8 @@ For details about what an addressable memory unit is,
 @c @subsubheading Example
 @c N.A.
 
-@subheading The @code{-data-disassemble} Command
 @findex -data-disassemble
+@subheading The @code{-data-disassemble} Command
 
 @subsubheading Synopsis
 
@@ -35323,8 +35323,8 @@ inst="sethi  %hi(0x11800), %o2"@}]@}]
 @end smallexample
 
 
-@subheading The @code{-data-evaluate-expression} Command
 @findex -data-evaluate-expression
+@subheading The @code{-data-evaluate-expression} Command
 
 @subsubheading Synopsis
 
@@ -35365,8 +35365,8 @@ output.
 @end smallexample
 
 
-@subheading The @code{-data-list-changed-registers} Command
 @findex -data-list-changed-registers
+@subheading The @code{-data-list-changed-registers} Command
 
 @subsubheading Synopsis
 
@@ -35403,8 +35403,8 @@ line="5",arch="powerpc"@}
 @end smallexample
 
 
-@subheading The @code{-data-list-register-names} Command
 @findex -data-list-register-names
+@subheading The @code{-data-list-register-names} Command
 
 @subsubheading Synopsis
 
@@ -35444,8 +35444,8 @@ For the PPC MBX board:
 (gdb)
 @end smallexample
 
-@subheading The @code{-data-list-register-values} Command
 @findex -data-list-register-values
+@subheading The @code{-data-list-register-values} Command
 
 @subsubheading Synopsis
 
@@ -35535,8 +35535,8 @@ don't appear in the actual output):
 @end smallexample
 
 
-@subheading The @code{-data-read-memory} Command
 @findex -data-read-memory
+@subheading The @code{-data-read-memory} Command
 
 This command is deprecated, use @code{-data-read-memory-bytes} instead.
 
@@ -35651,8 +35651,8 @@ next-page="0x000013c0",prev-page="0x00001380",memory=[
 (gdb)
 @end smallexample
 
-@subheading The @code{-data-read-memory-bytes} Command
 @findex -data-read-memory-bytes
+@subheading The @code{-data-read-memory-bytes} Command
 
 @subsubheading Synopsis
 
@@ -35737,8 +35737,8 @@ The corresponding @value{GDBN} command is @samp{x}.
 @end smallexample
 
 
-@subheading The @code{-data-write-memory-bytes} Command
 @findex -data-write-memory-bytes
+@subheading The @code{-data-write-memory-bytes} Command
 
 @subsubheading Synopsis
 
@@ -35795,8 +35795,8 @@ There's no corresponding @value{GDBN} command.
 The commands defined in this section implement MI support for
 tracepoints.  For detailed introduction, see @ref{Tracepoints}.
 
-@subheading The @code{-trace-find} Command
 @findex -trace-find
+@subheading The @code{-trace-find} Command
 
 @subsubheading Synopsis
 
@@ -35870,8 +35870,8 @@ frame.  This field is present only if a trace frame was found.
 
 The corresponding @value{GDBN} command is @samp{tfind}.
 
-@subheading -trace-define-variable
 @findex -trace-define-variable
+@subheading -trace-define-variable
 
 @subsubheading Synopsis
 
@@ -35888,8 +35888,8 @@ with the @samp{$} character.
 
 The corresponding @value{GDBN} command is @samp{tvariable}.
 
-@subheading The @code{-trace-frame-collected} Command
 @findex -trace-frame-collected
+@subheading The @code{-trace-frame-collected} Command
 
 @subsubheading Synopsis
 
@@ -36005,8 +36005,8 @@ There is no corresponding @value{GDBN} command.
 
 @subsubheading Example
 
-@subheading -trace-list-variables
 @findex -trace-list-variables
+@subheading -trace-list-variables
 
 @subsubheading Synopsis
 
@@ -36051,8 +36051,8 @@ body=[variable=@{name="$trace_timestamp",initial="0"@}
 (gdb)
 @end smallexample
 
-@subheading -trace-save
 @findex -trace-save
+@subheading -trace-save
 
 @subsubheading Synopsis
 
@@ -36074,8 +36074,8 @@ supply the optional @samp{-ctf} argument to save it the CTF format. See
 The corresponding @value{GDBN} command is @samp{tsave}.
 
 
-@subheading -trace-start
 @findex -trace-start
+@subheading -trace-start
 
 @subsubheading Synopsis
 
@@ -36090,8 +36090,8 @@ have any fields.
 
 The corresponding @value{GDBN} command is @samp{tstart}.
 
-@subheading -trace-status
 @findex -trace-status
+@subheading -trace-status
 
 @subsubheading Synopsis
 
@@ -36165,8 +36165,8 @@ optional, and only present when examining a trace file.
 
 The corresponding @value{GDBN} command is @samp{tstatus}.
 
-@subheading -trace-stop
 @findex -trace-stop
+@subheading -trace-stop
 
 @subsubheading Synopsis
 
@@ -36189,8 +36189,8 @@ The corresponding @value{GDBN} command is @samp{tstop}.
 
 
 @ignore
-@subheading The @code{-symbol-info-address} Command
 @findex -symbol-info-address
+@subheading The @code{-symbol-info-address} Command
 
 @subsubheading Synopsis
 
@@ -36208,8 +36208,8 @@ The corresponding @value{GDBN} command is @samp{info address}.
 N.A.
 
 
-@subheading The @code{-symbol-info-file} Command
 @findex -symbol-info-file
+@subheading The @code{-symbol-info-file} Command
 
 @subsubheading Synopsis
 
@@ -36228,9 +36228,9 @@ There's no equivalent @value{GDBN} command.  @code{gdbtk} has
 N.A.
 @end ignore
 
-@subheading The @code{-symbol-info-functions} Command
 @findex -symbol-info-functions
 @anchor{-symbol-info-functions}
+@subheading The @code{-symbol-info-functions} Command
 
 @subsubheading Synopsis
 
@@ -36340,9 +36340,9 @@ The corresponding @value{GDBN} command is @samp{info functions}.
 @end group
 @end smallexample
 
-@subheading The @code{-symbol-info-module-functions} Command
 @findex -symbol-info-module-functions
 @anchor{-symbol-info-module-functions}
+@subheading The @code{-symbol-info-module-functions} Command
 
 @subsubheading Synopsis
 
@@ -36406,9 +36406,9 @@ The corresponding @value{GDBN} command is @samp{info module functions}.
 @end group
 @end smallexample
 
-@subheading The @code{-symbol-info-module-variables} Command
 @findex -symbol-info-module-variables
 @anchor{-symbol-info-module-variables}
+@subheading The @code{-symbol-info-module-variables} Command
 
 @subsubheading Synopsis
 
@@ -36482,9 +36482,9 @@ The corresponding @value{GDBN} command is @samp{info module variables}.
 @end group
 @end smallexample
 
-@subheading The @code{-symbol-info-modules} Command
 @findex -symbol-info-modules
 @anchor{-symbol-info-modules}
+@subheading The @code{-symbol-info-modules} Command
 
 @subsubheading Synopsis
 
@@ -36543,9 +36543,9 @@ The corresponding @value{GDBN} command is @samp{info modules}.
 @end group
 @end smallexample
 
-@subheading The @code{-symbol-info-types} Command
 @findex -symbol-info-types
 @anchor{-symbol-info-types}
+@subheading The @code{-symbol-info-types} Command
 
 @subsubheading Synopsis
 
@@ -36608,9 +36608,9 @@ The corresponding @value{GDBN} command is @samp{info types}.
 @end group
 @end smallexample
 
-@subheading The @code{-symbol-info-variables} Command
 @findex -symbol-info-variables
 @anchor{-symbol-info-variables}
+@subheading The @code{-symbol-info-variables} Command
 
 @subsubheading Synopsis
 
@@ -36726,8 +36726,8 @@ The corresponding @value{GDBN} command is @samp{info variables}.
 @end smallexample
 
 @ignore
-@subheading The @code{-symbol-info-line} Command
 @findex -symbol-info-line
+@subheading The @code{-symbol-info-line} Command
 
 @subsubheading Synopsis
 
@@ -36746,8 +36746,8 @@ The corresponding @value{GDBN} command is @samp{info line}.
 N.A.
 
 
-@subheading The @code{-symbol-info-symbol} Command
 @findex -symbol-info-symbol
+@subheading The @code{-symbol-info-symbol} Command
 
 @subsubheading Synopsis
 
@@ -36765,8 +36765,8 @@ The corresponding @value{GDBN} command is @samp{info symbol}.
 N.A.
 
 
-@subheading The @code{-symbol-list-functions} Command
 @findex -symbol-list-functions
+@subheading The @code{-symbol-list-functions} Command
 
 @subsubheading Synopsis
 
@@ -36786,8 +36786,8 @@ N.A.
 @end ignore
 
 
-@subheading The @code{-symbol-list-lines} Command
 @findex -symbol-list-lines
+@subheading The @code{-symbol-list-lines} Command
 
 @subsubheading Synopsis
 
@@ -36813,8 +36813,8 @@ There is no corresponding @value{GDBN} command.
 
 
 @ignore
-@subheading The @code{-symbol-list-types} Command
 @findex -symbol-list-types
+@subheading The @code{-symbol-list-types} Command
 
 @subsubheading Synopsis
 
@@ -36833,8 +36833,8 @@ The corresponding commands are @samp{info types} in @value{GDBN},
 N.A.
 
 
-@subheading The @code{-symbol-list-variables} Command
 @findex -symbol-list-variables
+@subheading The @code{-symbol-list-variables} Command
 
 @subsubheading Synopsis
 
@@ -36852,8 +36852,8 @@ List all the global and static variable names.
 N.A.
 
 
-@subheading The @code{-symbol-locate} Command
 @findex -symbol-locate
+@subheading The @code{-symbol-locate} Command
 
 @subsubheading Synopsis
 
@@ -36869,8 +36869,8 @@ N.A.
 N.A.
 
 
-@subheading The @code{-symbol-type} Command
 @findex -symbol-type
+@subheading The @code{-symbol-type} Command
 
 @subsubheading Synopsis
 
@@ -36897,8 +36897,8 @@ N.A.
 This section describes the GDB/MI commands to specify executable file names
 and to read in and obtain symbol table information.
 
-@subheading The @code{-file-exec-and-symbols} Command
 @findex -file-exec-and-symbols
+@subheading The @code{-file-exec-and-symbols} Command
 
 @subsubheading Synopsis
 
@@ -36927,8 +36927,8 @@ The corresponding @value{GDBN} command is @samp{file}.
 @end smallexample
 
 
-@subheading The @code{-file-exec-file} Command
 @findex -file-exec-file
+@subheading The @code{-file-exec-file} Command
 
 @subsubheading Synopsis
 
@@ -36957,8 +36957,8 @@ The corresponding @value{GDBN} command is @samp{exec-file}.
 
 
 @ignore
-@subheading The @code{-file-list-exec-sections} Command
 @findex -file-list-exec-sections
+@subheading The @code{-file-list-exec-sections} Command
 
 @subsubheading Synopsis
 
@@ -36979,8 +36979,8 @@ N.A.
 @end ignore
 
 
-@subheading The @code{-file-list-exec-source-file} Command
 @findex -file-list-exec-source-file
+@subheading The @code{-file-list-exec-source-file} Command
 
 @subsubheading Synopsis
 
@@ -37007,9 +37007,9 @@ The @value{GDBN} equivalent is @samp{info source}
 @end smallexample
 
 
+@findex -file-list-exec-source-files
 @subheading The @code{-file-list-exec-source-files} Command
 @kindex info sources
-@findex -file-list-exec-source-files
 
 @subsubheading Synopsis
 
@@ -37147,8 +37147,8 @@ The @value{GDBN} equivalent is @samp{info sources}.
               sources=[]@}]
 @end smallexample
 
-@subheading The @code{-file-list-shared-libraries} Command
 @findex -file-list-shared-libraries
+@subheading The @code{-file-list-shared-libraries} Command
 
 @subsubheading Synopsis
 
@@ -37186,8 +37186,8 @@ The address defining the exclusive upper bound of the segment.
 
 
 @ignore
-@subheading The @code{-file-list-symbol-files} Command
 @findex -file-list-symbol-files
+@subheading The @code{-file-list-symbol-files} Command
 
 @subsubheading Synopsis
 
@@ -37206,8 +37206,8 @@ N.A.
 @end ignore
 
 
-@subheading The @code{-file-symbol-file} Command
 @findex -file-symbol-file
+@subheading The @code{-file-symbol-file} Command
 
 @subsubheading Synopsis
 
@@ -37272,8 +37272,8 @@ Signal handling commands are not implemented.
 @section @sc{gdb/mi} Target Manipulation Commands
 
 
-@subheading The @code{-target-attach} Command
 @findex -target-attach
+@subheading The @code{-target-attach} Command
 
 @subsubheading Synopsis
 
@@ -37301,8 +37301,8 @@ The corresponding @value{GDBN} command is @samp{attach}.
 @end smallexample
 
 @ignore
-@subheading The @code{-target-compare-sections} Command
 @findex -target-compare-sections
+@subheading The @code{-target-compare-sections} Command
 
 @subsubheading Synopsis
 
@@ -37322,8 +37322,8 @@ N.A.
 @end ignore
 
 
-@subheading The @code{-target-detach} Command
 @findex -target-detach
+@subheading The @code{-target-detach} Command
 
 @subsubheading Synopsis
 
@@ -37349,8 +37349,8 @@ The corresponding @value{GDBN} command is @samp{detach}.
 @end smallexample
 
 
-@subheading The @code{-target-disconnect} Command
 @findex -target-disconnect
+@subheading The @code{-target-disconnect} Command
 
 @subsubheading Synopsis
 
@@ -37375,8 +37375,8 @@ The corresponding @value{GDBN} command is @samp{disconnect}.
 @end smallexample
 
 
-@subheading The @code{-target-download} Command
 @findex -target-download
+@subheading The @code{-target-download} Command
 
 @subsubheading Synopsis
 
@@ -37480,8 +37480,8 @@ write-rate="429"
 
 
 @ignore
-@subheading The @code{-target-exec-status} Command
 @findex -target-exec-status
+@subheading The @code{-target-exec-status} Command
 
 @subsubheading Synopsis
 
@@ -37500,8 +37500,8 @@ There's no equivalent @value{GDBN} command.
 N.A.
 
 
-@subheading The @code{-target-list-available-targets} Command
 @findex -target-list-available-targets
+@subheading The @code{-target-list-available-targets} Command
 
 @subsubheading Synopsis
 
@@ -37519,8 +37519,8 @@ The corresponding @value{GDBN} command is @samp{help target}.
 N.A.
 
 
-@subheading The @code{-target-list-current-targets} Command
 @findex -target-list-current-targets
+@subheading The @code{-target-list-current-targets} Command
 
 @subsubheading Synopsis
 
@@ -37539,8 +37539,8 @@ other things).
 N.A.
 
 
-@subheading The @code{-target-list-parameters} Command
 @findex -target-list-parameters
+@subheading The @code{-target-list-parameters} Command
 
 @subsubheading Synopsis
 
@@ -37558,8 +37558,8 @@ No equivalent.
 @subsubheading Example
 N.A.
 
-@subheading The @code{-target-flash-erase} Command
 @findex -target-flash-erase
+@subheading The @code{-target-flash-erase} Command
 
 @subsubheading Synopsis
 
@@ -37581,8 +37581,8 @@ addresses and memory region sizes.
 (gdb)
 @end smallexample
 
-@subheading The @code{-target-select} Command
 @findex -target-select
+@subheading The @code{-target-select} Command
 
 @subsubheading Synopsis
 
@@ -37626,8 +37626,8 @@ The corresponding @value{GDBN} command is @samp{target}.
 @section @sc{gdb/mi} File Transfer Commands
 
 
-@subheading The @code{-target-file-put} Command
 @findex -target-file-put
+@subheading The @code{-target-file-put} Command
 
 @subsubheading Synopsis
 
@@ -37652,8 +37652,8 @@ The corresponding @value{GDBN} command is @samp{remote put}.
 @end smallexample
 
 
-@subheading The @code{-target-file-get} Command
 @findex -target-file-get
+@subheading The @code{-target-file-get} Command
 
 @subsubheading Synopsis
 
@@ -37678,8 +37678,8 @@ The corresponding @value{GDBN} command is @samp{remote get}.
 @end smallexample
 
 
-@subheading The @code{-target-file-delete} Command
 @findex -target-file-delete
+@subheading The @code{-target-file-delete} Command
 
 @subsubheading Synopsis
 
@@ -37707,8 +37707,8 @@ The corresponding @value{GDBN} command is @samp{remote delete}.
 @node GDB/MI Ada Exceptions Commands
 @section Ada Exceptions @sc{gdb/mi} Commands
 
-@subheading The @code{-info-ada-exceptions} Command
 @findex -info-ada-exceptions
+@subheading The @code{-info-ada-exceptions} Command
 
 @subsubheading Synopsis
 
@@ -37765,9 +37765,9 @@ some commands are available to help front-ends query the debugger
 about support for these capabilities.  Similarly, it is also possible
 to query @value{GDBN} about target support of certain features.
 
-@subheading The @code{-info-gdb-mi-command} Command
 @cindex @code{-info-gdb-mi-command}
 @findex -info-gdb-mi-command
+@subheading The @code{-info-gdb-mi-command} Command
 
 @subsubheading Synopsis
 
@@ -37816,9 +37816,9 @@ to the debugger:
 ^done,command=@{exists="true"@}
 @end smallexample
 
-@subheading The @code{-list-features} Command
 @findex -list-features
 @cindex supported @sc{gdb/mi} features, list
+@subheading The @code{-list-features} Command
 
 Returns a list of particular features of the MI protocol that
 this version of gdb implements.  A feature can be a command,
@@ -37880,8 +37880,8 @@ Indicates that the @code{-data-disassemble} command supports the @option{-a}
 option (@pxref{GDB/MI Data Manipulation}).
 @end ftable
 
-@subheading The @code{-list-target-features} Command
 @findex -list-target-features
+@subheading The @code{-list-target-features} Command
 
 Returns a list of particular features that are supported by the
 target.  Those features affect the permitted MI commands, but 
@@ -37917,8 +37917,8 @@ Indicates that the target is capable of reverse execution.
 
 @c @subheading -gdb-complete
 
-@subheading The @code{-gdb-exit} Command
 @findex -gdb-exit
+@subheading The @code{-gdb-exit} Command
 
 @subsubheading Synopsis
 
@@ -37942,8 +37942,8 @@ Approximately corresponds to @samp{quit}.
 
 
 @ignore
-@subheading The @code{-exec-abort} Command
 @findex -exec-abort
+@subheading The @code{-exec-abort} Command
 
 @subsubheading Synopsis
 
@@ -37962,8 +37962,8 @@ N.A.
 @end ignore
 
 
-@subheading The @code{-gdb-set} Command
 @findex -gdb-set
+@subheading The @code{-gdb-set} Command
 
 @subsubheading Synopsis
 
@@ -37988,8 +37988,8 @@ The corresponding @value{GDBN} command is @samp{set}.
 @end smallexample
 
 
-@subheading The @code{-gdb-show} Command
 @findex -gdb-show
+@subheading The @code{-gdb-show} Command
 
 @subsubheading Synopsis
 
@@ -38015,8 +38015,8 @@ The corresponding @value{GDBN} command is @samp{show}.
 @c @subheading -gdb-source
 
 
-@subheading The @code{-gdb-version} Command
 @findex -gdb-version
+@subheading The @code{-gdb-version} Command
 
 @subsubheading Synopsis
 
@@ -38052,8 +38052,8 @@ default shows this information when you start an interactive session.
 (gdb)
 @end smallexample
 
-@subheading The @code{-list-thread-groups} Command
 @findex -list-thread-groups
+@subheading The @code{-list-thread-groups} Command
 
 @subheading Synopsis
 
@@ -38173,8 +38173,8 @@ and only if there is a corresponding executable file.
                         @{id="2",target-id="Thread 0xb7e14b90",cores=[2]@}]@},...]
 @end smallexample
 
-@subheading The @code{-info-os} Command
 @findex -info-os
+@subheading The @code{-info-os} Command
 
 @subsubheading Synopsis
 
@@ -38248,8 +38248,8 @@ for MI clients that want to enumerate the types of data, such as in a
 popup menu, but is needless clutter on the command line, and
 @code{info os} omits it.)
 
-@subheading The @code{-add-inferior} Command
 @findex -add-inferior
+@subheading The @code{-add-inferior} Command
 
 @subheading Synopsis
 
@@ -38302,8 +38302,8 @@ The corresponding @value{GDBN} command is @samp{add-inferior}
 ^done,inferior="i3"
 @end smallexample
 
-@subheading The @code{-interpreter-exec} Command
 @findex -interpreter-exec
+@subheading The @code{-interpreter-exec} Command
 
 @subheading Synopsis
 
@@ -38330,8 +38330,8 @@ The corresponding @value{GDBN} command is @samp{interpreter-exec}.
 (gdb)
 @end smallexample
 
-@subheading The @code{-inferior-tty-set} Command
 @findex -inferior-tty-set
+@subheading The @code{-inferior-tty-set} Command
 
 @subheading Synopsis
 
@@ -38354,8 +38354,8 @@ The corresponding @value{GDBN} command is @samp{set inferior-tty} /dev/pts/1.
 (gdb)
 @end smallexample
 
-@subheading The @code{-inferior-tty-show} Command
 @findex -inferior-tty-show
+@subheading The @code{-inferior-tty-show} Command
 
 @subheading Synopsis
 
@@ -38381,8 +38381,8 @@ The corresponding @value{GDBN} command is @samp{show inferior-tty}.
 (gdb)
 @end smallexample
 
-@subheading The @code{-enable-timings} Command
 @findex -enable-timings
+@subheading The @code{-enable-timings} Command
 
 @subheading Synopsis
 
@@ -38426,8 +38426,8 @@ fullname="/home/nickrob/myprog.c",line="73",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
-@subheading The @code{-complete} Command
 @findex -complete
+@subheading The @code{-complete} Command
 
 @subheading Synopsis
 
