@@ -127,7 +127,8 @@ if {[allow_guile_tests]} {
     gdb_test "guile (set-breakpoint-thread! bp 1)" \
 	[multi_line \
 	     "ERROR: In procedure set-breakpoint-thread!:" \
-	     "In procedure gdbscm_set_breakpoint_thread_x: cannot set both task and thread attributes" \
+	     "(ERROR: )?In procedure gdbscm_set_breakpoint_thread_x:\
+	      cannot set both task and thread attributes" \
 	     "Error while executing Scheme code."] \
 	"attempt to set thread, but expect an error"
 
@@ -138,7 +139,8 @@ if {[allow_guile_tests]} {
     gdb_test "guile (set-breakpoint-task! bp 1)" \
 	[multi_line \
 	     "ERROR: In procedure set-breakpoint-task!:" \
-	     "In procedure gdbscm_set_breakpoint_task_x: cannot set both task and thread attributes" \
+	     "(ERROR: )?In procedure gdbscm_set_breakpoint_task_x:\
+	      cannot set both task and thread attributes" \
 	     "Error while executing Scheme code."] \
 	"attempt to set task, but expect an error"
 
