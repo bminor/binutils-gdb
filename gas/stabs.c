@@ -45,14 +45,30 @@ static void generate_asm_file (int, const char *);
 #define STAB_STRING_SECTION_NAME ".stabstr"
 #endif
 
-/* True if we're in the middle of a .func function, in which case
-   stabs_generate_asm_lineno emits function relative line number stabs.
-   Otherwise it emits line number stabs with absolute addresses.  Note that
-   both cases only apply to assembler code assembled with -gstabs.  */
-static bool in_dot_func_p = false;
-
-/* Label at start of current function if in_dot_func_p != FALSE.  */
+/* Label at start of current function if we're in the middle of a
+   .func function, in which case stabs_generate_asm_lineno emits
+   function relative line number stabs.  Otherwise it emits line
+   number stabs with absolute addresses.  Note that both cases only
+   apply to assembler code assembled with -gstabs.  */
 static const char *current_function_label;
+
+/* Current stab section when SEPARATE_STAB_SECTIONS.  */
+static segT cached_sec;
+
+/* State used by generate_asm_file.  */
+static char *last_asm_file;
+static int file_label_count;
+
+/* State used by stabs_generate_asm_lineno.  */
+static int line_label_count;
+static unsigned int prev_lineno;
+static char *prev_line_file;
+
+/* State used by stabs_generate_asm_func.  */
+static bool void_emitted_p;
+
+/* State used by stabs_generate_asm_endfunc.  */
+static int endfunc_label_count;
 
 /*
  * Handle .stabX directives, which used to be open-coded.
@@ -314,8 +330,6 @@ s_stab_generic (int what,
       unsigned int stroff;
       char *p;
 
-      static segT cached_sec;
-
       dot = frag_now_fix ();
 
 #ifdef md_flush_pending_output
@@ -512,24 +526,22 @@ stabs_generate_asm_file (void)
 static void
 generate_asm_file (int type, const char *file)
 {
-  static char *last_file;
-  static int label_count;
   char sym[30];
   char *buf;
   const char *tmp = file;
   const char *file_endp = file + strlen (file);
   char *bufp;
 
-  if (last_file != NULL
-      && filename_cmp (last_file, file) == 0)
+  if (last_asm_file != NULL
+      && filename_cmp (last_asm_file, file) == 0)
     return;
 
   /* Rather than try to do this in some efficient fashion, we just
      generate a string and then parse it again.  That lets us use the
      existing stabs hook, which expect to see a string, rather than
      inventing new ones.  */
-  sprintf (sym, "%sF%d", FAKE_LABEL_NAME, label_count);
-  ++label_count;
+  sprintf (sym, "%sF%d", FAKE_LABEL_NAME, file_label_count);
+  ++file_label_count;
 
   /* Allocate enough space for the file name (possibly extended with
      doubled up backslashes), the symbol name, and the other characters
@@ -563,8 +575,8 @@ generate_asm_file (int type, const char *file)
 
   colon (sym);
 
-  free (last_file);
-  last_file = xstrdup (file);
+  free (last_asm_file);
+  last_asm_file = xstrdup (file);
 
   free (buf);
 }
@@ -575,14 +587,10 @@ generate_asm_file (int type, const char *file)
 void
 stabs_generate_asm_lineno (void)
 {
-  static int label_count;
   const char *file;
   unsigned int lineno;
   char *buf;
   char sym[30];
-  /* Remember the last file/line and avoid duplicates.  */
-  static unsigned int prev_lineno = -1;
-  static char *prev_file = NULL;
 
   /* Rather than try to do this in some efficient fashion, we just
      generate a string and then parse it again.  That lets us use the
@@ -592,28 +600,21 @@ stabs_generate_asm_lineno (void)
   file = as_where (&lineno);
 
   /* Don't emit sequences of stabs for the same line.  */
-  if (prev_file == NULL)
+  if (prev_line_file != NULL
+      && filename_cmp (file, prev_line_file) == 0)
     {
-      /* First time through.  */
-      prev_file = xstrdup (file);
-      prev_lineno = lineno;
-    }
-  else if (lineno == prev_lineno
-	   && filename_cmp (file, prev_file) == 0)
-    {
-      /* Same file/line as last time.  */
-      return;
+      if (lineno == prev_lineno)
+	/* Same file/line as last time.  */
+	return;
     }
   else
     {
       /* Remember file/line for next time.  */
-      prev_lineno = lineno;
-      if (filename_cmp (file, prev_file) != 0)
-	{
-	  free (prev_file);
-	  prev_file = xstrdup (file);
-	}
+      free (prev_line_file);
+      prev_line_file = xstrdup (file);
     }
+
+  prev_lineno = lineno;
 
   /* Let the world know that we are in the middle of generating a
      piece of stabs line debugging information.  */
@@ -621,10 +622,10 @@ stabs_generate_asm_lineno (void)
 
   generate_asm_file (N_SOL, file);
 
-  sprintf (sym, "%sL%d", FAKE_LABEL_NAME, label_count);
-  ++label_count;
+  sprintf (sym, "%sL%d", FAKE_LABEL_NAME, line_label_count);
+  ++line_label_count;
 
-  if (in_dot_func_p)
+  if (current_function_label)
     {
       buf = XNEWVEC (char, 100 + strlen (current_function_label));
       sprintf (buf, "%d,0,%d,%s-%s\n", N_SLINE, lineno,
@@ -652,7 +653,6 @@ stabs_generate_asm_lineno (void)
 void
 stabs_generate_asm_func (const char *funcname, const char *startlabname)
 {
-  static bool void_emitted_p = false;
   char *buf;
   unsigned int lineno;
 
@@ -674,8 +674,8 @@ stabs_generate_asm_func (const char *funcname, const char *startlabname)
   restore_ilp ();
   free (buf);
 
+  free ((char *) current_function_label);
   current_function_label = xstrdup (startlabname);
-  in_dot_func_p = true;
 }
 
 /* Emit a stab to record the end of a function.  */
@@ -684,12 +684,11 @@ void
 stabs_generate_asm_endfunc (const char *funcname ATTRIBUTE_UNUSED,
 			    const char *startlabname)
 {
-  static int label_count;
   char *buf;
   char sym[30];
 
-  sprintf (sym, "%sendfunc%d", FAKE_LABEL_NAME, label_count);
-  ++label_count;
+  sprintf (sym, "%sendfunc%d", FAKE_LABEL_NAME, endfunc_label_count);
+  ++endfunc_label_count;
   colon (sym);
 
   if (asprintf (&buf, "\"\",%d,0,0,%s-%s", N_FUN, sym, startlabname) == -1)
@@ -700,6 +699,28 @@ stabs_generate_asm_endfunc (const char *funcname ATTRIBUTE_UNUSED,
   restore_ilp ();
   free (buf);
 
-  in_dot_func_p = false;
+  free ((char *) current_function_label);
   current_function_label = NULL;
+}
+
+void
+stabs_begin (void)
+{
+  current_function_label = NULL;
+  cached_sec = NULL;
+  last_asm_file = NULL;
+  file_label_count = 0;
+  line_label_count = 0;
+  prev_lineno = -1u;
+  prev_line_file = NULL;
+  void_emitted_p = false;
+  endfunc_label_count = 0;
+}
+
+void
+stabs_end (void)
+{
+  free ((char *) current_function_label);
+  free (last_asm_file);
+  free (prev_line_file);
 }

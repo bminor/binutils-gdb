@@ -149,6 +149,8 @@ extern void stabs_generate_asm_file (void);
 extern void stabs_generate_asm_lineno (void);
 extern void stabs_generate_asm_func (const char *, const char *);
 extern void stabs_generate_asm_endfunc (const char *, const char *);
+extern void stabs_begin (void);
+extern void stabs_end (void);
 extern void do_repeat (size_t, const char *, const char *, const char *);
 extern void end_repeat (int);
 extern void do_parse_cons_expression (expressionS *, int);

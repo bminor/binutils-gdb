@@ -274,11 +274,13 @@ read_begin (void)
 
   if (flag_mri)
     lex_type['?'] = 3;
+  stabs_begin ();
 }
 
 void
 read_end (void)
 {
+  stabs_end ();
   poend ();
   _obstack_free (&cond_obstack, NULL);
 }
