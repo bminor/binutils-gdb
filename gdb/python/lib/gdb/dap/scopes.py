@@ -18,6 +18,7 @@ import gdb
 from .frames import frame_for_id
 from .startup import send_gdb_with_response, in_gdb_thread
 from .server import request
+from .varref import BaseReference
 
 
 # Helper function to return a frame's block without error.
@@ -29,17 +30,53 @@ def _safe_block(frame):
         return None
 
 
-# Helper function to return a list of variables of block, up to the
-# enclosing function.
+# Helper function to return two lists of variables of block, up to the
+# enclosing function.  The result is of the form (ARGS, LOCALS), where
+# each element is itself a list.
 @in_gdb_thread
 def _block_vars(block):
-    result = []
+    args = []
+    locs = []
     while True:
-        result += list(block)
+        for var in block:
+            if var.is_argument:
+                args.append(var)
+            else:
+                locs.append(var)
         if block.function is not None:
             break
         block = block.superblock
-    return result
+    return (args, locs)
+
+
+class ScopeReference(BaseReference):
+    def __init__(self, name, frame, var_list):
+        super().__init__(name)
+        self.frame = frame
+        self.func = frame.function()
+        self.var_list = var_list
+
+    def to_object(self):
+        result = super().to_object()
+        # How would we know?
+        result["expensive"] = False
+        result["namedVariables"] = len(self.var_list)
+        if self.func is not None:
+            result["line"] = self.func.line
+            # FIXME construct a Source object
+        return result
+
+    def child_count(self):
+        return len(self.var_list)
+
+    @in_gdb_thread
+    def fetch_one_child(self, idx):
+        sym = self.var_list[idx]
+        if sym.needs_frame:
+            val = sym.value(self.frame)
+        else:
+            val = sym.value()
+        return (sym.print_name, val)
 
 
 # Helper function to create a DAP scopes for a given frame ID.
@@ -49,14 +86,12 @@ def _get_scope(id):
     block = _safe_block(frame)
     scopes = []
     if block is not None:
-        new_scope = {
-            # FIXME
-            "name": "Locals",
-            "expensive": False,
-            "namedVariables": len(_block_vars(block)),
-        }
-        scopes.append(new_scope)
-    return scopes
+        (args, locs) = _block_vars(block)
+        if args:
+            scopes.append(ScopeReference("Arguments", frame, args))
+        if locs:
+            scopes.append(ScopeReference("Locals", frame, locs))
+    return [x.to_object() for x in scopes]
 
 
 @request("scopes")
