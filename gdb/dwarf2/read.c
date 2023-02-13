@@ -198,9 +198,10 @@ private:
   gdb::array_view<const gdb_byte> m_bytes;
 };
 
-/* A description of the mapped index.  The file format is described in
+/* A description of .gdb_index index.  The file format is described in
    a comment by the code that writes the index.  */
-struct mapped_index final : public mapped_index_base
+
+struct mapped_gdb_index final : public mapped_index_base
 {
   /* Index data format version.  */
   int version = 0;
@@ -1925,7 +1926,7 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
 };
 
 quick_symbol_functions_up
-mapped_index::make_quick_functions () const
+mapped_gdb_index::make_quick_functions () const
 {
   return quick_symbol_functions_up (new dwarf2_gdb_index);
 }
@@ -2123,10 +2124,10 @@ create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
    CUs.  */
 
 static void
-create_cus_from_index_list (dwarf2_per_bfd *per_bfd,
-			    const gdb_byte *cu_list, offset_type n_elements,
-			    struct dwarf2_section_info *section,
-			    int is_dwz)
+create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
+				const gdb_byte *cu_list, offset_type n_elements,
+				struct dwarf2_section_info *section,
+				int is_dwz)
 {
   for (offset_type i = 0; i < n_elements; i += 2)
     {
@@ -2148,28 +2149,28 @@ create_cus_from_index_list (dwarf2_per_bfd *per_bfd,
    the CU objects for PER_BFD.  */
 
 static void
-create_cus_from_index (dwarf2_per_bfd *per_bfd,
+create_cus_from_gdb_index (dwarf2_per_bfd *per_bfd,
 		       const gdb_byte *cu_list, offset_type cu_list_elements,
 		       const gdb_byte *dwz_list, offset_type dwz_elements)
 {
   gdb_assert (per_bfd->all_units.empty ());
   per_bfd->all_units.reserve ((cu_list_elements + dwz_elements) / 2);
 
-  create_cus_from_index_list (per_bfd, cu_list, cu_list_elements,
-			      &per_bfd->info, 0);
+  create_cus_from_gdb_index_list (per_bfd, cu_list, cu_list_elements,
+				  &per_bfd->info, 0);
 
   if (dwz_elements == 0)
     return;
 
   dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
-  create_cus_from_index_list (per_bfd, dwz_list, dwz_elements,
-			      &dwz->info, 1);
+  create_cus_from_gdb_index_list (per_bfd, dwz_list, dwz_elements,
+				  &dwz->info, 1);
 }
 
 /* Create the signatured type hash table from the index.  */
 
 static void
-create_signatured_type_table_from_index
+create_signatured_type_table_from_gdb_index
   (dwarf2_per_bfd *per_bfd, struct dwarf2_section_info *section,
    const gdb_byte *bytes, offset_type elements)
 {
@@ -2253,12 +2254,12 @@ create_signatured_type_table_from_debug_names
   per_objfile->per_bfd->signatured_types = std::move (sig_types_hash);
 }
 
-/* Read the address map data from the mapped index, and use it to
+/* Read the address map data from the mapped GDB index, and use it to
    populate the index_addrmap.  */
 
 static void
-create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
-			   struct mapped_index *index)
+create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
+			       mapped_gdb_index *index)
 {
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -2521,7 +2522,7 @@ static bool
 read_gdb_index_from_buffer (const char *filename,
 			    bool deprecated_ok,
 			    gdb::array_view<const gdb_byte> buffer,
-			    struct mapped_index *map,
+			    mapped_gdb_index *map,
 			    const gdb_byte **cu_list,
 			    offset_type *cu_list_elements,
 			    const gdb_byte **types_list,
@@ -2652,7 +2653,7 @@ dwarf2_read_gdb_index
   if (main_index_contents.empty ())
     return 0;
 
-  std::unique_ptr<struct mapped_index> map (new struct mapped_index);
+  std::unique_ptr<mapped_gdb_index> map (new mapped_gdb_index);
   if (!read_gdb_index_from_buffer (objfile_name (objfile),
 				   use_deprecated_index_sections,
 				   main_index_contents, map.get (), &cu_list,
@@ -2669,7 +2670,7 @@ dwarf2_read_gdb_index
   dwz = dwarf2_get_dwz_file (per_bfd);
   if (dwz != NULL)
     {
-      struct mapped_index dwz_map;
+      mapped_gdb_index dwz_map;
       const gdb_byte *dwz_types_ignore;
       offset_type dwz_types_elements_ignore;
 
@@ -2691,8 +2692,8 @@ dwarf2_read_gdb_index
 	}
     }
 
-  create_cus_from_index (per_bfd, cu_list, cu_list_elements, dwz_list,
-			 dwz_list_elements);
+  create_cus_from_gdb_index (per_bfd, cu_list, cu_list_elements, dwz_list,
+			     dwz_list_elements);
 
   if (types_list_elements)
     {
@@ -2709,13 +2710,13 @@ dwarf2_read_gdb_index
 	   ? &per_bfd->types[0]
 	   : &per_bfd->info);
 
-      create_signatured_type_table_from_index (per_bfd, section, types_list,
-					       types_list_elements);
+      create_signatured_type_table_from_gdb_index (per_bfd, section, types_list,
+						   types_list_elements);
     }
 
   finalize_all_units (per_bfd);
 
-  create_addrmap_from_index (per_objfile, map.get ());
+  create_addrmap_from_gdb_index (per_objfile, map.get ());
 
   per_bfd->index_table = std::move (map);
   per_bfd->quick_file_names_table =
@@ -2947,7 +2948,7 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 		      dwarf2_per_objfile *per_objfile,
 		      gdb::optional<block_enum> block_index,
 		      domain_enum domain, offset_type namei,
-		      mapped_index &index)
+		      mapped_gdb_index &index)
 {
   iter->per_objfile = per_objfile;
   iter->block_index = block_index;
@@ -2968,7 +2969,7 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 
 static struct dwarf2_per_cu_data *
 dw2_symtab_iter_next (struct dw2_symtab_iterator *iter,
-		      mapped_index &index)
+		      mapped_gdb_index &index)
 {
   dwarf2_per_objfile *per_objfile = iter->per_objfile;
 
@@ -3091,8 +3092,8 @@ dwarf2_gdb_index::dump (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  mapped_index *index = (gdb::checked_static_cast<mapped_index *>
-			 (per_objfile->per_bfd->index_table.get ()));
+  mapped_gdb_index *index = (gdb::checked_static_cast<mapped_gdb_index *>
+			     (per_objfile->per_bfd->index_table.get ()));
   gdb_printf (".gdb_index: version %d\n", index->version);
   gdb_printf ("\n");
 }
@@ -3143,8 +3144,8 @@ dwarf2_gdb_index::expand_matching_symbols
 
   const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
 
-  mapped_index &index
-    = *(gdb::checked_static_cast<mapped_index *>
+  mapped_gdb_index &index
+    = *(gdb::checked_static_cast<mapped_gdb_index *>
 	(per_objfile->per_bfd->index_table.get ()));
 
   const char *match_name = name.ada ().lookup_name ().c_str ();
@@ -3993,8 +3994,8 @@ dw2_expand_marked_cus
 {
   offset_type vec_len, vec_idx;
   bool global_seen = false;
-  mapped_index &index
-    = *(gdb::checked_static_cast<mapped_index *>
+  mapped_gdb_index &index
+    = *(gdb::checked_static_cast<mapped_gdb_index *>
 	(per_objfile->per_bfd->index_table.get ()));
 
   offset_view vec (index.constant_pool.slice (index.symbol_vec_index (idx)));
@@ -4213,8 +4214,8 @@ dwarf2_gdb_index::expand_symtabs_matching
       return true;
     }
 
-  mapped_index &index
-    = *(gdb::checked_static_cast<mapped_index *>
+  mapped_gdb_index &index
+    = *(gdb::checked_static_cast<mapped_gdb_index *>
 	(per_objfile->per_bfd->index_table.get ()));
 
   bool result
