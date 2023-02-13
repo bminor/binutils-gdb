@@ -2347,9 +2347,12 @@ add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
 {
   struct cmd_list_element *cmd
     = do_add_internal_function (name.get (), doc.get (), handler, cookie);
-  doc.release ();
+
+  /* Manually transfer the ownership of the doc and name strings to CMD by
+     setting the appropriate flags.  */
+  (void) doc.release ();
   cmd->doc_allocated = 1;
-  name.release ();
+  (void) name.release ();
   cmd->name_allocated = 1;
 }
 
