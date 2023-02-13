@@ -651,7 +651,7 @@ fcompp, 0xded9, FP, NoSuf, {}
 fucom, 0xdd/4, i387, Modrm|NoSuf, { FloatReg }
 // alias for fucom %st(1)
 fucom, 0xdde1, i387, NoSuf, {}
-fucomp, 0xdd/4, i387, Modrm|NoSuf, { FloatReg }
+fucomp, 0xdd/5, i387, Modrm|NoSuf, { FloatReg }
 // alias for fucomp %st(1)
 fucomp, 0xdde9, i387, NoSuf, {}
 fucompp, 0xdae9, i387, NoSuf, {}
