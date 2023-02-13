@@ -18,7 +18,6 @@
 
 import gdb
 import re
-import sys
 
 
 class XMethod(object):

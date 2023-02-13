@@ -19,7 +19,6 @@
 import gdb
 import gdb.types
 import re
-import sys
 
 
 class PrettyPrinter(object):

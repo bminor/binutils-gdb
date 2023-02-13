@@ -17,7 +17,6 @@
 """Implementation of the GDB 'explore' command using the GDB Python API."""
 
 import gdb
-import sys
 
 
 class Explorer(object):
