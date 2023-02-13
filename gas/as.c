@@ -1267,14 +1267,11 @@ free_notes (void)
   _obstack_free (&notes, NULL);
 }
 
-int
-main (int argc, char ** argv)
+/* Early initialisation, before gas prints messages.  */
+
+static void
+gas_early_init (int *argcp, char ***argvp)
 {
-  char ** argv_orig = argv;
-  struct stat sob;
-
-  int macro_strip_at;
-
   start_time = get_run_time ();
   signal_init ();
 
@@ -1288,17 +1285,6 @@ main (int argc, char ** argv)
   if (debug_memory)
     chunksize = 64;
 
-#ifdef HOST_SPECIAL_INIT
-  HOST_SPECIAL_INIT (argc, argv);
-#endif
-
-  myname = argv[0];
-  xmalloc_set_program_name (myname);
-
-  expandargv (&argc, &argv);
-
-  START_PROGRESS (myname, 0);
-
 #ifndef OBJ_DEFAULT_OUTPUT_FILE_NAME
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME "a.out"
 #endif
@@ -1308,18 +1294,95 @@ main (int argc, char ** argv)
   hex_init ();
   if (bfd_init () != BFD_INIT_MAGIC)
     as_fatal (_("libbfd ABI mismatch"));
-  bfd_set_error_program_name (myname);
-
-#ifdef USE_EMULATIONS
-  select_emulation_mode (argc, argv);
-#endif
 
   obstack_begin (&notes, chunksize);
   xatexit (free_notes);
 
+  myname = **argvp;
+  xmalloc_set_program_name (myname);
+  bfd_set_error_program_name (myname);
+  START_PROGRESS (myname, 0);
+
+  expandargv (argcp, argvp);
+
+#ifdef HOST_SPECIAL_INIT
+  HOST_SPECIAL_INIT (*argcp, *argvp);
+#endif
+
+#ifdef USE_EMULATIONS
+  select_emulation_mode (*argcp, *argvp);
+#endif
+}
+
+/* Init things that might depend on program args.  */
+
+static void
+gas_late_init (void)
+{
+  symbol_begin ();
+  frag_init ();
+  subsegs_begin ();
+  read_begin ();
+  input_scrub_begin ();
+  expr_begin ();
+
+  int macro_strip_at = 0;
+#ifdef TC_I960
+  macro_strip_at = flag_mri;
+#endif
+  macro_init (flag_macro_alternate, flag_mri, macro_strip_at, macro_expr);
+
+  dwarf2_init ();
+
+  /* Somewhat arbitrary division into initialisation above that
+     doesn't need stdoutput open (even though it is open), and below
+     where things might be put on stdoutput memory, eg. symbols.  */
   PROGRESS (1);
-  /* Call parse_args before any of the init/begin functions
-     so that switches like --hash-size can be honored.  */
+
+  dot_symbol_init ();
+
+#ifdef tc_init_after_args
+  tc_init_after_args ();
+#endif
+
+  itbl_init ();
+
+  local_symbol_make (".gasversion.", absolute_section,
+		     &predefined_address_frag, BFD_VERSION / 10000UL);
+
+  /* Now that we have fully initialized, and have created the output
+     file, define any symbols requested by --defsym command line
+     arguments.  */
+  while (defsyms != NULL)
+    {
+      symbolS *sym;
+      struct defsym_list *next;
+
+      sym = symbol_new (defsyms->name, absolute_section,
+			&zero_address_frag, defsyms->value);
+      /* Make symbols defined on the command line volatile, so that they
+	 can be redefined inside a source file.  This makes this assembler's
+	 behaviour compatible with earlier versions, but it may not be
+	 completely intuitive.  */
+      S_SET_VOLATILE (sym);
+      symbol_table_insert (sym);
+      next = defsyms->next;
+      free (defsyms);
+      defsyms = next;
+    }
+}
+
+int
+main (int argc, char ** argv)
+{
+  char ** argv_orig = argv;
+  struct stat sob;
+
+  gas_early_init (&argc, &argv);
+  PROGRESS (1);
+
+  /* Call parse_args before gas_late_init so that switches like
+     --hash-size can be honored.  */
   parse_args (&argc, &argv);
 
   if (argc > 1 && stat (out_file_name, &sob) == 0)
@@ -1361,64 +1424,16 @@ main (int argc, char ** argv)
 	}
     }
 
-  symbol_begin ();
-  frag_init ();
-  subsegs_begin ();
-  read_begin ();
-  input_scrub_begin ();
-  expr_begin ();
-
   /* It has to be called after dump_statistics ().  */
   xatexit (output_file_close);
 
   if (flag_print_statistics)
     xatexit (dump_statistics);
 
-  macro_strip_at = 0;
-#ifdef TC_I960
-  macro_strip_at = flag_mri;
-#endif
-
-  macro_init (flag_macro_alternate, flag_mri, macro_strip_at, macro_expr);
-
-  PROGRESS (1);
-
   output_file_create (out_file_name);
   gas_assert (stdoutput != 0);
 
-  dot_symbol_init ();
-
-#ifdef tc_init_after_args
-  tc_init_after_args ();
-#endif
-
-  itbl_init ();
-
-  dwarf2_init ();
-
-  local_symbol_make (".gasversion.", absolute_section,
-		     &predefined_address_frag, BFD_VERSION / 10000UL);
-
-  /* Now that we have fully initialized, and have created the output
-     file, define any symbols requested by --defsym command line
-     arguments.  */
-  while (defsyms != NULL)
-    {
-      symbolS *sym;
-      struct defsym_list *next;
-
-      sym = symbol_new (defsyms->name, absolute_section,
-			&zero_address_frag, defsyms->value);
-      /* Make symbols defined on the command line volatile, so that they
-	 can be redefined inside a source file.  This makes this assembler's
-	 behaviour compatible with earlier versions, but it may not be
-	 completely intuitive.  */
-      S_SET_VOLATILE (sym);
-      symbol_table_insert (sym);
-      next = defsyms->next;
-      free (defsyms);
-      defsyms = next;
-    }
+  gas_late_init ();
 
   PROGRESS (1);
 
