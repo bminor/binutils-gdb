@@ -950,12 +950,24 @@ sframe_decoder_get_fixed_ra_offset (sframe_decoder_ctx *ctx)
   return dhp->sfh_cfa_fixed_ra_offset;
 }
 
+/* Find the function descriptor entry which contains the specified address
+   ADDR.
+   This function is deprecated and will be removed from libsframe.so.2.  */
+
+void *
+sframe_get_funcdesc_with_addr (sframe_decoder_ctx *ctx __attribute__ ((unused)),
+			       int32_t addr __attribute__ ((unused)),
+			       int *errp)
+{
+  return sframe_ret_set_errno (errp, SFRAME_ERR_INVAL);
+}
+
 /* Find the function descriptor entry starting which contains the specified
    address ADDR.  */
 
-sframe_func_desc_entry *
-sframe_get_funcdesc_with_addr (sframe_decoder_ctx *ctx,
-			       int32_t addr, int *errp)
+static sframe_func_desc_entry *
+sframe_get_funcdesc_with_addr_internal (sframe_decoder_ctx *ctx, int32_t addr,
+					int *errp)
 {
   sframe_header *dhp;
   sframe_func_desc_entry *fdp;
@@ -1053,7 +1065,7 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
     return sframe_set_errno (&err, SFRAME_ERR_INVAL);
 
   /* Find the FDE which contains the PC, then scan its fre entries.  */
-  fdep = sframe_get_funcdesc_with_addr (ctx, pc, &err);
+  fdep = sframe_get_funcdesc_with_addr_internal (ctx, pc, &err);
   if (fdep == NULL || ctx->sfd_fres == NULL)
     return sframe_set_errno (&err, SFRAME_ERR_DCTX_INVAL);
 
