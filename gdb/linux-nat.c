@@ -4114,9 +4114,7 @@ linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
   /* Pause all */
   target_stop (ptid);
 
-  memcpy (s, "qTfSTM", sizeof ("qTfSTM"));
-  s[sizeof ("qTfSTM")] = 0;
-
+  strcpy (s, "qTfSTM");
   agent_run_command (pid, s, strlen (s) + 1);
 
   /* Unpause all.  */
@@ -4133,8 +4131,7 @@ linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
 	}
       while (*p++ == ',');	/* comma-separated list */
 
-      memcpy (s, "qTsSTM", sizeof ("qTsSTM"));
-      s[sizeof ("qTsSTM")] = 0;
+      strcpy (s, "qTsSTM");
       agent_run_command (pid, s, strlen (s) + 1);
       p = s;
     }

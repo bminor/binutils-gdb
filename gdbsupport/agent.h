@@ -22,7 +22,7 @@
 
 #include "gdbsupport/preprocessor.h"
 
-int agent_run_command (int pid, const char *cmd, int len);
+int agent_run_command (int pid, char *cmd, int len);
 
 int agent_look_up_symbols (void *);
 
