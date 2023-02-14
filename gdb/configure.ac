@@ -574,18 +574,16 @@ fi
 # Check whether we should enable the TUI, but only do so if we really
 # can.
 if test x"$enable_tui" != xno; then
-  if test -d "$srcdir/tui"; then
-    if test "$curses_found" != no; then
-      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
-      CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
-      CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
-      ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
+  if test "$curses_found" != no; then
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
+    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
+    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
+    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
+  else
+    if test x"$enable_tui" = xyes; then
+      AC_MSG_ERROR([no enhanced curses library found; disable TUI])
     else
-      if test x"$enable_tui" = xyes; then
-	AC_MSG_ERROR([no enhanced curses library found; disable TUI])
-      else
-	AC_MSG_WARN([no enhanced curses library found; disabling TUI])
-      fi
+      AC_MSG_WARN([no enhanced curses library found; disabling TUI])
     fi
   fi
 fi

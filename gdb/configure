@@ -20636,19 +20636,17 @@ fi
 # Check whether we should enable the TUI, but only do so if we really
 # can.
 if test x"$enable_tui" != xno; then
-  if test -d "$srcdir/tui"; then
-    if test "$curses_found" != no; then
-      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
-      CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
-      CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
-      ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
+  if test "$curses_found" != no; then
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
+    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
+    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
+    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
+  else
+    if test x"$enable_tui" = xyes; then
+      as_fn_error $? "no enhanced curses library found; disable TUI" "$LINENO" 5
     else
-      if test x"$enable_tui" = xyes; then
-	as_fn_error $? "no enhanced curses library found; disable TUI" "$LINENO" 5
-      else
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no enhanced curses library found; disabling TUI" >&5
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no enhanced curses library found; disabling TUI" >&5
 $as_echo "$as_me: WARNING: no enhanced curses library found; disabling TUI" >&2;}
-      fi
     fi
   fi
 fi
