@@ -132,7 +132,7 @@ private:
 
   /* Values can only be created via "static constructors".  */
   explicit value (struct type *type_)
-    : m_modifiable (1),
+    : m_modifiable (true),
       m_lazy (1),
       m_initialized (1),
       m_stack (0),
@@ -228,11 +228,11 @@ public:
   /* The comment from "struct value" reads: ``Is it modifiable?  Only
      relevant if lval != not_lval.''.  Shouldn't the value instead be
      not_lval and be done with it?  */
-  int deprecated_modifiable () const
+  bool deprecated_modifiable () const
   { return m_modifiable; }
 
   /* Set or clear the modifiable flag.  */
-  void set_modifiable (int val)
+  void set_modifiable (bool val)
   { m_modifiable = val; }
 
   LONGEST pointed_to_offset () const
@@ -619,7 +619,7 @@ private:
   enum lval_type m_lval = not_lval;
 
   /* Is it modifiable?  Only relevant if lval != not_lval.  */
-  unsigned int m_modifiable : 1;
+  bool m_modifiable : 1;
 
   /* If zero, contents of this value are in the contents field.  If
      nonzero, contents are in inferior.  If the lval field is lval_memory,
