@@ -2049,18 +2049,22 @@ s_linefile (int ignore ATTRIBUTE_UNUSED)
 
       if (file || flags)
 	{
-	  linenum--;
+	  demand_empty_rest_of_line ();
+
+	  /* read_a_source_file() will bump the line number only if the line
+	     is terminated by '\n'.  */
+	  if (input_line_pointer[-1] == '\n')
+	    linenum--;
+
 	  new_logical_line_flags (file, linenum, flags);
 #ifdef LISTING
 	  if (listing)
 	    listing_source_line (linenum);
 #endif
+	  return;
 	}
     }
-  if (file || flags)
-    demand_empty_rest_of_line ();
-  else
-    ignore_rest_of_line ();
+  ignore_rest_of_line ();
 }
 
 /* Handle the .end pseudo-op.  Actually, the real work is done in
