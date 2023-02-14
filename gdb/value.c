@@ -1829,14 +1829,18 @@ union internalvar_data
 
 struct internalvar
 {
-  struct internalvar *next;
+  internalvar (std::string name)
+    : name (std::move (name))
+  {}
+
+  struct internalvar *next = nullptr;
   std::string name;
 
   /* We support various different kinds of content of an internal variable.
      enum internalvar_kind specifies the kind, and union internalvar_data
      provides the data associated with this particular kind.  */
 
-  enum internalvar_kind kind;
+  enum internalvar_kind kind = INTERNALVAR_VOID;
 
   union internalvar_data u;
 };
@@ -1922,10 +1926,8 @@ complete_internalvar (completion_tracker &tracker, const char *name)
 struct internalvar *
 create_internalvar (const char *name)
 {
-  internalvar *var = new internalvar;
+  internalvar *var = new internalvar (name);
 
-  var->name = name;
-  var->kind = INTERNALVAR_VOID;
   var->next = internalvars;
   internalvars = var;
   return var;
