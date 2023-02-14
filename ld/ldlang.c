@@ -8361,6 +8361,89 @@ lang_add_data (int type, union etree_union *exp)
   new_stmt->type = type;
 }
 
+void
+lang_add_string (const char *s)
+{
+  bfd_vma  len = strlen (s);
+  bfd_vma  i;
+  bool     escape = false;
+
+  /* Add byte expressions until end of string.  */
+  for (i = 0 ; i < len; i++)
+    {
+      char c = *s++;
+
+      if (escape)
+	{
+	  switch (c)
+	    {
+	    default:
+	      /* Ignore the escape.  */
+	      break;
+
+	    case 'n': c = '\n'; break;
+	    case 'r': c = '\r'; break;
+	    case 't': c = '\t'; break;
+	  
+	    case '0':
+	    case '1':
+	    case '2':
+	    case '3':
+	    case '4':
+	    case '5':
+	    case '6':
+	    case '7':
+	      /* We have an octal number.  */
+	      {
+		unsigned int value = c - '0';
+
+		c = *s;
+		if ((c >= '0') && (c <= '7'))
+		  {
+		    value <<= 3;
+		    value += (c - '0');
+		    i++;
+		    s++;
+
+		    c = *s;
+		    if ((c >= '0') && (c <= '7'))
+		      {
+			value <<= 3;
+			value += (c - '0');
+			i++;
+			s++;
+		      }
+		  }
+
+		if (value > 0xff)
+		  {
+		    /* octal: \777 is treated as '\077' + '7' */
+		    value >>= 3;
+		    i--;
+		    s--;
+		  }
+
+		c = value;
+	      }
+	      break;
+	    }
+
+	  lang_add_data (BYTE, exp_intop (c));
+	  escape = false;
+	}
+      else
+	{
+	  if (c == '\\')
+	    escape = true;
+	  else
+	    lang_add_data (BYTE, exp_intop (c));
+	}
+    }
+
+  /* Remeber to terminate the string.  */
+  lang_add_data (BYTE, exp_intop (0));
+}
+
 /* Create a new reloc statement.  RELOC is the BFD relocation type to
    generate.  HOWTO is the corresponding howto structure (we could
    look this up, but the caller has already done so).  SECTION is the

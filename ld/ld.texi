@@ -5308,6 +5308,7 @@ C identifiers because they contain a @samp{.} character.
 @cindex data
 @cindex section data
 @cindex output section data
+@kindex ASCIZ ``@var{string}''
 @kindex BYTE(@var{expression})
 @kindex SHORT(@var{expression})
 @kindex LONG(@var{expression})
@@ -5343,6 +5344,18 @@ which is the normal case, the value will be stored in that endianness.
 When the object file format does not have an explicit endianness, as is
 true of, for example, S-records, the value will be stored in the
 endianness of the first input object file.
+
+You can include a zero-terminated string in an output section by using
+@code{ASCIZ}.  The keyword is followed by a string which is stored at
+the current value of the location counter adding a zero byte at the
+end.  If the string includes spaces it must be enclosed in double
+quotes.  The string may contain '\n', '\r', '\t' and octal numbers.
+Hex numbers are not supported.
+
+For example, this string of 16 characters will create a 17 byte area
+@smallexample
+  ASCIZ "This is 16 bytes"
+@end smallexample
 
 Note---these commands only work inside a section description and not
 between them, so the following will produce an error from the linker:

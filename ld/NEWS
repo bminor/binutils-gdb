@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The linker script syntax has a new command for output sections: ASCIZ "string"
+  This will insert a zero-terminated string at the current location.
+
 Changes in 2.40:
 
 * The linker has a new command line option to suppress the generation of any

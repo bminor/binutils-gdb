@@ -645,7 +645,9 @@ extern void push_stat_ptr
 extern void pop_stat_ptr
   (void);
 extern void lang_add_data
-  (int type, union etree_union *);
+  (int, union etree_union *);
+extern void lang_add_string
+  (const char *);
 extern void lang_add_reloc
   (bfd_reloc_code_real_type, reloc_howto_type *, asection *, const char *,
    union etree_union *);
