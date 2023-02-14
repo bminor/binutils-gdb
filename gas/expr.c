@@ -149,8 +149,8 @@ symbol_lookup_or_make (const char *name, bool start)
 
     name = S_GET_NAME (symbolP);
     if ((symbols_case_sensitive
-	 ? strcasecmp (buf, name)
-	 : strcmp (buf, name)) == 0)
+	 ? strcmp (buf, name)
+	 : strcasecmp (buf, name)) == 0)
       {
 	free (buf);
 	return symbolP;
