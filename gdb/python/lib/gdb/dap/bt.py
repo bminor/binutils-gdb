@@ -69,7 +69,7 @@ def _backtrace(thread_id, levels, startFrame):
                 "instructionPointerReference": hex(current_frame.pc()),
             }
             sal = _safe_sal(current_frame)
-            if sal is not None:
+            if sal is not None and sal.symtab is not None:
                 newframe["source"] = {
                     "name": os.path.basename(sal.symtab.filename),
                     "path": sal.symtab.filename,
