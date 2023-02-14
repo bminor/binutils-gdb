@@ -70,7 +70,7 @@ struct internal_function
 /* Returns true if the ranges defined by [offset1, offset1+len1) and
    [offset2, offset2+len2) overlap.  */
 
-static int
+static bool
 ranges_overlap (LONGEST offset1, ULONGEST len1,
 		LONGEST offset2, ULONGEST len2)
 {
@@ -84,7 +84,7 @@ ranges_overlap (LONGEST offset1, ULONGEST len1,
 /* Returns true if RANGES contains any range that overlaps [OFFSET,
    OFFSET+LENGTH).  */
 
-static int
+static bool
 ranges_contain (const std::vector<range> &ranges, LONGEST offset,
 		ULONGEST length)
 {
@@ -132,7 +132,7 @@ ranges_contain (const std::vector<range> &ranges, LONGEST offset,
       const struct range &bef = *(i - 1);
 
       if (ranges_overlap (bef.offset, bef.length, offset, length))
-	return 1;
+	return true;
     }
 
   if (i < ranges.end ())
@@ -140,10 +140,10 @@ ranges_contain (const std::vector<range> &ranges, LONGEST offset,
       const struct range &r = *i;
 
       if (ranges_overlap (r.offset, r.length, offset, length))
-	return 1;
+	return true;
     }
 
-  return 0;
+  return false;
 }
 
 static struct cmd_list_element *functionlist;
@@ -169,7 +169,7 @@ value::arch () const
   return type ()->arch ();
 }
 
-int
+bool
 value::bits_available (LONGEST offset, ULONGEST length) const
 {
   gdb_assert (!m_lazy);
@@ -183,7 +183,7 @@ value::bits_available (LONGEST offset, ULONGEST length) const
 	   || ranges_contain (m_unavailable, offset, length));
 }
 
-int
+bool
 value::bytes_available (LONGEST offset, ULONGEST length) const
 {
   ULONGEST sign = (1ULL << (sizeof (ULONGEST) * 8 - 1)) / TARGET_CHAR_BIT;
@@ -197,7 +197,7 @@ value::bytes_available (LONGEST offset, ULONGEST length) const
   return bits_available (offset * TARGET_CHAR_BIT, length * TARGET_CHAR_BIT);
 }
 
-int
+bool
 value::bits_any_optimized_out (int bit_offset, int bit_length) const
 {
   gdb_assert (!m_lazy);
@@ -205,7 +205,7 @@ value::bits_any_optimized_out (int bit_offset, int bit_length) const
   return ranges_contain (m_optimized_out, bit_offset, bit_length);
 }
 
-int
+bool
 value::entirely_available ()
 {
   /* We can only tell whether the whole value is available when we try
@@ -214,13 +214,13 @@ value::entirely_available ()
     fetch_lazy ();
 
   if (m_unavailable.empty ())
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 /* See value.h.  */
 
-int
+bool
 value::entirely_covered_by_range_vector (const std::vector<range> &ranges)
 {
   /* We can only tell whether the whole value is optimized out /
@@ -234,10 +234,10 @@ value::entirely_covered_by_range_vector (const std::vector<range> &ranges)
 
       if (t.offset == 0
 	  && t.length == TARGET_CHAR_BIT * enclosing_type ()->length ())
-	return 1;
+	return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Insert into the vector pointed to by VECTORP the bit range starting of
@@ -1256,7 +1256,7 @@ value::contents_writeable ()
   return contents_raw ();
 }
 
-int
+bool
 value::optimized_out ()
 {
   if (m_lazy)

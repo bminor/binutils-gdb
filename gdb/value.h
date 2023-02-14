@@ -487,23 +487,23 @@ public:
 
   /* Given a value, determine whether the contents bytes starting at
      OFFSET and extending for LENGTH bytes are available.  This returns
-     nonzero if all bytes in the given range are available, zero if any
+     true if all bytes in the given range are available, false if any
      byte is unavailable.  */
-  int bytes_available (LONGEST offset, ULONGEST length) const;
+  bool bytes_available (LONGEST offset, ULONGEST length) const;
 
   /* Given a value, determine whether the contents bits starting at
      OFFSET and extending for LENGTH bits are available.  This returns
-     nonzero if all bits in the given range are available, zero if any
+     true if all bits in the given range are available, false if any
      bit is unavailable.  */
-  int bits_available (LONGEST offset, ULONGEST length) const;
+  bool bits_available (LONGEST offset, ULONGEST length) const;
 
   /* Like bytes_available, but return false if any byte in the
      whole object is unavailable.  */
-  int entirely_available ();
+  bool entirely_available ();
 
   /* Like entirely_available, but return false if any byte in the
      whole object is available.  */
-  int entirely_unavailable ()
+  bool entirely_unavailable ()
   { return entirely_covered_by_range_vector (m_unavailable); }
 
   /* Mark this value's content bytes starting at OFFSET and extending
@@ -514,19 +514,19 @@ public:
      for LENGTH bits as unavailable.  */
   void mark_bits_unavailable (LONGEST offset, ULONGEST length);
 
-  /* If nonzero, this is the value of a variable which does not actually
+  /* If true, this is the value of a variable which does not actually
      exist in the program, at least partially.  If the value is lazy,
      this may fetch it now.  */
-  int optimized_out ();
+  bool optimized_out ();
 
   /* Given a value, return true if any of the contents bits starting at
      OFFSET and extending for LENGTH bits is optimized out, false
      otherwise.  */
-  int bits_any_optimized_out (int bit_offset, int bit_length) const;
+  bool bits_any_optimized_out (int bit_offset, int bit_length) const;
 
   /* Like optimized_out, but return true iff the whole value is
      optimized out.  */
-  int entirely_optimized_out ()
+  bool entirely_optimized_out ()
   {
     return entirely_covered_by_range_vector (m_optimized_out);
   }
@@ -829,7 +829,7 @@ private:
   /* Returns true if this value is entirely covered by RANGES.  If the
      value is lazy, it'll be read now.  Note that RANGE is a pointer
      to pointer because reading the value might change *RANGE.  */
-  int entirely_covered_by_range_vector (const std::vector<range> &ranges);
+  bool entirely_covered_by_range_vector (const std::vector<range> &ranges);
 
   /* Copy the ranges metadata from this value that overlaps
      [SRC_BIT_OFFSET, SRC_BIT_OFFSET+BIT_LENGTH) into DST,
