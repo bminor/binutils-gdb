@@ -1,3 +1,8 @@
+2023-02-14  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texi (Plugins): Mention that the -plugin command line option
+	is used to load plugins.
+
 2023-01-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 29998
