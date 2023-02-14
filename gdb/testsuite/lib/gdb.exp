@@ -9374,5 +9374,28 @@ proc has_dependency { file dep } {
     return [regexp $dep $output]
 }
 
+# Detect linux kernel version and return as list of 3 numbers: major, minor,
+# and patchlevel.  On failure, return an empty list.
+
+gdb_caching_proc linux_kernel_version {
+    if { ![istarget *-*-linux*] } {
+	return {}
+    }
+
+    set res [remote_exec target "uname -r"]
+    set status [lindex $res 0]
+    set output [lindex $res 1]
+    if { $status != 0 } {
+	return {}
+    }
+
+    set re ^($::decimal)\\.($::decimal)\\.($::decimal)
+    if { [regexp $re $output dummy v1 v2 v3] != 1 } {
+	return {}
+    }
+
+    return [list $v1 $v2 $v3]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

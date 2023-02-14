@@ -59,20 +59,12 @@ if { !$supports_pkru } {
 # the PKRU using ptrace, see commit 4a804c4f8356 ("x86/fpu: Allow PKRU to be
 # (once again) written by ptrace.").
 set have_xfail 0
-if { [istarget *-*-linux*] } {
-    set res [remote_exec target "uname -r"]
-    set status [lindex $res 0]
-    set output [lindex $res 1]
-
-    set re ^($decimal)\\.($decimal)\\.($decimal)
-    if { $status == 0
-	 && [regexp $re $output dummy v1 v2 v3] == 1 } {
-	set v [list $v1 $v2 $v3]
-	set have_xfail \
-	    [expr \
-		 [version_compare [list 5 14 0] <= $v] \
-		 && [version_compare $v < [list 6 2 0]]]
-    }
+set v [linux_kernel_version]
+if { $v != {} } {
+    set have_xfail \
+	[expr \
+	     [version_compare [list 5 14 0] <= $v] \
+	     && [version_compare $v < [list 6 2 0]]]
 }
 
 # Test pkru register at startup
