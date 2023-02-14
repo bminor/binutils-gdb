@@ -135,7 +135,7 @@ private:
     : m_modifiable (true),
       m_lazy (true),
       m_initialized (true),
-      m_stack (0),
+      m_stack (false),
       m_is_zero (false),
       m_in_history (false),
       m_type (type_),
@@ -314,10 +314,10 @@ public:
 
   void set_enclosing_type (struct type *new_type);
 
-  int stack () const
+  bool stack () const
   { return m_stack; }
 
-  void set_stack (int val)
+  void set_stack (bool val)
   { m_stack = val; }
 
   /* If this value is lval_computed, return its lval_funcs
@@ -642,7 +642,7 @@ private:
 
   /* If value is from the stack.  If this is set, read_stack will be
      used instead of read_memory to enable extra caching.  */
-  unsigned int m_stack : 1;
+  bool m_stack : 1;
 
   /* True if this is a zero value, created by 'value::zero'; false
      otherwise.  */
@@ -1000,7 +1000,7 @@ extern struct value *coerce_array (struct value *value);
    whether the memory is known to be stack memory.  */
 
 extern void read_value_memory (struct value *val, LONGEST bit_offset,
-			       int stack, CORE_ADDR memaddr,
+			       bool stack, CORE_ADDR memaddr,
 			       gdb_byte *buffer, size_t length);
 
 /* Cast SCALAR_VALUE to the element type of VECTOR_TYPE, then replicate

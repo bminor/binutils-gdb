@@ -1041,7 +1041,7 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
 
 void
 read_value_memory (struct value *val, LONGEST bit_offset,
-		   int stack, CORE_ADDR memaddr,
+		   bool stack, CORE_ADDR memaddr,
 		   gdb_byte *buffer, size_t length)
 {
   ULONGEST xfered_total = 0;

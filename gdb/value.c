@@ -3749,7 +3749,7 @@ value::fetch_lazy_memory ()
   gdb_assert (len >= 0);
 
   if (len > 0)
-    read_value_memory (this, 0, stack (), addr,
+    read_value_memory (this, false, stack (), addr,
 		       contents_all_raw ().data (), len);
 }
 
