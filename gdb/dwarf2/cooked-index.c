@@ -30,6 +30,16 @@
 
 /* See cooked-index.h.  */
 
+bool
+language_requires_canonicalization (enum language lang)
+{
+  return (lang == language_ada
+	  || lang == language_c
+	  || lang == language_cplus);
+}
+
+/* See cooked-index.h.  */
+
 int
 cooked_index_entry::compare (const char *stra, const char *strb,
 			     comparison_mode mode)
@@ -144,10 +154,12 @@ test_compare ()
 /* See cooked-index.h.  */
 
 const char *
-cooked_index_entry::full_name (struct obstack *storage) const
+cooked_index_entry::full_name (struct obstack *storage, bool for_main) const
 {
+  const char *local_name = for_main ? name : canonical;
+
   if ((flags & IS_LINKAGE) != 0 || parent_entry == nullptr)
-    return canonical;
+    return local_name;
 
   const char *sep = nullptr;
   switch (per_cu->lang ())
@@ -164,11 +176,11 @@ cooked_index_entry::full_name (struct obstack *storage) const
       break;
 
     default:
-      return canonical;
+      return local_name;
     }
 
-  parent_entry->write_scope (storage, sep);
-  obstack_grow0 (storage, canonical, strlen (canonical));
+  parent_entry->write_scope (storage, sep, for_main);
+  obstack_grow0 (storage, local_name, strlen (local_name));
   return (const char *) obstack_finish (storage);
 }
 
@@ -176,11 +188,13 @@ cooked_index_entry::full_name (struct obstack *storage) const
 
 void
 cooked_index_entry::write_scope (struct obstack *storage,
-				 const char *sep) const
+				 const char *sep,
+				 bool for_main) const
 {
   if (parent_entry != nullptr)
-    parent_entry->write_scope (storage, sep);
-  obstack_grow (storage, canonical, strlen (canonical));
+    parent_entry->write_scope (storage, sep, for_main);
+  const char *local_name = for_main ? name : canonical;
+  obstack_grow (storage, local_name, strlen (local_name));
   obstack_grow (storage, sep, strlen (sep));
 }
 
@@ -199,10 +213,6 @@ cooked_index::add (sect_offset die_offset, enum dwarf_tag tag,
   /* An explicitly-tagged main program should always override the
      implicit "main" discovery.  */
   if ((flags & IS_MAIN) != 0)
-    m_main = result;
-  else if (per_cu->lang () != language_ada
-	   && m_main == nullptr
-	   && strcmp (name, "main") == 0)
     m_main = result;
 
   return result;
@@ -305,6 +315,8 @@ cooked_index::do_finalize ()
 
   for (cooked_index_entry *entry : m_entries)
     {
+      /* Note that this code must be kept in sync with
+	 language_requires_canonicalization.  */
       gdb_assert (entry->canonical == nullptr);
       if ((entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;
@@ -441,11 +453,15 @@ cooked_index_vector::get_main () const
   for (const auto &index : m_vector)
     {
       const cooked_index_entry *entry = index->get_main ();
-      if (result == nullptr
-	  || ((result->flags & IS_MAIN) == 0
-	      && entry != nullptr
-	      && (entry->flags & IS_MAIN) != 0))
-	result = entry;
+      /* Choose the first "main" we see.  The choice among several is
+	 arbitrary.  See the comment by the sole caller to understand
+	 the rationale for filtering by language.  */
+      if (entry != nullptr
+	  && !language_requires_canonicalization (entry->per_cu->lang ()))
+	{
+	  result = entry;
+	  break;
+	}
     }
 
   return result;

@@ -54,6 +54,13 @@ enum cooked_index_flag_enum : unsigned char
 };
 DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
+/* Return true if LANG requires canonicalization.  This is used
+   primarily to work around an issue computing the name of "main".
+   This function must be kept in sync with
+   cooked_index_shard::do_finalize.  */
+
+extern bool language_requires_canonicalization (enum language lang);
+
 /* A cooked_index_entry represents a single item in the index.  Note
    that two entries can be created for the same DIE -- one using the
    name, and another one using the linkage name, if any.
@@ -140,8 +147,11 @@ struct cooked_index_entry : public allocate_on_obstack
 
   /* Construct the fully-qualified name of this entry and return a
      pointer to it.  If allocation is needed, it will be done on
-     STORAGE.  */
-  const char *full_name (struct obstack *storage) const;
+     STORAGE.  FOR_MAIN is true if we are computing the name of the
+     "main" entry -- one marked DW_AT_main_subprogram.  This matters
+     for avoiding name canonicalization and also a related race (if
+     "main" computation is done during finalization).  */
+  const char *full_name (struct obstack *storage, bool for_main = false) const;
 
   /* Comparison modes for the 'compare' function.  See the function
      for a description.  */
@@ -216,7 +226,11 @@ struct cooked_index_entry : public allocate_on_obstack
 
 private:
 
-  void write_scope (struct obstack *storage, const char *sep) const;
+  /* A helper method for full_name.  Emits the full scope of this
+     object, followed by the separator, to STORAGE.  If this entry has
+     a parent, its write_scope method is called first.  */
+  void write_scope (struct obstack *storage, const char *sep,
+		    bool for_name) const;
 };
 
 class cooked_index_vector;
@@ -323,8 +337,7 @@ private:
   auto_obstack m_storage;
   /* List of all entries.  */
   std::vector<cooked_index_entry *> m_entries;
-  /* If we found "main" or an entry with 'is_main' set, store it
-     here.  */
+  /* If we found an entry with 'is_main' set, store it here.  */
   cooked_index_entry *m_main = nullptr;
   /* The addrmap.  This maps address ranges to dwarf2_per_cu_data
      objects.  */

@@ -32,8 +32,11 @@ Dwarf::assemble $asm_file {
     global srcfile
 
     cu {} {
+	# Note we don't want C here as that requires canonicalization,
+	# so choose a language that isn't C and that gdb is unlikely
+	# to implement.
 	DW_TAG_compile_unit {
-                {DW_AT_language @DW_LANG_C}
+		{DW_AT_language @DW_LANG_PLI}
                 {DW_AT_name     $srcfile}
                 {DW_AT_comp_dir /tmp}
         } {
