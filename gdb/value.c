@@ -1830,7 +1830,7 @@ union internalvar_data
 struct internalvar
 {
   struct internalvar *next;
-  char *name;
+  std::string name;
 
   /* We support various different kinds of content of an internal variable.
      enum internalvar_kind specifies the kind, and union internalvar_data
@@ -1894,7 +1894,7 @@ lookup_only_internalvar (const char *name)
   struct internalvar *var;
 
   for (var = internalvars; var; var = var->next)
-    if (strcmp (var->name, name) == 0)
+    if (var->name == name)
       return var;
 
   return NULL;
@@ -1912,8 +1912,8 @@ complete_internalvar (completion_tracker &tracker, const char *name)
   len = strlen (name);
 
   for (var = internalvars; var; var = var->next)
-    if (strncmp (var->name, name, len) == 0)
-      tracker.add_completion (make_unique_xstrdup (var->name));
+    if (var->name.compare (0, len, name) == 0)
+      tracker.add_completion (make_unique_xstrdup (var->name.c_str ()));
 }
 
 /* Create an internal variable with name NAME and with a void value.
@@ -1922,9 +1922,9 @@ complete_internalvar (completion_tracker &tracker, const char *name)
 struct internalvar *
 create_internalvar (const char *name)
 {
-  struct internalvar *var = XNEW (struct internalvar);
+  internalvar *var = new internalvar;
 
-  var->name = xstrdup (name);
+  var->name = name;
   var->kind = INTERNALVAR_VOID;
   var->next = internalvars;
   internalvars = var;
@@ -1996,7 +1996,7 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
 
   /* If there is a trace state variable of the same name, assume that
      is what we really want to see.  */
-  tsv = find_trace_state_variable (var->name);
+  tsv = find_trace_state_variable (var->name.c_str ());
   if (tsv)
     {
       tsv->value_known = target_get_trace_state_variable_value (tsv->number,
@@ -2149,7 +2149,7 @@ set_internalvar (struct internalvar *var, struct value *val)
   union internalvar_data new_data = { 0 };
 
   if (var->kind == INTERNALVAR_FUNCTION && var->u.fn.canonical)
-    error (_("Cannot overwrite convenience function %s"), var->name);
+    error (_("Cannot overwrite convenience function %s"), var->name.c_str ());
 
   /* Prepare new contents.  */
   switch (check_typedef (val->type ())->code ())
@@ -2261,7 +2261,7 @@ clear_internalvar (struct internalvar *var)
 const char *
 internalvar_name (const struct internalvar *var)
 {
-  return var->name;
+  return var->name.c_str ();
 }
 
 static struct internal_function *
@@ -2453,7 +2453,7 @@ show_convenience (const char *ignore, int from_tty)
 	{
 	  varseen = 1;
 	}
-      gdb_printf (("$%s = "), var->name);
+      gdb_printf (("$%s = "), var->name.c_str ());
 
       try
 	{
