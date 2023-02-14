@@ -920,9 +920,6 @@ static const char *read_indirect_string
   (dwarf2_per_objfile *per_objfile, bfd *, const gdb_byte *,
    const struct comp_unit_head *, unsigned int *);
 
-static const char *read_indirect_string_at_offset
-  (dwarf2_per_objfile *per_objfile, LONGEST str_offset);
-
 static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
 					      const gdb_byte *,
 					      unsigned int *);
@@ -1279,8 +1276,6 @@ static const char *compute_include_file_name
       const file_and_directory &cu_info,
       std::string &name_holder);
 
-static htab_up allocate_signatured_type_table ();
-
 static htab_up allocate_dwo_unit_table ();
 
 static struct dwo_unit *lookup_dwo_unit_in_dwp
@@ -1371,75 +1366,6 @@ line_header_eq_voidp (const void *item_lhs, const void *item_rhs)
   return (ofs_lhs->sect_off == ofs_rhs->sect_off
 	  && ofs_lhs->offset_in_dwz == ofs_rhs->offset_in_dwz);
 }
-
-
-
-/* An iterator for all_units that is based on index.  This
-   approach makes it possible to iterate over all_units safely,
-   when some caller in the loop may add new units.  */
-
-class all_units_iterator
-{
-public:
-
-  all_units_iterator (dwarf2_per_bfd *per_bfd, bool start)
-    : m_per_bfd (per_bfd),
-      m_index (start ? 0 : per_bfd->all_units.size ())
-  {
-  }
-
-  all_units_iterator &operator++ ()
-  {
-    ++m_index;
-    return *this;
-  }
-
-  dwarf2_per_cu_data *operator* () const
-  {
-    return m_per_bfd->get_cu (m_index);
-  }
-
-  bool operator== (const all_units_iterator &other) const
-  {
-    return m_index == other.m_index;
-  }
-
-
-  bool operator!= (const all_units_iterator &other) const
-  {
-    return m_index != other.m_index;
-  }
-
-private:
-
-  dwarf2_per_bfd *m_per_bfd;
-  size_t m_index;
-};
-
-/* A range adapter for the all_units_iterator.  */
-class all_units_range
-{
-public:
-
-  all_units_range (dwarf2_per_bfd *per_bfd)
-    : m_per_bfd (per_bfd)
-  {
-  }
-
-  all_units_iterator begin ()
-  {
-    return all_units_iterator (m_per_bfd, true);
-  }
-
-  all_units_iterator end ()
-  {
-    return all_units_iterator (m_per_bfd, false);
-  }
-
-private:
-
-  dwarf2_per_bfd *m_per_bfd;
-};
 
 /* See declaration.  */
 
@@ -1803,50 +1729,6 @@ struct quick_file_names
   const char **real_names;
 };
 
-struct dwarf2_base_index_functions : public quick_symbol_functions
-{
-  bool has_symbols (struct objfile *objfile) override;
-
-  bool has_unexpanded_symtabs (struct objfile *objfile) override;
-
-  struct symtab *find_last_source_symtab (struct objfile *objfile) override;
-
-  void forget_cached_source_info (struct objfile *objfile) override;
-
-  enum language lookup_global_symbol_language (struct objfile *objfile,
-					       const char *name,
-					       domain_enum domain,
-					       bool *symbol_found_p) override
-  {
-    *symbol_found_p = false;
-    return language_unknown;
-  }
-
-  void print_stats (struct objfile *objfile, bool print_bcache) override;
-
-  void expand_all_symtabs (struct objfile *objfile) override;
-
-  /* A helper function that finds the per-cu object from an "adjusted"
-     PC -- a PC with the base text offset removed.  */
-  virtual dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
-					   CORE_ADDR adjusted_pc);
-
-  struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin)
-       override final;
-
-  struct compunit_symtab *find_compunit_symtab_by_address
-    (struct objfile *objfile, CORE_ADDR address) override
-  {
-    return nullptr;
-  }
-
-  void map_symbol_filenames (struct objfile *objfile,
-			     gdb::function_view<symbol_filename_ftype> fun,
-			     bool need_fullname) override;
-};
-
 /* With OBJF_READNOW, the DWARF reader expands all CUs immediately.
    It's handy in this case to have an empty implementation of the
    quick symbol functions, to avoid special cases in the rest of the
@@ -1987,9 +1869,9 @@ eq_file_name_entry (const void *a, const void *b)
   return eq_stmt_list_entry (&ea->hash, &eb->hash);
 }
 
-/* Create a quick_file_names hash table.  */
+/* See read.h.  */
 
-static htab_up
+htab_up
 create_quick_file_names_table (unsigned int nr_initial_entries)
 {
   return htab_up (htab_create_alloc (nr_initial_entries,
@@ -2106,7 +1988,7 @@ dwarf2_per_bfd::allocate_signatured_type (ULONGEST signature)
 /* Return a new dwarf2_per_cu_data allocated on the per-bfd
    obstack, and constructed with the specified field values.  */
 
-static dwarf2_per_cu_data_up
+dwarf2_per_cu_data_up
 create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
 			   struct dwarf2_section_info *section,
 			   int is_dwz,
@@ -2311,7 +2193,7 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
    to populate given addrmap.  Returns true on success, false on
    failure.  */
 
-static bool
+bool
 read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 			   struct dwarf2_section_info *section,
 			   addrmap *mutable_map)
@@ -2620,8 +2502,6 @@ to use the section anyway."),
 
   return 1;
 }
-
-static void finalize_all_units (dwarf2_per_bfd *per_bfd);
 
 /* Callback types for dwarf2_read_gdb_index.  */
 
@@ -3117,21 +2997,6 @@ dwarf2_base_index_functions::expand_all_symtabs (struct objfile *objfile)
     }
 }
 
-static bool
-dw2_expand_symtabs_matching_symbol
-  (mapped_index_base &index,
-   const lookup_name_info &lookup_name_in,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<bool (offset_type)> match_callback,
-   dwarf2_per_objfile *per_objfile);
-
-static bool
-dw2_expand_symtabs_matching_one
-  (dwarf2_per_cu_data *per_cu,
-   dwarf2_per_objfile *per_objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify);
-
 void
 dwarf2_gdb_index::expand_matching_symbols
   (struct objfile *objfile,
@@ -3394,14 +3259,9 @@ mapped_index_base::build_name_components (dwarf2_per_objfile *per_objfile)
 	     name_comp_compare);
 }
 
-/* Helper for dw2_expand_symtabs_matching that works with a
-   mapped_index_base instead of the containing objfile.  This is split
-   to a separate function in order to be able to unit test the
-   name_components matching using a mock mapped_index_base.  For each
-   symbol name that matches, calls MATCH_CALLBACK, passing it the
-   symbol's index in the mapped_index_base symbol table.  */
+/* See read.h.  */
 
-static bool
+bool
 dw2_expand_symtabs_matching_symbol
   (mapped_index_base &index,
    const lookup_name_info &lookup_name_in,
@@ -3954,12 +3814,9 @@ run_test ()
 
 #endif /* GDB_SELF_TEST */
 
-/* If FILE_MATCHER is NULL or if PER_CU has
-   dwarf2_per_cu_quick_data::MARK set (see
-   dw_expand_symtabs_matching_file_matcher), expand the CU and call
-   EXPANSION_NOTIFY on it.  */
+/* See read.h.  */
 
-static bool
+bool
 dw2_expand_symtabs_matching_one
   (dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
@@ -4081,11 +3938,9 @@ dw2_expand_marked_cus
   return true;
 }
 
-/* If FILE_MATCHER is non-NULL, set all the
-   dwarf2_per_cu_quick_data::MARK of the current DWARF2_PER_OBJFILE
-   that match FILE_MATCHER.  */
+/* See read.h.  */
 
-static void
+void
 dw_expand_symtabs_matching_file_matcher
   (dwarf2_per_objfile *per_objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher)
@@ -5522,9 +5377,9 @@ eq_signatured_type (const void *item_lhs, const void *item_rhs)
   return lhs->signature == rhs->signature;
 }
 
-/* Allocate a hash table for signatured types.  */
+/* See read.h.  */
 
-static htab_up
+htab_up
 allocate_signatured_type_table ()
 {
   return htab_up (htab_create_alloc (41,
@@ -7245,7 +7100,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 
 /* Initialize the views on all_units.  */
 
-static void
+void
 finalize_all_units (dwarf2_per_bfd *per_bfd)
 {
   size_t nr_tus = per_bfd->tu_stats.nr_tus;
@@ -19342,9 +19197,9 @@ read_attribute (const struct die_reader_specs *reader,
 			       abbrev->implicit_const, info_ptr);
 }
 
-/* Return pointer to string at .debug_str offset STR_OFFSET.  */
+/* See read.h.  */
 
-static const char *
+const char *
 read_indirect_string_at_offset (dwarf2_per_objfile *per_objfile,
 				LONGEST str_offset)
 {

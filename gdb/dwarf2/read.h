@@ -558,6 +558,73 @@ public:
   struct addrmap *index_addrmap = nullptr;
 };
 
+/* An iterator for all_units that is based on index.  This
+   approach makes it possible to iterate over all_units safely,
+   when some caller in the loop may add new units.  */
+
+class all_units_iterator
+{
+public:
+
+  all_units_iterator (dwarf2_per_bfd *per_bfd, bool start)
+    : m_per_bfd (per_bfd),
+      m_index (start ? 0 : per_bfd->all_units.size ())
+  {
+  }
+
+  all_units_iterator &operator++ ()
+  {
+    ++m_index;
+    return *this;
+  }
+
+  dwarf2_per_cu_data *operator* () const
+  {
+    return m_per_bfd->get_cu (m_index);
+  }
+
+  bool operator== (const all_units_iterator &other) const
+  {
+    return m_index == other.m_index;
+  }
+
+
+  bool operator!= (const all_units_iterator &other) const
+  {
+    return m_index != other.m_index;
+  }
+
+private:
+
+  dwarf2_per_bfd *m_per_bfd;
+  size_t m_index;
+};
+
+/* A range adapter for the all_units_iterator.  */
+class all_units_range
+{
+public:
+
+  all_units_range (dwarf2_per_bfd *per_bfd)
+    : m_per_bfd (per_bfd)
+  {
+  }
+
+  all_units_iterator begin ()
+  {
+    return all_units_iterator (m_per_bfd, true);
+  }
+
+  all_units_iterator end ()
+  {
+    return all_units_iterator (m_per_bfd, false);
+  }
+
+private:
+
+  dwarf2_per_bfd *m_per_bfd;
+};
+
 /* This is the per-objfile data associated with a type_unit_group.  */
 
 struct type_unit_group_unshareable
@@ -763,5 +830,116 @@ extern void dwarf2_get_section_info (struct objfile *,
 
 /* Return true if the producer of the inferior is clang.  */
 extern bool producer_is_clang (struct dwarf2_cu *cu);
+
+/* Interface for DWARF indexing methods.  */
+
+struct dwarf2_base_index_functions : public quick_symbol_functions
+{
+  bool has_symbols (struct objfile *objfile) override;
+
+  bool has_unexpanded_symtabs (struct objfile *objfile) override;
+
+  struct symtab *find_last_source_symtab (struct objfile *objfile) override;
+
+  void forget_cached_source_info (struct objfile *objfile) override;
+
+  enum language lookup_global_symbol_language (struct objfile *objfile,
+					       const char *name,
+					       domain_enum domain,
+					       bool *symbol_found_p) override
+  {
+    *symbol_found_p = false;
+    return language_unknown;
+  }
+
+  void print_stats (struct objfile *objfile, bool print_bcache) override;
+
+  void expand_all_symtabs (struct objfile *objfile) override;
+
+  /* A helper function that finds the per-cu object from an "adjusted"
+     PC -- a PC with the base text offset removed.  */
+  virtual dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
+					   CORE_ADDR adjusted_pc);
+
+  struct compunit_symtab *find_pc_sect_compunit_symtab
+    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin)
+       override final;
+
+  struct compunit_symtab *find_compunit_symtab_by_address
+    (struct objfile *objfile, CORE_ADDR address) override
+  {
+    return nullptr;
+  }
+
+  void map_symbol_filenames (struct objfile *objfile,
+			     gdb::function_view<symbol_filename_ftype> fun,
+			     bool need_fullname) override;
+};
+
+/* If FILE_MATCHER is NULL or if PER_CU has
+   dwarf2_per_cu_quick_data::MARK set (see
+   dw_expand_symtabs_matching_file_matcher), expand the CU and call
+   EXPANSION_NOTIFY on it.  */
+
+extern bool dw2_expand_symtabs_matching_one
+  (dwarf2_per_cu_data *per_cu,
+   dwarf2_per_objfile *per_objfile,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify);
+
+/* Helper for dw2_expand_symtabs_matching that works with a
+   mapped_index_base instead of the containing objfile.  This is split
+   to a separate function in order to be able to unit test the
+   name_components matching using a mock mapped_index_base.  For each
+   symbol name that matches, calls MATCH_CALLBACK, passing it the
+   symbol's index in the mapped_index_base symbol table.  */
+
+extern bool dw2_expand_symtabs_matching_symbol
+  (mapped_index_base &index,
+   const lookup_name_info &lookup_name_in,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   gdb::function_view<bool (offset_type)> match_callback,
+   dwarf2_per_objfile *per_objfile);
+
+/* If FILE_MATCHER is non-NULL, set all the
+   dwarf2_per_cu_quick_data::MARK of the current DWARF2_PER_OBJFILE
+   that match FILE_MATCHER.  */
+
+extern void dw_expand_symtabs_matching_file_matcher
+  (dwarf2_per_objfile *per_objfile,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher);
+
+/* Return pointer to string at .debug_str offset STR_OFFSET.  */
+
+extern const char *read_indirect_string_at_offset
+  (dwarf2_per_objfile *per_objfile, LONGEST str_offset);
+
+/* Allocate a hash table for signatured types.  */
+
+extern htab_up allocate_signatured_type_table ();
+
+/* Return a new dwarf2_per_cu_data allocated on the per-bfd
+   obstack, and constructed with the specified field values.  */
+
+extern dwarf2_per_cu_data_up create_cu_from_index_list
+  (dwarf2_per_bfd *per_bfd, struct dwarf2_section_info *section,
+   int is_dwz, sect_offset sect_off, ULONGEST length);
+
+/* Initialize the views on all_units.  */
+
+extern void finalize_all_units (dwarf2_per_bfd *per_bfd);
+
+/* Create a quick_file_names hash table.  */
+
+extern htab_up create_quick_file_names_table (unsigned int nr_initial_entries);
+
+/* Read the address map data from DWARF-5 .debug_aranges, and use it
+   to populate given addrmap.  Returns true on success, false on
+   failure.  */
+
+extern bool read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
+				       dwarf2_section_info *section,
+				       addrmap *mutable_map);
 
 #endif /* DWARF2READ_H */
