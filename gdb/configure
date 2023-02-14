@@ -913,7 +913,6 @@ with_auto_load_safe_path
 enable_targets
 enable_64_bit_bfd
 with_amd_dbgapi
-enable_gdbmi
 enable_tui
 enable_gdbtk
 with_debuginfod
@@ -1630,7 +1629,6 @@ Optional Features:
   --enable-targets=TARGETS
                           alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
-  --disable-gdbmi         disable machine-interface (MI)
   --enable-tui            enable full-screen terminal user interface (TUI)
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
@@ -11450,7 +11448,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11453 "configure"
+#line 11451 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11556,7 +11554,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11559 "configure"
+#line 11557 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18302,31 +18300,6 @@ cat >>confdefs.h <<_ACEOF
 #define DEFAULT_BFD_VEC $targ_defvec
 _ACEOF
 
-fi
-
-# Enable MI.
-# Check whether --enable-gdbmi was given.
-if test "${enable_gdbmi+set}" = set; then :
-  enableval=$enable_gdbmi;
-	   case $enableval in
-	     yes | no)
-	       ;;
-	     *)
-	       as_fn_error $? "bad value $enableval for --enable-gdbmi" "$LINENO" 5
-	       ;;
-	   esac
-
-else
-  enable_gdbmi=yes
-fi
-
-if test x"$enable_gdbmi" = xyes; then
-  if test -d "$srcdir/mi"; then
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_MI_OBS)"
-    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_MI_DEPS)"
-    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_MI_SRCS)"
-    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_MI_CFLAGS)"
-  fi
 fi
 
 # Enable TUI.

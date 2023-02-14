@@ -318,20 +318,6 @@ if test "x$targ_defvec" != x; then
     [Define to BFD's default target vector. ])
 fi
 
-# Enable MI.
-AC_ARG_ENABLE([gdbmi],
-	      [AS_HELP_STRING([--disable-gdbmi], [disable machine-interface (MI)])],
-	      [GDB_CHECK_YES_NO_VAL([$enableval], [--enable-gdbmi])],
-	      [enable_gdbmi=yes])
-if test x"$enable_gdbmi" = xyes; then
-  if test -d "$srcdir/mi"; then
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_MI_OBS)"
-    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_MI_DEPS)"
-    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_MI_SRCS)"
-    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_MI_CFLAGS)"
-  fi
-fi
-
 # Enable TUI.
 AC_ARG_ENABLE(tui,
 AS_HELP_STRING([--enable-tui],

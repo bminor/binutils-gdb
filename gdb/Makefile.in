@@ -293,6 +293,7 @@ SUBDIR_MI_SRCS = \
 	mi/mi-cmd-target.c \
 	mi/mi-cmd-var.c \
 	mi/mi-cmds.c \
+	mi/mi-common.c \
 	mi/mi-console.c \
 	mi/mi-getopt.c \
 	mi/mi-interp.c \
@@ -302,10 +303,6 @@ SUBDIR_MI_SRCS = \
 	mi/mi-symbol-cmds.c
 
 SUBDIR_MI_OBS = $(patsubst %.c,%.o,$(SUBDIR_MI_SRCS))
-
-SUBDIR_MI_DEPS =
-SUBDIR_MI_LDFLAGS =
-SUBDIR_MI_CFLAGS =
 
 #
 # TUI sub directory definitions
@@ -1251,8 +1248,8 @@ SFILES = \
 	stub-termcap.c \
 	symfile-mem.c \
 	ui-file.h \
-	mi/mi-common.c \
 	$(SUBDIR_CLI_SRCS) \
+	$(SUBDIR_MI_SRCS) \
 	$(SUBDIR_TARGET_SRCS) \
 	$(COMMON_SFILES) \
 	$(SUBDIR_GCC_COMPILE_SRCS)
@@ -1866,6 +1863,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	xml-builtin.o \
 	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
 	$(SUBDIR_CLI_OBS) \
+	$(SUBDIR_MI_OBS) \
 	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
