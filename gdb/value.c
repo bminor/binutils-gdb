@@ -939,7 +939,7 @@ value::allocate (struct type *type, bool check_size)
   struct value *val = value::allocate_lazy (type);
 
   val->allocate_contents (check_size);
-  val->m_lazy = 0;
+  val->m_lazy = false;
   return val;
 }
 
@@ -991,7 +991,7 @@ value::allocate_optimized_out (struct type *type)
   struct value *retval = value::allocate_lazy (type);
 
   retval->mark_bytes_optimized_out (0, type->length ());
-  retval->set_lazy (0);
+  retval->set_lazy (false);
   return retval;
 }
 
@@ -3815,7 +3815,7 @@ value::fetch_lazy_register ()
 
   /* Copy the contents and the unavailability/optimized-out
      meta-data from NEW_VAL to VAL.  */
-  set_lazy (0);
+  set_lazy (false);
   new_val->contents_copy (this, embedded_offset (),
 			  new_val->embedded_offset (),
 			  type_length_units (type));
@@ -3899,7 +3899,7 @@ value::fetch_lazy ()
   else
     internal_error (_("Unexpected lazy value type."));
 
-  set_lazy (0);
+  set_lazy (false);
 }
 
 /* Implementation of the convenience function $_isvoid.  */

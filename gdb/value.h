@@ -133,7 +133,7 @@ private:
   /* Values can only be created via "static constructors".  */
   explicit value (struct type *type_)
     : m_modifiable (true),
-      m_lazy (1),
+      m_lazy (true),
       m_initialized (1),
       m_stack (0),
       m_is_zero (false),
@@ -247,8 +247,8 @@ public:
   void set_embedded_offset (LONGEST val)
   { m_embedded_offset = val; }
 
-  /* If zero, contents of this value are in the contents field.  If
-     nonzero, contents are in inferior.  If the lval field is lval_memory,
+  /* If false, contents of this value are in the contents field.  If
+     true, contents are in inferior.  If the lval field is lval_memory,
      the contents are in inferior memory at location.address plus offset.
      The lval field may also be lval_register.
 
@@ -262,10 +262,10 @@ public:
      element.  If you ever change the way lazy flag is set and reset, be
      sure to consider this use as well!  */
 
-  int lazy () const
+  bool lazy () const
   { return m_lazy; }
 
-  void set_lazy (int val)
+  void set_lazy (bool val)
   { m_lazy = val; }
 
   /* If a value represents a C++ object, then the `type' field gives the
@@ -621,8 +621,8 @@ private:
   /* Is it modifiable?  Only relevant if lval != not_lval.  */
   bool m_modifiable : 1;
 
-  /* If zero, contents of this value are in the contents field.  If
-     nonzero, contents are in inferior.  If the lval field is lval_memory,
+  /* If false, contents of this value are in the contents field.  If
+     true, contents are in inferior.  If the lval field is lval_memory,
      the contents are in inferior memory at location.address plus offset.
      The lval field may also be lval_register.
 
@@ -635,7 +635,7 @@ private:
      or array when the user wants to watch a single struct member or
      array element.  If you ever change the way lazy flag is set and
      reset, be sure to consider this use as well!  */
-  unsigned int m_lazy : 1;
+  bool m_lazy : 1;
 
   /* If value is a variable, is it initialized or not.  */
   unsigned int m_initialized : 1;
