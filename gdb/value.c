@@ -41,6 +41,7 @@
 #include "user-regs.h"
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <utility>
 #include <vector>
 #include "completer.h"
@@ -1833,7 +1834,6 @@ struct internalvar
     : name (std::move (name))
   {}
 
-  struct internalvar *next = nullptr;
   std::string name;
 
   /* We support various different kinds of content of an internal variable.
@@ -1845,7 +1845,10 @@ struct internalvar
   union internalvar_data u;
 };
 
-static struct internalvar *internalvars;
+/* Use std::map, a sorted container, to make the order of iteration (and
+   therefore the output of "show convenience" stable).  */
+
+static std::map<std::string, internalvar> internalvars;
 
 /* If the variable does not already exist create it and give it the
    value given.  If no value is given then the default is zero.  */
@@ -1895,13 +1898,11 @@ init_if_undefined_command (const char* args, int from_tty)
 struct internalvar *
 lookup_only_internalvar (const char *name)
 {
-  struct internalvar *var;
+  auto it = internalvars.find (name);
+  if (it == internalvars.end ())
+    return nullptr;
 
-  for (var = internalvars; var; var = var->next)
-    if (var->name == name)
-      return var;
-
-  return NULL;
+  return &it->second;
 }
 
 /* Complete NAME by comparing it to the names of internal
@@ -1910,27 +1911,29 @@ lookup_only_internalvar (const char *name)
 void
 complete_internalvar (completion_tracker &tracker, const char *name)
 {
-  struct internalvar *var;
-  int len;
+  int len = strlen (name);
 
-  len = strlen (name);
+  for (auto &pair : internalvars)
+    {
+      const internalvar &var = pair.second;
 
-  for (var = internalvars; var; var = var->next)
-    if (var->name.compare (0, len, name) == 0)
-      tracker.add_completion (make_unique_xstrdup (var->name.c_str ()));
+      if (var.name.compare (0, len, name) == 0)
+	tracker.add_completion (make_unique_xstrdup (var.name.c_str ()));
+    }
 }
 
 /* Create an internal variable with name NAME and with a void value.
-   NAME should not normally include a dollar sign.  */
+   NAME should not normally include a dollar sign.
+
+   An internal variable with that name must not exist already.  */
 
 struct internalvar *
 create_internalvar (const char *name)
 {
-  internalvar *var = new internalvar (name);
+  auto pair = internalvars.emplace (std::make_pair (name, internalvar (name)));
+  gdb_assert (pair.second);
 
-  var->next = internalvars;
-  internalvars = var;
-  return var;
+  return &pair.first->second;
 }
 
 /* Create an internal variable with name NAME and register FUN as the
@@ -2417,8 +2420,6 @@ preserve_one_varobj (struct varobj *varobj, struct objfile *objfile,
 void
 preserve_values (struct objfile *objfile)
 {
-  struct internalvar *var;
-
   /* Create the hash table.  We allocate on the objfile's obstack, since
      it is soon to be deleted.  */
   htab_up copied_types = create_copied_types_hash ();
@@ -2426,8 +2427,8 @@ preserve_values (struct objfile *objfile)
   for (const value_ref_ptr &item : value_history)
     item->preserve (objfile, copied_types.get ());
 
-  for (var = internalvars; var; var = var->next)
-    preserve_one_internalvar (var, objfile, copied_types.get ());
+  for (auto &pair : internalvars)
+    preserve_one_internalvar (&pair.second, objfile, copied_types.get ());
 
   /* For the remaining varobj, check that none has type owned by OBJFILE.  */
   all_root_varobjs ([&copied_types, objfile] (struct varobj *varobj)
@@ -2443,25 +2444,25 @@ static void
 show_convenience (const char *ignore, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
-  struct internalvar *var;
   int varseen = 0;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
-  for (var = internalvars; var; var = var->next)
+  for (auto &pair : internalvars)
     {
+      internalvar &var = pair.second;
 
       if (!varseen)
 	{
 	  varseen = 1;
 	}
-      gdb_printf (("$%s = "), var->name.c_str ());
+      gdb_printf (("$%s = "), var.name.c_str ());
 
       try
 	{
 	  struct value *val;
 
-	  val = value_of_internalvar (gdbarch, var);
+	  val = value_of_internalvar (gdbarch, &var);
 	  value_print (val, gdb_stdout, &opts);
 	}
       catch (const gdb_exception_error &ex)
