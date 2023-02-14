@@ -1496,7 +1496,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
   type *address_type = this->address_type ();
 
   this->m_location = DWARF_VALUE_MEMORY;
-  this->m_initialized = 1;  /* Default is initialized.  */
+  this->m_initialized = true;  /* Default is initialized.  */
 
   if (this->m_recursion_depth > this->m_max_recursion_depth)
     error (_("DWARF-2 expression error: Loop detected (%d)."),
@@ -2192,7 +2192,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    error (_("DWARF-2 expression error: DW_OP_GNU_uninit must always "
 		   "be the very last op."));
 
-	  this->m_initialized = 0;
+	  this->m_initialized = false;
 	  goto no_push;
 
 	case DW_OP_call2:

@@ -134,7 +134,7 @@ private:
   explicit value (struct type *type_)
     : m_modifiable (true),
       m_lazy (true),
-      m_initialized (1),
+      m_initialized (true),
       m_stack (0),
       m_is_zero (false),
       m_in_history (false),
@@ -338,11 +338,11 @@ public:
 
   /* Set or return field indicating whether a variable is initialized or
      not, based on debugging information supplied by the compiler.
-     1 = initialized; 0 = uninitialized.  */
-  int initialized () const
+     true = initialized; false = uninitialized.  */
+  bool initialized () const
   { return m_initialized; }
 
-  void set_initialized (int value)
+  void set_initialized (bool value)
   { m_initialized = value; }
 
   /* If lval == lval_memory, return the address in the inferior.  If
@@ -638,7 +638,7 @@ private:
   bool m_lazy : 1;
 
   /* If value is a variable, is it initialized or not.  */
-  unsigned int m_initialized : 1;
+  bool m_initialized : 1;
 
   /* If value is from the stack.  If this is set, read_stack will be
      used instead of read_memory to enable extra caching.  */

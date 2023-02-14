@@ -164,9 +164,9 @@ private:
   ULONGEST m_len = 0;
   const gdb_byte *m_data = nullptr;
 
-  /* Initialization status of variable: Non-zero if variable has been
-     initialized; zero otherwise.  */
-  int m_initialized = 0;
+  /* Initialization status of variable: True if variable has been
+     initialized; false otherwise.  */
+  bool m_initialized = false;
 
   /* A vector of pieces.
 
