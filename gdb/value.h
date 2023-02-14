@@ -475,7 +475,7 @@ public:
   /* Given a value, determine whether the bits starting at OFFSET and
      extending for LENGTH bits are a synthetic pointer.  */
 
-  int bits_synthetic_pointer (LONGEST offset, LONGEST length) const;
+  bool bits_synthetic_pointer (LONGEST offset, LONGEST length) const;
 
   /* Increase this value's reference count.  */
   void incref ()
@@ -924,8 +924,8 @@ struct lval_funcs
 
   /* If non-NULL, this is used to determine whether the indicated bits
      of VALUE are a synthetic pointer.  */
-  int (*check_synthetic_pointer) (const struct value *value,
-				  LONGEST offset, int length);
+  bool (*check_synthetic_pointer) (const struct value *value,
+				   LONGEST offset, int length);
 
   /* Return a duplicate of VALUE's closure, for use in a new value.
      This may simply return the same closure, if VALUE's is

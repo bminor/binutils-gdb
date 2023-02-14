@@ -459,7 +459,7 @@ is_optimized_out_pieced_value (value *v)
 /* An implementation of an lval_funcs method to see whether a value is
    a synthetic pointer.  */
 
-static int
+static bool
 check_pieced_synthetic_pointer (const value *value, LONGEST bit_offset,
 				int bit_length)
 {
@@ -490,10 +490,10 @@ check_pieced_synthetic_pointer (const value *value, LONGEST bit_offset,
 	bit_length -= this_size_bits;
 
       if (p->location != DWARF_VALUE_IMPLICIT_POINTER)
-	return 0;
+	return false;
     }
 
-  return 1;
+  return true;
 }
 
 /* An implementation of an lval_funcs method to indirect through a

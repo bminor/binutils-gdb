@@ -1316,12 +1316,12 @@ value::mark_bits_optimized_out (LONGEST offset, LONGEST length)
   insert_into_bit_range_vector (&m_optimized_out, offset, length);
 }
 
-int
+bool
 value::bits_synthetic_pointer (LONGEST offset, LONGEST length) const
 {
   if (m_lval != lval_computed
       || !m_location.computed.funcs->check_synthetic_pointer)
-    return 0;
+    return false;
   return m_location.computed.funcs->check_synthetic_pointer (this, offset,
 							     length);
 }

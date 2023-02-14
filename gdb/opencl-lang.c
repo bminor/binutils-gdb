@@ -187,10 +187,10 @@ lval_func_write (struct value *v, struct value *fromval)
     }
 }
 
-/* Return nonzero if bits in V from OFFSET and LENGTH represent a
+/* Return true if bits in V from OFFSET and LENGTH represent a
    synthetic pointer.  */
 
-static int
+static bool
 lval_func_check_synthetic_pointer (const struct value *v,
 				   LONGEST offset, int length)
 {
@@ -208,7 +208,7 @@ lval_func_check_synthetic_pointer (const struct value *v,
     end++;
 
   if (end > c->n)
-    return 0;
+    return false;
 
   for (i = start; i < end; i++)
     {
@@ -217,10 +217,10 @@ lval_func_check_synthetic_pointer (const struct value *v,
 
       if (!c->val->bits_synthetic_pointer (c->indices[i] * elsize + comp_offset,
 					   comp_length))
-	return 0;
+	return false;
     }
 
-  return 1;
+  return true;
 }
 
 static void *
