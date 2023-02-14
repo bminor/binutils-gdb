@@ -3134,8 +3134,8 @@ xresldtrk, 0xf20f01e9, TSXLDTRK, NoSuf, {}
 
 // AMX instructions.
 
-ldtilecfg, 0x49, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
-sttilecfg, 0x6649, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
+ldtilecfg, 0x49/0, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
+sttilecfg, 0x6649/0, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
 
 tdpbf16ps, 0xf35c, AMX_BF16|x64, Modrm|Vex128|Space0F38|VexVVVV=1|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
 tdpfp16ps, 0xf25c, AMX_FP16|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
