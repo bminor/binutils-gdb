@@ -54,7 +54,48 @@ with_test_prefix "prepare record" {
     gdb_test "python print(r.method)" "btrace"
     gdb_test "python print(r.format)" "pt|bts"
     gdb_test "stepi 100" ".*"
-    gdb_test_no_output "python insn = r.instruction_history"
+
+    # There's a HW bug affecting Processor Trace on some Intel processors.
+    # The bug was exposed by linux kernel commit 670638477aed
+    # ("perf/x86/intel/pt: Opportunistically use single range output mode"),
+    # added in version v5.5.0, and was worked around by commit ce0d998be927
+    # ("perf/x86/intel/pt: Fix sampling using single range output") in version
+    # 6.1.0.  Detect the kernel version range for which the problem may
+    # manifest.
+    set have_xfail 0
+    set v [linux_kernel_version]
+    if { $v != {} } {
+	set have_xfail \
+	    [expr [version_compare [list 5 5 0] <= $v] \
+		 && [version_compare $v < [list 6 1 0]]]
+    }
+    set nonl_re \[^\r\n\]
+    set xfail_re \
+	[join \
+	     [list \
+		  "warning: Decode error \\($nonl_re*\\) at instruction $decimal" \
+		  "\\(offset = $hex, pc = $hex\\):" \
+		  "$nonl_re*\\."]]
+
+    set got_xfail 0
+    set cmd "python insn = r.instruction_history"
+    gdb_test_multiple $cmd "" {
+	-re "^[string_to_regexp $cmd]\r\n$::gdb_prompt $" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "$xfail_re" {
+	    if { $have_xfail } {
+		xfail $gdb_test_name
+		set got_xfail 1
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
+    }
+    if { $got_xfail } {
+	return
+    }
+
     gdb_test_no_output "python call = r.function_call_history"
     gdb_test_no_output "python i = insn\[0\]"
     gdb_test_no_output "python c = call\[0\]"
