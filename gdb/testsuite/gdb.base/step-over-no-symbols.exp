@@ -76,9 +76,9 @@ proc test_step_over { displaced } {
 
     set after_addr [get_pc "get after PC"]
 
-    gdb_assert {{[regexp "^${hex}$" $before_addr] \
-		 && [regexp "^${hex}$" $after_addr] \
-		 && $before_addr != $after_addr}} "advanced"
+    gdb_assert {[regexp "^${hex}$" $before_addr] \
+		    && [regexp "^${hex}$" $after_addr] \
+		    && $before_addr != $after_addr} "advanced"
 }
 
 foreach displaced { "off" "on" "auto" } {

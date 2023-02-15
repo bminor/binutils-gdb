@@ -159,7 +159,7 @@ foreach {-> reg} [regexp -all -inline -line {^info registers (\w+\S*)} $regs_out
     lappend completed_regs $reg
 }
 set completed_regs [join [lsort $completed_regs]]
-gdb_assert {{$all_regs eq $completed_regs}} "complete 'info registers '"
+gdb_assert {$all_regs eq $completed_regs} "complete 'info registers '"
 
 # Tests below are about tab-completion, which doesn't work if readline
 # library isn't used.  Check it first.

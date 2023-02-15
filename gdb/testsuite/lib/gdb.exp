@@ -1942,7 +1942,7 @@ proc gdb_assert { condition {message ""} } {
 	set message $condition
     }
 
-    set code [catch {uplevel 1 expr $condition} res]
+    set code [catch {uplevel 1 [list expr $condition]} res]
     if {$code == 1} {
 	# If code is 1 (TCL_ERROR), it means evaluation failed and res contains
 	# an error message.  Print the error message, and set res to 0 since we
