@@ -3388,6 +3388,7 @@ Added inferior 2.
 
 You can now simply switch focus to inferior 2 and run it.
 
+@anchor{remove_inferiors_cli}
 @kindex remove-inferiors
 @item remove-inferiors @var{infno}@dots{}
 Removes the inferior or inferiors @var{infno}@dots{}.  It is not
@@ -38358,6 +38359,39 @@ The corresponding @value{GDBN} command is @samp{add-inferior}
 (@value{GDBP})
 -add-inferior
 ^done,inferior="i3"
+@end smallexample
+
+@findex -remove-inferior
+@subheading The @code{-remove-inferior} Command
+
+@subsubheading Synopsis
+
+@smallexample
+-remove-inferior @var{inferior-id}
+@end smallexample
+
+Removes an inferior (@pxref{Inferiors Connections and Programs}).
+Only inferiors that have exited can be removed.  The @var{inferior-id}
+is the inferior to be removed, and should be the same id string as
+returned by the @samp{-add-inferior} command.
+
+When an inferior is successfully removed a
+@code{=thread-group-removed} notification (@pxref{GDB/MI Async
+Records}) is emitted, the @var{id} field of which contains the
+@var{inferior-id} for the removed inferior.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{remove-inferiors}
+(@pxref{remove_inferiors_cli,,@samp{remove-inferiors}}).
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-remove-inferior i3
+=thread-group-removed,id="i3"
+^done
 @end smallexample
 
 @findex -interpreter-exec
