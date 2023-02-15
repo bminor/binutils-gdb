@@ -579,25 +579,24 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   ecoff_data (abfd)->raw_syments = raw;
 
   /* Get pointers for the numeric offsets in the HDRR structure.  */
-#define FIX(off1, off2, type)				\
-  if (internal_symhdr->off1 == 0)			\
-    debug->off2 = NULL;					\
-  else							\
-    debug->off2 = (type) ((char *) raw			\
-			  + (internal_symhdr->off1	\
-			     - raw_base))
+#define FIX(start, count, ptr, type) \
+  if (internal_symhdr->start == 0 || internal_symhdr->count == 0)	\
+    debug->ptr = NULL;							\
+  else									\
+    debug->ptr = (type) ((char *) raw					\
+			 + (internal_symhdr->start - raw_base))
 
-  FIX (cbLineOffset, line, unsigned char *);
-  FIX (cbDnOffset, external_dnr, void *);
-  FIX (cbPdOffset, external_pdr, void *);
-  FIX (cbSymOffset, external_sym, void *);
-  FIX (cbOptOffset, external_opt, void *);
-  FIX (cbAuxOffset, external_aux, union aux_ext *);
-  FIX (cbSsOffset, ss, char *);
-  FIX (cbSsExtOffset, ssext, char *);
-  FIX (cbFdOffset, external_fdr, void *);
-  FIX (cbRfdOffset, external_rfd, void *);
-  FIX (cbExtOffset, external_ext, void *);
+  FIX (cbLineOffset, cbLine, line, unsigned char *);
+  FIX (cbDnOffset, idnMax, external_dnr, void *);
+  FIX (cbPdOffset, ipdMax, external_pdr, void *);
+  FIX (cbSymOffset, isymMax, external_sym, void *);
+  FIX (cbOptOffset, ioptMax, external_opt, void *);
+  FIX (cbAuxOffset, iauxMax, external_aux, union aux_ext *);
+  FIX (cbSsOffset, issMax, ss, char *);
+  FIX (cbSsExtOffset, issExtMax, ssext, char *);
+  FIX (cbFdOffset, ifdMax, external_fdr, void *);
+  FIX (cbRfdOffset, crfd, external_rfd, void *);
+  FIX (cbExtOffset, iextMax, external_ext, void *);
 #undef FIX
 
   /* I don't want to always swap all the data, because it will just
@@ -932,7 +931,13 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
     {
       char *lraw_src;
       char *lraw_end;
+      HDRR *symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
 
+      if (fdr_ptr->isymBase < 0
+	  || fdr_ptr->isymBase > symhdr->isymMax
+	  || fdr_ptr->csym <= 0
+	  || fdr_ptr->csym > symhdr->isymMax - fdr_ptr->isymBase)
+	continue;
       lraw_src = ((char *) ecoff_data (abfd)->debug_info.external_sym
 		  + fdr_ptr->isymBase * external_sym_size);
       lraw_end = lraw_src + fdr_ptr->csym * external_sym_size;
@@ -944,7 +949,6 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
 
 	  (*swap_sym_in) (abfd, (void *) lraw_src, &internal_sym);
 
-	  HDRR *symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
 	  if (internal_sym.iss >= symhdr->issMax
 	      || internal_sym.iss < 0)
 	    {
