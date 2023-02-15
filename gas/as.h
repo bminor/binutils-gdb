@@ -77,9 +77,6 @@
 #include "bfd.h"
 #include "libiberty.h"
 
-/* Define the standard progress macros.  */
-#include "progress.h"
-
 /* Other stuff from config.h.  */
 #ifdef NEED_DECLARATION_ENVIRON
 extern char **environ;

@@ -23,7 +23,6 @@
 #include "bfd.h"
 #include "safe-ctype.h"
 #include "libiberty.h"
-#include "progress.h"
 #include "bfdlink.h"
 #include "ctf-api.h"
 #include "filenames.h"
@@ -262,8 +261,6 @@ main (int argc, char **argv)
 
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
-
-  START_PROGRESS (program_name, 0);
 
   expandargv (&argc, &argv);
 
@@ -617,8 +614,6 @@ main (int argc, char **argv)
 	    }
 	}
     }
-
-  END_PROGRESS (program_name);
 
   if (config.stats)
     {

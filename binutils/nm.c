@@ -20,7 +20,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "progress.h"
 #include "getopt.h"
 #include "aout/stab_gnu.h"
 #include "aout/ranlib.h"
@@ -786,8 +785,6 @@ filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
       int keep = 0;
       asymbol *sym;
 
-      PROGRESS (1);
-
       sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, (const void *) from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
@@ -1182,8 +1179,6 @@ print_symbol (bfd *        abfd,
 {
   symbol_info syminfo;
   struct extended_symbol_info info;
-
-  PROGRESS (1);
 
   format->print_symbol_filename (archive_bfd, abfd);
 
@@ -1604,8 +1599,6 @@ display_archive (bfd *file)
 
   for (;;)
     {
-      PROGRESS (1);
-
       arfile = bfd_openr_next_archived_file (file, arfile);
 
       if (arfile == NULL)
@@ -2005,8 +1998,6 @@ main (int argc, char **argv)
   bfd_plugin_set_program_name (program_name);
 #endif
 
-  START_PROGRESS (program_name, 0);
-
   expandargv (&argc, &argv);
 
   if (bfd_init () != BFD_INIT_MAGIC)
@@ -2193,12 +2184,9 @@ main (int argc, char **argv)
   /* We were given several filenames to do.  */
   while (optind < argc)
     {
-      PROGRESS (1);
       if (!display_file (argv[optind++]))
 	retval++;
     }
-
-  END_PROGRESS (program_name);
 
   exit (retval);
   return retval;

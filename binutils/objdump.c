@@ -52,7 +52,6 @@
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "coff-bfd.h"
-#include "progress.h"
 #include "bucomm.h"
 #include "elfcomm.h"
 #include "demanguse.h"
@@ -5838,8 +5837,6 @@ main (int argc, char **argv)
   xmalloc_set_program_name (program_name);
   bfd_set_error_program_name (program_name);
 
-  START_PROGRESS (program_name, 0);
-
   expandargv (&argc, &argv);
 
   if (bfd_init () != BFD_INIT_MAGIC)
@@ -6220,8 +6217,6 @@ main (int argc, char **argv)
   free (dump_ctf_section_name);
   free (dump_ctf_parent_name);
   free ((void *) source_comment);
-
-  END_PROGRESS (program_name);
 
   return exit_status;
 }

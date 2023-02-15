@@ -1250,7 +1250,6 @@ perform_an_assembly_pass (int argc, char ** argv)
     {
       if (*argv)
 	{			/* Is it a file-name argument?  */
-	  PROGRESS (1);
 	  saw_a_file++;
 	  /* argv->"" if stdin desired, else->filename.  */
 	  read_a_source_file (*argv);
@@ -1301,7 +1300,6 @@ gas_early_init (int *argcp, char ***argvp)
   myname = **argvp;
   xmalloc_set_program_name (myname);
   bfd_set_error_program_name (myname);
-  START_PROGRESS (myname, 0);
 
   expandargv (argcp, argvp);
 
@@ -1350,8 +1348,6 @@ gas_init (void)
   if (flag_print_statistics)
     xatexit (dump_statistics);
 
-  PROGRESS (1);
-
   dot_symbol_init ();
 
 #ifdef tc_init_after_args
@@ -1389,7 +1385,6 @@ main (int argc, char ** argv)
   struct stat sob;
 
   gas_early_init (&argc, &argv);
-  PROGRESS (1);
 
   /* Call parse_args before gas_init so that switches like
      --hash-size can be honored.  */
@@ -1435,8 +1430,6 @@ main (int argc, char ** argv)
     }
 
   gas_init ();
-
-  PROGRESS (1);
 
   /* Assemble it.  */
   perform_an_assembly_pass (argc, argv);
@@ -1512,8 +1505,6 @@ main (int argc, char ** argv)
 #endif
 
   input_scrub_end ();
-
-  END_PROGRESS (myname);
 
   /* Use xexit instead of return, because under VMS environments they
      may not place the same interpretation on the value given.  */

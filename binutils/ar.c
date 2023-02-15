@@ -26,7 +26,6 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
-#include "progress.h"
 #include "getopt.h"
 #include "aout/ar.h"
 #include "bucomm.h"
@@ -198,10 +197,7 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
   if (count == 0)
     {
       for (head = arch->archive_next; head; head = head->archive_next)
-	{
-	  PROGRESS (1);
-	  function (head);
-	}
+	function (head);
       return;
     }
 
@@ -223,7 +219,6 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
 	{
 	  const char * filename;
 
-	  PROGRESS (1);
 	  /* PR binutils/15796: Once an archive element has been matched
 	     do not match it again.  If the user provides multiple same-named
 	     parameters on the command line their intent is to match multiple
@@ -749,8 +744,6 @@ main (int argc, char **argv)
 	is_ranlib = 0;
     }
 
-  START_PROGRESS (program_name, 0);
-
   if (bfd_init () != BFD_INIT_MAGIC)
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
@@ -952,8 +945,6 @@ main (int argc, char **argv)
 	}
     }
 
-  END_PROGRESS (program_name);
-
   xexit (0);
   return 0;
 }
@@ -1063,7 +1054,6 @@ open_inarch (const char *archive_filename, const char *file)
        next_one;
        next_one = bfd_openr_next_archived_file (arch, next_one))
     {
-      PROGRESS (1);
       *last_one = next_one;
       last_one = &next_one->archive_next;
     }
