@@ -4603,7 +4603,10 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
 	{
 	  stabs = read_section_stabs (abfd, section->name, &stab_size, NULL);
 	  if (stabs)
-	    print_section_stabs (abfd, section->name, &sought->string_offset);
+	    {
+	      print_section_stabs (abfd, section->name, &sought->string_offset);
+	      free (stabs);
+	    }
 	}
     }
 }
