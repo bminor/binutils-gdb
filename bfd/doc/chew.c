@@ -1241,15 +1241,21 @@ add_intrinsic (char *name, void (*func) (void))
 }
 
 static void
-add_intrinsic_variable (char *name, intptr_t *loc)
+add_variable (char *name, intptr_t *loc)
 {
-  dict_type *new_d = newentry (xstrdup (name));
+  dict_type *new_d = newentry (name);
   pcu p = { push_variable };
   add_to_definition (new_d, p);
   p.l = (intptr_t) loc;
   add_to_definition (new_d, p);
   p.f = 0;
   add_to_definition (new_d, p);
+}
+
+static void
+add_intrinsic_variable (const char *name, intptr_t *loc)
+{
+  add_variable (xstrdup (name), loc);
 }
 
 void
@@ -1333,7 +1339,7 @@ compile (char *string)
 	    continue;
 	  intptr_t *loc = xmalloc (sizeof (intptr_t));
 	  *loc = 0;
-	  add_intrinsic_variable (word, loc);
+	  add_variable (word, loc);
 	  string = nextword (string, &word);
 	}
       else
