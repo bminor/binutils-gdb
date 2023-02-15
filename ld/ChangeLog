@@ -1,3 +1,10 @@
+2023-02-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 30078
+	* testsuite/ld-elf/merge4b.s: Use .asciz instead of .string in
+	order to avoid the special behaviour of the .string directive on
+	HPPA architectures.
+
 2023-02-14  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texi (Plugins): Mention that the -plugin command line option

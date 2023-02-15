@@ -1,11 +1,11 @@
 /* Check that pointing into padding zeros of string sections works. */
 	.section	.rodata.str1.1,"aMS",@progbits,1
-	.string ""
+	.asciz ""
 .LC0:
-	.string	"foobar"
+	.asciz	"foobar"
 1:
-	.string ""
-	.string "whatever"
+	.asciz ""
+	.asciz "whatever"
 	.section .data
 	.globl addr_of_str
 	.type addr_of_str, @object
@@ -19,5 +19,5 @@ addr_of_str2:
 	.type	str, @object
 	.size	str, 7
 str:
-	.string	"foobar"
+	.asciz	"foobar"
 	.section	.note.GNU-stack,"",@progbits
