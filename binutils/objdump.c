@@ -4443,39 +4443,32 @@ dump_dwarf (bfd *abfd, bool is_mainfile)
   bfd_map_over_sections (abfd, dump_dwarf_section, (void *) &is_mainfile);
 }
 
-/* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
-   it.  Return NULL on failure.   */
+/* Read ABFD's section SECT_NAME into *CONTENTS, and return a pointer to
+   the section.  Return NULL on failure.   */
 
-static bfd_byte *
-read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr,
-		    bfd_size_type *entsize_ptr)
+static asection *
+read_section (bfd *abfd, const char *sect_name, bfd_byte **contents)
 {
-  asection *stabsect;
-  bfd_byte *contents;
+  asection *sec;
 
-  stabsect = bfd_get_section_by_name (abfd, sect_name);
-  if (stabsect == NULL)
+  *contents = NULL;
+  sec = bfd_get_section_by_name (abfd, sect_name);
+  if (sec == NULL)
     {
-      printf (_("No %s section present\n\n"),
-	      sanitize_string (sect_name));
-      return false;
+      printf (_("No %s section present\n\n"), sanitize_string (sect_name));
+      return NULL;
     }
 
-  if (!bfd_malloc_and_get_section (abfd, stabsect, &contents))
+  if (!bfd_malloc_and_get_section (abfd, sec, contents))
     {
       non_fatal (_("reading %s section of %s failed: %s"),
 		 sect_name, bfd_get_filename (abfd),
 		 bfd_errmsg (bfd_get_error ()));
       exit_status = 1;
-      free (contents);
       return NULL;
     }
 
-  *size_ptr = bfd_section_size (stabsect);
-  if (entsize_ptr)
-    *entsize_ptr = stabsect->entsize;
-
-  return contents;
+  return sec;
 }
 
 /* Stabs entries use a 12 byte format:
@@ -4595,15 +4588,20 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
       && (section->name[len] == 0
 	  || (section->name[len] == '.' && ISDIGIT (section->name[len + 1]))))
     {
+      asection *s;
       if (strtab == NULL)
-	strtab = read_section_stabs (abfd, sought->string_section_name,
-				     &stabstr_size, NULL);
+	{
+	  s = read_section (abfd, sought->string_section_name, &strtab);
+	  if (s != NULL)
+	    stabstr_size = bfd_section_size (s);
+	}
 
       if (strtab)
 	{
-	  stabs = read_section_stabs (abfd, section->name, &stab_size, NULL);
-	  if (stabs)
+	  s = read_section (abfd, section->name, &stabs);
+	  if (s != NULL)
 	    {
+	      stab_size = bfd_section_size (s);
 	      print_section_stabs (abfd, section->name, &sought->string_offset);
 	      free (stabs);
 	    }
@@ -4776,9 +4774,9 @@ dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, ctf_dict_t *parent,
 static void
 dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 {
+  asection *sec;
   ctf_archive_t *ctfa = NULL;
-  bfd_byte *ctfdata = NULL;
-  bfd_size_type ctfsize;
+  bfd_byte *ctfdata;
   ctf_sect_t ctfsect;
   ctf_dict_t *parent;
   ctf_dict_t *fp;
@@ -4790,13 +4788,14 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   if (sect_name == NULL)
     sect_name = ".ctf";
 
-  if ((ctfdata = read_section_stabs (abfd, sect_name, &ctfsize, NULL)) == NULL)
-      bfd_fatal (bfd_get_filename (abfd));
+  sec = read_section (abfd, sect_name, &ctfdata);
+  if (sec == NULL)
+    bfd_fatal (bfd_get_filename (abfd));
 
   /* Load the CTF file and dump it.  Preload the parent dict, since it will
      need to be imported into every child in turn. */
 
-  ctfsect = make_ctfsect (sect_name, ctfdata, ctfsize);
+  ctfsect = make_ctfsect (sect_name, ctfdata, bfd_section_size (sec));
   if ((ctfa = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
@@ -4831,54 +4830,25 @@ dump_ctf (bfd *abfd ATTRIBUTE_UNUSED, const char *sect_name ATTRIBUTE_UNUSED,
 	  const char *parent_name ATTRIBUTE_UNUSED) {}
 #endif
 
-static bfd_byte*
-read_section_sframe (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr,
-		     bfd_vma *sframe_vma)
-{
-  asection *sframe_sect;
-  bfd_byte *contents;
-
-  sframe_sect = bfd_get_section_by_name (abfd, sect_name);
-  if (sframe_sect == NULL)
-    {
-      printf (_("No %s section present\n\n"),
-	      sanitize_string (sect_name));
-      return NULL;
-    }
-
-  if (!bfd_malloc_and_get_section (abfd, sframe_sect, &contents))
-    {
-      non_fatal (_("reading %s section of %s failed: %s"),
-		 sect_name, bfd_get_filename (abfd),
-		 bfd_errmsg (bfd_get_error ()));
-      exit_status = 1;
-      free (contents);
-      return NULL;
-    }
-
-  *size_ptr = bfd_section_size (sframe_sect);
-  *sframe_vma = bfd_section_vma (sframe_sect);
-
-  return contents;
-}
-
 static void
 dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
 		     const char * sect_name)
 {
+  asection *sec;
   sframe_decoder_ctx *sfd_ctx = NULL;
   bfd_size_type sf_size;
-  bfd_byte *sframe_data = NULL;
+  bfd_byte *sframe_data;
   bfd_vma sf_vma;
   int err = 0;
 
   if (sect_name == NULL)
     sect_name = ".sframe";
 
-  sframe_data = read_section_sframe (abfd, sect_name, &sf_size, &sf_vma);
-
-  if (sframe_data == NULL)
+  sec = read_section (abfd, sect_name, &sframe_data);
+  if (sec == NULL)
     bfd_fatal (bfd_get_filename (abfd));
+  sf_size = bfd_section_size (sec);
+  sf_vma = bfd_section_vma (sec);
 
   /* Decode the contents of the section.  */
   sfd_ctx = sframe_decode ((const char*)sframe_data, sf_size, &err);
