@@ -349,16 +349,19 @@ bpfinishpy_out_of_scope (struct finish_breakpoint_object *bpfinish_obj)
       if (meth_result == NULL)
 	gdbpy_print_stack ();
     }
-
-  delete_breakpoint (bpfinish_obj->py_bp.bp);
 }
 
 /* Callback for `bpfinishpy_detect_out_scope'.  Triggers Python's
-   `B->out_of_scope' function if B is a FinishBreakpoint out of its scope.  */
+   `B->out_of_scope' function if B is a FinishBreakpoint out of its scope.
+
+   When DELETE_BP is true then breakpoint B will be deleted if B is a
+   FinishBreakpoint and it is out of scope, otherwise B will not be
+   deleted.  */
 
 static void
 bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
-				struct breakpoint *bp_stopped)
+				struct breakpoint *bp_stopped,
+				bool delete_bp)
 {
   PyObject *py_bp = (PyObject *) b->py_bp_object;
 
@@ -379,7 +382,11 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
 	      if (b->pspace == current_inferior ()->pspace
 		  && (!target_has_registers ()
 		      || frame_find_by_id (initiating_frame) == NULL))
-		bpfinishpy_out_of_scope (finish_bp);
+		{
+		  bpfinishpy_out_of_scope (finish_bp);
+		  if (delete_bp)
+		    delete_breakpoint (finish_bp->py_bp.bp);
+		}
 	    }
 	  catch (const gdb_exception &except)
 	    {
@@ -388,6 +395,17 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
 	    }
 	}
     }
+}
+
+/* Called when gdbpy_breakpoint_deleted is about to delete a breakpoint.  A
+   chance to trigger the out_of_scope callback (if appropriate) for the
+   associated Python object.  */
+
+void
+bpfinishpy_pre_delete_hook (struct gdbpy_breakpoint_object *bp_obj)
+{
+  breakpoint *bp = bp_obj->bp;
+  bpfinishpy_detect_out_scope_cb (bp, nullptr, false);
 }
 
 /* Attached to `stop' notifications, check if the execution has run
@@ -399,7 +417,8 @@ bpfinishpy_handle_stop (struct bpstat *bs, int print_frame)
   gdbpy_enter enter_py;
 
   for (breakpoint *bp : all_breakpoints_safe ())
-    bpfinishpy_detect_out_scope_cb (bp, bs == NULL ? NULL : bs->breakpoint_at);
+    bpfinishpy_detect_out_scope_cb
+      (bp, bs == NULL ? NULL : bs->breakpoint_at, true);
 }
 
 /* Attached to `exit' notifications, triggers all the necessary out of
@@ -411,7 +430,7 @@ bpfinishpy_handle_exit (struct inferior *inf)
   gdbpy_enter enter_py (target_gdbarch ());
 
   for (breakpoint *bp : all_breakpoints_safe ())
-    bpfinishpy_detect_out_scope_cb (bp, nullptr);
+    bpfinishpy_detect_out_scope_cb (bp, nullptr, true);
 }
 
 /* Initialize the Python finish breakpoint code.  */

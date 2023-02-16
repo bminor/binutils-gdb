@@ -3249,14 +3249,10 @@ remove_threaded_breakpoints (struct thread_info *tp, int silent)
     {
       if (b->thread == tp->global_num && user_breakpoint_p (b))
 	{
-	  b->disposition = disp_del_at_next_stop;
-
 	  gdb_printf (_("\
 Thread-specific breakpoint %d deleted - thread %s no longer in the thread list.\n"),
 		      b->number, print_thread_id (tp));
-
-	  /* Hide it from the user.  */
-	  b->number = 0;
+	  delete_breakpoint (b);
        }
     }
 }

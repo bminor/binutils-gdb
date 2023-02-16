@@ -777,6 +777,7 @@ extern const struct value_print_options *gdbpy_current_print_options;
 
 void bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
 void bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
+void bpfinishpy_pre_delete_hook (struct gdbpy_breakpoint_object *bp_obj);
 
 extern PyObject *gdbpy_doc_cst;
 extern PyObject *gdbpy_children_cst;

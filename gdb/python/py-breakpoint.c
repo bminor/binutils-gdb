@@ -1199,6 +1199,9 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
       gdbpy_ref<gdbpy_breakpoint_object> bp_obj (bp->py_bp_object);
       if (bp_obj != NULL)
 	{
+	  if (bp_obj->is_finish_bp)
+	    bpfinishpy_pre_delete_hook (bp_obj.get ());
+
 	  if (!evregpy_no_listeners_p (gdb_py_events.breakpoint_deleted))
 	    {
 	      if (evpy_emit_event ((PyObject *) bp_obj.get (),
