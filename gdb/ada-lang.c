@@ -790,18 +790,6 @@ ada_get_decoded_type (struct type *type)
 
 				/* Language Selection */
 
-/* If the main program is in Ada, return language_ada, otherwise return LANG
-   (the main program is in Ada iif the adainit symbol is found).  */
-
-static enum language
-ada_update_initial_language (enum language lang)
-{
-  if (lookup_minimal_symbol ("adainit", NULL, NULL).minsym != NULL)
-    return language_ada;
-
-  return lang;
-}
-
 /* If the main procedure is written in Ada, then return its name.
    The result is good until the next call.  Return NULL if the main
    procedure doesn't appear to be in Ada.  */
@@ -11754,31 +11742,8 @@ ada_exception_support_info_sniffer (void)
       return;
     }
 
-  /* Sometimes, it is normal for us to not be able to find the routine
-     we are looking for.  This happens when the program is linked with
-     the shared version of the GNAT runtime, and the program has not been
-     started yet.  Inform the user of these two possible causes if
-     applicable.  */
-
-  if (ada_update_initial_language (language_unknown) != language_ada)
-    error (_("Unable to insert catchpoint.  Is this an Ada main program?"));
-
-  /* If the symbol does not exist, then check that the program is
-     already started, to make sure that shared libraries have been
-     loaded.  If it is not started, this may mean that the symbol is
-     in a shared library.  */
-
-  if (inferior_ptid.pid () == 0)
-    error (_("Unable to insert catchpoint. Try to start the program first."));
-
-  /* At this point, we know that we are debugging an Ada program and
-     that the inferior has been started, but we still are not able to
-     find the run-time symbols.  That can mean that we are in
-     configurable run time mode, or that a-except as been optimized
-     out by the linker...  In any case, at this point it is not worth
-     supporting this feature.  */
-
-  error (_("Cannot insert Ada exception catchpoints in this configuration."));
+  throw_error (NOT_FOUND_ERROR,
+	       _("Could not find Ada runtime exception support"));
 }
 
 /* True iff FRAME is very likely to be that of a function that is
@@ -12062,44 +12027,19 @@ struct ada_catchpoint : public code_breakpoint
 {
   ada_catchpoint (struct gdbarch *gdbarch_,
 		  enum ada_exception_catchpoint_kind kind,
-		  struct symtab_and_line sal,
-		  const char *addr_string_,
+		  const char *cond_string,
 		  bool tempflag,
 		  bool enabled,
 		  bool from_tty,
 		  std::string &&excep_string_)
-    : code_breakpoint (gdbarch_, bp_catchpoint, tempflag),
+    : code_breakpoint (gdbarch_, bp_catchpoint, tempflag, cond_string),
       m_excep_string (std::move (excep_string_)),
       m_kind (kind)
   {
-    add_location (sal);
-
     /* Unlike most code_breakpoint types, Ada catchpoints are
        pspace-specific.  */
-    gdb_assert (sal.pspace != nullptr);
-    this->pspace = sal.pspace;
-
-    if (from_tty)
-      {
-	struct gdbarch *loc_gdbarch = get_sal_arch (sal);
-	if (!loc_gdbarch)
-	  loc_gdbarch = gdbarch;
-
-	describe_other_breakpoints (loc_gdbarch,
-				    sal.pspace, sal.pc, sal.section, -1);
-	/* FIXME: brobecker/2006-12-28: Actually, re-implement a special
-	   version for exception catchpoints, because two catchpoints
-	   used for different exception names will use the same address.
-	   In this case, a "breakpoint ... also set at..." warning is
-	   unproductive.  Besides, the warning phrasing is also a bit
-	   inappropriate, we should use the word catchpoint, and tell
-	   the user what type of catchpoint it is.  The above is good
-	   enough for now, though.  */
-      }
-
+    pspace = current_program_space;
     enable_state = enabled ? bp_enabled : bp_disabled;
-    locspec = string_to_location_spec (&addr_string_,
-				       language_def (language_ada));
     language = language_ada;
 
     re_set ();
@@ -12144,15 +12084,29 @@ public:
   expression_up excep_cond_expr;
 };
 
+static struct symtab_and_line ada_exception_sal
+     (enum ada_exception_catchpoint_kind ex);
+
 /* Implement the RE_SET method in the structure for all exception
    catchpoint kinds.  */
 
 void
 ada_catchpoint::re_set ()
 {
-  /* Call the base class's method.  This updates the catchpoint's
-     locations.  */
-  this->code_breakpoint::re_set ();
+  std::vector<symtab_and_line> sals;
+  try
+    {
+      struct symtab_and_line sal = ada_exception_sal (m_kind);
+      sals.push_back (sal);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      /* For NOT_FOUND_ERROR, the breakpoint will be pending.  */
+      if (ex.error != NOT_FOUND_ERROR)
+	throw;
+    }
+
+  update_breakpoint_locations (this, pspace, sals, {});
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
@@ -12681,16 +12635,11 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
   return result;
 }
 
-/* Return the symtab_and_line that should be used to insert an exception
-   catchpoint of the TYPE kind.
-
-   ADDR_STRING returns the name of the function where the real
-   breakpoint that implements the catchpoints is set, depending on the
-   type of catchpoint we need to create.  */
+/* Return the symtab_and_line that should be used to insert an
+   exception catchpoint of the TYPE kind.  */
 
 static struct symtab_and_line
-ada_exception_sal (enum ada_exception_catchpoint_kind ex,
-		   std::string *addr_string)
+ada_exception_sal (enum ada_exception_catchpoint_kind ex)
 {
   const char *sym_name;
   struct symbol *sym;
@@ -12704,13 +12653,11 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex,
   sym = standard_lookup (sym_name, NULL, VAR_DOMAIN);
 
   if (sym == NULL)
-    error (_("Catchpoint symbol not found: %s"), sym_name);
+    throw_error (NOT_FOUND_ERROR, _("Catchpoint symbol not found: %s"),
+		 sym_name);
 
   if (sym->aclass () != LOC_BLOCK)
     error (_("Unable to insert catchpoint. %s is not a function."), sym_name);
-
-  /* Set ADDR_STRING.  */
-  *addr_string = sym_name;
 
   return find_function_start_sal (sym, 1);
 }
@@ -12739,15 +12686,11 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 int enabled,
 				 int from_tty)
 {
-  std::string addr_string;
-  struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string);
-
   std::unique_ptr<ada_catchpoint> c
-    (new ada_catchpoint (gdbarch, ex_kind, sal, addr_string.c_str (),
+    (new ada_catchpoint (gdbarch, ex_kind,
+			 cond_string.empty () ? nullptr : cond_string.c_str (),
 			 tempflag, enabled, from_tty,
 			 std::move (excep_string)));
-  if (!cond_string.empty ())
-    set_breakpoint_condition (c.get (), cond_string.c_str (), from_tty, false);
   install_breakpoint (0, std::move (c), 1);
 }
 
