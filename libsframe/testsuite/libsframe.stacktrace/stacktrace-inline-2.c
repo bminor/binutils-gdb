@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <execinfo.h>
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 
 #define BT_BUF_SIZE 10
 
@@ -77,7 +77,7 @@ inline ATTR void inlined_fn(void)
   char **strings;
   /* Call the unwinder to get an array of return addresses.  */
   int j, err;
-  int nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  int nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (nptrs == -1 || nptrs != 2)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
@@ -98,7 +98,8 @@ inline ATTR void inlined_fn(void)
       break;
 
     free(strings);
-    printf ("%s: inline-cmds test\n", j == nptrs ? "PASS" : "FAIL");
+    printf ("%s: stacktrace with inlined function test 2\n",
+	    (j == nptrs) ? "PASS" : "FAIL");
 }
 
 void noinline(void)

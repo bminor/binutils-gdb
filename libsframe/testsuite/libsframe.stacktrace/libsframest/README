@@ -1,0 +1,7 @@
+libsframest
+===========
+
+libsframest is the SFrame stack tracer library.
+
+The current usecase libsframest fulfills here is: aid testing stack
+tracing in libsframe testsuite.

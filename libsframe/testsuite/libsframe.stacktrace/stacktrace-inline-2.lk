@@ -1,0 +1,3 @@
+# source: stacktrace-inline-2.c
+# link: on
+PASS: stacktrace with inlined function test 2

@@ -18,11 +18,12 @@
 # MA 02110-1301, USA.
 #
 
-# Run the tests only if sframebt library exists.
+# Run the tests only if libsframest library exists.
 
-if [catch "exec ls $objdir/.libs/libsframebt.la" status] then {
-  verbose -log "$objdir/.libs/libsframebt.la not found.";
-  verbose -log "Skipping SFrame unwind tests";
+if [catch "exec ls $objdir/testsuite/libsframe.stacktrace/libsframest/.libs/libsframest.la" status] then {
+  verbose -log \
+    "$objdir/testsuite/libsframe.stacktrace/libsframest/.libs/libsframest.la not found.";
+  verbose -log "Skipping SFrame stacktrace tests";
   return;
 }
 
@@ -107,7 +108,7 @@ proc run_unwind_test { name } {
     }
 
     # Compile and link the unwind program.
-    set comp_output [compile_link_one_host_cc $opts(unwind) "tmpdir/test_x" "./.libs/libsframebt.la ./.libs/libsframe.la"]
+    set comp_output [compile_link_one_host_cc $opts(unwind) "tmpdir/test_x" "./testsuite/libsframe.stacktrace/libsframest/.libs/libsframest.la ./.libs/libsframe.la"]
 
     if { $comp_output != ""} {
 	send_log "compilation of unwind program $opts(unwind) failed with <$comp_output>"
@@ -122,7 +123,7 @@ proc run_unwind_test { name } {
     if { [llength $opts(source)] > 0 } {
 	set unwind ""
 	if { $run_ld } {
-	    set unwind_output "tmpdir/test_x ./.libs/libsframebt.a ./.libs/libsframe.a"
+	    set unwind_output "tmpdir/test_x ./testsuite/libsframe.stacktrace/libsframest/.libs/libsframest.a ./.libs/libsframe.a"
 	    # set unwind_output "tmpdir/out.so"
 	    # set unwind_flags "-fPIC $shared $opts(link_flags)"
 	} else {

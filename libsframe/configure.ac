@@ -138,6 +138,25 @@ AC_CHECK_HEADERS(byteswap.h endian.h)
 dnl Check for bswap_{16,32,64}
 AC_CHECK_DECLS([bswap_16, bswap_32, bswap_64], [], [], [[#include <byteswap.h>]])
 
+dnl Check for dl_iterate_phdr.  Used in the libsframe.stacktrace testsuite.
+dnl The stacktrace testsuite is NOT built and run for build != target.
+AC_CHECK_HEADERS(link.h)
+if test "$ac_cv_header_link_h" = "no"; then
+  have_dl_iterate_phdr=no
+else
+  AC_CHECK_FUNC([dl_iterate_phdr],
+		[have_dl_iterate_phdr=yes],
+		[have_dl_iterate_phdr=no])
+fi 
+if test "$have_dl_iterate_phdr" = "yes"; then
+  AC_DEFINE(HAVE_DL_ITERATE_PHDR, 1, [Define if dl_iterate_phdr is available.])
+fi
+AM_CONDITIONAL([HAVE_DL_ITERATE_PHDR], [test "x$have_dl_iterate_phdr" = "xyes"])
+
+dnl Check for dl_iterate_phdr
+AC_CHECK_HEADERS(link.h)
+AC_CHECK_DECLS
+
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT

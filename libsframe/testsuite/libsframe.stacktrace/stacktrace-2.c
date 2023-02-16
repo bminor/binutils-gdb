@@ -28,16 +28,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 
 #define BT_BUF_SIZE 100
 
-#define BT_EXPECTED_NPTRS 3
 /* Expected funclist.  */
 static const char *const func_list[] =
 {
   "show_bt",
+  "baz",
   "bar",
+  "foo",
   "main"
 };
 
@@ -45,13 +46,12 @@ void __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
 show_bt ()
 {
   void *buffer[BT_BUF_SIZE];
-  int j, nptrs, err = 0;
+  int j, nptrs, err;
   char **strings;
 
   /* Call the unwinder to get an array of return addresses.  */
-  // nptrs = backtrace (buffer, BT_BUF_SIZE);
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
-  if (err)
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
+  if (nptrs != 5)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
       return;
@@ -64,16 +64,6 @@ show_bt ()
       return;
   }
 
-  // for (j = 0; j < nptrs; j++)
-    // printf (" %s \n", strings[j]);
-
-  if (nptrs != BT_EXPECTED_NPTRS)
-    {
-      printf ("Backtace nptrs mismatch: expected = %d, generated = %d \n",
-	      BT_EXPECTED_NPTRS, nptrs);
-      return;
-    }
-
   /* Verify the results.  */
   for (j = 0; j < nptrs; j++)
     if (!strstr (strings[j], func_list[j]))
@@ -81,15 +71,59 @@ show_bt ()
 
   free(strings);
 
-  printf ("%s: backtrace-1\n",
-	  (j == nptrs) ? "PASS" : "FAIL");
+  printf ("%s: stacktrace-2\n", (j == nptrs) ? "PASS" : "FAIL");
+}
+
+int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
+baz ()
+{
+  void *buffer[BT_BUF_SIZE];
+  int nptrs, err;
+
+  /* Call the unwinder to get an array of return addresses.  */
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
+  if (nptrs == -1)
+    {
+      printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
+      return -1;
+    }
+
+  show_bt ();
+  return 0;
 }
 
 int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
 bar ()
 {
-  show_bt ();
-  return 0;
+  void *buffer[BT_BUF_SIZE];
+  int nptrs, err;
+
+  /* Call the unwinder to get an array of return addresses.  */
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
+  if (nptrs == -1)
+    {
+      printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
+      return -1;
+    }
+
+  return baz ();
+}
+
+int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
+foo ()
+{
+  void *buffer[BT_BUF_SIZE];
+  int nptrs, err;
+
+  /* Call the unwinder to get an array of return addresses.  */
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
+  if (nptrs == -1)
+    {
+      printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
+      return -1;
+    }
+
+  return bar ();
 }
 
 int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
@@ -98,15 +132,13 @@ main ()
   void *buffer[BT_BUF_SIZE];
   int nptrs, err;
 
-  /* The following call to sframe_backtrace () also prevents sibling call
-     optimization in main ().  */
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (nptrs == -1)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
       return -1;
     }
 
-  return bar ();
+  return foo ();
 }

@@ -13,11 +13,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <execinfo.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "sframe-backtrace-api.h"
+/* This is a revised version of gdb/testsuite/gdb.base/backtrace.c.  */
 
 #ifdef __has_attribute
 # if !__has_attribute (noclone)
@@ -28,26 +24,34 @@
 # define ATTRIBUTE_NOCLONE __attribute__((noclone))
 #endif
 
-#define BT_BUF_SIZE 16
+#include <execinfo.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "sframe-stacktrace-api.h"
 
-/* funclist for running tailcall.  */
-const char *const func_list[] =
+#define BT_BUF_SIZE 100
+
+#define BT_EXPECTED_NPTRS 3
+/* Expected funclist.  */
+static const char *const func_list[] =
 {
   "show_bt",
-  "dec",
-  "dec",
+  "bar",
   "main"
 };
 
-void show_bt ()
+void __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
+show_bt ()
 {
   void *buffer[BT_BUF_SIZE];
-  int j, nptrs, err;
+  int j, nptrs, err = 0;
   char **strings;
 
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
-  if (nptrs == -1 || nptrs != 4)
+  // nptrs = backtrace (buffer, BT_BUF_SIZE);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
+  if (err)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
       return;
@@ -60,6 +64,16 @@ void show_bt ()
       return;
   }
 
+  // for (j = 0; j < nptrs; j++)
+    // printf (" %s \n", strings[j]);
+
+  if (nptrs != BT_EXPECTED_NPTRS)
+    {
+      printf ("Backtace nptrs mismatch: expected = %d, generated = %d \n",
+	      BT_EXPECTED_NPTRS, nptrs);
+      return;
+    }
+
   /* Verify the results.  */
   for (j = 0; j < nptrs; j++)
     if (!strstr (strings[j], func_list[j]))
@@ -67,36 +81,31 @@ void show_bt ()
 
   free(strings);
 
-  printf ("%s: tailcall test\n", j == nptrs ? "PASS" : "FAIL");
+  printf ("%s: stacktrace-1\n", (j == nptrs) ? "PASS" : "FAIL");
 }
 
-/* An example of tail recursive function.  */
-void __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
-dec (int n)
+int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
+bar ()
+{
+  show_bt ();
+  return 0;
+}
+
+int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
+main ()
 {
   void *buffer[BT_BUF_SIZE];
   int nptrs, err;
 
+  /* The following call to sframe_stacktrace () also prevents sibling call
+     optimization in main ().  */
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (nptrs == -1)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
-      return;
+      return -1;
     }
 
-  if (n < 0)
-     return;
-
-  if (n == 2)
-    show_bt ();
-
-  /* The last executed statement is recursive call.  */
-  dec (n-1);
-}
-
-int
-main (void)
-{
-  dec (3);
+  return bar ();
 }

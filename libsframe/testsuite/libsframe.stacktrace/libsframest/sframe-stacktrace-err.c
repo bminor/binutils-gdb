@@ -1,8 +1,8 @@
-/* sframe-backtrace-err.c - SFrame Backtrace Error table.
+/* sframe-stacktrace-err.c - SFrame Stacktrace Error table.
 
-   Copyright (C) 2022 Free Software Foundation, Inc.
+   Copyright (C) 2023 Free Software Foundation, Inc.
 
-   This file is part of libsframebt.
+   This file is part of libsframest.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,14 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 
-/* SFrame backtrace error messages.  */
+/* SFrame stacktrace error messages.  */
 static const char *const sframe_bt_errlist[] =
 {
   "",
-  "File does not contain SFrame data",
-  "Iterating shared object reading error",
+  "Failed to setup SFrame state for stack tracing",
+  "Bad arguments; Unhealthy SFrame state possible",
   "Failed to malloc memory space",
   "Failed to realloc memory space",
   "Failed to open file",
@@ -34,7 +34,8 @@ static const char *const sframe_bt_errlist[] =
   "Failed to read from a file descriptor",
   "Failed to get the user context",
   "Failed to set up decode data",
-  "Illegal CFA offset"
+  "Illegal CFA offset",
+  "Corrupt FRE"
 };
 
 /* Return the error message associated with the error code.  */
@@ -47,3 +48,24 @@ sframe_bt_errmsg (enum sframe_bt_errcode ecode)
 
   return sframe_bt_errlist[ecode];
 }
+
+/* sframe_bt_errno - Check if there is error code in ERRP.  */
+
+int
+sframe_bt_errno (const int *errp)
+{
+  if (!errp)
+    return 0;
+
+  return (*errp != SFRAME_BT_OK);
+}
+
+int
+sframe_bt_ret_set_errno (int *errp, int error)
+{
+  if (errp)
+    *errp = error;
+
+  return error;
+}
+

@@ -1,0 +1,3 @@
+# source: stacktrace-tailcall-1.c
+# link: on
+PASS: stacktrace tailcall test

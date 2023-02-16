@@ -14,12 +14,14 @@ check-DEJAGNU: site.exp
 		CC="$(CC)" \
 		CROSS_COMPILE="$(CROSS_COMPILE)" \
 		COMPAT_DEJAGNU="$(COMPAT_DEJAGNU)" \
-		CFLAGS="$(CFLAGS) -I$(top_srcdir)/../include -I$(top_srcdir) -I$(top_builddir)" \
+		HAVE_DL_ITERATE_PHDR="$(HAVE_DL_ITERATE_PHDR)" \
+		CFLAGS="$(CFLAGS) -I$(top_srcdir)/../include -I$(top_srcdir) -I$(top_srcdir)/testsuite/libsframe.stacktrace/libsframest/include -I$(top_builddir)" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
-# libsframe encoder/decoder/find testsuite
+# libsframe encoder/decoder/stacktracer testsuite
 include %D%/libsframe.decode/local.mk
 include %D%/libsframe.encode/local.mk
 include %D%/libsframe.find/local.mk
+include %D%/libsframe.stacktrace/local.mk

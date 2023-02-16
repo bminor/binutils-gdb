@@ -1,0 +1,3 @@
+# source: stacktrace-2.c
+# link: on
+PASS: stacktrace-2

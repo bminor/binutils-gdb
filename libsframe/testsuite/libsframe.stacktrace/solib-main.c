@@ -16,7 +16,7 @@
 #include <execinfo.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 #include "solib-lib1.h"
 #include "solib-lib2.h"
 

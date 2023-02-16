@@ -19,9 +19,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 
-#define ATTR __attribute__((always_inline))
+#define ALWAYS_INLINE __attribute__((always_inline))
 
 #define BT_BUF_SIZE 32
 
@@ -40,20 +40,20 @@ void bar(void)
   x += y;
 }
 
-inline ATTR int func1(void)
+inline ALWAYS_INLINE int func1(void)
 {
   bar ();
   return x * y;
 }
 
-inline ATTR int func2(void)
+inline ALWAYS_INLINE int func2(void)
 {
   void *buffer[BT_BUF_SIZE];
   int ok = 0, nptrs, err;
   char **strings;
 
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (nptrs == -1)
     {
       printf ("SFrame error: %s\n", sframe_bt_errmsg (err));
@@ -73,7 +73,7 @@ inline ATTR int func2(void)
 
   free(strings);
 
-  printf ("%s: unwind test\n", ok == 1 ? "PASS" : "FAIL");
+  printf ("%s: stacktrace with inlined function\n", ok == 1 ? "PASS" : "FAIL");
 
   return x * func1 ();
 }
