@@ -35930,7 +35930,7 @@ frame.  This field is present only if a trace frame was found.
 The corresponding @value{GDBN} command is @samp{tfind}.
 
 @findex -trace-define-variable
-@subheading -trace-define-variable
+@subheading The @code{-trace-define-variable} Command
 
 @subsubheading Synopsis
 
@@ -36065,7 +36065,7 @@ There is no corresponding @value{GDBN} command.
 @subsubheading Example
 
 @findex -trace-list-variables
-@subheading -trace-list-variables
+@subheading The @code{-trace-list-variables} Command
 
 @subsubheading Synopsis
 
@@ -36111,7 +36111,7 @@ body=[variable=@{name="$trace_timestamp",initial="0"@}
 @end smallexample
 
 @findex -trace-save
-@subheading -trace-save
+@subheading The @code{-trace-save} Command
 
 @subsubheading Synopsis
 
@@ -36134,7 +36134,7 @@ The corresponding @value{GDBN} command is @samp{tsave}.
 
 
 @findex -trace-start
-@subheading -trace-start
+@subheading The @code{-trace-start} Command
 
 @subsubheading Synopsis
 
@@ -36150,7 +36150,7 @@ have any fields.
 The corresponding @value{GDBN} command is @samp{tstart}.
 
 @findex -trace-status
-@subheading -trace-status
+@subheading The @code{-trace-status} Command
 
 @subsubheading Synopsis
 
@@ -36225,7 +36225,7 @@ optional, and only present when examining a trace file.
 The corresponding @value{GDBN} command is @samp{tstatus}.
 
 @findex -trace-stop
-@subheading -trace-stop
+@subheading The @code{-trace-stop} Command
 
 @subsubheading Synopsis
 
@@ -38114,7 +38114,7 @@ default shows this information when you start an interactive session.
 @findex -list-thread-groups
 @subheading The @code{-list-thread-groups} Command
 
-@subheading Synopsis
+@subsubheading Synopsis
 
 @smallexample
 -list-thread-groups [ --available ] [ --recurse 1 ] [ @var{group} ... ]
@@ -38208,7 +38208,7 @@ and only if there is a corresponding executable file.
 
 @end table
 
-@subheading Example
+@subsubheading Example
 
 @smallexample
 (@value{GDBP})
@@ -38310,7 +38310,7 @@ popup menu, but is needless clutter on the command line, and
 @findex -add-inferior
 @subheading The @code{-add-inferior} Command
 
-@subheading Synopsis
+@subsubheading Synopsis
 
 @smallexample
 -add-inferior [ --no-connection ]
@@ -38348,12 +38348,12 @@ The number of the connection used for the new inferior.
 The name of the connection type used for the new inferior.
 @end table
 
-@subheading @value{GDBN} Command
+@subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} command is @samp{add-inferior}
 (@pxref{add_inferior_cli,,@samp{add-inferior}}).
 
-@subheading Example
+@subsubheading Example
 
 @smallexample
 (@value{GDBP})
@@ -38397,7 +38397,7 @@ The corresponding @value{GDBN} command is @samp{remove-inferiors}
 @findex -interpreter-exec
 @subheading The @code{-interpreter-exec} Command
 
-@subheading Synopsis
+@subsubheading Synopsis
 
 @smallexample
 -interpreter-exec @var{interpreter} @var{command}
@@ -38406,11 +38406,11 @@ The corresponding @value{GDBN} command is @samp{remove-inferiors}
 
 Execute the specified @var{command} in the given @var{interpreter}.
 
-@subheading @value{GDBN} Command
+@subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} command is @samp{interpreter-exec}.
 
-@subheading Example
+@subsubheading Example
 
 @smallexample
 (gdb)
@@ -38425,7 +38425,7 @@ The corresponding @value{GDBN} command is @samp{interpreter-exec}.
 @findex -inferior-tty-set
 @subheading The @code{-inferior-tty-set} Command
 
-@subheading Synopsis
+@subsubheading Synopsis
 
 @smallexample
 -inferior-tty-set /dev/pts/1
@@ -38433,11 +38433,11 @@ The corresponding @value{GDBN} command is @samp{interpreter-exec}.
 
 Set terminal for future runs of the program being debugged.
 
-@subheading @value{GDBN} Command
+@subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} command is @samp{set inferior-tty} /dev/pts/1.
 
-@subheading Example
+@subsubheading Example
 
 @smallexample
 (gdb)
@@ -38449,7 +38449,7 @@ The corresponding @value{GDBN} command is @samp{set inferior-tty} /dev/pts/1.
 @findex -inferior-tty-show
 @subheading The @code{-inferior-tty-show} Command
 
-@subheading Synopsis
+@subsubheading Synopsis
 
 @smallexample
 -inferior-tty-show
@@ -38457,11 +38457,11 @@ The corresponding @value{GDBN} command is @samp{set inferior-tty} /dev/pts/1.
 
 Show terminal for future runs of program being debugged.
 
-@subheading @value{GDBN} Command
+@subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} command is @samp{show inferior-tty}.
 
-@subheading Example
+@subsubheading Example
 
 @smallexample
 (gdb)
@@ -38476,7 +38476,7 @@ The corresponding @value{GDBN} command is @samp{show inferior-tty}.
 @findex -enable-timings
 @subheading The @code{-enable-timings} Command
 
-@subheading Synopsis
+@subsubheading Synopsis
 
 @smallexample
 -enable-timings [yes | no]
@@ -38487,11 +38487,11 @@ command as a field in its output.  This command is to help frontend
 developers optimize the performance of their code.  No argument is
 equivalent to @samp{yes}.
 
-@subheading @value{GDBN} Command
+@subsubheading @value{GDBN} Command
 
 No equivalent.
 
-@subheading Example
+@subsubheading Example
 
 @smallexample
 (gdb)
@@ -38521,7 +38521,7 @@ fullname="/home/nickrob/myprog.c",line="73",arch="i386:x86_64"@}
 @findex -complete
 @subheading The @code{-complete} Command
 
-@subheading Synopsis
+@subsubheading Synopsis
 
 @smallexample
 -complete @var{command}
@@ -38533,7 +38533,7 @@ This command is intended for @sc{gdb/mi} frontends that cannot use two separate
 CLI and MI channels --- for example: because of lack of PTYs like on Windows or
 because @value{GDBN} is used remotely via a SSH connection.
 
-@subheading Result
+@subsubheading Result
 
 The result consists of two or three fields:
 
@@ -38552,11 +38552,11 @@ This field contains @code{1} if number of known completions is above
 
 @end table
 
-@subheading @value{GDBN} Command
+@subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} command is @samp{complete}.
 
-@subheading Example
+@subsubheading Example
 
 @smallexample
 (gdb)
