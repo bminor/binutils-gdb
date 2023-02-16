@@ -2938,8 +2938,6 @@ insert_bp_location (struct bp_location *bl,
     }
 
   else if (bl->loc_type == bp_loc_hardware_watchpoint
-	   /* NOTE drow/2003-09-08: This state only exists for removing
-	      watchpoints.  It's not clear that it's necessary...  */
 	   && bl->owner->disposition != disp_del_at_next_stop)
     {
       int val;
