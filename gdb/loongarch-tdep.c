@@ -387,6 +387,14 @@ loongarch_software_single_step (struct regcache *regcache)
   return {next_pc};
 }
 
+/* Callback function for user_reg_add.  */
+
+static struct value *
+value_of_loongarch_user_reg (frame_info_ptr frame, const void *baton)
+{
+  return value_of_register ((long long) baton, frame);
+}
+
 /* Implement the frame_align gdbarch method.  */
 
 static CORE_ADDR
@@ -1588,6 +1596,19 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   info.target_desc = tdesc;
   info.tdesc_data = tdesc_data.get ();
+
+  for (int i = 0; i < ARRAY_SIZE (loongarch_r_lp64_name); ++i)
+    if (loongarch_r_lp64_name[i][0] != '\0')
+      user_reg_add (gdbarch, loongarch_r_lp64_name[i] + 1,
+	value_of_loongarch_user_reg, (void *) (size_t) i);
+
+  for (int i = 0; i < ARRAY_SIZE (loongarch_f_lp64_name); ++i)
+    {
+      if (loongarch_f_lp64_name[i][0] != '\0')
+	user_reg_add (gdbarch, loongarch_f_lp64_name[i] + 1,
+		      value_of_loongarch_user_reg,
+		      (void *) (size_t) (LOONGARCH_FIRST_FP_REGNUM + i));
+    }
 
   /* Information about registers.  */
   set_gdbarch_num_regs (gdbarch, regnum);
