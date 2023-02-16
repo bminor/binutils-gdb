@@ -1,7 +1,7 @@
 #include <execinfo.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 #include "solib-lib2.h"
 
 #define BT_BUF_SIZE 100
@@ -22,7 +22,7 @@ adder2 (unsigned int a, unsigned int b, int (*call)(int))
   int i, nptrs, err;
   char **strings;
 
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (err)
     {
       printf ("SFrame error: %s\n", sframe_bt_errmsg (err));
@@ -30,7 +30,7 @@ adder2 (unsigned int a, unsigned int b, int (*call)(int))
     }
   if (nptrs != 4)
     {
-      printf ("sframe_backtrace failed: %d %d\n", nptrs, err);
+      printf ("sframe_stacktrace failed: %d %d\n", nptrs, err);
       return (-1);
     }
 

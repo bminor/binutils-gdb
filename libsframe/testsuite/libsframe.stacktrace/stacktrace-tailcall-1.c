@@ -13,7 +13,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This is a revised version of gdb/testsuite/gdb.base/backtrace.c.  */
+#include <execinfo.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "sframe-stacktrace-api.h"
 
 #ifdef __has_attribute
 # if !__has_attribute (noclone)
@@ -24,43 +28,28 @@
 # define ATTRIBUTE_NOCLONE __attribute__((noclone))
 #endif
 
-#include <execinfo.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "sframe-backtrace-api.h"
+#define BT_BUF_SIZE 16
 
-#define BT_BUF_SIZE 100
-
-#define BT_EXPECTED_NPTRS 5
-/* Expected funclist.  */
-static const char *const func_list[] =
+/* funclist for running tailcall.  */
+const char *const func_list[] =
 {
   "show_bt",
-  "baz",
-  "bar",
-  "foo",
+  "dec",
+  "dec",
   "main"
 };
 
-void __attribute__((__noinline__,__optimize__("omit-frame-pointer"))) ATTRIBUTE_NOCLONE
-show_bt ()
+void show_bt ()
 {
   void *buffer[BT_BUF_SIZE];
   int j, nptrs, err;
   char **strings;
 
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
-  if (err)
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
+  if (nptrs == -1 || nptrs != 4)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
-      return;
-    }
-  if (nptrs != BT_EXPECTED_NPTRS)
-    {
-      printf ("Backtace nptrs mismatch: expected = %d, generated = %d \n",
-	      BT_EXPECTED_NPTRS, nptrs);
       return;
     }
 
@@ -78,31 +67,36 @@ show_bt ()
 
   free(strings);
 
-  printf ("%s: backtrace with omit-frame-pointer attr\n",
-	  (j == nptrs) ? "PASS" : "FAIL");
+  printf ("%s: stacktrace tailcall test\n", j == nptrs ? "PASS" : "FAIL");
 }
 
-int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
-baz ()
+/* An example of tail recursive function.  */
+void __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
+dec (int n)
 {
-  show_bt ();
-  return 0;
+  void *buffer[BT_BUF_SIZE];
+  int nptrs, err;
+
+  /* Call the unwinder to get an array of return addresses.  */
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
+  if (nptrs == -1)
+    {
+      printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
+      return;
+    }
+
+  if (n < 0)
+     return;
+
+  if (n == 2)
+    show_bt ();
+
+  /* The last executed statement is recursive call.  */
+  dec (n-1);
 }
 
-int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
-bar ()
+int
+main (void)
 {
-  return baz ();
-}
-
-int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
-foo ()
-{
-  return bar ();
-}
-
-int __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
-main ()
-{
-  return foo ();
+  dec (3);
 }

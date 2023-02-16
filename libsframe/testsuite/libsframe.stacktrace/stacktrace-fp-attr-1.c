@@ -28,12 +28,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 
 #define BT_BUF_SIZE 100
 
 #define BT_EXPECTED_NPTRS 5
-
 /* Expected funclist.  */
 static const char *const func_list[] =
 {
@@ -44,7 +43,7 @@ static const char *const func_list[] =
   "main"
 };
 
-void __attribute__((__noinline__,__optimize__("no-omit-frame-pointer"))) ATTRIBUTE_NOCLONE
+void __attribute__((__noinline__,__optimize__("omit-frame-pointer"))) ATTRIBUTE_NOCLONE
 show_bt ()
 {
   void *buffer[BT_BUF_SIZE];
@@ -52,7 +51,7 @@ show_bt ()
   char **strings;
 
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (err)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
@@ -79,7 +78,7 @@ show_bt ()
 
   free(strings);
 
-  printf ("%s: backtrace with no-omit-frame-pointer attr\n",
+  printf ("%s: stacktrace with omit-frame-pointer attr\n",
 	  (j == nptrs) ? "PASS" : "FAIL");
 }
 

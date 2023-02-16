@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sframe-backtrace-api.h"
+#include "sframe-stacktrace-api.h"
 
 #ifdef __has_attribute
 # if !__has_attribute (noclone)
@@ -50,7 +50,7 @@ void myfunc3 (void)
   char **strings;
 
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (nptrs == -1 || nptrs != 6)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
@@ -71,7 +71,8 @@ void myfunc3 (void)
 
   free(strings);
 
-  printf ("%s: unwind test\n", j == nptrs ? "PASS" : "FAIL");
+  printf ("%s: stacktrace with static function\n",
+	  (j == nptrs) ? "PASS" : "FAIL");
 }
 
 static void __attribute__((__noinline__)) ATTRIBUTE_NOCLONE
@@ -82,7 +83,7 @@ myfunc2 (void)
   int nptrs, err;
 
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (nptrs == -1)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);
@@ -99,7 +100,7 @@ myfunc (int ncalls)
   int nptrs, err;
 
   /* Call the unwinder to get an array of return addresses.  */
-  nptrs = sframe_backtrace (buffer, BT_BUF_SIZE, &err);
+  nptrs = sframe_stacktrace (buffer, BT_BUF_SIZE, &err);
   if (nptrs == -1)
     {
       printf ("SFrame error: %s (%d)\n", sframe_bt_errmsg (err), nptrs);

@@ -1,8 +1,8 @@
-/* The SFrame backtracer - accessing target registers.
+/* The SFrame stacktracer - accessing target registers.
 
-   Copyright (C) 2022 Free Software Foundation, Inc.
+   Copyright (C) 2023 Free Software Foundation, Inc.
 
-   This file is part of libsframebt.
+   This file is part of libsframest.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,9 @@
 
 #include <stdint.h>
 #include <ucontext.h>
+
+#ifndef SFRAME_STACKTRACE_REGS_H
+#define SFRAME_STACKTRACE_REGS_H
 
 #if defined (__x86_64__)
 
@@ -75,3 +78,5 @@ get_context_ra (ucontext_t *cp)
 }
 
 #endif
+
+#endif /* SFRAME_STACKTRACE_REGS_H.  */

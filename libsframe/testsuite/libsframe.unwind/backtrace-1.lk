@@ -1,4 +1,0 @@
-# source: backtrace-1.c
-# cflags: -O2
-# link: on
-PASS: backtrace-1

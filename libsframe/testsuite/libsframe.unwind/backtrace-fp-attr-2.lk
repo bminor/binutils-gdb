@@ -1,4 +1,0 @@
-# source: backtrace-fp-attr-2.c
-# cflags: -fomit-frame-pointer -fno-optimize-sibling-calls
-# link: on
-PASS: backtrace with no-omit-frame-pointer attr

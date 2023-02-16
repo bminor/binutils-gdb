@@ -1,0 +1,3 @@
+# source: stacktrace-3.c
+# link: on
+PASS: stacktrace with static function
