@@ -337,8 +337,6 @@ extern enum ada_renaming_category ada_parse_renaming (struct symbol *,
 
 extern void ada_find_printable_frame (frame_info_ptr fi);
 
-extern char *ada_breakpoint_rewrite (char *, int *);
-
 extern char *ada_main_name (void);
 
 extern void create_ada_exception_catchpoint
