@@ -12113,6 +12113,12 @@ struct ada_catchpoint : public code_breakpoint
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
 
+  /* A helper function for check_status.  Returns true if we should
+     stop for this breakpoint hit.  If the user specified a specific
+     exception, we only want to cause a stop if the program thrown
+     that exception.  */
+  bool should_stop_exception (const struct bp_location *bl) const;
+
   /* The name of the specific exception the user specified.  */
   std::string excep_string;
 
@@ -12200,12 +12206,10 @@ ada_catchpoint::allocate_location ()
   return new ada_catchpoint_location (this);
 }
 
-/* Returns true if we should stop for this breakpoint hit.  If the
-   user specified a specific exception, we only want to cause a stop
-   if the program thrown that exception.  */
+/* See declaration.  */
 
-static bool
-should_stop_exception (const struct bp_location *bl)
+bool
+ada_catchpoint::should_stop_exception (const struct bp_location *bl) const
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) bl->owner;
   const struct ada_catchpoint_location *ada_loc
