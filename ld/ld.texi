@@ -5308,7 +5308,6 @@ C identifiers because they contain a @samp{.} character.
 @cindex data
 @cindex section data
 @cindex output section data
-@kindex ASCIZ ``@var{string}''
 @kindex BYTE(@var{expression})
 @kindex SHORT(@var{expression})
 @kindex LONG(@var{expression})
@@ -5345,18 +5344,6 @@ When the object file format does not have an explicit endianness, as is
 true of, for example, S-records, the value will be stored in the
 endianness of the first input object file.
 
-You can include a zero-terminated string in an output section by using
-@code{ASCIZ}.  The keyword is followed by a string which is stored at
-the current value of the location counter adding a zero byte at the
-end.  If the string includes spaces it must be enclosed in double
-quotes.  The string may contain '\n', '\r', '\t' and octal numbers.
-Hex numbers are not supported.
-
-For example, this string of 16 characters will create a 17 byte area
-@smallexample
-  ASCIZ "This is 16 bytes"
-@end smallexample
-
 Note---these commands only work inside a section description and not
 between them, so the following will produce an error from the linker:
 @smallexample
@@ -5365,6 +5352,46 @@ SECTIONS @{@ .text : @{@ *(.text) @}@ LONG(1) .data : @{@ *(.data) @}@ @}@
 whereas this will work:
 @smallexample
 SECTIONS @{@ .text : @{@ *(.text) ; LONG(1) @}@ .data : @{@ *(.data) @}@ @}@
+@end smallexample
+
+@cindex output section strings
+@kindex ASCII (@var{expression}) ``@var{string}''
+@kindex ASCIZ ``@var{string}''
+You can include a zero-terminated string in an output section by using
+@code{ASCIZ}.  The keyword is followed by a string which is stored at
+the current value of the location counter including adding a zero byte
+at the end.  Any length of string is supported by this directive.
+
+You can include a fixed size string in an output section by using
+@code{ASCII}.  The keyword is followed by a size enclosed in
+parentheses and then a string.  The string is stored at the current
+value of the location counter and zero bytes are added at the end to
+fill up to the specified size.  Note the fill value is ignored for
+this padding.
+
+If the string is too long, a warning is issued and the string is
+truncated.  The string will still be zero-terminated in this case.
+
+If the expression evaluates to zero then the directive will be treated
+as if it were @code{ASCIZ} instead.
+
+If the string in an @code{ASCII} or @code{ASCIZ} command includes spaces
+it must be enclosed in double quotes.
+
+The string can have C escape characters like '\n', '\r', '\t' and
+octal numbers.  The '\"' escape is not supported.  Nor are escaped hex
+values.
+
+Example 1: This is string of 16 characters and will create a 32 byte
+area:
+@smallexample
+  ASCII (32) "This is 16 bytes"
+@end smallexample
+
+Example 2: This is a string of 16 characters and will create a 17 byte
+area:
+@smallexample
+  ASCIZ "This is 16 bytes"
 @end smallexample
 
 @kindex FILL(@var{expression})

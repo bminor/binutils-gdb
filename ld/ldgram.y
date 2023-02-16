@@ -125,7 +125,7 @@ static int error_index;
 %right UNARY
 %token END
 %left <token> '('
-%token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE ASCIZ
+%token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE ASCII ASCIZ
 %token SECTIONS PHDRS INSERT_K AFTER BEFORE
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
@@ -668,9 +668,15 @@ statement:
 		{
 		  lang_add_data ((int) $1, $3);
 		}
+        | ASCII '(' mustbe_exp ')' NAME
+		{
+		  /* 'value' is a memory leak, do we care?  */
+		  etree_type *value = $3;
+		  lang_add_string (value->value.value, $5);
+		}
 	| ASCIZ NAME
 		{
-		  lang_add_string ($2);
+		  lang_add_string (0, $2);
 		}
 	| FILL '(' fill_exp ')'
 		{

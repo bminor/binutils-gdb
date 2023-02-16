@@ -1,3 +1,22 @@
+2023-02-16  Ulf Samuelsson <binutils@emagii.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* ldlex.l: Add ASCII token.
+	* ldgram.y: Add parsing of the ASCII command.
+	* ldlang.c (lang_add_string): Add maximum size parameter.  Move
+	escape character handling code into separate function.
+	* ldlang.h (lang_add_string): Update prototype.
+	* NEWS: Mention the new feature.
+	* ld.texi (Output Section Data): Document the new directives.
+	* testsuite/ld-scripts/asciz.t: Adjust to work on more architectures
+	and to test more aspects of the ASCIZ directive.
+	* testsuite/ld-scripts/asciz.d: Adjust to match the changes to the
+	test linker script.
+	* testsuite/ld-scripts/ascii.d: New test driver.
+	* testsuite/ld-scripts/ascii.s: New test assembler source.
+	* testsuite/ld-scripts/ascii.t: New test script.
+	* testsuite/ld-scripts/script.exp: Run the new test.
+
 2023-02-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 30078
