@@ -163,4 +163,9 @@ set obj [dap_check_request_and_response "disassemble one instruction" \
 set response [lindex $obj 0]
 gdb_assert { [dict exists $response body instructions] } "instructions in disassemble output"
 
+set obj [dap_check_request_and_response "command repl" \
+	     evaluate {o expression [s {output 23}] context [s repl]}]
+set response [lindex $obj 0]
+gdb_assert {[dict get $response body result] == 23}
+
 dap_shutdown

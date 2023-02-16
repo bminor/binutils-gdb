@@ -38,12 +38,30 @@ def _evaluate(expr, frame_id):
     return ref.to_object()
 
 
+# Helper function to evaluate a gdb command in a certain frame.
+@in_gdb_thread
+def _repl(command, frame_id):
+    if frame_id is not None:
+        frame = frame_for_id(frame_id)
+        frame.select()
+    val = gdb.execute(command, from_tty=True, to_string=True)
+    return {
+        "result": val,
+        "variablesReference": 0,
+    }
+
+
 # FIXME 'format' & hex
 # FIXME supportsVariableType handling
-# FIXME "repl"
 @request("evaluate")
-def eval_request(*, expression, frameId=None, **args):
-    return send_gdb_with_response(lambda: _evaluate(expression, frameId))
+def eval_request(*, expression, frameId=None, context="variables", **args):
+    if context in ("watch", "variables"):
+        # These seem to be expression-like.
+        return send_gdb_with_response(lambda: _evaluate(expression, frameId))
+    elif context == "repl":
+        return send_gdb_with_response(lambda: _repl(expression, frameId))
+    else:
+        raise Exception(f'unknown evaluate context "{context}"')
 
 
 @in_gdb_thread
