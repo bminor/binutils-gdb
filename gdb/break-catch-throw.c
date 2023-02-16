@@ -94,13 +94,6 @@ struct exception_catchpoint : public code_breakpoint
   void check_status (struct bpstat *bs) override;
   struct bp_location *allocate_location () override;
 
-  /* FIXME this is temporary - until ordinary breakpoints have been
-     converted.  */
-  int resources_needed (const struct bp_location *) override
-  {
-    return 1;
-  }
-
   /* The kind of exception catchpoint.  */
 
   enum exception_event_kind kind;
