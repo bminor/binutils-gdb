@@ -12069,7 +12069,7 @@ struct ada_catchpoint : public code_breakpoint
 		  bool from_tty,
 		  std::string &&excep_string_)
     : code_breakpoint (gdbarch_, bp_catchpoint, tempflag),
-      excep_string (std::move (excep_string_)),
+      m_excep_string (std::move (excep_string_)),
       m_kind (kind)
   {
     add_location (sal);
@@ -12113,6 +12113,8 @@ struct ada_catchpoint : public code_breakpoint
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
 
+private:
+
   /* A helper function for check_status.  Returns true if we should
      stop for this breakpoint hit.  If the user specified a specific
      exception, we only want to cause a stop if the program thrown
@@ -12120,7 +12122,7 @@ struct ada_catchpoint : public code_breakpoint
   bool should_stop_exception (const struct bp_location *bl) const;
 
   /* The name of the specific exception the user specified.  */
-  std::string excep_string;
+  std::string m_excep_string;
 
   /* What kind of catchpoint this is.  */
   enum ada_exception_catchpoint_kind m_kind;
@@ -12156,7 +12158,7 @@ ada_catchpoint::re_set ()
      location.  */
 
   /* Nothing to do if there's no specific exception to catch.  */
-  if (excep_string.empty ())
+  if (m_excep_string.empty ())
     return;
 
   /* Same if there are no locations... */
@@ -12166,7 +12168,7 @@ ada_catchpoint::re_set ()
   /* Compute the condition expression in text form, from the specific
      exception we want to catch.  */
   std::string cond_string
-    = ada_exception_catchpoint_cond_string (excep_string.c_str (), m_kind);
+    = ada_exception_catchpoint_cond_string (m_excep_string.c_str (), m_kind);
 
   /* Iterate over all the catchpoint's locations, and parse an
      expression for each.  */
@@ -12241,7 +12243,7 @@ ada_catchpoint::should_stop_exception (const struct bp_location *bl) const
     }
 
   /* With no specific exception, should always stop.  */
-  if (c->excep_string.empty ())
+  if (c->m_excep_string.empty ())
     return true;
 
   if (ada_loc->excep_cond_expr == NULL)
@@ -12381,10 +12383,10 @@ ada_catchpoint::print_one (const bp_location **last_loc) const
   switch (m_kind)
     {
       case ada_catch_exception:
-	if (!excep_string.empty ())
+	if (!m_excep_string.empty ())
 	  {
 	    std::string msg = string_printf (_("`%s' Ada exception"),
-					     excep_string.c_str ());
+					     m_excep_string.c_str ());
 
 	    uiout->field_string ("what", msg);
 	  }
@@ -12398,11 +12400,11 @@ ada_catchpoint::print_one (const bp_location **last_loc) const
 	break;
       
       case ada_catch_handlers:
-	if (!excep_string.empty ())
+	if (!m_excep_string.empty ())
 	  {
 	    uiout->field_fmt ("what",
 			      _("`%s' Ada exception handlers"),
-			      excep_string.c_str ());
+			      m_excep_string.c_str ());
 	  }
 	else
 	  uiout->field_string ("what", "all Ada exceptions handlers");
@@ -12436,10 +12438,10 @@ ada_catchpoint::print_mention () const
   switch (m_kind)
     {
       case ada_catch_exception:
-	if (!excep_string.empty ())
+	if (!m_excep_string.empty ())
 	  {
 	    std::string info = string_printf (_("`%s' Ada exception"),
-					      excep_string.c_str ());
+					      m_excep_string.c_str ());
 	    uiout->text (info);
 	  }
 	else
@@ -12451,11 +12453,11 @@ ada_catchpoint::print_mention () const
 	break;
 
       case ada_catch_handlers:
-	if (!excep_string.empty ())
+	if (!m_excep_string.empty ())
 	  {
 	    std::string info
 	      = string_printf (_("`%s' Ada exception handlers"),
-			       excep_string.c_str ());
+			       m_excep_string.c_str ());
 	    uiout->text (info);
 	  }
 	else
@@ -12482,8 +12484,8 @@ ada_catchpoint::print_recreate (struct ui_file *fp) const
     {
       case ada_catch_exception:
 	gdb_printf (fp, "catch exception");
-	if (!excep_string.empty ())
-	  gdb_printf (fp, " %s", excep_string.c_str ());
+	if (!m_excep_string.empty ())
+	  gdb_printf (fp, " %s", m_excep_string.c_str ());
 	break;
 
       case ada_catch_exception_unhandled:
