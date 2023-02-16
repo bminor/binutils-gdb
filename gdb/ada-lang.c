@@ -12067,7 +12067,7 @@ struct ada_catchpoint : public code_breakpoint
 		  bool tempflag,
 		  bool enabled,
 		  bool from_tty)
-    : code_breakpoint (gdbarch_, bp_catchpoint),
+    : code_breakpoint (gdbarch_, bp_catchpoint, tempflag),
       m_kind (kind)
   {
     add_location (sal);
@@ -12096,7 +12096,6 @@ struct ada_catchpoint : public code_breakpoint
       }
 
     enable_state = enabled ? bp_enabled : bp_disabled;
-    disposition = tempflag ? disp_del : disp_donttouch;
     locspec = string_to_location_spec (&addr_string_,
 				       language_def (language_ada));
     language = language_ada;
