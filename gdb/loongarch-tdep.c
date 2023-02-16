@@ -24,6 +24,7 @@
 #include "frame-unwind.h"
 #include "gdbcore.h"
 #include "loongarch-tdep.h"
+#include "reggroups.h"
 #include "target.h"
 #include "target-descriptions.h"
 #include "trad-frame.h"
@@ -1433,6 +1434,43 @@ loongarch_find_default_target_description (const struct gdbarch_info info)
   return loongarch_lookup_target_description (features);
 }
 
+static int
+loongarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			       const struct reggroup *group)
+{
+  if (gdbarch_register_name (gdbarch, regnum) == NULL
+      || *gdbarch_register_name (gdbarch, regnum) == '\0')
+    return 0;
+
+  int raw_p = regnum < gdbarch_num_regs (gdbarch);
+
+  if (group == save_reggroup || group == restore_reggroup)
+    return raw_p;
+
+  if (group == all_reggroup)
+    return 1;
+
+  if (0 <= regnum && regnum <= LOONGARCH_BADV_REGNUM)
+    return group == general_reggroup;
+
+  /* Only ORIG_A0, PC, BADV in general_reggroup */
+  if (group == general_reggroup)
+    return 0;
+
+  if (LOONGARCH_FIRST_FP_REGNUM <= regnum && regnum <= LOONGARCH_FCSR_REGNUM)
+    return group == float_reggroup;
+
+  /* Only $fx / $fccx / $fcsr in float_reggroup */
+  if (group == float_reggroup)
+    return 0;
+
+  int ret = tdesc_register_in_reggroup_p (gdbarch, regnum, group);
+  if (ret != -1)
+    return ret;
+
+  return default_register_reggroup_p (gdbarch, regnum, group);
+}
+
 /* Initialize the current architecture based on INFO  */
 
 static struct gdbarch *
@@ -1586,6 +1624,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+  set_gdbarch_register_reggroup_p (gdbarch, loongarch_register_reggroup_p);
 
   return gdbarch;
 }
