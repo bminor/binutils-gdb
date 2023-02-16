@@ -337,7 +337,7 @@ extern enum ada_renaming_category ada_parse_renaming (struct symbol *,
 
 extern void ada_find_printable_frame (frame_info_ptr fi);
 
-extern char *ada_main_name (void);
+extern const char *ada_main_name ();
 
 extern void create_ada_exception_catchpoint
   (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,

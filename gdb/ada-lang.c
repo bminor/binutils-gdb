@@ -805,8 +805,8 @@ ada_update_initial_language (enum language lang)
    The result is good until the next call.  Return NULL if the main
    procedure doesn't appear to be in Ada.  */
 
-char *
-ada_main_name (void)
+const char *
+ada_main_name ()
 {
   struct bound_minimal_symbol msym;
   static gdb::unique_xmalloc_ptr<char> main_program_name;
