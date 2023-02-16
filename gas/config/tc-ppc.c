@@ -1496,9 +1496,11 @@ ppc_set_cpu (void)
 enum bfd_architecture
 ppc_arch (void)
 {
-  const char *default_cpu = TARGET_CPU;
   ppc_set_cpu ();
 
+#ifdef OBJ_ELF
+  return bfd_arch_powerpc;
+#else
   if ((ppc_cpu & PPC_OPCODE_PPC) != 0)
     return bfd_arch_powerpc;
   if ((ppc_cpu & PPC_OPCODE_VLE) != 0)
@@ -1507,14 +1509,12 @@ ppc_arch (void)
     return bfd_arch_rs6000;
   if ((ppc_cpu & (PPC_OPCODE_COMMON | PPC_OPCODE_ANY)) != 0)
     {
-      if (strcmp (default_cpu, "rs6000") == 0)
-	return bfd_arch_rs6000;
-      else if (startswith (default_cpu, "powerpc"))
+      const char *default_cpu = TARGET_CPU;
+      if (startswith (default_cpu, "powerpc"))
 	return bfd_arch_powerpc;
     }
-
-  as_fatal (_("neither Power nor PowerPC opcodes were selected."));
-  return bfd_arch_unknown;
+  return bfd_arch_rs6000;
+#endif
 }
 
 unsigned long
