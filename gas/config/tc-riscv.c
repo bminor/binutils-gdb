@@ -4179,7 +4179,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     }
   else
     {
-      as_warn (_("unrecognized .option directive: %s\n"), name);
+      as_warn (_("unrecognized .option directive: %s"), name);
     }
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
