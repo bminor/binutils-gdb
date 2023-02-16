@@ -341,7 +341,7 @@ extern const char *ada_main_name ();
 
 extern void create_ada_exception_catchpoint
   (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,
-   const std::string &excep_string, const std::string &cond_string, int tempflag,
+   std::string &&excep_string, const std::string &cond_string, int tempflag,
    int enabled, int from_tty);
 
 /* Return true if BP is an Ada catchpoint.  */

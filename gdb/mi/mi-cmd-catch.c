@@ -153,7 +153,7 @@ mi_cmd_catch_exception (const char *cmd, const char *const *argv, int argc)
 
   scoped_restore restore_breakpoint_reporting = setup_breakpoint_reporting ();
   create_ada_exception_catchpoint (gdbarch, ex_kind,
-				   exception_name,
+				   std::move (exception_name),
 				   condition, temp, enabled, 0);
 }
 
@@ -217,7 +217,7 @@ mi_cmd_catch_handlers (const char *cmd, const char *const *argv, int argc)
   scoped_restore restore_breakpoint_reporting
     = setup_breakpoint_reporting ();
   create_ada_exception_catchpoint (gdbarch, ada_catch_handlers,
-				   exception_name,
+				   std::move (exception_name),
 				   condition, temp, enabled, 0);
 }
 

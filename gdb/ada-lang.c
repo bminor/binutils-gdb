@@ -12066,8 +12066,10 @@ struct ada_catchpoint : public code_breakpoint
 		  const char *addr_string_,
 		  bool tempflag,
 		  bool enabled,
-		  bool from_tty)
+		  bool from_tty,
+		  std::string &&excep_string_)
     : code_breakpoint (gdbarch_, bp_catchpoint, tempflag),
+      excep_string (std::move (excep_string_)),
       m_kind (kind)
   {
     add_location (sal);
@@ -12732,7 +12734,7 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex,
 void
 create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 enum ada_exception_catchpoint_kind ex_kind,
-				 const std::string &excep_string,
+				 std::string &&excep_string,
 				 const std::string &cond_string,
 				 int tempflag,
 				 int enabled,
@@ -12743,8 +12745,8 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 
   std::unique_ptr<ada_catchpoint> c
     (new ada_catchpoint (gdbarch, ex_kind, sal, addr_string.c_str (),
-			 tempflag, enabled, from_tty));
-  c->excep_string = excep_string;
+			 tempflag, enabled, from_tty,
+			 std::move (excep_string)));
   create_excep_cond_exprs (c.get (), ex_kind);
   if (!cond_string.empty ())
     set_breakpoint_condition (c.get (), cond_string.c_str (), from_tty, false);
@@ -12771,7 +12773,7 @@ catch_ada_exception_command (const char *arg_entry, int from_tty,
   catch_ada_exception_command_split (arg, false, &ex_kind, &excep_string,
 				     &cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
-				   excep_string, cond_string,
+				   std::move (excep_string), cond_string,
 				   tempflag, 1 /* enabled */,
 				   from_tty);
 }
@@ -12796,7 +12798,7 @@ catch_ada_handlers_command (const char *arg_entry, int from_tty,
   catch_ada_exception_command_split (arg, true, &ex_kind, &excep_string,
 				     &cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
-				   excep_string, cond_string,
+				   std::move (excep_string), cond_string,
 				   tempflag, 1 /* enabled */,
 				   from_tty);
 }
@@ -12863,7 +12865,7 @@ catch_assert_command (const char *arg_entry, int from_tty,
     arg = "";
   catch_ada_assert_command_split (arg, cond_string);
   create_ada_exception_catchpoint (gdbarch, ada_catch_assert,
-				   "", cond_string,
+				   {}, cond_string,
 				   tempflag, 1 /* enabled */,
 				   from_tty);
 }
