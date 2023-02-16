@@ -12101,6 +12101,8 @@ struct ada_catchpoint : public code_breakpoint
     locspec = string_to_location_spec (&addr_string_,
 				       language_def (language_ada));
     language = language_ada;
+
+    re_set ();
   }
 
   struct bp_location *allocate_location () override;
@@ -12134,29 +12136,35 @@ public:
   expression_up excep_cond_expr;
 };
 
-/* Parse the exception condition string in the context of each of the
-   catchpoint's locations, and store them for later evaluation.  */
+/* Implement the RE_SET method in the structure for all exception
+   catchpoint kinds.  */
 
-static void
-create_excep_cond_exprs (struct ada_catchpoint *c,
-			 enum ada_exception_catchpoint_kind ex)
+void
+ada_catchpoint::re_set ()
 {
+  /* Call the base class's method.  This updates the catchpoint's
+     locations.  */
+  this->code_breakpoint::re_set ();
+
+  /* Reparse the exception conditional expressions.  One for each
+     location.  */
+
   /* Nothing to do if there's no specific exception to catch.  */
-  if (c->excep_string.empty ())
+  if (excep_string.empty ())
     return;
 
   /* Same if there are no locations... */
-  if (!c->has_locations ())
+  if (!has_locations ())
     return;
 
   /* Compute the condition expression in text form, from the specific
      exception we want to catch.  */
   std::string cond_string
-    = ada_exception_catchpoint_cond_string (c->excep_string.c_str (), ex);
+    = ada_exception_catchpoint_cond_string (excep_string.c_str (), m_kind);
 
   /* Iterate over all the catchpoint's locations, and parse an
      expression for each.  */
-  for (bp_location &bl : c->locations ())
+  for (bp_location &bl : locations ())
     {
       ada_catchpoint_location &ada_loc
 	= static_cast<ada_catchpoint_location &> (bl);
@@ -12175,7 +12183,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 	    {
 	      warning (_("failed to reevaluate internal exception condition "
 			 "for catchpoint %d: %s"),
-		       c->number, e.what ());
+		       number, e.what ());
 	    }
 	}
 
@@ -12190,21 +12198,6 @@ struct bp_location *
 ada_catchpoint::allocate_location ()
 {
   return new ada_catchpoint_location (this);
-}
-
-/* Implement the RE_SET method in the structure for all exception
-   catchpoint kinds.  */
-
-void
-ada_catchpoint::re_set ()
-{
-  /* Call the base class's method.  This updates the catchpoint's
-     locations.  */
-  this->code_breakpoint::re_set ();
-
-  /* Reparse the exception conditional expressions.  One for each
-     location.  */
-  create_excep_cond_exprs (this, m_kind);
 }
 
 /* Returns true if we should stop for this breakpoint hit.  If the
@@ -12747,7 +12740,6 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
     (new ada_catchpoint (gdbarch, ex_kind, sal, addr_string.c_str (),
 			 tempflag, enabled, from_tty,
 			 std::move (excep_string)));
-  create_excep_cond_exprs (c.get (), ex_kind);
   if (!cond_string.empty ())
     set_breakpoint_condition (c.get (), cond_string.c_str (), from_tty, false);
   install_breakpoint (0, std::move (c), 1);
