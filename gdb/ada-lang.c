@@ -12783,7 +12783,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 const std::string &excep_string,
 				 const std::string &cond_string,
 				 int tempflag,
-				 int disabled,
+				 int enabled,
 				 int from_tty)
 {
   std::string addr_string;
@@ -12791,7 +12791,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 
   std::unique_ptr<ada_catchpoint> c
     (new ada_catchpoint (gdbarch, ex_kind, sal, addr_string.c_str (),
-			 tempflag, disabled, from_tty));
+			 tempflag, enabled, from_tty));
   c->excep_string = excep_string;
   create_excep_cond_exprs (c.get (), ex_kind);
   if (!cond_string.empty ())
