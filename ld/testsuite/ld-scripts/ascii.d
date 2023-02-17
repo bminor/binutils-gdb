@@ -1,8 +1,8 @@
 #source: ascii.s
 #ld: -T ascii.t
 #objdump: -s -j .header
-#notarget: [is_aout_format]
-#skip: tic4x-*-* tic54x-*-* *-*-*ecoff *-*-macho *-*-aix*
+#target: [is_elf_format] [is_coff_format]
+#notarget: tic4x-*-* tic54x-*-*
 
 .*:     file format .*
 
