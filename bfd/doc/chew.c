@@ -885,6 +885,38 @@ kill_bogus_lines (void)
 }
 
 static void
+collapse_whitespace (void)
+{
+  int last_was_ws = 0;
+  int idx;
+
+  string_type out;
+  init_string (&out);
+
+  for (idx = 0; at (tos, idx) != 0; ++idx)
+    {
+      char c = at (tos, idx);
+      if (isspace (c))
+	{
+	  if (!last_was_ws)
+	    {
+	      catchar (&out, ' ');
+	      last_was_ws = 1;
+	    }
+	}
+      else
+	{
+	  catchar (&out, c);
+	  last_was_ws = 0;
+	}
+    }
+
+  pc++;
+  delete_string (tos);
+  *tos = out;
+}
+
+static void
 indent (void)
 {
   string_type out;
@@ -1485,6 +1517,7 @@ main (int ac, char *av[])
   add_intrinsic ("indent", indent);
   add_intrinsic ("print_stack_level", print_stack_level);
   add_intrinsic ("strip_trailing_newlines", strip_trailing_newlines);
+  add_intrinsic ("collapse_whitespace", collapse_whitespace);
 
   internal_mode = xmalloc (sizeof (intptr_t));
   *internal_mode = 0;

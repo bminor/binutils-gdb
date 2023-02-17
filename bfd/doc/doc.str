@@ -55,8 +55,10 @@ variable synopsis_seen
 	"@deftypefn {Function} " catstr
 	get_stuff_in_command  
 	kill_bogus_lines
+	collapse_whitespace
 	indent
 	catstr
+	"\n" catstr
 	;
 
 : func
