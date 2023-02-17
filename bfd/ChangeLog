@@ -1,5 +1,9 @@
 2023-02-17  Tom Tromey  <tom@tromey.com>
 
+	* doc/doc.str (FUNCTION): Call func.
+
+2023-02-17  Tom Tromey  <tom@tromey.com>
+
 	* opncls.c: Hoist the SECTION comment.
 
 2023-02-17  Tom Tromey  <tom@tromey.com>

@@ -74,15 +74,7 @@ variable synopsis_seen
 	;
 
 : FUNCTION
-	"@findex "	- a
-	skip_past_newline
-	copy_past_newline
-	dup		- a x x 
-	"@subsubsection @code{" - a x x b 
-	swap
-	remchar
-	"}\n" - a x b x c
-	catstr 	catstr 	catstr 	catstr 	catstr 
+	func
 	;
 
 : bodytext
