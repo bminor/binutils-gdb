@@ -499,8 +499,7 @@ DwrCU::parseChild (Dwarf_cnt *ctx)
 		  if (link_name && streq (link_name, NTXT ("MAIN")))
 		    ctx->fortranMAIN = Stabs::find_func (NTXT ("MAIN"), ctx->module->functions, true, true);
 		}
-	      if (get_linkage_name () == NULL)
-		break;
+	      break;
 	    }
 	  func = append_Function (ctx);
 	  if (func)
