@@ -394,7 +394,8 @@ go_symbol_package_name (const struct symbol *sym)
   int method_type_is_pointer;
   gdb::unique_xmalloc_ptr<char> name_buf;
 
-  gdb_assert (sym->language () == language_go);
+  if (sym->language () != language_go)
+    return nullptr;
   name_buf = unpack_mangled_go_symbol (mangled_name,
 				       &package_name, &object_name,
 				       &method_type_package_name,
