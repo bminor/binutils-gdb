@@ -1,5 +1,12 @@
 2023-02-17  Tom Tromey  <tom@tromey.com>
 
+	* opncls.c (bfd_get_debug_link_info_1, separate_debug_file_exists)
+	(separate_alt_debug_file_exists, find_separate_debug_file)
+	(get_build_id, get_build_id_name, check_build_id_file): Don't use
+	chew comments.
+
+2023-02-17  Tom Tromey  <tom@tromey.com>
+
 	* doc/doc.str (SYNOPSIS): Use collapse_whitespace.
 	* doc/chew.c (collapse_whitespace): New function.
 	(main): Register collapse_whitespace.
