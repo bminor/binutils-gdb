@@ -1012,7 +1012,7 @@ proc mi_run_with_cli {args} {
 # EXECUTABLE is the basename of the binary.
 # Return -1 if starting gdb or loading the executable failed.
 
-proc mi_clean_restart {{executable ""}} {
+proc mi_clean_restart {{executable ""} {flags {}}} {
     global srcdir
     global subdir
     global errcnt
@@ -1024,7 +1024,7 @@ proc mi_clean_restart {{executable ""}} {
     set errcnt 0
     set warncnt 0
 
-    if {[mi_gdb_start]} {
+    if {[mi_gdb_start $flags]} {
 	return -1
     }
 
