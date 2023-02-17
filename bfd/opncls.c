@@ -37,6 +37,14 @@
 #define S_IXOTH 0001	/* Execute by others.  */
 #endif
 
+/*
+SECTION
+	Opening and closing BFDs
+
+SUBSECTION
+	Functions for opening and closing
+*/
+
 /* Counters used to initialize the bfd identifier.  */
 
 static unsigned int bfd_id_counter = 0;
@@ -184,14 +192,6 @@ _bfd_free_cached_info (bfd *abfd)
 
   return true;
 }
-
-/*
-SECTION
-	Opening and closing BFDs
-
-SUBSECTION
-	Functions for opening and closing
-*/
 
 /*
 FUNCTION
