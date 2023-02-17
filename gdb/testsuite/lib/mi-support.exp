@@ -2498,8 +2498,11 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
 # locations.
 #
 # All arguments for the breakpoint location may be specified using the
-# options number, enabled, addr, func, file, fullname, line and
-# thread-groups.
+# options: number, enabled, addr, func, file, fullname, line,
+# thread-groups, and thread.
+#
+# For the option -thread the corresponding output field is only added
+# if the option is present and not set to the empty string.
 #
 # Example: mi_make_breakpoint_loc -number 2.1 -file ".*/myfile.c" -line 3
 # will return the breakpoint location:
@@ -2509,7 +2512,7 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
 proc mi_make_breakpoint_loc {args} {
     parse_args {{number .*} {enabled .*} {addr .*}
 	{func .*} {file .*} {fullname .*} {line .*}
-	{thread-groups \\\[.*\\\]}}
+	{thread-groups \\\[.*\\\]} {thread ""}}
 
     set attr_list {}
     foreach attr [list number enabled addr func file \
@@ -2517,18 +2520,31 @@ proc mi_make_breakpoint_loc {args} {
 	lappend attr_list $attr [set $attr]
     }
 
-    return "{[mi_build_kv_pairs $attr_list]}"
+    set result [mi_build_kv_pairs $attr_list]
+
+    if {[string length $thread] > 0} {
+	append result ","
+	append result [mi_build_kv_pairs [list "thread" $thread]]
+    }
+
+    return "{$result}"
 }
 
 # Bits shared between mi_make_breakpoint and mi_make_breakpoint_multi.
 
-proc mi_make_breakpoint_1 {attr_list cond evaluated-by times \
+proc mi_make_breakpoint_1 {attr_list thread cond evaluated-by times \
 			   ignore script original-location} {
     set result "bkpt=\\\{[mi_build_kv_pairs $attr_list]"
 
     # There are always exceptions.
 
-    # If COND is not preset, do not output it.
+    # If THREAD is not present, do not output it.
+    if {[string length $thread] > 0} {
+	append result ","
+	append result [mi_build_kv_pairs [list "thread" $thread]]
+    }
+
+    # If COND is not present, do not output it.
     if {[string length $cond] > 0} {
 	append result ","
 	append result [mi_build_kv_pairs [list "cond" $cond]]
@@ -2574,12 +2590,16 @@ proc mi_make_breakpoint_1 {attr_list cond evaluated-by times \
 # -dprintf-insert, or -break-info with breakpoints with multiple
 # locations.
 #
-# All arguments for the breakpoint may be specified using the options
-# number, type, disp, enabled, func, cond, evaluated-by, times,
-# ignore, script and locations.
+# All arguments for the breakpoint may be specified using the options:
+# number, type, disp, enabled, times, ignore, script,
+# original-location, cond, evaluated-by, locations, and thread.
 #
 # Only if -script and -ignore are given will they appear in the output.
 # Otherwise, this procedure will skip them using ".*".
+#
+# For the options -thread and -cond the corresponding output fields
+# are only added if the options are present and not set to the empty
+# string.
 #
 # Example: mi_make_breakpoint_multi -number 2 -locations "$loc"
 # will return the breakpoint:
@@ -2592,7 +2612,7 @@ proc mi_make_breakpoint_multi {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*}
 	{times .*} {ignore 0}
 	{script ""} {original-location .*} {cond ""} {evaluated-by ""}
-	{locations .*}}
+	{locations .*} {thread ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled] {
@@ -2602,7 +2622,7 @@ proc mi_make_breakpoint_multi {args} {
     lappend attr_list "addr" "<MULTIPLE>"
 
     set result [mi_make_breakpoint_1 \
-		    $attr_list $cond ${evaluated-by} $times \
+		    $attr_list $thread $cond ${evaluated-by} $times \
 		    $ignore $script ${original-location}]
 
     append result ","
@@ -2616,8 +2636,11 @@ proc mi_make_breakpoint_multi {args} {
 # be used to test the output of -break-insert, -dprintf-insert, or
 # -break-info for pending breakpoints.
 #
-# Arguments for the breakpoint may be specified using the options
-# number, type, disp, enabled, pending.
+# Arguments for the breakpoint may be specified using the options:
+# number, type, disp, enabled, pending, original-location, and thread.
+#
+# For the option -thread the corresponding output field is only
+# included if the option is present and not the empty string.
 #
 # Example: mi_make_breakpoint_pending -number 2 -pending func
 # will return the breakpoint:
@@ -2626,7 +2649,7 @@ proc mi_make_breakpoint_multi {args} {
 
 proc mi_make_breakpoint_pending {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*}
-	{pending .*} {original-location .*}}
+	{pending .*} {original-location .*} {thread ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled] {
@@ -2646,7 +2669,7 @@ proc mi_make_breakpoint_pending {args} {
     set evaluated-by ""
 
     set result [mi_make_breakpoint_1 \
-		    $attr_list $cond ${evaluated-by} $times \
+		    $attr_list $thread $cond ${evaluated-by} $times \
 		    $ignore $script ${original-location}]
 
     append result "\\\}"
@@ -2674,7 +2697,8 @@ proc mi_make_breakpoint {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*} {addr .*}
 	{func .*} {file .*} {fullname .*} {line .*}
 	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
-	{script ""} {original-location .*} {cond ""} {evaluated-by ""}}
+	{script ""} {original-location .*} {cond ""} {evaluated-by ""}
+	{thread ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled addr func file \
@@ -2683,7 +2707,7 @@ proc mi_make_breakpoint {args} {
     }
 
     set result [mi_make_breakpoint_1 \
-		    $attr_list $cond ${evaluated-by} $times \
+		    $attr_list $thread $cond ${evaluated-by} $times \
 		    $ignore $script ${original-location}]
 
     append result "\\\}"

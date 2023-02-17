@@ -6480,7 +6480,7 @@ print_one_breakpoint_location (struct breakpoint *b,
      For the CLI output, the thread/task information is printed on a
      separate line, see the 'stop only in thread' and 'stop only in task'
      output below.  */
-  if (!header_of_multiple && uiout->is_mi_like_p ())
+  if (part_of_multiple && uiout->is_mi_like_p ())
     {
       if (b->thread != -1)
 	uiout->field_signed ("thread", b->thread);

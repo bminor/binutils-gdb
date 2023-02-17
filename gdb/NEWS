@@ -83,6 +83,14 @@ maintenance info frame-unwinders
 ** mi now reports 'no-history' as a stop reason when hitting the end of the
    reverse execution history.
 
+** When creating a thread-specific breakpoint using the '-p' option,
+   the -break-insert command would report the 'thread' field twice in
+   the reply.  The content of both fields was always identical.  This
+   has now been fixed; the 'thread' field will be reported just once
+   for thread-specific breakpoints, or not at all for breakpoints
+   without a thread restriction.  The same is also true for the 'task'
+   field of an Ada task-specific breakpoint.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

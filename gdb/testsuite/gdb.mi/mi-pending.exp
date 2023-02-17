@@ -98,7 +98,7 @@ mi_gdb_test "-break-delete 3" "\\^done" "delete breakpoint 3"
 
 # Set pending breakpoint with a thread via MI.
 mi_gdb_test "-break-insert -p 2 -f pendfunc3" \
-    ".*\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"pendfunc3\",thread=\"2\",thread=\"2\",times=\"0\",original-location=\"pendfunc3\"\}"\
+    ".*\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"pendfunc3\",thread=\"2\",times=\"0\",original-location=\"pendfunc3\"\}"\
     "MI pending breakpoint on pendfunc3"
 
 mi_send_resuming_command "exec-continue" "continuing execution to thread condition"
