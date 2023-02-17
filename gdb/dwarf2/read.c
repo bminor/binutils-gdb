@@ -5838,7 +5838,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 	      && sym->aclass () == LOC_BLOCK)
 	    {
 	      gdb::unique_xmalloc_ptr<char> this_package_name
-		(go_symbol_package_name (sym));
+		= go_symbol_package_name (sym);
 
 	      if (this_package_name == NULL)
 		continue;

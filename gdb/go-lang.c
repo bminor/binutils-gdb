@@ -163,11 +163,8 @@ unpack_package_and_object (char *buf,
 
    Space for the resulting strings is malloc'd in one buffer.
    PACKAGEP,OBJECTP,METHOD_TYPE* will (typically) point into this buffer.
-   [There are a few exceptions, but the caller is still responsible for
-   freeing the resulting pointer.]
    A pointer to this buffer is returned, or NULL if symbol isn't a
    mangled Go symbol.
-   The caller is responsible for freeing the result.
 
    *METHOD_TYPE_IS_POINTERP is set to a boolean indicating if
    the method type is a pointer.
@@ -180,7 +177,7 @@ unpack_package_and_object (char *buf,
    If we ever need to unpack the method type, this routine should work
    for that too.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 unpack_mangled_go_symbol (const char *mangled_name,
 			  const char **packagep,
 			  const char **objectp,
@@ -209,9 +206,10 @@ unpack_mangled_go_symbol (const char *mangled_name,
   /* main.init is mangled specially.  */
   if (strcmp (mangled_name, "__go_init_main") == 0)
     {
-      char *package = xstrdup ("main");
+      gdb::unique_xmalloc_ptr<char> package
+	= make_unique_xstrdup ("main");
 
-      *packagep = package;
+      *packagep = package.get ();
       *objectp = "init";
       return package;
     }
@@ -219,9 +217,10 @@ unpack_mangled_go_symbol (const char *mangled_name,
   /* main.main is mangled specially (missing prefix).  */
   if (strcmp (mangled_name, "main.main") == 0)
     {
-      char *package = xstrdup ("main");
+      gdb::unique_xmalloc_ptr<char> package
+	= make_unique_xstrdup ("main");
 
-      *packagep = package;
+      *packagep = package.get ();
       *objectp = "main";
       return package;
     }
@@ -261,7 +260,8 @@ unpack_mangled_go_symbol (const char *mangled_name,
 
   /* At this point we've decided we have a mangled Go symbol.  */
 
-  buf = xstrdup (mangled_name);
+  gdb::unique_xmalloc_ptr<char> result = make_unique_xstrdup (mangled_name);
+  buf = result.get ();
 
   /* Search backwards looking for "N<digit(s)>".  */
   p = buf + len;
@@ -317,7 +317,7 @@ unpack_mangled_go_symbol (const char *mangled_name,
     }
 
   unpack_package_and_object (buf, packagep, objectp);
-  return buf;
+  return result;
 }
 
 /* Implements the la_demangle language_defn routine for language Go.
@@ -381,10 +381,9 @@ go_language::demangle_symbol (const char *mangled_name, int options) const
   return make_unique_xstrdup ((const char *) obstack_finish (&tempbuf));
 }
 
-/* Given a Go symbol, return its package or NULL if unknown.
-   Space for the result is malloc'd, caller must free.  */
+/* See go-lang.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 go_symbol_package_name (const struct symbol *sym)
 {
   const char *mangled_name = sym->linkage_name ();
@@ -393,8 +392,7 @@ go_symbol_package_name (const struct symbol *sym)
   const char *method_type_package_name;
   const char *method_type_object_name;
   int method_type_is_pointer;
-  char *name_buf;
-  char *result;
+  gdb::unique_xmalloc_ptr<char> name_buf;
 
   gdb_assert (sym->language () == language_go);
   name_buf = unpack_mangled_go_symbol (mangled_name,
@@ -405,15 +403,12 @@ go_symbol_package_name (const struct symbol *sym)
   /* Some Go symbols don't have mangled form we interpret (yet).  */
   if (name_buf == NULL)
     return NULL;
-  result = xstrdup (package_name);
-  xfree (name_buf);
-  return result;
+  return make_unique_xstrdup (package_name);
 }
 
-/* Return the package that BLOCK is in, or NULL if there isn't one.
-   Space for the result is malloc'd, caller must free.  */
+/* See go-lang.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 go_block_package_name (const struct block *block)
 {
   while (block != NULL)
@@ -422,7 +417,8 @@ go_block_package_name (const struct block *block)
 
       if (function != NULL)
 	{
-	  char *package_name = go_symbol_package_name (function);
+	  gdb::unique_xmalloc_ptr<char> package_name
+	    = go_symbol_package_name (function);
 
 	  if (package_name != NULL)
 	    return package_name;

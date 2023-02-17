@@ -63,9 +63,14 @@ extern const char *go_main_name (void);
 
 extern enum go_type go_classify_struct_type (struct type *type);
 
-extern char *go_symbol_package_name (const struct symbol *sym);
+/* Given a Go symbol, return its package or nullptr if unknown.  */
+extern gdb::unique_xmalloc_ptr<char> go_symbol_package_name
+     (const struct symbol *sym);
 
-extern char *go_block_package_name (const struct block *block);
+/* Return the package that BLOCK is in, or nullptr if there isn't
+   one.  */
+extern gdb::unique_xmalloc_ptr<char> go_block_package_name
+     (const struct block *block);
 
 extern const struct builtin_go_type *builtin_go_type (struct gdbarch *);
 

@@ -1396,16 +1396,16 @@ classify_name (struct parser_state *par_state, const struct block *block)
      current package.  */
 
   {
-    char *current_package_name = go_block_package_name (block);
+    gdb::unique_xmalloc_ptr<char> current_package_name
+      = go_block_package_name (block);
 
     if (current_package_name != NULL)
       {
 	struct stoken sval =
-	  build_packaged_name (current_package_name,
-			       strlen (current_package_name),
+	  build_packaged_name (current_package_name.get (),
+			       strlen (current_package_name.get ()),
 			       copy.c_str (), copy.size ());
 
-	xfree (current_package_name);
 	sym = lookup_symbol (sval.ptr, block, VAR_DOMAIN,
 			     &is_a_field_of_this);
 	if (sym.symbol)
