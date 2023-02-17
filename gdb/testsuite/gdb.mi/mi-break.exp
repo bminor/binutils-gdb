@@ -419,13 +419,6 @@ proc test_break {mi_mode} {
     test_forced_conditions
 }
 
-if [gdb_debug_enabled] {
-  # gdb debug doesn't work for separate-mi-tty.
-  set modes {"main"}
-} else {
-  set modes {"main" "separate"}
-}
-
-foreach_with_prefix mi-mode $modes {
+foreach_mi_ui_mode mi-mode {
     test_break ${mi-mode}
 }

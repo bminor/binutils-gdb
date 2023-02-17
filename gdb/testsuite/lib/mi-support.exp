@@ -2795,3 +2795,47 @@ proc mi_get_valueof { fmt exp default {test ""} } {
     }
     return ${val}
 }
+
+# Some MI tests should be run in the normal way, on the main UI, while
+# other tests should be run twice, once when the MI is on the main UI,
+# and once with the MI on a secondary UI, this proc facilitates that.
+#
+# Use as:
+#
+#   foreach_mi_ui_mode mode {
+#     # ... body ...
+#   }
+#
+# The BODY will then be run once with MODE set to 'main' and once with
+# MODE set to 'separate'.
+#
+# However, there are times when we know using the 'separate' UI will
+# not work.  This proc handles figuring that out, if the 'separate' UI
+# is known not to work then the 'separate' mode will be skipped and
+# BODY will be run just once with MODE set to 'main'.
+
+proc foreach_mi_ui_mode { var_name body } {
+    upvar 1 $var_name var
+
+    if [gdb_debug_enabled] {
+       # gdb debug doesn't work for separate-mi-tty.
+       set modes {"main"}
+    } else {
+       set modes {"main" "separate"}
+    }
+
+    foreach var $modes {
+       with_test_prefix "$var_name=$var" {
+           set code [catch {uplevel 1 $body} result]
+       }
+
+       if {$code == 1} {
+           global errorInfo errorCode
+           return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+       } elseif {$code == 3} {
+           break
+       } elseif {$code == 2} {
+           return -code $code $result
+       }
+    }
+}
