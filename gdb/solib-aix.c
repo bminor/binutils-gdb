@@ -610,6 +610,20 @@ solib_aix_bfd_open (const char *pathname)
       if (member_name == bfd_get_filename (object_bfd.get ()))
 	break;
 
+      std::string s = bfd_get_filename (object_bfd.get ());
+
+      /* For every inferior after first int bfd system we
+	 will have the pathname instead of the member name
+	 registered. Hence the below condition exists.  */
+
+      if (s.find ('(') != std::string::npos)
+	{
+	  int pos = s.find ('(');
+	  int len = s.find (')') - s.find ('(');
+	  if (s.substr (pos+1, len-1) == member_name)
+	    return object_bfd;
+	}
+
       object_bfd = gdb_bfd_openr_next_archived_file (archive_bfd.get (),
 						     object_bfd.get ());
     }
