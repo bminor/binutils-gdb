@@ -11731,11 +11731,8 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   /* Make sure that the symbol we found corresponds to a function.  */
 
   if (sym->aclass () != LOC_BLOCK)
-    {
-      error (_("Symbol \"%s\" is not a function (class = %d)"),
-	     sym->linkage_name (), sym->aclass ());
-      return 0;
-    }
+    error (_("Symbol \"%s\" is not a function (class = %d)"),
+	   sym->linkage_name (), sym->aclass ());
 
   sym = standard_lookup (einfo->catch_handlers_sym, NULL, VAR_DOMAIN);
   if (sym == NULL)
@@ -11754,11 +11751,8 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   /* Make sure that the symbol we found corresponds to a function.  */
 
   if (sym->aclass () != LOC_BLOCK)
-    {
-      error (_("Symbol \"%s\" is not a function (class = %d)"),
-	     sym->linkage_name (), sym->aclass ());
-      return 0;
-    }
+    error (_("Symbol \"%s\" is not a function (class = %d)"),
+	   sym->linkage_name (), sym->aclass ());
 
   return 1;
 }
