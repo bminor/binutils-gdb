@@ -1730,8 +1730,8 @@ mk_fdrtab (bfd *abfd,
   FDR *fdr_start;
   FDR *fdr_end;
   bool stabs;
-  long len;
-  bfd_size_type amt;
+  size_t len;
+  size_t amt;
 
   fdr_start = debug_info->fdr;
   fdr_end = fdr_start + debug_info->symbolic_header.ifdMax;
@@ -1739,17 +1739,26 @@ mk_fdrtab (bfd *abfd,
   /* First, let's see how long the table needs to be.  */
   for (len = 0, fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
     {
-      if (fdr_ptr->cpd == 0)	/* Skip FDRs that have no PDRs.  */
+      /* Sanity check fdr procedure descriptor pointer.  */
+      long ipdMax = debug_info->symbolic_header.ipdMax;
+      if (fdr_ptr->ipdFirst >= ipdMax
+	  || fdr_ptr->cpd > ipdMax - fdr_ptr->ipdFirst)
+	fdr_ptr->cpd = 0;
+      /* Skip FDRs that have no PDRs.  */
+      if (fdr_ptr->cpd == 0)
 	continue;
       ++len;
     }
 
   /* Now, create and fill in the table.  */
-  amt = (bfd_size_type) len * sizeof (struct ecoff_fdrtab_entry);
+  if (_bfd_mul_overflow (len, sizeof (struct ecoff_fdrtab_entry), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return false;
+    }
   line_info->fdrtab = (struct ecoff_fdrtab_entry*) bfd_zalloc (abfd, amt);
   if (line_info->fdrtab == NULL)
     return false;
-  line_info->fdrtab_len = len;
 
   tab = line_info->fdrtab;
   for (fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
@@ -1765,6 +1774,10 @@ mk_fdrtab (bfd *abfd,
 	{
 	  char *sym_ptr;
 	  SYMR sym;
+
+	  if ((long) ((unsigned long) fdr_ptr->isymBase + 1) <= 0
+	      || fdr_ptr->isymBase + 1 >= debug_info->symbolic_header.isymMax)
+	    continue;
 
 	  sym_ptr = ((char *) debug_info->external_sym
 		     + (fdr_ptr->isymBase + 1) * debug_swap->external_sym_size);
@@ -1797,12 +1810,14 @@ mk_fdrtab (bfd *abfd,
       tab->fdr = fdr_ptr;
       ++tab;
     }
+  len = tab - line_info->fdrtab;
+  line_info->fdrtab_len = len;
 
   /* Finally, the table is sorted in increasing memory-address order.
      The table is mostly sorted already, but there are cases (e.g.,
      static functions in include files), where this does not hold.
      Use "odump -PFv" to verify...  */
-  qsort (line_info->fdrtab, (size_t) len,
+  qsort (line_info->fdrtab, len,
 	 sizeof (struct ecoff_fdrtab_entry), cmp_fdrtab_entry);
 
   return true;
