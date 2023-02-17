@@ -1494,7 +1494,7 @@ mmap (void *start, size_t length, int prot, int flags, int fd, off_t offset)
 }
 
 /*------------------------------------------------------------- mmap64 */
-#if WSIZE(32)       /* mmap64 only defined for non-64-bit */
+#if WSIZE(32) && !defined(__USE_FILE_OFFSET64)
 
 void *
 mmap64 (void *start, size_t length, int prot, int flags, int fd, off64_t offset)

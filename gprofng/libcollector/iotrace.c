@@ -1441,7 +1441,7 @@ creat (const char *path, mode_t mode)
 }
 
 /*------------------------------------------------------------- creat64 */
-#if WSIZE(32)
+#if WSIZE(32) && !defined(__USE_LARGEFILE64)
 int
 creat64 (const char *path, mode_t mode)
 {
@@ -2476,7 +2476,7 @@ __collector_pwrite_2_1 (int fildes, const void *buf, size_t nbyte, off_t offset)
   return ret;
 }
 
-#else
+#endif
 ssize_t
 pwrite (int fildes, const void *buf, size_t nbyte, off_t offset)
 {
@@ -2497,11 +2497,10 @@ pwrite (int fildes, const void *buf, size_t nbyte, off_t offset)
   POP_REENTRANCE (guard);
   return ret;
 }
-#endif
 
 /*------------------------------------------------------------- pwrite64 */
-#if WSIZE(32)
-#if !defined(__MUSL_LIBC) && ARCH(Intel)
+#if WSIZE(32) && ARCH(Intel)
+#if !defined(__MUSL_LIBC)
 // map interposed symbol versions
 
 SYMVER_ATTRIBUTE (__collector_pwrite64_2_2, pwrite64@GLIBC_2.2)
@@ -2547,8 +2546,9 @@ __collector_pwrite64_2_1 (int fildes, const void *buf, size_t nbyte, off64_t off
   POP_REENTRANCE (guard);
   return ret;
 }
+#endif
 
-#else
+#if !defined(__USE_FILE_OFFSET64)
 ssize_t
 pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
 {
@@ -2570,7 +2570,8 @@ pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
   return ret;
 }
 #endif
-#endif /* SIZE(32) */
+
+#endif /* SIZE(32)  && ARCH(Intel) */
 
 /*------------------------------------------------------------- fgets */
 char*
