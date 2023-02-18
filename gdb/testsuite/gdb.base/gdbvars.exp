@@ -66,6 +66,14 @@ proc test_convenience_variables {} {
     gdb_test "print \$arr = {0, 1, 2, 3}" \
 	" = \\{0, 1, 2, 3\\}" \
 	"Set convenience variable to different array value"
+
+    gdb_test "print \$ptr = (void *) 7" \
+	" = \\(void \\*\\) 0x7" \
+	"set convenience variable to pointer value"
+    # This used to "succeed".
+    gdb_test "print \$ptr + 23 = 97" \
+	"Left operand of assignment is not an lvalue." \
+	"reject invalid assignment"
 }
 
 proc test_convenience_functions {} {

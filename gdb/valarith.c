@@ -93,7 +93,7 @@ value_ptradd (struct value *arg1, LONGEST arg2)
 
   result = value_from_pointer (valptrtype,
 			       value_as_address (arg1) + sz * arg2);
-  if (result->lval () != lval_internalvar)
+  if (arg1->lval () != lval_internalvar)
     result->set_component_location (arg1);
   return result;
 }
