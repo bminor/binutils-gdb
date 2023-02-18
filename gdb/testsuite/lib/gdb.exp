@@ -9298,6 +9298,28 @@ proc gdb_step_until { regexp {test_name ""} {max_steps 10} } {
     }
 }
 
+# Return false if the current target is not operating in non-stop
+# mode, otherwise, return true.
+#
+# The inferior will need to have started running in order to get the
+# correct result.
+
+proc is_target_non_stop { {testname ""} } {
+    # For historical reasons we assume non-stop mode is on.  If the
+    # maintenance command fails for any reason then we're going to
+    # return true.
+    set is_non_stop true
+    gdb_test_multiple "maint show target-non-stop" $testname {
+	-wrap -re "(is|currently) on.*" {
+	    set is_non_stop true
+	}
+	-wrap -re "(is|currently) off.*" {
+	    set is_non_stop false
+	}
+    }
+    return $is_non_stop
+}
+
 # Check if the compiler emits epilogue information associated
 # with the closing brace or with the last statement line.
 #

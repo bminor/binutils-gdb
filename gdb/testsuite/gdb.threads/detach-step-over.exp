@@ -314,12 +314,8 @@ proc_with_prefix test_detach_quit {condition_eval target_non_stop \
 	start_gdb_for_test $condition_eval $target_non_stop \
 	    $non_stop $displaced
 
-	gdb_test_multiple "maint show target-non-stop" "" {
-	    -wrap -re "(is|currently) on.*" {
-	    }
-	    -wrap -re "(is|currently) off.*" {
-		return
-	    }
+	if {![is_target_non_stop]} {
+	    return
 	}
     }
 

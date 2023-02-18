@@ -46,13 +46,9 @@ proc test { non_stop } {
 	&& ([target_info gdb_protocol] == "remote"
 	    || [target_info gdb_protocol] == "extended-remote")} {
 
-	gdb_test_multiple "maint show target-non-stop" "" {
-	    -wrap -re "(is|currently) on.*" {
-	    }
-	    -wrap -re "(is|currently) off.*" {
-		unsupported "can't issue commands while target is running"
-		return 0
-	    }
+	if {![is_target_non_stop]} {
+	    unsupported "can't issue commands while target is running"
+	    return 0
 	}
     }
 
