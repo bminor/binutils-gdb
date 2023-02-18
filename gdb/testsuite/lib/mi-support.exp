@@ -1390,6 +1390,14 @@ proc mi_create_breakpoint_multi {location test args} {
     return $bp
 }
 
+# Like mi_create_breakpoint, but creates a pending breakpoint.
+
+proc mi_create_breakpoint_pending {location test args} {
+    set bp [eval mi_make_breakpoint_pending $args]
+    mi_gdb_test "222-break-insert $location" ".*\r\n222\\^done,$bp" $test
+    return $bp
+}
+
 # Creates varobj named NAME for EXPRESSION.
 # Name cannot be "-".
 proc mi_create_varobj { name expression testname } {
@@ -2637,10 +2645,12 @@ proc mi_make_breakpoint_multi {args} {
 # -break-info for pending breakpoints.
 #
 # Arguments for the breakpoint may be specified using the options:
-# number, type, disp, enabled, pending, original-location, and thread.
+# number, type, disp, enabled, pending, original-location, thread, and
+# cond.
 #
-# For the option -thread the corresponding output field is only
-# included if the option is present and not the empty string.
+# For the options -thread and -cond the corresponding output fields
+# are only included if the options are present and not the empty
+# string.
 #
 # Example: mi_make_breakpoint_pending -number 2 -pending func
 # will return the breakpoint:
@@ -2649,7 +2659,7 @@ proc mi_make_breakpoint_multi {args} {
 
 proc mi_make_breakpoint_pending {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*}
-	{pending .*} {original-location .*} {thread ""}}
+	{pending .*} {original-location .*} {thread ""} {cond ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled] {
@@ -2665,7 +2675,6 @@ proc mi_make_breakpoint_pending {args} {
     set ignore 0
     set times 0
     set script ""
-    set cond ""
     set evaluated-by ""
 
     set result [mi_make_breakpoint_1 \
