@@ -3920,8 +3920,7 @@ static struct dwo_unit *
 lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
 {
 #if CXX_STD_THREAD
-  /* We need a lock here both to handle the DWO hash table, and BFD,
-     which is not thread-safe.  */
+  /* We need a lock here both to handle the DWO hash table.  */
   static std::mutex dwo_lock;
 
   std::lock_guard<std::mutex> guard (dwo_lock);

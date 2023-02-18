@@ -258,4 +258,9 @@ gdb_bfd_sections (const gdb_bfd_ref_ptr &abfd)
 
 extern std::string gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
+/* A wrapper for bfd_init that also handles setting up for
+   multi-threading.  */
+
+extern void gdb_bfd_init ();
+
 #endif /* GDB_BFD_H */

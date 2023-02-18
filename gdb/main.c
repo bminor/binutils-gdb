@@ -699,8 +699,7 @@ captured_main_1 (struct captured_main_args *context)
   auto temp_uiout = std::make_unique<cli_ui_out> (gdb_stdout);
   current_uiout = temp_uiout.get ();
 
-  if (bfd_init () != BFD_INIT_MAGIC)
-    error (_("fatal error: libbfd ABI mismatch"));
+  gdb_bfd_init ();
 
 #ifdef __MINGW32__
   /* On Windows, argv[0] is not necessarily set to absolute form when

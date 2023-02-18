@@ -35,6 +35,36 @@
 #include "cli/cli-style.h"
 #include <unordered_map>
 
+#if CXX_STD_THREAD
+
+#include <mutex>
+
+/* Lock held when doing BFD operations.  A recursive mutex is used
+   because we use this mutex internally and also for BFD, just to make
+   life a bit simpler, and we may sometimes hold it while calling into
+   BFD.  */
+static std::recursive_mutex gdb_bfd_mutex;
+
+/* BFD locking function.  */
+
+static bool
+gdb_bfd_lock (void *ignore)
+{
+  gdb_bfd_mutex.lock ();
+  return true;
+}
+
+/* BFD unlocking function.  */
+
+static bool
+gdb_bfd_unlock (void *ignore)
+{
+  gdb_bfd_mutex.unlock ();
+  return true;
+}
+
+#endif /* CXX_STD_THREAD */
+
 /* An object of this type is stored in the section's user data when
    mapping a section.  */
 
@@ -498,6 +528,10 @@ gdb_bfd_open (const char *name, const char *target, int fd,
       name += strlen (TARGET_SYSROOT_PREFIX);
     }
 
+#if CXX_STD_THREAD
+  std::lock_guard<std::recursive_mutex> guard (gdb_bfd_mutex);
+#endif
+
   if (gdb_bfd_cache == NULL)
     gdb_bfd_cache = htab_create_alloc (1, hash_bfd, eq_bfd, NULL,
 				       xcalloc, xfree);
@@ -625,6 +659,10 @@ gdb_bfd_ref (struct bfd *abfd)
   if (abfd == NULL)
     return;
 
+#if CXX_STD_THREAD
+  std::lock_guard<std::recursive_mutex> guard (gdb_bfd_mutex);
+#endif
+
   gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
 
   bfd_cache_debug_printf ("Increase reference count on bfd %s (%s)",
@@ -653,6 +691,10 @@ gdb_bfd_unref (struct bfd *abfd)
 
   if (abfd == NULL)
     return;
+
+#if CXX_STD_THREAD
+  std::lock_guard<std::recursive_mutex> guard (gdb_bfd_mutex);
+#endif
 
   gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
   gdb_assert (gdata->refc >= 1);
@@ -1169,6 +1211,22 @@ gdb_bfd_error_handler (const char *fmt, va_list ap)
      recognize.  It also outputs additional text, i.e. "BFD: ", which
      makes it clear that it's a BFD warning/error.  */
   (*default_bfd_error_handler) (fmt, ap);
+}
+
+/* See gdb_bfd.h.  */
+
+void
+gdb_bfd_init ()
+{
+  if (bfd_init () == BFD_INIT_MAGIC)
+    {
+#if CXX_STD_THREAD
+      if (bfd_thread_init (gdb_bfd_lock, gdb_bfd_unlock, nullptr))
+#endif
+	return;
+    }
+
+  error (_("fatal error: libbfd ABI mismatch"));
 }
 
 void _initialize_gdb_bfd ();
