@@ -564,11 +564,11 @@ if test x"$prefer_curses" = xyes; then
   # search /usr/local/include, if ncurses is installed in /usr/local.  A
   # default installation of ncurses on alpha*-dec-osf* will lead to such
   # a situation.
-  AC_SEARCH_LIBS(waddstr, [ncursesw ncurses cursesX curses])
-
-  if test "$ac_cv_search_waddstr" != no; then
-    curses_found=yes
-  fi
+  AC_SEARCH_LIBS(waddstr, [ncursesw ncurses cursesX curses],
+                 [curses_found=yes
+                  AC_DEFINE([HAVE_LIBCURSES], [1],
+                            [Define to 1 if curses is enabled.])
+                 ])
 fi
 
 # Check whether we should enable the TUI, but only do so if we really

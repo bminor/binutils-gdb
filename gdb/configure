@@ -20624,13 +20624,13 @@ $as_echo "$ac_cv_search_waddstr" >&6; }
 ac_res=$ac_cv_search_waddstr
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  curses_found=yes
+
+$as_echo "#define HAVE_LIBCURSES 1" >>confdefs.h
+
 
 fi
 
-
-  if test "$ac_cv_search_waddstr" != no; then
-    curses_found=yes
-  fi
 fi
 
 # Check whether we should enable the TUI, but only do so if we really

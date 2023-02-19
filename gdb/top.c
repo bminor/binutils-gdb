@@ -1619,6 +1619,16 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
+#if HAVE_LIBCURSES
+  gdb_printf (stream, _("\
+	     --with-curses\n\
+"));
+#else
+  gdb_printf (stream, _("\
+	     --without-curses\n\
+"));
+#endif
+
 #if HAVE_GUILE
   gdb_printf (stream, _("\
 	     --with-guile\n\
