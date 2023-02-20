@@ -1924,9 +1924,9 @@ static inline bool
 compunit_epilogue_unwind_valid (struct compunit_symtab *cust)
 {
   /* In absence of producer information, assume epilogue unwind info is
-     invalid.  */
+     valid.  */
   if (cust == nullptr)
-    return false;
+    return true;
 
   return cust->epilogue_unwind_valid ();
 }
