@@ -2229,9 +2229,9 @@ i386_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 static int
-i386_epilogue_frame_sniffer (const struct frame_unwind *self,
-			     frame_info_ptr this_frame,
-			     void **this_prologue_cache)
+i386_epilogue_frame_sniffer_1 (const struct frame_unwind *self,
+			       frame_info_ptr this_frame,
+			       void **this_prologue_cache, bool override_p)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -2240,12 +2240,43 @@ i386_epilogue_frame_sniffer (const struct frame_unwind *self,
     /* We're not in the inner frame, so assume we're not in an epilogue.  */
     return 0;
 
-  if (compunit_epilogue_unwind_valid (find_pc_compunit_symtab (pc)))
-    /* Don't override the symtab unwinders.  */
-    return 0;
+  bool unwind_valid_p
+    = compunit_epilogue_unwind_valid (find_pc_compunit_symtab (pc));
+  if (override_p)
+    {
+      if (unwind_valid_p)
+	/* Don't override the symtab unwinders, skip
+	   "i386 epilogue override".  */
+	return 0;
+    }
+  else
+    {
+      if (!unwind_valid_p)
+	/* "i386 epilogue override" unwinder already ran, skip
+	   "i386 epilogue".  */
+	return 0;
+    }
 
   /* Check whether we're in an epilogue.  */
   return i386_stack_frame_destroyed_p (gdbarch, pc);
+}
+
+static int
+i386_epilogue_override_frame_sniffer (const struct frame_unwind *self,
+				      frame_info_ptr this_frame,
+				      void **this_prologue_cache)
+{
+  return i386_epilogue_frame_sniffer_1 (self, this_frame, this_prologue_cache,
+					true);
+}
+
+static int
+i386_epilogue_frame_sniffer (const struct frame_unwind *self,
+			     frame_info_ptr this_frame,
+			     void **this_prologue_cache)
+{
+  return i386_epilogue_frame_sniffer_1 (self, this_frame, this_prologue_cache,
+					false);
 }
 
 static struct i386_frame_cache *
@@ -2319,6 +2350,17 @@ i386_epilogue_frame_prev_register (frame_info_ptr this_frame,
 
   return i386_frame_prev_register (this_frame, this_cache, regnum);
 }
+
+static const struct frame_unwind i386_epilogue_override_frame_unwind =
+{
+  "i386 epilogue override",
+  NORMAL_FRAME,
+  i386_epilogue_frame_unwind_stop_reason,
+  i386_epilogue_frame_this_id,
+  i386_epilogue_frame_prev_register,
+  NULL,
+  i386_epilogue_override_frame_sniffer
+};
 
 static const struct frame_unwind i386_epilogue_frame_unwind =
 {
@@ -8618,12 +8660,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      unwinder in function epilogues (where the DWARF unwinder
      currently fails).  */
   if (info.bfd_arch_info->bits_per_word == 32)
-    frame_unwind_append_unwinder (gdbarch, &i386_epilogue_frame_unwind);
+    frame_unwind_append_unwinder (gdbarch, &i386_epilogue_override_frame_unwind);
 
   /* Hook in the DWARF CFI frame unwinder.  This unwinder is appended
      to the list before the prologue-based unwinders, so that DWARF
      CFI info will be used if it is available.  */
   dwarf2_append_unwinders (gdbarch);
+
+  if (info.bfd_arch_info->bits_per_word == 32)
+    frame_unwind_append_unwinder (gdbarch, &i386_epilogue_frame_unwind);
 
   frame_base_set_default (gdbarch, &i386_frame_base);
 
