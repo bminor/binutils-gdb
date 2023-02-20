@@ -75,13 +75,12 @@ volatile int call_function = 0;
 void *thread_function(void *arg) {
     int my_number =  (long) arg;
     unsigned long long int *myp = (unsigned long long int *) &args[my_number];
-    volatile unsigned int cnt = 0;
+    volatile unsigned int one = 1;
 
-    while (1)
+    while (one)
       {
 	/* schedlock.exp: main loop.  */
 	MAYBE_CALL_SOME_FUNCTION(); (*myp) ++;
-	cnt++;
       }
 
     pthread_exit(NULL);
