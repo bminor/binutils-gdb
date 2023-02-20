@@ -471,7 +471,7 @@ if { [istarget alpha*-*-*vms*] } {
     close $f
     if { [ld_assemble $as $src tmpdir/empty.o]
 	 && ![ld_link $LD tmpdir/empty tmpdir/empty.o]
-	 && [regsub -all {[^\n]*: cannot find -l([^\n]*)} $exec_output {tmpdir/lib\1.a } missing_libs] } {
+	 && [regsub -all {[^\n]*: cannot find -l([^\n :]*)[^\n]*} $exec_output {tmpdir/lib\1.a } missing_libs] } {
 	regsub -all {\$} $missing_libs {\\\$} missing_libs
 	for { set i 0 } { $i < [llength $missing_libs] } { incr i } {
 	    set f [lindex $missing_libs $i]
