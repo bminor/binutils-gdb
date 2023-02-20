@@ -1,3 +1,9 @@
+2023-02-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 30004
+	* pe-dll.c (pe_dll_build_sections): Do not build an edata section
+	if all symbols are being excluded.
+
 2023-02-16  Ulf Samuelsson <binutils@emagii.com>
 	    Nick Clifton  <nickc@redhat.com>
 

@@ -3659,7 +3659,8 @@ pe_dll_build_sections (bfd *abfd, struct bfd_link_info *info)
   pe_output_file_set_long_section_names (abfd);
   process_def_file_and_drectve (abfd, info);
 
-  if (pe_def_file->num_exports == 0 && !bfd_link_pic (info))
+  if (pe_def_file->num_exports == 0
+      && (!bfd_link_pic (info) || pe_dll_exclude_all_symbols))
     {
       if (pe_dll_enable_reloc_section)
 	{
