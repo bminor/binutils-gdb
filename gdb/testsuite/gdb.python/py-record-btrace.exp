@@ -76,6 +76,11 @@ with_test_prefix "prepare record" {
 		  "warning: Decode error \\($nonl_re*\\) at instruction $decimal" \
 		  "\\(offset = $hex, pc = $hex\\):" \
 		  "$nonl_re*\\."]]
+    set xfail_re_2 \
+	[join \
+	     [list \
+		  "warning: Non-contiguous trace at instruction $decimal" \
+		  "\\(offset = $hex\\)\\."]]
 
     set got_xfail 0
     set cmd "python insn = r.instruction_history"
@@ -83,7 +88,7 @@ with_test_prefix "prepare record" {
 	-re "^[string_to_regexp $cmd]\r\n$::gdb_prompt $" {
 	    pass $gdb_test_name
 	}
-	-re -wrap "$xfail_re" {
+	-re -wrap "($xfail_re|$xfail_re_2)" {
 	    if { $have_xfail } {
 		xfail $gdb_test_name
 		set got_xfail 1
