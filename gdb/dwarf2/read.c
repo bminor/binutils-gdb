@@ -13195,6 +13195,8 @@ update_enumeration_type_from_children (struct die_info *die,
       memcpy (type->fields (), fields.data (),
 	      sizeof (struct field) * fields.size ());
     }
+  else
+    flag_enum = 0;
 
   if (unsigned_enum)
     type->set_is_unsigned (true);
