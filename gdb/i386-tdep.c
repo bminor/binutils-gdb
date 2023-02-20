@@ -2219,10 +2219,6 @@ static int
 i386_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
-
-  if (compunit_epilogue_unwind_valid (find_pc_compunit_symtab (pc)))
-    return 0;
-
   if (target_read_memory (pc, &insn, 1))
     return 0;	/* Can't read memory at pc.  */
 
@@ -2237,11 +2233,19 @@ i386_epilogue_frame_sniffer (const struct frame_unwind *self,
 			     frame_info_ptr this_frame,
 			     void **this_prologue_cache)
 {
-  if (frame_relative_level (this_frame) == 0)
-    return i386_stack_frame_destroyed_p (get_frame_arch (this_frame),
-					 get_frame_pc (this_frame));
-  else
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
+
+  if (frame_relative_level (this_frame) != 0)
+    /* We're not in the inner frame, so assume we're not in an epilogue.  */
     return 0;
+
+  if (compunit_epilogue_unwind_valid (find_pc_compunit_symtab (pc)))
+    /* Don't override the symtab unwinders.  */
+    return 0;
+
+  /* Check whether we're in an epilogue.  */
+  return i386_stack_frame_destroyed_p (gdbarch, pc);
 }
 
 static struct i386_frame_cache *
