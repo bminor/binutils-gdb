@@ -196,14 +196,13 @@ read_aarch64_ctx (CORE_ADDR ctx_addr, enum bfd_endian byte_order,
 /* Given CACHE, use the trad_frame* functions to restore the FPSIMD
    registers from a signal frame.
 
-   VREG_NUM is the number of the V register being restored, OFFSET is the
-   address containing the register value, BYTE_ORDER is the endianness and
-   HAS_SVE tells us if we have a valid SVE context or not.  */
+   FPSIMD_CONTEXT is the address of the signal frame context containing FPSIMD
+   data.  */
 
 static void
-aarch64_linux_restore_vreg (struct trad_frame_cache *cache, int num_regs,
-			    int vreg_num, CORE_ADDR offset,
-			    enum bfd_endian byte_order, bool has_sve)
+aarch64_linux_restore_vregs (struct gdbarch *gdbarch,
+			     struct trad_frame_cache *cache,
+			     CORE_ADDR fpsimd_context)
 {
   /* WARNING: SIMD state is laid out in memory in target-endian format.
 
@@ -215,11 +214,22 @@ aarch64_linux_restore_vreg (struct trad_frame_cache *cache, int num_regs,
      2 - If the target is little endian, then SIMD state is little endian, so
      no byteswap is needed. */
 
-  if (byte_order == BFD_ENDIAN_BIG)
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int num_regs = gdbarch_num_regs (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  for (int i = 0; i < 32; i++)
     {
+      CORE_ADDR offset = (fpsimd_context + AARCH64_FPSIMD_V0_OFFSET
+			  + (i * AARCH64_FPSIMD_VREG_SIZE));
+
       gdb_byte buf[V_REGISTER_SIZE];
 
-      if (target_read_memory (offset, buf, V_REGISTER_SIZE) != 0)
+      /* Read the contents of the V register.  */
+      if (target_read_memory (offset, buf, V_REGISTER_SIZE))
+	error (_("Failed to read fpsimd register from signal context."));
+
+      if (byte_order == BFD_ENDIAN_BIG)
 	{
 	  size_t size = V_REGISTER_SIZE/2;
 
@@ -234,50 +244,66 @@ aarch64_linux_restore_vreg (struct trad_frame_cache *cache, int num_regs,
 	  store_unsigned_integer (buf + size , size, BFD_ENDIAN_LITTLE, u64);
 
 	  /* Now we can store the correct bytes for the V register.  */
-	  trad_frame_set_reg_value_bytes (cache, AARCH64_V0_REGNUM + vreg_num,
+	  trad_frame_set_reg_value_bytes (cache, AARCH64_V0_REGNUM + i,
 					  {buf, V_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_Q0_REGNUM
-					  + vreg_num, {buf, Q_REGISTER_SIZE});
+					  + i, {buf, Q_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_D0_REGNUM
-					  + vreg_num, {buf, D_REGISTER_SIZE});
+					  + i, {buf, D_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_S0_REGNUM
-					  + vreg_num, {buf, S_REGISTER_SIZE});
+					  + i, {buf, S_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_H0_REGNUM
-					  + vreg_num, {buf, H_REGISTER_SIZE});
+					  + i, {buf, H_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_B0_REGNUM
-					  + vreg_num, {buf, B_REGISTER_SIZE});
+					  + i, {buf, B_REGISTER_SIZE});
 
-	  if (has_sve)
+	  if (tdep->has_sve ())
 	    trad_frame_set_reg_value_bytes (cache,
 					    num_regs + AARCH64_SVE_V0_REGNUM
-					    + vreg_num, {buf, V_REGISTER_SIZE});
+					    + i, {buf, V_REGISTER_SIZE});
 	}
-      return;
+      else
+	{
+	  /* Little endian, just point at the address containing the register
+	     value.  */
+	  trad_frame_set_reg_addr (cache, AARCH64_V0_REGNUM + i, offset);
+	  trad_frame_set_reg_addr (cache, num_regs + AARCH64_Q0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (cache, num_regs + AARCH64_D0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (cache, num_regs + AARCH64_S0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (cache, num_regs + AARCH64_H0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (cache, num_regs + AARCH64_B0_REGNUM + i,
+				   offset);
+
+	  if (tdep->has_sve ())
+	    trad_frame_set_reg_addr (cache, num_regs + AARCH64_SVE_V0_REGNUM
+				     + i, offset);
+	}
+
+      if (tdep->has_sve ())
+	{
+	  /* If SVE is supported for this target, zero out the Z
+	     registers then copy the first 16 bytes of each of the V
+	     registers to the associated Z register.  Otherwise the Z
+	     registers will contain uninitialized data.  */
+	  std::vector<gdb_byte> z_buffer (tdep->vq * 16);
+
+	  /* We have already handled the endianness swap above, so we don't need
+	     to worry about it here.  */
+	  memcpy (z_buffer.data (), buf, V_REGISTER_SIZE);
+	  trad_frame_set_reg_value_bytes (cache,
+					  AARCH64_SVE_Z0_REGNUM + i,
+					  z_buffer);
+	}
     }
-
-  /* Little endian, just point at the address containing the register
-     value.  */
-  trad_frame_set_reg_addr (cache, AARCH64_V0_REGNUM + vreg_num, offset);
-  trad_frame_set_reg_addr (cache, num_regs + AARCH64_Q0_REGNUM + vreg_num,
-			   offset);
-  trad_frame_set_reg_addr (cache, num_regs + AARCH64_D0_REGNUM + vreg_num,
-			   offset);
-  trad_frame_set_reg_addr (cache, num_regs + AARCH64_S0_REGNUM + vreg_num,
-			   offset);
-  trad_frame_set_reg_addr (cache, num_regs + AARCH64_H0_REGNUM + vreg_num,
-			   offset);
-  trad_frame_set_reg_addr (cache, num_regs + AARCH64_B0_REGNUM + vreg_num,
-			   offset);
-
-  if (has_sve)
-    trad_frame_set_reg_addr (cache, num_regs + AARCH64_SVE_V0_REGNUM
-			     + vreg_num, offset);
-
 }
 
 /* Implement the "init" method of struct tramp_frame.  */
@@ -432,16 +458,7 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 
       /* If there was no SVE section then set up the V registers.  */
       if (sve_regs == 0)
-	{
-	  for (int i = 0; i < 32; i++)
-	    {
-	      CORE_ADDR offset = (fpsimd + AARCH64_FPSIMD_V0_OFFSET
-				  + (i * AARCH64_FPSIMD_VREG_SIZE));
-
-	      aarch64_linux_restore_vreg (this_cache, num_regs, i, offset,
-					  byte_order, tdep->has_sve ());
-	    }
-	}
+	aarch64_linux_restore_vregs (gdbarch, this_cache, fpsimd);
     }
 
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
