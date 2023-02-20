@@ -107,6 +107,13 @@ struct globals
   htab_t hashmap;
 };
 
+struct in_sc
+{
+  asection *s;
+  uint16_t sect_num;
+  uint16_t mod_index;
+};
+
 static const uint32_t crc_table[] =
 {
   0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -4118,6 +4125,27 @@ find_section_number (bfd *abfd, asection *sect)
   return 0;
 }
 
+/* Used as parameter to qsort, to sort section contributions by section and
+   offset.  */
+static int
+section_contribs_compare (const void *p1, const void *p2)
+{
+  const struct in_sc *sc1 = p1;
+  const struct in_sc *sc2 = p2;
+
+  if (sc1->sect_num < sc2->sect_num)
+    return -1;
+  if (sc1->sect_num > sc2->sect_num)
+    return 1;
+
+  if (sc1->s->output_offset < sc2->s->output_offset)
+    return -1;
+  if (sc1->s->output_offset > sc2->s->output_offset)
+    return 1;
+
+  return 0;
+}
+
 /* Create the substream which maps addresses in the image file to locations
    in the original object files.  */
 static bool
@@ -4128,6 +4156,8 @@ create_section_contrib_substream (bfd *abfd, void **data, uint32_t *size)
   uint16_t mod_index;
   char *sect_flags;
   file_ptr offset;
+  struct in_sc *sc_in, *sc2;
+  uint32_t *ptr;
 
   for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
        in = in->link.next)
@@ -4168,8 +4198,11 @@ create_section_contrib_substream (bfd *abfd, void **data, uint32_t *size)
       offset += sizeof (struct external_scnhdr);
     }
 
-  sc =
-    (struct section_contribution *) ((uint8_t *) *data + sizeof (uint32_t));
+  /* Microsoft's DIA expects section contributions to be sorted by section
+     number and offset, otherwise it will be unable to resolve line numbers.  */
+
+  sc_in = xmalloc (num_sc * sizeof (* sc_in));
+  sc2 = sc_in;
 
   mod_index = 0;
   for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
@@ -4177,32 +4210,43 @@ create_section_contrib_substream (bfd *abfd, void **data, uint32_t *size)
     {
       for (asection *s = in->sections; s; s = s->next)
 	{
-	  uint16_t sect_num;
-
 	  if (s->size == 0 || discarded_section (s))
 	    continue;
 
-	  sect_num = find_section_number (abfd, s->output_section);
+	  sc2->s = s;
+	  sc2->sect_num = find_section_number (abfd, s->output_section);
+	  sc2->mod_index = mod_index;
 
-	  memcpy (&sc->characteristics,
-		  sect_flags + ((sect_num - 1) * sizeof (uint32_t)),
-		  sizeof (uint32_t));
-
-	  bfd_putl16 (sect_num, &sc->section);
-	  bfd_putl16 (0, &sc->padding1);
-	  bfd_putl32 (s->output_offset, &sc->offset);
-	  bfd_putl32 (s->size, &sc->size);
-	  bfd_putl16 (mod_index, &sc->module_index);
-	  bfd_putl16 (0, &sc->padding2);
-	  bfd_putl32 (0, &sc->data_crc);
-	  bfd_putl32 (0, &sc->reloc_crc);
-
-	  sc++;
+	  sc2++;
 	}
 
       mod_index++;
     }
 
+  qsort (sc_in, num_sc, sizeof (* sc_in), section_contribs_compare);
+
+  ptr = *data;
+  sc = (struct section_contribution *) (ptr + 1); /* Skip the version word.  */
+
+  for (unsigned int i = 0; i < num_sc; i++)
+    {
+      memcpy (&sc->characteristics,
+	      sect_flags + ((sc_in[i].sect_num - 1) * sizeof (uint32_t)),
+	      sizeof (uint32_t));
+
+      bfd_putl16 (sc_in[i].sect_num, &sc->section);
+      bfd_putl16 (0, &sc->padding1);
+      bfd_putl32 (sc_in[i].s->output_offset, &sc->offset);
+      bfd_putl32 (sc_in[i].s->size, &sc->size);
+      bfd_putl16 (sc_in[i].mod_index, &sc->module_index);
+      bfd_putl16 (0, &sc->padding2);
+      bfd_putl32 (0, &sc->data_crc);
+      bfd_putl32 (0, &sc->reloc_crc);
+
+      sc++;
+    }
+
+  free (sc_in);
   free (sect_flags);
 
   return true;
