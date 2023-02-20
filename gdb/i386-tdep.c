@@ -2219,10 +2219,8 @@ static int
 i386_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
-  struct compunit_symtab *cust;
 
-  cust = find_pc_compunit_symtab (pc);
-  if (cust != NULL && cust->epilogue_unwind_valid ())
+  if (compunit_epilogue_unwind_valid (find_pc_compunit_symtab (pc)))
     return 0;
 
   if (target_read_memory (pc, &insn, 1))

@@ -1917,6 +1917,19 @@ is_main_symtab_of_compunit_symtab (struct symtab *symtab)
 {
   return symtab == symtab->compunit ()->primary_filetab ();
 }
+
+/* Return true if epilogue unwind info of CUST is valid.  */
+
+static inline bool
+compunit_epilogue_unwind_valid (struct compunit_symtab *cust)
+{
+  /* In absence of producer information, assume epilogue unwind info is
+     invalid.  */
+  if (cust == nullptr)
+    return false;
+
+  return cust->epilogue_unwind_valid ();
+}
 
 
 /* The virtual function table is now an array of structures which have the
