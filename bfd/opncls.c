@@ -103,6 +103,12 @@ _bfd_new_bfd_contained_in (bfd *obfd)
 {
   bfd *nbfd;
 
+  /* Nested archives in bims are unsupported.  */
+  if ((obfd->flags & BFD_IN_MEMORY) != 0)
+    {
+      bfd_set_error (bfd_error_malformed_archive);
+      return NULL;
+    }
   nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
     return NULL;
