@@ -6460,7 +6460,13 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
       if (cu->has_loclist && gcc_4_minor >= 5)
 	cust->set_locations_valid (true);
 
-      if (gcc_4_minor >= 5)
+      int major, minor;
+      if (cu->producer != nullptr
+	  && producer_is_gcc (cu->producer, &major, &minor)
+	  && (major < 4 || (major == 4 && minor < 5)))
+	/* Don't trust gcc < 4.5.x.  */
+	cust->set_epilogue_unwind_valid (false);
+      else
 	cust->set_epilogue_unwind_valid (true);
 
       cust->set_call_site_htab (cu->call_site_htab);
