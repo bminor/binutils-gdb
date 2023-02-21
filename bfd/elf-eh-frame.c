@@ -602,6 +602,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   hdr_info = &htab->eh_info;
 
   if (sec->size == 0
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
       || sec->sec_info_type != SEC_INFO_TYPE_NONE)
     {
       /* This file does not contain .eh_frame information.  */

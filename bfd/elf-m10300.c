@@ -2694,7 +2694,8 @@ mn10300_elf_relax_section (bfd *abfd,
 	      if (! ((section->flags & SEC_RELOC) != 0
 		     && section->reloc_count != 0))
 		continue;
-	      if ((section->flags & SEC_ALLOC) == 0)
+	      if ((section->flags & SEC_ALLOC) == 0
+		  || (section->flags & SEC_HAS_CONTENTS) == 0)
 		continue;
 
 	      /* Get cached copy of section contents if it exists.  */
@@ -3034,7 +3035,9 @@ mn10300_elf_relax_section (bfd *abfd,
 	      unsigned int symcount;
 
 	      /* Skip non-code sections and empty sections.  */
-	      if ((section->flags & SEC_CODE) == 0 || section->size == 0)
+	      if ((section->flags & SEC_CODE) == 0
+		  || (section->flags & SEC_HAS_CONTENTS) == 0
+		  || section->size == 0)
 		continue;
 
 	      if (section->reloc_count != 0)

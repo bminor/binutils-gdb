@@ -4386,7 +4386,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		       | DYN_NO_NEEDED)) == 0;
 
       s = bfd_get_section_by_name (abfd, ".dynamic");
-      if (s != NULL && s->size != 0)
+      if (s != NULL && s->size != 0 && (s->flags & SEC_HAS_CONTENTS) != 0)
 	{
 	  bfd_byte *dynbuf;
 	  bfd_byte *extdyn;
@@ -8204,7 +8204,7 @@ bfd_elf_get_bfd_needed_list (bfd *abfd,
     return true;
 
   s = bfd_get_section_by_name (abfd, ".dynamic");
-  if (s == NULL || s->size == 0)
+  if (s == NULL || s->size == 0 || (s->flags & SEC_HAS_CONTENTS) == 0)
     return true;
 
   if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))

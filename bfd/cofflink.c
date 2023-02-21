@@ -1213,7 +1213,7 @@ process_embedded_commands (bfd *output_bfd,
   char *e;
   bfd_byte *copy;
 
-  if (!sec)
+  if (sec == NULL || (sec->flags & SEC_HAS_CONTENTS) == 0)
     return 1;
 
   if (!bfd_malloc_and_get_section (abfd, sec, &copy))

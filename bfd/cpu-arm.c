@@ -418,7 +418,8 @@ bfd_arm_update_notes (bfd *abfd, const char *note_section)
      different.  */
   arm_arch_section = bfd_get_section_by_name (abfd, note_section);
 
-  if (arm_arch_section == NULL)
+  if (arm_arch_section == NULL
+      || (arm_arch_section->flags & SEC_HAS_CONTENTS) == 0)
     return true;
 
   buffer_size = arm_arch_section->size;
@@ -521,7 +522,8 @@ bfd_arm_get_mach_from_notes (bfd *abfd, const char *note_section)
      different.  */
   arm_arch_section = bfd_get_section_by_name (abfd, note_section);
 
-  if (arm_arch_section == NULL)
+  if (arm_arch_section == NULL
+      || (arm_arch_section->flags & SEC_HAS_CONTENTS) == 0)
     return bfd_mach_arm_unknown;
 
   buffer_size = arm_arch_section->size;

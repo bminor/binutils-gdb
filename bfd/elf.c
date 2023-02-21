@@ -1689,7 +1689,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
     }
 
   s = bfd_get_section_by_name (abfd, ".dynamic");
-  if (s != NULL)
+  if (s != NULL && (s->flags & SEC_HAS_CONTENTS) != 0)
     {
       unsigned int elfsec;
       unsigned long shlink;

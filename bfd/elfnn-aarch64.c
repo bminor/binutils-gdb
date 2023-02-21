@@ -9880,6 +9880,7 @@ get_plt_type (bfd *abfd)
   bfd_byte *contents, *extdyn, *extdynend;
   asection *sec = bfd_get_section_by_name (abfd, ".dynamic");
   if (!sec
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
       || sec->size < sizeof (ElfNN_External_Dyn)
       || !bfd_malloc_and_get_section (abfd, sec, &contents))
     return ret;

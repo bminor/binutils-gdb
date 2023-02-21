@@ -4216,7 +4216,7 @@ avr_elf32_load_property_records (bfd *abfd)
 
   /* Find the '.avr.prop' section and load the contents into memory.  */
   sec = bfd_get_section_by_name (abfd, AVR_PROPERTY_RECORD_SECTION_NAME);
-  if (sec == NULL)
+  if (sec == NULL || (sec->flags & SEC_HAS_CONTENTS) == 0)
     return NULL;
   return avr_elf32_load_records_from_section (abfd, sec);
 }

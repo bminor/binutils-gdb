@@ -2880,27 +2880,38 @@ _bfd_handle_already_linked (asection *sec,
 	   sec->owner, sec);
       else if (sec->size != 0)
 	{
-	  bfd_byte *sec_contents, *l_sec_contents = NULL;
+	  bfd_byte *sec_contents, *l_sec_contents;
 
-	  if (!bfd_malloc_and_get_section (sec->owner, sec, &sec_contents))
+	  if ((sec->flags & SEC_HAS_CONTENTS) == 0
+	      && (l->sec->flags & SEC_HAS_CONTENTS) == 0)
+	    ;
+	  else if ((sec->flags & SEC_HAS_CONTENTS) == 0
+		   || !bfd_malloc_and_get_section (sec->owner, sec,
+						   &sec_contents))
 	    info->callbacks->einfo
 	      /* xgettext:c-format */
 	      (_("%pB: could not read contents of section `%pA'\n"),
 	       sec->owner, sec);
-	  else if (!bfd_malloc_and_get_section (l->sec->owner, l->sec,
-						&l_sec_contents))
-	    info->callbacks->einfo
-	      /* xgettext:c-format */
-	      (_("%pB: could not read contents of section `%pA'\n"),
-	       l->sec->owner, l->sec);
-	  else if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
-	    info->callbacks->einfo
-	      /* xgettext:c-format */
-	      (_("%pB: duplicate section `%pA' has different contents\n"),
-	       sec->owner, sec);
-
-	  free (sec_contents);
-	  free (l_sec_contents);
+	  else if ((l->sec->flags & SEC_HAS_CONTENTS) == 0
+		   || !bfd_malloc_and_get_section (l->sec->owner, l->sec,
+						   &l_sec_contents))
+	    {
+	      info->callbacks->einfo
+		/* xgettext:c-format */
+		(_("%pB: could not read contents of section `%pA'\n"),
+		 l->sec->owner, l->sec);
+	      free (sec_contents);
+	    }
+	  else
+	    {
+	      if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
+		info->callbacks->einfo
+		  /* xgettext:c-format */
+		  (_("%pB: duplicate section `%pA' has different contents\n"),
+		   sec->owner, sec);
+	      free (l_sec_contents);
+	      free (sec_contents);
+	    }
 	}
       break;
     }

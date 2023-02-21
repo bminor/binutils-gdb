@@ -193,6 +193,7 @@ _bfd_elf_parse_sframe (bfd *abfd,
   int decerr = 0;
 
   if (sec->size == 0
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
       || sec->sec_info_type != SEC_INFO_TYPE_NONE)
     {
       /* This file does not contain .sframe information.  */

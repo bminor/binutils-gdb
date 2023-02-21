@@ -1288,7 +1288,7 @@ pe_print_idata (bfd * abfd, void * vfile)
     {
       /* Maybe the extra header isn't there.  Look for the section.  */
       section = bfd_get_section_by_name (abfd, ".idata");
-      if (section == NULL)
+      if (section == NULL || (section->flags & SEC_HAS_CONTENTS) == 0)
 	return true;
 
       addr = section->vma;
@@ -1845,6 +1845,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
   int onaline = PDATA_ROW_SIZE;
 
   if (section == NULL
+      || (section->flags & SEC_HAS_CONTENTS) == 0
       || coff_section_data (abfd, section) == NULL
       || pei_section_data (abfd, section) == NULL)
     return true;
@@ -2014,6 +2015,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
   struct sym_cache cache = {0, 0} ;
 
   if (section == NULL
+      || (section->flags & SEC_HAS_CONTENTS) == 0
       || coff_section_data (abfd, section) == NULL
       || pei_section_data (abfd, section) == NULL)
     return true;
@@ -2147,7 +2149,9 @@ pe_print_reloc (bfd * abfd, void * vfile)
   asection *section = bfd_get_section_by_name (abfd, ".reloc");
   bfd_byte *p, *end;
 
-  if (section == NULL || section->size == 0 || !(section->flags & SEC_HAS_CONTENTS))
+  if (section == NULL
+      || section->size == 0
+      || (section->flags & SEC_HAS_CONTENTS) == 0)
     return true;
 
   fprintf (file,

@@ -1087,6 +1087,7 @@ _bfd_elf_ppc_set_arch (bfd *abfd)
       s = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
       if (s != NULL
 	  && s->size >= 24
+	  && (s->flags & SEC_HAS_CONTENTS) != 0
 	  && bfd_malloc_and_get_section (abfd, s, &contents))
 	{
 	  unsigned int apuinfo_size = bfd_get_32 (abfd, contents + 4);
@@ -1840,7 +1841,8 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   /* If this object was prelinked, the prelinker stored the address
      of .glink at got[1].  If it wasn't prelinked, got[1] will be zero.  */
   dynamic = bfd_get_section_by_name (abfd, ".dynamic");
-  if (dynamic != NULL)
+  if (dynamic != NULL
+      && (dynamic->flags & SEC_HAS_CONTENTS) != 0)
     {
       bfd_byte *dynbuf, *extdyn, *extdynend;
       size_t extdynsize;
@@ -6106,6 +6108,7 @@ ppc_elf_relax_section (bfd *abfd,
   /* No need to do anything with non-alloc or non-code sections.  */
   if ((isec->flags & SEC_ALLOC) == 0
       || (isec->flags & SEC_CODE) == 0
+      || (isec->flags & SEC_HAS_CONTENTS) == 0
       || (isec->flags & SEC_LINKER_CREATED) != 0
       || isec->size < 4)
     return true;

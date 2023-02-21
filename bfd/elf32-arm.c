@@ -7882,7 +7882,8 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
       if (sec->reloc_count == 0)
 	continue;
 
-      if ((sec->flags & SEC_EXCLUDE) != 0)
+      if ((sec->flags & SEC_EXCLUDE) != 0
+	  || (sec->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
 
       symtab_hdr = & elf_symtab_hdr (abfd);

@@ -984,7 +984,8 @@ elf_hppa_sort_unwind (bfd *abfd)
      Consider what happens if someone inept creates a linker script
      that puts unwind information in .text.  */
   s = bfd_get_section_by_name (abfd, ".PARISC.unwind");
-  if (s != NULL)
+  if (s != NULL && (s->flags & SEC_HAS_CONTENTS) != 0)
+
     {
       bfd_size_type size;
       bfd_byte *contents;

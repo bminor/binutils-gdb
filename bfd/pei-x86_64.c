@@ -555,6 +555,7 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
 
   /* Sanity checks.  */
   if (pdata_section == NULL
+      || (pdata_section->flags & SEC_HAS_CONTENTS) == 0
       || coff_section_data (abfd, pdata_section) == NULL
       || pei_section_data (abfd, pdata_section) == NULL)
     return true;
@@ -699,6 +700,7 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
     xdata_section = pex64_get_section_by_rva (abfd, xdata_base, ".text");
   /* Transfer xdata section into xdata array.  */
   if (!xdata_section
+      || (xdata_section->flags & SEC_HAS_CONTENTS) == 0
       || !bfd_malloc_and_get_section (abfd, xdata_section, &xdata))
     goto done;
 

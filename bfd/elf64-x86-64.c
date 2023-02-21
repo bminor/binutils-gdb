@@ -4967,7 +4967,9 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   for (j = 0; plts[j].name != NULL; j++)
     {
       plt = bfd_get_section_by_name (abfd, plts[j].name);
-      if (plt == NULL || plt->size == 0)
+      if (plt == NULL
+	  || plt->size == 0
+	  || (plt->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
 
       /* Get the PLT section contents.  */

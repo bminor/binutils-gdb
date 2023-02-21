@@ -1201,7 +1201,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
 
   sect = bfd_get_section_by_name (abfd, GNU_DEBUGLINK);
 
-  if (sect == NULL)
+  if (sect == NULL || (sect->flags & SEC_HAS_CONTENTS) == 0)
     return NULL;
 
   size = bfd_section_size (sect);
@@ -1289,7 +1289,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
 
   sect = bfd_get_section_by_name (abfd, GNU_DEBUGALTLINK);
 
-  if (sect == NULL)
+  if (sect == NULL || (sect->flags & SEC_HAS_CONTENTS) == 0)
     return NULL;
 
   size = bfd_section_size (sect);
@@ -1801,7 +1801,8 @@ get_build_id (bfd *abfd)
     return (struct bfd_build_id *) abfd->build_id;
 
   sect = bfd_get_section_by_name (abfd, ".note.gnu.build-id");
-  if (sect == NULL)
+  if (sect == NULL
+      || (sect->flags & SEC_HAS_CONTENTS) == 0)
     {
       bfd_set_error (bfd_error_no_debug_section);
       return NULL;

@@ -259,7 +259,7 @@ _bfd_xcoff_get_dynamic_symtab_upper_bound (bfd *abfd)
     }
 
   lsec = bfd_get_section_by_name (abfd, ".loader");
-  if (lsec == NULL)
+  if (lsec == NULL || (lsec->flags & SEC_HAS_CONTENTS) == 0)
     {
       bfd_set_error (bfd_error_no_symbols);
       return -1;
@@ -293,7 +293,7 @@ _bfd_xcoff_canonicalize_dynamic_symtab (bfd *abfd, asymbol **psyms)
     }
 
   lsec = bfd_get_section_by_name (abfd, ".loader");
-  if (lsec == NULL)
+  if (lsec == NULL || (lsec->flags & SEC_HAS_CONTENTS) == 0)
     {
       bfd_set_error (bfd_error_no_symbols);
       return -1;
@@ -378,7 +378,7 @@ _bfd_xcoff_get_dynamic_reloc_upper_bound (bfd *abfd)
     }
 
   lsec = bfd_get_section_by_name (abfd, ".loader");
-  if (lsec == NULL)
+  if (lsec == NULL || (lsec->flags & SEC_HAS_CONTENTS) == 0)
     {
       bfd_set_error (bfd_error_no_symbols);
       return -1;
@@ -413,7 +413,7 @@ _bfd_xcoff_canonicalize_dynamic_reloc (bfd *abfd,
     }
 
   lsec = bfd_get_section_by_name (abfd, ".loader");
-  if (lsec == NULL)
+  if (lsec == NULL || (lsec->flags & SEC_HAS_CONTENTS) == 0)
     {
       bfd_set_error (bfd_error_no_symbols);
       return -1;
@@ -904,7 +904,7 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
      o_snloader field in the a.out header, rather than grabbing the
      section by name.  */
   lsec = bfd_get_section_by_name (abfd, ".loader");
-  if (lsec == NULL)
+  if (lsec == NULL || (lsec->flags & SEC_HAS_CONTENTS) == 0)
     {
       _bfd_error_handler
 	(_("%pB: dynamic object with no .loader section"),
@@ -2373,7 +2373,7 @@ xcoff_link_check_dynamic_ar_symbols (bfd *abfd,
   *pneeded = false;
 
   lsec = bfd_get_section_by_name (abfd, ".loader");
-  if (lsec == NULL)
+  if (lsec == NULL || (lsec->flags & SEC_HAS_CONTENTS) == 0)
     /* There are no symbols, so don't try to include it.  */
     return true;
 
@@ -4128,7 +4128,9 @@ bfd_xcoff_build_dynamic_sections (bfd *output_bfd,
 	{
 	  /* Grab the contents of SUB's .debug section, if any.  */
 	  subdeb = bfd_get_section_by_name (sub, ".debug");
-	  if (subdeb != NULL && subdeb->size > 0)
+	  if (subdeb != NULL
+	      && subdeb->size != 0
+	      && (subdeb->flags & SEC_HAS_CONTENTS) != 0)
 	    {
 	      /* We use malloc and copy the names into the debug
 		 stringtab, rather than bfd_alloc, because I expect
