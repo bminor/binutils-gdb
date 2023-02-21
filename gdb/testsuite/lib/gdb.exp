@@ -9408,5 +9408,13 @@ proc have_syscall { name } {
     return [gdb_can_simple_compile have_syscall_$name $src object]
 }
 
+# Return 1 if compile flag FLAG is supported.
+
+proc have_compile_flag { flag } {
+    set src { void foo () {} }
+    return [gdb_can_simple_compile have_compile_flag_$flag $src object \
+		additional_flags=$flag]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
