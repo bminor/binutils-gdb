@@ -74,6 +74,7 @@
 #include "gdbsupport/common-debug.h"
 #include "gdbsupport/buildargv.h"
 #include "extension.h"
+#include "disasm.h"
 
 /* Prototypes for local functions */
 
@@ -1807,6 +1808,31 @@ displaced_step_prepare_throw (thread_info *tp)
   CORE_ADDR original_pc = regcache_read_pc (regcache);
   CORE_ADDR displaced_pc;
 
+  /* Display the instruction we are going to displaced step.  */
+  if (debug_displaced)
+    {
+      string_file tmp_stream;
+      int dislen = gdb_print_insn (gdbarch, original_pc, &tmp_stream,
+				   nullptr);
+
+      if (dislen > 0)
+	{
+	  gdb::byte_vector insn_buf (dislen);
+	  read_memory (original_pc, insn_buf.data (), insn_buf.size ());
+
+	  std::string insn_bytes
+	    = displaced_step_dump_bytes (insn_buf.data (), insn_buf.size ());
+
+	  displaced_debug_printf ("original insn %s: %s \t %s",
+				  paddress (gdbarch, original_pc),
+				  insn_bytes.c_str (),
+				  tmp_stream.string ().c_str ());
+	}
+      else
+	displaced_debug_printf ("original insn %s: invalid length: %d",
+				paddress (gdbarch, original_pc), dislen);
+    }
+
   displaced_step_prepare_status status
     = gdbarch_displaced_step_prepare (gdbarch, tp, displaced_pc);
 
@@ -1844,6 +1870,48 @@ displaced_step_prepare_throw (thread_info *tp)
 			  tp->ptid.to_string ().c_str (),
 			  paddress (gdbarch, original_pc),
 			  paddress (gdbarch, displaced_pc));
+
+  /* Display the new displaced instruction(s).  */
+  if (debug_displaced)
+    {
+      string_file tmp_stream;
+      CORE_ADDR addr = displaced_pc;
+
+      /* If displaced stepping is going to use h/w single step then we know
+	 that the replacement instruction can only be a single instruction,
+	 in that case set the end address at the next byte.
+
+	 Otherwise the displaced stepping copy instruction routine could
+	 have generated multiple instructions, and all we know is that they
+	 must fit within the LEN bytes of the buffer.  */
+      CORE_ADDR end
+	= addr + (gdbarch_displaced_step_hw_singlestep (gdbarch)
+		  ? 1 : gdbarch_displaced_step_buffer_length (gdbarch));
+
+      while (addr < end)
+	{
+	  int dislen = gdb_print_insn (gdbarch, addr, &tmp_stream, nullptr);
+	  if (dislen <= 0)
+	    {
+	      displaced_debug_printf
+		("replacement insn %s: invalid length: %d",
+		 paddress (gdbarch, addr), dislen);
+	      break;
+	    }
+
+	  gdb::byte_vector insn_buf (dislen);
+	  read_memory (addr, insn_buf.data (), insn_buf.size ());
+
+	  std::string insn_bytes
+	    = displaced_step_dump_bytes (insn_buf.data (), insn_buf.size ());
+	  std::string insn_str = tmp_stream.release ();
+	  displaced_debug_printf ("replacement insn %s: %s \t %s",
+				  paddress (gdbarch, addr),
+				  insn_bytes.c_str (),
+				  insn_str.c_str ());
+	  addr += dislen;
+	}
+    }
 
   return DISPLACED_STEP_PREPARE_STATUS_OK;
 }
@@ -2710,23 +2778,6 @@ resume_1 (enum gdb_signal sig)
 	 continue and we will hit it anyway.  */
       if (gdbarch_cannot_step_breakpoint (gdbarch))
 	step = false;
-    }
-
-  if (debug_displaced
-      && tp->control.trap_expected
-      && use_displaced_stepping (tp)
-      && !step_over_info_valid_p ())
-    {
-      struct regcache *resume_regcache = get_thread_regcache (tp);
-      struct gdbarch *resume_gdbarch = resume_regcache->arch ();
-      CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
-      gdb_byte buf[4];
-
-      read_memory (actual_pc, buf, sizeof (buf));
-      displaced_debug_printf ("run %s: %s",
-			      paddress (resume_gdbarch, actual_pc),
-			      displaced_step_dump_bytes
-				(buf, sizeof (buf)).c_str ());
     }
 
   if (tp->control.may_range_step)
