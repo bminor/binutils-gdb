@@ -1706,8 +1706,8 @@ SYNOPSIS
 DESCRIPTION
 	Takes a @var{BFD} and containing a .gnu_debuglink section @var{SECT}
 	and fills in the contents of the section to contain a link to the
-	specified @var{filename}.  The filename should be relative to the
-	current directory.
+	specified @var{filename}.  The filename should be absolute or
+	relative to the current directory.
 
 	<<TRUE>> is returned if all is ok.  Otherwise <<FALSE>> is returned
 	and bfd_error is set.
@@ -1733,12 +1733,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
       return false;
     }
 
-  /* Make sure that we can read the file.
-     XXX - Should we attempt to locate the debug info file using the same
-     algorithm as gdb ?  At the moment, since we are creating the
-     .gnu_debuglink section, we insist upon the user providing us with a
-     correct-for-section-creation-time path, but this need not conform to
-     the gdb location algorithm.  */
+  /* Open the linked file so that we can compute a CRC.  */
   handle = _bfd_real_fopen (filename, FOPEN_RB);
   if (handle == NULL)
     {

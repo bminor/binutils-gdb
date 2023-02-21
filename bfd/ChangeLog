@@ -1,3 +1,8 @@
+2023-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* opncls.c (bfd_fill_in_gnu_debuglink_section): Update
+	description.
+
 2023-02-17  Tom Tromey  <tom@tromey.com>
 
 	* doc/doc.str (FUNCTION): Call func.
