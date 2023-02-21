@@ -26,6 +26,11 @@ if { [istarget sh*-*-pe]
     return
 }
 
+if { [istarget alpha*-*-*vms*] } {
+    # relocatable link is not supported
+    return
+}
+
 file mkdir tmpdir/libtmp
 
 # Check that -l: works.  The first "test" just creates an object file
