@@ -8273,12 +8273,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (wordsize == 8)
     {
       set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
-      set_gdbarch_get_return_buf_addr (gdbarch,
-				       ppc64_sysv_get_return_buf_addr);
       set_gdbarch_update_call_site_pc (gdbarch, ppc64_update_call_site_pc);
     }
   else
     set_gdbarch_return_value (gdbarch, ppc_sysv_abi_return_value);
+  set_gdbarch_get_return_buf_addr (gdbarch, ppc_sysv_get_return_buf_addr);
 
   /* Set lr_frame_offset.  */
   if (wordsize == 8)
