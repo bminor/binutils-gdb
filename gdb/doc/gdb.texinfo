@@ -47844,40 +47844,190 @@ optional: @samp{lp_start}, @samp{lp_end}, and @samp{bta}.
 @subsection ARM Features
 @cindex target descriptions, ARM features
 
+@subsubsection Core register set for non-M-profile
+
 The @samp{org.gnu.gdb.arm.core} feature is required for non-M-profile
-ARM targets.
-It should contain registers @samp{r0} through @samp{r13}, @samp{sp},
-@samp{lr}, @samp{pc}, and @samp{cpsr}.
+ARM targets. It must contain the following registers:
+
+@itemize @minus
+@item
+@samp{r0} through @samp{r12}.  The general purpose registers.  They are 32 bits
+in size and have a type of @samp{uint32}.
+@item
+@samp{sp}, the stack pointer register, also known as @samp{r13}.  It is 32 bits
+in size and has a type of @samp{data_ptr}.
+@item
+@samp{lr}, the link register.  It is 32 bits in size.
+@item
+@samp{pc}, the program counter register.  It is 32 bit in size and of type
+@samp{code_ptr}.
+@item
+@samp{cpsr}, the current program status register containing all the status
+bits.  It is 32 bits in size.  Historically this register was hardwired to
+number 25, but debugging stubs that report XML do not need to use this number
+anymore.
+@end itemize
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection Core register set for M-profile
 
 For M-profile targets (e.g.@: Cortex-M3), the @samp{org.gnu.gdb.arm.core}
-feature is replaced by @samp{org.gnu.gdb.arm.m-profile}.  It should contain
-registers @samp{r0} through @samp{r13}, @samp{sp}, @samp{lr}, @samp{pc},
-and @samp{xpsr}.
+feature is replaced by @samp{org.gnu.gdb.arm.m-profile}, and it is a required
+feature.  It must contain the following registers:
 
-The @samp{org.gnu.gdb.arm.fpa} feature is optional.  If present, it
-should contain registers @samp{f0} through @samp{f7} and @samp{fps}.
+@itemize @minus
+@item
+@samp{r0} through @samp{r12}, the general purpose registers.  They have a size
+of 32 bits and a type of @samp{uint32}.
+@item
+@samp{sp}, the stack pointer register, also known as @samp{r13}.  It has a size
+of 32 bits and a type of @samp{data_ptr}.
+@item
+@samp{lr}, the link register.  It has a size of 32 bits.
+@item
+@samp{pc}, the program counter register.  It has a size of 32 bits and a type
+of @samp{code_ptr}.
+@item
+@samp{xpsr}, the program status register containing all the status
+bits.  It has a size of 32 bits.  Historically this register was hardwired to
+number 25, but debugging stubs that report XML do not need to use this number
+anymore.
+@end itemize
 
-The @samp{org.gnu.gdb.arm.m-profile-mve} feature is optional.  If present, it
-must contain register @samp{vpr}.
+Upon seeing this feature, @value{GDBN} will acknowledge that it is dealing
+with an M-profile target.  This means @value{GDBN} will use hooks and
+configurations that are meaningful to M-profiles.
 
-If the @samp{org.gnu.gdb.arm.m-profile-mve} feature is available, @value{GDBN}
-will synthesize the @samp{p0} pseudo register from @samp{vpr} contents.
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection FPA registers feature (obsolete)
+
+The @samp{org.gnu.gdb.arm.fpa} feature is obsolete and should not be
+advertised by debugging stubs anymore.  It used to advertise registers for
+the old FPA architecture that has long been discontinued in toolchains.
+
+It is kept in @value{GDBN} for backward compatibility purposes so older
+debugging stubs that don't support XML target descriptions still work
+correctly.  One such example is the KGDB debugging stub from
+Linux or BSD kernels.
+
+The description below is for historical purposes only.  This feature
+used to contain the following registers:
+
+@itemize @minus
+@item
+@samp{f0} through @samp{f8}.  The floating point registers.  They are 96 bits
+in size and of type @samp{arm_fpa_ext}.  @samp{f0} is pinned to register
+number 16.
+@item
+@samp{fps}, the status register.  It has a size of 32 bits.
+@end itemize
+
+@subsubsection M-profile Vector Extension (MVE)
+
+Also known as Helium, the M-profile Vector Extension is advertised via the
+optional @samp{org.gnu.gdb.arm.m-profile-mve} feature.
+
+It must contain the following:
+
+@itemize @minus
+@item
+@samp{vpr}, the vector predication status and control register.  It is 32 bits
+in size and has a custom flags type.  The flags type is laid out in a way that
+exposes the @samp{P0} field from bits 0 to 15, the @samp{MASK01} field from
+bits 16 to 19 and the @samp{MASK23} field from bits 20 to 23.
+
+Bits 24 through 31 are reserved.
+@end itemize
+
+When this feature is available, @value{GDBN} will synthesize the @samp{p0}
+pseudo-register from @samp{vpr} contents.
+
+This feature must only be advertised if the target is M-profile.  Advertising
+this feature for targets that are not M-profile may cause @value{GDBN} to
+assume the target is M-profile when it isn't.
 
 If the @samp{org.gnu.gdb.arm.vfp} feature is available alongside the
 @samp{org.gnu.gdb.arm.m-profile-mve} feature, @value{GDBN} will
-synthesize the @samp{q} pseudo registers from @samp{d} register
+synthesize the @samp{q} pseudo-registers from @samp{d} register
 contents.
 
-The @samp{org.gnu.gdb.xscale.iwmmxt} feature is optional.  If present,
-it should contain at least registers @samp{wR0} through @samp{wR15} and
-@samp{wCGR0} through @samp{wCGR3}.  The @samp{wCID}, @samp{wCon},
-@samp{wCSSF}, and @samp{wCASF} registers are optional.
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection XScale iwMMXt feature
+
+The XScale @samp{org.gnu.gdb.xscale.iwmmxt} feature is optional.  If present,
+it must contain the following:
+
+@itemize @minus
+@item
+@samp{wR0} through @samp{wR15}, registers with size 64 bits and a custom type
+@samp{iwmmxt_vec64i}.  @samp{iwmmxt_vec64i} is a union of four other
+types: @samp{uint64}, a 2-element vector of @samp{uint32}, a 4-element
+vector of @samp{uint16} and a 8-element vector of @samp{uint8}.
+@item
+@samp{wCGR0} through @samp{wCGR3}, registers with size 32 bits and
+type @samp{int}.
+@end itemize
+
+The following registers are optional:
+
+@itemize @minus
+@item
+@samp{wCID}, register with size of 32 bits and type @samp{int}.
+@item
+@samp{wCon}, register with size 32 bits and type @samp{int}.
+@item
+@samp{wCSSF}, register with size 32 bits and type @samp{int}.
+@item
+@samp{wCASF}, register with size 32 bit and type @samp{int}.
+@end itemize
+
+This feature should only be reported if the target is XScale.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection Vector Floating-Point (VFP) feature
 
 The @samp{org.gnu.gdb.arm.vfp} feature is optional.  If present, it
-should contain at least registers @samp{d0} through @samp{d15}.  If
-they are present, @samp{d16} through @samp{d31} should also be included.
-@value{GDBN} will synthesize the single-precision registers from
-halves of the double-precision registers.
+should contain one of two possible sets of values depending on whether
+VFP version 2 or VFP version 3 is in use.
+
+For VFP v2:
+
+@itemize @minus
+@item
+@samp{d0} through @samp{d15}.  The double-precision registers.  They are
+64 bits in size and have type @samp{ieee_double}.
+@item
+@samp{fpscr}, the floating-point status and control register.  It has a size
+of 32 bits and a type of @samp{int}.
+@end itemize
+
+For VFP v3:
+
+@itemize @minus
+@item
+@samp{d0} through @samp{d31}.  The double-precision registers.  They are
+64 bits in size and have type @samp{ieee_double}.
+@item
+@samp{fpscr}, the floating-point status and control register.  It has a size
+of 32 bits and a type of @samp{int}.
+@end itemize
+
+If this feature is available, @value{GDBN} will synthesize the
+single-precision floating-point registers from halves of the double-precision
+registers as pseudo-registers.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection NEON architecture feature
 
 The @samp{org.gnu.gdb.arm.neon} feature is optional.  It does not
 need to contain registers; it instructs @value{GDBN} to display the
@@ -47886,11 +48036,96 @@ quad-precision registers from pairs of double-precision registers.
 If this feature is present, @samp{org.gnu.gdb.arm.vfp} must also
 be present and include 32 double-precision registers.
 
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection M-profile Pointer Authentication and Branch Target Identification feature
+
 The @samp{org.gnu.gdb.arm.m-profile-pacbti} feature is optional, and
-acknowledges support for the ARMv8.1-m PACBTI extensions.  @value{GDBN}
-will track return address signing states and will decorate backtraces using
-the [PAC] marker, similar to AArch64's PAC extension.
+acknowledges support for the ARMv8.1-m PACBTI extensions.
+
+This feature doesn't contain any required registers, and it only serves as a
+hint to @value{GDBN} that the debugging stub supports the ARMv8.1-m PACBTI
+extensions.
+
+When @value{GDBN} sees this feature, it will track return address signing
+states and will decorate backtraces using the [PAC] marker, similar to
+AArch64's PAC extension.
 @xref{AArch64 PAC}.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection M-profile system registers feature
+
+The @samp{org.gnu.gdb.arm.m-system} optional feature was introduced as a way to
+inform @value{GDBN} about additional system registers.
+
+At the moment this feature must contain the following:
+
+@itemize @minus
+@item
+@samp{msp}, the main stack pointer register.  It is 32 bits in size with
+type @samp{data_ptr}.
+@item
+@samp{psp}, the process stack pointer register.  It is 32 bits in size with
+type @samp{data_ptr}.
+@end itemize
+
+This feature must only be advertised for M-profile targets.  When @value{GDBN}
+sees this feature, it will attempt to track the values of @samp{msp} and
+@samp{psp} across frames.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection M-profile Security Extensions feature
+
+The @samp{org.gnu.gdb.arm.secext} optional feature was introduced so
+@value{GDBN} could better support the switching of stack pointers and
+secure states in the Security Extensions.
+
+At the moment this feature must contain the following:
+
+@itemize @minus
+@item
+@samp{msp_ns}, the main stack pointer register (non-secure state).  It is
+32 bits in size with type @samp{data_ptr}.
+@item
+@samp{psp_ns}, the process stack pointer register (non-secure state).  It is
+32 bits in size with type @samp{data_ptr}.
+@item
+@samp{msp_s}, the main stack pointer register (secure state).  It is 32 bits
+in size with type @samp{data_ptr}.
+@item
+@samp{psp_s}, the process stack pointer register (secure state).  It is 32 bits
+in size with type @samp{data_ptr}.
+@end itemize
+
+When @value{GDBN} sees this feature, it will attempt to track the values of
+all 4 stack pointers across secure state transitions, potentially improving
+unwinding when applications switch between security states.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection TLS registers feature
+
+The optional @samp{org.gnu.gdb.arm.tls} feature contains TLS registers.
+
+Currently it contains the following:
+
+@itemize @minus
+@item
+@samp{tpidruro}, the user read-only thread id register.  It is 32 bits in size
+and has type @samp{data_ptr}.
+@end itemize
+
+At the moment @value{GDBN} looks for this feature, but doesn't do anything
+with it other than displaying it.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
 
 @node i386 Features
 @subsection i386 Features
