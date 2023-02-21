@@ -4508,7 +4508,7 @@ print_section_stabs (bfd *abfd,
 
      We start the index at -1 because there is a dummy symbol on
      the front of stabs-in-{coff,elf} sections that supplies sizes.  */
-  for (i = -1; stabp <= stabs_end - STABSIZE; stabp += STABSIZE, i++)
+  for (i = -1; (size_t) (stabs_end - stabp) >= STABSIZE; stabp += STABSIZE, i++)
     {
       const char *name;
       unsigned long strx;
