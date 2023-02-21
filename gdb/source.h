@@ -197,10 +197,6 @@ private:
 extern void print_source_lines (struct symtab *s, source_lines_range r,
 				print_source_lines_flags flags);
 
-/* Forget line positions and file names for the symtabs in a
-   particular objfile.  */
-extern void forget_cached_source_info_for_objfile (struct objfile *);
-
 /* Forget what we learned about line positions in source files, and
    which directories contain them; must check again now since files
    may be found in a different directory now.  */

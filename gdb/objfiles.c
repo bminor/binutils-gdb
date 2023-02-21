@@ -534,7 +534,7 @@ objfile::~objfile ()
 
   /* It still may reference data modules have associated with the objfile and
      the symbol file data.  */
-  forget_cached_source_info_for_objfile (this);
+  forget_cached_source_info ();
 
   breakpoint_free_objfile (this);
   btrace_free_objfile (this);

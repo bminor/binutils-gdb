@@ -155,6 +155,18 @@ objfile::forget_cached_source_info ()
     gdb_printf (gdb_stdlog, "qf->forget_cached_source_info (%s)\n",
 		objfile_debug_name (this));
 
+  for (compunit_symtab *cu : compunits ())
+    {
+      for (symtab *s : cu->filetabs ())
+	{
+	  if (s->fullname != NULL)
+	    {
+	      xfree (s->fullname);
+	      s->fullname = NULL;
+	    }
+	}
+    }
+
   for (const auto &iter : qf_require_partial_symbols ())
     iter->forget_cached_source_info (this);
 }

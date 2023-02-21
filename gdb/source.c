@@ -421,33 +421,11 @@ show_directories_command (struct ui_file *file, int from_tty,
 /* See source.h.  */
 
 void
-forget_cached_source_info_for_objfile (struct objfile *objfile)
-{
-  for (compunit_symtab *cu : objfile->compunits ())
-    {
-      for (symtab *s : cu->filetabs ())
-	{
-	  if (s->fullname != NULL)
-	    {
-	      xfree (s->fullname);
-	      s->fullname = NULL;
-	    }
-	}
-    }
-
-  objfile->forget_cached_source_info ();
-}
-
-/* See source.h.  */
-
-void
 forget_cached_source_info (void)
 {
   for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
-      {
-	forget_cached_source_info_for_objfile (objfile);
-      }
+      objfile->forget_cached_source_info ();
 
   g_source_cache.clear ();
   last_source_visited = NULL;
