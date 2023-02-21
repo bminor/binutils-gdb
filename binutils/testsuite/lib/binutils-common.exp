@@ -687,6 +687,22 @@ if ![string length [info proc prune_warnings]] {
     }
 }
 
+# prune_dump_output OUTPUT
+#
+# Clean up the output from system specific or unwanted characters.
+# This allows to simplify the regexp inside dump tests.
+proc prune_dump_output { output } {
+    if [ishost "*-*-mingw*"] {
+	# Prune DOS drive letter from an absolute path if it appears
+	# at the beginning of a line.
+	regsub -all {(^|\n)[[:alpha:]]:(/|\\)} $output "\\1\\2" output
+    }
+
+    # Prune last end of line.
+    regsub "\n$" $output "" output
+    return $output
+}
+
 # run_dump_test FILE (optional:) EXTRA_OPTIONS
 #
 # Assemble a .s file, then run some utility on it and check the output.
@@ -1450,7 +1466,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	}
 
-	regsub "\n$" $comp_output "" comp_output
+	set comp_output [prune_dump_output $comp_output]
 	if { $cmdret != 0 || $comp_output != "" || $want_out(source) != "" } {
 	    set exitstat "succeeded"
 	    if { $cmdret != 0 } { set exitstat "failed" }
