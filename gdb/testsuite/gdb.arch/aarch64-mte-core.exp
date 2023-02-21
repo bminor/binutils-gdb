@@ -166,6 +166,8 @@ proc test_mode { mode } {
 
 require is_aarch64_target
 
+require {have_compile_flag -march=armv8.5-a+memtag}
+
 # Run tests
 foreach_with_prefix mode {"sync" "async"} {
     test_mode $mode
