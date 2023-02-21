@@ -61,17 +61,18 @@ proc section_check {} {
     # Make sure that we got some output from the linker
     if [string match "" $exec_output] then {
 	fail $test
-    }
-
-    # Now remove our expected error message
-    regsub -all ".*: section .data .* overlaps section .text .*" $exec_output "" exec_output
-
-    # And check to see if anything else, (unexpected) was left
-    if [string match "" $exec_output] then {
-	pass $test
     } else {
-	verbose -log "Unexpected linker message(s): $exec_output"
-	fail $test
+
+	# Now remove our expected error message
+	regsub -all ".*: section .data .* overlaps section .text .*" $exec_output "" exec_output
+
+	# And check to see if anything else, (unexpected) was left
+	if [string match "" $exec_output] then {
+	    pass $test
+	} else {
+	    verbose -log "Unexpected linker message(s): $exec_output"
+	    fail $test
+	}
     }
 }
 
