@@ -23,6 +23,8 @@ require supports_reverse
 
 standard_testfile
 
+require {expr [have_syscall time]}
+
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }

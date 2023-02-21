@@ -9397,5 +9397,16 @@ gdb_caching_proc linux_kernel_version {
     return [list $v1 $v2 $v3]
 }
 
+# Return 1 if syscall NAME is supported.
+
+proc have_syscall { name } {
+    set src \
+	[list \
+	     "#include <sys/syscall.h>" \
+	     "int var = SYS_$name;"]
+    set src [join $src "\n"]
+    return [gdb_can_simple_compile have_syscall_$name $src object]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
