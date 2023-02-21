@@ -47778,20 +47778,214 @@ registers using the capitalization used in the description.
 @subsection AArch64 Features
 @cindex target descriptions, AArch64 features
 
+@subsubsection AArch64 core registers feature
+
 The @samp{org.gnu.gdb.aarch64.core} feature is required for AArch64
-targets.  It should contain registers @samp{x0} through @samp{x30},
-@samp{sp}, @samp{pc}, and @samp{cpsr}.
+targets.  It must contain the following:
+
+@itemize @minus
+@item
+@samp{x0} through @samp{x30}, the general purpose registers, with size of
+64 bits.  Register @samp{x30} is also known as the @dfn{link register},
+or @samp{lr}.
+@item
+@samp{sp}, the stack pointer register or @samp{x31}.  It is 64 bits in size and
+has a type of @samp{data_ptr}.
+@item
+@samp{pc}, the program counter register.  It is 64 bits in size and has a type
+of @samp{code_ptr}.
+@item
+@samp{cpsr}, the current program status register.  It is 32 bits in size
+and has a custom flags type.
+@end itemize
+
+The semantics of the individual flags and fields in @samp{cpsr} can change as
+new architectural features are added.  The current layout can be found in the
+aarch64-core.xml file.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection AArch64 floating-point registers feature
 
 The @samp{org.gnu.gdb.aarch64.fpu} feature is optional.  If present,
-it should contain registers @samp{v0} through @samp{v31}, @samp{fpsr},
-and @samp{fpcr}.
+it must contain the following registers:
+
+@itemize @minus
+@item
+@samp{v0} through @samp{v31}, the vector registers with size of 128 bits.  The
+type is a custom vector type.
+@item
+@samp{fpsr}, the floating-point status register.  It is 32 bits in size and has
+a custom flags type.
+@item
+@samp{fpcr}, the floating-point control register.  It is 32 bits in size and has
+a custom flags type.
+@end itemize
+
+The semantics of the individual flags and fields in @samp{fpsr} and @samp{fpcr}
+can change as new architectural features are added.
+
+The types for the vector registers, @samp{fpsr} and @samp{fpcr} registers can
+be found in the aarch64-fpu.xml file.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection AArch64 SVE registers feature
 
 The @samp{org.gnu.gdb.aarch64.sve} feature is optional.  If present,
-it should contain registers @samp{z0} through @samp{z31}, @samp{p0}
-through @samp{p15}, @samp{ffr} and @samp{vg}.
+it means the target supports the Scalable Vector Extension and must contain
+the following registers:
 
-The @samp{org.gnu.gdb.aarch64.pauth} feature is optional.  If present,
-it should contain registers @samp{pauth_dmask} and @samp{pauth_cmask}.
+@itemize @minus
+@item
+@samp{z0} through @samp{z31}, the scalable vector registers.  Their sizes are
+variable and a multiple of 128 bits up to a maximum of 2048 bit.  Their type is
+a custom union type that helps visualize different sizes of sub-vectors.
+@item
+@samp{fpsr}, the floating-point status register.  It is 32 bits in size and has
+a custom flags type.
+@item
+@samp{fpcr}, the floating-point control register.  It is 32 bits in size and has
+a custom flags type.
+@item
+@samp{p0} through @samp{p15}, the predicate registers.  Their sizes are
+variable, based on the current vector length, and a multiple of
+16 bits.  Their types are a custom union to help visualize sub-elements.
+@item
+@samp{ffr}, the First Fault register.  It has a variable size based on the
+current vector length and is a multiple of 16 bits.  The type is the same as
+the predicate registers.
+@item
+@samp{vg}, the vector granule.  It represents the number of 64 bits chunks in
+a @samp{z} register.  It is closely associated with the current vector
+length.  It has a type of @samp{int}.
+@end itemize
+
+When @value{GDBN} sees the SVE feature, it will assume the Scalable Vector
+Extension is supported, and will adjust the sizes of the @samp{z}, @samp{p}
+and @samp{ffr} registers accordingly, based on the value of @samp{vg}.
+
+@value{GDBN} will also create pseudo-registers equivalent to the @samp{v}
+vector registers from the @samp{org.gnu.gdb.aarch64.fpu} feature.
+
+The first 128 bits of the @samp{z} registers overlap the 128 bits of the
+@samp{v} registers, so changing one will trigger a change to the other.
+
+For the types of the @samp{z}, @samp{p} and @samp{ffr} registers, please
+check the aarch64-sve.c file.  No XML file is available for this feature
+because it is dynamically generated based on the current vector length.
+
+The semantics of the individual flags and fields in @samp{fpsr} and @samp{fpcr}
+can change as new architectural features are added.
+
+The types for the @samp{fpsr} and @samp{fpcr} registers can be found in the
+aarch64-sve.c file, and should match what is described in aarch64-fpu.xml.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection AArch64 Pointer Authentication registers feature
+
+The @samp{org.gnu.gdb.aarch64.pauth} optional feature was introduced so
+@value{GDBN} could detect support for the Pointer Authentication
+extension.  If present, it must contain one of two possible register sets.
+
+Pointer Authentication masks for user-mode:
+
+@itemize @minus
+@item
+@samp{pauth_dmask}, the user-mode pointer authentication mask for data
+pointers.  It is 64 bits in size.
+@item
+@samp{pauth_cmask}, the user-mode pointer authentication mask for code
+pointers.  It is 64 bits in size.
+@end itemize
+
+Pointer Authentication masks for user-mode and kernel-mode:
+
+@itemize @minus
+@item
+@samp{pauth_dmask}, the user-mode pointer authentication mask for data
+pointers.  It is 64 bits in size.
+@item
+@samp{pauth_cmask}, the user-mode pointer authentication mask for code
+pointers.  It is 64 bits in size.
+@item
+@samp{pauth_dmask_high}, the kernel-mode pointer authentication mask for
+data pointers.  It is 64 bits in size.
+@item
+@samp{pauth_cmask_high}, the kernel-mode pointer authentication mask for
+code pointers.  It is 64 bits in size.
+@end itemize
+
+If @value{GDBN} sees any of the two sets of registers in this feature, it will
+assume the target is capable of signing pointers.  If so, @value{GDBN} will
+decorate backtraces with a @samp{[PAC]} marker alongside a function that
+has a signed link register value that needs to be unmasked/decoded.
+
+@value{GDBN} will also use the masks to remove non-address bits from pointers.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection AArch64 TLS registers feature
+
+The @samp{org.gnu.gdb.aarch64.tls} optional feature was introduced to expose
+the TLS registers to @value{GDBN}.  If present, it must contain either one
+of the following register sets.
+
+Only @samp{tpidr}:
+
+@itemize @minus
+@item
+@samp{tpidr}, the software thread id register.  It is 64 bits in size and has a
+type of @samp{data_ptr}.
+@end itemize
+
+Both @samp{tpidr} and @samp{tpidr2}.
+
+@itemize @minus
+@item
+@samp{tpidr}, the software thread id register.  It is 64 bits in size and has a
+type of @samp{data_ptr}.
+@item
+@samp{tpidr2}, the second software thread id register.  It is 64 bits in size
+and has a type of @samp{data_ptr}.  It may be used in the future alongside
+the Scalable Matrix Extension for a lazy restore scheme.
+@end itemize
+
+If @value{GDBN} sees this feature, it will attempt to find one of the
+variations of the register set.  If @samp{tpidr2} is available,
+@value{GDBN} may act on it to display additional data in the future.
+
+There is no XML for this feature as the presence of @samp{tpidr2} is
+determined dynamically at runtime.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection AArch64 MTE registers feature
+
+The @samp{org.gnu.gdb.aarch64.mte} optional feature was introduced so
+@value{GDBN} could detect support for the Memory Tagging Extension and
+control memory tagging settings.  If present, this feature must have the
+following register:
+
+@itemize @minus
+@item
+@samp{tag_ctl}, the tag control register.  It is 64 bits in size and has a type
+of @samp{uint64}.
+@end itemize
+
+Memory Tagging detection is done via a runtime check though, so the presence
+of this feature and register is not enough to enable memory tagging support.
+
+This restriction may be lifted in the future.
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
 
 @node ARC Features
 @subsection ARC Features
