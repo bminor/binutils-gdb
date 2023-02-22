@@ -623,7 +623,7 @@ adjust_all_relocations (bfd *abfd,
 
   /* Now fix the stab relocations.  */
   stab = bfd_get_section_by_name (abfd, ".stab");
-  if (stab)
+  if (stab && stab->reloc_count != 0)
     {
       bfd_byte *stabcontents, *stabend, *stabp;
       bfd_size_type stab_size = stab->rawsize ? stab->rawsize : stab->size;
