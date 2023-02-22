@@ -16,10 +16,7 @@
 # Check that GDB isn't messing the SIGCHLD mask while creating an
 # inferior.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping sigchld.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 standard_testfile .c
 

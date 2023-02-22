@@ -19,10 +19,7 @@
 # Some targets can't call functions, so don't even bother with this
 # test.
 
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "this target can not call functions"
-    return
-}
+require {!target_info exists gdb,cannot_call_functions}
 
 standard_testfile .c
 

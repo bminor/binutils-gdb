@@ -17,6 +17,9 @@
 
 require allow_fortran_tests
 
+# This test relies on output from the inferior.
+require {!target_info exists gdb,noinferiorio}
+
 standard_testfile ".F90"
 load_lib fortran.exp
 
@@ -30,11 +33,6 @@ gdb_test_no_output "set auto-solib-add off"
 
 if ![fortran_runto_main] {
     return -1
-}
-
-# This test relies on output from the inferior.
-if [target_info exists gdb,noinferiorio] {
-   return 0
 }
 
 # Avoid libc symbols, in particular the 'array' type.

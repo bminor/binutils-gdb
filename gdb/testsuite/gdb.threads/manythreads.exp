@@ -17,10 +17,7 @@
 # This file was written by Jeff Johnston. (jjohnstn@redhat.com)
 
 # This test requires sending ^C to interrupt the running target.
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping manythreads.exp because of nointerrupts."
-    return
-}
+require {!target_info exists gdb,nointerrupts}
 
 standard_testfile
 

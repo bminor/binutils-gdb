@@ -18,10 +18,7 @@
 
 standard_testfile
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping ${testfile}.exp because of nosignals."
-    return -1
-}
+require {!target_info exists gdb,nosignals}
 
 if {[build_executable "failed to prepare" $testfile $srcfile \
 	 {debug pthreads}]} {

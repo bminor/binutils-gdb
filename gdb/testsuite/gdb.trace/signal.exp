@@ -28,10 +28,7 @@
 
 load_lib "trace-support.exp"
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping signal.exp because of nosignals."
-    return -1
-}
+require {!target_info exists gdb,nosignals}
 
 standard_testfile
 

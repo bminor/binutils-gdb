@@ -21,10 +21,7 @@
 # This test confirms that we can inspect signal info using the
 # $_siginfo convenience variable.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping siginfo-obj.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 require supports_get_siginfo_type
 

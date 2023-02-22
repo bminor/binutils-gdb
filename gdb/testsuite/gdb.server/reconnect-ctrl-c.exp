@@ -21,10 +21,7 @@ load_lib gdbserver-support.exp
 
 require allow_gdbserver_tests
 
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping reconnect-ctrl-c.exp because of nointerrupts."
-    return
-}
+require {!target_info exists gdb,nointerrupts}
 
 standard_testfile
 

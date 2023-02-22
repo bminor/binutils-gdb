@@ -33,19 +33,13 @@
 
 require allow_cplus_tests
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping gdb2495.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 standard_testfile .cc
 
 # Some targets can't do function calls, so don't even bother with this
 # test.
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "this target can not call functions"
-    return
-}
+require {!target_info exists gdb,cannot_call_functions}
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1

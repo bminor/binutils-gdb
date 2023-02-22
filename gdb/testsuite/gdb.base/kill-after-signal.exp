@@ -17,10 +17,7 @@ standard_testfile .c
 
 require can_single_step_to_signal_handler
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping kill-after-signal.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 if [prepare_for_testing "failed to prepare" ${testfile}] {
     return -1

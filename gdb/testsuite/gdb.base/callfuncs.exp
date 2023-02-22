@@ -27,10 +27,7 @@ if [support_complex_tests] {
 
 # Some targets can't do function calls, so don't even bother with this
 # test.
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "this target can not call functions"
-    return
-}
+require {!target_info exists gdb,cannot_call_functions}
 
 set allow_float_test [allow_float_test]
 

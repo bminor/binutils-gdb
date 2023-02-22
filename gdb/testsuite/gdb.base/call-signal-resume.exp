@@ -20,10 +20,11 @@
 # 2) Inferior is stopped at a signal.  Upon resumption it should continue
 #    with that signal, regardless of whatever the hand-called function did.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping call-signal-resume.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
+
+# Some targets can't do function calls, so don't even bother with this
+# test.
+require {!target_info exists gdb,cannot_call_functions}
 
 
 standard_testfile call-signals.c
@@ -31,13 +32,6 @@ standard_testfile call-signals.c
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested "failed to compile"
      return -1
-}
-
-# Some targets can't do function calls, so don't even bother with this
-# test.
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "this target can not call functions"
-    return
 }
 
 proc get_dummy_frame_number { } {

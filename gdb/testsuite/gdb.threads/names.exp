@@ -16,9 +16,7 @@
 # Verify that thread name features work properly (e.g. they show up in info
 # threads).
 
-if [target_info exists gdb,no_thread_names] {
-    return
-}
+require {!target_info exists gdb,no_thread_names}
 
 standard_testfile
 

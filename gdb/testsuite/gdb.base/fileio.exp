@@ -15,10 +15,7 @@
 
 # This file was written by Corinna Vinschen <vinschen@redhat.com>
 
-if [target_info exists gdb,nofileio] {
-    verbose "Skipping fileio.exp because of no fileio capabilities."
-    return
-}
+require {!target_info exists gdb,nofileio}
 
 
 standard_testfile

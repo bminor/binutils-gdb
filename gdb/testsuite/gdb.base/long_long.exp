@@ -18,9 +18,7 @@
 # long_long.exp   Test printing of 64-bit things in 32-bit gdb.
 #                 Also test differnet kinds of formats.
 #
-if [target_info exists no_long_long] {
-    return 0
-}
+require {!target_info exists no_long_long}
 
 standard_testfile .c
 

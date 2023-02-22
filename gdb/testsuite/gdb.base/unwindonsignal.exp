@@ -13,18 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping unwindonsignal.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 
 # Some targets can't do function calls, so don't even bother with this
 # test.
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "this target can not call functions"
-    return
-}
+require {!target_info exists gdb,cannot_call_functions}
 
 standard_testfile
 

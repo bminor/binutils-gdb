@@ -19,16 +19,10 @@
 # the terminal (between the stop and the re-resume), the resulting
 # "Quit" doesn't mess up the debug session.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 # This test requires sending ^C to interrupt the running target.
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping because of nointerrupts."
-    return
-}
+require {!target_info exists gdb,nointerrupts}
 
 standard_testfile
 

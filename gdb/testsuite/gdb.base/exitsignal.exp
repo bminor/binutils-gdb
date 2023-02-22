@@ -21,10 +21,7 @@
 # killed by a signal.  However, if it was killed by an uncaught
 # signal, then there is no way for it to have exited.
 
-if { [target_info exists gdb,nosignals] } {
-    verbose "Skipping exitsignal.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 standard_testfile segv.c
 

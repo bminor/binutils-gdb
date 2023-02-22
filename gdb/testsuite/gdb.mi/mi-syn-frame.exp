@@ -16,10 +16,7 @@
 # Test MI output with synthetic frames on the stack (call dummies,
 # signal handlers).
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping mi-syn-frame.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

@@ -17,10 +17,7 @@
 
 standard_testfile
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping ${testfile}.exp because of nosignals."
-    return -1
-}
+require {!target_info exists gdb,nosignals}
 
 if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}] {
     return -1

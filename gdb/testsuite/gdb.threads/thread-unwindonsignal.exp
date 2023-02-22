@@ -20,15 +20,12 @@ set NR_THREADS 4
 
 standard_testfile interrupted-hand-call.c
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "additional_flags=-DNR_THREADS=$NR_THREADS"]] != "" } {
-    return -1
-}
-
 # Some targets can't do function calls, so don't even bother with this
 # test.
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "this target can not call functions"
-    return
+require {!target_info exists gdb,cannot_call_functions}
+
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "additional_flags=-DNR_THREADS=$NR_THREADS"]] != "" } {
+    return -1
 }
 
 clean_restart ${binfile}

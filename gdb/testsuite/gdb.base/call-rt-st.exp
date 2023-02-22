@@ -19,20 +19,15 @@
 # corresponding source file: call_return_struct.c
 
 
-
+# Some targets can't do function calls, so don't even bother with this
+# test.
+require {!target_info exists gdb,cannot_call_functions}
 
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
     untested "failed to compile"
     return -1
-}
-
-# Some targets can't do function calls, so don't even bother with this
-# test.
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "this target can not call functions"
-    return
 }
 
 set allow_float_test [allow_float_test]

@@ -13,16 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping catch-signal.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 # This test requires sending ^C to interrupt the running target.
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping random-signal.exp because of nointerrupts."
-    return
-}
+require {!target_info exists gdb,nointerrupts}
 
 standard_testfile
 

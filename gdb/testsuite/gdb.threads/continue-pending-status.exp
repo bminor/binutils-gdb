@@ -17,10 +17,7 @@
 # thread, then switching to a thread that has a status pending and
 # continuing.
 
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping continue-pending-status.exp because of nointerrupts."
-    return
-}
+require {!target_info exists gdb,nointerrupts}
 
 standard_testfile
 

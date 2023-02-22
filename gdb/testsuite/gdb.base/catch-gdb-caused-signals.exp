@@ -23,10 +23,7 @@ standard_testfile
 
 # Some targets can't call functions, so don't even bother with this
 # test.
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "cannot call functions"
-    return
-}
+require {!target_info exists gdb,cannot_call_functions}
 
 set dp_location [gdb_get_line_number "set dprintf here"]
 set bp_location [gdb_get_line_number "set breakpoint here"]

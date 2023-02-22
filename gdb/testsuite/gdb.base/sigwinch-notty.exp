@@ -17,10 +17,7 @@
 # without readline, and, it receives a SIGWINCH.  Regression test for
 # PR gdb/26056.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping $subdir/$gdb_test_file_name.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 # The testfile relies on "run" from the command line, so only works
 # with "target native".

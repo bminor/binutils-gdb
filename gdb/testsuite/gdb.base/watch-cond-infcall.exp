@@ -26,10 +26,7 @@ set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 standard_testfile
 
-if [target_info exists gdb,cannot_call_functions] {
-    unsupported "can not call functions"
-    return
-}
+require {!target_info exists gdb,cannot_call_functions}
 
 if { [build_executable ${testfile}.exp ${testfile} ${testfile}.c {debug}] } {
     untested "failed to compile"

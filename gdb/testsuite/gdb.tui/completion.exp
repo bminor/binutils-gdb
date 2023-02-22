@@ -19,9 +19,7 @@ tuiterm_env
 
 clean_restart
 
-if {[target_info exists gdb,nointerrupts]} {
-    return
-}
+require {!target_info exists gdb,nointerrupts}
 
 gdb_test_no_output "set max-completions unlimited"
 

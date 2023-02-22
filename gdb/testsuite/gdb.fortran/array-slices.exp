@@ -36,9 +36,7 @@
 require allow_fortran_tests
 
 # This test relies on output from the inferior.
-if [target_info exists gdb,noinferiorio] {
-    return -1
-}
+require {!target_info exists gdb,noinferiorio}
 
 standard_testfile ".f90"
 load_lib fortran.exp

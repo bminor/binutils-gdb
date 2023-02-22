@@ -23,10 +23,7 @@
 # alternative sa_sigaction signal handler, and second that GDB can
 # nexti/stepi out of such a handler.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping siginfo.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 
 standard_testfile

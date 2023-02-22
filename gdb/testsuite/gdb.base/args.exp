@@ -16,9 +16,7 @@
 # This is a test for the gdb invocation option --args.
 
 # Skip test if target does not support argument passing.
-if [target_info exists noargs] {
-    return
-}
+require {!target_info exists noargs}
 
 # This test requires starting new inferior processes, skip it if the target
 # board is a stub.

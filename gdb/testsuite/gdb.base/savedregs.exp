@@ -24,10 +24,7 @@
 # instructions executed to perform the call may affect "info frame"
 # output.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping savedregs.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 
 standard_testfile .c

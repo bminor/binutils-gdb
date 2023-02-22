@@ -21,10 +21,7 @@
 # This test runs the program up to the signal handler, and then
 # attempts to step/next out of the handler and back into main.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping sigstep.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 
 standard_testfile

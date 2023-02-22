@@ -19,10 +19,7 @@
 
 load_lib selftest-support.exp
 
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping because of no inferiorio capabilities."
-    return
-}
+require {!target_info exists gdb,noinferiorio}
 
 require allow_python_tests
 

@@ -28,10 +28,7 @@
 #
 #  4. The breakpoint is never reached.
 
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping because of noinferiorio."
-    return
-}
+require {!target_info exists gdb,noinferiorio}
 
 standard_testfile
 

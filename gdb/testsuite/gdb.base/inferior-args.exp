@@ -16,10 +16,7 @@
 # Test running an inferior with arguments.
 
 # This does not work on boards that don't support inferior arguments.
-if {[target_info exists noargs]} {
-    verbose "skipping gdb.base/inferior-args.exp because of noargs"
-    return
-}
+require {!target_info exists noargs}
 
 standard_testfile .c
 

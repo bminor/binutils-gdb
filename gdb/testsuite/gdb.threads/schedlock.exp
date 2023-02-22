@@ -20,10 +20,7 @@
 
 # This test requires sending ^C to interrupt the running target.
 
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping schedlock.exp because of nointerrupts."
-    return
-}
+require {!target_info exists gdb,nointerrupts}
 
 standard_testfile
 

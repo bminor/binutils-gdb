@@ -27,10 +27,7 @@
 
 # This also tests backtrace/gdb1476.
 
-if [target_info exists gdb,nosignals] {
-    verbose "Skipping signull.exp because of nosignals."
-    return
-}
+require {!target_info exists gdb,nosignals}
 
 
 standard_testfile .c
