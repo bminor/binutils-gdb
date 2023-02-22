@@ -618,5 +618,7 @@ gdbpy_initialize_tui ()
 void
 gdbpy_finalize_tui ()
 {
+#ifdef TUI
   gdbpy_tui_window_maker::invalidate_all ();
+#endif	/* TUI */
 }
