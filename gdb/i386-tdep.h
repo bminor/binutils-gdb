@@ -448,7 +448,7 @@ extern displaced_step_copy_insn_closure_up i386_displaced_step_copy_insn
    struct regcache *regs);
 extern void i386_displaced_step_fixup
   (struct gdbarch *gdbarch, displaced_step_copy_insn_closure *closure,
-   CORE_ADDR from, CORE_ADDR to, regcache *regs);
+   CORE_ADDR from, CORE_ADDR to, regcache *regs, bool completed_p);
 
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);

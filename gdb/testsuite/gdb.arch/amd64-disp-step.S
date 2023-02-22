@@ -23,6 +23,10 @@
 main:
 	nop
 
+	callq	setup_signal_handler
+
+	nop
+
 /***********************************************/
 
 /* test call/ret */
@@ -135,12 +139,23 @@ test_rip_rdi:
 test_rip_rdi_end:
 	nop
 
+	.global test_jmp
+test_jmp:
+	jmpq 	*jmp_dest(%rip)
+	nop
+	.global test_jmp_end
+test_jmp_end:
+	nop
+
 	/* skip over test data */
 	jmp done
 
 /* test rip-relative data */
 
 answer:	.8byte 42
+
+jmp_dest:
+	.8byte	test_jmp_end
 
 /***********************************************/
 

@@ -263,22 +263,13 @@ displaced_step_buffers::finish (gdbarch *arch, thread_info *thread,
   bool instruction_executed_successfully
     = displaced_step_instruction_executed_successfully (arch, status);
 
-  if (instruction_executed_successfully)
-    {
-      gdbarch_displaced_step_fixup (arch, copy_insn_closure.get (),
-				    buffer->original_pc,
-				    buffer->addr, rc);
-      return DISPLACED_STEP_FINISH_STATUS_OK;
-    }
-  else
-    {
-      /* Since the instruction didn't complete, all we can do is relocate the
-	 PC.  */
-      CORE_ADDR pc = regcache_read_pc (rc);
-      pc = buffer->original_pc + (pc - buffer->addr);
-      regcache_write_pc (rc, pc);
-      return DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED;
-    }
+  gdbarch_displaced_step_fixup (arch, copy_insn_closure.get (),
+				buffer->original_pc, buffer->addr,
+				rc, instruction_executed_successfully);
+
+  return (instruction_executed_successfully
+	  ? DISPLACED_STEP_FINISH_STATUS_OK
+	  : DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED);
 }
 
 const displaced_step_copy_insn_closure *

@@ -93,7 +93,7 @@ extern displaced_step_copy_insn_closure_up amd64_displaced_step_copy_insn
    struct regcache *regs);
 extern void amd64_displaced_step_fixup
   (struct gdbarch *gdbarch, displaced_step_copy_insn_closure *closure,
-   CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+   CORE_ADDR from, CORE_ADDR to, struct regcache *regs, bool completed_p);
 
 /* Initialize the ABI for amd64.  Uses DEFAULT_TDESC as fallback
    tdesc, if INFO does not specify one.  */

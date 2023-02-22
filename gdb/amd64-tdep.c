@@ -1690,7 +1690,7 @@ void
 amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 			    struct displaced_step_copy_insn_closure *dsc_,
 			    CORE_ADDR from, CORE_ADDR to,
-			    struct regcache *regs)
+			    struct regcache *regs, bool completed_p)
 {
   amd64_displaced_step_copy_insn_closure *dsc
     = (amd64_displaced_step_copy_insn_closure *) dsc_;
@@ -1725,14 +1725,14 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
      the displaced instruction; make it relative to the original insn.
      Well, signal handler returns don't need relocation either, but we use the
      value of %rip to recognize those; see below.  */
-  if (! amd64_absolute_jmp_p (insn_details)
-      && ! amd64_absolute_call_p (insn_details)
-      && ! amd64_ret_p (insn_details))
+  if (!completed_p
+      || (!amd64_absolute_jmp_p (insn_details)
+	  && !amd64_absolute_call_p (insn_details)
+	  && !amd64_ret_p (insn_details)))
     {
-      ULONGEST orig_rip;
       int insn_len;
 
-      regcache_cooked_read_unsigned (regs, AMD64_RIP_REGNUM, &orig_rip);
+      CORE_ADDR pc = regcache_read_pc (regs);
 
       /* A signal trampoline system call changes the %rip, resuming
 	 execution of the main program after the signal handler has
@@ -1749,24 +1749,23 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 	 it unrelocated.  Goodness help us if there are PC-relative
 	 system calls.	*/
       if (amd64_syscall_p (insn_details, &insn_len)
-	  && orig_rip != to + insn_len
 	  /* GDB can get control back after the insn after the syscall.
-	     Presumably this is a kernel bug.
-	     Fixup ensures its a nop, we add one to the length for it.  */
-	  && orig_rip != to + insn_len + 1)
+	     Presumably this is a kernel bug.  Fixup ensures its a nop, we
+	     add one to the length for it.  */
+	  && (pc < to || pc > (to + insn_len + 1)))
 	displaced_debug_printf ("syscall changed %%rip; not relocating");
       else
 	{
-	  ULONGEST rip = orig_rip - insn_offset;
+	  CORE_ADDR rip = pc - insn_offset;
 
 	  /* If we just stepped over a breakpoint insn, we don't backup
 	     the pc on purpose; this is to match behaviour without
 	     stepping.  */
 
-	  regcache_cooked_write_unsigned (regs, AMD64_RIP_REGNUM, rip);
+	  regcache_write_pc (regs, rip);
 
 	  displaced_debug_printf ("relocated %%rip from %s to %s",
-				  paddress (gdbarch, orig_rip),
+				  paddress (gdbarch, pc),
 				  paddress (gdbarch, rip));
 	}
     }
@@ -1779,7 +1778,7 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
   /* If the instruction was a call, the return address now atop the
      stack is the address following the copied instruction.  We need
      to make it the address following the original instruction.	 */
-  if (amd64_call_p (insn_details))
+  if (completed_p && amd64_call_p (insn_details))
     {
       ULONGEST rsp;
       ULONGEST retaddr;

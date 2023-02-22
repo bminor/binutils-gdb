@@ -1771,9 +1771,9 @@ gdbarch_software_single_step routine, and true otherwise.
 
 Method(
     comment="""
-Fix up the state resulting from successfully single-stepping a
-displaced instruction, to give the result we would have gotten from
-stepping the instruction in its original location.
+Fix up the state after attempting to single-step a displaced
+instruction, to give the result we would have gotten from stepping the
+instruction in its original location.
 
 REGS is the register state resulting from single-stepping the
 displaced instruction.
@@ -1781,9 +1781,18 @@ displaced instruction.
 CLOSURE is the result from the matching call to
 gdbarch_displaced_step_copy_insn.
 
-If you provide gdbarch_displaced_step_copy_insn.but not this
-function, then GDB assumes that no fixup is needed after
-single-stepping the instruction.
+FROM is the address where the instruction was original located, TO is
+the address of the displaced buffer where the instruction was copied
+to for stepping.
+
+COMPLETED_P is true if GDB stopped as a result of the requested step
+having completed (e.g. the inferior stopped with SIGTRAP), otherwise
+COMPLETED_P is false and GDB stopped for some other reason.  In the
+case where a single instruction is expanded to multiple replacement
+instructions for stepping then it may be necessary to read the current
+program counter from REGS in order to decide how far through the
+series of replacement instructions the inferior got before stopping,
+this may impact what will need fixing up in this function.
 
 For a general explanation of displaced stepping and how GDB uses it,
 see the comments in infrun.c.
@@ -1795,6 +1804,7 @@ see the comments in infrun.c.
         ("CORE_ADDR", "from"),
         ("CORE_ADDR", "to"),
         ("struct regcache *", "regs"),
+        ("bool", "completed_p")
     ],
     predicate=False,
     predefault="NULL",

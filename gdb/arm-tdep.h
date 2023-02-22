@@ -296,7 +296,8 @@ int arm_frame_is_thumb (frame_info_ptr frame);
 
 extern void arm_displaced_step_fixup (struct gdbarch *,
 				      displaced_step_copy_insn_closure *,
-				      CORE_ADDR, CORE_ADDR, struct regcache *);
+				      CORE_ADDR, CORE_ADDR,
+				      struct regcache *, bool);
 
 /* Return the bit mask in ARM_PS_REGNUM that indicates Thumb mode.  */
 extern int arm_psr_thumb_bit (struct gdbarch *);

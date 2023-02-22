@@ -8659,8 +8659,32 @@ void
 arm_displaced_step_fixup (struct gdbarch *gdbarch,
 			  struct displaced_step_copy_insn_closure *dsc_,
 			  CORE_ADDR from, CORE_ADDR to,
-			  struct regcache *regs)
+			  struct regcache *regs, bool completed_p)
 {
+  /* The following block exists as a temporary measure while displaced
+     stepping is fixed architecture at a time within GDB.
+
+     In an earlier implementation of displaced stepping, if GDB thought the
+     displaced instruction had not been executed then this fix up function
+     was never called.  As a consequence, things that should be fixed by
+     this function were left in an unfixed state.
+
+     However, it's not as simple as always calling this function; this
+     function needs to be updated to decide what should be fixed up based
+     on whether the displaced step executed or not, which requires each
+     architecture to be considered individually.
+
+     Until this architecture is updated, this block replicates the old
+     behaviour; we just restore the program counter register, and leave
+     everything else unfixed.  */
+  if (!completed_p)
+    {
+      CORE_ADDR pc = regcache_read_pc (regs);
+      pc = from + (pc - to);
+      regcache_write_pc (regs, pc);
+      return;
+    }
+
   arm_displaced_step_copy_insn_closure *dsc
     = (arm_displaced_step_copy_insn_closure *) dsc_;
 

@@ -843,7 +843,7 @@ void
 i386_displaced_step_fixup (struct gdbarch *gdbarch,
 			   struct displaced_step_copy_insn_closure *closure_,
 			   CORE_ADDR from, CORE_ADDR to,
-			   struct regcache *regs)
+			   struct regcache *regs, bool completed_p)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -886,14 +886,14 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
      the displaced instruction; make it relative.  Well, signal
      handler returns don't need relocation either, but we use the
      value of %eip to recognize those; see below.  */
-  if (! i386_absolute_jmp_p (insn)
-      && ! i386_absolute_call_p (insn)
-      && ! i386_ret_p (insn))
+  if (!completed_p
+      || (!i386_absolute_jmp_p (insn)
+	  && !i386_absolute_call_p (insn)
+	  && !i386_ret_p (insn)))
     {
-      ULONGEST orig_eip;
       int insn_len;
 
-      regcache_cooked_read_unsigned (regs, I386_EIP_REGNUM, &orig_eip);
+      CORE_ADDR pc = regcache_read_pc (regs);
 
       /* A signal trampoline system call changes the %eip, resuming
 	 execution of the main program after the signal handler has
@@ -910,25 +910,25 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
 	 it unrelocated.  Goodness help us if there are PC-relative
 	 system calls.  */
       if (i386_syscall_p (insn, &insn_len)
-	  && orig_eip != to + (insn - insn_start) + insn_len
+	  && pc != to + (insn - insn_start) + insn_len
 	  /* GDB can get control back after the insn after the syscall.
 	     Presumably this is a kernel bug.
 	     i386_displaced_step_copy_insn ensures its a nop,
 	     we add one to the length for it.  */
-	  && orig_eip != to + (insn - insn_start) + insn_len + 1)
+	  && pc != to + (insn - insn_start) + insn_len + 1)
 	displaced_debug_printf ("syscall changed %%eip; not relocating");
       else
 	{
-	  ULONGEST eip = (orig_eip - insn_offset) & 0xffffffffUL;
+	  ULONGEST eip = (pc - insn_offset) & 0xffffffffUL;
 
 	  /* If we just stepped over a breakpoint insn, we don't backup
 	     the pc on purpose; this is to match behaviour without
 	     stepping.  */
 
-	  regcache_cooked_write_unsigned (regs, I386_EIP_REGNUM, eip);
+	  regcache_write_pc (regs, eip);
 
 	  displaced_debug_printf ("relocated %%eip from %s to %s",
-				  paddress (gdbarch, orig_eip),
+				  paddress (gdbarch, pc),
 				  paddress (gdbarch, eip));
 	}
     }
@@ -941,7 +941,7 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
   /* If the instruction was a call, the return address now atop the
      stack is the address following the copied instruction.  We need
      to make it the address following the original instruction.  */
-  if (i386_call_p (insn))
+  if (completed_p && i386_call_p (insn))
     {
       ULONGEST esp;
       ULONGEST retaddr;

@@ -142,7 +142,7 @@ displaced_step_copy_insn_closure_up
 void aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 				   displaced_step_copy_insn_closure *dsc,
 				   CORE_ADDR from, CORE_ADDR to,
-				   struct regcache *regs);
+				   struct regcache *regs, bool completed_p);
 
 bool aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch);
 
