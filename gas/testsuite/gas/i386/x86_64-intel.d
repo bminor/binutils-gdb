@@ -260,34 +260,34 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	48 89 0c 25 00 00 00 00 	mov    QWORD PTR (ds:)?0x0,rcx
 [ 	]*[a-f0-9]+:	66 0f 02 d2          	lar    dx,dx
 [ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 02 d2          	lar    rdx,rdx
 [ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 02 d2          	lar    rdx,rdx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
 [ 	]*[a-f0-9]+:	66 0f 02 12          	lar    dx,WORD PTR \[rdx\]
 [ 	]*[a-f0-9]+:	0f 02 12             	lar    edx,WORD PTR \[rdx\]
-[ 	]*[a-f0-9]+:	48 0f 02 12          	lar    rdx,WORD PTR \[rdx\]
+[ 	]*[a-f0-9]+:	0f 02 12             	lar    edx,WORD PTR \[rdx\]
 [ 	]*[a-f0-9]+:	66 0f 03 d2          	lsl    dx,dx
 [ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 03 d2          	lsl    rdx,rdx
 [ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 03 d2          	lsl    rdx,rdx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
 [ 	]*[a-f0-9]+:	66 0f 03 12          	lsl    dx,WORD PTR \[rdx\]
 [ 	]*[a-f0-9]+:	0f 03 12             	lsl    edx,WORD PTR \[rdx\]
-[ 	]*[a-f0-9]+:	48 0f 03 12          	lsl    rdx,WORD PTR \[rdx\]
+[ 	]*[a-f0-9]+:	0f 03 12             	lsl    edx,WORD PTR \[rdx\]
 [ 	]*[a-f0-9]+:	66 0f 02 d2          	lar    dx,dx
 [ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 02 d2          	lar    rdx,rdx
 [ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 02 d2          	lar    rdx,rdx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,edx
 [ 	]*[a-f0-9]+:	66 0f 02 12          	lar    dx,WORD PTR \[rdx\]
 [ 	]*[a-f0-9]+:	0f 02 12             	lar    edx,WORD PTR \[rdx\]
-[ 	]*[a-f0-9]+:	48 0f 02 12          	lar    rdx,WORD PTR \[rdx\]
+[ 	]*[a-f0-9]+:	0f 02 12             	lar    edx,WORD PTR \[rdx\]
 [ 	]*[a-f0-9]+:	66 0f 03 d2          	lsl    dx,dx
 [ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 03 d2          	lsl    rdx,rdx
 [ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
-[ 	]*[a-f0-9]+:	48 0f 03 d2          	lsl    rdx,rdx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,edx
 [ 	]*[a-f0-9]+:	66 0f 03 12          	lsl    dx,WORD PTR \[rdx\]
 [ 	]*[a-f0-9]+:	0f 03 12             	lsl    edx,WORD PTR \[rdx\]
-[ 	]*[a-f0-9]+:	48 0f 03 12          	lsl    rdx,WORD PTR \[rdx\]
+[ 	]*[a-f0-9]+:	0f 03 12             	lsl    edx,WORD PTR \[rdx\]
 #pass
