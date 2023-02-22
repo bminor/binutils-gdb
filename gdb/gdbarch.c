@@ -446,7 +446,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of max_insn_length, has predicate.  */
   /* Skip verify of displaced_step_copy_insn, has predicate.  */
   /* Skip verify of displaced_step_hw_singlestep, invalid_p == 0 */
-  /* Skip verify of displaced_step_fixup, has predicate.  */
+  if ((gdbarch->displaced_step_copy_insn == nullptr) != (gdbarch->displaced_step_fixup == nullptr))
+    log.puts ("\n\tdisplaced_step_fixup");
   /* Skip verify of displaced_step_prepare, has predicate.  */
   if ((! gdbarch->displaced_step_finish) != (! gdbarch->displaced_step_prepare))
     log.puts ("\n\tdisplaced_step_finish");
@@ -1090,9 +1091,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: displaced_step_hw_singlestep = <%s>\n",
 	      host_address_to_string (gdbarch->displaced_step_hw_singlestep));
-  gdb_printf (file,
-	      "gdbarch_dump: gdbarch_displaced_step_fixup_p() = %d\n",
-	      gdbarch_displaced_step_fixup_p (gdbarch));
   gdb_printf (file,
 	      "gdbarch_dump: displaced_step_fixup = <%s>\n",
 	      host_address_to_string (gdbarch->displaced_step_fixup));
@@ -4058,19 +4056,11 @@ set_gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
   gdbarch->displaced_step_hw_singlestep = displaced_step_hw_singlestep;
 }
 
-bool
-gdbarch_displaced_step_fixup_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->displaced_step_fixup != NULL;
-}
-
 void
 gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displaced_step_copy_insn_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->displaced_step_fixup != NULL);
-  /* Do not check predicate: gdbarch->displaced_step_fixup != NULL, allow call.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_displaced_step_fixup called\n");
   gdbarch->displaced_step_fixup (gdbarch, closure, from, to, regs);
