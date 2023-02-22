@@ -20,6 +20,12 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
+#ifdef USE_SYSCALL
+# define my_time(TLOC) syscall (SYS_time, TLOC)
+#else
+# define my_time(TLOC) time (TLOC)
+#endif
+
 void
 marker1 (void)
 {
@@ -36,7 +42,7 @@ int
 main (void)
 {
   marker1 ();
-  syscall (SYS_time, &time_global);
+  my_time (&time_global);
   marker2 ();
   return 0;
 }
