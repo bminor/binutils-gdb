@@ -704,12 +704,7 @@ proc runto { linespec args } {
 
     set test_name "runto: run to $linespec"
 
-    # We need to use eval here to pass our varargs args to gdb_breakpoint
-    # which is also a varargs function.
-    # But we also have to be careful because $linespec may have multiple
-    # elements, and we don't want Tcl to move the remaining elements after
-    # the first to $args.  That is why $linespec is wrapped in {}.
-    if ![eval gdb_breakpoint {$linespec} $args] {
+    if {![gdb_breakpoint $linespec {*}$args]} {
 	return 0
     }
 
