@@ -16,9 +16,7 @@
 # Until "set follow-fork-mode" and "catch fork" are implemented on
 # other targets...
 #
-if {![istarget "*-*-linux*"]} {
-    return
-}
+require {istarget "*-*-linux*"}
 
 
 standard_testfile .c

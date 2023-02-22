@@ -17,9 +17,7 @@
 # inferior that used the JIT API then exec'd a program that did not
 # use it.
 
-if {![istarget "*-linux*"]} {
-    return
-}
+require {istarget "*-linux*"}
 
 standard_testfile jit-reader-exec.c
 

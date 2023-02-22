@@ -18,9 +18,7 @@
 
 # Until "catch exec" is implemented on other targets...
 #
-if {![istarget "*-linux*"]} {
-    return
-}
+require {istarget "*-linux*"}
 
 standard_testfile foll-exec.c
 

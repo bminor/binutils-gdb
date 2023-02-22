@@ -14,9 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This test only works for native processes on GNU/Linux.
-if {[target_info gdb_protocol] != "" || ![istarget *-linux*]} {
+if {[target_info gdb_protocol] != ""} {
     return
 }
+require {istarget *-linux*}
 
 # Test relies on checking gdb debug output. Do not run if gdb debug is
 # enabled as any debug will be redirected to the log.
