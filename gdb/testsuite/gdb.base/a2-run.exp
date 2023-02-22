@@ -16,9 +16,7 @@
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
 # Can't do this test without stdio support.
-if [gdb_skip_stdio_test "a2run.exp"] {
-    return
-}
+require {!gdb_skip_stdio_test "a2run.exp"}
 
 #
 # test running programs
