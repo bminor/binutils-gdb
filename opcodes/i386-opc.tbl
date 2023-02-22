@@ -536,13 +536,13 @@ xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IsString, { Byte|Unspecified|Base
 bsf, 0xfbc, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 bsr, 0xfbd, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 bt, 0xfa3, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-bt, 0xfba/4, i386, Modrm|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+bt, 0xfba/4, i386, Modrm|No_bSuf|No_sSuf|Optimize, { Imm8, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 btc, 0xfbb, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-btc, 0xfba/7, i386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+btc, 0xfba/7, i386, Modrm|No_bSuf|No_sSuf|Optimize|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 btr, 0xfb3, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-btr, 0xfba/6, i386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+btr, 0xfba/6, i386, Modrm|No_bSuf|No_sSuf|Optimize|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 bts, 0xfab, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf|HLEPrefixLock, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
-bts, 0xfba/5, i386, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex }
+bts, 0xfba/5, i386, Modrm|No_bSuf|No_sSuf|Optimize|HLEPrefixLock, { Imm8, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 // Interrupts & op. sys insns.
 // See gas/config/tc-i386.c for conversion of 'int $3' into the special

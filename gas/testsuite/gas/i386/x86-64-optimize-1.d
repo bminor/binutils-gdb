@@ -58,4 +58,17 @@ Disassembly of section .text:
  +[a-f0-9]+:	48 b8 00 00 00 00 01 00 00 00 	movabs \$0x100000000,%rax
  +[a-f0-9]+:	31 c0                	xor    %eax,%eax
  +[a-f0-9]+:	45 31 f6             	xor    %r14d,%r14d
+ +[a-f0-9]+:	0f ba e0 0f          	bt     \$0xf,%eax
+ +[a-f0-9]+:	66 0f ba e0 10       	bt     \$0x10,%ax
+ +[a-f0-9]+:	41 0f ba e0 0f       	bt     \$0xf,%r8d
+ +[a-f0-9]+:	66 41 0f ba e0 10    	bt     \$0x10,%r8w
+ +[a-f0-9]+:	0f ba e0 1f          	bt     \$0x1f,%eax
+ +[a-f0-9]+:	48 0f ba e0 20       	bt     \$0x20,%rax
+ +[a-f0-9]+:	49 0f ba e0 1f       	bt     \$0x1f,%r8
+ +[a-f0-9]+:	66 0f ba f8 0f       	btc    \$0xf,%ax
+ +[a-f0-9]+:	48 0f ba f8 1f       	btc    \$0x1f,%rax
+ +[a-f0-9]+:	66 0f ba f0 0f       	btr    \$0xf,%ax
+ +[a-f0-9]+:	48 0f ba f0 1f       	btr    \$0x1f,%rax
+ +[a-f0-9]+:	66 0f ba e8 0f       	bts    \$0xf,%ax
+ +[a-f0-9]+:	48 0f ba e8 1f       	bts    \$0x1f,%rax
 #pass

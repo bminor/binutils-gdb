@@ -170,3 +170,16 @@ _start:
 	vporq		128(%eax), %ymm2, %ymm3
 	vpxord		128(%eax), %ymm2, %ymm3
 	vpxorq		128(%eax), %ymm2, %ymm3
+
+	bt	$15, %ax
+	bt	$16, %ax
+	btc	$15, %ax
+	btr	$15, %ax
+	bts	$15, %ax
+
+	.code16
+	bt	$15, %eax
+	bt	$16, %eax
+	btc	$15, %eax
+	btr	$15, %eax
+	bts	$15, %eax

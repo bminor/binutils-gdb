@@ -148,4 +148,14 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 .*	vporq  0x80\(%eax\),%ymm2,%ymm3
  +[a-f0-9]+:	62 .*	vpxord 0x80\(%eax\),%ymm2,%ymm3
  +[a-f0-9]+:	62 .*	vpxorq 0x80\(%eax\),%ymm2,%ymm3
+ +[a-f0-9]+:	0f ba e0 0f          	bt     \$0xf,%eax
+ +[a-f0-9]+:	66 0f ba e0 10       	bt     \$0x10,%ax
+ +[a-f0-9]+:	0f ba f8 0f          	btc    \$0xf,%eax
+ +[a-f0-9]+:	0f ba f0 0f          	btr    \$0xf,%eax
+ +[a-f0-9]+:	0f ba e8 0f          	bts    \$0xf,%eax
+ +[a-f0-9]+:	0f ba e0 0f          	bt     \$0xf,%eax
+ +[a-f0-9]+:	66 0f ba e0 10       	bt     \$0x10,%ax
+ +[a-f0-9]+:	0f ba f8 0f          	btc    \$0xf,%eax
+ +[a-f0-9]+:	0f ba f0 0f          	btr    \$0xf,%eax
+ +[a-f0-9]+:	0f ba e8 0f          	bts    \$0xf,%eax
 #pass

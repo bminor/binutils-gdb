@@ -4362,6 +4362,42 @@ optimize_encoding (void)
        */
       i.tm.base_opcode = 0x84 | (i.tm.base_opcode & 1);
     }
+  else if (i.tm.base_opcode == 0xba
+	   && i.tm.opcode_space == SPACE_0F
+	   && i.reg_operands == 1
+	   && i.op[0].imms->X_op == O_constant
+	   && i.op[0].imms->X_add_number >= 0)
+    {
+      /* Optimize: -O:
+	   btw $n, %rN -> btl $n, %rN (outside of 16-bit mode, n < 16)
+	   btq $n, %rN -> btl $n, %rN (in 64-bit mode, n < 32, N < 8)
+	   btl $n, %rN -> btw $n, %rN (in 16-bit mode, n < 16)
+
+	   With <BT> one of bts, btr, and bts also:
+	   <BT>w $n, %rN -> btl $n, %rN (in 32-bit mode, n < 16)
+	   <BT>l $n, %rN -> btw $n, %rN (in 16-bit mode, n < 16)
+       */
+      switch (flag_code)
+	{
+	case CODE_64BIT:
+	  if (i.tm.extension_opcode != 4)
+	    break;
+	  if (i.types[1].bitfield.qword
+	      && i.op[0].imms->X_add_number < 32
+	      && !(i.op[1].regs->reg_flags & RegRex))
+	    i.tm.opcode_modifier.size = SIZE32;
+	  /* Fall through.  */
+	case CODE_32BIT:
+	  if (i.types[1].bitfield.word
+	      && i.op[0].imms->X_add_number < 16)
+	    i.tm.opcode_modifier.size = SIZE32;
+	  break;
+	case CODE_16BIT:
+	  if (i.op[0].imms->X_add_number < 16)
+	    i.tm.opcode_modifier.size = SIZE16;
+	  break;
+	}
+    }
   else if (i.reg_operands == 3
 	   && i.op[0].regs == i.op[1].regs
 	   && !i.types[2].bitfield.xmmword
