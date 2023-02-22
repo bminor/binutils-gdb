@@ -4776,8 +4776,9 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 
   if (bfd_link_relocatable (info)
       || sec->sec_flg0
-      || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
+      || (sec->flags & SEC_RELOC) == 0
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
       || (info->disable_target_specific_optimizations
 	  && info->relax_pass == 0)
       /* The exp_seg_relro_adjust is enum phase_enum (0x4),

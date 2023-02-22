@@ -3726,8 +3726,8 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
   *again = false;
 
   if (bfd_link_relocatable (link_info)
-      || ((sec->flags & (SEC_CODE | SEC_RELOC | SEC_ALLOC))
-	  != (SEC_CODE | SEC_RELOC | SEC_ALLOC))
+      || ((sec->flags & (SEC_CODE | SEC_RELOC | SEC_ALLOC | SEC_HAS_CONTENTS))
+	  != (SEC_CODE | SEC_RELOC | SEC_ALLOC | SEC_HAS_CONTENTS))
       || sec->reloc_count == 0)
     return true;
 

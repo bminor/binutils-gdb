@@ -468,6 +468,7 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
   *again = false;
 
   if (bfd_link_relocatable (link_info)
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return true;
@@ -1154,6 +1155,7 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
       bfd_byte *ocontents;
 
       if (o == sec
+	  || (o->flags & SEC_HAS_CONTENTS) == 0
 	  || (o->flags & SEC_RELOC) == 0
 	  || o->reloc_count == 0)
 	continue;

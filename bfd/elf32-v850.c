@@ -3440,6 +3440,7 @@ v850_elf_relax_section (bfd *abfd,
   *again = false;
 
   if (bfd_link_relocatable (link_info)
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return true;
