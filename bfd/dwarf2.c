@@ -4681,6 +4681,7 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 
   *function_ptr = NULL;
   func_p = lookup_address_in_function_table (unit, addr, function_ptr);
+
   if (func_p && (*function_ptr)->tag == DW_TAG_inlined_subroutine)
     unit->stash->inliner_chain = *function_ptr;
 
@@ -6134,6 +6135,60 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
     bfd_close (stash->alt.bfd_ptr);
 }
 
+typedef struct elf_find_function_cache
+{
+  asection *     last_section;
+  asymbol *      func;
+  const char *   filename;
+  bfd_size_type  code_size;
+  bfd_vma        code_off;
+
+} elf_find_function_cache;
+
+
+/* Returns TRUE if the symbol with address CODE_OFF and size CODE_SIZE
+   is a better fit to match OFFSET than whatever is currenly stored in
+   CACHE.  */
+
+static inline bool
+better_fit (elf_find_function_cache *  cache,
+	    bfd_vma                    code_off,
+	    bfd_size_type              code_size,
+	    bfd_vma                    offset)
+{
+  /* If the symbol is beyond the desired offset, ignore it.  */
+  if (code_off > offset)
+    return false;
+
+  /* If the symbol is further away from the desired
+     offset than our current best, then ignore it.  */
+  if (code_off < cache->code_off)
+    return false;
+
+  /* On the other hand, if it is closer, then use it.  */
+  if (code_off > cache->code_off)
+    return true;
+
+  /* If our current best fit does not actually reach the desired
+     offset...  */
+  if (cache->code_off + cache->code_size <= offset)
+    {
+      /* Then return whichever candidate covers more area.  */
+      return code_size > cache->code_size;
+    }
+
+  /* If the new symbol also covers the desired offset... */
+  if (code_off + code_size > offset)
+    {
+      /* Then choose whichever is smaller.  */
+      /* FIXME: Maybe prefer LOCAL over GLOBAL or something else here ?  */
+      return code_size < cache->code_size;
+    }
+
+  /* Otherwise the cached symbol is better.  */
+  return false;
+}
+
 /* Find the function to a particular section and offset,
    for error reporting.  */
 
@@ -6145,21 +6200,14 @@ _bfd_elf_find_function (bfd *abfd,
 			const char **filename_ptr,
 			const char **functionname_ptr)
 {
-  struct elf_find_function_cache
-  {
-    asection *last_section;
-    asymbol *func;
-    const char *filename;
-    bfd_size_type func_size;
-  } *cache;
-
   if (symbols == NULL)
     return NULL;
 
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return NULL;
 
-  cache = elf_tdata (abfd)->elf_find_function_cache;
+  elf_find_function_cache * cache = elf_tdata (abfd)->elf_find_function_cache;
+
   if (cache == NULL)
     {
       cache = bfd_zalloc (abfd, sizeof (*cache));
@@ -6167,13 +6215,13 @@ _bfd_elf_find_function (bfd *abfd,
       if (cache == NULL)
 	return NULL;
     }
+
   if (cache->last_section != section
       || cache->func == NULL
       || offset < cache->func->value
-      || offset >= cache->func->value + cache->func_size)
+      || offset >= cache->func->value + cache->code_size)
     {
       asymbol *file;
-      bfd_vma low_func;
       asymbol **p;
       /* ??? Given multiple file symbols, it is impossible to reliably
 	 choose the right file name for global symbols.  File symbols are
@@ -6187,11 +6235,11 @@ _bfd_elf_find_function (bfd *abfd,
       const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
       file = NULL;
-      low_func = 0;
       state = nothing_seen;
       cache->filename = NULL;
       cache->func = NULL;
-      cache->func_size = 0;
+      cache->code_size = 0;
+      cache->code_off = 0;
       cache->last_section = section;
 
       for (p = symbols; *p != NULL; p++)
@@ -6208,24 +6256,36 @@ _bfd_elf_find_function (bfd *abfd,
 	      continue;
 	    }
 
+	  if (state == nothing_seen)
+	    state = symbol_seen;
+
 	  size = bed->maybe_function_sym (sym, section, &code_off);
-	  if (size != 0
-	      && code_off <= offset
-	      && (code_off > low_func
-		  || (code_off == low_func
-		      && size > cache->func_size)))
+
+	  if (size == 0)
+	    continue;
+
+	  if (better_fit (cache, code_off, size, offset))
 	    {
 	      cache->func = sym;
-	      cache->func_size = size;
+	      cache->code_size = size;
+	      cache->code_off = code_off;
 	      cache->filename = NULL;
-	      low_func = code_off;
+
 	      if (file != NULL
 		  && ((sym->flags & BSF_LOCAL) != 0
 		      || state != file_after_symbol_seen))
 		cache->filename = bfd_asymbol_name (file);
 	    }
-	  if (state == nothing_seen)
-	    state = symbol_seen;
+	  /* Otherwise, if the symbol is beyond the desired offset but it
+	     lies within the bounds of the current best match then reduce
+	     the size of the current best match so that future searches
+	     will not not used the cached symbol by mistake.  */
+	  else if (code_off > offset 
+		   && code_off > cache->code_off
+		   && code_off < cache->code_off + cache->code_size)
+	    {
+	      cache->code_size = code_off - cache->code_off;
+	    }
 	}
     }
 
