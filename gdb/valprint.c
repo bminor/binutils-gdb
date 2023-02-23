@@ -856,7 +856,7 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
 			  type->fixed_point_scaling_factor ());
 
       const char *fmt = type->length () < 4 ? "%.11Fg" : "%.17Fg";
-      std::string str = gmp_string_printf (fmt, f.val);
+      std::string str = f.str (fmt);
       gdb_printf (stream, "%s", str.c_str ());
     }
 }

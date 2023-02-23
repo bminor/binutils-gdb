@@ -388,10 +388,8 @@ private:
 
 struct gdb_mpf
 {
-  mpf_t val;
-
   /* Constructors.  */
-  gdb_mpf () { mpf_init (val); }
+  gdb_mpf () { mpf_init (m_val); }
 
   DISABLE_COPY_AND_ASSIGN (gdb_mpf);
 
@@ -409,11 +407,20 @@ struct gdb_mpf
     gdb_mpq tmp_q;
 
     tmp_q.read_fixed_point (buf, byte_order, unsigned_p, scaling_factor);
-    mpf_set_q (val, tmp_q.m_val);
+    mpf_set_q (m_val, tmp_q.m_val);
   }
 
+  /* Convert this value to a string.  FMT is the format to use, and
+     should have a single '%' substitution.  */
+  std::string str (const char *fmt) const
+  { return gmp_string_printf (fmt, m_val); }
+
   /* The destructor.  */
-  ~gdb_mpf () { mpf_clear (val); }
+  ~gdb_mpf () { mpf_clear (m_val); }
+
+private:
+
+  mpf_t m_val;
 };
 
 /* See declaration above.  */
