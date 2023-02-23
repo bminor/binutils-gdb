@@ -98,11 +98,11 @@ struct z80_unwind_cache
 
   struct
   {
-    int called:1;	/* there is return address on stack */
-    int load_args:1;	/* prologues loads args using POPs */
-    int fp_sdcc:1;	/* prologue saves and adjusts frame pointer IX */
-    int interrupt:1;	/* __interrupt handler */
-    int critical:1;	/* __critical function */
+    unsigned int called : 1;    /* there is return address on stack */
+    unsigned int load_args : 1; /* prologues loads args using POPs */
+    unsigned int fp_sdcc : 1;   /* prologue saves and adjusts frame pointer IX */
+    unsigned int interrupt : 1; /* __interrupt handler */
+    unsigned int critical : 1;  /* __critical function */
   } prologue_type;
 
   /* Table indicating the location of each and every register.  */
