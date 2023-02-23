@@ -63,34 +63,28 @@
 # * "predefault", "postdefault", and "invalid" - These are used for
 # the initialization and verification steps:
 #
-# A gdbarch is zero-initialized.  Then, if a field has a pre-default,
-# the field is set to that value.  After initialization is complete
-# (that is, after the tdep code has a chance to change the settings),
-# the post-initialization step is done.
+# A gdbarch is zero-initialized.  Then, if a field has a "predefault",
+# the field is set to that value.  This becomes the field's initial
+# value.
 #
-# There is a generic algorithm to generate a "validation function" for
-# all fields.  If the field has an "invalid" attribute with a string
-# value, then this string is the expression (note that a string-valued
-# "invalid" and "predicate" are mutually exclusive; and the case where
-# invalid is True means to ignore this field and instead use the
-# default checking that is about to be described).  Otherwise, if
-# there is a "predefault", then the field is valid if it differs from
-# the predefault.  Otherwise, the check is done against 0 (really NULL
-# for function pointers, but same idea).
-#
-# In post-initialization / validation, there are several cases.
-#
-# * If "invalid" is False, or if the field specifies "predicate",
-# validation is skipped.  Otherwise, a validation step is emitted.
-#
-# * Otherwise, the validity is checked using the usual validation
-# function (see above).  If the field is considered valid, nothing is
+# After initialization is complete (that is, after the tdep code has a
+# chance to change the settings), the post-initialization step is
 # done.
 #
-# * Otherwise, the field's value is invalid.  If there is a
-# "postdefault", then the field is assigned that value.
+# If the field still has its initial value (see above), and the field
+# has a "postdefault", then the field is set to this value.
 #
-# * Otherwise, the gdbarch will fail validation and gdb will crash.
+# After the possible "postdefault" assignment, validation is
+# performed for fields that don't have a "predicate".
+#
+# If the field has an "invalid" attribute with a string value, then
+# this string is the expression that should evaluate to true when the
+# field is invalid.
+#
+# Otherwise, if "invalid" is True, then the generic validation
+# function is used: the field is considered invalid it still contains
+# its default value.  This validation is what is used within the _p
+# predicate function if the field has "predicate" set to True.
 #
 # Function and Method share:
 #

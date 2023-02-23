@@ -203,35 +203,47 @@ with open("gdbarch.c", "w") as f:
         file=f,
     )
     for c in filter(not_info, components):
+        # An opportunity to write in the 'postdefault' value.  We
+        # change field's value to the postdefault if its current value
+        # is not different to the initial value of the field.
+        if c.postdefault is not None:
+            init_value = c.predefault or "0"
+            print(f"  if (gdbarch->{c.name} == {init_value})", file=f)
+            print(f"    gdbarch->{c.name} = {c.postdefault};", file=f)
+
+        # Now validate the value.
         if c.invalid is False:
             print(f"  /* Skip verify of {c.name}, invalid_p == 0 */", file=f)
         elif c.predicate:
             print(f"  /* Skip verify of {c.name}, has predicate.  */", file=f)
-        elif isinstance(c.invalid, str) and c.postdefault is not None:
-            print(f"  if ({c.invalid})", file=f)
-            print(f"    gdbarch->{c.name} = {c.postdefault};", file=f)
-        elif c.predefault is not None and c.postdefault is not None:
-            print(f"  if (gdbarch->{c.name} == {c.predefault})", file=f)
-            print(f"    gdbarch->{c.name} = {c.postdefault};", file=f)
-        elif c.postdefault is not None:
-            print(f"  if (gdbarch->{c.name} == 0)", file=f)
-            print(f"    gdbarch->{c.name} = {c.postdefault};", file=f)
+        elif c.invalid is None:
+            # No validation has been requested for this component.
+            pass
         elif isinstance(c.invalid, str):
             print(f"  if ({c.invalid})", file=f)
             print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
-        elif c.predefault is not None:
-            print(f"  if (gdbarch->{c.name} == {c.predefault})", file=f)
-            print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
         elif c.invalid is True:
-            print(f"  if (gdbarch->{c.name} == 0)", file=f)
-            print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
+            if c.postdefault is not None:
+                # This component has its 'invalid' field set to True, but
+                # also has a postdefault.  This makes no sense, the
+                # postdefault will have been applied above, so this field
+                # will not have a zero value.
+                raise Exception(
+                    f"component {c.name} has postdefault and invalid set to True"
+                )
+            else:
+                init_value = c.predefault or "0"
+                print(f"  if (gdbarch->{c.name} == {init_value})", file=f)
+                print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
         else:
             # We should not allow ourselves to simply do nothing here
             # because no other case applies.  If we end up here then
             # either the input data needs adjusting so one of the
             # above cases matches, or we need additional cases adding
             # here.
-            raise Exception("unhandled case when generating gdbarch validation")
+            raise Exception(
+                f"unhandled case when generating gdbarch validation: {c.name}"
+            )
     print("  if (!log.empty ())", file=f)
     print(
         """    internal_error (_("verify_gdbarch: the following are invalid ...%s"),""",
