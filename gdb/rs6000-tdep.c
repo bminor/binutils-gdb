@@ -889,7 +889,8 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs)
 {
-  size_t len = gdbarch_max_insn_length (gdbarch);
+  size_t len = gdbarch_displaced_step_buffer_length (gdbarch);
+  gdb_assert (len > PPC_INSN_SIZE);
   std::unique_ptr<ppc_displaced_step_copy_insn_closure> closure
     (new ppc_displaced_step_copy_insn_closure (len));
   gdb_byte *buf = closure->buf.data ();
@@ -8363,8 +8364,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_finish (gdbarch, ppc_displaced_step_finish);
   set_gdbarch_displaced_step_restore_all_in_ptid
     (gdbarch, ppc_displaced_step_restore_all_in_ptid);
+  set_gdbarch_displaced_step_buffer_length (gdbarch, 2 * PPC_INSN_SIZE);
 
-  set_gdbarch_max_insn_length (gdbarch, 2 * PPC_INSN_SIZE);
+  set_gdbarch_max_insn_length (gdbarch, PPC_INSN_SIZE);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;

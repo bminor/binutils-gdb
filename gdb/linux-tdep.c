@@ -2603,7 +2603,7 @@ linux_displaced_step_prepare (gdbarch *arch, thread_info *thread,
 	 at DISP_STEP_BUF_ADDR.  They are all of size BUF_LEN.  */
       CORE_ADDR disp_step_buf_addr
 	= linux_displaced_step_location (thread->inf->gdbarch);
-      int buf_len = gdbarch_max_insn_length (arch);
+      int buf_len = gdbarch_displaced_step_buffer_length (arch);
 
       linux_gdbarch_data *gdbarch_data = get_linux_gdbarch_data (arch);
       gdb_assert (gdbarch_data->num_disp_step_buffers > 0);

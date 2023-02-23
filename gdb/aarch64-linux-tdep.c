@@ -2240,7 +2240,9 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_get_syscall_number (gdbarch, aarch64_linux_get_syscall_number);
 
   /* Displaced stepping.  */
-  set_gdbarch_max_insn_length (gdbarch, 4 * AARCH64_DISPLACED_MODIFIED_INSNS);
+  set_gdbarch_max_insn_length (gdbarch, 4);
+  set_gdbarch_displaced_step_buffer_length
+    (gdbarch, 4 * AARCH64_DISPLACED_MODIFIED_INSNS);
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					aarch64_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);

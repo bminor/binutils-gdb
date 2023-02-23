@@ -1039,8 +1039,8 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
    see the comments in infrun.c.
 
    The TO area is only guaranteed to have space for
-   gdbarch_max_insn_length (arch) bytes, so this function must not
-   write more bytes than that to that area.
+   gdbarch_displaced_step_buffer_length (arch) octets, so this
+   function must not write more octets than that to this area.
 
    If you do not provide this function, GDB assumes that the
    architecture does not support displaced stepping.
@@ -1121,6 +1121,14 @@ extern void set_gdbarch_displaced_step_copy_insn_closure_by_addr (struct gdbarch
 typedef void (gdbarch_displaced_step_restore_all_in_ptid_ftype) (inferior *parent_inf, ptid_t child_ptid);
 extern void gdbarch_displaced_step_restore_all_in_ptid (struct gdbarch *gdbarch, inferior *parent_inf, ptid_t child_ptid);
 extern void set_gdbarch_displaced_step_restore_all_in_ptid (struct gdbarch *gdbarch, gdbarch_displaced_step_restore_all_in_ptid_ftype *displaced_step_restore_all_in_ptid);
+
+/* The maximum length in octets required for a displaced-step instruction
+   buffer.  By default this will be the same as gdbarch::max_insn_length,
+   but should be overridden for architectures that might expand a
+   displaced-step instruction to multiple replacement instructions. */
+
+extern ULONGEST gdbarch_displaced_step_buffer_length (struct gdbarch *gdbarch);
+extern void set_gdbarch_displaced_step_buffer_length (struct gdbarch *gdbarch, ULONGEST displaced_step_buffer_length);
 
 /* Relocate an instruction to execute at a different address.  OLDLOC
    is the address in the inferior memory where the instruction to

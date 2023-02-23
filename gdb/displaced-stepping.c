@@ -55,7 +55,7 @@ displaced_step_buffers::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
   regcache *regcache = get_thread_regcache (thread);
   const address_space *aspace = regcache->aspace ();
   gdbarch *arch = regcache->arch ();
-  ULONGEST len = gdbarch_max_insn_length (arch);
+  ULONGEST len = gdbarch_displaced_step_buffer_length (arch);
 
   /* Search for an unused buffer.  */
   displaced_step_buffer *buffer = nullptr;
@@ -243,7 +243,7 @@ displaced_step_buffers::finish (gdbarch *arch, thread_info *thread,
      below.  */
   thread->inf->displaced_step_state.unavailable = false;
 
-  ULONGEST len = gdbarch_max_insn_length (arch);
+  ULONGEST len = gdbarch_displaced_step_buffer_length (arch);
 
   /* Restore memory of the buffer.  */
   write_memory_ptid (thread->ptid, buffer->addr,
@@ -302,7 +302,7 @@ displaced_step_buffers::restore_in_ptid (ptid_t ptid)
 
       regcache *regcache = get_thread_regcache (buffer.current_thread);
       gdbarch *arch = regcache->arch ();
-      ULONGEST len = gdbarch_max_insn_length (arch);
+      ULONGEST len = gdbarch_displaced_step_buffer_length (arch);
 
       write_memory_ptid (ptid, buffer.addr, buffer.saved_copy.data (), len);
 

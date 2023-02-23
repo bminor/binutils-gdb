@@ -1735,8 +1735,8 @@ For a general explanation of displaced stepping and how GDB uses it,
 see the comments in infrun.c.
 
 The TO area is only guaranteed to have space for
-gdbarch_max_insn_length (arch) bytes, so this function must not
-write more bytes than that to that area.
+gdbarch_displaced_step_buffer_length (arch) octets, so this
+function must not write more octets than that to this area.
 
 If you do not provide this function, GDB assumes that the
 architecture does not support displaced stepping.
@@ -1842,6 +1842,20 @@ contents of all displaced step buffers in the child's address space.
     name="displaced_step_restore_all_in_ptid",
     params=[("inferior *", "parent_inf"), ("ptid_t", "child_ptid")],
     invalid=False,
+)
+
+Value(
+    comment="""
+The maximum length in octets required for a displaced-step instruction
+buffer.  By default this will be the same as gdbarch::max_insn_length,
+but should be overridden for architectures that might expand a
+displaced-step instruction to multiple replacement instructions.
+""",
+    type="ULONGEST",
+    name="displaced_step_buffer_length",
+    predefault="0",
+    postdefault="gdbarch->max_insn_length",
+    invalid="gdbarch->displaced_step_buffer_length < gdbarch->max_insn_length",
 )
 
 Method(

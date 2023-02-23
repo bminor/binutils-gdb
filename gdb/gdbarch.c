@@ -192,6 +192,7 @@ struct gdbarch
   gdbarch_displaced_step_finish_ftype *displaced_step_finish = NULL;
   gdbarch_displaced_step_copy_insn_closure_by_addr_ftype *displaced_step_copy_insn_closure_by_addr = nullptr;
   gdbarch_displaced_step_restore_all_in_ptid_ftype *displaced_step_restore_all_in_ptid = nullptr;
+  ULONGEST displaced_step_buffer_length = 0;
   gdbarch_relocate_instruction_ftype *relocate_instruction = NULL;
   gdbarch_overlay_update_ftype *overlay_update = nullptr;
   gdbarch_core_read_description_ftype *core_read_description = nullptr;
@@ -451,6 +452,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
     log.puts ("\n\tdisplaced_step_finish");
   /* Skip verify of displaced_step_copy_insn_closure_by_addr, has predicate.  */
   /* Skip verify of displaced_step_restore_all_in_ptid, invalid_p == 0 */
+  if (gdbarch->displaced_step_buffer_length == 0)
+    gdbarch->displaced_step_buffer_length = gdbarch->max_insn_length;
+  if (gdbarch->displaced_step_buffer_length < gdbarch->max_insn_length)
+    log.puts ("\n\tdisplaced_step_buffer_length");
   /* Skip verify of relocate_instruction, has predicate.  */
   /* Skip verify of overlay_update, has predicate.  */
   /* Skip verify of core_read_description, has predicate.  */
@@ -1109,6 +1114,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: displaced_step_restore_all_in_ptid = <%s>\n",
 	      host_address_to_string (gdbarch->displaced_step_restore_all_in_ptid));
+  gdb_printf (file,
+	      "gdbarch_dump: displaced_step_buffer_length = %s\n",
+	      plongest (gdbarch->displaced_step_buffer_length));
   gdb_printf (file,
 	      "gdbarch_dump: gdbarch_relocate_instruction_p() = %d\n",
 	      gdbarch_relocate_instruction_p (gdbarch));
@@ -4155,6 +4163,24 @@ set_gdbarch_displaced_step_restore_all_in_ptid (struct gdbarch *gdbarch,
 						gdbarch_displaced_step_restore_all_in_ptid_ftype displaced_step_restore_all_in_ptid)
 {
   gdbarch->displaced_step_restore_all_in_ptid = displaced_step_restore_all_in_ptid;
+}
+
+ULONGEST
+gdbarch_displaced_step_buffer_length (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Check variable is valid.  */
+  gdb_assert (!(gdbarch->displaced_step_buffer_length < gdbarch->max_insn_length));
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_displaced_step_buffer_length called\n");
+  return gdbarch->displaced_step_buffer_length;
+}
+
+void
+set_gdbarch_displaced_step_buffer_length (struct gdbarch *gdbarch,
+					  ULONGEST displaced_step_buffer_length)
+{
+  gdbarch->displaced_step_buffer_length = displaced_step_buffer_length;
 }
 
 bool
