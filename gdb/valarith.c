@@ -883,43 +883,43 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   switch (op)
     {
     case BINOP_ADD:
-      mpq_add (res.val, v1.val, v2.val);
+      res = v1 + v2;
       val = fixed_point_to_value (res);
       break;
 
     case BINOP_SUB:
-      mpq_sub (res.val, v1.val, v2.val);
+      res = v1 - v2;
       val = fixed_point_to_value (res);
       break;
 
     case BINOP_MIN:
-      val = fixed_point_to_value (mpq_cmp (v1.val, v2.val) < 0 ? v1 : v2);
+      val = fixed_point_to_value (std::min (v1, v2));
       break;
 
     case BINOP_MAX:
-      val = fixed_point_to_value (mpq_cmp (v1.val, v2.val) > 0 ? v1 : v2);
+      val = fixed_point_to_value (std::max (v1, v2));
       break;
 
     case BINOP_MUL:
-      mpq_mul (res.val, v1.val, v2.val);
+      res = v1 * v2;
       val = fixed_point_to_value (res);
       break;
 
     case BINOP_DIV:
-      if (mpq_sgn (v2.val) == 0)
+      if (v2.sgn () == 0)
 	error (_("Division by zero"));
-      mpq_div (res.val, v1.val, v2.val);
+      res = v1 / v2;
       val = fixed_point_to_value (res);
       break;
 
     case BINOP_EQUAL:
       val = value_from_ulongest (language_bool_type (language, gdbarch),
-				 mpq_cmp (v1.val, v2.val) == 0 ? 1 : 0);
+				 v1 == v2 ? 1 : 0);
       break;
 
     case BINOP_LESS:
       val = value_from_ulongest (language_bool_type (language, gdbarch),
-				 mpq_cmp (v1.val, v2.val) < 0 ? 1 : 0);
+				 v1 < v2 ? 1 : 0);
       break;
 
     default:

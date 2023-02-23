@@ -245,6 +245,13 @@ struct gdb_mpq
     mpq_canonicalize (val);
   }
 
+  gdb_mpq (long num, long denom)
+  {
+    mpq_init (val);
+    mpq_set_si (val, num, denom);
+    mpq_canonicalize (val);
+  }
+
   /* Copy assignment operator.  */
   gdb_mpq &operator= (const gdb_mpq &from)
   {
@@ -264,6 +271,67 @@ struct gdb_mpq
     return *this;
   }
 
+  gdb_mpq &operator= (double d)
+  {
+    mpq_set_d (val, d);
+    return *this;
+  }
+
+  /* Return the sign of this value.  This returns -1 for a negative
+     value, 0 if the value is 0, and 1 for a positive value.  */
+  int sgn () const
+  { return mpq_sgn (val); }
+
+  gdb_mpq operator+ (const gdb_mpq &other) const
+  {
+    gdb_mpq result;
+    mpq_add (result.val, val, other.val);
+    return result;
+  }
+
+  gdb_mpq operator- (const gdb_mpq &other) const
+  {
+    gdb_mpq result;
+    mpq_sub (result.val, val, other.val);
+    return result;
+  }
+
+  gdb_mpq operator* (const gdb_mpq &other) const
+  {
+    gdb_mpq result;
+    mpq_mul (result.val, val, other.val);
+    return result;
+  }
+
+  gdb_mpq operator/ (const gdb_mpq &other) const
+  {
+    gdb_mpq result;
+    mpq_div (result.val, val, other.val);
+    return result;
+  }
+
+  gdb_mpq &operator*= (const gdb_mpq &other)
+  {
+    mpq_mul (val, val, other.val);
+    return *this;
+  }
+
+  gdb_mpq &operator/= (const gdb_mpq &other)
+  {
+    mpq_div (val, val, other.val);
+    return *this;
+  }
+
+  bool operator== (const gdb_mpq &other) const
+  {
+    return mpq_cmp (val, other.val) == 0;
+  }
+
+  bool operator< (const gdb_mpq &other) const
+  {
+    return mpq_cmp (val, other.val) < 0;
+  }
+
   /* Return a string representing VAL as "<numerator> / <denominator>".  */
   std::string str () const { return gmp_string_printf ("%Qd", val); }
 
@@ -277,6 +345,10 @@ struct gdb_mpq
     mpz_tdiv_q (result.m_val, mpq_numref (val), mpq_denref (val));
     return result;
   }
+
+  /* Return this value converted to a host double.  */
+  double as_double () const
+  { return mpq_get_d (val); }
 
   /* Set VAL from the contents of the given byte array (BUF), which
      contains the unscaled value of a fixed point type object.

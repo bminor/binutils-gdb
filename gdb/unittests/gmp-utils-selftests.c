@@ -399,8 +399,8 @@ read_fp_test (int unscaled, const gdb_mpq &scaling_factor,
 
   actual.read_fixed_point ({buf, len}, byte_order, 0, scaling_factor);
 
-  mpq_set_si (expected.val, unscaled, 1);
-  mpq_mul (expected.val, expected.val, scaling_factor.val);
+  expected = gdb_mpq (unscaled, 1);
+  expected *= scaling_factor;
 }
 
 /* Perform various tests of the gdb_mpq::read_fixed_point method.  */
@@ -409,38 +409,37 @@ static void
 gdb_mpq_read_fixed_point ()
 {
   gdb_mpq expected, actual;
-  gdb_mpq scaling_factor;
 
   /* Pick an arbitrary scaling_factor; this operation is trivial enough
      thanks to GMP that the value we use isn't really important.  */
-  mpq_set_ui (scaling_factor.val, 3, 5);
+  gdb_mpq scaling_factor (3, 5);
 
   /* Try a few values, both negative and positive... */
 
   read_fp_test (-256, scaling_factor, BFD_ENDIAN_BIG, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
   read_fp_test (-256, scaling_factor, BFD_ENDIAN_LITTLE, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
 
   read_fp_test (-1, scaling_factor, BFD_ENDIAN_BIG, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
   read_fp_test (-1, scaling_factor, BFD_ENDIAN_LITTLE, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
 
   read_fp_test (0, scaling_factor, BFD_ENDIAN_BIG, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
   read_fp_test (0, scaling_factor, BFD_ENDIAN_LITTLE, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
 
   read_fp_test (1, scaling_factor, BFD_ENDIAN_BIG, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
   read_fp_test (1, scaling_factor, BFD_ENDIAN_LITTLE, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
 
   read_fp_test (1025, scaling_factor, BFD_ENDIAN_BIG, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
   read_fp_test (1025, scaling_factor, BFD_ENDIAN_LITTLE, expected, actual);
-  SELF_CHECK (mpq_cmp (actual.val, expected.val) == 0);
+  SELF_CHECK (actual == expected);
 }
 
 /* A helper function which builds a gdb_mpq object from the given
@@ -463,9 +462,7 @@ write_fp_test (int numerator, unsigned int denominator,
   gdb_byte buf[len];
   memset (buf, 0, len);
 
-  gdb_mpq v;
-  mpq_set_si (v.val, numerator, denominator);
-  mpq_canonicalize (v.val);
+  gdb_mpq v (numerator, denominator);
   v.write_fixed_point ({buf, len}, byte_order, 0, scaling_factor);
 
   return extract_unsigned_integer (buf, len, byte_order);
@@ -479,8 +476,7 @@ gdb_mpq_write_fixed_point ()
   /* Pick an arbitrary factor; this operations is sufficiently trivial
      with the use of GMP that the value of this factor is not really
      all that important.  */
-  gdb_mpq scaling_factor;
-  mpq_set_ui (scaling_factor.val, 1, 3);
+  gdb_mpq scaling_factor (1, 3);
 
   gdb_mpq vq;
 

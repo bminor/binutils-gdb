@@ -341,11 +341,7 @@ value_to_gdb_mpq (struct value *value)
 
   gdb_mpq result;
   if (is_floating_type (type))
-    {
-      double d = target_float_to_host_double (value->contents ().data (),
-					      type);
-      mpq_set_d (result.val, d);
-    }
+    result = target_float_to_host_double (value->contents ().data (), type);
   else
     {
       gdb_assert (is_integral_type (type)
@@ -357,8 +353,7 @@ value_to_gdb_mpq (struct value *value)
       result = vz;
 
       if (is_fixed_point_type (type))
-	mpq_mul (result.val, result.val,
-		 type->fixed_point_scaling_factor ().val);
+	result *= type->fixed_point_scaling_factor ();
     }
 
   return result;
@@ -386,7 +381,7 @@ value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
   /* Divide that value by the scaling factor to obtain the unscaled
      value, first in rational form, and then in integer form.  */
 
-  mpq_div (vq.val, vq.val, to_type->fixed_point_scaling_factor ().val);
+  vq /= to_type->fixed_point_scaling_factor ();
   gdb_mpz unscaled = vq.get_rounded ();
 
   /* Finally, create the result value, and pack the unscaled value
@@ -559,7 +554,7 @@ value_cast (struct type *type, struct value *arg2)
 
 	  struct value *v = value::allocate (to_type);
 	  target_float_from_host_double (v->contents_raw ().data (),
-					 to_type, mpq_get_d (fp_val.val));
+					 to_type, fp_val.as_double ());
 	  return v;
 	}
 
