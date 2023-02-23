@@ -14746,10 +14746,10 @@ get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
 						   &len);
 	  if (ptr - blk->data + len <= blk->size)
 	    {
-	      mpz_import (value->val, len,
-			  bfd_big_endian (cu->per_objfile->objfile->obfd.get ())
-			  ? 1 : -1,
-			  1, 0, 0, ptr);
+	      value->read (gdb::make_array_view (ptr, len),
+			   bfd_big_endian (cu->per_objfile->objfile->obfd.get ())
+			   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE,
+			   true);
 	      return;
 	    }
 	}
@@ -14760,10 +14760,10 @@ get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
   else if (attr->form_is_block ())
     {
       dwarf_block *blk = attr->as_block ();
-      mpz_import (value->val, blk->size,
-		  bfd_big_endian (cu->per_objfile->objfile->obfd.get ())
-		  ? 1 : -1,
-		  1, 0, 0, blk->data);
+      value->read (gdb::make_array_view (blk->data, blk->size),
+		   bfd_big_endian (cu->per_objfile->objfile->obfd.get ())
+		   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE,
+		   true);
     }
   else
     *value = gdb_mpz (attr->constant_value (1));
@@ -14815,19 +14815,19 @@ get_dwarf2_unsigned_rational_constant (struct die_info *die,
   gdb_mpz denom (1);
 
   get_dwarf2_rational_constant (die, cu, &num, &denom);
-  if (mpz_sgn (num.val) == -1 && mpz_sgn (denom.val) == -1)
+  if (num < 0 && denom < 0)
     {
-      mpz_neg (num.val, num.val);
-      mpz_neg (denom.val, denom.val);
+      num.negate ();
+      denom.negate ();
     }
-  else if (mpz_sgn (num.val) == -1)
+  else if (num < 0)
     {
       complaint (_("unexpected negative value for DW_AT_GNU_numerator"
 		   " in DIE at %s"),
 		 sect_offset_str (die->sect_off));
       return;
     }
-  else if (mpz_sgn (denom.val) == -1)
+  else if (denom < 0)
     {
       complaint (_("unexpected negative value for DW_AT_GNU_denominator"
 		   " in DIE at %s"),
@@ -14866,10 +14866,7 @@ ada_get_gnat_encoded_number (const char *encoding, int &k, gdb_mpz *result)
     return false;
 
   std::string copy (&encoding[start], k - start);
-  if (mpz_set_str (result->val, copy.c_str (), 10) == -1)
-    return false;
-
-  return true;
+  return result->set (copy.c_str (), 10);
 }
 
 /* Scan two numbers from ENCODING at OFFSET, assuming the string is of
@@ -14949,16 +14946,16 @@ finish_fixed_point_type (struct type *type, const char *suffix,
   else if (attr->name == DW_AT_binary_scale)
     {
       LONGEST scale_exp = attr->constant_value (0);
-      gdb_mpz *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
+      gdb_mpz &num_or_denom = scale_exp > 0 ? scale_num : scale_denom;
 
-      mpz_mul_2exp (num_or_denom->val, num_or_denom->val, std::abs (scale_exp));
+      num_or_denom <<= std::abs (scale_exp);
     }
   else if (attr->name == DW_AT_decimal_scale)
     {
       LONGEST scale_exp = attr->constant_value (0);
-      gdb_mpz *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
+      gdb_mpz &num_or_denom = scale_exp > 0 ? scale_num : scale_denom;
 
-      mpz_ui_pow_ui (num_or_denom->val, 10, std::abs (scale_exp));
+      num_or_denom = gdb_mpz::pow (10, std::abs (scale_exp));
     }
   else if (attr->name == DW_AT_small)
     {
@@ -14982,10 +14979,7 @@ finish_fixed_point_type (struct type *type, const char *suffix,
 		 sect_offset_str (die->sect_off));
     }
 
-  gdb_mpq &scaling_factor = type->fixed_point_info ().scaling_factor;
-  mpz_set (mpq_numref (scaling_factor.val), scale_num.val);
-  mpz_set (mpq_denref (scaling_factor.val), scale_denom.val);
-  mpq_canonicalize (scaling_factor.val);
+  type->fixed_point_info ().scaling_factor = gdb_mpq (scale_num, scale_denom);
 }
 
 /* The gnat-encoding suffix for fixed point.  */
@@ -15066,7 +15060,7 @@ has_zero_over_zero_small_attribute (struct die_info *die,
 
   gdb_mpz num (1), denom (1);
   get_dwarf2_rational_constant (scale_die, cu, &num, &denom);
-  return mpz_sgn (num.val) == 0 && mpz_sgn (denom.val) == 0;
+  return num == 0 && denom == 0;
 }
 
 /* Initialise and return a floating point type of size BITS suitable for

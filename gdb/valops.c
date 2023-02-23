@@ -354,7 +354,7 @@ value_to_gdb_mpq (struct value *value)
       gdb_mpz vz;
       vz.read (value->contents (), type_byte_order (type),
 	       type->is_unsigned ());
-      mpq_set_z (result.val, vz.val);
+      result = vz;
 
       if (is_fixed_point_type (type))
 	mpq_mul (result.val, result.val,

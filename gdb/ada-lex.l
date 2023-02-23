@@ -422,14 +422,14 @@ processInt (struct parser_state *par_state, const char *base0,
       int dig = fromhex (*num0);
       if (dig >= base)
 	error (_("Invalid digit `%c' in based literal"), *num0);
-      mpz_mul_ui (result.val, result.val, base);
-      mpz_add_ui (result.val, result.val, dig);
+      result *= base;
+      result += dig;
       ++num0;
     }
 
   while (exp > 0)
     {
-      mpz_mul_ui (result.val, result.val, base);
+      result *= base;
       exp -= 1;
     }
 
@@ -462,8 +462,7 @@ processInt (struct parser_state *par_state, const char *base0,
       return FLOAT;
     }
 
-  gdb_mpz maxval (ULONGEST_MAX);
-  if (mpz_cmp (result.val, maxval.val) > 0)
+  if (result > gdb_mpz (ULONGEST_MAX))
     error (_("Integer literal out of range"));
 
   int int_bits = gdbarch_int_bit (par_state->gdbarch ());

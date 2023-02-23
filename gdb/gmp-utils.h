@@ -89,6 +89,21 @@ struct gdb_mpz
     return *this;
   }
 
+  /* Initialize this value from a string and a base.  Returns true if
+     the string was parsed successfully, false otherwise.  */
+  bool set (const char *str, int base)
+  {
+    return mpz_set_str (val, str, base) != -1;
+  }
+
+  /* Return a new value that is BASE**EXP.  */
+  static gdb_mpz pow (unsigned long base, unsigned long exp)
+  {
+    gdb_mpz result;
+    mpz_ui_pow_ui (result.val, base, exp);
+    return result;
+  }
+
   /* Convert VAL to an integer of the given type.
 
      The return type can signed or unsigned, with no size restriction.  */
@@ -114,6 +129,56 @@ struct gdb_mpz
 
   /* The destructor.  */
   ~gdb_mpz () { mpz_clear (val); }
+
+  /* Negate this value in place.  */
+  void negate ()
+  {
+    mpz_neg (val, val);
+  }
+
+  gdb_mpz &operator*= (long other)
+  {
+    mpz_mul_si (val, val, other);
+    return *this;
+  }
+
+  gdb_mpz &operator+= (unsigned long other)
+  {
+    mpz_add_ui (val, val, other);
+    return *this;
+  }
+
+  gdb_mpz &operator-= (unsigned long other)
+  {
+    mpz_sub_ui (val, val, other);
+    return *this;
+  }
+
+  gdb_mpz &operator<<= (unsigned long nbits)
+  {
+    mpz_mul_2exp (val, val, nbits);
+    return *this;
+  }
+
+  bool operator> (const gdb_mpz &other) const
+  {
+    return mpz_cmp (val, other.val) > 0;
+  }
+
+  bool operator< (int other) const
+  {
+    return mpz_cmp_si (val, other) < 0;
+  }
+
+  bool operator== (int other) const
+  {
+    return mpz_cmp_si (val, other) == 0;
+  }
+
+  bool operator== (const gdb_mpz &other) const
+  {
+    return mpz_cmp (val, other.val) == 0;
+  }
 
 private:
 
@@ -166,6 +231,14 @@ struct gdb_mpq
     mpq_swap (val, from.val);
   }
 
+  gdb_mpq (const gdb_mpz &num, const gdb_mpz &denom)
+  {
+    mpq_init (val);
+    mpz_set (mpq_numref (val), num.val);
+    mpz_set (mpq_denref (val), denom.val);
+    mpq_canonicalize (val);
+  }
+
   /* Copy assignment operator.  */
   gdb_mpq &operator= (const gdb_mpq &from)
   {
@@ -179,11 +252,25 @@ struct gdb_mpq
     return *this;
   }
 
+  gdb_mpq &operator= (const gdb_mpz &from)
+  {
+    mpq_set_z (val, from.val);
+    return *this;
+  }
+
   /* Return a string representing VAL as "<numerator> / <denominator>".  */
   std::string str () const { return gmp_string_printf ("%Qd", val); }
 
   /* Return VAL rounded to the nearest integer.  */
   gdb_mpz get_rounded () const;
+
+  /* Return this value as an integer, rounded toward zero.  */
+  gdb_mpz as_integer () const
+  {
+    gdb_mpz result;
+    mpz_tdiv_q (result.val, mpq_numref (val), mpq_denref (val));
+    return result;
+  }
 
   /* Set VAL from the contents of the given byte array (BUF), which
      contains the unscaled value of a fixed point type object.

@@ -2732,8 +2732,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 			     byte_order, nosign,
 			     type->fixed_point_scaling_factor ());
 
-	gdb_mpz vz;
-	mpz_tdiv_q (vz.val, mpq_numref (vq.val), mpq_denref (vq.val));
+	gdb_mpz vz = vq.as_integer ();
 	return vz.as_integer<LONGEST> ();
       }
 
