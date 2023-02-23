@@ -214,126 +214,124 @@ private:
 
 struct gdb_mpq
 {
-  mpq_t val;
-
   /* Constructors.  */
-  gdb_mpq () { mpq_init (val); }
+  gdb_mpq () { mpq_init (m_val); }
 
   explicit gdb_mpq (const mpq_t &from_val)
   {
-    mpq_init (val);
-    mpq_set (val, from_val);
+    mpq_init (m_val);
+    mpq_set (m_val, from_val);
   }
 
   gdb_mpq (const gdb_mpq &from)
   {
-    mpq_init (val);
-    mpq_set (val, from.val);
+    mpq_init (m_val);
+    mpq_set (m_val, from.m_val);
   }
 
   explicit gdb_mpq (gdb_mpq &&from)
   {
-    mpq_init (val);
-    mpq_swap (val, from.val);
+    mpq_init (m_val);
+    mpq_swap (m_val, from.m_val);
   }
 
   gdb_mpq (const gdb_mpz &num, const gdb_mpz &denom)
   {
-    mpq_init (val);
-    mpz_set (mpq_numref (val), num.m_val);
-    mpz_set (mpq_denref (val), denom.m_val);
-    mpq_canonicalize (val);
+    mpq_init (m_val);
+    mpz_set (mpq_numref (m_val), num.m_val);
+    mpz_set (mpq_denref (m_val), denom.m_val);
+    mpq_canonicalize (m_val);
   }
 
   gdb_mpq (long num, long denom)
   {
-    mpq_init (val);
-    mpq_set_si (val, num, denom);
-    mpq_canonicalize (val);
+    mpq_init (m_val);
+    mpq_set_si (m_val, num, denom);
+    mpq_canonicalize (m_val);
   }
 
   /* Copy assignment operator.  */
   gdb_mpq &operator= (const gdb_mpq &from)
   {
-    mpq_set (val, from.val);
+    mpq_set (m_val, from.m_val);
     return *this;
   }
 
   gdb_mpq &operator= (gdb_mpq &&from)
   {
-    mpq_swap (val, from.val);
+    mpq_swap (m_val, from.m_val);
     return *this;
   }
 
   gdb_mpq &operator= (const gdb_mpz &from)
   {
-    mpq_set_z (val, from.m_val);
+    mpq_set_z (m_val, from.m_val);
     return *this;
   }
 
   gdb_mpq &operator= (double d)
   {
-    mpq_set_d (val, d);
+    mpq_set_d (m_val, d);
     return *this;
   }
 
   /* Return the sign of this value.  This returns -1 for a negative
      value, 0 if the value is 0, and 1 for a positive value.  */
   int sgn () const
-  { return mpq_sgn (val); }
+  { return mpq_sgn (m_val); }
 
   gdb_mpq operator+ (const gdb_mpq &other) const
   {
     gdb_mpq result;
-    mpq_add (result.val, val, other.val);
+    mpq_add (result.m_val, m_val, other.m_val);
     return result;
   }
 
   gdb_mpq operator- (const gdb_mpq &other) const
   {
     gdb_mpq result;
-    mpq_sub (result.val, val, other.val);
+    mpq_sub (result.m_val, m_val, other.m_val);
     return result;
   }
 
   gdb_mpq operator* (const gdb_mpq &other) const
   {
     gdb_mpq result;
-    mpq_mul (result.val, val, other.val);
+    mpq_mul (result.m_val, m_val, other.m_val);
     return result;
   }
 
   gdb_mpq operator/ (const gdb_mpq &other) const
   {
     gdb_mpq result;
-    mpq_div (result.val, val, other.val);
+    mpq_div (result.m_val, m_val, other.m_val);
     return result;
   }
 
   gdb_mpq &operator*= (const gdb_mpq &other)
   {
-    mpq_mul (val, val, other.val);
+    mpq_mul (m_val, m_val, other.m_val);
     return *this;
   }
 
   gdb_mpq &operator/= (const gdb_mpq &other)
   {
-    mpq_div (val, val, other.val);
+    mpq_div (m_val, m_val, other.m_val);
     return *this;
   }
 
   bool operator== (const gdb_mpq &other) const
   {
-    return mpq_cmp (val, other.val) == 0;
+    return mpq_cmp (m_val, other.m_val) == 0;
   }
 
   bool operator< (const gdb_mpq &other) const
   {
-    return mpq_cmp (val, other.val) < 0;
+    return mpq_cmp (m_val, other.m_val) < 0;
   }
 
   /* Return a string representing VAL as "<numerator> / <denominator>".  */
-  std::string str () const { return gmp_string_printf ("%Qd", val); }
+  std::string str () const { return gmp_string_printf ("%Qd", m_val); }
 
   /* Return VAL rounded to the nearest integer.  */
   gdb_mpz get_rounded () const;
@@ -342,13 +340,13 @@ struct gdb_mpq
   gdb_mpz as_integer () const
   {
     gdb_mpz result;
-    mpz_tdiv_q (result.m_val, mpq_numref (val), mpq_denref (val));
+    mpz_tdiv_q (result.m_val, mpq_numref (m_val), mpq_denref (m_val));
     return result;
   }
 
   /* Return this value converted to a host double.  */
   double as_double () const
-  { return mpq_get_d (val); }
+  { return mpq_get_d (m_val); }
 
   /* Set VAL from the contents of the given byte array (BUF), which
      contains the unscaled value of a fixed point type object.
@@ -374,7 +372,13 @@ struct gdb_mpq
 			  const gdb_mpq &scaling_factor) const;
 
   /* The destructor.  */
-  ~gdb_mpq () { mpq_clear (val); }
+  ~gdb_mpq () { mpq_clear (m_val); }
+
+private:
+
+  friend struct gdb_mpf;
+
+  mpq_t m_val;
 };
 
 /* A class to make it easier to use GMP's mpf_t values within GDB.
@@ -405,7 +409,7 @@ struct gdb_mpf
     gdb_mpq tmp_q;
 
     tmp_q.read_fixed_point (buf, byte_order, unsigned_p, scaling_factor);
-    mpf_set_q (val, tmp_q.val);
+    mpf_set_q (val, tmp_q.m_val);
   }
 
   /* The destructor.  */

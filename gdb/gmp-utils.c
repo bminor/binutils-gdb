@@ -162,8 +162,8 @@ gdb_mpq::get_rounded () const
   /* Work with a positive number so as to make the "floor" rounding
      always round towards zero.  */
 
-  gdb_mpq abs_val (val);
-  mpq_abs (abs_val.val, abs_val.val);
+  gdb_mpq abs_val (m_val);
+  mpq_abs (abs_val.m_val, abs_val.m_val);
 
   /* Convert our rational number into a quotient and remainder,
      with "floor" rounding, which in our case means rounding
@@ -171,17 +171,17 @@ gdb_mpq::get_rounded () const
 
   gdb_mpz quotient, remainder;
   mpz_fdiv_qr (quotient.m_val, remainder.m_val,
-	       mpq_numref (abs_val.val), mpq_denref (abs_val.val));
+	       mpq_numref (abs_val.m_val), mpq_denref (abs_val.m_val));
 
   /* Multiply the remainder by 2, and see if it is greater or equal
      to abs_val's denominator.  If yes, round to the next integer.  */
 
   mpz_mul_ui (remainder.m_val, remainder.m_val, 2);
-  if (mpz_cmp (remainder.m_val, mpq_denref (abs_val.val)) >= 0)
+  if (mpz_cmp (remainder.m_val, mpq_denref (abs_val.m_val)) >= 0)
     mpz_add_ui (quotient.m_val, quotient.m_val, 1);
 
   /* Re-apply the sign if needed.  */
-  if (mpq_sgn (val) < 0)
+  if (mpq_sgn (m_val) < 0)
     mpz_neg (quotient.m_val, quotient.m_val);
 
   return quotient;
@@ -197,8 +197,8 @@ gdb_mpq::read_fixed_point (gdb::array_view<const gdb_byte> buf,
   gdb_mpz vz;
   vz.read (buf, byte_order, unsigned_p);
 
-  mpq_set_z (val, vz.m_val);
-  mpq_mul (val, val, scaling_factor.val);
+  mpq_set_z (m_val, vz.m_val);
+  mpq_mul (m_val, m_val, scaling_factor.m_val);
 }
 
 /* See gmp-utils.h.  */
@@ -208,9 +208,9 @@ gdb_mpq::write_fixed_point (gdb::array_view<gdb_byte> buf,
 			    enum bfd_endian byte_order, bool unsigned_p,
 			    const gdb_mpq &scaling_factor) const
 {
-  gdb_mpq unscaled (val);
+  gdb_mpq unscaled (m_val);
 
-  mpq_div (unscaled.val, unscaled.val, scaling_factor.val);
+  mpq_div (unscaled.m_val, unscaled.m_val, scaling_factor.m_val);
 
   gdb_mpz unscaled_z = unscaled.get_rounded ();
   unscaled_z.write (buf, byte_order, unsigned_p);
