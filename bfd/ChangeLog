@@ -1,3 +1,13 @@
+2023-02-23  Nick Clifton  <nickc@redhat.com>
+            Alan Modra  <amodra@gmail.com>
+
+	PR 30150
+	* dwarf2.c (comp_unit_contains_address): Renamed to ...
+	(comp_unit_may_contain_address): this, and added code to return
+	true if the CU's ranges have not yet been computed.
+	(_bfd_dwarf2_find_nearest_line_with_alt): Use the renamed
+	function, simplifying code in the process.
+
 2023-02-21  Nick Clifton  <nickc@redhat.com>
 
 	* opncls.c (bfd_fill_in_gnu_debuglink_section): Update

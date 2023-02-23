@@ -4643,21 +4643,20 @@ parse_comp_unit (struct dwarf2_debug *stash,
    really contains the given address.  */
 
 static bool
-comp_unit_contains_address (struct comp_unit *unit, bfd_vma addr)
+comp_unit_may_contain_address (struct comp_unit *unit, bfd_vma addr)
 {
   struct arange *arange;
 
   if (unit->error)
     return false;
 
-  arange = &unit->arange;
-  do
-    {
-      if (addr >= arange->low && addr < arange->high)
-	return true;
-      arange = arange->next;
-    }
-  while (arange);
+  if (unit->arange.high == 0 /* No ranges have been computed yet.  */
+      || unit->line_table == NULL) /* The line info table has not been loaded.  */
+    return true;
+
+  for (arange = &unit->arange; arange != NULL; arange = arange->next)
+    if (addr >= arange->low && addr < arange->high)
+      return true;
 
   return false;
 }
@@ -5890,8 +5889,7 @@ _bfd_dwarf2_find_nearest_line_with_alt
       /* Check the previously read comp. units first.  */
       for (each = stash->f.all_comp_units; each; each = each->next_unit)
 	if ((symbol->flags & BSF_FUNCTION) == 0
-	    || each->arange.high == 0
-	    || comp_unit_contains_address (each, addr))
+	    || comp_unit_may_contain_address (each, addr))
 	  {
 	    found = comp_unit_find_line (each, symbol, addr, filename_ptr,
 					 linenumber_ptr);
@@ -5973,13 +5971,11 @@ _bfd_dwarf2_find_nearest_line_with_alt
 	 address.  */
       if (do_line)
 	found = (((symbol->flags & BSF_FUNCTION) == 0
-		  || each->arange.high == 0
-		  || comp_unit_contains_address (each, addr))
+		  || comp_unit_may_contain_address (each, addr))
 		 && comp_unit_find_line (each, symbol, addr,
 					 filename_ptr, linenumber_ptr));
       else
-	found = ((each->arange.high == 0
-		  || comp_unit_contains_address (each, addr))
+	found = (comp_unit_may_contain_address (each, addr)
 		 && comp_unit_find_nearest_line (each, addr,
 						 filename_ptr,
 						 &function,
