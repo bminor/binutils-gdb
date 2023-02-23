@@ -5230,6 +5230,13 @@ literal_value_equal (const literal_value *src1,
      (if undefined or weak).  */
   h1 = r_reloc_get_hash_entry (&src1->r_rel);
   h2 = r_reloc_get_hash_entry (&src2->r_rel);
+
+  /* Keep start_stop literals always unique to avoid dropping it due to them
+     having late initialization.
+     Now they are equal because initialized with zeroed values.  */
+  if (h2 && h2->start_stop)
+      return false;
+
   if (r_reloc_is_defined (&src1->r_rel)
       && (final_static_link
 	  || ((!h1 || h1->root.type != bfd_link_hash_defweak)
