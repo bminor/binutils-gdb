@@ -1648,16 +1648,13 @@ amd64_classify_insn_at (struct gdbarch *gdbarch, CORE_ADDR addr,
 			int (*pred) (const struct amd64_insn *))
 {
   struct amd64_insn details;
-  gdb_byte *buf;
-  int len, classification;
 
-  len = gdbarch_max_insn_length (gdbarch);
-  buf = (gdb_byte *) alloca (len);
+  gdb::byte_vector buf (gdbarch_max_insn_length (gdbarch));
 
-  read_code (addr, buf, len);
-  amd64_get_insn_details (buf, &details);
+  read_code (addr, buf.data (), buf.size ());
+  amd64_get_insn_details (buf.data (), &details);
 
-  classification = pred (&details);
+  int classification = pred (&details);
 
   return classification;
 }
@@ -1836,21 +1833,21 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
   int len = gdbarch_max_insn_length (gdbarch);
   /* Extra space for sentinels.  */
   int fixup_sentinel_space = len;
-  gdb_byte *buf = (gdb_byte *) xmalloc (len + fixup_sentinel_space);
+  gdb::byte_vector buf (len + fixup_sentinel_space);
   struct amd64_insn insn_details;
   int offset = 0;
   LONGEST rel32, newrel;
   gdb_byte *insn;
   int insn_length;
 
-  read_memory (oldloc, buf, len);
+  read_memory (oldloc, buf.data (), len);
 
   /* Set up the sentinel space so we don't have to worry about running
      off the end of the buffer.  An excessive number of leading prefixes
      could otherwise cause this.  */
-  memset (buf + len, 0, fixup_sentinel_space);
+  memset (buf.data () + len, 0, fixup_sentinel_space);
 
-  insn = buf;
+  insn = buf.data ();
   amd64_get_insn_details (insn, &insn_details);
 
   insn_length = gdb_buffered_insn_length (gdbarch, insn, len, oldloc);
@@ -1945,7 +1942,7 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
     }
 
   /* Write the adjusted instruction into its displaced location.  */
-  append_insns (to, insn_length, buf);
+  append_insns (to, insn_length, buf.data ());
 }
 
 
