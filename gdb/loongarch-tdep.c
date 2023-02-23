@@ -520,6 +520,10 @@ compute_struct_member (struct type *type,
 {
   for (int i = 0; i < type->num_fields (); i++)
     {
+      /* Ignore any static fields.  */
+      if (field_is_static (&type->field (i)))
+	continue;
+
       struct type *field_type = check_typedef (type->field (i).type ());
 
       if (field_type->code () == TYPE_CODE_INT
