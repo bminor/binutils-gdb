@@ -31,25 +31,26 @@
 
 std::string gmp_string_printf (const char *fmt, ...);
 
+struct gdb_mpq;
+struct gdb_mpf;
+
 /* A class to make it easier to use GMP's mpz_t values within GDB.  */
 
 struct gdb_mpz
 {
-  mpz_t val;
-
   /* Constructors.  */
-  gdb_mpz () { mpz_init (val); }
+  gdb_mpz () { mpz_init (m_val); }
 
   explicit gdb_mpz (const mpz_t &from_val)
   {
-    mpz_init (val);
-    mpz_set (val, from_val);
+    mpz_init (m_val);
+    mpz_set (m_val, from_val);
   }
 
   gdb_mpz (const gdb_mpz &from)
   {
-    mpz_init (val);
-    mpz_set (val, from.val);
+    mpz_init (m_val);
+    mpz_set (m_val, from.m_val);
   }
 
   /* Initialize using the given integral value.
@@ -59,26 +60,26 @@ struct gdb_mpz
   template<typename T, typename = gdb::Requires<std::is_integral<T>>>
   explicit gdb_mpz (T src)
   {
-    mpz_init (val);
+    mpz_init (m_val);
     set (src);
   }
 
   explicit gdb_mpz (gdb_mpz &&from)
   {
-    mpz_init (val);
-    mpz_swap (val, from.val);
+    mpz_init (m_val);
+    mpz_swap (m_val, from.m_val);
   }
 
   
   gdb_mpz &operator= (const gdb_mpz &from)
   {
-    mpz_set (val, from.val);
+    mpz_set (m_val, from.m_val);
     return *this;
   }
 
   gdb_mpz &operator= (gdb_mpz &&other)
   {
-    mpz_swap (val, other.val);
+    mpz_swap (m_val, other.m_val);
     return *this;
   }
 
@@ -93,14 +94,14 @@ struct gdb_mpz
      the string was parsed successfully, false otherwise.  */
   bool set (const char *str, int base)
   {
-    return mpz_set_str (val, str, base) != -1;
+    return mpz_set_str (m_val, str, base) != -1;
   }
 
   /* Return a new value that is BASE**EXP.  */
   static gdb_mpz pow (unsigned long base, unsigned long exp)
   {
     gdb_mpz result;
-    mpz_ui_pow_ui (result.val, base, exp);
+    mpz_ui_pow_ui (result.m_val, base, exp);
     return result;
   }
 
@@ -125,59 +126,59 @@ struct gdb_mpz
 	      bool unsigned_p) const;
 
   /* Return a string containing VAL.  */
-  std::string str () const { return gmp_string_printf ("%Zd", val); }
+  std::string str () const { return gmp_string_printf ("%Zd", m_val); }
 
   /* The destructor.  */
-  ~gdb_mpz () { mpz_clear (val); }
+  ~gdb_mpz () { mpz_clear (m_val); }
 
   /* Negate this value in place.  */
   void negate ()
   {
-    mpz_neg (val, val);
+    mpz_neg (m_val, m_val);
   }
 
   gdb_mpz &operator*= (long other)
   {
-    mpz_mul_si (val, val, other);
+    mpz_mul_si (m_val, m_val, other);
     return *this;
   }
 
   gdb_mpz &operator+= (unsigned long other)
   {
-    mpz_add_ui (val, val, other);
+    mpz_add_ui (m_val, m_val, other);
     return *this;
   }
 
   gdb_mpz &operator-= (unsigned long other)
   {
-    mpz_sub_ui (val, val, other);
+    mpz_sub_ui (m_val, m_val, other);
     return *this;
   }
 
   gdb_mpz &operator<<= (unsigned long nbits)
   {
-    mpz_mul_2exp (val, val, nbits);
+    mpz_mul_2exp (m_val, m_val, nbits);
     return *this;
   }
 
   bool operator> (const gdb_mpz &other) const
   {
-    return mpz_cmp (val, other.val) > 0;
+    return mpz_cmp (m_val, other.m_val) > 0;
   }
 
   bool operator< (int other) const
   {
-    return mpz_cmp_si (val, other) < 0;
+    return mpz_cmp_si (m_val, other) < 0;
   }
 
   bool operator== (int other) const
   {
-    return mpz_cmp_si (val, other) == 0;
+    return mpz_cmp_si (m_val, other) == 0;
   }
 
   bool operator== (const gdb_mpz &other) const
   {
-    return mpz_cmp (val, other.val) == 0;
+    return mpz_cmp (m_val, other.m_val) == 0;
   }
 
 private:
@@ -202,6 +203,11 @@ private:
     being exported.  */
   void safe_export (gdb::array_view<gdb_byte> buf,
 		    int endian, bool unsigned_p) const;
+
+  friend struct gdb_mpq;
+  friend struct gdb_mpf;
+
+  mpz_t m_val;
 };
 
 /* A class to make it easier to use GMP's mpq_t values within GDB.  */
@@ -234,8 +240,8 @@ struct gdb_mpq
   gdb_mpq (const gdb_mpz &num, const gdb_mpz &denom)
   {
     mpq_init (val);
-    mpz_set (mpq_numref (val), num.val);
-    mpz_set (mpq_denref (val), denom.val);
+    mpz_set (mpq_numref (val), num.m_val);
+    mpz_set (mpq_denref (val), denom.m_val);
     mpq_canonicalize (val);
   }
 
@@ -254,7 +260,7 @@ struct gdb_mpq
 
   gdb_mpq &operator= (const gdb_mpz &from)
   {
-    mpq_set_z (val, from.val);
+    mpq_set_z (val, from.m_val);
     return *this;
   }
 
@@ -268,7 +274,7 @@ struct gdb_mpq
   gdb_mpz as_integer () const
   {
     gdb_mpz result;
-    mpz_tdiv_q (result.val, mpq_numref (val), mpq_denref (val));
+    mpz_tdiv_q (result.m_val, mpq_numref (val), mpq_denref (val));
     return result;
   }
 
@@ -340,7 +346,7 @@ template<typename T>
 void
 gdb_mpz::set (T src)
 {
-  mpz_import (val, 1 /* count */, -1 /* order */,
+  mpz_import (m_val, 1 /* count */, -1 /* order */,
 	      sizeof (T) /* size */, 0 /* endian (0 = native) */,
 	      0 /* nails */, &src /* op */);
   if (std::is_signed<T>::value && src < 0)
@@ -350,8 +356,8 @@ gdb_mpz::set (T src)
 	 the correct negative value.  */
       gdb_mpz neg_offset;
 
-      mpz_ui_pow_ui (neg_offset.val, 2, sizeof (T) * HOST_CHAR_BIT);
-      mpz_sub (val, val, neg_offset.val);
+      mpz_ui_pow_ui (neg_offset.m_val, 2, sizeof (T) * HOST_CHAR_BIT);
+      mpz_sub (m_val, m_val, neg_offset.m_val);
     }
 }
 
