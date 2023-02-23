@@ -20,8 +20,6 @@
 #ifndef GMP_UTILS_H
 #define GMP_UTILS_H
 
-#include "defs.h"
-
 /* Include <stdio.h> and <stdarg.h> ahead of <gmp.h>, so as to get
    access to GMP's various formatting functions.  */
 #include <stdio.h>
