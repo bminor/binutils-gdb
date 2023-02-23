@@ -5390,7 +5390,7 @@ proc_xfer_memory (CORE_ADDR memaddr, unsigned char *readbuf,
       if (lseek (fd, memaddr, SEEK_SET) != -1)
 	bytes = (readbuf != nullptr
 		 ? read (fd, readbuf, len)
-		 ? write (fd, writebuf, len));
+		 : write (fd, writebuf, len));
 #endif
 
       if (bytes < 0)
