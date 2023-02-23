@@ -31,6 +31,12 @@ templ<basic_string> s;
 
 basic_string bs;
 
+class Other
+{
+};
+
+Other ovar;
+
 int main()
 {
   return 0;
