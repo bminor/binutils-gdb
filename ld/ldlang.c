@@ -1773,7 +1773,7 @@ output_prev_sec_find (lang_output_section_statement_type *os)
       if (lookup->constraint < 0)
 	continue;
 
-      if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
+      if (lookup->bfd_section != NULL)
 	return lookup->bfd_section;
     }
 
@@ -1792,13 +1792,13 @@ output_prev_sec_find (lang_output_section_statement_type *os)
    image symbols.  */
 
 static lang_statement_union_type **
-insert_os_after (lang_output_section_statement_type *after)
+insert_os_after (lang_statement_union_type *after)
 {
   lang_statement_union_type **where;
   lang_statement_union_type **assign = NULL;
   bool ignore_first;
 
-  ignore_first = after == (void *) lang_os_list.head;
+  ignore_first = after == lang_os_list.head;
 
   for (where = &after->header.next;
        *where != NULL;
@@ -1935,7 +1935,9 @@ lang_insert_orphan (asection *s,
 	  if (bfd_section == NULL)
 	    bfd_section = output_prev_sec_find (after);
 
-	  if (bfd_section != NULL && bfd_section != snew)
+	  if (bfd_section != NULL
+	      && bfd_section->owner != NULL
+	      && bfd_section != snew)
 	    place->section = &bfd_section->next;
 	}
 
@@ -2158,8 +2160,9 @@ lang_insert_orphan (asection *s,
 	  /* Place OS after AFTER if AFTER_NOTE is TRUE.  */
 	  if (place_after)
 	    {
-	      lang_statement_union_type **where = insert_os_after (after);
+	      lang_statement_union_type **where;
 
+	      where = insert_os_after ((lang_statement_union_type *) after);
 	      *add.tail = *where;
 	      *where = add.head;
 
@@ -4369,21 +4372,55 @@ process_insert_statements (lang_statement_union_type **start)
 		      else
 			link_info.output_bfd->section_last = first_sec->prev;
 		      /* Add back.  */
-		      last_sec->next = sec->next;
-		      if (sec->next != NULL)
-			sec->next->prev = last_sec;
+		      if (sec->owner == NULL)
+			/* SEC is the absolute section, from the
+			   first dummy output section statement.  Add
+			   back the sections we trimmed off to the
+			   start of the bfd sections.  */
+			sec = NULL;
+		      if (sec != NULL)
+			last_sec->next = sec->next;
+		      else
+			last_sec->next = link_info.output_bfd->sections;
+		      if (last_sec->next != NULL)
+			last_sec->next->prev = last_sec;
 		      else
 			link_info.output_bfd->section_last = last_sec;
 		      first_sec->prev = sec;
-		      sec->next = first_sec;
+		      if (first_sec->prev != NULL)
+			first_sec->prev->next = first_sec;
+		      else
+			link_info.output_bfd->sections = first_sec;
 		    }
 		}
-
-	      first_os = NULL;
-	      last_os = NULL;
 	    }
 
-	  ptr = insert_os_after (where);
+	  lang_statement_union_type *after = (void *) where;
+	  if (where == &lang_os_list.head->output_section_statement
+	      && where->next == first_os)
+	    {
+	      /* PR30155.  Handle a corner case where the statement
+		 list is something like the following:
+		 . LOAD t.o
+		 . .data           0x0000000000000000        0x0
+		 .                 [0x0000000000000000]              b = .
+		 .  *(.data)
+		 .  .data          0x0000000000000000        0x0 t.o
+		 .                 0x0000000000000000        0x4 LONG 0x0
+		 . INSERT BEFORE .text.start
+		 .                 [0x0000000000000004]              a = .
+		 . .text.start     0x0000000000000000        0x0
+		 .                 [0x0000000000000000]              c = .
+		 . OUTPUT(a.out elf64-x86-64)
+		 Here we do not want to allow insert_os_after to
+		 choose a point inside the list we are moving.
+		 That would lose the list.  Instead, let
+		 insert_os_after work from the INSERT, which in this
+		 particular example will result in inserting after
+		 the assignment "a = .".  */
+	      after = *s;
+	    }
+	  ptr = insert_os_after (after);
 	  /* Snip everything from the start of the list, up to and
 	     including the insert statement we are currently processing.  */
 	  first = *start;
@@ -4394,6 +4431,8 @@ process_insert_statements (lang_statement_union_type **start)
 	    statement_list.tail = s;
 	  *ptr = first;
 	  s = start;
+	  first_os = NULL;
+	  last_os = NULL;
 	  continue;
 	}
       s = &(*s)->header.next;
