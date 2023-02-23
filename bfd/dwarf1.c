@@ -301,13 +301,13 @@ parse_line_table (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
       bfd_size_type size;
 
       msec = bfd_get_section_by_name (stash->abfd, ".line");
-      if (! msec)
+      if (! msec || (msec->flags & SEC_HAS_CONTENTS) == 0)
 	return false;
 
       size = msec->rawsize ? msec->rawsize : msec->size;
       stash->line_section
-	= bfd_simple_get_relocated_section_contents
-	(stash->abfd, msec, NULL, stash->syms);
+	= bfd_simple_get_relocated_section_contents (stash->abfd, msec, NULL,
+						     stash->syms);
 
       if (! stash->line_section)
 	return false;
