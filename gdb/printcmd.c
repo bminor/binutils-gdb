@@ -349,7 +349,9 @@ float_type_from_length (struct type *type)
   struct gdbarch *gdbarch = type->arch ();
   const struct builtin_type *builtin = builtin_type (gdbarch);
 
-  if (type->length () == builtin->builtin_float->length ())
+  if (type->length () == builtin->builtin_half->length ())
+    type = builtin->builtin_half;
+  else if (type->length () == builtin->builtin_float->length ())
     type = builtin->builtin_float;
   else if (type->length () == builtin->builtin_double->length ())
     type = builtin->builtin_double;
