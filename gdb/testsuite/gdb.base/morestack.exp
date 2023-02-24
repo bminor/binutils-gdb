@@ -15,7 +15,7 @@
 
 require is_c_compiler_gcc
 
-require {expr [have_compile_flag -fsplit-stack]}
+require {have_compile_flag -fsplit-stack}
 
 standard_testfile
 
