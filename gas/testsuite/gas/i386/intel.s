@@ -205,8 +205,8 @@ foo:
  rcl    dword ptr 0x90909090[eax]
  rcl    byte ptr 0x90909090[eax], cl
  rcl    dword ptr 0x90909090[eax], cl
- aam    0xffffff90
- aad    0xffffff90
+ aam    0x90
+ aad    0x90
  xlat   byte ptr ds:[ebx]
  fcom   dword ptr 0x90909090[eax]
  fst    dword ptr 0x90909090[eax]

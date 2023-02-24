@@ -202,8 +202,8 @@ foo:
  rcll   0x90909090(%eax)
  rclb   %cl,0x90909090(%eax)
  rcll   %cl,0x90909090(%eax)
- aam    $0xffffff90
- aad    $0xffffff90
+ aam    $0x90
+ aad    $0x90
  xlat   %ds:(%ebx)
  fcoms  0x90909090(%eax)
  fsts   0x90909090(%eax)

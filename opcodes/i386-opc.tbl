@@ -377,12 +377,12 @@ idiv, 0xf6/7, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword
 idiv, 0xf6/7, 0, W|CheckOperandSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 
 rol, 0xd0/0, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-rol, 0xc0/0, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+rol, 0xc0/0, i186, W|Modrm|No_sSuf, { Imm8|Imm8S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rol, 0xd2/0, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 rol, 0xd0/0, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 ror, 0xd0/1, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-ror, 0xc0/1, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+ror, 0xc0/1, i186, W|Modrm|No_sSuf, { Imm8|Imm8S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ror, 0xd2/1, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ror, 0xd0/1, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
@@ -1135,13 +1135,13 @@ prefetcht1, 0xf18/2, SSE|3dnowA, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 prefetcht2, 0xf18/3, SSE|3dnowA, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 psadbw, 0xff6, SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 psadbw<sse2>, 0x660ff6, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pshufw, 0xf70, SSE|3dnowA, Modrm|NoSuf, { Imm8, Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
+pshufw, 0xf70, SSE|3dnowA, Modrm|NoSuf, { Imm8|Imm8S, Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 rcpps<sse>, 0x0f53, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 rcpss<sse>, 0xf30f53, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 rsqrtps<sse>, 0x0f52, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 rsqrtss<sse>, 0xf30f52, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 sfence, 0xfaef8, SSE|3dnowA, NoSuf, {}
-shufps<sse>, 0x0fc6, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+shufps<sse>, 0x0fc6, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 sqrtps<sse>, 0x0f51, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sqrtss<sse>, 0xf30f51, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 stmxcsr<sse>, 0x0fae/3, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { Dword|Unspecified|BaseIndex }
@@ -1193,7 +1193,7 @@ movupd<sse2>, 0x660f10, <sse2:cpu>, D|Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecif
 mulpd<sse2>, 0x660f59, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 mulsd<sse2>, 0xf20f59, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 orpd<sse2>, 0x660f56, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-shufpd<sse2>, 0x660fc6, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+shufpd<sse2>, 0x660fc6, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 sqrtpd<sse2>, 0x660f51, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sqrtsd<sse2>, 0xf20f51, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 subpd<sse2>, 0x660f5c, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -1226,9 +1226,9 @@ movdq2q, 0xf20fd6, SSE2, Modrm|NoSuf, { RegXMM, RegMMX }
 movq2dq, 0xf30fd6, SSE2, Modrm|NoSuf, { RegMMX, RegXMM }
 pmuludq<sse2>, 0x660ff4, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmuludq, 0xff4, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-pshufd<sse2>, 0x660f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-pshufhw<sse2>, 0xf30f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-pshuflw<sse2>, 0xf20f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+pshufd<sse2>, 0x660f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+pshufhw<sse2>, 0xf30f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+pshuflw<sse2>, 0xf20f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 pslldq<sse2>, 0x660f73/7, <sse2:cpu>, Modrm|<sse2:shimm>|NoSuf, { Imm8, RegXMM }
 psrldq<sse2>, 0x660f73/3, <sse2:cpu>, Modrm|<sse2:shimm>|NoSuf, { Imm8, RegXMM }
 punpckhqdq<sse2>, 0x660f6d, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -1337,25 +1337,25 @@ pabsd<ssse3>, 0x<ssse3:pfx>0f381e, <ssse3:cpu>, Modrm|<ssse3:attr>|NoSuf, { <sss
 <sse41:cpu:attr:scal:vvvv, $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, $sse:SSE4_1:::>
 <sd:ppfx:spfx:opc:vexw:elem, s::f3:0:VexW0:Dword, d:66:f2:1:VexW1:Qword>
 
-blendp<sd><sse41>, 0x660f3a0c | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+blendp<sd><sse41>, 0x660f3a0c | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 blendvp<sd>, 0x664a | <sd:opc>, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|SSE2AVX, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 blendvp<sd>, 0x664a | <sd:opc>, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|Implicit1stXmm0|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
 blendvp<sd>, 0x660f3814 | <sd:opc>, SSE4_1, Modrm|NoSuf, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 blendvp<sd>, 0x660f3814 | <sd:opc>, SSE4_1, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-dpp<sd><sse41>, 0x660f3a40 | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+dpp<sd><sse41>, 0x660f3a40 | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 extractps, 0x6617, AVX, Modrm|Vex|Space0F3A|VexWIG|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg32|Dword|Unspecified|BaseIndex }
 extractps, 0x6617, AVX|x64, RegMem|Vex|Space0F3A|VexWIG|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg64 }
 extractps, 0x660f3a17, SSE4_1, Modrm|IgnoreSize|NoSuf, { Imm8, RegXMM, Reg32|Dword|Unspecified|BaseIndex }
 extractps, 0x660f3a17, SSE4_1|x64, RegMem|NoSuf|NoRex64, { Imm8, RegXMM, Reg64 }
 insertps<sse41>, 0x660f3a21, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 movntdqa<sse41>, 0x660f382a, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
-mpsadbw<sse41>, 0x660f3a42, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+mpsadbw<sse41>, 0x660f3a42, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 packusdw<sse41>, 0x660f382b, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x664c, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|SSE2AVX, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x664c, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|Implicit1stXmm0|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x660f3810, SSE4_1, Modrm|NoSuf, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x660f3810, SSE4_1, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pblendw<sse41>, 0x660f3a0e, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+pblendw<sse41>, 0x660f3a0e, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpeqq<sse41>, 0x660f3829, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pextr<bw><sse41>, 0x660f3a14 | <bw:opc>, <sse41:cpu>, RegMem|<sse41:attr>|NoSuf|IgnoreSize|NoRex64, { Imm8, RegXMM, Reg32|Reg64 }
 pextr<bw><sse41>, 0x660f3a14 | <bw:opc>, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Imm8, RegXMM, <bw:elem>|Unspecified|BaseIndex }
@@ -1445,7 +1445,7 @@ vaesenclast, 0x66dd, VAES, Modrm|Vex=2|Space0F38|VexVVVV=1|VexWIG|NoSuf, { RegYM
 
 <pclmul:cpu:attr, $avx:AVX|:Vex128|VexW0|SSE2AVX|VexVVVV, $sse::>
 
-pclmulqdq<pclmul>, 0x660f3a44, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmulqdq<pclmul>, 0x660f3a44, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 pclmullqlqdq<pclmul>, 0x660f3a44/0x00, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pclmulhqlqdq<pclmul>, 0x660f3a44/0x01, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pclmullqhqdq<pclmul>, 0x660f3a44/0x10, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -1484,7 +1484,7 @@ vaddsubpd, 0x66d0, AVX, Modrm|Vex|Space0F|VexVVVV=1|VexWIG|CheckOperandSize|NoSu
 vaddsubps, 0xf2d0, AVX, Modrm|Vex|Space0F|VexVVVV=1|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vandnp<sd>, 0x<sd:ppfx>55, AVX, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf|Optimize, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vandp<sd>, 0x<sd:ppfx>54, AVX, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vblendp<sd>, 0x660c | <sd:opc>, AVX, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vblendp<sd>, 0x660c | <sd:opc>, AVX, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vblendvp<sd>, 0x664a | <sd:opc>, AVX, Modrm|Vex|Space0F3A|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vbroadcastf128, 0x661a, AVX, Modrm|Vex=2|Space0F38|VexW=1|NoSuf, { Xmmword|Unspecified|BaseIndex, RegYMM }
 vbroadcastsd, 0x6619, AVX, Modrm|Vex256|Space0F38|VexW0|NoSuf, { Qword|Unspecified|BaseIndex, RegYMM }
@@ -1512,8 +1512,8 @@ vcvttps2dq, 0xf35b, AVX, Modrm|Vex|Space0F|VexWIG|NoSuf, { Unspecified|BaseIndex
 vcvtts<sd>2si, 0x<sd:spfx>2c, AVX, Modrm|VexLIG|Space0F|No_bSuf|No_wSuf|No_sSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 vdivp<sd>, 0x<sd:ppfx>5e, AVX, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vdivs<sd>, 0x<sd:spfx>5e, AVX, Modrm|VexLIG|Space0F|VexVVVV|VexWIG|NoSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vdppd, 0x6641, AVX, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vdpps, 0x6640, AVX, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vdppd, 0x6641, AVX, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vdpps, 0x6640, AVX, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vextractf128, 0x6619, AVX, Modrm|Vex=2|Space0F3A|VexW=1|NoSuf, { Imm8, RegYMM, Unspecified|BaseIndex|RegXMM }
 vextractps, 0x6617, AVX, Modrm|Vex|Space0F3A|VexWIG|NoSuf, { Imm8, RegXMM, Reg32|Dword|Unspecified|BaseIndex }
 vextractps, 0x6617, AVX|x64, RegMem|Vex|Space0F3A|VexWIG|NoSuf, { Imm8, RegXMM, Reg64 }
@@ -1562,7 +1562,7 @@ vmovs<sd>, 0x<sd:spfx>10, AVX, D|Modrm|VexLIG|Space0F|VexVVVV|VexWIG|NoSuf, { Re
 vmovshdup, 0xf316, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vmovsldup, 0xf312, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vmovup<sd>, 0x<sd:ppfx>10, AVX, D|Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
-vmpsadbw, 0x6642, AVX|AVX2, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vmpsadbw, 0x6642, AVX|AVX2, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vmulp<sd>, 0x<sd:ppfx>59, AVX, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vmuls<sd>, 0x<sd:spfx>59, AVX, Modrm|VexLIG|Space0F|VexVVVV|VexWIG|NoSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vorp<sd>, 0x<sd:ppfx>56, AVX, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
@@ -1582,7 +1582,7 @@ vpand, 0x66db, AVX|AVX2, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoS
 vpandn, 0x66df, AVX|AVX2, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf|Optimize, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpavg<bw>, 0x66e0 | (3 * <bw:opc>), AVX|AVX2, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpblendvb, 0x664c, AVX|AVX2, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpblendw, 0x660e, AVX|AVX2, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpblendw, 0x660e, AVX|AVX2, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpeq<bw>, 0x6674 | <bw:opc>, AVX|AVX2, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpeqd, 0x6676, AVX|AVX2, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpeqq, 0x6629, AVX|AVX2, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
@@ -1595,9 +1595,9 @@ vpcmpgtd, 0x6666, AVX|AVX2, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|No
 vpcmpgtq, 0x6637, AVX|AVX2, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpistri, 0x6663, AVX, Modrm|Vex|Space0F3A|VexWIG|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
 vpcmpistrm, 0x6662, AVX, Modrm|Vex|Space0F3A|VexWIG|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
-vperm2f128, 0x6606, AVX, Modrm|Vex=2|Space0F3A|VexVVVV=1|VexW=1|NoSuf, { Imm8, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vperm2f128, 0x6606, AVX, Modrm|Vex=2|Space0F3A|VexVVVV=1|VexW=1|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 vpermilp<sd>, 0x660c | <sd:opc>, AVX, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpermilp<sd>, 0x6604 | <sd:opc>, AVX, Modrm|Vex|Space0F3A|VexW0|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
+vpermilp<sd>, 0x6604 | <sd:opc>, AVX, Modrm|Vex|Space0F3A|VexW0|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vpextr<dq>, 0x6616, AVX|<dq:cpu64>, Modrm|Vex|Space0F3A|<dq:vexw64>|NoSuf, { Imm8, RegXMM, <dq:gpr>|Unspecified|BaseIndex }
 vpextrw, 0x66c5, AVX, Load|Modrm|Vex|Space0F|VexWIG|No_bSuf|No_wSuf|No_sSuf, { Imm8, RegXMM, Reg32|Reg64 }
 vpextr<bw>, 0x6614 | <bw:opc>, AVX, RegMem|Vex|Space0F3A|VexWIG|NoSuf, { Imm8, RegXMM, Reg32|Reg64 }
@@ -1651,9 +1651,9 @@ vpmuludq, 0x66f4, AVX|AVX2, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|
 vpor, 0x66eb, AVX|AVX2, Modrm|C|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpsadbw, 0x66f6, AVX|AVX2, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|C|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpshufb, 0x6600, AVX|AVX2, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpshufd, 0x6670, AVX|AVX2, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
-vpshufhw, 0xf370, AVX|AVX2, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
-vpshuflw, 0xf270, AVX|AVX2, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
+vpshufd, 0x6670, AVX|AVX2, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
+vpshufhw, 0xf370, AVX|AVX2, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
+vpshuflw, 0xf270, AVX|AVX2, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vpsign<bw>, 0x6608 | <bw:opc>, AVX|AVX2, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpsignd, 0x660a, AVX|AVX2, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpsll<dq>, 0x6672 | <dq:opc>/6, AVX|AVX2, Modrm|Vex|Space0F|VexVVVV=2|VexWIG|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM, RegXMM|RegYMM }
@@ -1690,7 +1690,7 @@ vroundp<sd>, 0x6608 | <sd:opc>, AVX, Modrm|Vex|Space0F3A|VexWIG|CheckOperandSize
 vrounds<sd>, 0x660a | <sd:opc>, AVX, Modrm|VexLIG|Space0F3A|VexVVVV|VexWIG|NoSuf, { Imm8, <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vrsqrtps, 0x52, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vrsqrtss, 0xf352, AVX, Modrm|Vex=3|Space0F|VexVVVV|VexWIG|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vshufp<sd>, 0x<sd:ppfx>c6, AVX, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vshufp<sd>, 0x<sd:ppfx>c6, AVX, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vsqrtp<sd>, 0x<sd:ppfx>51, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vsqrts<sd>, 0x<sd:spfx>51, AVX, Modrm|VexLIG|Space0F|VexVVVV|VexWIG|NoSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vstmxcsr, 0xae/3, AVX, Modrm|Vex128|Space0F|VexWIG|NoSuf, { Dword|Unspecified|BaseIndex }
@@ -1725,14 +1725,14 @@ vpmovzxwq, 0x6634, AVX2, Modrm|Vex=2|Space0F38|VexWIG|NoSuf, { Qword|Unspecified
 vbroadcasti128, 0x665A, AVX2, Modrm|Vex=2|Space0F38|VexW=1|NoSuf, { Xmmword|Unspecified|BaseIndex, RegYMM }
 vbroadcastsd, 0x6619, AVX2, Modrm|Vex=2|Space0F38|VexW=1|NoSuf, { RegXMM, RegYMM }
 vbroadcastss, 0x6618, AVX2, Modrm|Vex|Space0F38|VexW=1|NoSuf, { RegXMM, RegXMM|RegYMM }
-vpblendd, 0x6602, AVX2, Modrm|Vex|Space0F3A|VexVVVV=1|VexW=1|CheckOperandSize|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpblendd, 0x6602, AVX2, Modrm|Vex|Space0F3A|VexVVVV|VexW0|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpbroadcast<bw>, 0x6678 | <bw:opc>, AVX2, Modrm|Vex|Space0F38|VexW0|NoSuf, { <bw:elem>|Unspecified|BaseIndex|RegXMM, RegXMM|RegYMM }
 vpbroadcast<dq>, 0x6658 | <dq:opc>, AVX2, Modrm|Vex|Space0F38|VexW0|NoSuf, { <dq:elem>|Unspecified|BaseIndex|RegXMM, RegXMM|RegYMM }
-vperm2i128, 0x6646, AVX2, Modrm|Vex=2|Space0F3A|VexVVVV=1|VexW=1|NoSuf, { Imm8, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vperm2i128, 0x6646, AVX2, Modrm|Vex=2|Space0F3A|VexVVVV|VexW0|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 vpermd, 0x6636, AVX2, Modrm|Vex=2|Space0F38|VexVVVV=1|VexW=1|NoSuf, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vpermpd, 0x6601, AVX2, Modrm|Vex=2|Space0F3A|VexW=2|NoSuf, { Imm8, Unspecified|BaseIndex|RegYMM, RegYMM }
+vpermpd, 0x6601, AVX2, Modrm|Vex=2|Space0F3A|VexW1|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM }
 vpermps, 0x6616, AVX2, Modrm|Vex=2|Space0F38|VexVVVV=1|VexW=1|NoSuf, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vpermq, 0x6600, AVX2, Modrm|Vex=2|Space0F3A|VexW=2|NoSuf, { Imm8, Unspecified|BaseIndex|RegYMM, RegYMM }
+vpermq, 0x6600, AVX2, Modrm|Vex=2|Space0F3A|VexW1|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM }
 vextracti128, 0x6639, AVX2, Modrm|Vex=2|Space0F3A|VexW=1|NoSuf, { Imm8, RegYMM, Unspecified|BaseIndex|RegXMM }
 vinserti128, 0x6638, AVX2, Modrm|Vex=2|Space0F3A|VexVVVV=1|VexW=1|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegYMM, RegYMM }
 vpmaskmov<dq>, 0x668e, AVX2, Modrm|Vex|Space0F38|VexVVVV|<dq:vexw>|CheckOperandSize|NoSuf, { RegXMM|RegYMM, RegXMM|RegYMM, Xmmword|Ymmword|Unspecified|BaseIndex }
@@ -1766,7 +1766,7 @@ vaeskeygenassist, 0x66df, AVX|AES, Modrm|Vex|Space0F3A|VexWIG|NoSuf, { Imm8, Uns
 
 // PCLMUL + AVX
 
-vpclmulqdq, 0x6644, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vpclmulqdq, 0x6644, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vpclmullqlqdq, 0x6644/0x00, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vpclmulhqlqdq, 0x6644/0x01, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vpclmullqhqdq, 0x6644/0x10, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV=1|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
@@ -1821,7 +1821,7 @@ bzhi, 0xf5, BMI2, Modrm|CheckOperandSize|Vex128|Space0F38|VexVVVV=1|SwapSources|
 mulx, 0xf2f6, BMI2, Modrm|CheckOperandSize|Vex128|Space0F38|VexVVVV=1|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
 pdep, 0xf2f5, BMI2, Modrm|CheckOperandSize|Vex128|Space0F38|VexVVVV=1|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
 pext, 0xf3f5, BMI2, Modrm|CheckOperandSize|Vex128|Space0F38|VexVVVV=1|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
-rorx, 0xf2f0, BMI2, Modrm|CheckOperandSize|Vex128|Space0F3A|VexVVVV=0|No_bSuf|No_wSuf|No_sSuf, { Imm8, Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64 }
+rorx, 0xf2f0, BMI2, Modrm|CheckOperandSize|Vex128|Space0F3A|No_bSuf|No_wSuf|No_sSuf, { Imm8|Imm8S, Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64 }
 sarx, 0xf3f7, BMI2, Modrm|CheckOperandSize|Vex128|Space0F38|VexVVVV=1|SwapSources|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64, Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64 }
 shlx, 0x66f7, BMI2, Modrm|CheckOperandSize|Vex128|Space0F38|VexVVVV=1|SwapSources|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64, Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64 }
 shrx, 0xf2f7, BMI2, Modrm|CheckOperandSize|Vex128|Space0F38|VexVVVV=1|SwapSources|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64, Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex, Reg32|Reg64 }
@@ -1877,7 +1877,7 @@ vpmadcsswd, 0xa6, XOP, Modrm|Vex128|SpaceXOP08|VexVVVV|VexW0|NoSuf, { RegXMM, Re
 vpmadcswd, 0xb6, XOP, Modrm|Vex128|SpaceXOP08|VexVVVV|VexW0|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM, RegXMM }
 vpperm, 0xa3, XOP, D|Modrm|Vex128|SpaceXOP08|VexVVVV|VexW0|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM, RegXMM }
 vprot<xop>, 0x90 | <xop:opc>, XOP, D|Modrm|Vex128|SpaceXOP09|VexVVVV|SwapSources|VexW0|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
-vprot<xop>, 0xc0 | <xop:opc>, XOP, Modrm|Vex128|SpaceXOP08|VexW0|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+vprot<xop>, 0xc0 | <xop:opc>, XOP, Modrm|Vex128|SpaceXOP08|VexW0|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 vpsha<xop>, 0x98 | <xop:opc>, XOP, D|Modrm|Vex128|SpaceXOP09|VexVVVV|SwapSources|VexW0|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
 vpshl<xop>, 0x94 | <xop:opc>, XOP, D|Modrm|Vex128|SpaceXOP09|VexVVVV|SwapSources|VexW0|NoSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
 
@@ -2025,7 +2025,7 @@ bndstx, 0x0f1b, MPX, Modrm|Anysize|IgnoreSize|NoSuf, { RegBND, BaseIndex }
 bndldx, 0x0f1a, MPX, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex, RegBND }
 
 // SHA instructions.
-sha1rnds4, 0xf3acc, SHA, Modrm|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+sha1rnds4, 0xf3acc, SHA, Modrm|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 sha1nexte, 0xf38c8, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha1msg1, 0xf38c9, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha1msg2, 0xf38ca, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -2036,7 +2036,7 @@ sha256msg2, 0xf38cd, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // VPCLMULQDQ instructions
 
-vpclmulqdq, 0x6644, VPCLMULQDQ, Modrm|Vex=2|Space0F3A|VexWIG|VexVVVV=1|NoSuf, { Imm8, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vpclmulqdq, 0x6644, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 vpclmullqlqdq, 0x6644/0x00, VPCLMULQDQ, Modrm|Vex=2|Space0F3A|VexWIG|VexVVVV=1|NoSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 vpclmulhqlqdq, 0x6644/0x01, VPCLMULQDQ, Modrm|Vex=2|Space0F3A|VexWIG|VexVVVV=1|NoSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 vpclmullqhqdq, 0x6644/0x10, VPCLMULQDQ, Modrm|Vex=2|Space0F3A|VexWIG|VexVVVV=1|NoSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
@@ -2110,7 +2110,7 @@ vprorv<dq>, 0x6614, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|<dq:vexw>|Broad
 vpsllv<dq>, 0x6647, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vpsrav<dq>, 0x6646, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vpsrlv<dq>, 0x6645, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vpternlog<dq>, 0x6625, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpternlog<dq>, 0x6625, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 vbroadcastf32x4, 0x661A, AVX512F, Modrm|Masking=3|Space0F38|VexW=1|Disp8MemShift=4|NoSuf, { XMMword|Unspecified|BaseIndex, RegYMM|RegZMM }
 vbroadcasti32x4, 0x665A, AVX512F, Modrm|Masking=3|Space0F38|VexW=1|Disp8MemShift=4|NoSuf, { XMMword|Unspecified|BaseIndex, RegYMM|RegZMM }
@@ -2214,8 +2214,8 @@ vextracti64x4, 0x663B, AVX512F, Modrm|EVex=1|MaskingMorZ|Space0F3A|VexW=2|Disp8M
 vextractps, 0x6617, AVX512F, Modrm|EVex128|Space0F3A|VexWIG|Disp8MemShift=2|NoSuf, { Imm8, RegXMM, Reg32|Dword|Unspecified|BaseIndex }
 vextractps, 0x6617, AVX512F|x64, RegMem|EVex128|Space0F3A|VexWIG|NoSuf, { Imm8, RegXMM, Reg64 }
 
-vfixupimmp<sd>, 0x6654, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|SAE, { Imm8, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vfixupimms<sd>, 0x6655, AVX512F, Modrm|EVexLIG|Masking=3|Space0F3A|VexVVVV|<sd:vexw>|Disp8MemShift|NoSuf|SAE, { Imm8, RegXMM|<sd:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
+vfixupimmp<sd>, 0x6654, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|SAE, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vfixupimms<sd>, 0x6655, AVX512F, Modrm|EVexLIG|Masking=3|Space0F3A|VexVVVV|<sd:vexw>|Disp8MemShift|NoSuf|SAE, { Imm8|Imm8S, RegXMM|<sd:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
 
 vgetmantp<sdh>, 0x<sdh:pfx>26, <sdh:cpu>, Modrm|Masking=3|Space0F3A|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|SAE, { Imm8, RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 vgetmants<sdh>, 0x<sdh:pfx>27, <sdh:cpu>, Modrm|EVexLIG|Masking=3|Space0F3A|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|SAE, { Imm8, RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
@@ -2328,12 +2328,12 @@ vptestnm<dq>, 0xf327, AVX512F, Modrm|Masking=2|Space0F38|VexVVVV|<dq:vexw>|Broad
 vpermd, 0x6636, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
 vpermps, 0x6616, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
 
-vpermilp<sd>, 0x6604 | <sd:opc>, AVX512F, Modrm|Masking=3|Space0F3A|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vpermilp<sd>, 0x6604 | <sd:opc>, AVX512F, Modrm|Masking=3|Space0F3A|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 vpermilp<sd>, 0x660C | <sd:opc>, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
-vpermpd, 0x6601, AVX512F, Modrm|Masking=3|Space0F3A|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM }
+vpermpd, 0x6601, AVX512F, Modrm|Masking=3|Space0F3A|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM }
 vpermpd, 0x6616, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
-vpermq, 0x6600, AVX512F, Modrm|Masking=3|Space0F3A|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM }
+vpermq, 0x6600, AVX512F, Modrm|Masking=3|Space0F3A|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM }
 vpermq, 0x6636, AVX512F, Modrm|Masking=3|Space0F38|VexVVVV=1|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
 
 vpmovdb, 0xF331, AVX512F, Modrm|EVex=1|MaskingMorZ|Space0F38|VexW=1|Disp8MemShift=4|NoSuf, { RegZMM, RegXMM|Unspecified|BaseIndex }
@@ -2371,10 +2371,10 @@ vpmovzxwd, 0x6633, AVX512F, Modrm|EVex=1|Masking=3|Space0F38|VexWIG|Disp8MemShif
 vpmovsxwq, 0x6624, AVX512F, Modrm|EVex=1|Masking=3|Space0F38|VexWIG|Disp8MemShift=4|NoSuf, { RegXMM|Unspecified|BaseIndex, RegZMM }
 vpmovzxwq, 0x6634, AVX512F, Modrm|EVex=1|Masking=3|Space0F38|VexWIG|Disp8MemShift=4|NoSuf, { RegXMM|Unspecified|BaseIndex, RegZMM }
 
-vprol<dq>, 0x6672/1, AVX512F, Modrm|Masking=3|Space0F|VexVVVV=2|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
-vpror<dq>, 0x6672/0, AVX512F, Modrm|Masking=3|Space0F|VexVVVV=2|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vprol<dq>, 0x6672/1, AVX512F, Modrm|Masking=3|Space0F|VexVVVV=2|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vpror<dq>, 0x6672/0, AVX512F, Modrm|Masking=3|Space0F|VexVVVV=2|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 
-vpshufd, 0x6670, AVX512F, Modrm|Masking=3|Space0F|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vpshufd, 0x6670, AVX512F, Modrm|Masking=3|Space0F|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 
 vpsll<dq>, 0x66f2 | <dq:opc>, AVX512F, Modrm|Masking=3|Space0F|VexVVVV|<dq:vexw>|Disp8MemShift=4|CheckOperandSize|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vpsll<dq>, 0x6672 | <dq:opc>/6, AVX512F, Modrm|Masking=3|Space0F|VexVVVV=2|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
@@ -2389,13 +2389,13 @@ vrcp14s<sd>, 0x664D, AVX512F, Modrm|EVexLIG|Masking=3|Space0F38|VexVVVV|<sd:vexw
 vrsqrt14p<sd>, 0x664E, AVX512F, Modrm|Masking=3|Space0F38|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 vrsqrt14s<sd>, 0x664F, AVX512F, Modrm|EVexLIG|Masking=3|Space0F38|VexVVVV|<sd:vexw>|Disp8MemShift|NoSuf, { RegXMM|<sd:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
 
-vshuff32x4, 0x6623, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
-vshufi32x4, 0x6643, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
+vshuff32x4, 0x6623, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
+vshufi32x4, 0x6643, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
 
-vshuff64x2, 0x6623, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
-vshufi64x2, 0x6643, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
+vshuff64x2, 0x6623, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
+vshufi64x2, 0x6643, AVX512F, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=2|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
 
-vshufp<sd>, 0x<sd:ppfx>C6, AVX512F, Modrm|Masking=3|Space0F|VexVVVV|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vshufp<sd>, 0x<sd:ppfx>C6, AVX512F, Modrm|Masking=3|Space0F|VexVVVV|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 vunpckhp<sd>, 0x<sd:ppfx>15, AVX512F, Modrm|Masking=3|Space0F|VexVVVV|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vunpcklp<sd>, 0x<sd:ppfx>14, AVX512F, Modrm|Masking=3|Space0F|VexVVVV|<sd:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
@@ -2604,7 +2604,7 @@ kunpckwd, 0x4B, AVX512BW, Modrm|Vex=2|Space0F|VexVVVV=1|VexW=1|NoSuf, { RegMask,
 kshiftl<dq>, 0x6633, AVX512BW, Modrm|Vex128|Space0F3A|<dq:vexw>|NoSuf, { Imm8, RegMask, RegMask }
 kshiftr<dq>, 0x6631, AVX512BW, Modrm|Vex128|Space0F3A|<dq:vexw>|NoSuf, { Imm8, RegMask, RegMask }
 
-vdbpsadbw, 0x6642, AVX512BW, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=1|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vdbpsadbw, 0x6642, AVX512BW, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=1|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 vmovdqu8, 0xF26F, AVX512BW, D|Modrm|MaskingMorZ|Space0F|VexW=1|Disp8ShiftVL|CheckOperandSize|NoSuf|Optimize, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 vmovdqu16, 0xF26F, AVX512BW, D|Modrm|MaskingMorZ|Space0F|VexW=2|Disp8ShiftVL|CheckOperandSize|NoSuf|Optimize, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
@@ -2708,8 +2708,8 @@ vpmovzxbw, 0x6630, AVX512BW|AVX512VL, Modrm|EVex=3|Masking=3|VexWIG|Space0F38|Di
 
 vpsadbw, 0x66F6, AVX512BW, Modrm|Space0F|VexVVVV=1|VexWIG|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
-vpshufhw, 0xF370, AVX512BW, Modrm|Masking=3|Space0F|VexWIG|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
-vpshuflw, 0xF270, AVX512BW, Modrm|Masking=3|Space0F|VexWIG|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vpshufhw, 0xF370, AVX512BW, Modrm|Masking=3|Space0F|VexWIG|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vpshuflw, 0xF270, AVX512BW, Modrm|Masking=3|Space0F|VexWIG|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 
 vptestm<bw>, 0x6626, AVX512BW, Modrm|Masking=2|Space0F38|VexVVVV|<bw:vexw>|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegMask }
 vptestnm<bw>, 0xf326, AVX512BW, Modrm|Masking=2|Space0F38|VexVVVV|<bw:vexw>|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegMask }
@@ -2781,12 +2781,12 @@ vextracti64x2, 0x6639, AVX512DQ, Modrm|MaskingMorZ|Space0F3A|VexW=2|Disp8MemShif
 vinsertf64x2, 0x6618, AVX512DQ, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=2|Disp8MemShift=4|CheckOperandSize|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
 vinserti64x2, 0x6638, AVX512DQ, Modrm|Masking=3|Space0F3A|VexVVVV=1|VexW=2|Disp8MemShift=4|CheckOperandSize|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
 
-vfpclassp<sd>, 0x6666, AVX512DQ, Modrm|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8ShiftVL|NoSuf|IntelSyntax, { Imm8, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
-vfpclassp<sd>, 0x6666, AVX512DQ, Modrm|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8ShiftVL|NoSuf|ATTSyntax, { Imm8, RegXMM|RegYMM|RegZMM|<sd:elem>|BaseIndex, RegMask }
-vfpclassp<sd>z, 0x6666, AVX512DQ, Modrm|EVex512|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8MemShift=6|NoSuf, { Imm8, RegZMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
-vfpclassp<sd>x, 0x6666, AVX512DQ|AVX512VL, Modrm|EVex128|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8MemShift=4|NoSuf, { Imm8, RegXMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
-vfpclassp<sd>y, 0x6666, AVX512DQ|AVX512VL, Modrm|EVex256|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8MemShift=5|NoSuf, { Imm8, RegYMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
-vfpclasss<sdh>, 0x<sdh:pfx>67, <sdh:cpudq>, Modrm|EVexLIG|Masking=2|Space0F3A|<sdh:vexw>|Disp8MemShift|NoSuf, { Imm8, RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegMask }
+vfpclassp<sd>, 0x6666, AVX512DQ, Modrm|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8ShiftVL|NoSuf|IntelSyntax, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
+vfpclassp<sd>, 0x6666, AVX512DQ, Modrm|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8ShiftVL|NoSuf|ATTSyntax, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|<sd:elem>|BaseIndex, RegMask }
+vfpclassp<sd>z, 0x6666, AVX512DQ, Modrm|EVex512|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8MemShift=6|NoSuf, { Imm8|Imm8S, RegZMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
+vfpclassp<sd>x, 0x6666, AVX512DQ|AVX512VL, Modrm|EVex128|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8MemShift=4|NoSuf, { Imm8|Imm8S, RegXMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
+vfpclassp<sd>y, 0x6666, AVX512DQ|AVX512VL, Modrm|EVex256|Masking=2|Space0F3A|<sd:vexw>|Broadcast|Disp8MemShift=5|NoSuf, { Imm8|Imm8S, RegYMM|<sd:elem>|Unspecified|BaseIndex, RegMask }
+vfpclasss<sdh>, 0x<sdh:pfx>67, <sdh:cpudq>, Modrm|EVexLIG|Masking=2|Space0F3A|<sdh:vexw>|Disp8MemShift|NoSuf, { Imm8|Imm8S, RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegMask }
 
 vpmov<dq>2m, 0xf339, AVX512DQ, Modrm|EVexDYN|Space0F38|<dq:vexw>|NoSuf, { RegXMM|RegYMM|RegZMM, RegMask }
 vpmovm2<dq>, 0xf338, AVX512DQ, Modrm|EVexDYN|Space0F38|<dq:vexw>|NoSuf, { RegMask, RegXMM|RegYMM|RegZMM }
@@ -2929,7 +2929,7 @@ vaesenclast, 0x66dd, VAES|AVX512F, Modrm|Space0F38|VexWIG|VexVVVV=1|Disp8ShiftVL
 
 // AVX512 + VPCLMULQDQ instructions
 
-vpclmulqdq, 0x6644, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmulqdq, 0x6644, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vpclmullqlqdq, 0x6644/0x00, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vpclmulhqlqdq, 0x6644/0x01, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vpclmullqhqdq, 0x6644/0x10, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV=1|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
@@ -3290,7 +3290,7 @@ vcvttph2uw, 0x7c, AVX512_FP16, Modrm|Masking=3|EVexMap5|VexW0|Broadcast|Disp8Shi
 
 vcvttsh2si, 0xf32c, AVX512_FP16, Modrm|EVexLIG|EVexMap5|Disp8MemShift=1|NoSuf|SAE, { RegXMM|Word|Unspecified|BaseIndex, Reg32|Reg64 }
 
-vfpclassph<xyz>, 0x66, AVX512_FP16|<xyz:vl>, Modrm|<xyz:attr>|Masking=2|Space0F3A|VexW0|Broadcast|NoSuf|<xyz:att>, { Imm8, <xyz:src>|Word, RegMask }
+vfpclassph<xyz>, 0x66, AVX512_FP16|<xyz:vl>, Modrm|<xyz:attr>|Masking=2|Space0F3A|VexW0|Broadcast|NoSuf|<xyz:att>, { Imm8|Imm8S, <xyz:src>|Word, RegMask }
 
 vmovw, 0x666e, AVX512_FP16, D|Modrm|EVex128|VexWIG|EVexMap5|Disp8MemShift=1|NoSuf, { Word|Unspecified|BaseIndex, RegXMM }
 vmovw, 0x667e, AVX512_FP16, D|RegMem|EVex128|VexWIG|EVexMap5|NoSuf, { RegXMM, Reg32 }

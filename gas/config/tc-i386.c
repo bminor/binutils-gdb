@@ -2373,7 +2373,8 @@ smallest_imm_type (offsetT num)
     }
   else if (fits_in_signed_byte (num))
     {
-      t.bitfield.imm8 = 1;
+      if (fits_in_unsigned_byte (num))
+	t.bitfield.imm8 = 1;
       t.bitfield.imm8s = 1;
       t.bitfield.imm16 = 1;
       t.bitfield.imm32 = 1;
@@ -7829,6 +7830,18 @@ static int
 update_imm (unsigned int j)
 {
   i386_operand_type overlap = i.types[j];
+
+  if (i.tm.operand_types[j].bitfield.imm8
+      && i.tm.operand_types[j].bitfield.imm8s
+      && overlap.bitfield.imm8 && overlap.bitfield.imm8s)
+    {
+      /* This combination is used on 8-bit immediates where e.g. $~0 is
+	 desirable to permit.  We're past operand type matching, so simply
+	 put things back in the shape they were before introducing the
+	 distinction between Imm8, Imm8S, and Imm8|Imm8S.  */
+      overlap.bitfield.imm8s = 0;
+    }
+
   if (overlap.bitfield.imm8
       + overlap.bitfield.imm8s
       + overlap.bitfield.imm16
@@ -8318,6 +8331,7 @@ build_modrm_byte (void)
 		      || (i.tm.opcode_modifier.vexvvvv == VEXXDS
 			  && i.imm_operands == 1
 			  && (i.types[0].bitfield.imm8
+			      || i.types[0].bitfield.imm8s
 			      || i.types[i.operands - 1].bitfield.imm8)));
 	  if (i.imm_operands == 2)
 	    source = 2;
