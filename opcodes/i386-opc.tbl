@@ -1270,17 +1270,17 @@ cmpxchg16b, 0xfc7/1, CX16|x64, Modrm|NoSuf|Size64|LockPrefixOk, { Oword|Unspecif
 
 // MONITOR instructions.
 
-monitor, 0xf01c8, SSE3, NoSuf, {}
+monitor, 0xf01c8, MONITOR, NoSuf, {}
 // monitor is very special. CX and DX are always 32 bits. The
 // address size override prefix can be used to overrride the AX size in
 // all modes.
-monitor, 0xf01c8, SSE3, AddrPrefixOpReg|NoSuf, { Acc|Word|Dword|Qword, RegC|Dword, RegD|Dword }
+monitor, 0xf01c8, MONITOR, AddrPrefixOpReg|NoSuf, { Acc|Word|Dword|Qword, RegC|Dword, RegD|Dword }
 // The 64-bit form exists only for compatibility with older gas.
-monitor, 0xf01c8, SSE3|x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword, RegC|Qword, RegD|Qword }
-mwait, 0xf01c9, SSE3, NoSuf, {}
+monitor, 0xf01c8, MONITOR|x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword, RegC|Qword, RegD|Qword }
+mwait, 0xf01c9, MONITOR, NoSuf, {}
 // mwait is very special. AX and CX are always 32 bits.
 // The 64-bit form exists only for compatibility with older gas.
-mwait, 0xf01c9, SSE3, CheckOperandSize|IgnoreSize|NoSuf|NoRex64, { Acc|Dword|Qword, RegC|Dword|Qword }
+mwait, 0xf01c9, MONITOR, CheckOperandSize|IgnoreSize|NoSuf|NoRex64, { Acc|Dword|Qword, RegC|Dword|Qword }
 
 // VMX instructions.
 

@@ -1,7 +1,17 @@
 .*: Assembler messages:
+.*:4: Error: .*
 .*:6: Error: .*
 .*:8: Error: .*
+.*:10: Error: .*
+.*:12: Error: .*
+.*:14: Error: .*
+.*:16: Error: .*
+.*:18: Error: .*
+.*:20: Error: .*
+.*:22: Error: .*
 .*:24: Error: .*
+.*:26: Error: .*
+.*:28: Error: .*
 .*:30: Error: .*
 .*:32: Error: .*
 .*:34: Error: .*
@@ -20,42 +30,35 @@
 .*:60: Error: .*
 .*:62: Error: .*
 .*:64: Error: .*
-.*:66: Error: .*
-GAS LISTING .*
-
-
 [ 	]*1[ 	]+\.include "arch-10\.s"
 [ 	]*1[ 	]+\# Test -march=
 [ 	]*2[ 	]+\.text
-[ 	]*3[ 	]+\# cmov feature 
-[ 	]*4[ 	]+\?\?\?\? 0F44D8   	cmove	%eax,%ebx
+[ 	]*3[ 	]+\# cmov feature *
+[ 	]*4[ 	]+cmove	%eax,%ebx
 [ 	]*5[ 	]+\# clflush
 [ 	]*6[ 	]+clflush \(%eax\)
 [ 	]*7[ 	]+\# SYSCALL
 [ 	]*8[ 	]+syscall
 [ 	]*9[ 	]+\# MMX
-[ 	]*10[ 	]+\?\?\?\? 0FFCDC   	paddb %mm4,%mm3
+[ 	]*10[ 	]+paddb %mm4,%mm3
 [ 	]*11[ 	]+\# SSE
-[ 	]*12[ 	]+\?\?\?\? F30F58DC 	addss %xmm4,%xmm3
+[ 	]*12[ 	]+addss %xmm4,%xmm3
 [ 	]*13[ 	]+\# SSE2
-[ 	]*14[ 	]+\?\?\?\? F20F58DC 	addsd %xmm4,%xmm3
+[ 	]*14[ 	]+addsd %xmm4,%xmm3
 [ 	]*15[ 	]+\# SSE3
-[ 	]*16[ 	]+\?\?\?\? 660FD0DC 	addsubpd %xmm4,%xmm3
+[ 	]*16[ 	]+addsubpd %xmm4,%xmm3
 [ 	]*17[ 	]+\# SSSE3
-[ 	]*18[ 	]+\?\?\?\? 660F3801 	phaddw %xmm4,%xmm3
-[ 	]*18[ 	]+DC
+[ 	]*18[ 	]+phaddw %xmm4,%xmm3
 [ 	]*19[ 	]+\# SSE4\.1
-[ 	]*20[ 	]+\?\?\?\? 660F3841 	phminposuw  %xmm1,%xmm3
-[ 	]*20[ 	]+D9
+[ 	]*20[ 	]+phminposuw  %xmm1,%xmm3
 [ 	]*21[ 	]+\# SSE4\.2
-[ 	]*22[ 	]+\?\?\?\? F20F38F1 	crc32   %ecx,%ebx
-[ 	]*22[ 	]+D9
+[ 	]*22[ 	]+crc32   %ecx,%ebx
 [ 	]*23[ 	]+\# AVX
 [ 	]*24[ 	]+vzeroall
 [ 	]*25[ 	]+\# VMX
-[ 	]*26[ 	]+\?\?\?\? 0F01C4   	vmxoff
+[ 	]*26[ 	]+vmxoff
 [ 	]*27[ 	]+\# SMX
-[ 	]*28[ 	]+\?\?\?\? 0F37     	getsec
+[ 	]*28[ 	]+getsec
 [ 	]*29[ 	]+\# Xsave
 [ 	]*30[ 	]+xgetbv
 [ 	]*31[ 	]+\# Xsaveopt
@@ -81,9 +84,6 @@ GAS LISTING .*
 [ 	]*51[ 	]+\# SSE4a
 [ 	]*52[ 	]+insertq %xmm2,%xmm1
 [ 	]*53[ 	]+\# SVME
-GAS LISTING .*
-
-
 [ 	]*54[ 	]+vmload
 [ 	]*55[ 	]+\# ABM/LZCNT
 [ 	]*56[ 	]+lzcnt %ecx,%ebx
@@ -96,4 +96,4 @@ GAS LISTING .*
 [ 	]*63[ 	]+\# TBM
 [ 	]*64[ 	]+blcfill %ecx,%ebx
 [ 	]*65[ 	]+\# MONITOR
-[ 	]*66[ 	]+monitor
+[ 	]*66[ 	]+\?\?\?\? 0F01C8   	monitor

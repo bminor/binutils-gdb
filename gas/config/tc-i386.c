@@ -1027,6 +1027,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (avx512dq, AVX512DQ, ANY_AVX512DQ, false),
   SUBARCH (avx512bw, AVX512BW, ANY_AVX512BW, false),
   SUBARCH (avx512vl, AVX512VL, ANY_AVX512VL, false),
+  SUBARCH (monitor, MONITOR, MONITOR, false),
   SUBARCH (vmx, VMX, ANY_VMX, false),
   SUBARCH (vmfunc, VMFUNC, ANY_VMFUNC, false),
   SUBARCH (smx, SMX, SMX, false),

@@ -152,6 +152,7 @@ accept various extension mnemonics.  For example,
 @code{avx},
 @code{avx2},
 @code{lahf_sahf},
+@code{monitor},
 @code{adx},
 @code{rdseed},
 @code{prfchw},
@@ -1487,7 +1488,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.aes} @tab @samp{.pclmul} @tab @samp{.fma} @tab @samp{.fsgsbase}
 @item @samp{.rdrnd} @tab @samp{.f16c} @tab @samp{.avx2} @tab @samp{.bmi2}
 @item @samp{.lzcnt} @tab @samp{.popcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc}
-@item @samp{.hle} @tab @samp{.rtm} @tab @samp{.tsx}
+@item @samp{.monitor} @tab @samp{.hle} @tab @samp{.rtm} @tab @samp{.tsx}
 @item @samp{.lahf_sahf} @tab @samp{.adx} @tab @samp{.rdseed} @tab @samp{.prfchw}
 @item @samp{.smap} @tab @samp{.mpx} @tab @samp{.sha} @tab @samp{.prefetchwt1}
 @item @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves} @tab @samp{.se1}
