@@ -694,7 +694,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  if (got_a_float == 2)	/* "fi..." */
 	    suffix = SHORT_MNEM_SUFFIX;
 	  else if (current_templates->start->mnem_off != MN_lar
-		   && current_templates->start->mnem_off != MN_lsl)
+		   && current_templates->start->mnem_off != MN_lsl
+		   && current_templates->start->mnem_off != MN_arpl)
 	    suffix = WORD_MNEM_SUFFIX;
 	  break;
 

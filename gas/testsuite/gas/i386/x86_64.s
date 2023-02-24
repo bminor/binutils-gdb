@@ -320,6 +320,12 @@ mov tr0, rcx
 	lar    (%rdx),%dx
 	lar    (%rdx),%edx
 	lar    (%rdx),%rdx
+
+	lldt   %dx
+	lldt   %edx
+	lldt   %rdx
+	lldt   (%rdx)
+
 	lsl    %dx,%dx
 	lsl    %dx,%edx
 	lsl    %dx,%rdx
@@ -328,6 +334,21 @@ mov tr0, rcx
 	lsl    (%rdx),%dx
 	lsl    (%rdx),%edx
 	lsl    (%rdx),%rdx
+
+	ltr    %dx
+	ltr    %edx
+	ltr    %rdx
+	ltr    (%rdx)
+
+	verr   %dx
+	verr   %edx
+	verr   %rdx
+	verr   (%rdx)
+
+	verw   %dx
+	verw   %edx
+	verw   %rdx
+	verw   (%rdx)
 
 	.intel_syntax noprefix
 	lar    dx,dx
@@ -338,6 +359,13 @@ mov tr0, rcx
 	lar    dx,WORD PTR [rdx]
 	lar    edx,WORD PTR [rdx]
 	lar    rdx,WORD PTR [rdx]
+
+	lldt   dx
+	lldt   edx
+	lldt   rdx
+	lldt   [rdx]
+	lldt   word ptr [rdx]
+
 	lsl    dx,dx
 	lsl    edx,dx
 	lsl    rdx,dx
@@ -346,3 +374,21 @@ mov tr0, rcx
 	lsl    dx,WORD PTR [rdx]
 	lsl    edx,WORD PTR [rdx]
 	lsl    rdx,WORD PTR [rdx]
+
+	ltr    dx
+	ltr    edx
+	ltr    rdx
+	ltr    [rdx]
+	ltr    word ptr [rdx]
+
+	verr   dx
+	verr   edx
+	verr   rdx
+	verr   [rdx]
+	verr   word ptr [rdx]
+
+	verw   dx
+	verw   edx
+	verw   rdx
+	verw   [rdx]
+	verw   word ptr [rdx]

@@ -566,18 +566,21 @@ nop, 0xf1f/0, Nop, Modrm|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|U
 nop, 0x90, 0, NoSuf|RepPrefixOk, {}
 
 // Protection control.
-arpl, 0x63, i286|No64, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16, Reg16|Word|Unspecified|BaseIndex }
+arpl, 0x63, i286|No64, RegMem|CheckOperandSize|IgnoreSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32, Reg16|Reg32 }
+arpl, 0x63, i286|No64, Modrm|IgnoreSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32, Word|Unspecified|BaseIndex }
 lar, 0xf02, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 lar, 0xf02, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 lgdt, 0xf01/2, i286|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
 lgdt, 0xf01/2, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
 lidt, 0xf01/3, i286|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
 lidt, 0xf01/3, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-lldt, 0xf00/2, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+lldt, 0xf00/2, i286, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+lldt, 0xf00/2, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
 lmsw, 0xf01/6, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
 lsl, 0xf03, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 lsl, 0xf03, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-ltr, 0xf00/3, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+ltr, 0xf00/3, i286, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+ltr, 0xf00/3, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
 
 sgdt, 0xf01/0, i286|No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
 sgdt, 0xf01/0, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
@@ -590,8 +593,10 @@ smsw, 0xf01/4, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Un
 str, 0xf00/1, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
 str, 0xf00/1, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
 
-verr, 0xf00/4, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
-verw, 0xf00/5, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Reg16|Word|Unspecified|BaseIndex }
+verr, 0xf00/4, i286, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+verr, 0xf00/4, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+verw, 0xf00/5, i286, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+verw, 0xf00/5, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
 
 // Floating point instructions.
 
