@@ -2312,8 +2312,6 @@ extern void smash_to_memberptr_type (struct type *, struct type *,
 
 extern void smash_to_methodptr_type (struct type *, struct type *);
 
-extern struct type *allocate_stub_method (struct type *);
-
 extern const char *type_name_or_error (struct type *type);
 
 struct struct_elt

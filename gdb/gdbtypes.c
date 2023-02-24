@@ -861,26 +861,6 @@ lookup_methodptr_type (struct type *to_type)
   return mtype;
 }
 
-/* Allocate a stub method whose return type is TYPE.  This apparently
-   happens for speed of symbol reading, since parsing out the
-   arguments to the method is cpu-intensive, the way we are doing it.
-   So, we will fill in arguments later.  This always returns a fresh
-   type.  */
-
-struct type *
-allocate_stub_method (struct type *type)
-{
-  struct type *mtype;
-
-  mtype = alloc_type_copy (type);
-  mtype->set_code (TYPE_CODE_METHOD);
-  mtype->set_length (1);
-  mtype->set_is_stub (true);
-  mtype->set_target_type (type);
-  /* TYPE_SELF_TYPE (mtype) = unknown yet */
-  return mtype;
-}
-
 /* See gdbtypes.h.  */
 
 bool
