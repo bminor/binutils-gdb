@@ -54,10 +54,10 @@ Disassembly of section .text:
  +[a-f0-9]+:	31 c8                	xor    %ecx,%eax
  +[a-f0-9]+:	33 c1                	xor    %ecx,%eax
  +[a-f0-9]+:	31 c8                	xor    %ecx,%eax
- +[a-f0-9]+:	a1 78 56 34 12       	mov    0x12345678,%eax
+ +[a-f0-9]+:	8b 05 78 56 34 12    	mov    0x12345678,%eax
  +[a-f0-9]+:	a3 78 56 34 12       	mov    %eax,0x12345678
  +[a-f0-9]+:	a1 78 56 34 12       	mov    0x12345678,%eax
- +[a-f0-9]+:	a3 78 56 34 12       	mov    %eax,0x12345678
+ +[a-f0-9]+:	89 05 78 56 34 12    	mov    %eax,0x12345678
  +[a-f0-9]+:	89 07                	mov    %eax,\(%edi\)
  +[a-f0-9]+:	8b 07                	mov    \(%edi\),%eax
  +[a-f0-9]+:	89 07                	mov    %eax,\(%edi\)
@@ -126,6 +126,91 @@ Disassembly of section .text:
  +[a-f0-9]+:	33 07                	xor    \(%edi\),%eax
  +[a-f0-9]+:	31 07                	xor    %eax,\(%edi\)
  +[a-f0-9]+:	33 07                	xor    \(%edi\),%eax
+ +[a-f0-9]+:	b0 12                	mov    \$0x12,%al
+ +[a-f0-9]+:	b8 45 03 00 00       	mov    \$0x345,%eax
+ +[a-f0-9]+:	b0 12                	mov    \$0x12,%al
+ +[a-f0-9]+:	b8 45 03 00 00       	mov    \$0x345,%eax
+ +[a-f0-9]+:	c6 c0 12             	mov    \$0x12,%al
+ +[a-f0-9]+:	c7 c0 45 03 00 00    	mov    \$0x345,%eax
+ +[a-f0-9]+:	14 12                	adc    \$0x12,%al
+ +[a-f0-9]+:	15 45 03 00 00       	adc    \$0x345,%eax
+ +[a-f0-9]+:	80 d0 12             	adc    \$0x12,%al
+ +[a-f0-9]+:	81 d0 45 03 00 00    	adc    \$0x345,%eax
+ +[a-f0-9]+:	80 d0 12             	adc    \$0x12,%al
+ +[a-f0-9]+:	81 d0 45 03 00 00    	adc    \$0x345,%eax
+ +[a-f0-9]+:	04 12                	add    \$0x12,%al
+ +[a-f0-9]+:	05 45 03 00 00       	add    \$0x345,%eax
+ +[a-f0-9]+:	80 c0 12             	add    \$0x12,%al
+ +[a-f0-9]+:	81 c0 45 03 00 00    	add    \$0x345,%eax
+ +[a-f0-9]+:	80 c0 12             	add    \$0x12,%al
+ +[a-f0-9]+:	81 c0 45 03 00 00    	add    \$0x345,%eax
+ +[a-f0-9]+:	24 12                	and    \$0x12,%al
+ +[a-f0-9]+:	25 45 03 00 00       	and    \$0x345,%eax
+ +[a-f0-9]+:	80 e0 12             	and    \$0x12,%al
+ +[a-f0-9]+:	81 e0 45 03 00 00    	and    \$0x345,%eax
+ +[a-f0-9]+:	80 e0 12             	and    \$0x12,%al
+ +[a-f0-9]+:	81 e0 45 03 00 00    	and    \$0x345,%eax
+ +[a-f0-9]+:	3c 12                	cmp    \$0x12,%al
+ +[a-f0-9]+:	3d 45 03 00 00       	cmp    \$0x345,%eax
+ +[a-f0-9]+:	80 f8 12             	cmp    \$0x12,%al
+ +[a-f0-9]+:	81 f8 45 03 00 00    	cmp    \$0x345,%eax
+ +[a-f0-9]+:	3c 12                	cmp    \$0x12,%al
+ +[a-f0-9]+:	3d 45 03 00 00       	cmp    \$0x345,%eax
+ +[a-f0-9]+:	0c 12                	or     \$0x12,%al
+ +[a-f0-9]+:	0d 45 03 00 00       	or     \$0x345,%eax
+ +[a-f0-9]+:	80 c8 12             	or     \$0x12,%al
+ +[a-f0-9]+:	81 c8 45 03 00 00    	or     \$0x345,%eax
+ +[a-f0-9]+:	80 c8 12             	or     \$0x12,%al
+ +[a-f0-9]+:	81 c8 45 03 00 00    	or     \$0x345,%eax
+ +[a-f0-9]+:	1c 12                	sbb    \$0x12,%al
+ +[a-f0-9]+:	1d 45 03 00 00       	sbb    \$0x345,%eax
+ +[a-f0-9]+:	80 d8 12             	sbb    \$0x12,%al
+ +[a-f0-9]+:	81 d8 45 03 00 00    	sbb    \$0x345,%eax
+ +[a-f0-9]+:	80 d8 12             	sbb    \$0x12,%al
+ +[a-f0-9]+:	81 d8 45 03 00 00    	sbb    \$0x345,%eax
+ +[a-f0-9]+:	2c 12                	sub    \$0x12,%al
+ +[a-f0-9]+:	2d 45 03 00 00       	sub    \$0x345,%eax
+ +[a-f0-9]+:	80 e8 12             	sub    \$0x12,%al
+ +[a-f0-9]+:	81 e8 45 03 00 00    	sub    \$0x345,%eax
+ +[a-f0-9]+:	80 e8 12             	sub    \$0x12,%al
+ +[a-f0-9]+:	81 e8 45 03 00 00    	sub    \$0x345,%eax
+ +[a-f0-9]+:	a8 12                	test   \$0x12,%al
+ +[a-f0-9]+:	a9 45 03 00 00       	test   \$0x345,%eax
+ +[a-f0-9]+:	f6 c0 12             	test   \$0x12,%al
+ +[a-f0-9]+:	f7 c0 45 03 00 00    	test   \$0x345,%eax
+ +[a-f0-9]+:	a8 12                	test   \$0x12,%al
+ +[a-f0-9]+:	a9 45 03 00 00       	test   \$0x345,%eax
+ +[a-f0-9]+:	34 12                	xor    \$0x12,%al
+ +[a-f0-9]+:	35 45 03 00 00       	xor    \$0x345,%eax
+ +[a-f0-9]+:	80 f0 12             	xor    \$0x12,%al
+ +[a-f0-9]+:	81 f0 45 03 00 00    	xor    \$0x345,%eax
+ +[a-f0-9]+:	80 f0 12             	xor    \$0x12,%al
+ +[a-f0-9]+:	81 f0 45 03 00 00    	xor    \$0x345,%eax
+ +[a-f0-9]+:	41                   	inc    %ecx
+ +[a-f0-9]+:	ff c1                	inc    %ecx
+ +[a-f0-9]+:	ff c1                	inc    %ecx
+ +[a-f0-9]+:	49                   	dec    %ecx
+ +[a-f0-9]+:	ff c9                	dec    %ecx
+ +[a-f0-9]+:	ff c9                	dec    %ecx
+ +[a-f0-9]+:	51                   	push   %ecx
+ +[a-f0-9]+:	ff f1                	push   %ecx
+ +[a-f0-9]+:	51                   	push   %ecx
+ +[a-f0-9]+:	59                   	pop    %ecx
+ +[a-f0-9]+:	59                   	pop    %ecx
+ +[a-f0-9]+:	8f c1                	pop    %ecx
+ +[a-f0-9]+:	0f c9                	bswap  %ecx
+ +[a-f0-9]+:	0f c9                	bswap  %ecx
+ +[a-f0-9]+:	0f c9                	bswap  %ecx
+ +[a-f0-9]+:	87 ce                	xchg   %ecx,%esi
+ +[a-f0-9]+:	87 f1                	xchg   %esi,%ecx
+ +[a-f0-9]+:	87 f1                	xchg   %esi,%ecx
+ +[a-f0-9]+:	87 ce                	xchg   %ecx,%esi
+ +[a-f0-9]+:	96                   	xchg   %eax,%esi
+ +[a-f0-9]+:	87 f0                	xchg   %esi,%eax
+ +[a-f0-9]+:	87 c6                	xchg   %eax,%esi
+ +[a-f0-9]+:	91                   	xchg   %eax,%ecx
+ +[a-f0-9]+:	87 c1                	xchg   %eax,%ecx
+ +[a-f0-9]+:	87 c8                	xchg   %ecx,%eax
  +[a-f0-9]+:	d8 c0                	fadd   %st\(0\),%st
  +[a-f0-9]+:	d8 c0                	fadd   %st\(0\),%st
  +[a-f0-9]+:	dc c0                	fadd   %st,%st\(0\)

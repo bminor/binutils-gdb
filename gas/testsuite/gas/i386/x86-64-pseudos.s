@@ -135,6 +135,42 @@ _start:
 	{store} xor %eax, (%rdi)
 	{store} xor (%rdi), %eax
 
+	.irp m, mov, adc, add, and, cmp, or, sbb, sub, test, xor
+	\m	$0x12, %al
+	\m	$0x345, %eax
+	{load} \m $0x12, %al		# bogus for MOV
+	{load} \m $0x345, %eax		# bogus for MOV
+	{store} \m $0x12, %al
+	{store} \m $0x345, %eax
+	.endr
+
+	# There should be no effect of the pseudo-prefixes on any of these.
+	mov	$0x123456789, %rcx
+	{load} mov $0x123456789, %rcx
+	{store} mov $0x123456789, %rcx
+	movabs	$0x12345678, %rcx
+	{load} movabs $0x12345678, %rcx
+	{store} movabs $0x12345678, %rcx
+
+	.irp m, push, pop, bswap
+	\m	%rcx
+	{load} \m %rcx			# bogus for POP
+	{store} \m %rcx			# bogus for PUSH
+	.endr
+
+	xchg	%ecx, %esi
+	xchg	%esi, %ecx
+	{load} xchg %ecx, %esi
+	{store} xchg %ecx, %esi
+
+	xchg	%eax, %esi
+	{load} xchg %eax, %esi
+	{store} xchg %eax, %esi
+
+	xchg	%ecx, %eax
+	{load} xchg %ecx, %eax
+	{store} xchg %ecx, %eax
+
 	fadd %st, %st
 	{load} fadd %st, %st
 	{store} fadd %st, %st
