@@ -264,8 +264,10 @@ cld, 0xfc, 0, NoSuf, {}
 cli, 0xfa, 0, NoSuf, {}
 clts, 0xf06, i286, NoSuf, {}
 cmc, 0xf5, 0, NoSuf, {}
-lahf, 0x9f, 0, NoSuf, {}
-sahf, 0x9e, 0, NoSuf, {}
+lahf, 0x9f, No64, NoSuf, {}
+lahf, 0x9f, LAHF_SAHF, NoSuf, {}
+sahf, 0x9e, No64, NoSuf, {}
+sahf, 0x9e, LAHF_SAHF, NoSuf, {}
 pushf, 0x9c, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
 pushf, 0x9c, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
 popf, 0x9d, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}

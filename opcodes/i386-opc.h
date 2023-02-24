@@ -137,6 +137,8 @@ enum
   CpuMovbe,
   /* CMPXCHG16B instruction support required.  */
   CpuCX16,
+  /* LAHF/SAHF instruction support required (in 64-bit mode).  */
+  CpuLAHF_SAHF,
   /* EPT Instructions required */
   CpuEPT,
   /* RDTSCP Instruction support required */
@@ -372,6 +374,7 @@ typedef union i386_cpu_flags
       unsigned int cputbm:1;
       unsigned int cpumovbe:1;
       unsigned int cpucx16:1;
+      unsigned int cpulahf_sahf:1;
       unsigned int cpuept:1;
       unsigned int cpurdtscp:1;
       unsigned int cpufsgsbase:1;

@@ -934,6 +934,7 @@ if [gas_64_check] then {
     run_dump_test "x86-64-arch-2-btver2"
     run_list_test "x86-64-arch-2-1" "-march=generic64 -I${srcdir}/$subdir -al"
     run_list_test "x86-64-arch-2-2" "-march=generic64+cx16 -I${srcdir}/$subdir -al"
+    run_list_test "x86-64-arch-2-3" "-march=generic64+lahf_sahf -I${srcdir}/$subdir -aln"
     run_dump_test "xmmhi64"
     run_dump_test "x86-64-xsave"
     run_dump_test "x86-64-xsave-intel"

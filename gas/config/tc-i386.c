@@ -1047,6 +1047,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (lwp, LWP, ANY_LWP, false),
   SUBARCH (movbe, MOVBE, MOVBE, false),
   SUBARCH (cx16, CX16, CX16, false),
+  SUBARCH (lahf_sahf, LAHF_SAHF, LAHF_SAHF, false),
   SUBARCH (ept, EPT, ANY_EPT, false),
   SUBARCH (lzcnt, LZCNT, LZCNT, false),
   SUBARCH (popcnt, POPCNT, POPCNT, false),

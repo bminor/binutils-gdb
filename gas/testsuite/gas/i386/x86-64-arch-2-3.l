@@ -14,6 +14,7 @@
 .*:40: Error: .*
 .*:42: Error: .*
 .*:44: Error: .*
+.*:46: Error: .*
 .*:48: Error: .*
 .*:50: Error: .*
 .*:52: Error: .*
@@ -23,14 +24,10 @@
 .*:60: Error: .*
 .*:62: Error: .*
 .*:64: Error: .*
-.*:66: Error: .*
-GAS LISTING .*
-
-
 [ 	]*1[ 	]+\.include "x86-64-arch-2\.s"
 [ 	]*1[ 	]+\# Test -march=
 [ 	]*2[ 	]+\.text
-[ 	]*3[ 	]+\# cmov feature 
+[ 	]*3[ 	]+\# cmov feature *
 [ 	]*4[ 	]+\?\?\?\? 0F44D8   	cmove	%eax,%ebx
 [ 	]*5[ 	]+\# clflush
 [ 	]*6[ 	]+\?\?\?\? 0FAE38   	clflush \(%rax\)
@@ -73,7 +70,7 @@ GAS LISTING .*
 [ 	]*43[ 	]+\# MOVBE
 [ 	]*44[ 	]+movbe   \(%rcx\),%ebx
 [ 	]*45[ 	]+\# CX16
-[ 	]*46[ 	]+\?\?\?\? 480FC70E 	cmpxchg16b \(%rsi\)
+[ 	]*46[ 	]+cmpxchg16b \(%rsi\)
 [ 	]*47[ 	]+\# EPT
 [ 	]*48[ 	]+invept  \(%rcx\),%rbx
 [ 	]*49[ 	]+\# RDTSCP
@@ -84,9 +81,6 @@ GAS LISTING .*
 [ 	]*54[ 	]+insertq %xmm2,%xmm1
 [ 	]*55[ 	]+\# SVME
 [ 	]*56[ 	]+vmload
-GAS LISTING .*
-
-
 [ 	]*57[ 	]+\# ABM/LZCNT
 [ 	]*58[ 	]+lzcnt %ecx,%ebx
 [ 	]*59[ 	]+\# PadLock
@@ -96,4 +90,4 @@ GAS LISTING .*
 [ 	]*63[ 	]+\# TBM
 [ 	]*64[ 	]+blcfill %ecx,%ebx
 [ 	]*65[ 	]+\# LAHF/SAHF
-[ 	]*66[ 	]+lahf
+[ 	]*66[ 	]+\?\?\?\? 9F       	lahf
