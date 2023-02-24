@@ -2551,6 +2551,14 @@ inside_main_func (frame_info_ptr this_frame)
       if (bs.symbol == nullptr)
 	return false;
 
+      /* We might have found some unrelated symbol.  For example, the
+	 Rust compiler can emit both a subprogram and a namespace with
+	 the same name in the same scope; and due to how gdb's symbol
+	 tables currently work, we can't request the one we'd
+	 prefer.  */
+      if (bs.symbol->aclass () != LOC_BLOCK)
+	return false;
+
       const struct block *block = bs.symbol->value_block ();
       gdb_assert (block != nullptr);
       sym_addr = block->start ();
