@@ -6146,12 +6146,13 @@ typedef struct elf_find_function_cache
 } elf_find_function_cache;
 
 
-/* Returns TRUE if the symbol with address CODE_OFF and size CODE_SIZE
+/* Returns TRUE if symbol SYM with address CODE_OFF and size CODE_SIZE
    is a better fit to match OFFSET than whatever is currenly stored in
    CACHE.  */
 
 static inline bool
 better_fit (elf_find_function_cache *  cache,
+	    asymbol *                  sym,
 	    bfd_vma                    code_off,
 	    bfd_size_type              code_size,
 	    bfd_vma                    offset)
@@ -6169,24 +6170,45 @@ better_fit (elf_find_function_cache *  cache,
   if (code_off > cache->code_off)
     return true;
 
+  /* assert (code_off == cache->code_off);  */
+
   /* If our current best fit does not actually reach the desired
      offset...  */
   if (cache->code_off + cache->code_size <= offset)
-    {
-      /* Then return whichever candidate covers more area.  */
-      return code_size > cache->code_size;
-    }
+    /* ... then return whichever candidate covers
+       more area and hence gets closer to OFFSET.  */
+    return code_size > cache->code_size;
 
-  /* If the new symbol also covers the desired offset... */
-  if (code_off + code_size > offset)
-    {
-      /* Then choose whichever is smaller.  */
-      /* FIXME: Maybe prefer LOCAL over GLOBAL or something else here ?  */
-      return code_size < cache->code_size;
-    }
+  /* The current cache'd symbol covers OFFSET.  */
 
-  /* Otherwise the cached symbol is better.  */
-  return false;
+  /* If the new symbol does not cover the desired offset then skip it.  */  
+  if (code_off + code_size <= offset)
+    return false;
+
+  /* Both symbols cover OFFSET.  */
+
+  /* Prefer functions over non-functions.  */
+  flagword cache_flags = cache->func->flags;
+  flagword sym_flags   = sym->flags;
+
+  if ((cache_flags & BSF_FUNCTION) && ((sym_flags & BSF_FUNCTION) == 0))
+    return false;
+  if ((sym_flags & BSF_FUNCTION) && ((cache_flags & BSF_FUNCTION) == 0))
+    return true;
+
+  /* FIXME: Should we choose LOCAL over GLOBAL ?  */
+
+  /* Prefer typed symbols over notyped.  */
+  int cache_type = ELF_ST_TYPE (((elf_symbol_type *) cache->func)->internal_elf_sym.st_info);
+  int sym_type   = ELF_ST_TYPE (((elf_symbol_type *) sym)->internal_elf_sym.st_info);
+
+  if (cache_type == STT_NOTYPE && sym_type != STT_NOTYPE)
+    return true;
+  if (cache_type != STT_NOTYPE && sym_type == STT_NOTYPE)
+    return false;
+
+  /* Otherwise choose whichever symbol covers a smaller area.  */
+  return code_size < cache->code_size;
 }
 
 /* Find the function to a particular section and offset,
@@ -6264,7 +6286,7 @@ _bfd_elf_find_function (bfd *abfd,
 	  if (size == 0)
 	    continue;
 
-	  if (better_fit (cache, code_off, size, offset))
+	  if (better_fit (cache, sym, code_off, size, offset))
 	    {
 	      cache->func = sym;
 	      cache->code_size = size;
