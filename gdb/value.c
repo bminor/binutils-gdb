@@ -1857,7 +1857,7 @@ struct internalvar
 };
 
 /* Use std::map, a sorted container, to make the order of iteration (and
-   therefore the output of "show convenience" stable).  */
+   therefore the output of "show convenience") stable.  */
 
 static std::map<std::string, internalvar> internalvars;
 
