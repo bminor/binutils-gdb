@@ -118,6 +118,9 @@ struct riscv_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
 
+  /* Various options and other info passed from the linker.  */
+  struct riscv_elf_params *params;
+
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sdyntdata;
 
@@ -156,6 +159,13 @@ struct riscv_elf_link_hash_table
   ((is_elf_hash_table ((p)->hash)					\
     && elf_hash_table_id (elf_hash_table (p)) == RISCV_ELF_DATA)	\
    ? (struct riscv_elf_link_hash_table *) (p)->hash : NULL)
+
+void
+riscv_elfNN_set_options (struct bfd_link_info *link_info,
+			 struct riscv_elf_params *params)
+{
+  riscv_elf_hash_table (link_info)->params = params;
+}
 
 static bool
 riscv_info_to_howto_rela (bfd *abfd,
@@ -4389,7 +4399,9 @@ _bfd_riscv_relax_lui (bfd *abfd,
 		      bool undefined_weak)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_vma gp = riscv_global_pointer_value (link_info);
+  bfd_vma gp = riscv_elf_hash_table (link_info)->params->relax_gp
+		   ? riscv_global_pointer_value (link_info)
+		   : 0;
   int use_rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
@@ -4834,7 +4846,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		   || type == R_RISCV_TPREL_LO12_I
 		   || type == R_RISCV_TPREL_LO12_S)
 	    relax_func = _bfd_riscv_relax_tls_le;
-	  else if (!bfd_link_pic (info)
+	  else if (!bfd_link_pic (info) && htab->params->relax_gp
 		   && (type == R_RISCV_PCREL_HI20
 		       || type == R_RISCV_PCREL_LO12_I
 		       || type == R_RISCV_PCREL_LO12_S))

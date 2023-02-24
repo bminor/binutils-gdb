@@ -1,3 +1,13 @@
+2023-02-23  Fangrui Song  <i@maskray.me>
+
+	* elfnn-riscv.c (struct riscv_elf_link_hash_table): Add params.
+	(riscv_elfNN_set_options): New.
+	(riscv_info_to_howto_rela): Check relax_gp.
+	(_bfd_riscv_relax_section): Likewise.
+	* elfxx-riscv.h (struct riscv_elf_params): New.
+	(riscv_elf32_set_options): New.
+	(riscv_elf64_set_options): New.
+
 2023-02-23  Nick Clifton  <nickc@redhat.com>
             Alan Modra  <amodra@gmail.com>
 
