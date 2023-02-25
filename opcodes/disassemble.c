@@ -652,6 +652,11 @@ disassemble_init_for_target (struct disassemble_info * info)
       info->skip_zeroes = 32;
       break;
 #endif
+#ifdef ARCH_m68k
+    case bfd_arch_m68k:
+      info->created_styled_output = true;
+      break;
+#endif
 #ifdef ARCH_mep
     case bfd_arch_mep:
       info->skip_zeroes = 256;
