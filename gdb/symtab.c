@@ -1162,29 +1162,6 @@ matching_obj_sections (struct obj_section *obj_first,
 
   return false;
 }
-
-/* See symtab.h.  */
-
-void
-expand_symtab_containing_pc (CORE_ADDR pc, struct obj_section *section)
-{
-  struct bound_minimal_symbol msymbol;
-
-  /* If we know that this is not a text address, return failure.  This is
-     necessary because we loop based on texthigh and textlow, which do
-     not include the data ranges.  */
-  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
-  if (msymbol.minsym && msymbol.minsym->data_p ())
-    return;
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      struct compunit_symtab *cust
-	= objfile->find_pc_sect_compunit_symtab (msymbol, pc, section, 0);
-      if (cust)
-	return;
-    }
-}
 
 /* Hash function for the symbol cache.  */
 

@@ -2189,10 +2189,6 @@ extern bound_minimal_symbol find_gnu_ifunc (const symbol *sym);
 
 extern void clear_pc_function_cache (void);
 
-/* Expand symtab containing PC, SECTION if not already expanded.  */
-
-extern void expand_symtab_containing_pc (CORE_ADDR, struct obj_section *);
-
 /* lookup full symbol table by address.  */
 
 extern struct compunit_symtab *find_pc_compunit_symtab (CORE_ADDR);
