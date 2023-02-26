@@ -1392,10 +1392,6 @@ elf_symfile_finish (struct objfile *objfile)
 static void
 elf_symfile_init (struct objfile *objfile)
 {
-  /* ELF objects may be reordered, so set OBJF_REORDERED.  If we
-     find this causes a significant slowdown in gdb then we could
-     set it in the debug symbol readers only when necessary.  */
-  objfile->flags |= OBJF_REORDERED;
 }
 
 /* Implementation of `sym_get_probes', as documented in symfile.h.  */

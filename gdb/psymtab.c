@@ -102,8 +102,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
      many partial symbol tables containing the PC, but
      we want the partial symbol table that contains the
      function containing the PC.  */
-  if (!(objfile->flags & OBJF_REORDERED)
-      && section == NULL)  /* Can't validate section this way.  */
+  if (section == nullptr)
     return pst;
 
   if (msymbol.minsym == NULL)

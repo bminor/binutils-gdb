@@ -789,10 +789,9 @@ buildsym_compunit::end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
 	}
     }
 
-  /* Reordered executables may have out of order pending blocks; if
-     OBJF_REORDERED is true, then sort the pending blocks.  */
-
-  if ((m_objfile->flags & OBJF_REORDERED) && m_pending_blocks)
+  /* Executables may have out of order pending blocks; sort the
+     pending blocks.  */
+  if (m_pending_blocks != nullptr)
     {
       struct pending_block *pb;
 
@@ -903,15 +902,14 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 		return (ln1.pc < ln2.pc);
 	      };
 
-	  /* Like the pending blocks, the line table may be scrambled in
-	     reordered executables.  Sort it if OBJF_REORDERED is true.  It
-	     is important to preserve the order of lines at the same
-	     address, as this maintains the inline function caller/callee
+	  /* Like the pending blocks, the line table may be scrambled
+	     in reordered executables.  Sort it.  It is important to
+	     preserve the order of lines at the same address, as this
+	     maintains the inline function caller/callee
 	     relationships, this is why std::stable_sort is used.  */
-	  if (m_objfile->flags & OBJF_REORDERED)
-	    std::stable_sort (subfile->line_vector_entries.begin (),
-			      subfile->line_vector_entries.end (),
-			      lte_is_less_than);
+	  std::stable_sort (subfile->line_vector_entries.begin (),
+			    subfile->line_vector_entries.end (),
+			    lte_is_less_than);
 	}
 
       /* Allocate a symbol table if necessary.  */

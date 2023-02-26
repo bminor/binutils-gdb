@@ -81,7 +81,6 @@ macho_new_init (struct objfile *objfile)
 static void
 macho_symfile_init (struct objfile *objfile)
 {
-  objfile->flags |= OBJF_REORDERED;
 }
 
 /* Add symbol SYM to the minimal symbol table of OBJFILE.  */
@@ -586,8 +585,7 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
   symbol_file_add_from_bfd
     (abfd, name, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE),
      NULL,
-     main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
-			    | OBJF_READNOW | OBJF_USERLOADED),
+     main_objfile->flags & (OBJF_SHARED | OBJF_READNOW | OBJF_USERLOADED),
      main_objfile);
 }
 

@@ -2842,18 +2842,11 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	  /* In order to better support objfiles that contain both
 	     stabs and coff debugging info, we continue on if a psymtab
 	     can't be found.  */
-	  if ((obj_file->flags & OBJF_REORDERED) != 0)
-	    {
-	      struct compunit_symtab *result;
-
-	      result
-		= obj_file->find_pc_sect_compunit_symtab (msymbol,
-							  pc,
-							  section,
-							  0);
-	      if (result != NULL)
-		return result;
-	    }
+	  struct compunit_symtab *result
+	    = obj_file->find_pc_sect_compunit_symtab (msymbol, pc,
+						      section, 0);
+	  if (result != nullptr)
+	    return result;
 
 	  if (section != 0)
 	    {

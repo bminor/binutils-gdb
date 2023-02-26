@@ -485,11 +485,6 @@ coff_symfile_init (struct objfile *objfile)
 {
   /* Allocate struct to keep track of the symfile.  */
   coff_objfile_data_key.emplace (objfile);
-
-  /* COFF objects may be reordered, so set OBJF_REORDERED.  If we
-     find this causes a significant slowdown in gdb then we could
-     set it in the debug symbol readers only when necessary.  */
-  objfile->flags |= OBJF_REORDERED;
 }
 
 /* This function is called for every section; it finds the outer

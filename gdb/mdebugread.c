@@ -3673,35 +3673,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			   textlow_not_set);
       includes_used = 0;
       dependencies_used = 0;
-
-      /* The objfile has its functions reordered if this partial symbol
-	 table overlaps any other partial symbol table.
-	 We cannot assume a reordered objfile if a partial symbol table
-	 is contained within another partial symbol table, as partial symbol
-	 tables for include files with executable code are contained
-	 within the partial symbol table for the including source file,
-	 and we do not want to flag the objfile reordered for these cases.
-
-	 This strategy works well for Irix-5.2 shared libraries, but we
-	 might have to use a more elaborate (and slower) algorithm for
-	 other cases.  */
-      save_pst = fdr_to_pst[f_idx].pst;
-      if (save_pst != NULL
-	  && save_pst->text_low_valid
-	  && !(objfile->flags & OBJF_REORDERED))
-	{
-	  for (partial_symtab *iter : partial_symtabs->range ())
-	    {
-	      if (save_pst != iter
-		  && save_pst->raw_text_low () >= iter->raw_text_low ()
-		  && save_pst->raw_text_low () < iter->raw_text_high ()
-		  && save_pst->raw_text_high () > iter->raw_text_high ())
-		{
-		  objfile->flags |= OBJF_REORDERED;
-		  break;
-		}
-	    }
-	}
     }
 
   /* Now scan the FDRs for dependencies.  */

@@ -1788,11 +1788,6 @@ xcoff_symfile_init (struct objfile *objfile)
 {
   /* Allocate struct to keep track of the symfile.  */
   xcoff_objfile_data_key.emplace (objfile);
-
-  /* XCOFF objects may be reordered, so set OBJF_REORDERED.  If we
-     find this causes a significant slowdown in gdb then we could
-     set it in the debug symbol readers only when necessary.  */
-  objfile->flags |= OBJF_REORDERED;
 }
 
 /* Perform any local cleanups required when we are done with a particular
