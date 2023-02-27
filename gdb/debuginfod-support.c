@@ -34,12 +34,14 @@ static cmd_list_element *show_debuginfod_prefix_list;
 static const char debuginfod_on[] = "on";
 static const char debuginfod_off[] = "off";
 static const char debuginfod_ask[] = "ask";
+static const char debuginfod_lazy[] = "lazy";
 
 static const char *debuginfod_enabled_enum[] =
 {
   debuginfod_on,
   debuginfod_off,
   debuginfod_ask,
+  debuginfod_lazy,
   nullptr
 };
 
@@ -424,7 +426,7 @@ debuginfod_section_query (const unsigned char *build_id,
   return scoped_fd (-ENOSYS);
 #else
 
- if (!debuginfod_is_enabled ())
+ if (debuginfod_enabled != debuginfod_lazy || !debuginfod_is_enabled ())
     return scoped_fd (-ENOSYS);
 
   debuginfod_client *c = get_debuginfod_client ();
@@ -468,6 +470,14 @@ static void
 set_debuginfod_enabled (const char *value)
 {
 #if defined(HAVE_LIBDEBUGINFOD)
+#if !defined(HAVE_DEBUGINFOD_FIND_SECTION)
+  if (value == debuginfod_lazy)
+    {
+      debuginfod_enabled = debuginfod_on;
+      error (_("Support for lazy downloading is not compiled into GDB. " \
+"Defaulting to \"on\"."));
+    }
+#endif
   debuginfod_enabled = value;
 #else
   /* Disabling debuginfod when gdb is not built with it is a no-op.  */
@@ -567,8 +577,12 @@ _initialize_debuginfod ()
 			_("Set whether to use debuginfod."),
 			_("Show whether to use debuginfod."),
 			_("\
-When on, enable the use of debuginfod to download missing debug info and\n\
-source files."),
+When set to \"on\", enable the use of debuginfod to download missing\n\
+debug info and source files. \"off\" disables the use of debuginfod.\n\
+When set to \"ask\", a prompt may ask whether to enable or disable\n\
+debuginfod.  When set to \"lazy\", debug info downloading will be\n\
+deferred until it is required. GDB may also download components of\n\
+debug info instead of entire files." ),
 			set_debuginfod_enabled,
 			get_debuginfod_enabled,
 			show_debuginfod_enabled,

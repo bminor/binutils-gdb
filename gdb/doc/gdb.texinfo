@@ -49332,10 +49332,15 @@ debug info or source files.  By default, @code{debuginfod enabled} is set to
 attempting to perform the next query.  By default, @code{debuginfod enabled}
 is set to @code{ask} for interactive sessions.
 
+@item set debuginfod enabled lazy
+@value{GDBN} will attempt to defer downloading entire debug info files until
+necessary. @value{GDBN} may instead download individual components of the
+debug info files such as @code{.gdb_index}.
+
 @kindex show debuginfod enabled
 @item show debuginfod enabled
-Display whether @code{debuginfod enabled} is set to @code{on}, @code{off} or
-@code{ask}.
+Display whether @code{debuginfod enabled} is set to @code{on}, @code{off},
+@code{ask} or @code{lazy}.
 
 @kindex set debuginfod urls
 @cindex configure debuginfod URLs
