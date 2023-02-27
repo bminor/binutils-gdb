@@ -410,6 +410,10 @@ start_event_loop ()
 	{
 	  result = gdb_do_one_event ();
 	}
+      catch (const gdb_exception_forced_quit &ex)
+	{
+	  throw;
+	}
       catch (const gdb_exception &ex)
 	{
 	  exception_print (gdb_stderr, ex);
@@ -517,6 +521,10 @@ catch_command_errors (catch_command_errors_const_ftype command,
       /* Do any commands attached to breakpoint we stopped at.  */
       if (do_bp_actions)
 	bpstat_do_actions ();
+    }
+  catch (const gdb_exception_forced_quit &e)
+    {
+      quit_force (NULL, 0);
     }
   catch (const gdb_exception &e)
     {
@@ -1308,6 +1316,10 @@ captured_main (void *data)
       try
 	{
 	  captured_command_loop ();
+	}
+      catch (const gdb_exception_forced_quit &ex)
+	{
+	  quit_force (NULL, 0);
 	}
       catch (const gdb_exception &ex)
 	{

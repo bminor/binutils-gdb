@@ -642,7 +642,7 @@ quit (void)
   if (sync_quit_force_run)
     {
       sync_quit_force_run = 0;
-      quit_force (NULL, 0);
+      throw_forced_quit ("SIGTERM");
     }
 
 #ifdef __MSDOS__
