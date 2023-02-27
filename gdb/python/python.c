@@ -621,31 +621,32 @@ static PyObject *
 execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 {
   const char *arg;
-  PyObject *from_tty_obj = NULL, *to_string_obj = NULL;
-  int from_tty, to_string;
-  static const char *keywords[] = { "command", "from_tty", "to_string", NULL };
+  PyObject *from_tty_obj = nullptr;
+  PyObject *to_string_obj = nullptr;
+  static const char *keywords[] = { "command", "from_tty", "to_string",
+				    nullptr };
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O!O!", keywords, &arg,
 					&PyBool_Type, &from_tty_obj,
 					&PyBool_Type, &to_string_obj))
-    return NULL;
+    return nullptr;
 
-  from_tty = 0;
-  if (from_tty_obj)
+  bool from_tty = false;
+  if (from_tty_obj != nullptr)
     {
       int cmp = PyObject_IsTrue (from_tty_obj);
       if (cmp < 0)
-	return NULL;
-      from_tty = cmp;
+	return nullptr;
+      from_tty = (cmp != 0);
     }
 
-  to_string = 0;
-  if (to_string_obj)
+  bool to_string = false;
+  if (to_string_obj != nullptr)
     {
       int cmp = PyObject_IsTrue (to_string_obj);
       if (cmp < 0)
-	return NULL;
-      to_string = cmp;
+	return nullptr;
+      to_string = (cmp != 0);
     }
 
   std::string to_string_res;
