@@ -389,7 +389,8 @@ elf_x86_64_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       default:
 	return false;
 
-      case 124:		/* sizeof(struct elf_prpsinfo) on Linux/x32 */
+      case 124:
+	/* sizeof (struct elf_external_linux_prpsinfo32_ugid16).  */
 	elf_tdata (abfd)->core->pid
 	  = bfd_get_32 (abfd, note->descdata + 12);
 	elf_tdata (abfd)->core->program
@@ -398,7 +399,18 @@ elf_x86_64_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 	  = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
 	break;
 
-      case 136:		/* sizeof(struct elf_prpsinfo) on Linux/x86_64 */
+    case 128:
+	/* sizeof (struct elf_external_linux_prpsinfo32_ugid32).  */
+	elf_tdata (abfd)->core->pid
+	  = bfd_get_32 (abfd, note->descdata + 12);
+	elf_tdata (abfd)->core->program
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 32, 16);
+	elf_tdata (abfd)->core->command
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 48, 80);
+	break;
+
+      case 136:
+	/* sizeof (struct elf_prpsinfo) on Linux/x86_64.  */
 	elf_tdata (abfd)->core->pid
 	  = bfd_get_32 (abfd, note->descdata + 24);
 	elf_tdata (abfd)->core->program

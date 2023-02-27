@@ -1,3 +1,8 @@
+2023-02-27  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_grok_psinfo): Check for
+	elf_external_linux_prpsinfo32_ugid32.
+
 2023-02-23  Fangrui Song  <i@maskray.me>
 
 	* elfnn-riscv.c (struct riscv_elf_link_hash_table): Add params.
