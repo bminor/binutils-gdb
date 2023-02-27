@@ -20,181 +20,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import textwrap
-import gdbcopyright
 
-# All the components created in gdbarch-components.py.
-components = []
+# gdbarch_components is imported only for its side-effect of filling
+# `gdbarch_types.components`.
+import gdbarch_components  # noqa: F401 # type: ignore
+import gdbcopyright
+from gdbarch_types import Function, Info, Value, components
 
 
 def indentation(n_columns):
     """Return string with tabs and spaces to indent line to N_COLUMNS."""
     return "\t" * (n_columns // 8) + " " * (n_columns % 8)
 
-
-def join_type_and_name(t, n):
-    "Combine the type T and the name N into a C declaration."
-    if t.endswith("*") or t.endswith("&"):
-        return t + n
-    else:
-        return t + " " + n
-
-
-def join_params(params):
-    """Given a sequence of (TYPE, NAME) pairs, generate a comma-separated
-    list of declarations."""
-    params = [join_type_and_name(p[0], p[1]) for p in params]
-    return ", ".join(params)
-
-
-class _Component:
-    "Base class for all components."
-
-    def __init__(
-        self,
-        name,
-        type,
-        printer=None,
-        comment=None,
-        predicate=False,
-        predefault=None,
-        postdefault=None,
-        invalid=None,
-        params=None,
-        param_checks=None,
-        result_checks=None,
-        implement=True,
-    ):
-        self.name = name
-        self.type = type
-        self.printer = printer
-        self.comment = comment
-        self.predicate = predicate
-        self.predefault = predefault
-        self.postdefault = postdefault
-        self.invalid = invalid
-        self.params = params
-        self.param_checks = param_checks
-        self.result_checks = result_checks
-        self.implement = implement
-
-        components.append(self)
-
-        # It doesn't make sense to have a check of the result value
-        # for a function or method with void return type.
-        if self.type == "void" and self.result_checks:
-            raise Exception("can't have result checks with a void return type")
-
-    def get_predicate(self):
-        "Return the expression used for validity checking."
-        assert self.predicate and not isinstance(self.invalid, str)
-        if self.predefault:
-            predicate = f"gdbarch->{self.name} != {self.predefault}"
-        else:
-            predicate = f"gdbarch->{self.name} != NULL"
-        return predicate
-
-
-class Info(_Component):
-    "An Info component is copied from the gdbarch_info."
-
-
-class Value(_Component):
-    "A Value component is just a data member."
-
-    def __init__(
-        self,
-        *,
-        name,
-        type,
-        comment=None,
-        predicate=False,
-        predefault=None,
-        postdefault=None,
-        invalid=None,
-        printer=None,
-    ):
-        super().__init__(
-            comment=comment,
-            name=name,
-            type=type,
-            predicate=predicate,
-            predefault=predefault,
-            postdefault=postdefault,
-            invalid=invalid,
-            printer=printer,
-        )
-
-
-class Function(_Component):
-    "A Function component is a function pointer member."
-
-    def __init__(
-        self,
-        *,
-        name,
-        type,
-        params,
-        comment=None,
-        predicate=False,
-        predefault=None,
-        postdefault=None,
-        invalid=None,
-        printer=None,
-        param_checks=None,
-        result_checks=None,
-        implement=True,
-    ):
-        super().__init__(
-            comment=comment,
-            name=name,
-            type=type,
-            predicate=predicate,
-            predefault=predefault,
-            postdefault=postdefault,
-            invalid=invalid,
-            printer=printer,
-            params=params,
-            param_checks=param_checks,
-            result_checks=result_checks,
-            implement=implement,
-        )
-
-    def ftype(self):
-        "Return the name of the function typedef to use."
-        return f"gdbarch_{self.name}_ftype"
-
-    def param_list(self):
-        "Return the formal parameter list as a string."
-        return join_params(self.params)
-
-    def set_list(self):
-        """Return the formal parameter list of the caller function,
-        as a string.  This list includes the gdbarch."""
-        arch_arg = ("struct gdbarch *", "gdbarch")
-        arch_tuple = [arch_arg]
-        return join_params(arch_tuple + list(self.params))
-
-    def actuals(self):
-        "Return the actual parameters to forward, as a string."
-        return ", ".join([p[1] for p in self.params])
-
-
-class Method(Function):
-    "A Method is like a Function but passes the gdbarch through."
-
-    def param_list(self):
-        "See superclass."
-        return self.set_list()
-
-    def actuals(self):
-        "See superclass."
-        result = ["gdbarch"] + [p[1] for p in self.params]
-        return ", ".join(result)
-
-
-# Read the components.
-with open("gdbarch-components.py") as fd:
-    exec(fd.read())
 
 copyright = gdbcopyright.copyright(
     "gdbarch.py", "Dynamic architecture support for GDB, the GNU debugger."

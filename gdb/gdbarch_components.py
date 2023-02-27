@@ -117,6 +117,8 @@
 # * "implement" - optional, a boolean.  If True (the default), a
 # wrapper function for this function will be emitted.
 
+from gdbarch_types import Function, Info, Method, Value
+
 Info(
     type="const struct bfd_arch_info *",
     name="bfd_arch_info",
