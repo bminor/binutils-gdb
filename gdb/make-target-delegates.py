@@ -33,7 +33,7 @@ ENDER = re.compile(r"^\s*};$")
 # Match a C symbol.
 SYMBOL = "[a-zA-Z_][a-zA-Z0-9_]*"
 # Match the name part of a method in struct target_ops.
-NAME_PART = r"(?P<name>" + SYMBOL + ")\s"
+NAME_PART = r"(?P<name>" + SYMBOL + r")\s"
 # Match the arguments to a method.
 ARGS_PART = r"(?P<args>\(.*\))"
 # We strip the indentation so here we only need the caret.
