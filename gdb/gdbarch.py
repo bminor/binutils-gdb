@@ -53,7 +53,7 @@ class _Component:
         self,
         name,
         type,
-        printer,
+        printer=None,
         comment=None,
         predicate=False,
         predefault=None,
@@ -96,11 +96,6 @@ class _Component:
 
 class Info(_Component):
     "An Info component is copied from the gdbarch_info."
-
-    def __init__(self, *, name, type, printer=None):
-        super().__init__(name=name, type=type, printer=printer)
-        # This little hack makes the generator a bit simpler.
-        self.predicate = None
 
 
 class Value(_Component):
