@@ -1585,7 +1585,7 @@ print_return_value (struct ui_out *uiout, struct return_value_info *rv)
 	 delete the breakpoint.  */
       print_return_value_1 (uiout, rv);
     }
-  catch (const gdb_exception &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_print (gdb_stdout, ex);
     }

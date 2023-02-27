@@ -2126,7 +2126,7 @@ do_one_display (struct display *d)
 	  d->exp = parse_expression (d->exp_string.c_str (), &tracker);
 	  d->block = tracker.block ();
 	}
-      catch (const gdb_exception &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  /* Can't re-parse the expression.  Disable this display item.  */
 	  d->enabled_p = false;

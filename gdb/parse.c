@@ -514,7 +514,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
     {
       lang->parser (&ps);
     }
-  catch (const gdb_exception &except)
+  catch (const gdb_exception_error &except)
     {
       /* If parsing for completion, allow this to succeed; but if no
 	 expression elements have been written, then there's nothing

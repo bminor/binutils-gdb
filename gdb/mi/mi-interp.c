@@ -841,7 +841,7 @@ mi_print_breakpoint_for_event (struct mi_interp *mi, breakpoint *bp)
 
       print_breakpoint (bp);
     }
-  catch (const gdb_exception &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_print (gdb_stderr, ex);
     }

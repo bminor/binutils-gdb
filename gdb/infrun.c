@@ -8875,7 +8875,7 @@ normal_stop ()
     {
       execute_cmd_pre_hook (stop_command);
     }
-  catch (const gdb_exception &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_fprintf (gdb_stderr, ex,
 			 "Error while running hook_stop:\n");

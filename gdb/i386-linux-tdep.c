@@ -415,7 +415,7 @@ i386_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
       access
 	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
     }
-  catch (const gdb_exception &exception)
+  catch (const gdb_exception_error &exception)
     {
       return;
     }

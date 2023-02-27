@@ -785,7 +785,7 @@ update_solib_list (int from_tty)
 	    {
 	      ops->open_symbol_file_object (from_tty);
 	    }
-	  catch (const gdb_exception &ex)
+	  catch (const gdb_exception_error &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error reading attached "

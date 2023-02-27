@@ -2840,7 +2840,7 @@ insert_bp_location (struct bp_location *bl,
 		  if (val)
 		    bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 		}
-	      catch (gdb_exception &e)
+	      catch (gdb_exception_error &e)
 		{
 		  rethrow_on_target_close_error (e);
 		  bp_excpt = std::move (e);
@@ -5302,7 +5302,7 @@ bpstat_check_watchpoint (bpstat *bs)
 	    {
 	      e = watchpoint_check (bs);
 	    }
-	  catch (const gdb_exception &ex)
+	  catch (const gdb_exception_error &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error evaluating expression "
@@ -5546,7 +5546,7 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 	    {
 	      condition_result = breakpoint_cond_eval (cond);
 	    }
-	  catch (const gdb_exception &ex)
+	  catch (const gdb_exception_error &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error in testing breakpoint condition:\n");
@@ -13518,7 +13518,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
 	  bpt->enable_state = bp_enabled;
 	  update_watchpoint (w, true /* reparse */);
 	}
-      catch (const gdb_exception &e)
+      catch (const gdb_exception_error &e)
 	{
 	  bpt->enable_state = orig_enable_state;
 	  exception_fprintf (gdb_stderr, e, _("Cannot enable watchpoint %d: "),

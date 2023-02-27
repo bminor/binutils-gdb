@@ -197,7 +197,7 @@ add_vsyscall_page (inferior *inf)
 				       name.c_str (),
 				       0 /* from_tty */);
 	}
-      catch (const gdb_exception &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 	}

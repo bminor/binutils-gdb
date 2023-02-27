@@ -12351,7 +12351,7 @@ should_stop_exception (const struct bp_location *bl)
       scoped_value_mark mark;
       stop = value_true (evaluate_expression (ada_loc->excep_cond_expr.get ()));
     }
-  catch (const gdb_exception &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_fprintf (gdb_stderr, ex,
 			 _("Error in testing exception condition:\n"));

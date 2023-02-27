@@ -716,7 +716,7 @@ jit_reader_try_read_symtab (gdbarch *gdbarch, jit_code_entry *code_entry,
 			      code_entry->symfile_size))
 	status = 0;
     }
-  catch (const gdb_exception &e)
+  catch (const gdb_exception_error &e)
     {
       status = 0;
     }

@@ -785,7 +785,7 @@ record_full_message_wrapper_safe (struct regcache *regcache,
     {
       record_full_message (regcache, signal);
     }
-  catch (const gdb_exception &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_print (gdb_stderr, ex);
       return false;

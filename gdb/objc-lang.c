@@ -1286,7 +1286,7 @@ find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
       if (f (pc, new_pc) == 0)
 	return 1;
     }
-  catch (const gdb_exception &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_fprintf (gdb_stderr, ex,
 			 "Unable to determine target of "

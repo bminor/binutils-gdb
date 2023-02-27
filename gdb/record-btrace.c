@@ -2932,7 +2932,7 @@ cmd_record_btrace_start (const char *args, int from_tty)
     {
       execute_command ("target record-btrace", from_tty);
     }
-  catch (const gdb_exception &exception)
+  catch (const gdb_exception_error &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_BTS;
 
