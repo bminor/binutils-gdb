@@ -1281,6 +1281,8 @@ async_disconnect (gdb_client_data arg)
       gdb_puts ("Could not kill the program being debugged",
 		gdb_stderr);
       exception_print (gdb_stderr, exception);
+      if (exception.reason == RETURN_FORCED_QUIT)
+	throw;
     }
 
   for (inferior *inf : all_inferiors ())

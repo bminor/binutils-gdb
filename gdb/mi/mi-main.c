@@ -1952,6 +1952,10 @@ mi_execute_command (const char *cmd, int from_tty)
 	     somewhere.  */
 	  mi_print_exception (command->token, result);
 	  mi_out_rewind (current_uiout);
+
+	  /* Throw to a higher level catch for SIGTERM sent to GDB.  */
+	  if (result.reason == RETURN_FORCED_QUIT)
+	    throw;
 	}
 
       bpstat_do_actions ();
