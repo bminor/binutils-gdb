@@ -46,6 +46,10 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
       p = command_line_input (buffer, prompt, "python");
     }
   /* Handle errors by raising Python exceptions.  */
+  catch (const gdb_exception_forced_quit &e)
+    {
+      quit_force (NULL, 0);
+    }
   catch (const gdb_exception &except)
     {
       /* Detect user interrupt (Ctrl-C).  */

@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "top.h"		/* For force_quit ().  */
 #include "block.h"
 #include "frame.h"
 #include "symtab.h"
@@ -516,6 +517,10 @@ gdbpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
       frame_info_ptr selected_frame
 	= get_selected_frame (_("No frame selected."));
       block = get_frame_block (selected_frame, NULL);
+    }
+  catch (const gdb_exception_forced_quit &e)
+    {
+      quit_force (NULL, 0);
     }
   catch (const gdb_exception &except)
     {

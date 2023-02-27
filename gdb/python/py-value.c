@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "top.h"		/* For quit_force ().  */
 #include "charset.h"
 #include "value.h"
 #include "language.h"
@@ -370,6 +371,10 @@ valpy_get_address (PyObject *self, void *closure)
 
 	  res_val = value_addr (val_obj->value);
 	  val_obj->address = value_to_value_object (res_val);
+	}
+      catch (const gdb_exception_forced_quit &except)
+	{
+	  quit_force (NULL, 0);
 	}
       catch (const gdb_exception &except)
 	{
