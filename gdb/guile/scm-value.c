@@ -21,6 +21,7 @@
    conventions, et.al.  */
 
 #include "defs.h"
+#include "top.h"		/* For quit_force().  */
 #include "arch-utils.h"
 #include "charset.h"
 #include "cp-abi.h"
@@ -415,6 +416,10 @@ gdbscm_value_address (SCM self)
 	  try
 	    {
 	      address = vlscm_scm_from_value (value_addr (value));
+	    }
+	  catch (const gdb_exception_forced_quit &except)
+	    {
+	      quit_force (NULL, 0);
 	    }
 	  catch (const gdb_exception &except)
 	    {

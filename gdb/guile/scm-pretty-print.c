@@ -21,6 +21,7 @@
    conventions, et.al.  */
 
 #include "defs.h"
+#include "top.h"		/* For quit_force().  */
 #include "charset.h"
 #include "symtab.h" /* Needed by language.h.  */
 #include "language.h"
@@ -557,6 +558,10 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
 	  result = ppscm_make_pp_type_error_exception
 	    (_("invalid result from pretty-printer to-string"), result);
 	}
+    }
+  catch (const gdb_exception_forced_quit &except)
+    {
+      quit_force (NULL, 0);
     }
   catch (const gdb_exception &except)
     {
