@@ -64,8 +64,6 @@ class _Component:
         assert self.predicate and not isinstance(self.invalid, str)
         if self.predefault:
             predicate = f"gdbarch->{self.name} != {self.predefault}"
-        elif isinstance(c, Value):
-            predicate = f"gdbarch->{self.name} != 0"
         else:
             predicate = f"gdbarch->{self.name} != NULL"
         return predicate
