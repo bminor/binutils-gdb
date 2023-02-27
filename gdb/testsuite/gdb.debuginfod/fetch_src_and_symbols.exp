@@ -42,6 +42,23 @@ if { [gdb_compile "$sourcetmp" "${binfile}2" executable {debug build-id}] != "" 
     return -1
 }
 
+set sectfile "section"
+set sectsrc $srcdir/$subdir/section.c
+set sectexec [standard_output_file $sectfile]
+
+set libfile "libsection"
+set libsrc $srcdir/$subdir/$libfile.c
+set lib_sl [standard_output_file $libfile.sl]
+
+set lib_opts [list debug build-id ]
+set exec_opts [list debug build-id shlib=$lib_sl]
+
+if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
+     || [gdb_compile $sectsrc $sectexec executable $exec_opts] != "" } {
+    untested "failed to compile"
+    return -1
+}
+
 # Write some assembly that just has a .gnu_debugaltlink section.
 # Copied from testsuite/gdb.dwarf2/dwzbuildid.exp.
 proc write_just_debugaltlink {filename dwzname buildid} {
@@ -94,6 +111,7 @@ proc write_dwarf_file {filename buildid {value 99}} {
 }
 
 set corefile [standard_output_file "corefile"]
+set lazy_support -1
 
 # Setup the global variable DEBUGDIR as a directory containing the
 # debug information for the test executable.
@@ -103,6 +121,8 @@ set corefile [standard_output_file "corefile"]
 # running.
 proc_with_prefix no_url { } {
     global binfile outputdir debugdir
+    global sectexec lib_sl libfile lazy_support
+    global gdb_prompt
 
     setenv DEBUGINFOD_URLS ""
 
@@ -119,11 +139,18 @@ proc_with_prefix no_url { } {
 	return -1
     }
 
+    if { [gdb_gnu_strip_debug $lib_sl ""] != 0} {
+	fail "strip shlib debuginfo"
+	return -1
+    }
+
     set debugdir [standard_output_file "debug"]
     set debuginfo [standard_output_file "fetch_src_and_symbols.debug"]
+    set debuginfo_shlib [standard_output_file $libfile.sl.debug]
 
     file mkdir $debugdir
     file rename -force $debuginfo $debugdir
+    file rename -force $debuginfo_shlib $debugdir
 
     # Test that GDB cannot find symbols without debuginfod.
     clean_restart $binfile
@@ -171,6 +198,25 @@ proc_with_prefix no_url { } {
 
     clean_restart
     gdb_test "core $::corefile" ".*in ?? ().*" "file [file tail $::corefile]"
+    clean_restart
+
+    # Check for lazy downloading support.
+    gdb_test_multiple "set debuginfod enabled lazy" "check for lazy" {
+	-re ".*lazy downloading is not compiled into GDB.*\n.*${gdb_prompt} $" {
+	    set lazy_support 0
+	}
+	-re ".*${gdb_prompt} $" {
+	    set lazy_support 1
+	}
+    }
+
+    if {$lazy_support == 1} {
+	gdb_test "file $sectexec" "" "file [file tail $sectexec] file no url"
+	gdb_test "start" "" "file [file tail $sectexec] start no url"
+	gdb_test "info sharedlibrary" ".*Yes \\(\\*\\).*libsection.*" "lib no debug"
+    } else {
+	untested "lazy support no_url"
+    }
 }
 
 # Test that GDB prints the debuginfod URLs when loading files.  URLS
@@ -208,6 +254,7 @@ proc disable_delete_breakpoints {} {
 # expected debug information.
 proc_with_prefix local_url { } {
     global binfile outputdir debugdir db
+    global sectexec lib_sl libfile lazy_support
 
     set url [start_debuginfod $db $debugdir]
     if { $url == "" } {
@@ -255,6 +302,17 @@ proc_with_prefix local_url { } {
 	".*Downloading.*separate debug info.*" \
 	"file [file tail ${binfile}_alt.o]" \
 	$enable_debuginfod_question "y"
+
+    if {$lazy_support == 1} {
+	# GDB should now download .gdb_index.
+	clean_restart
+	gdb_test "set debuginfod enabled lazy" "" "set lazy urls"
+	gdb_test "file $sectexec" "" "file [file tail $sectexec] file urls"
+	set res ".*Download.*\.gdb_index.*libsection.*\r\nDownload.*debug info.*libsection.*"
+	gdb_test "start $sectexec" $res "file [file tail $sectexec] start urls"
+    } else {
+	untested "lazy support urls"
+    }
 
     # Configure debuginfod with commands.
     unsetenv DEBUGINFOD_URLS
