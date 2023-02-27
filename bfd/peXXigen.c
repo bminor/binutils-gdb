@@ -3041,7 +3041,8 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	      return false;
 	    }
 
-	  if (bfd_malloc_and_get_section (obfd, section, &data))
+	  if ((section->flags & SEC_HAS_CONTENTS) != 0
+	      && bfd_malloc_and_get_section (obfd, section, &data))
 	    {
 	      unsigned int i;
 	      struct external_IMAGE_DEBUG_DIRECTORY *dd =
