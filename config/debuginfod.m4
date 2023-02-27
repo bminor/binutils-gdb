@@ -26,3 +26,30 @@ else
   AC_MSG_WARN([debuginfod support disabled; some features may be unavailable.])
 fi
 ])
+
+AC_DEFUN([AC_DEBUGINFOD_SECTION],
+[
+# Handle optional debuginfod support as well as optional section downloading support
+AC_ARG_WITH([debuginfod],
+  AC_HELP_STRING([--with-debuginfod], [Enable debuginfo lookups with debuginfod (auto/yes/no)]),
+  [], [with_debuginfod=auto])
+AC_MSG_CHECKING([whether to use debuginfod])
+AC_MSG_RESULT([$with_debuginfod])
+
+if test "x$with_debuginfod" != xno; then
+  PKG_CHECK_MODULES([DEBUGINFOD], [libdebuginfod >= 0.188],
+    [AC_DEFINE([HAVE_DEBUGINFOD_FIND_SECTION], [1],
+	       [Define to 1 if debuginfod section downloading is supported.])],
+    [AC_MSG_WARN([libdebuginfod is missing or some features may be unavailable.])])
+
+  PKG_CHECK_MODULES([DEBUGINFOD], [libdebuginfod >= 0.179],
+    [AC_DEFINE([HAVE_LIBDEBUGINFOD], [1], [Define to 1 if debuginfod is enabled.])],
+    [if test "x$with_debuginfod" = xyes; then
+      AC_MSG_ERROR(["--with-debuginfod was given, but libdebuginfod is missing or unusable."])
+     else
+      AC_MSG_WARN([libdebuginfod is missing or unusable; some features may be unavailable.])
+     fi])
+else
+  AC_MSG_WARN([debuginfod support disabled; some features may be unavailable.])
+fi
+])

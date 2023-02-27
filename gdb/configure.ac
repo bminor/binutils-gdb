@@ -342,7 +342,7 @@ case $host_os in
 esac
 
 # Handle optional debuginfod support
-AC_DEBUGINFOD
+AC_DEBUGINFOD_SECTION
 
 # Libunwind support for ia64.
 AC_ARG_WITH(libunwind-ia64,

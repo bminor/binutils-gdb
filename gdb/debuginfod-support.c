@@ -80,6 +80,15 @@ debuginfod_exec_query (const unsigned char *build_id,
   return scoped_fd (-ENOSYS);
 }
 
+scoped_fd
+debuginfod_section_query (const unsigned char *build_id,
+			  int build_id_len,
+			  const char *filename,
+			  const char *section_name,
+			  gdb::unique_xmalloc_ptr<char> *destname)
+{
+  return scoped_fd (-ENOSYS);
+}
 #define NO_IMPL _("Support for debuginfod is not compiled into GDB.")
 
 #else
@@ -401,6 +410,56 @@ debuginfod_exec_query (const unsigned char *build_id,
 
   return fd;
 }
+
+/* See debuginfod-support.h  */
+
+scoped_fd
+debuginfod_section_query (const unsigned char *build_id,
+			  int build_id_len,
+			  const char *filename,
+			  const char *section_name,
+			  gdb::unique_xmalloc_ptr<char> *destname)
+{
+#if !defined (HAVE_DEBUGINFOD_FIND_SECTION)
+  return scoped_fd (-ENOSYS);
+#else
+
+ if (!debuginfod_is_enabled ())
+    return scoped_fd (-ENOSYS);
+
+  debuginfod_client *c = get_debuginfod_client ();
+
+  if (c == nullptr)
+    return scoped_fd (-ENOMEM);
+
+  char *dname = nullptr;
+  std::string desc = std::string ("section ") + section_name + " for";
+  scoped_fd fd;
+  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+
+  {
+    user_data data (desc.c_str (), filename);
+    debuginfod_set_user_data (c, &data);
+    if (target_supports_terminal_ours ())
+      {
+	term_state.emplace ();
+	target_terminal::ours ();
+      }
+
+    fd = scoped_fd (debuginfod_find_section (c, build_id, build_id_len,
+					     section_name, &dname));
+    debuginfod_set_user_data (c, nullptr);
+  }
+
+  print_outcome (fd.get (), desc.c_str (), filename);
+
+  if (fd.get () >= 0 && destname != nullptr)
+    destname->reset (dname);
+
+  return fd;
+#endif /* HAVE_DEBUGINFOD_FIND_SECTION */
+}
+
 #endif
 
 /* Set callback for "set debuginfod enabled".  */
