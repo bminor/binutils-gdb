@@ -122,6 +122,13 @@ tui_rl_switch_mode (int notused1, int notused2)
 	  tui_enable ();
 	}
     }
+  catch (const gdb_exception_forced_quit &ex)
+    {
+      /* Ideally, we'd do a 'throw' here, but as noted above, we can't
+	 do that, so, instead, we'll set the necessary flags so that
+	 a later QUIT check will restart the forced quit.  */
+      set_force_quit_flag ();
+    }
   catch (const gdb_exception &ex)
     {
       exception_print (gdb_stderr, ex);
