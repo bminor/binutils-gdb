@@ -49,9 +49,34 @@ def join_params(params):
 class _Component:
     "Base class for all components."
 
-    def __init__(self, **kwargs):
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
+    def __init__(
+        self,
+        name,
+        type,
+        printer,
+        comment=None,
+        predicate=False,
+        predefault=None,
+        postdefault=None,
+        invalid=None,
+        params=None,
+        param_checks=None,
+        result_checks=None,
+        implement=True,
+    ):
+        self.name = name
+        self.type = type
+        self.printer = printer
+        self.comment = comment
+        self.predicate = predicate
+        self.predefault = predefault
+        self.postdefault = postdefault
+        self.invalid = invalid
+        self.params = params
+        self.param_checks = param_checks
+        self.result_checks = result_checks
+        self.implement = implement
+
         components.append(self)
 
         # It doesn't make sense to have a check of the result value
@@ -87,7 +112,7 @@ class Value(_Component):
         name,
         type,
         comment=None,
-        predicate=None,
+        predicate=False,
         predefault=None,
         postdefault=None,
         invalid=None,
@@ -115,7 +140,7 @@ class Function(_Component):
         type,
         params,
         comment=None,
-        predicate=None,
+        predicate=False,
         predefault=None,
         postdefault=None,
         invalid=None,
