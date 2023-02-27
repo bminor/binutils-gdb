@@ -1,3 +1,10 @@
+2023-02-27  Benson Muite  <benson_muite@emailplus.org>
+
+	PR 28909
+	* doc/local.mk (asconfig.texi): Use "cp -p" to preserve
+	timestamps.
+	* Makefile.in: Regenerate.
+
 2023-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2dbg.c (emit_inc_line_addr): Use unsigned constants when
