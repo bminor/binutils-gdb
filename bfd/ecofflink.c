@@ -1782,8 +1782,13 @@ mk_fdrtab (bfd *abfd,
 	  sym_ptr = ((char *) debug_info->external_sym
 		     + (fdr_ptr->isymBase + 1) * debug_swap->external_sym_size);
 	  (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
-	  if (strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
-		      STABS_SYMBOL) == 0)
+	  if (fdr_ptr->issBase >= 0
+	      && fdr_ptr->issBase < debug_info->symbolic_header.issMax
+	      && sym.iss >= 0
+	      && sym.iss < (debug_info->symbolic_header.issMax
+			    - fdr_ptr->issBase)
+	      && strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
+			 STABS_SYMBOL) == 0)
 	    stabs = true;
 	}
 
@@ -1981,13 +1986,26 @@ lookup_line (bfd *abfd,
       char *sym_ptr;
       SYMR sym;
 
-      sym_ptr = ((char *) debug_info->external_sym
-		 + (fdr_ptr->isymBase + 1) * debug_swap->external_sym_size);
-      (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
-      if (strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
-		  STABS_SYMBOL) == 0)
-	stabs = true;
+      if ((long) ((unsigned long) fdr_ptr->isymBase + 1) > 0
+	  && fdr_ptr->isymBase + 1 < debug_info->symbolic_header.isymMax)
+	{
+	  sym_ptr = ((char *) debug_info->external_sym
+		     + (fdr_ptr->isymBase + 1) * debug_swap->external_sym_size);
+	  (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
+	  if (fdr_ptr->issBase >= 0
+	      && fdr_ptr->issBase < debug_info->symbolic_header.issMax
+	      && sym.iss >= 0
+	      && sym.iss < (debug_info->symbolic_header.issMax
+			    - fdr_ptr->issBase)
+	      && strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
+			 STABS_SYMBOL) == 0)
+	    stabs = true;
+	}
     }
+
+  line_info->cache.filename = NULL;
+  line_info->cache.functionname = NULL;
+  line_info->cache.line_num = 0;
 
   if (!stabs)
     {
@@ -2167,38 +2185,50 @@ lookup_line (bfd *abfd,
 	 symbols, at least according to gdb/mipsread.c.  */
       if (fdr_ptr->rss == -1)
 	{
-	  line_info->cache.filename = NULL;
-	  if (pdr.isym == -1)
-	    line_info->cache.functionname = NULL;
-	  else
-	    {
-	      EXTR proc_ext;
+	  EXTR proc_ext;
 
+	  if (pdr.isym >= 0
+	      && pdr.isym < debug_info->symbolic_header.iextMax)
+	    {
 	      (*debug_swap->swap_ext_in)
-		(abfd,
-		 ((char *) debug_info->external_ext
-		  + pdr.isym * debug_swap->external_ext_size),
+		(abfd, ((char *) debug_info->external_ext
+			+ pdr.isym * debug_swap->external_ext_size),
 		 &proc_ext);
-	      line_info->cache.functionname = (debug_info->ssext
-					       + proc_ext.asym.iss);
+	      if (proc_ext.asym.iss >= 0
+		  && proc_ext.asym.iss < debug_info->symbolic_header.issExtMax)
+		line_info->cache.functionname = (debug_info->ssext
+						 + proc_ext.asym.iss);
 	    }
 	}
-      else
+      else if (fdr_ptr->issBase >= 0
+	       && fdr_ptr->issBase < debug_info->symbolic_header.issMax
+	       && fdr_ptr->rss >= 0
+	       && fdr_ptr->rss < (debug_info->symbolic_header.issMax
+				  - fdr_ptr->issBase))
 	{
 	  SYMR proc_sym;
 
 	  line_info->cache.filename = (debug_info->ss
 				       + fdr_ptr->issBase
 				       + fdr_ptr->rss);
-	  (*debug_swap->swap_sym_in)
-	    (abfd,
-	     ((char *) debug_info->external_sym
-	      + ((fdr_ptr->isymBase + pdr.isym)
-		 * debug_swap->external_sym_size)),
-	     &proc_sym);
-	  line_info->cache.functionname = (debug_info->ss
-					   + fdr_ptr->issBase
-					   + proc_sym.iss);
+	  if (fdr_ptr->isymBase >= 0
+	      && fdr_ptr->isymBase < debug_info->symbolic_header.isymMax
+	      && pdr.isym >= 0
+	      && pdr.isym < (debug_info->symbolic_header.isymMax
+			     - fdr_ptr->isymBase))
+	    {
+	      (*debug_swap->swap_sym_in)
+		(abfd, ((char *) debug_info->external_sym
+			+ ((fdr_ptr->isymBase + pdr.isym)
+			   * debug_swap->external_sym_size)),
+		 &proc_sym);
+	      if (proc_sym.iss >= 0
+		  && proc_sym.iss < (debug_info->symbolic_header.issMax
+				     - fdr_ptr->issBase))
+		line_info->cache.functionname = (debug_info->ss
+						 + fdr_ptr->issBase
+						 + proc_sym.iss);
+	    }
 	}
       if (lineno == ilineNil)
 	lineno = 0;
@@ -2230,10 +2260,6 @@ lookup_line (bfd *abfd,
 	 looking through the symbols until we find both a line number
 	 and a function name which are beyond the address we want.  */
 
-      line_info->cache.filename = NULL;
-      line_info->cache.functionname = NULL;
-      line_info->cache.line_num = 0;
-
       directory_name = NULL;
       main_file_name = NULL;
       current_file_name = NULL;
@@ -2246,9 +2272,21 @@ lookup_line (bfd *abfd,
 
       external_sym_size = debug_swap->external_sym_size;
 
-      sym_ptr = ((char *) debug_info->external_sym
-		 + (fdr_ptr->isymBase + 2) * external_sym_size);
-      sym_ptr_end = sym_ptr + (fdr_ptr->csym - 2) * external_sym_size;
+      if (fdr_ptr->isymBase >= 0
+	  && fdr_ptr->isymBase < debug_info->symbolic_header.isymMax
+	  && fdr_ptr->csym >= 2
+	  && fdr_ptr->csym < (debug_info->symbolic_header.isymMax
+			      - fdr_ptr->isymBase))
+	{
+	  sym_ptr = ((char *) debug_info->external_sym
+		     + (fdr_ptr->isymBase + 2) * external_sym_size);
+	  sym_ptr_end = sym_ptr + (fdr_ptr->csym - 2) * external_sym_size;
+	}
+      else
+	{
+	  sym_ptr = NULL;
+	  sym_ptr_end = sym_ptr;
+	}
       for (;
 	   sym_ptr < sym_ptr_end && (! past_line || ! past_fn);
 	   sym_ptr += external_sym_size)
@@ -2262,8 +2300,13 @@ lookup_line (bfd *abfd,
 	      switch (ECOFF_UNMARK_STAB (sym.index))
 		{
 		case N_SO:
-		  main_file_name = current_file_name =
-		    debug_info->ss + fdr_ptr->issBase + sym.iss;
+		  if (fdr_ptr->issBase >= 0
+		      && fdr_ptr->issBase < debug_info->symbolic_header.issMax
+		      && sym.iss >= 0
+		      && sym.iss < (debug_info->symbolic_header.issMax
+				    - fdr_ptr->issBase))
+		    main_file_name = current_file_name
+		      = debug_info->ss + fdr_ptr->issBase + sym.iss;
 
 		  /* Check the next symbol to see if it is also an
 		     N_SO symbol.  */
@@ -2278,16 +2321,26 @@ lookup_line (bfd *abfd,
 			  && ECOFF_UNMARK_STAB (nextsym.index) == N_SO)
 			{
 			  directory_name = current_file_name;
-			  main_file_name = current_file_name =
-			    debug_info->ss + fdr_ptr->issBase + nextsym.iss;
+			  if (fdr_ptr->issBase >= 0
+			      && fdr_ptr->issBase < debug_info->symbolic_header.issMax
+			      && nextsym.iss >= 0
+			      && nextsym.iss < (debug_info->symbolic_header.issMax
+						- fdr_ptr->issBase))
+			  main_file_name = current_file_name
+			    = debug_info->ss + fdr_ptr->issBase + nextsym.iss;
 			  sym_ptr += external_sym_size;
 			}
 		    }
 		  break;
 
 		case N_SOL:
-		  current_file_name =
-		    debug_info->ss + fdr_ptr->issBase + sym.iss;
+		  if (fdr_ptr->issBase >= 0
+		      && fdr_ptr->issBase < debug_info->symbolic_header.issMax
+		      && sym.iss >= 0
+		      && sym.iss < (debug_info->symbolic_header.issMax
+				    - fdr_ptr->issBase))
+		    current_file_name
+		      = debug_info->ss + fdr_ptr->issBase + sym.iss;
 		  break;
 
 		case N_FUN:
@@ -2296,8 +2349,13 @@ lookup_line (bfd *abfd,
 		  else if (sym.value >= low_func_vma)
 		    {
 		      low_func_vma = sym.value;
-		      function_name =
-			debug_info->ss + fdr_ptr->issBase + sym.iss;
+		      if (fdr_ptr->issBase >= 0
+			  && fdr_ptr->issBase < debug_info->symbolic_header.issMax
+			  && sym.iss >= 0
+			  && sym.iss < (debug_info->symbolic_header.issMax
+					- fdr_ptr->issBase))
+			function_name
+			  = debug_info->ss + fdr_ptr->issBase + sym.iss;
 		    }
 		  break;
 		}
