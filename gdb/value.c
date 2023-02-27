@@ -2551,6 +2551,76 @@ value_as_long (struct value *val)
   return unpack_long (val->type (), val->contents ().data ());
 }
 
+/* See value.h.  */
+
+gdb_mpz
+value_as_mpz (struct value *val)
+{
+  val = coerce_array (val);
+  struct type *type = check_typedef (val->type ());
+
+  switch (type->code ())
+    {
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_RANGE:
+      break;
+
+    default:
+      return gdb_mpz (value_as_long (val));
+    }
+
+  gdb_mpz result;
+
+  gdb::array_view<const gdb_byte> valbytes = val->contents ();
+  enum bfd_endian byte_order = type_byte_order (type);
+
+  /* Handle integers that are either not a multiple of the word size,
+     or that are stored at some bit offset.  */
+  unsigned bit_off = 0, bit_size = 0;
+  if (type->bit_size_differs_p ())
+    {
+      bit_size = type->bit_size ();
+      if (bit_size == 0)
+	{
+	  /* We can just handle this immediately.  */
+	  return result;
+	}
+
+      bit_off = type->bit_offset ();
+
+      unsigned n_bytes = ((bit_off % 8) + bit_size + 7) / 8;
+      valbytes = valbytes.slice (bit_off / 8, n_bytes);
+
+      if (byte_order == BFD_ENDIAN_BIG)
+	bit_off = (n_bytes * 8 - bit_off % 8 - bit_size);
+      else
+	bit_off %= 8;
+    }
+
+  result.read (val->contents (), byte_order, type->is_unsigned ());
+
+  /* Shift off any low bits, if needed.  */
+  if (bit_off != 0)
+    result >>= bit_off;
+
+  /* Mask off any high bits, if needed.  */
+  if (bit_size)
+    result.mask (bit_size);
+
+  /* Now handle any range bias.  */
+  if (type->code () == TYPE_CODE_RANGE && type->bounds ()->bias != 0)
+    {
+      /* Unfortunately we have to box here, because LONGEST is
+	 probably wider than long.  */
+      result += gdb_mpz (type->bounds ()->bias);
+    }
+
+  return result;
+}
+
 /* Extract a value as a C pointer.  Does not deallocate the value.
    Note that val's type may not actually be a pointer; value_as_long
    handles all the cases.  */
@@ -3378,6 +3448,42 @@ value_from_ulongest (struct type *type, ULONGEST num)
   return val;
 }
 
+/* See value.h.  */
+
+struct value *
+value_from_mpz (struct type *type, const gdb_mpz &v)
+{
+  struct type *real_type = check_typedef (type);
+
+  const gdb_mpz *val = &v;
+  gdb_mpz storage;
+  if (real_type->code () == TYPE_CODE_RANGE && type->bounds ()->bias != 0)
+    {
+      storage = *val;
+      val = &storage;
+      storage -= type->bounds ()->bias;
+    }
+
+  if (type->bit_size_differs_p ())
+    {
+      unsigned bit_off = type->bit_offset ();
+      unsigned bit_size = type->bit_size ();
+
+      if (val != &storage)
+	{
+	  storage = *val;
+	  val = &storage;
+	}
+
+      storage.mask (bit_size);
+      storage <<= bit_off;
+    }
+
+  struct value *result = value::allocate (type);
+  val->truncate (result->contents_raw (), type_byte_order (type),
+		 type->is_unsigned ());
+  return result;
+}
 
 /* Create a value representing a pointer of type TYPE to the address
    ADDR.  */
