@@ -21,8 +21,9 @@
 #    make-target-delegates.py
 
 import re
-import gdbcopyright
+from typing import List
 
+import gdbcopyright
 
 # The line we search for in target.h that marks where we should start
 # looking for methods.
@@ -90,6 +91,16 @@ ARGTYPES = re.compile(
 # Match TARGET_DEBUG_PRINTER in an argument type.
 # This must match the whole "sub-expression" including the parens.
 TARGET_DEBUG_PRINTER = r"\s*TARGET_DEBUG_PRINTER\s*\((?P<arg>[^)]*)\)\s*"
+
+
+class Entry:
+    def __init__(
+        self, argtypes: List[str], return_type: str, style: str, default_arg: str
+    ):
+        self.argtypes = argtypes
+        self.return_type = return_type
+        self.style = style
+        self.default_arg = default_arg
 
 
 def scan_target_h():
@@ -295,10 +306,9 @@ def print_class(f, class_name, delegators, entries):
     print("", file=f)
 
     for name in delegators:
-        return_type = entries[name]["return_type"]
-        argtypes = entries[name]["argtypes"]
         print("  ", file=f, end="")
-        write_declaration(f, name, return_type, argtypes)
+        entry = entries[name]
+        write_declaration(f, name, entry.return_type, entry.argtypes)
 
     print("};\n", file=f)
 
@@ -313,11 +323,14 @@ for current_line in scan_target_h():
     if not m:
         continue
     data = m.groupdict()
-    data["argtypes"] = parse_argtypes(data["args"])
-    data["return_type"] = data["return_type"].strip()
-    entries[data["name"]] = data
+    name = data["name"]
+    argtypes = parse_argtypes(data["args"])
+    return_type = data["return_type"].strip()
+    style = data["style"]
+    default_arg = data["default_arg"]
+    entries[name] = Entry(argtypes, return_type, style, default_arg)
 
-    delegators.append(data["name"])
+    delegators.append(name)
 
 with open("target-delegates.c", "w") as f:
     print(
@@ -330,11 +343,21 @@ with open("target-delegates.c", "w") as f:
     print_class(f, "debug_target", delegators, entries)
 
     for name in delegators:
-        tdefault = entries[name]["default_arg"]
-        return_type = entries[name]["return_type"]
-        style = entries[name]["style"]
-        argtypes = entries[name]["argtypes"]
+        entry = entries[name]
 
-        write_delegator(f, name, return_type, argtypes)
-        write_tdefault(f, tdefault, style, name, return_type, argtypes)
-        write_debugmethod(f, tdefault, name, return_type, argtypes)
+        write_delegator(f, name, entry.return_type, entry.argtypes)
+        write_tdefault(
+            f,
+            entry.default_arg,
+            entry.style,
+            name,
+            entry.return_type,
+            entry.argtypes,
+        )
+        write_debugmethod(
+            f,
+            entry.default_arg,
+            name,
+            entry.return_type,
+            entry.argtypes,
+        )
