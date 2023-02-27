@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-def copyright(tool, description):
+def copyright(tool: str, description: str):
     # Search the tool source itself for the correct copyright years.
     with open(tool, "r") as f:
         for line in f:

@@ -17,8 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import List, Optional, Tuple, Union
 
-def join_type_and_name(t, n):
+
+def join_type_and_name(t: str, n: str):
     "Combine the type T and the name N into a C declaration."
     if t.endswith("*") or t.endswith("&"):
         return t + n
@@ -26,30 +28,29 @@ def join_type_and_name(t, n):
         return t + " " + n
 
 
-def join_params(params):
+def join_params(params: List[Tuple[str, str]]):
     """Given a sequence of (TYPE, NAME) pairs, generate a comma-separated
     list of declarations."""
-    params = [join_type_and_name(p[0], p[1]) for p in params]
-    return ", ".join(params)
+    return ", ".join([join_type_and_name(p[0], p[1]) for p in params])
 
 
-class _Component:
+class Component:
     "Base class for all components."
 
     def __init__(
         self,
-        name,
-        type,
-        printer=None,
-        comment=None,
-        predicate=False,
-        predefault=None,
-        postdefault=None,
-        invalid=None,
-        params=None,
-        param_checks=None,
-        result_checks=None,
-        implement=True,
+        name: str,
+        type: str,
+        printer: Optional[str] = None,
+        comment: Optional[str] = None,
+        predicate: bool = False,
+        predefault: Optional[str] = None,
+        postdefault: Optional[str] = None,
+        invalid: Optional[Union[bool, str]] = None,
+        params: Optional[List[Tuple[str, str]]] = None,
+        param_checks: Optional[List[str]] = None,
+        result_checks: Optional[List[str]] = None,
+        implement: bool = True,
     ):
         self.name = name
         self.type = type
@@ -59,7 +60,7 @@ class _Component:
         self.predefault = predefault
         self.postdefault = postdefault
         self.invalid = invalid
-        self.params = params
+        self.params = params or []
         self.param_checks = param_checks
         self.result_checks = result_checks
         self.implement = implement
@@ -81,24 +82,24 @@ class _Component:
         return predicate
 
 
-class Info(_Component):
+class Info(Component):
     "An Info component is copied from the gdbarch_info."
 
 
-class Value(_Component):
+class Value(Component):
     "A Value component is just a data member."
 
     def __init__(
         self,
         *,
-        name,
-        type,
-        comment=None,
-        predicate=False,
-        predefault=None,
-        postdefault=None,
-        invalid=None,
-        printer=None,
+        name: str,
+        type: str,
+        comment: Optional[str] = None,
+        predicate: bool = False,
+        predefault: Optional[str] = None,
+        postdefault: Optional[str] = None,
+        invalid: Optional[Union[bool, str]] = None,
+        printer: Optional[str] = None,
     ):
         super().__init__(
             comment=comment,
@@ -112,24 +113,24 @@ class Value(_Component):
         )
 
 
-class Function(_Component):
+class Function(Component):
     "A Function component is a function pointer member."
 
     def __init__(
         self,
         *,
-        name,
-        type,
-        params,
-        comment=None,
-        predicate=False,
-        predefault=None,
-        postdefault=None,
-        invalid=None,
-        printer=None,
-        param_checks=None,
-        result_checks=None,
-        implement=True,
+        name: str,
+        type: str,
+        params: List[Tuple[str, str]],
+        comment: Optional[str] = None,
+        predicate: bool = False,
+        predefault: Optional[str] = None,
+        postdefault: Optional[str] = None,
+        invalid: Optional[Union[bool, str]] = None,
+        printer: Optional[str] = None,
+        param_checks: Optional[List[str]] = None,
+        result_checks: Optional[List[str]] = None,
+        implement: bool = True,
     ):
         super().__init__(
             comment=comment,
@@ -180,4 +181,4 @@ class Method(Function):
 
 
 # All the components created in gdbarch-components.py.
-components = []
+components: List[Component] = []

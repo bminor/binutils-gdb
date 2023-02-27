@@ -25,10 +25,10 @@ import textwrap
 # `gdbarch_types.components`.
 import gdbarch_components  # noqa: F401 # type: ignore
 import gdbcopyright
-from gdbarch_types import Function, Info, Value, components
+from gdbarch_types import Component, Function, Info, Value, components
 
 
-def indentation(n_columns):
+def indentation(n_columns: int):
     """Return string with tabs and spaces to indent line to N_COLUMNS."""
     return "\t" * (n_columns // 8) + " " * (n_columns % 8)
 
@@ -38,12 +38,12 @@ copyright = gdbcopyright.copyright(
 )
 
 
-def info(c):
+def info(c: Component):
     "Filter function to only allow Info components."
     return type(c) is Info
 
 
-def not_info(c):
+def not_info(c: Component):
     "Filter function to omit Info components."
     return type(c) is not Info
 
