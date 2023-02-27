@@ -1380,18 +1380,61 @@ _bfd_mips_elf_mkobject (bfd *abfd)
 				  MIPS_ELF_DATA);
 }
 
+/* MIPS ELF uses a special find_nearest_line routine in order the
+   handle the ECOFF debugging information.  */
+
+struct mips_elf_find_line
+{
+  struct ecoff_debug_info d;
+  struct ecoff_find_line i;
+};
+
+/* Free ECOFF debugging info used by find_nearest_line.  */
+
+static void
+free_ecoff_debug (struct ecoff_debug_info *debug)
+{
+  free (debug->line);
+  free (debug->external_dnr);
+  free (debug->external_pdr);
+  free (debug->external_sym);
+  free (debug->external_opt);
+  free (debug->external_aux);
+  free (debug->ss);
+  free (debug->ssext);
+  free (debug->external_fdr);
+  free (debug->external_rfd);
+  free (debug->external_ext);
+  debug->line = NULL;
+  debug->external_dnr = NULL;
+  debug->external_pdr = NULL;
+  debug->external_sym = NULL;
+  debug->external_opt = NULL;
+  debug->external_aux = NULL;
+  debug->ss = NULL;
+  debug->ssext = NULL;
+  debug->external_fdr = NULL;
+  debug->external_rfd = NULL;
+  debug->external_ext = NULL;
+}
+
 bool
 _bfd_mips_elf_close_and_cleanup (bfd *abfd)
 {
-  struct mips_elf_obj_tdata *tdata = mips_elf_tdata (abfd);
-  if (tdata != NULL && bfd_get_format (abfd) == bfd_object)
+  if (bfd_get_format (abfd) == bfd_object)
     {
-      BFD_ASSERT (tdata->root.object_id == MIPS_ELF_DATA);
-      while (tdata->mips_hi16_list != NULL)
+      struct mips_elf_obj_tdata *tdata = mips_elf_tdata (abfd);
+      if (tdata != NULL)
 	{
-	  struct mips_hi16 *hi = tdata->mips_hi16_list;
-	  tdata->mips_hi16_list = hi->next;
-	  free (hi);
+	  BFD_ASSERT (tdata->root.object_id == MIPS_ELF_DATA);
+	  while (tdata->mips_hi16_list != NULL)
+	    {
+	      struct mips_hi16 *hi = tdata->mips_hi16_list;
+	      tdata->mips_hi16_list = hi->next;
+	      free (hi);
+	    }
+	  if (tdata->find_line_info != NULL)
+	    free_ecoff_debug (&tdata->find_line_info->d);
 	}
     }
   return _bfd_elf_close_and_cleanup (abfd);
@@ -1438,6 +1481,8 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
 
   symhdr = &debug->symbolic_header;
   (*swap->swap_hdr_in) (abfd, ext_hdr, symhdr);
+  free (ext_hdr);
+  ext_hdr = NULL;
 
   /* The symbolic header contains absolute file offsets and sizes to
      read.  */
@@ -1474,23 +1519,11 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
   READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, void *);
 #undef READ
 
-  debug->fdr = NULL;
-
   return true;
 
  error_return:
   free (ext_hdr);
-  free (debug->line);
-  free (debug->external_dnr);
-  free (debug->external_pdr);
-  free (debug->external_sym);
-  free (debug->external_opt);
-  free (debug->external_aux);
-  free (debug->ss);
-  free (debug->ssext);
-  free (debug->external_fdr);
-  free (debug->external_rfd);
-  free (debug->external_ext);
+  free_ecoff_debug (debug);
   return false;
 }
 
@@ -13109,15 +13142,6 @@ _bfd_mips_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
   return _bfd_elf_is_local_label_name (abfd, sym->name);
 }
 
-/* MIPS ELF uses a special find_nearest_line routine in order the
-   handle the ECOFF debugging information.  */
-
-struct mips_elf_find_line
-{
-  struct ecoff_debug_info d;
-  struct ecoff_find_line i;
-};
-
 bool
 _bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
 				 asection *section, bfd_vma offset,
@@ -13189,6 +13213,7 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
 	  fi->d.fdr = bfd_alloc (abfd, amt);
 	  if (fi->d.fdr == NULL)
 	    {
+	      free_ecoff_debug (&fi->d);
 	      msec->flags = origflags;
 	      return false;
 	    }
@@ -13201,13 +13226,6 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asymbol **symbols,
 	    (*swap->swap_fdr_in) (abfd, fraw_src, fdr_ptr);
 
 	  mips_elf_tdata (abfd)->find_line_info = fi;
-
-	  /* Note that we don't bother to ever free this information.
-	     find_nearest_line is either called all the time, as in
-	     objdump -l, so the information should be saved, or it is
-	     rarely called, as in ld error messages, so the memory
-	     wasted is unimportant.  Still, it would probably be a
-	     good idea for free_cached_info to throw it away.  */
 	}
 
       if (_bfd_ecoff_locate_line (abfd, section, offset, &fi->d, swap,
@@ -15079,7 +15097,10 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (! (bfd_ecoff_debug_accumulate
 		     (mdebug_handle, abfd, &debug, swap, input_bfd,
 		      &input_debug, input_swap, info)))
-		return false;
+		{
+		  free_ecoff_debug (&input_debug);
+		  return false;
+		}
 
 	      /* Loop through the external symbols.  For each one with
 		 interesting information, try to find the symbol in
@@ -15120,17 +15141,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		}
 
 	      /* Free up the information we just read.  */
-	      free (input_debug.line);
-	      free (input_debug.external_dnr);
-	      free (input_debug.external_pdr);
-	      free (input_debug.external_sym);
-	      free (input_debug.external_opt);
-	      free (input_debug.external_aux);
-	      free (input_debug.ss);
-	      free (input_debug.ssext);
-	      free (input_debug.external_fdr);
-	      free (input_debug.external_rfd);
-	      free (input_debug.external_ext);
+	      free_ecoff_debug (&input_debug);
 
 	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
 		 elf_link_input_bfd ignores this section.  */
