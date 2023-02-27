@@ -90,6 +90,12 @@ struct gdb_mpz
     return *this;
   }
 
+  gdb_mpz &operator= (bool src)
+  {
+    mpz_set_ui (m_val, (unsigned long) src);
+    return *this;
+  }
+
   /* Initialize this value from a string and a base.  Returns true if
      the string was parsed successfully, false otherwise.  */
   bool set (const char *str, int base)
@@ -102,6 +108,14 @@ struct gdb_mpz
   {
     gdb_mpz result;
     mpz_ui_pow_ui (result.m_val, base, exp);
+    return result;
+  }
+
+  /* Return a new value that is this value raised to EXP.  */
+  gdb_mpz pow (unsigned long exp) const
+  {
+    gdb_mpz result;
+    mpz_pow_ui (result.m_val, m_val, exp);
     return result;
   }
 
@@ -137,10 +151,47 @@ struct gdb_mpz
     mpz_neg (m_val, m_val);
   }
 
+  /* Take the one's complement in place.  */
+  void complement ()
+  { mpz_com (m_val, m_val); }
+
+  /* Mask this value to N bits, in place.  */
+  void mask (unsigned n)
+  { mpz_tdiv_r_2exp (m_val, m_val, n); }
+
+  /* Return the sign of this value.  This returns -1 for a negative
+     value, 0 if the value is 0, and 1 for a positive value.  */
+  int sgn () const
+  { return mpz_sgn (m_val); }
+
+  explicit operator bool () const
+  { return sgn () != 0; }
+
   gdb_mpz &operator*= (long other)
   {
     mpz_mul_si (m_val, m_val, other);
     return *this;
+  }
+
+  gdb_mpz operator* (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_mul (result.m_val, m_val, other.m_val);
+    return result;
+  }
+
+  gdb_mpz operator/ (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_tdiv_q (result.m_val, m_val, other.m_val);
+    return result;
+  }
+
+  gdb_mpz operator% (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_tdiv_r (result.m_val, m_val, other.m_val);
+    return result;
   }
 
   gdb_mpz &operator+= (unsigned long other)
@@ -149,10 +200,36 @@ struct gdb_mpz
     return *this;
   }
 
+  gdb_mpz &operator+= (const gdb_mpz &other)
+  {
+    mpz_add (m_val, m_val, other.m_val);
+    return *this;
+  }
+
+  gdb_mpz operator+ (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_add (result.m_val, m_val, other.m_val);
+    return result;
+  }
+
   gdb_mpz &operator-= (unsigned long other)
   {
     mpz_sub_ui (m_val, m_val, other);
     return *this;
+  }
+
+  gdb_mpz &operator-= (const gdb_mpz &other)
+  {
+    mpz_sub (m_val, m_val, other.m_val);
+    return *this;
+  }
+
+  gdb_mpz operator- (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_sub (result.m_val, m_val, other.m_val);
+    return result;
   }
 
   gdb_mpz &operator<<= (unsigned long nbits)
@@ -161,9 +238,65 @@ struct gdb_mpz
     return *this;
   }
 
+  gdb_mpz operator<< (unsigned long nbits) const
+  {
+    gdb_mpz result;
+    mpz_mul_2exp (result.m_val, m_val, nbits);
+    return result;
+  }
+
+  gdb_mpz operator>> (unsigned long nbits) const
+  {
+    gdb_mpz result;
+    mpz_tdiv_q_2exp (result.m_val, m_val, nbits);
+    return result;
+  }
+
+  gdb_mpz &operator>>= (unsigned long nbits)
+  {
+    mpz_tdiv_q_2exp (m_val, m_val, nbits);
+    return *this;
+  }
+
+  gdb_mpz operator& (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_and (result.m_val, m_val, other.m_val);
+    return result;
+  }
+
+  gdb_mpz operator| (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_ior (result.m_val, m_val, other.m_val);
+    return result;
+  }
+
+  gdb_mpz operator^ (const gdb_mpz &other) const
+  {
+    gdb_mpz result;
+    mpz_xor (result.m_val, m_val, other.m_val);
+    return result;
+  }
+
   bool operator> (const gdb_mpz &other) const
   {
     return mpz_cmp (m_val, other.m_val) > 0;
+  }
+
+  bool operator>= (const gdb_mpz &other) const
+  {
+    return mpz_cmp (m_val, other.m_val) >= 0;
+  }
+
+  bool operator< (const gdb_mpz &other) const
+  {
+    return mpz_cmp (m_val, other.m_val) < 0;
+  }
+
+  bool operator<= (const gdb_mpz &other) const
+  {
+    return mpz_cmp (m_val, other.m_val) <= 0;
   }
 
   bool operator< (int other) const
@@ -179,6 +312,11 @@ struct gdb_mpz
   bool operator== (const gdb_mpz &other) const
   {
     return mpz_cmp (m_val, other.m_val) == 0;
+  }
+
+  bool operator!= (const gdb_mpz &other) const
+  {
+    return mpz_cmp (m_val, other.m_val) != 0;
   }
 
 private:
