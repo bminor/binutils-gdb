@@ -18,12 +18,7 @@
 load_lib rust-support.exp
 require allow_rust_tests
 require {can_compile rust}
-
-set v [split [rust_compiler_version] .]
-if {[lindex $v 0] == 1 && [lindex $v 1] < 30} {
-    untested "raw identifiers require rust 1.30 or greater"
-    return -1
-}
+require {rust_at_least 1.30}
 
 standard_testfile .rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
