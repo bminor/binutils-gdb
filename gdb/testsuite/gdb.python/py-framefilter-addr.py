@@ -18,6 +18,7 @@ import itertools
 from gdb.FrameDecorator import FrameDecorator
 import copy
 
+
 # A FrameDecorator that just returns gdb.Frame.pc () from 'function'.
 # We want to ensure that GDB correctly handles this case.
 class Function_Returns_Address(FrameDecorator):

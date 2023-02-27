@@ -139,6 +139,7 @@ class FrameElider:
 # thrown.
 name_error = RuntimeError
 
+
 # A simple decorator that gives an error when computing the function.
 class ErrorInName(FrameDecorator):
     def __init__(self, frame):

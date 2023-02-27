@@ -89,6 +89,7 @@ class ArrayPrinter(object):
 # Flag to make NoStringContainerPrinter throw an exception.
 exception_flag = False
 
+
 # Test a printer where to_string is None
 class NoStringContainerPrinter(object):
     def __init__(self, val):

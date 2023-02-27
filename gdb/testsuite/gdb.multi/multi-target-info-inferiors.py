@@ -15,6 +15,7 @@
 
 import gdb
 
+
 # Take a gdb.TargetConnection and return the connection number.
 def conn_num(c):
     return c.num

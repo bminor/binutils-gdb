@@ -64,7 +64,6 @@ class FrameDecorator(object):
             or frame.type() == gdb.DUMMY_FRAME
             or frame.type() == gdb.SIGTRAMP_FRAME
         ):
-
             return True
 
         return False

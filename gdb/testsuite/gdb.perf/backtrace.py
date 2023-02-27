@@ -33,7 +33,6 @@ class BackTrace(perftest.TestCaseWithBasicMeasurements):
             gdb.execute(do_test_command, False, True)
 
     def execute_test(self):
-
         line_size = 2
         for _ in range(1, 12):
             # Keep the total size of dcache unchanged, and increase the

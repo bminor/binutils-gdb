@@ -116,7 +116,7 @@ class Server:
             self._send_json(result)
             events = self.delayed_events
             self.delayed_events = []
-            for (event, body) in events:
+            for event, body in events:
                 self.send_event(event, body)
         # Got the terminate request.  This is handled by the
         # JSON-writing thread, so that we can ensure that all

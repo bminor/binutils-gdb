@@ -228,7 +228,7 @@ class _EnumInstance:
         flag_list = []
         v = int(self.val)
         any_found = False
-        for (e_name, e_value) in self.enumerators:
+        for e_name, e_value in self.enumerators:
             if v & e_value != 0:
                 flag_list.append(e_name)
                 v = v & ~e_value

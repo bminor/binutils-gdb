@@ -16,6 +16,7 @@
 import xml.etree.ElementTree as ET
 import gdb
 
+
 # Make use of gdb.RemoteTargetConnection.send_packet to fetch the
 # thread list from the remote target.
 #
