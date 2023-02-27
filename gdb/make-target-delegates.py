@@ -21,7 +21,7 @@
 #    make-target-delegates.py
 
 import re
-from typing import List
+from typing import Dict, List, TextIO
 
 import gdbcopyright
 
@@ -122,7 +122,7 @@ def scan_target_h():
                 line = re.split("//", line)[0]
                 all_the_text = all_the_text + " " + line
     if not found_trigger:
-        raise "Could not find trigger line"
+        raise RuntimeError("Could not find trigger line")
     # Now strip out the C comments.
     all_the_text = re.sub(r"/\*(.*?)\*/", "", all_the_text)
     # Replace sequences whitespace with a single space character.
@@ -143,10 +143,10 @@ def scan_target_h():
 
 
 # Parse arguments into a list.
-def parse_argtypes(typestr):
+def parse_argtypes(typestr: str):
     # Remove the outer parens.
     typestr = re.sub(r"^\((.*)\)$", r"\1", typestr)
-    result = []
+    result: list[str] = []
     for item in re.split(r",\s*", typestr):
         if item == "void" or item == "":
             continue
@@ -164,7 +164,9 @@ def parse_argtypes(typestr):
 
 # Write function header given name, return type, and argtypes.
 # Returns a list of actual argument names.
-def write_function_header(f, decl, name, return_type, argtypes):
+def write_function_header(
+    f: TextIO, decl: bool, name: str, return_type: str, argtypes: List[str]
+):
     print(return_type, file=f, end="")
     if decl:
         if not return_type.endswith("*"):
@@ -172,8 +174,8 @@ def write_function_header(f, decl, name, return_type, argtypes):
     else:
         print("", file=f)
     print(name + " (", file=f, end="")
-    argdecls = []
-    actuals = []
+    argdecls: list[str] = []
+    actuals: list[str] = []
     for i in range(len(argtypes)):
         val = re.sub(TARGET_DEBUG_PRINTER, "", argtypes[i])
         if not val.endswith("*") and not val.endswith("&"):
@@ -191,12 +193,12 @@ def write_function_header(f, decl, name, return_type, argtypes):
 
 
 # Write out a declaration.
-def write_declaration(f, name, return_type, argtypes):
+def write_declaration(f: TextIO, name: str, return_type: str, argtypes: List[str]):
     write_function_header(f, True, name, return_type, argtypes)
 
 
 # Write out a delegation function.
-def write_delegator(f, name, return_type, argtypes):
+def write_delegator(f: TextIO, name: str, return_type: str, argtypes: List[str]):
     names = write_function_header(
         f, False, "target_ops::" + name, return_type, argtypes
     )
@@ -210,7 +212,14 @@ def write_delegator(f, name, return_type, argtypes):
 
 
 # Write out a default function.
-def write_tdefault(f, content, style, name, return_type, argtypes):
+def write_tdefault(
+    f: TextIO,
+    content: str,
+    style: str,
+    name: str,
+    return_type: str,
+    argtypes: List[str],
+):
     name = "dummy_target::" + name
     names = write_function_header(f, False, name, return_type, argtypes)
     if style == "FUNC":
@@ -228,11 +237,11 @@ def write_tdefault(f, content, style, name, return_type, argtypes):
         # Nothing.
         pass
     else:
-        raise "unrecognized style: " + style
+        raise RuntimeError("unrecognized style: " + style)
     print("}\n", file=f)
 
 
-def munge_type(typename):
+def munge_type(typename: str):
     m = re.search(TARGET_DEBUG_PRINTER, typename)
     if m:
         return m.group("arg")
@@ -251,7 +260,9 @@ def munge_type(typename):
 
 
 # Write out a debug method.
-def write_debugmethod(f, content, name, return_type, argtypes):
+def write_debugmethod(
+    f: TextIO, content: str, name: str, return_type: str, argtypes: List[str]
+):
     debugname = "debug_target::" + name
     names = write_function_header(f, False, debugname, return_type, argtypes)
     if return_type != "void":
@@ -297,7 +308,12 @@ def write_debugmethod(f, content, name, return_type, argtypes):
     print("}\n", file=f)
 
 
-def print_class(f, class_name, delegators, entries):
+def print_class(
+    f: TextIO,
+    class_name: str,
+    delegators: List[str],
+    entries: Dict[str, Entry],
+):
     print("struct " + class_name + " : public target_ops", file=f)
     print("{", file=f)
     print("  const target_info &info () const override;", file=f)
@@ -313,8 +329,9 @@ def print_class(f, class_name, delegators, entries):
     print("};\n", file=f)
 
 
-delegators = []
-entries = {}
+delegators: List[str] = []
+entries: Dict[str, Entry] = {}
+
 for current_line in scan_target_h():
     # See comments in scan_target_h.  Here we strip away the leading
     # and trailing whitespace.
