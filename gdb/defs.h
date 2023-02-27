@@ -171,7 +171,10 @@ extern quit_handler_ftype *quit_handler;
 extern void default_quit_handler (void);
 
 /* Flag that function quit should call quit_force.  */
-extern volatile int sync_quit_force_run;
+extern volatile bool sync_quit_force_run;
+
+/* Set sync_quit_force_run and also call set_quit_flag().  */
+extern void set_force_quit_flag ();
 
 extern void quit (void);
 

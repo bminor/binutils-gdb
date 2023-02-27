@@ -641,7 +641,7 @@ quit (void)
 {
   if (sync_quit_force_run)
     {
-      sync_quit_force_run = 0;
+      sync_quit_force_run = false;
       throw_forced_quit ("SIGTERM");
     }
 
