@@ -60,6 +60,8 @@ int main (int argc, char *argv[])
       /* Nothing.  */
     }
 
+  i = -1; /* Past throw-catch.  */
+
   for (i = 0; i < 10; i++)
     {
       result += multiply (foo);  /* Break at multiply. */
