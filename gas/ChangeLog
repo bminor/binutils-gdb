@@ -1,3 +1,11 @@
+2023-02-28  Richard Ball  <richard.ball@arm.com>
+
+	* testsuite/gas/aarch64/mec-invalid.d: New test.
+	* testsuite/gas/aarch64/mec-invalid.l: New test.
+	* testsuite/gas/aarch64/mec-invalid.s: New test.
+	* testsuite/gas/aarch64/mec.d: New test.
+	* testsuite/gas/aarch64/mec.s: New test.
+
 2023-02-27  Benson Muite  <benson_muite@emailplus.org>
 
 	PR 28909
