@@ -2020,26 +2020,3 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
     rel_index = TARGET_CHAR_BIT - 1 - rel_index;
   return (word >> rel_index) & 1;
 }
-
-int
-value_in (struct value *element, struct value *set)
-{
-  int member;
-  struct type *settype = check_typedef (set->type ());
-  struct type *eltype = check_typedef (element->type ());
-
-  if (eltype->code () == TYPE_CODE_RANGE)
-    eltype = eltype->target_type ();
-  if (settype->code () != TYPE_CODE_SET)
-    error (_("Second argument of 'IN' has wrong type"));
-  if (eltype->code () != TYPE_CODE_INT
-      && eltype->code () != TYPE_CODE_CHAR
-      && eltype->code () != TYPE_CODE_ENUM
-      && eltype->code () != TYPE_CODE_BOOL)
-    error (_("First argument of 'IN' has wrong type"));
-  member = value_bit_index (settype, set->contents ().data (),
-			    value_as_long (element));
-  if (member < 0)
-    error (_("First argument of 'IN' not in range"));
-  return member;
-}
