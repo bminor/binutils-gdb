@@ -91,6 +91,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #define DEF_SIZE 5000
 #define STACK 50
@@ -1431,7 +1432,7 @@ print (void)
   else if (*isp == 2)
     write_buffer (tos, stderr);
   else
-    fprintf (stderr, "print: illegal print destination `%ld'\n", *isp);
+    fprintf (stderr, "print: illegal print destination `%" PRIdPTR "'\n", *isp);
   isp--;
   tos--;
   icheck_range ();
