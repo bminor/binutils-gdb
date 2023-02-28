@@ -30,4 +30,4 @@ if {![runto ${srcfile}:$line]} {
 }
 
 # Just setting a watchpoint was enough to trigger the bug.
-gdb_test "watch -location y" ".*watchpoint .* -location .*"
+gdb_test "watch -location y" ".*\[wW\]atchpoint .* -location .*"
