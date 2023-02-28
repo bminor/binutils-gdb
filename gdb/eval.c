@@ -371,29 +371,6 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 
       switch (language->la_language)
 	{
-	case language_c:
-	case language_cplus:
-	case language_asm:
-	case language_objc:
-	  if (result_len <= builtin->builtin_int->length ())
-	    {
-	      promoted_type = (unsigned_operation
-			       ? builtin->builtin_unsigned_int
-			       : builtin->builtin_int);
-	    }
-	  else if (result_len <= builtin->builtin_long->length ())
-	    {
-	      promoted_type = (unsigned_operation
-			       ? builtin->builtin_unsigned_long
-			       : builtin->builtin_long);
-	    }
-	  else
-	    {
-	      promoted_type = (unsigned_operation
-			       ? builtin->builtin_unsigned_long_long
-			       : builtin->builtin_long_long);
-	    }
-	  break;
 	case language_opencl:
 	  if (result_len
 	      <= lookup_signed_typename (language, "int")->length())
@@ -413,23 +390,29 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	    }
 	  break;
 	default:
-	  /* For other languages the result type is unchanged from gdb
-	     version 6.7 for backward compatibility.
-	     If either arg was long long, make sure that value is also long
-	     long.  Otherwise use long.  */
-	  if (unsigned_operation)
+	  if (result_len <= builtin->builtin_int->length ())
 	    {
-	      if (result_len > gdbarch_long_bit (gdbarch) / HOST_CHAR_BIT)
-		promoted_type = builtin->builtin_unsigned_long_long;
-	      else
-		promoted_type = builtin->builtin_unsigned_long;
+	      promoted_type = (unsigned_operation
+			       ? builtin->builtin_unsigned_int
+			       : builtin->builtin_int);
+	    }
+	  else if (result_len <= builtin->builtin_long->length ())
+	    {
+	      promoted_type = (unsigned_operation
+			       ? builtin->builtin_unsigned_long
+			       : builtin->builtin_long);
+	    }
+	  else if (result_len <= builtin->builtin_long_long->length ())
+	    {
+	      promoted_type = (unsigned_operation
+			       ? builtin->builtin_unsigned_long_long
+			       : builtin->builtin_long_long);
 	    }
 	  else
 	    {
-	      if (result_len > gdbarch_long_bit (gdbarch) / HOST_CHAR_BIT)
-		promoted_type = builtin->builtin_long_long;
-	      else
-		promoted_type = builtin->builtin_long;
+	      promoted_type = (unsigned_operation
+			       ? builtin->builtin_uint128
+			       : builtin->builtin_int128);
 	    }
 	  break;
 	}
