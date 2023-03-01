@@ -3,6 +3,8 @@
 
 *** Changes since GDB 13
 
+* GDB now has some support for integer types larger than 64 bits.
+
 * Removed targets and native configurations
 
   GDB no longer supports AIX 4.x, AIX 5.x and AIX 6.x.  The minimum supported

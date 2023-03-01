@@ -34,13 +34,6 @@ static struct value *value_subscripted_rvalue (struct value *array,
 					       LONGEST index,
 					       LONGEST lowerbound);
 
-/* Define whether or not the C operator '/' truncates towards zero for
-   differently signed operands (truncation direction is undefined in C).  */
-
-#ifndef TRUNCATION_TOWARDS_ZERO
-#define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
-#endif
-
 /* Given a pointer, return the size of its target.
    If the pointer type is void *, then return 1.
    If the target type is incomplete, then error out.
@@ -726,36 +719,6 @@ value_concat (struct value *arg1, struct value *arg2)
   return result;
 }
 
-/* Integer exponentiation: V1**V2, where both arguments are
-   integers.  Requires V1 != 0 if V2 < 0.  Returns 1 for 0 ** 0.  */
-
-static LONGEST
-integer_pow (LONGEST v1, LONGEST v2)
-{
-  if (v2 < 0)
-    {
-      if (v1 == 0)
-	error (_("Attempt to raise 0 to negative power."));
-      else
-	return 0;
-    }
-  else 
-    {
-      /* The Russian Peasant's Algorithm.  */
-      LONGEST v;
-      
-      v = 1;
-      for (;;)
-	{
-	  if (v2 & 1L) 
-	    v *= v1;
-	  v2 >>= 1;
-	  if (v2 == 0)
-	    return v;
-	  v1 *= v1;
-	}
-    }
-}
 
 /* Obtain argument values for binary operation, converting from
    other types if one of them is not floating point.  */
@@ -1099,33 +1062,39 @@ type_length_bits (type *type)
    both negative and too-large shift amounts, which are undefined, and
    would crash a GDB built with UBSan.  Depending on the current
    language, if the shift is not valid, this either warns and returns
-   false, or errors out.  Returns true if valid.  */
+   false, or errors out.  Returns true and sets NBITS if valid.  */
 
 static bool
 check_valid_shift_count (enum exp_opcode op, type *result_type,
-			 type *shift_count_type, ULONGEST shift_count)
+			 type *shift_count_type, const gdb_mpz &shift_count,
+			 unsigned long &nbits)
 {
-  if (!shift_count_type->is_unsigned () && (LONGEST) shift_count < 0)
+  if (!shift_count_type->is_unsigned ())
     {
-      auto error_or_warning = [] (const char *msg)
-      {
-	/* Shifts by a negative amount are always an error in Go.  Other
-	   languages are more permissive and their compilers just warn or
-	   have modes to disable the errors.  */
-	if (current_language->la_language == language_go)
-	  error (("%s"), msg);
-	else
-	  warning (("%s"), msg);
-      };
+      LONGEST count = shift_count.as_integer<LONGEST> ();
+      if (count < 0)
+	{
+	  auto error_or_warning = [] (const char *msg)
+	  {
+	    /* Shifts by a negative amount are always an error in Go.  Other
+	       languages are more permissive and their compilers just warn or
+	       have modes to disable the errors.  */
+	    if (current_language->la_language == language_go)
+	      error (("%s"), msg);
+	    else
+	      warning (("%s"), msg);
+	  };
 
-      if (op == BINOP_RSH)
-	error_or_warning (_("right shift count is negative"));
-      else
-	error_or_warning (_("left shift count is negative"));
-      return false;
+	  if (op == BINOP_RSH)
+	    error_or_warning (_("right shift count is negative"));
+	  else
+	    error_or_warning (_("left shift count is negative"));
+	  return false;
+	}
     }
 
-  if (shift_count >= type_length_bits (result_type))
+  nbits = shift_count.as_integer<unsigned long> ();
+  if (nbits >= type_length_bits (result_type))
     {
       /* In Go, shifting by large amounts is defined.  Be silent and
 	 still return false, as the caller's error path does the right
@@ -1249,283 +1218,127 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       else
 	result_type = promotion_type (type1, type2);
 
-      if (result_type->is_unsigned ())
+      gdb_mpz v1 = value_as_mpz (arg1);
+      gdb_mpz v2 = value_as_mpz (arg2);
+      gdb_mpz v;
+
+      switch (op)
 	{
-	  LONGEST v2_signed = value_as_long (arg2);
-	  ULONGEST v1, v2, v = 0;
+	case BINOP_ADD:
+	  v = v1 + v2;
+	  break;
 
-	  v1 = (ULONGEST) value_as_long (arg1);
-	  v2 = (ULONGEST) v2_signed;
+	case BINOP_SUB:
+	  v = v1 - v2;
+	  break;
 
-	  switch (op)
+	case BINOP_MUL:
+	  v = v1 * v2;
+	  break;
+
+	case BINOP_DIV:
+	case BINOP_INTDIV:
+	  if (v2.sgn () != 0)
+	    v = v1 / v2;
+	  else
+	    error (_("Division by zero"));
+	  break;
+
+	case BINOP_EXP:
+	  v = v1.pow (v2.as_integer<unsigned long> ());
+	  break;
+
+	case BINOP_REM:
+	  if (v2.sgn () != 0)
+	    v = v1 % v2;
+	  else
+	    error (_("Division by zero"));
+	  break;
+
+	case BINOP_MOD:
+	  /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
+	     v1 mod 0 has a defined value, v1.  */
+	  if (v2.sgn () == 0)
 	    {
-	    case BINOP_ADD:
-	      v = v1 + v2;
-	      break;
-
-	    case BINOP_SUB:
-	      v = v1 - v2;
-	      break;
-
-	    case BINOP_MUL:
-	      v = v1 * v2;
-	      break;
-
-	    case BINOP_DIV:
-	    case BINOP_INTDIV:
-	      if (v2 != 0)
-		v = v1 / v2;
-	      else
-		error (_("Division by zero"));
-	      break;
-
-	    case BINOP_EXP:
-	      v = uinteger_pow (v1, v2_signed);
-	      break;
-
-	    case BINOP_REM:
-	      if (v2 != 0)
-		v = v1 % v2;
-	      else
-		error (_("Division by zero"));
-	      break;
-
-	    case BINOP_MOD:
-	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
-		 v1 mod 0 has a defined value, v1.  */
-	      if (v2 == 0)
-		{
-		  v = v1;
-		}
-	      else
-		{
-		  v = v1 / v2;
-		  /* Note floor(v1/v2) == v1/v2 for unsigned.  */
-		  v = v1 - (v2 * v);
-		}
-	      break;
-
-	    case BINOP_LSH:
-	      if (!check_valid_shift_count (op, result_type, type2, v2))
-		v = 0;
-	      else
-		v = v1 << v2;
-	      break;
-
-	    case BINOP_RSH:
-	      if (!check_valid_shift_count (op, result_type, type2, v2))
-		v = 0;
-	      else
-		v = v1 >> v2;
-	      break;
-
-	    case BINOP_BITWISE_AND:
-	      v = v1 & v2;
-	      break;
-
-	    case BINOP_BITWISE_IOR:
-	      v = v1 | v2;
-	      break;
-
-	    case BINOP_BITWISE_XOR:
-	      v = v1 ^ v2;
-	      break;
-
-	    case BINOP_MIN:
-	      v = v1 < v2 ? v1 : v2;
-	      break;
-
-	    case BINOP_MAX:
-	      v = v1 > v2 ? v1 : v2;
-	      break;
-
-	    case BINOP_EQUAL:
-	      v = v1 == v2;
-	      break;
-
-	    case BINOP_NOTEQUAL:
-	      v = v1 != v2;
-	      break;
-
-	    case BINOP_LESS:
-	      v = v1 < v2;
-	      break;
-
-	    case BINOP_GTR:
-	      v = v1 > v2;
-	      break;
-
-	    case BINOP_LEQ:
-	      v = v1 <= v2;
-	      break;
-
-	    case BINOP_GEQ:
-	      v = v1 >= v2;
-	      break;
-
-	    default:
-	      error (_("Invalid binary operation on numbers."));
+	      v = v1;
 	    }
-
-	  val = value::allocate (result_type);
-	  store_unsigned_integer (val->contents_raw ().data (),
-				  val->type ()->length (),
-				  type_byte_order (result_type),
-				  v);
-	}
-      else
-	{
-	  LONGEST v1, v2, v = 0;
-
-	  v1 = value_as_long (arg1);
-	  v2 = value_as_long (arg2);
-
-	  switch (op)
+	  else
 	    {
-	    case BINOP_ADD:
-	      v = v1 + v2;
-	      break;
-
-	    case BINOP_SUB:
-	      /* Avoid runtime error: signed integer overflow: \
-		 0 - -9223372036854775808 cannot be represented in type
-		 'long int'.  */
-	      v = (ULONGEST)v1 - (ULONGEST)v2;
-	      break;
-
-	    case BINOP_MUL:
-	      v = v1 * v2;
-	      break;
-
-	    case BINOP_DIV:
-	    case BINOP_INTDIV:
-	      if (v2 != 0)
-		v = v1 / v2;
-	      else
-		error (_("Division by zero"));
-	      break;
-
-	    case BINOP_EXP:
-	      v = integer_pow (v1, v2);
-	      break;
-
-	    case BINOP_REM:
-	      if (v2 != 0)
-		v = v1 % v2;
-	      else
-		error (_("Division by zero"));
-	      break;
-
-	    case BINOP_MOD:
-	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
-		 X mod 0 has a defined value, X.  */
-	      if (v2 == 0)
-		{
-		  v = v1;
-		}
-	      else
-		{
-		  v = v1 / v2;
-		  /* Compute floor.  */
-		  if (TRUNCATION_TOWARDS_ZERO && (v < 0) && ((v1 % v2) != 0))
-		    {
-		      v--;
-		    }
-		  v = v1 - (v2 * v);
-		}
-	      break;
-
-	    case BINOP_LSH:
-	      if (!check_valid_shift_count (op, result_type, type2, v2))
-		v = 0;
-	      else
-		{
-		  /* Cast to unsigned to avoid undefined behavior on
-		     signed shift overflow (unless C++20 or later),
-		     which would crash GDB when built with UBSan.
-		     Note we don't warn on left signed shift overflow,
-		     because starting with C++20, that is actually
-		     defined behavior.  Also, note GDB assumes 2's
-		     complement throughout.  */
-		  v = (ULONGEST) v1 << v2;
-		}
-	      break;
-
-	    case BINOP_RSH:
-	      if (!check_valid_shift_count (op, result_type, type2, v2))
-		{
-		  /* Pretend the too-large shift was decomposed in a
-		     number of smaller shifts.  An arithmetic signed
-		     right shift of a negative number always yields -1
-		     with such semantics.  This is the right thing to
-		     do for Go, and we might as well do it for
-		     languages where it is undefined.  Also, pretend a
-		     shift by a negative number was a shift by the
-		     negative number cast to unsigned, which is the
-		     same as shifting by a too-large number.  */
-		  if (v1 < 0)
-		    v = -1;
-		  else
-		    v = 0;
-		}
-	      else
-		v = v1 >> v2;
-	      break;
-
-	    case BINOP_BITWISE_AND:
-	      v = v1 & v2;
-	      break;
-
-	    case BINOP_BITWISE_IOR:
-	      v = v1 | v2;
-	      break;
-
-	    case BINOP_BITWISE_XOR:
-	      v = v1 ^ v2;
-	      break;
-
-	    case BINOP_MIN:
-	      v = v1 < v2 ? v1 : v2;
-	      break;
-
-	    case BINOP_MAX:
-	      v = v1 > v2 ? v1 : v2;
-	      break;
-
-	    case BINOP_EQUAL:
-	      v = v1 == v2;
-	      break;
-
-	    case BINOP_NOTEQUAL:
-	      v = v1 != v2;
-	      break;
-
-	    case BINOP_LESS:
-	      v = v1 < v2;
-	      break;
-
-	    case BINOP_GTR:
-	      v = v1 > v2;
-	      break;
-
-	    case BINOP_LEQ:
-	      v = v1 <= v2;
-	      break;
-
-	    case BINOP_GEQ:
-	      v = v1 >= v2;
-	      break;
-
-	    default:
-	      error (_("Invalid binary operation on numbers."));
+	      v = v1 / v2;
+	      /* Note floor(v1/v2) == v1/v2 for unsigned.  */
+	      v = v1 - (v2 * v);
 	    }
+	  break;
 
-	  val = value::allocate (result_type);
-	  store_signed_integer (val->contents_raw ().data (),
-				val->type ()->length (),
-				type_byte_order (result_type),
-				v);
+	case BINOP_LSH:
+	  {
+	    unsigned long nbits;
+	    if (!check_valid_shift_count (op, result_type, type2, v2, nbits))
+	      v = 0;
+	    else
+	      v = v1 << nbits;
+	  }
+	  break;
+
+	case BINOP_RSH:
+	  {
+	    unsigned long nbits;
+	    if (!check_valid_shift_count (op, result_type, type2, v2, nbits))
+	      v = 0;
+	    else
+	      v = v1 >> nbits;
+	  }
+	  break;
+
+	case BINOP_BITWISE_AND:
+	  v = v1 & v2;
+	  break;
+
+	case BINOP_BITWISE_IOR:
+	  v = v1 | v2;
+	  break;
+
+	case BINOP_BITWISE_XOR:
+	  v = v1 ^ v2;
+	  break;
+
+	case BINOP_MIN:
+	  v = v1 < v2 ? v1 : v2;
+	  break;
+
+	case BINOP_MAX:
+	  v = v1 > v2 ? v1 : v2;
+	  break;
+
+	case BINOP_EQUAL:
+	  v = v1 == v2;
+	  break;
+
+	case BINOP_NOTEQUAL:
+	  v = v1 != v2;
+	  break;
+
+	case BINOP_LESS:
+	  v = v1 < v2;
+	  break;
+
+	case BINOP_GTR:
+	  v = v1 > v2;
+	  break;
+
+	case BINOP_LEQ:
+	  v = v1 <= v2;
+	  break;
+
+	case BINOP_GEQ:
+	  v = v1 >= v2;
+	  break;
+
+	default:
+	  error (_("Invalid binary operation on numbers."));
 	}
+
+      val = value_from_mpz (result_type, v);
     }
 
   return val;
@@ -1944,7 +1757,11 @@ value_complement (struct value *arg1)
   type = check_typedef (arg1->type ());
 
   if (is_integral_type (type))
-    val = value_from_longest (type, ~value_as_long (arg1));
+    {
+      gdb_mpz num = value_as_mpz (arg1);
+      num.complement ();
+      val = value_from_mpz (type, num);
+    }
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct type *eltype = check_typedef (type->target_type ());

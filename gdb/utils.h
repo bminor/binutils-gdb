@@ -303,13 +303,6 @@ extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
 
 extern int myread (int, char *, int);
 
-/* Integer exponentiation: Return V1**V2, where both arguments
-   are integers.
-
-   Requires V1 != 0 if V2 < 0.
-   Returns 1 for 0 ** 0.  */
-extern ULONGEST uinteger_pow (ULONGEST v1, LONGEST v2);
-
 /* Resource limits used by getrlimit and setrlimit.  */
 
 enum resource_limit_kind

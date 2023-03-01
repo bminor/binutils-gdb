@@ -570,7 +570,7 @@ value_cast (struct type *type, struct value *arg2)
 	   && (scalar || code2 == TYPE_CODE_PTR
 	       || code2 == TYPE_CODE_MEMBERPTR))
     {
-      LONGEST longest;
+      gdb_mpz longest;
 
       /* When we cast pointers to integers, we mustn't use
 	 gdbarch_pointer_to_address to find the address the pointer
@@ -579,12 +579,14 @@ value_cast (struct type *type, struct value *arg2)
 	 sees a cast as a simple reinterpretation of the pointer's
 	 bits.  */
       if (code2 == TYPE_CODE_PTR)
-	longest = extract_unsigned_integer
-	  (arg2->contents (), type_byte_order (type2));
+	longest = extract_unsigned_integer (arg2->contents (),
+					    type_byte_order (type2));
       else
-	longest = value_as_long (arg2);
-      return value_from_longest (to_type, convert_to_boolean ?
-				 (LONGEST) (longest ? 1 : 0) : longest);
+	longest = value_as_mpz (arg2);
+      if (convert_to_boolean)
+	longest = bool (longest);
+
+      return value_from_mpz (to_type, longest);
     }
   else if (code1 == TYPE_CODE_PTR && (code2 == TYPE_CODE_INT  
 				      || code2 == TYPE_CODE_ENUM 
