@@ -2149,7 +2149,8 @@ is_dynamic_type (struct type *type)
 }
 
 static struct type *resolve_dynamic_type_internal
-  (struct type *type, struct property_addr_info *addr_stack, int top_level);
+  (struct type *type, struct property_addr_info *addr_stack,
+   const frame_info_ptr &frame, int top_level);
 
 /* Given a dynamic range type (dyn_range_type) and a stack of
    struct property_addr_info elements, return a static version
@@ -2170,6 +2171,7 @@ static struct type *resolve_dynamic_type_internal
 static struct type *
 resolve_dynamic_range (struct type *dyn_range_type,
 		       struct property_addr_info *addr_stack,
+		       const frame_info_ptr &frame,
 		       int rank, bool resolve_p = true)
 {
   CORE_ADDR value;
@@ -2180,14 +2182,14 @@ resolve_dynamic_range (struct type *dyn_range_type,
   gdb_assert (rank >= 0);
 
   const struct dynamic_prop *prop = &dyn_range_type->bounds ()->low;
-  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value,
+  if (resolve_p && dwarf2_evaluate_property (prop, frame, addr_stack, &value,
 					     { (CORE_ADDR) rank }))
     low_bound.set_const_val (value);
   else
     low_bound.set_undefined ();
 
   prop = &dyn_range_type->bounds ()->high;
-  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value,
+  if (resolve_p && dwarf2_evaluate_property (prop, frame, addr_stack, &value,
 					     { (CORE_ADDR) rank }))
     {
       high_bound.set_const_val (value);
@@ -2201,7 +2203,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
   bool byte_stride_p = dyn_range_type->bounds ()->flag_is_byte_stride;
   prop = &dyn_range_type->bounds ()->stride;
-  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value,
+  if (resolve_p && dwarf2_evaluate_property (prop, frame, addr_stack, &value,
 					     { (CORE_ADDR) rank }))
     {
       stride.set_const_val (value);
@@ -2224,7 +2226,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
   static_target_type
     = resolve_dynamic_type_internal (dyn_range_type->target_type (),
-				     addr_stack, 0);
+				     addr_stack, frame, 0);
   LONGEST bias = dyn_range_type->bounds ()->bias;
   type_allocator alloc (dyn_range_type);
   static_range_type = create_range_type_with_stride
@@ -2257,6 +2259,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 static struct type *
 resolve_dynamic_array_or_string_1 (struct type *type,
 				   struct property_addr_info *addr_stack,
+				   const frame_info_ptr &frame,
 				   int rank, bool resolve_p)
 {
   CORE_ADDR value;
@@ -2286,7 +2289,7 @@ resolve_dynamic_array_or_string_1 (struct type *type,
      dimension of the array.  */
   prop = TYPE_ALLOCATED_PROP (type);
   if (prop != NULL && resolve_p
-      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+      && dwarf2_evaluate_property (prop, frame, addr_stack, &value))
     {
       prop->set_const_val (value);
       if (value == 0)
@@ -2295,7 +2298,7 @@ resolve_dynamic_array_or_string_1 (struct type *type,
 
   prop = TYPE_ASSOCIATED_PROP (type);
   if (prop != NULL && resolve_p
-      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+      && dwarf2_evaluate_property (prop, frame, addr_stack, &value))
     {
       prop->set_const_val (value);
       if (value == 0)
@@ -2304,14 +2307,15 @@ resolve_dynamic_array_or_string_1 (struct type *type,
 
   range_type = check_typedef (type->index_type ());
   range_type
-    = resolve_dynamic_range (range_type, addr_stack, rank, resolve_p);
+    = resolve_dynamic_range (range_type, addr_stack, frame, rank, resolve_p);
 
   ary_dim = check_typedef (type->target_type ());
   if (ary_dim != NULL && ary_dim->code () == TYPE_CODE_ARRAY)
     {
       ary_dim = copy_type (ary_dim);
       elt_type = resolve_dynamic_array_or_string_1 (ary_dim, addr_stack,
-						    rank - 1, resolve_p);
+						    frame, rank - 1,
+						    resolve_p);
     }
   else
     elt_type = type->target_type ();
@@ -2319,7 +2323,7 @@ resolve_dynamic_array_or_string_1 (struct type *type,
   prop = type->dyn_prop (DYN_PROP_BYTE_STRIDE);
   if (prop != NULL && resolve_p)
     {
-      if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+      if (dwarf2_evaluate_property (prop, frame, addr_stack, &value))
 	{
 	  type->remove_dyn_prop (DYN_PROP_BYTE_STRIDE);
 	  bit_stride = (unsigned int) (value * 8);
@@ -2347,7 +2351,8 @@ resolve_dynamic_array_or_string_1 (struct type *type,
 
 static struct type *
 resolve_dynamic_array_or_string (struct type *type,
-				 struct property_addr_info *addr_stack)
+				 struct property_addr_info *addr_stack,
+				 const frame_info_ptr &frame)
 {
   CORE_ADDR value;
   int rank = 0;
@@ -2361,7 +2366,7 @@ resolve_dynamic_array_or_string (struct type *type,
 
   /* Resolve the rank property to get rank value.  */
   struct dynamic_prop *prop = TYPE_RANK_PROP (type);
-  if (dwarf2_evaluate_property (prop, nullptr, addr_stack, &value))
+  if (dwarf2_evaluate_property (prop, frame, addr_stack, &value))
     {
       prop->set_const_val (value);
       rank = value;
@@ -2429,7 +2434,8 @@ resolve_dynamic_array_or_string (struct type *type,
      reduce the rank by 1 here.  */
   --rank;
 
-  return resolve_dynamic_array_or_string_1 (type, addr_stack, rank, true);
+  return resolve_dynamic_array_or_string_1 (type, addr_stack, frame, rank,
+					    true);
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
@@ -2438,7 +2444,8 @@ resolve_dynamic_array_or_string (struct type *type,
 
 static struct type *
 resolve_dynamic_union (struct type *type,
-		       struct property_addr_info *addr_stack)
+		       struct property_addr_info *addr_stack,
+		       const frame_info_ptr &frame)
 {
   struct type *resolved_type;
   int i;
@@ -2462,7 +2469,7 @@ resolve_dynamic_union (struct type *type,
 	continue;
 
       t = resolve_dynamic_type_internal (resolved_type->field (i).type (),
-					 addr_stack, 0);
+					 addr_stack, frame, 0);
       resolved_type->field (i).set_type (t);
 
       struct type *real_type = check_typedef (t);
@@ -2637,7 +2644,8 @@ compute_variant_fields (struct type *type,
 
 static struct type *
 resolve_dynamic_struct (struct type *type,
-			struct property_addr_info *addr_stack)
+			struct property_addr_info *addr_stack,
+			const frame_info_ptr &frame)
 {
   struct type *resolved_type;
   int i;
@@ -2687,7 +2695,7 @@ resolve_dynamic_struct (struct type *type,
 	  prop.set_locexpr (&baton);
 
 	  CORE_ADDR addr;
-	  if (dwarf2_evaluate_property (&prop, nullptr, addr_stack, &addr,
+	  if (dwarf2_evaluate_property (&prop, frame, addr_stack, &addr,
 					{addr_stack->addr}))
 	    resolved_type->field (i).set_loc_bitpos
 	      (TARGET_CHAR_BIT * (addr - addr_stack->addr));
@@ -2714,7 +2722,7 @@ resolve_dynamic_struct (struct type *type,
 
       resolved_type->field (i).set_type
 	(resolve_dynamic_type_internal (resolved_type->field (i).type (),
-					&pinfo, 0));
+					&pinfo, frame, 0));
       gdb_assert (resolved_type->field (i).loc_kind ()
 		  == FIELD_LOC_KIND_BITPOS);
 
@@ -2759,6 +2767,7 @@ resolve_dynamic_struct (struct type *type,
 static struct type *
 resolve_dynamic_type_internal (struct type *type,
 			       struct property_addr_info *addr_stack,
+			       const frame_info_ptr &frame,
 			       int top_level)
 {
   struct type *real_type = check_typedef (type);
@@ -2772,7 +2781,7 @@ resolve_dynamic_type_internal (struct type *type,
   gdb::optional<CORE_ADDR> type_length;
   prop = TYPE_DYNAMIC_LENGTH (type);
   if (prop != NULL
-      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+      && dwarf2_evaluate_property (prop, frame, addr_stack, &value))
     type_length = value;
 
   if (type->code () == TYPE_CODE_TYPEDEF)
@@ -2780,7 +2789,7 @@ resolve_dynamic_type_internal (struct type *type,
       resolved_type = copy_type (type);
       resolved_type->set_target_type
 	(resolve_dynamic_type_internal (type->target_type (), addr_stack,
-					top_level));
+					frame, top_level));
     }
   else
     {
@@ -2805,7 +2814,7 @@ resolve_dynamic_type_internal (struct type *type,
 	    resolved_type = copy_type (type);
 	    resolved_type->set_target_type
 	      (resolve_dynamic_type_internal (type->target_type (),
-					      &pinfo, top_level));
+					      &pinfo, frame, top_level));
 	    break;
 	  }
 
@@ -2813,7 +2822,8 @@ resolve_dynamic_type_internal (struct type *type,
 	  /* Strings are very much like an array of characters, and can be
 	     treated as one here.  */
 	case TYPE_CODE_ARRAY:
-	  resolved_type = resolve_dynamic_array_or_string (type, addr_stack);
+	  resolved_type = resolve_dynamic_array_or_string (type, addr_stack,
+							   frame);
 	  break;
 
 	case TYPE_CODE_RANGE:
@@ -2822,15 +2832,15 @@ resolve_dynamic_type_internal (struct type *type,
 	     this rank value is not actually required for the resolution of
 	     the dynamic range, otherwise, we'd be resolving this range
 	     within the context of a dynamic array.  */
-	  resolved_type = resolve_dynamic_range (type, addr_stack, 0);
+	  resolved_type = resolve_dynamic_range (type, addr_stack, frame, 0);
 	  break;
 
 	case TYPE_CODE_UNION:
-	  resolved_type = resolve_dynamic_union (type, addr_stack);
+	  resolved_type = resolve_dynamic_union (type, addr_stack, frame);
 	  break;
 
 	case TYPE_CODE_STRUCT:
-	  resolved_type = resolve_dynamic_struct (type, addr_stack);
+	  resolved_type = resolve_dynamic_struct (type, addr_stack, frame);
 	  break;
 	}
     }
@@ -2847,7 +2857,7 @@ resolve_dynamic_type_internal (struct type *type,
   /* Resolve data_location attribute.  */
   prop = TYPE_DATA_LOCATION (resolved_type);
   if (prop != NULL
-      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+      && dwarf2_evaluate_property (prop, frame, addr_stack, &value))
     {
       /* Start of Fortran hack.  See comment in f-lang.h for what is going
 	 on here.*/
@@ -2867,12 +2877,17 @@ resolve_dynamic_type_internal (struct type *type,
 struct type *
 resolve_dynamic_type (struct type *type,
 		      gdb::array_view<const gdb_byte> valaddr,
-		      CORE_ADDR addr)
+		      CORE_ADDR addr,
+		      const frame_info_ptr *in_frame)
 {
   struct property_addr_info pinfo
     = {check_typedef (type), valaddr, addr, NULL};
 
-  return resolve_dynamic_type_internal (type, &pinfo, 1);
+  frame_info_ptr frame;
+  if (in_frame != nullptr)
+    frame = *in_frame;
+
+  return resolve_dynamic_type_internal (type, &pinfo, frame, 1);
 }
 
 /* See gdbtypes.h  */

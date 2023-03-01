@@ -2544,6 +2544,10 @@ extern CORE_ADDR get_pointer_type_max (struct type *);
    If TYPE has no dynamic properties return TYPE; otherwise a new type with
    static properties is returned.
 
+   If FRAME is given, it is used when evaluating dynamic properties.
+   This can be important when a static link is seen.  If not given,
+   the selected frame is used.
+
    For an array type, if the element type is dynamic, then that will
    not be resolved.  This is done because each individual element may
    have a different type when resolved (depending on the contents of
@@ -2551,7 +2555,7 @@ extern CORE_ADDR get_pointer_type_max (struct type *);
    true for the return value of this function.  */
 extern struct type *resolve_dynamic_type
   (struct type *type, gdb::array_view<const gdb_byte> valaddr,
-   CORE_ADDR addr);
+   CORE_ADDR addr, const frame_info_ptr *frame = nullptr);
 
 /* * Predicate if the type has dynamic values, which are not resolved yet.
    See the caveat in 'resolve_dynamic_type' to understand a scenario
