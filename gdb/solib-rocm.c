@@ -425,7 +425,7 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
 	  if (errno != 0)
 	    {
 	      /* The actual message doesn't matter, the exception is caught
-	         below, transformed in a BFD error, and the message is lost.  */
+		 below, transformed in a BFD error, and the message is lost.  */
 	      error (_("Failed to parse integer."));
 	    }
 
