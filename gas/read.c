@@ -2201,22 +2201,32 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
 	as_warn (_("repeat < 0; .fill ignored"));
       size = 0;
     }
-
-  if (size && !need_pass_2)
+  else if (size && !need_pass_2)
     {
-      if (now_seg == absolute_section)
+      if (now_seg == absolute_section && rep_exp.X_op != O_constant)
 	{
-	  if (rep_exp.X_op != O_constant)
-	    as_bad (_("non-constant fill count for absolute section"));
-	  else if (fill && rep_exp.X_add_number != 0)
-	    as_bad (_("attempt to fill absolute section with non-zero value"));
-	  abs_section_offset += rep_exp.X_add_number * size;
+	  as_bad (_("non-constant fill count for absolute section"));
+	  size = 0;
+	}
+      else if (now_seg == absolute_section && fill && rep_exp.X_add_number != 0)
+	{
+	  as_bad (_("attempt to fill absolute section with non-zero value"));
+	  size = 0;
 	}
       else if (fill
 	       && (rep_exp.X_op != O_constant || rep_exp.X_add_number != 0)
 	       && in_bss ())
-	as_bad (_("attempt to fill section `%s' with non-zero value"),
-		segment_name (now_seg));
+	{
+	  as_bad (_("attempt to fill section `%s' with non-zero value"),
+		  segment_name (now_seg));
+	  size = 0;
+	}
+    }
+
+  if (size && !need_pass_2)
+    {
+      if (now_seg == absolute_section)
+	abs_section_offset += rep_exp.X_add_number * size;
 
       if (rep_exp.X_op == O_constant)
 	{
