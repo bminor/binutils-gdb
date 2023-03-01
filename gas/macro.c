@@ -1221,13 +1221,14 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
 
       if (macro_mri)
 	{
-	  char buffer[20];
-
-	  sb_reset (&t);
-	  sb_add_string (&t, macro_strip_at ? "$NARG" : "NARG");
-	  ptr = str_hash_find (m->formal_hash, sb_terminate (&t));
-	  sprintf (buffer, "%d", narg);
-	  sb_add_string (&ptr->actual, buffer);
+	  ptr = str_hash_find (m->formal_hash,
+			       macro_strip_at ? "$NARG" : "NARG");
+	  if (ptr)
+	    {
+	      char buffer[20];
+	      sprintf (buffer, "%d", narg);
+	      sb_add_string (&ptr->actual, buffer);
+	    }
 	}
 
       err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, m);
