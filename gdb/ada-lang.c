@@ -62,14 +62,6 @@
 #include "charset.h"
 #include "ax-gdb.h"
 
-/* Define whether or not the C operator '/' truncates towards zero for
-   differently signed operands (truncation direction is undefined in C).
-   Copied from valarith.c.  */
-
-#ifndef TRUNCATION_TOWARDS_ZERO
-#define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
-#endif
-
 static struct type *desc_base_type (struct type *);
 
 static struct type *desc_bounds_type (struct type *);
@@ -9356,9 +9348,7 @@ coerce_for_assign (struct type *type, struct value *val)
 static struct value *
 ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 {
-  struct value *val;
   struct type *type1, *type2;
-  LONGEST v, v1, v2;
 
   arg1 = coerce_ref (arg1);
   arg2 = coerce_ref (arg2);
@@ -9379,8 +9369,8 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       return value_binop (arg1, arg2, op);
     }
 
-  v2 = value_as_long (arg2);
-  if (v2 == 0)
+  gdb_mpz v2 = value_as_mpz (arg2);
+  if (v2.sgn () == 0)
     {
       const char *name;
       if (op == BINOP_MOD)
@@ -9399,13 +9389,12 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   if (type1->is_unsigned () || op == BINOP_MOD)
     return value_binop (arg1, arg2, op);
 
-  v1 = value_as_long (arg1);
+  gdb_mpz v1 = value_as_mpz (arg1);
+  gdb_mpz v;
   switch (op)
     {
     case BINOP_DIV:
       v = v1 / v2;
-      if (!TRUNCATION_TOWARDS_ZERO && v1 * (v1 % v2) < 0)
-	v += v > 0 ? -1 : 1;
       break;
     case BINOP_REM:
       v = v1 % v2;
@@ -9414,14 +9403,10 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       break;
     default:
       /* Should not reach this point.  */
-      v = 0;
+      gdb_assert_not_reached ("invalid operator");
     }
 
-  val = value::allocate (type1);
-  store_unsigned_integer (val->contents_raw ().data (),
-			  val->type ()->length (),
-			  type_byte_order (type1), v);
-  return val;
+  return value_from_mpz (type1, v);
 }
 
 static int
