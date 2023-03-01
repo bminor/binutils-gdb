@@ -137,7 +137,20 @@ struct gdb_mpz
 
      UNSIGNED_P indicates whether the number has an unsigned type.  */
   void write (gdb::array_view<gdb_byte> buf, enum bfd_endian byte_order,
-	      bool unsigned_p) const;
+	      bool unsigned_p) const
+  {
+    export_bits (buf, byte_order == BFD_ENDIAN_BIG ? 1 : -1 /* endian */,
+		 unsigned_p, true /* safe */);
+  }
+
+  /* Like write, but truncates the value to the desired number of
+     bytes.  */
+  void truncate (gdb::array_view<gdb_byte> buf, enum bfd_endian byte_order,
+		 bool unsigned_p) const
+  {
+    export_bits (buf, byte_order == BFD_ENDIAN_BIG ? 1 : -1 /* endian */,
+		 unsigned_p, false /* safe */);
+  }
 
   /* Return a string containing VAL.  */
   std::string str () const { return gmp_string_printf ("%Zd", m_val); }
@@ -337,10 +350,11 @@ private:
 	   . -1 for least significant byte first; or
 	   . 0 for native endianness.
 
-    An error is raised if BUF is not large enough to contain the value
-    being exported.  */
-  void safe_export (gdb::array_view<gdb_byte> buf,
-		    int endian, bool unsigned_p) const;
+    If SAFE is true, an error is raised if BUF is not large enough to
+    contain the value being exported.  If SAFE is false, the value is
+    truncated to fit in BUF.  */
+  void export_bits (gdb::array_view<gdb_byte> buf, int endian, bool unsigned_p,
+		    bool safe) const;
 
   friend struct gdb_mpq;
   friend struct gdb_mpf;
@@ -590,9 +604,10 @@ gdb_mpz::as_integer () const
 {
   T result;
 
-  this->safe_export ({(gdb_byte *) &result, sizeof (result)},
+  this->export_bits ({(gdb_byte *) &result, sizeof (result)},
 		     0 /* endian (0 = native) */,
-		     !std::is_signed<T>::value /* unsigned_p */);
+		     !std::is_signed<T>::value /* unsigned_p */,
+		     true /* safe */);
 
   return result;
 }
