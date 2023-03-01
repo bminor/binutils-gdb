@@ -6781,7 +6781,7 @@ linux_low_encode_raw (std::string *buffer, const gdb_byte *data,
       elem[0] = tohex ((*data >> 4) & 0xf);
       elem[1] = tohex (*data++ & 0xf);
 
-      buffer->append (elem);
+      buffer->append (elem, 2);
     }
 
   *buffer += "</raw>\n";
