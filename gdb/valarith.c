@@ -1102,7 +1102,7 @@ type_length_bits (type *type)
    false, or errors out.  Returns true if valid.  */
 
 static bool
-check_valid_shift_count (int op, type *result_type,
+check_valid_shift_count (enum exp_opcode op, type *result_type,
 			 type *shift_count_type, ULONGEST shift_count)
 {
   if (!shift_count_type->is_unsigned () && (LONGEST) shift_count < 0)
