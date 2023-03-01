@@ -9347,30 +9347,49 @@ gdb_caching_proc arm_cc_for_target {} {
 
 # Step until the pattern REGEXP is found.  Step at most
 # MAX_STEPS times, but stop stepping once REGEXP is found.
-#
+# CURRENT matches current location
 # If REGEXP is found then a single pass is emitted, otherwise, after
 # MAX_STEPS steps, a single fail is emitted.
 #
 # TEST_NAME is the name used in the pass/fail calls.
 
-proc gdb_step_until { regexp {test_name ""} {max_steps 10} } {
-    if { $test_name == "" } {
-	set test_name "stepping until regexp"
-    }
+proc gdb_step_until { regexp {test_name "stepping until regexp"} \
+			  {current "\}"} { max_steps 10 } } {
+    repeat_cmd_until "step" $current  $regexp  $test_name "10"
+}
+
+# Do repeated stepping COMMANDs in order to reach TARGET from CURRENT
+#
+#  COMMAND   is a stepping command
+#  CURRENT   is a string matching the current location
+#  TARGET    is a string matching the target location
+#  TEST_NAME is the test name
+#  MAX_STEPS is number of steps attempted before fail is emitted
+#
+# The function issues repeated COMMANDs as long as the location matches
+# CURRENT up to a maximum of MAX_STEPS.
+#
+# TEST_NAME passes if the resulting location matches TARGET and fails
+# otherwise.
+
+proc repeat_cmd_until { command current target \
+			    {test_name "stepping until regexp"} \
+			    {max_steps 100} } {
+    global gdb_prompt
 
     set count 0
-    gdb_test_multiple "step" "$test_name" {
-	-re "$regexp\r\n$::gdb_prompt $" {
-	    pass $test_name
-	}
-	-re ".*$::gdb_prompt $" {
-	    if {$count < $max_steps} {
-		incr count
-		send_gdb "step\n"
+    gdb_test_multiple "$command" "$test_name" {
+	-re "$current.*$gdb_prompt $" {
+	    incr count
+	    if { $count < $max_steps } {
+		send_gdb "$command\n"
 		exp_continue
 	    } else {
-		fail $test_name
+		fail "$test_name"
 	    }
+	}
+	-re "$target.*$gdb_prompt $" {
+	    pass "$test_name"
 	}
     }
 }
