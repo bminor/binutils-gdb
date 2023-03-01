@@ -81,7 +81,8 @@ gdb_mpz::safe_export (gdb::array_view<gdb_byte> buf,
 {
   gdb_assert (buf.size () > 0);
 
-  if (mpz_sgn (m_val) == 0)
+  int sign = mpz_sgn (m_val);
+  if (sign == 0)
     {
       /* Our value is zero, so no need to call mpz_export to do the work,
 	 especially since mpz_export's documentation explicitly says
@@ -121,17 +122,16 @@ gdb_mpz::safe_export (gdb::array_view<gdb_byte> buf,
 	   lo.str ().c_str (),
 	   hi.str ().c_str ());
 
-  gdb_mpz exported_val (m_val);
-
-  if (mpz_cmp_ui (exported_val.m_val, 0) < 0)
+  const gdb_mpz *exported_val = this;
+  gdb_mpz un_signed;
+  if (sign < 0)
     {
       /* mpz_export does not handle signed values, so create a positive
 	 value whose bit representation as an unsigned of the same length
 	 would be the same as our negative value.  */
-      gdb_mpz neg_offset;
-
-      mpz_ui_pow_ui (neg_offset.m_val, 2, buf.size () * HOST_CHAR_BIT);
-      mpz_add (exported_val.m_val, exported_val.m_val, neg_offset.m_val);
+      gdb_mpz neg_offset = gdb_mpz::pow (2, buf.size () * HOST_CHAR_BIT);
+      un_signed = *exported_val + neg_offset;
+      exported_val = &un_signed;
     }
 
   /* Do the export into a buffer allocated by GMP itself; that way,
@@ -147,7 +147,7 @@ gdb_mpz::safe_export (gdb::array_view<gdb_byte> buf,
   size_t word_countp;
   gdb::unique_xmalloc_ptr<void> exported
     (mpz_export (NULL, &word_countp, -1 /* order */, buf.size () /* size */,
-		 endian, 0 /* nails */, exported_val.m_val));
+		 endian, 0 /* nails */, exported_val->m_val));
 
   gdb_assert (word_countp == 1);
 
