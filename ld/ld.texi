@@ -85,7 +85,7 @@ section entitled ``GNU Free Documentation License''.
 @tex
 {\parskip=0pt
 \hfill Red Hat Inc\par
-\hfill nickc\@credhat.com, doc\@redhat.com\par
+\hfill nickc\@redhat.com, doc\@redhat.com\par
 \hfill {\it The GNU linker}\par
 \hfill Edited by Jeffrey Osier (jeffrey\@cygnus.com)\par
 }
