@@ -1745,8 +1745,7 @@ value_equal (struct value *arg1, struct value *arg2)
   is_int2 = is_integral_type (type2);
 
   if (is_int1 && is_int2)
-    return longest_to_int (value_as_long (value_binop (arg1, arg2,
-						       BINOP_EQUAL)));
+    return value_true (value_binop (arg1, arg2, BINOP_EQUAL));
   else if ((is_floating_value (arg1) || is_int1)
 	   && (is_floating_value (arg2) || is_int2))
     {
@@ -1833,8 +1832,7 @@ value_less (struct value *arg1, struct value *arg2)
 
   if ((is_int1 && is_int2)
       || (is_fixed_point_type (type1) && is_fixed_point_type (type2)))
-    return longest_to_int (value_as_long (value_binop (arg1, arg2,
-						       BINOP_LESS)));
+    return value_true (value_binop (arg1, arg2, BINOP_LESS));
   else if ((is_floating_value (arg1) || is_int1)
 	   && (is_floating_value (arg2) || is_int2))
     {
