@@ -4720,7 +4720,7 @@ remote_target::print_one_stopped_thread (thread_info *thread)
       enum gdb_signal sig = ws.sig ();
 
       if (signal_print_state (sig))
-	gdb::observers::signal_received.notify (sig);
+	notify_signal_received (sig);
     }
   gdb::observers::normal_stop.notify (NULL, 1);
 }

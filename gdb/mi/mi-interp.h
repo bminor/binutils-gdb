@@ -42,6 +42,8 @@ public:
 		    bool debug_redirect) override;
   void pre_command_loop () override;
 
+  void on_signal_received (gdb_signal sig) override;
+
   /* MI's output channels */
   mi_console_file *out;
   mi_console_file *err;

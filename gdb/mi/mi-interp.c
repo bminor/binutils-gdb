@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_on_signal_received (enum gdb_signal siggnal);
 static void mi_on_signal_exited (enum gdb_signal siggnal);
 static void mi_on_exited (int exitstatus);
 static void mi_on_normal_stop (struct bpstat *bs, int print_frame);
@@ -525,21 +524,11 @@ find_mi_interp (void)
    inferior has stopped to both the MI event channel and to the MI
    console.  If the MI interpreter is not active, print nothing.  */
 
-/* Observer for the signal_received notification.  */
-
-static void
-mi_on_signal_received (enum gdb_signal siggnal)
+void
+mi_interp::on_signal_received (enum gdb_signal siggnal)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = find_mi_interp ();
-
-      if (mi == NULL)
-	continue;
-
-      print_signal_received_reason (mi->mi_uiout, siggnal);
-      print_signal_received_reason (mi->cli_uiout, siggnal);
-    }
+  print_signal_received_reason (this->mi_uiout, siggnal);
+  print_signal_received_reason (this->cli_uiout, siggnal);
 }
 
 /* Observer for the signal_exited notification.  */
@@ -1304,7 +1293,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::signal_received.attach (mi_on_signal_received, "mi-interp");
   gdb::observers::signal_exited.attach (mi_on_signal_exited, "mi-interp");
   gdb::observers::exited.attach (mi_on_exited, "mi-interp");
   gdb::observers::no_history.attach (mi_on_no_history, "mi-interp");

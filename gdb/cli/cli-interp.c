@@ -137,19 +137,10 @@ cli_base_on_normal_stop (struct bpstat *bs, int print_frame)
     }
 }
 
-/* Observer for the signal_received notification.  */
-
-static void
-cli_base_on_signal_received (enum gdb_signal siggnal)
+void
+cli_interp_base::on_signal_received (enum gdb_signal siggnal)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      cli_interp_base *cli = as_cli_interp_base (top_level_interpreter ());
-      if (cli == nullptr)
-	continue;
-
-      print_signal_received_reason (cli->interp_ui_out (), siggnal);
-    }
+  print_signal_received_reason (this->interp_ui_out (), siggnal);
 }
 
 /* Observer for the signalled notification.  */
@@ -408,8 +399,6 @@ _initialize_cli_interp ()
   /* Note these all work for both the CLI and TUI interpreters.  */
   gdb::observers::normal_stop.attach (cli_base_on_normal_stop,
 				      "cli-interp-base");
-  gdb::observers::signal_received.attach (cli_base_on_signal_received,
-					  "cli-interp-base");
   gdb::observers::signal_exited.attach (cli_base_on_signal_exited,
 					"cli-interp-base");
   gdb::observers::exited.attach (cli_base_on_exited, "cli-interp-base");

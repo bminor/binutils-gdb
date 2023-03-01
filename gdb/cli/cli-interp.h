@@ -33,6 +33,8 @@ public:
   void pre_command_loop () override;
   bool supports_command_editing () override;
 
+  void on_signal_received (gdb_signal sig) override;
+
 private:
   struct saved_output_files
   {

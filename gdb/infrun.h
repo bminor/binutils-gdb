@@ -210,6 +210,10 @@ extern void set_step_info (thread_info *tp,
 			   frame_info_ptr frame,
 			   struct symtab_and_line sal);
 
+/* Notify interpreters and observers that the current inferior has stopped with
+   signal SIG.  */
+extern void notify_signal_received (gdb_signal sig);
+
 /* Several print_*_reason helper functions to print why the inferior
    has stopped to the passed in UIOUT.  */
 

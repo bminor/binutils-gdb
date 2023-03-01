@@ -82,6 +82,10 @@ public:
   const char *name () const
   { return m_name; }
 
+  /* Notify the interpreter that the current inferior has stopped with signal
+     SIG.  */
+  virtual void on_signal_received (gdb_signal sig) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -169,6 +173,10 @@ extern void interpreter_completer (struct cmd_list_element *ignore,
 				   completion_tracker &tracker,
 				   const char *text,
 				   const char *word);
+
+/* Notify all interpreters that the current inferior has stopped with signal
+   SIG.  */
+extern void interps_notify_signal_received (gdb_signal sig);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

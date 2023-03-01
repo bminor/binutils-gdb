@@ -76,6 +76,7 @@
 #include "gdbsupport/buildargv.h"
 #include "extension.h"
 #include "disasm.h"
+#include "interps.h"
 
 /* Prototypes for local functions */
 
@@ -6264,6 +6265,15 @@ finish_step_over (struct execution_control_state *ecs)
   return 0;
 }
 
+/* See infrun.h.  */
+
+void
+notify_signal_received (gdb_signal sig)
+{
+  interps_notify_signal_received (sig);
+  gdb::observers::signal_received.notify (sig);
+}
+
 /* Come here when the program has stopped with a signal.  */
 
 static void
@@ -6687,7 +6697,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	{
 	  /* The signal table tells us to print about this signal.  */
 	  target_terminal::ours_for_output ();
-	  gdb::observers::signal_received.notify (ecs->event_thread->stop_signal ());
+	  notify_signal_received (ecs->event_thread->stop_signal ());
 	  target_terminal::inferior ();
 	}
 
@@ -8829,7 +8839,7 @@ normal_stop ()
   update_thread_list ();
 
   if (last.kind () == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
-    gdb::observers::signal_received.notify (inferior_thread ()->stop_signal ());
+    notify_signal_received (inferior_thread ()->stop_signal ());
 
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until

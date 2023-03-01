@@ -383,6 +383,29 @@ current_interpreter (void)
   return current_ui->current_interpreter;
 }
 
+/* Helper interps_notify_* functions.  Call METHOD on the top-level interpreter
+   of all UIs.  */
+
+template <typename ...Args>
+void
+interps_notify (void (interp::*method) (Args...), Args... args)
+{
+  SWITCH_THRU_ALL_UIS ()
+    {
+      interp *tli = top_level_interpreter ();
+      if (tli != nullptr)
+	(tli->*method) (args...);
+    }
+}
+
+/* See interps.h.  */
+
+void
+interps_notify_signal_received (gdb_signal sig)
+{
+  interps_notify (&interp::on_signal_received, sig);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void
