@@ -3029,6 +3029,7 @@ do_repeat (size_t count, const char *start, const char *end,
   if (!buffer_and_nest (start, end, &one, get_non_macro_line_sb))
     {
       as_bad (_("%s without %s"), start, end);
+      sb_kill (&one);
       return;
     }
 
