@@ -980,14 +980,15 @@ value_one (struct type *type)
    e.g. in case the type is a variable length array.  */
 
 static struct value *
-get_value_at (struct type *type, CORE_ADDR addr, int lazy)
+get_value_at (struct type *type, CORE_ADDR addr, frame_info_ptr frame,
+	      int lazy)
 {
   struct value *val;
 
   if (check_typedef (type)->code () == TYPE_CODE_VOID)
     error (_("Attempt to dereference a generic pointer."));
 
-  val = value_from_contents_and_address (type, NULL, addr);
+  val = value_from_contents_and_address (type, NULL, addr, frame);
 
   if (!lazy)
     val->fetch_lazy ();
@@ -1013,7 +1014,7 @@ get_value_at (struct type *type, CORE_ADDR addr, int lazy)
 struct value *
 value_at (struct type *type, CORE_ADDR addr)
 {
-  return get_value_at (type, addr, 0);
+  return get_value_at (type, addr, nullptr, 0);
 }
 
 /* See value.h.  */
@@ -1032,9 +1033,9 @@ value_at_non_lval (struct type *type, CORE_ADDR addr)
    e.g. in case the type is a variable length array.  */
 
 struct value *
-value_at_lazy (struct type *type, CORE_ADDR addr)
+value_at_lazy (struct type *type, CORE_ADDR addr, frame_info_ptr frame)
 {
-  return get_value_at (type, addr, 1);
+  return get_value_at (type, addr, frame, 1);
 }
 
 void

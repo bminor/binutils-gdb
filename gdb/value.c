@@ -3543,12 +3543,14 @@ value_from_contents_and_address_unresolved (struct type *type,
 struct value *
 value_from_contents_and_address (struct type *type,
 				 const gdb_byte *valaddr,
-				 CORE_ADDR address)
+				 CORE_ADDR address,
+				 frame_info_ptr frame)
 {
   gdb::array_view<const gdb_byte> view;
   if (valaddr != nullptr)
     view = gdb::make_array_view (valaddr, type->length ());
-  struct type *resolved_type = resolve_dynamic_type (type, view, address);
+  struct type *resolved_type = resolve_dynamic_type (type, view, address,
+						     &frame);
   struct type *resolved_type_no_typedef = check_typedef (resolved_type);
   struct value *v;
 
