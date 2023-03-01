@@ -101,6 +101,25 @@ with_test_prefix "prepare record" {
 	return
     }
 
+    # Also handle the case that we're running into the hw bug without
+    # triggering a decode error.
+    gdb_test_multiple "python print(len(insn))" "" {
+	-re -wrap "100" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "" {
+	    if { $have_xfail } {
+		xfail $gdb_test_name
+		set got_xfail 1
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
+    }
+    if { $got_xfail } {
+	return
+    }
+
     gdb_test_no_output "python call = r.function_call_history"
     gdb_test_no_output "python i = insn\[0\]"
     gdb_test_no_output "python c = call\[0\]"
@@ -138,7 +157,6 @@ with_test_prefix "function call" {
 }
 
 with_test_prefix "list" {
-    gdb_test "python print(len(insn))" "100"
     gdb_test "python print(len(insn\[23:65\]))" "42"
     gdb_test "python print(insn\[17:\]\[2\].number)" "20"
     gdb_test "python print(i in insn)" "True"
