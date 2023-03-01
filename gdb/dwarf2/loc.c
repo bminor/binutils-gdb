@@ -1649,8 +1649,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
     {
     case PROP_LOCEXPR:
       {
-	const struct dwarf2_property_baton *baton
-	  = (const struct dwarf2_property_baton *) prop->baton ();
+	const struct dwarf2_property_baton *baton = prop->baton ();
 	gdb_assert (baton->property_type != NULL);
 
 	bool is_reference = baton->locexpr.is_reference;
@@ -1692,8 +1691,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
     case PROP_LOCLIST:
       {
-	struct dwarf2_property_baton *baton
-	  = (struct dwarf2_property_baton *) prop->baton ();
+	struct dwarf2_property_baton *baton = prop->baton ();
 	CORE_ADDR pc;
 	const gdb_byte *data;
 	struct value *val;
@@ -1724,8 +1722,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
     case PROP_ADDR_OFFSET:
       {
-	struct dwarf2_property_baton *baton
-	  = (struct dwarf2_property_baton *) prop->baton ();
+	struct dwarf2_property_baton *baton = prop->baton ();
 	const struct property_addr_info *pinfo;
 	struct value *val;
 
@@ -1775,8 +1772,7 @@ dwarf2_compile_property_to_c (string_file *stream,
 			      CORE_ADDR pc,
 			      struct symbol *sym)
 {
-  struct dwarf2_property_baton *baton
-    = (struct dwarf2_property_baton *) prop->baton ();
+  struct dwarf2_property_baton *baton = prop->baton ();
   const gdb_byte *data;
   size_t size;
   dwarf2_per_cu_data *per_cu;

@@ -64,6 +64,7 @@ struct value_print_options;
 struct language_defn;
 struct dwarf2_per_cu_data;
 struct dwarf2_per_objfile;
+struct dwarf2_property_baton;
 
 /* Some macros for char-based bitfields.  */
 
@@ -289,7 +290,7 @@ union dynamic_prop_data
 
   /* Storage for dynamic property.  */
 
-  void *baton;
+  dwarf2_property_baton *baton;
 
   /* Storage of variant parts for a type.  A type with variant parts
      has all its fields "linearized" -- stored in a single field
@@ -339,7 +340,7 @@ struct dynamic_prop
     m_data.const_val = const_val;
   }
 
-  void *baton () const
+  dwarf2_property_baton *baton () const
   {
     gdb_assert (m_kind == PROP_LOCEXPR
 		|| m_kind == PROP_LOCLIST
@@ -348,19 +349,19 @@ struct dynamic_prop
     return m_data.baton;
   }
 
-  void set_locexpr (void *baton)
+  void set_locexpr (dwarf2_property_baton *baton)
   {
     m_kind = PROP_LOCEXPR;
     m_data.baton = baton;
   }
 
-  void set_loclist (void *baton)
+  void set_loclist (dwarf2_property_baton *baton)
   {
     m_kind = PROP_LOCLIST;
     m_data.baton = baton;
   }
 
-  void set_addr_offset (void *baton)
+  void set_addr_offset (dwarf2_property_baton *baton)
   {
     m_kind = PROP_ADDR_OFFSET;
     m_data.baton = baton;
