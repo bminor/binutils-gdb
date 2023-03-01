@@ -3328,27 +3328,37 @@ s_space (int mult)
 
       if (exp.X_op == O_constant)
 	{
-	  offsetT repeat;
+	  addressT repeat = exp.X_add_number;
+	  addressT total;
 
-	  repeat = exp.X_add_number;
-	  if (mult)
-	    repeat *= mult;
-	  bytes = repeat;
-	  if (repeat <= 0)
+	  bytes = 0;
+	  if ((offsetT) repeat < 0)
+	    {
+	      as_warn (_(".space repeat count is negative, ignored"));
+	      goto getout;
+	    }
+	  if (repeat == 0)
 	    {
 	      if (!flag_mri)
 		as_warn (_(".space repeat count is zero, ignored"));
-	      else if (repeat < 0)
-		as_warn (_(".space repeat count is negative, ignored"));
 	      goto getout;
 	    }
+	  if ((unsigned int) mult <= 1)
+	    total = repeat;
+	  else if (gas_mul_overflow (repeat, mult, &total)
+		   || (offsetT) total < 0)
+	    {
+	      as_warn (_(".space repeat count overflow, ignored"));
+	      goto getout;
+	    }
+	  bytes = total;
 
 	  /* If we are in the absolute section, just bump the offset.  */
 	  if (now_seg == absolute_section)
 	    {
 	      if (val.X_op != O_constant || val.X_add_number != 0)
 		as_warn (_("ignoring fill value in absolute section"));
-	      abs_section_offset += repeat;
+	      abs_section_offset += total;
 	      goto getout;
 	    }
 
@@ -3358,13 +3368,13 @@ s_space (int mult)
 	  if (mri_common_symbol != NULL)
 	    {
 	      S_SET_VALUE (mri_common_symbol,
-			   S_GET_VALUE (mri_common_symbol) + repeat);
+			   S_GET_VALUE (mri_common_symbol) + total);
 	      goto getout;
 	    }
 
 	  if (!need_pass_2)
 	    p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
-			  (offsetT) repeat, (char *) 0);
+			  (offsetT) total, (char *) 0);
 	}
       else
 	{
