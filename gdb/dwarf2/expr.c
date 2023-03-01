@@ -1005,8 +1005,8 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	      }
 	    address = value_as_address (value_from_pointer (ptr_type, address));
 
-	    retval = value_at_lazy (subobj_type,
-				    address + subobj_offset);
+	    retval = value_at_lazy (subobj_type, address + subobj_offset,
+				    m_frame);
 	    if (in_stack_memory)
 	      retval->set_stack (true);
 	  }
