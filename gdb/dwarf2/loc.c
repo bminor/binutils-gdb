@@ -347,7 +347,7 @@ decode_debug_loc_dwo_addresses (dwarf2_per_cu_data *per_cu,
    can be more than one in the list.  */
 
 const gdb_byte *
-dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
+dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
 				 size_t *locexpr_length, CORE_ADDR pc)
 {
   dwarf2_per_objfile *per_objfile = baton->per_objfile;
@@ -1691,7 +1691,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
     case PROP_LOCLIST:
       {
-	struct dwarf2_property_baton *baton = prop->baton ();
+	const dwarf2_property_baton *baton = prop->baton ();
 	CORE_ADDR pc;
 	const gdb_byte *data;
 	struct value *val;
@@ -1722,7 +1722,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
     case PROP_ADDR_OFFSET:
       {
-	struct dwarf2_property_baton *baton = prop->baton ();
+	const dwarf2_property_baton *baton = prop->baton ();
 	const struct property_addr_info *pinfo;
 	struct value *val;
 
@@ -1772,7 +1772,7 @@ dwarf2_compile_property_to_c (string_file *stream,
 			      CORE_ADDR pc,
 			      struct symbol *sym)
 {
-  struct dwarf2_property_baton *baton = prop->baton ();
+  const dwarf2_property_baton *baton = prop->baton ();
   const gdb_byte *data;
   size_t size;
   dwarf2_per_cu_data *per_cu;

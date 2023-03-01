@@ -37,7 +37,7 @@ extern unsigned int entry_values_debug;
 
 /* Find a particular location expression from a location list.  */
 const gdb_byte *dwarf2_find_location_expression
-  (struct dwarf2_loclist_baton *baton,
+  (const dwarf2_loclist_baton *baton,
    size_t *locexpr_length,
    CORE_ADDR pc);
 

@@ -290,7 +290,7 @@ union dynamic_prop_data
 
   /* Storage for dynamic property.  */
 
-  dwarf2_property_baton *baton;
+  const dwarf2_property_baton *baton;
 
   /* Storage of variant parts for a type.  A type with variant parts
      has all its fields "linearized" -- stored in a single field
@@ -340,7 +340,7 @@ struct dynamic_prop
     m_data.const_val = const_val;
   }
 
-  dwarf2_property_baton *baton () const
+  const dwarf2_property_baton *baton () const
   {
     gdb_assert (m_kind == PROP_LOCEXPR
 		|| m_kind == PROP_LOCLIST
@@ -349,19 +349,19 @@ struct dynamic_prop
     return m_data.baton;
   }
 
-  void set_locexpr (dwarf2_property_baton *baton)
+  void set_locexpr (const dwarf2_property_baton *baton)
   {
     m_kind = PROP_LOCEXPR;
     m_data.baton = baton;
   }
 
-  void set_loclist (dwarf2_property_baton *baton)
+  void set_loclist (const dwarf2_property_baton *baton)
   {
     m_kind = PROP_LOCLIST;
     m_data.baton = baton;
   }
 
-  void set_addr_offset (dwarf2_property_baton *baton)
+  void set_addr_offset (const dwarf2_property_baton *baton)
   {
     m_kind = PROP_ADDR_OFFSET;
     m_data.baton = baton;
