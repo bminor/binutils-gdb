@@ -1331,14 +1331,6 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      v = v1 ^ v2;
 	      break;
 
-	    case BINOP_LOGICAL_AND:
-	      v = v1 && v2;
-	      break;
-
-	    case BINOP_LOGICAL_OR:
-	      v = v1 || v2;
-	      break;
-
 	    case BINOP_MIN:
 	      v = v1 < v2 ? v1 : v2;
 	      break;
@@ -1490,14 +1482,6 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
 	    case BINOP_BITWISE_XOR:
 	      v = v1 ^ v2;
-	      break;
-
-	    case BINOP_LOGICAL_AND:
-	      v = v1 && v2;
-	      break;
-
-	    case BINOP_LOGICAL_OR:
-	      v = v1 || v2;
 	      break;
 
 	    case BINOP_MIN:
