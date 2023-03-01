@@ -1206,10 +1206,15 @@ extern struct value *value_ref (struct value *arg1, enum type_code refcode);
 extern struct value *value_assign (struct value *toval,
 				   struct value *fromval);
 
+/* The unary + operation.  */
 extern struct value *value_pos (struct value *arg1);
 
+/* The unary - operation.  */
 extern struct value *value_neg (struct value *arg1);
 
+/* The unary ~ operation -- but note that it also implements the GCC
+   extension, where ~ of a complex number is the complex
+   conjugate.  */
 extern struct value *value_complement (struct value *arg1);
 
 extern struct value *value_struct_elt (struct value **argp,
