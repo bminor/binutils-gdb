@@ -6274,6 +6274,15 @@ notify_signal_received (gdb_signal sig)
   gdb::observers::signal_received.notify (sig);
 }
 
+/* See infrun.h.  */
+
+void
+notify_normal_stop (bpstat *bs, int print_frame)
+{
+  interps_notify_normal_stop (bs, print_frame);
+  gdb::observers::normal_stop.notify (bs, print_frame);
+}
+
 /* Come here when the program has stopped with a signal.  */
 
 static void
@@ -8956,12 +8965,10 @@ normal_stop ()
 
   /* Notify observers about the stop.  This is where the interpreters
      print the stop event.  */
-  if (inferior_ptid != null_ptid)
-    gdb::observers::normal_stop.notify (inferior_thread ()->control.stop_bpstat,
-					stop_print_frame);
-  else
-    gdb::observers::normal_stop.notify (nullptr, stop_print_frame);
-
+  notify_normal_stop ((inferior_ptid != null_ptid
+		       ? inferior_thread ()->control.stop_bpstat
+		       : nullptr),
+		      stop_print_frame);
   annotate_stopped ();
 
   if (target_has_execution ())

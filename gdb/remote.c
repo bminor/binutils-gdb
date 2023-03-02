@@ -4722,7 +4722,8 @@ remote_target::print_one_stopped_thread (thread_info *thread)
       if (signal_print_state (sig))
 	notify_signal_received (sig);
     }
-  gdb::observers::normal_stop.notify (NULL, 1);
+
+  notify_normal_stop (nullptr, 1);
 }
 
 /* Process all initial stop replies the remote side sent in response

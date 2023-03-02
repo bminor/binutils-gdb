@@ -112,10 +112,8 @@ should_print_stop_to_console (struct interp *console_interp,
    interpreter-exec), print nothing.  These are named "cli_base" as
    they print to both CLI interpreters and TUI interpreters.  */
 
-/* Observer for the normal_stop notification.  */
-
-static void
-cli_base_on_normal_stop (struct bpstat *bs, int print_frame)
+void
+cli_interp_base::on_normal_stop (struct bpstat *bs, int print_frame)
 {
   if (!print_frame)
     return;
@@ -124,17 +122,10 @@ cli_base_on_normal_stop (struct bpstat *bs, int print_frame)
   if (cli_suppress_notification.normal_stop)
     return;
 
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct interp *interp = top_level_interpreter ();
-      cli_interp_base *cli = as_cli_interp_base (interp);
-      if (cli == nullptr)
-	continue;
+  thread_info *thread = inferior_thread ();
+  if (should_print_stop_to_console (this, thread))
+    print_stop_event (this->interp_ui_out ());
 
-      thread_info *thread = inferior_thread ();
-      if (should_print_stop_to_console (interp, thread))
-	print_stop_event (cli->interp_ui_out ());
-    }
 }
 
 void
@@ -397,8 +388,6 @@ _initialize_cli_interp ()
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 
   /* Note these all work for both the CLI and TUI interpreters.  */
-  gdb::observers::normal_stop.attach (cli_base_on_normal_stop,
-				      "cli-interp-base");
   gdb::observers::signal_exited.attach (cli_base_on_signal_exited,
 					"cli-interp-base");
   gdb::observers::exited.attach (cli_base_on_exited, "cli-interp-base");

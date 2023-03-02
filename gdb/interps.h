@@ -24,6 +24,7 @@
 
 #include "gdbsupport/intrusive_list.h"
 
+struct bpstat;
 struct ui_out;
 struct interp;
 struct ui;
@@ -85,6 +86,9 @@ public:
   /* Notify the interpreter that the current inferior has stopped with signal
      SIG.  */
   virtual void on_signal_received (gdb_signal sig) {}
+
+  /* Notify the interpreter that the current inferior has stopped normally.  */
+  virtual void on_normal_stop (bpstat *bs, int print_frame) {}
 
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
@@ -177,6 +181,9 @@ extern void interpreter_completer (struct cmd_list_element *ignore,
 /* Notify all interpreters that the current inferior has stopped with signal
    SIG.  */
 extern void interps_notify_signal_received (gdb_signal sig);
+
+/* Notify all interpreters that the current inferior has stopped normally.  */
+extern void interps_notify_normal_stop (bpstat *bs, int print_frame);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

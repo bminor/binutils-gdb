@@ -62,7 +62,6 @@ static void mi_remove_notify_hooks (void);
 
 static void mi_on_signal_exited (enum gdb_signal siggnal);
 static void mi_on_exited (int exitstatus);
-static void mi_on_normal_stop (struct bpstat *bs, int print_frame);
 static void mi_on_no_history (void);
 
 static void mi_new_thread (struct thread_info *t);
@@ -582,33 +581,28 @@ mi_on_no_history (void)
     }
 }
 
-static void
-mi_on_normal_stop_1 (struct bpstat *bs, int print_frame)
+void
+mi_interp::on_normal_stop (struct bpstat *bs, int print_frame)
 {
   /* Since this can be called when CLI command is executing,
      using cli interpreter, be sure to use MI uiout for output,
      not the current one.  */
-  struct ui_out *mi_uiout = top_level_interpreter ()->interp_ui_out ();
-  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
+  ui_out *mi_uiout = this->interp_ui_out ();
 
   if (print_frame)
     {
-      struct thread_info *tp;
-      int core;
-      struct interp *console_interp;
-
-      tp = inferior_thread ();
+      thread_info *tp = inferior_thread ();
 
       if (tp->thread_fsm () != nullptr
 	  && tp->thread_fsm ()->finished_p ())
 	{
-	  enum async_reply_reason reason;
-
-	  reason = tp->thread_fsm ()->async_reply_reason ();
+	  async_reply_reason reason
+	    = tp->thread_fsm ()->async_reply_reason ();
 	  mi_uiout->field_string ("reason", async_reason_lookup (reason));
 	}
 
-      console_interp = interp_lookup (current_ui, INTERP_CONSOLE);
+      interp *console_interp = interp_lookup (current_ui, INTERP_CONSOLE);
+
       /* We only want to print the displays once, and we want it to
 	 look just how it would on the console, so we use this to
 	 decide whether the MI stop should include them.  */
@@ -616,7 +610,7 @@ mi_on_normal_stop_1 (struct bpstat *bs, int print_frame)
       print_stop_event (mi_uiout, !console_print);
 
       if (console_print)
-	print_stop_event (mi->cli_uiout);
+	print_stop_event (this->cli_uiout);
 
       mi_uiout->field_signed ("thread-id", tp->global_num);
       if (non_stop)
@@ -628,29 +622,17 @@ mi_on_normal_stop_1 (struct bpstat *bs, int print_frame)
       else
 	mi_uiout->field_string ("stopped-threads", "all");
 
-      core = target_core_of_thread (tp->ptid);
+      int core = target_core_of_thread (tp->ptid);
       if (core != -1)
 	mi_uiout->field_signed ("core", core);
     }
-  
-  gdb_puts ("*stopped", mi->raw_stdout);
-  mi_out_put (mi_uiout, mi->raw_stdout);
+
+  gdb_puts ("*stopped", this->raw_stdout);
+  mi_out_put (mi_uiout, this->raw_stdout);
   mi_out_rewind (mi_uiout);
-  mi_print_timing_maybe (mi->raw_stdout);
-  gdb_puts ("\n", mi->raw_stdout);
-  gdb_flush (mi->raw_stdout);
-}
-
-static void
-mi_on_normal_stop (struct bpstat *bs, int print_frame)
-{
-  SWITCH_THRU_ALL_UIS ()
-    {
-      if (as_mi_interp (top_level_interpreter ()) == NULL)
-	continue;
-
-      mi_on_normal_stop_1 (bs, print_frame);
-    }
+  mi_print_timing_maybe (this->raw_stdout);
+  gdb_puts ("\n", this->raw_stdout);
+  gdb_flush (this->raw_stdout);
 }
 
 static void
@@ -1303,7 +1285,6 @@ _initialize_mi_interp ()
   gdb::observers::inferior_exit.attach (mi_inferior_exit, "mi-interp");
   gdb::observers::inferior_removed.attach (mi_inferior_removed, "mi-interp");
   gdb::observers::record_changed.attach (mi_record_changed, "mi-interp");
-  gdb::observers::normal_stop.attach (mi_on_normal_stop, "mi-interp");
   gdb::observers::target_resumed.attach (mi_on_resume, "mi-interp");
   gdb::observers::solib_loaded.attach (mi_solib_loaded, "mi-interp");
   gdb::observers::solib_unloaded.attach (mi_solib_unloaded, "mi-interp");

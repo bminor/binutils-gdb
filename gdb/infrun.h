@@ -214,6 +214,10 @@ extern void set_step_info (thread_info *tp,
    signal SIG.  */
 extern void notify_signal_received (gdb_signal sig);
 
+/* Notify interpreters and observers that the current inferior has stopped
+   normally.  */
+extern void notify_normal_stop (bpstat *bs, int print_frame);
+
 /* Several print_*_reason helper functions to print why the inferior
    has stopped to the passed in UIOUT.  */
 
