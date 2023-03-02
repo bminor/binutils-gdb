@@ -905,6 +905,48 @@ enum domain_enum
 
 extern const char *domain_name (domain_enum);
 
+/* Flags used for searching symbol tables.  These can be combined to
+   let the search match multiple kinds of symbol.  */
+enum domain_search_flag
+{
+#define DOMAIN(X) \
+  SEARCH_ ## X ## _DOMAIN = (1 << X ## _DOMAIN),
+#include "sym-domains.def"
+#undef DOMAIN
+};
+DEF_ENUM_FLAGS_TYPE (enum domain_search_flag, domain_search_flags);
+
+/* A convenience constant to search for any symbol.  */
+constexpr domain_search_flags SEARCH_ALL
+    = ((domain_search_flags) 0
+#define DOMAIN(X) | SEARCH_ ## X ## _DOMAIN
+#include "sym-domains.def"
+#undef DOMAIN
+       );
+
+/* A convenience define for "C-like" name lookups, matching variables,
+   types, and functions.  */
+#define SEARCH_VFT \
+  (SEARCH_VAR_DOMAIN | SEARCH_FUNCTION_DOMAIN | SEARCH_TYPE_DOMAIN)
+
+/* Return a string representing the given flags.  */
+extern std::string domain_name (domain_search_flags);
+
+/* Convert a symbol domain to search flags.  */
+static inline domain_search_flags 
+to_search_flags (domain_enum domain)
+{
+  return domain_search_flags (domain_search_flag (1 << domain));
+}
+
+/* Return true if the given domain matches the given flags, false
+   otherwise.  */
+static inline bool
+search_flags_matches (domain_search_flags flags, domain_enum domain)
+{
+  return (flags & to_search_flags (domain)) != 0;
+}
+
 /* Searching domains, used when searching for symbols.  Element numbers are
    hardcoded in GDB, check all enum uses before changing it.  */
 
@@ -1264,6 +1306,9 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   {
     return symbol_matches_domain (language (), domain (), d);
   }
+
+  /* Return true if this symbol's domain matches FLAGS.  */
+  bool matches (domain_search_flags flags) const;
 
   domain_enum domain () const
   {

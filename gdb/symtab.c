@@ -331,6 +331,21 @@ search_domain_name (enum search_domain e)
 
 /* See symtab.h.  */
 
+std::string
+domain_name (domain_search_flags flags)
+{
+  static constexpr domain_search_flags::string_mapping mapping[] = {
+#define DOMAIN(X) \
+    MAP_ENUM_FLAG (SEARCH_ ## X ## _DOMAIN),
+#include "sym-domains.def"
+#undef DOMAIN
+  };
+
+  return flags.to_string (mapping);
+}
+
+/* See symtab.h.  */
+
 CORE_ADDR
 linetable_entry::pc (const struct objfile *objfile) const
 {
@@ -2662,6 +2677,41 @@ symbol_matches_domain (enum language symbol_language,
     }
   /* For all other languages, strict match is required.  */
   return (symbol_domain == domain);
+}
+
+/* See symtab.h.  */
+
+bool
+symbol::matches (domain_search_flags flags) const
+{
+  if (language () != language_c
+      && language () != language_objc
+      && language () != language_opencl)
+    {
+      /* Only C languages distinguish tag and type namespaces.  */
+      if ((flags & SEARCH_TYPE_DOMAIN) != 0)
+	flags |= SEARCH_STRUCT_DOMAIN;
+    }
+
+  if ((flags & SEARCH_FUNCTION_DOMAIN) != 0
+      && domain () == VAR_DOMAIN
+      && aclass () == LOC_BLOCK)
+    return true;
+
+  if ((flags & SEARCH_VAR_DOMAIN) != 0
+      && domain () == VAR_DOMAIN)
+    return true;
+
+  if ((flags & SEARCH_TYPE_DOMAIN) != 0
+      && domain () == VAR_DOMAIN
+      && aclass () == LOC_TYPEDEF)
+    return true;
+
+  if ((flags & SEARCH_STRUCT_DOMAIN) != 0
+      && domain () == STRUCT_DOMAIN)
+    return true;
+
+  return search_flags_matches (flags, m_domain);
 }
 
 /* See symtab.h.  */
