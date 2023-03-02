@@ -87,7 +87,7 @@ private:
 public:
   /* Interpreters are stored in a linked list, this is the next
      one...  */
-  struct interp *next;
+  interp *next = nullptr;
 
   /* Has the init method been run?  */
   bool inited = false;
