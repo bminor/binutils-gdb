@@ -922,15 +922,11 @@ enum domain_enum
   /* Fortran common blocks.  Their naming must be separate from VAR_DOMAIN.
      They also always use LOC_COMMON_BLOCK.  */
   COMMON_BLOCK_DOMAIN,
-
-  /* This must remain last.  */
-  NR_DOMAINS
 };
 
 /* The number of bits in a symbol used to represent the domain.  */
 
 #define SYMBOL_DOMAIN_BITS 3
-static_assert (NR_DOMAINS <= (1 << SYMBOL_DOMAIN_BITS));
 
 extern const char *domain_name (domain_enum);
 
