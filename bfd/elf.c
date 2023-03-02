@@ -5402,22 +5402,6 @@ print_segment_map (const struct elf_segment_map *m)
   fflush (stderr);
 }
 
-static bool
-write_zeros (bfd *abfd, file_ptr pos, bfd_size_type len)
-{
-  void *buf;
-  bool ret;
-
-  if (bfd_seek (abfd, pos, SEEK_SET) != 0)
-    return false;
-  buf = bfd_zmalloc (len);
-  if (buf == NULL)
-    return false;
-  ret = bfd_bwrite (buf, len, abfd) == len;
-  free (buf);
-  return ret;
-}
-
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
    the file header.  */
@@ -5866,11 +5850,13 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		      if (p->p_filesz + adjust < p->p_memsz)
 			{
 			  /* We have a PROGBITS section following NOBITS ones.
-			     Allocate file space for the NOBITS section(s) and
-			     zero it.  */
+			     Allocate file space for the NOBITS section(s).
+			     We don't need to write out the zeros, posix
+			     fseek past the end of data already written
+			     followed by a write at that location is
+			     guaranteed to result in zeros being read
+			     from the gap.  */
 			  adjust = p->p_memsz - p->p_filesz;
-			  if (!write_zeros (abfd, off, adjust))
-			    return false;
 			}
 		    }
 		  /* We only adjust sh_offset in SHT_NOBITS sections
