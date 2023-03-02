@@ -45,3 +45,12 @@ DOMAIN (LABEL)
 /* Fortran common blocks.  Their naming must be separate from VAR_DOMAIN.
    They also always use LOC_COMMON_BLOCK.  */
 DOMAIN (COMMON_BLOCK)
+
+/* TYPE_DOMAIN is for types and typedefs.  Note that tags are not
+   found here, see STRUCT_DOMAIN above.  */
+
+DOMAIN (TYPE)
+
+/* FUNCTION_DOMAIN is for functions and methods.  */
+
+DOMAIN (FUNCTION)
