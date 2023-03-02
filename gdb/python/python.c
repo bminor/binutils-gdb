@@ -736,7 +736,7 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
       minsyms_p = cmp;
     }
 
-  global_symbol_searcher spec (FUNCTIONS_DOMAIN, regex);
+  global_symbol_searcher spec (SEARCH_FUNCTION_DOMAIN, regex);
   SCOPE_EXIT {
     for (const char *elem : spec.filenames)
       xfree ((void *) elem);

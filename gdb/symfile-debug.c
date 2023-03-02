@@ -223,7 +223,7 @@ objfile::map_symtabs_matching_filename
 					  (SEARCH_GLOBAL_BLOCK
 					   | SEARCH_STATIC_BLOCK),
 					  UNDEF_DOMAIN,
-					  ALL_DOMAIN))
+					  SEARCH_ALL))
 	{
 	  retval = false;
 	  break;
@@ -289,7 +289,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
 					  ? SEARCH_GLOBAL_BLOCK
 					  : SEARCH_STATIC_BLOCK,
 					  domain,
-					  ALL_DOMAIN))
+					  SEARCH_ALL))
 	break;
     }
 
@@ -344,7 +344,7 @@ objfile::expand_symtabs_for_function (const char *func_name)
 				   (SEARCH_GLOBAL_BLOCK
 				    | SEARCH_STATIC_BLOCK),
 				   VAR_DOMAIN,
-				   ALL_DOMAIN);
+				   SEARCH_ALL);
 }
 
 void
@@ -381,7 +381,7 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 				   (SEARCH_GLOBAL_BLOCK
 				    | SEARCH_STATIC_BLOCK),
 				   UNDEF_DOMAIN,
-				   ALL_DOMAIN);
+				   SEARCH_ALL);
 }
 
 bool
@@ -392,7 +392,7 @@ objfile::expand_symtabs_matching
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
    domain_enum domain,
-   enum search_domain kind)
+   domain_search_flags kind)
 {
   /* This invariant is documented in quick-functions.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
@@ -404,7 +404,7 @@ objfile::expand_symtabs_matching
 		host_address_to_string (&file_matcher),
 		host_address_to_string (&symbol_matcher),
 		host_address_to_string (&expansion_notify),
-		search_domain_name (kind));
+		domain_name (kind).c_str ());
 
   for (const auto &iter : qf)
     if (!iter->expand_symtabs_matching (this, file_matcher, lookup_name,

@@ -147,7 +147,7 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
      domain_enum domain,
-     enum search_domain kind) override;
+     domain_search_flags kind) override;
 };
 
 /* This dumps minimal information about the index.
@@ -176,7 +176,7 @@ dw2_expand_marked_cus
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
-   search_domain kind)
+   domain_search_flags kind)
 {
   offset_type vec_len, vec_idx;
   bool global_seen = false;
@@ -227,27 +227,24 @@ dw2_expand_marked_cus
 		continue;
 	    }
 
-	  switch (kind)
+	  domain_search_flags mask = 0;
+	  switch (symbol_kind)
 	    {
-	    case VARIABLES_DOMAIN:
-	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE)
-		continue;
+	    case GDB_INDEX_SYMBOL_KIND_VARIABLE:
+	      mask = SEARCH_VAR_DOMAIN;
 	      break;
-	    case FUNCTIONS_DOMAIN:
-	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION)
-		continue;
+	    case GDB_INDEX_SYMBOL_KIND_FUNCTION:
+	      mask = SEARCH_FUNCTION_DOMAIN;
 	      break;
-	    case TYPES_DOMAIN:
-	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
-		continue;
+	    case GDB_INDEX_SYMBOL_KIND_TYPE:
+	      mask = SEARCH_TYPE_DOMAIN;
 	      break;
-	    case MODULES_DOMAIN:
-	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_OTHER)
-		continue;
-	      break;
-	    default:
+	    case GDB_INDEX_SYMBOL_KIND_OTHER:
+	      mask = SEARCH_MODULE_DOMAIN;
 	      break;
 	    }
+	  if ((kind & mask) == 0)
+	    continue;
 	}
 
       /* Don't crash on bad data.  */
@@ -276,7 +273,7 @@ dwarf2_gdb_index::expand_symtabs_matching
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
      domain_enum domain,
-     enum search_domain kind)
+     domain_search_flags kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 

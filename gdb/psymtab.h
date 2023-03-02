@@ -634,7 +634,7 @@ struct psymbol_functions : public quick_symbol_functions
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
      domain_enum domain,
-     enum search_domain kind) override;
+     domain_search_flags kind) override;
 
   struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,

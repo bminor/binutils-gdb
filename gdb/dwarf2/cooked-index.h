@@ -160,29 +160,7 @@ struct cooked_index_entry : public allocate_on_obstack
   }
 
   /* Return true if this entry matches KIND.  */
-  bool matches (enum search_domain kind) const
-  {
-    /* Just reject type declarations.  */
-    if ((flags & IS_TYPE_DECLARATION) != 0)
-      return false;
-
-    switch (kind)
-      {
-      case VARIABLES_DOMAIN:
-	return (tag == DW_TAG_variable
-		|| tag == DW_TAG_constant
-		|| tag == DW_TAG_enumerator);
-      case FUNCTIONS_DOMAIN:
-	return (tag == DW_TAG_subprogram
-		|| tag == DW_TAG_entry_point);
-      case TYPES_DOMAIN:
-	return tag_is_type (tag);
-      case MODULES_DOMAIN:
-	return tag == DW_TAG_module;
-      }
-
-    return true;
-  }
+  bool matches (domain_search_flags kind) const;
 
   /* Construct the fully-qualified name of this entry and return a
      pointer to it.  If allocation is needed, it will be done on
@@ -798,7 +776,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
      domain_enum domain,
-     enum search_domain kind) override;
+     domain_search_flags kind) override;
 
   struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,

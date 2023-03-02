@@ -1638,7 +1638,7 @@ struct readnow_functions : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
      domain_enum domain,
-     enum search_domain kind) override
+     domain_search_flags kind) override
   {
     return true;
   }
@@ -16625,7 +16625,7 @@ cooked_index_functions::expand_symtabs_matching
       gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
       block_search_flags search_flags,
       domain_enum domain,
-      enum search_domain kind)
+      domain_search_flags kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 

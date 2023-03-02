@@ -920,7 +920,7 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 	 NULL,
 	 SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
 	 UNDEF_DOMAIN,
-	 ALL_DOMAIN);
+	 SEARCH_ALL);
 }
 
 

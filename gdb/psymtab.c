@@ -803,7 +803,7 @@ recursively_search_psymtabs
    struct objfile *objfile,
    block_search_flags search_flags,
    domain_enum domain,
-   enum search_domain search,
+   domain_search_flags search,
    const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> sym_matcher)
 {
@@ -876,15 +876,15 @@ recursively_search_psymtabs
 	  if ((domain == UNDEF_DOMAIN
 	       || symbol_matches_domain ((*psym)->ginfo.language (),
 					 (*psym)->domain, domain))
-	      && (search == ALL_DOMAIN
-		  || (search == MODULES_DOMAIN
+	      && (search == SEARCH_ALL
+		  || (search == SEARCH_MODULE_DOMAIN
 		      && (*psym)->domain == MODULE_DOMAIN)
-		  || (search == VARIABLES_DOMAIN
+		  || (search == SEARCH_VAR_DOMAIN
 		      && (*psym)->aclass != LOC_TYPEDEF
 		      && (*psym)->aclass != LOC_BLOCK)
-		  || (search == FUNCTIONS_DOMAIN
+		  || (search == SEARCH_FUNCTION_DOMAIN
 		      && (*psym)->aclass == LOC_BLOCK)
-		  || (search == TYPES_DOMAIN
+		  || (search == SEARCH_TYPE_DOMAIN
 		      && (*psym)->aclass == LOC_TYPEDEF))
 	      && psymbol_name_matches (*psym, lookup_name)
 	      && (sym_matcher == NULL
@@ -914,7 +914,7 @@ psymbol_functions::expand_symtabs_matching
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
    domain_enum domain,
-   enum search_domain search)
+   domain_search_flags search)
 {
   /* Clear the search flags.  */
   for (partial_symtab *ps : partial_symbols (objfile))

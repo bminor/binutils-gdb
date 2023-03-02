@@ -156,7 +156,7 @@ struct quick_symbol_functions
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
      domain_enum domain,
-     enum search_domain kind) = 0;
+     domain_search_flags kind) = 0;
 
   /* Return the comp unit from OBJFILE that contains PC and
      SECTION.  Return NULL if there is no such compunit.  This

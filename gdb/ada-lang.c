@@ -5514,7 +5514,7 @@ map_matching_symbols (struct objfile *objfile,
 				    global
 				    ? SEARCH_GLOBAL_BLOCK
 				    : SEARCH_STATIC_BLOCK,
-				    domain, ALL_DOMAIN);
+				    domain, SEARCH_ALL);
 
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
   for (compunit_symtab *symtab : objfile->compunits ())
@@ -12997,7 +12997,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 			   },
 			   NULL,
 			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			   VARIABLES_DOMAIN);
+			   SEARCH_VAR_DOMAIN);
 
   /* Iterate over all objfiles irrespective of scope or linker namespaces
      so we get all exceptions anywhere in the progspace.  */
@@ -13542,7 +13542,7 @@ public:
 			     NULL,
 			     NULL,
 			     SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			     ALL_DOMAIN);
+			     SEARCH_ALL);
 
     /* At this point scan through the misc symbol vectors and add each
        symbol you find to the list.  Eventually we want to ignore

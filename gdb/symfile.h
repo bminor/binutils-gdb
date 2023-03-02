@@ -352,7 +352,7 @@ bool expand_symtabs_matching
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
-   enum search_domain kind);
+   domain_search_flags kind);
 
 void map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
 			   bool need_fullname);
