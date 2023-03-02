@@ -68,6 +68,8 @@ struct coff_slots
 {
   /* Next set of slots.  */
   struct coff_slots *next;
+  /* Where the SLOTS array starts.  */
+  unsigned int base_index;
   /* Slots.  */
 #define COFF_SLOTS (16)
   debug_type slots[COFF_SLOTS];
@@ -107,29 +109,21 @@ static debug_type *
 coff_get_slot (struct coff_types *types, long indx)
 {
   struct coff_slots **pps;
+  unsigned int base_index;
 
   pps = &types->slots;
+  base_index = indx / COFF_SLOTS * COFF_SLOTS;
+  indx -= base_index;
 
-  /* PR 17512: file: 078-18333-0.001:0.1.
-     FIXME: The value of 1000 is a guess.  Maybe a better heuristic is needed.  */
-  if (indx / COFF_SLOTS > 1000)
-    fatal (_("Excessively large slot index: %lx"), indx);
+  while (*pps && (*pps)->base_index < base_index)
+    pps = &(*pps)->next;
 
-  while (indx >= COFF_SLOTS)
+  if (*pps == NULL || (*pps)->base_index != base_index)
     {
-      if (*pps == NULL)
-	{
-	  *pps = (struct coff_slots *) xmalloc (sizeof **pps);
-	  memset (*pps, 0, sizeof **pps);
-	}
-      pps = &(*pps)->next;
-      indx -= COFF_SLOTS;
-    }
-
-  if (*pps == NULL)
-    {
-      *pps = (struct coff_slots *) xmalloc (sizeof **pps);
-      memset (*pps, 0, sizeof **pps);
+      struct coff_slots *n = xcalloc (1, sizeof (*n));
+      n->next = *pps;
+      n->base_index = base_index;
+      *pps = n;
     }
 
   return (*pps)->slots + indx;
