@@ -82,13 +82,11 @@ static struct interp *interp_lookup_existing (struct ui *ui,
 					      const char *name);
 
 interp::interp (const char *name)
-  : m_name (make_unique_xstrdup (name))
+  : m_name (name)
 {
 }
 
-interp::~interp ()
-{
-}
+interp::~interp () = default;
 
 /* An interpreter factory.  Maps an interpreter name to the factory
    function that instantiates an interpreter by that name.  */
@@ -235,7 +233,7 @@ interp_lookup (struct ui *ui, const char *name)
   for (const interp_factory &factory : interpreter_factories)
     if (strcmp (factory.name, name) == 0)
       {
-	interp = factory.func (name);
+	interp = factory.func (factory.name);
 	interp_add (ui, interp);
 	return interp;
       }

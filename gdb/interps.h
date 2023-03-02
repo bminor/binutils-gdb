@@ -32,7 +32,9 @@ typedef struct interp *(*interp_factory_func) (const char *name);
 /* Each interpreter kind (CLI, MI, etc.) registers itself with a call
    to this function, passing along its name, and a pointer to a
    function that creates a new instance of an interpreter with that
-   name.  */
+   name.
+
+   The memory for NAME must have static storage duration.  */
 extern void interp_factory_register (const char *name,
 				     interp_factory_func func);
 
@@ -76,13 +78,11 @@ public:
   { return false; }
 
   const char *name () const
-  {
-    return m_name.get ();
-  }
+  { return m_name; }
 
 private:
-  /* This is the name in "-i=" and "set interpreter".  */
-  gdb::unique_xmalloc_ptr<char> m_name;
+  /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
+  const char *m_name;
 
 public:
   /* Interpreters are stored in a linked list, this is the next
