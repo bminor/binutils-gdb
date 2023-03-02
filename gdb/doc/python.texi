@@ -6973,7 +6973,8 @@ back and be re-raised by @code{builtin_disassemble}.
 @end defun
 @end deftp
 
-@deftp {class} Disassembler
+@anchor{Disassembler Class}
+@deftp {class} gdb.disassembler.Disassembler
 This is a base class from which all user implemented disassemblers
 must inherit.
 
@@ -7023,10 +7024,16 @@ the error stream according to the @kbd{set python print-stack} setting
 @end defun
 @end deftp
 
-@deftp {class} DisassemblerResult
-This class is used to hold the result of calling
-@w{@code{Disassembler.__call__}}, and represents a single disassembled
-instruction.  This class has the following properties and methods:
+@deftp {class} gdb.disassembler.DisassemblerResult
+This class represents the result of disassembling a single
+instruction.  An instance of this class will be returned from
+@code{builtin_disassemble} (@pxref{builtin_disassemble}), and an
+instance of this class should be returned from
+@w{@code{Disassembler.__call__}} (@pxref{Disassembler Class}) if an
+instruction was successfully disassembled.
+
+The @code{DisassemblerResult} class has the following properties and
+methods:
 
 @defun DisassemblerResult.__init__ (length, string)
 Initialize an instance of this class, @var{length} is the length of
