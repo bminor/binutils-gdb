@@ -454,7 +454,7 @@ rust_parser::rust_lookup_type (const char *name)
   const struct block *block = pstate->expression_context_block;
   munge_name_and_block (&name, &block);
 
-  result = ::lookup_symbol (name, block, SEARCH_STRUCT_DOMAIN, NULL);
+  result = ::lookup_symbol (name, block, SEARCH_TYPE_DOMAIN, nullptr);
   if (result.symbol != NULL)
     {
       update_innermost_block (result);

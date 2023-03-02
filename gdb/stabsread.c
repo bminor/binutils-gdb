@@ -940,7 +940,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* A static function definition.  */
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_BLOCK);
-      sym->set_domain (VAR_DOMAIN);
+      sym->set_domain (FUNCTION_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       /* fall into process_function_types.  */
 
@@ -1011,7 +1011,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* A global function definition.  */
       sym->set_type (read_type (&p, objfile));
       sym->set_aclass_index (LOC_BLOCK);
-      sym->set_domain (VAR_DOMAIN);
+      sym->set_domain (FUNCTION_DOMAIN);
       add_symbol_to_list (sym, get_global_symbols ());
       goto process_function_types;
 
@@ -1209,7 +1209,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
       sym->set_aclass_index (LOC_TYPEDEF);
       sym->set_value_longest (valu);
-      sym->set_domain (VAR_DOMAIN);
+      sym->set_domain (TYPE_DOMAIN);
       /* C++ vagaries: we may have a type which is derived from
 	 a base type which did not have its name defined when the
 	 derived class was output.  We fill in the derived class's
@@ -1328,7 +1328,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  *typedef_sym = *sym;
 	  typedef_sym->set_aclass_index (LOC_TYPEDEF);
 	  typedef_sym->set_value_longest (valu);
-	  typedef_sym->set_domain (VAR_DOMAIN);
+	  typedef_sym->set_domain (TYPE_DOMAIN);
 	  if (sym->type ()->name () == 0)
 	    sym->type ()->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),

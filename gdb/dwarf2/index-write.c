@@ -1232,11 +1232,10 @@ write_cooked_index (cooked_index *table,
 	       || entry->tag == DW_TAG_constant
 	       || entry->tag == DW_TAG_enumerator)
 	kind = GDB_INDEX_SYMBOL_KIND_VARIABLE;
-      else if (entry->tag == DW_TAG_module
-	       || entry->tag == DW_TAG_common_block)
-	kind = GDB_INDEX_SYMBOL_KIND_OTHER;
-      else
+      else if (tag_is_type (entry->tag))
 	kind = GDB_INDEX_SYMBOL_KIND_TYPE;
+      else
+	kind = GDB_INDEX_SYMBOL_KIND_OTHER;
 
       symtab->add_index_entry (name, (entry->flags & IS_STATIC) != 0,
 			       kind, it->second);

@@ -974,7 +974,7 @@ language_arch_info::type_and_symbol::alloc_type_symbol
   symbol->set_is_objfile_owned (0);
   symbol->set_section_index (0);
   symbol->set_type (type);
-  symbol->set_domain (VAR_DOMAIN);
+  symbol->set_domain (TYPE_DOMAIN);
   symbol->set_aclass_index (LOC_TYPEDEF);
   return symbol;
 }

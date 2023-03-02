@@ -753,7 +753,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  break;
 	}
       s = new_symbol (name);
-      s->set_domain (VAR_DOMAIN);
+      s->set_domain (FUNCTION_DOMAIN);
       s->set_aclass_index (LOC_BLOCK);
       s->set_section_index (section_index);
       /* Type of the return value.  */
@@ -1297,7 +1297,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       if (has_opaque_xref (cur_fdr, sh))
 	break;
       s = new_symbol (name);
-      s->set_domain (VAR_DOMAIN);
+      s->set_domain (TYPE_DOMAIN);
       s->set_aclass_index (LOC_TYPEDEF);
       s->set_value_block (top_stack->cur_block);
       s->set_type (t);

@@ -520,17 +520,17 @@ ada_get_tcb_types_info (void)
      C-like) lookups to get the first match.  */
 
   struct symbol *atcb_sym =
-    lookup_symbol_in_language (atcb_name, NULL, SEARCH_STRUCT_DOMAIN,
+    lookup_symbol_in_language (atcb_name, NULL, SEARCH_TYPE_DOMAIN,
 			       language_c, NULL).symbol;
   const struct symbol *common_atcb_sym =
-    lookup_symbol_in_language (common_atcb_name, NULL, SEARCH_STRUCT_DOMAIN,
+    lookup_symbol_in_language (common_atcb_name, NULL, SEARCH_TYPE_DOMAIN,
 			       language_c, NULL).symbol;
   const struct symbol *private_data_sym =
-    lookup_symbol_in_language (private_data_name, NULL, SEARCH_STRUCT_DOMAIN,
+    lookup_symbol_in_language (private_data_name, NULL, SEARCH_TYPE_DOMAIN,
 			       language_c, NULL).symbol;
   const struct symbol *entry_call_record_sym =
     lookup_symbol_in_language (entry_call_record_name, NULL,
-			       SEARCH_STRUCT_DOMAIN,
+			       SEARCH_TYPE_DOMAIN,
 			       language_c, NULL).symbol;
 
   if (atcb_sym == NULL || atcb_sym->type () == NULL)
@@ -538,7 +538,7 @@ ada_get_tcb_types_info (void)
       /* In Ravenscar run-time libs, the  ATCB does not have a dynamic
 	 size, so the symbol name differs.  */
       atcb_sym = lookup_symbol_in_language (atcb_name_fixed, NULL,
-					    SEARCH_STRUCT_DOMAIN, language_c,
+					    SEARCH_TYPE_DOMAIN, language_c,
 					    NULL).symbol;
 
       if (atcb_sym == NULL || atcb_sym->type () == NULL)

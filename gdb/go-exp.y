@@ -1293,7 +1293,7 @@ package_name_p (const char *name, const struct block *block)
   struct symbol *sym;
   struct field_of_this_result is_a_field_of_this;
 
-  sym = lookup_symbol (name, block, SEARCH_STRUCT_DOMAIN,
+  sym = lookup_symbol (name, block, SEARCH_TYPE_DOMAIN,
 		       &is_a_field_of_this).symbol;
 
   if (sym

@@ -205,31 +205,7 @@ cooked_index_entry::matches (domain_search_flags kind) const
   if ((flags & IS_TYPE_DECLARATION) != 0)
     return false;
 
-  if ((kind & SEARCH_VAR_DOMAIN) != 0
-      && (tag == DW_TAG_variable
-	  || tag == DW_TAG_constant
-	  || tag == DW_TAG_enumerator))
-    return true;
-
-  if ((kind & SEARCH_STRUCT_DOMAIN) != 0
-      && (tag == DW_TAG_structure_type
-	  || tag == DW_TAG_class_type
-	  || tag == DW_TAG_union_type
-	  || tag == DW_TAG_enumeration_type))
-    return true;
-
-  if ((kind & SEARCH_MODULE_DOMAIN) != 0 && tag == DW_TAG_module)
-    return true;
-
-  if ((kind & SEARCH_TYPE_DOMAIN) != 0 && tag_is_type (tag))
-    return true;
-
-  if ((kind & SEARCH_FUNCTION_DOMAIN) != 0
-      && (tag == DW_TAG_subprogram
-	  || tag == DW_TAG_entry_point))
-    return true;
-
-  return false;
+  return tag_matches_domain (tag, kind, lang);
 }
 
 /* See cooked-index.h.  */

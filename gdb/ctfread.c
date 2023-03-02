@@ -505,7 +505,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	  case CTF_K_INTEGER:
 	  case CTF_K_FLOAT:
 	    sym->set_aclass_index (LOC_TYPEDEF);
-	    sym->set_domain (VAR_DOMAIN);
+	    sym->set_domain (TYPE_DOMAIN);
 	    break;
 	  case CTF_K_POINTER:
 	    break;

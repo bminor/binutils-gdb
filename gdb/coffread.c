@@ -1473,7 +1473,7 @@ patch_opaque_types (struct symtab *s)
 	 but search the whole chain, as there may be several syms
 	 from different files with the same name.  */
       if (real_sym->aclass () == LOC_TYPEDEF
-	  && real_sym->domain () == VAR_DOMAIN
+	  && real_sym->domain () == TYPE_DOMAIN
 	  && real_sym->type ()->code () == TYPE_CODE_PTR
 	  && real_sym->type ()->target_type ()->length () != 0)
 	{
@@ -1544,6 +1544,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
   if (ISFCN (cs->c_type))
     {
+      sym->set_domain (FUNCTION_DOMAIN);
       sym->set_value_longest
 	(sym->value_longest () + objfile->text_section_offset ());
       sym->set_type
@@ -1626,7 +1627,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
 	case C_TPDEF:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  sym->set_domain (VAR_DOMAIN);
+	  sym->set_domain (TYPE_DOMAIN);
 
 	  /* If type has no name, give it one.  */
 	  if (sym->type ()->name () == 0)

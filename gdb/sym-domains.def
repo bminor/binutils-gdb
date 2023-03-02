@@ -47,7 +47,9 @@ DOMAIN (LABEL)
 DOMAIN (COMMON_BLOCK)
 
 /* TYPE_DOMAIN is for types and typedefs.  Note that tags are not
-   found here, see STRUCT_DOMAIN above.  */
+   found here, see STRUCT_DOMAIN above.  If a language does not have a
+   tag namespace, then all types (including structures, etc) are
+   here.  */
 
 DOMAIN (TYPE)
 

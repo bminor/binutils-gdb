@@ -2681,32 +2681,10 @@ lookup_global_symbol (const char *name,
 bool
 symbol::matches (domain_search_flags flags) const
 {
-  if (language () != language_c
-      && language () != language_objc
-      && language () != language_opencl)
-    {
-      /* Only C languages distinguish tag and type namespaces.  */
-      if ((flags & SEARCH_TYPE_DOMAIN) != 0)
-	flags |= SEARCH_STRUCT_DOMAIN;
-    }
-
-  if ((flags & SEARCH_FUNCTION_DOMAIN) != 0
-      && domain () == VAR_DOMAIN
-      && aclass () == LOC_BLOCK)
-    return true;
-
-  if ((flags & SEARCH_VAR_DOMAIN) != 0
-      && domain () == VAR_DOMAIN)
-    return true;
-
-  if ((flags & SEARCH_TYPE_DOMAIN) != 0
-      && domain () == VAR_DOMAIN
-      && aclass () == LOC_TYPEDEF)
-    return true;
-
-  if ((flags & SEARCH_STRUCT_DOMAIN) != 0
-      && domain () == STRUCT_DOMAIN)
-    return true;
+  /* C++ has a typedef for every tag, and the types are in the struct
+     domain.  */
+  if (language () == language_cplus && (flags & SEARCH_TYPE_DOMAIN) != 0)
+    flags |= SEARCH_STRUCT_DOMAIN;
 
   return search_flags_matches (flags, m_domain);
 }
@@ -4908,59 +4886,42 @@ global_symbol_searcher::add_matching_symbols
 					 filenames, false))))
 		continue;
 
+	      if (!sym->matches (kind))
+		continue;
+
 	      if (preg.has_value () && !preg->exec (sym->natural_name (), 0,
 						    nullptr, 0) == 0)
 		continue;
 
-	      bool matches = false;
-	      if (!matches && (kind & SEARCH_VAR_DOMAIN) != 0)
+	      if (((sym->domain () == VAR_DOMAIN
+		    || sym->domain () == FUNCTION_DOMAIN)
+		   && treg.has_value ()
+		   && !treg_matches_sym_type_name (*treg, sym)))
+		continue;
+
+	      if ((kind & SEARCH_VAR_DOMAIN) != 0)
 		{
-		  if (sym->aclass () != LOC_TYPEDEF
-		      && sym->aclass () != LOC_UNRESOLVED
-		      && sym->aclass () != LOC_BLOCK
+		  if (sym->aclass () == LOC_UNRESOLVED
 		      /* LOC_CONST can be used for more than
 			 just enums, e.g., c++ static const
 			 members.  We only want to skip enums
 			 here.  */
-		      && !(sym->aclass () == LOC_CONST
-			   && (sym->type ()->code ()
-			       == TYPE_CODE_ENUM))
-		      && (!treg.has_value ()
-			  || treg_matches_sym_type_name (*treg, sym)))
-		    matches = true;
+		      || (sym->aclass () == LOC_CONST
+			  && (sym->type ()->code () == TYPE_CODE_ENUM)))
+		    continue;
 		}
-	      if (!matches && (kind & SEARCH_FUNCTION_DOMAIN) != 0)
+	      if (sym->domain () == MODULE_DOMAIN && sym->line () == 0)
+		continue;
+
+	      if (result_set->size () < m_max_search_results)
 		{
-		  if (sym->aclass () == LOC_BLOCK
-		      && (!treg.has_value ()
-			  || treg_matches_sym_type_name (*treg,
-							 sym)))
-		    matches = true;
+		  /* Match, insert if not already in the results.  */
+		  symbol_search ss (block, sym);
+		  if (result_set->find (ss) == result_set->end ())
+		    result_set->insert (ss);
 		}
-	      if (!matches && (kind & SEARCH_TYPE_DOMAIN) != 0)
-		{
-		  if (sym->aclass () == LOC_TYPEDEF
-		      && sym->domain () != MODULE_DOMAIN)
-		    matches = true;
-		}
-	      if (!matches && (kind & SEARCH_MODULE_DOMAIN) != 0)
-		{
-		  if (sym->domain () == MODULE_DOMAIN
-		      && sym->line () != 0)
-		    matches = true;
-		}
-	      if (matches)
-		{
-		  if (result_set->size () < m_max_search_results)
-		    {
-		      /* Match, insert if not already in the results.  */
-		      symbol_search ss (block, sym);
-		      if (result_set->find (ss) == result_set->end ())
-			result_set->insert (ss);
-		    }
-		  else
-		    return false;
-		}
+	      else
+		return false;
 	    }
 	}
     }
@@ -5123,12 +5084,12 @@ symbol_to_info_string (struct symbol *sym, int block)
   gdb_assert (block == GLOBAL_BLOCK || block == STATIC_BLOCK);
 
   if (block == STATIC_BLOCK
-      && sym->domain () == VAR_DOMAIN
-      && sym->aclass () != LOC_TYPEDEF)
+      && (sym->domain () == VAR_DOMAIN
+	  || sym->domain () == FUNCTION_DOMAIN))
     str += "static ";
 
   /* Typedef that is not a C++ class.  */
-  if (sym->domain () == VAR_DOMAIN && sym->aclass () == LOC_TYPEDEF)
+  if (sym->domain () == TYPE_DOMAIN)
     {
       string_file tmp_stream;
 
@@ -5147,7 +5108,8 @@ symbol_to_info_string (struct symbol *sym, int block)
       str += tmp_stream.string ();
     }
   /* variable, func, or typedef-that-is-c++-class.  */
-  else if (sym->domain () == VAR_DOMAIN || sym->domain () == STRUCT_DOMAIN)
+  else if (sym->domain () == VAR_DOMAIN || sym->domain () == STRUCT_DOMAIN
+	   || sym->domain () == FUNCTION_DOMAIN)
     {
       string_file tmp_stream;
 

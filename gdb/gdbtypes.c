@@ -2988,15 +2988,19 @@ check_typedef (struct type *type)
 	    return make_qualified_type (type, instance_flags, NULL);
 
 	  name = type->name ();
-	  /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or
-	     VAR_DOMAIN as appropriate?  */
 	  if (name == NULL)
 	    {
 	      stub_noname_complaint ();
 	      return make_qualified_type (type, instance_flags, NULL);
 	    }
-	  sym = lookup_symbol (name, nullptr, SEARCH_STRUCT_DOMAIN,
-			       nullptr).symbol;
+	  domain_search_flag flag
+	    = ((type->language () == language_c
+		|| type->language () == language_objc
+		|| type->language () == language_opencl
+		|| type->language () == language_minimal)
+	       ? SEARCH_STRUCT_DOMAIN
+	       : SEARCH_TYPE_DOMAIN);
+	  sym = lookup_symbol (name, nullptr, flag, nullptr).symbol;
 	  if (sym)
 	    type->set_target_type (sym->type ());
 	  else					/* TYPE_CODE_UNDEF */
@@ -3077,8 +3081,6 @@ check_typedef (struct type *type)
   else if (type->is_stub () && !currently_reading_symtab)
     {
       const char *name = type->name ();
-      /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or VAR_DOMAIN
-	 as appropriate?  */
       struct symbol *sym;
 
       if (name == NULL)
@@ -3086,8 +3088,14 @@ check_typedef (struct type *type)
 	  stub_noname_complaint ();
 	  return make_qualified_type (type, instance_flags, NULL);
 	}
-      sym = lookup_symbol (name, nullptr, SEARCH_STRUCT_DOMAIN,
-			   nullptr).symbol;
+      domain_search_flag flag
+	= ((type->language () == language_c
+	    || type->language () == language_objc
+	    || type->language () == language_opencl
+	    || type->language () == language_minimal)
+	   ? SEARCH_STRUCT_DOMAIN
+	   : SEARCH_TYPE_DOMAIN);
+      sym = lookup_symbol (name, nullptr, flag, nullptr).symbol;
       if (sym)
 	{
 	  /* Same as above for opaque types, we can replace the stub

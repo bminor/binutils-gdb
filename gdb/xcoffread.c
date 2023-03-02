@@ -1491,6 +1491,7 @@ process_xcoff_symbol (struct xcoff_symbol *cs, struct objfile *objfile)
       sym->set_linkage_name (SYMNAME_ALLOC (name, symname_alloced));
       sym->set_type (builtin_type (objfile)->nodebug_text_symbol);
 
+      sym->set_domain (FUNCTION_DOMAIN);
       sym->set_aclass_index (LOC_BLOCK);
       sym2 = new (&objfile->objfile_obstack) symbol (*sym);
 
@@ -2546,7 +2547,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			/* Also a typedef with the same name.  */
 			pst->add_psymbol (std::string_view (namestring,
 							    p - namestring),
-					  true, VAR_DOMAIN, LOC_TYPEDEF, -1,
+					  true, TYPE_DOMAIN, LOC_TYPEDEF, -1,
 					  psymbol_placement::STATIC,
 					  unrelocated_addr (0),
 					  psymtab_language,
@@ -2561,7 +2562,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		  {
 		    pst->add_psymbol (std::string_view (namestring,
 							p - namestring),
-				      true, VAR_DOMAIN, LOC_TYPEDEF, -1,
+				      true, TYPE_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
 				      unrelocated_addr (0),
 				      psymtab_language,
@@ -2661,7 +2662,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		  }
 		pst->add_psymbol (std::string_view (namestring,
 						    p - namestring),
-				  true, VAR_DOMAIN, LOC_BLOCK,
+				  true, FUNCTION_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::STATIC,
 				  unrelocated_addr (symbol.n_value),
@@ -2688,7 +2689,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
 		pst->add_psymbol (std::string_view (namestring,
 						    p - namestring),
-				  true, VAR_DOMAIN, LOC_BLOCK,
+				  true, FUNCTION_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::GLOBAL,
 				  unrelocated_addr (symbol.n_value),

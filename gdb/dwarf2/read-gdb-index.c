@@ -236,7 +236,7 @@ dw2_expand_marked_cus
 	      mask = SEARCH_FUNCTION_DOMAIN;
 	      break;
 	    case GDB_INDEX_SYMBOL_KIND_TYPE:
-	      mask = SEARCH_TYPE_DOMAIN;
+	      mask = SEARCH_TYPE_DOMAIN | SEARCH_STRUCT_DOMAIN;
 	      break;
 	    case GDB_INDEX_SYMBOL_KIND_OTHER:
 	      mask = SEARCH_MODULE_DOMAIN;

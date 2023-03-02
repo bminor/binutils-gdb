@@ -581,7 +581,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       new_block->set_end (gdb_block_iter.end);
 
       /* The name.  */
-      block_name->set_domain (VAR_DOMAIN);
+      block_name->set_domain (FUNCTION_DOMAIN);
       block_name->set_aclass_index (LOC_BLOCK);
       block_name->set_symtab (filetab);
       block_name->set_type (lookup_function_type (block_type));

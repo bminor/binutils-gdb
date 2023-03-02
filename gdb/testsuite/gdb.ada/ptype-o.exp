@@ -43,5 +43,5 @@ foreach_with_prefix scenario {all minimal} {
 	# crash.
 	set exp ".*"
     }
-    gdb_test "ptype/o struct prog__rec" $exp
+    gdb_test "ptype/o prog__rec" $exp
 }
