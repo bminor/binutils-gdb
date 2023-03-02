@@ -116,6 +116,7 @@ class VariableReference(BaseReference):
         RESULT_NAME can be used to change how the simple string result
         is emitted in the result dictionary."""
         super().__init__(name)
+        self.value = value
         self.printer = gdb.printing.make_visualizer(value)
         self.result_name = result_name
         # We cache all the children we create.
@@ -160,6 +161,10 @@ class VariableReference(BaseReference):
                 result["indexedVariables"] = num_children
             else:
                 result["namedVariables"] = num_children
+        if self.value.type.code == gdb.TYPE_CODE_PTR:
+            result["memoryReference"] = hex(int(self.value))
+        elif self.value.address is not None:
+            result["memoryReference"] = hex(int(self.value.address))
         return result
 
     @in_gdb_thread

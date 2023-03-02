@@ -25,6 +25,7 @@ from . import bt
 from . import disassemble
 from . import evaluate
 from . import launch
+from . import memory
 from . import next
 from . import pause
 from . import scopes

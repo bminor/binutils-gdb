@@ -96,6 +96,7 @@ PYTHON_FILE_LIST = \
 	gdb/dap/__init__.py \
 	gdb/dap/io.py \
 	gdb/dap/launch.py \
+	gdb/dap/memory.py \
 	gdb/dap/next.py \
 	gdb/dap/pause.py \
 	gdb/dap/scopes.py \
