@@ -68,6 +68,11 @@ maintenance info frame-unwinders
   List the frame unwinders currently in effect, starting with the highest
   priority.
 
+set always-read-ctf on|off
+show always-read-ctf
+  When off, CTF is only read if DWARF is not present.  When on, CTF is
+  read regardless of whether DWARF is present.  Off by default.
+
 * New convenience function "$_shell", to execute a shell command and
   return the result.  This lets you run shell commands in expressions.
   Some examples:

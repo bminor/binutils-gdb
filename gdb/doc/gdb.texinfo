@@ -20365,6 +20365,17 @@ location to represent a line or a statement.  The @samp{PROLOGUE-END} column
 indicates that a given address is an adequate place to set a breakpoint at the
 first instruction following a function prologue.
 
+@kindex set always-read-ctf [on|off]
+@kindex show always-read-ctf
+@cindex always-read-ctf
+@cindex CTF info, when to read
+@item set always-read-ctf [on|off]
+@itemx show always-read-ctf
+
+When off, CTF debug info is only read if DWARF debug info is not
+present.  When on, CTF debug info is read regardless of whether DWARF
+debug info is present.  The default value is off.
+
 @kindex maint set symbol-cache-size
 @cindex symbol cache size
 @item maint set symbol-cache-size @var{size}

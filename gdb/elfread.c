@@ -51,6 +51,10 @@
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
 #include "dwarf2/public.h"
+#include "cli/cli-cmds.h"
+
+/* Whether ctf should always be read, or only if no dwarf is present.  */
+static bool always_read_ctf;
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
@@ -1349,10 +1353,16 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 				bfd_section_size (str_sect));
     }
 
+  /* Read the CTF section only if there is no DWARF info.  */
+  if (always_read_ctf && ei.ctfsect)
+    {
+      elfctf_build_psymtabs (objfile);
+    }
+
   bool has_dwarf2 = elf_symfile_read_dwarf2 (objfile, symfile_flags);
 
   /* Read the CTF section only if there is no DWARF info.  */
-  if (!has_dwarf2 && ei.ctfsect)
+  if (!always_read_ctf && !has_dwarf2 && ei.ctfsect)
     {
       elfctf_build_psymtabs (objfile);
     }
@@ -1449,4 +1459,16 @@ _initialize_elfread ()
   add_symtab_fns (bfd_target_elf_flavour, &elf_sym_fns);
 
   gnu_ifunc_fns_p = &elf_gnu_ifunc_fns;
+
+  /* Add "set always-read-ctf on/off".  */
+  add_setshow_boolean_cmd ("always-read-ctf", class_support, &always_read_ctf,
+			   _("\
+Set whether CTF is always read."),
+			   _("\
+Show whether CTF is always read."),
+			   _("\
+When off, CTF is only read if DWARF is not present.  When on, CTF is read\
+ regardless of whether DWARF is present."),
+			   nullptr /* set_func */, nullptr /* show_func */,
+			   &setlist, &showlist);
 }
