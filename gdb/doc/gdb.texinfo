@@ -41374,6 +41374,12 @@ give an error.
 For platforms that do support creating the backtrace this feature is
 @code{on} by default.
 
+@kindex maint wait-for-index-cache
+@item maint wait-for-index-cache
+Wait until all pending writes to the index cache have completed.  This
+is used by the test suite to avoid races when the index cache is being
+updated by a worker thread.
+
 @kindex maint with
 @item maint with @var{setting} [@var{value}] [-- @var{command}]
 Like the @code{with} command, but works with @code{maintenance set}

@@ -84,6 +84,10 @@ proc run_test_with_flags { cache_dir cache_enabled code } {
 
 	clean_restart ${testfile}
 
+	# The tests generally want to check the cache, so make sure it
+	# has completed its work.
+	gdb_test_no_output "maintenance wait-for-index-cache"
+
 	uplevel 1 $code
     }
 }
@@ -201,7 +205,9 @@ proc_with_prefix test_cache_enabled_hit { cache_dir } {
     global expecting_index_cache_use
 
     # Just to populate the cache.
-    run_test_with_flags $cache_dir on {}
+    with_test_prefix "populate cache" {
+	run_test_with_flags $cache_dir on {}
+    }
 
     lassign [ls_host $cache_dir] ret files_before
 

@@ -33,6 +33,7 @@
 #include "gdbsupport/selftest.h"
 #include <chrono>
 #include <unordered_set>
+#include "cli/cli-cmds.h"
 
 /* We don't want gdb to exit while it is in the process of writing to
    the index cache.  So, all live cooked index vectors are stored
@@ -640,6 +641,14 @@ wait_for_index_cache (int)
     item->wait_completely ();
 }
 
+/* A maint command to wait for the cache.  */
+
+static void
+maintenance_wait_for_index_cache (const char *args, int from_tty)
+{
+  wait_for_index_cache (0);
+}
+
 void _initialize_cooked_index ();
 void
 _initialize_cooked_index ()
@@ -647,6 +656,12 @@ _initialize_cooked_index ()
 #if GDB_SELF_TEST
   selftests::register_test ("cooked_index_entry::compare", test_compare);
 #endif
+
+  add_cmd ("wait-for-index-cache", class_maintenance,
+	   maintenance_wait_for_index_cache, _("\
+Usage: maintenance wait-for-index-cache\n\
+Wait until all pending writes to the index cache have completed."),
+	   &maintenancelist);
 
   gdb::observers::gdb_exiting.attach (wait_for_index_cache, "cooked-index");
 }

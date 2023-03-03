@@ -68,6 +68,9 @@ maintenance info frame-unwinders
   List the frame unwinders currently in effect, starting with the highest
   priority.
 
+maintenance wait-for-index-cache
+  Wait until all pending writes to the index cache have completed.
+
 set always-read-ctf on|off
 show always-read-ctf
   When off, CTF is only read if DWARF is not present.  When on, CTF is
