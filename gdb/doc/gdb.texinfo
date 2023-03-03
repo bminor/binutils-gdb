@@ -32215,7 +32215,10 @@ all of the breakpoint locations.
 Initialize the @var{ignore-count}.
 @item -p @var{thread-id}
 Restrict the breakpoint to the thread with the specified global
-@var{thread-id}.
+@var{thread-id}.  @var{thread-id} must be a valid thread-id at the
+time the breakpoint is requested.  Breakpoints created with a
+@var{thread-id} will automatically be deleted when the corresponding
+thread exits.
 @item --qualified
 This option makes @value{GDBN} interpret a function name specified as
 a complete fully-qualified name.
