@@ -228,6 +228,10 @@ print_version_id (void)
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
 enum compressed_debug_section_type flag_compress_debug
   = DEFAULT_COMPRESSED_DEBUG_ALGORITHM;
+#define DEFAULT_COMPRESSED_DEBUG_ALGORITHM_HELP \
+        DEFAULT_COMPRESSED_DEBUG_ALGORITHM
+#else
+#define DEFAULT_COMPRESSED_DEBUG_ALGORITHM_HELP COMPRESS_DEBUG_NONE
 #endif
 
 static void
@@ -256,7 +260,8 @@ Options:\n\
                           compress DWARF debug sections\n")),
   fprintf (stream, _("\
 		            Default: %s\n"),
-	   bfd_get_compression_algorithm_name (flag_compress_debug));
+	   bfd_get_compression_algorithm_name
+             (DEFAULT_COMPRESSED_DEBUG_ALGORITHM_HELP));
 
   fprintf (stream, _("\
   --nocompress-debug-sections\n\
@@ -764,7 +769,7 @@ This program has absolutely no warranty.\n"));
 #endif
 	    }
 	  else
-	    flag_compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
+	    flag_compress_debug = DEFAULT_COMPRESSED_DEBUG_ALGORITHM;
 	  break;
 
 	case OPTION_NOCOMPRESS_DEBUG:
