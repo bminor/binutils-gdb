@@ -49,7 +49,7 @@ after 1000 {
     # Note, GDB is started under a shell, so PID is actually the
     # shell's pid, not GDB's.  Use "-PID" to send the signal to the
     # whole process group and reach GDB, instead of just to the shell.
-    remote_exec host "kill -SIGWINCH -${gdb_pid}"
+    remote_exec host "kill -WINCH -${gdb_pid}"
 }
 
 # If GDB mishandles the SIGWINCH and crashes, that happens before we

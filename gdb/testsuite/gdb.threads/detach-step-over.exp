@@ -285,7 +285,7 @@ proc_with_prefix test_detach_command {condition_eval target_non_stop non_stop di
 		# over, then threads of other inferiors should be
 		# re-resumed.  Test for that by sending a signal to
 		# inferior 2.
-		remote_exec target "kill -SIGUSR1 ${pid_inf2}"
+		remote_exec target "kill -USR1 ${pid_inf2}"
 
 		gdb_test_multiple "" "stop with SIGUSR1" {
 		    -re "received signal SIGUSR1" {
