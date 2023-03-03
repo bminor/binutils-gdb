@@ -6409,9 +6409,6 @@ check_VecOperands (const insn_template *t)
 	  return 1;
 	}
 
-      if (i.broadcast.type)
-	i.broadcast.bytes = ((1 << (t->opcode_modifier.broadcast - 1))
-			     * i.broadcast.type);
       operand_type_set (&type, 0);
       switch (get_broadcast_bytes (t, false))
 	{
