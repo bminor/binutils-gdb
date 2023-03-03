@@ -14,6 +14,13 @@
   'thread' or 'task' keywords are parsed at the time the breakpoint is
   created, rather than at the time the breakpoint becomes non-pending.
 
+* Thread-specific breakpoints are only inserted into the program space
+  in which the thread of interest is running.  In most cases program
+  spaces are unique for each inferior, so this means that
+  thread-specific breakpoints will usually only be inserted for the
+  inferior containing the thread of interest.  The breakpoint will
+  be hit no less than before.
+
 * Python API
 
   ** Added gdb.record.clear.  Clears the trace data of the current recording.

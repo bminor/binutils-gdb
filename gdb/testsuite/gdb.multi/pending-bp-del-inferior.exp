@@ -129,10 +129,8 @@ proc do_bp_test { bp_type bp_pending } {
     } else {
 	set bp_pattern_before \
 	    [multi_line \
-		 "$bp_number\\s+breakpoint\\s+keep\\s+y\\s+<MULTIPLE>\\s*" \
-		 "\\s+stop only in [string_to_regexp $bp_restriction]" \
-		 "$bp_number\\.1\\s+y\\s+$::hex in $bp_func at \[^\r\n\]+ inf 1" \
-		 "$bp_number\\.2\\s+y\\s+$::hex in $bp_func at \[^\r\n\]+ inf 2"]
+		 "$bp_number\\s+breakpoint\\s+keep\\s+y\\s+$::hex in $bp_func at \[^\r\n\]+ inf 1" \
+		 "\\s+stop only in [string_to_regexp $bp_restriction]"]
 
 	set bp_pattern_after \
 	    [multi_line \

@@ -105,16 +105,8 @@ proc check_info_breakpoints { testname bp_number expected_loc_count } {
 # Create an inferior-specific breakpoint.  Use gdb_test instead of
 # gdb_breakpoint here as we want to check the breakpoint was placed in
 # multiple locations.
-#
-# Currently GDB still places inferior specific breakpoints into every
-# inferior, just like it does with thread specific breakpoints.
-# Hopefully this will change in the future, at which point, this test
-# will need updating.
-#
-# Two of these locations are in inferior 1, while the third is in
-# inferior 2.
 gdb_test "break foo inferior 1" \
-    "Breakpoint $decimal at $hex: foo\\. \\(3 locations\\)"
+    "Breakpoint $decimal at $hex: foo\\. \\(2 locations\\)"
 set bp_number [get_integer_valueof "\$bpnum" "INVALID" \
 		  "get b/p number for inferior specific breakpoint"]
 
@@ -123,7 +115,7 @@ set location_count 0
 set saw_inf_cond false
 
 check_info_breakpoints "first check for inferior specific breakpoint" \
-    $bp_number 3
+    $bp_number 2
 
 # Create a multi-inferior breakpoint to stop at.
 gdb_breakpoint "stop_breakpt" message

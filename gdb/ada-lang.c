@@ -12073,11 +12073,11 @@ struct ada_catchpoint : public code_breakpoint
     enable_state = enabled ? bp_enabled : bp_disabled;
     language = language_ada;
 
-    re_set ();
+    re_set (pspace);
   }
 
   struct bp_location *allocate_location () override;
-  void re_set () override;
+  void re_set (program_space *pspace) override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (const bp_location **) const override;
@@ -12122,7 +12122,7 @@ static struct symtab_and_line ada_exception_sal
    catchpoint kinds.  */
 
 void
-ada_catchpoint::re_set ()
+ada_catchpoint::re_set (program_space *pspace)
 {
   std::vector<symtab_and_line> sals;
   try

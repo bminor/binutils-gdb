@@ -91,9 +91,12 @@
 static void map_breakpoint_numbers (const char *,
 				    gdb::function_view<void (breakpoint *)>);
 
-static void
-  create_sals_from_location_spec_default (location_spec *locspec,
-					  linespec_result *canonical);
+static void parse_breakpoint_sals (location_spec *locspec,
+				   linespec_result *canonical,
+				   program_space *search_pspace);
+
+static void breakpoint_re_set_one (breakpoint *b,
+				   program_space *filter_pspace);
 
 static void create_breakpoints_sal (struct gdbarch *,
 				    struct linespec_result *,
@@ -283,11 +286,12 @@ static bool strace_marker_p (struct breakpoint *b);
 
 static void bkpt_probe_create_sals_from_location_spec
      (location_spec *locspec,
-      struct linespec_result *canonical);
+      struct linespec_result *canonical,
+      struct program_space *search_pspace);
 
 const struct breakpoint_ops code_breakpoint_ops =
 {
-  create_sals_from_location_spec_default,
+  parse_breakpoint_sals,
   create_breakpoints_sal,
 };
 
@@ -352,7 +356,7 @@ struct internal_breakpoint : public code_breakpoint
     disposition = disp_donttouch;
   }
 
-  void re_set () override;
+  void re_set (program_space *pspace) override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () const override;
@@ -389,7 +393,7 @@ struct momentary_breakpoint : public code_breakpoint
     gdb_assert (inferior == -1);
   }
 
-  void re_set () override;
+  void re_set (program_space *pspace) override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () const override;
@@ -400,7 +404,7 @@ struct dprintf_breakpoint : public ordinary_breakpoint
 {
   using ordinary_breakpoint::ordinary_breakpoint;
 
-  void re_set () override;
+  void re_set (program_space *pspace) override;
   int breakpoint_hit (const struct bp_location *bl,
 		      const address_space *aspace,
 		      CORE_ADDR bp_addr,
@@ -1549,7 +1553,36 @@ breakpoint_set_thread (struct breakpoint *b, int thread)
   int old_thread = b->thread;
   b->thread = thread;
   if (old_thread != thread)
-    notify_breakpoint_modified (b);
+    {
+      /* If THREAD is in a different program_space than OLD_THREAD, or the
+	 breakpoint has switched to or from being thread-specific, then we
+	 need to re-set the locations of this breakpoint.  First, figure
+	 out the program_space for the old and new threads, use a value of
+	 nullptr to indicate the breakpoint is in all program spaces.  */
+      program_space *old_pspace = nullptr;
+      if (old_thread != -1)
+	{
+	  struct thread_info *thr = find_thread_global_id (old_thread);
+	  gdb_assert (thr != nullptr);
+	  old_pspace = thr->inf->pspace;
+	}
+
+      program_space *new_pspace = nullptr;
+      if (thread != -1)
+	{
+	  struct thread_info *thr = find_thread_global_id (thread);
+	  gdb_assert (thr != nullptr);
+	  new_pspace = thr->inf->pspace;
+	}
+
+      /* If the program space has changed for this breakpoint, then
+	 re-evaluate it's locations.  */
+      if (old_pspace != new_pspace)
+	breakpoint_re_set_one (b, new_pspace);
+
+      /* Let others know the breakpoint has changed.  */
+      notify_breakpoint_modified (b);
+    }
 }
 
 /* See breakpoint.h.  */
@@ -1568,7 +1601,34 @@ breakpoint_set_inferior (struct breakpoint *b, int inferior)
   int old_inferior = b->inferior;
   b->inferior = inferior;
   if (old_inferior != inferior)
-    notify_breakpoint_modified (b);
+    {
+      /* If INFERIOR is in a different program_space than OLD_INFERIOR, or
+	 the breakpoint has switch to or from inferior-specific, then we
+	 need to re-set the locations of this breakpoint.  First, figure
+	 out the program_space for the old and new inferiors, use a value
+	 of nullptr to indicate the breakpoint is in all program
+	 spaces.  */
+      program_space *old_pspace = nullptr;
+      if (old_inferior != -1)
+	{
+	  struct inferior *inf = find_inferior_id (old_inferior);
+	  gdb_assert (inf != nullptr);
+	  old_pspace = inf->pspace;
+	}
+
+      program_space *new_pspace = nullptr;
+      if (inferior != -1)
+	{
+	  struct inferior *inf = find_inferior_id (inferior);
+	  gdb_assert (inf != nullptr);
+	  new_pspace = inf->pspace;
+	}
+
+      if (old_pspace != new_pspace)
+	breakpoint_re_set_one (b, new_pspace);
+
+      notify_breakpoint_modified (b);
+    }
 }
 
 /* See breakpoint.h.  */
@@ -8124,10 +8184,15 @@ catchpoint::catchpoint (struct gdbarch *gdbarch, bool temp,
 /* See breakpoint.h.  */
 
 void
-catchpoint::re_set ()
+catchpoint::re_set (program_space *filter_pspace)
 {
   /* All catchpoints are associated with a specific program_space.  */
   gdb_assert (pspace != nullptr);
+
+  /* If only a single program space changed, and it's not the program space
+     for which this catchpoint applies, then there's nothing to do.  */
+  if (filter_pspace != nullptr && filter_pspace != pspace)
+    return;
 
   /* Catchpoints have a single dummy location.  */
   gdb_assert (locations ().size () == 1);
@@ -8852,7 +8917,8 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 
 static void
 parse_breakpoint_sals (location_spec *locspec,
-		       struct linespec_result *canonical)
+		       struct linespec_result *canonical,
+		       struct program_space *search_pspace)
 {
   if (locspec->type () == LINESPEC_LOCATION_SPEC)
     {
@@ -8916,7 +8982,7 @@ parse_breakpoint_sals (location_spec *locspec,
 	      && strchr ("+-", spec[0]) != NULL
 	      && spec[1] != '['))
 	{
-	  decode_line_full (locspec, DECODE_LINE_FUNFIRSTLINE, NULL,
+	  decode_line_full (locspec, DECODE_LINE_FUNFIRSTLINE, search_pspace,
 			    get_last_displayed_symtab (),
 			    get_last_displayed_line (),
 			    canonical, NULL, NULL);
@@ -8924,7 +8990,7 @@ parse_breakpoint_sals (location_spec *locspec,
 	}
     }
 
-  decode_line_full (locspec, DECODE_LINE_FUNFIRSTLINE, NULL,
+  decode_line_full (locspec, DECODE_LINE_FUNFIRSTLINE, search_pspace,
 		    cursal.symtab, cursal.line, canonical, NULL, NULL);
 }
 
@@ -9021,6 +9087,39 @@ breakpoint_ops_for_location_spec_type (enum location_spec_type locspec_type,
       else
 	return &code_breakpoint_ops;
     }
+}
+
+/* Return the program space to use as a filter when searching for locations
+   of a breakpoint specific to THREAD or INFERIOR.  If THREAD and INFERIOR
+   are both -1, meaning all threads/inferiors, then this function returns
+   nullptr, indicating no program space filtering should be performed.
+   Otherwise, this function returns the program space for the inferior that
+   contains THREAD (when THREAD is not -1), or the program space for
+   INFERIOR (when INFERIOR is not -1).  */
+
+static struct program_space *
+find_program_space_for_breakpoint (int thread, int inferior)
+{
+  if (thread != -1)
+    {
+      gdb_assert (inferior == -1);
+
+      struct thread_info *thr = find_thread_global_id (thread);
+      gdb_assert (thr != nullptr);
+      gdb_assert (thr->inf != nullptr);
+      return thr->inf->pspace;
+    }
+  else if (inferior != -1)
+    {
+      gdb_assert (thread == -1);
+
+      struct inferior *inf = find_inferior_id (inferior);
+      gdb_assert (inf != nullptr);
+
+      return inf->pspace;
+    }
+
+  return nullptr;
 }
 
 /* See breakpoint.h.  */
@@ -9124,7 +9223,10 @@ create_breakpoint (struct gdbarch *gdbarch,
 
   try
     {
-      ops->create_sals_from_location_spec (locspec, &canonical);
+      struct program_space *search_pspace
+	= find_program_space_for_breakpoint (thread, inferior);
+      ops->create_sals_from_location_spec (locspec, &canonical,
+					   search_pspace);
     }
   catch (const gdb_exception_error &e)
     {
@@ -9597,7 +9699,7 @@ break_range_command (const char *arg, int from_tty)
   arg_start = arg;
   location_spec_up start_locspec
     = string_to_location_spec (&arg, current_language);
-  parse_breakpoint_sals (start_locspec.get (), &canonical_start);
+  parse_breakpoint_sals (start_locspec.get (), &canonical_start, nullptr);
 
   if (arg[0] != ',')
     error (_("Too few arguments."));
@@ -9698,7 +9800,7 @@ watchpoint_exp_is_const (const struct expression *exp)
 /* Implement the "re_set" method for watchpoints.  */
 
 void
-watchpoint::re_set ()
+watchpoint::re_set (struct program_space *pspace)
 {
   /* Watchpoint can be either on expression using entirely global
      variables, or it can be on local variables.
@@ -11810,7 +11912,7 @@ breakpoint::print_recreate (struct ui_file *fp) const
 /* Default breakpoint_ops methods.  */
 
 void
-code_breakpoint::re_set ()
+code_breakpoint::re_set (struct program_space *pspace)
 {
   /* FIXME: is this still reachable?  */
   if (breakpoint_location_spec_empty_p (this))
@@ -11820,7 +11922,7 @@ code_breakpoint::re_set ()
       return;
     }
 
-  re_set_default ();
+  re_set_default (pspace);
 }
 
 int
@@ -12026,7 +12128,7 @@ code_breakpoint::decode_location_spec (location_spec *locspec,
 /* Virtual table for internal breakpoints.  */
 
 void
-internal_breakpoint::re_set ()
+internal_breakpoint::re_set (struct program_space *pspace)
 {
   switch (type)
     {
@@ -12119,7 +12221,7 @@ internal_breakpoint::print_mention () const
 /* Virtual table for momentary breakpoints  */
 
 void
-momentary_breakpoint::re_set ()
+momentary_breakpoint::re_set (struct program_space *pspace)
 {
   /* Keep temporary breakpoints, which can be encountered when we step
      over a dlopen call and solib_add is resetting the breakpoints.
@@ -12160,12 +12262,13 @@ longjmp_breakpoint::~longjmp_breakpoint ()
 
 static void
 bkpt_probe_create_sals_from_location_spec (location_spec *locspec,
-					   struct linespec_result *canonical)
+					   struct linespec_result *canonical,
+					   struct program_space *search_pspace)
 
 {
   struct linespec_sals lsal;
 
-  lsal.sals = parse_probes (locspec, NULL, canonical);
+  lsal.sals = parse_probes (locspec, search_pspace, canonical);
   lsal.canonical = xstrdup (canonical->locspec->to_string ());
   canonical->lsals.push_back (std::move (lsal));
 }
@@ -12255,9 +12358,9 @@ tracepoint::print_recreate (struct ui_file *fp) const
 }
 
 void
-dprintf_breakpoint::re_set ()
+dprintf_breakpoint::re_set (struct program_space *pspace)
 {
-  re_set_default ();
+  re_set_default (pspace);
 
   /* 1 - connect to target 1, that can run breakpoint commands.
      2 - create a dprintf, which resolves fine.
@@ -12311,8 +12414,10 @@ dprintf_breakpoint::after_condition_true (struct bpstat *bs)
    markers (`-m').  */
 
 static void
-strace_marker_create_sals_from_location_spec (location_spec *locspec,
-					      struct linespec_result *canonical)
+strace_marker_create_sals_from_location_spec
+	(location_spec *locspec,
+	 struct linespec_result *canonical,
+	 struct program_space *search_pspace)
 {
   struct linespec_sals lsal;
   const char *arg_start, *arg;
@@ -12836,11 +12941,31 @@ update_breakpoint_locations (code_breakpoint *b,
      all locations are in the same shared library, that was unloaded.
      We'd like to retain the location, so that when the library is
      loaded again, we don't loose the enabled/disabled status of the
-     individual locations.  */
+     individual locations.
+
+     Thread specific breakpoints will also trigger this case if the thread
+     is changed to a different program space, and all of the old locations
+     go out of scope.  In this case we do (currently) discard the old
+     locations -- we assume the change in thread is permanent and the old
+     locations will never come back into scope.  */
   if (all_locations_are_pending (b, filter_pspace) && sals.empty ())
-    return;
+    {
+      if (b->thread != -1)
+	b->clear_locations ();
+      return;
+    }
 
   bp_location_list existing_locations = b->steal_locations (filter_pspace);
+
+  /* If this is a thread-specific breakpoint then any locations left on the
+     breakpoint are for a program space in which the thread of interest
+     does not operate.  This can happen when the user changes the thread of
+     a thread-specific breakpoint.
+
+     We assume that the change in thread is permanent, and that the old
+     locations will never be used again, so discard them now.  */
+  if (b->thread != -1)
+    b->clear_locations ();
 
   for (const auto &sal : sals)
     {
@@ -13007,38 +13132,43 @@ code_breakpoint::location_spec_to_sals (location_spec *locspec,
    locations.  */
 
 void
-code_breakpoint::re_set_default ()
+code_breakpoint::re_set_default (struct program_space *filter_pspace)
 {
-  struct program_space *filter_pspace = current_program_space;
   std::vector<symtab_and_line> expanded, expanded_end;
 
-  int found;
-  std::vector<symtab_and_line> sals = location_spec_to_sals (locspec.get (),
-							     filter_pspace,
-							     &found);
-  if (found)
-    expanded = std::move (sals);
+  /* If this breakpoint is thread-specific then find the program space in
+     which the specific thread exists.  Otherwise, for breakpoints that are
+     not thread-specific THREAD_PSPACE will be nullptr.  */
+  program_space *bp_pspace
+    = find_program_space_for_breakpoint (this->thread, this->inferior);
 
-  if (locspec_range_end != nullptr)
+  /* If this is not a thread or inferior specific breakpoint, or it is a
+     thread or inferior specific breakpoint but we are looking for new
+     locations in the program space that the specific thread or inferior is
+     running, then look for new locations for this breakpoint.  */
+  if (bp_pspace == nullptr || filter_pspace == bp_pspace)
     {
-      std::vector<symtab_and_line> sals_end
-	= location_spec_to_sals (locspec_range_end.get (),
-				 filter_pspace, &found);
+      int found;
+      std::vector<symtab_and_line> sals
+	= location_spec_to_sals (locspec.get (), filter_pspace, &found);
       if (found)
-	expanded_end = std::move (sals_end);
+	expanded = std::move (sals);
+
+      if (locspec_range_end != nullptr)
+	{
+	  std::vector<symtab_and_line> sals_end
+	    = location_spec_to_sals (locspec_range_end.get (),
+				     filter_pspace, &found);
+	  if (found)
+	    expanded_end = std::move (sals_end);
+	}
     }
 
+  /* Update the locations for this breakpoint.  For thread-specific
+     breakpoints this will remove any old locations that are for the wrong
+     program space -- this can happen if the user changes the thread of a
+     thread-specific breakpoint.  */
   update_breakpoint_locations (this, filter_pspace, expanded, expanded_end);
-}
-
-/* Default method for creating SALs from an address string.  It basically
-   calls parse_breakpoint_sals.  Return 1 for success, zero for failure.  */
-
-static void
-create_sals_from_location_spec_default (location_spec *locspec,
-					struct linespec_result *canonical)
-{
-  parse_breakpoint_sals (locspec, canonical);
 }
 
 /* Re-set breakpoint locations for the current program space.
@@ -13075,7 +13205,7 @@ breakpoint_re_set (void)
 	  {
 	    input_radix = b.input_radix;
 	    set_language (b.language);
-	    b.re_set ();
+	    b.re_set (current_program_space);
 	  }
 	catch (const gdb_exception &ex)
 	  {
@@ -13092,6 +13222,53 @@ breakpoint_re_set (void)
   create_longjmp_master_breakpoint ();
   create_std_terminate_master_breakpoint ();
   create_exception_master_breakpoint ();
+
+  /* Now we can insert.  */
+  update_global_location_list (UGLL_MAY_INSERT);
+}
+
+/* Re-set locations for breakpoint B in FILTER_PSPACE.  If FILTER_PSPACE is
+   nullptr then re-set locations for B in all program spaces.  Locations
+   bound to program spaces other than FILTER_PSPACE are left untouched.  */
+
+static void
+breakpoint_re_set_one (breakpoint *b, program_space *filter_pspace)
+{
+  {
+    scoped_restore_current_language save_language;
+    scoped_restore save_input_radix = make_scoped_restore (&input_radix);
+    scoped_restore_current_pspace_and_thread restore_pspace_thread;
+
+    /* To ::re_set each breakpoint we set the current_language to the
+       language of the breakpoint before re-evaluating the breakpoint's
+       location.  This change can unfortunately get undone by accident if
+       the language_mode is set to auto, and we either switch frames, or
+       more likely in this context, we select the current frame.
+
+       We prevent this by temporarily turning the language_mode to
+       language_mode_manual.  We restore it once all breakpoints
+       have been reset.  */
+    scoped_restore save_language_mode = make_scoped_restore (&language_mode);
+    language_mode = language_mode_manual;
+
+    /* Note: we must not try to insert locations until after all
+       breakpoints have been re-set.  Otherwise, e.g., when re-setting
+       breakpoint 1, we'd insert the locations of breakpoint 2, which
+       hadn't been re-set yet, and thus may have stale locations.  */
+
+    try
+      {
+	input_radix = b->input_radix;
+	set_language (b->language);
+	b->re_set (filter_pspace);
+      }
+    catch (const gdb_exception &ex)
+      {
+	exception_fprintf (gdb_stderr, ex,
+			   "Error in re-setting breakpoint %d: ",
+			   b->number);
+      }
+  }
 
   /* Now we can insert.  */
   update_global_location_list (UGLL_MAY_INSERT);
