@@ -31,14 +31,17 @@ standard_testfile .c
 # Using `-gctf` generates full-fledged CTF debug information.
 set opts {}
 lappend opts additional_flags=-gctf
-lappend opts ldflags=-Wl,--strip-debug
 lappend opts ldflags=-Wl,--ctf-variables
 lappend opts nowarnings
 
-if { [prepare_for_testing "failed to prepare" ${testfile} \
+if { [build_executable "failed to prepare" ${testfile} \
 	  [list $srcfile] $opts] } {
     return 0
 }
+
+clean_restart
+gdb_test_no_output "set always-read-ctf on"
+gdb_load $binfile
 
 #
 # set it up at a breakpoint so we can play with the variable values

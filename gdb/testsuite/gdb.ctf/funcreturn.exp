@@ -30,13 +30,16 @@ standard_testfile whatis.c
 set opts {}
 lappend opts additional_flags=-gctf
 lappend opts ldflags=-Wl,--export-dynamic
-lappend opts ldflags=-Wl,--strip-debug
 lappend opts nowarning
 
-if { [prepare_for_testing "failed to prepare" ${testfile} \
+if { [build_executable "failed to prepare" ${testfile} \
 	  [list $srcfile] $opts] } {
     return 0
 }
+
+clean_restart
+gdb_test_no_output "set always-read-ctf on"
+gdb_load $binfile
 
 # test print command with functions return type
 set void "(void|)"

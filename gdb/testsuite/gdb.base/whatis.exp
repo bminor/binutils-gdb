@@ -49,10 +49,14 @@ proc do_test {dir options} {
     global srcfile testfile gcc_compiled
 
     set binfile [standard_output_file ${dir}/${testfile}]
-    if { [prepare_for_testing "failed to prepare" ${binfile} \
+    if { [build_executable "failed to prepare" ${binfile} \
 	      [list $srcfile] $options] } {
 	return 0
     }
+
+    clean_restart
+    gdb_test_no_output "set always-read-ctf on"
+    gdb_load $binfile
 
     #
     # Test whatis command with basic C types
@@ -587,7 +591,6 @@ proc do_test {dir options} {
 
 set ctf_opts {}
 lappend ctf_opts additional_flags=-gctf
-lappend ctf_opts ldflags=-Wl,--strip-debug
 lappend ctf_opts ldflags=-Wl,--ctf-variables
 
 # Build up the set of debug formats for which we will run this test.
