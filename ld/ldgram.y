@@ -672,7 +672,10 @@ statement:
 		{
 		  /* 'value' is a memory leak, do we care?  */
 		  etree_type *value = $3;
-		  lang_add_string (value->value.value, $5);
+		  if (value->type.node_code == INT)
+		    lang_add_string (value->value.value, $5);
+		  else
+		    einfo (_("%X%P:%pS: ASCII expression must be an integer\n"), NULL);
 		}
 	| ASCIZ NAME
 		{
