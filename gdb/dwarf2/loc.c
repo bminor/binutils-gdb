@@ -711,7 +711,11 @@ call_site_target::iterate_over_addresses
 			  : msym.minsym->print_name ()));
 			
 	  }
-	callback (msym.value_address ());
+
+	CORE_ADDR addr = (gdbarch_convert_from_func_ptr_addr
+			  (call_site_gdbarch, msym.value_address (),
+			   current_inferior ()->top_target ()));
+	callback (addr);
       }
       break;
 
