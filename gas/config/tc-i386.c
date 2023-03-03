@@ -3593,16 +3593,9 @@ build_vex_prefix (const insn_template *t)
       && (i.tm.opcode_modifier.load || i.tm.opcode_modifier.d)
       && i.rex == REX_B)
     {
-      unsigned int xchg = i.operands - 1;
-      union i386_op temp_op;
-      i386_operand_type temp_type;
+      unsigned int xchg;
 
-      temp_type = i.types[xchg];
-      i.types[xchg] = i.types[0];
-      i.types[0] = temp_type;
-      temp_op = i.op[xchg];
-      i.op[xchg] = i.op[0];
-      i.op[0] = temp_op;
+      swap_2_operands (0, i.operands - 1);
 
       gas_assert (i.rm.mode == 3);
 
@@ -3632,8 +3625,6 @@ build_vex_prefix (const insn_template *t)
       && !(i.vex.register_specifier->reg_flags & RegRex))
     {
       unsigned int xchg = i.operands - i.reg_operands;
-      union i386_op temp_op;
-      i386_operand_type temp_type;
 
       gas_assert (i.tm.opcode_space == SPACE_0F);
       gas_assert (!i.tm.opcode_modifier.sae);
@@ -3641,12 +3632,7 @@ build_vex_prefix (const insn_template *t)
                                       &i.types[i.operands - 3]));
       gas_assert (i.rm.mode == 3);
 
-      temp_type = i.types[xchg];
-      i.types[xchg] = i.types[xchg + 1];
-      i.types[xchg + 1] = temp_type;
-      temp_op = i.op[xchg];
-      i.op[xchg] = i.op[xchg + 1];
-      i.op[xchg + 1] = temp_op;
+      swap_2_operands (xchg, xchg + 1);
 
       i.rex = 0;
       xchg = i.rm.regmem | 8;
