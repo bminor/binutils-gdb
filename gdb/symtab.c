@@ -5054,19 +5054,19 @@ global_symbol_searcher::search () const
 /* See symtab.h.  */
 
 std::string
-symbol_to_info_string (struct symbol *sym, int block,
-		       enum search_domain kind)
+symbol_to_info_string (struct symbol *sym, int block)
 {
   std::string str;
 
   gdb_assert (block == GLOBAL_BLOCK || block == STATIC_BLOCK);
 
-  if (kind != TYPES_DOMAIN && block == STATIC_BLOCK)
+  if (block == STATIC_BLOCK
+      && sym->domain () == VAR_DOMAIN
+      && sym->aclass () != LOC_TYPEDEF)
     str += "static ";
 
   /* Typedef that is not a C++ class.  */
-  if (kind == TYPES_DOMAIN
-      && sym->domain () != STRUCT_DOMAIN)
+  if (sym->domain () == VAR_DOMAIN && sym->aclass () == LOC_TYPEDEF)
     {
       string_file tmp_stream;
 
@@ -5085,9 +5085,7 @@ symbol_to_info_string (struct symbol *sym, int block,
       str += tmp_stream.string ();
     }
   /* variable, func, or typedef-that-is-c++-class.  */
-  else if (kind < TYPES_DOMAIN
-	   || (kind == TYPES_DOMAIN
-	       && sym->domain () == STRUCT_DOMAIN))
+  else if (sym->domain () == VAR_DOMAIN || sym->domain () == STRUCT_DOMAIN)
     {
       string_file tmp_stream;
 
@@ -5102,23 +5100,21 @@ symbol_to_info_string (struct symbol *sym, int block,
   /* Printing of modules is currently done here, maybe at some future
      point we might want a language specific method to print the module
      symbol so that we can customise the output more.  */
-  else if (kind == MODULES_DOMAIN)
+  else if (sym->domain () == MODULE_DOMAIN)
     str += sym->print_name ();
 
   return str;
 }
 
-/* Helper function for symbol info commands, for example 'info functions',
-   'info variables', etc.  KIND is the kind of symbol we searched for, and
-   BLOCK is the type of block the symbols was found in, either GLOBAL_BLOCK
-   or STATIC_BLOCK.  SYM is the symbol we found.  If LAST is not NULL,
-   print file and line number information for the symbol as well.  Skip
-   printing the filename if it matches LAST.  */
+/* Helper function for symbol info commands, for example 'info
+   functions', 'info variables', etc.  BLOCK is the type of block the
+   symbols was found in, either GLOBAL_BLOCK or STATIC_BLOCK.  SYM is
+   the symbol we found.  If LAST is not NULL, print file and line
+   number information for the symbol as well.  Skip printing the
+   filename if it matches LAST.  */
 
 static void
-print_symbol_info (enum search_domain kind,
-		   struct symbol *sym,
-		   int block, const char *last)
+print_symbol_info (struct symbol *sym, int block, const char *last)
 {
   scoped_switch_to_sym_language_if_auto l (sym);
   struct symtab *s = sym->symtab ();
@@ -5140,7 +5136,7 @@ print_symbol_info (enum search_domain kind,
 	gdb_puts ("\t");
     }
 
-  std::string str = symbol_to_info_string (sym, block, kind);
+  std::string str = symbol_to_info_string (sym, block);
   gdb_printf ("%s\n", str.c_str ());
 }
 
@@ -5236,10 +5232,7 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
 	}
       else
 	{
-	  print_symbol_info (kind,
-			     p.symbol,
-			     p.block,
-			     last_filename);
+	  print_symbol_info (p.symbol, p.block, last_filename);
 	  last_filename
 	    = symtab_to_filename_for_display (p.symbol->symtab ());
 	}
@@ -5475,7 +5468,7 @@ rbreak_command (const char *regexp, int from_tty)
 	  string = string_printf ("%s:'%s'", fullname,
 				  p.symbol->linkage_name ());
 	  break_command (&string[0], from_tty);
-	  print_symbol_info (FUNCTIONS_DOMAIN, p.symbol, p.block, NULL);
+	  print_symbol_info (p.symbol, p.block, nullptr);
 	}
       else
 	{
@@ -6838,8 +6831,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 	  last_filename = "";
 	}
 
-      print_symbol_info (FUNCTIONS_DOMAIN, q.symbol, q.block,
-			 last_filename);
+      print_symbol_info (q.symbol, q.block, last_filename);
       last_filename
 	= symtab_to_filename_for_display (q.symbol->symtab ());
     }

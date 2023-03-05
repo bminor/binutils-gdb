@@ -87,7 +87,7 @@ output_debug_symbol (ui_out *uiout, enum search_domain kind,
       type_print (sym->type (), "", &tmp_stream, -1);
       uiout->field_string ("type", tmp_stream.string ());
 
-      std::string str = symbol_to_info_string (sym, block, kind);
+      std::string str = symbol_to_info_string (sym, block);
       uiout->field_string ("description", str);
     }
 }
