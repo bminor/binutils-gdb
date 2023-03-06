@@ -41,6 +41,7 @@
 #include "mri.h"
 #include "ldctor.h"
 #include "ldlex.h"
+#include "lddigest.h"
 
 #ifndef YYDEBUG
 #define YYDEBUG 1
@@ -130,6 +131,9 @@ static int error_index;
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
 %token SORT_BY_INIT_PRIORITY
+%token DIGEST POLY POLYI TABLE
+%token TIMESTAMP
+%token DEBUG ON OFF
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION FORCE_GROUP_ALLOCATION
@@ -668,7 +672,7 @@ statement:
 		{
 		  lang_add_data ((int) $1, $3);
 		}
-        | ASCII '(' mustbe_exp ')' NAME
+	| ASCII '(' mustbe_exp ')' NAME
 		{
 		  /* 'value' is a memory leak, do we care?  */
 		  etree_type *value = $3;
@@ -685,6 +689,31 @@ statement:
 		{
 		  lang_add_fill ($3);
 		}
+	| DIGEST NAME
+		{ /* CRC_ADDRESS is set in <polynome>, but polynome reserves space, so we use a temporary */
+		  digest_label = lang_get_label($2, &digest_big_endian);
+		  lang_add_assignment (exp_assign (digest_label, exp_nameop (NAME, "."), false));
+		}
+		polynome '(' mustbe_exp ',' mustbe_exp ')'
+		{
+		  if (polynome_valid)
+		    {
+		      lang_add_assignment (exp_assign (CRC_ADDRESS, exp_nameop (NAME, digest_label), false));
+		      lang_add_assignment (exp_assign (CRC_START, $6, false));
+		      lang_add_assignment (exp_assign (CRC_END,   $8, false));
+		    }
+		}
+	| DIGEST TABLE NAME
+		{
+		  bool       big_endian;
+		  const char *label = lang_get_label($3, &big_endian);
+		  lang_add_assignment (exp_assign (label, exp_nameop (NAME,"."), false));
+		  lang_add_digest_table (big_endian);
+		}
+	| TIMESTAMP
+		{
+		  lang_add_timestamp ();
+		}
 	| ASSERT_K
 		{ ldlex_expression (); }
 	  '(' exp ',' NAME ')' separator
@@ -692,12 +721,42 @@ statement:
 		  ldlex_popstate ();
 		  lang_add_assignment (exp_assert ($4, $6));
 		}
+	| DEBUG ON
+		{
+		  yydebug = 1;
+		}
+	| DEBUG OFF
+		{
+		  yydebug = 0;
+		}
 	| INCLUDE filename
 		{
 		  ldfile_open_command_file ($2);
 		}
+
 	  statement_list_opt END
 	;
+
+polynome:
+	NAME
+		{
+		  polynome_valid = lang_set_digest($1);
+		}
+	| POLY '(' mustbe_exp ','
+		   mustbe_exp ',' mustbe_exp ',' mustbe_exp ','
+		   mustbe_exp ',' mustbe_exp ',' mustbe_exp ')'
+		{
+		  lang_add_digest (
+			$3->value.value,	/* size			*/
+			$5->value.value,	/* polynome		*/
+			$7->value.value,	/* initial value	*/
+			$9->value.value,	/* xor     value	*/
+			$11->value.value,	/* input   reflected	*/
+			$13->value.value,	/* output  reflected	*/
+			$15->value.value	/* reciprocal		*/
+			);
+		  polynome_valid = true;
+		}
 
 statement_list:
 		statement_list statement
