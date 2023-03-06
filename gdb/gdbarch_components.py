@@ -374,7 +374,6 @@ Function(
     name="read_pc",
     params=[("readable_regcache *", "regcache")],
     predicate=True,
-    invalid=True,
 )
 
 Function(
@@ -382,7 +381,6 @@ Function(
     name="write_pc",
     params=[("struct regcache *", "regcache"), ("CORE_ADDR", "val")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -411,7 +409,6 @@ Method(
         ("gdb_byte *", "buf"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -425,7 +422,6 @@ never be called.
     name="pseudo_register_read_value",
     params=[("readable_regcache *", "regcache"), ("int", "cookednum")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -437,7 +433,6 @@ Method(
         ("const gdb_byte *", "buf"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -469,7 +464,6 @@ Return -1 if something goes wrong, 0 otherwise.
     name="ax_pseudo_register_collect",
     params=[("struct agent_expr *", "ax"), ("int", "reg")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -482,7 +476,6 @@ Return -1 if something goes wrong, 0 otherwise.
     name="ax_pseudo_register_push_stack",
     params=[("struct agent_expr *", "ax"), ("int", "reg")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -495,7 +488,6 @@ UIOUT is the output stream where the handler will place information.
     name="report_signal_info",
     params=[("struct ui_out *", "uiout"), ("enum gdb_signal", "siggnal")],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -649,7 +641,6 @@ Method(
         ("CORE_ADDR", "struct_addr"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -673,7 +664,6 @@ Method(
         ("struct regcache *", "regcache"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -721,7 +711,6 @@ Method(
         ("const char *", "args"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -763,7 +752,6 @@ FRAME corresponds to the longjmp frame.
     name="get_longjmp_target",
     params=[("frame_info_ptr", "frame"), ("CORE_ADDR *", "pc")],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -845,7 +833,6 @@ Method(
     name="integer_to_address",
     params=[("struct type *", "type"), ("const gdb_byte *", "buf")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -952,7 +939,6 @@ Method(
     name="skip_main_prologue",
     params=[("CORE_ADDR", "ip")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -973,7 +959,6 @@ is not used.
     name="skip_entrypoint",
     params=[("CORE_ADDR", "ip")],
     predicate=True,
-    invalid=True,
 )
 
 Function(
@@ -1034,7 +1019,6 @@ Method(
     name="adjust_breakpoint_address",
     params=[("CORE_ADDR", "bpaddr")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1094,7 +1078,6 @@ Fetch the target specific address used to represent a load module.
     name="fetch_tls_load_module_address",
     params=[("struct objfile *", "objfile")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1109,7 +1092,6 @@ be zero for statically linked multithreaded inferiors.
     name="get_thread_local_address",
     params=[("ptid_t", "ptid"), ("CORE_ADDR", "lm_addr"), ("CORE_ADDR", "offset")],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -1143,7 +1125,6 @@ frame-base.  Enable frame-base before frame-unwind.
     name="frame_num_args",
     params=[("frame_info_ptr", "frame")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1151,7 +1132,6 @@ Method(
     name="frame_align",
     params=[("CORE_ADDR", "address")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1314,7 +1294,6 @@ past a conditional branch to self.
     name="software_single_step",
     params=[("struct regcache *", "regcache")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1326,7 +1305,6 @@ further single-step is needed before the instruction finishes.
     name="single_step_through_delay",
     params=[("frame_info_ptr", "frame")],
     predicate=True,
-    invalid=True,
 )
 
 Function(
@@ -1425,7 +1403,6 @@ the main symbol table and DWARF-2 records.
     name="elf_make_msymbol_special",
     params=[("asymbol *", "sym"), ("struct minimal_symbol *", "msym")],
     predicate=True,
-    invalid=True,
 )
 
 Function(
@@ -1513,7 +1490,6 @@ Function(
     name="address_class_type_flags",
     params=[("int", "byte_size"), ("int", "dwarf2_addr_class")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1521,7 +1497,6 @@ Method(
     name="address_class_type_flags_to_name",
     params=[("type_instance_flags", "type_flags")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1546,7 +1521,6 @@ type_flags was set, false otherwise.
     name="address_class_name_to_type_flags",
     params=[("const char *", "name"), ("type_instance_flags *", "type_flags_ptr")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1572,7 +1546,6 @@ Fetch the pointer to the ith function argument.
         ("struct type *", "type"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1592,7 +1565,6 @@ sections.
         ("const struct regcache *", "regcache"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1603,7 +1575,6 @@ Create core file notes
     name="make_corefile_notes",
     params=[("bfd *", "obfd"), ("int *", "note_size")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1614,7 +1585,6 @@ Find core file memory regions
     name="find_memory_regions",
     params=[("find_memory_region_ftype", "func"), ("void *", "data")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1625,7 +1595,6 @@ Given a bfd OBFD, segment ADDRESS and SIZE, create a memory tag section to be du
     name="create_memtag_section",
     params=[("bfd *", "obfd"), ("CORE_ADDR", "address"), ("size_t", "size")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1636,7 +1605,6 @@ Given a memory tag section OSEC, fill OSEC's contents with the appropriate tag d
     name="fill_memtag_section",
     params=[("asection *", "osec")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1654,7 +1622,6 @@ If no tags were found, return an empty vector.
         ("size_t", "length"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1668,7 +1635,6 @@ failed, otherwise, return the red length of READBUF.
     name="core_xfer_shared_libraries",
     params=[("gdb_byte *", "readbuf"), ("ULONGEST", "offset"), ("ULONGEST", "len")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1681,7 +1647,6 @@ Return the number of bytes read (zero indicates failure).
     name="core_xfer_shared_libraries_aix",
     params=[("gdb_byte *", "readbuf"), ("ULONGEST", "offset"), ("ULONGEST", "len")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1692,7 +1657,6 @@ How the core target converts a PTID from a core file to a string.
     name="core_pid_to_str",
     params=[("ptid_t", "ptid")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1703,7 +1667,6 @@ How the core target extracts the name of a thread from a core file.
     name="core_thread_name",
     params=[("struct thread_info *", "thr")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1716,7 +1679,6 @@ of bytes read (zero indicates EOF, a negative value indicates failure).
     name="core_xfer_siginfo",
     params=[("gdb_byte *", "readbuf"), ("ULONGEST", "offset"), ("ULONGEST", "len")],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -1727,7 +1689,6 @@ BFD target to use when generating a core file.
     name="gcore_bfd_target",
     predicate=True,
     predefault="0",
-    invalid=True,
     printer="pstring (gdbarch->gcore_bfd_target)",
 )
 
@@ -1773,7 +1734,6 @@ The maximum length of an instruction on this architecture in bytes.
     name="max_insn_length",
     predicate=True,
     predefault="0",
-    invalid=True,
 )
 
 Method(
@@ -1806,7 +1766,6 @@ that case.
     name="displaced_step_copy_insn",
     params=[("CORE_ADDR", "from"), ("CORE_ADDR", "to"), ("struct regcache *", "regs")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1856,7 +1815,6 @@ see the comments in infrun.c.
     ],
     predicate=True,
     predefault="NULL",
-    invalid=True,
 )
 
 Method(
@@ -1869,7 +1827,6 @@ Throw an exception if any unexpected error happens.
     name="displaced_step_prepare",
     params=[("thread_info *", "thread"), ("CORE_ADDR &", "displaced_pc")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1891,7 +1848,6 @@ Return the closure associated to the displaced step buffer that is at ADDR.
     name="displaced_step_copy_insn_closure_by_addr",
     params=[("inferior *", "inf"), ("CORE_ADDR", "addr")],
     predicate=True,
-    invalid=True,
 )
 
 Function(
@@ -1924,7 +1880,6 @@ offset adjusted; etc.
     params=[("CORE_ADDR *", "to"), ("CORE_ADDR", "from")],
     predicate=True,
     predefault="NULL",
-    invalid=True,
 )
 
 Function(
@@ -1935,7 +1890,6 @@ Refresh overlay mapped state for section OSECT.
     name="overlay_update",
     params=[("struct obj_section *", "osect")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1943,7 +1897,6 @@ Method(
     name="core_read_description",
     params=[("struct target_ops *", "target"), ("bfd *", "abfd")],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -1967,7 +1920,6 @@ Return -1 if something goes wrong, 0 otherwise.
     name="process_record",
     params=[("struct regcache *", "regcache"), ("CORE_ADDR", "addr")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1979,7 +1931,6 @@ Return -1 if something goes wrong, 0 otherwise.
     name="process_record_signal",
     params=[("struct regcache *", "regcache"), ("enum gdb_signal", "signal")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -1996,7 +1947,6 @@ headers.  This is mainly used when cross-debugging core files ---
     name="gdb_signal_from_target",
     params=[("int", "signo")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2013,7 +1963,6 @@ signal number is invalid.
     name="gdb_signal_to_target",
     params=[("enum gdb_signal", "signal")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2026,7 +1975,6 @@ Return a type suitable to inspect extra signal information.
     name="get_siginfo_type",
     params=[],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2037,7 +1985,6 @@ Record architecture-specific information from the symbol table.
     name="record_special_symbol",
     params=[("struct objfile *", "objfile"), ("asymbol *", "sym")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2049,7 +1996,6 @@ Get architecture-specific system calls information from registers.
     name="get_syscall_number",
     params=[("thread_info *", "thread")],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -2219,7 +2165,6 @@ something like `(%', do not match just the `('.
     name="stap_is_single_operand",
     params=[("const char *", "s")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2250,7 +2195,6 @@ parser), and should advance the buffer pointer (p->arg).
     name="stap_parse_special_token",
     params=[("struct stap_parse_info *", "p")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2287,7 +2231,6 @@ The rationale for this can be found at PR breakpoints/24541.
         ("int", "regnum"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2300,7 +2243,6 @@ NARG must be >= 0.
     name="dtrace_parse_probe_argument",
     params=[("int", "narg")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2312,7 +2254,6 @@ corresponding to a disabled DTrace is-enabled probe.
     name="dtrace_probe_is_enabled",
     params=[("CORE_ADDR", "addr")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2323,7 +2264,6 @@ Enable a DTrace is-enabled probe at ADDR.
     name="dtrace_enable_probe",
     params=[("CORE_ADDR", "addr")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2334,7 +2274,6 @@ Disable a DTrace is-enabled probe at ADDR.
     name="dtrace_disable_probe",
     params=[("CORE_ADDR", "addr")],
     predicate=True,
-    invalid=True,
 )
 
 Value(
@@ -2476,7 +2415,6 @@ Implement the "info proc" command.
     name="info_proc",
     params=[("const char *", "args"), ("enum info_proc_what", "what")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2489,7 +2427,6 @@ one for live targets.
     name="core_info_proc",
     params=[("const char *", "args"), ("enum info_proc_what", "what")],
     predicate=True,
-    invalid=True,
 )
 
 Method(
@@ -2585,7 +2522,6 @@ Return 1 if an entry was read into *TYPEP and *VALP.
         ("CORE_ADDR *", "valp"),
     ],
     predicate=True,
-    invalid=True,
 )
 
 Method(
