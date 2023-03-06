@@ -29,7 +29,7 @@ proc gdb_compile_opencl_hostapp {clsource executable options} {
 
 # Run a test on the target to check if it supports OpenCL. Return 1 if so, 0 if
 # it does not.
-gdb_caching_proc allow_opencl_tests {
+gdb_caching_proc allow_opencl_tests {} {
     global srcdir objdir subdir gdb_prompt
     global inferior_exited_re
 

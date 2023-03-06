@@ -166,7 +166,7 @@ proc gnatmake_version_at_least { major } {
 
 # Return 1 if the GNAT runtime appears to have debug info.
 
-gdb_caching_proc gnat_runtime_has_debug_info {
+gdb_caching_proc gnat_runtime_has_debug_info {} {
     global srcdir
 
     set src "$srcdir/lib/gnat_debug_info_test.adb"

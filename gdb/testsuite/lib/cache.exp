@@ -121,7 +121,10 @@ proc gdb_do_cache {name} {
 # results, both in memory and, if GDB_PARALLEL is defined, in the
 # filesystem for use across invocations of dejagnu.
 
-proc gdb_caching_proc {name body} {
+proc gdb_caching_proc {name arglist body} {
+    if { [llength $arglist] != 0 } {
+	error "gdb_caching_proc with non-empty args list"
+    }
     # Define the underlying proc that we'll call.
     set real_name gdb_real__$name
     proc $real_name {} $body

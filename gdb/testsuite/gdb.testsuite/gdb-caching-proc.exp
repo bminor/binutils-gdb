@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-gdb_caching_proc gdb_testsuite_gdb_caching_proc_exp_noarg {
+gdb_caching_proc gdb_testsuite_gdb_caching_proc_exp_noarg {} {
     incr ::count
     return 1
 }

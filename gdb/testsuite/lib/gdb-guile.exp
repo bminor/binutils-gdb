@@ -20,7 +20,7 @@ set ghex {[0-9a-f]+}
 
 # Return a 1 for configurations that support Guile scripting.
 
-gdb_caching_proc allow_guile_tests {
+gdb_caching_proc allow_guile_tests {} {
     set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS --configuration"]
     return [expr {[string first "--with-guile" $output] != -1}]
 }
