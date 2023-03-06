@@ -919,7 +919,7 @@ bfd_mach_o_canonicalize_symtab (bfd *abfd, asymbol **alocation)
     {
       _bfd_error_handler
 	(_("bfd_mach_o_canonicalize_symtab: unable to load symbols"));
-      return 0;
+      return -1;
     }
 
   BFD_ASSERT (sym->symbols != NULL);
@@ -1554,7 +1554,7 @@ bfd_mach_o_pre_canonicalize_one_reloc (bfd *abfd,
   bfd_vma addr;
 
   addr = bfd_get_32 (abfd, raw->r_address);
-  res->sym_ptr_ptr = NULL;
+  res->sym_ptr_ptr = bfd_und_section_ptr->symbol_ptr_ptr;
   res->addend = 0;
 
   if (addr & BFD_MACH_O_SR_SCATTERED)
@@ -1572,7 +1572,7 @@ bfd_mach_o_pre_canonicalize_one_reloc (bfd *abfd,
 	 end of the data for the section (e.g. in a calculation of section
 	 data length).  At present, the symbol will end up associated with
 	 the following section or, if it falls within alignment padding, as
-	 null - which will assert later.  */
+	 the undefined section symbol.  */
       for (j = 0; j < mdata->nsects; j++)
 	{
 	  bfd_mach_o_section *sect = mdata->sections[j];
