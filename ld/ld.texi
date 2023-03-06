@@ -5302,7 +5302,7 @@ __stop_SECNAME, where SECNAME is the name of the section.  These
 indicate the start address and end address of the output section
 respectively.  Note: most section names are not representable as
 C identifiers because they contain a @samp{.} character.
-
+@page
 @node Output Section Data
 @subsection Output Section Data
 @cindex data
@@ -5353,10 +5353,28 @@ whereas this will work:
 @smallexample
 SECTIONS @{@ .text : @{@ *(.text) ; LONG(1) @}@ .data : @{@ *(.data) @}@ @}@
 @end smallexample
-
+@page
 @cindex output section strings
 @kindex ASCII (@var{expression}) ``@var{string}''
 @kindex ASCIZ ``@var{string}''
+@code{ASCII strings}
+@sp 1
+@multitable @columnfractions .25 .20 .30 .20 .05
+@item
+ASCIZ
+@tab
+@tab
+"<string"
+@tab
+@item
+ASCII
+@tab
+(<size>)
+@tab
+"<string"
+@tab
+@end multitable
+@sp 1
 You can include a zero-terminated string in an output section by using
 @code{ASCIZ}.  The keyword is followed by a string which is stored at
 the current value of the location counter including adding a zero byte
@@ -5381,18 +5399,490 @@ it must be enclosed in double quotes.
 The string can have C escape characters like '\n', '\r', '\t' and
 octal numbers.  The '\"' escape is not supported.  Nor are escaped hex
 values.
-
+@sp 2
 Example 1: This is string of 16 characters and will create a 32 byte
 area:
 @smallexample
   ASCII (32) "This is 16 bytes"
 @end smallexample
-
+@sp 2
 Example 2: This is a string of 16 characters and will create a 17 byte
 area:
 @smallexample
   ASCIZ "This is 16 bytes"
 @end smallexample
+@page
+@cindex output section strings
+@kindex DIGEST "<label>[#<endian>]" "CRC64-ECMA"   (@var{expr}, @var{expr})
+@kindex DIGEST "<label>[#<endian>]" "CRC64-ISO"    (@var{expr}, @var{expr})
+@kindex DIGEST "<label>[#<endian>]" "CRC64-ISO-R"  (@var{expr}, @var{expr})
+@kindex DIGEST "<label>[#<endian>]" "CRC64-WE"     (@var{expr}, @var{expr})
+@kindex DIGEST "<label>[#<endian>]" "CRC64-XZ"     (@var{expr}, @var{expr})
+@kindex DIGEST "<label>[#<endian>]" "CRC32"        (@var{expr}, @var{expr})
+@kindex DIGEST "<label>[#<endian>]"  POLY (@var{<parms>}) (@var{expr}, @var{expr})
+
+@code{CRC Calculation}
+@sp 1
+@multitable @columnfractions .20 .27 .28 .25
+@item
+DIGEST
+@tab
+"<label>[#<endian>]"
+@tab
+"CRC32"
+@tab
+(start, end)
+@item
+DIGEST
+@tab
+"<label>[#<endian>]"
+@tab
+"CRC64-ECMA"
+@tab
+(start, end)
+@item
+DIGEST
+@tab
+"<label>[#<endian>]"
+@tab
+"CRC64-GO-ISO"
+@tab
+(start, end)
+@item
+DIGEST
+@tab
+"<label>[#<endian>]"
+@tab
+"CRC64-GO-ISO-R"
+@tab
+(start, end)
+@item
+DIGEST
+@tab
+"<label>[#<endian>]"
+@tab
+"CRC64-WE"
+@tab
+(start, end)
+@item
+DIGEST
+@tab
+"<label>[#<endian>]"
+@tab
+"CRC64-XZ"
+@tab
+(start, end)
+@item
+DIGEST
+@tab
+"<label>[#<endian>]"
+@tab
+POLY (<params>)
+@tab
+(start, end)
+@item
+DIGEST TABLE
+@tab
+"<label>[#<endian>]"
+@tab
+@tab
+(start, end)
+@end multitable
+
+You can calculate the CRC of a part of an output section through the
+@code{DIGEST} command. The default section is the @code{".text"} section.
+The commands take parameters for a label, a @code{polynome} and then two more,
+specifying range of the checked area.  The end address is the first address
+past the checked area.
+
+The checksum is generated in little endian format, but this can be overridden by
+adding a @code{#BE} or @code{#LE} modifier to the label string.
+The generated label does not include the modifier. The endian can also be
+specified on the command line using @code{-BE} or @code{-LE}.
+
+@sp 1
+There is one predefined 32-bit polynome
+
+@multitable @columnfractions .3 .4 .4
+@item
+* @code{CRC32}
+@tab
+@code{0x04C11DB7}
+@tab
+@end multitable
+
+There are five predefined 64-bit polynomes
+
+@multitable @columnfractions .3 .4 .4
+@item
+* @code{CRC64-ECMA}
+@tab
+@code{0x42F0E1EBA9EA3693}
+@tab
+@item
+* @code{CRC64-ISO}
+@tab
+@code{0x000000000000001B}
+@tab
+@item
+* @code{CRC64-ISO-R}
+@tab
+@code{0xD800000000000000}
+@tab
+@item
+* @code{CRC64-WE}
+@tab
+@code{0x42F0E1EBA9EA3693}
+@tab
+@item
+* @code{CRC64-XZ}
+@tab
+@code{0x42F0E1EBA9EA3693}
+@tab
+@end multitable
+@sp 1
+You can also select your own @code{polynome} using the @code{DIGEST POLY}.
+
+It takes the following @code{parameters} separated by commas.
+
+@multitable @columnfractions .3 .7
+@item
+@code{size}
+@tab
+size of CRC (32 or 64)
+@item
+@code{polynome}
+@tab
+@item
+@code{initial}
+@tab
+initial value of crc before calculation
+@item
+@code{xor}
+@tab
+xor result before return
+@item
+@code{input reflect}
+@tab
+bitreverse input data
+@item
+@code{output reflect}
+@tab
+bitreverse result (before xor'ing)
+@item
+@code{reciprocal}
+@tab
+bitreverse polynome before generating table
+@end multitable
+
+The parameters are explained in detail in
+
+@code{http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html}
+
+Some of the predefined polynomes are the same, but differs in the other
+parameters.
+@page
+The 32-bit <polynome> command defines the following global symbols.
+
+@multitable @columnfractions .3 .7
+@item
+@code{___CRC32___}
+@tab
+address of the CRC32 checksum
+@item
+@code{___CRC32_START___}
+@tab
+first address in the checked area.
+@item
+@code{___CRC32_END___}
+@tab
+first address past the checked area.
+@end multitable
+@sp 2
+The 64-bit <polynome> command defines the following global symbols.
+
+@multitable @columnfractions .3 .7
+@item
+@code{___CRC64___}
+@tab
+address of the CRC64 checksum
+@item
+@code{___CRC64_START___}
+@tab
+first address in the checked area.
+@item
+@code{___CRC64_END___}
+@tab
+first address past the checked area.
+@end multitable
+@sp 2
+Note: The generated CRC value must be stored outside the checked area.
+@sp 2
+Example 1: This request a CRC check using the @code{ECMA} algorithm
+
+@smallexample
+  DIGEST "C64" "CRC64-ECMA" (START_CHECK,END_TEXT)
+@end smallexample
+
+The user can retrieve the CRC value through the @code{C64} label.
+@sp 2
+Example 2: This request a CRC check using the @code{ISO} algorithm
+
+           The checksum is stored as big endian
+
+@smallexample
+  DIGEST "C64I#BE" "CRC64-ISO" (START_CHECK,END_TEXT)
+@end smallexample
+
+The user can retrieve the big endian CRC value through the @code{C64I} label.
+@sp 2
+Example 3: This request a CRC check using a user defined @code{polynome}
+
+           The setup is the "CRC32" algorithm
+
+@smallexample
+  DIGEST "CRC" POLY (32, 0x04C11DB7,~0,~0,1,1,0) (START_CHECK,END_TEXT)
+@end smallexample
+
+The user can retrieve the CRC value through the @code{CRC} label.
+@sp 2
+Example 4: This request a CRC check using the @code{CRC32} polynome
+
+@smallexample
+  DIGEST "C32.SE" (START_CHECK,END_TEXT)
+@end smallexample
+
+The user can retrieve the CRC value through the @code{C32} label.
+
+@page
+@cindex output section strings
+@kindex DIGEST TABLE "<label>[#<endian>]"
+@page
+The @code{DIGEST TABLE} command creates a 1 or 2 kByte table for a table-driven
+CRC calculation.  This speeds up the CRC calculation over a non-table-driver
+version since you can handle 8 bits at a time, instead of 1 bit.
+
+The table generated is for the @code{polynome} selected using a
+@code{DIGEST <polynome>} command.
+
+The command will define the label supplied as a parameter.
+The table will be in small endian, unless the @code{.BE} or @code{.LE} extension
+is given to the label.
+It also defines a symbol based on the size of the polynome.
+
+@enumerate
+@item
+@code{___CRC32_TABLE___}       address of the CRC32 table, or
+@item
+@code{___CRC64_TABLE___}       address of the CRC64 table
+@end enumerate
+
+@sp 2
+Example 1: Generate a 1 kB table
+
+(assuming a previous @code{DIGEST "CRC32"} command)
+
+@smallexample
+  DIGEST TABLE "crc_tab32"
+@end smallexample
+
+The user must declare @code{extern uint32_t *crc_tab32;} in his code.
+@sp 2
+Example 2: Generate a 2 kB table in big endian format.
+
+(assuming a previous @code{DIGEST "CRC64-###"} command)
+
+@smallexample
+  DIGEST TABLE "crc_tab64.be"
+@end smallexample
+
+The user must declare @code{extern uint64_t *crc_tab64;} in his code.
+
+Using the tables:
+           The user must include CRC code in the application to test the CRC
+@sp 2
+
+@multitable @columnfractions .15 .85
+@item
+Example 1:
+@tab
+Calculating CRC-64
+@end multitable
+@sp 1
+@multitable @columnfractions .05 .95
+@item
+@tab
+Copyright (c) 2016 Lammert Bies
+@item
+@tab
+Copyright (c) 2021 Bastian Molkenthin
+@item
+@tab
+Copyright (c) 2023 Ulf Samuelsson
+@end multitable
+@sp 2
+@smallexample
+#define SHIFT(t)   ((sizeof(t)-1)*8)
+uint64_t calc_crc64
+  (algorithm_desc_t * dsc, const unsigned char *input_str, size_t num_bytes)
+@{
+  uint64_t crc;
+  const unsigned char *ptr;
+  uint64_t *crc_tab = dsc->crc_tab;
+  uint64_t index;
+
+  if ((ptr = input_str) == NULL)
+    return 0;
+
+  if (crc_tab == NULL)
+    return 0;
+
+
+  crc = dsc->initial;
+  if (dsc->reciprocal)
+    @{
+      for (uint32_t i = 0; i < num_bytes; i++)
+        @{
+          index = ((crc >> 0) ^ (uint64_t) * ptr++) & 0x00000000000000FFull;
+          crc = (crc >> 8) ^ crc_tab[index];
+        @}
+    @}
+  else
+    @{
+      uint32_t shift = SHIFT (uint64_t);
+      for (uint32_t i = 0; i < num_bytes; i++)
+        @{
+          const unsigned char c = *ptr++;
+          uint64_t rc = (uint64_t) (dsc->ireflect ? reflect8 (c) : c);
+          crc = (crc ^ (rc << shift));
+          index = (uint32_t) (crc >> shift);
+          crc = (crc << 8);
+          crc = (crc ^ (crc_tab[index]));
+        @}
+    @}
+  crc = (dsc->oreflect ? reflect64 (crc) : crc);
+  crc = crc ^ dsc->xor_val;
+  return crc;
+@}  /* calc_crc64 */
+@end smallexample
+@page
+@multitable @columnfractions .15 .85
+@item
+Example 2:
+@tab
+Calculating CRC-32
+@end multitable
+@sp 1
+@multitable @columnfractions .05 .95
+@item
+@tab
+Copyright (c) 2016 Lammert Bies
+@item
+@tab
+Copyright (c) 2021 Bastian Molkenthin
+@item
+@tab
+Copyright (c) 2023 Ulf Samuelsson
+@end multitable
+@sp 2
+@smallexample
+#define SHIFT(t)   ((sizeof(t)-1)*8)
+uint32_t
+calc_crc32 (algorithm_desc_t * dsc, const unsigned char *input_str,
+            size_t num_bytes)
+@{
+  uint32_t crc;
+  const unsigned char *ptr;
+  uint32_t index;
+  uint32_t *crc_tab = dsc->crc_tab;
+
+  if ((ptr = input_str) == NULL)
+    return 0;
+
+  if (crc_tab == NULL)
+    return 0;
+
+  crc = dsc->initial;
+
+  if (dsc->reciprocal)
+    @{
+      for (uint32_t i = 0; i < num_bytes; i++)
+        @{
+          index = ((crc >> 0) ^ (uint32_t) * ptr++) & 0x000000FFul;
+          crc = (crc >> 8) ^ crc_tab[index];
+        @}
+    @}
+  else
+    @{
+      uint32_t shift = SHIFT (uint32_t);
+      for (uint32_t i = 0; i < num_bytes; i++)
+        @{
+          const unsigned char c = *ptr++;
+          uint32_t rc = (uint32_t) (dsc->ireflect ? reflect8 (c) : c);
+          crc = (crc ^ (rc << shift));
+          index = (uint32_t) (crc >> shift);
+          crc = (crc << 8);
+          crc = (crc ^ (crc_tab[index]));
+        @}
+    @}
+  crc = (dsc->oreflect ? reflect32 (crc) : crc);
+  crc = crc ^ dsc->xor_val;
+  return crc;
+@} /* calc_crc32 */
+@end smallexample
+@page
+@multitable @columnfractions .15 .85
+@item
+Example 3:
+@tab
+Calculating CRC-32 using optimized routine
+@end multitable
+@sp 1
+@multitable @columnfractions .05 .95
+@item
+@tab
+Copyright (c) 2016 Lammert Bies
+@item
+@tab
+Copyright (c) 2021 Bastian Molkenthin
+@item
+@tab
+Copyright (c) 2023 Ulf Samuelsson
+@end multitable
+@sp 2
+@smallexample
+#define SHIFT(t)   ((sizeof(t)-1)*8)
+extern uint32_t *crc_tab;
+
+uint32_t
+calc_crc32 (const unsigned char *input_str, size_t num_bytes)
+@{
+  uint32_t crc;
+  const unsigned char *ptr;
+  uint32_t index;
+  uint32_t shift = SHIFT (uint32_t);
+
+  if ((ptr = input_str) == NULL)
+    return 0;
+
+  crc = 0xFFFFFFFF;
+  for (uint32_t i = 0; i < num_bytes; i++)
+    @{
+      const unsigned char c = *ptr++;
+      crc = (crc ^ (c << shift));
+      index = (uint32_t) (crc >> shift);
+      crc = (crc << 8);
+      crc = (crc ^ (crc_tab[index]));
+    @}
+  return crc ^ 0xFFFFFFFF;
+@} /* calc_crc32 */
+@end smallexample
+@page
+@cindex output section strings
+@kindex TIMESTAMP
+
+The @code{TIMESTAMP} command creates 64-bit integer with the number of seconds
+since Epoch (1970-01-01 00:00).
 
 @kindex FILL(@var{expression})
 @cindex holes, filling
