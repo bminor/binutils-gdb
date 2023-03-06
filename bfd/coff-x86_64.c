@@ -139,15 +139,19 @@ coff_amd64_reloc (bfd *abfd,
 	  break;
 	case bfd_target_elf_flavour:
 	  /* Subtract __ImageBase.  */
+	  h = NULL;
 	  link_info = _bfd_get_link_info (obfd);
-	  if (link_info == NULL)
-	    return bfd_reloc_dangerous;
-	  h = bfd_link_hash_lookup (link_info->hash, "__ImageBase",
-				    false, false, false);
-	  if (h == NULL)
-	    return bfd_reloc_dangerous;
-	  while (h->type == bfd_link_hash_indirect)
-	    h = h->u.i.link;
+	  if (link_info != NULL)
+	    h = bfd_link_hash_lookup (link_info->hash, "__ImageBase",
+				      false, false, true);
+	  if (h == NULL
+	      || (h->type != bfd_link_hash_defined
+		  && h->type != bfd_link_hash_defweak))
+	    {
+	      *error_message
+		= (char *) _("R_AMD64_IMAGEBASE with __ImageBase undefined");
+	      return bfd_reloc_dangerous;
+	    }
 	  /* ELF symbols in relocatable files are section relative,
 	     but in nonrelocatable files they are virtual addresses.  */
 	  diff -= (h->u.def.value
