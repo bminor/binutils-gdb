@@ -369,6 +369,7 @@ Dwarf::Dwarf (Stabs *_stabs)
   debug_abbrevSec = NULL;
   debug_strSec = NULL;
   debug_lineSec = NULL;
+  debug_line_strSec = NULL;
   debug_rangesSec = NULL;
   elf = stabs->openElf (true);
   if (elf == NULL)
@@ -388,6 +389,7 @@ Dwarf::Dwarf (Stabs *_stabs)
   debug_strSec = dwrGetSec (NTXT (".debug_str"));
   debug_lineSec = dwrGetSec (NTXT (".debug_line"));
   debug_rangesSec = dwrGetSec (NTXT (".debug_ranges"));
+  debug_line_strSec = dwrGetSec (".debug_line_str");
 
   if ((debug_infoSec == NULL) || (debug_abbrevSec == NULL) || (debug_lineSec == NULL))
     {
@@ -610,9 +612,9 @@ Dwarf::archive_Dwarf (LoadObject *lo)
 	      dwrCU->srcFiles = new Vector<SourceFile *> (VecSize (lineReg->file_names));
 	      for (long i = 0, sz = VecSize (lineReg->file_names); i < sz; i++)
 		{
-		  char *fname = lineReg->getPath (i + 1);
-		  SourceFile *sf = mod->findSource (fname, true);
-		  dwrCU->srcFiles->append (sf);
+		  char *fname = lineReg->getPath (i);
+		  if (fname)
+		    dwrCU->srcFiles->append (mod->findSource (fname, true));
 		}
 	    }
 
@@ -988,7 +990,7 @@ DwrCU::append_Function (Dwarf_cnt *ctx)
       if (lineno > 0)
 	{
 	  func->setLineFirst (lineno);
-	  int fileno = ((int) Dwarf_data (DW_AT_decl_file)) - 1;
+	  int fileno = ((int) Dwarf_data (DW_AT_decl_file));
 	  SourceFile *sf = ((fileno >= 0) && (fileno < VecSize (srcFiles))) ? srcFiles->get (fileno)
 		  : module->getMainSrc ();
 	  func->setDefSrc (sf);

@@ -76,6 +76,7 @@ public:
   DwrSec *debug_abbrevSec;
   DwrSec *debug_strSec;
   DwrSec *debug_lineSec;
+  DwrSec *debug_line_strSec;
   DwrSec *debug_rangesSec;
   Elf *elf;
   Stabs *stabs;

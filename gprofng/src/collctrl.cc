@@ -114,7 +114,6 @@ Coll_Ctrl::Coll_Ctrl (int _interactive, bool _defHWC, bool _kernelHWC)
 
 #elif defined(__aarch64__)
   asm volatile("mrs %0, cntfrq_el0" : "=r" (cpu_clk_freq));
-  dbe_write (2, GTXT ("CPU clock frequency: %d\n"), cpu_clk_freq);
 
 #else
   FILE *procf = fopen ("/proc/cpuinfo", "r");
@@ -1079,15 +1078,16 @@ Coll_Ctrl::set_synctrace (const char *string)
   /* the remaining string should be a number >= 0 */
   char *endchar = NULL;
   int tval = (int) strtol (val, &endchar, 0);
-  free (val);
   if (*endchar != 0 || tval < 0)
     {
+      free (val);
       /* invalid setting */
       /* restore the comma, if it was zeroed out */
       if (comma_p != NULL)
 	*comma_p = ',';
       return dbe_sprintf (GTXT ("Unrecognized synchronization tracing threshold `%s'\n"), string);
     }
+  free (val);
   synctrace_thresh = tval;
   synctrace_enabled = 1;
   return NULL;
