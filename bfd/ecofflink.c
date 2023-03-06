@@ -1742,6 +1742,7 @@ mk_fdrtab (bfd *abfd,
       /* Sanity check fdr procedure descriptor pointer.  */
       long ipdMax = debug_info->symbolic_header.ipdMax;
       if (fdr_ptr->ipdFirst >= ipdMax
+	  || fdr_ptr->cpd < 0
 	  || fdr_ptr->cpd > ipdMax - fdr_ptr->ipdFirst)
 	fdr_ptr->cpd = 0;
       /* Skip FDRs that have no PDRs.  */
@@ -2146,12 +2147,20 @@ lookup_line (bfd *abfd,
 	 are stored in a very funky format, which I won't try to
 	 describe.  The search is bounded by the end of the FDRs line
 	 number entries.  */
-      line_end = debug_info->line + fdr_ptr->cbLineOffset + fdr_ptr->cbLine;
+      line_ptr = line_end = debug_info->line;
+      if (fdr_ptr->cbLineOffset < debug_info->symbolic_header.cbLine
+	  && fdr_ptr->cbLine <= (debug_info->symbolic_header.cbLine
+				 - fdr_ptr->cbLineOffset)
+	  && pdr.cbLineOffset <= (debug_info->symbolic_header.cbLine
+				  - fdr_ptr->cbLineOffset))
+	{
+	  line_end += fdr_ptr->cbLineOffset + fdr_ptr->cbLine;
+	  line_ptr += fdr_ptr->cbLineOffset + pdr.cbLineOffset;
+	}
 
       /* Make offset relative to procedure entry.  */
       offset -= pdr.adr - 0x10 * pdr.prof;
       lineno = pdr.lnLow;
-      line_ptr = debug_info->line + fdr_ptr->cbLineOffset + pdr.cbLineOffset;
       while (line_ptr < line_end)
 	{
 	  int delta;
