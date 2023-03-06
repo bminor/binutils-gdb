@@ -1002,16 +1002,20 @@ slurp_symtab (bfd *abfd)
     {
       non_fatal (_("failed to read symbol table from: %s"),
 		 bfd_get_filename (abfd));
-      bfd_fatal (_("error message was"));
+      my_bfd_nonfatal (_("error message was"));
     }
 
-  if (storage == 0)
+  if (storage <= 0)
     return NULL;
 
   asymbol **sy = (asymbol **) xmalloc (storage);
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount < 0)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      my_bfd_nonfatal (bfd_get_filename (abfd));
+      free (sy);
+      sy = NULL;
+    }
   return sy;
 }
 
@@ -1031,16 +1035,20 @@ slurp_dynamic_symtab (bfd *abfd)
 	  return NULL;
 	}
 
-      bfd_fatal (bfd_get_filename (abfd));
+      my_bfd_nonfatal (bfd_get_filename (abfd));
     }
 
-  if (storage == 0)
+  if (storage <= 0)
     return NULL;
 
   asymbol **sy = (asymbol **) xmalloc (storage);
   dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
   if (dynsymcount < 0)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      my_bfd_nonfatal (bfd_get_filename (abfd));
+      free (sy);
+      sy = NULL;
+    }
   return sy;
 }
 
@@ -3747,17 +3755,23 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 
 	  relsize = bfd_get_reloc_upper_bound (abfd, section);
 	  if (relsize < 0)
-	    bfd_fatal (bfd_get_filename (abfd));
+	    my_bfd_nonfatal (bfd_get_filename (abfd));
 
 	  if (relsize > 0)
 	    {
-	      rel_ppstart = rel_pp = (arelent **) xmalloc (relsize);
+	      rel_pp = (arelent **) xmalloc (relsize);
 	      rel_count = bfd_canonicalize_reloc (abfd, section, rel_pp, syms);
 	      if (rel_count < 0)
-		bfd_fatal (bfd_get_filename (abfd));
-
-	      /* Sort the relocs by address.  */
-	      qsort (rel_pp, rel_count, sizeof (arelent *), compare_relocs);
+		{
+		  my_bfd_nonfatal (bfd_get_filename (abfd));
+		  free (rel_pp);
+		  rel_pp = NULL;
+		  rel_count = 0;
+		}
+	      else if (rel_count > 1)
+		/* Sort the relocs by address.  */
+		qsort (rel_pp, rel_count, sizeof (arelent *), compare_relocs);
+	      rel_ppstart = rel_pp;
 	    }
 	}
     }
@@ -4103,9 +4117,12 @@ disassemble_data (bfd *abfd)
       const bfd_arch_info_type *inf = bfd_scan_arch (machine);
 
       if (inf == NULL)
-	fatal (_("can't use supplied machine %s"), machine);
-
-      abfd->arch_info = inf;
+	{
+	  non_fatal (_("can't use supplied machine %s"), machine);
+	  exit_status = 1;
+	}
+      else
+	abfd->arch_info = inf;
     }
 
   if (endian != BFD_ENDIAN_UNKNOWN)
@@ -4156,20 +4173,22 @@ disassemble_data (bfd *abfd)
   /* Pre-load the dynamic relocs as we may need them during the disassembly.  */
   long relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
 
-  if (relsize < 0 && dump_dynamic_reloc_info)
-    bfd_fatal (bfd_get_filename (abfd));
-
   if (relsize > 0)
     {
       disasm_info.dynrelbuf = (arelent **) xmalloc (relsize);
       disasm_info.dynrelcount
 	= bfd_canonicalize_dynamic_reloc (abfd, disasm_info.dynrelbuf, dynsyms);
       if (disasm_info.dynrelcount < 0)
-	bfd_fatal (bfd_get_filename (abfd));
-
-      /* Sort the relocs by address.  */
-      qsort (disasm_info.dynrelbuf, disasm_info.dynrelcount, sizeof (arelent *),
-	     compare_relocs);
+	{
+	  my_bfd_nonfatal (bfd_get_filename (abfd));
+	  free (disasm_info.dynrelbuf);
+	  disasm_info.dynrelbuf = NULL;
+	  disasm_info.dynrelcount = 0;
+	}
+      else if (disasm_info.dynrelcount > 1)
+	/* Sort the relocs by address.  */
+	qsort (disasm_info.dynrelbuf, disasm_info.dynrelcount,
+	       sizeof (arelent *), compare_relocs);
     }
 
   disasm_info.symtab = sorted_syms;
@@ -4789,7 +4808,10 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 
   sec = read_section (abfd, sect_name, &ctfdata);
   if (sec == NULL)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      my_bfd_nonfatal (bfd_get_filename (abfd));
+      return;
+    }
 
   /* Load the CTF file and dump it.  Preload the parent dict, since it will
      need to be imported into every child in turn. */
@@ -4799,14 +4821,19 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
-      bfd_fatal (bfd_get_filename (abfd));
+      my_bfd_nonfatal (bfd_get_filename (abfd));
+      free (ctfdata);
+      return;
     }
 
   if ((parent = ctf_dict_open (ctfa, parent_name, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
-      bfd_fatal (bfd_get_filename (abfd));
+      my_bfd_nonfatal (bfd_get_filename (abfd));
+      ctf_close (ctfa);
+      free (ctfdata);
+      return;
     }
 
   printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));
@@ -4817,7 +4844,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF archive member open failure: %s"), ctf_errmsg (err));
-      bfd_fatal (bfd_get_filename (abfd));
+      my_bfd_nonfatal (bfd_get_filename (abfd));
     }
   ctf_dict_close (parent);
   ctf_close (ctfa);
@@ -4845,7 +4872,10 @@ dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
 
   sec = read_section (abfd, sect_name, &sframe_data);
   if (sec == NULL)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      my_bfd_nonfatal (bfd_get_filename (abfd));
+      return;
+    }
   sf_size = bfd_section_size (sec);
   sf_vma = bfd_section_vma (sec);
 
@@ -4853,8 +4883,9 @@ dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
   sfd_ctx = sframe_decode ((const char*)sframe_data, sf_size, &err);
   if (!sfd_ctx)
     {
+      my_bfd_nonfatal (bfd_get_filename (abfd));
       free (sframe_data);
-      bfd_fatal (bfd_get_filename (abfd));
+      return;
     }
 
   printf (_("Contents of the SFrame section %s:"),
@@ -4862,8 +4893,8 @@ dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
   /* Dump the contents as text.  */
   dump_sframe (sfd_ctx, sf_vma);
 
-  free (sframe_data);
   sframe_decoder_free (&sfd_ctx);
+  free (sframe_data);
 }
 
 
@@ -5334,7 +5365,7 @@ dump_relocs_in_section (bfd *abfd,
 			asection *section,
 			void *dummy ATTRIBUTE_UNUSED)
 {
-  arelent **relpp = NULL;
+  arelent **relpp;
   long relcount;
   long relsize;
 
@@ -5355,7 +5386,10 @@ dump_relocs_in_section (bfd *abfd,
     }
 
   if (relsize < 0)
-    relcount = relsize;
+    {
+      relpp = NULL;
+      relcount = relsize;
+    }
   else
     {
       relpp = (arelent **) xmalloc (relsize);
@@ -5367,7 +5401,7 @@ dump_relocs_in_section (bfd *abfd,
       printf ("\n");
       non_fatal (_("failed to read relocs in: %s"),
 		 sanitize_string (bfd_get_filename (abfd)));
-      bfd_fatal (_("error message was"));
+      my_bfd_nonfatal (_("error message was"));
     }
   else if (relcount == 0)
     printf (" (none)\n\n");
@@ -5394,30 +5428,42 @@ dump_dynamic_relocs (bfd *abfd)
   long relcount;
 
   relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
-  if (relsize < 0)
-    bfd_fatal (bfd_get_filename (abfd));
 
   printf ("DYNAMIC RELOCATION RECORDS");
 
   if (relsize == 0)
-    printf (" (none)\n\n");
+    {
+      printf (" (none)\n\n");
+      return;
+    }
+
+  if (relsize < 0)
+    {
+      relpp = NULL;
+      relcount = relsize;
+    }
   else
     {
       relpp = (arelent **) xmalloc (relsize);
       relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
-
-      if (relcount < 0)
-	bfd_fatal (bfd_get_filename (abfd));
-      else if (relcount == 0)
-	printf (" (none)\n\n");
-      else
-	{
-	  printf ("\n");
-	  dump_reloc_set (abfd, NULL, relpp, relcount);
-	  printf ("\n\n");
-	}
-      free (relpp);
     }
+
+  if (relcount < 0)
+    {
+      printf ("\n");
+      non_fatal (_("failed to read relocs in: %s"),
+		 sanitize_string (bfd_get_filename (abfd)));
+      my_bfd_nonfatal (_("error message was"));
+    }
+  else if (relcount == 0)
+    printf (" (none)\n\n");
+  else
+    {
+      printf ("\n");
+      dump_reloc_set (abfd, NULL, relpp, relcount);
+      printf ("\n\n");
+    }
+  free (relpp);
 }
 
 /* Creates a table of paths, to search for source files.  */
@@ -5743,7 +5789,8 @@ display_any_bfd (bfd *file, int level)
 	{
 	  /* Prevent corrupted files from spinning us into an
 	     infinite loop.  100 is an arbitrary heuristic.  */
-	  fatal (_("Archive nesting is too deep"));
+	  non_fatal (_("Archive nesting is too deep"));
+	  exit_status = 1;
 	  return;
 	}
       else
