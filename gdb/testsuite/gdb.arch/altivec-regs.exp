@@ -52,6 +52,9 @@ if {![runto_main]} {
     return 0
 }
 
+gdb_breakpoint [gdb_get_line_number "start here"]
+gdb_continue_to_breakpoint "start here"
+
 gdb_test "set print frame-arguments all"
 
 # set all the registers integer portions to 1
