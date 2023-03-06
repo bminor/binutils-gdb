@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include <limits.h>
+#include <time.h>
 #include "bfd.h"
 #include "libiberty.h"
 #include "filenames.h"
@@ -8518,6 +8519,13 @@ lang_add_string (size_t size, const char *s)
     lang_add_data (BYTE, exp_intop ('\0'));
 
   free (string);
+}
+
+/* Store the time of linking in the image */
+void
+lang_add_timestamp (void)
+{
+  lang_add_data (QUAD, exp_intop ((bfd_vma) time (0)));
 }
 
 /* Create a new reloc statement.  RELOC is the BFD relocation type to
