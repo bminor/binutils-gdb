@@ -736,19 +736,19 @@ print_symdef_entry (bfd *abfd)
        idx != BFD_NO_MORE_SYMBOLS;
        idx = bfd_get_next_mapent (abfd, idx, &thesym))
     {
-      bfd *elt;
       if (!everprinted)
 	{
 	  printf (_("\nArchive index:\n"));
 	  everprinted = true;
 	}
-      elt = bfd_get_elt_at_index (abfd, idx);
-      if (elt == NULL)
-	bfd_fatal ("bfd_get_elt_at_index");
-      if (thesym->name != (char *) NULL)
+      if (thesym->name != NULL)
 	{
 	  print_symname ("%s", NULL, thesym->name, abfd);
-	  printf (" in %s\n", bfd_get_filename (elt));
+	  bfd *elt = bfd_get_elt_at_index (abfd, idx);
+	  if (elt)
+	    printf (" in %s\n", bfd_get_filename (elt));
+	  else
+	    printf ("\n");
 	}
     }
 }
@@ -781,9 +781,9 @@ filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
       int keep = 0;
       asymbol *sym;
 
-      sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, (const void *) from, store);
+      sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, from, store);
       if (sym == NULL)
-	bfd_fatal (bfd_get_filename (abfd));
+	continue;
 
       if (sym->name != NULL
 	  && sym->name[0] == '_'
@@ -1405,19 +1405,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
     }
 
   symcount = bfd_read_minisymbols (abfd, dynamic, &minisyms, &size);
-  if (symcount < 0)
-    {
-      if (dynamic && bfd_get_error () == bfd_error_no_symbols)
-	{
-	  if (!quiet)
-	    non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
-	  return;
-	}
-
-      bfd_fatal (bfd_get_filename (abfd));
-    }
-
-  if (symcount == 0)
+  if (symcount <= 0)
     {
       if (!quiet)
 	non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
@@ -1449,7 +1437,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 	      dyn_syms = (asymbol **) xmalloc (storage);
 	      dyn_count = bfd_canonicalize_dynamic_symtab (abfd, dyn_syms);
 	      if (dyn_count < 0)
-		bfd_fatal (bfd_get_filename (abfd));
+		dyn_count = 0;
 	    }
 	}
 
@@ -1588,7 +1576,7 @@ display_archive (bfd *file)
       if (arfile == NULL)
 	{
 	  if (bfd_get_error () != bfd_error_no_more_archived_files)
-	    bfd_fatal (bfd_get_filename (file));
+	    bfd_nonfatal (bfd_get_filename (file));
 	  break;
 	}
 
@@ -1664,7 +1652,7 @@ display_file (char *filename)
 
   free_lineno_cache (file);
   if (!bfd_close (file))
-    bfd_fatal (filename);
+    retval = false;
 
   return retval;
 }
