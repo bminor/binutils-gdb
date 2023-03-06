@@ -17,8 +17,15 @@ gdb_caching_proc gdb_testsuite_gdb_caching_proc_exp_noarg {} {
     return 1
 }
 
+gdb_caching_proc gdb_testsuite_gdb_caching_proc_exp_arg { arg } {
+    incr ::count
+    return $arg
+}
+
 set assertions {
     { [gdb_testsuite_gdb_caching_proc_exp_noarg] == 1 }
+    { [gdb_testsuite_gdb_caching_proc_exp_arg 1] == 1 }
+    { [gdb_testsuite_gdb_caching_proc_exp_arg "foo foo"] == "foo foo" }
 }
 
 set assertion_nr 0

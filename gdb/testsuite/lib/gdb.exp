@@ -9427,7 +9427,7 @@ proc have_syscall { name } {
 
 # Return 1 if compile flag FLAG is supported.
 
-proc have_compile_flag { flag } {
+gdb_caching_proc have_compile_flag { flag } {
     set src { void foo () {} }
     return [gdb_can_simple_compile have_compile_flag_$flag $src object \
 		additional_flags=$flag]

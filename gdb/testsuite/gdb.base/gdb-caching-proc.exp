@@ -81,6 +81,10 @@ proc test_file { file } {
     }
 
     foreach procname $procnames {
+	if { [info args $procname] != "" } {
+	    # With args.
+	    continue
+	}
 	with_test_prefix $procname {
 	    switch $procname {
 		"is_address_zero_readable" { set setup_gdb 1 }
