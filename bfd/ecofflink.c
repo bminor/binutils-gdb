@@ -2093,7 +2093,7 @@ lookup_line (bfd *abfd,
 	     because we iterate over every FDR rather than just ones
 	     with a base address less than or equal to 'offset'.  */
 	  bfd_signed_vma dist = -1, min_dist = -1;
-	  char *pdr_hold;
+	  char *pdr_hold = NULL;
 	  char *pdr_end;
 
 	  fdr_ptr = tab[i].fdr;
@@ -2101,17 +2101,14 @@ lookup_line (bfd *abfd,
 	  pdr_ptr = ((char *) debug_info->external_pdr
 		     + fdr_ptr->ipdFirst * external_pdr_size);
 	  pdr_end = pdr_ptr + fdr_ptr->cpd * external_pdr_size;
-	  (*debug_swap->swap_pdr_in) (abfd, pdr_ptr, &pdr);
 	  /* Find PDR that is closest to OFFSET.  If pdr.prof is set,
 	     the procedure entry-point *may* be 0x10 below pdr.adr.  We
 	     simply pretend that pdr.prof *implies* a lower entry-point.
 	     This is safe because it just means that may identify 4 NOPs
 	     in front of the function as belonging to the function.  */
-	  for (pdr_hold = NULL;
-	       pdr_ptr < pdr_end;
-	       (pdr_ptr += external_pdr_size,
-		(*debug_swap->swap_pdr_in) (abfd, pdr_ptr, &pdr)))
+	  for (; pdr_ptr < pdr_end; pdr_ptr += external_pdr_size)
 	    {
+	      (*debug_swap->swap_pdr_in) (abfd, pdr_ptr, &pdr);
 	      if (offset >= (pdr.adr - 0x10 * pdr.prof))
 		{
 		  dist = offset - (pdr.adr - 0x10 * pdr.prof);
