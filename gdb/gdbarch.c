@@ -298,29 +298,38 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of bfloat16_bit, invalid_p == 0 */
   if (gdbarch->bfloat16_format == 0)
     gdbarch->bfloat16_format = floatformats_bfloat16;
+  /* Skip verify of bfloat16_format, invalid_p == 0 */
   /* Skip verify of half_bit, invalid_p == 0 */
   if (gdbarch->half_format == 0)
     gdbarch->half_format = floatformats_ieee_half;
+  /* Skip verify of half_format, invalid_p == 0 */
   /* Skip verify of float_bit, invalid_p == 0 */
   if (gdbarch->float_format == 0)
     gdbarch->float_format = floatformats_ieee_single;
+  /* Skip verify of float_format, invalid_p == 0 */
   /* Skip verify of double_bit, invalid_p == 0 */
   if (gdbarch->double_format == 0)
     gdbarch->double_format = floatformats_ieee_double;
+  /* Skip verify of double_format, invalid_p == 0 */
   /* Skip verify of long_double_bit, invalid_p == 0 */
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = floatformats_ieee_double;
+  /* Skip verify of long_double_format, invalid_p == 0 */
   /* Skip verify of wchar_bit, invalid_p == 0 */
   if (gdbarch->wchar_signed == -1)
     gdbarch->wchar_signed = 1;
+  /* Skip verify of wchar_signed, invalid_p == 0 */
   /* Skip verify of floatformat_for_type, invalid_p == 0 */
   /* Skip verify of ptr_bit, invalid_p == 0 */
   if (gdbarch->addr_bit == 0)
     gdbarch->addr_bit = gdbarch_ptr_bit (gdbarch);
+  /* Skip verify of addr_bit, invalid_p == 0 */
   if (gdbarch->dwarf2_addr_size == 0)
     gdbarch->dwarf2_addr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+  /* Skip verify of dwarf2_addr_size, invalid_p == 0 */
   if (gdbarch->char_signed == -1)
     gdbarch->char_signed = 1;
+  /* Skip verify of char_signed, invalid_p == 0 */
   /* Skip verify of read_pc, has predicate.  */
   /* Skip verify of write_pc, has predicate.  */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
@@ -412,6 +421,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   if (gdbarch->so_ops == 0)
     gdbarch->so_ops = &solib_target_so_ops;
+  /* Skip verify of so_ops, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of in_indirect_branch_thunk, invalid_p == 0 */
@@ -1490,6 +1500,7 @@ const struct floatformat **
 gdbarch_bfloat16_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
+  /* Skip verify of bfloat16_format, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_bfloat16_format called\n");
   return gdbarch->bfloat16_format;
@@ -1523,6 +1534,7 @@ const struct floatformat **
 gdbarch_half_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
+  /* Skip verify of half_format, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_half_format called\n");
   return gdbarch->half_format;
@@ -1556,6 +1568,7 @@ const struct floatformat **
 gdbarch_float_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
+  /* Skip verify of float_format, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_float_format called\n");
   return gdbarch->float_format;
@@ -1589,6 +1602,7 @@ const struct floatformat **
 gdbarch_double_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
+  /* Skip verify of double_format, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_double_format called\n");
   return gdbarch->double_format;
@@ -1622,6 +1636,7 @@ const struct floatformat **
 gdbarch_long_double_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
+  /* Skip verify of long_double_format, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_long_double_format called\n");
   return gdbarch->long_double_format;
@@ -3304,6 +3319,7 @@ const struct target_so_ops *
 gdbarch_so_ops (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
+  /* Skip verify of so_ops, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_so_ops called\n");
   return gdbarch->so_ops;

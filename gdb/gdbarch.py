@@ -212,17 +212,12 @@ with open("gdbarch.c", "w") as f:
             print(f"    gdbarch->{c.name} = {c.postdefault};", file=f)
 
         # Now validate the value.
-        if c.invalid is False:
-            print(f"  /* Skip verify of {c.name}, invalid_p == 0 */", file=f)
-        elif c.predicate:
-            print(f"  /* Skip verify of {c.name}, has predicate.  */", file=f)
-        elif c.invalid is None:
-            # No validation has been requested for this component.
-            pass
-        elif isinstance(c.invalid, str):
+        if isinstance(c.invalid, str):
             print(f"  if ({c.invalid})", file=f)
             print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
-        elif c.invalid is True:
+        elif c.predicate:
+            print(f"  /* Skip verify of {c.name}, has predicate.  */", file=f)
+        elif c.invalid:
             if c.postdefault is not None:
                 # This component has its 'invalid' field set to True, but
                 # also has a postdefault.  This makes no sense, the
@@ -236,14 +231,7 @@ with open("gdbarch.c", "w") as f:
                 print(f"  if (gdbarch->{c.name} == {init_value})", file=f)
                 print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
         else:
-            # We should not allow ourselves to simply do nothing here
-            # because no other case applies.  If we end up here then
-            # either the input data needs adjusting so one of the
-            # above cases matches, or we need additional cases adding
-            # here.
-            raise Exception(
-                f"unhandled case when generating gdbarch validation: {c.name}"
-            )
+            print(f"  /* Skip verify of {c.name}, invalid_p == 0 */", file=f)
     print("  if (!log.empty ())", file=f)
     print(
         """    internal_error (_("verify_gdbarch: the following are invalid ...%s"),""",
@@ -360,14 +348,20 @@ with open("gdbarch.c", "w") as f:
             print(f"gdbarch_{c.name} (struct gdbarch *gdbarch)", file=f)
             print("{", file=f)
             print("  gdb_assert (gdbarch != NULL);", file=f)
-            if c.invalid is False:
-                print(f"  /* Skip verify of {c.name}, invalid_p == 0 */", file=f)
-            elif isinstance(c.invalid, str):
+            if isinstance(c.invalid, str):
                 print("  /* Check variable is valid.  */", file=f)
                 print(f"  gdb_assert (!({c.invalid}));", file=f)
-            elif c.predefault:
+            elif c.postdefault is not None and c.predefault is not None:
                 print("  /* Check variable changed from pre-default.  */", file=f)
                 print(f"  gdb_assert (gdbarch->{c.name} != {c.predefault});", file=f)
+            elif c.invalid:
+                if c.predefault:
+                    print("  /* Check variable changed from pre-default.  */", file=f)
+                    print(
+                        f"  gdb_assert (gdbarch->{c.name} != {c.predefault});", file=f
+                    )
+            else:
+                print(f"  /* Skip verify of {c.name}, invalid_p == 0 */", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
                 f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",

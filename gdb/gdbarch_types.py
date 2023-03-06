@@ -46,7 +46,7 @@ class Component:
         predicate: bool = False,
         predefault: Optional[str] = None,
         postdefault: Optional[str] = None,
-        invalid: Optional[Union[bool, str]] = None,
+        invalid: Union[bool, str] = False,
         params: Optional[List[Tuple[str, str]]] = None,
         param_checks: Optional[List[str]] = None,
         result_checks: Optional[List[str]] = None,
@@ -74,7 +74,6 @@ class Component:
 
     def get_predicate(self):
         "Return the expression used for validity checking."
-        assert self.predicate and not isinstance(self.invalid, str)
         if self.predefault:
             predicate = f"gdbarch->{self.name} != {self.predefault}"
         else:
@@ -98,7 +97,7 @@ class Value(Component):
         predicate: bool = False,
         predefault: Optional[str] = None,
         postdefault: Optional[str] = None,
-        invalid: Optional[Union[bool, str]] = None,
+        invalid: Union[bool, str] = False,
         printer: Optional[str] = None,
     ):
         super().__init__(
@@ -126,7 +125,7 @@ class Function(Component):
         predicate: bool = False,
         predefault: Optional[str] = None,
         postdefault: Optional[str] = None,
-        invalid: Optional[Union[bool, str]] = None,
+        invalid: Union[bool, str] = False,
         printer: Optional[str] = None,
         param_checks: Optional[List[str]] = None,
         result_checks: Optional[List[str]] = None,

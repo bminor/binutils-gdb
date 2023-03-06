@@ -1675,6 +1675,7 @@ BFD target to use when generating a core file.
     predicate=True,
     predefault="0",
     printer="pstring (gdbarch->gcore_bfd_target)",
+    invalid=True,
 )
 
 Value(
@@ -1719,6 +1720,7 @@ The maximum length of an instruction on this architecture in bytes.
     name="max_insn_length",
     predicate=True,
     predefault="0",
+    invalid=True,
 )
 
 Method(
