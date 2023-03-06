@@ -128,7 +128,7 @@ CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=[^ ]*//g'`
 
 transform = s/^ld-new$$/$(installed_linker)/;@program_transform_name@
 bin_PROGRAMS = ld-new
-info_TEXINFOS = ld.texi
+info_TEXINFOS = ld.texi ldint.texi
 ld_TEXINFOS = configdoc.texi
 noinst_TEXINFOS = ldint.texi
 man_MANS = ld.1
@@ -1060,7 +1060,19 @@ ld.1: $(srcdir)/ld.texi configdoc.texi
 		(rm -f $@.T$$$$ && exit 1)
 	$(AM_V_at)rm -f ld.pod
 
-MAINTAINERCLEANFILES = configdoc.texi ld.1
+# Build the man page from the texinfo file
+# The sed command removes the no-adjust Nroff command so that
+# the man output looks standard.
+ldint.1: $(srcdir)/ldint.texi configdoc.texi
+	$(AM_V_GEN)touch $@
+	$(AM_V_at)-$(TEXI2POD) $(MANCONF) < $(srcdir)/ldint.texi > ldint.pod
+	$(AM_V_at)-($(POD2MAN) ldint.pod | \
+		sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || \
+		(rm -f $@.T$$$$ && exit 1)
+	$(AM_V_at)rm -f ldint.pod
+
+MAINTAINERCLEANFILES = configdoc.texi ld.1 ldint.1
 
 # We want to reconfigure if configure.host or configure.tgt changes.
 # development.sh is used to determine -Werror default.

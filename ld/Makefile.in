@@ -305,11 +305,11 @@ am__v_texidevnull_0 = > /dev/null
 am__v_texidevnull_1 = 
 INFO_DEPS = ld.info
 am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
-DVIS = ld.dvi
-PDFS = ld.pdf
-PSS = ld.ps
-HTMLS = ld.html
-TEXINFOS = ld.texi
+DVIS = ld.dvi ldint.dvi
+PDFS = ld.pdf ldint.pdf
+PSS = ld.ps ldint.ps
+HTMLS = ld.html ldint.html
+TEXINFOS = ld.texi ldint.texi
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
 AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
@@ -1682,17 +1682,47 @@ ld.info: ld.texi $(ld_TEXINFOS)
 	fi; \
 	rm -rf $$backupdir; exit $$rc
 
+ldint.info: ld.texi $(ld_TEXINFOS)
+	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
+	rm -rf $$backupdir && mkdir $$backupdir && \
+	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
+	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
+	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
+	  done; \
+	else :; fi && \
+	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
+	 -o $@ `test -f 'ldint.texi' || echo '$(srcdir)/'`ldint.texi; \
+	then \
+	  rc=0; \
+	else \
+	  rc=$$?; \
+	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
+	fi; \
+	rm -rf $$backupdir; exit $$rc
+
 ld.dvi: ld.texi $(ld_TEXINFOS) 
 	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2DVI) $(AM_V_texinfo) --build-dir=$(@:.dvi=.t2d) -o $@ $(AM_V_texidevnull) \
 	`test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi
 
-ld.pdf: ld.texi $(ld_TEXINFOS) 
+ldint.dvi: ldint.texi $(ld_TEXINFOS)
+	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
+	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
+	$(TEXI2DVI) $(AM_V_texinfo) --build-dir=$(@:.dvi=.t2d) -o $@ $(AM_V_texidevnull) \
+	`test -f 'ldint.texi' || echo '$(srcdir)/'`ldint.texi
+
+ld.pdf: ld.texi $(ld_TEXINFOS)
 	$(AM_V_TEXI2PDF)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) $(AM_V_texinfo) --build-dir=$(@:.pdf=.t2p) -o $@ $(AM_V_texidevnull) \
 	`test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi
+
+ldint.pdf: ldint.texi $(ld_TEXINFOS)
+	$(AM_V_TEXI2PDF)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
+	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
+	$(TEXI2PDF) $(AM_V_texinfo) --build-dir=$(@:.pdf=.t2p) -o $@ $(AM_V_texidevnull) \
+	`test -f 'ldint.texi' || echo '$(srcdir)/'`ldint.texi
 
 ld.html: ld.texi $(ld_TEXINFOS) 
 	$(AM_V_MAKEINFO)rm -rf $(@:.html=.htp)
@@ -1703,6 +1733,17 @@ ld.html: ld.texi $(ld_TEXINFOS)
 	else \
 	  rm -rf $(@:.html=.htp); exit 1; \
 	fi
+
+ldint.html: ldint.texi $(ld_TEXINFOS)
+	$(AM_V_MAKEINFO)rm -rf $(@:.html=.htp)
+	$(AM_V_at)if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
+	 -o $(@:.html=.htp) `test -f 'ldint.texi' || echo '$(srcdir)/'`ldint.texi; \
+	then \
+	  rm -rf $@ && mv $(@:.html=.htp) $@; \
+	else \
+	  rm -rf $(@:.html=.htp); exit 1; \
+	fi
+
 .dvi.ps:
 	$(AM_V_DVIPS)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	$(DVIPS) $(AM_V_texinfo) -o $@ $<
