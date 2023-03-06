@@ -51,6 +51,16 @@ get_amdgpu_gdbarch_tdep (gdbarch *arch)
   return gdbarch_tdep<amdgpu_gdbarch_tdep> (arch);
 }
 
+/* Dummy implementation of gdbarch_return_value_as_value.  */
+
+static return_value_convention
+amdgpu_return_value_as_value (gdbarch *arch, value *function, type *valtype,
+			      regcache *regcache, value **read_value,
+			      const gdb_byte *writebuf)
+{
+  gdb_assert_not_reached ("not implemented");
+}
+
 /* Return the name of register REGNUM.  */
 
 static const char *
@@ -1194,6 +1204,8 @@ amdgpu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, -1);
 
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, amdgpu_dwarf_reg_to_regnum);
+
+  set_gdbarch_return_value_as_value (gdbarch, amdgpu_return_value_as_value);
 
   /* Register representation.  */
   set_gdbarch_register_name (gdbarch, amdgpu_register_name);
