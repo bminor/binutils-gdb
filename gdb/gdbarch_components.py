@@ -206,7 +206,6 @@ Value(
     type="const struct floatformat **",
     name="bfloat16_format",
     postdefault="floatformats_bfloat16",
-    invalid=True,
     printer="pformat (gdbarch, gdbarch->bfloat16_format)",
 )
 
@@ -221,7 +220,6 @@ Value(
     type="const struct floatformat **",
     name="half_format",
     postdefault="floatformats_ieee_half",
-    invalid=True,
     printer="pformat (gdbarch, gdbarch->half_format)",
 )
 
@@ -236,7 +234,6 @@ Value(
     type="const struct floatformat **",
     name="float_format",
     postdefault="floatformats_ieee_single",
-    invalid=True,
     printer="pformat (gdbarch, gdbarch->float_format)",
 )
 
@@ -251,7 +248,6 @@ Value(
     type="const struct floatformat **",
     name="double_format",
     postdefault="floatformats_ieee_double",
-    invalid=True,
     printer="pformat (gdbarch, gdbarch->double_format)",
 )
 
@@ -266,7 +262,6 @@ Value(
     type="const struct floatformat **",
     name="long_double_format",
     postdefault="floatformats_ieee_double",
-    invalid=True,
     printer="pformat (gdbarch, gdbarch->long_double_format)",
 )
 
@@ -289,7 +284,6 @@ One if `wchar_t' is signed, zero if unsigned.
     name="wchar_signed",
     predefault="-1",
     postdefault="1",
-    invalid=True,
 )
 
 Method(
@@ -332,7 +326,6 @@ addr_bit is the size of a target address as represented in gdb
     name="addr_bit",
     predefault="0",
     postdefault="gdbarch_ptr_bit (gdbarch)",
-    invalid=True,
 )
 
 Value(
@@ -355,7 +348,6 @@ and if Dwarf versions < 4 need to be supported.
     name="dwarf2_addr_size",
     predefault="0",
     postdefault="gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT",
-    invalid=True,
 )
 
 Value(
@@ -366,7 +358,6 @@ One if `char' acts like `signed char', zero if `unsigned char'.
     name="char_signed",
     predefault="-1",
     postdefault="1",
-    invalid=True,
 )
 
 Function(
