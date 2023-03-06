@@ -34,6 +34,7 @@
 #include "ldwrite.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "lddigest.h"
 #include <ldgram.h>
 #include "ldlex.h"
 #include "ldfile.h"
@@ -527,6 +528,7 @@ main (int argc, char **argv)
 
   ldwrite ();
 
+  lang_generate_digest();		/* Calculate and store CRC on request */
   if (config.map_file != NULL)
     lang_map ();
   if (command_line.cref)
