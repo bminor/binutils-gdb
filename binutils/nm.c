@@ -53,15 +53,15 @@ struct size_sym
   bfd_vma size;
 };
 
-/* When fetching relocs, we use this structure to pass information to
-   get_relocs.  */
+/* line number related info cached in bfd usrdata.  */
 
-struct get_relocs_info
+struct lineno_cache
 {
   asection **secs;
   arelent ***relocs;
   long *relcount;
   asymbol **syms;
+  long symcount;
 };
 
 struct extended_symbol_info
@@ -217,10 +217,6 @@ static const char *plugin_target = "plugin";
 #else
 static const char *plugin_target = NULL;
 #endif
-
-/* Used to cache the line numbers for a BFD.  */
-static bfd *lineno_cache_bfd;
-static bfd *lineno_cache_rel_bfd;
 
 typedef enum unicode_display_type
 {
@@ -1140,33 +1136,46 @@ sort_symbols_by_size (bfd *abfd, bool is_dynamic, void *minisyms,
 static void
 get_relocs (bfd *abfd, asection *sec, void *dataarg)
 {
-  struct get_relocs_info *data = (struct get_relocs_info *) dataarg;
+  struct lineno_cache *data = (struct lineno_cache *) dataarg;
 
   *data->secs = sec;
+  *data->relocs = NULL;
+  *data->relcount = 0;
 
-  if ((sec->flags & SEC_RELOC) == 0)
+  if ((sec->flags & SEC_RELOC) != 0)
     {
-      *data->relocs = NULL;
-      *data->relcount = 0;
-    }
-  else
-    {
-      long relsize;
-
-      relsize = bfd_get_reloc_upper_bound (abfd, sec);
-      if (relsize < 0)
-	bfd_fatal (bfd_get_filename (abfd));
-
-      *data->relocs = (arelent **) xmalloc (relsize);
-      *data->relcount = bfd_canonicalize_reloc (abfd, sec, *data->relocs,
-						data->syms);
-      if (*data->relcount < 0)
-	bfd_fatal (bfd_get_filename (abfd));
+      long relsize = bfd_get_reloc_upper_bound (abfd, sec);
+      if (relsize > 0)
+	{
+	  *data->relocs = (arelent **) xmalloc (relsize);
+	  *data->relcount = bfd_canonicalize_reloc (abfd, sec, *data->relocs,
+						    data->syms);
+	}
     }
 
   ++data->secs;
   ++data->relocs;
   ++data->relcount;
+}
+
+static void
+free_lineno_cache (bfd *abfd)
+{
+  struct lineno_cache *lc = bfd_usrdata (abfd);
+
+  if (lc)
+    {
+      unsigned int seccount = bfd_count_sections (abfd);
+      for (unsigned int i = 0; i < seccount; i++)
+	if (lc->relocs[i] != NULL)
+	  free (lc->relocs[i]);
+      free (lc->relcount);
+      free (lc->relocs);
+      free (lc->secs);
+      free (lc->syms);
+      free (lc);
+      bfd_set_usrdata (abfd, NULL);
+    }
 }
 
 /* Print a single symbol.  */
@@ -1215,73 +1224,48 @@ print_symbol (bfd *        abfd,
 
   if (line_numbers)
     {
-      static asymbol **syms;
-      static long symcount;
+      struct lineno_cache *lc = bfd_usrdata (abfd);
       const char *filename, *functionname;
       unsigned int lineno;
 
       /* We need to get the canonical symbols in order to call
          bfd_find_nearest_line.  This is inefficient, but, then, you
          don't have to use --line-numbers.  */
-      if (abfd != lineno_cache_bfd && syms != NULL)
+      if (lc == NULL)
 	{
-	  free (syms);
-	  syms = NULL;
+	  lc = xcalloc (1, sizeof (*lc));
+	  bfd_set_usrdata (abfd, lc);
 	}
-      if (syms == NULL)
+      if (lc->syms == NULL && lc->symcount == 0)
 	{
-	  long symsize;
-
-	  symsize = bfd_get_symtab_upper_bound (abfd);
-	  if (symsize < 0)
-	    bfd_fatal (bfd_get_filename (abfd));
-	  syms = (asymbol **) xmalloc (symsize);
-	  symcount = bfd_canonicalize_symtab (abfd, syms);
-	  if (symcount < 0)
-	    bfd_fatal (bfd_get_filename (abfd));
-	  lineno_cache_bfd = abfd;
+	  long symsize = bfd_get_symtab_upper_bound (abfd);
+	  if (symsize <= 0)
+	    lc->symcount = -1;
+	  else
+	    {
+	      lc->syms = xmalloc (symsize);
+	      lc->symcount = bfd_canonicalize_symtab (abfd, lc->syms);
+	    }
 	}
 
-      if (bfd_is_und_section (bfd_asymbol_section (sym)))
+      if (lc->symcount <= 0)
+	;
+      else if (bfd_is_und_section (bfd_asymbol_section (sym)))
 	{
-	  static asection **secs;
-	  static arelent ***relocs;
-	  static long *relcount;
-	  static unsigned int seccount;
 	  unsigned int i;
 	  const char *symname;
+	  unsigned int seccount = bfd_count_sections (abfd);
 
 	  /* For an undefined symbol, we try to find a reloc for the
              symbol, and print the line number of the reloc.  */
-	  if (abfd != lineno_cache_rel_bfd && relocs != NULL)
+	  if (lc->relocs == NULL)
 	    {
-	      for (i = 0; i < seccount; i++)
-		if (relocs[i] != NULL)
-		  free (relocs[i]);
-	      free (secs);
-	      free (relocs);
-	      free (relcount);
-	      secs = NULL;
-	      relocs = NULL;
-	      relcount = NULL;
-	    }
+	      lc->secs = xmalloc (seccount * sizeof (*lc->secs));
+	      lc->relocs = xmalloc (seccount * sizeof (*lc->relocs));
+	      lc->relcount = xmalloc (seccount * sizeof (*lc->relcount));
 
-	  if (relocs == NULL)
-	    {
-	      struct get_relocs_info rinfo;
-
-	      seccount = bfd_count_sections (abfd);
-
-	      secs = (asection **) xmalloc (seccount * sizeof *secs);
-	      relocs = (arelent ***) xmalloc (seccount * sizeof *relocs);
-	      relcount = (long *) xmalloc (seccount * sizeof *relcount);
-
-	      rinfo.secs = secs;
-	      rinfo.relocs = relocs;
-	      rinfo.relcount = relcount;
-	      rinfo.syms = syms;
-	      bfd_map_over_sections (abfd, get_relocs, (void *) &rinfo);
-	      lineno_cache_rel_bfd = abfd;
+	      struct lineno_cache rinfo = *lc;
+	      bfd_map_over_sections (abfd, get_relocs, &rinfo);
 	    }
 
 	  symname = bfd_asymbol_name (sym);
@@ -1289,17 +1273,17 @@ print_symbol (bfd *        abfd,
 	    {
 	      long j;
 
-	      for (j = 0; j < relcount[i]; j++)
+	      for (j = 0; j < lc->relcount[i]; j++)
 		{
 		  arelent *r;
 
-		  r = relocs[i][j];
+		  r = lc->relocs[i][j];
 		  if (r->sym_ptr_ptr != NULL
 		      && (*r->sym_ptr_ptr)->section == sym->section
 		      && (*r->sym_ptr_ptr)->value == sym->value
 		      && strcmp (symname,
 				 bfd_asymbol_name (*r->sym_ptr_ptr)) == 0
-		      && bfd_find_nearest_line (abfd, secs[i], syms,
+		      && bfd_find_nearest_line (abfd, lc->secs[i], lc->syms,
 						r->address, &filename,
 						&functionname, &lineno)
 		      && filename != NULL)
@@ -1314,9 +1298,9 @@ print_symbol (bfd *        abfd,
 	}
       else if (bfd_asymbol_section (sym)->owner == abfd)
 	{
-	  if ((bfd_find_line (abfd, syms, sym, &filename, &lineno)
+	  if ((bfd_find_line (abfd, lc->syms, sym, &filename, &lineno)
 	       || bfd_find_nearest_line (abfd, bfd_asymbol_section (sym),
-					 syms, sym->value, &filename,
+					 lc->syms, sym->value, &filename,
 					 &functionname, &lineno))
 	      && filename != NULL
 	      && lineno != 0)
@@ -1624,9 +1608,8 @@ display_archive (bfd *file)
 
       if (last_arfile != NULL)
 	{
+	  free_lineno_cache (last_arfile);
 	  bfd_close (last_arfile);
-	  lineno_cache_bfd = NULL;
-	  lineno_cache_rel_bfd = NULL;
 	  if (arfile == last_arfile)
 	    return;
 	}
@@ -1635,9 +1618,8 @@ display_archive (bfd *file)
 
   if (last_arfile != NULL)
     {
+      free_lineno_cache (last_arfile);
       bfd_close (last_arfile);
-      lineno_cache_bfd = NULL;
-      lineno_cache_rel_bfd = NULL;
     }
 }
 
@@ -1680,11 +1662,9 @@ display_file (char *filename)
       retval = false;
     }
 
+  free_lineno_cache (file);
   if (!bfd_close (file))
     bfd_fatal (filename);
-
-  lineno_cache_bfd = NULL;
-  lineno_cache_rel_bfd = NULL;
 
   return retval;
 }
