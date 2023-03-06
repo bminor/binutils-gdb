@@ -558,7 +558,7 @@ static struct option long_options[]=
 };
 
 static void
-nonfatal (const char *msg)
+my_bfd_nonfatal (const char *msg)
 {
   bfd_nonfatal (msg);
   exit_status = 1;
@@ -5701,14 +5701,14 @@ display_object_bfd (bfd *abfd)
 
   if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
     {
-      nonfatal (bfd_get_filename (abfd));
+      my_bfd_nonfatal (bfd_get_filename (abfd));
       list_matching_formats (matching);
       return;
     }
 
   if (bfd_get_error () != bfd_error_file_not_recognized)
     {
-      nonfatal (bfd_get_filename (abfd));
+      my_bfd_nonfatal (bfd_get_filename (abfd));
       return;
     }
 
@@ -5718,7 +5718,7 @@ display_object_bfd (bfd *abfd)
       return;
     }
 
-  nonfatal (bfd_get_filename (abfd));
+  my_bfd_nonfatal (bfd_get_filename (abfd));
 
   if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
     list_matching_formats (matching);
@@ -5758,7 +5758,7 @@ display_any_bfd (bfd *file, int level)
 	  if (arfile == NULL)
 	    {
 	      if (bfd_get_error () != bfd_error_no_more_archived_files)
-		nonfatal (bfd_get_filename (file));
+		my_bfd_nonfatal (bfd_get_filename (file));
 	      break;
 	    }
 
@@ -5798,7 +5798,7 @@ display_file (char *filename, char *target, bool last_file)
   file = bfd_openr (filename, target);
   if (file == NULL)
     {
-      nonfatal (filename);
+      my_bfd_nonfatal (filename);
       return;
     }
 
@@ -5951,7 +5951,10 @@ main (int argc, char **argv)
 	      else if (streq (optarg, "off"))
 		visualize_jumps = false;
 	      else
-		nonfatal (_("unrecognized argument to --visualize-option"));
+		{
+		  non_fatal (_("unrecognized argument to --visualize-option"));
+		  usage (stderr, 1);
+		}
 	    }
 	  break;
 	case OPTION_DISASSEMBLER_COLOR:
@@ -5968,7 +5971,10 @@ main (int argc, char **argv)
 		   || streq (optarg, "extended-colour"))
 	    disassembler_color = extended;
 	  else
-	    nonfatal (_("unrecognized argument to --disassembler-color"));
+	    {
+	      non_fatal (_("unrecognized argument to --disassembler-color"));
+	      usage (stderr, 1);
+	    }
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)
@@ -5977,7 +5983,7 @@ main (int argc, char **argv)
 	    endian = BFD_ENDIAN_LITTLE;
 	  else
 	    {
-	      nonfatal (_("unrecognized -E option"));
+	      non_fatal (_("unrecognized -E option"));
 	      usage (stderr, 1);
 	    }
 	  break;
@@ -5989,7 +5995,6 @@ main (int argc, char **argv)
 	  else
 	    {
 	      non_fatal (_("unrecognized --endian type `%s'"), optarg);
-	      exit_status = 1;
 	      usage (stderr, 1);
 	    }
 	  break;
