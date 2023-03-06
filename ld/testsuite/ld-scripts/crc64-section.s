@@ -1,0 +1,21 @@
+    .extern ecc_start
+	.section .foo
+main:
+	.byte 0x43
+	.byte 0x4F
+	.byte 0x44
+	.byte 0x45
+    .long 0
+    .long 0
+    .long 0
+	.section .data
+    .byte 0xde
+    .byte 0xad
+    .byte 0xde
+    .byte 0xad
+    .byte 0xde
+    .byte 0xad
+    .byte 0xbe
+    .byte 0xef
+	.section .bss
+	.long 0
