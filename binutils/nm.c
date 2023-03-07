@@ -62,6 +62,7 @@ struct lineno_cache
   long *relcount;
   asymbol **syms;
   long symcount;
+  unsigned int seccount;
 };
 
 struct extended_symbol_info
@@ -1165,9 +1166,8 @@ free_lineno_cache (bfd *abfd)
 
   if (lc)
     {
-      unsigned int seccount = bfd_count_sections (abfd);
-      for (unsigned int i = 0; i < seccount; i++)
-	if (lc->relocs[i] != NULL)
+      if (lc->relocs)
+	for (unsigned int i = 0; i < lc->seccount; i++)
 	  free (lc->relocs[i]);
       free (lc->relcount);
       free (lc->relocs);
@@ -1254,12 +1254,13 @@ print_symbol (bfd *        abfd,
 	{
 	  unsigned int i;
 	  const char *symname;
-	  unsigned int seccount = bfd_count_sections (abfd);
 
 	  /* For an undefined symbol, we try to find a reloc for the
              symbol, and print the line number of the reloc.  */
 	  if (lc->relocs == NULL)
 	    {
+	      unsigned int seccount = bfd_count_sections (abfd);
+	      lc->seccount = seccount;
 	      lc->secs = xmalloc (seccount * sizeof (*lc->secs));
 	      lc->relocs = xmalloc (seccount * sizeof (*lc->relocs));
 	      lc->relcount = xmalloc (seccount * sizeof (*lc->relcount));
@@ -1269,7 +1270,7 @@ print_symbol (bfd *        abfd,
 	    }
 
 	  symname = bfd_asymbol_name (sym);
-	  for (i = 0; i < seccount; i++)
+	  for (i = 0; i < lc->seccount; i++)
 	    {
 	      long j;
 
@@ -1290,7 +1291,7 @@ print_symbol (bfd *        abfd,
 		    {
 		      /* We only print the first one we find.  */
 		      printf ("\t%s:%u", filename, lineno);
-		      i = seccount;
+		      i = lc->seccount;
 		      break;
 		    }
 		}
