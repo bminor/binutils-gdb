@@ -32,6 +32,9 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile1}" executable {deb
 }
 
 clean_restart ${binfile}
+if { [is_remote target] } {
+    gdb_remote_download target $binfile1
+}
 
 runto_main
 
