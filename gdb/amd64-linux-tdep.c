@@ -281,9 +281,7 @@ static int
 amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				 const struct reggroup *group)
 { 
-  if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM
-      || regnum == AMD64_FSBASE_REGNUM
-      || regnum == AMD64_GSBASE_REGNUM)
+  if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM)
     return (group == system_reggroup
 	    || group == save_reggroup
 	    || group == restore_reggroup);
