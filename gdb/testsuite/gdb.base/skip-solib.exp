@@ -51,9 +51,7 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile_main}" "${binfile_main}.o" \
 
 set testobjdir [standard_output_file {}]
 if {[gdb_compile "${binfile_main}.o" "${binfile_main}" executable \
-	 [list debug "additional_flags=-L$testobjdir" \
-	      "additional_flags=-l${test}" \
-	      "ldflags=-Wl,-rpath=$testobjdir"]] != ""} {
+	 [list debug shlib=$binfile_lib]] != ""} {
     return -1
 }
 
