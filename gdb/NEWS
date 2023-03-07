@@ -3,6 +3,11 @@
 
 *** Changes since GDB 13
 
+* Removed targets and native configurations
+
+  GDB no longer supports AIX 4.x, AIX 5.x and AIX 6.x.  The minimum supported
+  AIX version is now AIX 7.1.
+
 * Multi-target feature configuration
 
   GDB now supports the individual configuration of remote targets' feature

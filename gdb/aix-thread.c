@@ -301,7 +301,16 @@ ptrace_check (int req, int id, int ret)
 			req, id, ret, errno);
 	  return ret == -1 ? 0 : 1;
 	}
-      break;
+	break;
+     case PTT_READ_VEC:
+     case PTT_READ_VSX:
+        if (debug_aix_thread)
+            gdb_printf (gdb_stdlog,
+                        "ptrace (%d, %d) = %d (errno = %d)\n",
+                        req, id, ret, errno);
+	if (ret == -1)
+	  return -1;
+	break;
     }
   error (_("aix-thread: ptrace (%d, %d) returned %d (errno = %d %s)"),
 	 req, id, ret, errno, safe_strerror (errno));
@@ -475,6 +484,42 @@ pdc_read_regs (pthdb_user_t user_current_pid,
 	  memcpy (&context->msr, &sprs32, sizeof(sprs32));
 	}
     }  
+
+  /* vector registers.  */
+  __vmx_context_t vmx;
+  if (__power_vmx() && (flags & PTHDB_FLAG_REGS))
+    {
+      if (data->arch64)
+	{
+	  if (!ptrace64aix (PTT_READ_VEC, tid, (long long) &vmx, 0, 0))
+	    memset (&vmx, 0, sizeof (vmx));
+	  memcpy (&context->vmx, &vmx, sizeof(__vmx_context_t));
+	}
+      else
+	{
+	  if (!ptrace32 (PTT_READ_VEC, tid, (long long) &vmx, 0, 0))
+	    memset (&vmx, 0, sizeof (vmx));
+	   memcpy (&context->vmx, &vmx, sizeof(__vmx_context_t));
+	}
+    }
+
+  /* vsx registers.  */
+  __vsx_context_t vsx;
+  if (__power_vsx() && (flags & PTHDB_FLAG_REGS))
+    {
+      if (data->arch64)
+	{
+	  if (!ptrace64aix (PTT_READ_VSX, tid, (long long) &vsx, 0, 0))
+	    memset (&vsx, 0, sizeof (vsx));
+	  memcpy (&context->vsx, &vsx, sizeof(__vsx_context_t));
+	}
+      else
+	{
+	  if (!ptrace32 (PTT_READ_VSX, tid, (long long) &vsx, 0, 0))
+	    memset (&vsx, 0, sizeof (vsx));
+	  memcpy (&context->vsx, &vsx, sizeof(__vsx_context_t));
+	}
+    }
   return 0;
 }
 
@@ -530,6 +575,24 @@ pdc_write_regs (pthdb_user_t user_current_pid,
 	{
 	  ptrace32 (PTT_WRITE_SPRS, tid, (uintptr_t) &context->msr, 0, NULL);
 	}
+    }
+
+  /* vector registers.  */
+  if (__power_vmx() && (flags & PTHDB_FLAG_REGS))
+    {
+      if (data->arch64)
+	ptrace64aix (PTT_WRITE_VEC, tid, (unsigned long) &context->vmx, 0, 0);
+      else
+	ptrace32 (PTT_WRITE_VEC, tid, (uintptr_t) &context->vmx, 0, 0);
+    }
+
+  /* vsx registers.  */
+  if (__power_vsx() && (flags & PTHDB_FLAG_REGS))
+    {
+      if (data->arch64)
+	ptrace64aix (PTT_WRITE_VSX, tid, (unsigned long) &context->vsx, 0, 0);
+      else
+	ptrace32 (PTT_WRITE_VSX, tid, (uintptr_t) &context->vsx, 0, 0);
     }
   return 0;
 }
@@ -1172,6 +1235,35 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
   return pd_update (ptid.pid ());
 }
 
+/* Supply AIX altivec registers, both 64 and 32 bit.  */
+
+static void 
+supply_altivec_regs (struct regcache *regcache, __vmx_context_t vmx)
+{
+  ppc_gdbarch_tdep *tdep
+    = gdbarch_tdep<ppc_gdbarch_tdep> (regcache->arch ());
+  int regno;
+  for (regno = 0; regno < ppc_num_vrs; regno++)
+    regcache->raw_supply (tdep->ppc_vr0_regnum + regno,
+			  &(vmx.__vr[regno]));
+  regcache->raw_supply (tdep->ppc_vrsave_regnum, &(vmx.__vrsave));
+  regcache->raw_supply (tdep->ppc_vrsave_regnum - 1, &(vmx.__vscr));
+}
+
+/* Supply AIX VSX registers, both 64 and 32 bit.  */
+
+static void
+supply_vsx_regs (struct regcache *regcache, __vsx_context_t vsx)
+{
+  ppc_gdbarch_tdep *tdep
+    = gdbarch_tdep<ppc_gdbarch_tdep> (regcache->arch ());
+  int regno;
+
+  for (regno = 0; regno < ppc_num_vshrs; regno++)
+    regcache->raw_supply (tdep->ppc_vsr0_upper_regnum + regno,
+			  &(vsx.__vsr_dw1[regno]));
+}
+
 /* Record that the 64-bit general-purpose registers contain VALS.  */
 
 static void
@@ -1321,6 +1413,12 @@ fetch_regs_user_thread (struct regcache *regcache, pthdb_pthread_t pdtid)
   else
     supply_sprs32 (regcache, ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr,
 			     ctx.xer, ctx.fpscr);
+
+  /* Altivec registers.  */
+  supply_altivec_regs (regcache, ctx.vmx);
+
+  /* VSX registers.  */
+  supply_vsx_regs (regcache, ctx.vsx);
 }
 
 /* Fetch register REGNO if != -1 or all registers otherwise from
@@ -1378,6 +1476,38 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 	  for (i = 0; i < ppc_num_gprs; i++)
 	    supply_reg32 (regcache, tdep->ppc_gp0_regnum + i, gprs32[i]);
 	}
+    }
+
+  /* vector registers.  */
+  if (tdep->ppc_vr0_regnum != -1)
+    {
+      int ret = 0;
+      __vmx_context_t vmx;
+      if (data->arch64)
+	ret = ptrace64aix (PTT_READ_VEC, tid, (long long) &vmx, 0, 0);
+      else
+	ret = ptrace32 (PTT_READ_VEC, tid, (uintptr_t) &vmx, 0, 0);
+      if (ret < 0)
+	memset(&vmx, 0, sizeof(__vmx_context_t));
+      for (i = 0; i < ppc_num_vrs; i++)
+	regcache->raw_supply (tdep->ppc_vr0_regnum + i, &(vmx.__vr[i]));
+      regcache->raw_supply (tdep->ppc_vrsave_regnum, &(vmx.__vrsave));
+      regcache->raw_supply (tdep->ppc_vrsave_regnum - 1, &(vmx.__vscr));
+    }
+
+  /* vsx registers.  */
+  if (tdep->ppc_vsr0_upper_regnum != -1)
+    {
+      __vsx_context_t vsx;
+      int ret = 0;
+      if (data->arch64)
+	ret = ptrace64aix (PTT_READ_VSX, tid, (long long) &vsx, 0, 0);
+      else
+	ret = ptrace32 (PTT_READ_VSX, tid, (long long) &vsx, 0, 0);
+      if (ret < 0)
+        memset(&vsx, 0, sizeof(__vsx_context_t));
+      for (i = 0; i < ppc_num_vshrs; i++)
+        regcache->raw_supply (tdep->ppc_vsr0_upper_regnum + i, &(vsx.__vsr_dw1[i]));
     }
 
   /* Floating-point registers.  */
@@ -1445,6 +1575,41 @@ aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
       else
 	fetch_regs_kernel_thread (regcache, regno, tid);
     }
+}
+
+/* Fill altivec registers.  */
+
+static void
+fill_altivec (const struct regcache *regcache, __vmx_context_t *vmx)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  int regno;
+
+  for (regno = 0; regno < ppc_num_vrs; regno++)
+    if (REG_VALID == regcache->get_register_status (tdep->ppc_vr0_regnum + regno))
+      regcache->raw_collect (tdep->ppc_vr0_regnum + regno,
+				     &(vmx->__vr[regno]));
+
+  if (REG_VALID == regcache->get_register_status (tdep->ppc_vrsave_regnum))
+    regcache->raw_collect (tdep->ppc_vrsave_regnum, &(vmx->__vrsave));
+  if (REG_VALID == regcache->get_register_status (tdep->ppc_vrsave_regnum - 1))
+    regcache->raw_collect (tdep->ppc_vrsave_regnum - 1, &(vmx->__vscr));
+}
+
+/* Fill vsx registers. */
+
+static void
+fill_vsx (const struct regcache *regcache, __vsx_context_t  *vsx)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  int regno;
+
+  for (regno = 0; regno < ppc_num_vshrs; regno++)
+    if (REG_VALID == regcache->get_register_status ( tdep->ppc_vsr0_upper_regnum + regno))
+      regcache->raw_collect (tdep->ppc_vsr0_upper_regnum + regno,
+                                   &(vsx->__vsr_dw1[0]) + regno);
 }
 
 /* Store the gp registers into an array of uint32_t or uint64_t.  */
@@ -1582,6 +1747,9 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
   uint64_t int64;
   struct aix_thread_variables *data;
   data = get_thread_data_helper_for_ptid (inferior_ptid);
+  int ret;
+  __vmx_context_t vmx;
+  __vsx_context_t  vsx;
 
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog, 
@@ -1593,6 +1761,38 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
   if (status != PTHDB_SUCCESS)
     error (_("aix-thread: store_registers: pthdb_pthread_context returned %s"),
 	   pd_status2str (status));
+
+  /* Fill altivec-registers.  */
+
+  if (__power_vmx())
+    {
+      memset(&vmx, 0, sizeof(__vmx_context_t));
+      for (i = 0; i < ppc_num_vrs; i++)
+	if (REG_VALID == regcache->get_register_status (tdep->ppc_vr0_regnum + i))
+	  {
+	    regcache->raw_collect (tdep->ppc_vr0_regnum + i,
+				   &(vmx.__vr[i]));
+	    ctx.vmx.__vr[i] = vmx.__vr[i];
+	  }
+	if (REG_VALID == regcache->get_register_status (tdep->ppc_vrsave_regnum))
+	  ctx.vmx.__vrsave = vmx.__vrsave;
+	if (REG_VALID == regcache->get_register_status (tdep->ppc_vrsave_regnum - 1))
+	  ctx.vmx.__vscr = vmx.__vscr;
+    }
+
+  /* Fill vsx registers. */
+
+  if (__power_vsx())
+    {
+      memset(&vsx, 0, sizeof(__vsx_context_t));
+      for (i = 0; i < ppc_num_vshrs; i++)
+	if (REG_VALID == regcache->get_register_status (tdep->ppc_vsr0_regnum + i))
+	  {
+	    regcache->raw_collect (tdep->ppc_vr0_regnum + i,
+				   &(vsx.__vsr_dw1[i]));
+	    ctx.vsx.__vsr_dw1[i] = vsx.__vsr_dw1[i];
+	  }
+    }
 
   /* Collect general-purpose register values from the regcache.  */
 
@@ -1674,6 +1874,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
   struct ptxsprs sprs64;
   struct ptsprs  sprs32;
   struct aix_thread_variables *data;
+  int ret = 0;
 
   data = get_thread_data_helper_for_ptid (regcache->ptid ());
 
@@ -1766,6 +1967,56 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 	  ptrace32 (PTT_WRITE_SPRS, tid, (uintptr_t) &sprs32, 0, NULL);
 	}
     }
+    
+    /* Vector registers.  */
+    if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1
+	&& (regno == -1 || (regno >= tdep->ppc_vr0_regnum
+	&& regno <= tdep->ppc_vrsave_regnum)))
+      {
+	__vmx_context_t vmx;
+	if (__power_vmx())
+	  {
+	    if (data->arch64)
+	      ret = ptrace64aix (PTT_READ_VEC, tid, (long long) &vmx, 0, 0);
+	    else
+	      ret = ptrace32 (PTT_READ_VEC, tid, (long long) &vmx, 0, 0);
+	    if (ret > 0)
+	      {
+		fill_altivec(regcache, &vmx);
+		if (data->arch64)
+		  ret = ptrace64aix (PTT_WRITE_VEC, tid, (long long) &vmx, 0, 0);
+		else
+		  ret = ptrace32 (PTT_WRITE_VEC, tid, (long long) &vmx, 0, 0);
+		if (ret < 0)
+		  perror_with_name (_("Unable to store AltiVec register after read"));
+	      }
+	  }
+      }
+
+    /* VSX registers.  */
+    if (tdep->ppc_vsr0_upper_regnum != -1 && (regno == -1
+	|| (regno >=tdep->ppc_vsr0_upper_regnum
+	&& regno < tdep->ppc_vsr0_upper_regnum + ppc_num_vshrs)))
+      {
+	__vsx_context_t vsx;
+	if (__power_vsx())
+	  {
+	    if (data->arch64)
+	      ret =  ptrace64aix (PTT_READ_VSX, tid, (long long) &vsx, 0, 0);
+	    else
+	      ret =  ptrace32 (PTT_READ_VSX, tid, (long long) &vsx, 0, 0);
+	    if (ret > 0)
+	      {
+		fill_vsx (regcache, &vsx);
+		if (data->arch64)
+		  ret = ptrace64aix (PTT_WRITE_VSX, tid, (long long) &vsx, 0, 0);
+		else
+		  ret = ptrace32 (PTT_WRITE_VSX, tid, (long long) &vsx, 0, 0);
+		if (ret < 0)
+		  perror_with_name (_("Unable to store VSX register after read"));
+	      }
+	  }
+      }
 }
 
 /* Store gdb's current view of the register set into the

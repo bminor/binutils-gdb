@@ -68,6 +68,178 @@
 /* Minimum possible text address in AIX.  */
 #define AIX_TEXT_SEGMENT_BASE 0x10000000
 
+struct rs6000_aix_reg_vrreg_offset
+{
+  int vr0_offset;
+  int vscr_offset;
+  int vrsave_offset;
+};
+
+static struct rs6000_aix_reg_vrreg_offset rs6000_aix_vrreg_offset =
+{
+   /* AltiVec registers.  */
+  32, /* vr0_offset */
+  544, /* vscr_offset. */
+  560 /* vrsave_offset */
+};
+
+static int
+rs6000_aix_get_vrreg_offset (ppc_gdbarch_tdep *tdep,
+  const struct rs6000_aix_reg_vrreg_offset *offsets,
+                                         int regnum)
+{
+  if (regnum >= tdep->ppc_vr0_regnum &&
+  regnum < tdep->ppc_vr0_regnum + ppc_num_vrs)
+    return offsets->vr0_offset + (regnum - tdep->ppc_vr0_regnum) * 16;
+
+  if (regnum == tdep->ppc_vrsave_regnum - 1)
+    return offsets->vscr_offset;
+
+  if (regnum == tdep->ppc_vrsave_regnum)
+    return offsets->vrsave_offset;
+
+  return -1;
+}
+
+static void
+rs6000_aix_supply_vrregset (const struct regset *regset, struct regcache *regcache,
+                                        int regnum, const void *vrregs, size_t len)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  const struct rs6000_aix_reg_vrreg_offset  *offsets;
+  size_t offset;
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  if (!(tdep->ppc_vr0_regnum >= 0  && tdep->ppc_vrsave_regnum >= 0))
+    return;
+
+  offsets = (const struct rs6000_aix_reg_vrreg_offset *) regset->regmap;
+  if (regnum == -1)
+    {
+      int i;
+
+      for (i = tdep->ppc_vr0_regnum, offset = offsets->vr0_offset;
+			   i < tdep->ppc_vr0_regnum + ppc_num_vrs;
+						i++, offset += 16)
+	ppc_supply_reg (regcache, i, (const gdb_byte *) vrregs, offset, 16);
+
+      ppc_supply_reg (regcache, (tdep->ppc_vrsave_regnum - 1),
+	  (const gdb_byte *) vrregs, offsets->vscr_offset, 4);
+
+      ppc_supply_reg (regcache, tdep->ppc_vrsave_regnum,
+	(const gdb_byte *) vrregs, offsets->vrsave_offset, 4);
+
+      return;
+    }
+  offset = rs6000_aix_get_vrreg_offset (tdep, offsets, regnum);
+  if (regnum != tdep->ppc_vrsave_regnum &&
+      regnum != tdep->ppc_vrsave_regnum - 1)
+    ppc_supply_reg (regcache, regnum, (const gdb_byte *) vrregs, offset, 16);
+  else
+    ppc_supply_reg (regcache, regnum,
+     (const gdb_byte *) vrregs, offset, 4);
+
+}
+
+static void
+rs6000_aix_supply_vsxregset (const struct regset *regset, struct regcache *regcache,
+                                        int regnum, const void *vsxregs, size_t len)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  if (!(tdep->ppc_vsr0_regnum >= 0))
+    return;
+
+  if (regnum == -1)
+    {
+      int i, offset = 0;
+
+      for (i = tdep->ppc_vsr0_upper_regnum; i < tdep->ppc_vsr0_upper_regnum 
+						     + 32; i++, offset += 8)
+	ppc_supply_reg (regcache, i, (const gdb_byte *) vsxregs, offset, 8);
+
+      return;
+    }
+  else
+    ppc_supply_reg (regcache, regnum, (const gdb_byte *) vsxregs, 0, 8);
+}
+
+static void
+rs6000_aix_collect_vsxregset (const struct regset *regset,
+                          const struct regcache *regcache,
+                    int regnum, void *vsxregs, size_t len)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  if (!(tdep->ppc_vsr0_regnum >= 0))
+    return;
+
+  if (regnum == -1)
+    {
+      int i;
+      int offset = 0;
+      for (i = tdep->ppc_vsr0_upper_regnum; i < tdep->ppc_vsr0_upper_regnum
+						     + 32; i++, offset += 8)
+	ppc_collect_reg (regcache, i, (gdb_byte *) vsxregs, offset, 8);
+
+      return;
+    }
+
+ else
+    ppc_collect_reg (regcache, regnum, (gdb_byte *) vsxregs, 0, 8);
+}
+
+static void
+rs6000_aix_collect_vrregset (const struct regset *regset,
+                         const struct regcache *regcache,
+                    int regnum, void *vrregs, size_t len)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  const struct rs6000_aix_reg_vrreg_offset *offsets;
+  size_t offset;
+
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  if (!(tdep->ppc_vr0_regnum >= 0 && tdep->ppc_vrsave_regnum >= 0))
+    return;
+
+  offsets = (const struct rs6000_aix_reg_vrreg_offset *) regset->regmap;
+  if (regnum == -1)
+    {
+      int i;
+
+      for (i = tdep->ppc_vr0_regnum, offset = offsets->vr0_offset; i <
+		tdep->ppc_vr0_regnum + ppc_num_vrs; i++, offset += 16)
+	ppc_collect_reg (regcache, i, (gdb_byte *) vrregs, offset, 16);
+
+      ppc_collect_reg (regcache, (tdep->ppc_vrsave_regnum - 1),
+		 (gdb_byte *) vrregs, offsets->vscr_offset, 4);
+
+      ppc_collect_reg (regcache, tdep->ppc_vrsave_regnum,
+	 (gdb_byte *) vrregs, offsets->vrsave_offset, 4);
+
+      return;
+    }
+
+  offset = rs6000_aix_get_vrreg_offset (tdep, offsets, regnum);
+  if (regnum != tdep->ppc_vrsave_regnum
+      && regnum != tdep->ppc_vrsave_regnum - 1)
+    ppc_collect_reg (regcache, regnum, (gdb_byte *) vrregs, offset, 16);
+  else
+    ppc_collect_reg (regcache, regnum,
+                   (gdb_byte *) vrregs, offset, 4);
+}
+
+static const struct regset rs6000_aix_vrregset = {
+  &rs6000_aix_vrreg_offset,
+  rs6000_aix_supply_vrregset,
+  rs6000_aix_collect_vrregset
+};
+
+static const struct regset rs6000_aix_vsxregset = {
+  &rs6000_aix_vrreg_offset,
+  rs6000_aix_supply_vsxregset,
+  rs6000_aix_collect_vsxregset
+};
+
 static struct trad_frame_cache *
 aix_sighandle_frame_cache (frame_info_ptr this_frame,
 			   void **this_cache)
@@ -262,10 +434,20 @@ rs6000_aix_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 const struct regcache *regcache)
 {
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  int have_altivec = tdep->ppc_vr0_regnum != -1;
+  int have_vsx = tdep->ppc_vsr0_upper_regnum != -1;
+
   if (tdep->wordsize == 4)
     cb (".reg", 592, 592, &rs6000_aix32_regset, NULL, cb_data);
   else
     cb (".reg", 576, 576, &rs6000_aix64_regset, NULL, cb_data);
+
+  if (have_altivec)
+   cb (".aix-vmx", 560, 560, &rs6000_aix_vrregset, "AIX altivec", cb_data);
+
+  if (have_vsx)
+   cb (".aix-vsx", 256, 256, &rs6000_aix_vsxregset, "AIX vsx", cb_data);
+
 }
 
 
