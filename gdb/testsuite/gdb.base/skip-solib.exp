@@ -61,6 +61,7 @@ if {[gdb_compile "${binfile_main}.o" "${binfile_main}" executable \
 with_test_prefix "ignoring solib file" {
 
     clean_restart ${executable_main}
+    gdb_load_shlib $binfile_lib
 
     gdb_test "skip file ${srcfile_lib}" \
 	"File ${srcfile_lib} will be skipped when stepping." \
@@ -87,6 +88,7 @@ with_test_prefix "ignoring solib file" {
 #
 with_test_prefix "ignoring solib function" {
     clean_restart ${executable_main}
+    gdb_load_shlib $binfile_lib
 
     gdb_test "skip function multiply" \
 	"Function multiply will be skipped when stepping\\." \
