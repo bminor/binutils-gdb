@@ -615,53 +615,43 @@ objfile_relocate1 (struct objfile *objfile,
     return 0;
 
   /* OK, get all the symtabs.  */
-  {
-    for (compunit_symtab *cust : objfile->compunits ())
-      {
-	struct blockvector *bv = cust->blockvector ();
-	int block_line_section = SECT_OFF_TEXT (objfile);
+  for (compunit_symtab *cust : objfile->compunits ())
+    {
+      struct blockvector *bv = cust->blockvector ();
+      int block_line_section = SECT_OFF_TEXT (objfile);
 
-	if (bv->map () != nullptr)
-	  bv->map ()->relocate (delta[block_line_section]);
+      if (bv->map () != nullptr)
+	bv->map ()->relocate (delta[block_line_section]);
 
-	for (block *b : bv->blocks ())
-	  {
-	    struct symbol *sym;
-	    struct mdict_iterator miter;
+      for (block *b : bv->blocks ())
+	{
+	  struct symbol *sym;
+	  struct mdict_iterator miter;
 
-	    b->set_start (b->start () + delta[block_line_section]);
-	    b->set_end (b->end () + delta[block_line_section]);
+	  b->set_start (b->start () + delta[block_line_section]);
+	  b->set_end (b->end () + delta[block_line_section]);
 
-	    for (blockrange &r : b->ranges ())
-	      {
-		r.set_start (r.start () + delta[block_line_section]);
-		r.set_end (r.end () + delta[block_line_section]);
-	      }
+	  for (blockrange &r : b->ranges ())
+	    {
+	      r.set_start (r.start () + delta[block_line_section]);
+	      r.set_end (r.end () + delta[block_line_section]);
+	    }
 
-	    /* We only want to iterate over the local symbols, not any
-	       symbols in included symtabs.  */
-	    ALL_DICT_SYMBOLS (b->multidict (), miter, sym)
-	      {
-		relocate_one_symbol (sym, objfile, delta);
-	      }
-	  }
-      }
-  }
+	  /* We only want to iterate over the local symbols, not any
+	     symbols in included symtabs.  */
+	  ALL_DICT_SYMBOLS (b->multidict (), miter, sym)
+	    {
+	      relocate_one_symbol (sym, objfile, delta);
+	    }
+	}
+    }
 
   /* Relocate isolated symbols.  */
-  {
-    struct symbol *iter;
+  for (symbol *iter = objfile->template_symbols; iter; iter = iter->hash_next)
+    relocate_one_symbol (iter, objfile, delta);
 
-    for (iter = objfile->template_symbols; iter; iter = iter->hash_next)
-      relocate_one_symbol (iter, objfile, delta);
-  }
-
-  {
-    int i;
-
-    for (i = 0; i < objfile->section_offsets.size (); ++i)
-      objfile->section_offsets[i] = new_offsets[i];
-  }
+  for (int i = 0; i < objfile->section_offsets.size (); ++i)
+    objfile->section_offsets[i] = new_offsets[i];
 
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (objfile->pspace)->section_map_dirty = 1;
