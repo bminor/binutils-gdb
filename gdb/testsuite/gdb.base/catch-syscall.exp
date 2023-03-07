@@ -63,7 +63,7 @@ set all_syscalls_numbers { }
 # The last syscall (exit()) does not return, so
 # we cannot expect the catchpoint to be triggered
 # twice.  It is a special case.
-set last_syscall "exit_group"
+set last_syscall { }
 set last_syscall_number { }
 
 set vfork_syscalls "(vfork|clone2?)"
@@ -494,7 +494,7 @@ proc do_syscall_tests {} {
 
     # Testing if the 'catch syscall' command works when switching to
     # different architectures on-the-fly (PR gdb/10737).
-    if {[runto_main]} { test_catch_syscall_multi_arch }
+    if {[istarget *-linux*] && [runto_main]} { test_catch_syscall_multi_arch }
 
     # Testing the 'catch' syscall command for a group of syscalls.
     if {[runto_main]} { test_catch_syscall_group }
@@ -677,13 +677,12 @@ proc do_syscall_tests_without_xml {} {
 # This procedure fills the vector "all_syscalls_numbers" with the proper
 # numbers for the used syscalls according to the architecture.
 proc fill_all_syscalls_numbers {} {
-    global all_syscalls_numbers last_syscall_number unknown_syscall_number all_syscalls
+    global all_syscalls_numbers unknown_syscall_number all_syscalls
 
     foreach syscall $all_syscalls {
 	lappend all_syscalls_numbers [get_integer_valueof "${syscall}_syscall" -1]
     }
 
-    set last_syscall_number [get_integer_valueof "exit_group_syscall" -1]
     set unknown_syscall_number [get_integer_valueof "unknown_syscall" -1]
 }
 
@@ -693,6 +692,7 @@ proc setup_all_syscalls {} {
     global all_syscalls
     global gdb_prompt
     global decimal
+    global last_syscall last_syscall_number
 
     # They are ordered according to the file, so do not change this.
     lappend all_syscalls "close"
@@ -769,6 +769,46 @@ proc setup_all_syscalls {} {
     lappend all_syscalls "write"
     lappend all_syscalls "read"
 
+    # Determine the right syscall to use for exit()
+    set test "check SYS_exit"
+    set have_SYS_exit 0
+    set SYS_exit -1
+    gdb_test_multiple "p exit_syscall" $test {
+	-re -wrap " = ($decimal)" {
+	    pass $test
+	    set have_SYS_exit 1
+	    set SYS_exit $expect_out(1,string)
+	}
+	-re -wrap "No symbol .*" {
+	    pass $test
+	}
+    }
+
+    set test "check SYS_exit_group"
+    set have_SYS_exit_group 0
+    set SYS_exit_group -1
+    gdb_test_multiple "p exit_group_syscall" $test {
+	-re -wrap " = ($decimal)" {
+	    pass $test
+	    set have_SYS_exit_group 1
+	    set SYS_exit_group $expect_out(1,string)
+	}
+	-re -wrap "No symbol .*" {
+	    pass $test
+	}
+    }
+
+    if { $have_SYS_exit == 0 && $have_SYS_exit_group == 0 } {
+	return 0
+    }
+
+    if { $have_SYS_exit } {
+	set last_syscall "exit"
+	set last_syscall_number $SYS_exit
+    } else {
+	set last_syscall "exit_group"
+	set last_syscall_number $SYS_exit_group
+    }
     return 1
 }
 
