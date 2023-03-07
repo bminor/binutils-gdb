@@ -55,6 +55,27 @@ if { [board_info $board username] != $env(USER) } {
 	chmod go-rx ."
 }
 
+proc ${board}_file { dest op args } {
+    global board_info
+    set username [board_info $dest username]
+
+    if { $op == "absolute" } {
+	set file [lindex $args 0]
+
+	if { [file pathtype $file] == "relative" } {
+	    # Make sure we get an absolute file name relative to home
+	    # dir of $username, not $env(USER).
+	    set pwd [regsub $::env(USER) $::env(HOME) $username]
+	    set file [remote_file build join $pwd $file]
+	}
+
+	return [remote_file build $op $file]
+    }
+
+    # Fall back to standard_file.
+    return [standard_file $dest $op {*}$args]
+}
+
 proc ${board}_spawn { board cmd } {
     global board_info
 
