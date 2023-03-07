@@ -659,8 +659,8 @@ _initialize_cooked_index ()
 
   add_cmd ("wait-for-index-cache", class_maintenance,
 	   maintenance_wait_for_index_cache, _("\
-Usage: maintenance wait-for-index-cache\n\
-Wait until all pending writes to the index cache have completed."),
+Wait until all pending writes to the index cache have completed.\n\
+Usage: maintenance wait-for-index-cache"),
 	   &maintenancelist);
 
   gdb::observers::gdb_exiting.attach (wait_for_index_cache, "cooked-index");
