@@ -18,7 +18,7 @@ main ()
   vector unsigned int y; 
   vector unsigned int x; 
   vector unsigned int z; 
-  int a;
+  int a = 0;
 
   #ifdef _AIX
   /* On AIX, the debugger cannot access vector registers before they
