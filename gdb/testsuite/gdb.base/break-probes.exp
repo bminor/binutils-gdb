@@ -26,10 +26,14 @@ if { [gdb_compile_shlib $srcfile_lib $binfile_lib {}] != "" } {
     return -1
 }
 
+set binfile_lib_target [gdb_download_shlib $binfile_lib]
+
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
-	  [list debug shlib_load additional_flags=-DSHLIB_NAME=\"$binfile_lib\"]] } {
+	  [list debug shlib_load additional_flags=-DSHLIB_NAME=\"$binfile_lib_target\"]] } {
     return -1
 }
+
+gdb_locate_shlib $binfile_lib
 
 # Enable stop-on-solib-events
 gdb_test_no_output "set stop-on-solib-events 1"
@@ -81,7 +85,9 @@ gdb_test_multiple $test $test {
 
 # GDB strips "target:" from the start of filenames
 # when operating on the local filesystem
-regsub "^target:" "$sysroot" "(target:)?" sysroot
+if { ![is_remote target] } {
+    regsub "^target:" "$sysroot" "(target:)?" sysroot
+}
 
 # Run til it loads our library
 set test "run til our library loads"
@@ -89,7 +95,7 @@ set not_loaded_library 1
 while { $not_loaded_library } {
     set not_loaded_library 0
     gdb_test_multiple "c" $test {
-	-re "Inferior loaded $sysroot$binfile_lib\\M.*$gdb_prompt $" {
+	-re "Inferior loaded $sysroot\[^\r\n\]*$binfile_lib_target\\M.*$gdb_prompt $" {
 	    pass $test
 	}
 	-re "Stopped due to shared library event\\M.*$gdb_prompt $" {
