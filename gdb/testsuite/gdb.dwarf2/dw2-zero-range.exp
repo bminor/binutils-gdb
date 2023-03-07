@@ -104,6 +104,7 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
     }
 
     clean_restart $binfile
+    gdb_load_shlib $lib1
 
     set readnow_p [readnow]
 
@@ -123,7 +124,7 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
     with_complaints 1 {
 	set test "Zero address complaint - relocated - psymtab"
 	set have_complaint 0
-	gdb_test_multiple "sharedlibrary $lib1" $test {
+	gdb_test_multiple "sharedlibrary [file tail $lib1]" $test {
 	    -re -wrap $re {
 		set have_complaint 1
 	    }
