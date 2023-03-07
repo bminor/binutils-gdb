@@ -1495,9 +1495,9 @@ Special entry points for gdb to swap in coff symbol table parts:
 .    (bfd *, FILE *, combined_entry_type *, combined_entry_type *,
 .     combined_entry_type *, unsigned int);
 .
-.  void (*_bfd_coff_reloc16_extra_cases)
+.  bool (*_bfd_coff_reloc16_extra_cases)
 .    (bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *,
-.     bfd_byte *, unsigned int *, unsigned int *);
+.     bfd_byte *, size_t *, size_t *);
 .
 .  int (*_bfd_coff_reloc16_estimate)
 .    (bfd *, asection *, arelent *, unsigned int,
@@ -5331,18 +5331,16 @@ dummy_reloc16_estimate (bfd *abfd ATTRIBUTE_UNUSED,
 
 #define coff_reloc16_extra_cases dummy_reloc16_extra_cases
 
-/* This works even if abort is not declared in any header file.  */
-
-static void
+static bool
 dummy_reloc16_extra_cases (bfd *abfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			   struct bfd_link_order *link_order ATTRIBUTE_UNUSED,
 			   arelent *reloc ATTRIBUTE_UNUSED,
 			   bfd_byte *data ATTRIBUTE_UNUSED,
-			   unsigned int *src_ptr ATTRIBUTE_UNUSED,
-			   unsigned int *dst_ptr ATTRIBUTE_UNUSED)
+			   size_t *src_ptr ATTRIBUTE_UNUSED,
+			   size_t *dst_ptr ATTRIBUTE_UNUSED)
 {
-  abort ();
+  return false;
 }
 #endif
 

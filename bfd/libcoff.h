@@ -801,9 +801,9 @@ typedef struct
     (bfd *, FILE *, combined_entry_type *, combined_entry_type *,
      combined_entry_type *, unsigned int);
 
-  void (*_bfd_coff_reloc16_extra_cases)
+  bool (*_bfd_coff_reloc16_extra_cases)
     (bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *,
-     bfd_byte *, unsigned int *, unsigned int *);
+     bfd_byte *, size_t *, size_t *);
 
   int (*_bfd_coff_reloc16_estimate)
     (bfd *, asection *, arelent *, unsigned int,
