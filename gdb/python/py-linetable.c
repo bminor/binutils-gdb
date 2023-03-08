@@ -156,7 +156,7 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
 {
   struct symtab *symtab;
   gdb_py_longest py_line;
-  struct linetable_entry *best_entry = NULL;
+  const linetable_entry *best_entry = nullptr;
   std::vector<CORE_ADDR> pcs;
 
   LTPY_REQUIRE_VALID (self, symtab);
@@ -201,7 +201,7 @@ ltpy_has_line (PyObject *self, PyObject *args)
 
   for (index = 0; index < symtab->linetable ()->nitems; index++)
     {
-      struct linetable_entry *item = &(symtab->linetable ()->item[index]);
+      const linetable_entry *item = &(symtab->linetable ()->item[index]);
       if (item->line == py_line)
 	  Py_RETURN_TRUE;
     }
@@ -219,7 +219,6 @@ ltpy_get_all_source_lines (PyObject *self, PyObject *args)
 {
   struct symtab *symtab;
   Py_ssize_t index;
-  struct linetable_entry *item;
 
   LTPY_REQUIRE_VALID (self, symtab);
 
@@ -236,7 +235,7 @@ ltpy_get_all_source_lines (PyObject *self, PyObject *args)
 
   for (index = 0; index < symtab->linetable ()->nitems; index++)
     {
-      item = &(symtab->linetable ()->item[index]);
+      const linetable_entry *item = &(symtab->linetable ()->item[index]);
 
       /* 0 is used to signify end of line table information.  Do not
 	 include in the source set. */
@@ -395,7 +394,6 @@ ltpy_iternext (PyObject *self)
   ltpy_iterator_object *iter_obj = (ltpy_iterator_object *) self;
   struct symtab *symtab;
   PyObject *obj;
-  struct linetable_entry *item;
 
   LTPY_REQUIRE_VALID (iter_obj->source, symtab);
 
@@ -405,7 +403,8 @@ ltpy_iternext (PyObject *self)
       return NULL;
     }
 
-  item = &(symtab->linetable ()->item[iter_obj->current_index]);
+  const linetable_entry *item
+    = &(symtab->linetable ()->item[iter_obj->current_index]);
 
   /* Skip over internal entries such as 0.  0 signifies the end of
      line table data and is not useful to the API user.  */

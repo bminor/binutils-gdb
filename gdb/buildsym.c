@@ -916,13 +916,15 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	  size_t entry_array_size = n_entries * sizeof (struct linetable_entry);
 	  int linetablesize = sizeof (struct linetable) + entry_array_size;
 
-	  symtab->set_linetable
-	    (XOBNEWVAR (&m_objfile->objfile_obstack, struct linetable,
-			linetablesize));
+	  struct linetable *new_table
+	    = XOBNEWVAR (&m_objfile->objfile_obstack, struct linetable,
+			 linetablesize);
 
-	  symtab->linetable ()->nitems = n_entries;
-	  memcpy (symtab->linetable ()->item,
+	  new_table->nitems = n_entries;
+	  memcpy (new_table->item,
 		  subfile->line_vector_entries.data (), entry_array_size);
+
+	  symtab->set_linetable (new_table);
 	}
       else
 	symtab->set_linetable (nullptr);

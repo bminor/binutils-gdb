@@ -237,7 +237,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   struct objfile *objfile = symtab->compunit ()->objfile ();
   struct gdbarch *gdbarch = objfile->arch ();
   struct mdict_iterator miter;
-  struct linetable *l;
+  const struct linetable *l;
   struct symbol *sym;
   int depth;
 
@@ -948,7 +948,7 @@ block_depth (const struct block *block)
 static int
 maintenance_print_one_line_table (struct symtab *symtab, void *data)
 {
-  struct linetable *linetable;
+  const struct linetable *linetable;
   struct objfile *objfile;
 
   objfile = symtab->compunit ()->objfile ();
@@ -986,7 +986,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 
       for (int i = 0; i < linetable->nitems; ++i)
 	{
-	  struct linetable_entry *item;
+	  const linetable_entry *item;
 
 	  item = &linetable->item [i];
 	  ui_out_emit_tuple tuple_emitter (uiout, nullptr);

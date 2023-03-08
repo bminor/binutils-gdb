@@ -1635,12 +1635,12 @@ struct symtab
     m_compunit = compunit;
   }
 
-  struct linetable *linetable () const
+  const struct linetable *linetable () const
   {
     return m_linetable;
   }
 
-  void set_linetable (struct linetable *linetable)
+  void set_linetable (const struct linetable *linetable)
   {
     m_linetable = linetable;
   }
@@ -1667,7 +1667,7 @@ struct symtab
   /* Table mapping core addresses to line numbers for this file.
      Can be NULL if none.  Never shared between different symtabs.  */
 
-  struct linetable *m_linetable;
+  const struct linetable *m_linetable;
 
   /* Name of this source file, in a form appropriate to print to the user.
 
@@ -2698,7 +2698,7 @@ void iterate_over_symtabs (const char *name,
 
 
 std::vector<CORE_ADDR> find_pcs_for_symtab_line
-    (struct symtab *symtab, int line, struct linetable_entry **best_entry);
+    (struct symtab *symtab, int line, const linetable_entry **best_entry);
 
 /* Prototype for callbacks for LA_ITERATE_OVER_SYMBOLS.  The callback
    is called once per matching symbol SYM.  The callback should return

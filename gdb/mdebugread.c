@@ -4065,7 +4065,10 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
       psymtab_language = cust->primary_filetab ()->language ();
 
-      lines = cust->primary_filetab ()->linetable ();
+      /* This code allocates the line table on the heap and then later
+	 copies it to the obstack.  So, while casting away const here
+	 is ugly, it's not incorrect.  */
+      lines = const_cast<linetable *> (cust->primary_filetab ()->linetable ());
 
       /* Get a new lexical context.  */
 

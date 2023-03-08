@@ -573,7 +573,7 @@ do_mixed_source_and_assembly_deprecated
 {
   int newlines = 0;
   int nlines;
-  struct linetable_entry *le;
+  const struct linetable_entry *le;
   struct deprecated_dis_line_entry *mle;
   struct symtab_and_line sal;
   int i;
