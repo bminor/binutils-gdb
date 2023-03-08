@@ -2,10 +2,7 @@
 #ld: -T crc64-iso.t
 #objdump: -s -j .text
 #target: [is_elf_format] [is_coff_format]
-#notarget: [is_aout_format]
-#xfail: tic4x-*-* tic54x-*-*
-#skip: ns32k-pc532-macho, pdp11-dec-aout, powerpc-ibm-aix5.2.0
-#skip: rs6000-aix4.3.3, alpha-linuxecoff
+#skip: tic4x-*-* tic54x-*-*
 
 .*:     file format .*
 
