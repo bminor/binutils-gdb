@@ -891,25 +891,13 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
     {
       if (!subfile->line_vector_entries.empty ())
 	{
-	  const auto lte_is_less_than
-	    = [] (const linetable_entry &ln1,
-		  const linetable_entry &ln2) -> bool
-	      {
-		if (ln1.pc == ln2.pc
-		    && ((ln1.line == 0) != (ln2.line == 0)))
-		  return ln1.line == 0;
-
-		return (ln1.pc < ln2.pc);
-	      };
-
 	  /* Like the pending blocks, the line table may be scrambled
 	     in reordered executables.  Sort it.  It is important to
 	     preserve the order of lines at the same address, as this
 	     maintains the inline function caller/callee
 	     relationships, this is why std::stable_sort is used.  */
 	  std::stable_sort (subfile->line_vector_entries.begin (),
-			    subfile->line_vector_entries.end (),
-			    lte_is_less_than);
+			    subfile->line_vector_entries.end ());
 	}
 
       /* Allocate a symbol table if necessary.  */

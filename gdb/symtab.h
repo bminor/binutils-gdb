@@ -1547,6 +1547,19 @@ struct rust_vtable_symbol : public symbol
 
 struct linetable_entry
 {
+  bool operator< (const linetable_entry &other) const
+  {
+    if (pc == other.pc
+	&& (line != 0) != (other.line != 0))
+      return line == 0;
+    return pc < other.pc;
+  }
+
+  /* Two entries are equal if they have the same line and PC.  The
+     other members are ignored.  */
+  bool operator== (const linetable_entry &other) const
+  { return line == other.line && pc == other.pc; }
+
   /* The line number for this entry.  */
   int line;
 

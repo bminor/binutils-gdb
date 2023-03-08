@@ -604,7 +604,7 @@ do_mixed_source_and_assembly_deprecated
 
   for (; i < nlines - 1 && le[i].pc < high; i++)
     {
-      if (le[i].line == le[i + 1].line && le[i].pc == le[i + 1].pc)
+      if (le[i] == le[i + 1])
 	continue;		/* Ignore duplicates.  */
 
       /* Skip any end-of-function markers.  */

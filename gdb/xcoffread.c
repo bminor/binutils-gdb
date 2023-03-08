@@ -439,9 +439,7 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
   if (fentries.empty ())
     return;
 
-  std::sort (fentries.begin (), fentries.end (),
-	     [] (const linetable_entry &lte1, const linetable_entry& lte2)
-	     { return lte1.pc < lte2.pc; });
+  std::sort (fentries.begin (), fentries.end ());
 
   /* Allocate a new line table.  */
   std::vector<linetable_entry> new_linetable;
