@@ -2842,6 +2842,33 @@ values see @ref{gdbpy_frame_read_register,,Frame.read_register}.
 @var{value} is a register value (a @code{gdb.Value} object).
 @end defun
 
+@subheading The @code{gdb.unwinder} Module
+
+@value{GDBN} comes with a @code{gdb.unwinder} module which contains
+the following class:
+
+@deftp {class} gdb.unwinder.Unwinder
+The @code{Unwinder} class is a base class from which user created
+unwinders can derive, though it is not required that unwinders derive
+from this class, so long as any user created unwinder has the required
+@code{name} and @code{enabled} attributes.
+
+@defun gdb.unwinder.Unwinder.__init__(@var{name})
+The @var{name} is a string used to reference this unwinder within some
+@value{GDBN} commands (@pxref{Managing Registered Unwinders}).
+@end defun
+
+@defvar gdb.unwinder.name
+A read-only attribute which is a string, the name of this unwinder.
+@end defvar
+
+@defvar gdb.unwinder.enabled
+A modifiable attribute containing a boolean; when @code{True}, the
+unwinder is enabled, and will be used by @value{GDBN}.  When
+@code{False}, the unwinder has been disabled, and will not be used.
+@end defvar
+@end deftp
+
 @subheading Registering an Unwinder
 
 Object files and program spaces can have unwinders registered with
@@ -2870,9 +2897,7 @@ builtin to @value{GDBN}.
 
 @subheading Unwinder Skeleton Code
 
-@value{GDBN} comes with the module containing the base @code{Unwinder}
-class.  Derive your unwinder class from it and structure the code as
-follows:
+Here is an example of how to structure a user created unwinder:
 
 @smallexample
 from gdb.unwinder import Unwinder
@@ -2907,6 +2932,36 @@ class MyUnwinder(Unwinder):
 
 gdb.unwinder.register_unwinder(<locus>, MyUnwinder(), <replace>)
 @end smallexample
+
+@anchor{Managing Registered Unwinders}
+@subheading Managing Registered Unwinders
+@value{GDBN} defines 3 commands to manage registered unwinders.  These
+are:
+
+@table @code
+@item info unwinder @r{[} @var{locus} @r{[} @var{name-regexp} @r{]} @r{]}
+Lists all registered unwinders.  Arguments @var{locus} and
+@var{name-regexp} are both optional and can be used to filter which
+unwinders are listed.
+
+The @var{locus} argument should be either @kbd{global},
+@kbd{progspace}, or the name of an object file.  Only unwinders
+registered for the specified locus will be listed.
+
+The @var{name-regexp} is a regular expression used to match against
+unwinder names.  When trying to match against unwinder names that
+include a string enclose @var{name-regexp} in quotes.
+@item disable unwinder @r{[} @var{locus} @r{[} @var{name-regexp} @r{]} @r{]}
+The @var{locus} and @var{name-regexp} are interpreted as in @kbd{info
+unwinder} above, but instead of listing the matching unwinders, all of
+the matching unwinders are disabled.  The @code{enabled} field of each
+matching unwinder is set to @code{False}.
+@item enable unwinder @r{[} @var{locus} @r{[} @var{name-regexp} @r{]} @r{]}
+The @var{locus} and @var{name-regexp} are interpreted as in @kbd{info
+unwinder} above, but instead of listing the matching unwinders, all of
+the matching unwinders are enabled.  The @code{enabled} field of each
+matching unwinder is set to @code{True}.
+@end table
 
 @node Xmethods In Python
 @subsubsection Xmethods In Python

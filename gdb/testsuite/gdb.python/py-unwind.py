@@ -130,5 +130,16 @@ class TestUnwinder(Unwinder):
             return None
 
 
-gdb.unwinder.register_unwinder(None, TestUnwinder(), True)
+global_test_unwinder = TestUnwinder()
+gdb.unwinder.register_unwinder(None, global_test_unwinder, True)
+
+
+class simple_unwinder(Unwinder):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def __call__(self, pending_frame):
+        return None
+
+
 print("Python script imported")

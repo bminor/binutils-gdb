@@ -35,8 +35,27 @@ class Unwinder(object):
         Args:
             name: An identifying name for the unwinder.
         """
-        self.name = name
-        self.enabled = True
+
+        if not isinstance(name, str):
+            raise TypeError("incorrect type for name: %s" % type(name))
+
+        self._name = name
+        self._enabled = True
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def enabled(self):
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("incorrect type for enabled attribute: %s" % type(value))
+        self._enabled = value
+        gdb.invalidate_cached_frames()
 
     def __call__(self, pending_frame):
         """GDB calls this method to unwind a frame.

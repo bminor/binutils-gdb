@@ -40,25 +40,105 @@ if {![runto_main]} {
     return 0
 }
 
+# Check for the corrupt backtrace.
+proc check_for_broken_backtrace {testname} {
+    gdb_test_sequence "where" $testname {
+	"\\r\\n#0 .* corrupt_frame_inner \\(\\) at "
+	"\\r\\n#1 .* corrupt_frame_outer \\(\\) at "
+	"Backtrace stopped: frame did not save the PC"
+    }
+}
+
+# Check for the correct backtrace.
+proc check_for_fixed_backtrace {testname} {
+    gdb_test_sequence "where" $testname {
+	"\\r\\n#0 .* corrupt_frame_inner \\(\\) at "
+	"\\r\\n#1 .* corrupt_frame_outer \\(\\) at "
+	"\\r\\n#2 .* main \\(.*\\) at"
+    }
+}
+
+# Check the 'info unwinder' output.
+proc check_info_unwinder {testname enabled} {
+    if {$enabled} {
+	set suffix ""
+    } else {
+	set suffix " \\\[disabled\\\]"
+    }
+
+    gdb_test_sequence "info unwinder" $testname \
+	[list \
+	     "Global:" \
+	     "  test unwinder${suffix}"]
+}
+
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 
 gdb_breakpoint [gdb_get_line_number "break backtrace-broken"]
 
-gdb_test "source ${pyfile}" "Python script imported" \
-         "import python scripts"
-
 gdb_continue_to_breakpoint "break backtrace-broken"
-gdb_test_sequence "where"  "Backtrace restored by unwinder" {
-    "\\r\\n#0 .* corrupt_frame_inner \\(\\) at "
-    "\\r\\n#1 .* corrupt_frame_outer \\(\\) at "
-    "\\r\\n#2 .* main \\(.*\\) at"
-}
+
+check_for_broken_backtrace "Backtrace is initially broken"
+
+gdb_test "source ${pyfile}" "Python script imported" \
+    "import python scripts"
+
+check_info_unwinder "info unwinder after loading script" on
+
+check_for_fixed_backtrace "check backtrace after loading unwinder"
 
 # Check that the Python unwinder frames can be flushed / released.
 gdb_test "maint flush register-cache" "Register cache flushed\\." "flush frames"
+
+check_for_fixed_backtrace "check backtrace after flush"
+
+# Try to disable the unwinder but instead set the enabled field to a
+# non boolean value.  This should fail.  Check the 'info unwinder'
+# output to be sure.
+gdb_test "python global_test_unwinder.enabled = \"off\"" \
+    [multi_line \
+	 "TypeError: incorrect type for enabled attribute: <class 'str'>" \
+	 "Error while executing Python code\\."]
+check_info_unwinder "info unwinder after failed disable" on
+
+# While we're doing silly stuff, lets try to change the name of this
+# unwider.  Doing this is bad as the new name might clash with an
+# already registered name, which violates the promises made during
+# 'register_unwinder'.
+gdb_test "python global_test_unwinder.name = \"foo\"" \
+    [multi_line \
+	 "AttributeError: can't set attribute" \
+	 "Error while executing Python code\\."]
+check_info_unwinder "info unwinder after failed name change" on
+
+# Now actually disable the unwinder by manually adjusting the
+# 'enabled' attribute.  Check that the stack is once again broken, and
+# that the unwinder shows as disabled in the 'info unwinder' output.
+gdb_test_no_output "python global_test_unwinder.enabled = False"
+check_for_broken_backtrace "stack is broken after disabling"
+check_info_unwinder "info unwinder after manually disabling" off
+
+# Now enable the unwinder using the 'enable unwinder' command.
+gdb_test "enable unwinder global \"test unwinder\"" \
+    "1 unwinder enabled"
+check_for_fixed_backtrace "check backtrace after enabling with command"
+check_info_unwinder "info unwinder after command enabled" on
+
+# And now disable using the command and check the stack is once again
+# broken, and that the 'info unwinder' output updates correctly.
+gdb_test "disable unwinder global \"test unwinder\"" \
+    "1 unwinder disabled"
+check_for_broken_backtrace "stack is broken after command disabling"
+check_info_unwinder "info unwinder after command disabling" off
 
 # Check that invalid register names cause errors.
 gdb_test "python print(add_saved_register_error)" "True" \
     "add_saved_register error"
 gdb_test "python print(read_register_error)" "True" \
     "read_register error"
+
+# Try to create an unwinder object with a non-string name.
+gdb_test "python obj = simple_unwinder(True)" \
+    [multi_line \
+	 "TypeError: incorrect type for name: <class 'bool'>" \
+	 "Error while executing Python code\\."]

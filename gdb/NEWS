@@ -106,6 +106,20 @@ show always-read-ctf
    without a thread restriction.  The same is also true for the 'task'
    field of an Ada task-specific breakpoint.
 
+* Python API
+
+  ** The gdb.unwinder.Unwinder.name attribute is now read-only.
+
+  ** The name argument passed to gdb.unwinder.Unwinder.__init__ must
+     now be of type 'str' otherwise a TypeError will be raised.
+
+  ** The gdb.unwinder.Unwinder.enabled attribute can now only accept
+     values of type 'bool'.  Changing this attribute will now
+     invalidate GDB's frame-cache, which means GDB will need to
+     rebuild its frame-cache when next required - either with, or
+     without the particular unwinder, depending on how 'enabled' was
+     changed.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.
