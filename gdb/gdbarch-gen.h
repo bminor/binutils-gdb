@@ -476,6 +476,19 @@ typedef bool (gdbarch_dwarf2_omit_typedef_p_ftype) (struct type *target_type, co
 extern bool gdbarch_dwarf2_omit_typedef_p (struct gdbarch *gdbarch, struct type *target_type, const char *producer, const char *name);
 extern void set_gdbarch_dwarf2_omit_typedef_p (struct gdbarch *gdbarch, gdbarch_dwarf2_omit_typedef_p_ftype *dwarf2_omit_typedef_p);
 
+/* Update PC when trying to find a call site.  This is useful on
+   architectures where the call site PC, as reported in the DWARF, can be
+   incorrect for some reason.
+
+   The passed-in PC will be an address in the inferior.  GDB will have
+   already failed to find a call site at this PC.  This function may
+   simply return its parameter if it thinks that should be the correct
+   address. */
+
+typedef CORE_ADDR (gdbarch_update_call_site_pc_ftype) (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern CORE_ADDR gdbarch_update_call_site_pc (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_update_call_site_pc (struct gdbarch *gdbarch, gdbarch_update_call_site_pc_ftype *update_call_site_pc);
+
 /* Return true if the return value of function is stored in the first hidden
    parameter.  In theory, this feature should be language-dependent, specified
    by language and its ABI, such as C++.  Unfortunately, compiler may

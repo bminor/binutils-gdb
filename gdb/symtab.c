@@ -349,6 +349,19 @@ compunit_symtab::find_call_site (CORE_ADDR pc) const
   struct call_site call_site_local (unrelocated_pc, nullptr, nullptr);
   void **slot
     = htab_find_slot (m_call_site_htab, &call_site_local, NO_INSERT);
+  if (slot != nullptr)
+    return (call_site *) *slot;
+
+  /* See if the arch knows another PC we should try.  On some
+     platforms, GCC emits a DWARF call site that is offset from the
+     actual return location.  */
+  struct gdbarch *arch = objfile ()->arch ();
+  CORE_ADDR new_pc = gdbarch_update_call_site_pc (arch, pc);
+  if (pc == new_pc)
+    return nullptr;
+
+  call_site new_call_site_local (new_pc - delta, nullptr, nullptr);
+  slot = htab_find_slot (m_call_site_htab, &new_call_site_local, NO_INSERT);
   if (slot == nullptr)
     return nullptr;
 

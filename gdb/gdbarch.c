@@ -115,6 +115,7 @@ struct gdbarch
   gdbarch_return_value_as_value_ftype *return_value_as_value = default_gdbarch_return_value;
   gdbarch_get_return_buf_addr_ftype *get_return_buf_addr = default_get_return_buf_addr;
   gdbarch_dwarf2_omit_typedef_p_ftype *dwarf2_omit_typedef_p = default_dwarf2_omit_typedef_p;
+  gdbarch_update_call_site_pc_ftype *update_call_site_pc = default_update_call_site_pc;
   gdbarch_return_in_first_hidden_param_p_ftype *return_in_first_hidden_param_p = default_return_in_first_hidden_param_p;
   gdbarch_skip_prologue_ftype *skip_prologue = nullptr;
   gdbarch_skip_main_prologue_ftype *skip_main_prologue = nullptr;
@@ -372,6 +373,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     log.puts ("\n\treturn_value_as_value");
   /* Skip verify of get_return_buf_addr, invalid_p == 0 */
   /* Skip verify of dwarf2_omit_typedef_p, invalid_p == 0 */
+  /* Skip verify of update_call_site_pc, invalid_p == 0 */
   /* Skip verify of return_in_first_hidden_param_p, invalid_p == 0 */
   if (gdbarch->skip_prologue == 0)
     log.puts ("\n\tskip_prologue");
@@ -793,6 +795,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: dwarf2_omit_typedef_p = <%s>\n",
 	      host_address_to_string (gdbarch->dwarf2_omit_typedef_p));
+  gdb_printf (file,
+	      "gdbarch_dump: update_call_site_pc = <%s>\n",
+	      host_address_to_string (gdbarch->update_call_site_pc));
   gdb_printf (file,
 	      "gdbarch_dump: return_in_first_hidden_param_p = <%s>\n",
 	      host_address_to_string (gdbarch->return_in_first_hidden_param_p));
@@ -2637,6 +2642,23 @@ set_gdbarch_dwarf2_omit_typedef_p (struct gdbarch *gdbarch,
 				   gdbarch_dwarf2_omit_typedef_p_ftype dwarf2_omit_typedef_p)
 {
   gdbarch->dwarf2_omit_typedef_p = dwarf2_omit_typedef_p;
+}
+
+CORE_ADDR
+gdbarch_update_call_site_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->update_call_site_pc != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_update_call_site_pc called\n");
+  return gdbarch->update_call_site_pc (gdbarch, pc);
+}
+
+void
+set_gdbarch_update_call_site_pc (struct gdbarch *gdbarch,
+				 gdbarch_update_call_site_pc_ftype update_call_site_pc)
+{
+  gdbarch->update_call_site_pc = update_call_site_pc;
 }
 
 int

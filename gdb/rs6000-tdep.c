@@ -7471,6 +7471,24 @@ rs6000_program_breakpoint_here_p (gdbarch *gdbarch, CORE_ADDR address)
   return false;
 }
 
+/* Implement the update_call_site_pc arch hook.  */
+
+static CORE_ADDR
+ppc64_update_call_site_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  /* Some versions of GCC emit:
+
+     .  bl function
+     .  nop
+     .  ...
+
+     but emit DWARF where the DW_AT_call_return_pc points to
+     instruction after the 'nop'.  Note that while the compiler emits
+     a 'nop', the linker might put some other instruction there -- so
+     we just unconditionally check the next instruction.  */
+  return pc + 4;
+}
+
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -8257,6 +8275,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
       set_gdbarch_get_return_buf_addr (gdbarch,
 				       ppc64_sysv_get_return_buf_addr);
+      set_gdbarch_update_call_site_pc (gdbarch, ppc64_update_call_site_pc);
     }
   else
     set_gdbarch_return_value (gdbarch, ppc_sysv_abi_return_value);

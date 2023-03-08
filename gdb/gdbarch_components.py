@@ -929,6 +929,23 @@ Return 0 by default""",
 
 Method(
     comment="""
+Update PC when trying to find a call site.  This is useful on
+architectures where the call site PC, as reported in the DWARF, can be
+incorrect for some reason.
+
+The passed-in PC will be an address in the inferior.  GDB will have
+already failed to find a call site at this PC.  This function may
+simply return its parameter if it thinks that should be the correct
+address.""",
+    type="CORE_ADDR",
+    name="update_call_site_pc",
+    params=[("CORE_ADDR", "pc")],
+    predefault="default_update_call_site_pc",
+    invalid=False,
+)
+
+Method(
+    comment="""
 Return true if the return value of function is stored in the first hidden
 parameter.  In theory, this feature should be language-dependent, specified
 by language and its ABI, such as C++.  Unfortunately, compiler may
