@@ -263,7 +263,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
       for (int i = 0; i < len; i++)
 	{
 	  gdb_printf (outfile, " line %d at ", l->item[i].line);
-	  gdb_puts (paddress (gdbarch, l->item[i].pc), outfile);
+	  gdb_puts (paddress (gdbarch, l->item[i].pc (objfile)), outfile);
 	  if (l->item[i].is_stmt)
 	    gdb_printf (outfile, "\t(stmt)");
 	  gdb_printf (outfile, "\n");
@@ -996,7 +996,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 	  else
 	    uiout->field_string ("line", _("END"));
 	  uiout->field_core_addr ("address", objfile->arch (),
-				  item->pc);
+				  item->raw_pc ());
 	  uiout->field_string ("is-stmt", item->is_stmt ? "Y" : "");
 	  uiout->field_string ("prologue-end", item->prologue_end ? "Y" : "");
 	  uiout->text ("\n");

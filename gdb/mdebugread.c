@@ -2152,7 +2152,7 @@ parse_external (EXTR *es, int bigend, const section_offsets &section_offsets,
 
 static void
 parse_lines (FDR *fh, PDR *pr, struct linetable *lt, int maxlines,
-	     CORE_ADDR textlow, CORE_ADDR lowest_pdr_addr)
+	     CORE_ADDR lowest_pdr_addr)
 {
   unsigned char *base;
   int j, k;
@@ -2183,7 +2183,7 @@ parse_lines (FDR *fh, PDR *pr, struct linetable *lt, int maxlines,
 	halt = base + fh->cbLine;
       base += pr->cbLineOffset;
 
-      adr = textlow + pr->adr - lowest_pdr_addr;
+      adr = pr->adr - lowest_pdr_addr;
 
       l = adr >> 2;		/* in words */
       for (lineno = pr->lnLow; base < halt;)
@@ -3982,7 +3982,6 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 	      else
 		{
 		  /* Handle encoded stab line number.  */
-		  valu += section_offsets[SECT_OFF_TEXT (objfile)];
 		  record_line (get_current_subfile (), sh.index,
 			       gdbarch_addr_bits_remove (gdbarch, valu));
 		}
@@ -4134,7 +4133,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 		}
 
 	      parse_lines (fh, pr_block.data (), lines, maxlines,
-			   pst->text_low (objfile), lowest_pdr_addr);
+			   lowest_pdr_addr);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 
@@ -4511,7 +4510,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
     return lineno;
 
   lt->item[lt->nitems].line = lineno;
-  lt->item[lt->nitems++].pc = adr << 2;
+  lt->item[lt->nitems++].set_raw_pc (adr << 2);
   return lineno;
 }
 

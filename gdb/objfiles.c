@@ -618,22 +618,6 @@ objfile_relocate1 (struct objfile *objfile,
   {
     for (compunit_symtab *cust : objfile->compunits ())
       {
-	for (symtab *s : cust->filetabs ())
-	  {
-	    struct linetable *l;
-
-	    /* First the line table.  */
-	    l = s->linetable ();
-	    if (l)
-	      {
-		for (int i = 0; i < l->nitems; ++i)
-		  l->item[i].pc += delta[SECT_OFF_TEXT (objfile)];
-	      }
-	  }
-      }
-
-    for (compunit_symtab *cust : objfile->compunits ())
-      {
 	struct blockvector *bv = cust->blockvector ();
 	int block_line_section = SECT_OFF_TEXT (objfile);
 

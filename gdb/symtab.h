@@ -1547,18 +1547,29 @@ struct rust_vtable_symbol : public symbol
 
 struct linetable_entry
 {
+  /* Set the (unrelocated) PC for this entry.  */
+  void set_raw_pc (CORE_ADDR pc)
+  { m_pc = pc; }
+
+  /* Return the unrelocated PC for this entry.  */
+  CORE_ADDR raw_pc () const
+  { return m_pc; }
+
+  /* Return the relocated PC for this entry.  */
+  CORE_ADDR pc (const struct objfile *objfile) const;
+
   bool operator< (const linetable_entry &other) const
   {
-    if (pc == other.pc
+    if (m_pc == other.m_pc
 	&& (line != 0) != (other.line != 0))
       return line == 0;
-    return pc < other.pc;
+    return m_pc < other.m_pc;
   }
 
   /* Two entries are equal if they have the same line and PC.  The
      other members are ignored.  */
   bool operator== (const linetable_entry &other) const
-  { return line == other.line && pc == other.pc; }
+  { return line == other.line && m_pc == other.m_pc; }
 
   /* The line number for this entry.  */
   int line;
@@ -1571,7 +1582,7 @@ struct linetable_entry
   bool prologue_end : 1;
 
   /* The address for this entry.  */
-  CORE_ADDR pc;
+  CORE_ADDR m_pc;
 };
 
 /* The order of entries in the linetable is significant.  They should

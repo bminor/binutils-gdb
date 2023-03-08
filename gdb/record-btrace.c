@@ -44,6 +44,7 @@
 #include "cli/cli-style.h"
 #include "async-event.h"
 #include <forward_list>
+#include "objfiles.h"
 
 static const target_info record_btrace_target_info = {
   "record-btrace",
@@ -722,6 +723,9 @@ btrace_find_line_range (CORE_ADDR pc)
   if (nlines <= 0)
     return btrace_mk_line_range (symtab, 0, 0);
 
+  struct objfile *objfile = symtab->compunit ()->objfile ();
+  pc -= objfile->text_section_offset ();
+
   range = btrace_mk_line_range (symtab, 0, 0);
   for (i = 0; i < nlines - 1; i++)
     {
@@ -733,7 +737,7 @@ btrace_find_line_range (CORE_ADDR pc)
 	 possibly adding more line numbers to the range.  At the time this
 	 change was made I was unsure how to test this so chose to go with
 	 maintaining the existing experience.  */
-      if ((lines[i].pc == pc) && (lines[i].line != 0)
+      if ((lines[i].raw_pc () == pc) && (lines[i].line != 0)
 	  && (lines[i].is_stmt == 1))
 	range = btrace_line_range_add (range, lines[i].line);
     }

@@ -17980,10 +17980,9 @@ public:
   }
 
   /* Handle DW_LNE_set_address.  */
-  void handle_set_address (CORE_ADDR baseaddr, CORE_ADDR address)
+  void handle_set_address (CORE_ADDR address)
   {
     m_op_index = 0;
-    address += baseaddr;
     m_address = gdbarch_adjust_dwarf2_line (m_gdbarch, address, false);
   }
 
@@ -18458,7 +18457,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 
 		    state_machine.check_line_address (cu, line_ptr,
 						      lowpc - baseaddr, address);
-		    state_machine.handle_set_address (baseaddr, address);
+		    state_machine.handle_set_address (address);
 		  }
 		  break;
 		case DW_LNE_define_file:

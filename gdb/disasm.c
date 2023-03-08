@@ -32,6 +32,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "valprint.h"
 #include "cli/cli-style.h"
+#include "objfiles.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -592,17 +593,21 @@ do_mixed_source_and_assembly_deprecated
   mle = (struct deprecated_dis_line_entry *)
     alloca (nlines * sizeof (struct deprecated_dis_line_entry));
 
+  struct objfile *objfile = symtab->compunit ()->objfile ();
+  low -= objfile->text_section_offset ();
+  high -= objfile->text_section_offset ();
+
   /* Copy linetable entries for this function into our data
      structure, creating end_pc's and setting out_of_order as
      appropriate.  */
 
   /* First, skip all the preceding functions.  */
 
-  for (i = 0; i < nlines - 1 && le[i].pc < low; i++);
+  for (i = 0; i < nlines - 1 && le[i].raw_pc () < low; i++);
 
   /* Now, copy all entries before the end of this function.  */
 
-  for (; i < nlines - 1 && le[i].pc < high; i++)
+  for (; i < nlines - 1 && le[i].raw_pc () < high; i++)
     {
       if (le[i] == le[i + 1])
 	continue;		/* Ignore duplicates.  */
@@ -614,19 +619,19 @@ do_mixed_source_and_assembly_deprecated
       mle[newlines].line = le[i].line;
       if (le[i].line > le[i + 1].line)
 	out_of_order = 1;
-      mle[newlines].start_pc = le[i].pc;
-      mle[newlines].end_pc = le[i + 1].pc;
+      mle[newlines].start_pc = le[i].pc (objfile);
+      mle[newlines].end_pc = le[i + 1].pc (objfile);
       newlines++;
     }
 
   /* If we're on the last line, and it's part of the function,
      then we need to get the end pc in a special way.  */
 
-  if (i == nlines - 1 && le[i].pc < high)
+  if (i == nlines - 1 && le[i].raw_pc () < high)
     {
       mle[newlines].line = le[i].line;
-      mle[newlines].start_pc = le[i].pc;
-      sal = find_pc_line (le[i].pc, 0);
+      mle[newlines].start_pc = le[i].pc (objfile);
+      sal = find_pc_line (le[i].pc (objfile), 0);
       mle[newlines].end_pc = sal.end;
       newlines++;
     }
@@ -733,6 +738,10 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 
   htab_up dis_line_table (allocate_dis_line_table ());
 
+  struct objfile *objfile = main_symtab->compunit ()->objfile ();
+  low -= objfile->text_section_offset ();
+  high -= objfile->text_section_offset ();
+
   pc = low;
 
   /* The prologue may be empty, but there may still be a line number entry
@@ -746,10 +755,10 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
   first_le = NULL;
 
   /* Skip all the preceding functions.  */
-  for (i = 0; i < nlines && le[i].pc < low; i++)
+  for (i = 0; i < nlines && le[i].raw_pc () < low; i++)
     continue;
 
-  if (i < nlines && le[i].pc < high)
+  if (i < nlines && le[i].raw_pc () < high)
     first_le = &le[i];
 
   /* Add lines for every pc value.  */

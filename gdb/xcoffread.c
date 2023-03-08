@@ -432,7 +432,7 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
 	  linetable_entry &e = fentries.back ();
 	  e.line = ii;
 	  e.is_stmt = 1;
-	  e.pc = old_linetable[ii].pc;
+	  e.set_raw_pc (old_linetable[ii].raw_pc ());
 	}
     }
 
@@ -457,7 +457,7 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
 	 extra line to cover the function prologue.  */
       int jj = entry.line;
       if (jj + 1 < old_linetable.size ()
-	  && old_linetable[jj].pc != old_linetable[jj + 1].pc)
+	  && old_linetable[jj].raw_pc () != old_linetable[jj + 1].raw_pc ())
 	{
 	  new_linetable.push_back (old_linetable[jj]);
 	  new_linetable.back ().line = old_linetable[jj + 1].line;
@@ -790,15 +790,16 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
       if (addr < startaddr || (endaddr && addr >= endaddr))
 	return;
 
+      CORE_ADDR record_addr = (gdbarch_addr_bits_remove (gdbarch, addr)
+			       - objfile->text_section_offset ());
       if (int_lnno.l_lnno == 0)
 	{
 	  *firstLine = read_symbol_lineno (int_lnno.l_addr.l_symndx);
-	  record_line (subfile, 0, gdbarch_addr_bits_remove (gdbarch, addr));
+	  record_line (subfile, 0, record_addr);
 	  --(*firstLine);
 	}
       else
-	record_line (subfile, *firstLine + int_lnno.l_lnno,
-		     gdbarch_addr_bits_remove (gdbarch, addr));
+	record_line (subfile, *firstLine + int_lnno.l_lnno, record_addr);
       curoffset += linesz;
     }
 }

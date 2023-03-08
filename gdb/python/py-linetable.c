@@ -422,7 +422,8 @@ ltpy_iternext (PyObject *self)
       item = &(symtab->linetable ()->item[iter_obj->current_index]);
     }
 
-  obj = build_linetable_entry (item->line, item->pc);
+  struct objfile *objfile = symtab->compunit ()->objfile ();
+  obj = build_linetable_entry (item->line, item->pc (objfile));
   iter_obj->current_index++;
 
   return obj;
