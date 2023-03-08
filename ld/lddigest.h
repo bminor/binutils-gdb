@@ -156,28 +156,34 @@ extern const char *digest_label;
 extern bool digest_big_endian;
 extern bool polynome_valid;
 
-/* CRC-32 */
-extern uint32_t *init_crc32_tab (algorithm_desc_t * dsc);
+/* In ldcrc32.c.  */
+extern uint32_t * init_crc32_tab
+  (algorithm_desc_t *);
 extern uint32_t calc_crc32
-  (algorithm_desc_t * dsc, const unsigned char *input_str, size_t num_bytes);
-extern void lang_add_crc32_syndrome (algorithm_desc_t * a);
+  (algorithm_desc_t *, const unsigned char *, size_t);
+extern void lang_add_crc32_syndrome
+  (algorithm_desc_t *);
 
-/* CR-64 */
-extern bfd_vma *init_crc64_tab (algorithm_desc_t * dsc);
-extern bfd_vma calc_crc64
-  (algorithm_desc_t * dsc, const unsigned char *input_str, size_t num_bytes);
-extern void lang_add_crc64_syndrome (algorithm_desc_t * a);
+/* In ldcrc64.c.  */
+extern uint64_t * init_crc64_tab
+  (algorithm_desc_t *);
+extern uint64_t calc_crc64
+  (algorithm_desc_t *, const unsigned char *, size_t);
+extern void lang_add_crc64_syndrome
+  (algorithm_desc_t * );
 
-extern void lang_add_digest (bfd_vma size,
-			     bfd_vma poly,
-			     bfd_vma initial,
-			     bfd_vma xor_val,
-			     bfd_vma ireflect,
-			     bfd_vma oreflect, bfd_vma reciprocal);
-extern bool lang_set_digest (char *digest);
-extern void lang_add_digest_table (bool big_endian);
-extern const char *lang_get_label (const char *label, bool *big_endian);
-extern void lang_generate_crc (void);
-extern void lang_generate_digest (void);
+/* In lddigest.c  */
+extern void lang_add_digest
+  (bfd_vma, bfd_vma, bfd_vma, bfd_vma, bfd_vma, bfd_vma, bfd_vma);
+extern bool lang_set_digest
+  (char *);
+extern void lang_add_digest_table
+  (bool);
+extern const char * lang_get_label
+  (const char *, bool *);
+extern void lang_generate_crc
+  (void);
+extern void lang_generate_digest
+  (void);
 
 #endif /* LDDIGEST_H */

@@ -5581,6 +5581,10 @@ The parameters are explained in detail in
 
 Some of the predefined polynomes are the same, but differs in the other
 parameters.
+
+Note - the generation of 64-bit polynomes on 32-bit hosts for 32-bit
+targets is not supported.
+
 @page
 The 32-bit <polynome> command defines the following global symbols.
 

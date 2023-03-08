@@ -26,7 +26,7 @@ SECTIONS
       QUAD(0x0);
 
       crc64 = .;
-      DIGEST "_CRC64#BE" POLY(64,0x42F0E1EBA9EA3693,0,0,0,0,0)(ecc_start , ecc_end)
+      DIGEST "_CRC64#BE" POLY(64,0xA9EA3693,0,0,0,0,0)(ecc_start , ecc_end)
       QUAD(0x0);
 
       INCLUDE "end_tag.inc"

@@ -115,7 +115,7 @@ lang_add_crc32_table (bool big_endian)
 	}
       local_table = true;
     }
-  for (bfd_vma i = 0; i < 256; i++)
+  for (int i = 0; i < 256; i++)
     {
       uint32_t elem = crc32_table[i];
       if (big_endian)
@@ -137,7 +137,10 @@ lang_add_crc64_syndrome (algorithm_desc_t * a)
   CRC_START = CRC64_START;
   CRC_END = CRC64_END;
   CRC_TABLE = CRC64_TABLE;
-  lang_add_data (QUAD, exp_intop (0));	/* Reserve room for the ECC value */
+
+  /* Reserve room for the ECC value.  */
+  lang_add_data (QUAD, exp_intop (0));
+
   a->crc_tab = init_crc64_tab (a);
   if (a->crc_tab == NULL)
     {
@@ -181,10 +184,13 @@ print_hash64_table (algorithm_desc_t * a)
 static void
 lang_add_crc64_table (bool big_endian)
 {
-  bfd_vma *crc64_table = algorithm.crc_tab;	/* Use a precomputed, if it exists */
+  /* Use a precomputed table, if one exists.  */
+  uint64_t *crc64_table = algorithm.crc_tab;
   bool local_table = false;
+
   if (crc64_table == NULL)
-    {				/* No luck, create a table */
+    {
+      /* No luck, create a table.  */
       crc64_table = init_crc64_tab (&algorithm);
       if (crc64_table == NULL)
 	{
@@ -193,21 +199,28 @@ lang_add_crc64_table (bool big_endian)
 	}
       local_table = true;
     }
-  print_hash64_table (&algorithm);
-  for (bfd_vma i = 0; i < 256; i++)
-    {
-      bfd_vma elem = crc64_table[i];
-      if (big_endian)
-	{
-	  elem = __builtin_bswap64 (elem);
-	}
-      if (link_info.big_endian)
-	{
-	  elem = __builtin_bswap64 (elem);
-	}
 
-      lang_add_data (QUAD, exp_intop (elem));
+  print_hash64_table (&algorithm);
+
+  for (int i = 0; i < 256; i++)
+    {
+      uint64_t elem = crc64_table[i];
+
+      if (big_endian)
+	elem = __builtin_bswap64 (elem);
+
+      if (link_info.big_endian)
+	elem = __builtin_bswap64 (elem);
+
+      if (sizeof (bfd_vma) >= QUAD_SIZE)
+	lang_add_data (QUAD, exp_intop (elem));
+      else
+	{
+	  lang_add_data (LONG, exp_intop (elem >> 32));
+	  lang_add_data (LONG, exp_intop (elem));
+	}
     }
+
   if (local_table)
     free (crc64_table);
 }
@@ -219,7 +232,9 @@ lang_add_digest (bfd_vma size,
 		 bfd_vma poly,
 		 bfd_vma initial,
 		 bfd_vma xor_val,
-		 bfd_vma ireflect, bfd_vma oreflect, bfd_vma reciprocal)
+		 bfd_vma ireflect,
+		 bfd_vma oreflect,
+		 bfd_vma reciprocal)
 {
   if (algorithm.crc_algo != no_algo)	/* We only allow one CRC <polynom> */
     {
@@ -578,7 +593,7 @@ get_text_section_contents (void)
 				   text_section->output_section,
 				   (bfd_byte **) & text_contents))
     {
-      einfo (_("%X%P: '&s' section contents unavailable\n"
+      einfo (_("%X%P: '%s' section contents unavailable\n"
 	       "CRC generation aborted\n"), digest_section);
       return false;
     }
@@ -660,7 +675,7 @@ set_crc64_checksum (uint64_t crc, bfd_vma addr)
 }
 
 static bool
-set_crc_checksum (bfd_vma crc, bfd_vma addr, bfd_vma size)
+set_crc_checksum (uint64_t crc, bfd_vma addr, bfd_vma size)
 {
   bool status;
   if (size == 64)
@@ -700,7 +715,7 @@ symbol_lookup (char *name, bfd_vma * val)
  * Multiplexing function for calculating CRC with different algorithms
  * 'algorithm.crc_algo'
  */
-static bfd_vma
+static uint64_t
 calculate_crc (const unsigned char *input_str, size_t num_bytes)
 {
   if (algorithm.crc_algo == crc_algo_64)
@@ -723,7 +738,8 @@ calculate_crc (const unsigned char *input_str, size_t num_bytes)
 
 static bool
 invalid_crc_parameters (bfd_vma crc_addr,
-			bfd_vma crc_area_start, bfd_vma crc_area_end)
+			bfd_vma crc_area_start,
+			bfd_vma crc_area_end)
 {
   bool crc_in_section;
   bfd_vma crc_size = algorithm.crc_size / 8;
@@ -782,7 +798,7 @@ void
 lang_generate_crc (void)
 {
   bfd_vma crc_addr, crc_area_start, crc_area_end;
-  bfd_vma crc;
+  uint64_t crc;
   bool can_do_crc;
 
   /* Return immediately, if CRC is not requested */

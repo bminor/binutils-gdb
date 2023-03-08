@@ -691,7 +691,7 @@ statement:
 		}
 	| DIGEST NAME
 		{ /* CRC_ADDRESS is set in <polynome>, but polynome reserves space, so we use a temporary */
-		  digest_label = lang_get_label($2, &digest_big_endian);
+		  digest_label = lang_get_label ($2, &digest_big_endian);
 		  lang_add_assignment (exp_assign (digest_label, exp_nameop (NAME, "."), false));
 		}
 		polynome '(' mustbe_exp ',' mustbe_exp ')'
@@ -740,7 +740,7 @@ statement:
 polynome:
 	NAME
 		{
-		  polynome_valid = lang_set_digest($1);
+		  polynome_valid = lang_set_digest ($1);
 		}
 	| POLY '(' mustbe_exp ','
 		   mustbe_exp ',' mustbe_exp ',' mustbe_exp ','
