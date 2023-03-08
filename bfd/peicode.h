@@ -401,11 +401,11 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 #ifdef COFF_IMAGE_WITH_PE
 
-/* Code to handle Microsoft's Image Library Format.
+/* Code to handle Microsoft's Import Library Format.
    Also known as LINK6 format.
    Documentation about this format can be found at:
 
-   http://msdn.microsoft.com/library/specs/pecoff_section8.htm  */
+   https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#import-library-format  */
 
 /* The following constants specify the sizes of the various data
    structures that we have to create in order to build a bfd describing
@@ -1074,39 +1074,6 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
       abort ();
     }
 
-  /* Initialise the bfd.  */
-  memset (& internal_f, 0, sizeof (internal_f));
-
-  internal_f.f_magic  = magic;
-  internal_f.f_symptr = 0;
-  internal_f.f_nsyms  = 0;
-  internal_f.f_flags  = F_AR32WR | F_LNNO; /* XXX is this correct ?  */
-
-  if (   ! bfd_set_start_address (abfd, (bfd_vma) 0)
-      || ! bfd_coff_set_arch_mach_hook (abfd, & internal_f))
-    goto error_return;
-
-  if (bfd_coff_mkobject_hook (abfd, (void *) & internal_f, NULL) == NULL)
-    goto error_return;
-
-  obj_pe (abfd) = true;
-#ifdef THUMBPEMAGIC
-  if (vars.magic == THUMBPEMAGIC)
-    /* Stop some linker warnings about thumb code not supporting interworking.  */
-    coff_data (abfd)->flags |= F_INTERWORK | F_INTERWORK_SET;
-#endif
-
-  /* Switch from file contents to memory contents.  */
-  bfd_cache_close (abfd);
-
-  abfd->iostream = (void *) vars.bim;
-  abfd->flags |= BFD_IN_MEMORY /* | HAS_LOCALS */;
-  abfd->iovec = &_bfd_memory_iovec;
-  abfd->where = 0;
-  abfd->origin = 0;
-  abfd->size = 0;
-  obj_sym_filepos (abfd) = 0;
-
   /* Now create a symbol describing the imported value.  */
   switch (import_type)
     {
@@ -1133,6 +1100,39 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   if (ptr)
     * ptr = '.';
 
+  /* Initialise the bfd.  */
+  memset (& internal_f, 0, sizeof (internal_f));
+
+  internal_f.f_magic  = magic;
+  internal_f.f_symptr = 0;
+  internal_f.f_nsyms  = 0;
+  internal_f.f_flags  = F_AR32WR | F_LNNO; /* XXX is this correct ?  */
+
+  if (   ! bfd_set_start_address (abfd, (bfd_vma) 0)
+      || ! bfd_coff_set_arch_mach_hook (abfd, & internal_f))
+    goto error_return;
+
+  if (bfd_coff_mkobject_hook (abfd, (void *) & internal_f, NULL) == NULL)
+    goto error_return;
+
+  obj_pe (abfd) = true;
+#ifdef THUMBPEMAGIC
+  if (vars.magic == THUMBPEMAGIC)
+    /* Stop some linker warnings about thumb code not supporting interworking.  */
+    coff_data (abfd)->flags |= F_INTERWORK | F_INTERWORK_SET;
+#endif
+
+  /* Switch from file contents to memory contents.  */
+  bfd_cache_close (abfd);
+
+  abfd->iostream = (void *) vars.bim;
+  abfd->flags |= BFD_IN_MEMORY | HAS_SYMS;
+  abfd->iovec = &_bfd_memory_iovec;
+  abfd->where = 0;
+  abfd->origin = 0;
+  abfd->size = 0;
+  obj_sym_filepos (abfd) = 0;
+
   /* Point the bfd at the symbol table.  */
   obj_symbols (abfd) = vars.sym_cache;
   abfd->symcount = vars.sym_index;
@@ -1149,8 +1149,6 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   obj_coff_strings (abfd) = vars.string_table;
   obj_coff_keep_strings (abfd) = true;
 
-  abfd->flags |= HAS_SYMS;
-
   return true;
 
  error_return:
@@ -1159,7 +1157,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   return false;
 }
 
-/* We have detected a Image Library Format archive element.
+/* We have detected an Import Library Format archive element.
    Decode the element and return the appropriate target.  */
 
 static bfd_cleanup
@@ -1176,7 +1174,7 @@ pe_ILF_object_p (bfd * abfd)
   unsigned int	  magic;
 
   /* Upon entry the first six bytes of the ILF header have
-      already been read.  Now read the rest of the header.  */
+     already been read.  Now read the rest of the header.  */
   if (bfd_bread (buffer, (bfd_size_type) 14, abfd) != 14)
     return NULL;
 
