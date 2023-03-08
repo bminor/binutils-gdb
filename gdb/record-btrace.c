@@ -738,7 +738,7 @@ btrace_find_line_range (CORE_ADDR pc)
 	 change was made I was unsure how to test this so chose to go with
 	 maintaining the existing experience.  */
       if ((lines[i].raw_pc () == pc) && (lines[i].line != 0)
-	  && (lines[i].is_stmt == 1))
+	  && lines[i].is_stmt)
 	range = btrace_line_range_add (range, lines[i].line);
     }
 

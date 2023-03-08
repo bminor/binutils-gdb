@@ -422,7 +422,7 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
 
   for (int ii = 0; ii < old_linetable.size (); ++ii)
     {
-      if (old_linetable[ii].is_stmt == 0)
+      if (!old_linetable[ii].is_stmt)
 	continue;
 
       if (old_linetable[ii].line == 0)
@@ -431,7 +431,7 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
 	  fentries.emplace_back ();
 	  linetable_entry &e = fentries.back ();
 	  e.line = ii;
-	  e.is_stmt = 1;
+	  e.is_stmt = true;
 	  e.set_raw_pc (old_linetable[ii].raw_pc ());
 	}
     }
