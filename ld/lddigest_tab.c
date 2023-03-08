@@ -99,9 +99,9 @@ const algorithm_desc_t algorithms[MAXALGO+1] =
   [CRC32] =
 	{
 		crc_algo_32, 32, "CRC32",
-		.poly.d32._0 = CRC_POLY_32,
+		.poly.d32 = { CRC_POLY_32, 0 },
 		.initial.d64 = CRC_START_32_INV,
-		.xor_val.d32._0 = CRC_END_32_INV,
+		.xor_val.d32 = { CRC_END_32_INV, 0 },
 		.ireflect = true,
 		.oreflect = true,
 		.reciprocal = false,

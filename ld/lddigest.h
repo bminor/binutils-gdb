@@ -173,8 +173,11 @@ extern void lang_add_crc64_syndrome
   (algorithm_desc_t * );
 
 /* In lddigest.c  */
+union etree_union;
 extern void lang_add_digest
-  (bfd_vma, bfd_vma, bfd_vma, bfd_vma, bfd_vma, bfd_vma, bfd_vma);
+  (union etree_union *, union etree_union *, union etree_union *,
+   union etree_union *, union etree_union *, union etree_union *,
+   union etree_union *);
 extern bool lang_set_digest
   (char *);
 extern void lang_add_digest_table

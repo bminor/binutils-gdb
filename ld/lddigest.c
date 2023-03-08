@@ -103,10 +103,12 @@ lang_add_crc32_syndrome (algorithm_desc_t * a)
 static void
 lang_add_crc32_table (bool big_endian)
 {
-  uint32_t *crc32_table = algorithm.crc_tab;	/* Use a precomputed, if it exists */
+  /* Use a precomputed table, if one exists.  */
+  uint32_t *crc32_table = algorithm.crc_tab;
   bool local_table = false;
   if (crc32_table == NULL)
-    {				/* No luck, create a table */
+    {
+      /* No luck, create a table.  */
       crc32_table = init_crc32_tab (&algorithm);
       if (crc32_table == NULL)
 	{
@@ -227,14 +229,42 @@ lang_add_crc64_table (bool big_endian)
 
 /* ============ DIGEST COMMON functions ======================================*/
 
+static uint64_t
+get_uint64 (etree_type *tree, bool *err)
+{
+  if (tree != NULL)
+    {
+      exp_fold_tree_no_dot (tree);
+
+      if (expld.result.valid_p)
+	{
+	  if (expld.result.str != NULL)
+	    {
+	      char *end;
+	      uint64_t val = strtoull (expld.result.str, &end, 16);
+	      if (!*end)
+		return val;
+	    }
+	  else
+	    {
+	      if (expld.result.section != NULL)
+		expld.result.value += expld.result.section->vma;
+	      return expld.result.value;
+	    }
+	}
+    }
+  *err = true;
+  return 0;
+}
+
 void
-lang_add_digest (bfd_vma size,
-		 bfd_vma poly,
-		 bfd_vma initial,
-		 bfd_vma xor_val,
-		 bfd_vma ireflect,
-		 bfd_vma oreflect,
-		 bfd_vma reciprocal)
+lang_add_digest (etree_type *size,
+		 etree_type *poly,
+		 etree_type *initial,
+		 etree_type *xor_val,
+		 etree_type *ireflect,
+		 etree_type *oreflect,
+		 etree_type *reciprocal)
 {
   if (algorithm.crc_algo != no_algo)	/* We only allow one CRC <polynom> */
     {
@@ -242,40 +272,44 @@ lang_add_digest (bfd_vma size,
       return;
     }
 
+  bool err = false;
   algorithm.name = "CUSTOM";
   algorithm.big_endian = digest_big_endian;
-  if (size == 64)
+  algorithm.crc_size = get_uint64 (size, &err);
+  algorithm.poly.d64 = get_uint64 (poly, &err);
+  algorithm.initial.d64 = get_uint64 (initial, &err);
+  algorithm.xor_val.d64 = get_uint64 (xor_val, &err);
+  algorithm.ireflect = get_uint64 (ireflect, &err);
+  algorithm.oreflect = get_uint64 (oreflect, &err);
+  algorithm.crc_tab = NULL;
+  algorithm.reciprocal = get_uint64 (reciprocal, &err);
+  algorithm.expected.d64 = 0;
+
+  if (err)
+    {
+      einfo (_("%F%P: Invalid DIGEST arg\n"));
+      return;
+    }
+
+  if (algorithm.crc_size == 64)
     {
       algorithm.crc_algo = crc_algo_64;
-      algorithm.crc_size = size;
-      algorithm.poly.d64 = poly;	/* Set the polynom */
-      algorithm.initial.d64 = initial;	/* Set seed */
-      algorithm.xor_val.d64 = xor_val;	/* final XOR value */
-      algorithm.ireflect = ireflect;
-      algorithm.oreflect = oreflect;
-      algorithm.crc_tab = NULL;
-      algorithm.reciprocal = reciprocal;
-      algorithm.expected.d64 = 0;
-
       lang_add_crc64_syndrome (&algorithm);
     }
-  else if (size == 32)
+  else if (algorithm.crc_size == 32)
     {
       algorithm.crc_algo = crc_algo_32;
-      algorithm.crc_size = size;
-      algorithm.poly.d32._0 = poly;	/* Set the polynom */
-      algorithm.initial.d32._0 = initial;	/* Set seed */
-      algorithm.xor_val.d32._0 = xor_val;	/* final XOR value */
-      algorithm.ireflect = ireflect;
-      algorithm.oreflect = oreflect;
-      algorithm.crc_tab = NULL;
-      algorithm.reciprocal = reciprocal;
-      algorithm.expected.d32._0 = 0;
+      algorithm.poly.d32._0 = algorithm.poly.d64;
+      algorithm.poly.d32._1 = 0;
+      algorithm.initial.d32._0 = algorithm.initial.d64;
+      algorithm.initial.d32._1 = 0;
+      algorithm.xor_val.d32._0 = algorithm.xor_val.d64;
+      algorithm.xor_val.d32._1 = 0;
       lang_add_crc32_syndrome (&algorithm);
     }
   else
     {
-      einfo (_("%F%P: Illegal Size in DIGEST: %E\n"));
+      einfo (_("%F%P: Invalid Size in DIGEST\n"));
       return;
     }
 }
@@ -675,7 +709,7 @@ set_crc64_checksum (uint64_t crc, bfd_vma addr)
 }
 
 static bool
-set_crc_checksum (uint64_t crc, bfd_vma addr, bfd_vma size)
+set_crc_checksum (uint64_t crc, bfd_vma addr, int size)
 {
   bool status;
   if (size == 64)

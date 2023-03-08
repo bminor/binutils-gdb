@@ -747,13 +747,13 @@ polynome:
 		   mustbe_exp ',' mustbe_exp ',' mustbe_exp ')'
 		{
 		  lang_add_digest (
-			$3->value.value,	/* size			*/
-			$5->value.value,	/* polynome		*/
-			$7->value.value,	/* initial value	*/
-			$9->value.value,	/* xor     value	*/
-			$11->value.value,	/* input   reflected	*/
-			$13->value.value,	/* output  reflected	*/
-			$15->value.value	/* reciprocal		*/
+			$3,	/* size			*/
+			$5,	/* polynome		*/
+			$7,	/* initial value	*/
+			$9,	/* xor     value	*/
+			$11,	/* input   reflected	*/
+			$13,	/* output  reflected	*/
+			$15	/* reciprocal		*/
 			);
 		  polynome_valid = true;
 		}
