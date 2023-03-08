@@ -2784,9 +2784,10 @@ instance to be returned to @value{GDBN}:
 
 @defun PendingFrame.create_unwind_info (frame_id)
 Returns a new @code{gdb.UnwindInfo} instance identified by given
-@var{frame_id}.  The argument is used to build @value{GDBN}'s frame ID
-using one of functions provided by @value{GDBN}.  @var{frame_id}'s attributes
-determine which function will be used, as follows:
+@var{frame_id}.  The @var{frame_id} is used internally by @value{GDBN}
+to identify the frames within the current thread's stack.  The
+attributes of @var{frame_id} determine what type of frame is
+created within @value{GDBN}:
 
 @table @code
 @item sp, pc
@@ -2841,6 +2842,32 @@ values see @ref{gdbpy_frame_read_register,,Frame.read_register}.
 @var{value} is a register value (a @code{gdb.Value} object).
 @end defun
 
+@subheading Registering an Unwinder
+
+Object files and program spaces can have unwinders registered with
+them.  In addition, you can register unwinders globally.
+
+The @code{gdb.unwinders} module provides the function to register an
+unwinder:
+
+@defun gdb.unwinder.register_unwinder (locus, unwinder, replace=False)
+@var{locus} specifies to which unwinder list to prepend the
+@var{unwinder}.  It can be either an object file (@pxref{Objfiles In
+Python}), a program space (@pxref{Progspaces In Python}), or
+@code{None}, in which case the unwinder is registered globally.  The
+newly added @var{unwinder} will be called before any other unwinder
+from the same locus.  Two unwinders in the same locus cannot have the
+same name.  An attempt to add an unwinder with an already existing
+name raises an exception unless @var{replace} is @code{True}, in which
+case the old unwinder is deleted and the new unwinder is registered in
+its place.
+
+@value{GDBN} first calls the unwinders from all the object files in no
+particular order, then the unwinders from the current program space,
+then the globally registered unwinders, and finally the unwinders
+builtin to @value{GDBN}.
+@end defun
+
 @subheading Unwinder Skeleton Code
 
 @value{GDBN} comes with the module containing the base @code{Unwinder}
@@ -2848,7 +2875,7 @@ class.  Derive your unwinder class from it and structure the code as
 follows:
 
 @smallexample
-from gdb.unwinders import Unwinder
+from gdb.unwinder import Unwinder
 
 class FrameId(object):
     def __init__(self, sp, pc):
@@ -2857,52 +2884,29 @@ class FrameId(object):
 
 
 class MyUnwinder(Unwinder):
-    def __init__(....):
-        super(MyUnwinder, self).__init___(<expects unwinder name argument>)
+    def __init__(self):
+        super().__init___("MyUnwinder_Name")
 
-    def __call__(pending_frame):
+    def __call__(self, pending_frame):
         if not <we recognize frame>:
             return None
-        # Create UnwindInfo.  Usually the frame is identified by the stack 
-        # pointer and the program counter.
-        sp = pending_frame.read_register(<SP number>)
-        pc = pending_frame.read_register(<PC number>)
+
+        # Create a FrameID.  Usually the frame is identified by a
+        # stack pointer and the function address.
+        sp = ... compute a stack address ...
+        pc = ... compute function address ...
         unwind_info = pending_frame.create_unwind_info(FrameId(sp, pc))
 
-        # Find the values of the registers in the caller's frame and 
+        # Find the values of the registers in the caller's frame and
         # save them in the result:
-        unwind_info.add_saved_register(<register>, <value>)
+        unwind_info.add_saved_register(<register-number>, <register-value>)
         ....
 
         # Return the result:
         return unwind_info
 
+gdb.unwinder.register_unwinder(<locus>, MyUnwinder(), <replace>)
 @end smallexample
-
-@subheading Registering an Unwinder
-
-Object files and program spaces can have unwinders registered with
-them.  In addition, you can also register unwinders globally.
-
-The @code{gdb.unwinders} module provides the function to register an
-unwinder:
-
-@defun gdb.unwinder.register_unwinder (locus, unwinder, replace=False)
-@var{locus} specifies to which unwinder list to prepend the
-@var{unwinder}.  It can be either an object file, a program space, or
-@code{None}, in which case the unwinder is registered globally.  The
-newly added @var{unwinder} will be called before any other unwinder from the
-same locus.  Two unwinders in the same locus cannot have the same
-name.  An attempt to add an unwinder with an already existing name raises
-an exception unless @var{replace} is @code{True}, in which case the
-old unwinder is deleted.
-@end defun
-
-@subheading Unwinder Precedence
-
-@value{GDBN} first calls the unwinders from all the object files in no
-particular order, then the unwinders from the current program space,
-and finally the unwinders from @value{GDBN}.
 
 @node Xmethods In Python
 @subsubsection Xmethods In Python
@@ -4398,7 +4402,7 @@ will uninstall the command, removing it from the set of available
 commands.  Setting this attribute to @code{True} will install the
 command for use.  If there is already a Python command with this name
 installed, the currently installed command will be uninstalled, and
-this command installed in its place.
+this command installed in its stead.
 @end defvar
 
 The following code snippet shows how a two trivial MI command can be
