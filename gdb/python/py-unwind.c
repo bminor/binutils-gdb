@@ -28,6 +28,10 @@
 #include "regcache.h"
 #include "valprint.h"
 #include "user-regs.h"
+#include "stack.h"
+#include "charset.h"
+#include "block.h"
+
 
 /* Debugging of Python unwinders.  */
 
@@ -412,6 +416,200 @@ pending_framepy_read_register (PyObject *self, PyObject *args)
   return result;
 }
 
+/* Implement PendingFrame.is_valid().  Return True if this pending frame
+   object is still valid.  */
+
+static PyObject *
+pending_framepy_is_valid (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  if (pending_frame->frame_info == nullptr)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
+
+/* Implement PendingFrame.name().  Return a string that is the name of the
+   function for this frame, or None if the name can't be found.  */
+
+static PyObject *
+pending_framepy_name (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
+  gdb::unique_xmalloc_ptr<char> name;
+
+  try
+    {
+      enum language lang;
+      frame_info_ptr frame = pending_frame->frame_info;
+
+      name = find_frame_funname (frame, &lang, nullptr);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (name != nullptr)
+    return PyUnicode_Decode (name.get (), strlen (name.get ()),
+			     host_charset (), nullptr);
+
+  Py_RETURN_NONE;
+}
+
+/* Implement gdb.PendingFrame.pc().  Returns an integer containing the
+   frame's current $pc value.  */
+
+static PyObject *
+pending_framepy_pc (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
+  CORE_ADDR pc = 0;
+
+  try
+    {
+      pc = get_frame_pc (pending_frame->frame_info);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return gdb_py_object_from_ulongest (pc).release ();
+}
+
+/* Implement gdb.PendingFrame.language().  Return the name of the language
+   for this frame.  */
+
+static PyObject *
+pending_framepy_language (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
+  try
+    {
+      frame_info_ptr fi = pending_frame->frame_info;
+
+      enum language lang = get_frame_language (fi);
+      const language_defn *lang_def = language_def (lang);
+
+      return host_string_to_python_string (lang_def->name ()).release ();
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  Py_RETURN_NONE;
+}
+
+/* Implement PendingFrame.find_sal().  Return the PendingFrame's symtab and
+   line.  */
+
+static PyObject *
+pending_framepy_find_sal (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
+  PyObject *sal_obj = nullptr;
+
+  try
+    {
+      frame_info_ptr frame = pending_frame->frame_info;
+
+      symtab_and_line sal = find_frame_sal (frame);
+      sal_obj = symtab_and_line_to_sal_object (sal);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return sal_obj;
+}
+
+/* Implement PendingFrame.block().  Return a gdb.Block for the pending
+   frame's code, or raise  RuntimeError if the block can't be found.  */
+
+static PyObject *
+pending_framepy_block (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
+  frame_info_ptr frame = pending_frame->frame_info;
+  const struct block *block = nullptr, *fn_block;
+
+  try
+    {
+      block = get_frame_block (frame, nullptr);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  for (fn_block = block;
+       fn_block != nullptr && fn_block->function () == nullptr;
+       fn_block = fn_block->superblock ())
+    ;
+
+  if (block == nullptr
+      || fn_block == nullptr
+      || fn_block->function () == nullptr)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Cannot locate block for frame."));
+      return nullptr;
+    }
+
+  return block_to_block_object (block, fn_block->function ()->objfile ());
+}
+
+/* Implement gdb.PendingFrame.function().  Return a gdb.Symbol
+   representing the function of this frame, or None if no suitable symbol
+   can be found.  */
+
+static PyObject *
+pending_framepy_function (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
+  struct symbol *sym = nullptr;
+
+  try
+    {
+      enum language funlang;
+      frame_info_ptr frame = pending_frame->frame_info;
+
+      gdb::unique_xmalloc_ptr<char> funname
+	= find_frame_funname (frame, &funlang, &sym);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (sym != nullptr)
+    return symbol_to_symbol_object (sym);
+
+  Py_RETURN_NONE;
+}
+
 /* Implementation of
    PendingFrame.create_unwind_info (self, frameId) -> UnwindInfo.  */
 
@@ -737,6 +935,29 @@ static PyMethodDef pending_frame_object_methods[] =
     pending_framepy_architecture, METH_NOARGS,
     "architecture () -> gdb.Architecture\n"
     "The architecture for this PendingFrame." },
+  { "name",
+    pending_framepy_name, METH_NOARGS,
+    "name() -> String.\n\
+Return the function name of the frame, or None if it can't be determined." },
+  { "is_valid",
+    pending_framepy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this PendingFrame is valid, false if not." },
+  { "pc",
+    pending_framepy_pc, METH_NOARGS,
+    "pc () -> Long.\n\
+Return the frame's resume address." },
+  { "language", pending_framepy_language, METH_NOARGS,
+    "The language of this frame." },
+  { "find_sal", pending_framepy_find_sal, METH_NOARGS,
+    "find_sal () -> gdb.Symtab_and_line.\n\
+Return the frame's symtab and line." },
+  { "block", pending_framepy_block, METH_NOARGS,
+    "block () -> gdb.Block.\n\
+Return the frame's code block." },
+  { "function", pending_framepy_function, METH_NOARGS,
+    "function () -> gdb.Symbol.\n\
+Returns the symbol for the function corresponding to this frame." },
   { "level", pending_framepy_level, METH_NOARGS,
     "The stack level of this frame." },
   {NULL}  /* Sentinel */

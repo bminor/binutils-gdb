@@ -2830,6 +2830,46 @@ Return an integer, the stack frame level for this frame.
 @xref{Frames, ,Stack Frames}.
 @end defun
 
+@defun PendingFrame.name ()
+Returns the function name of this pending frame, or @code{None} if it
+can't be obtained.
+@end defun
+
+@defun PendingFrame.is_valid ()
+Returns true if the @code{gdb.PendingFrame} object is valid, false if
+not.  A pending frame object becomes invalid when the call to the
+unwinder, for which the pending frame was created, returns.
+
+All @code{gdb.PendingFrame} methods, except this one, will raise an
+exception if the pending frame object is invalid at the time the
+method is called.
+@end defun
+
+@defun PendingFrame.pc ()
+Returns the pending frame's resume address.
+@end defun
+
+@defun PendingFrame.block ()
+Return the pending frame's code block (@pxref{Blocks In Python}).  If
+the frame does not have a block -- for example, if there is no
+debugging information for the code in question -- then this will raise
+a @code{RuntimeError} exception.
+@end defun
+
+@defun PendingFrame.function ()
+Return the symbol for the function corresponding to this pending frame.
+@xref{Symbols In Python}.
+@end defun
+
+@defun PendingFrame.find_sal ()
+Return the pending frame's symtab and line object (@pxref{Symbol
+Tables In Python}).
+@end defun
+
+@defun PendingFrame.language ()
+Return the language of this frame, as a string, or None.
+@end defun
+
 @subheading Unwinder Output: UnwindInfo
 
 Use @code{PendingFrame.create_unwind_info} method described above to

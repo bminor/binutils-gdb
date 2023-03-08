@@ -144,8 +144,112 @@ class simple_unwinder(Unwinder):
     def __call__(self, pending_frame):
         global captured_pending_frame
 
+        assert pending_frame.is_valid()
+
         if captured_pending_frame is None:
             captured_pending_frame = pending_frame
+        return None
+
+
+# Return a dictionary of information about FRAME.
+def capture_frame_information(frame):
+    name = frame.name()
+    level = frame.level()
+    language = frame.language()
+    function = frame.function()
+    architecture = frame.architecture()
+    pc = frame.pc()
+    sal = frame.find_sal()
+    try:
+        block = frame.block()
+        assert isinstance(block, gdb.Block)
+    except RuntimeError as rte:
+        assert str(rte) == "Cannot locate block for frame."
+        block = "RuntimeError: " + str(rte)
+
+    return {
+        "name": name,
+        "level": level,
+        "language": language,
+        "function": function,
+        "architecture": architecture,
+        "pc": pc,
+        "sal": sal,
+        "block": block,
+    }
+
+
+# List of information about each frame.  The index into this list is
+# the frame level.  This is populated by
+# capture_all_frame_information.
+all_frame_information = []
+
+# Fill in the global ALL_FRAME_INFORMATION list.
+def capture_all_frame_information():
+    global all_frame_information
+
+    all_frame_information = []
+
+    gdb.newest_frame().select()
+    frame = gdb.selected_frame()
+    count = 0
+
+    while frame is not None:
+        frame.select()
+        info = capture_frame_information(frame)
+        level = info["level"]
+        info["matched"] = False
+
+        while len(all_frame_information) <= level:
+            all_frame_information.append(None)
+
+        assert all_frame_information[level] is None
+        all_frame_information[level] = info
+
+        if frame.name == "main" or count > 10:
+            break
+
+        count += 1
+        frame = frame.older()
+
+
+# Assert that every entry in the global ALL_FRAME_INFORMATION list was
+# matched by the validating_unwinder.
+def check_all_frame_information_matched():
+    global all_frame_information
+    for entry in all_frame_information:
+        assert entry["matched"]
+
+
+# An unwinder that doesn't match any frames.  What it does do is
+# lookup information from the PendingFrame object and compare it
+# against information stored in the global ALL_FRAME_INFORMATION list.
+class validating_unwinder(Unwinder):
+    def __init__(self):
+        super().__init__("validating_unwinder")
+
+    def __call__(self, pending_frame):
+        info = capture_frame_information(pending_frame)
+        level = info["level"]
+
+        global all_frame_information
+        old_info = all_frame_information[level]
+
+        assert old_info is not None
+        assert not old_info["matched"]
+
+        for key, value in info.items():
+            assert key in old_info, f"{key} not in old_info"
+            assert type(value) == type(old_info[key])
+            if isinstance(value, gdb.Block):
+                assert value.start == old_info[key].start
+                assert value.end == old_info[key].end
+                assert value.is_static == old_info[key].is_static
+                assert value.is_global == old_info[key].is_global
+            else:
+                assert str(value) == str(old_info[key])
+
+        old_info["matched"] = True
         return None
 
 

@@ -149,15 +149,46 @@ gdb_test_no_output "python obj = simple_unwinder(\"simple\")"
 gdb_test_no_output "python gdb.unwinder.register_unwinder(None, obj)"
 check_for_broken_backtrace "backtrace to capture a PendingFrame object"
 
+# Check the captured PendingFrame is not valid.
+gdb_test "python print(captured_pending_frame.is_valid())" "False"
+
 # Call methods on the captured gdb.PendingFrame and check we see the
 # expected error.
 gdb_test_no_output "python pf = captured_pending_frame"
 foreach cmd {"pf.read_register(\"pc\")" \
 		 "pf.create_unwind_info(None)" \
 		 "pf.architecture()" \
-		 "pf.level()"} {
+		 "pf.level()" \
+		 "pf.name()" \
+		 "pf.pc()" \
+		 "pf.language()" \
+		 "pf.find_sal()" \
+		 "pf.block()" \
+		 "pf.function()" } {
     gdb_test "python $cmd" \
 	[multi_line \
 	     "ValueError: gdb\\.PendingFrame is invalid\\." \
 	     "Error while executing Python code\\."]
 }
+
+# Turn on the useful unwinder so we have the full backtrace again, and
+# disable the simple unwinder -- because we can!
+gdb_test "enable unwinder global \"test unwinder\"" \
+    "1 unwinder enabled" \
+    "re-enable 'test unwinder' so we can check PendingFrame methods"
+gdb_test "disable unwinder global \"simple\"" \
+    "1 unwinder disabled"
+check_for_fixed_backtrace \
+    "check backtrace before testing PendingFrame methods"
+
+# Gather information about every frame.
+gdb_test_no_output "python capture_all_frame_information()"
+gdb_test_no_output "python gdb.newest_frame().select()"
+gdb_test_no_output "python pspace = gdb.selected_inferior().progspace"
+gdb_test_no_output "python obj = validating_unwinder()"
+gdb_test_no_output "python gdb.unwinder.register_unwinder(pspace, obj)"
+
+check_for_fixed_backtrace \
+    "check backtrace to validate all information"
+
+gdb_test_no_output "python check_all_frame_information_matched()"

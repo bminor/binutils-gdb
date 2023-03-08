@@ -120,6 +120,26 @@ show always-read-ctf
      without the particular unwinder, depending on how 'enabled' was
      changed.
 
+  ** New methods added to the gdb.PendingFrame class.  These methods
+     have the same behaviour as the corresponding methods on
+     gdb.Frame.  The new methods are:
+
+     - gdb.PendingFrame.name: Return the name for the frame's
+       function, or None.
+     - gdb.PendingFrame.is_valid: Return True if the pending frame
+       object is valid.
+     - gdb.PendingFrame.pc: Return the $pc register value for this
+       frame.
+     - gdb.PendingFrame.language: Return a string containing the
+       language for this frame, or None.
+     - gdb.PendingFrame.find_sal: Return a gdb.Symtab_and_line
+       object for the current location within the pending frame, or
+       None.
+     - gdb.PendingFrame.block: Return a gdb.Block for the current
+       pending frame, or None.
+     - gdb.PendingFrame.function: Return a gdb.Symbol for the
+       current pending frame, or None.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.
