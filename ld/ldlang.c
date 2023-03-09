@@ -8400,20 +8400,15 @@ lang_add_data (int type, union etree_union *exp)
   new_stmt->type = type;
 }
 
-/* Convert escape codes in S.
-   Supports \n, \r, \t and \NNN octals.
-   Returns a copy of S in a malloc'ed buffer.  */
-
-static char *
-convert_string (const char * s)
+void
+lang_add_string (const char *s)
 {
-  size_t  len = strlen (s);
-  size_t  i;
-  bool    escape = false;
-  char *  buffer = malloc (len + 1);
-  char *  b;
+  bfd_vma  len = strlen (s);
+  bfd_vma  i;
+  bool     escape = false;
 
-  for (i = 0, b = buffer; i < len; i++)
+  /* Add byte expressions until end of string.  */
+  for (i = 0 ; i < len; i++)
     {
       char c = *s++;
 
@@ -8448,7 +8443,7 @@ convert_string (const char * s)
 		    value += (c - '0');
 		    i++;
 		    s++;
- 
+
 		    c = *s;
 		    if ((c >= '0') && (c <= '7'))
 		      {
@@ -8466,58 +8461,26 @@ convert_string (const char * s)
 		    i--;
 		    s--;
 		  }
-		
+
 		c = value;
 	      }
 	      break;
 	    }
+
+	  lang_add_data (BYTE, exp_intop (c));
 	  escape = false;
 	}
       else
 	{
 	  if (c == '\\')
-	    {
-	      escape = true;
-	      continue;
-	    }
+	    escape = true;
+	  else
+	    lang_add_data (BYTE, exp_intop (c));
 	}
-
-      * b ++ = c;
     }
 
-  * b = 0;
-  return buffer;
-}
-
-void
-lang_add_string (size_t size, const char *s)
-{
-  size_t  len;
-  size_t  i;
-  char *  string;
-
-  string = convert_string (s);
-  len = strlen (string);
-
-  /* Check if it is ASCIZ command (len == 0) */
-  if (size == 0)
-    /* Make sure that we include the terminating nul byte.  */
-    size = len + 1;
-  else if (len >= size)
-    {
-      len = size - 1;
-
-      einfo (_("%P:%pS: warning: ASCII string does not fit in allocated space,"
-               " truncated\n"), NULL);
-    }
-
-  for (i = 0 ; i < len ; i++)
-    lang_add_data (BYTE, exp_intop (string[i]));
-
-  while (i++ < size)
-    lang_add_data (BYTE, exp_intop ('\0'));
-
-  free (string);
+  /* Remeber to terminate the string.  */
+  lang_add_data (BYTE, exp_intop (0));
 }
 
 /* Create a new reloc statement.  RELOC is the BFD relocation type to

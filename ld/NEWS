@@ -1,12 +1,6 @@
 -*- text -*-
 
-* The linker script syntax has two new commands for inserting text into output
-  sections:
-    ASCII (<size>) "string"
-  This will reserve a zero filled block of <size> bytes at the current
-  location and insert "string" at the beginning of the block.  If the string
-  is too long, it will be truncated.
-    ASCIZ "string"
+* The linker script syntax has a new command for output sections: ASCIZ "string"
   This will insert a zero-terminated string at the current location.
 
 Changes in 2.40:
