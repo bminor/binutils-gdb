@@ -23,6 +23,8 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
+set target_binfile [gdb_remote_download target $binfile]
+
 # Test running GDB without providing a local binary for it.  In order
 # to do that, we unset GDBFLAGS before running GDB.  We also start
 # gdbserver "by hand".  For more details about this test, see PR
@@ -39,7 +41,7 @@ save_vars { GDBFLAGS } {
     gdb_exit
     gdb_start
 
-    gdb_test_no_output "set remote exec-file $binfile" \
+    gdb_test_no_output "set remote exec-file $target_binfile" \
 	"set remote exec-file"
 
     # Make sure we're disconnected, in case we're testing with an

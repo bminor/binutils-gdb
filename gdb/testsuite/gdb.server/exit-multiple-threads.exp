@@ -35,7 +35,7 @@ standard_testfile
 #
 # Places a breakpoint in function 'breakpt' and then continues to the
 # breakpoint, at which point it runs 'info threads'.
-proc prepare_for_test { executable disable_multi_process } {
+proc prepare_for_test { executable target_executable disable_multi_process } {
     global GDBFLAGS
 
     save_vars { GDBFLAGS } {
@@ -65,7 +65,7 @@ proc prepare_for_test { executable disable_multi_process } {
     }
 
     # Start gdbserver and connect.
-    set res [gdbserver_start "" $executable]
+    set res [gdbserver_start "" $target_executable]
     set gdbserver_protocol [lindex $res 0]
     set gdbserver_gdbport [lindex $res 1]
     set res [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
@@ -83,10 +83,10 @@ proc prepare_for_test { executable disable_multi_process } {
 # we have multiple-threads.  EXECUTABLE is the binary under test, and
 # DISABLE_MULTI_PROCESS indicates if we should disable GDB's remote
 # multi-process support.
-proc run_exit_test { executable disable_multi_process } {
+proc run_exit_test { executable target_executable disable_multi_process } {
     global decimal
 
-    prepare_for_test ${executable} ${disable_multi_process}
+    prepare_for_test ${executable} $target_executable ${disable_multi_process}
 
     # Finally, continue until the process exits, ensure we don't see
     # any warnings between "Continuing." and the final process has
@@ -107,10 +107,10 @@ proc run_exit_test { executable disable_multi_process } {
 # while we have multiple-threads.  EXECUTABLE is the binary under
 # test, and DISABLE_MULTI_PROCESS indicates if we should disable GDB's
 # remote multi-process support.
-proc run_signal_test { executable disable_multi_process } {
+proc run_signal_test { executable target_executable disable_multi_process } {
     global decimal gdb_prompt
 
-    prepare_for_test ${executable} ${disable_multi_process}
+    prepare_for_test ${executable} $target_executable ${disable_multi_process}
 
     set inf_pid [get_valueof "/d" "global_pid" "unknown"]
     gdb_assert ![string eq ${inf_pid} "unknown"] "read the pid"
@@ -142,7 +142,9 @@ foreach_with_prefix test { exit signal } {
 	return -1
     }
 
+    set target_executable [gdb_remote_download target $executable]
+
     foreach_with_prefix multi_process { 0 1 } {
-	$func ${executable} ${multi_process}
+	$func ${executable} $target_executable ${multi_process}
     }
 }

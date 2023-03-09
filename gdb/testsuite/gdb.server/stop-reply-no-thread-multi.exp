@@ -37,6 +37,8 @@ if { [build_executable "failed to prepare" $testfile $srcfile {debug pthreads}] 
     return -1
 }
 
+set target_binfile [gdb_remote_download target $binfile]
+
 # Run the tests with different features of GDBserver disabled.
 # TARGET_NON_STOP is passed to "maint set target-non-stop".
 proc run_test { target_non_stop disable_feature } {
@@ -63,7 +65,7 @@ proc run_test { target_non_stop disable_feature } {
     if { $disable_feature != "" } {
 	set packet_arg "--disable-packet=${disable_feature}"
     }
-    set res [gdbserver_start $packet_arg $binfile]
+    set res [gdbserver_start $packet_arg $::target_binfile]
     set gdbserver_protocol [lindex $res 0]
     set gdbserver_gdbport [lindex $res 1]
 
