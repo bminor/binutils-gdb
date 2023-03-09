@@ -30,11 +30,15 @@ if {[build_executable "failed to prepare" ${testfile} \
     return -1
 }
 
+set target_binfile [gdb_remote_download target $binfile]
+
 # Start gdbserver.
-set res [gdbserver_spawn "${binfile}"]
+set res [gdbserver_spawn "${target_binfile}"]
 set gdbserver_protocol [lindex $res 0]
 set gdbserver_gdbport [lindex $res 1]
 set gdbserver_pid [exp_pid -i $server_spawn_id]
+
+set break_linenr [gdb_get_line_number "@@XX@@ Inferior Starting @@XX@@"]
 
 # Generate a python script we will later source.
 set file1 [standard_output_file file1.py]
@@ -44,6 +48,9 @@ puts $fd \
 
 def do_gdb_stuff ():
     gdb.execute ('target $gdbserver_protocol $gdbserver_gdbport')
+    gdb.execute ('break $srcfile:$break_linenr')
+    gdb.execute ('continue')
+    gdb.execute ('p server_pid')
     gdb.execute ('continue')
 
 do_gdb_stuff()"
@@ -57,8 +64,22 @@ if {[gdb_spawn_with_cmdline_opts \
     return
 }
 
+# Get the gdbserver PID.
+set gdbserver_pid 0
+
 # Wait for the inferior to start up.
 with_spawn_id $server_spawn_id {
+    gdb_test_multiple "" "get gdbserver PID" {
+	-re " = ($decimal)\r\n" {
+	    set gdbserver_pid $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+    if { $gdbserver_pid == 0 } {
+	return
+    }
+
     gdb_test_multiple "" "ensure inferior is running" {
 	-re "@@XX@@ Inferior Starting @@XX@@" {
 	    pass $gdb_test_name

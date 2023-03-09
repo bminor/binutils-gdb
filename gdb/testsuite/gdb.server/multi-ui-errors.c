@@ -17,11 +17,16 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/types.h>
+
+pid_t server_pid;
 
 int
 main (void)
 {
   int i;
+
+  server_pid = getppid ();
 
   printf ("@@XX@@ Inferior Starting @@XX@@\n");
 

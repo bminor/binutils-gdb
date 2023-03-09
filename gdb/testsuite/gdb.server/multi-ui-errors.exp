@@ -100,6 +100,35 @@ with_spawn_id $gdb_main_spawn_id {
     gdb_test "echo hello\\n" "hello" "interact with GDB's main UI"
 }
 
+# Get the gdbserver PID.
+set gdbserver_pid 0
+with_spawn_id $gdb_main_spawn_id {
+    gdb_test "interrupt"
+
+    gdb_test_multiple "" "interrupt arrived" {
+	-re "Program received signal SIGINT, Interrupt\\.\r\n" {
+	    pass $gdb_test_name
+	}
+    }
+
+    gdb_test_multiple "p server_pid" "" {
+	-re -wrap " = ($decimal)" {
+	    set gdbserver_pid $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+    gdb_test_multiple continue "" {
+	-re "Continuing\\.\r\n" {
+	    pass $gdb_test_name
+	}
+    }
+}
+
+if { $gdbserver_pid == 0 } {
+    return
+}
+
 # Now kill the gdbserver.
 remote_exec target "kill -9 $gdbserver_pid"
 
