@@ -88,7 +88,7 @@ all_matching_threads_iterator::all_matching_threads_iterator
   if (filter_ptid == minus_one_ptid)
     {
       /* Iterate on all threads of all inferiors, possibly filtering on
-         FILTER_TARGET.  */
+	 FILTER_TARGET.  */
       m_mode = mode::ALL_THREADS;
 
       /* Seek the first thread of the first matching inferior.  */

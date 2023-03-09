@@ -86,7 +86,7 @@ static struct rs6000_aix_reg_vrreg_offset rs6000_aix_vrreg_offset =
 static int
 rs6000_aix_get_vrreg_offset (ppc_gdbarch_tdep *tdep,
   const struct rs6000_aix_reg_vrreg_offset *offsets,
-                                         int regnum)
+  int regnum)
 {
   if (regnum >= tdep->ppc_vr0_regnum &&
   regnum < tdep->ppc_vr0_regnum + ppc_num_vrs)
@@ -103,7 +103,7 @@ rs6000_aix_get_vrreg_offset (ppc_gdbarch_tdep *tdep,
 
 static void
 rs6000_aix_supply_vrregset (const struct regset *regset, struct regcache *regcache,
-                                        int regnum, const void *vrregs, size_t len)
+			    int regnum, const void *vrregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   const struct rs6000_aix_reg_vrreg_offset  *offsets;
@@ -142,7 +142,7 @@ rs6000_aix_supply_vrregset (const struct regset *regset, struct regcache *regcac
 
 static void
 rs6000_aix_supply_vsxregset (const struct regset *regset, struct regcache *regcache,
-                                        int regnum, const void *vsxregs, size_t len)
+			     int regnum, const void *vsxregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
@@ -165,8 +165,8 @@ rs6000_aix_supply_vsxregset (const struct regset *regset, struct regcache *regca
 
 static void
 rs6000_aix_collect_vsxregset (const struct regset *regset,
-                          const struct regcache *regcache,
-                    int regnum, void *vsxregs, size_t len)
+			      const struct regcache *regcache,
+			      int regnum, void *vsxregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
@@ -183,15 +183,14 @@ rs6000_aix_collect_vsxregset (const struct regset *regset,
 
       return;
     }
-
- else
+  else
     ppc_collect_reg (regcache, regnum, (gdb_byte *) vsxregs, 0, 8);
 }
 
 static void
 rs6000_aix_collect_vrregset (const struct regset *regset,
-                         const struct regcache *regcache,
-                    int regnum, void *vrregs, size_t len)
+			     const struct regcache *regcache,
+			     int regnum, void *vrregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   const struct rs6000_aix_reg_vrreg_offset *offsets;
@@ -225,7 +224,7 @@ rs6000_aix_collect_vrregset (const struct regset *regset,
     ppc_collect_reg (regcache, regnum, (gdb_byte *) vrregs, offset, 16);
   else
     ppc_collect_reg (regcache, regnum,
-                   (gdb_byte *) vrregs, offset, 4);
+		     (gdb_byte *) vrregs, offset, 4);
 }
 
 static const struct regset rs6000_aix_vrregset = {

@@ -562,7 +562,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	{
 	  *except_scmp
 	    = gdbscm_make_out_of_range_error
-	        (func_name, obj_arg_pos, obj,
+		(func_name, obj_arg_pos, obj,
 		 _("value out of range for type"));
 	  return NULL;
 	}

@@ -3958,15 +3958,15 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
       cu->addr_base = stub_comp_unit_die->addr_base ();
 
       /* There should be a DW_AT_GNU_ranges_base attribute here (if needed).
-         We need the value before we can process DW_AT_ranges values from the
-         DWO.  */
+	 We need the value before we can process DW_AT_ranges values from the
+	 DWO.  */
       cu->gnu_ranges_base = stub_comp_unit_die->gnu_ranges_base ();
 
       /* For DWARF5: record the DW_AT_rnglists_base value from the skeleton.  If
-         there are attributes of form DW_FORM_rnglistx in the skeleton, they'll
-         need the rnglists base.  Attributes of form DW_FORM_rnglistx in the
-         split unit don't use it, as the DWO has its own .debug_rnglists.dwo
-         section.  */
+	 there are attributes of form DW_FORM_rnglistx in the skeleton, they'll
+	 need the rnglists base.  Attributes of form DW_FORM_rnglistx in the
+	 split unit don't use it, as the DWO has its own .debug_rnglists.dwo
+	 section.  */
       cu->rnglists_base = stub_comp_unit_die->rnglists_base ();
     }
   else if (stub_comp_dir != NULL)
@@ -11576,17 +11576,17 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       && !die_is_declaration (die, cu))
     {
       if (die->tag == DW_TAG_namelist_item)
-        {
+	{
 	  /* Typically, DW_TAG_namelist_item are references to namelist items.
 	     If so, follow that reference.  */
 	  struct attribute *attr1 = dwarf2_attr (die, DW_AT_namelist_item, cu);
 	  struct die_info *item_die = nullptr;
 	  struct dwarf2_cu *item_cu = cu;
-          if (attr1->form_is_ref ())
+	  if (attr1->form_is_ref ())
 	    item_die = follow_die_ref (die, attr1, &item_cu);
 	  if (item_die != nullptr)
 	    die = item_die;
-        }
+	}
       /* Data member other than a C++ static data member.  */
 
       /* Get type of field.  */
@@ -16452,8 +16452,8 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	     have linkage name present but name is absent.  */
 	  if (name != nullptr
 	      || (abbrev->tag != DW_TAG_subprogram
-	          && abbrev->tag != DW_TAG_inlined_subroutine
-	          && abbrev->tag != DW_TAG_entry_point))
+		  && abbrev->tag != DW_TAG_inlined_subroutine
+		  && abbrev->tag != DW_TAG_entry_point))
 	    flags = flags | IS_LINKAGE;
 	  m_index_storage->add (this_die, abbrev->tag, flags,
 				linkage_name, nullptr, m_per_cu);
@@ -17555,7 +17555,7 @@ read_dwo_str_index (const struct die_reader_specs *reader, ULONGEST str_index)
   if (reader->cu->header.version >= 5)
     {
       /* We have a DWARF5 CU with a reference to a .debug_str_offsets section,
-         so assume the .debug_str_offsets section is DWARF5 as well, and
+	 so assume the .debug_str_offsets section is DWARF5 as well, and
 	 parse the header.  FIXME: Parse the header only once.  */
       unsigned int bytes_read = 0;
       bfd *abfd = reader->dwo_file->sections.str_offsets.get_bfd_owner ();
@@ -18786,8 +18786,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
   name = dwarf2_name (die, cu);
   if (name == nullptr && (die->tag == DW_TAG_subprogram
-                          || die->tag == DW_TAG_inlined_subroutine
-                          || die->tag == DW_TAG_entry_point))
+			  || die->tag == DW_TAG_inlined_subroutine
+			  || die->tag == DW_TAG_entry_point))
     name = dw2_linkage_name (die, cu);
 
   if (name)

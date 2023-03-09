@@ -1400,7 +1400,7 @@ rust_parser::parse_binop (bool required)
 	  /* Arrange to pop the entire stack.  */
 	  precedence = -2;
 	  break;
-        }
+	}
 
       /* Make sure that assignments are right-associative while other
 	 operations are left-associative.  */

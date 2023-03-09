@@ -1226,7 +1226,7 @@ get_detach_signal (struct lwp_info *lp)
 	  if (tp->has_pending_waitstatus ())
 	    {
 	      /* If the thread has a pending event, and it was stopped with a
-	         signal, use that signal to resume it.  If it has a pending
+		 signal, use that signal to resume it.  If it has a pending
 		 event of another kind, it was not stopped with a signal, so
 		 resume it without a signal.  */
 	      if (tp->pending_waitstatus ().kind () == TARGET_WAITKIND_STOPPED)

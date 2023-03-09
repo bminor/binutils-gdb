@@ -131,7 +131,7 @@ private:
      The API is inspired from GMP's mpz_export, hence the naming and types
      of the following parameter:
        - ENDIAN should be:
-           . 1 for most significant byte first; or
+	   . 1 for most significant byte first; or
 	   . -1 for least significant byte first; or
 	   . 0 for native endianness.
 

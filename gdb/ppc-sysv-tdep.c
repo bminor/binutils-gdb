@@ -1563,13 +1563,13 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 		    && eltype->length () == 16
 		    && (gdbarch_long_double_format (gdbarch)
 			== floatformats_ieee_quad))
-                 /* IEEE FLOAT128, args in vector registers.  */
+		  /* IEEE FLOAT128, args in vector registers.  */
 		  {
 		    ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
 		    align = 16;
 		  }
 		else if (eltype->code () == TYPE_CODE_FLT
-                          || eltype->code () == TYPE_CODE_DECFLOAT)
+			 || eltype->code () == TYPE_CODE_DECFLOAT)
 		    /* IBM long double and all other floats and decfloats, args
 		       are in a pair of floating point registers.  */
 		  ppc64_sysv_abi_push_freg (gdbarch, eltype, elval, argpos);

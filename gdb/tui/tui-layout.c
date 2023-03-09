@@ -850,7 +850,7 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
 	{
 	  /* Save the old cmd window information, in case we need to
 	     restore it later.  */
-          old_cmd_info.emplace (i, info[i].min_size, info[i].max_size);
+	  old_cmd_info.emplace (i, info[i].min_size, info[i].max_size);
 
 	  /* If this layout has never been applied, then it means the
 	     user just changed the layout.  In this situation, it's
@@ -965,11 +965,11 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
 		 window non-fixed-size (if possible), and hope we can
 		 shrink this enough to fit the rest of the sub-layouts in.
 
-	         Alternatively, we've made it around the loop without
-	         adjusting any window's size.  This likely means all
-	         windows have hit their min or max size.  Again, our only
-	         hope is to make the cmd window non-fixed-size, and hope
-	         this fixes all our problems.  */
+		 Alternatively, we've made it around the loop without
+		 adjusting any window's size.  This likely means all
+		 windows have hit their min or max size.  Again, our only
+		 hope is to make the cmd window non-fixed-size, and hope
+		 this fixes all our problems.  */
 	      if (old_cmd_info.has_value ()
 		  && ((available_size < used_size)
 		      || !found_window_that_can_grow_p))

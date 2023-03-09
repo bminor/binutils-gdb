@@ -1058,7 +1058,7 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
   else
     {
       /* Handle any other instructions that do not fit in the categories
-         above.  */
+	 above.  */
       regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
 				      from + offset);
     }
@@ -4181,15 +4181,15 @@ ppc_record_ACC_fpscr (struct regcache *regcache, ppc_gdbarch_tdep *tdep,
      entry consist of four 128-bit rows.
 
      The ACC rows map to specific VSR registers.
-         ACC[0][0] -> VSR[0]
-         ACC[0][1] -> VSR[1]
-         ACC[0][2] -> VSR[2]
-         ACC[0][3] -> VSR[3]
-              ...
-         ACC[7][0] -> VSR[28]
-         ACC[7][1] -> VSR[29]
-         ACC[7][2] -> VSR[30]
-         ACC[7][3] -> VSR[31]
+	 ACC[0][0] -> VSR[0]
+	 ACC[0][1] -> VSR[1]
+	 ACC[0][2] -> VSR[2]
+	 ACC[0][3] -> VSR[3]
+	      ...
+	 ACC[7][0] -> VSR[28]
+	 ACC[7][1] -> VSR[29]
+	 ACC[7][2] -> VSR[30]
+	 ACC[7][3] -> VSR[31]
 
      NOTE:
      In ISA 3.1 the ACC is mapped on top of VSR[0] thru VSR[31].
@@ -7446,14 +7446,14 @@ rs6000_program_breakpoint_here_p (gdbarch *gdbarch, CORE_ADDR address)
   if (target_read_memory (address, target_mem, PPC_INSN_SIZE) == 0)
     {
       uint32_t insn = (uint32_t) extract_unsigned_integer
-        (target_mem, PPC_INSN_SIZE, gdbarch_byte_order_for_code (gdbarch));
+	(target_mem, PPC_INSN_SIZE, gdbarch_byte_order_for_code (gdbarch));
 
       /* Check if INSN is a TW, TWI, TD or TDI instruction.  There
-         are multiple choices of such instructions with different registers
-         and / or immediate values but they all cause a break. */
+	 are multiple choices of such instructions with different registers
+	 and / or immediate values but they all cause a break. */
       if (is_tw_insn (insn) || is_twi_insn (insn) || is_td_insn (insn)
-          || is_tdi_insn (insn))
-        return true;
+	  || is_tdi_insn (insn))
+	return true;
     }
 
   return false;
@@ -8326,7 +8326,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sw_breakpoint_from_kind (gdbarch,
 				       rs6000_breakpoint::bp_from_kind);
   set_gdbarch_program_breakpoint_here_p (gdbarch,
-                                         rs6000_program_breakpoint_here_p);
+					 rs6000_program_breakpoint_here_p);
 
   /* The value of symbols of type N_SO and N_FUN maybe null when
      it shouldn't be.  */

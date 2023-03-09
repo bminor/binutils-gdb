@@ -637,9 +637,7 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
 	 only the root VAROBJs.  */
 
       all_root_varobjs ([=] (varobj *var)
-        {
-	  mi_cmd_var_update_iter (var, *name == '0', print_values);
-	});
+	{ mi_cmd_var_update_iter (var, *name == '0', print_values); });
     }
   else
     {

@@ -571,7 +571,7 @@ get_token (shared_macro_buffer *tok, shared_macro_buffer *src)
    yield "< <", not "<<", etc.  */
 static void
 append_tokens_without_splicing (growable_macro_buffer *dest,
-                                shared_macro_buffer *src)
+				shared_macro_buffer *src)
 {
   int original_dest_len = dest->len;
   shared_macro_buffer dest_tail, new_token;

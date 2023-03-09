@@ -809,8 +809,8 @@ static bool
 libpthread_objfile_p (objfile *obj)
 {
   return (libpthread_name_p (objfile_name (obj))
-          && lookup_minimal_symbol ("pthread_create",
-	                            NULL,
+	  && lookup_minimal_symbol ("pthread_create",
+				    NULL,
 				    obj).minsym != NULL);
 }
 

@@ -693,7 +693,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
   if (child_inf != nullptr)
     {
       /* If FOLLOW_CHILD, we leave CHILD_INF as the current inferior
-         (do not restore the parent as the current inferior).  */
+	 (do not restore the parent as the current inferior).  */
       gdb::optional<scoped_restore_current_thread> maybe_restore;
 
       if (!follow_child)
@@ -3089,7 +3089,7 @@ scoped_disable_commit_resumed::reset ()
   if (m_prev_enable_commit_resumed)
     {
       /* This is the outermost instance, re-enable
-         COMMIT_RESUMED_STATE on the targets where it's possible.  */
+	 COMMIT_RESUMED_STATE on the targets where it's possible.  */
       maybe_set_commit_resumed_all_targets ();
     }
   else
@@ -5878,7 +5878,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  if (should_resume)
 	    {
 	      /* Never call switch_back_to_stepped_thread if we are waiting for
-	         vfork-done (waiting for an external vfork child to exec or
+		 vfork-done (waiting for an external vfork child to exec or
 		 exit).  We will resume only the vforking thread for the purpose
 		 of collecting the vfork-done event, and we will restart any
 		 step once the critical shared address space window is done.  */
@@ -7518,7 +7518,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  return;
 	}
       else if (get_frame_id (get_current_frame ())
-               == ecs->event_thread->control.step_frame_id)
+	       == ecs->event_thread->control.step_frame_id)
 	{
 	  /* We are not at the start of a statement, and we have not changed
 	     frame.

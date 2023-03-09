@@ -928,7 +928,7 @@ z80_read_overlay_region_table ()
   byte_order = gdbarch_byte_order (gdbarch);
 
   cache_novly_regions = read_memory_integer (novly_regions_msym.value_address (),
-                                             4, byte_order);
+					     4, byte_order);
   cache_ovly_region_table
     = (unsigned int (*)[3]) xmalloc (cache_novly_regions *
 					sizeof (*cache_ovly_region_table));

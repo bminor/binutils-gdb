@@ -959,7 +959,7 @@ bool
 libpthread_name_p (const char *name)
 {
   return (strstr (name, "/libpthread") != NULL
-          || strstr (name, "/libc.") != NULL );
+	  || strstr (name, "/libc.") != NULL );
 }
 
 /* Return non-zero if SO is the libpthread shared library.  */

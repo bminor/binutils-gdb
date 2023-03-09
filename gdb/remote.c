@@ -5214,7 +5214,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 	continue;
 
       /* Need to switch to a specific thread, because remote_check_symbols
-         uses INFERIOR_PTID to set the general thread.  */
+	 uses INFERIOR_PTID to set the general thread.  */
       scoped_restore_current_thread restore_thread;
       thread_info *thread = any_thread_of_inferior (inf);
       switch_to_thread (thread);
@@ -6733,7 +6733,7 @@ remote_target::resume (ptid_t scope_ptid, int step, enum gdb_signal siggnal)
 	= get_remote_thread_info (inferior_thread ());
 
       /* We don't expect the core to ask to resume an already resumed (from
-         its point of view) thread.  */
+	 its point of view) thread.  */
       gdb_assert (remote_thr->get_resume_state () == resume_state::NOT_RESUMED);
 
       remote_thr->set_resumed_pending_vcont (step, siggnal);
@@ -7025,7 +7025,7 @@ remote_target::commit_resumed ()
       gdb_assert (!thread_is_in_step_over_chain (tp));
 
       /* We should never be commit-resuming a thread that has a stop reply.
-         Otherwise, we would end up reporting a stop event for a thread while
+	 Otherwise, we would end up reporting a stop event for a thread while
 	 it is running on the remote target.  */
       remote_state *rs = get_remote_state ();
       for (const auto &stop_reply : rs->stop_reply_queue)
@@ -7035,7 +7035,7 @@ remote_target::commit_resumed ()
 	= remote_thr->resumed_pending_vcont_info ();
 
       /* Check if we need to send a specific action for this thread.  If not,
-         it will be included in a wildcard resume instead.  */
+	 it will be included in a wildcard resume instead.  */
       if (info.step || info.sig != GDB_SIGNAL_0
 	  || !get_remote_inferior (tp->inf)->may_wildcard_vcont)
 	vcont_builder.push_action (tp->ptid, info.step, info.sig);
@@ -14732,7 +14732,7 @@ remote_new_objfile (struct objfile *objfile)
 	continue;
 
       /* Need to switch to a specific thread, because remote_check_symbols will
-         set the general thread using INFERIOR_PTID.
+	 set the general thread using INFERIOR_PTID.
 
 	 It's possible to have inferiors with no thread here, because we are
 	 called very early in the connection process, while the inferior is

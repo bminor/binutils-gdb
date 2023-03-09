@@ -845,9 +845,9 @@ Available FLAGS are:\n\
   /T    print typedefs defined in a class\n\
   /o    print offsets and sizes of fields in a struct (like pahole)\n\
   /x    use hexadecimal notation when displaying sizes and offsets\n\
-        of struct members\n\
+	of struct members\n\
   /d    use decimal notation when displaying sizes and offsets\n\
-        of struct members "));
+	of struct members "));
   set_cmd_completer (c, expression_completer);
 
   c = add_com ("whatis", class_vars, whatis_command,

@@ -1105,7 +1105,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 	      if (WIFEXITED (wstatus))
 		{
 		  status->set_exited (WEXITSTATUS (wstatus));
-	          inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
+		  inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
 				  res_pid, wstatus);
 		}
 	      else if (WIFSTOPPED (wstatus))
@@ -1128,7 +1128,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 		{
 		  status->set_ignore ();
 		  warning (_("Unexpected wait status after MACH_NOTIFY_DEAD_NAME "
-		             "notification: 0x%x"), wstatus);
+			     "notification: 0x%x"), wstatus);
 		  return minus_one_ptid;
 		}
 

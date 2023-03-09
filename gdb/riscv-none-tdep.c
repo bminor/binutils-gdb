@@ -134,7 +134,7 @@ riscv_iterate_over_regset_sections (struct gdbarch *gdbarch,
   if (tdesc != nullptr)
     {
       const struct tdesc_feature *feature_csr
-        = tdesc_find_feature (tdesc, riscv_feature_name_csr);
+	= tdesc_find_feature (tdesc, riscv_feature_name_csr);
       if (feature_csr != nullptr && feature_csr->registers.size () > 0)
 	{
 	  riscv_update_csrmap (gdbarch, feature_csr);

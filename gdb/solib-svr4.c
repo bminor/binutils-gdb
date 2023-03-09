@@ -1908,8 +1908,8 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
 	return 0;
 
       /* Get the so list from the target.  We replace the list in the
-         target response so we can easily check that the response only
-         covers one namespace.
+	 target response so we can easily check that the response only
+	 covers one namespace.
 
 	 We expect gdbserver to provide updates for the namespace that
 	 contains LM, which whould be this namespace...  */

@@ -304,10 +304,10 @@ ptrace_check (int req, int id, int ret)
 	break;
      case PTT_READ_VEC:
      case PTT_READ_VSX:
-        if (debug_aix_thread)
-            gdb_printf (gdb_stdlog,
-                        "ptrace (%d, %d) = %d (errno = %d)\n",
-                        req, id, ret, errno);
+	if (debug_aix_thread)
+	  gdb_printf (gdb_stdlog,
+		      "ptrace (%d, %d) = %d (errno = %d)\n",
+		      req, id, ret, errno);
 	if (ret == -1)
 	  return -1;
 	break;
@@ -1505,9 +1505,9 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
       else
 	ret = ptrace32 (PTT_READ_VSX, tid, (long long) &vsx, 0, 0);
       if (ret < 0)
-        memset(&vsx, 0, sizeof(__vsx_context_t));
+	memset(&vsx, 0, sizeof(__vsx_context_t));
       for (i = 0; i < ppc_num_vshrs; i++)
-        regcache->raw_supply (tdep->ppc_vsr0_upper_regnum + i, &(vsx.__vsr_dw1[i]));
+	regcache->raw_supply (tdep->ppc_vsr0_upper_regnum + i, &(vsx.__vsr_dw1[i]));
     }
 
   /* Floating-point registers.  */
@@ -1609,7 +1609,7 @@ fill_vsx (const struct regcache *regcache, __vsx_context_t  *vsx)
   for (regno = 0; regno < ppc_num_vshrs; regno++)
     if (REG_VALID == regcache->get_register_status ( tdep->ppc_vsr0_upper_regnum + regno))
       regcache->raw_collect (tdep->ppc_vsr0_upper_regnum + regno,
-                                   &(vsx->__vsr_dw1[0]) + regno);
+			     &(vsx->__vsr_dw1[0]) + regno);
 }
 
 /* Store the gp registers into an array of uint32_t or uint64_t.  */

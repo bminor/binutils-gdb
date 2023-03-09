@@ -271,9 +271,7 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
 	  debug_printf (_("\n"));
 	}
       results.post (i, [=] ()
-        {
-	  return callback (first, end);
-	});
+	{ return callback (first, end); });
       first = end;
     }
 

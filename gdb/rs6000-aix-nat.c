@@ -296,7 +296,7 @@ store_vsx_register_aix (struct regcache *regcache, int regno)
   tid64_t thrd_i = 0;
 
   if (getthrds64(pid, &thrdentry, sizeof(struct thrdentry64),
-                                           &thrd_i, 1) == 1)
+		 &thrd_i, 1) == 1)
     thrd_i = thrdentry.ti_tid;
 
   memset(&vsx, 0, sizeof(__vsx_context_t));
@@ -336,7 +336,7 @@ store_altivec_register_aix (struct regcache *regcache, int regno)
   tid64_t  thrd_i = 0;
 
   if (getthrds64(pid, &thrdentry, sizeof(struct thrdentry64),
-                                            &thrd_i, 1) == 1)
+		 &thrd_i, 1) == 1)
     thrd_i = thrdentry.ti_tid;
 
   memset(&vmx, 0, sizeof(__vmx_context_t));
@@ -373,7 +373,7 @@ supply_vrregset_aix (struct regcache *regcache, __vmx_context_t *vmx)
 
   for (i = 0; i < num_of_vrregs; i++)
     regcache->raw_supply (tdep->ppc_vr0_regnum + i,
-                                    &(vmx->__vr[i]));
+			  &(vmx->__vr[i]));
   regcache->raw_supply (tdep->ppc_vrsave_regnum, &(vmx->__vrsave));
   regcache->raw_supply (tdep->ppc_vrsave_regnum - 1, &(vmx->__vscr));
 }
@@ -389,7 +389,7 @@ fetch_altivec_registers_aix (struct regcache *regcache)
   tid64_t  thrd_i = 0;
 
   if (getthrds64(pid, &thrdentry, sizeof(struct thrdentry64),
-                               &thrd_i, 1) == 1)
+		 &thrd_i, 1) == 1)
     thrd_i = thrdentry.ti_tid;
 
   memset(&vmx, 0, sizeof(__vmx_context_t));
@@ -414,7 +414,7 @@ supply_vsxregset_aix (struct regcache *regcache, __vsx_context_t *vsx)
 
   for (i = 0; i < ppc_num_vshrs; i++)
    regcache->raw_supply (tdep->ppc_vsr0_upper_regnum + i,
-                                   &(vsx->__vsr_dw1[i]));
+			 &(vsx->__vsr_dw1[i]));
 }
 
 /* Fetch vsx registers.  */
@@ -427,7 +427,7 @@ fetch_vsx_registers_aix (struct regcache *regcache)
   tid64_t  thrd_i = 0;
 
   if (getthrds64(pid, &thrdentry, sizeof(struct thrdentry64),
-                                            &thrd_i, 1) == 1)
+		 &thrd_i, 1) == 1)
     thrd_i = thrdentry.ti_tid;
 
   memset(&vsx, 0, sizeof(__vsx_context_t));
@@ -654,10 +654,10 @@ rs6000_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	  fetch_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
-        fetch_altivec_registers_aix (regcache);
+	fetch_altivec_registers_aix (regcache);
 
       if (tdep->ppc_vsr0_upper_regnum != -1)
-        fetch_vsx_registers_aix (regcache);
+	fetch_vsx_registers_aix (regcache);
 
       /* Read special registers.  */
       fetch_register (regcache, gdbarch_pc_regnum (gdbarch));

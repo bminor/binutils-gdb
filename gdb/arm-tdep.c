@@ -3876,7 +3876,7 @@ arm_m_exception_prev_register (frame_info_ptr this_frame,
 							  prev_regnum);
       CORE_ADDR pc = value_as_address (value);
       return frame_unwind_got_constant (this_frame, prev_regnum,
-				        UNMAKE_THUMB_ADDR (pc));
+					UNMAKE_THUMB_ADDR (pc));
     }
 
   /* The value might be one of the alternative SP, if so, use the

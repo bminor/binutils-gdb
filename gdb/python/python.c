@@ -2078,7 +2078,7 @@ do_start_initialization ()
 
   PyConfig_InitPythonConfig (&config);
   PyStatus status = PyConfig_SetString (&config, &config.program_name,
-                                        progname_copy);
+					progname_copy);
   if (PyStatus_Exception (status))
     goto init_done;
 

@@ -566,7 +566,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	}
 
       if (name[0] == '\0')
-        goto skip_dup;
+	goto skip_dup;
       if (name[0] == '~')
 	new_name_holder
 	  = gdb::unique_xmalloc_ptr<char[]> (tilde_expand (name)).get ();
@@ -2021,12 +2021,12 @@ By default, relative filenames are displayed."),
 			&setlist, &showlist);
 
   add_prefix_cmd ("source", no_class, set_source,
-                  _("Generic command for setting how sources are handled."),
-                  &setsourcelist, 0, &setlist);
+		  _("Generic command for setting how sources are handled."),
+		  &setsourcelist, 0, &setlist);
 
   add_prefix_cmd ("source", no_class, show_source,
-                  _("Generic command for showing source settings."),
-                  &showsourcelist, 0, &showlist);
+		  _("Generic command for showing source settings."),
+		  &showsourcelist, 0, &showlist);
 
   add_setshow_boolean_cmd ("open", class_files, &source_open, _("\
 Set whether GDB should open source files."), _("\
@@ -2038,7 +2038,7 @@ When this option is off GDB will not try to open source files, instead\n\
 GDB will print the file and line number that would have been displayed.\n\
 This can be useful if access to source code files is slow, for example\n\
 due to the source being located over a slow network connection."),
-                           NULL,
-                           show_source_open,
-                           &setsourcelist, &showsourcelist);
+			   NULL,
+			   show_source_open,
+			   &setsourcelist, &showsourcelist);
 }

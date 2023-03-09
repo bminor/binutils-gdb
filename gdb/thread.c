@@ -204,11 +204,11 @@ set_thread_exited (thread_info *tp, bool silent)
       process_stratum_target *proc_target = tp->inf->process_target ();
 
       /* Some targets unpush themselves from the inferior's target stack before
-         clearing the inferior's thread list (which marks all threads as exited,
-         and therefore leads to this function).  In this case, the inferior's
-         process target will be nullptr when we arrive here.
+	 clearing the inferior's thread list (which marks all threads as exited,
+	 and therefore leads to this function).  In this case, the inferior's
+	 process target will be nullptr when we arrive here.
 
-         See also the comment in inferior::unpush_target.  */
+	 See also the comment in inferior::unpush_target.  */
       if (proc_target != nullptr)
 	proc_target->maybe_remove_resumed_with_pending_wait_status (tp);
 

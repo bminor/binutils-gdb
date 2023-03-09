@@ -5219,13 +5219,13 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
      From MIPSpro Assembly Language Programmer's Guide, Document Number:
      007-2418-004
 
-              Software
+	      Software
      Register Name(from
      Name     fgregdef.h) Use and Linkage
      -----------------------------------------------------------------
      $f0, $f2 fv0, fv1    Hold results of floating-point type function
-                          ($f0) and complex type function ($f0 has the
-                          real part, $f2 has the imaginary part.)  */
+			  ($f0) and complex type function ($f0 has the
+			  real part, $f2 has the imaginary part.)  */
 
   if (type->length () > 2 * MIPS64_REGSIZE)
     return RETURN_VALUE_STRUCT_CONVENTION;

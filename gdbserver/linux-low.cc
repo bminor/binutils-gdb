@@ -3540,7 +3540,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   else
     {
       /* The LWP stopped due to a plain signal or a syscall signal.  Either way,
-         event_chid->waitstatus wasn't filled in with the details, so look at
+	 event_chid->waitstatus wasn't filled in with the details, so look at
 	 the wait status W.  */
       if (WSTOPSIG (w) == SYSCALL_SIGTRAP)
 	{

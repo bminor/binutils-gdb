@@ -3771,7 +3771,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       pc = saved_pc;
 
       /* Check if the compiler explicitly indicated where a breakpoint should
-         be placed to skip the prologue.  */
+	 be placed to skip the prologue.  */
       if (!ignore_prologue_end_flag && skip)
 	{
 	  gdb::optional<CORE_ADDR> linetable_pc
@@ -4153,7 +4153,7 @@ operator_chars (const char *p, const char **end)
 /* See class declaration.  */
 
 info_sources_filter::info_sources_filter (match_on match_type,
-                                          const char *regexp)
+					  const char *regexp)
   : m_match_type (match_type),
     m_regexp (regexp)
 {
@@ -4182,23 +4182,23 @@ info_sources_filter::matches (const char *fullname) const
       std::string dirname;
 
       switch (m_match_type)
-        {
-        case match_on::DIRNAME:
-          dirname = ldirname (fullname);
-          to_match = dirname.c_str ();
-          break;
-        case match_on::BASENAME:
-          to_match = lbasename (fullname);
-          break;
-        case match_on::FULLNAME:
-          to_match = fullname;
-          break;
+	{
+	case match_on::DIRNAME:
+	  dirname = ldirname (fullname);
+	  to_match = dirname.c_str ();
+	  break;
+	case match_on::BASENAME:
+	  to_match = lbasename (fullname);
+	  break;
+	case match_on::FULLNAME:
+	  to_match = fullname;
+	  break;
 	default:
 	  gdb_assert_not_reached ("bad m_match_type");
-        }
+	}
 
       if (m_c_regexp->exec (to_match, 0, NULL, 0) != 0)
-        return false;
+	return false;
     }
 
   return true;

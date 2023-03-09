@@ -321,7 +321,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
       if (type->code () == TYPE_CODE_UNION)
 	prefix = "Type, C_Union :: ";
       else if (type->code () == TYPE_CODE_STRUCT
-               || type->code () == TYPE_CODE_NAMELIST)
+	       || type->code () == TYPE_CODE_NAMELIST)
 	prefix = "Type ";
       gdb_printf (stream, "%*s%s%s", level, "", prefix, type->name ());
       return;

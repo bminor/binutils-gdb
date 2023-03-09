@@ -160,16 +160,16 @@ struct fortran_array_walker_base_impl
 
      start_dimension (INDEX_TYPE, 3, false);
        start_dimension (INDEX_TYPE, 2, true);
-         process_element (TYPE, OFFSET, false);
-         process_element (TYPE, OFFSET, true);
+	 process_element (TYPE, OFFSET, false);
+	 process_element (TYPE, OFFSET, true);
        finish_dimension (true, false);
        start_dimension (INDEX_TYPE, 2, true);
-         process_element (TYPE, OFFSET, false);
-         process_element (TYPE, OFFSET, true);
+	 process_element (TYPE, OFFSET, false);
+	 process_element (TYPE, OFFSET, true);
        finish_dimension (true, true);
        start_dimension (INDEX_TYPE, 2, true);
-         process_element (TYPE, OFFSET, false);
-         process_element (TYPE, OFFSET, true);
+	 process_element (TYPE, OFFSET, false);
+	 process_element (TYPE, OFFSET, true);
        finish_dimension (true, true);
      finish_dimension (false, true);  */
   void process_element (struct type *elt_type, LONGEST elt_off,

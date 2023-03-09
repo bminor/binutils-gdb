@@ -99,9 +99,7 @@ register_test_foreach_arch (const std::string &name,
 			    self_test_foreach_arch_function *function)
 {
   add_lazy_generator ([=] ()
-		      {
-		        return foreach_arch_test_generator (name, function);
-		      });
+		      { return foreach_arch_test_generator (name, function); });
 }
 
 void

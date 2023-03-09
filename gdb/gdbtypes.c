@@ -3384,7 +3384,7 @@ set_type_code (struct type *type, enum type_code code)
 	break;
       case TYPE_CODE_FUNC:
 	INIT_FUNC_SPECIFIC (type);
-        break;
+	break;
       case TYPE_CODE_FIXED_POINT:
 	INIT_FIXED_POINT_SPECIFIC (type);
 	break;
@@ -5702,10 +5702,10 @@ copy_type_recursive (struct type *type, htab_t copied_types)
 	      new_type->field (i).set_loc_physname
 		(xstrdup (type->field (i).loc_physname ()));
 	      break;
-            case FIELD_LOC_KIND_DWARF_BLOCK:
-              new_type->field (i).set_loc_dwarf_block
+	    case FIELD_LOC_KIND_DWARF_BLOCK:
+	      new_type->field (i).set_loc_dwarf_block
 		(type->field (i).loc_dwarf_block ());
-              break;
+	      break;
 	    default:
 	      internal_error (_("Unexpected type field location kind: %d"),
 			      type->field (i).loc_kind ());

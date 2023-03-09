@@ -667,7 +667,7 @@ execute_command (const char *p, int from_tty)
 	   subcommands.  */
 	{
 	  std::string prefixname = c->prefixname ();
-          std::string prefixname_no_space
+	  std::string prefixname_no_space
 	    = prefixname.substr (0, prefixname.length () - 1);
 	  gdb_printf
 	    ("\"%s\" must be followed by the name of a subcommand.\n",

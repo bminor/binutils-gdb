@@ -521,7 +521,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 		       docstring.release (), cmd_list);
 
       /* If successful, the above takes ownership of the name, since we set
-         name_allocated, so release it.  */
+	 name_allocated, so release it.  */
       cmd_name.release ();
 
       /* There appears to be no API to set this.  */

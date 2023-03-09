@@ -127,7 +127,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	}
 
       /* Ensure the ptid is updated with an LWP id on the first stop
-         of a process.  */
+	 of a process.  */
       if (!in_thread_list (this, wptid))
 	{
 	  if (in_thread_list (this, ptid_t (pid)))

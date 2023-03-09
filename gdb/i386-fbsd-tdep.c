@@ -133,7 +133,7 @@ const struct regset i386_fbsd_segbases_regset =
 		__sighandler_t		*sf_handler;
 	} sf_ahu;
 	ucontext_t	sf_uc;
-        ...
+	...
    }
 
    ucontext_t is defined as:

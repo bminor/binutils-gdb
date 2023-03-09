@@ -602,12 +602,12 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	       and the signed integer scalars are sign-extended.  */
 	  if (type->is_unsigned ())
 	    {
-              ULONGEST data = extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
+	      ULONGEST data = extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
 	      if (gar > 0)
 		pass_in_gar (regcache, gar--, (gdb_byte *) &data);
 	      else
 		pass_on_stack (regcache, (gdb_byte *) &data, len, align, &addr);
-            }
+	    }
 	  else
 	    {
 	      LONGEST data = extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
@@ -615,7 +615,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		pass_in_gar (regcache, gar--, (gdb_byte *) &data);
 	      else
 		pass_on_stack (regcache, (gdb_byte *) &data, len, align, &addr);
-            }
+	    }
 	  }
 	  break;
 	case TYPE_CODE_FLT:
@@ -975,7 +975,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	      }
 	    else if (len > 2 * regsize)
 	      {
-	        /* It's passed by reference and are replaced in the argument list with the address.
+		/* It's passed by reference and are replaced in the argument list with the address.
 		   If there is an available GAR, the reference is passed in the GAR,
 		   and passed on the stack if no GAR is available.  */
 		sp = align_down (sp - len, 16);

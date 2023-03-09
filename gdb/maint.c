@@ -1239,7 +1239,7 @@ Usage: maintenance info sections [-all-objects] [FILTERS]\n\
 FILTERS is a list of words, each word is either:\n\
   + A section name - any section with this name will be printed, or\n\
   + A section flag - any section with this flag will be printed.  The\n\
-        known flags are:\n\
+	known flags are:\n\
 	  ALLOC LOAD RELOC READONLY CODE DATA ROM CONSTRUCTOR\n\
 	  HAS_CONTENTS NEVER_LOAD COFF_SHARED_LIBRARY IS_COMMON\n\
 \n\

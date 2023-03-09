@@ -95,7 +95,7 @@ process_stratum_target::follow_exec (inferior *follow_inf, ptid_t ptid,
   if (orig_inf != follow_inf)
     {
       /* Execution continues in a new inferior, push the original inferior's
-         process target on the new inferior's target stack.  The process target
+	 process target on the new inferior's target stack.  The process target
 	 may decide to unpush itself from the original inferior's target stack
 	 after that, at its discretion.  */
       follow_inf->push_target (orig_inf->process_target ());

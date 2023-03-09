@@ -1634,10 +1634,10 @@ value::set_component_location (const struct value *whole)
 	 By changing the type of the component to lval_memory we ensure
 	 that value_fetch_lazy can successfully load the component.
 
-         This solution isn't ideal, but a real fix would require values to
-         carry around both the parent value contents, and the contents of
-         any dynamic fields within the parent.  This is a substantial
-         change to how values work in GDB.  */
+	 This solution isn't ideal, but a real fix would require values to
+	 carry around both the parent value contents, and the contents of
+	 any dynamic fields within the parent.  This is a substantial
+	 change to how values work in GDB.  */
       if (this->lval () == lval_internalvar_component)
 	{
 	  gdb_assert (lazy ());

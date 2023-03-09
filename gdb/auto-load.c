@@ -1537,8 +1537,8 @@ _initialize_auto_load ()
   const char *suffix;
 
   gdb::observers::new_objfile.attach (auto_load_new_objfile,
-                                      auto_load_new_objfile_observer_token,
-                                      "auto-load");
+				      auto_load_new_objfile_observer_token,
+				      "auto-load");
   add_setshow_boolean_cmd ("gdb-scripts", class_support,
 			   &auto_load_gdb_scripts, _("\
 Enable or disable auto-loading of canned sequences of commands scripts."), _("\
