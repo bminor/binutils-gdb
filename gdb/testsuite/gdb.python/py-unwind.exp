@@ -142,3 +142,22 @@ gdb_test "python obj = simple_unwinder(True)" \
     [multi_line \
 	 "TypeError: incorrect type for name: <class 'bool'>" \
 	 "Error while executing Python code\\."]
+
+# Now register the simple_unwinder with a valid name, and use the
+# unwinder to capture a PendingFrame object.
+gdb_test_no_output "python obj = simple_unwinder(\"simple\")"
+gdb_test_no_output "python gdb.unwinder.register_unwinder(None, obj)"
+check_for_broken_backtrace "backtrace to capture a PendingFrame object"
+
+# Call methods on the captured gdb.PendingFrame and check we see the
+# expected error.
+gdb_test_no_output "python pf = captured_pending_frame"
+foreach cmd {"pf.read_register(\"pc\")" \
+		 "pf.create_unwind_info(None)" \
+		 "pf.architecture()" \
+		 "pf.level()"} {
+    gdb_test "python $cmd" \
+	[multi_line \
+	     "ValueError: gdb\\.PendingFrame is invalid\\." \
+	     "Error while executing Python code\\."]
+}

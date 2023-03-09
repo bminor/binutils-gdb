@@ -133,12 +133,19 @@ class TestUnwinder(Unwinder):
 global_test_unwinder = TestUnwinder()
 gdb.unwinder.register_unwinder(None, global_test_unwinder, True)
 
+# This is filled in by the simple_unwinder class.
+captured_pending_frame = None
+
 
 class simple_unwinder(Unwinder):
     def __init__(self, name):
         super().__init__(name)
 
     def __call__(self, pending_frame):
+        global captured_pending_frame
+
+        if captured_pending_frame is None:
+            captured_pending_frame = pending_frame
         return None
 
 

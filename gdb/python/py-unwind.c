@@ -52,6 +52,17 @@ show_pyuw_debug (struct ui_file *file, int from_tty,
 #define PYUW_SCOPED_DEBUG_ENTER_EXIT \
   scoped_debug_enter_exit (pyuw_debug, "py-unwind")
 
+/* Require a valid pending frame.  */
+#define PENDING_FRAMEPY_REQUIRE_VALID(pending_frame)	     \
+  do {							     \
+    if ((pending_frame)->frame_info == nullptr)		     \
+      {							     \
+	PyErr_SetString (PyExc_ValueError,		     \
+			 _("gdb.PendingFrame is invalid.")); \
+	return nullptr;					     \
+      }							     \
+  } while (0)
+
 struct pending_frame_object
 {
   PyObject_HEAD
@@ -215,21 +226,20 @@ unwind_infopy_str (PyObject *self)
 }
 
 /* Create UnwindInfo instance for given PendingFrame and frame ID.
-   Sets Python error and returns NULL on error.  */
+   Sets Python error and returns NULL on error.
+
+   The PYO_PENDING_FRAME object must be valid.  */
 
 static PyObject *
 pyuw_create_unwind_info (PyObject *pyo_pending_frame,
 			 struct frame_id frame_id)
 {
-  unwind_info_object *unwind_info
-      = PyObject_New (unwind_info_object, &unwind_info_object_type);
+  gdb_assert (((pending_frame_object *) pyo_pending_frame)->frame_info
+	      != nullptr);
 
-  if (((pending_frame_object *) pyo_pending_frame)->frame_info == NULL)
-    {
-      PyErr_SetString (PyExc_ValueError,
-		       "Attempting to use stale PendingFrame");
-      return NULL;
-    }
+  unwind_info_object *unwind_info
+    = PyObject_New (unwind_info_object, &unwind_info_object_type);
+
   unwind_info->frame_id = frame_id;
   Py_INCREF (pyo_pending_frame);
   unwind_info->pending_frame = pyo_pending_frame;
@@ -365,15 +375,11 @@ static PyObject *
 pending_framepy_read_register (PyObject *self, PyObject *args)
 {
   pending_frame_object *pending_frame = (pending_frame_object *) self;
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
   int regnum;
   PyObject *pyo_reg_id;
 
-  if (pending_frame->frame_info == NULL)
-    {
-      PyErr_SetString (PyExc_ValueError,
-		       "Attempting to read register from stale PendingFrame");
-      return NULL;
-    }
   if (!PyArg_UnpackTuple (args, "read_register", 1, 1, &pyo_reg_id))
     return NULL;
   if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
@@ -417,6 +423,8 @@ pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
   CORE_ADDR pc;
   CORE_ADDR special;
 
+  PENDING_FRAMEPY_REQUIRE_VALID ((pending_frame_object *) self);
+
   if (!PyArg_ParseTuple (args, "O:create_unwind_info", &pyo_frame_id))
       return NULL;
   if (!pyuw_object_attribute_to_pointer (pyo_frame_id, "sp", &sp))
@@ -451,12 +459,8 @@ pending_framepy_architecture (PyObject *self, PyObject *args)
 {
   pending_frame_object *pending_frame = (pending_frame_object *) self;
 
-  if (pending_frame->frame_info == NULL)
-    {
-      PyErr_SetString (PyExc_ValueError,
-		       "Attempting to read register from stale PendingFrame");
-      return NULL;
-    }
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
   return gdbarch_to_arch_object (pending_frame->gdbarch);
 }
 
@@ -467,12 +471,8 @@ pending_framepy_level (PyObject *self, PyObject *args)
 {
   pending_frame_object *pending_frame = (pending_frame_object *) self;
 
-  if (pending_frame->frame_info == NULL)
-    {
-      PyErr_SetString (PyExc_ValueError,
-		       "Attempting to read stack level from stale PendingFrame");
-      return NULL;
-    }
+  PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
+
   int level = frame_relative_level (pending_frame->frame_info);
   return gdb_py_object_from_longest (level).release ();
 }
@@ -538,6 +538,7 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
       return 0;
     }
   pfo->gdbarch = gdbarch;
+  pfo->frame_info = nullptr;
   scoped_restore invalidate_frame = make_scoped_restore (&pfo->frame_info,
 							 this_frame);
 
