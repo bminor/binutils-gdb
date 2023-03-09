@@ -1328,6 +1328,7 @@ gas_init (void)
   read_begin ();
   input_scrub_begin ();
   expr_begin ();
+  eh_begin ();
 
   int macro_strip_at = 0;
 #ifdef TC_I960

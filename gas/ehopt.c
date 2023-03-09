@@ -94,8 +94,6 @@ struct cie_info
   int z_augmentation;
 };
 
-static int get_cie_info (struct cie_info *);
-
 /* Extract information from the CIE.  */
 
 static int
@@ -238,6 +236,27 @@ enum frame_state
   state_error,
 };
 
+struct frame_data
+{
+  enum frame_state state;
+
+  int cie_info_ok;
+  struct cie_info cie_info;
+
+  symbolS *size_end_sym;
+  fragS *loc4_frag;
+  int loc4_fix;
+
+  int aug_size;
+  int aug_shift;
+};
+
+static struct eh_state
+{
+  struct frame_data eh_data;
+  struct frame_data debug_data;
+} frame;
+
 /* This function is called from emit_expr.  It looks for cases which
    we can optimize.
 
@@ -254,23 +273,6 @@ enum frame_state
 int
 check_eh_frame (expressionS *exp, unsigned int *pnbytes)
 {
-  struct frame_data
-  {
-    enum frame_state state;
-
-    int cie_info_ok;
-    struct cie_info cie_info;
-
-    symbolS *size_end_sym;
-    fragS *loc4_frag;
-    int loc4_fix;
-
-    int aug_size;
-    int aug_shift;
-  };
-
-  static struct frame_data eh_frame_data;
-  static struct frame_data debug_frame_data;
   struct frame_data *d;
 
   /* Don't optimize.  */
@@ -285,9 +287,9 @@ check_eh_frame (expressionS *exp, unsigned int *pnbytes)
   /* Select the proper section data.  */
   if (startswith (segment_name (now_seg), ".eh_frame")
       && segment_name (now_seg)[9] != '_')
-    d = &eh_frame_data;
+    d = &frame.eh_data;
   else if (startswith (segment_name (now_seg), ".debug_frame"))
-    d = &debug_frame_data;
+    d = &frame.debug_data;
   else
     return 0;
 
@@ -569,4 +571,10 @@ eh_frame_convert_frag (fragS *frag)
   frag->fr_type = rs_fill;
   frag->fr_subtype = 0;
   frag->fr_offset = 0;
+}
+
+void
+eh_begin (void)
+{
+  memset (&frame, 0, sizeof (frame));
 }
