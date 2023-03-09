@@ -1710,6 +1710,10 @@ finish_backward (struct finish_command_fsm *sm)
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc;
   CORE_ADDR func_addr;
+  CORE_ADDR alt_entry_point = sal.pc;
+  CORE_ADDR entry_point = alt_entry_point;
+  frame_info_ptr frame = get_selected_frame (nullptr);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
 
   pc = get_frame_pc (get_current_frame ());
 
@@ -1717,6 +1721,15 @@ finish_backward (struct finish_command_fsm *sm)
     error (_("Cannot find bounds of current function"));
 
   sal = find_pc_line (func_addr, 0);
+
+  if (gdbarch_skip_entrypoint_p (gdbarch))
+    /* Some architectures, like PowerPC use local and global entry points.
+       There is only one Entry Point (GEP = LEP) for other architectures.
+       The GEP is an alternate entry point.  The LEP is the normal entry point.
+       The value of entry_point was initialized to the alternate entry point
+       (GEP).  It will be adjusted to the normal entry point if the function
+       has two entry points.  */
+    entry_point = gdbarch_skip_entrypoint (gdbarch, sal.pc);
 
   tp->control.proceed_to_finish = 1;
   /* Special case: if we're sitting at the function entry point,
@@ -1728,15 +1741,12 @@ finish_backward (struct finish_command_fsm *sm)
      no way that a function up the stack can have a return address
      that's equal to its entry point.  */
 
-  if (sal.pc != pc)
+  if ((pc < alt_entry_point) || (pc > entry_point))
     {
-      frame_info_ptr frame = get_selected_frame (nullptr);
-      struct gdbarch *gdbarch = get_frame_arch (frame);
-
-      /* Set a step-resume at the function's entry point.  Once that's
-	 hit, we'll do one more step backwards.  */
+      /* We are in the body of the function.  Set a breakpoint to go back to
+	 the normal entry point.  */
       symtab_and_line sr_sal;
-      sr_sal.pc = sal.pc;
+      sr_sal.pc = entry_point;
       sr_sal.pspace = get_frame_program_space (frame);
       insert_step_resume_breakpoint_at_sal (gdbarch,
 					    sr_sal, null_frame_id);
@@ -1745,8 +1755,12 @@ finish_backward (struct finish_command_fsm *sm)
     }
   else
     {
-      /* We're almost there -- we just need to back up by one more
-	 single-step.  */
+      /* We are either at one of the entry points or between the entry points.
+	 If we are not at the alt_entry point, go back to the alt_entry_point
+	 If we at the normal entry point step back one instruction, when we
+	 stop we will determine if we entered via the entry point or the
+	 alternate entry point.  If we are at the alternate entry point,
+	 single step back to the function call.  */
       tp->control.step_range_start = tp->control.step_range_end = 1;
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }

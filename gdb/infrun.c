@@ -1938,6 +1938,7 @@ struct execution_control_state
 
   struct target_waitstatus ws;
   int stop_func_filled_in = 0;
+  CORE_ADDR stop_func_alt_start = 0;
   CORE_ADDR stop_func_start = 0;
   CORE_ADDR stop_func_end = 0;
   const char *stop_func_name = nullptr;
@@ -4822,6 +4823,11 @@ fill_in_stop_func (struct gdbarch *gdbarch,
 	  ecs->stop_func_start
 	    += gdbarch_deprecated_function_start_offset (gdbarch);
 
+	  /* PowerPC functions have a Local Entry Point (LEP) and a Global
+	     Entry Point (GEP).  There is only one Entry Point (GEP = LEP) for
+	     other architectures.  */
+	  ecs->stop_func_alt_start = ecs->stop_func_start;
+
 	  if (gdbarch_skip_entrypoint_p (gdbarch))
 	    ecs->stop_func_start
 	      = gdbarch_skip_entrypoint (gdbarch, ecs->stop_func_start);
@@ -7409,6 +7415,24 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  keep_going (ecs);
 	  return;
 	}
+    }
+
+  if (execution_direction == EXEC_REVERSE
+      && ecs->event_thread->control.proceed_to_finish
+      && ecs->event_thread->stop_pc () >= ecs->stop_func_alt_start
+      && ecs->event_thread->stop_pc () < ecs->stop_func_start)
+    {
+      /* We are executing the reverse-finish command.
+	 If the system supports multiple entry points and we are finishing a
+	 function in reverse.   If we are between the entry points singe-step
+	 back to the alternate entry point.  If we are at the alternate entry
+	 point -- just   need to back up by one more single-step, which
+	 should take us back to the function call.  */
+      ecs->event_thread->control.step_range_start
+	= ecs->event_thread->control.step_range_end = 1;
+      keep_going (ecs);
+      return;
+
     }
 
   if (ecs->event_thread->control.step_range_end == 1)
