@@ -43,8 +43,11 @@ proc connect_no_symbol_file { sysroot action } {
     global binfile
 
     with_test_prefix "setup" {
+	# Restore original $binfile.
+	gdb_remote_download build $binfile.bak $binfile
+
 	# Copy the symbol file to the target.
-	set target_exec [gdb_remote_download target $binfile.bak $binfile]
+	set target_exec [gdb_remote_download target $binfile]
 
 	# Make sure we're disconnected, in case we're testing with an
 	# extended-remote board, therefore already connected.
@@ -89,7 +92,7 @@ proc connect_no_symbol_file { sysroot action } {
 }
 
 # Make sure we have the original symbol file in a safe place to copy from.
-gdb_remote_download host $binfile $binfile.bak
+gdb_remote_download build $binfile $binfile.bak
 
 # Start with no executable loaded.
 clean_restart
