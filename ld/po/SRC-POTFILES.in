@@ -3,14 +3,9 @@ elf-hints-local.h
 ld.h
 ldbuildid.c
 ldbuildid.h
-ldcrc32.c
-ldcrc64.c
 ldcref.c
 ldctor.c
 ldctor.h
-lddigest.c
-lddigest.h
-lddigest_tab.c
 ldelf.c
 ldelf.h
 ldelfgen.c
@@ -29,8 +24,6 @@ ldmain.c
 ldmain.h
 ldmisc.c
 ldmisc.h
-ldreflect.c
-ldreflect.h
 ldver.c
 ldver.h
 ldwrite.c
