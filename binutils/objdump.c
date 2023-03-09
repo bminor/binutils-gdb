@@ -4477,16 +4477,16 @@ read_section (bfd *abfd, const char *sect_name, bfd_byte **contents)
       return NULL;
     }
 
-  if (!bfd_malloc_and_get_section (abfd, sec, contents))
-    {
-      non_fatal (_("reading %s section of %s failed: %s"),
-		 sect_name, bfd_get_filename (abfd),
-		 bfd_errmsg (bfd_get_error ()));
-      exit_status = 1;
-      return NULL;
-    }
+  if ((bfd_section_flags (sec) & SEC_HAS_CONTENTS) == 0)
+    bfd_set_error (bfd_error_no_contents);
+  else if (bfd_malloc_and_get_section (abfd, sec, contents))
+    return sec;
 
-  return sec;
+  non_fatal (_("reading %s section of %s failed: %s"),
+	     sect_name, bfd_get_filename (abfd),
+	     bfd_errmsg (bfd_get_error ()));
+  exit_status = 1;
+  return NULL;
 }
 
 /* Stabs entries use a 12 byte format:
