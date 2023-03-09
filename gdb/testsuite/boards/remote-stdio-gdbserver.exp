@@ -47,11 +47,9 @@ if [info exists REMOTE_TMPDIR] {
     set_board_info remotedir $REMOTE_TMPDIR
 }
 
-unset_board_info gdb_server_prog
 if [info exists GDBSERVER] {
+    unset_board_info gdb_server_prog
     set_board_info gdb_server_prog $GDBSERVER
-} else {
-    set_board_info gdb_server_prog /usr/bin/gdbserver
 }
 
 proc get_remote_login { } {
