@@ -40,6 +40,9 @@ foreach_with_prefix thread {5 4 3}  {
     -re "\\\[New Thread ${hex} \\\(LWP \[0-9\]+\\\)\\\].*${gdb_prompt}" {
       pass "${after_new_thread_message}"
     }
+    -re -wrap "\\\[New Thread $decimal\\.$decimal\\\]\r\n.*" {
+      pass $gdb_test_name
+    }
   }
 }
 
