@@ -1253,7 +1253,7 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	  if (largepic)
 	    return r_type == R_X86_64_PLTOFF64;
 	  else if (indirect_call)
-	    return r_type == R_X86_64_GOTPCRELX;
+	    return (r_type == R_X86_64_GOTPCRELX || r_type == R_X86_64_GOTPCREL);
 	  else
 	    return (r_type == R_X86_64_PC32 || r_type == R_X86_64_PLT32);
 	}
