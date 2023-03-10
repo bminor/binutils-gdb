@@ -88,7 +88,7 @@ struct gdbarch
   gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum = no_op_reg_to_regnum;
-  gdbarch_register_name_ftype *register_name = 0;
+  gdbarch_register_name_ftype *register_name = nullptr;
   gdbarch_register_type_ftype *register_type = nullptr;
   gdbarch_dummy_id_ftype *dummy_id = default_dummy_id;
   int deprecated_fp_regnum = -1;
@@ -115,12 +115,12 @@ struct gdbarch
   gdbarch_return_value_as_value_ftype *return_value_as_value = default_gdbarch_return_value;
   gdbarch_get_return_buf_addr_ftype *get_return_buf_addr = default_get_return_buf_addr;
   gdbarch_return_in_first_hidden_param_p_ftype *return_in_first_hidden_param_p = default_return_in_first_hidden_param_p;
-  gdbarch_skip_prologue_ftype *skip_prologue = 0;
+  gdbarch_skip_prologue_ftype *skip_prologue = nullptr;
   gdbarch_skip_main_prologue_ftype *skip_main_prologue = nullptr;
   gdbarch_skip_entrypoint_ftype *skip_entrypoint = nullptr;
-  gdbarch_inner_than_ftype *inner_than = 0;
+  gdbarch_inner_than_ftype *inner_than = nullptr;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc = default_breakpoint_from_pc;
-  gdbarch_breakpoint_kind_from_pc_ftype *breakpoint_kind_from_pc = 0;
+  gdbarch_breakpoint_kind_from_pc_ftype *breakpoint_kind_from_pc = nullptr;
   gdbarch_sw_breakpoint_from_kind_ftype *sw_breakpoint_from_kind = NULL;
   gdbarch_breakpoint_kind_from_current_state_ftype *breakpoint_kind_from_current_state = default_breakpoint_kind_from_current_state;
   gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address = nullptr;
@@ -3912,7 +3912,7 @@ bool
 gdbarch_gcore_bfd_target_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->gcore_bfd_target != 0;
+  return gdbarch->gcore_bfd_target != NULL;
 }
 
 const char *

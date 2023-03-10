@@ -340,7 +340,6 @@ and if Dwarf versions < 4 need to be supported.
 """,
     type="int",
     name="dwarf2_addr_size",
-    predefault="0",
     postdefault="gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT",
 )
 
@@ -567,7 +566,6 @@ should never return nullptr.
     params=[("int", "regnr")],
     param_checks=["regnr >= 0", "regnr < gdbarch_num_cooked_regs (gdbarch)"],
     result_checks=["result != nullptr"],
-    predefault="0",
     invalid=True,
 )
 
@@ -915,7 +913,6 @@ Method(
     type="CORE_ADDR",
     name="skip_prologue",
     params=[("CORE_ADDR", "ip")],
-    predefault="0",
     invalid=True,
 )
 
@@ -950,7 +947,6 @@ Function(
     type="int",
     name="inner_than",
     params=[("CORE_ADDR", "lhs"), ("CORE_ADDR", "rhs")],
-    predefault="0",
     invalid=True,
 )
 
@@ -969,7 +965,6 @@ Return the breakpoint kind for this target based on *PCPTR.
     type="int",
     name="breakpoint_kind_from_pc",
     params=[("CORE_ADDR *", "pcptr")],
-    predefault="0",
     invalid=True,
 )
 
@@ -1673,7 +1668,6 @@ BFD target to use when generating a core file.
     type="const char *",
     name="gcore_bfd_target",
     predicate=True,
-    predefault="0",
     printer="pstring (gdbarch->gcore_bfd_target)",
     invalid=True,
 )
@@ -1697,7 +1691,6 @@ significant bit of the pfn for pointers to virtual member functions.
 """,
     type="int",
     name="vbit_in_delta",
-    predefault="0",
     invalid=False,
 )
 
@@ -1718,8 +1711,8 @@ The maximum length of an instruction on this architecture in bytes.
 """,
     type="ULONGEST",
     name="max_insn_length",
-    predicate=True,
     predefault="0",
+    predicate=True,
     invalid=True,
 )
 
@@ -1991,7 +1984,6 @@ The filename of the XML syscall for this architecture.
 """,
     type="const char *",
     name="xml_syscall_file",
-    predefault="0",
     invalid=False,
     printer="pstring (gdbarch->xml_syscall_file)",
 )
@@ -2002,7 +1994,6 @@ Information about system calls from this architecture
 """,
     type="struct syscalls_info *",
     name="syscalls_info",
-    predefault="0",
     invalid=False,
     printer="host_address_to_string (gdbarch->syscalls_info)",
 )
@@ -2020,7 +2011,6 @@ in this case, this prefix would be the character `$'.
 """,
     type="const char *const *",
     name="stap_integer_prefixes",
-    predefault="0",
     invalid=False,
     printer="pstring_list (gdbarch->stap_integer_prefixes)",
 )
@@ -2032,7 +2022,6 @@ on the architecture's assembly.
 """,
     type="const char *const *",
     name="stap_integer_suffixes",
-    predefault="0",
     invalid=False,
     printer="pstring_list (gdbarch->stap_integer_suffixes)",
 )
@@ -2049,7 +2038,6 @@ in this case, this prefix would be the character `%'.
 """,
     type="const char *const *",
     name="stap_register_prefixes",
-    predefault="0",
     invalid=False,
     printer="pstring_list (gdbarch->stap_register_prefixes)",
 )
@@ -2061,7 +2049,6 @@ the architecture's assembly.
 """,
     type="const char *const *",
     name="stap_register_suffixes",
-    predefault="0",
     invalid=False,
     printer="pstring_list (gdbarch->stap_register_suffixes)",
 )
@@ -2081,7 +2068,6 @@ displacement, e.g., `4(%eax)' on x86.
 """,
     type="const char *const *",
     name="stap_register_indirection_prefixes",
-    predefault="0",
     invalid=False,
     printer="pstring_list (gdbarch->stap_register_indirection_prefixes)",
 )
@@ -2101,7 +2087,6 @@ displacement, e.g., `4(%eax)' on x86.
 """,
     type="const char *const *",
     name="stap_register_indirection_suffixes",
-    predefault="0",
     invalid=False,
     printer="pstring_list (gdbarch->stap_register_indirection_suffixes)",
 )
@@ -2117,7 +2102,6 @@ register would be represented as `r10' internally.
 """,
     type="const char *",
     name="stap_gdb_register_prefix",
-    predefault="0",
     invalid=False,
     printer="pstring (gdbarch->stap_gdb_register_prefix)",
 )
@@ -2128,7 +2112,6 @@ Suffix used to name a register using GDB's nomenclature.
 """,
     type="const char *",
     name="stap_gdb_register_suffix",
-    predefault="0",
     invalid=False,
     printer="pstring (gdbarch->stap_gdb_register_suffix)",
 )
@@ -2610,7 +2593,6 @@ Functions for allowing a target to modify its disassembler options.
 """,
     type="const char *",
     name="disassembler_options_implicit",
-    predefault="0",
     invalid=False,
     printer="pstring (gdbarch->disassembler_options_implicit)",
 )
@@ -2618,7 +2600,6 @@ Functions for allowing a target to modify its disassembler options.
 Value(
     type="char **",
     name="disassembler_options",
-    predefault="0",
     invalid=False,
     printer="pstring_ptr (gdbarch->disassembler_options)",
 )
@@ -2626,7 +2607,6 @@ Value(
 Value(
     type="const disasm_options_and_args_t *",
     name="valid_disassembler_options",
-    predefault="0",
     invalid=False,
     printer="host_address_to_string (gdbarch->valid_disassembler_options)",
 )
