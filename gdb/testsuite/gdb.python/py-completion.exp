@@ -72,6 +72,8 @@ if { [readline_is_used] && ![is_remote host] } {
 	}
     }
 
+    # Discarding again
+    gdb_test " " ".*" "discard #[incr discard]"
 }
 
 # Start gdb over again to clear out current state.  This can interfere
