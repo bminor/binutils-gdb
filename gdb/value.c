@@ -2621,9 +2621,8 @@ value_as_mpz (struct value *val)
   return result;
 }
 
-/* Extract a value as a C pointer.  Does not deallocate the value.
-   Note that val's type may not actually be a pointer; value_as_long
-   handles all the cases.  */
+/* Extract a value as a C pointer.  */
+
 CORE_ADDR
 value_as_address (struct value *val)
 {
@@ -2662,7 +2661,7 @@ value_as_address (struct value *val)
      to COERCE_ARRAY below actually does all the usual unary
      conversions, which includes converting values of type `function'
      to `pointer to function'.  This is the challenging conversion
-     discussed above.  Then, `unpack_long' will convert that pointer
+     discussed above.  Then, `unpack_pointer' will convert that pointer
      back into an address.
 
      So, suppose the user types `disassemble foo' on an architecture
@@ -2723,7 +2722,7 @@ value_as_address (struct value *val)
     return gdbarch_integer_to_address (gdbarch, val->type (),
 				       val->contents ().data ());
 
-  return unpack_long (val->type (), val->contents ().data ());
+  return unpack_pointer (val->type (), val->contents ().data ());
 #endif
 }
 
