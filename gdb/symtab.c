@@ -4855,39 +4855,56 @@ global_symbol_searcher::add_matching_symbols
 	      /* Check first sole REAL_SYMTAB->FILENAME.  It does
 		 not need to be a substring of symtab_to_fullname as
 		 it may contain "./" etc.  */
-	      if ((file_matches (real_symtab->filename, filenames, false)
-		   || ((basenames_may_differ
-			|| file_matches (lbasename (real_symtab->filename),
-					 filenames, true))
-		       && file_matches (symtab_to_fullname (real_symtab),
-					filenames, false)))
-		  && ((!preg.has_value ()
-		       || preg->exec (sym->natural_name (), 0,
-				      NULL, 0) == 0)
-		      && ((kind == VARIABLES_DOMAIN
-			   && sym->aclass () != LOC_TYPEDEF
-			   && sym->aclass () != LOC_UNRESOLVED
-			   && sym->aclass () != LOC_BLOCK
-			   /* LOC_CONST can be used for more than
-			      just enums, e.g., c++ static const
-			      members.  We only want to skip enums
-			      here.  */
-			   && !(sym->aclass () == LOC_CONST
-				&& (sym->type ()->code ()
-				    == TYPE_CODE_ENUM))
-			   && (!treg.has_value ()
-			       || treg_matches_sym_type_name (*treg, sym)))
-			  || (kind == FUNCTIONS_DOMAIN
-			      && sym->aclass () == LOC_BLOCK
-			      && (!treg.has_value ()
-				  || treg_matches_sym_type_name (*treg,
-								 sym)))
-			  || (kind == TYPES_DOMAIN
-			      && sym->aclass () == LOC_TYPEDEF
-			      && sym->domain () != MODULE_DOMAIN)
-			  || (kind == MODULES_DOMAIN
-			      && sym->domain () == MODULE_DOMAIN
-			      && sym->line () != 0))))
+	      if (!(file_matches (real_symtab->filename, filenames, false)
+		    || ((basenames_may_differ
+			 || file_matches (lbasename (real_symtab->filename),
+					  filenames, true))
+			&& file_matches (symtab_to_fullname (real_symtab),
+					 filenames, false))))
+		continue;
+
+	      if (preg.has_value () && !preg->exec (sym->natural_name (), 0,
+						    nullptr, 0) == 0)
+		continue;
+
+	      bool matches = false;
+	      if (!matches && kind == VARIABLES_DOMAIN)
+		{
+		  if (sym->aclass () != LOC_TYPEDEF
+		      && sym->aclass () != LOC_UNRESOLVED
+		      && sym->aclass () != LOC_BLOCK
+		      /* LOC_CONST can be used for more than
+			 just enums, e.g., c++ static const
+			 members.  We only want to skip enums
+			 here.  */
+		      && !(sym->aclass () == LOC_CONST
+			   && (sym->type ()->code ()
+			       == TYPE_CODE_ENUM))
+		      && (!treg.has_value ()
+			  || treg_matches_sym_type_name (*treg, sym)))
+		    matches = true;
+		}
+	      if (!matches && kind == FUNCTIONS_DOMAIN)
+		{
+		  if (sym->aclass () == LOC_BLOCK
+		      && (!treg.has_value ()
+			  || treg_matches_sym_type_name (*treg,
+							 sym)))
+		    matches = true;
+		}
+	      if (!matches && kind == TYPES_DOMAIN)
+		{
+		  if (sym->aclass () == LOC_TYPEDEF
+		      && sym->domain () != MODULE_DOMAIN)
+		    matches = true;
+		}
+	      if (!matches && kind == MODULES_DOMAIN)
+		{
+		  if (sym->domain () == MODULE_DOMAIN
+		      && sym->line () != 0)
+		    matches = true;
+		}
+	      if (matches)
 		{
 		  if (result_set->size () < m_max_search_results)
 		    {
