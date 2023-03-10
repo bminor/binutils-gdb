@@ -211,3 +211,20 @@ check_for_fixed_backtrace \
     "check backtrace to validate all information"
 
 gdb_test_no_output "python check_all_frame_information_matched()"
+
+# Check we can't sub-class from gdb.UnwindInfo.
+gdb_test_multiline "Sub-class gdb.UnwindInfo " \
+    "python" "" \
+    "class my_unwind_info(gdb.UnwindInfo):" "" \
+    "  def __init__(self):" "" \
+    "    pass" "" \
+    "end" \
+    [multi_line \
+	 "TypeError: type 'gdb\\.UnwindInfo' is not an acceptable base type" \
+	 "Error while executing Python code\\."]
+
+# Check we can't directly instantiate a gdb.UnwindInfo.
+gdb_test "python uw = gdb.UnwindInfo()" \
+    [multi_line \
+     "TypeError: cannot create 'gdb\\.UnwindInfo' instances" \
+     "Error while executing Python code\\."]
