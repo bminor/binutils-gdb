@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include <stdio.h>
+#include <string.h>
 #include <zlib.h>
 #if HAVE_ZSTD
 #include <zstd.h>
@@ -39,10 +40,7 @@ compress_init (bool use_zstd)
   }
 
   static struct z_stream_s strm;
-
-  strm.zalloc = NULL;
-  strm.zfree = NULL;
-  strm.opaque = NULL;
+  memset (&strm, 0, sizeof (strm));
   deflateInit (&strm, Z_DEFAULT_COMPRESSION);
   return &strm;
 }
