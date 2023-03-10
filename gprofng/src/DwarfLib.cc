@@ -1687,7 +1687,7 @@ DwrLineRegs::reset ()
   timestamp = 0;
   file_size = 0;
   address = 0;
-  file = 0;
+  file = 1;
   line = 1;
   column = 0;
   is_stmt = (default_is_stmt != 0);
