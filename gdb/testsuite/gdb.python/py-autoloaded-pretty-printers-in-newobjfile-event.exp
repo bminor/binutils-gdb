@@ -60,9 +60,26 @@ set remote_python_event_handler_file\
 gdb_test_no_output "source ${remote_python_event_handler_file}" "load python file"
 
 gdb_load ${binfile}
+gdb_load_shlib $binfile_lib
 
 if { ![runto_main] } {
     return
+}
+
+if { [is_remote target ] } {
+    set target_sysroot 0
+    gdb_test_multiple  "show sysroot" "" {
+	-re -wrap "\r\nThe current system root is \"target:.*\"\\." {
+	    set target_sysroot 1
+	}
+	-re -wrap "" {
+	}
+    }
+
+    if { $target_sysroot } {
+	unsupported "sysroot start with target: -- auto-load not supported"
+	return
+    }
 }
 
 # Check that the new_objfile handler saw the pretty-printer.
