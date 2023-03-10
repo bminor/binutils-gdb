@@ -805,36 +805,36 @@ _start:
 	pextrw $100,%xmm4,%ecx
 
 # Tests for REX prefix conversion
-	{rex} addps %xmm0, %xmm0
-	{rex} addps (%rax,%rax), %xmm0
-	rex addps %xmm0, %xmm0
-	rex addps (%rax,%rax), %xmm0
-	rexx addps %xmm0, %xmm0
-	rexx addps (%rax,%rax), %xmm0
-	rexy addps %xmm0, %xmm0
-	rexy addps (%rax,%rax), %xmm0
-	rexz addps %xmm0, %xmm0
-	rexz addps (%rax,%rax), %xmm0
+	{rex} addps %xmm0, %xmm1
+	{rex} addps (%rax,%rax), %xmm1
+	rex addps %xmm0, %xmm1
+	rex addps (%rax,%rax), %xmm1
+	rexx addps %xmm0, %xmm1
+	rexx addps (%rax,%rax), %xmm1
+	rexy addps %xmm0, %xmm1
+	rexy addps (%rax,%rax), %xmm1
+	rexz addps %xmm0, %xmm1
+	rexz addps (%rax,%rax), %xmm1
 
-	{load} rexx movss %xmm0, %xmm0
-	{load} rexz movss %xmm0, %xmm0
+	{load} rexx movss %xmm0, %xmm1
+	{load} rexz movss %xmm0, %xmm1
 
-	{store} rexx movss %xmm0, %xmm0
-	{store} rexz movss %xmm0, %xmm0
+	{store} rexx movss %xmm0, %xmm1
+	{store} rexz movss %xmm0, %xmm1
 
 	rexz psllw $0, %xmm0
 
-	rexx pextrw $0, %xmm0, %eax
-	rexz pextrw $0, %xmm0, %eax
+	rexx pextrw $0, %xmm0, %ecx
+	rexz pextrw $0, %xmm0, %ecx
 
-	rexx pextrb $0, %xmm0, %eax
-	rexz pextrb $0, %xmm0, %eax
+	rexx pextrb $0, %xmm0, %ecx
+	rexz pextrb $0, %xmm0, %ecx
 
-	rexx blendvps %xmm0, %xmm0, %xmm0
-	rexz blendvps %xmm0, %xmm0, %xmm0
+	rexx blendvps %xmm0, %xmm0, %xmm1
+	rexz blendvps %xmm0, %xmm0, %xmm1
 
-	rexx blendvps %xmm0, %xmm0
-	rexz blendvps %xmm0, %xmm0
+	rexx blendvps %xmm0, %xmm1
+	rexz blendvps %xmm0, %xmm1
 
 	rex64 cvtsi2sd (%rax), %xmm0
 	rex64 cvtsi2ss (%rax), %xmm0
