@@ -81,10 +81,11 @@
 # this string is the expression that should evaluate to true when the
 # field is invalid.
 #
-# Otherwise, if "invalid" is True, then the generic validation
-# function is used: the field is considered invalid it still contains
-# its default value.  This validation is what is used within the _p
-# predicate function if the field has "predicate" set to True.
+# Otherwise, if "invalid" is True (the default), then the generic
+# validation function is used: the field is considered invalid it
+# still contains its default value.  This validation is what is used
+# within the _p predicate function if the field has "predicate" set to
+# True.
 #
 # Function and Method share:
 #
@@ -201,6 +202,7 @@ Value(
     name="bfloat16_format",
     predefault="floatformats_bfloat16",
     printer="pformat (gdbarch, gdbarch->bfloat16_format)",
+    invalid=False,
 )
 
 Value(
@@ -215,6 +217,7 @@ Value(
     name="half_format",
     predefault="floatformats_ieee_half",
     printer="pformat (gdbarch, gdbarch->half_format)",
+    invalid=False,
 )
 
 Value(
@@ -229,6 +232,7 @@ Value(
     name="float_format",
     predefault="floatformats_ieee_single",
     printer="pformat (gdbarch, gdbarch->float_format)",
+    invalid=False,
 )
 
 Value(
@@ -243,6 +247,7 @@ Value(
     name="double_format",
     predefault="floatformats_ieee_double",
     printer="pformat (gdbarch, gdbarch->double_format)",
+    invalid=False,
 )
 
 Value(
@@ -257,6 +262,7 @@ Value(
     name="long_double_format",
     predefault="floatformats_ieee_double",
     printer="pformat (gdbarch, gdbarch->long_double_format)",
+    invalid=False,
 )
 
 Value(
@@ -278,6 +284,7 @@ One if `wchar_t' is signed, zero if unsigned.
     name="wchar_signed",
     predefault="-1",
     postdefault="1",
+    invalid=False,
 )
 
 Method(
@@ -320,6 +327,7 @@ addr_bit is the size of a target address as represented in gdb
     name="addr_bit",
     predefault="0",
     postdefault="gdbarch_ptr_bit (gdbarch)",
+    invalid=False,
 )
 
 Value(
@@ -341,6 +349,7 @@ and if Dwarf versions < 4 need to be supported.
     type="int",
     name="dwarf2_addr_size",
     postdefault="gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT",
+    invalid=False,
 )
 
 Value(
@@ -351,6 +360,7 @@ One if `char' acts like `signed char', zero if `unsigned char'.
     name="char_signed",
     predefault="-1",
     postdefault="1",
+    invalid=False,
 )
 
 Function(
@@ -423,7 +433,6 @@ Value(
     type="int",
     name="num_regs",
     predefault="-1",
-    invalid=True,
 )
 
 Value(
@@ -566,7 +575,6 @@ should never return nullptr.
     params=[("int", "regnr")],
     param_checks=["regnr >= 0", "regnr < gdbarch_num_cooked_regs (gdbarch)"],
     result_checks=["result != nullptr"],
-    invalid=True,
 )
 
 Method(
@@ -578,7 +586,6 @@ use "register_type".
     type="struct type *",
     name="register_type",
     params=[("int", "reg_nr")],
-    invalid=True,
 )
 
 Method(
@@ -913,7 +920,6 @@ Method(
     type="CORE_ADDR",
     name="skip_prologue",
     params=[("CORE_ADDR", "ip")],
-    invalid=True,
 )
 
 Method(
@@ -947,7 +953,6 @@ Function(
     type="int",
     name="inner_than",
     params=[("CORE_ADDR", "lhs"), ("CORE_ADDR", "rhs")],
-    invalid=True,
 )
 
 Method(
@@ -965,7 +970,6 @@ Return the breakpoint kind for this target based on *PCPTR.
     type="int",
     name="breakpoint_kind_from_pc",
     params=[("CORE_ADDR *", "pcptr")],
-    invalid=True,
 )
 
 Method(
@@ -1313,6 +1317,7 @@ Value(
     name="so_ops",
     predefault="&solib_target_so_ops",
     printer="host_address_to_string (gdbarch->so_ops)",
+    invalid=False,
 )
 
 Method(
@@ -1669,7 +1674,6 @@ BFD target to use when generating a core file.
     name="gcore_bfd_target",
     predicate=True,
     printer="pstring (gdbarch->gcore_bfd_target)",
-    invalid=True,
 )
 
 Value(
@@ -1713,7 +1717,6 @@ The maximum length of an instruction on this architecture in bytes.
     name="max_insn_length",
     predefault="0",
     predicate=True,
-    invalid=True,
 )
 
 Method(

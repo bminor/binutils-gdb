@@ -46,7 +46,7 @@ class Component:
         predicate: bool = False,
         predefault: Optional[str] = None,
         postdefault: Optional[str] = None,
-        invalid: Union[bool, str] = False,
+        invalid: Union[bool, str] = True,
         params: Optional[List[Tuple[str, str]]] = None,
         param_checks: Optional[List[str]] = None,
         result_checks: Optional[List[str]] = None,
@@ -97,7 +97,7 @@ class Value(Component):
         predicate: bool = False,
         predefault: Optional[str] = None,
         postdefault: Optional[str] = None,
-        invalid: Union[bool, str] = False,
+        invalid: Union[bool, str] = True,
         printer: Optional[str] = None,
     ):
         super().__init__(
@@ -125,7 +125,7 @@ class Function(Component):
         predicate: bool = False,
         predefault: Optional[str] = None,
         postdefault: Optional[str] = None,
-        invalid: Union[bool, str] = False,
+        invalid: Union[bool, str] = True,
         printer: Optional[str] = None,
         param_checks: Optional[List[str]] = None,
         result_checks: Optional[List[str]] = None,
