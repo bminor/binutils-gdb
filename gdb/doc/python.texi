@@ -2782,6 +2782,7 @@ pointer, pointer-to-function, floating point or vector types.
 It also provides a factory method to create a @code{gdb.UnwindInfo}
 instance to be returned to @value{GDBN}:
 
+@anchor{gdb.PendingFrame.create_unwind_info}
 @defun PendingFrame.create_unwind_info (frame_id)
 Returns a new @code{gdb.UnwindInfo} instance identified by given
 @var{frame_id}.  The @var{frame_id} is used internally by @value{GDBN}
@@ -2817,6 +2818,10 @@ this.
 
 Each attribute value should either be an instance of @code{gdb.Value}
 or an integer.
+
+A helper class is provided in the @code{gdb.unwinder} module that can
+be used to represent a frame-id
+(@pxref{gdb.unwinder.FrameId}).
 
 @end defun
 
@@ -2886,7 +2891,7 @@ values see @ref{gdbpy_frame_read_register,,Frame.read_register}.
 @subheading The @code{gdb.unwinder} Module
 
 @value{GDBN} comes with a @code{gdb.unwinder} module which contains
-the following class:
+the following classes:
 
 @deftp {class} gdb.unwinder.Unwinder
 The @code{Unwinder} class is a base class from which user created
@@ -2907,6 +2912,40 @@ A read-only attribute which is a string, the name of this unwinder.
 A modifiable attribute containing a boolean; when @code{True}, the
 unwinder is enabled, and will be used by @value{GDBN}.  When
 @code{False}, the unwinder has been disabled, and will not be used.
+@end defvar
+@end deftp
+
+@anchor{gdb.unwinder.FrameId}
+@deftp {class} gdb.unwinder.FrameId
+This is a class suitable for being used as the frame-id when calling
+@code{gdb.PendingFrame.create_unwind_info}.  It is not required to use
+this class, any class with the required attribute
+(@pxref{gdb.PendingFrame.create_unwind_info}) will be accepted, but in
+most cases this class will be sufficient.
+
+@code{gdb.unwinder.FrameId} has the following method:
+
+@defun gdb.unwinder.FrameId.__init__(@var{sp}, @var{pc}, @var{special} = @code{None})
+The @var{sp} and @var{pc} arguments are required and should be either
+a @code{gdb.Value} object, or an integer.
+
+The @var{special} argument is optional; if specified, it should be a
+@code{gdb.Value} object, or an integer.
+@end defun
+
+@code{gdb.unwinder.FrameId} has the following read-only attributes:
+
+@defvar gdb.unwinder.sp
+The @var{sp} value passed to the constructor.
+@end defvar
+
+@defvar gdb.unwinder.pc
+The @var{pc} value passed to the constructor.
+@end defvar
+
+@defvar gdb.unwinder.special
+The @var{special} value passed to the constructor, or @code{None} if
+no such value was passed.
 @end defvar
 @end deftp
 
@@ -2941,13 +2980,7 @@ builtin to @value{GDBN}.
 Here is an example of how to structure a user created unwinder:
 
 @smallexample
-from gdb.unwinder import Unwinder
-
-class FrameId(object):
-    def __init__(self, sp, pc):
-        self.sp = sp
-        self.pc = pc
-
+from gdb.unwinder import Unwinder, FrameId
 
 class MyUnwinder(Unwinder):
     def __init__(self):

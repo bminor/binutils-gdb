@@ -14,26 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gdb
-from gdb.unwinder import Unwinder
+from gdb.unwinder import Unwinder, FrameId
 
 
 # These are set to test whether invalid register names cause an error.
 add_saved_register_error = False
 read_register_error = False
-
-
-class FrameId(object):
-    def __init__(self, sp, pc):
-        self._sp = sp
-        self._pc = pc
-
-    @property
-    def sp(self):
-        return self._sp
-
-    @property
-    def pc(self):
-        return self._pc
 
 
 class TestUnwinder(Unwinder):

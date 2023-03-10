@@ -69,6 +69,32 @@ class Unwinder(object):
         raise NotImplementedError("Unwinder __call__.")
 
 
+class FrameId(object):
+    """A Frame-ID class for use when creating gdb.UnwindInfo objects.
+
+    Attributes (all read-only):
+        pc: Program counter value.
+        sp: The stack-pointer value.
+        special: An alternative stack-pointer value, can be None."""
+
+    def __init__(self, sp, pc, special=None):
+        self._sp = sp
+        self._pc = pc
+        self._special = special
+
+    @property
+    def sp(self):
+        return self._sp
+
+    @property
+    def pc(self):
+        return self._pc
+
+    @property
+    def special(self):
+        return self._special
+
+
 def register_unwinder(locus, unwinder, replace=False):
     """Register unwinder in given locus.
 
