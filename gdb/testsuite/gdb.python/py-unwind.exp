@@ -152,6 +152,25 @@ check_for_broken_backtrace "backtrace to capture a PendingFrame object"
 # Check the captured PendingFrame is not valid.
 gdb_test "python print(captured_pending_frame.is_valid())" "False"
 
+# Check the __repr__ of an invalid PendingFrame.
+gdb_test "python print(repr(captured_pending_frame))" \
+    "<gdb.PendingFrame \\(invalid\\)>"
+
+# Check the __repr__ of an UnwindInfo for an invalid PendingFrame.
+gdb_test "python print(captured_unwind_info)"
+gdb_test "python print(repr(captured_unwind_info))" \
+    "<gdb.UnwindInfo for an invalid frame>"
+
+# Check the repr of a PendingFrame that was copied (as a string) at a
+# time the PendingFrame was valid.
+gdb_test "python print(captured_pending_frame_repr)" \
+    "<gdb.PendingFrame level=0, sp=$hex, pc=$hex>"
+
+# Check the repr of an UnwindInfo that was copied (as a string) at a
+# time the UnwindInfo was valid.
+gdb_test "python print(captured_unwind_info_repr)" \
+    "<gdb.UnwindInfo frame #0, saved_regs=\\(rip, rbp, rsp\\)>"
+
 # Call methods on the captured gdb.PendingFrame and check we see the
 # expected error.
 gdb_test_no_output "python pf = captured_pending_frame"

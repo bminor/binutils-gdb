@@ -133,8 +133,11 @@ class TestUnwinder(Unwinder):
 global_test_unwinder = TestUnwinder()
 gdb.unwinder.register_unwinder(None, global_test_unwinder, True)
 
-# This is filled in by the simple_unwinder class.
+# These are filled in by the simple_unwinder class.
 captured_pending_frame = None
+captured_pending_frame_repr = None
+captured_unwind_info = None
+captured_unwind_info_repr = None
 
 
 class simple_unwinder(Unwinder):
@@ -143,11 +146,22 @@ class simple_unwinder(Unwinder):
 
     def __call__(self, pending_frame):
         global captured_pending_frame
+        global captured_pending_frame_repr
+        global captured_unwind_info
+        global captured_unwind_info_repr
 
         assert pending_frame.is_valid()
 
         if captured_pending_frame is None:
             captured_pending_frame = pending_frame
+            captured_pending_frame_repr = repr(pending_frame)
+            fid = FrameId(gdb.Value(0x123), gdb.Value(0x456))
+            uw = pending_frame.create_unwind_info(fid)
+            uw.add_saved_register("rip", gdb.Value(0x123))
+            uw.add_saved_register("rbp", gdb.Value(0x456))
+            uw.add_saved_register("rsp", gdb.Value(0x789))
+            captured_unwind_info = uw
+            captured_unwind_info_repr = repr(uw)
         return None
 
 

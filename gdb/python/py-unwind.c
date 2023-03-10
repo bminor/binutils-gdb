@@ -229,6 +229,38 @@ unwind_infopy_str (PyObject *self)
   return PyUnicode_FromString (stb.c_str ());
 }
 
+/* Implement UnwindInfo.__repr__().  */
+
+static PyObject *
+unwind_infopy_repr (PyObject *self)
+{
+  unwind_info_object *unwind_info = (unwind_info_object *) self;
+  pending_frame_object *pending_frame
+    = (pending_frame_object *) (unwind_info->pending_frame);
+  frame_info_ptr frame = pending_frame->frame_info;
+
+  if (frame == nullptr)
+    return PyUnicode_FromFormat ("<%s for an invalid frame>",
+				 Py_TYPE (self)->tp_name);
+
+  std::string saved_reg_names;
+  struct gdbarch *gdbarch = pending_frame->gdbarch;
+
+  for (const saved_reg &reg : *unwind_info->saved_regs)
+    {
+      const char *name = gdbarch_register_name (gdbarch, reg.number);
+      if (saved_reg_names.empty ())
+	saved_reg_names = name;
+      else
+	saved_reg_names = (saved_reg_names + ", ") + name;
+    }
+
+  return PyUnicode_FromFormat ("<%s frame #%d, saved_regs=(%s)>",
+			       Py_TYPE (self)->tp_name,
+			       frame_relative_level (frame),
+			       saved_reg_names.c_str ());
+}
+
 /* Create UnwindInfo instance for given PendingFrame and frame ID.
    Sets Python error and returns NULL on error.
 
@@ -370,6 +402,37 @@ pending_framepy_str (PyObject *self)
     }
 
   return PyUnicode_FromFormat ("SP=%s,PC=%s", sp_str, pc_str);
+}
+
+/* Implement PendingFrame.__repr__().  */
+
+static PyObject *
+pending_framepy_repr (PyObject *self)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+  frame_info_ptr frame = pending_frame->frame_info;
+
+  if (frame == nullptr)
+    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+
+  const char *sp_str = nullptr;
+  const char *pc_str = nullptr;
+
+  try
+    {
+      sp_str = core_addr_to_string_nz (get_frame_sp (frame));
+      pc_str = core_addr_to_string_nz (get_frame_pc (frame));
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return PyUnicode_FromFormat ("<%s level=%d, sp=%s, pc=%s>",
+			       Py_TYPE (self)->tp_name,
+			       frame_relative_level (frame),
+			       sp_str,
+			       pc_str);
 }
 
 /* Implementation of gdb.PendingFrame.read_register (self, reg) -> gdb.Value.
@@ -974,7 +1037,7 @@ PyTypeObject pending_frame_object_type =
   0,                              /* tp_getattr */
   0,                              /* tp_setattr */
   0,                              /* tp_compare */
-  0,                              /* tp_repr */
+  pending_framepy_repr,           /* tp_repr */
   0,                              /* tp_as_number */
   0,                              /* tp_as_sequence */
   0,                              /* tp_as_mapping */
@@ -1024,7 +1087,7 @@ PyTypeObject unwind_info_object_type =
   0,                              /* tp_getattr */
   0,                              /* tp_setattr */
   0,                              /* tp_compare */
-  0,                              /* tp_repr */
+  unwind_infopy_repr,             /* tp_repr */
   0,                              /* tp_as_number */
   0,                              /* tp_as_sequence */
   0,                              /* tp_as_mapping */
