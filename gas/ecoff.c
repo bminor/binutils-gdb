@@ -1850,7 +1850,6 @@ add_aux_sym_tir (type_info_t *t,	/* current type information */
 {
   varray_t *vp;
   aux_t *aux_ptr;
-  static AUXU init_aux;
   symint_t ret;
   int i;
   AUXU aux;
@@ -1860,7 +1859,7 @@ add_aux_sym_tir (type_info_t *t,	/* current type information */
 
   vp = &cur_file_ptr->aux_syms;
 
-  aux = init_aux;
+  memset (&aux, 0, sizeof (aux));
   aux.ti.bt = (int) t->basic_type;
   aux.ti.continued = 0;
   aux.ti.fBitfield = t->bitfield;
@@ -4808,7 +4807,6 @@ static scope_t *
 allocate_scope (void)
 {
   scope_t *ptr;
-  static scope_t initial_scope;
 
 #ifndef MALLOC_CHECK
 
@@ -4838,7 +4836,7 @@ allocate_scope (void)
 #endif
 
   alloc_counts[(int) alloc_type_scope].total_alloc++;
-  *ptr = initial_scope;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
@@ -4863,7 +4861,6 @@ static vlinks_t *
 allocate_vlinks (void)
 {
   vlinks_t *ptr;
-  static vlinks_t initial_vlinks;
 
 #ifndef MALLOC_CHECK
 
@@ -4887,7 +4884,7 @@ allocate_vlinks (void)
 #endif
 
   alloc_counts[(int) alloc_type_vlinks].total_alloc++;
-  *ptr = initial_vlinks;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
@@ -4897,7 +4894,6 @@ static shash_t *
 allocate_shash (void)
 {
   shash_t *ptr;
-  static shash_t initial_shash;
 
 #ifndef MALLOC_CHECK
 
@@ -4921,7 +4917,7 @@ allocate_shash (void)
 #endif
 
   alloc_counts[(int) alloc_type_shash].total_alloc++;
-  *ptr = initial_shash;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
@@ -4931,7 +4927,6 @@ static thash_t *
 allocate_thash (void)
 {
   thash_t *ptr;
-  static thash_t initial_thash;
 
 #ifndef MALLOC_CHECK
 
@@ -4955,7 +4950,7 @@ allocate_thash (void)
 #endif
 
   alloc_counts[(int) alloc_type_thash].total_alloc++;
-  *ptr = initial_thash;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
@@ -4965,7 +4960,6 @@ static tag_t *
 allocate_tag (void)
 {
   tag_t *ptr;
-  static tag_t initial_tag;
 
 #ifndef MALLOC_CHECK
 
@@ -4995,7 +4989,7 @@ allocate_tag (void)
 #endif
 
   alloc_counts[(int) alloc_type_tag].total_alloc++;
-  *ptr = initial_tag;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
@@ -5020,7 +5014,6 @@ static forward_t *
 allocate_forward (void)
 {
   forward_t *ptr;
-  static forward_t initial_forward;
 
 #ifndef MALLOC_CHECK
 
@@ -5044,7 +5037,7 @@ allocate_forward (void)
 #endif
 
   alloc_counts[(int) alloc_type_forward].total_alloc++;
-  *ptr = initial_forward;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
@@ -5054,7 +5047,6 @@ static thead_t *
 allocate_thead (void)
 {
   thead_t *ptr;
-  static thead_t initial_thead;
 
 #ifndef MALLOC_CHECK
 
@@ -5084,7 +5076,7 @@ allocate_thead (void)
 #endif
 
   alloc_counts[(int) alloc_type_thead].total_alloc++;
-  *ptr = initial_thead;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
@@ -5107,7 +5099,6 @@ static lineno_list_t *
 allocate_lineno_list (void)
 {
   lineno_list_t *ptr;
-  static lineno_list_t initial_lineno_list;
 
 #ifndef MALLOC_CHECK
 
@@ -5131,7 +5122,7 @@ allocate_lineno_list (void)
 #endif
 
   alloc_counts[(int) alloc_type_lineno].total_alloc++;
-  *ptr = initial_lineno_list;
+  memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
 
