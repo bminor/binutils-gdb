@@ -536,6 +536,10 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
 
 /* Record an entry for LOC occurring at OFS within the current fragment.  */
 
+static unsigned int dw2_line;
+static const char *dw2_filename;
+static int label_num;
+
 void
 dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
 {
@@ -558,27 +562,23 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
      uses them to determine the end of the prologue.  */
   if (debug_type == DEBUG_DWARF2)
     {
-      static unsigned int line = -1;
-      static const char *filename = NULL;
-
-      if (line == loc->line)
+      if (dw2_line == loc->line)
 	{
-	  if (filename == loc->u.filename)
+	  if (dw2_filename == loc->u.filename)
 	    return;
-	  if (filename_cmp (filename, loc->u.filename) == 0)
+	  if (filename_cmp (dw2_filename, loc->u.filename) == 0)
 	    {
-	      filename = loc->u.filename;
+	      dw2_filename = loc->u.filename;
 	      return;
 	    }
 	}
 
-      line = loc->line;
-      filename = loc->u.filename;
+      dw2_line = loc->line;
+      dw2_filename = loc->u.filename;
     }
 
   if (linkrelax)
     {
-      static int label_num = 0;
       char name[32];
 
       /* Use a non-fake name for the line number location,
@@ -715,10 +715,12 @@ assign_file_to_slot (unsigned int i, const char *file, unsigned int dir)
    Returns the slot number allocated to that filename or -1
    if there was a problem.  */
 
+static int last_used;
+static int last_used_dir_len;
+
 static signed int
 allocate_filenum (const char * pathname)
 {
-  static signed int last_used = -1, last_used_dir_len = 0;
   const char *file;
   size_t dir_len;
   unsigned int i, dir;
@@ -3089,6 +3091,10 @@ dwarf2_init (void)
   current.u.view = NULL;
   force_reset_view = NULL;
   view_assert_failed = NULL;
+  dw2_line = -1;
+  dw2_filename = NULL;
+  label_num = 0;
+  last_used = -1;
 
   /* Select the default CIE version to produce here.  The global
      starts with a value of -1 and will be modified to a valid value
