@@ -1463,7 +1463,7 @@ amd_dbgapi_target::detach (inferior *inf, int from_tty)
      Breakpoints may still be inserted because the inferior may be running in
      non-stop mode, or because GDB changed the default setting to leave all
      breakpoints inserted in all-stop mode when all threads are stopped.  */
-  remove_breakpoints_inf (current_inferior ());
+  remove_breakpoints_inf (inf);
 
   detach_amd_dbgapi (inf);
   beneath ()->detach (inf, from_tty);
