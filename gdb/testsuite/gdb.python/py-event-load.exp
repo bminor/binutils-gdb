@@ -36,12 +36,13 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 set testfile2 py-events-shlib
 set srcfile2 ${testfile2}.c
 set binfile2 [standard_output_file ${testfile2}.so]
-set binfile2_dlopen [shlib_target_file ${testfile2}.so]
 if {[gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" \
 	 ${binfile2} {debug}] != ""} {
     untested "failed to compile shared library"
     return -1
 }
+
+set binfile2_dlopen [gdb_download_shlib $binfile2]
 
 clean_restart $testfile
 
@@ -49,7 +50,7 @@ if {![runto_main]} {
     return
 }
 
-gdb_test_no_output "set var libname = \"$binfile2_dlopen\""
+gdb_test_no_output "set var libname = \"$binfile2_dlopen\"" "set var libname"
 
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/py-event-load.py]
 gdb_test_no_output "source ${pyfile}" "load python file"
