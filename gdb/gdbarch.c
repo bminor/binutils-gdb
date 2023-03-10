@@ -1658,7 +1658,7 @@ int
 gdbarch_wchar_signed (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
+  /* Check variable changed from its initial value.  */
   gdb_assert (gdbarch->wchar_signed != -1);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_wchar_signed called\n");
@@ -1710,7 +1710,7 @@ int
 gdbarch_addr_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
+  /* Check variable changed from its initial value.  */
   gdb_assert (gdbarch->addr_bit != 0);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_addr_bit called\n");
@@ -1728,7 +1728,7 @@ int
 gdbarch_dwarf2_addr_size (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
+  /* Check variable changed from its initial value.  */
   gdb_assert (gdbarch->dwarf2_addr_size != 0);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_dwarf2_addr_size called\n");
@@ -1746,7 +1746,7 @@ int
 gdbarch_char_signed (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
+  /* Check variable changed from its initial value.  */
   gdb_assert (gdbarch->char_signed != -1);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_char_signed called\n");
@@ -1901,7 +1901,7 @@ int
 gdbarch_num_regs (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
+  /* Check variable changed from its initial value.  */
   gdb_assert (gdbarch->num_regs != -1);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_num_regs called\n");
@@ -3919,8 +3919,8 @@ const char *
 gdbarch_gcore_bfd_target (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
-  gdb_assert (gdbarch->gcore_bfd_target != 0);
+  /* Check predicate was used.  */
+  gdb_assert (gdbarch_gcore_bfd_target_p (gdbarch));
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_gcore_bfd_target called\n");
   return gdbarch->gcore_bfd_target;
@@ -3995,8 +3995,8 @@ ULONGEST
 gdbarch_max_insn_length (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
-  gdb_assert (gdbarch->max_insn_length != 0);
+  /* Check predicate was used.  */
+  gdb_assert (gdbarch_max_insn_length_p (gdbarch));
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_max_insn_length called\n");
   return gdbarch->max_insn_length;

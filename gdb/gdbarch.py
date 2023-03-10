@@ -351,15 +351,13 @@ with open("gdbarch.c", "w") as f:
             if isinstance(c.invalid, str):
                 print("  /* Check variable is valid.  */", file=f)
                 print(f"  gdb_assert (!({c.invalid}));", file=f)
-            elif c.postdefault is not None and c.predefault is not None:
-                print("  /* Check variable changed from pre-default.  */", file=f)
-                print(f"  gdb_assert (gdbarch->{c.name} != {c.predefault});", file=f)
-            elif c.invalid:
-                if c.predefault:
-                    print("  /* Check variable changed from pre-default.  */", file=f)
-                    print(
-                        f"  gdb_assert (gdbarch->{c.name} != {c.predefault});", file=f
-                    )
+            elif c.predicate:
+                print("  /* Check predicate was used.  */", file=f)
+                print(f"  gdb_assert (gdbarch_{c.name}_p (gdbarch));", file=f)
+            elif c.invalid or c.postdefault is not None:
+                init_value = c.predefault or "0"
+                print("  /* Check variable changed from its initial value.  */", file=f)
+                print(f"  gdb_assert (gdbarch->{c.name} != {init_value});", file=f)
             else:
                 print(f"  /* Skip verify of {c.name}, invalid_p == 0 */", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
