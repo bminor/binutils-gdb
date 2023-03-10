@@ -324,5 +324,5 @@ if { $readnow_p } {
     global gdb_file_cmd_msg
     gdb_assert {[regexp $re $gdb_file_cmd_msg]} $test
 } else {
-    gdb_test "print N100::x" $re $test
+    gdb_test "maint expand-symtabs" $re $test
 }
