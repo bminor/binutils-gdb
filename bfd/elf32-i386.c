@@ -963,7 +963,8 @@ elf_i386_check_tls_transition (asection *sec,
 	  || !((struct elf_x86_link_hash_entry *) h)->tls_get_addr)
 	return false;
       else if (indirect_call)
-	return (ELF32_R_TYPE (rel[1].r_info) == R_386_GOT32X);
+	return (ELF32_R_TYPE (rel[1].r_info) == R_386_GOT32X
+		|| ELF32_R_TYPE (rel[1].r_info) == R_386_GOT32);
       else
 	return (ELF32_R_TYPE (rel[1].r_info) == R_386_PC32
 		|| ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
