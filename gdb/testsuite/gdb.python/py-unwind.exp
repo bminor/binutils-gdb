@@ -200,6 +200,42 @@ gdb_test "disable unwinder global \"simple\"" \
 check_for_fixed_backtrace \
     "check backtrace before testing PendingFrame methods"
 
+# Turn the 'simple' unwinder back on.
+gdb_test "enable unwinder global \"simple\"" \
+    "1 unwinder enabled"
+
+# Replace the "simple" unwinder with a new version that doesn't set
+# the 'sp' attribute.  Also the 'pc' attribute is invalid, but we'll
+# hit the missing 'sp' error first.
+with_test_prefix "frame-id 'sp' is None" {
+    gdb_test_no_output "python obj = simple_unwinder(\"simple\", None, \"xyz\")"
+    gdb_test_no_output "python gdb.unwinder.register_unwinder(None, obj, replace=True)"
+    gdb_test_no_output "python captured_pending_frame = None"
+    gdb_test "backtrace" \
+	"Python Exception <class 'ValueError'>: frame_id should have 'sp' attribute\\.\r\n.*"
+}
+
+# Replace the "simple" unwinder with a new version that sets the 'sp'
+# attribute to an invalid value.  Also the 'pc' attribute is invalid, but we'll
+# hit the invalid 'sp' error first.
+with_test_prefix "frame-id 'sp' is invalid" {
+    gdb_test_no_output "python obj = simple_unwinder(\"simple\", \"jkl\", \"xyz\")"
+    gdb_test_no_output "python gdb.unwinder.register_unwinder(None, obj, replace=True)"
+    gdb_test_no_output "python captured_pending_frame = None"
+    gdb_test "backtrace" \
+	"Python Exception <class 'ValueError'>: invalid literal for int\\(\\) with base 10: 'jkl'\r\n.*"
+}
+
+# Replace the "simple" unwinder with a new version that sets the 'sp'
+# to a valid value, but set the 'pc' attribute to an invalid value.
+with_test_prefix "frame-id 'pc' is invalid" {
+    gdb_test_no_output "python obj = simple_unwinder(\"simple\", 0x123, \"xyz\")"
+    gdb_test_no_output "python gdb.unwinder.register_unwinder(None, obj, replace=True)"
+    gdb_test_no_output "python captured_pending_frame = None"
+    gdb_test "backtrace" \
+	"Python Exception <class 'ValueError'>: invalid literal for int\\(\\) with base 10: 'xyz'\r\n.*"
+}
+
 # Gather information about every frame.
 gdb_test_no_output "python capture_all_frame_information()"
 gdb_test_no_output "python gdb.newest_frame().select()"

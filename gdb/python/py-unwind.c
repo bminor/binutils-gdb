@@ -132,58 +132,63 @@ extern PyTypeObject pending_frame_object_type
 extern PyTypeObject unwind_info_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
 
-/* Convert gdb.Value instance to inferior's pointer.  Return 1 on success,
-   0 on failure.  */
+/* An enum returned by pyuw_object_attribute_to_pointer, a function which
+   is used to extract an attribute from a Python object.  */
 
-static int
-pyuw_value_obj_to_pointer (PyObject *pyo_value, CORE_ADDR *addr)
+enum class pyuw_get_attr_code
 {
-  int rc = 0;
-  struct value *value;
+  /* The attribute was present, and its value was successfully extracted.  */
+  ATTR_OK,
 
-  try
-    {
-      if ((value = value_object_to_value (pyo_value)) != NULL)
-	{
-	  *addr = unpack_pointer (value->type (),
-				  value->contents ().data ());
-	  rc = 1;
-	}
-    }
-  catch (const gdb_exception &except)
-    {
-      gdbpy_convert_exception (except);
-    }
-  return rc;
-}
+  /* The attribute was not present, or was present and its value was None.
+     No Python error has been set.  */
+  ATTR_MISSING,
 
-/* Get attribute from an object and convert it to the inferior's
-   pointer value.  Return 1 if attribute exists and its value can be
-   converted.  Otherwise, if attribute does not exist or its value is
-   None, return 0.  In all other cases set Python error and return
-   0.  */
+  /* The attribute was present, but there was some error while trying to
+     get the value from the attribute.  A Python error will be set when
+     this is returned.  */
+  ATTR_ERROR,
+};
 
-static int
+/* Get the attribute named ATTR_NAME from the object PYO and convert it to
+   an inferior pointer value, placing the pointer in *ADDR.
+
+   Return pyuw_get_attr_code::ATTR_OK if the attribute was present and its
+   value was successfully written into *ADDR.  For any other return value
+   the contents of *ADDR are undefined.
+
+   Return pyuw_get_attr_code::ATTR_MISSING if the attribute was not
+   present, or it was present but its value was None.  The contents of
+   *ADDR are undefined in this case.  No Python error will be set in this
+   case.
+
+   Return pyuw_get_attr_code::ATTR_ERROR if the attribute was present, but
+   there was some error while extracting the attribute's value.  A Python
+   error will be set in this case.  The contents of *ADDR are undefined.  */
+
+static pyuw_get_attr_code
 pyuw_object_attribute_to_pointer (PyObject *pyo, const char *attr_name,
 				  CORE_ADDR *addr)
 {
-  int rc = 0;
+  if (!PyObject_HasAttrString (pyo, attr_name))
+    return pyuw_get_attr_code::ATTR_MISSING;
 
-  if (PyObject_HasAttrString (pyo, attr_name))
+  gdbpy_ref<> pyo_value (PyObject_GetAttrString (pyo, attr_name));
+  if (pyo_value == nullptr)
     {
-      gdbpy_ref<> pyo_value (PyObject_GetAttrString (pyo, attr_name));
-
-      if (pyo_value != NULL && pyo_value != Py_None)
-	{
-	  rc = pyuw_value_obj_to_pointer (pyo_value.get (), addr);
-	  if (!rc)
-	    PyErr_Format (
-		PyExc_ValueError,
-		_("The value of the '%s' attribute is not a pointer."),
-		attr_name);
-	}
+      gdb_assert (PyErr_Occurred ());
+      return pyuw_get_attr_code::ATTR_ERROR;
     }
-  return rc;
+  if (pyo_value == Py_None)
+    return pyuw_get_attr_code::ATTR_MISSING;
+
+  if (get_addr_from_python (pyo_value.get (), addr) < 0)
+    {
+      gdb_assert (PyErr_Occurred ());
+      return pyuw_get_attr_code::ATTR_ERROR;
+    }
+
+  return pyuw_get_attr_code::ATTR_OK;
 }
 
 /* Called by the Python interpreter to obtain string representation
@@ -687,13 +692,18 @@ pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
   PENDING_FRAMEPY_REQUIRE_VALID ((pending_frame_object *) self);
 
   if (!PyArg_ParseTuple (args, "O:create_unwind_info", &pyo_frame_id))
-      return NULL;
-  if (!pyuw_object_attribute_to_pointer (pyo_frame_id, "sp", &sp))
+    return nullptr;
+
+  pyuw_get_attr_code code
+    = pyuw_object_attribute_to_pointer (pyo_frame_id, "sp", &sp);
+  if (code == pyuw_get_attr_code::ATTR_MISSING)
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("frame_id should have 'sp' attribute."));
-      return NULL;
+      return nullptr;
     }
+  else if (code == pyuw_get_attr_code::ATTR_ERROR)
+    return nullptr;
 
   /* The logic of building frame_id depending on the attributes of
      the frame_id object:
@@ -704,13 +714,20 @@ pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
      Y       Y      N             frame_id_build (sp, pc)
      Y       Y      Y             frame_id_build_special (sp, pc, special)
   */
-  if (!pyuw_object_attribute_to_pointer (pyo_frame_id, "pc", &pc))
+  code = pyuw_object_attribute_to_pointer (pyo_frame_id, "pc", &pc);
+  if (code == pyuw_get_attr_code::ATTR_ERROR)
+    return nullptr;
+  else if (code == pyuw_get_attr_code::ATTR_MISSING)
     return pyuw_create_unwind_info (self, frame_id_build_wild (sp));
-  if (!pyuw_object_attribute_to_pointer (pyo_frame_id, "special", &special))
+
+  code = pyuw_object_attribute_to_pointer (pyo_frame_id, "special", &special);
+  if (code == pyuw_get_attr_code::ATTR_ERROR)
+    return nullptr;
+  else if (code == pyuw_get_attr_code::ATTR_MISSING)
     return pyuw_create_unwind_info (self, frame_id_build (sp, pc));
-  else
-    return pyuw_create_unwind_info (self,
-				    frame_id_build_special (sp, pc, special));
+
+  return pyuw_create_unwind_info (self,
+				  frame_id_build_special (sp, pc, special));
 }
 
 /* Implementation of PendingFrame.architecture (self) -> gdb.Architecture.  */

@@ -140,6 +140,10 @@ show always-read-ctf
      - gdb.PendingFrame.function: Return a gdb.Symbol for the
        current pending frame, or None.
 
+  ** The frame-id passed to gdb.PendingFrame.create_unwind_info can
+     now use either an integer or a gdb.Value object for each of its
+     'sp', 'pc', and 'special' attributes.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

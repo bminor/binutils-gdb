@@ -2815,7 +2815,8 @@ Inside gdb, this is called a ``wild frame''.  You will never need
 this.
 @end table
 
-Each attribute value should be an instance of @code{gdb.Value}.
+Each attribute value should either be an instance of @code{gdb.Value}
+or an integer.
 
 @end defun
 

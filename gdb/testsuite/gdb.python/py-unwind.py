@@ -141,8 +141,10 @@ captured_unwind_info_repr = None
 
 
 class simple_unwinder(Unwinder):
-    def __init__(self, name):
+    def __init__(self, name, sp=0x123, pc=0x456):
         super().__init__(name)
+        self._sp = sp
+        self._pc = pc
 
     def __call__(self, pending_frame):
         global captured_pending_frame
@@ -155,7 +157,7 @@ class simple_unwinder(Unwinder):
         if captured_pending_frame is None:
             captured_pending_frame = pending_frame
             captured_pending_frame_repr = repr(pending_frame)
-            fid = FrameId(gdb.Value(0x123), gdb.Value(0x456))
+            fid = FrameId(self._sp, self._pc)
             uw = pending_frame.create_unwind_info(fid)
             uw.add_saved_register("rip", gdb.Value(0x123))
             uw.add_saved_register("rbp", gdb.Value(0x456))
