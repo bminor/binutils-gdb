@@ -165,7 +165,7 @@ static void swap_operands (void);
 static void swap_2_operands (unsigned int, unsigned int);
 static enum flag_code i386_addressing_mode (void);
 static void optimize_imm (void);
-static void optimize_disp (void);
+static bool optimize_disp (const insn_template *t);
 static const insn_template *match_template (char);
 static int check_string (void);
 static int process_suffix (void);
@@ -4966,42 +4966,8 @@ md_assemble (char *line)
   if (i.imm_operands)
     optimize_imm ();
 
-  if (i.disp_operands && !want_disp32 (t)
-      && (!t->opcode_modifier.jump
-	  || i.jumpabsolute || i.types[0].bitfield.baseindex))
-    {
-      for (j = 0; j < i.operands; ++j)
-	{
-	  const expressionS *exp = i.op[j].disps;
-
-	  if (!operand_type_check (i.types[j], disp))
-	    continue;
-
-	  if (exp->X_op != O_constant)
-	    continue;
-
-	  /* Since displacement is signed extended to 64bit, don't allow
-	     disp32 if it is out of range.  */
-	  if (fits_in_signed_long (exp->X_add_number))
-	    continue;
-
-	  i.types[j].bitfield.disp32 = 0;
-	  if (i.types[j].bitfield.baseindex)
-	    {
-	      as_bad (_("0x%" PRIx64 " out of range of signed 32bit displacement"),
-		      (uint64_t) exp->X_add_number);
-	      return;
-	    }
-	}
-    }
-
-  /* Don't optimize displacement for movabs since it only takes 64bit
-     displacement.  */
-  if (i.disp_operands
-      && i.disp_encoding <= disp_encoding_8bit
-      && (flag_code != CODE_64BIT
-	  || strcmp (mnemonic, "movabs") != 0))
-    optimize_disp ();
+  if (i.disp_operands && !optimize_disp (t))
+    return;
 
   /* Next, we find a template that matches the given insn,
      making sure the overlap of the given operands types is consistent
@@ -6130,12 +6096,47 @@ optimize_imm (void)
 }
 
 /* Try to use the smallest displacement type too.  */
-static void
-optimize_disp (void)
+static bool
+optimize_disp (const insn_template *t)
 {
-  int op;
+  unsigned int op;
 
-  for (op = i.operands; --op >= 0;)
+  if (!want_disp32 (t)
+      && (!t->opcode_modifier.jump
+	  || i.jumpabsolute || i.types[0].bitfield.baseindex))
+    {
+      for (op = 0; op < i.operands; ++op)
+	{
+	  const expressionS *exp = i.op[op].disps;
+
+	  if (!operand_type_check (i.types[op], disp))
+	    continue;
+
+	  if (exp->X_op != O_constant)
+	    continue;
+
+	  /* Since displacement is signed extended to 64bit, don't allow
+	     disp32 if it is out of range.  */
+	  if (fits_in_signed_long (exp->X_add_number))
+	    continue;
+
+	  i.types[op].bitfield.disp32 = 0;
+	  if (i.types[op].bitfield.baseindex)
+	    {
+	      as_bad (_("0x%" PRIx64 " out of range of signed 32bit displacement"),
+		      (uint64_t) exp->X_add_number);
+	      return false;
+	    }
+	}
+    }
+
+  /* Don't optimize displacement for movabs since it only takes 64bit
+     displacement.  */
+  if (i.disp_encoding > disp_encoding_8bit
+      || (flag_code == CODE_64BIT && t->mnem_off == MN_movabs))
+    return true;
+
+  for (op = i.operands; op-- > 0;)
     if (operand_type_check (i.types[op], disp))
       {
 	if (i.op[op].disps->X_op == O_constant)
@@ -6164,8 +6165,8 @@ optimize_disp (void)
 	    /* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
 	    if ((flag_code != CODE_64BIT
 		 ? i.types[op].bitfield.disp32
-		 : want_disp32 (current_templates->start)
-		   && (!current_templates->start->opcode_modifier.jump
+		 : want_disp32 (t)
+		   && (!t->opcode_modifier.jump
 		       || i.jumpabsolute || i.types[op].bitfield.baseindex))
 		&& fits_in_unsigned_long (op_disp))
 	      {
@@ -6201,6 +6202,8 @@ optimize_disp (void)
 	  /* We only support 64bit displacement on constants.  */
 	  i.types[op].bitfield.disp64 = 0;
       }
+
+  return true;
 }
 
 /* Return 1 if there is a match in broadcast bytes between operand
