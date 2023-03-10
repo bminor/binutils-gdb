@@ -204,8 +204,17 @@ symbolS *mri_common_symbol;
    may be needed.  */
 static int mri_pending_align;
 
+/* Record the current function so that we can issue an error message for
+   misplaced .func,.endfunc, and also so that .endfunc needs no
+   arguments.  */
+static char *current_name;
+static char *current_label;
+
 #ifndef NO_LISTING
 #ifdef OBJ_ELF
+static int dwarf_file;
+static int dwarf_line;
+
 /* This variable is set to be non-zero if the next string we see might
    be the name of the source file in DWARF debugging information.  See
    the comment in emit_expr for the format we look for.  */
@@ -276,6 +285,35 @@ read_begin (void)
   if (flag_mri)
     lex_type['?'] = 3;
   stabs_begin ();
+
+#ifndef WORKING_DOT_WORD
+  broken_words = NULL;
+  new_broken_words = 0;
+#endif
+
+  abs_section_offset = 0;
+
+  line_label = NULL;
+  mri_common_symbol = NULL;
+  mri_pending_align = 0;
+
+  current_name = NULL;
+  current_label = NULL;
+
+#ifndef NO_LISTING
+#ifdef OBJ_ELF
+  dwarf_file = 0;
+  dwarf_line = -1;
+  dwarf_file_string = 0;
+#endif
+#endif
+
+#ifdef HANDLE_BUNDLE
+  bundle_align_p2 = 0;
+  bundle_lock_frag = NULL;
+  bundle_lock_frchain = NULL;
+  bundle_lock_depth = 0;
+#endif
 }
 
 void
@@ -517,7 +555,7 @@ get_absolute_expression (void)
   return get_absolute_expr (&exp);
 }
 
-static int pop_override_ok = 0;
+static int pop_override_ok;
 static const char *pop_table_name;
 
 void
@@ -554,6 +592,7 @@ pobegin (void)
 
   /* Do the target-specific pseudo ops.  */
   pop_table_name = "md";
+  pop_override_ok = 0;
   md_pop_insert ();
 
   /* Now object specific.  Skip any that were in the target table.  */
@@ -567,7 +606,6 @@ pobegin (void)
 
   /* Now CFI ones.  */
   pop_table_name = "cfi";
-  pop_override_ok = 1;
   cfi_pop_insert ();
 }
 
@@ -838,9 +876,8 @@ read_a_source_file (const char *name)
 #ifndef NO_LISTING
       /* In order to avoid listing macro expansion lines with labels
 	 multiple times, keep track of which line was last issued.  */
-      static char *last_eol;
+      char *last_eol = NULL;
 
-      last_eol = NULL;
 #endif
       while (input_line_pointer < buffer_limit)
 	{
@@ -4176,7 +4213,7 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
   int c;
   struct reloc_list *reloc;
   struct _bfd_rel { const char * name; bfd_reloc_code_real_type code; };
-  static struct _bfd_rel bfd_relocs[] =
+  static const struct _bfd_rel bfd_relocs[] =
   {
     { "NONE", BFD_RELOC_NONE },
     { "8",  BFD_RELOC_8 },
@@ -4326,62 +4363,54 @@ emit_expr_with_reloc (expressionS *exp,
   /* When gcc emits DWARF 1 debugging pseudo-ops, a line number will
      appear as a four byte positive constant in the .line section,
      followed by a 2 byte 0xffff.  Look for that case here.  */
-  {
-    static int dwarf_line = -1;
-
-    if (strcmp (segment_name (now_seg), ".line") != 0)
-      dwarf_line = -1;
-    else if (dwarf_line >= 0
-	     && nbytes == 2
-	     && exp->X_op == O_constant
-	     && (exp->X_add_number == -1 || exp->X_add_number == 0xffff))
-      listing_source_line ((unsigned int) dwarf_line);
-    else if (nbytes == 4
-	     && exp->X_op == O_constant
-	     && exp->X_add_number >= 0)
-      dwarf_line = exp->X_add_number;
-    else
-      dwarf_line = -1;
-  }
+  if (strcmp (segment_name (now_seg), ".line") != 0)
+    dwarf_line = -1;
+  else if (dwarf_line >= 0
+	   && nbytes == 2
+	   && exp->X_op == O_constant
+	   && (exp->X_add_number == -1 || exp->X_add_number == 0xffff))
+    listing_source_line ((unsigned int) dwarf_line);
+  else if (nbytes == 4
+	   && exp->X_op == O_constant
+	   && exp->X_add_number >= 0)
+    dwarf_line = exp->X_add_number;
+  else
+    dwarf_line = -1;
 
   /* When gcc emits DWARF 1 debugging pseudo-ops, a file name will
      appear as a 2 byte TAG_compile_unit (0x11) followed by a 2 byte
      AT_sibling (0x12) followed by a four byte address of the sibling
      followed by a 2 byte AT_name (0x38) followed by the name of the
      file.  We look for that case here.  */
-  {
-    static int dwarf_file = 0;
+  if (strcmp (segment_name (now_seg), ".debug") != 0)
+    dwarf_file = 0;
+  else if (dwarf_file == 0
+	   && nbytes == 2
+	   && exp->X_op == O_constant
+	   && exp->X_add_number == 0x11)
+    dwarf_file = 1;
+  else if (dwarf_file == 1
+	   && nbytes == 2
+	   && exp->X_op == O_constant
+	   && exp->X_add_number == 0x12)
+    dwarf_file = 2;
+  else if (dwarf_file == 2
+	   && nbytes == 4)
+    dwarf_file = 3;
+  else if (dwarf_file == 3
+	   && nbytes == 2
+	   && exp->X_op == O_constant
+	   && exp->X_add_number == 0x38)
+    dwarf_file = 4;
+  else
+    dwarf_file = 0;
 
-    if (strcmp (segment_name (now_seg), ".debug") != 0)
-      dwarf_file = 0;
-    else if (dwarf_file == 0
-	     && nbytes == 2
-	     && exp->X_op == O_constant
-	     && exp->X_add_number == 0x11)
-      dwarf_file = 1;
-    else if (dwarf_file == 1
-	     && nbytes == 2
-	     && exp->X_op == O_constant
-	     && exp->X_add_number == 0x12)
-      dwarf_file = 2;
-    else if (dwarf_file == 2
-	     && nbytes == 4)
-      dwarf_file = 3;
-    else if (dwarf_file == 3
-	     && nbytes == 2
-	     && exp->X_op == O_constant
-	     && exp->X_add_number == 0x38)
-      dwarf_file = 4;
-    else
-      dwarf_file = 0;
-
-    /* The variable dwarf_file_string tells stringer that the string
-       may be the name of the source file.  */
-    if (dwarf_file == 4)
-      dwarf_file_string = 1;
-    else
-      dwarf_file_string = 0;
-  }
+  /* The variable dwarf_file_string tells stringer that the string
+     may be the name of the source file.  */
+  if (dwarf_file == 4)
+    dwarf_file_string = 1;
+  else
+    dwarf_file_string = 0;
 #endif
 #endif
 
@@ -6005,12 +6034,6 @@ s_func (int end_p)
 static void
 do_s_func (int end_p, const char *default_prefix)
 {
-  /* Record the current function so that we can issue an error message for
-     misplaced .func,.endfunc, and also so that .endfunc needs no
-     arguments.  */
-  static char *current_name;
-  static char *current_label;
-
   if (end_p)
     {
       if (current_name == NULL)
@@ -6255,7 +6278,7 @@ find_end_of_line (char *s, int mri_string)
   return _find_end_of_line (s, mri_string, 0, 0);
 }
 
-static char *saved_ilp = NULL;
+static char *saved_ilp;
 static char *saved_limit;
 
 /* Use BUF as a temporary input pointer for calling other functions in this
