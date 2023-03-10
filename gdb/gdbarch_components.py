@@ -199,7 +199,7 @@ useful).
 Value(
     type="const struct floatformat **",
     name="bfloat16_format",
-    postdefault="floatformats_bfloat16",
+    predefault="floatformats_bfloat16",
     printer="pformat (gdbarch, gdbarch->bfloat16_format)",
 )
 
@@ -213,7 +213,7 @@ Value(
 Value(
     type="const struct floatformat **",
     name="half_format",
-    postdefault="floatformats_ieee_half",
+    predefault="floatformats_ieee_half",
     printer="pformat (gdbarch, gdbarch->half_format)",
 )
 
@@ -227,7 +227,7 @@ Value(
 Value(
     type="const struct floatformat **",
     name="float_format",
-    postdefault="floatformats_ieee_single",
+    predefault="floatformats_ieee_single",
     printer="pformat (gdbarch, gdbarch->float_format)",
 )
 
@@ -241,7 +241,7 @@ Value(
 Value(
     type="const struct floatformat **",
     name="double_format",
-    postdefault="floatformats_ieee_double",
+    predefault="floatformats_ieee_double",
     printer="pformat (gdbarch, gdbarch->double_format)",
 )
 
@@ -255,7 +255,7 @@ Value(
 Value(
     type="const struct floatformat **",
     name="long_double_format",
-    postdefault="floatformats_ieee_double",
+    predefault="floatformats_ieee_double",
     printer="pformat (gdbarch, gdbarch->long_double_format)",
 )
 
@@ -1316,7 +1316,7 @@ Value(
     comment="Vtable of solib operations functions.",
     type="const struct target_so_ops *",
     name="so_ops",
-    postdefault="&solib_target_so_ops",
+    predefault="&solib_target_so_ops",
     printer="host_address_to_string (gdbarch->so_ops)",
 )
 

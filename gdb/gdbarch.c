@@ -53,15 +53,15 @@ struct gdbarch
   int long_bit = 4*TARGET_CHAR_BIT;
   int long_long_bit = 2*4*TARGET_CHAR_BIT;
   int bfloat16_bit = 2*TARGET_CHAR_BIT;
-  const struct floatformat ** bfloat16_format = 0;
+  const struct floatformat ** bfloat16_format = floatformats_bfloat16;
   int half_bit = 2*TARGET_CHAR_BIT;
-  const struct floatformat ** half_format = 0;
+  const struct floatformat ** half_format = floatformats_ieee_half;
   int float_bit = 4*TARGET_CHAR_BIT;
-  const struct floatformat ** float_format = 0;
+  const struct floatformat ** float_format = floatformats_ieee_single;
   int double_bit = 8*TARGET_CHAR_BIT;
-  const struct floatformat ** double_format = 0;
+  const struct floatformat ** double_format = floatformats_ieee_double;
   int long_double_bit = 8*TARGET_CHAR_BIT;
-  const struct floatformat ** long_double_format = 0;
+  const struct floatformat ** long_double_format = floatformats_ieee_double;
   int wchar_bit = 4*TARGET_CHAR_BIT;
   int wchar_signed = -1;
   gdbarch_floatformat_for_type_ftype *floatformat_for_type = default_floatformat_for_type;
@@ -151,7 +151,7 @@ struct gdbarch
   gdbarch_single_step_through_delay_ftype *single_step_through_delay = nullptr;
   gdbarch_print_insn_ftype *print_insn = default_print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code = generic_skip_trampoline_code;
-  const struct target_so_ops * so_ops = 0;
+  const struct target_so_ops * so_ops = &solib_target_so_ops;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline = generic_in_solib_return_trampoline;
   gdbarch_in_indirect_branch_thunk_ftype *in_indirect_branch_thunk = default_in_indirect_branch_thunk;
@@ -296,24 +296,14 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of long_bit, invalid_p == 0 */
   /* Skip verify of long_long_bit, invalid_p == 0 */
   /* Skip verify of bfloat16_bit, invalid_p == 0 */
-  if (gdbarch->bfloat16_format == 0)
-    gdbarch->bfloat16_format = floatformats_bfloat16;
   /* Skip verify of bfloat16_format, invalid_p == 0 */
   /* Skip verify of half_bit, invalid_p == 0 */
-  if (gdbarch->half_format == 0)
-    gdbarch->half_format = floatformats_ieee_half;
   /* Skip verify of half_format, invalid_p == 0 */
   /* Skip verify of float_bit, invalid_p == 0 */
-  if (gdbarch->float_format == 0)
-    gdbarch->float_format = floatformats_ieee_single;
   /* Skip verify of float_format, invalid_p == 0 */
   /* Skip verify of double_bit, invalid_p == 0 */
-  if (gdbarch->double_format == 0)
-    gdbarch->double_format = floatformats_ieee_double;
   /* Skip verify of double_format, invalid_p == 0 */
   /* Skip verify of long_double_bit, invalid_p == 0 */
-  if (gdbarch->long_double_format == 0)
-    gdbarch->long_double_format = floatformats_ieee_double;
   /* Skip verify of long_double_format, invalid_p == 0 */
   /* Skip verify of wchar_bit, invalid_p == 0 */
   if (gdbarch->wchar_signed == -1)
@@ -419,8 +409,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of single_step_through_delay, has predicate.  */
   /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
-  if (gdbarch->so_ops == 0)
-    gdbarch->so_ops = &solib_target_so_ops;
   /* Skip verify of so_ops, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
