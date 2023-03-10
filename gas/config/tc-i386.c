@@ -7972,6 +7972,25 @@ finalize_imm (void)
   return 1;
 }
 
+static INLINE void set_rex_vrex (const reg_entry *r, unsigned int rex_bit,
+				 bool do_sse2avx)
+{
+  if (r->reg_flags & RegRex)
+    {
+      if (i.rex & rex_bit)
+	as_bad (_("same type of prefix used twice"));
+      i.rex |= rex_bit;
+    }
+  else if (do_sse2avx && (i.rex & rex_bit) && i.vex.register_specifier)
+    {
+      gas_assert (i.vex.register_specifier == r);
+      i.vex.register_specifier += 8;
+    }
+
+  if (r->reg_flags & RegVRex)
+    i.vrex |= rex_bit;
+}
+
 static int
 process_operands (void)
 {
@@ -8196,8 +8215,7 @@ process_operands (void)
 	r = i.op[1].regs;
       /* Register goes in low 3 bits of opcode.  */
       i.tm.base_opcode |= r->reg_num;
-      if ((r->reg_flags & RegRex) != 0)
-	i.rex |= REX_B;
+      set_rex_vrex (r, REX_B, false);
     }
 
   if ((i.seg[0] || i.prefix[SEG_PREFIX])
@@ -8225,25 +8243,6 @@ process_operands (void)
 	return 0;
     }
   return 1;
-}
-
-static INLINE void set_rex_vrex (const reg_entry *r, unsigned int rex_bit,
-				 bool do_sse2avx)
-{
-  if (r->reg_flags & RegRex)
-    {
-      if (i.rex & rex_bit)
-	as_bad (_("same type of prefix used twice"));
-      i.rex |= rex_bit;
-    }
-  else if (do_sse2avx && (i.rex & rex_bit) && i.vex.register_specifier)
-    {
-      gas_assert (i.vex.register_specifier == r);
-      i.vex.register_specifier += 8;
-    }
-
-  if (r->reg_flags & RegVRex)
-    i.vrex |= rex_bit;
 }
 
 static const reg_entry *
