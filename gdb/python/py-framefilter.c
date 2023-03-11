@@ -235,14 +235,10 @@ py_print_value (struct ui_out *out, struct value *val,
   if (args_type == MI_PRINT_SIMPLE_VALUES
       || args_type == MI_PRINT_ALL_VALUES)
     {
-      struct type *type = check_typedef (val->type ());
-
       if (args_type == MI_PRINT_ALL_VALUES)
 	should_print = 1;
       else if (args_type == MI_PRINT_SIMPLE_VALUES
-	       && type->code () != TYPE_CODE_ARRAY
-	       && type->code () != TYPE_CODE_STRUCT
-	       && type->code () != TYPE_CODE_UNION)
+	       && mi_simple_type_p (val->type ()))
 	should_print = 1;
     }
   else if (args_type != NO_VALUES)

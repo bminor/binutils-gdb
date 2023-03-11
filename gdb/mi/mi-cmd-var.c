@@ -335,14 +335,27 @@ mi_print_value_p (struct varobj *var, enum print_values print_values)
   if (type == NULL)
     return 1;
   else
-    {
-      type = check_typedef (type);
+    return mi_simple_type_p (type);
+}
 
-      /* For PRINT_SIMPLE_VALUES, only print the value if it has a type
-	 and that type is not a compound type.  */
-      return (type->code () != TYPE_CODE_ARRAY
-	      && type->code () != TYPE_CODE_STRUCT
-	      && type->code () != TYPE_CODE_UNION);
+/* See mi-cmds.h.  */
+
+bool
+mi_simple_type_p (struct type *type)
+{
+  type = check_typedef (type);
+
+  if (TYPE_IS_REFERENCE (type))
+    type = check_typedef (type->target_type ());
+
+  switch (type->code ())
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      return false;
+    default:
+      return true;
     }
 }
 

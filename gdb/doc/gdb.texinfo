@@ -38009,6 +38009,13 @@ option (@pxref{GDB/MI Program Execution}).
 @item data-disassemble-a-option
 Indicates that the @code{-data-disassemble} command supports the @option{-a}
 option (@pxref{GDB/MI Data Manipulation}).
+@item simple-values-ref-types
+Indicates that the @code{--simple-values} argument to the
+@code{-stack-list-arguments}, @code{-stack-list-locals},
+@code{-stack-list-variables}, and @code{-var-list-children} commands
+takes reference types into account: that is, a value is considered
+simple if it is neither an array, structure, or union, nor a reference
+to an array, structure, or union.
 @end ftable
 
 @findex -list-target-features

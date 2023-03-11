@@ -119,6 +119,14 @@ info main
    CLI, that the MI allowed it was a long standing bug, which has now
    been fixed.
 
+** The '--simple-values' argument to the '-stack-list-arguments',
+   '-stack-list-locals', '-stack-list-variables', and '-var-list-children'
+   commands now takes reference types into account: that is, a value is now
+   considered simple if it is neither an array, structure, or union, nor a
+   reference to an array, structure, or union.  (Previously all references were
+   considered simple.)  Support for this feature can be verified by using the
+   '-list-features' command, which should contain "simple-values-ref-types".
+
 * Python API
 
   ** The gdb.unwinder.Unwinder.name attribute is now read-only.

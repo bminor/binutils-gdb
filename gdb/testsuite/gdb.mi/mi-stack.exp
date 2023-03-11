@@ -87,6 +87,9 @@ proc test_stack_args_listing {} {
     # -stack-list-arguments 1 1 1
     # -stack-list-arguments 1 1 3
     # -stack-list-arguments 
+    # -stack-list-arguments 1 1 300
+    # -stack-list-arguments 2 1 1
+    # -stack-list-arguments --simple-values 1 1
 
     mi_gdb_test "231-stack-list-arguments 0" \
 	"231\\^done,stack-args=\\\[frame=\{level=\"0\",args=\\\[\\\]\},frame=\{level=\"1\",args=\\\[name=\"strarg\"\\\]\},frame=\{level=\"2\",args=\\\[name=\"intarg\",name=\"strarg\"\\\]\},frame=\{level=\"3\",args=\\\[name=\"intarg\",name=\"strarg\",name=\"fltarg\"\\\]\},frame=\{level=\"4\",args=\\\[\\\]\}\\\]" \
@@ -119,6 +122,14 @@ proc test_stack_args_listing {} {
     mi_gdb_test "235-stack-list-arguments 1 1 300" \
 	"235\\^done,stack-args=\\\[frame=\{level=\"1\",args=\\\[\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"2\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"3\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\\\]\},frame=\{level=\"4\",args=\\\[\\\]\}\\\]" \
 	"stack args listing 1 1 300"
+
+    mi_gdb_test "236-stack-list-arguments 2 1 1" \
+	"236\\^done,stack-args=\\\[frame=\\{level=\"1\",args=\\\[\\{name=\"strarg\",type=\"char \\*\",value=\"$hex \\\\\"A string argument.\\\\\"\"\\}\\\]\\}\\\]" \
+	"stack args listing 2 1 1"
+
+    mi_gdb_test "237-stack-list-arguments --simple-values 1 1" \
+	"237\\^done,stack-args=\\\[frame=\\{level=\"1\",args=\\\[\\{name=\"strarg\",type=\"char \\*\",value=\"$hex \\\\\"A string argument.\\\\\"\"\\}\\\]\\}\\\]" \
+	"stack args listing --simple-values 1 1"
 }
 
 proc test_stack_info_depth {} {
@@ -157,7 +168,6 @@ proc test_stack_locals_listing {} {
     # -stack-list-locals 0 (--no-values)
     # -stack-list-locals 1 (--all-values)
     # -stack-list-locals 2 (--simple-values)
-    # -stack-list-arguments 
 
     mi_gdb_test "232-stack-list-locals 0" \
 	"232\\^done,locals=\\\[name=\"A\",name=\"B\",name=\"C\",name=\"D\"\\\]" \
@@ -172,6 +182,10 @@ proc test_stack_locals_listing {} {
     mi_gdb_test "232-stack-list-locals 1" \
 	"232\\^done,locals=\\\[\{name=\"A\",value=\"1\"\},\{name=\"B\",value=\"2\"\},\{name=\"C\",value=\"3\"\},\{name=\"D\",value=\"\\{0, 1, 2\\}\"\}\\\]" \
 	"stack locals listing of names and values"
+
+    mi_gdb_test "232-stack-list-locals 2" \
+	"232\\^done,locals=\\\[\{name=\"A\",type=\"int\",value=\"1\"\},\{name=\"B\",type=\"int\",value=\"2\"\},\{name=\"C\",type=\"int\",value=\"3\"\},\{name=\"D\",type=\"int \\\[3\\\]\"\}\\\]" \
+	"stack locals listing 2"
 
     mi_gdb_test "232-stack-list-locals --simple-values" \
 	"232\\^done,locals=\\\[\{name=\"A\",type=\"int\",value=\"1\"\},\{name=\"B\",type=\"int\",value=\"2\"\},\{name=\"C\",type=\"int\",value=\"3\"\},\{name=\"D\",type=\"int \\\[3\\\]\"\}\\\]" \

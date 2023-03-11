@@ -1657,6 +1657,7 @@ mi_cmd_list_features (const char *command, char **argv, int argc)
       uiout->field_string (NULL, "undefined-command-error-code");
       uiout->field_string (NULL, "exec-run-start-option");
       uiout->field_string (NULL, "data-disassemble-a-option");
+      uiout->field_string (NULL, "simple-values-ref-types");
 
       if (ext_lang_initialized_p (get_ext_lang_defn (EXT_LANG_PYTHON)))
 	uiout->field_string (NULL, "python");
@@ -2459,7 +2460,6 @@ static void
 print_variable_or_computed (const char *expression, enum print_values values)
 {
   struct value *val;
-  struct type *type;
   struct ui_out *uiout = current_uiout;
 
   string_file stb;
@@ -2479,12 +2479,9 @@ print_variable_or_computed (const char *expression, enum print_values values)
   switch (values)
     {
     case PRINT_SIMPLE_VALUES:
-      type = check_typedef (val->type ());
       type_print (val->type (), "", &stb, -1);
       uiout->field_stream ("type", stb);
-      if (type->code () != TYPE_CODE_ARRAY
-	  && type->code () != TYPE_CODE_STRUCT
-	  && type->code () != TYPE_CODE_UNION)
+      if (mi_simple_type_p (val->type ()))
 	{
 	  struct value_print_options opts;
 
