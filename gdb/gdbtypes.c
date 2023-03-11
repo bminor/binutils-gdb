@@ -1407,10 +1407,7 @@ lookup_array_range_type (struct type *element_type,
   struct type *range_type;
 
   type_allocator alloc (element_type);
-  if (element_type->is_objfile_owned ())
-    index_type = objfile_type (element_type->objfile_owner ())->builtin_int;
-  else
-    index_type = builtin_type (element_type->arch_owner ())->builtin_int;
+  index_type = builtin_type (element_type->arch ())->builtin_int;
 
   range_type = create_static_range_type (alloc, index_type,
 					 low_bound, high_bound);
