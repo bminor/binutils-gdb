@@ -2119,47 +2119,9 @@ struct builtin_type
 
 extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
 
-/* * Per-objfile types used by symbol readers.  */
-
-struct objfile_type
-{
-  /* Basic types based on the objfile architecture.  */
-  struct type *builtin_void;
-  struct type *builtin_char;
-  struct type *builtin_short;
-  struct type *builtin_int;
-  struct type *builtin_long;
-  struct type *builtin_long_long;
-  struct type *builtin_signed_char;
-  struct type *builtin_unsigned_char;
-  struct type *builtin_unsigned_short;
-  struct type *builtin_unsigned_int;
-  struct type *builtin_unsigned_long;
-  struct type *builtin_unsigned_long_long;
-  struct type *builtin_half;
-  struct type *builtin_float;
-  struct type *builtin_double;
-  struct type *builtin_long_double;
-
-  /* * This type is used to represent symbol addresses.  */
-  struct type *builtin_core_addr;
-
-  /* * This type represents a type that was unrecognized in symbol
-     read-in.  */
-  struct type *builtin_error;
-
-  /* * Types used for symbols with no debug information.  */
-  struct type *nodebug_text_symbol;
-  struct type *nodebug_text_gnu_ifunc_symbol;
-  struct type *nodebug_got_plt_symbol;
-  struct type *nodebug_data_symbol;
-  struct type *nodebug_unknown_symbol;
-  struct type *nodebug_tls_symbol;
-};
-
 /* * Return the type table for the specified objfile.  */
 
-extern const struct objfile_type *builtin_type (struct objfile *objfile);
+extern const struct builtin_type *builtin_type (struct objfile *objfile);
  
 /* Explicit floating-point formats.  See "floatformat.h".  */
 extern const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN];
