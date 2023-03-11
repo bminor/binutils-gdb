@@ -410,7 +410,7 @@ ctf_add_member_cb (const char *name,
       if (t == nullptr)
 	{
 	  complaint (_("ctf_add_member_cb: %s has NO type (%ld)"), name, tid);
-	  t = objfile_type (ccp->of)->builtin_error;
+	  t = builtin_type (ccp->of)->builtin_error;
 	  set_tid_type (ccp->of, tid, t);
 	}
     }
@@ -501,7 +501,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	    break;
 	  case CTF_K_CONST:
 	    if (sym->type ()->code () == TYPE_CODE_VOID)
-	      sym->set_type (objfile_type (objfile)->builtin_int);
+	      sym->set_type (builtin_type (objfile)->builtin_int);
 	    break;
 	  case CTF_K_TYPEDEF:
 	  case CTF_K_INTEGER:
@@ -717,7 +717,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 
       type->set_fields
 	((struct field *) TYPE_ZALLOC (type, argc * sizeof (struct field)));
-      struct type *void_type = objfile_type (of)->builtin_void;
+      struct type *void_type = builtin_type (of)->builtin_void;
       /* If failed to find the argument type, fill it with void_type.  */
       for (int iparam = 0; iparam < argc; iparam++)
 	{
@@ -829,7 +829,7 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
 
   idx_type = fetch_tid_type (ccp, ar.ctr_index);
   if (idx_type == nullptr)
-    idx_type = objfile_type (objfile)->builtin_int;
+    idx_type = builtin_type (objfile)->builtin_int;
 
   type_allocator alloc (objfile);
   range_type = create_static_range_type (alloc, idx_type, 0, ar.ctr_nelems - 1);
@@ -863,7 +863,7 @@ read_const_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
       if (base_type == nullptr)
 	{
 	  complaint (_("read_const_type: NULL base type (%ld)"), btid);
-	  base_type = objfile_type (objfile)->builtin_error;
+	  base_type = builtin_type (objfile)->builtin_error;
 	}
     }
   cv_type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
@@ -887,7 +887,7 @@ read_volatile_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
       if (base_type == nullptr)
 	{
 	  complaint (_("read_volatile_type: NULL base type (%ld)"), btid);
-	  base_type = objfile_type (objfile)->builtin_error;
+	  base_type = builtin_type (objfile)->builtin_error;
 	}
     }
 
@@ -913,7 +913,7 @@ read_restrict_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
       if (base_type == nullptr)
 	{
 	  complaint (_("read_restrict_type: NULL base type (%ld)"), btid);
-	  base_type = objfile_type (objfile)->builtin_error;
+	  base_type = builtin_type (objfile)->builtin_error;
 	}
     }
   cv_type = make_restrict_type (base_type);
@@ -959,7 +959,7 @@ read_pointer_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
       if (target_type == nullptr)
 	{
 	  complaint (_("read_pointer_type: NULL target type (%ld)"), btid);
-	  target_type = objfile_type (ccp->of)->builtin_error;
+	  target_type = builtin_type (ccp->of)->builtin_error;
 	}
     }
 
@@ -1167,7 +1167,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	if (type == nullptr)
 	  {
 	    complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
-	    type = objfile_type (ccp->of)->builtin_error;
+	    type = builtin_type (ccp->of)->builtin_error;
 	  }
 	sym = new (&ccp->of->objfile_obstack) symbol;
 	OBJSTAT (ccp->of, n_syms++);

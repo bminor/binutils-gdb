@@ -1314,8 +1314,8 @@ objfile_int_type (struct objfile *of, int size_in_bytes, bool unsigned_p)
   /* Helper macro to examine the various builtin types.  */
 #define TRY_TYPE(F)							\
   int_type = (unsigned_p						\
-	      ? objfile_type (of)->builtin_unsigned_ ## F		\
-	      : objfile_type (of)->builtin_ ## F);			\
+	      ? builtin_type (of)->builtin_unsigned_ ## F		\
+	      : builtin_type (of)->builtin_ ## F);			\
   if (int_type != NULL && int_type->length () == size_in_bytes)	\
     return int_type
 

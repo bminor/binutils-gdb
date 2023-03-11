@@ -311,7 +311,7 @@ dbx_lookup_type (int typenums[2], struct objfile *objfile)
 	  warning (_("GDB internal error: bad real_filenum"));
 
 	error_return:
-	  temp_type = objfile_type (objfile)->builtin_error;
+	  temp_type = builtin_type (objfile)->builtin_error;
 	  return &temp_type;
 	}
 
@@ -798,7 +798,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    gdb_byte *dbl_valu;
 	    struct type *dbl_type;
 
-	    dbl_type = objfile_type (objfile)->builtin_double;
+	    dbl_type = builtin_type (objfile)->builtin_double;
 	    dbl_valu
 	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
 					    dbl_type->length ());
@@ -819,7 +819,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	       types; other languages probably should have at least
 	       unsigned as well as signed constants.  */
 
-	    sym->set_type (objfile_type (objfile)->builtin_long);
+	    sym->set_type (builtin_type (objfile)->builtin_long);
 	    sym->set_value_longest (atoi (p));
 	    sym->set_aclass_index (LOC_CONST);
 	  }
@@ -827,7 +827,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	case 'c':
 	  {
-	    sym->set_type (objfile_type (objfile)->builtin_char);
+	    sym->set_type (builtin_type (objfile)->builtin_char);
 	    sym->set_value_longest (atoi (p));
 	    sym->set_aclass_index (LOC_CONST);
 	  }
@@ -880,10 +880,10 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    type_allocator alloc (objfile);
 	    range_type
 	      = create_static_range_type (alloc,
-					  objfile_type (objfile)->builtin_int,
+					  builtin_type (objfile)->builtin_int,
 					  0, ind);
 	    sym->set_type
-	      (create_array_type (alloc, objfile_type (objfile)->builtin_char,
+	      (create_array_type (alloc, builtin_type (objfile)->builtin_char,
 				  range_type));
 	    string_value
 	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, ind + 1);
@@ -1002,7 +1002,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 		 it back into builtin_int here.
 		 FIXME: Do we need a new builtin_promoted_int_arg ?  */
 	      if (ptype->code () == TYPE_CODE_VOID)
-		ptype = objfile_type (objfile)->builtin_int;
+		ptype = builtin_type (objfile)->builtin_int;
 	      ftype->field (nparams).set_type (ptype);
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
@@ -1094,8 +1094,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    {
 	      sym->set_type
 		(sym->type ()->is_unsigned ()
-		 ? objfile_type (objfile)->builtin_unsigned_int
-		 : objfile_type (objfile)->builtin_int);
+		 ? builtin_type (objfile)->builtin_unsigned_int
+		 : builtin_type (objfile)->builtin_int);
 	    }
 	  break;
 	}
@@ -1462,7 +1462,7 @@ error_type (const char **pp, struct objfile *objfile)
 	  break;
 	}
     }
-  return objfile_type (objfile)->builtin_error;
+  return builtin_type (objfile)->builtin_error;
 }
 
 
@@ -2063,7 +2063,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
   if (typenum >= 0 || typenum < -NUMBER_RECOGNIZED)
     {
       complaint (_("Unknown builtin type %d"), typenum);
-      return objfile_type (objfile)->builtin_error;
+      return builtin_type (objfile)->builtin_error;
     }
 
   if (!negative_types)
@@ -4172,7 +4172,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 handle_true_range:
 
   if (self_subrange)
-    index_type = objfile_type (objfile)->builtin_int;
+    index_type = builtin_type (objfile)->builtin_int;
   else
     index_type = *dbx_lookup_type (rangenums, objfile);
   if (index_type == NULL)
@@ -4182,7 +4182,7 @@ handle_true_range:
 
       complaint (_("base type %d of range type is not defined"), rangenums[1]);
 
-      index_type = objfile_type (objfile)->builtin_int;
+      index_type = builtin_type (objfile)->builtin_int;
     }
 
   result_type

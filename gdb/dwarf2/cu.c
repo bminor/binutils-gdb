@@ -107,7 +107,7 @@ struct type *
 dwarf2_cu::addr_type () const
 {
   struct objfile *objfile = this->per_objfile->objfile;
-  struct type *void_type = objfile_type (objfile)->builtin_void;
+  struct type *void_type = builtin_type (objfile)->builtin_void;
   struct type *addr_type = lookup_pointer_type (void_type);
   int addr_size = this->per_cu->addr_size ();
 

@@ -1486,7 +1486,7 @@ process_xcoff_symbol (struct xcoff_symbol *cs, struct objfile *objfile)
 	 patch_block_stabs (), unless the file was compiled without -g.  */
 
       sym->set_linkage_name (SYMNAME_ALLOC (name, symname_alloced));
-      sym->set_type (objfile_type (objfile)->nodebug_text_symbol);
+      sym->set_type (builtin_type (objfile)->nodebug_text_symbol);
 
       sym->set_aclass_index (LOC_BLOCK);
       sym2 = new (&objfile->objfile_obstack) symbol (*sym);
@@ -1499,7 +1499,7 @@ process_xcoff_symbol (struct xcoff_symbol *cs, struct objfile *objfile)
   else
     {
       /* In case we can't figure out the type, provide default.  */
-      sym->set_type (objfile_type (objfile)->nodebug_data_symbol);
+      sym->set_type (builtin_type (objfile)->nodebug_data_symbol);
 
       switch (cs->c_sclass)
 	{

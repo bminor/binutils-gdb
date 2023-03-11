@@ -570,7 +570,7 @@ add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
   /* Type could be missing if file is compiled without debugging info.  */
   if (SC_IS_UNDEF (sh->sc)
       || sh->sc == scNil || sh->index == indexNil)
-    s->set_type (objfile_type (objfile)->nodebug_data_symbol);
+    s->set_type (builtin_type (objfile)->nodebug_data_symbol);
   else
     s->set_type (parse_type (cur_fd, ax, sh->index, 0, bigend, name));
   /* Value of a data symbol is its memory address.  */
@@ -715,7 +715,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s->set_aclass_index (LOC_LABEL);	/* but not misused.  */
       s->set_section_index (section_index);
       s->set_value_address (sh->value);
-      s->set_type (objfile_type (objfile)->builtin_int);
+      s->set_type (builtin_type (objfile)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
 
@@ -758,7 +758,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s->set_section_index (section_index);
       /* Type of the return value.  */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
-	t = objfile_type (objfile)->builtin_int;
+	t = builtin_type (objfile)->builtin_int;
       else
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
@@ -1167,7 +1167,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  s->set_domain (LABEL_DOMAIN);
 	  s->set_aclass_index (LOC_CONST);
-	  s->set_type (objfile_type (mdebugread_objfile)->builtin_void);
+	  s->set_type (builtin_type (mdebugread_objfile)->builtin_void);
 	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
 			      mdebug_extra_func_info);
 	  s->set_value_bytes ((gdb_byte *) e);
@@ -1391,12 +1391,12 @@ basic_type (int bt, struct objfile *objfile)
   switch (bt)
     {
     case btNil:
-      tp = objfile_type (objfile)->builtin_void;
+      tp = builtin_type (objfile)->builtin_void;
       break;
 
     case btAdr:
       tp = init_pointer_type (alloc, 32, "adr_32",
-			      objfile_type (objfile)->builtin_void);
+			      builtin_type (objfile)->builtin_void);
       break;
 
     case btChar:
@@ -1470,7 +1470,7 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btVoid:
-      tp = objfile_type (objfile)->builtin_void;
+      tp = builtin_type (objfile)->builtin_void;
       break;
 
     case btLong64:
@@ -1491,7 +1491,7 @@ basic_type (int bt, struct objfile *objfile)
 
     case btAdr64:
       tp = init_pointer_type (alloc, 64, "adr_64",
-			      objfile_type (objfile)->builtin_void);
+			      builtin_type (objfile)->builtin_void);
       break;
 
     case btInt64:
@@ -1851,7 +1851,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 	{
 	  complaint (_("illegal array index type for %s, assuming int"),
 		     sym_name);
-	  indx = objfile_type (mdebugread_objfile)->builtin_int;
+	  indx = builtin_type (mdebugread_objfile)->builtin_int;
 	}
 
       /* Get the bounds, and create the array type.  */
@@ -2003,7 +2003,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Don't know its type, hope int is ok.  */
       s->type ()
-	= lookup_function_type (objfile_type (pst->objfile)->builtin_int);
+	= lookup_function_type (builtin_type (pst->objfile)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       /* Won't have symbols for this one.  */
       b = new_block (2);
@@ -2057,7 +2057,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
       && s->type ()->target_type ()->code () == TYPE_CODE_VOID)
-    s->set_type (objfile_type (mdebugread_objfile)->nodebug_text_symbol);
+    s->set_type (builtin_type (mdebugread_objfile)->nodebug_text_symbol);
 }
 
 /* Parse the external symbol ES.  Just call parse_symbol() after
@@ -3972,7 +3972,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
 		  s->set_domain (LABEL_DOMAIN);
 		  s->set_aclass_index (LOC_CONST);
-		  s->set_type (objfile_type (objfile)->builtin_void);
+		  s->set_type (builtin_type (objfile)->builtin_void);
 		  s->set_value_bytes ((gdb_byte *) e);
 		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, get_local_symbols ());

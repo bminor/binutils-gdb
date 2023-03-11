@@ -2144,7 +2144,7 @@ struct objfile_type
 
 /* * Return the type table for the specified objfile.  */
 
-extern const struct objfile_type *objfile_type (struct objfile *objfile);
+extern const struct objfile_type *builtin_type (struct objfile *objfile);
  
 /* Explicit floating-point formats.  See "floatformat.h".  */
 extern const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN];

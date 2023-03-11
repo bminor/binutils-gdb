@@ -6084,7 +6084,7 @@ static const registry<objfile>::key<struct objfile_type,
   objfile_type_data;
 
 const struct objfile_type *
-objfile_type (struct objfile *objfile)
+builtin_type (struct objfile *objfile)
 {
   struct gdbarch *gdbarch;
   struct objfile_type *objfile_type = objfile_type_data.get (objfile);

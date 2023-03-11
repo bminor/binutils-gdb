@@ -142,7 +142,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
       /* Skip translation if caller does not need the address.  */
       if (address_p != NULL)
 	*address_p = target_translate_tls_address (objfile, addr);
-      return objfile_type (objfile)->nodebug_tls_symbol;
+      return builtin_type (objfile)->nodebug_tls_symbol;
     }
 
   if (address_p != NULL)
@@ -153,22 +153,22 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
     case mst_text:
     case mst_file_text:
     case mst_solib_trampoline:
-      return objfile_type (objfile)->nodebug_text_symbol;
+      return builtin_type (objfile)->nodebug_text_symbol;
 
     case mst_text_gnu_ifunc:
-      return objfile_type (objfile)->nodebug_text_gnu_ifunc_symbol;
+      return builtin_type (objfile)->nodebug_text_gnu_ifunc_symbol;
 
     case mst_data:
     case mst_file_data:
     case mst_bss:
     case mst_file_bss:
-      return objfile_type (objfile)->nodebug_data_symbol;
+      return builtin_type (objfile)->nodebug_data_symbol;
 
     case mst_slot_got_plt:
-      return objfile_type (objfile)->nodebug_got_plt_symbol;
+      return builtin_type (objfile)->nodebug_got_plt_symbol;
 
     default:
-      return objfile_type (objfile)->nodebug_unknown_symbol;
+      return builtin_type (objfile)->nodebug_unknown_symbol;
     }
 }
 

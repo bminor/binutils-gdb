@@ -291,14 +291,14 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
     case mst_text:
     case mst_file_text:
     case mst_solib_trampoline:
-      type = objfile_type (objfile)->nodebug_text_symbol;
+      type = builtin_type (objfile)->nodebug_text_symbol;
       kind = GCC_CP_SYMBOL_FUNCTION;
       break;
 
     case mst_text_gnu_ifunc:
       /* nodebug_text_gnu_ifunc_symbol would cause:
 	 function return type cannot be function  */
-      type = objfile_type (objfile)->nodebug_text_symbol;
+      type = builtin_type (objfile)->nodebug_text_symbol;
       kind = GCC_CP_SYMBOL_FUNCTION;
       addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
       break;
@@ -307,17 +307,17 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
     case mst_file_data:
     case mst_bss:
     case mst_file_bss:
-      type = objfile_type (objfile)->nodebug_data_symbol;
+      type = builtin_type (objfile)->nodebug_data_symbol;
       kind = GCC_CP_SYMBOL_VARIABLE;
       break;
 
     case mst_slot_got_plt:
-      type = objfile_type (objfile)->nodebug_got_plt_symbol;
+      type = builtin_type (objfile)->nodebug_got_plt_symbol;
       kind = GCC_CP_SYMBOL_FUNCTION;
       break;
 
     default:
-      type = objfile_type (objfile)->nodebug_unknown_symbol;
+      type = builtin_type (objfile)->nodebug_unknown_symbol;
       kind = GCC_CP_SYMBOL_VARIABLE;
       break;
     }
