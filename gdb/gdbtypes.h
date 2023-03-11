@@ -2098,6 +2098,21 @@ struct builtin_type
 
   /* * This type is used to represent an xmethod.  */
   struct type *xmethod = nullptr;
+
+  /* * This type is used to represent symbol addresses.  */
+  struct type *builtin_core_addr = nullptr;
+
+  /* * This type represents a type that was unrecognized in symbol
+     read-in.  */
+  struct type *builtin_error = nullptr;
+
+  /* * Types used for symbols with no debug information.  */
+  struct type *nodebug_text_symbol = nullptr;
+  struct type *nodebug_text_gnu_ifunc_symbol = nullptr;
+  struct type *nodebug_got_plt_symbol = nullptr;
+  struct type *nodebug_data_symbol = nullptr;
+  struct type *nodebug_unknown_symbol = nullptr;
+  struct type *nodebug_tls_symbol = nullptr;
 };
 
 /* * Return the type table for the specified architecture.  */

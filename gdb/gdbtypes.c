@@ -6061,6 +6061,56 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
   builtin_type->xmethod
     = alloc.new_type (TYPE_CODE_XMETHOD, 0, "<xmethod>");
 
+  /* This type represents a type that was unrecognized in symbol read-in.  */
+  builtin_type->builtin_error
+    = alloc.new_type (TYPE_CODE_ERROR, 0, "<unknown type>");
+
+  /* The following set of types is used for symbols with no
+     debug information.  */
+  builtin_type->nodebug_text_symbol
+    = alloc.new_type (TYPE_CODE_FUNC, TARGET_CHAR_BIT,
+		      "<text variable, no debug info>");
+
+  builtin_type->nodebug_text_gnu_ifunc_symbol
+    = alloc.new_type (TYPE_CODE_FUNC, TARGET_CHAR_BIT,
+		      "<text gnu-indirect-function variable, no debug info>");
+  builtin_type->nodebug_text_gnu_ifunc_symbol->set_is_gnu_ifunc (true);
+
+  builtin_type->nodebug_got_plt_symbol
+    = init_pointer_type (alloc, gdbarch_addr_bit (gdbarch),
+			 "<text from jump slot in .got.plt, no debug info>",
+			 builtin_type->nodebug_text_symbol);
+  builtin_type->nodebug_data_symbol
+    = alloc.new_type (TYPE_CODE_ERROR, 0, "<data variable, no debug info>");
+  builtin_type->nodebug_unknown_symbol
+    = alloc.new_type (TYPE_CODE_ERROR, 0,
+		      "<variable (not text or data), no debug info>");
+  builtin_type->nodebug_tls_symbol
+    = alloc.new_type (TYPE_CODE_ERROR, 0,
+		      "<thread local variable, no debug info>");
+
+  /* NOTE: on some targets, addresses and pointers are not necessarily
+     the same.
+
+     The upshot is:
+     - gdb's `struct type' always describes the target's
+       representation.
+     - gdb's `struct value' objects should always hold values in
+       target form.
+     - gdb's CORE_ADDR values are addresses in the unified virtual
+       address space that the assembler and linker work with.  Thus,
+       since target_read_memory takes a CORE_ADDR as an argument, it
+       can access any memory on the target, even if the processor has
+       separate code and data address spaces.
+
+     In this context, builtin_type->builtin_core_addr is a bit odd:
+     it's a target type for a value the target will never see.  It's
+     only used to hold the values of (typeless) linker symbols, which
+     are indeed in the unified virtual address space.  */
+
+  builtin_type->builtin_core_addr
+    = init_integer_type (alloc, gdbarch_addr_bit (gdbarch), 1,
+			 "__CORE_ADDR");
   return builtin_type;
 }
 
