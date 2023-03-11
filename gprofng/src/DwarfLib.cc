@@ -1779,7 +1779,15 @@ DwrLineRegs::getPath (int fn)
     }
   if (dir == NULL || *dir == 0)
     return fnp->path;
-  fnp->path = canonical_path (dbe_sprintf ("%s/%s", dir, fnp->fname));
+
+  char *dir1 = NULL;
+  if (*dir != '/')
+    dir1 = dir_names->get(0)->fname;
+  if (dir1 && *dir != 0)
+    fnp->path = dbe_sprintf ("%s/%s/%s", dir1, dir, fnp->fname);
+  else 
+    fnp->path = dbe_sprintf ("%s/%s", dir, fnp->fname);
+  fnp->path = canonical_path (fnp->path);
   return fnp->path;
 }
 
