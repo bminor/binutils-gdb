@@ -137,28 +137,6 @@ struct cooked_index_entry : public allocate_on_obstack
     return false;
   }
 
-  /* Return true if this entry matches DOMAIN.  */
-  bool matches (domain_enum domain) const
-  {
-    /* Just reject type declarations.  */
-    if ((flags & IS_TYPE_DECLARATION) != 0)
-      return false;
-
-    switch (domain)
-      {
-      case LABEL_DOMAIN:
-	return false;
-
-      case MODULE_DOMAIN:
-	return tag == DW_TAG_module;
-
-      case COMMON_BLOCK_DOMAIN:
-	return tag == DW_TAG_common_block;
-      }
-
-    return true;
-  }
-
   /* Return true if this entry matches KIND.  */
   bool matches (domain_search_flags kind) const;
 
@@ -775,8 +753,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_enum domain,
-     domain_search_flags kind) override;
+     domain_search_flags domain) override;
 
   struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,

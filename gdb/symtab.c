@@ -2864,7 +2864,7 @@ basic_lookup_transparent_type (const char *name)
 bool
 iterate_over_symbols (const struct block *block,
 		      const lookup_name_info &name,
-		      const domain_enum domain,
+		      const domain_search_flags domain,
 		      gdb::function_view<symbol_found_callback_ftype> callback)
 {
   for (struct symbol *sym : block_iterator_range (block, &name))
@@ -2886,7 +2886,7 @@ bool
 iterate_over_symbols_terminated
   (const struct block *block,
    const lookup_name_info &name,
-   const domain_enum domain,
+   const domain_search_flags domain,
    gdb::function_view<symbol_found_callback_ftype> callback)
 {
   if (!iterate_over_symbols (block, name, domain, callback))
@@ -4846,7 +4846,6 @@ global_symbol_searcher::expand_symtabs
      },
      NULL,
      SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-     UNDEF_DOMAIN,
      kind);
 
   /* Here, we search through the minimal symbol tables for functions and
@@ -6502,7 +6501,7 @@ find_main_name (void)
      [&symbol_found_p, pspace] (objfile *obj)
        {
 	 language lang
-	   = obj->lookup_global_symbol_language ("main", VAR_DOMAIN,
+	   = obj->lookup_global_symbol_language ("main", SEARCH_VFT,
 						 &symbol_found_p);
 	 if (symbol_found_p)
 	   {

@@ -96,14 +96,14 @@ struct quick_symbol_functions
 
   /* Check to see if the global symbol is defined in a "partial" symbol table
      of OBJFILE. NAME is the name of the symbol to look for.  DOMAIN
-     indicates what sort of symbol to search for.
+     indicates what sorts of symbols to search for.
 
      If found, sets *symbol_found_p to true and returns the symbol language.
      defined, or NULL if no such symbol table exists.  */
   virtual enum language lookup_global_symbol_language
        (struct objfile *objfile,
 	const char *name,
-	domain_enum domain,
+	domain_search_flags domain,
 	bool *symbol_found_p) = 0;
 
   /* Print statistics about any indices loaded for OBJFILE.  The
@@ -134,8 +134,7 @@ struct quick_symbol_functions
 
      Otherwise, individual symbols are considered.
 
-     If DOMAIN or KIND do not match, the symbol is skipped.
-     If DOMAIN is UNDEF_DOMAIN, that is treated as a wildcard.
+     If DOMAIN does not match, the symbol is skipped.
 
      If the symbol name does not match LOOKUP_NAME, the symbol is skipped.
 
@@ -155,8 +154,7 @@ struct quick_symbol_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_enum domain,
-     domain_search_flags kind) = 0;
+     domain_search_flags domain) = 0;
 
   /* Return the comp unit from OBJFILE that contains PC and
      SECTION.  Return NULL if there is no such compunit.  This

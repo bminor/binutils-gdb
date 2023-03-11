@@ -230,14 +230,14 @@ extern std::string ada_decode (const char *name, bool wrap = true,
 			       bool wide = true);
 
 extern std::vector<struct block_symbol> ada_lookup_symbol_list
-     (const char *, const struct block *, domain_enum);
+     (const char *, const struct block *, domain_search_flags);
 
 extern struct block_symbol ada_lookup_symbol (const char *,
 					      const struct block *,
-					      domain_enum);
+					      domain_search_flags);
 
 extern void ada_lookup_encoded_symbol
-  (const char *name, const struct block *block, domain_enum domain,
+  (const char *name, const struct block *block, domain_search_flags domain,
    struct block_symbol *symbol_info);
 
 extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *,

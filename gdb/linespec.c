@@ -350,7 +350,7 @@ struct linespec_parser
 
 static void iterate_over_file_blocks
   (struct symtab *symtab, const lookup_name_info &name,
-   domain_enum domain,
+   domain_search_flags domain,
    gdb::function_view<symbol_found_callback_ftype> callback);
 
 static void initialize_defaults (struct symtab **default_symtab,
@@ -1154,8 +1154,7 @@ static void
 iterate_over_all_matching_symtabs
   (struct linespec_state *state,
    const lookup_name_info &lookup_name,
-   const domain_enum name_domain,
-   domain_search_flags domain_search_flags,
+   const domain_search_flags domain,
    struct program_space *search_pspace, bool include_inline,
    gdb::function_view<symbol_found_callback_ftype> callback)
 {
@@ -1173,15 +1172,13 @@ iterate_over_all_matching_symtabs
 	  objfile->expand_symtabs_matching (NULL, &lookup_name, NULL, NULL,
 					    (SEARCH_GLOBAL_BLOCK
 					     | SEARCH_STATIC_BLOCK),
-					    UNDEF_DOMAIN,
-					    domain_search_flags);
+					    domain);
 
 	  for (compunit_symtab *cu : objfile->compunits ())
 	    {
 	      struct symtab *symtab = cu->primary_filetab ();
 
-	      iterate_over_file_blocks (symtab, lookup_name, name_domain,
-					callback);
+	      iterate_over_file_blocks (symtab, lookup_name, domain, callback);
 
 	      if (include_inline)
 		{
@@ -1193,7 +1190,7 @@ iterate_over_all_matching_symtabs
 		    {
 		      block = bv->block (i);
 		      state->language->iterate_over_symbols
-			(block, lookup_name, name_domain,
+			(block, lookup_name, domain,
 			 [&] (block_symbol *bsym)
 			 {
 			   /* Restrict calls to CALLBACK to symbols
@@ -1226,7 +1223,8 @@ get_current_search_block (void)
 static void
 iterate_over_file_blocks
   (struct symtab *symtab, const lookup_name_info &name,
-   domain_enum domain, gdb::function_view<symbol_found_callback_ftype> callback)
+   domain_search_flags domain,
+   gdb::function_view<symbol_found_callback_ftype> callback)
 {
   const struct block *block;
 
@@ -3450,10 +3448,10 @@ lookup_prefix_sym (struct linespec_state *state,
       if (elt == nullptr)
 	{
 	  iterate_over_all_matching_symtabs (state, lookup_name,
-					     STRUCT_DOMAIN, SEARCH_ALL,
+					     SEARCH_STRUCT_DOMAIN,
 					     NULL, false, collector);
 	  iterate_over_all_matching_symtabs (state, lookup_name,
-					     VAR_DOMAIN, SEARCH_ALL,
+					     SEARCH_VFT,
 					     NULL, false, collector);
 	}
       else
@@ -3464,8 +3462,12 @@ lookup_prefix_sym (struct linespec_state *state,
 
 	  gdb_assert (!pspace->executing_startup);
 	  set_current_program_space (pspace);
-	  iterate_over_file_blocks (elt, lookup_name, STRUCT_DOMAIN, collector);
-	  iterate_over_file_blocks (elt, lookup_name, VAR_DOMAIN, collector);
+	  iterate_over_file_blocks (elt, lookup_name,
+				    SEARCH_STRUCT_DOMAIN,
+				    collector);
+	  iterate_over_file_blocks (elt, lookup_name,
+				    SEARCH_VFT,
+				    collector);
 	}
     }
 
@@ -3799,12 +3801,16 @@ find_function_symbols (struct linespec_state *state,
 
   /* Try NAME as an Objective-C selector.  */
   find_imps (name, &symbol_names);
+
+  domain_search_flags flags = SEARCH_FUNCTION_DOMAIN;
+  if (state->list_mode)
+    flags = SEARCH_VFT;
+
   if (!symbol_names.empty ())
     add_all_symbol_names_from_pspace (&info, state->search_pspace,
-				      symbol_names, SEARCH_FUNCTION_DOMAIN);
+				      symbol_names, flags);
   else
-    add_matching_symbols_to_info (name, name_match_type,
-				  SEARCH_FUNCTION_DOMAIN,
+    add_matching_symbols_to_info (name, name_match_type, flags,
 				  &info, state->search_pspace);
 }
 
@@ -4334,7 +4340,7 @@ add_matching_symbols_to_info (const char *name,
       if (elt == nullptr)
 	{
 	  iterate_over_all_matching_symtabs (info->state, lookup_name,
-					     VAR_DOMAIN, domain_search_flags,
+					     domain_search_flags,
 					     pspace, true,
 					     [&] (block_symbol *bsym)
 	    { return info->add_symbol (bsym); });
@@ -4349,7 +4355,7 @@ add_matching_symbols_to_info (const char *name,
 	  program_space *elt_pspace = elt->compunit ()->objfile ()->pspace;
 	  gdb_assert (!elt_pspace->executing_startup);
 	  set_current_program_space (elt_pspace);
-	  iterate_over_file_blocks (elt, lookup_name, VAR_DOMAIN,
+	  iterate_over_file_blocks (elt, lookup_name, SEARCH_VFT,
 				    [&] (block_symbol *bsym)
 	    { return info->add_symbol (bsym); });
 

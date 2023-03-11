@@ -2817,7 +2817,7 @@ typedef bool (symbol_found_callback_ftype) (struct block_symbol *bsym);
 
 bool iterate_over_symbols (const struct block *block,
 			   const lookup_name_info &name,
-			   const domain_enum domain,
+			   const domain_search_flags domain,
 			   gdb::function_view<symbol_found_callback_ftype> callback);
 
 /* Like iterate_over_symbols, but if all calls to CALLBACK return
@@ -2827,7 +2827,7 @@ bool iterate_over_symbols (const struct block *block,
 bool iterate_over_symbols_terminated
   (const struct block *block,
    const lookup_name_info &name,
-   const domain_enum domain,
+   const domain_search_flags domain,
    gdb::function_view<symbol_found_callback_ftype> callback);
 
 /* Storage type used by demangle_for_lookup.  demangle_for_lookup

@@ -146,8 +146,7 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_enum domain,
-     domain_search_flags kind) override;
+     domain_search_flags domain) override;
 };
 
 /* This dumps minimal information about the index.
@@ -272,8 +271,7 @@ dwarf2_gdb_index::expand_symtabs_matching
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_enum domain,
-     domain_search_flags kind)
+     domain_search_flags domain)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -306,7 +304,7 @@ dwarf2_gdb_index::expand_symtabs_matching
 					  [&] (offset_type idx)
     {
       if (!dw2_expand_marked_cus (per_objfile, idx, file_matcher,
-				  expansion_notify, search_flags, kind))
+				  expansion_notify, search_flags, domain))
 	return false;
       return true;
     }, per_objfile);

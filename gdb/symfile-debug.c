@@ -222,7 +222,6 @@ objfile::map_symtabs_matching_filename
 					  on_expansion,
 					  (SEARCH_GLOBAL_BLOCK
 					   | SEARCH_STATIC_BLOCK),
-					  UNDEF_DOMAIN,
 					  SEARCH_ALL))
 	{
 	  retval = false;
@@ -278,6 +277,10 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
     return true;
   };
 
+  domain_search_flags flags = to_search_flags (domain);
+  if (domain == VAR_DOMAIN)
+    flags |= SEARCH_TYPE_DOMAIN | SEARCH_FUNCTION_DOMAIN;
+
   for (const auto &iter : qf)
     {
       if (!iter->expand_symtabs_matching (this,
@@ -288,8 +291,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
 					  kind == GLOBAL_BLOCK
 					  ? SEARCH_GLOBAL_BLOCK
 					  : SEARCH_STATIC_BLOCK,
-					  domain,
-					  SEARCH_ALL))
+					  flags))
 	break;
     }
 
@@ -343,8 +345,7 @@ objfile::expand_symtabs_for_function (const char *func_name)
 				   nullptr,
 				   (SEARCH_GLOBAL_BLOCK
 				    | SEARCH_STATIC_BLOCK),
-				   VAR_DOMAIN,
-				   SEARCH_ALL);
+				   SEARCH_VFT);
 }
 
 void
@@ -380,7 +381,6 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 				   nullptr,
 				   (SEARCH_GLOBAL_BLOCK
 				    | SEARCH_STATIC_BLOCK),
-				   UNDEF_DOMAIN,
 				   SEARCH_ALL);
 }
 
@@ -391,8 +391,7 @@ objfile::expand_symtabs_matching
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
-   domain_enum domain,
-   domain_search_flags kind)
+   domain_search_flags domain)
 {
   /* This invariant is documented in quick-functions.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
@@ -404,12 +403,12 @@ objfile::expand_symtabs_matching
 		host_address_to_string (&file_matcher),
 		host_address_to_string (&symbol_matcher),
 		host_address_to_string (&expansion_notify),
-		domain_name (kind).c_str ());
+		domain_name (domain).c_str ());
 
   for (const auto &iter : qf)
     if (!iter->expand_symtabs_matching (this, file_matcher, lookup_name,
 					symbol_matcher, expansion_notify,
-					search_flags, domain, kind))
+					search_flags, domain))
       return false;
   return true;
 }
@@ -504,7 +503,7 @@ objfile::find_compunit_symtab_by_address (CORE_ADDR address)
 
 enum language
 objfile::lookup_global_symbol_language (const char *name,
-					domain_enum domain,
+					domain_search_flags domain,
 					bool *symbol_found_p)
 {
   enum language result = language_unknown;

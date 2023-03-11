@@ -1265,7 +1265,7 @@ write_object_renaming (struct parser_state *par_state,
 
   name = obstack_strndup (&temp_parse_space, renamed_entity,
 			  renamed_entity_len);
-  ada_lookup_encoded_symbol (name, orig_left_context, VAR_DOMAIN, &sym_info);
+  ada_lookup_encoded_symbol (name, orig_left_context, SEARCH_VFT, &sym_info);
   if (sym_info.symbol == NULL)
     error (_("Could not find renamed variable: %s"), ada_decode (name).c_str ());
   else if (sym_info.symbol->aclass () == LOC_TYPEDEF)
@@ -1334,7 +1334,7 @@ write_object_renaming (struct parser_state *par_state,
 	    renaming_expr = end;
 
 	    ada_lookup_encoded_symbol (index_name, orig_left_context,
-				       VAR_DOMAIN, &index_sym_info);
+				       SEARCH_VFT, &index_sym_info);
 	    if (index_sym_info.symbol == NULL)
 	      error (_("Could not find %s"), index_name);
 	    else if (index_sym_info.symbol->aclass () == LOC_TYPEDEF)
@@ -1404,7 +1404,7 @@ block_lookup (const struct block *context, const char *raw_name)
     }
 
   std::vector<struct block_symbol> syms
-    = ada_lookup_symbol_list (name, context, VAR_DOMAIN);
+    = ada_lookup_symbol_list (name, context, SEARCH_VFT);
 
   if (context == NULL
       && (syms.empty () || syms[0].symbol->aclass () != LOC_BLOCK))
@@ -1483,7 +1483,7 @@ find_primitive_type (struct parser_state *par_state, const char *name)
 	(char *) alloca (strlen (name) + sizeof ("standard__"));
       strcpy (expanded_name, "standard__");
       strcat (expanded_name, name);
-      sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN).symbol;
+      sym = ada_lookup_symbol (expanded_name, NULL, SEARCH_VFT).symbol;
       if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
 	type = sym->type ();
     }
@@ -1670,7 +1670,8 @@ write_var_or_type (struct parser_state *par_state,
 	  encoded_name[tail_index] = terminator;
 
 	  std::vector<struct block_symbol> syms
-	    = ada_lookup_symbol_list (decoded_name.c_str (), block, VAR_DOMAIN);
+	    = ada_lookup_symbol_list (decoded_name.c_str (), block,
+				      SEARCH_VFT);
 
 	  type_sym = select_possible_type_sym (syms);
 
@@ -1876,7 +1877,7 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
       std::vector<struct block_symbol> syms
 	= ada_lookup_symbol_list (name.ptr,
 				  par_state->expression_context_block,
-				  VAR_DOMAIN);
+				  SEARCH_VFT);
 
       if (syms.size () != 1 || syms[0].symbol->aclass () == LOC_TYPEDEF)
 	pstate->push_new<ada_string_operation> (copy_name (name));

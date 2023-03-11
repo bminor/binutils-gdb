@@ -617,7 +617,7 @@ struct psymbol_functions : public quick_symbol_functions
 
   enum language lookup_global_symbol_language (struct objfile *objfile,
 					       const char *name,
-					       domain_enum domain,
+					       domain_search_flags domain,
 					       bool *symbol_found_p) override;
 
   void print_stats (struct objfile *objfile, bool print_bcache) override;
@@ -633,7 +633,6 @@ struct psymbol_functions : public quick_symbol_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_enum domain,
      domain_search_flags kind) override;
 
   struct compunit_symtab *find_pc_sect_compunit_symtab

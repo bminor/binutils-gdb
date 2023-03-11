@@ -839,7 +839,7 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 
   enum language lookup_global_symbol_language (struct objfile *objfile,
 					       const char *name,
-					       domain_enum domain,
+					       domain_search_flags domain,
 					       bool *symbol_found_p) override
   {
     *symbol_found_p = false;

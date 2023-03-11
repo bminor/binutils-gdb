@@ -98,12 +98,12 @@ static struct value *make_array_descriptor (struct type *, struct value *);
 static void ada_add_block_symbols (std::vector<struct block_symbol> &,
 				   const struct block *,
 				   const lookup_name_info &lookup_name,
-				   domain_enum, struct objfile *);
+				   domain_search_flags, struct objfile *);
 
 static void ada_add_all_symbols (std::vector<struct block_symbol> &,
 				 const struct block *,
 				 const lookup_name_info &lookup_name,
-				 domain_enum, int, int *);
+				 domain_search_flags, int, int *);
 
 static int is_nonfunction (const std::vector<struct block_symbol> &);
 
@@ -175,9 +175,6 @@ static struct value *ada_coerce_ref (struct value *);
 static LONGEST pos_atr (struct value *);
 
 static struct value *val_atr (struct type *, LONGEST);
-
-static struct symbol *standard_lookup (const char *, const struct block *,
-				       domain_enum);
 
 static struct value *ada_search_struct_field (const char *, struct value *, int,
 					      struct type *);
@@ -335,7 +332,7 @@ struct cache_entry
   /* The name used to perform the lookup.  */
   std::string name;
   /* The namespace used during the lookup.  */
-  domain_enum domain = UNDEF_DOMAIN;
+  domain_search_flags domain = 0;
   /* The symbol returned by the lookup, or NULL if no matching symbol
      was found.  */
   struct symbol *sym = nullptr;
@@ -349,7 +346,7 @@ struct cache_entry
 struct cache_entry_search
 {
   const char *name;
-  domain_enum domain;
+  domain_search_flags domain;
 
   hashval_t hash () const
   {
@@ -3751,7 +3748,7 @@ ada_find_operator_symbol (enum exp_opcode op, bool parse_completion,
     {
       std::vector<struct block_symbol> candidates
 	= ada_lookup_symbol_list (ada_decoded_op_name (op),
-				  NULL, VAR_DOMAIN);
+				  NULL, SEARCH_VFT);
 
       int i = ada_resolve_function (candidates, argvec,
 				    nargs, ada_decoded_op_name (op), NULL,
@@ -3772,7 +3769,7 @@ ada_resolve_funcall (struct symbol *sym, const struct block *block,
 		     innermost_block_tracker *tracker)
 {
   std::vector<struct block_symbol> candidates
-    = ada_lookup_symbol_list (sym->linkage_name (), block, VAR_DOMAIN);
+    = ada_lookup_symbol_list (sym->linkage_name (), block, SEARCH_VFT);
 
   int i;
   if (candidates.size () == 1)
@@ -3838,7 +3835,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 		      innermost_block_tracker *tracker)
 {
   std::vector<struct block_symbol> candidates
-    = ada_lookup_symbol_list (sym->linkage_name (), block, VAR_DOMAIN);
+    = ada_lookup_symbol_list (sym->linkage_name (), block, SEARCH_VFT);
 
   if (std::any_of (candidates.begin (),
 		   candidates.end (),
@@ -4708,7 +4705,7 @@ ada_clear_symbol_cache (program_space *pspace)
    SYM.  Same principle for BLOCK if not NULL.  */
 
 static int
-lookup_cached_symbol (const char *name, domain_enum domain,
+lookup_cached_symbol (const char *name, domain_search_flags domain,
 		      struct symbol **sym, const struct block **block)
 {
   htab_t tab = get_ada_pspace_data (current_program_space);
@@ -4731,8 +4728,8 @@ lookup_cached_symbol (const char *name, domain_enum domain,
    in domain DOMAIN, save this result in our symbol cache.  */
 
 static void
-cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
-	      const struct block *block)
+cache_symbol (const char *name, domain_search_flags domain,
+	      struct symbol *sym, const struct block *block)
 {
   /* Symbols for builtin types don't have a block.
      For now don't cache such symbols.  */
@@ -4789,7 +4786,7 @@ name_match_type_from_name (const char *lookup_name)
 
 static struct symbol *
 standard_lookup (const char *name, const struct block *block,
-		 domain_enum domain)
+		 domain_search_flags domain)
 {
   /* Initialize it just to avoid a GCC false warning.  */
   struct block_symbol sym = {};
@@ -5192,7 +5189,7 @@ is_package_name (const char *name)
 
   /* If it is a function that has not been defined at library level,
      then we should be able to look it up in the symbols.  */
-  if (standard_lookup (name, NULL, VAR_DOMAIN) != NULL)
+  if (standard_lookup (name, NULL, SEARCH_VFT) != NULL)
     return 0;
 
   /* Library-level function names start with "_ada_".  See if function
@@ -5205,7 +5202,7 @@ is_package_name (const char *name)
 
   std::string fun_name = string_printf ("_ada_%s", name);
 
-  return (standard_lookup (fun_name.c_str (), NULL, VAR_DOMAIN) == NULL);
+  return (standard_lookup (fun_name.c_str (), NULL, SEARCH_VFT) == NULL);
 }
 
 /* Return nonzero if SYM corresponds to a renaming entity that is
@@ -5365,7 +5362,7 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
 static void
 ada_add_local_symbols (std::vector<struct block_symbol> &result,
 		       const lookup_name_info &lookup_name,
-		       const struct block *block, domain_enum domain)
+		       const struct block *block, domain_search_flags domain)
 {
   while (block != NULL)
     {
@@ -5439,7 +5436,7 @@ static int
 ada_add_block_renamings (std::vector<struct block_symbol> &result,
 			 const struct block *block,
 			 const lookup_name_info &lookup_name,
-			 domain_enum domain)
+			 domain_search_flags domain)
 {
   struct using_direct *renaming;
   int defns_mark = result.size ();
@@ -5504,7 +5501,7 @@ ada_lookup_name (const lookup_name_info &lookup_name)
 static void
 map_matching_symbols (struct objfile *objfile,
 		      const lookup_name_info &lookup_name,
-		      domain_enum domain,
+		      domain_search_flags domain,
 		      int global,
 		      match_data &data)
 {
@@ -5514,7 +5511,7 @@ map_matching_symbols (struct objfile *objfile,
 				    global
 				    ? SEARCH_GLOBAL_BLOCK
 				    : SEARCH_STATIC_BLOCK,
-				    domain, SEARCH_ALL);
+				    domain);
 
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
   for (compunit_symtab *symtab : objfile->compunits ())
@@ -5535,7 +5532,7 @@ map_matching_symbols (struct objfile *objfile,
 static void
 add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 		      const lookup_name_info &lookup_name,
-		      domain_enum domain, int global)
+		      domain_search_flags domain, int global)
 {
   struct match_data data (&result);
 
@@ -5588,7 +5585,7 @@ static void
 ada_add_all_symbols (std::vector<struct block_symbol> &result,
 		     const struct block *block,
 		     const lookup_name_info &lookup_name,
-		     domain_enum domain,
+		     domain_search_flags domain,
 		     int full_search,
 		     int *made_global_lookup_p)
 {
@@ -5668,7 +5665,7 @@ ada_add_all_symbols (std::vector<struct block_symbol> &result,
 static std::vector<struct block_symbol>
 ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 			       const struct block *block,
-			       domain_enum domain,
+			       domain_search_flags domain,
 			       int full_search)
 {
   int syms_from_global_search;
@@ -5697,7 +5694,7 @@ ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 
 std::vector<struct block_symbol>
 ada_lookup_symbol_list (const char *name, const struct block *block,
-			domain_enum domain)
+			domain_search_flags domain)
 {
   symbol_name_match_type name_match_type = name_match_type_from_name (name);
   lookup_name_info lookup_name (name, name_match_type);
@@ -5714,7 +5711,7 @@ ada_lookup_symbol_list (const char *name, const struct block *block,
 
 void
 ada_lookup_encoded_symbol (const char *name, const struct block *block,
-			   domain_enum domain,
+			   domain_search_flags domain,
 			   struct block_symbol *info)
 {
   /* Since we already have an encoded name, wrap it in '<>' to force a
@@ -5736,7 +5733,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
 
 struct block_symbol
 ada_lookup_symbol (const char *name, const struct block *block0,
-		   domain_enum domain)
+		   domain_search_flags domain)
 {
   std::vector<struct block_symbol> candidates
     = ada_lookup_symbol_list (name, block0, domain);
@@ -6008,7 +6005,7 @@ static void
 ada_add_block_symbols (std::vector<struct block_symbol> &result,
 		       const struct block *block,
 		       const lookup_name_info &lookup_name,
-		       domain_enum domain, struct objfile *objfile)
+		       domain_search_flags domain, struct objfile *objfile)
 {
   /* A matching argument symbol, if any.  */
   struct symbol *arg_sym;
@@ -7441,11 +7438,11 @@ ada_find_any_type_symbol (const char *name)
 {
   struct symbol *sym;
 
-  sym = standard_lookup (name, get_selected_block (NULL), VAR_DOMAIN);
+  sym = standard_lookup (name, get_selected_block (NULL), SEARCH_VFT);
   if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
     return sym;
 
-  sym = standard_lookup (name, NULL, STRUCT_DOMAIN);
+  sym = standard_lookup (name, NULL, SEARCH_STRUCT_DOMAIN);
   return sym;
 }
 
@@ -11323,7 +11320,7 @@ get_var_value (const char *name, const char *err_msg)
   std::vector<struct block_symbol> syms
     = ada_lookup_symbol_list_worker (lookup_name,
 				     get_selected_block (0),
-				     VAR_DOMAIN, 1);
+				     SEARCH_VFT, 1);
 
   if (syms.size () != 1)
     {
@@ -11626,7 +11623,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
      that should be compiled with debugging information.  As a result, we
      expect to find that symbol in the symtabs.  */
 
-  sym = standard_lookup (einfo->catch_exception_sym, NULL, VAR_DOMAIN);
+  sym = standard_lookup (einfo->catch_exception_sym, NULL, SEARCH_VFT);
   if (sym == NULL)
     {
       /* Perhaps we did not find our symbol because the Ada runtime was
@@ -11660,7 +11657,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
     error (_("Symbol \"%s\" is not a function (class = %d)"),
 	   sym->linkage_name (), sym->aclass ());
 
-  sym = standard_lookup (einfo->catch_handlers_sym, NULL, VAR_DOMAIN);
+  sym = standard_lookup (einfo->catch_handlers_sym, NULL, SEARCH_VFT);
   if (sym == NULL)
     {
       struct bound_minimal_symbol msym
@@ -12627,7 +12624,7 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex)
   /* Then lookup the function on which we will break in order to catch
      the Ada exceptions requested by the user.  */
   sym_name = ada_exception_sym_name (ex);
-  sym = standard_lookup (sym_name, NULL, VAR_DOMAIN);
+  sym = standard_lookup (sym_name, NULL, SEARCH_VFT);
 
   if (sym == NULL)
     throw_error (NOT_FOUND_ERROR, _("Catchpoint symbol not found: %s"),
@@ -13445,7 +13442,7 @@ public:
 
   bool iterate_over_symbols
 	(const struct block *block, const lookup_name_info &name,
-	 domain_enum domain,
+	 domain_search_flags domain,
 	 gdb::function_view<symbol_found_callback_ftype> callback) const override
   {
     std::vector<struct block_symbol> results
@@ -13682,11 +13679,15 @@ public:
   {
     struct block_symbol sym;
 
+    domain_search_flags flags = to_search_flags (domain);
+    if (domain == VAR_DOMAIN)
+      flags |= SEARCH_TYPE_DOMAIN | SEARCH_FUNCTION_DOMAIN;
+
     sym = ada_lookup_symbol (name,
 			     (block == nullptr
 			      ? nullptr
 			      : block->static_block ()),
-			     domain);
+			     flags);
     if (sym.symbol != NULL)
       return sym;
 
