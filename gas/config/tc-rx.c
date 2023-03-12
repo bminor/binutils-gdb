@@ -380,9 +380,7 @@ rx_include (int ignore)
 
       if (try == NULL)
 	{
-	  int i;
-
-	  for (i = 0; i < include_dir_count; i++)
+	  for (size_t i = 0; i < include_dir_count; i++)
 	    {
 	      sprintf (path, "%s/%s", include_dirs[i], f);
 	      if ((try = fopen (path, FOPEN_RT)) != NULL)

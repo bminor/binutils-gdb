@@ -40,6 +40,7 @@
 #include "dw2gencfi.h"
 #include "codeview.h"
 #include "wchar.h"
+#include "filenames.h"
 
 #include <limits.h>
 
@@ -173,10 +174,10 @@ int target_big_endian = TARGET_BYTES_BIG_ENDIAN;
 const char **include_dirs;
 
 /* How many are in the table.  */
-int include_dir_count;
+size_t include_dir_count;
 
 /* Length of longest in table.  */
-int include_dir_maxlen = 1;
+size_t include_dir_maxlen;
 
 #ifndef WORKING_DOT_WORD
 struct broken_word *broken_words;
@@ -5746,6 +5747,30 @@ equals (char *sym_name, int reassign)
     }
 }
 
+/* Open FILENAME, first trying the unadorned file name, then if that
+   fails and the file name is not an absolute path, attempt to open
+   the file in current -I include paths.  PATH is a preallocated
+   buffer which will be set to the file opened, or FILENAME if no file
+   is found.  */
+
+FILE *
+search_and_open (const char *filename, char *path)
+{
+  FILE *f = fopen (filename, FOPEN_RB);
+  if (f == NULL && !IS_ABSOLUTE_PATH (filename))
+    {
+      for (size_t i = 0; i < include_dir_count; i++)
+	{
+	  sprintf (path, "%s/%s", include_dirs[i], filename);
+	  f = fopen (path, FOPEN_RB);
+	  if (f != NULL)
+	    return f;
+	}
+    }
+  strcpy (path, filename);
+  return f;
+}
+
 /* .incbin -- include a file verbatim at the current location.  */
 
 void
@@ -5797,30 +5822,12 @@ s_incbin (int x ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 
-  /* Try opening absolute path first, then try include dirs.  */
-  binfile = fopen (filename, FOPEN_RB);
+  path = XNEWVEC (char, len + include_dir_maxlen + 2);
+  binfile = search_and_open (filename, path);
+
   if (binfile == NULL)
-    {
-      int i;
-
-      path = XNEWVEC (char, (unsigned long) len + include_dir_maxlen + 5);
-
-      for (i = 0; i < include_dir_count; i++)
-	{
-	  sprintf (path, "%s/%s", include_dirs[i], filename);
-
-	  binfile = fopen (path, FOPEN_RB);
-	  if (binfile != NULL)
-	    break;
-	}
-
-      if (binfile == NULL)
-	as_bad (_("file not found: %s"), filename);
-    }
+    as_bad (_("file not found: %s"), filename);
   else
-    path = xstrdup (filename);
-
-  if (binfile)
     {
       long   file_len;
       struct stat filestat;
@@ -5914,48 +5921,33 @@ s_include (int arg ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-  path = notes_alloc ((size_t) i + include_dir_maxlen + 5);
 
-  for (i = 0; i < include_dir_count; i++)
-    {
-      strcpy (path, include_dirs[i]);
-      strcat (path, "/");
-      strcat (path, filename);
-      if (0 != (try_file = fopen (path, FOPEN_RT)))
-	{
-	  fclose (try_file);
-	  goto gotit;
-	}
-    }
+  path = notes_alloc (i + include_dir_maxlen + 2);
+  try_file = search_and_open (filename, path);
+  if (try_file)
+    fclose (try_file);
 
-  notes_free (path);
-  path = filename;
- gotit:
   register_dependency (path);
   input_scrub_insert_file (path);
 }
 
 void
+init_include_dir (void)
+{
+  include_dirs = XNEWVEC (const char *, 1);
+  include_dirs[0] = ".";	/* Current dir.  */
+  include_dir_count = 1;
+  include_dir_maxlen = 1;
+}
+
+void
 add_include_dir (char *path)
 {
-  int i;
-
-  if (include_dir_count == 0)
-    {
-      include_dirs = XNEWVEC (const char *, 2);
-      include_dirs[0] = ".";	/* Current dir.  */
-      include_dir_count = 2;
-    }
-  else
-    {
-      include_dir_count++;
-      include_dirs = XRESIZEVEC (const char *, include_dirs,
-				 include_dir_count);
-    }
-
+  include_dir_count++;
+  include_dirs = XRESIZEVEC (const char *, include_dirs, include_dir_count);
   include_dirs[include_dir_count - 1] = path;	/* New one.  */
 
-  i = strlen (path);
+  size_t i = strlen (path);
   if (i > include_dir_maxlen)
     include_dir_maxlen = i;
 }

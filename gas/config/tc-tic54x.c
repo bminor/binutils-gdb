@@ -1909,35 +1909,22 @@ tic54x_clink (int ignored ATTRIBUTE_UNUSED)
 }
 
 /* Change the default include directory to be the current source file's
-   directory, instead of the current working directory.  If DOT is non-zero,
-   set to "." instead.  */
+   directory.  */
 
 static void
 tic54x_set_default_include (void)
 {
-  char *dir, *tmp = NULL;
-  const char *curfile;
   unsigned lineno;
-
-  curfile = as_where (&lineno);
-  dir = xstrdup (curfile);
-  tmp = strrchr (dir, '/');
+  const char *curfile = as_where (&lineno);
+  const char *tmp = strrchr (curfile, '/');
   if (tmp != NULL)
     {
-      int len;
-
-      *tmp = '\0';
-      len = strlen (dir);
-      if (include_dir_count == 0)
-	{
-	  include_dirs = XNEWVEC (const char *, 1);
-	  include_dir_count = 1;
-	}
-      include_dirs[0] = dir;
+      size_t len = tmp - curfile;
       if (len > include_dir_maxlen)
 	include_dir_maxlen = len;
+      include_dirs[0] = notes_memdup (curfile, len, len + 1);
     }
-  else if (include_dirs != NULL)
+  else
     include_dirs[0] = ".";
 }
 
@@ -2325,7 +2312,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
 {
   char *filename;
   char *path;
-  int len, i;
+  int len;
   bfd *abfd, *mbfd;
 
   ILLEGAL_WITHIN_STRUCT ();
@@ -2353,31 +2340,11 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 
   tic54x_set_default_include ();
-  path = XNEWVEC (char, (unsigned long) len + include_dir_maxlen + 5);
+  path = notes_alloc (len + include_dir_maxlen + 2);
+  FILE *try = search_and_open (filename, path);
+  if (try)
+    fclose (try);
 
-  for (i = 0; i < include_dir_count; i++)
-    {
-      FILE *try;
-
-      strcpy (path, include_dirs[i]);
-      strcat (path, "/");
-      strcat (path, filename);
-      if ((try = fopen (path, "r")) != NULL)
-	{
-	  fclose (try);
-	  break;
-	}
-    }
-
-  if (i >= include_dir_count)
-    {
-      free (path);
-      path = filename;
-    }
-
-  /* FIXME: if path is found, malloc'd storage is not freed.  Of course, this
-     happens all over the place, and since the assembler doesn't usually keep
-     running for a very long time, it really doesn't matter.  */
   register_dependency (path);
 
   /* Expand all archive entries to temporary files and include them.  */

@@ -1308,6 +1308,8 @@ gas_early_init (int *argcp, char ***argvp)
 
   expandargv (argcp, argvp);
 
+  init_include_dir ();
+
 #ifdef HOST_SPECIAL_INIT
   HOST_SPECIAL_INIT (*argcp, *argvp);
 #endif
