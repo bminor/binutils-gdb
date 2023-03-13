@@ -372,10 +372,11 @@ dbx_init_float_type (struct objfile *objfile, int bits)
   struct type *type;
 
   format = gdbarch_floatformat_for_type (gdbarch, NULL, bits);
+  type_allocator alloc (objfile);
   if (format)
     type = init_float_type (objfile, bits, NULL, format);
   else
-    type = init_type (objfile, TYPE_CODE_ERROR, bits, NULL);
+    type = alloc.new_type (TYPE_CODE_ERROR, bits, NULL);
 
   return type;
 }
@@ -2080,6 +2081,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
      TARGET_CHAR_BIT.  */
 #endif
 
+  type_allocator alloc (objfile);
   switch (-typenum)
     {
     case 1:
@@ -2119,7 +2121,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_integer_type (objfile, 32, 1, "unsigned long");
       break;
     case 11:
-      rettype = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
+      rettype = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
       break;
     case 12:
       /* IEEE single precision (32 bit).  */
@@ -2153,7 +2155,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
 				 floatformats_ieee_double);
       break;
     case 19:
-      rettype = init_type (objfile, TYPE_CODE_ERROR, 0, "stringptr");
+      rettype = alloc.new_type (TYPE_CODE_ERROR, 0, "stringptr");
       break;
     case 20:
       rettype = init_character_type (objfile, 8, 1, "character");
@@ -3745,10 +3747,11 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
   if (**pp == ';')
     ++(*pp);
 
+  type_allocator alloc (objfile);
   if (type_bits == 0)
     {
-      struct type *type = init_type (objfile, TYPE_CODE_VOID,
-				     TARGET_CHAR_BIT, NULL);
+      struct type *type = alloc.new_type (TYPE_CODE_VOID,
+					  TARGET_CHAR_BIT, nullptr);
       if (unsigned_type)
 	type->set_is_unsigned (true);
 
@@ -4013,6 +4016,8 @@ read_range_type (const char **pp, int typenums[2], int type_size,
   if (n2bits == -1 || n3bits == -1)
     return error_type (pp, objfile);
 
+  type_allocator alloc (objfile);
+
   if (index_type)
     goto handle_true_range;
 
@@ -4061,7 +4066,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 
   /* A type defined as a subrange of itself, with bounds both 0, is void.  */
   if (self_subrange && n2 == 0 && n3 == 0)
-    return init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
+    return alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, nullptr);
 
   /* If n3 is zero and n2 is positive, we want a floating type, and n2
      is the width in bytes.

@@ -2296,8 +2296,6 @@ private:
 
 /* * Helper function to construct objfile-owned types.  */
 
-extern struct type *init_type (struct objfile *, enum type_code, int,
-			       const char *);
 extern struct type *init_integer_type (struct objfile *, int, int,
 				       const char *);
 extern struct type *init_character_type (struct objfile *, int, int,

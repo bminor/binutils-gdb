@@ -3398,37 +3398,6 @@ floatformat_from_type (const struct type *type)
   return TYPE_FLOATFORMAT (type);
 }
 
-/* Helper function to initialize the standard scalar types.
-
-   If NAME is non-NULL, then it is used to initialize the type name.
-   Note that NAME is not copied; it is required to have a lifetime at
-   least as long as OBJFILE.  */
-
-struct type *
-init_type (struct objfile *objfile, enum type_code code, int bit,
-	   const char *name)
-{
-  struct type *type;
-
-  type = type_allocator (objfile).new_type ();
-  set_type_code (type, code);
-  gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
-  type->set_length (bit / TARGET_CHAR_BIT);
-  type->set_name (name);
-
-  return type;
-}
-
-/* Allocate a TYPE_CODE_ERROR type structure associated with OBJFILE,
-   to use with variables that have no debug info.  NAME is the type
-   name.  */
-
-static struct type *
-init_nodebug_var_type (struct objfile *objfile, const char *name)
-{
-  return init_type (objfile, TYPE_CODE_ERROR, 0, name);
-}
-
 /* Allocate a TYPE_CODE_INT type structure associated with OBJFILE.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
@@ -3439,7 +3408,7 @@ init_integer_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_INT, bit, name);
+  t = type_allocator (objfile).new_type (TYPE_CODE_INT, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -3460,7 +3429,7 @@ init_character_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_CHAR, bit, name);
+  t = type_allocator (objfile).new_type (TYPE_CODE_CHAR, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -3477,7 +3446,7 @@ init_boolean_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_BOOL, bit, name);
+  t = type_allocator (objfile).new_type (TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -3510,7 +3479,7 @@ init_float_type (struct objfile *objfile,
   struct type *t;
 
   bit = verify_floatformat (bit, fmt);
-  t = init_type (objfile, TYPE_CODE_FLT, bit, name);
+  t = type_allocator (objfile).new_type (TYPE_CODE_FLT, bit, name);
   TYPE_FLOATFORMAT (t) = fmt;
 
   return t;
@@ -3522,10 +3491,7 @@ init_float_type (struct objfile *objfile,
 struct type *
 init_decfloat_type (struct objfile *objfile, int bit, const char *name)
 {
-  struct type *t;
-
-  t = init_type (objfile, TYPE_CODE_DECFLOAT, bit, name);
-  return t;
+  return type_allocator (objfile).new_type (TYPE_CODE_DECFLOAT, bit, name);
 }
 
 /* Return true if init_complex_type can be called with TARGET_TYPE.  */
@@ -3583,7 +3549,7 @@ init_pointer_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_PTR, bit, name);
+  t = type_allocator (objfile).new_type (TYPE_CODE_PTR, bit, name);
   t->set_target_type (target_type);
   t->set_is_unsigned (true);
   return t;
@@ -3600,7 +3566,7 @@ init_fixed_point_type (struct objfile *objfile,
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_FIXED_POINT, bit, name);
+  t = type_allocator (objfile).new_type (TYPE_CODE_FIXED_POINT, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -6291,9 +6257,11 @@ objfile_type (struct objfile *objfile)
   /* Use the objfile architecture to determine basic type properties.  */
   gdbarch = objfile->arch ();
 
+  type_allocator alloc (objfile);
+
   /* Basic types.  */
   objfile_type->builtin_void
-    = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
+    = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   objfile_type->builtin_char
     = init_integer_type (objfile, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
@@ -6340,17 +6308,17 @@ objfile_type (struct objfile *objfile)
 
   /* This type represents a type that was unrecognized in symbol read-in.  */
   objfile_type->builtin_error
-    = init_type (objfile, TYPE_CODE_ERROR, 0, "<unknown type>");
+    = alloc.new_type (TYPE_CODE_ERROR, 0, "<unknown type>");
 
   /* The following set of types is used for symbols with no
      debug information.  */
   objfile_type->nodebug_text_symbol
-    = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
-		 "<text variable, no debug info>");
+    = alloc.new_type (TYPE_CODE_FUNC, TARGET_CHAR_BIT,
+		      "<text variable, no debug info>");
 
   objfile_type->nodebug_text_gnu_ifunc_symbol
-    = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
-		 "<text gnu-indirect-function variable, no debug info>");
+    = alloc.new_type (TYPE_CODE_FUNC, TARGET_CHAR_BIT,
+		      "<text gnu-indirect-function variable, no debug info>");
   objfile_type->nodebug_text_gnu_ifunc_symbol->set_is_gnu_ifunc (true);
 
   objfile_type->nodebug_got_plt_symbol
@@ -6358,11 +6326,13 @@ objfile_type (struct objfile *objfile)
 			 "<text from jump slot in .got.plt, no debug info>",
 			 objfile_type->nodebug_text_symbol);
   objfile_type->nodebug_data_symbol
-    = init_nodebug_var_type (objfile, "<data variable, no debug info>");
+    = alloc.new_type (TYPE_CODE_ERROR, 0, "<data variable, no debug info>");
   objfile_type->nodebug_unknown_symbol
-    = init_nodebug_var_type (objfile, "<variable (not text or data), no debug info>");
+    = alloc.new_type (TYPE_CODE_ERROR, 0,
+		      "<variable (not text or data), no debug info>");
   objfile_type->nodebug_tls_symbol
-    = init_nodebug_var_type (objfile, "<thread local variable, no debug info>");
+    = alloc.new_type (TYPE_CODE_ERROR, 0,
+		      "<thread local variable, no debug info>");
 
   /* NOTE: on some targets, addresses and pointers are not necessarily
      the same.

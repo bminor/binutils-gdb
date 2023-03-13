@@ -372,11 +372,12 @@ ctf_init_float_type (struct objfile *objfile,
   const struct floatformat **format;
   struct type *type;
 
+  type_allocator alloc (objfile);
   format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
   if (format != nullptr)
     type = init_float_type (objfile, bits, name, format);
   else
-    type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
+    type = alloc.new_type (TYPE_CODE_ERROR, bits, name);
 
   return type;
 }
@@ -554,6 +555,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
 		   ctf_errmsg (ctf_errno (fp)));
     }
 
+  type_allocator alloc (of);
   kind = ctf_type_kind (fp, tid);
   if (kind == CTF_K_INTEGER)
     {
@@ -596,7 +598,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
   else
     {
       complaint (_("read_base_type: unsupported base kind (%d)"), kind);
-      type = init_type (of, TYPE_CODE_ERROR, cet.cte_bits, name);
+      type = alloc.new_type (TYPE_CODE_ERROR, cet.cte_bits, name);
     }
 
   if (name != nullptr && strcmp (name, "char") == 0)
@@ -928,7 +930,7 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
   struct type *this_type, *target_type;
 
   char *aname = obstack_strdup (&objfile->objfile_obstack, name);
-  this_type = init_type (objfile, TYPE_CODE_TYPEDEF, 0, aname);
+  this_type = type_allocator (objfile).new_type (TYPE_CODE_TYPEDEF, 0, aname);
   set_tid_type (objfile, tid, this_type);
   target_type = fetch_tid_type (ccp, btid);
   if (target_type != this_type)

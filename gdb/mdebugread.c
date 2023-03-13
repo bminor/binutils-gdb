@@ -1386,6 +1386,8 @@ basic_type (int bt, struct objfile *objfile)
   if (map_bt[bt])
     return map_bt[bt];
 
+  type_allocator alloc (objfile);
+
   switch (bt)
     {
     case btNil:
@@ -1457,14 +1459,14 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btFloatDec:
-      tp = init_type (objfile, TYPE_CODE_ERROR,
-		      gdbarch_double_bit (gdbarch), "floating decimal");
+      tp = alloc.new_type (TYPE_CODE_ERROR,
+			   gdbarch_double_bit (gdbarch), "floating decimal");
       break;
 
     case btString:
       /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
 	 FIXME.  */
-      tp = init_type (objfile, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
+      tp = alloc.new_type (TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
       break;
 
     case btVoid:
@@ -1573,6 +1575,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	}
     }
 
+  type_allocator alloc (mdebugread_objfile);
+
   /* Move on to next aux.  */
   ax++;
 
@@ -1647,7 +1651,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       /* Try to cross reference this type, build new type on failure.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
       if (tp == NULL)
-	tp = init_type (mdebugread_objfile, type_code, 0, NULL);
+	tp = alloc.new_type (type_code, 0, NULL);
 
       /* DEC c89 produces cross references to qualified aggregate types,
 	 dereference them.  */
@@ -1705,7 +1709,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       /* Try to cross reference this type, build new type on failure.  */
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
       if (tp == NULL)
-	tp = init_type (mdebugread_objfile, type_code, 0, NULL);
+	tp = alloc.new_type (type_code, 0, NULL);
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
 	 Any type may be returned from cross_ref if file indirect entries
@@ -4266,13 +4270,15 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
       rf = rn->rfd;
     }
 
+  type_allocator alloc (mdebugread_objfile);
+
   /* mips cc uses a rf of -1 for opaque struct definitions.
      Set TYPE_STUB for these types so that check_typedef will
      resolve them if the struct gets defined in another compilation unit.  */
   if (rf == -1)
     {
       *pname = "<undefined>";
-      *tpp = init_type (mdebugread_objfile, type_code, 0, NULL);
+      *tpp = alloc.new_type (type_code, 0, NULL);
       (*tpp)->set_is_stub (true);
       return result;
     }
@@ -4358,7 +4364,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	  switch (tir.bt)
 	    {
 	    case btVoid:
-	      *tpp = init_type (mdebugread_objfile, type_code, 0, NULL);
+	      *tpp = alloc.new_type (type_code, 0, NULL);
 	      *pname = "<undefined>";
 	      break;
 
@@ -4392,7 +4398,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	    default:
 	      complaint (_("illegal bt %d in forward typedef for %s"), tir.bt,
 			 sym_name);
-	      *tpp = init_type (mdebugread_objfile, type_code, 0, NULL);
+	      *tpp = alloc.new_type (type_code, 0, NULL);
 	      break;
 	    }
 	  return result;
@@ -4420,7 +4426,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	     has not been parsed yet.
 	     Initialize the type only, it will be filled in when
 	     it's definition is parsed.  */
-	  *tpp = init_type (mdebugread_objfile, type_code, 0, NULL);
+	  *tpp = alloc.new_type (type_code, 0, NULL);
 	}
       add_pending (fh, esh, *tpp);
     }

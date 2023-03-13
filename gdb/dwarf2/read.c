@@ -5860,8 +5860,9 @@ fixup_go_packaging (struct dwarf2_cu *cu)
     {
       struct objfile *objfile = cu->per_objfile->objfile;
       const char *saved_package_name = objfile->intern (package_name.get ());
-      struct type *type = init_type (objfile, TYPE_CODE_MODULE, 0,
-				     saved_package_name);
+      struct type *type
+	= type_allocator (objfile).new_type (TYPE_CODE_MODULE, 0,
+					     saved_package_name);
       struct symbol *sym;
 
       sym = new (&objfile->objfile_obstack) symbol;
@@ -6048,8 +6049,9 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       const char *dataless_name
 	= rust_fully_qualify (&objfile->objfile_obstack, type->name (),
 			      name);
-      struct type *dataless_type = init_type (objfile, TYPE_CODE_VOID, 0,
-					      dataless_name);
+      struct type *dataless_type
+	= type_allocator (objfile).new_type (TYPE_CODE_VOID, 0,
+					     dataless_name);
       type->field (2).set_type (dataless_type);
       /* NAME points into the original discriminant name, which
 	 already has the correct lifetime.  */
@@ -14039,7 +14041,7 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
 			    previous_prefix, name, 0, cu);
 
   /* Create the type.  */
-  type = init_type (objfile, TYPE_CODE_NAMESPACE, 0, name);
+  type = type_allocator (objfile).new_type (TYPE_CODE_NAMESPACE, 0, name);
 
   return set_die_type (die, type, cu);
 }
@@ -14101,7 +14103,7 @@ read_module_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
 
   module_name = dwarf2_name (die, cu);
-  type = init_type (objfile, TYPE_CODE_MODULE, 0, module_name);
+  type = type_allocator (objfile).new_type (TYPE_CODE_MODULE, 0, module_name);
 
   return set_die_type (die, type, cu);
 }
@@ -14700,7 +14702,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   struct type *this_type, *target_type;
 
   name = dwarf2_full_name (NULL, die, cu);
-  this_type = init_type (objfile, TYPE_CODE_TYPEDEF, 0, name);
+  this_type = type_allocator (objfile).new_type (TYPE_CODE_TYPEDEF, 0, name);
   this_type->set_target_is_stub (true);
   set_die_type (die, this_type, cu);
   target_type = die_type (die, cu);
@@ -15009,11 +15011,12 @@ dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
   const struct floatformat **format;
   struct type *type;
 
+  type_allocator alloc (objfile);
   format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
   if (format)
     type = init_float_type (objfile, bits, name, format, byte_order);
   else
-    type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
+    type = alloc.new_type (TYPE_CODE_ERROR, bits, name);
 
   return type;
 }
@@ -15217,11 +15220,12 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+  type_allocator alloc (objfile);
   switch (encoding)
     {
       case DW_ATE_address:
 	/* Turn DW_ATE_address into a void * pointer.  */
-	type = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
+	type = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
 	type = init_pointer_type (objfile, bits, name, type);
 	break;
       case DW_ATE_boolean:
@@ -15239,7 +15243,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 		name = obconcat (obstack, "_Complex ", type->name (),
 				 nullptr);
 	      }
-	    type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
+	    type = alloc.new_type (TYPE_CODE_ERROR, bits, name);
 	  }
 	else
 	  type = init_complex_type (name, type);
@@ -15298,7 +15302,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       default:
 	complaint (_("unsupported DW_AT_encoding: '%s'"),
 		   dwarf_type_encoding_name (encoding));
-	type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
+	type = alloc.new_type (TYPE_CODE_ERROR, bits, name);
 	break;
     }
 
@@ -15744,7 +15748,8 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct type *type;
 
-  type = init_type (cu->per_objfile->objfile, TYPE_CODE_VOID, 0, NULL);
+  type = (type_allocator (cu->per_objfile->objfile)
+	  .new_type (TYPE_CODE_VOID, 0, nullptr));
   type->set_name (dwarf2_name (die, cu));
 
   /* In Ada, an unspecified type is typically used when the description
@@ -19461,7 +19466,7 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
 		     sect_offset_str (die->sect_off));
   saved = obstack_strdup (&objfile->objfile_obstack, message);
 
-  return init_type (objfile, TYPE_CODE_ERROR, 0, saved);
+  return type_allocator (objfile).new_type (TYPE_CODE_ERROR, 0, saved);
 }
 
 /* Look up the type of DIE in CU using its type attribute ATTR.
