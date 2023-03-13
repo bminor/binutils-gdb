@@ -342,7 +342,7 @@ rs6000coff_core_p (bfd *abfd)
   /* Values from new and old core structures.  */
   int c_flag;
   file_ptr c_stack, c_regoff, c_loader;
-  bfd_size_type c_size, c_regsize, c_lsize;
+  bfd_size_type c_size, c_regsize, c_lsize, c_extoff;
   bfd_vma c_stackend;
   void *c_regptr;
   int proc64;
@@ -370,6 +370,7 @@ rs6000coff_core_p (bfd *abfd)
       c_stackend = CNEW_STACKORG (core.new_dump) + c_size;
       c_lsize = CNEW_LSIZE (core.new_dump);
       c_loader = CNEW_LOADER (core.new_dump);
+      c_extoff = core.new_dump.c_extctx;
 #ifndef BFD64
       proc64 = CNEW_PROC64 (core.new_dump);
     }
@@ -516,6 +517,19 @@ rs6000coff_core_p (bfd *abfd)
 			  SEC_HAS_CONTENTS,
 			  c_regsize, (bfd_vma) 0, c_regoff))
     goto fail;
+
+  if (c_extoff)
+    {
+      if (!make_bfd_asection (abfd, ".aix-vmx",
+			      SEC_HAS_CONTENTS,
+			      560, (bfd_vma) 0, c_extoff))
+	goto fail;
+
+      if (!make_bfd_asection (abfd, ".aix-vsx",
+			      SEC_HAS_CONTENTS,
+			      256, (bfd_vma) 0, c_extoff + 584))
+	goto fail;
+    }
 
   /* .ldinfo section.
      To actually find out how long this section is in this particular
