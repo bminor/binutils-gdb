@@ -1015,6 +1015,7 @@ slurp_symtab (bfd *abfd)
       my_bfd_nonfatal (bfd_get_filename (abfd));
       free (sy);
       sy = NULL;
+      symcount = 0;
     }
   return sy;
 }
@@ -1048,6 +1049,7 @@ slurp_dynamic_symtab (bfd *abfd)
       my_bfd_nonfatal (bfd_get_filename (abfd));
       free (sy);
       sy = NULL;
+      dynsymcount = 0;
     }
   return sy;
 }
