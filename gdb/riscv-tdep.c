@@ -1987,6 +1987,214 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
 }
 
+/* Return true if INSN represents an instruction something like:
+
+   ld fp,IMMEDIATE(sp)
+
+   That is, a load from stack-pointer plus some immediate offset, with the
+   result stored into the frame pointer.  We also accept 'lw' as well as
+   'ld'.  */
+
+static bool
+is_insn_load_of_fp_from_sp (const struct riscv_insn &insn)
+{
+  return ((insn.opcode () == riscv_insn::LD
+	   || insn.opcode () == riscv_insn::LW)
+	  && insn.rd () == RISCV_FP_REGNUM
+	  && insn.rs1 () == RISCV_SP_REGNUM);
+}
+
+/* Return true if INSN represents an instruction something like:
+
+   add sp,sp,IMMEDIATE
+
+   That is, an add of an immediate to the value in the stack pointer
+   register, with the result stored back to the stack pointer register.  */
+
+static bool
+is_insn_addi_of_sp_to_sp (const struct riscv_insn &insn)
+{
+  return ((insn.opcode () == riscv_insn::ADDI
+	   || insn.opcode () == riscv_insn::ADDIW)
+	  && insn.rd () == RISCV_SP_REGNUM
+	  && insn.rs1 () == RISCV_SP_REGNUM);
+}
+
+/* Is the instruction in code memory prior to address PC a load from stack
+   instruction?  Return true if it is, otherwise, return false.
+
+   This is a best effort that is used as part of the function prologue
+   scanning logic.  With compressed instructions and arbitrary control
+   flow in the inferior, we can never be certain what the instruction
+   prior to PC is.
+
+   This function first looks for a compressed instruction, then looks for
+   a 32-bit non-compressed instruction.  */
+
+static bool
+previous_insn_is_load_fp_from_stack (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  struct riscv_insn insn;
+  insn.decode (gdbarch, pc - 2);
+  gdb_assert (insn.length () > 0);
+
+  if (insn.length () != 2 || !is_insn_load_of_fp_from_sp (insn))
+    {
+      insn.decode (gdbarch, pc - 4);
+      gdb_assert (insn.length () > 0);
+
+      if (insn.length () != 4 || !is_insn_load_of_fp_from_sp (insn))
+	return false;
+    }
+
+  riscv_unwinder_debug_printf
+    ("previous instruction at %s (length %d) was 'ld'",
+     core_addr_to_string (pc - insn.length ()), insn.length ());
+  return true;
+}
+
+/* Is the instruction in code memory prior to address PC an add of an
+   immediate to the stack pointer, with the result being written back into
+   the stack pointer?  Return true and set *PREV_PC to the address of the
+   previous instruction if we believe the previous instruction is such an
+   add, otherwise return false and *PREV_PC is undefined.
+
+   This is a best effort that is used as part of the function prologue
+   scanning logic.  With compressed instructions and arbitrary control
+   flow in the inferior, we can never be certain what the instruction
+   prior to PC is.
+
+   This function first looks for a compressed instruction, then looks for
+   a 32-bit non-compressed instruction.  */
+
+static bool
+previous_insn_is_add_imm_to_sp (struct gdbarch *gdbarch, CORE_ADDR pc,
+				CORE_ADDR *prev_pc)
+{
+  struct riscv_insn insn;
+  insn.decode (gdbarch, pc - 2);
+  gdb_assert (insn.length () > 0);
+
+  if (insn.length () != 2 || !is_insn_addi_of_sp_to_sp (insn))
+    {
+      insn.decode (gdbarch, pc - 4);
+      gdb_assert (insn.length () > 0);
+
+      if (insn.length () != 4 || !is_insn_addi_of_sp_to_sp (insn))
+	return false;
+    }
+
+  riscv_unwinder_debug_printf
+    ("previous instruction at %s (length %d) was 'add'",
+     core_addr_to_string (pc - insn.length ()), insn.length ());
+  *prev_pc = pc - insn.length ();
+  return true;
+}
+
+/* Try to spot when PC is located in an exit sequence for a particular
+   function.  Detecting an exit sequence involves a limited amount of
+   scanning backwards through the disassembly, and so, when considering
+   compressed instructions, we can never be certain that we have
+   disassembled the preceding instructions correctly.  On top of that, we
+   can't be certain that the inferior arrived at PC by passing through the
+   preceding instructions.
+
+   With all that said, we know that using prologue scanning to figure a
+   functions unwind information starts to fail when we consider returns
+   from an instruction -- we must pass through some instructions that
+   restore the previous state prior to the final return instruction, and
+   with state partially restored, our prologue derived unwind information
+   is no longer valid.
+
+   This function then, aims to spot instruction sequences like this:
+
+     ld     fp, IMM_1(sp)
+     add    sp, sp, IMM_2
+     ret
+
+   The first instruction restores the previous frame-pointer value, the
+   second restores the previous stack pointer value, and the final
+   instruction is the actual return.
+
+   We need to consider that some or all of these instructions might be
+   compressed.
+
+   This function makes the assumption that, when the inferior reaches the
+   'ret' instruction the stack pointer will have been restored to its value
+   on entry to this function.  This assumption will be true in most well
+   formed programs.
+
+   Return true if we detect that we are in such an instruction sequence,
+   that is PC points at one of the three instructions given above.  In this
+   case, set *OFFSET to IMM_2 if PC points to either of the first
+   two instructions (the 'ld' or 'add'), otherwise set *OFFSET to 0.
+
+   Otherwise, this function returns false, and the contents of *OFFSET are
+   undefined.  */
+
+static bool
+riscv_detect_end_of_function (struct gdbarch *gdbarch, CORE_ADDR pc,
+			      int *offset)
+{
+  *offset = 0;
+
+  /* We only want to scan a maximum of 3 instructions.  */
+  for (int i = 0; i < 3; ++i)
+    {
+      struct riscv_insn insn;
+      insn.decode (gdbarch, pc);
+      gdb_assert (insn.length () > 0);
+
+      if (is_insn_load_of_fp_from_sp (insn))
+	{
+	  riscv_unwinder_debug_printf ("found 'ld' instruction at %s",
+				       core_addr_to_string (pc));
+	  if (i > 0)
+	    return false;
+	  pc += insn.length ();
+	}
+      else if (is_insn_addi_of_sp_to_sp (insn))
+	{
+	  riscv_unwinder_debug_printf ("found 'add' instruction at %s",
+				       core_addr_to_string (pc));
+	  if (i > 1)
+	    return false;
+	  if (i == 0)
+	    {
+	      if (!previous_insn_is_load_fp_from_stack (gdbarch, pc))
+		return false;
+
+	      i = 1;
+	    }
+	  *offset = insn.imm_signed ();
+	  pc += insn.length ();
+	}
+      else if (insn.opcode () == riscv_insn::JALR
+	       && insn.rs1 () == RISCV_RA_REGNUM
+	       && insn.rs2 () == RISCV_ZERO_REGNUM)
+	{
+	  riscv_unwinder_debug_printf ("found 'ret' instruction at %s",
+				       core_addr_to_string (pc));
+	  gdb_assert (i != 1);
+	  if (i == 0)
+	    {
+	      CORE_ADDR prev_pc;
+	      if (!previous_insn_is_add_imm_to_sp (gdbarch, pc, &prev_pc))
+		return false;
+	      if (!previous_insn_is_load_fp_from_stack (gdbarch, prev_pc))
+		return false;
+	      i = 2;
+	    }
+
+	  pc += insn.length ();
+	}
+      else
+	return false;
+    }
+
+  return true;
+}
+
 /* The prologue scanner.  This is currently only used for skipping the
    prologue of a function when the DWARF information is not sufficient.
    However, it is written with filling of the frame cache in mind, which
@@ -2001,6 +2209,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 		     struct riscv_unwind_cache *cache)
 {
   CORE_ADDR cur_pc, next_pc, after_prologue_pc;
+  CORE_ADDR original_end_pc = end_pc;
   CORE_ADDR end_prologue_addr = 0;
 
   /* Find an upper limit on the function prologue using the debug
@@ -2032,10 +2241,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
       next_pc = cur_pc + insn.length ();
 
       /* Look for common stack adjustment insns.  */
-      if ((insn.opcode () == riscv_insn::ADDI
-	   || insn.opcode () == riscv_insn::ADDIW)
-	  && insn.rd () == RISCV_SP_REGNUM
-	  && insn.rs1 () == RISCV_SP_REGNUM)
+      if (is_insn_addi_of_sp_to_sp (insn))
 	{
 	  /* Handle: addi sp, sp, -i
 	     or:     addiw sp, sp, -i  */
@@ -2170,6 +2376,27 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	{
 	  cache->frame_base_reg = RISCV_SP_REGNUM;
 	  cache->frame_base_offset = -regs[RISCV_SP_REGNUM].k;
+	}
+
+      /* Check to see if we are located near to a return instruction in
+	 this function.  If we are then the one or both of the stack
+	 pointer and frame pointer may have been restored to their previous
+	 value.  If we can spot this situation then we can adjust which
+	 register and offset we use for the frame base.  */
+      if (cache->frame_base_reg != RISCV_SP_REGNUM
+	  || cache->frame_base_offset != 0)
+	{
+	  int sp_offset;
+
+	  if (riscv_detect_end_of_function (gdbarch, original_end_pc,
+					    &sp_offset))
+	    {
+	      riscv_unwinder_debug_printf
+		("in function epilogue at %s, stack offset is %d",
+		 core_addr_to_string (original_end_pc), sp_offset);
+	      cache->frame_base_reg= RISCV_SP_REGNUM;
+	      cache->frame_base_offset = sp_offset;
+	    }
 	}
 
       /* Assign offset from old SP to all saved registers.  As we don't
