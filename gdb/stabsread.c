@@ -2144,7 +2144,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_integer_type (alloc, 32, 0, "integer");
       break;
     case 16:
-      rettype = init_boolean_type (objfile, 32, 1, "boolean");
+      rettype = init_boolean_type (alloc, 32, 1, "boolean");
       break;
     case 17:
       rettype = init_float_type (objfile, 32, "short real",
@@ -2161,16 +2161,16 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_character_type (alloc, 8, 1, "character");
       break;
     case 21:
-      rettype = init_boolean_type (objfile, 8, 1, "logical*1");
+      rettype = init_boolean_type (alloc, 8, 1, "logical*1");
       break;
     case 22:
-      rettype = init_boolean_type (objfile, 16, 1, "logical*2");
+      rettype = init_boolean_type (alloc, 16, 1, "logical*2");
       break;
     case 23:
-      rettype = init_boolean_type (objfile, 32, 1, "logical*4");
+      rettype = init_boolean_type (alloc, 32, 1, "logical*4");
       break;
     case 24:
-      rettype = init_boolean_type (objfile, 32, 1, "logical");
+      rettype = init_boolean_type (alloc, 32, 1, "logical");
       break;
     case 25:
       /* Complex type consisting of two IEEE single precision values.  */
@@ -3759,7 +3759,7 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
     }
 
   if (boolean_type)
-    return init_boolean_type (objfile, type_bits, unsigned_type, NULL);
+    return init_boolean_type (alloc, type_bits, unsigned_type, NULL);
   else
     return init_integer_type (alloc, type_bits, unsigned_type, NULL);
 }

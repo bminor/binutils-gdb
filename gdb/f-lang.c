@@ -1733,16 +1733,16 @@ build_fortran_types (struct gdbarch *gdbarch)
     = alloc.new_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT, "character");
 
   builtin_f_type->builtin_logical_s1
-    = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "logical*1");
+    = init_boolean_type (alloc, TARGET_CHAR_BIT, 1, "logical*1");
 
   builtin_f_type->builtin_logical_s2
-    = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1, "logical*2");
+    = init_boolean_type (alloc, gdbarch_short_bit (gdbarch), 1, "logical*2");
 
   builtin_f_type->builtin_logical
-    = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "logical*4");
+    = init_boolean_type (alloc, gdbarch_int_bit (gdbarch), 1, "logical*4");
 
   builtin_f_type->builtin_logical_s8
-    = arch_boolean_type (gdbarch, gdbarch_long_long_bit (gdbarch), 1,
+    = init_boolean_type (alloc, gdbarch_long_long_bit (gdbarch), 1,
 			 "logical*8");
 
   builtin_f_type->builtin_integer_s1

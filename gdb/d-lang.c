@@ -204,7 +204,7 @@ build_d_types (struct gdbarch *gdbarch)
   type_allocator alloc (gdbarch);
   builtin_d_type->builtin_void = builtin_type (gdbarch)->builtin_void;
   builtin_d_type->builtin_bool
-    = arch_boolean_type (gdbarch, 8, 1, "bool");
+    = init_boolean_type (alloc, 8, 1, "bool");
   builtin_d_type->builtin_byte
     = init_integer_type (alloc, 8, 0, "byte");
   builtin_d_type->builtin_ubyte

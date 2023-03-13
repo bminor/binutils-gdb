@@ -3432,17 +3432,15 @@ init_character_type (type_allocator &alloc,
   return t;
 }
 
-/* Allocate a TYPE_CODE_BOOL type structure associated with OBJFILE.
-   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
-   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+/* See gdbtypes.h.  */
 
 struct type *
-init_boolean_type (struct objfile *objfile,
+init_boolean_type (type_allocator &alloc,
 		   int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
-  t = type_allocator (objfile).new_type (TYPE_CODE_BOOL, bit, name);
+  t = alloc.new_type (TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -5748,23 +5746,6 @@ copy_type (const struct type *type)
 
 /* Helper functions to initialize architecture-specific types.  */
 
-/* Allocate a TYPE_CODE_BOOL type structure associated with GDBARCH.
-   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
-   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
-
-struct type *
-arch_boolean_type (struct gdbarch *gdbarch,
-		   int bit, int unsigned_p, const char *name)
-{
-  struct type *t;
-
-  t = type_allocator (gdbarch).new_type (TYPE_CODE_BOOL, bit, name);
-  if (unsigned_p)
-    t->set_is_unsigned (true);
-
-  return t;
-}
-
 /* Allocate a TYPE_CODE_FLT type structure associated with GDBARCH.
    BIT is the type size in bits; if BIT equals -1, the size is
    determined by the floatformat.  NAME is the type name.  Set the
@@ -6103,7 +6084,7 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
   builtin_type->builtin_string
     = alloc.new_type (TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
   builtin_type->builtin_bool
-    = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "bool");
+    = init_boolean_type (alloc, TARGET_CHAR_BIT, 1, "bool");
 
   /* The following three are about decimal floating point types, which
      are 32-bits, 64-bits and 128-bits respectively.  */

@@ -294,7 +294,7 @@ build_m2_types (struct gdbarch *gdbarch)
   builtin_m2_type->builtin_char
     = init_character_type (alloc, TARGET_CHAR_BIT, 1, "CHAR");
   builtin_m2_type->builtin_bool
-    = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "BOOLEAN");
+    = init_boolean_type (alloc, gdbarch_int_bit (gdbarch), 1, "BOOLEAN");
 
   return builtin_m2_type;
 }

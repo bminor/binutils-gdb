@@ -933,7 +933,7 @@ public:
     el_type = add (arch_float_type (gdbarch, 64, "double", floatformats_ieee_double));
     BUILD_OCL_VTYPES (double, el_type);
 
-    add (arch_boolean_type (gdbarch, 8, 1, "bool"));
+    add (init_boolean_type (alloc, 8, 1, "bool"));
     add (init_integer_type (alloc, 8, 1, "unsigned char"));
     add (init_integer_type (alloc, 16, 1, "unsigned short"));
     add (init_integer_type (alloc, 32, 1, "unsigned int"));

@@ -1596,7 +1596,7 @@ rust_language::language_arch_info (struct gdbarch *gdbarch,
 
   type_allocator alloc (gdbarch);
   struct type *bool_type
-    = add (arch_boolean_type (gdbarch, 8, 1, "bool"));
+    = add (init_boolean_type (alloc, 8, 1, "bool"));
   add (init_character_type (alloc, 32, 1, "char"));
   add (init_integer_type (alloc, 8, 0, "i8"));
   struct type *u8_type

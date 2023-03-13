@@ -15232,7 +15232,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type = init_pointer_type (objfile, bits, name, type);
 	break;
       case DW_ATE_boolean:
-	type = init_boolean_type (objfile, bits, 1, name);
+	type = init_boolean_type (alloc, bits, 1, name);
 	break;
       case DW_ATE_complex_float:
 	type = dwarf2_init_complex_target_type (cu, objfile, bits / 2, name,

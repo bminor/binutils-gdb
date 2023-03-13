@@ -2307,8 +2307,14 @@ extern struct type *init_integer_type (type_allocator &alloc, int bit,
 
 extern struct type *init_character_type (type_allocator &alloc, int bit,
 					 int unsigned_p, const char *name);
-extern struct type *init_boolean_type (struct objfile *, int, int,
-				       const char *);
+
+/* Allocate a TYPE_CODE_BOOL type structure using ALLOC.  BIT is the
+   type size in bits.  If UNSIGNED_P is non-zero, set the type's
+   TYPE_UNSIGNED flag.  NAME is the type name.  */
+
+extern struct type *init_boolean_type (type_allocator &alloc, int bit,
+				       int unsigned_p, const char *name);
+
 extern struct type *init_float_type (struct objfile *, int, const char *,
 				     const struct floatformat **,
 				     enum bfd_endian = BFD_ENDIAN_UNKNOWN);
@@ -2321,8 +2327,6 @@ extern struct type *init_fixed_point_type (struct objfile *, int, int,
 					   const char *);
 
 /* Helper functions to construct architecture-owned types.  */
-extern struct type *arch_boolean_type (struct gdbarch *, int, int,
-				       const char *);
 extern struct type *arch_float_type (struct gdbarch *, int, const char *,
 				     const struct floatformat **);
 extern struct type *arch_decfloat_type (struct gdbarch *, int, const char *);
