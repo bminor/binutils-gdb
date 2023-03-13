@@ -675,9 +675,9 @@ ptype	:	typebase
 			    range_type =
 			      create_static_range_type (alloc, idx_type,
 							0, array_size - 1);
-			    follow_type =
-			      create_array_type ((struct type *) NULL,
-						 follow_type, range_type);
+			    follow_type = create_array_type (alloc,
+							     follow_type,
+							     range_type);
 			  }
 			else
 			  follow_type = lookup_pointer_type (follow_type);

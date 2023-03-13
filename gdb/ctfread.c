@@ -833,7 +833,7 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
 
   type_allocator alloc (objfile);
   range_type = create_static_range_type (alloc, idx_type, 0, ar.ctr_nelems - 1);
-  type = create_array_type (NULL, element_type, range_type);
+  type = create_array_type (alloc, element_type, range_type);
   if (ar.ctr_nelems <= 1)	/* Check if undefined upper bound.  */
     {
       range_type->bounds ()->high.set_undefined ();

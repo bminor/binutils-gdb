@@ -1783,8 +1783,7 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
 	  type_allocator alloc (objfile);
 	  range_type
 	    = create_static_range_type (alloc, index_type, 0, n - 1);
-	  type =
-	    create_array_type (NULL, base_type, range_type);
+	  type = create_array_type (alloc, base_type, range_type);
 	}
       return type;
     }

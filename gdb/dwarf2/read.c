@@ -13658,7 +13658,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
       index_type = objfile_type (objfile)->builtin_int;
       type_allocator alloc (objfile);
       range_type = create_static_range_type (alloc, index_type, 0, -1);
-      type = create_array_type_with_stride (NULL, element_type, range_type,
+      type = create_array_type_with_stride (alloc, element_type, range_type,
 					    byte_stride_prop, bit_stride);
       return set_die_type (die, type, cu);
     }
@@ -13695,13 +13695,14 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
   type = element_type;
 
+  type_allocator alloc (cu->per_objfile->objfile);
   if (read_array_order (die, cu) == DW_ORD_col_major)
     {
       int i = 0;
 
       while (i < range_types.size ())
 	{
-	  type = create_array_type_with_stride (NULL, type, range_types[i++],
+	  type = create_array_type_with_stride (alloc, type, range_types[i++],
 						byte_stride_prop, bit_stride);
 	  type->set_is_multi_dimensional (true);
 	  bit_stride = 0;
@@ -13713,7 +13714,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
       size_t ndim = range_types.size ();
       while (ndim-- > 0)
 	{
-	  type = create_array_type_with_stride (NULL, type, range_types[ndim],
+	  type = create_array_type_with_stride (alloc, type, range_types[ndim],
 						byte_stride_prop, bit_stride);
 	  type->set_is_multi_dimensional (true);
 	  bit_stride = 0;
@@ -14509,7 +14510,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
       range_type = create_range_type (alloc, index_type, &low_bound, &prop, 0);
     }
   char_type = language_string_char_type (cu->language_defn, gdbarch);
-  type = create_string_type (NULL, char_type, range_type);
+  type = create_string_type (alloc, char_type, range_type);
 
   return set_die_type (die, type, cu);
 }

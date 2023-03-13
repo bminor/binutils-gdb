@@ -1866,7 +1866,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 	type_allocator alloc (indx);
 	range = create_static_range_type (alloc, indx, lower, upper);
 
-	t = create_array_type (NULL, *tpp, range);
+	t = create_array_type (alloc, *tpp, range);
       }
 
       /* We used to fill in the supplied array element bitsize

@@ -1336,30 +1336,10 @@ update_static_array_size (struct type *type)
   return false;
 }
 
-/* Create an array type using either a blank type supplied in
-   RESULT_TYPE, or creating a new type, inheriting the objfile from
-   RANGE_TYPE.
-
-   Elements will be of type ELEMENT_TYPE, the indices will be of type
-   RANGE_TYPE.
-
-   BYTE_STRIDE_PROP, when not NULL, provides the array's byte stride.
-   This byte stride property is added to the resulting array type
-   as a DYN_PROP_BYTE_STRIDE.  As a consequence, the BYTE_STRIDE_PROP
-   argument can only be used to create types that are objfile-owned
-   (see add_dyn_prop), meaning that either this function must be called
-   with an objfile-owned RESULT_TYPE, or an objfile-owned RANGE_TYPE.
-
-   BIT_STRIDE is taken into account only when BYTE_STRIDE_PROP is NULL.
-   If BIT_STRIDE is not zero, build a packed array type whose element
-   size is BIT_STRIDE.  Otherwise, ignore this parameter.
-
-   FIXME: Maybe we should check the TYPE_CODE of RESULT_TYPE to make
-   sure it is TYPE_CODE_UNDEF before we bash it into an array
-   type?  */
+/* See gdbtypes.h.  */
 
 struct type *
-create_array_type_with_stride (struct type *result_type,
+create_array_type_with_stride (type_allocator &alloc,
 			       struct type *element_type,
 			       struct type *range_type,
 			       struct dynamic_prop *byte_stride_prop,
@@ -1376,8 +1356,7 @@ create_array_type_with_stride (struct type *result_type,
       byte_stride_prop = NULL;
     }
 
-  if (result_type == NULL)
-    result_type = type_allocator (range_type).new_type ();
+  struct type *result_type = alloc.new_type ();
 
   result_type->set_code (TYPE_CODE_ARRAY);
   result_type->set_target_type (element_type);
@@ -1409,15 +1388,14 @@ create_array_type_with_stride (struct type *result_type,
   return result_type;
 }
 
-/* Same as create_array_type_with_stride but with no bit_stride
-   (BIT_STRIDE = 0), thus building an unpacked array.  */
+/* See gdbtypes.h.  */
 
 struct type *
-create_array_type (struct type *result_type,
+create_array_type (type_allocator &alloc,
 		   struct type *element_type,
 		   struct type *range_type)
 {
-  return create_array_type_with_stride (result_type, element_type,
+  return create_array_type_with_stride (alloc, element_type,
 					range_type, NULL, 0);
 }
 
@@ -1437,29 +1415,19 @@ lookup_array_range_type (struct type *element_type,
   range_type = create_static_range_type (alloc, index_type,
 					 low_bound, high_bound);
 
-  return create_array_type (NULL, element_type, range_type);
+  return create_array_type (alloc, element_type, range_type);
 }
 
-/* Create a string type using either a blank type supplied in
-   RESULT_TYPE, or creating a new type.  String types are similar
-   enough to array of char types that we can use create_array_type to
-   build the basic type and then bash it into a string type.
-
-   For fixed length strings, the range type contains 0 as the lower
-   bound and the length of the string minus one as the upper bound.
-
-   FIXME: Maybe we should check the TYPE_CODE of RESULT_TYPE to make
-   sure it is TYPE_CODE_UNDEF before we bash it into a string
-   type?  */
+/* See gdbtypes.h.  */
 
 struct type *
-create_string_type (struct type *result_type,
+create_string_type (type_allocator &alloc,
 		    struct type *string_char_type,
 		    struct type *range_type)
 {
-  result_type = create_array_type (result_type,
-				   string_char_type,
-				   range_type);
+  struct type *result_type = create_array_type (alloc,
+						string_char_type,
+						range_type);
   result_type->set_code (TYPE_CODE_STRING);
   return result_type;
 }
@@ -2371,7 +2339,8 @@ resolve_dynamic_array_or_string_1 (struct type *type,
   else
     bit_stride = TYPE_FIELD_BITSIZE (type, 0);
 
-  return create_array_type_with_stride (type, elt_type, range_type, NULL,
+  type_allocator alloc (type, type_allocator::SMASH);
+  return create_array_type_with_stride (alloc, elt_type, range_type, NULL,
 					bit_stride);
 }
 

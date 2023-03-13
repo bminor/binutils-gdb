@@ -137,7 +137,7 @@ fortran_bounds_all_dims (bool lbound_p,
 				builtin_f_type (gdbarch)->builtin_integer,
 				1, ndimensions);
   struct type *elm_type = builtin_f_type (gdbarch)->builtin_integer;
-  struct type *result_type = create_array_type (nullptr, elm_type, range);
+  struct type *result_type = create_array_type (alloc, elm_type, range);
   struct value *result = value::allocate (result_type);
 
   /* Walk the array dimensions backwards due to the way the array will be
@@ -721,7 +721,7 @@ fortran_array_shape (struct gdbarch *gdbarch, const language_defn *lang,
 				builtin_type (gdbarch)->builtin_int,
 				1, ndimensions);
   struct type *elm_type = builtin_f_type (gdbarch)->builtin_integer;
-  struct type *result_type = create_array_type (nullptr, elm_type, range);
+  struct type *result_type = create_array_type (alloc, elm_type, range);
   struct value *result = value::allocate (result_type);
   LONGEST elm_len = elm_type->length ();
 
@@ -1402,7 +1402,7 @@ fortran_undetermined::value_subarray (value *array,
 					 &p_low, &p_high, 0, &p_stride,
 					 true);
       array_slice_type
-	= create_array_type (nullptr, array_slice_type, new_range);
+	= create_array_type (alloc, array_slice_type, new_range);
     }
 
   if (fortran_array_slicing_debug)
@@ -1439,7 +1439,7 @@ fortran_undetermined::value_subarray (value *array,
 					     &p_low, &p_high, 0, &p_stride,
 					     true);
 	  repacked_array_type
-	    = create_array_type (nullptr, repacked_array_type, new_range);
+	    = create_array_type (alloc, repacked_array_type, new_range);
 	}
 
       /* Now copy the elements from the original ARRAY into the packed

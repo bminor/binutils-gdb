@@ -2141,7 +2141,6 @@ ada_type_of_array (struct value *arr, int bounds)
       while (arity > 0)
 	{
 	  type_allocator alloc (arr->type ());
-	  struct type *array_type = alloc.new_type ();
 	  struct value *low = desc_one_bound (descriptor, arity, 0);
 	  struct value *high = desc_one_bound (descriptor, arity, 1);
 
@@ -2150,7 +2149,7 @@ ada_type_of_array (struct value *arr, int bounds)
 	    = create_static_range_type (alloc, low->type (),
 					longest_to_int (value_as_long (low)),
 					longest_to_int (value_as_long (high)));
-	  elt_type = create_array_type (array_type, elt_type, range_type);
+	  elt_type = create_array_type (alloc, elt_type, range_type);
 
 	  if (ada_is_unconstrained_packed_array_type (arr->type ()))
 	    {
@@ -2169,7 +2168,7 @@ ada_type_of_array (struct value *arr, int bounds)
 		  int array_bitsize =
 			(hi - lo + 1) * TYPE_FIELD_BITSIZE (elt_type, 0);
 
-		  array_type->set_length ((array_bitsize + 7) / 8);
+		  elt_type->set_length ((array_bitsize + 7) / 8);
 		}
 	    }
 	}
@@ -2383,11 +2382,11 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
   else
     index_type = type->index_type ();
 
-  new_type = type_allocator (type).new_type ();
+  type_allocator alloc (type);
   new_elt_type =
     constrained_packed_array_type (ada_check_typedef (type->target_type ()),
 				   elt_bits);
-  create_array_type (new_type, new_elt_type, index_type);
+  new_type = create_array_type (alloc, new_elt_type, index_type);
   TYPE_FIELD_BITSIZE (new_type, 0) = *elt_bits;
   new_type->set_name (ada_type_name (type));
 
@@ -3098,7 +3097,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
   struct type *index_type
     = create_static_range_type (alloc, base_index_type, low, high);
   struct type *slice_type = create_array_type_with_stride
-			      (NULL, type0->target_type (), index_type,
+			      (alloc, type0->target_type (), index_type,
 			       type0->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       TYPE_FIELD_BITSIZE (type0, 0));
   int base_low =  ada_discrete_type_low_bound (type0->index_type ());
@@ -3133,7 +3132,7 @@ ada_value_slice (struct value *array, int low, int high)
   struct type *index_type
     = create_static_range_type (alloc, type->index_type (), low, high);
   struct type *slice_type = create_array_type_with_stride
-			      (NULL, type->target_type (), index_type,
+			      (alloc, type->target_type (), index_type,
 			       type->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       TYPE_FIELD_BITSIZE (type, 0));
   gdb::optional<LONGEST> low_pos, high_pos;
@@ -3409,7 +3408,7 @@ empty_array (struct type *arr_type, int low, int high)
 	 high < low ? low - 1 : high);
   struct type *elt_type = ada_array_element_type (arr_type0, 1);
 
-  return value::allocate (create_array_type (NULL, elt_type, index_type));
+  return value::allocate (create_array_type (alloc, elt_type, index_type));
 }
 
 
@@ -8474,8 +8473,10 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       if (elt_type0 == elt_type && !constrained_packed_array_p)
 	result = type0;
       else
-	result = create_array_type (type_allocator (type0).new_type (),
-				    elt_type, type0->index_type ());
+	{
+	  type_allocator alloc (type0);
+	  result = create_array_type (alloc, elt_type, type0->index_type ());
+	}
     }
   else
     {
@@ -8506,8 +8507,8 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 	  struct type *range_type =
 	    to_fixed_range_type (index_type_desc->field (i).type (), dval);
 
-	  result = create_array_type (type_allocator (elt_type0).new_type (),
-				      result, range_type);
+	  type_allocator alloc (elt_type0);
+	  result = create_array_type (alloc, result, range_type);
 	  elt_type0 = elt_type0->target_type ();
 	}
     }

@@ -883,7 +883,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 					  objfile_type (objfile)->builtin_int,
 					  0, ind);
 	    sym->set_type
-	      (create_array_type (NULL, objfile_type (objfile)->builtin_char,
+	      (create_array_type (alloc, objfile_type (objfile)->builtin_char,
 				  range_type));
 	    string_value
 	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, ind + 1);
@@ -3551,7 +3551,8 @@ read_array_type (const char **pp, struct type *type,
   type_allocator alloc (objfile);
   range_type =
     create_static_range_type (alloc, index_type, lower, upper);
-  type = create_array_type (type, element_type, range_type);
+  type_allocator smash_alloc (type, type_allocator::SMASH);
+  type = create_array_type (smash_alloc, element_type, range_type);
 
   return type;
 }

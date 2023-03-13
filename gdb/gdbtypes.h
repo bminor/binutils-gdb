@@ -2483,10 +2483,26 @@ extern struct type *create_static_range_type (type_allocator &alloc,
 					      LONGEST low_bound,
 					      LONGEST high_bound);
 
+/* Create an array type using ALLOC.
+
+   Elements will be of type ELEMENT_TYPE, the indices will be of type
+   RANGE_TYPE.
+
+   BYTE_STRIDE_PROP, when not NULL, provides the array's byte stride.
+   This byte stride property is added to the resulting array type
+   as a DYN_PROP_BYTE_STRIDE.  As a consequence, the BYTE_STRIDE_PROP
+   argument can only be used to create types that are objfile-owned
+   (see add_dyn_prop), meaning that either this function must be called
+   with an objfile-owned RESULT_TYPE, or an objfile-owned RANGE_TYPE.
+
+   BIT_STRIDE is taken into account only when BYTE_STRIDE_PROP is NULL.
+   If BIT_STRIDE is not zero, build a packed array type whose element
+   size is BIT_STRIDE.  Otherwise, ignore this parameter.  */
 
 extern struct type *create_array_type_with_stride
-  (struct type *, struct type *, struct type *,
-   struct dynamic_prop *, unsigned int);
+     (type_allocator &alloc, struct type *element_type,
+      struct type *range_type, struct dynamic_prop *byte_stride_prop,
+      unsigned int bit_stride);
 
 /* Create a range type using ALLOC with a dynamic range from LOW_BOUND
    to HIGH_BOUND, inclusive.  INDEX_TYPE is the underlying type.  BIAS
@@ -2509,13 +2525,26 @@ extern struct type *create_range_type_with_stride
    const struct dynamic_prop *high_bound, LONGEST bias,
    const struct dynamic_prop *stride, bool byte_stride_p);
 
-extern struct type *create_array_type (struct type *, struct type *,
-				       struct type *);
+/* Same as create_array_type_with_stride but with no bit_stride
+   (BIT_STRIDE = 0), thus building an unpacked array.  */
+
+extern struct type *create_array_type (type_allocator &alloc,
+				       struct type *element_type,
+				       struct type *range_type);
 
 extern struct type *lookup_array_range_type (struct type *, LONGEST, LONGEST);
 
-extern struct type *create_string_type (struct type *, struct type *,
-					struct type *);
+/* Create a string type using ALLOC.  String types are similar enough
+   to array of char types that we can use create_array_type to build
+   the basic type and then bash it into a string type.
+
+   For fixed length strings, the range type contains 0 as the lower
+   bound and the length of the string minus one as the upper bound.  */
+
+extern struct type *create_string_type (type_allocator &alloc,
+					struct type *string_char_type,
+					struct type *range_type);
+
 extern struct type *lookup_string_range_type (struct type *, LONGEST, LONGEST);
 
 extern struct type *create_set_type (struct type *, struct type *);
