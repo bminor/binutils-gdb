@@ -651,7 +651,7 @@ ctf_id_t
 ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 		 int functions)
 {
-  ctf_id_t sym;
+  ctf_id_t sym = CTF_ERR;
   ctf_next_t *i = *it;
   int err;
 
