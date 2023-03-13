@@ -29,11 +29,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
 }
 
 # Only run on native boards.
-require !use_gdb_stub
-if { [target_info gdb_protocol] == "extended-remote" } {
-    untested "not supported"
-    return
-}
+require {target_can_use_run_cmd core}
 
 if { ![runto_main] } {
     return -1

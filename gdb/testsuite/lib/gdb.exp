@@ -385,10 +385,30 @@ proc delete_breakpoints {} {
 
 # Returns true iff the target supports using the "run" command.
 
-proc target_can_use_run_cmd {} {
+proc target_can_use_run_cmd { {target_description ""} } {
+    if { $target_description == "" } {
+	set have_core 0
+    } elseif { $target_description == "core" } {
+	# We could try to figure this out by issuing an "info target" and
+	# checking for "Local core dump file:", but it would mean the proc
+	# would start requiring a current target. Also, uses while gdb
+	# produces non-standard output due to, say annotations would
+	# have to be moved around or eliminated, which would further limit
+	# usability.
+	set have_core 1
+    } else {
+	error "invalid argument: $target_description"
+    }
+
     if [target_info exists use_gdb_stub] {
 	# In this case, when we connect, the inferior is already
 	# running.
+	return 0
+    }
+
+    if { $have_core && [target_info gdb_protocol] == "extended-remote" } {
+	# In this case, when we connect, the inferior is not running but
+	# cannot be made to run.
 	return 0
     }
 
