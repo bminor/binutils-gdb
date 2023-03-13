@@ -261,13 +261,13 @@ aarch64_tls_register_count (int tid)
   iovec.iov_base = tls_regs;
   iovec.iov_len = sizeof (tls_regs);
 
-  /* Attempt to read both TPIDR and TPIDR2.  If the request fails, it means
-     the Linux Kernel does not support TPIDR2.
-
-     Otherwise the Linux Kernel supports both TPIDR and TPIDR2.  */
+  /* Attempt to read both TPIDR and TPIDR2.  If ptrace returns less data than
+     we are expecting, that means it doesn't support all the registers.  From
+     the iovec length, figure out how many TPIDR registers the target actually
+     supports.  */
   if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
-    return 1;
+    return 0;
 
-  /* TPIDR2 is available as well.  */
-  return 2;
+  /* Calculate how many TPIDR registers we have.  */
+  return iovec.iov_len / sizeof (uint64_t);
 }
