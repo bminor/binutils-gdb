@@ -40,6 +40,7 @@ gdb_test_no_output "tui new-layout fail fail 1 status 0 cmd 1"
 
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
+    return
 }
 
 Term::command "layout test"
