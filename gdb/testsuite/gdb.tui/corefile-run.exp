@@ -40,6 +40,19 @@ if { ![gdb_gcore_cmd "$core" "save a corefile"] } {
     return -1
 }
 
+set src_line "return 0;"
+set src_line_nr [gdb_get_line_number $src_line]
+
+set run_re \
+    "\\\[Inferior $decimal \\\(process $decimal\\\) exited normally\\]"
+
+if { [info exists USE_TUI] && $USE_TUI == 0 } {
+    clean_restart $testfile
+    gdb_test "core-file $core" $src_line "load corefile"
+    gdb_test "run" $run_re "run until the end"
+    return
+}
+
 Term::clean_restart 24 80 $testfile
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
@@ -51,8 +64,7 @@ gdb_assert {![string match "No Source Available" $text]} \
     "initial source listing"
 
 Term::command "core-file $core"
-Term::check_contents "load corefile" "21 *return 0.*$gdb_prompt .*"
+Term::check_contents "load corefile" "$src_line_nr *$src_line.*$gdb_prompt .*"
 
 Term::command "run"
-Term::check_contents "run until the end" \
-    "\\\[Inferior $decimal \\\(process $decimal\\\) exited normally\\]"
+Term::check_contents "run until the end" $run_re
