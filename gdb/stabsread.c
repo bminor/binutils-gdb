@@ -2158,7 +2158,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = alloc.new_type (TYPE_CODE_ERROR, 0, "stringptr");
       break;
     case 20:
-      rettype = init_character_type (objfile, 8, 1, "character");
+      rettype = init_character_type (alloc, 8, 1, "character");
       break;
     case 21:
       rettype = init_boolean_type (objfile, 8, 1, "logical*1");
@@ -2192,7 +2192,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_integer_type (alloc, 32, 0, "integer*4");
       break;
     case 30:
-      rettype = init_character_type (objfile, 16, 0, "wchar");
+      rettype = init_character_type (alloc, 16, 0, "wchar");
       break;
     case 31:
       rettype = init_integer_type (alloc, 64, 0, "long long");

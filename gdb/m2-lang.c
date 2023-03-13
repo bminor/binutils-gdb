@@ -292,7 +292,7 @@ build_m2_types (struct gdbarch *gdbarch)
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch), "REAL",
 		       gdbarch_float_format (gdbarch));
   builtin_m2_type->builtin_char
-    = arch_character_type (gdbarch, TARGET_CHAR_BIT, 1, "CHAR");
+    = init_character_type (alloc, TARGET_CHAR_BIT, 1, "CHAR");
   builtin_m2_type->builtin_bool
     = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "BOOLEAN");
 

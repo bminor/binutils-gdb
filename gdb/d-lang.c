@@ -262,11 +262,11 @@ build_d_types (struct gdbarch *gdbarch)
 
   /* Character types.  */
   builtin_d_type->builtin_char
-    = arch_character_type (gdbarch, 8, 1, "char");
+    = init_character_type (alloc, 8, 1, "char");
   builtin_d_type->builtin_wchar
-    = arch_character_type (gdbarch, 16, 1, "wchar");
+    = init_character_type (alloc, 16, 1, "wchar");
   builtin_d_type->builtin_dchar
-    = arch_character_type (gdbarch, 32, 1, "dchar");
+    = init_character_type (alloc, 32, 1, "dchar");
 
   return builtin_d_type;
 }

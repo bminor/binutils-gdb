@@ -15264,7 +15264,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	if (cu->lang () == language_fortran
 	    && name
 	    && startswith (name, "character("))
-	  type = init_character_type (objfile, bits, 1, name);
+	  type = init_character_type (alloc, bits, 1, name);
 	else
 	  type = dwarf2_init_integer_type (cu, objfile, bits, 1, name);
 	break;
@@ -15273,7 +15273,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    || cu->lang () == language_m2
 	    || cu->lang () == language_pascal
 	    || cu->lang () == language_fortran)
-	  type = init_character_type (objfile, bits, 0, name);
+	  type = init_character_type (alloc, bits, 0, name);
 	else
 	  type = dwarf2_init_integer_type (cu, objfile, bits, 0, name);
 	break;
@@ -15283,13 +15283,13 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    || cu->lang () == language_pascal
 	    || cu->lang () == language_fortran
 	    || cu->lang () == language_rust)
-	  type = init_character_type (objfile, bits, 1, name);
+	  type = init_character_type (alloc, bits, 1, name);
 	else
 	  type = dwarf2_init_integer_type (cu, objfile, bits, 1, name);
 	break;
       case DW_ATE_UTF:
 	{
-	  type = init_character_type (objfile, bits, 1, name);
+	  type = init_character_type (alloc, bits, 1, name);
 	  return set_die_type (die, type, cu);
 	}
 	break;

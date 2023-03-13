@@ -566,7 +566,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
       ischar = cet.cte_format & CTF_INT_CHAR;
       isbool = cet.cte_format & CTF_INT_BOOL;
       if (ischar)
-	type = init_character_type (of, TARGET_CHAR_BIT, !issigned, name);
+	type = init_character_type (alloc, TARGET_CHAR_BIT, !issigned, name);
       else if (isbool)
 	type = init_boolean_type (of, gdbarch_int_bit (gdbarch),
 				  !issigned, name);

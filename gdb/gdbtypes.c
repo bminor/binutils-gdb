@@ -3417,17 +3417,15 @@ init_integer_type (type_allocator &alloc,
   return t;
 }
 
-/* Allocate a TYPE_CODE_CHAR type structure associated with OBJFILE.
-   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
-   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+/* See gdbtypes.h.  */
 
 struct type *
-init_character_type (struct objfile *objfile,
+init_character_type (type_allocator &alloc,
 		     int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
-  t = type_allocator (objfile).new_type (TYPE_CODE_CHAR, bit, name);
+  t = alloc.new_type (TYPE_CODE_CHAR, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -5750,23 +5748,6 @@ copy_type (const struct type *type)
 
 /* Helper functions to initialize architecture-specific types.  */
 
-/* Allocate a TYPE_CODE_CHAR type structure associated with GDBARCH.
-   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
-   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
-
-struct type *
-arch_character_type (struct gdbarch *gdbarch,
-		     int bit, int unsigned_p, const char *name)
-{
-  struct type *t;
-
-  t = type_allocator (gdbarch).new_type (TYPE_CODE_CHAR, bit, name);
-  if (unsigned_p)
-    t->set_is_unsigned (true);
-
-  return t;
-}
-
 /* Allocate a TYPE_CODE_BOOL type structure associated with GDBARCH.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
@@ -6135,9 +6116,9 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
 
   /* "True" character types.  */
   builtin_type->builtin_true_char
-    = arch_character_type (gdbarch, TARGET_CHAR_BIT, 0, "true character");
+    = init_character_type (alloc, TARGET_CHAR_BIT, 0, "true character");
   builtin_type->builtin_true_unsigned_char
-    = arch_character_type (gdbarch, TARGET_CHAR_BIT, 1, "true character");
+    = init_character_type (alloc, TARGET_CHAR_BIT, 1, "true character");
 
   /* Fixed-size integer types.  */
   builtin_type->builtin_int0

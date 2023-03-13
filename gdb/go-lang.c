@@ -486,7 +486,7 @@ build_go_types (struct gdbarch *gdbarch)
   type_allocator alloc (gdbarch);
   builtin_go_type->builtin_void = builtin_type (gdbarch)->builtin_void;
   builtin_go_type->builtin_char
-    = arch_character_type (gdbarch, 8, 1, "char");
+    = init_character_type (alloc, 8, 1, "char");
   builtin_go_type->builtin_bool
     = arch_boolean_type (gdbarch, 8, 0, "bool");
   builtin_go_type->builtin_int

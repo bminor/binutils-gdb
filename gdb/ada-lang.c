@@ -13563,12 +13563,12 @@ public:
 			    0, "long_integer"));
     add (init_integer_type (alloc, gdbarch_short_bit (gdbarch),
 			    0, "short_integer"));
-    struct type *char_type = arch_character_type (gdbarch, TARGET_CHAR_BIT,
+    struct type *char_type = init_character_type (alloc, TARGET_CHAR_BIT,
 						  1, "character");
     lai->set_string_char_type (char_type);
     add (char_type);
-    add (arch_character_type (gdbarch, 16, 1, "wide_character"));
-    add (arch_character_type (gdbarch, 32, 1, "wide_wide_character"));
+    add (init_character_type (alloc, 16, 1, "wide_character"));
+    add (init_character_type (alloc, 32, 1, "wide_wide_character"));
     add (arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 			  "float", gdbarch_float_format (gdbarch)));
     add (arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
