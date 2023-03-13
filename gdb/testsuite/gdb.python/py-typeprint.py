@@ -15,6 +15,7 @@
 
 import gdb
 
+
 class StringRecognizer(object):
     def __init__(self):
         self.enabled = True
@@ -36,22 +37,26 @@ class StringTypePrinter(object):
 
 gdb.type_printers.append(StringTypePrinter())
 
+
 class OtherRecognizer(object):
     def __init__(self):
         self.enabled = True
 
     def recognize(self, type_obj):
-        if type_obj.tag == 'Other':
-            return 'Another'
+        if type_obj.tag == "Other":
+            return "Another"
         return None
+
 
 class OtherTypePrinter(object):
     def __init__(self):
-        self.name = 'other'
+        self.name = "other"
         self.enabled = True
 
     def instantiate(self):
         return OtherRecognizer()
 
+
 import gdb.types
+
 gdb.types.register_type_printer(gdb.objfiles()[0], OtherTypePrinter())
