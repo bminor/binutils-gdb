@@ -346,7 +346,7 @@ dbx_alloc_type (int typenums[2], struct objfile *objfile)
 
   if (typenums[0] == -1)
     {
-      return (alloc_type (objfile));
+      return type_allocator (objfile).new_type ();
     }
 
   type_addr = dbx_lookup_type (typenums, objfile);
@@ -356,7 +356,7 @@ dbx_alloc_type (int typenums[2], struct objfile *objfile)
      We will fill it in later if we find out how.  */
   if (*type_addr == 0)
     {
-      *type_addr = alloc_type (objfile);
+      *type_addr = type_allocator (objfile).new_type ();
     }
 
   return (*type_addr);

@@ -2186,9 +2186,6 @@ extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
 
 #define TYPE_ZALLOC(t,size) (memset (TYPE_ALLOC (t, size), 0, size))
 
-/* Use alloc_type to allocate a type owned by an objfile.  */
-extern struct type *alloc_type (struct objfile *);
-
 /* * This returns the target type (or NULL) of TYPE, also skipping
    past typedefs.  */
 

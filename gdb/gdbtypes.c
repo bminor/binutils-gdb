@@ -231,33 +231,6 @@ type_allocator::new_type ()
   return type;
 }
 
-/* Allocate a new OBJFILE-associated type structure and fill it
-   with some defaults.  Space for the type structure is allocated
-   on the objfile's objfile_obstack.  */
-
-struct type *
-alloc_type (struct objfile *objfile)
-{
-  struct type *type;
-
-  gdb_assert (objfile != NULL);
-
-  /* Alloc the structure and start off with all fields zeroed.  */
-  type = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct type);
-  TYPE_MAIN_TYPE (type) = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-					  struct main_type);
-  OBJSTAT (objfile, n_types++);
-
-  type->set_owner (objfile);
-
-  /* Initialize the fields that might not be zero.  */
-
-  type->set_code (TYPE_CODE_UNDEF);
-  TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
-
-  return type;
-}
-
 /* See gdbtypes.h.  */
 
 type *
@@ -3437,7 +3410,7 @@ init_type (struct objfile *objfile, enum type_code code, int bit,
 {
   struct type *type;
 
-  type = alloc_type (objfile);
+  type = type_allocator (objfile).new_type ();
   set_type_code (type, code);
   gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
   type->set_length (bit / TARGET_CHAR_BIT);

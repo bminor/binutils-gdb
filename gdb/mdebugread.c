@@ -4727,7 +4727,7 @@ new_type (char *name)
 {
   struct type *t;
 
-  t = alloc_type (mdebugread_objfile);
+  t = type_allocator (mdebugread_objfile).new_type ();
   t->set_name (name);
   INIT_CPLUS_SPECIFIC (t);
   return t;

@@ -629,7 +629,7 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
   struct type *type;
   uint32_t kind;
 
-  type = alloc_type (of);
+  type = type_allocator (of).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr && strlen (name) != 0)
@@ -688,7 +688,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
   ctf_funcinfo_t cfi;
   uint32_t argc;
 
-  type = alloc_type (of);
+  type = type_allocator (of).new_type ();
 
   type->set_code (TYPE_CODE_FUNC);
   if (ctf_func_type_info (fp, tid, &cfi) < 0)
@@ -740,7 +740,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   ctf_dict_t *fp = ccp->fp;
   struct type *type;
 
-  type = alloc_type (of);
+  type = type_allocator (of).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr && strlen (name) != 0)
@@ -976,7 +976,7 @@ read_forward_type (struct ctf_context *ccp, ctf_id_t tid)
   struct type *type;
   uint32_t kind;
 
-  type = alloc_type (of);
+  type = type_allocator (of).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr && strlen (name) != 0)

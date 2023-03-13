@@ -354,7 +354,7 @@ coff_alloc_type (int index)
      We will fill it in later if we find out how.  */
   if (type == NULL)
     {
-      type = alloc_type (coffread_objfile);
+      type = type_allocator (coffread_objfile).new_type ();
       *type_addr = type;
     }
   return type;
