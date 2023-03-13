@@ -577,7 +577,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
 	    bits = cet.cte_bits;
 	  else
 	    bits = gdbarch_int_bit (gdbarch);
-	  type = init_integer_type (of, bits, !issigned, name);
+	  type = init_integer_type (alloc, bits, !issigned, name);
 	}
     }
   else if (kind == CTF_K_FLOAT)

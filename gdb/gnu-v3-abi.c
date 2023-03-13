@@ -129,7 +129,7 @@ get_gdb_vtable_type (struct gdbarch *arch)
 
   /* ARCH can't give us the true ptrdiff_t type, so we guess.  */
   struct type *ptrdiff_type
-    = arch_integer_type (arch, gdbarch_ptr_bit (arch), 0, "ptrdiff_t");
+    = init_integer_type (alloc, gdbarch_ptr_bit (arch), 0, "ptrdiff_t");
 
   /* We assume no padding is necessary, since GDB doesn't know
      anything about alignment at the moment.  If this assumption bites

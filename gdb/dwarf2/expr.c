@@ -700,9 +700,12 @@ dwarf_expr_context::address_type () const
 	   8 * this->m_addr_size);
 
   if (types->dw_types[ndx] == NULL)
-    types->dw_types[ndx]
-      = arch_integer_type (arch, 8 * this->m_addr_size,
-			   0, "<signed DWARF address type>");
+    {
+      type_allocator alloc (arch);
+      types->dw_types[ndx]
+	= init_integer_type (alloc, 8 * this->m_addr_size,
+			     0, "<signed DWARF address type>");
+    }
 
   return types->dw_types[ndx];
 }

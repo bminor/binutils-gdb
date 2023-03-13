@@ -15036,7 +15036,10 @@ dwarf2_init_integer_type (struct dwarf2_cu *cu, struct objfile *objfile,
       && strcmp (name, "void") == 0)
     type = objfile_type (objfile)->builtin_void;
   else
-    type = init_integer_type (objfile, bits, unsigned_p, name);
+    {
+      type_allocator alloc (objfile);
+      type = init_integer_type (alloc, bits, unsigned_p, name);
+    }
 
   return type;
 }

@@ -2294,10 +2294,12 @@ private:
   bool m_smash = false;
 };
 
-/* * Helper function to construct objfile-owned types.  */
+/* Allocate a TYPE_CODE_INT type structure using ALLOC.  BIT is the
+   type size in bits.  If UNSIGNED_P is non-zero, set the type's
+   TYPE_UNSIGNED flag.  NAME is the type name.  */
 
-extern struct type *init_integer_type (struct objfile *, int, int,
-				       const char *);
+extern struct type *init_integer_type (type_allocator &alloc, int bit,
+				       int unsigned_p, const char *name);
 extern struct type *init_character_type (struct objfile *, int, int,
 					 const char *);
 extern struct type *init_boolean_type (struct objfile *, int, int,
@@ -2314,8 +2316,6 @@ extern struct type *init_fixed_point_type (struct objfile *, int, int,
 					   const char *);
 
 /* Helper functions to construct architecture-owned types.  */
-extern struct type *arch_integer_type (struct gdbarch *, int, int,
-				       const char *);
 extern struct type *arch_character_type (struct gdbarch *, int, int,
 					 const char *);
 extern struct type *arch_boolean_type (struct gdbarch *, int, int,

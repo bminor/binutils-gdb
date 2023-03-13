@@ -201,29 +201,30 @@ build_d_types (struct gdbarch *gdbarch)
   struct builtin_d_type *builtin_d_type = new struct builtin_d_type;
 
   /* Basic types.  */
+  type_allocator alloc (gdbarch);
   builtin_d_type->builtin_void = builtin_type (gdbarch)->builtin_void;
   builtin_d_type->builtin_bool
     = arch_boolean_type (gdbarch, 8, 1, "bool");
   builtin_d_type->builtin_byte
-    = arch_integer_type (gdbarch, 8, 0, "byte");
+    = init_integer_type (alloc, 8, 0, "byte");
   builtin_d_type->builtin_ubyte
-    = arch_integer_type (gdbarch, 8, 1, "ubyte");
+    = init_integer_type (alloc, 8, 1, "ubyte");
   builtin_d_type->builtin_short
-    = arch_integer_type (gdbarch, 16, 0, "short");
+    = init_integer_type (alloc, 16, 0, "short");
   builtin_d_type->builtin_ushort
-    = arch_integer_type (gdbarch, 16, 1, "ushort");
+    = init_integer_type (alloc, 16, 1, "ushort");
   builtin_d_type->builtin_int
-    = arch_integer_type (gdbarch, 32, 0, "int");
+    = init_integer_type (alloc, 32, 0, "int");
   builtin_d_type->builtin_uint
-    = arch_integer_type (gdbarch, 32, 1, "uint");
+    = init_integer_type (alloc, 32, 1, "uint");
   builtin_d_type->builtin_long
-    = arch_integer_type (gdbarch, 64, 0, "long");
+    = init_integer_type (alloc, 64, 0, "long");
   builtin_d_type->builtin_ulong
-    = arch_integer_type (gdbarch, 64, 1, "ulong");
+    = init_integer_type (alloc, 64, 1, "ulong");
   builtin_d_type->builtin_cent
-    = arch_integer_type (gdbarch, 128, 0, "cent");
+    = init_integer_type (alloc, 128, 0, "cent");
   builtin_d_type->builtin_ucent
-    = arch_integer_type (gdbarch, 128, 1, "ucent");
+    = init_integer_type (alloc, 128, 1, "ucent");
   builtin_d_type->builtin_float
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 		       "float", gdbarch_float_format (gdbarch));

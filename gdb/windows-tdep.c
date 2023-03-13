@@ -216,13 +216,13 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
 
   type_allocator alloc (gdbarch);
 
-  dword_ptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
+  dword_ptr_type = init_integer_type (alloc, gdbarch_ptr_bit (gdbarch),
 				 1, "DWORD_PTR");
-  dword32_type = arch_integer_type (gdbarch, 32,
+  dword32_type = init_integer_type (alloc, 32,
 				 1, "DWORD32");
-  word_type = arch_integer_type (gdbarch, 16,
+  word_type = init_integer_type (alloc, 16,
 				 1, "WORD");
-  wchar_type = arch_integer_type (gdbarch, 16,
+  wchar_type = init_integer_type (alloc, 16,
 				  1, "wchar_t");
   void_ptr_type = lookup_pointer_type (builtin_type (gdbarch)->builtin_void);
   wchar_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
@@ -810,11 +810,12 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   if (windows_gdbarch_data->siginfo_type != NULL)
     return windows_gdbarch_data->siginfo_type;
 
-  dword_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+  type_allocator alloc (gdbarch);
+  dword_type = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 				  1, "DWORD");
   pvoid_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch), "PVOID",
 				  builtin_type (gdbarch)->builtin_void);
-  ulongptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
+  ulongptr_type = init_integer_type (alloc, gdbarch_ptr_bit (gdbarch),
 				     1, "ULONG_PTR");
 
   /* ExceptionCode value names */

@@ -312,8 +312,9 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 		  tp->next = tdep->type_entries;
 		  tdep->type_entries = tp;
 		  tp->size = size;
+		  type_allocator alloc (gdbarch);
 		  tp->virtual_type
-		    = arch_integer_type (gdbarch, size * 8, 1, name.c_str ());
+		    = init_integer_type (alloc, size * 8, 1, name.c_str ());
 		}
 
 	      reg->ctype = tp->virtual_type;

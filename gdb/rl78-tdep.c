@@ -1411,12 +1411,12 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Initialize types.  */
   type_allocator alloc (gdbarch);
   tdep->rl78_void = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
-  tdep->rl78_uint8 = arch_integer_type (gdbarch, 8, 1, "uint8_t");
-  tdep->rl78_int8 = arch_integer_type (gdbarch, 8, 0, "int8_t");
-  tdep->rl78_uint16 = arch_integer_type (gdbarch, 16, 1, "uint16_t");
-  tdep->rl78_int16 = arch_integer_type (gdbarch, 16, 0, "int16_t");
-  tdep->rl78_uint32 = arch_integer_type (gdbarch, 32, 1, "uint32_t");
-  tdep->rl78_int32 = arch_integer_type (gdbarch, 32, 0, "int32_t");
+  tdep->rl78_uint8 = init_integer_type (alloc, 8, 1, "uint8_t");
+  tdep->rl78_int8 = init_integer_type (alloc, 8, 0, "int8_t");
+  tdep->rl78_uint16 = init_integer_type (alloc, 16, 1, "uint16_t");
+  tdep->rl78_int16 = init_integer_type (alloc, 16, 0, "int16_t");
+  tdep->rl78_uint32 = init_integer_type (alloc, 32, 1, "uint32_t");
+  tdep->rl78_int32 = init_integer_type (alloc, 32, 0, "int32_t");
 
   tdep->rl78_data_pointer
     = arch_pointer_type (gdbarch, 16, "rl78_data_addr_t", tdep->rl78_void);

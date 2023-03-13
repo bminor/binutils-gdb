@@ -483,33 +483,34 @@ build_go_types (struct gdbarch *gdbarch)
 {
   struct builtin_go_type *builtin_go_type = new struct builtin_go_type;
 
+  type_allocator alloc (gdbarch);
   builtin_go_type->builtin_void = builtin_type (gdbarch)->builtin_void;
   builtin_go_type->builtin_char
     = arch_character_type (gdbarch, 8, 1, "char");
   builtin_go_type->builtin_bool
     = arch_boolean_type (gdbarch, 8, 0, "bool");
   builtin_go_type->builtin_int
-    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0, "int");
+    = init_integer_type (alloc, gdbarch_int_bit (gdbarch), 0, "int");
   builtin_go_type->builtin_uint
-    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "uint");
+    = init_integer_type (alloc, gdbarch_int_bit (gdbarch), 1, "uint");
   builtin_go_type->builtin_uintptr
-    = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "uintptr");
+    = init_integer_type (alloc, gdbarch_ptr_bit (gdbarch), 1, "uintptr");
   builtin_go_type->builtin_int8
-    = arch_integer_type (gdbarch, 8, 0, "int8");
+    = init_integer_type (alloc, 8, 0, "int8");
   builtin_go_type->builtin_int16
-    = arch_integer_type (gdbarch, 16, 0, "int16");
+    = init_integer_type (alloc, 16, 0, "int16");
   builtin_go_type->builtin_int32
-    = arch_integer_type (gdbarch, 32, 0, "int32");
+    = init_integer_type (alloc, 32, 0, "int32");
   builtin_go_type->builtin_int64
-    = arch_integer_type (gdbarch, 64, 0, "int64");
+    = init_integer_type (alloc, 64, 0, "int64");
   builtin_go_type->builtin_uint8
-    = arch_integer_type (gdbarch, 8, 1, "uint8");
+    = init_integer_type (alloc, 8, 1, "uint8");
   builtin_go_type->builtin_uint16
-    = arch_integer_type (gdbarch, 16, 1, "uint16");
+    = init_integer_type (alloc, 16, 1, "uint16");
   builtin_go_type->builtin_uint32
-    = arch_integer_type (gdbarch, 32, 1, "uint32");
+    = init_integer_type (alloc, 32, 1, "uint32");
   builtin_go_type->builtin_uint64
-    = arch_integer_type (gdbarch, 64, 1, "uint64");
+    = init_integer_type (alloc, 64, 1, "uint64");
   builtin_go_type->builtin_float32
     = arch_float_type (gdbarch, 32, "float32", floatformats_ieee_single);
   builtin_go_type->builtin_float64

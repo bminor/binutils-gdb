@@ -201,12 +201,12 @@ make_types (struct gdbarch *arch)
   tdep->code_addr_reg_type
     = arch_pointer_type (arch, code_addr_reg_bits, type_name, tdep->func_voyd);
 
-  tdep->uint8  = arch_integer_type (arch,  8, 1, "uint8_t");
-  tdep->uint16 = arch_integer_type (arch, 16, 1, "uint16_t");
-  tdep->int8   = arch_integer_type (arch,  8, 0, "int8_t");
-  tdep->int16  = arch_integer_type (arch, 16, 0, "int16_t");
-  tdep->int32  = arch_integer_type (arch, 32, 0, "int32_t");
-  tdep->int64  = arch_integer_type (arch, 64, 0, "int64_t");
+  tdep->uint8  = init_integer_type (alloc,  8, 1, "uint8_t");
+  tdep->uint16 = init_integer_type (alloc, 16, 1, "uint16_t");
+  tdep->int8   = init_integer_type (alloc,  8, 0, "int8_t");
+  tdep->int16  = init_integer_type (alloc, 16, 0, "int16_t");
+  tdep->int32  = init_integer_type (alloc, 32, 0, "int32_t");
+  tdep->int64  = init_integer_type (alloc, 64, 0, "int64_t");
 }
 
 

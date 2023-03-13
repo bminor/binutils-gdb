@@ -1400,36 +1400,36 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btChar:
-      tp = init_integer_type (objfile, 8, 0, "char");
+      tp = init_integer_type (alloc, 8, 0, "char");
       tp->set_has_no_signedness (true);
       break;
 
     case btUChar:
-      tp = init_integer_type (objfile, 8, 1, "unsigned char");
+      tp = init_integer_type (alloc, 8, 1, "unsigned char");
       break;
 
     case btShort:
-      tp = init_integer_type (objfile, 16, 0, "short");
+      tp = init_integer_type (alloc, 16, 0, "short");
       break;
 
     case btUShort:
-      tp = init_integer_type (objfile, 16, 1, "unsigned short");
+      tp = init_integer_type (alloc, 16, 1, "unsigned short");
       break;
 
     case btInt:
-      tp = init_integer_type (objfile, 32, 0, "int");
+      tp = init_integer_type (alloc, 32, 0, "int");
       break;
 
    case btUInt:
-      tp = init_integer_type (objfile, 32, 1, "unsigned int");
+      tp = init_integer_type (alloc, 32, 1, "unsigned int");
       break;
 
     case btLong:
-      tp = init_integer_type (objfile, 32, 0, "long");
+      tp = init_integer_type (alloc, 32, 0, "long");
       break;
 
     case btULong:
-      tp = init_integer_type (objfile, 32, 1, "unsigned long");
+      tp = init_integer_type (alloc, 32, 1, "unsigned long");
       break;
 
     case btFloat:
@@ -1454,7 +1454,7 @@ basic_type (int bt, struct objfile *objfile)
       /* We use TYPE_CODE_INT to print these as integers.  Does this do any
 	 good?  Would we be better off with TYPE_CODE_ERROR?  Should
 	 TYPE_CODE_ERROR print things in hex if it knows the size?  */
-      tp = init_integer_type (objfile, gdbarch_int_bit (gdbarch), 0,
+      tp = init_integer_type (alloc, gdbarch_int_bit (gdbarch), 0,
 			      "fixed decimal");
       break;
 
@@ -1474,19 +1474,19 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btLong64:
-      tp = init_integer_type (objfile, 64, 0, "long");
+      tp = init_integer_type (alloc, 64, 0, "long");
       break;
 
     case btULong64:
-      tp = init_integer_type (objfile, 64, 1, "unsigned long");
+      tp = init_integer_type (alloc, 64, 1, "unsigned long");
       break;
 
     case btLongLong64:
-      tp = init_integer_type (objfile, 64, 0, "long long");
+      tp = init_integer_type (alloc, 64, 0, "long long");
       break;
 
     case btULongLong64:
-      tp = init_integer_type (objfile, 64, 1, "unsigned long long");
+      tp = init_integer_type (alloc, 64, 1, "unsigned long long");
       break;
 
     case btAdr64:
@@ -1495,11 +1495,11 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btInt64:
-      tp = init_integer_type (objfile, 64, 0, "int");
+      tp = init_integer_type (alloc, 64, 0, "int");
       break;
 
     case btUInt64:
-      tp = init_integer_type (objfile, 64, 1, "unsigned int");
+      tp = init_integer_type (alloc, 64, 1, "unsigned int");
       break;
 
     default:

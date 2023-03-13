@@ -1594,11 +1594,12 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
   if (fbsd_gdbarch_data->siginfo_type != NULL)
     return fbsd_gdbarch_data->siginfo_type;
 
-  int_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+  type_allocator alloc (gdbarch);
+  int_type = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 				0, "int");
-  int32_type = arch_integer_type (gdbarch, 32, 0, "int32_t");
-  uint32_type = arch_integer_type (gdbarch, 32, 1, "uint32_t");
-  long_type = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+  int32_type = init_integer_type (alloc, 32, 0, "int32_t");
+  uint32_type = init_integer_type (alloc, 32, 1, "uint32_t");
+  long_type = init_integer_type (alloc, gdbarch_long_bit (gdbarch),
 				 0, "long");
   void_ptr_type = lookup_pointer_type (builtin_type (gdbarch)->builtin_void);
 
@@ -1609,7 +1610,6 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
   append_composite_type_field (sigval_type, "sival_ptr", void_ptr_type);
 
   /* __pid_t */
-  type_allocator alloc (gdbarch);
   pid_type = alloc.new_type (TYPE_CODE_TYPEDEF,
 			     int32_type->length () * TARGET_CHAR_BIT,
 			     "__pid_t");

@@ -909,21 +909,22 @@ public:
 
     struct type *el_type, *char_type, *int_type;
 
-    char_type = el_type = add (arch_integer_type (gdbarch, 8, 0, "char"));
+    type_allocator alloc (gdbarch);
+    char_type = el_type = add (init_integer_type (alloc, 8, 0, "char"));
     BUILD_OCL_VTYPES (char, el_type);
-    el_type = add (arch_integer_type (gdbarch, 8, 1, "uchar"));
+    el_type = add (init_integer_type (alloc, 8, 1, "uchar"));
     BUILD_OCL_VTYPES (uchar, el_type);
-    el_type = add (arch_integer_type (gdbarch, 16, 0, "short"));
+    el_type = add (init_integer_type (alloc, 16, 0, "short"));
     BUILD_OCL_VTYPES (short, el_type);
-    el_type = add (arch_integer_type (gdbarch, 16, 1, "ushort"));
+    el_type = add (init_integer_type (alloc, 16, 1, "ushort"));
     BUILD_OCL_VTYPES (ushort, el_type);
-    int_type = el_type = add (arch_integer_type (gdbarch, 32, 0, "int"));
+    int_type = el_type = add (init_integer_type (alloc, 32, 0, "int"));
     BUILD_OCL_VTYPES (int, el_type);
-    el_type = add (arch_integer_type (gdbarch, 32, 1, "uint"));
+    el_type = add (init_integer_type (alloc, 32, 1, "uint"));
     BUILD_OCL_VTYPES (uint, el_type);
-    el_type = add (arch_integer_type (gdbarch, 64, 0, "long"));
+    el_type = add (init_integer_type (alloc, 64, 0, "long"));
     BUILD_OCL_VTYPES (long, el_type);
-    el_type = add (arch_integer_type (gdbarch, 64, 1, "ulong"));
+    el_type = add (init_integer_type (alloc, 64, 1, "ulong"));
     BUILD_OCL_VTYPES (ulong, el_type);
     el_type = add (arch_float_type (gdbarch, 16, "half", floatformats_ieee_half));
     BUILD_OCL_VTYPES (half, el_type);
@@ -933,14 +934,14 @@ public:
     BUILD_OCL_VTYPES (double, el_type);
 
     add (arch_boolean_type (gdbarch, 8, 1, "bool"));
-    add (arch_integer_type (gdbarch, 8, 1, "unsigned char"));
-    add (arch_integer_type (gdbarch, 16, 1, "unsigned short"));
-    add (arch_integer_type (gdbarch, 32, 1, "unsigned int"));
-    add (arch_integer_type (gdbarch, 64, 1, "unsigned long"));
-    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "size_t"));
-    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "ptrdiff_t"));
-    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "intptr_t"));
-    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "uintptr_t"));
+    add (init_integer_type (alloc, 8, 1, "unsigned char"));
+    add (init_integer_type (alloc, 16, 1, "unsigned short"));
+    add (init_integer_type (alloc, 32, 1, "unsigned int"));
+    add (init_integer_type (alloc, 64, 1, "unsigned long"));
+    add (init_integer_type (alloc, gdbarch_ptr_bit (gdbarch), 1, "size_t"));
+    add (init_integer_type (alloc, gdbarch_ptr_bit (gdbarch), 0, "ptrdiff_t"));
+    add (init_integer_type (alloc, gdbarch_ptr_bit (gdbarch), 0, "intptr_t"));
+    add (init_integer_type (alloc, gdbarch_ptr_bit (gdbarch), 1, "uintptr_t"));
     add (builtin_type (gdbarch)->builtin_void);
 
     /* Type of elements of strings.  */

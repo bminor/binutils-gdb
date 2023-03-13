@@ -13557,11 +13557,11 @@ public:
     };
 
     type_allocator alloc (gdbarch);
-    add (arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+    add (init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 			    0, "integer"));
-    add (arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+    add (init_integer_type (alloc, gdbarch_long_bit (gdbarch),
 			    0, "long_integer"));
-    add (arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch),
+    add (init_integer_type (alloc, gdbarch_short_bit (gdbarch),
 			    0, "short_integer"));
     struct type *char_type = arch_character_type (gdbarch, TARGET_CHAR_BIT,
 						  1, "character");
@@ -13573,14 +13573,14 @@ public:
 			  "float", gdbarch_float_format (gdbarch)));
     add (arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
 			  "long_float", gdbarch_double_format (gdbarch)));
-    add (arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
+    add (init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			    0, "long_long_integer"));
     add (arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
 			  "long_long_float",
 			  gdbarch_long_double_format (gdbarch)));
-    add (arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+    add (init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 			    0, "natural"));
-    add (arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+    add (init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 			    0, "positive"));
     add (builtin->builtin_void);
 
@@ -13594,7 +13594,7 @@ public:
        type.  This is a signed integral type whose size is the same as
        the size of addresses.  */
     unsigned int addr_length = system_addr_ptr->length ();
-    add (arch_integer_type (gdbarch, addr_length * HOST_CHAR_BIT, 0,
+    add (init_integer_type (alloc, addr_length * HOST_CHAR_BIT, 0,
 			    "storage_offset"));
 
     lai->set_bool_type (builtin->builtin_bool);

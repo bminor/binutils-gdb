@@ -2090,35 +2090,35 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
 	 is other than 32 bits, then it should use a new negative type
 	 number (or avoid negative type numbers for that case).
 	 See stabs.texinfo.  */
-      rettype = init_integer_type (objfile, 32, 0, "int");
+      rettype = init_integer_type (alloc, 32, 0, "int");
       break;
     case 2:
-      rettype = init_integer_type (objfile, 8, 0, "char");
+      rettype = init_integer_type (alloc, 8, 0, "char");
       rettype->set_has_no_signedness (true);
       break;
     case 3:
-      rettype = init_integer_type (objfile, 16, 0, "short");
+      rettype = init_integer_type (alloc, 16, 0, "short");
       break;
     case 4:
-      rettype = init_integer_type (objfile, 32, 0, "long");
+      rettype = init_integer_type (alloc, 32, 0, "long");
       break;
     case 5:
-      rettype = init_integer_type (objfile, 8, 1, "unsigned char");
+      rettype = init_integer_type (alloc, 8, 1, "unsigned char");
       break;
     case 6:
-      rettype = init_integer_type (objfile, 8, 0, "signed char");
+      rettype = init_integer_type (alloc, 8, 0, "signed char");
       break;
     case 7:
-      rettype = init_integer_type (objfile, 16, 1, "unsigned short");
+      rettype = init_integer_type (alloc, 16, 1, "unsigned short");
       break;
     case 8:
-      rettype = init_integer_type (objfile, 32, 1, "unsigned int");
+      rettype = init_integer_type (alloc, 32, 1, "unsigned int");
       break;
     case 9:
-      rettype = init_integer_type (objfile, 32, 1, "unsigned");
+      rettype = init_integer_type (alloc, 32, 1, "unsigned");
       break;
     case 10:
-      rettype = init_integer_type (objfile, 32, 1, "unsigned long");
+      rettype = init_integer_type (alloc, 32, 1, "unsigned long");
       break;
     case 11:
       rettype = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
@@ -2141,7 +2141,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
 				 floatformats_ieee_double);
       break;
     case 15:
-      rettype = init_integer_type (objfile, 32, 0, "integer");
+      rettype = init_integer_type (alloc, 32, 0, "integer");
       break;
     case 16:
       rettype = init_boolean_type (objfile, 32, 1, "boolean");
@@ -2183,28 +2183,28 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
 				   rs6000_builtin_type (13, objfile));
       break;
     case 27:
-      rettype = init_integer_type (objfile, 8, 0, "integer*1");
+      rettype = init_integer_type (alloc, 8, 0, "integer*1");
       break;
     case 28:
-      rettype = init_integer_type (objfile, 16, 0, "integer*2");
+      rettype = init_integer_type (alloc, 16, 0, "integer*2");
       break;
     case 29:
-      rettype = init_integer_type (objfile, 32, 0, "integer*4");
+      rettype = init_integer_type (alloc, 32, 0, "integer*4");
       break;
     case 30:
       rettype = init_character_type (objfile, 16, 0, "wchar");
       break;
     case 31:
-      rettype = init_integer_type (objfile, 64, 0, "long long");
+      rettype = init_integer_type (alloc, 64, 0, "long long");
       break;
     case 32:
-      rettype = init_integer_type (objfile, 64, 1, "unsigned long long");
+      rettype = init_integer_type (alloc, 64, 1, "unsigned long long");
       break;
     case 33:
-      rettype = init_integer_type (objfile, 64, 1, "logical*8");
+      rettype = init_integer_type (alloc, 64, 1, "logical*8");
       break;
     case 34:
-      rettype = init_integer_type (objfile, 64, 0, "integer*8");
+      rettype = init_integer_type (alloc, 64, 0, "integer*8");
       break;
     }
   negative_types[-typenum] = rettype;
@@ -3761,7 +3761,7 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
   if (boolean_type)
     return init_boolean_type (objfile, type_bits, unsigned_type, NULL);
   else
-    return init_integer_type (objfile, type_bits, unsigned_type, NULL);
+    return init_integer_type (alloc, type_bits, unsigned_type, NULL);
 }
 
 static struct type *
@@ -4059,7 +4059,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 	}
 
       if (got_signed || got_unsigned)
-	return init_integer_type (objfile, nbits, got_unsigned, NULL);
+	return init_integer_type (alloc, nbits, got_unsigned, NULL);
       else
 	return error_type (pp, objfile);
     }
@@ -4105,14 +4105,14 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 	  bits = gdbarch_int_bit (gdbarch);
 	}
 
-      return init_integer_type (objfile, bits, 1, NULL);
+      return init_integer_type (alloc, bits, 1, NULL);
     }
 
   /* Special case: char is defined (Who knows why) as a subrange of
      itself with range 0-127.  */
   else if (self_subrange && n2 == 0 && n3 == 127)
     {
-      struct type *type = init_integer_type (objfile, TARGET_CHAR_BIT,
+      struct type *type = init_integer_type (alloc, TARGET_CHAR_BIT,
 					     0, NULL);
       type->set_has_no_signedness (true);
       return type;
@@ -4126,7 +4126,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 
       if (n3 < 0)
 	/* n3 actually gives the size.  */
-	return init_integer_type (objfile, -n3 * TARGET_CHAR_BIT, 1, NULL);
+	return init_integer_type (alloc, -n3 * TARGET_CHAR_BIT, 1, NULL);
 
       /* Is n3 == 2**(8n)-1 for some integer n?  Then it's an
 	 unsigned n-byte integer.  But do require n to be a power of
@@ -4140,7 +4140,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 	  bits >>= 8;
 	if (bits == 0
 	    && ((bytes - 1) & bytes) == 0) /* "bytes is a power of two" */
-	  return init_integer_type (objfile, bytes * TARGET_CHAR_BIT, 1, NULL);
+	  return init_integer_type (alloc, bytes * TARGET_CHAR_BIT, 1, NULL);
       }
     }
   /* I think this is for Convex "long long".  Since I don't know whether
@@ -4150,15 +4150,15 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 	   && (self_subrange
 	       || n2 == -gdbarch_long_long_bit
 			  (gdbarch) / TARGET_CHAR_BIT))
-    return init_integer_type (objfile, -n2 * TARGET_CHAR_BIT, 0, NULL);
+    return init_integer_type (alloc, -n2 * TARGET_CHAR_BIT, 0, NULL);
   else if (n2 == -n3 - 1)
     {
       if (n3 == 0x7f)
-	return init_integer_type (objfile, 8, 0, NULL);
+	return init_integer_type (alloc, 8, 0, NULL);
       if (n3 == 0x7fff)
-	return init_integer_type (objfile, 16, 0, NULL);
+	return init_integer_type (alloc, 16, 0, NULL);
       if (n3 == 0x7fffffff)
-	return init_integer_type (objfile, 32, 0, NULL);
+	return init_integer_type (alloc, 32, 0, NULL);
     }
 
   /* We have a real range type on our hands.  Allocate space and

@@ -3398,17 +3398,15 @@ floatformat_from_type (const struct type *type)
   return TYPE_FLOATFORMAT (type);
 }
 
-/* Allocate a TYPE_CODE_INT type structure associated with OBJFILE.
-   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
-   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+/* See gdbtypes.h.  */
 
 struct type *
-init_integer_type (struct objfile *objfile,
+init_integer_type (type_allocator &alloc,
 		   int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
-  t = type_allocator (objfile).new_type (TYPE_CODE_INT, bit, name);
+  t = alloc.new_type (TYPE_CODE_INT, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -5752,23 +5750,6 @@ copy_type (const struct type *type)
 
 /* Helper functions to initialize architecture-specific types.  */
 
-/* Allocate a TYPE_CODE_INT type structure associated with GDBARCH.
-   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
-   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
-
-struct type *
-arch_integer_type (struct gdbarch *gdbarch,
-		   int bit, int unsigned_p, const char *name)
-{
-  struct type *t;
-
-  t = type_allocator (gdbarch).new_type (TYPE_CODE_INT, bit, name);
-  if (unsigned_p)
-    t->set_is_unsigned (true);
-
-  return t;
-}
-
 /* Allocate a TYPE_CODE_CHAR type structure associated with GDBARCH.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
@@ -6086,38 +6067,38 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
   builtin_type->builtin_void
     = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   builtin_type->builtin_char
-    = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
+    = init_integer_type (alloc, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
   builtin_type->builtin_char->set_has_no_signedness (true);
   builtin_type->builtin_signed_char
-    = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
+    = init_integer_type (alloc, TARGET_CHAR_BIT,
 			 0, "signed char");
   builtin_type->builtin_unsigned_char
-    = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
+    = init_integer_type (alloc, TARGET_CHAR_BIT,
 			 1, "unsigned char");
   builtin_type->builtin_short
-    = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_short_bit (gdbarch),
 			 0, "short");
   builtin_type->builtin_unsigned_short
-    = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_short_bit (gdbarch),
 			 1, "unsigned short");
   builtin_type->builtin_int
-    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 			 0, "int");
   builtin_type->builtin_unsigned_int
-    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 			 1, "unsigned int");
   builtin_type->builtin_long
-    = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_bit (gdbarch),
 			 0, "long");
   builtin_type->builtin_unsigned_long
-    = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_bit (gdbarch),
 			 1, "unsigned long");
   builtin_type->builtin_long_long
-    = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			 0, "long long");
   builtin_type->builtin_unsigned_long_long
-    = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			 1, "unsigned long long");
   builtin_type->builtin_half
     = arch_float_type (gdbarch, gdbarch_half_bit (gdbarch),
@@ -6160,31 +6141,31 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
 
   /* Fixed-size integer types.  */
   builtin_type->builtin_int0
-    = arch_integer_type (gdbarch, 0, 0, "int0_t");
+    = init_integer_type (alloc, 0, 0, "int0_t");
   builtin_type->builtin_int8
-    = arch_integer_type (gdbarch, 8, 0, "int8_t");
+    = init_integer_type (alloc, 8, 0, "int8_t");
   builtin_type->builtin_uint8
-    = arch_integer_type (gdbarch, 8, 1, "uint8_t");
+    = init_integer_type (alloc, 8, 1, "uint8_t");
   builtin_type->builtin_int16
-    = arch_integer_type (gdbarch, 16, 0, "int16_t");
+    = init_integer_type (alloc, 16, 0, "int16_t");
   builtin_type->builtin_uint16
-    = arch_integer_type (gdbarch, 16, 1, "uint16_t");
+    = init_integer_type (alloc, 16, 1, "uint16_t");
   builtin_type->builtin_int24
-    = arch_integer_type (gdbarch, 24, 0, "int24_t");
+    = init_integer_type (alloc, 24, 0, "int24_t");
   builtin_type->builtin_uint24
-    = arch_integer_type (gdbarch, 24, 1, "uint24_t");
+    = init_integer_type (alloc, 24, 1, "uint24_t");
   builtin_type->builtin_int32
-    = arch_integer_type (gdbarch, 32, 0, "int32_t");
+    = init_integer_type (alloc, 32, 0, "int32_t");
   builtin_type->builtin_uint32
-    = arch_integer_type (gdbarch, 32, 1, "uint32_t");
+    = init_integer_type (alloc, 32, 1, "uint32_t");
   builtin_type->builtin_int64
-    = arch_integer_type (gdbarch, 64, 0, "int64_t");
+    = init_integer_type (alloc, 64, 0, "int64_t");
   builtin_type->builtin_uint64
-    = arch_integer_type (gdbarch, 64, 1, "uint64_t");
+    = init_integer_type (alloc, 64, 1, "uint64_t");
   builtin_type->builtin_int128
-    = arch_integer_type (gdbarch, 128, 0, "int128_t");
+    = init_integer_type (alloc, 128, 0, "int128_t");
   builtin_type->builtin_uint128
-    = arch_integer_type (gdbarch, 128, 1, "uint128_t");
+    = init_integer_type (alloc, 128, 1, "uint128_t");
 
   builtin_type->builtin_int8->set_instance_flags
     (builtin_type->builtin_int8->instance_flags ()
@@ -6196,11 +6177,11 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
 
   /* Wide character types.  */
   builtin_type->builtin_char16
-    = arch_integer_type (gdbarch, 16, 1, "char16_t");
+    = init_integer_type (alloc, 16, 1, "char16_t");
   builtin_type->builtin_char32
-    = arch_integer_type (gdbarch, 32, 1, "char32_t");
+    = init_integer_type (alloc, 32, 1, "char32_t");
   builtin_type->builtin_wchar
-    = arch_integer_type (gdbarch, gdbarch_wchar_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_wchar_bit (gdbarch),
 			 !gdbarch_wchar_signed (gdbarch), "wchar_t");
 
   /* Default data/code pointer types.  */
@@ -6263,38 +6244,38 @@ objfile_type (struct objfile *objfile)
   objfile_type->builtin_void
     = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   objfile_type->builtin_char
-    = init_integer_type (objfile, TARGET_CHAR_BIT,
+    = init_integer_type (alloc, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
   objfile_type->builtin_char->set_has_no_signedness (true);
   objfile_type->builtin_signed_char
-    = init_integer_type (objfile, TARGET_CHAR_BIT,
+    = init_integer_type (alloc, TARGET_CHAR_BIT,
 			 0, "signed char");
   objfile_type->builtin_unsigned_char
-    = init_integer_type (objfile, TARGET_CHAR_BIT,
+    = init_integer_type (alloc, TARGET_CHAR_BIT,
 			 1, "unsigned char");
   objfile_type->builtin_short
-    = init_integer_type (objfile, gdbarch_short_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_short_bit (gdbarch),
 			 0, "short");
   objfile_type->builtin_unsigned_short
-    = init_integer_type (objfile, gdbarch_short_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_short_bit (gdbarch),
 			 1, "unsigned short");
   objfile_type->builtin_int
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 			 0, "int");
   objfile_type->builtin_unsigned_int
-    = init_integer_type (objfile, gdbarch_int_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 			 1, "unsigned int");
   objfile_type->builtin_long
-    = init_integer_type (objfile, gdbarch_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_bit (gdbarch),
 			 0, "long");
   objfile_type->builtin_unsigned_long
-    = init_integer_type (objfile, gdbarch_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_bit (gdbarch),
 			 1, "unsigned long");
   objfile_type->builtin_long_long
-    = init_integer_type (objfile, gdbarch_long_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			 0, "long long");
   objfile_type->builtin_unsigned_long_long
-    = init_integer_type (objfile, gdbarch_long_long_bit (gdbarch),
+    = init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			 1, "unsigned long long");
   objfile_type->builtin_float
     = init_float_type (objfile, gdbarch_float_bit (gdbarch),
@@ -6354,7 +6335,7 @@ objfile_type (struct objfile *objfile)
      are indeed in the unified virtual address space.  */
 
   objfile_type->builtin_core_addr
-    = init_integer_type (objfile, gdbarch_addr_bit (gdbarch), 1,
+    = init_integer_type (alloc, gdbarch_addr_bit (gdbarch), 1,
 			 "__CORE_ADDR");
 
   objfile_type_data.set (objfile, objfile_type);
