@@ -61,6 +61,10 @@ proc test_layout_or_focus {layout_name terminal execution} {
     }
 
     if {$dumb_terminal} {
+	if { [is_remote host] } {
+	    # setenv TERM dummy has no effect on remote host.
+	    return
+	}
 	gdb_test "layout $layout_name" \
 	    "Cannot enable the TUI: terminal doesn't support cursor addressing \\\[TERM=dumb\\\]"
     } else {
