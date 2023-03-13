@@ -412,7 +412,7 @@ intern (ctf_dict_t *fp, char *atom)
 /* Add an indication of the namespace to a type name in a way that is not valid
    for C identifiers.  Used to maintain hashes of type names to other things
    while allowing for the four C namespaces (normal, struct, union, enum).
-   Return a new dynamically-allocated string.  */
+   Return a pointer into the cd_decorated_names atoms table.  */
 static const char *
 ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
 {
