@@ -831,7 +831,8 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
   if (idx_type == nullptr)
     idx_type = objfile_type (objfile)->builtin_int;
 
-  range_type = create_static_range_type (NULL, idx_type, 0, ar.ctr_nelems - 1);
+  type_allocator alloc (objfile);
+  range_type = create_static_range_type (alloc, idx_type, 0, ar.ctr_nelems - 1);
   type = create_array_type (NULL, element_type, range_type);
   if (ar.ctr_nelems <= 1)	/* Check if undefined upper bound.  */
     {

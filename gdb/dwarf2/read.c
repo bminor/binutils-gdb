@@ -13547,7 +13547,8 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
       range_fields[i + 1].set_name (objfile->intern (name));
     }
 
-  struct type *bounds = type_allocator (objfile).new_type ();
+  type_allocator alloc (objfile);
+  struct type *bounds = alloc.new_type ();
   bounds->set_code (TYPE_CODE_STRUCT);
 
   bounds->set_num_fields (range_fields.size ());
@@ -13571,7 +13572,7 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
       gdb_assert (iter->code () == TYPE_CODE_ARRAY);
       iter->main_type->dyn_prop_list = nullptr;
       iter->set_index_type
-	(create_static_range_type (NULL, bounds->field (i).type (), 1, 0));
+	(create_static_range_type (alloc, bounds->field (i).type (), 1, 0));
       iter = iter->target_type ();
     }
 
@@ -13655,7 +13656,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (die->child == NULL)
     {
       index_type = objfile_type (objfile)->builtin_int;
-      range_type = create_static_range_type (NULL, index_type, 0, -1);
+      type_allocator alloc (objfile);
+      range_type = create_static_range_type (alloc, index_type, 0, -1);
       type = create_array_type_with_stride (NULL, element_type, range_type,
 					    byte_stride_prop, bit_stride);
       return set_die_type (die, type, cu);
@@ -14496,14 +14498,15 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   index_type = objfile_type (objfile)->builtin_int;
+  type_allocator alloc (objfile);
   if (length_is_constant)
-    range_type = create_static_range_type (NULL, index_type, 1, length);
+    range_type = create_static_range_type (alloc, index_type, 1, length);
   else
     {
       struct dynamic_prop low_bound;
 
       low_bound.set_const_val (1);
-      range_type = create_range_type (NULL, index_type, &low_bound, &prop, 0);
+      range_type = create_range_type (alloc, index_type, &low_bound, &prop, 0);
     }
   char_type = language_string_char_type (cu->language_defn, gdbarch);
   type = create_string_type (NULL, char_type, range_type);
@@ -15707,6 +15710,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+  type_allocator alloc (cu->per_objfile->objfile);
   if (attr_byte_stride != nullptr
       || attr_bit_stride != nullptr)
     {
@@ -15715,11 +15719,11 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	= byte_stride_p ? &byte_stride_prop : &bit_stride_prop;
 
       range_type
-	= create_range_type_with_stride (NULL, orig_base_type, &low,
+	= create_range_type_with_stride (alloc, orig_base_type, &low,
 					 &high, bias, stride, byte_stride_p);
     }
   else
-    range_type = create_range_type (NULL, orig_base_type, &low, &high, bias);
+    range_type = create_range_type (alloc, orig_base_type, &low, &high, bias);
 
   if (high_bound_is_count)
     range_type->bounds ()->flag_upper_bound_is_count = 1;

@@ -2141,15 +2141,15 @@ ada_type_of_array (struct value *arr, int bounds)
       while (arity > 0)
 	{
 	  type_allocator alloc (arr->type ());
-	  struct type *range_type = alloc.new_type ();
 	  struct type *array_type = alloc.new_type ();
 	  struct value *low = desc_one_bound (descriptor, arity, 0);
 	  struct value *high = desc_one_bound (descriptor, arity, 1);
 
 	  arity -= 1;
-	  create_static_range_type (range_type, low->type (),
-				    longest_to_int (value_as_long (low)),
-				    longest_to_int (value_as_long (high)));
+	  struct type *range_type
+	    = create_static_range_type (alloc, low->type (),
+					longest_to_int (value_as_long (low)),
+					longest_to_int (value_as_long (high)));
 	  elt_type = create_array_type (array_type, elt_type, range_type);
 
 	  if (ada_is_unconstrained_packed_array_type (arr->type ()))
@@ -3094,8 +3094,9 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
 {
   struct type *type0 = ada_check_typedef (type);
   struct type *base_index_type = type0->index_type ()->target_type ();
+  type_allocator alloc (base_index_type);
   struct type *index_type
-    = create_static_range_type (NULL, base_index_type, low, high);
+    = create_static_range_type (alloc, base_index_type, low, high);
   struct type *slice_type = create_array_type_with_stride
 			      (NULL, type0->target_type (), index_type,
 			       type0->dyn_prop (DYN_PROP_BYTE_STRIDE),
@@ -3128,8 +3129,9 @@ ada_value_slice (struct value *array, int low, int high)
 {
   struct type *type = ada_check_typedef (array->type ());
   struct type *base_index_type = type->index_type ()->target_type ();
+  type_allocator alloc (type->index_type ());
   struct type *index_type
-    = create_static_range_type (NULL, type->index_type (), low, high);
+    = create_static_range_type (alloc, type->index_type (), low, high);
   struct type *slice_type = create_array_type_with_stride
 			      (NULL, type->target_type (), index_type,
 			       type->dyn_prop (DYN_PROP_BYTE_STRIDE),
@@ -3400,9 +3402,10 @@ static struct value *
 empty_array (struct type *arr_type, int low, int high)
 {
   struct type *arr_type0 = ada_check_typedef (arr_type);
+  type_allocator alloc (arr_type0->index_type ()->target_type ());
   struct type *index_type
     = create_static_range_type
-	(NULL, arr_type0->index_type ()->target_type (), low,
+	(alloc, arr_type0->index_type ()->target_type (), low,
 	 high < low ? low - 1 : high);
   struct type *elt_type = ada_array_element_type (arr_type0, 1);
 
@@ -11515,8 +11518,10 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       if (L < INT_MIN || U > INT_MAX)
 	return raw_type;
       else
-	return create_static_range_type (type_allocator (raw_type).new_type (),
-					 raw_type, L, U);
+	{
+	  type_allocator alloc (raw_type);
+	  return create_static_range_type (alloc, raw_type, L, U);
+	}
     }
   else
     {
@@ -11567,8 +11572,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 	    }
 	}
 
-      type = create_static_range_type (type_allocator (raw_type).new_type (),
-				       base_type, L, U);
+      type_allocator alloc (raw_type);
+      type = create_static_range_type (alloc, base_type, L, U);
       /* create_static_range_type alters the resulting type's length
 	 to match the size of the base_type, which is not what we want.
 	 Set it back to the original range type's length.  */

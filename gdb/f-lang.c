@@ -131,8 +131,9 @@ fortran_bounds_all_dims (bool lbound_p,
   int ndimensions = calc_f77_array_dims (array_type);
 
   /* Allocate a result value of the correct type.  */
+  type_allocator alloc (gdbarch);
   struct type *range
-    = create_static_range_type (nullptr,
+    = create_static_range_type (alloc,
 				builtin_f_type (gdbarch)->builtin_integer,
 				1, ndimensions);
   struct type *elm_type = builtin_f_type (gdbarch)->builtin_integer;
@@ -714,8 +715,9 @@ fortran_array_shape (struct gdbarch *gdbarch, const language_defn *lang,
     ndimensions = calc_f77_array_dims (val_type);
 
   /* Allocate a result value of the correct type.  */
+  type_allocator alloc (gdbarch);
   struct type *range
-    = create_static_range_type (nullptr,
+    = create_static_range_type (alloc,
 				builtin_type (gdbarch)->builtin_int,
 				1, ndimensions);
   struct type *elm_type = builtin_f_type (gdbarch)->builtin_integer;
@@ -1393,8 +1395,9 @@ fortran_undetermined::value_subarray (value *array,
       p_high.set_const_val (d.high);
       p_stride.set_const_val (d.stride);
 
+      type_allocator alloc (d.index->target_type ());
       struct type *new_range
-	= create_range_type_with_stride ((struct type *) NULL,
+	= create_range_type_with_stride (alloc,
 					 d.index->target_type (),
 					 &p_low, &p_high, 0, &p_stride,
 					 true);
@@ -1429,8 +1432,9 @@ fortran_undetermined::value_subarray (value *array,
 	  p_high.set_const_val (d.high);
 	  p_stride.set_const_val (repacked_array_type->length ());
 
+	  type_allocator alloc (d.index->target_type ());
 	  struct type *new_range
-	    = create_range_type_with_stride ((struct type *) NULL,
+	    = create_range_type_with_stride (alloc,
 					     d.index->target_type (),
 					     &p_low, &p_high, 0, &p_stride,
 					     true);

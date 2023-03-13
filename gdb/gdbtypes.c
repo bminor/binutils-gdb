@@ -929,11 +929,10 @@ operator== (const range_bounds &l, const range_bounds &r)
 #undef FIELD_EQ
 }
 
-/* Create a range type with a dynamic range from LOW_BOUND to
-   HIGH_BOUND, inclusive.  See create_range_type for further details. */
+/* See gdbtypes.h.  */
 
 struct type *
-create_range_type (struct type *result_type, struct type *index_type,
+create_range_type (type_allocator &alloc, struct type *index_type,
 		   const struct dynamic_prop *low_bound,
 		   const struct dynamic_prop *high_bound,
 		   LONGEST bias)
@@ -943,8 +942,7 @@ create_range_type (struct type *result_type, struct type *index_type,
   gdb_assert (index_type->code () != TYPE_CODE_VOID);
   gdb_assert (index_type->length () > 0);
 
-  if (result_type == NULL)
-    result_type = type_allocator (index_type).new_type ();
+  struct type *result_type = alloc.new_type ();
   result_type->set_code (TYPE_CODE_RANGE);
   result_type->set_target_type (index_type);
   if (index_type->is_stub ())
@@ -996,7 +994,7 @@ create_range_type (struct type *result_type, struct type *index_type,
 /* See gdbtypes.h.  */
 
 struct type *
-create_range_type_with_stride (struct type *result_type,
+create_range_type_with_stride (type_allocator &alloc,
 			       struct type *index_type,
 			       const struct dynamic_prop *low_bound,
 			       const struct dynamic_prop *high_bound,
@@ -1004,8 +1002,8 @@ create_range_type_with_stride (struct type *result_type,
 			       const struct dynamic_prop *stride,
 			       bool byte_stride_p)
 {
-  result_type = create_range_type (result_type, index_type, low_bound,
-				   high_bound, bias);
+  struct type *result_type = create_range_type (alloc, index_type, low_bound,
+						high_bound, bias);
 
   gdb_assert (stride != nullptr);
   result_type->bounds ()->stride = *stride;
@@ -1014,20 +1012,10 @@ create_range_type_with_stride (struct type *result_type,
   return result_type;
 }
 
-
-
-/* Create a range type using either a blank type supplied in
-   RESULT_TYPE, or creating a new type, inheriting the objfile from
-   INDEX_TYPE.
-
-   Indices will be of type INDEX_TYPE, and will range from LOW_BOUND
-   to HIGH_BOUND, inclusive.
-
-   FIXME: Maybe we should check the TYPE_CODE of RESULT_TYPE to make
-   sure it is TYPE_CODE_UNDEF before we bash it into a range type?  */
+/* See gdbtypes.h.  */
 
 struct type *
-create_static_range_type (struct type *result_type, struct type *index_type,
+create_static_range_type (type_allocator &alloc, struct type *index_type,
 			  LONGEST low_bound, LONGEST high_bound)
 {
   struct dynamic_prop low, high;
@@ -1035,7 +1023,8 @@ create_static_range_type (struct type *result_type, struct type *index_type,
   low.set_const_val (low_bound);
   high.set_const_val (high_bound);
 
-  result_type = create_range_type (result_type, index_type, &low, &high, 0);
+  struct type *result_type = create_range_type (alloc, index_type,
+						&low, &high, 0);
 
   return result_type;
 }
@@ -1439,12 +1428,13 @@ lookup_array_range_type (struct type *element_type,
   struct type *index_type;
   struct type *range_type;
 
+  type_allocator alloc (element_type);
   if (element_type->is_objfile_owned ())
     index_type = objfile_type (element_type->objfile_owner ())->builtin_int;
   else
     index_type = builtin_type (element_type->arch_owner ())->builtin_int;
 
-  range_type = create_static_range_type (NULL, index_type,
+  range_type = create_static_range_type (alloc, index_type,
 					 low_bound, high_bound);
 
   return create_array_type (NULL, element_type, range_type);
@@ -2272,8 +2262,9 @@ resolve_dynamic_range (struct type *dyn_range_type,
     = resolve_dynamic_type_internal (dyn_range_type->target_type (),
 				     addr_stack, 0);
   LONGEST bias = dyn_range_type->bounds ()->bias;
+  type_allocator alloc (dyn_range_type);
   static_range_type = create_range_type_with_stride
-    (copy_type (dyn_range_type), static_target_type,
+    (alloc, static_target_type,
      &low_bound, &high_bound, bias, &stride, byte_stride_p);
   static_range_type->bounds ()->flag_bound_evaluated = 1;
   return static_range_type;

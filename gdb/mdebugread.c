@@ -1862,9 +1862,12 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
       ax++;
       rf = AUX_GET_WIDTH (bigend, ax);	/* bit size of array element */
 
-      range = create_static_range_type (NULL, indx, lower, upper);
+      {
+	type_allocator alloc (indx);
+	range = create_static_range_type (alloc, indx, lower, upper);
 
-      t = create_array_type (NULL, *tpp, range);
+	t = create_array_type (NULL, *tpp, range);
+      }
 
       /* We used to fill in the supplied array element bitsize
 	 here if the TYPE_LENGTH of the target type was zero.

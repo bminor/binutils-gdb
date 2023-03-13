@@ -877,8 +877,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    /* NULL terminate the string.  */
 	    string_local[ind] = 0;
+	    type_allocator alloc (objfile);
 	    range_type
-	      = create_static_range_type (NULL,
+	      = create_static_range_type (alloc,
 					  objfile_type (objfile)->builtin_int,
 					  0, ind);
 	    sym->set_type
@@ -3547,8 +3548,9 @@ read_array_type (const char **pp, struct type *type,
       upper = -1;
     }
 
+  type_allocator alloc (objfile);
   range_type =
-    create_static_range_type (NULL, index_type, lower, upper);
+    create_static_range_type (alloc, index_type, lower, upper);
   type = create_array_type (type, element_type, range_type);
 
   return type;
@@ -4180,7 +4182,7 @@ handle_true_range:
     }
 
   result_type
-    = create_static_range_type (NULL, index_type, n2, n3);
+    = create_static_range_type (alloc, index_type, n2, n3);
   return (result_type);
 }
 

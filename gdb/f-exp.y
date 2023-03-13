@@ -669,10 +669,11 @@ ptype	:	typebase
 			array_size = type_stack->pop_int ();
 			if (array_size != -1)
 			  {
+			    struct type *idx_type
+			      = parse_f_type (pstate)->builtin_integer;
+			    type_allocator alloc (idx_type);
 			    range_type =
-			      create_static_range_type ((struct type *) NULL,
-							parse_f_type (pstate)
-							->builtin_integer,
+			      create_static_range_type (alloc, idx_type,
 							0, array_size - 1);
 			    follow_type =
 			      create_array_type ((struct type *) NULL,

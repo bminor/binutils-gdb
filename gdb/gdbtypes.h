@@ -2473,25 +2473,38 @@ extern struct type *lookup_function_type_with_arguments (struct type *,
 							 int,
 							 struct type **);
 
-extern struct type *create_static_range_type (struct type *, struct type *,
-					      LONGEST, LONGEST);
+/* Create a range type using ALLOC.
+
+   Indices will be of type INDEX_TYPE, and will range from LOW_BOUND
+   to HIGH_BOUND, inclusive.  */
+
+extern struct type *create_static_range_type (type_allocator &alloc,
+					      struct type *index_type,
+					      LONGEST low_bound,
+					      LONGEST high_bound);
 
 
 extern struct type *create_array_type_with_stride
   (struct type *, struct type *, struct type *,
    struct dynamic_prop *, unsigned int);
 
-extern struct type *create_range_type (struct type *, struct type *,
-				       const struct dynamic_prop *,
-				       const struct dynamic_prop *,
-				       LONGEST);
+/* Create a range type using ALLOC with a dynamic range from LOW_BOUND
+   to HIGH_BOUND, inclusive.  INDEX_TYPE is the underlying type.  BIAS
+   is the bias to be applied when storing or retrieving values of this
+   type.  */
+
+extern struct type *create_range_type (type_allocator &alloc,
+				       struct type *index_type,
+				       const struct dynamic_prop *low_bound,
+				       const struct dynamic_prop *high_bound,
+				       LONGEST bias);
 
 /* Like CREATE_RANGE_TYPE but also sets up a stride.  When BYTE_STRIDE_P
    is true the value in STRIDE is a byte stride, otherwise STRIDE is a bit
    stride.  */
 
-extern struct type * create_range_type_with_stride
-  (struct type *result_type, struct type *index_type,
+extern struct type *create_range_type_with_stride
+  (type_allocator &alloc, struct type *index_type,
    const struct dynamic_prop *low_bound,
    const struct dynamic_prop *high_bound, LONGEST bias,
    const struct dynamic_prop *stride, bool byte_stride_p);
