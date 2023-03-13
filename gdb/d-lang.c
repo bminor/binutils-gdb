@@ -201,8 +201,7 @@ build_d_types (struct gdbarch *gdbarch)
   struct builtin_d_type *builtin_d_type = new struct builtin_d_type;
 
   /* Basic types.  */
-  builtin_d_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
+  builtin_d_type->builtin_void = builtin_type (gdbarch)->builtin_void;
   builtin_d_type->builtin_bool
     = arch_boolean_type (gdbarch, 8, 1, "bool");
   builtin_d_type->builtin_byte

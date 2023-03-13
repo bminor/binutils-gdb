@@ -483,8 +483,7 @@ build_go_types (struct gdbarch *gdbarch)
 {
   struct builtin_go_type *builtin_go_type = new struct builtin_go_type;
 
-  builtin_go_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
+  builtin_go_type->builtin_void = builtin_type (gdbarch)->builtin_void;
   builtin_go_type->builtin_char
     = arch_character_type (gdbarch, 8, 1, "char");
   builtin_go_type->builtin_bool

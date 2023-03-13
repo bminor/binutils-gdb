@@ -941,7 +941,7 @@ public:
     add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "ptrdiff_t"));
     add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "intptr_t"));
     add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "uintptr_t"));
-    add (arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void"));
+    add (builtin_type (gdbarch)->builtin_void);
 
     /* Type of elements of strings.  */
     lai->set_string_char_type (char_type);

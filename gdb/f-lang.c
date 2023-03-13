@@ -1725,8 +1725,7 @@ build_fortran_types (struct gdbarch *gdbarch)
 {
   struct builtin_f_type *builtin_f_type = new struct builtin_f_type;
 
-  builtin_f_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
+  builtin_f_type->builtin_void = builtin_type (gdbarch)->builtin_void;
 
   builtin_f_type->builtin_character
     = arch_type (gdbarch, TYPE_CODE_CHAR, TARGET_CHAR_BIT, "character");

@@ -571,10 +571,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
     {
       struct block *new_block = new (&objfile->objfile_obstack) block;
       struct symbol *block_name = new (&objfile->objfile_obstack) symbol;
-      struct type *block_type = arch_type (objfile->arch (),
-					   TYPE_CODE_VOID,
-					   TARGET_CHAR_BIT,
-					   "void");
+      struct type *block_type = builtin_type (objfile->arch ())->builtin_void;
 
       new_block->set_multidict
 	(mdict_create_linear (&objfile->objfile_obstack, NULL));
