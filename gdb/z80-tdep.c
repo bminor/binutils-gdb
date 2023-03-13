@@ -1139,8 +1139,9 @@ z80_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Create a type for PC.  We can't use builtin types here, as they may not
      be defined.  */
-  tdep->void_type = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
-			       "void");
+  type_allocator alloc (gdbarch);
+  tdep->void_type = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT,
+				    "void");
   tdep->func_void_type = make_function_type (tdep->void_type, NULL);
   tdep->pc_type = arch_pointer_type (gdbarch,
 				     tdep->addr_length * TARGET_CHAR_BIT,

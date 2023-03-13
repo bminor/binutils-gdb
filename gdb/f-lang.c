@@ -1727,8 +1727,10 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_void = builtin_type (gdbarch)->builtin_void;
 
+  type_allocator alloc (gdbarch);
+
   builtin_f_type->builtin_character
-    = arch_type (gdbarch, TYPE_CODE_CHAR, TARGET_CHAR_BIT, "character");
+    = alloc.new_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT, "character");
 
   builtin_f_type->builtin_logical_s1
     = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "logical*1");
@@ -1774,7 +1776,7 @@ build_fortran_types (struct gdbarch *gdbarch)
 			 "real*16", gdbarch_long_double_format (gdbarch));
   else
     builtin_f_type->builtin_real_s16
-      = arch_type (gdbarch, TYPE_CODE_ERROR, 128, "real*16");
+      = alloc.new_type (TYPE_CODE_ERROR, 128, "real*16");
 
   builtin_f_type->builtin_complex
     = init_complex_type ("complex*4", builtin_f_type->builtin_real);
@@ -1784,7 +1786,7 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   if (builtin_f_type->builtin_real_s16->code () == TYPE_CODE_ERROR)
     builtin_f_type->builtin_complex_s16
-      = arch_type (gdbarch, TYPE_CODE_ERROR, 256, "complex*16");
+      = alloc.new_type (TYPE_CODE_ERROR, 256, "complex*16");
   else
     builtin_f_type->builtin_complex_s16
       = init_complex_type ("complex*16", builtin_f_type->builtin_real_s16);

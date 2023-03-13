@@ -284,8 +284,9 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 
     void make_gdb_type_enum (const tdesc_type_with_fields *e)
     {
-      m_type = arch_type (m_gdbarch, TYPE_CODE_ENUM, e->size * TARGET_CHAR_BIT,
-			  e->name.c_str ());
+      m_type = (type_allocator (m_gdbarch)
+		.new_type (TYPE_CODE_ENUM, e->size * TARGET_CHAR_BIT,
+			   e->name.c_str ()));
 
       m_type->set_is_unsigned (true);
 

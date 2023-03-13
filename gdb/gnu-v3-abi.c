@@ -125,6 +125,8 @@ get_gdb_vtable_type (struct gdbarch *arch)
   struct type *ptr_to_void_fn_type
     = builtin_type (arch)->builtin_func_ptr;
 
+  type_allocator alloc (arch);
+
   /* ARCH can't give us the true ptrdiff_t type, so we guess.  */
   struct type *ptrdiff_type
     = arch_integer_type (arch, gdbarch_ptr_bit (arch), 0, "ptrdiff_t");
@@ -170,7 +172,7 @@ get_gdb_vtable_type (struct gdbarch *arch)
   /* We assumed in the allocation above that there were four fields.  */
   gdb_assert (field == (field_list + 4));
 
-  t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
+  t = alloc.new_type (TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
   t->set_num_fields (field - field_list);
   t->set_fields (field_list);
   t->set_name ("gdb_gnu_v3_abi_vtable");
@@ -1053,7 +1055,8 @@ build_std_type_info_type (struct gdbarch *arch)
 
   gdb_assert (field == (field_list + 2));
 
-  t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
+  t = type_allocator (arch).new_type (TYPE_CODE_STRUCT,
+				      offset * TARGET_CHAR_BIT, nullptr);
   t->set_num_fields (field - field_list);
   t->set_fields (field_list);
   t->set_name ("gdb_gnu_v3_type_info");

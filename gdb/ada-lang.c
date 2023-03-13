@@ -13556,6 +13556,7 @@ public:
       lai->add_primitive_type (t);
     };
 
+    type_allocator alloc (gdbarch);
     add (arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
 			    0, "integer"));
     add (arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
@@ -13584,8 +13585,8 @@ public:
     add (builtin->builtin_void);
 
     struct type *system_addr_ptr
-      = lookup_pointer_type (arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
-					"void"));
+      = lookup_pointer_type (alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT,
+					     "void"));
     system_addr_ptr->set_name ("system__address");
     add (system_addr_ptr);
 

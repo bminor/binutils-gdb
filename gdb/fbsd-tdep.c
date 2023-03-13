@@ -1609,15 +1609,17 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
   append_composite_type_field (sigval_type, "sival_ptr", void_ptr_type);
 
   /* __pid_t */
-  pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			int32_type->length () * TARGET_CHAR_BIT, "__pid_t");
+  type_allocator alloc (gdbarch);
+  pid_type = alloc.new_type (TYPE_CODE_TYPEDEF,
+			     int32_type->length () * TARGET_CHAR_BIT,
+			     "__pid_t");
   pid_type->set_target_type (int32_type);
   pid_type->set_target_is_stub (true);
 
   /* __uid_t */
-  uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			uint32_type->length () * TARGET_CHAR_BIT,
-			"__uid_t");
+  uid_type = alloc.new_type (TYPE_CODE_TYPEDEF,
+			     uint32_type->length () * TARGET_CHAR_BIT,
+			     "__uid_t");
   uid_type->set_target_type (uint32_type);
   pid_type->set_target_is_stub (true);
 

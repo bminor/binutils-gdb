@@ -414,24 +414,28 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
   size_t char_bits = gdbarch_addressable_memory_unit_size (gdbarch) * 8;
 
   /* pid_t */
-  type *pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			      int32_type->length () * char_bits, "pid_t");
+  type_allocator alloc (gdbarch);
+  type *pid_type = alloc.new_type (TYPE_CODE_TYPEDEF,
+				   int32_type->length () * char_bits,
+				   "pid_t");
   pid_type->set_target_type (int32_type);
 
   /* uid_t */
-  type *uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			      uint32_type->length () * char_bits, "uid_t");
+  type *uid_type = alloc.new_type (TYPE_CODE_TYPEDEF,
+				   uint32_type->length () * char_bits,
+				   "uid_t");
   uid_type->set_target_type (uint32_type);
 
   /* clock_t */
-  type *clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-				int_type->length () * char_bits, "clock_t");
+  type *clock_type = alloc.new_type (TYPE_CODE_TYPEDEF,
+				     int_type->length () * char_bits,
+				     "clock_t");
   clock_type->set_target_type (int_type);
 
   /* lwpid_t */
-  type *lwpid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-				int32_type->length () * char_bits,
-				"lwpid_t");
+  type *lwpid_type = alloc.new_type (TYPE_CODE_TYPEDEF,
+				     int32_type->length () * char_bits,
+				     "lwpid_t");
   lwpid_type->set_target_type (int32_type);
 
   /* union sigval */

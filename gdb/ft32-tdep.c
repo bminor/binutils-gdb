@@ -573,7 +573,8 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Create a type for PC.  We can't use builtin types here, as they may not
      be defined.  */
-  void_type = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
+  type_allocator alloc (gdbarch);
+  void_type = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   func_void_type = make_function_type (void_type, NULL);
   tdep->pc_type = arch_pointer_type (gdbarch, 4 * TARGET_CHAR_BIT, NULL,
 				     func_void_type);

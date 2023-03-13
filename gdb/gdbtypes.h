@@ -2316,8 +2316,6 @@ extern struct type *init_fixed_point_type (struct objfile *, int, int,
 					   const char *);
 
 /* Helper functions to construct architecture-owned types.  */
-extern struct type *arch_type (struct gdbarch *, enum type_code, int,
-			       const char *);
 extern struct type *arch_integer_type (struct gdbarch *, int, int,
 				       const char *);
 extern struct type *arch_character_type (struct gdbarch *, int, int,

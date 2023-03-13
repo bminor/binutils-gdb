@@ -749,8 +749,9 @@ amd_dbgapi_register_type_to_gdb_type (const amd_dbgapi_register_type &type,
 	const auto &enum_type
 	  = static_cast<const amd_dbgapi_register_type_enum &> (type);
 	struct type *gdb_type
-	  = arch_type (gdbarch, TYPE_CODE_ENUM, enum_type.bit_size (),
-		       enum_type.name ().c_str ());
+	  = (type_allocator (gdbarch)
+	     .new_type (TYPE_CODE_ENUM, enum_type.bit_size (),
+			enum_type.name ().c_str ()));
 
 	gdb_type->set_num_fields (enum_type.size ());
 	gdb_type->set_fields

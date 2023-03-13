@@ -5786,26 +5786,6 @@ copy_type (const struct type *type)
 
 /* Helper functions to initialize architecture-specific types.  */
 
-/* Allocate a type structure associated with GDBARCH and set its
-   CODE, LENGTH, and NAME fields.  */
-
-struct type *
-arch_type (struct gdbarch *gdbarch,
-	   enum type_code code, int bit, const char *name)
-{
-  struct type *type;
-
-  type = type_allocator (gdbarch).new_type ();
-  set_type_code (type, code);
-  gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
-  type->set_length (bit / TARGET_CHAR_BIT);
-
-  if (name)
-    type->set_name (gdbarch_obstack_strdup (gdbarch, name));
-
-  return type;
-}
-
 /* Allocate a TYPE_CODE_INT type structure associated with GDBARCH.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
@@ -5816,7 +5796,7 @@ arch_integer_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_INT, bit, name);
+  t = type_allocator (gdbarch).new_type (TYPE_CODE_INT, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -5833,7 +5813,7 @@ arch_character_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_CHAR, bit, name);
+  t = type_allocator (gdbarch).new_type (TYPE_CODE_CHAR, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -5850,7 +5830,7 @@ arch_boolean_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_BOOL, bit, name);
+  t = type_allocator (gdbarch).new_type (TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
@@ -5871,7 +5851,7 @@ arch_float_type (struct gdbarch *gdbarch,
   struct type *t;
 
   bit = verify_floatformat (bit, fmt);
-  t = arch_type (gdbarch, TYPE_CODE_FLT, bit, name);
+  t = type_allocator (gdbarch).new_type (TYPE_CODE_FLT, bit, name);
   TYPE_FLOATFORMAT (t) = fmt;
 
   return t;
@@ -5885,7 +5865,7 @@ arch_decfloat_type (struct gdbarch *gdbarch, int bit, const char *name)
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_DECFLOAT, bit, name);
+  t = type_allocator (gdbarch).new_type (TYPE_CODE_DECFLOAT, bit, name);
   return t;
 }
 
@@ -5900,7 +5880,7 @@ arch_pointer_type (struct gdbarch *gdbarch,
 {
   struct type *t;
 
-  t = arch_type (gdbarch, TYPE_CODE_PTR, bit, name);
+  t = type_allocator (gdbarch).new_type (TYPE_CODE_PTR, bit, name);
   t->set_target_type (target_type);
   t->set_is_unsigned (true);
   return t;
@@ -5914,7 +5894,7 @@ arch_flags_type (struct gdbarch *gdbarch, const char *name, int bit)
 {
   struct type *type;
 
-  type = arch_type (gdbarch, TYPE_CODE_FLAGS, bit, name);
+  type = type_allocator (gdbarch).new_type (TYPE_CODE_FLAGS, bit, name);
   type->set_is_unsigned (true);
   type->set_num_fields (0);
   /* Pre-allocate enough space assuming every field is one bit.  */
@@ -5970,7 +5950,7 @@ arch_composite_type (struct gdbarch *gdbarch, const char *name,
   struct type *t;
 
   gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION);
-  t = arch_type (gdbarch, code, 0, NULL);
+  t = type_allocator (gdbarch).new_type (code, 0, NULL);
   t->set_name (name);
   INIT_CPLUS_SPECIFIC (t);
   return t;
@@ -6134,9 +6114,11 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
 {
   struct builtin_type *builtin_type = new struct builtin_type;
 
+  type_allocator alloc (gdbarch);
+
   /* Basic types.  */
   builtin_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
+    = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   builtin_type->builtin_char
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
@@ -6191,7 +6173,7 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
   builtin_type->builtin_double_complex
     = init_complex_type ("double complex", builtin_type->builtin_double);
   builtin_type->builtin_string
-    = arch_type (gdbarch, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
+    = alloc.new_type (TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
   builtin_type->builtin_bool
     = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "bool");
 
@@ -6265,12 +6247,12 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
 
   /* This type represents a GDB internal function.  */
   builtin_type->internal_fn
-    = arch_type (gdbarch, TYPE_CODE_INTERNAL_FUNCTION, 0,
-		 "<internal function>");
+    = alloc.new_type (TYPE_CODE_INTERNAL_FUNCTION, 0,
+		      "<internal function>");
 
   /* This type represents an xmethod.  */
   builtin_type->xmethod
-    = arch_type (gdbarch, TYPE_CODE_XMETHOD, 0, "<xmethod>");
+    = alloc.new_type (TYPE_CODE_XMETHOD, 0, "<xmethod>");
 
   return builtin_type;
 }
