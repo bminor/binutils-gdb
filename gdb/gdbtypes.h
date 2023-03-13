@@ -2327,7 +2327,12 @@ extern struct type *init_float_type
       const struct floatformat **floatformats,
       enum bfd_endian byte_order = BFD_ENDIAN_UNKNOWN);
 
-extern struct type *init_decfloat_type (struct objfile *, int, const char *);
+/* Allocate a TYPE_CODE_DECFLOAT type structure using ALLOC.
+   BIT is the type size in bits.  NAME is the type name.  */
+
+extern struct type *init_decfloat_type (type_allocator &alloc, int bit,
+					const char *name);
+
 extern bool can_create_complex_type (struct type *);
 extern struct type *init_complex_type (const char *, struct type *);
 extern struct type *init_pointer_type (struct objfile *, int, const char *,
@@ -2336,7 +2341,6 @@ extern struct type *init_fixed_point_type (struct objfile *, int, int,
 					   const char *);
 
 /* Helper functions to construct architecture-owned types.  */
-extern struct type *arch_decfloat_type (struct gdbarch *, int, const char *);
 extern struct type *arch_pointer_type (struct gdbarch *, int, const char *,
 				       struct type *);
 

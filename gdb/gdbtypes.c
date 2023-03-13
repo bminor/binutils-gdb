@@ -3474,13 +3474,12 @@ init_float_type (type_allocator &alloc,
   return t;
 }
 
-/* Allocate a TYPE_CODE_DECFLOAT type structure associated with OBJFILE.
-   BIT is the type size in bits.  NAME is the type name.  */
+/* See gdbtypes.h.  */
 
 struct type *
-init_decfloat_type (struct objfile *objfile, int bit, const char *name)
+init_decfloat_type (type_allocator &alloc, int bit, const char *name)
 {
-  return type_allocator (objfile).new_type (TYPE_CODE_DECFLOAT, bit, name);
+  return alloc.new_type (TYPE_CODE_DECFLOAT, bit, name);
 }
 
 /* Return true if init_complex_type can be called with TARGET_TYPE.  */
@@ -5741,18 +5740,6 @@ copy_type (const struct type *type)
 
 /* Helper functions to initialize architecture-specific types.  */
 
-/* Allocate a TYPE_CODE_DECFLOAT type structure associated with GDBARCH.
-   BIT is the type size in bits.  NAME is the type name.  */
-
-struct type *
-arch_decfloat_type (struct gdbarch *gdbarch, int bit, const char *name)
-{
-  struct type *t;
-
-  t = type_allocator (gdbarch).new_type (TYPE_CODE_DECFLOAT, bit, name);
-  return t;
-}
-
 /* Allocate a TYPE_CODE_PTR type structure associated with GDBARCH.
    BIT is the pointer type size in bits.  NAME is the type name.
    TARGET_TYPE is the pointer target type.  Always sets the pointer type's
@@ -6064,11 +6051,11 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
   /* The following three are about decimal floating point types, which
      are 32-bits, 64-bits and 128-bits respectively.  */
   builtin_type->builtin_decfloat
-    = arch_decfloat_type (gdbarch, 32, "_Decimal32");
+    = init_decfloat_type (alloc, 32, "_Decimal32");
   builtin_type->builtin_decdouble
-    = arch_decfloat_type (gdbarch, 64, "_Decimal64");
+    = init_decfloat_type (alloc, 64, "_Decimal64");
   builtin_type->builtin_declong
-    = arch_decfloat_type (gdbarch, 128, "_Decimal128");
+    = init_decfloat_type (alloc, 128, "_Decimal128");
 
   /* "True" character types.  */
   builtin_type->builtin_true_char

@@ -15252,7 +15252,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	  type = init_complex_type (name, type);
 	break;
       case DW_ATE_decimal_float:
-	type = init_decfloat_type (objfile, bits, name);
+	type = init_decfloat_type (alloc, bits, name);
 	break;
       case DW_ATE_float:
 	type = dwarf2_init_float_type (objfile, bits, name, name, byte_order);
