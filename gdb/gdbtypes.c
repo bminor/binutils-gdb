@@ -1445,10 +1445,9 @@ lookup_string_range_type (struct type *string_char_type,
 }
 
 struct type *
-create_set_type (struct type *result_type, struct type *domain_type)
+create_set_type (type_allocator &alloc, struct type *domain_type)
 {
-  if (result_type == NULL)
-    result_type = type_allocator (domain_type).new_type ();
+  struct type *result_type = alloc.new_type ();
 
   result_type->set_code (TYPE_CODE_SET);
   result_type->set_num_fields (1);

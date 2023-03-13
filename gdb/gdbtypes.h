@@ -2547,7 +2547,8 @@ extern struct type *create_string_type (type_allocator &alloc,
 
 extern struct type *lookup_string_range_type (struct type *, LONGEST, LONGEST);
 
-extern struct type *create_set_type (struct type *, struct type *);
+extern struct type *create_set_type (type_allocator &alloc,
+				     struct type *domain_type);
 
 extern struct type *lookup_unsigned_typename (const struct language_defn *,
 					      const char *);

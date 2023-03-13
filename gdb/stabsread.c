@@ -2016,10 +2016,13 @@ again:
       break;
 
     case 'S':			/* Set type */
-      type1 = read_type (pp, objfile);
-      type = create_set_type (NULL, type1);
-      if (typenums[0] != -1)
-	*dbx_lookup_type (typenums, objfile) = type;
+      {
+	type1 = read_type (pp, objfile);
+	type_allocator alloc (objfile);
+	type = create_set_type (alloc, type1);
+	if (typenums[0] != -1)
+	  *dbx_lookup_type (typenums, objfile) = type;
+      }
       break;
 
     default:

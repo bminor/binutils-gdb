@@ -13825,7 +13825,8 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
   if (set_type)
     return set_type;
 
-  set_type = create_set_type (NULL, domain_type);
+  type_allocator alloc (cu->per_objfile->objfile);
+  set_type = create_set_type (alloc, domain_type);
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr && attr->form_is_unsigned ())
