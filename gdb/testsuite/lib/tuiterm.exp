@@ -792,6 +792,14 @@ namespace eval Term {
     # Setup ready for starting the tui, but don't actually start it.
     # Returns 1 on success, 0 if TUI tests should be skipped.
     proc prepare_for_tui {} {
+	if { [is_remote host] } {
+	    # In clean_restart, we're using "setenv TERM ansi", which has
+	    # effect on build.  If we have [is_remote host] == 0, so
+	    # build == host, then it also has effect on host.  But for
+	    # [is_remote host] == 1, it has no effect on host.
+	    return 0
+	}
+
 	if {![allow_tui_tests]} {
 	    return 0
 	}
