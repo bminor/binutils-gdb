@@ -74,25 +74,56 @@ static inline bool is_ ## INSN_NAME ## _insn (long insn) \
 #include "opcode/riscv-opc.h"
 #undef DECLARE_INSN
 
-/* When this is set to non-zero debugging information about breakpoint
-   kinds will be printed.  */
+/* When this is true debugging information about breakpoint kinds will be
+   printed.  */
 
-static unsigned int riscv_debug_breakpoints = 0;
+static bool riscv_debug_breakpoints = false;
 
-/* When this is set to non-zero debugging information about inferior calls
+/* Print a "riscv-breakpoints" debug statement.  */
+
+#define riscv_breakpoints_debug_printf(fmt, ...)	\
+  debug_prefixed_printf_cond (riscv_debug_breakpoints,	\
+			      "riscv-breakpoints",	\
+			      fmt, ##__VA_ARGS__)
+
+/* When this is true debugging information about inferior calls will be
+   printed.  */
+
+static bool riscv_debug_infcall = false;
+
+/* Print a "riscv-infcall" debug statement.  */
+
+#define riscv_infcall_debug_printf(fmt, ...)				\
+  debug_prefixed_printf_cond (riscv_debug_infcall, "riscv-infcall",	\
+			      fmt, ##__VA_ARGS__)
+
+/* Print "riscv-infcall" start/end debug statements.  */
+
+#define RISCV_INFCALL_SCOPED_DEBUG_START_END(fmt, ...)		\
+  scoped_debug_start_end (riscv_debug_infcall, "riscv-infcall", \
+			  fmt, ##__VA_ARGS__)
+
+/* When this is true debugging information about stack unwinding will be
+   printed.  */
+
+static bool riscv_debug_unwinder = false;
+
+/* Print a "riscv-unwinder" debug statement.  */
+
+#define riscv_unwinder_debug_printf(fmt, ...)				\
+  debug_prefixed_printf_cond (riscv_debug_unwinder, "riscv-unwinder",	\
+			      fmt, ##__VA_ARGS__)
+
+/* When this is true debugging information about gdbarch initialisation
    will be printed.  */
 
-static unsigned int riscv_debug_infcall = 0;
+static bool riscv_debug_gdbarch = false;
 
-/* When this is set to non-zero debugging information about stack unwinding
-   will be printed.  */
+/* Print a "riscv-gdbarch" debug statement.  */
 
-static unsigned int riscv_debug_unwinder = 0;
-
-/* When this is set to non-zero debugging information about gdbarch
-   initialisation will be printed.  */
-
-static unsigned int riscv_debug_gdbarch = 0;
+#define riscv_gdbarch_debug_printf(fmt, ...)				\
+  debug_prefixed_printf_cond (riscv_debug_gdbarch, "riscv-gdbarch",	\
+			      fmt, ##__VA_ARGS__)
 
 /* The names of the RISC-V target description features.  */
 const char *riscv_feature_name_csr = "org.gnu.gdb.riscv.csr";
@@ -832,13 +863,15 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 	  const char *bp = (unaligned_p || riscv_insn_length (buf[0]) == 2
 			    ? "C.EBREAK" : "EBREAK");
 
-	  gdb_printf (gdb_stdlog, "Using %s for breakpoint at %s ",
-		      bp, paddress (gdbarch, *pcptr));
+	  std::string suffix;
 	  if (unaligned_p)
-	    gdb_printf (gdb_stdlog, "(unaligned address)\n");
+	    suffix = "(unaligned address)";
 	  else
-	    gdb_printf (gdb_stdlog, "(instruction length %d)\n",
-			riscv_insn_length (buf[0]));
+	    suffix = string_printf ("(instruction length %d)",
+				    riscv_insn_length (buf[0]));
+	  riscv_breakpoints_debug_printf ("Using %s for breakpoint at %s %s",
+					  bp, paddress (gdbarch, *pcptr),
+					  suffix.c_str ());
 	}
       if (unaligned_p || riscv_insn_length (buf[0]) == 2)
 	return 2;
@@ -1971,12 +2004,9 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
     regs[regno] = pv_register (regno, 0);
   pv_area stack (RISCV_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
-  if (riscv_debug_unwinder)
-    gdb_printf
-      (gdb_stdlog,
-       "Prologue scan for function starting at %s (limit %s)\n",
-       core_addr_to_string (start_pc),
-       core_addr_to_string (end_pc));
+  riscv_unwinder_debug_printf ("function starting at %s (limit %s)",
+			       core_addr_to_string (start_pc),
+			       core_addr_to_string (end_pc));
 
   for (next_pc = cur_pc = start_pc; cur_pc < end_pc; cur_pc = next_pc)
     {
@@ -2108,9 +2138,8 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
   if (end_prologue_addr == 0)
     end_prologue_addr = cur_pc;
 
-  if (riscv_debug_unwinder)
-    gdb_printf (gdb_stdlog, "End of prologue at %s\n",
-		core_addr_to_string (end_prologue_addr));
+  riscv_unwinder_debug_printf ("end of prologue at %s",
+			       core_addr_to_string (end_prologue_addr));
 
   if (cache != NULL)
     {
@@ -2139,17 +2168,13 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	  CORE_ADDR offset;
 	  if (stack.find_reg (gdbarch, i, &offset))
 	    {
-	      if (riscv_debug_unwinder)
-		{
-		  /* Display OFFSET as a signed value, the offsets are from
-		     the frame base address to the registers location on
-		     the stack, with a descending stack this means the
-		     offsets are always negative.  */
-		  gdb_printf (gdb_stdlog,
-			      "Register $%s at stack offset %s\n",
-			      gdbarch_register_name (gdbarch, i),
-			      plongest ((LONGEST) offset));
-		}
+	      /* Display OFFSET as a signed value, the offsets are from the
+		 frame base address to the registers location on the stack,
+		 with a descending stack this means the offsets are always
+		 negative.  */
+	      riscv_unwinder_debug_printf ("register $%s at stack offset %s",
+					   gdbarch_register_name (gdbarch, i),
+					   plongest ((LONGEST) offset));
 	      cache->regs[i].set_addr (offset);
 	    }
 	}
@@ -2222,12 +2247,10 @@ riscv_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
      there will be no need to write to memory later.  */
   int status = target_write_memory (*bp_addr, nop_insn, sizeof (nop_insn));
 
-  if (riscv_debug_breakpoints || riscv_debug_infcall)
-    gdb_printf (gdb_stdlog,
-		"Writing %s-byte nop instruction to %s: %s\n",
-		plongest (sizeof (nop_insn)),
-		paddress (gdbarch, *bp_addr),
-		(status == 0 ? "success" : "failed"));
+  riscv_infcall_debug_printf ("writing %s-byte nop instruction to %s: %s",
+			      plongest (sizeof (nop_insn)),
+			      paddress (gdbarch, *bp_addr),
+			      (status == 0 ? "success" : "failed"));
 
   return sp;
 }
@@ -3078,35 +3101,36 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
   sp = sp_refs = align_down (sp - call_info.memory.ref_offset, SP_ALIGNMENT);
   sp = sp_args = align_down (sp - call_info.memory.arg_offset, SP_ALIGNMENT);
 
-  if (riscv_debug_infcall > 0)
+  if (riscv_debug_infcall)
     {
-      gdb_printf (gdb_stdlog, "dummy call args:\n");
-      gdb_printf (gdb_stdlog, ": floating point ABI %s in use\n",
-		  (riscv_has_fp_abi (gdbarch) ? "is" : "is not"));
-      gdb_printf (gdb_stdlog, ": xlen: %d\n: flen: %d\n",
-		  call_info.xlen, call_info.flen);
+      RISCV_INFCALL_SCOPED_DEBUG_START_END ("dummy call args");
+      riscv_infcall_debug_printf ("floating point ABI %s in use",
+				  (riscv_has_fp_abi (gdbarch)
+				   ? "is" : "is not"));
+      riscv_infcall_debug_printf ("xlen: %d", call_info.xlen);
+      riscv_infcall_debug_printf ("flen: %d", call_info.flen);
       if (return_method == return_method_struct)
-	gdb_printf (gdb_stdlog,
-		    "[*] struct return pointer in register $A0\n");
+	riscv_infcall_debug_printf
+	  ("[**] struct return pointer in register $A0");
       for (i = 0; i < nargs; ++i)
 	{
 	  struct riscv_arg_info *info = &arg_info [i];
+	  string_file tmp;
 
-	  gdb_printf (gdb_stdlog, "[%2d] ", i);
-	  riscv_print_arg_location (gdb_stdlog, gdbarch, info, sp_refs, sp_args);
-	  gdb_printf (gdb_stdlog, "\n");
+	  riscv_print_arg_location (&tmp, gdbarch, info, sp_refs, sp_args);
+	  riscv_infcall_debug_printf ("[%2d] %s", i, tmp.string ().c_str ());
 	}
       if (call_info.memory.arg_offset > 0
 	  || call_info.memory.ref_offset > 0)
 	{
-	  gdb_printf (gdb_stdlog, "              Original sp: %s\n",
-		      core_addr_to_string (osp));
-	  gdb_printf (gdb_stdlog, "Stack required (for args): 0x%x\n",
-		      call_info.memory.arg_offset);
-	  gdb_printf (gdb_stdlog, "Stack required (for refs): 0x%x\n",
-		      call_info.memory.ref_offset);
-	  gdb_printf (gdb_stdlog, "          Stack allocated: %s\n",
-		      core_addr_to_string_nz (osp - sp));
+	  riscv_infcall_debug_printf ("              Original sp: %s",
+				      core_addr_to_string (osp));
+	  riscv_infcall_debug_printf ("Stack required (for args): 0x%x",
+				      call_info.memory.arg_offset);
+	  riscv_infcall_debug_printf ("Stack required (for refs): 0x%x",
+				      call_info.memory.ref_offset);
+	  riscv_infcall_debug_printf ("          Stack allocated: %s",
+				      core_addr_to_string_nz (osp - sp));
 	}
     }
 
@@ -3204,16 +3228,13 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
   /* Set the dummy return value to bp_addr.
      A dummy breakpoint will be setup to execute the call.  */
 
-  if (riscv_debug_infcall > 0)
-    gdb_printf (gdb_stdlog, ": writing $ra = %s\n",
-		core_addr_to_string (bp_addr));
+  riscv_infcall_debug_printf ("writing $ra = %s",
+			      core_addr_to_string (bp_addr));
   regcache_cooked_write_unsigned (regcache, RISCV_RA_REGNUM, bp_addr);
 
   /* Finally, update the stack pointer.  */
 
-  if (riscv_debug_infcall > 0)
-    gdb_printf (gdb_stdlog, ": writing $sp = %s\n",
-		core_addr_to_string (sp));
+  riscv_infcall_debug_printf ("writing $sp = %s", core_addr_to_string (sp));
   regcache_cooked_write_unsigned (regcache, RISCV_SP_REGNUM, sp);
 
   return sp;
@@ -3236,12 +3257,11 @@ riscv_return_value (struct gdbarch  *gdbarch,
   arg_type = check_typedef (type);
   riscv_arg_location (gdbarch, &info, &call_info, arg_type, false);
 
-  if (riscv_debug_infcall > 0)
+  if (riscv_debug_infcall)
     {
-      gdb_printf (gdb_stdlog, "riscv return value:\n");
-      gdb_printf (gdb_stdlog, "[R] ");
-      riscv_print_arg_location (gdb_stdlog, gdbarch, &info, 0, 0);
-      gdb_printf (gdb_stdlog, "\n");
+      string_file tmp;
+      riscv_print_arg_location (&tmp, gdbarch, &info, 0, 0);
+      riscv_infcall_debug_printf ("[R] %s", tmp.string ().c_str ());
     }
 
   if (read_value != nullptr || writebuf != nullptr)
@@ -3466,12 +3486,11 @@ riscv_frame_cache (frame_info_ptr this_frame, void **this_cache)
   cache->frame_base
     = (get_frame_register_unsigned (this_frame, cache->frame_base_reg)
        + cache->frame_base_offset);
-  if (riscv_debug_unwinder)
-    gdb_printf (gdb_stdlog, "Frame base is %s ($%s + 0x%x)\n",
-		core_addr_to_string (cache->frame_base),
-		gdbarch_register_name (gdbarch,
-				       cache->frame_base_reg),
-		cache->frame_base_offset);
+  riscv_unwinder_debug_printf ("frame base is %s ($%s + 0x%x)",
+			       core_addr_to_string (cache->frame_base),
+			       gdbarch_register_name (gdbarch,
+						      cache->frame_base_reg),
+			       cache->frame_base_offset);
 
   /* The prologue scanner sets the address of registers stored to the stack
      as the offset of that register from the frame base.  The prologue
@@ -3827,8 +3846,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
     tdesc = riscv_find_default_target_description (info);
   gdb_assert (tdesc != nullptr);
 
-  if (riscv_debug_gdbarch)
-    gdb_printf (gdb_stdlog, "Have got a target description\n");
+  riscv_gdbarch_debug_printf ("have got a target description");
 
   tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   std::vector<riscv_pending_register_alias> pending_aliases;
@@ -3845,8 +3863,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
 						 &pending_aliases, &features));
   if (!valid_p)
     {
-      if (riscv_debug_gdbarch)
-	gdb_printf (gdb_stdlog, "Target description is not valid\n");
+      riscv_gdbarch_debug_printf ("target description is not valid");
       return NULL;
     }
 
@@ -4297,45 +4314,45 @@ _initialize_riscv_tdep ()
 			  &setdebugriscvcmdlist, &showdebugriscvcmdlist,
 			  &setdebuglist, &showdebuglist);
 
-  add_setshow_zuinteger_cmd ("breakpoints", class_maintenance,
-			     &riscv_debug_breakpoints,  _("\
+  add_setshow_boolean_cmd ("breakpoints", class_maintenance,
+			   &riscv_debug_breakpoints,  _("\
 Set riscv breakpoint debugging."), _("\
 Show riscv breakpoint debugging."), _("\
 When non-zero, print debugging information for the riscv specific parts\n\
 of the breakpoint mechanism."),
-			     NULL,
-			     show_riscv_debug_variable,
-			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
+			   nullptr,
+			   show_riscv_debug_variable,
+			   &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
-  add_setshow_zuinteger_cmd ("infcall", class_maintenance,
-			     &riscv_debug_infcall,  _("\
+  add_setshow_boolean_cmd ("infcall", class_maintenance,
+			   &riscv_debug_infcall,  _("\
 Set riscv inferior call debugging."), _("\
 Show riscv inferior call debugging."), _("\
 When non-zero, print debugging information for the riscv specific parts\n\
 of the inferior call mechanism."),
-			     NULL,
-			     show_riscv_debug_variable,
-			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
+			   nullptr,
+			   show_riscv_debug_variable,
+			   &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
-  add_setshow_zuinteger_cmd ("unwinder", class_maintenance,
-			     &riscv_debug_unwinder,  _("\
+  add_setshow_boolean_cmd ("unwinder", class_maintenance,
+			   &riscv_debug_unwinder,  _("\
 Set riscv stack unwinding debugging."), _("\
 Show riscv stack unwinding debugging."), _("\
-When non-zero, print debugging information for the riscv specific parts\n\
+When on, print debugging information for the riscv specific parts\n\
 of the stack unwinding mechanism."),
-			     NULL,
-			     show_riscv_debug_variable,
-			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
+			   nullptr,
+			   show_riscv_debug_variable,
+			   &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
-  add_setshow_zuinteger_cmd ("gdbarch", class_maintenance,
-			     &riscv_debug_gdbarch,  _("\
+  add_setshow_boolean_cmd ("gdbarch", class_maintenance,
+			   &riscv_debug_gdbarch,  _("\
 Set riscv gdbarch initialisation debugging."), _("\
 Show riscv gdbarch initialisation debugging."), _("\
 When non-zero, print debugging information for the riscv gdbarch\n\
 initialisation process."),
-			     NULL,
-			     show_riscv_debug_variable,
-			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
+			   nullptr,
+			   show_riscv_debug_variable,
+			   &setdebugriscvcmdlist, &showdebugriscvcmdlist);
 
   /* Add root prefix command for all "set riscv" and "show riscv" commands.  */
   add_setshow_prefix_cmd ("riscv", no_class,
