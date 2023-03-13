@@ -36,7 +36,10 @@ tuiterm_env
 
 # Setup and enter TUI mode.
 Term::clean_restart 24 80
-Term::enter_tui
+if {![Term::enter_tui]} {
+    unsupported "TUI not supported"
+    return
+}
 
 # Send the command, and check the output is correctly split over
 # multiple lines.
