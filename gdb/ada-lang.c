@@ -13569,13 +13569,13 @@ public:
     add (char_type);
     add (init_character_type (alloc, 16, 1, "wide_character"));
     add (init_character_type (alloc, 32, 1, "wide_wide_character"));
-    add (arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+    add (init_float_type (alloc, gdbarch_float_bit (gdbarch),
 			  "float", gdbarch_float_format (gdbarch)));
-    add (arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+    add (init_float_type (alloc, gdbarch_double_bit (gdbarch),
 			  "long_float", gdbarch_double_format (gdbarch)));
     add (init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			    0, "long_long_integer"));
-    add (arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+    add (init_float_type (alloc, gdbarch_long_double_bit (gdbarch),
 			  "long_long_float",
 			  gdbarch_long_double_format (gdbarch)));
     add (init_integer_type (alloc, gdbarch_int_bit (gdbarch),

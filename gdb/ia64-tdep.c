@@ -313,9 +313,12 @@ ia64_ext_type (struct gdbarch *gdbarch)
   ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
 
   if (!tdep->ia64_ext_type)
-    tdep->ia64_ext_type
-      = arch_float_type (gdbarch, 128, "builtin_type_ia64_ext",
-			 floatformats_ia64_ext);
+    {
+      type_allocator alloc (gdbarch);
+      tdep->ia64_ext_type
+	= init_float_type (alloc, 128, "builtin_type_ia64_ext",
+			   floatformats_ia64_ext);
+    }
 
   return tdep->ia64_ext_type;
 }

@@ -1516,9 +1516,12 @@ sh_littlebyte_bigword_type (struct gdbarch *gdbarch)
   sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
 
   if (tdep->sh_littlebyte_bigword_type == NULL)
-    tdep->sh_littlebyte_bigword_type
-      = arch_float_type (gdbarch, -1, "builtin_type_sh_littlebyte_bigword",
-			 floatformats_ieee_double_littlebyte_bigword);
+    {
+      type_allocator alloc (gdbarch);
+      tdep->sh_littlebyte_bigword_type
+	= init_float_type (alloc, -1, "builtin_type_sh_littlebyte_bigword",
+			   floatformats_ieee_double_littlebyte_bigword);
+    }
 
   return tdep->sh_littlebyte_bigword_type;
 }

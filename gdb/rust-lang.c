@@ -1613,8 +1613,8 @@ rust_language::language_arch_info (struct gdbarch *gdbarch,
   struct type *usize_type
     = add (init_integer_type (alloc, length, 1, "usize"));
 
-  add (arch_float_type (gdbarch, 32, "f32", floatformats_ieee_single));
-  add (arch_float_type (gdbarch, 64, "f64", floatformats_ieee_double));
+  add (init_float_type (alloc, 32, "f32", floatformats_ieee_single));
+  add (init_float_type (alloc, 64, "f64", floatformats_ieee_double));
   add (init_integer_type (alloc, 0, 1, "()"));
 
   struct type *tem = make_cv_type (1, 0, u8_type, NULL);

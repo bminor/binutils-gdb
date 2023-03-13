@@ -15014,7 +15014,7 @@ dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
   type_allocator alloc (objfile);
   format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
   if (format)
-    type = init_float_type (objfile, bits, name, format, byte_order);
+    type = init_float_type (alloc, bits, name, format, byte_order);
   else
     type = alloc.new_type (TYPE_CODE_ERROR, bits, name);
 

@@ -102,9 +102,12 @@ m68881_ext_type (struct gdbarch *gdbarch)
   m68k_gdbarch_tdep *tdep = gdbarch_tdep<m68k_gdbarch_tdep> (gdbarch);
 
   if (!tdep->m68881_ext_type)
-    tdep->m68881_ext_type
-      = arch_float_type (gdbarch, -1, "builtin_type_m68881_ext",
-			 floatformats_m68881_ext);
+    {
+      type_allocator alloc (gdbarch);
+      tdep->m68881_ext_type
+	= init_float_type (alloc, -1, "builtin_type_m68881_ext",
+			   floatformats_m68881_ext);
+    }
 
   return tdep->m68881_ext_type;
 }

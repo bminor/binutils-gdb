@@ -2432,8 +2432,9 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
       */
 
       /* PPC specific type for IEEE 128-bit float field */
+      type_allocator alloc (gdbarch);
       struct type *t_float128
-	= arch_float_type (gdbarch, 128, "float128_t", floatformats_ieee_quad);
+	= init_float_type (alloc, 128, "float128_t", floatformats_ieee_quad);
 
       struct type *t;
 

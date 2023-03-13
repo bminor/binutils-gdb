@@ -2315,9 +2315,18 @@ extern struct type *init_character_type (type_allocator &alloc, int bit,
 extern struct type *init_boolean_type (type_allocator &alloc, int bit,
 				       int unsigned_p, const char *name);
 
-extern struct type *init_float_type (struct objfile *, int, const char *,
-				     const struct floatformat **,
-				     enum bfd_endian = BFD_ENDIAN_UNKNOWN);
+/* Allocate a TYPE_CODE_FLT type structure using ALLOC.
+   BIT is the type size in bits; if BIT equals -1, the size is
+   determined by the floatformat.  NAME is the type name.  Set the
+   TYPE_FLOATFORMAT from FLOATFORMATS.  BYTE_ORDER is the byte order
+   to use.  If it is BFD_ENDIAN_UNKNOWN (the default), then the byte
+   order of the objfile's architecture is used.  */
+
+extern struct type *init_float_type
+     (type_allocator &alloc, int bit, const char *name,
+      const struct floatformat **floatformats,
+      enum bfd_endian byte_order = BFD_ENDIAN_UNKNOWN);
+
 extern struct type *init_decfloat_type (struct objfile *, int, const char *);
 extern bool can_create_complex_type (struct type *);
 extern struct type *init_complex_type (const char *, struct type *);
@@ -2327,8 +2336,6 @@ extern struct type *init_fixed_point_type (struct objfile *, int, int,
 					   const char *);
 
 /* Helper functions to construct architecture-owned types.  */
-extern struct type *arch_float_type (struct gdbarch *, int, const char *,
-				     const struct floatformat **);
 extern struct type *arch_decfloat_type (struct gdbarch *, int, const char *);
 extern struct type *arch_pointer_type (struct gdbarch *, int, const char *,
 				       struct type *);

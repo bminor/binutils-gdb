@@ -289,7 +289,7 @@ build_m2_types (struct gdbarch *gdbarch)
   builtin_m2_type->builtin_card
     = init_integer_type (alloc, gdbarch_int_bit (gdbarch), 1, "CARDINAL");
   builtin_m2_type->builtin_real
-    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch), "REAL",
+    = init_float_type (alloc, gdbarch_float_bit (gdbarch), "REAL",
 		       gdbarch_float_format (gdbarch));
   builtin_m2_type->builtin_char
     = init_character_type (alloc, TARGET_CHAR_BIT, 1, "CHAR");

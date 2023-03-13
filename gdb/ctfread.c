@@ -375,7 +375,7 @@ ctf_init_float_type (struct objfile *objfile,
   type_allocator alloc (objfile);
   format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
   if (format != nullptr)
-    type = init_float_type (objfile, bits, name, format);
+    type = init_float_type (alloc, bits, name, format);
   else
     type = alloc.new_type (TYPE_CODE_ERROR, bits, name);
 

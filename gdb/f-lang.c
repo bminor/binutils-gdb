@@ -1759,20 +1759,20 @@ build_fortran_types (struct gdbarch *gdbarch)
 			 "integer*8");
 
   builtin_f_type->builtin_real
-    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_float_bit (gdbarch),
 		       "real*4", gdbarch_float_format (gdbarch));
 
   builtin_f_type->builtin_real_s8
-    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_double_bit (gdbarch),
 		       "real*8", gdbarch_double_format (gdbarch));
 
   auto fmt = gdbarch_floatformat_for_type (gdbarch, "real(kind=16)", 128);
   if (fmt != nullptr)
     builtin_f_type->builtin_real_s16
-      = arch_float_type (gdbarch, 128, "real*16", fmt);
+      = init_float_type (alloc, 128, "real*16", fmt);
   else if (gdbarch_long_double_bit (gdbarch) == 128)
     builtin_f_type->builtin_real_s16
-      = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+      = init_float_type (alloc, gdbarch_long_double_bit (gdbarch),
 			 "real*16", gdbarch_long_double_format (gdbarch));
   else
     builtin_f_type->builtin_real_s16

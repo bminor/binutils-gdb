@@ -226,13 +226,13 @@ build_d_types (struct gdbarch *gdbarch)
   builtin_d_type->builtin_ucent
     = init_integer_type (alloc, 128, 1, "ucent");
   builtin_d_type->builtin_float
-    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_float_bit (gdbarch),
 		       "float", gdbarch_float_format (gdbarch));
   builtin_d_type->builtin_double
-    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_double_bit (gdbarch),
 		       "double", gdbarch_double_format (gdbarch));
   builtin_d_type->builtin_real
-    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_long_double_bit (gdbarch),
 		       "real", gdbarch_long_double_format (gdbarch));
 
   builtin_d_type->builtin_byte->set_instance_flags
@@ -245,13 +245,13 @@ build_d_types (struct gdbarch *gdbarch)
 
   /* Imaginary and complex types.  */
   builtin_d_type->builtin_ifloat
-    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_float_bit (gdbarch),
 		       "ifloat", gdbarch_float_format (gdbarch));
   builtin_d_type->builtin_idouble
-    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_double_bit (gdbarch),
 		       "idouble", gdbarch_double_format (gdbarch));
   builtin_d_type->builtin_ireal
-    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_long_double_bit (gdbarch),
 		       "ireal", gdbarch_long_double_format (gdbarch));
   builtin_d_type->builtin_cfloat
     = init_complex_type ("cfloat", builtin_d_type->builtin_float);

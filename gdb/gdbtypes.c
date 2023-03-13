@@ -3451,29 +3451,24 @@ init_boolean_type (type_allocator &alloc,
   return t;
 }
 
-/* Allocate a TYPE_CODE_FLT type structure associated with OBJFILE.
-   BIT is the type size in bits; if BIT equals -1, the size is
-   determined by the floatformat.  NAME is the type name.  Set the
-   TYPE_FLOATFORMAT from FLOATFORMATS.  BYTE_ORDER is the byte order
-   to use.  If it is BFD_ENDIAN_UNKNOWN (the default), then the byte
-   order of the objfile's architecture is used.  */
+/* See gdbtypes.h.  */
 
 struct type *
-init_float_type (struct objfile *objfile,
+init_float_type (type_allocator &alloc,
 		 int bit, const char *name,
 		 const struct floatformat **floatformats,
 		 enum bfd_endian byte_order)
 {
   if (byte_order == BFD_ENDIAN_UNKNOWN)
     {
-      struct gdbarch *gdbarch = objfile->arch ();
+      struct gdbarch *gdbarch = alloc.arch ();
       byte_order = gdbarch_byte_order (gdbarch);
     }
   const struct floatformat *fmt = floatformats[byte_order];
   struct type *t;
 
   bit = verify_floatformat (bit, fmt);
-  t = type_allocator (objfile).new_type (TYPE_CODE_FLT, bit, name);
+  t = alloc.new_type (TYPE_CODE_FLT, bit, name);
   TYPE_FLOATFORMAT (t) = fmt;
 
   return t;
@@ -5746,26 +5741,6 @@ copy_type (const struct type *type)
 
 /* Helper functions to initialize architecture-specific types.  */
 
-/* Allocate a TYPE_CODE_FLT type structure associated with GDBARCH.
-   BIT is the type size in bits; if BIT equals -1, the size is
-   determined by the floatformat.  NAME is the type name.  Set the
-   TYPE_FLOATFORMAT from FLOATFORMATS.  */
-
-struct type *
-arch_float_type (struct gdbarch *gdbarch,
-		 int bit, const char *name,
-		 const struct floatformat **floatformats)
-{
-  const struct floatformat *fmt = floatformats[gdbarch_byte_order (gdbarch)];
-  struct type *t;
-
-  bit = verify_floatformat (bit, fmt);
-  t = type_allocator (gdbarch).new_type (TYPE_CODE_FLT, bit, name);
-  TYPE_FLOATFORMAT (t) = fmt;
-
-  return t;
-}
-
 /* Allocate a TYPE_CODE_DECFLOAT type structure associated with GDBARCH.
    BIT is the type size in bits.  NAME is the type name.  */
 
@@ -6063,19 +6038,19 @@ create_gdbtypes_data (struct gdbarch *gdbarch)
     = init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			 1, "unsigned long long");
   builtin_type->builtin_half
-    = arch_float_type (gdbarch, gdbarch_half_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_half_bit (gdbarch),
 		       "half", gdbarch_half_format (gdbarch));
   builtin_type->builtin_float
-    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_float_bit (gdbarch),
 		       "float", gdbarch_float_format (gdbarch));
   builtin_type->builtin_bfloat16
-    = arch_float_type (gdbarch, gdbarch_bfloat16_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_bfloat16_bit (gdbarch),
 		       "bfloat16", gdbarch_bfloat16_format (gdbarch));
   builtin_type->builtin_double
-    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_double_bit (gdbarch),
 		       "double", gdbarch_double_format (gdbarch));
   builtin_type->builtin_long_double
-    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_long_double_bit (gdbarch),
 		       "long double", gdbarch_long_double_format (gdbarch));
   builtin_type->builtin_complex
     = init_complex_type ("complex", builtin_type->builtin_float);
@@ -6240,13 +6215,13 @@ objfile_type (struct objfile *objfile)
     = init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			 1, "unsigned long long");
   objfile_type->builtin_float
-    = init_float_type (objfile, gdbarch_float_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_float_bit (gdbarch),
 		       "float", gdbarch_float_format (gdbarch));
   objfile_type->builtin_double
-    = init_float_type (objfile, gdbarch_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_double_bit (gdbarch),
 		       "double", gdbarch_double_format (gdbarch));
   objfile_type->builtin_long_double
-    = init_float_type (objfile, gdbarch_long_double_bit (gdbarch),
+    = init_float_type (alloc, gdbarch_long_double_bit (gdbarch),
 		       "long double", gdbarch_long_double_format (gdbarch));
 
   /* This type represents a type that was unrecognized in symbol read-in.  */

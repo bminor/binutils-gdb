@@ -737,8 +737,11 @@ csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 
   /* Float register has 64 bits, and only in ck810.  */
   if ((reg_nr >=CSKY_FR0_REGNUM) && (reg_nr <= CSKY_FR0_REGNUM + 15))
-      return arch_float_type (gdbarch, 64, "builtin_type_csky_ext",
+    {
+      type_allocator alloc (gdbarch);
+      return init_float_type (alloc, 64, "builtin_type_csky_ext",
 			      floatformats_ieee_double);
+    }
 
   /* Profiling general register has 48 bits, we use 64bit.  */
   if ((reg_nr >= CSKY_PROFGR_REGNUM) && (reg_nr <= CSKY_PROFGR_REGNUM + 44))

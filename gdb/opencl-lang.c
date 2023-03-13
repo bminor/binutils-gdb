@@ -926,11 +926,11 @@ public:
     BUILD_OCL_VTYPES (long, el_type);
     el_type = add (init_integer_type (alloc, 64, 1, "ulong"));
     BUILD_OCL_VTYPES (ulong, el_type);
-    el_type = add (arch_float_type (gdbarch, 16, "half", floatformats_ieee_half));
+    el_type = add (init_float_type (alloc, 16, "half", floatformats_ieee_half));
     BUILD_OCL_VTYPES (half, el_type);
-    el_type = add (arch_float_type (gdbarch, 32, "float", floatformats_ieee_single));
+    el_type = add (init_float_type (alloc, 32, "float", floatformats_ieee_single));
     BUILD_OCL_VTYPES (float, el_type);
-    el_type = add (arch_float_type (gdbarch, 64, "double", floatformats_ieee_double));
+    el_type = add (init_float_type (alloc, 64, "double", floatformats_ieee_double));
     BUILD_OCL_VTYPES (double, el_type);
 
     add (init_boolean_type (alloc, 8, 1, "bool"));

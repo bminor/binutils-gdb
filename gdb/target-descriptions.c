@@ -116,34 +116,35 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
       if (m_type != NULL)
 	return;
 
+      type_allocator alloc (m_gdbarch);
       switch (e->kind)
 	{
 	case TDESC_TYPE_IEEE_HALF:
-	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_ieee_half",
+	  m_type = init_float_type (alloc, -1, "builtin_type_ieee_half",
 				    floatformats_ieee_half);
 	  return;
 
 	case TDESC_TYPE_IEEE_SINGLE:
-	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_ieee_single",
+	  m_type = init_float_type (alloc, -1, "builtin_type_ieee_single",
 				    floatformats_ieee_single);
 	  return;
 
 	case TDESC_TYPE_IEEE_DOUBLE:
-	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_ieee_double",
+	  m_type = init_float_type (alloc, -1, "builtin_type_ieee_double",
 				    floatformats_ieee_double);
 	  return;
 	case TDESC_TYPE_ARM_FPA_EXT:
-	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_arm_ext",
+	  m_type = init_float_type (alloc, -1, "builtin_type_arm_ext",
 				    floatformats_arm_ext);
 	  return;
 
 	case TDESC_TYPE_I387_EXT:
-	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_i387_ext",
+	  m_type = init_float_type (alloc, -1, "builtin_type_i387_ext",
 				    floatformats_i387_ext);
 	  return;
 
 	case TDESC_TYPE_BFLOAT16:
-	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_bfloat16",
+	  m_type = init_float_type (alloc, -1, "builtin_type_bfloat16",
 				    floatformats_bfloat16);
 	  return;
 	}

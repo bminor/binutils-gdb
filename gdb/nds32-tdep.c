@@ -403,8 +403,11 @@ nds32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 
   /* Currently, only FSRs could be defined as pseudo registers.  */
   if (regnum < gdbarch_num_pseudo_regs (gdbarch))
-    return arch_float_type (gdbarch, -1, "builtin_type_ieee_single",
-			    floatformats_ieee_single);
+    {
+      type_allocator alloc (gdbarch);
+      return init_float_type (alloc, -1, "builtin_type_ieee_single",
+			      floatformats_ieee_single);
+    }
 
   warning (_("Unknown nds32 pseudo register %d."), regnum);
   return NULL;

@@ -374,7 +374,7 @@ dbx_init_float_type (struct objfile *objfile, int bits)
   format = gdbarch_floatformat_for_type (gdbarch, NULL, bits);
   type_allocator alloc (objfile);
   if (format)
-    type = init_float_type (objfile, bits, NULL, format);
+    type = init_float_type (alloc, bits, NULL, format);
   else
     type = alloc.new_type (TYPE_CODE_ERROR, bits, NULL);
 
@@ -2125,19 +2125,19 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       break;
     case 12:
       /* IEEE single precision (32 bit).  */
-      rettype = init_float_type (objfile, 32, "float",
+      rettype = init_float_type (alloc, 32, "float",
 				 floatformats_ieee_single);
       break;
     case 13:
       /* IEEE double precision (64 bit).  */
-      rettype = init_float_type (objfile, 64, "double",
+      rettype = init_float_type (alloc, 64, "double",
 				 floatformats_ieee_double);
       break;
     case 14:
       /* This is an IEEE double on the RS/6000, and different machines with
 	 different sizes for "long double" should use different negative
 	 type numbers.  See stabs.texinfo.  */
-      rettype = init_float_type (objfile, 64, "long double",
+      rettype = init_float_type (alloc, 64, "long double",
 				 floatformats_ieee_double);
       break;
     case 15:
@@ -2147,11 +2147,11 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       rettype = init_boolean_type (alloc, 32, 1, "boolean");
       break;
     case 17:
-      rettype = init_float_type (objfile, 32, "short real",
+      rettype = init_float_type (alloc, 32, "short real",
 				 floatformats_ieee_single);
       break;
     case 18:
-      rettype = init_float_type (objfile, 64, "real",
+      rettype = init_float_type (alloc, 64, "real",
 				 floatformats_ieee_double);
       break;
     case 19:

@@ -4904,9 +4904,12 @@ arm_ext_type (struct gdbarch *gdbarch)
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (!tdep->arm_ext_type)
-    tdep->arm_ext_type
-      = arch_float_type (gdbarch, -1, "builtin_type_arm_ext",
-			 floatformats_arm_ext);
+    {
+      type_allocator alloc (gdbarch);
+      tdep->arm_ext_type
+	= init_float_type (alloc, -1, "builtin_type_arm_ext",
+			   floatformats_arm_ext);
+    }
 
   return tdep->arm_ext_type;
 }
