@@ -32,7 +32,10 @@ set pyfile [gdb_remote_download host \
 		${srcdir}/${subdir}/${gdb_test_file_name}.py]
 
 Term::clean_restart 24 80
-Term::prepare_for_tui
+if { ![Term::prepare_for_tui] } {
+    unsupported "TUI not supported"
+    return
+}
 
 gdb_test "source ${pyfile}" "Python script imported" \
     "import python scripts"
