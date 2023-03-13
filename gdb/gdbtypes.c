@@ -258,32 +258,6 @@ alloc_type (struct objfile *objfile)
   return type;
 }
 
-/* Allocate a new GDBARCH-associated type structure and fill it
-   with some defaults.  Space for the type structure is allocated
-   on the obstack associated with GDBARCH.  */
-
-struct type *
-alloc_type_arch (struct gdbarch *gdbarch)
-{
-  struct type *type;
-
-  gdb_assert (gdbarch != NULL);
-
-  /* Alloc the structure and start off with all fields zeroed.  */
-
-  type = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct type);
-  TYPE_MAIN_TYPE (type) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct main_type);
-
-  type->set_owner (gdbarch);
-
-  /* Initialize the fields that might not be zero.  */
-
-  type->set_code (TYPE_CODE_UNDEF);
-  TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
-
-  return type;
-}
-
 /* If TYPE is objfile-associated, allocate a new type structure
    associated with the same objfile.  If TYPE is gdbarch-associated,
    allocate a new type structure associated with the same gdbarch.  */
@@ -291,10 +265,7 @@ alloc_type_arch (struct gdbarch *gdbarch)
 struct type *
 alloc_type_copy (const struct type *type)
 {
-  if (type->is_objfile_owned ())
-    return alloc_type (type->objfile_owner ());
-  else
-    return alloc_type_arch (type->arch_owner ());
+  return type_allocator (type).new_type ();
 }
 
 /* See gdbtypes.h.  */
@@ -3112,7 +3083,7 @@ check_typedef (struct type *type)
 	  if (sym)
 	    type->set_target_type (sym->type ());
 	  else					/* TYPE_CODE_UNDEF */
-	    type->set_target_type (alloc_type_arch (type->arch ()));
+	    type->set_target_type (type_allocator (type->arch ()).new_type ());
 	}
       type = type->target_type ();
 
@@ -5689,7 +5660,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
   if (*slot != NULL)
     return ((struct type_pair *) *slot)->newobj;
 
-  new_type = alloc_type_arch (type->arch ());
+  new_type = type_allocator (type->arch ()).new_type ();
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
@@ -5861,7 +5832,7 @@ arch_type (struct gdbarch *gdbarch,
 {
   struct type *type;
 
-  type = alloc_type_arch (gdbarch);
+  type = type_allocator (gdbarch).new_type ();
   set_type_code (type, code);
   gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
   type->set_length (bit / TARGET_CHAR_BIT);

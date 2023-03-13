@@ -2187,12 +2187,10 @@ extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
 #define TYPE_ZALLOC(t,size) (memset (TYPE_ALLOC (t, size), 0, size))
 
 /* Use alloc_type to allocate a type owned by an objfile.  Use
-   alloc_type_arch to allocate a type owned by an architecture.  Use
    alloc_type_copy to allocate a type with the same owner as a
    pre-existing template type, no matter whether objfile or
    gdbarch.  */
 extern struct type *alloc_type (struct objfile *);
-extern struct type *alloc_type_arch (struct gdbarch *);
 extern struct type *alloc_type_copy (const struct type *);
 
 /* * This returns the target type (or NULL) of TYPE, also skipping
