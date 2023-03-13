@@ -1395,7 +1395,7 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btAdr:
-      tp = init_pointer_type (objfile, 32, "adr_32",
+      tp = init_pointer_type (alloc, 32, "adr_32",
 			      objfile_type (objfile)->builtin_void);
       break;
 
@@ -1490,7 +1490,7 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btAdr64:
-      tp = init_pointer_type (objfile, 64, "adr_64",
+      tp = init_pointer_type (alloc, 64, "adr_64",
 			      objfile_type (objfile)->builtin_void);
       break;
 

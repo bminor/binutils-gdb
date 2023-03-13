@@ -225,8 +225,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   wchar_type = init_integer_type (alloc, 16,
 				  1, "wchar_t");
   void_ptr_type = lookup_pointer_type (builtin_type (gdbarch)->builtin_void);
-  wchar_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
-				      NULL, wchar_type);
+  wchar_ptr_type = init_pointer_type (alloc, gdbarch_ptr_bit (gdbarch),
+				      nullptr, wchar_type);
 
   /* list entry */
 
@@ -319,8 +319,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   append_composite_type_field (rupp_type, "shell_info", uni_str_type);
   append_composite_type_field (rupp_type, "runtime_data", uni_str_type);
 
-  rupp_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
-				     NULL, rupp_type);
+  rupp_ptr_type = init_pointer_type (alloc, gdbarch_ptr_bit (gdbarch),
+				     nullptr, rupp_type);
 
 
   /* struct process environment block */
@@ -813,7 +813,7 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   type_allocator alloc (gdbarch);
   dword_type = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 				  1, "DWORD");
-  pvoid_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch), "PVOID",
+  pvoid_type = init_pointer_type (alloc, gdbarch_ptr_bit (gdbarch), "PVOID",
 				  builtin_type (gdbarch)->builtin_void);
   ulongptr_type = init_integer_type (alloc, gdbarch_ptr_bit (gdbarch),
 				     1, "ULONG_PTR");
@@ -844,8 +844,8 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
 
   siginfo_type = arch_composite_type (gdbarch, "EXCEPTION_RECORD",
 				      TYPE_CODE_STRUCT);
-  siginfo_ptr_type = arch_pointer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
-					NULL, siginfo_type);
+  siginfo_ptr_type = init_pointer_type (alloc, gdbarch_ptr_bit (gdbarch),
+					nullptr, siginfo_type);
 
   /* ExceptionCode is documented as type DWORD, but here a helper
      enum type is used instead to display a human-readable value.  */

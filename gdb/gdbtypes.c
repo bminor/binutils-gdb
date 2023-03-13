@@ -3526,18 +3526,15 @@ init_complex_type (const char *name, struct type *target_type)
   return TYPE_MAIN_TYPE (target_type)->flds_bnds.complex_type;
 }
 
-/* Allocate a TYPE_CODE_PTR type structure associated with OBJFILE.
-   BIT is the pointer type size in bits.  NAME is the type name.
-   TARGET_TYPE is the pointer target type.  Always sets the pointer type's
-   TYPE_UNSIGNED flag.  */
+/* See gdbtypes.h.  */
 
 struct type *
-init_pointer_type (struct objfile *objfile,
+init_pointer_type (type_allocator &alloc,
 		   int bit, const char *name, struct type *target_type)
 {
   struct type *t;
 
-  t = type_allocator (objfile).new_type (TYPE_CODE_PTR, bit, name);
+  t = alloc.new_type (TYPE_CODE_PTR, bit, name);
   t->set_target_type (target_type);
   t->set_is_unsigned (true);
   return t;
@@ -5740,23 +5737,6 @@ copy_type (const struct type *type)
 
 /* Helper functions to initialize architecture-specific types.  */
 
-/* Allocate a TYPE_CODE_PTR type structure associated with GDBARCH.
-   BIT is the pointer type size in bits.  NAME is the type name.
-   TARGET_TYPE is the pointer target type.  Always sets the pointer type's
-   TYPE_UNSIGNED flag.  */
-
-struct type *
-arch_pointer_type (struct gdbarch *gdbarch,
-		   int bit, const char *name, struct type *target_type)
-{
-  struct type *t;
-
-  t = type_allocator (gdbarch).new_type (TYPE_CODE_PTR, bit, name);
-  t->set_target_type (target_type);
-  t->set_is_unsigned (true);
-  return t;
-}
-
 /* Allocate a TYPE_CODE_FLAGS type structure associated with GDBARCH.
    NAME is the type name.  BIT is the size of the flag word in bits.  */
 
@@ -6227,7 +6207,7 @@ objfile_type (struct objfile *objfile)
   objfile_type->nodebug_text_gnu_ifunc_symbol->set_is_gnu_ifunc (true);
 
   objfile_type->nodebug_got_plt_symbol
-    = init_pointer_type (objfile, gdbarch_addr_bit (gdbarch),
+    = init_pointer_type (alloc, gdbarch_addr_bit (gdbarch),
 			 "<text from jump slot in .got.plt, no debug info>",
 			 objfile_type->nodebug_text_symbol);
   objfile_type->nodebug_data_symbol

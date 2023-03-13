@@ -2335,14 +2335,18 @@ extern struct type *init_decfloat_type (type_allocator &alloc, int bit,
 
 extern bool can_create_complex_type (struct type *);
 extern struct type *init_complex_type (const char *, struct type *);
-extern struct type *init_pointer_type (struct objfile *, int, const char *,
-				       struct type *);
+
+/* Allocate a TYPE_CODE_PTR type structure using ALLOC.
+   BIT is the pointer type size in bits.  NAME is the type name.
+   TARGET_TYPE is the pointer target type.  Always sets the pointer type's
+   TYPE_UNSIGNED flag.  */
+
+extern struct type *init_pointer_type (type_allocator &alloc, int bit,
+				       const char *name,
+				       struct type *target_type);
+
 extern struct type *init_fixed_point_type (struct objfile *, int, int,
 					   const char *);
-
-/* Helper functions to construct architecture-owned types.  */
-extern struct type *arch_pointer_type (struct gdbarch *, int, const char *,
-				       struct type *);
 
 /* Helper functions to construct a struct or record type.  An
    initially empty type is created using arch_composite_type().

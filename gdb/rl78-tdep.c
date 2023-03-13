@@ -1419,9 +1419,9 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->rl78_int32 = init_integer_type (alloc, 32, 0, "int32_t");
 
   tdep->rl78_data_pointer
-    = arch_pointer_type (gdbarch, 16, "rl78_data_addr_t", tdep->rl78_void);
+    = init_pointer_type (alloc, 16, "rl78_data_addr_t", tdep->rl78_void);
   tdep->rl78_code_pointer
-    = arch_pointer_type (gdbarch, 32, "rl78_code_addr_t", tdep->rl78_void);
+    = init_pointer_type (alloc, 32, "rl78_code_addr_t", tdep->rl78_void);
 
   /* Registers.  */
   set_gdbarch_num_regs (gdbarch, RL78_NUM_REGS);

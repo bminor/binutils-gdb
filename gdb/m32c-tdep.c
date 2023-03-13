@@ -188,18 +188,19 @@ make_types (struct gdbarch *arch)
   type_allocator alloc (arch);
   tdep->voyd = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   tdep->ptr_voyd
-    = arch_pointer_type (arch, gdbarch_ptr_bit (arch), NULL, tdep->voyd);
+    = init_pointer_type (alloc, gdbarch_ptr_bit (arch), NULL, tdep->voyd);
   tdep->func_voyd = lookup_function_type (tdep->voyd);
 
   xsnprintf (type_name, sizeof (type_name), "%s_data_addr_t",
 	     gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->data_addr_reg_type
-    = arch_pointer_type (arch, data_addr_reg_bits, type_name, tdep->voyd);
+    = init_pointer_type (alloc, data_addr_reg_bits, type_name, tdep->voyd);
 
   xsnprintf (type_name, sizeof (type_name), "%s_code_addr_t",
 	     gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->code_addr_reg_type
-    = arch_pointer_type (arch, code_addr_reg_bits, type_name, tdep->func_voyd);
+    = init_pointer_type (alloc, code_addr_reg_bits, type_name,
+			 tdep->func_voyd);
 
   tdep->uint8  = init_integer_type (alloc,  8, 1, "uint8_t");
   tdep->uint16 = init_integer_type (alloc, 16, 1, "uint16_t");

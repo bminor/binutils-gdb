@@ -15229,7 +15229,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       case DW_ATE_address:
 	/* Turn DW_ATE_address into a void * pointer.  */
 	type = alloc.new_type (TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
-	type = init_pointer_type (objfile, bits, name, type);
+	type = init_pointer_type (alloc, bits, name, type);
 	break;
       case DW_ATE_boolean:
 	type = init_boolean_type (alloc, bits, 1, name);
