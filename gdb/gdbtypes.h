@@ -2205,6 +2205,104 @@ extern struct type *get_target_type (struct type *type);
 
 extern unsigned int type_length_units (struct type *type);
 
+/* An object of this type is passed when allocating certain types.  It
+   determines where the new type is allocated.  Ultimately a type is
+   either allocated on a on an objfile obstack or on a gdbarch
+   obstack.  However, it's also possible to request that a new type be
+   allocated on the same obstack as some existing type, or that a
+   "new" type instead overwrite a supplied type object.  */
+
+class type_allocator
+{
+public:
+
+  /* Create new types on OBJFILE.  */
+  explicit type_allocator (objfile *objfile)
+    : m_is_objfile (true)
+  {
+    m_data.objfile = objfile;
+  }
+
+  /* Create new types on GDBARCH.  */
+  explicit type_allocator (gdbarch *gdbarch)
+  {
+    m_data.gdbarch = gdbarch;
+  }
+
+  /* This determines whether a passed-in type should be rewritten in
+     place, or whether it should simply determine where the new type
+     is created.  */
+  enum type_allocator_kind
+  {
+    /* Allocate on same obstack as existing type.  */
+    SAME = 0,
+    /* Smash the existing type.  */
+    SMASH = 1,
+  };
+
+  /* Create new types either on the same obstack as TYPE; or if SMASH
+     is passed, overwrite TYPE.  */
+  explicit type_allocator (struct type *type,
+			   type_allocator_kind kind = SAME)
+  {
+    if (kind == SAME)
+      {
+	if (type->is_objfile_owned ())
+	  {
+	    m_data.objfile = type->objfile_owner ();
+	    m_is_objfile = true;
+	  }
+	else
+	  m_data.gdbarch = type->arch_owner ();
+      }
+    else
+      {
+	m_smash = true;
+	m_data.type = type;
+      }
+  }
+
+  /* Create new types on the same obstack as TYPE.  */
+  explicit type_allocator (const struct type *type)
+    : m_is_objfile (type->is_objfile_owned ())
+  {
+    if (type->is_objfile_owned ())
+      m_data.objfile = type->objfile_owner ();
+    else
+      m_data.gdbarch = type->arch_owner ();
+  }
+
+  /* Create a new type on the desired obstack.  Note that a "new" type
+     is not created if type-smashing was selected at construction.  */
+  type *new_type ();
+
+  /* Create a new type on the desired obstack, and fill in its code,
+     length, and name.  If NAME is non-null, it is copied to the
+     destination obstack first.  Note that a "new" type is not created
+     if type-smashing was selected at construction.  */
+  type *new_type (enum type_code code, int bit, const char *name);
+
+  /* Return the architecture associated with this allocator.  This
+     comes from whatever object was supplied to the constructor.  */
+  gdbarch *arch ();
+
+private:
+
+  /* Where the type should wind up.  */
+  union
+  {
+    struct objfile *objfile;
+    struct gdbarch *gdbarch;
+    struct type *type;
+  } m_data {};
+
+  /* True if this allocator uses the objfile field above.  */
+  bool m_is_objfile = false;
+  /* True if this allocator uses the type field above, indicating that
+     the "allocation" should be done in-place.  */
+  bool m_smash = false;
+};
+
 /* * Helper function to construct objfile-owned types.  */
 
 extern struct type *init_type (struct objfile *, enum type_code, int,

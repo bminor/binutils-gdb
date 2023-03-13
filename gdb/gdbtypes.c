@@ -173,6 +173,64 @@ show_strict_type_checking (struct ui_file *file, int from_tty,
 }
 
 
+/* Helper function to initialize a newly allocated type.  Set type code
+   to CODE and initialize the type-specific fields accordingly.  */
+
+static void
+set_type_code (struct type *type, enum type_code code)
+{
+  type->set_code (code);
+
+  switch (code)
+    {
+      case TYPE_CODE_STRUCT:
+      case TYPE_CODE_UNION:
+      case TYPE_CODE_NAMESPACE:
+	INIT_CPLUS_SPECIFIC (type);
+	break;
+      case TYPE_CODE_FLT:
+	TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
+	break;
+      case TYPE_CODE_FUNC:
+	INIT_FUNC_SPECIFIC (type);
+	break;
+      case TYPE_CODE_FIXED_POINT:
+	INIT_FIXED_POINT_SPECIFIC (type);
+	break;
+    }
+}
+
+/* See gdbtypes.h.  */
+
+type *
+type_allocator::new_type ()
+{
+  if (m_smash)
+    return m_data.type;
+
+  obstack *obstack = (m_is_objfile
+		      ? &m_data.objfile->objfile_obstack
+		      : gdbarch_obstack (m_data.gdbarch));
+
+  /* Alloc the structure and start off with all fields zeroed.  */
+  struct type *type = OBSTACK_ZALLOC (obstack, struct type);
+  TYPE_MAIN_TYPE (type) = OBSTACK_ZALLOC (obstack, struct main_type);
+
+  if (m_is_objfile)
+    {
+      OBJSTAT (m_data.objfile, n_types++);
+      type->set_owner (m_data.objfile);
+    }
+  else
+    type->set_owner (m_data.gdbarch);
+
+  /* Initialize the fields that might not be zero.  */
+  type->set_code (TYPE_CODE_UNDEF);
+  TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
+
+  return type;
+}
+
 /* Allocate a new OBJFILE-associated type structure and fill it
    with some defaults.  Space for the type structure is allocated
    on the objfile's objfile_obstack.  */
@@ -237,6 +295,39 @@ alloc_type_copy (const struct type *type)
     return alloc_type (type->objfile_owner ());
   else
     return alloc_type_arch (type->arch_owner ());
+}
+
+/* See gdbtypes.h.  */
+
+type *
+type_allocator::new_type (enum type_code code, int bit, const char *name)
+{
+  struct type *type = new_type ();
+  set_type_code (type, code);
+  gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
+  type->set_length (bit / TARGET_CHAR_BIT);
+
+  if (name != nullptr)
+    {
+      obstack *obstack = (m_is_objfile
+			  ? &m_data.objfile->objfile_obstack
+			  : gdbarch_obstack (m_data.gdbarch));
+      type->set_name (obstack_strdup (obstack, name));
+    }
+
+  return type;
+}
+
+/* See gdbtypes.h.  */
+
+gdbarch *
+type_allocator::arch ()
+{
+  if (m_smash)
+    return m_data.type->arch ();
+  if (m_is_objfile)
+    return m_data.objfile->arch ();
+  return m_data.gdbarch;
 }
 
 /* See gdbtypes.h.  */
@@ -3342,33 +3433,6 @@ allocate_gnat_aux_type (struct type *type)
   TYPE_GNAT_SPECIFIC (type) = (struct gnat_aux_type *)
     TYPE_ALLOC (type, sizeof (struct gnat_aux_type));
   *(TYPE_GNAT_SPECIFIC (type)) = gnat_aux_default;
-}
-
-/* Helper function to initialize a newly allocated type.  Set type code
-   to CODE and initialize the type-specific fields accordingly.  */
-
-static void
-set_type_code (struct type *type, enum type_code code)
-{
-  type->set_code (code);
-
-  switch (code)
-    {
-      case TYPE_CODE_STRUCT:
-      case TYPE_CODE_UNION:
-      case TYPE_CODE_NAMESPACE:
-	INIT_CPLUS_SPECIFIC (type);
-	break;
-      case TYPE_CODE_FLT:
-	TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
-	break;
-      case TYPE_CODE_FUNC:
-	INIT_FUNC_SPECIFIC (type);
-	break;
-      case TYPE_CODE_FIXED_POINT:
-	INIT_FIXED_POINT_SPECIFIC (type);
-	break;
-    }
 }
 
 /* Helper function to verify floating-point format and size.
