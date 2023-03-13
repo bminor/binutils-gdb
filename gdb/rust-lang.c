@@ -939,7 +939,7 @@ rust_composite_type (struct type *original,
 		     const char *field1, struct type *type1,
 		     const char *field2, struct type *type2)
 {
-  struct type *result = alloc_type_copy (original);
+  struct type *result = type_allocator (original).new_type ();
   int i, nfields, bitpos;
 
   nfields = 0;

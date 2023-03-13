@@ -2140,8 +2140,9 @@ ada_type_of_array (struct value *arr, int bounds)
 	return NULL;
       while (arity > 0)
 	{
-	  struct type *range_type = alloc_type_copy (arr->type ());
-	  struct type *array_type = alloc_type_copy (arr->type ());
+	  type_allocator alloc (arr->type ());
+	  struct type *range_type = alloc.new_type ();
+	  struct type *array_type = alloc.new_type ();
 	  struct value *low = desc_one_bound (descriptor, arity, 0);
 	  struct value *high = desc_one_bound (descriptor, arity, 1);
 
@@ -2382,7 +2383,7 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
   else
     index_type = type->index_type ();
 
-  new_type = alloc_type_copy (type);
+  new_type = type_allocator (type).new_type ();
   new_elt_type =
     constrained_packed_array_type (ada_check_typedef (type->target_type ()),
 				   elt_bits);
@@ -7816,7 +7817,7 @@ variant_field_index (struct type *type)
 static struct type *
 empty_record (struct type *templ)
 {
-  struct type *type = alloc_type_copy (templ);
+  struct type *type = type_allocator (templ).new_type ();
 
   type->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (type);
@@ -7872,7 +7873,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	nfields++;
     }
 
-  rtype = alloc_type_copy (type);
+  rtype = type_allocator (type).new_type ();
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
   rtype->set_num_fields (nfields);
@@ -8123,7 +8124,7 @@ template_to_static_fixed_type (struct type *type0)
 	  /* Clone TYPE0 only the first time we get a new field type.  */
 	  if (type == type0)
 	    {
-	      type = alloc_type_copy (type0);
+	      type = type_allocator (type0).new_type ();
 	      type0->set_target_type (type);
 	      type->set_code (type0->code ());
 	      INIT_NONE_SPECIFIC (type);
@@ -8177,7 +8178,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   else
     dval = dval0;
 
-  rtype = alloc_type_copy (type);
+  rtype = type_allocator (type).new_type ();
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
   rtype->set_num_fields (nfields);
@@ -8470,7 +8471,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       if (elt_type0 == elt_type && !constrained_packed_array_p)
 	result = type0;
       else
-	result = create_array_type (alloc_type_copy (type0),
+	result = create_array_type (type_allocator (type0).new_type (),
 				    elt_type, type0->index_type ());
     }
   else
@@ -8502,7 +8503,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 	  struct type *range_type =
 	    to_fixed_range_type (index_type_desc->field (i).type (), dval);
 
-	  result = create_array_type (alloc_type_copy (elt_type0),
+	  result = create_array_type (type_allocator (elt_type0).new_type (),
 				      result, range_type);
 	  elt_type0 = elt_type0->target_type ();
 	}
@@ -11514,8 +11515,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       if (L < INT_MIN || U > INT_MAX)
 	return raw_type;
       else
-	return create_static_range_type (alloc_type_copy (raw_type), raw_type,
-					 L, U);
+	return create_static_range_type (type_allocator (raw_type).new_type (),
+					 raw_type, L, U);
     }
   else
     {
@@ -11566,7 +11567,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 	    }
 	}
 
-      type = create_static_range_type (alloc_type_copy (raw_type),
+      type = create_static_range_type (type_allocator (raw_type).new_type (),
 				       base_type, L, U);
       /* create_static_range_type alters the resulting type's length
 	 to match the size of the base_type, which is not what we want.

@@ -1475,7 +1475,7 @@ allocate_stub_method (struct type *type)
 {
   struct type *mtype;
 
-  mtype = alloc_type_copy (type);
+  mtype = type_allocator (type).new_type ();
   mtype->set_code (TYPE_CODE_METHOD);
   mtype->set_length (1);
   mtype->set_is_stub (true);

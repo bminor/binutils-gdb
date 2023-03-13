@@ -258,16 +258,6 @@ alloc_type (struct objfile *objfile)
   return type;
 }
 
-/* If TYPE is objfile-associated, allocate a new type structure
-   associated with the same objfile.  If TYPE is gdbarch-associated,
-   allocate a new type structure associated with the same gdbarch.  */
-
-struct type *
-alloc_type_copy (const struct type *type)
-{
-  return type_allocator (type).new_type ();
-}
-
 /* See gdbtypes.h.  */
 
 type *
@@ -421,7 +411,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
 
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
     {
-      ntype = alloc_type_copy (type);
+      ntype = type_allocator (type).new_type ();
       if (typeptr)
 	*typeptr = ntype;
     }
@@ -499,7 +489,7 @@ make_reference_type (struct type *type, struct type **typeptr,
 
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
     {
-      ntype = alloc_type_copy (type);
+      ntype = type_allocator (type).new_type ();
       if (typeptr)
 	*typeptr = ntype;
     }
@@ -574,7 +564,7 @@ make_function_type (struct type *type, struct type **typeptr)
 
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
     {
-      ntype = alloc_type_copy (type);
+      ntype = type_allocator (type).new_type ();
       if (typeptr)
 	*typeptr = ntype;
     }
@@ -906,7 +896,7 @@ lookup_memberptr_type (struct type *type, struct type *domain)
 {
   struct type *mtype;
 
-  mtype = alloc_type_copy (type);
+  mtype = type_allocator (type).new_type ();
   smash_to_memberptr_type (mtype, domain, type);
   return mtype;
 }
@@ -918,7 +908,7 @@ lookup_methodptr_type (struct type *to_type)
 {
   struct type *mtype;
 
-  mtype = alloc_type_copy (to_type);
+  mtype = type_allocator (to_type).new_type ();
   smash_to_methodptr_type (mtype, to_type);
   return mtype;
 }
@@ -981,7 +971,7 @@ create_range_type (struct type *result_type, struct type *index_type,
   gdb_assert (index_type->length () > 0);
 
   if (result_type == NULL)
-    result_type = alloc_type_copy (index_type);
+    result_type = type_allocator (index_type).new_type ();
   result_type->set_code (TYPE_CODE_RANGE);
   result_type->set_target_type (index_type);
   if (index_type->is_stub ())
@@ -1425,7 +1415,7 @@ create_array_type_with_stride (struct type *result_type,
     }
 
   if (result_type == NULL)
-    result_type = alloc_type_copy (range_type);
+    result_type = type_allocator (range_type).new_type ();
 
   result_type->set_code (TYPE_CODE_ARRAY);
   result_type->set_target_type (element_type);
@@ -1527,7 +1517,7 @@ struct type *
 create_set_type (struct type *result_type, struct type *domain_type)
 {
   if (result_type == NULL)
-    result_type = alloc_type_copy (domain_type);
+    result_type = type_allocator (domain_type).new_type ();
 
   result_type->set_code (TYPE_CODE_SET);
   result_type->set_num_fields (1);
@@ -3597,7 +3587,7 @@ init_complex_type (const char *name, struct type *target_type)
 	  name = new_name;
 	}
 
-      t = alloc_type_copy (target_type);
+      t = type_allocator (target_type).new_type ();
       set_type_code (t, TYPE_CODE_COMPLEX);
       t->set_length (2 * target_type->length ());
       t->set_name (name);
@@ -5804,7 +5794,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
 struct type *
 copy_type (const struct type *type)
 {
-  struct type *new_type = alloc_type_copy (type);
+  struct type *new_type = type_allocator (type).new_type ();
   new_type->set_instance_flags (type->instance_flags ());
   new_type->set_length (type->length ());
   memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
