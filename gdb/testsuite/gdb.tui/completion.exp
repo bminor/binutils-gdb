@@ -48,12 +48,15 @@ proc test_tab_completion {input_line expected_re} {
     }
 }
 
-with_test_prefix "completion of layout names" {
-    test_tab_completion "layout" "asm *next *prev *regs *split *src *"
-}
+if { [readline_is_used] } {
+    with_test_prefix "completion of layout names" {
+	test_tab_completion "layout" "asm *next *prev *regs *split *src *"
+    }
 
-with_test_prefix "completion of focus command" {
-    test_tab_completion "focus" "cmd *next *prev *src *"
+
+    with_test_prefix "completion of focus command" {
+	test_tab_completion "focus" "cmd *next *prev *src *"
+    }
 }
 
 # Now run some completion tests when TUI mode is enabled.
