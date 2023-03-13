@@ -1669,11 +1669,20 @@ private:
     m_imm.s = EXTRACT_ITYPE_IMM (ival);
   }
 
-  /* Helper for DECODE, decode 16-bit compressed I-type instruction.  */
-  void decode_ci_type_insn (enum opcode opcode, ULONGEST ival)
+  /* Helper for DECODE, decode 16-bit compressed I-type instruction.  Some
+     of the CI instruction have a hard-coded rs1 register, while others
+     just use rd for both the source and destination.  RS1_REGNUM, if
+     passed, is the value to place in rs1, otherwise rd is duplicated into
+     rs1.  */
+  void decode_ci_type_insn (enum opcode opcode, ULONGEST ival,
+			    gdb::optional<int> rs1_regnum = {})
   {
     m_opcode = opcode;
-    m_rd = m_rs1 = decode_register_index (ival, OP_SH_CRS1S);
+    m_rd = decode_register_index (ival, OP_SH_CRS1S);
+    if (rs1_regnum.has_value ())
+      m_rs1 = *rs1_regnum;
+    else
+      m_rs1 = m_rd;
     m_imm.s = EXTRACT_CITYPE_IMM (ival);
   }
 
@@ -1960,6 +1969,10 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	decode_cl_type_insn (LD, ival);
       else if (is_c_lw_insn (ival))
 	decode_cl_type_insn (LW, ival);
+      else if (is_c_ldsp_insn (ival))
+	decode_ci_type_insn (LD, ival, RISCV_SP_REGNUM);
+      else if (is_c_lwsp_insn (ival))
+	decode_ci_type_insn (LW, ival, RISCV_SP_REGNUM);
       else
 	/* None of the other fields of INSN are valid in this case.  */
 	m_opcode = OTHER;
