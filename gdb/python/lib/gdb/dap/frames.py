@@ -18,20 +18,17 @@ import gdb
 from .startup import in_gdb_thread
 
 
-# Map from frame (thread,level) pair to frame ID numbers.  Note we
-# can't use the frame itself here as it is not hashable.
-_frame_ids = {}
-
-# Map from frame ID number back to frames.
-_id_to_frame = {}
+# A list of all the frames we've reported.  A frame's index in the
+# list is its ID.  We don't use a hash here because frames are not
+# hashable.
+_all_frames = []
 
 
 # Clear all the frame IDs.
 @in_gdb_thread
 def _clear_frame_ids(evt):
-    global _frame_ids, _id_to_frame
-    _frame_ids = {}
-    _id_to_frame = {}
+    global _all_frames
+    _all_frames = []
 
 
 # Clear the frame ID map whenever the inferior runs.
@@ -41,17 +38,17 @@ gdb.events.cont.connect(_clear_frame_ids)
 @in_gdb_thread
 def frame_id(frame):
     """Return the frame identifier for FRAME."""
-    global _frame_ids, _id_to_frame
-    pair = (gdb.selected_thread().global_num, frame.level)
-    if pair not in _frame_ids:
-        id = len(_frame_ids)
-        _frame_ids[pair] = id
-        _id_to_frame[id] = frame
-    return _frame_ids[pair]
+    global _all_frames
+    for i in range(0, len(_all_frames)):
+        if _all_frames[i] == frame:
+            return i
+    result = len(_all_frames)
+    _all_frames.append(frame)
+    return result
 
 
 @in_gdb_thread
 def frame_for_id(id):
     """Given a frame identifier ID, return the corresponding frame."""
-    global _id_to_frame
-    return _id_to_frame[id]
+    global _all_frames
+    return _all_frames[id]
