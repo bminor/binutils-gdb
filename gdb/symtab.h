@@ -1226,6 +1226,10 @@ enum symbol_subclass_kind
 
 extern gdb::array_view<const struct symbol_impl> symbol_impls;
 
+bool symbol_matches_domain (enum language symbol_language,
+			    domain_enum symbol_domain,
+			    domain_enum domain);
+
 /* This structure is space critical.  See space comments at the top.  */
 
 struct symbol : public general_symbol_info, public allocate_on_obstack
@@ -1270,6 +1274,13 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   address_class aclass () const
   {
     return this->impl ().aclass;
+  }
+
+  /* Call symbol_matches_domain on this symbol, using the symbol's
+     domain.  */
+  bool matches (domain_enum d) const
+  {
+    return symbol_matches_domain (language (), domain (), d);
   }
 
   domain_enum domain () const
@@ -2020,10 +2031,6 @@ extern const char multiple_symbols_all[];
 extern const char multiple_symbols_cancel[];
 
 const char *multiple_symbols_select_mode (void);
-
-bool symbol_matches_domain (enum language symbol_language,
-			    domain_enum symbol_domain,
-			    domain_enum domain);
 
 /* lookup a symbol table by source file name.  */
 

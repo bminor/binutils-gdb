@@ -6051,7 +6051,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
   found_sym = false;
   for (struct symbol *sym : block_iterator_range (block, &lookup_name))
     {
-      if (symbol_matches_domain (sym->language (), sym->domain (), domain))
+      if (sym->matches (domain))
 	{
 	  if (sym->aclass () != LOC_UNRESOLVED)
 	    {
@@ -6086,8 +6086,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 
       for (struct symbol *sym : block_iterator_range (block))
       {
-	if (symbol_matches_domain (sym->language (),
-				   sym->domain (), domain))
+	if (sym->matches (domain))
 	  {
 	    int cmp;
 

@@ -2288,8 +2288,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 	  other = result;
 	  break;
 	}
-      if (symbol_matches_domain (result.symbol->language (),
-				 result.symbol->domain (), domain))
+      if (result.symbol->matches (domain))
 	{
 	  struct symbol *better
 	    = better_symbol (other.symbol, result.symbol, domain);
@@ -2777,7 +2776,7 @@ iterate_over_symbols (const struct block *block,
 {
   for (struct symbol *sym : block_iterator_range (block, &name))
     {
-      if (symbol_matches_domain (sym->language (), sym->domain (), domain))
+      if (sym->matches (domain))
 	{
 	  struct block_symbol block_sym = {sym, block};
 
