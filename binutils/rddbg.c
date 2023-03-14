@@ -147,7 +147,8 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	    }
 	  /* Zero terminate the strings table, just in case.  */
 	  strsize = bfd_section_size (strsec);
-	  strings [strsize - 1] = 0;
+	  if (strsize != 0)
+	    strings [strsize - 1] = 0;
 	  if (shandle == NULL)
 	    {
 	      shandle = start_stab (dhandle, abfd, true, syms, symcount);
