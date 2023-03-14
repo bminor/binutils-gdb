@@ -50,14 +50,6 @@ set_board_info rsh_prog /usr/bin/ssh
 set_board_info rcp_prog /usr/bin/scp
 set_board_info file_transfer "rsh"
 
-if { ![info exists HOST_DIR] } {
-    set HOST_DIR [file join [pwd] "remote-host"]
-}
-
-if { $board_type == "host" } {
-    set_board_info gdb_opts "-d \"${HOST_DIR}\""
-}
-
 proc ${board}_spawn { board cmd } {
     global board_info
 
@@ -68,20 +60,6 @@ proc ${board}_spawn { board cmd } {
     spawn $RSH -t -l $username $remote $cmd
     set board_info($board,fileid) $spawn_id
     return $spawn_id
-}
-
-proc ${board}_download { board src dest } {
-    global HOST_DIR
-
-    if { ![file exists $HOST_DIR] } {
-	file mkdir $HOST_DIR
-    }
-
-    set destfile [file join $HOST_DIR $dest]
-    verbose -log "${board}_download: file copy -force $src $destfile"
-    file copy -force $src $destfile
-
-    return $destfile
 }
 
 if { $board_type == "host" } {
