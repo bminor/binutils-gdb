@@ -5246,7 +5246,12 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	    }
 
 	  if (n_files > 0)
-	    printf (_("File name                            Line number    Starting address    View    Stmt\n"));
+	    {
+	      if (do_wide)
+		printf (_("File name                            Line number    Starting address    View    Stmt\n"));
+	      else
+		printf (_("File name                        Line number    Starting address    View    Stmt\n"));
+	    }
 	  else
 	    printf (_("CU: Empty file name table\n"));
 	  saved_linfo = linfo;
@@ -5572,23 +5577,23 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  if (linfo.li_max_ops_per_insn == 1)
 		    {
 		      if (xop == -DW_LNE_end_sequence)
-			printf ("%-35s  %11s  %#18" PRIx64,
+			printf ("%-31s  %11s  %#18" PRIx64,
 				newFileName, "-",
 				state_machine_regs.address);
 		      else
-			printf ("%-35s  %11d  %#18" PRIx64,
+			printf ("%-31s  %11d  %#18" PRIx64,
 				newFileName, state_machine_regs.line,
 				state_machine_regs.address);
 		    }
 		  else
 		    {
 		      if (xop == -DW_LNE_end_sequence)
-			printf ("%-35s  %11s  %#18" PRIx64 "[%d]",
+			printf ("%-31s  %11s  %#18" PRIx64 "[%d]",
 				newFileName, "-",
 				state_machine_regs.address,
 				state_machine_regs.op_index);
 		      else
-			printf ("%-35s  %11d  %#18" PRIx64 "[%d]",
+			printf ("%-31s  %11d  %#18" PRIx64 "[%d]",
 				newFileName, state_machine_regs.line,
 				state_machine_regs.address,
 				state_machine_regs.op_index);
