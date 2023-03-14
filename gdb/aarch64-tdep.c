@@ -55,6 +55,9 @@
 #include <algorithm>
 #include <unordered_map>
 
+/* For inferior_ptid and current_inferior ().  */
+#include "inferior.h"
+
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
 #define HA_MAX_NUM_FLDS		4
@@ -3556,40 +3559,73 @@ aarch64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 static CORE_ADDR
 aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
 {
-  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
-
   /* By default, we assume TBI and discard the top 8 bits plus the VA range
-     select bit (55).  */
+     select bit (55).  Below we try to fetch information about pointer
+     authentication masks in order to make non-address removal more
+     precise.  */
   CORE_ADDR mask = AARCH64_TOP_BITS_MASK;
 
-  if (tdep->has_pauth ())
+  /* Check if we have an inferior first.  If not, just use the default
+     mask.
+
+     We use the inferior_ptid here because the pointer authentication masks
+     should be the same across threads of a process.  Since we may not have
+     access to the current thread (gdb may have switched to no inferiors
+     momentarily), we use the inferior ptid.  */
+  if (inferior_ptid != null_ptid)
     {
-      /* Fetch the PAC masks.  These masks are per-process, so we can just
-	 fetch data from whatever thread we have at the moment.
+      /* If we do have an inferior, attempt to fetch its thread's thread_info
+	 struct.  */
+      thread_info *thread
+	= find_thread_ptid (current_inferior ()->process_target (),
+			    inferior_ptid);
 
-	 Also, we have both a code mask and a data mask.  For now they are the
-	 same, but this may change in the future.  */
-      struct regcache *regs = get_current_regcache ();
-      CORE_ADDR cmask, dmask;
-      int dmask_regnum = AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base);
-      int cmask_regnum = AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
-
-      /* If we have a kernel address and we have kernel-mode address mask
-	 registers, use those instead.  */
-      if (tdep->pauth_reg_count > 2
-	  && pointer & VA_RANGE_SELECT_BIT_MASK)
+      /* If the thread is running, we will not be able to fetch the mask
+	 registers.  */
+      if (thread != nullptr && thread->state != THREAD_RUNNING)
 	{
-	  dmask_regnum = AARCH64_PAUTH_DMASK_HIGH_REGNUM (tdep->pauth_reg_base);
-	  cmask_regnum = AARCH64_PAUTH_CMASK_HIGH_REGNUM (tdep->pauth_reg_base);
+	  /* Otherwise, fetch the register cache and the masks.  */
+	  struct regcache *regs
+	    = get_thread_regcache (current_inferior ()->process_target (),
+				   inferior_ptid);
+
+	  /* Use the gdbarch from the register cache to check for pointer
+	     authentication support, as it matches the features found in
+	     that particular thread.  */
+	  aarch64_gdbarch_tdep *tdep
+	    = gdbarch_tdep<aarch64_gdbarch_tdep> (regs->arch ());
+
+	  /* Is there pointer authentication support?  */
+	  if (tdep->has_pauth ())
+	    {
+	      CORE_ADDR cmask, dmask;
+	      int dmask_regnum
+		= AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base);
+	      int cmask_regnum
+		= AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
+
+	      /* If we have a kernel address and we have kernel-mode address
+		 mask registers, use those instead.  */
+	      if (tdep->pauth_reg_count > 2
+		  && pointer & VA_RANGE_SELECT_BIT_MASK)
+		{
+		  dmask_regnum
+		    = AARCH64_PAUTH_DMASK_HIGH_REGNUM (tdep->pauth_reg_base);
+		  cmask_regnum
+		    = AARCH64_PAUTH_CMASK_HIGH_REGNUM (tdep->pauth_reg_base);
+		}
+
+	      /* We have both a code mask and a data mask.  For now they are
+		 the same, but this may change in the future.  */
+	      if (regs->cooked_read (dmask_regnum, &dmask) != REG_VALID)
+		dmask = mask;
+
+	      if (regs->cooked_read (cmask_regnum, &cmask) != REG_VALID)
+		cmask = mask;
+
+	      mask |= aarch64_mask_from_pac_registers (cmask, dmask);
+	    }
 	}
-
-      if (regs->cooked_read (dmask_regnum, &dmask) != REG_VALID)
-	dmask = mask;
-
-      if (regs->cooked_read (cmask_regnum, &cmask) != REG_VALID)
-	cmask = mask;
-
-      mask |= aarch64_mask_from_pac_registers (cmask, dmask);
     }
 
   return aarch64_remove_top_bits (pointer, mask);
