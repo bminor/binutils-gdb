@@ -10912,6 +10912,9 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       if (nused == -1u
 	  || _mul_overflow ((size_t) ncols, 4, &temp)
 	  || _mul_overflow ((size_t) nused + 1, temp, &total)
+	  || total > (size_t) (limit - ppool)
+	  /* PR 30227: ncols could be 0.  */
+	  || _mul_overflow ((size_t) nused + 1, 4, &total)
 	  || total > (size_t) (limit - ppool))
 	{
 	  warn (_("Section %s too small for offset and size tables\n"),
