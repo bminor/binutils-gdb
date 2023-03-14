@@ -443,16 +443,17 @@ pending_framepy_repr (PyObject *self)
    Returns the value of register REG as gdb.Value instance.  */
 
 static PyObject *
-pending_framepy_read_register (PyObject *self, PyObject *args)
+pending_framepy_read_register (PyObject *self, PyObject *args, PyObject *kw)
 {
   pending_frame_object *pending_frame = (pending_frame_object *) self;
   PENDING_FRAMEPY_REQUIRE_VALID (pending_frame);
 
-  int regnum;
   PyObject *pyo_reg_id;
+  static const char *keywords[] = { "register", nullptr };
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &pyo_reg_id))
+    return nullptr;
 
-  if (!PyArg_UnpackTuple (args, "read_register", 1, 1, &pyo_reg_id))
-    return NULL;
+  int regnum;
   if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
     return nullptr;
 
@@ -681,7 +682,8 @@ pending_framepy_function (PyObject *self, PyObject *args)
    PendingFrame.create_unwind_info (self, frameId) -> UnwindInfo.  */
 
 static PyObject *
-pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
+pending_framepy_create_unwind_info (PyObject *self, PyObject *args,
+				    PyObject *kw)
 {
   PyObject *pyo_frame_id;
   CORE_ADDR sp;
@@ -690,7 +692,9 @@ pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
 
   PENDING_FRAMEPY_REQUIRE_VALID ((pending_frame_object *) self);
 
-  if (!PyArg_ParseTuple (args, "O:create_unwind_info", &pyo_frame_id))
+  static const char *keywords[] = { "frame_id", nullptr };
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords,
+					&pyo_frame_id))
     return nullptr;
 
   pyuw_get_attr_code code
@@ -1002,11 +1006,12 @@ gdbpy_initialize_unwind (void)
 
 static PyMethodDef pending_frame_object_methods[] =
 {
-  { "read_register", pending_framepy_read_register, METH_VARARGS,
+  { "read_register", (PyCFunction) pending_framepy_read_register,
+    METH_VARARGS | METH_KEYWORDS,
     "read_register (REG) -> gdb.Value\n"
     "Return the value of the REG in the frame." },
-  { "create_unwind_info",
-    pending_framepy_create_unwind_info, METH_VARARGS,
+  { "create_unwind_info", (PyCFunction) pending_framepy_create_unwind_info,
+    METH_VARARGS | METH_KEYWORDS,
     "create_unwind_info (FRAME_ID) -> gdb.UnwindInfo\n"
     "Construct UnwindInfo for this PendingFrame, using FRAME_ID\n"
     "to identify it." },

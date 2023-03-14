@@ -99,7 +99,7 @@ class TestUnwinder(Unwinder):
                 read_register_error = str(ve)
 
             frame_id = FrameId(
-                pending_frame.read_register(TestUnwinder.AMD64_RSP),
+                pending_frame.read_register(register=TestUnwinder.AMD64_RSP),
                 pending_frame.read_register(TestUnwinder.AMD64_RIP),
             )
             unwind_info = pending_frame.create_unwind_info(frame_id)
@@ -156,7 +156,7 @@ class simple_unwinder(Unwinder):
             captured_pending_frame = pending_frame
             captured_pending_frame_repr = repr(pending_frame)
             fid = FrameId(self._sp, self._pc)
-            uw = pending_frame.create_unwind_info(fid)
+            uw = pending_frame.create_unwind_info(frame_id=fid)
             uw.add_saved_register("rip", gdb.Value(0x123))
             uw.add_saved_register("rbp", gdb.Value(0x456))
             uw.add_saved_register("rsp", gdb.Value(0x789))
