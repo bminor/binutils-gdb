@@ -131,10 +131,17 @@ gdb_test "disable unwinder global \"test unwinder\"" \
 check_for_broken_backtrace "stack is broken after command disabling"
 check_info_unwinder "info unwinder after command disabling" off
 
-# Check that invalid register names cause errors.
-gdb_test "python print(add_saved_register_error)" "True" \
-    "add_saved_register error"
-gdb_test "python print(read_register_error)" "True" \
+# Check that invalid register names and values cause errors.
+gdb_test "python print(add_saved_register_errors\[\"unknown_name\"\])" \
+    "Bad register" \
+    "add_saved_register error when an unknown register name is used"
+gdb_test "python print(add_saved_register_errors\[\"unknown_number\"\])" \
+    "Bad register" \
+    "add_saved_register error when an unknown register number is used"
+gdb_test "python print(add_saved_register_errors\[\"bad_value\"\])" \
+    "argument 2 must be gdb.Value, not int" \
+    "add_saved_register error when invalid register value is used"
+gdb_test "python print(read_register_error)" "Bad register" \
     "read_register error"
 
 # Try to create an unwinder object with a non-string name.

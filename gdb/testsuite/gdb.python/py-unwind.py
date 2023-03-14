@@ -18,7 +18,7 @@ from gdb.unwinder import Unwinder, FrameId
 
 
 # These are set to test whether invalid register names cause an error.
-add_saved_register_error = False
+add_saved_register_errors = {}
 read_register_error = False
 
 
@@ -94,9 +94,9 @@ class TestUnwinder(Unwinder):
 
             try:
                 pending_frame.read_register("nosuchregister")
-            except ValueError:
+            except ValueError as ve:
                 global read_register_error
-                read_register_error = True
+                read_register_error = str(ve)
 
             frame_id = FrameId(
                 pending_frame.read_register(TestUnwinder.AMD64_RSP),
@@ -104,13 +104,25 @@ class TestUnwinder(Unwinder):
             )
             unwind_info = pending_frame.create_unwind_info(frame_id)
             unwind_info.add_saved_register(TestUnwinder.AMD64_RBP, previous_bp)
-            unwind_info.add_saved_register("rip", previous_ip)
-            unwind_info.add_saved_register("rsp", previous_sp)
+            unwind_info.add_saved_register(value=previous_ip, register="rip")
+            unwind_info.add_saved_register(register="rsp", value=previous_sp)
+
+            global add_saved_register_errors
             try:
                 unwind_info.add_saved_register("nosuchregister", previous_sp)
-            except ValueError:
-                global add_saved_register_error
-                add_saved_register_error = True
+            except ValueError as ve:
+                add_saved_register_errors["unknown_name"] = str(ve)
+
+            try:
+                unwind_info.add_saved_register(999, previous_sp)
+            except ValueError as ve:
+                add_saved_register_errors["unknown_number"] = str(ve)
+
+            try:
+                unwind_info.add_saved_register("rsp", 1234)
+            except TypeError as ve:
+                add_saved_register_errors["bad_value"] = str(ve)
+
             return unwind_info
         except (gdb.error, RuntimeError):
             return None

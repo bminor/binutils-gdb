@@ -2882,8 +2882,8 @@ Use @code{PendingFrame.create_unwind_info} method described above to
 create a @code{gdb.UnwindInfo} instance.  Use the following method to
 specify caller registers that have been saved in this frame:
 
-@defun gdb.UnwindInfo.add_saved_register (reg, value)
-@var{reg} identifies the register, for a description of the acceptable
+@defun gdb.UnwindInfo.add_saved_register (register, value)
+@var{register} identifies the register, for a description of the acceptable
 values see @ref{gdbpy_frame_read_register,,Frame.read_register}.
 @var{value} is a register value (a @code{gdb.Value} object).
 @end defun
