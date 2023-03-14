@@ -4878,6 +4878,11 @@ same number of @code{.bundle_lock} and @code{.bundle_unlock} directives.
 @code{.byte} expects zero or more expressions, separated by commas.
 Each expression is assembled into the next byte.
 
+Note - this directive is not intended for encoding instructions, and it will
+not trigger effects like DWARF line number generation.  Instead some targets
+support special directives for encoding arbitrary binary sequences as
+instructions such as @code{.insn} or @code{.inst}.
+
 @node CFI directives
 @section CFI directives
 @subsection @code{.cfi_sections @var{section_list}}
@@ -5176,6 +5181,11 @@ If no suffix is used then @samp{.w} is assumed.
 The byte ordering is target dependent, as is the size and format of floating
 point values.
 
+Note - these directives are not intended for encoding instructions, and they
+will not trigger effects like DWARF line number generation.  Instead some
+targets support special directives for encoding arbitrary binary sequences as
+instructions such as @code{.insn} or @code{.inst}.
+
 @node Dcb
 @section @code{.dcb[@var{size}] @var{number} [,@var{fill}]}
 @cindex @code{dcb} directive
@@ -5235,7 +5245,6 @@ suffixes do not indicate that floating-point values are to be inserted.
 If the @var{size} suffix is omitted then @samp{.w} is assumed.
 
 The byte ordering is target dependent.
-
 
 @ifset COFF
 @node Def
@@ -5770,6 +5779,11 @@ integers.  On the H8/300H and the Renesas SH, however, @code{.int} emits
 32-bit integers.
 @end ifset
 @end ifclear
+
+Note - this directive is not intended for encoding instructions, and it will
+not trigger effects like DWARF line number generation.  Instead some targets
+support special directives for encoding arbitrary binary sequences as
+instructions such as eg @code{.insn} or @code{.inst}.
 
 @ifset ELF
 @node Internal
@@ -6586,6 +6600,11 @@ warning message; and just takes the lowest order 16 bytes of the bignum.
 @cindex integer, 16-byte
 @end ifset
 
+Note - this directive is not intended for encoding instructions, and it will
+not trigger effects like DWARF line number generation.  Instead some targets
+support special directives for encoding arbitrary binary sequences as
+instructions such as @code{.insn} or @code{.inst}.
+
 @node Reloc
 @section @code{.reloc @var{offset}, @var{reloc_name}[, @var{expression}]}
 
@@ -7016,6 +7035,11 @@ This expects zero or more @var{expressions}, and emits
 a 16 bit number for each.
 @end ifset
 @end ifclear
+
+Note - this directive is not intended for encoding instructions, and it will
+not trigger effects like DWARF line number generation.  Instead some targets
+support special directives for encoding arbitrary binary sequences as
+instructions such as @code{.insn} or @code{.inst}.
 
 @node Single
 @section @code{.single @var{flonums}}

@@ -1,3 +1,9 @@
+2023-03-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 30206
+	* doc/as.texi (Pseudo Ops): Document that data directives such as
+	.byte and .int are not intended for encoding instructions.
+
 2023-02-28  Richard Ball  <richard.ball@arm.com>
 
 	* testsuite/gas/aarch64/mec-invalid.d: New test.
