@@ -1489,25 +1489,13 @@ proc gdb_test { args } {
     return [gdb_test_multiple $command $message {*}$opts $user_code]
 }
 
-# Return 1 if version MAJOR.MINOR is at least AT_LEAST_MAJOR.AT_LEAST_MINOR.
-proc version_at_least { major minor at_least_major at_least_minor} {
-    if { $major > $at_least_major } {
-        return 1
-    } elseif { $major == $at_least_major \
-		   && $minor >= $at_least_minor } {
-        return 1
-    } else {
-        return 0
-    }
-}
-
 # Return 1 if tcl version used is at least MAJOR.MINOR
 proc tcl_version_at_least { major minor } {
     global tcl_version
     regexp {^([0-9]+)\.([0-9]+)$} $tcl_version \
 	dummy tcl_version_major tcl_version_minor
-    return [version_at_least $tcl_version_major $tcl_version_minor \
-		$major $minor]
+    return [version_compare [list $major $minor] \
+		<= [list $tcl_version_major $tcl_version_minor]]
 }
 
 if { [tcl_version_at_least 8 5] == 0 } {
@@ -7018,7 +7006,7 @@ proc readelf_prints_pie { } {
     # flag is printed by readelf, but we cannot reliably construct a PIE
     # executable if the multilib_flags dictate otherwise
     # (--target_board=unix/-no-pie/-fno-PIE).
-    return [version_at_least $major $minor 2 26]
+    return [version_compare {2 26} <= [list $major $minor]]
 }
 
 # Return 1 if EXECUTABLE is a Position Independent Executable, 0 if it is not,
