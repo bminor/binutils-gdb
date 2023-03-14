@@ -101,49 +101,40 @@ proc gdb_get_bp_addr { num } {
     return ""
 }
 
-# Compare the version numbers in L1 to those in L2 using OP, and return
-# 1 if the comparison is true.
+# Compare the version numbers in L1 to those in L2 using OP, and
+# return 1 if the comparison is true.  OP can be "<", "<=", or "==".
+# It is ok if the lengths of the lists differ.
 
 proc version_compare { l1 op l2 } {
-    set len [llength $l1]
-    if { $len != [llength $l2] } {
-	error "l2 not the same length as l1"
-    }
-
     switch -exact $op {
 	"=="    -
+	"<="    -
 	"<"     {}
-	"<="    { return [expr [version_compare $l1 < $l2] \
-			      || [version_compare $l1 == $l2]]}
 	default { error "unsupported op: $op" }
     }
 
     # Handle ops < and ==.
-    set idx 0
-    foreach v1 $l1 {
-	set v2 [lindex $l2 $idx]
-	incr idx
-	set last [expr $len == $idx]
-
-	set cmp [expr $v1 $op $v2]
-	if { $op == "==" } {
-	    if { $cmp } {
-		continue
-	    } else {
-		return 0
-	    }
-	} else {
-	    # $op == "<".
-	    if { $cmp } {
+    foreach v1 $l1 v2 $l2 {
+	if {$v1 == ""} {
+	    # This is: "1.2 OP 1.2.1".
+	    if {$op != "=="} {
 		return 1
-	    } else {
-		if { !$last && $v1 == $v2 } {
-		    continue
-		}
-		return 0
 	    }
+	    return 0
 	}
+	if {$v2 == ""} {
+	    # This is: "1.2.1 OP 1.2".
+	    return 0
+	}
+	if {$v1 == $v2} {
+	    continue
+	}
+	return [expr $v1 $op $v2]
     }
 
+    if {$op == "<"} {
+	# They are equal.
+	return 0
+    }
     return 1
 }

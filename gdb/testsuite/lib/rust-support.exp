@@ -116,24 +116,6 @@ gdb_caching_proc rust_compiler_version {} {
 # A helper that checks that the rust compiler is at least the given
 # version.  This is handy for use with 'require'.
 proc rust_at_least {atleast} {
-    foreach n1 [split [rust_compiler_version] .] n2 [split $atleast .] {
-	if {$n1 == ""} {
-	    # Have 1.2, wanted 1.2.1.
-	    return 0
-	}
-	if {$n2 == ""} {
-	    # Have 1.2.1, wanted 1.2.
-	    return 1
-	}
-	if {$n1 > $n2} {
-	    # Have 1.3, wanted 1.2.
-	    return 1
-	}
-	if {$n1 < $n2} {
-	    # Have 1.1, wanted 1.2.
-	    return 0
-	}
-    }
-    # Completely equal.
-    return 1
+    return [version_compare  [split $atleast .] \
+		<= [split [rust_compiler_version] .]]
 }
