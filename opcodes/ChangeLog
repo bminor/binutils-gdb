@@ -1,5 +1,10 @@
 2023-03-15  Nick Clifton  <nickc@redhat.com>
 
+	PR 30231
+	* mep-dis.c: Regenerate.
+
+2023-03-15  Nick Clifton  <nickc@redhat.com>
+
 	PR 30230
 	* arm-dis.c (get_sym_code_type): Check for non-ELF symbols.
 

@@ -649,6 +649,20 @@ mep_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
 	  mep_config_index = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_INDEX_MASK;
 	  /* This instantly redefines MEP_CONFIG, MEP_OMASK, .... MEP_VLIW64 */
 
+	  /* mep_config_map is a variable sized array, so we do not know how big it is.
+	     The only safe way to check the index therefore is to iterate over the array.
+	     We do know that the last entry is all null.  */
+	  int i;
+	  for (i = 0; i <= mep_config_index; i++)
+	    if (mep_config_map[i].name == NULL)
+	      break;
+	  
+	  if (i < mep_config_index)
+	    {
+	      opcodes_error_handler (_("illegal MEP INDEX setting '%x' in ELF header e_flags field"), mep_config_index);
+	      mep_config_index = 0;
+	    }
+	  
 	  cop_type = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_COP_MASK;
 	  if (cop_type == EF_MEP_COP_IVC2)
 	    ivc2 = 1;
