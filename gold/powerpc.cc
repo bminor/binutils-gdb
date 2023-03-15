@@ -636,6 +636,24 @@ enum Got_type
     GOT_TYPE_SMALL_TPREL = 7
   };
 
+// gsym->needs_plt_entry purpose is to decide whether a non-branch
+// reloc should reference a plt entry.  It can't be used to decide
+// whether branches need a plt entry.  In fact the call to
+// needs_plt_entry here is not needed;  All cases where it might
+// return true ought to be covered already.  However, since this
+// function is used to decide between plt_ and lplt_ sections in
+// plt_off, make certain that every case where make_plt_entry puts
+// entries in plt_ is covered here.
+static bool
+branch_needs_plt_entry(const Symbol* gsym)
+{
+  return (((!gsym->is_defined()
+	    || gsym->is_from_dynobj()
+	    || gsym->is_preemptible())
+	   && !gsym->final_value_is_known())
+	  || gsym->needs_plt_entry());
+}
+
 template<int size, bool big_endian>
 class Target_powerpc : public Sized_target<size, big_endian>
 {
@@ -927,7 +945,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     if (gsym->type() == elfcpp::STT_GNU_IFUNC
 	&& gsym->can_use_relative_reloc(false))
       *sec = this->iplt_section();
-    else if (!parameters->doing_static_link())
+    else if (branch_needs_plt_entry(gsym))
       *sec = this->plt_section();
     else
       *sec = this->lplt_section();
@@ -4133,7 +4151,7 @@ class Output_data_plt_powerpc : public Output_section_data_build
 template<int size, bool big_endian>
 void
 Output_data_plt_powerpc<size, big_endian>::add_entry(Symbol* gsym,
-						     bool stash)
+						     bool is_local)
 {
   if (!gsym->has_plt_offset())
     {
@@ -4143,13 +4161,24 @@ Output_data_plt_powerpc<size, big_endian>::add_entry(Symbol* gsym,
       gsym->set_plt_offset(off);
       if (this->rel_)
 	{
-	  gsym->set_needs_dynsym_entry();
-	  unsigned int dynrel = elfcpp::R_POWERPC_JMP_SLOT;
-	  this->rel_->add_global(gsym, dynrel, this, off, 0);
+	  if (is_local)
+	    {
+	      unsigned int dynrel = elfcpp::R_POWERPC_RELATIVE;
+	      if (size == 64 && this->targ_->abiversion() < 2)
+		dynrel = elfcpp::R_POWERPC_JMP_SLOT;
+	      this->rel_->add_symbolless_global_addend(gsym, dynrel,
+						       this, off, 0);
+	    }
+	  else
+	    {
+	      gsym->set_needs_dynsym_entry();
+	      unsigned int dynrel = elfcpp::R_POWERPC_JMP_SLOT;
+	      this->rel_->add_global(gsym, dynrel, this, off, 0);
+	    }
 	}
       off += this->plt_entry_size();
       this->set_current_data_size(off);
-      if (stash)
+      if (is_local)
 	{
 	  Local_plt_ent sym(gsym);
 	  this->sym_ents_.push_back(sym);
@@ -4493,13 +4522,7 @@ Target_powerpc<size, big_endian>::make_lplt_section(Symbol_table* symtab,
     {
       Reloc_section* lplt_rel = NULL;
       if (parameters->options().output_is_position_independent())
-	{
-	  lplt_rel = new Reloc_section(false);
-	  this->rela_dyn_section(layout);
-	  if (this->rela_dyn_->output_section())
-	    this->rela_dyn_->output_section()
-	      ->add_output_section_data(lplt_rel);
-	}
+	lplt_rel = this->rela_dyn_section(layout);
       this->lplt_
 	= new Output_data_plt_powerpc<size, big_endian>(this, symtab, lplt_rel,
 							"** LPLT");
@@ -4609,11 +4632,7 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
 	{
 	  // When PIC we can't fill in .branch_lt but must initialise at
 	  // runtime via dynamic relocations.
-	  this->rela_dyn_section(layout);
-	  brlt_rel = new Reloc_section(false);
-	  if (this->rela_dyn_->output_section())
-	    this->rela_dyn_->output_section()
-	      ->add_output_section_data(brlt_rel);
+	  brlt_rel = this->rela_dyn_section(layout);
 	}
       this->brlt_section_
 	= new Output_data_brlt_powerpc<size, big_endian>(this, brlt_rel);
@@ -9009,7 +9028,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_PPC64_PLT16_LO_DS:
       if (!pushed_ifunc)
 	{
-	  if (!parameters->doing_static_link())
+	  if (branch_needs_plt_entry(gsym))
 	    target->make_plt_entry(symtab, layout, gsym);
 	  else
 	    target->make_local_plt_entry(symtab, layout, gsym);
@@ -9028,11 +9047,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	  target->push_branch(ppc_object, data_shndx, reloc.get_r_offset(),
 			      r_type, r_sym, reloc.get_r_addend());
-	  if (gsym->needs_plt_entry()
-	      || (!gsym->final_value_is_known()
-		  && (gsym->is_undefined()
-		      || gsym->is_from_dynobj()
-		      || gsym->is_preemptible())))
+	  if (branch_needs_plt_entry(gsym))
 	    target->make_plt_entry(symtab, layout, gsym);
 	}
       // Fall through.
