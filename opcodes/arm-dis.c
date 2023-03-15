@@ -12400,13 +12400,14 @@ find_ifthen_state (bfd_vma pc,
    mapping symbol.  */
 
 static int
-is_mapping_symbol (struct disassemble_info *info, int n,
+is_mapping_symbol (struct disassemble_info *info,
+		   int n,
 		   enum map_type *map_type)
 {
-  const char *name;
+  const char *name = bfd_asymbol_name (info->symtab[n]);
 
-  name = bfd_asymbol_name (info->symtab[n]);
-  if (name[0] == '$' && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
+  if (name[0] == '$'
+      && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
       && (name[2] == 0 || name[2] == '.'))
     {
       *map_type = ((name[1] == 'a') ? MAP_ARM
@@ -12443,12 +12444,18 @@ get_sym_code_type (struct disassemble_info *info,
 {
   elf_symbol_type *es;
   unsigned int type;
+  asymbol * sym;
 
   /* If the symbol is in a different section, ignore it.  */
   if (info->section != NULL && info->section != info->symtab[n]->section)
     return false;
 
-  es = *(elf_symbol_type **)(info->symtab + n);
+  /* PR 30230: Reject non-ELF symbols, eg synthetic ones.  */
+  sym = info->symtab[n];
+  if (bfd_asymbol_flavour (sym) != bfd_target_elf_flavour)
+    return false;
+
+  es = (elf_symbol_type *) sym;
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
   /* If the symbol has function type then use that.  */
