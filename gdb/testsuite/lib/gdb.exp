@@ -219,6 +219,17 @@ if ![info exists INTERNAL_GDBFLAGS] {
 		   {-iex "set height 0"} \
 		   {-iex "set width 0"}]]
 
+    # If DEBUGINFOD_URLS is set, gdb will try to download sources and
+    # debug info for f.i. system libraries.  Prevent this.
+    if { [is_remote host] } {
+	# Setting environment variables on build has no effect on remote host,
+	# so handle this using "set debuginfod enabled off" instead.
+	set INTERNAL_GDBFLAGS \
+	    "$INTERNAL_GDBFLAGS -iex \"set debuginfod enabled off\""
+    } else {
+	# See default_gdb_init.
+    }
+
     set INTERNAL_GDBFLAGS [append_gdb_data_directory_option $INTERNAL_GDBFLAGS]
 }
 
@@ -6173,7 +6184,14 @@ proc default_gdb_init { test_file_name } {
 
     # If DEBUGINFOD_URLS is set, gdb will try to download sources and
     # debug info for f.i. system libraries.  Prevent this.
-    unset -nocomplain ::env(DEBUGINFOD_URLS)
+    if { [is_remote host] } {
+	# See initialization of INTERNAL_GDBFLAGS.
+    } else {
+	# Using "set debuginfod enabled off" in INTERNAL_GDBFLAGS interferes
+	# with the gdb.debuginfod test-cases, so use the unsetenv method for
+	# non-remote host.
+	unset -nocomplain ::env(DEBUGINFOD_URLS)
+    }
 
     # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
     # environment, we don't want these modifications to the history
