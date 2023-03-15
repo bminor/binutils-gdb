@@ -169,10 +169,9 @@ SECTIONS
     __ISTACK_START = .;
   }${RELOCATING+ > ram}
 
-  .comment        0 : { *(.comment) }
-
 EOF
 
+. $srcdir/scripttempl/misc-sections.sc
 . $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF

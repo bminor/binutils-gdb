@@ -69,10 +69,5 @@ SECTIONS
   {
     *(.stabstr)
   }
-EOF
-
-. $srcdir/scripttempl/DWARF.sc
-
-cat <<EOF
 }
 EOF

@@ -38,5 +38,13 @@ SECTIONS
    ${RELOCATING+*(COMMON)}
    ${RELOCATING+end = .;}
   }
+
+EOF
+
+. $srcdir/scripttempl/misc-sections.sc
+
+. $srcdir/scripttempl/DWARF.sc
+
+cat <<EOF
 }
 EOF

@@ -461,6 +461,22 @@ will contain a colon separated list of audit interfaces to use.  This
 option is only meaningful on ELF platforms supporting the rtld-audit interface.
 The -P option is provided for Solaris compatibility.
 
+@kindex --enable-linker-version
+@item   --enable-linker-version
+Enables the @code{LINKER_VERSION} linker script directive, described
+in @ref{Output Section Data}.  If this directive is used in a linker
+script and this option has been enabled then a string containing the
+linker version will be inserted at the current point.
+
+Note - this location of this option on the linker command line is
+significant.  It will only affect linker scripts that come after it on
+the command line, or which are built into the linker.
+
+@kindex --disable-linker-version
+@item   --disable-linker-version
+Disables the @code{LINKER_VERSION} linker script directive, so that it
+does not insert a version string.  This is the default.
+
 @kindex --enable-non-contiguous-regions
 @item --enable-non-contiguous-regions
 This option avoids generating an error if an input section does not
@@ -1168,7 +1184,9 @@ in a linker script.
 @itemx --version
 @itemx -V
 Display the version number for @command{ld}.  The @option{-V} option also
-lists the supported emulations.
+lists the supported emulations.  See also the description of the
+@option{--enable-linker-version} in @ref{Options,,Command-line Options}
+which can be used to insert the linker version string into a binary.
 
 @kindex -x
 @kindex --discard-all
@@ -5392,6 +5410,16 @@ part of the section following the @code{FILL} command, rather than the
 entire section.  If both are used, the @code{FILL} command takes
 precedence.  @xref{Output Section Fill}, for details on the fill
 expression.
+
+@kindex LINKER_VERSION
+@cindex LINKER_VERSION
+Inserts a string containing the version of the linker at the current
+point.  Note - by default this directive is disabled and will do
+nothing.  It only becomes active if the
+@option{--enable-linker-version} command line option is used.
+
+Built-in linker scripts for ELF based targets already include this
+directive in their @samp{.comment} section.
 
 @node Output Section Keywords
 @subsection Output Section Keywords

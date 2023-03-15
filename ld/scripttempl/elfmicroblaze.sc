@@ -232,5 +232,11 @@ SECTIONS
     ${RELOCATING+*(.tbss.*)}
     ${RELOCATING+*(.gnu.linkonce.tb.*)}
   }
+EOF
+
+. $srcdir/scripttempl/misc-sections.sc
+. $srcdir/scripttempl/DWARF.sc
+
+cat <<EOF
 }
 EOF

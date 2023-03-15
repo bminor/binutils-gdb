@@ -1,3 +1,58 @@
+2023-03-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 30187
+	* NEWS: Mention the new feature.
+	* ld.texi: Document the new feature.
+	* ldgram.y: Handle LINKER_VERSION token.
+	* ldlang.c (lang_add_version): New function.
+	(enable_linker_version): New global variable.
+	* ldlang.h (land_add_version): Prototype.
+	(enable_linker_version): Export.
+	* ldlex.h (OPTION_ENABLE_LINKER_VERSION): Define.
+	(OPTION_DISABLE_LINKER_VERSION): Define.
+	* ldlex.l (LINKER_VERSION): Add token.
+	* lexsup.c (ld_options): Add --enable-linker-version and
+	--disable-linker-version.
+	(parse_args): Handle the new options.
+	* scripttempl/arclinux.sc: Remove stabs and comment sections and
+	replace with inclusion of misc-sections.sc
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/dlx.sc: Likewise.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf32cr16.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise.
+	* scripttempl/elf64bpf.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfarc.sc: Likewise.
+	* scripttempl/elfarcv2.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/elfm9s12z.sc: Likewise.
+	* scripttempl/elfmicroblaze.sc: Likewise.
+	* scripttempl/elfxgate.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/epiphany_4x4.sc: Likewise.
+	* scripttempl/ft32.sc: Likewise.
+	* scripttempl/ip2k.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/nds32elf.sc: Likewise.
+	* scripttempl/pru.sc: Likewise.
+	* scripttempl/v850.sc: Likewise.
+	* scripttempl/v850_rh850.sc: Likewise.
+	* scripttempl/visium.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+	* scripttempl/z80.sc: Likewise.
+	* testsuite/ld-scripts/script.exp: Run new tests.
+	* scripttempl/misc-sections.sc: New file.
+	* testsuite/ld-scripts/ld-version-2.d: New file.
+	* testsuite/ld-scripts/ld-version.d: New file.
+	* testsuite/ld-scripts/ld-version.t: New file.
+
 2023-02-23  Fangrui Song  <i@maskray.me>
 
 	* emultempl/riscvelf.em: Add option parsing.

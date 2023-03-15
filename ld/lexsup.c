@@ -130,6 +130,10 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Enable support of non-contiguous memory regions"), TWO_DASHES },
   { {"enable-non-contiguous-regions-warnings", no_argument, NULL, OPTION_NON_CONTIGUOUS_REGIONS_WARNINGS},
     '\0', NULL, N_("Enable warnings when --enable-non-contiguous-regions may cause unexpected behaviour"), TWO_DASHES },
+  { {"disable-linker-version", no_argument, NULL, OPTION_DISABLE_LINKER_VERSION},
+    '\0', NULL, N_("Disable the LINKER_VERSION linker script directive"), TWO_DASHES },
+  { {"enable-linker-version", no_argument, NULL, OPTION_ENABLE_LINKER_VERSION},
+    '\0', NULL, N_("Enable the LINKER_VERSION linker script directive"), TWO_DASHES },
   { {"EB", no_argument, NULL, OPTION_EB},
     '\0', NULL, N_("Link big-endian objects"), ONE_DASH },
   { {"EL", no_argument, NULL, OPTION_EL},
@@ -1094,6 +1098,13 @@ parse_args (unsigned argc, char **argv)
 	  error_handling_script = optarg;
 	  break;
 #endif
+
+	case OPTION_ENABLE_LINKER_VERSION:
+	  enable_linker_version = true;
+	  break;
+	case OPTION_DISABLE_LINKER_VERSION:
+	  enable_linker_version = false;
+	  break;
 
 	case OPTION_UNDEFINED_VERSION:
 	  link_info.allow_undefined_version = true;

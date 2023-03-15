@@ -163,7 +163,7 @@ SECTIONS
   .stab.index    0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
 
-  .comment       0 : { *(.comment) }
+  .comment       0 : { *(.comment); LINKER_VERSION; }
 
 EOF
 

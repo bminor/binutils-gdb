@@ -1,5 +1,9 @@
 -*- text -*-
 
+* For most ELF based targets, if the --enable-linker-version option is used
+  then the version of the linker will be inserted as a string into the .comment
+  section.
+
 * The linker script syntax has a new command for output sections: ASCIZ "string"
   This will insert a zero-terminated string at the current location.
 

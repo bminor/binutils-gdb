@@ -49,5 +49,11 @@ SECTIONS
 	*(bss)
 	${RELOCATING+ __Hbss = .;}
 	}
+EOF
+
+. $srcdir/scripttempl/misc-sections.sc
+. $srcdir/scripttempl/DWARF.sc
+
+cat <<EOF
 }
 EOF

@@ -27,7 +27,6 @@
 #include "obstack.h"
 #include "bfdlink.h"
 #include "ctf-api.h"
-
 #include "ld.h"
 #include "ldmain.h"
 #include "ldexp.h"
@@ -42,9 +41,11 @@
 #include "demangle.h"
 #include "hashtab.h"
 #include "elf-bfd.h"
+#include "bfdver.h"
+
 #if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif /* BFD_SUPPORTS_PLUGINS */
+#endif
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
@@ -131,6 +132,7 @@ bool lang_has_input_file = false;
 bool had_output_filename = false;
 bool lang_float_flag = false;
 bool delete_output_file_on_failure = false;
+bool enable_linker_version = false;
 struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
@@ -8259,6 +8261,28 @@ lang_process (void)
   ldlang_check_require_defined_symbols ();
 
   lang_end ();
+}
+
+void
+lang_add_version_string (void)
+{
+  if (! enable_linker_version)
+    return;
+
+  const char * str = "GNU ld ";
+  int len = strlen (str);
+  int i;
+
+  for (i = 0 ; i < len ; i++)
+    lang_add_data (BYTE, exp_intop (str[i]));
+
+  str = BFD_VERSION_STRING;
+  len = strlen (str);
+
+  for (i = 0 ; i < len ; i++)
+    lang_add_data (BYTE, exp_intop (str[i]));
+
+  lang_add_data (BYTE, exp_intop ('\0'));
 }
 
 /* EXPORTED TO YACC */
