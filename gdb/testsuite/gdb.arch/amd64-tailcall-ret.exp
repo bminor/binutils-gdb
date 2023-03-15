@@ -14,14 +14,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 set opts {}
-standard_testfile .S
+standard_testfile .S .c
 
 if [info exists COMPILE] {
     # make check RUNTESTFLAGS="gdb.arch/amd64-tailcall-ret.exp COMPILE=1"
-    standard_testfile
+    standard_testfile .c .c
     lappend opts debug optimize=-O2
 } else {
     require is_x86_64_m64_target
+}
+
+# Make .c available on the host.
+if [is_remote host] {
+    gdb_remote_download host $srcdir/$subdir/$srcfile2
 }
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
