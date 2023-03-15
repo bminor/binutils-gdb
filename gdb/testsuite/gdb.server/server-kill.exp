@@ -137,6 +137,12 @@ proc_with_prefix test_stepi {} {
 	return
     }
 
+    # Ensure GDB has computed the frame-id for the current frame
+    # before we kill the gdbserver.  With the frame-id cached when we
+    # stepi below the first packets we try to send to gdbserver will
+    # be from within the breakpoint insertion process.
+    gdb_test "info frame" "Stack level 0, .*"
+
     kill_server
 
     gdb_test "stepi" "(Target disconnected|Remote connection closed|Remote communication error).*"
