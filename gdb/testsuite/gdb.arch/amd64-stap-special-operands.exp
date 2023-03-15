@@ -28,7 +28,7 @@ proc test_probe { probe_name } {
 
 standard_testfile amd64-stap-triplet.S
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile-triplet $srcfile] } {
     return -1
 }
 
@@ -36,7 +36,8 @@ test_probe "triplet"
 
 standard_testfile amd64-stap-three-arg-disp.S
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile-three-arg-displ \
+	  $srcfile] } {
     return -1
 }
 
