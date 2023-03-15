@@ -235,44 +235,6 @@ static const utf8_entry ada_case_fold[] =
 
 
 
-/* The result of a symbol lookup to be stored in our symbol cache.  */
-
-struct cache_entry
-{
-  /* The name used to perform the lookup.  */
-  const char *name;
-  /* The namespace used during the lookup.  */
-  domain_enum domain;
-  /* The symbol returned by the lookup, or NULL if no matching symbol
-     was found.  */
-  struct symbol *sym;
-  /* The block where the symbol was found, or NULL if no matching
-     symbol was found.  */
-  const struct block *block;
-  /* A pointer to the next entry with the same hash.  */
-  struct cache_entry *next;
-};
-
-/* The Ada symbol cache, used to store the result of Ada-mode symbol
-   lookups in the course of executing the user's commands.
-
-   The cache is implemented using a simple, fixed-sized hash.
-   The size is fixed on the grounds that there are not likely to be
-   all that many symbols looked up during any given session, regardless
-   of the size of the symbol table.  If we decide to go to a resizable
-   table, let's just use the stuff from libiberty instead.  */
-
-#define HASH_SIZE 1009
-
-struct ada_symbol_cache
-{
-  /* An obstack used to store the entries in our cache.  */
-  struct auto_obstack cache_space;
-
-  /* The root of the hash table used to implement our symbol cache.  */
-  struct cache_entry *root[HASH_SIZE] {};
-};
-
 static const char ada_completer_word_break_characters[] =
 #ifdef VMS
   " \t\n!@#%^&*()+=|~`}{[]\";:?/,-";
@@ -361,15 +323,58 @@ ada_inferior_exit (struct inferior *inf)
 
 			/* program-space-specific data.  */
 
-/* This module's per-program-space data.  */
-struct ada_pspace_data
+/* The result of a symbol lookup to be stored in our symbol cache.  */
+
+struct cache_entry
 {
-  /* The Ada symbol cache.  */
-  std::unique_ptr<ada_symbol_cache> sym_cache;
+  /* The name used to perform the lookup.  */
+  std::string name;
+  /* The namespace used during the lookup.  */
+  domain_enum domain = UNDEF_DOMAIN;
+  /* The symbol returned by the lookup, or NULL if no matching symbol
+     was found.  */
+  struct symbol *sym = nullptr;
+  /* The block where the symbol was found, or NULL if no matching
+     symbol was found.  */
+  const struct block *block = nullptr;
 };
 
+/* The symbol cache uses this type when searching.  */
+
+struct cache_entry_search
+{
+  const char *name;
+  domain_enum domain;
+
+  hashval_t hash () const
+  {
+    /* This must agree with hash_cache_entry, below.  */
+    return htab_hash_string (name);
+  }
+};
+
+/* Hash function for cache_entry.  */
+
+static hashval_t
+hash_cache_entry (const void *v)
+{
+  const cache_entry *entry = (const cache_entry *) v;
+  return htab_hash_string (entry->name.c_str ());
+}
+
+/* Equality function for cache_entry.  */
+
+static int
+eq_cache_entry (const void *a, const void *b)
+{
+  const cache_entry *entrya = (const cache_entry *) a;
+  const cache_entry_search *entryb = (const cache_entry_search *) b;
+
+  return entrya->domain == entryb->domain && entrya->name == entryb->name;
+}
+
 /* Key to our per-program-space data.  */
-static const registry<program_space>::key<ada_pspace_data>
+static const registry<program_space>::key<htab, htab_deleter>
   ada_pspace_data_handle;
 
 /* Return this module's data for the given program space (PSPACE).
@@ -377,14 +382,17 @@ static const registry<program_space>::key<ada_pspace_data>
 
    This function always returns a valid object.  */
 
-static struct ada_pspace_data *
+static htab_t
 get_ada_pspace_data (struct program_space *pspace)
 {
-  struct ada_pspace_data *data;
-
-  data = ada_pspace_data_handle.get (pspace);
-  if (data == NULL)
-    data = ada_pspace_data_handle.emplace (pspace);
+  htab_t data = ada_pspace_data_handle.get (pspace);
+  if (data == nullptr)
+    {
+      data = htab_create_alloc (10, hash_cache_entry, eq_cache_entry,
+				htab_delete_entry<cache_entry>,
+				xcalloc, xfree);
+      ada_pspace_data_handle.set (pspace, data);
+    }
 
   return data;
 }
@@ -4635,49 +4643,12 @@ make_array_descriptor (struct type *type, struct value *arr)
    even in this case, some expensive name-based symbol searches are still
    sometimes necessary - to find an XVZ variable, mostly.  */
 
-/* Return the symbol cache associated to the given program space PSPACE.
-   If not allocated for this PSPACE yet, allocate and initialize one.  */
-
-static struct ada_symbol_cache *
-ada_get_symbol_cache (struct program_space *pspace)
-{
-  struct ada_pspace_data *pspace_data = get_ada_pspace_data (pspace);
-
-  if (pspace_data->sym_cache == nullptr)
-    pspace_data->sym_cache.reset (new ada_symbol_cache);
-
-  return pspace_data->sym_cache.get ();
-}
-
 /* Clear all entries from the symbol cache.  */
 
 static void
 ada_clear_symbol_cache ()
 {
-  struct ada_pspace_data *pspace_data
-    = get_ada_pspace_data (current_program_space);
-
-  if (pspace_data->sym_cache != nullptr)
-    pspace_data->sym_cache.reset ();
-}
-
-/* Search our cache for an entry matching NAME and DOMAIN.
-   Return it if found, or NULL otherwise.  */
-
-static struct cache_entry **
-find_entry (const char *name, domain_enum domain)
-{
-  struct ada_symbol_cache *sym_cache
-    = ada_get_symbol_cache (current_program_space);
-  int h = msymbol_hash (name) % HASH_SIZE;
-  struct cache_entry **e;
-
-  for (e = &sym_cache->root[h]; *e != NULL; e = &(*e)->next)
-    {
-      if (domain == (*e)->domain && strcmp (name, (*e)->name) == 0)
-	return e;
-    }
-  return NULL;
+  ada_pspace_data_handle.clear (current_program_space);
 }
 
 /* Search the symbol cache for an entry matching NAME and DOMAIN.
@@ -4690,14 +4661,19 @@ static int
 lookup_cached_symbol (const char *name, domain_enum domain,
 		      struct symbol **sym, const struct block **block)
 {
-  struct cache_entry **e = find_entry (name, domain);
+  htab_t tab = get_ada_pspace_data (current_program_space);
+  cache_entry_search search;
+  search.name = name;
+  search.domain = domain;
 
-  if (e == NULL)
+  cache_entry *e = (cache_entry *) htab_find_with_hash (tab, &search,
+							search.hash ());
+  if (e == nullptr)
     return 0;
-  if (sym != NULL)
-    *sym = (*e)->sym;
-  if (block != NULL)
-    *block = (*e)->block;
+  if (sym != nullptr)
+    *sym = e->sym;
+  if (block != nullptr)
+    *block = e->block;
   return 1;
 }
 
@@ -4708,11 +4684,6 @@ static void
 cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
 	      const struct block *block)
 {
-  struct ada_symbol_cache *sym_cache
-    = ada_get_symbol_cache (current_program_space);
-  int h;
-  struct cache_entry *e;
-
   /* Symbols for builtin types don't have a block.
      For now don't cache such symbols.  */
   if (sym != NULL && !sym->is_objfile_owned ())
@@ -4730,14 +4701,21 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
 	return;
     }
 
-  h = msymbol_hash (name) % HASH_SIZE;
-  e = XOBNEW (&sym_cache->cache_space, cache_entry);
-  e->next = sym_cache->root[h];
-  sym_cache->root[h] = e;
-  e->name = obstack_strdup (&sym_cache->cache_space, name);
-  e->sym = sym;
+  htab_t tab = get_ada_pspace_data (current_program_space);
+  cache_entry_search search;
+  search.name = name;
+  search.domain = domain;
+
+  void **slot = htab_find_slot_with_hash (tab, &search,
+					  search.hash (), INSERT);
+
+  cache_entry *e = new cache_entry;
+  e->name = name;
   e->domain = domain;
+  e->sym = sym;
   e->block = block;
+
+  *slot = e;
 }
 
 				/* Symbol Lookup */
