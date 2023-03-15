@@ -40,6 +40,11 @@
 #include "trad-frame.h"
 #include "frame-unwind.h"
 
+#include "features/rs6000/powerpc-altivec32.c"
+#include "features/rs6000/powerpc-vsx32.c"
+#include "features/rs6000/powerpc-altivec64.c"
+#include "features/rs6000/powerpc-vsx64.c"
+
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
    the address of the sigcontext in an argument register.  Usually
@@ -449,6 +454,36 @@ rs6000_aix_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 }
 
+/* Read core file description for AIX.  */
+
+static const struct target_desc *
+ppc_aix_core_read_description (struct gdbarch *gdbarch,
+			       struct target_ops *target,
+			       bfd *abfd)
+{
+  asection *altivec = bfd_get_section_by_name (abfd, ".aix-vmx");
+  asection *vsx = bfd_get_section_by_name (abfd, ".aix-vsx");
+  asection *section = bfd_get_section_by_name (abfd, ".reg");
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+
+  if (!section)
+    return NULL;
+
+  int arch64 = 0;
+  if (tdep->wordsize == 8)
+    arch64 = 1;
+
+  if (vsx && arch64)
+    return tdesc_powerpc_vsx64;
+  else if (vsx && !arch64)
+    return tdesc_powerpc_vsx32;
+  else if (altivec && arch64)
+    return tdesc_powerpc_altivec64;
+  else if (altivec && !arch64)
+    return tdesc_powerpc_altivec32;
+
+  return NULL;
+}
 
 /* Pass the arguments in either registers, or in the stack.  In RS/6000,
    the first eight words of the argument list (that might be less than
@@ -1347,6 +1382,7 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, rs6000_aix_iterate_over_regset_sections);
   set_gdbarch_core_xfer_shared_libraries_aix
     (gdbarch, rs6000_aix_core_xfer_shared_libraries_aix);
+  set_gdbarch_core_read_description (gdbarch, ppc_aix_core_read_description);
 
   if (tdep->wordsize == 8)
     tdep->lr_frame_offset = 16;
