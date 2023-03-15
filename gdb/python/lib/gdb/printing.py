@@ -271,6 +271,7 @@ class FlagEnumerationPrinter(PrettyPrinter):
 
 class NoOpScalarPrinter:
     """A no-op pretty printer that wraps a scalar value."""
+
     def __init__(self, value):
         self.value = value
 
@@ -280,6 +281,7 @@ class NoOpScalarPrinter:
 
 class NoOpArrayPrinter:
     """A no-op pretty printer that wraps an array value."""
+
     def __init__(self, value):
         self.value = value
         (low, high) = self.value.type.range()
@@ -302,6 +304,7 @@ class NoOpArrayPrinter:
 
 class NoOpStructPrinter:
     """A no-op pretty printer that wraps a struct or union value."""
+
     def __init__(self, value):
         self.value = value
 
