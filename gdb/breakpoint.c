@@ -9220,6 +9220,12 @@ create_breakpoint (struct gdbarch *gdbarch,
   gdb_assert (inferior == -1 || inferior > 0);
   gdb_assert (thread == -1 || inferior == -1);
 
+  /* If PARSE_EXTRA is true then the thread and inferior details will be
+     parsed from the EXTRA_STRING, the THREAD and INFERIOR arguments
+     should be -1.  */
+  gdb_assert (!parse_extra || thread == -1);
+  gdb_assert (!parse_extra || inferior == -1);
+
   gdb_assert (ops != NULL);
 
   /* If extra_string isn't useful, set it to NULL.  */
