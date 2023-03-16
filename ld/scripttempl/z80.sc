@@ -10,7 +10,7 @@ if test "${OUTPUT_FORMAT}" = "elf32-z80"; then
   NO_SMALL_DATA=1
   EMBEDDED=1
   ALIGNMENT=1
-  . $srcdir/scripttempl/elf.sc
+  source_sh $srcdir/scripttempl/elf.sc
   return 0
 fi
 
