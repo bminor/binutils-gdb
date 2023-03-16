@@ -192,6 +192,9 @@ info main
      - Changes are backwards compatible, the older API can still be
        used to disassemble instructions without styling.
 
+  ** New function gdb.execute_mi(COMMAND, [ARG]...), that invokes a
+     GDB/MI command and returns the output as a Python dictionary.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

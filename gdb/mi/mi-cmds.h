@@ -206,6 +206,11 @@ extern mi_command *mi_cmd_lookup (const char *command);
 
 extern void mi_execute_command (const char *cmd, int from_tty);
 
+/* Execute an MI command given an already-constructed parse
+   object.  */
+
+extern void mi_execute_command (mi_parse *context);
+
 /* Insert COMMAND into the global mi_cmd_table.  Return false if
    COMMAND->name already exists in mi_cmd_table, in which case COMMAND will
    not have been added to mi_cmd_table.  Otherwise, return true, and

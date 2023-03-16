@@ -2484,6 +2484,11 @@ PyMethodDef python_GdbMethods[] =
 Evaluate command, a string, as a gdb CLI command.  Optionally returns\n\
 a Python String containing the output of the command if to_string is\n\
 set to True." },
+  { "execute_mi", (PyCFunction) gdbpy_execute_mi_command,
+    METH_VARARGS | METH_KEYWORDS,
+    "execute_mi (command, arg...) -> dictionary\n\
+Evaluate command, a string, as a gdb MI command.\n\
+Arguments (also strings) are passed to the command." },
   { "parameter", gdbpy_parameter, METH_VARARGS,
     "Return a gdb parameter's value" },
 

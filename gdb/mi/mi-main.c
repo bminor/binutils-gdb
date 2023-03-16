@@ -1965,6 +1965,21 @@ mi_execute_command (const char *cmd, int from_tty)
     }
 }
 
+/* See mi-cmds.h.  */
+
+void
+mi_execute_command (mi_parse *context)
+{
+  if (context->op != MI_COMMAND)
+    error (_("Command is not an MI command"));
+
+  scoped_restore save_token = make_scoped_restore (&current_token,
+						   context->token);
+  scoped_restore save_debug = make_scoped_restore (&mi_debug_p, 0);
+
+  mi_cmd_execute (context);
+}
+
 /* Captures the current user selected context state, that is the current
    thread and frame.  Later we can then check if the user selected context
    has changed at all.  */

@@ -4584,6 +4584,36 @@ commands have been added:
 (@value{GDBP})
 @end smallexample
 
+Conversely, it is possible to execute @sc{gdb/mi} commands from
+Python, with the results being a Python object and not a
+specially-formatted string.  This is done with the
+@code{gdb.execute_mi} function.
+
+@findex gdb.execute_mi
+@defun gdb.execute_mi (command @r{[}, arg @r{]}@dots{})
+Invoke a @sc{gdb/mi} command.  @var{command} is the name of the
+command, a string.  The arguments, @var{arg}, are passed to the
+command.  Each argument must also be a string.
+
+This function returns a Python dictionary whose contents reflect the
+corresponding @sc{GDB/MI} command's output.  Refer to the
+documentation for these commands for details.  Lists are represented
+as Python lists, and tuples are represented as Python dictionaries.
+
+If the command fails, it will raise a Python exception.
+@end defun
+
+Here is how this works using the commands from the example above:
+
+@smallexample
+(@value{GDBP}) python print(gdb.execute_mi("-echo-dict", "abc", "def", "ghi"))
+@{'dict': @{'argv': ['abc', 'def', 'ghi']@}@}
+(@value{GDBP}) python print(gdb.execute_mi("-echo-list", "abc", "def", "ghi"))
+@{'list': ['abc', 'def', 'ghi']@}
+(@value{GDBP}) python print(gdb.execute_mi("-echo-string", "abc", "def", "ghi"))
+@{'string': 'abc, def, ghi'@}
+@end smallexample
+
 @node Parameters In Python
 @subsubsection Parameters In Python
 
