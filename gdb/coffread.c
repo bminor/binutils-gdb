@@ -1130,9 +1130,10 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		 of the closing '}', and for which we do not have any
 		 other statement-line-number.  */
 	      if (fcn_last_line == 1)
-		record_line (get_current_subfile (), fcn_first_line,
-			     gdbarch_addr_bits_remove (gdbarch,
-						       fcn_first_line_addr));
+		record_line
+		  (get_current_subfile (), fcn_first_line,
+		   unrelocated_addr (gdbarch_addr_bits_remove (gdbarch,
+							       fcn_first_line_addr)));
 	      else
 		enter_linenos (fcn_line_ptr, fcn_first_line,
 			       fcn_last_line, objfile);
@@ -1460,7 +1461,8 @@ enter_linenos (file_ptr file_offset, int first_line,
 	  CORE_ADDR addr = lptr.l_addr.l_paddr;
 	  record_line (get_current_subfile (),
 		       first_line + L_LNNO32 (&lptr),
-		       gdbarch_addr_bits_remove (gdbarch, addr));
+		       unrelocated_addr (gdbarch_addr_bits_remove (gdbarch,
+								   addr)));
 	}
       else
 	break;

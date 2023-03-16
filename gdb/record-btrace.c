@@ -724,7 +724,8 @@ btrace_find_line_range (CORE_ADDR pc)
     return btrace_mk_line_range (symtab, 0, 0);
 
   struct objfile *objfile = symtab->compunit ()->objfile ();
-  pc -= objfile->text_section_offset ();
+  unrelocated_addr unrel_pc
+    = unrelocated_addr (pc - objfile->text_section_offset ());
 
   range = btrace_mk_line_range (symtab, 0, 0);
   for (i = 0; i < nlines - 1; i++)
@@ -737,7 +738,7 @@ btrace_find_line_range (CORE_ADDR pc)
 	 possibly adding more line numbers to the range.  At the time this
 	 change was made I was unsure how to test this so chose to go with
 	 maintaining the existing experience.  */
-      if ((lines[i].raw_pc () == pc) && (lines[i].line != 0)
+      if (lines[i].raw_pc () == unrel_pc && lines[i].line != 0
 	  && lines[i].is_stmt)
 	range = btrace_line_range_add (range, lines[i].line);
     }

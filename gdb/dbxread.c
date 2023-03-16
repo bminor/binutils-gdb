@@ -2453,9 +2453,10 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	    {
 	      CORE_ADDR addr = last_function_start + valu;
 
-	      record_line (get_current_subfile (), 0,
-			   gdbarch_addr_bits_remove (gdbarch, addr)
-			   - objfile->text_section_offset ());
+	      record_line
+		(get_current_subfile (), 0,
+		 unrelocated_addr (gdbarch_addr_bits_remove (gdbarch, addr)
+				   - objfile->text_section_offset ()));
 	    }
 
 	  within_function = 0;
@@ -2662,15 +2663,17 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  CORE_ADDR addr = processing_gcc_compilation == 2 ?
 			   last_function_start : valu;
 
-	  record_line (get_current_subfile (), desc,
-		       gdbarch_addr_bits_remove (gdbarch, addr)
-		       - objfile->text_section_offset ());
+	  record_line
+	    (get_current_subfile (), desc,
+	     unrelocated_addr (gdbarch_addr_bits_remove (gdbarch, addr)
+			       - objfile->text_section_offset ()));
 	  sline_found_in_function = 1;
 	}
       else
-	record_line (get_current_subfile (), desc,
-		     gdbarch_addr_bits_remove (gdbarch, valu)
-		     - objfile->text_section_offset ());
+	record_line
+	  (get_current_subfile (), desc,
+	   unrelocated_addr (gdbarch_addr_bits_remove (gdbarch, valu)
+			     - objfile->text_section_offset ()));
       break;
 
     case N_BCOMM:

@@ -3982,8 +3982,10 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 	      else
 		{
 		  /* Handle encoded stab line number.  */
-		  record_line (get_current_subfile (), sh.index,
-			       gdbarch_addr_bits_remove (gdbarch, valu));
+		  record_line
+		    (get_current_subfile (), sh.index,
+		     unrelocated_addr (gdbarch_addr_bits_remove (gdbarch,
+								 valu)));
 		}
 	    }
 	  else if (sh.st == stProc || sh.st == stStaticProc
@@ -4513,7 +4515,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
     return lineno;
 
   lt->item[lt->nitems].line = lineno;
-  lt->item[lt->nitems++].set_raw_pc (adr << 2);
+  lt->item[lt->nitems++].set_raw_pc (unrelocated_addr (adr << 2));
   return lineno;
 }
 

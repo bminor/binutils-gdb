@@ -1540,6 +1540,12 @@ struct rust_vtable_symbol : public symbol
 };
 
 
+/* Like a CORE_ADDR, but not directly convertible.  This is used to
+   represent an unrelocated CORE_ADDR.  DEFINE_OFFSET_TYPE is not used
+   here because there's no need to add or subtract values of this
+   type.  */
+enum class unrelocated_addr : CORE_ADDR { };
+
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only
    the files which are actually debugged are read in to core, we don't
@@ -1548,11 +1554,11 @@ struct rust_vtable_symbol : public symbol
 struct linetable_entry
 {
   /* Set the (unrelocated) PC for this entry.  */
-  void set_raw_pc (CORE_ADDR pc)
+  void set_raw_pc (unrelocated_addr pc)
   { m_pc = pc; }
 
   /* Return the unrelocated PC for this entry.  */
-  CORE_ADDR raw_pc () const
+  unrelocated_addr raw_pc () const
   { return m_pc; }
 
   /* Return the relocated PC for this entry.  */
@@ -1582,7 +1588,7 @@ struct linetable_entry
   bool prologue_end : 1;
 
   /* The address for this entry.  */
-  CORE_ADDR m_pc;
+  unrelocated_addr m_pc;
 };
 
 /* The order of entries in the linetable is significant.  They should

@@ -18209,7 +18209,8 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
 		     linetable_entry_flags flags,
 		     struct dwarf2_cu *cu)
 {
-  CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
+  unrelocated_addr addr
+    = unrelocated_addr (gdbarch_addr_bits_remove (gdbarch, address));
 
   if (dwarf_line_debug)
     {

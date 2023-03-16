@@ -205,7 +205,7 @@ finish_block (struct symbol *symbol, struct pending_block *old_blocks,
 }
 
 void
-record_line (struct subfile *subfile, int line, CORE_ADDR pc)
+record_line (struct subfile *subfile, int line, unrelocated_addr pc)
 {
   gdb_assert (buildsym_compunit != nullptr);
   /* Assume every line entry is a statement start, that is a good place to

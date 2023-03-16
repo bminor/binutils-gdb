@@ -332,7 +332,7 @@ search_domain_name (enum search_domain e)
 CORE_ADDR
 linetable_entry::pc (const struct objfile *objfile) const
 {
-  return m_pc + objfile->text_section_offset ();
+  return CORE_ADDR (m_pc) + objfile->text_section_offset ();
 }
 
 /* See symtab.h.  */
@@ -3158,17 +3158,18 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  && (!alt || item->raw_pc () < alt->raw_pc ()))
 	alt = item;
 
-      auto pc_compare = [](const CORE_ADDR & comp_pc,
-			   const struct linetable_entry & lhs)->bool
+      auto pc_compare = [] (const unrelocated_addr &comp_pc,
+			    const struct linetable_entry & lhs)
       {
 	return comp_pc < lhs.raw_pc ();
       };
 
       const linetable_entry *first = item;
       const linetable_entry *last = item + len;
-      item = std::upper_bound (first, last,
-			       pc - objfile->text_section_offset (),
-			       pc_compare);
+      item = (std::upper_bound
+	      (first, last,
+	       unrelocated_addr (pc - objfile->text_section_offset ()),
+	       pc_compare));
       if (item != first)
 	prev = item - 1;		/* Found a matching item.  */
 
@@ -3689,18 +3690,22 @@ skip_prologue_using_linetable (CORE_ADDR func_addr)
       const linetable *linetable = prologue_sal.symtab->linetable ();
 
       struct objfile *objfile = prologue_sal.symtab->compunit ()->objfile ();
-      start_pc -= objfile->text_section_offset ();
-      end_pc -= objfile->text_section_offset ();
+
+      unrelocated_addr unrel_start
+	= unrelocated_addr (start_pc - objfile->text_section_offset ());
+      unrelocated_addr unrel_end
+	= unrelocated_addr (end_pc - objfile->text_section_offset ());
 
       auto it = std::lower_bound
-	(linetable->item, linetable->item + linetable->nitems, start_pc,
-	 [] (const linetable_entry &lte, CORE_ADDR pc) -> bool
+	(linetable->item, linetable->item + linetable->nitems, unrel_start,
+	 [] (const linetable_entry &lte, unrelocated_addr pc)
 	 {
 	   return lte.raw_pc () < pc;
 	 });
 
       for (;
-	   it < linetable->item + linetable->nitems && it->raw_pc () <= end_pc;
+	   (it < linetable->item + linetable->nitems
+	    && it->raw_pc () <= unrel_end);
 	   it++)
 	if (it->prologue_end)
 	  return {it->pc (objfile)};

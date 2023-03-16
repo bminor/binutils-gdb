@@ -629,7 +629,7 @@ buildsym_compunit::pop_subfile ()
 
 void
 buildsym_compunit::record_line (struct subfile *subfile, int line,
-				CORE_ADDR pc, linetable_entry_flags flags)
+				unrelocated_addr pc, linetable_entry_flags flags)
 {
   m_have_line_numbers = true;
 

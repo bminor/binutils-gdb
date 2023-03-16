@@ -795,11 +795,12 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
       if (int_lnno.l_lnno == 0)
 	{
 	  *firstLine = read_symbol_lineno (int_lnno.l_addr.l_symndx);
-	  record_line (subfile, 0, record_addr);
+	  record_line (subfile, 0, unrelocated_addr (record_addr));
 	  --(*firstLine);
 	}
       else
-	record_line (subfile, *firstLine + int_lnno.l_lnno, record_addr);
+	record_line (subfile, *firstLine + int_lnno.l_lnno,
+		     unrelocated_addr (record_addr));
       curoffset += linesz;
     }
 }
