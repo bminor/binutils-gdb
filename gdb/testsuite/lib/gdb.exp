@@ -8872,7 +8872,7 @@ proc is_stmt_addresses { file } {
     set is_stmt [list]
 
     gdb_test_multiple "maint info line-table $file" "" {
-	-re "\r\n$decimal\[ \t\]+$decimal\[ \t\]+($hex)\[ \t\]+Y\[^\r\n\]*" {
+	-re "\r\n$decimal\[ \t\]+$decimal\[ \t\]+($hex)\[ \t\]+$hex\[ \t\]+Y\[^\r\n\]*" {
 	    lappend is_stmt $expect_out(1,string)
 	    exp_continue
 	}

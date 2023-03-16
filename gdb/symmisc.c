@@ -976,10 +976,11 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
       /* Leave space for 6 digits of index and line number.  After that the
 	 tables will just not format as well.  */
       struct ui_out *uiout = current_uiout;
-      ui_out_emit_table table_emitter (uiout, 5, -1, "line-table");
+      ui_out_emit_table table_emitter (uiout, 6, -1, "line-table");
       uiout->table_header (6, ui_left, "index", _("INDEX"));
       uiout->table_header (6, ui_left, "line", _("LINE"));
-      uiout->table_header (18, ui_left, "address", _("ADDRESS"));
+      uiout->table_header (18, ui_left, "rel-address", _("REL-ADDRESS"));
+      uiout->table_header (18, ui_left, "unrel-address", _("UNREL-ADDRESS"));
       uiout->table_header (7, ui_left, "is-stmt", _("IS-STMT"));
       uiout->table_header (12, ui_left, "prologue-end", _("PROLOGUE-END"));
       uiout->table_body ();
@@ -995,7 +996,9 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 	    uiout->field_signed ("line", item->line);
 	  else
 	    uiout->field_string ("line", _("END"));
-	  uiout->field_core_addr ("address", objfile->arch (),
+	  uiout->field_core_addr ("rel-address", objfile->arch (),
+				  item->pc (objfile));
+	  uiout->field_core_addr ("unrel-address", objfile->arch (),
 				  CORE_ADDR (item->raw_pc ()));
 	  uiout->field_string ("is-stmt", item->is_stmt ? "Y" : "");
 	  uiout->field_string ("prologue-end", item->prologue_end ? "Y" : "");
