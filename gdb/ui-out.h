@@ -302,7 +302,7 @@ class ui_out
 
     ~progress_update ()
     {
-
+      m_uiout->do_progress_end ();
     }
 
     progress_update (const progress_update &) = delete;
@@ -321,14 +321,13 @@ class ui_out
     {
       m_uiout->do_progress_notify (msg, "", -1, -1);
     }
+
   private:
 
     struct ui_out *m_uiout;
   };
 
-  virtual void do_progress_end () = 0;
-
- protected:
+protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows, const char *tblid)
     = 0;
@@ -365,6 +364,7 @@ class ui_out
   virtual void do_progress_start () = 0;
   virtual void do_progress_notify (const std::string &, const char *,
 				   double, double) = 0;
+  virtual void do_progress_end () = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */

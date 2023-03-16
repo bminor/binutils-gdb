@@ -261,16 +261,13 @@ debuginfod_is_enabled ()
 /* Print the result of the most recent attempted download.  */
 
 static void
-print_outcome (user_data &data, int fd)
+print_outcome (int fd, const char *desc, const char *fname)
 {
-  /* Clears the current line of progress output.  */
-  current_uiout->do_progress_end ();
-
   if (fd < 0 && fd != -ENOENT)
     gdb_printf (_("Download failed: %s.  Continuing without %s %ps.\n"),
 		safe_strerror (-fd),
-		data.desc,
-		styled_string (file_name_style.style (), data.fname));
+		desc,
+		styled_string (file_name_style.style (), fname));
 }
 
 /* See debuginfod-support.h  */
@@ -290,23 +287,28 @@ debuginfod_source_query (const unsigned char *build_id,
     return scoped_fd (-ENOMEM);
 
   char *dname = nullptr;
-  user_data data ("source file", srcpath);
-
-  debuginfod_set_user_data (c, &data);
+  scoped_fd fd;
   gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
-  if (target_supports_terminal_ours ())
-    {
-      term_state.emplace ();
-      target_terminal::ours ();
-    }
 
-  scoped_fd fd (debuginfod_find_source (c,
-					build_id,
-					build_id_len,
-					srcpath,
-					&dname));
-  debuginfod_set_user_data (c, nullptr);
-  print_outcome (data, fd.get ());
+  {
+    user_data data ("source file", srcpath);
+
+    debuginfod_set_user_data (c, &data);
+    if (target_supports_terminal_ours ())
+      {
+	term_state.emplace ();
+	target_terminal::ours ();
+      }
+
+    fd = scoped_fd (debuginfod_find_source (c,
+					    build_id,
+					    build_id_len,
+					    srcpath,
+					    &dname));
+    debuginfod_set_user_data (c, nullptr);
+  }
+
+  print_outcome (fd.get (), "source file", srcpath);
 
   if (fd.get () >= 0)
     destname->reset (dname);
@@ -331,20 +333,25 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
     return scoped_fd (-ENOMEM);
 
   char *dname = nullptr;
-  user_data data ("separate debug info for", filename);
-
-  debuginfod_set_user_data (c, &data);
+  scoped_fd fd;
   gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
-  if (target_supports_terminal_ours ())
-    {
-      term_state.emplace ();
-      target_terminal::ours ();
-    }
 
-  scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len,
-					   &dname));
-  debuginfod_set_user_data (c, nullptr);
-  print_outcome (data, fd.get ());
+  {
+    user_data data ("separate debug info for", filename);
+
+    debuginfod_set_user_data (c, &data);
+    if (target_supports_terminal_ours ())
+      {
+	term_state.emplace ();
+	target_terminal::ours ();
+      }
+
+    fd = scoped_fd (debuginfod_find_debuginfo (c, build_id, build_id_len,
+					       &dname));
+    debuginfod_set_user_data (c, nullptr);
+  }
+
+  print_outcome (fd.get (), "separate debug info for", filename);
 
   if (fd.get () >= 0)
     destname->reset (dname);
@@ -369,19 +376,25 @@ debuginfod_exec_query (const unsigned char *build_id,
     return scoped_fd (-ENOMEM);
 
   char *dname = nullptr;
-  user_data data ("executable for", filename);
-
-  debuginfod_set_user_data (c, &data);
+  scoped_fd fd;
   gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
-  if (target_supports_terminal_ours ())
-    {
-      term_state.emplace ();
-      target_terminal::ours ();
-    }
 
-  scoped_fd fd (debuginfod_find_executable (c, build_id, build_id_len, &dname));
-  debuginfod_set_user_data (c, nullptr);
-  print_outcome (data, fd.get ());
+  {
+    user_data data ("executable for", filename);
+
+    debuginfod_set_user_data (c, &data);
+    if (target_supports_terminal_ours ())
+      {
+	term_state.emplace ();
+	target_terminal::ours ();
+      }
+
+    fd = scoped_fd (debuginfod_find_executable (c, build_id, build_id_len,
+						&dname));
+    debuginfod_set_user_data (c, nullptr);
+  }
+
+  print_outcome (fd.get (), "executable for", filename);
 
   if (fd.get () >= 0)
     destname->reset (dname);
