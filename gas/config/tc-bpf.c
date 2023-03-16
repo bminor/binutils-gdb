@@ -274,15 +274,8 @@ md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
 {
   switch (operand->type)
     {
-    case BPF_OPERAND_OFFSET16:
-      return BFD_RELOC_BPF_16;
-    case BPF_OPERAND_IMM32:
-      return BFD_RELOC_BPF_32;
     case BPF_OPERAND_IMM64:
       return BFD_RELOC_BPF_64;
-    case BPF_OPERAND_DISP16:
-      fixP->fx_pcrel = 1;
-      return BFD_RELOC_BPF_DISP16;
     case BPF_OPERAND_DISP32:
       fixP->fx_pcrel = 1;
       return BFD_RELOC_BPF_DISP32;
