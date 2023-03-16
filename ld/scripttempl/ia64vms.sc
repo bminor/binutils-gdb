@@ -122,7 +122,7 @@ SECTIONS
 
 EOF
 
-. $srcdir/scripttempl/DWARF.sc
+source_sh $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   .note : { *(.vms.note) }

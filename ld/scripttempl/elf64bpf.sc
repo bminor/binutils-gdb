@@ -679,7 +679,7 @@ EOF
 
 test -z "${NON_ALLOC_DYN}" || emit_dyn
 
-. $srcdir/scripttempl/misc-sections.sc
+source_sh $srcdir/scripttempl/misc-sections.sc
 
 cat <<EOF
   ${ATTRS_SECTIONS}

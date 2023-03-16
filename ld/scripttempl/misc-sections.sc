@@ -13,7 +13,7 @@ cat <<EOF
   .stab.index    0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
 
-  .comment         : { *(.comment); LINKER_VERSION; }
+  .comment 0 (INFO) : { *(.comment); LINKER_VERSION; }
 
   .gnu.build.attributes : { *(.gnu.build.attributes${RELOCATING+ .gnu.build.attributes.*}) }
 

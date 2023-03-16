@@ -432,7 +432,7 @@ SECTIONS
   ${RELOCATING+${VECTORS}}
 EOF
 
-. $srcdir/scripttempl/misc-sections.sc
+source_sh $srcdir/scripttempl/misc-sections.sc
 
 cat <<EOF
   /* Treatment of DWARF debug section must be at end of the linker
@@ -441,7 +441,7 @@ cat <<EOF
      symbols are found.  */
 EOF
 
-. $srcdir/scripttempl/DWARF.sc
+source_sh $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
 }

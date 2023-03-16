@@ -332,8 +332,8 @@ SECTIONS
 
 EOF
 
-. $srcdir/scripttempl/misc-sections.sc
-. $srcdir/scripttempl/DWARF.sc
+source_sh $srcdir/scripttempl/misc-sections.sc
+source_sh $srcdir/scripttempl/DWARF.sc
 
 test -n "${RELOCATING}" && cat <<EOF
   .MSP430.attributes 0 :

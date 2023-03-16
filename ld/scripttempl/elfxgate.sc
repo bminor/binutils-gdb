@@ -432,8 +432,8 @@ SECTIONS
   ${RELOCATING+${VECTORS}}
 EOF
 
-. $srcdir/scripttempl/misc-sections.sc
-. $srcdir/scripttempl/DWARF.sc
+source_sh $srcdir/scripttempl/misc-sections.sc
+source_sh $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
 }
