@@ -9232,6 +9232,16 @@ create_breakpoint (struct gdbarch *gdbarch,
   if (extra_string != NULL && *extra_string == '\0')
     extra_string = NULL;
 
+  /* A bp_dprintf must always have an accompanying EXTRA_STRING containing
+     the dprintf format and arguments -- PARSE_EXTRA should always be false
+     in this case.
+
+     For all other breakpoint types, EXTRA_STRING should be nullptr unless
+     PARSE_EXTRA is true.  */
+  gdb_assert ((type_wanted == bp_dprintf)
+	      ? (extra_string != nullptr && !parse_extra)
+	      : (extra_string == nullptr || parse_extra));
+
   try
     {
       ops->create_sals_from_location_spec (locspec, &canonical);
@@ -9295,6 +9305,8 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       if (parse_extra)
 	{
+	  gdb_assert (type_wanted != bp_dprintf);
+
 	  gdb::unique_xmalloc_ptr<char> rest;
 	  gdb::unique_xmalloc_ptr<char> cond;
 
@@ -9303,15 +9315,15 @@ create_breakpoint (struct gdbarch *gdbarch,
 	  find_condition_and_thread_for_sals (lsal.sals, extra_string,
 					      &cond, &thread, &inferior,
 					      &task, &rest);
+
+	  if (rest.get () != nullptr && *(rest.get ()) != '\0')
+	    error (_("Garbage '%s' at end of command"), rest.get ());
+
 	  cond_string_copy = std::move (cond);
 	  extra_string_copy = std::move (rest);
 	}
       else
 	{
-	  if (type_wanted != bp_dprintf
-	      && extra_string != NULL && *extra_string != '\0')
-		error (_("Garbage '%s' at end of location"), extra_string);
-
 	  /* Check the validity of the condition.  We should error out
 	     if the condition is invalid at all of the locations and
 	     if it is not forced.  In the PARSE_EXTRA case above, this
@@ -9522,21 +9534,18 @@ dprintf_command (const char *arg, int from_tty)
 
   /* If non-NULL, ARG should have been advanced past the location;
      the next character must be ','.  */
-  if (arg != NULL)
+  if (arg == nullptr || arg[0] != ',' || arg[1] == '\0')
+    error (_("Format string required"));
+  else
     {
-      if (arg[0] != ',' || arg[1] == '\0')
-	error (_("Format string required"));
-      else
-	{
-	  /* Skip the comma.  */
-	  ++arg;
-	}
+      /* Skip the comma.  */
+      ++arg;
     }
 
   create_breakpoint (get_current_arch (),
 		     locspec.get (),
 		     NULL, -1, -1,
-		     arg, false, 1 /* parse arg */,
+		     arg, false, 0 /* parse arg */,
 		     0, bp_dprintf,
 		     0 /* Ignore count */,
 		     pending_break_support,
@@ -14142,6 +14151,12 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 
   location_spec_up locspec = string_to_location_spec (&addr_str,
 						      current_language);
+
+
+  gdb_assert (addr_str != nullptr);
+  if (*addr_str != '\0')
+    error (_("Garbage '%s' at end of location"), addr_str);
+
   if (!create_breakpoint (get_current_arch (),
 			  locspec.get (),
 			  utp->cond_string.get (), -1, -1, addr_str,

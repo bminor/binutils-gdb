@@ -1595,32 +1595,42 @@ enum breakpoint_create_flags
    functions for setting a breakpoint at LOCSPEC.
 
    This function has two major modes of operations, selected by the
-   PARSE_EXTRA parameter.
+   PARSE_EXTRA and WANTED_TYPE parameters.
 
-   If PARSE_EXTRA is zero, LOCSPEC is just the breakpoint's location
-   spec, with condition, thread, and extra string specified by the
-   COND_STRING, THREAD, and EXTRA_STRING parameters.
+   When WANTED_TYPE is not bp_dprintf the following rules apply:
 
-   If PARSE_EXTRA is non-zero, this function will attempt to extract
-   the condition, thread, and extra string from EXTRA_STRING, ignoring
-   the similarly named parameters.
+     If PARSE_EXTRA is zero, LOCSPEC is just the breakpoint's location
+     spec, with condition, thread, and extra string specified by the
+     COND_STRING, THREAD, and EXTRA_STRING parameters.
 
-   If FORCE_CONDITION is true, the condition is accepted even when it is
-   invalid at all of the locations.  However, if PARSE_EXTRA is non-zero,
-   the FORCE_CONDITION parameter is ignored and the corresponding argument
-   is parsed from EXTRA_STRING.
+     If PARSE_EXTRA is non-zero, this function will attempt to extract the
+     condition, thread, and extra string from EXTRA_STRING, ignoring the
+     similarly named parameters.
+
+   When WANTED_TYPE is bp_dprintf the following rules apply:
+
+     PARSE_EXTRA must always be zero, LOCSPEC is just the breakpoint's
+     location spec, with condition, thread, and extra string (which
+     contains the dprintf format and arguments) specified by the
+     COND_STRING, THREAD, and EXTRA_STRING parameters.
+
+   If FORCE_CONDITION is true, the condition (in COND_STRING) is accepted
+   even when it is invalid at all of the locations.  However, if
+   PARSE_EXTRA is non-zero and WANTED_TYPE is not bp_dprintf, the
+   FORCE_CONDITION parameter is ignored and the corresponding argument is
+   parsed from EXTRA_STRING.
 
    The THREAD should be a global thread number, the created breakpoint will
    only apply for that thread.  If the breakpoint should apply for all
-   threads then pass -1.  However, if PARSE_EXTRA is non-zero then the
-   THREAD parameter is ignored and an optional thread number will be parsed
-   from EXTRA_STRING.
+   threads then pass -1.  However, if PARSE_EXTRA is non-zero and
+   WANTED_TYPE is not bp_dprintf, then the THREAD parameter is ignored and
+   an optional thread number will be parsed from EXTRA_STRING.
 
    The INFERIOR should be a global inferior number, the created breakpoint
    will only apply for that inferior.  If the breakpoint should apply for
-   all inferiors then pass -1.  However, if PARSE_EXTRA is non-zero then
-   the INFERIOR parameter is ignored and an optional inferior number will
-   be parsed from EXTRA_STRING.
+   all inferiors then pass -1.  However, if PARSE_EXTRA is non-zero and
+   WANTED_TYPE is not bp_dprintf, then the INFERIOR parameter is ignored
+   and an optional inferior number will be parsed from EXTRA_STRING.
 
    At most one of THREAD and INFERIOR should be set to a value other than
    -1; breakpoints can be thread specific, or inferior specific, but not
