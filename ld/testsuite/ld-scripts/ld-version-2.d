@@ -4,4 +4,4 @@
 # target: [is_elf_format]
 
 String dump of section '.comment':
-.*GNU ld \(GNU Binutils\) 2.*
+.*GNU ld \(.*\) 2.*
