@@ -450,4 +450,10 @@ struct ppc_inferior_data
 
 extern ppc_inferior_data * get_ppc_per_inferior (inferior *inf);
 
+extern const struct target_desc *tdesc_powerpc_vsx64l;
+extern const struct target_desc *tdesc_powerpc_vsx64;
+extern const struct target_desc *tdesc_powerpc_vsx32;
+extern const struct target_desc *tdesc_powerpc_altivec64;
+extern const struct target_desc *tdesc_powerpc_altivec32;
+
 #endif /* ppc-tdep.h */

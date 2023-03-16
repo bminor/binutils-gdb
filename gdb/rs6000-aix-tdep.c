@@ -40,11 +40,6 @@
 #include "trad-frame.h"
 #include "frame-unwind.h"
 
-#include "features/rs6000/powerpc-altivec32.c"
-#include "features/rs6000/powerpc-vsx32.c"
-#include "features/rs6000/powerpc-altivec64.c"
-#include "features/rs6000/powerpc-vsx64.c"
-
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
    the address of the sigcontext in an argument register.  Usually
