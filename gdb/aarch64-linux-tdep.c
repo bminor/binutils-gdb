@@ -154,6 +154,7 @@
 #define AARCH64_FPSIMD_MAGIC			0x46508001
 #define AARCH64_SVE_MAGIC			0x53564501
 #define AARCH64_ZA_MAGIC			0x54366345
+#define AARCH64_TPIDR2_MAGIC			0x54504902
 
 /* Defines for the extra_context that follows an AARCH64_EXTRA_MAGIC.  */
 #define AARCH64_EXTRA_DATAP_OFFSET		8
@@ -184,6 +185,9 @@
 #define AARCH64_SME_CONTEXT_SIZE(svq) \
   (AARCH64_SME_CONTEXT_REGS_OFFSET + AARCH64_SME_CONTEXT_ZA_SIZE (svq))
 
+/* TPIDR2 register value offset in the TPIDR2 signal frame context.  */
+#define AARCH64_TPIDR2_CONTEXT_TPIDR2_OFFSET	8
+
 /* Holds information about the signal frame.  */
 struct aarch64_linux_sigframe
 {
@@ -204,6 +208,8 @@ struct aarch64_linux_sigframe
   CORE_ADDR sve_section = 0;
   /* Starting address of the section containing the ZA register.  */
   CORE_ADDR za_section = 0;
+  /* Starting address of the section containing the TPIDR2 register.  */
+  CORE_ADDR tpidr2_section = 0;
   /* Starting address of the section containing extra information.  */
   CORE_ADDR extra_section = 0;
 
@@ -464,6 +470,13 @@ aarch64_linux_read_signal_frame_info (frame_info_ptr this_frame,
 	    break;
 	  }
 
+	case AARCH64_TPIDR2_MAGIC:
+	  {
+	    /* This is context containing the tpidr2 register.  */
+	    signal_frame.tpidr2_section = section;
+	    section += size;
+	    break;
+	  }
 	case AARCH64_EXTRA_MAGIC:
 	  {
 	    /* Extra is always the last valid section in reserved and points to
@@ -603,6 +616,17 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
       /* Restore SVG.  */
       trad_frame_set_reg_value (this_cache, tdep->sme_svg_regnum,
 				sve_vg_from_vl (signal_frame.svl));
+    }
+
+  /* Restore the tpidr2 register, if the target supports it and if there is
+     an entry for it.  */
+  if (signal_frame.tpidr2_section != 0 && tdep->has_tls ()
+      && tdep->tls_register_count >= 2)
+    {
+      /* Restore tpidr2.  */
+      trad_frame_set_reg_addr (this_cache, tdep->tls_regnum_base + 1,
+			       signal_frame.tpidr2_section
+			       + AARCH64_TPIDR2_CONTEXT_TPIDR2_OFFSET);
     }
 
   trad_frame_set_id (this_cache, frame_id_build (signal_frame.sp, func));
