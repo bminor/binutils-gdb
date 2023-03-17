@@ -504,6 +504,7 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
   aarch64_gdbarch_tdep *tdep
     = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
 
+  /* Do we need to fetch all registers?  */
   if (regno == -1)
     {
       fetch_gregs_from_thread (regcache);
@@ -521,28 +522,28 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
       if (tdep->has_tls ())
 	fetch_tlsregs_from_thread (regcache);
     }
+  /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
     fetch_gregs_from_thread (regcache);
-  else if (tdep->has_sve ())
+  /* SVE register?  */
+  else if (tdep->has_sve () && regno <= AARCH64_SVE_VG_REGNUM)
     fetch_sveregs_from_thread (regcache);
-  else
+  /* FPSIMD register?  */
+  else if (regno <= AARCH64_FPCR_REGNUM)
     fetch_fpregs_from_thread (regcache);
-
-  if (tdep->has_pauth ())
-    {
-      if (regno == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
-	  || regno == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base))
-	fetch_pauth_masks_from_thread (regcache);
-    }
-
-  /* Fetch individual MTE registers.  */
-  if (tdep->has_mte ()
-      && (regno == tdep->mte_reg_base))
+  /* PAuth register?  */
+  else if (tdep->has_pauth ()
+	   && (regno == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
+	       || regno == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base)))
+    fetch_pauth_masks_from_thread (regcache);
+  /* MTE register?  */
+  else if (tdep->has_mte ()
+	   && (regno == tdep->mte_reg_base))
     fetch_mteregs_from_thread (regcache);
-
-  if (tdep->has_tls ()
-      && regno >= tdep->tls_regnum_base
-      && regno < tdep->tls_regnum_base + tdep->tls_register_count)
+  /* TLS register?  */
+  else if (tdep->has_tls ()
+	   && regno >= tdep->tls_regnum_base
+	   && regno < tdep->tls_regnum_base + tdep->tls_register_count)
     fetch_tlsregs_from_thread (regcache);
 }
 
@@ -592,6 +593,7 @@ aarch64_store_registers (struct regcache *regcache, int regno)
   aarch64_gdbarch_tdep *tdep
     = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
 
+  /* Do we need to store all registers?  */
   if (regno == -1)
     {
       store_gregs_to_thread (regcache);
@@ -606,22 +608,26 @@ aarch64_store_registers (struct regcache *regcache, int regno)
       if (tdep->has_tls ())
 	store_tlsregs_to_thread (regcache);
     }
+  /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
     store_gregs_to_thread (regcache);
-  else if (tdep->has_sve ())
+  /* SVE register?  */
+  else if (tdep->has_sve () && regno <= AARCH64_SVE_VG_REGNUM)
     store_sveregs_to_thread (regcache);
-  else
+  /* FPSIMD register?  */
+  else if (regno <= AARCH64_FPCR_REGNUM)
     store_fpregs_to_thread (regcache);
-
-  /* Store MTE registers.  */
-  if (tdep->has_mte ()
-      && (regno == tdep->mte_reg_base))
+  /* MTE register?  */
+  else if (tdep->has_mte ()
+	   && (regno == tdep->mte_reg_base))
     store_mteregs_to_thread (regcache);
-
-  if (tdep->has_tls ()
-      && regno >= tdep->tls_regnum_base
-      && regno < tdep->tls_regnum_base + tdep->tls_register_count)
+  /* TLS register?  */
+  else if (tdep->has_tls ()
+	   && regno >= tdep->tls_regnum_base
+	   && regno < tdep->tls_regnum_base + tdep->tls_register_count)
     store_tlsregs_to_thread (regcache);
+
+  /* PAuth registers are read-only.  */
 }
 
 /* A version of the "store_registers" target_ops method used when running
