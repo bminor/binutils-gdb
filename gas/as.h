@@ -305,6 +305,9 @@ COMMON int flag_keep_locals; /* -L */
 /* True if we are assembling in MRI mode.  */
 COMMON int flag_mri;
 
+/* True if alternate macro mode is in effect.  */
+COMMON bool flag_macro_alternate;
+
 /* Should the data section be made read-only and appended to the text
    section?  */
 COMMON unsigned char flag_readonly_data_in_text; /* -R */

@@ -125,8 +125,6 @@ static struct defsym_list *defsyms;
 
 static long start_time;
 
-static int flag_macro_alternate;
-
 
 #ifdef USE_EMULATIONS
 #define EMULATION_ENVIRON "AS_EMULATION"
@@ -1310,7 +1308,7 @@ gas_init (void)
   expr_begin ();
   eh_begin ();
 
-  macro_init (flag_macro_alternate);
+  macro_init ();
 
   dwarf2_init ();
 

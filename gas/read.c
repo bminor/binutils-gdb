@@ -1616,7 +1616,7 @@ static void
 s_altmacro (int on)
 {
   demand_empty_rest_of_line ();
-  macro_set_alternate (on);
+  flag_macro_alternate = on;
 }
 
 /* Read a symbol name from input_line_pointer.
