@@ -9808,12 +9808,17 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       /* Getting here means we tried for data but didn't get it.  That
 	 means we have an incomplete instruction of some sort.  Just
 	 print the first byte as a prefix or a .byte pseudo-op.  */
-      if (ins.codep > priv.the_buffer)
+      volatile struct dis_private *ppriv = &priv;
+      volatile instr_info *pins = &ins;
+      if (pins->codep > ppriv->the_buffer)
 	{
 	  const char *name = NULL;
 
-	  if (ins.prefixes || ins.fwait_prefix >= 0 || (ins.rex & REX_OPCODE))
-	    name = prefix_name (&ins, priv.the_buffer[0], priv.orig_sizeflag);
+	  if (pins->prefixes
+	      || pins->fwait_prefix >= 0
+	      || (pins->rex & REX_OPCODE))
+	    name = prefix_name (&ins, ppriv->the_buffer[0],
+				ppriv->orig_sizeflag);
 	  if (name != NULL)
 	    i386_dis_printf (&ins, dis_style_mnemonic, "%s", name);
 	  else
@@ -9822,7 +9827,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	      i386_dis_printf (&ins, dis_style_assembler_directive,
 			       ".byte ");
 	      i386_dis_printf (&ins, dis_style_immediate, "0x%x",
-			       (unsigned int) priv.the_buffer[0]);
+			       (unsigned int) ppriv->the_buffer[0]);
 	    }
 
 	  return 1;
