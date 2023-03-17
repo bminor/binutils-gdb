@@ -1875,7 +1875,8 @@ xcoff_start_psymtab (psymtab_storage *partial_symtabs,
 {
   /* We fill in textlow later.  */
   legacy_psymtab *result = new legacy_psymtab (filename, partial_symtabs,
-					       objfile->per_bfd, 0);
+					       objfile->per_bfd,
+					       unrelocated_addr (0));
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct xcoff_symloc);
@@ -2172,14 +2173,16 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		      }
 		    if (pst != NULL)
 		      {
-			CORE_ADDR highval =
-			  symbol.n_value + CSECT_LEN (&csect_aux);
+			unrelocated_addr highval
+			  = unrelocated_addr (symbol.n_value
+					      + CSECT_LEN (&csect_aux));
 
 			if (highval > pst->raw_text_high ())
 			  pst->set_text_high (highval);
-			if (!pst->text_low_valid
-			    || symbol.n_value < pst->raw_text_low ())
-			  pst->set_text_low (symbol.n_value);
+			unrelocated_addr loval
+			  = unrelocated_addr (symbol.n_value);
+			if (!pst->text_low_valid || loval < pst->raw_text_low ())
+			  pst->set_text_low (loval);
 		      }
 		    misc_func_recorded = 0;
 		    break;

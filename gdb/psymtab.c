@@ -1110,7 +1110,7 @@ psymbol_functions::has_unexpanded_symtabs (struct objfile *objfile)
 partial_symtab::partial_symtab (const char *filename,
 				psymtab_storage *partial_symtabs,
 				objfile_per_bfd_storage *objfile_per_bfd,
-				CORE_ADDR textlow)
+				unrelocated_addr textlow)
   : partial_symtab (filename, partial_symtabs, objfile_per_bfd)
 {
   set_text_low (textlow);
@@ -1653,7 +1653,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		      gdb_printf (" psymtab\n");
 		    }
 		}
-	      if (ps->raw_text_high () != 0
+	      if (ps->raw_text_high () != unrelocated_addr (0)
 		  && (ps->text_low (objfile) < b->start ()
 		      || ps->text_high (objfile) > b->end ()))
 		{

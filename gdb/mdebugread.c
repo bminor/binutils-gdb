@@ -2601,7 +2601,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
     {
       legacy_psymtab *save_pst;
       EXTR *ext_ptr;
-      CORE_ADDR textlow;
+      unrelocated_addr textlow;
 
       cur_fdr = fh = debug_info->fdr + f_idx;
 
@@ -2614,9 +2614,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       /* Determine the start address for this object file from the
 	 file header and relocate it, except for Irix 5.2 zero fh->adr.  */
       if (fh->cpd)
-	textlow = fh->adr;
+	textlow = unrelocated_addr (fh->adr);
       else
-	textlow = 0;
+	textlow = unrelocated_addr (0);
       pst = new legacy_psymtab (fdr_name (fh), partial_symtabs,
 				objfile->per_bfd, textlow);
       pst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, md_symloc);
@@ -2695,7 +2695,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		{
 		  if (sh.st == stProc || sh.st == stStaticProc)
 		    {
-		      CORE_ADDR procaddr;
+		      unrelocated_addr procaddr;
 		      long isym;
 
 		      if (sh.st == stStaticProc)
@@ -2705,7 +2705,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 						 mst_file_text, sh.sc,
 						 objfile);
 			}
-		      procaddr = sh.value;
+		      procaddr = unrelocated_addr (sh.value);
 
 		      isym = AUX_GET_ISYM (fh->fBigendian,
 					   (debug_info->external_aux
@@ -2718,7 +2718,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				      &sh);
 		      if (sh.st == stEnd)
 			{
-			  CORE_ADDR high = procaddr + sh.value;
+			  unrelocated_addr high
+			    = unrelocated_addr (CORE_ADDR (procaddr)
+						+ sh.value);
 
 			  /* Kludge for Irix 5.2 zero fh->adr.  */
 			  if (!relocatable
@@ -3304,8 +3306,12 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    continue;
 
 		  case N_RBRAC:
-		    if (sh.value > save_pst->raw_text_high ())
-		      save_pst->set_text_high (sh.value);
+		    {
+		      unrelocated_addr unrel_value
+			= unrelocated_addr (sh.value);
+		      if (unrel_value > save_pst->raw_text_high ())
+			save_pst->set_text_high (unrel_value);
+		    }
 		    continue;
 		  case N_EINCL:
 		  case N_DSLINE:
@@ -3409,8 +3415,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 	      switch (sh.st)
 		{
-		  CORE_ADDR high;
-		  CORE_ADDR procaddr;
+		  unrelocated_addr high;
+		  unrelocated_addr procaddr;
 		  int new_sdx;
 
 		case stStaticProc:
@@ -3479,7 +3485,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				      sh.value, psymtab_language,
 				      partial_symtabs, objfile);
 
-		  procaddr = sh.value;
+		  procaddr = unrelocated_addr (sh.value);
 
 		  cur_sdx = new_sdx;
 		  (*swap_sym_in) (cur_bfd,
@@ -3496,7 +3502,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			  || procaddr < pst->raw_text_low ()))
 		    pst->set_text_low (procaddr);
 
-		  high = procaddr + sh.value;
+		  high = unrelocated_addr (CORE_ADDR (procaddr) + sh.value);
 		  if (high > pst->raw_text_high ())
 		    pst->set_text_high (high);
 		  continue;
@@ -4005,7 +4011,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
       if (! last_symtab_ended)
 	{
-	  cust = end_compunit_symtab (pst->raw_text_high ());
+	  cust = end_compunit_symtab (pst->text_high (objfile));
 	  end_stabs ();
 	}
 
