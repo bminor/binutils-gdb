@@ -5967,7 +5967,11 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
 # Copy shlib FILE to the target.
 
 proc gdb_download_shlib { file } {
-    return [gdb_remote_download target [shlib_target_file $file]]
+    set target_file [shlib_target_file $file]
+    if { [is_remote host] } {
+	remote_download host $target_file
+    }
+    return [gdb_remote_download target $target_file]
 }
 
 # Set solib-search-path to allow gdb to locate shlib FILE.
@@ -5979,16 +5983,26 @@ proc gdb_locate_shlib { file } {
 	perror "gdb_load_shlib: GDB is not running"
     }
 
-    # If the target is remote, we need to tell gdb where to find the
-    # libraries.
-    if { ![is_remote target] } {
+    if { [is_remote target] || [is_remote host] } {
+	# If the target or host is remote, we need to tell gdb where to find
+	# the libraries.
+    } else {
 	return
     }
 
     # We could set this even when not testing remotely, but a user
     # generally won't set it unless necessary.  In order to make the tests
     # more like the real-life scenarios, we don't set it for local testing.
-    gdb_test "set solib-search-path [file dirname $file]" "" \
+    if { [is_remote host] } {
+	set solib_search_path [board_info host remotedir]
+	if { $solib_search_path == "" } {
+	    set solib_search_path .
+	}
+    } else {
+	set solib_search_path [file dirname $file]
+    }
+
+    gdb_test_no_output "set solib-search-path $solib_search_path" \
 	"set solib-search-path for [file tail $file]"
 }
 
