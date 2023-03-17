@@ -41,7 +41,7 @@ if {[gdb_gnu_strip_debug $binfile]} {
     return -1
 }
 
-set debugfile "$[standard_output_file ${testfile}.debug]"
+set debugfile [standard_output_file ${testfile}.debug]
 set debugdir [standard_output_file "debug"]
 remote_exec build "mkdir $debugdir"
 remote_exec build "mkdir -p [file dirname $debugfile]"
