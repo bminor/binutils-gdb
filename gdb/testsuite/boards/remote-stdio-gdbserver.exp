@@ -45,6 +45,22 @@ set_board_info rcp_prog /usr/bin/scp
 # Some remote machines don't have writable home directories.
 if [info exists REMOTE_TMPDIR] {
     set_board_info remotedir $REMOTE_TMPDIR
+} else {
+    # Set remotedir by default, to force remote_download target to give an
+    # absolute file name.
+    save_vars {rsh_cmd res} {
+	set rsh_cmd \
+	    [join \
+		 [list \
+		      [board_info $board rsh_prog] \
+		      -l [board_info $board username] \
+		      [board_info $board hostname]]]
+	set res [remote_exec build $rsh_cmd pwd]
+	if { [lindex $res 0] != 0 } {
+	    error "Couldn't set remotedir using pwd"
+	}
+	set_board_info remotedir [string trim [lindex $res 1]]
+    }
 }
 
 if [info exists GDBSERVER] {

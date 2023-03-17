@@ -120,3 +120,35 @@ foreach_with_prefix remote {host target} {
 	test_remote $remote $host_is_target
     }
 }
+
+proc_with_prefix gdb_simple_compile_and_run {} {
+    set src {
+	int main() {
+	    return 0;
+	}
+    }
+
+    set test "compile"
+    if {![gdb_simple_compile board-sanity $src executable]} {
+	fail $test
+	return
+    }
+    pass $test
+
+    set target_obj [gdb_remote_download target $obj]
+    set result [remote_exec target $target_obj]
+    set status [lindex $result 0]
+    set output [lindex $result 1]
+
+    if { [host_info name] == "local-remote-host-native"
+	 && [target_info name] == "local-remote-host-native" } {
+	# Setting remotedir on this board has effect on both host and
+	# target, and it seems to broken for host.  Xfail this for now.
+	setup_xfail *-*-*
+    }
+    gdb_assert { $status == 0 && $output == "" }
+
+    remote_file build delete $obj
+}
+
+gdb_simple_compile_and_run
