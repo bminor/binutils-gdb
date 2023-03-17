@@ -12,7 +12,7 @@ Disassembly of section \.text:
   10:	b7 02 00 00 02 00 00 00 	mov %r2,2
   18:	18 06 00 00 38 00 00 00 	lddw %r6,0x38
   20:	00 00 00 00 00 00 00 00[    ]*
-			18: R_BPF_INSN_64	.text
+			18: R_BPF_64_64	.text
   28:	8d 06 00 00 00 00 00 00 	call %r6
   30:	95 00 00 00 00 00 00 00 	exit
 

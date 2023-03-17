@@ -3,7 +3,7 @@
 #source: bar.s
 #objdump: -dr
 #ld: -EL
-#name: CALL with disp32 reloc
+#name: CALL with 64_32 reloc
 
 .*: +file format .*bpf.*
 
