@@ -32,6 +32,8 @@ if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
     lappend flags "additional_flags=-msse -I${srcdir}/.."
 }
 
+lappend_include_file flags $srcdir/lib/precise-aligned-alloc.c
+
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 	  $flags] != "" } {
     unsupported "compiler does not support SSE"

@@ -9491,5 +9491,21 @@ gdb_caching_proc have_compile_flag { flag } {
 		additional_flags=$flag]
 }
 
+
+# Handle include file FILE, and if necessary update compiler flags variable
+# FLAGS.
+
+proc lappend_include_file { flags file } {
+    upvar $flags up_flags
+    if { [is_remote host] } {
+	gdb_remote_download host $file
+    } else {
+	set dir [file dirname $file]
+	if { $dir != [file join $::srcdir $::subdir] } {
+	    lappend up_flags "additional_flags=-I$dir"
+	}
+    }
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

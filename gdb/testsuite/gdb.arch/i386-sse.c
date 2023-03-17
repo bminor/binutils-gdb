@@ -65,7 +65,7 @@ have_sse (void)
     return 0;
 }
 
-#include "../lib/precise-aligned-alloc.c"
+#include "precise-aligned-alloc.c"
 
 int
 main (int argc, char **argv)

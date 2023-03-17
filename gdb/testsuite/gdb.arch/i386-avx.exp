@@ -30,6 +30,8 @@ set flags { debug }
 # C11 for _Alignas, gnu for asm.
 lappend flags additional_flags=-std=gnu11
 
+lappend_include_file flags $srcdir/lib/precise-aligned-alloc.c
+
 if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
     lappend flags "additional_flags=-mavx -I${srcdir}/.."
 }

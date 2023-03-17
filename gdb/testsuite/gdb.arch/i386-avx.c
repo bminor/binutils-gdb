@@ -50,7 +50,7 @@ v8sf_t data_orig[] =
 #endif
   };
 
-#include "../lib/precise-aligned-alloc.c"
+#include "precise-aligned-alloc.c"
 
 int
 main (int argc, char **argv)
