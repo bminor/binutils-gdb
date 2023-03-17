@@ -49,6 +49,8 @@ if {$corestat(size) != 102400} {
     return -1
 }
 
+set corefile [gdb_remote_download host $corefile]
+
 # First check if this particular GDB supports i386, otherwise we should not
 # expect the i386 core file to be loaded successfully.
 set archs [get_set_option_choices "set architecture" "i386"]
