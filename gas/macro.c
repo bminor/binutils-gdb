@@ -60,7 +60,7 @@ static int macro_mri;
 
 /* Whether we should strip '@' characters.  */
 
-static int macro_strip_at;
+#define macro_strip_at false
 
 /* Number of macro expansions that have been done.  */
 
@@ -78,14 +78,13 @@ macro_del_f (void *ent)
 /* Initialize macro processing.  */
 
 void
-macro_init (int alternate, int mri, int strip_at)
+macro_init (int alternate, int mri)
 {
   macro_hash = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
 				  macro_del_f, notes_calloc, NULL);
   macro_defined = 0;
   macro_alternate = alternate;
   macro_mri = mri;
-  macro_strip_at = strip_at;
 }
 
 void
