@@ -1701,11 +1701,36 @@ long
 bfd_mach_o_get_dynamic_reloc_upper_bound (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  bfd_mach_o_dysymtab_command *dysymtab = mdata->dysymtab;
 
-  if (mdata->dysymtab == NULL)
+  if (dysymtab == NULL)
     return 1;
-  return (mdata->dysymtab->nextrel + mdata->dysymtab->nlocrel + 1)
-    * sizeof (arelent *);
+
+  ufile_ptr filesize = bfd_get_file_size (abfd);
+  size_t amt;
+
+  if (filesize != 0)
+    {
+      if (dysymtab->extreloff > filesize
+	  || dysymtab->nextrel > ((filesize - dysymtab->extreloff)
+				  / BFD_MACH_O_RELENT_SIZE)
+	  || dysymtab->locreloff > filesize
+	  || dysymtab->nlocrel > ((filesize - dysymtab->locreloff)
+				  / BFD_MACH_O_RELENT_SIZE))
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
+  if (dysymtab->nextrel + dysymtab->nlocrel < dysymtab->nextrel
+      || _bfd_mul_overflow (dysymtab->nextrel + dysymtab->nlocrel,
+			    sizeof (arelent), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return -1;
+    }
+
+  return (dysymtab->nextrel + dysymtab->nlocrel + 1) * sizeof (arelent *);
 }
 
 long
@@ -1729,29 +1754,7 @@ bfd_mach_o_canonicalize_dynamic_reloc (bfd *abfd, arelent **rels,
 
   if (mdata->dyn_reloc_cache == NULL)
     {
-      ufile_ptr filesize = bfd_get_file_size (abfd);
-      size_t amt;
-
-      if (filesize != 0)
-	{
-	  if (dysymtab->extreloff > filesize
-	      || dysymtab->nextrel > ((filesize - dysymtab->extreloff)
-				      / BFD_MACH_O_RELENT_SIZE)
-	      || dysymtab->locreloff > filesize
-	      || dysymtab->nlocrel > ((filesize - dysymtab->locreloff)
-				      / BFD_MACH_O_RELENT_SIZE))
-	    {
-	      bfd_set_error (bfd_error_file_truncated);
-	      return -1;
-	    }
-	}
-      if (_bfd_mul_overflow (dysymtab->nextrel + dysymtab->nlocrel,
-			     sizeof (arelent), &amt))
-	{
-	  bfd_set_error (bfd_error_file_too_big);
-	  return -1;
-	}
-
+      size_t amt = (dysymtab->nextrel + dysymtab->nlocrel) * sizeof (arelent);
       res = bfd_malloc (amt);
       if (res == NULL)
 	return -1;
