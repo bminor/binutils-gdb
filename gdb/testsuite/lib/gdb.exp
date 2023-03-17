@@ -4653,6 +4653,16 @@ proc gdb_can_simple_compile {name code {type object} {compile_flags ""}} {
 global gdb_saved_set_unbuffered_mode_obj
 set gdb_saved_set_unbuffered_mode_obj ""
 
+# Escape STR sufficiently for use on host commandline.
+
+proc escape_for_host { str } {
+    set map {
+	{$} {\$}
+    }
+
+    return [string map $map $str]
+}
+
 # Compile source files specified by SOURCE into a binary of type TYPE at path
 # DEST.  gdb_compile is implemented using DejaGnu's target_compile, so the type
 # parameter and most options are passed directly to it.
@@ -4926,7 +4936,7 @@ proc gdb_compile {source dest type options} {
 	    if { $shlib_load } {
 		lappend new_options "libs=-ldl"
 	    }
-	    lappend new_options "ldflags=-Wl,-rpath,\\\$ORIGIN"
+	    lappend new_options [escape_for_host {ldflags=-Wl,-rpath,$ORIGIN}]
 	}
     }
     set options $new_options
