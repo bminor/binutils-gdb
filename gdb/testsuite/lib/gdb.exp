@@ -4656,8 +4656,14 @@ set gdb_saved_set_unbuffered_mode_obj ""
 # Escape STR sufficiently for use on host commandline.
 
 proc escape_for_host { str } {
-    set map {
-	{$} {\$}
+    if { [is_remote host] } {
+	set map {
+	    {$} {\\$}
+       }
+    } else {
+	set map {
+	    {$} {\$}
+	}
     }
 
     return [string map $map $str]
