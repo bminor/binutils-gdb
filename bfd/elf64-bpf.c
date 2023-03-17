@@ -190,6 +190,7 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
   for (rel = relocs; rel < relend; rel ++)
     {
       reloc_howto_type *	   howto;
+      unsigned int		   howto_index;
       unsigned long		   r_symndx;
       Elf_Internal_Sym *	   sym;
       asection *		   sec;
@@ -203,7 +204,9 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       r_type = ELF64_R_TYPE (rel->r_info);
       r_symndx = ELF64_R_SYM (rel->r_info);
-      howto  = bpf_elf_howto_table + ELF64_R_TYPE (rel->r_info);
+
+      howto_index = bpf_index_for_rtype (ELF64_R_TYPE (rel->r_info));
+      howto  = &bpf_elf_howto_table[howto_index];
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
