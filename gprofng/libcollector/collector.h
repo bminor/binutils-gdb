@@ -29,6 +29,8 @@
 #include "collector_module.h"
 
 #define GETRELTIME()    (__collector_gethrtime() - __collector_start_time)
+#define CALL_REAL(x)	(__real_##x)
+#define NULL_PTR(x)	(__real_##x == NULL)
 
 #if defined(__MUSL_LIBC)
 #define dlvsym(f, nm, v)  dlsym (f, nm)
@@ -169,6 +171,17 @@ enum
   SP_DUMP_NOHEADER  = 8,
   SP_DUMP_UNWIND    = 16,
   SP_DUMP_STACK     = 32,
+};
+
+/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
+enum
+{
+  DBG_LT0 = 0, // for high-level configuration, unexpected errors/warnings
+  DBG_LTT = 0, // for interposition on GLIBC functions
+  DBG_LT1 = 1, // for configuration details, warnings
+  DBG_LT2 = 2,
+  DBG_LT3 = 3,
+  DBG_LT4 = 4
 };
 
 #ifndef DEBUG

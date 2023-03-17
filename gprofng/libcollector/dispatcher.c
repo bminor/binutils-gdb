@@ -41,18 +41,10 @@
 #include "collector_module.h"
 #include "tsd.h"
 #include "hwcdrv.h"
-
-
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LTT 0 // for interposition on GLIBC functions
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
+#include "memmgr.h"
 
 static void collector_sigprof_dispatcher (int, siginfo_t*, void*);
 static int init_interposition_intf ();
-#include "memmgr.h"
 static int collector_timer_create (timer_t * ptimerid);
 static int collector_timer_settime (int period, timer_t timerid);
 static int collector_timer_gettime (timer_t timerid);
@@ -61,20 +53,28 @@ static timer_t collector_master_thread_timerid = NULL;
 static collector_mutex_t collector_clone_libc_lock = COLLECTOR_MUTEX_INITIALIZER;
 static unsigned dispatcher_key = COLLECTOR_TSD_INVALID_KEY;
 
-static void *__real_clone = NULL;
-static void *__real_timer_create = NULL;
-static void *__real_timer_settime = NULL;
-static void *__real_timer_delete = NULL;
-static void *__real_timer_gettime = NULL;
+static int (*__real_clone) (int (*fn)(void *), void *child_stack, int flags,
+			    void *arg, ...) = NULL;
+static int (*__real_timer_create) (clockid_t clockid,
+				struct sigevent *sevp, timer_t *timerid) = NULL;
+static int (*__real_timer_settime) (timer_t timerid, int flags,
+				    const struct itimerspec *new_value,
+				    struct itimerspec *old_value) = NULL;
+static int (*__real_timer_delete) (timer_t timerid) = NULL;
+static int (*__real_timer_gettime) (timer_t timerid,
+				    struct itimerspec *curr_value) = NULL;
 #if ARCH(Intel) && WSIZE(32)
-static void *__real_pthread_create_2_1 = NULL;
-static void *__real_pthread_create_2_0 = NULL;
+static int (*__real_pthread_create_2_1) (pthread_t *thread,
+			const pthread_attr_t *attr,
+			void *(*start_routine) (void *), void *arg) = NULL;
+static int (*__real_pthread_create_2_0) (pthread_t *thread,
+			const pthread_attr_t *attr,
+			void *(*start_routine) (void *), void *arg) = NULL;
 #elif ARCH(Intel) && WSIZE(64)
-static void *__real_timer_create_2_3_3 = NULL;
-static void *__real_timer_create_2_2_5 = NULL;
-#elif ARCH(SPARC) && WSIZE(64)
-static void *__real_timer_create_2_3_3 = NULL;
-static void *__real_timer_create_2_2 = NULL;
+static int (*__real_timer_create_2_3_3) (clockid_t clockid,
+				struct sigevent *sevp, timer_t *timerid) = NULL;
+static int (*__real_timer_create_2_2_5) (clockid_t clockid,
+				struct sigevent *sevp, timer_t *timerid) = NULL;
 #endif
 
 /* Original SIGPROF handler which will be replaced with the dispatcher.  Used
@@ -93,16 +93,21 @@ static int dispatch_mode = DISPATCH_NYI;   /* controls SIGPROF dispatching */
 static int itimer_period_requested = 0;    /* dispatcher itimer period */
 static int itimer_period_actual = 0;       /* actual dispatcher itimer period */
 
-#define CALL_REAL(x) (*(int(*)())__real_##x)
-#define NULL_PTR(x) ( __real_##x == NULL )
-
-static void *__real_sigaction = NULL;
-static void *__real_setitimer = NULL;
-static void *__real_libc_setitimer = NULL;
-static void *__real_sigprocmask = NULL;
-static void *__real_thr_sigsetmask = NULL;
-static void *__real_pthread_sigmask = NULL;
-static void *__real_pthread_create = NULL;
+static int (*__real_sigaction) (int signum, const struct sigaction *act,
+                     struct sigaction *oldact) = NULL;
+static int (*__real_setitimer) (int which, const struct itimerval *new_value,
+                     struct itimerval *old_value) = NULL;
+static int (*__real_libc_setitimer) (int which,
+	const struct itimerval *new_value, struct itimerval *old_value) = NULL;
+static int (*__real_sigprocmask) (int how, const sigset_t *set,
+				  sigset_t *oldset) = NULL;
+static int (*__real_thr_sigsetmask) (int how, const sigset_t *iset,
+				     sigset_t *oset) = NULL;
+static int (*__real_pthread_sigmask) (int how, const sigset_t *set,
+				      sigset_t *oldset) = NULL;
+static int (*__real_pthread_create) (pthread_t *thread,
+			const pthread_attr_t *attr,
+			void *(*start_routine) (void *), void *arg) = NULL;
 
 /*
  * void collector_sigprof_dispatcher()

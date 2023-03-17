@@ -26,17 +26,10 @@
 #include <dlfcn.h>
 
 #include "gp-defs.h"
-#include "collector_module.h"
+#include "collector.h"
 #include "gp-experiment.h"
 #include "data_pckts.h"
 #include "tsd.h"
-
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
-#define DBG_LT4 4
 
 /* define the packets to be written out */
 typedef struct Heap_packet
@@ -73,17 +66,7 @@ static unsigned heap_key = COLLECTOR_TSD_INVALID_KEY;
 #define CHCK_REENTRANCE(x)  ( !heap_mode || ((x) = collector_interface->getKey( heap_key )) == NULL || (*(x) != 0) )
 #define PUSH_REENTRANCE(x)  ((*(x))++)
 #define POP_REENTRANCE(x)   ((*(x))--)
-#define CALL_REAL(x)        (__real_##x)
-#define NULL_PTR(x)         (__real_##x == NULL)
 #define gethrtime collector_interface->getHiResTime
-
-#ifdef DEBUG
-#define Tprintf(...)   if (collector_interface) collector_interface->writeDebugInfo( 0, __VA_ARGS__ )
-#define TprintfT(...)  if (collector_interface) collector_interface->writeDebugInfo( 1, __VA_ARGS__ )
-#else
-#define Tprintf(...)
-#define TprintfT(...)
-#endif
 
 static void *(*__real_malloc)(size_t) = NULL;
 static void (*__real_free)(void *);

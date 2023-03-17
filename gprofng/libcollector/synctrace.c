@@ -38,13 +38,6 @@
 #include "tsd.h"
 #include "cc_libcollector.h"
 
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LTT 0 // for interposition on GLIBC functions
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
-
 /* define the packet that will be written out */
 typedef struct Sync_packet
 { /* Synchronization delay tracing packet */
@@ -88,18 +81,7 @@ static int init_thread_intf_finished = 0;
 #define RECHCK_JREENTRANCE(x)   (!sync_java || !sync_mode || ((x) = collector_interface->getKey( sync_key )) == NULL || (*(x) == 0))
 #define PUSH_REENTRANCE(x)      ((*(x))++)
 #define POP_REENTRANCE(x)       ((*(x))--)
-
-#define CALL_REAL(x)            (*(int(*)())__real_##x)
-#define NULL_PTR(x)             ( __real_##x == NULL )
 #define gethrtime	collector_interface->getHiResTime
-
-#ifdef DEBUG
-#define Tprintf(...)   if (collector_interface) collector_interface->writeDebugInfo( 0, __VA_ARGS__ )
-#define TprintfT(...)  if (collector_interface) collector_interface->writeDebugInfo( 1, __VA_ARGS__ )
-#else
-#define Tprintf(...)
-#define TprintfT(...)
-#endif
 
 /*
  * In most cases, the functions which require interposition are implemented as
@@ -109,26 +91,36 @@ static int init_thread_intf_finished = 0;
  * is distinct from the internal version (used by system libraries), i.e.,
  * cond_wait() is an alias for _cond_wait_cancel() rather than _cond_wait().
  */
-static void *__real_strtol = NULL;
-static void *__real_fprintf = NULL;
-static void *__real___collector_jprofile_enable_synctrace = NULL;
-static void *__real_pthread_mutex_lock = NULL;
-static void *__real_pthread_mutex_unlock = NULL; /* not interposed, used in calibrate */
-static void *__real_pthread_cond_wait = NULL;
-static void *__real_pthread_cond_timedwait = NULL;
-static void *__real_pthread_join = NULL;
-static void *__real_sem_wait = NULL;
-static void *__real_pthread_cond_wait_2_3_2 = NULL;
-static void *__real_pthread_cond_timedwait_2_3_2 = NULL;
+static long int (*__real_strtol)(const char *nptr, char **endptr, int base) = NULL;
+static int (*__real_fprintf) (FILE *stream, const char *format, ...) = NULL;
+static void (*__real___collector_jprofile_enable_synctrace) (void) = NULL;
+static int (*__real_pthread_mutex_lock) (pthread_mutex_t *mutex) = NULL;
+static int (*__real_pthread_mutex_unlock) (pthread_mutex_t *mutex) = NULL;
+static int (*__real_pthread_cond_wait) (pthread_cond_t *restrict cond,
+				pthread_mutex_t *restrict mutex) = NULL;
+static int (*__real_pthread_cond_timedwait) (pthread_cond_t *restrict cond,
+			pthread_mutex_t *restrict mutex,
+			const struct timespec *restrict abstime) = NULL;
+static int (*__real_pthread_join) (pthread_t thread, void **retval) = NULL;
+static int (*__real_sem_wait) (sem_t *sem) = NULL;
+static int (*__real_pthread_cond_wait_2_3_2) (pthread_cond_t *restrict cond,
+				pthread_mutex_t *restrict mutex) = NULL;
+static int (*__real_pthread_cond_timedwait_2_3_2) (pthread_cond_t *restrict cond,
+			pthread_mutex_t *restrict mutex,
+			const struct timespec *restrict abstime) = NULL;
 
 #if WSIZE(32)
-static void *__real_sem_wait_2_1 = NULL;
-static void *__real_sem_wait_2_0 = NULL;
-static void *__real_pthread_cond_wait_2_0 = NULL;
-static void *__real_pthread_cond_timedwait_2_0 = NULL;
+static int (*__real_sem_wait_2_1) (sem_t *sem) = NULL;
+static int (*__real_sem_wait_2_0) (sem_t *sem) = NULL;
+static int (*__real_pthread_cond_wait_2_0) (pthread_cond_t *restrict cond,
+				pthread_mutex_t *restrict mutex) = NULL;
+static int (*__real_pthread_cond_timedwait_2_0) (pthread_cond_t *restrict cond,
+			pthread_mutex_t *restrict mutex,
+			const struct timespec *restrict abstime) = NULL;
 #elif WSIZE(64)
 #if ARCH(Intel)
-static void *__real_pthread_cond_wait_2_2_5 = NULL;
+static int (*__real_pthread_cond_wait_2_2_5) (pthread_cond_t *restrict cond,
+				pthread_mutex_t *restrict mutex) = NULL;
 static void *__real_pthread_cond_timedwait_2_2_5 = NULL;
 #elif ARCH(SPARC)
 static void *__real_pthread_cond_wait_2_2 = NULL;

@@ -61,13 +61,6 @@ typedef struct prmap_t
   int pr_pagesize;          /* pagesize (bytes) for this mapping */
 } prmap_t;
 
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
-#define DBG_LT4 4
-
 #define SYS_MMAP_NAME       "mmap"
 #define SYS_MMAP64_NAME     "mmap64"
 #define SYS_MUNMAP_NAME     "munmap"
@@ -112,9 +105,6 @@ static int reentrance = 0;
 #define CURR_REENTRANCE  reentrance
 #define PUSH_REENTRANCE  reentrance++
 #define POP_REENTRANCE   reentrance--
-
-#define CALL_REAL(x)    (__real_##x)
-#define NULL_PTR(x)     (__real_##x == NULL)
 
 /* interposition function handles */
 static void *(*__real_mmap)(void* start, size_t length, int prot, int flags,

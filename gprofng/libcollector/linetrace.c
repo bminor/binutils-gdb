@@ -30,16 +30,9 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <limits.h>
-
+#include <spawn.h>
 
 #include "descendants.h"
-
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LTT 0 // for interposition on GLIBC functions
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
 
 #define LT_MAXNAMELEN 1024
 #define LT_MAXPATHLEN 1024
@@ -63,51 +56,77 @@ static int line_initted = 0;
 static collector_mutex_t fork_lineage_lock = COLLECTOR_MUTEX_INITIALIZER;
 static collector_mutex_t clone_lineage_lock = COLLECTOR_MUTEX_INITIALIZER;
 
-/* interposition */
-#define CALL_REAL(x)    (*(int(*)())__real_##x)
-#define CALL_REALC(x)   (*(char*(*)())__real_##x)
-#define CALL_REALF(x)   (*(FILE*(*)())__real_##x)
-#define NULL_PTR(x)     ( __real_##x == NULL )
-
 // For a given Linux, which lib functions have more than one GLIBC version? Do this:
 // objdump -T `find /lib /lib64 -name "*.so*"` | grep GLIBC | grep text | grep \(
-static void *__real_fork = NULL;
-static void *__real_vfork = NULL;
-static void *__real_execve = NULL;
-static void *__real_execvp = NULL;
-static void *__real_execv = NULL;
-static void *__real_execle = NULL;
-static void *__real_execlp = NULL;
-static void *__real_execl = NULL;
-static void *__real_clone = NULL;
-static void *__real_grantpt = NULL;
-static void *__real_ptsname = NULL;
-static void *__real_popen = NULL;
+static pid_t (*__real_fork) (void) = NULL;
+static pid_t (*__real_vfork) (void) = NULL;
+static int (*__real_execve) (const char *file, char *const argv[],
+			     char *const envp[]) = NULL;
+static int (*__real_execvp) (const char *file, char *const argv[]) = NULL;
+static int (*__real_execv) (const char *file, char *const argv[]) = NULL;
+static int (*__real_execle) (const char *path, const char *arg, ...) = NULL;
+static int (*__real_execlp) (const char *file, const char *arg, ...) = NULL;
+static int (*__real_execl) (const char *file, const char *arg, ...) = NULL;
+static int (*__real_clone) (int (*fn) (void *), void *child_stack,
+			   int flags, void *arg, ...) = NULL;
+static int (*__real_grantpt) (int fd) = NULL;
+static char *(*__real_ptsname) (int fd) = NULL;
+static FILE *(*__real_popen) (const char *command, const char *type) = NULL;
 static int clone_linenum = 0;
 #if ARCH(Intel)
 #if WSIZE(32)
-static void *__real_popen_2_1 = NULL;
-static void *__real_popen_2_0 = NULL;
-static void *__real_posix_spawn_2_15 = NULL;
-static void *__real_posix_spawnp_2_15 = NULL;
-static void *__real_posix_spawn_2_2 = NULL;
-static void *__real_posix_spawnp_2_2 = NULL;
+static FILE *(*__real_popen_2_1) (const char *command, const char *type) = NULL;
+static FILE *(*__real_popen_2_0) (const char *command, const char *type) = NULL;
+static int (*__real_posix_spawn_2_15) (pid_t *pid, const char *path,
+			       const posix_spawn_file_actions_t *file_actions,
+			       const posix_spawnattr_t *attrp,
+			       char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawn_2_2) (pid_t *pid, const char *path,
+			      const posix_spawn_file_actions_t *file_actions,
+			      const posix_spawnattr_t *attrp,
+			      char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawnp_2_15) (pid_t *pid, const char *file,
+				const posix_spawn_file_actions_t *file_actions,
+				const posix_spawnattr_t *attrp,
+				char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawnp_2_2) (pid_t *pid, const char *file,
+			       const posix_spawn_file_actions_t *file_actions,
+			       const posix_spawnattr_t *attrp,
+			       char *const argv[], char *const envp[]) = NULL;
 #elif WSIZE(64)
-static void *__real_posix_spawn_2_15 = NULL;
-static void *__real_posix_spawnp_2_15 = NULL;
-static void *__real_posix_spawn_2_2_5 = NULL;
-static void *__real_posix_spawnp_2_2_5 = NULL;
+static int (*__real_posix_spawn_2_15) (pid_t *pid, const char *path,
+			       const posix_spawn_file_actions_t *file_actions,
+			       const posix_spawnattr_t *attrp,
+			       char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawn_2_2_5) (pid_t *pid, const char *path,
+				const posix_spawn_file_actions_t *file_actions,
+				const posix_spawnattr_t *attrp,
+				char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawnp_2_15) (pid_t *pid, const char *file,
+				const posix_spawn_file_actions_t *file_actions,
+				const posix_spawnattr_t *attrp,
+				char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawnp_2_2_5) (pid_t *pid, const char *file,
+				 const posix_spawn_file_actions_t *file_actions,
+				 const posix_spawnattr_t *attrp,
+				 char *const argv[], char *const envp[]) = NULL;
 #endif /* WSIZE() */
 #endif /* ARCH(Intel) */
-static void *__real_system = NULL;
-static void *__real_posix_spawn = NULL;
-static void *__real_posix_spawnp = NULL;
-static void *__real_setuid = NULL;
-static void *__real_seteuid = NULL;
-static void *__real_setreuid = NULL;
-static void *__real_setgid = NULL;
-static void *__real_setegid = NULL;
-static void *__real_setregid = NULL;
+static int (*__real_system) (const char *command) = NULL;
+static int (*__real_posix_spawn) (pid_t *pid, const char *path,
+				const posix_spawn_file_actions_t *file_actions,
+				const posix_spawnattr_t *attrp,
+				char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawnp) (pid_t *pid, const char *file,
+				const posix_spawn_file_actions_t *file_actions,
+				const posix_spawnattr_t *attrp,
+				char *const argv[], char *const envp[]) = NULL;
+static int (*__real_setuid) (uid_t uid) = NULL;
+static int (*__real_seteuid) (uid_t euid) = NULL;
+static int (*__real_setreuid) (uid_t ruid, uid_t euid) = NULL;
+static int (*__real_setgid) (gid_t gid) = NULL;
+static int (*__real_setegid) (gid_t egid) = NULL;
+static int (*__real_setregid) (gid_t rgid, gid_t egid)= NULL;
 static void linetrace_dormant ();
 static int check_follow_fork ();
 static int check_follow_exec (const char *execfile);
@@ -1604,7 +1623,7 @@ __collector_popen_2_1 (const char *cmd, const char *mode)
   if (NULL_PTR (popen))
     init_lineage_intf ();
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_popen_2_1@%p\n", CALL_REAL (popen_2_1));
-  return __collector_popen_symver (CALL_REALF (popen_2_1), cmd, mode);
+  return __collector_popen_symver (CALL_REAL (popen_2_1), cmd, mode);
 }
 
 SYMVER_ATTRIBUTE (__collector_popen_2_0, popen@GLIBC_2.0)
@@ -1614,7 +1633,7 @@ __collector_popen_2_0 (const char *cmd, const char *mode)
   if (NULL_PTR (popen))
     init_lineage_intf ();
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_popen_2_0@%p\n", CALL_REAL (popen_2_0));
-  return __collector_popen_symver (CALL_REALF (popen_2_0), cmd, mode);
+  return __collector_popen_symver (CALL_REAL (popen_2_0), cmd, mode);
 }
 
 SYMVER_ATTRIBUTE (__collector__popen_2_1, _popen@GLIBC_2.1)
@@ -1624,7 +1643,7 @@ __collector__popen_2_1 (const char *cmd, const char *mode)
   if (NULL_PTR (popen))
     init_lineage_intf ();
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector__popen_2_1@%p\n", CALL_REAL (popen_2_1));
-  return __collector_popen_symver (CALL_REALF (popen_2_1), cmd, mode);
+  return __collector_popen_symver (CALL_REAL (popen_2_1), cmd, mode);
 }
 
 SYMVER_ATTRIBUTE (__collector__popen_2_0, _popen@GLIBC_2.0)
@@ -1633,7 +1652,7 @@ __collector__popen_2_0 (const char *cmd, const char *mode)
 {
   if (NULL_PTR (popen))
     init_lineage_intf ();
-  return __collector_popen_symver (CALL_REALF (popen_2_0), cmd, mode);
+  return __collector_popen_symver (CALL_REAL (popen_2_0), cmd, mode);
 }
 #else // WSIZE(64)
 FILE * popen () __attribute__ ((weak, alias ("__collector_popen")));
@@ -1662,7 +1681,7 @@ __collector_popen (const char *cmd, const char *mode)
 #if ARCH(Intel) && WSIZE(32)
       return (real_popen) (cmd, mode);
 #else
-      return CALL_REALF (popen)(cmd, mode);
+      return CALL_REAL (popen)(cmd, mode);
 #endif
     }
   int following_combo = 0;
@@ -1671,7 +1690,7 @@ __collector_popen (const char *cmd, const char *mode)
 #if ARCH(Intel) && WSIZE(32)
   ret = (real_popen) (cmd, mode);
 #else
-  ret = CALL_REALF (popen)(cmd, mode);
+  ret = CALL_REAL (popen)(cmd, mode);
 #endif
   POP_REENTRANCE (guard);
   linetrace_ext_combo_epilogue ("popen", (ret == NULL) ? (-1) : 0, &following_combo);
@@ -1718,11 +1737,11 @@ __collector_ptsname (const int fildes)
   if (line_mode == LM_TRACK_LINEAGE)
     INIT_REENTRANCE (guard);
   if (guard == NULL)
-    return CALL_REALC (ptsname)(fildes);
+    return CALL_REAL (ptsname)(fildes);
   int following_combo = 0;
   linetrace_ext_combo_prologue ("ptsname", "/usr/lib/pt_chmod", &following_combo);
   PUSH_REENTRANCE (guard);
-  char *ret = CALL_REALC (ptsname)(fildes);
+  char *ret = CALL_REAL (ptsname)(fildes);
   POP_REENTRANCE (guard);
   linetrace_ext_combo_epilogue ("ptsname", (ret == NULL) ? (-1) : 1, &following_combo);
   return ret;

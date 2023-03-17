@@ -37,12 +37,6 @@
 #include "cc_libcollector.h"
 #include "tsd.h"
 
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
-
 typedef unsigned long ulong_t;
 
 extern char **environ;
@@ -2455,11 +2449,8 @@ __collector_dlog (int tflag, int level, char *format, ...)
  */
 /*------------------------------------------------------------- _exit */
 
-#define CALL_REAL(x) (*(int(*)())__real_##x)
-#define NULL_PTR(x) ( __real_##x == NULL )
-
-static void *__real__exit = NULL; /* libc only: _exit */
-static void *__real__Exit = NULL; /* libc only: _Exit */
+static void (*__real__exit) (int status) = NULL; /* libc only: _exit */
+static void (*__real__Exit) (int status) = NULL; /* libc only: _Exit */
 void _exit () __attribute__ ((weak, alias ("__collector_exit")));
 void _Exit () __attribute__ ((weak, alias ("__collector_Exit")));
 
