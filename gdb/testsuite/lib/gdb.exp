@@ -8987,7 +8987,8 @@ gdb_caching_proc supports_scalar_storage_order_attribute {} {
 	return 0
     }
 
-    set result [remote_exec target $obj]
+    set target_obj [gdb_remote_download target $obj]
+    set result [remote_exec target $target_obj]
     set status [lindex $result 0]
     set output [lindex $result 1]
     if { $output != "" } {
@@ -9047,7 +9048,8 @@ gdb_caching_proc have_mpx {} {
         return 0
     }
 
-    set result [remote_exec target $obj]
+    set target_obj [gdb_remote_download target $obj]
+    set result [remote_exec target $target_obj]
     set status [lindex $result 0]
     set output [lindex $result 1]
     if { $output != "" } {
@@ -9071,7 +9073,8 @@ gdb_caching_proc have_mpx {} {
         return 0
     }
 
-    set result [remote_exec target $obj]
+    set target_obj [gdb_remote_download target $obj]
+    set result [remote_exec target $target_obj]
     set status [lindex $result 0]
     set output [lindex $result 1]
     set status [expr ($status == 0) \
@@ -9114,7 +9117,8 @@ gdb_caching_proc have_avx {} {
         return 0
     }
 
-    set result [remote_exec target $obj]
+    set target_obj [gdb_remote_download target $obj]
+    set result [remote_exec target $target_obj]
     set status [lindex $result 0]
     set output [lindex $result 1]
     if { $output != "" } {
@@ -9311,7 +9315,8 @@ gdb_caching_proc arm_cc_for_target {} {
 		 $src \
 		 executable [list compiler=$compiler]]} {
 
-	    set result [remote_exec target $obj]
+	    set target_obj [gdb_remote_download target $obj]
+	    set result [remote_exec target $target_obj]
 	    set status [lindex $result 0]
 	    set output [lindex $result 1]
 
