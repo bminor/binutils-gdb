@@ -1310,7 +1310,7 @@ gas_init (void)
   expr_begin ();
   eh_begin ();
 
-  macro_init (flag_macro_alternate, flag_mri);
+  macro_init (flag_macro_alternate);
 
   dwarf2_init ();
 
