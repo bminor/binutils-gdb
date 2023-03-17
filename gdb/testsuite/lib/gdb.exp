@@ -2442,6 +2442,10 @@ proc allow_fortran_tests {} {
 # Return a 1 if I want to try to test ada.
 
 proc allow_ada_tests {} {
+    if { [is_remote host] } {
+	# Currently gdb_ada_compile doesn't support remote host.
+	return 0
+    }
     return 1
 }
 
