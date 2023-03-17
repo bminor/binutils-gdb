@@ -182,7 +182,7 @@ extern void add_to_result (expressionS *, offsetT, int);
 extern void subtract_from_result (expressionS *, offsetT, int);
 extern segT expr (int, expressionS *, enum expr_mode);
 extern unsigned int get_single_number (void);
-extern symbolS *make_expr_symbol (expressionS * expressionP);
+extern symbolS *make_expr_symbol (const expressionS * expressionP);
 extern int expr_symbol_where (symbolS *, const char **, unsigned int *);
 extern void current_location (expressionS *);
 extern symbolS *expr_build_uconstant (offsetT);

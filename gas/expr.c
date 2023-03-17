@@ -48,15 +48,16 @@ struct expr_symbol_line {
 };
 
 static struct expr_symbol_line *expr_symbol_lines;
+
+static const expressionS zero = { .X_op = O_constant };
 
 /* Build a dummy symbol to hold a complex expression.  This is how we
    build expressions up out of other expressions.  The symbol is put
    into the fake section expr_section.  */
 
 symbolS *
-make_expr_symbol (expressionS *expressionP)
+make_expr_symbol (const expressionS *expressionP)
 {
-  expressionS zero;
   symbolS *symbolP;
   struct expr_symbol_line *n;
 
@@ -73,11 +74,6 @@ make_expr_symbol (expressionS *expressionP)
 	as_bad (_("bignum invalid"));
       else
 	as_bad (_("floating point number invalid"));
-      zero.X_op = O_constant;
-      zero.X_add_number = 0;
-      zero.X_unsigned = 0;
-      zero.X_extrabit = 0;
-      clean_up_expression (&zero);
       expressionP = &zero;
     }
 
@@ -750,6 +746,10 @@ current_location (expressionS *expressionp)
     }
 }
 
+#ifndef md_register_arithmetic
+# define md_register_arithmetic 1
+#endif
+
 /* In:	Input_line_pointer points to 1st char of operand, which may
 	be a space.
 
@@ -1126,6 +1126,14 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		else
 		  expressionP->X_op = O_logical_not;
 		expressionP->X_add_number = 0;
+	      }
+	    else if (!md_register_arithmetic && expressionP->X_op == O_register)
+	      {
+		/* Convert to binary '+'.  */
+		expressionP->X_op_symbol = make_expr_symbol (expressionP);
+		expressionP->X_add_symbol = make_expr_symbol (&zero);
+		expressionP->X_add_number = 0;
+		expressionP->X_op = O_add;
 	      }
 	  }
 	else
@@ -1890,9 +1898,6 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  ;
 	}
       else
-#endif
-#ifndef md_register_arithmetic
-# define md_register_arithmetic 1
 #endif
       if (op_left == O_add && right.X_op == O_constant
 	  && (md_register_arithmetic || resultP->X_op != O_register))
