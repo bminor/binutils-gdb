@@ -83,8 +83,7 @@ extern htab_t macro_hash;
 
 extern int buffer_and_nest (const char *, const char *, sb *,
 			    size_t (*) (sb *));
-extern void macro_init (int, int, int,
-			size_t (*) (const char *, size_t, sb *, offsetT *));
+extern void macro_init (int, int, int);
 extern void macro_end (void);
 extern void macro_set_alternate (int);
 extern void macro_mri_mode (int);

@@ -62,10 +62,6 @@ static int macro_mri;
 
 static int macro_strip_at;
 
-/* Function to use to parse an expression.  */
-
-static size_t (*macro_expr) (const char *, size_t, sb *, offsetT *);
-
 /* Number of macro expansions that have been done.  */
 
 static int macro_number;
@@ -82,8 +78,7 @@ macro_del_f (void *ent)
 /* Initialize macro processing.  */
 
 void
-macro_init (int alternate, int mri, int strip_at,
-	    size_t (*exp) (const char *, size_t, sb *, offsetT *))
+macro_init (int alternate, int mri, int strip_at)
 {
   macro_hash = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
 				  macro_del_f, notes_calloc, NULL);
@@ -91,7 +86,6 @@ macro_init (int alternate, int mri, int strip_at,
   macro_alternate = alternate;
   macro_mri = mri;
   macro_strip_at = strip_at;
-  macro_expr = exp;
 }
 
 void
@@ -412,16 +406,21 @@ get_any_string (size_t idx, sb *in, sb *out)
 	}
       else if (in->ptr[idx] == '%' && macro_alternate)
 	{
-	  offsetT val;
+	  /* Turn the following expression into a string.  */
+	  expressionS ex;
 	  char buf[64];
 
-	  /* Turns the next expression into a string.  */
-	  /* xgettext: no-c-format */
-	  idx = (*macro_expr) (_("% operator needs absolute expression"),
-			       idx + 1,
-			       in,
-			       &val);
-	  sprintf (buf, "%" PRId64, (int64_t) val);
+	  sb_terminate (in);
+
+	  temp_ilp (in->ptr + idx + 1);
+	  expression_and_evaluate (&ex);
+	  idx = input_line_pointer - in->ptr;
+	  restore_ilp ();
+
+	  if (ex.X_op != O_constant)
+	    as_bad (_("%% operator needs absolute expression"));
+
+	  sprintf (buf, "%" PRId64, (int64_t) ex.X_add_number);
 	  sb_add_string (out, buf);
 	}
       else if (in->ptr[idx] == '"'
