@@ -43,9 +43,6 @@
 #include "value.h"
 #include "parser-defs.h"
 #include "m2-lang.h"
-#include "bfd.h" /* Required by objfiles.h.  */
-#include "symfile.h" /* Required by objfiles.h.  */
-#include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "block.h"
 #include "m2-exp.h"
 

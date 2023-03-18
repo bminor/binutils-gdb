@@ -50,11 +50,7 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "p-lang.h"
-#include "bfd.h" /* Required by objfiles.h.  */
-#include "symfile.h" /* Required by objfiles.h.  */
-#include "objfiles.h" /* For have_full_symbols and have_partial_symbols.  */
 #include "block.h"
-#include "completer.h"
 #include "expop.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())

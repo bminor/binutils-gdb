@@ -42,9 +42,6 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "ada-lang.h"
-#include "bfd.h" /* Required by objfiles.h.  */
-#include "symfile.h" /* Required by objfiles.h.  */
-#include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "frame.h"
 #include "block.h"
 #include "ada-exp.h"
