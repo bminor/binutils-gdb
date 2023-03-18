@@ -119,6 +119,7 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
       strsec = bfd_get_section_by_name (abfd, names[i].strsecname);
       if (sec != NULL
 	  && (bfd_section_flags (sec) & SEC_HAS_CONTENTS) != 0
+	  && bfd_section_size (sec) >= 12
 	  && strsec != NULL
 	  && (bfd_section_flags (strsec) & SEC_HAS_CONTENTS) != 0)
 	{
