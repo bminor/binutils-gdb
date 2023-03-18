@@ -11,6 +11,7 @@ eaarch64linux.c
 eaarch64linux32.c
 eaarch64linux32b.c
 eaarch64linuxb.c
+eaarch64nto.c
 eaarch64pe.c
 eaix5ppc.c
 eaix5rs6.c
