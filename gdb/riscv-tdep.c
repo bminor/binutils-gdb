@@ -56,6 +56,7 @@
 #include "prologue-value.h"
 #include "arch/riscv.h"
 #include "riscv-ravenscar-thread.h"
+#include "safe-ctype.h"
 
 /* The stack must be 16-byte aligned.  */
 #define SP_ALIGNMENT 16
@@ -3780,6 +3781,33 @@ riscv_gnu_triplet_regexp (struct gdbarch *gdbarch)
   return "riscv(32|64)?";
 }
 
+/* Implementation of `gdbarch_stap_is_single_operand', as defined in
+   gdbarch.h.  */
+
+static int
+riscv_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
+{
+  return (ISDIGIT (*s) /* Literal number.  */
+	  || *s == '(' /* Register indirection.  */
+	  || ISALPHA (*s)); /* Register value.  */
+}
+
+/* String that appears before a register name in a SystemTap register
+   indirect expression.  */
+
+static const char *const stap_register_indirection_prefixes[] =
+{
+  "(", nullptr
+};
+
+/* String that appears after a register name in a SystemTap register
+   indirect expression.  */
+
+static const char *const stap_register_indirection_suffixes[] =
+{
+  ")", nullptr
+};
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -4019,6 +4047,13 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_valid_disassembler_options (gdbarch,
 					  disassembler_options_riscv ());
   set_gdbarch_disassembler_options (gdbarch, &riscv_disassembler_options);
+
+  /* SystemTap Support.  */
+  set_gdbarch_stap_is_single_operand (gdbarch, riscv_stap_is_single_operand);
+  set_gdbarch_stap_register_indirection_prefixes
+    (gdbarch, stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes
+    (gdbarch, stap_register_indirection_suffixes);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
