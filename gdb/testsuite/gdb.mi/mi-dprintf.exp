@@ -19,7 +19,11 @@ set MIFLAGS "-i=mi"
 
 standard_testfile
 
-if {[build_executable $testfile.exp $testfile $srcfile {debug}] == -1} {
+set flags {}
+lappend flags debug
+lappend_include_file flags $srcdir/lib/unbuffer_output.c
+
+if {[build_executable $testfile.exp $testfile $srcfile $flags] == -1} {
     untested "failed to compile"
     return -1
 }

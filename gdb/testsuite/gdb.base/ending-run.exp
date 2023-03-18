@@ -23,7 +23,11 @@
 
 standard_testfile
 
-if { [prepare_for_testing "failed to prepare" $testfile] } {
+set flags {}
+lappend flags debug
+lappend_include_file flags $srcdir/lib/unbuffer_output.c
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $flags] } {
     return -1
 }
 remote_exec build "rm -f core"

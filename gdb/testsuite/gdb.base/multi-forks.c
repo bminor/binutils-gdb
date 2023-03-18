@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../lib/unbuffer_output.c"
+#include "unbuffer_output.c"
 
 pid_t pids[4];
 

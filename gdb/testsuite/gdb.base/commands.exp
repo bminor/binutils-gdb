@@ -25,9 +25,14 @@
 
 set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
-standard_testfile
+standard_testfile run.c
 
-if { [prepare_for_testing "failed to prepare" commands run.c {debug additional_flags=-DFAKEARGV}] } {
+set flags {}
+lappend flags debug
+lappend flags additional_flags=-DFAKEARGV
+lappend_include_file flags $srcdir/lib/unbuffer_output.c
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $flags] } {
     return -1
 }
 

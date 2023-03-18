@@ -19,7 +19,10 @@ require {!target_info exists gdb,noinferiorio}
 
 standard_testfile
 
-set options { debug }
+set options {}
+lappend options debug
+lappend_include_file options $srcdir/lib/unbuffer_output.c
+
 if { ! [target_info exists gdb,nosignals] } {
     lappend options "additional_flags=-DSIGNALS"
 }

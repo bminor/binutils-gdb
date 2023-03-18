@@ -28,7 +28,11 @@ require {!target_info exists gdb,cannot_call_functions}
 
 set allow_float_test [allow_float_test]
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+set flags {}
+lappend flags debug
+lappend_include_file flags $srcdir/lib/unbuffer_output.c
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile $flags]} {
     return -1
 }
 
