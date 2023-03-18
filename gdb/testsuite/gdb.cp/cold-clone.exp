@@ -15,8 +15,13 @@
 
 standard_testfile .cc
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
-	 {debug c++ optimize=-O2}]} {
+set flags {}
+lappend flags debug
+lappend flags c++
+lappend flags optimize=-O2
+lappend_include_file flags $srcdir/lib/attributes.h
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile $flags]} {
     return -1
 }
 

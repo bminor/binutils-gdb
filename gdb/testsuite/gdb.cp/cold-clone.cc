@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdlib.h>
-#include "../lib/attributes.h"
+#include "attributes.h"
 
 int a;
 int b;

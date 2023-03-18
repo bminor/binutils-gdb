@@ -40,6 +40,8 @@ if { $lang == "c++" && [test_compiler_info clang*] } {
     lappend compile_flags "additional_flags=-Wno-tautological-compare"
 }
 
+lappend_include_file compile_flags $srcdir/lib/attributes.h
+
 # Given N (0..25), return the corresponding alphabetic letter in upper
 # case.
 

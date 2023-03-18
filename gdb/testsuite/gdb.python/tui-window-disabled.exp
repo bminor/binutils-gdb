@@ -27,7 +27,11 @@ tuiterm_env
 
 standard_testfile
 
-if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
+set flags {}
+lappend flags debug
+lappend_include_file flags $srcdir/lib/attributes.h
+
+if {[build_executable "failed to prepare" ${testfile} ${srcfile} $flags] == -1} {
     return -1
 }
 

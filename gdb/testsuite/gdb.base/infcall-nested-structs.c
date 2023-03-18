@@ -33,7 +33,7 @@
    in the structs.exp test script.  */
 
 #include <string.h>
-#include "../lib/attributes.h"
+#include "attributes.h"
 
 /* Useful abreviations.  */
 typedef char tc;

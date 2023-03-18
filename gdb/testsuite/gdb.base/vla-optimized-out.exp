@@ -26,6 +26,7 @@ proc vla_optimized_out {exe_suffix options} {
     global testfile srcfile
 
     lassign $options compile_flags sizeof_result
+    lappend_include_file compile_flags $::srcdir/lib/attributes.h
 
     if { [prepare_for_testing "failed to prepare" "$testfile-$exe_suffix" $srcfile \
 	      $compile_flags] } {
