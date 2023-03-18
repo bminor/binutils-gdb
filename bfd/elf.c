@@ -6893,14 +6893,14 @@ section_size (asection *section, Elf_Internal_Phdr *segment)
 
 /* Returns TRUE if the given section is contained within the given
    segment.  LMA addresses are compared against PADDR when
-   bed->want_p_paddr_set_to_zero is false, VMA against VADDR when true.  */
+   USE_VADDR is false, VMA against VADDR when true.  */
 static bool
 is_contained_by (asection *section, Elf_Internal_Phdr *segment,
 		 bfd_vma paddr, bfd_vma vaddr, unsigned int opb,
-		 const struct elf_backend_data *bed)
+		 bool use_vaddr)
 {
-  bfd_vma seg_addr = !bed->want_p_paddr_set_to_zero ? paddr : vaddr;
-  bfd_vma addr = !bed->want_p_paddr_set_to_zero ? section->lma : section->vma;
+  bfd_vma seg_addr = !use_vaddr ? paddr : vaddr;
+  bfd_vma addr = !use_vaddr ? section->lma : section->vma;
   bfd_vma octet;
   if (_bfd_mul_overflow (addr, opb, &octet))
     return false;
@@ -6982,7 +6982,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	  (with the possible exception of .dynamic).  */
 #define IS_SECTION_IN_INPUT_SEGMENT(section, segment, bed, opb)		\
   (((is_contained_by (section, segment, segment->p_paddr,		\
-		      segment->p_vaddr, opb, bed)			\
+		      segment->p_vaddr, opb,				\
+		      bed->want_p_paddr_set_to_zero)			\
      && (section->flags & SEC_ALLOC) != 0)				\
     || is_note (section, segment))					\
    && segment->p_type != PT_GNU_STACK					\
@@ -7309,7 +7310,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
 	      if (is_contained_by (output_section, segment, map->p_paddr,
-				   map->p_paddr + map->p_vaddr_offset, opb, bed)
+				   0, opb, false)
 		  || is_note (section, segment))
 		{
 		  if (matching_lma == NULL
@@ -7427,7 +7428,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	      BFD_ASSERT (output_section != NULL);
 
 	      if (is_contained_by (output_section, segment, map->p_paddr,
-				   map->p_paddr + map->p_vaddr_offset, opb, bed)
+				   0, opb, false)
 		  || is_note (section, segment))
 		{
 		  if (map->count == 0)
