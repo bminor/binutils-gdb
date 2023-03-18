@@ -21,7 +21,7 @@
 #include <string.h>
 #include <pthread.h>
 
-#include "../lib/my-syscalls.h"
+#include "my-syscalls.h"
 
 #if (!defined(LEADER_DOES_EXEC) && !defined(OTHER_DOES_EXEC) \
      || defined(LEADER_DOES_EXEC) && defined(OTHER_DOES_EXEC))
