@@ -1714,8 +1714,11 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 	  laststart -= SIZEOF_AR_HDR + arel->extra_size;
 	}
 
-      /* Sanity check that we aren't pointing into the previous element.  */
-      if (filestart != 0 && filestart >= laststart && filestart < lastend)
+      /* Sanity check that we aren't pointing into the previous element,
+	 or into the header.  */
+      if (filestart != 0
+	  && (filestart < SIZEOF_AR_FILE_HDR
+	      || (filestart >= laststart && filestart < lastend)))
 	{
 	  bfd_set_error (bfd_error_malformed_archive);
 	  return NULL;
@@ -1747,8 +1750,11 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 	  laststart -= SIZEOF_AR_HDR_BIG + arel->extra_size;
 	}
 
-      /* Sanity check that we aren't pointing into the previous element.  */
-      if (filestart != 0 && filestart >= laststart && filestart < lastend)
+      /* Sanity check that we aren't pointing into the previous element
+	 or into the header.  */
+      if (filestart != 0
+	  && (filestart < SIZEOF_AR_FILE_HDR_BIG
+	      || (filestart >= laststart && filestart < lastend)))
 	{
 	  bfd_set_error (bfd_error_malformed_archive);
 	  return NULL;
