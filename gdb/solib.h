@@ -28,6 +28,7 @@ struct program_space;
 
 #include "gdb_bfd.h"
 #include "symfile-add-flags.h"
+#include "gdbsupport/function-view.h"
 
 /* Value of the 'set debug solib' configuration variable.  */
 
@@ -107,18 +108,13 @@ extern bool libpthread_name_p (const char *name);
 
 /* Look up symbol from both symbol table and dynamic string table.  */
 
-extern CORE_ADDR gdb_bfd_lookup_symbol (bfd *abfd,
-					int (*match_sym) (const asymbol *,
-							  const void *),
-					const void *data);
+extern CORE_ADDR gdb_bfd_lookup_symbol
+     (bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym);
 
 /* Look up symbol from symbol table.  */
 
-extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
-						    int (*match_sym)
-						      (const asymbol *,
-						       const void *),
-						    const void *data);
+extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab
+     (bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym);
 
 /* Scan for DESIRED_DYNTAG in .dynamic section of ABFD.  If DESIRED_DYNTAG is
    found, 1 is returned and the corresponding PTR and PTR_ADDR are set.  */

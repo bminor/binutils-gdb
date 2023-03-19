@@ -472,14 +472,6 @@ enable_break_failure_warning (void)
 	   "and track explicitly loaded dynamic code."));
 }
 
-/* Helper function for gdb_bfd_lookup_symbol.  */
-
-static int
-cmp_name (const asymbol *sym, const void *data)
-{
-  return (strcmp (sym->name, (const char *) data) == 0);
-}
-
 /* Arrange for dynamic linker to hit breakpoint.
 
    The dynamic linkers has, as part of its debugger interface, support
@@ -602,7 +594,12 @@ enable_break2 (void)
 	    interp_plt_sect_low + bfd_section_size (interp_sect);
 	}
 
-      addr = gdb_bfd_lookup_symbol (tmp_bfd.get (), cmp_name, "_dl_debug_addr");
+      addr = (gdb_bfd_lookup_symbol
+	      (tmp_bfd.get (),
+	       [] (const asymbol *sym)
+	       {
+		 return strcmp (sym->name, "_dl_debug_addr") == 0;
+	       }));
 
       if (addr == 0)
 	{

@@ -662,14 +662,6 @@ enable_break_failure_warning (void)
 	     "and track explicitly loaded dynamic code."));
 }
 
-/* Helper function for gdb_bfd_lookup_symbol.  */
-
-static int
-cmp_name (const asymbol *sym, const void *data)
-{
-  return (strcmp (sym->name, (const char *) data) == 0);
-}
-
 /* The dynamic linkers has, as part of its debugger interface, support
    for arranging for the inferior to hit a breakpoint after mapping in
    the shared libraries.  This function enables that breakpoint.
@@ -759,8 +751,13 @@ enable_break (void)
 	    = info->interp_plt_sect_low + bfd_section_size (interp_sect);
 	}
 
-      addr = gdb_bfd_lookup_symbol (tmp_bfd.get (), cmp_name,
-				    "_dl_debug_state");
+      addr = (gdb_bfd_lookup_symbol
+	      (tmp_bfd.get (),
+	       [] (const asymbol *sym)
+	       {
+		 return strcmp (sym->name, "_dl_debug_state") == 0;
+	       }));
+
       if (addr != 0)
 	{
 	  if (solib_dsbt_debug)

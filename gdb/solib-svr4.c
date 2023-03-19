@@ -2301,14 +2301,6 @@ svr4_create_solib_event_breakpoints (svr4_info *info, struct gdbarch *gdbarch,
     }
 }
 
-/* Helper function for gdb_bfd_lookup_symbol.  */
-
-static int
-cmp_name_and_sec_flags (const asymbol *sym, const void *data)
-{
-  return (strcmp (sym->name, (const char *) data) == 0
-	  && (sym->section->flags & (SEC_CODE | SEC_DATA)) != 0);
-}
 /* Arrange for dynamic linker to hit breakpoint.
 
    Both the SunOS and the SVR4 dynamic linkers have, as part of their
@@ -2553,9 +2545,15 @@ enable_break (struct svr4_info *info, int from_tty)
       /* Now try to set a breakpoint in the dynamic linker.  */
       for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  sym_addr = gdb_bfd_lookup_symbol (tmp_bfd.get (),
-					    cmp_name_and_sec_flags,
-					    *bkpt_namep);
+	  sym_addr
+	    = (gdb_bfd_lookup_symbol
+	       (tmp_bfd.get (),
+		[=] (const asymbol *sym)
+		{
+		  return (strcmp (sym->name, *bkpt_namep) == 0
+			  && ((sym->section->flags & (SEC_CODE | SEC_DATA))
+			      != 0));
+		}));
 	  if (sym_addr != 0)
 	    break;
 	}

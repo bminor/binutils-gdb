@@ -1475,13 +1475,11 @@ show_auto_solib_add (struct ui_file *file, int from_tty,
 /* Lookup the value for a specific symbol from dynamic symbol table.  Look
    up symbol from ABFD.  MATCH_SYM is a callback function to determine
    whether to pick up a symbol.  DATA is the input of this callback
-   function.  Return NULL if symbol is not found.  */
+   function.  Return 0 if symbol is not found.  */
 
 CORE_ADDR
-gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
-				   int (*match_sym) (const asymbol *,
-						     const void *),
-				   const void *data)
+gdb_bfd_lookup_symbol_from_symtab
+     (bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym)
 {
   long storage_needed = bfd_get_symtab_upper_bound (abfd);
   CORE_ADDR symaddr = 0;
@@ -1499,7 +1497,7 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 	{
 	  asymbol *sym  = *symbol_table++;
 
-	  if (match_sym (sym, data))
+	  if (match_sym (sym))
 	    {
 	      struct gdbarch *gdbarch = target_gdbarch ();
 	      symaddr = sym->value;
@@ -1671,14 +1669,12 @@ gdb_bfd_read_elf_soname (const char *filename)
 
 /* Lookup the value for a specific symbol from symbol table.  Look up symbol
    from ABFD.  MATCH_SYM is a callback function to determine whether to pick
-   up a symbol.  DATA is the input of this callback function.  Return NULL
+   up a symbol.  DATA is the input of this callback function.  Return 0
    if symbol is not found.  */
 
 static CORE_ADDR
-bfd_lookup_symbol_from_dyn_symtab (bfd *abfd,
-				   int (*match_sym) (const asymbol *,
-						     const void *),
-				   const void *data)
+bfd_lookup_symbol_from_dyn_symtab
+     (bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym)
 {
   long storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
   CORE_ADDR symaddr = 0;
@@ -1695,7 +1691,7 @@ bfd_lookup_symbol_from_dyn_symtab (bfd *abfd,
 	{
 	  asymbol *sym = *symbol_table++;
 
-	  if (match_sym (sym, data))
+	  if (match_sym (sym))
 	    {
 	      /* BFD symbols are section relative.  */
 	      symaddr = sym->value + sym->section->vma;
@@ -1709,20 +1705,19 @@ bfd_lookup_symbol_from_dyn_symtab (bfd *abfd,
 /* Lookup the value for a specific symbol from symbol table and dynamic
    symbol table.  Look up symbol from ABFD.  MATCH_SYM is a callback
    function to determine whether to pick up a symbol.  DATA is the
-   input of this callback function.  Return NULL if symbol is not
+   input of this callback function.  Return 0 if symbol is not
    found.  */
 
 CORE_ADDR
-gdb_bfd_lookup_symbol (bfd *abfd,
-		       int (*match_sym) (const asymbol *, const void *),
-		       const void *data)
+gdb_bfd_lookup_symbol
+     (bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym)
 {
-  CORE_ADDR symaddr = gdb_bfd_lookup_symbol_from_symtab (abfd, match_sym, data);
+  CORE_ADDR symaddr = gdb_bfd_lookup_symbol_from_symtab (abfd, match_sym);
 
   /* On FreeBSD, the dynamic linker is stripped by default.  So we'll
      have to check the dynamic string table too.  */
   if (symaddr == 0)
-    symaddr = bfd_lookup_symbol_from_dyn_symtab (abfd, match_sym, data);
+    symaddr = bfd_lookup_symbol_from_dyn_symtab (abfd, match_sym);
 
   return symaddr;
 }
