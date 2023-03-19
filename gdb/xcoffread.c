@@ -2499,7 +2499,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  true, VAR_DOMAIN, LOC_STATIC,
 				  SECT_OFF_DATA (objfile),
 				  psymbol_placement::STATIC,
-				  symbol.n_value,
+				  unrelocated_addr (symbol.n_value),
 				  psymtab_language,
 				  partial_symtabs, objfile);
 		continue;
@@ -2512,7 +2512,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  true, VAR_DOMAIN, LOC_STATIC,
 				  SECT_OFF_DATA (objfile),
 				  psymbol_placement::GLOBAL,
-				  symbol.n_value,
+				  unrelocated_addr (symbol.n_value),
 				  psymtab_language,
 				  partial_symtabs, objfile);
 		continue;
@@ -2532,7 +2532,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 							p - namestring),
 				      true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
-				      0, psymtab_language,
+				      unrelocated_addr (0),
+				      psymtab_language,
 				      partial_symtabs, objfile);
 		    if (p[2] == 't')
 		      {
@@ -2541,7 +2542,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 					  psymbol_placement::STATIC,
-					  0, psymtab_language,
+					  unrelocated_addr (0),
+					  psymtab_language,
 					  partial_symtabs, objfile);
 			p += 1;
 		      }
@@ -2555,7 +2557,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 							p - namestring),
 				      true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
-				      0, psymtab_language,
+				      unrelocated_addr (0),
+				      psymtab_language,
 				      partial_symtabs, objfile);
 		  }
 	      check_enum:
@@ -2618,7 +2621,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			pst->add_psymbol (gdb::string_view (p, q - p), true,
 					  VAR_DOMAIN, LOC_CONST, -1,
 					  psymbol_placement::STATIC,
-					  0, psymtab_language,
+					  unrelocated_addr (0),
+					  psymtab_language,
 					  partial_symtabs, objfile);
 			/* Point past the name.  */
 			p = q;
@@ -2638,7 +2642,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 						    p - namestring),
 				  true, VAR_DOMAIN, LOC_CONST, -1,
 				  psymbol_placement::STATIC,
-				  0, psymtab_language,
+				  unrelocated_addr (0),
+				  psymtab_language,
 				  partial_symtabs, objfile);
 		continue;
 
@@ -2653,7 +2658,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  true, VAR_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::STATIC,
-				  symbol.n_value,
+				  unrelocated_addr (symbol.n_value),
 				  psymtab_language,
 				  partial_symtabs, objfile);
 		continue;
@@ -2680,7 +2685,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  true, VAR_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::GLOBAL,
-				  symbol.n_value,
+				  unrelocated_addr (symbol.n_value),
 				  psymtab_language,
 				  partial_symtabs, objfile);
 		continue;

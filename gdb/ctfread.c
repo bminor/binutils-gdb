@@ -1291,7 +1291,8 @@ ctf_psymtab_add_enums (struct ctf_context *ccp, ctf_id_t tid)
       ccp->pst->add_psymbol (ename, true,
 			     VAR_DOMAIN, LOC_CONST, -1,
 			     psymbol_placement::GLOBAL,
-			     0, language_c, ccp->partial_symtabs, ccp->of);
+			     unrelocated_addr (0),
+			     language_c, ccp->partial_symtabs, ccp->of);
     }
   if (ctf_errno (ccp->fp) != ECTF_NEXT_END)
     complaint (_("ctf_enum_next ctf_psymtab_add_enums failed - %s"),
@@ -1336,7 +1337,8 @@ ctf_psymtab_add_stt_entries (ctf_dict_t *cfp, ctf_psymtab *pst,
       pst->add_psymbol (tname, true,
 			tdomain, aclass, -1,
 			psymbol_placement::GLOBAL,
-			0, language_c, pst->context.partial_symtabs, of);
+			unrelocated_addr (0),
+			language_c, pst->context.partial_symtabs, of);
     }
 }
 
@@ -1513,7 +1515,8 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
   ccp->pst->add_psymbol (name, false,
 			 domain, aclass, section,
 			 psymbol_placement::STATIC,
-			 0, language_c, ccp->partial_symtabs, ccp->of);
+			 unrelocated_addr (0),
+			 language_c, ccp->partial_symtabs, ccp->of);
 
   return 0;
 }
@@ -1528,7 +1531,8 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
   ccp->pst->add_psymbol (name, true,
 			 VAR_DOMAIN, LOC_STATIC, -1,
 			 psymbol_placement::GLOBAL,
-			 0, language_c, ccp->partial_symtabs, ccp->of);
+			 unrelocated_addr (0),
+			 language_c, ccp->partial_symtabs, ccp->of);
   return 0;
 }
 

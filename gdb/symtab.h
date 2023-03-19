@@ -530,6 +530,18 @@ struct general_symbol_info
     m_value.address = address;
   }
 
+  /* Return the unrelocated address of this symbol.  */
+  unrelocated_addr unrelocated_address () const
+  {
+    return m_value.unrel_addr;
+  }
+
+  /* Set the unrelocated address of this symbol.  */
+  void set_unrelocated_address (unrelocated_addr addr)
+  {
+    m_value.unrel_addr = addr;
+  }
+
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
      objfile.  For languages like C++ that make a distinction between
@@ -553,6 +565,10 @@ struct general_symbol_info
     const gdb_byte *bytes;
 
     CORE_ADDR address;
+
+    /* The address, if unrelocated.  An unrelocated symbol does not
+       have the runtime section offset applied.  */
+    unrelocated_addr unrel_addr;
 
     /* A common block.  Used with LOC_COMMON_BLOCK.  */
 

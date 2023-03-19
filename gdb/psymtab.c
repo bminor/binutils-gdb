@@ -675,7 +675,8 @@ print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
 	  break;
 	}
       gdb_puts (", ", outfile);
-      gdb_puts (paddress (gdbarch, p->unrelocated_address ()), outfile);
+      gdb_puts (paddress (gdbarch, CORE_ADDR (p->unrelocated_address ())),
+		outfile);
       gdb_printf (outfile, "\n");
     }
 }
@@ -1212,7 +1213,7 @@ partial_symtab::add_psymbol (gdb::string_view name, bool copy_name,
 			     enum address_class theclass,
 			     short section,
 			     psymbol_placement where,
-			     CORE_ADDR coreaddr,
+			     unrelocated_addr coreaddr,
 			     enum language language,
 			     psymtab_storage *partial_symtabs,
 			     struct objfile *objfile)

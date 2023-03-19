@@ -1484,7 +1484,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 				  VAR_DOMAIN, LOC_STATIC,
 				  data_sect_index,
 				  psymbol_placement::STATIC,
-				  nlist.n_value, psymtab_language,
+				  unrelocated_addr (nlist.n_value),
+				  psymtab_language,
 				  partial_symtabs, objfile);
 	      else
 		complaint (_("static `%*s' appears to be defined "
@@ -1500,7 +1501,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 				  VAR_DOMAIN, LOC_STATIC,
 				  data_sect_index,
 				  psymbol_placement::GLOBAL,
-				  nlist.n_value, psymtab_language,
+				  unrelocated_addr (nlist.n_value),
+				  psymtab_language,
 				  partial_symtabs, objfile);
 	      else
 		complaint (_("global `%*s' appears to be defined "
@@ -1523,7 +1525,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		    pst->add_psymbol (gdb::string_view (sym_name, sym_len),
 				      true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
-				      0, psymtab_language,
+				      unrelocated_addr (0),
+				      psymtab_language,
 				      partial_symtabs, objfile);
 		  else
 		    complaint (_("enum, struct, or union `%*s' appears "
@@ -1537,7 +1540,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 			pst->add_psymbol (gdb::string_view (sym_name, sym_len),
 					  true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 					  psymbol_placement::STATIC,
-					  0, psymtab_language,
+					  unrelocated_addr (0),
+					  psymtab_language,
 					  partial_symtabs, objfile);
 		      else
 			complaint (_("typedef `%*s' appears to be defined "
@@ -1555,7 +1559,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		    pst->add_psymbol (gdb::string_view (sym_name, sym_len),
 				      true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
-				      0, psymtab_language,
+				      unrelocated_addr (0),
+				      psymtab_language,
 				      partial_symtabs, objfile);
 		  else
 		    complaint (_("typename `%*s' appears to be defined "
@@ -1621,7 +1626,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		      if (pst != nullptr)
 			pst->add_psymbol (gdb::string_view (p, q - p), true,
 					  VAR_DOMAIN, LOC_CONST, -1,
-					  psymbol_placement::STATIC, 0,
+					  psymbol_placement::STATIC,
+					  unrelocated_addr (0),
 					  psymtab_language,
 					  partial_symtabs, objfile);
 		      else
@@ -1645,7 +1651,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      if (pst != nullptr)
 		pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
 				  VAR_DOMAIN, LOC_CONST, -1,
-				  psymbol_placement::STATIC, 0,
+				  psymbol_placement::STATIC,
+				  unrelocated_addr (0),
 				  psymtab_language,
 				  partial_symtabs, objfile);
 	      else
@@ -1705,7 +1712,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 				  VAR_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::STATIC,
-				  nlist.n_value, psymtab_language,
+				  unrelocated_addr (nlist.n_value),
+				  psymtab_language,
 				  partial_symtabs, objfile);
 	      continue;
 
@@ -1762,7 +1770,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 				  VAR_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::GLOBAL,
-				  nlist.n_value, psymtab_language,
+				  unrelocated_addr (nlist.n_value),
+				  psymtab_language,
 				  partial_symtabs, objfile);
 	      continue;
 

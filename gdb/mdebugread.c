@@ -3056,7 +3056,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  true, VAR_DOMAIN, LOC_STATIC,
 					  SECT_OFF_DATA (objfile),
 					  psymbol_placement::STATIC,
-					  sh.value,
+					  unrelocated_addr (sh.value),
 					  psymtab_language,
 					  partial_symtabs, objfile);
 			continue;
@@ -3069,7 +3069,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  true, VAR_DOMAIN, LOC_STATIC,
 					  SECT_OFF_DATA (objfile),
 					  psymbol_placement::GLOBAL,
-					  sh.value,
+					  unrelocated_addr (sh.value),
 					  psymtab_language,
 					  partial_symtabs, objfile);
 			continue;
@@ -3088,7 +3088,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			    pst->add_psymbol
 			      (gdb::string_view (namestring, p - namestring),
 			       true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
-			       psymbol_placement::STATIC, 0, psymtab_language,
+			       psymbol_placement::STATIC,
+			       unrelocated_addr (0),
+			       psymtab_language,
 			       partial_symtabs, objfile);
 			    if (p[2] == 't')
 			      {
@@ -3097,7 +3099,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				  (gdb::string_view (namestring,
 						     p - namestring),
 				   true, VAR_DOMAIN, LOC_TYPEDEF, -1,
-				   psymbol_placement::STATIC, 0,
+				   psymbol_placement::STATIC,
+				   unrelocated_addr (0),
 				   psymtab_language,
 				   partial_symtabs, objfile);
 				p += 1;
@@ -3112,7 +3115,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			      (gdb::string_view (namestring,
 						 p - namestring),
 			       true, VAR_DOMAIN, LOC_TYPEDEF, -1,
-			       psymbol_placement::STATIC, 0, psymtab_language,
+			       psymbol_placement::STATIC,
+			       unrelocated_addr (0),
+			       psymtab_language,
 			       partial_symtabs, objfile);
 			  }
 		      check_enum:
@@ -3179,7 +3184,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 						  true, VAR_DOMAIN,
 						  LOC_CONST, -1,
 						  psymbol_placement::STATIC,
-						  0, psymtab_language,
+						  unrelocated_addr (0),
+						  psymtab_language,
 						  partial_symtabs, objfile);
 				/* Point past the name.  */
 				p = q;
@@ -3198,7 +3204,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_CONST, -1,
 					  psymbol_placement::STATIC,
-					  0, psymtab_language,
+					  unrelocated_addr (0),
+					  psymtab_language,
 					  partial_symtabs, objfile);
 			continue;
 
@@ -3214,7 +3221,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  true, VAR_DOMAIN, LOC_BLOCK,
 					  SECT_OFF_TEXT (objfile),
 					  psymbol_placement::STATIC,
-					  sh.value,
+					  unrelocated_addr (sh.value),
 					  psymtab_language,
 					  partial_symtabs, objfile);
 			continue;
@@ -3235,7 +3242,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  true, VAR_DOMAIN, LOC_BLOCK,
 					  SECT_OFF_TEXT (objfile),
 					  psymbol_placement::GLOBAL,
-					  sh.value,
+					  unrelocated_addr (sh.value),
 					  psymtab_language,
 					  partial_symtabs, objfile);
 			continue;
@@ -3475,14 +3482,16 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				      VAR_DOMAIN, LOC_BLOCK,
 				      section,
 				      psymbol_placement::GLOBAL,
-				      sh.value, psymtab_language,
+				      unrelocated_addr (sh.value),
+				      psymtab_language,
 				      partial_symtabs, objfile);
 		  else
 		    pst->add_psymbol (sym_name, true,
 				      VAR_DOMAIN, LOC_BLOCK,
 				      section,
 				      psymbol_placement::STATIC,
-				      sh.value, psymtab_language,
+				      unrelocated_addr (sh.value),
+				      psymtab_language,
 				      partial_symtabs, objfile);
 
 		  procaddr = unrelocated_addr (sh.value);
@@ -3549,7 +3558,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      pst->add_psymbol (sym_name, true,
 					STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 					psymbol_placement::STATIC,
-					0, psymtab_language,
+					unrelocated_addr (0),
+					psymtab_language,
 					partial_symtabs, objfile);
 		    }
 		  handle_psymbol_enumerators (objfile, partial_symtabs,
@@ -3591,7 +3601,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      pst->add_psymbol (sym_name, true,
 				VAR_DOMAIN, theclass, section,
 				psymbol_placement::STATIC,
-				sh.value, psymtab_language,
+				unrelocated_addr (sh.value),
+				psymtab_language,
 				partial_symtabs, objfile);
 	    skip:
 	      cur_sdx++;	/* Go to next file symbol.  */
@@ -3671,7 +3682,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				VAR_DOMAIN, theclass,
 				section,
 				psymbol_placement::GLOBAL,
-				svalue, psymtab_language,
+				unrelocated_addr (svalue),
+				psymtab_language,
 				partial_symtabs, objfile);
 	    }
 	}
@@ -3805,7 +3817,8 @@ handle_psymbol_enumerators (struct objfile *objfile,
 	 in psymtabs, just in symtabs.  */
       pst->add_psymbol (name, true,
 			VAR_DOMAIN, LOC_CONST, -1,
-			psymbol_placement::STATIC, 0,
+			psymbol_placement::STATIC,
+			unrelocated_addr (0),
 			psymtab_language, partial_symtabs, objfile);
       ext_sym += external_sym_size;
     }
