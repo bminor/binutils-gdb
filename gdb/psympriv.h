@@ -579,11 +579,6 @@ private:
   /* Count the number of partial symbols in *THIS.  */
   int count_psyms ();
 
-  void fill_psymbol_map (struct objfile *objfile,
-			 struct partial_symtab *psymtab,
-			 std::set<CORE_ADDR> *seen_addrs,
-			 const std::vector<partial_symbol *> &symbols);
-
   /* Storage for the partial symbols.  */
   std::shared_ptr<psymtab_storage> m_partial_symtabs;
 };
