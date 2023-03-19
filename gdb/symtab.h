@@ -58,6 +58,12 @@ class probe;
 struct lookup_name_info;
 struct code_breakpoint;
 
+/* Like a CORE_ADDR, but not directly convertible.  This is used to
+   represent an unrelocated CORE_ADDR.  DEFINE_OFFSET_TYPE is not used
+   here because there's no need to add or subtract values of this
+   type.  */
+enum class unrelocated_addr : CORE_ADDR { };
+
 /* How to match a lookup name against a symbol search name.  */
 enum class symbol_name_match_type
 {
@@ -1536,12 +1542,6 @@ struct rust_vtable_symbol : public symbol
 };
 
 
-/* Like a CORE_ADDR, but not directly convertible.  This is used to
-   represent an unrelocated CORE_ADDR.  DEFINE_OFFSET_TYPE is not used
-   here because there's no need to add or subtract values of this
-   type.  */
-enum class unrelocated_addr : CORE_ADDR { };
-
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only
    the files which are actually debugged are read in to core, we don't
