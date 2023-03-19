@@ -1824,7 +1824,7 @@ info_address_command (const char *exp, int from_tty)
 	    if (section
 		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
 	      {
-		load_addr = msym.minsym->value_raw_address ();
+		load_addr = CORE_ADDR (msym.minsym->value_raw_address ());
 		gdb_printf (_("a thread-local variable at offset %s "
 			      "in the thread-local storage for `%s'"),
 			    paddress (gdbarch, load_addr),

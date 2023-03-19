@@ -120,7 +120,7 @@ class minimal_symbol_reader
 
   struct minimal_symbol *record_full (gdb::string_view name,
 				      bool copy_name,
-				      CORE_ADDR address,
+				      unrelocated_addr address,
 				      enum minimal_symbol_type ms_type,
 				      int section);
 
@@ -131,7 +131,7 @@ class minimal_symbol_reader
 
      This variant does not return the new symbol.  */
 
-  void record (const char *name, CORE_ADDR address,
+  void record (const char *name, unrelocated_addr address,
 	       enum minimal_symbol_type ms_type);
 
   /* Like record_full, but:
@@ -140,7 +140,7 @@ class minimal_symbol_reader
 
      This variant does not return the new symbol.  */
 
-  void record_with_info (const char *name, CORE_ADDR address,
+  void record_with_info (const char *name, unrelocated_addr address,
 			 enum minimal_symbol_type ms_type,
 			 int section)
   {

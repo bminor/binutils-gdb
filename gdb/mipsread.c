@@ -358,7 +358,7 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &reader,
 	    }
 	}
 
-      reader.record (name, sym_value, ms_type);
+      reader.record (name, unrelocated_addr (sym_value), ms_type);
     }
 }
 

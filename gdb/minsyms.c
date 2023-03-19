@@ -672,19 +672,20 @@ lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
 
 /* A helper function that makes *PC section-relative.  This searches
    the sections of OBJFILE and if *PC is in a section, it subtracts
-   the section offset and returns true.  Otherwise it returns
-   false.  */
+   the section offset, stores the result into UNREL_ADDR, and returns
+   true.  Otherwise it returns false.  */
 
 static int
-frob_address (struct objfile *objfile, CORE_ADDR *pc)
+frob_address (struct objfile *objfile, CORE_ADDR pc,
+	      unrelocated_addr *unrel_addr)
 {
   struct obj_section *iter;
 
   ALL_OBJFILE_OSECTIONS (objfile, iter)
     {
-      if (*pc >= iter->addr () && *pc < iter->endaddr ())
+      if (pc >= iter->addr () && pc < iter->endaddr ())
 	{
-	  *pc -= iter->offset ();
+	  *unrel_addr = unrelocated_addr (pc - iter->offset ());
 	  return 1;
 	}
     }
@@ -793,15 +794,16 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 
 	     Warning: this code is trickier than it would appear at first.  */
 
-	  if (frob_address (objfile, &pc)
-	      && pc >= msymbol[lo].value_raw_address ())
+	  unrelocated_addr unrel_pc;
+	  if (frob_address (objfile, pc, &unrel_pc)
+	      && unrel_pc >= msymbol[lo].value_raw_address ())
 	    {
-	      while (msymbol[hi].value_raw_address () > pc)
+	      while (msymbol[hi].value_raw_address () > unrel_pc)
 		{
 		  /* pc is still strictly less than highest address.  */
 		  /* Note "new" will always be >= lo.  */
 		  newobj = (lo + hi) / 2;
-		  if ((msymbol[newobj].value_raw_address () >= pc)
+		  if ((msymbol[newobj].value_raw_address () >= unrel_pc)
 		      || (lo == newobj))
 		    {
 		      hi = newobj;
@@ -894,10 +896,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		     the cancellable variants, but both have sizes.  */
 		  if (hi > 0
 		      && msymbol[hi].size () != 0
-		      && pc >= (msymbol[hi].value_raw_address ()
-				+ msymbol[hi].size ())
-		      && pc < (msymbol[hi - 1].value_raw_address ()
-			       + msymbol[hi - 1].size ()))
+		      && unrel_pc >= msymbol[hi].value_raw_end_address ()
+		      && unrel_pc < msymbol[hi - 1].value_raw_end_address ())
 		    {
 		      hi--;
 		      continue;
@@ -926,8 +926,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 
 	      if (hi >= 0
 		  && msymbol[hi].size () != 0
-		  && pc >= (msymbol[hi].value_raw_address ()
-			    + msymbol[hi].size ()))
+		  && unrel_pc >= msymbol[hi].value_raw_end_address ())
 		{
 		  if (best_zero_sized != -1)
 		    hi = best_zero_sized;
@@ -1092,7 +1091,7 @@ minimal_symbol_reader::~minimal_symbol_reader ()
 /* See minsyms.h.  */
 
 void
-minimal_symbol_reader::record (const char *name, CORE_ADDR address,
+minimal_symbol_reader::record (const char *name, unrelocated_addr address,
 			       enum minimal_symbol_type ms_type)
 {
   int section;
@@ -1152,7 +1151,7 @@ mst_str (minimal_symbol_type t)
 
 struct minimal_symbol *
 minimal_symbol_reader::record_full (gdb::string_view name,
-				    bool copy_name, CORE_ADDR address,
+				    bool copy_name, unrelocated_addr address,
 				    enum minimal_symbol_type ms_type,
 				    int section)
 {
@@ -1178,8 +1177,9 @@ minimal_symbol_reader::record_full (gdb::string_view name,
     return (NULL);
 
   symtab_create_debug_printf_v ("recording minsym:  %-21s  %18s  %4d  %.*s",
-				mst_str (ms_type), hex_string (address), section,
-				(int) name.size (), name.data ());
+				mst_str (ms_type),
+				hex_string (LONGEST (address)),
+				section, (int) name.size (), name.data ());
 
   if (m_msym_bunch_index == BUNCH_SIZE)
     {
@@ -1198,7 +1198,7 @@ minimal_symbol_reader::record_full (gdb::string_view name,
   else
     msymbol->m_name = name.data ();
 
-  msymbol->set_value_address (address);
+  msymbol->set_unrelocated_address (address);
   msymbol->set_section_index (section);
 
   msymbol->set_type (ms_type);

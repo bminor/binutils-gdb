@@ -840,7 +840,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
 
 static void
 record_minimal_symbol (minimal_symbol_reader &reader,
-		       const char *name, CORE_ADDR address,
+		       const char *name, unrelocated_addr address,
 		       enum minimal_symbol_type ms_type,
 		       int n_scnum,
 		       struct objfile *objfile)
@@ -2055,7 +2055,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
   unsigned int ssymnum;
 
   const char *last_csect_name = NULL; /* Last seen csect's name and value.  */
-  CORE_ADDR last_csect_val = 0;
+  unrelocated_addr last_csect_val = unrelocated_addr (0);
   int last_csect_sec = 0;
   int misc_func_recorded = 0;	/* true if any misc. function.  */
   int textlow_not_set = 1;
@@ -2168,7 +2168,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				       || namestring[0] == '@'))
 		      {
 			last_csect_name = namestring;
-			last_csect_val = symbol.n_value;
+			last_csect_val = unrelocated_addr (symbol.n_value);
 			last_csect_sec = symbol.n_scnum;
 		      }
 		    if (pst != NULL)
@@ -2193,7 +2193,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		       table, except for section symbols.  */
 		    if (*namestring != '.')
 		      record_minimal_symbol
-			(reader, namestring, symbol.n_value,
+			(reader, namestring, unrelocated_addr (symbol.n_value),
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 symbol.n_scnum, objfile);
 		    break;
@@ -2231,7 +2231,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			main_aux[0].x_sym.x_fcnary.x_fcn.x_lnnoptr;
 
 		    record_minimal_symbol
-		      (reader, namestring, symbol.n_value,
+		      (reader, namestring, unrelocated_addr (symbol.n_value),
 		       sclass == C_HIDEXT ? mst_file_text : mst_text,
 		       symbol.n_scnum, objfile);
 		    misc_func_recorded = 1;
@@ -2246,7 +2246,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		       symbols, we will choose mst_text over
 		       mst_solib_trampoline.  */
 		    record_minimal_symbol
-		      (reader, namestring, symbol.n_value,
+		      (reader, namestring, unrelocated_addr (symbol.n_value),
 		       mst_solib_trampoline, symbol.n_scnum, objfile);
 		    misc_func_recorded = 1;
 		    break;
@@ -2268,7 +2268,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		       XMC_BS might be possible too.  */
 		    if (*namestring != '.')
 		      record_minimal_symbol
-			(reader, namestring, symbol.n_value,
+			(reader, namestring, unrelocated_addr (symbol.n_value),
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 symbol.n_scnum, objfile);
 		    break;
@@ -2284,7 +2284,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		       table, except for section symbols.  */
 		    if (*namestring != '.')
 		      record_minimal_symbol
-			(reader, namestring, symbol.n_value,
+			(reader, namestring, unrelocated_addr (symbol.n_value),
 			 sclass == C_HIDEXT ? mst_file_bss : mst_bss,
 			 symbol.n_scnum, objfile);
 		    break;

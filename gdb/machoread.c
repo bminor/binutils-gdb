@@ -98,11 +98,11 @@ macho_symtab_add_minsym (minimal_symbol_reader &reader,
 
   if (sym->flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))
     {
-      CORE_ADDR symaddr;
+      unrelocated_addr symaddr;
       enum minimal_symbol_type ms_type;
 
       /* Bfd symbols are section relative.  */
-      symaddr = sym->value + sym->section->vma;
+      symaddr = unrelocated_addr (sym->value + sym->section->vma);
 
       if (sym->section == bfd_abs_section_ptr)
 	ms_type = mst_abs;

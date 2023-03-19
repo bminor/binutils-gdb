@@ -2235,7 +2235,7 @@ function_outside_compilation_unit_complaint (const char *arg1)
 
 static void
 record_minimal_symbol (minimal_symbol_reader &reader,
-		       const char *name, const CORE_ADDR address,
+		       const char *name, const unrelocated_addr address,
 		       enum minimal_symbol_type ms_type, int storage_class,
 		       struct objfile *objfile)
 {
@@ -2461,7 +2461,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   for (; ext_in < ext_in_end; ext_in++)
     {
       enum minimal_symbol_type ms_type = mst_text;
-      CORE_ADDR svalue = ext_in->asym.value;
+      unrelocated_addr svalue = unrelocated_addr (ext_in->asym.value);
 
       /* The Irix 5 native tools seem to sometimes generate bogus
 	 external symbols.  */
@@ -2701,7 +2701,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      if (sh.st == stStaticProc)
 			{
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  record_minimal_symbol (reader, namestring, sh.value,
+			  record_minimal_symbol (reader, namestring,
+						 unrelocated_addr (sh.value),
 						 mst_file_text, sh.sc,
 						 objfile);
 			}
@@ -2747,7 +2748,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			case scPData:
 			case scXData:
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  record_minimal_symbol (reader, namestring, sh.value,
+			  record_minimal_symbol (reader, namestring,
+						 unrelocated_addr (sh.value),
 						 mst_file_data, sh.sc,
 						 objfile);
 			  break;
@@ -2756,7 +2758,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			  /* FIXME!  Shouldn't this use cases for bss, 
 			     then have the default be abs?  */
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  record_minimal_symbol (reader, namestring, sh.value,
+			  record_minimal_symbol (reader, namestring,
+						 unrelocated_addr (sh.value),
 						 mst_file_bss, sh.sc,
 						 objfile);
 			  break;
@@ -3369,7 +3372,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	    {
 	      char *sym_name;
 	      enum address_class theclass;
-	      CORE_ADDR minsym_value;
+	      unrelocated_addr minsym_value;
 	      short section = -1;
 
 	      (*swap_sym_in) (cur_bfd,
@@ -3396,7 +3399,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 	      sym_name = debug_info->ss + fh->issBase + sh.iss;
 
-	      minsym_value = sh.value;
+	      minsym_value = unrelocated_addr (sh.value);
 
 	      switch (sh.sc)
 		{

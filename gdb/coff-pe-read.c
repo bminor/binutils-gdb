@@ -127,7 +127,8 @@ add_pe_exported_sym (minimal_symbol_reader &reader,
 		     const char *dll_name, struct objfile *objfile)
 {
   /* Add the stored offset to get the loaded address of the symbol.  */
-  CORE_ADDR vma = func_rva + section_data->vma_offset;
+  unrelocated_addr vma = unrelocated_addr (func_rva
+					   + section_data->vma_offset);
 
   /* Generate a (hopefully unique) qualified name using the first part
      of the dll name, e.g. KERNEL32!AddAtomA.  This matches the style
@@ -174,7 +175,6 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 		      const char *forward_func_name, int ordinal,
 		      const char *dll_name, struct objfile *objfile)
 {
-  CORE_ADDR vma, baseaddr;
   struct bound_minimal_symbol msymbol;
   enum minimal_symbol_type msymtype;
   int forward_dll_name_len = strlen (forward_dll_name);
@@ -210,7 +210,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 			      " \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
 		sym_name, dll_name, forward_qualified_name.c_str ());
 
-  vma = msymbol.value_address ();
+  unrelocated_addr vma = msymbol.minsym->value_raw_address ();
   msymtype = msymbol.minsym->type ();
   section = msymbol.minsym->section_index ();
 
@@ -232,14 +232,11 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
      really be relocated properly, but nevertheless we make a stab at
      it, choosing an approach consistent with the history of this
      code.  */
-  baseaddr = objfile->text_section_offset ();
 
-  reader.record_with_info (qualified_name.c_str (), vma - baseaddr, msymtype,
-			   section);
+  reader.record_with_info (qualified_name.c_str (), vma, msymtype, section);
 
   /* Enter the plain name as well, which might not be unique.  */
-  reader.record_with_info (bare_name.c_str(), vma - baseaddr, msymtype,
-			   section);
+  reader.record_with_info (bare_name.c_str(), vma, msymtype, section);
 
   return 1;
 }

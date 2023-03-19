@@ -199,7 +199,7 @@ elf_locate_sections (asection *sectp, struct elfinfo *ei)
 static struct minimal_symbol *
 record_minimal_symbol (minimal_symbol_reader &reader,
 		       gdb::string_view name, bool copy_name,
-		       CORE_ADDR address,
+		       unrelocated_addr address,
 		       enum minimal_symbol_type ms_type,
 		       asection *bfd_section, struct objfile *objfile)
 {
@@ -207,7 +207,9 @@ record_minimal_symbol (minimal_symbol_reader &reader,
 
   if (ms_type == mst_text || ms_type == mst_file_text
       || ms_type == mst_text_gnu_ifunc)
-    address = gdbarch_addr_bits_remove (gdbarch, address);
+    address
+      = unrelocated_addr (gdbarch_addr_bits_remove (gdbarch,
+						    CORE_ADDR (address)));
 
   /* We only setup section information for allocatable sections.  Usually
      we'd only expect to find msymbols for allocatable sections, but if the
@@ -338,7 +340,8 @@ elf_symtab_read (minimal_symbol_reader &reader,
 
 	  msym = record_minimal_symbol
 	    (reader, sym->name, copy_names,
-	     symaddr, mst_solib_trampoline, sect, objfile);
+	     unrelocated_addr (symaddr),
+	     mst_solib_trampoline, sect, objfile);
 	  if (msym != NULL)
 	    {
 	      msym->filename = filesymname;
@@ -477,7 +480,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	      continue;	/* Skip this symbol.  */
 	    }
 	  msym = record_minimal_symbol
-	    (reader, sym->name, copy_names, symaddr,
+	    (reader, sym->name, copy_names, unrelocated_addr (symaddr),
 	     ms_type, sym->section, objfile);
 
 	  if (msym)
@@ -509,8 +512,8 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		  && (elf_sym->version & VERSYM_HIDDEN) == 0)
 		record_minimal_symbol (reader,
 				       gdb::string_view (sym->name, len),
-				       true, symaddr, ms_type, sym->section,
-				       objfile);
+				       true, unrelocated_addr (symaddr),
+				       ms_type, sym->section, objfile);
 	      else if (is_plt)
 		{
 		  /* For @plt symbols, also record a trampoline to the
@@ -523,7 +526,8 @@ elf_symtab_read (minimal_symbol_reader &reader,
 
 		      mtramp = record_minimal_symbol
 			(reader, gdb::string_view (sym->name, len), true,
-			 symaddr, mst_solib_trampoline, sym->section, objfile);
+			 unrelocated_addr (symaddr),
+			 mst_solib_trampoline, sym->section, objfile);
 		      if (mtramp)
 			{
 			  mtramp->set_size (msym->size());
@@ -641,8 +645,8 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
       string_buffer.append (got_suffix, got_suffix + got_suffix_len);
 
       msym = record_minimal_symbol (reader, string_buffer,
-				    true, address, mst_slot_got_plt,
-				    msym_section, objfile);
+				    true, unrelocated_addr (address),
+				    mst_slot_got_plt, msym_section, objfile);
       if (msym)
 	msym->set_size (ptr_size);
     }

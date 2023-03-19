@@ -754,10 +754,21 @@ struct minimal_symbol : public general_symbol_info
      offsets from OBJFILE.  */
   CORE_ADDR value_address (objfile *objfile) const;
 
+  /* It does not make sense to call this for minimal symbols, as they
+     are stored unrelocated.  */
+  CORE_ADDR value_address () const = delete;
+
   /* The unrelocated address of the minimal symbol.  */
-  CORE_ADDR value_raw_address () const
+  unrelocated_addr value_raw_address () const
   {
-    return m_value.address;
+    return m_value.unrel_addr;
+  }
+
+  /* The unrelocated address just after the end of the the minimal
+     symbol.  */
+  unrelocated_addr value_raw_end_address () const
+  {
+    return unrelocated_addr (CORE_ADDR (value_raw_address ()) + size ());
   }
 
   /* Return this minimal symbol's type.  */
