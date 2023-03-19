@@ -59,3 +59,6 @@ gdb_test "print *self" " = 23"
 gdb_test "info functions HasMethods::new" \
     "fn methods::HasMethods::new\\(\\) -> methods::HasMethods;"
 
+# Regression test for PR rust/20367 and PR rust/30211.  This used to
+# crash.
+gdb_test_no_output "complete break what"

@@ -204,9 +204,8 @@ extern void quit_serial_event_clear (void);
    these languages, so some symbols could be successfully demangled by
    several languages.  For that reason, the constants here are sorted
    in the order we'll attempt demangling them.  For example: Rust uses
-   C++ mangling, so must come after C++; Ada must come last (see
-   ada_sniff_from_mangled_name).  (Keep this order in sync with the
-   'languages' array in language.c.)  */
+   a C++-compatible mangling, so must come before C++; Ada must come
+   last (see ada_sniff_from_mangled_name).  */
 
 enum language
   {
@@ -214,6 +213,7 @@ enum language
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
     language_objc,		/* Objective-C */
+    language_rust,		/* Rust */
     language_cplus,		/* C++ */
     language_d,			/* D */
     language_go,		/* Go */
@@ -222,7 +222,6 @@ enum language
     language_asm,		/* Assembly language */
     language_pascal,		/* Pascal */
     language_opencl,		/* OpenCL */
-    language_rust,		/* Rust */
     language_minimal,		/* All other languages, minimal support only */
     language_ada,		/* Ada */
     nr_languages

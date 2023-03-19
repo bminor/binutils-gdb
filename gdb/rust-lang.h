@@ -93,7 +93,7 @@ public:
        (const char *mangled, gdb::unique_xmalloc_ptr<char> *demangled)
        const override
   {
-    *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+    demangled->reset (rust_demangle (mangled, 0));
     return *demangled != NULL;
   }
 
@@ -102,7 +102,7 @@ public:
   gdb::unique_xmalloc_ptr<char> demangle_symbol (const char *mangled,
 						 int options) const override
   {
-    return gdb_demangle (mangled, options);
+    return gdb::unique_xmalloc_ptr<char> (rust_demangle (mangled, options));
   }
 
   /* See language.h.  */
