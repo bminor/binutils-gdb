@@ -2230,6 +2230,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
   static_range_type = create_range_type_with_stride
     (alloc, static_target_type,
      &low_bound, &high_bound, bias, &stride, byte_stride_p);
+  static_range_type->set_name (dyn_range_type->name ());
   static_range_type->bounds ()->flag_bound_evaluated = 1;
   return static_range_type;
 }
