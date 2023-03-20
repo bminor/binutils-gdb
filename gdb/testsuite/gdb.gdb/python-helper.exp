@@ -145,7 +145,7 @@ proc test_python_helper {} {
 		    " flags = \[^\r\n\]+," \
 		    " owner = $hex \\(gdbarch\\)," \
 		    " target_type = 0x0," \
-		    " type_specific_field = TYPE_SPECIFIC_NONE}"]
+		    " int_stuff = { bit_size = $decimal, bit_offset = $decimal }}"]
     gdb_test -prompt $outer_prompt_re "print *val->m_type->main_type" $answer "pretty print type->main_type"
 
     # Send the continue to the outer GDB, which resumes the inner GDB,
