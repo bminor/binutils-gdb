@@ -1749,18 +1749,18 @@ vpsravd, 0x6646, AVX2, Modrm|Vex|Space0F38|VexVVVV=1|VexW=1|CheckOperandSize|NoS
 vpsrlv<dq>, 0x6645, AVX2, Modrm|Vex|Space0F38|VexVVVV|<dq:vexw>|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 
 // AVX gather instructions
-vgatherdpd, 0x6692, AVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|CheckOperandSize|NoSuf|VecSIB128, { RegXMM|RegYMM, Qword|Unspecified|BaseIndex, RegXMM|RegYMM }
-vgatherdps, 0x6692, AVX2, Modrm|Vex|Space0F38|VexVVVV|VexW0|NoSuf|VecSIB128, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
-vgatherdps, 0x6692, AVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|NoSuf|VecSIB256, { RegYMM, Dword|Unspecified|BaseIndex, RegYMM }
-vgatherqp<sd>, 0x6693, AVX2, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|NoSuf|VecSIB128, { RegXMM, <sd:elem>|Unspecified|BaseIndex, RegXMM }
-vgatherqpd, 0x6693, AVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW1|NoSuf|VecSIB256, { RegYMM, Qword|Unspecified|BaseIndex, RegYMM }
-vgatherqps, 0x6693, AVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|NoSuf|VecSIB256, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
-vpgatherdd, 0x6690, AVX2, Modrm|Vex|Space0F38|VexVVVV|VexW0|NoSuf|VecSIB128, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
-vpgatherdd, 0x6690, AVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|NoSuf|VecSIB256, { RegYMM, Dword|Unspecified|BaseIndex, RegYMM }
-vpgatherdq, 0x6690, AVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|CheckOperandSize|NoSuf|VecSIB128, { RegXMM|RegYMM, Qword|Unspecified|BaseIndex, RegXMM|RegYMM }
-vpgatherq<dq>, 0x6691, AVX2, Modrm|Vex|Space0F38|VexVVVV|<dq:vexw>|NoSuf|VecSIB128, { RegXMM, <dq:elem>|Unspecified|BaseIndex, RegXMM }
-vpgatherqd, 0x6691, AVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|NoSuf|VecSIB256, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
-vpgatherqq, 0x6691, AVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW1|NoSuf|VecSIB256, { RegYMM, Qword|Unspecified|BaseIndex, RegYMM }
+vgatherdpd, 0x6692, AVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|SwapSources|CheckOperandSize|NoSuf|VecSIB128, { RegXMM|RegYMM, Qword|Unspecified|BaseIndex, RegXMM|RegYMM }
+vgatherdps, 0x6692, AVX2, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf|VecSIB128, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
+vgatherdps, 0x6692, AVX2, Modrm|Vex256|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf|VecSIB256, { RegYMM, Dword|Unspecified|BaseIndex, RegYMM }
+vgatherqp<sd>, 0x6693, AVX2, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|SwapSources|NoSuf|VecSIB128, { RegXMM, <sd:elem>|Unspecified|BaseIndex, RegXMM }
+vgatherqpd, 0x6693, AVX2, Modrm|Vex256|Space0F38|VexVVVV|VexW1|SwapSources|NoSuf|VecSIB256, { RegYMM, Qword|Unspecified|BaseIndex, RegYMM }
+vgatherqps, 0x6693, AVX2, Modrm|Vex256|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf|VecSIB256, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
+vpgatherdd, 0x6690, AVX2, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf|VecSIB128, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
+vpgatherdd, 0x6690, AVX2, Modrm|Vex256|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf|VecSIB256, { RegYMM, Dword|Unspecified|BaseIndex, RegYMM }
+vpgatherdq, 0x6690, AVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|SwapSources|CheckOperandSize|NoSuf|VecSIB128, { RegXMM|RegYMM, Qword|Unspecified|BaseIndex, RegXMM|RegYMM }
+vpgatherq<dq>, 0x6691, AVX2, Modrm|Vex128|Space0F38|VexVVVV|<dq:vexw>|SwapSources|NoSuf|VecSIB128, { RegXMM, <dq:elem>|Unspecified|BaseIndex, RegXMM }
+vpgatherqd, 0x6691, AVX2, Modrm|Vex256|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf|VecSIB256, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
+vpgatherqq, 0x6691, AVX2, Modrm|Vex256|Space0F38|VexVVVV|VexW1|SwapSources|NoSuf|VecSIB256, { RegYMM, Qword|Unspecified|BaseIndex, RegYMM }
 
 // AES + AVX
 
@@ -3321,7 +3321,7 @@ prefetchit1, 0xf18/6, PREFETCHI|x64, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex
 
 // CMPCCXADD instructions.
 
-cmp<cc>xadd, 0x66e<cc:opc>, CMPCCXADD|x64, Modrm|Vex|Space0F38|VexVVVV|CheckOperandSize|NoSuf, { Reg32|Reg64, Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+cmp<cc>xadd, 0x66e<cc:opc>, CMPCCXADD|x64, Modrm|Vex|Space0F38|VexVVVV|SwapSources|CheckOperandSize|NoSuf, { Reg32|Reg64, Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 
 // CMPCCXADD instructions end.
 

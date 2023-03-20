@@ -8022,6 +8022,22 @@ process_operands (void)
   else if (i.tm.opcode_modifier.immext)
     process_immext ();
 
+  /* TILEZERO is unusual in that it has a single operand encoded in ModR/M.reg,
+     not ModR/M.rm.  To avoid special casing this in build_modrm_byte(), fake a
+     new destination operand here, while converting the source one to register
+     number 0.  */
+  if (i.tm.mnem_off == MN_tilezero)
+    {
+      i.op[1].regs = i.op[0].regs;
+      i.op[0].regs -= i.op[0].regs->reg_num;
+      i.types[1] = i.types[0];
+      i.tm.operand_types[1] = i.tm.operand_types[0];
+      i.flags[1] = i.flags[0];
+      i.operands++;
+      i.reg_operands++;
+      i.tm.operands++;
+    }
+
   if (i.tm.opcode_modifier.sse2avx && i.tm.opcode_modifier.vexvvvv)
     {
       static const i386_operand_type regxmm = {
@@ -8253,16 +8269,26 @@ static const reg_entry *
 build_modrm_byte (void)
 {
   const reg_entry *default_seg = NULL;
-  unsigned int source, dest;
-  bool vex_3_sources = (i.reg_operands + i.mem_operands == 4);
+  unsigned int source = i.imm_operands - i.tm.opcode_modifier.immext
+			/* Compensate for kludge in md_assemble().  */
+			+ i.tm.operand_types[0].bitfield.imm1;
+  unsigned int dest = i.operands - 1 - i.tm.opcode_modifier.immext;
+  unsigned int v, op, reg_slot = ~0;
 
-  if (vex_3_sources)
+  /* Accumulator (in particular %st), shift count (%cl), and alike need
+     to be skipped just like immediate operands do.  */
+  if (i.tm.operand_types[source].bitfield.instance)
+    ++source;
+  while (i.tm.operand_types[dest].bitfield.instance)
+    --dest;
+
+  for (op = source; op < i.operands; ++op)
+    if (i.tm.operand_types[op].bitfield.baseindex)
+      break;
+
+  if (i.reg_operands + i.mem_operands + (i.tm.extension_opcode != None) == 4)
     {
-      unsigned int nds, reg_slot;
       expressionS *exp;
-
-      dest = i.operands - 1;
-      nds = dest - 1;
 
       /* There are 2 kinds of instructions:
 	 1. 5 operands: 4 register operands or 3 register operands
@@ -8275,18 +8301,12 @@ build_modrm_byte (void)
 		  && i.tm.opcode_modifier.vexw
 		  && i.tm.operand_types[dest].bitfield.class == RegSIMD);
 
-      /* If VexW1 is set, the first non-immediate operand is the source and
-	 the second non-immediate one is encoded in the immediate operand.  */
-      if (i.tm.opcode_modifier.vexw == VEXW1)
-	{
-	  source = i.imm_operands;
-	  reg_slot = i.imm_operands + 1;
-	}
+      /* Of the first two non-immediate operands the one with the template
+	 not allowing for a memory one is encoded in the immediate operand.  */
+      if (source == op)
+	reg_slot = source + 1;
       else
-	{
-	  source = i.imm_operands + 1;
-	  reg_slot = i.imm_operands;
-	}
+	reg_slot = source++;
 
       if (i.imm_operands == 0)
 	{
@@ -8316,159 +8336,42 @@ build_modrm_byte (void)
 	      |= register_number (i.op[reg_slot].regs) << 4;
 	  gas_assert ((i.op[reg_slot].regs->reg_flags & RegVRex) == 0);
 	}
-
-      gas_assert (i.tm.operand_types[nds].bitfield.class == RegSIMD);
-      i.vex.register_specifier = i.op[nds].regs;
     }
-  else
-    source = dest = 0;
 
-  /* i.reg_operands MUST be the number of real register operands;
-     implicit registers do not count.  If there are 3 register
-     operands, it must be a instruction with VexNDS.  For a
-     instruction with VexNDD, the destination register is encoded
-     in VEX prefix.  If there are 4 register operands, it must be
-     a instruction with VEX prefix and 3 sources.  */
-  if (i.mem_operands == 0
-      && ((i.reg_operands == 2
-	   && i.tm.opcode_modifier.vexvvvv <= VEXXDS)
-	  || (i.reg_operands == 3
-	      && i.tm.opcode_modifier.vexvvvv == VEXXDS)
-	  || (i.reg_operands == 4 && vex_3_sources)))
+  for (v = source + 1; v < dest; ++v)
+    if (v != reg_slot)
+      break;
+  if (v >= dest)
+    v = ~0;
+  if (i.tm.extension_opcode != None)
     {
-      switch (i.operands)
-	{
-	case 2:
-	  source = 0;
-	  break;
-	case 3:
-	  /* When there are 3 operands, one of them may be immediate,
-	     which may be the first or the last operand.  Otherwise,
-	     the first operand must be shift count register (cl) or it
-	     is an instruction with VexNDS. */
-	  gas_assert (i.imm_operands == 1
-		      || (i.imm_operands == 0
-			  && (i.tm.opcode_modifier.vexvvvv == VEXXDS
-			      || (i.types[0].bitfield.instance == RegC
-				  && i.types[0].bitfield.byte))));
-	  if (operand_type_check (i.types[0], imm)
-	      || (i.types[0].bitfield.instance == RegC
-		  && i.types[0].bitfield.byte))
-	    source = 1;
-	  else
-	    source = 0;
-	  break;
-	case 4:
-	  /* When there are 4 operands, the first two must be 8bit
-	     immediate operands. The source operand will be the 3rd
-	     one.
-
-	     For instructions with VexNDS, if the first operand
-	     an imm8, the source operand is the 2nd one.  If the last
-	     operand is imm8, the source operand is the first one.  */
-	  gas_assert ((i.imm_operands == 2
-		       && i.types[0].bitfield.imm8
-		       && i.types[1].bitfield.imm8)
-		      || (i.tm.opcode_modifier.vexvvvv == VEXXDS
-			  && i.imm_operands == 1
-			  && (i.types[0].bitfield.imm8
-			      || i.types[0].bitfield.imm8s
-			      || i.types[i.operands - 1].bitfield.imm8)));
-	  if (i.imm_operands == 2)
-	    source = 2;
-	  else
-	    {
-	      if (i.types[0].bitfield.imm8)
-		source = 1;
-	      else
-		source = 0;
-	    }
-	  break;
-	case 5:
-	  gas_assert (!is_evex_encoding (&i.tm));
-	  gas_assert (i.imm_operands == 1 && vex_3_sources);
-	  break;
-	default:
-	  abort ();
-	}
-
-      if (!vex_3_sources)
-	{
-	  dest = source + 1;
-
-	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
-	    {
-	      /* For instructions with VexNDS, the register-only source
-		 operand must be a 32/64bit integer, XMM, YMM, ZMM, or mask
-		 register.  It is encoded in VEX prefix.  */
-
-	      i386_operand_type op;
-	      unsigned int vvvv;
-
-	      /* Swap two source operands if needed.  */
-	      if (i.tm.opcode_modifier.operandconstraint == SWAP_SOURCES)
-		{
-		  vvvv = source;
-		  source = dest;
-		}
-	      else
-		vvvv = dest;
-
-	      op = i.tm.operand_types[vvvv];
-	      if ((dest + 1) >= i.operands
-		  || ((op.bitfield.class != Reg
-		       || (!op.bitfield.dword && !op.bitfield.qword))
-		      && op.bitfield.class != RegSIMD
-		      && op.bitfield.class != RegMask))
-		abort ();
-	      i.vex.register_specifier = i.op[vvvv].regs;
-	      dest++;
-	    }
-	}
-
-      i.rm.mode = 3;
-      /* One of the register operands will be encoded in the i.rm.reg
-	 field, the other in the combined i.rm.mode and i.rm.regmem
-	 fields.  If no form of this instruction supports a memory
-	 destination operand, then we assume the source operand may
-	 sometimes be a memory operand and so we need to store the
-	 destination in the i.rm.reg field.  */
-      if (!i.tm.opcode_modifier.regmem
-	  && operand_type_check (i.tm.operand_types[dest], anymem) == 0)
-	{
-	  i.rm.reg = i.op[dest].regs->reg_num;
-	  i.rm.regmem = i.op[source].regs->reg_num;
-	  set_rex_vrex (i.op[dest].regs, REX_R, i.tm.opcode_modifier.sse2avx);
-	  set_rex_vrex (i.op[source].regs, REX_B, false);
-	}
-      else
-	{
-	  i.rm.reg = i.op[source].regs->reg_num;
-	  i.rm.regmem = i.op[dest].regs->reg_num;
-	  set_rex_vrex (i.op[dest].regs, REX_B, i.tm.opcode_modifier.sse2avx);
-	  set_rex_vrex (i.op[source].regs, REX_R, false);
-	}
-      if (flag_code != CODE_64BIT && (i.rex & REX_R))
-	{
-	  if (i.types[!i.tm.opcode_modifier.regmem].bitfield.class != RegCR)
-	    abort ();
-	  i.rex &= ~REX_R;
-	  add_prefix (LOCK_PREFIX_OPCODE);
-	}
+      if (dest != source)
+	v = dest;
+      dest = ~0;
     }
-  else
-    {			/* If it's not 2 reg operands...  */
-      unsigned int mem;
+  gas_assert (source < dest);
+  if (i.tm.opcode_modifier.operandconstraint == SWAP_SOURCES
+      && source != op)
+    {
+      unsigned int tmp = source;
 
+      source = v;
+      v = tmp;
+    }
+
+  if (v < MAX_OPERANDS)
+    {
+      gas_assert (i.tm.opcode_modifier.vexvvvv);
+      i.vex.register_specifier = i.op[v].regs;
+    }
+
+  if (op < i.operands)
+    {
       if (i.mem_operands)
 	{
 	  unsigned int fake_zero_displacement = 0;
-	  unsigned int op;
 
-	  for (op = 0; op < i.operands; op++)
-	    if (i.flags[op] & Operand_Mem)
-	      break;
-	  gas_assert (op < i.operands);
+	  gas_assert (i.flags[op] & Operand_Mem);
 
 	  if (i.tm.opcode_modifier.sib)
 	    {
@@ -8698,140 +8601,62 @@ build_modrm_byte (void)
 	      exp->X_add_symbol = (symbolS *) 0;
 	      exp->X_op_symbol = (symbolS *) 0;
 	    }
+	}
+    else
+	{
+      i.rm.mode = 3;
+      i.rm.regmem = i.op[op].regs->reg_num;
+      set_rex_vrex (i.op[op].regs, REX_B, false);
+	}
 
-	  mem = op;
+      if (op == dest)
+	dest = ~0;
+      if (op == source)
+	source = ~0;
+    }
+  else
+    {
+      i.rm.mode = 3;
+      if (!i.tm.opcode_modifier.regmem)
+	{
+	  gas_assert (source < MAX_OPERANDS);
+	  i.rm.regmem = i.op[source].regs->reg_num;
+	  set_rex_vrex (i.op[source].regs, REX_B,
+			dest >= MAX_OPERANDS && i.tm.opcode_modifier.sse2avx);
+	  source = ~0;
 	}
       else
-	mem = ~0;
-
-      if (i.tm.opcode_modifier.vexvvvv == VEXLWP)
 	{
-	  i.vex.register_specifier = i.op[2].regs;
-	  if (!i.mem_operands)
-	    {
-	      i.rm.mode = 3;
-	      i.rm.regmem = i.op[1].regs->reg_num;
-	      if ((i.op[1].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_B;
-	    }
+	  gas_assert (dest < MAX_OPERANDS);
+	  i.rm.regmem = i.op[dest].regs->reg_num;
+	  set_rex_vrex (i.op[dest].regs, REX_B, i.tm.opcode_modifier.sse2avx);
+	  dest = ~0;
 	}
-      /* Fill in i.rm.reg or i.rm.regmem field with register operand
-	 (if any) based on i.tm.extension_opcode.  Again, we must be
-	 careful to make sure that segment/control/debug/test/MMX
-	 registers are coded into the i.rm.reg field.  */
-      else if (i.reg_operands)
-	{
-	  unsigned int op;
-	  unsigned int vex_reg = ~0;
-
-	  for (op = 0; op < i.operands; op++)
-	    if (i.types[op].bitfield.class == Reg
-		|| i.types[op].bitfield.class == RegBND
-		|| i.types[op].bitfield.class == RegMask
-		|| i.types[op].bitfield.class == SReg
-		|| i.types[op].bitfield.class == RegCR
-		|| i.types[op].bitfield.class == RegDR
-		|| i.types[op].bitfield.class == RegTR
-		|| i.types[op].bitfield.class == RegSIMD
-		|| i.types[op].bitfield.class == RegMMX)
-	      break;
-
-	  if (vex_3_sources)
-	    op = dest;
-	  else if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
-	    {
-	      /* For instructions with VexNDS, the register-only
-		 source operand is encoded in VEX prefix. */
-	      gas_assert (mem != (unsigned int) ~0);
-
-	      if (op > mem || i.tm.cpu_flags.bitfield.cpucmpccxadd)
-		{
-		  vex_reg = op++;
-		  gas_assert (op < i.operands);
-		}
-	      else
-		{
-		  /* Check register-only source operand when two source
-		     operands are swapped.  */
-		  if (!i.tm.operand_types[op].bitfield.baseindex
-		      && i.tm.operand_types[op + 1].bitfield.baseindex)
-		    {
-		      vex_reg = op;
-		      op += 2;
-		      gas_assert (mem == (vex_reg + 1)
-				  && op < i.operands);
-		    }
-		  else
-		    {
-		      vex_reg = op + 1;
-		      gas_assert (vex_reg < i.operands);
-		    }
-		}
-	    }
-	  else if (i.tm.opcode_modifier.vexvvvv == VEXNDD)
-	    {
-	      /* For instructions with VexNDD, the register destination
-		 is encoded in VEX prefix.  */
-	      if (i.mem_operands == 0)
-		{
-		  /* There is no memory operand.  */
-		  gas_assert ((op + 2) == i.operands);
-		  vex_reg = op + 1;
-		}
-	      else
-		{
-		  /* There are only 2 non-immediate operands.  */
-		  gas_assert (op < i.imm_operands + 2
-			      && i.operands == i.imm_operands + 2);
-		  vex_reg = i.imm_operands + 1;
-		}
-	    }
-	  else
-	    gas_assert (op < i.operands);
-
-	  if (vex_reg != (unsigned int) ~0)
-	    {
-	      i386_operand_type *type = &i.tm.operand_types[vex_reg];
-
-	      if ((type->bitfield.class != Reg
-		   || (!type->bitfield.dword && !type->bitfield.qword))
-		  && type->bitfield.class != RegSIMD
-		  && type->bitfield.class != RegMask)
-		abort ();
-
-	      i.vex.register_specifier = i.op[vex_reg].regs;
-	    }
-
-	  /* Don't set OP operand twice.  */
-	  if (vex_reg != op)
-	    {
-	      /* If there is an extension opcode to put here, the
-		 register number must be put into the regmem field.  */
-	      if (i.tm.extension_opcode != None)
-		{
-		  i.rm.regmem = i.op[op].regs->reg_num;
-		  set_rex_vrex (i.op[op].regs, REX_B,
-				i.tm.opcode_modifier.sse2avx);
-		}
-	      else
-		{
-		  i.rm.reg = i.op[op].regs->reg_num;
-		  set_rex_vrex (i.op[op].regs, REX_R,
-				i.tm.opcode_modifier.sse2avx);
-		}
-	    }
-
-	  /* Now, if no memory operand has set i.rm.mode = 0, 1, 2 we
-	     must set it to 3 to indicate this is a register operand
-	     in the regmem field.  */
-	  if (!i.mem_operands)
-	    i.rm.mode = 3;
-	}
-
-      /* Fill in i.rm.reg field with extension opcode (if any).  */
-      if (i.tm.extension_opcode != None)
-	i.rm.reg = i.tm.extension_opcode;
     }
+
+  /* Fill in i.rm.reg field with extension opcode (if any) or the
+     appropriate register.  */
+  if (i.tm.extension_opcode != None)
+    i.rm.reg = i.tm.extension_opcode;
+  else if (!i.tm.opcode_modifier.regmem && dest < MAX_OPERANDS)
+    {
+      i.rm.reg = i.op[dest].regs->reg_num;
+      set_rex_vrex (i.op[dest].regs, REX_R, i.tm.opcode_modifier.sse2avx);
+    }
+  else
+    {
+      gas_assert (source < MAX_OPERANDS);
+      i.rm.reg = i.op[source].regs->reg_num;
+      set_rex_vrex (i.op[source].regs, REX_R, false);
+    }
+
+  if (flag_code != CODE_64BIT && (i.rex & REX_R))
+    {
+      gas_assert (i.types[!i.tm.opcode_modifier.regmem].bitfield.class == RegCR);
+      i.rex &= ~REX_R;
+      add_prefix (LOCK_PREFIX_OPCODE);
+    }
+
   return default_seg;
 }
 
