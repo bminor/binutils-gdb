@@ -215,6 +215,54 @@ mi_parse::~mi_parse ()
   freeargv (argv);
 }
 
+/* See mi-parse.h.  */
+
+void
+mi_parse::set_thread_group (const char *arg, char **endp)
+{
+  if (thread_group != -1)
+    error (_("Duplicate '--thread-group' option"));
+  if (*arg != 'i')
+    error (_("Invalid thread group id"));
+  arg += 1;
+  thread_group = strtol (arg, endp, 10);
+}
+
+/* See mi-parse.h.  */
+
+void
+mi_parse::set_thread (const char *arg, char **endp)
+{
+  if (thread != -1)
+    error (_("Duplicate '--thread' option"));
+  thread = strtol (arg, endp, 10);
+}
+
+/* See mi-parse.h.  */
+
+void
+mi_parse::set_frame (const char *arg, char **endp)
+{
+  if (frame != -1)
+    error (_("Duplicate '--frame' option"));
+  frame = strtol (arg, endp, 10);
+}
+
+/* See mi-parse.h.  */
+
+void
+mi_parse::set_language (const char *arg, const char **endp)
+{
+  std::string lang_name = extract_arg (&arg);
+
+  language = language_enum (lang_name.c_str ());
+  if (language == language_unknown)
+    error (_("Invalid --language argument: %s"), lang_name.c_str ());
+
+  if (endp != nullptr)
+    *endp = arg;
+}
+
 std::unique_ptr<struct mi_parse>
 mi_parse::make (const char *cmd, char **token)
 {
@@ -295,13 +343,8 @@ mi_parse::make (const char *cmd, char **token)
 	  char *endp;
 
 	  option = "--thread-group";
-	  if (parse->thread_group != -1)
-	    error (_("Duplicate '--thread-group' option"));
 	  chp += tgs;
-	  if (*chp != 'i')
-	    error (_("Invalid thread group id"));
-	  chp += 1;
-	  parse->thread_group = strtol (chp, &endp, 10);
+	  parse->set_thread_group (chp, &endp);
 	  chp = endp;
 	}
       else if (strncmp (chp, "--thread ", ts) == 0)
@@ -309,10 +352,8 @@ mi_parse::make (const char *cmd, char **token)
 	  char *endp;
 
 	  option = "--thread";
-	  if (parse->thread != -1)
-	    error (_("Duplicate '--thread' option"));
 	  chp += ts;
-	  parse->thread = strtol (chp, &endp, 10);
+	  parse->set_thread (chp, &endp);
 	  chp = endp;
 	}
       else if (strncmp (chp, "--frame ", fs) == 0)
@@ -320,21 +361,15 @@ mi_parse::make (const char *cmd, char **token)
 	  char *endp;
 
 	  option = "--frame";
-	  if (parse->frame != -1)
-	    error (_("Duplicate '--frame' option"));
 	  chp += fs;
-	  parse->frame = strtol (chp, &endp, 10);
+	  parse->set_frame (chp, &endp);
 	  chp = endp;
 	}
       else if (strncmp (chp, "--language ", ls) == 0)
 	{
 	  option = "--language";
 	  chp += ls;
-	  std::string lang_name = extract_arg (&chp);
-
-	  parse->language = language_enum (lang_name.c_str ());
-	  if (parse->language == language_unknown)
-	    error (_("Invalid --language argument: %s"), lang_name.c_str ());
+	  parse->set_language (chp, &chp);
 	}
       else
 	break;

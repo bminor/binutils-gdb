@@ -84,6 +84,15 @@ struct mi_parse
 
     mi_parse () = default;
 
+    /* Helper methods for parsing arguments.  Each takes the argument
+       to be parsed.  It will either set a member of this object, or
+       throw an exception on error.  In each case, *ENDP, if non-NULL,
+       will be updated to just after the argument text.  */
+    void set_thread_group (const char *arg, char **endp);
+    void set_thread (const char *arg, char **endp);
+    void set_frame (const char *arg, char **endp);
+    void set_language (const char *arg, const char **endp);
+
     std::string m_args;
   };
 
