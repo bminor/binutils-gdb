@@ -1919,7 +1919,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
   try
     {
-      command = mi_parse (cmd, &token);
+      command = mi_parse::make (cmd, &token);
     }
   catch (const gdb_exception &exception)
     {

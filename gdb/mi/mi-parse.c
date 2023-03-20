@@ -109,7 +109,7 @@ mi_parse_escape (const char **string_ptr)
 void
 mi_parse::parse_argv ()
 {
-  const char *chp = m_args.get ();
+  const char *chp = m_args.c_str ();
   int argc = 0;
   char **argv = XNEWVEC (char *, argc + 1);
 
@@ -216,7 +216,7 @@ mi_parse::~mi_parse ()
 }
 
 std::unique_ptr<struct mi_parse>
-mi_parse (const char *cmd, char **token)
+mi_parse::make (const char *cmd, char **token)
 {
   const char *chp;
 
@@ -345,7 +345,7 @@ mi_parse (const char *cmd, char **token)
     }
 
   /* Save the rest of the arguments for the command.  */
-  parse->set_args (chp);
+  parse->m_args = chp;
 
   /* Fully parsed, flag as an MI command.  */
   parse->op = MI_COMMAND;

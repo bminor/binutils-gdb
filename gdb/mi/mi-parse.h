@@ -41,7 +41,17 @@ enum mi_command_type
 
 struct mi_parse
   {
-    mi_parse () = default;
+    /* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is
+       invalid, an exception is thrown.  For an MI_COMMAND COMMAND, ARGS
+       and OP are initialized.  Un-initialized fields are zero.  *TOKEN is
+       set to the token, even if an exception is thrown.  It is allocated
+       with xmalloc; it must either be freed with xfree, or assigned to
+       the TOKEN field of the resultant mi_parse object, to be freed by
+       mi_parse_free.  */
+
+    static std::unique_ptr<struct mi_parse> make (const char *cmd,
+						  char **token);
+
     ~mi_parse ();
 
     DISABLE_COPY_AND_ASSIGN (mi_parse);
@@ -53,9 +63,6 @@ struct mi_parse
        implemented as CLI commands.  */
     const char *args () const
     { return m_args.c_str (); }
-
-    void set_args (const char *args)
-    { m_args = args; }
 
     enum mi_command_type op = MI_COMMAND;
     char *command = nullptr;
@@ -75,19 +82,10 @@ struct mi_parse
 
   private:
 
+    mi_parse () = default;
+
     std::string m_args;
   };
-
-/* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is
-   invalid, an exception is thrown.  For an MI_COMMAND COMMAND, ARGS
-   and OP are initialized.  Un-initialized fields are zero.  *TOKEN is
-   set to the token, even if an exception is thrown.  It is allocated
-   with xmalloc; it must either be freed with xfree, or assigned to
-   the TOKEN field of the resultant mi_parse object, to be freed by
-   mi_parse_free.  */
-
-extern std::unique_ptr<struct mi_parse> mi_parse (const char *cmd,
-						  char **token);
 
 /* Parse a string argument into a print_values value.  */
 
