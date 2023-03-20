@@ -583,23 +583,8 @@ enum
   Vex,
   /* How to encode VEX.vvvv:
      0: VEX.vvvv must be 1111b.
-     1: VEX.NDS.  Register-only source is encoded in VEX.vvvv where
-	the content of source registers will be preserved.
-	VEX.DDS.  The second register operand is encoded in VEX.vvvv
-	where the content of first source register will be overwritten
-	by the result.
-	VEX.NDD2.  The second destination register operand is encoded in
-	VEX.vvvv for instructions with 2 destination register operands.
-	For assembler, there are no difference between VEX.NDS, VEX.DDS
-	and VEX.NDD2.
-     2. VEX.NDD.  Register destination is encoded in VEX.vvvv for
-     instructions with 1 destination register operand.
-     3. VEX.LWP.  Register destination is encoded in VEX.vvvv and one
-	of the operands can access a memory location.
+     1: VEX.vvvv encodes one of the register operands.
    */
-#define VEXXDS	1
-#define VEXNDD	2
-#define VEXLWP	3
   VexVVVV,
   /* How the VEX.W bit is used:
      0: Set by the REX.W bit.
@@ -733,7 +718,7 @@ typedef struct i386_opcode_modifier
   unsigned int immext:1;
   unsigned int norex64:1;
   unsigned int vex:2;
-  unsigned int vexvvvv:2;
+  unsigned int vexvvvv:1;
   unsigned int vexw:2;
   unsigned int opcodeprefix:2;
   unsigned int sib:3;

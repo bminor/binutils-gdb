@@ -8297,7 +8297,7 @@ build_modrm_byte (void)
 	 ZMM register.
 	 2. 4 operands: 4 register operands or 3 register operands
 	 plus 1 memory operand, with VexXDS.  */
-      gas_assert (i.tm.opcode_modifier.vexvvvv == VEXXDS
+      gas_assert (i.tm.opcode_modifier.vexvvvv
 		  && i.tm.opcode_modifier.vexw
 		  && i.tm.operand_types[dest].bitfield.class == RegSIMD);
 
