@@ -11423,7 +11423,8 @@ i386_att_operand (char *operand_string)
 
   /* We check for an absolute prefix (differentiating,
      for example, 'jmp pc_relative_label' from 'jmp *absolute_label'.  */
-  if (*op_string == ABSOLUTE_PREFIX)
+  if (*op_string == ABSOLUTE_PREFIX
+      && current_templates->start->opcode_modifier.jump)
     {
       ++op_string;
       if (is_space_char (*op_string))
@@ -11454,7 +11455,8 @@ i386_att_operand (char *operand_string)
 	    ++op_string;
 
 	  /* Handle case of %es:*foo.  */
-	  if (!i.jumpabsolute && *op_string == ABSOLUTE_PREFIX)
+	  if (!i.jumpabsolute && *op_string == ABSOLUTE_PREFIX
+	      && current_templates->start->opcode_modifier.jump)
 	    {
 	      ++op_string;
 	      if (is_space_char (*op_string))
