@@ -531,14 +531,12 @@ const char FLT_CHARS[] = "fFdDxXhHbB";
 static char mnemonic_chars[256];
 static char register_chars[256];
 static char operand_chars[256];
-static char identifier_chars[256];
 
 /* Lexical macros.  */
 #define is_mnemonic_char(x) (mnemonic_chars[(unsigned char) x])
 #define is_operand_char(x) (operand_chars[(unsigned char) x])
 #define is_register_char(x) (register_chars[(unsigned char) x])
 #define is_space_char(x) ((x) == ' ')
-#define is_identifier_char(x) (identifier_chars[(unsigned char) x])
 
 /* All non-digit non-letter characters that may occur in an operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
@@ -2611,8 +2609,6 @@ set_intel_syntax (int syntax_flag)
 
   expr_set_rank (O_full_ptr, syntax_flag ? 10 : 0);
 
-  identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
-  identifier_chars['$'] = intel_syntax ? '$' : 0;
   register_prefix = allow_naked_reg ? "" : "%";
 }
 
@@ -3076,27 +3072,16 @@ md_begin (void)
 	  operand_chars[c] = c;
 #endif
 
-	if (ISALPHA (c) || ISDIGIT (c))
-	  identifier_chars[c] = c;
-	else if (c >= 128)
-	  {
-	    identifier_chars[c] = c;
-	    operand_chars[c] = c;
-	  }
+	if (c >= 128)
+	  operand_chars[c] = c;
       }
 
-#ifdef LEX_AT
-    identifier_chars['@'] = '@';
-#endif
 #ifdef LEX_QM
-    identifier_chars['?'] = '?';
     operand_chars['?'] = '?';
 #endif
     mnemonic_chars['_'] = '_';
     mnemonic_chars['-'] = '-';
     mnemonic_chars['.'] = '.';
-    identifier_chars['_'] = '_';
-    identifier_chars['.'] = '.';
 
     for (p = operand_special_chars; *p != '\0'; p++)
       operand_chars[(unsigned char) *p] = *p;
@@ -11404,7 +11389,7 @@ RC_SAE_immediate (const char *imm_start)
 static INLINE bool starts_memory_operand (char c)
 {
   return ISDIGIT (c)
-	 || is_identifier_char (c)
+	 || is_name_beginner (c)
 	 || strchr ("([\"+-!~", c);
 }
 
@@ -12896,10 +12881,7 @@ parse_real_register (char *reg_string, char **end_op)
       s++;
     }
 
-  /* For naked regs, make sure that we are not dealing with an identifier.
-     This prevents confusing an identifier like `eax_var' with register
-     `eax'.  */
-  if (allow_naked_reg && identifier_chars[(unsigned char) *s])
+  if (is_part_of_name (*s))
     return (const reg_entry *) NULL;
 
   *end_op = s;
