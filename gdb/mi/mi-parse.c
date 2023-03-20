@@ -109,6 +109,11 @@ mi_parse_escape (const char **string_ptr)
 void
 mi_parse::parse_argv ()
 {
+  /* If arguments were already computed (or were supplied at
+     construction), then there's no need to re-compute them.  */
+  if (argv != nullptr)
+    return;
+
   const char *chp = m_args.c_str ();
   int argc = 0;
   char **argv = XNEWVEC (char *, argc + 1);
@@ -213,6 +218,27 @@ mi_parse::~mi_parse ()
   xfree (command);
   xfree (token);
   freeargv (argv);
+}
+
+/* See mi-parse.h.  */
+
+const char *
+mi_parse::args ()
+{
+  /* If args were already computed, or if there is no pre-computed
+     argv, just return the args.  */
+  if (!m_args.empty () || argv == nullptr)
+    return  m_args.c_str ();
+
+  /* Compute args from argv.  */
+  for (int i = 0; i < argc; ++i)
+    {
+      if (!m_args.empty ())
+	m_args += " ";
+      m_args += argv[i];
+    }
+
+  return m_args.c_str ();
 }
 
 /* See mi-parse.h.  */
@@ -381,6 +407,77 @@ mi_parse::make (const char *cmd, char **token)
 
   /* Save the rest of the arguments for the command.  */
   parse->m_args = chp;
+
+  /* Fully parsed, flag as an MI command.  */
+  parse->op = MI_COMMAND;
+  return parse;
+}
+
+/* See mi-parse.h.  */
+
+std::unique_ptr<struct mi_parse>
+mi_parse::make (gdb::unique_xmalloc_ptr<char> command,
+		std::vector<gdb::unique_xmalloc_ptr<char>> args)
+{
+  std::unique_ptr<struct mi_parse> parse (new struct mi_parse);
+
+  parse->command = command.release ();
+  parse->token = xstrdup ("");
+
+  if (parse->command[0] != '-')
+    throw_error (UNDEFINED_COMMAND_ERROR,
+		 _("MI command '%s' does not start with '-'"),
+		 parse->command);
+
+  /* Find the command in the MI table.  */
+  parse->cmd = mi_cmd_lookup (parse->command + 1);
+  if (parse->cmd == NULL)
+    throw_error (UNDEFINED_COMMAND_ERROR,
+		 _("Undefined MI command: %s"), parse->command);
+
+  /* This over-allocates slightly, but it seems unimportant.  */
+  parse->argv = XCNEWVEC (char *, args.size () + 1);
+
+  for (size_t i = 0; i < args.size (); ++i)
+    {
+      const char *chp = args[i].get ();
+
+      /* See if --all is the last token in the input.  */
+      if (strcmp (chp, "--all") == 0)
+	{
+	  parse->all = 1;
+	}
+      else if (strcmp (chp, "--thread-group") == 0)
+	{
+	  ++i;
+	  if (i == args.size ())
+	    error ("No argument to '--thread-group'");
+	  parse->set_thread_group (args[i].get (), nullptr);
+	}
+      else if (strcmp (chp, "--thread") == 0)
+	{
+	  ++i;
+	  if (i == args.size ())
+	    error ("No argument to '--thread'");
+	  parse->set_thread (args[i].get (), nullptr);
+	}
+      else if (strcmp (chp, "--frame") == 0)
+	{
+	  ++i;
+	  if (i == args.size ())
+	    error ("No argument to '--frame'");
+	  parse->set_frame (args[i].get (), nullptr);
+	}
+      else if (strcmp (chp, "--language") == 0)
+	{
+	  ++i;
+	  if (i == args.size ())
+	    error ("No argument to '--language'");
+	  parse->set_language (args[i].get (), nullptr);
+	}
+      else
+	parse->argv[parse->argc++] = args[i].release ();
+    }
 
   /* Fully parsed, flag as an MI command.  */
   parse->op = MI_COMMAND;

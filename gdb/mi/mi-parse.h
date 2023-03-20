@@ -52,6 +52,15 @@ struct mi_parse
     static std::unique_ptr<struct mi_parse> make (const char *cmd,
 						  char **token);
 
+    /* Create an mi_parse object given the command name and a vector
+       of arguments.  Unlike with the other constructor, here the
+       arguments are treated "as is" -- no escape processing is
+       done.  */
+
+    static std::unique_ptr<struct mi_parse> make
+	 (gdb::unique_xmalloc_ptr<char> command,
+	  std::vector<gdb::unique_xmalloc_ptr<char>> args);
+
     ~mi_parse ();
 
     DISABLE_COPY_AND_ASSIGN (mi_parse);
@@ -61,8 +70,7 @@ struct mi_parse
 
     /* Return the full argument string, as used by commands which are
        implemented as CLI commands.  */
-    const char *args () const
-    { return m_args.c_str (); }
+    const char *args ();
 
     enum mi_command_type op = MI_COMMAND;
     char *command = nullptr;
