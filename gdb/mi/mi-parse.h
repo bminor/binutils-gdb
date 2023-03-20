@@ -46,6 +46,9 @@ struct mi_parse
 
     DISABLE_COPY_AND_ASSIGN (mi_parse);
 
+    /* Split the arguments into argc/argv and store the result.  */
+    void parse_argv ();
+
     /* Return the full argument string, as used by commands which are
        implemented as CLI commands.  */
     const char *args () const
@@ -89,9 +92,5 @@ extern std::unique_ptr<struct mi_parse> mi_parse (const char *cmd,
 /* Parse a string argument into a print_values value.  */
 
 enum print_values mi_parse_print_values (const char *name);
-
-/* Split ARGS into argc/argv and store the result in PARSE.  */
-
-extern void mi_parse_argv (const char *args, struct mi_parse *parse);
 
 #endif /* MI_MI_PARSE_H */

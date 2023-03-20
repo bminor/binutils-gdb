@@ -49,7 +49,7 @@ struct mi_command_mi : public mi_command
      with arguments contained within PARSE.  */
   void invoke (struct mi_parse *parse) const override
   {
-    mi_parse_argv (parse->args (), parse);
+    parse->parse_argv ();
 
     if (parse->argv == nullptr)
       error (_("Problem parsing arguments: %s %s"), parse->command,

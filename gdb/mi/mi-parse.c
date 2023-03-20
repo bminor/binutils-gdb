@@ -107,9 +107,9 @@ mi_parse_escape (const char **string_ptr)
 }
 
 void
-mi_parse_argv (const char *args, struct mi_parse *parse)
+mi_parse::parse_argv ()
 {
-  const char *chp = args;
+  const char *chp = m_args.get ();
   int argc = 0;
   char **argv = XNEWVEC (char *, argc + 1);
 
@@ -124,8 +124,8 @@ mi_parse_argv (const char *args, struct mi_parse *parse)
       switch (*chp)
 	{
 	case '\0':
-	  parse->argv = argv;
-	  parse->argc = argc;
+	  this->argv = argv;
+	  this->argc = argc;
 	  return;
 	case '"':
 	  {
