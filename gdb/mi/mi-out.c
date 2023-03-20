@@ -360,12 +360,6 @@ as_mi_ui_out (ui_out *uiout)
   return gdb::checked_static_cast<mi_ui_out *> (uiout);
 }
 
-int
-mi_version (ui_out *uiout)
-{
-  return as_mi_ui_out (uiout)->version ();
-}
-
 void
 mi_out_put (ui_out *uiout, struct ui_file *stream)
 {
