@@ -1710,8 +1710,8 @@ finish_backward (struct finish_command_fsm *sm)
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc;
   CORE_ADDR func_addr;
-  CORE_ADDR alt_entry_point = sal.pc;
-  CORE_ADDR entry_point = alt_entry_point;
+  CORE_ADDR alt_entry_point;
+  CORE_ADDR entry_point;
   frame_info_ptr frame = get_selected_frame (nullptr);
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -1721,6 +1721,8 @@ finish_backward (struct finish_command_fsm *sm)
     error (_("Cannot find bounds of current function"));
 
   sal = find_pc_line (func_addr, 0);
+  alt_entry_point = sal.pc;
+  entry_point = alt_entry_point;
 
   if (gdbarch_skip_entrypoint_p (gdbarch))
     /* Some architectures, like PowerPC use local and global entry points.
