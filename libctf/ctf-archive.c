@@ -1249,7 +1249,6 @@ static int arc_mmap_writeout (int fd, void *header, size_t headersz,
 			      const char **errmsg)
 {
   ssize_t len;
-  size_t acc = 0;
   char *data = (char *) header;
   ssize_t count = headersz;
 
@@ -1272,7 +1271,6 @@ static int arc_mmap_writeout (int fd, void *header, size_t headersz,
       if (len == EINTR)
 	continue;
 
-      acc += len;
       if (len == 0)				/* EOF.  */
 	break;
 
