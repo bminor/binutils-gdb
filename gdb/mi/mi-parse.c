@@ -212,7 +212,6 @@ mi_parse::~mi_parse ()
 {
   xfree (command);
   xfree (token);
-  xfree (args);
   freeargv (argv);
 }
 
@@ -346,7 +345,7 @@ mi_parse (const char *cmd, char **token)
     }
 
   /* Save the rest of the arguments for the command.  */
-  parse->args = xstrdup (chp);
+  parse->set_args (chp);
 
   /* Fully parsed, flag as an MI command.  */
   parse->op = MI_COMMAND;

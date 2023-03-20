@@ -1813,7 +1813,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
       if (mi_debug_p)
 	gdb_printf (gdb_stdlog,
 		    " token=`%s' command=`%s' args=`%s'\n",
-		    context->token, context->command, context->args);
+		    context->token, context->command, context->args ());
 
       mi_cmd_execute (context);
 

@@ -355,10 +355,11 @@ mi_command_py::invoke (struct mi_parse *parse) const
 
   pymicmd_debug_printf ("this = %p, name = %s", this, name ());
 
-  mi_parse_argv (parse->args, parse);
+  mi_parse_argv (parse->args (), parse);
 
   if (parse->argv == nullptr)
-    error (_("Problem parsing arguments: %s %s"), parse->command, parse->args);
+    error (_("Problem parsing arguments: %s %s"), parse->command,
+	   parse->args ());
 
 
   gdbpy_enter enter_py;

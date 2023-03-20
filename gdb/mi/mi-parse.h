@@ -46,12 +46,19 @@ struct mi_parse
 
     DISABLE_COPY_AND_ASSIGN (mi_parse);
 
+    /* Return the full argument string, as used by commands which are
+       implemented as CLI commands.  */
+    const char *args () const
+    { return m_args.c_str (); }
+
+    void set_args (const char *args)
+    { m_args = args; }
+
     enum mi_command_type op = MI_COMMAND;
     char *command = nullptr;
     char *token = nullptr;
     const struct mi_command *cmd = nullptr;
     struct mi_timestamp *cmd_start = nullptr;
-    char *args = nullptr;
     char **argv = nullptr;
     int argc = 0;
     int all = 0;
@@ -62,6 +69,10 @@ struct mi_parse
     /* The language that should be used to evaluate the MI command.
        Ignored if set to language_unknown.  */
     enum language language = language_unknown;
+
+  private:
+
+    std::string m_args;
   };
 
 /* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is

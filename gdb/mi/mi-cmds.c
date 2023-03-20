@@ -49,11 +49,11 @@ struct mi_command_mi : public mi_command
      with arguments contained within PARSE.  */
   void invoke (struct mi_parse *parse) const override
   {
-    mi_parse_argv (parse->args, parse);
+    mi_parse_argv (parse->args (), parse);
 
     if (parse->argv == nullptr)
       error (_("Problem parsing arguments: %s %s"), parse->command,
-	     parse->args);
+	     parse->args ());
 
     this->m_argv_function (parse->command, parse->argv, parse->argc);
   }
@@ -87,7 +87,7 @@ struct mi_command_cli : public mi_command
      is passed through to the CLI function as its argument string.  */
   void invoke (struct mi_parse *parse) const override
   {
-    const char *args = m_args_p ? parse->args : nullptr;
+    const char *args = m_args_p ? parse->args () : nullptr;
     mi_execute_cli_command (m_cli_name, m_args_p, args);
   }
 
