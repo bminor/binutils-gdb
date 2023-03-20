@@ -752,6 +752,7 @@ run_dump_test pr19498
 run_list_test "nop-bad-1" ""
 run_list_test "unspec" ""
 run_dump_test "fp"
+run_dump_test pr30248
 if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     run_list_test_stdin "list-1" "-al"
     run_list_test_stdin "list-2" "-al"

@@ -11613,7 +11613,11 @@ i386_att_operand (char *operand_string)
 	  temp_string = base_string;
 
 	  /* Skip past '(' and whitespace.  */
-	  gas_assert (*base_string == '(');
+	  if (*base_string != '(')
+	    {
+	      as_bad (_("unbalanced braces"));
+	      return 0;
+	    }
 	  ++base_string;
 	  if (is_space_char (*base_string))
 	    ++base_string;
