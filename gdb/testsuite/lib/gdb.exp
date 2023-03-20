@@ -5917,6 +5917,21 @@ proc gdb_touch_execfile { binfile } {
     }
 }
 
+# Override of dejagnu's remote_upload, which doesn't handle remotedir.
+
+rename remote_upload dejagnu_remote_upload
+proc remote_upload { dest srcfile args } {
+    if { [is_remote $dest] && [board_info $dest exists remotedir] } {
+	set remotedir [board_info $dest remotedir]
+	if { ![string match "$remotedir*" $srcfile] } {
+	    # Use hardcoded '/' as separator, as in dejagnu's remote_download.
+	    set srcfile $remotedir/$srcfile
+	}
+    }
+
+    return [dejagnu_remote_upload $dest $srcfile {*}$args]
+}
+
 # Like remote_download but provides a gdb-specific behavior.
 #
 # If the destination board is remote, the local file FROMFILE is transferred as

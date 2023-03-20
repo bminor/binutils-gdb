@@ -77,9 +77,7 @@ proc test_remote { remote host_is_target } {
 	}
 
     with_test_prefix copy-from-remote {
-	# Note: we're using $remote_file here instead of $file, otherwise
-	# this breaks with board_info remotedir.
-	set build_file [remote_upload $remote $remote_file]
+	set build_file [remote_upload $remote $file]
 	gdb_assert { [string equal [file tail $build_file] $file] == 1 } \
 	    "remote_upload returns valid value"
 	
