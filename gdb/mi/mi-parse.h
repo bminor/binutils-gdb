@@ -41,27 +41,27 @@ enum mi_command_type
 
 struct mi_parse
   {
-    mi_parse ();
+    mi_parse () = default;
     ~mi_parse ();
 
     DISABLE_COPY_AND_ASSIGN (mi_parse);
 
-    enum mi_command_type op;
-    char *command;
-    char *token;
-    const struct mi_command *cmd;
-    struct mi_timestamp *cmd_start;
-    char *args;
-    char **argv;
-    int argc;
-    int all;
-    int thread_group; /* At present, the same as inferior number.  */
-    int thread;
-    int frame;
+    enum mi_command_type op = MI_COMMAND;
+    char *command = nullptr;
+    char *token = nullptr;
+    const struct mi_command *cmd = nullptr;
+    struct mi_timestamp *cmd_start = nullptr;
+    char *args = nullptr;
+    char **argv = nullptr;
+    int argc = 0;
+    int all = 0;
+    int thread_group = -1; /* At present, the same as inferior number.  */
+    int thread = -1;
+    int frame = -1;
 
     /* The language that should be used to evaluate the MI command.
        Ignored if set to language_unknown.  */
-    enum language language;
+    enum language language = language_unknown;
   };
 
 /* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is

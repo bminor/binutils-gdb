@@ -208,23 +208,6 @@ mi_parse_argv (const char *args, struct mi_parse *parse)
     }
 }
 
-mi_parse::mi_parse ()
-  : op (MI_COMMAND),
-    command (NULL),
-    token (NULL),
-    cmd (NULL),
-    cmd_start (NULL),
-    args (NULL),
-    argv (NULL),
-    argc (0),
-    all (0),
-    thread_group (-1),
-    thread (-1),
-    frame (-1),
-    language (language_unknown)
-{
-}
-
 mi_parse::~mi_parse ()
 {
   xfree (command);
