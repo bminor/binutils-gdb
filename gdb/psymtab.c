@@ -1115,7 +1115,7 @@ partial_symtab::partial_symtab (const char *filename,
   : partial_symtab (filename, partial_symtabs, objfile_per_bfd)
 {
   set_text_low (textlow);
-  set_text_high (raw_text_low ()); /* default */
+  set_text_high (unrelocated_text_low ()); /* default */
 }
 
 /* Perform "finishing up" operations of a partial symtab.  */
@@ -1654,7 +1654,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		      gdb_printf (" psymtab\n");
 		    }
 		}
-	      if (ps->raw_text_high () != unrelocated_addr (0)
+	      if (ps->unrelocated_text_high () != unrelocated_addr (0)
 		  && (ps->text_low (objfile) < b->start ()
 		      || ps->text_high (objfile) > b->end ()))
 		{

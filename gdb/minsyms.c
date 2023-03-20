@@ -796,14 +796,14 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 
 	  unrelocated_addr unrel_pc;
 	  if (frob_address (objfile, pc, &unrel_pc)
-	      && unrel_pc >= msymbol[lo].value_raw_address ())
+	      && unrel_pc >= msymbol[lo].unrelocated_address ())
 	    {
-	      while (msymbol[hi].value_raw_address () > unrel_pc)
+	      while (msymbol[hi].unrelocated_address () > unrel_pc)
 		{
 		  /* pc is still strictly less than highest address.  */
 		  /* Note "new" will always be >= lo.  */
 		  newobj = (lo + hi) / 2;
-		  if ((msymbol[newobj].value_raw_address () >= unrel_pc)
+		  if ((msymbol[newobj].unrelocated_address () >= unrel_pc)
 		      || (lo == newobj))
 		    {
 		      hi = newobj;
@@ -818,8 +818,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		 hi to point to the last one.  That way we can find the
 		 right symbol if it has an index greater than hi.  */
 	      while (hi < objfile->per_bfd->minimal_symbol_count - 1
-		     && (msymbol[hi].value_raw_address ()
-			 == msymbol[hi + 1].value_raw_address ()))
+		     && (msymbol[hi].unrelocated_address ()
+			 == msymbol[hi + 1].unrelocated_address ()))
 		hi++;
 
 	      /* Skip various undesirable symbols.  */
@@ -866,8 +866,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		      && msymbol[hi].type () != want_type
 		      && msymbol[hi - 1].type () == want_type
 		      && (msymbol[hi].size () == msymbol[hi - 1].size ())
-		      && (msymbol[hi].value_raw_address ()
-			  == msymbol[hi - 1].value_raw_address ())
+		      && (msymbol[hi].unrelocated_address ()
+			  == msymbol[hi - 1].unrelocated_address ())
 		      && (msymbol[hi].obj_section (objfile)
 			  == msymbol[hi - 1].obj_section (objfile)))
 		    {
@@ -896,8 +896,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		     the cancellable variants, but both have sizes.  */
 		  if (hi > 0
 		      && msymbol[hi].size () != 0
-		      && unrel_pc >= msymbol[hi].value_raw_end_address ()
-		      && unrel_pc < msymbol[hi - 1].value_raw_end_address ())
+		      && unrel_pc >= msymbol[hi].unrelocated_end_address ()
+		      && unrel_pc < msymbol[hi - 1].unrelocated_end_address ())
 		    {
 		      hi--;
 		      continue;
@@ -926,7 +926,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 
 	      if (hi >= 0
 		  && msymbol[hi].size () != 0
-		  && unrel_pc >= msymbol[hi].value_raw_end_address ())
+		  && unrel_pc >= msymbol[hi].unrelocated_end_address ())
 		{
 		  if (best_zero_sized != -1)
 		    hi = best_zero_sized;
@@ -937,8 +937,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		      if (previous != nullptr)
 			{
 			  if (previous->minsym == nullptr
-			      || (msymbol[hi].value_raw_address ()
-				  > previous->minsym->value_raw_address ()))
+			      || (msymbol[hi].unrelocated_address ()
+				  > previous->minsym->unrelocated_address ()))
 			    {
 			      previous->minsym = &msymbol[hi];
 			      previous->objfile = objfile;
@@ -955,8 +955,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 
 	      if (hi >= 0
 		  && ((best_symbol == NULL) ||
-		      (best_symbol->value_raw_address () <
-		       msymbol[hi].value_raw_address ())))
+		      (best_symbol->unrelocated_address () <
+		       msymbol[hi].unrelocated_address ())))
 		{
 		  best_symbol = &msymbol[hi];
 		  best_objfile = objfile;
@@ -1222,11 +1222,11 @@ static inline bool
 minimal_symbol_is_less_than (const minimal_symbol &fn1,
 			     const minimal_symbol &fn2)
 {
-  if ((&fn1)->value_raw_address () < (&fn2)->value_raw_address ())
+  if ((&fn1)->unrelocated_address () < (&fn2)->unrelocated_address ())
     {
       return true;		/* addr 1 is less than addr 2.  */
     }
-  else if ((&fn1)->value_raw_address () > (&fn2)->value_raw_address ())
+  else if ((&fn1)->unrelocated_address () > (&fn2)->unrelocated_address ())
     {
       return false;		/* addr 1 is greater than addr 2.  */
     }
@@ -1286,8 +1286,8 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
       copyfrom = copyto = msymbol;
       while (copyfrom < msymbol + mcount - 1)
 	{
-	  if (copyfrom->value_raw_address ()
-	      == (copyfrom + 1)->value_raw_address ()
+	  if (copyfrom->unrelocated_address ()
+	      == (copyfrom + 1)->unrelocated_address ()
 	      && (copyfrom->section_index ()
 		  == (copyfrom + 1)->section_index ())
 	      && strcmp (copyfrom->linkage_name (),
@@ -1593,8 +1593,8 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
   section = msymbol->section_index ();
   for (iter = msymbol + 1; iter != past_the_end; ++iter)
     {
-      if ((iter->value_raw_address ()
-	   != msymbol->value_raw_address ())
+      if ((iter->unrelocated_address ()
+	   != msymbol->unrelocated_address ())
 	  && iter->section_index () == section)
 	break;
     }

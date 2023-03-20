@@ -2177,11 +2177,12 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			  = unrelocated_addr (symbol.n_value
 					      + CSECT_LEN (&csect_aux));
 
-			if (highval > pst->raw_text_high ())
+			if (highval > pst->unrelocated_text_high ())
 			  pst->set_text_high (highval);
 			unrelocated_addr loval
 			  = unrelocated_addr (symbol.n_value);
-			if (!pst->text_low_valid || loval < pst->raw_text_low ())
+			if (!pst->text_low_valid
+			    || loval < pst->unrelocated_text_low ())
 			  pst->set_text_low (loval);
 		      }
 		    misc_func_recorded = 0;

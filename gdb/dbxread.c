@@ -1131,13 +1131,13 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      if (past_first_source_file && pst
 		  /* The gould NP1 uses low values for .o and -l symbols
 		     which are not the address.  */
-		  && unrel_val >= pst->raw_text_low ())
+		  && unrel_val >= pst->unrelocated_text_low ())
 		{
 		  dbx_end_psymtab (objfile, partial_symtabs,
 				   pst, psymtab_include_list,
 				   includes_used, symnum * symbol_size,
-				   unrel_val > pst->raw_text_high ()
-				   ? unrel_val : pst->raw_text_high (),
+				   unrel_val > pst->unrelocated_text_high ()
+				   ? unrel_val : pst->unrelocated_text_high (),
 				   dependency_list, dependencies_used,
 				   textlow_not_set);
 		  pst = (legacy_psymtab *) 0;
@@ -1253,8 +1253,9 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		    dbx_end_psymtab (objfile, partial_symtabs,
 				     pst, psymtab_include_list,
 				     includes_used, symnum * symbol_size,
-				     (unrel_value > pst->raw_text_high ()
-				      ? unrel_value : pst->raw_text_high ()),
+				     unrel_value > pst->unrelocated_text_high ()
+				     ? unrel_value
+				     : pst->unrelocated_text_high (),
 				     dependency_list, dependencies_used,
 				     prev_textlow_not_set);
 		    pst = (legacy_psymtab *) 0;
@@ -1427,8 +1428,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		 function relative stabs, or the address of the function's
 		 end for old style stabs.  */
 	      valu = unrelocated_addr (nlist.n_value + last_function_start);
-	      if (pst->raw_text_high () == unrelocated_addr (0)
-		  || valu > pst->raw_text_high ())
+	      if (pst->unrelocated_text_high () == unrelocated_addr (0)
+		  || valu > pst->unrelocated_text_high ())
 		pst->set_text_high (valu);
 	      break;
 	    }
@@ -1682,7 +1683,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 					  objfile);
 		  if (minsym.minsym != NULL)
 		    nlist.n_value
-		      = CORE_ADDR (minsym.minsym->value_raw_address ());
+		      = CORE_ADDR (minsym.minsym->unrelocated_address ());
 		}
 	      if (pst && textlow_not_set
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
@@ -1703,7 +1704,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      if (pst
 		  && (textlow_not_set
 		      || (unrelocated_addr (nlist.n_value)
-			  < pst->raw_text_low ()
+			  < pst->unrelocated_text_low ()
 			  && (nlist.n_value != 0))))
 		{
 		  pst->set_text_low (unrelocated_addr (nlist.n_value));
@@ -1741,7 +1742,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 					  objfile);
 		  if (minsym.minsym != NULL)
 		    nlist.n_value
-		      = CORE_ADDR (minsym.minsym->value_raw_address ());
+		      = CORE_ADDR (minsym.minsym->unrelocated_address ());
 		}
 	      if (pst && textlow_not_set
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
@@ -1762,7 +1763,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      if (pst
 		  && (textlow_not_set
 		      || (unrelocated_addr (nlist.n_value)
-			  < pst->raw_text_low ()
+			  < pst->unrelocated_text_low ()
 			  && (nlist.n_value != 0))))
 		{
 		  pst->set_text_low (unrelocated_addr (nlist.n_value));
@@ -1957,8 +1958,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
       dbx_end_psymtab (objfile, partial_symtabs,
 		       pst, psymtab_include_list, includes_used,
 		       symnum * symbol_size,
-		       (text_end > pst->raw_text_high ()
-			? text_end : pst->raw_text_high ()),
+		       (text_end > pst->unrelocated_text_high ()
+			? text_end : pst->unrelocated_text_high ()),
 		       dependency_list, dependencies_used, textlow_not_set);
     }
 }
@@ -2058,7 +2059,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
 
       if (minsym.minsym)
 	pst->set_text_high
-	  (unrelocated_addr (CORE_ADDR (minsym.minsym->value_raw_address ())
+	  (unrelocated_addr (CORE_ADDR (minsym.minsym->unrelocated_address ())
 			     + minsym.minsym->size ()));
 
       last_function_name = NULL;
@@ -2068,7 +2069,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
     ;
   /* This test will be true if the last .o file is only data.  */
   else if (textlow_not_set)
-    pst->set_text_low (pst->raw_text_high ());
+    pst->set_text_low (pst->unrelocated_text_high ());
   else
     {
       /* If we know our own starting text address, then walk through all other
@@ -2078,7 +2079,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
 
       for (partial_symtab *p1 : partial_symtabs->range ())
 	if (!p1->text_high_valid && p1->text_low_valid && p1 != pst)
-	  p1->set_text_high (pst->raw_text_low ());
+	  p1->set_text_high (pst->unrelocated_text_low ());
     }
 
   /* End of kludge for patching Solaris textlow and texthigh.  */

@@ -1515,7 +1515,7 @@ gdb_bfd_lookup_symbol_from_symtab
 
 		  msym.set_value_address (symaddr);
 		  gdbarch_elf_make_msymbol_special (gdbarch, sym, &msym);
-		  symaddr = CORE_ADDR (msym.value_raw_address ());
+		  symaddr = CORE_ADDR (msym.unrelocated_address ());
 		}
 
 	      /* BFD symbols are section relative.  */

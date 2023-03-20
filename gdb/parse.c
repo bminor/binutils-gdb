@@ -115,7 +115,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
     {
       /* Addresses of TLS symbols are really offsets into a
 	 per-objfile/per-thread storage block.  */
-      addr = CORE_ADDR (bound_msym.minsym->value_raw_address ());
+      addr = CORE_ADDR (bound_msym.minsym->unrelocated_address ());
     }
   else if (msymbol_is_function (objfile, msymbol, &addr))
     {

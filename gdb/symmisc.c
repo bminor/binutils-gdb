@@ -201,7 +201,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 
       /* Use the relocated address as shown in the symbol here -- do
 	 not try to respect copy relocations.  */
-      CORE_ADDR addr = (CORE_ADDR (msymbol->value_raw_address ())
+      CORE_ADDR addr = (CORE_ADDR (msymbol->unrelocated_address ())
 			+ objfile->section_offsets[msymbol->section_index ()]);
       gdb_puts (paddress (gdbarch, addr), outfile);
       gdb_printf (outfile, " %s", msymbol->linkage_name ());

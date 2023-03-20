@@ -424,7 +424,7 @@ minimal_symbol::value_address (objfile *objfile) const
   if (this->maybe_copied)
     return get_msymbol_address (objfile, this);
   else
-    return (CORE_ADDR (this->value_raw_address ())
+    return (CORE_ADDR (this->unrelocated_address ())
 	    + objfile->section_offsets[this->section_index ()]);
 }
 

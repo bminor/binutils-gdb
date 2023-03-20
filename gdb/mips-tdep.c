@@ -436,13 +436,13 @@ mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
   if (ELF_ST_IS_MICROMIPS (st_other))
     {
       SET_MSYMBOL_TARGET_FLAG_MICROMIPS (msym);
-      CORE_ADDR fixed = CORE_ADDR (msym->value_raw_address ()) | 1;
+      CORE_ADDR fixed = CORE_ADDR (msym->unrelocated_address ()) | 1;
       msym->set_unrelocated_address (unrelocated_addr (fixed));
     }
   else if (ELF_ST_IS_MIPS16 (st_other))
     {
       SET_MSYMBOL_TARGET_FLAG_MIPS16 (msym);
-      CORE_ADDR fixed = CORE_ADDR (msym->value_raw_address ()) | 1;
+      CORE_ADDR fixed = CORE_ADDR (msym->unrelocated_address ()) | 1;
       msym->set_unrelocated_address (unrelocated_addr (fixed));
     }
 }

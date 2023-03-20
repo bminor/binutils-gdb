@@ -173,14 +173,14 @@ struct partial_symtab
 
   /* Return the unrelocated low text address of this
      partial_symtab.  */
-  unrelocated_addr raw_text_low () const
+  unrelocated_addr unrelocated_text_low () const
   {
     return m_text_low;
   }
 
   /* Return the unrelocated_addr high text address of this
      partial_symtab.  */
-  unrelocated_addr raw_text_high () const
+  unrelocated_addr unrelocated_text_high () const
   {
     return m_text_high;
   }

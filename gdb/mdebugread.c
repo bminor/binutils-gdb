@@ -2659,7 +2659,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	psymtab_language = prev_language;
       PST_PRIVATE (pst)->pst_language = psymtab_language;
 
-      pst->set_text_high (pst->raw_text_low ());
+      pst->set_text_high (pst->unrelocated_text_low ());
 
       /* For stabs-in-ecoff files, the second symbol must be @stab.
 	 This symbol is emitted by mips-tfile to signal that the
@@ -2726,9 +2726,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			  /* Kludge for Irix 5.2 zero fh->adr.  */
 			  if (!relocatable
 			      && (!pst->text_low_valid
-				  || procaddr < pst->raw_text_low ()))
+				  || procaddr < pst->unrelocated_text_low ()))
 			    pst->set_text_low (procaddr);
-			  if (high > pst->raw_text_high ())
+			  if (high > pst->unrelocated_text_high ())
 			    pst->set_text_high (high);
 			}
 		    }
@@ -3319,7 +3319,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    {
 		      unrelocated_addr unrel_value
 			= unrelocated_addr (sh.value);
-		      if (unrel_value > save_pst->raw_text_high ())
+		      if (unrel_value > save_pst->unrelocated_text_high ())
 			save_pst->set_text_high (unrel_value);
 		    }
 		    continue;
@@ -3511,11 +3511,11 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  /* Kludge for Irix 5.2 zero fh->adr.  */
 		  if (!relocatable
 		      && (!pst->text_low_valid
-			  || procaddr < pst->raw_text_low ()))
+			  || procaddr < pst->unrelocated_text_low ()))
 		    pst->set_text_low (procaddr);
 
 		  high = unrelocated_addr (CORE_ADDR (procaddr) + sh.value);
-		  if (high > pst->raw_text_high ())
+		  if (high > pst->unrelocated_text_high ())
 		    pst->set_text_high (high);
 		  continue;
 
@@ -3696,7 +3696,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       fdr_to_pst[f_idx].pst
 	= dbx_end_psymtab (objfile, partial_symtabs, save_pst,
 			   psymtab_include_list, includes_used,
-			   -1, save_pst->raw_text_high (),
+			   -1, save_pst->unrelocated_text_high (),
 			   dependency_list, dependencies_used,
 			   textlow_not_set);
       includes_used = 0;

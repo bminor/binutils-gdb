@@ -754,7 +754,7 @@ language_defn::read_var_value (struct symbol *var,
 	   a TLS variable. */
 	if (obj_section == NULL
 	    || (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
-	  addr = CORE_ADDR (bmsym.minsym->value_raw_address ());
+	  addr = CORE_ADDR (bmsym.minsym->unrelocated_address ());
 	else
 	  addr = bmsym.value_address ();
 	if (overlay_debugging)
