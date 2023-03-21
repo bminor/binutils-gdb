@@ -6364,6 +6364,16 @@ proc standard_output_file {basename} {
     return [file join $dir $basename]
 }
 
+# Turn BASENAME into a file name on host.
+
+proc host_standard_output_file { basename } {
+    if { [is_remote host] } {
+	return $basename
+    } else {
+	return [standard_output_file $basename]
+    }
+}
+
 # Turn BASENAME into a full file name in the standard output directory.  If
 # GDB has been launched more than once then append the count, starting with
 # a ".1" postfix.

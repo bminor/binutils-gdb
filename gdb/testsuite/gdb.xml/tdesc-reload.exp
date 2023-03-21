@@ -29,9 +29,9 @@ if {![runto_main]} {
 }
 
 # Three files we're going to write out to.
-set xml_file_1 [standard_output_file outfile1.xml]
-set xml_file_2 [standard_output_file outfile2.xml]
-set xml_file_3 [standard_output_file outfile3.xml]
+set xml_file_1 [host_standard_output_file outfile1.xml]
+set xml_file_2 [host_standard_output_file outfile2.xml]
+set xml_file_3 [host_standard_output_file outfile3.xml]
 
 # Write the current target description to a file.
 gdb_test_no_output "pipe maint print xml-tdesc | cat > $xml_file_1" \
