@@ -133,7 +133,6 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
     printf (", pauth = B key");
 
   char temp[100];
-  memset (temp, 0, 100);
 
   printf ("\n    %-7s%-8s %-10s%-10s%-13s", "STARTPC", fde_type_marker, "CFA", "FP", "RA");
   for (j = 0; j < num_fres; j++)
@@ -158,7 +157,6 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
       printf ("  %-10s", temp);
 
       /* Dump SP/FP info.  */
-      memset (temp, 0, 100);
       if (err[1] == 0)
 	sprintf (temp, "c%+d", fp_offset);
       else
@@ -166,7 +164,6 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
       printf ("%-10s", temp);
 
       /* Dump RA info.  */
-      memset (temp, 0, 100);
       if (err[2] == 0)
 	sprintf (temp, "c%+d", ra_offset);
       else
