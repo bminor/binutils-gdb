@@ -168,4 +168,7 @@ set obj [dap_check_request_and_response "command repl" \
 set response [lindex $obj 0]
 gdb_assert {[dict get $response body result] == 23}
 
+set obj [dap_check_request_and_response sources loadedSources]
+gdb_assert {[string first basic-dap.c $obj] != -1}
+
 dap_shutdown

@@ -29,6 +29,7 @@ from . import memory
 from . import next
 from . import pause
 from . import scopes
+from . import sources
 from . import threads
 
 from .server import Server

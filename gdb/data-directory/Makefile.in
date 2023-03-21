@@ -101,6 +101,7 @@ PYTHON_FILE_LIST = \
 	gdb/dap/pause.py \
 	gdb/dap/scopes.py \
 	gdb/dap/server.py \
+	gdb/dap/sources.py \
 	gdb/dap/startup.py \
 	gdb/dap/state.py \
 	gdb/dap/threads.py \
