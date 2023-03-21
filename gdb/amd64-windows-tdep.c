@@ -1098,13 +1098,14 @@ amd64_windows_frame_cache (frame_info_ptr this_frame, void **this_cache)
   cache->sp = extract_unsigned_integer (buf, 8, byte_order);
   cache->pc = pc;
 
+  /* If we can't find the unwind info, keep trying as though this is a
+     leaf function.  This situation can happen when PC==0, see
+     https://sourceware.org/bugzilla/show_bug.cgi?id=30255.  */
   if (amd64_windows_find_unwind_info (gdbarch, pc, &unwind_info,
 				      &cache->image_base,
 				      &cache->start_rva,
-				      &cache->end_rva))
-    return cache;
-
-  if (unwind_info == 0)
+				      &cache->end_rva)
+      || unwind_info == 0)
     {
       /* Assume a leaf function.  */
       cache->prev_sp = cache->sp + 8;
