@@ -61,11 +61,6 @@
 /* Header files for alti-vec reg.  */
 #include <sys/context.h>
 
-#include "features/rs6000/powerpc-vsx64.c"
-#include "features/rs6000/powerpc-vsx32.c"
-#include "features/rs6000/powerpc-altivec32.c"
-#include "features/rs6000/powerpc-altivec64.c"
-
 /* On AIX4.3+, sys/ldr.h provides different versions of struct ld_info for
    debugging 32-bit and 64-bit processes.  Define a typedef and macros for
    accessing fields in the appropriate structures.  */
