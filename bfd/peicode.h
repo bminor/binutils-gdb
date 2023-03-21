@@ -1147,6 +1147,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   obj_conv_table_size (abfd) = vars.sym_index;
 
   obj_coff_strings (abfd) = vars.string_table;
+  obj_coff_strings_len (abfd) = vars.string_ptr - vars.string_table;
   obj_coff_keep_strings (abfd) = true;
 
   return true;
