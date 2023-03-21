@@ -2866,7 +2866,12 @@ sh_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      name = NULL;
 	    else if (sym->_n._n_n._n_zeroes == 0
 		     && sym->_n._n_n._n_offset != 0)
-	      name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
+	      {
+		if (sym->_n._n_n._n_offset < obj_coff_strings_len (input_bfd))
+		  name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
+		else
+		  name = "?";
+	      }
 	    else
 	      {
 		strncpy (buf, sym->_n._n_name, SYMNMLEN);

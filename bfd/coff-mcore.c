@@ -434,7 +434,13 @@ coff_mcore_relocate_section (bfd * output_bfd,
 		my_name = "*unknown*";
 	      else if (   sym->_n._n_n._n_zeroes == 0
 		       && sym->_n._n_n._n_offset != 0)
-		my_name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
+		{
+		  if (sym->_n._n_n._n_offset < obj_coff_strings_len (input_bfd))
+		    my_name = (obj_coff_strings (input_bfd)
+			       + sym->_n._n_n._n_offset);
+		  else
+		    my_name = "?";
+		}
 	      else
 		{
 		  strncpy (buf, sym->_n._n_name, SYMNMLEN);
