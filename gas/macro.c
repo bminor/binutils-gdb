@@ -1320,7 +1320,10 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 
   sb_new (&sub);
   if (! buffer_and_nest (NULL, "ENDR", &sub, get_line))
-    return _("unexpected end of file in irp or irpc");
+    {
+      err = _("unexpected end of file in irp or irpc");
+      goto out2;
+    }
 
   sb_new (&f.name);
   sb_new (&f.def);
@@ -1328,7 +1331,10 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 
   idx = get_token (idx, in, &f.name);
   if (f.name.len == 0)
-    return _("missing model parameter");
+    {
+      err = _("missing model parameter");
+      goto out1;
+    }
 
   h = str_htab_create ();
 
@@ -1392,9 +1398,11 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
     }
 
   htab_delete (h);
+ out1:
   sb_kill (&f.actual);
   sb_kill (&f.def);
   sb_kill (&f.name);
+ out2:
   sb_kill (&sub);
 
   return err;
