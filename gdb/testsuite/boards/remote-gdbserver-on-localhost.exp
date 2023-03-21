@@ -51,12 +51,16 @@ save_vars {rsh_cmd res} {
 	# Make things a bit more realistic by restricting file permissions.
 
 	# Make sure remote target can't see files on build.
-	remote_exec build "chmod go-rx $objdir"
+	set res [remote_exec build "chmod go-rx $objdir"]
+	if { [lindex $res 0] != 0 } {
+	    error "Couldn't remove permissions for $objdir on build"
+	}
 
-	# Make sure build can't see files on remote target.  We can't use
-	# remote_exec target, because we're in the middle of parsing the
-	# target board.
-	remote_exec build $rsh_cmd "chmod go-rx ."
+	# Make sure build can't see files on remote target.
+	set res [remote_exec build $rsh_cmd "chmod go-rx ."]
+	if { [lindex $res 0] != 0 } {
+	    error "Couldn't remove permissions for . on target"
+	}
     }
 
     # Set remotedir by default, to force remote_download target to give an
