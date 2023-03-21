@@ -142,12 +142,10 @@ proc load_description { file errmsg xml_file } {
     close $ifd
     close $ofd
 
-    if {[is_remote host]} {
-	set regs_file [remote_download host "$regs_file" $xml_file]
-    }
+    set host_regs_file [gdb_remote_download host "$regs_file"]
 
     # Anchor the test output, so that error messages are detected.
-    set cmd "set tdesc filename [file tail $regs_file]"
+    set cmd "set tdesc filename $host_regs_file"
     set msg "set tdesc filename $xml_file - from $file"
     set cmd_regex [string_to_regexp $cmd]
     gdb_test_multiple $cmd $msg {
