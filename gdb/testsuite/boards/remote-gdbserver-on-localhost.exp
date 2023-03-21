@@ -56,7 +56,7 @@ save_vars {rsh_cmd res} {
 	# Make sure build can't see files on remote target.  We can't use
 	# remote_exec target, because we're in the middle of parsing the
 	# target board.
-	remote_exec build $rsh_cmd chmod go-rx ."
+	remote_exec build $rsh_cmd "chmod go-rx ."
     }
 
     # Set remotedir by default, to force remote_download target to give an
