@@ -59,14 +59,20 @@ def start_thread(name, target, args=()):
     with blocked_signals():
         result = threading.Thread(target=target, args=args, daemon=True)
         result.start()
-        return result
 
 
 def start_dap(target):
     """Start the DAP thread and invoke TARGET there."""
-    global _dap_thread
     exec_and_log("set breakpoint pending on")
-    _dap_thread = start_thread("DAP", target)
+
+    # Functions in this thread contain assertions that check for this
+    # global, so we must set it before letting these functions run.
+    def really_start_dap():
+        global _dap_thread
+        _dap_thread = threading.current_thread()
+        target()
+
+    start_thread("DAP", really_start_dap)
 
 
 def in_gdb_thread(func):

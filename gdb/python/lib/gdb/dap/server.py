@@ -100,9 +100,7 @@ class Server:
         log("WROTE: <<<" + json.dumps(obj) + ">>>")
         self.write_queue.put(obj)
 
-    # This must be run in the DAP thread, but we can't use
-    # @in_dap_thread here because the global isn't set until after
-    # this starts running.  FIXME.
+    @in_dap_thread
     def main_loop(self):
         """The main loop of the DAP server."""
         # Before looping, start the thread that writes JSON to the
