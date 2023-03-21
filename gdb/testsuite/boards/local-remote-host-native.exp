@@ -40,7 +40,7 @@ if { $board_type == "target" } {
 set GDB [file join [pwd] "../gdb"]
 verbose -log "Overriding setting of GDB to $GDB"
 
-set_board_info hostname 127.0.0.1
+set_board_info hostname localhost
 
 set_board_info username $env(USER)
 
@@ -65,7 +65,7 @@ save_vars {rsh_cmd res} {
     }
 }
 
-# The ssh key should be correctly set up that you ssh to 127.0.0.1
+# The ssh key should be correctly set up that you ssh to localhost
 # without having to type password.
 set_board_info rsh_prog /usr/bin/ssh
 set_board_info rcp_prog /usr/bin/scp
