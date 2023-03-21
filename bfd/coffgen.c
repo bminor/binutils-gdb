@@ -1756,10 +1756,7 @@ coff_get_normalized_symtab (bfd *abfd)
 
       /* PR 17512: Prevent buffer overrun.  */
       if (symbol_ptr->u.syment.n_numaux > ((raw_end - 1) - raw_src) / symesz)
-	{
-	  bfd_release (abfd, internal);
-	  return NULL;
-	}
+	return NULL;
 
       for (i = 0;
 	   i < symbol_ptr->u.syment.n_numaux;
