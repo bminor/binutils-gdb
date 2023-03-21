@@ -86,14 +86,6 @@ proc get_target_remote_pipe_cmd { } {
     return "$rsh_cmd $gdbserver --once stdio $target_exec"
 }
 
-proc ${board}_file { dest op args } {
-    if { $op == "delete" } {
-	set res [remote_exec target "rm -f $args"]
-	return [lindex $res 0]
-    }
-    return [eval [list standard_file $dest $op] $args]
-}
-
 proc ${board}_spawn { board cmd } {
     global board_info
 
