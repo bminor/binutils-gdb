@@ -189,7 +189,8 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	    }
 	  memcpy (sec_name, name, name_len);
 
-	  flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
+	  flags = (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD
+		   | SEC_LINKER_CREATED);
 	  sec = bfd_make_section_anyway_with_flags (abfd, sec_name, flags);
 	  if (sec == NULL)
 	    {
@@ -198,18 +199,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	      return;
 	    }
 
-	  sec->vma = 0;
-	  sec->lma = 0;
-	  sec->size = 0;
-	  sec->filepos = 0;
-	  sec->rel_filepos = 0;
-	  sec->reloc_count = 0;
-	  sec->line_filepos = 0;
-	  sec->lineno_count = 0;
-	  sec->userdata = NULL;
-	  sec->next = NULL;
 	  sec->alignment_power = 2;
-
 	  sec->target_index = unused_section_number;
 
 	  in->n_scnum = unused_section_number;
