@@ -137,13 +137,6 @@ proc_with_prefix gdb_simple_compile_and_run {} {
     set result [remote_exec target $target_obj]
     set status [lindex $result 0]
     set output [lindex $result 1]
-
-    if { [host_info name] == "local-remote-host-native"
-	 && [target_info name] == "local-remote-host-native" } {
-	# Setting remotedir on this board has effect on both host and
-	# target, and it seems to broken for host.  Xfail this for now.
-	setup_xfail *-*-*
-    }
     gdb_assert { $status == 0 && $output == "" }
 
     remote_file build delete $obj

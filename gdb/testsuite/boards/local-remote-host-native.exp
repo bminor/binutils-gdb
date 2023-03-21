@@ -44,11 +44,36 @@ set_board_info hostname 127.0.0.1
 
 set_board_info username $env(USER)
 
+save_vars {rsh_cmd res} {
+    set rsh_cmd \
+	[join \
+	     [list \
+		  [board_info $board rsh_prog] \
+		  -l [board_info $board username] \
+		  [board_info $board hostname]]]
+
+    if [info exists HOST_DIR] {
+	set_board_info remotedir $HOST_DIR
+    } else {
+	# Set remotedir by default, to force remote_download target to give an
+	# absolute file name.
+	set res [remote_exec build $rsh_cmd pwd]
+	if { [lindex $res 0] != 0 } {
+	    error "Couldn't set remotedir using pwd"
+	}
+	set_board_info remotedir [string trim [lindex $res 1]]
+    }
+}
+
 # The ssh key should be correctly set up that you ssh to 127.0.0.1
 # without having to type password.
 set_board_info rsh_prog /usr/bin/ssh
 set_board_info rcp_prog /usr/bin/scp
 set_board_info file_transfer "rsh"
+
+if { $board_type == "host" } {
+    set_board_info gdb_opts "-d \"${HOST_DIR}\""
+}
 
 proc ${board}_spawn { board cmd } {
     global board_info
