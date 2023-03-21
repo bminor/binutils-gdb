@@ -913,7 +913,7 @@ linux_mntns_access_fs (pid_t pid)
   struct stat sb;
   struct linux_mnsh *helper;
   ssize_t size;
-  int fd;
+  int fd, fd_user = -1;
 
   if (pid == getpid ())
     return MNSH_FS_DIRECT;
@@ -930,6 +930,8 @@ linux_mntns_access_fs (pid_t pid)
     {
       int save_errno = errno;
       close (fd);
+      if (fd_user >= 0)
+	close (fd_user);
       errno = save_errno;
     };
 
@@ -939,6 +941,13 @@ linux_mntns_access_fs (pid_t pid)
   if (sb.st_ino == ns->id)
     return MNSH_FS_DIRECT;
 
+  struct linux_ns *ns_user = linux_ns_get_namespace (LINUX_NS_USER);
+  if (ns_user != nullptr)
+    {
+      const char *ns_filename = linux_ns_filename (ns_user, pid);
+      fd_user = gdb_open_cloexec (ns_filename, O_RDONLY, 0).release ();
+    }
+
   helper = linux_mntns_get_helper ();
   if (helper == NULL)
     return MNSH_FS_ERROR;
@@ -946,6 +955,19 @@ linux_mntns_access_fs (pid_t pid)
   if (sb.st_ino != helper->nsid)
     {
       int result, error;
+
+      /* Try to enter the user namespace first.  The current user might
+	 have elevated privileges within the user namespace, which would
+	 then allow the attempt to enter the mount namespace to succeed.  */
+      if (fd_user >= 0)
+	{
+	  size = mnsh_send_setns (helper, fd_user, 0);
+	  if (size < 0)
+	    return MNSH_FS_ERROR;
+
+	  if (mnsh_recv_int (helper, &result, &error) != 0)
+	    return MNSH_FS_ERROR;
+	}
 
       size = mnsh_send_setns (helper, fd, 0);
       if (size < 0)
