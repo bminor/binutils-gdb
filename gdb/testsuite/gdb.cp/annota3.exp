@@ -95,14 +95,23 @@ gdb_expect_list "print class" "$gdb_prompt$" {
 # annotate-exited
 #
 send_gdb "continue\n"
-gdb_expect_list "continue to exit" "$gdb_prompt$" [concat {
-    "\r\n\032\032post-prompt\r\n"
-    "Continuing.\r\n"
-    "\r\n\032\032starting\r\n"
-    "a.x is 1\r\n"
-    "\r\n\032\032exited 0\r\n"} [list "$inferior_exited_re normally.\r\n"] {
-    "\r\n\032\032stopped\r\n"
-}]
+
+set el {}
+lappend el "\r\n\032\032post-prompt\r\n"
+lappend el "Continuing.\r\n"
+lappend el "\r\n\032\032starting\r\n"
+if { $gdb_spawn_id == $inferior_spawn_id } {
+    lappend el "a.x is 1\r\n"
+} else {
+    # Usually we'd handle this using gdb_test_stdio, but that looks too
+    # complicated in combination with annotations, so just ignore the inferior
+    # output.
+}
+lappend el "\r\n\032\032exited 0\r\n"
+lappend el "$inferior_exited_re normally.\r\n"
+lappend el "\r\n\032\032stopped\r\n"
+
+gdb_expect_list "continue to exit" "$gdb_prompt$" $el
 
 #
 # delete all breakpoints
