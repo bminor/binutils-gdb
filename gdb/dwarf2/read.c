@@ -10083,8 +10083,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   gdb_assert (cu->get_builder () != nullptr);
   newobj = cu->get_builder ()->push_context (0, lowpc);
-  newobj->name = new_symbol (die, read_type_die (die, cu), cu,
-			     (struct symbol *) templ_func);
+  newobj->name = new_symbol (die, read_type_die (die, cu), cu, templ_func);
 
   if (dwarf2_flag_true_p (die, DW_AT_main_subprogram, cu))
     set_objfile_main_name (objfile, newobj->name->linkage_name (),
