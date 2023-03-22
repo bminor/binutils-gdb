@@ -57,6 +57,8 @@ require allow_cplus_tests
 # Test for c++/11734
 standard_testfile ovsrch1.cc ovsrch2.cc ovsrch3.cc ovsrch4.cc
 
+include_file ovsrch.h
+
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2 $srcfile3 $srcfile4] {c++ debug}]} {
     return -1

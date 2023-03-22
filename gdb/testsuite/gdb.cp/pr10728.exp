@@ -22,6 +22,8 @@ require allow_cplus_tests
 load_lib "cp-support.exp"
 
 standard_testfile pr10728-x.cc pr10728-y.cc
+include_file pr10728-x.h
+
 set tfx [standard_output_file pr10728-x.o]
 set tfy [standard_output_file pr10728-y.o]
 

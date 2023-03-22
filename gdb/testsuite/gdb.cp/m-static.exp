@@ -27,6 +27,8 @@ require allow_cplus_tests
 
 standard_testfile .cc m-static1.cc
 
+include_file m-static.h
+
 set flags [list debug c++]
 if { [test_compiler_info gcc-*] && [gcc_major_version] >= 10 } {
     # Work around PR gcc/101452.
@@ -181,7 +183,11 @@ gdb_test "print test4.somewhere" "\\$\[0-9\].* = 3.14\[0-9\]*" "static const flo
 
 # Also make sure static const members can be found via "info var".
 if { $non_dwarf } { setup_xfail *-*-* }
-gdb_test "info variable everywhere" "File .*/m-static\[.\]h.*const int gnu_obj_4::everywhere;"
+gdb_test "info variable everywhere" \
+    [multi_line \
+	 "File (.*/)?m-static\[.\]h:" \
+	 "$decimal:\tconst int gnu_obj_4::everywhere;" \
+	 ".*"]
 
 # Perhaps at some point test4 should also include a test for a static
 # const int that was initialized in the header file.  But I'm not sure

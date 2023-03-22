@@ -22,6 +22,7 @@ require allow_cplus_tests
 
 standard_testfile mb-inline1.cc mb-inline2.cc
 set hdrfile "${testfile}.h"
+include_file $hdrfile
 
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] {debug c++}]} {

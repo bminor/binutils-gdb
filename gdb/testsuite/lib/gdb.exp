@@ -9554,6 +9554,18 @@ gdb_caching_proc have_compile_flag { flag } {
 		additional_flags=$flag]
 }
 
+# Handle include file $srcdir/$subdir/FILE.
+
+proc include_file { file } {
+    set file [file join $::srcdir $::subdir $file]
+    if { [is_remote host] } {
+	set res [remote_download host $file]
+    } else {
+	set res $file
+    }
+
+    return $res
+}
 
 # Handle include file FILE, and if necessary update compiler flags variable
 # FLAGS.

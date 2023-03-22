@@ -34,6 +34,8 @@ require allow_cplus_tests
 
 standard_testfile rtti1.cc rtti2.cc
 
+include_file rtti.h
+
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] {debug c++}]} {
     return -1

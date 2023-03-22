@@ -17,6 +17,8 @@ require allow_cplus_tests
 
 standard_testfile .cc
 
+include_file includefile
+
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }

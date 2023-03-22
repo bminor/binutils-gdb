@@ -25,6 +25,8 @@ require allow_cplus_tests allow_shlib_tests
 
 standard_testfile .cc gdb2384-base.cc
 
+include_file gdb2384-base.h
+
 set sofile [standard_output_file gdb2384-base.so]
 
 if { [gdb_compile_shlib $srcdir/$subdir/$srcfile2 $sofile {debug c++}] != ""

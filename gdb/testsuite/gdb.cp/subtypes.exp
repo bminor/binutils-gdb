@@ -22,6 +22,8 @@ load_lib "cp-support.exp"
 
 standard_testfile .cc subtypes-2.cc
 
+include_file subtypes.h
+
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] \
 	 {debug c++ additional_flags=-std=c++11}]} {

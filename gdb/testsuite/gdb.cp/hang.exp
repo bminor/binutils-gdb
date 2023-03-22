@@ -18,6 +18,8 @@ require allow_cplus_tests
 
 standard_testfile hang1.cc hang2.cc hang3.cc
 
+include_file hang.H
+
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2 $srcfile3] {debug c++}]} {
     return -1

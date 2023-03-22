@@ -19,6 +19,8 @@ require allow_cplus_tests
 
 standard_testfile .cc breakpoint-locs-2.cc
 
+include_file breakpoint-locs.h
+
 if { [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2"\
 	  {debug c++}] } {
     return -1
