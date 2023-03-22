@@ -347,13 +347,22 @@ maintenance_info_frame_unwinders (const char *args, int from_tty)
   struct gdbarch *gdbarch = target_gdbarch ();
   struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
 
+  ui_out *uiout = current_uiout;
+  ui_out_emit_table table_emitter (uiout, 2, -1, "FrameUnwinders");
+  uiout->table_header (27, ui_left, "name", "Name");
+  uiout->table_header (25, ui_left, "type", "Type");
+  uiout->table_body ();
+
   for (struct frame_unwind_table_entry *entry = table->list; entry != NULL;
        entry = entry->next)
     {
       const char *name = entry->unwinder->name;
       const char *type = frame_type_str (entry->unwinder->type);
 
-      gdb_printf (gdb_stdout, "%-16s\t%-16s\n", name, type);
+      ui_out_emit_list tuple_emitter (uiout, nullptr);
+      uiout->field_string ("name", name);
+      uiout->field_string ("type", type);
+      uiout->text ("\n");
     }
 }
 
