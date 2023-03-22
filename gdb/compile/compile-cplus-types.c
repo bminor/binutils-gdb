@@ -802,7 +802,7 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
 				       enum gcc_cp_symbol_kind nested_access)
 {
   const char *filename = nullptr;
-  unsigned short line = 0;
+  unsigned int line = 0;
 
   /* Get the decl name of this type.  */
   gdb::unique_xmalloc_ptr<char> name

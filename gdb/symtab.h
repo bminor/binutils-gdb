@@ -1293,12 +1293,12 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_type = type;
   }
 
-  unsigned short line () const
+  unsigned int line () const
   {
     return m_line;
   }
 
-  void set_line (unsigned short line)
+  void set_line (unsigned int line)
   {
     m_line = line;
   }
@@ -1461,13 +1461,9 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
      SYMBOL_INLINED set) this is the line number of the function's call
      site.  Inlined function symbols are not definitions, and they are
      never found by symbol table lookup.
-     If this symbol is arch-owned, LINE shall be zero.
+     If this symbol is arch-owned, LINE shall be zero.  */
 
-     FIXME: Should we really make the assumption that nobody will try
-     to debug files longer than 64K lines?  What about machine
-     generated programs?  */
-
-  unsigned short m_line = 0;
+  unsigned int m_line = 0;
 
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data

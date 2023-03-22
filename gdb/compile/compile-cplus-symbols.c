@@ -49,7 +49,7 @@ convert_one_symbol (compile_cplus_instance *instance,
   /* Squash compiler warning.  */
   gcc_type sym_type = 0;
   const char *filename = sym.symbol->symtab ()->filename;
-  unsigned short line = sym.symbol->line ();
+  unsigned int line = sym.symbol->line ();
 
   instance->error_symbol_once (sym.symbol);
 
