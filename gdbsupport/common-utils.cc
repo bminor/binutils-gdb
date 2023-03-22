@@ -445,3 +445,21 @@ hex2bin (const char *hex)
 
   return bin;
 }
+
+/* See gdbsupport/common-utils.h.  */
+
+std::string
+bytes_to_string (gdb::array_view<const gdb_byte> bytes)
+{
+  std::string ret;
+
+  for (size_t i = 0; i < bytes.size (); i++)
+    {
+      if (i == 0)
+	ret += string_printf ("%02x", bytes[i]);
+      else
+	ret += string_printf (" %02x", bytes[i]);
+    }
+
+  return ret;
+}

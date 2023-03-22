@@ -21,6 +21,7 @@
 #include "traits.h"
 #include <algorithm>
 #include <type_traits>
+#include "gdbsupport/gdb_assert.h"
 
 /* An array_view is an abstraction that provides a non-owning view
    over a sequence of contiguous objects.

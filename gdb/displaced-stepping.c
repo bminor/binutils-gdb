@@ -122,8 +122,7 @@ displaced_step_buffers::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
 
   displaced_debug_printf ("saved %s: %s",
 			  paddress (arch, buffer->addr),
-			  displaced_step_dump_bytes
-			  (buffer->saved_copy.data (), len).c_str ());
+			  bytes_to_string (buffer->saved_copy).c_str ());
 
   /* Save this in a local variable first, so it's released if code below
      throws.  */

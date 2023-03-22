@@ -1725,24 +1725,6 @@ displaced_step_reset (displaced_step_thread_state *displaced)
 
 using displaced_step_reset_cleanup = FORWARD_SCOPE_EXIT (displaced_step_reset);
 
-/* See infrun.h.  */
-
-std::string
-displaced_step_dump_bytes (const gdb_byte *buf, size_t len)
-{
-  std::string ret;
-
-  for (size_t i = 0; i < len; i++)
-    {
-      if (i == 0)
-	ret += string_printf ("%02x", buf[i]);
-      else
-	ret += string_printf (" %02x", buf[i]);
-    }
-
-  return ret;
-}
-
 /* Prepare to single-step, using displaced stepping.
 
    Note that we cannot use displaced stepping when we have a signal to
@@ -1820,8 +1802,7 @@ displaced_step_prepare_throw (thread_info *tp)
 	  gdb::byte_vector insn_buf (dislen);
 	  read_memory (original_pc, insn_buf.data (), insn_buf.size ());
 
-	  std::string insn_bytes
-	    = displaced_step_dump_bytes (insn_buf.data (), insn_buf.size ());
+	  std::string insn_bytes = bytes_to_string (insn_buf);
 
 	  displaced_debug_printf ("original insn %s: %s \t %s",
 				  paddress (gdbarch, original_pc),
@@ -1902,8 +1883,7 @@ displaced_step_prepare_throw (thread_info *tp)
 	  gdb::byte_vector insn_buf (dislen);
 	  read_memory (addr, insn_buf.data (), insn_buf.size ());
 
-	  std::string insn_bytes
-	    = displaced_step_dump_bytes (insn_buf.data (), insn_buf.size ());
+	  std::string insn_bytes = bytes_to_string (insn_buf);
 	  std::string insn_str = tmp_stream.release ();
 	  displaced_debug_printf ("replacement insn %s: %s \t %s",
 				  paddress (gdbarch, addr),

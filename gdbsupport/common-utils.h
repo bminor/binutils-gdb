@@ -24,6 +24,7 @@
 #include <vector>
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_unique_ptr.h"
+#include "gdbsupport/array-view.h"
 #include "poison.h"
 #include "gdb_string_view.h"
 
@@ -193,6 +194,21 @@ extern int hex2bin (const char *hex, gdb_byte *bin, int count);
 
 /* Like the above, but return a gdb::byte_vector.  */
 gdb::byte_vector hex2bin (const char *hex);
+
+/* Build a string containing the contents of BYTES.  Each byte is
+   represented as a 2 character hex string, with spaces separating each
+   individual byte.  */
+
+extern std::string bytes_to_string (gdb::array_view<const gdb_byte> bytes);
+
+/* See bytes_to_string above.  This takes a BUFFER pointer and LENGTH
+   rather than an array view.  */
+
+static inline std::string bytes_to_string (const gdb_byte *buffer,
+					   size_t length)
+{
+  return bytes_to_string ({buffer, length});
+}
 
 /* A fast hashing function.  This can be used to hash data in a fast way
    when the length is known.  If no fast hashing library is available, falls
