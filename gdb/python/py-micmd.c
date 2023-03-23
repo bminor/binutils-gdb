@@ -293,6 +293,21 @@ serialize_mi_result_1 (PyObject *result, const char *field_name)
     }
   else
     {
+      if (PyLong_Check (result))
+	{
+	  int overflow = 0;
+	  gdb_py_longest val = gdb_py_long_as_long_and_overflow (result,
+								 &overflow);
+	  if (PyErr_Occurred () != nullptr)
+	    gdbpy_handle_exception ();
+	  if (overflow == 0)
+	    {
+	      uiout->field_signed (field_name, val);
+	      return;
+	    }
+	  /* Fall through to the string case on overflow.  */
+	}
+
       gdb::unique_xmalloc_ptr<char> string (gdbpy_obj_to_string (result));
       if (string == nullptr)
 	gdbpy_handle_exception ();
