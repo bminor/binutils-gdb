@@ -23,7 +23,6 @@
 #include <queue>
 #include <unordered_map>
 #include "dwarf2/comp-unit-head.h"
-#include "dwarf2/cooked-index.h"
 #include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/mapped-index.h"

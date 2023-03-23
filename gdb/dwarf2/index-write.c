@@ -30,6 +30,7 @@
 #include "gdbsupport/scoped_fd.h"
 #include "complaints.h"
 #include "dwarf2/index-common.h"
+#include "dwarf2/cooked-index.h"
 #include "dwarf2.h"
 #include "dwarf2/read.h"
 #include "dwarf2/dwz.h"
