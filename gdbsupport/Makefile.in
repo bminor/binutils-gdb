@@ -166,8 +166,8 @@ am_libgdbsupport_a_OBJECTS = agent.$(OBJEXT) btrace-common.$(OBJEXT) \
 	ptid.$(OBJEXT) rsp-low.$(OBJEXT) run-time-clock.$(OBJEXT) \
 	safe-strerror.$(OBJEXT) scoped_mmap.$(OBJEXT) search.$(OBJEXT) \
 	signals.$(OBJEXT) signals-state-save-restore.$(OBJEXT) \
-	tdesc.$(OBJEXT) thread-pool.$(OBJEXT) xml-utils.$(OBJEXT) \
-	$(am__objects_1) $(am__objects_2)
+	task-group.$(OBJEXT) tdesc.$(OBJEXT) thread-pool.$(OBJEXT) \
+	xml-utils.$(OBJEXT) $(am__objects_1) $(am__objects_2)
 libgdbsupport_a_OBJECTS = $(am_libgdbsupport_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -436,6 +436,7 @@ libgdbsupport_a_SOURCES = \
     search.cc \
     signals.cc \
     signals-state-save-restore.cc \
+    task-group.cc \
     tdesc.cc \
     thread-pool.cc \
     xml-utils.cc \
@@ -546,6 +547,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/selftest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals-state-save-restore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/task-group.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tdesc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml-utils.Po@am__quote@

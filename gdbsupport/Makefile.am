@@ -79,6 +79,7 @@ libgdbsupport_a_SOURCES = \
     search.cc \
     signals.cc \
     signals-state-save-restore.cc \
+    task-group.cc \
     tdesc.cc \
     thread-pool.cc \
     xml-utils.cc \
