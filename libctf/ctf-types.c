@@ -1417,7 +1417,10 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
 	  && (ctf_type_kind (fp, memb.ctlm_type) == CTF_K_STRUCT
 	      || ctf_type_kind (fp, memb.ctlm_type) == CTF_K_UNION)
 	  && (ctf_member_info (fp, memb.ctlm_type, name, mip) == 0))
-	return 0;
+	{
+	  mip->ctm_offset += (unsigned long) CTF_LMEM_OFFSET (&memb);
+	  return 0;
+	}
 
       if (strcmp (membname, name) == 0)
 	{
