@@ -468,6 +468,14 @@ typedef CORE_ADDR (gdbarch_get_return_buf_addr_ftype) (struct type *val_type, fr
 extern CORE_ADDR gdbarch_get_return_buf_addr (struct gdbarch *gdbarch, struct type *val_type, frame_info_ptr cur_frame);
 extern void set_gdbarch_get_return_buf_addr (struct gdbarch *gdbarch, gdbarch_get_return_buf_addr_ftype *get_return_buf_addr);
 
+/* Return true if the typedef record needs to be replaced.".
+
+   Return 0 by default */
+
+typedef bool (gdbarch_dwarf2_omit_typedef_p_ftype) (struct type *target_type, const char *producer, const char *name);
+extern bool gdbarch_dwarf2_omit_typedef_p (struct gdbarch *gdbarch, struct type *target_type, const char *producer, const char *name);
+extern void set_gdbarch_dwarf2_omit_typedef_p (struct gdbarch *gdbarch, gdbarch_dwarf2_omit_typedef_p_ftype *dwarf2_omit_typedef_p);
+
 /* Return true if the return value of function is stored in the first hidden
    parameter.  In theory, this feature should be language-dependent, specified
    by language and its ABI, such as C++.  Unfortunately, compiler may

@@ -62,6 +62,7 @@
 #include "user-regs.h"
 #include <ctype.h>
 #include "elf-bfd.h"
+#include "producer.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
@@ -2006,6 +2007,38 @@ ppc_floatformat_for_type (struct gdbarch *gdbarch,
   return default_floatformat_for_type (gdbarch, name, len);
 }
 
+static bool
+linux_dwarf2_omit_typedef_p (struct type *target_type,
+			     const char *producer, const char *name)
+{
+  int gcc_major, gcc_minor;
+
+  if (producer_is_gcc (producer, &gcc_major, &gcc_minor))
+    {
+      if ((target_type->code () == TYPE_CODE_FLT
+	   || target_type->code () == TYPE_CODE_COMPLEX)
+	  && (strcmp (name, "long double") == 0
+	      || strcmp (name, "complex long double") == 0))
+	{
+	  /* IEEE 128-bit floating point and IBM long double are two
+	     encodings for 128-bit values.  The DWARF debug data can't
+	     distinguish between them.  See bugzilla:
+	     https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104194
+
+	     A GCC hack was introduced to still allow the debugger to identify
+	     the case where "long double" uses the IEEE 128-bit floating point
+	     format: GCC will emit a bogus DWARF type record pretending that
+	     "long double" is a typedef alias for the _Float128 type.
+
+	     This hack should not be visible to the GDB user, so we replace
+	     this bogus typedef by a normal floating-point type, copying the
+	     format information from the target type of the bogus typedef.  */
+	  return true;
+	}
+    }
+  return false;
+}
+
 /* Specify the powerpc64le target triplet.
    This can be variations of
 	ppc64le-{distro}-linux-gcc
@@ -2082,6 +2115,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
   /* Support for floating-point data type variants.  */
   set_gdbarch_floatformat_for_type (gdbarch, ppc_floatformat_for_type);
+
+  /* Support for replacing typedef record.  */
+  set_gdbarch_dwarf2_omit_typedef_p (gdbarch, linux_dwarf2_omit_typedef_p);
 
   /* Handle inferior calls during interrupted system calls.  */
   set_gdbarch_write_pc (gdbarch, ppc_linux_write_pc);

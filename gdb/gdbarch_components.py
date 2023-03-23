@@ -901,6 +901,29 @@ May return 0 when unable to determine that address.""",
     invalid=False,
 )
 
+
+# The DWARF info currently does not distinquish between IEEE 128-bit floating
+# point values and the IBM 128-bit floating point format.  GCC has an internal
+# hack to identify the IEEE 128-bit floating point value.  The long double is a
+# defined base type in C.  The GCC hack uses a typedef for long double to
+# reference_Float128 base to identify the long double as and IEEE 128-bit
+# value.  The following method is used to "fix" the long double type to be a
+# base type with the IEEE float format info from the _Float128 basetype and
+# the long double name.  With the fix, the proper name is printed for the
+# GDB typedef command.
+Function(
+    comment="""
+Return true if the typedef record needs to be replaced.".
+
+Return 0 by default""",
+    type="bool",
+    name="dwarf2_omit_typedef_p",
+    params=[("struct type *", "target_type"), ("const char *", "producer"),
+            ("const char *", "name")],
+    predefault="default_dwarf2_omit_typedef_p",
+    invalid=False,
+)
+
 Method(
     comment="""
 Return true if the return value of function is stored in the first hidden

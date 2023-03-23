@@ -14721,14 +14721,29 @@ static struct type *
 read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->per_objfile->objfile;
-  const char *name = NULL;
-  struct type *this_type, *target_type;
+  const char *name = dwarf2_full_name (NULL, die, cu);
+  struct type *this_type;
+  struct gdbarch *gdbarch = objfile->arch ();
+  struct type *target_type = die_type (die, cu);
 
-  name = dwarf2_full_name (NULL, die, cu);
+  if (gdbarch_dwarf2_omit_typedef_p (gdbarch, target_type, cu->producer, name))
+    {
+      /* The long double is defined as a base type in C.  GCC creates a long
+	 double typedef with target-type _Float128 for the long double to
+	 identify it as the IEEE Float128 value.  This is a GCC hack since the
+	 DWARF doesn't distinquish between the IBM long double and IEEE
+	 128-bit float.	 Replace the GCC workaround for the long double
+	 typedef with the actual type information copied from the target-type
+	 with the correct long double base type name.  */
+      this_type = copy_type (target_type);
+      this_type->set_name (name);
+      set_die_type (die, this_type, cu);
+      return this_type;
+    }
+
   this_type = type_allocator (objfile).new_type (TYPE_CODE_TYPEDEF, 0, name);
   this_type->set_target_is_stub (true);
   set_die_type (die, this_type, cu);
-  target_type = die_type (die, cu);
   if (target_type != this_type)
     this_type->set_target_type (target_type);
   else
