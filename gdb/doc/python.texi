@@ -4405,7 +4405,7 @@ installed, the currently installed command will be uninstalled, and
 this command installed in its stead.
 @end defvar
 
-The following code snippet shows how a two trivial MI command can be
+The following code snippet shows how some trivial MI commands can be
 implemented in Python:
 
 @smallexample
