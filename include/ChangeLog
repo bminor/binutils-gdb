@@ -1,3 +1,7 @@
+2023-03-23  Frederic Cambus  <fred@statdns.com>
+
+	* elf/common.h (PT_OPENBSD_MUTABLE): Define.
+
 2023-01-03  Luis Machado  <luis.machado@arm.com>
 
 	* elf/common.h (NT_ARM_SSVE): Define.
