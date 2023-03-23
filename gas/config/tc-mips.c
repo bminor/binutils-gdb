@@ -6942,10 +6942,6 @@ fix_loongson3_llsc (struct mips_cl_insn * ip)
       unsigned long lookback = ARRAY_SIZE (history);
       for (i = 0; i < lookback; i++)
 	{
-	  if (streq (history[i].insn_mo->name, "ll")
-	      || streq (history[i].insn_mo->name, "lld"))
-	    break;
-
 	  if (streq (history[i].insn_mo->name, "sc")
 	      || streq (history[i].insn_mo->name, "scd"))
 	    {
@@ -6953,8 +6949,8 @@ fix_loongson3_llsc (struct mips_cl_insn * ip)
 
 	      for (j = i + 1; j < lookback; j++)
 		{
-		  if (streq (history[i].insn_mo->name, "ll")
-		      || streq (history[i].insn_mo->name, "lld"))
+		  if (streq (history[j].insn_mo->name, "ll")
+		      || streq (history[j].insn_mo->name, "lld"))
 		    break;
 
 		  if (delayed_branch_p (&history[j]))
@@ -6993,7 +6989,7 @@ fix_loongson3_llsc (struct mips_cl_insn * ip)
 	      for (j = i + 1; j < lookback; j++)
 		{
 		  if (streq (history[j].insn_mo->name, "ll")
-		      || streq (history[i].insn_mo->name, "lld"))
+		      || streq (history[j].insn_mo->name, "lld"))
 		    break;
 		}
 
