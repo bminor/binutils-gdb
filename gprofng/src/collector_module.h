@@ -222,15 +222,4 @@ extern "C"
 }
 #endif
 
-#ifdef __has_attribute
-# if __has_attribute (__symver__)
-#  define SYMVER_ATTRIBUTE(sym, symver) \
-    __attribute__ ((__symver__ (#symver)))
-# endif
-#endif
-#ifndef SYMVER_ATTRIBUTE
-# define SYMVER_ATTRIBUTE(sym, symver) \
-  __asm__(".symver " #sym "," #symver);
-#endif
-
 #endif /* _COLLECTOR_MODULE_H */

@@ -19,8 +19,6 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I . -I ../.. 
 
-GPROFNG_VARIANT = @GPROFNG_VARIANT@
-
 CSOURCES = \
 	gethrtime.c \
 	dispatcher.c \
@@ -46,7 +44,7 @@ AM_CPPFLAGS = $(GPROFNG_CPPFLAGS) -I.. -I$(srcdir) \
 	-I$(srcdir)/../common -I$(srcdir)/../src \
 	-I$(srcdir)/../../include
 AM_LDFLAGS = -module -avoid-version \
-	-Wl,--version-script,$(srcdir)/mapfile.$(GPROFNG_VARIANT) \
+	-Wl,--version-script,$(srcdir)/libgprofng.ver \
 	$(LD_NO_AS_NEEDED) -Wl,-lrt -Wl,-ldl
 
 myincludedir = @includedir@

@@ -36,7 +36,6 @@
 #include "gp-defs.h"
 #include "collector.h"
 #include "gp-experiment.h"
-#include "data_pckts.h"
 #include "tsd.h"
 
 
@@ -132,38 +131,42 @@ static struct dirent *(*__real_readdir)(DIR *dirp) = NULL;
 static int (*__real_flock)(int fd, int operation) = NULL;
 static int (*__real_lockf)(int fildes, int function, off_t size) = NULL;
 static int (*__real_fflush)(FILE *stream) = NULL;
-
-#if WSIZE(32)
 static int (*__real_open64)(const char *path, int oflag, ...) = NULL;
+static int (*__real_open64_2_2)(const char *path, int oflag, ...) = NULL;
 static int (*__real_creat64)(const char *path, mode_t mode) = NULL;
 static int (*__real_fgetpos64)(FILE *stream, fpos64_t *pos) = NULL;
 static int (*__real_fsetpos64)(FILE *stream, const fpos64_t *pos) = NULL;
-
-#if ARCH(Intel)
+static FILE *(*__real_fopen_2_17)(const char *filename, const char *mode) = NULL;
+static FILE *(*__real_fopen_2_2_5)(const char *filename, const char *mode) = NULL;
 static FILE *(*__real_fopen_2_1)(const char *filename, const char *mode) = NULL;
+static FILE *(*__real_fopen_2_0)(const char *filename, const char *mode) = NULL;
+static int (*__real_fclose_2_17)(FILE *stream) = NULL;
+static int (*__real_fclose_2_2_5)(FILE *stream) = NULL;
 static int (*__real_fclose_2_1)(FILE *stream) = NULL;
+static int (*__real_fclose_2_0)(FILE *stream) = NULL;
+static FILE *(*__real_fdopen_2_17)(int fildes, const char *mode) = NULL;
+static FILE *(*__real_fdopen_2_2_5)(int fildes, const char *mode) = NULL;
 static FILE *(*__real_fdopen_2_1)(int fildes, const char *mode) = NULL;
+static FILE *(*__real_fdopen_2_0)(int fildes, const char *mode) = NULL;
+static int (*__real_fgetpos_2_17)(FILE *stream, fpos_t *pos) = NULL;
+static int (*__real_fgetpos_2_2_5)(FILE *stream, fpos_t *pos) = NULL;
 static int (*__real_fgetpos_2_2)(FILE *stream, fpos_t *pos) = NULL;
+static int (*__real_fgetpos_2_0)(FILE *stream, fpos_t *pos) = NULL;
+static int (*__real_fsetpos_2_17)(FILE *stream, const fpos_t *pos) = NULL;
+static int (*__real_fsetpos_2_2_5)(FILE *stream, const fpos_t *pos) = NULL;
 static int (*__real_fsetpos_2_2)(FILE *stream, const fpos_t *pos) = NULL;
-static int (*__real_fgetpos64_2_2)(FILE *stream, fpos64_t *pos) = NULL;
-static int (*__real_fsetpos64_2_2)(FILE *stream, const fpos64_t *pos) = NULL;
-static int (*__real_open64_2_2)(const char *path, int oflag, ...) = NULL;
+static int (*__real_fsetpos_2_0)(FILE *stream, const fpos_t *pos) = NULL;
 static ssize_t (*__real_pread_2_2)(int fildes, void *buf, size_t nbyte, off_t offset) = NULL;
 static ssize_t (*__real_pwrite_2_2)(int fildes, const void *buf, size_t nbyte, off_t offset) = NULL;
-static ssize_t (*__real_pwrite64_2_2)(int fildes, const void *buf, size_t nbyte, off64_t offset) = NULL;
-static FILE *(*__real_fopen_2_0)(const char *filename, const char *mode) = NULL;
-static int (*__real_fclose_2_0)(FILE *stream) = NULL;
-static FILE *(*__real_fdopen_2_0)(int fildes, const char *mode) = NULL;
-static int (*__real_fgetpos_2_0)(FILE *stream, fpos_t *pos) = NULL;
-static int (*__real_fsetpos_2_0)(FILE *stream, const fpos_t *pos) = NULL;
+static int (*__real_fgetpos64_2_17)(FILE *stream, fpos64_t *pos) = NULL;
+static int (*__real_fgetpos64_2_2_5)(FILE *stream, fpos64_t *pos) = NULL;
+static int (*__real_fgetpos64_2_2)(FILE *stream, fpos64_t *pos) = NULL;
 static int (*__real_fgetpos64_2_1)(FILE *stream, fpos64_t *pos) = NULL;
+static int (*__real_fsetpos64_2_17)(FILE *stream, const fpos64_t *pos) = NULL;
+static int (*__real_fsetpos64_2_2_5)(FILE *stream, const fpos64_t *pos) = NULL;
+static int (*__real_fsetpos64_2_2)(FILE *stream, const fpos64_t *pos) = NULL;
 static int (*__real_fsetpos64_2_1)(FILE *stream, const fpos64_t *pos) = NULL;
-static int (*__real_open64_2_1)(const char *path, int oflag, ...) = NULL;
-static ssize_t (*__real_pread_2_1)(int fildes, void *buf, size_t nbyte, off_t offset) = NULL;
-static ssize_t (*__real_pwrite_2_1)(int fildes, const void *buf, size_t nbyte, off_t offset) = NULL;
-static ssize_t (*__real_pwrite64_2_1)(int fildes, const void *buf, size_t nbyte, off64_t offset) = NULL;
-#endif /* ARCH() */
-#endif /* WSIZE(32) */
+static ssize_t (*__real_pwrite64_2_2)(int fildes, const void *buf, size_t nbyte, off64_t offset) = NULL;
 
 static int
 collector_align_pktsize (int sz)
@@ -379,6 +382,26 @@ detach_experiment (void)
 }
 
 static int
+init_fopen (void *dlflag)
+{
+  __real_fopen_2_17 = dlvsym (dlflag, "fopen", "GLIBC_2.17");
+  __real_fopen_2_2_5 = dlvsym (dlflag, "fopen", "GLIBC_2.2.5");
+  __real_fopen_2_1 = dlvsym (dlflag, "fopen", "GLIBC_2.1");
+  __real_fopen_2_0 = dlvsym (dlflag, "fopen", "GLIBC_2.0");
+  if (__real_fopen_2_17)
+    __real_fopen = __real_fopen_2_17;
+  else if (__real_fopen_2_2_5)
+    __real_fopen = __real_fopen_2_2_5;
+  else if (__real_fopen_2_1)
+    __real_fopen = __real_fopen_2_1;
+  else if (__real_fopen_2_0)
+    __real_fopen = __real_fopen_2_0;
+  else 
+    __real_fopen = dlsym (dlflag, "fopen");
+  return __real_fopen ? 1 : 0;
+}
+
+static int
 init_io_intf ()
 {
   void *dlflag;
@@ -400,46 +423,11 @@ init_io_intf ()
   else
     abort ();
 
-#if ARCH(Intel)
-#if WSIZE(32)
-#define SYS_FOPEN_X_VERSION "GLIBC_2.1"
-#define SYS_FGETPOS_X_VERSION "GLIBC_2.2"
-#define SYS_FGETPOS64_X_VERSION "GLIBC_2.2"
-#define SYS_OPEN64_X_VERSION "GLIBC_2.2"
-#define SYS_PREAD_X_VERSION "GLIBC_2.2"
-#define SYS_PWRITE_X_VERSION "GLIBC_2.2"
-#define SYS_PWRITE64_X_VERSION "GLIBC_2.2"
-#else /* WSIZE(64) */
-#define SYS_FOPEN_X_VERSION "GLIBC_2.2.5"
-#define SYS_FGETPOS_X_VERSION "GLIBC_2.2.5"
-#endif
-#elif ARCH(SPARC)
-#if WSIZE(32)
-#define SYS_FOPEN_X_VERSION "GLIBC_2.1"
-#define SYS_FGETPOS_X_VERSION "GLIBC_2.2"
-#else /* WSIZE(64) */
-#define SYS_FOPEN_X_VERSION "GLIBC_2.2"
-#define SYS_FGETPOS_X_VERSION "GLIBC_2.2"
-#endif
-#elif ARCH(Aarch64)
-#define SYS_FOPEN_X_VERSION      "GLIBC_2.17"
-#define SYS_FGETPOS_X_VERSION    "GLIBC_2.17"
-#endif /* ARCH() */
-
-#if WSIZE(32)
   dlflag = RTLD_NEXT;
-  __real_fopen = (FILE * (*)(const char*, const char*))dlvsym (dlflag, "fopen", SYS_FOPEN_X_VERSION);
-  if (__real_fopen == NULL)
+  if (init_fopen (dlflag) == 0)
     {
-      /* We are probably dlopened after libc,
-       * try to search in the previously loaded objects
-       */
-      __real_fopen = (FILE * (*)(const char*, const char*))dlvsym (RTLD_DEFAULT, "fopen", SYS_FOPEN_X_VERSION);
-      if (__real_fopen != NULL)
-	{
-	  Tprintf (0, "iotrace: WARNING: init_io_intf() using RTLD_DEFAULT for Linux io routines\n");
-	  dlflag = RTLD_DEFAULT;
-	}
+      if (init_fopen (RTLD_DEFAULT))
+	dlflag = RTLD_DEFAULT;
       else
 	{
 	  CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fopen\n");
@@ -447,212 +435,129 @@ init_io_intf ()
 	}
     }
 
-  __real_fclose = (int (*)(FILE*))dlvsym (dlflag, "fclose", SYS_FOPEN_X_VERSION);
+  __real_fgetpos64_2_17 = dlvsym (dlflag, "fgetpos64", "GLIBC_2.17");
+  __real_fgetpos64_2_2_5 = dlvsym (dlflag, "fgetpos64", "GLIBC_2.2.5");
+  __real_fgetpos64_2_2 = dlvsym (dlflag, "fgetpos64", "GLIBC_2.2");
+  __real_fgetpos64_2_1 = dlvsym (dlflag, "fgetpos64", "GLIBC_2.1");
+  if (__real_fgetpos64_2_17)
+    __real_fgetpos64 = __real_fgetpos64_2_17;
+  else if (__real_fgetpos64_2_2_5)
+    __real_fgetpos64 = __real_fgetpos64_2_2_5;
+  else if (__real_fgetpos64_2_2)
+    __real_fgetpos64 = __real_fgetpos64_2_2;
+  else if (__real_fgetpos64_2_1)
+    __real_fgetpos64 = __real_fgetpos64_2_1;
+  else
+    __real_fgetpos64 = dlsym (dlflag, "fgetpos64");
+
+  __real_pread_2_2 = dlvsym (dlflag, "pread", "GLIBC_2.2");
+  if (__real_pread_2_2)
+    __real_pread = __real_pread_2_2;
+  else
+    __real_pread = dlsym (dlflag, "pread");
+  if (__real_pread == NULL)
+    {
+      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pread\n");
+      rc = COL_ERROR_IOINIT;
+    }
+
+  __real_pwrite_2_2 = dlvsym (dlflag, "pwrite", "GLIBC_2.2");
+  if (__real_pwrite_2_2)
+    __real_pwrite = __real_pwrite_2_2;
+  else
+    __real_pwrite = dlsym (dlflag, "pwrite");
+  if (__real_pwrite == NULL)
+    {
+      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pwrite\n");
+      rc = COL_ERROR_IOINIT;
+    }
+
+
+  __real_pwrite64_2_2 = dlvsym (dlflag, "pwrite64", "GLIBC_2.2");
+  if (__real_pwrite64_2_2)
+    __real_pwrite64 = __real_pwrite64_2_2;
+  else
+    __real_pwrite64 = dlsym (dlflag, "pwrite64");
+
+  __real_fclose_2_17 = dlvsym (dlflag, "fclose", "GLIBC_2.17");
+  __real_fclose_2_2_5 = dlvsym (dlflag, "fclose", "GLIBC_2.2.5");
+  __real_fclose_2_1 = dlvsym (dlflag, "fclose", "GLIBC_2.1");
+  __real_fclose_2_0 = dlvsym (dlflag, "fclose", "GLIBC_2.0");
+  if (__real_fclose_2_17)
+    __real_fclose = __real_fclose_2_17;
+  else if (__real_fclose_2_2_5)
+    __real_fclose = __real_fclose_2_2_5;
+  else if (__real_fclose_2_1)
+    __real_fclose = __real_fclose_2_1;
+  else if (__real_fclose_2_0)
+    __real_fclose = __real_fclose_2_0;
+  else
+    __real_fclose = dlsym (dlflag, "fclose");
   if (__real_fclose == NULL)
     {
       CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fclose\n");
       rc = COL_ERROR_IOINIT;
     }
 
-  __real_fdopen = (FILE * (*)(int, const char*))dlvsym (dlflag, "fdopen", SYS_FOPEN_X_VERSION);
+  __real_fdopen_2_17 = dlvsym (dlflag, "fdopen", "GLIBC_2.17");
+  __real_fdopen_2_2_5 = dlvsym (dlflag, "fdopen", "GLIBC_2.2.5");
+  __real_fdopen_2_1 = dlvsym (dlflag, "fdopen", "GLIBC_2.1");
+  __real_fdopen_2_0 = dlvsym (dlflag, "fdopen", "GLIBC_2.0");
+  if (__real_fdopen_2_17)
+    __real_fdopen = __real_fdopen_2_17;
+  else if (__real_fdopen_2_2_5)
+    __real_fdopen = __real_fdopen_2_2_5;
+  else if (__real_fdopen_2_1)
+    __real_fdopen = __real_fdopen_2_1;
+  else if (__real_fdopen_2_0)
+    __real_fdopen = __real_fdopen_2_0;
+  else
+    __real_fdopen = dlsym (dlflag, "fdopen");
   if (__real_fdopen == NULL)
     {
       CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fdopen\n");
       rc = COL_ERROR_IOINIT;
     }
 
-  __real_fgetpos = (int (*)(FILE*, fpos_t*))dlvsym (dlflag, "fgetpos", SYS_FGETPOS_X_VERSION);
+  __real_fgetpos_2_17 = dlvsym (dlflag, "fgetpos", "GLIBC_2.17");
+  __real_fgetpos_2_2_5 = dlvsym (dlflag, "fgetpos", "GLIBC_2.2.5");
+  __real_fgetpos_2_2 = dlvsym (dlflag, "fgetpos", "GLIBC_2.2");
+  __real_fgetpos_2_0 = dlvsym (dlflag, "fgetpos", "GLIBC_2.0");
+  if (__real_fgetpos_2_17)
+    __real_fgetpos = __real_fgetpos_2_17;
+  else if (__real_fgetpos_2_2_5)
+    __real_fgetpos = __real_fgetpos_2_2_5;
+  else if (__real_fgetpos_2_2)
+    __real_fgetpos = __real_fgetpos_2_2;
+  else if (__real_fgetpos_2_0)
+    __real_fgetpos = __real_fgetpos_2_0;
+  else
+    __real_fgetpos = dlsym (dlflag, "fgetpos");
   if (__real_fgetpos == NULL)
     {
       CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fgetpos\n");
       rc = COL_ERROR_IOINIT;
     }
 
-  __real_fsetpos = (int (*)(FILE*, const fpos_t*))dlvsym (dlflag, "fsetpos", SYS_FGETPOS_X_VERSION);
+  __real_fsetpos_2_17 = dlvsym (dlflag, "fsetpos", "GLIBC_2.17");
+  __real_fsetpos_2_2_5 = dlvsym (dlflag, "fsetpos", "GLIBC_2.2.5");
+  __real_fsetpos_2_2 = dlvsym (dlflag, "fsetpos", "GLIBC_2.2");
+  __real_fsetpos_2_0 = dlvsym (dlflag, "fsetpos", "GLIBC_2.0");
+  if (__real_fsetpos_2_17)
+    __real_fsetpos = __real_fsetpos_2_17;
+  else if (__real_fsetpos_2_2_5)
+    __real_fsetpos = __real_fsetpos_2_2_5;
+  else if (__real_fsetpos_2_2)
+    __real_fsetpos = __real_fsetpos_2_2;
+  else if (__real_fsetpos_2_0)
+    __real_fsetpos = __real_fsetpos_2_0;
+  else
+    __real_fsetpos = dlsym (dlflag, "fsetpos");
   if (__real_fsetpos == NULL)
     {
       CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fsetpos\n");
       rc = COL_ERROR_IOINIT;
     }
-
-
-#if ARCH(Intel)
-  __real_fopen_2_1 = __real_fopen;
-  __real_fclose_2_1 = __real_fclose;
-  __real_fdopen_2_1 = __real_fdopen;
-  __real_fgetpos_2_2 = __real_fgetpos;
-  __real_fsetpos_2_2 = __real_fsetpos;
-
-  __real_fopen_2_0 = (FILE * (*)(const char*, const char*))dlvsym (dlflag, "fopen", "GLIBC_2.0");
-  if (__real_fopen_2_0 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fopen_2_0\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fclose_2_0 = (int (*)(FILE*))dlvsym (dlflag, "fclose", "GLIBC_2.0");
-  if (__real_fclose_2_0 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fclose_2_0\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fdopen_2_0 = (FILE * (*)(int, const char*))dlvsym (dlflag, "fdopen", "GLIBC_2.0");
-  if (__real_fdopen_2_0 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fdopen_2_0\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fgetpos_2_0 = (int (*)(FILE*, fpos_t*))dlvsym (dlflag, "fgetpos", "GLIBC_2.0");
-  if (__real_fgetpos_2_0 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fgetpos_2_0\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fsetpos_2_0 = (int (*)(FILE*, const fpos_t*))dlvsym (dlflag, "fsetpos", "GLIBC_2.0");
-  if (__real_fsetpos_2_0 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fsetpos_2_0\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fgetpos64_2_1 = (int (*)(FILE*, fpos64_t*))dlvsym (dlflag, "fgetpos64", "GLIBC_2.1");
-  if (__real_fgetpos64_2_1 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fgetpos64_2_1\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fsetpos64_2_1 = (int (*)(FILE*, const fpos64_t*))dlvsym (dlflag, "fsetpos64", "GLIBC_2.1");
-  if (__real_fsetpos64_2_1 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fsetpos64_2_1\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_open64_2_1 = (int (*)(const char*, int, ...))dlvsym (dlflag, "open64", "GLIBC_2.1");
-  if (__real_open64_2_1 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT open64_2_1\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_pread_2_1 = (int (*)(int fildes, void *buf, size_t nbyte, off_t offset))dlvsym (dlflag, "pread", "GLIBC_2.1");
-  if (__real_pread_2_1 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pread_2_1\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_pwrite_2_1 = (int (*)(int fildes, const void *buf, size_t nbyte, off_t offset))dlvsym (dlflag, "pwrite", "GLIBC_2.1");
-  if (__real_pwrite_2_1 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pwrite_2_1\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_pwrite64_2_1 = (int (*)(int fildes, const void *buf, size_t nbyte, off64_t offset))dlvsym (dlflag, "pwrite64", "GLIBC_2.1");
-  if (__real_pwrite64_2_1 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pwrite64_2_1\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fgetpos64_2_2 = (int (*)(FILE*, fpos64_t*))dlvsym (dlflag, "fgetpos64", SYS_FGETPOS64_X_VERSION);
-  if (__real_fgetpos64_2_2 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fgetpos64_2_2\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fsetpos64_2_2 = (int (*)(FILE*, const fpos64_t*))dlvsym (dlflag, "fsetpos64", SYS_FGETPOS64_X_VERSION);
-  if (__real_fsetpos64_2_2 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fsetpos64_2_2\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_open64_2_2 = (int (*)(const char*, int, ...))dlvsym (dlflag, "open64", SYS_OPEN64_X_VERSION);
-  if (__real_open64_2_2 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT open64_2_2\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_pread_2_2 = (int (*)(int fildes, void *buf, size_t nbyte, off_t offset))dlvsym (dlflag, "pread", SYS_PREAD_X_VERSION);
-  if (__real_pread_2_2 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pread_2_2\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_pwrite_2_2 = (int (*)(int fildes, const void *buf, size_t nbyte, off_t offset))dlvsym (dlflag, "pwrite", SYS_PWRITE_X_VERSION);
-  if (__real_pwrite_2_2 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pwrite_2_2\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_pwrite64_2_2 = (int (*)(int fildes, const void *buf, size_t nbyte, off64_t offset))dlvsym (dlflag, "pwrite64", SYS_PWRITE64_X_VERSION);
-  if (__real_pwrite64_2_2 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT pwrite64_2_2\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-#endif
-
-#else /* WSIZE(64) */
-  dlflag = RTLD_NEXT;
-  __real_fopen = (FILE * (*)(const char*, const char*))dlvsym (dlflag, "fopen", SYS_FOPEN_X_VERSION);
-  if (__real_fopen == NULL)
-    {
-      /* We are probably dlopened after libc,
-       * try to search in the previously loaded objects
-       */
-      __real_fopen = (FILE * (*)(const char*, const char*))dlvsym (RTLD_DEFAULT, "fopen", SYS_FOPEN_X_VERSION);
-      if (__real_fopen != NULL)
-	{
-	  Tprintf (0, "iotrace: WARNING: init_io_intf() using RTLD_DEFAULT for Linux io routines\n");
-	  dlflag = RTLD_DEFAULT;
-	}
-      else
-	{
-	  CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fopen\n");
-	  rc = COL_ERROR_IOINIT;
-	}
-    }
-
-  __real_fclose = (int (*)(FILE*))dlvsym (dlflag, "fclose", SYS_FOPEN_X_VERSION);
-  if (__real_fclose == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fclose\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fdopen = (FILE * (*)(int, const char*))dlvsym (dlflag, "fdopen", SYS_FOPEN_X_VERSION);
-  if (__real_fdopen == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fdopen\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fgetpos = (int (*)(FILE*, fpos_t*))dlvsym (dlflag, "fgetpos", SYS_FGETPOS_X_VERSION);
-  if (__real_fgetpos == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fgetpos\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fsetpos = (int (*)(FILE*, const fpos_t*))dlvsym (dlflag, "fsetpos", SYS_FGETPOS_X_VERSION);
-  if (__real_fsetpos == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fsetpos\n");
-      rc = COL_ERROR_IOINIT;
-    }
-#endif /* WSIZE(32) */
 
   __real_open = (int (*)(const char*, int, ...))dlsym (dlflag, "open");
   if (__real_open == NULL)
@@ -661,14 +566,11 @@ init_io_intf ()
       rc = COL_ERROR_IOINIT;
     }
 
-#if WSIZE(32)
-  __real_open64 = (int (*)(const char*, int, ...))dlsym (dlflag, "open64");
-  if (__real_open64 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT open64\n");
-      rc = COL_ERROR_IOINIT;
-    }
-#endif
+  __real_open64_2_2 = dlvsym (dlflag, "open64", "GLIBC_2.2");
+  if (__real_open64_2_2)
+    __real_open64 = __real_open64_2_2;
+  else
+    __real_open64 = dlsym (dlflag, "open64");
 
   __real_fcntl = (int (*)(int, int, ...))dlsym (dlflag, "fcntl");
   if (__real_fcntl == NULL)
@@ -748,14 +650,12 @@ init_io_intf ()
       rc = COL_ERROR_IOINIT;
     }
 
-#if WSIZE(32)
   __real_creat64 = (int (*)(const char*, mode_t))dlsym (dlflag, "creat64");
   if (__real_creat64 == NULL)
     {
       CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT creat64\n");
       rc = COL_ERROR_IOINIT;
     }
-#endif
 
   __real_read = (ssize_t (*)(int, void*, size_t))dlsym (dlflag, "read");
   if (__real_read == NULL)
@@ -963,21 +863,6 @@ init_io_intf ()
       rc = COL_ERROR_IOINIT;
     }
 
-#if WSIZE(32)
-  __real_fgetpos64 = (int (*)(FILE*, fpos64_t*))dlsym (dlflag, "fgetpos64");
-  if (__real_fgetpos64 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fgetpos64\n");
-      rc = COL_ERROR_IOINIT;
-    }
-
-  __real_fsetpos64 = (int (*)(FILE*, const fpos64_t*))dlsym (dlflag, "fsetpos64");
-  if (__real_fsetpos64 == NULL)
-    {
-      CALL_REAL (fprintf)(stderr, "iotrace_init COL_ERROR_IOINIT fsetpos64\n");
-      rc = COL_ERROR_IOINIT;
-    }
-#endif
   init_io_intf_finished++;
   return rc;
 }
@@ -1062,53 +947,9 @@ open (const char *path, int oflag, ...)
 }
 
 /*------------------------------------------------------------- open64 */
-#if ARCH(Intel) && WSIZE(32)
-// map interposed symbol versions
 static int
-__collector_open64_symver (int(real_open64) (const char *, int, ...),
-			   const char *path, int oflag, mode_t mode);
-
-SYMVER_ATTRIBUTE (__collector_open64_2_2, open64@GLIBC_2.2)
-int
-__collector_open64_2_2 (const char *path, int oflag, ...)
-{
-  mode_t mode;
-  va_list ap;
-  va_start (ap, oflag);
-  mode = va_arg (ap, mode_t);
-  va_end (ap);
-  TprintfT (DBG_LTT,
-	    "iotrace: __collector_open64_2_2@%p(path=%s, oflag=0%o, mode=0%o\n",
-	    CALL_REAL (open64_2_2), path ? path : "NULL", oflag, mode);
-  if (NULL_PTR (open64))
-    init_io_intf ();
-  return __collector_open64_symver (CALL_REAL (open64_2_2), path, oflag, mode);
-}
-
-SYMVER_ATTRIBUTE (__collector_open64_2_1, open64@GLIBC_2.1)
-int
-__collector_open64_2_1 (const char *path, int oflag, ...)
-{
-  mode_t mode;
-  va_list ap;
-  va_start (ap, oflag);
-  mode = va_arg (ap, mode_t);
-  va_end (ap);
-  TprintfT (DBG_LTT,
-	    "iotrace: __collector_open64_2_1@%p(path=%s, oflag=0%o, mode=0%o\n",
-	    CALL_REAL (open64_2_1), path ? path : "NULL", oflag, mode);
-  if (NULL_PTR (open64))
-    init_io_intf ();
-  return __collector_open64_symver (CALL_REAL (open64_2_1), path, oflag, mode);
-}
-
-#endif /* ARCH(Intel) && WSIZE(32) */
-#if WSIZE(32)
-#if ARCH(Intel) && WSIZE(32)
-
-static int
-__collector_open64_symver (int(real_open64) (const char *, int, ...),
-			   const char *path, int oflag, mode_t mode)
+gprofng_open64 (int(real_open64) (const char *, int, ...),
+		const char *path, int oflag, mode_t mode)
 {
   int *guard;
   int fd;
@@ -1116,39 +957,11 @@ __collector_open64_symver (int(real_open64) (const char *, int, ...),
   IOTrace_packet *iopkt;
   size_t sz;
   unsigned pktSize;
-  if (NULL_PTR (open64))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard) || path == NULL)
-    return (real_open64) (path, oflag, mode);
+    return real_open64 (path, oflag, mode);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
   fd = real_open64 (path, oflag, mode);
-#else /* ^ARCH(Intel) && WSIZE(32) */
-
-int
-open64 (const char *path, int oflag, ...)
-{
-  int *guard;
-  int fd;
-  void *packet;
-  IOTrace_packet *iopkt;
-  mode_t mode;
-  va_list ap;
-  size_t sz;
-  unsigned pktSize;
-
-  va_start (ap, oflag);
-  mode = va_arg (ap, mode_t);
-  va_end (ap);
-  if (NULL_PTR (open64))
-    init_io_intf ();
-  if (CHCK_REENTRANCE (guard) || path == NULL)
-    return CALL_REAL (open64)(path, oflag, mode);
-  PUSH_REENTRANCE (guard);
-  hrtime_t reqt = gethrtime ();
-  fd = CALL_REAL (open64)(path, oflag, mode);
-#endif /* ^ARCH(Intel) && WSIZE(32) */
-
   if (RECHCK_REENTRANCE (guard) || path == NULL)
     {
       POP_REENTRANCE (guard);
@@ -1174,7 +987,8 @@ open64 (const char *path, int oflag, ...)
       iopkt->fd = fd;
       iopkt->fstype = collector_fstype (path);
       collector_strncpy (&(iopkt->fname), path, sz);
-      iopkt->comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt->comm.tstamp, FRINFO_FROM_STACK, &iopkt);
+      iopkt->comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+		iopkt->comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
       collector_interface->writeDataRecord (io_hndl, (Common_packet*) iopkt);
       collector_interface->freeCSize (io_heap, packet, pktSize);
     }
@@ -1186,7 +1000,23 @@ open64 (const char *path, int oflag, ...)
   POP_REENTRANCE (guard);
   return fd;
 }
-#endif
+
+#define DCL_OPEN64(dcl_f, real_f) \
+  int dcl_f (const char *path, int oflag, ...) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    mode_t mode; \
+    va_list ap; \
+    va_start (ap, oflag); \
+    mode = va_arg (ap, mode_t); \
+    va_end (ap); \
+    return gprofng_open64 (real_f, path, oflag, mode); \
+  }
+
+DCL_FUNC_VER (DCL_OPEN64, open64_2_2, open64@GLIBC_2.2)
+DCL_OPEN64 (open64, CALL_REAL(open64))
+
 
 #define F_ERROR_ARG     0
 #define F_INT_ARG       1
@@ -1627,69 +1457,21 @@ close (int fildes)
 }
 
 /*------------------------------------------------------------- fopen */
-// map interposed symbol versions
-#if ARCH(Intel) && WSIZE(32)
-
 static FILE*
-__collector_fopen_symver (FILE*(real_fopen) (), const char *filename, const char *mode);
-
-SYMVER_ATTRIBUTE (__collector_fopen_2_1, fopen@GLIBC_2.1)
-FILE*
-__collector_fopen_2_1 (const char *filename, const char *mode)
+gprofng_fopen (FILE*(real_fopen) (), const char *filename, const char *mode)
 {
-  if (NULL_PTR (fopen))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fopen_2_1@%p\n", CALL_REAL (fopen_2_1));
-  return __collector_fopen_symver (CALL_REAL (fopen_2_1), filename, mode);
-}
-
-SYMVER_ATTRIBUTE (__collector_fopen_2_0, fopen@GLIBC_2.0)
-FILE*
-__collector_fopen_2_0 (const char *filename, const char *mode)
-{
-  if (NULL_PTR (fopen))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fopen_2_0@%p\n", CALL_REAL (fopen_2_0));
-  return __collector_fopen_symver (CALL_REAL (fopen_2_0), filename, mode);
-}
-
-#endif
-
-#if ARCH(Intel) && WSIZE(32)
-
-static FILE*
-__collector_fopen_symver (FILE*(real_fopen) (), const char *filename, const char *mode)
-{
-#else
-
-FILE*
-fopen (const char *filename, const char *mode)
-{
-#endif
   int *guard;
   FILE *fp = NULL;
   void *packet;
   IOTrace_packet *iopkt;
   size_t sz;
   unsigned pktSize;
-  if (NULL_PTR (fopen))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard) || filename == NULL)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_fopen) (filename, mode);
-#else
-      return CALL_REAL (fopen)(filename, mode);
-#endif
-    }
+    return real_fopen (filename, mode);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
 
-#if ARCH(Intel) && WSIZE(32)
-  fp = (real_fopen) (filename, mode);
-#else
-  fp = CALL_REAL (fopen)(filename, mode);
-#endif
+  fp = real_fopen (filename, mode);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -1720,12 +1502,8 @@ fopen (const char *filename, const char *mode)
 	}
       iopkt->fstype = collector_fstype (filename);
       collector_strncpy (&(iopkt->fname), filename, sz);
-
-#if ARCH(Intel) && WSIZE(32)
-      iopkt->comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt->comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
-#else
-      iopkt->comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt->comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-#endif
+      iopkt->comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt->comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
       collector_interface->writeDataRecord (io_hndl, (Common_packet*) iopkt);
       collector_interface->freeCSize (io_heap, packet, pktSize);
     }
@@ -1738,66 +1516,32 @@ fopen (const char *filename, const char *mode)
   return fp;
 }
 
+#define DCL_FOPEN(dcl_f, real_f) \
+  FILE *dcl_f (const char *filename, const char *mode) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_fopen (real_f, filename, mode); \
+  }
+
+DCL_FUNC_VER (DCL_FOPEN, fopen_2_17, fopen@GLIBC_2.17)
+DCL_FUNC_VER (DCL_FOPEN, fopen_2_2_5, fopen@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_FOPEN, fopen_2_1, fopen@GLIBC_2.1)
+DCL_FUNC_VER (DCL_FOPEN, fopen_2_0, fopen@GLIBC_2.0)
+DCL_FOPEN (fopen, CALL_REAL(fopen))
+
 /*------------------------------------------------------------- fclose */
-// map interposed symbol versions
-#if ARCH(Intel) && WSIZE(32)
-
 static int
-__collector_fclose_symver (int(real_fclose) (), FILE *stream);
-
-SYMVER_ATTRIBUTE (__collector_fclose_2_1, fclose@GLIBC_2.1)
-int
-__collector_fclose_2_1 (FILE *stream)
+gprofng_fclose (int(real_fclose) (), FILE *stream)
 {
-  if (NULL_PTR (fclose))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fclose_2_1@%p\n", CALL_REAL (fclose_2_1));
-  return __collector_fclose_symver (CALL_REAL (fclose_2_1), stream);
-}
-
-SYMVER_ATTRIBUTE (__collector_fclose_2_0, fclose@GLIBC_2.0)
-int
-__collector_fclose_2_0 (FILE *stream)
-{
-  if (NULL_PTR (fclose))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fclose_2_0@%p\n", CALL_REAL (fclose_2_0));
-  return __collector_fclose_symver (CALL_REAL (fclose_2_0), stream);
-}
-
-#endif
-
-#if ARCH(Intel) && WSIZE(32)
-
-static int
-__collector_fclose_symver (int(real_fclose) (), FILE *stream)
-{
-#else
-
-int
-fclose (FILE *stream)
-{
-#endif
   int *guard;
   int stat;
   IOTrace_packet iopkt;
-  if (NULL_PTR (fclose))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard) || stream == NULL)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_fclose) (stream);
-#else
-      return CALL_REAL (fclose)(stream);
-#endif
-    }
+    return real_fclose (stream);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  stat = (real_fclose) (stream);
-#else
-  stat = CALL_REAL (fclose)(stream);
-#endif
+  stat = real_fclose (stream);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -1813,16 +1557,26 @@ fclose (FILE *stream)
   else
     iopkt.iotype = CLOSE_TRACE_ERROR;
   iopkt.fd = fileno (stream);
-
-#if ARCH(Intel) && WSIZE(32)
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
-#else
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-#endif
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
   collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
   POP_REENTRANCE (guard);
   return stat;
 }
+
+#define DCL_FCLOSE(dcl_f, real_f) \
+  int dcl_f (FILE *stream) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_fclose (real_f, stream); \
+  }
+
+DCL_FUNC_VER (DCL_FCLOSE, fclose_2_17, fclose@GLIBC_2.17)
+DCL_FUNC_VER (DCL_FCLOSE, fclose_2_2_5, fclose@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_FCLOSE, fclose_2_1, fclose@GLIBC_2.1)
+DCL_FUNC_VER (DCL_FCLOSE, fclose_2_0, fclose@GLIBC_2.0)
+DCL_FCLOSE (fclose, CALL_REAL(fclose))
 
 /*------------------------------------------------------------- fflush */
 int
@@ -1863,63 +1617,19 @@ fflush (FILE *stream)
 }
 
 /*------------------------------------------------------------- fdopen */
-// map interposed symbol versions
-#if ARCH(Intel) && WSIZE(32)
-
 static FILE*
-__collector_fdopen_symver (FILE*(real_fdopen) (), int fildes, const char *mode);
-
-SYMVER_ATTRIBUTE (__collector_fdopen_2_1, fdopen@GLIBC_2.1)
-FILE*
-__collector_fdopen_2_1 (int fildes, const char *mode)
+gprofng_fdopen (FILE*(real_fdopen) (), int fildes, const char *mode)
 {
-  if (NULL_PTR (fdopen))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fdopen_2_1@%p\n", CALL_REAL (fdopen_2_1));
-  return __collector_fdopen_symver (CALL_REAL (fdopen_2_1), fildes, mode);
-}
-
-SYMVER_ATTRIBUTE (__collector_fdopen_2_0, fdopen@GLIBC_2.0)
-FILE*
-__collector_fdopen_2_0 (int fildes, const char *mode)
-{
-  if (NULL_PTR (fdopen))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fdopen_2_0@%p\n", CALL_REAL (fdopen_2_0));
-  return __collector_fdopen_symver (CALL_REAL (fdopen_2_0), fildes, mode);
-}
-
-#endif
-
-#if ARCH(Intel) && WSIZE(32)
-static FILE*
-__collector_fdopen_symver (FILE*(real_fdopen) (), int fildes, const char *mode)
-{
-#else
-FILE*
-fdopen (int fildes, const char *mode)
-{
-#endif
   int *guard;
   FILE *fp = NULL;
   IOTrace_packet iopkt;
   if (NULL_PTR (fdopen))
     init_io_intf ();
   if (CHCK_REENTRANCE (guard))
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_fdopen) (fildes, mode);
-#else
-      return CALL_REAL (fdopen)(fildes, mode);
-#endif
-    }
+    return real_fdopen (fildes, mode);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  fp = (real_fdopen) (fildes, mode);
-#else
-  fp = CALL_REAL (fdopen)(fildes, mode);
-#endif
+  fp = real_fdopen (fildes, mode);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -1936,15 +1646,26 @@ fdopen (int fildes, const char *mode)
     iopkt.iotype = OPEN_TRACE_ERROR;
   iopkt.fd = fildes;
   iopkt.fstype = UNKNOWNFS_TYPE;
-#if ARCH(Intel) && WSIZE(32)
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
-#else
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-#endif
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
   collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
   POP_REENTRANCE (guard);
   return fp;
 }
+
+#define DCL_FDOPEN(dcl_f, real_f) \
+  FILE *dcl_f (int fildes, const char *mode) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_fdopen (real_f, fildes, mode); \
+  }
+
+DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_17, fdopen@GLIBC_2.17)
+DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_2_5, fdopen@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_1, fdopen@GLIBC_2.1)
+DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_0, fdopen@GLIBC_2.0)
+DCL_FDOPEN (fdopen, CALL_REAL(fdopen))
 
 /*------------------------------------------------------------- dup */
 int
@@ -2332,62 +2053,18 @@ fwrite (const void *ptr, size_t size, size_t nitems, FILE *stream)
 }
 
 /*------------------------------------------------------------- pread */
-#if ARCH(Intel) && WSIZE(32)
-// map interposed symbol versions
-static int
-__collector_pread_symver (int(real_pread) (), int fildes, void *buf, size_t nbyte, off_t offset);
-
-SYMVER_ATTRIBUTE (__collector_pread_2_2, pread@GLIBC_2.2)
-int
-__collector_pread_2_2 (int fildes, void *buf, size_t nbyte, off_t offset)
+static ssize_t
+gprofng_pread (ssize_t(real_pread) (int, void *, size_t, off_t),
+	       int fildes, void *buf, size_t nbyte, off_t offset)
 {
-  TprintfT (DBG_LTT, "iotrace: __collector_pread_2_2@%p(fildes=%d, buf=%p, nbyte=%lld, offset=%lld)\n",
-	    CALL_REAL (pread_2_2), fildes, buf, (long long) nbyte, (long long) offset);
-  if (NULL_PTR (pread))
-    init_io_intf ();
-  return __collector_pread_symver (CALL_REAL (pread_2_2), fildes, buf, nbyte, offset);
-}
-
-SYMVER_ATTRIBUTE (__collector_pread_2_1, pread@GLIBC_2.1)
-int
-__collector_pread_2_1 (int fildes, void *buf, size_t nbyte, off_t offset)
-{
-  TprintfT (DBG_LTT, "iotrace: __collector_pread_2_1@%p(fildes=%d, buf=%p, nbyte=%lld, offset=%lld)\n",
-	    CALL_REAL (pread_2_1), fildes, buf, (long long) nbyte, (long long) offset);
-  if (NULL_PTR (pread))
-    init_io_intf ();
-  return __collector_pread_symver (CALL_REAL (pread_2_1), fildes, buf, nbyte, offset);
-}
-
-static int
-__collector_pread_symver (int(real_pread) (), int fildes, void *buf, size_t nbyte, off_t offset)
-{
-#else /* ^ARCH(Intel) && WSIZE(32) */
-
-ssize_t
-pread (int fildes, void *buf, size_t nbyte, off_t offset)
-{
-#endif
   int *guard;
   ssize_t ret;
   IOTrace_packet iopkt;
-  if (NULL_PTR (pread))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard))
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_pread) (fildes, buf, nbyte, offset);
-#else
-      return CALL_REAL (pread)(fildes, buf, nbyte, offset);
-#endif
-    }
+    return real_pread (fildes, buf, nbyte, offset);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_pread) (fildes, buf, nbyte, offset);
-#else
-  ret = CALL_REAL (pread)(fildes, buf, nbyte, offset);
-#endif
+  ret = real_pread (fildes, buf, nbyte, offset);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -2404,15 +2081,27 @@ pread (int fildes, void *buf, size_t nbyte, off_t offset)
     iopkt.iotype = READ_TRACE_ERROR;
   iopkt.fd = fildes;
   iopkt.nbyte = ret;
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-  collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
+  collector_interface->writeDataRecord (io_hndl, (Common_packet*) &iopkt);
   POP_REENTRANCE (guard);
   return ret;
 }
 
+#define DCL_PREAD(dcl_f, real_f) \
+  ssize_t dcl_f (int fildes, void *buf, size_t nbyte, off_t offset) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_pread (real_f, fildes, buf, nbyte, offset); \
+  }
+
+DCL_FUNC_VER (DCL_PREAD, pread_2_2, pread@GLIBC_2.2)
+DCL_PREAD (pread, CALL_REAL(pread))
+
 /*------------------------------------------------------------- pwrite */
 
-#if !defined(__MUSL_LIBC) && ARCH(Intel) && WSIZE(32)
+#if !defined(__MUSL_LIBC)
 // map interposed symbol versions
 
 SYMVER_ATTRIBUTE (__collector_pwrite_2_2, pwrite@GLIBC_2.2)
@@ -2427,28 +2116,6 @@ __collector_pwrite_2_2 (int fildes, const void *buf, size_t nbyte, off_t offset)
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
   ssize_t ret = CALL_REAL (pwrite_2_2)(fildes, buf, nbyte, offset);
-  if (RECHCK_REENTRANCE (guard))
-    {
-      POP_REENTRANCE (guard);
-      return ret;
-    }
-  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
-  POP_REENTRANCE (guard);
-  return ret;
-}
-
-SYMVER_ATTRIBUTE (__collector_pwrite_2_1, pwrite@GLIBC_2.1)
-int
-__collector_pwrite_2_1 (int fildes, const void *buf, size_t nbyte, off_t offset)
-{
-  int *guard;
-  if (NULL_PTR (pwrite_2_1))
-    init_io_intf ();
-  if (CHCK_REENTRANCE (guard))
-    return CALL_REAL (pwrite_2_1)(fildes, buf, nbyte, offset);
-  PUSH_REENTRANCE (guard);
-  hrtime_t reqt = gethrtime ();
-  ssize_t ret = CALL_REAL (pwrite_2_1)(fildes, buf, nbyte, offset);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -2482,7 +2149,7 @@ pwrite (int fildes, const void *buf, size_t nbyte, off_t offset)
 }
 
 /*------------------------------------------------------------- pwrite64 */
-#if WSIZE(32) && ARCH(Intel)
+#if WSIZE(32) && !defined(__USE_FILE_OFFSET64)
 #if !defined(__MUSL_LIBC)
 // map interposed symbol versions
 
@@ -2507,31 +2174,8 @@ __collector_pwrite64_2_2 (int fildes, const void *buf, size_t nbyte, off64_t off
   POP_REENTRANCE (guard);
   return ret;
 }
-
-SYMVER_ATTRIBUTE (__collector_pwrite64_2_1, pwrite64@GLIBC_2.1)
-int
-__collector_pwrite64_2_1 (int fildes, const void *buf, size_t nbyte, off64_t offset)
-{
-  int *guard;
-  if (NULL_PTR (pwrite64_2_1))
-    init_io_intf ();
-  if (CHCK_REENTRANCE (guard))
-    return CALL_REAL (pwrite64_2_1)(fildes, buf, nbyte, offset);
-  PUSH_REENTRANCE (guard);
-  hrtime_t reqt = gethrtime ();
-  ssize_t ret = CALL_REAL (pwrite64_2_1)(fildes, buf, nbyte, offset);
-  if (RECHCK_REENTRANCE (guard))
-    {
-      POP_REENTRANCE (guard);
-      return ret;
-    }
-  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
-  POP_REENTRANCE (guard);
-  return ret;
-}
 #endif
 
-#if !defined(__USE_FILE_OFFSET64)
 ssize_t
 pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
 {
@@ -2553,8 +2197,6 @@ pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
   return ret;
 }
 #endif
-
-#endif /* SIZE(32)  && ARCH(Intel) */
 
 /*------------------------------------------------------------- fgets */
 char*
@@ -3238,62 +2880,18 @@ ftell (FILE *stream)
 }
 
 /*------------------------------------------------------------- fgetpos */
-// map interposed symbol versions
-#if ARCH(Intel) && WSIZE(32)
 static int
-__collector_fgetpos_symver (int(real_fgetpos) (), FILE *stream, fpos_t *pos);
-
-SYMVER_ATTRIBUTE (__collector_fgetpos_2_2, fgetpos@GLIBC_2.2)
-int
-__collector_fgetpos_2_2 (FILE *stream, fpos_t *pos)
+gprofng_fgetpos (int(real_fgetpos) (FILE *stream, fpos_t *pos),
+		 FILE *stream, fpos_t *pos)
 {
-  if (NULL_PTR (fgetpos))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fgetpos_2_2@%p\n", CALL_REAL (fgetpos_2_2));
-  return __collector_fgetpos_symver (CALL_REAL (fgetpos_2_2), stream, pos);
-}
-
-SYMVER_ATTRIBUTE (__collector_fgetpos_2_0, fgetpos@GLIBC_2.0)
-int
-__collector_fgetpos_2_0 (FILE *stream, fpos_t *pos)
-{
-  if (NULL_PTR (fgetpos))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fgetpos_2_0@%p\n", CALL_REAL (fgetpos_2_0));
-  return __collector_fgetpos_symver (CALL_REAL (fgetpos_2_0), stream, pos);
-}
-#endif
-
-#if ARCH(Intel) && WSIZE(32)
-
-static int
-__collector_fgetpos_symver (int(real_fgetpos) (), FILE *stream, fpos_t *pos)
-{
-#else
-int
-fgetpos (FILE *stream, fpos_t *pos)
-{
-#endif
   int *guard;
   int ret;
   IOTrace_packet iopkt;
-  if (NULL_PTR (fgetpos))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard) || stream == NULL)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_fgetpos) (stream, pos);
-#else
-      return CALL_REAL (fgetpos)(stream, pos);
-#endif
-    }
+    return real_fgetpos (stream, pos);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_fgetpos) (stream, pos);
-#else
-  ret = CALL_REAL (fgetpos)(stream, pos);
-#endif
+  ret = real_fgetpos (stream, pos);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -3309,75 +2907,39 @@ fgetpos (FILE *stream, fpos_t *pos)
   else
     iopkt.iotype = OTHERIO_TRACE_ERROR;
   iopkt.fd = fileno (stream);
-
-#if ARCH(Intel) && WSIZE(32)
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
-#else
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-#endif
-  collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
+  collector_interface->writeDataRecord (io_hndl, (Common_packet*) &iopkt);
   POP_REENTRANCE (guard);
   return ret;
 }
 
-#if WSIZE(32)
+#define DCL_FGETPOS(dcl_f, real_f) \
+  int dcl_f (FILE *stream, fpos_t *pos) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_fgetpos (real_f, stream, pos); \
+  }
+
+DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_17, fgetpos@GLIBC_2.17)
+DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_2_5, fgetpos@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_2, fgetpos@GLIBC_2.2)
+DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_0, fgetpos@GLIBC_2.0)
+DCL_FGETPOS (fgetpos, CALL_REAL(fgetpos))
+
 /*------------------------------------------------------------- fgetpos64 */
-#if ARCH(Intel)
-// map interposed symbol versions
-
 static int
-__collector_fgetpos64_symver (int(real_fgetpos64) (), FILE *stream, fpos64_t *pos);
-
-SYMVER_ATTRIBUTE (__collector_fgetpos64_2_2, fgetpos64@GLIBC_2.2)
-int
-__collector_fgetpos64_2_2 (FILE *stream, fpos64_t *pos)
+gprofng_fgetpos64 (int(real_fgetpos64) (), FILE *stream, fpos64_t *pos)
 {
-  TprintfT (DBG_LTT, "iotrace: __collector_fgetpos64_2_2@%p(stream=%p, pos=%p)\n",
-	    CALL_REAL (fgetpos64_2_2), stream, pos);
-  if (NULL_PTR (fgetpos64))
-    init_io_intf ();
-  return __collector_fgetpos64_symver (CALL_REAL (fgetpos64_2_2), stream, pos);
-}
-
-SYMVER_ATTRIBUTE (__collector_fgetpos64_2_1, fgetpos64@GLIBC_2.1)
-int
-__collector_fgetpos64_2_1 (FILE *stream, fpos64_t *pos)
-{
-  TprintfT (DBG_LTT, "iotrace: __collector_fgetpos64_2_1@%p(stream=%p, pos=%p)\n",
-	    CALL_REAL (fgetpos64_2_1), stream, pos);
-  if (NULL_PTR (fgetpos64))
-    init_io_intf ();
-  return __collector_fgetpos64_symver (CALL_REAL (fgetpos64_2_1), stream, pos);
-}
-
-static int
-__collector_fgetpos64_symver (int(real_fgetpos64) (), FILE *stream, fpos64_t *pos)
-{
-#else
-int
-fgetpos64 (FILE *stream, fpos64_t *pos)
-{
-#endif
   int *guard;
   int ret;
   IOTrace_packet iopkt;
-  if (NULL_PTR (fgetpos64))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard) || stream == NULL)
-    {
-#if ARCH(Intel)
-      return (real_fgetpos64) (stream, pos);
-#else
-      return CALL_REAL (fgetpos64)(stream, pos);
-#endif
-    }
+    return real_fgetpos64 (stream, pos);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel)
-  ret = (real_fgetpos64) (stream, pos);
-#else
-  ret = CALL_REAL (fgetpos64)(stream, pos);
-#endif
+  ret = real_fgetpos64 (stream, pos);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -3393,74 +2955,40 @@ fgetpos64 (FILE *stream, fpos64_t *pos)
   else
     iopkt.iotype = OTHERIO_TRACE_ERROR;
   iopkt.fd = fileno (stream);
-#if ARCH(Intel)
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
-#else
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-#endif
-  collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
+  collector_interface->writeDataRecord (io_hndl, (Common_packet*) &iopkt);
   POP_REENTRANCE (guard);
   return ret;
 }
-#endif
+
+#define DCL_FGETPOS64(dcl_f, real_f) \
+  int dcl_f (FILE *stream, fpos64_t *pos) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_fgetpos64 (real_f, stream, pos); \
+  }
+
+DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_17, fgetpos64@GLIBC_2.17)
+DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_2_5, fgetpos64@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_2, fgetpos64@GLIBC_2.2)
+DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_1, fgetpos64@GLIBC_2.1)
+DCL_FGETPOS64 (fgetpos64, CALL_REAL(fgetpos64))
 
 /*------------------------------------------------------------- fsetpos */
-// map interposed symbol versions
-#if ARCH(Intel) && WSIZE(32)
 static int
-__collector_fsetpos_symver (int(real_fsetpos) (), FILE *stream, const fpos_t *pos);
-
-SYMVER_ATTRIBUTE (__collector_fsetpos_2_2, fsetpos@GLIBC_2.2)
-int
-__collector_fsetpos_2_2 (FILE *stream, const fpos_t *pos)
+gprofng_fsetpos (int(real_fsetpos) (FILE *, const fpos_t *),
+		 FILE *stream, const fpos_t *pos)
 {
-  if (NULL_PTR (fsetpos))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fsetpos_2_2@%p\n", CALL_REAL (fsetpos_2_2));
-  return __collector_fsetpos_symver (CALL_REAL (fsetpos_2_2), stream, pos);
-}
-
-SYMVER_ATTRIBUTE (__collector_fsetpos_2_0, fsetpos@GLIBC_2.0)
-int
-__collector_fsetpos_2_0 (FILE *stream, const fpos_t *pos)
-{
-  if (NULL_PTR (fsetpos))
-    init_io_intf ();
-  TprintfT (DBG_LTT, "iotrace: __collector_fsetpos_2_0@%p\n", CALL_REAL (fsetpos_2_0));
-  return __collector_fsetpos_symver (CALL_REAL (fsetpos_2_0), stream, pos);
-}
-#endif
-
-#if ARCH(Intel) && WSIZE(32)
-
-static int
-__collector_fsetpos_symver (int(real_fsetpos) (), FILE *stream, const fpos_t *pos)
-{
-#else
-int
-fsetpos (FILE *stream, const fpos_t *pos)
-{
-#endif
   int *guard;
   int ret;
   IOTrace_packet iopkt;
-  if (NULL_PTR (fsetpos))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard) || stream == NULL)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_fsetpos) (stream, pos);
-#else
-      return CALL_REAL (fsetpos)(stream, pos);
-#endif
-    }
+    return real_fsetpos (stream, pos);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_fsetpos) (stream, pos);
-#else
-  ret = CALL_REAL (fsetpos)(stream, pos);
-#endif
+  ret = real_fsetpos (stream, pos);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -3476,73 +3004,40 @@ fsetpos (FILE *stream, const fpos_t *pos)
   else
     iopkt.iotype = OTHERIO_TRACE_ERROR;
   iopkt.fd = fileno (stream);
-#if ARCH(Intel) && WSIZE(32)
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
-#else
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-#endif
-  collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
+  collector_interface->writeDataRecord (io_hndl, (Common_packet*) &iopkt);
   POP_REENTRANCE (guard);
   return ret;
 }
 
-#if WSIZE(32)
+#define DCL_FSETPOS(dcl_f, real_f) \
+  int dcl_f (FILE *stream, const fpos_t *pos) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_fsetpos (real_f, stream, pos); \
+  }
+
+DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_17, fsetpos@GLIBC_2.17)
+DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_2_5, fsetpos@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_2, fsetpos@GLIBC_2.2)
+DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_0, fsetpos@GLIBC_2.0)
+DCL_FSETPOS (fsetpos, CALL_REAL(fsetpos))
+
 /*------------------------------------------------------------- fsetpos64 */
-#if ARCH(Intel)
-// map interposed symbol versions
 static int
-__collector_fsetpos64_symver (int(real_fsetpos64) (), FILE *stream, const fpos64_t *pos);
-
-SYMVER_ATTRIBUTE (__collector_fsetpos64_2_2, fsetpos64@GLIBC_2.2)
-int
-__collector_fsetpos64_2_2 (FILE *stream, const fpos64_t *pos)
+gprofng_fsetpos64 (int(real_fsetpos64) (FILE *, const fpos64_t *),
+		   FILE *stream, const fpos64_t *pos)
 {
-  TprintfT (DBG_LTT, "iotrace: __collector_fsetpos64_2_2@%p(stream=%p, pos=%p)\n",
-	    CALL_REAL (fsetpos64_2_2), stream, pos);
-  if (NULL_PTR (fsetpos64))
-    init_io_intf ();
-  return __collector_fsetpos64_symver (CALL_REAL (fsetpos64_2_2), stream, pos);
-}
-
-SYMVER_ATTRIBUTE (__collector_fsetpos64_2_1, fsetpos64@GLIBC_2.1)
-int
-__collector_fsetpos64_2_1 (FILE *stream, const fpos64_t *pos)
-{
-  TprintfT (DBG_LTT, "iotrace: __collector_fsetpos64_2_1@%p(stream=%p, pos=%p)\n",
-	    CALL_REAL (fsetpos64_2_1), stream, pos);
-  if (NULL_PTR (fsetpos64))
-    init_io_intf ();
-  return __collector_fsetpos64_symver (CALL_REAL (fsetpos64_2_1), stream, pos);
-}
-
-static int
-__collector_fsetpos64_symver (int(real_fsetpos64) (), FILE *stream, const fpos64_t *pos)
-{
-#else
-int
-fsetpos64 (FILE *stream, const fpos64_t *pos)
-{
-#endif
   int *guard;
   int ret;
   IOTrace_packet iopkt;
-  if (NULL_PTR (fsetpos64))
-    init_io_intf ();
   if (CHCK_REENTRANCE (guard) || stream == NULL)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_fsetpos64) (stream, pos);
-#else
-      return CALL_REAL (fsetpos64)(stream, pos);
-#endif
-    }
+    return real_fsetpos64 (stream, pos);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_fsetpos64) (stream, pos);
-#else
-  ret = CALL_REAL (fsetpos64)(stream, pos);
-#endif
+  ret = real_fsetpos64 (stream, pos);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
@@ -3558,16 +3053,26 @@ fsetpos64 (FILE *stream, const fpos64_t *pos)
   else
     iopkt.iotype = OTHERIO_TRACE_ERROR;
   iopkt.fd = fileno (stream);
-#if ARCH(Intel)
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
-#else
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-#endif
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK_ARG, &iopkt);
   collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
   POP_REENTRANCE (guard);
   return ret;
 }
-#endif
+
+#define DCL_FSETPOS64(dcl_f, real_f) \
+  int dcl_f (FILE *stream, const fpos64_t *pos) \
+  { \
+    if ((real_f) == NULL) \
+      init_io_intf (); \
+    return gprofng_fsetpos64 (real_f, stream, pos); \
+  }
+
+DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_17, fsetpos64@GLIBC_2.17)
+DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_2_5, fsetpos64@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_2, fsetpos64@GLIBC_2.2)
+DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_1, fsetpos64@GLIBC_2.1)
+DCL_FSETPOS64 (fsetpos64, CALL_REAL(fsetpos64))
 
 /*------------------------------------------------------------- fsync */
 int

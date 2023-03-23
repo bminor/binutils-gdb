@@ -73,32 +73,29 @@ static int (*__real_grantpt) (int fd) = NULL;
 static char *(*__real_ptsname) (int fd) = NULL;
 static FILE *(*__real_popen) (const char *command, const char *type) = NULL;
 static int clone_linenum = 0;
-#if ARCH(Intel)
-#if WSIZE(32)
+static FILE *(*__real_popen_2_17) (const char *command, const char *type) = NULL;
+static FILE *(*__real_popen_2_2_5) (const char *command, const char *type) = NULL;
 static FILE *(*__real_popen_2_1) (const char *command, const char *type) = NULL;
 static FILE *(*__real_popen_2_0) (const char *command, const char *type) = NULL;
-static int (*__real_posix_spawn_2_15) (pid_t *pid, const char *path,
+
+static int (*__real_posix_spawn_2_17) (pid_t *pid, const char *path,
 			       const posix_spawn_file_actions_t *file_actions,
 			       const posix_spawnattr_t *attrp,
 			       char *const argv[], char *const envp[]) = NULL;
-static int (*__real_posix_spawn_2_2) (pid_t *pid, const char *path,
-			      const posix_spawn_file_actions_t *file_actions,
-			      const posix_spawnattr_t *attrp,
-			      char *const argv[], char *const envp[]) = NULL;
-static int (*__real_posix_spawnp_2_15) (pid_t *pid, const char *file,
-				const posix_spawn_file_actions_t *file_actions,
-				const posix_spawnattr_t *attrp,
-				char *const argv[], char *const envp[]) = NULL;
-static int (*__real_posix_spawnp_2_2) (pid_t *pid, const char *file,
-			       const posix_spawn_file_actions_t *file_actions,
-			       const posix_spawnattr_t *attrp,
-			       char *const argv[], char *const envp[]) = NULL;
-#elif WSIZE(64)
 static int (*__real_posix_spawn_2_15) (pid_t *pid, const char *path,
 			       const posix_spawn_file_actions_t *file_actions,
 			       const posix_spawnattr_t *attrp,
 			       char *const argv[], char *const envp[]) = NULL;
 static int (*__real_posix_spawn_2_2_5) (pid_t *pid, const char *path,
+				const posix_spawn_file_actions_t *file_actions,
+				const posix_spawnattr_t *attrp,
+				char *const argv[], char *const envp[]) = NULL;
+static int (*__real_posix_spawn_2_2) (pid_t *pid, const char *path,
+			      const posix_spawn_file_actions_t *file_actions,
+			      const posix_spawnattr_t *attrp,
+			      char *const argv[], char *const envp[]) = NULL;
+
+static int (*__real_posix_spawnp_2_17) (pid_t *pid, const char *file,
 				const posix_spawn_file_actions_t *file_actions,
 				const posix_spawnattr_t *attrp,
 				char *const argv[], char *const envp[]) = NULL;
@@ -110,8 +107,10 @@ static int (*__real_posix_spawnp_2_2_5) (pid_t *pid, const char *file,
 				 const posix_spawn_file_actions_t *file_actions,
 				 const posix_spawnattr_t *attrp,
 				 char *const argv[], char *const envp[]) = NULL;
-#endif /* WSIZE() */
-#endif /* ARCH(Intel) */
+static int (*__real_posix_spawnp_2_2) (pid_t *pid, const char *file,
+			       const posix_spawn_file_actions_t *file_actions,
+			       const posix_spawnattr_t *attrp,
+			       char *const argv[], char *const envp[]) = NULL;
 static int (*__real_system) (const char *command) = NULL;
 static int (*__real_posix_spawn) (pid_t *pid, const char *path,
 				const posix_spawn_file_actions_t *file_actions,
@@ -675,63 +674,87 @@ init_lineage_intf ()
     dlflag = RTLD_NEXT;
   TprintfT (DBG_LT2, "init_lineage_intf() using RTLD_%s\n",
 	    dlflag == RTLD_DEFAULT ? "DEFAULT" : "NEXT");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_fork\n", __real_fork);
   __real_vfork = dlsym (dlflag, "vfork");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_vfork\n", __real_vfork);
   __real_execve = dlsym (dlflag, "execve");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_execve\n", __real_execve);
   __real_execvp = dlsym (dlflag, "execvp");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_execvp\n", __real_execvp);
   __real_execv = dlsym (dlflag, "execv");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_execv\n", __real_execv);
   __real_execle = dlsym (dlflag, "execle");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_execle\n", __real_execle);
   __real_execlp = dlsym (dlflag, "execlp");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_execlp\n", __real_execlp);
   __real_execl = dlsym (dlflag, "execl");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_execl\n", __real_execl);
   __real_clone = dlsym (dlflag, "clone");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_clone\n", __real_clone);
   __real_posix_spawn = dlsym (dlflag, "posix_spawn");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_posix_spawn\n",
-	    __real_posix_spawn);
   __real_posix_spawnp = dlsym (dlflag, "posix_spawnp");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_posix_spawnp\n",
-	    __real_posix_spawnp);
-  __real_popen = dlvsym (dlflag, "popen", SYS_POPEN_VERSION);
-  TprintfT (DBG_LT2, "init_lineage_intf()[%s] @0x%p __real_popen\n",
-	    SYS_POPEN_VERSION, __real_popen);
-#if ARCH(Intel)
-  __real_posix_spawn_2_15 = dlvsym (dlflag, "posix_spawn", SYS_POSIX_SPAWN_VERSION);
-  __real_posix_spawnp_2_15 = dlvsym (dlflag, "posix_spawnp", SYS_POSIX_SPAWN_VERSION);
-#if WSIZE(32)
-  __real_popen_2_1 = __real_popen;
+
+  __real_popen_2_17 = dlvsym (dlflag, "popen", "GLIBC_2.17");
+  __real_popen_2_2_5 = dlvsym (dlflag, "popen", "GLIBC_2.2.5");
+  __real_popen_2_1 = dlvsym (dlflag, "popen", "GLIBC_2.1");
   __real_popen_2_0 = dlvsym (dlflag, "popen", "GLIBC_2.0");
-  __real_posix_spawn_2_2 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.2");
-  __real_posix_spawnp_2_2 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.2");
-#elif WSIZE(64)
+  if (__real_popen_2_17)
+    __real_popen = __real_popen_2_17;
+  else if (__real_popen_2_2_5)
+    __real_popen = __real_popen_2_2_5;
+  else if (__real_popen_2_1)
+    __real_popen = __real_popen_2_1;
+  else if (__real_popen_2_0)
+    __real_popen = __real_popen_2_0;
+  else
+    __real_popen = dlsym (dlflag, "popen");
+
+  __real_posix_spawn_2_17 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.17");
+  __real_posix_spawn_2_15 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.15");
   __real_posix_spawn_2_2_5 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.2.5");
+  __real_posix_spawn_2_2 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.2");
+
+  __real_posix_spawnp_2_17 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.17");
+  __real_posix_spawnp_2_15 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.15");
   __real_posix_spawnp_2_2_5 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.2.5");
-#endif /* WSIZE() */
-#endif /* ARCH(Intel) */
+  __real_posix_spawnp_2_2 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.2");
+
   __real_grantpt = dlsym (dlflag, "grantpt");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_grantpt\n", __real_grantpt);
   __real_ptsname = dlsym (dlflag, "ptsname");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_ptsname\n", __real_ptsname);
   __real_system = dlsym (dlflag, "system");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_system\n", __real_system);
   __real_setuid = dlsym (dlflag, "setuid");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_setuid\n", __real_setuid);
   __real_seteuid = dlsym (dlflag, "seteuid");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_seteuid\n", __real_seteuid);
   __real_setreuid = dlsym (dlflag, "setreuid");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_setreuid\n", __real_setreuid);
   __real_setgid = dlsym (dlflag, "setgid");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_setgid\n", __real_setgid);
   __real_setegid = dlsym (dlflag, "setegid");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_setegid\n", __real_setegid);
   __real_setregid = dlsym (dlflag, "setregid");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_setregid\n", __real_setregid);
+
+#define PR_FUNC(f)  TprintfT (DBG_LT2, "linetrace.c: " #f ": @%p\n", f)
+  PR_FUNC (__real_fork);
+  PR_FUNC (__real_vfork);
+  PR_FUNC (__real_execve);
+  PR_FUNC (__real_execvp);
+  PR_FUNC (__real_execv);
+  PR_FUNC (__real_execle);
+  PR_FUNC (__real_execlp);
+  PR_FUNC (__real_execl);
+  PR_FUNC (__real_clone);
+  PR_FUNC (__real_grantpt);
+  PR_FUNC (__real_ptsname);
+  PR_FUNC (__real_popen);
+  PR_FUNC (__real_popen_2_17);
+  PR_FUNC (__real_popen_2_2_5);
+  PR_FUNC (__real_popen_2_1);
+  PR_FUNC (__real_popen_2_0);
+  PR_FUNC (__real_posix_spawn_2_17);
+  PR_FUNC (__real_posix_spawn_2_15);
+  PR_FUNC (__real_posix_spawn_2_2_5);
+  PR_FUNC (__real_posix_spawn_2_2);
+  PR_FUNC (__real_posix_spawnp_2_17);
+  PR_FUNC (__real_posix_spawnp_2_15);
+  PR_FUNC (__real_posix_spawnp_2_2_5);
+  PR_FUNC (__real_posix_spawnp_2_2);
+  PR_FUNC (__real_system);
+  PR_FUNC (__real_posix_spawn);
+  PR_FUNC (__real_posix_spawnp);
+  PR_FUNC (__real_setuid);
+  PR_FUNC (__real_seteuid);
+  PR_FUNC (__real_setreuid);
+  PR_FUNC (__real_setgid);
+  PR_FUNC (__real_setegid);
+  PR_FUNC (__real_setregid);
+
   return 0;
 }
 
@@ -1365,225 +1388,119 @@ __collector_execl (const char* path, const char *arg0, ...)
 #include <spawn.h>
 
 /*-------------------------------------------------------- posix_spawn */
-#if ARCH(Intel)
 // map interposed symbol versions
 static int
-__collector_posix_spawn_symver (int(real_posix_spawn) (),
-				pid_t *pidp, const char *path,
-				const posix_spawn_file_actions_t *file_actions,
-				const posix_spawnattr_t *attrp,
-				char *const argv[], char *const envp[]);
-
-SYMVER_ATTRIBUTE (__collector_posix_spawn_2_15, posix_spawn@GLIBC_2.15)
-int
-__collector_posix_spawn_2_15 (pid_t *pidp, const char *path,
-			      const posix_spawn_file_actions_t *file_actions,
-			      const posix_spawnattr_t *attrp,
-			      char *const argv[], char *const envp[])
-{
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_posix_spawn_2_15@%p(path=%s, argv[0]=%s, env[0]=%s)\n",
-	    CALL_REAL (posix_spawn_2_15), path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL", envp ? (envp[0] ? envp[0] : "NULL") : "NULL");
-  if (NULL_PTR (posix_spawn))
-    init_lineage_intf ();
-  return __collector_posix_spawn_symver (CALL_REAL (posix_spawn_2_15), pidp,
-					 path, file_actions, attrp, argv, envp);
-}
-
-#if WSIZE(32)
-SYMVER_ATTRIBUTE (__collector_posix_spawn_2_2, posix_spawn@GLIBC_2.2)
-int
-__collector_posix_spawn_2_2 (pid_t *pidp, const char *path,
-			     const posix_spawn_file_actions_t *file_actions,
-			     const posix_spawnattr_t *attrp,
-			     char *const argv[], char *const envp[])
-{
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_posix_spawn_2_2@%p(path=%s, argv[0]=%s, env[0]=%s)\n",
-	    CALL_REAL (posix_spawn_2_2), path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL", envp ? (envp[0] ? envp[0] : "NULL") : "NULL");
-  if (NULL_PTR (posix_spawn))
-    init_lineage_intf ();
-  return __collector_posix_spawn_symver (CALL_REAL (posix_spawn_2_2), pidp,
-					 path, file_actions, attrp, argv, envp);
-}
-
-#else /* ^WSIZE(32) */
-SYMVER_ATTRIBUTE (__collector_posix_spawn_2_2_5, posix_spawn@GLIBC_2.2.5)
-int
-__collector_posix_spawn_2_2_5 (pid_t *pidp, const char *path,
-			       const posix_spawn_file_actions_t *file_actions,
-			       const posix_spawnattr_t *attrp,
-			       char *const argv[], char *const envp[])
-{
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_posix_spawn_2_2_5@%p(path=%s, argv[0]=%s, env[0]=%s)\n",
-	    CALL_REAL (posix_spawn_2_2_5), path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL", envp ? (envp[0] ? envp[0] : "NULL") : "NULL");
-  if (NULL_PTR (posix_spawn))
-    init_lineage_intf ();
-  return __collector_posix_spawn_symver (CALL_REAL (posix_spawn_2_2_5), pidp,
-					 path, file_actions, attrp, argv, envp);
-}
-#endif /* ^WSIZE(32) */
-
-static int
-__collector_posix_spawn_symver (int(real_posix_spawn) (),
-#else /* ^ARCH(Intel) */
-int
-__collector_posix_spawn (
-#endif /* ARCH() */
-	pid_t *pidp, const char *path,
-			 const posix_spawn_file_actions_t *file_actions,
-			 const posix_spawnattr_t *attrp,
-			 char *const argv[], char *const envp[])
+gprofng_posix_spawn (int(real_posix_spawn) (),
+		     pid_t *pidp, const char *path,
+		     const posix_spawn_file_actions_t *file_actions,
+		     const posix_spawnattr_t *attrp,
+		     char *const argv[], char *const envp[])
 {
   int ret;
   static char **coll_env = NULL; /* environment for collection */
-  if (NULL_PTR (posix_spawn))
-    init_lineage_intf ();
-  if (NULL_PTR (posix_spawn))
+  if (real_posix_spawn == NULL)
     {
-      TprintfT (DBG_LT0, "__collector_posix_spawn(path=%s) interposing: ERROR, posix_spawn() not found by dlsym\n",
+      TprintfT (DBG_LT0, "gprofng_posix_spawn (path=%s) interposin ERROR, posix_spawn() not found by dlsym\n",
 		path ? path : "NULL");
       return -1; /* probably should set errno */
     }
-  int * guard = NULL;
-  int combo_flag = (line_mode == LM_TRACK_LINEAGE) ? ((CHCK_REENTRANCE (guard)) ? 1 : 0) : 0;
-  TprintfT (DBG_LT0, "__collector_posix_spawn(path=%s, argv[0]=%s, env[0]=%s) interposing: line_mode=%d combo=%d\n",
-	    path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL", envp ? (envp[0] ? envp[0] : "NULL") : "NULL", line_mode, combo_flag);
+  int *guard = NULL;
+  int combo_flag = (line_mode == LM_TRACK_LINEAGE &&
+		    CHCK_REENTRANCE (guard)) ? 1 : 0;
+  TprintfT (DBG_LT0, "gprofng_posix_spawn @%p (%s, argv[0]=%s, env[0]=%s)"
+	    "line_mode=%d combo=%d\n", (real_posix_spawn), path ? path : "NULL",
+	    (argv && argv[0]) ? argv[0] : "NULL",
+	    (envp && envp[0]) ? envp[0] : "NULL", line_mode, combo_flag);
   if (line_mode == LM_CLOSED) /* ensure collection environment is sanitised */
     __collector_env_unset ((char**) envp);
 
-  if ((line_mode != LM_TRACK_LINEAGE) || combo_flag)
-    {
-#if ARCH(Intel)
-      return (real_posix_spawn) (pidp, path, file_actions, attrp, argv, envp);
-#else
-      return CALL_REAL (posix_spawn)(pidp, path, file_actions, attrp, argv, envp);
-#endif
-    }
+  if (line_mode != LM_TRACK_LINEAGE || combo_flag)
+    return (real_posix_spawn) (pidp, path, file_actions, attrp, argv, envp);
   int following_exec = 0;
-  coll_env = linetrace_ext_exec_prologue ("posix_spawn", path, argv, envp, &following_exec);
-  TprintfT (DBG_LT0, "__collector_posix_spawn(): coll_env=0x%p\n", coll_env);
-  __collector_env_printall ("__collector_posix_spawn", coll_env);
+  coll_env = linetrace_ext_exec_prologue ("posix_spawn", path, argv, envp,
+					  &following_exec);
+  __collector_env_printall ("gprofng_posix_spawn", coll_env);
   PUSH_REENTRANCE (guard);
-#if ARCH(Intel)
-  ret = (real_posix_spawn) (pidp, path, file_actions, attrp, argv, coll_env);
-#else
-  ret = CALL_REAL (posix_spawn)(pidp, path, file_actions, attrp, argv, coll_env);
-#endif
+  ret = real_posix_spawn (pidp, path, file_actions, attrp, argv, coll_env);
   POP_REENTRANCE (guard);
   linetrace_ext_exec_epilogue ("posix_spawn", envp, ret, &following_exec);
   return ret;
 }
 
+#define DCL_POSIX_SPAWN(dcl_f, real_f) \
+int dcl_f (pid_t *pidp, const char *path, \
+	   const posix_spawn_file_actions_t *file_actions, \
+	   const posix_spawnattr_t *attrp, \
+	   char *const argv[], char *const envp[]) \
+  { \
+    if ((real_f) == NULL) \
+      init_lineage_intf (); \
+    return gprofng_posix_spawn (real_f, pidp, path, file_actions, attrp, \
+				argv, envp); \
+  }
+
+
+DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_17, posix_spawn@GLIBC_2.17)
+DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_15, posix_spawn@GLIBC_2.15)
+DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_2_5, posix_spawn@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_2, posix_spawn@GLIBC_2.2)
+DCL_POSIX_SPAWN (posix_spawn, CALL_REAL (posix_spawn))
+
 /*-------------------------------------------------------- posix_spawnp */
-#if ARCH(Intel)
-// map interposed symbol versions
-
 static int
-__collector_posix_spawnp_symver (int(real_posix_spawnp) (), pid_t *pidp,
-				 const char *path,
-				 const posix_spawn_file_actions_t *file_actions,
-				 const posix_spawnattr_t *attrp,
-				 char *const argv[], char *const envp[]);
-
-SYMVER_ATTRIBUTE (__collector_posix_spawnp_2_15, posix_spawnp@GLIBC_2.15)
-int // Common interposition
-__collector_posix_spawnp_2_15 (pid_t *pidp, const char *path,
-			       const posix_spawn_file_actions_t *file_actions,
-			       const posix_spawnattr_t *attrp,
-			       char *const argv[], char *const envp[])
+gprofng_posix_spawnp (int (real_posix_spawnp) (),
+                      pid_t *pidp, const char *path,
+                      const posix_spawn_file_actions_t *file_actions,
+                      const posix_spawnattr_t *attrp,
+                      char *const argv[], char *const envp[])
 {
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_posix_spawnp_2_15@%p(path=%s, argv[0]=%s, env[0]=%s)\n",
-	    CALL_REAL (posix_spawnp_2_15), path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL", envp ? (envp[0] ? envp[0] : "NULL") : "NULL");
-  if (NULL_PTR (posix_spawnp))
-    init_lineage_intf ();
-  return __collector_posix_spawnp_symver (CALL_REAL (posix_spawnp_2_15), pidp,
-					  path, file_actions, attrp, argv, envp);
-}
-
-#if WSIZE(32)
-
-SYMVER_ATTRIBUTE (__collector_posix_spawnp_2_2, posix_spawnp@GLIBC_2.2)
-int
-__collector_posix_spawnp_2_2 (pid_t *pidp, const char *path,
-			      const posix_spawn_file_actions_t *file_actions,
-			      const posix_spawnattr_t *attrp,
-			      char *const argv[], char *const envp[])
-{
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_posix_spawnp_2_2@%p(path=%s, argv[0]=%s, env[0]=%s)\n",
-	    CALL_REAL (posix_spawnp_2_2), path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL", envp ? (envp[0] ? envp[0] : "NULL") : "NULL");
-  if (NULL_PTR (posix_spawnp))
-    init_lineage_intf ();
-  return __collector_posix_spawnp_symver (CALL_REAL (posix_spawnp_2_2), pidp,
-					  path, file_actions, attrp, argv, envp);
-}
-
-#else /* ^WSIZE(32) */
-SYMVER_ATTRIBUTE (__collector_posix_spawnp_2_2_5, posix_spawnp@GLIBC_2.2.5)
-int
-__collector_posix_spawnp_2_2_5 (pid_t *pidp, const char *path,
-				const posix_spawn_file_actions_t *file_actions,
-				const posix_spawnattr_t *attrp,
-				char *const argv[], char *const envp[])
-{
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_posix_spawnp_2_2_5@%p(path=%s, argv[0]=%s, env[0]=%s)\n",
-	    CALL_REAL (posix_spawnp_2_2_5), path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL", envp ? (envp[0] ? envp[0] : "NULL") : "NULL");
-  if (NULL_PTR (posix_spawnp))
-    init_lineage_intf ();
-  return __collector_posix_spawnp_symver (CALL_REAL (posix_spawnp_2_2_5), pidp,
-					  path, file_actions, attrp, argv, envp);
-}
-
-#endif /* ^WSIZE(32) */
-
-static int
-__collector_posix_spawnp_symver (int(real_posix_spawnp) (),
-#else /* ^ARCH(Intel) */
-int
-__collector_posix_spawnp (
-#endif /* ARCH() */
-	pid_t *pidp, const char *path,
-			  const posix_spawn_file_actions_t *file_actions,
-			  const posix_spawnattr_t *attrp,
-			  char *const argv[], char *const envp[]){
-  int ret;
   static char **coll_env = NULL; /* environment for collection */
-  if (NULL_PTR (posix_spawnp))
-    init_lineage_intf ();
-  if (NULL_PTR (posix_spawnp))
+
+  if (real_posix_spawnp == NULL)
     {
-      TprintfT (DBG_LT0, "__collector_posix_spawnp(path=%s) interposing: ERROR, posix_spawnp() not found by dlsym\n",
+      TprintfT (DBG_LT0, "gprofng_posix_spawnp (path=%s) interposin ERROR\n",
 		path ? path : "NULL");
       return -1; /* probably should set errno */
     }
-  int * guard = NULL;
+  int *guard = NULL;
   int combo_flag = (line_mode == LM_TRACK_LINEAGE) ? ((CHCK_REENTRANCE (guard)) ? 1 : 0) : 0;
-  TprintfT (DBG_LT0, "__collector_posix_spawnp(path=%s, argv[0]=%s, env[0]=%s) interposing: line_mode=%d combo=%d\n",
-	    path ? path : "NULL", argv ? (argv[0] ? argv[0] : "NULL") : "NULL",
-	    envp ? (envp[0] ? envp[0] : "NULL") : "NULL", line_mode, combo_flag);
+  TprintfT (DBG_LT0, "gprofng_posix_spawnp @%p (path=%s, argv[0]=%s, env[0]=%s) line_mode=%d combo=%d\n",
+	    real_posix_spawnp, path ? path : "NULL",
+	    argv && argv[0] ? argv[0] : "NULL",
+	    envp && envp[0] ? envp[0] : "NULL", line_mode, combo_flag);
 
-  if (line_mode == LM_CLOSED) /* ensure collection environment is sanitised */
+  if (line_mode == LM_CLOSED) /* ensure collection environment is sanitized */
     __collector_env_unset ((char**) envp);
   if (line_mode != LM_TRACK_LINEAGE || combo_flag)
-    {
-#if ARCH(Intel)
-      return (real_posix_spawnp) (pidp, path, file_actions, attrp, argv, envp);
-#else
-      return CALL_REAL (posix_spawnp)(pidp, path, file_actions, attrp, argv, envp);
-#endif
-    }
+    return (real_posix_spawnp) (pidp, path, file_actions, attrp, argv, envp);
   int following_exec = 0;
   coll_env = linetrace_ext_exec_prologue ("posix_spawnp", path, argv, envp, &following_exec);
   TprintfT (DBG_LT0, "__collector_posix_spawnp(): coll_env=0x%p\n", coll_env);
   __collector_env_printall ("__collector_posix_spawnp", coll_env);
   PUSH_REENTRANCE (guard);
-#if ARCH(Intel)
-  ret = (real_posix_spawnp) (pidp, path, file_actions, attrp, argv, coll_env);
-#else
-  ret = CALL_REAL (posix_spawnp)(pidp, path, file_actions, attrp, argv, coll_env);
-#endif
+  int ret = real_posix_spawnp (pidp, path, file_actions, attrp, argv, coll_env);
   POP_REENTRANCE (guard);
   linetrace_ext_exec_epilogue ("posix_spawnp", envp, ret, &following_exec);
   return ret;
 }
+
+#define DCL_POSIX_SPAWNP(dcl_f, real_f) \
+int dcl_f (pid_t *pidp, const char *path, \
+	   const posix_spawn_file_actions_t *file_actions, \
+	   const posix_spawnattr_t *attrp, \
+	   char *const argv[], char *const envp[]) \
+  { \
+    if ((real_f) == NULL) \
+      init_lineage_intf (); \
+    return gprofng_posix_spawnp (real_f, pidp, path, \
+				 file_actions, attrp, argv, envp); \
+  }
+
+DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_17, posix_spawnp@GLIBC_2.17)
+DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_15, posix_spawnp@GLIBC_2.15)
+DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_2_5, posix_spawnp@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_2, posix_spawnp@GLIBC_2.2)
+DCL_POSIX_SPAWNP (posix_spawnp, CALL_REAL (posix_spawnp))
 
 /*------------------------------------------------------------- system */
 int system () __attribute__ ((weak, alias ("__collector_system")));
@@ -1612,90 +1529,33 @@ __collector_system (const char *cmd)
 
 /*------------------------------------------------------------- popen */
 // map interposed symbol versions
-#if ARCH(Intel) && WSIZE(32)
-static FILE *
-__collector_popen_symver (FILE*(real_popen) (), const char *cmd, const char *mode);
+#define DCL_POPEN(dcl_f, real_f) \
+  FILE *dcl_f (const char *cmd, const char *mode) \
+  { \
+    if ((real_f) == NULL) \
+      init_lineage_intf (); \
+    TprintfT (DBG_LT0, #dcl_f " (%s) interposing: line_mode=%d combo=%d\n", \
+	      cmd ? cmd : "NULL", line_mode, get_combo_flag ()); \
+    int *guard = NULL; \
+    if (line_mode == LM_TRACK_LINEAGE) \
+      INIT_REENTRANCE (guard); \
+    if (guard == NULL) \
+      return (real_f) (cmd, mode); \
+    int following_combo = 0; \
+    linetrace_ext_combo_prologue ("popen", cmd, &following_combo); \
+    PUSH_REENTRANCE (guard); \
+    FILE *ret = (real_f) (cmd, mode); \
+    POP_REENTRANCE (guard); \
+    linetrace_ext_combo_epilogue ("popen", ret == NULL ? -1 : 0, \
+				  &following_combo); \
+    return ret; \
+  }
 
-SYMVER_ATTRIBUTE (__collector_popen_2_1, popen@GLIBC_2.1)
-FILE *
-__collector_popen_2_1 (const char *cmd, const char *mode)
-{
-  if (NULL_PTR (popen))
-    init_lineage_intf ();
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_popen_2_1@%p\n", CALL_REAL (popen_2_1));
-  return __collector_popen_symver (CALL_REAL (popen_2_1), cmd, mode);
-}
-
-SYMVER_ATTRIBUTE (__collector_popen_2_0, popen@GLIBC_2.0)
-FILE *
-__collector_popen_2_0 (const char *cmd, const char *mode)
-{
-  if (NULL_PTR (popen))
-    init_lineage_intf ();
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_popen_2_0@%p\n", CALL_REAL (popen_2_0));
-  return __collector_popen_symver (CALL_REAL (popen_2_0), cmd, mode);
-}
-
-SYMVER_ATTRIBUTE (__collector__popen_2_1, _popen@GLIBC_2.1)
-FILE *
-__collector__popen_2_1 (const char *cmd, const char *mode)
-{
-  if (NULL_PTR (popen))
-    init_lineage_intf ();
-  TprintfT (DBG_LTT, "linetrace: GLIBC: __collector__popen_2_1@%p\n", CALL_REAL (popen_2_1));
-  return __collector_popen_symver (CALL_REAL (popen_2_1), cmd, mode);
-}
-
-SYMVER_ATTRIBUTE (__collector__popen_2_0, _popen@GLIBC_2.0)
-FILE *
-__collector__popen_2_0 (const char *cmd, const char *mode)
-{
-  if (NULL_PTR (popen))
-    init_lineage_intf ();
-  return __collector_popen_symver (CALL_REAL (popen_2_0), cmd, mode);
-}
-#else // WSIZE(64)
-FILE * popen () __attribute__ ((weak, alias ("__collector_popen")));
-#endif
-
-#if ARCH(Intel) && WSIZE(32)
-static FILE *
-__collector_popen_symver (FILE*(real_popen) (), const char *cmd, const char *mode)
-#else
-
-FILE *
-__collector_popen (const char *cmd, const char *mode)
-#endif
-{
-  FILE *ret;
-  if (NULL_PTR (popen))
-    init_lineage_intf ();
-  TprintfT (DBG_LT0,
-	    "__collector_popen(cmd=%s) interposing: line_mode=%d combo=%d\n",
-	    cmd ? cmd : "NULL", line_mode, get_combo_flag ());
-  int *guard = NULL;
-  if (line_mode == LM_TRACK_LINEAGE)
-    INIT_REENTRANCE (guard);
-  if (guard == NULL)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_popen) (cmd, mode);
-#else
-      return CALL_REAL (popen)(cmd, mode);
-#endif
-    }
-  int following_combo = 0;
-  linetrace_ext_combo_prologue ("popen", cmd, &following_combo);
-  PUSH_REENTRANCE (guard);
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_popen) (cmd, mode);
-#else
-  ret = CALL_REAL (popen)(cmd, mode);
-#endif
-  POP_REENTRANCE (guard);
-  linetrace_ext_combo_epilogue ("popen", (ret == NULL) ? (-1) : 0, &following_combo);
-  return ret;
-}
+DCL_FUNC_VER (DCL_POPEN, popen_2_17, popen@GLIBC_2.17)
+DCL_FUNC_VER (DCL_POPEN, popen_2_2_5, popen@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_POPEN, popen_2_1, popen@GLIBC_2.1)
+DCL_FUNC_VER (DCL_POPEN, popen_2_0, popen@GLIBC_2.0)
+DCL_POPEN (popen, CALL_REAL (popen))
 
 /*------------------------------------------------------------- grantpt */
 int grantpt () __attribute__ ((weak, alias ("__collector_grantpt")));

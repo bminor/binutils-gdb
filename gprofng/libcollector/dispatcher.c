@@ -63,19 +63,39 @@ static int (*__real_timer_settime) (timer_t timerid, int flags,
 static int (*__real_timer_delete) (timer_t timerid) = NULL;
 static int (*__real_timer_gettime) (timer_t timerid,
 				    struct itimerspec *curr_value) = NULL;
-#if ARCH(Intel) && WSIZE(32)
+
+static int (*__real_pthread_create_2_34) (pthread_t *thread,
+			const pthread_attr_t *attr,
+			void *(*start_routine) (void *), void *arg) = NULL;
+static int (*__real_pthread_create_2_17) (pthread_t *thread,
+			const pthread_attr_t *attr,
+			void *(*start_routine) (void *), void *arg) = NULL;
+static int (*__real_pthread_create_2_2_5) (pthread_t *thread,
+			const pthread_attr_t *attr,
+			void *(*start_routine) (void *), void *arg) = NULL;
 static int (*__real_pthread_create_2_1) (pthread_t *thread,
 			const pthread_attr_t *attr,
 			void *(*start_routine) (void *), void *arg) = NULL;
 static int (*__real_pthread_create_2_0) (pthread_t *thread,
 			const pthread_attr_t *attr,
 			void *(*start_routine) (void *), void *arg) = NULL;
-#elif ARCH(Intel) && WSIZE(64)
+
+static int (*__real_timer_create_2_34) (clockid_t clockid,
+				struct sigevent *sevp, timer_t *timerid) = NULL;
+static int (*__real_timer_create_2_17) (clockid_t clockid,
+				struct sigevent *sevp, timer_t *timerid) = NULL;
 static int (*__real_timer_create_2_3_3) (clockid_t clockid,
 				struct sigevent *sevp, timer_t *timerid) = NULL;
 static int (*__real_timer_create_2_2_5) (clockid_t clockid,
 				struct sigevent *sevp, timer_t *timerid) = NULL;
-#endif
+static int (*__real_timer_create_2_2) (clockid_t clockid,
+				struct sigevent *sevp, timer_t *timerid) = NULL;
+
+int (*__real_pthread_sigmask_2_32) (int, const sigset_t *, sigset_t *) = NULL;
+int (*__real_pthread_sigmask_2_17) (int, const sigset_t *, sigset_t *) = NULL;
+int (*__real_pthread_sigmask_2_2_5) (int, const sigset_t *, sigset_t *) = NULL;
+int (*__real_pthread_sigmask_2_0) (int, const sigset_t *, sigset_t *) = NULL;
+
 
 /* Original SIGPROF handler which will be replaced with the dispatcher.  Used
  * to properly interact with libaio, which uses SIGPROF as its SIGAIOCANCEL. */
@@ -637,12 +657,6 @@ protect_profiling_signals (sigset_t* lset)
     }
 }
 
-#define SYS_SETITIMER_NAME      "setitimer"
-#define SYS_SIGACTION_NAME      "sigaction"
-#define SYS_SIGPROCMASK_NAME    "sigprocmask"
-#define SYS_PTHREAD_SIGMASK     "pthread_sigmask"
-#define SYS_THR_SIGSETMASK      "thr_sigsetmask"
-
 static int
 init_interposition_intf ()
 {
@@ -652,15 +666,10 @@ init_interposition_intf ()
   /* Linux requires RTLD_LAZY, Solaris can do just RTLD_NOLOAD */
   void *handle = dlopen (SYS_LIBC_NAME, RTLD_LAZY | RTLD_NOLOAD);
 
-#if ARCH(SPARC) && WSIZE(64)
-  /* dlopen a bogus path to avoid CR 23608692 */
-  dlopen ("/bogus_path_for_23608692_workaround/", RTLD_LAZY | RTLD_NOLOAD);
-#endif
-  __real_setitimer = dlsym (RTLD_NEXT, SYS_SETITIMER_NAME);
-
+  __real_setitimer = dlsym (RTLD_NEXT, "setitimer");
   if (__real_setitimer == NULL)
     {
-      __real_setitimer = dlsym (RTLD_DEFAULT, SYS_SETITIMER_NAME);
+      __real_setitimer = dlsym (RTLD_DEFAULT, "setitimer");
       if (__real_setitimer == NULL)
 	{
 	  TprintfT (DBG_LT2, "init_interposition_intf() setitimer not found\n");
@@ -673,54 +682,127 @@ init_interposition_intf ()
 
   TprintfT (DBG_LT2, "init_interposition_intf() using RTLD_%s\n",
 	    (dlflag == RTLD_DEFAULT) ? "DEFAULT" : "NEXT");
-  TprintfT (DBG_LT2, "@%p __real_setitimer\n", __real_setitimer);
 
-  __real_sigaction = dlsym (dlflag, SYS_SIGACTION_NAME);
-  TprintfT (DBG_LT2, "@%p __real_sigaction\n", __real_sigaction);
+  __real_sigaction = dlsym (dlflag, "sigaction");
 
   /* also explicitly get libc.so/setitimer (as a backup) */
-  __real_libc_setitimer = dlsym (handle, SYS_SETITIMER_NAME);
-  TprintfT (DBG_LT2, "@%p __real_libc_setitimer\n", __real_libc_setitimer);
+  __real_libc_setitimer = dlsym (handle, "setitimer");
 
-  __real_sigprocmask = dlsym (dlflag, SYS_SIGPROCMASK_NAME);
-  TprintfT (DBG_LT2, "@%p __real_sigprocmask\n", __real_sigprocmask);
+  __real_sigprocmask = dlsym (dlflag, "sigprocmask");
+  __real_thr_sigsetmask = dlsym (dlflag, "thr_sigsetmask");
 
-  __real_thr_sigsetmask = dlsym (dlflag, SYS_THR_SIGSETMASK);
-  TprintfT (DBG_LT2, "@%p __real_thr_sigsetmask\n", __real_thr_sigsetmask);
+  __real_pthread_sigmask_2_32 = dlvsym (dlflag, "pthread_sigmask", "GLIBC_2.32");
+  __real_pthread_sigmask_2_17 = dlvsym (dlflag, "pthread_sigmask", "GLIBC_2.17");
+  __real_pthread_sigmask_2_2_5 = dlvsym (dlflag, "pthread_sigmask", "GLIBC_2.2.5");
+  __real_pthread_sigmask_2_0 = dlvsym (dlflag, "pthread_sigmask", "GLIBC_2.0");
+  __real_pthread_sigmask = dlsym (dlflag, "pthread_sigmask");
 
-  __real_pthread_sigmask = dlsym (dlflag, SYS_PTHREAD_SIGMASK);
-  TprintfT (DBG_LT2, "@%p __real_pthread_sigmask\n", __real_pthread_sigmask);
-
-#if ARCH(Aarch64)
-  __real_pthread_create = dlvsym (dlflag, "pthread_create", SYS_PTHREAD_CREATE_VERSION);
-  __real_timer_create = dlsym (dlflag, "timer_create");
-  __real_timer_settime = dlsym (dlflag, "timer_settime");
-  __real_timer_delete = dlsym (dlflag, "timer_delete");
-  __real_timer_gettime = dlsym (dlflag, "timer_gettime");
-#else
-  __real_pthread_create = dlvsym (dlflag, "pthread_create", SYS_PTHREAD_CREATE_VERSION);
-  TprintfT (DBG_LT2, "[%s] @%p __real_pthread_create\n", SYS_PTHREAD_CREATE_VERSION, __real_pthread_create);
-  __real_timer_create = dlvsym (dlflag, "timer_create", SYS_TIMER_X_VERSION);
-  TprintfT (DBG_LT2, "init_lineage_intf() [%s] @0x%p __real_timer_create\n", SYS_TIMER_X_VERSION, __real_timer_create);
-  __real_timer_settime = dlvsym (dlflag, "timer_settime", SYS_TIMER_X_VERSION);
-  TprintfT (DBG_LT2, "init_lineage_intf() [%s] @0x%p __real_timer_settime\n", SYS_TIMER_X_VERSION, __real_timer_settime);
-  __real_timer_delete = dlvsym (dlflag, "timer_delete", SYS_TIMER_X_VERSION);
-  TprintfT (DBG_LT2, "init_lineage_intf() [%s] @0x%p __real_timer_delete\n", SYS_TIMER_X_VERSION, __real_timer_delete);
-  __real_timer_gettime = dlvsym (dlflag, "timer_gettime", SYS_TIMER_X_VERSION);
-  TprintfT (DBG_LT2, "init_lineage_intf() [%s] @0x%p __real_timer_gettime\n", SYS_TIMER_X_VERSION, __real_timer_gettime);
-  __real_clone = dlsym (dlflag, "clone");
-  TprintfT (DBG_LT2, "init_lineage_intf() @0x%p __real_clone\n", __real_clone);
-#if ARCH(Intel) && WSIZE(32)
-  __real_pthread_create_2_1 = __real_pthread_create;
+  __real_pthread_create_2_34 = dlvsym (dlflag, "pthread_create", "GLIBC_2.34");
+  __real_pthread_create_2_17 = dlvsym (dlflag, "pthread_create", "GLIBC_2.17");
+  __real_pthread_create_2_2_5 = dlvsym (dlflag, "pthread_create", "GLIBC_2.2.5");
+  __real_pthread_create_2_1 = dlvsym (dlflag, "pthread_create", "GLIBC_2.1");
   __real_pthread_create_2_0 = dlvsym (dlflag, "pthread_create", "GLIBC_2.0");
-#elif ARCH(Intel) && WSIZE(64)
-  __real_timer_create_2_3_3 = __real_timer_create;
+  if (__real_pthread_create_2_34)
+    __real_pthread_create = __real_pthread_create_2_34;
+  else if (__real_pthread_create_2_17)
+    __real_pthread_create = __real_pthread_create_2_17;
+  else if (__real_pthread_create_2_2_5)
+    __real_pthread_create = __real_pthread_create_2_2_5;
+  else if (__real_pthread_create_2_1)
+    __real_pthread_create = __real_pthread_create_2_1;
+  else if (__real_pthread_create_2_0)
+    __real_pthread_create = __real_pthread_create_2_0;
+  else
+    __real_pthread_create = dlsym (dlflag, "pthread_create");
+
+  __real_timer_create_2_34 = dlvsym (dlflag, "timer_create", "GLIBC_2.34");
+  __real_timer_create_2_17 = dlvsym (dlflag, "timer_create", "GLIBC_2.17");
+  __real_timer_create_2_3_3 = dlvsym (dlflag, "timer_create", "GLIBC_2.3.3");
   __real_timer_create_2_2_5 = dlvsym (dlflag, "timer_create", "GLIBC_2.2.5");
-#elif ARCH(SPARC) && WSIZE(64)
-  __real_timer_create_2_3_3 = __real_timer_create;
   __real_timer_create_2_2 = dlvsym (dlflag, "timer_create", "GLIBC_2.2");
-#endif /* ARCH() && SIZE() */
-#endif
+  if (__real_timer_create_2_34)
+    __real_timer_create = __real_timer_create_2_34;
+  else if (__real_timer_create_2_17)
+    __real_timer_create = __real_timer_create_2_17;
+  else if (__real_timer_create_2_3_3)
+    __real_timer_create = __real_timer_create_2_3_3;
+  else if (__real_timer_create_2_2_5)
+    __real_timer_create = __real_timer_create_2_2_5;
+  else if (__real_timer_create_2_2)
+    __real_timer_create = __real_timer_create_2_2;
+  else
+    __real_timer_create = dlsym (dlflag, "timer_create");
+
+  void *t;
+  if ((t = dlvsym (dlflag, "timer_settime", "GLIBC_2.34")) != NULL)
+    __real_timer_settime = t;
+  else if ((t = dlvsym (dlflag, "timer_settime", "GLIBC_2.17")) != NULL)
+    __real_timer_settime = t;
+  else if ((t = dlvsym (dlflag, "timer_settime", "GLIBC_2.3.3")) != NULL)
+    __real_timer_settime = t;
+  else if ((t = dlvsym (dlflag, "timer_settime", "GLIBC_2.2.5")) != NULL)
+    __real_timer_settime = t;
+  else if ((t = dlvsym (dlflag, "timer_settime", "GLIBC_2.0")) != NULL)
+    __real_timer_settime = t;
+  else
+    __real_timer_settime = dlsym (dlflag, "timer_settime");
+
+  if ((t = dlvsym (dlflag, "timer_delete", "GLIBC_2.34")) != NULL)
+    __real_timer_delete = t;
+  else if ((t = dlvsym (dlflag, "timer_delete", "GLIBC_2.17")) != NULL)
+    __real_timer_delete = t;
+  else if ((t = dlvsym (dlflag, "timer_delete", "GLIBC_2.3.3")) != NULL)
+    __real_timer_delete = t;
+  else if ((t = dlvsym (dlflag, "timer_delete", "GLIBC_2.2.5")) != NULL)
+    __real_timer_delete = t;
+  else if ((t = dlvsym (dlflag, "timer_delete", "GLIBC_2.2")) != NULL)
+    __real_timer_delete = t;
+  else
+    __real_timer_delete = dlsym (dlflag, "timer_delete");
+
+  if ((t = dlvsym (dlflag, "timer_gettime", "GLIBC_2.34")) != NULL)
+    __real_timer_gettime = t;
+  else if ((t = dlvsym (dlflag, "timer_gettime", "GLIBC_2.17")) != NULL)
+    __real_timer_gettime = t;
+  else if ((t = dlvsym (dlflag, "timer_gettime", "GLIBC_2.3.3")) != NULL)
+    __real_timer_gettime = t;
+  else if ((t = dlvsym (dlflag, "timer_gettime", "GLIBC_2.2.5")) != NULL)
+    __real_timer_gettime = t;
+  else if ((t = dlvsym (dlflag, "timer_gettime", "GLIBC_2.0")) != NULL)
+    __real_timer_gettime = t;
+  else
+    __real_timer_gettime = dlsym (dlflag, "timer_gettime");
+
+  __real_clone = dlsym (dlflag, "clone");
+
+#define PR_FUNC(f)  TprintfT (DBG_LT2, " dispetcher.c: " #f ": @%p\n", f)
+  PR_FUNC (__real_clone);
+  PR_FUNC (__real_libc_setitimer);
+  PR_FUNC (__real_pthread_create);
+  PR_FUNC (__real_pthread_create_2_0);
+  PR_FUNC (__real_pthread_create_2_1);
+  PR_FUNC (__real_pthread_create_2_17);
+  PR_FUNC (__real_pthread_create_2_2_5);
+  PR_FUNC (__real_pthread_create_2_34);
+  PR_FUNC (__real_pthread_sigmask);
+  PR_FUNC (__real_pthread_sigmask_2_0);
+  PR_FUNC (__real_pthread_sigmask_2_2_5);
+  PR_FUNC (__real_pthread_sigmask_2_17);
+  PR_FUNC (__real_pthread_sigmask_2_32);
+  PR_FUNC (__real_setitimer);
+  PR_FUNC (__real_sigaction);
+  PR_FUNC (__real_sigprocmask);
+  PR_FUNC (__real_thr_sigsetmask);
+  PR_FUNC (__real_timer_create);
+  PR_FUNC (__real_timer_create_2_17);
+  PR_FUNC (__real_timer_create_2_2);
+  PR_FUNC (__real_timer_create_2_2_5);
+  PR_FUNC (__real_timer_create_2_3_3);
+  PR_FUNC (__real_timer_create_2_34);
+  PR_FUNC (__real_timer_delete);
+  PR_FUNC (__real_timer_gettime);
+  PR_FUNC (__real_timer_settime);
+
   return 0;
 }
 
@@ -817,88 +899,44 @@ sigset (int sig, sighandler_t handler)
 /*------------------------------------------------------------- timer_create */
 
 // map interposed symbol versions
-#if WSIZE(64)
-#if ARCH(SPARC) || ARCH(Intel)
 static int
-__collector_timer_create_symver (int(real_timer_create) (), clockid_t clockid, struct sigevent *sevp,
-				 timer_t *timerid);
-
-SYMVER_ATTRIBUTE (__collector_timer_create_2_3_3, timer_create@GLIBC_2.3.3)
-int
-__collector_timer_create_2_3_3 (clockid_t clockid, struct sigevent *sevp,
-				timer_t *timerid)
+gprofng_timer_create (int (real_func) (), clockid_t clockid,
+                      struct sigevent *sevp, timer_t *timerid)
 {
-  if (NULL_PTR (timer_create))
-    init_interposition_intf ();
-  TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_timer_create_2_3_3@%p\n", CALL_REAL (timer_create_2_3_3));
-  return __collector_timer_create_symver (CALL_REAL (timer_create_2_3_3), clockid, sevp, timerid);
-}
-#endif /* ARCH(SPARC) || ARCH(Intel)*/
-
-#if ARCH(SPARC)
-
-SYMVER_ATTRIBUTE (__collector_timer_create_2_2, timer_create@GLIBC_2.2)
-int
-__collector_timer_create_2_2 (clockid_t clockid, struct sigevent *sevp,
-			      timer_t *timerid)
-{
-  if (NULL_PTR (timer_create))
-    init_interposition_intf ();
-  TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_timer_create_2_2@%p\n", CALL_REAL (timer_create_2_2));
-  return __collector_timer_create_symver (CALL_REAL (timer_create_2_2), clockid, sevp, timerid);
-}
-
-#elif ARCH(Intel)
-
-SYMVER_ATTRIBUTE (__collector_timer_create_2_2_5, timer_create@GLIBC_2.2.5)
-int
-__collector_timer_create_2_2_5 (clockid_t clockid, struct sigevent *sevp,
-				timer_t *timerid)
-{
-  if (NULL_PTR (timer_create))
-    init_interposition_intf ();
-  TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_timer_create_2_2_5@%p\n", CALL_REAL (timer_create_2_2_5));
-  return __collector_timer_create_symver (CALL_REAL (timer_create_2_2_5), clockid, sevp, timerid);
-}
-#endif /* ARCH() */
-#endif /* WSIZE(64) */
-
-#if ARCH(Aarch64) || (ARCH(Intel) && WSIZE(32))
-int timer_create (clockid_t clockid, struct sigevent *sevp, timer_t *timerid)
-#else
-static int
-__collector_timer_create_symver (int(real_timer_create) (), clockid_t clockid,
-				 struct sigevent *sevp, timer_t *timerid)
-#endif
-{
-  int ret;
-
-  if (NULL_PTR (timer_create))
-    init_interposition_intf ();
-
-  /* collector reserves SIGPROF
-   */
-  if (sevp == NULL || sevp->sigev_notify != SIGEV_SIGNAL
-      || sevp->sigev_signo != SIGPROF)
+  // collector reserves SIGPROF
+  if (sevp == NULL || sevp->sigev_notify != SIGEV_SIGNAL ||
+      sevp->sigev_signo != SIGPROF)
     {
-#if ARCH(Aarch64) || (ARCH(Intel) && WSIZE(32))
-      ret = CALL_REAL (timer_create)(clockid, sevp, timerid);
-#else
-      ret = (real_timer_create) (clockid, sevp, timerid);
-#endif
-      TprintfT (DBG_LT2, "Real timer_create(%d) returned %d\n",
-		clockid, ret);
+      int ret = real_func (clockid, sevp, timerid);
+      TprintfT (DBG_LT2, "timer_create @%p (%d) ret=%d\n", real_func,
+                (int) clockid, ret);
       return ret;
     }
 
   /* log that application's timer_create request is overridden */
   (void) __collector_log_write ("<event kind=\"%s\" id=\"%d\">%d</event>\n",
 				SP_JCMD_CWARN, COL_WARN_ITMROVR, -1);
-  ret = -1;
   errno = EBUSY;
-  TprintfT (DBG_LT2, "timer_create() returning %d\n", ret);
-  return ret;
+  TprintfT (DBG_LT2, "timer_create @%p (%d) ret=%d\n", real_func,
+                (int) clockid, -1); \
+  return -1;
 }
+
+#define DCL_TIMER_CREATE(dcl_f, real_f) \
+  int dcl_f (clockid_t clockid, struct sigevent *sevp, timer_t *timerid) \
+  { \
+    if ((real_f) == NULL) \
+      init_interposition_intf (); \
+    return gprofng_timer_create (real_f, clockid, sevp, timerid); \
+  }
+
+DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_34, timer_create@GLIBC_2.34)
+DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_17, timer_create@GLIBC_2.17)
+DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_3_3, timer_create@GLIBC_2.3.3)
+DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_2_5, timer_create@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_2, timer_create@GLIBC_2.2)
+DCL_TIMER_CREATE (timer_create, CALL_REAL (timer_create))
+
 /*------------------------------------------------------------- setitimer */
 int
 _setitimer (int which, const struct itimerval *nval,
@@ -995,26 +1033,42 @@ __collector_thr_sigsetmask (int how, const sigset_t* iset, sigset_t* oset)
 }
 
 /*----------------------------------------------------------- pthread_sigmask */
+// map interposed symbol versions
 
-int
-pthread_sigmask (int how, const sigset_t* iset, sigset_t* oset)
+static int
+gprofng_pthread_sigmask (int (real_func) (),
+                         int how, const sigset_t *iset, sigset_t* oset)
 {
-  if (NULL_PTR (pthread_sigmask))
-    init_interposition_intf ();
-  TprintfT (DBG_LT1, "__collector_pthread_sigmask(%d) interposing\n", how);
   sigset_t lsigset;
   sigset_t* lset = NULL;
   if (iset)
     {
       lsigset = *iset;
       lset = &lsigset;
-      if ((how == SIG_BLOCK) || (how == SIG_SETMASK))
-	protect_profiling_signals (lset);
+      if (how == SIG_BLOCK || how == SIG_SETMASK)
+        protect_profiling_signals (lset);
     }
-  int ret = CALL_REAL (pthread_sigmask)(how, lset, oset);
-  TprintfT (DBG_LT1, "__collector_pthread_sigmask(%d) returning %d\n", how, ret);
+  int ret = (real_func) (how, lset, oset);
+  TprintfT (DBG_LT1, "real_pthread_sigmask @%p (%d) ret=%d\n",
+            real_func, how, ret);
   return ret;
+
 }
+
+#define DCL_PTHREAD_SIGMASK(dcl_f, real_f) \
+  int dcl_f (int how, const sigset_t *iset, sigset_t* oset) \
+  { \
+    if ((real_f) == NULL) \
+      init_interposition_intf (); \
+    return gprofng_pthread_sigmask (real_f, how, iset, oset); \
+  }
+
+DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_32, pthread_sigmask@GLIBC_2.32)
+DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_17, pthread_sigmask@GLIBC_2.17)
+DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_2_5, pthread_sigmask@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_0, pthread_sigmask@GLIBC_2.0)
+DCL_PTHREAD_SIGMASK (pthread_sigmask, CALL_REAL(pthread_sigmask))
+
 /*----------------------------------------------------------- pthread_create */
 typedef struct _CollectorArgs
 {
@@ -1075,93 +1129,46 @@ collector_root (void *cargs)
 }
 
 // map interposed symbol versions
-#if ARCH(Intel) && WSIZE(32)
+
 static int
-__collector_pthread_create_symver (int(real_pthread_create) (),
-				   pthread_t *thread,
-				   const pthread_attr_t *attr,
-				   void *(*func)(void*),
-				   void *arg);
-
-SYMVER_ATTRIBUTE (__collector_pthread_create_2_1, pthread_create@GLIBC_2.1)
-int
-__collector_pthread_create_2_1 (pthread_t *thread,
-				const pthread_attr_t *attr,
-				void *(*func)(void*),
-				void *arg)
+gprofng_pthread_create (int (real_func) (), pthread_t *thread,
+                        const pthread_attr_t *attr,
+                        void *(*func)(void*), void *arg)
 {
-  if (NULL_PTR (pthread_create))
-    init_interposition_intf ();
-  TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_pthread_create_2_1@%p\n", CALL_REAL (pthread_create_2_1));
-  return __collector_pthread_create_symver (CALL_REAL (pthread_create_2_1), thread, attr, func, arg);
-}
-
-SYMVER_ATTRIBUTE (__collector_pthread_create_2_0, pthread_create@GLIBC_2.0)
-int
-__collector_pthread_create_2_0 (pthread_t *thread,
-				const pthread_attr_t *attr,
-				void *(*func)(void*),
-				void *arg)
-{
-  if (NULL_PTR (pthread_create))
-    init_interposition_intf ();
-  TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_pthread_create_2_0@%p\n", CALL_REAL (pthread_create_2_0));
-  return __collector_pthread_create_symver (CALL_REAL (pthread_create_2_0), thread, attr, func, arg);
-}
-
-#endif
-
-#if ARCH(Intel) && WSIZE(32)
-static int
-__collector_pthread_create_symver (int(real_pthread_create) (),
-				   pthread_t *thread,
-				   const pthread_attr_t *attr,
-				   void *(*func)(void*),
-				   void *arg)
-#else
-int
-pthread_create (pthread_t *thread, const pthread_attr_t *attr,
-		void *(*func)(void*), void *arg)
-#endif
-{
-  if (NULL_PTR (pthread_create))
-    init_interposition_intf ();
-
-  TprintfT (DBG_LT1, "pthread_create interposition called\n");
-
+  TprintfT (DBG_LTT, "gprofng_pthread_create @%p\n", real_func);
   if (dispatch_mode != DISPATCH_ON)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_pthread_create) (thread, attr, func, arg);
-#else
-      return CALL_REAL (pthread_create)(thread, attr, func, arg);
-#endif
-    }
-  CollectorArgs *cargs = __collector_allocCSize (__collector_heap, sizeof (CollectorArgs), 1);
-
+    return (real_func) (thread, attr, func, arg);
+  CollectorArgs *cargs = __collector_allocCSize (__collector_heap,
+                                                 sizeof (CollectorArgs), 1);
   if (cargs == NULL)
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_pthread_create) (thread, attr, func, arg);
-#else
-      return CALL_REAL (pthread_create)(thread, attr, func, arg);
-#endif
-    }
+    return (real_func) (thread, attr, func, arg);
   cargs->func = func;
   cargs->arg = arg;
   cargs->stack = NULL;
   cargs->isPthread = 1;
-  int ret = -1;
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_pthread_create) (thread, attr, &collector_root, cargs);
-#else
-  ret = CALL_REAL (pthread_create)(thread, attr, &collector_root, cargs);
-#endif
+  int ret = (real_func) (thread, attr, &collector_root, cargs);
   if (ret)
     __collector_freeCSize (__collector_heap, cargs, sizeof (CollectorArgs));
-  TprintfT (DBG_LT1, "pthread_create returning %d\n", ret);
+  TprintfT (DBG_LT1, "gprofng_pthread_create @%p returns %d\n", real_func, ret);
   return ret;
 }
+
+
+#define DCL_PTHREAD_CREATE(dcl_f, real_f) \
+  int dcl_f (pthread_t *thread, const pthread_attr_t *attr, \
+             void *(*func)(void*), void *arg) \
+  { \
+    if ((real_f) == NULL) \
+      init_interposition_intf (); \
+     return gprofng_pthread_create (real_f, thread, attr, func, arg); \
+  }
+
+DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_34, pthread_create@GLIBC_2.34)
+DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_17, pthread_create@GLIBC_2.17)
+DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_2_5, pthread_create@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_1, pthread_create@GLIBC_2.1)
+DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_0, pthread_create@GLIBC_2.0)
+DCL_PTHREAD_CREATE (pthread_create, CALL_REAL (pthread_create))
 
 int
 __collector_ext_clone_pthread (int (*fn)(void *), void *child_stack, int flags, void *arg,

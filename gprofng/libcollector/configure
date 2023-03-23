@@ -634,7 +634,6 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 GPROFNG_NO_NONNULL_COMPARE_CFLAGS
-GPROFNG_VARIANT
 CXXCPP
 OTOOL64
 OTOOL
@@ -12064,7 +12063,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12067 "configure"
+#line 12066 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12170,7 +12169,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12173 "configure"
+#line 12172 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15474,23 +15473,6 @@ if test "$enable_shared" != "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cannot set --enable-shared for gprofng/libcollector. Profiling will be unavailable." >&5
 $as_echo "$as_me: WARNING: Cannot set --enable-shared for gprofng/libcollector. Profiling will be unavailable." >&2;}
 fi
-
-GPROFNG_VARIANT=unknown
-x=`echo | $CC $CFLAGS -dM -E - | grep -w __x86_64`
-if test -n "$x"; then
-  GPROFNG_VARIANT=amd64-Linux
-else
-  x=`echo | $CC $CFLAGS -dM -E - | grep -w __i386__`
-  if test -n "$x"; then
-    GPROFNG_VARIANT=intel-Linux
-  else
-    x=`echo | $CC $CFLAGS -dM -E - | grep -w __aarch64__`
-    if test -n "$x"; then
-      GPROFNG_VARIANT=aarch64-Linux
-    fi
-  fi
-fi
-
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
