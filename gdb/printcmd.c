@@ -2735,7 +2735,7 @@ ui_printf (const char *arg, struct ui_file *stream)
   if (*s++ != '"')
     error (_("Bad format string, missing '\"'."));
 
-  format_pieces fpieces (&s);
+  format_pieces fpieces (&s, false, true);
 
   if (*s++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
@@ -2876,6 +2876,34 @@ ui_printf (const char *arg, struct ui_file *stream)
 	    break;
 	  case ptr_arg:
 	    printf_pointer (stream, current_substring, val_args[i]);
+	    break;
+	  case value_arg:
+	    {
+	      value_print_options print_opts;
+	      get_user_print_options (&print_opts);
+
+	      if (current_substring[2] == '[')
+		{
+		  std::string args (&current_substring[3],
+				    strlen (&current_substring[3]) - 1);
+
+		  const char *args_ptr = args.c_str ();
+
+		  /* Override global settings with explicit options, if
+		     any.  */
+		  auto group
+		    = make_value_print_options_def_group (&print_opts);
+		  gdb::option::process_options
+		    (&args_ptr, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR,
+		     group);
+
+		  if (*args_ptr != '\0')
+		    error (_("unexpected content in print options: %s"),
+			     args_ptr);
+		}
+
+	      print_formatted (val_args[i], 0, &print_opts, stream);
+	    }
 	    break;
 	  case literal_piece:
 	    /* Print a portion of the format string that has no

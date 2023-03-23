@@ -41,7 +41,8 @@ enum argclass
     int_arg, long_arg, long_long_arg, size_t_arg, ptr_arg,
     string_arg, wide_string_arg, wide_char_arg,
     double_arg, long_double_arg,
-    dec32float_arg, dec64float_arg, dec128float_arg
+    dec32float_arg, dec64float_arg, dec128float_arg,
+    value_arg
   };
 
 /* A format piece is a section of the format string that may include a
@@ -75,7 +76,8 @@ class format_pieces
 {
 public:
 
-  format_pieces (const char **arg, bool gdb_extensions = false);
+  format_pieces (const char **arg, bool gdb_extensions = false,
+		 bool value_extension = false);
   ~format_pieces () = default;
 
   DISABLE_COPY_AND_ASSIGN (format_pieces);

@@ -981,6 +981,32 @@ proc test_printf_with_strings {} {
     }
 }
 
+# Test the printf '%V' format.
+proc test_printf_V_format {} {
+    # Enums.
+    gdb_test {printf "%V\n", one} "FE_ONE"
+    gdb_test {printf "%V\n", three} "\\(FE_ONE \\| FE_TWO\\)"
+    gdb_test {printf "%V\n", flag_enum_without_zero} "0"
+    gdb_test {printf "%V\n", three_not_flag} "3"
+
+    # Arrays.
+    gdb_test {printf "%V\n", a1} "\\{2, 4, 6, 8, 10, 12, 14, 16, 18, 20\\}"
+    gdb_test {printf "%V[]\n", a1} "\\{2, 4, 6, 8, 10, 12, 14, 16, 18, 20\\}"
+    gdb_test {printf "%V[][]\n", a1} \
+	"\\{2, 4, 6, 8, 10, 12, 14, 16, 18, 20\\}\\\[\\\]"
+    gdb_test {printf "%V[-elements 3]\n", a1} "\\{2, 4, 6\\.\\.\\.\\}"
+    gdb_test {printf "%V[-elements 3][]\n", a1} \
+	"\\{2, 4, 6\\.\\.\\.\\}\\\[\\\]"
+    gdb_test {printf "%V[-elements 3 -array-indexes on]\n", a1} \
+	"\\{\\\[0\\\] = 2, \\\[1\\\] = 4, \\\[2\\\] = 6\\.\\.\\.\\}"
+
+    # Structures.
+    gdb_test {printf "%V\n", a_small_struct} \
+	"\\{a = 1, b = 2, c = 3\\}"
+    gdb_test {printf "%V[-pretty on]\n", a_small_struct} \
+	"\\{\r\n  a = 1,\r\n  b = 2,\r\n  c = 3\r\n\\}"
+}
+
 proc test_print_symbol {} {
     gdb_test_no_output "set print symbol on"
 
@@ -1127,7 +1153,6 @@ proc test_printf_convenience_var {prefix} {
     }
 }
 
-
 clean_restart
 
 gdb_test "print \$pc" "No registers\\."
@@ -1213,6 +1238,7 @@ test_print_enums
 test_printf
 test_printf_with_dfp
 test_printf_with_strings
+test_printf_V_format
 test_print_symbol
 test_repeat_bytes
 test_radices

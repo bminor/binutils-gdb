@@ -67,6 +67,17 @@
     break foo thread 1 task 1
     watch var thread 2 task 3
 
+* The printf command now accepts a '%V' output format which will
+  format an expression just as the 'print' command would.  Print
+  options can be placed withing '[...]' after the '%V' to modify how
+  the value is printed.  E.g:
+    printf "%V", some_array
+    printf "%V[-array-indexes on]", some_array
+  will print the array without, or with array indexes included, just
+  as the array would be printed by the 'print' command.  This
+  functionality is also available for dprintf when dprintf-style is
+  'gdb'.
+
 * New commands
 
 maintenance print record-instruction [ N ]

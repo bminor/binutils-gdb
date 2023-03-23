@@ -20,7 +20,8 @@
 #include "common-defs.h"
 #include "format.h"
 
-format_pieces::format_pieces (const char **arg, bool gdb_extensions)
+format_pieces::format_pieces (const char **arg, bool gdb_extensions,
+			      bool value_extension)
 {
   const char *s;
   const char *string;
@@ -44,7 +45,7 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
       char *f = (char *) alloca (strlen (s) + 1);
       string = f;
 
-      while ((gdb_extensions || *s != '"') && *s != '\0')
+      while (*s != '"' && *s != '\0')
 	{
 	  int c = *s++;
 	  switch (c)
@@ -338,6 +339,27 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions)
 
 	    if (lcount || seen_h)
 	      bad = 1;
+	    break;
+
+	  case 'V':
+	    if (!value_extension)
+	      error (_("Unrecognized format specifier '%c' in printf"), *f);
+
+	    if (lcount > 1 || seen_h || seen_big_h || seen_big_h
+		|| seen_big_d || seen_double_big_d || seen_size_t
+		|| seen_prec || seen_zero || seen_space || seen_plus)
+	      bad = 1;
+
+	    this_argclass = value_arg;
+
+	    if (f[1] == '[')
+	      {
+		/* Move F forward to the next ']' character if such a
+		   character exists, otherwise leave F unchanged.  */
+		const char *tmp = strchr (f, ']');
+		if (tmp != nullptr)
+		  f = tmp;
+	      }
 	    break;
 
 	  case '*':
