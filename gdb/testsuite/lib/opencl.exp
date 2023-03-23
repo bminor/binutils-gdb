@@ -38,14 +38,13 @@ gdb_caching_proc allow_opencl_tests {} {
     # Set up, compile, and execute an OpenCL program.  Include the current
     # process ID in the file name of the executable to prevent conflicts with
     # invocations for multiple testsuites.
-    set clprogram [remote_download target ${srcdir}/lib/opencl_kernel.cl]
+    set clprogram [gdb_remote_download target ${srcdir}/lib/opencl_kernel.cl]
     set executable opencltest[pid].x
 
     verbose "$me:  compiling OpenCL test app" 2
     set compile_flags {debug nowarnings quiet}
 
     if { [gdb_compile_opencl_hostapp "${clprogram}" "${executable}" "${compile_flags}" ] != "" } {
-	remote_file target delete ${clprogram}
 	verbose "$me:  compiling OpenCL binary failed, returning 0" 2
 	return 0
     }
@@ -69,9 +68,6 @@ gdb_caching_proc allow_opencl_tests {} {
     }
     gdb_exit
     remote_file build delete $executable
-
-    # Delete the OpenCL program source file.
-    remote_file target delete ${clprogram}
 
     verbose "$me:  returning $result" 2
     return $result
