@@ -185,8 +185,10 @@ gdb_test "print test4.somewhere" "\\$\[0-9\].* = 3.14\[0-9\]*" "static const flo
 if { $non_dwarf } { setup_xfail *-*-* }
 gdb_test "info variable everywhere" \
     [multi_line \
+	 {All variables matching regular expression "everywhere":} \
+	 "" \
 	 "File (.*/)?m-static\[.\]h:" \
-	 "$decimal:\tconst int gnu_obj_4::everywhere;.*"]
+	 "$decimal:\tconst int gnu_obj_4::everywhere;"]
 
 # Perhaps at some point test4 should also include a test for a static
 # const int that was initialized in the header file.  But I'm not sure

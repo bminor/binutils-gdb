@@ -7610,8 +7610,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
      then there won't be any interesting code in the CU, but a check later on
      (in lnp_state_machine::check_line_address) will fail to properly exclude
      an entry that was removed via --gc-sections.  */
-  if (have_code)
-    dwarf_decode_lines (cu->line_header, cu, lowpc, decode_mapping);
+  dwarf_decode_lines (cu->line_header, cu, lowpc, decode_mapping && have_code);
 }
 
 /* Process DW_TAG_compile_unit or DW_TAG_partial_unit.  */
