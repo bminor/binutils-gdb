@@ -573,6 +573,10 @@ extern bool _bfd_dwarf1_find_nearest_line
   (bfd *, asymbol **, asection *, bfd_vma,
    const char **, const char **, unsigned int *) ATTRIBUTE_HIDDEN;
 
+/* Clean up the data used to handle DWARF 1 debugging information. */
+extern void _bfd_dwarf1_cleanup_debug_info
+  (bfd *, void **) ATTRIBUTE_HIDDEN;
+
 struct dwarf_debug_section
 {
   const char * uncompressed_name;

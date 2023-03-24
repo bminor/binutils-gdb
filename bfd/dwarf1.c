@@ -593,3 +593,15 @@ _bfd_dwarf1_find_nearest_line (bfd *abfd,
 
   return false;
 }
+
+void
+_bfd_dwarf1_cleanup_debug_info (bfd *abfd ATTRIBUTE_UNUSED, void **pinfo)
+{
+  struct dwarf1_debug* stash = *pinfo;
+
+  if (stash == NULL)
+    return;
+
+  free (stash->debug_section);
+  free (stash->line_section);
+}
