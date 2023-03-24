@@ -1267,7 +1267,11 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set r ""
     if { $reason != "" } {
-	set r "reason=\"$reason\","
+	if { [regexp {"} $reason] } {
+	   set r "reason=$reason,"
+	} else {
+	   set r "reason=\"$reason\","
+	}	
     }
 
 

@@ -77,7 +77,7 @@ mi_gdb_test "-catch-exception -c \"i = 2\" -e constraint_error" \
 mi_run_cmd
 
 mi_expect_stop \
-    "breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"CONSTRAINT_ERROR(\",exception-message=\"foo\\.adb:$decimal explicit raise)?" \
+    "\"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"CONSTRAINT_ERROR(\",exception-message=\"foo\\.adb:$decimal explicit raise)?\"" \
     "foo" "" ".*" ".*" \
     ".*" \
     "run to exception catchpoint hit"

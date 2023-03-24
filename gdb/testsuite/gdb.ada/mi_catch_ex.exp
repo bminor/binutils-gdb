@@ -92,7 +92,7 @@ proc continue_to_exception { exception_name exception_message test } {
 
     # Now MI stream output.
     mi_expect_stop \
-	"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"$exception_name\(\",exception-message=\"$exception_message\)?" \
+	"\"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"$exception_name\(\",exception-message=\"$exception_message\)?\"" \
 	"foo" "" ".*" ".*" \
 	".*" \
 	$test
@@ -140,19 +140,19 @@ mi_gdb_test "-catch-exception -u" \
             "catch unhandled exceptions"
 
 mi_execute_to "exec-continue" \
-              "breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"PROGRAM_ERROR(\",exception-message=\"foo\\.adb:$decimal explicit raise)?" \
+              "\"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"PROGRAM_ERROR(\",exception-message=\"foo\\.adb:$decimal explicit raise)?\"" \
               "foo" "" ".*" ".*" \
               ".*" \
               "continue to exception catchpoint hit"
 
 mi_execute_to "exec-continue" \
-              "breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb" \
+              "\"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\"" \
               "foo" "" ".*" ".*" \
               ".*" \
               "continue to assert failure catchpoint hit"
 
 mi_execute_to "exec-continue" \
-              "breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"CONSTRAINT_ERROR" \
+              "\"breakpoint-hit\",disp=\"keep\",bkptno=\"$any_nb\",exception-name=\"CONSTRAINT_ERROR\"" \
               "foo" "" ".*" ".*" \
               ".*" \
               "continue to unhandled exception catchpoint hit"
