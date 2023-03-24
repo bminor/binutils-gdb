@@ -443,24 +443,30 @@ cooked_index_shard::wait (bool allow_quit) const
     m_future.wait ();
 }
 
-cooked_index::cooked_index (vec_type &&vec, dwarf2_per_bfd *per_bfd)
+cooked_index::cooked_index (vec_type &&vec)
   : m_vector (std::move (vec))
 {
   for (auto &idx : m_vector)
     idx->finalize ();
 
-  /* This must be set after all the finalization tasks have been
-     started, because it may call 'wait'.  */
-  m_write_future
-    = gdb::thread_pool::g_thread_pool->post_task ([this, per_bfd] ()
-      {
-	maybe_write_index (per_bfd);
-      });
-
   /* ACTIVE_VECTORS is not locked, and this assert ensures that this
      will be caught if ever moved to the background.  */
   gdb_assert (is_main_thread ());
   active_vectors.insert (this);
+}
+
+/* See cooked-index.h.  */
+
+void
+cooked_index::start_writing_index (dwarf2_per_bfd *per_bfd)
+{
+  /* This must be set after all the finalization tasks have been
+     started, because it may call 'wait'.  */
+  m_write_future
+    = gdb::thread_pool::g_thread_pool->post_task ([this, per_bfd] ()
+	{
+	  maybe_write_index (per_bfd);
+	});
 }
 
 cooked_index::~cooked_index ()
