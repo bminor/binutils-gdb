@@ -2462,7 +2462,8 @@ coff_pointerize_aux_hook (bfd *abfd ATTRIBUTE_UNUSED,
       && indaux + 1 == symbol->u.syment.n_numaux)
     {
       BFD_ASSERT (! aux->is_sym);
-      if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) == XTY_LD)
+      if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) == XTY_LD
+	  && (bfd_vma) aux->u.auxent.x_csect.x_scnlen.l < obj_raw_syment_count (abfd))
 	{
 	  aux->u.auxent.x_csect.x_scnlen.p =
 	    table_base + aux->u.auxent.x_csect.x_scnlen.l;
