@@ -576,7 +576,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   esym = vars->esym_ptr;
 
   /* Copy the symbol's name into the string table.  */
-  sprintf (vars->string_ptr, "%s%s", prefix, symbol_name);
+  int len = sprintf (vars->string_ptr, "%s%s", prefix, symbol_name);
 
   if (section == NULL)
     section = bfd_und_section_ptr;
@@ -612,7 +612,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   vars->table_ptr ++;
   vars->native_ptr ++;
   vars->esym_ptr ++;
-  vars->string_ptr += strlen (symbol_name) + strlen (prefix) + 1;
+  vars->string_ptr += len + 1;
 
   BFD_ASSERT (vars->string_ptr < vars->end_string_ptr);
 }
