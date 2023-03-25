@@ -6158,7 +6158,7 @@ ppc_frob_symbol (symbolS *sym)
 	  csectaux = &coffsymbol (symbol_get_bfdsym (within))
 	    ->native[S_GET_NUMBER_AUXILIARY(within)].u.auxent;
 
-	  SA_SET_SYM_FSIZE (sym, csectaux->x_csect.x_scnlen.l);
+	  SA_SET_SYM_FSIZE (sym, csectaux->x_csect.x_scnlen.u64);
 	}
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_FCN
@@ -6204,7 +6204,7 @@ ppc_frob_symbol (symbolS *sym)
 	{
 	  /* This is the TOC table.  */
 	  know (strcmp (S_GET_NAME (sym), "TOC") == 0);
-	  a->x_csect.x_scnlen.l = 0;
+	  a->x_csect.x_scnlen.u64 = 0;
 	  a->x_csect.x_smtyp = (2 << 3) | XTY_SD;
 	}
       else if (symbol_get_tc (sym)->subseg != 0)
@@ -6212,13 +6212,13 @@ ppc_frob_symbol (symbolS *sym)
 	  /* This is a csect symbol.  x_scnlen is the size of the
 	     csect.  */
 	  if (symbol_get_tc (sym)->next == (symbolS *) NULL)
-	    a->x_csect.x_scnlen.l = (bfd_section_size (S_GET_SEGMENT (sym))
-				     - S_GET_VALUE (sym));
+	    a->x_csect.x_scnlen.u64
+	      = bfd_section_size (S_GET_SEGMENT (sym)) - S_GET_VALUE (sym);
 	  else
 	    {
 	      resolve_symbol_value (symbol_get_tc (sym)->next);
-	      a->x_csect.x_scnlen.l = (S_GET_VALUE (symbol_get_tc (sym)->next)
-				       - S_GET_VALUE (sym));
+	      a->x_csect.x_scnlen.u64
+		= S_GET_VALUE (symbol_get_tc (sym)->next) - S_GET_VALUE (sym);
 	    }
 	  if (symbol_get_tc (sym)->symbol_class == XMC_BS
 	      || symbol_get_tc (sym)->symbol_class == XMC_UL)
@@ -6230,7 +6230,7 @@ ppc_frob_symbol (symbolS *sym)
 	       || S_GET_SEGMENT (sym) == ppc_xcoff_tbss_section.segment)
 	{
 	  /* This is a common symbol.  */
-	  a->x_csect.x_scnlen.l = symbol_get_frag (sym)->fr_offset;
+	  a->x_csect.x_scnlen.u64 = symbol_get_frag (sym)->fr_offset;
 	  a->x_csect.x_smtyp = (symbol_get_tc (sym)->align << 3) | XTY_CM;
 	  if (S_GET_SEGMENT (sym) == ppc_xcoff_tbss_section.segment)
 	    symbol_get_tc (sym)->symbol_class = XMC_UL;
@@ -6251,7 +6251,7 @@ ppc_frob_symbol (symbolS *sym)
       else if (! S_IS_DEFINED (sym))
 	{
 	  /* This is an external symbol.  */
-	  a->x_csect.x_scnlen.l = 0;
+	  a->x_csect.x_scnlen.u64 = 0;
 	  a->x_csect.x_smtyp = XTY_ER;
 	}
       else if (ppc_is_toc_sym (sym))
@@ -6267,17 +6267,17 @@ ppc_frob_symbol (symbolS *sym)
 	      || (!ppc_is_toc_sym (next)))
 	    {
 	      if (ppc_after_toc_frag == (fragS *) NULL)
-		a->x_csect.x_scnlen.l = (bfd_section_size (data_section)
-					 - S_GET_VALUE (sym));
+		a->x_csect.x_scnlen.u64
+		  = bfd_section_size (data_section) - S_GET_VALUE (sym);
 	      else
-		a->x_csect.x_scnlen.l = (ppc_after_toc_frag->fr_address
-					 - S_GET_VALUE (sym));
+		a->x_csect.x_scnlen.u64
+		  = ppc_after_toc_frag->fr_address - S_GET_VALUE (sym);
 	    }
 	  else
 	    {
 	      resolve_symbol_value (next);
-	      a->x_csect.x_scnlen.l = (S_GET_VALUE (next)
-				       - S_GET_VALUE (sym));
+	      a->x_csect.x_scnlen.u64
+		= S_GET_VALUE (next) - S_GET_VALUE (sym);
 	    }
 	  a->x_csect.x_smtyp = (2 << 3) | XTY_SD;
 	}
@@ -6302,7 +6302,7 @@ ppc_frob_symbol (symbolS *sym)
 	  if (csect == (symbolS *) NULL)
 	    {
 	      as_warn (_("warning: symbol %s has no csect"), S_GET_NAME (sym));
-	      a->x_csect.x_scnlen.l = 0;
+	      a->x_csect.x_scnlen.u64 = 0;
 	    }
 	  else
 	    {
@@ -6435,7 +6435,7 @@ ppc_adjust_symtab (void)
       i = S_GET_NUMBER_AUXILIARY (csect);
       S_SET_NUMBER_AUXILIARY (csect, i + 1);
       a = &coffsymbol (symbol_get_bfdsym (csect))->native[i + 1].u.auxent;
-      a->x_csect.x_scnlen.l = 0;
+      a->x_csect.x_scnlen.u64 = 0;
       a->x_csect.x_smtyp = XTY_SD;
       a->x_csect.x_parmhash = 0;
       a->x_csect.x_snhash = 0;

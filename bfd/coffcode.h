@@ -2463,10 +2463,10 @@ coff_pointerize_aux_hook (bfd *abfd ATTRIBUTE_UNUSED,
     {
       BFD_ASSERT (! aux->is_sym);
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) == XTY_LD
-	  && (bfd_vma) aux->u.auxent.x_csect.x_scnlen.l < obj_raw_syment_count (abfd))
+	  && aux->u.auxent.x_csect.x_scnlen.u64 < obj_raw_syment_count (abfd))
 	{
 	  aux->u.auxent.x_csect.x_scnlen.p =
-	    table_base + aux->u.auxent.x_csect.x_scnlen.l;
+	    table_base + aux->u.auxent.x_csect.x_scnlen.u64;
 	  aux->fix_scnlen = 1;
 	}
 
@@ -2505,21 +2505,21 @@ coff_print_aux (bfd *abfd ATTRIBUTE_UNUSED,
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) != XTY_LD)
 	{
 	  BFD_ASSERT (! aux->fix_scnlen);
-	  fprintf (file, "val %5" PRId64,
-		   (int64_t) aux->u.auxent.x_csect.x_scnlen.l);
+	  fprintf (file, "val %5" PRIu64,
+		   aux->u.auxent.x_csect.x_scnlen.u64);
 	}
       else
 	{
 	  fprintf (file, "indx ");
 	  if (! aux->fix_scnlen)
-	    fprintf (file, "%4" PRId64,
-		     (int64_t) aux->u.auxent.x_csect.x_scnlen.l);
+	    fprintf (file, "%4" PRIu64,
+		     aux->u.auxent.x_csect.x_scnlen.u64);
 	  else
 	    fprintf (file, "%4ld",
 		     (long) (aux->u.auxent.x_csect.x_scnlen.p - table_base));
 	}
       fprintf (file,
-	       " prmhsh %ld snhsh %u typ %d algn %d clss %u stb %ld snstb %u",
+	       " prmhsh %u snhsh %u typ %d algn %d clss %u stb %u snstb %u",
 	       aux->u.auxent.x_csect.x_parmhash,
 	       (unsigned int) aux->u.auxent.x_csect.x_snhash,
 	       SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp),
@@ -5745,7 +5745,7 @@ coff_bigobj_swap_aux_in (bfd *abfd,
       break;
 
     default:
-      in->x_sym.x_tagndx.l = H_GET_32 (abfd, ext->Sym.WeakDefaultSymIndex);
+      in->x_sym.x_tagndx.u32 = H_GET_32 (abfd, ext->Sym.WeakDefaultSymIndex);
       /* Characteristics is ignored.  */
       break;
     }
@@ -5793,7 +5793,7 @@ coff_bigobj_swap_aux_out (bfd * abfd,
       break;
     }
 
-  H_PUT_32 (abfd, in->x_sym.x_tagndx.l, ext->Sym.WeakDefaultSymIndex);
+  H_PUT_32 (abfd, in->x_sym.x_tagndx.u32, ext->Sym.WeakDefaultSymIndex);
   H_PUT_32 (abfd, 1, ext->Sym.WeakSearchType);
 
   return AUXESZ;

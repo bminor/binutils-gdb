@@ -176,13 +176,13 @@ parse_coff_type (bfd *abfd, struct coff_symbols *symbols,
       return type;
     }
 
-  if (pauxent != NULL && pauxent->x_sym.x_tagndx.l > 0)
+  if (pauxent != NULL && (int32_t) pauxent->x_sym.x_tagndx.u32 > 0)
     {
       debug_type *slot;
 
       /* This is a reference to an existing type.  FIXME: gdb checks
 	 that the class is not C_STRTAG, nor C_UNTAG, nor C_ENTAG.  */
-      slot = coff_get_slot (types, pauxent->x_sym.x_tagndx.l);
+      slot = coff_get_slot (types, pauxent->x_sym.x_tagndx.u32);
       if (*slot != DEBUG_TYPE_NULL)
 	return *slot;
       else
@@ -328,7 +328,7 @@ parse_coff_struct_type (bfd *abfd, struct coff_symbols *symbols,
   int count;
   bool done;
 
-  symend = pauxent->x_sym.x_fcnary.x_fcn.x_endndx.l;
+  symend = pauxent->x_sym.x_fcnary.x_fcn.x_endndx.u32;
 
   alloc = 10;
   fields = (debug_field *) xmalloc (alloc * sizeof *fields);
@@ -438,7 +438,7 @@ parse_coff_enum_type (bfd *abfd, struct coff_symbols *symbols,
   int count;
   bool done;
 
-  symend = pauxent->x_sym.x_fcnary.x_fcn.x_endndx.l;
+  symend = pauxent->x_sym.x_fcnary.x_fcn.x_endndx.u32;
 
   alloc = 10;
   names = (const char **) xmalloc (alloc * sizeof *names);

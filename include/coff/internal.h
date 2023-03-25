@@ -549,40 +549,40 @@ union internal_auxent
   {
     union
     {
-      long l;			/* str, un, or enum tag indx */
+      uint32_t u32;		/* str, un, or enum tag indx */
       struct coff_ptr_struct *p;
-    }     x_tagndx;
+    } x_tagndx;
 
     union
     {
       struct
       {
-	unsigned short x_lnno;	/* declaration line number */
-	unsigned short x_size;	/* str/union/array size */
-      }      x_lnsz;
-      long x_fsize;		/* size of function */
-    }     x_misc;
+	uint16_t x_lnno;	/* declaration line number */
+	uint16_t x_size;	/* str/union/array size */
+      } x_lnsz;
+      uint32_t x_fsize;		/* size of function */
+    } x_misc;
 
     union
     {
       struct
       {				/* if ISFCN, tag, or .bb */
-	bfd_signed_vma x_lnnoptr;		/* ptr to fcn line # */
+	uint64_t x_lnnoptr;	/* ptr to fcn line # */
 	union
 	{			/* entry ndx past block end */
-	  long l;
+	  uint32_t u32;
 	  struct coff_ptr_struct *p;
-	}     x_endndx;
-      }      x_fcn;
+	} x_endndx;
+      } x_fcn;
 
       struct
       {				/* if ISARY, up to 4 dimen. */
-	unsigned short x_dimen[DIMNUM];
-      }      x_ary;
-    }     x_fcnary;
+	uint16_t x_dimen[DIMNUM];
+      } x_ary;
+    } x_fcnary;
 
-    unsigned short x_tvndx;	/* tv index */
-  }      x_sym;
+    uint16_t x_tvndx;		/* tv index */
+  } x_sym;
 
   struct
   {
@@ -600,28 +600,28 @@ union internal_auxent
 	   32 bits.  */
 	uintptr_t x_zeroes;
 	uintptr_t x_offset;
-      }      x_n;
+      } x_n;
     } x_n;
 
-    unsigned char x_ftype;
-  }     x_file;
+    uint8_t x_ftype;
+  } x_file;
 
   struct
   {
-    long x_scnlen;		/* section length */
-    unsigned short x_nreloc;	/* # relocation entries */
-    unsigned short x_nlinno;	/* # line numbers */
-    unsigned long x_checksum;	/* section COMDAT checksum for PE */
-    unsigned short x_associated; /* COMDAT associated section index for PE */
-    unsigned char x_comdat;	/* COMDAT selection number for PE */
-  }      x_scn;
+    uint32_t x_scnlen;		/* section length */
+    uint16_t x_nreloc;		/* # relocation entries */
+    uint16_t x_nlinno;		/* # line numbers */
+    uint32_t x_checksum;	/* section COMDAT checksum for PE */
+    uint16_t x_associated;	/* COMDAT associated section index for PE */
+    uint8_t x_comdat;		/* COMDAT selection number for PE */
+  } x_scn;
 
   struct
   {
-    long x_tvfill;		/* tv fill value */
-    unsigned short x_tvlen;	/* length of .tv */
-    unsigned short x_tvran[2];	/* tv range */
-  }      x_tv;			/* info about .tv section (in auxent of symbol .tv)) */
+    uint32_t x_tvfill;		/* tv fill value */
+    uint16_t x_tvlen;		/* length of .tv */
+    uint16_t x_tvran[2];	/* tv range */
+  } x_tv;			/* info about .tv section (in auxent of symbol .tv)) */
 
   /******************************************
    * RS/6000-specific auxent - last auxent for every external symbol
@@ -630,18 +630,18 @@ union internal_auxent
   {
     union
       {				/* csect length or enclosing csect */
-	bfd_signed_vma l;
+	uint64_t u64;
 	struct coff_ptr_struct *p;
       } x_scnlen;
-    long x_parmhash;		/* parm type hash index */
-    unsigned short x_snhash;	/* sect num with parm hash */
-    unsigned char x_smtyp;	/* symbol align and type */
+    uint32_t x_parmhash;	/* parm type hash index */
+    uint16_t x_snhash;		/* sect num with parm hash */
+    uint8_t x_smtyp;		/* symbol align and type */
     /* 0-4 - Log 2 of alignment */
     /* 5-7 - symbol type */
-    unsigned char x_smclas;	/* storage mapping class */
-    long x_stab;		/* dbx stab info index */
-    unsigned short x_snstab;	/* sect num with dbx stab */
-  }      x_csect;		/* csect definition information */
+    uint8_t x_smclas;		/* storage mapping class */
+    uint32_t x_stab;		/* dbx stab info index */
+    uint16_t x_snstab;		/* sect num with dbx stab */
+  } x_csect;			/* csect definition information */
 
 /* x_smtyp values:  */
 
@@ -677,8 +677,8 @@ union internal_auxent
 
   struct
   {
-    long x_scnlen;              /* Section length */
-    long x_nreloc;              /* Number of relocation entries */
+    uint64_t x_scnlen;		/* Section length */
+    uint64_t x_nreloc;		/* Number of relocation entries */
   } x_sect;
 };
 

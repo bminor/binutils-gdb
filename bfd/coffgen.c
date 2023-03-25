@@ -802,19 +802,19 @@ coff_mangle_symbols (bfd *bfd_ptr)
 	      BFD_ASSERT (! a->is_sym);
 	      if (a->fix_tag)
 		{
-		  a->u.auxent.x_sym.x_tagndx.l =
+		  a->u.auxent.x_sym.x_tagndx.u32 =
 		    a->u.auxent.x_sym.x_tagndx.p->offset;
 		  a->fix_tag = 0;
 		}
 	      if (a->fix_end)
 		{
-		  a->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l =
+		  a->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32 =
 		    a->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p->offset;
 		  a->fix_end = 0;
 		}
 	      if (a->fix_scnlen)
 		{
-		  a->u.auxent.x_csect.x_scnlen.l =
+		  a->u.auxent.x_csect.x_scnlen.u64 =
 		    a->u.auxent.x_csect.x_scnlen.p->offset;
 		  a->fix_scnlen = 0;
 		}
@@ -1463,25 +1463,24 @@ coff_pointerize_aux (bfd *abfd,
 
   if ((ISFCN (type) || ISTAG (n_sclass) || n_sclass == C_BLOCK
        || n_sclass == C_FCN)
-      && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0
-      && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l
-      < (long) obj_raw_syment_count (abfd)
-      && table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l
-      < table_end)
+      && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32 > 0
+      && (auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32
+	  < obj_raw_syment_count (abfd))
+      && (table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32
+	  < table_end))
     {
       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p =
-	table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
+	table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32;
       auxent->fix_end = 1;
     }
 
   /* A negative tagndx is meaningless, but the SCO 3.2v4 cc can
      generate one, so we must be careful to ignore it.  */
-  if ((unsigned long) auxent->u.auxent.x_sym.x_tagndx.l
-      < obj_raw_syment_count (abfd)
-      && table_base + auxent->u.auxent.x_sym.x_tagndx.l < table_end)
+  if (auxent->u.auxent.x_sym.x_tagndx.u32 < obj_raw_syment_count (abfd)
+      && table_base + auxent->u.auxent.x_sym.x_tagndx.u32 < table_end)
     {
       auxent->u.auxent.x_sym.x_tagndx.p =
-	table_base + auxent->u.auxent.x_sym.x_tagndx.l;
+	table_base + auxent->u.auxent.x_sym.x_tagndx.u32;
       auxent->fix_tag = 1;
     }
 }
@@ -2092,7 +2091,7 @@ coff_print_symbol (bfd *abfd,
 	      if (auxp->fix_tag)
 		tagndx = auxp->u.auxent.x_sym.x_tagndx.p - root;
 	      else
-		tagndx = auxp->u.auxent.x_sym.x_tagndx.l;
+		tagndx = auxp->u.auxent.x_sym.x_tagndx.u32;
 
 	      fprintf (file, "\n");
 
@@ -2112,8 +2111,8 @@ coff_print_symbol (bfd *abfd,
 		  break;
 
 		case C_DWARF:
-		  fprintf (file, "AUX scnlen 0x%lx nreloc %ld",
-			   (unsigned long) auxp->u.auxent.x_sect.x_scnlen,
+		  fprintf (file, "AUX scnlen %#" PRIx64 " nreloc %" PRId64,
+			   auxp->u.auxent.x_sect.x_scnlen,
 			   auxp->u.auxent.x_sect.x_nreloc);
 		  break;
 
@@ -2128,7 +2127,7 @@ coff_print_symbol (bfd *abfd,
 		      if (auxp->u.auxent.x_scn.x_checksum != 0
 			  || auxp->u.auxent.x_scn.x_associated != 0
 			  || auxp->u.auxent.x_scn.x_comdat != 0)
-			fprintf (file, " checksum 0x%lx assoc %d comdat %d",
+			fprintf (file, " checksum 0x%x assoc %d comdat %d",
 				 auxp->u.auxent.x_scn.x_checksum,
 				 auxp->u.auxent.x_scn.x_associated,
 				 auxp->u.auxent.x_scn.x_comdat);
@@ -2145,7 +2144,7 @@ coff_print_symbol (bfd *abfd,
 			next = (auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p
 			       - root);
 		      else
-			next = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
+			next = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32;
 		      llnos = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 		      fprintf (file,
 			       "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld",
@@ -2797,8 +2796,8 @@ _bfd_coff_gc_mark_hook (asection *sec,
 		 record indicating that if the weak symbol is not resolved,
 		 another external symbol is used instead.  */
 	      struct coff_link_hash_entry *h2 =
-		h->auxbfd->tdata.coff_obj_data->sym_hashes[
-		    h->aux->x_sym.x_tagndx.l];
+		h->auxbfd->tdata.coff_obj_data->sym_hashes
+		[h->aux->x_sym.x_tagndx.u32];
 
 	      if (h2 && h2->root.type != bfd_link_hash_undefined)
 		return  h2->root.u.def.section;

@@ -411,10 +411,10 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type ATTRIBUTE_UNUSED,
 	  if (auxtype != _AUX_CSECT)
 	    goto error;
 
-	  bfd_vma h = H_GET_S32 (abfd, ext->x_csect.x_scnlen_hi);
+	  bfd_vma h = H_GET_32 (abfd, ext->x_csect.x_scnlen_hi);
 	  bfd_vma l = H_GET_32 (abfd, ext->x_csect.x_scnlen_lo);
 
-	  in->x_csect.x_scnlen.l = h << 32 | (l & 0xffffffff);
+	  in->x_csect.x_scnlen.u64 = h << 32 | (l & 0xffffffff);
 
 	  in->x_csect.x_parmhash = H_GET_32 (abfd, ext->x_csect.x_parmhash);
 	  in->x_csect.x_snhash = H_GET_16 (abfd, ext->x_csect.x_snhash);
@@ -436,7 +436,7 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type ATTRIBUTE_UNUSED,
 	    = H_GET_64 (abfd, ext->x_fcn.x_lnnoptr);
 	  in->x_sym.x_misc.x_fsize
 	    = H_GET_32 (abfd, ext->x_fcn.x_fsize);
-	  in->x_sym.x_fcnary.x_fcn.x_endndx.l
+	  in->x_sym.x_fcnary.x_fcn.x_endndx.u32
 	    = H_GET_32 (abfd, ext->x_fcn.x_endndx);
 	}
       break;
@@ -524,9 +524,9 @@ _bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type ATTRIBUTE_UNUSED,
 	{
 	  bfd_vma temp;
 
-	  temp = in->x_csect.x_scnlen.l & 0xffffffff;
+	  temp = in->x_csect.x_scnlen.u64 & 0xffffffff;
 	  H_PUT_32 (abfd, temp, ext->x_csect.x_scnlen_lo);
-	  temp = in->x_csect.x_scnlen.l >> 32;
+	  temp = in->x_csect.x_scnlen.u64 >> 32;
 	  H_PUT_32 (abfd, temp, ext->x_csect.x_scnlen_hi);
 	  H_PUT_32 (abfd, in->x_csect.x_parmhash, ext->x_csect.x_parmhash);
 	  H_PUT_16 (abfd, in->x_csect.x_snhash, ext->x_csect.x_snhash);
@@ -542,7 +542,7 @@ _bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type ATTRIBUTE_UNUSED,
 	  H_PUT_64 (abfd, in->x_sym.x_fcnary.x_fcn.x_lnnoptr,
 		    ext->x_fcn.x_lnnoptr);
 	  H_PUT_32 (abfd, in->x_sym.x_misc.x_fsize, ext->x_fcn.x_fsize);
-	  H_PUT_32 (abfd, in->x_sym.x_fcnary.x_fcn.x_endndx.l,
+	  H_PUT_32 (abfd, in->x_sym.x_fcnary.x_fcn.x_endndx.u32,
 		    ext->x_fcn.x_endndx);
 	  H_PUT_8 (abfd, _AUX_FCN, ext->x_csect.x_auxtype);
 	}
@@ -2265,7 +2265,7 @@ xcoff64_generate_rtinit (bfd *abfd, const char *init, const char *fini,
   syment.n_scnum = 2;
   syment.n_sclass = C_HIDEXT;
   syment.n_numaux = 1;
-  auxent.x_csect.x_scnlen.l = data_buffer_size;
+  auxent.x_csect.x_scnlen.u64 = data_buffer_size;
   auxent.x_csect.x_smtyp = 3 << 3 | XTY_SD;
   auxent.x_csect.x_smclas = XMC_RW;
   bfd_coff_swap_sym_out (abfd, &syment,

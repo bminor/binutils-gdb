@@ -1611,7 +1611,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 			  if (h->symbol_class != C_NT_WEAK || h->numaux != 1)
 			    continue;
 			  h2 = h->auxbfd->tdata.coff_obj_data->sym_hashes
-						[h->aux->x_sym.x_tagndx.l];
+						[h->aux->x_sym.x_tagndx.u32];
 			  /* We don't want a base reloc if the aux sym is not
 			     found, undefined, or if it is the constant ABS
 			     zero default value.  (We broaden that slightly by

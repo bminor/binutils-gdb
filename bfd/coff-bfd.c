@@ -83,7 +83,7 @@ bfd_coff_get_auxent (bfd *abfd,
 
   if (ent->fix_tag)
     {
-      pauxent->x_sym.x_tagndx.l =
+      pauxent->x_sym.x_tagndx.u32 =
 	((combined_entry_type *) pauxent->x_sym.x_tagndx.p
 	 - obj_raw_syments (abfd));
       ent->fix_tag = 0;
@@ -91,7 +91,7 @@ bfd_coff_get_auxent (bfd *abfd,
 
   if (ent->fix_end)
     {
-      pauxent->x_sym.x_fcnary.x_fcn.x_endndx.l =
+      pauxent->x_sym.x_fcnary.x_fcn.x_endndx.u32 =
 	((combined_entry_type *) pauxent->x_sym.x_fcnary.x_fcn.x_endndx.p
 	 - obj_raw_syments (abfd));
       ent->fix_end = 0;
@@ -99,7 +99,7 @@ bfd_coff_get_auxent (bfd *abfd,
 
   if (ent->fix_scnlen)
     {
-      pauxent->x_csect.x_scnlen.l =
+      pauxent->x_csect.x_scnlen.u64 =
 	((combined_entry_type *) pauxent->x_csect.x_scnlen.p
 	 - obj_raw_syments (abfd));
       ent->fix_scnlen = 0;

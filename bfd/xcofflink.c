@@ -1577,14 +1577,14 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  /* This is an external reference.  */
 	  if (sym.n_sclass == C_HIDEXT
 	      || sym.n_scnum != N_UNDEF
-	      || aux.x_csect.x_scnlen.l != 0)
+	      || aux.x_csect.x_scnlen.u64 != 0)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("%pB: bad XTY_ER symbol `%s': class %d scnum %d "
 		   "scnlen %" PRId64),
 		 abfd, name, sym.n_sclass, sym.n_scnum,
-		 (int64_t) aux.x_csect.x_scnlen.l);
+		 aux.x_csect.x_scnlen.u64);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -1608,12 +1608,12 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (aux.x_csect.x_smclas == XMC_TC0)
 	    {
 	      if (sym.n_sclass != C_HIDEXT
-		  || aux.x_csect.x_scnlen.l != 0)
+		  || aux.x_csect.x_scnlen.u64 != 0)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: XMC_TC0 symbol `%s' is class %d scnlen %" PRId64),
-		     abfd, name, sym.n_sclass, (int64_t) aux.x_csect.x_scnlen.l);
+		    (_("%pB: XMC_TC0 symbol `%s' is class %d scnlen %" PRIu64),
+		     abfd, name, sym.n_sclass, aux.x_csect.x_scnlen.u64);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -1643,9 +1643,9 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	      && sym.n_sclass == C_HIDEXT
 	      && info->output_bfd->xvec == abfd->xvec
 	      && ((bfd_xcoff_is_xcoff32 (abfd)
-		   && aux.x_csect.x_scnlen.l == 4)
+		   && aux.x_csect.x_scnlen.u64 == 4)
 		  || (bfd_xcoff_is_xcoff64 (abfd)
-		      && aux.x_csect.x_scnlen.l == 8)))
+		      && aux.x_csect.x_scnlen.u64 == 8)))
 	    {
 	      asection *enclosing;
 	      struct internal_reloc *relocs;
@@ -1776,7 +1776,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	    if (! bfd_is_abs_section (enclosing)
 		&& ((bfd_vma) sym.n_value < enclosing->vma
-		    || ((bfd_vma) sym.n_value + aux.x_csect.x_scnlen.l
+		    || (sym.n_value + aux.x_csect.x_scnlen.u64
 			> enclosing->vma + enclosing->size)))
 	      {
 		_bfd_error_handler
@@ -1790,8 +1790,8 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    csect->filepos = (enclosing->filepos
 			      + sym.n_value
 			      - enclosing->vma);
-	    csect->size = aux.x_csect.x_scnlen.l;
-	    csect->rawsize = aux.x_csect.x_scnlen.l;
+	    csect->size = aux.x_csect.x_scnlen.u64;
+	    csect->rawsize = aux.x_csect.x_scnlen.u64;
 	    csect->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS;
 	    csect->alignment_power = SMTYP_ALIGN (aux.x_csect.x_smtyp);
 
@@ -1876,13 +1876,12 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    bool bad;
 
 	    bad = false;
-	    if (aux.x_csect.x_scnlen.l < 0
-		|| (aux.x_csect.x_scnlen.l
-		    >= esym - (bfd_byte *) obj_coff_external_syms (abfd)))
+	    if (aux.x_csect.x_scnlen.u64
+		>= (size_t) (esym - (bfd_byte *) obj_coff_external_syms (abfd)))
 	      bad = true;
 	    if (! bad)
 	      {
-		section = xcoff_data (abfd)->csects[aux.x_csect.x_scnlen.l];
+		section = xcoff_data (abfd)->csects[aux.x_csect.x_scnlen.u64];
 		if (section == NULL
 		    || (section->flags & SEC_HAS_CONTENTS) == 0)
 		  bad = true;
@@ -1929,7 +1928,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (csect == NULL)
 	    goto error_return;
 	  csect->vma = sym.n_value;
-	  csect->size = aux.x_csect.x_scnlen.l;
+	  csect->size = aux.x_csect.x_scnlen.u64;
 	  csect->alignment_power = SMTYP_ALIGN (aux.x_csect.x_smtyp);
 	  /* There are a number of other fields and section flags
 	     which we do not bother to set.  */
@@ -1956,7 +1955,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	      csect->flags |= SEC_IS_COMMON;
 	      csect->size = 0;
 	      section = csect;
-	      value = aux.x_csect.x_scnlen.l;
+	      value = aux.x_csect.x_scnlen.u64;
 	    }
 
 	  break;
@@ -5556,7 +5555,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 		    {
 		      unsigned long indx;
 
-		      indx = aux.x_csect.x_scnlen.l;
+		      indx = aux.x_csect.x_scnlen.u64;
 		      if (indx < obj_raw_syment_count (input_bfd))
 			{
 			  long symindx;
@@ -5564,11 +5563,11 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			  symindx = flinfo->sym_indices[indx];
 			  if (symindx < 0)
 			    {
-			      aux.x_csect.x_scnlen.l = 0;
+			      aux.x_csect.x_scnlen.u64 = 0;
 			    }
 			  else
 			    {
-			      aux.x_csect.x_scnlen.l = symindx;
+			      aux.x_csect.x_scnlen.u64 = symindx;
 			    }
 			}
 		    }
@@ -5582,7 +5581,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 		      || isymp->n_sclass == C_BLOCK
 		      || isymp->n_sclass == C_FCN)
 		    {
-		      indx = aux.x_sym.x_fcnary.x_fcn.x_endndx.l;
+		      indx = aux.x_sym.x_fcnary.x_fcn.x_endndx.u32;
 		      if (indx > 0
 			  && indx < obj_raw_syment_count (input_bfd))
 			{
@@ -5597,21 +5596,21 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			    indx = output_index;
 			  else
 			    indx = flinfo->sym_indices[indx];
-			  aux.x_sym.x_fcnary.x_fcn.x_endndx.l = indx;
+			  aux.x_sym.x_fcnary.x_fcn.x_endndx.u32 = indx;
 
 			}
 		    }
 
-		  indx = aux.x_sym.x_tagndx.l;
+		  indx = aux.x_sym.x_tagndx.u32;
 		  if (indx > 0 && indx < obj_raw_syment_count (input_bfd))
 		    {
 		      long symindx;
 
 		      symindx = flinfo->sym_indices[indx];
 		      if (symindx < 0)
-			aux.x_sym.x_tagndx.l = 0;
+			aux.x_sym.x_tagndx.u32 = 0;
 		      else
-			aux.x_sym.x_tagndx.l = symindx;
+			aux.x_sym.x_tagndx.u32 = symindx;
 		    }
 
 		}
@@ -6208,7 +6207,7 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
   memset (&iraux, 0, sizeof iraux);
   iraux.x_csect.x_smtyp = XTY_SD;
   iraux.x_csect.x_smclas = XMC_TC0;
-  iraux.x_csect.x_scnlen.l = 0;
+  iraux.x_csect.x_scnlen.u64 = 0;
   bfd_coff_swap_aux_out (output_bfd, &iraux, T_NULL, C_HIDEXT, 0, 1,
 			 flinfo->outsyms + bfd_coff_symesz (output_bfd));
 
@@ -6424,7 +6423,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 	 whether the output is 32 or 64 bit.  */
       memset (&iraux, 0, sizeof iraux);
       iraux.x_csect.x_smtyp = XTY_SD;
-      /* iraux.x_csect.x_scnlen.l = 4 or 8, see below.  */
+      /* iraux.x_csect.x_scnlen.u64 = 4 or 8, see below.  */
       iraux.x_csect.x_smclas = XMC_TC;
 
       /* 32 bit uses a 32 bit R_POS to do the relocations
@@ -6436,12 +6435,12 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
       if (bfd_xcoff_is_xcoff64 (output_bfd))
 	{
 	  irel->r_size = 63;
-	  iraux.x_csect.x_scnlen.l = 8;
+	  iraux.x_csect.x_scnlen.u64 = 8;
 	}
       else if (bfd_xcoff_is_xcoff32 (output_bfd))
 	{
 	  irel->r_size = 31;
-	  iraux.x_csect.x_scnlen.l = 4;
+	  iraux.x_csect.x_scnlen.u64 = 4;
 	}
       else
 	return false;
@@ -6716,7 +6715,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
       /* For stub symbols, the section already has its correct size.  */
       if (h->root.u.def.section->owner == xcoff_hash_table (flinfo->info)->params->stub_bfd)
 	{
-	  aux.x_csect.x_scnlen.l = h->root.u.def.section->size;
+	  aux.x_csect.x_scnlen.u64 = h->root.u.def.section->size;
 	}
       else if ((h->flags & XCOFF_HAS_SIZE) != 0)
 	{
@@ -6726,7 +6725,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 	    {
 	      if (l->h == h)
 		{
-		  aux.x_csect.x_scnlen.l = l->size;
+		  aux.x_csect.x_scnlen.u64 = l->size;
 		  break;
 		}
 	    }
@@ -6739,7 +6738,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
       isym.n_scnum = h->root.u.c.p->section->output_section->target_index;
       isym.n_sclass = C_EXT;
       aux.x_csect.x_smtyp = XTY_CM;
-      aux.x_csect.x_scnlen.l = h->root.u.c.size;
+      aux.x_csect.x_scnlen.u64 = h->root.u.c.size;
     }
   else
     abort ();
@@ -6771,7 +6770,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
       outsym += bfd_coff_symesz (output_bfd);
 
       aux.x_csect.x_smtyp = XTY_LD;
-      aux.x_csect.x_scnlen.l = obj_raw_syment_count (output_bfd);
+      aux.x_csect.x_scnlen.u64 = obj_raw_syment_count (output_bfd);
       bfd_coff_swap_aux_out (output_bfd, (void *) &aux, T_NULL, C_EXT, 0, 1,
 			     (void *) outsym);
       outsym += bfd_coff_auxesz (output_bfd);

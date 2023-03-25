@@ -1062,7 +1062,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	  /* Dealing with a symbol with a csect entry.  */
 
 #define	CSECT(PP) ((PP)->x_csect)
-#define	CSECT_LEN(PP) (CSECT(PP).x_scnlen.l)
+#define	CSECT_LEN(PP) (CSECT(PP).x_scnlen.u64)
 #define	CSECT_ALIGN(PP) (SMTYP_ALIGN(CSECT(PP).x_smtyp))
 #define	CSECT_SMTYP(PP) (SMTYP_SMTYP(CSECT(PP).x_smtyp))
 #define	CSECT_SCLAS(PP) (CSECT(PP).x_smclas)
@@ -2173,7 +2173,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		    if (pst != NULL)
 		      {
 			CORE_ADDR highval =
-			  symbol.n_value + csect_aux.x_csect.x_scnlen.l;
+			  symbol.n_value + CSECT_LEN (&csect_aux);
 
 			if (highval > pst->raw_text_high ())
 			  pst->set_text_high (highval);
