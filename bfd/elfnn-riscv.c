@@ -38,6 +38,79 @@
 #define CHAR_BIT 8
 #endif
 
+/* True if dynamic relocation is needed.  If we are creating a shared library,
+   and this is a reloc against a global symbol, or a non PC relative reloc
+   against a local symbol, then we need to copy the reloc into the shared
+   library.  However, if we are linking with -Bsymbolic, we do not need to
+   copy a reloc against a global symbol which is defined in an object we are
+   including in the link (i.e., DEF_REGULAR is set).
+
+   At this point we have not seen all the input files, so it is possible that
+   DEF_REGULAR is not set now but will be set later (it is never cleared).
+   In case of a weak definition, DEF_REGULAR may be cleared later by a strong
+   definition in a shared library.  We account for that possibility below by
+   storing information in the relocs_copied field of the hash table entry.
+   A similar situation occurs when creating shared libraries and symbol
+   visibility changes render the symbol local.
+
+   If on the other hand, we are creating an executable, we may need to keep
+   relocations for symbols satisfied by a dynamic library if we manage to
+   avoid copy relocs for the symbol.
+
+   Generate dynamic pointer relocation against STT_GNU_IFUNC symbol in the
+   non-code section (R_RISCV_32/R_RISCV_64).  */
+#define RISCV_NEED_DYNAMIC_RELOC(PCREL, INFO, H, SEC) \
+  ((bfd_link_pic (INFO) \
+    && ((SEC)->flags & SEC_ALLOC) != 0 \
+    && (!(PCREL) \
+	|| ((H) != NULL \
+	    && (!(INFO)->symbolic \
+		|| (H)->root.type == bfd_link_hash_defweak \
+		|| !(H)->def_regular)))) \
+   || (!bfd_link_pic (INFO) \
+       && ((SEC)->flags & SEC_ALLOC) != 0 \
+       && (H) != NULL \
+       && ((H)->root.type == bfd_link_hash_defweak \
+	   || !(H)->def_regular)) \
+   || (!bfd_link_pic (INFO) \
+       && (H) != NULL \
+       && (H)->type == STT_GNU_IFUNC \
+       && ((SEC)->flags & SEC_CODE) == 0))
+
+/* True if dynamic relocation should be generated.  */
+#define RISCV_GENERATE_DYNAMIC_RELOC(PCREL, INFO, H, RESOLVED_TO_ZERO) \
+  ((bfd_link_pic (INFO) \
+    && ((H) == NULL \
+	|| (ELF_ST_VISIBILITY ((H)->other) == STV_DEFAULT && !(RESOLVED_TO_ZERO)) \
+	|| (H)->root.type != bfd_link_hash_undefweak) \
+    && (!(PCREL) \
+	|| !SYMBOL_CALLS_LOCAL ((INFO), (H)))) \
+   || (!bfd_link_pic (INFO) \
+       && (H) != NULL \
+       && (H)->dynindx != -1 \
+       && !(H)->non_got_ref \
+       && (((H)->def_dynamic && !(H)->def_regular) \
+	   || (H)->root.type == bfd_link_hash_undefweak \
+	   || (H)->root.type == bfd_link_hash_undefined)))
+
+/* True if this input relocation should be copied to output.  H->dynindx
+   may be -1 if this symbol was marked to become local.  */
+#define RISCV_COPY_INPUT_RELOC(INFO, H) \
+  ((H) != NULL \
+   && (H)->dynindx != -1 \
+   && (!bfd_link_pic (INFO) \
+       || !SYMBOLIC_BIND ((INFO), (H)) \
+       || !(H)->def_regular))
+
+/* True if this is actually a static link, or it is a -Bsymbolic link
+   and the symbol is defined locally, or the symbol was forced to be
+   local because of a version file.  */
+#define RISCV_RESOLVED_LOCALLY(INFO, H) \
+  (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (elf_hash_table (INFO)->dynamic_sections_created, \
+				     bfd_link_pic (INFO), (H)) \
+   || (bfd_link_pic (INFO) \
+       && SYMBOL_REFERENCES_LOCAL ((INFO), (H))))
+
 /* Internal relocations used exclusively by the relaxation pass.  */
 #define R_RISCV_DELETE (R_RISCV_max + 1)
 
@@ -835,48 +908,8 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 	    }
 
-	  /* If we are creating a shared library, and this is a reloc
-	     against a global symbol, or a non PC relative reloc
-	     against a local symbol, then we need to copy the reloc
-	     into the shared library.  However, if we are linking with
-	     -Bsymbolic, we do not need to copy a reloc against a
-	     global symbol which is defined in an object we are
-	     including in the link (i.e., DEF_REGULAR is set).  At
-	     this point we have not seen all the input files, so it is
-	     possible that DEF_REGULAR is not set now but will be set
-	     later (it is never cleared).  In case of a weak definition,
-	     DEF_REGULAR may be cleared later by a strong definition in
-	     a shared library.  We account for that possibility below by
-	     storing information in the relocs_copied field of the hash
-	     table entry.  A similar situation occurs when creating
-	     shared libraries and symbol visibility changes render the
-	     symbol local.
-
-	     If on the other hand, we are creating an executable, we
-	     may need to keep relocations for symbols satisfied by a
-	     dynamic library if we manage to avoid copy relocs for the
-	     symbol.
-
-	     Generate dynamic pointer relocation against STT_GNU_IFUNC
-	     symbol in the non-code section (R_RISCV_32/R_RISCV_64).  */
-	  reloc_howto_type * r = riscv_elf_rtype_to_howto (abfd, r_type);
-
-	  if ((bfd_link_pic (info)
-	       && (sec->flags & SEC_ALLOC) != 0
-	       && ((r != NULL && !r->pc_relative)
-		   || (h != NULL
-		       && (!info->symbolic
-			   || h->root.type == bfd_link_hash_defweak
-			   || !h->def_regular))))
-	      || (!bfd_link_pic (info)
-		  && (sec->flags & SEC_ALLOC) != 0
-		  && h != NULL
-		  && (h->root.type == bfd_link_hash_defweak
-		      || !h->def_regular))
-	      || (!bfd_link_pic (info)
-		  && h != NULL
-		  && h->type == STT_GNU_IFUNC
-		  && (sec->flags & SEC_CODE) == 0))
+	  reloc_howto_type *r = riscv_elf_rtype_to_howto (abfd, r_type);
+	  if (RISCV_NEED_DYNAMIC_RELOC (r->pc_relative, info, h, sec))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
@@ -2329,23 +2362,14 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_GOT_HI20:
 	  if (h != NULL)
 	    {
-	      bool dyn, pic;
-
 	      off = h->got.offset;
 	      BFD_ASSERT (off != (bfd_vma) -1);
-	      dyn = elf_hash_table (info)->dynamic_sections_created;
-	      pic = bfd_link_pic (info);
 
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, pic, h)
-		  || (pic && SYMBOL_REFERENCES_LOCAL (info, h)))
+	      if (RISCV_RESOLVED_LOCALLY (info, h))
 		{
-		  /* This is actually a static link, or it is a
-		     -Bsymbolic link and the symbol is defined
-		     locally, or the symbol was forced to be local
-		     because of a version file.  We must initialize
-		     this entry in the global offset table.  Since the
-		     offset must always be a multiple of the word size,
-		     we use the least significant bit to record whether
+		  /* We must initialize this entry in the global offset table.
+		     Since the offset must always be a multiple of the word
+		     size, we use the least significant bit to record whether
 		     we have initialized it already.
 
 		     When doing a dynamic link, we create a .rela.got
@@ -2610,21 +2634,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
-	  if ((bfd_link_pic (info)
-	       && (h == NULL
-		   || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		       && !resolved_to_zero)
-		   || h->root.type != bfd_link_hash_undefweak)
-	       && (!howto->pc_relative
-		   || !SYMBOL_CALLS_LOCAL (info, h)))
-	      || (!bfd_link_pic (info)
-		  && h != NULL
-		  && h->dynindx != -1
-		  && !h->non_got_ref
-		  && ((h->def_dynamic
-		       && !h->def_regular)
-		      || h->root.type == bfd_link_hash_undefweak
-		      || h->root.type == bfd_link_hash_undefined)))
+	  if (RISCV_GENERATE_DYNAMIC_RELOC (howto->pc_relative, info, h,
+					    resolved_to_zero))
 	    {
 	      Elf_Internal_Rela outrel;
 	      asection *sreloc;
@@ -2643,10 +2654,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip_dynamic_relocation)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (h != NULL && h->dynindx != -1
-		       && !(bfd_link_pic (info)
-			    && SYMBOLIC_BIND (info, h)
-			    && h->def_regular))
+	      else if (RISCV_COPY_INPUT_RELOC (info, h))
 		{
 		  outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;
