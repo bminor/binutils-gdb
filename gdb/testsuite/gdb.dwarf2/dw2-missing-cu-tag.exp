@@ -49,6 +49,8 @@ set host_binfile [gdb_remote_download host $binfile]
 # Restart with no executable.
 clean_restart
 
+gdb_test_no_output "maint set dwarf synchronous on"
+
 # This pattern is hit when GDB does not use -readnow (i.e. the default
 # behaviour).
 set pattern1 \

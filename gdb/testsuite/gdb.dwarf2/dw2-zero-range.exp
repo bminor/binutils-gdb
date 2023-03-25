@@ -124,7 +124,7 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
     with_complaints 1 {
 	set test "Zero address complaint - relocated - psymtab"
 	set have_complaint 0
-	gdb_test_multiple "sharedlibrary [file tail $lib1]" $test {
+	gdb_test_multiple "maint with dwarf synchronous on -- sharedlibrary [file tail $lib1]" $test {
 	    -re -wrap $re {
 		set have_complaint 1
 	    }
@@ -144,12 +144,14 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
 
     clean_restart
     # Test for presence of complaint, with lib1 unrelocated.
+    gdb_test_no_output "maint set dwarf synchronous on"
     with_complaints 1 {
 	gdb_load $lib1
 	set test "Zero address complaint - unrelocated - psymtab"
 	set have_complaint [regexp $re.* $gdb_file_cmd_msg]
 	gdb_assert { $have_complaint } $test
     }
+    gdb_test_no_output "maint set dwarf synchronous off"
 
     if { ! $readnow_p } {
 	with_complaints 1 {

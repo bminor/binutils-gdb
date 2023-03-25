@@ -32,9 +32,18 @@
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/thread-pool.h"
 #include "dwarf2/mapped-index.h"
+#include "dwarf2/read.h"
 #include "dwarf2/tag.h"
 #include "dwarf2/abbrev-cache.h"
 #include "gdbsupport/range-chain.h"
+#include "gdbsupport/task-group.h"
+#include "complaints.h"
+#include "run-on-main-thread.h"
+
+#if CXX_STD_THREAD
+#include <mutex>
+#include <condition_variable>
+#endif /* CXX_STD_THREAD */
 
 struct dwarf2_per_cu_data;
 struct dwarf2_per_bfd;
@@ -64,7 +73,7 @@ std::string to_string (cooked_index_flag flags);
 /* Return true if LANG requires canonicalization.  This is used
    primarily to work around an issue computing the name of "main".
    This function must be kept in sync with
-   cooked_index_shard::do_finalize.  */
+   cooked_index_shard::finalize.  */
 
 extern bool language_requires_canonicalization (enum language lang);
 
@@ -271,14 +280,6 @@ public:
     m_addrmap = new (&m_storage) addrmap_fixed (&m_storage, map);
   }
 
-  /* Finalize the index.  This should be called a single time, when
-     the index has been fully populated.  It enters all the entries
-     into the internal table.  */
-  void finalize ();
-
-  /* Wait for this index's finalization to be complete.  */
-  void wait (bool allow_quit = true) const;
-
   friend class cooked_index;
 
   /* A simple range over part of m_entries.  */
@@ -335,8 +336,11 @@ private:
   gdb::unique_xmalloc_ptr<char> handle_gnat_encoded_entry
        (cooked_index_entry *entry, htab_t gnat_entries);
 
-  /* A helper method that does the work of 'finalize'.  */
-  void do_finalize ();
+  /* Finalize the index.  This should be called a single time, when
+     the index has been fully populated.  It enters all the entries
+     into the internal table.  This may be invoked in a worker
+     thread.  */
+  void finalize ();
 
   /* Storage for the entries.  */
   auto_obstack m_storage;
@@ -349,10 +353,6 @@ private:
   addrmap *m_addrmap = nullptr;
   /* Storage for canonical names.  */
   std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
-  /* A future that tracks when the 'finalize' method is done.  Note
-     that the 'get' method is never called on this future, only
-     'wait'.  */
-  gdb::future<void> m_future;
 };
 
 class cutu_reader;
@@ -424,10 +424,164 @@ private:
   addrmap_mutable m_addrmap;
 };
 
-/* The main index of DIEs.  The parallel DIE indexers create
-   cooked_index_shard objects.  Then, these are all handled to a
-   cooked_index for storage and final indexing.  The index is
-   made by iterating over the entries previously created.  */
+/* The possible states of the index.  See the explanatory comment
+   before cooked_index for more details.  */
+enum class cooked_state
+{
+  /* The default state.  This is not a valid argument to 'wait'.  */
+  INITIAL,
+  /* The initial scan has completed.  The name of "main" is now
+     available (if known).  The addrmaps are usable now.
+     Finalization has started but is not complete.  */
+  MAIN_AVAILABLE,
+  /* Finalization has completed.  This means the index is fully
+     available for queries.  */
+  FINALIZED,
+  /* Writing to the index cache has finished.  */
+  CACHE_DONE,
+};
+
+/* An object of this type controls the scanning of the DWARF.  It
+   schedules the worker tasks and tracks the current state.  Once
+   scanning is done, this object is discarded.  */
+
+class cooked_index_worker
+{
+public:
+
+  explicit cooked_index_worker (dwarf2_per_objfile *per_objfile);
+  DISABLE_COPY_AND_ASSIGN (cooked_index_worker);
+
+  /* Start reading.  */
+  void start ();
+
+  /* Wait for a particular state to be achieved.  If ALLOW_QUIT is
+     true, then the loop will check the QUIT flag.  Normally this
+     method may only be called from the main thread; however, it can
+     be called from a worker thread provided that the desired state
+     has already been attained.  (This oddity is used by the index
+     cache writer.)  */
+  bool wait (cooked_state desired_state, bool allow_quit);
+
+private:
+
+  /* Let cooked_index call the 'set' method.  */
+  friend class cooked_index;
+  void set (cooked_state desired_state);
+
+  /* Start reading DWARF.  This can be run in a worker thread without
+     problems.  */
+  void start_reading ();
+
+  /* Helper function that does most of the work for start_reading.  */
+  void do_reading ();
+
+  /* After the last DWARF-reading task has finished, this function
+     does the remaining work to finish the scan.  */
+  void done_reading ();
+
+  /* An iterator for the comp units.  */
+  typedef std::vector<dwarf2_per_cu_data_up>::iterator unit_iterator;
+
+  /* Process a batch of CUs.  This may be called multiple times in
+     separate threads.  TASK_NUMBER indicates which task this is --
+     the result is stored in that slot of M_RESULTS.  */
+  void process_cus (size_t task_number, unit_iterator first,
+ 		    unit_iterator end);
+
+  /* Each thread returns a tuple holding a cooked index, any collected
+     complaints, and a vector of errors that should be printed.  The
+     latter is done because GDB's I/O system is not thread-safe.
+     run_on_main_thread could be used, but that would mean the
+     messages are printed after the prompt, which looks weird.  */
+  using result_type = std::tuple<std::unique_ptr<cooked_index_shard>,
+				 complaint_collection,
+				 std::vector<gdb_exception>>;
+
+  /* The per-objfile object.  */
+  dwarf2_per_objfile *m_per_objfile;
+  /* A storage object for "leftovers" -- see the 'start' method, but
+     essentially things not parsed during the normal CU parsing
+     passes.  */
+  cooked_index_storage m_index_storage;
+  /* Result of each worker task.  */
+  std::vector<result_type> m_results;
+  /* Any warnings emitted.  This is not in 'result_type' because (for
+     the time being at least), it's only needed in do_reading, not in
+     every worker.  Note that deferred_warnings uses gdb_stderr in its
+     constructor, and this should only be done from the main thread.
+     This is enforced in the cooked_index_worker constructor.  */
+  deferred_warnings m_warnings;
+
+#if CXX_STD_THREAD
+  /* Current state of this object.  */
+  cooked_state m_state = cooked_state::INITIAL;
+  /* This flag indicates whether any complaints or exceptions that
+     arose during scanning have been reported by 'wait'.  This may
+     only be modified on the main thread.  */
+  bool m_reported = false;
+  /* Mutex and condition variable used to synchronize.  */
+  std::mutex m_mutex;
+  std::condition_variable m_cond;
+  /* If set, an exception occurred during start_reading; in this case
+     the scanning is stopped and this exception will later be reported
+     by the 'wait' method.  */
+  std::optional<gdb_exception> m_failed;
+#endif /* CXX_STD_THREAD */
+};
+
+/* The main index of DIEs.
+
+   The index is created by multiple threads.  The overall process is
+   somewhat complicated, so here's a diagram to help sort it out.
+
+   The basic idea behind this design is (1) to do as much work as
+   possible in worker threads, and (2) to start the work as early as
+   possible.  This combination should help hide the effort from the
+   user to the maximum possible degree.
+
+   . Main Thread                |       Worker Threads
+   ============================================================
+   . dwarf2_initialize_objfile
+   . 	      |
+   .          v
+   .     cooked index ------------> cooked_index_worker::start
+   .          |                           / | \
+   .          v                          /  |  \
+   .       install                      /   |	\
+   .  cooked_index_functions        scan CUs in workers
+   .          |               create cooked_index_shard objects
+   .          |                           \ | /
+   .          v                            \|/
+   .    return to caller                    v
+   .                                 initial scan is done
+   .                                state = MAIN_AVAILABLE
+   .                              "main" name now available
+   .                                        |
+   .                                        |
+   .   if main thread calls...              v
+   .   compute_main_name         cooked_index::set_contents
+   .          |                           / | \
+   .          v                          /  |  \
+   .   wait (MAIN_AVAILABLE)          finalization
+   .          |                          \  |  /
+   .          v                           \ | /        
+   .        done                      state = FINALIZED
+   .                                        |
+   .                                        v
+   .                              maybe write to index cache
+   .                                  state = CACHE_DONE
+   .
+   .
+   .   if main thread calls...
+   .   any other "quick" API
+   .          |
+   .          v
+   .   wait (FINALIZED)
+   .          |
+   .          v
+   .    use the index
+*/
 
 class cooked_index : public dwarf_scanner_base
 {
@@ -437,17 +591,17 @@ public:
      object.  */
   using vec_type = std::vector<std::unique_ptr<cooked_index_shard>>;
 
-  explicit cooked_index (vec_type &&vec);
+  explicit cooked_index (dwarf2_per_objfile *per_objfile);
   ~cooked_index () override;
+
   DISABLE_COPY_AND_ASSIGN (cooked_index);
 
-  /* Wait until the finalization of the entire cooked_index is
-     done.  */
-  void wait () const
-  {
-    for (auto &item : m_vector)
-      item->wait ();
-  }
+  /* Start reading the DWARF.  */
+  void start_reading ();
+
+  /* Called by cooked_index_worker to set the contents of this index
+     and transition to the MAIN_AVAILABLE state.  */
+  void set_contents (vec_type &&vec);
 
   /* A range over a vector of subranges.  */
   using range = range_chain<cooked_index_shard::range>;
@@ -455,12 +609,12 @@ public:
   /* Look up an entry by name.  Returns a range of all matching
      results.  If COMPLETING is true, then a larger range, suitable
      for completion, will be returned.  */
-  range find (const std::string &name, bool completing) const;
+  range find (const std::string &name, bool completing);
 
   /* Return a range of all the entries.  */
-  range all_entries () const
+  range all_entries ()
   {
-    wait ();
+    wait (cooked_state::FINALIZED, true);
     std::vector<cooked_index_shard::range> result_range;
     result_range.reserve (m_vector.size ());
     for (auto &entry : m_vector)
@@ -475,34 +629,38 @@ public:
 
   /* Return a new vector of all the addrmaps used by all the indexes
      held by this object.  */
-  std::vector<const addrmap *> get_addrmaps () const;
+  std::vector<const addrmap *> get_addrmaps ();
 
   /* Return the entry that is believed to represent the program's
      "main".  This will return NULL if no such entry is available.  */
   const cooked_index_entry *get_main () const;
 
+  const char *get_main_name (struct obstack *obstack, enum language *lang)
+    const;
+
   cooked_index *index_for_writing () override
   {
+    wait (cooked_state::FINALIZED, true);
     return this;
   }
 
   quick_symbol_functions_up make_quick_functions () const override;
 
   /* Dump a human-readable form of the contents of the index.  */
-  void dump (gdbarch *arch) const;
+  void dump (gdbarch *arch);
 
-  /* Wait for the index to be completely finished.  For ordinary uses,
-     the index code ensures this itself -- e.g., 'all_entries' will
-     wait on the 'finalize' future.  However, on destruction, if an
-     index is being written, it's also necessary to wait for that to
-     complete.  */
+  /* Wait until this object reaches the desired state.  Note that
+     DESIRED_STATE may not be INITIAL -- it does not make sense to
+     wait for this.  If ALLOW_QUIT is true, timed waits will be done
+     and the quit flag will be checked in a loop.  This may normally
+     only be called from the main thread; however, it is ok to call
+     from a worker as long as the desired state has already been
+     attained.  (This property is needed by the index cache
+     writer.)  */
+  void wait (cooked_state desired_state, bool allow_quit = false);
+
   void wait_completely () override
-  {
-    m_write_future.wait ();
-  }
-
-  /* Start writing to the index cache, if the user asked for this.  */
-  void start_writing_index (dwarf2_per_bfd *per_bfd);
+  { wait (cooked_state::CACHE_DONE); }
 
 private:
 
@@ -514,8 +672,12 @@ private:
      entries are stored on the obstacks in those objects.  */
   vec_type m_vector;
 
-  /* A future that tracks when the 'index_write' method is done.  */
-  gdb::future<void> m_write_future;
+  /* This tracks the current state.  When this is nullptr, it means
+     that the state is CACHE_DONE -- it's important to note that only
+     the main thread may change the value of this pointer.  */
+  std::unique_ptr<cooked_index_worker> m_state;
+
+  dwarf2_per_bfd *m_per_bfd;
 };
 
 #endif /* GDB_DWARF2_COOKED_INDEX_H */

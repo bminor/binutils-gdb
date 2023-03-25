@@ -31,6 +31,7 @@ if {[build_executable $testfile.exp $testfile $srcfile {nodebug quiet}]} {
 clean_restart
 
 gdb_test_no_output "set breakpoint pending off"
+gdb_test_no_output "maint set dwarf synchronous on"
 
 set host_binfile [gdb_remote_download host $binfile]
 

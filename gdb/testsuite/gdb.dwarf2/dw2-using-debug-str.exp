@@ -128,6 +128,8 @@ if {[run_on_host "objcopy" [gdb_find_objcopy] "$args"]} {
 # executable we're going to get an error, which we check for below.
 clean_restart
 
+gdb_test_no_output "maint set dwarf synchronous on"
+
 set line1 "Reading symbols from \[^\r\n\]+"
 set dwarf_error "Dwarf Error: DW_FORM_strp used without required section"
 
