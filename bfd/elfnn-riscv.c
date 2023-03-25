@@ -862,6 +862,47 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 ifunc symbol.  */
 	      h->plt.refcount += 1;
 	    }
+
+	  /* The non-preemptible absolute symbol shouldn't be referneced with
+	     pc-relative relocation when generating shared object.  However,
+	     PCREL_HI20/LO12 relocs are always bind locally when generating
+	     shared object, so all absolute symbol referenced need to be
+	     disallowed, except they are defined in linker script.
+
+	     Maybe we should add this check for all pc-relative relocations,
+	     please see pr28789 and pr25749 for details.  */
+	  if (bfd_link_pic (info)
+	      /* (h == NULL || SYMBOL_REFERENCES_LOCAL (info, h))  */
+	      && is_abs_symbol)
+	    {
+	      if (h != NULL && (h)->root.ldscript_def)
+		/* Disallow the absolute symbol defined in linker script here
+		   will cause the glibc-linux toolchain build failed, so regard
+		   them as pc-relative symbols, just like what x86 did.  */
+		;
+	      else
+		{
+		  const char *name;
+		  if (h->root.root.string)
+		    name = h->root.root.string;
+		  else
+		    {
+		      Elf_Internal_Sym *sym;
+		      sym = bfd_sym_from_r_symndx (&htab->elf.sym_cache, abfd,
+						   r_symndx);
+		      name = bfd_elf_sym_name (abfd, symtab_hdr, sym, NULL);
+		    }
+
+		  reloc_howto_type *r_t =
+			riscv_elf_rtype_to_howto (abfd, r_type);
+		  _bfd_error_handler
+		    (_("%pB: relocation %s against absolute symbol `%s' can "
+		       "not be used when making a shared object"),
+		     abfd, r_t ? r_t->name : _("<unknown>"), name);
+		  bfd_set_error (bfd_error_bad_value);
+		  return false;
+		}
+	    }
 	  /* Fall through.  */
 
 	case R_RISCV_JAL:

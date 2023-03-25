@@ -308,4 +308,11 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "ifunc-seperate-plt-pic"
     run_dump_test "ifunc-seperate-pcrel-pie"
     run_dump_test "ifunc-seperate-pcrel-pic"
+
+    # Tests related to mixing medany code into position-independent targets,
+    # where it's not always possible to generate correct addressing sequences.
+    run_dump_test "pcrel-reloc-rel-nopie"
+    run_dump_test "pcrel-reloc-rel-pie"
+    run_dump_test "pcrel-reloc-abs-nopie"
+    run_dump_test "pcrel-reloc-abs-pie"
 }
