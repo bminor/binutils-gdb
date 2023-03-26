@@ -1562,6 +1562,7 @@ public:
       ADDW,
       AUIPC,
       LUI,
+      LI,
       SD,
       SW,
       LD,
@@ -1943,6 +1944,8 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  m_rd = decode_register_index (ival, OP_SH_CRS1S);
 	  m_imm.s = EXTRACT_CITYPE_LUI_IMM (ival);
 	}
+      else if (is_c_li_insn (ival))
+	decode_ci_type_insn (LI, ival);
       /* C_SD and C_FSW have the same opcode.  C_SD is RV64 and RV128 only,
 	 and C_FSW is RV32 only.  */
       else if (xlen != 4 && is_c_sd_insn (ival))
@@ -2302,10 +2305,11 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	  gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
 	  regs[insn.rd ()] = pv_constant (cur_pc + insn.imm_signed ());
 	}
-      else if (insn.opcode () == riscv_insn::LUI)
+      else if (insn.opcode () == riscv_insn::LUI
+	       || insn.opcode () == riscv_insn::LI)
 	{
 	  /* Handle: lui REG, n
-	     Where REG is not gp register.  */
+	     or:     li  REG, n  */
 	  gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
 	  regs[insn.rd ()] = pv_constant (insn.imm_signed ());
 	}
