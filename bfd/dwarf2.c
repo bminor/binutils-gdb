@@ -4083,8 +4083,11 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		{
 		case DW_AT_call_file:
 		  if (is_int_form (&attr))
-		    func->caller_file = concat_filename (unit->line_table,
-							 attr.u.val);
+		    {
+		      free (func->caller_file);
+		      func->caller_file = concat_filename (unit->line_table,
+							   attr.u.val);
+		    }
 		  break;
 
 		case DW_AT_call_line:
