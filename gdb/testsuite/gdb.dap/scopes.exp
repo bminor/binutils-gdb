@@ -15,7 +15,7 @@
 
 # Test "scopes" and "variables".
 
-require allow_python_tests
+require allow_dap_tests
 
 load_lib dap-support.exp
 

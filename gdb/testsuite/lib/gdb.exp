@@ -2488,6 +2488,21 @@ gdb_caching_proc allow_python_tests {} {
     return [expr {[string first "--with-python" $output] != -1}]
 }
 
+gdb_caching_proc allow_dap_tests {} {
+    if { ![allow_python_tests] } {
+	return 0
+    }
+
+    # With set auto-connect-native-target off, we run into:
+    # +++ run
+    # Traceback (most recent call last):
+    #   File "startup.py", line <n>, in exec_and_log
+    #     output = gdb.execute(cmd, from_tty=True, to_string=True)
+    # gdb.error: Don't know how to run.  Try "help target".
+    set gdb_flags [join $::GDBFLAGS $::INTERNAL_GDBFLAGS]
+    return [expr {[string first "set auto-connect-native-target off" $gdb_flags] == -1}]
+}
+
 # Return a 1 if we should run shared library tests.
 
 proc allow_shlib_tests {} {

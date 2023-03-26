@@ -15,6 +15,8 @@
 
 # Test DAP 'bt' through a function without debuginfo.
 
+require allow_dap_tests
+
 load_lib dap-support.exp
 
 standard_testfile bt-main.c bt-inner.c
