@@ -68,6 +68,11 @@ static struct parser_state *pstate = NULL;
 /* The original expression string.  */
 static const char *original_expr;
 
+/* We don't have a good way to manage non-POD data in Yacc, so store
+   values here.  The storage here is only valid for the duration of
+   the parse.  */
+static std::vector<std::unique_ptr<gdb_mpz>> int_storage;
+
 int yyparse (void);
 
 static int yylex (void);
@@ -416,9 +421,13 @@ make_tick_completer (struct stoken tok)
   {
     LONGEST lval;
     struct {
-      LONGEST val;
+      const gdb_mpz *val;
       struct type *type;
     } typed_val;
+    struct {
+      LONGEST val;
+      struct type *type;
+    } typed_char;
     struct {
       gdb_byte val[16];
       struct type *type;
@@ -433,7 +442,8 @@ make_tick_completer (struct stoken tok)
 %type <lval> aggregate_component_list 
 %type <tval> var_or_type type_prefix opt_type_prefix
 
-%token <typed_val> INT NULL_PTR CHARLIT
+%token <typed_val> INT NULL_PTR
+%token <typed_char> CHARLIT
 %token <typed_val_float> FLOAT
 %token TRUEKEYWORD FALSEKEYWORD
 %token COLONCOLON
@@ -867,7 +877,7 @@ primary :	primary TICK_ACCESS
 tick_arglist :			%prec '('
 			{ $$ = 1; }
 	| 	'(' INT ')'
-			{ $$ = $2.val; }
+			{ $$ = $2.val->as_integer<LONGEST> (); }
 	;
 
 type_prefix :
@@ -888,7 +898,10 @@ opt_type_prefix :
 
 
 primary	:	INT
-			{ write_int (pstate, (LONGEST) $1.val, $1.type); }
+			{
+			  pstate->push_new<long_const_operation> ($1.type, *$1.val);
+			  ada_wrap<ada_wrapped_operation> ();
+			}
 	;
 
 primary	:	CHARLIT
@@ -1144,6 +1157,7 @@ ada_parse (struct parser_state *par_state)
   obstack_init (&temp_parse_space);
   components.clear ();
   associations.clear ();
+  int_storage.clear ();
 
   int result = yyparse ();
   if (!result)

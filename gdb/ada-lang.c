@@ -13544,6 +13544,8 @@ public:
 			  "long_float", gdbarch_double_format (gdbarch)));
     add (init_integer_type (alloc, gdbarch_long_long_bit (gdbarch),
 			    0, "long_long_integer"));
+    add (init_integer_type (alloc, 128, 0, "long_long_long_integer"));
+    add (init_integer_type (alloc, 128, 1, "unsigned_long_long_long_integer"));
     add (init_float_type (alloc, gdbarch_long_double_bit (gdbarch),
 			  "long_long_float",
 			  gdbarch_long_double_format (gdbarch)));

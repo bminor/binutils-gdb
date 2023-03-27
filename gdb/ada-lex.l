@@ -179,15 +179,15 @@ static int paren_depth;
 		}
 
 <INITIAL>"'"({GRAPHIC}|\")"'" {
-		   yylval.typed_val.val = yytext[1];
-		   yylval.typed_val.type = type_for_char (pstate, yytext[1]);
+		   yylval.typed_char.val = yytext[1];
+		   yylval.typed_char.type = type_for_char (pstate, yytext[1]);
 		   return CHARLIT;
 		}
 
 <INITIAL>"'[\""{HEXDIG}{2,}"\"]'"   {
                    ULONGEST v = strtoulst (yytext+3, nullptr, 16);
-		   yylval.typed_val.val = v;
-                   yylval.typed_val.type = type_for_char (pstate, v);
+		   yylval.typed_char.val = v;
+                   yylval.typed_char.type = type_for_char (pstate, v);
 		   return CHARLIT;
 		}
 
@@ -462,52 +462,35 @@ processInt (struct parser_state *par_state, const char *base0,
       return FLOAT;
     }
 
-  if (result > gdb_mpz (ULONGEST_MAX))
-    error (_("Integer literal out of range"));
+  int_storage.emplace_back (new gdb_mpz (std::move (result)));
+  const gdb_mpz *value = int_storage.back ().get ();
 
   int int_bits = gdbarch_int_bit (par_state->gdbarch ());
   int long_bits = gdbarch_long_bit (par_state->gdbarch ());
   int long_long_bits = gdbarch_long_long_bit (par_state->gdbarch ());
 
-  ULONGEST value = result.as_integer<ULONGEST> ();
-  if (fits_in_type (1, value, int_bits, true))
+  if (fits_in_type (1, *value, int_bits, true))
     yylval.typed_val.type = parse_type (par_state)->builtin_int;
-  else if (fits_in_type (1, value, long_bits, true))
+  else if (fits_in_type (1, *value, long_bits, true))
     yylval.typed_val.type = parse_type (par_state)->builtin_long;
-  else if (fits_in_type (1, value, long_bits, false))
-    {
-      /* We have a number representable as an unsigned integer quantity.
-         For consistency with the C treatment, we will treat it as an
-	 anonymous modular (unsigned) quantity.  Alas, the types are such
-	 that we need to store .val as a signed quantity.  Sorry
-         for the mess, but C doesn't officially guarantee that a simple
-         assignment does the trick (no, it doesn't; read the reference manual).
-       */
-      yylval.typed_val.type
-	= builtin_type (par_state->gdbarch ())->builtin_unsigned_long;
-      if (value & LONGEST_SIGN)
-	yylval.typed_val.val =
-	  (LONGEST) (value & ~LONGEST_SIGN)
-	  - (LONGEST_SIGN>>1) - (LONGEST_SIGN>>1);
-      else
-	yylval.typed_val.val = (LONGEST) value;
-      return INT;
-    }
-  else if (fits_in_type (1, value, long_long_bits, true))
+  else if (fits_in_type (1, *value, long_bits, false))
+    yylval.typed_val.type
+      = builtin_type (par_state->gdbarch ())->builtin_unsigned_long;
+  else if (fits_in_type (1, *value, long_long_bits, true))
     yylval.typed_val.type = parse_type (par_state)->builtin_long_long;
-  else if (fits_in_type (1, value, long_long_bits, false))
-    {
-      yylval.typed_val.type
-	= builtin_type (par_state->gdbarch ())->builtin_unsigned_long_long;
-      /* See unsigned long case above.  */
-      if (value & LONGEST_SIGN)
-	yylval.typed_val.val =
-	  (LONGEST) (value & ~LONGEST_SIGN)
-	  - (LONGEST_SIGN>>1) - (LONGEST_SIGN>>1);
-      else
-	yylval.typed_val.val = (LONGEST) value;
-      return INT;
-    }
+  else if (fits_in_type (1, *value, long_long_bits, false))
+    yylval.typed_val.type
+      = builtin_type (par_state->gdbarch ())->builtin_unsigned_long_long;
+  else if (fits_in_type (1, *value, 128, true))
+    yylval.typed_val.type
+      = language_lookup_primitive_type (par_state->language (),
+					par_state->gdbarch (),
+					"long_long_long_integer");
+  else if (fits_in_type (1, *value, 128, false))
+    yylval.typed_val.type
+      = language_lookup_primitive_type (par_state->language (),
+					par_state->gdbarch (),
+					"unsigned_long_long_long_integer");
   else
     error (_("Integer literal out of range"));
 
