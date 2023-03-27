@@ -18,6 +18,9 @@ load_lib dwarf.exp
 # This test can only be run on targets which support DWARF-2.
 require dwarf2_support
 
+# The current implementation of ensure_gdb_index doesn't work on remote host.
+require {!is_remote host}
+
 standard_testfile main.c
 
 # First check whether we can actually handle the non-symlink case.
