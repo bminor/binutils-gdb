@@ -122,5 +122,10 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
 
 gdb_reinitialize_dir /tmp
 
+# Compilation on remote host downloads the source files to remote host, but
+# doesn't clean them up, allowing gdb to find $srcfile, in contrast to
+# non-remote host.
+remote_file host delete $srcfile
+
 # Using an absolute path is important to see the bug.
 gdb_test "break /tmp/${srcfile}:19" "Breakpoint .* file $srcfile, line .*"
