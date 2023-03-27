@@ -93,17 +93,7 @@ static const struct block *block_lookup (const struct block *, const char *);
 static void write_ambiguous_var (struct parser_state *,
 				 const struct block *, const char *, int);
 
-static struct type *type_int (struct parser_state *);
-
-static struct type *type_long (struct parser_state *);
-
-static struct type *type_long_long (struct parser_state *);
-
-static struct type *type_long_double (struct parser_state *);
-
 static struct type *type_for_char (struct parser_state *, ULONGEST);
-
-static struct type *type_boolean (struct parser_state *);
 
 static struct type *type_system_address (struct parser_state *);
 
@@ -934,9 +924,15 @@ primary	:	STRING
 	;
 
 primary :	TRUEKEYWORD
-			{ write_int (pstate, 1, type_boolean (pstate)); }
+			{
+			  write_int (pstate, 1,
+				     parse_type (pstate)->builtin_bool);
+			}
 	|	FALSEKEYWORD
-			{ write_int (pstate, 0, type_boolean (pstate)); }
+			{
+			  write_int (pstate, 0,
+				     parse_type (pstate)->builtin_bool);
+			}
 	;
 
 primary	: 	NEW NAME
@@ -1268,7 +1264,7 @@ write_object_renaming (struct parser_state *par_state,
 	    if (next == renaming_expr)
 	      goto BadEncoding;
 	    renaming_expr = next;
-	    write_int (par_state, val, type_int (par_state));
+	    write_int (par_state, val, parse_type (par_state)->builtin_int);
 	  }
 	else
 	  {
@@ -1842,30 +1838,6 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
 }
 
 static struct type *
-type_int (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_int;
-}
-
-static struct type *
-type_long (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_long;
-}
-
-static struct type *
-type_long_long (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_long_long;
-}
-
-static struct type *
-type_long_double (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_long_double;
-}
-
-static struct type *
 type_for_char (struct parser_state *par_state, ULONGEST value)
 {
   if (value <= 0xff)
@@ -1878,12 +1850,6 @@ type_for_char (struct parser_state *par_state, ULONGEST value)
   return language_lookup_primitive_type (par_state->language (),
 					 par_state->gdbarch (),
 					 "wide_wide_character");
-}
-
-static struct type *
-type_boolean (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_bool;
 }
 
 static struct type *

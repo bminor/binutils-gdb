@@ -471,9 +471,9 @@ processInt (struct parser_state *par_state, const char *base0,
 
   ULONGEST value = result.as_integer<ULONGEST> ();
   if (fits_in_type (1, value, int_bits, true))
-    yylval.typed_val.type = type_int (par_state);
+    yylval.typed_val.type = parse_type (par_state)->builtin_int;
   else if (fits_in_type (1, value, long_bits, true))
-    yylval.typed_val.type = type_long (par_state);
+    yylval.typed_val.type = parse_type (par_state)->builtin_long;
   else if (fits_in_type (1, value, long_bits, false))
     {
       /* We have a number representable as an unsigned integer quantity.
@@ -494,7 +494,7 @@ processInt (struct parser_state *par_state, const char *base0,
       return INT;
     }
   else if (fits_in_type (1, value, long_long_bits, true))
-    yylval.typed_val.type = type_long_long (par_state);
+    yylval.typed_val.type = parse_type (par_state)->builtin_long_long;
   else if (fits_in_type (1, value, long_long_bits, false))
     {
       yylval.typed_val.type
@@ -518,7 +518,7 @@ processInt (struct parser_state *par_state, const char *base0,
 static int
 processReal (struct parser_state *par_state, const char *num0)
 {
-  yylval.typed_val_float.type = type_long_double (par_state);
+  yylval.typed_val_float.type = parse_type (par_state)->builtin_long_double;
 
   bool parsed = parse_float (num0, strlen (num0),
 			     yylval.typed_val_float.type,

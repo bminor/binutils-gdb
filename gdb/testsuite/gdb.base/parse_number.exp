@@ -145,6 +145,8 @@ proc parse_number { lang n } {
 	} elseif { [fits_in_type $n $long_long_bits u] } {
 	    # Note: Interprets ULLONG_MAX as -1.
 	    return [list "<$sizeof_long_long-byte integer>" $n]
+	} elseif { [fits_in_type $n 128 u] } {
+	    return [list "<16-byte integer>" $n]
 	} else {
 	    # Overflow.
 	    return [list $re_overflow $re_overflow]
