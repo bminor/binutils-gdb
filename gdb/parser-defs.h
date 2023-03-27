@@ -414,6 +414,8 @@ extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);
 extern bool fits_in_type (int n_sign, ULONGEST n, int type_bits,
 			  bool type_signed_p);
+extern bool fits_in_type (int n_sign, const gdb_mpz &n, int type_bits,
+			  bool type_signed_p);
 
 
 /* Function used to avoid direct calls to fprintf

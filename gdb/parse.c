@@ -648,6 +648,32 @@ fits_in_type (int n_sign, ULONGEST n, int type_bits, bool type_signed_p)
   else
     gdb_assert_not_reached ("");
 }
+
+/* Return true if the number N_SIGN * N fits in a type with TYPE_BITS and
+   TYPE_SIGNED_P.  N_SIGNED is either 1 or -1.  */
+
+bool
+fits_in_type (int n_sign, const gdb_mpz &n, int type_bits, bool type_signed_p)
+{
+  /* N must be nonnegative.  */
+  gdb_assert (n.sgn () >= 0);
+
+  /* Zero always fits.  */
+  /* Normalize -0.  */
+  if (n.sgn () == 0)
+    return true;
+
+  if (n_sign == -1 && !type_signed_p)
+    /* Can't fit a negative number in an unsigned type.  */
+    return false;
+
+  gdb_mpz max = gdb_mpz::pow (2, (type_signed_p
+				  ? type_bits - 1
+				  : type_bits));
+  if (n_sign == -1)
+    return n <= max;
+  return n < max;
+}
 
 /* This function avoids direct calls to fprintf 
    in the parser generated debug code.  */
