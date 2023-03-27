@@ -82,19 +82,28 @@ bfd_coff_get_auxent (bfd *abfd,
   *pauxent = ent->u.auxent;
 
   if (ent->fix_tag)
-    pauxent->x_sym.x_tagndx.l =
-      ((combined_entry_type *) pauxent->x_sym.x_tagndx.p
-       - obj_raw_syments (abfd));
+    {
+      pauxent->x_sym.x_tagndx.l =
+	((combined_entry_type *) pauxent->x_sym.x_tagndx.p
+	 - obj_raw_syments (abfd));
+      ent->fix_tag = 0;
+    }
 
   if (ent->fix_end)
-    pauxent->x_sym.x_fcnary.x_fcn.x_endndx.l =
-      ((combined_entry_type *) pauxent->x_sym.x_fcnary.x_fcn.x_endndx.p
-       - obj_raw_syments (abfd));
+    {
+      pauxent->x_sym.x_fcnary.x_fcn.x_endndx.l =
+	((combined_entry_type *) pauxent->x_sym.x_fcnary.x_fcn.x_endndx.p
+	 - obj_raw_syments (abfd));
+      ent->fix_end = 0;
+    }
 
   if (ent->fix_scnlen)
-    pauxent->x_csect.x_scnlen.l =
-      ((combined_entry_type *) pauxent->x_csect.x_scnlen.p
-       - obj_raw_syments (abfd));
+    {
+      pauxent->x_csect.x_scnlen.l =
+	((combined_entry_type *) pauxent->x_csect.x_scnlen.p
+	 - obj_raw_syments (abfd));
+      ent->fix_scnlen = 0;
+    }
 
   return true;
 }
