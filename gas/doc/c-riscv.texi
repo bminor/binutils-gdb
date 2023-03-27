@@ -18,6 +18,7 @@
 * RISC-V-Options::        RISC-V Options
 * RISC-V-Directives::     RISC-V Directives
 * RISC-V-Modifiers::      RISC-V Assembler Modifiers
+* RISC-V-Floating-Point:: RISC-V Floating Point
 * RISC-V-Formats::        RISC-V Instruction Formats
 * RISC-V-ATTRIBUTE::      RISC-V Object Attribute
 * RISC-V-CustomExts::     RISC-V Custom (Vendor-Defined) Extensions
@@ -381,6 +382,46 @@ The pseudo la.tls.gd instruction can be expended to
 @end smallexample
 
 @end table
+
+@node RISC-V-Floating-Point
+@section RISC-V Floating Point
+@cindex floating point, risc-v (@sc{ieee})
+@cindex RISC-V floating point (@sc{ieee})
+
+The RISC-V architecture uses @sc{ieee} floating-point numbers.
+
+The RISC-V Zfa extension includes a load-immediate instruction
+for floating-point registers, which allows specifying the immediate
+(from a pool of 32 predefined values defined in the specification)
+as operand.
+E.g. to load the value @code{0.0625} as single-precision FP value into
+the FP register @code{ft1} one of the following instructions can be used:
+
+	fli.s ft1, 0.0625 # dec floating-point literal
+	fli.s ft1, 0x1p-4 # hex floating-point literal
+	fli.s ft1, 0x0.8p-3
+	fli.s ft1, 0x1.0p-4
+	fli.s ft1, 0x2p-5
+	fli.s ft1, 0x4p-6
+	...
+
+As can be seen, many valid ways exist to express a floating-point value.
+This is realized by parsing the value operand using strtof() and
+comparing the parsed value against built-in float-constants that
+are written as hex floating-point literals.
+
+This approach works on all machines that use IEEE 754.
+However, there is a chance that this fails on other machines
+with the following error message:
+
+	Error: improper fli value operand
+	Error: illegal operands `fli.s ft1,0.0625
+
+The error indicates that parsing @samp{0x1p-4} and @samp{0.0625}
+to single-precision floating point numbers will not result
+in two equal values on that machine.
+
+If you encounter this problem, then please report it.
 
 @node RISC-V-Formats
 @section RISC-V Instruction Formats

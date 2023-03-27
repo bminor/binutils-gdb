@@ -389,6 +389,10 @@ enum riscv_insn_class
   INSN_CLASS_ZFHMIN_INX,
   INSN_CLASS_ZFHMIN_AND_D_INX,
   INSN_CLASS_ZFHMIN_AND_Q_INX,
+  INSN_CLASS_ZFA,
+  INSN_CLASS_D_AND_ZFA,
+  INSN_CLASS_Q_AND_ZFA,
+  INSN_CLASS_ZFH_AND_ZFA,
   INSN_CLASS_ZBA,
   INSN_CLASS_ZBB,
   INSN_CLASS_ZBC,
@@ -557,6 +561,8 @@ extern const char * const riscv_vsew[8];
 extern const char * const riscv_vlmul[8];
 extern const char * const riscv_vta[2];
 extern const char * const riscv_vma[2];
+extern const char * const riscv_fli_symval[32];
+extern const float riscv_fli_numval[32];
 
 extern const struct riscv_opcode riscv_opcodes[];
 extern const struct riscv_opcode riscv_insn_types[];
