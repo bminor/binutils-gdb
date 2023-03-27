@@ -8740,6 +8740,10 @@ proc readnow { } {
 # Otherwise, return "".
 
 proc have_index { objfile } {
+    # This proc is mostly used with $binfile, but that gives problems with
+    # remote host, while using $testfile would work.
+    # Fix this by reducing $binfile to $testfile.
+    set objfile [file tail $objfile]
 
     set res ""
     set cmd "maint print objfiles $objfile"
