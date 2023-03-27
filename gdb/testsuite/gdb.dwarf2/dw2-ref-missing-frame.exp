@@ -25,12 +25,18 @@ lassign [function_range func_loopfb \
              "${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}"] \
     func_loopfb_start func_loopfb_len
 
-set flags \
-    [list \
-         "additional_flags=\"-DFUNC_NOFB_START=$func_nofb_start\"" \
-         "additional_flags=\"-DFUNC_NOFB_END=$func_nofb_start + $func_nofb_len\"" \
-         "additional_flags=\"-DFUNC_LOOPFB_START=$func_loopfb_start\"" \
-         "additional_flags=\"-DFUNC_LOOPFB_END=$func_loopfb_start + $func_loopfb_len\""]
+set flags {}
+lappend flags \
+    additional_flags=[quote_for_host -DFUNC_NOFB_START=$func_nofb_start]
+lappend flags \
+    additional_flags=[quote_for_host -DFUNC_NOFB_END=$func_nofb_start \
+			  + $func_nofb_len]
+lappend flags \
+    additional_flags=[quote_for_host -DFUNC_LOOPFB_START=$func_loopfb_start]
+lappend flags \
+    additional_flags=[quote_for_host -DFUNC_LOOPFB_END=$func_loopfb_start \
+			  + $func_loopfb_len]
+
 set executable ${testfile}
 
 if { [prepare_for_testing_full "failed to prepare" \

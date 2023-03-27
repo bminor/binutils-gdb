@@ -37,13 +37,16 @@ set sources \
 	 ${testfile}-hello.c \
 	 ${testfile}-world-dbg.S \
 	 ${testfile}-world.c]
-set flags \
-    [list \
-	 "nodebug" \
-	 "additional_flags=\"-DHELLO_START=$hello_start\"" \
-	 "additional_flags=\"-DHELLO_END=$hello_start + $hello_len\"" \
-	 "additional_flags=\"-DWORLD_START=$world_start\"" \
-	 "additional_flags=\"-DWORLD_END=$world_start + $world_len\""]
+
+set flags {}
+lappend flags nodebug
+lappend flags additional_flags=[quote_for_host -DHELLO_START=$hello_start]
+lappend flags additional_flags=[quote_for_host -DHELLO_END=$hello_start \
+				    + $hello_len]
+lappend flags additional_flags=[quote_for_host -DWORLD_START=$world_start]
+lappend flags additional_flags=[quote_for_host -DWORLD_END=$world_start \
+				    + $world_len]
+
 set executable ${testfile}
 if {[build_executable ${testfile}.exp ${executable} $sources $flags] == -1} {
     return -1

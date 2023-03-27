@@ -4700,6 +4700,19 @@ proc escape_for_host { str } {
     return [string map $map $str]
 }
 
+# Add double quotes around ARGS, sufficiently escaped for use on host
+# commandline.
+
+proc quote_for_host { args } {
+    set str [join $args]
+    if { [is_remote host] } {
+	set str [join [list {\"} $str {\"}] ""]
+    } else {
+	set str [join [list {"} $str {"}] ""]
+    }
+    return $str
+}
+
 # Compile source files specified by SOURCE into a binary of type TYPE at path
 # DEST.  gdb_compile is implemented using DejaGnu's target_compile, so the type
 # parameter and most options are passed directly to it.
