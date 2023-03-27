@@ -852,23 +852,23 @@ fbsd_enable_proc_events (pid_t pid)
 #ifdef PT_GET_EVENT_MASK
   int events;
 
-  if (ptrace (PT_GET_EVENT_MASK, pid, (PTRACE_TYPE_ARG3)&events,
+  if (ptrace (PT_GET_EVENT_MASK, pid, (PTRACE_TYPE_ARG3) &events,
 	      sizeof (events)) == -1)
     perror_with_name (("ptrace (PT_GET_EVENT_MASK)"));
   events |= PTRACE_FORK | PTRACE_LWP;
 #ifdef PTRACE_VFORK
   events |= PTRACE_VFORK;
 #endif
-  if (ptrace (PT_SET_EVENT_MASK, pid, (PTRACE_TYPE_ARG3)&events,
+  if (ptrace (PT_SET_EVENT_MASK, pid, (PTRACE_TYPE_ARG3) &events,
 	      sizeof (events)) == -1)
     perror_with_name (("ptrace (PT_SET_EVENT_MASK)"));
 #else
 #ifdef TDP_RFPPWAIT
-  if (ptrace (PT_FOLLOW_FORK, pid, (PTRACE_TYPE_ARG3)0, 1) == -1)
+  if (ptrace (PT_FOLLOW_FORK, pid, (PTRACE_TYPE_ARG3) 0, 1) == -1)
     perror_with_name (("ptrace (PT_FOLLOW_FORK)"));
 #endif
 #ifdef PT_LWP_EVENTS
-  if (ptrace (PT_LWP_EVENTS, pid, (PTRACE_TYPE_ARG3)0, 1) == -1)
+  if (ptrace (PT_LWP_EVENTS, pid, (PTRACE_TYPE_ARG3) 0, 1) == -1)
     perror_with_name (("ptrace (PT_LWP_EVENTS)"));
 #endif
 #endif
@@ -1369,7 +1369,7 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 		  gdb_assert (pid == child);
 
-		  if (ptrace (PT_LWPINFO, child, (caddr_t)&pl, sizeof pl) == -1)
+		  if (ptrace (PT_LWPINFO, child, (caddr_t) &pl, sizeof pl) == -1)
 		    perror_with_name (("ptrace (PT_LWPINFO)"));
 
 		  gdb_assert (pl.pl_flags & PL_FLAG_CHILD);
@@ -1489,7 +1489,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
      event loop keeps polling until no event is returned.  */
   if (is_async_p ()
       && ((ourstatus->kind () != TARGET_WAITKIND_IGNORE
-	  && ourstatus->kind() != TARGET_WAITKIND_NO_RESUMED)
+	  && ourstatus->kind () != TARGET_WAITKIND_NO_RESUMED)
 	  || ptid != minus_one_ptid))
     async_file_mark ();
 
@@ -1607,7 +1607,7 @@ fbsd_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
 
-      if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
+      if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3) 1, 0) == -1)
 	perror_with_name (("ptrace (PT_DETACH)"));
 
 #ifndef PTRACE_VFORK
@@ -1740,7 +1740,7 @@ fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,
 
   if (regnum == -1
       || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
-						      regcache->arch(), size)))
+						      regcache->arch (), size)))
     {
       if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
@@ -1765,7 +1765,7 @@ fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
 
   if (regnum == -1
       || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
-						      regcache->arch(), size)))
+						      regcache->arch (), size)))
     {
       if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
@@ -1807,7 +1807,7 @@ fbsd_nat_target::fetch_regset (struct regcache *regcache, int regnum, int note,
 
   if (regnum == -1
       || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
-						      regcache->arch(), size)))
+						      regcache->arch (), size)))
     {
       struct iovec iov;
 
@@ -1833,7 +1833,7 @@ fbsd_nat_target::store_regset (struct regcache *regcache, int regnum, int note,
 
   if (regnum == -1
       || (regnum >= regbase && regcache_map_supplies (map, regnum - regbase,
-						      regcache->arch(), size)))
+						      regcache->arch (), size)))
     {
       struct iovec iov;
 
