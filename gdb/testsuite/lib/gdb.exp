@@ -4579,8 +4579,8 @@ gdb_caching_proc universal_compile_options {} {
     set me "universal_compile_options"
     set options {}
 
-    set src [standard_temp_file ccopts[pid].c]
-    set obj [standard_temp_file ccopts[pid].o]
+    set src [standard_temp_file ccopts.c]
+    set obj [standard_temp_file ccopts.o]
 
     gdb_produce_source $src {
 	int foo(void) { return 0; }
@@ -4635,8 +4635,8 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
 	    break
 	}
     }
-    set src [standard_temp_file $name-[pid].$ext]
-    set obj [standard_temp_file $name-[pid].$postfix]
+    set src [standard_temp_file $name.$ext]
+    set obj [standard_temp_file $name.$postfix]
     set compile_flags [concat $compile_flags {debug nowarnings quiet}]
 
     gdb_produce_source $src $code
@@ -7011,8 +7011,8 @@ gdb_caching_proc allow_float_test {} {
 
 	# Set up, compile, and execute a test program having VFP
 	# operations.
-	set src [standard_temp_file arm_vfp[pid].c]
-	set exe [standard_temp_file arm_vfp[pid].x]
+	set src [standard_temp_file arm_vfp.c]
+	set exe [standard_temp_file arm_vfp.x]
 
 	gdb_produce_source $src {
 	    int main() {

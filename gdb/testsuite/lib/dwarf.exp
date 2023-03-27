@@ -294,7 +294,7 @@ proc shared_gdb_start_use { src options } {
     }
 
     if { $do_start } {
-	set exe [standard_temp_file func_addr[pid].x]
+	set exe [standard_temp_file func_addr.x]
 
 	gdb_compile $src $exe executable $options
 
