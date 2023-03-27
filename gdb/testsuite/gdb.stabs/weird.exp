@@ -275,10 +275,9 @@ remote_file build delete ${srcfile}
 
 clean_restart
 
-set binfile [gdb_remote_download host ${binfile} \
-		 [standard_output_file object.o]]
-set binfile_re [string_to_regexp $binfile]
-send_gdb "file $binfile\n"
+set binfile_host [gdb_remote_download host $binfile]
+set binfile_re [string_to_regexp $binfile_host]
+send_gdb "file $binfile_host\n"
 # If $binfile is very long, a \r (but not a \n) will echo in the
 # middle of the echo of the command.  So to match the echo, we
 # would like to match anything not containing \n
