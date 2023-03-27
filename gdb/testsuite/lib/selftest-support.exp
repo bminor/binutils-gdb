@@ -100,7 +100,7 @@ proc do_self_tests {function body} {
     # Are we testing with a remote board?  In that case, the target
     # won't have access to the GDB's auxilliary data files
     # (data-directory, etc.).  It's simpler to just skip.
-    if [is_remote target] {
+    if { [is_remote target]  || [is_remote host] } {
 	return
     }
 
