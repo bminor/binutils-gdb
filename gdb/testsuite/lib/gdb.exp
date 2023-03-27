@@ -2461,6 +2461,18 @@ proc allow_d_tests {} {
     return 1
 }
 
+# Return a 1 if we can compile source files in LANG.
+
+gdb_caching_proc can_compile { lang } {
+
+    if { $lang == "d" } {
+	set src { void main() {} }
+	return [gdb_can_simple_compile can_compile_$lang $src executable {d}]
+    }
+
+    error "can_compile doesn't support lang: $lang"
+}
+
 # Return 1 to try Rust tests, 0 to skip them.
 proc allow_rust_tests {} {
     if { ![isnative] } {
@@ -4632,6 +4644,10 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
 	}
 	if { "$flag" eq "hip" } {
 	    set ext "cpp"
+	    break
+	}
+	if { "$flag" eq "d" } {
+	    set ext "d"
 	    break
 	}
     }

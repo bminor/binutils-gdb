@@ -17,6 +17,7 @@
 
 load_lib d-support.exp
 require allow_d_tests
+require {can_compile d}
 
 # This testcase verifies the behavior of the `start' command, which
 # does not work when we use the gdb stub...
