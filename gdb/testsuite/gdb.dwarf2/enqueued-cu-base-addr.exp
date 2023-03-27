@@ -89,7 +89,7 @@ set cu2_blockvector_re \
 	 "" \
 	 "block #000, \[^\r\n\]* in ($hex)..$hex" \
 	 ".*"]
-gdb_test_multiple "maint print symbols -objfile $binfile" "CU addr found" {
+gdb_test_multiple "maint print symbols -objfile $testfile" "CU addr found" {
     -re -wrap $cu2_blockvector_re {
 	set addr $expect_out(1,string)
 	if { $addr eq "0x0" } {
