@@ -6412,7 +6412,12 @@ proc standard_output_file {basename} {
 
 proc host_standard_output_file { basename } {
     if { [is_remote host] } {
-	return $basename
+	set remotedir [board_info host remotedir]
+	if { $remotedir == "" } {
+	    return $basename
+	} else {
+	    return [join [list $remotedir $basename] "/"]
+	}
     } else {
 	return [standard_output_file $basename]
     }
