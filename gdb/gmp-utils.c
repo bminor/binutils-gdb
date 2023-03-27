@@ -69,18 +69,20 @@ void
 gdb_mpz::export_bits (gdb::array_view<gdb_byte> buf, int endian, bool unsigned_p,
 		      bool safe) const
 {
-  gdb_assert (buf.size () > 0);
-
   int sign = mpz_sgn (m_val);
   if (sign == 0)
     {
       /* Our value is zero, so no need to call mpz_export to do the work,
 	 especially since mpz_export's documentation explicitly says
 	 that the function is a noop in this case.  Just write zero to
-	 BUF ourselves.  */
-      memset (buf.data (), 0, buf.size ());
+	 BUF ourselves, if it is non-empty.  In some languages, a
+	 zero-bit type can exist and this is also fine.  */
+      if (buf.size () > 0)
+	memset (buf.data (), 0, buf.size ());
       return;
     }
+
+  gdb_assert (buf.size () > 0);
 
   if (safe)
     {
