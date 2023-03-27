@@ -25,18 +25,11 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {}] != ""
 
 clean_restart
 
-# From gdb_file_cmd:
-if [is_remote host] {
-    set arg [remote_download host $binfile]
-    if { $arg == "" } {
-	perror "download failed"
-	return -1
-    }
-}
+set host_binfile [gdb_remote_download host $binfile]
 gdb_test_no_output "set complaints 100"
 set w1 0
 set w2 0
-gdb_test_multiple "file $binfile" "file command" {
+gdb_test_multiple "file $host_binfile" "file command" {
     -re "\r\nReading symbols from \[^\r\n\]*\\.\\.\\." {
 	exp_continue
     }

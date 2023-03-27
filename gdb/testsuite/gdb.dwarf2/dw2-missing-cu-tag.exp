@@ -44,6 +44,8 @@ if {[build_executable "failed to build executable" $testfile \
     return -1
 }
 
+set host_binfile [gdb_remote_download host $binfile]
+
 # Restart with no executable.
 clean_restart
 
@@ -63,7 +65,7 @@ set pattern2 \
 	 "Dwarf Error: unexpected tag 'DW_TAG_subprogram' at offset $hex"]
 
 # Load the executable, we expect an error from the DWARF parser.
-gdb_test_multiple "file $binfile" "file $testfile" {
+gdb_test_multiple "file $host_binfile" "file $testfile" {
     -wrap -re $pattern1 {
 	pass $gdb_test_name
     }
