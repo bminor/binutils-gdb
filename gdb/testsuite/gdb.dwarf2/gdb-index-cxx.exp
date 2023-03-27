@@ -23,7 +23,7 @@ if {[prepare_for_testing "failed to prepare" "${testfile}" \
 }
 
 # The bug was that gdb would crash when saving.
-set output_dir [standard_output_file ""]
+set output_dir [host_standard_output_file ""]
 set cmd "save gdb-index"
 gdb_test_multiple "$cmd $output_dir" $cmd {
     -re -wrap "Cannot use an index to create the index.*" {

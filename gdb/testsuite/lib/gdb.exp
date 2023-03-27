@@ -6414,6 +6414,9 @@ proc host_standard_output_file { basename } {
     if { [is_remote host] } {
 	set remotedir [board_info host remotedir]
 	if { $remotedir == "" } {
+	    if { $basename == "" } {
+		return "."
+	    }
 	    return $basename
 	} else {
 	    return [join [list $remotedir $basename] "/"]
