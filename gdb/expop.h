@@ -274,6 +274,12 @@ check_objfile (ULONGEST val, struct objfile *objfile)
   return false;
 }
 
+static inline bool
+check_objfile (const gdb_mpz &val, struct objfile *objfile)
+{
+  return false;
+}
+
 template<typename T>
 static inline bool
 check_objfile (enum_flags<T> val, struct objfile *objfile)
@@ -319,6 +325,8 @@ extern void dump_for_expression (struct ui_file *stream, int depth,
 				 struct type *type);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 CORE_ADDR addr);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 const gdb_mpz &addr);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 internalvar *ivar);
 extern void dump_for_expression (struct ui_file *stream, int depth,
@@ -464,6 +472,12 @@ check_constant (const std::string &str)
 
 static inline bool
 check_constant (ULONGEST cst)
+{
+  return true;
+}
+
+static inline bool
+check_constant (const gdb_mpz &cst)
 {
   return true;
 }
@@ -665,18 +679,21 @@ protected:
 };
 
 class long_const_operation
-  : public tuple_holding_operation<struct type *, LONGEST>
+  : public tuple_holding_operation<struct type *, gdb_mpz>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
 
+  long_const_operation (struct type *type, LONGEST val)
+    : long_const_operation (type, gdb_mpz (val))
+  { }
+
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
 		   enum noside noside) override
   {
-    return value_from_longest (std::get<0> (m_storage),
-			       std::get<1> (m_storage));
+    return value_from_mpz (std::get<0> (m_storage), std::get<1> (m_storage));
   }
 
   enum exp_opcode opcode () const override
@@ -686,6 +703,9 @@ public:
   { return true; }
 
 protected:
+
+  LONGEST as_longest () const
+  { return std::get<1> (m_storage).as_integer_truncate<LONGEST> (); }
 
   void do_generate_ax (struct expression *exp,
 		       struct agent_expr *ax,

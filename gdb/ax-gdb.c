@@ -1630,8 +1630,8 @@ long_const_operation::do_generate_ax (struct expression *exp,
 				      struct axs_value *value,
 				      struct type *cast_type)
 {
-  gen_int_literal (ax, value, std::get<1> (m_storage),
-		   std::get<0> (m_storage));
+  LONGEST val = as_longest ();
+  gen_int_literal (ax, value, val, std::get<0> (m_storage));
 }
 
 void

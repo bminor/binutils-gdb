@@ -10590,10 +10590,10 @@ ada_char_operation::replace (operation_up &&owner,
 
   if (context_type != nullptr && context_type->code () == TYPE_CODE_ENUM)
     {
+      LONGEST val = as_longest ();
       gdb_assert (result.get () == this);
       std::get<0> (m_storage) = context_type;
-      std::get<1> (m_storage)
-	= convert_char_literal (context_type, std::get<1> (m_storage));
+      std::get<1> (m_storage) = convert_char_literal (context_type, val);
     }
 
   return result;

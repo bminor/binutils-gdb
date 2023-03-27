@@ -109,6 +109,12 @@ dump_for_expression (struct ui_file *stream, int depth, CORE_ADDR addr)
 }
 
 void
+dump_for_expression (struct ui_file *stream, int depth, const gdb_mpz &val)
+{
+  gdb_printf (stream, _("%*sConstant: %s\n"), depth, "", val.str ().c_str ());
+}
+
+void
 dump_for_expression (struct ui_file *stream, int depth, internalvar *ivar)
 {
   gdb_printf (stream, _("%*sInternalvar: $%s\n"), depth, "",
