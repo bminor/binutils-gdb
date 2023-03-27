@@ -1434,8 +1434,7 @@ coff_pointerize_aux (bfd *abfd,
 		     combined_entry_type *table_base,
 		     combined_entry_type *symbol,
 		     unsigned int indaux,
-		     combined_entry_type *auxent,
-		     combined_entry_type *table_end)
+		     combined_entry_type *auxent)
 {
   unsigned int type = symbol->u.syment.n_type;
   unsigned int n_sclass = symbol->u.syment.n_sclass;
@@ -1465,9 +1464,7 @@ coff_pointerize_aux (bfd *abfd,
        || n_sclass == C_FCN)
       && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32 > 0
       && (auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32
-	  < obj_raw_syment_count (abfd))
-      && (table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32
-	  < table_end))
+	  < obj_raw_syment_count (abfd)))
     {
       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p =
 	table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.u32;
@@ -1476,8 +1473,7 @@ coff_pointerize_aux (bfd *abfd,
 
   /* A negative tagndx is meaningless, but the SCO 3.2v4 cc can
      generate one, so we must be careful to ignore it.  */
-  if (auxent->u.auxent.x_sym.x_tagndx.u32 < obj_raw_syment_count (abfd)
-      && table_base + auxent->u.auxent.x_sym.x_tagndx.u32 < table_end)
+  if (auxent->u.auxent.x_sym.x_tagndx.u32 < obj_raw_syment_count (abfd))
     {
       auxent->u.auxent.x_sym.x_tagndx.p =
 	table_base + auxent->u.auxent.x_sym.x_tagndx.u32;
@@ -1768,8 +1764,7 @@ coff_get_normalized_symtab (bfd *abfd)
 				&(internal_ptr->u.auxent));
 
 	  internal_ptr->is_sym = false;
-	  coff_pointerize_aux (abfd, internal, symbol_ptr, i,
-			       internal_ptr, internal_end);
+	  coff_pointerize_aux (abfd, internal, symbol_ptr, i, internal_ptr);
 	}
     }
 
