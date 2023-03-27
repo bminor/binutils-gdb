@@ -1439,7 +1439,7 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 	     SIGTRAP, so only treat SIGTRAP events as system call
 	     entry/exit events.  */
 	  if (pl.pl_flags & (PL_FLAG_SCE | PL_FLAG_SCX)
-	      && ourstatus->sig () == SIGTRAP)
+	      && ourstatus->sig () == GDB_SIGNAL_TRAP)
 	    {
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
 	      if (catch_syscall_enabled ())
