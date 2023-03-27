@@ -22,6 +22,8 @@
 
 standard_testfile exclfwd1.c exclfwd2.c
 
+include_file exclfwd.h
+
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] debug]} {
     return -1
