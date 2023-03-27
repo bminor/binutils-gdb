@@ -1,3 +1,10 @@
+2023-03-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 30187
+	* options.h (class General_options): Add enable-linker-version.
+	* layout.cc (Layout::create_gold_note): If linker-version is
+	enabled put the version string into the .comment section.
+
 2023-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: Updated Romainian translation.

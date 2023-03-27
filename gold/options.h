@@ -847,6 +847,10 @@ class General_options
 		N_("Enable use of DT_RUNPATH"),
 		N_("Disable use of DT_RUNPATH"));
 
+  DEFINE_enable(linker_version, options::EXACTLY_TWO_DASHES, '\0', false,
+		N_("Put the linker version string into the .comment section"),
+		N_("Put the linker version string into the .note.gnu.gold-version section"));
+
   DEFINE_bool(enum_size_warning, options::TWO_DASHES, '\0', true, NULL,
 	      N_("(ARM only) Do not warn about objects with incompatible "
 		 "enum sizes"));
