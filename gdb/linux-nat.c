@@ -903,7 +903,7 @@ linux_nat_switch_fork (ptid_t new_ptid)
 static void
 exit_lwp (struct lwp_info *lp)
 {
-  struct thread_info *th = find_thread_ptid (linux_target, lp->ptid);
+  struct thread_info *th = linux_target->find_thread (lp->ptid);
 
   if (th)
     {
@@ -1232,7 +1232,7 @@ get_detach_signal (struct lwp_info *lp)
     signo = gdb_signal_from_host (WSTOPSIG (lp->status));
   else
     {
-      struct thread_info *tp = find_thread_ptid (linux_target, lp->ptid);
+      thread_info *tp = linux_target->find_thread (lp->ptid);
 
       if (target_is_non_stop_p () && !tp->executing ())
 	{
@@ -1325,7 +1325,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
 
 
   /* Check in thread_info::pending_waitstatus.  */
-  thread_info *tp = find_thread_ptid (linux_target, lp->ptid);
+  thread_info *tp = linux_target->find_thread (lp->ptid);
   if (tp->has_pending_waitstatus ())
     {
       const target_waitstatus &ws = tp->pending_waitstatus ();
@@ -1579,7 +1579,7 @@ linux_nat_resume_callback (struct lwp_info *lp, struct lwp_info *except)
     {
       struct thread_info *thread;
 
-      thread = find_thread_ptid (linux_target, lp->ptid);
+      thread = linux_target->find_thread (lp->ptid);
       if (thread != NULL)
 	{
 	  signo = thread->stop_signal ();
@@ -1717,7 +1717,7 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
 {
   struct target_waitstatus *ourstatus = &lp->waitstatus;
   struct gdbarch *gdbarch = target_thread_architecture (lp->ptid);
-  thread_info *thread = find_thread_ptid (linux_target, lp->ptid);
+  thread_info *thread = linux_target->find_thread (lp->ptid);
   int syscall_number = (int) gdbarch_get_syscall_number (gdbarch, thread);
 
   if (stopping)
@@ -2996,7 +2996,7 @@ linux_nat_filter_event (int lwpid, int status)
       if (!lp->step
 	  && WSTOPSIG (status) && sigismember (&pass_mask, WSTOPSIG (status))
 	  && (WSTOPSIG (status) != SIGSTOP
-	      || !find_thread_ptid (linux_target, lp->ptid)->stop_requested)
+	      || !linux_target->find_thread (lp->ptid)->stop_requested)
 	  && !linux_wstatus_maybe_breakpoint (status))
 	{
 	  linux_resume_one_lwp (lp, lp->step, signo);
@@ -4278,7 +4278,7 @@ linux_nat_stop_lwp (struct lwp_info *lwp)
 
       if (debug_linux_nat)
 	{
-	  if (find_thread_ptid (linux_target, lwp->ptid)->stop_requested)
+	  if (linux_target->find_thread (lwp->ptid)->stop_requested)
 	    linux_nat_debug_printf ("already stopped/stop_requested %s",
 				    lwp->ptid.to_string ().c_str ());
 	  else

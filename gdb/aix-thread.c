@@ -941,7 +941,7 @@ sync_threadlists (pid_t pid)
 
 	      if (gptid.is_pid ())
 		{
-		  tp = find_thread_ptid (proc_target, gptid);
+		  tp = proc_target->find_thread (gptid);
 		  thread_change_ptid (proc_target, gptid, pptid);
 		  aix_thread_info *priv = new aix_thread_info;
 		  priv->pdtid = pbuf[pi].pdtid;

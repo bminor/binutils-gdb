@@ -515,17 +515,6 @@ find_thread_id (struct inferior *inf, int thr_num)
 /* See gdbthread.h.  */
 
 struct thread_info *
-find_thread_ptid (process_stratum_target *targ, ptid_t ptid)
-{
-  inferior *inf = find_inferior_ptid (targ, ptid);
-  if (inf == NULL)
-    return NULL;
-  return inf->find_thread (ptid);
-}
-
-/* See gdbthread.h.  */
-
-struct thread_info *
 find_thread_by_handle (gdb::array_view<const gdb_byte> handle,
 		       struct inferior *inf)
 {
@@ -598,7 +587,7 @@ valid_global_thread_id (int global_id)
 bool
 in_thread_list (process_stratum_target *targ, ptid_t ptid)
 {
-  return find_thread_ptid (targ, ptid) != nullptr;
+  return targ->find_thread (ptid) != nullptr;
 }
 
 /* Finds the first thread of the inferior.  */
@@ -1333,7 +1322,7 @@ switch_to_thread (thread_info *thr)
 void
 switch_to_thread (process_stratum_target *proc_target, ptid_t ptid)
 {
-  thread_info *thr = find_thread_ptid (proc_target, ptid);
+  thread_info *thr = proc_target->find_thread (ptid);
   switch_to_thread (thr);
 }
 

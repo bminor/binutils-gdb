@@ -1295,7 +1295,7 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 		 threads might be skipped during post_attach that
 		 have not yet reported their PL_FLAG_EXITED event.
 		 Ignore EXITED events for an unknown LWP.  */
-	      thread_info *thr = find_thread_ptid (this, wptid);
+	      thread_info *thr = this->find_thread (wptid);
 	      if (thr != nullptr)
 		{
 		  fbsd_lwp_debug_printf ("deleting thread for LWP %u",

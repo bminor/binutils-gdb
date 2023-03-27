@@ -199,6 +199,17 @@ process_stratum_target::random_resumed_with_pending_wait_status
 
 /* See process-stratum-target.h.  */
 
+thread_info *
+process_stratum_target::find_thread (ptid_t ptid)
+{
+  inferior *inf = find_inferior_ptid (this, ptid);
+  if (inf == NULL)
+    return NULL;
+  return inf->find_thread (ptid);
+}
+
+/* See process-stratum-target.h.  */
+
 std::set<process_stratum_target *>
 all_non_exited_process_targets ()
 {

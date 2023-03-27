@@ -122,7 +122,7 @@ all_matching_threads_iterator::all_matching_threads_iterator
 	  /* Iterate on a single thread.  */
 	  m_mode = mode::SINGLE_THREAD;
 
-	  m_thr = find_thread_ptid (filter_target, filter_ptid);
+	  m_thr = filter_target->find_thread (filter_ptid);
 	}
     }
 }

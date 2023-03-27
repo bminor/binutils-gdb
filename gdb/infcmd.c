@@ -710,7 +710,7 @@ continue_command (const char *args, int from_tty)
 	  ptid_t last_ptid;
 
 	  get_last_target_status (&last_target, &last_ptid, nullptr);
-	  tp = find_thread_ptid (last_target, last_ptid);
+	  tp = last_target->find_thread (last_ptid);
 	}
       if (tp != nullptr)
 	bs = tp->control.stop_bpstat;

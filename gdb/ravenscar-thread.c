@@ -127,7 +127,7 @@ struct ravenscar_thread_target final : public target_ops
     process_stratum_target *proc_target
       = as_process_stratum_target (this->beneath ());
     ptid_t underlying = get_base_thread_from_ravenscar_task (tp->ptid);
-    tp = find_thread_ptid (proc_target, underlying);
+    tp = proc_target->find_thread (underlying);
 
     return beneath ()->enable_btrace (tp, conf);
   }
@@ -161,7 +161,7 @@ private:
     process_stratum_target *proc_target
       = as_process_stratum_target (this->beneath ());
     ptid_t underlying = get_base_thread_from_ravenscar_task (ptid);
-    switch_to_thread (find_thread_ptid (proc_target, underlying));
+    switch_to_thread (proc_target->find_thread (underlying));
   }
 
   /* Some targets use lazy FPU initialization.  On these, the FP
@@ -312,7 +312,7 @@ ravenscar_thread_target::add_active_thread ()
   /* The running thread may not have been added to
      system.tasking.debug's list yet; so ravenscar_update_thread_list
      may not always add it to the thread list.  Add it here.  */
-  thread_info *active_thr = find_thread_ptid (proc_target, active_ptid);
+  thread_info *active_thr = proc_target->find_thread (active_ptid);
   if (active_thr == nullptr)
     {
       active_thr = ::add_thread (proc_target, active_ptid);

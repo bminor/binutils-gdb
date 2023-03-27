@@ -626,7 +626,7 @@ windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
 		target_pid_to_str (ptid).c_str (),
 		(unsigned) exit_code);
 
-  ::delete_thread (find_thread_ptid (this, ptid));
+  ::delete_thread (this->find_thread (ptid));
 
   auto iter = std::find_if (windows_process.thread_list.begin (),
 			    windows_process.thread_list.end (),
@@ -1944,7 +1944,7 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
       this->resume (minus_one_ptid, 0, GDB_SIGNAL_0);
     }
 
-  switch_to_thread (find_thread_ptid (this, last_ptid));
+  switch_to_thread (this->find_thread (last_ptid));
 
   /* Now that the inferior has been started and all DLLs have been mapped,
      we can iterate over all DLLs and load them in.

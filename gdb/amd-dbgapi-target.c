@@ -718,7 +718,7 @@ amd_dbgapi_target::stop (ptid_t ptid)
     {
       /* No need to iterate all non-exited threads if the request is to stop a
 	 specific thread.  */
-      stop_one_thread (find_thread_ptid (proc_target, ptid));
+      stop_one_thread (proc_target->find_thread (ptid));
       return;
     }
 
@@ -998,7 +998,7 @@ process_one_event (amd_dbgapi_event_id_t event_id,
 	    else
 	      ws.set_stopped (GDB_SIGNAL_0);
 
-	    thread_info *thread = find_thread_ptid (proc_target, event_ptid);
+	    thread_info *thread = proc_target->find_thread (event_ptid);
 	    if (thread == nullptr)
 	      {
 		/* Silently create new GPU threads to avoid spamming the

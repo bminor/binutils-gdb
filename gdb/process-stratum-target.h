@@ -108,6 +108,9 @@ public:
   thread_info *random_resumed_with_pending_wait_status
     (inferior *inf, ptid_t filter_ptid);
 
+  /* Search function to lookup a (non-exited) thread by 'ptid'.  */
+  thread_info *find_thread (ptid_t ptid);
+
   /* The connection number.  Visible in "info connections".  */
   int connection_number = 0;
 

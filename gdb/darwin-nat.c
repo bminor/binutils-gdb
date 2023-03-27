@@ -360,7 +360,7 @@ darwin_nat_target::check_new_threads (inferior *inf)
 	{
 	  /* A thread was removed.  */
 	  struct thread_info *thr
-	    = find_thread_ptid (this, ptid_t (inf->pid, 0, old_id));
+	    = this->find_thread (ptid_t (inf->pid, 0, old_id));
 	  delete_thread (thr);
 	  kret = mach_port_deallocate (gdb_task, old_id);
 	  MACH_CHECK_ERROR (kret);

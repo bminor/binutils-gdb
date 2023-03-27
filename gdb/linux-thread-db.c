@@ -422,7 +422,7 @@ thread_from_lwp (thread_info *stopped, ptid_t ptid)
 	   thread_db_err_str (err));
 
   /* Fill the cache.  */
-  tp = find_thread_ptid (stopped->inf->process_target (), ptid);
+  tp = stopped->inf->process_target ()->find_thread (ptid);
   return record_thread (info, tp, ptid, &th, &ti);
 }
 
@@ -439,7 +439,7 @@ thread_db_notice_clone (ptid_t parent, ptid_t child)
   if (info == NULL)
     return 0;
 
-  thread_info *stopped = find_thread_ptid (linux_target, parent);
+  thread_info *stopped = linux_target->find_thread (parent);
 
   thread_from_lwp (stopped, child);
 
@@ -685,7 +685,7 @@ check_thread_db_callback (const td_thrhandle_t *th, void *arg)
      to how GDB accesses TLS could result in this passing
      without exercising the calls it's supposed to.  */
   ptid_t ptid = ptid_t (tdb_testinfo->info->pid, ti.ti_lid);
-  thread_info *thread_info = find_thread_ptid (linux_target, ptid);
+  thread_info *thread_info = linux_target->find_thread (ptid);
   if (thread_info != NULL && thread_info->priv != NULL)
     {
       LOG ("; errno");
@@ -1417,7 +1417,7 @@ thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     return ptid;
 
   /* Fill in the thread's user-level thread id and status.  */
-  thread_from_lwp (find_thread_ptid (beneath, ptid), ptid);
+  thread_from_lwp (beneath->find_thread (ptid), ptid);
 
   return ptid;
 }
@@ -1511,7 +1511,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
     }
 
   ptid_t ptid (info->pid, ti.ti_lid);
-  tp = find_thread_ptid (info->process_target, ptid);
+  tp = info->process_target->find_thread (ptid);
   if (tp == NULL || tp->priv == NULL)
     record_thread (info, tp, ptid, th_p, &ti);
 
@@ -1751,7 +1751,7 @@ thread_db_target::get_thread_local_address (ptid_t ptid,
   process_stratum_target *beneath
     = as_process_stratum_target (this->beneath ());
   /* Find the matching thread.  */
-  thread_info = find_thread_ptid (beneath, ptid);
+  thread_info = beneath->find_thread (ptid);
 
   /* We may not have discovered the thread yet.  */
   if (thread_info != NULL && thread_info->priv == NULL)

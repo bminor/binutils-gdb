@@ -1015,7 +1015,7 @@ mi_on_resume (ptid_t ptid)
   if (ptid == minus_one_ptid || ptid.is_pid ())
     tp = inferior_thread ();
   else
-    tp = find_thread_ptid (target, ptid);
+    tp = target->find_thread (ptid);
 
   /* Suppress output while calling an inferior function.  */
   if (tp->control.in_infcall)

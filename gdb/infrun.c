@@ -876,7 +876,7 @@ follow_fork ()
 	    /* If we followed the child, switch to it...  */
 	    if (follow_child)
 	      {
-		tp = find_thread_ptid (parent_targ, child);
+		tp = parent_targ->find_thread (child);
 		switch_to_thread (tp);
 
 		/* ... and preserve the stepping state, in case the
@@ -5116,7 +5116,7 @@ handle_one (const wait_one_event &event)
 	}
       else
 	{
-	  t = find_thread_ptid (event.target, event.ptid);
+	  t = event.target->find_thread (event.ptid);
 	  /* Check if this is the first time we see this thread.
 	     Don't bother adding if it individually exited.  */
 	  if (t == nullptr
@@ -5137,7 +5137,7 @@ handle_one (const wait_one_event &event)
     }
   else
     {
-      thread_info *t = find_thread_ptid (event.target, event.ptid);
+      thread_info *t = event.target->find_thread (event.ptid);
       if (t == nullptr)
 	t = add_thread (event.target, event.ptid);
 
@@ -5538,7 +5538,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   if (ecs->ws.kind () != TARGET_WAITKIND_EXITED
       && ecs->ws.kind () != TARGET_WAITKIND_SIGNALLED)
     {
-      ecs->event_thread = find_thread_ptid (ecs->target, ecs->ptid);
+      ecs->event_thread = ecs->target->find_thread (ecs->ptid);
       /* If it's a new thread, add it to the thread database.  */
       if (ecs->event_thread == nullptr)
 	ecs->event_thread = add_thread (ecs->target, ecs->ptid);
@@ -5687,7 +5687,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   need to have access to the just-exited thread.  That is the
 	   case of GNU/Linux's "checkpoint" support, for example.
 	   Call the switch_to_xxx routine as appropriate.  */
-	thread_info *thr = find_thread_ptid (ecs->target, ecs->ptid);
+	thread_info *thr = ecs->target->find_thread (ecs->ptid);
 	if (thr != nullptr)
 	  switch_to_thread (thr);
 	else
@@ -5874,7 +5874,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* Note that one of these may be an invalid pointer,
 	     depending on detach_fork.  */
 	  thread_info *parent = ecs->event_thread;
-	  thread_info *child = find_thread_ptid (targ, ecs->ws.child_ptid ());
+	  thread_info *child = targ->find_thread (ecs->ws.child_ptid ());
 
 	  /* At this point, the parent is marked running, and the
 	     child is marked stopped.  */

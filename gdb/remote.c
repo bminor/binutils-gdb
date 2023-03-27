@@ -2783,7 +2783,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
 
-  thread_info *tp = find_thread_ptid (this, currthread);
+  thread_info *tp = this->find_thread (currthread);
   if (tp != NULL && tp->state == THREAD_EXITED)
     {
       /* We're seeing an event on a thread id we knew had exited.
@@ -2875,7 +2875,7 @@ get_remote_thread_info (thread_info *thread)
 static remote_thread_info *
 get_remote_thread_info (remote_target *target, ptid_t ptid)
 {
-  thread_info *thr = find_thread_ptid (target, ptid);
+  thread_info *thr = target->find_thread (ptid);
   return get_remote_thread_info (thr);
 }
 
@@ -4175,7 +4175,7 @@ remote_target::update_thread_list ()
 
 	      remote_notice_new_inferior (item.ptid, executing);
 
-	      thread_info *tp = find_thread_ptid (this, item.ptid);
+	      thread_info *tp = this->find_thread (item.ptid);
 	      remote_thread_info *info = get_remote_thread_info (tp);
 	      info->core = item.core;
 	      info->extra = std::move (item.extra);
@@ -4771,7 +4771,7 @@ remote_target::process_initial_stop_replies (int from_tty)
       if (ignore_event)
 	continue;
 
-      thread_info *evthread = find_thread_ptid (this, event_ptid);
+      thread_info *evthread = this->find_thread (event_ptid);
 
       if (ws.kind () == TARGET_WAITKIND_STOPPED)
 	{
@@ -5123,7 +5123,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 		}
 	    }
 	  else
-	    switch_to_thread (find_thread_ptid (this, curr_thread));
+	    switch_to_thread (this->find_thread (curr_thread));
 	}
 
       /* init_wait_for_inferior should be called before get_offsets in order
@@ -6192,7 +6192,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
       remote_detach_pid (reply->ws.child_ptid ().pid ());
     }
 
-  thread_info *tp = find_thread_ptid (this, inferior_ptid);
+  thread_info *tp = this->find_thread (inferior_ptid);
 
   /* Check to see if we are detaching a fork parent.  Note that if we
      are detaching a fork child, tp == NULL.  */
@@ -6502,10 +6502,10 @@ remote_target::append_resumption (char *p, char *endp,
 	{
 	  /* If we don't know about the target thread's tid, then
 	     we're resuming magic_null_ptid (see caller).  */
-	  tp = find_thread_ptid (this, magic_null_ptid);
+	  tp = this->find_thread (magic_null_ptid);
 	}
       else
-	tp = find_thread_ptid (this, ptid);
+	tp = this->find_thread (ptid);
       gdb_assert (tp != NULL);
 
       if (tp->control.may_range_step)
@@ -13964,7 +13964,7 @@ remote_target::set_disconnected_tracing (int val)
 int
 remote_target::core_of_thread (ptid_t ptid)
 {
-  thread_info *info = find_thread_ptid (this, ptid);
+  thread_info *info = this->find_thread (ptid);
 
   if (info != NULL && info->priv != NULL)
     return get_remote_thread_info (info)->core;

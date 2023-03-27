@@ -3576,9 +3576,7 @@ aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
     {
       /* If we do have an inferior, attempt to fetch its thread's thread_info
 	 struct.  */
-      thread_info *thread
-	= find_thread_ptid (current_inferior ()->process_target (),
-			    inferior_ptid);
+      thread_info *thread = current_inferior ()->find_thread (inferior_ptid);
 
       /* If the thread is running, we will not be able to fetch the mask
 	 registers.  */

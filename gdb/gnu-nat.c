@@ -2186,8 +2186,7 @@ gnu_nat_target::attach (const char *args, int from_tty)
 
   inf_update_procs (inf);
 
-  thread_info *thr
-    = find_thread_ptid (this, ptid_t (pid, inf_pick_first_thread ()));
+  thread_info *thr = this->find_thread (ptid_t (pid, inf_pick_first_thread ()));
   switch_to_thread (thr);
 
   /* We have to initialize the terminal settings now, since the code

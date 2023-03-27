@@ -1396,7 +1396,7 @@ enum record_method
 record_btrace_target::record_method (ptid_t ptid)
 {
   process_stratum_target *proc_target = current_inferior ()->process_target ();
-  thread_info *const tp = find_thread_ptid (proc_target, ptid);
+  thread_info *const tp = proc_target->find_thread (ptid);
 
   if (tp == NULL)
     error (_("No thread."));
@@ -1548,7 +1548,7 @@ record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
   /* Thread-db may ask for a thread's registers before GDB knows about the
      thread.  We forward the request to the target beneath in this
      case.  */
-  thread_info *tp = find_thread_ptid (regcache->target (), regcache->ptid ());
+  thread_info *tp = regcache->target ()->find_thread (regcache->ptid ());
   if (tp != nullptr)
     replay =  tp->btrace.replay;
 

@@ -2118,7 +2118,7 @@ wait_again:
 		    if (print_thread_events)
 		      gdb_printf (_("[%s exited]\n"),
 				  target_pid_to_str (retval).c_str ());
-		    delete_thread (find_thread_ptid (this, retval));
+		    delete_thread (this->find_thread (retval));
 		    target_continue_no_signal (ptid);
 		    goto wait_again;
 		  }
@@ -2225,7 +2225,7 @@ wait_again:
 		    if (print_thread_events)
 		      gdb_printf (_("[%s exited]\n"),
 				  target_pid_to_str (retval).c_str ());
-		    delete_thread (find_thread_ptid (this, retval));
+		    delete_thread (this->find_thread (retval));
 		    status->set_spurious ();
 		    return retval;
 		  }
@@ -2854,7 +2854,7 @@ procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
 {
   ptid_t gdb_threadid = ptid_t (pi->pid, thread->tid, 0);
 
-  thread_info *thr = find_thread_ptid (&the_procfs_target, gdb_threadid);
+  thread_info *thr = the_procfs_target.find_thread (gdb_threadid);
   if (thr == NULL || thr->state == THREAD_EXITED)
     add_thread (&the_procfs_target, gdb_threadid);
 
