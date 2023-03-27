@@ -1261,7 +1261,7 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
       wptid = fbsd_next_vfork_done ();
       if (wptid != null_ptid)
 	{
-	  ourstatus->kind = TARGET_WAITKIND_VFORK_DONE;
+	  ourstatus->set_vfork_done ();
 	  return wptid;
 	}
 #endif
