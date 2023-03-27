@@ -69,7 +69,7 @@ static const char number_regex_text[] =
 #define INT_TEXT 5
 #define INT_TYPE 6
   "(0x[a-fA-F0-9_]+|0o[0-7_]+|0b[01_]+|[0-9][0-9_]*)"
-  "([iu](size|8|16|32|64))?"
+  "([iu](size|8|16|32|64|128))?"
   ")";
 /* The number of subexpressions to allocate space for, including the
    "0th" whole match subexpression.  */
@@ -126,7 +126,7 @@ enum token_type : int
 
 struct typed_val_int
 {
-  ULONGEST val;
+  gdb_mpz val;
   struct type *type;
 };
 
@@ -1007,7 +1007,6 @@ rust_parser::lex_number ()
   /* Parse the number.  */
   if (is_integer)
     {
-      uint64_t value;
       int radix = 10;
       int offset = 0;
 
@@ -1026,14 +1025,22 @@ rust_parser::lex_number ()
 	    }
 	}
 
-      const char *trailer;
-      value = strtoulst (number.c_str () + offset, &trailer, radix);
-      if (*trailer != '\0')
-	error (_("Integer literal is too large"));
-      if (implicit_i32 && value >= ((uint64_t) 1) << 31)
-	type = get_type ("i64");
+      if (!current_int_val.val.set (number.c_str () + offset, radix))
+	{
+	  /* Shouldn't be possible.  */
+	  error (_("Invalid integer"));
+	}
+      if (implicit_i32)
+	{
+	  static gdb_mpz sixty_three_bit = gdb_mpz::pow (2, 63);
+	  static gdb_mpz thirty_one_bit = gdb_mpz::pow (2, 31);
 
-      current_int_val.val = value;
+	  if (current_int_val.val >= sixty_three_bit)
+	    type = get_type ("i128");
+	  else if (current_int_val.val >= thirty_one_bit)
+	    type = get_type ("i64");
+	}
+
       current_int_val.type = type;
     }
   else
@@ -1556,9 +1563,11 @@ rust_parser::parse_field (operation_up &&lhs)
       break;
 
     case DECIMAL_INTEGER:
-      result = make_operation<rust_struct_anon> (current_int_val.val,
-						 std::move (lhs));
-      lex ();
+      {
+	int idx = current_int_val.val.as_integer<int> ();
+	result = make_operation<rust_struct_anon> (idx, std::move (lhs));
+	lex ();
+      }
       break;
 
     case INTEGER:
@@ -1659,7 +1668,7 @@ rust_parser::parse_array_type ()
 
   if (current_token != INTEGER && current_token != DECIMAL_INTEGER)
     error (_("integer expected"));
-  ULONGEST val = current_int_val.val;
+  ULONGEST val = current_int_val.val.as_integer<ULONGEST> ();
   lex ();
   require (']');
 

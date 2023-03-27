@@ -108,9 +108,10 @@ proc parse_number { lang n } {
 	    return [list "i32" $n]
 	} elseif { [fits_in_type $n 64 s] } {
 	    return [list "i64" $n]
-	} elseif { [fits_in_type $n 64 u] } {
-	    # Note: Interprets MAX_U64 as -1.
-	    return [list "i64" $n]
+	} elseif { [fits_in_type $n 128 u] } {
+	    return [list "i128" $n]
+	} elseif { [fits_in_type $n 128 u] } {
+	    return [list "i128" $n]
 	} else {
 	    # Overflow.
 	    return [list $re_overflow $re_overflow]

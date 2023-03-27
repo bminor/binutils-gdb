@@ -64,3 +64,7 @@ gdb_test "print x >> 2" "= 85070591730234615865843651857942052863"
 gdb_test "print/x x & mask" " = 0xf0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"
 gdb_test "print/x x ^ mask" " = 0xf0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
 gdb_test "print/x mask | (mask >> 4)" " = 0xffffffffffffffffffffffffffffffff"
+
+gdb_test "print 170141183460469231731687303715884105727" \
+    " = 170141183460469231731687303715884105727"
+gdb_test "ptype 23i128" "type = i128"
