@@ -67,6 +67,7 @@ set lib_basename ${::gdb_test_file_name}-lib
 # which will be ${srcfile3} after the execution of standard_testfile.
 
 standard_testfile $main_basename.c $lib_basename.c $lib_basename.S
+include_file locexpr-data-member-location.h
 
 set libsrc "${::srcdir}/${::subdir}/${::srcfile2}"
 set lib_so [standard_output_file ${lib_basename}.so]
