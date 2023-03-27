@@ -451,7 +451,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       /* See if we have a new thread.  */
       if (rtnval.tid_p ())
 	{
-	  thread_info *thr = find_thread_ptid (current_inferior (), rtnval);
+	  thread_info *thr = current_inferior ()->find_thread (rtnval);
 	  if (thr == NULL || thr->state == THREAD_EXITED)
 	    {
 	      process_stratum_target *proc_target
@@ -1003,7 +1003,7 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
     return -1;
 
   ptid_t ptid = ptid_t (current_inferior ()->pid, 0, ti.ti_tid);
-  thread_info *thr = find_thread_ptid (current_inferior (), ptid);
+  thread_info *thr = current_inferior ()->find_thread (ptid);
   if (thr == NULL || thr->state == THREAD_EXITED)
     {
       process_stratum_target *proc_target

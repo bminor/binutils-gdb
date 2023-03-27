@@ -1655,7 +1655,7 @@ thread_db_target::update_thread_list ()
 std::string
 thread_db_target::pid_to_str (ptid_t ptid)
 {
-  thread_info *thread_info = find_thread_ptid (current_inferior (), ptid);
+  thread_info *thread_info = current_inferior ()->find_thread (ptid);
 
   if (thread_info != NULL && thread_info->priv != NULL)
     {

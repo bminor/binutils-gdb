@@ -672,9 +672,6 @@ extern bool in_thread_list (process_stratum_target *targ, ptid_t ptid);
    global id, not the system's).  */
 extern int valid_global_thread_id (int global_id);
 
-/* Find (non-exited) thread PTID of inferior INF.  */
-extern thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
-
 /* Search function to lookup a (non-exited) thread by 'ptid'.  */
 extern struct thread_info *find_thread_ptid (process_stratum_target *targ,
 					     ptid_t ptid);

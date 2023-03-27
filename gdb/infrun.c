@@ -646,7 +646,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
      The former case will have pending_follow cleared, the later will have
      pending_follow set.  */
-  thread_info *parent_thread = find_thread_ptid (parent_inf, parent_ptid);
+  thread_info *parent_thread = parent_inf->find_thread (parent_ptid);
   gdb_assert (parent_thread != nullptr);
   parent_thread->pending_follow.set_spurious ();
 
@@ -3761,7 +3761,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
 			   ptid.to_string ().c_str ());
 
       /* We have a specific thread to check.  */
-      tp = find_thread_ptid (inf, ptid);
+      tp = inf->find_thread (ptid);
       gdb_assert (tp != nullptr);
       if (!tp->has_pending_waitstatus ())
 	tp = nullptr;

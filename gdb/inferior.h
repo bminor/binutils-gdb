@@ -490,6 +490,9 @@ public:
   inline safe_inf_threads_range threads_safe ()
   { return safe_inf_threads_range (this->thread_list.begin ()); }
 
+  /* Find (non-exited) thread PTID of this inferior.  */
+  thread_info *find_thread (ptid_t ptid);
+
   /* Delete all threads in the thread list.  If SILENT, exit threads
      silently.  */
   void clear_thread_list (bool silent);

@@ -452,7 +452,7 @@ ravenscar_thread_target::wait (ptid_t ptid,
 void
 ravenscar_thread_target::add_thread (struct ada_task_info *task)
 {
-  if (find_thread_ptid (current_inferior (), task->ptid) == NULL)
+  if (current_inferior ()->find_thread (task->ptid) == NULL)
     {
       ::add_thread (current_inferior ()->process_target (), task->ptid);
       m_cpu_map[task->ptid.tid ()] = task->base_cpu;

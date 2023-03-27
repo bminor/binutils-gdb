@@ -3246,7 +3246,7 @@ maint_btrace_packet_history_cmd (const char *arg, int from_tty)
   struct btrace_thread_info *btinfo;
   unsigned int size, begin, end, from, to;
 
-  thread_info *tp = find_thread_ptid (current_inferior (), inferior_ptid);
+  thread_info *tp = current_inferior ()->find_thread (inferior_ptid);
   if (tp == NULL)
     error (_("No thread."));
 

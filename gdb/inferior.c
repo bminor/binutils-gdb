@@ -216,6 +216,18 @@ add_inferior (int pid)
 
 /* See inferior.h.  */
 
+thread_info *
+inferior::find_thread (ptid_t ptid)
+{
+  auto it = this->ptid_thread_map.find (ptid);
+  if (it != this->ptid_thread_map.end ())
+    return it->second;
+  else
+    return nullptr;
+}
+
+/* See inferior.h.  */
+
 void
 inferior::clear_thread_list (bool silent)
 {

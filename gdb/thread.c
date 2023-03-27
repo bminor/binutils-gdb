@@ -221,7 +221,7 @@ set_thread_exited (thread_info *tp, bool silent)
       clear_thread_inferior_resources (tp);
 
       /* Remove from the ptid_t map.  We don't want for
-	 find_thread_ptid to find exited threads.  Also, the target
+	 inferior::find_thread to find exited threads.  Also, the target
 	 may reuse the ptid for a new thread, and there can only be
 	 one value per key; adding a new thread with the same ptid_t
 	 would overwrite the exited thread's ptid entry.  */
@@ -275,7 +275,7 @@ add_thread_silent (process_stratum_target *targ, ptid_t ptid)
      If we do, it must be dead, otherwise we wouldn't be adding a new
      thread with the same id.  The OS is reusing this id --- delete
      the old thread, and create a new one.  */
-  thread_info *tp = find_thread_ptid (inf, ptid);
+  thread_info *tp = inf->find_thread (ptid);
   if (tp != nullptr)
     delete_thread (tp);
 
@@ -520,21 +520,7 @@ find_thread_ptid (process_stratum_target *targ, ptid_t ptid)
   inferior *inf = find_inferior_ptid (targ, ptid);
   if (inf == NULL)
     return NULL;
-  return find_thread_ptid (inf, ptid);
-}
-
-/* See gdbthread.h.  */
-
-struct thread_info *
-find_thread_ptid (inferior *inf, ptid_t ptid)
-{
-  gdb_assert (inf != nullptr);
-
-  auto it = inf->ptid_thread_map.find (ptid);
-  if (it != inf->ptid_thread_map.end ())
-    return it->second;
-  else
-    return nullptr;
+  return inf->find_thread (ptid);
 }
 
 /* See gdbthread.h.  */
@@ -802,7 +788,7 @@ thread_change_ptid (process_stratum_target *targ,
   inf = find_inferior_ptid (targ, old_ptid);
   inf->pid = new_ptid.pid ();
 
-  tp = find_thread_ptid (inf, old_ptid);
+  tp = inf->find_thread (old_ptid);
   gdb_assert (tp != nullptr);
 
   int num_erased = inf->ptid_thread_map.erase (old_ptid);

@@ -1177,7 +1177,7 @@ print_ada_task_info (struct ui_out *uiout,
       if (uiout->is_mi_like_p ())
 	{
 	  thread_info *thread = (ada_task_is_alive (task_info)
-				 ? find_thread_ptid (inf, task_info->ptid)
+				 ? inf->find_thread (task_info->ptid)
 				 : nullptr);
 
 	  if (thread != NULL)
@@ -1393,7 +1393,7 @@ task_command_1 (const char *taskno_str, int from_tty, struct inferior *inf)
      computed if target_get_ada_task_ptid has not been implemented for
      our target (yet).  Rather than cause an assertion error in that case,
      it's nicer for the user to just refuse to perform the task switch.  */
-  thread_info *tp = find_thread_ptid (inf, task_info->ptid);
+  thread_info *tp = inf->find_thread (task_info->ptid);
   if (tp == NULL)
     error (_("Unable to compute thread ID for task %s.\n"
 	     "Cannot switch to this task."),
@@ -1577,7 +1577,7 @@ task_apply_all_command (const char *cmd, int from_tty)
       if (!ada_task_is_alive (&task))
 	continue;
 
-      thread_info *tp = find_thread_ptid (inf, task.ptid);
+      thread_info *tp = inf->find_thread (task.ptid);
       if (tp == nullptr)
 	warning (_("Unable to compute thread ID for task %s.\n"
 		   "Cannot switch to this task."),
@@ -1627,7 +1627,7 @@ task_apply_command (const char *tidlist, int from_tty)
 	  if (!ada_task_is_alive (&task))
 	    continue;
 
-	  thread_info *tp = find_thread_ptid (inf, task.ptid);
+	  thread_info *tp = inf->find_thread (task.ptid);
 	  if (tp == nullptr)
 	    warning (_("Unable to compute thread ID for task %s.\n"
 		       "Cannot switch to this task."),

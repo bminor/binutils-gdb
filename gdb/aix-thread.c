@@ -1172,7 +1172,7 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     }
   else
     {
-      thread = find_thread_ptid (current_inferior (), ptid);
+      thread = current_inferior ()->find_thread (ptid);
       if (!thread)
 	error (_("aix-thread resume: unknown pthread %ld"),
 	       ptid.lwp ());
@@ -1566,7 +1566,7 @@ aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
     beneath ()->fetch_registers (regcache, regno);
   else
     {
-      thread = find_thread_ptid (current_inferior (), regcache->ptid ());
+      thread = current_inferior ()->find_thread (regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
       tid = priv->tid;
 
@@ -2032,7 +2032,7 @@ aix_thread_target::store_registers (struct regcache *regcache, int regno)
     beneath ()->store_registers (regcache, regno);
   else
     {
-      thread = find_thread_ptid (current_inferior (), regcache->ptid ());
+      thread = current_inferior ()->find_thread (regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
       tid = priv->tid;
 
