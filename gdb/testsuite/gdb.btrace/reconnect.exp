@@ -27,6 +27,8 @@ if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
     return -1
 }
 
+set target_binfile [gdb_remote_download target $binfile]
+
 # Make sure we're disconnected and no recording is active, in case
 # we're testing with an extended-remote board, therefore already
 # connected.
@@ -37,7 +39,7 @@ with_test_prefix "preparation" {
 
 # Start fresh gdbserver.
 set gdbserver_reconnect_p 1
-set res [gdbserver_start "" $binfile]
+set res [gdbserver_start "" $target_binfile]
 set gdbserver_protocol [lindex $res 0]
 set gdbserver_gdbport [lindex $res 1]
 gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport
