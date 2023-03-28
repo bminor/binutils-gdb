@@ -273,7 +273,8 @@ proc test_stepping {} {
     global gdb_prompt
 
     if {[runto marker1]} {
-	gdb_test "watch ival2" ".*\[Ww\]atchpoint \[0-9\]*: ival2"
+	gdb_test "watch ival2" \
+	    "^watch ival2\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]*: ival2"
 
 	# Well, let's not be too mundane.  It should be a *bit* of a challenge
 	gdb_test "break func2 if 0" "Breakpoint.*at.*"
@@ -432,7 +433,8 @@ proc test_complex_watchpoint {} {
     global gdb_prompt
 
     if {[runto marker4]} {
-	gdb_test "watch ptr1->val" ".*\[Ww\]atchpoint \[0-9\]*: ptr1->val"
+	gdb_test "watch ptr1->val" \
+	    "^watch ptr1->val\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]*: ptr1->val"
 	gdb_test "break marker5" ".*Breakpoint.*"
 
 	gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ptr1->val.*Old value = 1.*New value = 2.*" "test complex watchpoint"
@@ -458,7 +460,9 @@ proc test_complex_watchpoint {} {
         # is the function we're now in.  This should auto-delete when
         # execution exits the scope of the watchpoint.
         #
-        gdb_test "watch local_a" ".*\[Ww\]atchpoint \[0-9\]*: local_a" "set local watch"
+	gdb_test "watch local_a" \
+	    "^watch local_a\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]*: local_a" \
+	    "set local watch"
         gdb_test "cont" "\[Ww\]atchpoint.*local_a.*" "trigger local watch"
 
 	set test "self-delete local watch"
@@ -487,7 +491,8 @@ proc test_complex_watchpoint {} {
         # something whose scope is larger than this invocation
         # of "func2".  This should also auto-delete.
         #
-        gdb_test "watch local_a + ival5" ".*\[Ww\]atchpoint \[0-9\]*: local_a . ival5" \
+	gdb_test "watch local_a + ival5" \
+	    "^watch local_a \\+ ival5\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]*: local_a . ival5" \
                  "set partially local watch"
         gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_a . ival5.*" \
                  "trigger1 partially local watch"
@@ -502,7 +507,8 @@ proc test_complex_watchpoint {} {
         # delete.
         #
 	gdb_continue_to_breakpoint "func2 breakpoint here, third time"
-        gdb_test "watch static_b" ".*\[Ww\]atchpoint \[0-9\]*: static_b" \
+	gdb_test "watch static_b" \
+	    "^watch static_b\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]*: static_b" \
                  "set static local watch"
         gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: static_b.*" \
                  "trigger static local watch"
@@ -521,7 +527,8 @@ proc test_complex_watchpoint {} {
 	    gdb_test "tbreak recurser" ".*breakpoint.*"
 	    gdb_test "cont" "Continuing.*recurser.*"
 	    gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
-	    gdb_test "watch local_x" ".*\[Ww\]atchpoint \[0-9\]*: local_x" \
+	    gdb_test "watch local_x" \
+		"^watch local_x\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]*: local_x" \
 		"set local watch in recursive call"
 	    gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_x.*New value = 2.*" \
 		"trigger local watch in recursive call"
@@ -536,7 +543,8 @@ proc test_complex_watchpoint {} {
 	    gdb_test "tbreak recurser" ".*breakpoint.*"
 	    gdb_test "cont" "Continuing.*recurser.*" "continue to recurser"
 	    gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
-	    gdb_test "watch recurser::local_x" ".*\[Ww\]atchpoint \[0-9\]*: recurser::local_x" \
+	    gdb_test "watch recurser::local_x" \
+		"^watch recurser::local_x\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]*: recurser::local_x" \
 		"set local watch in recursive call with explicit scope"
 	    gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: recurser::local_x.*New value = 2.*" \
 		"trigger local watch with explicit scope in recursive call"
@@ -562,7 +570,8 @@ proc test_watchpoint_and_breakpoint {} {
     if {[runto func3]} {
 	gdb_breakpoint [gdb_get_line_number "second x assignment"]
 	gdb_continue_to_breakpoint "second x assignment"
-	gdb_test "watch x" ".*atchpoint \[0-9\]+: x"
+	gdb_test "watch x" \
+	    "^watch x\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]+: x"
 	gdb_test "next" \
 	    ".*atchpoint \[0-9\]+: x\r\n\r\nOld value = 0\r\nNew value = 1\r\n.*" \
 	    "next after watch x"
@@ -579,7 +588,8 @@ proc test_constant_watchpoint {} {
     "marker1 is constant"
     gdb_test "watch count + 6" ".*atchpoint \[0-9\]+: count \\+ 6"
     gdb_test_no_output "delete \$bpnum" "delete watchpoint `count + 6'"
-    gdb_test "watch 7 + count" ".*atchpoint \[0-9\]+: 7 \\+ count"
+    gdb_test "watch 7 + count" \
+	"^watch 7 \\+ count\r\n\[^\r\n\]*atchpoint \[0-9\]+: 7 \\+ count"
     gdb_test_no_output "delete \$bpnum" "delete watchpoint `7 + count'"
 }
 
@@ -588,7 +598,7 @@ proc test_disable_enable_software_watchpoint {} {
     # for software watchpoints.
 
     # Watch something not memory to force a software watchpoint.
-    gdb_test {watch $pc} ".*atchpoint \[0-9\]+: .pc"
+    gdb_test {watch $pc} "^watch \\\$pc\r\n\[^\r\n\]*\[Ww\]atchpoint \[0-9\]+: .pc"
 
     gdb_test_no_output "disable \$bpnum" "disable watchpoint `\$pc'"
     gdb_test_no_output "enable \$bpnum" "reenable watchpoint `\$pc'"
@@ -822,7 +832,7 @@ proc test_no_hw_watchpoints {} {
 	"show disable fast watches"
 
     gdb_test "watch ival3 if  count > 1" \
-	"Watchpoint \[0-9\]*: ival3.*" \
+	"^watch ival3 if  count > 1\r\nWatchpoint \[0-9\]*: ival3.*" \
 	"set slow conditional watch"
 
     gdb_test "continue" \
@@ -832,7 +842,7 @@ proc test_no_hw_watchpoints {} {
     gdb_test_no_output "delete \$bpnum" "delete watch ival3"
 
     gdb_test "watch ival3 if  count > 1  thread 1 " \
-         "Watchpoint \[0-9\]*: ival3.*" \
+	"watch ival3 if  count > 1  thread 1 \r\nWatchpoint \[0-9\]*: ival3.*" \
          "set slow condition watch w/thread"
 
     gdb_test_no_output "delete \$bpnum" "delete watch w/condition and thread"
