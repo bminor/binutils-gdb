@@ -28,11 +28,16 @@ if {[build_executable "failed to prepare" $testfile $srcfile "additional_flags=-
 }
 
 set target_binfile [gdb_remote_download target $binfile]
+set host_binfile [gdb_remote_download host $binfile]
 
 # Run once with sysroot set to the local filesystem and once set to the remote
 # target.
 set modes {}
-if { ![is_remote target] } {
+if { ( ![is_remote host] && ![is_remote target ] )
+     || [board_info host name] == [board_info target name] } {
+    # Local means that gdb and gdbserver look at the same file system.  That's
+    # not the case for remote host or remote target, unless
+    # remote host == remote target.
     lappend modes "local"
 }
 lappend modes "remote"
@@ -44,7 +49,7 @@ foreach_with_prefix sysroot $modes {
 
     if { $sysroot == "local" } {
 	set sysroot_command "/"
-	set reading_symbols "Reading symbols from $binfile..."
+	set reading_symbols "Reading symbols from $host_binfile..."
 	set timeout_factor 1
     } else {
 	set sysroot_command "target:"
