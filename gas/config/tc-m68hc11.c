@@ -643,7 +643,7 @@ md_begin (void)
          (int (*) (const void*, const void*)) cmp_opcode);
 
   opc = XNEWVEC (struct m68hc11_opcode_def, num_opcodes);
-  m68hc11_opcode_defs = opc--;
+  m68hc11_opcode_defs = opc;
 
   /* Insert unique names into hash table.  The M6811 instruction set
      has several identical opcode names that have different opcodes based
@@ -655,19 +655,18 @@ md_begin (void)
 
       if (strcmp (prev_name, opcodes->name))
 	{
-	  prev_name = (char *) opcodes->name;
-
+	  prev_name = opcodes->name;
 	  opc++;
-	  opc->format = 0;
-	  opc->min_operands = 100;
-	  opc->max_operands = 0;
-	  opc->nb_modes = 0;
-	  opc->opcode = opcodes;
-	  opc->used = 0;
-	  str_hash_insert (m68hc11_hash, opcodes->name, opc, 0);
+	  (opc - 1)->format = 0;
+	  (opc - 1)->min_operands = 100;
+	  (opc - 1)->max_operands = 0;
+	  (opc - 1)->nb_modes = 0;
+	  (opc - 1)->opcode = opcodes;
+	  (opc - 1)->used = 0;
+	  str_hash_insert (m68hc11_hash, opcodes->name, opc - 1, 0);
 	}
-      opc->nb_modes++;
-      opc->format |= opcodes->format;
+      (opc - 1)->nb_modes++;
+      (opc - 1)->format |= opcodes->format;
 
       /* See how many operands this opcode needs.  */
       expect = 0;
@@ -700,14 +699,13 @@ md_begin (void)
 	    expect++;
 	}
 
-      if (expect < opc->min_operands)
-	opc->min_operands = expect;
+      if (expect < (opc - 1)->min_operands)
+	(opc - 1)->min_operands = expect;
       if (IS_CALL_SYMBOL (opcodes->format))
 	expect++;
-      if (expect > opc->max_operands)
-	opc->max_operands = expect;
+      if (expect > (opc - 1)->max_operands)
+	(opc - 1)->max_operands = expect;
     }
-  opc++;
   m68hc11_nb_opcode_defs = opc - m68hc11_opcode_defs;
 
   if (flag_print_opcodes)
