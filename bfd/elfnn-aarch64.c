@@ -2767,14 +2767,9 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
 
       /* Initialize the local fields.  */
       eh = (struct elf_aarch64_stub_hash_entry *) entry;
-      eh->adrp_offset = 0;
-      eh->stub_sec = NULL;
-      eh->stub_offset = 0;
-      eh->target_value = 0;
-      eh->target_section = NULL;
-      eh->stub_type = aarch64_stub_none;
-      eh->h = NULL;
-      eh->id_sec = NULL;
+      memset (&eh->stub_sec, 0,
+	      (sizeof (struct elf_aarch64_stub_hash_entry)
+	       - offsetof (struct elf_aarch64_stub_hash_entry, stub_sec)));
     }
 
   return entry;
