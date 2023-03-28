@@ -773,7 +773,8 @@ run_cc_link_tests [list \
 
 set exec_output [run_host_cmd "sh" \
 			      "-c \"ulimit -n 20; \
-			      $CC_FOR_TARGET -Btmpdir/ld -o tmpdir/pr28138 \
+			      $CC_FOR_TARGET $gcc_B_opt $CFLAGS_FOR_TARGET \
+			      $ld_L_opt -o tmpdir/pr28138 \
 			      tmpdir/pr28138.o tmpdir/pr28138.a\""]
 set exec_output [prune_warnings $exec_output]
 if [string match "" $exec_output] then {

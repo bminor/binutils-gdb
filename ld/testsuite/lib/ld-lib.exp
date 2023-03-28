@@ -467,7 +467,6 @@ proc run_ld_link_tests { ldtests args } {
     global subdir
     global env
     global CC_FOR_TARGET
-    global CFLAGS_FOR_TARGET
     global runtests
     global exec_output
 
@@ -534,7 +533,7 @@ proc run_ld_link_tests { ldtests args } {
 		set objfile "tmpdir/$fileroot.o"
 		if { [file extension $src_file] == ".c" } {
 		    set as_file "tmpdir/$fileroot.s"
-		    if ![ld_compile "$CC_FOR_TARGET -S $CFLAGS_FOR_TARGET $cflags" $srcdir/$subdir/$src_file $as_file] {
+		    if ![ld_compile "$CC_FOR_TARGET -S $cflags" $srcdir/$subdir/$src_file $as_file] {
 			set is_unsupported 1
 			break
 		    }
@@ -685,8 +684,6 @@ proc run_ld_link_exec_tests { ldtests args } {
     global env
     global CC_FOR_TARGET
     global CXX_FOR_TARGET
-    global CFLAGS_FOR_TARGET
-    global CXXFLAGS_FOR_TARGET
     global errcnt
     global exec_output
     global board_cflags
@@ -753,9 +750,9 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    lappend objfiles $objfile
 
 	    if { [ string match "c++" $lang ] } {
-		set cmd "$CXX_FOR_TARGET -c $CXXFLAGS_FOR_TARGET $cflags"
+		set cmd "$CXX_FOR_TARGET -c $cflags"
 	    } else {
-		set cmd "$CC_FOR_TARGET -c $CFLAGS_FOR_TARGET $cflags"
+		set cmd "$CC_FOR_TARGET -c $cflags"
 	    }
 	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
 		set failed 1
@@ -860,8 +857,6 @@ proc run_cc_link_tests { ldtests } {
     global env
     global CC_FOR_TARGET
     global CXX_FOR_TARGET
-    global CFLAGS_FOR_TARGET
-    global CXXFLAGS_FOR_TARGET
     global ar
     global exec_output
     global board_cflags
@@ -950,9 +945,9 @@ proc run_cc_link_tests { ldtests } {
 	    lappend objfiles $objfile
 
 	    if { [ string match "c++" $lang ] } {
-		set cmd "$CXX_FOR_TARGET -c $CXXFLAGS_FOR_TARGET $cflags"
+		set cmd "$CXX_FOR_TARGET -c $cflags"
 	    } else {
-		set cmd "$CC_FOR_TARGET -c $CFLAGS_FOR_TARGET $cflags"
+		set cmd "$CC_FOR_TARGET -c $cflags"
 	    }
 	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
 		set failed 1
