@@ -2470,29 +2470,41 @@ gdb_caching_proc can_compile { lang } {
 	return [gdb_can_simple_compile can_compile_$lang $src executable {d}]
     }
 
+    if { $lang == "rust" } {
+	if { ![isnative] } {
+	    return 0
+	}
+
+	if { [is_remote host] } {
+	    # Proc find_rustc returns "" for remote host.
+	    return 0
+	}
+
+	# The rust compiler does not support "-m32", skip.
+	global board board_info
+	set board [target_info name]
+	if {[board_info $board exists multilib_flags]} {
+	    foreach flag [board_info $board multilib_flags] {
+		if { $flag == "-m32" } {
+		    return 0
+		}
+	    }
+	}
+
+	set src { fn main() {} }
+	# Drop nowarnings in default_compile_flags, it translates to -w which
+	# rustc doesn't support.
+	return [gdb_can_simple_compile can_compile_$lang $src executable \
+		    {rust} {debug quiet}]
+    }
+
     error "can_compile doesn't support lang: $lang"
 }
 
 # Return 1 to try Rust tests, 0 to skip them.
 proc allow_rust_tests {} {
-    if { ![isnative] } {
+    if { ![can_compile rust] } {
 	return 0
-    }
-
-    if { [is_remote host] } {
-	# Proc find_rustc returns "" for remote host.
-	return 0
-    }
-
-    # The rust compiler does not support "-m32", skip.
-    global board board_info
-    set board [target_info name]
-    if {[board_info $board exists multilib_flags]} {
-	foreach flag [board_info $board multilib_flags] {
-	    if { $flag == "-m32" } {
-		return 0
-	    }
-	}
     }
 
     return 1
@@ -4620,11 +4632,12 @@ gdb_caching_proc universal_compile_options {} {
 }
 
 # Compile the code in $code to a file based on $name, using the flags
-# $compile_flag as well as debug, nowarning and quiet.
+# $compile_flag as well as debug, nowarning and quiet  (unless otherwise
+# specified in default_compile_flags).
 # Return 1 if code can be compiled
 # Leave the file name of the resulting object in the upvar object.
 
-proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}} {
+proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj} {default_compile_flags {}}} {
     upvar $object obj
 
     switch -regexp -- $type {
@@ -4658,7 +4671,11 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
     }
     set src [standard_temp_file $name.$ext]
     set obj [standard_temp_file $name.$postfix]
-    set compile_flags [concat $compile_flags {debug nowarnings quiet}]
+    if { $default_compile_flags == "" } {
+	set compile_flags [concat $compile_flags {debug nowarnings quiet}]
+    } else {
+	set compile_flags [concat $compile_flags $default_compile_flags]
+    }
 
     gdb_produce_source $src $code
 
@@ -4675,12 +4692,14 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
 }
 
 # Compile the code in $code to a file based on $name, using the flags
-# $compile_flag as well as debug, nowarning and quiet.
+# $compile_flag as well as debug, nowarning and quiet (unless otherwise
+# specified in default_compile_flags).
 # Return 1 if code can be compiled
 # Delete all created files and objects.
 
-proc gdb_can_simple_compile {name code {type object} {compile_flags ""}} {
-    set ret [gdb_simple_compile $name $code $type $compile_flags temp_obj]
+proc gdb_can_simple_compile {name code {type object} {compile_flags ""} {default_compile_flags ""}} {
+    set ret [gdb_simple_compile $name $code $type $compile_flags temp_obj \
+		 $default_compile_flags]
     file delete $temp_obj
     return $ret
 }
