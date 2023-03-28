@@ -83,7 +83,11 @@ proc ${board}_spawn { board cmd } {
     set RSH [board_info $board rsh_prog]
 
     spawn $RSH -t -l $username $remote $cmd
-    set board_info($board,fileid) $spawn_id
+
+    if { [string match "$::GDB*" $cmd] } {
+	set board_info($board,fileid) $spawn_id
+    }
+
     return $spawn_id
 }
 
