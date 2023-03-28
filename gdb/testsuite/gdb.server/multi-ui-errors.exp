@@ -25,6 +25,9 @@ load_lib gdbserver-support.exp
 standard_testfile
 
 require allow_gdbserver_tests
+# The test-case uses "spawn -pty", which creates a pty on build, which gdb
+# cannot use on remote host.
+require {!is_remote host}
 
 save_vars { GDBFLAGS } {
     # If GDB and GDBserver are both running locally, set the sysroot to avoid
