@@ -2539,12 +2539,13 @@ NAME (aout, bfd_free_cached_info) (bfd *abfd)
 {
   asection *o;
 
-  if (bfd_get_format (abfd) != bfd_object)
+  if (bfd_get_format (abfd) != bfd_object
+      || abfd->tdata.aout_data == NULL)
     return true;
 
 #define BFCI_FREE(x) do { free (x); x = NULL; } while (0)
+  BFCI_FREE (adata (abfd).line_buf);
   BFCI_FREE (obj_aout_symbols (abfd));
-
 #ifdef USE_MMAP
   obj_aout_external_syms (abfd) = 0;
   bfd_free_window (&obj_aout_sym_window (abfd));
