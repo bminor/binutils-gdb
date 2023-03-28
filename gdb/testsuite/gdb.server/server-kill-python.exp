@@ -31,6 +31,7 @@ if {[build_executable "failed to prepare" ${testfile} \
 }
 
 set target_binfile [gdb_remote_download target $binfile]
+set host_binfile [gdb_remote_download host $binfile]
 
 # Start gdbserver.
 set res [gdbserver_spawn "${target_binfile}"]
@@ -47,6 +48,7 @@ puts $fd \
 "import gdb
 
 def do_gdb_stuff ():
+    gdb.execute ('file $host_binfile')
     gdb.execute ('target $gdbserver_protocol $gdbserver_gdbport')
     gdb.execute ('break $srcfile:$break_linenr')
     gdb.execute ('continue')
@@ -56,10 +58,12 @@ def do_gdb_stuff ():
 do_gdb_stuff()"
 close $fd
 
+set host_file1 [gdb_remote_download host $file1]
+
 # Now start GDB, sourcing the python command file we generated above.
 # Set the height and width so we don't end up at a paging prompt.
 if {[gdb_spawn_with_cmdline_opts \
-	 "-quiet -iex \"set height 0\" -iex \"set width 0\" -ex \"source $file1\""] != 0} {
+	 "-quiet -iex \"set height 0\" -iex \"set width 0\" -ex \"source $host_file1\""] != 0} {
     fail "spawn"
     return
 }
