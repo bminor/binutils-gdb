@@ -17,6 +17,7 @@
 
 load_lib rust-support.exp
 require allow_rust_tests
+require {can_compile rust}
 
 standard_testfile .rs
 

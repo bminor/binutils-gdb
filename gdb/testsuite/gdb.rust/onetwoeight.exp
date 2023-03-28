@@ -17,6 +17,7 @@
 
 load_lib rust-support.exp
 require allow_rust_tests
+require {can_compile rust}
 
 set v [split [rust_compiler_version] .]
 if {[lindex $v 0] == 1 && [lindex $v 1] < 43} {

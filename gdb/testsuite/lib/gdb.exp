@@ -2503,10 +2503,6 @@ gdb_caching_proc can_compile { lang } {
 
 # Return 1 to try Rust tests, 0 to skip them.
 proc allow_rust_tests {} {
-    if { ![can_compile rust] } {
-	return 0
-    }
-
     return 1
 }
 

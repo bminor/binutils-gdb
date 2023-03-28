@@ -18,6 +18,7 @@
 load_lib gdb-python.exp
 load_lib rust-support.exp
 require allow_rust_tests allow_python_tests
+require {can_compile rust}
 
 standard_testfile .rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
