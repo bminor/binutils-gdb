@@ -2479,6 +2479,11 @@ proc allow_rust_tests {} {
 	return 0
     }
 
+    if { [is_remote host] } {
+	# Proc find_rustc returns "" for remote host.
+	return 0
+    }
+
     # The rust compiler does not support "-m32", skip.
     global board board_info
     set board [target_info name]
