@@ -31,6 +31,8 @@ if [prepare_for_testing "failed to prepare" $testfile {} {debug}] {
     return -1
 }
 
+set host_binfile [gdb_remote_download host $binfile]
+
 with_test_prefix "inferior 1" {
     if ![runto_main] {
 	return -1
@@ -38,7 +40,7 @@ with_test_prefix "inferior 1" {
 }
 
 with_test_prefix "inferior 2" {
-    gdb_test "add-inferior -exec ${binfile}" "Added inferior 2.*" \
+    gdb_test "add-inferior -exec $host_binfile" "Added inferior 2.*" \
 	"add second inferior"
     gdb_test "inferior 2" "Switching to inferior 2.*"
 
@@ -57,7 +59,7 @@ with_test_prefix "inferior 1" {
 }
 
 with_test_prefix "inferior 3" {
-    gdb_test "add-inferior -exec ${binfile}" "Added inferior 3.*" \
+    gdb_test "add-inferior -exec ${host_binfile}" "Added inferior 3.*" \
 	"add third inferior"
     gdb_test "inferior 3" "Switching to inferior 3.*"
 
