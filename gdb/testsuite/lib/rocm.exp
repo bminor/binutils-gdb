@@ -64,19 +64,19 @@ gdb_caching_proc allow_hipcc_tests {} {
     # testing against GDBserver, there's no point in running the ROCm
     # tests.
     if {[target_info gdb_protocol] != ""} {
-	return 0
+	return {0 "remote debugging"}
     }
 
     # Ensure that GDB is built with amd-dbgapi support.
     set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS --configuration"]
     if { [string first "--with-amd-dbgapi" $output] == -1 } {
-	return 0
+	return {0 "amd-dbgapi not supported"}
     }
 
     # Check we have a working hipcc compiler available.
     set targets [hcc_amdgpu_targets]
     if { [llength $targets] == 0} {
-	return 0
+	return {0 "no suitable amdgpu targets found"}
     }
 
     set flags [list hip additional_flags=--offload-arch=[join $targets ","]]
@@ -93,7 +93,7 @@ gdb_caching_proc allow_hipcc_tests {} {
 		return 0;
 	    }
 	} executable $flags]} {
-	return 0
+	return {0 "failed to compile hip program"}
     }
 
     return 1

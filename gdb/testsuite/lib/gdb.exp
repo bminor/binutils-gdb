@@ -9251,22 +9251,43 @@ gdb_caching_proc have_avx {} {
 #
 # ARG can either be a name, or of the form !NAME.
 #
-# Each name is a proc to evaluate in the caller's context.  It returns
-# a boolean, and a "!" means to invert the result.  If this is
-# nonzero, all is well.  If it is zero, an "untested" is emitted and
-# this proc causes the caller to return.
+# Each name is a proc to evaluate in the caller's context.  It can return a
+# boolean or a two element list with a boolean and a reason string.
+# A "!" means to invert the result.  If this is true, all is well.  If it is
+# false, an "unsupported" is emitted and this proc causes the caller to return.
+#
+# The reason string is used to provide some context about a require failure,
+# and is included in the "unsupported" message.
 
 proc require { args } {
     foreach arg $args {
 	if {[string index $arg 0] == "!"} {
-	    set ok 0
+	    set required_val 0
 	    set fn [string range $arg 1 end]
 	} else {
-	    set ok 1
+	    set required_val 1
 	    set fn $arg
 	}
-	if {$ok != !![uplevel 1 $fn]} {
-	    unsupported "require failed: $arg"
+
+	set result [uplevel 1 $fn]
+	set len [llength $result]
+	if { $len == 2 } {
+	    set actual_val [lindex $result 0]
+	    set msg [lindex $result 1]
+	} elseif { $len == 1 } {
+	    set actual_val $result
+	    set msg ""
+	} else {
+	    error "proc $fn returned a list of unexpected length $len"
+	}
+
+	if {$required_val != !!$actual_val} {
+	    if { [string length $msg] > 0 } {
+		unsupported "require failed: $arg ($msg)"
+	    } else {
+		unsupported "require failed: $arg"
+	    }
+
 	    return -code return 0
 	}
     }
