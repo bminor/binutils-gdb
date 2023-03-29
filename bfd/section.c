@@ -1600,6 +1600,8 @@ SYNOPSIS
 DESCRIPTION
 	Read all data from @var{section} in BFD @var{abfd}
 	into a buffer, *@var{buf}, malloc'd by this function.
+	Return @code{true} on success, @code{false} on failure in which
+	case *@var{buf} will be NULL.
 */
 
 bool

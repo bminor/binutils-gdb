@@ -1211,10 +1211,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
     return NULL;
 
   if (!bfd_malloc_and_get_section (abfd, sect, &contents))
-    {
-      free (contents);
-      return NULL;
-    }
+    return NULL;
 
   /* CRC value is stored after the filename, aligned up to 4 bytes.  */
   name = (char *) contents;
@@ -1222,7 +1219,10 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
   crc_offset = strnlen (name, size) + 1;
   crc_offset = (crc_offset + 3) & ~3;
   if (crc_offset + 4 > size)
-    return NULL;
+    {
+      free (name);
+      return NULL;
+    }
 
   *crc32 = bfd_get_32 (abfd, contents + crc_offset);
   return name;
@@ -1297,10 +1297,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
     return NULL;
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))
-    {
-      free (contents);
-      return NULL;
-    }
+    return NULL;
 
   /* BuildID value is stored after the filename.  */
   name = (char *) contents;
@@ -1817,10 +1814,7 @@ get_build_id (bfd *abfd)
     }
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))
-    {
-      free (contents);
-      return NULL;
-    }
+    return NULL;
 
   /* FIXME: Paranoia - allow for compressed build-id sections.
      Maybe we should complain if this size is different from
