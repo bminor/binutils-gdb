@@ -202,7 +202,7 @@ demangle_command (const char *args, int from_tty)
     lang = current_language;
 
   gdb::unique_xmalloc_ptr<char> demangled
-    = language_demangle (lang, name, DMGL_ANSI | DMGL_PARAMS);
+    = lang->demangle_symbol (name, DMGL_ANSI | DMGL_PARAMS);
   if (demangled != NULL)
     gdb_printf ("%s\n", demangled.get ());
   else

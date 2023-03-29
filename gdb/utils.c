@@ -1909,7 +1909,7 @@ fprintf_symbol (struct ui_file *stream, const char *name,
       else
 	{
 	  gdb::unique_xmalloc_ptr<char> demangled
-	    = language_demangle (language_def (lang), name, arg_mode);
+	    = language_def (lang)->demangle_symbol (name, arg_mode);
 	  gdb_puts (demangled ? demangled.get () : name, stream);
 	}
     }

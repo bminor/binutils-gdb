@@ -540,21 +540,6 @@ skip_language_trampoline (frame_info_ptr frame, CORE_ADDR pc)
   return 0;
 }
 
-/* Return demangled language symbol, or NULL.
-   FIXME: Options are only useful for certain languages and ignored
-   by others, so it would be better to remove them here and have a
-   more flexible demangler for the languages that need it.
-   FIXME: Sometimes the demangler is invoked when we don't know the
-   language, so we can't use this everywhere.  */
-gdb::unique_xmalloc_ptr<char>
-language_demangle (const struct language_defn *current_language, 
-				const char *mangled, int options)
-{
-  if (current_language != NULL)
-    return current_language->demangle_symbol (mangled, options);
-  return NULL;
-}
-
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */
 

@@ -791,11 +791,6 @@ extern const char *language_str (enum language);
 
 extern CORE_ADDR skip_language_trampoline (frame_info_ptr, CORE_ADDR pc);
 
-/* Return demangled language symbol, or NULL.  */
-extern gdb::unique_xmalloc_ptr<char> language_demangle
-     (const struct language_defn *current_language,
-      const char *mangled, int options);
-
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */
 struct language_pass_by_ref_info language_pass_by_reference (struct type *type);
