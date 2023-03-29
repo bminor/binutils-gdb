@@ -469,16 +469,18 @@ write_stabs_in_sections_debugging_info (bfd *abfd, void *dhandle,
   struct string_hash_entry *h;
   bfd_byte *p;
 
+  memset (&info, 0, sizeof info);
   info.abfd = abfd;
 
-  info.symbols_size = 0;
   info.symbols_alloc = 500;
   info.symbols = (bfd_byte *) xmalloc (info.symbols_alloc);
 
-  info.strings = NULL;
-  info.last_string = NULL;
   /* Reserve 1 byte for a null byte.  */
   info.strings_size = 1;
+  info.type_index = 1;
+  info.so_offset = -1;
+  info.fun_offset = -1;
+  info.pending_lbrac = (bfd_vma) -1;
 
   if (!bfd_hash_table_init (&info.strhash.table, string_hash_newfunc,
 			    sizeof (struct string_hash_entry))
@@ -487,38 +489,28 @@ write_stabs_in_sections_debugging_info (bfd *abfd, void *dhandle,
     {
       non_fatal ("bfd_hash_table_init_failed: %s",
 		 bfd_errmsg (bfd_get_error ()));
-      return false;
+      goto fail;
     }
-
-  info.type_stack = NULL;
-  info.type_index = 1;
-  memset (&info.type_cache, 0, sizeof info.type_cache);
-  info.so_offset = -1;
-  info.fun_offset = -1;
-  info.last_text_address = 0;
-  info.nesting = 0;
-  info.fnaddr = 0;
-  info.pending_lbrac = (bfd_vma) -1;
 
   /* The initial symbol holds the string size.  */
   if (! stab_write_symbol (&info, 0, 0, 0, (const char *) NULL))
-    return false;
+    goto fail;
 
   /* Output an initial N_SO symbol.  */
   info.so_offset = info.symbols_size;
   if (! stab_write_symbol (&info, N_SO, 0, 0, bfd_get_filename (abfd)))
-    return false;
+    goto fail;
 
   if (! debug_write (dhandle, &stab_fns, (void *) &info))
-    return false;
+    goto fail;
 
   if (info.pending_lbrac != (bfd_vma) -1)
-    return false;
+    goto fail;
 
   /* Output a trailing N_SO.  */
   if (! stab_write_symbol (&info, N_SO, 0, info.last_text_address,
 			   (const char *) NULL))
-    return false;
+    goto fail;
 
   /* Put the string size in the initial symbol.  */
   bfd_put_32 (abfd, info.strings_size, info.symbols + 8);
@@ -537,7 +529,17 @@ write_stabs_in_sections_debugging_info (bfd *abfd, void *dhandle,
       p += strlen ((char *) p) + 1;
     }
 
+  bfd_hash_table_free (&info.typedef_hash.table);
+  bfd_hash_table_free (&info.strhash.table);
   return true;
+
+ fail:
+  if (info.typedef_hash.table.memory)
+    bfd_hash_table_free (&info.typedef_hash.table);
+  if (info.strhash.table.memory)
+    bfd_hash_table_free (&info.strhash.table);
+  free (info.symbols);
+  return false;
 }
 
 /* Start writing out information for a compilation unit.  */

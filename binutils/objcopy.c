@@ -1065,6 +1065,10 @@ delete_symbol_htabs (void)
   htab_delete (weaken_specific_htab);
   htab_delete (redefine_specific_htab);
   htab_delete (redefine_specific_reverse_htab);
+
+  free (isympp);
+  if (osympp != isympp)
+    free (osympp);
 }
 
 /* Add a symbol to strip_specific_list.  */
@@ -4656,6 +4660,7 @@ write_debugging_info (bfd *obfd, void *dhandle,
       bfd_size_type symsize, stringsize;
       asection *stabsec, *stabstrsec;
       flagword flags;
+      bool ret;
 
       if (! write_stabs_in_sections_debugging_info (obfd, dhandle, &syms,
 						    &symsize, &strings,
@@ -4682,17 +4687,19 @@ write_debugging_info (bfd *obfd, void *dhandle,
 	 the next thing the caller is going to do is copy over the
 	 real sections.  We may someday have to split the contents
 	 setting out of this function.  */
+      ret = true;
       if (! bfd_set_section_contents (obfd, stabsec, syms, 0, symsize)
 	  || ! bfd_set_section_contents (obfd, stabstrsec, strings, 0,
 					 stringsize))
 	{
 	  bfd_nonfatal_message (NULL, obfd, NULL,
 				_("can't set debugging section contents"));
-	  free (strings);
-	  return false;
+	  ret = false;
 	}
 
-      return true;
+      free (strings);
+      free (syms);
+      return ret;
     }
 
   bfd_nonfatal_message (NULL, obfd, NULL,
