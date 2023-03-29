@@ -1065,7 +1065,8 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
       || sec->size == 0
       || sec->rawsize != 0
       || sec->contents != NULL
-      || sec->compress_status != COMPRESS_SECTION_NONE)
+      || sec->compress_status != COMPRESS_SECTION_NONE
+      || _bfd_section_size_insane (abfd, sec))
     {
       bfd_set_error (bfd_error_invalid_operation);
       return false;
