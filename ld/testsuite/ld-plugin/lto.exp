@@ -530,6 +530,15 @@ set lto_link_elf_tests [list \
    {} \
    "pr29086" \
   ] \
+  [list \
+   "Build pr30281.so" \
+   "-shared -Wl,--version-script,pr30281.t \
+    -O2 -fPIC -flto-partition=max -flto=2" \
+   "-O2 -fPIC -flto-partition=max -flto=2" \
+   {pr30281.c} \
+   "" \
+   "pr30281.so" \
+  ] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
