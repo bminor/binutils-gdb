@@ -680,6 +680,11 @@ protected:
 	  (const lookup_name_info &lookup_name) const;
 };
 
+/* Return the current language.  Normally code just uses the
+   'current_language' macro.  */
+
+extern const struct language_defn *get_current_language ();
+
 /* Pointer to the language_defn for our current language.  This pointer
    always points to *some* valid struct; it can be used without checking
    it for validity.
@@ -696,7 +701,7 @@ protected:
    the language of symbol files (e.g. detecting when ".c" files are
    C++), it should be a separate setting from the current_language.  */
 
-extern const struct language_defn *current_language;
+#define current_language (get_current_language ())
 
 /* Pointer to the language_defn expected by the user, e.g. the language
    of main(), or the language we last mentioned in a message, or C.  */
