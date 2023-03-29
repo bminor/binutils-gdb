@@ -1438,21 +1438,19 @@ scoped_restore_current_thread::restore ()
       && target_has_stack ()
       && target_has_memory ())
     restore_selected_frame (m_selected_frame_id, m_selected_frame_level);
-
-  set_language (m_lang);
 }
 
 scoped_restore_current_thread::~scoped_restore_current_thread ()
 {
-  if (!m_dont_restore)
+  if (m_dont_restore)
+    m_lang.dont_restore ();
+  else
     restore ();
 }
 
 scoped_restore_current_thread::scoped_restore_current_thread ()
 {
   m_inf = inferior_ref::new_reference (current_inferior ());
-
-  m_lang = current_language->la_language;
 
   if (inferior_ptid != null_ptid)
     {

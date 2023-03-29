@@ -1684,13 +1684,11 @@ symbol_file_command (const char *args, int from_tty)
     }
 }
 
-/* Set the initial language.  */
+/* Lazily set the initial language.  */
 
-void
-set_initial_language (void)
+static void
+set_initial_language_callback ()
 {
-  if (language_mode == language_mode_manual)
-    return;
   enum language lang = main_language ();
   /* Make C the default language.  */
   enum language default_lang = language_c;
@@ -1713,6 +1711,16 @@ set_initial_language (void)
 
   set_language (lang);
   expected_language = current_language; /* Don't warn the user.  */
+}
+
+/* Set the initial language.  */
+
+void
+set_initial_language (void)
+{
+  if (language_mode == language_mode_manual)
+    return;
+  lazily_set_language (set_initial_language_callback);
 }
 
 /* Open the file specified by NAME and hand it off to BFD for

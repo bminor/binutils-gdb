@@ -787,6 +787,10 @@ extern void language_info ();
 
 extern void set_language (enum language lang);
 
+typedef void lazily_set_language_ftype ();
+extern void lazily_set_language (lazily_set_language_ftype *fun);
+
+
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,
    in C the literal form of the character with octal value 141 is 'a'
@@ -837,14 +841,14 @@ class scoped_restore_current_language
 {
 public:
 
-  explicit scoped_restore_current_language ()
-    : m_lang (current_language->la_language)
-  {
-  }
+  scoped_restore_current_language ();
+  ~scoped_restore_current_language ();
 
-  ~scoped_restore_current_language ()
+  scoped_restore_current_language (scoped_restore_current_language &&other)
   {
-    set_language (m_lang);
+    m_lang = other.m_lang;
+    m_fun = other.m_fun;
+    other.dont_restore ();
   }
 
   scoped_restore_current_language (const scoped_restore_current_language &)
@@ -852,9 +856,18 @@ public:
   scoped_restore_current_language &operator=
       (const scoped_restore_current_language &) = delete;
 
+  /* Cancel restoring on scope exit.  */
+  void dont_restore ()
+  {
+    /* This is implemented using a sentinel value.  */
+    m_lang = nullptr;
+    m_fun = nullptr;
+  }
+
 private:
 
-  enum language m_lang;
+  const language_defn *m_lang;
+  lazily_set_language_ftype *m_fun;
 };
 
 /* If language_mode is language_mode_auto,

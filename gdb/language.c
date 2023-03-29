@@ -80,6 +80,7 @@ enum case_sensitivity case_sensitivity = case_sensitive_on;
 /* The current language and language_mode (see language.h).  */
 
 static const struct language_defn *global_current_language;
+static lazily_set_language_ftype *lazy_language_setter;
 enum language_mode language_mode = language_mode_auto;
 
 /* See language.h.  */
@@ -87,7 +88,39 @@ enum language_mode language_mode = language_mode_auto;
 const struct language_defn *
 get_current_language ()
 {
+  if (lazy_language_setter != nullptr)
+    {
+      /* Avoid recursive calls -- set_language refers to
+	 current_language.  */
+      lazily_set_language_ftype *call = lazy_language_setter;
+      lazy_language_setter = nullptr;
+      call ();
+    }
   return global_current_language;
+}
+
+void
+lazily_set_language (lazily_set_language_ftype *fun)
+{
+  lazy_language_setter = fun;
+}
+
+scoped_restore_current_language::scoped_restore_current_language ()
+  : m_lang (global_current_language),
+    m_fun (lazy_language_setter)
+{
+}
+
+scoped_restore_current_language::~scoped_restore_current_language ()
+{
+  /* If both are NULL, then that means dont_restore was called.  */
+  if (m_lang != nullptr || m_fun != nullptr)
+    {
+      global_current_language = m_lang;
+      lazy_language_setter = m_fun;
+      if (lazy_language_setter == nullptr)
+	set_range_case ();
+    }
 }
 
 /* The language that the user expects to be typing in (the language
@@ -185,6 +218,7 @@ set_language (const char *language)
 
       /* Found it!  Go into manual mode, and use this language.  */
       language_mode = language_mode_manual;
+      lazy_language_setter = nullptr;
       global_current_language = lang;
       set_range_case ();
       expected_language = lang;
@@ -372,6 +406,7 @@ set_range_case (void)
 void
 set_language (enum language lang)
 {
+  lazy_language_setter = nullptr;
   global_current_language = language_def (lang);
   set_range_case ();
 }
