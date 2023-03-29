@@ -31,7 +31,7 @@ if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
 # gdb will find it.
 set remote_guile_file [remote_download host \
 			   ${srcdir}/${subdir}/${testfile}-gdb.in \
-			   [standard_output_file ${testfile}-gdb.scm]]
+			   [host_standard_output_file ${testfile}-gdb.scm]]
 
 clean_restart
 gdb_test_no_output "set auto-load safe-path ${remote_guile_file}" \
