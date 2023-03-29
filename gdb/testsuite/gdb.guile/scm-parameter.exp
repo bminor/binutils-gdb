@@ -34,8 +34,15 @@ proc scm_param_test_maybe_no_output { command pattern args } {
 }
 
 # We use "." here instead of ":" so that this works on win32 too.
-set escaped_directory [string_to_regexp "$srcdir/$subdir"]
-gdb_test "guile (print (parameter-value \"directories\"))" "$escaped_directory.\\\$cdir.\\\$cwd"
+if { [is_remote host] } {
+    # Proc gdb_reinitialize_dir has no effect for remote host.
+    gdb_test "guile (print (parameter-value \"directories\"))" \
+	"\\\$cdir.\\\$cwd"
+} else {
+    set escaped_directory [string_to_regexp "$srcdir/$subdir"]
+    gdb_test "guile (print (parameter-value \"directories\"))" \
+	"$escaped_directory.\\\$cdir.\\\$cwd"
+}
 
 # Test a simple boolean parameter, and parameter? while we're at it.
 
