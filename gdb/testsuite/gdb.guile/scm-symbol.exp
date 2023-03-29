@@ -132,7 +132,7 @@ gdb_test "guile (print (= (symbol-addr-class t) SYMBOL_LOC_CONST))" "= #t"
 gdb_test "guile (print (symbol-type t))" "= enum tag"
 
 # Test symtab attribute.
-gdb_test "guile (print (symbol-symtab t))" "= #<gdb:symtab .*gdb.guile/scm-symbol.c>"
+gdb_test "guile (print (symbol-symtab t))" "= #<gdb:symtab (.*/)?scm-symbol.c>"
 
 # C++ tests
 # Recompile binary.

@@ -61,7 +61,7 @@ gdb_scm_test_silent_cmd "guile (define new-pc (sal-pc (frame-sal (selected-frame
 
 # Test sal.
 gdb_test "guile (print (sal-symtab sal))" \
-    ".*gdb.guile/scm-symtab.c.*" "Test sal-symtab"
+    " (.*/)?scm-symtab.c.*" "Test sal-symtab"
 gdb_test "guile (print (sal-pc sal))" \
     "${decimal}" "test sal-pc"
 gdb_test "guile (print (= (sal-last sal) (- new-pc 1)))" \
@@ -85,11 +85,16 @@ gdb_test "guile (print (eq? symtab (symbol-symtab (lookup-global-symbol \"func1\
 
 # Test symbol table.
 gdb_test "guile (print (symtab-filename symtab))" \
-    ".*gdb.guile/scm-symtab.c.*" "test symtab-filename"
+    " (.*/)?scm-symtab.c.*" "test symtab-filename"
 gdb_test "guile (print (symtab-objfile symtab))" \
     "#<gdb:objfile .*scm-symtab>" "test symtab-objfile"
-gdb_test "guile (print (symtab-fullname symtab))" \
-    "testsuite/gdb.guile/scm-symtab.c.*" "test symtab-fullname"
+if { [is_remote host] } {
+    gdb_test "guile (print (symtab-fullname symtab))" \
+	" (.*/)scm-symtab.c.*" "test symtab-fullname"
+} else {
+    gdb_test "guile (print (symtab-fullname symtab))" \
+	"testsuite/gdb.guile/scm-symtab.c.*" "test symtab-fullname"
+}
 gdb_test "guile (print (symtab-valid? symtab))" \
     "#t" "test symtab-valid?"
 gdb_test "guile (print (->bool (member \"qq\" global-symbols)))" \
