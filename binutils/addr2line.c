@@ -451,6 +451,7 @@ process_file (const char *file_name, const char *section_name,
   if (bfd_check_format (abfd, bfd_archive))
     {
       non_fatal (_("%s: cannot get addresses from archive"), file_name);
+      bfd_close (abfd);
       return 1;
     }
 
@@ -459,6 +460,7 @@ process_file (const char *file_name, const char *section_name,
       bfd_nonfatal (bfd_get_filename (abfd));
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	list_matching_formats (matching);
+      bfd_close (abfd);
       return 1;
     }
 
@@ -468,6 +470,7 @@ process_file (const char *file_name, const char *section_name,
       if (section == NULL)
 	{
 	  non_fatal (_("%s: cannot find section %s"), file_name, section_name);
+	  bfd_close (abfd);
 	  return 1;
 	}
     }
