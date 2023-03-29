@@ -54,14 +54,17 @@ proc test_with_error {setting tmp_val expected_re} {
     global gdb_prompt
 
     with_test_prefix "$setting, $tmp_val" {
-	set test "save org value"
 	set org_val ""
-	gdb_test_multiple "maint show test-settings $setting" $test {
-	    -re "(.*)\r\n$gdb_prompt $" {
-		set org_val $expect_out(1,string)
-		pass $test
+	gdb_test_multiple "maint show test-settings $setting" \
+	    "save org value" {
+		-re "^maint show test-settings $setting\r\n" {
+		    exp_continue
+		}
+		-re "^(.*)\r\n$gdb_prompt $" {
+		    set org_val $expect_out(1,string)
+		    pass $gdb_test_name
+		}
 	    }
-	}
 
 	gdb_test \
 	    "maint with test-settings $setting $tmp_val -- p 1" \

@@ -540,7 +540,9 @@ proc test-string {variant} {
 
     # Checks that gdb doesn't crash if we haven't set the string yet.
     if {$variant != "filename"} {
-	gdb_test "$show_cmd" "^$show_cmd\r\n" "$show_cmd: show default"
+	# This odd expected output here is because we expect GDB to
+	# emit a single blank line as a result of this command.
+	gdb_test "$show_cmd" "^" "$show_cmd: show default"
     } else {
 	gdb_test "$show_cmd" "/foo/bar" "$show_cmd: show default"
     }
@@ -570,8 +572,9 @@ proc test-string {variant} {
 	    show_setting "$show_cmd" "\"hello world\""
 	} else {
 	    gdb_test_no_output "$set_cmd"
-	    gdb_test "$show_cmd" \
-		"^$show_cmd\r\n" "$show_cmd: empty second time"
+	    # This odd expected output here is because we expect GDB to
+	    # emit a single blank line as a result of this command.
+	    gdb_test "$show_cmd" "^" "$show_cmd: empty second time"
 	}
     }
 

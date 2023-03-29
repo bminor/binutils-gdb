@@ -38,7 +38,7 @@ proc compare_sections { {options ""} } {
 	-re "MIS-MATCHED.*$gdb_prompt $" {
 	    fail $test
 	}
-	-re "warning.*One or more sections.*does not match.*loaded file.*$gdb_prompt $" {
+	-re "warning: One or more sections.*does not match.*loaded file.*$gdb_prompt $" {
 	    fail $test
 	}
 	-re "Section.*matched.*$gdb_prompt $" {

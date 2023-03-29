@@ -69,7 +69,7 @@ with_test_prefix "python interactive help" {
 
 	    # The "quit" must be seen on the output.  A buggy GDB
 	    # would not display it.
-	    gdb_test "quit" "^quit.*leaving help.*" "quit help"
+	    gdb_test "quit" "^\r\nYou are now leaving help.*" "quit help"
 	}
     }
 }

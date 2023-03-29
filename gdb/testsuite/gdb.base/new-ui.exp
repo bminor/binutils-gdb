@@ -28,7 +28,7 @@ proc ensure_no_output {message} {
 
     # Run a command and use an anchor to make sure no output appears
     # before the command's expected output.
-    gdb_test "print 999" "^print 999\r\n\\\$$decimal = 999" $message
+    gdb_test "print 999" "^\\\$$decimal = 999" $message
 }
 
 # Run a few execution-related commands on CON1, and ensure the proper
@@ -121,10 +121,10 @@ proc_with_prefix do_test {} {
     # Ensure non-execution commands in one console don't cause output
     # in the other consoles.
     with_spawn_id $gdb_main_spawn_id {
-	gdb_test "print 1" "^print 1\r\n\\\$1 = 1" "print on main console"
+	gdb_test "print 1" "^\\\$1 = 1" "print on main console"
     }
     with_spawn_id $extra_spawn_id {
-	gdb_test "print 2" "^print 2\r\n\\\$2 = 2" "print on extra console"
+	gdb_test "print 2" "^\\\$2 = 2" "print on extra console"
     }
 
     # Verify that we get proper queries on the main UI, but that they are

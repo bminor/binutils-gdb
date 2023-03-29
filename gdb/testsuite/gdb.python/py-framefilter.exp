@@ -97,7 +97,7 @@ foreach bttype [list "bt" "bt full"] {
 	    pass $test
 	}
     }
-    gdb_test "q" "^q\r\nQuit" "pagination quit - $bttype - q"
+    gdb_test "q" "^Quit" "pagination quit - $bttype - q"
 }
 gdb_test_no_output "set height unlimited" "pagination quit - set height unlimited"
 

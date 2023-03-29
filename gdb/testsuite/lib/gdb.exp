@@ -1401,10 +1401,12 @@ proc gdb_test_multiline { name args } {
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
 #   this is the null string no command is sent.
-# PATTERN is the pattern to match for a PASS, and must NOT include
-#   the \r\n sequence immediately before the gdb prompt.  This argument
-#   may be omitted to just match the prompt, ignoring whatever output 
-#   precedes it.
+# PATTERN is the pattern to match for a PASS, and must NOT include the
+#   \r\n sequence immediately before the gdb prompt (see -nonl below).
+#   This argument may be omitted to just match the prompt, ignoring
+#   whatever output precedes it.  If PATTERN starts with '^' then
+#   PATTERN will be anchored such that it should match all output from
+#   COMMAND.
 # MESSAGE is an optional message to be printed.  If this is
 #   omitted, then the pass/fail messages use the command string as the
 #   message.  (If this is the empty string, then sometimes we don't
@@ -1457,6 +1459,18 @@ proc gdb_test { args } {
     set nl [expr ${nonl} ? {""} : {"\r\n"}]
 
     set saw_question 0
+
+    # If the pattern starts with a '^' then we want to match all the
+    # output from COMMAND.  To support this, here we inject an
+    # additional pattern that matches the command immediately after
+    # the '^'.
+    if {[string range $pattern 0 0] eq "^"} {
+	set command_regex [string_to_regexp $command]
+	set pattern [string range $pattern 1 end]
+	if {$command_regex ne ""} {
+	    set pattern "^${command_regex}\r\n$pattern"
+	}
+    }
 
     set user_code {}
     lappend user_code {
