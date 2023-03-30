@@ -2417,6 +2417,11 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	    ("write HFA or HVA return value element %d to %s",
 	     i + 1, gdbarch_register_name (gdbarch, regno));
 
+	  /* Depending on whether the target supports SVE or not, the V
+	     registers may report a size > 16 bytes.  In that case, read the
+	     original contents of the register before overriding it with a new
+	     value that has a potential size <= 16 bytes.  */
+	  regs->cooked_read (regno, tmpbuf);
 	  memcpy (tmpbuf, valbuf,
 		  len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
 	  regs->cooked_write (regno, tmpbuf);
