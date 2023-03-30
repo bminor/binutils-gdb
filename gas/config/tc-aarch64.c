@@ -801,6 +801,38 @@ parse_reg (char **ccp)
   return reg;
 }
 
+/* Return the operand qualifier associated with all uses of REG, or
+   AARCH64_OPND_QLF_NIL if none.  AARCH64_OPND_QLF_NIL means either
+   that qualifiers don't apply to REG or that qualifiers are added
+   using suffixes.  */
+
+static aarch64_opnd_qualifier_t
+inherent_reg_qualifier (const reg_entry *reg)
+{
+  switch (reg->type)
+    {
+    case REG_TYPE_R_32:
+    case REG_TYPE_SP_32:
+    case REG_TYPE_Z_32:
+      return AARCH64_OPND_QLF_W;
+
+    case REG_TYPE_R_64:
+    case REG_TYPE_SP_64:
+    case REG_TYPE_Z_64:
+      return AARCH64_OPND_QLF_X;
+
+    case REG_TYPE_FP_B:
+    case REG_TYPE_FP_H:
+    case REG_TYPE_FP_S:
+    case REG_TYPE_FP_D:
+    case REG_TYPE_FP_Q:
+      return AARCH64_OPND_QLF_S_B + (reg->type - REG_TYPE_FP_B);
+
+    default:
+      return AARCH64_OPND_QLF_NIL;
+    }
+}
+
 /* Return TRUE if REG->TYPE is a valid type of TYPE; otherwise
    return FALSE.  */
 static bool
@@ -828,18 +860,6 @@ aarch64_addr_reg_parse (char **ccp, aarch64_reg_type reg_type,
 
   switch (reg->type)
     {
-    case REG_TYPE_R_32:
-    case REG_TYPE_SP_32:
-    case REG_TYPE_Z_32:
-      *qualifier = AARCH64_OPND_QLF_W;
-      break;
-
-    case REG_TYPE_R_64:
-    case REG_TYPE_SP_64:
-    case REG_TYPE_Z_64:
-      *qualifier = AARCH64_OPND_QLF_X;
-      break;
-
     case REG_TYPE_ZN:
       if ((reg_type_masks[reg_type] & (1 << REG_TYPE_ZN)) == 0
 	  || str[0] != '.')
@@ -859,7 +879,10 @@ aarch64_addr_reg_parse (char **ccp, aarch64_reg_type reg_type,
       break;
 
     default:
-      return NULL;
+      if (!aarch64_check_reg_type (reg, REG_TYPE_R_Z_SP))
+	return NULL;
+      *qualifier = inherent_reg_qualifier (reg);
+      break;
     }
 
   *ccp = str;
@@ -4744,15 +4767,15 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
       }								\
   } while (0)
 
-#define po_int_reg_or_fail(reg_type) do {			\
-    reg = aarch64_reg_parse_32_64 (&str, &qualifier);		\
+#define po_int_fp_reg_or_fail(reg_type) do {			\
+    reg = parse_reg (&str);					\
     if (!reg || !aarch64_check_reg_type (reg, reg_type))	\
       {								\
 	set_default_error ();					\
 	goto failure;						\
       }								\
     info->reg.regno = reg->number;				\
-    info->qualifier = qualifier;				\
+    info->qualifier = inherent_reg_qualifier (reg);		\
   } while (0)
 
 #define po_imm_nc_or_fail() do {				\
@@ -6163,7 +6186,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rt_SYS:
 	case AARCH64_OPND_PAIRREG:
 	case AARCH64_OPND_SVE_Rm:
-	  po_int_reg_or_fail (REG_TYPE_R_Z);
+	  po_int_fp_reg_or_fail (REG_TYPE_R_Z);
 
 	  /* In LS64 load/store instructions Rt register number must be even
 	     and <=22.  */
@@ -6186,7 +6209,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rt_SP:
 	case AARCH64_OPND_SVE_Rn_SP:
 	case AARCH64_OPND_Rm_SP:
-	  po_int_reg_or_fail (REG_TYPE_R_SP);
+	  po_int_fp_reg_or_fail (REG_TYPE_R_SP);
 	  break;
 
 	case AARCH64_OPND_Rm_EXT:
@@ -6221,17 +6244,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Vd:
 	case AARCH64_OPND_SVE_Vm:
 	case AARCH64_OPND_SVE_Vn:
-	  reg = aarch64_reg_parse (&str, REG_TYPE_BHSDQ, NULL);
-	  if (!reg)
-	    {
-	      first_error (_(get_reg_expected_msg (REG_TYPE_BHSDQ)));
-	      goto failure;
-	    }
-	  gas_assert (reg->type >= REG_TYPE_FP_B
-		      && reg->type <= REG_TYPE_FP_Q);
-
-	  info->reg.regno = reg->number;
-	  info->qualifier = AARCH64_OPND_QLF_S_B + (reg->type - REG_TYPE_FP_B);
+	  po_int_fp_reg_or_fail (REG_TYPE_BHSDQ);
 	  break;
 
 	case AARCH64_OPND_SVE_Pd:
