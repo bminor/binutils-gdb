@@ -1083,6 +1083,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 		 struct vector_type_el *typeinfo, unsigned int flags)
 {
   char *str = *ccp;
+  bool isalpha = ISALPHA (*str);
   const reg_entry *reg = parse_reg (&str);
   struct vector_type_el atype;
   struct vector_type_el parsetype;
@@ -1098,7 +1099,10 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
     {
       if (typeinfo)
 	*typeinfo = atype;
-      set_default_error ();
+      if (!isalpha && (flags & PTR_IN_REGLIST))
+	set_fatal_syntax_error (_("syntax error in register list"));
+      else
+	set_default_error ();
       return NULL;
     }
 
@@ -4361,15 +4365,16 @@ parse_bti_operand (char **str,
      REG_TYPE.QUALIFIER
 
    Side effect: Update STR with current parse position of success.
-*/
+
+   FLAGS is as for parse_typed_reg.  */
 
 static const reg_entry *
 parse_reg_with_qual (char **str, aarch64_reg_type reg_type,
-                     aarch64_opnd_qualifier_t *qualifier)
+		     aarch64_opnd_qualifier_t *qualifier, unsigned int flags)
 {
   struct vector_type_el vectype;
   const reg_entry *reg = parse_typed_reg (str, reg_type, &vectype,
-					  PTR_FULL_REG);
+					  PTR_FULL_REG | flags);
   if (!reg)
     return NULL;
 
@@ -4464,13 +4469,16 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
    <Pm>.<T>[<Wv>< #<imm>]
    ZA[<Wv>, #<imm>]
    <ZAn><HV>.<T>[<Wv>, #<imm>]
-*/
+
+   FLAGS is as for parse_typed_reg.  */
+
 static bool
 parse_dual_indexed_reg (char **str, aarch64_reg_type reg_type,
 			struct aarch64_indexed_za *opnd,
-			aarch64_opnd_qualifier_t *qualifier)
+			aarch64_opnd_qualifier_t *qualifier,
+			unsigned int flags)
 {
-  const reg_entry *reg = parse_reg_with_qual (str, reg_type, qualifier);
+  const reg_entry *reg = parse_reg_with_qual (str, reg_type, qualifier, flags);
   if (!reg)
     return false;
 
@@ -4494,7 +4502,8 @@ parse_sme_za_hv_tiles_operand_with_braces (char **str,
       return false;
     }
 
-  if (!parse_dual_indexed_reg (str, REG_TYPE_ZATHV, opnd, qualifier))
+  if (!parse_dual_indexed_reg (str, REG_TYPE_ZATHV, opnd, qualifier,
+			       PTR_IN_REGLIST))
     return false;
 
   if (!skip_past_char (str, '}'))
@@ -4527,7 +4536,7 @@ parse_sme_zero_mask(char **str)
   do
     {
       const reg_entry *reg = parse_reg_with_qual (&q, REG_TYPE_ZA_ZAT,
-						  &qualifier);
+						  &qualifier, PTR_IN_REGLIST);
       if (!reg)
 	return PARSE_FAIL;
 
@@ -7028,7 +7037,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  if (!parse_dual_indexed_reg (&str, REG_TYPE_PN,
-				       &info->indexed_za, &qualifier))
+				       &info->indexed_za, &qualifier, 0))
 	    goto failure;
 	  info->qualifier = qualifier;
 	  break;
@@ -7348,7 +7357,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SME_ZAda_2b:
 	case AARCH64_OPND_SME_ZAda_3b:
-	  reg = parse_reg_with_qual (&str, REG_TYPE_ZAT, &qualifier);
+	  reg = parse_reg_with_qual (&str, REG_TYPE_ZAT, &qualifier, 0);
 	  if (!reg)
 	    goto failure;
 	  info->reg.regno = reg->number;
@@ -7363,7 +7372,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 							    &info->indexed_za,
 							    &qualifier)
 	      : !parse_dual_indexed_reg (&str, REG_TYPE_ZATHV,
-					 &info->indexed_za, &qualifier))
+					 &info->indexed_za, &qualifier, 0))
 	    goto failure;
 	  info->qualifier = qualifier;
 	  break;
@@ -7377,7 +7386,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SME_ZA_array:
 	  if (!parse_dual_indexed_reg (&str, REG_TYPE_ZA,
-				       &info->indexed_za, &qualifier))
+				       &info->indexed_za, &qualifier, 0))
 	    goto failure;
 	  info->qualifier = qualifier;
 	  break;

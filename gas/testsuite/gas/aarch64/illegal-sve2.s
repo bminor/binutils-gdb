@@ -166,6 +166,7 @@ eortb z32.h, z0.h, z0.h
 eortb z0.s, z32.s, z0.s
 eortb z0.s, z0.s, z32.s
 
+ext z0.b, {,}, #0
 ext z0.b, { z0.b, z2.b }, #0
 ext z0.h, { z0.b, z1.b }, #0
 ext z0.b, { z0.h, z1.b }, #0

@@ -238,6 +238,7 @@
 [^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `eortb z32\.h,z0\.h,z0\.h'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `eortb z0\.s,z32\.s,z0\.s'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `eortb z0\.s,z0\.s,z32\.s'
+[^ :]+:[0-9]+: Error: syntax error in register list at operand 2 -- `ext z0\.b,{,},#0'
 [^ :]+:[0-9]+: Error: invalid register list at operand 2 -- `ext z0\.b,{z0\.b,z2\.b},#0'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ext z0\.h,{z0\.b,z1\.b},#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
