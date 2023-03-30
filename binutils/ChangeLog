@@ -1,3 +1,9 @@
+2023-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 30284
+	* dwarf.c (read_and_display_attr_value): Detect and ignore
+	negative base values.
+
 2023-03-23  Frederic Cambus  <fred@statdns.com>
 
 	* readelf.c (get_segment_type): Handle PT_OPENBSD_MUTABLE segment

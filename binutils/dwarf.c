@@ -2802,7 +2802,7 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     default:
-      warn (_("Unrecognized form: %#lx\n"), form);
+      warn (_("Unrecognized form: %#lx"), form);
       /* What to do?  Consume a byte maybe?  */
       ++data;
       break;
@@ -2820,22 +2820,48 @@ read_and_display_attr_value (unsigned long attribute,
 		    "(%#" PRIx64 " and %#" PRIx64 ")"),
 		  debug_info_p->cu_offset,
 		  debug_info_p->loclists_base, uvalue);
+	  svalue = uvalue;
+	  if (svalue < 0)
+	    {
+	      warn (_("CU @ %#" PRIx64 " has has a negative loclists_base "
+		      "value of %#" PRIx64 " - treating as zero"),
+		    debug_info_p->cu_offset, svalue);
+	      uvalue = 0;
+	    }
 	  debug_info_p->loclists_base = uvalue;
 	  break;
+
 	case DW_AT_rnglists_base:
 	  if (debug_info_p->rnglists_base)
 	    warn (_("CU @ %#" PRIx64 " has multiple rnglists_base values "
 		    "(%#" PRIx64 " and %#" PRIx64 ")"),
 		  debug_info_p->cu_offset,
 		  debug_info_p->rnglists_base, uvalue);
+	  svalue = uvalue;
+	  if (svalue < 0)
+	    {
+	      warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
+		      "value of %#" PRIx64 " - treating as zero"),
+		    debug_info_p->cu_offset, svalue);
+	      uvalue = 0;
+	    }
 	  debug_info_p->rnglists_base = uvalue;
 	  break;
+
 	case DW_AT_str_offsets_base:
 	  if (debug_info_p->str_offsets_base)
 	    warn (_("CU @ %#" PRIx64 " has multiple str_offsets_base values "
 		    "%#" PRIx64 " and %#" PRIx64 ")"),
 		  debug_info_p->cu_offset,
 		  debug_info_p->str_offsets_base, uvalue);
+	  svalue = uvalue;
+	  if (svalue < 0)
+	    {
+	      warn (_("CU @ %#" PRIx64 " has has a negative stroffsets_base "
+		      "value of %#" PRIx64 " - treating as zero"),
+		    debug_info_p->cu_offset, svalue);
+	      uvalue = 0;
+	    }
 	  debug_info_p->str_offsets_base = uvalue;
 	  break;
 
@@ -8245,7 +8271,7 @@ display_debug_ranges (struct dwarf_section *section,
     }
 
   introduce (section, false);
-
+  
   if (is_rnglists)
     return display_debug_rnglists (section);
 
@@ -8324,7 +8350,7 @@ display_debug_ranges (struct dwarf_section *section,
 	}
 
       next = section_begin + offset + debug_info_p->rnglists_base;
-
+      
       /* If multiple DWARF entities reference the same range then we will
 	 have multiple entries in the `range_entries' list for the same
 	 offset.  Thanks to the sort above these will all be consecutive in
