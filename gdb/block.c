@@ -778,46 +778,25 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 /* See block.h.  */
 
 struct symbol *
-block_find_symbol (const struct block *block, const char *name,
-		   const domain_enum domain,
-		   block_symbol_matcher_ftype *matcher, void *data)
+block_find_symbol (const struct block *block, const lookup_name_info &name,
+		   const domain_enum domain, struct symbol **stub)
 {
-  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
   gdb_assert (block->superblock () == NULL
 	      || block->superblock ()->superblock () == NULL);
 
-  for (struct symbol *sym : block_iterator_range (block, &lookup_name))
+  for (struct symbol *sym : block_iterator_range (block, &name))
     {
-      /* MATCHER is deliberately called second here so that it never sees
-	 a non-domain-matching symbol.  */
-      if (sym->matches (domain)
-	  && matcher (sym, data))
+      if (!sym->matches (domain))
+	continue;
+
+      if (!TYPE_IS_OPAQUE (sym->type ()))
 	return sym;
+
+      if (stub != nullptr)
+	*stub = sym;
     }
-  return NULL;
-}
-
-/* See block.h.  */
-
-int
-block_find_non_opaque_type (struct symbol *sym, void *data)
-{
-  return !TYPE_IS_OPAQUE (sym->type ());
-}
-
-/* See block.h.  */
-
-int
-block_find_non_opaque_type_preferred (struct symbol *sym, void *data)
-{
-  struct symbol **best = (struct symbol **) data;
-
-  if (!TYPE_IS_OPAQUE (sym->type ()))
-    return 1;
-  *best = sym;
-  return 0;
+  return nullptr;
 }
 
 /* See block.h.  */

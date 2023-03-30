@@ -2679,9 +2679,10 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
 
   bv = cust->blockvector ();
   block = bv->block (block_index);
-  sym = block_find_symbol (block, name, STRUCT_DOMAIN,
-			   block_find_non_opaque_type, NULL);
-  if (sym == NULL)
+
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+  sym = block_find_symbol (block, lookup_name, STRUCT_DOMAIN, nullptr);
+  if (sym == nullptr)
     error_in_psymtab_expansion (block_index, name, cust);
   gdb_assert (!TYPE_IS_OPAQUE (sym->type ()));
   return sym->type ();
@@ -2700,13 +2701,13 @@ basic_lookup_transparent_type_1 (struct objfile *objfile,
   const struct block *block;
   const struct symbol *sym;
 
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
   for (compunit_symtab *cust : objfile->compunits ())
     {
       bv = cust->blockvector ();
       block = bv->block (block_index);
-      sym = block_find_symbol (block, name, STRUCT_DOMAIN,
-			       block_find_non_opaque_type, NULL);
-      if (sym != NULL)
+      sym = block_find_symbol (block, lookup_name, STRUCT_DOMAIN, nullptr);
+      if (sym != nullptr)
 	{
 	  gdb_assert (!TYPE_IS_OPAQUE (sym->type ()));
 	  return sym->type ();

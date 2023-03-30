@@ -556,39 +556,15 @@ extern struct symbol *block_lookup_symbol_primary (const struct block *block,
 						   const char *name,
 						   const domain_enum domain);
 
-/* The type of the MATCHER argument to block_find_symbol.  */
-
-typedef int (block_symbol_matcher_ftype) (struct symbol *, void *);
-
-/* Find symbol NAME in BLOCK and in DOMAIN that satisfies MATCHER.
-   DATA is passed unchanged to MATCHER.
-   BLOCK must be STATIC_BLOCK or GLOBAL_BLOCK.  */
+/* Find symbol NAME in BLOCK and in DOMAIN.  This will return a
+   matching symbol whose type is not a "opaque", see TYPE_IS_OPAQUE.
+   If STUB is non-NULL, an otherwise matching symbol whose type is a
+   opaque will be stored here.  */
 
 extern struct symbol *block_find_symbol (const struct block *block,
-					 const char *name,
+					 const lookup_name_info &name,
 					 const domain_enum domain,
-					 block_symbol_matcher_ftype *matcher,
-					 void *data);
-
-/* A matcher function for block_find_symbol to find only symbols with
-   non-opaque types.  */
-
-extern int block_find_non_opaque_type (struct symbol *sym, void *data);
-
-/* A matcher function for block_find_symbol to prefer symbols with
-   non-opaque types.  The way to use this function is as follows:
-
-   struct symbol *with_opaque = NULL;
-   struct symbol *sym
-     = block_find_symbol (block, name, domain,
-			  block_find_non_opaque_type_preferred, &with_opaque);
-
-   At this point if SYM is non-NULL then a non-opaque type has been found.
-   Otherwise, if WITH_OPAQUE is non-NULL then an opaque type has been found.
-   Otherwise, the symbol was not found.  */
-
-extern int block_find_non_opaque_type_preferred (struct symbol *sym,
-						 void *data);
+					 struct symbol **stub);
 
 /* Given a vector of pairs, allocate and build an obstack allocated
    blockranges struct for a block.  */

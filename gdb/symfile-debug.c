@@ -260,23 +260,19 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
     const struct blockvector *bv = stab->blockvector ();
     const struct block *block = bv->block (kind);
 
-    sym = block_find_symbol (block, name, domain,
-			     block_find_non_opaque_type_preferred,
-			     &with_opaque);
+    sym = block_find_symbol (block, lookup_name, domain, &with_opaque);
 
     /* Some caution must be observed with overloaded functions
        and methods, since the index will not contain any overload
        information (but NAME might contain it).  */
 
-    if (sym != NULL
-	&& symbol_matches_search_name (sym, lookup_name))
+    if (sym != nullptr)
       {
 	retval = stab;
 	/* Found it.  */
 	return false;
       }
-    if (with_opaque != NULL
-	&& symbol_matches_search_name (with_opaque, lookup_name))
+    if (with_opaque != nullptr)
       retval = stab;
 
     /* Keep looking through other psymtabs.  */
