@@ -202,74 +202,36 @@ aarch64_select_operand_for_sizeq_field_coding (const aarch64_opcode *opcode)
 const aarch64_field fields[] =
 {
     {  0,  0 },	/* NIL.  */
-    {  0,  4 },	/* cond2: condition in truly conditional-executed inst.  */
-    {  0,  4 },	/* nzcv: flag bit specifier, encoded in the "nzcv" field.  */
-    {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
-    { 16,  3 },	/* abc: a:b:c bits in AdvSIMD modified immediate.  */
-    {  5, 19 },	/* imm19: e.g. in CBZ.  */
-    {  5, 19 },	/* immhi: e.g. in ADRP.  */
-    { 29,  2 },	/* immlo: e.g. in ADRP.  */
-    { 22,  2 },	/* size: in most AdvSIMD and floating-point instructions.  */
-    { 10,  2 },	/* vldst_size: size field in the AdvSIMD load/store inst.  */
-    { 29,  1 },	/* op: in AdvSIMD modified immediate instructions.  */
-    { 30,  1 },	/* Q: in most AdvSIMD instructions.  */
-    {  0,  5 },	/* Rt: in load/store instructions.  */
-    {  0,  5 },	/* Rd: in many integer instructions.  */
-    {  5,  5 },	/* Rn: in many integer instructions.  */
-    { 10,  5 },	/* Rt2: in load/store pair instructions.  */
-    { 10,  5 },	/* Ra: in fp instructions.  */
-    {  5,  3 },	/* op2: in the system instructions.  */
     {  8,  4 },	/* CRm: in the system instructions.  */
+    { 10,  2 }, /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
     { 12,  4 },	/* CRn: in the system instructions.  */
-    { 16,  3 },	/* op1: in the system instructions.  */
-    { 19,  2 },	/* op0: in the system instructions.  */
-    { 10,  3 },	/* imm3: in add/sub extended reg instructions.  */
-    { 12,  4 },	/* cond: condition flags as a source operand.  */
-    { 12,  4 },	/* opcode: in advsimd load/store instructions.  */
-    { 12,  4 },	/* cmode: in advsimd modified immediate instructions.  */
-    { 13,  3 },	/* asisdlso_opcode: opcode in advsimd ld/st single element.  */
-    { 13,  2 },	/* len: in advsimd tbl/tbx instructions.  */
-    { 16,  5 },	/* Rm: in ld/st reg offset and some integer inst.  */
-    { 16,  5 },	/* Rs: in load/store exclusive instructions.  */
-    { 13,  3 },	/* option: in ld/st reg offset + add/sub extended reg inst.  */
-    { 12,  1 },	/* S: in load/store reg offset instructions.  */
-    { 21,  2 },	/* hw: in move wide constant instructions.  */
-    { 22,  2 },	/* opc: in load/store reg offset instructions.  */
-    { 23,  1 },	/* opc1: in load/store reg offset instructions.  */
-    { 22,  2 },	/* shift: in add/sub reg/imm shifted instructions.  */
-    { 22,  2 },	/* type: floating point type field in fp data inst.  */
-    { 30,  2 },	/* ldst_size: size field in ld/st reg offset inst.  */
-    { 10,  6 },	/* imm6_10: in add/sub reg shifted instructions.  */
-    { 15,  6 },	/* imm6_15: in rmif instructions.  */
-    { 11,  4 },	/* imm4_11: in advsimd ext and advsimd ins instructions.  */
-    {  0,  4 },	/* imm4_0: in rmif instructions.  */
-    { 10,  4 },	/* imm4_10: in adddg/subg instructions.  */
-    {  5,  4 }, /* imm4_5: in SME instructions.  */
-    { 16,  5 },	/* imm5: in conditional compare (immediate) instructions.  */
-    { 15,  7 },	/* imm7: in load/store pair pre/post index instructions.  */
-    { 13,  8 },	/* imm8: in floating-point scalar move immediate inst.  */
-    { 12,  9 },	/* imm9: in load/store pre/post index instructions.  */
-    { 10, 12 },	/* imm12: in ld/st unsigned imm or add/sub shifted inst.  */
-    {  5, 14 },	/* imm14: in test bit and branch instructions.  */
-    {  5, 16 },	/* imm16_5: in exception instructions.  */
-    {  0, 16 },	/* imm16_0: in udf instruction. */
-    {  0, 26 },	/* imm26: in unconditional branch instructions.  */
-    { 10,  6 },	/* imms: in bitfield and logical immediate instructions.  */
-    { 16,  6 },	/* immr: in bitfield and logical immediate instructions.  */
-    { 16,  3 },	/* immb: in advsimd shift by immediate instructions.  */
-    { 19,  4 },	/* immh: in advsimd shift by immediate instructions.  */
-    { 22,  1 },	/* S_imm10: in LDRAA and LDRAB instructions.  */
-    { 22,  1 },	/* N: in logical (immediate) instructions.  */
-    { 11,  1 },	/* index: in ld/st inst deciding the pre/post-index.  */
-    { 24,  1 },	/* index2: in ld/st pair inst deciding the pre/post-index.  */
-    { 31,  1 },	/* sf: in integer data processing instructions.  */
-    { 30,  1 },	/* lse_sz: in LSE extension atomic instructions.  */
+    { 10,  8 }, /* CSSC_imm8.  */
     { 11,  1 },	/* H: in advsimd scalar x indexed element instructions.  */
     { 21,  1 },	/* L: in advsimd scalar x indexed element instructions.  */
     { 20,  1 },	/* M: in advsimd scalar x indexed element instructions.  */
-    { 31,  1 },	/* b5: in the test bit and branch instructions.  */
-    { 19,  5 },	/* b40: in the test bit and branch instructions.  */
-    { 10,  6 },	/* scale: in the fixed-point scalar to fp converting inst.  */
+    { 22,  1 },	/* N: in logical (immediate) instructions.  */
+    { 30,  1 },	/* Q: in most AdvSIMD instructions.  */
+    { 10,  5 },	/* Ra: in fp instructions.  */
+    {  0,  5 },	/* Rd: in many integer instructions.  */
+    { 16,  5 },	/* Rm: in ld/st reg offset and some integer inst.  */
+    {  5,  5 },	/* Rn: in many integer instructions.  */
+    { 16,  5 },	/* Rs: in load/store exclusive instructions.  */
+    {  0,  5 },	/* Rt: in load/store instructions.  */
+    { 10,  5 },	/* Rt2: in load/store pair instructions.  */
+    { 12,  1 },	/* S: in load/store reg offset instructions.  */
+    { 12,  2 }, /* SM3_imm2: Indexed element SM3 2 bits index immediate.  */
+    { 13,  3 }, /* SME_Pm: second source scalable predicate register P0-P7.  */
+    { 16,  1 }, /* SME_Q: Q class bit, bit 16.  */
+    { 16,  2 }, /* SME_Rm: index base register W12-W15 [17:16].  */
+    { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */
+    { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
+    {  0,  2 }, /* SME_ZAda_2b: tile ZA0-ZA3.  */
+    {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
+    { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
+    { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
+    { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
+    { 18,  3 }, /* SME_tszl: immediate and qualifier field, bits [20:18].  */
+    { 0,   8 }, /* SME_zero_mask: list of up to 8 tile names separated by commas [7:0].  */
     {  4,  1 }, /* SVE_M_4: Merge/zero select, bit 4.  */
     { 14,  1 }, /* SVE_M_14: Merge/zero select, bit 14.  */
     { 16,  1 }, /* SVE_M_16: Merge/zero select, bit 16.  */
@@ -295,10 +257,10 @@ const aarch64_field fields[] =
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
     {  5,  1 }, /* SVE_i1: single-bit immediate.  */
-    { 22,  1 }, /* SVE_i3h: high bit of 3-bit immediate.  */
-    { 11,  1 }, /* SVE_i3l: low bit of 3-bit immediate.  */
-    { 19,  2 }, /* SVE_i3h2: two high bits of 3bit immediate, bits [20,19].  */
     { 20,  1 }, /* SVE_i2h: high bit of 2bit immediate, bits.  */
+    { 22,  1 }, /* SVE_i3h: high bit of 3-bit immediate.  */
+    { 19,  2 }, /* SVE_i3h2: two high bits of 3bit immediate, bits [20,19].  */
+    { 11,  1 }, /* SVE_i3l: low bit of 3-bit immediate.  */
     { 16,  3 }, /* SVE_imm3: 3-bit immediate field.  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
     {  5,  5 }, /* SVE_imm5: 5-bit immediate field.  */
@@ -315,8 +277,8 @@ const aarch64_field fields[] =
     { 16,  1 }, /* SVE_rot1: 1-bit rotation amount.  */
     { 10,  2 }, /* SVE_rot2: 2-bit rotation amount.  */
     { 10,  1 }, /* SVE_rot3: 1-bit rotation amount at bit 10.  */
-    { 22,  1 }, /* SVE_sz: 1-bit element size select.  */
     { 17,  2 }, /* SVE_size: 2-bit element size, bits [18,17].  */
+    { 22,  1 }, /* SVE_sz: 1-bit element size select.  */
     { 30,  1 }, /* SVE_sz2: 1-bit element size select.  */
     { 16,  4 }, /* SVE_tsz: triangular size select.  */
     { 22,  2 }, /* SVE_tszh: triangular size select high, bits [23,22].  */
@@ -324,25 +286,63 @@ const aarch64_field fields[] =
     { 19,  2 }, /* SVE_tszl_19: triangular size select low, bits [20,19].  */
     { 14,  1 }, /* SVE_xs_14: UXTW/SXTW select (bit 14).  */
     { 22,  1 }, /* SVE_xs_22: UXTW/SXTW select (bit 22).  */
-    {  0,  2 }, /* SME_ZAda_2b: tile ZA0-ZA3.  */
-    {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
-    { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
-    { 16,  1 }, /* SME_Q: Q class bit, bit 16.  */
-    { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
-    { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */
-    { 13,  3 }, /* SME_Pm: second source scalable predicate register P0-P7.  */
-    { 0,   8 }, /* SME_zero_mask: list of up to 8 tile names separated by commas [7:0].  */
-    { 16,  2 }, /* SME_Rm: index base register W12-W15 [17:16].  */
-    { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
-    { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
-    { 18,  3 }, /* SME_tszl: immediate and qualifier field, bits [20:18].  */
+    { 22,  1 },	/* S_imm10: in LDRAA and LDRAB instructions.  */
+    { 16,  3 },	/* abc: a:b:c bits in AdvSIMD modified immediate.  */
+    { 13,  3 },	/* asisdlso_opcode: opcode in advsimd ld/st single element.  */
+    { 19,  5 },	/* b40: in the test bit and branch instructions.  */
+    { 31,  1 },	/* b5: in the test bit and branch instructions.  */
+    { 12,  4 },	/* cmode: in advsimd modified immediate instructions.  */
+    { 12,  4 },	/* cond: condition flags as a source operand.  */
+    {  0,  4 },	/* cond2: condition in truly conditional-executed inst.  */
+    {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
+    { 21,  2 },	/* hw: in move wide constant instructions.  */
+    { 10,  3 },	/* imm3: in add/sub extended reg instructions.  */
+    {  0,  4 },	/* imm4_0: in rmif instructions.  */
+    {  5,  4 }, /* imm4_5: in SME instructions.  */
+    { 10,  4 },	/* imm4_10: in adddg/subg instructions.  */
+    { 11,  4 },	/* imm4_11: in advsimd ext and advsimd ins instructions.  */
+    { 16,  5 },	/* imm5: in conditional compare (immediate) instructions.  */
+    { 10,  6 },	/* imm6_10: in add/sub reg shifted instructions.  */
+    { 15,  6 },	/* imm6_15: in rmif instructions.  */
+    { 15,  7 },	/* imm7: in load/store pair pre/post index instructions.  */
+    { 13,  8 },	/* imm8: in floating-point scalar move immediate inst.  */
+    { 12,  9 },	/* imm9: in load/store pre/post index instructions.  */
+    { 10, 12 },	/* imm12: in ld/st unsigned imm or add/sub shifted inst.  */
+    {  5, 14 },	/* imm14: in test bit and branch instructions.  */
+    {  0, 16 },	/* imm16_0: in udf instruction. */
+    {  5, 16 },	/* imm16_5: in exception instructions.  */
+    {  5, 19 },	/* imm19: e.g. in CBZ.  */
+    {  0, 26 },	/* imm26: in unconditional branch instructions.  */
+    { 16,  3 },	/* immb: in advsimd shift by immediate instructions.  */
+    { 19,  4 },	/* immh: in advsimd shift by immediate instructions.  */
+    {  5, 19 },	/* immhi: e.g. in ADRP.  */
+    { 29,  2 },	/* immlo: e.g. in ADRP.  */
+    { 16,  6 },	/* immr: in bitfield and logical immediate instructions.  */
+    { 10,  6 },	/* imms: in bitfield and logical immediate instructions.  */
+    { 11,  1 },	/* index: in ld/st inst deciding the pre/post-index.  */
+    { 24,  1 },	/* index2: in ld/st pair inst deciding the pre/post-index.  */
+    { 30,  2 },	/* ldst_size: size field in ld/st reg offset inst.  */
+    { 13,  2 },	/* len: in advsimd tbl/tbx instructions.  */
+    { 30,  1 },	/* lse_sz: in LSE extension atomic instructions.  */
+    {  0,  4 },	/* nzcv: flag bit specifier, encoded in the "nzcv" field.  */
+    { 29,  1 },	/* op: in AdvSIMD modified immediate instructions.  */
+    { 19,  2 },	/* op0: in the system instructions.  */
+    { 16,  3 },	/* op1: in the system instructions.  */
+    {  5,  3 },	/* op2: in the system instructions.  */
+    { 22,  2 },	/* opc: in load/store reg offset instructions.  */
+    { 23,  1 },	/* opc1: in load/store reg offset instructions.  */
+    { 12,  4 },	/* opcode: in advsimd load/store instructions.  */
+    { 13,  3 },	/* option: in ld/st reg offset + add/sub extended reg inst.  */
     { 11,  2 }, /* rotate1: FCMLA immediate rotate.  */
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
-    { 12,  2 }, /* SM3_imm2: Indexed element SM3 2 bits index immediate.  */
+    { 10,  6 },	/* scale: in the fixed-point scalar to fp converting inst.  */
+    { 31,  1 },	/* sf: in integer data processing instructions.  */
+    { 22,  2 },	/* shift: in add/sub reg/imm shifted instructions.  */
+    { 22,  2 },	/* size: in most AdvSIMD and floating-point instructions.  */
     { 22,  1 }, /* sz: 1-bit element size select.  */
-    { 10,  2 }, /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
-    { 10,  8 }, /* CSSC_imm8.  */
+    { 22,  2 },	/* type: floating point type field in fp data inst.  */
+    { 10,  2 },	/* vldst_size: size field in the AdvSIMD load/store inst.  */
 };
 
 enum aarch64_operand_class
