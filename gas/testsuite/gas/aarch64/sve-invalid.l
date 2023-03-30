@@ -932,6 +932,14 @@
 .*: Error: register element index out of range 0 to 63 at operand 2 -- `dup z0\.b,z1\.b\[-1\]'
 .*: Error: register element index out of range 0 to 63 at operand 2 -- `dup z0\.b,z1\.b\[64\]'
 .*: Error: constant expression required at operand 2 -- `dup z0\.b,z1\.b\[x0\]'
+.*: Error: operand mismatch -- `dup z0\.b,z1\[0\]'
+.*: Info:    did you mean this\?
+.*: Info:    	dup z0\.b, z1\.b\[0\]
+.*: Info:    other valid variant\(s\):
+.*: Info:    	dup z0\.h, z1\.h\[0\]
+.*: Info:    	dup z0\.s, z1\.s\[0\]
+.*: Info:    	dup z0\.d, z1\.d\[0\]
+.*: Info:    	dup z0\.q, z1\.q\[0\]
 .*: Error: register element index out of range 0 to 31 at operand 2 -- `dup z0\.h,z1\.h\[-1\]'
 .*: Error: register element index out of range 0 to 31 at operand 2 -- `dup z0\.h,z1\.h\[32\]'
 .*: Error: constant expression required at operand 2 -- `dup z0\.h,z1\.h\[x0\]'

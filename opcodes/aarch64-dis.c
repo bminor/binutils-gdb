@@ -702,6 +702,8 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 
   if (operand_need_shift_by_two (self))
     imm <<= 2;
+  else if (operand_need_shift_by_three (self))
+    imm <<= 3;
   else if (operand_need_shift_by_four (self))
     imm <<= 4;
 
@@ -3070,6 +3072,19 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 	  i >>= 1;
 	  variant += 1;
 	}
+      break;
+
+    case sme_size_12_bhs:
+      variant = extract_field (FLD_SME_size_12, inst->value, 0);
+      if (variant >= 3)
+	return false;
+      break;
+
+    case sme_size_12_hs:
+      variant = extract_field (FLD_SME_size_12, inst->value, 0);
+      if (variant != 1 && variant != 2)
+	return false;
+      variant -= 1;
       break;
 
     case sme_size_22:

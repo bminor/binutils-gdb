@@ -404,6 +404,8 @@ aarch64_ins_imm (const aarch64_operand *self, const aarch64_opnd_info *info,
   imm = info->imm.value;
   if (operand_need_shift_by_two (self))
     imm >>= 2;
+  if (operand_need_shift_by_three (self))
+    imm >>= 3;
   if (operand_need_shift_by_four (self))
     imm >>= 4;
   insert_all_fields (self, code, imm);
@@ -1946,9 +1948,19 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       /* The variant is encoded as part of the immediate.  */
       break;
 
+    case sme_size_12_bhs:
+      insert_field (FLD_SME_size_12, &inst->value,
+		    aarch64_get_variant (inst), 0);
+      break;
+
     case sme_size_22:
       insert_field (FLD_SME_size_22, &inst->value,
 		    aarch64_get_variant (inst), 0);
+      break;
+
+    case sme_size_12_hs:
+      insert_field (FLD_SME_size_12, &inst->value,
+		    aarch64_get_variant (inst) + 1, 0);
       break;
 
     case sve_cpy:

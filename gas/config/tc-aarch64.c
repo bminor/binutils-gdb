@@ -312,6 +312,7 @@ struct reloc_entry
   BASIC_REG_TYPE(ZAT)	/* za[0-15] (ZA tile) */			\
   BASIC_REG_TYPE(ZATH)	/* za[0-15]h (ZA tile horizontal slice) */ 	\
   BASIC_REG_TYPE(ZATV)	/* za[0-15]v (ZA tile vertical slice) */	\
+  BASIC_REG_TYPE(ZT0)	/* zt0 */					\
   /* Typecheck: any 64-bit int reg         (inc SP exc XZR).  */	\
   MULTI_REG_TYPE(R64_SP, REG_TYPE(R_64) | REG_TYPE(SP_64))		\
   /* Typecheck: same, plus SVE registers.  */				\
@@ -483,11 +484,11 @@ get_reg_expected_msg (unsigned int mask, unsigned int seen)
   if (mask == reg_type_masks[REG_TYPE_VZP])
     return N_("expected a vector or predicate register at operand %d");
 
-  /* ZA-related registers.  */
+  /* SME-related registers.  */
   if (mask == reg_type_masks[REG_TYPE_ZA])
     return N_("expected a ZA array vector at operand %d");
-  if (mask == reg_type_masks[REG_TYPE_ZA_ZAT])
-    return N_("expected 'za' or a ZA tile at operand %d");
+  if (mask == (reg_type_masks[REG_TYPE_ZA_ZAT] | reg_type_masks[REG_TYPE_ZT0]))
+    return N_("expected ZT0 or a ZA mask at operand %d");
   if (mask == reg_type_masks[REG_TYPE_ZAT])
     return N_("expected a ZA tile at operand %d");
   if (mask == reg_type_masks[REG_TYPE_ZATHV])
@@ -1279,7 +1280,10 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
   if (!(flags & PTR_FULL_REG) && skip_past_char (&str, '['))
     {
       /* Reject Sn[index] syntax.  */
-      if (reg->type != REG_TYPE_PN && !is_typed_vecreg)
+      if (reg->type != REG_TYPE_Z
+	  && reg->type != REG_TYPE_PN
+	  && reg->type != REG_TYPE_ZT0
+	  && !is_typed_vecreg)
 	{
 	  first_error (_("this type of register can't be indexed"));
 	  return NULL;
@@ -6722,6 +6726,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zm4_11_INDEX:
 	case AARCH64_OPND_SVE_Zm4_INDEX:
 	case AARCH64_OPND_SVE_Zn_INDEX:
+	case AARCH64_OPND_SME_Zn_INDEX1_16:
+	case AARCH64_OPND_SME_Zn_INDEX2_15:
+	case AARCH64_OPND_SME_Zn_INDEX2_16:
+	case AARCH64_OPND_SME_Zn_INDEX3_14:
+	case AARCH64_OPND_SME_Zn_INDEX3_15:
+	case AARCH64_OPND_SME_Zn_INDEX4_14:
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg_index;
 
@@ -6735,14 +6745,23 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  reg = aarch64_reg_parse (&str, reg_type, &vectype);
 	  if (!reg)
 	    goto failure;
-	  if (vectype.type == NT_invtype || !(vectype.defined & NTA_HASINDEX))
+	  if (!(vectype.defined & NTA_HASINDEX))
 	    goto failure;
+
+	  if (reg->type == REG_TYPE_Z && vectype.type == NT_invtype)
+	    /* Unqualified Zn[index] is allowed in LUTI2 instructions.  */
+	    info->qualifier = AARCH64_OPND_QLF_NIL;
+	  else
+	    {
+	      if (vectype.type == NT_invtype)
+		goto failure;
+	      info->qualifier = vectype_to_qualifier (&vectype);
+	      if (info->qualifier == AARCH64_OPND_QLF_NIL)
+		goto failure;
+	    }
 
 	  info->reglane.regno = reg->number;
 	  info->reglane.index = vectype.index;
-	  info->qualifier = vectype_to_qualifier (&vectype);
-	  if (info->qualifier == AARCH64_OPND_QLF_NIL)
-	    goto failure;
 	  break;
 
 	case AARCH64_OPND_SVE_ZnxN:
@@ -7740,6 +7759,39 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
+	case AARCH64_OPND_SME_ZT0:
+	  po_reg_or_fail (REG_TYPE_ZT0);
+	  break;
+
+	case AARCH64_OPND_SME_ZT0_INDEX:
+	  reg = aarch64_reg_parse (&str, REG_TYPE_ZT0, &vectype);
+	  if (!reg || vectype.type != NT_invtype)
+	    goto failure;
+	  if (!(vectype.defined & NTA_HASINDEX))
+	    {
+	      set_syntax_error (_("missing register index"));
+	      goto failure;
+	    }
+	  info->imm.value = vectype.index;
+	  break;
+
+	case AARCH64_OPND_SME_ZT0_LIST:
+	  if (*str != '{')
+	    {
+	      set_expected_reglist_error (REG_TYPE_ZT0, parse_reg (&str));
+	      goto failure;
+	    }
+	  str++;
+	  if (!parse_typed_reg (&str, REG_TYPE_ZT0, &vectype, PTR_IN_REGLIST))
+	    goto failure;
+	  if (*str != '}')
+	    {
+	      set_syntax_error (_("expected '}' after ZT0"));
+	      goto failure;
+	    }
+	  str++;
+	  break;
+
 	case AARCH64_OPND_SME_PNn3_INDEX1:
 	case AARCH64_OPND_SME_PNn3_INDEX2:
 	  reg = aarch64_reg_parse (&str, REG_TYPE_PN, &vectype);
@@ -8462,7 +8514,10 @@ static const reg_entry reg_names[] = {
   REGSET16S (za, h, ZATH), REGSET16S (ZA, H, ZATH),
 
   /* SME ZA tile registers (vertical slice).  */
-  REGSET16S (za, v, ZATV), REGSET16S (ZA, V, ZATV)
+  REGSET16S (za, v, ZATV), REGSET16S (ZA, V, ZATV),
+
+  /* SME2 ZT0.  */
+  REGDEF (zt0, 0, ZT0), REGDEF (ZT0, 0, ZT0)
 };
 
 #undef REGDEF

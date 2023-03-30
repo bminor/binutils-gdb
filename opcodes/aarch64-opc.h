@@ -70,6 +70,7 @@ enum aarch64_field_kind
   FLD_SME_Zt3,
   FLD_SME_Zt2,
   FLD_SME_i1,
+  FLD_SME_size_12,
   FLD_SME_size_22,
   FLD_SME_tszh,
   FLD_SME_tszl,
@@ -139,14 +140,21 @@ enum aarch64_field_kind
   FLD_defgh,
   FLD_hw,
   FLD_imm1_8,
+  FLD_imm1_16,
   FLD_imm2_8,
+  FLD_imm2_15,
+  FLD_imm2_16,
   FLD_imm3_0,
   FLD_imm3_5,
   FLD_imm3_10,
+  FLD_imm3_12,
+  FLD_imm3_14,
+  FLD_imm3_15,
   FLD_imm4_0,
   FLD_imm4_5,
   FLD_imm4_10,
   FLD_imm4_11,
+  FLD_imm4_14,
   FLD_imm5,
   FLD_imm6_10,
   FLD_imm6_15,
@@ -242,7 +250,10 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #define OPD_F_OD_MASK		0x000001e0	/* Operand-dependent data.  */
 #define OPD_F_OD_LSB		5
 #define OPD_F_NO_ZR		0x00000200	/* ZR index not allowed.  */
-#define OPD_F_SHIFT_BY_4	0x00000400	/* Need to left shift the field
+#define OPD_F_SHIFT_BY_3	0x00000400	/* Need to left shift the field
+						   value by 3 to get the value
+						   of an immediate operand.  */
+#define OPD_F_SHIFT_BY_4	0x00000800	/* Need to left shift the field
 						   value by 4 to get the value
 						   of an immediate operand.  */
 
@@ -327,6 +338,12 @@ static inline bool
 operand_need_shift_by_two (const aarch64_operand *operand)
 {
   return (operand->flags & OPD_F_SHIFT_BY_2) != 0;
+}
+
+static inline bool
+operand_need_shift_by_three (const aarch64_operand *operand)
+{
+  return (operand->flags & OPD_F_SHIFT_BY_3) != 0;
 }
 
 static inline bool

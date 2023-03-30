@@ -249,6 +249,7 @@ const aarch64_field fields[] =
     {  0,  3 }, /* SME_Zt3: lower 3 bits of Zt, bits [2:0].  */
     {  0,  2 }, /* SME_Zt2: lower 2 bits of Zt, bits [1:0].  */
     { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
+    { 12,  2 }, /* SME_size_12: bits [13:12].  */
     { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
     { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
     { 18,  3 }, /* SME_tszl: immediate and qualifier field, bits [20:18].  */
@@ -318,14 +319,21 @@ const aarch64_field fields[] =
     {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
     { 21,  2 },	/* hw: in move wide constant instructions.  */
     {  8,  1 },	/* imm1_8: general immediate in bits [8].  */
+    { 16,  1 },	/* imm1_16: general immediate in bits [16].  */
     {  8,  2 },	/* imm2_8: general immediate in bits [9:8].  */
+    { 15,  2 }, /* imm2_15: 2-bit immediate, bits [16:15] */
+    { 16,  2 }, /* imm2_16: 2-bit immediate, bits [17:16] */
     {  0,  3 },	/* imm3_0: general immediate in bits [2:0].  */
     {  5,  3 },	/* imm3_5: general immediate in bits [7:5].  */
     { 10,  3 },	/* imm3_10: in add/sub extended reg instructions.  */
+    { 12,  3 },	/* imm3_12: general immediate in bits [14:12].  */
+    { 14,  3 },	/* imm3_14: general immediate in bits [16:14].  */
+    { 15,  3 },	/* imm3_15: general immediate in bits [17:15].  */
     {  0,  4 },	/* imm4_0: in rmif instructions.  */
     {  5,  4 }, /* imm4_5: in SME instructions.  */
     { 10,  4 },	/* imm4_10: in adddg/subg instructions.  */
     { 11,  4 },	/* imm4_11: in advsimd ext and advsimd ins instructions.  */
+    { 14,  4 },	/* imm4_14: general immediate in bits [17:14].  */
     { 16,  5 },	/* imm5: in conditional compare (immediate) instructions.  */
     { 10,  6 },	/* imm6_10: in add/sub reg shifted instructions.  */
     { 15,  6 },	/* imm6_15: in rmif instructions.  */
@@ -1744,6 +1752,18 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SME_Zn_INDEX1_16:
+	case AARCH64_OPND_SME_Zn_INDEX2_15:
+	case AARCH64_OPND_SME_Zn_INDEX2_16:
+	case AARCH64_OPND_SME_Zn_INDEX3_14:
+	case AARCH64_OPND_SME_Zn_INDEX3_15:
+	case AARCH64_OPND_SME_Zn_INDEX4_14:
+	  size = get_operand_fields_width (get_operand_from_code (type)) - 5;
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
+			      0, (1 << size) - 1))
+	    return 0;
+	  break;
+
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
@@ -2862,6 +2882,20 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_ZT0_INDEX:
+	  if (!value_in_range_p (opnd->imm.value, 0, 56))
+	    {
+	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, 56);
+	      return 0;
+	    }
+	  if (opnd->imm.value % 8 != 0)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("byte index must be a multiple of 8"));
+	      return 0;
+	    }
+	  break;
+
 	default:
 	  break;
 	}
@@ -3867,9 +3901,17 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zm4_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:
     case AARCH64_OPND_SVE_Zn_INDEX:
+    case AARCH64_OPND_SME_Zn_INDEX1_16:
+    case AARCH64_OPND_SME_Zn_INDEX2_15:
+    case AARCH64_OPND_SME_Zn_INDEX2_16:
+    case AARCH64_OPND_SME_Zn_INDEX3_14:
+    case AARCH64_OPND_SME_Zn_INDEX3_15:
+    case AARCH64_OPND_SME_Zn_INDEX4_14:
       snprintf (buf, size, "%s[%s]",
-		style_reg (styler, "z%d.%s", opnd->reglane.regno,
-			   aarch64_get_qualifier_name (opnd->qualifier)),
+		(opnd->qualifier == AARCH64_OPND_QLF_NIL
+		 ? style_reg (styler, "z%d", opnd->reglane.regno)
+		 : style_reg (styler, "z%d.%s", opnd->reglane.regno,
+			      aarch64_get_qualifier_name (opnd->qualifier))),
 		style_imm (styler, "%" PRIi64, opnd->reglane.index));
       break;
 
@@ -4448,6 +4490,19 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_BARRIER_PSB:
       snprintf (buf, size, "%s", style_sub_mnem (styler, "csync"));
+      break;
+
+    case AARCH64_OPND_SME_ZT0:
+      snprintf (buf, size, "%s", style_reg (styler, "zt0"));
+      break;
+
+    case AARCH64_OPND_SME_ZT0_INDEX:
+      snprintf (buf, size, "%s[%s]", style_reg (styler, "zt0"),
+		style_imm (styler, "%d", (int) opnd->imm.value));
+      break;
+
+    case AARCH64_OPND_SME_ZT0_LIST:
+      snprintf (buf, size, "{%s}", style_reg (styler, "zt0"));
       break;
 
     case AARCH64_OPND_BTI_TARGET:

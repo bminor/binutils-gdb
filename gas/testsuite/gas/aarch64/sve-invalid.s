@@ -1143,6 +1143,7 @@
 	dup	z0.b, z1.b[63]				// OK
 	dup	z0.b, z1.b[64]
 	dup	z0.b, z1.b[x0]
+	dup	z0.b, z1[0]
 
 	dup	z0.h, z1.h[-1]
 	dup	z0.h, z1.h[0]				// OK
