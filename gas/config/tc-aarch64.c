@@ -4914,6 +4914,20 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
       goto failure;						\
   } while (0)
 
+/* A primitive log calculator.  */
+
+static inline unsigned int
+get_log2 (unsigned int n)
+{
+  unsigned int count = 0;
+  while (n > 1)
+    {
+      n >>= 1;
+      count += 1;
+    }
+  return count;
+}
+
 /* encode the 12-bit imm field of Add/sub immediate */
 static inline uint32_t
 encode_addsub_imm (uint32_t imm)
@@ -5732,14 +5746,17 @@ output_operand_error_record (const operand_error_record *record, char *str)
       break;
 
     case AARCH64_OPDE_REG_LIST:
-      if (detail->data[0].i == 1)
+      if (detail->data[0].i == (1 << 1))
 	handler (_("invalid number of registers in the list; "
 		   "only 1 register is expected at operand %d -- `%s'"),
 		 idx + 1, str);
-      else
+      else if ((detail->data[0].i & -detail->data[0].i) == detail->data[0].i)
 	handler (_("invalid number of registers in the list; "
 		   "%d registers are expected at operand %d -- `%s'"),
-	       detail->data[0].i, idx + 1, str);
+		 get_log2 (detail->data[0].i), idx + 1, str);
+      else
+	handler (_("invalid number of registers in the list"
+		   " at operand %d -- `%s'"), idx + 1, str);
       break;
 
     case AARCH64_OPDE_UNALIGNED:
@@ -5807,6 +5824,12 @@ output_operand_error_report (char *str, bool non_fatal_only)
 		       curr->detail.data[0].i, curr->detail.data[1].i,
 		       curr->detail.data[2].i);
 	}
+      else if (curr->detail.kind == AARCH64_OPDE_REG_LIST)
+	{
+	  DEBUG_TRACE ("\t%s [%x]",
+		       operand_mismatch_kind_names[curr->detail.kind],
+		       curr->detail.data[0].i);
+	}
       else
 	{
 	  DEBUG_TRACE ("\t%s", operand_mismatch_kind_names[curr->detail.kind]);
@@ -5846,6 +5869,13 @@ output_operand_error_report (char *str, bool non_fatal_only)
 			   operand_mismatch_kind_names[kind],
 			   curr->detail.data[0].i, curr->detail.data[1].i,
 			   curr->detail.data[2].i);
+	    }
+	  else if (kind == AARCH64_OPDE_REG_LIST)
+	    {
+	      record->detail.data[0].i |= curr->detail.data[0].i;
+	      DEBUG_TRACE ("\t--> %s [%x]",
+			   operand_mismatch_kind_names[kind],
+			   curr->detail.data[0].i);
 	    }
 	}
     }
@@ -6191,22 +6221,6 @@ process_movw_reloc_info (void)
   return true;
 }
 
-/* A primitive log calculator.  */
-
-static inline unsigned int
-get_logsz (unsigned int size)
-{
-  const unsigned char ls[16] =
-    {0, 1, -1, 2, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, 4};
-  if (size > 16)
-    {
-      gas_assert (0);
-      return -1;
-    }
-  gas_assert (ls[size - 1] != (unsigned char)-1);
-  return ls[size - 1];
-}
-
 /* Determine and return the real reloc type code for an instruction
    with the pseudo reloc type code BFD_RELOC_AARCH64_LDST_LO12.  */
 
@@ -6271,7 +6285,7 @@ ldst_lo12_determine_real_reloc_type (void)
 				      1, opd0_qlf, 0);
   gas_assert (opd1_qlf != AARCH64_OPND_QLF_NIL);
 
-  logsz = get_logsz (aarch64_get_qualifier_esize (opd1_qlf));
+  logsz = get_log2 (aarch64_get_qualifier_esize (opd1_qlf));
 
   if (inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
       || inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC

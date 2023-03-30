@@ -1438,7 +1438,7 @@ set_reg_list_error (aarch64_operand_error *mismatch_detail, int idx,
   if (mismatch_detail == NULL)
     return;
   set_error (mismatch_detail, AARCH64_OPDE_REG_LIST, idx, NULL);
-  mismatch_detail->data[0].i = expected_num;
+  mismatch_detail->data[0].i = 1 << expected_num;
 }
 
 static inline void
