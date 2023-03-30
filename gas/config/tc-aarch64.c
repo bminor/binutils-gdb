@@ -284,6 +284,7 @@ struct reloc_entry
   BASIC_REG_TYPE(VN)	/* v[0-31] */	\
   BASIC_REG_TYPE(ZN)	/* z[0-31] */	\
   BASIC_REG_TYPE(PN)	/* p[0-15] */	\
+  BASIC_REG_TYPE(ZA)	/* za */	\
   BASIC_REG_TYPE(ZAT)	/* za[0-15] (ZA tile) */			\
   BASIC_REG_TYPE(ZATH)	/* za[0-15]h (ZA tile horizontal slice) */ 	\
   BASIC_REG_TYPE(ZATV)	/* za[0-15]v (ZA tile vertical slice) */	\
@@ -327,6 +328,8 @@ struct reloc_entry
   MULTI_REG_TYPE(R_N, REG_TYPE(R_32) | REG_TYPE(R_64)			\
 		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64))			\
+  /* The whole of ZA or a single tile.  */				\
+  MULTI_REG_TYPE(ZA_ZAT, REG_TYPE(ZA) | REG_TYPE(ZAT))			\
   /* A horizontal or vertical slice of a ZA tile.  */			\
   MULTI_REG_TYPE(ZATHV, REG_TYPE(ZATH) | REG_TYPE(ZATV))		\
   /* Pseudo type to mark the end of the enumerator sequence.  */	\
@@ -1016,6 +1019,7 @@ aarch64_valid_suffix_char_p (aarch64_reg_type type, char ch)
     {
     case REG_TYPE_VN:
     case REG_TYPE_ZN:
+    case REG_TYPE_ZA:
     case REG_TYPE_ZAT:
     case REG_TYPE_ZATH:
     case REG_TYPE_ZATV:
@@ -4349,9 +4353,14 @@ parse_reg_with_qual (char **str, aarch64_reg_type reg_type,
   if (!reg)
     return NULL;
 
-  *qualifier = vectype_to_qualifier (&vectype);
-  if (*qualifier == AARCH64_OPND_QLF_NIL)
-    return NULL;
+  if (vectype.type == NT_invtype)
+    *qualifier = AARCH64_OPND_QLF_NIL;
+  else
+    {
+      *qualifier = vectype_to_qualifier (&vectype);
+      if (*qualifier == AARCH64_OPND_QLF_NIL)
+	return NULL;
+    }
 
   return reg;
 }
@@ -4558,10 +4567,23 @@ parse_sme_zero_mask(char **str)
   q = *str;
   do
     {
-      const reg_entry *reg = parse_reg_with_qual (&q, REG_TYPE_ZAT,
+      const reg_entry *reg = parse_reg_with_qual (&q, REG_TYPE_ZA_ZAT,
 						  &qualifier);
-      if (reg)
-        {
+      if (!reg)
+	return PARSE_FAIL;
+
+      if (reg->type == REG_TYPE_ZA)
+	{
+	  if (qualifier != AARCH64_OPND_QLF_NIL)
+	    {
+	      set_syntax_error ("ZA should not have a size suffix");
+	      return PARSE_FAIL;
+	    }
+          /* { ZA } is assembled as all-ones immediate.  */
+          mask = 0xff;
+	}
+      else
+	{
           int regno = reg->number;
           if (qualifier == AARCH64_OPND_QLF_S_B)
             {
@@ -4574,24 +4596,23 @@ parse_sme_zero_mask(char **str)
             mask |= 0x11 << regno;
           else if (qualifier == AARCH64_OPND_QLF_S_D)
             mask |= 0x01 << regno;
+	  else if (qualifier == AARCH64_OPND_QLF_S_Q)
+	    {
+              set_syntax_error (_("ZA tile masks do not operate at .Q"
+				  " granularity"));
+              return PARSE_FAIL;
+	    }
+	  else if (qualifier == AARCH64_OPND_QLF_NIL)
+	    {
+              set_syntax_error (_("missing ZA tile size"));
+              return PARSE_FAIL;
+	    }
           else
             {
-              set_syntax_error (_("wrong ZA tile element format"));
+              set_syntax_error (_("invalid ZA tile"));
               return PARSE_FAIL;
             }
-          continue;
         }
-      clear_error ();
-      if (strncasecmp (q, "za", 2) == 0 && !ISALNUM (q[2]))
-        {
-          /* { ZA } is assembled as all-ones immediate.  */
-          mask = 0xff;
-          q += 2;
-          continue;
-        }
-
-      set_syntax_error (_("wrong ZA tile element format"));
-      return PARSE_FAIL;
     }
   while (skip_past_char (&q, ','));
 
@@ -4646,15 +4667,13 @@ parse_sme_list_of_64bit_tiles (char **str)
 static int
 parse_sme_za_array (char **str, int *imm)
 {
-  char *p, *q;
+  char *q;
   int regno;
   int64_t imm_value;
 
-  p = q = *str;
-  while (ISALPHA (*q))
-    q++;
-
-  if ((q - p != 2) || strncasecmp ("za", p, q - p) != 0)
+  q = *str;
+  const reg_entry *reg = parse_reg (&q);
+  if (!reg || reg->type != REG_TYPE_ZA)
     {
       set_syntax_error (_("expected ZA array"));
       return PARSE_FAIL;
@@ -8180,6 +8199,10 @@ static const reg_entry reg_names[] = {
 
   /* SVE predicate registers.  */
   REGSET16 (p, PN), REGSET16 (P, PN),
+
+  /* SME ZA.  We model this as a register because it acts syntactically
+     like ZA0H, supporting qualifier suffixes and indexing.  */
+  REGDEF (za, 0, ZA), REGDEF (ZA, 0, ZA),
 
   /* SME ZA tile registers.  */
   REGSET16 (za, ZAT), REGSET16 (ZA, ZAT),

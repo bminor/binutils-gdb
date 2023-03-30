@@ -5921,7 +5921,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\
       "an SVE predicate register")					\
     Y(SVE_REG, imm, "SME_list_of_64bit_tiles", 0,	\
-      F(FLD_SME_zero_mask), "list of 64-bit ZA element tiles")					\
+      F(FLD_SME_zero_mask), "a list of 64-bit ZA element tiles")					\
     Y(SVE_REG, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,				\
       F(FLD_SME_size_10,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),	\
       "an SME horizontal or vertical vector access register")	\

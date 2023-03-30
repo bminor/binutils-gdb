@@ -30,3 +30,13 @@ zero { za0 }
 zero { zax }
 zero { za{ }
 zero { za} }
+zero { za0.q }
+zero { za.b }
+zero { za.h }
+zero { za.s }
+zero { za.d }
+zero { za.q }
+zero { za.2d }
+zero { za0.2d }
+zero { za0h.b }
+zero { za0v.b }
