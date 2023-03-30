@@ -6729,6 +6729,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	case AARCH64_OPND_SME_Zm_INDEX1:
 	case AARCH64_OPND_SME_Zm_INDEX2:
+	case AARCH64_OPND_SME_Zm_INDEX3_2:
+	case AARCH64_OPND_SME_Zm_INDEX3_10:
 	case AARCH64_OPND_SME_Zn_INDEX1_16:
 	case AARCH64_OPND_SME_Zn_INDEX2_15:
 	case AARCH64_OPND_SME_Zn_INDEX2_16:
@@ -7850,8 +7852,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->imm.value = val;
 	  break;
 
+	case AARCH64_OPND_SME_ZA_array_off2x2:
 	case AARCH64_OPND_SME_ZA_array_off3_0:
 	case AARCH64_OPND_SME_ZA_array_off3_5:
+	case AARCH64_OPND_SME_ZA_array_off3x2:
 	case AARCH64_OPND_SME_ZA_array_off4:
 	  if (!parse_dual_indexed_reg (&str, REG_TYPE_ZA,
 				       &info->indexed_za, &qualifier, 0))

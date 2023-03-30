@@ -1487,8 +1487,10 @@ aarch64_ins_sme_za_array (const aarch64_operand *self,
 {
   int regno = info->indexed_za.index.regno & 3;
   int imm = info->indexed_za.index.imm;
+  int countm1 = info->indexed_za.index.countm1;
+  assert (imm % (countm1 + 1) == 0);
   insert_field (self->fields[0], code, regno, 0);
-  insert_field (self->fields[1], code, imm, 0);
+  insert_field (self->fields[1], code, imm / (countm1 + 1), 0);
   return true;
 }
 

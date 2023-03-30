@@ -1905,7 +1905,7 @@ aarch64_ext_sme_za_list (const aarch64_operand *self,
 bool
 aarch64_ext_sme_za_array (const aarch64_operand *self,
                           aarch64_opnd_info *info, aarch64_insn code,
-                          const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                          const aarch64_inst *inst,
                           aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   int regno = extract_field (self->fields[0], code, 0);
@@ -1914,8 +1914,12 @@ aarch64_ext_sme_za_array (const aarch64_operand *self,
   else
     regno += 8;
   int imm = extract_field (self->fields[1], code, 0);
+  int num_offsets = get_operand_specific_data (self);
+  if (num_offsets == 0)
+    num_offsets = 1;
   info->indexed_za.index.regno = regno;
-  info->indexed_za.index.imm = imm;
+  info->indexed_za.index.imm = imm * num_offsets;
+  info->indexed_za.index.countm1 = num_offsets - 1;
   info->indexed_za.group_size = get_opcode_dependent_value (inst->opcode);
   return true;
 }
