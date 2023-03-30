@@ -366,7 +366,7 @@ unsigned char aarch64_get_qualifier_nelem (aarch64_opnd_qualifier_t);
 aarch64_insn aarch64_get_qualifier_standard_value (aarch64_opnd_qualifier_t);
 int aarch64_find_best_match (const aarch64_inst *,
 			     const aarch64_opnd_qualifier_seq_t *,
-			     int, aarch64_opnd_qualifier_t *);
+			     int, aarch64_opnd_qualifier_t *, int *);
 
 static inline void
 reset_operand_qualifier (aarch64_inst *inst, int idx)

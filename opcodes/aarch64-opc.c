@@ -906,6 +906,9 @@ aarch64_num_of_operands (const aarch64_opcode *opcode)
 /* Find the best matched qualifier sequence in *QUALIFIERS_LIST for INST.
    If succeeds, fill the found sequence in *RET, return 1; otherwise return 0.
 
+   Store the smallest number of non-matching qualifiers in *INVALID_COUNT.
+   This is always 0 if the function succeeds.
+
    N.B. on the entry, it is very likely that only some operands in *INST
    have had their qualifiers been established.
 
@@ -928,16 +931,17 @@ aarch64_num_of_operands (const aarch64_opcode *opcode)
 int
 aarch64_find_best_match (const aarch64_inst *inst,
 			 const aarch64_opnd_qualifier_seq_t *qualifiers_list,
-			 int stop_at, aarch64_opnd_qualifier_t *ret)
+			 int stop_at, aarch64_opnd_qualifier_t *ret,
+			 int *invalid_count)
 {
-  int found = 0;
-  int i, num_opnds;
+  int i, num_opnds, invalid, min_invalid;
   const aarch64_opnd_qualifier_t *qualifiers;
 
   num_opnds = aarch64_num_of_operands (inst->opcode);
   if (num_opnds == 0)
     {
       DEBUG_TRACE ("SUCCEED: no operand");
+      *invalid_count = 0;
       return 1;
     }
 
@@ -945,13 +949,14 @@ aarch64_find_best_match (const aarch64_inst *inst,
     stop_at = num_opnds - 1;
 
   /* For each pattern.  */
+  min_invalid = num_opnds;
   for (i = 0; i < AARCH64_MAX_QLF_SEQ_NUM; ++i, ++qualifiers_list)
     {
       int j;
       qualifiers = *qualifiers_list;
 
       /* Start as positive.  */
-      found = 1;
+      invalid = 0;
 
       DEBUG_TRACE ("%d", i);
 #ifdef DEBUG_AARCH64
@@ -963,10 +968,7 @@ aarch64_find_best_match (const aarch64_inst *inst,
 	 qualifier sequence.  (This matters for strict testing.)  In other
 	 positions an empty sequence acts as a terminator.  */
       if (i > 0 && empty_qualifier_sequence_p (qualifiers))
-	{
-	  found = 0;
-	  break;
-	}
+	break;
 
       for (j = 0; j < num_opnds && j <= stop_at; ++j, ++qualifiers)
 	{
@@ -989,21 +991,22 @@ aarch64_find_best_match (const aarch64_inst *inst,
 	      if (operand_also_qualified_p (inst->operands + j, *qualifiers))
 		continue;
 	      else
-		{
-		  found = 0;
-		  break;
-		}
+		invalid += 1;
 	    }
 	  else
 	    continue;	/* Equal qualifiers are certainly matched.  */
 	}
 
+      if (min_invalid > invalid)
+	min_invalid = invalid;
+
       /* Qualifiers established.  */
-      if (found == 1)
+      if (min_invalid == 0)
 	break;
     }
 
-  if (found == 1)
+  *invalid_count = min_invalid;
+  if (min_invalid == 0)
     {
       /* Fill the result in *RET.  */
       int j;
@@ -1033,17 +1036,21 @@ aarch64_find_best_match (const aarch64_inst *inst,
    Return 1 if the operand qualifier(s) in *INST match one of the qualifier
    sequences in INST->OPCODE->qualifiers_list; otherwise return 0.
 
+   Store the smallest number of non-matching qualifiers in *INVALID_COUNT.
+   This is always 0 if the function succeeds.
+
    if UPDATE_P, update the qualifier(s) in *INST after the matching
    succeeds.  */
 
 static int
-match_operands_qualifier (aarch64_inst *inst, bool update_p)
+match_operands_qualifier (aarch64_inst *inst, bool update_p,
+			  int *invalid_count)
 {
   int i;
   aarch64_opnd_qualifier_seq_t qualifiers;
 
   if (!aarch64_find_best_match (inst, inst->opcode->qualifiers_list, -1,
-			       qualifiers))
+				qualifiers, invalid_count))
     {
       DEBUG_TRACE ("matching FAIL");
       return 0;
@@ -2893,7 +2900,9 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
      constraint checking will carried out by operand_general_constraint_met_p,
      which has be to called after this in order to get all of the operands'
      qualifiers established.  */
-  if (match_operands_qualifier (inst, true /* update_p */) == 0)
+  int invalid_count;
+  if (match_operands_qualifier (inst, true /* update_p */,
+				&invalid_count) == 0)
     {
       DEBUG_TRACE ("FAIL on operand qualifier matching");
       if (mismatch_detail)
@@ -2904,6 +2913,7 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
 	  mismatch_detail->kind = AARCH64_OPDE_INVALID_VARIANT;
 	  mismatch_detail->index = -1;
 	  mismatch_detail->error = NULL;
+	  mismatch_detail->data[0].i = invalid_count;
 	}
       return 0;
     }

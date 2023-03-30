@@ -253,8 +253,9 @@ get_expected_qualifier (const aarch64_inst *inst, int i)
   aarch64_opnd_qualifier_seq_t qualifiers;
   /* Should not be called if the qualifier is known.  */
   assert (inst->operands[i].qualifier == AARCH64_OPND_QLF_NIL);
+  int invalid_count;
   if (aarch64_find_best_match (inst, inst->opcode->qualifiers_list,
-			       i, qualifiers))
+			       i, qualifiers, &invalid_count))
     return qualifiers[i];
   else
     return AARCH64_OPND_QLF_NIL;

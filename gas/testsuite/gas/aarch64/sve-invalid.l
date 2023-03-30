@@ -1165,13 +1165,13 @@
 .*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
 .*: Error: operand mismatch -- `sdot z0\.h,z1\.h,z2\.h\[0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
+.*: Info:    	sdot z0\.d, z1\.h, z2\.h\[0\]
 .*: Error: operand mismatch -- `sdot z0\.s,z1\.s,z2\.s\[0\]'
 .*: Info:    did you mean this\?
 .*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
 .*: Error: operand mismatch -- `sdot z0\.d,z1\.d,z2\.d\[0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	sdot z0\.s, z1\.b, z2\.b\[0\]
+.*: Info:    	sdot z0\.d, z1\.h, z2\.h\[0\]
 .*: Error: operand mismatch -- `udot z0\.b,z1\.b,z2\.b'
 .*: Info:    did you mean this\?
 .*: Info:    	udot z0\.s, z1\.b, z2\.b
@@ -1197,13 +1197,13 @@
 .*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]
 .*: Error: operand mismatch -- `udot z0\.h,z1\.h,z2\.h\[0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]
+.*: Info:    	udot z0\.d, z1\.h, z2\.h\[0\]
 .*: Error: operand mismatch -- `udot z0\.s,z1\.s,z2\.s\[0\]'
 .*: Info:    did you mean this\?
 .*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]
 .*: Error: operand mismatch -- `udot z0\.d,z1\.d,z2\.d\[0\]'
 .*: Info:    did you mean this\?
-.*: Info:    	udot z0\.s, z1\.b, z2\.b\[0\]
+.*: Info:    	udot z0\.d, z1\.h, z2\.h\[0\]
 .*: Error: syntax error in register list at operand 1 -- `ld2b {},p0/z,\[x0\]'
 .*: Error: syntax error in register list at operand 1 -- `ld2b {.b},p0/z,\[x0\]'
 .*: Error: syntax error in register list at operand 1 -- `ld2b {z0.b-},p0/z,\[x0\]'

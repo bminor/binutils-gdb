@@ -159,7 +159,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `cdot z0\.s,z0\.b,z0\.b\[4\],#0'
 [^ :]+:[0-9]+: Error: operand mismatch -- `cdot z0\.s,z0\.d,z0\.b\[0\],#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	cdot z0\.d, z0\.h, z0\.h\[0\], #0
+[^ :]+:[0-9]+: Info:    	cdot z0\.s, z0\.b, z0\.b\[0\], #0
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `cdot z32\.s,z0\.b,z0\.b\[0\],#0'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `cdot z0\.s,z32\.b,z0\.b\[0\],#0'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `cdot z0\.s,z0\.b,z8\.b\[0\],#0'
@@ -197,7 +197,7 @@
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `cmla z0\.s,z0\.s,z16\.s\[0\],#0'
 [^ :]+:[0-9]+: Error: operand mismatch -- `cmla z0\.s,z0\.s,z0\.d\[0\],#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	cmla z0\.h, z0\.h, z0\.h\[0\], #0
+[^ :]+:[0-9]+: Info:    	cmla z0\.s, z0\.s, z0\.s\[0\], #0
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `cmla z0\.s,z0\.s,z0\.s\[2\],#0'
 [^ :]+:[0-9]+: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `cmla z0\.s,z0\.s,z0\.s\[0\],#1'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `cmla z32\.b,z0\.b,z0\.b,#0'
@@ -282,7 +282,7 @@
 [^ :]+:[0-9]+: Info:    	fcvtlt z0\.d, p0/m, z0\.s
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtlt z0\.s,p0/z,z0\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtlt z0\.d, p0/m, z0\.s
+[^ :]+:[0-9]+: Info:    	fcvtlt z0\.s, p0/m, z0\.h
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fcvtlt z32\.d,p0/m,z0\.s'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `fcvtlt z0\.d,p8/m,z0\.s'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fcvtlt z0\.d,p0/m,z32\.s'
@@ -298,10 +298,10 @@
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fcvtnt z0\.h,p0/m,z32\.s'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtnt z0\.h,p0/m,z0\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtnt z0\.s, p0/m, z0\.d
+[^ :]+:[0-9]+: Info:    	fcvtnt z0\.h, p0/m, z0\.s
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtnt z0\.h,p0/z,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtnt z0\.s, p0/m, z0\.d
+[^ :]+:[0-9]+: Info:    	fcvtnt z0\.h, p0/m, z0\.s
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fcvtnt z32\.s,p0/m,z0\.d'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `fcvtnt z0\.s,p8/m,z0\.d'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fcvtnt z0\.s,p0/m,z32\.d'
@@ -491,7 +491,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1b {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1b {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.d}, p0/z, \[z0\.d, xzr\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1b {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1b {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1b {z0\.d},p0/z,\[z32\.d\]'
@@ -538,7 +538,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1h {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1h {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1h {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1h {z0\.d}, p0/z, \[z0\.d, xzr\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1h {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1h {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1h {z0\.d},p0/z,\[z32\.d\]'
@@ -598,7 +598,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1w {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1w {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1w {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1w {z0\.d}, p0/z, \[z0\.d, xzr\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1w {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1w {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1w {z0\.d},p0/z,\[z32\.d\]'
@@ -638,20 +638,20 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `mla z0\.s,z0\.s,z0\.s\[4\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `mla z0\.h,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mla z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mla z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `mla z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mla z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mla z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `mla z32\.s,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector or predicate register at operand 2 -- `mla z0\.s,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `mla z0\.s,z0\.s,z8\.s\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `mla z0\.d,z0\.d,z0\.d\[2\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `mla z0\.h,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mla z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mla z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `mla z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mla z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mla z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `mla z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector or predicate register at operand 2 -- `mla z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `mla z0\.d,z0\.d,z16\.d\[0\]'
@@ -668,20 +668,20 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `mls z0\.s,z0\.s,z0\.s\[4\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `mls z0\.h,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mls z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mls z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `mls z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mls z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mls z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `mls z32\.s,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector or predicate register at operand 2 -- `mls z0\.s,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `mls z0\.s,z0\.s,z8\.s\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `mls z0\.d,z0\.d,z0\.d\[2\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `mls z0\.h,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mls z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mls z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `mls z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mls z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mls z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `mls z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector or predicate register at operand 2 -- `mls z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `mls z0\.d,z0\.d,z16\.d\[0\]'
@@ -698,20 +698,20 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `mul z0\.s,z0\.s,z0\.s\[4\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `mul z0\.h,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mul z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mul z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `mul z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mul z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mul z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: expected an integer or vector register at operand 1 -- `mul z32\.s,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector or predicate register at operand 2 -- `mul z0\.s,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `mul z0\.s,z0\.s,z8\.s\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `mul z0\.d,z0\.d,z0\.d\[2\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `mul z0\.h,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mul z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mul z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `mul z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	mul z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	mul z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: expected an integer or vector register at operand 1 -- `mul z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector or predicate register at operand 2 -- `mul z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `mul z0\.d,z0\.d,z16\.d\[0\]'
@@ -762,7 +762,9 @@
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `pmullb z0\.h,z0\.b,z32\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `pmullb z0\.b,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	pmullb z0\.q, z0\.d, z0\.d
+[^ :]+:[0-9]+: Info:    	pmullb z0\.h, z0\.b, z0\.b
+[^ :]+:[0-9]+: Info:    other valid variant\(s\):
+[^ :]+:[0-9]+: Info:    	pmullb z0\.d, z0\.s, z0\.s
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `pmullt z32\.q,z0\.d,z0\.d'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `pmullt z0\.q,z32\.d,z0\.d'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `pmullt z0\.q,z0\.d,z32\.d'
@@ -774,7 +776,9 @@
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `pmullt z0\.h,z0\.b,z32\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `pmullt z0\.b,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	pmullt z0\.q, z0\.d, z0\.d
+[^ :]+:[0-9]+: Info:    	pmullt z0\.h, z0\.b, z0\.b
+[^ :]+:[0-9]+: Info:    other valid variant\(s\):
+[^ :]+:[0-9]+: Info:    	pmullt z0\.d, z0\.s, z0\.s
 [^ :]+:[0-9]+: Error: operand mismatch -- `raddhnb z0\.h,z0\.h,z0\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	raddhnb z0\.b, z0\.h, z0\.h
@@ -1125,7 +1129,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `smlalb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `smlalb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	smlalb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	smlalb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `smlalb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `smlalb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `smlalb z0\.d,z0\.s,z16\.s\[0\]'
@@ -1149,7 +1153,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `smlalt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `smlalt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	smlalt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	smlalt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `smlalt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `smlalt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `smlalt z0\.d,z0\.s,z16\.s\[0\]'
@@ -1173,7 +1177,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `smlslb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `smlslb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	smlslb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	smlslb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `smlslb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `smlslb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `smlslb z0\.d,z0\.s,z16\.s\[0\]'
@@ -1197,7 +1201,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `smlslt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `smlslt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	smlslt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	smlslt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `smlslt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `smlslt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `smlslt z0\.d,z0\.s,z16\.s\[0\]'
@@ -1231,7 +1235,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `smullb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `smullb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	smullb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	smullb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `smullb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `smullb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `smullb z0\.d,z0\.s,z16\.s\[0\]'
@@ -1255,7 +1259,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `smullt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `smullt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	smullt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	smullt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `smullt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `smullt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `smullt z0\.d,z0\.s,z16\.s\[0\]'
@@ -1342,7 +1346,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqdmlalb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmlalb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmlalb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmlalb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqdmlalb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmlalb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqdmlalb z0\.d,z0\.s,z16\.s\[0\]'
@@ -1376,7 +1380,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqdmlalt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmlalt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmlalt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmlalt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqdmlalt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmlalt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqdmlalt z0\.d,z0\.s,z16\.s\[0\]'
@@ -1400,7 +1404,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqdmlslb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmlslb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmlslb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmlslb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqdmlslb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmlslb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqdmlslb z0\.d,z0\.s,z16\.s\[0\]'
@@ -1434,7 +1438,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqdmlslt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmlslt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmlslt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmlslt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqdmlslt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmlslt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqdmlslt z0\.d,z0\.s,z16\.s\[0\]'
@@ -1468,20 +1472,20 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `sqdmulh z0\.s,z0\.s,z0\.s\[4\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmulh z0\.s,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmulh z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmulh z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmulh z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqdmulh z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmulh z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqdmulh z0\.d,z0\.d,z16\.d\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `sqdmulh z0\.d,z0\.d,z0\.d\[2\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmulh z0\.d,z0\.h,z0\.d\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmulh z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmulh z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmulh z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqdmulh z32\.h,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmulh z0\.h,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `sqdmulh z0\.h,z0\.b,z32\.b'
@@ -1499,7 +1503,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqdmullb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmullb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmullb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmullb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqdmullb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmullb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqdmullb z0\.d,z0\.s,z16\.s\[0\]'
@@ -1523,7 +1527,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqdmullt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqdmullt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqdmullt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	sqdmullt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqdmullt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqdmullt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqdmullt z0\.d,z0\.s,z16\.s\[0\]'
@@ -1566,10 +1570,10 @@
 [^ :]+:[0-9]+: Error: rotate expected to be 0, 90, 180 or 270 at operand 4 -- `sqrdcmlah z0\.h,z0\.h,z0\.h\[0\],#360'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdcmlah z0\.h,z0\.h,z0\.s\[0\],#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdcmlah z0\.s, z0\.s, z0\.s\[0\], #0
+[^ :]+:[0-9]+: Info:    	sqrdcmlah z0\.h, z0\.h, z0\.h\[0\], #0
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdcmlah z0\.h,z0\.s,z0\.h\[0\],#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdcmlah z0\.s, z0\.s, z0\.s\[0\], #0
+[^ :]+:[0-9]+: Info:    	sqrdcmlah z0\.h, z0\.h, z0\.h\[0\], #0
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqrdcmlah z32\.s,z0\.s,z0\.s\[0\],#0'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdcmlah z0\.s,z32\.s,z0\.s\[0\],#0'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqrdcmlah z0\.s,z0\.s,z16\.s\[0\],#0'
@@ -1610,20 +1614,20 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `sqrdmlah z0\.s,z0\.s,z0\.s\[4\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlah z0\.s,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlah z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqrdmlah z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdmlah z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqrdmlah z0\.d,z0\.d,z16\.d\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `sqrdmlah z0\.d,z0\.d,z0\.d\[2\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlah z0\.d,z0\.h,z0\.d\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlah z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlah z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqrdmlah z32\.h,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdmlah z0\.h,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `sqrdmlah z0\.h,z0\.b,z32\.b'
@@ -1651,20 +1655,20 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `sqrdmlsh z0\.s,z0\.s,z0\.s\[4\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlsh z0\.s,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlsh z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqrdmlsh z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdmlsh z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqrdmlsh z0\.d,z0\.d,z16\.d\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `sqrdmlsh z0\.d,z0\.d,z0\.d\[2\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlsh z0\.d,z0\.h,z0\.d\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlsh z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqrdmlsh z32\.h,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdmlsh z0\.h,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `sqrdmlsh z0\.h,z0\.b,z32\.b'
@@ -1692,20 +1696,20 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `sqrdmulh z0\.s,z0\.s,z0\.s\[4\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmulh z0\.s,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmulh z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.s, z0\.s, z0\.s\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqrdmulh z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdmulh z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqrdmulh z0\.d,z0\.d,z16\.d\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `sqrdmulh z0\.d,z0\.d,z0\.d\[2\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmulh z0\.d,z0\.h,z0\.d\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmulh z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.h, z0\.h, z0\.h\[0\]
+[^ :]+:[0-9]+: Info:    	sqrdmulh z0\.d, z0\.d, z0\.d\[0\]
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqrdmulh z32\.h,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdmulh z0\.h,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `sqrdmulh z0\.h,z0\.b,z32\.b'
@@ -2215,7 +2219,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1b {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1b {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1b {z0\.s}, p0, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1b {z0\.d}, p0, \[z0\.d, xzr\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1b {z32\.d},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1b {z0\.d},p8,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `stnt1b {z0\.d},p0,\[z32\.d\]'
@@ -2250,7 +2254,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1h {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1h {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1h {z0\.s}, p0, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1h {z0\.d}, p0, \[z0\.d, xzr\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1h {z32\.d},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1h {z0\.d},p8,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `stnt1h {z0\.d},p0,\[z32\.d\]'
@@ -2271,7 +2275,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1w {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1w {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1w {z0\.s}, p0, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1w {z0\.d}, p0, \[z0\.d, xzr\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1w {z32\.d},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1w {z0\.d},p8,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `stnt1w {z0\.d},p0,\[z32\.d\]'
@@ -2558,7 +2562,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `umlalb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `umlalb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	umlalb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	umlalb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `umlalb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `umlalb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `umlalb z0\.d,z0\.s,z16\.s\[0\]'
@@ -2582,7 +2586,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `umlalt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `umlalt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	umlalt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	umlalt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `umlalt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `umlalt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `umlalt z0\.d,z0\.s,z16\.s\[0\]'
@@ -2606,7 +2610,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `umlslb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `umlslb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	umlslb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	umlslb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `umlslb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `umlslb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `umlslb z0\.d,z0\.s,z16\.s\[0\]'
@@ -2630,7 +2634,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `umlslt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `umlslt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	umlslt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	umlslt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `umlslt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `umlslt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `umlslt z0\.d,z0\.s,z16\.s\[0\]'
@@ -2665,7 +2669,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `umullb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `umullb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	umullb z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	umullb z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `umullb z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `umullb z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `umullb z0\.d,z0\.s,z16\.s\[0\]'
@@ -2689,7 +2693,7 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `umullt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `umullt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	umullt z0\.d, z0\.s, z0\.s\[0\]
+[^ :]+:[0-9]+: Info:    	umullt z0\.s, z0\.h, z0\.h\[0\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `umullt z32\.d,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `umullt z0\.d,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `umullt z0\.d,z0\.s,z16\.s\[0\]'
@@ -3159,11 +3163,11 @@
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilege p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilege p0/m,w0,w0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	whilege p0\.b, x0, x0
+[^ :]+:[0-9]+: Info:    	whilege p0\.b, w0, w0
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	whilege p0\.h, x0, x0
-[^ :]+:[0-9]+: Info:    	whilege p0\.s, x0, x0
-[^ :]+:[0-9]+: Info:    	whilege p0\.d, x0, x0
+[^ :]+:[0-9]+: Info:    	whilege p0\.h, w0, w0
+[^ :]+:[0-9]+: Info:    	whilege p0\.s, w0, w0
+[^ :]+:[0-9]+: Info:    	whilege p0\.d, w0, w0
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilege p0\.b,w31,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilege p0\.b,w0,w31'
 [^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilegt p16\.b,x0,x0'
@@ -3197,11 +3201,11 @@
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilegt p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilegt p0/m,w0,w0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	whilegt p0\.b, x0, x0
+[^ :]+:[0-9]+: Info:    	whilegt p0\.b, w0, w0
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	whilegt p0\.h, x0, x0
-[^ :]+:[0-9]+: Info:    	whilegt p0\.s, x0, x0
-[^ :]+:[0-9]+: Info:    	whilegt p0\.d, x0, x0
+[^ :]+:[0-9]+: Info:    	whilegt p0\.h, w0, w0
+[^ :]+:[0-9]+: Info:    	whilegt p0\.s, w0, w0
+[^ :]+:[0-9]+: Info:    	whilegt p0\.d, w0, w0
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilegt p0\.b,w31,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilegt p0\.b,w0,w31'
 [^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilehi p16\.b,x0,x0'
@@ -3235,11 +3239,11 @@
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehi p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilehi p0/m,w0,w0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	whilehi p0\.b, x0, x0
+[^ :]+:[0-9]+: Info:    	whilehi p0\.b, w0, w0
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	whilehi p0\.h, x0, x0
-[^ :]+:[0-9]+: Info:    	whilehi p0\.s, x0, x0
-[^ :]+:[0-9]+: Info:    	whilehi p0\.d, x0, x0
+[^ :]+:[0-9]+: Info:    	whilehi p0\.h, w0, w0
+[^ :]+:[0-9]+: Info:    	whilehi p0\.s, w0, w0
+[^ :]+:[0-9]+: Info:    	whilehi p0\.d, w0, w0
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilehi p0\.b,w31,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehi p0\.b,w0,w31'
 [^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilehs p16\.b,x0,x0'
@@ -3273,11 +3277,11 @@
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehs p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilehs p0/m,w0,w0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	whilehs p0\.b, x0, x0
+[^ :]+:[0-9]+: Info:    	whilehs p0\.b, w0, w0
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	whilehs p0\.h, x0, x0
-[^ :]+:[0-9]+: Info:    	whilehs p0\.s, x0, x0
-[^ :]+:[0-9]+: Info:    	whilehs p0\.d, x0, x0
+[^ :]+:[0-9]+: Info:    	whilehs p0\.h, w0, w0
+[^ :]+:[0-9]+: Info:    	whilehs p0\.s, w0, w0
+[^ :]+:[0-9]+: Info:    	whilehs p0\.d, w0, w0
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilehs p0\.b,w31,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehs p0\.b,w0,w31'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilerw p0\.b,w0,x0'

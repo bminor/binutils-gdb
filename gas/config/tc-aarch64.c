@@ -5875,6 +5875,10 @@ output_operand_error_report (char *str, bool non_fatal_only)
 			   operand_mismatch_kind_names[kind],
 			   curr->detail.data[0].i);
 	    }
+	  /* Pick the variant with the cloest match.  */
+	  else if (kind == AARCH64_OPDE_INVALID_VARIANT
+		   && record->detail.data[0].i > curr->detail.data[0].i)
+	    record = curr;
 	}
     }
 
