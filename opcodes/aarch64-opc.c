@@ -2770,7 +2770,7 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
         case sme_str:
           assert (inst->operands[0].type == AARCH64_OPND_SME_ZA_array);
           assert (inst->operands[1].type == AARCH64_OPND_SME_ADDR_RI_U4xVL);
-          if (inst->operands[0].za_tile_vector.index.imm
+          if (inst->operands[0].indexed_za.index.imm
               != inst->operands[1].addr.offset.imm)
             {
               if (mismatch_detail)
@@ -3556,11 +3556,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "%s%s[%s, %s]%s",
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
 		style_reg (styler, "za%d%c.%s",
-			   opnd->za_tile_vector.regno,
-			   opnd->za_tile_vector.v == 1 ? 'v' : 'h',
+			   opnd->indexed_za.regno,
+			   opnd->indexed_za.v == 1 ? 'v' : 'h',
 			   aarch64_get_qualifier_name (opnd->qualifier)),
-		style_reg (styler, "w%d", opnd->za_tile_vector.index.regno),
-		style_imm (styler, "%d", opnd->za_tile_vector.index.imm),
+		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
+		style_imm (styler, "%d", opnd->indexed_za.index.imm),
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "}" : "");
       break;
 
@@ -3571,8 +3571,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_ZA_array:
       snprintf (buf, size, "%s[%s, %s]",
 		style_reg (styler, "za"),
-		style_reg (styler, "w%d", opnd->za_tile_vector.index.regno),
-		style_imm (styler, "%d", opnd->za_tile_vector.index.imm));
+		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
+		style_imm (styler, "%d", opnd->indexed_za.index.imm));
       break;
 
     case AARCH64_OPND_SME_SM_ZA:
@@ -3582,10 +3582,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SME_PnT_Wm_imm:
       snprintf (buf, size, "%s[%s, %s]",
-		style_reg (styler, "p%d.%s", opnd->za_tile_vector.regno,
+		style_reg (styler, "p%d.%s", opnd->indexed_za.regno,
 			   aarch64_get_qualifier_name (opnd->qualifier)),
-                style_reg (styler, "w%d", opnd->za_tile_vector.index.regno),
-                style_imm (styler, "%d", opnd->za_tile_vector.index.imm));
+		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
+		style_imm (styler, "%d", opnd->indexed_za.index.imm));
       break;
 
     case AARCH64_OPND_CRn:

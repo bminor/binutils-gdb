@@ -1108,6 +1108,18 @@ extern const aarch64_cond aarch64_conds[16];
 const aarch64_cond* get_cond_from_value (aarch64_insn value);
 const aarch64_cond* get_inverted_cond (const aarch64_cond *cond);
 
+/* Information about a reference to part of ZA.  */
+struct aarch64_indexed_za
+{
+  int regno;      /* <ZAn> */
+  struct
+  {
+    int regno;    /* <Wv>  */
+    int imm;      /* <imm>  */
+  } index;
+  unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
+};
+
 /* Structure representing an operand.  */
 
 struct aarch64_opnd_info
@@ -1172,16 +1184,7 @@ struct aarch64_opnd_info
 	} sysreg;
 
       /* ZA tile vector, e.g. <ZAn><HV>.D[<Wv>{, <imm>}]  */
-      struct
-	{
-	  int regno;      /* <ZAn> */
-	  struct
-	  {
-	    int regno;    /* <Wv>  */
-	    int imm;      /* <imm>  */
-	  } index;
-	  unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
-	} za_tile_vector;
+      struct aarch64_indexed_za indexed_za;
 
       const aarch64_cond *cond;
       /* The encoding of the PSTATE field.  */

@@ -1786,34 +1786,34 @@ aarch64_ext_sme_za_hv_tiles (const aarch64_operand *self,
   /* Deduce qualifier encoded in size and Q fields.  */
   if (fld_size == 0)
     {
-      info->za_tile_vector.regno = 0;
-      info->za_tile_vector.index.imm = fld_zan_imm;
+      info->indexed_za.regno = 0;
+      info->indexed_za.index.imm = fld_zan_imm;
     }
   else if (fld_size == 1)
     {
-      info->za_tile_vector.regno = fld_zan_imm >> 3;
-      info->za_tile_vector.index.imm = fld_zan_imm & 0x07;
+      info->indexed_za.regno = fld_zan_imm >> 3;
+      info->indexed_za.index.imm = fld_zan_imm & 0x07;
     }
   else if (fld_size == 2)
     {
-      info->za_tile_vector.regno = fld_zan_imm >> 2;
-      info->za_tile_vector.index.imm = fld_zan_imm & 0x03;
+      info->indexed_za.regno = fld_zan_imm >> 2;
+      info->indexed_za.index.imm = fld_zan_imm & 0x03;
     }
   else if (fld_size == 3 && fld_q == 0)
     {
-      info->za_tile_vector.regno = fld_zan_imm >> 1;
-      info->za_tile_vector.index.imm = fld_zan_imm & 0x01;
+      info->indexed_za.regno = fld_zan_imm >> 1;
+      info->indexed_za.index.imm = fld_zan_imm & 0x01;
     }
   else if (fld_size == 3 && fld_q == 1)
     {
-      info->za_tile_vector.regno = fld_zan_imm;
-      info->za_tile_vector.index.imm = 0;
+      info->indexed_za.regno = fld_zan_imm;
+      info->indexed_za.index.imm = 0;
     }
   else
     return false;
 
-  info->za_tile_vector.index.regno = fld_rv + 12;
-  info->za_tile_vector.v = fld_v;
+  info->indexed_za.index.regno = fld_rv + 12;
+  info->indexed_za.v = fld_v;
 
   return true;
 }
@@ -1847,8 +1847,8 @@ aarch64_ext_sme_za_array (const aarch64_operand *self,
 {
   int regno = extract_field (self->fields[0], code, 0) + 12;
   int imm = extract_field (self->fields[1], code, 0);
-  info->za_tile_vector.index.regno = regno;
-  info->za_tile_vector.index.imm = imm;
+  info->indexed_za.index.regno = regno;
+  info->indexed_za.index.imm = imm;
   return true;
 }
 
@@ -1902,8 +1902,8 @@ aarch64_ext_sme_pred_reg_with_index (const aarch64_operand *self,
   aarch64_insn fld_tszl = extract_field (self->fields[4], code, 0);
   int imm;
 
-  info->za_tile_vector.regno = fld_pn;
-  info->za_tile_vector.index.regno = fld_rm + 12;
+  info->indexed_za.regno = fld_pn;
+  info->indexed_za.index.regno = fld_rm + 12;
 
   if (fld_tszl & 0x1)
     imm = (fld_i1 << 3) | (fld_tszh << 2) | (fld_tszl >> 1);
@@ -1916,7 +1916,7 @@ aarch64_ext_sme_pred_reg_with_index (const aarch64_operand *self,
   else
     return false;
 
-  info->za_tile_vector.index.imm = imm;
+  info->indexed_za.index.imm = imm;
   return true;
 }
 

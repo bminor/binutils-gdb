@@ -1340,10 +1340,10 @@ aarch64_ins_sme_za_hv_tiles (const aarch64_operand *self,
 {
   int fld_size;
   int fld_q;
-  int fld_v = info->za_tile_vector.v;
-  int fld_rv = info->za_tile_vector.index.regno - 12;
-  int fld_zan_imm = info->za_tile_vector.index.imm;
-  int regno = info->za_tile_vector.regno;
+  int fld_v = info->indexed_za.v;
+  int fld_rv = info->indexed_za.index.regno - 12;
+  int fld_zan_imm = info->indexed_za.index.imm;
+  int regno = info->indexed_za.regno;
 
   switch (info->qualifier)
     {
@@ -1410,8 +1410,8 @@ aarch64_ins_sme_za_array (const aarch64_operand *self,
                           const aarch64_inst *inst ATTRIBUTE_UNUSED,
                           aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int regno = info->za_tile_vector.index.regno - 12;
-  int imm = info->za_tile_vector.index.imm;
+  int regno = info->indexed_za.index.regno - 12;
+  int imm = info->indexed_za.index.imm;
   insert_field (self->fields[0], code, regno, 0);
   insert_field (self->fields[1], code, imm, 0);
   return true;
@@ -1464,9 +1464,9 @@ aarch64_ins_sme_pred_reg_with_index (const aarch64_operand *self,
                                      const aarch64_inst *inst ATTRIBUTE_UNUSED,
                                      aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int fld_pn = info->za_tile_vector.regno;
-  int fld_rm = info->za_tile_vector.index.regno - 12;
-  int imm = info->za_tile_vector.index.imm;
+  int fld_pn = info->indexed_za.regno;
+  int fld_rm = info->indexed_za.index.regno - 12;
+  int imm = info->indexed_za.index.imm;
   int fld_i1, fld_tszh, fld_tshl;
 
   insert_field (self->fields[0], code, fld_rm, 0);

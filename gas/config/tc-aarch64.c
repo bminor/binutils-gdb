@@ -7185,9 +7185,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    if (val == PARSE_FAIL)
 	        goto failure;
 
-	    info->za_tile_vector.regno = val;
-	    info->za_tile_vector.index.regno = index_base_reg;
-	    info->za_tile_vector.index.imm = imm;
+	    info->indexed_za.regno = val;
+	    info->indexed_za.index.regno = index_base_reg;
+	    info->indexed_za.index.imm = imm;
 	    info->qualifier = qualifier;
 	    break;
 	  }
@@ -7535,10 +7535,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	                                           &qualifier);
 	    if (val == PARSE_FAIL)
 	      goto failure;
-	    info->za_tile_vector.regno = val;
-	    info->za_tile_vector.index.regno = vector_select_register;
-	    info->za_tile_vector.index.imm = imm;
-	    info->za_tile_vector.v = slice_indicator;
+	    info->indexed_za.regno = val;
+	    info->indexed_za.index.regno = vector_select_register;
+	    info->indexed_za.index.imm = imm;
+	    info->indexed_za.v = slice_indicator;
 	    info->qualifier = qualifier;
 	    break;
 	  }
@@ -7556,8 +7556,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      val = parse_sme_za_array (&str, &imm);
 	      if (val == PARSE_FAIL)
 	        goto failure;
-	      info->za_tile_vector.index.regno = val;
-	      info->za_tile_vector.index.imm = imm;
+	      info->indexed_za.index.regno = val;
+	      info->indexed_za.index.imm = imm;
 	      break;
 	    }
 
