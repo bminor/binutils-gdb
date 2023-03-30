@@ -134,6 +134,7 @@ struct vector_type_el
 {
   enum vector_el_type type;
   unsigned char defined;
+  unsigned element_size;
   unsigned width;
   int64_t index;
 };
@@ -966,6 +967,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
 
   parsed_type->type = type;
   parsed_type->width = width;
+  parsed_type->element_size = element_size;
 
   *str = ptr;
 
@@ -1056,6 +1058,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
   atype.defined = 0;
   atype.type = NT_invtype;
   atype.width = -1;
+  atype.element_size = 0;
   atype.index = 0;
 
   if (reg == NULL)
@@ -1080,6 +1083,14 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 	{
 	  if (!parse_vector_type_for_operand (type, &parsetype, &str))
 	    return NULL;
+	  if ((reg->type == REG_TYPE_ZAT
+	       || reg->type == REG_TYPE_ZATH
+	       || reg->type == REG_TYPE_ZATV)
+	      && reg->number * 8 >= parsetype.element_size)
+	    {
+	      set_syntax_error (_("ZA tile number out of range"));
+	      return NULL;
+	    }
 	}
       else
 	{
@@ -1182,10 +1193,11 @@ aarch64_reg_parse (char **ccp, aarch64_reg_type type,
 static inline bool
 eq_vector_type_el (struct vector_type_el e1, struct vector_type_el e2)
 {
-  return
-    e1.type == e2.type
-    && e1.defined == e2.defined
-    && e1.width == e2.width && e1.index == e2.index;
+  return (e1.type == e2.type
+	  && e1.defined == e2.defined
+	  && e1.width == e2.width
+	  && e1.element_size == e2.element_size
+	  && e1.index == e2.index);
 }
 
 /* This function parses a list of vector registers of type TYPE.
@@ -1234,6 +1246,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   typeinfo_first.defined = 0;
   typeinfo_first.type = NT_invtype;
   typeinfo_first.width = -1;
+  typeinfo_first.element_size = 0;
   typeinfo_first.index = 0;
   ret_val = 0;
   val = -1;
@@ -4343,63 +4356,6 @@ parse_reg_with_qual (char **str, aarch64_reg_type reg_type,
   return reg;
 }
 
-/* Parse SME ZA tile encoded in <ZAda> assembler symbol.
-   Function return tile QUALIFIER on success.
-
-   Tiles are in example format: za[0-9]\.[bhsd]
-
-   Function returns <ZAda> register number or PARSE_FAIL.
-*/
-static int
-parse_sme_zada_operand (char **str, aarch64_opnd_qualifier_t *qualifier)
-{
-  int regno;
-  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_ZAT, qualifier);
-
-  if (reg == NULL)
-    return PARSE_FAIL;
-  regno = reg->number;
-
-  switch (*qualifier)
-    {
-    case AARCH64_OPND_QLF_S_B:
-      if (regno != 0x00)
-      {
-        set_syntax_error (_("invalid ZA tile register number, expected za0"));
-        return PARSE_FAIL;
-      }
-      break;
-    case AARCH64_OPND_QLF_S_H:
-      if (regno > 0x01)
-      {
-        set_syntax_error (_("invalid ZA tile register number, expected za0-za1"));
-        return PARSE_FAIL;
-      }
-      break;
-    case AARCH64_OPND_QLF_S_S:
-      if (regno > 0x03)
-      {
-        /* For the 32-bit variant: is the name of the ZA tile ZA0-ZA3.  */
-        set_syntax_error (_("invalid ZA tile register number, expected za0-za3"));
-        return PARSE_FAIL;
-      }
-      break;
-    case AARCH64_OPND_QLF_S_D:
-      if (regno > 0x07)
-      {
-        /* For the 64-bit variant: is the name of the ZA tile ZA0-ZA7  */
-        set_syntax_error (_("invalid ZA tile register number, expected za0-za7"));
-        return PARSE_FAIL;
-      }
-      break;
-    default:
-      set_syntax_error (_("invalid ZA tile element size, allowed b, h, s and d"));
-      return PARSE_FAIL;
-    }
-
-  return regno;
-}
-
 /* Parse STR for unsigned, immediate (1-2 digits) in format:
 
      #<imm>
@@ -4498,7 +4454,6 @@ parse_sme_za_hv_tiles_operand (char **str,
                                aarch64_opnd_qualifier_t *qualifier)
 {
   int regno;
-  int regno_limit;
   int64_t imm_limit;
   int64_t imm_value;
   const reg_entry *reg;
@@ -4515,35 +4470,22 @@ parse_sme_za_hv_tiles_operand (char **str,
   switch (*qualifier)
     {
     case AARCH64_OPND_QLF_S_B:
-      regno_limit = 0;
       imm_limit = 15;
       break;
     case AARCH64_OPND_QLF_S_H:
-      regno_limit = 1;
       imm_limit = 7;
       break;
     case AARCH64_OPND_QLF_S_S:
-      regno_limit = 3;
       imm_limit = 3;
       break;
     case AARCH64_OPND_QLF_S_D:
-      regno_limit = 7;
       imm_limit = 1;
       break;
     case AARCH64_OPND_QLF_S_Q:
-      regno_limit = 15;
       imm_limit = 0;
       break;
     default:
       set_syntax_error (_("invalid ZA tile element size, allowed b, h, s, d and q"));
-      return PARSE_FAIL;
-    }
-
-  /* Check if destination register ZA tile vector is in range for given
-     instruction variant.  */
-  if (regno < 0 || regno > regno_limit)
-    {
-      set_syntax_error (_("ZA tile vector out of range"));
       return PARSE_FAIL;
     }
 
@@ -4621,16 +4563,16 @@ parse_sme_zero_mask(char **str)
       if (reg)
         {
           int regno = reg->number;
-          if (qualifier == AARCH64_OPND_QLF_S_B && regno == 0)
+          if (qualifier == AARCH64_OPND_QLF_S_B)
             {
               /* { ZA0.B } is assembled as all-ones immediate.  */
               mask = 0xff;
             }
-          else if (qualifier == AARCH64_OPND_QLF_S_H && regno < 2)
+          else if (qualifier == AARCH64_OPND_QLF_S_H)
             mask |= 0x55 << regno;
-          else if (qualifier == AARCH64_OPND_QLF_S_S && regno < 4)
+          else if (qualifier == AARCH64_OPND_QLF_S_S)
             mask |= 0x11 << regno;
-          else if (qualifier == AARCH64_OPND_QLF_S_D && regno < 8)
+          else if (qualifier == AARCH64_OPND_QLF_S_D)
             mask |= 0x01 << regno;
           else
             {
@@ -7546,10 +7488,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SME_ZAda_2b:
 	case AARCH64_OPND_SME_ZAda_3b:
-	  val = parse_sme_zada_operand (&str, &qualifier);
-	  if (val == PARSE_FAIL)
+	  reg = parse_reg_with_qual (&str, REG_TYPE_ZAT, &qualifier);
+	  if (!reg)
 	    goto failure;
-	  info->reg.regno = val;
+	  info->reg.regno = reg->number;
 	  info->qualifier = qualifier;
 	  break;
 
