@@ -879,4 +879,8 @@
 [^:]*:593: Error: .*`st2 {v0\.16b-v1\.16b}\[1\],\[x0\]'
 [^:]*:594: Error: .*`st3 {v0\.16b-v2\.16b}\[2\],\[x0\]'
 [^:]*:595: Error: .*`st4 {v0\.8b-v3\.8b}\[4\],\[x0\]'
-[^:]*:597: Error: .*
+[^:]*:597: Error: the register-index form of PRFM does not accept opcodes in the range 24-31 at operand 1 -- `prfm #0x18,\[sp,x15,lsl#0\]'
+[^:]*:598: Error: the register-index form of PRFM does not accept opcodes in the range 24-31 at operand 1 -- `prfm #0x1f,\[sp,x15,lsl#0\]'
+[^:]*:599: Error: immediate value out of range 0 to 31 at operand 1 -- `prfm #0x20,\[sp,x15,lsl#0\]'
+[^:]*:600: Error: immediate value out of range 0 to 31 at operand 1 -- `prfm #0x20,FOO'
+[^:]*:602: Error: .*

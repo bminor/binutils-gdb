@@ -70,8 +70,10 @@
 
 	.macro	all_prefetchs op, from=0, to=31
 	\op	\from, LABEL1
+	.if	\from < 24
 	\op	\from, [sp, x15, lsl #0]
 	\op	\from, [x7, w30, uxtw #3]
+	.endif
 	\op	\from, [x3, #24]
 	.if	\to-\from
 	all_prefetchs \op, "(\from+1)", \to
@@ -91,3 +93,6 @@
 	.endr
 	.endr
 	.endr
+
+	.inst	0xf8a04817
+	.inst	0xf8a04818

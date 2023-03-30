@@ -2599,6 +2599,15 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      return 0;
 	    }
 	  break;
+	case AARCH64_OPND_PRFOP:
+	  if (opcode->iclass == ldst_regoff && opnd->prfop->value >= 24)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("the register-index form of PRFM does"
+				 " not accept opcodes in the range 24-31"));
+	      return 0;
+	    }
+	  break;
 	default:
 	  break;
 	}

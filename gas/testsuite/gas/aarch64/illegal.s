@@ -594,4 +594,9 @@ one_label:
 	st3 {v0.16b-v2.16b}[2],[x0]
 	st4 {v0.8b-v3.8b}[4],[x0]
 
+	prfm	#0x18, [sp, x15, lsl #0]
+	prfm	#0x1f, [sp, x15, lsl #0]
+	prfm	#0x20, [sp, x15, lsl #0]
+	prfm	#0x20, FOO
+
 	// End (for errors during literal pool generation)
