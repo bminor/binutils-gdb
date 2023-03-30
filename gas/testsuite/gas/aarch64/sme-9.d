@@ -71,3 +71,6 @@ Disassembly of section \.text:
   f4:	44cbc544 	uclamp	z4.d, z10.d, z11.d
   f8:	25277c61 	psel	p1, p15, p3.b\[w15, 0\]
   fc:	252778a2 	psel	p2, p14, p5.b\[w15, 0\]
+ 100:	25244200 	\.inst	0x25244200 ; undefined
+ 104:	25244010 	\.inst	0x25244010 ; undefined
+ 108:	25244210 	\.inst	0x25244210 ; undefined
