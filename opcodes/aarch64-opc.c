@@ -1438,14 +1438,28 @@ set_other_error (aarch64_operand_error *mismatch_detail, int idx,
   set_error (mismatch_detail, AARCH64_OPDE_OTHER_ERROR, idx, error);
 }
 
-/* Check that indexed ZA operand OPND has a vector select offset
-   in the range [0, MAX_VALUE].  */
+/* Check that indexed ZA operand OPND has:
+
+   - a selection register in the range [MIN_WREG, MIN_WREG + 3]
+
+   - an immediate offset in the range [0, MAX_VALUE].  */
 
 static bool
 check_za_access (const aarch64_opnd_info *opnd,
 		 aarch64_operand_error *mismatch_detail, int idx,
-		 int max_value)
+		 int min_wreg, int max_value)
 {
+  if (!value_in_range_p (opnd->indexed_za.index.regno, min_wreg, min_wreg + 3))
+    {
+      if (min_wreg == 12)
+	set_other_error (mismatch_detail, idx,
+			 _("expected a selection register in the"
+			   " range w12-w15"));
+      else
+	abort ();
+      return false;
+    }
+
   if (!value_in_range_p (opnd->indexed_za.index.imm, 0, max_value))
     {
       set_offset_out_of_range_error (mismatch_detail, idx, 0, max_value);
@@ -1593,7 +1607,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
-	  if (!check_za_access (opnd, mismatch_detail, idx, max_value))
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value))
 	    return 0;
 	  break;
 
@@ -1610,12 +1624,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
-	  if (!check_za_access (opnd, mismatch_detail, idx, max_value))
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array:
-	  if (!check_za_access (opnd, mismatch_detail, idx, 15))
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15))
 	    return 0;
 	  break;
 

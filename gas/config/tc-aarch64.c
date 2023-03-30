@@ -4372,11 +4372,10 @@ parse_sme_immediate (char **str, int64_t *imm)
   return true;
 }
 
-/* Parse index with vector select register and immediate:
+/* Parse index with selection register and immediate offset:
 
    [<Wv>, <imm>]
    [<Wv>, #<imm>]
-   where <Wv> is in W12-W15 range and # is optional for immediate.
 
    Return true on success, populating OPND with the parsed index.  */
 
@@ -4391,12 +4390,11 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
       return false;
     }
 
-  /* Vector select register W12-W15 encoded in the 2-bit Rv field.  */
+  /* The selection register, encoded in the 2-bit Rv field.  */
   reg = parse_reg (str);
-  if (reg == NULL || reg->type != REG_TYPE_R_32
-      || reg->number < 12 || reg->number > 15)
+  if (reg == NULL || reg->type != REG_TYPE_R_32)
     {
-      set_syntax_error (_("expected vector select register W12-W15"));
+      set_syntax_error (_("expected a 32-bit selection register"));
       return false;
     }
   opnd->index.regno = reg->number;
@@ -4424,9 +4422,8 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
 
 /* Parse a register of type REG_TYPE that might have an element type
    qualifier and that is indexed by two values: a 32-bit register,
-   followed by an immediate.  The 32-bit register must be W12-W15.
-   The range of the immediate varies by opcode and is checked in
-   libopcodes.
+   followed by an immediate.  The ranges of the register and the
+   immediate vary by opcode and are checked in libopcodes.
 
    Return true on success, populating OPND with information about
    the operand and setting QUALIFIER to the register qualifier.

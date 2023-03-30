@@ -1,6 +1,6 @@
 [^:]*: Assembler messages:
-[^:]*:[0-9]+: Error: expected vector select register W12-W15 at operand 1 -- `ld1b {za0h.b\[w11,0\]},p0/z,\[x0\]'
-[^:]*:[0-9]+: Error: expected vector select register W12-W15 at operand 1 -- `ld1h {za0h.h\[w16,0\]},p0/z,\[x0\]'
+[^:]*:[0-9]+: Error: expected a selection register in the range w12-w15 at operand 1 -- `ld1b {za0h.b\[w11,0\]},p0/z,\[x0\]'
+[^:]*:[0-9]+: Error: expected a selection register in the range w12-w15 at operand 1 -- `ld1h {za0h.h\[w16,0\]},p0/z,\[x0\]'
 [^:]*:[0-9]+: Error: invalid addressing mode at operand 3 -- `ld1h {za0v.h\[w12,0\]},p0/z,\[x0,x0,lsl#3\]'
 [^:]*:[0-9]+: Error: '\]' expected at operand 3 -- `ld1w {za3v.s\[w15,3\]},p7/z,\[sp,lsl#2\]'
 [^:]*:[0-9]+: Error: invalid addressing mode at operand 3 -- `ld1d {za0h.d\[w12,0\]},p0/z,\[sp,x0,lsl#12\]'
