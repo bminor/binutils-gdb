@@ -615,9 +615,9 @@ gprofng_pthread_mutex_lock (int (real_func) (pthread_mutex_t *),
     return gprofng_pthread_mutex_lock (real_f, mp); \
   }
 
-DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_17, timer_create@GLIBC_2.17)
-DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_2_5, timer_create@GLIBC_2.2.5)
-DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_0, timer_create@GLIBC_2.0)
+DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_17, pthread_mutex_lock@GLIBC_2.17)
+DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_2_5, pthread_mutex_lock@GLIBC_2.2.5)
+DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_0, pthread_mutex_lock@GLIBC_2.0)
 DCL_PTHREAD_MUTEX_LOCK (pthread_mutex_lock, CALL_REAL (pthread_mutex_lock))
 
 /*------------------------------------------------------------- pthread_cond_wait */

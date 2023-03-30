@@ -20,54 +20,71 @@
 
 GLIBC_2.0 {
   global:
-    pthread_create;
-    pthread_mutex_lock;
-    pthread_mutex_unlock;
-    pthread_sigmask;
+    dlclose;
+    dlopen;
+    fclose;
+    fdopen;
+    fgetpos;
+    fopen;
+    fsetpos;
     popen;
+    pthread_cond_timedwait;
+    pthread_cond_wait;
+    pthread_create;
+    pthread_join;
+    pthread_sigmask;
+    sem_wait;
+    timer_create;
 };
 
 GLIBC_2.1 {
   global:
-    pthread_create;
+    dlopen;
+    fclose;
+    fdopen;
+    fgetpos64;
+    fopen;
+    fsetpos64;
     popen;
+    pthread_create;
+    sem_wait;
 } GLIBC_2.0;
 
 GLIBC_2.2 {
   global:
+    fgetpos;
+    fgetpos64;
+    fsetpos;
+    fsetpos64;
     open64;
     posix_spawn;
     posix_spawnp;
     pread;
-    pwrite;
-    pwrite64;
     timer_create;
-    fgetpos;
-    fsetpos;
-    fgetpos64;
-    fsetpos64;
 } GLIBC_2.1;
 
 GLIBC_2.2.5 {
   global:
-    posix_spawn;
-    posix_spawnp;
-    pthread_mutex_lock;
-    pthread_mutex_unlock;
-    pthread_sigmask;
-    pthread_join;			
-    sem_wait;		
-    pthread_create;
+    dlclose;
     dlopen;
-    popen;
-    timer_create;
-    pthread_cond_wait;		
-    pthread_cond_timedwait;
-    fopen;
     fclose;
     fdopen;
     fgetpos;
+    fgetpos64;
+    fopen;
     fsetpos;
+    fsetpos64;
+    popen;
+    posix_spawn;
+    posix_spawnp;
+    pthread_cond_timedwait;
+    pthread_cond_wait;
+    pthread_create;
+    pthread_join;
+    pthread_sigmask;
+    sem_wait;
+    timer_create;
+    timer_create;
 } GLIBC_2.2 ;
 
 GLIBC_2.3.2 {
@@ -89,24 +106,26 @@ GLIBC_2.15 {
 
 GLIBC_2.17 {
   global:
-    posix_spawn;
-    posix_spawnp;
-    pthread_mutex_lock;
-    pthread_mutex_unlock;
-    pthread_sigmask;
-    pthread_join;			
-    sem_wait;		
-    pthread_create;
+    dlclose;
     dlopen;
-    popen;
-    timer_create;
-    pthread_cond_wait;		
-    pthread_cond_timedwait;
-    fopen;
     fclose;
     fdopen;
     fgetpos;
+    fgetpos64;
+    fopen;
     fsetpos;
+    fsetpos64;
+    popen;
+    posix_spawn;
+    posix_spawnp;
+    pthread_cond_timedwait;
+    pthread_cond_wait;
+    pthread_create;
+    pthread_join;
+    pthread_sigmask;
+    sem_wait;
+    timer_create;
+    timer_create;
 } GLIBC_2.15;
 
 GLIBC_2.32 {
@@ -116,10 +135,11 @@ GLIBC_2.32 {
 
 GLIBC_2.34 {
   global:
-    pthread_join;	
-    sem_wait;
-    pthread_create;
+    dlclose;
     dlopen;
+    pthread_create;
+    pthread_join;
+    sem_wait;
     timer_create;
 } GLIBC_2.32;
 
