@@ -1358,7 +1358,6 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   int val, val_range;
   int in_range;
   int ret_val;
-  int i;
   bool error = false;
   bool expect_index = false;
   unsigned int ptr_flags = PTR_IN_REGLIST;
@@ -1409,13 +1408,13 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 
       if (in_range)
 	{
-	  if (val < val_range)
+	  if (val == val_range)
 	    {
 	      set_first_syntax_error
 		(_("invalid range in vector register list"));
 	      error = true;
 	    }
-	  val_range++;
+	  val_range = (val_range + 1) & 0x1f;
 	}
       else
 	{
@@ -1430,10 +1429,13 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	    }
 	}
       if (! error)
-	for (i = val_range; i <= val; i++)
+	for (;;)
 	  {
-	    ret_val |= i << (5 * nb_regs);
+	    ret_val |= val_range << (5 * nb_regs);
 	    nb_regs++;
+	    if (val_range == val)
+	      break;
+	    val_range = (val_range + 1) & 0x1f;
 	  }
       in_range = 0;
       ptr_flags |= PTR_GOOD_MATCH;

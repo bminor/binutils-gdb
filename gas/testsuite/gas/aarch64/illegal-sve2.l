@@ -242,12 +242,12 @@
 [^ :]+:[0-9]+: Error: the register list must have a stride of 1 at operand 2 -- `ext z0\.b,{z0\.b,z2\.b},#0'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ext z0\.h,{z0\.b,z1\.b},#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ext z0\.b, {z0\.b, z1\.b}, #0
+[^ :]+:[0-9]+: Info:    	ext z0\.b, {z0\.b-z1\.b}, #0
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 2 -- `ext z0\.b,{z0\.h,z1\.b},#0'
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 2 -- `ext z0\.b,{z0\.b,z1\.h},#0'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ext z0\.b,{z0\.h,z1\.h},#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ext z0\.b, {z0\.b, z1\.b}, #0
+[^ :]+:[0-9]+: Info:    	ext z0\.b, {z0\.b-z1\.b}, #0
 [^ :]+:[0-9]+: Error: expected a list of 2 registers at operand 2 -- `ext z0\.b,{z0\.b,z1\.b,z2\.b},#0'
 [^ :]+:[0-9]+: Error: expected a list of 2 registers at operand 2 -- `ext z0\.b,{z0\.b},#0'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `ext z0\.b,z0\.b,#0'
@@ -1280,11 +1280,11 @@
 [^ :]+:[0-9]+: Error: the register list must have a stride of 1 at operand 3 -- `splice z0\.b,p0,{z0\.b,z2\.b}'
 [^ :]+:[0-9]+: Error: operand mismatch -- `splice z0\.h,p0,{z0\.b,z1\.b}'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	splice z0\.b, p0, {z0\.b, z1\.b}
+[^ :]+:[0-9]+: Info:    	splice z0\.b, p0, {z0\.b-z1\.b}
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	splice z0\.h, p0, {z0\.h, z1\.h}
-[^ :]+:[0-9]+: Info:    	splice z0\.s, p0, {z0\.s, z1\.s}
-[^ :]+:[0-9]+: Info:    	splice z0\.d, p0, {z0\.d, z1\.d}
+[^ :]+:[0-9]+: Info:    	splice z0\.h, p0, {z0\.h-z1\.h}
+[^ :]+:[0-9]+: Info:    	splice z0\.s, p0, {z0\.s-z1\.s}
+[^ :]+:[0-9]+: Info:    	splice z0\.d, p0, {z0\.d-z1\.d}
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 3 -- `splice z0\.b,p0,{z0\.h,z1\.b}'
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 3 -- `splice z0\.b,p0,{z0\.b,z1\.h}'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `splice z32\.b,p0,{z0\.b,z1\.b}'
@@ -2336,21 +2336,21 @@
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `tbl z0\.b,{z0\.b,z1\.b},z32\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `tbl z0\.b,{z0\.b,z1\.b},z0\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	tbl z0\.b, {z0\.b, z1\.b}, z0\.b
+[^ :]+:[0-9]+: Info:    	tbl z0\.b, {z0\.b-z1\.b}, z0\.b
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	tbl z0\.h, {z0\.h, z1\.h}, z0\.h
-[^ :]+:[0-9]+: Info:    	tbl z0\.s, {z0\.s, z1\.s}, z0\.s
-[^ :]+:[0-9]+: Info:    	tbl z0\.d, {z0\.d, z1\.d}, z0\.d
+[^ :]+:[0-9]+: Info:    	tbl z0\.h, {z0\.h-z1\.h}, z0\.h
+[^ :]+:[0-9]+: Info:    	tbl z0\.s, {z0\.s-z1\.s}, z0\.s
+[^ :]+:[0-9]+: Info:    	tbl z0\.d, {z0\.d-z1\.d}, z0\.d
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 2 -- `tbl z0\.b,{z0\.b,z1\.h},z0\.b'
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 2 -- `tbl z0\.b,{z0\.h,z0\.b},z0\.b'
 [^ :]+:[0-9]+: Error: invalid register list at operand 2 -- `tbl z0\.h,{z0\.b,z0\.b},z0\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `tbl z0\.h,{z0\.b,z1\.b},z0\.b'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	tbl z0\.b, {z0\.b, z1\.b}, z0\.b
+[^ :]+:[0-9]+: Info:    	tbl z0\.b, {z0\.b-z1\.b}, z0\.b
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	tbl z0\.h, {z0\.h, z1\.h}, z0\.h
-[^ :]+:[0-9]+: Info:    	tbl z0\.s, {z0\.s, z1\.s}, z0\.s
-[^ :]+:[0-9]+: Info:    	tbl z0\.d, {z0\.d, z1\.d}, z0\.d
+[^ :]+:[0-9]+: Info:    	tbl z0\.h, {z0\.h-z1\.h}, z0\.h
+[^ :]+:[0-9]+: Info:    	tbl z0\.s, {z0\.s-z1\.s}, z0\.s
+[^ :]+:[0-9]+: Info:    	tbl z0\.d, {z0\.d-z1\.d}, z0\.d
 [^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `tbx z32\.h,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `tbx z0\.h,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `tbx z0\.h,z0\.b,z32\.b'

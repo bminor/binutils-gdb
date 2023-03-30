@@ -3246,7 +3246,7 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
   /* The hyphenated form is preferred for disassembly if there are
      more than two registers in the list, and the register numbers
      are monotonically increasing in increments of one.  */
-  if (stride == 1 && num_regs > 2 && last_reg > first_reg)
+  if (stride == 1 && num_regs > 1)
     snprintf (buf, size, "{%s-%s}%s",
 	      style_reg (styler, "%s%d.%s", prefix, first_reg, qlf_name),
 	      style_reg (styler, "%s%d.%s", prefix, last_reg, qlf_name), tb);

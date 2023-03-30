@@ -113,9 +113,9 @@ Disassembly of section \.text:
  *[0-9a-f]+:	45409400 	eortb	z0\.h, z0\.h, z0\.h
  *[0-9a-f]+:	45809400 	eortb	z0\.s, z0\.s, z0\.s
  *[0-9a-f]+:	45c09400 	eortb	z0\.d, z0\.d, z0\.d
- *[0-9a-f]+:	057b16b1 	ext	z17\.b, {z21\.b, z22\.b}, #221
- *[0-9a-f]+:	05600000 	ext	z0\.b, {z0\.b, z1\.b}, #0
- *[0-9a-f]+:	056003e0 	ext	z0\.b, {z31\.b, z0\.b}, #0
+ *[0-9a-f]+:	057b16b1 	ext	z17\.b, {z21\.b-z22\.b}, #221
+ *[0-9a-f]+:	05600000 	ext	z0\.b, {z0\.b-z1\.b}, #0
+ *[0-9a-f]+:	056003e0 	ext	z0\.b, {z31\.b-z0\.b}, #0
  *[0-9a-f]+:	645096b1 	faddp	z17\.h, p5/m, z17\.h, z21\.h
  *[0-9a-f]+:	64508000 	faddp	z0\.h, p0/m, z0\.h, z0\.h
  *[0-9a-f]+:	64908000 	faddp	z0\.s, p0/m, z0\.s, z0\.s
@@ -480,12 +480,12 @@ Disassembly of section \.text:
  *[0-9a-f]+:	45407400 	smullt	z0\.h, z0\.b, z0\.b
  *[0-9a-f]+:	45807400 	smullt	z0\.s, z0\.h, z0\.h
  *[0-9a-f]+:	45c07400 	smullt	z0\.d, z0\.s, z0\.s
- *[0-9a-f]+:	052d96b1 	splice	z17\.b, p5, {z21\.b, z22\.b}
- *[0-9a-f]+:	052d8000 	splice	z0\.b, p0, {z0\.b, z1\.b}
- *[0-9a-f]+:	056d8000 	splice	z0\.h, p0, {z0\.h, z1\.h}
- *[0-9a-f]+:	05ad8000 	splice	z0\.s, p0, {z0\.s, z1\.s}
- *[0-9a-f]+:	05ed8000 	splice	z0\.d, p0, {z0\.d, z1\.d}
- *[0-9a-f]+:	052d83e0 	splice	z0\.b, p0, {z31\.b, z0\.b}
+ *[0-9a-f]+:	052d96b1 	splice	z17\.b, p5, {z21\.b-z22\.b}
+ *[0-9a-f]+:	052d8000 	splice	z0\.b, p0, {z0\.b-z1\.b}
+ *[0-9a-f]+:	056d8000 	splice	z0\.h, p0, {z0\.h-z1\.h}
+ *[0-9a-f]+:	05ad8000 	splice	z0\.s, p0, {z0\.s-z1\.s}
+ *[0-9a-f]+:	05ed8000 	splice	z0\.d, p0, {z0\.d-z1\.d}
+ *[0-9a-f]+:	052d83e0 	splice	z0\.b, p0, {z31\.b-z0\.b}
  *[0-9a-f]+:	4408b6b1 	sqabs	z17\.b, p5/m, z21\.b
  *[0-9a-f]+:	4408a000 	sqabs	z0\.b, p0/m, z0\.b
  *[0-9a-f]+:	4448a000 	sqabs	z0\.h, p0/m, z0\.h
@@ -915,12 +915,12 @@ Disassembly of section \.text:
  *[0-9a-f]+:	445c8000 	suqadd	z0\.h, p0/m, z0\.h, z0\.h
  *[0-9a-f]+:	449c8000 	suqadd	z0\.s, p0/m, z0\.s, z0\.s
  *[0-9a-f]+:	44dc8000 	suqadd	z0\.d, p0/m, z0\.d, z0\.d
- *[0-9a-f]+:	053b2ab1 	tbl	z17\.b, {z21\.b, z22\.b}, z27\.b
- *[0-9a-f]+:	05202800 	tbl	z0\.b, {z0\.b, z1\.b}, z0\.b
- *[0-9a-f]+:	05602800 	tbl	z0\.h, {z0\.h, z1\.h}, z0\.h
- *[0-9a-f]+:	05a02800 	tbl	z0\.s, {z0\.s, z1\.s}, z0\.s
- *[0-9a-f]+:	05e02800 	tbl	z0\.d, {z0\.d, z1\.d}, z0\.d
- *[0-9a-f]+:	05202be0 	tbl	z0\.b, {z31\.b, z0\.b}, z0\.b
+ *[0-9a-f]+:	053b2ab1 	tbl	z17\.b, {z21\.b-z22\.b}, z27\.b
+ *[0-9a-f]+:	05202800 	tbl	z0\.b, {z0\.b-z1\.b}, z0\.b
+ *[0-9a-f]+:	05602800 	tbl	z0\.h, {z0\.h-z1\.h}, z0\.h
+ *[0-9a-f]+:	05a02800 	tbl	z0\.s, {z0\.s-z1\.s}, z0\.s
+ *[0-9a-f]+:	05e02800 	tbl	z0\.d, {z0\.d-z1\.d}, z0\.d
+ *[0-9a-f]+:	05202be0 	tbl	z0\.b, {z31\.b-z0\.b}, z0\.b
  *[0-9a-f]+:	053b2eb1 	tbx	z17\.b, z21\.b, z27\.b
  *[0-9a-f]+:	05202c00 	tbx	z0\.b, z0\.b, z0\.b
  *[0-9a-f]+:	05602c00 	tbx	z0\.h, z0\.h, z0\.h
