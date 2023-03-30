@@ -1,3 +1,9 @@
+2023-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 30285
+	* elf.c (_bfd_elf_slurp_version_tables): Fail if no version
+	definitions are allocated.
+
 2023-02-27  Felix Willgerodt  <felix.willgerodt@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_grok_psinfo): Check for
