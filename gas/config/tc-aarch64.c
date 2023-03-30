@@ -1006,19 +1006,19 @@ parse_predication_for_operand (struct vector_type_el *parsed_type, char **str)
 
 /* Parse a register of the type TYPE.
 
-   Return PARSE_FAIL if the string pointed by *CCP is not a valid register
+   Return null if the string pointed to by *CCP is not a valid register
    name or the parsed register is not of TYPE.
 
-   Otherwise return the register number, and optionally fill in the actual
-   type of the register in *RTYPE when multiple alternatives were given, and
-   return the register shape and element index information in *TYPEINFO.
+   Otherwise return the register, and optionally return the register
+   shape and element index information in *TYPEINFO.
 
-   IN_REG_LIST should be set with TRUE if the caller is parsing a register
-   list.  */
+   FLAGS includes PTR_IN_REGLIST if the caller is parsing a register list.  */
 
-static int
-parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
-		 struct vector_type_el *typeinfo, bool in_reg_list)
+#define PTR_IN_REGLIST (1U << 0)
+
+static const reg_entry *
+parse_typed_reg (char **ccp, aarch64_reg_type type,
+		 struct vector_type_el *typeinfo, unsigned int flags)
 {
   char *str = *ccp;
   const reg_entry *reg = parse_reg (&str);
@@ -1036,14 +1036,14 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
       if (typeinfo)
 	*typeinfo = atype;
       set_default_error ();
-      return PARSE_FAIL;
+      return NULL;
     }
 
   if (! aarch64_check_reg_type (reg, type))
     {
       DEBUG_TRACE ("reg type check failed");
       set_default_error ();
-      return PARSE_FAIL;
+      return NULL;
     }
   type = reg->type;
 
@@ -1053,12 +1053,12 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
       if (*str == '.')
 	{
 	  if (!parse_vector_type_for_operand (type, &parsetype, &str))
-	    return PARSE_FAIL;
+	    return NULL;
 	}
       else
 	{
 	  if (!parse_predication_for_operand (&parsetype, &str))
-	    return PARSE_FAIL;
+	    return NULL;
 	}
 
       /* Register if of the form Vn.[bhsdq].  */
@@ -1092,13 +1092,13 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
       if (!is_typed_vecreg)
 	{
 	  first_error (_("this type of register can't be indexed"));
-	  return PARSE_FAIL;
+	  return NULL;
 	}
 
-      if (in_reg_list)
+      if (flags & PTR_IN_REGLIST)
 	{
 	  first_error (_("index not allowed inside register list"));
-	  return PARSE_FAIL;
+	  return NULL;
 	}
 
       atype.defined |= NTA_HASINDEX;
@@ -1108,19 +1108,19 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
       if (exp.X_op != O_constant)
 	{
 	  first_error (_("constant expression required"));
-	  return PARSE_FAIL;
+	  return NULL;
 	}
 
       if (! skip_past_char (&str, ']'))
-	return PARSE_FAIL;
+	return NULL;
 
       atype.index = exp.X_add_number;
     }
-  else if (!in_reg_list && (atype.defined & NTA_HASINDEX) != 0)
+  else if (!(flags & PTR_IN_REGLIST) && (atype.defined & NTA_HASINDEX) != 0)
     {
       /* Indexed vector register expected.  */
       first_error (_("indexed vector register expected"));
-      return PARSE_FAIL;
+      return NULL;
     }
 
   /* A vector reg Vn should be typed or indexed.  */
@@ -1132,44 +1132,25 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
   if (typeinfo)
     *typeinfo = atype;
 
-  if (rtype)
-    *rtype = type;
-
   *ccp = str;
 
-  return reg->number;
+  return reg;
 }
 
 /* Parse register.
 
-   Return the register number on success; return PARSE_FAIL otherwise.
-
-   If RTYPE is not NULL, return in *RTYPE the (possibly restricted) type of
-   the register (e.g. NEON double or quad reg when either has been requested).
+   Return the register on success; return null otherwise.
 
    If this is a NEON vector register with additional type information, fill
    in the struct pointed to by VECTYPE (if non-NULL).
 
-   This parser does not handle register list.  */
+   This parser does not handle register lists.  */
 
-static int
+static const reg_entry *
 aarch64_reg_parse (char **ccp, aarch64_reg_type type,
-		   aarch64_reg_type *rtype, struct vector_type_el *vectype)
+		   struct vector_type_el *vectype)
 {
-  struct vector_type_el atype;
-  char *str = *ccp;
-  int reg = parse_typed_reg (&str, type, rtype, &atype,
-			     /*in_reg_list= */ false);
-
-  if (reg == PARSE_FAIL)
-    return PARSE_FAIL;
-
-  if (vectype)
-    *vectype = atype;
-
-  *ccp = str;
-
-  return reg;
+  return parse_typed_reg (ccp, type, vectype, 0);
 }
 
 static inline bool
@@ -1239,14 +1220,15 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	  str++;		/* skip over '-' */
 	  val_range = val;
 	}
-      val = parse_typed_reg (&str, type, NULL, &typeinfo,
-			     /*in_reg_list= */ true);
-      if (val == PARSE_FAIL)
+      const reg_entry *reg = parse_typed_reg (&str, type, &typeinfo,
+					      PTR_IN_REGLIST);
+      if (!reg)
 	{
 	  set_first_syntax_error (_("invalid vector register in list"));
 	  error = true;
 	  continue;
 	}
+      val = reg->number;
       /* reject [bhsd]n */
       if (type == REG_TYPE_VN && typeinfo.defined == 0)
 	{
@@ -2271,18 +2253,18 @@ const pseudo_typeS md_pseudo_table[] = {
 static bool
 reg_name_p (char *str, aarch64_reg_type reg_type)
 {
-  int reg;
+  const reg_entry *reg;
 
   /* Prevent the diagnostics state from being spoiled.  */
   if (error_p ())
     return false;
 
-  reg = aarch64_reg_parse (&str, reg_type, NULL, NULL);
+  reg = aarch64_reg_parse (&str, reg_type, NULL);
 
   /* Clear the parsing error that may be set by the reg parser.  */
   clear_error ();
 
-  if (reg == PARSE_FAIL)
+  if (!reg)
     return false;
 
   skip_whitespace (str);
@@ -4957,8 +4939,8 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
 } while (0)
 
 #define po_reg_or_fail(regtype) do {				\
-    val = aarch64_reg_parse (&str, regtype, &rtype, NULL);	\
-    if (val == PARSE_FAIL)					\
+    reg = aarch64_reg_parse (&str, regtype, NULL);		\
+    if (!reg)							\
       {								\
 	set_default_error ();					\
 	goto failure;						\
@@ -6344,7 +6326,6 @@ parse_operands (char *str, const aarch64_opcode *opcode)
       int64_t val;
       const reg_entry *reg;
       int comma_skipped_p = 0;
-      aarch64_reg_type rtype;
       struct vector_type_el vectype;
       aarch64_opnd_qualifier_t qualifier, base_qualifier, offset_qualifier;
       aarch64_opnd_info *info = &inst.base.operands[i];
@@ -6443,16 +6424,17 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Vd:
 	case AARCH64_OPND_SVE_Vm:
 	case AARCH64_OPND_SVE_Vn:
-	  val = aarch64_reg_parse (&str, REG_TYPE_BHSDQ, &rtype, NULL);
-	  if (val == PARSE_FAIL)
+	  reg = aarch64_reg_parse (&str, REG_TYPE_BHSDQ, NULL);
+	  if (!reg)
 	    {
 	      first_error (_(get_reg_expected_msg (REG_TYPE_BHSDQ)));
 	      goto failure;
 	    }
-	  gas_assert (rtype >= REG_TYPE_FP_B && rtype <= REG_TYPE_FP_Q);
+	  gas_assert (reg->type >= REG_TYPE_FP_B
+		      && reg->type <= REG_TYPE_FP_Q);
 
-	  info->reg.regno = val;
-	  info->qualifier = AARCH64_OPND_QLF_S_B + (rtype - REG_TYPE_FP_B);
+	  info->reg.regno = reg->number;
+	  info->qualifier = AARCH64_OPND_QLF_S_B + (reg->type - REG_TYPE_FP_B);
 	  break;
 
 	case AARCH64_OPND_SVE_Pd:
@@ -6483,8 +6465,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Vm:
 	  reg_type = REG_TYPE_VN;
 	vector_reg:
-	  val = aarch64_reg_parse (&str, reg_type, NULL, &vectype);
-	  if (val == PARSE_FAIL)
+	  reg = aarch64_reg_parse (&str, reg_type, &vectype);
+	  if (!reg)
 	    {
 	      first_error (_(get_reg_expected_msg (reg_type)));
 	      goto failure;
@@ -6492,7 +6474,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  if (vectype.defined & NTA_HASINDEX)
 	    goto failure;
 
-	  info->reg.regno = val;
+	  info->reg.regno = reg->number;
 	  if ((reg_type == REG_TYPE_PN || reg_type == REG_TYPE_ZN)
 	      && vectype.type == NT_invtype)
 	    /* Unqualified Pn and Zn registers are allowed in certain
@@ -6509,8 +6491,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_VdD1:
 	case AARCH64_OPND_VnD1:
-	  val = aarch64_reg_parse (&str, REG_TYPE_VN, NULL, &vectype);
-	  if (val == PARSE_FAIL)
+	  reg = aarch64_reg_parse (&str, REG_TYPE_VN, &vectype);
+	  if (!reg)
 	    {
 	      set_first_syntax_error (_(get_reg_expected_msg (REG_TYPE_VN)));
 	      goto failure;
@@ -6521,7 +6503,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		(_("the top half of a 128-bit FP/SIMD register is expected"));
 	      goto failure;
 	    }
-	  info->reg.regno = val;
+	  info->reg.regno = reg->number;
 	  /* N.B: VdD1 and VnD1 are treated as an fp or advsimd scalar register
 	     here; it is correct for the purpose of encoding/decoding since
 	     only the register number is explicitly encoded in the related
@@ -6545,8 +6527,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SM3_IMM2:
 	  reg_type = REG_TYPE_VN;
 	vector_reg_index:
-	  val = aarch64_reg_parse (&str, reg_type, NULL, &vectype);
-	  if (val == PARSE_FAIL)
+	  reg = aarch64_reg_parse (&str, reg_type, &vectype);
+	  if (!reg)
 	    {
 	      first_error (_(get_reg_expected_msg (reg_type)));
 	      goto failure;
@@ -6554,7 +6536,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  if (vectype.type == NT_invtype || !(vectype.defined & NTA_HASINDEX))
 	    goto failure;
 
-	  info->reglane.regno = val;
+	  info->reglane.regno = reg->number;
 	  info->reglane.index = vectype.index;
 	  info->qualifier = vectype_to_qualifier (&vectype);
 	  if (info->qualifier == AARCH64_OPND_QLF_NIL)
@@ -6576,13 +6558,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      && get_opcode_dependent_value (opcode) == 1
 	      && *str != '{')
 	    {
-	      val = aarch64_reg_parse (&str, reg_type, NULL, &vectype);
-	      if (val == PARSE_FAIL)
+	      reg = aarch64_reg_parse (&str, reg_type, &vectype);
+	      if (!reg)
 		{
 		  first_error (_(get_reg_expected_msg (reg_type)));
 		  goto failure;
 		}
-	      info->reglist.first_regno = val;
+	      info->reglist.first_regno = reg->number;
 	      info->reglist.num_regs = 1;
 	    }
 	  else
