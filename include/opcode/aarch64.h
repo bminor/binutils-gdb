@@ -371,6 +371,7 @@ enum aarch64_opnd
   AARCH64_OPND_BARRIER_DSB_NXS,	/* Barrier operand for DSB nXS variant.  */
   AARCH64_OPND_BARRIER_ISB,	/* Barrier operand for ISB.  */
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
+  AARCH64_OPND_RPRFMOP,		/* Range prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
   AARCH64_OPND_BTI_TARGET,	/* BTI {<target>}.  */
   AARCH64_OPND_SVE_ADDR_RI_S4x16,   /* SVE [<Xn|SP>, #<simm4>*16].  */
@@ -1600,6 +1601,7 @@ aarch64_verbose (const char *, ...) __attribute__ ((format (printf, 1, 2)));
 
 extern const char *const aarch64_sve_pattern_array[32];
 extern const char *const aarch64_sve_prfop_array[16];
+extern const char *const aarch64_rprfmop_array[64];
 extern const char *const aarch64_sme_vlxn_array[2];
 
 #ifdef __cplusplus

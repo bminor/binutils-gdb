@@ -151,6 +151,7 @@ enum aarch64_field_kind
   FLD_imm2_1,
   FLD_imm2_8,
   FLD_imm2_10,
+  FLD_imm2_12,
   FLD_imm2_15,
   FLD_imm2_16,
   FLD_imm2_19,

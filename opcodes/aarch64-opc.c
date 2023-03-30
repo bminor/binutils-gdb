@@ -99,6 +99,17 @@ const char *const aarch64_sve_prfop_array[16] = {
   0
 };
 
+/* The enumeration strings associated with each value of a 6-bit RPRFM
+   operation.  */
+const char *const aarch64_rprfmop_array[64] = {
+  "pldkeep",
+  "pstkeep",
+  0,
+  0,
+  "pldstrm",
+  "pststrm"
+};
+
 /* Vector length multiples for a predicate-as-counter operand.  Used in things
    like AARCH64_OPND_SME_VLxN_10.  */
 const char *const aarch64_sme_vlxn_array[2] = {
@@ -330,6 +341,7 @@ const aarch64_field fields[] =
     {  1,  2 },	/* imm2_1: general immediate in bits [2:1].  */
     {  8,  2 },	/* imm2_8: general immediate in bits [9:8].  */
     { 10,  2 }, /* imm2_10: 2-bit immediate, bits [11:10] */
+    { 12,  2 }, /* imm2_12: 2-bit immediate, bits [13:12] */
     { 15,  2 }, /* imm2_15: 2-bit immediate, bits [16:15] */
     { 16,  2 }, /* imm2_16: 2-bit immediate, bits [17:16] */
     { 19,  2 }, /* imm2_19: 2-bit immediate, bits [20:19] */
@@ -4582,6 +4594,17 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       else
 	snprintf (buf, size, "%s", style_imm (styler, "#0x%02x",
 					      opnd->prfop->value));
+      break;
+
+    case AARCH64_OPND_RPRFMOP:
+      enum_value = opnd->imm.value;
+      if (enum_value < ARRAY_SIZE (aarch64_rprfmop_array)
+	  && aarch64_rprfmop_array[enum_value])
+	snprintf (buf, size, "%s",
+		  style_reg (styler, aarch64_rprfmop_array[enum_value]));
+      else
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#%" PRIi64, opnd->imm.value));
       break;
 
     case AARCH64_OPND_BARRIER_PSB:

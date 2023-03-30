@@ -1779,6 +1779,10 @@
 {                                                       \
   QLF2(NIL,X),                                          \
 }
+#define OP_SVE_UXU                                      \
+{                                                       \
+  QLF3(NIL,X,NIL),                                      \
+}
 #define OP_SVE_VMR_BHSD                                 \
 {                                                       \
   QLF3(S_B,P_M,W),                                      \
@@ -5359,6 +5363,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_Pd, SVE_Pg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
   SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_PNd, SVE_PNg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
 
+  /* Added in SME2, but part of the prefetch hint space and available
+     without special command-line flags.  */
+  CORE_INSN ("rprfm", 0xf8a04818, 0xffe04c18, sme_misc, 0, OP3 (RPRFMOP, Rm, SIMD_ADDR_SIMPLE), OP_SVE_UXU, 0),
+
   /* SME2 extensions to SVE2.  */
   SME2_INSNC ("bfmlslb", 0x64e06000, 0xffe0f400, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSNC ("bfmlslb", 0x64e0a000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
@@ -6269,6 +6277,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "the ISB option name SY or an optional 4-bit unsigned immediate")	\
     Y(SYSTEM, prfop, "PRFOP", 0, F(),					\
       "a prefetch operation specifier")					\
+    Y(SYSTEM, imm, "RPRFMOP", 0,					\
+      F(FLD_imm1_15, FLD_imm2_12, FLD_imm3_0),	        		\
+      "a range prefetch operation specifier")				\
     Y(SYSTEM, none, "BARRIER_PSB", 0, F (),				\
       "the PSB/TSB option name CSYNC")					\
     Y(SYSTEM, hint, "BTI", 0, F (),					\

@@ -132,6 +132,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER_DSB_NXS", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "the DSB nXS option qualifier name SY, ISH, NSH, OSH or an optional 5-bit unsigned immediate"},
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER_ISB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "the ISB option name SY or an optional 4-bit unsigned immediate"},
   {AARCH64_OPND_CLASS_SYSTEM, "PRFOP", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "a prefetch operation specifier"},
+  {AARCH64_OPND_CLASS_SYSTEM, "RPRFMOP", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm1_15, FLD_imm2_12, FLD_imm3_0}, "a range prefetch operation specifier"},
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER_PSB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "the PSB/TSB option name CSYNC"},
   {AARCH64_OPND_CLASS_SYSTEM, "BTI", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "BTI targets j/c/jc"},
   {AARCH64_OPND_CLASS_ADDRESS, "SVE_ADDR_RI_S4x16", 4 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an address with a 4-bit signed offset, multiplied by 16"},

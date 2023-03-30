@@ -371,4 +371,4 @@ Disassembly of section \.text:
 .*:	f9800c74 	prfm	pstl3keep, \[x3, #24\]
 .*:	f9800c75 	prfm	pstl3strm, \[x3, #24\]
 .*:	f8a04817 	prfm	#0x17, \[x0, w0, uxtw\]
-.*:	f8a04818 	\.inst	0xf8a04818 ; undefined
+.*:	f8a04818 	rprfm	pldkeep, x0, \[x0\]

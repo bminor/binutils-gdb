@@ -7773,6 +7773,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  inst.base.operands[i].prfop = aarch64_prfops + val;
 	  break;
 
+	case AARCH64_OPND_RPRFMOP:
+	  po_enum_or_fail (aarch64_rprfmop_array);
+	  info->imm.value = val;
+	  break;
+
 	case AARCH64_OPND_BARRIER_PSB:
 	  val = parse_barrier_psb (&str, &(info->hint_option));
 	  if (val == PARSE_FAIL)
