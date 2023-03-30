@@ -96,8 +96,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_F64MM	     (1ULL << 54)
 #define AARCH64_FEATURE_FLAGM	     (1ULL << 55) /* v8.4 Flag Manipulation.  */
 #define AARCH64_FEATURE_V9	     (1ULL << 56) /* Armv9.0-A processors.  */
-#define AARCH64_FEATURE_SME_F64	     (1ULL << 57) /* SME F64.  */
-#define AARCH64_FEATURE_SME_I64	     (1ULL << 58) /* SME I64.  */
+#define AARCH64_FEATURE_SME_F64F64   (1ULL << 57) /* SME F64F64.  */
+#define AARCH64_FEATURE_SME_I16I64   (1ULL << 58) /* SME I16I64.  */
 #define AARCH64_FEATURE_V8_8	     (1ULL << 59) /* Armv8.8 processors.  */
 #define AARCH64_FEATURE_CSSC	     (1ULL << 60) /* Common Short Sequence Compression instructions.  */
 

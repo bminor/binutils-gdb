@@ -231,10 +231,10 @@ automatically cause those extensions to be disabled.
  @code{fp} and @code{simd}.
 @item @code{sme} @tab Armv9-A @tab No
  @tab Enable SME Extension.
-@item @code{sme-f64} @tab Armv9-A @tab No
- @tab Enable SME F64 Extension.
-@item @code{sme-i64} @tab Armv9-A @tab No
- @tab Enable SME I64 Extension.
+@item @code{sme-f64f64} @tab Armv9-A @tab No
+ @tab Enable SME F64F64 Extension.
+@item @code{sme-i16i64} @tab Armv9-A @tab No
+ @tab Enable SME I16I64 Extension.
 @item @code{ssbs} @tab ARMv8-A @tab ARMv8.5-A or later
  @tab Enable Speculative Store Bypassing Safe state read and write.
 @item @code{sve} @tab ARMv8.2-A @tab Armv9-A or later
