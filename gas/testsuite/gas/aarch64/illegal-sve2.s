@@ -1526,6 +1526,7 @@ tbl z0.b, { z0.b, z1.b }, z0.h
 tbl z0.b, { z0.b, z1.h }, z0.b
 tbl z0.b, { z0.h, z0.b }, z0.b
 tbl z0.h, { z0.b, z0.b }, z0.b
+tbl z0.h, { z0.b, z1.b }, z0.b
 
 tbx z32.h, z0.b, z0.b
 tbx z0.h, z32.b, z0.b

@@ -78,7 +78,7 @@
 [^:]*:80: Error: immediate value out of range 0 to 15 at operand 1 -- `dmb #16'
 [^:]*:81: Error: immediate value out of range 0 to 31 at operand 2 -- `tbz w0,#40,0x17c'
 [^:]*:82: Error: expected a list of 2 registers at operand 1 -- `st2 \{v4.2d,v5.2d,v6.2d\},\[x3\]'
-[^:]*:83: Error: invalid register list at operand 1 -- `ld2 \{v1.4h,v0.4h\},\[x1\]'
+[^:]*:83: Error: the register list must have a stride of 1 at operand 1 -- `ld2 \{v1.4h,v0.4h\},\[x1\]'
 [^:]*:84: Error: the specified option is not accepted in ISB at operand 1 -- `isb osh'
 [^:]*:85: Error: invalid address at operand 2 -- `st2 \{v4.2d,v5.2d,v6.2d\},\\\[x3\\\]'
 [^:]*:86: Error: immediate value must be a multiple of 4 at operand 3 -- `ldnp w7,w15,\[x3,#3\]'

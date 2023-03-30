@@ -1439,12 +1439,22 @@ set_unaligned_error (aarch64_operand_error *mismatch_detail, int idx,
 }
 
 static inline void
-set_reg_list_error (aarch64_operand_error *mismatch_detail, int idx,
-		    int expected_num)
+set_reg_list_length_error (aarch64_operand_error *mismatch_detail, int idx,
+			   int expected_num)
 {
   if (mismatch_detail == NULL)
     return;
-  set_error (mismatch_detail, AARCH64_OPDE_REG_LIST, idx, NULL);
+  set_error (mismatch_detail, AARCH64_OPDE_REG_LIST_LENGTH, idx, NULL);
+  mismatch_detail->data[0].i = 1 << expected_num;
+}
+
+static inline void
+set_reg_list_stride_error (aarch64_operand_error *mismatch_detail, int idx,
+			   int expected_num)
+{
+  if (mismatch_detail == NULL)
+    return;
+  set_error (mismatch_detail, AARCH64_OPDE_REG_LIST_STRIDE, idx, NULL);
   mismatch_detail->data[0].i = 1 << expected_num;
 }
 
@@ -1477,6 +1487,27 @@ check_reglane (const aarch64_opnd_info *opnd,
     {
       set_elem_idx_out_of_range_error (mismatch_detail, idx, min_index,
 				       max_index);
+      return false;
+    }
+  return true;
+}
+
+/* Check that register list operand OPND has NUM_REGS registers and a
+   register stride of STRIDE.  */
+
+static bool
+check_reglist (const aarch64_opnd_info *opnd,
+	       aarch64_operand_error *mismatch_detail, int idx,
+	       int num_regs, int stride)
+{
+  if (opnd->reglist.num_regs != num_regs)
+    {
+      set_reg_list_length_error (mismatch_detail, idx, num_regs);
+      return false;
+    }
+  if (opnd->reglist.stride != stride)
+    {
+      set_reg_list_stride_error (mismatch_detail, idx, stride);
       return false;
     }
   return true;
@@ -1637,11 +1668,8 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
     case AARCH64_OPND_CLASS_SVE_REGLIST:
       num = get_opcode_dependent_value (opcode);
-      if (opnd->reglist.num_regs != num)
-	{
-	  set_reg_list_error (mismatch_detail, idx, num);
-	  return 0;
-	}
+      if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
+	return 0;
       break;
 
     case AARCH64_OPND_CLASS_ZA_ACCESS:
@@ -2123,25 +2151,24 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  assert (num >= 1 && num <= 4);
 	  /* Unless LD1/ST1, the number of registers should be equal to that
 	     of the structure elements.  */
-	  if (num != 1 && opnd->reglist.num_regs != num)
-	    {
-	      set_reg_list_error (mismatch_detail, idx, num);
-	      return 0;
-	    }
+	  if (num != 1 && !check_reglist (opnd, mismatch_detail, idx, num, 1))
+	    return 0;
 	  break;
 	case AARCH64_OPND_LVt_AL:
 	case AARCH64_OPND_LEt:
 	  assert (num >= 1 && num <= 4);
 	  /* The number of registers should be equal to that of the structure
 	     elements.  */
-	  if (opnd->reglist.num_regs != num)
-	    {
-	      set_reg_list_error (mismatch_detail, idx, num);
-	      return 0;
-	    }
+	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
+	    return 0;
 	  break;
 	default:
 	  break;
+	}
+      if (opnd->reglist.stride != 1)
+	{
+	  set_reg_list_stride_error (mismatch_detail, idx, 1);
+	  return 0;
 	}
       break;
 
@@ -3199,8 +3226,9 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
 		     const char *prefix, struct aarch64_styler *styler)
 {
   const int num_regs = opnd->reglist.num_regs;
+  const int stride = opnd->reglist.stride;
   const int first_reg = opnd->reglist.first_regno;
-  const int last_reg = (first_reg + num_regs - 1) & 0x1f;
+  const int last_reg = (first_reg + (num_regs - 1) * stride) & 0x1f;
   const char *qlf_name = aarch64_get_qualifier_name (opnd->qualifier);
   char tb[16];	/* Temporary buffer.  */
 
@@ -3218,16 +3246,16 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
   /* The hyphenated form is preferred for disassembly if there are
      more than two registers in the list, and the register numbers
      are monotonically increasing in increments of one.  */
-  if (num_regs > 2 && last_reg > first_reg)
+  if (stride == 1 && num_regs > 2 && last_reg > first_reg)
     snprintf (buf, size, "{%s-%s}%s",
 	      style_reg (styler, "%s%d.%s", prefix, first_reg, qlf_name),
 	      style_reg (styler, "%s%d.%s", prefix, last_reg, qlf_name), tb);
   else
     {
       const int reg0 = first_reg;
-      const int reg1 = (first_reg + 1) & 0x1f;
-      const int reg2 = (first_reg + 2) & 0x1f;
-      const int reg3 = (first_reg + 3) & 0x1f;
+      const int reg1 = (first_reg + stride) & 0x1f;
+      const int reg2 = (first_reg + stride * 2) & 0x1f;
+      const int reg3 = (first_reg + stride * 3) & 0x1f;
 
       switch (num_regs)
 	{

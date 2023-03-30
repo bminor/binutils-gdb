@@ -1122,6 +1122,19 @@ struct aarch64_indexed_za
   unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
 };
 
+/* Information about a list of registers.  */
+struct aarch64_reglist
+{
+  unsigned first_regno : 8;
+  unsigned num_regs : 8;
+  /* The difference between the nth and the n+1th register.  */
+  unsigned stride : 8;
+  /* 1 if it is a list of reg element.  */
+  unsigned has_index : 1;
+  /* Lane index; valid only when has_index is 1.  */
+  int64_t index;
+} reglist;
+
 /* Structure representing an operand.  */
 
 struct aarch64_opnd_info
@@ -1142,15 +1155,7 @@ struct aarch64_opnd_info
 	  int64_t index;
 	} reglane;
       /* e.g. LVn.  */
-      struct
-	{
-	  unsigned first_regno : 5;
-	  unsigned num_regs : 3;
-	  /* 1 if it is a list of reg element.  */
-	  unsigned has_index : 1;
-	  /* Lane index; valid only when has_index is 1.  */
-	  int64_t index;
-	} reglist;
+      struct aarch64_reglist reglist;
       /* e.g. immediate or pc relative address offset.  */
       struct
 	{
@@ -1288,10 +1293,18 @@ struct aarch64_inst
    The following errors are only reported against an asm string that is
    syntactically valid and that has valid operand qualifiers.
 
-   AARCH64_OPDE_REG_LIST
-     Error about the register list operand having an unexpected number of
+   AARCH64_OPDE_REG_LIST_LENGTH
+     Error about a register list operand having an unexpected number of
      registers.  This error is low severity because there might be another
      opcode entry that supports the given number of registers.
+
+   AARCH64_OPDE_REG_LIST_STRIDE
+     Error about a register list operand having the correct number
+     (and type) of registers, but an unexpected stride.  This error is
+     more severe than AARCH64_OPDE_REG_LIST_LENGTH because it implies
+     that the length is known to be correct.  However, it is lower than
+     many other errors, since some instructions have forms that share
+     the same number of registers but have different strides.
 
    AARCH64_OPDE_UNTIED_IMMS
      The asm failed to use the same immediate for a destination operand
@@ -1342,7 +1355,8 @@ enum aarch64_operand_error_kind
   AARCH64_OPDE_SYNTAX_ERROR,
   AARCH64_OPDE_FATAL_SYNTAX_ERROR,
   AARCH64_OPDE_INVALID_VARIANT,
-  AARCH64_OPDE_REG_LIST,
+  AARCH64_OPDE_REG_LIST_LENGTH,
+  AARCH64_OPDE_REG_LIST_STRIDE,
   AARCH64_OPDE_UNTIED_IMMS,
   AARCH64_OPDE_UNTIED_OPERAND,
   AARCH64_OPDE_OUT_OF_RANGE,

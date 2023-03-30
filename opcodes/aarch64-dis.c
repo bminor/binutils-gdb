@@ -439,6 +439,7 @@ aarch64_ext_reglist (const aarch64_operand *self, aarch64_opnd_info *info,
   info->reglist.first_regno = extract_field (self->fields[0], code, 0);
   /* len */
   info->reglist.num_regs = extract_field (FLD_len, code, 0) + 1;
+  info->reglist.stride = 1;
   return true;
 }
 
@@ -482,6 +483,7 @@ aarch64_ext_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
   if (expected_num != data[value].num_elements || data[value].is_reserved)
     return false;
   info->reglist.num_regs = data[value].num_regs;
+  info->reglist.stride = 1;
 
   return true;
 }
@@ -510,6 +512,7 @@ aarch64_ext_ldst_reglist_r (const aarch64_operand *self ATTRIBUTE_UNUSED,
   if (info->reglist.num_regs == 1 && value == (aarch64_insn) 1)
     info->reglist.num_regs = 2;
 
+  info->reglist.stride = 1;
   return true;
 }
 
@@ -573,6 +576,7 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   info->reglist.has_index = 1;
   info->reglist.num_regs = 0;
+  info->reglist.stride = 1;
   /* Number of registers is equal to the number of elements in
      each structure to be loaded/stored.  */
   info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
@@ -1982,6 +1986,7 @@ aarch64_ext_sve_reglist (const aarch64_operand *self,
 {
   info->reglist.first_regno = extract_field (self->fields[0], code, 0);
   info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
+  info->reglist.stride = 1;
   return true;
 }
 

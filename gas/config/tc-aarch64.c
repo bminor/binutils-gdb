@@ -5065,7 +5065,8 @@ const char* operand_mismatch_kind_names[] =
   "AARCH64_OPDE_SYNTAX_ERROR",
   "AARCH64_OPDE_FATAL_SYNTAX_ERROR",
   "AARCH64_OPDE_INVALID_VARIANT",
-  "AARCH64_OPDE_REG_LIST",
+  "AARCH64_OPDE_REG_LIST_LENGTH",
+  "AARCH64_OPDE_REG_LIST_STRIDE",
   "AARCH64_OPDE_UNTIED_IMMS",
   "AARCH64_OPDE_UNTIED_OPERAND",
   "AARCH64_OPDE_OUT_OF_RANGE",
@@ -5092,10 +5093,11 @@ operand_error_higher_severity_p (enum aarch64_operand_error_kind lhs,
   gas_assert (AARCH64_OPDE_SYNTAX_ERROR > AARCH64_OPDE_EXPECTED_A_AFTER_B);
   gas_assert (AARCH64_OPDE_FATAL_SYNTAX_ERROR > AARCH64_OPDE_SYNTAX_ERROR);
   gas_assert (AARCH64_OPDE_INVALID_VARIANT > AARCH64_OPDE_FATAL_SYNTAX_ERROR);
-  gas_assert (AARCH64_OPDE_REG_LIST > AARCH64_OPDE_INVALID_VARIANT);
-  gas_assert (AARCH64_OPDE_OUT_OF_RANGE > AARCH64_OPDE_REG_LIST);
+  gas_assert (AARCH64_OPDE_REG_LIST_LENGTH > AARCH64_OPDE_INVALID_VARIANT);
+  gas_assert (AARCH64_OPDE_REG_LIST_STRIDE > AARCH64_OPDE_REG_LIST_LENGTH);
+  gas_assert (AARCH64_OPDE_OUT_OF_RANGE > AARCH64_OPDE_REG_LIST_STRIDE);
   gas_assert (AARCH64_OPDE_UNALIGNED > AARCH64_OPDE_OUT_OF_RANGE);
-  gas_assert (AARCH64_OPDE_OTHER_ERROR > AARCH64_OPDE_REG_LIST);
+  gas_assert (AARCH64_OPDE_OTHER_ERROR > AARCH64_OPDE_REG_LIST_STRIDE);
   gas_assert (AARCH64_OPDE_INVALID_REGNO > AARCH64_OPDE_OTHER_ERROR);
   return lhs > rhs;
 }
@@ -5745,7 +5747,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 		 detail->data[0].i, idx + 1, str);
       break;
 
-    case AARCH64_OPDE_REG_LIST:
+    case AARCH64_OPDE_REG_LIST_LENGTH:
       if (detail->data[0].i == (1 << 1))
 	handler (_("expected a single-register list at operand %d -- `%s'"),
 		 idx + 1, str);
@@ -5755,6 +5757,15 @@ output_operand_error_record (const operand_error_record *record, char *str)
       else
 	handler (_("invalid number of registers in the list"
 		   " at operand %d -- `%s'"), idx + 1, str);
+      break;
+
+    case AARCH64_OPDE_REG_LIST_STRIDE:
+      if (detail->data[0].i == (1 << 1))
+	handler (_("the register list must have a stride of %d"
+		   " at operand %d -- `%s'"), 1, idx + 1, str);
+      else
+	handler (_("invalid register stride at operand %d -- `%s'"),
+		 idx + 1, str);
       break;
 
     case AARCH64_OPDE_UNALIGNED:
@@ -5860,7 +5871,8 @@ output_operand_error_report (char *str, bool non_fatal_only)
 		       curr->detail.data[0].i, curr->detail.data[1].i,
 		       curr->detail.data[2].i);
 	}
-      else if (curr->detail.kind == AARCH64_OPDE_REG_LIST)
+      else if (curr->detail.kind == AARCH64_OPDE_REG_LIST_LENGTH
+	       || curr->detail.kind == AARCH64_OPDE_REG_LIST_STRIDE)
 	{
 	  DEBUG_TRACE ("\t%s [%x]",
 		       operand_mismatch_kind_names[curr->detail.kind],
@@ -5908,7 +5920,8 @@ output_operand_error_report (char *str, bool non_fatal_only)
 			   curr->detail.data[0].i, curr->detail.data[1].i,
 			   curr->detail.data[2].i);
 	    }
-	  else if (kind == AARCH64_OPDE_REG_LIST)
+	  else if (kind == AARCH64_OPDE_REG_LIST_LENGTH
+		   || kind == AARCH64_OPDE_REG_LIST_STRIDE)
 	    {
 	      record->detail.data[0].i |= curr->detail.data[0].i;
 	      DEBUG_TRACE ("\t--> %s [%x]",
@@ -6352,33 +6365,40 @@ ldst_lo12_determine_real_reloc_type (void)
 }
 
 /* Check whether a register list REGINFO is valid.  The registers must be
-   numbered in increasing order (modulo 32), in increments of one or two.
+   numbered in increasing order (modulo 32).  They must also have a
+   consistent stride.
 
-   If ACCEPT_ALTERNATE is non-zero, the register numbers should be in
-   increments of two.
-
-   Return FALSE if such a register list is invalid, otherwise return TRUE.  */
+   Return true if the list is valid, describing it in LIST if so.  */
 
 static bool
-reg_list_valid_p (uint32_t reginfo, int accept_alternate)
+reg_list_valid_p (uint32_t reginfo, struct aarch64_reglist *list)
 {
   uint32_t i, nb_regs, prev_regno, incr;
 
   nb_regs = 1 + (reginfo & 0x3);
   reginfo >>= 2;
   prev_regno = reginfo & 0x1f;
-  incr = accept_alternate ? 2 : 1;
+  incr = 1;
+
+  list->first_regno = prev_regno;
+  list->num_regs = nb_regs;
 
   for (i = 1; i < nb_regs; ++i)
     {
-      uint32_t curr_regno;
+      uint32_t curr_regno, curr_incr;
       reginfo >>= 5;
       curr_regno = reginfo & 0x1f;
-      if (curr_regno != ((prev_regno + incr) & 0x1f))
+      curr_incr = (curr_regno - prev_regno) & 0x1f;
+      if (curr_incr == 0)
+	return false;
+      else if (i == 1)
+	incr = curr_incr;
+      else if (curr_incr != incr)
 	return false;
       prev_regno = curr_regno;
     }
 
+  list->stride = incr;
   return true;
 }
 
@@ -6628,6 +6648,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		goto failure;
 	      info->reglist.first_regno = reg->number;
 	      info->reglist.num_regs = 1;
+	      info->reglist.stride = 1;
 	    }
 	  else
 	    {
@@ -6635,7 +6656,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      if (val == PARSE_FAIL)
 		goto failure;
 
-	      if (! reg_list_valid_p (val, /* accept_alternate */ 0))
+	      if (! reg_list_valid_p (val, &info->reglist))
 		{
 		  set_fatal_syntax_error (_("invalid register list"));
 		  goto failure;
@@ -6647,9 +6668,6 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		    (_("expected element type rather than vector type"));
 		  goto failure;
 		}
-
-	      info->reglist.first_regno = (val >> 2) & 0x1f;
-	      info->reglist.num_regs = (val & 0x3) + 1;
 	    }
 	  if (operands[i] == AARCH64_OPND_LEt)
 	    {
