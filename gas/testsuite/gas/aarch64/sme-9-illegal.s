@@ -1,6 +1,8 @@
 /* Scalable Matrix Extension (SME).  */
 
+psel p1, p15, p3.b[w12]
 psel p1, p15, p3.q[w15]
+psel p1, p15, p3.q[w15, #0]
 psel p1, p15, p3.b[w11]
 psel p8, p11, p15.h[w16]
 psel p2, p7, p15.s[w3]

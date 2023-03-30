@@ -1438,6 +1438,22 @@ set_other_error (aarch64_operand_error *mismatch_detail, int idx,
   set_error (mismatch_detail, AARCH64_OPDE_OTHER_ERROR, idx, error);
 }
 
+/* Check that indexed ZA operand OPND has a vector select offset
+   in the range [0, MAX_VALUE].  */
+
+static bool
+check_za_access (const aarch64_opnd_info *opnd,
+		 aarch64_operand_error *mismatch_detail, int idx,
+		 int max_value)
+{
+  if (!value_in_range_p (opnd->indexed_za.index.imm, 0, max_value))
+    {
+      set_offset_out_of_range_error (mismatch_detail, idx, 0, max_value);
+      return false;
+    }
+  return true;
+}
+
 /* General constraint checking based on operand code.
 
    Return 1 if OPNDS[IDX] meets the general constraint of operand code TYPE
@@ -1574,8 +1590,37 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_PnT_Wm_imm:
+	  size = aarch64_get_qualifier_esize (opnd->qualifier);
+	  max_value = 16 / size - 1;
+	  if (!check_za_access (opnd, mismatch_detail, idx, max_value))
+	    return 0;
+	  break;
+
 	default:
 	  break;
+	}
+      break;
+
+    case AARCH64_OPND_CLASS_ZA_ACCESS:
+      switch (type)
+	{
+	case AARCH64_OPND_SME_ZA_HV_idx_src:
+	case AARCH64_OPND_SME_ZA_HV_idx_dest:
+	case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
+	  size = aarch64_get_qualifier_esize (opnd->qualifier);
+	  max_value = 16 / size - 1;
+	  if (!check_za_access (opnd, mismatch_detail, idx, max_value))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 15))
+	    return 0;
+	  break;
+
+	default:
+	  abort ();
 	}
       break;
 

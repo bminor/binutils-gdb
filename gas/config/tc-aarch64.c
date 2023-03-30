@@ -4440,50 +4440,14 @@ parse_sme_za_hv_tiles_operand (char **str,
 			       struct aarch64_indexed_za *opnd,
 			       aarch64_opnd_qualifier_t *qualifier)
 {
-  int64_t imm_limit;
-  const reg_entry *reg;
-
-  reg = parse_reg_with_qual (str, REG_TYPE_ZATHV, qualifier);
+  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_ZATHV, qualifier);
   if (!reg)
     return false;
 
   opnd->v = aarch64_check_reg_type (reg, REG_TYPE_ZATV);
   opnd->regno = reg->number;
 
-  switch (*qualifier)
-    {
-    case AARCH64_OPND_QLF_S_B:
-      imm_limit = 15;
-      break;
-    case AARCH64_OPND_QLF_S_H:
-      imm_limit = 7;
-      break;
-    case AARCH64_OPND_QLF_S_S:
-      imm_limit = 3;
-      break;
-    case AARCH64_OPND_QLF_S_D:
-      imm_limit = 1;
-      break;
-    case AARCH64_OPND_QLF_S_Q:
-      imm_limit = 0;
-      break;
-    default:
-      set_syntax_error (_("invalid ZA tile element size, allowed b, h, s, d and q"));
-      return false;
-    }
-
-  if (!parse_sme_za_index (str, opnd))
-    return false;
-
-  /* Check if optional index offset is in the range for instruction
-     variant.  */
-  if (opnd->index.imm < 0 || opnd->index.imm > imm_limit)
-    {
-      set_syntax_error (_("index offset out of range"));
-      return false;
-    }
-
-  return true;
+  return parse_sme_za_index (str, opnd);
 }
 
 /* Like parse_sme_za_hv_tiles_operand, but expect braces around the
@@ -4644,17 +4608,8 @@ parse_sme_za_array (char **str, struct aarch64_indexed_za *opnd)
     }
   opnd->regno = -1;
 
-  if (! parse_sme_za_index (&q, opnd))
-    return false;
-
-  if (opnd->index.imm < 0 || opnd->index.imm > 15)
-    {
-      set_syntax_error (_("offset out of range"));
-      return false;
-    }
-
   *str = q;
-  return true;
+  return parse_sme_za_index (str, opnd);
 }
 
 /* Parse streaming mode operand for SMSTART and SMSTOP.
@@ -4697,42 +4652,14 @@ static bool
 parse_sme_pred_reg_with_index (char **str, struct aarch64_indexed_za *opnd,
 			       aarch64_opnd_qualifier_t *qualifier)
 {
-  int regno;
-  int64_t imm_limit;
   const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_PN, qualifier);
-
   if (reg == NULL)
     return false;
-  regno = reg->number;
 
-  switch (*qualifier)
-    {
-    case AARCH64_OPND_QLF_S_B:
-      imm_limit = 15;
-      break;
-    case AARCH64_OPND_QLF_S_H:
-      imm_limit = 7;
-      break;
-    case AARCH64_OPND_QLF_S_S:
-      imm_limit = 3;
-      break;
-    case AARCH64_OPND_QLF_S_D:
-      imm_limit = 1;
-      break;
-    default:
-      set_syntax_error (_("wrong predicate register element size, allowed b, h, s and d"));
-      return false;
-    }
-  opnd->regno = regno;
+  opnd->regno = reg->number;
 
   if (! parse_sme_za_index (str, opnd))
     return false;
-
-  if (opnd->index.imm < 0 || opnd->index.imm > imm_limit)
-    {
-      set_syntax_error (_("element index out of range for given variant"));
-      return false;
-    }
 
   return true;
 }

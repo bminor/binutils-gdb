@@ -5909,32 +5909,29 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REG, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
       "a list of SVE vector registers")					\
     Y(SVE_REG, regno, "SME_ZAda_2b", 0, F(FLD_SME_ZAda_2b),		\
-      "an SME ZA tile ZA0-ZA3")					\
+      "an SME ZA tile ZA0-ZA3")						\
     Y(SVE_REG, regno, "SME_ZAda_3b", 0, F(FLD_SME_ZAda_3b),		\
-      "an SME ZA tile ZA0-ZA7")					\
-    Y(SVE_REG, sme_za_hv_tiles, "SME_ZA_HV_idx_src", 0,				\
-      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_5),\
-      "an SME horizontal or vertical vector access register")	\
-    Y(SVE_REG, sme_za_hv_tiles, "SME_ZA_HV_idx_dest", 0,				\
-      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),\
-      "an SME horizontal or vertical vector access register")	\
+      "an SME ZA tile ZA0-ZA7")						\
+    Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_src", 0,		\
+      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_5),	\
+      "an SME horizontal or vertical vector access register")		\
+    Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_dest", 0,		\
+      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),	\
+      "an SME horizontal or vertical vector access register")		\
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\
       "an SVE predicate register")					\
-    Y(SVE_REG, imm, "SME_list_of_64bit_tiles", 0,	\
-      F(FLD_SME_zero_mask), "a list of 64-bit ZA element tiles")					\
-    Y(SVE_REG, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,				\
+    Y(SVE_REG, imm, "SME_list_of_64bit_tiles", 0,			\
+      F(FLD_SME_zero_mask), "a list of 64-bit ZA element tiles")	\
+    Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,		\
       F(FLD_SME_size_10,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),	\
-      "an SME horizontal or vertical vector access register")	\
-    Y(SVE_REG, sme_za_array, "SME_ZA_array", 0,				\
-      F(FLD_SME_Rv,FLD_imm4_2),	\
-      "ZA array")	\
+      "an SME horizontal or vertical vector access register")		\
+    Y(ZA_ACCESS, sme_za_array, "SME_ZA_array", 0,			\
+      F(FLD_SME_Rv,FLD_imm4_2), "ZA array")				\
     Y(ADDRESS, sme_addr_ri_u4xvl, "SME_ADDR_RI_U4xVL", 0 << OPD_F_OD_LSB, \
-      F(FLD_Rn,FLD_imm4_2),					\
-      "memory offset")	\
-    Y(ADDRESS, sme_sm_za, "SME_SM_ZA", 0, \
-      F(FLD_CRm),					\
-      "streaming mode")	\
-    Y(SVE_REG, sme_pred_reg_with_index, "SME_PnT_Wm_imm", 0,			\
+      F(FLD_Rn,FLD_imm4_2), "memory offset")				\
+    Y(ADDRESS, sme_sm_za, "SME_SM_ZA", 0,				\
+      F(FLD_CRm), "streaming mode")					\
+    Y(SVE_REG, sme_pred_reg_with_index, "SME_PnT_Wm_imm", 0,		\
       F(FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl),	\
       "Source scalable predicate register with index ")	\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
