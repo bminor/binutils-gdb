@@ -1316,7 +1316,10 @@ struct aarch64_inst
    The enumerators have an increasing severity.  This is helpful when there are
    multiple instruction templates available for a given mnemonic name (e.g.
    FMOV); this mechanism will help choose the most suitable template from which
-   the generated diagnostics can most closely describe the issues, if any.  */
+   the generated diagnostics can most closely describe the issues, if any.
+
+   This enum needs to be kept up-to-date with operand_mismatch_kind_names
+   in tc-aarch64.c.  */
 
 enum aarch64_operand_error_kind
 {
