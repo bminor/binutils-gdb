@@ -717,6 +717,7 @@ enum aarch64_insn_class
   sme_size_12_hs,
   sme_size_22,
   sme_size_22_hsd,
+  sme_sz_23,
   sme_str,
   sme_start,
   sme_stop,

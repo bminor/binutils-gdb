@@ -252,6 +252,7 @@ const aarch64_field fields[] =
     { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
     { 12,  2 }, /* SME_size_12: bits [13:12].  */
     { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
+    { 23,  1 }, /* SME_sz_23: bit [23].  */
     { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
     { 18,  3 }, /* SME_tszl: immediate and qualifier field, bits [20:18].  */
     { 0,   8 }, /* SME_zero_mask: list of up to 8 tile names separated by commas [7:0].  */

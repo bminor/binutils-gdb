@@ -2128,6 +2128,11 @@
   QLF2(S_D,S_D),                                        \
   QLF2(S_Q,S_Q),                                        \
 }
+#define OP_SVE_VV_BH_SD                                 \
+{                                                       \
+  QLF2(S_B,S_S),                                        \
+  QLF2(S_H,S_D),                                        \
+}
 #define OP_SVE_VV_HSD                                   \
 {                                                       \
   QLF2(S_H,S_H),                                        \
@@ -5608,6 +5613,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("smlsll", 0xc1a10008, 0xffa39c7e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD_BH, F_OD (4), 0),
   SME2_INSN ("smopa", 0xa0800008, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_SMMHH, 0, 0),
   SME2_INSN ("smops", 0xa0800018, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_SMMHH, 0, 0),
+  SME2_INSN ("sqcvt", 0xc123e000, 0xfffffc20, sme_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
+  SME2_INSN ("sqcvt", 0xc133e000, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
+  SME2_INSN ("sqcvtn", 0xc133e040, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
+  SME2_INSN ("sqcvtu", 0xc163e000, 0xfffffc20, sme_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
+  SME2_INSN ("sqcvtu", 0xc173e000, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
+  SME2_INSN ("sqcvtun", 0xc173e040, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
   SME2_INSN ("sqdmulh", 0xc120a400, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("sqdmulh", 0xc120ac00, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("sqdmulh", 0xc120b400, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),
@@ -5757,6 +5768,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("umlsll", 0xc1a10018, 0xffa39c7e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD_BH, F_OD (4), 0),
   SME2_INSN ("umopa", 0xa1800008, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_SMMHH, 0, 0),
   SME2_INSN ("umops", 0xa1800018, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_SMMHH, 0, 0),
+  SME2_INSN ("uqcvt", 0xc123e020, 0xfffffc20, sme_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
+  SME2_INSN ("uqcvt", 0xc133e020, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
+  SME2_INSN ("uqcvtn", 0xc133e060, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
   SME2_INSN ("urshl", 0xc120a221, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("urshl", 0xc120aa21, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("urshl", 0xc120b221, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),

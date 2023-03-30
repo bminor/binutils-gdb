@@ -73,6 +73,7 @@ enum aarch64_field_kind
   FLD_SME_i1,
   FLD_SME_size_12,
   FLD_SME_size_22,
+  FLD_SME_sz_23,
   FLD_SME_tszh,
   FLD_SME_tszl,
   FLD_SME_zero_mask,

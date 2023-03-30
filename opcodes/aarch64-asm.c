@@ -1970,6 +1970,11 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
 		    aarch64_get_variant (inst) + 1, 0);
       break;
 
+    case sme_sz_23:
+      insert_field (FLD_SME_sz_23, &inst->value,
+		    aarch64_get_variant (inst), 0);
+      break;
+
     case sve_cpy:
       insert_fields (&inst->value, aarch64_get_variant (inst),
 		     0, 2, FLD_SVE_M_14, FLD_size);

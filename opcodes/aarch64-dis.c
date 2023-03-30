@@ -3102,6 +3102,10 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
       variant -= 1;
       break;
 
+    case sme_sz_23:
+      variant = extract_field (FLD_SME_sz_23, inst->value, 0);
+      break;
+
     case sve_cpy:
       variant = extract_fields (inst->value, 0, 2, FLD_size, FLD_SVE_M_14);
       break;
