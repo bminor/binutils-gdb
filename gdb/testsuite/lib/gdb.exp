@@ -1536,6 +1536,11 @@ if { [tcl_version_at_least 8 6] == 0 } {
 #
 # See gdb_test for a description of the -prompt, -no-prompt-anchor, -nopass,
 # COMMAND, and MESSAGE parameters.
+#
+# Returns:
+#    1 if the test failed,
+#    0 if the test passes,
+#   -1 if there was an internal error.
 
 proc gdb_test_no_output { args } {
     global gdb_prompt
@@ -1551,13 +1556,13 @@ proc gdb_test_no_output { args } {
     set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
 
     set command_regex [string_to_regexp $command]
-    gdb_test_multiple $command $message -prompt $prompt {
+    return [gdb_test_multiple $command $message -prompt $prompt {
 	-re "^$command_regex\r\n$prompt" {
 	    if {!$nopass} {
 		pass $gdb_test_name
 	    }
 	}
-    }
+    }]
 }
 
 # Send a command and then wait for a sequence of outputs.

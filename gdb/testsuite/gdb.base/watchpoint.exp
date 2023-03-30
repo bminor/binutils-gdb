@@ -80,7 +80,7 @@ proc initialize {} {
     # to use it.  This allows the test program to run at full speed until
     # we get to the first marker function.
 
-    if [gdb_test "disable 3" "disable 3\[\r\n\]+" "disable watchpoint" ] { 
+    if [gdb_test_no_output "disable 3" "disable watchpoint" ] {
       return 0
     }
 
@@ -99,7 +99,8 @@ proc test_simple_watchpoint {} {
 
     # Ensure that the watchpoint is disabled when we startup.
 
-    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_simple_watchpoint" ] { 
+    if [gdb_test_no_output "disable 3" \
+	    "disable watchpoint in test_simple_watchpoint" ] {
       return 0
     }
 
@@ -120,7 +121,7 @@ proc test_simple_watchpoint {} {
 
     # After reaching the marker function, enable the watchpoint.
 
-    if [gdb_test "enable 3" "^enable 3\[\r\n\]+" "enable watchpoint" ] { 
+    if [gdb_test_no_output "enable 3" "enable watchpoint" ] {
       return
     }
 
@@ -187,7 +188,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     # Disable the watchpoint so we run at full speed until we exit.
 
-    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "watchpoint disabled" ] { 
+    if [gdb_test_no_output "disable 3" "watchpoint disabled" ] {
       return
     }
 
@@ -212,7 +213,8 @@ proc test_disabling_watchpoints {} {
 
     # Ensure that the watchpoint is disabled when we startup.
 
-    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_disabling_watchpoints" ] { 
+    if [gdb_test_no_output "disable 3" \
+	    "disable watchpoint in test_disabling_watchpoints" ] {
       return 0
     }
 
@@ -234,7 +236,7 @@ proc test_disabling_watchpoints {} {
 
     # After reaching the marker function, enable the watchpoint.
 
-    if [gdb_test "enable 3" "^enable 3\[\r\n\]+" "watchpoint enabled" ] { 
+    if [gdb_test_no_output "enable 3" "watchpoint enabled" ] {
       return
     }
 
@@ -249,7 +251,8 @@ proc test_disabling_watchpoints {} {
     
     # Disable the watchpoint but leave breakpoints
 
-    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint #2 in test_disabling_watchpoints" ] { 
+    if [gdb_test_no_output "disable 3" \
+	    "disable watchpoint #2 in test_disabling_watchpoints" ] {
       return 0
     }
 
