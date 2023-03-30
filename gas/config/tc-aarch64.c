@@ -4399,15 +4399,15 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
     }
   opnd->index.regno = reg->number;
 
-  if (!skip_past_char (str, ','))    /* Optional index offset immediate.  */
+  if (!skip_past_char (str, ','))
     {
-      set_syntax_error (_("expected ','"));
+      set_syntax_error (_("missing immediate offset"));
       return false;
     }
 
   if (!parse_sme_immediate (str, &opnd->index.imm))
     {
-      set_syntax_error (_("index offset immediate expected"));
+      set_syntax_error (_("expected a constant immediate offset"));
       return false;
     }
 

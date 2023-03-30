@@ -4,7 +4,7 @@
 [^:]*:[0-9]+: Error: invalid addressing mode at operand 3 -- `st1h {za0v.h\[w12,0\]},p0,\[x0,x0,lsl#3\]'
 [^:]*:[0-9]+: Error: '\]' expected at operand 3 -- `st1w {za3v.s\[w15,3\]},p7,\[sp,lsl#2\]'
 [^:]*:[0-9]+: Error: invalid addressing mode at operand 3 -- `st1d {za0h.d\[w12,0\]},p0,\[sp,x0,lsl#12\]'
-[^:]*:[0-9]+: Error: expected ',' at operand 1 -- `st1q {za0v.q\[w12\]},p0,\[x0,x0,lsl#2\]'
+[^:]*:[0-9]+: Error: missing immediate offset at operand 1 -- `st1q {za0v.q\[w12\]},p0,\[x0,x0,lsl#2\]'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `st1b {za1h.b\[w12,0\]},p0,\[x0\]'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `st1b {za1v.b\[w12,0\]},p0,\[sp\]'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `st1b {za1h.b\[w12,0\]},p0,\[sp,x0\]'
