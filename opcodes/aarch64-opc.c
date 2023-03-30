@@ -258,12 +258,12 @@ const aarch64_field fields[] =
     { 16,  6 },	/* immr: in bitfield and logical immediate instructions.  */
     { 16,  3 },	/* immb: in advsimd shift by immediate instructions.  */
     { 19,  4 },	/* immh: in advsimd shift by immediate instructions.  */
-    { 22,  1 },	/* S: in LDRAA and LDRAB instructions.  */
+    { 22,  1 },	/* S_imm10: in LDRAA and LDRAB instructions.  */
     { 22,  1 },	/* N: in logical (immediate) instructions.  */
     { 11,  1 },	/* index: in ld/st inst deciding the pre/post-index.  */
     { 24,  1 },	/* index2: in ld/st pair inst deciding the pre/post-index.  */
     { 31,  1 },	/* sf: in integer data processing instructions.  */
-    { 30,  1 },	/* lse_size: in LSE extension atomic instructions.  */
+    { 30,  1 },	/* lse_sz: in LSE extension atomic instructions.  */
     { 11,  1 },	/* H: in advsimd scalar x indexed element instructions.  */
     { 21,  1 },	/* L: in advsimd scalar x indexed element instructions.  */
     { 20,  1 },	/* M: in advsimd scalar x indexed element instructions.  */
@@ -324,22 +324,22 @@ const aarch64_field fields[] =
     { 19,  2 }, /* SVE_tszl_19: triangular size select low, bits [20,19].  */
     { 14,  1 }, /* SVE_xs_14: UXTW/SXTW select (bit 14).  */
     { 22,  1 }, /* SVE_xs_22: UXTW/SXTW select (bit 22).  */
-    {  0,  2 }, /* SME ZAda tile ZA0-ZA3.  */
-    {  0,  3 }, /* SME ZAda tile ZA0-ZA7.  */
+    {  0,  2 }, /* SME_ZAda_2b: tile ZA0-ZA3.  */
+    {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
     { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
     { 16,  1 }, /* SME_Q: Q class bit, bit 16.  */
     { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
     { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */
-    { 13,  3 }, /* SME Pm second source scalable predicate register P0-P7.  */
+    { 13,  3 }, /* SME_Pm: second source scalable predicate register P0-P7.  */
     { 0,   8 }, /* SME_zero_mask: list of up to 8 tile names separated by commas [7:0].  */
     { 16,  2 }, /* SME_Rm: index base register W12-W15 [17:16].  */
     { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
     { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
-    { 18,  3 }, /* SME_tshl: immediate and qualifier field, bits [20:18].  */
+    { 18,  3 }, /* SME_tszl: immediate and qualifier field, bits [20:18].  */
     { 11,  2 }, /* rotate1: FCMLA immediate rotate.  */
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
-    { 12,  2 }, /* SM3: Indexed element SM3 2 bits index immediate.  */
+    { 12,  2 }, /* SM3_imm2: Indexed element SM3 2 bits index immediate.  */
     { 22,  1 }, /* sz: 1-bit element size select.  */
     { 10,  2 }, /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
     { 10,  8 }, /* CSSC_imm8.  */
