@@ -906,7 +906,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
   gas_assert (*ptr == '.');
   ptr++;
 
-  if (reg_type == REG_TYPE_ZN || reg_type == REG_TYPE_PN || !ISDIGIT (*ptr))
+  if (reg_type != REG_TYPE_VN || !ISDIGIT (*ptr))
     {
       width = 0;
       goto elt_size;
@@ -938,7 +938,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
       element_size = 64;
       break;
     case 'q':
-      if (reg_type == REG_TYPE_ZN || width == 1)
+      if (reg_type != REG_TYPE_VN || width == 1)
 	{
 	  type = NT_q;
 	  element_size = 128;
@@ -1004,6 +1004,29 @@ parse_predication_for_operand (struct vector_type_el *parsed_type, char **str)
   return true;
 }
 
+/* Return true if CH is a valid suffix character for registers of
+   type TYPE.  */
+
+static bool
+aarch64_valid_suffix_char_p (aarch64_reg_type type, char ch)
+{
+  switch (type)
+    {
+    case REG_TYPE_VN:
+    case REG_TYPE_ZN:
+    case REG_TYPE_ZAT:
+    case REG_TYPE_ZATH:
+    case REG_TYPE_ZATV:
+      return ch == '.';
+
+    case REG_TYPE_PN:
+      return ch == '.' || ch == '/';
+
+    default:
+      return false;
+    }
+}
+
 /* Parse a register of the type TYPE.
 
    Return null if the string pointed to by *CCP is not a valid register
@@ -1012,9 +1035,13 @@ parse_predication_for_operand (struct vector_type_el *parsed_type, char **str)
    Otherwise return the register, and optionally return the register
    shape and element index information in *TYPEINFO.
 
-   FLAGS includes PTR_IN_REGLIST if the caller is parsing a register list.  */
+   FLAGS includes PTR_IN_REGLIST if the caller is parsing a register list.
+
+   FLAGS includes PTR_FULL_REG if the function should ignore any potential
+   register index.  */
 
 #define PTR_IN_REGLIST (1U << 0)
+#define PTR_FULL_REG (1U << 1)
 
 static const reg_entry *
 parse_typed_reg (char **ccp, aarch64_reg_type type,
@@ -1047,8 +1074,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
     }
   type = reg->type;
 
-  if ((type == REG_TYPE_VN || type == REG_TYPE_ZN || type == REG_TYPE_PN)
-      && (*str == '.' || (type == REG_TYPE_PN && *str == '/')))
+  if (aarch64_valid_suffix_char_p (reg->type, *str))
     {
       if (*str == '.')
 	{
@@ -1064,7 +1090,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
       /* Register if of the form Vn.[bhsdq].  */
       is_typed_vecreg = true;
 
-      if (type == REG_TYPE_ZN || type == REG_TYPE_PN)
+      if (type != REG_TYPE_VN)
 	{
 	  /* The width is always variable; we don't allow an integer width
 	     to be specified.  */
@@ -1084,7 +1110,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
       atype.width = parsetype.width;
     }
 
-  if (skip_past_char (&str, '['))
+  if (!(flags & PTR_FULL_REG) && skip_past_char (&str, '['))
     {
       expressionS exp;
 
@@ -4304,45 +4330,17 @@ static const reg_entry *
 parse_reg_with_qual (char **str, aarch64_reg_type reg_type,
                      aarch64_opnd_qualifier_t *qualifier)
 {
-  char *q;
+  struct vector_type_el vectype;
+  const reg_entry *reg = parse_typed_reg (str, reg_type, &vectype,
+					  PTR_FULL_REG);
+  if (!reg)
+    return NULL;
 
-  reg_entry *reg = parse_reg (str);
-  if (reg != NULL && aarch64_check_reg_type (reg, reg_type))
-    {
-      if (!skip_past_char (str, '.'))
-        {
-          set_syntax_error (_("missing ZA tile element size separator"));
-          return NULL;
-        }
+  *qualifier = vectype_to_qualifier (&vectype);
+  if (*qualifier == AARCH64_OPND_QLF_NIL)
+    return NULL;
 
-      q = *str;
-      switch (TOLOWER (*q))
-        {
-        case 'b':
-          *qualifier = AARCH64_OPND_QLF_S_B;
-          break;
-        case 'h':
-          *qualifier = AARCH64_OPND_QLF_S_H;
-          break;
-        case 's':
-          *qualifier = AARCH64_OPND_QLF_S_S;
-          break;
-        case 'd':
-          *qualifier = AARCH64_OPND_QLF_S_D;
-          break;
-        case 'q':
-          *qualifier = AARCH64_OPND_QLF_S_Q;
-          break;
-        default:
-          return NULL;
-        }
-      q++;
-
-      *str = q;
-      return reg;
-    }
-
-  return NULL;
+  return reg;
 }
 
 /* Parse SME ZA tile encoded in <ZAda> assembler symbol.
@@ -4641,19 +4639,17 @@ parse_sme_zero_mask(char **str)
             }
           continue;
         }
-      else if (strncasecmp (q, "za", 2) == 0
-               && !ISALNUM (q[2]))
+      clear_error ();
+      if (strncasecmp (q, "za", 2) == 0 && !ISALNUM (q[2]))
         {
           /* { ZA } is assembled as all-ones immediate.  */
           mask = 0xff;
           q += 2;
           continue;
         }
-      else
-        {
-          set_syntax_error (_("wrong ZA tile element format"));
-          return PARSE_FAIL;
-        }
+
+      set_syntax_error (_("wrong ZA tile element format"));
+      return PARSE_FAIL;
     }
   while (skip_past_char (&q, ','));
 
