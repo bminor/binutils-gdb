@@ -27,6 +27,16 @@
 [^:]*:[0-9]+: Error: immediate offset out of range 0 to 7 at operand 3 -- `psel p1,p8,p6.h\[w14,#8\]'
 [^:]*:[0-9]+: Error: immediate offset out of range 0 to 3 at operand 3 -- `psel p8,p4,p15.s\[w13,#4\]'
 [^:]*:[0-9]+: Error: immediate offset out of range 0 to 1 at operand 3 -- `psel p1,p1,p1.d\[w12,#2\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 3 -- `psel p0,p0,p0\.b\[w12,#0,vgx2\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 3 -- `psel p0,p0,p0\.b\[w12,#0,vgx4\]'
+[^:]*:[0-9]+: Error: invalid vector group size at operand 3 -- `psel p0,p0,p0\.b\[w12,#0,vgx8\]'
+[^:]*:[0-9]+: Error: operand mismatch -- `psel p0\.b,p0\.b,p0\.b\[w12,#0,vgx2\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.b\[w12, 0\]
+[^:]*:[0-9]+: Info:    other valid variant\(s\):
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.h\[w12, 0\]
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.s\[w12, 0\]
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.d\[w12, 0\]
 [^:]*:[0-9]+: Error: operand mismatch -- `revd z0.q,p0/m,z0.b'
 [^:]*:[0-9]+: Info:    did you mean this\?
 [^:]*:[0-9]+: Info:    	revd z0.q, p0/m, z0.q

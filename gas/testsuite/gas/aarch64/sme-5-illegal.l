@@ -56,3 +56,9 @@
 [^:]*:[0-9]+: Error: missing braces at operand 1 -- `ld1w za0h.s\[w12,0\],p0/z,\[x0\]'
 [^:]*:[0-9]+: Error: missing braces at operand 1 -- `ld1d za0h.d\[w12,0\],p0/z,\[x0\]'
 [^:]*:[0-9]+: Error: missing braces at operand 1 -- `ld1q za0h.q\[w12,0\],p0/z,\[x0\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `ld1b {za0h\.b\[w12,0,vgx2\]},p0/z,\[x0\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `ld1b {za0h\.b\[w12,0,vgx4\]},p0/z,\[x0\]'
+[^:]*:[0-9]+: Error: invalid vector group size at operand 1 -- `ld1b {za0h\.b\[w12,0,vgx8\]},p0/z,\[x0\]'
+[^:]*:[0-9]+: Error: operand mismatch -- `ld1b {za0h\.b\[w12,0,vgx4\]},p0/m,\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ld1b {za0h\.b\[w12, 0, vgx4\]}, p0/z, \[x0, xzr\]

@@ -54,3 +54,15 @@
 [^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0h.h\[w12,0\],\[x0\]'
 [^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0v\[w12,0\],\[x0\]'
 [^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0v.s\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `ldr za\[w12,0,vgx2\],\[x0\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `ldr za\[w12,0,vgx4\],\[x0\]'
+[^:]*:[0-9]+: Error: invalid vector group size at operand 1 -- `ldr za\[w12,0,vgx8\],\[x0\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `str za\[w12,0,vgx2\],\[x0\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `str za\[w12,0,vgx4\],\[x0\]'
+[^:]*:[0-9]+: Error: invalid vector group size at operand 1 -- `str za\[w12,0,vgx8\],\[x0\]'
+[^:]*:[0-9]+: Error: operand mismatch -- `ldr za\.b\[w12,0,vgx2\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ldr za\[w12, 0, vgx2\], \[x0\]
+[^:]*:[0-9]+: Error: operand mismatch -- `str za\.b\[w12,0,vgx4\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	str za\[w12, 0, vgx4\], \[x0\]

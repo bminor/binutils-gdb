@@ -25,3 +25,6 @@
 [^:]*:[0-9]+: Error: expected '\]' at operand 3 -- `mova z0\.q,p0/m,za0v\.q\[w12,#1a\]'
 [^:]*:[0-9]+: Error: expected '\]' at operand 3 -- `mova z0\.q,p0/m,za0v\.q\[w12,1a2\]'
 [^:]*:[0-9]+: Error: expected '\]' at operand 3 -- `mova z0\.q,p0/m,za0v\.q\[w12,#1a2\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,#0,vgx2\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,#0,vgx4\]'
+[^:]*:[0-9]+: Error: invalid vector group size at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,#0,vgx8\]'

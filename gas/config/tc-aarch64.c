@@ -4550,6 +4550,26 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
       return false;
     }
 
+  opnd->group_size = 0;
+  if (skip_past_char (str, ','))
+    {
+      if (strncasecmp (*str, "vgx2", 4) == 0 && !ISALPHA ((*str)[4]))
+	{
+	  *str += 4;
+	  opnd->group_size = 2;
+	}
+      else if (strncasecmp (*str, "vgx4", 4) == 0 && !ISALPHA ((*str)[4]))
+	{
+	  *str += 4;
+	  opnd->group_size = 4;
+	}
+      else
+	{
+	  set_syntax_error (_("invalid vector group size"));
+	  return false;
+	}
+    }
+
   if (!skip_past_char (str, ']'))
     {
       set_syntax_error (_("expected ']'"));
@@ -5067,6 +5087,7 @@ const char* operand_mismatch_kind_names[] =
   "AARCH64_OPDE_SYNTAX_ERROR",
   "AARCH64_OPDE_FATAL_SYNTAX_ERROR",
   "AARCH64_OPDE_INVALID_VARIANT",
+  "AARCH64_OPDE_INVALID_VG_SIZE",
   "AARCH64_OPDE_REG_LIST_LENGTH",
   "AARCH64_OPDE_REG_LIST_STRIDE",
   "AARCH64_OPDE_UNTIED_IMMS",
@@ -5095,7 +5116,8 @@ operand_error_higher_severity_p (enum aarch64_operand_error_kind lhs,
   gas_assert (AARCH64_OPDE_SYNTAX_ERROR > AARCH64_OPDE_EXPECTED_A_AFTER_B);
   gas_assert (AARCH64_OPDE_FATAL_SYNTAX_ERROR > AARCH64_OPDE_SYNTAX_ERROR);
   gas_assert (AARCH64_OPDE_INVALID_VARIANT > AARCH64_OPDE_FATAL_SYNTAX_ERROR);
-  gas_assert (AARCH64_OPDE_REG_LIST_LENGTH > AARCH64_OPDE_INVALID_VARIANT);
+  gas_assert (AARCH64_OPDE_INVALID_VG_SIZE > AARCH64_OPDE_INVALID_VARIANT);
+  gas_assert (AARCH64_OPDE_REG_LIST_LENGTH > AARCH64_OPDE_INVALID_VG_SIZE);
   gas_assert (AARCH64_OPDE_REG_LIST_STRIDE > AARCH64_OPDE_REG_LIST_LENGTH);
   gas_assert (AARCH64_OPDE_OUT_OF_RANGE > AARCH64_OPDE_REG_LIST_STRIDE);
   gas_assert (AARCH64_OPDE_UNALIGNED > AARCH64_OPDE_OUT_OF_RANGE);
@@ -5747,6 +5769,15 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	handler (_("%s must be %d at operand %d -- `%s'"),
 		 msg ? msg : _("immediate value"),
 		 detail->data[0].i, idx + 1, str);
+      break;
+
+    case AARCH64_OPDE_INVALID_VG_SIZE:
+      if (detail->data[0].i == 0)
+	handler (_("unexpected vector group size at operand %d -- `%s'"),
+		 idx + 1, str);
+      else
+	handler (_("operand %d must have a vector group size of %d -- `%s'"),
+		 idx + 1, detail->data[0].i, str);
       break;
 
     case AARCH64_OPDE_REG_LIST_LENGTH:

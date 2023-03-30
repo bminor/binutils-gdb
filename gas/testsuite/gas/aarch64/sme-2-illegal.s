@@ -30,3 +30,7 @@ mova    z0.q, p0/m, za0v.q[w12, 1a]
 mova    z0.q, p0/m, za0v.q[w12, #1a]
 mova    z0.q, p0/m, za0v.q[w12, 1a2]
 mova    z0.q, p0/m, za0v.q[w12, #1a2]
+
+mova	z0.b, p0/m, za0h.b[w12, #0, vgx2]
+mova	z0.b, p0/m, za0h.b[w12, #0, vgx4]
+mova	z0.b, p0/m, za0h.b[w12, #0, vgx8]

@@ -43,3 +43,9 @@
 [^:]*:[0-9]+: Error: immediate offset must be 0 at operand 1 -- `st1q {za15h.q\[w15,1\]},p7,\[sp\]'
 [^:]*:[0-9]+: Error: immediate offset must be 0 at operand 1 -- `st1q {za15v.q\[w15,1\]},p7,\[x0,x17,lsl#4\]'
 [^:]*:[0-9]+: Error: immediate offset must be 0 at operand 1 -- `st1q {za15h.q\[w15,1\]},p7,\[sp,x17,lsl#4\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `st1b {za0h.b\[w12,0,vgx2\]},p0,\[x0\]'
+[^:]*:[0-9]+: Error: unexpected vector group size at operand 1 -- `st1b {za0h\.b\[w12,0,vgx4\]},p0,\[x0\]'
+[^:]*:[0-9]+: Error: invalid vector group size at operand 1 -- `st1b {za0h\.b\[w12,0,vgx8\]},p0,\[x0\]'
+[^:]*:[0-9]+: Error: operand mismatch -- `st1b {za0h\.b\[w12,0,vgx2\]},p0/z,\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	st1b {za0h\.b\[w12, 0, vgx2\]}, p0, \[x0, xzr\]

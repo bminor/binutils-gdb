@@ -1120,6 +1120,7 @@ struct aarch64_indexed_za
     int regno;    /* <Wv>  */
     int64_t imm;  /* <imm>  */
   } index;
+  unsigned group_size : 8;
   unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
 };
 
@@ -1294,6 +1295,17 @@ struct aarch64_inst
    The following errors are only reported against an asm string that is
    syntactically valid and that has valid operand qualifiers.
 
+   AARCH64_OPDE_INVALID_VG_SIZE
+     Error about a "VGx<n>" modifier in a ZA index not having the
+     correct <n>.  This error effectively forms a pair with
+     AARCH64_OPDE_REG_LIST_LENGTH, since both errors relate to the number
+     of vectors that an instruction operates on.  However, the "VGx<n>"
+     modifier is optional, whereas a register list always has a known
+     and explicit length.  It therefore seems better to place more
+     importance on the register list length when selecting an opcode table
+     entry.  This in turn means that having an incorrect register length
+     should be more severe than having an incorrect "VGx<n>".
+
    AARCH64_OPDE_REG_LIST_LENGTH
      Error about a register list operand having an unexpected number of
      registers.  This error is low severity because there might be another
@@ -1356,6 +1368,7 @@ enum aarch64_operand_error_kind
   AARCH64_OPDE_SYNTAX_ERROR,
   AARCH64_OPDE_FATAL_SYNTAX_ERROR,
   AARCH64_OPDE_INVALID_VARIANT,
+  AARCH64_OPDE_INVALID_VG_SIZE,
   AARCH64_OPDE_REG_LIST_LENGTH,
   AARCH64_OPDE_REG_LIST_STRIDE,
   AARCH64_OPDE_UNTIED_IMMS,

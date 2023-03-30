@@ -57,3 +57,9 @@ ld1h za0h.h[w12, 0], p0/z, [x0]
 ld1w za0h.s[w12, 0], p0/z, [x0]
 ld1d za0h.d[w12, 0], p0/z, [x0]
 ld1q za0h.q[w12, 0], p0/z, [x0]
+
+ld1b {za0h.b[w12, 0, vgx2]}, p0/z, [x0]
+ld1b {za0h.b[w12, 0, vgx4]}, p0/z, [x0]
+ld1b {za0h.b[w12, 0, vgx8]}, p0/z, [x0]
+
+ld1b {za0h.b[w12, 0, vgx4]}, p0/m, [x0]

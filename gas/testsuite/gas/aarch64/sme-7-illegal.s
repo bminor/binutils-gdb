@@ -52,3 +52,14 @@ ldr za0h[w12, 0], [x0]
 ldr za0h.h[w12, 0], [x0]
 ldr za0v[w12, 0], [x0]
 ldr za0v.s[w12, 0], [x0]
+
+ldr za[w12, 0, vgx2], [x0]
+ldr za[w12, 0, vgx4], [x0]
+ldr za[w12, 0, vgx8], [x0]
+
+str za[w12, 0, vgx2], [x0]
+str za[w12, 0, vgx4], [x0]
+str za[w12, 0, vgx8], [x0]
+
+ldr za.b[w12, 0, vgx2], [x0]
+str za.b[w12, 0, vgx4], [x0]

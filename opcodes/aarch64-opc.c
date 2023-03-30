@@ -1459,6 +1459,16 @@ set_reg_list_stride_error (aarch64_operand_error *mismatch_detail, int idx,
 }
 
 static inline void
+set_invalid_vg_size (aarch64_operand_error *mismatch_detail,
+		     int idx, int expected)
+{
+  if (mismatch_detail == NULL)
+    return;
+  set_error (mismatch_detail, AARCH64_OPDE_INVALID_VG_SIZE, idx, NULL);
+  mismatch_detail->data[0].i = expected;
+}
+
+static inline void
 set_other_error (aarch64_operand_error *mismatch_detail, int idx,
 		 const char* error)
 {
@@ -1517,12 +1527,14 @@ check_reglist (const aarch64_opnd_info *opnd,
 
    - a selection register in the range [MIN_WREG, MIN_WREG + 3]
 
-   - an immediate offset in the range [0, MAX_VALUE].  */
+   - an immediate offset in the range [0, MAX_VALUE].
+
+   - a vector group size of GROUP_SIZE.  */
 
 static bool
 check_za_access (const aarch64_opnd_info *opnd,
 		 aarch64_operand_error *mismatch_detail, int idx,
-		 int min_wreg, int max_value)
+		 int min_wreg, int max_value, int group_size)
 {
   if (!value_in_range_p (opnd->indexed_za.index.regno, min_wreg, min_wreg + 3))
     {
@@ -1540,6 +1552,15 @@ check_za_access (const aarch64_opnd_info *opnd,
       set_offset_out_of_range_error (mismatch_detail, idx, 0, max_value);
       return false;
     }
+
+  /* The vector group specifier is optional in assembly code.  */
+  if (opnd->indexed_za.group_size != 0
+      && opnd->indexed_za.group_size != group_size)
+    {
+      set_invalid_vg_size (mismatch_detail, idx, group_size);
+      return false;
+    }
+
   return true;
 }
 
@@ -1657,7 +1678,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
-	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value))
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value, 0))
 	    return 0;
 	  break;
 
@@ -1680,12 +1701,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
-	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value))
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value,
+				get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off4:
-	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15))
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15,
+				get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
 
@@ -3671,7 +3694,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_ZA_HV_idx_src:
     case AARCH64_OPND_SME_ZA_HV_idx_dest:
     case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
-      snprintf (buf, size, "%s%s[%s, %s]%s",
+      snprintf (buf, size, "%s%s[%s, %s%s%s]%s",
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
 		style_reg (styler, "za%d%c.%s",
 			   opnd->indexed_za.regno,
@@ -3679,6 +3702,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 			   aarch64_get_qualifier_name (opnd->qualifier)),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
 		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
+		opnd->indexed_za.group_size ? ", " : "",
+		opnd->indexed_za.group_size == 2
+		? style_sub_mnem (styler, "vgx2")
+		: opnd->indexed_za.group_size == 4
+		? style_sub_mnem (styler, "vgx4") : "",
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "}" : "");
       break;
 
@@ -3687,10 +3715,15 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_SME_ZA_array_off4:
-      snprintf (buf, size, "%s[%s, %s]",
+      snprintf (buf, size, "%s[%s, %s%s%s]",
 		style_reg (styler, "za"),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
-		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm));
+		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
+		opnd->indexed_za.group_size ? ", " : "",
+		opnd->indexed_za.group_size == 2
+		? style_sub_mnem (styler, "vgx2")
+		: opnd->indexed_za.group_size == 4
+		? style_sub_mnem (styler, "vgx4") : "");
       break;
 
     case AARCH64_OPND_SME_SM_ZA:

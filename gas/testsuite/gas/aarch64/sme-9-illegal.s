@@ -17,6 +17,12 @@ psel p1, p8, p6.h[w14, #8]
 psel p8, p4, p15.s[w13, #4]
 psel p1, p1, p1.d[w12, #2]
 
+psel p0, p0, p0.b[w12, #0, vgx2]
+psel p0, p0, p0.b[w12, #0, vgx4]
+psel p0, p0, p0.b[w12, #0, vgx8]
+
+psel p0.b, p0.b, p0.b[w12, #0, vgx2]
+
 revd z0.q, p0/m, z0.b
 
 sclamp z8.b, z1.b, z31.q
