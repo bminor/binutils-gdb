@@ -44,9 +44,9 @@ proc watch { expr } {
 proc expect_watchpoint { expr old new } {
     with_test_prefix "$expr: $old->$new" {
 	set expr_re [string_to_regexp $expr]
-	gdb_test "print $expr" "\\$\\d+ = $old\\s" "print expression before"
+	gdb_test "print $expr" "\\$\\d+ = $old" "print expression before"
 	gdb_test "continue" "$expr_re\\s.*Old value = $old\\s+New value = $new\\s.*"
-	gdb_test "print $expr" "\\$\\d+ = $new\\s" "print expression after"
+	gdb_test "print $expr" "\\$\\d+ = $new" "print expression after"
     }
 }
 

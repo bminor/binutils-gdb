@@ -386,8 +386,8 @@ gdb_test "overlay list"   "No sections are mapped."
 gdb_test "overlay map"    "Overlay debugging not enabled.*" "overlay map #1"
 gdb_test "overlay unmap"  "Overlay debugging not enabled.*" "overlay unmap #1"
 gdb_test_no_output "overlay manual" "overlay manual #2"
-gdb_test "overlay map"    "Argument required: name of an overlay section." "overlay map #2"
-gdb_test "overlay unmap"  "Argument required: name of an overlay section." "overlay unmap #2"
+gdb_test "overlay map"    "Argument required: name of an overlay section" "overlay map #2"
+gdb_test "overlay unmap"  "Argument required: name of an overlay section" "overlay unmap #2"
 
 #test print "p" abbreviation
 gdb_test "p" "The history is empty." "print \"p\" abbreviation"

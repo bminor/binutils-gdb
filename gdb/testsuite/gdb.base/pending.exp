@@ -225,7 +225,7 @@ gdb_test "continue" \
 
 gdb_test "continue" \
 ".*Breakpoint.*pendfunc1.*at.*pendshr.c:$bp2_loc.*
-\[$\]1 = 1." \
+\\\$1 = 1" \
 "continue to resolved breakpoint 1"
 
 #

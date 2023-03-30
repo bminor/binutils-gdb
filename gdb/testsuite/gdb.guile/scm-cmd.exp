@@ -93,7 +93,7 @@ gdb_test_multiline "input command to throw error" \
     "    (throw-user-error \"you lose! ~a\" arg))))" "" \
     "end" ""
 
-gdb_test "test-error-cmd ugh" "ERROR: you lose! ugh" "call error command"
+gdb_test "test-error-cmd ugh" "ERROR: you lose! ugh\r\n" "call error command"
 
 # Test string->argv.
 

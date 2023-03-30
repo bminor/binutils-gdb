@@ -57,7 +57,7 @@ proc_with_prefix test_bkpt_basic { } {
     gdb_test "python print (blist\[0\])" \
 	"<gdb.Breakpoint object at $hex>" "Check obj exists @main"
     gdb_test "python print (blist\[0\].location)" \
-	"main." "Check breakpoint location @main"
+	"main" "Check breakpoint location @main"
     gdb_test "python print (blist\[0\].pending)" "False" \
 	"Check pending status of main breakpoint"
 
@@ -75,7 +75,7 @@ proc_with_prefix test_bkpt_basic { } {
     gdb_test "python print (blist\[0\])" \
 	"<gdb.Breakpoint object at $hex>" "Check obj exists @main 2"
     gdb_test "python print (blist\[0\].location)" \
-	"main." "Check breakpoint location @main 2"
+	"main" "Check breakpoint location @main 2"
     gdb_test "python print (blist\[1\])" \
 	"<gdb.Breakpoint object at $hex>" "Check obj exists @mult_line"
 
@@ -206,7 +206,7 @@ proc_with_prefix test_bkpt_cond_and_cmds { } {
     gdb_py_test_silent_cmd "python last_bp = blist\[len(blist)-1\]" \
 	"Find last breakpoint" 0
     gdb_test "python print (last_bp.commands)" \
-	"print \"Command for breakpoint has been executed.\".*print result"
+	"print \"Command for breakpoint has been executed.\".*print result\r\n"
 
     gdb_test_no_output "python last_bp.commands = 'echo hi\\necho there'" \
 	"set commands"

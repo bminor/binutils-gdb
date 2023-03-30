@@ -140,7 +140,7 @@ gdb_test "step" {baz \(.*?\);} "step into foo 1"
 gdb_test "finish" {Run till exit.*bar \(\).*baz.*} "finish out of foo 1"
 gdb_test "next" {foo \(2\);} "next over baz in bar"
 gdb_test "step" {baz \(.*?\);} "step into foo 2"
-gdb_test "next" "\}\[\r\n\]+" "next over baz in foo"
-gdb_test "step" "bar \\(\\).*}\[\r\n\]+.*" "step out of foo back into bar"
+gdb_test "next" "\}" "next over baz in foo"
+gdb_test "step" "bar \\(\\).*}" "step out of foo back into bar"
 
 gdb_continue_to_end

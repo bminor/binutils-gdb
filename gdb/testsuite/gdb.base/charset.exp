@@ -496,8 +496,8 @@ gdb_test_no_output "set target-charset UTF-8"
 gdb_test "print \"\\242\"" " = \"\\\\242\"" \
   "non-representable target character"
 
-gdb_test "print '\\x'" "\\\\x escape without a following hex digit."
-gdb_test "print '\\u'" "\\\\u escape without a following hex digit."
+gdb_test "print '\\x'" "\\\\x escape without a following hex digit"
+gdb_test "print '\\u'" "\\\\u escape without a following hex digit"
 gdb_test "print '\\9'" " = \[0-9\]+ '9'"
 
 # An octal escape can only be 3 digits.

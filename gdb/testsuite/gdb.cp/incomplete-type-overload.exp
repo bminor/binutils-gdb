@@ -172,5 +172,5 @@ gdb_test "print foo(inc)"\
 	 "The type. 'incomplete .' isn't fully known to GDB.*"\
 	 "unsuccessful because declaration"
 gdb_test "print foo(ip)"\
-	 "Cannot resolve function foo to any overloaded instance."\
+	 "Cannot resolve function foo to any overloaded instance"\
 	 "unsuccessful because incorrect"

@@ -40,14 +40,14 @@ set eol "\[ \t\]*\[\n\r\]+"
 gdb_test "ptype v1" "type = struct a {$eol
     int x;$eol
     int y;$eol
-}$eol"
+}"
 
 if {[test_debug_format "stabs"]} {
     setup_kfail "gdb/1602" *-*-*
 }
 gdb_test "ptype v2" "type = struct a {$eol
     const char .c;$eol
-}$eol"
+}"
 
 if {[test_debug_format "stabs"]} {
     setup_kfail "gdb/1603" *-*-*

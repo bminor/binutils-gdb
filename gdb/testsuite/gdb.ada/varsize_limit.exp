@@ -31,7 +31,7 @@ if {![runto "vsizelim.adb:$bp_location"]} {
 }
 
 gdb_test "set varsize-limit 16" \
-    "Warning: command 'set varsize-limit' is deprecated.\r\nUse 'set max-value-size'."
+    "Warning: command 'set varsize-limit' is deprecated.\r\nUse 'set max-value-size'\\.\r\n"
 
 gdb_test "print small" " = \"1234567890\""
 

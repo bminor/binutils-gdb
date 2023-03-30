@@ -234,7 +234,7 @@ proc_with_prefix catch_fork_child_follow {second_inferior} {
     # Verify that the catchpoint is mentioned in an "info breakpoints",
     # and further that the catchpoint mentions no process id.
     gdb_test "info breakpoints" \
-	".*catchpoint.*keep y.*fork\[\r\n\]+" \
+	".*catchpoint.*keep y.*fork" \
 	"info breakpoints before fork"
 
     gdb_test "continue" \

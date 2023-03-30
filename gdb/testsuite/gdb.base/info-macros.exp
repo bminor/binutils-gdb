@@ -33,22 +33,22 @@ gdb_test "info macro  -- -all" \
 	 "The symbol `-all' has no definition .*\r\nat .*$srcfile:\[0-9\]+"
 
 gdb_test "info macro -all --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*"
 
 gdb_test "info macro -all  --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*"
 
 gdb_test "info macro  -all  --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*"
 
 gdb_test "info macro --" \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*"
 
 gdb_test "info macro -- " \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*" \
 	 "info macro -- <EOL>"
 gdb_test "info macro  -- " \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*" \
 	 "info macro  -- <EOL>"
 
 gdb_test "info macro -invalid-option" \

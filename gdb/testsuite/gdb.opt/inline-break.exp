@@ -74,7 +74,11 @@ proc break_info_1 {num args} {
 	}
 
 	#  Add function/source file info.
-	append result "in $func at .*$source${end}"
+	append result "in $func at .*$source"
+
+	if {$i < $locs} {
+	    append result ${end}
+	}
     }
 
     return $result

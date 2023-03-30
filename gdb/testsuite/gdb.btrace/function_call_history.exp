@@ -187,7 +187,7 @@ set expected_range [multi_line \
 gdb_test "record function-call-history 4,10" $expected_range
 gdb_test "record function-call-history 4,+7" $expected_range
 gdb_test "record function-call-history 10,-7" $expected_range
-gdb_test "record function-call-history 4,4" "4\tinc\r"
+gdb_test "record function-call-history 4,4" "4\tinc"
 
 # set bp after fib recursion and continue
 set bp_location [gdb_get_line_number "bp.2" $testfile.c]

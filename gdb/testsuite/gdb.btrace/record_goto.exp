@@ -149,7 +149,7 @@ gdb_test "record goto 2" ".*fun4 \\(\\) at record_goto.c:40.*"
 gdb_test "record function-call-history /ci -" [multi_line \
   "1\tmain\tinst 1,1" \
   "2\t  fun4\tinst 2,4" \
-  "3\t    fun1\tinst 5,8\r" \
+  "3\t    fun1\tinst 5,8" \
   ] "function-call-history from 2 backwards"
 
 # check that we're filling up the context correctly
@@ -173,7 +173,7 @@ gdb_test "record function-call-history /ci" [multi_line \
 gdb_test "record instruction-history" [multi_line \
   "38.*" \
   "39.*" \
-  "40.*\r" \
+  "40.*" \
   ] "instruction-history from end forwards"
 
 # we should get the exact same history from the second to last instruction
@@ -183,12 +183,12 @@ gdb_test "record goto 39" ".*fun4 \\(\\) at record_goto.c:44.*"
 gdb_test "record function-call-history /ci" [multi_line \
   "14\t      fun2\tinst 35,36" \
   "15\t    fun3\tinst 37,38" \
-  "16\t  fun4\tinst 39,40\r" \
+  "16\t  fun4\tinst 39,40" \
   ] "function-call-history from 39 forwards"
 
 # check that we're filling up the context correctly
 gdb_test "record instruction-history" [multi_line \
   "38.*" \
   "39.*" \
-  "40.*\r" \
+  "40.*" \
   ] "instruction-history from 39 forwards"

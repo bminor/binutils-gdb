@@ -56,7 +56,7 @@ gdb_test "break loop_count" \
     "breakpoint loop_count"
 
 gdb_test "continue" \
-    "Continuing\\..*Breakpoint.*loop_count \\(\\) at.*call-rt-st.c:$stop_line\[ \t\r\n\]+$stop_line\[\t \]+for \\(index=0; index.4; index..\\);.*\[\r\n \]+" \
+    "Continuing\\..*Breakpoint.*loop_count \\(\\) at.*call-rt-st.c:$stop_line\[ \t\r\n\]+$stop_line\[\t \]+for \\(index=0; index.4; index..\\);.*" \
     "continue to loop_count"
 
 gdb_test_multiple "finish" "finish out from loop count" {

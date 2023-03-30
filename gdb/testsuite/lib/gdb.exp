@@ -1454,13 +1454,13 @@ proc gdb_test { args } {
     }
 
     set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
-    set nl [expr ${nonl} ? {""} : {"\[\r\n\]+"}]
+    set nl [expr ${nonl} ? {""} : {"\r\n"}]
 
     set saw_question 0
 
     set user_code {}
     lappend user_code {
-	-re "\[\r\n\]*(?:$pattern)$nl$prompt" {
+	-re "(?:$pattern)$nl$prompt" {
 	    if { $question != "" & !$saw_question} {
 		fail $message
 	    } elseif {!$nopass} {

@@ -51,6 +51,4 @@ if ![runto opaque_routine] {
 # correctly when frame #0 (the frame which does not have any debugging
 # info) is the selected frame.
 
-gdb_test "bt full" \
-         ".*\[\r\n\]+ *my_table = \\{0, 1, 2\\}\[\r\n\]+.*"
-
+gdb_test "bt full" ".*\[\r\n\]+ *my_table = \\{0, 1, 2\\}"

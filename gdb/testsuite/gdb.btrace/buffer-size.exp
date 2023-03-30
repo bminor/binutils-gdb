@@ -30,8 +30,8 @@ if ![runto_main] {
 
 gdb_test_no_output "set record btrace bts buffer-size 1"
 gdb_test_no_output "set record btrace pt buffer-size 1"
-gdb_test "show record btrace bts buffer-size" "The record/replay bts buffer size is 1\.\r"
-gdb_test "show record btrace pt buffer-size" "The record/replay pt buffer size is 1\.\r"
+gdb_test "show record btrace bts buffer-size" "The record/replay bts buffer size is 1\."
+gdb_test "show record btrace pt buffer-size" "The record/replay pt buffer size is 1\."
 
 gdb_test_no_output "record btrace"
 gdb_test "info record" [multi_line \

@@ -39,7 +39,7 @@ gdb_test "until $bp_location1" \
 # Verify that a malformed "advance" is gracefully caught.
 #
 gdb_test "until 80 then stop" \
-    "malformed linespec error: unexpected string, \"then stop\"." \
+    "malformed linespec error: unexpected string, \"then stop\"" \
     "malformed until"
 
 # Rerun up to factorial, outer invocation

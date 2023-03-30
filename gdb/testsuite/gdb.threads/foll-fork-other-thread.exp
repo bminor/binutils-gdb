@@ -60,7 +60,7 @@ proc do_test { fork_func follow target-non-stop non-stop displaced-stepping } {
     # Verify that the catchpoint is mentioned in an "info breakpoints",
     # and further that the catchpoint mentions no process id.
     gdb_test "info breakpoints" \
-	".*catchpoint.*keep y.*fork\[\r\n\]+" \
+	".*catchpoint.*keep y.*fork" \
 	"info breakpoints before fork"
 
     gdb_test "continue" \
