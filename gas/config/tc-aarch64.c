@@ -6659,6 +6659,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zm_16:
 	case AARCH64_OPND_SVE_Zn:
 	case AARCH64_OPND_SVE_Zt:
+	case AARCH64_OPND_SME_Zm:
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg;
 
@@ -6811,7 +6812,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		  goto failure;
 		}
 
-	      if (vectype.width != 0 && *str != ',')
+	      if ((int) vectype.width > 0 && *str != ',')
 		{
 		  set_fatal_syntax_error
 		    (_("expected element type rather than vector type"));

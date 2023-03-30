@@ -5325,7 +5325,19 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("whilelt", 0x25205410, 0xff20fc11, sme_size_22, 0, OP3 (SME_Pdx2, Rn, Rm), OP_SVE_VXX_BHSD, 0, 0),
 
   /* SME2 extensions to SME.  */
+  SME2_INSN ("add", 0xc1a01c10, 0xffbf9c38, sme_int_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("add", 0xc1a11c10, 0xffbf9c78, sme_int_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_VVV_SD, F_OD (4), 0),
+  SME2_INSN ("add", 0xc1201810, 0xffb09c18, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("add", 0xc1301810, 0xffb09c18, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD, F_OD (4), 0),
+  SME2_INSN ("add", 0xc1a01810, 0xffa19c38, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zmx2), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("add", 0xc1a11810, 0xffa39c78, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD, F_OD (4), 0),
+  SME2_INSN ("add", 0xc120a300, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
+  SME2_INSN ("add", 0xc120ab00, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("cntp", 0x25208200, 0xff3ffa00, sme_size_22, 0, OP3 (Rd, SME_PNn, SME_VLxN_10), OP_SVE_XV_BHSD, 0, 0),
+  SME2_INSN ("fadd", 0xc1a01c00, 0xffbf9c38, sme_fp_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("fadd", 0xc1a11c00, 0xffbf9c78, sme_fp_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_VVV_SD, F_OD (4), 0),
+  SME2_INSN ("fsub", 0xc1a01c08, 0xffbf9c38, sme_fp_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("fsub", 0xc1a11c08, 0xffbf9c78, sme_fp_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_VVV_SD, F_OD (4), 0),
   SME2_INSN ("ld1b", 0xa0400000, 0xfff0e001, sve_misc, 0, OP3 (SME_Zdnx2, SME_PNg3, SVE_ADDR_RI_S4x2xVL), OP_SVE_BZU, 0, 0),
   SME2_INSN ("ld1b", 0xa0408000, 0xfff0e003, sve_misc, 0, OP3 (SME_Zdnx4, SME_PNg3, SVE_ADDR_RI_S4x4xVL), OP_SVE_BZU, 0, 0),
   SME2_INSN ("ld1b", 0xa1400000, 0xfff0e008, sve_misc, 0, OP3 (SME_Ztx2_STRIDED, SME_PNg3, SVE_ADDR_RI_S4x2xVL), OP_SVE_BZU, 0, 0),
@@ -5485,6 +5497,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("stnt1w", 0xa1204008, 0xffe0e008, sve_misc, 0, OP3 (SME_Ztx2_STRIDED, SME_PNg3, SVE_ADDR_RR_LSL2), OP_SVE_SUU, 0, 0),
   SME2_INSN ("stnt1w", 0xa120c008, 0xffe0e00c, sve_misc, 0, OP3 (SME_Ztx4_STRIDED, SME_PNg3, SVE_ADDR_RR_LSL2), OP_SVE_SUU, 0, 0),
   SME2_INSN ("str", 0xe13f8000, 0xfffffc1f, sme_misc, 0, OP2 (SME_ZT0, SIMD_ADDR_SIMPLE), {}, 0, 0),
+  SME2_INSN ("sub", 0xc1a01c18, 0xffbf9c38, sme_int_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("sub", 0xc1a11c18, 0xffbf9c78, sme_int_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_VVV_SD, F_OD (4), 0),
+  SME2_INSN ("sub", 0xc1201818, 0xffb09c18, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("sub", 0xc1301818, 0xffb09c18, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD, F_OD (4), 0),
+  SME2_INSN ("sub", 0xc1a01818, 0xffa19c38, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zmx2), OP_SVE_VVV_SD, F_OD (2), 0),
+  SME2_INSN ("sub", 0xc1a11818, 0xffa39c78, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD, F_OD (4), 0),
   SME2_INSN ("whilege", 0x25204010, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
   SME2_INSN ("whilegt", 0x25204018, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
   SME2_INSN ("whilehi", 0x25204818, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
@@ -6138,6 +6156,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SME_Zdn2), "a list of SVE vector registers")		\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx4", 4 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zdn4), "a list of SVE vector registers")		\
+    Y(SVE_REG, regno, "SME_Zm", 0, F(FLD_SME_Zm),			\
+      "an SVE vector register")						\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zmx2", 2 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zm2), "a list of SVE vector registers")			\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zmx4", 4 << OPD_F_OD_LSB,	\

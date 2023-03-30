@@ -62,6 +62,7 @@ enum aarch64_field_kind
   FLD_SME_ZAda_3b,
   FLD_SME_Zdn2,
   FLD_SME_Zdn4,
+  FLD_SME_Zm,
   FLD_SME_Zm2,
   FLD_SME_Zm4,
   FLD_SME_Zn2,

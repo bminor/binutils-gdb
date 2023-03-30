@@ -241,6 +241,7 @@ const aarch64_field fields[] =
     {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
     {  1,  4 }, /* SME_Zdn2: Z0-Z31, multiple of 2, bits [4:1].  */
     {  2,  3 }, /* SME_Zdn4: Z0-Z31, multiple of 4, bits [4:2].  */
+    { 16,  4 }, /* SME_Zm: Z0-Z15, bits [19:16].  */
     { 17,  4 }, /* SME_Zm2: Z0-Z31, multiple of 2, bits [20:17].  */
     { 18,  3 }, /* SME_Zm4: Z0-Z31, multiple of 4, bits [20:18].  */
     {  6,  4 }, /* SME_Zn2: Z0-Z31, multiple of 2, bits [9:6].  */
@@ -1764,6 +1765,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SME_Zm:
+	  if (opnd->reg.regno > 15)
+	    {
+	      set_invalid_regno_error (mismatch_detail, idx, "z", 0, 15);
+	      return 0;
+	    }
+	  break;
+
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
@@ -3101,23 +3110,38 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
           break;
 
         default:
-          /* Check for cases where a source register needs to be the same as the
-             destination register.  Do this before matching qualifiers since if
-             an instruction has both invalid tying and invalid qualifiers,
-             the error about qualifiers would suggest several alternative
-             instructions that also have invalid tying.  */
-          if (inst->operands[0].reg.regno
-              != inst->operands[i].reg.regno)
-            {
-              if (mismatch_detail)
-                {
-                  mismatch_detail->kind = AARCH64_OPDE_UNTIED_OPERAND;
-                  mismatch_detail->index = i;
-                  mismatch_detail->error = NULL;
-                }
-              return 0;
-            }
-          break;
+	  {
+	    /* Check for cases where a source register needs to be the
+	       same as the destination register.  Do this before
+	       matching qualifiers since if an instruction has both
+	       invalid tying and invalid qualifiers, the error about
+	       qualifiers would suggest several alternative instructions
+	       that also have invalid tying.  */
+	    enum aarch64_operand_class op_class1
+	       = aarch64_get_operand_class (inst->operands[0].type);
+	    enum aarch64_operand_class op_class2
+	       = aarch64_get_operand_class (inst->operands[i].type);
+	    assert (op_class1 == op_class2);
+	    if (op_class1 == AARCH64_OPND_CLASS_SVE_REGLIST
+		? ((inst->operands[0].reglist.first_regno
+		    != inst->operands[i].reglist.first_regno)
+		   || (inst->operands[0].reglist.num_regs
+		       != inst->operands[i].reglist.num_regs)
+		   || (inst->operands[0].reglist.stride
+		       != inst->operands[i].reglist.stride))
+		: (inst->operands[0].reg.regno
+		   != inst->operands[i].reg.regno))
+	      {
+		if (mismatch_detail)
+		  {
+		    mismatch_detail->kind = AARCH64_OPDE_UNTIED_OPERAND;
+		    mismatch_detail->index = i;
+		    mismatch_detail->error = NULL;
+		  }
+		return 0;
+	      }
+	    break;
+	  }
         }
     }
 
@@ -3874,6 +3898,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zm_16:
     case AARCH64_OPND_SVE_Zn:
     case AARCH64_OPND_SVE_Zt:
+    case AARCH64_OPND_SME_Zm:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
 	snprintf (buf, size, "%s", style_reg (styler, "z%d", opnd->reg.regno));
       else
@@ -6499,6 +6524,18 @@ aarch64_cpu_supports_inst_p (uint64_t cpu_variant, aarch64_inst *inst)
 {
   if (!inst->opcode->avariant
       || !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant, *inst->opcode->avariant))
+    return false;
+
+  if (inst->opcode->iclass == sme_fp_sd
+      && inst->operands[0].qualifier == AARCH64_OPND_QLF_S_D
+      && !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant,
+					AARCH64_FEATURE_SME_F64F64))
+    return false;
+
+  if (inst->opcode->iclass == sme_int_sd
+      && inst->operands[0].qualifier == AARCH64_OPND_QLF_S_D
+      && !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant,
+					AARCH64_FEATURE_SME_I16I64))
     return false;
 
   return true;
