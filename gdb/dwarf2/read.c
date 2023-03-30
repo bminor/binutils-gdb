@@ -18870,7 +18870,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 	  sym->set_type (builtin_type (objfile)->builtin_core_addr);
 	  sym->set_domain (LABEL_DOMAIN);
-	  add_symbol_to_list (sym, cu->list_in_scope);
+	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_entry_point:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
@@ -19209,7 +19209,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_common_block:
 	  sym->set_aclass_index (LOC_COMMON_BLOCK);
 	  sym->set_domain (COMMON_BLOCK_DOMAIN);
-	  add_symbol_to_list (sym, cu->list_in_scope);
+	  list_to_add = cu->list_in_scope;
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing
