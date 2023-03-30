@@ -31,3 +31,20 @@
 [^:]*:[0-9]+: Error: operand 2 must have the same immediate value as operand 1 -- `str za\[w13,-1\],\[x17,#1,mul vl\]'
 [^:]*:[0-9]+: Error: operand 2 must have the same immediate value as operand 1 -- `ldr za\[w13,1\],\[x17,#-1,mul vl\]'
 [^:]*:[0-9]+: Error: operand 2 must have the same immediate value as operand 1 -- `str za\[w13,1\],\[x17,#-1,mul vl\]'
+[^:]*:[0-9]+: Error: operand mismatch -- `ldr za.b\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ldr za\[w12, 0\], \[x0\]
+[^:]*:[0-9]+: Error: operand mismatch -- `ldr za.h\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ldr za\[w12, 0\], \[x0\]
+[^:]*:[0-9]+: Error: operand mismatch -- `ldr za.s\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ldr za\[w12, 0\], \[x0\]
+[^:]*:[0-9]+: Error: operand mismatch -- `ldr za.d\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ldr za\[w12, 0\], \[x0\]
+[^:]*:[0-9]+: Error: operand mismatch -- `ldr za.q\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ldr za\[w12, 0\], \[x0\]
+[^:]*:[0-9]+: Error: expected '\[' at operand 1 -- `ldr za/z\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: unexpected character `2' in element size at operand 1 -- `ldr za.2b\[w12,0\],\[x0\]'

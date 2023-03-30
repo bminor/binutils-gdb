@@ -4422,25 +4422,27 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
   return true;
 }
 
-/* Parse SME ZA horizontal or vertical vector access to tiles.
+/* Parse a register of type REG_TYPE that might have an element type
+   qualifier and that is indexed by two values: a 32-bit register,
+   followed by an immediate.  The 32-bit register must be W12-W15.
+   The range of the immediate varies by opcode and is checked in
+   libopcodes.
+
    Return true on success, populating OPND with information about
-   the indexed tile and QUALIFIER with the qualifier that was applied
-   to the tile name.
+   the operand and setting QUALIFIER to the register qualifier.
 
    Field format examples:
 
-   ZA0<HV>.B[<Wv>, #<imm>]
-   <ZAn><HV>.H[<Wv>, #<imm>]
-   <ZAn><HV>.S[<Wv>, #<imm>]
-   <ZAn><HV>.D[<Wv>, #<imm>]
-   <ZAn><HV>.Q[<Wv>, #<imm>]
+   <Pm>.<T>[<Wv>< #<imm>]
+   ZA[<Wv>, #<imm>]
+   <ZAn><HV>.<T>[<Wv>, #<imm>]
 */
 static bool
-parse_sme_za_hv_tiles_operand (char **str,
-			       struct aarch64_indexed_za *opnd,
-			       aarch64_opnd_qualifier_t *qualifier)
+parse_dual_indexed_reg (char **str, aarch64_reg_type reg_type,
+			struct aarch64_indexed_za *opnd,
+			aarch64_opnd_qualifier_t *qualifier)
 {
-  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_ZATHV, qualifier);
+  const reg_entry *reg = parse_reg_with_qual (str, reg_type, qualifier);
   if (!reg)
     return false;
 
@@ -4464,7 +4466,7 @@ parse_sme_za_hv_tiles_operand_with_braces (char **str,
       return false;
     }
 
-  if (!parse_sme_za_hv_tiles_operand (str, opnd, qualifier))
+  if (!parse_dual_indexed_reg (str, REG_TYPE_ZATHV, opnd, qualifier))
     return false;
 
   if (!skip_past_char (str, '}'))
@@ -4585,33 +4587,6 @@ parse_sme_list_of_64bit_tiles (char **str)
   return regno;
 }
 
-/* Parse ZA array operand used in e.g. STR and LDR instruction.
-   Operand format:
-
-   ZA[<Wv>, <imm>]
-   ZA[<Wv>, #<imm>]
-
-   Return true on success, populating OPND with information about
-   the operand.  */
-
-static bool
-parse_sme_za_array (char **str, struct aarch64_indexed_za *opnd)
-{
-  char *q;
-
-  q = *str;
-  const reg_entry *reg = parse_reg (&q);
-  if (!reg || reg->type != REG_TYPE_ZA)
-    {
-      set_syntax_error (_("expected ZA array"));
-      return false;
-    }
-  opnd->regno = -1;
-
-  *str = q;
-  return parse_sme_za_index (str, opnd);
-}
-
 /* Parse streaming mode operand for SMSTART and SMSTOP.
 
    {SM | ZA}
@@ -4636,32 +4611,6 @@ parse_sme_sm_za (char **str)
 
   *str = q;
   return TOLOWER (p[0]);
-}
-
-/* Parse the name of the source scalable predicate register, the index base
-   register W12-W15 and the element index. Function performs element index
-   limit checks as well as qualifier type checks.
-
-   <Pn>.<T>[<Wv>, <imm>]
-   <Pn>.<T>[<Wv>, #<imm>]
-
-   Return true on success, populating OPND with information about the index
-   and setting QUALIFIER to <T>.  */
-
-static bool
-parse_sme_pred_reg_with_index (char **str, struct aarch64_indexed_za *opnd,
-			       aarch64_opnd_qualifier_t *qualifier)
-{
-  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_PN, qualifier);
-  if (reg == NULL)
-    return false;
-
-  opnd->regno = reg->number;
-
-  if (! parse_sme_za_index (str, opnd))
-    return false;
-
-  return true;
 }
 
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
@@ -7060,9 +7009,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_SME_PnT_Wm_imm:
-	  /* <Pn>.<T>[<Wm>, #<imm>]  */
-	  if (!parse_sme_pred_reg_with_index (&str, &info->indexed_za,
-					      &qualifier))
+	  if (!parse_dual_indexed_reg (&str, REG_TYPE_PN,
+				       &info->indexed_za, &qualifier))
 	    goto failure;
 	  info->qualifier = qualifier;
 	  break;
@@ -7396,8 +7344,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      ? !parse_sme_za_hv_tiles_operand_with_braces (&str,
 							    &info->indexed_za,
 							    &qualifier)
-	      : !parse_sme_za_hv_tiles_operand (&str, &info->indexed_za,
-						&qualifier))
+	      : !parse_dual_indexed_reg (&str, REG_TYPE_ZATHV,
+					 &info->indexed_za, &qualifier))
 	    goto failure;
 	  info->qualifier = qualifier;
 	  break;
@@ -7410,8 +7358,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array:
-	  if (!parse_sme_za_array (&str, &info->indexed_za))
+	  if (!parse_dual_indexed_reg (&str, REG_TYPE_ZA,
+				       &info->indexed_za, &qualifier))
 	    goto failure;
+	  info->qualifier = qualifier;
 	  break;
 
 	case AARCH64_OPND_MOPS_ADDR_Rd:

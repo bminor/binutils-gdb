@@ -8,6 +8,13 @@
 [^:]*:[0-9]+: Info:    	psel p1, p15, p3.h\[w15, 0\]
 [^:]*:[0-9]+: Info:    	psel p1, p15, p3.s\[w15, 0\]
 [^:]*:[0-9]+: Info:    	psel p1, p15, p3.d\[w15, 0\]
+[^:]*:[0-9]+: Error: operand mismatch -- `psel p1,p15,p3\[w15,#0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	psel p1, p15, p3.b\[w15, 0\]
+[^:]*:[0-9]+: Info:    other valid variant\(s\):
+[^:]*:[0-9]+: Info:    	psel p1, p15, p3.h\[w15, 0\]
+[^:]*:[0-9]+: Info:    	psel p1, p15, p3.s\[w15, 0\]
+[^:]*:[0-9]+: Info:    	psel p1, p15, p3.d\[w15, 0\]
 [^:]*:[0-9]+: Error: expected vector select register W12-W15 at operand 3 -- `psel p1,p15,p3.b\[w11\]'
 [^:]*:[0-9]+: Error: expected vector select register W12-W15 at operand 3 -- `psel p8,p11,p15.h\[w16\]'
 [^:]*:[0-9]+: Error: expected vector select register W12-W15 at operand 3 -- `psel p2,p7,p15.s\[w3\]'
