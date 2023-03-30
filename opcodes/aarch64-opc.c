@@ -3560,7 +3560,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 			   opnd->indexed_za.v == 1 ? 'v' : 'h',
 			   aarch64_get_qualifier_name (opnd->qualifier)),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
-		style_imm (styler, "%d", opnd->indexed_za.index.imm),
+		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "}" : "");
       break;
 
@@ -3572,7 +3572,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "%s[%s, %s]",
 		style_reg (styler, "za"),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
-		style_imm (styler, "%d", opnd->indexed_za.index.imm));
+		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm));
       break;
 
     case AARCH64_OPND_SME_SM_ZA:
@@ -3585,7 +3585,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		style_reg (styler, "p%d.%s", opnd->indexed_za.regno,
 			   aarch64_get_qualifier_name (opnd->qualifier)),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
-		style_imm (styler, "%d", opnd->indexed_za.index.imm));
+		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm));
       break;
 
     case AARCH64_OPND_CRn:

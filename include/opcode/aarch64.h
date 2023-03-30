@@ -1115,7 +1115,7 @@ struct aarch64_indexed_za
   struct
   {
     int regno;    /* <Wv>  */
-    int imm;      /* <imm>  */
+    int64_t imm;  /* <imm>  */
   } index;
   unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
 };
