@@ -943,7 +943,7 @@ aarch64_ins_reg_extended (const aarch64_operand *self ATTRIBUTE_UNUSED,
       ? AARCH64_MOD_UXTW : AARCH64_MOD_UXTX;
   insert_field (FLD_option, code, aarch64_get_operand_modifier_value (kind), 0);
   /* imm3 */
-  insert_field (FLD_imm3, code, info->shifter.amount, 0);
+  insert_field (FLD_imm3_10, code, info->shifter.amount, 0);
 
   return true;
 }
@@ -1016,7 +1016,7 @@ aarch64_ins_sve_addr_ri_s9xvl (const aarch64_operand *self,
   int factor = 1 + get_operand_specific_data (self);
   insert_field (self->fields[0], code, info->addr.base_regno, 0);
   insert_fields (code, info->addr.offset.imm / factor, 0,
-		 2, FLD_imm3, FLD_SVE_imm6);
+		 2, FLD_imm3_10, FLD_SVE_imm6);
   return true;
 }
 

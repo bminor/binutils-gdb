@@ -1395,7 +1395,7 @@ aarch64_ext_reg_extended (const aarch64_operand *self ATTRIBUTE_UNUSED,
   info->shifter.kind =
     aarch64_get_operand_modifier_from_value (value, true /* extend_p */);
   /* imm3 */
-  info->shifter.amount = extract_field (FLD_imm3, code,  0);
+  info->shifter.amount = extract_field (FLD_imm3_10, code,  0);
 
   /* This makes the constraint checking happy.  */
   info->shifter.operator_present = 1;
@@ -1512,7 +1512,7 @@ aarch64_ext_sve_addr_ri_s9xvl (const aarch64_operand *self,
 {
   int offset;
 
-  offset = extract_fields (code, 0, 2, FLD_SVE_imm6, FLD_imm3);
+  offset = extract_fields (code, 0, 2, FLD_SVE_imm6, FLD_imm3_10);
   offset = (((offset + 256) & 511) - 256);
   return aarch64_ext_sve_addr_reg_mul_vl (self, info, code, offset);
 }

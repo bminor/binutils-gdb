@@ -296,7 +296,7 @@ const aarch64_field fields[] =
     {  0,  4 },	/* cond2: condition in truly conditional-executed inst.  */
     {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
     { 21,  2 },	/* hw: in move wide constant instructions.  */
-    { 10,  3 },	/* imm3: in add/sub extended reg instructions.  */
+    { 10,  3 },	/* imm3_10: in add/sub extended reg instructions.  */
     {  0,  4 },	/* imm4_0: in rmif instructions.  */
     {  5,  4 }, /* imm4_5: in SME instructions.  */
     { 10,  4 },	/* imm4_10: in adddg/subg instructions.  */

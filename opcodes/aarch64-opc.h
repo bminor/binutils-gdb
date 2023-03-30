@@ -124,7 +124,7 @@ enum aarch64_field_kind
   FLD_cond2,
   FLD_defgh,
   FLD_hw,
-  FLD_imm3,
+  FLD_imm3_10,
   FLD_imm4_0,
   FLD_imm4_5,
   FLD_imm4_10,

@@ -5863,7 +5863,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a 7-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "SVE_UIMM8", 0, F(FLD_SVE_imm8),			\
       "an 8-bit unsigned immediate")					\
-    Y(IMMEDIATE, imm, "SVE_UIMM8_53", 0, F(FLD_imm5,FLD_imm3),		\
+    Y(IMMEDIATE, imm, "SVE_UIMM8_53", 0, F(FLD_imm5,FLD_imm3_10),		\
       "an 8-bit unsigned immediate")					\
     Y(SIMD_REG, regno, "SVE_VZn", 0, F(FLD_SVE_Zn), "a SIMD register")	\
     Y(SIMD_REG, regno, "SVE_Vd", 0, F(FLD_SVE_Vd), "a SIMD register")	\
