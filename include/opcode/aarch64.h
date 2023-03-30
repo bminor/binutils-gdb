@@ -1284,6 +1284,14 @@ struct aarch64_inst
      No syntax error, but the operands are not a valid combination, e.g.
      FMOV D0,S0
 
+   The following errors are only reported against an asm string that is
+   syntactically valid and that has valid operand qualifiers.
+
+   AARCH64_OPDE_REG_LIST
+     Error about the register list operand having an unexpected number of
+     registers.  This error is low severity because there might be another
+     opcode entry that supports the given number of registers.
+
    AARCH64_OPDE_UNTIED_IMMS
      The asm failed to use the same immediate for a destination operand
      and a tied source operand.
@@ -1298,10 +1306,6 @@ struct aarch64_inst
    AARCH64_OPDE_UNALIGNED
      Error about some immediate value not properly aligned (i.e. not being a
      multiple times of a certain value).
-
-   AARCH64_OPDE_REG_LIST
-     Error about the register list operand having unexpected number of
-     registers.
 
    AARCH64_OPDE_OTHER_ERROR
      Error of the highest severity and used for any severe issue that does not
@@ -1330,11 +1334,11 @@ enum aarch64_operand_error_kind
   AARCH64_OPDE_SYNTAX_ERROR,
   AARCH64_OPDE_FATAL_SYNTAX_ERROR,
   AARCH64_OPDE_INVALID_VARIANT,
+  AARCH64_OPDE_REG_LIST,
   AARCH64_OPDE_UNTIED_IMMS,
   AARCH64_OPDE_UNTIED_OPERAND,
   AARCH64_OPDE_OUT_OF_RANGE,
   AARCH64_OPDE_UNALIGNED,
-  AARCH64_OPDE_REG_LIST,
   AARCH64_OPDE_OTHER_ERROR
 };
 
