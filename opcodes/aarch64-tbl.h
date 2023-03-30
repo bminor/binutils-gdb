@@ -1624,6 +1624,10 @@
 {                                                       \
   QLF3(S_H,P_M,S_S),                                    \
 }
+#define OP_SVE_HS                                       \
+{                                                       \
+  QLF2(S_H,S_S),                                        \
+}
 #define OP_SVE_HU                                       \
 {                                                       \
   QLF2(S_H,NIL),                                        \
@@ -5353,6 +5357,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("add", 0xc1a11810, 0xffa39c78, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD, F_OD (4), 0),
   SME2_INSN ("add", 0xc120a300, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("add", 0xc120ab00, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
+  SME2_INSN ("bfcvt", 0xc160e000, 0xfffffc20, sme_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
+  SME2_INSN ("bfcvtn", 0xc160e020, 0xfffffc20, sme_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
   SME2_INSN ("bfdot", 0xc1501018, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX2), OP_SVE_SHH, F_OD (2), 0),
   SME2_INSN ("bfdot", 0xc1509018, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zm_INDEX2), OP_SVE_SHH, F_OD (4), 0),
   SME2_INSN ("bfdot", 0xc1201010, 0xfff09c18, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_SHH, F_OD (2), 0),
@@ -5383,6 +5389,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("fadd", 0xc1a11c00, 0xffbf9c78, sme_fp_sd, 0, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_VVV_SD, F_OD (4), 0),
   SME2_INSN ("fclamp", 0xc120c000, 0xff20fc01, sme_size_22_hsd, 0, OP3 (SME_Zdnx2, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_HSD, 0, 0),
   SME2_INSN ("fclamp", 0xc120c800, 0xff20fc03, sme_size_22_hsd, 0, OP3 (SME_Zdnx4, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_HSD, 0, 0),
+  SME2_INSN ("fcvt", 0xc120e000, 0xfffffc20, sve_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
+  SME2_INSN ("fcvtn", 0xc120e020, 0xfffffc20, sve_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
   SME2_INSN ("fcvtzs", 0xc121e000, 0xfffffc21, sve_misc, 0, OP2 (SME_Zdnx2, SME_Znx2), OP_SVE_SS, 0, 0),
   SME2_INSN ("fcvtzs", 0xc131e000, 0xfffffc63, sve_misc, 0, OP2 (SME_Zdnx4, SME_Znx4), OP_SVE_SS, 0, 0),
   SME2_INSN ("fcvtzu", 0xc121e020, 0xfffffc21, sve_misc, 0, OP2 (SME_Zdnx2, SME_Znx2), OP_SVE_SS, 0, 0),
