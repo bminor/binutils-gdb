@@ -5769,6 +5769,44 @@ output_operand_error_record (const operand_error_record *record, char *str)
     }
 }
 
+/* Return true if the presence of error A against an instruction means
+   that error B should not be reported.  This is only used as a first pass,
+   to pick the kind of error that we should report.  */
+
+static bool
+better_error_p (operand_error_record *a, operand_error_record *b)
+{
+  /* For errors reported during parsing, prefer errors that relate to
+     later operands, since that implies that the earlier operands were
+     syntactically valid.
+
+     For example, if we see a register R instead of an immediate in
+     operand N, we'll report that as a recoverable "immediate operand
+     required" error.  This is because there is often another opcode
+     entry that accepts a register operand N, and any errors about R
+     should be reported against the register forms of the instruction.
+     But if no such register form exists, the recoverable error should
+     still win over a syntax error against operand N-1.
+
+     For these purposes, count an error reported at the end of the
+     assembly string as equivalent to an error reported against the
+     final operand.  This means that opcode entries that expect more
+     operands win over "unexpected characters following instruction".  */
+  if (a->detail.kind <= AARCH64_OPDE_FATAL_SYNTAX_ERROR
+      && b->detail.kind <= AARCH64_OPDE_FATAL_SYNTAX_ERROR)
+    {
+      int a_index = (a->detail.index < 0
+		     ? aarch64_num_of_operands (a->opcode) - 1
+		     : a->detail.index);
+      int b_index = (b->detail.index < 0
+		     ? aarch64_num_of_operands (b->opcode) - 1
+		     : b->detail.index);
+      if (a_index != b_index)
+	return a_index > b_index;
+    }
+  return operand_error_higher_severity_p (a->detail.kind, b->detail.kind);
+}
+
 /* Process and output the error message about the operand mismatching.
 
    When this function is called, the operand error information had
@@ -5787,7 +5825,7 @@ output_operand_error_report (char *str, bool non_fatal_only)
   enum aarch64_operand_error_kind kind;
   operand_error_record *curr;
   operand_error_record *head = operand_error_report.head;
-  operand_error_record *record = NULL;
+  operand_error_record *record;
 
   /* No error to report.  */
   if (head == NULL)
@@ -5811,7 +5849,7 @@ output_operand_error_report (char *str, bool non_fatal_only)
 
   /* Find the error kind of the highest severity.  */
   DEBUG_TRACE ("multiple opcode entries with error kind");
-  kind = AARCH64_OPDE_NIL;
+  record = NULL;
   for (curr = head; curr != NULL; curr = curr->next)
     {
       gas_assert (curr->detail.kind != AARCH64_OPDE_NIL);
@@ -5832,14 +5870,16 @@ output_operand_error_report (char *str, bool non_fatal_only)
 	{
 	  DEBUG_TRACE ("\t%s", operand_mismatch_kind_names[curr->detail.kind]);
 	}
-      if (operand_error_higher_severity_p (curr->detail.kind, kind)
-	  && (!non_fatal_only || (non_fatal_only && curr->detail.non_fatal)))
-	kind = curr->detail.kind;
+      if ((!non_fatal_only || curr->detail.non_fatal)
+	  && (!record || better_error_p (curr, record)))
+	record = curr;
     }
 
+  kind = (record ? record->detail.kind : AARCH64_OPDE_NIL);
   gas_assert (kind != AARCH64_OPDE_NIL || non_fatal_only);
 
   /* Pick up one of errors of KIND to report.  */
+  record = NULL;
   for (curr = head; curr != NULL; curr = curr->next)
     {
       /* If we don't want to print non-fatal errors then don't consider them
