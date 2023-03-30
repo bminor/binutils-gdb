@@ -319,12 +319,14 @@ const aarch64_field fields[] =
     {  0,  4 },	/* cond2: condition in truly conditional-executed inst.  */
     {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
     { 21,  2 },	/* hw: in move wide constant instructions.  */
+    {  0,  1 },	/* imm1_0: general immediate in bits [0].  */
     {  2,  1 },	/* imm1_2: general immediate in bits [2].  */
     {  8,  1 },	/* imm1_8: general immediate in bits [8].  */
     { 10,  1 },	/* imm1_10: general immediate in bits [10].  */
     { 15,  1 },	/* imm1_15: general immediate in bits [15].  */
     { 16,  1 },	/* imm1_16: general immediate in bits [16].  */
     {  0,  2 },	/* imm2_0: general immediate in bits [1:0].  */
+    {  1,  2 },	/* imm2_1: general immediate in bits [2:1].  */
     {  8,  2 },	/* imm2_8: general immediate in bits [9:8].  */
     { 10,  2 }, /* imm2_10: 2-bit immediate, bits [11:10] */
     { 15,  2 }, /* imm2_15: 2-bit immediate, bits [16:15] */
@@ -1772,8 +1774,11 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_SME_Zm_INDEX1:
 	case AARCH64_OPND_SME_Zm_INDEX2:
+	case AARCH64_OPND_SME_Zm_INDEX3_1:
 	case AARCH64_OPND_SME_Zm_INDEX3_2:
 	case AARCH64_OPND_SME_Zm_INDEX3_10:
+	case AARCH64_OPND_SME_Zm_INDEX4_1:
+	case AARCH64_OPND_SME_Zm_INDEX4_10:
 	  size = get_operand_fields_width (get_operand_from_code (type)) - 4;
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 15,
 			      0, (1 << size) - 1))
@@ -1877,8 +1882,20 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SME_ZA_array_off1x4:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 1, 4,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
 	case AARCH64_OPND_SME_ZA_array_off2x2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 3, 2,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_off2x4:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 3, 4,
 				get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
@@ -3955,8 +3972,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zn_INDEX:
     case AARCH64_OPND_SME_Zm_INDEX1:
     case AARCH64_OPND_SME_Zm_INDEX2:
+    case AARCH64_OPND_SME_Zm_INDEX3_1:
     case AARCH64_OPND_SME_Zm_INDEX3_2:
     case AARCH64_OPND_SME_Zm_INDEX3_10:
+    case AARCH64_OPND_SME_Zm_INDEX4_1:
+    case AARCH64_OPND_SME_Zm_INDEX4_10:
     case AARCH64_OPND_SME_Zn_INDEX1_16:
     case AARCH64_OPND_SME_Zn_INDEX2_15:
     case AARCH64_OPND_SME_Zn_INDEX2_16:
@@ -4009,7 +4029,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_sme_za_list (buf, size, opnd->reg.regno, styler);
       break;
 
+    case AARCH64_OPND_SME_ZA_array_off1x4:
     case AARCH64_OPND_SME_ZA_array_off2x2:
+    case AARCH64_OPND_SME_ZA_array_off2x4:
     case AARCH64_OPND_SME_ZA_array_off3_0:
     case AARCH64_OPND_SME_ZA_array_off3_5:
     case AARCH64_OPND_SME_ZA_array_off3x2:

@@ -1535,6 +1535,10 @@
 {                                                       \
   QLF3(S_D,S_D,S_D),                                    \
 }
+#define OP_SVE_DHH                                      \
+{                                                       \
+  QLF3(S_D,S_H,S_H),                                    \
+}
 #define OP_SVE_DMMD                                     \
 {                                                       \
   QLF4(S_D,P_M,P_M,S_D),                                \
@@ -2509,6 +2513,8 @@ static const aarch64_feature_set aarch64_feature_sme_i16i64 =
 static const aarch64_feature_set aarch64_feature_sme2 =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SME
 		   | AARCH64_FEATURE_SME2, 0);
+static const aarch64_feature_set aarch64_feature_sme2_i16i64 =
+  AARCH64_FEATURE (AARCH64_FEATURE_SME2 | AARCH64_FEATURE_SME_I16I64, 0);
 static const aarch64_feature_set aarch64_feature_sme2_f64f64 =
   AARCH64_FEATURE (AARCH64_FEATURE_SME2 | AARCH64_FEATURE_SME_F64F64, 0);
 static const aarch64_feature_set aarch64_feature_v8_6 =
@@ -2580,6 +2586,7 @@ static const aarch64_feature_set aarch64_feature_cssc =
 #define SME_F64F64	&aarch64_feature_sme_f64f64
 #define SME_I16I64	&aarch64_feature_sme_i16i64
 #define SME2		&aarch64_feature_sme2
+#define SME2_I16I64	&aarch64_feature_sme2_i16i64
 #define SME2_F64F64	&aarch64_feature_sme2_f64f64
 #define ARMV8_6		&aarch64_feature_v8_6
 #define ARMV8_6_SVE		&aarch64_feature_v8_6
@@ -2694,6 +2701,9 @@ static const aarch64_feature_set aarch64_feature_cssc =
     F_STRICT | FLAGS, CONSTRAINTS, TIED, NULL }
 #define SME2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME2, OPS, QUALS, \
+    F_STRICT | FLAGS, 0, TIED, NULL }
+#define SME2_I16I64_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SME2_I16I64, OPS, QUALS, \
     F_STRICT | FLAGS, 0, TIED, NULL }
 #define SME2_F64F64_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME2_F64F64, OPS, QUALS, \
@@ -5514,6 +5524,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("smlal", 0xc1700800, 0xfff09c1c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SVE_ZnxN, SME_Zm), OP_SVE_SHH, F_OD (4), 0),
   SME2_INSN ("smlal", 0xc1e00800, 0xffe19c3c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx2, SME_Zmx2), OP_SVE_SHH, F_OD (2), 0),
   SME2_INSN ("smlal", 0xc1e10800, 0xffe39c7c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx4, SME_Zmx4), OP_SVE_SHH, F_OD (4), 0),
+  SME2_INSN ("smlall", 0xc1000000, 0xfff0001c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX4_10), OP_SVE_SBB, 0, 0),
+  SME2_INSN ("smlall", 0xc1100000, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("smlall", 0xc1108000, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (4), 0),
+  SME2_INSN ("smlall", 0xc1200400, 0xffb09c1c, sme_int_sd, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm), OP_SVE_VVV_SD_BH, 0, 0),
+  SME2_INSN ("smlall", 0xc1200000, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("smlall", 0xc1300000, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (4), 0),
+  SME2_INSN ("smlall", 0xc1a00000, 0xffa19c3e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zmx2), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("smlall", 0xc1a10000, 0xffa39c7e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD_BH, F_OD (4), 0),
   SME2_INSN ("smlsl", 0xc1c01008, 0xfff01018, sme_misc, 0, OP3 (SME_ZA_array_off3x2, SVE_Zn, SME_Zm_INDEX3_10), OP_SVE_SHH, 0, 0),
   SME2_INSN ("smlsl", 0xc1d01008, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx2, SME_Zm_INDEX3_2), OP_SVE_SHH, F_OD (2), 0),
   SME2_INSN ("smlsl", 0xc1d09008, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx4, SME_Zm_INDEX3_2), OP_SVE_SHH, F_OD (4), 0),
@@ -5522,6 +5540,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("smlsl", 0xc1700808, 0xfff09c1c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SVE_ZnxN, SME_Zm), OP_SVE_SHH, F_OD (4), 0),
   SME2_INSN ("smlsl", 0xc1e00808, 0xffe19c3c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx2, SME_Zmx2), OP_SVE_SHH, F_OD (2), 0),
   SME2_INSN ("smlsl", 0xc1e10808, 0xffe39c7c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx4, SME_Zmx4), OP_SVE_SHH, F_OD (4), 0),
+  SME2_INSN ("smlsll", 0xc1000008, 0xfff0001c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX4_10), OP_SVE_SBB, 0, 0),
+  SME2_INSN ("smlsll", 0xc1100008, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("smlsll", 0xc1108008, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (4), 0),
+  SME2_INSN ("smlsll", 0xc1200408, 0xffb09c1c, sme_int_sd, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm), OP_SVE_VVV_SD_BH, 0, 0),
+  SME2_INSN ("smlsll", 0xc1200008, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("smlsll", 0xc1300008, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (4), 0),
+  SME2_INSN ("smlsll", 0xc1a00008, 0xffa19c3e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zmx2), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("smlsll", 0xc1a10008, 0xffa39c7e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD_BH, F_OD (4), 0),
   SME2_INSN ("sqdmulh", 0xc120a400, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("sqdmulh", 0xc120ac00, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("sqdmulh", 0xc120b400, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),
@@ -5601,6 +5627,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("sub", 0xc1301818, 0xffb09c18, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD, F_OD (4), 0),
   SME2_INSN ("sub", 0xc1a01818, 0xffa19c38, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zmx2), OP_SVE_VVV_SD, F_OD (2), 0),
   SME2_INSN ("sub", 0xc1a11818, 0xffa39c78, sme_int_sd, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD, F_OD (4), 0),
+  SME2_INSN ("sumlall", 0xc1000014, 0xfff0001c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX4_10), OP_SVE_SBB, 0, 0),
+  SME2_INSN ("sumlall", 0xc1100030, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("sumlall", 0xc1108030, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (4), 0),
+  SME2_INSN ("sumlall", 0xc1200014, 0xfff09c1e, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("sumlall", 0xc1300014, 0xfff09c1e, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_SBB, F_OD (4), 0),
   SME2_INSN ("umax", 0xc120a001, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("umax", 0xc120a801, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("umax", 0xc120b001, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),
@@ -5617,6 +5648,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("umlal", 0xc1700810, 0xfff09c1c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SVE_ZnxN, SME_Zm), OP_SVE_SHH, F_OD (4), 0),
   SME2_INSN ("umlal", 0xc1e00810, 0xffe19c3c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx2, SME_Zmx2), OP_SVE_SHH, F_OD (2), 0),
   SME2_INSN ("umlal", 0xc1e10810, 0xffe39c7c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx4, SME_Zmx4), OP_SVE_SHH, F_OD (4), 0),
+  SME2_INSN ("umlall", 0xc1000010, 0xfff0001c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX4_10), OP_SVE_SBB, 0, 0),
+  SME2_INSN ("umlall", 0xc1100010, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("umlall", 0xc1108010, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (4), 0),
+  SME2_INSN ("umlall", 0xc1200410, 0xffb09c1c, sme_int_sd, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm), OP_SVE_VVV_SD_BH, 0, 0),
+  SME2_INSN ("umlall", 0xc1200010, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("umlall", 0xc1300010, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (4), 0),
+  SME2_INSN ("umlall", 0xc1a00010, 0xffa19c3e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zmx2), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("umlall", 0xc1a10010, 0xffa39c7e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD_BH, F_OD (4), 0),
   SME2_INSN ("umlsl", 0xc1c01018, 0xfff01018, sme_misc, 0, OP3 (SME_ZA_array_off3x2, SVE_Zn, SME_Zm_INDEX3_10), OP_SVE_SHH, 0, 0),
   SME2_INSN ("umlsl", 0xc1d01018, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx2, SME_Zm_INDEX3_2), OP_SVE_SHH, F_OD (2), 0),
   SME2_INSN ("umlsl", 0xc1d09018, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx4, SME_Zm_INDEX3_2), OP_SVE_SHH, F_OD (4), 0),
@@ -5625,10 +5664,26 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("umlsl", 0xc1700818, 0xfff09c1c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SVE_ZnxN, SME_Zm), OP_SVE_SHH, F_OD (4), 0),
   SME2_INSN ("umlsl", 0xc1e00818, 0xffe19c3c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx2, SME_Zmx2), OP_SVE_SHH, F_OD (2), 0),
   SME2_INSN ("umlsl", 0xc1e10818, 0xffe39c7c, sme_misc, 0, OP3 (SME_ZA_array_off2x2, SME_Znx4, SME_Zmx4), OP_SVE_SHH, F_OD (4), 0),
+  SME2_INSN ("umlsll", 0xc1000018, 0xfff0001c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX4_10), OP_SVE_SBB, 0, 0),
+  SME2_INSN ("umlsll", 0xc1100018, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("umlsll", 0xc1108018, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (4), 0),
+  SME2_INSN ("umlsll", 0xc1200418, 0xffb09c1c, sme_int_sd, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm), OP_SVE_VVV_SD_BH, 0, 0),
+  SME2_INSN ("umlsll", 0xc1200018, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("umlsll", 0xc1300018, 0xffb09c1e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (4), 0),
+  SME2_INSN ("umlsll", 0xc1a00018, 0xffa19c3e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zmx2), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("umlsll", 0xc1a10018, 0xffa39c7e, sme_int_sd, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_SD_BH, F_OD (4), 0),
   SME2_INSN ("urshl", 0xc120a221, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("urshl", 0xc120aa21, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("urshl", 0xc120b221, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("urshl", 0xc120ba21, 0xff23ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zmx4), OP_SVE_VVV_BHSD, 0, 1),
+  SME2_INSN ("usmlall", 0xc1000004, 0xfff0001c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX4_10), OP_SVE_SBB, 0, 0),
+  SME2_INSN ("usmlall", 0xc1100020, 0xfff09038, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("usmlall", 0xc1108020, 0xfff09078, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX4_1), OP_SVE_SBB, F_OD (4), 0),
+  SME2_INSN ("usmlall", 0xc1200404, 0xfff09c1c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm), OP_SVE_VVV_SD_BH, 0, 0),
+  SME2_INSN ("usmlall", 0xc1200004, 0xfff09c1e, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (2), 0),
+  SME2_INSN ("usmlall", 0xc1300004, 0xfff09c1e, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SVE_ZnxN, SME_Zm), OP_SVE_VVV_SD_BH, F_OD (4), 0),
+  SME2_INSN ("usmlall", 0xc1a00004, 0xffe19c3e, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zmx2), OP_SVE_SBB, F_OD (2), 0),
+  SME2_INSN ("usmlall", 0xc1a10004, 0xffe39c7e, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zmx4), OP_SVE_SBB, F_OD (4), 0),
   SME2_INSN ("whilege", 0x25204010, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
   SME2_INSN ("whilegt", 0x25204018, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
   SME2_INSN ("whilehi", 0x25204818, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
@@ -5638,6 +5693,20 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("whilels", 0x25204c18, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
   SME2_INSN ("whilelt", 0x25204410, 0xff20dc18, sme_size_22, 0, OP4 (SME_PNd3, Rn, Rm, SME_VLxN_13), OP_SVE_VXXU_BHSD, 0, 0),
   SME2_INSN ("zero", 0xc0480001, 0xffffffff, sme_misc, 0, OP1 (SME_ZT0_LIST), {}, 0, 0),
+
+  /* SME2 I16I64 instructions.  */
+  SME2_I16I64_INSN ("smlall", 0xc1800000, 0xfff0101c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX3_10), OP_SVE_DHH, 0, 0),
+  SME2_I16I64_INSN ("smlall", 0xc1900000, 0xfff09838, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (2), 0),
+  SME2_I16I64_INSN ("smlall", 0xc1908000, 0xfff09878, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (4), 0),
+  SME2_I16I64_INSN ("smlsll", 0xc1800008, 0xfff0101c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX3_10), OP_SVE_DHH, 0, 0),
+  SME2_I16I64_INSN ("smlsll", 0xc1900008, 0xfff09838, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (2), 0),
+  SME2_I16I64_INSN ("smlsll", 0xc1908008, 0xfff09878, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (4), 0),
+  SME2_I16I64_INSN ("umlall", 0xc1800010, 0xfff0101c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX3_10), OP_SVE_DHH, 0, 0),
+  SME2_I16I64_INSN ("umlall", 0xc1900010, 0xfff09838, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (2), 0),
+  SME2_I16I64_INSN ("umlall", 0xc1908010, 0xfff09878, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (4), 0),
+  SME2_I16I64_INSN ("umlsll", 0xc1800018, 0xfff0101c, sme_misc, 0, OP3 (SME_ZA_array_off2x4, SVE_Zn, SME_Zm_INDEX3_10), OP_SVE_DHH, 0, 0),
+  SME2_I16I64_INSN ("umlsll", 0xc1900018, 0xfff09838, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx2, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (2), 0),
+  SME2_I16I64_INSN ("umlsll", 0xc1908018, 0xfff09878, sme_misc, 0, OP3 (SME_ZA_array_off1x4, SME_Znx4, SME_Zm_INDEX3_1), OP_SVE_DHH, F_OD (4), 0),
 
   /* SME2 F64F64 instructions.  */
   SME2_F64F64_INSN ("fmla", 0xc1d00000, 0xfff09838, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX1), OP_SVE_DDD, F_OD (2), 0),
@@ -6343,8 +6412,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,		\
       F(FLD_SME_size_22,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_0),	\
       "an SME horizontal or vertical vector access register")		\
+    Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off1x4",			\
+      4 << OPD_F_OD_LSB, F(FLD_SME_Rv,FLD_imm1_0), "ZA array")		\
     Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off2x2",			\
       2 << OPD_F_OD_LSB, F(FLD_SME_Rv,FLD_imm2_0), "ZA array")		\
+    Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off2x4",			\
+      4 << OPD_F_OD_LSB, F(FLD_SME_Rv,FLD_imm2_0), "ZA array")		\
     Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off3_0", 0,		\
       F(FLD_SME_Rv,FLD_imm3_0), "ZA array")				\
     Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off3_5", 0,		\
@@ -6364,11 +6437,20 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SME_Zm, FLD_imm1_10), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX2", 0,			\
       F(FLD_SME_Zm, FLD_imm2_10), "an indexed SVE vector register")	\
+    Y(SVE_REG, simple_index, "SME_Zm_INDEX3_1", 0,			\
+      F(FLD_SME_Zm, FLD_imm1_10, FLD_imm2_1),				\
+      "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX3_2", 0,			\
       F(FLD_SME_Zm, FLD_imm2_10, FLD_imm1_2),				\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX3_10", 0,			\
       F(FLD_SME_Zm, FLD_imm1_15, FLD_imm2_10),				\
+      "an indexed SVE vector register")					\
+    Y(SVE_REG, simple_index, "SME_Zm_INDEX4_1", 0,			\
+      F(FLD_SME_Zm, FLD_imm2_10, FLD_imm2_1),				\
+      "an indexed SVE vector register")					\
+    Y(SVE_REG, simple_index, "SME_Zm_INDEX4_10", 0,			\
+      F(FLD_SME_Zm, FLD_imm1_15, FLD_imm3_10),				\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX1_16", 0,			\
       F(FLD_SVE_Zn, FLD_imm1_16), "an indexed SVE vector register")	\
