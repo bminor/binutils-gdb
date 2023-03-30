@@ -326,6 +326,8 @@ struct reloc_entry
   MULTI_REG_TYPE(R_N, REG_TYPE(R_32) | REG_TYPE(R_64)			\
 		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64))			\
+  /* A horizontal or vertical slice of a ZA tile.  */			\
+  MULTI_REG_TYPE(ZATHV, REG_TYPE(ZATH) | REG_TYPE(ZATV))		\
   /* Pseudo type to mark the end of the enumerator sequence.  */	\
   BASIC_REG_TYPE(MAX)
 
@@ -4248,7 +4250,7 @@ parse_reg_with_qual (char **str, aarch64_reg_type reg_type,
   char *q;
 
   reg_entry *reg = parse_reg (str);
-  if (reg != NULL && reg->type == reg_type)
+  if (reg != NULL && aarch64_check_reg_type (reg, reg_type))
     {
       if (!skip_past_char (str, '.'))
         {
@@ -4440,26 +4442,19 @@ parse_sme_za_hv_tiles_operand (char **str,
                                int *imm,
                                aarch64_opnd_qualifier_t *qualifier)
 {
-  char *qh, *qv;
   int regno;
   int regno_limit;
   int64_t imm_limit;
   int64_t imm_value;
   const reg_entry *reg;
 
-  qh = qv = *str;
-  if ((reg = parse_reg_with_qual (&qh, REG_TYPE_ZATH, qualifier)) != NULL)
-    {
-      *slice_indicator = HV_horizontal;
-      *str = qh;
-    }
-  else if ((reg = parse_reg_with_qual (&qv, REG_TYPE_ZATV, qualifier)) != NULL)
-    {
-      *slice_indicator = HV_vertical;
-      *str = qv;
-    }
-  else
+  reg = parse_reg_with_qual (str, REG_TYPE_ZATHV, qualifier);
+  if (!reg)
     return PARSE_FAIL;
+
+  *slice_indicator = (aarch64_check_reg_type (reg, REG_TYPE_ZATH)
+		      ? HV_horizontal
+		      : HV_vertical);
   regno = reg->number;
 
   switch (*qualifier)
