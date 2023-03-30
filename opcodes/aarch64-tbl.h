@@ -4110,6 +4110,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("mov", 0x05202000, 0xff20fc00, sve_index, OP_MOV_Z_V, OP2 (SVE_Zd, SVE_VZn), OP_SVE_VV_BHSDQ, F_ALIAS | F_MISC, 0),
   _SVE_INSN ("mov", 0x05203800, 0xff3ffc00, sve_size_bhsd, 0, OP2 (SVE_Zd, Rn_SP), OP_SVE_VR_BHSD, F_ALIAS, 0),
   _SVE_INSN ("mov", 0x25804000, 0xfff0c210, sve_misc, OP_MOV_P_P, OP2 (SVE_Pd, SVE_Pn), OP_SVE_BB, F_ALIAS | F_MISC, 0),
+  _SVE_INSN ("mov", 0x25804000, 0xfff0c210, sve_misc, OP_MOV_PN_PN, OP2 (SVE_PNd, SVE_PNn), OP_SVE_BB, F_ALIAS | F_MISC, 0),
   _SVE_INSN ("mov", 0x05202000, 0xff20fc00, sve_index, OP_MOV_Z_Zi, OP2 (SVE_Zd, SVE_Zn_INDEX), OP_SVE_VV_BHSDQ, F_ALIAS | F_MISC, 0),
   _SVE_INSN ("mov", 0x05c00000, 0xfffc0000, sve_limm, 0, OP2 (SVE_Zd, SVE_LIMM_MOV), OP_SVE_VU_BHSD, F_ALIAS, 0),
   _SVE_INSN ("mov", 0x2538c000, 0xff3fc000, sve_size_bhsd, 0, OP2 (SVE_Zd, SVE_ASIMM), OP_SVE_VU_BHSD, F_ALIAS, 0),
@@ -4583,6 +4584,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("ldnt1w", 0xa500c000, 0xffe0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX_LSL2), OP_SVE_SZU, F_OD(1), 0),
   _SVE_INSN ("ldnt1w", 0xa500e000, 0xfff0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RI_S4xVL), OP_SVE_SZU, F_OD(1), 0),
   _SVE_INSN ("ldr", 0x85800000, 0xffc0e010, sve_misc, 0, OP2 (SVE_Pt, SVE_ADDR_RI_S9xVL), {}, 0, 0),
+  _SVE_INSN ("ldr", 0x85800000, 0xffc0e010, sve_misc, 0, OP2 (SVE_PNt, SVE_ADDR_RI_S9xVL), {}, 0, 0),
   _SVE_INSN ("ldr", 0x85804000, 0xffc0e000, sve_misc, 0, OP2 (SVE_Zt, SVE_ADDR_RI_S9xVL), {}, 0, 0),
   _SVE_INSN ("lsl", 0x04208c00, 0xff20fc00, sve_size_bhs, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVD_BHS, 0, 0),
   _SVE_INSN ("lsl", 0x04209c00, 0xff20fc00, sve_shift_unpred, 0, OP3 (SVE_Zd, SVE_Zn, SVE_SHLIMM_UNPRED), OP_SVE_VVU_BHSD, 0, 0),
@@ -4619,6 +4621,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("orrs", 0x25c04000, 0xfff0c210, sve_misc, 0, OP4 (SVE_Pd, SVE_Pg4_10, SVE_Pn, SVE_Pm), OP_SVE_BZBB, F_HAS_ALIAS, 0),
   _SVE_INSN ("orv", 0x04182000, 0xff3fe000, sve_size_bhsd, 0, OP3 (SVE_Vd, SVE_Pg3, SVE_Zn), OP_SVE_VUV_BHSD, 0, 0),
   _SVE_INSN ("pfalse", 0x2518e400, 0xfffffff0, sve_misc, 0, OP1 (SVE_Pd), OP_SVE_B, 0, 0),
+  _SVE_INSN ("pfalse", 0x2518e400, 0xfffffff0, sve_misc, 0, OP1 (SVE_PNd), OP_SVE_B, 0, 0),
   _SVE_INSN ("pfirst", 0x2558c000, 0xfffffe10, sve_misc, 0, OP3 (SVE_Pd, SVE_Pg4_5, SVE_Pd), OP_SVE_BUB, 0, 2),
   _SVE_INSN ("pnext", 0x2519c400, 0xff3ffe10, sve_size_bhsd, 0, OP3 (SVE_Pd, SVE_Pg4_5, SVE_Pd), OP_SVE_VUV_BHSD, 0, 2),
   _SVE_INSN ("prfb", 0x8400c000, 0xffe0e010, sve_misc, 0, OP3 (SVE_PRFOP, SVE_Pg3, SVE_ADDR_RX), {}, 0, 0),
@@ -4800,6 +4803,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("stnt1w", 0xe5006000, 0xffe0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RX_LSL2), OP_SVE_SUU, F_OD(1), 0),
   _SVE_INSN ("stnt1w", 0xe510e000, 0xfff0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RI_S4xVL), OP_SVE_SUU, F_OD(1), 0),
   _SVE_INSN ("str", 0xe5800000, 0xffc0e010, sve_misc, 0, OP2 (SVE_Pt, SVE_ADDR_RI_S9xVL), {}, 0, 0),
+  _SVE_INSN ("str", 0xe5800000, 0xffc0e010, sve_misc, 0, OP2 (SVE_PNt, SVE_ADDR_RI_S9xVL), {}, 0, 0),
   _SVE_INSN ("str", 0xe5804000, 0xffc0e000, sve_misc, 0, OP2 (SVE_Zt, SVE_ADDR_RI_S9xVL), {}, 0, 0),
   _SVE_INSN ("sub", 0x04200400, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, 0),
   _SVE_INSNC ("sub", 0x2521c000, 0xff3fc000, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zd, SVE_AIMM), OP_SVE_VVU_BHSD, 0, C_SCAN_MOVPRFX, 1),
@@ -5272,6 +5276,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSNC ("sclamp", 0x4400c000, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, C_SCAN_MOVPRFX, 0),
   SME_INSNC ("uclamp", 0x4400c400, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, C_SCAN_MOVPRFX, 0),
   SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_Pd, SVE_Pg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
+  SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_PNd, SVE_PNg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
 
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
@@ -5817,19 +5822,27 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an enumeration value such as PLDL1KEEP")				\
     Y(PRED_REG, regno, "SVE_Pd", 0, F(FLD_SVE_Pd),			\
       "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_PNd", 0, F(FLD_SVE_Pd),			\
+      "an SVE predicate-as-counter register")				\
     Y(PRED_REG, regno, "SVE_Pg3", 0, F(FLD_SVE_Pg3),			\
       "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pg4_5", 0, F(FLD_SVE_Pg4_5),		\
       "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pg4_10", 0, F(FLD_SVE_Pg4_10),		\
       "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_PNg4_10", 0, F(FLD_SVE_Pg4_10),		\
+      "an SVE predicate-as-counter register")				\
     Y(PRED_REG, regno, "SVE_Pg4_16", 0, F(FLD_SVE_Pg4_16),		\
       "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pm", 0, F(FLD_SVE_Pm),			\
       "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pn", 0, F(FLD_SVE_Pn),			\
       "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_PNn", 0, F(FLD_SVE_Pn),			\
+      "an SVE predicate register")					\
     Y(PRED_REG, regno, "SVE_Pt", 0, F(FLD_SVE_Pt),			\
+      "an SVE predicate register")					\
+    Y(PRED_REG, regno, "SVE_PNt", 0, F(FLD_SVE_Pt),			\
       "an SVE predicate register")					\
     Y(INT_REG, regno, "SVE_Rm", 0, F(FLD_SVE_Rm),			\
       "an integer register or zero")					\

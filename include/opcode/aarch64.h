@@ -439,13 +439,17 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_PATTERN_SCALED, /* Likewise, with additional MUL factor.  */
   AARCH64_OPND_SVE_PRFOP,	/* SVE prefetch operation.  */
   AARCH64_OPND_SVE_Pd,		/* SVE p0-p15 in Pd.  */
+  AARCH64_OPND_SVE_PNd,		/* SVE pn0-pn15 in Pd.  */
   AARCH64_OPND_SVE_Pg3,		/* SVE p0-p7 in Pg.  */
   AARCH64_OPND_SVE_Pg4_5,	/* SVE p0-p15 in Pg, bits [8,5].  */
   AARCH64_OPND_SVE_Pg4_10,	/* SVE p0-p15 in Pg, bits [13,10].  */
+  AARCH64_OPND_SVE_PNg4_10,	/* SVE pn0-pn15 in Pg, bits [13,10].  */
   AARCH64_OPND_SVE_Pg4_16,	/* SVE p0-p15 in Pg, bits [19,16].  */
   AARCH64_OPND_SVE_Pm,		/* SVE p0-p15 in Pm.  */
   AARCH64_OPND_SVE_Pn,		/* SVE p0-p15 in Pn.  */
+  AARCH64_OPND_SVE_PNn,		/* SVE pn0-pn15 in Pn.  */
   AARCH64_OPND_SVE_Pt,		/* SVE p0-p15 in Pt.  */
+  AARCH64_OPND_SVE_PNt,		/* SVE pn0-pn15 in Pt.  */
   AARCH64_OPND_SVE_Rm,		/* Integer Rm or ZR, alt. SVE position.  */
   AARCH64_OPND_SVE_Rn_SP,	/* Integer Rn or SP, alt. SVE position.  */
   AARCH64_OPND_SVE_SHLIMM_PRED,	  /* SVE shift left amount (predicated).  */
@@ -783,6 +787,7 @@ enum aarch64_op
   OP_UXTL2,
 
   OP_MOV_P_P,
+  OP_MOV_PN_PN,
   OP_MOV_Z_P_Z,
   OP_MOV_Z_V,
   OP_MOV_Z_Z,

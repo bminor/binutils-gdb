@@ -307,6 +307,7 @@ struct reloc_entry
   BASIC_REG_TYPE(V)	/* v[0-31] */	\
   BASIC_REG_TYPE(Z)	/* z[0-31] */	\
   BASIC_REG_TYPE(P)	/* p[0-15] */	\
+  BASIC_REG_TYPE(PN)	/* pn[0-15] */	\
   BASIC_REG_TYPE(ZA)	/* za */	\
   BASIC_REG_TYPE(ZAT)	/* za[0-15] (ZA tile) */			\
   BASIC_REG_TYPE(ZATH)	/* za[0-15]h (ZA tile horizontal slice) */ 	\
@@ -440,6 +441,16 @@ get_reg_expected_msg (unsigned int mask, unsigned int seen)
 		  | reg_type_masks[REG_TYPE_ZATHV])))
     return N_("expected 'za' rather than a ZA tile at operand %d");
 
+  if ((mask & reg_type_masks[REG_TYPE_PN])
+      && (seen & reg_type_masks[REG_TYPE_P]))
+    return N_("expected a predicate-as-counter rather than predicate-as-mask"
+	      " register at operand %d");
+
+  if ((mask & reg_type_masks[REG_TYPE_P])
+      && (seen & reg_type_masks[REG_TYPE_PN]))
+    return N_("expected a predicate-as-mask rather than predicate-as-counter"
+	      " register at operand %d");
+
   /* Integer, zero and stack registers.  */
   if (mask == reg_type_masks[REG_TYPE_R_64])
     return N_("expected a 64-bit integer register at operand %d");
@@ -456,7 +467,12 @@ get_reg_expected_msg (unsigned int mask, unsigned int seen)
     return N_("expected an Advanced SIMD vector register at operand %d");
   if (mask == reg_type_masks[REG_TYPE_Z])
     return N_("expected an SVE vector register at operand %d");
-  if (mask == reg_type_masks[REG_TYPE_P])
+  if (mask == reg_type_masks[REG_TYPE_P]
+      || mask == (reg_type_masks[REG_TYPE_P] | reg_type_masks[REG_TYPE_PN]))
+    /* Use this error for "predicate-as-mask only" and "either kind of
+       predicate".  We report a more specific error if P is used where
+       PN is expected, and vice versa, so the issue at this point is
+       "predicate-like" vs. "not predicate-like".  */
     return N_("expected an SVE predicate register at operand %d");
   if (mask == reg_type_masks[REG_TYPE_VZ])
     return N_("expected a vector register at operand %d");
@@ -1127,6 +1143,7 @@ aarch64_valid_suffix_char_p (aarch64_reg_type type, char ch)
       return ch == '.';
 
     case REG_TYPE_P:
+    case REG_TYPE_PN:
       return ch == '.' || ch == '/';
 
     default:
@@ -6609,6 +6626,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg;
 
+	case AARCH64_OPND_SVE_PNd:
+	case AARCH64_OPND_SVE_PNg4_10:
+	case AARCH64_OPND_SVE_PNn:
+	case AARCH64_OPND_SVE_PNt:
+	  reg_type = REG_TYPE_PN;
+	  goto vector_reg;
+
 	case AARCH64_OPND_Va:
 	case AARCH64_OPND_Vd:
 	case AARCH64_OPND_Vn:
@@ -6622,7 +6646,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 
 	  info->reg.regno = reg->number;
-	  if ((reg_type == REG_TYPE_P || reg_type == REG_TYPE_Z)
+	  if ((reg_type == REG_TYPE_P
+	       || reg_type == REG_TYPE_PN
+	       || reg_type == REG_TYPE_Z)
 	      && vectype.type == NT_invtype)
 	    /* Unqualified P and Z registers are allowed in certain
 	       contexts.  Rely on F_STRICT qualifier checking to catch
@@ -8343,8 +8369,11 @@ static const reg_entry reg_names[] = {
   /* SVE vector registers.  */
   REGSET (z, Z), REGSET (Z, Z),
 
-  /* SVE predicate registers.  */
+  /* SVE predicate(-as-mask) registers.  */
   REGSET16 (p, P), REGSET16 (P, P),
+
+  /* SVE predicate-as-counter registers.  */
+  REGSET16 (pn, PN), REGSET16 (PN, PN),
 
   /* SME ZA.  We model this as a register because it acts syntactically
      like ZA0H, supporting qualifier suffixes and indexing.  */

@@ -1643,6 +1643,7 @@ do_misc_encoding (aarch64_inst *inst)
       encode_asisd_fcvtxn (inst);
       break;
     case OP_MOV_P_P:
+    case OP_MOV_PN_PN:
     case OP_MOVS_P_P:
       /* Copy Pn to Pm and Pg.  */
       value = extract_field (FLD_SVE_Pn, inst->value, 0);

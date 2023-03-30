@@ -3679,6 +3679,19 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 			     aarch64_get_qualifier_name (opnd->qualifier)));
       break;
 
+    case AARCH64_OPND_SVE_PNd:
+    case AARCH64_OPND_SVE_PNg4_10:
+    case AARCH64_OPND_SVE_PNn:
+    case AARCH64_OPND_SVE_PNt:
+      if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
+	snprintf (buf, size, "%s",
+		  style_reg (styler, "pn%d", opnd->reg.regno));
+      else
+	snprintf (buf, size, "%s",
+		  style_reg (styler, "pn%d.%s", opnd->reg.regno,
+			     aarch64_get_qualifier_name (opnd->qualifier)));
+      break;
+
     case AARCH64_OPND_SVE_Za_5:
     case AARCH64_OPND_SVE_Za_16:
     case AARCH64_OPND_SVE_Zd:
