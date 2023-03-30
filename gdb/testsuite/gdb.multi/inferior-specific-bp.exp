@@ -51,9 +51,9 @@ if {![runto_main]} {
 # this should fail.  Try with the keywords in both orders just in case the
 # parser has a bug.
 gdb_test "break foo thread 1.1 inferior 1" \
-    "You can specify only one of inferior or thread\\."
+    "You can specify only one of thread, inferior, or task\\."
 gdb_test "break foo inferior 1 thread 1.1" \
-    "You can specify only one of inferior or thread\\."
+    "You can specify only one of thread, inferior, or task\\."
 
 # Try to create a breakpoint using the 'inferior' keyword multiple times.
 gdb_test "break foo inferior 1 inferior 2" \

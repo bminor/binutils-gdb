@@ -575,22 +575,30 @@ namespace eval $testfile {
 	      allow-pending]} {
 	fail "set $tst"
     } else {
-	gdb_test "info break" ".*PENDING.*myfunction if foofoofoo == 1.*" $tst
+	gdb_test "info break" ".*PENDING.*myfunction\r\n\\s+stop only if foofoofoo == 1.*" $tst
     }
 
     gdb_exit
     gdb_start
+
+    if {[target_info gdb_protocol] == "extended-remote"} {
+	set evals_re "(?: \\(\[^) \]+ evals\\))?"
+    } else {
+	set evals_re ""
+    }
 
     set tst "pending valid conditional explicit breakpoint"
     if {![gdb_breakpoint "-func myfunction if arg == 0" \
 	      allow-pending]} {
 	fail "set $tst"
     } else {
-	gdb_test "info break" ".*PENDING.*myfunction if arg == 0" $tst
+	gdb_test "info break" \
+	    ".*PENDING.*myfunction\r\n\\s+stop only if arg == 0${evals_re}" \
+	    $tst
 
 	gdb_load [standard_output_file $exefile]
 	gdb_test "info break" \
-	    ".*in myfunction at .*$srcfile:.*stop only if arg == 0.*" \
+	    ".*in myfunction at .*$srcfile:.*stop only if arg == 0${evals_re}" \
 	    "$tst resolved"
     }
 

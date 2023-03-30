@@ -10,6 +10,10 @@
   function in Python.  By default, the raw ptwrite payload is printed for
   each ptwrite that is encountered.
 
+* For breakpoints that are created in the 'pending' state, any
+  'thread' or 'task' keywords are parsed at the time the breakpoint is
+  created, rather than at the time the breakpoint becomes non-pending.
+
 * Python API
 
   ** Added gdb.record.clear.  Clears the trace data of the current recording.

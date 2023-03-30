@@ -1051,6 +1051,7 @@ COMMON_SFILES = \
 	break-catch-sig.c \
 	break-catch-syscall.c \
 	break-catch-throw.c \
+	break-cond-parse.c \
 	breakpoint.c \
 	bt-utils.c \
 	btrace.c \
@@ -1320,6 +1321,7 @@ HFILES_NO_SRCDIR = \
 	bfd-target.h \
 	bfin-tdep.h \
 	block.h \
+	break-cond-parse.h \
 	breakpoint.h \
 	bsd-kvm.h \
 	bsd-uthread.h \

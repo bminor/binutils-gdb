@@ -70,6 +70,7 @@
 #include "cli/cli-style.h"
 #include "cli/cli-decode.h"
 #include <unordered_set>
+#include "break-cond-parse.h"
 
 /* readline include files */
 #include "readline/tilde.h"
@@ -6321,20 +6322,7 @@ print_breakpoint_location (const breakpoint *b, const bp_location *loc)
       uiout->field_stream ("at", stb);
     }
   else
-    {
-      uiout->field_string ("pending", b->locspec->to_string ());
-      /* If extra_string is available, it could be holding a condition
-	 or dprintf arguments.  In either case, make sure it is printed,
-	 too, but only for non-MI streams.  */
-      if (!uiout->is_mi_like_p () && b->extra_string != NULL)
-	{
-	  if (b->type == bp_dprintf)
-	    uiout->text (",");
-	  else
-	    uiout->text (" ");
-	  uiout->text (b->extra_string.get ());
-	}
-    }
+    uiout->field_string ("pending", b->locspec->to_string ());
 
   if (loc && is_breakpoint (b)
       && breakpoint_condition_evaluation_mode () == condition_evaluation_target
@@ -8749,8 +8737,8 @@ code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
      command line, otherwise it's an error.  */
   if (type == bp_dprintf)
     update_dprintf_command_list (this);
-  else if (extra_string != nullptr)
-    error (_("Garbage '%s' at end of command"), extra_string.get ());
+  else
+    gdb_assert (extra_string == nullptr);
 
   /* The order of the locations is now stable.  Set the location
      condition using the location's number.  */
@@ -8978,197 +8966,6 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
     }
 }
 
-/* Given TOK, a string specification of condition and thread, as accepted
-   by the 'break' command, extract the condition string into *COND_STRING.
-   If no condition string is found then *COND_STRING is set to nullptr.
-
-   If the breakpoint specification has an associated thread, task, or
-   inferior, these are extracted into *THREAD, *TASK, and *INFERIOR
-   respectively, otherwise these arguments are set to -1 (for THREAD and
-   INFERIOR) or 0 (for TASK).
-
-   PC identifies the context at which the condition should be parsed.  */
-
-static void
-find_condition_and_thread (const char *tok, CORE_ADDR pc,
-			   gdb::unique_xmalloc_ptr<char> *cond_string,
-			   int *thread, int *inferior, int *task,
-			   gdb::unique_xmalloc_ptr<char> *rest)
-{
-  cond_string->reset ();
-  *thread = -1;
-  *inferior = -1;
-  *task = -1;
-  rest->reset ();
-  bool force = false;
-
-  while (tok && *tok)
-    {
-      const char *end_tok;
-      int toklen;
-      const char *cond_start = NULL;
-      const char *cond_end = NULL;
-
-      tok = skip_spaces (tok);
-
-      if ((*tok == '"' || *tok == ',') && rest)
-	{
-	  rest->reset (savestring (tok, strlen (tok)));
-	  break;
-	}
-
-      end_tok = skip_to_space (tok);
-
-      toklen = end_tok - tok;
-
-      if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
-	{
-	  tok = cond_start = end_tok + 1;
-	  try
-	    {
-	      parse_exp_1 (&tok, pc, block_for_pc (pc), 0);
-	    }
-	  catch (const gdb_exception_error &)
-	    {
-	      if (!force)
-		throw;
-	      else
-		tok = tok + strlen (tok);
-	    }
-	  cond_end = tok;
-	  cond_string->reset (savestring (cond_start, cond_end - cond_start));
-	}
-      else if (toklen >= 1 && strncmp (tok, "-force-condition", toklen) == 0)
-	{
-	  tok = tok + toklen;
-	  force = true;
-	}
-      else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
-	{
-	  const char *tmptok;
-	  struct thread_info *thr;
-
-	  if (*thread != -1)
-	    error(_("You can specify only one thread."));
-
-	  if (*task != -1)
-	    error (_("You can specify only one of thread or task."));
-
-	  if (*inferior != -1)
-	    error (_("You can specify only one of inferior or thread."));
-
-	  tok = end_tok + 1;
-	  thr = parse_thread_id (tok, &tmptok);
-	  if (tok == tmptok)
-	    error (_("Junk after thread keyword."));
-	  *thread = thr->global_num;
-	  tok = tmptok;
-	}
-      else if (toklen >= 1 && strncmp (tok, "inferior", toklen) == 0)
-	{
-	  if (*inferior != -1)
-	    error(_("You can specify only one inferior."));
-
-	  if (*task != -1)
-	    error (_("You can specify only one of inferior or task."));
-
-	  if (*thread != -1)
-	    error (_("You can specify only one of inferior or thread."));
-
-	  char *tmptok;
-	  tok = end_tok + 1;
-	  *inferior = strtol (tok, &tmptok, 0);
-	  if (tok == tmptok)
-	    error (_("Junk after inferior keyword."));
-	  if (!valid_global_inferior_id (*inferior))
-	    error (_("Unknown inferior number %d."), *inferior);
-	  tok = tmptok;
-	}
-      else if (toklen >= 1 && strncmp (tok, "task", toklen) == 0)
-	{
-	  char *tmptok;
-
-	  if (*task != -1)
-	    error(_("You can specify only one task."));
-
-	  if (*thread != -1)
-	    error (_("You can specify only one of thread or task."));
-
-	  if (*inferior != -1)
-	    error (_("You can specify only one of inferior or task."));
-
-	  tok = end_tok + 1;
-	  *task = strtol (tok, &tmptok, 0);
-	  if (tok == tmptok)
-	    error (_("Junk after task keyword."));
-	  if (!valid_task_id (*task))
-	    error (_("Unknown task %d."), *task);
-	  tok = tmptok;
-	}
-      else if (rest)
-	{
-	  rest->reset (savestring (tok, strlen (tok)));
-	  break;
-	}
-      else
-	error (_("Junk at end of arguments."));
-    }
-}
-
-/* Call 'find_condition_and_thread' for each sal in SALS until a parse
-   succeeds.  The parsed values are written to COND_STRING, THREAD,
-   TASK, and REST.  See the comment of 'find_condition_and_thread'
-   for the description of these parameters and INPUT.  */
-
-static void
-find_condition_and_thread_for_sals (const std::vector<symtab_and_line> &sals,
-				    const char *input,
-				    gdb::unique_xmalloc_ptr<char> *cond_string,
-				    int *thread, int *inferior, int *task,
-				    gdb::unique_xmalloc_ptr<char> *rest)
-{
-  int num_failures = 0;
-  for (auto &sal : sals)
-    {
-      gdb::unique_xmalloc_ptr<char> cond;
-      int thread_id = -1;
-      int inferior_id = -1;
-      int task_id = -1;
-      gdb::unique_xmalloc_ptr<char> remaining;
-
-      /* Here we want to parse 'arg' to separate condition from thread
-	 number.  But because parsing happens in a context and the
-	 contexts of sals might be different, try each until there is
-	 success.  Finding one successful parse is sufficient for our
-	 goal.  When setting the breakpoint we'll re-parse the
-	 condition in the context of each sal.  */
-      try
-	{
-	  find_condition_and_thread (input, sal.pc, &cond, &thread_id,
-				     &inferior_id, &task_id, &remaining);
-	  *cond_string = std::move (cond);
-	  /* A value of -1 indicates that these fields are unset.  At most
-	     one of these fields should be set (to a value other than -1)
-	     at this point.  */
-	  gdb_assert (((thread_id == -1 ? 1 : 0)
-		       + (task_id == -1 ? 1 : 0)
-		       + (inferior_id == -1 ? 1 : 0)) >= 2);
-	  *thread = thread_id;
-	  *inferior = inferior_id;
-	  *task = task_id;
-	  *rest = std::move (remaining);
-	  break;
-	}
-      catch (const gdb_exception_error &e)
-	{
-	  num_failures++;
-	  /* If no sal remains, do not continue.  */
-	  if (num_failures == sals.size ())
-	    throw;
-	}
-    }
-}
-
 /* Decode a static tracepoint marker spec.  */
 
 static std::vector<symtab_and_line>
@@ -9285,6 +9082,46 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      ? (extra_string != nullptr && !parse_extra)
 	      : (extra_string == nullptr || parse_extra));
 
+  /* Will hold either copies of the similarly named function argument, or
+     will hold a modified version of the function argument, depending on
+     the value of PARSE_EXTRA.  */
+  gdb::unique_xmalloc_ptr<char> cond_string_copy;
+  gdb::unique_xmalloc_ptr<char> extra_string_copy;
+
+  if (parse_extra)
+    {
+      /* Parse EXTRA_STRING splitting the parts out.  */
+      create_breakpoint_parse_arg_string (extra_string, &cond_string_copy,
+					  &thread, &inferior, &task,
+					  &extra_string_copy,
+					  &force_condition);
+
+      /* We could check that EXTRA_STRING_COPY is empty at this point -- it
+	 should be, as we only get here for things that are not bp_dprintf,
+	 however, we prefer to give the location spec parser a chance to
+	 run first, this means the user will get errors about invalid
+	 location spec instead of an error about garbage at the end of the
+	 command line.
+
+	 We still do the EXTRA_STRING_COPY is empty check, just later in
+	 this function.  */
+
+      gdb_assert (thread == -1 || thread > 0);
+      gdb_assert (task == -1 || task > 0);
+      gdb_assert (inferior == -1 || inferior > 0);
+    }
+  else
+    {
+      if (cond_string != nullptr)
+	cond_string_copy.reset (xstrdup (cond_string));
+      if (extra_string != nullptr)
+	extra_string_copy.reset (xstrdup (extra_string));
+    }
+
+  /* Clear these.  Updated values are now held in the *_copy locals.  */
+  cond_string = nullptr;
+  extra_string = nullptr;
+
   try
     {
       ops->create_sals_from_location_spec (locspec, &canonical);
@@ -9320,6 +9157,13 @@ create_breakpoint (struct gdbarch *gdbarch,
 	throw;
     }
 
+  /* Only bp_dprintf breakpoints should have anything in EXTRA_STRING_COPY
+     by this point.  For all other breakpoints this indicates an error.  We
+     could place this check earlier in the function, but we prefer to see
+     errors from the location spec parser before we see this error message.  */
+  if (type_wanted != bp_dprintf && extra_string_copy.get () != nullptr)
+    error (_("Garbage '%s' at end of command"), extra_string_copy.get ());
+
   if (!pending && canonical.lsals.empty ())
     return 0;
 
@@ -9343,63 +9187,31 @@ create_breakpoint (struct gdbarch *gdbarch,
      breakpoint.  */
   if (!pending)
     {
-      gdb::unique_xmalloc_ptr<char> cond_string_copy;
-      gdb::unique_xmalloc_ptr<char> extra_string_copy;
-
-      if (parse_extra)
+      /* Check the validity of the condition.  We should error out if the
+	 condition is invalid at all of the locations and if it is not
+	 forced.  In the PARSE_EXTRA case above, this check is done when
+	 parsing the EXTRA_STRING.  */
+      if (cond_string_copy.get () != nullptr && !force_condition)
 	{
-	  gdb_assert (type_wanted != bp_dprintf);
-
-	  gdb::unique_xmalloc_ptr<char> rest;
-	  gdb::unique_xmalloc_ptr<char> cond;
-
+	  int num_failures = 0;
 	  const linespec_sals &lsal = canonical.lsals[0];
-
-	  find_condition_and_thread_for_sals (lsal.sals, extra_string,
-					      &cond, &thread, &inferior,
-					      &task, &rest);
-
-	  if (rest.get () != nullptr && *(rest.get ()) != '\0')
-	    error (_("Garbage '%s' at end of command"), rest.get ());
-
-	  cond_string_copy = std::move (cond);
-	  extra_string_copy = std::move (rest);
-	}
-      else
-	{
-	  /* Check the validity of the condition.  We should error out
-	     if the condition is invalid at all of the locations and
-	     if it is not forced.  In the PARSE_EXTRA case above, this
-	     check is done when parsing the EXTRA_STRING.  */
-	  if (cond_string != nullptr && !force_condition)
+	  for (const auto &sal : lsal.sals)
 	    {
-	      int num_failures = 0;
-	      const linespec_sals &lsal = canonical.lsals[0];
-	      for (const auto &sal : lsal.sals)
+	      const char *cond = cond_string_copy.get ();
+	      try
 		{
-		  const char *cond = cond_string;
-		  try
-		    {
-		      parse_exp_1 (&cond, sal.pc, block_for_pc (sal.pc), 0);
-		      /* One success is sufficient to keep going.  */
-		      break;
-		    }
-		  catch (const gdb_exception_error &)
-		    {
-		      num_failures++;
-		      /* If this is the last sal, error out.  */
-		      if (num_failures == lsal.sals.size ())
-			throw;
-		    }
+		  parse_exp_1 (&cond, sal.pc, block_for_pc (sal.pc), 0);
+		  /* One success is sufficient to keep going.  */
+		  break;
+		}
+	      catch (const gdb_exception_error &)
+		{
+		  num_failures++;
+		  /* If this is the last sal, error out.  */
+		  if (num_failures == lsal.sals.size ())
+		    throw;
 		}
 	    }
-
-	  /* Create a private copy of condition string.  */
-	  if (cond_string)
-	    cond_string_copy.reset (xstrdup (cond_string));
-	  /* Create a private copy of any extra string.  */
-	  if (extra_string)
-	    extra_string_copy.reset (xstrdup (extra_string));
 	}
 
       ops->create_breakpoints_sal (gdbarch, &canonical,
@@ -9416,21 +9228,16 @@ create_breakpoint (struct gdbarch *gdbarch,
 								 type_wanted);
       b->locspec = locspec->clone ();
 
-      if (parse_extra)
-	b->cond_string = NULL;
-      else
-	{
-	  /* Create a private copy of condition string.  */
-	  b->cond_string.reset (cond_string != NULL
-				? xstrdup (cond_string)
-				: NULL);
-	  b->thread = thread;
-	}
+      /* Create a private copy of the condition string.  */
+      b->cond_string = std::move (cond_string_copy);
+
+      b->thread = thread;
+      b->task = task;
+      b->inferior = inferior;
 
       /* Create a private copy of any extra string.  */
-      b->extra_string.reset (extra_string != NULL
-			     ? xstrdup (extra_string)
-			     : NULL);
+      b->extra_string = std::move (extra_string_copy);
+
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
@@ -9439,9 +9246,12 @@ create_breakpoint (struct gdbarch *gdbarch,
 	   && type_wanted != bp_hardware_breakpoint) || thread != -1)
 	b->pspace = current_program_space;
 
+      if (b->type == bp_dprintf)
+	update_dprintf_command_list (b.get ());
+
       install_breakpoint (internal, std::move (b), 0);
     }
-  
+
   if (canonical.lsals.size () > 1)
     {
       warning (_("Multiple breakpoints were set.\nUse the "
@@ -13180,24 +12990,6 @@ code_breakpoint::location_spec_to_sals (location_spec *locspec,
     {
       for (auto &sal : sals)
 	resolve_sal_pc (&sal);
-      if (condition_not_parsed && extra_string != NULL)
-	{
-	  gdb::unique_xmalloc_ptr<char> local_cond, local_extra;
-	  int local_thread, local_task, local_inferior;
-
-	  find_condition_and_thread_for_sals (sals, extra_string.get (),
-					      &local_cond, &local_thread,
-					      &local_inferior,
-					      &local_task, &local_extra);
-	  gdb_assert (cond_string == nullptr);
-	  if (local_cond != nullptr)
-	    cond_string = std::move (local_cond);
-	  thread = local_thread;
-	  task = local_task;
-	  if (local_extra != nullptr)
-	    extra_string = std::move (local_extra);
-	  condition_not_parsed = 0;
-	}
 
       if (type == bp_static_tracepoint)
 	{
