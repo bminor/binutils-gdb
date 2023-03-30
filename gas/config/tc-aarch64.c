@@ -6350,7 +6350,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   clear_error ();
   skip_whitespace (str);
 
-  if (AARCH64_CPU_HAS_FEATURE (AARCH64_FEATURE_SVE, *opcode->avariant))
+  if (AARCH64_CPU_HAS_ANY_FEATURES (*opcode->avariant,
+				    AARCH64_FEATURE_SVE
+				    | AARCH64_FEATURE_SVE2))
     imm_reg_type = REG_TYPE_R_Z_SP_BHSDQ_VZP;
   else
     imm_reg_type = REG_TYPE_R_Z_BHSDQ_V;

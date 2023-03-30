@@ -3328,3 +3328,10 @@
 [^ :]+:[0-9]+: Error: immediate value out of range 1 to 32 at operand 4 -- `xar z0\.s,z0\.s,z0\.s,#0'
 [^ :]+:[0-9]+: Error: immediate value out of range 1 to 32 at operand 4 -- `xar z0\.s,z0\.s,z0\.s,#33'
 [^ :]+:[0-9]+: Error: immediate value out of range 1 to 64 at operand 4 -- `xar z0\.d,z0\.d,z0\.d,#0'
+[^ :]+:[0-9]+: Error: operand mismatch -- `sqshl z1\.s,p0/m,z1\.s,z0\.h'
+[^ :]+:[0-9]+: Info:    did you mean this\?
+[^ :]+:[0-9]+: Info:    	sqshl z1\.s, p0/m, z1\.s, z0\.s
+[^ :]+:[0-9]+: Info:    other valid variant\(s\):
+[^ :]+:[0-9]+: Info:    	sqshl z1\.b, p0/m, z1\.b, z0\.b
+[^ :]+:[0-9]+: Info:    	sqshl z1\.h, p0/m, z1\.h, z0\.h
+[^ :]+:[0-9]+: Info:    	sqshl z1\.d, p0/m, z1\.d, z0\.d

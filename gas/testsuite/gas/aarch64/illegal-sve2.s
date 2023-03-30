@@ -2072,3 +2072,6 @@ xar z0.s, z0.s, z0.s, #0
 xar z0.s, z0.s, z0.s, #33
 xar z0.d, z0.d, z0.d, #0
 xar z0.d, z0.d, z0.d, #64
+
+.equ z0.h, 1
+sqshl z1.s, p0/m, z1.s, z0.h
