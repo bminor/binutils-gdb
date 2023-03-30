@@ -496,7 +496,7 @@ sections are evaluated does not change, for instance:
   SECTIONS @{
     mem1 : @{ *(.data.*); @} > MEM1
     mem2 : @{ *(.data.*); @} > MEM2
-    mem3 : @{ *(.data.*); @} > MEM2
+    mem3 : @{ *(.data.*); @} > MEM3
   @}
 
   with input sections:
