@@ -1329,3 +1329,5 @@
 	ld2b	{.b}, p0/z, [x0]
 	ld2b	{z0.b-}, p0/z, [x0]
 	ld2b	{z0.b,}, p0/z, [x0]
+	ld2b	{z0.b-z32.b}, p0/z, [x0]
+	ld2b	{z0.b-v1.16b}, p0/z, [x0]

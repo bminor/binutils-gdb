@@ -1208,3 +1208,5 @@
 .*: Error: syntax error in register list at operand 1 -- `ld2b {.b},p0/z,\[x0\]'
 .*: Error: syntax error in register list at operand 1 -- `ld2b {z0.b-},p0/z,\[x0\]'
 .*: Error: syntax error in register list at operand 1 -- `ld2b {z0.b,},p0/z,\[x0\]'
+.*: Error: operand 1 must be a list of SVE vector registers -- `ld2b {z0\.b-z32\.b},p0/z,\[x0\]'
+.*: Error: operand 1 must be a list of SVE vector registers -- `ld2b {z0\.b-v1\.16b},p0/z,\[x0\]'

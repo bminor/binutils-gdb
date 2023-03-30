@@ -19,6 +19,8 @@ zero { , , }
 zero { za0 }
 zero { , za0.d }
 zero { za0.d , }
+zero { za0.d, z1.d }
+zero { za0.d, za32.d }
 zero { za0.d , za1.d , }
 zero { za, }
 zero { za. }

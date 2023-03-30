@@ -1073,10 +1073,14 @@ parse_index_expression (char **str, int64_t *imm)
    FLAGS includes PTR_IN_REGLIST if the caller is parsing a register list.
 
    FLAGS includes PTR_FULL_REG if the function should ignore any potential
-   register index.  */
+   register index.
+
+   FLAGS includes PTR_GOOD_MATCH if we are sufficiently far into parsing
+   an operand that we can be confident that it is a good match.  */
 
 #define PTR_IN_REGLIST (1U << 0)
 #define PTR_FULL_REG (1U << 1)
+#define PTR_GOOD_MATCH (1U << 2)
 
 static const reg_entry *
 parse_typed_reg (char **ccp, aarch64_reg_type type,
@@ -1101,6 +1105,8 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 	*typeinfo = atype;
       if (!isalpha && (flags & PTR_IN_REGLIST))
 	set_fatal_syntax_error (_("syntax error in register list"));
+      else if (flags & PTR_GOOD_MATCH)
+	set_fatal_syntax_error (NULL);
       else
 	set_default_error ();
       return NULL;
@@ -1109,7 +1115,10 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
   if (! aarch64_check_reg_type (reg, type))
     {
       DEBUG_TRACE ("reg type check failed");
-      set_default_error ();
+      if (flags & PTR_GOOD_MATCH)
+	set_fatal_syntax_error (NULL);
+      else
+	set_default_error ();
       return NULL;
     }
   type = reg->type;
@@ -1262,6 +1271,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   int i;
   bool error = false;
   bool expect_index = false;
+  unsigned int ptr_flags = PTR_IN_REGLIST;
 
   if (*str != '{')
     {
@@ -1288,7 +1298,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	  val_range = val;
 	}
       const reg_entry *reg = parse_typed_reg (&str, type, &typeinfo,
-					      PTR_IN_REGLIST);
+					      ptr_flags);
       if (!reg)
 	{
 	  set_first_syntax_error (_("invalid vector register in list"));
@@ -1336,6 +1346,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	    nb_regs++;
 	  }
       in_range = 0;
+      ptr_flags |= PTR_GOOD_MATCH;
     }
   while (skip_past_comma (&str) || (in_range = 1, *str == '-'));
 
@@ -4530,13 +4541,14 @@ parse_sme_zero_mask(char **str)
   char *q;
   int mask;
   aarch64_opnd_qualifier_t qualifier;
+  unsigned int ptr_flags = PTR_IN_REGLIST;
 
   mask = 0x00;
   q = *str;
   do
     {
       const reg_entry *reg = parse_reg_with_qual (&q, REG_TYPE_ZA_ZAT,
-						  &qualifier, PTR_IN_REGLIST);
+						  &qualifier, ptr_flags);
       if (!reg)
 	return PARSE_FAIL;
 
@@ -4581,6 +4593,7 @@ parse_sme_zero_mask(char **str)
               return PARSE_FAIL;
             }
         }
+      ptr_flags |= PTR_GOOD_MATCH;
     }
   while (skip_past_char (&q, ','));
 

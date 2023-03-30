@@ -16,6 +16,8 @@
 [^:]*:[0-9]+: Error: missing ZA tile size at operand 1 -- `zero {za0}'
 [^:]*:[0-9]+: Error: syntax error in register list at operand 1 -- `zero {,za0.d}'
 [^:]*:[0-9]+: Error: syntax error in register list at operand 1 -- `zero {za0.d,}'
+[^:]*:[0-9]+: Error: operand 1 must be a list of 64-bit ZA element tiles -- `zero {za0.d,z1.d}'
+[^:]*:[0-9]+: Error: operand 1 must be a list of 64-bit ZA element tiles -- `zero {za0.d,za32.d}'
 [^:]*:[0-9]+: Error: syntax error in register list at operand 1 -- `zero {za0.d,za1.d,}'
 [^:]*:[0-9]+: Error: syntax error in register list at operand 1 -- `zero {za,}'
 [^:]*:[0-9]+: Error: unexpected character `}' in element size at operand 1 -- `zero {za.}'

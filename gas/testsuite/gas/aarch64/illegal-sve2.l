@@ -255,7 +255,7 @@
 [^ :]+:[0-9]+: Error: invalid register list at operand 2 -- `ext z0\.b,{z0\.b,z31\.b},#0'
 [^ :]+:[0-9]+: Error: immediate value out of range 0 to 255 at operand 3 -- `ext z0\.b,{z0\.b,z1\.b},#256'
 [^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `ext z32\.b,{z0\.b,z1\.b},#0'
-[^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `ext z0\.b,{z31\.b,z32\.b},#0'
+[^ :]+:[0-9]+: Error: operand 2 must be a list of SVE vector registers -- `ext z0\.b,{z31\.b,z32\.b},#0'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `ext z0\.b,{z32\.b,z33\.b},#0'
 [^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `faddp z32\.h,p0/m,z32\.h,z0\.h'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `faddp z0\.h,p8/m,z0\.h,z0\.h'
