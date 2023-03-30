@@ -7647,7 +7647,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->imm.value = val;
 	  break;
 
-	case AARCH64_OPND_SME_ZA_array:
+	case AARCH64_OPND_SME_ZA_array_off4:
 	  if (!parse_dual_indexed_reg (&str, REG_TYPE_ZA,
 				       &info->indexed_za, &qualifier, 0))
 	    goto failure;

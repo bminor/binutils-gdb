@@ -5265,8 +5265,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("st1d", 0xe0e00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_DUU, 0, 0),
   SME_INSN ("st1q", 0xe1e00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_QUU, 0, 0),
 
-  SME_INSN ("ldr", 0xe1000000, 0xffff9c10, sme_ldr, 0, OP2 (SME_ZA_array, SME_ADDR_RI_U4xVL), {}, 0, 1),
-  SME_INSN ("str", 0xe1200000, 0xffff9c10, sme_str, 0, OP2 (SME_ZA_array, SME_ADDR_RI_U4xVL), {}, 0, 1),
+  SME_INSN ("ldr", 0xe1000000, 0xffff9c10, sme_ldr, 0, OP2 (SME_ZA_array_off4, SME_ADDR_RI_U4xVL), {}, 0, 1),
+  SME_INSN ("str", 0xe1200000, 0xffff9c10, sme_str, 0, OP2 (SME_ZA_array_off4, SME_ADDR_RI_U4xVL), {}, 0, 1),
 
   SME_INSNC ("revd", 0x52e8000, 0xffffe000, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_QMQ, 0, C_SCAN_MOVPRFX, 0),
   SME_INSNC ("sclamp", 0x4400c000, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, C_SCAN_MOVPRFX, 0),
@@ -5921,7 +5921,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,		\
       F(FLD_SME_size_22,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_0),	\
       "an SME horizontal or vertical vector access register")		\
-    Y(ZA_ACCESS, sme_za_array, "SME_ZA_array", 0,			\
+    Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off4", 0,			\
       F(FLD_SME_Rv,FLD_imm4_0), "ZA array")				\
     Y(ADDRESS, sme_addr_ri_u4xvl, "SME_ADDR_RI_U4xVL", 0 << OPD_F_OD_LSB, \
       F(FLD_Rn,FLD_imm4_0), "memory offset")				\

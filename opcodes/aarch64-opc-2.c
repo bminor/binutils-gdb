@@ -241,7 +241,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_PRED_REG, "SME_Pm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Pm}, "an SVE predicate register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_list_of_64bit_tiles", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_zero_mask}, "a list of 64-bit ZA element tiles"},
   {AARCH64_OPND_CLASS_ZA_ACCESS, "SME_ZA_HV_idx_ldstr", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_size_22,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_0}, "an SME horizontal or vertical vector access register"},
-  {AARCH64_OPND_CLASS_ZA_ACCESS, "SME_ZA_array", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Rv,FLD_imm4_0}, "ZA array"},
+  {AARCH64_OPND_CLASS_ZA_ACCESS, "SME_ZA_array_off4", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Rv,FLD_imm4_0}, "ZA array"},
   {AARCH64_OPND_CLASS_ADDRESS, "SME_ADDR_RI_U4xVL", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_imm4_0}, "memory offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SME_SM_ZA", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_CRm}, "streaming mode"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_PnT_Wm_imm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl}, "Source scalable predicate register with index "},

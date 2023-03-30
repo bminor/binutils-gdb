@@ -1684,7 +1684,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
-	case AARCH64_OPND_SME_ZA_array:
+	case AARCH64_OPND_SME_ZA_array_off4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15))
 	    return 0;
 	  break;
@@ -2882,7 +2882,7 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
         */
         case sme_ldr:
         case sme_str:
-          assert (inst->operands[0].type == AARCH64_OPND_SME_ZA_array);
+          assert (inst->operands[0].type == AARCH64_OPND_SME_ZA_array_off4);
           assert (inst->operands[1].type == AARCH64_OPND_SME_ADDR_RI_U4xVL);
           if (inst->operands[0].indexed_za.index.imm
               != inst->operands[1].addr.offset.imm)
@@ -3686,7 +3686,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_sme_za_list (buf, size, opnd->reg.regno, styler);
       break;
 
-    case AARCH64_OPND_SME_ZA_array:
+    case AARCH64_OPND_SME_ZA_array_off4:
       snprintf (buf, size, "%s[%s, %s]",
 		style_reg (styler, "za"),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
