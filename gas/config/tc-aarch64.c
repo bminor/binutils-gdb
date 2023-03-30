@@ -155,11 +155,7 @@ struct aarch64_instruction
   /* libopcodes structure for instruction intermediate representation.  */
   aarch64_inst base;
   /* Record assembly errors found during the parsing.  */
-  struct
-    {
-      enum aarch64_operand_error_kind kind;
-      const char *error;
-    } parsing_error;
+  aarch64_operand_error parsing_error;
   /* The condition that appears in the assembly line.  */
   int cond;
   /* Relocation information (including the GAS internal fixup).  */
@@ -195,8 +191,8 @@ static bool programmer_friendly_fixup (aarch64_instruction *);
 static inline void
 clear_error (void)
 {
+  memset (&inst.parsing_error, 0, sizeof (inst.parsing_error));
   inst.parsing_error.kind = AARCH64_OPDE_NIL;
-  inst.parsing_error.error = NULL;
 }
 
 static inline bool
@@ -205,21 +201,11 @@ error_p (void)
   return inst.parsing_error.kind != AARCH64_OPDE_NIL;
 }
 
-static inline const char *
-get_error_message (void)
-{
-  return inst.parsing_error.error;
-}
-
-static inline enum aarch64_operand_error_kind
-get_error_kind (void)
-{
-  return inst.parsing_error.kind;
-}
-
 static inline void
 set_error (enum aarch64_operand_error_kind kind, const char *error)
 {
+  memset (&inst.parsing_error, 0, sizeof (inst.parsing_error));
+  inst.parsing_error.index = -1;
   inst.parsing_error.kind = kind;
   inst.parsing_error.error = error;
 }
@@ -7733,15 +7719,15 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
   if (error_p ())
     {
+      inst.parsing_error.index = i;
       DEBUG_TRACE ("parsing FAIL: %s - %s",
-		   operand_mismatch_kind_names[get_error_kind ()],
-		   get_error_message ());
+		   operand_mismatch_kind_names[inst.parsing_error.kind],
+		   inst.parsing_error.error);
       /* Record the operand error properly; this is useful when there
 	 are multiple instruction templates for a mnemonic name, so that
 	 later on, we can select the error that most closely describes
 	 the problem.  */
-      record_operand_error (opcode, i, get_error_kind (),
-			    get_error_message ());
+      record_operand_error_info (opcode, &inst.parsing_error);
       return false;
     }
   else
