@@ -1450,6 +1450,31 @@ set_other_error (aarch64_operand_error *mismatch_detail, int idx,
   set_error (mismatch_detail, AARCH64_OPDE_OTHER_ERROR, idx, error);
 }
 
+/* Check that indexed register operand OPND has a register in the range
+   [MIN_REGNO, MAX_REGNO] and an index in the range [MIN_INDEX, MAX_INDEX].
+   PREFIX is the register prefix, such as "z" for SVE vector registers.  */
+
+static bool
+check_reglane (const aarch64_opnd_info *opnd,
+	       aarch64_operand_error *mismatch_detail, int idx,
+	       const char *prefix, int min_regno, int max_regno,
+	       int min_index, int max_index)
+{
+  if (!value_in_range_p (opnd->reglane.regno, min_regno, max_regno))
+    {
+      set_invalid_regno_error (mismatch_detail, idx, prefix, min_regno,
+			       max_regno);
+      return false;
+    }
+  if (!value_in_range_p (opnd->reglane.index, min_index, max_index))
+    {
+      set_elem_idx_out_of_range_error (mismatch_detail, idx, min_index,
+				       max_index);
+      return false;
+    }
+  return true;
+}
+
 /* Check that indexed ZA operand OPND has:
 
    - a selection register in the range [MIN_WREG, MIN_WREG + 3]
@@ -1578,28 +1603,17 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_Zm4_INDEX:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  shift = get_operand_specific_data (&aarch64_operands[type]);
-	  mask = (1 << shift) - 1;
-	  if (opnd->reg.regno > mask)
-	    {
-	      set_invalid_regno_error (mismatch_detail, idx, "z", 0, mask);
-	      return 0;
-	    }
-	  mask = (1u << (size - shift)) - 1;
-	  if (!value_in_range_p (opnd->reglane.index, 0, mask))
-	    {
-	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, mask);
-	      return 0;
-	    }
+	  if (!check_reglane (opnd, mismatch_detail, idx,
+			      "z", 0, (1 << shift) - 1,
+			      0, (1u << (size - shift)) - 1))
+	    return 0;
 	  break;
 
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
-	  if (!value_in_range_p (opnd->reglane.index, 0, 64 / size - 1))
-	    {
-	      set_elem_idx_out_of_range_error (mismatch_detail, idx,
-					       0, 64 / size - 1);
-	      return 0;
-	    }
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
+			      0, 64 / size - 1))
+	    return 0;
 	  break;
 
 	case AARCH64_OPND_SVE_ZnxN:
