@@ -16326,6 +16326,12 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	      || abbrev->tag == DW_TAG_enumeration_type
 	      || abbrev->tag == DW_TAG_enumerator))
 	*flags &= ~IS_STATIC;
+
+      /* Keep in sync with new_symbol.  */
+      if (abbrev->tag == DW_TAG_subprogram
+	  && (m_language == language_ada
+	      || m_language == language_fortran))
+	*flags &= ~IS_STATIC;
     }
 
   return info_ptr;
