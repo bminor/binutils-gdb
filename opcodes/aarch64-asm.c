@@ -1167,6 +1167,19 @@ aarch64_ins_sve_aimm (const aarch64_operand *self,
   return true;
 }
 
+bool
+aarch64_ins_sve_aligned_reglist (const aarch64_operand *self,
+				 const aarch64_opnd_info *info,
+				 aarch64_insn *code,
+				 const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  unsigned int num_regs = get_operand_specific_data (self);
+  unsigned int val = info->reglist.first_regno;
+  insert_field (self->fields[0], code, val / num_regs, 0);
+  return true;
+}
+
 /* Encode an SVE CPY/DUP immediate.  */
 bool
 aarch64_ins_sve_asimm (const aarch64_operand *self,
@@ -1384,6 +1397,35 @@ aarch64_ins_sme_za_hv_tiles (const aarch64_operand *self,
   return true;
 }
 
+bool
+aarch64_ins_sme_za_hv_tiles_range (const aarch64_operand *self,
+				   const aarch64_opnd_info *info,
+				   aarch64_insn *code,
+				   const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				   aarch64_operand_error *errors
+				     ATTRIBUTE_UNUSED)
+{
+  int ebytes = aarch64_get_qualifier_esize (info->qualifier);
+  int range_size = get_opcode_dependent_value (inst->opcode);
+  int fld_v = info->indexed_za.v;
+  int fld_rv = info->indexed_za.index.regno - 12;
+  int imm = info->indexed_za.index.imm;
+  int max_value = 16 / range_size / ebytes;
+
+  if (max_value == 0)
+    max_value = 1;
+
+  assert (imm % range_size == 0 && (imm / range_size) < max_value);
+  int fld_zan_imm = (info->indexed_za.regno * max_value) | (imm / range_size);
+  assert (fld_zan_imm < (range_size == 4 && ebytes < 8 ? 4 : 8));
+
+  insert_field (self->fields[0], code, fld_v, 0);
+  insert_field (self->fields[1], code, fld_rv, 0);
+  insert_field (self->fields[2], code, fld_zan_imm, 0);
+
+  return true;
+}
+
 /* Encode in SME instruction ZERO list of up to eight 64-bit element tile names
    separated by commas, encoded in the "imm8" field.
 
@@ -1410,7 +1452,7 @@ aarch64_ins_sme_za_array (const aarch64_operand *self,
                           const aarch64_inst *inst ATTRIBUTE_UNUSED,
                           aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int regno = info->indexed_za.index.regno - 12;
+  int regno = info->indexed_za.index.regno & 3;
   int imm = info->indexed_za.index.imm;
   insert_field (self->fields[0], code, regno, 0);
   insert_field (self->fields[1], code, imm, 0);
@@ -1858,6 +1900,11 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       /* The variant is encoded as part of the immediate.  */
       break;
 
+    case sme_size_22:
+      insert_field (FLD_SME_size_22, &inst->value,
+		    aarch64_get_variant (inst), 0);
+      break;
+
     case sve_cpy:
       insert_fields (&inst->value, aarch64_get_variant (inst),
 		     0, 2, FLD_SVE_M_14, FLD_size);
@@ -1873,6 +1920,7 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       break;
 
     case sve_limm:
+    case sme2_mov:
       /* For sve_limm, the .B, .H, and .S forms are just a convenience
 	 and depend on the immediate.  They don't have a separate
 	 encoding.  */

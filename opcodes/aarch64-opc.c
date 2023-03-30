@@ -227,6 +227,10 @@ const aarch64_field fields[] =
     { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
     {  0,  2 }, /* SME_ZAda_2b: tile ZA0-ZA3.  */
     {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
+    {  1,  4 }, /* SME_Zdn2: Z0-Z31, multiple of 2, bits [4:1].  */
+    {  2,  3 }, /* SME_Zdn4: Z0-Z31, multiple of 4, bits [4:2].  */
+    {  6,  4 }, /* SME_Zn2: Z0-Z31, multiple of 2, bits [9:6].  */
+    {  7,  3 }, /* SME_Zn4: Z0-Z31, multiple of 4, bits [9:7].  */
     { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
     { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
     { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
@@ -296,6 +300,8 @@ const aarch64_field fields[] =
     {  0,  4 },	/* cond2: condition in truly conditional-executed inst.  */
     {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
     { 21,  2 },	/* hw: in move wide constant instructions.  */
+    {  0,  3 },	/* imm3_0: general immediate in bits [2:0].  */
+    {  5,  3 },	/* imm3_5: general immediate in bits [7:5].  */
     { 10,  3 },	/* imm3_10: in add/sub extended reg instructions.  */
     {  0,  4 },	/* imm4_0: in rmif instructions.  */
     {  5,  4 }, /* imm4_5: in SME instructions.  */
@@ -1546,6 +1552,10 @@ check_za_access (const aarch64_opnd_info *opnd,
 	set_other_error (mismatch_detail, idx,
 			 _("expected a selection register in the"
 			   " range w12-w15"));
+      else if (min_wreg == 8)
+	set_other_error (mismatch_detail, idx,
+			 _("expected a selection register in the"
+			   " range w8-w11"));
       else
 	abort ();
       return false;
@@ -1574,6 +1584,12 @@ check_za_access (const aarch64_opnd_info *opnd,
 	set_other_error (mismatch_detail, idx,
 			 _("expected a single offset rather than"
 			   " a range"));
+      else if (range_size == 2)
+	set_other_error (mismatch_detail, idx,
+			 _("expected a range of two offsets"));
+      else if (range_size == 4)
+	set_other_error (mismatch_detail, idx,
+			 _("expected a range of four offsets"));
       else
 	abort ();
       return false;
@@ -1715,9 +1731,33 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       break;
 
     case AARCH64_OPND_CLASS_SVE_REGLIST:
-      num = get_opcode_dependent_value (opcode);
-      if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
-	return 0;
+      switch (type)
+	{
+	case AARCH64_OPND_SME_Zdnx2:
+	case AARCH64_OPND_SME_Zdnx4:
+	case AARCH64_OPND_SME_Znx2:
+	case AARCH64_OPND_SME_Znx4:
+	  num = get_operand_specific_data (&aarch64_operands[type]);
+	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
+	    return 0;
+	  if ((opnd->reglist.first_regno % num) != 0)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("start register out of range"));
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SVE_ZnxN:
+	case AARCH64_OPND_SVE_ZtxN:
+	  num = get_opcode_dependent_value (opcode);
+	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
+	    return 0;
+	  break;
+
+	default:
+	  abort ();
+	}
       break;
 
     case AARCH64_OPND_CLASS_ZA_ACCESS:
@@ -1736,6 +1776,25 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_ZA_array_off4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15, 1,
 				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_off3_0:
+	case AARCH64_OPND_SME_ZA_array_off3_5:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 7, 1,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_HV_idx_srcxN:
+	case AARCH64_OPND_SME_ZA_HV_idx_destxN:
+	  size = aarch64_get_qualifier_esize (opnd->qualifier);
+	  num = get_opcode_dependent_value (opcode);
+	  max_value = 16 / num / size;
+	  if (max_value > 0)
+	    max_value -= 1;
+	  if (!check_za_access (opnd, mismatch_detail, idx,
+				12, max_value, num, 0))
 	    return 0;
 	  break;
 
@@ -3709,6 +3768,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SVE_ZnxN:
     case AARCH64_OPND_SVE_ZtxN:
+    case AARCH64_OPND_SME_Zdnx2:
+    case AARCH64_OPND_SME_Zdnx4:
+    case AARCH64_OPND_SME_Znx2:
+    case AARCH64_OPND_SME_Znx4:
       print_register_list (buf, size, opnd, "z", styler);
       break;
 
@@ -3732,7 +3795,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_SME_ZA_HV_idx_src:
+    case AARCH64_OPND_SME_ZA_HV_idx_srcxN:
     case AARCH64_OPND_SME_ZA_HV_idx_dest:
+    case AARCH64_OPND_SME_ZA_HV_idx_destxN:
     case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
       snprintf (buf, size, "%s%s[%s, %s%s%s%s%s]%s",
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
@@ -3760,9 +3825,15 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_sme_za_list (buf, size, opnd->reg.regno, styler);
       break;
 
+    case AARCH64_OPND_SME_ZA_array_off3_0:
+    case AARCH64_OPND_SME_ZA_array_off3_5:
     case AARCH64_OPND_SME_ZA_array_off4:
       snprintf (buf, size, "%s[%s, %s%s%s%s%s]",
-		style_reg (styler, "za"),
+		style_reg (styler, "za%s%s",
+			   opnd->qualifier == AARCH64_OPND_QLF_NIL ? "" : ".",
+			   (opnd->qualifier == AARCH64_OPND_QLF_NIL
+			    ? ""
+			    : aarch64_get_qualifier_name (opnd->qualifier))),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
 		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
 		opnd->indexed_za.index.countm1 ? ":" : "",

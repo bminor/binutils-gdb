@@ -1715,6 +1715,20 @@ aarch64_ext_sve_aimm (const aarch64_operand *self,
 	  && decode_sve_aimm (info, (uint8_t) info->imm.value));
 }
 
+bool
+aarch64_ext_sve_aligned_reglist (const aarch64_operand *self,
+				 aarch64_opnd_info *info, aarch64_insn code,
+				 const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  unsigned int num_regs = get_operand_specific_data (self);
+  unsigned int val = extract_field (self->fields[0], code, 0);
+  info->reglist.first_regno = val * num_regs;
+  info->reglist.num_regs = num_regs;
+  info->reglist.stride = 1;
+  return true;
+}
+
 /* Decode an SVE CPY/DUP immediate.  */
 bool
 aarch64_ext_sve_asimm (const aarch64_operand *self,
@@ -1823,6 +1837,36 @@ aarch64_ext_sme_za_hv_tiles (const aarch64_operand *self,
   return true;
 }
 
+bool
+aarch64_ext_sme_za_hv_tiles_range (const aarch64_operand *self,
+				   aarch64_opnd_info *info, aarch64_insn code,
+				   const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				   aarch64_operand_error *errors
+				     ATTRIBUTE_UNUSED)
+{
+  int ebytes = aarch64_get_qualifier_esize (info->qualifier);
+  int range_size = get_opcode_dependent_value (inst->opcode);
+  int fld_v = extract_field (self->fields[0], code, 0);
+  int fld_rv = extract_field (self->fields[1], code, 0);
+  int fld_zan_imm = extract_field (self->fields[2], code, 0);
+  int max_value = 16 / range_size / ebytes;
+
+  if (max_value == 0)
+    max_value = 1;
+
+  int regno = fld_zan_imm / max_value;
+  if (regno >= ebytes)
+    return false;
+
+  info->indexed_za.regno = regno;
+  info->indexed_za.index.imm = (fld_zan_imm % max_value) * range_size;
+  info->indexed_za.index.countm1 = range_size - 1;
+  info->indexed_za.index.regno = fld_rv + 12;
+  info->indexed_za.v = fld_v;
+
+  return true;
+}
+
 /* Decode in SME instruction ZERO list of up to eight 64-bit element tile names
    separated by commas, encoded in the "imm8" field.
 
@@ -1850,10 +1894,15 @@ aarch64_ext_sme_za_array (const aarch64_operand *self,
                           const aarch64_inst *inst ATTRIBUTE_UNUSED,
                           aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int regno = extract_field (self->fields[0], code, 0) + 12;
+  int regno = extract_field (self->fields[0], code, 0);
+  if (info->type == AARCH64_OPND_SME_ZA_array_off4)
+    regno += 12;
+  else
+    regno += 8;
   int imm = extract_field (self->fields[1], code, 0);
   info->indexed_za.index.regno = regno;
   info->indexed_za.index.imm = imm;
+  info->indexed_za.group_size = get_opcode_dependent_value (inst->opcode);
   return true;
 }
 
@@ -2979,6 +3028,10 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 	}
       break;
 
+    case sme_size_22:
+      variant = extract_field (FLD_SME_size_22, inst->value, 0);
+      break;
+
     case sve_cpy:
       variant = extract_fields (inst->value, 0, 2, FLD_size, FLD_SVE_M_14);
       break;
@@ -3004,6 +3057,11 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 	variant = 2;
       else
 	variant = 3;
+      break;
+
+    case sme2_mov:
+      /* .D is preferred over the other sizes in disassembly.  */
+      variant = 3;
       break;
 
     case sme_misc:

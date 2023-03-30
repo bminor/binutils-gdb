@@ -2477,6 +2477,9 @@ static const aarch64_feature_set aarch64_feature_sme_f64f64 =
 static const aarch64_feature_set aarch64_feature_sme_i16i64 =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SME
        | AARCH64_FEATURE_SME_I16I64, 0);
+static const aarch64_feature_set aarch64_feature_sme2 =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SME
+		   | AARCH64_FEATURE_SME2, 0);
 static const aarch64_feature_set aarch64_feature_v8_6 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_6, 0);
 static const aarch64_feature_set aarch64_feature_v8_7 =
@@ -2545,6 +2548,7 @@ static const aarch64_feature_set aarch64_feature_cssc =
 #define SME		&aarch64_feature_sme
 #define SME_F64F64	&aarch64_feature_sme_f64f64
 #define SME_I16I64	&aarch64_feature_sme_i16i64
+#define SME2		&aarch64_feature_sme2
 #define ARMV8_6		&aarch64_feature_v8_6
 #define ARMV8_6_SVE		&aarch64_feature_v8_6
 #define BFLOAT16_SVE	&aarch64_feature_bfloat16_sve
@@ -2656,6 +2660,9 @@ static const aarch64_feature_set aarch64_feature_cssc =
 #define SME_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME, OPS, QUALS, \
     F_STRICT | FLAGS, CONSTRAINTS, TIED, NULL }
+#define SME2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SME2, OPS, QUALS, \
+    F_STRICT | FLAGS, 0, TIED, NULL }
 #define SVE2BITPERM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_BITPERM, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
@@ -5278,6 +5285,24 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_Pd, SVE_Pg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
   SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_PNd, SVE_PNg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
 
+  /* SME2 extensions to SME.  */
+  SME2_INSN ("mov", 0xc0060800, 0xffff9f01, sme2_mov, 0, OP2 (SME_Zdnx2, SME_ZA_array_off3_5), OP_SVE_VV_BHSD, F_OD (2), 0),
+  SME2_INSN ("mov", 0xc0060c00, 0xffff9f03, sme2_mov, 0, OP2 (SME_Zdnx4, SME_ZA_array_off3_5), OP_SVE_VV_BHSD, F_OD (4), 0),
+  SME2_INSN ("mov", 0xc0060000, 0xff3f1f01, sme_size_22, 0, OP2 (SME_Zdnx2, SME_ZA_HV_idx_srcxN), OP_SVE_VV_BHSDQ, F_OD (2), 0),
+  SME2_INSN ("mov", 0xc0060400, 0xff3f1f03, sme_size_22, 0, OP2 (SME_Zdnx4, SME_ZA_HV_idx_srcxN), OP_SVE_VV_BHSDQ, F_OD (4), 0),
+  SME2_INSN ("mov", 0xc0040800, 0xffff9c38, sme2_mov, 0, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_VV_BHSD, F_OD (2), 0),
+  SME2_INSN ("mov", 0xc0040c00, 0xffff9c78, sme2_mov, 0, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_VV_BHSD, F_OD (4), 0),
+  SME2_INSN ("mov", 0xc0040000, 0xff3f1c38, sme_size_22, 0, OP2 (SME_ZA_HV_idx_destxN, SME_Znx2), OP_SVE_VV_BHSDQ, F_OD (2), 0),
+  SME2_INSN ("mov", 0xc0040400, 0xff3f1c78, sme_size_22, 0, OP2 (SME_ZA_HV_idx_destxN, SME_Znx4), OP_SVE_VV_BHSDQ, F_OD (4), 0),
+  SME2_INSN ("mova", 0xc0060800, 0xffff9f01, sme2_mov, 0, OP2 (SME_Zdnx2, SME_ZA_array_off3_5), OP_SVE_VV_BHSD, F_OD (2), 0),
+  SME2_INSN ("mova", 0xc0060c00, 0xffff9f03, sme2_mov, 0, OP2 (SME_Zdnx4, SME_ZA_array_off3_5), OP_SVE_VV_BHSD, F_OD (4), 0),
+  SME2_INSN ("mova", 0xc0060000, 0xff3f1f01, sme_size_22, 0, OP2 (SME_Zdnx2, SME_ZA_HV_idx_srcxN), OP_SVE_VV_BHSDQ, F_OD (2), 0),
+  SME2_INSN ("mova", 0xc0060400, 0xff3f1f03, sme_size_22, 0, OP2 (SME_Zdnx4, SME_ZA_HV_idx_srcxN), OP_SVE_VV_BHSDQ, F_OD (4), 0),
+  SME2_INSN ("mova", 0xc0040800, 0xffff9c38, sme2_mov, 0, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_VV_BHSD, F_OD (2), 0),
+  SME2_INSN ("mova", 0xc0040c00, 0xffff9c78, sme2_mov, 0, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_VV_BHSD, F_OD (4), 0),
+  SME2_INSN ("mova", 0xc0040000, 0xff3f1c38, sme_size_22, 0, OP2 (SME_ZA_HV_idx_destxN, SME_Znx2), OP_SVE_VV_BHSDQ, F_OD (2), 0),
+  SME2_INSN ("mova", 0xc0040400, 0xff3f1c78, sme_size_22, 0, OP2 (SME_ZA_HV_idx_destxN, SME_Znx4), OP_SVE_VV_BHSDQ, F_OD (4), 0),
+
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
@@ -5917,6 +5942,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE vector register")						\
     Y(SVE_REGLIST, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
       "a list of SVE vector registers")					\
+    Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx2", 2 << OPD_F_OD_LSB,	\
+      F(FLD_SME_Zdn2), "a list of SVE vector registers")		\
+    Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx4", 4 << OPD_F_OD_LSB,	\
+      F(FLD_SME_Zdn4), "a list of SVE vector registers")		\
+    Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx2", 2 << OPD_F_OD_LSB,	\
+      F(FLD_SME_Zn2), "a list of SVE vector registers")			\
+    Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx4", 4 << OPD_F_OD_LSB,	\
+      F(FLD_SME_Zn4), "a list of SVE vector registers")			\
     Y(SVE_REG, regno, "SME_ZAda_2b", 0, F(FLD_SME_ZAda_2b),		\
       "an SME ZA tile ZA0-ZA3")						\
     Y(SVE_REG, regno, "SME_ZAda_3b", 0, F(FLD_SME_ZAda_3b),		\
@@ -5924,8 +5957,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_src", 0,		\
       F(FLD_SME_size_22,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_5),	\
       "an SME horizontal or vertical vector access register")		\
+    Y(ZA_ACCESS, sme_za_hv_tiles_range, "SME_ZA_HV_idx_srcxN", 0,	\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_imm3_5),				\
+      "an SME horizontal or vertical vector access register")		\
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_dest", 0,		\
       F(FLD_SME_size_22,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_0),	\
+      "an SME horizontal or vertical vector access register")		\
+    Y(ZA_ACCESS, sme_za_hv_tiles_range, "SME_ZA_HV_idx_destxN", 0,	\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_imm3_0),				\
       "an SME horizontal or vertical vector access register")		\
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\
       "an SVE predicate register")					\
@@ -5934,6 +5973,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,		\
       F(FLD_SME_size_22,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_0),	\
       "an SME horizontal or vertical vector access register")		\
+    Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off3_0", 0,		\
+      F(FLD_SME_Rv,FLD_imm3_0), "ZA array")				\
+    Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off3_5", 0,		\
+      F(FLD_SME_Rv,FLD_imm3_5), "ZA array")				\
     Y(ZA_ACCESS, sme_za_array, "SME_ZA_array_off4", 0,			\
       F(FLD_SME_Rv,FLD_imm4_0), "ZA array")				\
     Y(ADDRESS, sme_addr_ri_u4xvl, "SME_ADDR_RI_U4xVL", 0 << OPD_F_OD_LSB, \

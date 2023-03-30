@@ -6712,6 +6712,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SVE_ZnxN:
 	case AARCH64_OPND_SVE_ZtxN:
+	case AARCH64_OPND_SME_Zdnx2:
+	case AARCH64_OPND_SME_Zdnx4:
+	case AARCH64_OPND_SME_Znx2:
+	case AARCH64_OPND_SME_Znx4:
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg_list;
 
@@ -7708,7 +7712,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_SME_ZA_HV_idx_src:
+	case AARCH64_OPND_SME_ZA_HV_idx_srcxN:
 	case AARCH64_OPND_SME_ZA_HV_idx_dest:
+	case AARCH64_OPND_SME_ZA_HV_idx_destxN:
 	case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
 	  if (operands[i] == AARCH64_OPND_SME_ZA_HV_idx_ldstr
 	      ? !parse_sme_za_hv_tiles_operand_with_braces (&str,
@@ -7727,6 +7733,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->imm.value = val;
 	  break;
 
+	case AARCH64_OPND_SME_ZA_array_off3_0:
+	case AARCH64_OPND_SME_ZA_array_off3_5:
 	case AARCH64_OPND_SME_ZA_array_off4:
 	  if (!parse_dual_indexed_reg (&str, REG_TYPE_ZA,
 				       &info->indexed_za, &qualifier, 0))
