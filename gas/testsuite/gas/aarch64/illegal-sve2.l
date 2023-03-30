@@ -248,8 +248,8 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `ext z0\.b,{z0\.h,z1\.h},#0'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ext z0\.b, {z0\.b, z1\.b}, #0
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; 2 registers are expected at operand 2 -- `ext z0\.b,{z0\.b,z1\.b,z2\.b},#0'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; 2 registers are expected at operand 2 -- `ext z0\.b,{z0\.b},#0'
+[^ :]+:[0-9]+: Error: expected a list of 2 registers at operand 2 -- `ext z0\.b,{z0\.b,z1\.b,z2\.b},#0'
+[^ :]+:[0-9]+: Error: expected a list of 2 registers at operand 2 -- `ext z0\.b,{z0\.b},#0'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `ext z0\.b,z0\.b,#0'
 [^ :]+:[0-9]+: Error: invalid register list at operand 2 -- `ext z0\.b,{z31\.b,z1\.b},#0'
 [^ :]+:[0-9]+: Error: invalid register list at operand 2 -- `ext z0\.b,{z0\.b,z31\.b},#0'
@@ -488,7 +488,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `histseg z0\.b,z0\.b,z0\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	histseg z0\.b, z0\.b, z0\.b
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `ldnt1b {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1b {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1b {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s, xzr\]
@@ -515,7 +515,7 @@
 [^ :]+:[0-9]+: Error: invalid offset register at operand 3 -- `ldnt1b {z0\.s},p0/z,\[z0\.s,sp\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1b {z0\.s},p0/z,\[z0\.s,x32\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1b {z0\.s},p0/z,\[z0\.s,z0\.s\]'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `ldnt1d {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1d {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1d {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d, xzr\]
@@ -535,7 +535,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1d {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d, xzr\]
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `ldnt1h {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1h {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1h {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1h {z0\.s}, p0/z, \[z0\.s, xzr\]
@@ -556,7 +556,7 @@
 [^ :]+:[0-9]+: Error: invalid offset register at operand 3 -- `ldnt1h {z0\.s},p0/z,\[z0\.s,sp\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1h {z0\.s},p0/z,\[z0\.s,x32\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1h {z0\.s},p0/z,\[z0\.s,z0\.s\]'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `ldnt1sb {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1sb {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1sb {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1sb {z0\.d}, p0/z, \[z0\.d, xzr\]
@@ -569,7 +569,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1sb {z0\.d},p0/z,\[z0\.d,x32\]'
 [^ :]+:[0-9]+: Error: invalid use of 32-bit register offset at operand 3 -- `ldnt1sb {z0\.d},p0/z,\[z0\.d,w16\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1sb {z0\.d},p0/z,\[z0\.d,z0\.d\]'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `ldnt1sh {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1sh {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1sh {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.d}, p0/z, \[z0\.d, xzr\]
@@ -582,7 +582,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z0\.d,x32\]'
 [^ :]+:[0-9]+: Error: invalid use of 32-bit register offset at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z0\.d,w16\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z0\.d,z0\.d\]'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `ldnt1sh {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1sh {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1sh {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.d}, p0/z, \[z0\.d, xzr\]
@@ -595,7 +595,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z0\.d,x32\]'
 [^ :]+:[0-9]+: Error: invalid use of 32-bit register offset at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z0\.d,w16\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z0\.d,z0\.d\]'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `ldnt1w {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1w {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1w {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	ldnt1w {z0\.s}, p0/z, \[z0\.s, xzr\]
@@ -2212,7 +2212,7 @@
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
 [^ :]+:[0-9]+: Info:    	ssubwt z0\.s, z0\.s, z0\.h
 [^ :]+:[0-9]+: Info:    	ssubwt z0\.d, z0\.d, z0\.s
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `stnt1b {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1b {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1b {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	stnt1b {z0\.s}, p0, \[z0\.s, xzr\]
@@ -2233,7 +2233,7 @@
 [^ :]+:[0-9]+: Error: invalid offset register at operand 3 -- `stnt1b {z0\.s},p0,\[z0\.s,sp\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1b {z0\.s},p0,\[z0\.s,x32\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1b {z0\.s},p0,\[z0\.s,z0\.s\]'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `stnt1d {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1d {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1d {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	stnt1d {z0\.d}, p0, \[z0\.d, xzr\]
@@ -2247,7 +2247,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1d {z0\.s},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	stnt1d {z0\.d}, p0, \[z0\.d, xzr\]
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `stnt1h {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1h {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1h {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	stnt1h {z0\.s}, p0, \[z0\.s, xzr\]
@@ -2268,7 +2268,7 @@
 [^ :]+:[0-9]+: Error: invalid offset register at operand 3 -- `stnt1h {z0\.s},p0,\[z0\.s,sp\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1h {z0\.s},p0,\[z0\.s,x32\]'
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1h {z0\.s},p0,\[z0\.s,z0\.s\]'
-[^ :]+:[0-9]+: Error: invalid number of registers in the list; only 1 register is expected at operand 1 -- `stnt1w {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
+[^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1w {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1w {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	stnt1w {z0\.s}, p0, \[z0\.s, xzr\]

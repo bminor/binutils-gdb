@@ -5747,12 +5747,10 @@ output_operand_error_record (const operand_error_record *record, char *str)
 
     case AARCH64_OPDE_REG_LIST:
       if (detail->data[0].i == (1 << 1))
-	handler (_("invalid number of registers in the list; "
-		   "only 1 register is expected at operand %d -- `%s'"),
+	handler (_("expected a single-register list at operand %d -- `%s'"),
 		 idx + 1, str);
       else if ((detail->data[0].i & -detail->data[0].i) == detail->data[0].i)
-	handler (_("invalid number of registers in the list; "
-		   "%d registers are expected at operand %d -- `%s'"),
+	handler (_("expected a list of %d registers at operand %d -- `%s'"),
 		 get_log2 (detail->data[0].i), idx + 1, str);
       else
 	handler (_("invalid number of registers in the list"
