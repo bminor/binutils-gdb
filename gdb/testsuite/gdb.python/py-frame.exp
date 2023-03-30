@@ -45,6 +45,10 @@ gdb_test "python print (bf1.read_var(\"i\"))" "\"stuff\"" "test i"
 gdb_test "python print (bf1.read_var(\"f\"))" "\"foo\"" "test f"
 gdb_test "python print (bf1.read_var(\"b\"))" "\"bar\"" "test b"
 
+# Check we can use a single named argument with read_var.
+gdb_test "python print (bf1.read_var(variable = \"b\"))" "\"bar\"" \
+    "test b using named arguments"
+
 # Test the read_var function in another block other than the current
 # block (in this case, the super block). Test thar read_var is reading
 # the correct variables of i and f but they are the correct value and type.
@@ -54,11 +58,41 @@ gdb_test "python print (bf1.read_var(\"i\", sb).type)" "double" "test double i"
 gdb_test "python print (bf1.read_var(\"f\", sb))" "2.2.*" "test f = 2.2"
 gdb_test "python print (bf1.read_var(\"f\", sb).type)" "double" "test double f"
 
+# Now test read_var with a variable and block using named arguments.
+gdb_test "python print (bf1.read_var(block = sb, variable = \"i\"))" "1.1.*" \
+    "test i = 1.1 usign named arguments"
+gdb_test "python print (bf1.read_var(block = sb, variable = \"f\"))" "2.2.*" \
+    "test f = 2.2 using named arguments"
+
 # And again test another outerblock, this time testing "i" is the
 # correct value and type.
 gdb_py_test_silent_cmd "python sb = sb.superblock" "get superblock" 0
 gdb_test "python print (bf1.read_var(\"i\", sb))" "99" "test i = 99"
 gdb_test "python print (bf1.read_var(\"i\", sb).type)" "int" "test int i"
+
+# Test what happens when we provide a block of the wrong type.
+gdb_test "python print (bf1.read_var(\"i\", \"some_block\"))" \
+    [multi_line \
+	 "TypeError: argument 2 must be gdb\\.Block, not str" \
+	 "Error while executing Python code\\."] \
+    "check invalid block type error"
+gdb_test "python print (bf1.read_var(block = \"some_block\", variable = \"i\"))" \
+    [multi_line \
+	 "TypeError: argument 2 must be gdb\\.Block, not str" \
+	 "Error while executing Python code\\."] \
+    "check invalid block type error when named args are used"
+
+# Test what happens when we provide a variable of the wrong type.
+gdb_test "python print (bf1.read_var(None))" \
+    [multi_line \
+	 "TypeError: argument 1 must be gdb\\.Symbol or str, not NoneType" \
+	 "Error while executing Python code\\."] \
+    "check read_var error when variable is None"
+gdb_test "python print (bf1.read_var(sb))" \
+    [multi_line \
+	 "TypeError: argument 1 must be gdb\\.Symbol or str, not gdb\\.Block" \
+	 "Error while executing Python code\\."] \
+    "check read_var error when variable is a gdb.Block"
 
 gdb_breakpoint "f2"
 gdb_continue_to_breakpoint "breakpoint at f2"

@@ -475,15 +475,18 @@ frapy_find_sal (PyObject *self, PyObject *args)
    gdb.Symbol.  The block argument must be an instance of gdb.Block.  Returns
    NULL on error, with a python exception set.  */
 static PyObject *
-frapy_read_var (PyObject *self, PyObject *args)
+frapy_read_var (PyObject *self, PyObject *args, PyObject *kw)
 {
   frame_info_ptr frame;
   PyObject *sym_obj, *block_obj = NULL;
   struct symbol *var = NULL;	/* gcc-4.3.2 false warning.  */
   const struct block *block = NULL;
 
-  if (!PyArg_ParseTuple (args, "O|O", &sym_obj, &block_obj))
-    return NULL;
+  static const char *keywords[] = { "variable", "block", nullptr };
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O|O!", keywords,
+					&sym_obj, &block_object_type,
+					&block_obj))
+    return nullptr;
 
   if (PyObject_TypeCheck (sym_obj, &symbol_object_type))
     var = symbol_object_to_symbol (sym_obj);
@@ -495,15 +498,13 @@ frapy_read_var (PyObject *self, PyObject *args)
       if (!var_name)
 	return NULL;
 
-      if (block_obj)
+      if (block_obj != nullptr)
 	{
+	  /* This call should only fail if the type of BLOCK_OBJ is wrong,
+	     and we ensure the type is correct when we parse the arguments,
+	     so we can just assert the return value is not nullptr.  */
 	  block = block_object_to_block (block_obj);
-	  if (!block)
-	    {
-	      PyErr_SetString (PyExc_RuntimeError,
-			       _("Second argument must be block."));
-	      return NULL;
-	    }
+	  gdb_assert (block != nullptr);
 	}
 
       try
@@ -533,8 +534,9 @@ frapy_read_var (PyObject *self, PyObject *args)
     }
   else
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("Argument must be a symbol or string."));
+      PyErr_Format (PyExc_TypeError,
+		    _("argument 1 must be gdb.Symbol or str, not %s"),
+		    Py_TYPE (sym_obj)->tp_name);
       return NULL;
     }
 
@@ -787,7 +789,7 @@ Return the frame called by this frame." },
   { "find_sal", frapy_find_sal, METH_NOARGS,
     "find_sal () -> gdb.Symtab_and_line.\n\
 Return the frame's symtab and line." },
-  { "read_var", frapy_read_var, METH_VARARGS,
+  { "read_var", (PyCFunction) frapy_read_var, METH_VARARGS | METH_KEYWORDS,
     "read_var (variable) -> gdb.Value.\n\
 Return the value of the variable in this frame." },
   { "select", frapy_select, METH_NOARGS,
