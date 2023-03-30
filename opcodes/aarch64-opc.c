@@ -1616,16 +1616,6 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
-	case AARCH64_OPND_SVE_ZnxN:
-	case AARCH64_OPND_SVE_ZtxN:
-	  if (opnd->reglist.num_regs != get_opcode_dependent_value (opcode))
-	    {
-	      set_other_error (mismatch_detail, idx,
-			       _("invalid register list"));
-	      return 0;
-	    }
-	  break;
-
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
@@ -1635,6 +1625,15 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	default:
 	  break;
+	}
+      break;
+
+    case AARCH64_OPND_CLASS_SVE_REGLIST:
+      num = get_opcode_dependent_value (opcode);
+      if (opnd->reglist.num_regs != num)
+	{
+	  set_reg_list_error (mismatch_detail, idx, num);
+	  return 0;
 	}
       break;
 

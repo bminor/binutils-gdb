@@ -5902,11 +5902,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE vector register")						\
     Y(SVE_REG, sve_index, "SVE_Zn_INDEX", 0, F(FLD_SVE_Zn),		\
       "an indexed SVE vector register")					\
-    Y(SVE_REG, sve_reglist, "SVE_ZnxN", 0, F(FLD_SVE_Zn),		\
+    Y(SVE_REGLIST, sve_reglist, "SVE_ZnxN", 0, F(FLD_SVE_Zn),		\
       "a list of SVE vector registers")					\
     Y(SVE_REG, regno, "SVE_Zt", 0, F(FLD_SVE_Zt),			\
       "an SVE vector register")						\
-    Y(SVE_REG, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
+    Y(SVE_REGLIST, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
       "a list of SVE vector registers")					\
     Y(SVE_REG, regno, "SME_ZAda_2b", 0, F(FLD_SME_ZAda_2b),		\
       "an SME ZA tile ZA0-ZA3")						\
