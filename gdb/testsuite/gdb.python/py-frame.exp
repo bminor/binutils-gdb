@@ -115,6 +115,12 @@ gdb_test "python print ('result = %s' % (f0.read_register('pc') == f0.pc()))" \
   " = True" \
   "test Frame.read_register(pc)"
 
+# Repeat the previous test, but this time use named arguments for the
+# read_register method call.
+gdb_test "python print ('result = %s' % (f0.read_register(register = 'pc') == f0.pc()))" \
+  " = True" \
+  "test Frame.read_register() using named arguments"
+
 # Test arch-specific register name.
 set pc ""
 if {[is_amd64_regs_target]} {

@@ -238,13 +238,15 @@ frapy_pc (PyObject *self, PyObject *args)
    Returns the value of a register in this frame.  */
 
 static PyObject *
-frapy_read_register (PyObject *self, PyObject *args)
+frapy_read_register (PyObject *self, PyObject *args, PyObject *kw)
 {
   PyObject *pyo_reg_id;
   PyObject *result = nullptr;
 
-  if (!PyArg_UnpackTuple (args, "read_register", 1, 1, &pyo_reg_id))
-    return NULL;
+  static const char *keywords[] = { "register", nullptr };
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &pyo_reg_id))
+    return nullptr;
+
   try
     {
       scoped_value_mark free_values;
@@ -766,7 +768,8 @@ Return the reason why it's not possible to find frames older than this." },
   { "pc", frapy_pc, METH_NOARGS,
     "pc () -> Long.\n\
 Return the frame's resume address." },
-  { "read_register", frapy_read_register, METH_VARARGS,
+  { "read_register", (PyCFunction) frapy_read_register,
+    METH_VARARGS | METH_KEYWORDS,
     "read_register (register_name) -> gdb.Value\n\
 Return the value of the register in the frame." },
   { "block", frapy_block, METH_NOARGS,
