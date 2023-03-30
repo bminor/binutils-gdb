@@ -235,7 +235,7 @@ show_range_command (struct ui_file *file, int from_tty,
       || ((range_check == range_check_on)
 	  != current_language->range_checking_on_by_default ()))
     warning (_("the current range check setting "
-	       "does not match the language.\n"));
+	       "does not match the language."));
 }
 
 /* Set command.  Change the setting for range checking.  */
@@ -272,7 +272,7 @@ set_range_command (const char *ignore,
       || ((range_check == range_check_on)
 	  != current_language->range_checking_on_by_default ()))
     warning (_("the current range check setting "
-	       "does not match the language.\n"));
+	       "does not match the language."));
 }
 
 /* Show command.  Display a warning if the case sensitivity setting does
@@ -309,7 +309,7 @@ show_case_command (struct ui_file *file, int from_tty,
 
   if (case_sensitivity != current_language->case_sensitivity ())
     warning (_("the current case sensitivity setting does not match "
-	       "the language.\n"));
+	       "the language."));
 }
 
 /* Set command.  Change the setting for case sensitivity.  */
@@ -341,7 +341,7 @@ set_case_command (const char *ignore, int from_tty, struct cmd_list_element *c)
 
    if (case_sensitivity != current_language->case_sensitivity ())
      warning (_("the current case sensitivity setting does not match "
-		"the language.\n"));
+		"the language."));
 }
 
 /* Set the status of range and type checking and case sensitivity based on

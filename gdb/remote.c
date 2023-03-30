@@ -11250,8 +11250,8 @@ compare_sections_command (const char *args, int from_tty)
 	}
     }
   if (mismatched > 0)
-    warning (_("One or more sections of the target image does not match\n\
-the loaded file\n"));
+    warning (_("One or more sections of the target image does "
+	       "not match the loaded file"));
   if (args && !matched)
     gdb_printf (_("No loaded section named '%s'.\n"), args);
 }
