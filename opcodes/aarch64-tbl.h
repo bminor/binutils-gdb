@@ -5364,6 +5364,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSNC ("bfmlslb", 0x64e0a000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSNC ("bfmlslt", 0x64e06400, 0xffe0f400, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSNC ("bfmlslt", 0x64e0a400, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("fdot", 0x64204000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_19_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("fdot", 0x64208000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("sdot", 0x4480c800, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_19_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("sdot", 0x4400c800, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("udot", 0x4480cc00, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_19_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("udot", 0x4400cc00, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSN ("whilege", 0x25205010, 0xff20fc11, sme_size_22, 0, OP3 (SME_Pdx2, Rn, Rm), OP_SVE_VXX_BHSD, 0, 0),
   SME2_INSN ("whilegt", 0x25205011, 0xff20fc11, sme_size_22, 0, OP3 (SME_Pdx2, Rn, Rm), OP_SVE_VXX_BHSD, 0, 0),
   SME2_INSN ("whilehi", 0x25205811, 0xff20fc11, sme_size_22, 0, OP3 (SME_Pdx2, Rn, Rm), OP_SVE_VXX_BHSD, 0, 0),
@@ -6486,11 +6492,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_INDEX",				\
       3 << OPD_F_OD_LSB, F(FLD_SVE_Zm_16),				\
       "an indexed SVE vector register")					\
-    Y(SVE_REG, sve_quad_index, "SVE_Zm3_22_INDEX", 			\
-      3 << OPD_F_OD_LSB, F(FLD_SVE_i3h, FLD_SVE_Zm_16),			\
-      "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_11_INDEX", 			\
       3 << OPD_F_OD_LSB, F(FLD_SVE_i3h2, FLD_SVE_i3l, FLD_SVE_imm3),    \
+      "an indexed SVE vector register")					\
+    Y(SVE_REG, sve_quad_index, "SVE_Zm3_19_INDEX", 			\
+      3 << OPD_F_OD_LSB, F(FLD_imm2_19, FLD_SVE_imm3),			\
+      "an indexed SVE vector register")					\
+    Y(SVE_REG, sve_quad_index, "SVE_Zm3_22_INDEX", 			\
+      3 << OPD_F_OD_LSB, F(FLD_SVE_i3h, FLD_SVE_Zm_16),			\
       "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm4_11_INDEX", 			\
       4 << OPD_F_OD_LSB, F(FLD_SVE_i2h, FLD_SVE_i3l, FLD_SVE_imm4),     \

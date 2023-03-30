@@ -332,6 +332,7 @@ const aarch64_field fields[] =
     { 10,  2 }, /* imm2_10: 2-bit immediate, bits [11:10] */
     { 15,  2 }, /* imm2_15: 2-bit immediate, bits [16:15] */
     { 16,  2 }, /* imm2_16: 2-bit immediate, bits [17:16] */
+    { 19,  2 }, /* imm2_19: 2-bit immediate, bits [20:19] */
     {  0,  3 },	/* imm3_0: general immediate in bits [2:0].  */
     {  5,  3 },	/* imm3_5: general immediate in bits [7:5].  */
     { 10,  3 },	/* imm3_10: in add/sub extended reg instructions.  */
@@ -1735,6 +1736,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	{
 	case AARCH64_OPND_SVE_Zm3_INDEX:
 	case AARCH64_OPND_SVE_Zm3_22_INDEX:
+	case AARCH64_OPND_SVE_Zm3_19_INDEX:
 	case AARCH64_OPND_SVE_Zm3_11_INDEX:
 	case AARCH64_OPND_SVE_Zm4_11_INDEX:
 	case AARCH64_OPND_SVE_Zm4_INDEX:
@@ -3977,6 +3979,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SVE_Zm3_INDEX:
     case AARCH64_OPND_SVE_Zm3_22_INDEX:
+    case AARCH64_OPND_SVE_Zm3_19_INDEX:
     case AARCH64_OPND_SVE_Zm3_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:

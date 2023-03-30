@@ -1155,14 +1155,10 @@
 .*: Info:    	sdot z0\.d, z1\.h, z2\.h
 .*: Error: operand mismatch -- `sdot z0\.h,z1\.h,z2\.h'
 .*: Info:    did you mean this\?
-.*: Info:    	sdot z0\.d, z1\.h, z2\.h
-.*: Info:    other valid variant\(s\):
-.*: Info:    	sdot z0\.s, z1\.b, z2\.b
+.*: Info:    	sdot z0\.s, z1\.h, z2\.h
 .*: Error: operand mismatch -- `sdot z0\.s,z1\.s,z2\.s'
 .*: Info:    did you mean this\?
-.*: Info:    	sdot z0\.s, z1\.b, z2\.b
-.*: Info:    other valid variant\(s\):
-.*: Info:    	sdot z0\.d, z1\.h, z2\.h
+.*: Info:    	sdot z0\.s, z1\.h, z2\.h
 .*: Error: operand mismatch -- `sdot z0\.d,z1\.d,z2\.d'
 .*: Info:    did you mean this\?
 .*: Info:    	sdot z0\.d, z1\.h, z2\.h
@@ -1187,14 +1183,10 @@
 .*: Info:    	udot z0\.d, z1\.h, z2\.h
 .*: Error: operand mismatch -- `udot z0\.h,z1\.h,z2\.h'
 .*: Info:    did you mean this\?
-.*: Info:    	udot z0\.d, z1\.h, z2\.h
-.*: Info:    other valid variant\(s\):
-.*: Info:    	udot z0\.s, z1\.b, z2\.b
+.*: Info:    	udot z0\.s, z1\.h, z2\.h
 .*: Error: operand mismatch -- `udot z0\.s,z1\.s,z2\.s'
 .*: Info:    did you mean this\?
-.*: Info:    	udot z0\.s, z1\.b, z2\.b
-.*: Info:    other valid variant\(s\):
-.*: Info:    	udot z0\.d, z1\.h, z2\.h
+.*: Info:    	udot z0\.s, z1\.h, z2\.h
 .*: Error: operand mismatch -- `udot z0\.d,z1\.d,z2\.d'
 .*: Info:    did you mean this\?
 .*: Info:    	udot z0\.d, z1\.h, z2\.h
