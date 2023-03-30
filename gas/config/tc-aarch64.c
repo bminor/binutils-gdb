@@ -5057,6 +5057,7 @@ const char* operand_mismatch_kind_names[] =
   "AARCH64_OPDE_OUT_OF_RANGE",
   "AARCH64_OPDE_UNALIGNED",
   "AARCH64_OPDE_OTHER_ERROR",
+  "AARCH64_OPDE_INVALID_REGNO",
 };
 #endif /* DEBUG_AARCH64 */
 
@@ -5081,6 +5082,7 @@ operand_error_higher_severity_p (enum aarch64_operand_error_kind lhs,
   gas_assert (AARCH64_OPDE_OUT_OF_RANGE > AARCH64_OPDE_REG_LIST);
   gas_assert (AARCH64_OPDE_UNALIGNED > AARCH64_OPDE_OUT_OF_RANGE);
   gas_assert (AARCH64_OPDE_OTHER_ERROR > AARCH64_OPDE_REG_LIST);
+  gas_assert (AARCH64_OPDE_INVALID_REGNO > AARCH64_OPDE_OTHER_ERROR);
   return lhs > rhs;
 }
 
@@ -5710,6 +5712,12 @@ output_operand_error_record (const operand_error_record *record, char *str)
     case AARCH64_OPDE_UNTIED_OPERAND:
       handler (_("operand %d must be the same register as operand 1 -- `%s'"),
                detail->index + 1, str);
+      break;
+
+    case AARCH64_OPDE_INVALID_REGNO:
+      handler (_("%s%d-%s%d expected at operand %d -- `%s'"),
+	       detail->data[0].s, detail->data[1].i,
+	       detail->data[0].s, detail->data[2].i, idx + 1, str);
       break;
 
     case AARCH64_OPDE_OUT_OF_RANGE:

@@ -1311,6 +1311,13 @@ struct aarch64_inst
      Error of the highest severity and used for any severe issue that does not
      fall into any of the above categories.
 
+   AARCH64_OPDE_INVALID_REGNO
+     A register was syntactically valid and had the right type, but it was
+     outside the range supported by the associated operand field.  This is
+     a high severity error because there are currently no instructions that
+     would accept the operands that precede the erroneous one (if any) and
+     yet still accept a wider range of registers.
+
    AARCH64_OPDE_RECOVERABLE, AARCH64_OPDE_SYNTAX_ERROR and
    AARCH64_OPDE_FATAL_SYNTAX_ERROR are only deteced by GAS while the
    AARCH64_OPDE_INVALID_VARIANT error can only be spotted by libopcodes as
@@ -1339,7 +1346,8 @@ enum aarch64_operand_error_kind
   AARCH64_OPDE_UNTIED_OPERAND,
   AARCH64_OPDE_OUT_OF_RANGE,
   AARCH64_OPDE_UNALIGNED,
-  AARCH64_OPDE_OTHER_ERROR
+  AARCH64_OPDE_OTHER_ERROR,
+  AARCH64_OPDE_INVALID_REGNO
 };
 
 /* N.B. GAS assumes that this structure work well with shallow copy.  */

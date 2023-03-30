@@ -1336,6 +1336,18 @@ set_syntax_error (aarch64_operand_error *mismatch_detail, int idx,
 }
 
 static inline void
+set_invalid_regno_error (aarch64_operand_error *mismatch_detail, int idx,
+			 const char *prefix, int lower_bound, int upper_bound)
+{
+  if (mismatch_detail == NULL)
+    return;
+  set_error (mismatch_detail, AARCH64_OPDE_INVALID_REGNO, idx, NULL);
+  mismatch_detail->data[0].s = prefix;
+  mismatch_detail->data[1].i = lower_bound;
+  mismatch_detail->data[2].i = upper_bound;
+}
+
+static inline void
 set_out_of_range_error (aarch64_operand_error *mismatch_detail,
 			int idx, int lower_bound, int upper_bound,
 			const char* error)
@@ -1569,11 +1581,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  mask = (1 << shift) - 1;
 	  if (opnd->reg.regno > mask)
 	    {
-	      assert (mask == 7 || mask == 15);
-	      set_other_error (mismatch_detail, idx,
-			       mask == 15
-			       ? _("z0-z15 expected")
-			       : _("z0-z7 expected"));
+	      set_invalid_regno_error (mismatch_detail, idx, "z", 0, mask);
 	      return 0;
 	    }
 	  mask = (1u << (size - shift)) - 1;
@@ -1642,7 +1650,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       if (opnd->reg.regno >= 8
 	  && get_operand_fields_width (get_operand_from_code (type)) == 3)
 	{
-	  set_other_error (mismatch_detail, idx, _("p0-p7 expected"));
+	  set_invalid_regno_error (mismatch_detail, idx, "p", 0, 7);
 	  return 0;
 	}
       break;
