@@ -3819,10 +3819,18 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 
   /* [ */
 
+  bool alpha_base_p = ISALPHA (*p);
   reg = aarch64_addr_reg_parse (&p, base_type, base_qualifier);
   if (!reg || !aarch64_check_reg_type (reg, base_type))
     {
-      set_syntax_error (_(get_reg_expected_msg (base_type)));
+      if (reg
+	  && aarch64_check_reg_type (reg, REG_TYPE_R_SP)
+	  && *base_qualifier == AARCH64_OPND_QLF_W)
+	set_syntax_error (_("expected a 64-bit base register"));
+      else if (alpha_base_p)
+	set_syntax_error (_("invalid base register"));
+      else
+	set_syntax_error (_("expected a base register"));
       return false;
     }
   operand->addr.base_regno = reg->number;
@@ -3838,7 +3846,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	{
 	  if (!aarch64_check_reg_type (reg, offset_type))
 	    {
-	      set_syntax_error (_(get_reg_expected_msg (offset_type)));
+	      set_syntax_error (_("invalid offset register"));
 	      return false;
 	    }
 
@@ -3974,7 +3982,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	  /* [Xn],Xm */
 	  if (!aarch64_check_reg_type (reg, REG_TYPE_R_64))
 	    {
-	      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
+	      set_syntax_error (_("invalid offset register"));
 	      return false;
 	    }
 

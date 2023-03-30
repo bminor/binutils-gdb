@@ -313,3 +313,7 @@
 	ldxp	x26, x1, [x26]
 	st4	{v0.16b-v3.16b}[4], [x0]
 	stlxp	w3, w26, w26, [x3]
+
+	ldr	x0, [1]
+	ldr	x0, []
+	ldr	x0, [,xzr]
