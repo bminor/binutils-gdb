@@ -1210,7 +1210,7 @@ struct aarch64_reglist
   unsigned has_index : 1;
   /* Lane index; valid only when has_index is 1.  */
   int64_t index;
-} reglist;
+};
 
 /* Structure representing an operand.  */
 
