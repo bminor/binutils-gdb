@@ -239,11 +239,11 @@ const aarch64_field fields[] =
     { 22,  2 },	/* shift: in add/sub reg/imm shifted instructions.  */
     { 22,  2 },	/* type: floating point type field in fp data inst.  */
     { 30,  2 },	/* ldst_size: size field in ld/st reg offset inst.  */
-    { 10,  6 },	/* imm6: in add/sub reg shifted instructions.  */
-    { 15,  6 },	/* imm6_2: in rmif instructions.  */
-    { 11,  4 },	/* imm4: in advsimd ext and advsimd ins instructions.  */
-    {  0,  4 },	/* imm4_2: in rmif instructions.  */
-    { 10,  4 },	/* imm4_3: in adddg/subg instructions.  */
+    { 10,  6 },	/* imm6_10: in add/sub reg shifted instructions.  */
+    { 15,  6 },	/* imm6_15: in rmif instructions.  */
+    { 11,  4 },	/* imm4_11: in advsimd ext and advsimd ins instructions.  */
+    {  0,  4 },	/* imm4_0: in rmif instructions.  */
+    { 10,  4 },	/* imm4_10: in adddg/subg instructions.  */
     {  5,  4 }, /* imm4_5: in SME instructions.  */
     { 16,  5 },	/* imm5: in conditional compare (immediate) instructions.  */
     { 15,  7 },	/* imm7: in load/store pair pre/post index instructions.  */
@@ -251,8 +251,8 @@ const aarch64_field fields[] =
     { 12,  9 },	/* imm9: in load/store pre/post index instructions.  */
     { 10, 12 },	/* imm12: in ld/st unsigned imm or add/sub shifted inst.  */
     {  5, 14 },	/* imm14: in test bit and branch instructions.  */
-    {  5, 16 },	/* imm16: in exception instructions.  */
-    {  0, 16 },	/* imm16_2: in udf instruction. */
+    {  5, 16 },	/* imm16_5: in exception instructions.  */
+    {  0, 16 },	/* imm16_0: in udf instruction. */
     {  0, 26 },	/* imm26: in unconditional branch instructions.  */
     { 10,  6 },	/* imms: in bitfield and logical immediate instructions.  */
     { 16,  6 },	/* immr: in bitfield and logical immediate instructions.  */
@@ -326,7 +326,7 @@ const aarch64_field fields[] =
     { 22,  1 }, /* SVE_xs_22: UXTW/SXTW select (bit 22).  */
     {  0,  2 }, /* SME ZAda tile ZA0-ZA3.  */
     {  0,  3 }, /* SME ZAda tile ZA0-ZA7.  */
-    { 22,  2 }, /* SME_size_10: size<1>, size<0> class field, [23:22].  */
+    { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
     { 16,  1 }, /* SME_Q: Q class bit, bit 16.  */
     { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
     { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */

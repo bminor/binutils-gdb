@@ -5535,9 +5535,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a 4-bit opcode field named for historical reasons C0 - C15")	\
     Y(IMMEDIATE, imm, "CRm", 0, F(FLD_CRm),				\
       "a 4-bit opcode field named for historical reasons C0 - C15")	\
-    Y(IMMEDIATE, imm, "IDX", 0, F(FLD_imm4),				\
+    Y(IMMEDIATE, imm, "IDX", 0, F(FLD_imm4_11),				\
       "an immediate as the index of the least significant byte")	\
-    Y(IMMEDIATE, imm, "MASK", 0, F(FLD_imm4_2),				\
+    Y(IMMEDIATE, imm, "MASK", 0, F(FLD_imm4_0),				\
       "an immediate as the index of the least significant byte")	\
     Y(IMMEDIATE, advsimd_imm_shift, "IMM_VLSL", 0, F(),			\
       "a left shift amount for an AdvSIMD register")			\
@@ -5557,19 +5557,19 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an 8-bit floating-point constant")				\
     Y(IMMEDIATE, imm, "IMMR", 0, F(FLD_immr),				\
       "the right rotate amount")					\
-    Y(IMMEDIATE, imm, "IMMS", 0, F(FLD_imm6),				\
+    Y(IMMEDIATE, imm, "IMMS", 0, F(FLD_imm6_10),			\
       "the leftmost bit number to be moved from the source")		\
-    Y(IMMEDIATE, imm, "WIDTH", 0, F(FLD_imm6),				\
+    Y(IMMEDIATE, imm, "WIDTH", 0, F(FLD_imm6_10),			\
       "the width of the bit-field")					\
-    Y(IMMEDIATE, imm, "IMM", 0, F(FLD_imm6), "an immediate")            \
-    Y(IMMEDIATE, imm, "IMM_2", 0, F(FLD_imm6_2), "an immediate")        \
+    Y(IMMEDIATE, imm, "IMM", 0, F(FLD_imm6_10), "an immediate")         \
+    Y(IMMEDIATE, imm, "IMM_2", 0, F(FLD_imm6_15), "an immediate")       \
     Y(IMMEDIATE, imm, "UIMM3_OP1", 0, F(FLD_op1),			\
       "a 3-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "UIMM3_OP2", 0, F(FLD_op2),			\
       "a 3-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "UIMM4", 0, F(FLD_CRm),				\
       "a 4-bit unsigned immediate")					\
-    Y(IMMEDIATE, imm, "UIMM4_ADDG", 0, F(FLD_imm4_3),			\
+    Y(IMMEDIATE, imm, "UIMM4_ADDG", 0, F(FLD_imm4_10),			\
       "a 4-bit unsigned Logical Address Tag modifier")			\
     Y(IMMEDIATE, imm, "UIMM7", 0, F(FLD_CRm, FLD_op2),			\
       "a 7-bit unsigned immediate")					\
@@ -5577,9 +5577,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a 10-bit unsigned multiple of 16")				\
     Y(IMMEDIATE, imm, "BIT_NUM", 0, F(FLD_b5, FLD_b40),			\
       "the bit number to be tested")					\
-    Y(IMMEDIATE, imm, "EXCEPTION", 0, F(FLD_imm16),			\
+    Y(IMMEDIATE, imm, "EXCEPTION", 0, F(FLD_imm16_5),			\
       "a 16-bit unsigned immediate")					\
-    Y(IMMEDIATE, imm, "UNDEFINED", 0, F(FLD_imm16_2),			\
+    Y(IMMEDIATE, imm, "UNDEFINED", 0, F(FLD_imm16_0),			\
       "a 16-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "CCMP_IMM", 0, F(FLD_imm5),			\
       "a 5-bit unsigned immediate")					\
@@ -5591,7 +5591,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "Logical immediate")						\
     Y(IMMEDIATE, aimm, "AIMM", 0, F(FLD_shift,FLD_imm12),		\
       "a 12-bit unsigned immediate with optional left shift of 12 bits")\
-    Y(IMMEDIATE, imm_half, "HALF", 0, F(FLD_imm16),			\
+    Y(IMMEDIATE, imm_half, "HALF", 0, F(FLD_imm16_5),			\
       "a 16-bit immediate with optional left shift")			\
     Y(IMMEDIATE, fbits, "FBITS", 0, F(FLD_scale),			\
       "the number of bits after the binary point in the fixed-point value")\
@@ -5909,28 +5909,28 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REG, regno, "SME_ZAda_3b", 0, F(FLD_SME_ZAda_3b),		\
       "an SME ZA tile ZA0-ZA7")						\
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_src", 0,		\
-      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_5),	\
+      F(FLD_SME_size_22,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_5),	\
       "an SME horizontal or vertical vector access register")		\
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_dest", 0,		\
-      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),	\
+      F(FLD_SME_size_22,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_0),	\
       "an SME horizontal or vertical vector access register")		\
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\
       "an SVE predicate register")					\
     Y(SVE_REG, imm, "SME_list_of_64bit_tiles", 0,			\
       F(FLD_SME_zero_mask), "a list of 64-bit ZA element tiles")	\
     Y(ZA_ACCESS, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,		\
-      F(FLD_SME_size_10,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),	\
+      F(FLD_SME_size_22,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_0),	\
       "an SME horizontal or vertical vector access register")		\
     Y(ZA_ACCESS, sme_za_array, "SME_ZA_array", 0,			\
-      F(FLD_SME_Rv,FLD_imm4_2), "ZA array")				\
+      F(FLD_SME_Rv,FLD_imm4_0), "ZA array")				\
     Y(ADDRESS, sme_addr_ri_u4xvl, "SME_ADDR_RI_U4xVL", 0 << OPD_F_OD_LSB, \
-      F(FLD_Rn,FLD_imm4_2), "memory offset")				\
+      F(FLD_Rn,FLD_imm4_0), "memory offset")				\
     Y(ADDRESS, sme_sm_za, "SME_SM_ZA", 0,				\
       F(FLD_CRm), "streaming mode")					\
     Y(SVE_REG, sme_pred_reg_with_index, "SME_PnT_Wm_imm", 0,		\
       F(FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl),	\
       "Source scalable predicate register with index ")	\
-    Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
+    Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16_5),			\
       "a 16-bit unsigned immediate for TME tcancel")			\
     Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\
       "an indexed SM3 vector immediate")				\

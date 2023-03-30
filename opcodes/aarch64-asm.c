@@ -120,7 +120,7 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	  /* index2 for e.g. INS <Vd>.<Ts>[<index1>], <Vn>.<Ts>[<index2>].  */
 	  assert (info->idx == 1);	/* Vn */
 	  aarch64_insn value = info->reglane.index << pos;
-	  insert_field (FLD_imm4, code, value, 0);
+	  insert_field (FLD_imm4_11, code, value, 0);
 	}
       else
 	{
@@ -962,7 +962,7 @@ aarch64_ins_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   insert_field (FLD_shift, code,
 		aarch64_get_operand_modifier_value (info->shifter.kind), 0);
   /* imm6 */
-  insert_field (FLD_imm6, code, info->shifter.amount, 0);
+  insert_field (FLD_imm6_10, code, info->shifter.amount, 0);
 
   return true;
 }
