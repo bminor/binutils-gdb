@@ -1624,6 +1624,19 @@ aarch64_ins_simple_index (const aarch64_operand *self,
   return true;
 }
 
+/* Insert a plain shift-right immediate, when there is only a single
+   element size.  */
+bool
+aarch64_ins_plain_shrimm (const aarch64_operand *self,
+			  const aarch64_opnd_info *info, aarch64_insn *code,
+			  const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  unsigned int base = 1 << get_operand_field_width (self, 0);
+  insert_field (self->fields[0], code, base - info->imm.value, 0);
+  return true;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for
@@ -1980,6 +1993,7 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
 		     0, 2, FLD_SVE_M_14, FLD_size);
       break;
 
+    case sme_shift:
     case sve_index:
     case sve_shift_pred:
     case sve_shift_unpred:

@@ -520,6 +520,8 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ADDR_RI_U4xVL,   /* SME [<Xn|SP>{, #<imm>, MUL VL}].  */
   AARCH64_OPND_SME_SM_ZA,           /* SME {SM | ZA}.  */
   AARCH64_OPND_SME_PnT_Wm_imm,      /* SME <Pn>.<T>[<Wm>, #<imm>].  */
+  AARCH64_OPND_SME_SHRIMM4,	    /* 4-bit right shift, bits [19:16].  */
+  AARCH64_OPND_SME_SHRIMM5,	    /* size + 5-bit right shift, bits [23:22,20:16].  */
   AARCH64_OPND_SME_Zm_INDEX1,	    /* Zn.T[index], bits [19:16,10].  */
   AARCH64_OPND_SME_Zm_INDEX2,	    /* Zn.T[index], bits [19:16,11:10].  */
   AARCH64_OPND_SME_Zm_INDEX3_1,     /* Zn.T[index], bits [19:16,10,2:1].  */
@@ -713,6 +715,7 @@ enum aarch64_insn_class
   sme_mov,
   sme_ldr,
   sme_psel,
+  sme_shift,
   sme_size_12_bhs,
   sme_size_12_hs,
   sme_size_22,

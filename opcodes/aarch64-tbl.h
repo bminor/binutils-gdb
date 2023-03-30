@@ -1628,6 +1628,10 @@
 {                                                       \
   QLF2(S_H,S_S),                                        \
 }
+#define OP_SVE_HSU                                      \
+{                                                       \
+  QLF3(S_H,S_S,NIL),                                    \
+}
 #define OP_SVE_HU                                       \
 {                                                       \
   QLF2(S_H,NIL),                                        \
@@ -1853,6 +1857,11 @@
   QLF3(S_H,P_M,S_B),                                    \
   QLF3(S_S,P_M,S_H),                                    \
   QLF3(S_D,P_M,S_S),                                    \
+}
+#define OP_SVE_VVU_BH_SD                                \
+{                                                       \
+  QLF3(S_B,S_S,NIL),                                    \
+  QLF3(S_H,S_D,NIL),                                    \
 }
 #define OP_SVE_VVU_HSD_BHS                              \
 {                                                       \
@@ -5623,6 +5632,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("sqdmulh", 0xc120ac00, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("sqdmulh", 0xc120b400, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("sqdmulh", 0xc120bc00, 0xff23ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zmx4), OP_SVE_VVV_BHSD, 0, 1),
+  SME2_INSN ("sqrshr", 0xc1e0d400, 0xfff0fc20, sme_misc, 0, OP3 (SVE_Zd, SME_Znx2, SME_SHRIMM4), OP_SVE_HSU, 0, 0),
+  SME2_INSN ("sqrshr", 0xc120d800, 0xff20fc60, sme_shift, 0, OP3 (SVE_Zd, SME_Znx4, SME_SHRIMM5), OP_SVE_VVU_BH_SD, 0, 0),
+  SME2_INSN ("sqrshrn", 0xc120dc00, 0xff20fc60, sme_shift, 0, OP3 (SVE_Zd, SME_Znx4, SME_SHRIMM5), OP_SVE_VVU_BH_SD, 0, 0),
+  SME2_INSN ("sqrshru", 0xc1f0d400, 0xfff0fc20, sme_misc, 0, OP3 (SVE_Zd, SME_Znx2, SME_SHRIMM4), OP_SVE_HSU, 0, 0),
+  SME2_INSN ("sqrshru", 0xc120d840, 0xff20fc60, sme_shift, 0, OP3 (SVE_Zd, SME_Znx4, SME_SHRIMM5), OP_SVE_VVU_BH_SD, 0, 0),
+  SME2_INSN ("sqrshrun", 0xc120dc40, 0xff20fc60, sme_shift, 0, OP3 (SVE_Zd, SME_Znx4, SME_SHRIMM5), OP_SVE_VVU_BH_SD, 0, 0),
   SME2_INSN ("srshl", 0xc120a220, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("srshl", 0xc120aa20, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("srshl", 0xc120b220, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),
@@ -5771,6 +5786,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSN ("uqcvt", 0xc123e020, 0xfffffc20, sme_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
   SME2_INSN ("uqcvt", 0xc133e020, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
   SME2_INSN ("uqcvtn", 0xc133e060, 0xff7ffc60, sme_sz_23, 0, OP2 (SVE_Zd, SME_Znx4), OP_SVE_VV_BH_SD, 0, 0),
+  SME2_INSN ("uqrshr", 0xc1e0d420, 0xfff0fc20, sme_misc, 0, OP3 (SVE_Zd, SME_Znx2, SME_SHRIMM4), OP_SVE_HSU, 0, 0),
+  SME2_INSN ("uqrshr", 0xc120d820, 0xff20fc60, sme_shift, 0, OP3 (SVE_Zd, SME_Znx4, SME_SHRIMM5), OP_SVE_VVU_BH_SD, 0, 0),
+  SME2_INSN ("uqrshrn", 0xc120dc20, 0xff20fc60, sme_shift, 0, OP3 (SVE_Zd, SME_Znx4, SME_SHRIMM5), OP_SVE_VVU_BH_SD, 0, 0),
   SME2_INSN ("urshl", 0xc120a221, 0xff30ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("urshl", 0xc120aa21, 0xff30ffe3, sme_size_22, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_BHSD, 0, 1),
   SME2_INSN ("urshl", 0xc120b221, 0xff21ffe1, sme_size_22, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_BHSD, 0, 1),
@@ -6547,6 +6565,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REG, sme_pred_reg_with_index, "SME_PnT_Wm_imm", 0,		\
       F(FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl),	\
       "Source scalable predicate register with index ")	\
+    Y(IMMEDIATE, plain_shrimm, "SME_SHRIMM4", 0, F(FLD_SVE_imm4), 	\
+      "a shift-right immediate operand")				\
+    Y(IMMEDIATE, sve_shrimm, "SME_SHRIMM5", 1 << OPD_F_OD_LSB,		\
+      F(FLD_SVE_tszh,FLD_SVE_imm5b), "a shift-right immediate operand")	\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX1", 0,			\
       F(FLD_SME_Zm, FLD_imm1_10), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX2", 0,			\

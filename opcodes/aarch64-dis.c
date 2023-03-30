@@ -2157,6 +2157,19 @@ aarch64_ext_simple_index (const aarch64_operand *self, aarch64_opnd_info *info,
   info->reglane.index = extract_all_fields_after (self, 1, code);
   return true;
 }
+
+/* Decode a plain shift-right immediate, when there is only a single
+   element size.  */
+bool
+aarch64_ext_plain_shrimm (const aarch64_operand *self, aarch64_opnd_info *info,
+			  const aarch64_insn code,
+			  const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  unsigned int base = 1 << get_operand_field_width (self, 0);
+  info->imm.value = base - extract_field (self->fields[0], code, 0);
+  return true;
+}
 
 /* Bitfields that are commonly used to encode certain operands' information
    may be partially used as part of the base opcode in some instructions.
@@ -3077,6 +3090,10 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 	  variant += 1;
 	}
       break;
+
+    case sme_shift:
+      i = extract_field (FLD_SVE_tszh, inst->value, 0);
+      goto sve_shift;
 
     case sme_size_12_bhs:
       variant = extract_field (FLD_SME_size_12, inst->value, 0);

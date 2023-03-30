@@ -2924,6 +2924,16 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_SHRIMM4:
+	  size = 1 << get_operand_fields_width (get_operand_from_code (type));
+	  if (!value_in_range_p (opnd->imm.value, 1, size))
+	    {
+	      set_imm_out_of_range_error (mismatch_detail, idx, 1, size);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_SME_SHRIMM5:
 	case AARCH64_OPND_SVE_SHRIMM_PRED:
 	case AARCH64_OPND_SVE_SHRIMM_UNPRED:
 	case AARCH64_OPND_SVE_SHRIMM_UNPRED_22:
@@ -4103,6 +4113,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_FBITS:
     case AARCH64_OPND_TME_UIMM16:
     case AARCH64_OPND_SIMM5:
+    case AARCH64_OPND_SME_SHRIMM4:
+    case AARCH64_OPND_SME_SHRIMM5:
     case AARCH64_OPND_SVE_SHLIMM_PRED:
     case AARCH64_OPND_SVE_SHLIMM_UNPRED:
     case AARCH64_OPND_SVE_SHLIMM_UNPRED_22:

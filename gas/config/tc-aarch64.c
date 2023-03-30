@@ -349,6 +349,13 @@ struct reloc_entry
 		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
 		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q)	\
 		 | REG_TYPE(Z) | REG_TYPE(P))				\
+  /* Likewise, but with predicate-as-counter registers added.  */	\
+  MULTI_REG_TYPE(R_ZR_SP_BHSDQ_VZP_PN, REG_TYPE(R_32) | REG_TYPE(R_64)	\
+		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
+		 | REG_TYPE(ZR_32) | REG_TYPE(ZR_64) | REG_TYPE(V)	\
+		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
+		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q)	\
+		 | REG_TYPE(Z) | REG_TYPE(P) | REG_TYPE(PN))		\
   /* Any integer register; used for error messages only.  */		\
   MULTI_REG_TYPE(R_N, REG_TYPE(R_32) | REG_TYPE(R_64)			\
 		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
@@ -6527,9 +6534,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   clear_error ();
   skip_whitespace (str);
 
-  if (AARCH64_CPU_HAS_ANY_FEATURES (*opcode->avariant,
-				    AARCH64_FEATURE_SVE
-				    | AARCH64_FEATURE_SVE2))
+  if (AARCH64_CPU_HAS_FEATURE (*opcode->avariant, AARCH64_FEATURE_SME2))
+    imm_reg_type = REG_TYPE_R_ZR_SP_BHSDQ_VZP_PN;
+  else if (AARCH64_CPU_HAS_ANY_FEATURES (*opcode->avariant,
+					 AARCH64_FEATURE_SVE
+					 | AARCH64_FEATURE_SVE2))
     imm_reg_type = REG_TYPE_R_ZR_SP_BHSDQ_VZP;
   else
     imm_reg_type = REG_TYPE_R_ZR_BHSDQ_V;
@@ -6892,6 +6901,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_SHLIMM_PRED:
 	case AARCH64_OPND_SVE_SHLIMM_UNPRED:
 	case AARCH64_OPND_SVE_SHLIMM_UNPRED_22:
+	case AARCH64_OPND_SME_SHRIMM4:
+	case AARCH64_OPND_SME_SHRIMM5:
 	case AARCH64_OPND_SVE_SHRIMM_PRED:
 	case AARCH64_OPND_SVE_SHRIMM_UNPRED:
 	case AARCH64_OPND_SVE_SHRIMM_UNPRED_22:
