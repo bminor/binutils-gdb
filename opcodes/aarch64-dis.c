@@ -168,24 +168,35 @@ extract_fields (aarch64_insn code, aarch64_insn mask, ...)
   return value;
 }
 
-/* Extract the value of all fields in SELF->fields from instruction CODE.
-   The least significant bit comes from the final field.  */
+/* Extract the value of all fields in SELF->fields after START from
+   instruction CODE.  The least significant bit comes from the final field.  */
 
 static aarch64_insn
-extract_all_fields (const aarch64_operand *self, aarch64_insn code)
+extract_all_fields_after (const aarch64_operand *self, unsigned int start,
+			  aarch64_insn code)
 {
   aarch64_insn value;
   unsigned int i;
   enum aarch64_field_kind kind;
 
   value = 0;
-  for (i = 0; i < ARRAY_SIZE (self->fields) && self->fields[i] != FLD_NIL; ++i)
+  for (i = start;
+       i < ARRAY_SIZE (self->fields) && self->fields[i] != FLD_NIL; ++i)
     {
       kind = self->fields[i];
       value <<= fields[kind].width;
       value |= extract_field (kind, code, 0);
     }
   return value;
+}
+
+/* Extract the value of all fields in SELF->fields from instruction CODE.
+   The least significant bit comes from the final field.  */
+
+static aarch64_insn
+extract_all_fields (const aarch64_operand *self, aarch64_insn code)
+{
+  return extract_all_fields_after (self, 0, code);
 }
 
 /* Sign-extend bit I of VALUE.  */
@@ -2125,6 +2136,20 @@ aarch64_ext_x0_to_x30 (const aarch64_operand *self, aarch64_opnd_info *info,
 {
   info->reg.regno = extract_field (self->fields[0], code, 0);
   return info->reg.regno <= 30;
+}
+
+/* Decode an indexed register, with the first field being the register
+   number and the remaining fields being the index.  */
+bool
+aarch64_ext_simple_index (const aarch64_operand *self, aarch64_opnd_info *info,
+			  const aarch64_insn code,
+			  const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int bias = get_operand_specific_data (self);
+  info->reglane.regno = extract_field (self->fields[0], code, 0) + bias;
+  info->reglane.index = extract_all_fields_after (self, 1, code);
+  return true;
 }
 
 /* Bitfields that are commonly used to encode certain operands' information

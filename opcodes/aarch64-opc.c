@@ -99,6 +99,13 @@ const char *const aarch64_sve_prfop_array[16] = {
   0
 };
 
+/* Vector length multiples for a predicate-as-counter operand.  Used in things
+   like AARCH64_OPND_SME_VLxN_10.  */
+const char *const aarch64_sme_vlxn_array[2] = {
+  "vlx2",
+  "vlx4"
+};
+
 /* Helper functions to determine which operand to be used to encode/decode
    the size:Q fields for AdvSIMD instructions.  */
 
@@ -220,15 +227,22 @@ const aarch64_field fields[] =
     { 10,  5 },	/* Rt2: in load/store pair instructions.  */
     { 12,  1 },	/* S: in load/store reg offset instructions.  */
     { 12,  2 }, /* SM3_imm2: Indexed element SM3 2 bits index immediate.  */
+    {  1,  3 }, /* SME_Pdx2: predicate register, multiple of 2, [3:1].  */
     { 13,  3 }, /* SME_Pm: second source scalable predicate register P0-P7.  */
+    {  0,  3 }, /* SME_PNd3: PN0-PN7, bits [2:0].  */
+    {  5,  3 }, /* SME_PNn3: PN0-PN7, bits [7:5].  */
     { 16,  1 }, /* SME_Q: Q class bit, bit 16.  */
     { 16,  2 }, /* SME_Rm: index base register W12-W15 [17:16].  */
     { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */
     { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
+    { 10,  1 }, /* SME_VL_10: VLx2 or VLx4, bit [10].  */
+    { 13,  1 }, /* SME_VL_13: VLx2 or VLx4, bit [13].  */
     {  0,  2 }, /* SME_ZAda_2b: tile ZA0-ZA3.  */
     {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
     {  1,  4 }, /* SME_Zdn2: Z0-Z31, multiple of 2, bits [4:1].  */
     {  2,  3 }, /* SME_Zdn4: Z0-Z31, multiple of 4, bits [4:2].  */
+    { 17,  4 }, /* SME_Zm2: Z0-Z31, multiple of 2, bits [20:17].  */
+    { 18,  3 }, /* SME_Zm4: Z0-Z31, multiple of 4, bits [20:18].  */
     {  6,  4 }, /* SME_Zn2: Z0-Z31, multiple of 2, bits [9:6].  */
     {  7,  3 }, /* SME_Zn4: Z0-Z31, multiple of 4, bits [9:7].  */
     {  4,  1 }, /* SME_ZtT: upper bit of Zt, bit [4].  */
@@ -303,6 +317,8 @@ const aarch64_field fields[] =
     {  0,  4 },	/* cond2: condition in truly conditional-executed inst.  */
     {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
     { 21,  2 },	/* hw: in move wide constant instructions.  */
+    {  8,  1 },	/* imm1_8: general immediate in bits [8].  */
+    {  8,  2 },	/* imm2_8: general immediate in bits [9:8].  */
     {  0,  3 },	/* imm3_0: general immediate in bits [2:0].  */
     {  5,  3 },	/* imm3_5: general immediate in bits [7:5].  */
     { 10,  3 },	/* imm3_10: in add/sub extended reg instructions.  */
@@ -1720,6 +1736,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SME_PNn3_INDEX1:
+	case AARCH64_OPND_SME_PNn3_INDEX2:
+	  size = get_operand_field_width (get_operand_from_code (type), 1);
+	  if (!check_reglane (opnd, mismatch_detail, idx, "pn", 8, 15,
+			      0, (1 << size) - 1))
+	    return 0;
+	  break;
+
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
@@ -1736,8 +1760,11 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
     case AARCH64_OPND_CLASS_SVE_REGLIST:
       switch (type)
 	{
+	case AARCH64_OPND_SME_Pdx2:
 	case AARCH64_OPND_SME_Zdnx2:
 	case AARCH64_OPND_SME_Zdnx4:
+	case AARCH64_OPND_SME_Zmx2:
+	case AARCH64_OPND_SME_Zmx4:
 	case AARCH64_OPND_SME_Znx2:
 	case AARCH64_OPND_SME_Znx4:
 	  num = get_operand_specific_data (&aarch64_operands[type]);
@@ -1767,6 +1794,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_PdxN:
 	case AARCH64_OPND_SVE_ZnxN:
 	case AARCH64_OPND_SVE_ZtxN:
 	  num = get_opcode_dependent_value (opcode);
@@ -1825,6 +1853,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
     case AARCH64_OPND_CLASS_PRED_REG:
       switch (type)
 	{
+	case AARCH64_OPND_SME_PNd3:
 	case AARCH64_OPND_SME_PNg3:
 	  if (opnd->reg.regno < 8)
 	    {
@@ -3366,10 +3395,11 @@ static void
 print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
 		     const char *prefix, struct aarch64_styler *styler)
 {
+  const int mask = (prefix[0] == 'p' ? 15 : 31);
   const int num_regs = opnd->reglist.num_regs;
   const int stride = opnd->reglist.stride;
   const int first_reg = opnd->reglist.first_regno;
-  const int last_reg = (first_reg + (num_regs - 1) * stride) & 0x1f;
+  const int last_reg = (first_reg + (num_regs - 1) * stride) & mask;
   const char *qlf_name = aarch64_get_qualifier_name (opnd->qualifier);
   char tb[16];	/* Temporary buffer.  */
 
@@ -3394,9 +3424,9 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
   else
     {
       const int reg0 = first_reg;
-      const int reg1 = (first_reg + stride) & 0x1f;
-      const int reg2 = (first_reg + stride * 2) & 0x1f;
-      const int reg3 = (first_reg + stride * 3) & 0x1f;
+      const int reg1 = (first_reg + stride) & mask;
+      const int reg2 = (first_reg + stride * 2) & mask;
+      const int reg3 = (first_reg + stride * 3) & mask;
 
       switch (num_regs)
 	{
@@ -3774,7 +3804,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_PNg4_10:
     case AARCH64_OPND_SVE_PNn:
     case AARCH64_OPND_SVE_PNt:
+    case AARCH64_OPND_SME_PNd3:
     case AARCH64_OPND_SME_PNg3:
+    case AARCH64_OPND_SME_PNn:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
 	snprintf (buf, size, "%s",
 		  style_reg (styler, "pn%d", opnd->reg.regno));
@@ -3787,6 +3819,18 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	snprintf (buf, size, "%s",
 		  style_reg (styler, "pn%d.%s", opnd->reg.regno,
 			     aarch64_get_qualifier_name (opnd->qualifier)));
+      break;
+
+    case AARCH64_OPND_SME_Pdx2:
+    case AARCH64_OPND_SME_PdxN:
+      print_register_list (buf, size, opnd, "p", styler);
+      break;
+
+    case AARCH64_OPND_SME_PNn3_INDEX1:
+    case AARCH64_OPND_SME_PNn3_INDEX2:
+      snprintf (buf, size, "%s[%s]",
+		style_reg (styler, "pn%d", opnd->reglane.regno),
+		style_imm (styler, "%" PRIi64, opnd->reglane.index));
       break;
 
     case AARCH64_OPND_SVE_Za_5:
@@ -3808,6 +3852,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ZtxN:
     case AARCH64_OPND_SME_Zdnx2:
     case AARCH64_OPND_SME_Zdnx4:
+    case AARCH64_OPND_SME_Zmx2:
+    case AARCH64_OPND_SME_Zmx4:
     case AARCH64_OPND_SME_Znx2:
     case AARCH64_OPND_SME_Znx4:
     case AARCH64_OPND_SME_Ztx2_STRIDED:
@@ -3900,6 +3946,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 			   aarch64_get_qualifier_name (opnd->qualifier)),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
 		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm));
+      break;
+
+    case AARCH64_OPND_SME_VLxN_10:
+    case AARCH64_OPND_SME_VLxN_13:
+      enum_value = opnd->imm.value;
+      assert (enum_value < ARRAY_SIZE (aarch64_sme_vlxn_array));
+      snprintf (buf, size, "%s",
+		style_sub_mnem (styler, aarch64_sme_vlxn_array[enum_value]));
       break;
 
     case AARCH64_OPND_CRn:

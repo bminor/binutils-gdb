@@ -134,6 +134,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_sme_pred_reg_with_index);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate1);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate2);
 AARCH64_DECL_OPD_EXTRACTOR (ext_x0_to_x30);
+AARCH64_DECL_OPD_EXTRACTOR (ext_simple_index);
 
 #undef AARCH64_DECL_OPD_EXTRACTOR
 

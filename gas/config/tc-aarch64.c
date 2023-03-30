@@ -474,6 +474,8 @@ get_reg_expected_msg (unsigned int mask, unsigned int seen)
        PN is expected, and vice versa, so the issue at this point is
        "predicate-like" vs. "not predicate-like".  */
     return N_("expected an SVE predicate register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_PN])
+    return N_("expected an SVE predicate-as-counter register at operand %d");
   if (mask == reg_type_masks[REG_TYPE_VZ])
     return N_("expected a vector register at operand %d");
   if (mask == reg_type_masks[REG_TYPE_ZP])
@@ -1277,7 +1279,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
   if (!(flags & PTR_FULL_REG) && skip_past_char (&str, '['))
     {
       /* Reject Sn[index] syntax.  */
-      if (!is_typed_vecreg)
+      if (reg->type != REG_TYPE_PN && !is_typed_vecreg)
 	{
 	  first_error (_("this type of register can't be indexed"));
 	  return NULL;
@@ -1344,6 +1346,14 @@ eq_vector_type_el (struct vector_type_el e1, struct vector_type_el e2)
 	  && e1.index == e2.index);
 }
 
+/* Return the register number mask for registers of type REG_TYPE.  */
+
+static inline int
+reg_type_mask (aarch64_reg_type reg_type)
+{
+  return reg_type == REG_TYPE_P ? 15 : 31;
+}
+
 /* This function parses a list of vector registers of type TYPE.
    On success, it returns the parsed register list information in the
    following encoded format:
@@ -1372,7 +1382,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   char *str = *ccp;
   int nb_regs;
   struct vector_type_el typeinfo, typeinfo_first;
-  int val, val_range;
+  int val, val_range, mask;
   int in_range;
   int ret_val;
   bool error = false;
@@ -1396,6 +1406,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   val = -1;
   val_range = -1;
   in_range = 0;
+  mask = reg_type_mask (type);
   do
     {
       if (in_range)
@@ -1431,7 +1442,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 		(_("invalid range in vector register list"));
 	      error = true;
 	    }
-	  val_range = (val_range + 1) & 0x1f;
+	  val_range = (val_range + 1) & mask;
 	}
       else
 	{
@@ -1452,7 +1463,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	    nb_regs++;
 	    if (val_range == val)
 	      break;
-	    val_range = (val_range + 1) & 0x1f;
+	    val_range = (val_range + 1) & mask;
 	  }
       in_range = 0;
       ptr_flags |= PTR_GOOD_MATCH;
@@ -4316,8 +4327,10 @@ parse_adrp (char **str)
 
 /* Parse a symbolic operand such as "pow2" at *STR.  ARRAY is an array
    of SIZE tokens in which index I gives the token for field value I,
-   or is null if field value I is invalid.  REG_TYPE says which register
-   names should be treated as registers rather than as symbolic immediates.
+   or is null if field value I is invalid.  If the symbolic operand
+   can also be given as a 0-based integer, REG_TYPE says which register
+   names should be treated as registers rather than as symbolic immediates
+   while parsing that integer.  REG_TYPE is REG_TYPE_MAX otherwise.
 
    Return true on success, moving *STR past the operand and storing the
    field value in *VAL.  */
@@ -4344,6 +4357,9 @@ parse_enum_string (char **str, int64_t *val, const char *const *array,
 	*str = q;
 	return true;
       }
+
+  if (reg_type == REG_TYPE_MAX)
+    return false;
 
   if (!parse_immediate_expression (&p, &exp, reg_type))
     return false;
@@ -4968,6 +4984,12 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
 #define po_enum_or_fail(array) do {				\
     if (!parse_enum_string (&str, &val, array,			\
 			    ARRAY_SIZE (array), imm_reg_type))	\
+      goto failure;						\
+  } while (0)
+
+#define po_strict_enum_or_fail(array) do {			\
+    if (!parse_enum_string (&str, &val, array,			\
+			    ARRAY_SIZE (array), REG_TYPE_MAX))	\
       goto failure;						\
   } while (0)
 
@@ -6445,16 +6467,18 @@ ldst_lo12_determine_real_reloc_type (void)
   return reloc_ldst_lo12[inst.reloc.type - BFD_RELOC_AARCH64_LDST_LO12][logsz];
 }
 
-/* Check whether a register list REGINFO is valid.  The registers must be
-   numbered in increasing order (modulo 32).  They must also have a
-   consistent stride.
+/* Check whether a register list REGINFO is valid.  The registers have type
+   REG_TYPE and must be numbered in increasing order (modulo the register
+   bank size).  They must have a consistent stride.
 
    Return true if the list is valid, describing it in LIST if so.  */
 
 static bool
-reg_list_valid_p (uint32_t reginfo, struct aarch64_reglist *list)
+reg_list_valid_p (uint32_t reginfo, struct aarch64_reglist *list,
+		  aarch64_reg_type reg_type)
 {
-  uint32_t i, nb_regs, prev_regno, incr;
+  uint32_t i, nb_regs, prev_regno, incr, mask;
+  mask = reg_type_mask (reg_type);
 
   nb_regs = 1 + (reginfo & 0x3);
   reginfo >>= 2;
@@ -6469,7 +6493,7 @@ reg_list_valid_p (uint32_t reginfo, struct aarch64_reglist *list)
       uint32_t curr_regno, curr_incr;
       reginfo >>= 5;
       curr_regno = reginfo & 0x1f;
-      curr_incr = (curr_regno - prev_regno) & 0x1f;
+      curr_incr = (curr_regno - prev_regno) & mask;
       if (curr_incr == 0)
 	return false;
       else if (i == 1)
@@ -6638,7 +6662,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_PNg4_10:
 	case AARCH64_OPND_SVE_PNn:
 	case AARCH64_OPND_SVE_PNt:
+	case AARCH64_OPND_SME_PNd3:
 	case AARCH64_OPND_SME_PNg3:
+	case AARCH64_OPND_SME_PNn:
 	  reg_type = REG_TYPE_PN;
 	  goto vector_reg;
 
@@ -6723,11 +6749,18 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_ZtxN:
 	case AARCH64_OPND_SME_Zdnx2:
 	case AARCH64_OPND_SME_Zdnx4:
+	case AARCH64_OPND_SME_Zmx2:
+	case AARCH64_OPND_SME_Zmx4:
 	case AARCH64_OPND_SME_Znx2:
 	case AARCH64_OPND_SME_Znx4:
 	case AARCH64_OPND_SME_Ztx2_STRIDED:
 	case AARCH64_OPND_SME_Ztx4_STRIDED:
 	  reg_type = REG_TYPE_Z;
+	  goto vector_reg_list;
+
+	case AARCH64_OPND_SME_Pdx2:
+	case AARCH64_OPND_SME_PdxN:
+	  reg_type = REG_TYPE_P;
 	  goto vector_reg_list;
 
 	case AARCH64_OPND_LVn:
@@ -6753,7 +6786,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      if (val == PARSE_FAIL)
 		goto failure;
 
-	      if (! reg_list_valid_p (val, &info->reglist))
+	      if (! reg_list_valid_p (val, &info->reglist, reg_type))
 		{
 		  set_fatal_syntax_error (_("invalid register list"));
 		  goto failure;
@@ -6779,7 +6812,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		goto failure;
 	      if (!(vectype.defined & NTA_HASTYPE))
 		{
-		  if (reg_type == REG_TYPE_Z)
+		  if (reg_type == REG_TYPE_Z || reg_type == REG_TYPE_P)
 		    set_fatal_syntax_error (_("missing type suffix"));
 		  goto failure;
 		}
@@ -7707,6 +7740,24 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
+	case AARCH64_OPND_SME_PNn3_INDEX1:
+	case AARCH64_OPND_SME_PNn3_INDEX2:
+	  reg = aarch64_reg_parse (&str, REG_TYPE_PN, &vectype);
+	  if (!reg)
+	    goto failure;
+	  if (!(vectype.defined & NTA_HASINDEX))
+	    {
+	      set_syntax_error (_("missing register index"));
+	      goto failure;
+	    }
+	  info->reglane.regno = reg->number;
+	  info->reglane.index = vectype.index;
+	  if (vectype.type == NT_invtype)
+	    info->qualifier = AARCH64_OPND_QLF_NIL;
+	  else
+	    info->qualifier = vectype_to_qualifier (&vectype);
+	  break;
+
 	case AARCH64_OPND_BTI_TARGET:
 	  val = parse_bti_operand (&str, &(info->hint_option));
 	  if (val == PARSE_FAIL)
@@ -7751,6 +7802,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 				       &info->indexed_za, &qualifier, 0))
 	    goto failure;
 	  info->qualifier = qualifier;
+	  break;
+
+	case AARCH64_OPND_SME_VLxN_10:
+	case AARCH64_OPND_SME_VLxN_13:
+	  po_strict_enum_or_fail (aarch64_sme_vlxn_array);
+	  info->imm.value = val;
 	  break;
 
 	case AARCH64_OPND_MOPS_ADDR_Rd:

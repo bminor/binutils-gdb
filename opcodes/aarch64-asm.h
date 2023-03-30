@@ -110,6 +110,7 @@ AARCH64_DECL_OPD_INSERTER (ins_sme_pred_reg_with_index);
 AARCH64_DECL_OPD_INSERTER (ins_imm_rotate1);
 AARCH64_DECL_OPD_INSERTER (ins_imm_rotate2);
 AARCH64_DECL_OPD_INSERTER (ins_x0_to_x30);
+AARCH64_DECL_OPD_INSERTER (ins_simple_index);
 
 #undef AARCH64_DECL_OPD_INSERTER
 

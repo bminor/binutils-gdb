@@ -3139,7 +3139,7 @@
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
 [^ :]+:[0-9]+: Info:    	usubwt z0\.s, z0\.s, z0\.h
 [^ :]+:[0-9]+: Info:    	usubwt z0\.d, z0\.d, z0\.s
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilege p16\.b,x0,x0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilege p16\.b,x0,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilege p0\.b,x32,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilege p0\.b,x0,x32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilege p0/m,x0,x0'
@@ -3165,7 +3165,7 @@
 [^ :]+:[0-9]+: Info:    	whilege p0\.h, x0, x0
 [^ :]+:[0-9]+: Info:    	whilege p0\.s, x0, x0
 [^ :]+:[0-9]+: Info:    	whilege p0\.d, x0, x0
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilege p16\.b,w0,w0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilege p16\.b,w0,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilege p0\.b,w32,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilege p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilege p0/m,w0,w0'
@@ -3177,7 +3177,7 @@
 [^ :]+:[0-9]+: Info:    	whilege p0\.d, w0, w0
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilege p0\.b,w31,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilege p0\.b,w0,w31'
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilegt p16\.b,x0,x0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilegt p16\.b,x0,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilegt p0\.b,x32,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilegt p0\.b,x0,x32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilegt p0/m,x0,x0'
@@ -3203,7 +3203,7 @@
 [^ :]+:[0-9]+: Info:    	whilegt p0\.h, x0, x0
 [^ :]+:[0-9]+: Info:    	whilegt p0\.s, x0, x0
 [^ :]+:[0-9]+: Info:    	whilegt p0\.d, x0, x0
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilegt p16\.b,w0,w0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilegt p16\.b,w0,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilegt p0\.b,w32,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilegt p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilegt p0/m,w0,w0'
@@ -3215,7 +3215,7 @@
 [^ :]+:[0-9]+: Info:    	whilegt p0\.d, w0, w0
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilegt p0\.b,w31,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilegt p0\.b,w0,w31'
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilehi p16\.b,x0,x0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilehi p16\.b,x0,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilehi p0\.b,x32,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehi p0\.b,x0,x32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilehi p0/m,x0,x0'
@@ -3241,7 +3241,7 @@
 [^ :]+:[0-9]+: Info:    	whilehi p0\.h, x0, x0
 [^ :]+:[0-9]+: Info:    	whilehi p0\.s, x0, x0
 [^ :]+:[0-9]+: Info:    	whilehi p0\.d, x0, x0
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilehi p16\.b,w0,w0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilehi p16\.b,w0,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilehi p0\.b,w32,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehi p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilehi p0/m,w0,w0'
@@ -3253,7 +3253,7 @@
 [^ :]+:[0-9]+: Info:    	whilehi p0\.d, w0, w0
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilehi p0\.b,w31,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehi p0\.b,w0,w31'
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilehs p16\.b,x0,x0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilehs p16\.b,x0,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilehs p0\.b,x32,x0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehs p0\.b,x0,x32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilehs p0/m,x0,x0'
@@ -3279,7 +3279,7 @@
 [^ :]+:[0-9]+: Info:    	whilehs p0\.h, x0, x0
 [^ :]+:[0-9]+: Info:    	whilehs p0\.s, x0, x0
 [^ :]+:[0-9]+: Info:    	whilehs p0\.d, x0, x0
-[^ :]+:[0-9]+: Error: expected an SVE predicate register at operand 1 -- `whilehs p16\.b,w0,w0'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `whilehs p16\.b,w0,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 2 -- `whilehs p0\.b,w32,w0'
 [^ :]+:[0-9]+: Error: expected an integer or zero register at operand 3 -- `whilehs p0\.b,w0,w32'
 [^ :]+:[0-9]+: Error: operand mismatch -- `whilehs p0/m,w0,w0'

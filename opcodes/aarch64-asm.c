@@ -57,6 +57,25 @@ insert_fields (aarch64_insn *code, aarch64_insn value, aarch64_insn mask, ...)
   va_end (va);
 }
 
+/* Insert a raw field value VALUE into all fields in SELF->fields after START.
+   The least significant bit goes in the final field.  */
+
+static void
+insert_all_fields_after (const aarch64_operand *self, unsigned int start,
+			 aarch64_insn *code, aarch64_insn value)
+{
+  unsigned int i;
+  enum aarch64_field_kind kind;
+
+  for (i = ARRAY_SIZE (self->fields); i-- > start; )
+    if (self->fields[i] != FLD_NIL)
+      {
+	kind = self->fields[i];
+	insert_field (kind, code, value, 0);
+	value >>= fields[kind].width;
+      }
+}
+
 /* Insert a raw field value VALUE into all fields in SELF->fields.
    The least significant bit goes in the final field.  */
 
@@ -64,16 +83,7 @@ static void
 insert_all_fields (const aarch64_operand *self, aarch64_insn *code,
 		   aarch64_insn value)
 {
-  unsigned int i;
-  enum aarch64_field_kind kind;
-
-  for (i = ARRAY_SIZE (self->fields); i-- > 0; )
-    if (self->fields[i] != FLD_NIL)
-      {
-	kind = self->fields[i];
-	insert_field (kind, code, value, 0);
-	value >>= fields[kind].width;
-      }
+  return insert_all_fields_after (self, 0, code, value);
 }
 
 /* Operand inserters.  */
@@ -1592,6 +1602,21 @@ aarch64_ins_x0_to_x30 (const aarch64_operand *self,
 {
   assert (info->reg.regno <= 30);
   insert_field (self->fields[0], code, info->reg.regno, 0);
+  return true;
+}
+
+/* Insert an indexed register, with the first field being the register
+   number and the remaining fields being the index.  */
+bool
+aarch64_ins_simple_index (const aarch64_operand *self,
+			  const aarch64_opnd_info *info,
+			  aarch64_insn *code,
+			  const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int bias = get_operand_specific_data (self);
+  insert_field (self->fields[0], code, info->reglane.regno - bias, 0);
+  insert_all_fields_after (self, 1, code, info->reglane.index);
   return true;
 }
 

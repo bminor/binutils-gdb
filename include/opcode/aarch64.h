@@ -487,6 +487,8 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
   AARCH64_OPND_SME_Zdnx2,	/* SVE vector register list from [4:1]*2.  */
   AARCH64_OPND_SME_Zdnx4,	/* SVE vector register list from [4:2]*4.  */
+  AARCH64_OPND_SME_Zmx2,	/* SVE vector register list from [20:17]*2.  */
+  AARCH64_OPND_SME_Zmx4,	/* SVE vector register list from [20:18]*4.  */
   AARCH64_OPND_SME_Znx2,	/* SVE vector register list from [9:6]*2.  */
   AARCH64_OPND_SME_Znx4,	/* SVE vector register list from [9:7]*4.  */
   AARCH64_OPND_SME_Ztx2_STRIDED, /* SVE vector register list in [4:0]&23.  */
@@ -497,8 +499,14 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ZA_HV_idx_srcxN,	/* SME N source ZA tile vectors.  */
   AARCH64_OPND_SME_ZA_HV_idx_dest,	/* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_ZA_HV_idx_destxN,	/* SME N dest ZA tile vectors.  */
+  AARCH64_OPND_SME_Pdx2,	/* Predicate register list in [3:1].  */
+  AARCH64_OPND_SME_PdxN,	/* Predicate register list in [3:0].  */
   AARCH64_OPND_SME_Pm,		/* SME scalable predicate register, bits [15:13].  */
+  AARCH64_OPND_SME_PNd3,	/* Predicate-as-counter register, bits [3:0].  */
   AARCH64_OPND_SME_PNg3,	/* Predicate-as-counter register, bits [12:10].  */
+  AARCH64_OPND_SME_PNn,		/* Predicate-as-counter register, bits [8:5].  */
+  AARCH64_OPND_SME_PNn3_INDEX1,	/* Indexed pred-as-counter reg, bits [8:5].  */
+  AARCH64_OPND_SME_PNn3_INDEX2,	/* Indexed pred-as-counter reg, bits [9:5].  */
   AARCH64_OPND_SME_list_of_64bit_tiles, /* SME list of ZA tiles.  */
   AARCH64_OPND_SME_ZA_HV_idx_ldstr, /* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_ZA_array_off3_0, /* SME ZA[<Wv>{, #<imm3>}].  */
@@ -507,6 +515,8 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ADDR_RI_U4xVL,   /* SME [<Xn|SP>{, #<imm>, MUL VL}].  */
   AARCH64_OPND_SME_SM_ZA,           /* SME {SM | ZA}.  */
   AARCH64_OPND_SME_PnT_Wm_imm,      /* SME <Pn>.<T>[<Wm>, #<imm>].  */
+  AARCH64_OPND_SME_VLxN_10,	/* VLx2 or VLx4, in bit 10.  */
+  AARCH64_OPND_SME_VLxN_13,	/* VLx2 or VLx4, in bit 13.  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
   AARCH64_OPND_MOPS_ADDR_Rd,	/* [Rd]!, in bits [0, 4].  */
@@ -1559,6 +1569,7 @@ aarch64_verbose (const char *, ...) __attribute__ ((format (printf, 1, 2)));
 
 extern const char *const aarch64_sve_pattern_array[32];
 extern const char *const aarch64_sve_prfop_array[16];
+extern const char *const aarch64_sme_vlxn_array[2];
 
 #ifdef __cplusplus
 }
