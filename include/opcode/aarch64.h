@@ -100,6 +100,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SME_I16I64   (1ULL << 58) /* SME I16I64.  */
 #define AARCH64_FEATURE_V8_8	     (1ULL << 59) /* Armv8.8 processors.  */
 #define AARCH64_FEATURE_CSSC	     (1ULL << 60) /* Common Short Sequence Compression instructions.  */
+#define AARCH64_FEATURE_SME2	     (1ULL << 61) /* SME2.  */
 
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)

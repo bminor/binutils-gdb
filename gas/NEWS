@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add SME2 support to the AArch64 port.
+
 Changes in 2.40:
 
 * Add support for Intel RAO-INT instructions.
