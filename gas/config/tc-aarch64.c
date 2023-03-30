@@ -1022,6 +1022,23 @@ aarch64_valid_suffix_char_p (aarch64_reg_type type, char ch)
     }
 }
 
+/* Parse an index expression at *STR, storing it in *IMM on success.  */
+
+static bool
+parse_index_expression (char **str, int64_t *imm)
+{
+  expressionS exp;
+
+  aarch64_get_expression (&exp, str, GE_NO_PREFIX, REJECT_ABSENT);
+  if (exp.X_op != O_constant)
+    {
+      first_error (_("constant expression required"));
+      return false;
+    }
+  *imm = exp.X_add_number;
+  return true;
+}
+
 /* Parse a register of the type TYPE.
 
    Return null if the string pointed to by *CCP is not a valid register
@@ -1116,8 +1133,6 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 
   if (!(flags & PTR_FULL_REG) && skip_past_char (&str, '['))
     {
-      expressionS exp;
-
       /* Reject Sn[index] syntax.  */
       if (!is_typed_vecreg)
 	{
@@ -1133,18 +1148,11 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 
       atype.defined |= NTA_HASINDEX;
 
-      aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT);
-
-      if (exp.X_op != O_constant)
-	{
-	  first_error (_("constant expression required"));
-	  return NULL;
-	}
+      if (!parse_index_expression (&str, &atype.index))
+	return NULL;
 
       if (! skip_past_char (&str, ']'))
 	return NULL;
-
-      atype.index = exp.X_add_number;
     }
   else if (!(flags & PTR_IN_REGLIST) && (atype.defined & NTA_HASINDEX) != 0)
     {
@@ -1318,18 +1326,10 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
     {
       if (skip_past_char (&str, '['))
 	{
-	  expressionS exp;
-
-	  aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT);
-	  if (exp.X_op != O_constant)
-	    {
-	      set_first_syntax_error (_("constant expression required."));
-	      error = true;
-	    }
+	  if (!parse_index_expression (&str, &typeinfo_first.index))
+	    error = true;
 	  if (! skip_past_char (&str, ']'))
 	    error = true;
-	  else
-	    typeinfo_first.index = exp.X_add_number;
 	}
       else
 	{
