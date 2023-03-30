@@ -320,8 +320,10 @@ const aarch64_field fields[] =
     {  5,  5 },	/* defgh: d:e:f:g:h bits in AdvSIMD modified immediate.  */
     { 21,  2 },	/* hw: in move wide constant instructions.  */
     {  8,  1 },	/* imm1_8: general immediate in bits [8].  */
+    { 10,  1 },	/* imm1_10: general immediate in bits [10].  */
     { 16,  1 },	/* imm1_16: general immediate in bits [16].  */
     {  8,  2 },	/* imm2_8: general immediate in bits [9:8].  */
+    { 10,  2 }, /* imm2_10: 2-bit immediate, bits [11:10] */
     { 15,  2 }, /* imm2_15: 2-bit immediate, bits [16:15] */
     { 16,  2 }, /* imm2_16: 2-bit immediate, bits [17:16] */
     {  0,  3 },	/* imm3_0: general immediate in bits [2:0].  */
@@ -1761,6 +1763,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_Zn_INDEX4_14:
 	  size = get_operand_fields_width (get_operand_from_code (type)) - 5;
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
+			      0, (1 << size) - 1))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_Zm_INDEX1:
+	case AARCH64_OPND_SME_Zm_INDEX2:
+	  size = get_operand_fields_width (get_operand_from_code (type)) - 4;
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 15,
 			      0, (1 << size) - 1))
 	    return 0;
 	  break;
@@ -3926,6 +3936,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zm4_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:
     case AARCH64_OPND_SVE_Zn_INDEX:
+    case AARCH64_OPND_SME_Zm_INDEX1:
+    case AARCH64_OPND_SME_Zm_INDEX2:
     case AARCH64_OPND_SME_Zn_INDEX1_16:
     case AARCH64_OPND_SME_Zn_INDEX2_15:
     case AARCH64_OPND_SME_Zn_INDEX2_16:

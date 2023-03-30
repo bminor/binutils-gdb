@@ -269,6 +269,8 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_ADDRESS, "SME_ADDR_RI_U4xVL", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_imm4_0}, "memory offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SME_SM_ZA", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_CRm}, "streaming mode"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_PnT_Wm_imm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl}, "Source scalable predicate register with index "},
+  {AARCH64_OPND_CLASS_SVE_REG, "SME_Zm_INDEX1", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Zm, FLD_imm1_10}, "an indexed SVE vector register"},
+  {AARCH64_OPND_CLASS_SVE_REG, "SME_Zm_INDEX2", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Zm, FLD_imm2_10}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX1_16", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm1_16}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX2_15", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm2_15}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX2_16", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm2_16}, "an indexed SVE vector register"},
