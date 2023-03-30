@@ -8116,8 +8116,7 @@ md_assemble (char *str)
 	  && do_encode (inst_base->opcode, &inst.base, &inst_base->value))
 	{
 	  /* Check that this instruction is supported for this CPU.  */
-	  if (!opcode->avariant
-	      || !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant, *opcode->avariant))
+	  if (!aarch64_cpu_supports_inst_p (cpu_variant, inst_base))
 	    {
 	      as_bad (_("selected processor does not support `%s'"), str);
 	      return;

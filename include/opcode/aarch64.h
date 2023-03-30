@@ -1471,6 +1471,9 @@ aarch64_get_operand_desc (enum aarch64_opnd);
 extern bool
 aarch64_sve_dupm_mov_immediate_p (uint64_t, int);
 
+extern bool
+aarch64_cpu_supports_inst_p (uint64_t, aarch64_inst *);
+
 #ifdef DEBUG_AARCH64
 extern int debug_dump;
 

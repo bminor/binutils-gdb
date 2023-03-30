@@ -6158,6 +6158,19 @@ aarch64_sve_dupm_mov_immediate_p (uint64_t uvalue, int esize)
   return svalue < -128 || svalue >= 128;
 }
 
+/* Return true if a CPU with the AARCH64_FEATURE_* bits in CPU_VARIANT
+   supports the instruction described by INST.  */
+
+bool
+aarch64_cpu_supports_inst_p (uint64_t cpu_variant, aarch64_inst *inst)
+{
+  if (!inst->opcode->avariant
+      || !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant, *inst->opcode->avariant))
+    return false;
+
+  return true;
+}
+
 /* Include the opcode description table as well as the operand description
    table.  */
 #define VERIFIER(x) verify_##x
