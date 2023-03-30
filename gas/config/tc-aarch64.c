@@ -283,9 +283,9 @@ struct reloc_entry
   BASIC_REG_TYPE(VN)	/* v[0-31] */	\
   BASIC_REG_TYPE(ZN)	/* z[0-31] */	\
   BASIC_REG_TYPE(PN)	/* p[0-15] */	\
-  BASIC_REG_TYPE(ZA)	/* za[0-15] */	\
-  BASIC_REG_TYPE(ZAH)	/* za[0-15]h */	\
-  BASIC_REG_TYPE(ZAV)	/* za[0-15]v */	\
+  BASIC_REG_TYPE(ZAT)	/* za[0-15] (ZA tile) */			\
+  BASIC_REG_TYPE(ZATH)	/* za[0-15]h (ZA tile horizontal slice) */ 	\
+  BASIC_REG_TYPE(ZATV)	/* za[0-15]v (ZA tile vertical slice) */	\
   /* Typecheck: any 64-bit int reg         (inc SP exc XZR).  */	\
   MULTI_REG_TYPE(R64_SP, REG_TYPE(R_64) | REG_TYPE(SP_64))		\
   /* Typecheck: same, plus SVE registers.  */				\
@@ -4297,7 +4297,7 @@ static int
 parse_sme_zada_operand (char **str, aarch64_opnd_qualifier_t *qualifier)
 {
   int regno;
-  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_ZA, qualifier);
+  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_ZAT, qualifier);
 
   if (reg == NULL)
     return PARSE_FAIL;
@@ -4448,12 +4448,12 @@ parse_sme_za_hv_tiles_operand (char **str,
   const reg_entry *reg;
 
   qh = qv = *str;
-  if ((reg = parse_reg_with_qual (&qh, REG_TYPE_ZAH, qualifier)) != NULL)
+  if ((reg = parse_reg_with_qual (&qh, REG_TYPE_ZATH, qualifier)) != NULL)
     {
       *slice_indicator = HV_horizontal;
       *str = qh;
     }
-  else if ((reg = parse_reg_with_qual (&qv, REG_TYPE_ZAV, qualifier)) != NULL)
+  else if ((reg = parse_reg_with_qual (&qv, REG_TYPE_ZATV, qualifier)) != NULL)
     {
       *slice_indicator = HV_vertical;
       *str = qv;
@@ -4566,7 +4566,8 @@ parse_sme_zero_mask(char **str)
   q = *str;
   do
     {
-      const reg_entry *reg = parse_reg_with_qual (&q, REG_TYPE_ZA, &qualifier);
+      const reg_entry *reg = parse_reg_with_qual (&q, REG_TYPE_ZAT,
+						  &qualifier);
       if (reg)
         {
           int regno = reg->number;
@@ -8266,13 +8267,13 @@ static const reg_entry reg_names[] = {
   REGSET16 (p, PN), REGSET16 (P, PN),
 
   /* SME ZA tile registers.  */
-  REGSET16 (za, ZA), REGSET16 (ZA, ZA),
+  REGSET16 (za, ZAT), REGSET16 (ZA, ZAT),
 
   /* SME ZA tile registers (horizontal slice).  */
-  REGSET16S (za, h, ZAH), REGSET16S (ZA, H, ZAH),
+  REGSET16S (za, h, ZATH), REGSET16S (ZA, H, ZATH),
 
   /* SME ZA tile registers (vertical slice).  */
-  REGSET16S (za, v, ZAV), REGSET16S (ZA, V, ZAV)
+  REGSET16S (za, v, ZATV), REGSET16S (ZA, V, ZATV)
 };
 
 #undef REGDEF
