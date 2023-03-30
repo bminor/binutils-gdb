@@ -2728,6 +2728,9 @@ static const aarch64_feature_set aarch64_feature_cssc =
 #define SME2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME2, OPS, QUALS, \
     F_STRICT | FLAGS, 0, TIED, NULL }
+#define SME2_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SME2, OPS, QUALS, \
+    FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
 #define SME2_I16I64_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME2_I16I64, OPS, QUALS, \
     F_STRICT | FLAGS, 0, TIED, NULL }
@@ -5357,6 +5360,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_PNd, SVE_PNg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
 
   /* SME2 extensions to SVE2.  */
+  SME2_INSNC ("bfmlslb", 0x64e06000, 0xffe0f400, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("bfmlslb", 0x64e0a000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("bfmlslt", 0x64e06400, 0xffe0f400, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("bfmlslt", 0x64e0a400, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSN ("whilege", 0x25205010, 0xff20fc11, sme_size_22, 0, OP3 (SME_Pdx2, Rn, Rm), OP_SVE_VXX_BHSD, 0, 0),
   SME2_INSN ("whilegt", 0x25205011, 0xff20fc11, sme_size_22, 0, OP3 (SME_Pdx2, Rn, Rm), OP_SVE_VXX_BHSD, 0, 0),
   SME2_INSN ("whilehi", 0x25205811, 0xff20fc11, sme_size_22, 0, OP3 (SME_Pdx2, Rn, Rm), OP_SVE_VXX_BHSD, 0, 0),
