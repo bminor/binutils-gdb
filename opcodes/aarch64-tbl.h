@@ -5366,6 +5366,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_INSNC ("bfmlslt", 0x64e0a400, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSNC ("fdot", 0x64204000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_19_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSNC ("fdot", 0x64208000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
+  SME2_INSNC ("fclamp", 0x64202400, 0xff20fc00, sme_size_22_hsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_HSD, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSNC ("sdot", 0x4480c800, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_19_INDEX), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSNC ("sdot", 0x4400c800, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0, C_SCAN_MOVPRFX, 0),
   SME2_INSN ("sqcvtn", 0x45314000, 0xfffffc20, sve_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_HS, 0, 0),
