@@ -114,17 +114,6 @@ enum vector_el_type
   NT_merge
 };
 
-/* SME horizontal or vertical slice indicator, encoded in "V".
-   Values:
-     0 - Horizontal
-     1 - vertical
-*/
-enum sme_hv_slice
-{
-  HV_horizontal = 0,
-  HV_vertical = 1
-};
-
 /* Bits for DEFINED field in vector_type_el.  */
 #define NTA_HASTYPE     1
 #define NTA_HASINDEX    2
@@ -4389,16 +4378,10 @@ parse_sme_immediate (char **str, int64_t *imm)
    [<Wv>, #<imm>]
    where <Wv> is in W12-W15 range and # is optional for immediate.
 
-   Function performs extra check for mandatory immediate value if REQUIRE_IMM
-   is set to true.
+   Return true on success, populating OPND with the parsed index.  */
 
-   On success function returns TRUE and populated VECTOR_SELECT_REGISTER and
-   IMM output.
-*/
 static bool
-parse_sme_za_hv_tiles_operand_index (char **str,
-                                     int *vector_select_register,
-                                     int64_t *imm)
+parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
 {
   const reg_entry *reg;
 
@@ -4416,7 +4399,7 @@ parse_sme_za_hv_tiles_operand_index (char **str,
       set_syntax_error (_("expected vector select register W12-W15"));
       return false;
     }
-  *vector_select_register = reg->number;
+  opnd->index.regno = reg->number;
 
   if (!skip_past_char (str, ','))    /* Optional index offset immediate.  */
     {
@@ -4424,7 +4407,7 @@ parse_sme_za_hv_tiles_operand_index (char **str,
       return false;
     }
 
-  if (!parse_sme_immediate (str, imm))
+  if (!parse_sme_immediate (str, &opnd->index.imm))
     {
       set_syntax_error (_("index offset immediate expected"));
       return false;
@@ -4440,10 +4423,9 @@ parse_sme_za_hv_tiles_operand_index (char **str,
 }
 
 /* Parse SME ZA horizontal or vertical vector access to tiles.
-   Function extracts from STR to SLICE_INDICATOR <HV> horizontal (0) or
-   vertical (1) ZA tile vector orientation. VECTOR_SELECT_REGISTER
-   contains <Wv> select register and corresponding optional IMMEDIATE.
-   In addition QUALIFIER is extracted.
+   Return true on success, populating OPND with information about
+   the indexed tile and QUALIFIER with the qualifier that was applied
+   to the tile name.
 
    Field format examples:
 
@@ -4452,29 +4434,21 @@ parse_sme_za_hv_tiles_operand_index (char **str,
    <ZAn><HV>.S[<Wv>, #<imm>]
    <ZAn><HV>.D[<Wv>, #<imm>]
    <ZAn><HV>.Q[<Wv>, #<imm>]
-
-   Function returns <ZAda> register number or PARSE_FAIL.
 */
-static int
+static bool
 parse_sme_za_hv_tiles_operand (char **str,
-                               enum sme_hv_slice *slice_indicator,
-                               int *vector_select_register,
-                               int *imm,
-                               aarch64_opnd_qualifier_t *qualifier)
+			       struct aarch64_indexed_za *opnd,
+			       aarch64_opnd_qualifier_t *qualifier)
 {
-  int regno;
   int64_t imm_limit;
-  int64_t imm_value;
   const reg_entry *reg;
 
   reg = parse_reg_with_qual (str, REG_TYPE_ZATHV, qualifier);
   if (!reg)
-    return PARSE_FAIL;
+    return false;
 
-  *slice_indicator = (aarch64_check_reg_type (reg, REG_TYPE_ZATH)
-		      ? HV_horizontal
-		      : HV_vertical);
-  regno = reg->number;
+  opnd->v = aarch64_check_reg_type (reg, REG_TYPE_ZATV);
+  opnd->regno = reg->number;
 
   switch (*qualifier)
     {
@@ -4495,56 +4469,47 @@ parse_sme_za_hv_tiles_operand (char **str,
       break;
     default:
       set_syntax_error (_("invalid ZA tile element size, allowed b, h, s, d and q"));
-      return PARSE_FAIL;
+      return false;
     }
 
-  if (!parse_sme_za_hv_tiles_operand_index (str, vector_select_register,
-                                            &imm_value))
-    return PARSE_FAIL;
+  if (!parse_sme_za_index (str, opnd))
+    return false;
 
   /* Check if optional index offset is in the range for instruction
      variant.  */
-  if (imm_value < 0 || imm_value > imm_limit)
+  if (opnd->index.imm < 0 || opnd->index.imm > imm_limit)
     {
       set_syntax_error (_("index offset out of range"));
-      return PARSE_FAIL;
+      return false;
     }
 
-  *imm = imm_value;
-
-  return regno;
+  return true;
 }
 
+/* Like parse_sme_za_hv_tiles_operand, but expect braces around the
+   operand.  */
 
-static int
+static bool
 parse_sme_za_hv_tiles_operand_with_braces (char **str,
-                                           enum sme_hv_slice *slice_indicator,
-                                           int *vector_select_register,
-                                           int *imm,
+					   struct aarch64_indexed_za *opnd,
                                            aarch64_opnd_qualifier_t *qualifier)
 {
-  int regno;
-
   if (!skip_past_char (str, '{'))
     {
       set_syntax_error (_("expected '{'"));
-      return PARSE_FAIL;
+      return false;
     }
 
-  regno = parse_sme_za_hv_tiles_operand (str, slice_indicator,
-                                         vector_select_register, imm,
-                                         qualifier);
-
-  if (regno == PARSE_FAIL)
-    return PARSE_FAIL;
+  if (!parse_sme_za_hv_tiles_operand (str, opnd, qualifier))
+    return false;
 
   if (!skip_past_char (str, '}'))
     {
       set_syntax_error (_("expected '}'"));
-      return PARSE_FAIL;
+      return false;
     }
 
-  return regno;
+  return true;
 }
 
 /* Parse list of up to eight 64-bit element tile names separated by commas in
@@ -4662,35 +4627,34 @@ parse_sme_list_of_64bit_tiles (char **str)
    ZA[<Wv>, <imm>]
    ZA[<Wv>, #<imm>]
 
-   Function returns <Wv> or PARSE_FAIL.
-*/
-static int
-parse_sme_za_array (char **str, int *imm)
+   Return true on success, populating OPND with information about
+   the operand.  */
+
+static bool
+parse_sme_za_array (char **str, struct aarch64_indexed_za *opnd)
 {
   char *q;
-  int regno;
-  int64_t imm_value;
 
   q = *str;
   const reg_entry *reg = parse_reg (&q);
   if (!reg || reg->type != REG_TYPE_ZA)
     {
       set_syntax_error (_("expected ZA array"));
-      return PARSE_FAIL;
+      return false;
     }
+  opnd->regno = -1;
 
-  if (! parse_sme_za_hv_tiles_operand_index (&q, &regno, &imm_value))
-    return PARSE_FAIL;
+  if (! parse_sme_za_index (&q, opnd))
+    return false;
 
-  if (imm_value < 0 || imm_value > 15)
+  if (opnd->index.imm < 0 || opnd->index.imm > 15)
     {
       set_syntax_error (_("offset out of range"));
-      return PARSE_FAIL;
+      return false;
     }
 
-  *imm = imm_value;
   *str = q;
-  return regno;
+  return true;
 }
 
 /* Parse streaming mode operand for SMSTART and SMSTOP.
@@ -4726,23 +4690,19 @@ parse_sme_sm_za (char **str)
    <Pn>.<T>[<Wv>, <imm>]
    <Pn>.<T>[<Wv>, #<imm>]
 
-   On success function sets <Wv> to INDEX_BASE_REG, <T> to QUALIFIER and
-   <imm> to IMM.
-   Function returns <Pn>, or PARSE_FAIL.
-*/
-static int
-parse_sme_pred_reg_with_index(char **str,
-                              int *index_base_reg,
-                              int *imm,
-                              aarch64_opnd_qualifier_t *qualifier)
+   Return true on success, populating OPND with information about the index
+   and setting QUALIFIER to <T>.  */
+
+static bool
+parse_sme_pred_reg_with_index (char **str, struct aarch64_indexed_za *opnd,
+			       aarch64_opnd_qualifier_t *qualifier)
 {
   int regno;
   int64_t imm_limit;
-  int64_t imm_value;
   const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_PN, qualifier);
 
   if (reg == NULL)
-    return PARSE_FAIL;
+    return false;
   regno = reg->number;
 
   switch (*qualifier)
@@ -4761,21 +4721,20 @@ parse_sme_pred_reg_with_index(char **str,
       break;
     default:
       set_syntax_error (_("wrong predicate register element size, allowed b, h, s and d"));
-      return PARSE_FAIL;
+      return false;
     }
+  opnd->regno = regno;
 
-  if (! parse_sme_za_hv_tiles_operand_index (str, index_base_reg, &imm_value))
-    return PARSE_FAIL;
+  if (! parse_sme_za_index (str, opnd))
+    return false;
 
-  if (imm_value < 0 || imm_value > imm_limit)
+  if (opnd->index.imm < 0 || opnd->index.imm > imm_limit)
     {
       set_syntax_error (_("element index out of range for given variant"));
-      return PARSE_FAIL;
+      return false;
     }
 
-  *imm = imm_value;
-
-  return regno;
+  return true;
 }
 
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
@@ -7175,22 +7134,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  /* <Pn>.<T>[<Wm>, #<imm>]  */
-	  {
-	    int index_base_reg;
-	    int imm;
-	    val = parse_sme_pred_reg_with_index (&str,
-	                                         &index_base_reg,
-	                                         &imm,
-	                                         &qualifier);
-	    if (val == PARSE_FAIL)
-	        goto failure;
-
-	    info->indexed_za.regno = val;
-	    info->indexed_za.index.regno = index_base_reg;
-	    info->indexed_za.index.imm = imm;
-	    info->qualifier = qualifier;
-	    break;
-	  }
+	  if (!parse_sme_pred_reg_with_index (&str, &info->indexed_za,
+					      &qualifier))
+	    goto failure;
+	  info->qualifier = qualifier;
+	  break;
 
 	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x32:
@@ -7517,49 +7465,27 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SME_ZA_HV_idx_src:
 	case AARCH64_OPND_SME_ZA_HV_idx_dest:
 	case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
-	  {
-	    enum sme_hv_slice slice_indicator;
-	    int vector_select_register;
-	    int imm;
+	  if (operands[i] == AARCH64_OPND_SME_ZA_HV_idx_ldstr
+	      ? !parse_sme_za_hv_tiles_operand_with_braces (&str,
+							    &info->indexed_za,
+							    &qualifier)
+	      : !parse_sme_za_hv_tiles_operand (&str, &info->indexed_za,
+						&qualifier))
+	    goto failure;
+	  info->qualifier = qualifier;
+	  break;
 
-	    if (operands[i] == AARCH64_OPND_SME_ZA_HV_idx_ldstr)
-	      val = parse_sme_za_hv_tiles_operand_with_braces (&str,
-	                                                       &slice_indicator,
-	                                                       &vector_select_register,
-	                                                       &imm,
-	                                                       &qualifier);
-	    else
-	      val = parse_sme_za_hv_tiles_operand (&str, &slice_indicator,
-	                                           &vector_select_register,
-	                                           &imm,
-	                                           &qualifier);
-	    if (val == PARSE_FAIL)
-	      goto failure;
-	    info->indexed_za.regno = val;
-	    info->indexed_za.index.regno = vector_select_register;
-	    info->indexed_za.index.imm = imm;
-	    info->indexed_za.v = slice_indicator;
-	    info->qualifier = qualifier;
-	    break;
-	  }
+	case AARCH64_OPND_SME_list_of_64bit_tiles:
+	  val = parse_sme_list_of_64bit_tiles (&str);
+	  if (val == PARSE_FAIL)
+	    goto failure;
+	  info->imm.value = val;
+	  break;
 
-	  case AARCH64_OPND_SME_list_of_64bit_tiles:
-	    val = parse_sme_list_of_64bit_tiles (&str);
-	    if (val == PARSE_FAIL)
-	      goto failure;
-	    info->imm.value = val;
-	    break;
-
-	  case AARCH64_OPND_SME_ZA_array:
-	    {
-	      int imm;
-	      val = parse_sme_za_array (&str, &imm);
-	      if (val == PARSE_FAIL)
-	        goto failure;
-	      info->indexed_za.index.regno = val;
-	      info->indexed_za.index.imm = imm;
-	      break;
-	    }
+	case AARCH64_OPND_SME_ZA_array:
+	  if (!parse_sme_za_array (&str, &info->indexed_za))
+	    goto failure;
+	  break;
 
 	case AARCH64_OPND_MOPS_ADDR_Rd:
 	case AARCH64_OPND_MOPS_ADDR_Rs:
