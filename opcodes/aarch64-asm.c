@@ -1852,6 +1852,11 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
   int variant = 0;
   switch (inst->opcode->iclass)
     {
+    case sme_mov:
+    case sme_psel:
+      /* The variant is encoded as part of the immediate.  */
+      break;
+
     case sve_cpy:
       insert_fields (&inst->value, aarch64_get_variant (inst),
 		     0, 2, FLD_SVE_M_14, FLD_size);
@@ -1872,8 +1877,9 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
 	 encoding.  */
       break;
 
+    case sme_misc:
     case sve_misc:
-      /* sve_misc instructions have only a single variant.  */
+      /* These instructions have only a single variant.  */
       break;
 
     case sve_movprfx:

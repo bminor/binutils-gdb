@@ -1785,44 +1785,35 @@ aarch64_ext_sme_za_hv_tiles (const aarch64_operand *self,
 
   /* Deduce qualifier encoded in size and Q fields.  */
   if (fld_size == 0)
-    info->qualifier = AARCH64_OPND_QLF_S_B;
+    {
+      info->za_tile_vector.regno = 0;
+      info->za_tile_vector.index.imm = fld_zan_imm;
+    }
   else if (fld_size == 1)
-    info->qualifier = AARCH64_OPND_QLF_S_H;
+    {
+      info->za_tile_vector.regno = fld_zan_imm >> 3;
+      info->za_tile_vector.index.imm = fld_zan_imm & 0x07;
+    }
   else if (fld_size == 2)
-    info->qualifier = AARCH64_OPND_QLF_S_S;
+    {
+      info->za_tile_vector.regno = fld_zan_imm >> 2;
+      info->za_tile_vector.index.imm = fld_zan_imm & 0x03;
+    }
   else if (fld_size == 3 && fld_q == 0)
-    info->qualifier = AARCH64_OPND_QLF_S_D;
+    {
+      info->za_tile_vector.regno = fld_zan_imm >> 1;
+      info->za_tile_vector.index.imm = fld_zan_imm & 0x01;
+    }
   else if (fld_size == 3 && fld_q == 1)
-    info->qualifier = AARCH64_OPND_QLF_S_Q;
+    {
+      info->za_tile_vector.regno = fld_zan_imm;
+      info->za_tile_vector.index.imm = 0;
+    }
+  else
+    return false;
 
   info->za_tile_vector.index.regno = fld_rv + 12;
   info->za_tile_vector.v = fld_v;
-
-  switch (info->qualifier)
-    {
-    case AARCH64_OPND_QLF_S_B:
-      info->za_tile_vector.regno = 0;
-      info->za_tile_vector.index.imm = fld_zan_imm;
-      break;
-    case AARCH64_OPND_QLF_S_H:
-      info->za_tile_vector.regno = fld_zan_imm >> 3;
-      info->za_tile_vector.index.imm = fld_zan_imm & 0x07;
-      break;
-    case AARCH64_OPND_QLF_S_S:
-      info->za_tile_vector.regno = fld_zan_imm >> 2;
-      info->za_tile_vector.index.imm = fld_zan_imm & 0x03;
-      break;
-    case AARCH64_OPND_QLF_S_D:
-      info->za_tile_vector.regno = fld_zan_imm >> 1;
-      info->za_tile_vector.index.imm = fld_zan_imm & 0x01;
-      break;
-    case AARCH64_OPND_QLF_S_Q:
-      info->za_tile_vector.regno = fld_zan_imm;
-      info->za_tile_vector.index.imm = 0;
-      break;
-    default:
-      return false;
-    }
 
   return true;
 }
@@ -1914,26 +1905,14 @@ aarch64_ext_sme_pred_reg_with_index (const aarch64_operand *self,
   info->za_tile_vector.regno = fld_pn;
   info->za_tile_vector.index.regno = fld_rm + 12;
 
-  if (fld_tszh == 0x1 && fld_tszl == 0x0)
-    {
-      info->qualifier = AARCH64_OPND_QLF_S_D;
-      imm = fld_i1;
-    }
-  else if (fld_tszl == 0x4)
-    {
-      info->qualifier = AARCH64_OPND_QLF_S_S;
-      imm = (fld_i1 << 1) | fld_tszh;
-    }
-  else if ((fld_tszl & 0x3) == 0x2)
-    {
-      info->qualifier = AARCH64_OPND_QLF_S_H;
-      imm = (fld_i1 << 2) | (fld_tszh << 1) | (fld_tszl >> 2);
-    }
-  else if (fld_tszl & 0x1)
-    {
-      info->qualifier = AARCH64_OPND_QLF_S_B;
-      imm = (fld_i1 << 3) | (fld_tszh << 2) | (fld_tszl >> 1);
-    }
+  if (fld_tszl & 0x1)
+    imm = (fld_i1 << 3) | (fld_tszh << 2) | (fld_tszl >> 1);
+  else if (fld_tszl & 0x2)
+    imm = (fld_i1 << 2) | (fld_tszh << 1) | (fld_tszl >> 2);
+  else if (fld_tszl & 0x4)
+    imm = (fld_i1 << 1) | fld_tszh;
+  else if (fld_tszh)
+    imm = fld_i1;
   else
     return false;
 
@@ -2975,6 +2954,25 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
   variant = 0;
   switch (inst->opcode->iclass)
     {
+    case sme_mov:
+      variant = extract_fields (inst->value, 0, 2, FLD_SME_Q, FLD_SME_size_10);
+      if (variant >= 4 && variant < 7)
+	return false;
+      if (variant == 7)
+	variant = 4;
+      break;
+
+    case sme_psel:
+      i = extract_fields (inst->value, 0, 2, FLD_SME_tszh, FLD_SME_tszl);
+      if (i == 0)
+	return false;
+      while ((i & 1) == 0)
+	{
+	  i >>= 1;
+	  variant += 1;
+	}
+      break;
+
     case sve_cpy:
       variant = extract_fields (inst->value, 0, 2, FLD_size, FLD_SVE_M_14);
       break;
@@ -3002,8 +3000,9 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 	variant = 3;
       break;
 
+    case sme_misc:
     case sve_misc:
-      /* sve_misc instructions have only a single variant.  */
+      /* These instructions have only a single variant.  */
       break;
 
     case sve_movprfx:

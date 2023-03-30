@@ -2650,16 +2650,16 @@ static const aarch64_feature_set aarch64_feature_cssc =
     FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
 #define SME_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME, OPS, QUALS, \
-    FLAGS, 0, TIED, NULL }
+    F_STRICT | FLAGS, 0, TIED, NULL }
 #define SME_F64F64_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME_F64F64, OPS, QUALS, \
-    FLAGS, 0, TIED, NULL }
+    F_STRICT | FLAGS, 0, TIED, NULL }
 #define SME_I16I64_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME_I16I64, OPS, QUALS, \
-    FLAGS, 0, TIED, NULL }
+    F_STRICT | FLAGS, 0, TIED, NULL }
 #define SME_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME, OPS, QUALS, \
-    FLAGS, CONSTRAINTS, TIED, NULL }
+    F_STRICT | FLAGS, CONSTRAINTS, TIED, NULL }
 #define SVE2BITPERM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_BITPERM, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
@@ -5238,10 +5238,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("usmops", 0xa1800010, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_S_PM_PM_B_B, 0, 0),
   SME_I16I64_INSN ("usmops", 0xa1c00010, 0xffe00018, sme_misc, 0, OP5 (SME_ZAda_3b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_D_PM_PM_H_H, 0, 0),
 
-  SME_INSN ("mov", 0xc0020000, 0xff3e0200, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SME_ZA_HV_idx_src), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
-  SME_INSN ("mov", 0xc0000000, 0xff3e0010, sme_misc, 0, OP3 (SME_ZA_HV_idx_dest, SVE_Pg3, SVE_Zn), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
-  SME_INSN ("mova", 0xc0020000, 0xff3e0200, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SME_ZA_HV_idx_src), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
-  SME_INSN ("mova", 0xc0000000, 0xff3e0010, sme_misc, 0, OP3 (SME_ZA_HV_idx_dest, SVE_Pg3, SVE_Zn), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+  SME_INSN ("mov", 0xc0020000, 0xff3e0200, sme_mov, 0, OP3 (SVE_Zd, SVE_Pg3, SME_ZA_HV_idx_src), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+  SME_INSN ("mov", 0xc0000000, 0xff3e0010, sme_mov, 0, OP3 (SME_ZA_HV_idx_dest, SVE_Pg3, SVE_Zn), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+  SME_INSN ("mova", 0xc0020000, 0xff3e0200, sme_mov, 0, OP3 (SVE_Zd, SVE_Pg3, SME_ZA_HV_idx_src), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+  SME_INSN ("mova", 0xc0000000, 0xff3e0010, sme_mov, 0, OP3 (SME_ZA_HV_idx_dest, SVE_Pg3, SVE_Zn), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
 
   SME_INSN ("zero", 0xc0080000, 0xffffff00, sme_misc, 0, OP1 (SME_list_of_64bit_tiles), {}, 0, 0),
 
@@ -5275,7 +5275,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSNC ("revd", 0x52e8000, 0xffffe000, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_QMQ, 0, C_SCAN_MOVPRFX, 0),
   SME_INSNC ("sclamp", 0x4400c000, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, C_SCAN_MOVPRFX, 0),
   SME_INSNC ("uclamp", 0x4400c400, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, C_SCAN_MOVPRFX, 0),
-  SME_INSN ("psel", 0x25204000, 0xff20c210, sme_misc, 0, OP3 (SVE_Pd, SVE_Pg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
+  SME_INSN ("psel", 0x25204000, 0xff20c210, sme_psel, 0, OP3 (SVE_Pd, SVE_Pg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
 
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
