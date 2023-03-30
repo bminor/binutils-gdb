@@ -25,28 +25,28 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmlalt z0\.s,z0\.h,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmlalt z0\.s, z0\.h, z0\.h
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalt z32\.s,z0\.h,z0\.h'
-[^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `bfmlalt z0\.s,z32\.h,z0\.h'
-[^ :]+:[0-9]+: Error: operand 3 must be an indexed SVE vector register -- `bfmlalt z0\.s,z0\.h,z32\.h'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalt z32\.s,z0\.h,z0\.h'
+[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `bfmlalt z0\.s,z32\.h,z0\.h'
+[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `bfmlalt z0\.s,z0\.h,z32\.h'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `bfmlalt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmlalt z0\.s,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmlalt z0\.s, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalt z32\.s,z0\.h,z0\.h\[0\]'
-[^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `bfmlalt z0\.s,z32\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalt z32\.s,z0\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `bfmlalt z0\.s,z32\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `bfmlalt z0\.s,z0\.h,z8\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmlalb z0\.s,z0\.h,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmlalb z0\.s, z0\.h, z0\.h
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalb z32\.s,z0\.h,z0\.h'
-[^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `bfmlalb z0\.s,z32\.h,z0\.h'
-[^ :]+:[0-9]+: Error: operand 3 must be an indexed SVE vector register -- `bfmlalb z0\.s,z0\.h,z32\.h'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalb z32\.s,z0\.h,z0\.h'
+[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `bfmlalb z0\.s,z32\.h,z0\.h'
+[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `bfmlalb z0\.s,z0\.h,z32\.h'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `bfmlalb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmlalb z0\.s,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmlalb z0\.s, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalb z32\.s,z0\.h,z0\.h\[0\]'
-[^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `bfmlalb z0\.s,z32\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalb z32\.s,z0\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `bfmlalb z0\.s,z32\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `bfmlalb z0\.s,z0\.h,z8\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfdot v0\.2s,v1\.4h,v2\.2s\[3\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
@@ -61,18 +61,18 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmlalb v0\.4s,v0\.4h,v0\.8h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmlalb v0\.4s, v0\.8h, v0\.8h
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalb v32\.4s,v0\.8h,v0\.8h'
-[^ :]+:[0-9]+: Error: operand 2 must be a SIMD vector register -- `bfmlalb v0\.4s,v32\.8h,v0\.8h'
-[^ :]+:[0-9]+: Error: operand 3 must be a SIMD vector register -- `bfmlalb v0\.4s,v0\.8h,v32\.8h'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalb v32\.4s,v0\.8h,v0\.8h'
+[^ :]+:[0-9]+: Error: expected an Advanced SIMD vector register at operand 2 -- `bfmlalb v0\.4s,v32\.8h,v0\.8h'
+[^ :]+:[0-9]+: Error: expected an Advanced SIMD vector register at operand 3 -- `bfmlalb v0\.4s,v0\.8h,v32\.8h'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmlalt v0\.4s,v0\.8h,v0\.4h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmlalt v0\.4s, v0\.8h, v0\.8h
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalt v32\.4s,v0\.8h,v0\.8h'
-[^ :]+:[0-9]+: Error: operand 2 must be a SIMD vector register -- `bfmlalt v0\.4s,v32\.8h,v0\.8h'
-[^ :]+:[0-9]+: Error: operand 3 must be a SIMD vector register -- `bfmlalt v0\.4s,v0\.8h,v32\.8h'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalt v32\.4s,v0\.8h,v0\.8h'
+[^ :]+:[0-9]+: Error: expected an Advanced SIMD vector register at operand 2 -- `bfmlalt v0\.4s,v32\.8h,v0\.8h'
+[^ :]+:[0-9]+: Error: expected an Advanced SIMD vector register at operand 3 -- `bfmlalt v0\.4s,v0\.8h,v32\.8h'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `bfmlalb v0\.4s,v0\.8h,v0\.h\[8\]'
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalb v32\.4s,v0\.8h,v0\.h\[0\]'
-[^ :]+:[0-9]+: Error: operand 2 must be a SIMD vector register -- `bfmlalb v0\.4s,v32\.8h,v0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalb v32\.4s,v0\.8h,v0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected an Advanced SIMD vector register at operand 2 -- `bfmlalb v0\.4s,v32\.8h,v0\.h\[0\]'
 [^ :]+:[0-9]+: Error: register number out of range 0 to 15 at operand 3 -- `bfmlalb v0\.4s,v0\.8h,v16\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmlalb v0\.4s,v0\.4h,v0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
@@ -87,8 +87,8 @@
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmlalt v0\.4s, v0\.8h, v0\.h\[0\]
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `bfmlalt v0\.4s,v0\.8h,v0\.h\[8\]'
-[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bfmlalt v32\.4s,v0\.8h,v0\.h\[0\]'
-[^ :]+:[0-9]+: Error: operand 2 must be a SIMD vector register -- `bfmlalt v0\.4s,v32\.8h,v0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `bfmlalt v32\.4s,v0\.8h,v0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected an Advanced SIMD vector register at operand 2 -- `bfmlalt v0\.4s,v32\.8h,v0\.h\[0\]'
 [^ :]+:[0-9]+: Error: register number out of range 0 to 15 at operand 3 -- `bfmlalt v0\.4s,v0\.8h,v16\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfcvt h0,h1'
 [^ :]+:[0-9]+: Info:    did you mean this\?

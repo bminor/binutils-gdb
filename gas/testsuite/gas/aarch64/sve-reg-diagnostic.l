@@ -1,6 +1,6 @@
 .*: Assembler messages:
-.*: Error: operand 3 must be a SIMD vector register -- `cmeq v0\.4s,v1\.4s,x0'
-.*: Error: operand 3 must be a SIMD vector register -- `cmeq v0\.4s,v1\.4s,s0'
+.*: Error: expected an Advanced SIMD vector register at operand 3 -- `cmeq v0\.4s,v1\.4s,x0'
+.*: Error: expected an Advanced SIMD vector register at operand 3 -- `cmeq v0\.4s,v1\.4s,s0'
 .*: Error: immediate zero expected at operand 3 -- `cmeq v0\.4s,v1\.4s,p0\.b'
 .*: Error: immediate zero expected at operand 3 -- `cmeq v0\.4s,v1\.4s,#p0\.b'
 .*: Error: invalid base register at operand 2 -- `ldr x1,\[s0\]'
@@ -19,6 +19,6 @@
 .*: Error: immediate out of range at operand 3 -- `and x0,x0,#z0\.s'
 .*: Error: immediate out of range at operand 3 -- `and x0,x0,p0'
 .*: Error: immediate out of range at operand 3 -- `and x0,x0,#p0'
-.*: Error: operand 3 must be an integer register -- `lsl x0,x0,s0'
+.*: Error: expected an integer or zero register at operand 3 -- `lsl x0,x0,s0'
 .*: Error: immediate operand required at operand 1 -- `svc x0'
 .*: Error: immediate operand required at operand 1 -- `svc s0'

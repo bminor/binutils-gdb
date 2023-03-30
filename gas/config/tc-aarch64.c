@@ -161,6 +161,32 @@ static aarch64_instruction inst;
 static bool parse_operands (char *, const aarch64_opcode *);
 static bool programmer_friendly_fixup (aarch64_instruction *);
 
+/* If an AARCH64_OPDE_SYNTAX_ERROR has no error string, its first three
+   data fields contain the following information:
+
+   data[0].i:
+     A mask of register types that would have been acceptable as bare
+     operands, outside of a register list.  In addition, SEF_DEFAULT_ERROR
+     is set if a general parsing error occured for an operand (that is,
+     an error not related to registers, and having no error string).
+
+   data[1].i:
+     A mask of register types that would have been acceptable inside
+     a register list.  In addition, SEF_IN_REGLIST is set if the
+     operand contained a '{' and if we got to the point of trying
+     to parse a register inside a list.
+
+   data[2].i:
+     The mask associated with the register that was actually seen, or 0
+     if none.  A nonzero value describes a register inside a register
+     list if data[1].i & SEF_IN_REGLIST, otherwise it describes a bare
+     register.
+
+   The idea is that stringless errors from multiple opcode templates can
+   be ORed together to give a summary of the available alternatives.  */
+#define SEF_DEFAULT_ERROR (1U << 31)
+#define SEF_IN_REGLIST (1U << 31)
+
 /* Diagnostics inline function utilities.
 
    These are lightweight utilities which should only be called by parse_operands
@@ -212,6 +238,14 @@ static inline void
 set_default_error (void)
 {
   set_error (AARCH64_OPDE_SYNTAX_ERROR, NULL);
+  inst.parsing_error.data[0].i = SEF_DEFAULT_ERROR;
+}
+
+static inline void
+set_expected_error (unsigned int flags)
+{
+  set_error (AARCH64_OPDE_SYNTAX_ERROR, NULL);
+  inst.parsing_error.data[0].i = flags;
 }
 
 static inline void
@@ -317,17 +351,25 @@ struct reloc_entry
   MULTI_REG_TYPE(R_N, REG_TYPE(R_32) | REG_TYPE(R_64)			\
 		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64))			\
+  /* Any vector register.  */						\
+  MULTI_REG_TYPE(VZ, REG_TYPE(VN) | REG_TYPE(ZN))			\
+  /* An SVE vector or predicate register.  */				\
+  MULTI_REG_TYPE(ZP, REG_TYPE(ZN) | REG_TYPE(PN))			\
+  /* Any vector or predicate register.  */				\
+  MULTI_REG_TYPE(VZP, REG_TYPE(VN) | REG_TYPE(ZN) | REG_TYPE(PN))	\
   /* The whole of ZA or a single tile.  */				\
   MULTI_REG_TYPE(ZA_ZAT, REG_TYPE(ZA) | REG_TYPE(ZAT))			\
   /* A horizontal or vertical slice of a ZA tile.  */			\
   MULTI_REG_TYPE(ZATHV, REG_TYPE(ZATH) | REG_TYPE(ZATV))		\
   /* Pseudo type to mark the end of the enumerator sequence.  */	\
-  BASIC_REG_TYPE(MAX)
+  END_REG_TYPE(MAX)
 
 #undef BASIC_REG_TYPE
 #define BASIC_REG_TYPE(T)	REG_TYPE_##T,
 #undef MULTI_REG_TYPE
 #define MULTI_REG_TYPE(T,V)	BASIC_REG_TYPE(T)
+#undef END_REG_TYPE
+#define END_REG_TYPE(T)		BASIC_REG_TYPE(T)
 
 /* Register type enumerators.  */
 typedef enum aarch64_reg_type_
@@ -342,6 +384,8 @@ typedef enum aarch64_reg_type_
 #define REG_TYPE(T)		(1 << REG_TYPE_##T)
 #undef MULTI_REG_TYPE
 #define MULTI_REG_TYPE(T,V)	V,
+#undef END_REG_TYPE
+#define END_REG_TYPE(T)		0
 
 /* Structure for a hash table entry for a register.  */
 typedef struct
@@ -361,84 +405,129 @@ static const unsigned reg_type_masks[] =
 #undef BASIC_REG_TYPE
 #undef REG_TYPE
 #undef MULTI_REG_TYPE
+#undef END_REG_TYPE
 #undef AARCH64_REG_TYPES
 
-/* Diagnostics used when we don't get a register of the expected type.
-   Note:  this has to synchronized with aarch64_reg_type definitions
-   above.  */
-static const char *
-get_reg_expected_msg (aarch64_reg_type reg_type)
-{
-  const char *msg;
+/* We expected one of the registers in MASK to be specified.  If a register
+   of some kind was specified, SEEN is a mask that contains that register,
+   otherwise it is zero.
 
-  switch (reg_type)
-    {
-    case REG_TYPE_R_32:
-      msg = N_("integer 32-bit register expected");
-      break;
-    case REG_TYPE_R_64:
-      msg = N_("integer 64-bit register expected");
-      break;
-    case REG_TYPE_R_N:
-      msg = N_("integer register expected");
-      break;
-    case REG_TYPE_R64_SP:
-      msg = N_("64-bit integer or SP register expected");
-      break;
-    case REG_TYPE_SVE_BASE:
-      msg = N_("base register expected");
-      break;
-    case REG_TYPE_R_Z:
-      msg = N_("integer or zero register expected");
-      break;
-    case REG_TYPE_SVE_OFFSET:
-      msg = N_("offset register expected");
-      break;
-    case REG_TYPE_R_SP:
-      msg = N_("integer or SP register expected");
-      break;
-    case REG_TYPE_R_Z_SP:
-      msg = N_("integer, zero or SP register expected");
-      break;
-    case REG_TYPE_FP_B:
-      msg = N_("8-bit SIMD scalar register expected");
-      break;
-    case REG_TYPE_FP_H:
-      msg = N_("16-bit SIMD scalar or floating-point half precision "
-	       "register expected");
-      break;
-    case REG_TYPE_FP_S:
-      msg = N_("32-bit SIMD scalar or floating-point single precision "
-	       "register expected");
-      break;
-    case REG_TYPE_FP_D:
-      msg = N_("64-bit SIMD scalar or floating-point double precision "
-	       "register expected");
-      break;
-    case REG_TYPE_FP_Q:
-      msg = N_("128-bit SIMD scalar or floating-point quad precision "
-	       "register expected");
-      break;
-    case REG_TYPE_R_Z_BHSDQ_V:
-    case REG_TYPE_R_Z_SP_BHSDQ_VZP:
-      msg = N_("register expected");
-      break;
-    case REG_TYPE_BHSDQ:	/* any [BHSDQ]P FP  */
-      msg = N_("SIMD scalar or floating-point register expected");
-      break;
-    case REG_TYPE_VN:		/* any V reg  */
-      msg = N_("vector register expected");
-      break;
-    case REG_TYPE_ZN:
-      msg = N_("SVE vector register expected");
-      break;
-    case REG_TYPE_PN:
-      msg = N_("SVE predicate register expected");
-      break;
-    default:
-      as_fatal (_("invalid register type %d"), reg_type);
-    }
-  return msg;
+   If it is possible to provide a relatively pithy message that describes
+   the error exactly, return a string that does so, reporting the error
+   against "operand %d".  Return null otherwise.
+
+   From a QoI perspective, any REG_TYPE_* that is passed as the first
+   argument to set_expected_reg_error should generally have its own message.
+   Providing messages for combinations of such REG_TYPE_*s can be useful if
+   it is possible to summarize the combination in a relatively natural way.
+   On the other hand, it seems better to avoid long lists of unrelated
+   things.  */
+
+static const char *
+get_reg_expected_msg (unsigned int mask, unsigned int seen)
+{
+  /* First handle messages that use SEEN.  */
+  if ((mask & reg_type_masks[REG_TYPE_ZAT])
+      && (seen & reg_type_masks[REG_TYPE_ZATHV]))
+    return N_("expected an unsuffixed ZA tile at operand %d");
+
+  if ((mask & reg_type_masks[REG_TYPE_ZATHV])
+      && (seen & reg_type_masks[REG_TYPE_ZAT]))
+    return N_("missing horizontal or vertical suffix at operand %d");
+
+  if ((mask & reg_type_masks[REG_TYPE_ZA])
+      && (seen & (reg_type_masks[REG_TYPE_ZAT]
+		  | reg_type_masks[REG_TYPE_ZATHV])))
+    return N_("expected 'za' rather than a ZA tile at operand %d");
+
+  /* Integer, zero and stack registers.  */
+  if (mask == reg_type_masks[REG_TYPE_R_64])
+    return N_("expected a 64-bit integer register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_R_Z])
+    return N_("expected an integer or zero register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_R_SP])
+    return N_("expected an integer or stack pointer register at operand %d");
+
+  /* Floating-point and SIMD registers.  */
+  if (mask == reg_type_masks[REG_TYPE_BHSDQ])
+    return N_("expected a scalar SIMD or floating-point register"
+	      " at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_VN])
+    return N_("expected an Advanced SIMD vector register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_ZN])
+    return N_("expected an SVE vector register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_PN])
+    return N_("expected an SVE predicate register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_VZ])
+    return N_("expected a vector register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_ZP])
+    return N_("expected an SVE vector or predicate register at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_VZP])
+    return N_("expected a vector or predicate register at operand %d");
+
+  /* ZA-related registers.  */
+  if (mask == reg_type_masks[REG_TYPE_ZA])
+    return N_("expected a ZA array vector at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_ZA_ZAT])
+    return N_("expected 'za' or a ZA tile at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_ZAT])
+    return N_("expected a ZA tile at operand %d");
+  if (mask == reg_type_masks[REG_TYPE_ZATHV])
+    return N_("expected a ZA tile slice at operand %d");
+
+  /* Integer and vector combos.  */
+  if (mask == (reg_type_masks[REG_TYPE_R_Z] | reg_type_masks[REG_TYPE_VN]))
+    return N_("expected an integer register or Advanced SIMD vector register"
+	      " at operand %d");
+  if (mask == (reg_type_masks[REG_TYPE_R_Z] | reg_type_masks[REG_TYPE_ZN]))
+    return N_("expected an integer register or SVE vector register"
+	      " at operand %d");
+  if (mask == (reg_type_masks[REG_TYPE_R_Z] | reg_type_masks[REG_TYPE_VZ]))
+    return N_("expected an integer or vector register at operand %d");
+  if (mask == (reg_type_masks[REG_TYPE_R_Z] | reg_type_masks[REG_TYPE_PN]))
+    return N_("expected an integer or predicate register at operand %d");
+  if (mask == (reg_type_masks[REG_TYPE_R_Z] | reg_type_masks[REG_TYPE_VZP]))
+    return N_("expected an integer, vector or predicate register"
+	      " at operand %d");
+
+  /* SVE and SME combos.  */
+  if (mask == (reg_type_masks[REG_TYPE_ZN] | reg_type_masks[REG_TYPE_ZATHV]))
+    return N_("expected an SVE vector register or ZA tile slice"
+	      " at operand %d");
+
+  return NULL;
+}
+
+/* Record that we expected a register of type TYPE but didn't see one.
+   REG is the register that we actually saw, or null if we didn't see a
+   recognized register.  FLAGS is SEF_IN_REGLIST if we are parsing the
+   contents of a register list, otherwise it is zero.  */
+
+static inline void
+set_expected_reg_error (aarch64_reg_type type, const reg_entry *reg,
+			unsigned int flags)
+{
+  assert (flags == 0 || flags == SEF_IN_REGLIST);
+  set_error (AARCH64_OPDE_SYNTAX_ERROR, NULL);
+  if (flags & SEF_IN_REGLIST)
+    inst.parsing_error.data[1].i = reg_type_masks[type] | flags;
+  else
+    inst.parsing_error.data[0].i = reg_type_masks[type];
+  if (reg)
+    inst.parsing_error.data[2].i = reg_type_masks[reg->type];
+}
+
+/* Record that we expected a register list containing registers of type TYPE,
+   but didn't see the opening '{'.  If we saw a register instead, REG is the
+   register that we saw, otherwise it is null.  */
+
+static inline void
+set_expected_reglist_error (aarch64_reg_type type, const reg_entry *reg)
+{
+  set_error (AARCH64_OPDE_SYNTAX_ERROR, NULL);
+  inst.parsing_error.data[1].i = reg_type_masks[type];
+  if (reg)
+    inst.parsing_error.data[2].i = reg_type_masks[reg->type];
 }
 
 /* Some well known registers that we refer to directly elsewhere.  */
@@ -1092,6 +1181,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
   struct vector_type_el atype;
   struct vector_type_el parsetype;
   bool is_typed_vecreg = false;
+  unsigned int err_flags = (flags & PTR_IN_REGLIST) ? SEF_IN_REGLIST : 0;
 
   atype.defined = 0;
   atype.type = NT_invtype;
@@ -1108,7 +1198,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
       else if (flags & PTR_GOOD_MATCH)
 	set_fatal_syntax_error (NULL);
       else
-	set_default_error ();
+	set_expected_reg_error (type, reg, err_flags);
       return NULL;
     }
 
@@ -1118,7 +1208,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
       if (flags & PTR_GOOD_MATCH)
 	set_fatal_syntax_error (NULL);
       else
-	set_default_error ();
+	set_expected_reg_error (type, reg, err_flags);
       return NULL;
     }
   type = reg->type;
@@ -1275,7 +1365,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 
   if (*str != '{')
     {
-      set_syntax_error (_("expecting {"));
+      set_expected_reglist_error (type, parse_reg (&str));
       return PARSE_FAIL;
     }
   str++;
@@ -3612,7 +3702,7 @@ parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 
       if (!aarch64_check_reg_type (reg, REG_TYPE_R_Z))
 	{
-	  set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_Z)));
+	  set_expected_reg_error (REG_TYPE_R_Z, reg, 0);
 	  return false;
 	}
 
@@ -4110,7 +4200,7 @@ parse_x0_to_x30 (char **str, aarch64_opnd_info *operand)
   const reg_entry *reg = parse_reg (str);
   if (!reg || !aarch64_check_reg_type (reg, REG_TYPE_R_64))
     {
-      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
+      set_expected_reg_error (REG_TYPE_R_64, reg, 0);
       return false;
     }
   operand->reg.regno = reg->number;
@@ -4509,7 +4599,7 @@ parse_sme_za_hv_tiles_operand_with_braces (char **str,
 {
   if (!skip_past_char (str, '{'))
     {
-      set_syntax_error (_("expected '{'"));
+      set_expected_reglist_error (REG_TYPE_ZATHV, parse_reg (str));
       return false;
     }
 
@@ -4783,17 +4873,14 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
 #define po_reg_or_fail(regtype) do {				\
     reg = aarch64_reg_parse (&str, regtype, NULL);		\
     if (!reg)							\
-      {								\
-	set_default_error ();					\
-	goto failure;						\
-      }								\
+      goto failure;						\
   } while (0)
 
 #define po_int_fp_reg_or_fail(reg_type) do {			\
     reg = parse_reg (&str);					\
     if (!reg || !aarch64_check_reg_type (reg, reg_type))	\
       {								\
-	set_default_error ();					\
+	set_expected_reg_error (reg_type, reg, 0);		\
 	goto failure;						\
       }								\
     info->reg.regno = reg->number;				\
@@ -5389,6 +5476,64 @@ output_info (const char *format, ...)
   (void) putc ('\n', stderr);
 }
 
+/* See if the AARCH64_OPDE_SYNTAX_ERROR error described by DETAIL
+   relates to registers or register lists.  If so, return a string that
+   reports the error against "operand %d", otherwise return null.  */
+
+static const char *
+get_reg_error_message (const aarch64_operand_error *detail)
+{
+  /* Handle the case where we found a register that was expected
+     to be in a register list outside of a register list.  */
+  if ((detail->data[1].i & detail->data[2].i) != 0
+      && (detail->data[1].i & SEF_IN_REGLIST) == 0)
+    return _("missing braces at operand %d");
+
+  /* If some opcodes expected a register, and we found a register,
+     complain about the difference.  */
+  if (detail->data[2].i)
+    {
+      unsigned int expected = (detail->data[1].i & SEF_IN_REGLIST
+			       ? detail->data[1].i & ~SEF_IN_REGLIST
+			       : detail->data[0].i & ~SEF_DEFAULT_ERROR);
+      const char *msg = get_reg_expected_msg (expected, detail->data[2].i);
+      if (!msg)
+	msg = N_("unexpected register type at operand %d");
+      return msg;
+    }
+
+  /* Handle the case where we got to the point of trying to parse a
+     register within a register list, but didn't find a known register.  */
+  if (detail->data[1].i & SEF_IN_REGLIST)
+    {
+      unsigned int expected = detail->data[1].i & ~SEF_IN_REGLIST;
+      const char *msg = get_reg_expected_msg (expected, 0);
+      if (!msg)
+	msg = _("invalid register list at operand %d");
+      return msg;
+    }
+
+  /* Punt if register-related problems weren't the only errors.  */
+  if (detail->data[0].i & SEF_DEFAULT_ERROR)
+    return NULL;
+
+  /* Handle the case where the only acceptable things are registers.  */
+  if (detail->data[1].i == 0)
+    {
+      const char *msg = get_reg_expected_msg (detail->data[0].i, 0);
+      if (!msg)
+	msg = _("expected a register at operand %d");
+      return msg;
+    }
+
+  /* Handle the case where the only acceptable things are register lists,
+     and there was no opening '{'.  */
+  if (detail->data[0].i == 0)
+    return _("expected '{' at operand %d");
+
+  return _("expected a register or register list at operand %d");
+}
+
 /* Output one operand error record.  */
 
 static void
@@ -5402,6 +5547,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 
   typedef void (*handler_t)(const char *format, ...);
   handler_t handler = detail->non_fatal ? as_warn : as_bad;
+  const char *msg = detail->error;
 
   switch (detail->kind)
     {
@@ -5422,18 +5568,31 @@ output_operand_error_record (const operand_error_record *record, char *str)
       break;
 
     case AARCH64_OPDE_SYNTAX_ERROR:
+      if (!msg && idx >= 0)
+	{
+	  msg = get_reg_error_message (detail);
+	  if (msg)
+	    {
+	      char *full_msg = xasprintf (msg, idx + 1);
+	      handler (_("%s -- `%s'"), full_msg, str);
+	      free (full_msg);
+	      break;
+	    }
+	}
+      /* Fall through.  */
+
     case AARCH64_OPDE_RECOVERABLE:
     case AARCH64_OPDE_FATAL_SYNTAX_ERROR:
     case AARCH64_OPDE_OTHER_ERROR:
       /* Use the prepared error message if there is, otherwise use the
 	 operand description string to describe the error.  */
-      if (detail->error != NULL)
+      if (msg != NULL)
 	{
 	  if (idx < 0)
-	    handler (_("%s -- `%s'"), detail->error, str);
+	    handler (_("%s -- `%s'"), msg, str);
 	  else
 	    handler (_("%s at operand %d -- `%s'"),
-		     detail->error, idx + 1, str);
+		     msg, idx + 1, str);
 	}
       else
 	{
@@ -5554,11 +5713,11 @@ output_operand_error_record (const operand_error_record *record, char *str)
     case AARCH64_OPDE_OUT_OF_RANGE:
       if (detail->data[0].i != detail->data[1].i)
 	handler (_("%s out of range %d to %d at operand %d -- `%s'"),
-		 detail->error ? detail->error : _("immediate value"),
+		 msg ? msg : _("immediate value"),
 		 detail->data[0].i, detail->data[1].i, idx + 1, str);
       else
 	handler (_("%s must be %d at operand %d -- `%s'"),
-		 detail->error ? detail->error : _("immediate value"),
+		 msg ? msg : _("immediate value"),
 		 detail->data[0].i, idx + 1, str);
       break;
 
@@ -5600,8 +5759,6 @@ output_operand_error_record (const operand_error_record *record, char *str)
 static void
 output_operand_error_report (char *str, bool non_fatal_only)
 {
-  int largest_error_pos;
-  const char *msg = NULL;
   enum aarch64_operand_error_kind kind;
   operand_error_record *curr;
   operand_error_record *head = operand_error_report.head;
@@ -5633,7 +5790,17 @@ output_operand_error_report (char *str, bool non_fatal_only)
   for (curr = head; curr != NULL; curr = curr->next)
     {
       gas_assert (curr->detail.kind != AARCH64_OPDE_NIL);
-      DEBUG_TRACE ("\t%s", operand_mismatch_kind_names[curr->detail.kind]);
+      if (curr->detail.kind == AARCH64_OPDE_SYNTAX_ERROR)
+	{
+	  DEBUG_TRACE ("\t%s [%x, %x, %x]",
+		       operand_mismatch_kind_names[curr->detail.kind],
+		       curr->detail.data[0].i, curr->detail.data[1].i,
+		       curr->detail.data[2].i);
+	}
+      else
+	{
+	  DEBUG_TRACE ("\t%s", operand_mismatch_kind_names[curr->detail.kind]);
+	}
       if (operand_error_higher_severity_p (curr->detail.kind, kind)
 	  && (!non_fatal_only || (non_fatal_only && curr->detail.non_fatal)))
 	kind = curr->detail.kind;
@@ -5642,7 +5809,6 @@ output_operand_error_report (char *str, bool non_fatal_only)
   gas_assert (kind != AARCH64_OPDE_NIL || non_fatal_only);
 
   /* Pick up one of errors of KIND to report.  */
-  largest_error_pos = -2; /* Index can be -1 which means unknown index.  */
   for (curr = head; curr != NULL; curr = curr->next)
     {
       /* If we don't want to print non-fatal errors then don't consider them
@@ -5654,13 +5820,23 @@ output_operand_error_report (char *str, bool non_fatal_only)
 	 mismatching operand index.  In the case of multiple errors with
 	 the equally highest operand index, pick up the first one or the
 	 first one with non-NULL error message.  */
-      if (curr->detail.index > largest_error_pos
-	  || (curr->detail.index == largest_error_pos && msg == NULL
-	      && curr->detail.error != NULL))
+      if (!record || curr->detail.index > record->detail.index)
+	record = curr;
+      else if (curr->detail.index == record->detail.index
+	       && !record->detail.error)
 	{
-	  largest_error_pos = curr->detail.index;
-	  record = curr;
-	  msg = record->detail.error;
+	  if (curr->detail.error)
+	    record = curr;
+	  else if (kind == AARCH64_OPDE_SYNTAX_ERROR)
+	    {
+	      record->detail.data[0].i |= curr->detail.data[0].i;
+	      record->detail.data[1].i |= curr->detail.data[1].i;
+	      record->detail.data[2].i |= curr->detail.data[2].i;
+	      DEBUG_TRACE ("\t--> %s [%x, %x, %x]",
+			   operand_mismatch_kind_names[kind],
+			   curr->detail.data[0].i, curr->detail.data[1].i,
+			   curr->detail.data[2].i);
+	    }
 	}
     }
 
@@ -5675,9 +5851,9 @@ output_operand_error_report (char *str, bool non_fatal_only)
   if (non_fatal_only && !record)
     return;
 
-  gas_assert (largest_error_pos != -2 && record != NULL);
+  gas_assert (record);
   DEBUG_TRACE ("Pick up error kind %s to report",
-	       operand_mismatch_kind_names[record->detail.kind]);
+	       operand_mismatch_kind_names[kind]);
 
   /* Output.  */
   output_operand_error_record (record, str);
@@ -6299,10 +6475,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	vector_reg:
 	  reg = aarch64_reg_parse (&str, reg_type, &vectype);
 	  if (!reg)
-	    {
-	      first_error (_(get_reg_expected_msg (reg_type)));
-	      goto failure;
-	    }
+	    goto failure;
 	  if (vectype.defined & NTA_HASINDEX)
 	    goto failure;
 
@@ -6325,10 +6498,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_VnD1:
 	  reg = aarch64_reg_parse (&str, REG_TYPE_VN, &vectype);
 	  if (!reg)
-	    {
-	      set_first_syntax_error (_(get_reg_expected_msg (REG_TYPE_VN)));
-	      goto failure;
-	    }
+	    goto failure;
 	  if (vectype.type != NT_d || vectype.index != 1)
 	    {
 	      set_fatal_syntax_error
@@ -6361,10 +6531,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	vector_reg_index:
 	  reg = aarch64_reg_parse (&str, reg_type, &vectype);
 	  if (!reg)
-	    {
-	      first_error (_(get_reg_expected_msg (reg_type)));
-	      goto failure;
-	    }
+	    goto failure;
 	  if (vectype.type == NT_invtype || !(vectype.defined & NTA_HASINDEX))
 	    goto failure;
 
@@ -6392,10 +6559,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    {
 	      reg = aarch64_reg_parse (&str, reg_type, &vectype);
 	      if (!reg)
-		{
-		  first_error (_(get_reg_expected_msg (reg_type)));
-		  goto failure;
-		}
+		goto failure;
 	      info->reglist.first_regno = reg->number;
 	      info->reglist.num_regs = 1;
 	    }

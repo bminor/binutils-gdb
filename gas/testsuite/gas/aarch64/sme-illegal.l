@@ -4,6 +4,7 @@
 [^:]*:[0-9]+: Error: operand mismatch -- `addha za0.s,p2/m,p3/m,z2.d'
 [^:]*:[0-9]+: Info:    did you mean this\?
 [^:]*:[0-9]+: Info:    	addha za0.d, p2/m, p3/m, z2.d
+[^:]*:[0-9]+: Error: expected a ZA tile at operand 1 -- `addha z0.s,p0/m,p1/m,z1.s'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `addha za8.d,p0/m,p1/m,z1.d'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `addha za15.d,p2/m,p3/m,z2.d'
 [^:]*:[0-9]+: Error: operand mismatch -- `addha za0.d,p2/m,p3/m,z2.s'

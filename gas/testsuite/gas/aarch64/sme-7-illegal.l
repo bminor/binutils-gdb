@@ -48,3 +48,9 @@
 [^:]*:[0-9]+: Info:    	ldr za\[w12, 0\], \[x0\]
 [^:]*:[0-9]+: Error: expected '\[' at operand 1 -- `ldr za/z\[w12,0\],\[x0\]'
 [^:]*:[0-9]+: Error: unexpected character `2' in element size at operand 1 -- `ldr za.2b\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0.b\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0h\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0h.h\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0v\[w12,0\],\[x0\]'
+[^:]*:[0-9]+: Error: expected 'za' rather than a ZA tile at operand 1 -- `ldr za0v.s\[w12,0\],\[x0\]'
