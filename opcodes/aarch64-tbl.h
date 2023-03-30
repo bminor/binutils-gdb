@@ -1547,10 +1547,6 @@
 {                                                       \
   QLF5(S_D,P_M,P_M,S_H,S_H)                             \
 }
-#define OP_SVE_QQQ                                      \
-{                                                       \
-  QLF3(S_Q,S_Q,S_Q),                                    \
-}
 #define OP_SVE_DDDD                                     \
 {                                                       \
   QLF4(S_D,S_D,S_D,S_D),                                \
@@ -1558,10 +1554,6 @@
 #define OP_SVE_DMD                                      \
 {                                                       \
   QLF3(S_D,P_M,S_D),                                    \
-}
-#define OP_SVE_QMQ                                      \
-{                                                       \
-  QLF3(S_Q,P_M,S_Q),                                    \
 }
 #define OP_SVE_DMH                                      \
 {                                                       \
@@ -1583,10 +1575,6 @@
 {                                                       \
   QLF3(S_D,NIL,NIL),                                    \
 }
-#define OP_SVE_QUU                                      \
-{                                                       \
-  QLF3(S_Q,NIL,NIL),                                    \
-}
 #define OP_SVE_DUV_BHS                                  \
 {                                                       \
   QLF3(S_D,NIL,S_B),                                    \
@@ -1607,10 +1595,6 @@
 #define OP_SVE_DZU                                      \
 {                                                       \
   QLF3(S_D,P_Z,NIL),                                    \
-}
-#define OP_SVE_QZU                                      \
-{                                                       \
-  QLF3(S_Q,P_Z,NIL),                                    \
 }
 #define OP_SVE_HB                                       \
 {                                                       \
@@ -1647,6 +1631,22 @@
 #define OP_SVE_HZU                                      \
 {                                                       \
   QLF3(S_H,P_Z,NIL),                                    \
+}
+#define OP_SVE_QMQ                                      \
+{                                                       \
+  QLF3(S_Q,P_M,S_Q),                                    \
+}
+#define OP_SVE_QQQ                                      \
+{                                                       \
+  QLF3(S_Q,S_Q,S_Q),                                    \
+}
+#define OP_SVE_QUU                                      \
+{                                                       \
+  QLF3(S_Q,NIL,NIL),                                    \
+}
+#define OP_SVE_QZU                                      \
+{                                                       \
+  QLF3(S_Q,P_Z,NIL),                                    \
 }
 #define OP_SVE_RR                                       \
 {                                                       \
