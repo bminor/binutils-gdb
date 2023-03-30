@@ -694,6 +694,81 @@ first_error_fmt (const char *format, ...)
     }
 }
 
+/* Internal helper routine converting a vector_type_el structure *VECTYPE
+   to a corresponding operand qualifier.  */
+
+static inline aarch64_opnd_qualifier_t
+vectype_to_qualifier (const struct vector_type_el *vectype)
+{
+  /* Element size in bytes indexed by vector_el_type.  */
+  const unsigned char ele_size[5]
+    = {1, 2, 4, 8, 16};
+  const unsigned int ele_base [5] =
+    {
+      AARCH64_OPND_QLF_V_4B,
+      AARCH64_OPND_QLF_V_2H,
+      AARCH64_OPND_QLF_V_2S,
+      AARCH64_OPND_QLF_V_1D,
+      AARCH64_OPND_QLF_V_1Q
+  };
+
+  if (!vectype->defined || vectype->type == NT_invtype)
+    goto vectype_conversion_fail;
+
+  if (vectype->type == NT_zero)
+    return AARCH64_OPND_QLF_P_Z;
+  if (vectype->type == NT_merge)
+    return AARCH64_OPND_QLF_P_M;
+
+  gas_assert (vectype->type >= NT_b && vectype->type <= NT_q);
+
+  if (vectype->defined & (NTA_HASINDEX | NTA_HASVARWIDTH))
+    {
+      /* Special case S_4B.  */
+      if (vectype->type == NT_b && vectype->width == 4)
+	return AARCH64_OPND_QLF_S_4B;
+
+      /* Special case S_2H.  */
+      if (vectype->type == NT_h && vectype->width == 2)
+	return AARCH64_OPND_QLF_S_2H;
+
+      /* Vector element register.  */
+      return AARCH64_OPND_QLF_S_B + vectype->type;
+    }
+  else
+    {
+      /* Vector register.  */
+      int reg_size = ele_size[vectype->type] * vectype->width;
+      unsigned offset;
+      unsigned shift;
+      if (reg_size != 16 && reg_size != 8 && reg_size != 4)
+	goto vectype_conversion_fail;
+
+      /* The conversion is by calculating the offset from the base operand
+	 qualifier for the vector type.  The operand qualifiers are regular
+	 enough that the offset can established by shifting the vector width by
+	 a vector-type dependent amount.  */
+      shift = 0;
+      if (vectype->type == NT_b)
+	shift = 3;
+      else if (vectype->type == NT_h || vectype->type == NT_s)
+	shift = 2;
+      else if (vectype->type >= NT_d)
+	shift = 1;
+      else
+	gas_assert (0);
+
+      offset = ele_base [vectype->type] + (vectype->width >> shift);
+      gas_assert (AARCH64_OPND_QLF_V_4B <= offset
+		  && offset <= AARCH64_OPND_QLF_V_1Q);
+      return offset;
+    }
+
+ vectype_conversion_fail:
+  first_error (_("bad vector arrangement type"));
+  return AARCH64_OPND_QLF_NIL;
+}
+
 /* Register parsing.  */
 
 /* Generic register parser which is called by other specialized
@@ -5903,81 +5978,6 @@ opcode_lookup (char *base, char *dot, char *end)
     }
 
   return NULL;
-}
-
-/* Internal helper routine converting a vector_type_el structure *VECTYPE
-   to a corresponding operand qualifier.  */
-
-static inline aarch64_opnd_qualifier_t
-vectype_to_qualifier (const struct vector_type_el *vectype)
-{
-  /* Element size in bytes indexed by vector_el_type.  */
-  const unsigned char ele_size[5]
-    = {1, 2, 4, 8, 16};
-  const unsigned int ele_base [5] =
-    {
-      AARCH64_OPND_QLF_V_4B,
-      AARCH64_OPND_QLF_V_2H,
-      AARCH64_OPND_QLF_V_2S,
-      AARCH64_OPND_QLF_V_1D,
-      AARCH64_OPND_QLF_V_1Q
-  };
-
-  if (!vectype->defined || vectype->type == NT_invtype)
-    goto vectype_conversion_fail;
-
-  if (vectype->type == NT_zero)
-    return AARCH64_OPND_QLF_P_Z;
-  if (vectype->type == NT_merge)
-    return AARCH64_OPND_QLF_P_M;
-
-  gas_assert (vectype->type >= NT_b && vectype->type <= NT_q);
-
-  if (vectype->defined & (NTA_HASINDEX | NTA_HASVARWIDTH))
-    {
-      /* Special case S_4B.  */
-      if (vectype->type == NT_b && vectype->width == 4)
-	return AARCH64_OPND_QLF_S_4B;
-
-      /* Special case S_2H.  */
-      if (vectype->type == NT_h && vectype->width == 2)
-	return AARCH64_OPND_QLF_S_2H;
-
-      /* Vector element register.  */
-      return AARCH64_OPND_QLF_S_B + vectype->type;
-    }
-  else
-    {
-      /* Vector register.  */
-      int reg_size = ele_size[vectype->type] * vectype->width;
-      unsigned offset;
-      unsigned shift;
-      if (reg_size != 16 && reg_size != 8 && reg_size != 4)
-	goto vectype_conversion_fail;
-
-      /* The conversion is by calculating the offset from the base operand
-	 qualifier for the vector type.  The operand qualifiers are regular
-	 enough that the offset can established by shifting the vector width by
-	 a vector-type dependent amount.  */
-      shift = 0;
-      if (vectype->type == NT_b)
-	shift = 3;
-      else if (vectype->type == NT_h || vectype->type == NT_s)
-	shift = 2;
-      else if (vectype->type >= NT_d)
-	shift = 1;
-      else
-	gas_assert (0);
-
-      offset = ele_base [vectype->type] + (vectype->width >> shift);
-      gas_assert (AARCH64_OPND_QLF_V_4B <= offset
-		  && offset <= AARCH64_OPND_QLF_V_1Q);
-      return offset;
-    }
-
- vectype_conversion_fail:
-  first_error (_("bad vector arrangement type"));
-  return AARCH64_OPND_QLF_NIL;
 }
 
 /* Process an optional operand that is found omitted from the assembly line.
