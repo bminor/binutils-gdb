@@ -1527,14 +1527,18 @@ check_reglist (const aarch64_opnd_info *opnd,
 
    - a selection register in the range [MIN_WREG, MIN_WREG + 3]
 
-   - an immediate offset in the range [0, MAX_VALUE].
+   - RANGE_SIZE consecutive immediate offsets.
+
+   - an initial immediate offset that is a multiple of RANGE_SIZE
+     in the range [0, MAX_VALUE * RANGE_SIZE]
 
    - a vector group size of GROUP_SIZE.  */
 
 static bool
 check_za_access (const aarch64_opnd_info *opnd,
 		 aarch64_operand_error *mismatch_detail, int idx,
-		 int min_wreg, int max_value, int group_size)
+		 int min_wreg, int max_value, unsigned int range_size,
+		 int group_size)
 {
   if (!value_in_range_p (opnd->indexed_za.index.regno, min_wreg, min_wreg + 3))
     {
@@ -1547,9 +1551,31 @@ check_za_access (const aarch64_opnd_info *opnd,
       return false;
     }
 
-  if (!value_in_range_p (opnd->indexed_za.index.imm, 0, max_value))
+  int max_index = max_value * range_size;
+  if (!value_in_range_p (opnd->indexed_za.index.imm, 0, max_index))
     {
-      set_offset_out_of_range_error (mismatch_detail, idx, 0, max_value);
+      set_offset_out_of_range_error (mismatch_detail, idx, 0, max_index);
+      return false;
+    }
+
+  if ((opnd->indexed_za.index.imm % range_size) != 0)
+    {
+      assert (range_size == 2 || range_size == 4);
+      set_other_error (mismatch_detail, idx,
+		       range_size == 2
+		       ? _("starting offset is not a multiple of 2")
+		       : _("starting offset is not a multiple of 4"));
+      return false;
+    }
+
+  if (opnd->indexed_za.index.countm1 != range_size - 1)
+    {
+      if (range_size == 1)
+	set_other_error (mismatch_detail, idx,
+			 _("expected a single offset rather than"
+			   " a range"));
+      else
+	abort ();
       return false;
     }
 
@@ -1678,7 +1704,8 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
-	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value, 0))
+	  if (!check_za_access (opnd, mismatch_detail, idx,
+				12, max_value, 1, 0))
 	    return 0;
 	  break;
 
@@ -1701,13 +1728,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
-	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value,
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value, 1,
 				get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off4:
-	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15,
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15, 1,
 				get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
@@ -3694,7 +3721,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_ZA_HV_idx_src:
     case AARCH64_OPND_SME_ZA_HV_idx_dest:
     case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
-      snprintf (buf, size, "%s%s[%s, %s%s%s]%s",
+      snprintf (buf, size, "%s%s[%s, %s%s%s%s%s]%s",
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
 		style_reg (styler, "za%d%c.%s",
 			   opnd->indexed_za.regno,
@@ -3702,6 +3729,12 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 			   aarch64_get_qualifier_name (opnd->qualifier)),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
 		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
+		opnd->indexed_za.index.countm1 ? ":" : "",
+		(opnd->indexed_za.index.countm1
+		 ? style_imm (styler, "%d",
+			      opnd->indexed_za.index.imm
+			      + opnd->indexed_za.index.countm1)
+		 : ""),
 		opnd->indexed_za.group_size ? ", " : "",
 		opnd->indexed_za.group_size == 2
 		? style_sub_mnem (styler, "vgx2")
@@ -3715,10 +3748,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_SME_ZA_array_off4:
-      snprintf (buf, size, "%s[%s, %s%s%s]",
+      snprintf (buf, size, "%s[%s, %s%s%s%s%s]",
 		style_reg (styler, "za"),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
 		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
+		opnd->indexed_za.index.countm1 ? ":" : "",
+		(opnd->indexed_za.index.countm1
+		 ? style_imm (styler, "%d",
+			      opnd->indexed_za.index.imm
+			      + opnd->indexed_za.index.countm1)
+		 : ""),
 		opnd->indexed_za.group_size ? ", " : "",
 		opnd->indexed_za.group_size == 2
 		? style_sub_mnem (styler, "vgx2")

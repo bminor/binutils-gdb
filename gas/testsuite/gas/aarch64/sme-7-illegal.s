@@ -63,3 +63,9 @@ str za[w12, 0, vgx8], [x0]
 
 ldr za.b[w12, 0, vgx2], [x0]
 str za.b[w12, 0, vgx4], [x0]
+
+ldr za[w12, 0:1], [x0]
+str za[w12, 0:2, vgx4], [x0]
+
+ldr za.b[w12, 0:1], [x0]
+str za.b[w12, 0:2, vgx4], [x0]

@@ -62,3 +62,7 @@
 [^:]*:[0-9]+: Error: operand mismatch -- `ld1b {za0h\.b\[w12,0,vgx4\]},p0/m,\[x0\]'
 [^:]*:[0-9]+: Info:    did you mean this\?
 [^:]*:[0-9]+: Info:    	ld1b {za0h\.b\[w12, 0, vgx4\]}, p0/z, \[x0, xzr\]
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 1 -- `ld1b {za0h\.b\[w12,0:1\]},p0/z,\[x0\]'
+[^:]+:[0-9]+: Error: operand mismatch -- `ld1b {za0h\.b\[w12,0:1\]},p0/m,\[x0\]'
+[^:]+:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ld1b {za0h\.b\[w12, 0:1\]}, p0/z, \[x0, xzr\]

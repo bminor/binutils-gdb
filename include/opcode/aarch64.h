@@ -1114,14 +1114,29 @@ const aarch64_cond* get_inverted_cond (const aarch64_cond *cond);
 /* Information about a reference to part of ZA.  */
 struct aarch64_indexed_za
 {
-  int regno;      /* <ZAn> */
+  /* Which tile is being accessed.  Unused (and 0) for an index into ZA.  */
+  int regno;
+
   struct
   {
-    int regno;    /* <Wv>  */
-    int64_t imm;  /* <imm>  */
+    /* The 32-bit index register.  */
+    int regno;
+
+    /* The first (or only) immediate offset.  */
+    int64_t imm;
+
+    /* The last immediate offset minus the first immediate offset.
+       Unlike the range size, this is guaranteed not to overflow
+       when the end offset > the start offset.  */
+    uint64_t countm1;
   } index;
+
+  /* The vector group size, or 0 if none.  */
   unsigned group_size : 8;
-  unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
+
+  /* True if a tile access is vertical, false if it is horizontal.
+     Unused (and 0) for an index into ZA.  */
+  unsigned v : 1;
 };
 
 /* Information about a list of registers.  */

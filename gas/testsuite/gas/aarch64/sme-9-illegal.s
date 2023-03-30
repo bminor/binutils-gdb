@@ -23,6 +23,10 @@ psel p0, p0, p0.b[w12, #0, vgx8]
 
 psel p0.b, p0.b, p0.b[w12, #0, vgx2]
 
+psel p0, p0, p0.b[w12, 0:1]
+psel p0, p0, p0.b[w12, 0:1, vgx2]
+psel p0.b, p0.b, p0.b[w12, 0:1, vgx2]
+
 revd z0.q, p0/m, z0.b
 
 sclamp z8.b, z1.b, z31.q

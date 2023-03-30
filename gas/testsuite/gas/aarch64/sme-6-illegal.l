@@ -49,3 +49,7 @@
 [^:]*:[0-9]+: Error: operand mismatch -- `st1b {za0h\.b\[w12,0,vgx2\]},p0/z,\[x0\]'
 [^:]*:[0-9]+: Info:    did you mean this\?
 [^:]*:[0-9]+: Info:    	st1b {za0h\.b\[w12, 0, vgx2\]}, p0, \[x0, xzr\]
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 1 -- `st1b {za0h\.b\[w12,0:1,vgx2\]},p0,\[x0\]'
+[^:]+:[0-9]+: Error: operand mismatch -- `st1b {za0h\.b\[w12,0:1,vgx2\]},p0/m,\[x0\]'
+[^:]+:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	st1b {za0h\.b\[w12, 0:1, vgx2\]}, p0, \[x0, xzr\]

@@ -66,3 +66,11 @@
 [^:]*:[0-9]+: Error: operand mismatch -- `str za\.b\[w12,0,vgx4\],\[x0\]'
 [^:]*:[0-9]+: Info:    did you mean this\?
 [^:]*:[0-9]+: Info:    	str za\[w12, 0, vgx4\], \[x0\]
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 1 -- `ldr za\[w12,0:1\],\[x0\]'
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 1 -- `str za\[w12,0:2,vgx4\],\[x0\]'
+[^:]*:[0-9]+: Error: operand mismatch -- `ldr za\.b\[w12,0:1\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	ldr za\[w12, 0:1\], \[x0\]
+[^:]*:[0-9]+: Error: operand mismatch -- `str za\.b\[w12,0:2,vgx4\],\[x0\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	str za\[w12, 0:2, vgx4\], \[x0\]

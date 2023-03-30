@@ -28,3 +28,16 @@
 [^:]*:[0-9]+: Error: unexpected vector group size at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,#0,vgx2\]'
 [^:]*:[0-9]+: Error: unexpected vector group size at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,#0,vgx4\]'
 [^:]*:[0-9]+: Error: invalid vector group size at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,#0,vgx8\]'
+[^:]*:[0-9]+: Error: the last offset is less than the first offset at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,1:0\]'
+[^:]*:[0-9]+: Error: the last offset is equal to the first offset at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,0:0\]'
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,0:1\]'
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,0:2\]'
+[^:]+:[0-9]+: Error: operand mismatch -- `mova z0\.b,p0/m,za0h\.h\[w12,0:1\]'
+[^:]+:[0-9]+: Info:    did you mean this\?
+[^:]+:[0-9]+: Info:    	mova z0\.b, p0/m, za0h\.b\[w12, 0:1\]
+[^:]+:[0-9]+: Info:    other valid variant\(s\):
+[^:]+:[0-9]+: Info:    	mova z0\.h, p0/m, za0h\.h\[w12, 0:1\]
+[^:]+:[0-9]+: Info:    	mova z0\.s, p0/m, za0h\.s\[w12, 0:1\]
+[^:]+:[0-9]+: Info:    	mova z0\.d, p0/m, za0h\.d\[w12, 0:1\]
+[^:]+:[0-9]+: Info:    	mova z0\.q, p0/m, za0h\.q\[w12, 0:1\]
+[^:]*:[0-9]+: Error: expected a constant immediate offset at operand 3 -- `mova z0.b,p0/m,za0h.b\[w12,0:foo\]'

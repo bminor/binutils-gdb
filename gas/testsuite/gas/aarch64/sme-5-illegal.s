@@ -63,3 +63,6 @@ ld1b {za0h.b[w12, 0, vgx4]}, p0/z, [x0]
 ld1b {za0h.b[w12, 0, vgx8]}, p0/z, [x0]
 
 ld1b {za0h.b[w12, 0, vgx4]}, p0/m, [x0]
+
+ld1b {za0h.b[w12, 0:1]}, p0/z, [x0]
+ld1b {za0h.b[w12, 0:1]}, p0/m, [x0]

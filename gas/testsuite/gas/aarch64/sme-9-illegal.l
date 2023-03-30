@@ -37,6 +37,15 @@
 [^:]*:[0-9]+: Info:    	psel p0, p0, p0\.h\[w12, 0\]
 [^:]*:[0-9]+: Info:    	psel p0, p0, p0\.s\[w12, 0\]
 [^:]*:[0-9]+: Info:    	psel p0, p0, p0\.d\[w12, 0\]
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 3 -- `psel p0,p0,p0\.b\[w12,0:1\]'
+[^:]*:[0-9]+: Error: expected a single offset rather than a range at operand 3 -- `psel p0,p0,p0\.b\[w12,0:1,vgx2\]'
+[^:]*:[0-9]+: Error: operand mismatch -- `psel p0\.b,p0\.b,p0\.b\[w12,0:1,vgx2\]'
+[^:]*:[0-9]+: Info:    did you mean this\?
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.b\[w12, 0\]
+[^:]*:[0-9]+: Info:    other valid variant\(s\):
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.h\[w12, 0\]
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.s\[w12, 0\]
+[^:]*:[0-9]+: Info:    	psel p0, p0, p0\.d\[w12, 0\]
 [^:]*:[0-9]+: Error: operand mismatch -- `revd z0.q,p0/m,z0.b'
 [^:]*:[0-9]+: Info:    did you mean this\?
 [^:]*:[0-9]+: Info:    	revd z0.q, p0/m, z0.q

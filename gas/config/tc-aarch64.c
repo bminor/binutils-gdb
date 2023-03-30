@@ -4550,6 +4550,29 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
       return false;
     }
 
+  if (skip_past_char (str, ':'))
+    {
+      int64_t end;
+      if (!parse_sme_immediate (str, &end))
+	{
+	  set_syntax_error (_("expected a constant immediate offset"));
+	  return false;
+	}
+      if (end < opnd->index.imm)
+	{
+	  set_syntax_error (_("the last offset is less than the"
+			      " first offset"));
+	  return false;
+	}
+      if (end == opnd->index.imm)
+	{
+	  set_syntax_error (_("the last offset is equal to the"
+			      " first offset"));
+	  return false;
+	}
+      opnd->index.countm1 = (uint64_t) end - opnd->index.imm;
+    }
+
   opnd->group_size = 0;
   if (skip_past_char (str, ','))
     {
