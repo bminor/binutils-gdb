@@ -5827,6 +5827,10 @@ output_operand_error_record (const operand_error_record *record, char *str)
       else if ((detail->data[0].i & -detail->data[0].i) == detail->data[0].i)
 	handler (_("expected a list of %d registers at operand %d -- `%s'"),
 		 get_log2 (detail->data[0].i), idx + 1, str);
+      else if (detail->data[0].i == 0x14)
+	handler (_("expected a list of %d or %d registers at"
+		   " operand %d -- `%s'"),
+		 2, 4, idx + 1, str);
       else
 	handler (_("invalid number of registers in the list"
 		   " at operand %d -- `%s'"), idx + 1, str);
@@ -5836,6 +5840,10 @@ output_operand_error_record (const operand_error_record *record, char *str)
       if (detail->data[0].i == (1 << 1))
 	handler (_("the register list must have a stride of %d"
 		   " at operand %d -- `%s'"), 1, idx + 1, str);
+      else if (detail->data[0].i == 0x12 || detail->data[0].i == 0x102)
+	handler (_("the register list must have a stride of %d or %d"
+		   " at operand %d -- `%s`"), 1,
+		 detail->data[0].i == 0x12 ? 4 : 8, idx + 1, str);
       else
 	handler (_("invalid register stride at operand %d -- `%s'"),
 		 idx + 1, str);
@@ -6630,6 +6638,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_PNg4_10:
 	case AARCH64_OPND_SVE_PNn:
 	case AARCH64_OPND_SVE_PNt:
+	case AARCH64_OPND_SME_PNg3:
 	  reg_type = REG_TYPE_PN;
 	  goto vector_reg;
 
@@ -6716,6 +6725,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SME_Zdnx4:
 	case AARCH64_OPND_SME_Znx2:
 	case AARCH64_OPND_SME_Znx4:
+	case AARCH64_OPND_SME_Ztx2_STRIDED:
+	case AARCH64_OPND_SME_Ztx4_STRIDED:
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg_list;
 

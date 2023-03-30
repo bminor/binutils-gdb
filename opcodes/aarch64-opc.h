@@ -59,6 +59,9 @@ enum aarch64_field_kind
   FLD_SME_Zdn4,
   FLD_SME_Zn2,
   FLD_SME_Zn4,
+  FLD_SME_ZtT,
+  FLD_SME_Zt3,
+  FLD_SME_Zt2,
   FLD_SME_i1,
   FLD_SME_size_22,
   FLD_SME_tszh,
@@ -227,10 +230,10 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 						   value by 2 to get the value
 						   of an immediate operand.  */
 #define OPD_F_MAYBE_SP		0x00000010	/* May potentially be SP.  */
-#define OPD_F_OD_MASK		0x000000e0	/* Operand-dependent data.  */
+#define OPD_F_OD_MASK		0x000001e0	/* Operand-dependent data.  */
 #define OPD_F_OD_LSB		5
-#define OPD_F_NO_ZR		0x00000100	/* ZR index not allowed.  */
-#define OPD_F_SHIFT_BY_4	0x00000200	/* Need to left shift the field
+#define OPD_F_NO_ZR		0x00000200	/* ZR index not allowed.  */
+#define OPD_F_SHIFT_BY_4	0x00000400	/* Need to left shift the field
 						   value by 4 to get the value
 						   of an immediate operand.  */
 

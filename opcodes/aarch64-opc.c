@@ -231,6 +231,9 @@ const aarch64_field fields[] =
     {  2,  3 }, /* SME_Zdn4: Z0-Z31, multiple of 4, bits [4:2].  */
     {  6,  4 }, /* SME_Zn2: Z0-Z31, multiple of 2, bits [9:6].  */
     {  7,  3 }, /* SME_Zn4: Z0-Z31, multiple of 4, bits [9:7].  */
+    {  4,  1 }, /* SME_ZtT: upper bit of Zt, bit [4].  */
+    {  0,  3 }, /* SME_Zt3: lower 3 bits of Zt, bits [2:0].  */
+    {  0,  2 }, /* SME_Zt2: lower 2 bits of Zt, bits [1:0].  */
     { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
     { 22,  2 }, /* SME_size_22: size<1>, size<0> class field, [23:22].  */
     { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
@@ -1748,6 +1751,22 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_Ztx2_STRIDED:
+	case AARCH64_OPND_SME_Ztx4_STRIDED:
+	  /* 2-register lists have a stride of 8 and 4-register lists
+	     have a stride of 4.  */
+	  num = get_operand_specific_data (&aarch64_operands[type]);
+	  if (!check_reglist (opnd, mismatch_detail, idx, num, 16 / num))
+	    return 0;
+	  num = 16 | (opnd->reglist.stride - 1);
+	  if ((opnd->reglist.first_regno & ~num) != 0)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("start register out of range"));
+	      return 0;
+	    }
+	  break;
+
 	case AARCH64_OPND_SVE_ZnxN:
 	case AARCH64_OPND_SVE_ZtxN:
 	  num = get_opcode_dependent_value (opcode);
@@ -1804,11 +1823,24 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       break;
 
     case AARCH64_OPND_CLASS_PRED_REG:
-      if (opnd->reg.regno >= 8
-	  && get_operand_fields_width (get_operand_from_code (type)) == 3)
+      switch (type)
 	{
-	  set_invalid_regno_error (mismatch_detail, idx, "p", 0, 7);
-	  return 0;
+	case AARCH64_OPND_SME_PNg3:
+	  if (opnd->reg.regno < 8)
+	    {
+	      set_invalid_regno_error (mismatch_detail, idx, "pn", 8, 15);
+	      return 0;
+	    }
+	  break;
+
+	default:
+	  if (opnd->reg.regno >= 8
+	      && get_operand_fields_width (get_operand_from_code (type)) == 3)
+	    {
+	      set_invalid_regno_error (mismatch_detail, idx, "p", 0, 7);
+	      return 0;
+	    }
+	  break;
 	}
       break;
 
@@ -3742,9 +3774,15 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_PNg4_10:
     case AARCH64_OPND_SVE_PNn:
     case AARCH64_OPND_SVE_PNt:
+    case AARCH64_OPND_SME_PNg3:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
 	snprintf (buf, size, "%s",
 		  style_reg (styler, "pn%d", opnd->reg.regno));
+      else if (opnd->qualifier == AARCH64_OPND_QLF_P_Z
+	       || opnd->qualifier == AARCH64_OPND_QLF_P_M)
+	snprintf (buf, size, "%s",
+		  style_reg (styler, "pn%d/%s", opnd->reg.regno,
+			     aarch64_get_qualifier_name (opnd->qualifier)));
       else
 	snprintf (buf, size, "%s",
 		  style_reg (styler, "pn%d.%s", opnd->reg.regno,
@@ -3772,6 +3810,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_Zdnx4:
     case AARCH64_OPND_SME_Znx2:
     case AARCH64_OPND_SME_Znx4:
+    case AARCH64_OPND_SME_Ztx2_STRIDED:
+    case AARCH64_OPND_SME_Ztx4_STRIDED:
       print_register_list (buf, size, opnd, "z", styler);
       break;
 

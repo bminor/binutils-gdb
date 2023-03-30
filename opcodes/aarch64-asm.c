@@ -96,7 +96,8 @@ aarch64_ins_regno (const aarch64_operand *self, const aarch64_opnd_info *info,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  insert_field (self->fields[0], code, info->reg.regno, 0);
+  int val = info->reg.regno - get_operand_specific_data (self);
+  insert_field (self->fields[0], code, val, 0);
   return true;
 }
 
@@ -1242,6 +1243,26 @@ aarch64_ins_sve_reglist (const aarch64_operand *self,
 			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   insert_field (self->fields[0], code, info->reglist.first_regno, 0);
+  return true;
+}
+
+/* Encode a strided register list.  The first field holds the top bit
+   (0 or 16) and the second field holds the lower bits.  The stride is
+   16 divided by the list length.  */
+bool
+aarch64_ins_sve_strided_reglist (const aarch64_operand *self,
+				 const aarch64_opnd_info *info,
+				 aarch64_insn *code,
+				 const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				 aarch64_operand_error *errors
+				   ATTRIBUTE_UNUSED)
+{
+  unsigned int num_regs = get_operand_specific_data (self);
+  unsigned int mask = 16 | (16 / num_regs - 1);
+  unsigned int val = info->reglist.first_regno;
+  assert ((val & mask) == val);
+  insert_field (self->fields[0], code, val >> 4, 0);
+  insert_field (self->fields[1], code, val & 15, 0);
   return true;
 }
 

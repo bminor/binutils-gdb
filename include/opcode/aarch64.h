@@ -489,6 +489,8 @@ enum aarch64_opnd
   AARCH64_OPND_SME_Zdnx4,	/* SVE vector register list from [4:2]*4.  */
   AARCH64_OPND_SME_Znx2,	/* SVE vector register list from [9:6]*2.  */
   AARCH64_OPND_SME_Znx4,	/* SVE vector register list from [9:7]*4.  */
+  AARCH64_OPND_SME_Ztx2_STRIDED, /* SVE vector register list in [4:0]&23.  */
+  AARCH64_OPND_SME_Ztx4_STRIDED, /* SVE vector register list in [4:0]&19.  */
   AARCH64_OPND_SME_ZAda_2b,	/* SME <ZAda>.S, 2-bits.  */
   AARCH64_OPND_SME_ZAda_3b,	/* SME <ZAda>.D, 3-bits.  */
   AARCH64_OPND_SME_ZA_HV_idx_src,	/* SME source ZA tile vector.  */
@@ -496,6 +498,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ZA_HV_idx_dest,	/* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_ZA_HV_idx_destxN,	/* SME N dest ZA tile vectors.  */
   AARCH64_OPND_SME_Pm,		/* SME scalable predicate register, bits [15:13].  */
+  AARCH64_OPND_SME_PNg3,	/* Predicate-as-counter register, bits [12:10].  */
   AARCH64_OPND_SME_list_of_64bit_tiles, /* SME list of ZA tiles.  */
   AARCH64_OPND_SME_ZA_HV_idx_ldstr, /* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_ZA_array_off3_0, /* SME ZA[<Wv>{, #<imm3>}].  */

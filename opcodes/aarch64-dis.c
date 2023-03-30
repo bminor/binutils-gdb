@@ -279,7 +279,8 @@ aarch64_ext_regno (const aarch64_operand *self, aarch64_opnd_info *info,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  info->reg.regno = extract_field (self->fields[0], code, 0);
+  info->reg.regno = (extract_field (self->fields[0], code, 0)
+		     + get_operand_specific_data (self));
   return true;
 }
 
@@ -2036,6 +2037,24 @@ aarch64_ext_sve_reglist (const aarch64_operand *self,
   info->reglist.first_regno = extract_field (self->fields[0], code, 0);
   info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
   info->reglist.stride = 1;
+  return true;
+}
+
+/* Decode a strided register list.  The first field holds the top bit
+   (0 or 16) and the second field holds the lower bits.  The stride is
+   16 divided by the list length.  */
+bool
+aarch64_ext_sve_strided_reglist (const aarch64_operand *self,
+				 aarch64_opnd_info *info, aarch64_insn code,
+				 const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				 aarch64_operand_error *errors
+				   ATTRIBUTE_UNUSED)
+{
+  unsigned int upper = extract_field (self->fields[0], code, 0);
+  unsigned int lower = extract_field (self->fields[1], code, 0);
+  info->reglist.first_regno = upper * 16 + lower;
+  info->reglist.num_regs = get_operand_specific_data (self);
+  info->reglist.stride = 16 / info->reglist.num_regs;
   return true;
 }
 
