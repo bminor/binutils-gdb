@@ -12,3 +12,7 @@ insn:
 
 	# setssbsy
 	.insn 0xf30f01e8
+
+	# vzeroall
+	.insn VEX.256.0F.WIG 0x77
+	.insn {vex3} VEX.L1 0x0f77

@@ -307,6 +307,9 @@ struct _i386_insn
     unsigned int prefixes;
     unsigned char prefix[MAX_PREFIXES];
 
+    /* .insn allows for reserved opcode spaces.  */
+    unsigned char insn_opcode_space;
+
     /* Register is in low 3 bits of opcode.  */
     bool short_form;
 
@@ -565,6 +568,9 @@ static expressionS im_expressions[MAX_IMMEDIATE_OPERANDS];
 
 /* Current operand we are working on.  */
 static int this_operand = -1;
+
+/* Are we processing a .insn directive?  */
+#define dot_insn() (i.tm.mnem_off == MN__insn)
 
 /* We support four different modes.  FLAG_CODE variable is used to distinguish
    these.  */
@@ -3633,6 +3639,8 @@ build_vex_prefix (const insn_template *t)
     vector_length = avxscalar;
   else if (i.tm.opcode_modifier.vex == VEX256)
     vector_length = 1;
+  else if (dot_insn () && i.tm.opcode_modifier.vex == VEX128)
+    vector_length = 0;
   else
     {
       unsigned int op;
@@ -3700,7 +3708,9 @@ build_vex_prefix (const insn_template *t)
 
       /* The high 3 bits of the second VEX byte are 1's compliment
 	 of RXB bits from REX.  */
-      i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_space;
+      i.vex.bytes[1] = ((~i.rex & 7) << 5)
+		       | (!dot_insn () ? i.tm.opcode_space
+				       : i.insn_opcode_space);
 
       i.vex.bytes[2] = (w << 7
 			| register_specifier << 3
@@ -3836,7 +3846,9 @@ build_evex_prefix (void)
      bits from REX.  */
   gas_assert (i.tm.opcode_space >= SPACE_0F);
   gas_assert (i.tm.opcode_space <= SPACE_EVEXMAP6);
-  i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_space;
+  i.vex.bytes[1] = ((~i.rex & 7) << 5)
+		   | (!dot_insn () ? i.tm.opcode_space
+				   : i.insn_opcode_space);
 
   /* The fifth bit of the second EVEX byte is 1's compliment of the
      REX_R bit in VREX.  */
@@ -3953,6 +3965,13 @@ build_evex_prefix (void)
 	case EVEX512:
 	  vec_length = 2 << 5;
 	  break;
+	case EVEX_L3:
+	  if (dot_insn ())
+	    {
+	      vec_length = 3 << 5;
+	      break;
+	    }
+	  /* Fall through.  */
 	default:
 	  abort ();
 	  break;
@@ -10552,6 +10571,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   bad:
       *saved_ilp = saved_char;
       ignore_rest_of_line ();
+      i.tm.mnem_off = 0;
       return;
     }
   line += end - line;
@@ -10574,6 +10594,9 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	  && (*e == '.' || is_space_char (*e)))
 	{
 	  xop = true;
+	  /* Arrange for build_vex_prefix() to emit 0x8f.  */
+	  i.tm.opcode_space = SPACE_XOP08;
+	  i.insn_opcode_space = n;
 	  line = e;
 	}
     }
@@ -10597,6 +10620,188 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 
   if (line > end && *line == '.')
     {
+      /* Length specifier (VEX.L, XOP.L, EVEX.L'L).  */
+      switch (line[1])
+	{
+	case 'L':
+	  switch (line[2])
+	    {
+	    case '0':
+	      if (evex)
+		i.tm.opcode_modifier.evex = EVEX128;
+	      else
+		i.tm.opcode_modifier.vex = VEX128;
+	      break;
+
+	    case '1':
+	      if (evex)
+		i.tm.opcode_modifier.evex = EVEX256;
+	      else
+		i.tm.opcode_modifier.vex = VEX256;
+	      break;
+
+	    case '2':
+	      if (evex)
+		i.tm.opcode_modifier.evex = EVEX512;
+	      break;
+
+	    case '3':
+	      if (evex)
+		i.tm.opcode_modifier.evex = EVEX_L3;
+	      break;
+
+	    case 'I':
+	      if (line[3] == 'G')
+		{
+		  if (evex)
+		    i.tm.opcode_modifier.evex = EVEXLIG;
+		  else
+		    i.tm.opcode_modifier.vex = VEXScalar; /* LIG */
+		  ++line;
+		}
+	      break;
+	    }
+
+	  if (i.tm.opcode_modifier.vex || i.tm.opcode_modifier.evex)
+	    line += 3;
+	  break;
+
+	case '1':
+	  if (line[2] == '2' && line[3] == '8')
+	    {
+	      if (evex)
+		i.tm.opcode_modifier.evex = EVEX128;
+	      else
+		i.tm.opcode_modifier.vex = VEX128;
+	      line += 4;
+	    }
+	  break;
+
+	case '2':
+	  if (line[2] == '5' && line[3] == '6')
+	    {
+	      if (evex)
+		i.tm.opcode_modifier.evex = EVEX256;
+	      else
+		i.tm.opcode_modifier.vex = VEX256;
+	      line += 4;
+	    }
+	  break;
+
+	case '5':
+	  if (evex && line[2] == '1' && line[3] == '2')
+	    {
+	      i.tm.opcode_modifier.evex = EVEX512;
+	      line += 4;
+	    }
+	  break;
+	}
+    }
+
+  if (line > end && *line == '.')
+    {
+      /* embedded prefix (VEX.pp, XOP.pp, EVEX.pp).  */
+      switch (line[1])
+	{
+	case 'N':
+	  if (line[2] == 'P')
+	    line += 3;
+	  break;
+
+	case '6':
+	  if (line[2] == '6')
+	    {
+	      i.tm.opcode_modifier.opcodeprefix = PREFIX_0X66;
+	      line += 3;
+	    }
+	  break;
+
+	case 'F': case 'f':
+	  if (line[2] == '3')
+	    {
+	      i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
+	      line += 3;
+	    }
+	  else if (line[2] == '2')
+	    {
+	      i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF2;
+	      line += 3;
+	    }
+	  break;
+	}
+    }
+
+  if (line > end && !xop && *line == '.')
+    {
+      /* Encoding space (VEX.mmmmm, EVEX.mmmm).  */
+      switch (line[1])
+	{
+	case '0':
+	  if (TOUPPER (line[2]) != 'F')
+	    break;
+	  if (line[3] == '.' || is_space_char (line[3]))
+	    {
+	      i.insn_opcode_space = SPACE_0F;
+	      line += 3;
+	    }
+	  else if (line[3] == '3'
+		   && (line[4] == '8' || TOUPPER (line[4]) == 'A')
+		   && (line[5] == '.' || is_space_char (line[5])))
+	    {
+	      i.insn_opcode_space = line[4] == '8' ? SPACE_0F38 : SPACE_0F3A;
+	      line += 5;
+	    }
+	  break;
+
+	case 'M':
+	  if (ISDIGIT (line[2]) && line[2] != '0')
+	    {
+	      char *e;
+	      unsigned long n = strtoul (line + 2, &e, 10);
+
+	      if (n <= (evex ? 15 : 31)
+		  && (*e == '.' || is_space_char (*e)))
+		{
+		  i.insn_opcode_space = n;
+		  line = e;
+		}
+	    }
+	  break;
+	}
+    }
+
+  if (line > end && *line == '.' && line[1] == 'W')
+    {
+      /* VEX.W, XOP.W, EVEX.W  */
+      switch (line[2])
+	{
+	case '0':
+	  i.tm.opcode_modifier.vexw = VEXW0;
+	  break;
+
+	case '1':
+	  i.tm.opcode_modifier.vexw = VEXW1;
+	  break;
+
+	case 'I':
+	  if (line[3] == 'G')
+	    {
+	      i.tm.opcode_modifier.vexw = VEXWIG;
+	      ++line;
+	    }
+	  break;
+	}
+
+      if (i.tm.opcode_modifier.vexw)
+	line += 3;
+    }
+
+  if (line > end && *line && !is_space_char (*line))
+    {
+      /* Improve diagnostic a little.  */
+      if (*line == '.' && line[1] && !is_space_char (line[1]))
+	++line;
+      goto done;
     }
 
   input_line_pointer = line;
@@ -10625,24 +10830,30 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
     }
 
   /* Trim off encoding space.  */
-  if (j > 1 && !i.tm.opcode_space && (val >> ((j - 1) * 8)) == 0x0f)
+  if (j > 1 && !i.insn_opcode_space && (val >> ((j - 1) * 8)) == 0x0f)
     {
       uint8_t byte = val >> ((--j - 1) * 8);
 
-      i.tm.opcode_space = SPACE_0F;
+      i.insn_opcode_space = SPACE_0F;
       switch (byte & -(j > 1))
 	{
 	case 0x38:
-	  i.tm.opcode_space = SPACE_0F38;
+	  i.insn_opcode_space = SPACE_0F38;
 	  --j;
 	  break;
 	case 0x3a:
-	  i.tm.opcode_space = SPACE_0F3A;
+	  i.insn_opcode_space = SPACE_0F3A;
 	  --j;
 	  break;
 	}
+      i.tm.opcode_space = i.insn_opcode_space;
       val &= ((uint64_t)1 << (j * 8)) - 1;
     }
+  if (!i.tm.opcode_space && (vex || evex))
+    /* Arrange for build_vex_prefix() to properly emit 0xC4/0xC5.
+       Also avoid hitting abort() there or in build_evex_prefix().  */
+    i.tm.opcode_space = i.insn_opcode_space == SPACE_0F ? SPACE_0F
+						   : SPACE_0F38;
 
   if (j > 2)
     {
@@ -10652,12 +10863,33 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   i.opcode_length = j;
   i.tm.base_opcode = val;
 
+  if (vex || xop)
+    {
+      if (!i.tm.opcode_modifier.vex)
+	i.tm.opcode_modifier.vex = VEXScalar; /* LIG */
+
+      build_vex_prefix (NULL);
+      i.rex &= REX_OPCODE;
+    }
+  else if (evex)
+    {
+      if (!i.tm.opcode_modifier.evex)
+	i.tm.opcode_modifier.evex = EVEXLIG;
+
+      build_evex_prefix ();
+      i.rex &= REX_OPCODE;
+    }
+
   output_insn ();
 
+ done:
   *saved_ilp = saved_char;
   input_line_pointer = line;
 
   demand_empty_rest_of_line ();
+
+  /* Make sure dot_insn() won't yield "true" anymore.  */
+  i.tm.mnem_off = 0;
 }
 
 #ifdef TE_PE
