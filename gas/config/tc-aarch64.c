@@ -1393,7 +1393,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   char *str = *ccp;
   int nb_regs;
   struct vector_type_el typeinfo, typeinfo_first;
-  int val, val_range, mask;
+  uint32_t val, val_range, mask;
   int in_range;
   int ret_val;
   bool error = false;
@@ -1414,8 +1414,8 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   typeinfo_first.element_size = 0;
   typeinfo_first.index = 0;
   ret_val = 0;
-  val = -1;
-  val_range = -1;
+  val = -1u;
+  val_range = -1u;
   in_range = 0;
   mask = reg_type_mask (type);
   do
@@ -1470,7 +1470,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
       if (! error)
 	for (;;)
 	  {
-	    ret_val |= val_range << (5 * nb_regs);
+	    ret_val |= val_range << ((5 * nb_regs) & 31);
 	    nb_regs++;
 	    if (val_range == val)
 	      break;
