@@ -613,6 +613,137 @@ This directive behaves in the same way as the @code{.short} directive,
 taking a series of comma separated expressions and storing them as
 two-byte wide values into the current section.
 
+@cindex @code{insn} directive
+@item .insn [@var{prefix}[,...]] [@var{encoding}] @var{major-opcode}[@code{+r}|@code{/@var{extension}}] [,@var{operand}[,...]]
+This directive allows composing instructions which @code{@value{AS}}
+may not know about yet, or which it has no way of expressing (which
+can be the case for certain alternative encodings).  It assumes certain
+basic structure in how operands are encoded, and it also only
+recognizes - with a few extensions as per below - operands otherwise
+valid for instructions.  Therefore there is no guarantee that
+everything can be expressed (e.g. the original Intel Xeon Phi's MVEX
+encodings cannot be expressed).
+
+@itemize @bullet
+@item
+@var{prefix} expresses one or more opcode prefixes in the usual way.
+Legacy encoding prefixes altering meaning (0x66, 0xF2, 0xF3) may be
+specified as high byte of <major-opcode> (perhaps already including an
+encoding space prefix).  Note that there can only be one such prefix.
+Segment overrides are better specified in the respective memory
+operand, as long as there is one.
+
+@item
+@var{encoding} is used to specify VEX, XOP, or EVEX encodings. The
+syntax tries to resemble that used in documentation:
+@itemize @bullet
+@item @code{VEX}[@code{.@var{len}}][@code{.@var{prefix}}][@code{.@var{space}}][@code{.@var{w}}]
+@item @code{EVEX}[@code{.@var{len}}][@code{.@var{prefix}}][@code{.@var{space}}][@code{.@var{w}}]
+@item @code{XOP}@var{space}[@code{.@var{len}}][@code{.@var{prefix}}][@code{.@var{w}}]
+@end itemize
+
+Here
+@itemize @bullet
+@item @var{len} can be @code{LIG}, @code{128}, @code{256}, or (EVEX
+only) @code{512} as well as @code{L0} / @code{L1} for VEX / XOP and
+@code{L0}...@code{L3} for EVEX
+@item @var{prefix} can be @code{NP}, @code{66}, @code{F3}, or @code{F2}
+@item @var{space} can be
+@itemize @bullet
+@item @code{0f}, @code{0f38}, @code{0f3a}, or @code{M0}...@code{M31}
+for VEX
+@item @code{08}...@code{1f} for XOP
+@item @code{0f}, @code{0f38}, @code{0f3a}, or @code{M0}...@code{M15}
+for EVEX
+@end itemize
+@item @var{w} can be @code{WIG}, @code{W0}, or @code{W1}
+@end itemize
+
+Defaults:
+@itemize @bullet
+@item Omitted @var{len} means "infer from operand size" if there is at
+least one sized vector operand, or @code{LIG} otherwise. (Obviously
+@var{len} has to be omitted when there's EVEX rounding control
+specified later in the operands.)
+@item Omitted @var{prefix} means @code{NP}.
+@item Omitted @var{space} (VEX/EVEX only) implies encoding space is
+taken from @var{major-opcode}.
+@item Omitted @var{w} means "infer from GPR operand size" in 64-bit
+code if there is at least one GPR(-like) operand, or @code{WIG}
+otherwise.
+@end itemize
+
+@item
+@var{major-opcode} is an absolute expression specifying the instruction
+opcode.  Legacy encoding prefixes altering encoding space (0x0f,
+0x0f38, 0x0f3a) have to be specified as high byte(s) here.
+"Degenerate" ModR/M bytes, as present in e.g. certain FPU opcodes or
+sub-spaces like that of major opcode 0x0f01, generally want encoding as
+immediate operand (such opcodes wouldn't normally have non-immediate
+operands); in some cases it may be possible to also encode these as low
+byte of the major opcode, but there are potential ambiguities.  Also
+note that after stripping encoding prefixes, the residual has to fit in
+two bytes (16 bits).  @code{+r} can be suffixed to the major opcode
+expression to specify register-only encoding forms not using a ModR/M
+byte.  @code{/@var{extension}} can alternatively be suffixed to the
+major opcode expression to specify an extension opcode, encoded in bits
+3-5 of the ModR/M byte.
+
+@item
+@var{operand} is an instruction operand expressed the usual way.
+Register operands are primarily used to express register numbers as
+encoded in ModR/M byte and REX/VEX/XOP/EVEX prefixes.  In certain
+cases the register type (really: size) is also used to derive other
+encoding attributes, if these aren't specified explicitly.  Note that
+there is no consistency checking among operands, so entirely bogus
+mixes of operands are possible.  Note further that only operands
+actually encoded in the instruction should be specified.  Operands like
+@samp{%cl} in shift/rotate instructions have to be omitted, or else
+they'll be encoded as an ordinary (register) operand.  Operand order
+may also not match that of the actual instruction (see below).
+@end itemize
+
+Encoding of operands: While for a memory operand (of which there can be
+only one) it is clear how to encode it in the resulting ModR/M byte,
+register operands are encoded strictly in this order (operand counts do
+not include immediate ones in the enumeration below, and if there was an
+extension opcode specified it counts as a register operand; VEX.vvvv
+is meant to cover XOP and EVEX as well):
+
+@itemize @bullet
+@item VEX.vvvv for 1-register-operand VEX/XOP/EVEX insns,
+@item ModR/M.rm, ModR/M.reg for 2-operand insns,
+@item ModR/M.rm, VEX.vvvv, ModR/M.reg for 3-operand insns, and
+@item Imm@{4,5@}, ModR/M.rm, VEX.vvvv, ModR/M.reg for 4-operand insns,
+@end itemize
+
+obviously with the ModR/M.rm slot skipped when there is a memory
+operand, and obviously with the ModR/M.reg slot skipped when there is
+an extension opcode.  For Intel syntax of course the opposite order
+applies.  With @code{+r} (and hence no ModR/M) there can only be a
+single register operand for legacy encodings.  VEX and alike can have
+two register operands, where the second (first in Intel syntax) would
+go into VEX.vvvv.
+
+Immediate operands (including immediate-like displacements, i.e. when
+not part of ModR/M addressing) are emitted in the order specified,
+regardless of AT&T or Intel syntax.  Since it may not be possible to
+infer the size of such immediates, they can be suffixed by
+@code{@{:s@var{n}@}} or @code{@{:u@var{n}@}}, representing signed /
+unsigned immediates of the given number of bits respectively.  When
+emitting such operands, the number of bits will be rounded up to the
+smallest suitable of 8, 16, 32, or 64.  Immediates wider than 32 bits
+are permitted in 64-bit code only.
+
+For EVEX encoding memory operands with a displacement need to know
+Disp8 scaling size in order to use an 8-bit displacement.  For many
+instructions this can be inferred from the types of other operands
+specified.  In Intel syntax @samp{DWORD PTR} and alike can be used to
+specify the respective size.  In AT&T syntax the memory operands can
+be suffixed by @code{@{:d@var{n}@}} to specify the size (in bytes).
+This can be combined with an embedded broadcast specifier:
+@samp{8(%eax)@{1to8:d8@}}.
+
 @c FIXME: Document other x86 specific directives ?  Eg: .code16gcc,
 
 @end table
