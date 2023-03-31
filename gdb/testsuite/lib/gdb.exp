@@ -8490,7 +8490,7 @@ proc gdb_define_cmd {command command_list} {
     set test "define $command"
 
     gdb_test_multiple "define $command" $test {
-	-re "End with"  {
+	-re "End with \[^\r\n\]*\r\n *>$"  {
 	    gdb_test_multiple $input $test {
 		-re "\r\n$gdb_prompt " {
 		}
