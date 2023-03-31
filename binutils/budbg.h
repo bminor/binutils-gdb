@@ -39,7 +39,7 @@ extern void *start_stab (void *, bfd *, bool, asymbol **, long);
 extern bool finish_stab (void *, void *);
 
 extern bool parse_stab
-  (void *, void *, int, int, bfd_vma, const char *);
+  (void *, void *, int, int, bfd_vma, const char *, bool *);
 
 extern bool write_stabs_in_sections_debugging_info
   (bfd *, void *, bfd_byte **, bfd_size_type *, bfd_byte **, bfd_size_type *);

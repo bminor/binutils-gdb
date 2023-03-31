@@ -435,7 +435,7 @@ extern bool debug_set_filename (void *, const char *);
 /* Change source files to the given file name.  This is used for
    include files in a single compilation unit.  */
 
-extern bool debug_start_source (void *, const char *);
+extern bool debug_start_source (void *, const char *, bool *);
 
 /* Record a function definition.  This implicitly starts a function
    block.  The debug_type argument is the type of the return value.

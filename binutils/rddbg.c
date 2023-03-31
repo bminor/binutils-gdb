@@ -194,6 +194,7 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 		{
 		  size_t len;
 		  char *f, *s;
+		  bool f_used;
 
 		  if (stroff + strx >= strsize)
 		    {
@@ -238,10 +239,13 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 		      free (f);
 		      f = s;
 		    }
+		  if (!f)
+		    f = xstrdup (s);
 
 		  save_stab (type, desc, value, s);
 
-		  if (! parse_stab (dhandle, shandle, type, desc, value, s))
+		  if (! parse_stab (dhandle, shandle, type, desc, value,
+				    f, &f_used))
 		    {
 		      stab_context ();
 		      free_saved_stabs ();
@@ -252,18 +256,14 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 		      return false;
 		    }
 
-		  /* Don't free f, since I think the stabs code
-		     expects strings to hang around.  This should be
-		     straightened out.  FIXME.  */
+		  if (!f_used)
+		    free (f);
 		}
 	    }
 
 	  free_saved_stabs ();
 	  free (stabs);
-
-	  /* Don't free strings, since I think the stabs code expects
-	     the strings to hang around.  This should be straightened
-	     out.  FIXME.  */
+	  free (strings);
 	}
     }
 
@@ -297,6 +297,7 @@ read_symbol_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	{
 	  const char *s;
 	  char *f;
+	  bool f_used;
 
 	  if (shandle == NULL)
 	    {
@@ -327,20 +328,22 @@ read_symbol_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	      f = n;
 	      s = n;
 	    }
+	  if (!f)
+	    f = xstrdup (s);
 
 	  save_stab (i.stab_type, i.stab_desc, i.value, s);
 
 	  if (! parse_stab (dhandle, shandle, i.stab_type, i.stab_desc,
-			    i.value, s))
+			    i.value, f, &f_used))
 	    {
 	      stab_context ();
+	      free (f);
 	      free_saved_stabs ();
 	      return false;
 	    }
 
-	  /* Don't free f, since I think the stabs code expects
-	     strings to hang around.  This should be straightened out.
-	     FIXME.  */
+	  if (!f_used)
+	    free (f);
 	}
     }
 

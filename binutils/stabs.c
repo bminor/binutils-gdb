@@ -422,11 +422,12 @@ finish_stab (void *dhandle, void *handle)
 
 bool
 parse_stab (void *dhandle, void *handle, int type, int desc, bfd_vma value,
-	    const char *string)
+	    const char *string, bool *string_used)
 {
   const char * string_end;
   struct stab_handle *info = (struct stab_handle *) handle;
 
+  *string_used = false;
   /* gcc will emit two N_SO strings per compilation unit, one for the
      directory name and one for the file name.  We just collect N_SO
      strings as we see them, and start the new compilation unit when
@@ -447,11 +448,11 @@ parse_stab (void *dhandle, void *handle, int type, int desc, bfd_vma value,
 	info->file_start_offset = info->so_value;
 
       /* We need to reset the mapping from type numbers to types.  We
-	 can't free the old mapping, because of the use of
-	 debug_make_indirect_type.  */
+	 can only free the file_types array, not the stab_types
+	 list entries due to the use of debug_make_indirect_type.  */
       info->files = 1;
       info->file_types = ((struct stab_types **)
-			  xmalloc (sizeof *info->file_types));
+			  xrealloc (info->file_types, sizeof *info->file_types));
       info->file_types[0] = NULL;
       info->so_string = NULL;
 
@@ -566,21 +567,29 @@ parse_stab (void *dhandle, void *handle, int type, int desc, bfd_vma value,
 
     case N_SOL:
       /* Start an include file.  */
-      if (! debug_start_source (dhandle, string))
+      if (! debug_start_source (dhandle, string, string_used))
 	return false;
       break;
 
     case N_BINCL:
       /* Start an include file which may be replaced.  */
+      *string_used = true;
       push_bincl (info, string, value);
-      if (! debug_start_source (dhandle, string))
+      if (! debug_start_source (dhandle, string, string_used))
 	return false;
       break;
 
     case N_EINCL:
       /* End an N_BINCL include.  */
-      if (! debug_start_source (dhandle, pop_bincl (info)))
-	return false;
+      string = pop_bincl (info);
+      if (! debug_start_source (dhandle, string, string_used))
+	{
+	  free ((char *) string);
+	  return false;
+	}
+      if (!*string_used)
+	free ((char *) string);
+      *string_used = false;
       break;
 
     case N_EXCL:

@@ -713,7 +713,7 @@ debug_set_filename (void *handle, const char *name)
    include files in a single compilation unit.  */
 
 bool
-debug_start_source (void *handle, const char *name)
+debug_start_source (void *handle, const char *name, bool *name_used)
 {
   struct debug_handle *info = (struct debug_handle *) handle;
   struct debug_file *f, **pf;
@@ -740,6 +740,7 @@ debug_start_source (void *handle, const char *name)
   memset (f, 0, sizeof *f);
 
   f->filename = name;
+  *name_used = true;
 
   for (pf = &info->current_file->next;
        *pf != NULL;
