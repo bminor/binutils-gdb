@@ -38,6 +38,7 @@ insn:
 
 	# vaddss
 	.insn VEX.LIG.F3.0F 0x58, %xmm0, %xmm1, %xmm10
+	.insn EVEX.LIG.F3.0F.W0 0x58, 4(%rax){:d4}, %xmm1, %xmm2
 
 	# vfmaddps
 	.insn VEX.66.0F3A.W0 0x68, %xmm8, (%rcx), %xmm2, %xmm3
@@ -63,3 +64,18 @@ insn:
 	.insn EVEX.66.0f38.W1 0x93, (%rax, %xmm17, 2), %xmm3{%k4}
 	.insn EVEX.66.0f38.W1 0x93, (%rax, %xmm1, 2), %xmm11{%k4}
 	.insn EVEX.66.0f38.W1 0x93, (%rax, %xmm1, 2), %xmm19{%k4}
+
+	# vexpandps
+	.insn EVEX.66.0F38.W0 0x88, 4(%rax){:d4}, %ymm1
+
+	# vcvtpd2phz
+	.insn EVEX.512.66.M5.W1 0x5a, 64(%rax), %xmm0
+	.insn EVEX.66.M5.W1 0x5a, 64(%rax), %zmm0
+	.insn EVEX.66.M5.W1 0x5a, 64(%rax){:d64}, %xmm0
+	.insn EVEX.512.66.M5.W1 0x5a, 8(%rax){1to8}, %xmm0
+	.insn EVEX.66.M5.W1 0x5a, 8(%rax){1to8}, %zmm0
+	.insn EVEX.66.M5.W1 0x5a, 8(%rax){1to8:d8}, %xmm0
+
+	# vcvtph2pd
+	.insn EVEX.M5.W0 0x5a, 16(%rax){:d16}, %zmm0
+	.insn EVEX.M5.W0 0x5a, 2(%rax){1to8:d2}, %zmm0

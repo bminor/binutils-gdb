@@ -10931,7 +10931,10 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   if (*line == ',')
     {
       i386_operand_type combined;
+      expressionS *disp_exp = NULL;
       bool changed;
+
+      i.memshift = -1;
 
       ptr = parse_operands (line + 1, &i386_mnemonics[MN__insn]);
       this_operand = -1;
@@ -11078,12 +11081,40 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 
       /* Establish operand size encoding.  */
       operand_type_set (&combined, 0);
+
       for (j = i.imm_operands; j < i.operands; ++j)
 	{
 	  i.types[j].bitfield.instance = InstanceNone;
 
 	  if (operand_type_check (i.types[j], disp))
-	    i.types[j].bitfield.baseindex = 1;
+	    {
+	      i.types[j].bitfield.baseindex = 1;
+	      disp_exp = i.op[j].disps;
+	    }
+
+	  if (evex && i.types[j].bitfield.baseindex)
+	    {
+	      unsigned int n = i.memshift;
+
+	      if (i.types[j].bitfield.byte)
+		n = 0;
+	      else if (i.types[j].bitfield.word)
+		n = 1;
+	      else if (i.types[j].bitfield.dword)
+		n = 2;
+	      else if (i.types[j].bitfield.qword)
+		n = 3;
+	      else if (i.types[j].bitfield.xmmword)
+		n = 4;
+	      else if (i.types[j].bitfield.ymmword)
+		n = 5;
+	      else if (i.types[j].bitfield.zmmword)
+		n = 6;
+
+	      if (i.memshift < 32 && n != i.memshift)
+		as_warn ("conflicting memory operand size specifiers");
+	      i.memshift = n;
+	    }
 
 	  if ((i.broadcast.type || i.broadcast.bytes)
 	      && j == i.broadcast.operand)
@@ -11091,6 +11122,16 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 
 	  combined = operand_type_or (combined, i.types[j]);
 	  combined.bitfield.class = ClassNone;
+	}
+
+      switch ((i.broadcast.type ? i.broadcast.type : 1)
+	      << (i.memshift < 32 ? i.memshift : 0))
+	{
+	case 64: combined.bitfield.zmmword = 1; break;
+	case 32: combined.bitfield.ymmword = 1; break;
+	case 16: combined.bitfield.xmmword = 1; break;
+	case  8: combined.bitfield.qword = 1; break;
+	case  4: combined.bitfield.dword = 1; break;
 	}
 
       if (i.vec_encoding == vex_encoding_default)
@@ -11138,7 +11179,39 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	      else if (combined.bitfield.xmmword)
 	        i.tm.opcode_modifier.evex = EVEX128;
 	    }
+
+	  if (i.memshift >= 32)
+	    {
+	      unsigned int n = 0;
+
+	      switch (i.tm.opcode_modifier.evex)
+		{
+		case EVEX512: n = 64; break;
+		case EVEX256: n = 32; break;
+		case EVEX128: n = 16; break;
+		}
+
+	      if (i.broadcast.type)
+		n /= i.broadcast.type;
+
+	      if (n > 0)
+		for (i.memshift = 0; !(n & 1); n >>= 1)
+		  ++i.memshift;
+	      else if (disp_exp != NULL && disp_exp->X_op == O_constant
+		       && disp_exp->X_add_number != 0
+		       && i.disp_encoding != disp_encoding_32bit)
+		{
+		  if (!quiet_warnings)
+		    as_warn ("cannot determine memory operand size");
+		  i.disp_encoding = disp_encoding_32bit;
+		}
+	    }
 	}
+
+      if (i.memshift >= 32)
+	i.memshift = 0;
+      else if (!evex)
+	i.vec_encoding = vex_encoding_error;
 
       if (i.disp_operands && !optimize_disp (&i.tm))
 	goto done;
@@ -11314,6 +11387,29 @@ check_VecOperations (char *op_string)
 
 	      i.broadcast.type = bcst_type;
 	      i.broadcast.operand = this_operand;
+
+	      /* For .insn a data size specifier may be appended.  */
+	      if (dot_insn () && *op_string == ':')
+		goto dot_insn_modifier;
+	    }
+	  /* Check .insn special cases.  */
+	  else if (dot_insn () && *op_string == ':')
+	    {
+	    dot_insn_modifier:
+	      if (op_string[1] == 'd')
+		{
+		  unsigned long n;
+
+		  if (i.memshift < 32)
+		    goto duplicated_vec_op;
+
+		  n = strtoul (op_string + 2, &end_op, 0);
+		  if (n)
+		    for (i.memshift = 0; !(n & 1); n >>= 1)
+		      ++i.memshift;
+		  if (i.memshift < 32 && n == 1)
+		    op_string = end_op;
+		}
 	    }
 	  /* Check masking operation.  */
 	  else if ((mask = parse_register (op_string, &end_op)) != NULL)
