@@ -6946,8 +6946,12 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 	  /* An object file might have a reference to a local
 	     undefined symbol.  This is a daft object file, but we
-	     should at least do something about it.  */
+	     should at least do something about it.  NONE and NULL
+	     relocations do not use the symbol and are explicitly
+	     allowed to use an undefined one, so allow those.
+	     Likewise for relocations against STN_UNDEF.  */
 	  if (r_type != R_AARCH64_NONE && r_type != R_AARCH64_NULL
+	      && r_symndx != STN_UNDEF
 	      && bfd_is_und_section (sec)
 	      && ELF_ST_BIND (sym->st_info) != STB_WEAK)
 	    (*info->callbacks->undefined_symbol)
