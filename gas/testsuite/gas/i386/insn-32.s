@@ -9,6 +9,7 @@ insn:
 
 	# fldz
 	.insn 0xd9ee
+	.insn 0xd9, $0xee
 
 	# setssbsy
 	.insn 0xf30f01e8
@@ -23,8 +24,19 @@ insn:
 	.insn 0x0fb6, %ah, %cx
 	.insn 0x0fb7, %eax, %ecx
 
+	# xorb
+	.insn lock 0x80/6, $1, %fs:(%eax)
+
 	# bswap
 	.insn 0x0fc8+r, %edx
+
+1:
+	# xbegin 3f
+	.insn 0xc7f8, $3f-2f{:s32}
+2:
+	# loop 1b
+	.insn 0xe2, $1b-3f{:s8}
+3:
 
 	# vzeroall
 	.insn VEX.256.0F.WIG 0x77
@@ -42,6 +54,11 @@ insn:
 	.insn VEX.66.0F3A.W0 0x68, %xmm0, (%ecx), %xmm2, %xmm3
 	.insn VEX.66.0F3A.W1 0x68, %xmm0, (%ecx), %xmm2, %xmm3
 	.insn VEX.66.0F3A.W1 0x68, (%eax), %xmm1, %xmm2, %xmm3
+
+	# vpermil2ps
+	.insn VEX.66.0F3A.W0 0x48, $0, %xmm0, (%ecx), %xmm2, %xmm3
+	.insn VEX.66.0F3A.W1 0x48, $2, %xmm0, (%ecx), %xmm2, %xmm3
+	.insn VEX.66.0F3A.W1 0x48, $3, (%eax), %xmm1, %xmm2, %xmm3
 
 	# kmovw
 	.insn VEX.L0.0F.W0 0x92, %eax, %k1
@@ -68,3 +85,10 @@ insn:
 	# vcvtph2pd
 	.insn EVEX.M5.W0 0x5a, 16(%eax){:d16}, %zmm0
 	.insn EVEX.M5.W0 0x5a, 2(%eax){1to8:d2}, %zmm0
+
+	.intel_syntax noprefix
+	# vfpclassps
+	.insn EVEX.256.66.0f3a.W0 0x66, k0, [eax+32], 0xff
+	.insn EVEX.66.0f3a.W0 0x66, k0, ymmword ptr [eax+32], 0xff
+	.insn EVEX.256.66.0f3a.W0 0x66, k0, [eax+4]{1to8}, 0xff
+	.insn EVEX.66.0f3a.W0 0x66, k0, dword ptr [eax+4]{1to8}, 0xff

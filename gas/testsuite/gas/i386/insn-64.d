@@ -1,5 +1,7 @@
-#objdump: -dw
+#as: --divide
+#objdump: -dwr
 #name: .insn (64-bit code)
+#xfail: *-*-darwin*
 
 .*: +file format .*
 
@@ -18,8 +20,14 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f be cc[ 	]+movsbw %ah,%cx
 [ 	]*[a-f0-9]+:	0f bf c8[ 	]+movswl %ax,%ecx
 [ 	]*[a-f0-9]+:	48 63 c8[ 	]+movslq %eax,%rcx
+[ 	]*[a-f0-9]+:	f0 80 35 ((00|ff) ){4}01[ 	]+lock xorb \$(0x)?1,[-x01]+\(%rip\) *# .*: (R_X86_64_PC32	lock-(0x)?5|IMAGE_REL_AMD64_REL32	lock)
 [ 	]*[a-f0-9]+:	48 0f ca[ 	]+bswap  %rdx
 [ 	]*[a-f0-9]+:	41 0f c8[ 	]+bswap  %r8d
+[ 	]*[a-f0-9]+:	c7 f8 02 00 00 00[ 	]+xbegin [0-9a-f]+ <insn\+.*>
+[ 	]*[a-f0-9]+:	e2 f8[ 	]+loop   [0-9a-f]+ <insn\+.*>
+[ 	]*[a-f0-9]+:	05 00 00 00 00[ 	]+add    \$(0x)?0,%eax	.*: (R_X86_64_32|IMAGE_REL_AMD64_ADDR32)	var
+[ 	]*[a-f0-9]+:	48 05 00 00 00 00[ 	]+add    \$(0x)?0,%rax	.*: R_X86_64_32S	var
+[ 	]*[a-f0-9]+:	81 3d (00|fc) ((00|ff) ){3}13 12 23 21[ 	]+cmpl   \$0x21231213,[-x04]+\(%rip\) *# .*: (R_X86_64_PC32	var-(0x)?8|IMAGE_REL_AMD64_REL32	var)
 [ 	]*[a-f0-9]+:	c5 fc 77[ 	]+vzeroall
 [ 	]*[a-f0-9]+:	c4 e1 7c 77[ 	]+vzeroall
 [ 	]*[a-f0-9]+:	c4 c1 71 58 d0[ 	]+vaddpd %xmm8,%xmm1,%xmm2
@@ -29,6 +37,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 69 68 19 80[ 	]+vfmaddps %xmm8,\(%rcx\),%xmm2,%xmm3
 [ 	]*[a-f0-9]+:	67 c4 e3 e9 68 19 00[ 	]+vfmaddps \(%ecx\),%xmm0,%xmm2,%xmm3
 [ 	]*[a-f0-9]+:	c4 c3 e9 68 18 10[ 	]+vfmaddps \(%r8\),%xmm1,%xmm2,%xmm3
+[ 	]*[a-f0-9]+:	c4 e3 69 48 19 80[ 	]+vpermil2ps \$(0x)0,%xmm8,\(%rcx\),%xmm2,%xmm3
+[ 	]*[a-f0-9]+:	67 c4 e3 e9 48 19 02[ 	]+vpermil2ps \$(0x)2,\(%ecx\),%xmm0,%xmm2,%xmm3
+[ 	]*[a-f0-9]+:	c4 c3 e9 48 18 13[ 	]+vpermil2ps \$(0x)3,\(%r8\),%xmm1,%xmm2,%xmm3
 [ 	]*[a-f0-9]+:	c4 c1 78 92 c8[ 	]+kmovw  %r8d,%k1
 [ 	]*[a-f0-9]+:	c5 78 93 c1[ 	]+kmovw  %k1,%r8d
 [ 	]*[a-f0-9]+:	62 b1 74 38 58 d0[ 	]+vaddps \{rd-sae\},%zmm16,%zmm1,%zmm2

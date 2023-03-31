@@ -24,9 +24,29 @@ insn:
 	.insn 0x0fbf, %eax, %ecx
 	.insn 0x63, %rax, %rcx
 
+	# xorb
+	.insn lock 0x80/6, $1, lock(%rip)
+
 	# bswap
 	.insn 0x0fc8+r, %rdx
 	.insn 0x0fc8+r, %r8d
+
+1:
+	# xbegin 3f
+	.insn 0xc7f8, $3f-2f{:s32}
+2:
+	# loop 1b
+	.insn 0xe2, $1b-3f{:s8}
+3:
+
+	# add $var, %eax
+	.insn 0x05, $var{:u32}
+
+	# add $var, %rax
+	.insn rex.w 0x05, $var{:s32}
+
+	# cmpl (32-bit immediate split into two 16-bit halves)
+	.insn 0x81/7, $0x1213, $0x2123, var(%rip)
 
 	# vzeroall
 	.insn VEX.256.0F.WIG 0x77
@@ -44,6 +64,11 @@ insn:
 	.insn VEX.66.0F3A.W0 0x68, %xmm8, (%rcx), %xmm2, %xmm3
 	.insn VEX.66.0F3A.W1 0x68, %xmm0, (%ecx), %xmm2, %xmm3
 	.insn VEX.66.0F3A.W1 0x68, (%r8), %xmm1, %xmm2, %xmm3
+
+	# vpermil2ps
+	.insn VEX.66.0F3A.W0 0x48, $0, %xmm8, (%rcx), %xmm2, %xmm3
+	.insn VEX.66.0F3A.W1 0x48, $2, %xmm0, (%ecx), %xmm2, %xmm3
+	.insn VEX.66.0F3A.W1 0x48, $3, (%r8), %xmm1, %xmm2, %xmm3
 
 	# kmovw
 	.insn VEX.L0.0F.W0 0x92, %r8d, %k1

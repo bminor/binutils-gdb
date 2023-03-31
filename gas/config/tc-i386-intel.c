@@ -965,7 +965,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
       i386_operand_type temp;
 
       /* Register operand.  */
-      if (intel_state.base || intel_state.index || intel_state.seg)
+      if (intel_state.base || intel_state.index || intel_state.seg
+          || i.imm_bits[this_operand])
 	{
 	  as_bad (_("invalid operand"));
 	  return 0;
@@ -998,6 +999,12 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	   || intel_state.is_mem)
     {
       /* Memory operand.  */
+      if (i.imm_bits[this_operand])
+	{
+	  as_bad (_("invalid operand"));
+	  return 0;
+	}
+
       if (i.mem_operands)
 	{
 	  /* Handle

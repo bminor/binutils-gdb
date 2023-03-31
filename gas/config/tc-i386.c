@@ -288,6 +288,7 @@ struct _i386_insn
     unsigned int flags[MAX_OPERANDS];
 #define Operand_PCrel 1
 #define Operand_Mem   2
+#define Operand_Signed 4 /* .insn only */
 
     /* Relocation type for operand */
     enum bfd_reloc_code_real reloc[MAX_OPERANDS];
@@ -309,6 +310,9 @@ struct _i386_insn
 
     /* .insn allows for reserved opcode spaces.  */
     unsigned char insn_opcode_space;
+
+    /* .insn also allows (requires) specifying immediate size.  */
+    unsigned char imm_bits[MAX_OPERANDS];
 
     /* Register is in low 3 bits of opcode.  */
     bool short_form;
@@ -5923,6 +5927,10 @@ swap_2_operands (unsigned int xchg1, unsigned int xchg2)
   i.reloc[xchg2] = i.reloc[xchg1];
   i.reloc[xchg1] = temp_reloc;
 
+  temp_flags = i.imm_bits[xchg2];
+  i.imm_bits[xchg2] = i.imm_bits[xchg1];
+  i.imm_bits[xchg1] = temp_flags;
+
   if (i.mask.reg)
     {
       if (i.mask.operand == xchg1)
@@ -10188,7 +10196,8 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 
 	      if (i.types[n].bitfield.imm32s
 		  && (i.suffix == QWORD_MNEM_SUFFIX
-		      || (!i.suffix && i.tm.opcode_modifier.no_lsuf)))
+		      || (!i.suffix && i.tm.opcode_modifier.no_lsuf)
+		      || dot_insn ()))
 		sign = 1;
 	      else
 		sign = 0;
@@ -11216,6 +11225,57 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       if (i.disp_operands && !optimize_disp (&i.tm))
 	goto done;
 
+      /* Establish size for immediate operands.  */
+      for (j = 0; j < i.imm_operands; ++j)
+	{
+	  expressionS *expP = i.op[j].imms;
+
+	  gas_assert (operand_type_check (i.types[j], imm));
+	  operand_type_set (&i.types[j], 0);
+
+	  if (i.imm_bits[j] > 32)
+	    i.types[j].bitfield.imm64 = 1;
+	  else if (i.imm_bits[j] > 16)
+	    {
+	      if (flag_code == CODE_64BIT && (i.flags[j] & Operand_Signed))
+		i.types[j].bitfield.imm32s = 1;
+	      else
+		i.types[j].bitfield.imm32 = 1;
+	    }
+	  else if (i.imm_bits[j] > 8)
+	    i.types[j].bitfield.imm16 = 1;
+	  else if (i.imm_bits[j] > 0)
+	    {
+	      if (i.flags[j] & Operand_Signed)
+		i.types[j].bitfield.imm8s = 1;
+	      else
+		i.types[j].bitfield.imm8 = 1;
+	    }
+	  else if (expP->X_op == O_constant)
+	    {
+	      i.types[j] = smallest_imm_type (expP->X_add_number);
+	      i.types[j].bitfield.imm1 = 0;
+	      /* Oddly enough imm_size() checks imm64 first, so the bit needs
+		 zapping since smallest_imm_type() sets it unconditionally.  */
+	      if (flag_code != CODE_64BIT)
+		{
+		  i.types[j].bitfield.imm64 = 0;
+		  i.types[j].bitfield.imm32s = 0;
+		  i.types[j].bitfield.imm32 = 1;
+		}
+	      else if (i.types[j].bitfield.imm32 || i.types[j].bitfield.imm32s)
+		i.types[j].bitfield.imm64 = 0;
+	    }
+	  else
+	    /* Non-constant expressions are sized heuristically.  */
+	    switch (flag_code)
+	      {
+	      case CODE_64BIT: i.types[j].bitfield.imm32s = 1; break;
+	      case CODE_32BIT: i.types[j].bitfield.imm32 = 1; break;
+	      case CODE_16BIT: i.types[j].bitfield.imm16 = 1; break;
+	      }
+	}
+
       for (j = 0; j < i.operands; ++j)
 	i.tm.operand_types[j] = i.types[j];
 
@@ -11396,10 +11456,11 @@ check_VecOperations (char *op_string)
 	  else if (dot_insn () && *op_string == ':')
 	    {
 	    dot_insn_modifier:
-	      if (op_string[1] == 'd')
+	      switch (op_string[1])
 		{
 		  unsigned long n;
 
+		case 'd':
 		  if (i.memshift < 32)
 		    goto duplicated_vec_op;
 
@@ -11409,6 +11470,27 @@ check_VecOperations (char *op_string)
 		      ++i.memshift;
 		  if (i.memshift < 32 && n == 1)
 		    op_string = end_op;
+		  break;
+
+		case 's': case 'u':
+		  /* This isn't really a "vector" operation, but a sign/size
+		     specifier for immediate operands of .insn.  Note that AT&T
+		     syntax handles the same in i386_immediate().  */
+		  if (!intel_syntax)
+		    break;
+
+		  if (i.imm_bits[this_operand])
+		    goto duplicated_vec_op;
+
+		  n = strtoul (op_string + 2, &end_op, 0);
+		  if (n && n <= (flag_code == CODE_64BIT ? 64 : 32))
+		    {
+		      i.imm_bits[this_operand] = n;
+		      if (op_string[1] == 's')
+			i.flags[this_operand] |= Operand_Signed;
+		      op_string = end_op;
+		    }
+		  break;
 		}
 	    }
 	  /* Check masking operation.  */
@@ -11546,6 +11628,22 @@ i386_immediate (char *imm_start)
     input_line_pointer = gotfree_input_line;
 
   exp_seg = expression (exp);
+
+  /* For .insn immediates there may be a size specifier.  */
+  if (dot_insn () && *input_line_pointer == '{' && input_line_pointer[1] == ':'
+      && (input_line_pointer[2] == 's' || input_line_pointer[2] == 'u'))
+    {
+      char *e;
+      unsigned long n = strtoul (input_line_pointer + 3, &e, 0);
+
+      if (*e == '}' && n && n <= (flag_code == CODE_64BIT ? 64 : 32))
+	{
+	  i.imm_bits[this_operand] = n;
+	  if (input_line_pointer[2] == 's')
+	    i.flags[this_operand] |= Operand_Signed;
+	  input_line_pointer = e + 1;
+	}
+    }
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer)
