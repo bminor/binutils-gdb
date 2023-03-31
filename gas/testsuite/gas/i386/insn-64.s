@@ -13,6 +13,53 @@ insn:
 	# setssbsy
 	.insn 0xf30f01e8
 
+	# mov
+	.insn 0x8b, %ecx, %r8d
+	.insn 0x8b, %rax, %rcx
+	.insn 0x89, %ecx, 8(%r8)
+	.insn 0x8b, 0x8080(,%r8), %ecx
+
+	# movsx
+	.insn 0x0fbe, %ah, %cx
+	.insn 0x0fbf, %eax, %ecx
+	.insn 0x63, %rax, %rcx
+
+	# bswap
+	.insn 0x0fc8+r, %rdx
+	.insn 0x0fc8+r, %r8d
+
 	# vzeroall
 	.insn VEX.256.0F.WIG 0x77
 	.insn {vex3} VEX.L1 0x0f77
+
+	# vaddpd
+	.insn VEX.66.0F 0x58, %xmm8, %xmm1, %xmm2
+	.insn VEX.66 0x0f58, %ymm0, %ymm9, %ymm2
+
+	# vaddss
+	.insn VEX.LIG.F3.0F 0x58, %xmm0, %xmm1, %xmm10
+
+	# vfmaddps
+	.insn VEX.66.0F3A.W0 0x68, %xmm8, (%rcx), %xmm2, %xmm3
+	.insn VEX.66.0F3A.W1 0x68, %xmm0, (%ecx), %xmm2, %xmm3
+	.insn VEX.66.0F3A.W1 0x68, (%r8), %xmm1, %xmm2, %xmm3
+
+	# kmovw
+	.insn VEX.L0.0F.W0 0x92, %r8d, %k1
+	.insn VEX.L0.0F.W0 0x93, %k1, %r8d
+
+	# vaddps
+	.insn EVEX.NP.0F.W0 0x58, {rd-sae}, %zmm16, %zmm1, %zmm2
+	.insn EVEX.NP.0F.W0 0x58, {rn-sae}, %zmm0, %zmm17, %zmm2
+	.insn EVEX.NP.0F.W0 0x58, {ru-sae}, %zmm0, %zmm1, %zmm18
+
+	# vgather...
+	.insn VEX.66.0f38.W0 0x92, %xmm8, (%rax, %xmm1, 2), %xmm3
+	.insn VEX.66.0f38.W0 0x92, %xmm0, (%r8, %xmm1, 2), %xmm3
+	.insn VEX.66.0f38.W0 0x92, %xmm0, (%rax, %xmm9, 2), %xmm3
+	.insn VEX.66.0f38.W0 0x92, %xmm0, (%rax, %xmm1, 2), %xmm11
+	.insn EVEX.66.0f38.W1 0x93, (%r8, %xmm1, 2), %xmm3{%k4}
+	.insn EVEX.66.0f38.W1 0x93, (%rax, %xmm9, 2), %xmm3{%k4}
+	.insn EVEX.66.0f38.W1 0x93, (%rax, %xmm17, 2), %xmm3{%k4}
+	.insn EVEX.66.0f38.W1 0x93, (%rax, %xmm1, 2), %xmm11{%k4}
+	.insn EVEX.66.0f38.W1 0x93, (%rax, %xmm1, 2), %xmm19{%k4}
