@@ -154,7 +154,7 @@ type_name_to_scope (const char *type_name, const struct block *block)
 
       /* Look up the resulting name.  */
       struct block_symbol bsymbol
-	= lookup_symbol (lookup_name.c_str (), block, VAR_DOMAIN, nullptr);
+	= lookup_symbol (lookup_name.c_str (), block, SEARCH_VFT, nullptr);
 
       if (bsymbol.symbol != nullptr)
 	{
@@ -384,7 +384,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	  scope_component comp
 	    = {
 		decl_name (type->name ()).get (),
-		lookup_symbol (type->name (), block (), VAR_DOMAIN, nullptr)
+		lookup_symbol (type->name (), block (), SEARCH_VFT, nullptr)
 	      };
 	  scope.push_back (comp);
 	}
@@ -617,7 +617,7 @@ compile_cplus_convert_struct_or_union_members
 		const char *physname = type->field (i).loc_physname ();
 		struct block_symbol sym
 		  = lookup_symbol (physname, instance->block (),
-				   VAR_DOMAIN, nullptr);
+				   SEARCH_VFT, nullptr);
 
 		if (sym.symbol == nullptr)
 		  {
@@ -729,7 +729,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	  gcc_type method_type;
 	  struct block_symbol sym
 	    = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, j),
-			     instance->block (), VAR_DOMAIN, nullptr);
+			     instance->block (), SEARCH_VFT, nullptr);
 
 	  if (sym.symbol == nullptr)
 	    {

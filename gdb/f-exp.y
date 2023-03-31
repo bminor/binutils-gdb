@@ -1640,11 +1640,11 @@ yylex (void)
   {
     std::string tmp = copy_name (yylval.sval);
     struct block_symbol result;
-    const domain_enum lookup_domains[] =
+    const domain_search_flags lookup_domains[] =
     {
-      STRUCT_DOMAIN,
-      VAR_DOMAIN,
-      MODULE_DOMAIN
+      SEARCH_STRUCT_DOMAIN,
+      SEARCH_VFT,
+      SEARCH_MODULE_DOMAIN
     };
     int hextype;
 

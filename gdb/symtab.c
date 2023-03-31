@@ -85,7 +85,7 @@ static struct block_symbol
   lookup_symbol_aux (const char *name,
 		     symbol_name_match_type match_type,
 		     const struct block *block,
-		     const domain_enum domain,
+		     const domain_search_flags domain,
 		     enum language language,
 		     struct field_of_this_result *);
 
@@ -93,13 +93,14 @@ static
 struct block_symbol lookup_local_symbol (const char *name,
 					 symbol_name_match_type match_type,
 					 const struct block *block,
-					 const domain_enum domain,
+					 const domain_search_flags domain,
 					 enum language language);
 
 static struct block_symbol
   lookup_symbol_in_objfile (struct objfile *objfile,
 			    enum block_enum block_index,
-			    const char *name, const domain_enum domain);
+			    const char *name,
+			    const domain_search_flags domain);
 
 static void set_main_name (program_space *pspace, const char *name,
 			   language lang);
@@ -171,14 +172,14 @@ struct symbol_cache_slot
      lookup was saved in the cache, but cache space is pretty cheap.  */
   const struct objfile *objfile_context;
 
+  /* The domain that was searched for initially.  This must exactly
+     match.  */
+  domain_search_flags domain;
+
   union
   {
     struct block_symbol found;
-    struct
-    {
-      char *name;
-      domain_enum domain;
-    } not_found;
+    char *name;
   } value;
 };
 
@@ -188,7 +189,7 @@ static void
 symbol_cache_clear_slot (struct symbol_cache_slot *slot)
 {
   if (slot->state == SYMBOL_SLOT_NOT_FOUND)
-    xfree (slot->value.not_found.name);
+    xfree (slot->value.name);
   slot->state = SYMBOL_SLOT_UNUSED;
 }
 
@@ -1243,19 +1244,14 @@ matching_obj_sections (struct obj_section *obj_first,
 
 static unsigned int
 hash_symbol_entry (const struct objfile *objfile_context,
-		   const char *name, domain_enum domain)
+		   const char *name, domain_search_flags domain)
 {
   unsigned int hash = (uintptr_t) objfile_context;
 
   if (name != NULL)
     hash += htab_hash_string (name);
 
-  /* Because of symbol_matches_domain we need VAR_DOMAIN and STRUCT_DOMAIN
-     to map to the same slot.  */
-  if (domain == STRUCT_DOMAIN)
-    hash += VAR_DOMAIN * 7;
-  else
-    hash += domain * 7;
+  hash += domain * 7;
 
   return hash;
 }
@@ -1265,10 +1261,9 @@ hash_symbol_entry (const struct objfile *objfile_context,
 static int
 eq_symbol_entry (const struct symbol_cache_slot *slot,
 		 const struct objfile *objfile_context,
-		 const char *name, domain_enum domain)
+		 const char *name, domain_search_flags domain)
 {
   const char *slot_name;
-  domain_enum slot_domain;
 
   if (slot->state == SYMBOL_SLOT_UNUSED)
     return 0;
@@ -1276,16 +1271,11 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
   if (slot->objfile_context != objfile_context)
     return 0;
 
+  domain_search_flags slot_domain = slot->domain;
   if (slot->state == SYMBOL_SLOT_NOT_FOUND)
-    {
-      slot_name = slot->value.not_found.name;
-      slot_domain = slot->value.not_found.domain;
-    }
+    slot_name = slot->value.name;
   else
-    {
-      slot_name = slot->value.found.symbol->search_name ();
-      slot_domain = slot->value.found.symbol->domain ();
-    }
+    slot_name = slot->value.found.symbol->search_name ();
 
   /* NULL names match.  */
   if (slot_name == NULL && name == NULL)
@@ -1301,17 +1291,17 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
 	 the first time through.  If the slot records a found symbol,
 	 then this means using the symbol name comparison function of
 	 the symbol's language with symbol->search_name ().  See
-	 dictionary.c.  It also means using symbol_matches_domain for
-	 found symbols.  See block.c.
+	 dictionary.c.
 
 	 If the slot records a not-found symbol, then require a precise match.
 	 We could still be lax with whitespace like strcmp_iw though.  */
 
+      if (slot_domain != domain)
+	return 0;
+
       if (slot->state == SYMBOL_SLOT_NOT_FOUND)
 	{
 	  if (strcmp (slot_name, name) != 0)
-	    return 0;
-	  if (slot_domain != domain)
 	    return 0;
 	}
       else
@@ -1320,9 +1310,6 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
 	  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
 	  if (!symbol_matches_search_name (sym, lookup_name))
-	    return 0;
-
-	  if (!symbol_matches_domain (sym->language (), slot_domain, domain))
 	    return 0;
 	}
     }
@@ -1443,7 +1430,7 @@ set_symbol_cache_size_handler (const char *args, int from_tty,
 static struct block_symbol
 symbol_cache_lookup (struct symbol_cache *cache,
 		     struct objfile *objfile_context, enum block_enum block,
-		     const char *name, domain_enum domain,
+		     const char *name, domain_search_flags domain,
 		     struct block_symbol_cache **bsc_ptr,
 		     struct symbol_cache_slot **slot_ptr)
 {
@@ -1474,7 +1461,7 @@ symbol_cache_lookup (struct symbol_cache *cache,
 				  block == GLOBAL_BLOCK ? "Global" : "Static",
 				  slot->state == SYMBOL_SLOT_NOT_FOUND
 				  ? " (not found)" : "", name,
-				  domain_name (domain));
+				  domain_name (domain).c_str ());
       ++bsc->hits;
       if (slot->state == SYMBOL_SLOT_NOT_FOUND)
 	return SYMBOL_LOOKUP_FAILED;
@@ -1485,7 +1472,7 @@ symbol_cache_lookup (struct symbol_cache *cache,
 
   symbol_lookup_debug_printf ("%s block symbol cache miss for %s, %s",
 			      block == GLOBAL_BLOCK ? "Global" : "Static",
-			      name, domain_name (domain));
+			      name, domain_name (domain).c_str ());
   ++bsc->misses;
   return {};
 }
@@ -1500,7 +1487,8 @@ symbol_cache_mark_found (struct block_symbol_cache *bsc,
 			 struct symbol_cache_slot *slot,
 			 struct objfile *objfile_context,
 			 struct symbol *symbol,
-			 const struct block *block)
+			 const struct block *block,
+			 domain_search_flags domain)
 {
   if (bsc == NULL)
     return;
@@ -1513,6 +1501,7 @@ symbol_cache_mark_found (struct block_symbol_cache *bsc,
   slot->objfile_context = objfile_context;
   slot->value.found.symbol = symbol;
   slot->value.found.block = block;
+  slot->domain = domain;
 }
 
 /* Mark symbol NAME, DOMAIN as not found in SLOT.
@@ -1523,7 +1512,7 @@ static void
 symbol_cache_mark_not_found (struct block_symbol_cache *bsc,
 			     struct symbol_cache_slot *slot,
 			     struct objfile *objfile_context,
-			     const char *name, domain_enum domain)
+			     const char *name, domain_search_flags domain)
 {
   if (bsc == NULL)
     return;
@@ -1534,8 +1523,8 @@ symbol_cache_mark_not_found (struct block_symbol_cache *bsc,
     }
   slot->state = SYMBOL_SLOT_NOT_FOUND;
   slot->objfile_context = objfile_context;
-  slot->value.not_found.name = xstrdup (name);
-  slot->value.not_found.domain = domain;
+  slot->value.name = xstrdup (name);
+  slot->domain = domain;
 }
 
 /* Flush the symbol cache of PSPACE.  */
@@ -1620,8 +1609,8 @@ symbol_cache_dump (const struct symbol_cache *cache)
 	    case SYMBOL_SLOT_NOT_FOUND:
 	      gdb_printf ("  [%4u] = %s, %s %s (not found)\n", i,
 			  host_address_to_string (slot->objfile_context),
-			  slot->value.not_found.name,
-			  domain_name (slot->value.not_found.domain));
+			  slot->value.name,
+			  domain_name (slot->domain).c_str ());
 	      break;
 	    case SYMBOL_SLOT_FOUND:
 	      {
@@ -1984,7 +1973,8 @@ search_name_hash (enum language language, const char *search_name)
 
 struct block_symbol
 lookup_symbol_in_language (const char *name, const struct block *block,
-			   const domain_enum domain, enum language lang,
+			   const domain_search_flags domain,
+			   enum language lang,
 			   struct field_of_this_result *is_a_field_of_this)
 {
   SYMBOL_LOOKUP_SCOPED_DEBUG_ENTER_EXIT;
@@ -2002,7 +1992,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 
 struct block_symbol
 lookup_symbol (const char *name, const struct block *block,
-	       domain_enum domain,
+	       domain_search_flags domain,
 	       struct field_of_this_result *is_a_field_of_this)
 {
   return lookup_symbol_in_language (name, block, domain,
@@ -2014,7 +2004,7 @@ lookup_symbol (const char *name, const struct block *block,
 
 struct block_symbol
 lookup_symbol_search_name (const char *search_name, const struct block *block,
-			   domain_enum domain)
+			   domain_search_flags domain)
 {
   return lookup_symbol_aux (search_name, symbol_name_match_type::SEARCH_NAME,
 			    block, domain, language_asm, NULL);
@@ -2039,7 +2029,7 @@ lookup_language_this (const struct language_defn *lang,
 
       sym = block_lookup_symbol (block, lang->name_of_this (),
 				 symbol_name_match_type::SEARCH_NAME,
-				 VAR_DOMAIN);
+				 SEARCH_VFT);
       if (sym != NULL)
 	{
 	  symbol_lookup_debug_printf_v
@@ -2108,7 +2098,7 @@ check_field (struct type *type, const char *name,
 static struct block_symbol
 lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 		   const struct block *block,
-		   const domain_enum domain, enum language language,
+		   const domain_search_flags domain, enum language language,
 		   struct field_of_this_result *is_a_field_of_this)
 {
   SYMBOL_LOOKUP_SCOPED_DEBUG_ENTER_EXIT;
@@ -2127,7 +2117,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	 objfile != NULL ? objfile_debug_name (objfile) : "NULL");
       symbol_lookup_debug_printf
 	("domain name = \"%s\", language = \"%s\")",
-	 domain_name (domain), language_str (language));
+	 domain_name (domain).c_str (), language_str (language));
     }
 
   /* Make sure we do something sensible with is_a_field_of_this, since
@@ -2157,7 +2147,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   /* Don't do this check if we are searching for a struct.  It will
      not be found by check_field, but will be found by other
      means.  */
-  if (is_a_field_of_this != NULL && domain != STRUCT_DOMAIN)
+  if (is_a_field_of_this != NULL && (domain & SEARCH_STRUCT_DOMAIN) == 0)
     {
       result = lookup_language_this (langdef, block);
 
@@ -2213,7 +2203,7 @@ static struct block_symbol
 lookup_local_symbol (const char *name,
 		     symbol_name_match_type match_type,
 		     const struct block *block,
-		     const domain_enum domain,
+		     const domain_search_flags domain,
 		     enum language language)
 {
   if (block == nullptr)
@@ -2258,7 +2248,7 @@ lookup_local_symbol (const char *name,
 struct symbol *
 lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
 			const struct block *block,
-			const domain_enum domain)
+			const domain_search_flags domain)
 {
   struct symbol *sym;
 
@@ -2271,7 +2261,7 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
 	("lookup_symbol_in_block (%s, %s (objfile %s), %s)",
 	 name, host_address_to_string (block),
 	 objfile != nullptr ? objfile_debug_name (objfile) : "NULL",
-	 domain_name (domain));
+	 domain_name (domain).c_str ());
     }
 
   sym = block_lookup_symbol (block, name, match_type, domain);
@@ -2292,7 +2282,7 @@ struct block_symbol
 lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				   enum block_enum block_index,
 				   const char *name,
-				   const domain_enum domain)
+				   const domain_search_flags domain)
 {
   gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
@@ -2316,7 +2306,7 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 static struct block_symbol
 lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 				  enum block_enum block_index, const char *name,
-				  const domain_enum domain)
+				  const domain_search_flags domain)
 {
   gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
@@ -2324,7 +2314,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
     ("lookup_symbol_in_objfile_symtabs (%s, %s, %s, %s)",
      objfile_debug_name (objfile),
      block_index == GLOBAL_BLOCK ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-     name, domain_name (domain));
+     name, domain_name (domain).c_str ());
 
   struct block_symbol other;
   other.symbol = NULL;
@@ -2383,7 +2373,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 static struct block_symbol
 lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
 					    const char *linkage_name,
-					    domain_enum domain)
+					    domain_search_flags domain)
 {
   enum language lang = current_language->la_language;
   struct objfile *main_objfile;
@@ -2435,7 +2425,7 @@ Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
 static struct block_symbol
 lookup_symbol_via_quick_fns (struct objfile *objfile,
 			     enum block_enum block_index, const char *name,
-			     const domain_enum domain)
+			     const domain_search_flags domain)
 {
   struct compunit_symtab *cust;
   const struct blockvector *bv;
@@ -2446,7 +2436,7 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
     ("lookup_symbol_via_quick_fns (%s, %s, %s, %s)",
      objfile_debug_name (objfile),
      block_index == GLOBAL_BLOCK ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-     name, domain_name (domain));
+     name, domain_name (domain).c_str ());
 
   cust = objfile->lookup_symbol (block_index, name, domain);
   if (cust == NULL)
@@ -2477,7 +2467,7 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
 struct block_symbol
 language_defn::lookup_symbol_nonlocal (const char *name,
 				       const struct block *block,
-				       const domain_enum domain) const
+				       const domain_search_flags domain) const
 {
   struct block_symbol result;
 
@@ -2495,7 +2485,7 @@ language_defn::lookup_symbol_nonlocal (const char *name,
      shared libraries we could search all of them only to find out the
      builtin type isn't defined in any of them.  This is common for types
      like "void".  */
-  if (domain == VAR_DOMAIN)
+  if ((domain & SEARCH_TYPE_DOMAIN) != 0)
     {
       struct gdbarch *gdbarch;
 
@@ -2518,7 +2508,7 @@ language_defn::lookup_symbol_nonlocal (const char *name,
 struct block_symbol
 lookup_symbol_in_static_block (const char *name,
 			       const struct block *block,
-			       const domain_enum domain)
+			       const domain_search_flags domain)
 {
   if (block == nullptr)
     return {};
@@ -2538,7 +2528,7 @@ lookup_symbol_in_static_block (const char *name,
 	("lookup_symbol_in_static_block (%s, %s (objfile %s), %s)",
 	 name, host_address_to_string (block),
 	 objfile != nullptr ? objfile_debug_name (objfile) : "NULL",
-	 domain_name (domain));
+	 domain_name (domain).c_str ());
     }
 
   sym = lookup_symbol_in_block (name,
@@ -2557,7 +2547,7 @@ lookup_symbol_in_static_block (const char *name,
 
 static struct block_symbol
 lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
-			  const char *name, const domain_enum domain)
+			  const char *name, const domain_search_flags domain)
 {
   struct block_symbol result;
 
@@ -2567,7 +2557,7 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
 			      objfile_debug_name (objfile),
 			      block_index == GLOBAL_BLOCK
 			      ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-			      name, domain_name (domain));
+			      name, domain_name (domain).c_str ());
 
   result = lookup_symbol_in_objfile_symtabs (objfile, block_index,
 					     name, domain);
@@ -2598,7 +2588,7 @@ static struct block_symbol
 lookup_global_or_static_symbol (const char *name,
 				enum block_enum block_index,
 				struct objfile *objfile,
-				const domain_enum domain)
+				const domain_search_flags domain)
 {
   struct symbol_cache *cache = get_symbol_cache (current_program_space);
   struct block_symbol result;
@@ -2632,7 +2622,8 @@ lookup_global_or_static_symbol (const char *name,
        objfile);
 
   if (result.symbol != NULL)
-    symbol_cache_mark_found (bsc, slot, objfile, result.symbol, result.block);
+    symbol_cache_mark_found (bsc, slot, objfile, result.symbol, result.block,
+			     domain);
   else
     symbol_cache_mark_not_found (bsc, slot, objfile, name, domain);
 
@@ -2642,7 +2633,7 @@ lookup_global_or_static_symbol (const char *name,
 /* See symtab.h.  */
 
 struct block_symbol
-lookup_static_symbol (const char *name, const domain_enum domain)
+lookup_static_symbol (const char *name, const domain_search_flags domain)
 {
   return lookup_global_or_static_symbol (name, STATIC_BLOCK, nullptr, domain);
 }
@@ -2652,7 +2643,7 @@ lookup_static_symbol (const char *name, const domain_enum domain)
 struct block_symbol
 lookup_global_symbol (const char *name,
 		      const struct block *block,
-		      const domain_enum domain)
+		      const domain_search_flags domain)
 {
   /* If a block was passed in, we want to search the corresponding
      global block first.  This yields "more expected" behavior, and is
@@ -2761,7 +2752,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
   const struct block *block;
   struct symbol *sym;
 
-  cust = objfile->lookup_symbol (block_index, name, STRUCT_DOMAIN);
+  cust = objfile->lookup_symbol (block_index, name, SEARCH_STRUCT_DOMAIN);
   if (cust == NULL)
     return NULL;
 
@@ -2769,7 +2760,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
   block = bv->block (block_index);
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-  sym = block_find_symbol (block, lookup_name, STRUCT_DOMAIN, nullptr);
+  sym = block_find_symbol (block, lookup_name, SEARCH_STRUCT_DOMAIN, nullptr);
   if (sym == nullptr)
     error_in_psymtab_expansion (block_index, name, cust);
   gdb_assert (!TYPE_IS_OPAQUE (sym->type ()));
@@ -2794,7 +2785,8 @@ basic_lookup_transparent_type_1 (struct objfile *objfile,
     {
       bv = cust->blockvector ();
       block = bv->block (block_index);
-      sym = block_find_symbol (block, lookup_name, STRUCT_DOMAIN, nullptr);
+      sym = block_find_symbol (block, lookup_name, SEARCH_STRUCT_DOMAIN,
+			       nullptr);
       if (sym != nullptr)
 	{
 	  gdb_assert (!TYPE_IS_OPAQUE (sym->type ()));
@@ -4888,7 +4880,7 @@ global_symbol_searcher::expand_symtabs
 			 (msymbol->value_address (objfile)) == NULL)
 		      : (lookup_symbol_in_objfile_from_linkage_name
 			 (objfile, msymbol->linkage_name (),
-			  VAR_DOMAIN)
+			  SEARCH_VFT)
 			 .symbol == NULL))
 		    found_msymbol = true;
 		}
@@ -5026,7 +5018,7 @@ global_symbol_searcher::add_matching_msymbols
 		{
 		  if (lookup_symbol_in_objfile_from_linkage_name
 		      (objfile, msymbol->linkage_name (),
-		       VAR_DOMAIN).symbol == NULL)
+		       SEARCH_VFT).symbol == NULL)
 		    {
 		      /* Matching msymbol, add it to the results list.  */
 		      if (results->size () < m_max_search_results)

@@ -617,7 +617,8 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
   gdbscm_gdb_exception except {};
   try
     {
-      symbol = lookup_symbol (name, block, (domain_enum) domain,
+      domain_search_flags flags = from_scripting_domain (domain);
+      symbol = lookup_symbol (name, block, flags,
 			      &is_a_field_of_this).symbol;
     }
   catch (const gdb_exception &ex)
@@ -654,7 +655,8 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
 
   try
     {
-      symbol = lookup_global_symbol (name, NULL, (domain_enum) domain).symbol;
+      domain_search_flags flags = from_scripting_domain (domain);
+      symbol = lookup_global_symbol (name, NULL, flags).symbol;
     }
   catch (const gdb_exception &ex)
     {
@@ -696,14 +698,15 @@ static const scheme_integer_constant symbol_integer_constants[] =
 #undef X
 
 #define DOMAIN(X) \
-  { "SYMBOL_" #X "_DOMAIN", X ## _DOMAIN },
+  { "SYMBOL_" #X "_DOMAIN", to_scripting_domain (X ## _DOMAIN) },	\
+  { "SEARCH_" #X "_DOMAIN", to_scripting_domain (SEARCH_ ## X ## _DOMAIN) },
 #include "sym-domains.def"
 #undef DOMAIN
 
-  /* These were never correct.  */
-  { "SYMBOL_VARIABLES_DOMAIN", VAR_DOMAIN },
-  { "SYMBOL_FUNCTIONS_DOMAIN", VAR_DOMAIN },
-  { "SYMBOL_TYPES_DOMAIN", VAR_DOMAIN },
+  /* Historical.  */
+  { "SYMBOL_VARIABLES_DOMAIN", to_scripting_domain (SEARCH_VAR_DOMAIN) },
+  { "SYMBOL_FUNCTIONS_DOMAIN", to_scripting_domain (SEARCH_FUNCTION_DOMAIN) },
+  { "SYMBOL_TYPES_DOMAIN", to_scripting_domain (SEARCH_TYPE_DOMAIN) },
 
   END_INTEGER_CONSTANTS
 };

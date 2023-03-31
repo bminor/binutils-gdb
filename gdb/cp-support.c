@@ -151,7 +151,7 @@ inspect_type (struct demangle_parse_info *info,
 
   try
     {
-      sym = lookup_symbol (name, 0, VAR_DOMAIN, 0).symbol;
+      sym = lookup_symbol (name, 0, SEARCH_VFT, 0).symbol;
     }
   catch (const gdb_exception &except)
     {
@@ -505,7 +505,7 @@ replace_typedefs (struct demangle_parse_info *info,
 	      try
 		{
 		  sym = lookup_symbol (local_name.get (), 0,
-				       VAR_DOMAIN, 0).symbol;
+				       SEARCH_VFT, 0).symbol;
 		}
 	      catch (const gdb_exception &except)
 		{
@@ -1500,7 +1500,7 @@ cp_lookup_rtti_type (const char *name, const struct block *block)
 
   /* Use VAR_DOMAIN here as NAME may be a typedef.  PR 18141, 18417.
      Classes "live" in both STRUCT_DOMAIN and VAR_DOMAIN.  */
-  rtti_sym = lookup_symbol (name, block, VAR_DOMAIN, NULL).symbol;
+  rtti_sym = lookup_symbol (name, block, SEARCH_VFT, NULL).symbol;
 
   if (rtti_sym == NULL)
     {

@@ -1507,7 +1507,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 
 		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),
 					     symbol_name_match_type::SEARCH_NAME,
-					     psym->domain);
+					     to_search_flags (psym->domain));
 		  if (!sym)
 		    {
 		      gdb_printf ("Static symbol `");
@@ -1522,7 +1522,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		{
 		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),
 					     symbol_name_match_type::SEARCH_NAME,
-					     psym->domain);
+					     to_search_flags (psym->domain));
 		  if (!sym)
 		    {
 		      gdb_printf ("Global symbol `");

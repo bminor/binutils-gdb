@@ -1563,7 +1563,8 @@ rust_structop::evaluate_funcall (struct type *expect_type,
 
   const struct block *block = get_selected_block (0);
   struct block_symbol sym = lookup_symbol (name.c_str (), block,
-					   VAR_DOMAIN, NULL);
+					   SEARCH_VFT,
+					   nullptr);
   if (sym.symbol == NULL)
     error (_("Could not find function named '%s'"), name.c_str ());
 
@@ -1699,7 +1700,7 @@ rust_language::is_string_type_p (struct type *type) const
 struct block_symbol
 rust_language::lookup_symbol_nonlocal
      (const char *name, const struct block *block,
-      const domain_enum domain) const
+      const domain_search_flags domain) const
 {
   struct block_symbol result = {};
 
@@ -1707,7 +1708,7 @@ rust_language::lookup_symbol_nonlocal
   symbol_lookup_debug_printf
     ("rust_lookup_symbol_non_local (%s, %s (scope %s), %s)",
      name, host_address_to_string (block), scope,
-     domain_name (domain));
+     domain_name (domain).c_str ());
 
   /* Look up bare names in the block's scope.  */
   std::string scopedname;

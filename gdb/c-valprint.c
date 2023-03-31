@@ -205,7 +205,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	    {
 	      const char *search_name = msymbol.minsym->search_name ();
 	      wsym = lookup_symbol_search_name (search_name, NULL,
-						VAR_DOMAIN).symbol;
+						SEARCH_VAR_DOMAIN).symbol;
 	    }
 
 	  if (wsym)

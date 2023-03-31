@@ -944,7 +944,8 @@ language_arch_info::bool_type () const
     {
       struct symbol *sym;
 
-      sym = lookup_symbol (m_bool_type_name, NULL, VAR_DOMAIN, NULL).symbol;
+      sym = lookup_symbol (m_bool_type_name, nullptr, SEARCH_TYPE_DOMAIN,
+			   nullptr).symbol;
       if (sym != nullptr)
 	{
 	  struct type *type = sym->type ();

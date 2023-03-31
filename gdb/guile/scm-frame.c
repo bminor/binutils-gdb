@@ -937,7 +937,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
 
 	    if (block == NULL)
 	      block = get_frame_block (frame_info_ptr (frame), NULL);
-	    lookup_sym = lookup_symbol (var_name.get (), block, VAR_DOMAIN,
+	    lookup_sym = lookup_symbol (var_name.get (), block, SEARCH_VFT,
 					NULL);
 	    var = lookup_sym.symbol;
 	    block = lookup_sym.block;

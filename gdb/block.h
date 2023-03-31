@@ -554,28 +554,29 @@ typedef iterator_range<block_iterator_wrapper> block_iterator_range;
 
 /* Return true if symbol A is the best match possible for DOMAIN.  */
 
-extern bool best_symbol (struct symbol *a, const domain_enum domain);
+extern bool best_symbol (struct symbol *a, const domain_search_flags domain);
 
 /* Return symbol B if it is a better match than symbol A for DOMAIN.
    Otherwise return A.  */
 
 extern struct symbol *better_symbol (struct symbol *a, struct symbol *b,
-				     const domain_enum domain);
+				     const domain_search_flags domain);
 
 /* Search BLOCK for symbol NAME in DOMAIN.  */
 
 extern struct symbol *block_lookup_symbol (const struct block *block,
 					   const char *name,
 					   symbol_name_match_type match_type,
-					   const domain_enum domain);
+					   const domain_search_flags domain);
 
 /* Search BLOCK for symbol NAME in DOMAIN but only in primary symbol table of
    BLOCK.  BLOCK must be STATIC_BLOCK or GLOBAL_BLOCK.  Function is useful if
    one iterates all global/static blocks of an objfile.  */
 
-extern struct symbol *block_lookup_symbol_primary (const struct block *block,
-						   const char *name,
-						   const domain_enum domain);
+extern struct symbol *block_lookup_symbol_primary
+     (const struct block *block,
+      const char *name,
+      const domain_search_flags domain);
 
 /* Find symbol NAME in BLOCK and in DOMAIN.  This will return a
    matching symbol whose type is not a "opaque", see TYPE_IS_OPAQUE.
@@ -584,7 +585,7 @@ extern struct symbol *block_lookup_symbol_primary (const struct block *block,
 
 extern struct symbol *block_find_symbol (const struct block *block,
 					 const lookup_name_info &name,
-					 const domain_enum domain,
+					 const domain_search_flags domain,
 					 struct symbol **stub);
 
 /* Given a vector of pairs, allocate and build an obstack allocated

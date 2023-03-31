@@ -629,9 +629,10 @@ block	:	block COLONCOLON name
 			  std::string copy = copy_name ($3);
 			  struct symbol *tem
 			    = lookup_symbol (copy.c_str (), $1,
-					     VAR_DOMAIN, NULL).symbol;
+					     SEARCH_FUNCTION_DOMAIN,
+					     nullptr).symbol;
 
-			  if (!tem || tem->aclass () != LOC_BLOCK)
+			  if (tem == nullptr)
 			    error (_("No function \"%s\" in specified context."),
 				   copy.c_str ());
 			  $$ = tem->value_block (); }
@@ -642,7 +643,7 @@ variable:	block COLONCOLON name
 
 			  std::string copy = copy_name ($3);
 			  sym = lookup_symbol (copy.c_str (), $1,
-					       VAR_DOMAIN, NULL);
+					       SEARCH_VFT, NULL);
 			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy.c_str ());
@@ -672,7 +673,7 @@ variable:	qualified_name
 
 			  struct block_symbol sym
 			    = lookup_symbol (name.c_str (), nullptr,
-					     VAR_DOMAIN, nullptr);
+					     SEARCH_VFT, nullptr);
 			  pstate->push_symbol (name.c_str (), sym);
 			}
 	;
@@ -1400,7 +1401,7 @@ yylex (void)
 	  static const char this_name[] = "this";
 
 	  if (lookup_symbol (this_name, pstate->expression_context_block,
-			     VAR_DOMAIN, NULL).symbol)
+			     SEARCH_VFT, NULL).symbol)
 	    {
 	      free (uptokstart);
 	      return THIS;
@@ -1440,7 +1441,7 @@ yylex (void)
       sym = NULL;
     else
       sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
-			   VAR_DOMAIN, &is_a_field_of_this).symbol;
+			   SEARCH_VFT, &is_a_field_of_this).symbol;
     /* second chance uppercased (as Free Pascal does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
@@ -1456,7 +1457,7 @@ yylex (void)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
-			      VAR_DOMAIN, &is_a_field_of_this).symbol;
+			      SEARCH_VFT, &is_a_field_of_this).symbol;
       }
     /* Third chance Capitalized (as GPC does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
@@ -1479,7 +1480,7 @@ yylex (void)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
-			      VAR_DOMAIN, &is_a_field_of_this).symbol;
+			      SEARCH_VFT, &is_a_field_of_this).symbol;
       }
 
     if (is_a_field || (is_a_field_of_this.type != NULL))
@@ -1576,7 +1577,7 @@ yylex (void)
 		      cur_sym
 			= lookup_symbol (ncopy,
 					 pstate->expression_context_block,
-					 VAR_DOMAIN, NULL).symbol;
+					 SEARCH_VFT, NULL).symbol;
 		      if (cur_sym)
 			{
 			  if (cur_sym->aclass () == LOC_TYPEDEF)

@@ -3923,7 +3923,7 @@ find_label_symbols_in_block (const struct block *block,
 
       for (struct symbol *sym : block_iterator_range (block))
 	{
-	  if (sym->matches (LABEL_DOMAIN)
+	  if (sym->domain () == LABEL_DOMAIN
 	      && cmp (sym->search_name (), name, name_len) == 0)
 	    {
 	      result->push_back ({sym, block});
@@ -3934,7 +3934,7 @@ find_label_symbols_in_block (const struct block *block,
   else
     {
       struct block_symbol label_sym
-	= lookup_symbol (name, block, LABEL_DOMAIN, 0);
+	= lookup_symbol (name, block, SEARCH_LABEL_DOMAIN, 0);
 
       if (label_sym.symbol != NULL)
 	{

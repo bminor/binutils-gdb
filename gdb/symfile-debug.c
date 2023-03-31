@@ -240,7 +240,8 @@ objfile::map_symtabs_matching_filename
 }
 
 struct compunit_symtab *
-objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
+objfile::lookup_symbol (block_enum kind, const char *name,
+			domain_search_flags domain)
 {
   struct compunit_symtab *retval = nullptr;
 
@@ -248,7 +249,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
     gdb_printf (gdb_stdlog,
 		"qf->lookup_symbol (%s, %d, \"%s\", %s)\n",
 		objfile_debug_name (this), kind, name,
-		domain_name (domain));
+		domain_name (domain).c_str ());
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
@@ -277,10 +278,6 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
     return true;
   };
 
-  domain_search_flags flags = to_search_flags (domain);
-  if (domain == VAR_DOMAIN)
-    flags |= SEARCH_TYPE_DOMAIN | SEARCH_FUNCTION_DOMAIN;
-
   for (const auto &iter : qf)
     {
       if (!iter->expand_symtabs_matching (this,
@@ -291,7 +288,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
 					  kind == GLOBAL_BLOCK
 					  ? SEARCH_GLOBAL_BLOCK
 					  : SEARCH_STATIC_BLOCK,
-					  flags))
+					  domain))
 	break;
     }
 

@@ -1293,7 +1293,8 @@ package_name_p (const char *name, const struct block *block)
   struct symbol *sym;
   struct field_of_this_result is_a_field_of_this;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, &is_a_field_of_this).symbol;
+  sym = lookup_symbol (name, block, SEARCH_STRUCT_DOMAIN,
+		       &is_a_field_of_this).symbol;
 
   if (sym
       && sym->aclass () == LOC_TYPEDEF
@@ -1335,7 +1336,7 @@ classify_packaged_name (const struct block *block)
 
   std::string copy = copy_name (yylval.sval);
 
-  sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
+  sym = lookup_symbol (copy.c_str (), block, SEARCH_VFT, &is_a_field_of_this);
 
   if (sym.symbol)
     {
@@ -1378,7 +1379,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 
   /* TODO: What about other types?  */
 
-  sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
+  sym = lookup_symbol (copy.c_str (), block, SEARCH_VFT, &is_a_field_of_this);
 
   if (sym.symbol)
     {
@@ -1403,7 +1404,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 			       strlen (current_package_name.get ()),
 			       copy.c_str (), copy.size ());
 
-	sym = lookup_symbol (sval.ptr, block, VAR_DOMAIN,
+	sym = lookup_symbol (sval.ptr, block, SEARCH_VFT,
 			     &is_a_field_of_this);
 	if (sym.symbol)
 	  {

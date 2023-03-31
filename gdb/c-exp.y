@@ -1087,9 +1087,10 @@ block	:	block COLONCOLON name
 			  std::string copy = copy_name ($3);
 			  struct symbol *tem
 			    = lookup_symbol (copy.c_str (), $1,
-					     VAR_DOMAIN, NULL).symbol;
+					     SEARCH_FUNCTION_DOMAIN,
+					     nullptr).symbol;
 
-			  if (!tem || tem->aclass () != LOC_BLOCK)
+			  if (tem == nullptr)
 			    error (_("No function \"%s\" in specified context."),
 				   copy.c_str ());
 			  $$ = tem->value_block (); }
@@ -1113,7 +1114,7 @@ variable:	block COLONCOLON name
 			  std::string copy = copy_name ($3);
 			  struct block_symbol sym
 			    = lookup_symbol (copy.c_str (), $1,
-					     VAR_DOMAIN, NULL);
+					     SEARCH_VFT, NULL);
 
 			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
@@ -1168,7 +1169,7 @@ variable:	qualified_name
 			  struct block_symbol sym
 			    = lookup_symbol (name.c_str (),
 					     (const struct block *) NULL,
-					     VAR_DOMAIN, NULL);
+					     SEARCH_VFT, NULL);
 			  pstate->push_symbol (name.c_str (), sym);
 			}
 	;
@@ -1833,7 +1834,7 @@ name_not_typename :	NAME
 			  $$.sym
 			    = lookup_symbol ($1.ptr,
 					     pstate->expression_context_block,
-					     VAR_DOMAIN,
+					     SEARCH_VFT,
 					     &is_a_field_of_this);
 			  $$.is_a_field_of_this
 			    = is_a_field_of_this.type != NULL;
@@ -2969,7 +2970,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 
 	    if (lookup_symbol (copy.c_str (),
 			       pstate->expression_context_block,
-			       VAR_DOMAIN,
+			       SEARCH_VFT,
 			       (par_state->language ()->la_language
 				== language_cplus ? &is_a_field_of_this
 				: NULL)).symbol
@@ -3037,7 +3038,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
      we can refer to it unconditionally below.  */
   memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-  bsym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN,
+  bsym = lookup_symbol (copy.c_str (), block, SEARCH_VFT,
 			par_state->language ()->name_of_this ()
 			? &is_a_field_of_this : NULL);
 
@@ -3060,7 +3061,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	{
 	  struct field_of_this_result inner_is_a_field_of_this;
 
-	  bsym = lookup_symbol (copy.c_str (), block, STRUCT_DOMAIN,
+	  bsym = lookup_symbol (copy.c_str (), block, SEARCH_STRUCT_DOMAIN,
 				&inner_is_a_field_of_this);
 	  if (bsym.symbol != NULL)
 	    {
@@ -3167,7 +3168,7 @@ classify_inner_name (struct parser_state *par_state,
   std::string copy = copy_name (yylval.ssym.stoken);
   /* N.B. We assume the symbol can only be in VAR_DOMAIN.  */
   yylval.ssym.sym = cp_lookup_nested_symbol (type, copy.c_str (), block,
-					     VAR_DOMAIN);
+					     SEARCH_VFT);
 
   /* If no symbol was found, search for a matching base class named
      COPY.  This will allow users to enter qualified names of class members

@@ -1582,7 +1582,7 @@ info_address_command (const char *exp, int from_tty)
   if (exp == 0)
     error (_("Argument required."));
 
-  sym = lookup_symbol (exp, get_selected_block (&context_pc), VAR_DOMAIN,
+  sym = lookup_symbol (exp, get_selected_block (&context_pc), SEARCH_VFT,
 		       &is_a_field_of_this).symbol;
   if (sym == NULL)
     {

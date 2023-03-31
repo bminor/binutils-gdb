@@ -1960,8 +1960,9 @@ fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
     {
       /* Fetch offsets from debug symbols in rtld.  */
       struct symbol *obj_entry_sym
-	= lookup_symbol_in_language ("Struct_Obj_Entry", NULL, STRUCT_DOMAIN,
-				     language_c, NULL).symbol;
+	= lookup_symbol_in_language ("Struct_Obj_Entry", nullptr,
+				     SEARCH_STRUCT_DOMAIN,
+				     language_c, nullptr).symbol;
       if (obj_entry_sym == NULL)
 	error (_("Unable to find Struct_Obj_Entry symbol"));
       data->off_linkmap = lookup_struct_elt (obj_entry_sym->type (),

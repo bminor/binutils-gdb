@@ -1453,7 +1453,8 @@ gen_static_field (struct agent_expr *ax, struct axs_value *value,
   else
     {
       const char *phys_name = type->field (fieldno).loc_physname ();
-      struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0).symbol;
+      struct symbol *sym = lookup_symbol (phys_name, 0,
+					  SEARCH_VAR_DOMAIN, 0).symbol;
 
       if (sym)
 	{
@@ -1544,7 +1545,7 @@ gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 
   sym = cp_lookup_symbol_namespace (namespace_name, name,
 				    block_for_pc (ax->scope),
-				    VAR_DOMAIN);
+				    SEARCH_VAR_DOMAIN);
 
   if (sym.symbol == NULL)
     return 0;

@@ -532,7 +532,8 @@ frapy_read_var (PyObject *self, PyObject *args, PyObject *kw)
 
 	  if (!block)
 	    block = get_frame_block (frame, NULL);
-	  lookup_sym = lookup_symbol (var_name.get (), block, VAR_DOMAIN, NULL);
+	  lookup_sym = lookup_symbol (var_name.get (), block,
+				      SEARCH_VFT, nullptr);
 	  var = lookup_sym.symbol;
 	  block = lookup_sym.block;
 	}

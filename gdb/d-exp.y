@@ -444,7 +444,7 @@ PrimaryExpression:
 		  /* Handle VAR, which could be local or global.  */
 		  sym = lookup_symbol (copy.c_str (),
 				       pstate->expression_context_block,
-				       VAR_DOMAIN, &is_a_field_of_this);
+				       SEARCH_VFT, &is_a_field_of_this);
 		  if (sym.symbol && sym.symbol->aclass () != LOC_TYPEDEF)
 		    {
 		      if (symbol_read_needs_frame (sym.symbol))
@@ -493,7 +493,7 @@ PrimaryExpression:
 			      sym =
 				lookup_symbol (name.c_str (),
 					       (const struct block *) NULL,
-					       VAR_DOMAIN, NULL);
+					       SEARCH_VFT, NULL);
 			      pstate->push_symbol (name.c_str (), sym);
 			    }
 			  else
@@ -1337,7 +1337,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 
   std::string copy = copy_name (yylval.sval);
 
-  sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
+  sym = lookup_symbol (copy.c_str (), block, SEARCH_VFT, &is_a_field_of_this);
   if (sym.symbol && sym.symbol->aclass () == LOC_TYPEDEF)
     {
       yylval.tsym.type = sym.symbol->type ();
@@ -1346,9 +1346,11 @@ classify_name (struct parser_state *par_state, const struct block *block)
   else if (sym.symbol == NULL)
     {
       /* Look-up first for a module name, then a type.  */
-      sym = lookup_symbol (copy.c_str (), block, MODULE_DOMAIN, NULL);
+      sym = lookup_symbol (copy.c_str (), block, SEARCH_MODULE_DOMAIN,
+			   nullptr);
       if (sym.symbol == NULL)
-	sym = lookup_symbol (copy.c_str (), block, STRUCT_DOMAIN, NULL);
+	sym = lookup_symbol (copy.c_str (), block, SEARCH_STRUCT_DOMAIN,
+			     nullptr);
 
       if (sym.symbol != NULL)
 	{

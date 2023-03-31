@@ -118,15 +118,9 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
 {
   struct block_symbol sym;
 
-  sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
+  sym = lookup_symbol (name, nullptr, SEARCH_TYPE_DOMAIN, nullptr);
   if (sym.symbol != NULL)
     {
-      if (sym.symbol->aclass () != LOC_BLOCK)
-	{
-	  error (_("\"%s\" exists in this program but is not a function."),
-		 name);
-	}
-
       if (objf_p)
 	*objf_p = sym.symbol->objfile ();
 
@@ -3708,7 +3702,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-			       0, VAR_DOMAIN, 0).symbol;
+			       0, SEARCH_FUNCTION_DOMAIN, 0).symbol;
 
 	      if (s == NULL)
 		return NULL;
@@ -3739,7 +3733,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-			       0, VAR_DOMAIN, 0).symbol;
+			       0, SEARCH_FUNCTION_DOMAIN, 0).symbol;
 
 	      if (s == NULL)
 		return NULL;
@@ -3819,7 +3813,7 @@ value_maybe_namespace_elt (const struct type *curtype,
   struct value *result;
 
   sym = cp_lookup_symbol_namespace (namespace_name, name,
-				    get_selected_block (0), VAR_DOMAIN);
+				    get_selected_block (0), SEARCH_VFT);
 
   if (sym.symbol == NULL)
     return NULL;

@@ -630,26 +630,32 @@ block_iterator_next (struct block_iterator *iterator)
 /* See block.h.  */
 
 bool
-best_symbol (struct symbol *a, const domain_enum domain)
+best_symbol (struct symbol *a, const domain_search_flags domain)
 {
-  return (a->domain () == domain
-	  && a->aclass () != LOC_UNRESOLVED);
+  if (a->aclass () == LOC_UNRESOLVED)
+    return false;
+
+  if ((domain & SEARCH_VAR_DOMAIN) != 0)
+    return a->domain () == VAR_DOMAIN;
+
+  return a->matches (domain);
 }
 
 /* See block.h.  */
 
 struct symbol *
-better_symbol (struct symbol *a, struct symbol *b, const domain_enum domain)
+better_symbol (struct symbol *a, struct symbol *b,
+	       const domain_search_flags domain)
 {
   if (a == NULL)
     return b;
   if (b == NULL)
     return a;
 
-  if (a->domain () == domain && b->domain () != domain)
+  if (a->matches (domain) && !b->matches (domain))
     return a;
 
-  if (b->domain () == domain && a->domain () != domain)
+  if (b->matches (domain) && !a->matches (domain))
     return b;
 
   if (a->aclass () != LOC_UNRESOLVED && b->aclass () == LOC_UNRESOLVED)
@@ -675,7 +681,7 @@ better_symbol (struct symbol *a, struct symbol *b, const domain_enum domain)
 struct symbol *
 block_lookup_symbol (const struct block *block, const char *name,
 		     symbol_name_match_type match_type,
-		     const domain_enum domain)
+		     const domain_search_flags domain)
 {
   lookup_name_info lookup_name (name, match_type);
 
@@ -730,7 +736,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 
 struct symbol *
 block_lookup_symbol_primary (const struct block *block, const char *name,
-			     const domain_enum domain)
+			     const domain_search_flags domain)
 {
   struct symbol *sym, *other;
   struct mdict_iterator mdict_iter;
@@ -792,7 +798,7 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 
 struct symbol *
 block_find_symbol (const struct block *block, const lookup_name_info &name,
-		   const domain_enum domain, struct symbol **stub)
+		   const domain_search_flags domain, struct symbol **stub)
 {
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
   gdb_assert (block->superblock () == NULL

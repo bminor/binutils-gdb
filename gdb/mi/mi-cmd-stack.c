@@ -636,8 +636,9 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      struct frame_arg arg, entryarg;
 
 	      if (sym->is_argument ())
-		sym2 = lookup_symbol_search_name (sym->search_name (),
-						  block, VAR_DOMAIN).symbol;
+		sym2 = (lookup_symbol_search_name
+			(sym->search_name (),
+			 block, SEARCH_VAR_DOMAIN).symbol);
 	      else
 		sym2 = sym;
 	      gdb_assert (sym2 != NULL);

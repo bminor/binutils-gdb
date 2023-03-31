@@ -69,10 +69,11 @@ extern const struct builtin_d_type *builtin_d_type (struct gdbarch *);
 
 /* Defined in d-namespace.c  */
 
-extern struct block_symbol d_lookup_symbol_nonlocal (const struct language_defn *,
-						     const char *,
-						     const struct block *,
-						     const domain_enum);
+extern struct block_symbol d_lookup_symbol_nonlocal
+     (const struct language_defn *,
+      const char *,
+      const struct block *,
+      const domain_search_flags);
 
 extern struct block_symbol d_lookup_nested_symbol (struct type *, const char *,
 						   const struct block *);

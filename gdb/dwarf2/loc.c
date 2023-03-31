@@ -624,7 +624,7 @@ func_get_frame_base_dwarf_block (struct symbol *framefunc, CORE_ADDR pc,
 value *
 compute_var_value (const char *name)
 {
-  struct block_symbol sym = lookup_symbol (name, nullptr, VAR_DOMAIN,
+  struct block_symbol sym = lookup_symbol (name, nullptr, SEARCH_VAR_DOMAIN,
 					   nullptr);
   if (sym.symbol != nullptr)
     return value_of_variable (sym.symbol, sym.block);

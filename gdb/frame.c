@@ -2559,7 +2559,8 @@ inside_main_func (frame_info_ptr this_frame)
       /* In some language (for example Fortran) there will be no minimal
 	 symbol with the name of the main function.  In this case we should
 	 search the full symbols to see if we can find a match.  */
-      struct block_symbol bs = lookup_symbol (name, NULL, VAR_DOMAIN, 0);
+      struct block_symbol bs = lookup_symbol (name, nullptr,
+					      SEARCH_VFT, nullptr);
 
       /* We might have found some unrelated symbol.  For example, the
 	 Rust compiler can emit both a subprogram and a namespace with

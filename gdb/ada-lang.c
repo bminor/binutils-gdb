@@ -13675,19 +13675,15 @@ public:
 
   struct block_symbol lookup_symbol_nonlocal
 	(const char *name, const struct block *block,
-	 const domain_enum domain) const override
+	 const domain_search_flags domain) const override
   {
     struct block_symbol sym;
-
-    domain_search_flags flags = to_search_flags (domain);
-    if (domain == VAR_DOMAIN)
-      flags |= SEARCH_TYPE_DOMAIN | SEARCH_FUNCTION_DOMAIN;
 
     sym = ada_lookup_symbol (name,
 			     (block == nullptr
 			      ? nullptr
 			      : block->static_block ()),
-			     flags);
+			     domain);
     if (sym.symbol != NULL)
       return sym;
 
@@ -13703,7 +13699,7 @@ public:
        languages, we search the primitive types this late and only after
        having searched the global symbols without success.  */
 
-    if (domain == VAR_DOMAIN)
+    if ((domain & SEARCH_TYPE_DOMAIN) != 0)
       {
 	struct gdbarch *gdbarch;
 

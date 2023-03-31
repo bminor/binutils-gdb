@@ -437,7 +437,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       gdb_val_sym = block_lookup_symbol (block,
 					 COMPILE_I_EXPR_VAL,
 					 symbol_name_match_type::SEARCH_NAME,
-					 VAR_DOMAIN);
+					 SEARCH_VFT);
       if (gdb_val_sym == NULL)
 	continue;
 
@@ -463,7 +463,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 
   gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
 					  symbol_name_match_type::SEARCH_NAME,
-					  VAR_DOMAIN);
+					  SEARCH_VFT);
   if (gdb_ptr_type_sym == NULL)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_ptr_type = gdb_ptr_type_sym->type ();
@@ -652,7 +652,7 @@ compile_object_load (const compile_file_names &file_names,
   func_sym = lookup_global_symbol_from_objfile (objfile,
 						GLOBAL_BLOCK,
 						GCC_FE_WRAPPER_FUNCTION,
-						VAR_DOMAIN).symbol;
+						SEARCH_VFT).symbol;
   if (func_sym == NULL)
     error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));

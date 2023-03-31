@@ -210,7 +210,7 @@ convert_one_symbol (compile_c_instance *context,
 
 static void
 convert_symbol_sym (compile_c_instance *context, const char *identifier,
-		    struct block_symbol sym, domain_enum domain)
+		    struct block_symbol sym, domain_search_flags domain)
 {
   int is_local_symbol;
 
@@ -325,19 +325,19 @@ gcc_convert_symbol (void *datum,
 {
   compile_c_instance *context
     = static_cast<compile_c_instance *> (datum);
-  domain_enum domain;
+  domain_search_flags domain;
   int found = 0;
 
   switch (request)
     {
     case GCC_C_ORACLE_SYMBOL:
-      domain = VAR_DOMAIN;
+      domain = SEARCH_VFT;
       break;
     case GCC_C_ORACLE_TAG:
-      domain = STRUCT_DOMAIN;
+      domain = SEARCH_STRUCT_DOMAIN;
       break;
     case GCC_C_ORACLE_LABEL:
-      domain = LABEL_DOMAIN;
+      domain = SEARCH_LABEL_DOMAIN;
       break;
     default:
       gdb_assert_not_reached ("Unrecognized oracle request.");
@@ -355,7 +355,7 @@ gcc_convert_symbol (void *datum,
 	  convert_symbol_sym (context, identifier, sym, domain);
 	  found = 1;
 	}
-      else if (domain == VAR_DOMAIN)
+      else if (request == GCC_C_ORACLE_SYMBOL)
 	{
 	  struct bound_minimal_symbol bmsym;
 
@@ -398,8 +398,9 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
       struct symbol *sym;
 
       /* We only need global functions here.  */
-      sym = lookup_symbol (identifier, NULL, VAR_DOMAIN, NULL).symbol;
-      if (sym != NULL && sym->aclass () == LOC_BLOCK)
+      sym = lookup_symbol (identifier, nullptr, SEARCH_FUNCTION_DOMAIN,
+			   nullptr).symbol;
+      if (sym != nullptr)
 	{
 	  if (compile_debug)
 	    gdb_printf (gdb_stdlog,

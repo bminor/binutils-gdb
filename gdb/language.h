@@ -513,7 +513,7 @@ struct language_defn
   virtual struct block_symbol lookup_symbol_nonlocal
 	(const char *name,
 	 const struct block *block,
-	 const domain_enum domain) const;
+	 const domain_search_flags domain) const;
 
   /* Return an expression that can be used for a location
      watchpoint.  TYPE is a pointer type that points to the memory

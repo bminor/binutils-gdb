@@ -2922,7 +2922,8 @@ value_static_field (struct type *type, int fieldno)
     {
       const char *phys_name = type->field (fieldno).loc_physname ();
       /* type->field (fieldno).name (); */
-      struct block_symbol sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
+      struct block_symbol sym = lookup_symbol (phys_name, nullptr,
+					       SEARCH_VAR_DOMAIN, nullptr);
 
       if (sym.symbol == NULL)
 	{
@@ -3113,7 +3114,8 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   struct symbol *sym;
   struct bound_minimal_symbol msym;
 
-  sym = lookup_symbol (physname, 0, VAR_DOMAIN, 0).symbol;
+  sym = lookup_symbol (physname, nullptr, SEARCH_FUNCTION_DOMAIN,
+		       nullptr).symbol;
   if (sym == nullptr)
     {
       msym = lookup_bound_minimal_symbol (physname);

@@ -42,7 +42,7 @@ static struct block_symbol
 			     const char *nested_name,
 			     const char *concatenated_name,
 			     const struct block *block,
-			     const domain_enum domain,
+			     const domain_search_flags domain,
 			     int basic_lookup, int is_in_anonymous);
 
 static struct type *cp_lookup_transparent_type_loop (const char *name,
@@ -129,7 +129,7 @@ cp_is_in_anonymous (const char *symbol_name)
 
 static struct block_symbol
 cp_basic_lookup_symbol (const char *name, const struct block *block,
-			const domain_enum domain, int is_in_anonymous)
+			const domain_search_flags domain, int is_in_anonymous)
 {
   struct block_symbol sym;
 
@@ -172,7 +172,7 @@ cp_basic_lookup_symbol (const char *name, const struct block *block,
 static struct block_symbol
 cp_lookup_bare_symbol (const struct language_defn *langdef,
 		       const char *name, const struct block *block,
-		       const domain_enum domain, int search)
+		       const domain_search_flags domain, int search)
 {
   struct block_symbol sym;
 
@@ -192,7 +192,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
      shared libraries we could search all of them only to find out the
      builtin type isn't defined in any of them.  This is common for types
      like "void".  */
-  if (langdef != NULL && domain == VAR_DOMAIN)
+  if (langdef != nullptr && (domain & SEARCH_TYPE_DOMAIN) != 0)
     {
       struct gdbarch *gdbarch;
 
@@ -251,7 +251,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 static struct block_symbol
 cp_search_static_and_baseclasses (const char *name,
 				  const struct block *block,
-				  const domain_enum domain,
+				  const domain_search_flags domain,
 				  unsigned int prefix_len,
 				  int is_in_anonymous)
 {
@@ -273,9 +273,9 @@ cp_search_static_and_baseclasses (const char *name,
      symbol_matches_domain (which should be replaced with something
      else, but it's what we have today).  */
   block_symbol scope_sym = lookup_symbol_in_static_block (scope.c_str (),
-							  block, VAR_DOMAIN);
+							  block, SEARCH_VFT);
   if (scope_sym.symbol == NULL)
-    scope_sym = lookup_global_symbol (scope.c_str (), block, VAR_DOMAIN);
+    scope_sym = lookup_global_symbol (scope.c_str (), block, SEARCH_VFT);
   if (scope_sym.symbol == NULL)
     return {};
 
@@ -285,9 +285,9 @@ cp_search_static_and_baseclasses (const char *name,
      static variable.  E.g., "print 'function()::static_var'".  */
   if ((scope_type->code () == TYPE_CODE_FUNC
        || scope_type->code () == TYPE_CODE_METHOD)
-      && domain == VAR_DOMAIN)
+      && (domain & SEARCH_VAR_DOMAIN) != 0)
     return lookup_symbol (nested, scope_sym.symbol->value_block (),
-			  VAR_DOMAIN, NULL);
+			  domain, NULL);
 
   /* Look for a symbol named NESTED in this class/namespace.
      The caller is assumed to have already have done a basic lookup of NAME.
@@ -308,7 +308,7 @@ cp_search_static_and_baseclasses (const char *name,
 static struct block_symbol
 cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
 			       const struct block *block,
-			       const domain_enum domain, int search)
+			       const domain_search_flags domain, int search)
 {
   char *concatenated_name = NULL;
   int is_in_anonymous;
@@ -382,7 +382,7 @@ static void
 cp_lookup_symbol_via_imports (const char *scope,
 			      const char *name,
 			      const struct block *block,
-			      const domain_enum domain,
+			      const domain_search_flags domain,
 			      const int search_scope_first,
 			      const int declaration_only,
 			      const int search_parents,
@@ -503,7 +503,7 @@ static struct block_symbol
 cp_lookup_symbol_via_imports (const char *scope,
 			      const char *name,
 			      const struct block *block,
-			      const domain_enum domain,
+			      const domain_search_flags domain,
 			      const int declaration_only,
 			      const int search_parents)
 {
@@ -560,13 +560,14 @@ struct block_symbol
 cp_lookup_symbol_imports_or_template (const char *scope,
 				      const char *name,
 				      const struct block *block,
-				      const domain_enum domain)
+				      const domain_search_flags domain)
 {
   struct symbol *function = block->function ();
 
   symbol_lookup_debug_printf
     ("cp_lookup_symbol_imports_or_template (%s, %s, %s, %s)",
-     scope, name, host_address_to_string (block), domain_name (domain));
+     scope, name, host_address_to_string (block),
+     domain_name (domain).c_str ());
 
   if (function != NULL && function->language () == language_cplus)
     {
@@ -646,7 +647,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 static struct block_symbol
 cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
 				  const struct block *block,
-				  const domain_enum domain)
+				  const domain_search_flags domain)
 {
   struct block_symbol sym;
 
@@ -671,13 +672,13 @@ struct block_symbol
 cp_lookup_symbol_namespace (const char *scope,
 			    const char *name,
 			    const struct block *block,
-			    const domain_enum domain)
+			    const domain_search_flags domain)
 {
   struct block_symbol sym;
 
   symbol_lookup_debug_printf ("cp_lookup_symbol_namespace (%s, %s, %s, %s)",
 			      scope, name, host_address_to_string (block),
-			      domain_name (domain));
+			      domain_name (domain).c_str ());
 
   /* First, try to find the symbol in the given namespace.  */
   sym = cp_lookup_symbol_in_namespace (scope, name, block, domain, 1);
@@ -711,7 +712,7 @@ static struct block_symbol
 lookup_namespace_scope (const struct language_defn *langdef,
 			const char *name,
 			const struct block *block,
-			const domain_enum domain,
+			const domain_search_flags domain,
 			const char *scope,
 			int scope_len)
 {
@@ -768,14 +769,15 @@ struct block_symbol
 cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
 			   const char *name,
 			   const struct block *block,
-			   const domain_enum domain)
+			   const domain_search_flags domain)
 {
   struct block_symbol sym;
   const char *scope = block == nullptr ? "" : block->scope ();
 
   symbol_lookup_debug_printf
     ("cp_lookup_symbol_non_local (%s, %s (scope %s), %s)",
-     name, host_address_to_string (block), scope, domain_name (domain));
+     name, host_address_to_string (block), scope,
+     domain_name (domain).c_str ());
 
   /* First, try to find the symbol in the given namespace, and all
      containing namespaces.  */
@@ -826,7 +828,8 @@ cp_find_type_baseclass_by_name (struct type *parent_type, const char *name)
 
 static struct block_symbol
 find_symbol_in_baseclass (struct type *parent_type, const char *name,
-			  const struct block *block, const domain_enum domain,
+			  const struct block *block,
+			  const domain_search_flags domain,
 			  int is_in_anonymous)
 {
   int i;
@@ -869,7 +872,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
 			   const char *nested_name,
 			   const char *concatenated_name,
 			   const struct block *block,
-			   const domain_enum domain,
+			   const domain_search_flags domain,
 			   int basic_lookup, int is_in_anonymous)
 {
   struct block_symbol sym;
@@ -933,7 +936,7 @@ struct block_symbol
 cp_lookup_nested_symbol (struct type *parent_type,
 			 const char *nested_name,
 			 const struct block *block,
-			 const domain_enum domain)
+			 const domain_search_flags domain)
 {
   /* type_name_or_error provides better error reporting using the
      original type.  */
@@ -948,7 +951,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
       symbol_lookup_debug_printf ("cp_lookup_nested_symbol (%s, %s, %s, %s)",
 				  type_name != NULL ? type_name : "unnamed",
 				  nested_name, host_address_to_string (block),
-				  domain_name (domain));
+				  domain_name (domain).c_str ());
     }
 
   switch (parent_type->code ())

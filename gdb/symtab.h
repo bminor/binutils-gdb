@@ -2112,7 +2112,7 @@ struct field_of_this_result
 extern struct block_symbol
   lookup_symbol_in_language (const char *,
 			     const struct block *,
-			     const domain_enum,
+			     const domain_search_flags,
 			     enum language,
 			     struct field_of_this_result *);
 
@@ -2120,7 +2120,7 @@ extern struct block_symbol
 
 extern struct block_symbol lookup_symbol (const char *,
 					  const struct block *,
-					  const domain_enum,
+					  const domain_search_flags,
 					  struct field_of_this_result *);
 
 /* Find the definition for a specified symbol search name in domain
@@ -2132,9 +2132,10 @@ extern struct block_symbol lookup_symbol (const char *,
    pointer, or NULL if no symbol is found.  The symbol's section is
    fixed up if necessary.  */
 
-extern struct block_symbol lookup_symbol_search_name (const char *search_name,
-						      const struct block *block,
-						      domain_enum domain);
+extern struct block_symbol lookup_symbol_search_name
+     (const char *search_name,
+      const struct block *block,
+      domain_search_flags domain);
 
 /* Some helper functions for languages that need to write their own
    lookup_symbol_nonlocal functions.  */
@@ -2146,13 +2147,13 @@ extern struct block_symbol lookup_symbol_search_name (const char *search_name,
 extern struct block_symbol
   lookup_symbol_in_static_block (const char *name,
 				 const struct block *block,
-				 const domain_enum domain);
+				 const domain_search_flags domain);
 
 /* Search all static file-level symbols for NAME from DOMAIN.
    Upon success fixes up the symbol's section if necessary.  */
 
-extern struct block_symbol lookup_static_symbol (const char *name,
-						 const domain_enum domain);
+extern struct block_symbol lookup_static_symbol
+     (const char *name, const domain_search_flags domain);
 
 /* Lookup a symbol in all files' global blocks.
 
@@ -2168,7 +2169,7 @@ extern struct block_symbol lookup_static_symbol (const char *name,
 extern struct block_symbol
   lookup_global_symbol (const char *name,
 			const struct block *block,
-			const domain_enum domain);
+			const domain_search_flags domain);
 
 /* Lookup a symbol in block BLOCK.
    Upon success fixes up the symbol's section if necessary.  */
@@ -2177,7 +2178,7 @@ extern struct symbol *
   lookup_symbol_in_block (const char *name,
 			  symbol_name_match_type match_type,
 			  const struct block *block,
-			  const domain_enum domain);
+			  const domain_search_flags domain);
 
 /* Look up the `this' symbol for LANG in BLOCK.  Return the symbol if
    found, or NULL if not found.  */
@@ -2724,7 +2725,7 @@ extern struct block_symbol
   lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				     enum block_enum block_index,
 				     const char *name,
-				     const domain_enum domain);
+				     const domain_search_flags domain);
 
 /* Return 1 if the supplied producer string matches the ARM RealView
    compiler (armcc).  */

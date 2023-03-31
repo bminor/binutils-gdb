@@ -1715,7 +1715,7 @@ f_language::search_name_hash (const char *name) const
 struct block_symbol
 f_language::lookup_symbol_nonlocal (const char *name,
 				    const struct block *block,
-				    const domain_enum domain) const
+				    const domain_search_flags domain) const
 {
   return cp_lookup_symbol_nonlocal (this, name, block, domain);
 }
