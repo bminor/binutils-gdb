@@ -2339,3 +2339,4 @@ extern const char i386_mnemonics[];
 #define MN__rex_ 0x469c
 #define MN__evex_ 0x46a2
 #define MN__vex_ 0x46a9
+#define MN__insn 0x46af

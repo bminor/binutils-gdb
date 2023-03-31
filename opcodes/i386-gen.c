@@ -1814,6 +1814,9 @@ process_i386_opcodes (FILE *table)
       l = l1;
     }
 
+  fprintf (table, "  \"\\0\"\".insn\"\n");
+  fprintf (fp, "#define MN__insn %#x\n", offs + 1);
+
   fprintf (table, ";\n");
 
   fclose (fp);

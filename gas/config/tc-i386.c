@@ -137,6 +137,7 @@ typedef struct
 arch_entry;
 
 static void update_code_flag (int, int);
+static void s_insn (int);
 static void set_code_flag (int);
 static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
@@ -159,7 +160,7 @@ static int i386_intel_operand (char *, int);
 static int i386_intel_simplify (expressionS *);
 static int i386_intel_parse_name (const char *, expressionS *);
 static const reg_entry *parse_register (char *, char **);
-static const char *parse_insn (const char *, char *);
+static const char *parse_insn (const char *, char *, bool);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
 static void swap_2_operands (unsigned int, unsigned int);
@@ -1196,6 +1197,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"bfloat16", float_cons, 'b'},
   {"value", cons, 2},
   {"slong", signed_cons, 4},
+  {"insn", s_insn, 0},
   {"noopt", s_ignore, 0},
   {"optim", s_ignore, 0},
   {"code16gcc", set_16bit_gcc_code_flag, CODE_16BIT},
@@ -4841,6 +4843,20 @@ insert_lfence_before (void)
     }
 }
 
+/* Shared helper for md_assemble() and s_insn().  */
+static void init_globals (void)
+{
+  unsigned int j;
+
+  memset (&i, '\0', sizeof (i));
+  i.rounding.type = rc_none;
+  for (j = 0; j < MAX_OPERANDS; j++)
+    i.reloc[j] = NO_RELOC;
+  memset (disp_expressions, '\0', sizeof (disp_expressions));
+  memset (im_expressions, '\0', sizeof (im_expressions));
+  save_stack_p = save_stack;
+}
+
 /* Helper for md_assemble() to decide whether to prepare for a possible 2nd
    parsing pass. Instead of introducing a rarely use new insn attribute this
    utilizes a common pattern between affected templates. It is deemed
@@ -4873,19 +4889,13 @@ md_assemble (char *line)
   /* Initialize globals.  */
   current_templates = NULL;
  retry:
-  memset (&i, '\0', sizeof (i));
-  i.rounding.type = rc_none;
-  for (j = 0; j < MAX_OPERANDS; j++)
-    i.reloc[j] = NO_RELOC;
-  memset (disp_expressions, '\0', sizeof (disp_expressions));
-  memset (im_expressions, '\0', sizeof (im_expressions));
-  save_stack_p = save_stack;
+  init_globals ();
 
   /* First parse an instruction mnemonic & call i386_operand for the operands.
      We assume that the scrubber has arranged it so that line[0] is the valid
      start of a (possibly prefixed) mnemonic.  */
 
-  end = parse_insn (line, mnemonic);
+  end = parse_insn (line, mnemonic, false);
   if (end == NULL)
     {
       if (pass1_mnem != NULL)
@@ -5424,7 +5434,7 @@ static INLINE bool q_suffix_allowed(const insn_template *t)
 }
 
 static const char *
-parse_insn (const char *line, char *mnemonic)
+parse_insn (const char *line, char *mnemonic, bool prefix_only)
 {
   const char *l = line, *token_start = l;
   char *mnem_p;
@@ -5454,6 +5464,8 @@ parse_insn (const char *line, char *mnemonic)
 	      || (*l != PREFIX_SEPARATOR
 		  && *l != ',')))
 	{
+	  if (prefix_only)
+	    break;
 	  as_bad (_("invalid character %s in mnemonic"),
 		  output_invalid (*l));
 	  return NULL;
@@ -5574,6 +5586,9 @@ parse_insn (const char *line, char *mnemonic)
       else
 	break;
     }
+
+  if (prefix_only)
+    return token_start;
 
   if (!current_templates)
     {
@@ -10513,6 +10528,136 @@ signed_cons (int size)
     cons_sign = 1;
   cons (size);
   cons_sign = -1;
+}
+
+static void
+s_insn (int dummy ATTRIBUTE_UNUSED)
+{
+  char mnemonic[MAX_MNEM_SIZE], *line = input_line_pointer;
+  char *saved_ilp = find_end_of_line (line, false), saved_char;
+  const char *end;
+  unsigned int j;
+  valueT val;
+  bool vex = false, xop = false, evex = false;
+  static const templates tt = { &i.tm, &i.tm + 1 };
+
+  init_globals ();
+
+  saved_char = *saved_ilp;
+  *saved_ilp = 0;
+
+  end = parse_insn (line, mnemonic, true);
+  if (end == NULL)
+    {
+  bad:
+      *saved_ilp = saved_char;
+      ignore_rest_of_line ();
+      return;
+    }
+  line += end - line;
+
+  current_templates = &tt;
+  i.tm.mnem_off = MN__insn;
+
+  if (startswith (line, "VEX")
+      && (line[3] == '.' || is_space_char (line[3])))
+    {
+      vex = true;
+      line += 3;
+    }
+  else if (startswith (line, "XOP") && ISDIGIT (line[3]))
+    {
+      char *e;
+      unsigned long n = strtoul (line + 3, &e, 16);
+
+      if (e == line + 5 && n >= 0x08 && n <= 0x1f
+	  && (*e == '.' || is_space_char (*e)))
+	{
+	  xop = true;
+	  line = e;
+	}
+    }
+  else if (startswith (line, "EVEX")
+	   && (line[4] == '.' || is_space_char (line[4])))
+    {
+      evex = true;
+      line += 4;
+    }
+
+  if (vex || xop
+      ? i.vec_encoding == vex_encoding_evex
+      : evex
+	? i.vec_encoding == vex_encoding_vex
+	  || i.vec_encoding == vex_encoding_vex3
+	: i.vec_encoding != vex_encoding_default)
+    {
+      as_bad (_("pseudo-prefix conflicts with encoding specifier"));
+      goto bad;
+    }
+
+  if (line > end && *line == '.')
+    {
+    }
+
+  input_line_pointer = line;
+  val = get_absolute_expression ();
+  line = input_line_pointer;
+
+  for (j = 1; j < sizeof(val); ++j)
+    if (!(val >> (j * 8)))
+      break;
+
+  /* Trim off a prefix if present.  */
+  if (j > 1 && !vex && !xop && !evex)
+    {
+      uint8_t byte = val >> ((j - 1) * 8);
+
+      switch (byte)
+	{
+	case DATA_PREFIX_OPCODE:
+	case REPE_PREFIX_OPCODE:
+	case REPNE_PREFIX_OPCODE:
+	  if (!add_prefix (byte))
+	    goto bad;
+	  val &= ((uint64_t)1 << (--j * 8)) - 1;
+	  break;
+	}
+    }
+
+  /* Trim off encoding space.  */
+  if (j > 1 && !i.tm.opcode_space && (val >> ((j - 1) * 8)) == 0x0f)
+    {
+      uint8_t byte = val >> ((--j - 1) * 8);
+
+      i.tm.opcode_space = SPACE_0F;
+      switch (byte & -(j > 1))
+	{
+	case 0x38:
+	  i.tm.opcode_space = SPACE_0F38;
+	  --j;
+	  break;
+	case 0x3a:
+	  i.tm.opcode_space = SPACE_0F3A;
+	  --j;
+	  break;
+	}
+      val &= ((uint64_t)1 << (j * 8)) - 1;
+    }
+
+  if (j > 2)
+    {
+      as_bad (_("opcode residual (%#"PRIx64") too wide"), (uint64_t) val);
+      goto bad;
+    }
+  i.opcode_length = j;
+  i.tm.base_opcode = val;
+
+  output_insn ();
+
+  *saved_ilp = saved_char;
+  input_line_pointer = line;
+
+  demand_empty_rest_of_line ();
 }
 
 #ifdef TE_PE

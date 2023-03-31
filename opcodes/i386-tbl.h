@@ -60199,6 +60199,7 @@ const char i386_mnemonics[] =
   "\0""{rex}"
   "\0""{evex}"
   "\0""{vex}"
+  "\0"".insn"
 ;
 
 /* i386 register table.  */
