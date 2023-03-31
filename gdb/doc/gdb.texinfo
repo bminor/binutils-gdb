@@ -20162,6 +20162,12 @@ The optional flag @samp{-q}, which stands for @samp{quiet}, disables
 printing header information and messages explaining why no functions
 or variables have been printed.
 
+@kindex info main
+@item info main
+Print the name of the starting function of the program.  This serves
+primarily Fortran programs, which have a user-supplied name for the
+main subroutine.
+
 @kindex info classes
 @cindex Objective-C, classes and selectors
 @item info classes

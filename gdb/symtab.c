@@ -5282,6 +5282,14 @@ info_modules_command (const char *args, int from_tty)
 		      from_tty);
 }
 
+/* Implement the 'info main' command.  */
+
+static void
+info_main_command (const char *args, int from_tty)
+{
+  gdb_printf ("%s\n", main_name ());
+}
+
 static void
 rbreak_command (const char *regexp, int from_tty)
 {
@@ -6872,6 +6880,9 @@ Options:\n\
   c = add_info ("modules", info_modules_command,
 		_("All module names, or those matching REGEXP."));
   set_cmd_completer_handle_brkchars (c, info_types_command_completer);
+
+  add_info ("main", info_main_command,
+	    _("Get main symbol to identify entry point into program."));
 
   add_basic_prefix_cmd ("module", class_info, _("\
 Print information about modules."),
