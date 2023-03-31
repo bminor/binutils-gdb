@@ -10552,7 +10552,7 @@ signed_cons (int size)
 static void
 s_insn (int dummy ATTRIBUTE_UNUSED)
 {
-  char mnemonic[MAX_MNEM_SIZE], *line = input_line_pointer;
+  char mnemonic[MAX_MNEM_SIZE], *line = input_line_pointer, *ptr;
   char *saved_ilp = find_end_of_line (line, false), saved_char;
   const char *end;
   unsigned int j;
@@ -10578,6 +10578,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 
   current_templates = &tt;
   i.tm.mnem_off = MN__insn;
+  i.tm.extension_opcode = None;
 
   if (startswith (line, "VEX")
       && (line[3] == '.' || is_space_char (line[3])))
@@ -10804,9 +10805,45 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       goto done;
     }
 
+  /* Before processing the opcode expression, find trailing "+r" or
+     "/<digit>" specifiers.  */
+  for (ptr = line; ; ++ptr)
+    {
+      unsigned long n;
+      char *e;
+
+      ptr = strpbrk (ptr, "+/,");
+      if (ptr == NULL || *ptr == ',')
+	break;
+
+      if (*ptr == '+' && ptr[1] == 'r'
+	  && (ptr[2] == ',' || (is_space_char (ptr[2]) && ptr[3] == ',')))
+	{
+	  *ptr = ' ';
+	  ptr[1] = ' ';
+	  i.short_form = true;
+	  break;
+	}
+
+      if (*ptr == '/' && ISDIGIT (ptr[1])
+	  && (n = strtoul (ptr + 1, &e, 8)) < 8
+	  && e == ptr + 2
+	  && (ptr[2] == ',' || (is_space_char (ptr[2]) && ptr[3] == ',')))
+	{
+	  *ptr = ' ';
+	  ptr[1] = ' ';
+	  i.tm.extension_opcode = n;
+	  i.tm.opcode_modifier.modrm = 1;
+	  break;
+	}
+    }
+
   input_line_pointer = line;
   val = get_absolute_expression ();
   line = input_line_pointer;
+
+  if (i.short_form && (val & 7))
+    as_warn ("`+r' assumes low three opcode bits to be clear");
 
   for (j = 1; j < sizeof(val); ++j)
     if (!(val >> (j * 8)))
