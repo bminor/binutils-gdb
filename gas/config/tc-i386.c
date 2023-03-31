@@ -10050,13 +10050,13 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		    if (operand_type_check (i.types[n1], imm))
 		      {
 			/* Only one immediate is allowed for PC
-			   relative address.  */
-			gas_assert (sz == 0);
-			sz = imm_size (n1);
-			i.op[n].disps->X_add_number -= sz;
+			   relative address, except with .insn.  */
+			gas_assert (sz == 0 || dot_insn ());
+			sz += imm_size (n1);
 		      }
-		  /* We should find the immediate.  */
+		  /* We should find at least one immediate.  */
 		  gas_assert (sz != 0);
+		  i.op[n].disps->X_add_number -= sz;
 		}
 
 	      p = frag_more (size);
