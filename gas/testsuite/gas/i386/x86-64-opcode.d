@@ -1,4 +1,4 @@
-#as: -J
+#as: -J --divide
 #objdump: -drw
 #name: x86-64 opcode
 

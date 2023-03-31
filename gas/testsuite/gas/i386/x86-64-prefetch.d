@@ -1,3 +1,4 @@
+#as: --divide
 #objdump: -dw
 #name: x86-64 prefetch
 #source: prefetch.s

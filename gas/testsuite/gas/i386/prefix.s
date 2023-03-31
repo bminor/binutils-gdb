@@ -336,59 +336,32 @@
 	int $3
 
 # "repz" vmovaps %xmm7, %xmm7
-	.byte 0xc5
-	.byte 0xfa
-	.byte 0x28
-	.byte 0xff
+	.insn VEX.128.f3.0f.W0 0x28, %xmm7, %xmm7
 
 	int $3
 
 # "repnz" {vex3} vmovaps %xmm7, %xmm7
-	.byte 0xc4
-	.byte 0xe1
-	.byte 0x7b
-	.byte 0x28
-	.byte 0xff
+	.insn {vex3} VEX.128.f2.0f.W0 0x28, %xmm7, %xmm7
 
 	int $3
 
 # "EVEX.W1" vmovaps %xmm7, %xmm7
-	.byte 0x62
-	.byte 0xf1
-	.byte 0xfc
-	.byte 0x08
-	.byte 0x28
-	.byte 0xff
+	.insn EVEX.128.0f.W1 0x28, %xmm7, %xmm7
 
 	int $3
 
 # "repz" vmovaps %xmm7, %xmm7
-	.byte 0x62
-	.byte 0xf1
-	.byte 0x7e
-	.byte 0x08
-	.byte 0x28
-	.byte 0xff
+	.insn EVEX.128.f3.0f.W0 0x28, %xmm7, %xmm7
 
 	int $3
 
 # "EVEX.W0" vmovapd %xmm7, %xmm7
-	.byte 0x62
-	.byte 0xf1
-	.byte 0x7d
-	.byte 0x08
-	.byte 0x28
-	.byte 0xff
+	.insn EVEX.128.66.0f.W0 0x28, %xmm7, %xmm7
 
 	int $3
 
 # "repnz" vmovapd %xmm7, %xmm7
-	.byte 0x62
-	.byte 0xf1
-	.byte 0xff
-	.byte 0x08
-	.byte 0x28
-	.byte 0xff
+	.insn EVEX.128.f2.0f.W1 0x28, %xmm7, %xmm7
 
 	int $3
 

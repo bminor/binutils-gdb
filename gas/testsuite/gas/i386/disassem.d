@@ -1,3 +1,4 @@
+#as: --divide
 #objdump: -drw
 #name: opcodes with invalid modrm byte
 

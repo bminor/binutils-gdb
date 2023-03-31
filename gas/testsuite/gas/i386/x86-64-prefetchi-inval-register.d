@@ -1,4 +1,4 @@
-#as:
+#as: --divide
 #objdump: -dw
 #name: x86-64 PREFETCHI INVAL REGISTER insns
 

@@ -1,3 +1,4 @@
+#as: --divide
 #objdump: -dw -Mintel
 #name: x86-64 prefetch (Intel disassembly)
 #source: prefetch.s

@@ -1,4 +1,4 @@
-#as: -J
+#as: -J --divide
 #objdump: -dw
 #name: i386 opcodes
 
@@ -597,7 +597,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	df 38                	fistpll \(%eax\)
 [ 	]*[a-f0-9]+:	df 38                	fistpll \(%eax\)
  +[a-f0-9]+:	82 c3 01             	add    \$0x1,%bl
- +[a-f0-9]+:	82 f3 01             	xor    \$0x1,%bl
+ +[a-f0-9]+:	82 cb 01             	or     \$0x1,%bl
  +[a-f0-9]+:	82 d3 01             	adc    \$0x1,%bl
  +[a-f0-9]+:	82 db 01             	sbb    \$0x1,%bl
  +[a-f0-9]+:	82 e3 01             	and    \$0x1,%bl

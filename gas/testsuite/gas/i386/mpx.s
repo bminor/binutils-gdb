@@ -158,14 +158,10 @@ start:
 
 foo:	bnd ret
 
+	.att_syntax prefix
 bad:
 	# bndldx (%eax),(bad)
-	.byte 0x0f
-	.byte 0x1a
-	.byte 0x30
+	.insn 0x0f1a, (%eax), %esi
 
 	# bndmov (bad),%bnd0
-	.byte 0x66
-	.byte 0x0f
-	.byte 0x1a
-	.byte 0xc4
+	.insn 0x660f1a, %k4, %bnd0
