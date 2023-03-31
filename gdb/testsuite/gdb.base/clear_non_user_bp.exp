@@ -30,7 +30,7 @@
 #
 proc get_first_maint_bp_num { } {
     gdb_test_multiple "maint info break" "find first internal bp num" {
-	-re -wrap "(-\[0-9\]).*" {
+	-re -wrap "\r\n(-\[1-9\]\[0-9\]*).*" {
 	    return $expect_out(1,string)
 	}
     }
