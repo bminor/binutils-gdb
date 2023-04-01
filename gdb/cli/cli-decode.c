@@ -1637,9 +1637,8 @@ fput_command_names_styled (const cmd_list_element &c,
    otherwise print only one-line help for command C.  */
 
 static void
-print_doc_of_command (const cmd_list_element &c, const char *prefix,
-		      bool verbose, compiled_regex &highlight,
-		      struct ui_file *stream)
+print_doc_of_command (const cmd_list_element &c, bool verbose,
+		      compiled_regex &highlight, struct ui_file *stream)
 {
   /* When printing the full documentation, add a line to separate
      this documentation from the previous command help, in the likely
@@ -1674,7 +1673,7 @@ print_doc_of_command (const cmd_list_element &c, const char *prefix,
 void
 apropos_cmd (struct ui_file *stream,
 	     struct cmd_list_element *commandlist,
-	     bool verbose, compiled_regex &regex, const char *prefix)
+	     bool verbose, compiled_regex &regex)
 {
   struct cmd_list_element *c;
   int returnvalue;
@@ -1698,7 +1697,7 @@ apropos_cmd (struct ui_file *stream,
 	  /* Try to match against the name.  */
 	  returnvalue = regex.search (c->name, name_len, 0, name_len, NULL);
 	  if (returnvalue >= 0)
-	    print_doc_of_command (*c, prefix, verbose, regex, stream);
+	    print_doc_of_command (*c, verbose, regex, stream);
 
 	  /* Try to match against the name of the aliases.  */
 	  for (const cmd_list_element &alias : c->aliases)
@@ -1707,7 +1706,7 @@ apropos_cmd (struct ui_file *stream,
 	      returnvalue = regex.search (alias.name, name_len, 0, name_len, NULL);
 	      if (returnvalue >= 0)
 		{
-		  print_doc_of_command (*c, prefix, verbose, regex, stream);
+		  print_doc_of_command (*c, verbose, regex, stream);
 		  break;
 		}
 	    }
@@ -1718,15 +1717,14 @@ apropos_cmd (struct ui_file *stream,
 
 	  /* Try to match against documentation.  */
 	  if (regex.search (c->doc, doc_len, 0, doc_len, NULL) >= 0)
-	    print_doc_of_command (*c, prefix, verbose, regex, stream);
+	    print_doc_of_command (*c, verbose, regex, stream);
 	}
       /* Check if this command has subcommands.  */
       if (c->is_prefix ())
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
-	  apropos_cmd (stream, *c->subcommands, verbose, regex,
-		       c->prefixname ().c_str ());
+	  apropos_cmd (stream, *c->subcommands, verbose, regex);
 	}
     }
 }

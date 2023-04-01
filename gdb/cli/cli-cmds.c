@@ -1768,7 +1768,7 @@ apropos_command (const char *arg, int from_tty)
   compiled_regex pattern (arg, REG_ICASE,
 			  _("Error in regular expression"));
 
-  apropos_cmd (gdb_stdout, cmdlist, verbose, pattern, "");
+  apropos_cmd (gdb_stdout, cmdlist, verbose, pattern);
 }
 
 /* The options for the "alias" command.  */
