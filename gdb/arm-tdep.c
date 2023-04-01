@@ -3115,26 +3115,34 @@ arm_exidx_unwind_sniffer (const struct frame_unwind *self,
 	  && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME)
 	exc_valid = 1;
 
-      /* We also assume exception information is valid if we're currently
-	 blocked in a system call.  The system library is supposed to
-	 ensure this, so that e.g. pthread cancellation works.  */
-      if (arm_frame_is_thumb (this_frame))
+      /* Some syscalls keep PC pointing to the SVC instruction itself.  */
+      for (int shift = 0; shift <= 1 && !exc_valid; ++shift)
 	{
-	  ULONGEST insn;
+	  /* We also assume exception information is valid if we're currently
+	     blocked in a system call.  The system library is supposed to
+	     ensure this, so that e.g. pthread cancellation works.  */
+	  if (arm_frame_is_thumb (this_frame))
+	    {
+	      ULONGEST insn;
 
-	  if (safe_read_memory_unsigned_integer (get_frame_pc (this_frame) - 2,
-						 2, byte_order_for_code, &insn)
-	      && (insn & 0xff00) == 0xdf00 /* svc */)
-	    exc_valid = 1;
-	}
-      else
-	{
-	  ULONGEST insn;
+	      if (safe_read_memory_unsigned_integer ((get_frame_pc (this_frame)
+						      - (shift ? 2 : 0)),
+						     2, byte_order_for_code,
+						     &insn)
+		  && (insn & 0xff00) == 0xdf00 /* svc */)
+		exc_valid = 1;
+	    }
+	  else
+	    {
+	      ULONGEST insn;
 
-	  if (safe_read_memory_unsigned_integer (get_frame_pc (this_frame) - 4,
-						 4, byte_order_for_code, &insn)
-	      && (insn & 0x0f000000) == 0x0f000000 /* svc */)
-	    exc_valid = 1;
+	      if (safe_read_memory_unsigned_integer ((get_frame_pc (this_frame)
+						      - (shift ? 4 : 0)),
+						     4, byte_order_for_code,
+						     &insn)
+		  && (insn & 0x0f000000) == 0x0f000000 /* svc */)
+		exc_valid = 1;
+	    }
 	}
 	
       /* Bail out if we don't know that exception information is valid.  */
