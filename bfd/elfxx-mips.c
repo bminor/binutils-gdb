@@ -1486,7 +1486,7 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
 
   /* The symbolic header contains absolute file offsets and sizes to
      read.  */
-#define READ(ptr, offset, count, size, type)				\
+#define READ(ptr, offset, count, size)					\
   do									\
     {									\
       size_t amt;							\
@@ -1500,23 +1500,23 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
 	}								\
       if (bfd_seek (abfd, symhdr->offset, SEEK_SET) != 0)		\
 	goto error_return;						\
-      debug->ptr = (type) _bfd_malloc_and_read (abfd, amt, amt);	\
+      debug->ptr = _bfd_malloc_and_read (abfd, amt + 1, amt);		\
       if (debug->ptr == NULL)						\
 	goto error_return;						\
+      ((char *) debug->ptr)[amt] = 0;					\
     } while (0)
 
-  READ (line, cbLineOffset, cbLine, sizeof (unsigned char), unsigned char *);
-  READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size, void *);
-  READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size, void *);
-  READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size, void *);
-  READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size, void *);
-  READ (external_aux, cbAuxOffset, iauxMax, sizeof (union aux_ext),
-	union aux_ext *);
-  READ (ss, cbSsOffset, issMax, sizeof (char), char *);
-  READ (ssext, cbSsExtOffset, issExtMax, sizeof (char), char *);
-  READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size, void *);
-  READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, void *);
-  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, void *);
+  READ (line, cbLineOffset, cbLine, sizeof (unsigned char));
+  READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size);
+  READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size);
+  READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size);
+  READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size);
+  READ (external_aux, cbAuxOffset, iauxMax, sizeof (union aux_ext));
+  READ (ss, cbSsOffset, issMax, sizeof (char));
+  READ (ssext, cbSsExtOffset, issExtMax, sizeof (char));
+  READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size);
+  READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size);
+  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size);
 #undef READ
 
   return true;

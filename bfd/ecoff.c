@@ -3749,7 +3749,7 @@ ecoff_final_link_debug_accumulate (bfd *output_bfd,
   HDRR *symhdr = &debug->symbolic_header;
   bool ret;
 
-#define READ(ptr, offset, count, size, type)				\
+#define READ(ptr, offset, count, size)					\
   do									\
     {									\
       size_t amt;							\
@@ -3767,29 +3767,28 @@ ecoff_final_link_debug_accumulate (bfd *output_bfd,
 	  ret = false;							\
 	  goto return_something;					\
 	}								\
-      debug->ptr = (type) _bfd_malloc_and_read (input_bfd, amt, amt);	\
+      debug->ptr = _bfd_malloc_and_read (input_bfd, amt + 1, amt);	\
       if (debug->ptr == NULL)						\
 	{								\
 	  ret = false;							\
 	  goto return_something;					\
 	}								\
+      ((char *) debug->ptr)[amt] = 0;					\
     } while (0)
 
   /* If raw_syments is not NULL, then the data was already by read by
      _bfd_ecoff_slurp_symbolic_info.  */
   if (ecoff_data (input_bfd)->raw_syments == NULL)
     {
-      READ (line, cbLineOffset, cbLine, sizeof (unsigned char),
-	    unsigned char *);
-      READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size, void *);
-      READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size, void *);
-      READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size, void *);
-      READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size, void *);
-      READ (external_aux, cbAuxOffset, iauxMax, sizeof (union aux_ext),
-	    union aux_ext *);
-      READ (ss, cbSsOffset, issMax, sizeof (char), char *);
-      READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size, void *);
-      READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, void *);
+      READ (line, cbLineOffset, cbLine, sizeof (unsigned char));
+      READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size);
+      READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size);
+      READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size);
+      READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size);
+      READ (external_aux, cbAuxOffset, iauxMax, sizeof (union aux_ext));
+      READ (ss, cbSsOffset, issMax, sizeof (char));
+      READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size);
+      READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size);
     }
 #undef READ
 
