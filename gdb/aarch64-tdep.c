@@ -5313,18 +5313,39 @@ morello_write_pc (struct regcache *regs, CORE_ADDR pc)
   struct gdbarch *gdbarch = regs->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  CORE_ADDR current_pc = 0;
+
+  /* Read the lower 64 bits of the PCC and check if the PC we want to set it
+     to is the same or not.  If it is the same, gdb is likely moving the
+     inferior.  In that case we don't need to adjust the upper 64 bits and
+     tag of the PCC.  Just return.  */
+  regs->cooked_read_part (tdep->cap_reg_pcc, 0, sizeof (pc),
+			  (gdb_byte *) &current_pc);
+
+  if (pc == current_pc)
+    return;
+
+  /* Otherwise gdb is trying to do some other more complex operation, like
+     trying to do displaced stepping or a manual function call.  In that case,
+     we do need to update the upper 64 bits of PCC and force the tag to 1.
+
+     The strategy here is to rely on the bounds used by the CSP register, as
+     that gives us a broad range we can use.  The PCC may have narrower
+     bounds, but at the moment there isn't a good way for gdb to find out
+     the precise bounds to use.  */
   regs->cooked_write_part (tdep->cap_reg_pcc, 0, sizeof (pc),
 			   (const gdb_byte *) &pc);
 
-  /* Upper 64 bits of the capability with maximum bounds and reasonable
-     permissions.  We only adjust this if we are using the purecap ABI.  */
-  pc = 0xffffc00000010005;
-  regs->cooked_write_part (tdep->cap_reg_pcc, 8, sizeof (pc),
-			   (const gdb_byte *) &pc);
+  /* Read the upper 64 bits of CSP.  */
+  CORE_ADDR bounds = 0;
+  regs->cooked_read_part (tdep->cap_reg_csp, 8, sizeof (bounds),
+			  (gdb_byte *) &bounds);
 
-  /* We may need to set the tag of the PCC here, but we don't do so at the
-     moment.  If this turns out to be a problem in the future, we should
-     force the tag to 1.  */
+  /* Set the upper 64 bits of PCC to the upper bits of CSP.  */
+  regs->cooked_write_part (tdep->cap_reg_pcc, 8, sizeof (pc),
+			   (const gdb_byte *) &bounds);
+
+  aarch64_register_set_tag (gdbarch, regs, tdep->cap_reg_pcc, true);
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
