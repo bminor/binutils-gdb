@@ -1950,9 +1950,9 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	 is.  */
       unrelocated_addr text_end
 	= (unrelocated_addr
-	   (lowest_text_address == (unrelocated_addr) -1
-	    ? text_addr
-	    : CORE_ADDR (lowest_text_address)
+	   ((lowest_text_address == (unrelocated_addr) -1
+	     ? text_addr
+	     : CORE_ADDR (lowest_text_address))
 	    + text_size));
 
       dbx_end_psymtab (objfile, partial_symtabs,
