@@ -44,6 +44,7 @@ DEFINE_OBSERVABLE (target_changed);
 DEFINE_OBSERVABLE (executable_changed);
 DEFINE_OBSERVABLE (inferior_created);
 DEFINE_OBSERVABLE (inferior_execd);
+DEFINE_OBSERVABLE (inferior_forked);
 DEFINE_OBSERVABLE (record_changed);
 DEFINE_OBSERVABLE (solib_loaded);
 DEFINE_OBSERVABLE (solib_unloaded);

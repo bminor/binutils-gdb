@@ -624,6 +624,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
   target_follow_fork (child_inf, child_ptid, fork_kind, follow_child,
 		      detach_fork);
 
+  gdb::observers::inferior_forked.notify (parent_inf, child_inf, fork_kind);
+
   /* target_follow_fork must leave the parent as the current inferior.  If we
      want to follow the child, we make it the current one below.  */
   gdb_assert (current_inferior () == parent_inf);

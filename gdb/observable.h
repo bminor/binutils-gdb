@@ -21,6 +21,7 @@
 #define OBSERVABLE_H
 
 #include "gdbsupport/observable.h"
+#include "target/waitstatus.h"
 
 struct bpstat;
 struct so_list;
@@ -96,6 +97,14 @@ extern observable<inferior */* inferior */> inferior_created;
    EXEC_INF, depending on "set follow-exec-mode".  */
 extern observable<inferior */* exec_inf */, inferior */* follow_inf */>
     inferior_execd;
+
+/* The inferior PARENT_INF has forked.  If we are setting up an inferior for
+   the child (because we follow only the child or we follow both), CHILD_INF
+   is the child inferior.  Otherwise, CHILD_INF is nullptr.
+
+   FORK_KIND is TARGET_WAITKIND_FORKED or TARGET_WAITKIND_VFORKED.  */
+extern observable<inferior */* parent_inf */, inferior */* child_inf */,
+		  target_waitkind /* fork_kind */> inferior_forked;
 
 /* The status of process record for inferior inferior in gdb has
    changed.  The process record is started if STARTED is true, and
