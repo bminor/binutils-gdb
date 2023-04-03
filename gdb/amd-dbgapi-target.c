@@ -1343,6 +1343,17 @@ attach_amd_dbgapi (inferior *inf)
       return;
     }
 
+  /* dbgapi can't attach to a vfork child (a process born from a vfork that
+     hasn't exec'ed yet) while we are still attached to the parent.  It would
+     not be useful for us to attach to vfork children anyway, because vfork
+     children are very restricted in what they can do (see vfork(2)) and aren't
+     going to launch some GPU programs that we need to debug.  To avoid this
+     problem, we don't push the amd-dbgapi target / attach dbgapi in vfork
+     children.  If a vfork child execs, we'll try enabling the amd-dbgapi target
+     through the inferior_execd observer.  */
+  if (inf->vfork_parent != nullptr)
+    return;
+
   auto *info = get_amd_dbgapi_inferior_info (inf);
 
   /* Are we already attached?  */
@@ -1655,6 +1666,32 @@ amd_dbgapi_target_inferior_created (inferior *inf)
   attach_amd_dbgapi (inf);
 }
 
+/* inferior_execd observer.  */
+
+static void
+amd_dbgapi_inferior_execd (inferior *exec_inf, inferior *follow_inf)
+{
+  /* The inferior has EXEC'd and the process image has changed.  The dbgapi is
+     attached to the old process image, so we need to detach and re-attach to
+     the new process image.  */
+  detach_amd_dbgapi (exec_inf);
+  attach_amd_dbgapi (follow_inf);
+}
+
+/* inferior_forked observer.  */
+
+static void
+amd_dbgapi_inferior_forked (inferior *parent_inf, inferior *child_inf,
+			    target_waitkind fork_kind)
+{
+  if (child_inf != nullptr  && fork_kind != TARGET_WAITKIND_VFORKED)
+    {
+      scoped_restore_current_thread restore_thread;
+      switch_to_thread (*child_inf->threads ().begin ());
+      attach_amd_dbgapi (child_inf);
+    }
+}
+
 /* inferior_exit observer.
 
    This covers normal exits, but also detached inferiors (including detached
@@ -1924,6 +1961,8 @@ _initialize_amd_dbgapi_target ()
   gdb::observers::inferior_created.attach
     (amd_dbgapi_target_inferior_created,
      amd_dbgapi_target_inferior_created_observer_token, "amd-dbgapi");
+  gdb::observers::inferior_execd.attach (amd_dbgapi_inferior_execd, "amd-dbgapi");
+  gdb::observers::inferior_forked.attach (amd_dbgapi_inferior_forked, "amd-dbgapi");
   gdb::observers::inferior_exit.attach (amd_dbgapi_inferior_exited, "amd-dbgapi");
   gdb::observers::inferior_pre_detach.attach (amd_dbgapi_inferior_pre_detach, "amd-dbgapi");
 
