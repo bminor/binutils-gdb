@@ -1744,7 +1744,8 @@ _initialize_solib ()
 {
   gdb::observers::free_objfile.attach (remove_user_added_objfile,
 				       "solib");
-  gdb::observers::inferior_execd.attach ([] (inferior *inf)
+  gdb::observers::inferior_execd.attach ([] (inferior *exec_inf,
+					     inferior *follow_inf)
     {
       solib_create_inferior_hook (0);
     }, "solib");

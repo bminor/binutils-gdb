@@ -244,6 +244,14 @@ invalidate_linux_cache_inf (struct inferior *inf)
   linux_inferior_data.clear (inf);
 }
 
+/* inferior_execd observer.  */
+
+static void
+linux_inferior_execd (inferior *exec_inf, inferior *follow_inf)
+{
+  invalidate_linux_cache_inf (follow_inf);
+}
+
 /* Fetch the linux cache info for INF.  This function always returns a
    valid INFO pointer.  */
 
@@ -2789,7 +2797,7 @@ _initialize_linux_tdep ()
 					"linux-tdep");
   gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf,
 					    "linux-tdep");
-  gdb::observers::inferior_execd.attach (invalidate_linux_cache_inf,
+  gdb::observers::inferior_execd.attach (linux_inferior_execd,
 					 "linux-tdep");
 
   add_setshow_boolean_cmd ("use-coredump-filter", class_files,

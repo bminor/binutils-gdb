@@ -1147,7 +1147,10 @@ jit_prepend_unwinder (struct gdbarch *gdbarch)
     }
 }
 
-/* Register any already created translations.  */
+/* Looks for the descriptor and registration symbols and breakpoints
+   the registration function.  If it finds both, it registers all the
+   already JITed code.  If it has already found the symbols, then it
+   doesn't try again.  */
 
 static void
 jit_inferior_init (inferior *inf)
@@ -1203,15 +1206,20 @@ jit_inferior_init (inferior *inf)
     }
 }
 
-/* Looks for the descriptor and registration symbols and breakpoints
-   the registration function.  If it finds both, it registers all the
-   already JITed code.  If it has already found the symbols, then it
-   doesn't try again.  */
+/* inferior_created observer.  */
 
 static void
 jit_inferior_created_hook (inferior *inf)
 {
   jit_inferior_init (inf);
+}
+
+/* inferior_execd observer.  */
+
+static void
+jit_inferior_execd_hook (inferior *exec_inf, inferior *follow_inf)
+{
+  jit_inferior_init (follow_inf);
 }
 
 /* Exported routine to call to re-set the jit breakpoints,
@@ -1304,7 +1312,7 @@ _initialize_jit ()
 	   &maintenanceinfolist);
 
   gdb::observers::inferior_created.attach (jit_inferior_created_hook, "jit");
-  gdb::observers::inferior_execd.attach (jit_inferior_created_hook, "jit");
+  gdb::observers::inferior_execd.attach (jit_inferior_execd_hook, "jit");
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook, "jit");
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted, "jit");
 
