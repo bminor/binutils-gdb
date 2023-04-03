@@ -5698,8 +5698,6 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 			 bfd_get_filename (abfd));
 	      exit_status = 1;
 	    }
-
-	  free (dhandle);
 	}
       /* PR 6483: If there was no STABS debug info in the file, try
 	 DWARF instead.  */

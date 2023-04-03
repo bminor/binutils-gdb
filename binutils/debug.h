@@ -425,7 +425,12 @@ struct debug_write_fns
 
 /* Return a debugging handle.  */
 
-extern void *debug_init (void);
+extern void *debug_init (bfd *);
+
+/* Allocate bytes on the debug handle objalloc memory pool.  */
+
+extern void *debug_xalloc (void *, size_t);
+extern void *debug_xzalloc (void *, size_t);
 
 /* Set the source filename.  This implicitly starts a new compilation
    unit.  */
@@ -435,7 +440,7 @@ extern bool debug_set_filename (void *, const char *);
 /* Change source files to the given file name.  This is used for
    include files in a single compilation unit.  */
 
-extern bool debug_start_source (void *, const char *, bool *);
+extern bool debug_start_source (void *, const char *);
 
 /* Record a function definition.  This implicitly starts a function
    block.  The debug_type argument is the type of the return value.
