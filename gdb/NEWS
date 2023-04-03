@@ -3,6 +3,10 @@
 
 *** Changes since GDB 13
 
+* The AArch64 'org.gnu.gdb.aarch64.pauth' Pointer Authentication feature string
+  has been deprecated in favor of the 'org.gnu.gdb.aarch64.pauth_v2' feature
+  string.
+
 * GDB now has some support for integer types larger than 64 bits.
 
 * Removed targets and native configurations

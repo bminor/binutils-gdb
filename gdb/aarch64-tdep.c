@@ -3500,8 +3500,15 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
     return features;
 
   features.vq = aarch64_get_tdesc_vq (tdesc);
+
+  /* We need to look for a couple pauth feature name variations.  */
   features.pauth
       = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth") != nullptr);
+
+  if (!features.pauth)
+    features.pauth = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth_v2")
+		      != nullptr);
+
   features.mte
       = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte") != nullptr);
 
@@ -3679,7 +3686,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");
   feature_fpu = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpu");
   feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
-  feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth");
   const struct tdesc_feature *feature_mte
     = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte");
   const struct tdesc_feature *feature_tls
@@ -3772,6 +3778,13 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  return nullptr;
 	}
     }
+
+  /* We have two versions of the pauth target description due to a past bug
+     where GDB would crash when seeing the first version of the pauth target
+     description.  */
+  feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth");
+  if (feature_pauth == nullptr)
+    feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth_v2");
 
   /* Add the pauth registers.  */
   int pauth_masks = 0;

@@ -47991,6 +47991,29 @@ has a signed link register value that needs to be unmasked/decoded.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
+Please note the @samp{org.gnu.gdb.aarch64.pauth} feature string is deprecated
+and must only be used for backwards compatibility with older releases of
+@value{GDBN} and @command{gdbserver}.  Targets that support Pointer
+Authentication must advertise such capability by using the
+@samp{org.gnu.gdb.aarch64.pauth_v2} feature string instead.
+
+The @samp{org.gnu.gdb.aarch64.pauth_v2} feature has the exact same contents
+as feature @samp{org.gnu.gdb.aarch64.pauth}.
+
+The reason for having feature @samp{org.gnu.gdb.aarch64.pauth_v2} is a bug in
+previous versions of @value{GDBN} (versions 9, 10, 11 and 12).  This bug
+caused @value{GDBN} to crash whenever the target reported support for Pointer
+Authentication (using feature string @samp{org.gnu.gdb.aarch64.pauth}) and also
+reported additional system registers that were not accounted for by
+@value{GDBN}.  This is more common when using emulators and on bare-metal
+debugging scenarios.
+
+It can also happen if a newer gdbserver is used with an old @value{GDBN} that
+has the bug.  In such a case, the newer gdbserver might report Pointer
+Authentication support via the @samp{org.gnu.gdb.aarch64.pauth} feature string
+and also report additional registers the older @value{GDBN} does not know
+about, potentially leading to a crash.
+
 @subsubsection AArch64 TLS registers feature
 
 The @samp{org.gnu.gdb.aarch64.tls} optional feature was introduced to expose
