@@ -340,6 +340,13 @@ extern void set_current_inferior (inferior *);
    selected.  */
 extern void switch_to_inferior_no_thread (inferior *inf);
 
+/* Ensure INF is the current inferior.
+
+   If the current inferior was changed, return an RAII object that will
+   restore the original current context.  */
+extern gdb::optional<scoped_restore_current_thread> maybe_switch_inferior
+  (inferior *inf);
+
 /* Info about an inferior's target description.  There's one of these
    for each inferior.  */
 

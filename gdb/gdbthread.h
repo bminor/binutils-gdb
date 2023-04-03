@@ -851,6 +851,8 @@ public:
   scoped_restore_current_thread ();
   ~scoped_restore_current_thread ();
 
+  scoped_restore_current_thread (scoped_restore_current_thread &&rhs);
+
   DISABLE_COPY_AND_ASSIGN (scoped_restore_current_thread);
 
   /* Cancel restoring on scope exit.  */

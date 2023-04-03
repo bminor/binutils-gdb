@@ -1378,6 +1378,20 @@ scoped_restore_current_thread::scoped_restore_current_thread ()
     }
 }
 
+scoped_restore_current_thread::scoped_restore_current_thread
+  (scoped_restore_current_thread &&rhs)
+  : m_dont_restore (std::move (rhs.m_dont_restore)),
+    m_thread (std::move (rhs.m_thread)),
+    m_inf (std::move (rhs.m_inf)),
+    m_selected_frame_id (std::move (rhs.m_selected_frame_id)),
+    m_selected_frame_level (std::move (rhs.m_selected_frame_level)),
+    m_was_stopped (std::move (rhs.m_was_stopped)),
+    m_lang (std::move (rhs.m_lang))
+{
+  /* Deactivate the rhs.  */
+  rhs.m_dont_restore = true;
+}
+
 /* See gdbthread.h.  */
 
 int

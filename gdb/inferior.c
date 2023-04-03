@@ -684,6 +684,21 @@ switch_to_inferior_no_thread (inferior *inf)
   set_current_program_space (inf->pspace);
 }
 
+/* See regcache.h.  */
+
+gdb::optional<scoped_restore_current_thread>
+maybe_switch_inferior (inferior *inf)
+{
+  gdb::optional<scoped_restore_current_thread> maybe_restore_thread;
+  if (inf != current_inferior ())
+    {
+      maybe_restore_thread.emplace ();
+      switch_to_inferior_no_thread (inf);
+    }
+
+  return maybe_restore_thread;
+}
+
 static void
 inferior_command (const char *args, int from_tty)
 {
