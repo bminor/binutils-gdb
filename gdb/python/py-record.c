@@ -177,7 +177,8 @@ recpy_end (PyObject *self, void* closure)
 /* Create a new gdb.RecordInstruction object.  */
 
 PyObject *
-recpy_insn_new (thread_info *thread, enum record_method method, Py_ssize_t number)
+recpy_insn_new (thread_info *thread, enum record_method method,
+		Py_ssize_t number)
 {
   recpy_element_object * const obj = PyObject_New (recpy_element_object,
 						   &recpy_insn_type);
@@ -273,7 +274,8 @@ recpy_insn_is_speculative (PyObject *self, void *closure)
 /* Create a new gdb.RecordFunctionSegment object.  */
 
 PyObject *
-recpy_func_new (thread_info *thread, enum record_method method, Py_ssize_t number)
+recpy_func_new (thread_info *thread, enum record_method method,
+		Py_ssize_t number)
 {
   recpy_element_object * const obj = PyObject_New (recpy_element_object,
 						   &recpy_func_type);

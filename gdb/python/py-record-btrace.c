@@ -169,8 +169,8 @@ btpy_insn_or_gap_new (thread_info *tinfo, Py_ssize_t number)
 /* Create a new gdb.BtraceList object.  */
 
 static PyObject *
-btpy_list_new (thread_info *thread, Py_ssize_t first, Py_ssize_t last, Py_ssize_t step,
-	       PyTypeObject *element_type)
+btpy_list_new (thread_info *thread, Py_ssize_t first, Py_ssize_t last,
+	       Py_ssize_t step, PyTypeObject *element_type)
 {
   btpy_list_object * const obj = PyObject_New (btpy_list_object,
 					       &btpy_list_type);
@@ -309,7 +309,6 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
       gdbpy_convert_exception (except);
       return NULL;
     }
-
 
   return PyBytes_FromString (strfile.string ().c_str ());
 }
