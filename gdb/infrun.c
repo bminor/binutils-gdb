@@ -4358,9 +4358,13 @@ fetch_inferior_event ()
 
     gdb_assert (ecs.ws.kind () != TARGET_WAITKIND_IGNORE);
 
-    /* Switch to the target that generated the event, so we can do
-       target calls.  */
-    switch_to_target_no_thread (ecs.target);
+    /* Switch to the inferior that generated the event, so we can do
+       target calls.  If the event was not associated to a ptid,  */
+    if (ecs.ptid != null_ptid
+	&& ecs.ptid != minus_one_ptid)
+      switch_to_inferior_no_thread (find_inferior_ptid (ecs.target, ecs.ptid));
+    else
+      switch_to_target_no_thread (ecs.target);
 
     if (debug_infrun)
       print_target_wait_results (minus_one_ptid, ecs.ptid, ecs.ws);
