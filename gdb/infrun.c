@@ -5805,7 +5805,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       list yet at this point.  */
 
 	    child_regcache
-	      = get_thread_arch_aspace_regcache (parent_inf->process_target (),
+	      = get_thread_arch_aspace_regcache (parent_inf,
 						 ecs->ws.child_ptid (),
 						 gdbarch,
 						 parent_inf->aspace);

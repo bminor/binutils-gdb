@@ -29,6 +29,7 @@ struct gdbarch;
 struct address_space;
 class thread_info;
 struct process_stratum_target;
+struct inferior;
 
 extern struct regcache *get_current_regcache (void);
 extern struct regcache *get_thread_regcache (process_stratum_target *target,
@@ -40,7 +41,7 @@ extern struct regcache *get_thread_regcache (thread_info *thread);
 extern struct regcache *get_thread_arch_regcache
   (process_stratum_target *targ, ptid_t, struct gdbarch *);
 extern struct regcache *get_thread_arch_aspace_regcache
-  (process_stratum_target *target, ptid_t,
+  (inferior *inf_for_target_calls, ptid_t,
    struct gdbarch *, struct address_space *);
 
 extern enum register_status
@@ -421,7 +422,7 @@ public:
   void debug_print_register (const char *func, int regno);
 
 protected:
-  regcache (process_stratum_target *target, gdbarch *gdbarch,
+  regcache (inferior *inf_for_target_calls, gdbarch *gdbarch,
 	    const address_space *aspace);
 
 private:
@@ -448,13 +449,21 @@ private:
      makes sense, like PC or SP).  */
   const address_space * const m_aspace;
 
+  /* The inferior to switch to, to make target calls.
+
+     This may not be the inferior of thread M_PTID.  For instance, this
+     regcache might be for a fork child we are about to detach, so there will
+     never be an inferior for that thread / process.  Nevertheless, we need to
+     be able to switch to the target stack that can handle register reads /
+     writes for this regcache, and that's what this inferior is for.  */
+  inferior *m_inf_for_target_calls;
+
   /* If this is a read-write cache, which thread's registers is
      it connected to?  */
-  process_stratum_target *m_target;
   ptid_t m_ptid;
 
   friend struct regcache *
-  get_thread_arch_aspace_regcache (process_stratum_target *target, ptid_t ptid,
+  get_thread_arch_aspace_regcache (inferior *inf_for_target_calls, ptid_t ptid,
 				   struct gdbarch *gdbarch,
 				   struct address_space *aspace);
 };
