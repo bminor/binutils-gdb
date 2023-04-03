@@ -1622,7 +1622,6 @@ get_thread_arch_aspace_regcache_and_check (process_stratum_target *target,
     = get_thread_arch_aspace_regcache (target, ptid, arch, aspace);
 
   SELF_CHECK (regcache != NULL);
-  SELF_CHECK (regcache->target () == target);
   SELF_CHECK (regcache->ptid () == ptid);
   SELF_CHECK (regcache->arch () == arch);
   SELF_CHECK (regcache->aspace () == aspace);

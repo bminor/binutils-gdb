@@ -416,11 +416,6 @@ public:
     this->m_ptid = ptid;
   }
 
-  process_stratum_target *target () const
-  {
-    return m_target;
-  }
-
 /* Dump the contents of a register from the register cache to the target
    debug.  */
   void debug_print_register (const char *func, int regno);
