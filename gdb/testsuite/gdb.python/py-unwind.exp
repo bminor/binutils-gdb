@@ -107,7 +107,7 @@ check_info_unwinder "info unwinder after failed disable" on
 # 'register_unwinder'.
 gdb_test "python global_test_unwinder.name = \"foo\"" \
     [multi_line \
-	 "AttributeError: can't set attribute" \
+	 "AttributeError: can't set attribute(?: 'name')?" \
 	 "Error while executing Python code\\."]
 check_info_unwinder "info unwinder after failed name change" on
 
