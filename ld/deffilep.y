@@ -1134,7 +1134,7 @@ def_image_name (const char *name, bfd_vma base, int is_dll)
       const char* image_name = lbasename (name);
 
       if (image_name != name)
-	einfo ("%s:%d: Warning: path components stripped from %s, '%s'\n",
+	einfo (_("%s:%d: Warning: path components stripped from %s, '%s'\n"),
 	       def_filename, linenumber, is_dll ? "LIBRARY" : "NAME",
 	       name);
       free (def->name);

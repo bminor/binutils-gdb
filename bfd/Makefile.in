@@ -1174,7 +1174,7 @@ BUILD_HFILES = \
 
 
 # Ensure they are built early:
-BUILT_SOURCES = $(BUILD_HFILES) $(BUILD_CFILES)
+BUILT_SOURCES = $(BUILD_HFILES) @MAINT@ $(BUILD_CFILES)
 HFILES = $(SOURCE_HFILES) $(BUILD_HFILES)
 BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
 LOCAL_H_DEPS = libbfd.h sysdep.h config.h

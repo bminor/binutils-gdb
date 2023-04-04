@@ -721,7 +721,7 @@ BUILD_HFILES = \
 	bfdver.h elf32-target.h elf64-target.h targmatch.h
 
 # Ensure they are built early:
-BUILT_SOURCES = $(BUILD_HFILES) $(BUILD_CFILES)
+BUILT_SOURCES = $(BUILD_HFILES) @MAINT@ $(BUILD_CFILES)
 
 HFILES = $(SOURCE_HFILES) $(BUILD_HFILES)
 

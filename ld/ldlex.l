@@ -489,8 +489,8 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
   return END;
 }
 
-<SCRIPT,WILD,MRI,VERS_START,VERS_SCRIPT,VERS_NODE>.	lex_warn_invalid (" in script", yytext);
-<EXPRESSION>.	lex_warn_invalid (" in expression", yytext);
+<SCRIPT,WILD,MRI,VERS_START,VERS_SCRIPT,VERS_NODE>.	lex_warn_invalid (_(" in script"), yytext);
+<EXPRESSION>.	lex_warn_invalid (_(" in expression"), yytext);
 
 %%
 

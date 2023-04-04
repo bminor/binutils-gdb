@@ -493,7 +493,8 @@ GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 
 # Require an early dependency on the generated headers, as the dependency
 # tracking will not cause them to be built beforehand.
-BUILT_SOURCES = $(GENERATED_HFILES)
+BUILT_SOURCES = $(GENERATED_HFILES) @MAINT@ $(GENERATED_CFILES) \
+	$(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
 
 OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ \
 	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ plugin.@OBJEXT@ \
@@ -548,7 +549,7 @@ po/SRC-POTFILES.in: @MAINT@ Makefile
 	for f in $(SRC_POTFILES); do echo $$f; done | LC_ALL=C sort > $@-tmp \
 	  && mv $@-tmp $(srcdir)/po/SRC-POTFILES.in
 
-po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
+po/BLD-POTFILES.in: @MAINT@ Makefile
 	for f in $(BLD_POTFILES); do echo $$f; done | LC_ALL=C sort > $@-tmp \
 	  && mv $@-tmp $(srcdir)/po/BLD-POTFILES.in
 
