@@ -3138,55 +3138,48 @@ _initialize_infcmd ()
 {
   static struct cmd_list_element *info_proc_cmdlist;
   struct cmd_list_element *c = nullptr;
-  const char *cmd_name;
 
   /* Add the filename of the terminal connected to inferior I/O.  */
-  add_setshow_optional_filename_cmd ("inferior-tty", class_run,
-				     &inferior_io_terminal_scratch, _("\
-Set terminal for future runs of program being debugged."), _("\
-Show terminal for future runs of program being debugged."), _("\
-Usage: set inferior-tty [TTY]\n\n\
-If TTY is omitted, the default behavior of using the same terminal as GDB\n\
+  auto tty_set_show
+    = add_setshow_optional_filename_cmd ("inferior-tty", class_run,
+					 &inferior_io_terminal_scratch, _("\
+Set terminal for future runs of program being debugged."), _("		\
+Show terminal for future runs of program being debugged."), _("		\
+Usage: set inferior-tty [TTY]\n\n					\
+If TTY is omitted, the default behavior of using the same terminal as GDB\n \
 is restored."),
-				     set_inferior_tty_command,
-				     show_inferior_tty_command,
-				     &setlist, &showlist);
-  cmd_name = "inferior-tty";
-  c = lookup_cmd (&cmd_name, setlist, "", nullptr, -1, 1);
-  gdb_assert (c != nullptr);
-  add_alias_cmd ("tty", c, class_run, 0, &cmdlist);
+					 set_inferior_tty_command,
+					 show_inferior_tty_command,
+					 &setlist, &showlist);
+  add_alias_cmd ("tty", tty_set_show.set, class_run, 0, &cmdlist);
 
-  cmd_name = "args";
-  add_setshow_string_noescape_cmd (cmd_name, class_run,
-				   &inferior_args_scratch, _("\
+  auto args_set_show
+    = add_setshow_string_noescape_cmd ("args", class_run,
+				       &inferior_args_scratch, _("\
 Set argument list to give program being debugged when it is started."), _("\
 Show argument list to give program being debugged when it is started."), _("\
 Follow this command with any number of args, to be passed to the program."),
-				   set_args_command,
-				   show_args_command,
-				   &setlist, &showlist);
-  c = lookup_cmd (&cmd_name, setlist, "", nullptr, -1, 1);
-  gdb_assert (c != nullptr);
-  set_cmd_completer (c, filename_completer);
+				       set_args_command,
+				       show_args_command,
+				       &setlist, &showlist);
+  set_cmd_completer (args_set_show.set, filename_completer);
 
-  cmd_name = "cwd";
-  add_setshow_string_noescape_cmd (cmd_name, class_run,
-				   &inferior_cwd_scratch, _("\
-Set the current working directory to be used when the inferior is started.\n\
-Changing this setting does not have any effect on inferiors that are\n\
+  auto cwd_set_show
+    = add_setshow_string_noescape_cmd ("cwd", class_run,
+				       &inferior_cwd_scratch, _("\
+Set the current working directory to be used when the inferior is started.\n \
+Changing this setting does not have any effect on inferiors that are\n	\
 already running."),
-				   _("\
+				       _("\
 Show the current working directory that is used when the inferior is started."),
-				   _("\
+				       _("\
 Use this command to change the current working directory that will be used\n\
 when the inferior is started.  This setting does not affect GDB's current\n\
 working directory."),
-				   set_cwd_command,
-				   show_cwd_command,
-				   &setlist, &showlist);
-  c = lookup_cmd (&cmd_name, setlist, "", nullptr, -1, 1);
-  gdb_assert (c != nullptr);
-  set_cmd_completer (c, filename_completer);
+				       set_cwd_command,
+				       show_cwd_command,
+				       &setlist, &showlist);
+  set_cmd_completer (cwd_set_show.set, filename_completer);
 
   c = add_cmd ("environment", no_class, environment_info, _("\
 The environment to give the program, or one variable's value.\n\
