@@ -28,6 +28,11 @@ package Pkg is
    function Exported_Func_Ada return Integer;
    pragma Export (C, Exported_Func_Ada, "exported_func");
 
+   function base return Integer;
+   pragma Export (Ada, base);
+   function copy return Integer;
+   pragma Export (Ada, copy);
+
    procedure Do_Nothing (A : System.Address);
 
 end Pkg;

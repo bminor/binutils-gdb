@@ -5079,6 +5079,20 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
 	    }
 	}
       
+      /* Two functions with the same block are identical.  */
+
+      else if (syms[i].symbol->aclass () == LOC_BLOCK)
+	{
+	  for (j = 0; !remove_p && j < syms.size (); j += 1)
+	    {
+	      if (i != j
+		  && syms[j].symbol->aclass () == LOC_BLOCK
+		  && (syms[i].symbol->value_block ()
+		      == syms[j].symbol->value_block ()))
+		remove_p = true;
+	    }
+	}
+
       if (remove_p)
 	syms.erase (syms.begin () + i);
       else

@@ -56,3 +56,5 @@ gdb_breakpoint "local_imported_func" message
 gdb_breakpoint "pkg.exported_func_ada" message
 gdb_breakpoint "exported_func_ada" message
 gdb_breakpoint "exported_func" message
+
+gdb_test "print copy" " = 42"

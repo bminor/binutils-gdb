@@ -20,6 +20,13 @@ package body Pkg is
       return Imported_Var_Ada;
    end Exported_Func_Ada;
 
+   function base return Integer is
+   begin
+      return Imported_Var_Ada;
+   end base;
+
+   function copy return Integer renames base;
+
    procedure Do_Nothing (A : System.Address) is
    begin
       null;
