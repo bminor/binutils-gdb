@@ -41189,6 +41189,10 @@ module (@pxref{Disassembly In Python}), and will only be present after
 that module has been imported.  To force the module to be imported do
 the following:
 
+@kindex maint info linux-lwps
+@item maint info linux-lwps
+Print information about LWPs under control of the Linux native target.
+
 @smallexample
 (@value{GDBP}) python import gdb.disassembler
 @end smallexample

@@ -4503,6 +4503,49 @@ current_lwp_ptid (void)
   return inferior_ptid;
 }
 
+/* Implement 'maintenance info linux-lwps'.  Displays some basic
+   information about all the current lwp_info objects.  */
+
+static void
+maintenance_info_lwps (const char *arg, int from_tty)
+{
+  if (all_lwps ().size () == 0)
+    {
+      gdb_printf ("No Linux LWPs\n");
+      return;
+    }
+
+  /* Start the width at 8 to match the column heading below, then
+     figure out the widest ptid string.  We'll use this to build our
+     output table below.  */
+  size_t ptid_width = 8;
+  for (lwp_info *lp : all_lwps ())
+    ptid_width = std::max (ptid_width, lp->ptid.to_string ().size ());
+
+  /* Setup the table headers.  */
+  struct ui_out *uiout = current_uiout;
+  ui_out_emit_table table_emitter (uiout, 2, -1, "linux-lwps");
+  uiout->table_header (ptid_width, ui_left, "lwp-ptid", _("LWP Ptid"));
+  uiout->table_header (9, ui_left, "thread-info", _("Thread ID"));
+  uiout->table_body ();
+
+  /* Display one table row for each lwp_info.  */
+  for (lwp_info *lp : all_lwps ())
+    {
+      ui_out_emit_tuple tuple_emitter (uiout, "lwp-entry");
+
+      thread_info *th = linux_target->find_thread (lp->ptid);
+
+      uiout->field_string ("lwp-ptid", lp->ptid.to_string ().c_str ());
+      if (th == nullptr)
+	uiout->field_string ("thread-info", "None");
+      else
+	uiout->field_string ("thread-info", print_full_thread_id (th));
+
+      uiout->message ("\n");
+    }
+}
+
 void _initialize_linux_nat ();
 void
 _initialize_linux_nat ()
@@ -4540,6 +4583,9 @@ Enables printf debugging output."),
   sigemptyset (&blocked_mask);
 
   lwp_lwpid_htab_create ();
+
+  add_cmd ("linux-lwps", class_maintenance, maintenance_info_lwps,
+	 _("List the Linux LWPS."), &maintenanceinfolist);
 }
 
 

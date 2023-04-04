@@ -24,6 +24,11 @@ disassemble
   ** New read/write attribute gdb.Value.bytes that contains a bytes
      object holding the contents of this value.
 
+* New commands
+
+maintenance info linux-lwps
+  List all LWPs under control of the linux-nat target.
+
 *** Changes in GDB 14
 
 * GDB now supports the AArch64 Scalable Matrix Extension 2 (SME2), which
