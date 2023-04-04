@@ -66,14 +66,6 @@ static void step_1 (int, int, const char *);
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution ()) error (_("The program is not being run."));
 
-/* Scratch area where string containing arguments to give to the
-   program will be stored by 'set args'.  As soon as anything is
-   stored, notice_args_set will move it into per-inferior storage.
-   Arguments are separated by spaces.  Empty string (pointer to '\0')
-   means no args.  */
-
-static std::string inferior_args_scratch;
-
 /* Scratch area where the new cwd will be stored by 'set cwd'.  */
 
 static std::string inferior_cwd_scratch;
@@ -136,26 +128,33 @@ set_inferior_args_vector (int argc, char **argv)
   current_inferior ()->set_args (std::move (n));
 }
 
-/* Notice when `set args' is run.  */
+/* Store the new value passed to 'set args'.  */
 
 static void
-set_args_command (const char *args, int from_tty, struct cmd_list_element *c)
+set_args_value (const std::string &args)
 {
-  /* CLI has assigned the user-provided value to inferior_args_scratch.
-     Now route it to current inferior.  */
-  current_inferior ()->set_args (inferior_args_scratch);
+  current_inferior ()->set_args (args);
 }
 
-/* Notice when `show args' is run.  */
+/* Return the value for 'show args' to display.  */
+
+static const std::string &
+get_args_value ()
+{
+  return current_inferior ()->args ();
+}
+
+/* Callback to implement 'show args' command.  */
 
 static void
 show_args_command (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  /* Note that we ignore the passed-in value in favor of computing it
-     directly.  */
-  deprecated_show_value_hack (file, from_tty, c,
-			      current_inferior ()->args ().c_str ());
+  /* Ignore the passed in value, pull the argument directly from the
+     inferior.  However, these should always be the same.  */
+  gdb_printf (_("\
+Argument list to give program being debugged when it is started is \"%s\".\n"),
+	      current_inferior ()->args ().c_str ());
 }
 
 /* See gdbsupport/common-inferior.h.  */
@@ -3154,12 +3153,12 @@ is restored."),
   add_alias_cmd ("tty", tty_set_show.set, class_run, 0, &cmdlist);
 
   auto args_set_show
-    = add_setshow_string_noescape_cmd ("args", class_run,
-				       &inferior_args_scratch, _("\
+    = add_setshow_string_noescape_cmd ("args", class_run, _("\
 Set argument list to give program being debugged when it is started."), _("\
 Show argument list to give program being debugged when it is started."), _("\
 Follow this command with any number of args, to be passed to the program."),
-				       set_args_command,
+				       set_args_value,
+				       get_args_value,
 				       show_args_command,
 				       &setlist, &showlist);
   set_cmd_completer (args_set_show.set, filename_completer);
