@@ -70,6 +70,7 @@ foreach_with_prefix inf $inferiors {
 	"switch to inferior ${inf} before set"
     gdb_test_no_output "set args inf${inf}-args"
     gdb_test_no_output "set cwd /inf${inf}-cwd"
+    gdb_test_no_output "set inferior-tty /inf${inf}-tty"
 }
 
 # Check settings are still correct for each inferior.
@@ -84,19 +85,30 @@ foreach_with_prefix inf $inferiors {
     gdb_test "with cwd tmp-value -- print 1" " = 1"
     gdb_test "show cwd" "/inf${inf}-cwd.*"
 
+    gdb_test "with inferior-tty tmp-value -- print 1" " = 1"
+    gdb_test "show inferior-tty" "/inf${inf}-tty.*"
+
     # If the inferiors are running check $_gdb_setting_str and
     # $_gdb_setting return the correct values.
     if { $run } {
 	gdb_test {print $_gdb_setting_str("args")} "\"inf${inf}-args\""
 	gdb_test {print $_gdb_setting("args")} "\"inf${inf}-args\""
+
 	gdb_test {print $_gdb_setting_str("cwd")} "\"/inf${inf}-cwd\""
 	gdb_test {print $_gdb_setting("cwd")} "\"/inf${inf}-cwd\""
+
+	gdb_test {print $_gdb_setting_str("inferior-tty")} \
+	    "\"/inf${inf}-tty\""
+	gdb_test {print $_gdb_setting("inferior-tty")} \
+	    "\"/inf${inf}-tty\""
     }
 
     # Check the settings can be read from Python.
     if { $run_python_tests } {
 	gdb_test "python print(gdb.parameter('args'))" "inf${inf}-args"
 	gdb_test "python print(gdb.parameter('cwd'))" "/inf${inf}-cwd"
+	gdb_test "python print(gdb.parameter('inferior-tty'))" \
+	    "/inf${inf}-tty"
     }
 
     # Check the settings can be read from Guile.
@@ -105,5 +117,7 @@ foreach_with_prefix inf $inferiors {
 	    "inf${inf}-args"
 	gdb_test "guile (print (parameter-value \"cwd\"))" \
 	    "/inf${inf}-cwd"
+	gdb_test "guile (print (parameter-value \"inferior-tty\"))" \
+	    "/inf${inf}-tty"
     }
 }

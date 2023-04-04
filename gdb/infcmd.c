@@ -66,11 +66,6 @@ static void step_1 (int, int, const char *);
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution ()) error (_("The program is not being run."));
 
-/* Scratch area where 'set inferior-tty' will store user-provided value.
-   We'll immediate copy it into per-inferior storage.  */
-
-static std::string inferior_io_terminal_scratch;
-
 /* Pid of our debugged inferior, or 0 if no inferior now.
    Since various parts of infrun.c test this to see whether there is a program
    being debugged it should be nonzero (currently 3 is used) for remote
@@ -94,14 +89,23 @@ static bool finish_print = true;
 
 
 
+/* Store the new value passed to 'set inferior-tty'.  */
+
 static void
-set_inferior_tty_command (const char *args, int from_tty,
-			  struct cmd_list_element *c)
+set_tty_value (const std::string &tty)
 {
-  /* CLI has assigned the user-provided value to inferior_io_terminal_scratch.
-     Now route it to current inferior.  */
-  current_inferior ()->set_tty (inferior_io_terminal_scratch);
+  current_inferior ()->set_tty (tty);
 }
+
+/* Get the current 'inferior-tty' value.  */
+
+static const std::string &
+get_tty_value ()
+{
+  return current_inferior ()->tty ();
+}
+
+/* Implement 'show inferior-tty' command.  */
 
 static void
 show_inferior_tty_command (struct ui_file *file, int from_tty,
@@ -3136,14 +3140,14 @@ _initialize_infcmd ()
 
   /* Add the filename of the terminal connected to inferior I/O.  */
   auto tty_set_show
-    = add_setshow_optional_filename_cmd ("inferior-tty", class_run,
-					 &inferior_io_terminal_scratch, _("\
+    = add_setshow_optional_filename_cmd ("inferior-tty", class_run, _("\
 Set terminal for future runs of program being debugged."), _("		\
 Show terminal for future runs of program being debugged."), _("		\
 Usage: set inferior-tty [TTY]\n\n					\
 If TTY is omitted, the default behavior of using the same terminal as GDB\n \
 is restored."),
-					 set_inferior_tty_command,
+					 set_tty_value,
+					 get_tty_value,
 					 show_inferior_tty_command,
 					 &setlist, &showlist);
   add_alias_cmd ("tty", tty_set_show.set, class_run, 0, &cmdlist);
