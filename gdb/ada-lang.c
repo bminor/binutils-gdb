@@ -5026,34 +5026,34 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
    debugging symbols)).  Modifies SYMS to squeeze out deleted entries.  */
 
 static void
-remove_extra_symbols (std::vector<struct block_symbol> *syms)
+remove_extra_symbols (std::vector<struct block_symbol> &syms)
 {
   int i, j;
 
   /* We should never be called with less than 2 symbols, as there
      cannot be any extra symbol in that case.  But it's easy to
      handle, since we have nothing to do in that case.  */
-  if (syms->size () < 2)
+  if (syms.size () < 2)
     return;
 
   i = 0;
-  while (i < syms->size ())
+  while (i < syms.size ())
     {
       int remove_p = 0;
 
       /* If two symbols have the same name and one of them is a stub type,
 	 the get rid of the stub.  */
 
-      if ((*syms)[i].symbol->type ()->is_stub ()
-	  && (*syms)[i].symbol->linkage_name () != NULL)
+      if (syms[i].symbol->type ()->is_stub ()
+	  && syms[i].symbol->linkage_name () != NULL)
 	{
-	  for (j = 0; j < syms->size (); j++)
+	  for (j = 0; j < syms.size (); j++)
 	    {
 	      if (j != i
-		  && !(*syms)[j].symbol->type ()->is_stub ()
-		  && (*syms)[j].symbol->linkage_name () != NULL
-		  && strcmp ((*syms)[i].symbol->linkage_name (),
-			     (*syms)[j].symbol->linkage_name ()) == 0)
+		  && !syms[j].symbol->type ()->is_stub ()
+		  && syms[j].symbol->linkage_name () != NULL
+		  && strcmp (syms[i].symbol->linkage_name (),
+			     syms[j].symbol->linkage_name ()) == 0)
 		remove_p = 1;
 	    }
 	}
@@ -5061,26 +5061,26 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
       /* Two symbols with the same name, same class and same address
 	 should be identical.  */
 
-      else if ((*syms)[i].symbol->linkage_name () != NULL
-	  && (*syms)[i].symbol->aclass () == LOC_STATIC
-	  && is_nondebugging_type ((*syms)[i].symbol->type ()))
+      else if (syms[i].symbol->linkage_name () != NULL
+	  && syms[i].symbol->aclass () == LOC_STATIC
+	  && is_nondebugging_type (syms[i].symbol->type ()))
 	{
-	  for (j = 0; j < syms->size (); j += 1)
+	  for (j = 0; j < syms.size (); j += 1)
 	    {
 	      if (i != j
-		  && (*syms)[j].symbol->linkage_name () != NULL
-		  && strcmp ((*syms)[i].symbol->linkage_name (),
-			     (*syms)[j].symbol->linkage_name ()) == 0
-		  && ((*syms)[i].symbol->aclass ()
-		      == (*syms)[j].symbol->aclass ())
-		  && (*syms)[i].symbol->value_address ()
-		  == (*syms)[j].symbol->value_address ())
+		  && syms[j].symbol->linkage_name () != NULL
+		  && strcmp (syms[i].symbol->linkage_name (),
+			     syms[j].symbol->linkage_name ()) == 0
+		  && (syms[i].symbol->aclass ()
+		      == syms[j].symbol->aclass ())
+		  && syms[i].symbol->value_address ()
+		  == syms[j].symbol->value_address ())
 		remove_p = 1;
 	    }
 	}
       
       if (remove_p)
-	syms->erase (syms->begin () + i);
+	syms.erase (syms.begin () + i);
       else
 	i += 1;
     }
@@ -5097,8 +5097,8 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
      to ask the user to disambiguate anyways.  And if we have to
      present a multiple-choice menu, it's less confusing if the list
      isn't missing some choices that were identical and yet distinct.  */
-  if (symbols_are_identical_enums (*syms))
-    syms->resize (1);
+  if (symbols_are_identical_enums (syms))
+    syms.resize (1);
 }
 
 /* Given a type that corresponds to a renaming entity, use the type name
@@ -5710,7 +5710,7 @@ ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
   ada_add_all_symbols (results, block, lookup_name,
 		       domain, full_search, &syms_from_global_search);
 
-  remove_extra_symbols (&results);
+  remove_extra_symbols (results);
 
   if (results.empty () && full_search && syms_from_global_search)
     cache_symbol (ada_lookup_name (lookup_name), domain, NULL, NULL);
