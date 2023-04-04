@@ -48,6 +48,9 @@ struct aarch64_features
 
      These use at most 5 bits to represent.  */
   uint8_t svq = 0;
+
+  /* Whether SME2 is supported.  */
+  bool sme2 = false;
 };
 
 inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
@@ -56,7 +59,8 @@ inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
     && lhs.pauth == rhs.pauth
     && lhs.mte == rhs.mte
     && lhs.tls == rhs.tls
-    && lhs.svq == rhs.svq;
+    && lhs.svq == rhs.svq
+    && lhs.sme2 == rhs.sme2;
 }
 
 namespace std
@@ -79,6 +83,9 @@ namespace std
       gdb_assert (features.svq >= 0);
       gdb_assert (features.svq <= 16);
       h = h << 5 | (features.svq & 0x5);
+
+      /* SME2 feature.  */
+      h = h << 1 | features.sme2;
       return h;
     }
   };
@@ -219,5 +226,8 @@ enum aarch64_regnum
 /* svl limits for SME.  */
 #define AARCH64_SME_MIN_SVL 128
 #define AARCH64_SME_MAX_SVL 2048
+
+/* Size of the SME2 ZT0 register in bytes.  */
+#define AARCH64_SME2_ZT0_SIZE 64
 
 #endif /* ARCH_AARCH64_H */

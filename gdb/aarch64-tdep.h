@@ -172,6 +172,16 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
   {
     return sme_svq != 0;
   }
+
+  /* Index of the SME2 ZT0 register.  This is -1 if SME2 is not
+     supported.  */
+  int sme2_zt0_regnum = -1;
+
+  /* Return true if the target supports SME2, and false otherwise.  */
+  bool has_sme2 () const
+  {
+    return sme2_zt0_regnum > 0;
+  }
 };
 
 const target_desc *aarch64_read_description (const aarch64_features &features);

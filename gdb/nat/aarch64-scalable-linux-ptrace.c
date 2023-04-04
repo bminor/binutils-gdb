@@ -519,8 +519,73 @@ aarch64_initialize_za_regset (int tid)
   if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_ZA, &iovec) < 0)
     perror_with_name (_("Failed to initialize the NT_ARM_ZA register set."));
 
+  if (supports_zt_registers (tid))
+    {
+      /* If this target supports SME2, upon initializing ZA, we also need to
+	 initialize the ZT registers with 0 values.  Do so now.  */
+      gdb::byte_vector zt_new_state (AARCH64_SME2_ZT0_SIZE, 0);
+      aarch64_store_zt_regset (tid, zt_new_state);
+    }
+
   /* The NT_ARM_ZA register set should now contain a zero-initialized ZA
      payload.  */
+}
+
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
+
+gdb::byte_vector
+aarch64_fetch_zt_regset (int tid)
+{
+  /* Read NT_ARM_ZT.  This register set is only available if
+     the ZA bit is non-zero.  */
+  gdb::byte_vector zt_state (AARCH64_SME2_ZT0_SIZE);
+
+  struct iovec iovec;
+  iovec.iov_len = AARCH64_SME2_ZT0_SIZE;
+  iovec.iov_base = zt_state.data ();
+
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_ZT, &iovec) < 0)
+    perror_with_name (_("Failed to fetch NT_ARM_ZT register set."));
+
+  return zt_state;
+}
+
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
+
+void
+aarch64_store_zt_regset (int tid, const gdb::byte_vector &zt_state)
+{
+  gdb_assert (zt_state.size () == AARCH64_SME2_ZT0_SIZE
+	      || zt_state.size () == 0);
+
+  /* We need to be mindful of writing data to NT_ARM_ZT.  If the ZA bit
+     is 0 and we write something to ZT, it will flip the ZA bit.
+
+     Right now this is taken care of by callers of this function.  */
+  struct iovec iovec;
+  iovec.iov_len = zt_state.size ();
+  iovec.iov_base = (void *) zt_state.data ();
+
+  /* Write the contents of ZT_STATE to the NT_ARM_ZT register set.  */
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_ZT, &iovec) < 0)
+    perror_with_name (_("Failed to write to the NT_ARM_ZT register set."));
+}
+
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
+
+bool
+supports_zt_registers (int tid)
+{
+  gdb_byte zt_state[AARCH64_SME2_ZT0_SIZE];
+
+  struct iovec iovec;
+  iovec.iov_len = AARCH64_SME2_ZT0_SIZE;
+  iovec.iov_base = (void *) zt_state;
+
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_ZT, &iovec) < 0)
+    return false;
+
+  return true;
 }
 
 /* If we are running in BE mode, byteswap the contents
@@ -988,4 +1053,73 @@ aarch64_za_regs_copy_from_reg_buf (int tid,
 
   /* At this point we have written the data contained in the register cache to
      the thread's NT_ARM_ZA register set.  */
+}
+
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
+
+void
+aarch64_zt_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf,
+				 int zt_regnum)
+{
+  /* If we have ZA state, read the ZT state.  Otherwise, make the contents of
+     ZT in the register cache all zeroes.  This is how we present the ZT
+     state when it is not initialized (ZA not active).  */
+  if (aarch64_has_za_state (tid))
+    {
+      /* Fetch the current ZT state from the thread.  */
+      gdb::byte_vector zt_state = aarch64_fetch_zt_regset (tid);
+
+      /* Sanity check.  */
+      gdb_assert (!zt_state.empty ());
+
+      /* Copy the ZT data to the register buffer.  */
+      reg_buf->raw_supply (zt_regnum, zt_state.data ());
+    }
+  else
+    {
+      /* Zero out ZT.  */
+      gdb::byte_vector zt_zeroed (AARCH64_SME2_ZT0_SIZE, 0);
+      reg_buf->raw_supply (zt_regnum, zt_zeroed.data ());
+    }
+
+  /* The register buffer should now contain the updated copy of the NT_ARM_ZT
+     state.  */
+}
+
+/* See nat/aarch64-scalable-linux-ptrace.h.  */
+
+void
+aarch64_zt_regs_copy_from_reg_buf (int tid,
+				   struct reg_buffer_common *reg_buf,
+				   int zt_regnum)
+{
+  /* Do we have a valid ZA state?  */
+  bool valid_za = aarch64_has_za_state (tid);
+
+  /* Is the register buffer contents for ZT all zeroes?  */
+  gdb::byte_vector zt_bytes (AARCH64_SME2_ZT0_SIZE, 0);
+  bool zt_is_all_zeroes
+    = reg_buf->raw_compare (zt_regnum, zt_bytes.data (), 0);
+
+  /* If ZA state is valid or if we have non-zero data for ZT in the register
+     buffer, we will invoke ptrace to write the ZT state.  Otherwise we don't
+     have to do anything here.  */
+  if (valid_za || !zt_is_all_zeroes)
+    {
+      if (!valid_za)
+	{
+	  /* ZA state is not valid.  That means we need to initialize the ZA
+	     state prior to writing the ZT state.  */
+	  aarch64_initialize_za_regset (tid);
+	}
+
+      /* Extract the ZT data from the register buffer.  */
+      reg_buf->raw_collect (zt_regnum, zt_bytes.data ());
+
+      /* Write the ZT data to thread TID.  */
+      aarch64_store_zt_regset (tid, zt_bytes);
+    }
+
+  /* At this point we have (potentially) written the data contained in the
+     register cache to the thread's NT_ARM_ZT register set.  */
 }

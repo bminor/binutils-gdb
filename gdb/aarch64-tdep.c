@@ -4048,6 +4048,10 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
 
   features.svq = aarch64_get_tdesc_svq (tdesc);
 
+  /* Check for the SME2 feature.  */
+  features.sme2 = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sme2")
+		   != nullptr);
+
   return features;
 }
 
@@ -4310,6 +4314,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   int first_sme_regnum = -1;
+  int first_sme2_regnum = -1;
   int first_sme_pseudo_regnum = -1;
   const struct tdesc_feature *feature_sme
     = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sme");
@@ -4336,6 +4341,19 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       /* Add the ZA tile pseudo registers.  */
       num_pseudo_regs += AARCH64_ZA_TILES_NUM;
+
+      /* Now check for the SME2 feature.  SME2 is only available if SME is
+	 available.  */
+      const struct tdesc_feature *feature_sme2
+	= tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sme2");
+      if (feature_sme2 != nullptr)
+	{
+	  /* Record the first SME2 register.  */
+	  first_sme2_regnum = num_regs;
+
+	  valid_p &= tdesc_numbered_register (feature_sme2, tdesc_data.get (),
+					      num_regs++, "zt0");
+	}
     }
 
   /* Add the TLS register.  */
@@ -4458,6 +4476,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sme_svcr_regnum = first_sme_regnum + 1;
   tdep->sme_za_regnum = first_sme_regnum + 2;
   tdep->sme_svq = svq;
+
+  /* Set the SME2 register set details.  */
+  tdep->sme2_zt0_regnum = first_sme2_regnum;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);

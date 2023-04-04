@@ -376,6 +376,37 @@ store_za_to_thread (struct regcache *regcache)
 				     tdep->sme_svcr_regnum);
 }
 
+/* Fill GDB's REGCACHE with the ZT register set contents from the
+   thread associated with REGCACHE.  If there is no active ZA register state,
+   make the ZT register contents zero.  */
+
+static void
+fetch_zt_from_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  /* Read ZT state from the thread to the register cache.  */
+  aarch64_zt_regs_copy_to_reg_buf (regcache->ptid ().lwp (),
+				   regcache,
+				   tdep->sme2_zt0_regnum);
+}
+
+/* Store the NT_ARM_ZT register set contents from GDB's REGCACHE to the
+   thread associated with REGCACHE.  */
+
+static void
+store_zt_to_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  /* Write ZT state from the register cache to the thread.  */
+  aarch64_zt_regs_copy_from_reg_buf (regcache->ptid ().lwp (),
+				     regcache,
+				     tdep->sme2_zt0_regnum);
+}
+
 /* Fill GDB's register array with the pointer authentication mask values from
    the current thread.  */
 
@@ -549,6 +580,9 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
 
       if (tdep->has_sme ())
 	fetch_za_from_thread (regcache);
+
+      if (tdep->has_sme2 ())
+	fetch_zt_from_thread (regcache);
     }
   /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
@@ -569,6 +603,9 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
   else if (tdep->has_sme () && regno >= tdep->sme_reg_base
 	   && regno < tdep->sme_reg_base + 3)
     fetch_za_from_thread (regcache);
+  /* SME2 register?  */
+  else if (tdep->has_sme2 () && regno == tdep->sme2_zt0_regnum)
+    fetch_zt_from_thread (regcache);
   /* MTE register?  */
   else if (tdep->has_mte ()
 	   && (regno == tdep->mte_reg_base))
@@ -646,6 +683,9 @@ aarch64_store_registers (struct regcache *regcache, int regno)
 
       if (tdep->has_sme ())
 	store_za_to_thread (regcache);
+
+      if (tdep->has_sme2 ())
+	store_zt_to_thread (regcache);
     }
   /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
@@ -661,6 +701,8 @@ aarch64_store_registers (struct regcache *regcache, int regno)
   else if (tdep->has_sme () && regno >= tdep->sme_reg_base
 	   && regno < tdep->sme_reg_base + 3)
     store_za_to_thread (regcache);
+  else if (tdep->has_sme2 () && regno == tdep->sme2_zt0_regnum)
+    store_zt_to_thread (regcache);
   /* MTE register?  */
   else if (tdep->has_mte ()
 	   && (regno == tdep->mte_reg_base))
@@ -861,6 +903,10 @@ aarch64_linux_nat_target::read_description ()
   /* SME feature check.  */
   features.svq = aarch64_za_get_svq (tid);
 
+  /* Check for SME2 support.  */
+  if ((hwcap2 & HWCAP2_SME2) || (hwcap2 & HWCAP2_SME2P1))
+    features.sme2 = supports_zt_registers (tid);
+
   return aarch64_read_description (features);
 }
 
@@ -980,6 +1026,9 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
   aarch64_features features = aarch64_features_from_target_desc (tdesc);
   features.vq = vq;
   features.svq = svq;
+
+  /* Check for the SME2 feature.  */
+  features.sme2 = supports_zt_registers (ptid.lwp ());
 
   struct gdbarch_info info;
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_aarch64, bfd_mach_aarch64);

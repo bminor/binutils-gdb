@@ -120,6 +120,16 @@ extern void aarch64_store_za_regset (int tid, const gdb::byte_vector &za_state);
    size.  The bytes of the ZA register are initialized to zero.  */
 extern void aarch64_initialize_za_regset (int tid);
 
+/* Given TID, return the NT_ARM_ZT register set data as a vector of bytes.  */
+extern gdb::byte_vector aarch64_fetch_zt_regset (int tid);
+
+/* Write ZT_STATE for TID.  */
+extern void aarch64_store_zt_regset (int tid, const gdb::byte_vector &zt_state);
+
+/* Return TRUE if thread TID supports the NT_ARM_ZT register set.
+   Return FALSE otherwise.  */
+extern bool supports_zt_registers (int tid);
+
 /* Given a register buffer REG_BUF, update it with SVE/SSVE register data
    from SVE_STATE.  */
 extern void
@@ -151,4 +161,20 @@ aarch64_za_regs_copy_from_reg_buf (int tid,
 				   struct reg_buffer_common *reg_buf,
 				   int za_regnum, int svg_regnum,
 				   int svcr_regnum);
+
+/* Given a thread id TID and a register buffer REG_BUF, update the register
+   buffer with the ZT register set state from thread TID.
+
+   ZT_REGNUM is the register number for ZT0.  */
+extern void
+aarch64_zt_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf,
+				 int zt_regnum);
+
+/* Given a thread id TID and a register buffer REG_BUF containing the ZT
+   register set state, write the ZT data to thread TID.
+
+   ZT_REGNUM is the register number for ZT0.  */
+extern void
+aarch64_zt_regs_copy_from_reg_buf (int tid, struct reg_buffer_common *reg_buf,
+				   int zt_regnum);
 #endif /* NAT_AARCH64_SCALABLE_LINUX_PTRACE_H */
