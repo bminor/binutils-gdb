@@ -48,9 +48,11 @@ mi_load_shlibs $lib_sl1
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 
 # Set pending dprintf via MI.
+set bp [mi_make_breakpoint_pending -number "1" -type "dprintf" \
+	    -disp "keep" -enabled "y" -pending "pendfunc1" \
+	    -original-location "pendfunc1"]
 mi_gdb_test "-dprintf-insert -f pendfunc1 \"hello\"" \
-    ".*\\^done,bkpt={number=\"1\",type=\"dprintf\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"pendfunc1\",times=\"0\",original-location=\"pendfunc1\"}" \
-    "mi set dprintf"
+    ".*\\^done,$bp" "mi set dprintf"
 
 mi_create_breakpoint $bp_location1 "mi insert breakpoint bp_location1" \
     -type "breakpoint" -line $bp_location1 -file ".*$srcfile"
