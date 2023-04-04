@@ -5039,7 +5039,7 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
   i = 0;
   while (i < syms.size ())
     {
-      int remove_p = 0;
+      bool remove_p = false;
 
       /* If two symbols have the same name and one of them is a stub type,
 	 the get rid of the stub.  */
@@ -5047,14 +5047,14 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
       if (syms[i].symbol->type ()->is_stub ()
 	  && syms[i].symbol->linkage_name () != NULL)
 	{
-	  for (j = 0; j < syms.size (); j++)
+	  for (j = 0; !remove_p && j < syms.size (); j++)
 	    {
 	      if (j != i
 		  && !syms[j].symbol->type ()->is_stub ()
 		  && syms[j].symbol->linkage_name () != NULL
 		  && strcmp (syms[i].symbol->linkage_name (),
 			     syms[j].symbol->linkage_name ()) == 0)
-		remove_p = 1;
+		remove_p = true;
 	    }
 	}
 
@@ -5065,7 +5065,7 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
 	  && syms[i].symbol->aclass () == LOC_STATIC
 	  && is_nondebugging_type (syms[i].symbol->type ()))
 	{
-	  for (j = 0; j < syms.size (); j += 1)
+	  for (j = 0; !remove_p && j < syms.size (); j += 1)
 	    {
 	      if (i != j
 		  && syms[j].symbol->linkage_name () != NULL
@@ -5075,7 +5075,7 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
 		      == syms[j].symbol->aclass ())
 		  && syms[i].symbol->value_address ()
 		  == syms[j].symbol->value_address ())
-		remove_p = 1;
+		remove_p = true;
 	    }
 	}
       
