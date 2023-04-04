@@ -136,9 +136,6 @@ private:
 extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 				 int flags);
 
-extern void substitute_path_component (char **stringp, const char *from,
-				       const char *to);
-
 std::string ldirname (const char *filename);
 
 extern int count_path_elements (const char *path);
