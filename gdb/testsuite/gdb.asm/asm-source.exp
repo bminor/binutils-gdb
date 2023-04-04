@@ -212,7 +212,7 @@ if { [string equal ${asm-flags} ""] } {
 }
 
 if { [string equal ${debug-flags} ""] } {
-    set debug-flags "-gstabs"
+    set debug-flags "-g"
 }
 
 # Allow the target board to override the debug flags.
