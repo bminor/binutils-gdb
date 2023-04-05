@@ -53,15 +53,18 @@ read_debugging_info (bfd *abfd, asymbol **syms, long symcount,
   if (dhandle == NULL)
     return NULL;
 
+  if (!debug_set_filename (dhandle, bfd_get_filename (abfd)))
+    return NULL;
+
   if (! read_section_stabs_debugging_info (abfd, syms, symcount, dhandle,
 					   &found))
-    goto err_exit;
+    return NULL;
 
   if (bfd_get_flavour (abfd) == bfd_target_aout_flavour)
     {
       if (! read_symbol_stabs_debugging_info (abfd, syms, symcount, dhandle,
 					      &found))
-	goto err_exit;
+	return NULL;
     }
 
   /* Try reading the COFF symbols if we didn't find any stabs in COFF
@@ -71,7 +74,7 @@ read_debugging_info (bfd *abfd, asymbol **syms, long symcount,
       && symcount > 0)
     {
       if (! parse_coff (abfd, syms, symcount, dhandle))
-	goto err_exit;
+	return NULL;
       found = true;
     }
 
@@ -80,7 +83,6 @@ read_debugging_info (bfd *abfd, asymbol **syms, long symcount,
       if (! no_messages)
 	non_fatal (_("%s: no recognized debugging information"),
 		   bfd_get_filename (abfd));
-    err_exit:
       return NULL;
     }
 
