@@ -680,7 +680,7 @@ proc gdb_breakpoint { linespec args } {
 	-re "$break_message \[0-9\]* \\(.*\\) pending.*$gdb_prompt $" {
 		if {$pending_response == "n"} {
 			if { $print_fail } {
-				fail $gdb_name_name
+				fail $gdb_test_name
 			}
 			return 0
 		}
