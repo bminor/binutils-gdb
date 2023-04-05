@@ -3678,7 +3678,7 @@ Thread 1 "main" received signal SIGINT, Interrupt.
 @table @code
 @anchor{info_threads}
 @kindex info threads
-@item info threads @r{[}@var{thread-id-list}@r{]}
+@item info threads @r{[}-gid@r{]} @r{[}@var{thread-id-list}@r{]}
 
 Display information about one or more threads.  With no arguments
 displays information about all threads.  You can specify the list of
