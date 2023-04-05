@@ -39822,29 +39822,69 @@ recent C@t{++}11 compiler, e.g.@: GCC.
 @value{GDBN}'s build system relies on features only found in the GNU
 make program.  Other variants of @code{make} will not work.
 
-@item GMP (The GNU Multiple Precision Arithmetic Library)
-@value{GDBN} now uses GMP to perform some of its arithmetics.
-This library may be included with your operating system distribution;
-if it is not, you can get the latest version from
-@url{https://gmplib.org/}. If GMP is installed at an unusual path,
-you can use the @option{--with-gmp} option or options
-@option{--with-gmp-include} and @option{--with-gmp-lib} to specify
-its location.
+@item Libraries
+The following libraries are mandatory for building @value{GDBN}.  The
+@file{configure} script searches for each of these libraries in
+several standard locations; if some library is installed in an unusual
+place, you can use the @file{configure} either the option
+@option{--with-@var{lib}} to specify its installation directory, or
+two separate options @option{---with-@var{library}-include} (to
+specify the location of its header files) and
+@option{--with-@var{library}-lib} (to specify the location of its
+libraries).  For example, for the GMP library, the 3 options are
+@option{--with-gmp}, @option{--with-gmp-include}, and
+@option{--with-gmp-lib}.  @xref{Configure Options}.  We mention below
+the home site of each library, so that you could download and install
+them if your system doesn't already include them.
+
+@table @asis
+@item GMP (The GNU Multiple Precision arithmetic library)
+@value{GDBN} uses GMP to perform some of its extended-precision
+arithmetics.  The latest version of GMP is available from
+@url{https://gmplib.org/}.
+
+@anchor{MPFR}
+@item MPFR (The GNU Multiple-precision floating-point library)
+@value{GDBN} uses MPFR to emulate the target floating-point
+arithmetics during expression evaluation, if the target uses different
+floating-point formats than the host.
+@end table
 
 @end table
 
 @heading Tools/Packages Optional for Building @value{GDBN}
-@table @asis
-@item Expat
-@anchor{Expat}
-@value{GDBN} can use the Expat XML parsing library.  This library may be
-included with your operating system distribution; if it is not, you
-can get the latest version from @url{http://expat.sourceforge.net}.
-The @file{configure} script will search for this library in several
-standard locations; if it is installed in an unusual path, you can
-use the @option{--with-libexpat-prefix} option to specify its location.
+The tools/packages and libraries listed below are optional;
+@value{GDBN} can be build without them, at the expense of some run-time
+functionality that will be missing.  As above, we list the home sites
+for each package/library, and the command-line options supported by
+the @file{configure} script to specify their installation directories
+if they are non-standard.  In addition, for each package you can use
+the option @option{--with-@var{package}} to force @value{GDBN} to be
+compiled with the named @var{package}, and
+@option{--without-@var{package}} to disable building with it even if
+it is available.  @xref{Configure Options}, for detailed description
+of the options to @file{configure}.
 
-Expat is used for:
+@table @asis
+@item Python
+@value{GDBN} can be scripted using Python language.  @xref{Python}.
+The latest version is available from
+@url{https://www.python.org/downloads/}.  Use the
+@option{--with-python=@var{dir}} to specify the non-standard directory
+where Python is installed.
+
+@item Guile
+@value{GDBN} can also be scripted using GNU Guile.  @xref{Guile}.  The
+latest version can be found on
+@url{https://www.gnu.org/software/guile/download/}.  If you have more
+than one version of Guile installed, use the
+@option{--with-guile=@var{guile-version}} to specify the Guile version
+to include in the build.
+
+@anchor{Expat}
+@item Expat
+If available, @value{GDBN} uses the Expat library for parsing XML
+files.  @value{GDBN} uses XML files for the following functionalities:
 
 @itemize @bullet
 @item
@@ -39863,86 +39903,57 @@ Branch trace (@pxref{Branch Trace Format},
 @pxref{Branch Trace Configuration Format})
 @end itemize
 
-@item Guile
-@value{GDBN} can be scripted using GNU Guile.  @xref{Guile}.  By
-default, @value{GDBN} will be compiled if the Guile libraries are
-installed and are found by @file{configure}.  You can use the
-@code{--with-guile} option to request Guile, and pass either the Guile
-version number or the file name of the relevant @code{pkg-config}
-program to choose a particular version of Guile.
+The latest version of Expat is available from
+@url{http://expat.sourceforge.net}.  Use the
+@option{--with-libexpat-prefix} to specify non-standard installation
+places for Expat.
 
 @item iconv
 @value{GDBN}'s features related to character sets (@pxref{Character
 Sets}) require a functioning @code{iconv} implementation.  If you are
 on a GNU system, then this is provided by the GNU C Library.  Some
-other systems also provide a working @code{iconv}.
+other systems also provide a working @code{iconv}.  Use the option
+@option{--with-iconv-bin} to specify where to find the @command{iconv}
+program.
 
-If @value{GDBN} is using the @code{iconv} program which is installed
-in a non-standard place, you will need to tell @value{GDBN} where to
-find it.  This is done with @option{--with-iconv-bin} which specifies
-the directory that contains the @code{iconv} program.  This program is
-run in order to make a list of the available character sets.
+On systems without @code{iconv}, you can install the GNU Libiconv
+library; its latest version can be found on
+@url{https://ftp.gnu.org/pub/gnu/libiconv/} if your system doesn't
+provide it.  Use the @option{--with-libiconv-prefix} option to
+@file{configure} to specify non-standard installation place for it.
 
-On systems without @code{iconv}, you can install GNU Libiconv.  If
-Libiconv is installed in a standard place, @value{GDBN} will
-automatically use it if it is needed.  If you have previously
-installed Libiconv in a non-standard place, you can use the
-@option{--with-libiconv-prefix} option to @file{configure}.
+Alternatively, @value{GDBN}'s top-level @file{configure} and
+@file{Makefile} will arrange to build Libiconv if a directory named
+@file{libiconv} appears in the top-most source directory.  If Libiconv
+is built this way, and if the operating system does not provide a
+suitable @code{iconv} implementation, then the just-built library will
+automatically be used by @value{GDBN}.  One easy way to set this up is
+to download GNU Libiconv, unpack it inside the top-level directory of
+the @value{GDBN} source tree, and then rename the directory holding
+the Libiconv source code to @samp{libiconv}.
 
-@value{GDBN}'s top-level @file{configure} and @file{Makefile} will
-arrange to build Libiconv if a directory named @file{libiconv} appears
-in the top-most source directory.  If Libiconv is built this way, and
-if the operating system does not provide a suitable @code{iconv}
-implementation, then the just-built library will automatically be used
-by @value{GDBN}.  One easy way to set this up is to download GNU
-Libiconv, unpack it inside the top-level directory of the @value{GDBN}
-source tree, and then rename the directory holding the Libiconv source
-code to @samp{libiconv}.
-
+@cindex compressed debug sections
 @item lzma
 @value{GDBN} can support debugging sections that are compressed with
 the LZMA library.  @xref{MiniDebugInfo}.  If this library is not
 included with your operating system, you can find it in the xz package
-at @url{http://tukaani.org/xz/}.  If the LZMA library is available in
-the usual place, then the @file{configure} script will use it
-automatically.  If it is installed in an unusual path, you can use the
-@option{--with-liblzma-prefix} option to specify its location.
-
-@item MPFR
-@anchor{MPFR}
-@value{GDBN} now uses the GNU MPFR multiple-precision floating-point
-library.  This library may be included with your operating system
-distribution; if it is not, you can get the latest version from
-@url{http://www.mpfr.org}.  The @file{configure} script will search
-for this library in several standard locations; if it is installed
-in an unusual path, you can use the @option{--with-mpfr} option or options
-@option{--with-mpfr-include} and @option{--with-mpfr-lib} to specify
-its location.
-
-GNU MPFR is used to emulate target floating-point arithmetic during
-expression evaluation when the target uses different floating-point
-formats than the host.
-
-@item Python
-@value{GDBN} can be scripted using Python language.  @xref{Python}.
-By default, @value{GDBN} will be compiled if the Python libraries are
-installed and are found by @file{configure}.  You can use the
-@code{--with-python} option to request Python, and pass either the
-file name of the relevant @code{python} executable, or the name of the
-directory in which Python is installed, to choose a particular
-installation of Python.
+at @url{http://tukaani.org/xz/}.  Use the
+@option{--with-liblzma-prefix} option to specify its non-standard
+location.
 
 @item zlib
-@cindex compressed debug sections 
 @value{GDBN} will use the @samp{zlib} library, if available, to read
-compressed debug sections.  Some linkers, such as GNU gold, are capable
-of producing binaries with compressed debug sections.  If @value{GDBN}
-is compiled with @samp{zlib}, it will be able to read the debug
-information in such binaries.
+compressed debug sections.  Some linkers, such as GNU @command{gold},
+are capable of producing binaries with compressed debug sections.  If
+@value{GDBN} is compiled with @samp{zlib}, it will be able to read the
+debug information in such binaries.
 
 The @samp{zlib} library is likely included with your operating system
 distribution; if it is not, you can get the latest version from
 @url{http://zlib.net}.
+
+@c FIXME: what about other optional libraries: debuginfod, zstd,
+@c libipt, babeltrace, xxhash, source-highlight?
 @end table
 
 @node Running Configure
@@ -40147,6 +40158,10 @@ directory (@file{gdb-@value{GDBVN}}, for version @value{GDBVN}).
 @node Configure Options
 @section @file{configure} Options
 
+@c FIXME: This largely repeats what was already described in
+@c ``Requirements'', and OTOH doesn't describe the more fgine-granular
+@c options like --with-libexpat-prefix and --with-python-libdir.
+@c Should it?
 Here is a summary of the @file{configure} options and arguments that
 are most often useful for building @value{GDBN}.  @file{configure}
 also has several other options not listed here.  @xref{Running
@@ -40251,7 +40266,7 @@ at configure time.  For more information regarding @code{debuginfod} see
 
 @item --with-libunwind-ia64
 Use the libunwind library for unwinding function call stack on ia64
-target platforms.  See http://www.nongnu.org/libunwind/index.html for
+target platforms.  See @url{http://www.nongnu.org/libunwind/index.html} for
 details.
 
 @item --with-system-readline
@@ -40271,15 +40286,14 @@ is unavailable, some features, such as remote protocol memory maps,
 target descriptions, and shared library lists, that are based on XML
 files, will not be available in @value{GDBN}.  If your host does not
 have libexpat installed, you can get the latest version from
-`http://expat.sourceforge.net'.
+@url{http://expat.sourceforge.net}.
 
 @item --with-libiconv-prefix@r{[}=@var{dir}@r{]}
-
 Build @value{GDBN} with GNU libiconv, a character set encoding
 conversion library.  This is not done by default, as on GNU systems
 the @code{iconv} that is built in to the C library is sufficient.  If
 your host does not have a working @code{iconv}, you can get the latest
-version of GNU iconv from `https://www.gnu.org/software/libiconv/'.
+version of GNU iconv from @url{https://www.gnu.org/software/libiconv/}.
 
 @value{GDBN}'s build system also supports building GNU libiconv as
 part of the overall build.   @xref{Requirements}.
@@ -40290,35 +40304,24 @@ if liblzma is installed and found at configure time.)  LZMA is used by
 @value{GDBN}'s "mini debuginfo" feature, which is only useful on
 platforms using the ELF object file format.  If your host does not
 have liblzma installed, you can get the latest version from
-`https://tukaani.org/xz/'.
-
-@item --with-mpfr
-Build @value{GDBN} with GNU MPFR, a library for multiple-precision
-floating-point computation with correct rounding.  (Done by default if
-GNU MPFR is installed and found at configure time.)  This library is
-used to emulate target floating-point arithmetic during expression
-evaluation when the target uses different floating-point formats than
-the host.  If GNU MPFR is not available, @value{GDBN} will fall back
-to using host floating-point arithmetic.  If your host does not have
-GNU MPFR installed, you can get the latest version from
-`http://www.mpfr.org'.
+@url{https://tukaani.org/xz/}.
 
 @item --with-python@r{[}=@var{python}@r{]}
 Build @value{GDBN} with Python scripting support.  (Done by default if
 libpython is present and found at configure time.)  Python makes
 @value{GDBN} scripting much more powerful than the restricted CLI
 scripting language.  If your host does not have Python installed, you
-can find it on `http://www.python.org/download/'.  The oldest version
-of Python supported by GDB is 2.6.  The optional argument @var{python}
+can find it on @url{http://www.python.org/download/}.  The oldest version
+of Python supported by GDB is 3.0.1.  The optional argument @var{python}
 is used to find the Python headers and libraries.  It can be either
 the name of a Python executable, or the name of the directory in which
 Python is installed.
 
-@item --with-guile[=GUILE]'
+@item --with-guile[=@var{guile}]
 Build @value{GDBN} with GNU Guile scripting support.  (Done by default
 if libguile is present and found at configure time.)  If your host
 does not have Guile installed, you can find it at
-`https://www.gnu.org/software/guile/'.  The optional argument GUILE
+@url{https://www.gnu.org/software/guile/}.  The optional argument @var{guile}
 can be a version number, which will cause @code{configure} to try to
 use that version of Guile; or the file name of a @code{pkg-config}
 executable, which will be queried to find the information needed to
