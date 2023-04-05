@@ -8529,8 +8529,9 @@ update_dprintf_command_list (struct breakpoint *b)
   const char *dprintf_args = b->extra_string.get ();
   gdb::unique_xmalloc_ptr<char> printf_line = nullptr;
 
-  if (!dprintf_args)
-    return;
+  /* Trying to create a dprintf breakpoint without a format and args
+     string should be detected at creation time.  */
+  gdb_assert (dprintf_args != nullptr);
 
   dprintf_args = skip_spaces (dprintf_args);
 
