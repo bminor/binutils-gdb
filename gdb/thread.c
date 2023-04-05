@@ -961,7 +961,7 @@ pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread)
    and PID is not -1, then the thread is printed if it belongs to the
    specified process.  Otherwise, an error is raised.  */
 
-static int
+static bool
 should_print_thread (const char *requested_threads, int default_inf_num,
 		     int global_ids, int pid, struct thread_info *thr)
 {
@@ -975,20 +975,20 @@ should_print_thread (const char *requested_threads, int default_inf_num,
 	in_list = tid_is_in_list (requested_threads, default_inf_num,
 				  thr->inf->num, thr->per_inf_num);
       if (!in_list)
-	return 0;
+	return false;
     }
 
   if (pid != -1 && thr->ptid.pid () != pid)
     {
       if (requested_threads != NULL && *requested_threads != '\0')
 	error (_("Requested thread not found in requested process"));
-      return 0;
+      return false;
     }
 
   if (thr->state == THREAD_EXITED)
-    return 0;
+    return false;
 
-  return 1;
+  return true;
 }
 
 /* Return the string to display in "info threads"'s "Target Id"
