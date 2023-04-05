@@ -402,7 +402,13 @@ ctf_lookup_variable (ctf_dict_t *fp, const char *name)
   if (ent == NULL)
     {
       if (fp->ctf_parent != NULL)
-	return ctf_lookup_variable (fp->ctf_parent, name);
+        {
+          ctf_id_t ptype;
+
+          if ((ptype = ctf_lookup_variable (fp->ctf_parent, name)) != CTF_ERR)
+            return ptype;
+          return (ctf_set_errno (fp, ctf_errno (fp->ctf_parent)));
+        }
 
       return (ctf_set_errno (fp, ECTF_NOTYPEDAT));
     }
@@ -626,7 +632,16 @@ ctf_lookup_symbol_idx (ctf_dict_t *fp, const char *symname)
 
  try_parent:
   if (fp->ctf_parent)
-    return ctf_lookup_symbol_idx (fp->ctf_parent, symname);
+    {
+      unsigned long psym;
+
+      if ((psym = ctf_lookup_symbol_idx (fp->ctf_parent, symname))
+          != (unsigned long) -1)
+        return psym;
+
+      ctf_set_errno (fp, ctf_errno (fp->ctf_parent));
+      return (unsigned long) -1;
+    }
   else
     {
       ctf_set_errno (fp, err);

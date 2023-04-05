@@ -628,8 +628,8 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
      point to the unimplemented type, for now, because the compiler can emit
      such slices, though they're not very much use.  */
 
-  resolved_ref = ctf_type_resolve_unsliced (tmp, ref);
-  kind = ctf_type_kind_unsliced (tmp, resolved_ref);
+  resolved_ref = ctf_type_resolve_unsliced (fp, ref);
+  kind = ctf_type_kind_unsliced (fp, resolved_ref);
 
   if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) &&
       (kind != CTF_K_ENUM)
