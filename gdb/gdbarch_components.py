@@ -1804,7 +1804,7 @@ see the comments in infrun.c.
         ("CORE_ADDR", "from"),
         ("CORE_ADDR", "to"),
         ("struct regcache *", "regs"),
-        ("bool", "completed_p")
+        ("bool", "completed_p"),
     ],
     predicate=False,
     predefault="NULL",
