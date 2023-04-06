@@ -41,7 +41,7 @@ def _block_vars(block):
         for var in block:
             if var.is_argument:
                 args.append(var)
-            else:
+            elif var.is_variable or var.is_constant:
                 locs.append(var)
         if block.function is not None:
             break

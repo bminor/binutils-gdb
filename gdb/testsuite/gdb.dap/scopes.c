@@ -15,14 +15,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct dei_struct
-{
-  int x;
-  int more[5];
-};
-
 int main ()
 {
+  struct dei_struct
+  {
+    int x;
+    int more[5];
+  };
+
   struct dei_struct dei = { 2, { 3, 5, 7, 11, 13 } };
 
   static int scalar = 23;
