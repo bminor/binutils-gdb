@@ -621,7 +621,7 @@ currently active connection (@pxref{Connections In Python}).  The
 connection objects are in no particular order in the returned list.
 @end defun
 
-@defun gdb.format_address (@var{address} @r{[}, @var{progspace}, @var{architecture}@r{]})
+@defun gdb.format_address (address @r{[}, progspace, architecture@r{]})
 Return a string in the format @samp{@var{addr}
 <@var{symbol}+@var{offset}>}, where @var{addr} is @var{address}
 formatted in hexadecimal, @var{symbol} is the symbol whose address is
@@ -894,7 +894,7 @@ method is invoked.
 
 The following methods are provided:
 
-@defun Value.__init__ (@var{val})
+@defun Value.__init__ (val)
 Many Python values can be converted directly to a @code{gdb.Value} via
 this object initializer.  Specifically:
 
@@ -931,7 +931,7 @@ its result is used.
 @end table
 @end defun
 
-@defun Value.__init__ (@var{val}, @var{type})
+@defun Value.__init__ (val, type)
 This second form of the @code{gdb.Value} constructor returns a
 @code{gdb.Value} of type @var{type} where the value contents are taken
 from the Python buffer object specified by @var{val}.  The number of
@@ -1439,7 +1439,7 @@ The type which contains this field.  This is an instance of
 @end table
 @end defun
 
-@defun Type.array (@var{n1} @r{[}, @var{n2}@r{]})
+@defun Type.array (n1 @r{[}, n2@r{]})
 Return a new @code{gdb.Type} object which represents an array of this
 type.  If one argument is given, it is the inclusive upper bound of
 the array; in this case the lower bound is zero.  If two arguments are
@@ -1448,7 +1448,7 @@ second argument is the upper bound of the array.  An array's length
 must not be negative, but the bounds can be.
 @end defun
 
-@defun Type.vector (@var{n1} @r{[}, @var{n2}@r{]})
+@defun Type.vector (n1 @r{[}, n2@r{]})
 Return a new @code{gdb.Type} object which represents a vector of this
 type.  If one argument is given, it is the inclusive upper bound of
 the vector; in this case the lower bound is zero.  If two arguments are
@@ -2899,7 +2899,7 @@ unwinders can derive, though it is not required that unwinders derive
 from this class, so long as any user created unwinder has the required
 @code{name} and @code{enabled} attributes.
 
-@defun gdb.unwinder.Unwinder.__init__(@var{name})
+@defun gdb.unwinder.Unwinder.__init__(name)
 The @var{name} is a string used to reference this unwinder within some
 @value{GDBN} commands (@pxref{Managing Registered Unwinders}).
 @end defun
@@ -2925,7 +2925,7 @@ most cases this class will be sufficient.
 
 @code{gdb.unwinder.FrameId} has the following method:
 
-@defun gdb.unwinder.FrameId.__init__(@var{sp}, @var{pc}, @var{special} = @code{None})
+@defun gdb.unwinder.FrameId.__init__(sp, pc, special = @code{None})
 The @var{sp} and @var{pc} arguments are required and should be either
 a @code{gdb.Value} object, or an integer.
 
@@ -4160,7 +4160,7 @@ You can implement new @value{GDBN} CLI commands in Python.  A CLI
 command is implemented using an instance of the @code{gdb.Command}
 class, most commonly using a subclass.
 
-@defun Command.__init__ (name, @var{command_class} @r{[}, @var{completer_class} @r{[}, @var{prefix}@r{]]})
+@defun Command.__init__ (name, command_class @r{[}, completer_class @r{[}, prefix@r{]]})
 The object initializer for @code{Command} registers the new command
 with @value{GDBN}.  This initializer is normally invoked from the
 subclass' own @code{__init__} method.
@@ -4604,7 +4604,7 @@ There are many parameters that already exist and can be set in
 behavior in @value{GDBN}.  Similarly, you can define parameters that
 can be used to influence behavior in custom Python scripts and commands.
 
-@defun Parameter.__init__ (name, @var{command-class}, @var{parameter-class} @r{[}, @var{enum-sequence}@r{]})
+@defun Parameter.__init__ (name, command_class, parameter_class @r{[}, enum_sequence@r{]})
 The object initializer for @code{Parameter} registers the new
 parameter with @value{GDBN}.  This initializer is normally invoked
 from the subclass' own @code{__init__} method.
@@ -4620,20 +4620,20 @@ parameter.  In this case the parameter can subsequently be accessed in
 If @var{name} consists of multiple words, and no prefix parameter group
 can be found, an exception is raised.
 
-@var{command-class} should be one of the @samp{COMMAND_} constants
+@var{command_class} should be one of the @samp{COMMAND_} constants
 (@pxref{CLI Commands In Python}).  This argument tells @value{GDBN} how to
 categorize the new parameter in the help system.
 
-@var{parameter-class} should be one of the @samp{PARAM_} constants
+@var{parameter_class} should be one of the @samp{PARAM_} constants
 defined below.  This argument tells @value{GDBN} the type of the new
 parameter; this information is used for input validation and
 completion.
 
-If @var{parameter-class} is @code{PARAM_ENUM}, then
-@var{enum-sequence} must be a sequence of strings.  These strings
+If @var{parameter_class} is @code{PARAM_ENUM}, then
+@var{enum_sequence} must be a sequence of strings.  These strings
 represent the possible values for the parameter.
 
-If @var{parameter-class} is not @code{PARAM_ENUM}, then the presence
+If @var{parameter_class} is not @code{PARAM_ENUM}, then the presence
 of a fourth argument will cause an exception to be thrown.
 
 The help text for the new parameter includes the Python documentation
@@ -4838,7 +4838,7 @@ The documentation for the new function is taken from the documentation
 string for the new class.
 @end defun
 
-@defun Function.invoke (@var{*args})
+@defun Function.invoke (*args)
 When a convenience function is evaluated, its arguments are converted
 to instances of @code{gdb.Value}, and then the function's
 @code{invoke} method is called.  Note that @value{GDBN} does not
@@ -6489,7 +6489,7 @@ A @code{gdb.Architecture} class has the following methods:
 Return the name (string value) of the architecture.
 @end defun
 
-@defun Architecture.disassemble (@var{start_pc} @r{[}, @var{end_pc} @r{[}, @var{count}@r{]]})
+@defun Architecture.disassemble (start_pc @r{[}, end_pc @r{[}, count@r{]]})
 Return a list of disassembled instructions starting from the memory
 address @var{start_pc}.  The optional arguments @var{end_pc} and
 @var{count} determine the number of instructions in the returned list.
@@ -6541,7 +6541,7 @@ If the indicated type cannot be found, this function will throw a
 @end defun
 
 @anchor{gdbpy_architecture_registers}
-@defun Architecture.registers (@r{[} @var{reggroup} @r{]})
+@defun Architecture.registers (@r{[} reggroup @r{]})
 Return a @code{gdb.RegisterDescriptorIterator} (@pxref{Registers In
 Python}) for all of the registers in @var{reggroup}, a string that is
 the name of a register group.  If @var{reggroup} is omitted, or is the
@@ -6581,7 +6581,7 @@ The name of this register.
 It is also possible to lookup a register descriptor based on its name
 using the following @code{gdb.RegisterDescriptorIterator} function:
 
-@defun RegisterDescriptorIterator.find (@var{name})
+@defun RegisterDescriptorIterator.find (name)
 Takes @var{name} as an argument, which must be a string, and returns a
 @code{gdb.RegisterDescriptor} for the register with that name, or
 @code{None} if there is no register with that name.
@@ -6704,7 +6704,7 @@ and methods available from the @code{gdb.TargetConnection} base class,
 a @code{gdb.RemoteTargetConnection} has the following method:
 
 @kindex maint packet
-@defun RemoteTargetConnection.send_packet (@var{packet})
+@defun RemoteTargetConnection.send_packet (packet)
 This method sends @var{packet} to the remote target and returns the
 response.  The @var{packet} should either be a @code{bytes} object, or
 a @code{Unicode} string.
@@ -6747,7 +6747,7 @@ This is equivalent to the @code{maintenance packet} command
 New TUI (@pxref{TUI}) windows can be implemented in Python.
 
 @findex gdb.register_window_type
-@defun gdb.register_window_type (@var{name}, @var{factory})
+@defun gdb.register_window_type (name, factory)
 Because TUI windows are created and destroyed depending on the layout
 the user chooses, new window types are implemented by registering a
 factory function with @value{GDBN}.
@@ -6798,7 +6798,7 @@ displayed above the window.  This attribute can be modified.
 Remove all the contents of the window.
 @end defun
 
-@defun TuiWindow.write (@var{string} @r{[}, @var{full_window}@r{]})
+@defun TuiWindow.write (string @r{[}, full_window@r{]})
 Write @var{string} to the window.  @var{string} can contain ANSI
 terminal escape styling sequences; @value{GDBN} will translate these
 as appropriate for the terminal.
@@ -6839,7 +6839,7 @@ inferior, you will probably also want to register event listeners and
 send output to the @code{gdb.TuiWindow}.
 @end defun
 
-@defun Window.hscroll (@var{num})
+@defun Window.hscroll (num)
 This is a request to scroll the window horizontally.  @var{num} is the
 amount by which to scroll, with negative numbers meaning to scroll
 right.  In the TUI model, it is the viewport that moves, not the
@@ -6847,7 +6847,7 @@ contents.  A positive argument should cause the viewport to move
 right, and so the content should appear to move to the left.
 @end defun
 
-@defun Window.vscroll (@var{num})
+@defun Window.vscroll (num)
 This is a request to scroll the window vertically.  @var{num} is the
 amount by which to scroll, with negative numbers meaning to scroll
 backward.  In the TUI model, it is the viewport that moves, not the
@@ -6855,7 +6855,7 @@ contents.  A positive argument should cause the viewport to move down,
 and so the content should appear to move up.
 @end defun
 
-@defun Window.click (@var{x}, @var{y}, @var{button})
+@defun Window.click (x, y, button)
 This is called on a mouse click in this window.  @var{x} and @var{y} are
 the mouse coordinates inside the window (0-based, from the top left
 corner), and @var{button} specifies which mouse button was used, whose
@@ -7028,7 +7028,7 @@ This class is used to hold the result of calling
 @w{@code{Disassembler.__call__}}, and represents a single disassembled
 instruction.  This class has the following properties and methods:
 
-@defun DisassemblerResult.__init__ (@var{length}, @var{string})
+@defun DisassemblerResult.__init__ (length, string)
 Initialize an instance of this class, @var{length} is the length of
 the disassembled instruction in bytes, which must be greater than
 zero, and @var{string} is a non-empty string that represents the
