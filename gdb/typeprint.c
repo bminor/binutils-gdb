@@ -309,7 +309,6 @@ const char *
 typedef_hash_table::find_global_typedef (const struct type_print_options *flags,
 					 struct type *t)
 {
-  char *applied;
   void **slot;
   struct decl_field tf, *new_tf;
 
@@ -334,14 +333,12 @@ typedef_hash_table::find_global_typedef (const struct type_print_options *flags,
 
   *slot = new_tf;
 
-  applied = apply_ext_lang_type_printers (flags->global_printers, t);
+  gdb::unique_xmalloc_ptr<char> applied
+    = apply_ext_lang_type_printers (flags->global_printers, t);
 
-  if (applied != NULL)
-    {
-      new_tf->name = obstack_strdup (&flags->global_typedefs->m_storage,
-				     applied);
-      xfree (applied);
-    }
+  if (applied != nullptr)
+    new_tf->name = obstack_strdup (&flags->global_typedefs->m_storage,
+				   applied.get ());
 
   return new_tf->name;
 }

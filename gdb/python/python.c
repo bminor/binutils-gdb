@@ -112,7 +112,8 @@ static void gdbpy_start_type_printers (const struct extension_language_defn *,
 				       struct ext_lang_type_printers *);
 static enum ext_lang_rc gdbpy_apply_type_printers
   (const struct extension_language_defn *,
-   const struct ext_lang_type_printers *, struct type *, char **);
+   const struct ext_lang_type_printers *, struct type *,
+   gdb::unique_xmalloc_ptr<char> *);
 static void gdbpy_free_type_printers (const struct extension_language_defn *,
 				      struct ext_lang_type_printers *);
 static void gdbpy_set_quit_flag (const struct extension_language_defn *);
@@ -1700,7 +1701,7 @@ gdbpy_start_type_printers (const struct extension_language_defn *extlang,
 
 /* If TYPE is recognized by some type printer, store in *PRETTIED_TYPE
    a newly allocated string holding the type's replacement name, and return
-   EXT_LANG_RC_OK.  The caller is responsible for freeing the string.
+   EXT_LANG_RC_OK.
    If there's a Python error return EXT_LANG_RC_ERROR.
    Otherwise, return EXT_LANG_RC_NOP.
    This is the extension_language_ops.apply_type_printers "method".  */
@@ -1708,7 +1709,8 @@ gdbpy_start_type_printers (const struct extension_language_defn *extlang,
 static enum ext_lang_rc
 gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
 			   const struct ext_lang_type_printers *ext_printers,
-			   struct type *type, char **prettied_type)
+			   struct type *type,
+			   gdb::unique_xmalloc_ptr<char> *prettied_type)
 {
   PyObject *printers_obj = (PyObject *) ext_printers->py_type_printers;
   gdb::unique_xmalloc_ptr<char> result;
@@ -1763,7 +1765,7 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
       return EXT_LANG_RC_ERROR;
     }
 
-  *prettied_type = result.release ();
+  *prettied_type = std::move (result);
   return EXT_LANG_RC_OK;
 }
 

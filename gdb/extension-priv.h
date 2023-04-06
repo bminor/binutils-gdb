@@ -137,7 +137,7 @@ struct extension_language_ops
 			       struct ext_lang_type_printers *);
 
   /* Try to pretty-print TYPE.  If successful the pretty-printed type is
-     stored in *PRETTIED_TYPE, and the caller must free it.
+     stored in *PRETTIED_TYPE.
      Returns EXT_LANG_RC_OK upon success, EXT_LANG_RC_NOP if the type
      is not recognized, and EXT_LANG_RC_ERROR if an error was encountered.
      This function has a bit of a funny name, since it actually applies
@@ -146,7 +146,8 @@ struct extension_language_ops
   enum ext_lang_rc (*apply_type_printers)
     (const struct extension_language_defn *,
      const struct ext_lang_type_printers *,
-     struct type *, char **prettied_type);
+     struct type *,
+     gdb::unique_xmalloc_ptr<char> *prettied_type);
 
   /* Called after a type has been printed to give the type pretty-printer
      mechanism an opportunity to clean up.  */

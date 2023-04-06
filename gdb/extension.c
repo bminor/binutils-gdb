@@ -418,13 +418,13 @@ ext_lang_type_printers::ext_lang_type_printers ()
    returning the result of the first one that succeeds.
    If there was an error, or if no printer succeeds, then NULL is returned.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 apply_ext_lang_type_printers (struct ext_lang_type_printers *printers,
 			      struct type *type)
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
-      char *result = NULL;
+      gdb::unique_xmalloc_ptr<char> result;
       enum ext_lang_rc rc;
 
       if (extlang->ops == nullptr
@@ -435,7 +435,7 @@ apply_ext_lang_type_printers (struct ext_lang_type_printers *printers,
       switch (rc)
 	{
 	case EXT_LANG_RC_OK:
-	  gdb_assert (result != NULL);
+	  gdb_assert (result != nullptr);
 	  return result;
 	case EXT_LANG_RC_ERROR:
 	  return NULL;

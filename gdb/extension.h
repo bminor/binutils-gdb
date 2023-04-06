@@ -282,8 +282,8 @@ extern void eval_ext_lang_from_control_command (struct command_line *cmd);
 
 extern void auto_load_ext_lang_scripts_for_objfile (struct objfile *);
 
-extern char *apply_ext_lang_type_printers (struct ext_lang_type_printers *,
-					   struct type *);
+extern gdb::unique_xmalloc_ptr<char> apply_ext_lang_type_printers
+     (struct ext_lang_type_printers *, struct type *);
 
 extern int apply_ext_lang_val_pretty_printer
   (struct value *value, struct ui_file *stream, int recurse,
