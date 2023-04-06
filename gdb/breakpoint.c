@@ -6484,15 +6484,15 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    inf_nums.push_back (inf->num);
 	}
 
-	/* For backward compatibility, don't display inferiors in CLI unless
-	   there are several.  Always display for MI. */
-	if (allflag
-	    || (!gdbarch_has_global_breakpoints (target_gdbarch ())
-		&& (program_spaces.size () > 1
-		    || number_of_inferiors () > 1)
-		/* LOC is for existing B, it cannot be in
-		   moribund_locations and thus having NULL OWNER.  */
-		&& loc->owner->type != bp_catchpoint))
+      /* For backward compatibility, don't display inferiors in CLI unless
+	 there are several.  Always display for MI. */
+      if (allflag
+	  || (!gdbarch_has_global_breakpoints (target_gdbarch ())
+	      && (program_spaces.size () > 1
+		  || number_of_inferiors () > 1)
+	      /* LOC is for existing B, it cannot be in
+		 moribund_locations and thus having NULL OWNER.  */
+	      && loc->owner->type != bp_catchpoint))
 	mi_only = 0;
       output_thread_groups (uiout, "thread-groups", inf_nums, mi_only);
     }
