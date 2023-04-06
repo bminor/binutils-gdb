@@ -464,7 +464,7 @@ write_stabs_in_sections_debugging_info (bfd *abfd, void *dhandle,
 					bfd_size_type *pstringsize)
 {
   struct stab_write_handle info;
-  struct string_hash_entry *h, *hnext;
+  struct string_hash_entry *h;
   bfd_byte *p;
   bool ret;
 
@@ -535,11 +535,6 @@ write_stabs_in_sections_debugging_info (bfd *abfd, void *dhandle,
   free (info.symbols);
   ret = false;
  out:
-  for (h = info.strings; h != NULL; h = hnext)
-    {
-      hnext = h->next;
-      free (h);
-    }
   while (info.type_stack != NULL)
     {
       struct stab_type_stack *s = info.type_stack;
