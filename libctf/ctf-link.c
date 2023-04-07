@@ -321,12 +321,12 @@ ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
   if (ctf_name == NULL)
     ctf_name = cu_name;
 
-  /* Look up the per-CU dict.  If we don't know of one, or it is for
-     a different input CU which just happens to have the same name,
-     create a new one.  */
+  /* Look up the per-CU dict.  If we don't know of one, or it is for a different input
+     CU which just happens to have the same name, create a new one.  If we are creating
+     a dict with no input specified, anything will do.  */
 
   if ((cu_fp = ctf_dynhash_lookup (fp->ctf_link_outputs, ctf_name)) == NULL
-      || cu_fp->ctf_link_in_out != fp)
+      || (input && cu_fp->ctf_link_in_out != fp))
     {
       int err;
 
@@ -1505,11 +1505,17 @@ ctf_link (ctf_dict_t *fp, int flags)
   if (fp->ctf_link_outputs == NULL)
     return ctf_set_errno (fp, ENOMEM);
 
+  fp->ctf_flags |= LCTF_LINKING;
+  ctf_link_deduplicating (fp);
+  fp->ctf_flags &= ~LCTF_LINKING;
+
+  if ((ctf_errno (fp) != 0) && (ctf_errno (fp) != ECTF_NOCTFDATA))
+    return -1;
+
   /* Create empty CUs if requested.  We do not currently claim that multiple
      links in succession with CTF_LINK_EMPTY_CU_MAPPINGS set in some calls and
      not set in others will do anything especially sensible.  */
 
-  fp->ctf_flags |= LCTF_LINKING;
   if (fp->ctf_link_out_cu_mapping && (flags & CTF_LINK_EMPTY_CU_MAPPINGS))
     {
       ctf_next_t *i = NULL;
@@ -1535,11 +1541,6 @@ ctf_link (ctf_dict_t *fp, int flags)
 	}
     }
 
-  ctf_link_deduplicating (fp);
-
-  fp->ctf_flags &= ~LCTF_LINKING;
-  if ((ctf_errno (fp) != 0) && (ctf_errno (fp) != ECTF_NOCTFDATA))
-    return -1;
   return 0;
 }
 
