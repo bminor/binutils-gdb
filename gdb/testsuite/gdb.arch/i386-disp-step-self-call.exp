@@ -60,7 +60,8 @@ gdb_test_multiple "x/2i \$pc" "get address of next insn" {
 
 # Clear the slot on the stack and confirm it was set to zero.
 set sp [expr $sp - 0x4]
-gdb_test_no_output "set {unsigned long long} $sp = 0"
+gdb_test_no_output "set {unsigned int} $sp = 0" \
+    "clear stack slot"
 set zero_val 0x[format %08x 0]
 gdb_test "x/1wx 0x[format %x $sp]" "$hex:\\s+${zero_val}" \
     "check return address slot was set to zero"
