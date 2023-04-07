@@ -942,8 +942,8 @@ static const char *namespace_name (struct die_info *die,
 
 static void process_enumeration_scope (struct die_info *, struct dwarf2_cu *);
 
-static CORE_ADDR decode_locdesc (struct dwarf_block *, struct dwarf2_cu *,
-				 bool * = nullptr);
+static bool decode_locdesc (struct dwarf_block *, struct dwarf2_cu *,
+			    CORE_ADDR *addr);
 
 static enum dwarf_array_dim_ordering read_array_order (struct die_info *,
 						       struct dwarf2_cu *);
@@ -11457,6 +11457,7 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
   if (attr != NULL)
     {
       *offset = 0;
+      CORE_ADDR temp;
 
       /* Note that we do not check for a section offset first here.
 	 This is because DW_AT_data_member_location is new in DWARF 4,
@@ -11466,8 +11467,11 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	*offset = attr->constant_value (0);
       else if (attr->form_is_section_offset ())
 	dwarf2_complex_location_expr_complaint ();
-      else if (attr->form_is_block ())
-	*offset = decode_locdesc (attr->as_block (), cu);
+      else if (attr->form_is_block ()
+	       && decode_locdesc (attr->as_block (), cu, &temp))
+	{
+	  *offset = temp;
+	}
       else
 	dwarf2_complex_location_expr_complaint ();
 
@@ -11520,9 +11524,8 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	dwarf2_complex_location_expr_complaint ();
       else if (attr->form_is_block ())
 	{
-	  bool handled;
-	  CORE_ADDR offset = decode_locdesc (attr->as_block (), cu, &handled);
-	  if (handled)
+	  CORE_ADDR offset;
+	  if (decode_locdesc (attr->as_block (), cu, &offset))
 	    field->set_loc_bitpos (offset * bits_per_byte);
 	  else
 	    {
@@ -12242,18 +12245,25 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
       if (attr->form_is_block () && attr->as_block ()->size > 0)
 	{
 	  struct dwarf_block *block = attr->as_block ();
+	  CORE_ADDR offset;
 
-	  if (block->data[0] == DW_OP_constu)
+	  if (block->data[0] == DW_OP_constu
+	      && decode_locdesc (block, cu, &offset))
 	    {
-	      /* Old-style GCC.  */
-	      fnp->voffset = decode_locdesc (block, cu) + 2;
+	      /* "Old"-style GCC.  See
+		 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=44126
+		 for discussion.  This was known and a patch available
+		 in 2010, but as of 2023, both GCC and clang still
+		 emit this.  */
+	      fnp->voffset = offset + 2;
 	    }
-	  else if (block->data[0] == DW_OP_deref
-		   || (block->size > 1
-		       && block->data[0] == DW_OP_deref_size
-		       && block->data[1] == cu->header.addr_size))
+	  else if ((block->data[0] == DW_OP_deref
+		    || (block->size > 1
+			&& block->data[0] == DW_OP_deref_size
+			&& block->data[1] == cu->header.addr_size))
+		   && decode_locdesc (block, cu, &offset))
 	    {
-	      fnp->voffset = decode_locdesc (block, cu);
+	      fnp->voffset = offset;
 	      if ((fnp->voffset % cu->header.addr_size) != 0)
 		dwarf2_complex_location_expr_complaint ();
 	      else
@@ -16226,9 +16236,10 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	  if (!scanning_per_cu->addresses_seen && attr.form_is_block ())
 	    {
 	      struct dwarf_block *locdesc = attr.as_block ();
-	      CORE_ADDR addr = decode_locdesc (locdesc, reader->cu);
-	      if (addr != 0
-		  || reader->cu->per_objfile->per_bfd->has_section_at_zero)
+	      CORE_ADDR addr;
+	      if (decode_locdesc (locdesc, reader->cu, &addr)
+		  && (addr != 0
+		      || reader->cu->per_objfile->per_bfd->has_section_at_zero))
 		{
 		  low_pc = addr;
 		  /* For variables, we don't want to try decoding the
@@ -20926,14 +20937,34 @@ read_signatured_type (signatured_type *sig_type,
 }
 
 /* Decode simple location descriptions.
-   Given a pointer to a dwarf block that defines a location, compute
-   the location and return the value.  If COMPUTED is non-null, it is
-   set to true to indicate that decoding was successful, and false
-   otherwise.  If COMPUTED is null, then this function may emit a
-   complaint.  */
 
-static CORE_ADDR
-decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu, bool *computed)
+   Given a pointer to a DWARF block that defines a location, compute
+   the location.  Returns true if the expression was computable by
+   this function, false otherwise.  On a true return, *RESULT is set.
+
+   Note that this function does not implement a full DWARF expression
+   evaluator.  Instead, it is used for a few limited purposes:
+
+   - Getting the address of a symbol that has a constant address.  For
+   example, if a symbol has a location like "DW_OP_addr", the address
+   can be extracted.
+
+   - Getting the offset of a virtual function in its vtable.  There
+   are two forms of this, one of which involves DW_OP_deref -- so this
+   function handles derefs in a peculiar way to make this 'work'.
+   (Probably this area should be rewritten.)
+
+   - Getting the offset of a field, when it is constant.
+
+   Opcodes that cannot be part of a constant expression, for example
+   those involving registers, simply result in a return of
+   'false'.
+
+   This function may emit a complaint.  */
+
+static bool
+decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu,
+		CORE_ADDR *result)
 {
   struct objfile *objfile = cu->per_objfile->objfile;
   size_t i;
@@ -20941,12 +20972,10 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu, bool *computed)
   const gdb_byte *data = blk->data;
   CORE_ADDR stack[64];
   int stacki;
-  unsigned int bytes_read, unsnd;
+  unsigned int bytes_read;
   gdb_byte op;
 
-  if (computed != nullptr)
-    *computed = false;
-
+  *result = 0;
   i = 0;
   stacki = 0;
   stack[stacki] = 0;
@@ -20990,61 +21019,6 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu, bool *computed)
 	case DW_OP_lit30:
 	case DW_OP_lit31:
 	  stack[++stacki] = op - DW_OP_lit0;
-	  break;
-
-	case DW_OP_reg0:
-	case DW_OP_reg1:
-	case DW_OP_reg2:
-	case DW_OP_reg3:
-	case DW_OP_reg4:
-	case DW_OP_reg5:
-	case DW_OP_reg6:
-	case DW_OP_reg7:
-	case DW_OP_reg8:
-	case DW_OP_reg9:
-	case DW_OP_reg10:
-	case DW_OP_reg11:
-	case DW_OP_reg12:
-	case DW_OP_reg13:
-	case DW_OP_reg14:
-	case DW_OP_reg15:
-	case DW_OP_reg16:
-	case DW_OP_reg17:
-	case DW_OP_reg18:
-	case DW_OP_reg19:
-	case DW_OP_reg20:
-	case DW_OP_reg21:
-	case DW_OP_reg22:
-	case DW_OP_reg23:
-	case DW_OP_reg24:
-	case DW_OP_reg25:
-	case DW_OP_reg26:
-	case DW_OP_reg27:
-	case DW_OP_reg28:
-	case DW_OP_reg29:
-	case DW_OP_reg30:
-	case DW_OP_reg31:
-	  stack[++stacki] = op - DW_OP_reg0;
-	  if (i < size)
-	    {
-	      if (computed == nullptr)
-		dwarf2_complex_location_expr_complaint ();
-	      else
-		return 0;
-	    }
-	  break;
-
-	case DW_OP_regx:
-	  unsnd = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
-	  i += bytes_read;
-	  stack[++stacki] = unsnd;
-	  if (i < size)
-	    {
-	      if (computed == nullptr)
-		dwarf2_complex_location_expr_complaint ();
-	      else
-		return 0;
-	    }
 	  break;
 
 	case DW_OP_addr:
@@ -21127,37 +21101,7 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu, bool *computed)
 	     global symbols, although the variable's address will be bogus
 	     in the psymtab.  */
 	  if (i < size)
-	    {
-	      if (computed == nullptr)
-		dwarf2_complex_location_expr_complaint ();
-	      else
-		return 0;
-	    }
-	  break;
-
-	case DW_OP_GNU_push_tls_address:
-	case DW_OP_form_tls_address:
-	  /* The top of the stack has the offset from the beginning
-	     of the thread control block at which the variable is located.  */
-	  /* Nothing should follow this operator, so the top of stack would
-	     be returned.  */
-	  /* This is valid for partial global symbols, but the variable's
-	     address will be bogus in the psymtab.  Make it always at least
-	     non-zero to not look as a variable garbage collected by linker
-	     which have DW_OP_addr 0.  */
-	  if (i < size)
-	    {
-	      if (computed == nullptr)
-		dwarf2_complex_location_expr_complaint ();
-	      else
-		return 0;
-	    }
-	  stack[stacki]++;
-	  break;
-
-	case DW_OP_GNU_uninit:
-	  if (computed != nullptr)
-	    return 0;
+	    return false;
 	  break;
 
 	case DW_OP_addrx:
@@ -21169,41 +21113,26 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu, bool *computed)
 	  break;
 
 	default:
-	  if (computed == nullptr)
-	    {
-	      const char *name = get_DW_OP_name (op);
-
-	      if (name)
-		complaint (_("unsupported stack op: '%s'"),
-			   name);
-	      else
-		complaint (_("unsupported stack op: '%02x'"),
-			   op);
-	    }
-
-	  return (stack[stacki]);
+	  return false;
 	}
 
       /* Enforce maximum stack depth of SIZE-1 to avoid writing
 	 outside of the allocated space.  Also enforce minimum>0.  */
       if (stacki >= ARRAY_SIZE (stack) - 1)
 	{
-	  if (computed == nullptr)
-	    complaint (_("location description stack overflow"));
-	  return 0;
+	  complaint (_("location description stack overflow"));
+	  return false;
 	}
 
       if (stacki <= 0)
 	{
-	  if (computed == nullptr)
-	    complaint (_("location description stack underflow"));
-	  return 0;
+	  complaint (_("location description stack underflow"));
+	  return false;
 	}
     }
 
-  if (computed != nullptr)
-    *computed = true;
-  return (stack[stacki]);
+  *result = stack[stacki];
+  return true;
 }
 
 /* memory allocation interface */
