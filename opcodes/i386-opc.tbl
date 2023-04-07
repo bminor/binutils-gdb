@@ -3146,6 +3146,9 @@ xresldtrk, 0xf20f01e9, TSXLDTRK, NoSuf, {}
 ldtilecfg, 0x49/0, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
 sttilecfg, 0x6649/0, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
 
+tcmmimfp16ps, 0x666c, AMX_COMPLEX|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tcmmrlfp16ps, 0x6c, AMX_COMPLEX|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+
 tdpbf16ps, 0xf35c, AMX_BF16|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
 tdpfp16ps, 0xf25c, AMX_FP16|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
 tdpbssd, 0xf25e, AMX_INT8|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }

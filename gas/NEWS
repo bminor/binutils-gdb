@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel AMX-COMPLEX instructions.
+
 * Add SME2 support to the AArch64 port.
 
 * A new .insn directive is recognized by x86 gas.

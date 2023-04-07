@@ -248,6 +248,8 @@ enum
   CpuAMX_BF16,
   /* AMX-FP16 instructions required */
   CpuAMX_FP16,
+  /* AMX-COMPLEX instructions required.  */
+  CpuAMX_COMPLEX,
   /* AMX-TILE instructions required */
   CpuAMX_TILE,
   /* GFNI instructions required */
@@ -432,6 +434,7 @@ typedef union i386_cpu_flags
       unsigned int cpuamx_int8:1;
       unsigned int cpuamx_bf16:1;
       unsigned int cpuamx_fp16:1;
+      unsigned int cpuamx_complex:1;
       unsigned int cpuamx_tile:1;
       unsigned int cpugfni:1;
       unsigned int cpuvaes:1;
