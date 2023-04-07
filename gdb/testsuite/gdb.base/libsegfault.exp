@@ -84,4 +84,7 @@ proc test_libsegfault {} {
     }
 }
 
-test_libsegfault
+save_vars { ::INTERNAL_GDBFLAGS } {
+    set ::INTERNAL_GDBFLAGS [string map {"-q" ""} $::INTERNAL_GDBFLAGS]
+    test_libsegfault
+}

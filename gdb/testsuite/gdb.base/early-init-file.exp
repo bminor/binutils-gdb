@@ -101,7 +101,10 @@ save_vars { env(TERM) } {
     setenv TERM ansi
 
     # Start GDB and confirm that the version string is styled.
-    check_gdb_startup_version_string version
+    save_vars { INTERNAL_GDBFLAGS env(HOME) env(XDG_CONFIG_HOME) } {
+	set INTERNAL_GDBFLAGS [string map {"-q" ""} $INTERNAL_GDBFLAGS]
+	check_gdb_startup_version_string version
+    }
 
     # Create an empty directory we can use as HOME for some of the
     # tests below.  When we set XDG_CONFIG_HOME we still need to point
@@ -120,7 +123,7 @@ save_vars { env(TERM) } {
 
     # Now arrange to use the fake home directory early init file.
     save_vars { INTERNAL_GDBFLAGS env(HOME) env(XDG_CONFIG_HOME) } {
-	set INTERNAL_GDBFLAGS [string map {"-nx" ""} $INTERNAL_GDBFLAGS]
+	set INTERNAL_GDBFLAGS [string map {"-nx" "" "-q" ""} $INTERNAL_GDBFLAGS]
 
 	# Now test GDB when using the HOME directory.
 	set env(HOME) $home_dir
@@ -144,7 +147,7 @@ save_vars { env(TERM) } {
 
     # Now arrange to use the fake home directory startup file.
     save_vars { INTERNAL_GDBFLAGS env(HOME) env(XDG_CONFIG_HOME) } {
-	set INTERNAL_GDBFLAGS [string map {"-nx" ""} $INTERNAL_GDBFLAGS]
+	set INTERNAL_GDBFLAGS [string map {"-nx" "" "-q" ""} $INTERNAL_GDBFLAGS]
 
 	# Now test GDB when using the HOME directory.
 	set env(HOME) $home_dir

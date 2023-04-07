@@ -172,12 +172,16 @@ proc test_fg_execution_pagination_cancel { how } {
     }
 }
 
-if {[probe_can_run_cmdline] > 0} {
-    test_fg_execution_pagination_return
-    if ![target_info exists gdb,nointerrupts] {
-       test_fg_execution_pagination_cancel "ctrl-c"
+save_vars { INTERNAL_GDBFLAGS } {
+    set INTERNAL_GDBFLAGS [string map {"-q" ""} $INTERNAL_GDBFLAGS]
+
+    if {[probe_can_run_cmdline] > 0} {
+	test_fg_execution_pagination_return
+	if ![target_info exists gdb,nointerrupts] {
+	    test_fg_execution_pagination_cancel "ctrl-c"
+	}
+	test_fg_execution_pagination_cancel "quit"
     }
-    test_fg_execution_pagination_cancel "quit"
 }
 
 set GDBFLAGS $saved_gdbflags

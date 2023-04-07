@@ -459,7 +459,12 @@ proc test_disassembler_error_handling { } {
 # startup process).
 proc test_startup_version_string { } {
     gdb_exit
-    gdb_spawn
+
+    save_vars { ::INTERNAL_GDBFLAGS } {
+	set ::INTERNAL_GDBFLAGS [string map {"-q" ""} $::INTERNAL_GDBFLAGS]
+
+	gdb_spawn
+    }
 
     # Deliberate use of base STYLE proc here as the style of the
     # startup version string can't (currently) be controlled.

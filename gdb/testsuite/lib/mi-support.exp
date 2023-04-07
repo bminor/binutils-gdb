@@ -265,6 +265,10 @@ proc default_mi_gdb_start { { flags {} } } {
 	    # We have a new format mi startup prompt.
 	    verbose "GDB initialized."
 	}
+	-re "^(=\[^\r\n\]*\r\n)*$mi_gdb_prompt$" {
+	    # Output with -q.
+	    verbose "GDB initialized."
+	}
 	-re ".*unrecognized option.*for a complete list of options." {
 	    untested "skip mi tests (not compiled with mi support)."
 	    remote_close host

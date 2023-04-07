@@ -165,4 +165,7 @@ proc test_with_self { } {
     return 0
 }
 
-do_self_tests captured_main test_with_self
+save_vars { INTERNAL_GDBFLAGS } {
+    set INTERNAL_GDBFLAGS [string map {"-q" ""} $INTERNAL_GDBFLAGS]
+    do_self_tests captured_main test_with_self
+}

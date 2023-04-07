@@ -216,6 +216,7 @@ if ![info exists INTERNAL_GDBFLAGS] {
 	[join [list \
 		   "-nw" \
 		   "-nx" \
+		   "-q" \
 		   {-iex "set height 0"} \
 		   {-iex "set width 0"}]]
 
@@ -2300,6 +2301,14 @@ proc default_gdb_start { } {
 	    # default_gdb_init), but for at least one test we turn
 	    # bracketed paste mode back on, and then start GDB.  In
 	    # that case, this case is hit.
+	    verbose "GDB initialized."
+	}
+	-re "^$gdb_prompt $" {
+	    # Output with -q.
+	    verbose "GDB initialized."
+	}
+	-re "^\033\\\[.2004h$gdb_prompt $" {
+	    # Output with -q, and bracketed paste mode enabled, see above.
 	    verbose "GDB initialized."
 	}
 	-re "$gdb_prompt $"	{
