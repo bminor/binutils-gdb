@@ -47,3 +47,4 @@ done:
 	pushl $0
 	call exit
 	hlt
+	.section	.note.GNU-stack,"",@progbits

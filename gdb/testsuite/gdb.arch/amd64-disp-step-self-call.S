@@ -47,3 +47,4 @@ done:
 	mov $0,%rdi
 	call exit
 	hlt
+	.section	.note.GNU-stack,"",@progbits
