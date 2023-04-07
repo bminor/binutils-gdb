@@ -39826,9 +39826,9 @@ make program.  Other variants of @code{make} will not work.
 The following libraries are mandatory for building @value{GDBN}.  The
 @file{configure} script searches for each of these libraries in
 several standard locations; if some library is installed in an unusual
-place, you can use the @file{configure} either the option
-@option{--with-@var{lib}} to specify its installation directory, or
-two separate options @option{---with-@var{library}-include} (to
+place, you can use either the @option{--with-@var{lib}}
+@file{configure} option to specify its installation directory, or
+the two separate options @option{---with-@var{library}-include} (to
 specify the location of its header files) and
 @option{--with-@var{library}-lib} (to specify the location of its
 libraries).  For example, for the GMP library, the 3 options are
@@ -39847,7 +39847,8 @@ arithmetics.  The latest version of GMP is available from
 @item MPFR (The GNU Multiple-precision floating-point library)
 @value{GDBN} uses MPFR to emulate the target floating-point
 arithmetics during expression evaluation, if the target uses different
-floating-point formats than the host.
+floating-point formats than the host.  The latest version of MPFR is
+available from @url{http://www.mpfr.org}.
 @end table
 
 @end table
