@@ -442,7 +442,7 @@ private:
   vec_type m_vector;
 
   /* A future that tracks when the 'index_write' method is done.  */
-  std::future<void> m_write_future;
+  gdb::future<void> m_write_future;
 };
 
 #endif /* GDB_DWARF2_COOKED_INDEX_H */
