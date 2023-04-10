@@ -679,9 +679,7 @@ static int
 frob_address (struct objfile *objfile, CORE_ADDR pc,
 	      unrelocated_addr *unrel_addr)
 {
-  struct obj_section *iter;
-
-  ALL_OBJFILE_OSECTIONS (objfile, iter)
+  for (obj_section *iter : objfile->sections ())
     {
       if (pc >= iter->addr () && pc < iter->endaddr ())
 	{

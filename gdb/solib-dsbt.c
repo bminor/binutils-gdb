@@ -802,7 +802,6 @@ dsbt_relocate_main_executable (void)
 {
   struct int_elf32_dsbt_loadmap *ldm;
   int changed;
-  struct obj_section *osect;
   struct dsbt_info *info = get_dsbt_info ();
 
   dsbt_get_initial_loadmaps ();
@@ -816,7 +815,7 @@ dsbt_relocate_main_executable (void)
   section_offsets new_offsets (objf->section_offsets.size ());
   changed = 0;
 
-  ALL_OBJFILE_OSECTIONS (objf, osect)
+  for (obj_section *osect : objf->sections ())
     {
       CORE_ADDR orig_addr, addr, offset;
       int osect_idx;

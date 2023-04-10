@@ -541,41 +541,38 @@ xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 
   if (faddr_sect)
     {
-      struct obj_section *osect;
-
       /* Return faddr if it's already a pointer to a jump table entry.  */
       if (!strcmp (faddr_sect->the_bfd_section->name, ".plt"))
 	return faddr;
 
-      ALL_OBJFILE_OSECTIONS (faddr_sect->objfile, osect)
-      {
-	if (!strcmp (osect->the_bfd_section->name, ".plt"))
-	  break;
-      }
-
-      if (osect < faddr_sect->objfile->sections_end)
+      for (obj_section *osect : faddr_sect->objfile->sections ())
 	{
-	  CORE_ADDR addr, endaddr;
-
-	  addr = osect->addr ();
-	  endaddr = osect->endaddr ();
-
-	  for (; addr < endaddr; addr += 2 * xstormy16_inst_size)
+	  if (!strcmp (osect->the_bfd_section->name, ".plt"))
 	    {
-	      LONGEST inst, inst2, faddr2;
-	      gdb_byte buf[2 * xstormy16_inst_size];
+	      CORE_ADDR addr, endaddr;
 
-	      if (target_read_memory (addr, buf, sizeof buf))
-		return 0;
-	      inst = extract_unsigned_integer (buf,
-					       xstormy16_inst_size,
-					       byte_order);
-	      inst2 = extract_unsigned_integer (buf + xstormy16_inst_size,
-						xstormy16_inst_size,
-						byte_order);
-	      faddr2 = inst2 << 8 | (inst & 0xff);
-	      if (faddr == faddr2)
-		return addr;
+	      addr = osect->addr ();
+	      endaddr = osect->endaddr ();
+
+	      for (; addr < endaddr; addr += 2 * xstormy16_inst_size)
+		{
+		  LONGEST inst, inst2, faddr2;
+		  gdb_byte buf[2 * xstormy16_inst_size];
+
+		  if (target_read_memory (addr, buf, sizeof buf))
+		    return 0;
+		  inst = extract_unsigned_integer (buf,
+						   xstormy16_inst_size,
+						   byte_order);
+		  inst2 = extract_unsigned_integer (buf + xstormy16_inst_size,
+						    xstormy16_inst_size,
+						    byte_order);
+		  faddr2 = inst2 << 8 | (inst & 0xff);
+		  if (faddr == faddr2)
+		    return addr;
+		}
+
+	      break;
 	    }
 	}
     }

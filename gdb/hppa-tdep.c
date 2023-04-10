@@ -910,7 +910,7 @@ static CORE_ADDR
 hppa64_convert_code_addr_to_fptr (struct gdbarch *gdbarch, CORE_ADDR code)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct obj_section *sec, *opd;
+  struct obj_section *sec;
 
   sec = find_pc_section (code);
 
@@ -921,25 +921,24 @@ hppa64_convert_code_addr_to_fptr (struct gdbarch *gdbarch, CORE_ADDR code)
   if (!(sec->the_bfd_section->flags & SEC_CODE))
     return code;
 
-  ALL_OBJFILE_OSECTIONS (sec->objfile, opd)
+  for (obj_section *opd : sec->objfile->sections ())
     {
       if (strcmp (opd->the_bfd_section->name, ".opd") == 0)
-	break;
-    }
-
-  if (opd < sec->objfile->sections_end)
-    {
-      for (CORE_ADDR addr = opd->addr (); addr < opd->endaddr (); addr += 2 * 8)
 	{
-	  ULONGEST opdaddr;
-	  gdb_byte tmp[8];
+	  for (CORE_ADDR addr = opd->addr ();
+	       addr < opd->endaddr ();
+	       addr += 2 * 8)
+	    {
+	      ULONGEST opdaddr;
+	      gdb_byte tmp[8];
 
-	  if (target_read_memory (addr, tmp, sizeof (tmp)))
-	      break;
-	  opdaddr = extract_unsigned_integer (tmp, sizeof (tmp), byte_order);
+	      if (target_read_memory (addr, tmp, sizeof (tmp)))
+		break;
+	      opdaddr = extract_unsigned_integer (tmp, sizeof (tmp), byte_order);
 
-	  if (opdaddr == code)
-	    return addr - 16;
+	      if (opdaddr == code)
+		return addr - 16;
+	    }
 	}
     }
 

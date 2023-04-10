@@ -1770,9 +1770,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 	 this reason, we still attempt a lookup by name prior to doing
 	 a search of the section table.  */
 
-      struct obj_section *s;
-
-      ALL_OBJFILE_OSECTIONS (objfile, s)
+      for (obj_section *s : objfile->sections ())
 	{
 	  if ((bfd_section_flags (s->the_bfd_section) & SEC_ALLOC) == 0)
 	    continue;

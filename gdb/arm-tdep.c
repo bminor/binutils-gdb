@@ -2491,9 +2491,7 @@ static const registry<bfd>::key<arm_exidx_data> arm_exidx_data_key;
 static struct obj_section *
 arm_obj_section_from_vma (struct objfile *objfile, bfd_vma vma)
 {
-  struct obj_section *osect;
-
-  ALL_OBJFILE_OSECTIONS (objfile, osect)
+  for (obj_section *osect : objfile->sections ())
     if (bfd_section_flags (osect->the_bfd_section) & SEC_ALLOC)
       {
 	bfd_vma start, size;

@@ -657,8 +657,7 @@ objfile_relocate1 (struct objfile *objfile,
   get_objfile_pspace_data (objfile->pspace)->section_map_dirty = 1;
 
   /* Update the table in exec_ops, used to read memory.  */
-  struct obj_section *s;
-  ALL_OBJFILE_OSECTIONS (objfile, s)
+  for (obj_section *s : objfile->sections ())
     {
       int idx = s - objfile->sections_start;
 
@@ -876,9 +875,7 @@ sort_cmp (const struct obj_section *sect1, const obj_section *sect2)
 	     second case shouldn't occur during normal use, but std::sort
 	     does check that '!(a < a)' when compiled in debug mode.  */
 
-	  const struct obj_section *osect;
-
-	  ALL_OBJFILE_OSECTIONS (objfile1, osect)
+	  for (const obj_section *osect : objfile1->sections ())
 	    if (osect == sect2)
 	      return false;
 	    else if (osect == sect1)
@@ -1071,7 +1068,7 @@ update_section_map (struct program_space *pspace,
 {
   struct objfile_pspace_info *pspace_info;
   int alloc_size, map_size, i;
-  struct obj_section *s, **map;
+  struct obj_section **map;
 
   pspace_info = get_objfile_pspace_data (pspace);
   gdb_assert (pspace_info->section_map_dirty != 0
@@ -1082,7 +1079,7 @@ update_section_map (struct program_space *pspace,
 
   alloc_size = 0;
   for (objfile *objfile : pspace->objfiles ())
-    ALL_OBJFILE_OSECTIONS (objfile, s)
+    for (obj_section *s : objfile->sections ())
       if (insert_section_p (objfile->obfd.get (), s->the_bfd_section))
 	alloc_size += 1;
 
@@ -1098,7 +1095,7 @@ update_section_map (struct program_space *pspace,
 
   i = 0;
   for (objfile *objfile : pspace->objfiles ())
-    ALL_OBJFILE_OSECTIONS (objfile, s)
+    for (obj_section *s : objfile->sections ())
       if (insert_section_p (objfile->obfd.get (), s->the_bfd_section))
 	map[i++] = s;
 
@@ -1214,12 +1211,10 @@ inhibit_section_map_updates (struct program_space *pspace)
 bool
 is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
 {
-  struct obj_section *osect;
-
   if (objfile == NULL)
     return false;
 
-  ALL_OBJFILE_OSECTIONS (objfile, osect)
+  for (obj_section *osect : objfile->sections ())
     {
       if (section_is_overlay (osect) && !section_is_mapped (osect))
 	continue;

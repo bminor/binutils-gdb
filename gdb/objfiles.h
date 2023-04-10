@@ -127,14 +127,6 @@ struct entry_info
   unsigned initialized : 1;
 };
 
-#define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
-  for (osect = objfile->sections_start; osect < objfile->sections_end; osect++) \
-    if (osect->the_bfd_section == NULL)					\
-      {									\
-	/* Nothing.  */							\
-      }									\
-    else
-
 #define SECT_OFF_DATA(objfile) \
      ((objfile->sect_index_data == -1) \
       ? (internal_error (_("sect_index_data not initialized")), -1)	\
@@ -379,6 +371,40 @@ private:
 
 typedef iterator_range<separate_debug_iterator> separate_debug_range;
 
+/* Sections in an objfile.  The section offsets are stored in the
+   OBJFILE.  */
+
+struct obj_section
+{
+  /* Relocation offset applied to the section.  */
+  CORE_ADDR offset () const;
+
+  /* Set the relocation offset applied to the section.  */
+  void set_offset (CORE_ADDR offset);
+
+  /* The memory address of the section (vma + offset).  */
+  CORE_ADDR addr () const
+  {
+    return bfd_section_vma (this->the_bfd_section) + this->offset ();
+  }
+
+  /* The one-passed-the-end memory address of the section
+     (vma + size + offset).  */
+  CORE_ADDR endaddr () const
+  {
+    return this->addr () + bfd_section_size (this->the_bfd_section);
+  }
+
+  /* BFD section pointer */
+  struct bfd_section *the_bfd_section;
+
+  /* Objfile this section is part of.  */
+  struct objfile *objfile;
+
+  /* True if this "overlay section" is mapped into an "overlay region".  */
+  int ovly_mapped;
+};
+
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
    The main symbol file, symfile_objfile, set by the symbol-file command,
@@ -609,6 +635,68 @@ public:
     this->section_offsets[idx] = offset;
   }
 
+  class section_iterator
+  {
+  public:
+    section_iterator (const section_iterator &) = default;
+    section_iterator (section_iterator &&) = default;
+    section_iterator &operator= (const section_iterator &) = default;
+    section_iterator &operator= (section_iterator &&) = default;
+
+    typedef section_iterator self_type;
+    typedef obj_section *value_type;
+
+    value_type operator* ()
+    { return m_iter; }
+
+    section_iterator &operator++ ()
+    {
+      ++m_iter;
+      skip_null ();
+      return *this;
+    }
+
+    bool operator== (const section_iterator &other) const
+    { return m_iter == other.m_iter && m_end == other.m_end; }
+
+    bool operator!= (const section_iterator &other) const
+    { return !(*this == other); }
+
+  private:
+
+    friend class objfile;
+
+    section_iterator (obj_section *iter, obj_section *end)
+      : m_iter (iter),
+	m_end (end)
+    {
+      skip_null ();
+    }
+
+    void skip_null ()
+    {
+      while (m_iter < m_end && m_iter->the_bfd_section == nullptr)
+	++m_iter;
+    }
+
+    value_type m_iter;
+    value_type m_end;
+  };
+
+  iterator_range<section_iterator> sections ()
+  {
+    return (iterator_range<section_iterator>
+	    (section_iterator (sections_start, sections_end),
+	     section_iterator (sections_end, sections_end)));
+  }
+
+  iterator_range<section_iterator> sections () const
+  {
+    return (iterator_range<section_iterator>
+	    (section_iterator (sections_start, sections_end),
+	     section_iterator (sections_end, sections_end)));
+  }
+
 private:
 
   /* Ensure that partial symbols have been read and return the "quick" (aka
@@ -800,46 +888,19 @@ struct objfile_deleter
 
 typedef std::unique_ptr<objfile, objfile_deleter> objfile_up;
 
-
-/* Sections in an objfile.  The section offsets are stored in the
-   OBJFILE.  */
-
-struct obj_section
+/* Relocation offset applied to the section.  */
+inline CORE_ADDR
+obj_section::offset () const
 {
-  /* Relocation offset applied to the section.  */
-  CORE_ADDR offset () const
-  {
-    return this->objfile->section_offset (this->the_bfd_section);
-  }
+  return this->objfile->section_offset (this->the_bfd_section);
+}
 
-  /* Set the relocation offset applied to the section.  */
-  void set_offset (CORE_ADDR offset)
-  {
-    this->objfile->set_section_offset (this->the_bfd_section, offset);
-  }
-
-  /* The memory address of the section (vma + offset).  */
-  CORE_ADDR addr () const
-  {
-    return bfd_section_vma (this->the_bfd_section) + this->offset ();
-  }
-
-  /* The one-passed-the-end memory address of the section
-     (vma + size + offset).  */
-  CORE_ADDR endaddr () const
-  {
-    return this->addr () + bfd_section_size (this->the_bfd_section);
-  }
-
-  /* BFD section pointer */
-  struct bfd_section *the_bfd_section;
-
-  /* Objfile this section is part of.  */
-  struct objfile *objfile;
-
-  /* True if this "overlay section" is mapped into an "overlay region".  */
-  int ovly_mapped;
-};
+/* Set the relocation offset applied to the section.  */
+inline void
+obj_section::set_offset (CORE_ADDR offset)
+{
+  this->objfile->set_section_offset (this->the_bfd_section, offset);
+}
 
 /* Declarations for functions defined in objfiles.c */
 

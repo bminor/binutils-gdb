@@ -360,49 +360,47 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
   faddr_sect = find_pc_section (faddr);
   if (faddr_sect != NULL)
     {
-      struct obj_section *osect;
-
-      ALL_OBJFILE_OSECTIONS (faddr_sect->objfile, osect)
+      for (obj_section *osect : faddr_sect->objfile->sections ())
 	{
 	  if (strcmp (osect->the_bfd_section->name, ".dynamic") == 0)
-	    break;
-	}
-
-      if (osect < faddr_sect->objfile->sections_end)
-	{
-	  CORE_ADDR addr, endaddr;
-
-	  addr = osect->addr ();
-	  endaddr = osect->endaddr ();
-
-	  while (addr < endaddr)
 	    {
-	      int status;
-	      LONGEST tag;
-	      gdb_byte buf[4];
+	      CORE_ADDR addr, endaddr;
 
-	      status = target_read_memory (addr, buf, sizeof (buf));
-	      if (status != 0)
-		break;
-	      tag = extract_signed_integer (buf, byte_order);
+	      addr = osect->addr ();
+	      endaddr = osect->endaddr ();
 
-	      if (tag == DT_PLTGOT)
+	      while (addr < endaddr)
 		{
-		  CORE_ADDR global_pointer;
+		  int status;
+		  LONGEST tag;
+		  gdb_byte buf[4];
 
-		  status = target_read_memory (addr + 4, buf, sizeof (buf));
+		  status = target_read_memory (addr, buf, sizeof (buf));
 		  if (status != 0)
 		    break;
-		  global_pointer = extract_unsigned_integer (buf, sizeof (buf),
-							     byte_order);
-		  /* The payoff...  */
-		  return global_pointer;
+		  tag = extract_signed_integer (buf, byte_order);
+
+		  if (tag == DT_PLTGOT)
+		    {
+		      CORE_ADDR global_pointer;
+
+		      status = target_read_memory (addr + 4, buf,
+						   sizeof (buf));
+		      if (status != 0)
+			break;
+		      global_pointer
+			= extract_unsigned_integer (buf, sizeof (buf),
+						    byte_order);
+		      /* The payoff...  */
+		      return global_pointer;
+		    }
+
+		  if (tag == DT_NULL)
+		    break;
+
+		  addr += 8;
 		}
-
-	      if (tag == DT_NULL)
-		break;
-
-	      addr += 8;
+	      break;
 	    }
 	}
     }

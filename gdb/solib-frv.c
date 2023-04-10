@@ -727,7 +727,6 @@ frv_relocate_main_executable (void)
   CORE_ADDR exec_addr, interp_addr;
   struct int_elf32_fdpic_loadmap *ldm;
   int changed;
-  struct obj_section *osect;
 
   status = frv_fdpic_loadmap_addresses (target_gdbarch (),
 					&interp_addr, &exec_addr);
@@ -751,7 +750,7 @@ frv_relocate_main_executable (void)
   section_offsets new_offsets (objf->section_offsets.size ());
   changed = 0;
 
-  ALL_OBJFILE_OSECTIONS (objf, osect)
+  for (obj_section *osect : objf->sections ())
     {
       CORE_ADDR orig_addr, addr, offset;
       int osect_idx;

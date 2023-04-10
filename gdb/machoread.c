@@ -893,7 +893,6 @@ macho_symfile_offsets (struct objfile *objfile,
 		       const section_addr_info &addrs)
 {
   unsigned int i;
-  struct obj_section *osect;
 
   /* Allocate section_offsets.  */
   objfile->section_offsets.assign (gdb_bfd_count_sections (objfile->obfd.get ()), 0);
@@ -909,7 +908,7 @@ macho_symfile_offsets (struct objfile *objfile,
 
   for (i = 0; i < addrs.size (); i++)
     {
-      ALL_OBJFILE_OSECTIONS (objfile, osect)
+      for (obj_section *osect : objfile->sections ())
 	{
 	  const char *bfd_sect_name = osect->the_bfd_section->name;
 
@@ -923,7 +922,7 @@ macho_symfile_offsets (struct objfile *objfile,
 
   objfile->sect_index_text = 0;
 
-  ALL_OBJFILE_OSECTIONS (objfile, osect)
+  for (obj_section *osect : objfile->sections ())
     {
       const char *bfd_sect_name = osect->the_bfd_section->name;
       int sect_index = osect - objfile->sections_start;
