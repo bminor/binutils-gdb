@@ -2890,7 +2890,8 @@ xcoff_symfile_offsets (struct objfile *objfile,
   if (objfile->section_offsets.empty ())
     return; /* Is that even possible?  Better safe than sorry.  */
 
-  first_section_name = bfd_section_name (objfile->sections[0].the_bfd_section);
+  first_section_name
+    = bfd_section_name (objfile->sections_start[0].the_bfd_section);
 
   if (objfile->sect_index_text == 0
       && strcmp (first_section_name, ".text") != 0)

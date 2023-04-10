@@ -212,7 +212,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 			bfd_section_name (section->the_bfd_section));
 	  else
 	    gdb_printf (outfile, " spurious section %ld",
-			(long) (section - objfile->sections));
+			(long) (section - objfile->sections_start));
 	}
       if (msymbol->demangled_name () != NULL)
 	{

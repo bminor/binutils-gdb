@@ -822,7 +822,7 @@ dsbt_relocate_main_executable (void)
       int osect_idx;
       int seg;
 
-      osect_idx = osect - objf->sections;
+      osect_idx = osect - objf->sections_start;
 
       /* Current address of section.  */
       addr = osect->addr ();

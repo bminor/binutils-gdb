@@ -128,7 +128,7 @@ struct entry_info
 };
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
-  for (osect = objfile->sections; osect < objfile->sections_end; osect++) \
+  for (osect = objfile->sections_start; osect < objfile->sections_end; osect++) \
     if (osect->the_bfd_section == NULL)					\
       {									\
 	/* Nothing.  */							\
@@ -713,16 +713,16 @@ public:
   int sect_index_bss = -1;
   int sect_index_rodata = -1;
 
-  /* These pointers are used to locate the section table, which
-     among other things, is used to map pc addresses into sections.
-     SECTIONS points to the first entry in the table, and
-     SECTIONS_END points to the first location past the last entry
-     in the table.  The table is stored on the objfile_obstack.  The
-     sections are indexed by the BFD section index; but the
-     structure data is only valid for certain sections
-     (e.g. non-empty, SEC_ALLOC).  */
+  /* These pointers are used to locate the section table, which among
+     other things, is used to map pc addresses into sections.
+     SECTIONS_START points to the first entry in the table, and
+     SECTIONS_END points to the first location past the last entry in
+     the table.  The table is stored on the objfile_obstack.  The
+     sections are indexed by the BFD section index; but the structure
+     data is only valid for certain sections (e.g. non-empty,
+     SEC_ALLOC).  */
 
-  struct obj_section *sections = nullptr;
+  struct obj_section *sections_start = nullptr;
   struct obj_section *sections_end = nullptr;
 
   /* GDB allows to have debug symbols in separate object files.  This is

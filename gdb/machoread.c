@@ -926,7 +926,7 @@ macho_symfile_offsets (struct objfile *objfile,
   ALL_OBJFILE_OSECTIONS (objfile, osect)
     {
       const char *bfd_sect_name = osect->the_bfd_section->name;
-      int sect_index = osect - objfile->sections;;
+      int sect_index = osect - objfile->sections_start;
 
       if (startswith (bfd_sect_name, "LC_SEGMENT."))
 	bfd_sect_name += 11;

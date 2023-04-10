@@ -331,11 +331,11 @@ maint_obj_section_from_bfd_section (bfd *abfd,
 				    asection *asection,
 				    objfile *ofile)
 {
-  if (ofile->sections == nullptr)
+  if (ofile->sections_start == nullptr)
     return nullptr;
 
   obj_section *osect
-    = &ofile->sections[gdb_bfd_section_index (abfd, asection)];
+    = &ofile->sections_start[gdb_bfd_section_index (abfd, asection)];
 
   if (osect >= ofile->sections_end)
     return nullptr;
@@ -375,7 +375,7 @@ maint_print_all_sections (const char *header, bfd *abfd, objfile *objfile,
 
       if (objfile != nullptr)
 	{
-	  gdb_assert (objfile->sections != nullptr);
+	  gdb_assert (objfile->sections_start != nullptr);
 	  osect
 	    = maint_obj_section_from_bfd_section (abfd, sect, objfile);
 	  if (osect->the_bfd_section == nullptr)

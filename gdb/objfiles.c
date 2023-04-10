@@ -264,7 +264,7 @@ add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 	return;
     }
 
-  section = &objfile->sections[gdb_bfd_section_index (abfd, asect)];
+  section = &objfile->sections_start[gdb_bfd_section_index (abfd, asect)];
   section->objfile = objfile;
   section->the_bfd_section = asect;
   section->ovly_mapped = 0;
@@ -280,10 +280,10 @@ build_objfile_section_table (struct objfile *objfile)
 {
   int count = gdb_bfd_count_sections (objfile->obfd.get ());
 
-  objfile->sections = OBSTACK_CALLOC (&objfile->objfile_obstack,
-				      count,
-				      struct obj_section);
-  objfile->sections_end = (objfile->sections + count);
+  objfile->sections_start = OBSTACK_CALLOC (&objfile->objfile_obstack,
+					    count,
+					    struct obj_section);
+  objfile->sections_end = (objfile->sections_start + count);
   for (asection *sect : gdb_bfd_sections (objfile->obfd))
     add_to_objfile_sections (objfile->obfd.get (), sect, objfile, 0);
 
@@ -660,7 +660,7 @@ objfile_relocate1 (struct objfile *objfile,
   struct obj_section *s;
   ALL_OBJFILE_OSECTIONS (objfile, s)
     {
-      int idx = s - objfile->sections;
+      int idx = s - objfile->sections_start;
 
       exec_set_section_address (bfd_get_filename (objfile->obfd.get ()), idx,
 				s->addr ());
