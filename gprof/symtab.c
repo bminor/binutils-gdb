@@ -147,7 +147,7 @@ symtab_finalize (Sym_Table *tab)
 	}
     }
 
-  if (tab->len > 0 && dst[-1].end_addr == 0)
+  if (tab->len > 0 && dst > tab->base && dst[-1].end_addr == 0)
     dst[-1].end_addr
       = core_text_sect->vma + bfd_section_size (core_text_sect) - 1;
 

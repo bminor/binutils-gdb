@@ -1,3 +1,9 @@
+2023-04-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 30324
+	* symtab.c (symtab_finalize): Only change the end address if dst
+	has been updated.
+
 2023-02-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/ms.po: Updated Malayasian translation.
