@@ -2676,7 +2676,9 @@ init_nfp6000_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 
   memset (mecfg_orders, -1, sizeof (mecfg_orders));
 
-  if (!dinfo->section)
+  if (dinfo->section == NULL
+      || dinfo->section->owner == NULL
+      || elf_elfsections (dinfo->section->owner) == NULL)
     /* No section info, will use default values.  */
     return true;
 

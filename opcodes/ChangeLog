@@ -1,3 +1,9 @@
+2023-04-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 30310
+	* nfp-dis.c (init_nfp6000_priv): Check that the output section
+	exists.
+
 2023-03-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 30231
