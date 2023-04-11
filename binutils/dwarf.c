@@ -4997,6 +4997,12 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      if (n_directories == 0)
 		directory_table = NULL;
+	      else if (n_directories > section->size)
+		{
+		  warn (_("number of directories (0x%x) exceeds size of section %s\n"),
+			n_directories, section->name);
+		  return 0;
+		}
 	      else
 		directory_table = (char **)
 		  xcalloc (n_directories, sizeof (unsigned char *));
@@ -5055,6 +5061,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	      if (do_checks && format_count > 5)
 		warn (_("Unexpectedly large number of columns in the file name table (%u)\n"),
 		      format_count);
+
 	      format_start = data;
 	      for (formati = 0; formati < format_count; formati++)
 		{
@@ -5071,6 +5078,12 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      if (n_files == 0)
 		file_table = NULL;
+	      else if (n_files > section->size)
+		{
+		  warn (_("number of files (0x%x) exceeds size of section %s\n"),
+			n_files, section->name);
+		  return 0;
+		}
 	      else
 		file_table = (File_Entry *) xcalloc (n_files,
 						     sizeof (File_Entry));
