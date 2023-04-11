@@ -1,5 +1,9 @@
 2023-04-11  Nick Clifton  <nickc@redhat.com>
 
+	PR 30312
+	* dwarf.c (prealloc_cu_tu_list): Always allocate at least one
+	entry.
+
 	PR 30311
 	* readelf.c (uncompress_section_contents): Check for a
 	suspiciously large uncompressed size.
