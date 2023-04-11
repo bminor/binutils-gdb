@@ -196,23 +196,15 @@ _bfd_elf_swap_versym_out (bfd *abfd,
 unsigned long
 bfd_elf_hash (const char *namearg)
 {
-  const unsigned char *name = (const unsigned char *) namearg;
-  unsigned long h = 0;
-  unsigned long g;
-  int ch;
+  uint32_t h = 0;
 
-  while ((ch = *name++) != '\0')
+  for (const unsigned char *name = (const unsigned char *) namearg;
+       *name; name++)
     {
-      h = (h << 4) + ch;
-      if ((g = (h & 0xf0000000)) != 0)
-	{
-	  h ^= g >> 24;
-	  /* The ELF ABI says `h &= ~g', but this is equivalent in
-	     this case and on some machines one insn instead of two.  */
-	  h ^= g;
-	}
+      h = (h << 4) + *name;
+      h ^= (h >> 24) & 0xf0;
     }
-  return h & 0xffffffff;
+  return h & 0x0fffffff;
 }
 
 /* DT_GNU_HASH hash function.  Do not change this function; you will
@@ -221,13 +213,12 @@ bfd_elf_hash (const char *namearg)
 unsigned long
 bfd_elf_gnu_hash (const char *namearg)
 {
-  const unsigned char *name = (const unsigned char *) namearg;
-  unsigned long h = 5381;
-  unsigned char ch;
+  uint32_t h = 5381;
 
-  while ((ch = *name++) != '\0')
-    h = (h << 5) + h + ch;
-  return h & 0xffffffff;
+  for (const unsigned char *name = (const unsigned char *) namearg;
+       *name; name++)
+    h = (h << 5) + h + *name;
+  return h;
 }
 
 /* Create a tdata field OBJECT_SIZE bytes in length, zeroed out and with
