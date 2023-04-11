@@ -15268,15 +15268,30 @@ get_section_contents (Elf_Internal_Shdr * section, Filedata * filedata)
 /* Uncompresses a section that was compressed using zlib/zstd, in place.  */
 
 static bool
-uncompress_section_contents (bool is_zstd, unsigned char **buffer,
-			     uint64_t uncompressed_size, uint64_t *size)
+uncompress_section_contents (bool              is_zstd,
+			     unsigned char **  buffer,
+			     uint64_t          uncompressed_size,
+			     uint64_t *        size,
+			     uint64_t          file_size)
 {
   uint64_t compressed_size = *size;
   unsigned char *compressed_buffer = *buffer;
-  unsigned char *uncompressed_buffer = xmalloc (uncompressed_size);
+  unsigned char *uncompressed_buffer = NULL;
   z_stream strm;
   int rc;
 
+  /* Similar to _bfd_section_size_insane() in the BFD library we expect an
+     upper limit of ~10x compression.  Any compression larger than that is
+     thought to be due to fuzzing of the compression header.  */
+  if (uncompressed_size > file_size * 10)
+    {
+      error (_("Uncompressed section size is suspiciously large: 0x%" PRIu64 "\n"),
+	       uncompressed_size);
+      goto fail;
+    }
+
+  uncompressed_buffer = xmalloc (uncompressed_size);
+  
   if (is_zstd)
     {
 #ifdef HAVE_ZSTD
@@ -15406,7 +15421,7 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
       if (uncompressed_size)
 	{
 	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
-					   &new_size))
+					   &new_size, filedata->file_size))
 	    num_bytes = new_size;
 	  else
 	    {
@@ -15629,7 +15644,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
       if (uncompressed_size)
 	{
 	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
-					   &new_size))
+					   &new_size, filedata->file_size))
 	    {
 	      section_size = new_size;
 	    }
@@ -16061,7 +16076,7 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
       if (uncompressed_size)
 	{
 	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
-					   &size))
+					   &size, filedata->file_size))
 	    {
 	      /* Free the compressed buffer, update the section buffer
 		 and the section size if uncompress is successful.  */
