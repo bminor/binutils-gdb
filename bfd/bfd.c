@@ -181,12 +181,6 @@ CODE_FRAGMENT
 .  {* Compress sections in this BFD with SHF_COMPRESSED zstd.  *}
 .#define BFD_COMPRESS_ZSTD      0x400000
 .
-.  {* Flags bits to be saved in bfd_preserve_save.  *}
-.#define BFD_FLAGS_SAVED \
-.  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
-.   | BFD_PLUGIN | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON \
-.   | BFD_USE_ELF_STT_COMMON | BFD_COMPRESS_ZSTD)
-.
 .  {* Flags bits which are for BFD use only.  *}
 .#define BFD_FLAGS_FOR_BFD_USE_MASK \
 .  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \

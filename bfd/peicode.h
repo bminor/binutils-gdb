@@ -1158,6 +1158,17 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   return false;
 }
 
+/* Cleanup function, returned from check_format hook.  */
+
+static void
+pe_ILF_cleanup (bfd *abfd)
+{
+  struct bfd_in_memory *bim = abfd->iostream;
+  free (bim->buffer);
+  free (bim);
+  abfd->iostream = NULL;
+}
+
 /* We have detected an Import Library Format archive element.
    Decode the element and return the appropriate target.  */
 
@@ -1331,7 +1342,7 @@ pe_ILF_object_p (bfd * abfd)
       return NULL;
     }
 
-  return _bfd_no_cleanup;
+  return pe_ILF_cleanup;
 }
 
 static void

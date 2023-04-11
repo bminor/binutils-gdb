@@ -266,10 +266,7 @@ bfd_cache_lookup_worker (bfd *abfd, enum cache_flag flag)
 	   && !(flag & CACHE_NO_SEEK_ERROR))
     bfd_set_error (bfd_error_system_call);
   else
-    {
-      abfd->flags &= ~BFD_CLOSED_BY_CACHE;
-      return (FILE *) abfd->iostream;
-    }
+    return (FILE *) abfd->iostream;
 
   /* xgettext:c-format */
   _bfd_error_handler (_("reopening %pB: %s"),
@@ -506,6 +503,7 @@ bfd_cache_init (bfd *abfd)
     }
   abfd->iovec = &cache_iovec;
   insert (abfd);
+  abfd->flags &= ~BFD_CLOSED_BY_CACHE;
   ++open_files;
   return true;
 }
@@ -528,6 +526,7 @@ DESCRIPTION
 bool
 bfd_cache_close (bfd *abfd)
 {
+  /* Don't remove this test.  bfd_reinit depends on it.  */
   if (abfd->iovec != &cache_iovec)
     return true;
 

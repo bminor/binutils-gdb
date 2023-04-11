@@ -99,6 +99,8 @@ struct bfd_preserve
   void *marker;
   void *tdata;
   flagword flags;
+  const struct bfd_iovec *iovec;
+  void *iostream;
   const struct bfd_arch_info *arch_info;
   struct bfd_section *sections;
   struct bfd_section *section_last;
@@ -125,6 +127,8 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve,
   preserve->tdata = abfd->tdata.any;
   preserve->arch_info = abfd->arch_info;
   preserve->flags = abfd->flags;
+  preserve->iovec = abfd->iovec;
+  preserve->iostream = abfd->iostream;
   preserve->sections = abfd->sections;
   preserve->section_last = abfd->section_last;
   preserve->section_count = abfd->section_count;
@@ -143,14 +147,24 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve,
 /* Clear out a subset of BFD state.  */
 
 static void
-bfd_reinit (bfd *abfd, unsigned int section_id, bfd_cleanup cleanup)
+bfd_reinit (bfd *abfd, unsigned int section_id,
+	    struct bfd_preserve *preserve, bfd_cleanup cleanup)
 {
   _bfd_section_id = section_id;
   if (cleanup)
     cleanup (abfd);
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
-  abfd->flags &= BFD_FLAGS_SAVED;
+  if ((abfd->flags & BFD_CLOSED_BY_CACHE) != 0
+      && (abfd->flags & BFD_IN_MEMORY) != 0
+      && (preserve->flags & BFD_CLOSED_BY_CACHE) == 0
+      && (preserve->flags & BFD_IN_MEMORY) == 0)
+    {
+      /* This is to reverse pe_ILF_build_a_bfd, which closes the file
+	 and sets up a bfd in memory.  */
+      bfd_open_file (abfd);
+    }
+  abfd->flags = preserve->flags;
   abfd->build_id = NULL;
   bfd_section_list_clear (abfd);
 }
@@ -164,7 +178,11 @@ bfd_preserve_restore (bfd *abfd, struct bfd_preserve *preserve)
 
   abfd->tdata.any = preserve->tdata;
   abfd->arch_info = preserve->arch_info;
+  if (abfd->iovec != preserve->iovec)
+    bfd_cache_close (abfd);
   abfd->flags = preserve->flags;
+  abfd->iovec = preserve->iovec;
+  abfd->iostream = preserve->iostream;
   abfd->section_htab = preserve->section_htab;
   abfd->sections = preserve->sections;
   abfd->section_last = preserve->section_last;
@@ -368,7 +386,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       /* If we already tried a match, the bfd is modified and may
 	 have sections attached, which will confuse the next
 	 _bfd_check_format call.  */
-      bfd_reinit (abfd, initial_section_id, cleanup);
+      bfd_reinit (abfd, initial_section_id, &preserve, cleanup);
       /* Free bfd_alloc memory too.  If we have matched and preserved
 	 a target then the high water mark is that much higher.  */
       if (preserve_match.marker)
@@ -527,7 +545,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	 RIGHT_TARG again.  */
       if (match_targ != right_targ)
 	{
-	  bfd_reinit (abfd, initial_section_id, cleanup);
+	  bfd_reinit (abfd, initial_section_id, &preserve, cleanup);
 	  bfd_release (abfd, preserve.marker);
 	  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	    goto err_ret;
