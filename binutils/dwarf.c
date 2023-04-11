@@ -2927,8 +2927,14 @@ read_and_display_attr_value (unsigned long attribute,
 		}
 	      else
 		{
-		  assert (debug_info_p->num_loc_views <= num);
-		  num = debug_info_p->num_loc_views;
+		  if (debug_info_p->num_loc_views > num)
+		    {
+		      warn (_("The number of views (%u) is greater than the number of locations (%u)\n"),
+			    debug_info_p->num_loc_views, num);
+		      debug_info_p->num_loc_views = num;
+		    }
+		  else
+		    num = debug_info_p->num_loc_views;
 		  if (num > debug_info_p->num_loc_offsets)
 		    warn (_("More DW_AT_GNU_locview attributes than location offset attributes\n"));
 		  else

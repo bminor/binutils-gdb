@@ -1,5 +1,9 @@
 2023-04-11  Nick Clifton  <nickc@redhat.com>
 
+	PR 30327
+	* dwarf.c (read_and_display_attr_value): Warn if the number of
+	views is greater than the number of locations.
+
 	PR 30313
 	* dwarf.c (display_debug_lines_decoded): Check for an overlarge
 	number of files or directories.
