@@ -11228,7 +11228,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
 	    error_call_unknown_return_type (NULL);
 	  return value::allocate (type->target_type ());
 	}
-      return call_function_by_hand (callee, NULL, argvec);
+      return call_function_by_hand (callee, expect_type, argvec);
     case TYPE_CODE_INTERNAL_FUNCTION:
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	/* We don't know anything about what the internal

@@ -51,6 +51,9 @@ proc target_compile_ada_from_dir {builddir source dest type options} {
 }
 
 # Compile some Ada code.  Return "" if the compile was successful.
+# OPTIONS are as for target_compile, but with this addition:
+# "no-force" - do not pass -f to gnatmake.  By default -f is
+# used, forcing a full recompilation.
 
 proc gdb_compile_ada_1 {source dest type options} {
 
@@ -66,7 +69,9 @@ proc gdb_compile_ada_1 {source dest type options} {
     # and it avoids using a stray objfile file from a long-past
     # run, for instance.
     append options " ada"
-    append options " additional_flags=-f"
+    if {[lsearch -exact $options no-force] == -1} {
+	append options " additional_flags=-f"
+    }
     append options " additional_flags=-I$srcdir"
 
     set result [target_compile_ada_from_dir \
