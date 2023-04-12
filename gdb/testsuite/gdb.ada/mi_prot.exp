@@ -16,10 +16,8 @@
 load_lib "ada.exp"
 
 require allow_ada_tests
+require {gnatmake_version_at_least 8}
 
-if { ![gnatmake_version_at_least 8] } {
-    return -1
-}
 standard_ada_testfile prot
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable \
