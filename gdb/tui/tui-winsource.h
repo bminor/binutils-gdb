@@ -58,7 +58,7 @@ DEF_ENUM_FLAGS_TYPE (enum tui_bp_flag, tui_bp_flags);
 #define TUI_BP_HIT_POS      0
 #define TUI_BP_BREAK_POS    1
 #define TUI_EXEC_POS        2
-#define TUI_EXECINFO_SIZE   4
+#define TUI_EXECINFO_SIZE   3
 
 /* Elements in the Source/Disassembly Window.  */
 struct tui_source_element
