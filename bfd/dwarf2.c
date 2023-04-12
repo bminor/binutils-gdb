@@ -137,7 +137,7 @@ struct trie_leaf
   struct {
     struct comp_unit *unit;
     bfd_vma low_pc, high_pc;
-  } ranges[TRIE_LEAF_SIZE];
+  } ranges[];
 };
 
 struct trie_interior
@@ -148,7 +148,9 @@ struct trie_interior
 
 static struct trie_node *alloc_trie_leaf (bfd *abfd)
 {
-  struct trie_leaf *leaf = bfd_zalloc (abfd, sizeof (struct trie_leaf));
+  struct trie_leaf *leaf;
+  size_t amt = sizeof (*leaf) + TRIE_LEAF_SIZE * sizeof (leaf->ranges[0]);
+  leaf = bfd_zalloc (abfd, amt);
   if (leaf == NULL)
     return NULL;
   leaf->head.num_room_in_leaf = TRIE_LEAF_SIZE;
@@ -2207,9 +2209,7 @@ insert_arange_in_trie (bfd *abfd,
       const struct trie_leaf *leaf = (struct trie_leaf *) trie;
       unsigned int new_room_in_leaf = trie->num_room_in_leaf * 2;
       struct trie_leaf *new_leaf;
-      size_t amt = (sizeof (struct trie_leaf)
-		    + ((new_room_in_leaf - TRIE_LEAF_SIZE)
-		       * sizeof (leaf->ranges[0])));
+      size_t amt = sizeof (*leaf) + new_room_in_leaf * sizeof (leaf->ranges[0]);
       new_leaf = bfd_zalloc (abfd, amt);
       new_leaf->head.num_room_in_leaf = new_room_in_leaf;
       new_leaf->num_stored_in_leaf = leaf->num_stored_in_leaf;
