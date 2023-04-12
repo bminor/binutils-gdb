@@ -489,9 +489,9 @@ sections are evaluated does not change, for instance:
 
 @smallexample
   MEMORY @{
-    MEM1 (rwx) : ORIGIN : 0x1000, LENGTH = 0x14
-    MEM2 (rwx) : ORIGIN : 0x1000, LENGTH = 0x40
-    MEM3 (rwx) : ORIGIN : 0x2000, LENGTH = 0x40
+    MEM1 (rwx) : ORIGIN = 0x1000, LENGTH = 0x14
+    MEM2 (rwx) : ORIGIN = 0x1000, LENGTH = 0x40
+    MEM3 (rwx) : ORIGIN = 0x2000, LENGTH = 0x40
   @}
   SECTIONS @{
     mem1 : @{ *(.data.*); @} > MEM1
