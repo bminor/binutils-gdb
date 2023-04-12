@@ -2908,30 +2908,25 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 			       ULONGEST offset, ULONGEST len,
 			       ULONGEST *xfered_len)
 {
-  auto_obstack obstack;
-  const char *buf;
-  LONGEST len_avail;
-
   if (writebuf)
     return TARGET_XFER_E_IO;
 
-  obstack_grow_str (&obstack, "<library-list>\n");
+  std::string xml = "<library-list>\n";
   for (windows_solib &so : windows_process.solibs)
     windows_xfer_shared_library (so.name.c_str (),
 				 (CORE_ADDR) (uintptr_t) so.load_addr,
 				 &so.text_offset,
-				 current_inferior ()->arch (), &obstack);
-  obstack_grow_str0 (&obstack, "</library-list>\n");
+				 current_inferior ()->arch (), xml);
+  xml += "</library-list>\n";
 
-  buf = (const char *) obstack_finish (&obstack);
-  len_avail = strlen (buf);
+  ULONGEST len_avail = xml.size ();
   if (offset >= len_avail)
-    len= 0;
+    len = 0;
   else
     {
       if (len > len_avail - offset)
 	len = len_avail - offset;
-      memcpy (readbuf, buf + offset, len);
+      memcpy (readbuf, xml.data () + offset, len);
     }
 
   *xfered_len = (ULONGEST) len;

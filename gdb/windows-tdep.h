@@ -18,7 +18,6 @@
 #ifndef WINDOWS_TDEP_H
 #define WINDOWS_TDEP_H
 
-struct obstack;
 struct gdbarch;
 
 extern struct cmd_list_element *info_w32_cmdlist;
@@ -29,7 +28,7 @@ extern void windows_xfer_shared_library (const char* so_name,
 					 CORE_ADDR load_addr,
 					 CORE_ADDR *text_offset_cached,
 					 struct gdbarch *gdbarch,
-					 struct obstack *obstack);
+					 std::string &xml);
 
 extern ULONGEST windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 						    gdb_byte *readbuf,

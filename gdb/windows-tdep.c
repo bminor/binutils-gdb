@@ -527,14 +527,13 @@ display_tib (const char * args, int from_tty)
 void
 windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
 			     CORE_ADDR *text_offset_cached,
-			     struct gdbarch *gdbarch, struct obstack *obstack)
+			     struct gdbarch *gdbarch, std::string &xml)
 {
   CORE_ADDR text_offset = text_offset_cached ? *text_offset_cached : 0;
 
-  obstack_grow_str (obstack, "<library name=\"");
-  std::string p = xml_escape_text (so_name);
-  obstack_grow_str (obstack, p.c_str ());
-  obstack_grow_str (obstack, "\"><segment address=\"");
+  xml += "<library name=\"";
+  xml_escape_text_append (xml, so_name);
+  xml += "\"><segment address=\"";
 
   if (!text_offset)
     {
@@ -547,8 +546,8 @@ windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
 	*text_offset_cached = text_offset;
     }
 
-  obstack_grow_str (obstack, paddress (gdbarch, load_addr + text_offset));
-  obstack_grow_str (obstack, "\"/></library>");
+  xml += paddress (gdbarch, load_addr + text_offset);
+  xml += "\"/></library>";
 }
 
 /* Implement the "iterate_over_objfiles_in_search_order" gdbarch
@@ -1087,7 +1086,7 @@ range [%s, %s]."),
 struct cpms_data
 {
   struct gdbarch *gdbarch;
-  struct obstack *obstack;
+  std::string xml;
   int module_count;
 };
 
@@ -1145,37 +1144,30 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)
     windows_xfer_shared_library (module_name, base_addr,
-				 NULL, data->gdbarch, data->obstack);
+				 NULL, data->gdbarch, data->xml);
   data->module_count++;
 }
 
 ULONGEST
 windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
-				  gdb_byte *readbuf,
-				  ULONGEST offset, ULONGEST len)
+				    gdb_byte *readbuf,
+				    ULONGEST offset, ULONGEST len)
 {
-  struct obstack obstack;
-  const char *buf;
-  ULONGEST len_avail;
-  struct cpms_data data = { gdbarch, &obstack, 0 };
-
-  obstack_init (&obstack);
-  obstack_grow_str (&obstack, "<library-list>\n");
+  cpms_data data { gdbarch, "<library-list>\n", 0 };
   bfd_map_over_sections (core_bfd,
 			 core_process_module_section,
 			 &data);
-  obstack_grow_str0 (&obstack, "</library-list>\n");
+  data.xml += "</library-list>\n";
 
-  buf = (const char *) obstack_finish (&obstack);
-  len_avail = strlen (buf);
+  ULONGEST len_avail = data.xml.length ();
   if (offset >= len_avail)
     return 0;
 
   if (len > len_avail - offset)
     len = len_avail - offset;
-  memcpy (readbuf, buf + offset, len);
 
-  obstack_free (&obstack, NULL);
+  memcpy (readbuf, data.xml.data () + offset, len);
+
   return len;
 }
 

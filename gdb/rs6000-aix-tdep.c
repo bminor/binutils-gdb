@@ -1238,44 +1238,41 @@ rs6000_aix_extract_ld_info (struct gdbarch *gdbarch,
   return info;
 }
 
-/* Append to OBJSTACK an XML string description of the shared library
+/* Append to XML an XML string description of the shared library
    corresponding to LDI, following the TARGET_OBJECT_LIBRARIES_AIX
    format.  */
 
 static void
-rs6000_aix_shared_library_to_xml (struct ld_info *ldi,
-				  struct obstack *obstack)
+rs6000_aix_shared_library_to_xml (struct ld_info *ldi, std::string &xml)
 {
-  obstack_grow_str (obstack, "<library name=\"");
-  std::string p = xml_escape_text (ldi->filename);
-  obstack_grow_str (obstack, p.c_str ());
-  obstack_grow_str (obstack, "\"");
+  xml += "<library name=\"";
+  xml_escape_text_append (xml, ldi->filename);
+  xml += '"';
 
   if (ldi->member_name[0] != '\0')
     {
-      obstack_grow_str (obstack, " member=\"");
-      p = xml_escape_text (ldi->member_name);
-      obstack_grow_str (obstack, p.c_str ());
-      obstack_grow_str (obstack, "\"");
+      xml += " member=\"";
+      xml_escape_text_append (xml, ldi->member_name);
+      xml += '"';
     }
 
-  obstack_grow_str (obstack, " text_addr=\"");
-  obstack_grow_str (obstack, core_addr_to_string (ldi->textorg));
-  obstack_grow_str (obstack, "\"");
+  xml += " text_addr=\"";
+  xml += core_addr_to_string (ldi->textorg);
+  xml += '"';
 
-  obstack_grow_str (obstack, " text_size=\"");
-  obstack_grow_str (obstack, pulongest (ldi->textsize));
-  obstack_grow_str (obstack, "\"");
+  xml += " text_size=\"";
+  xml += pulongest (ldi->textsize);
+  xml += '"';
 
-  obstack_grow_str (obstack, " data_addr=\"");
-  obstack_grow_str (obstack, core_addr_to_string (ldi->dataorg));
-  obstack_grow_str (obstack, "\"");
+  xml += " data_addr=\"";
+  xml += core_addr_to_string (ldi->dataorg);
+  xml += '"';
 
-  obstack_grow_str (obstack, " data_size=\"");
-  obstack_grow_str (obstack, pulongest (ldi->datasize));
-  obstack_grow_str (obstack, "\"");
+  xml += " data_size=\"";
+  xml += pulongest (ldi->datasize);
+  xml += '"';
 
-  obstack_grow_str (obstack, "></library>");
+  xml += "></library>";
 }
 
 /* Convert the ld_info binary data provided by the AIX loader into
@@ -1298,18 +1295,13 @@ rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
 			   gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
 			   int close_ldinfo_fd)
 {
-  struct obstack obstack;
-  const char *buf;
-  ULONGEST len_avail;
-
-  obstack_init (&obstack);
-  obstack_grow_str (&obstack, "<library-list-aix version=\"1.0\">\n");
+  std::string xml = "<library-list-aix version=\"1.0\">\n";
 
   while (1)
     {
       struct ld_info ldi = rs6000_aix_extract_ld_info (gdbarch, ldi_buf);
 
-      rs6000_aix_shared_library_to_xml (&ldi, &obstack);
+      rs6000_aix_shared_library_to_xml (&ldi, xml);
       if (close_ldinfo_fd)
 	close (ldi.fd);
 
@@ -1318,20 +1310,18 @@ rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
       ldi_buf = ldi_buf + ldi.next;
     }
 
-  obstack_grow_str0 (&obstack, "</library-list-aix>\n");
+  xml += "</library-list-aix>\n";
 
-  buf = (const char *) obstack_finish (&obstack);
-  len_avail = strlen (buf);
+  ULONGEST len_avail = xml.length ();
   if (offset >= len_avail)
     len= 0;
   else
     {
       if (len > len_avail - offset)
 	len = len_avail - offset;
-      memcpy (readbuf, buf + offset, len);
+      memcpy (readbuf, xml.data () + offset, len);
     }
 
-  obstack_free (&obstack, NULL);
   return len;
 }
 
