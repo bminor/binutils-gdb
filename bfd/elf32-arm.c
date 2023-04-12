@@ -20067,7 +20067,7 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
       plt->flags |= SEC_IN_MEMORY;
     }
 
-  count = relplt->size / hdr->sh_entsize;
+  count = NUM_SHDR_ENTRIES (hdr);
   size = count * sizeof (asymbol);
   p = relplt->relocation;
   for (i = 0; i < count; i++, p += elf32_arm_size_info.int_rels_per_ext_rel)

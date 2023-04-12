@@ -1920,7 +1920,7 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
 	    }
     }
 
-  count = relplt->size / sizeof (Elf32_External_Rela);
+  count = NUM_SHDR_ENTRIES (&elf_section_data (relplt)->this_hdr);
   /* If the stubs are those for -shared/-pie then we might have
      multiple stubs for each plt entry.  If that is the case then
      there is no way to associate stubs with their plt entries short

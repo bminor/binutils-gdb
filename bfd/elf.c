@@ -2381,6 +2381,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   its sh_link points to the null section.  */
 	if (((abfd->flags & (DYNAMIC | EXEC_P)) != 0
 	     && (hdr->sh_flags & SHF_ALLOC) != 0)
+	    || (hdr->sh_flags & SHF_COMPRESSED) != 0
 	    || hdr->sh_type == SHT_RELR
 	    || hdr->sh_link == SHN_UNDEF
 	    || hdr->sh_link != elf_onesymtab (abfd)
@@ -8728,15 +8729,16 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
   for (s = abfd->sections; s != NULL; s = s->next)
     if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	&& (elf_section_data (s)->this_hdr.sh_type == SHT_REL
-	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
+	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA)
+	&& (elf_section_data (s)->this_hdr.sh_flags & SHF_COMPRESSED) == 0)
       {
-	ext_rel_size += s->size;
-	if (ext_rel_size < s->size)
+	ext_rel_size += elf_section_data (s)->this_hdr.sh_size;
+	if (ext_rel_size < elf_section_data (s)->this_hdr.sh_size)
 	  {
 	    bfd_set_error (bfd_error_file_truncated);
 	    return -1;
 	  }
-	count += s->size / elf_section_data (s)->this_hdr.sh_entsize;
+	count += NUM_SHDR_ENTRIES (&elf_section_data (s)->this_hdr);
 	if (count > LONG_MAX / sizeof (arelent *))
 	  {
 	    bfd_set_error (bfd_error_file_too_big);
@@ -8785,14 +8787,15 @@ _bfd_elf_canonicalize_dynamic_reloc (bfd *abfd,
     {
       if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	  && (elf_section_data (s)->this_hdr.sh_type == SHT_REL
-	      || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
+	      || elf_section_data (s)->this_hdr.sh_type == SHT_RELA)
+	  && (elf_section_data (s)->this_hdr.sh_flags & SHF_COMPRESSED) == 0)
 	{
 	  arelent *p;
 	  long count, i;
 
 	  if (! (*slurp_relocs) (abfd, s, syms, true))
 	    return -1;
-	  count = s->size / elf_section_data (s)->this_hdr.sh_entsize;
+	  count = NUM_SHDR_ENTRIES (&elf_section_data (s)->this_hdr);
 	  p = s->relocation;
 	  for (i = 0; i < count; i++)
 	    *storage++ = p++;
@@ -12936,7 +12939,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   if (! (*slurp_relocs) (abfd, relplt, dynsyms, true))
     return -1;
 
-  count = relplt->size / hdr->sh_entsize;
+  count = NUM_SHDR_ENTRIES (hdr);
   size = count * sizeof (asymbol);
   p = relplt->relocation;
   for (i = 0; i < count; i++, p += bed->s->int_rels_per_ext_rel)

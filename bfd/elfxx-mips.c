@@ -16595,7 +16595,7 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
   /* Calculating the exact amount of space required for symbols would
      require two passes over the PLT, so just pessimise assuming two
      PLT slots per relocation.  */
-  count = relplt->size / hdr->sh_entsize;
+  count = NUM_SHDR_ENTRIES (hdr);
   counti = count * bed->s->int_rels_per_ext_rel;
   size = 2 * count * sizeof (asymbol);
   size += count * (sizeof (mipssuffix) +

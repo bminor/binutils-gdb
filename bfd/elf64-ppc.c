@@ -2576,7 +2576,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	      if (!(*slurp_relocs) (abfd, relplt, dyn_syms, true))
 		goto free_contents_and_exit_err;
 
-	      plt_count = relplt->size / sizeof (Elf64_External_Rela);
+	      plt_count = NUM_SHDR_ENTRIES (&elf_section_data (relplt)->this_hdr);
 	      size += plt_count * sizeof (asymbol);
 
 	      p = relplt->relocation;
