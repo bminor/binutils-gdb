@@ -234,6 +234,9 @@ tui_source_window::show_line_number (int offset) const
   char text[20];
   /* To completely overwrite the previous border when the source window height
      is increased, both spaces after the line number have to be redrawn.  */
-  xsnprintf (text, sizeof (text), "%*d  ", m_digits - 1, lineno);
+  char space = tui_left_margin_verbose ? '_' : ' ';
+  xsnprintf (text, sizeof (text),
+	     tui_left_margin_verbose ? "%0*d%c%c" : "%*d%c%c", m_digits - 1,
+	     lineno, space, space);
   waddstr (handle.get (), text);
 }

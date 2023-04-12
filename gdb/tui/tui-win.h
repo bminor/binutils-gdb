@@ -55,4 +55,7 @@ extern bool compact_source;
    current position indicator.  */
 extern bool style_tui_current_position;
 
+/* Whether to replace the spaces in the left margin with '_' and '0'.  */
+extern bool tui_left_margin_verbose;
+
 #endif /* TUI_TUI_WIN_H */

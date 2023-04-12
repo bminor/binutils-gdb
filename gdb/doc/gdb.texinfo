@@ -41249,6 +41249,17 @@ has been resized.  This setting is intended for use by the test suite,
 where it would otherwise be difficult to determine when a resize and
 refresh has been completed.
 
+@kindex maint set tui-left-margin-verbose
+@kindex maint show tui-left-margin-verbose
+@item maint set tui-left-margin-verbose
+@item maint show tui-left-margin-verbose
+Control whether the left margin of the TUI source and disassembly windows
+uses @samp{_} and @samp{0} at locations where otherwise there would be a
+space.  The default is @code{off}, which means spaces are used.  The
+setting is intended to make it clear where the left margin begins and
+ends, to avoid incorrectly interpreting a space as being part of the
+the left margin.
+
 @kindex maint set per-command
 @kindex maint show per-command
 @item maint set per-command

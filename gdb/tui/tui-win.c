@@ -1111,6 +1111,10 @@ tui_window_command (const char *args, int from_tty)
   help_list (tui_window_cmds, "tui window ", all_commands, gdb_stdout);
 }
 
+/* See tui-win.h.  */
+
+bool tui_left_margin_verbose = false;
+
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
 
@@ -1283,6 +1287,18 @@ position indicator is styled."),
 			   show_style_tui_current_position,
 			   &style_set_list,
 			   &style_show_list);
+
+  add_setshow_boolean_cmd ("tui-left-margin-verbose", class_maintenance,
+			   &tui_left_margin_verbose, _("\
+Set whether the left margin should use '_' and '0' instead of spaces."),
+			   _("\
+Show whether the left margin should use '_' and '0' instead of spaces."),
+			   _("\
+When enabled, the left margin will use '_' and '0' instead of spaces."),
+			   nullptr,
+			   nullptr,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 
   tui_border_style.changed.attach (tui_rehighlight_all, "tui-win");
   tui_active_border_style.changed.attach (tui_rehighlight_all, "tui-win");
