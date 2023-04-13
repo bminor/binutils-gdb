@@ -102,13 +102,16 @@ struct bfd_preserve
   const struct bfd_iovec *iovec;
   void *iostream;
   const struct bfd_arch_info *arch_info;
+  const struct bfd_build_id *build_id;
+  bfd_cleanup cleanup;
   struct bfd_section *sections;
   struct bfd_section *section_last;
   unsigned int section_count;
   unsigned int section_id;
+  unsigned int symcount;
+  bool read_only;
+  bfd_vma start_address;
   struct bfd_hash_table section_htab;
-  const struct bfd_build_id *build_id;
-  bfd_cleanup cleanup;
 };
 
 /* When testing an object for compatibility with a particular target
@@ -133,6 +136,9 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve,
   preserve->section_last = abfd->section_last;
   preserve->section_count = abfd->section_count;
   preserve->section_id = _bfd_section_id;
+  preserve->symcount = abfd->symcount;
+  preserve->read_only = abfd->read_only;
+  preserve->start_address = abfd->start_address;
   preserve->section_htab = abfd->section_htab;
   preserve->marker = bfd_alloc (abfd, 1);
   preserve->build_id = abfd->build_id;
@@ -183,6 +189,9 @@ bfd_reinit (bfd *abfd, unsigned int section_id,
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
   io_reinit (abfd, preserve);
+  abfd->symcount = 0;
+  abfd->read_only = 0;
+  abfd->start_address = 0;
   abfd->build_id = NULL;
   bfd_section_list_clear (abfd);
 }
@@ -202,6 +211,9 @@ bfd_preserve_restore (bfd *abfd, struct bfd_preserve *preserve)
   abfd->section_last = preserve->section_last;
   abfd->section_count = preserve->section_count;
   _bfd_section_id = preserve->section_id;
+  abfd->symcount = preserve->symcount;
+  abfd->read_only = preserve->read_only;
+  abfd->start_address = preserve->start_address;
   abfd->build_id = preserve->build_id;
 
   /* bfd_release frees all memory more recently bfd_alloc'd than
