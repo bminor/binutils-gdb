@@ -144,6 +144,33 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve,
 			      sizeof (struct section_hash_entry));
 }
 
+/* A back-end object_p function may flip a bfd from file backed to
+   in-memory, eg. pe_ILF_object_p.  In that case to restore the
+   original IO state we need to reopen the file.  Conversely, if we
+   are restoring a previously matched pe ILF format and have been
+   checking further target matches using file IO then we need to close
+   the file and detach the bfd from the cache lru list.  */
+
+static void
+io_reinit (bfd *abfd, struct bfd_preserve *preserve)
+{
+  if (abfd->iovec != preserve->iovec)
+    {
+      /* Handle file backed to in-memory transition.  bfd_cache_close
+	 won't do anything unless abfd->iovec is the cache_iovec.  */
+      bfd_cache_close (abfd);
+      abfd->iovec = preserve->iovec;
+      abfd->iostream = preserve->iostream;
+      /* Handle in-memory to file backed transition.  */
+      if ((abfd->flags & BFD_CLOSED_BY_CACHE) != 0
+	  && (abfd->flags & BFD_IN_MEMORY) != 0
+	  && (preserve->flags & BFD_CLOSED_BY_CACHE) == 0
+	  && (preserve->flags & BFD_IN_MEMORY) == 0)
+	bfd_open_file (abfd);
+    }
+  abfd->flags = preserve->flags;
+}
+
 /* Clear out a subset of BFD state.  */
 
 static void
@@ -155,16 +182,7 @@ bfd_reinit (bfd *abfd, unsigned int section_id,
     cleanup (abfd);
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
-  if ((abfd->flags & BFD_CLOSED_BY_CACHE) != 0
-      && (abfd->flags & BFD_IN_MEMORY) != 0
-      && (preserve->flags & BFD_CLOSED_BY_CACHE) == 0
-      && (preserve->flags & BFD_IN_MEMORY) == 0)
-    {
-      /* This is to reverse pe_ILF_build_a_bfd, which closes the file
-	 and sets up a bfd in memory.  */
-      bfd_open_file (abfd);
-    }
-  abfd->flags = preserve->flags;
+  io_reinit (abfd, preserve);
   abfd->build_id = NULL;
   bfd_section_list_clear (abfd);
 }
@@ -178,11 +196,7 @@ bfd_preserve_restore (bfd *abfd, struct bfd_preserve *preserve)
 
   abfd->tdata.any = preserve->tdata;
   abfd->arch_info = preserve->arch_info;
-  if (abfd->iovec != preserve->iovec)
-    bfd_cache_close (abfd);
-  abfd->flags = preserve->flags;
-  abfd->iovec = preserve->iovec;
-  abfd->iostream = preserve->iostream;
+  io_reinit (abfd, preserve);
   abfd->section_htab = preserve->section_htab;
   abfd->sections = preserve->sections;
   abfd->section_last = preserve->section_last;
