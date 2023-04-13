@@ -6592,7 +6592,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	}
     }
 
-  if (loc != NULL && !header_of_multiple)
+  if (loc != nullptr && !header_of_multiple && !loc->shlib_disabled)
     {
       std::vector<int> inf_nums;
       int mi_only = 1;
