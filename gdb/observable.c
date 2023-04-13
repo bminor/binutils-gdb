@@ -58,6 +58,7 @@ DEFINE_OBSERVABLE (inferior_appeared);
 DEFINE_OBSERVABLE (inferior_pre_detach);
 DEFINE_OBSERVABLE (inferior_exit);
 DEFINE_OBSERVABLE (inferior_removed);
+DEFINE_OBSERVABLE (inferior_cloned);
 DEFINE_OBSERVABLE (memory_changed);
 DEFINE_OBSERVABLE (before_prompt);
 DEFINE_OBSERVABLE (gdb_datadir_changed);

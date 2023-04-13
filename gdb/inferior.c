@@ -1041,6 +1041,8 @@ clone_inferior_command (const char *args, int from_tty)
       for (const std::string &unset_var
 	   : orginf->environment.user_unset_env ())
 	inf->environment.unset (unset_var.c_str ());
+
+      gdb::observers::inferior_cloned.notify (orginf, inf);
     }
 }
 

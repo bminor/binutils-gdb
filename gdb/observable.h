@@ -172,6 +172,10 @@ extern observable<struct inferior */* inf */> inferior_exit;
    This method is called immediately before freeing INF.  */
 extern observable<struct inferior */* inf */> inferior_removed;
 
+/* The inferior CLONE has been created by cloning INF.  */
+extern observable<struct inferior */* inf */, struct inferior */* clone */>
+    inferior_cloned;
+
 /* Bytes from DATA to DATA + LEN have been written to the inferior
    at ADDR.  */
 extern observable<struct inferior */* inferior */, CORE_ADDR /* addr */,
