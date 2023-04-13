@@ -52,11 +52,19 @@ set scopes [dap_check_request_and_response "get scopes" scopes \
 		[format {o frameId [i %d]} $frame_id]]
 set scopes [dict get [lindex $scopes 0] body scopes]
 
-gdb_assert {[llength $scopes] == 1} "single scope"
+gdb_assert {[llength $scopes] == 2} "two scopes"
 
-set scope [lindex $scopes 0]
+lassign $scopes scope reg_scope
 gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
+gdb_assert {[dict get $scope presentationHint] == "locals"} \
+    "locals presentation hint"
 gdb_assert {[dict get $scope namedVariables] == 3} "three vars in scope"
+
+gdb_assert {[dict get $reg_scope name] == "Registers"} \
+    "second scope is registers"
+gdb_assert {[dict get $reg_scope presentationHint] == "registers"} \
+    "registers presentation hint"
+gdb_assert {[dict get $reg_scope namedVariables] > 0} "at least one register"
 
 set num [dict get $scope variablesReference]
 set refs [lindex [dap_check_request_and_response "fetch variables" \
@@ -97,5 +105,11 @@ set refs [lindex [dap_check_request_and_response "fetch contents of dei" \
 	      0]
 set deivals [dict get $refs body variables]
 gdb_assert {[llength $deivals] == 2} "dei has two members"
+
+set num [dict get $reg_scope variablesReference]
+# The request succeeding is sufficient.
+dap_check_request_and_response "fetch first register" \
+    "variables" \
+    [format {o variablesReference [i %d] count [i 1]} $num]
 
 dap_shutdown

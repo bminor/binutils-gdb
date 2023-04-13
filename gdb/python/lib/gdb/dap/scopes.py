@@ -50,14 +50,16 @@ def _block_vars(block):
 
 
 class ScopeReference(BaseReference):
-    def __init__(self, name, frame, var_list):
+    def __init__(self, name, hint, frame, var_list):
         super().__init__(name)
+        self.hint = hint
         self.frame = frame
         self.func = frame.function()
         self.var_list = var_list
 
     def to_object(self):
         result = super().to_object()
+        result["presentationHint"] = self.hint
         # How would we know?
         result["expensive"] = False
         result["namedVariables"] = len(self.var_list)
@@ -79,6 +81,17 @@ class ScopeReference(BaseReference):
         return (sym.print_name, val)
 
 
+class RegisterReference(ScopeReference):
+    def __init__(self, name, frame):
+        super().__init__(
+            name, "registers", frame, list(frame.architecture().registers())
+        )
+
+    @in_gdb_thread
+    def fetch_one_child(self, idx):
+        return (self.var_list[idx].name, self.frame.read_register(self.var_list[idx]))
+
+
 # Helper function to create a DAP scopes for a given frame ID.
 @in_gdb_thread
 def _get_scope(id):
@@ -88,9 +101,10 @@ def _get_scope(id):
     if block is not None:
         (args, locs) = _block_vars(block)
         if args:
-            scopes.append(ScopeReference("Arguments", frame, args))
+            scopes.append(ScopeReference("Arguments", "arguments", frame, args))
         if locs:
-            scopes.append(ScopeReference("Locals", frame, locs))
+            scopes.append(ScopeReference("Locals", "locals", frame, locs))
+    scopes.append(RegisterReference("Registers", frame))
     return [x.to_object() for x in scopes]
 
 
