@@ -969,7 +969,13 @@ extern aarch64_opcode aarch64_opcode_table[];
 #define F_SCAN (1ULL << 31)
 /* Do no shift immediate operand.  */
 #define F_NOSHIFT (1ULL << 32)
-/* Next bit is 33.  */
+/* Opcode variant is invalidated by PSTATE.C64.  When PSTATE.C64 == 1, operation
+   requires use of capability operands.  */
+#define F_NONC64 (1ULL << 33)
+/* Opcode vatiant not suitable for morello hybrid mode and will fail unless
+   PSTATE.C64 == 1.  */
+#define F_C64ONLY (1ULL << 34)
+/* Next bit is 35.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */

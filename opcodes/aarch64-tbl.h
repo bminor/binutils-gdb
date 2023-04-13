@@ -3395,9 +3395,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("b", 0x14000000, 0xfc000000, branch_imm, OP_B, OP1 (ADDR_PCREL26), QL_PCREL_26, 0),
   CORE_INSN ("bl", 0x94000000, 0xfc000000, branch_imm, OP_BL, OP1 (ADDR_PCREL26), QL_PCREL_26, 0),
   /* Unconditional branch (register).  */
-  CORE_INSN ("br", 0xd61f0000, 0xfffffc1f, branch_reg, 0, OP1 (Rn), QL_I1X, 0),
-  CORE_INSN ("blr", 0xd63f0000, 0xfffffc1f, branch_reg, 0, OP1 (Rn), QL_I1X, 0),
-  CORE_INSN ("ret", 0xd65f0000, 0xfffffc1f, branch_reg, 0, OP1 (Rn), QL_I1X, F_OPD0_OPT | F_DEFAULT (30)),
+  CORE_INSN ("br", 0xd61f0000, 0xfffffc1f, branch_reg, 0, OP1 (Rn), QL_I1X, F_NONC64),
+  CORE_INSN ("blr", 0xd63f0000, 0xfffffc1f, branch_reg, 0, OP1 (Rn), QL_I1X, F_NONC64),
+  CORE_INSN ("ret", 0xd65f0000, 0xfffffc1f, branch_reg, 0, OP1 (Rn), QL_I1X, F_OPD0_OPT | F_DEFAULT (30) | F_NONC64),
   CORE_INSN ("eret", 0xd69f03e0, 0xffffffff, branch_reg, 0, OP0 (), {}, 0),
   CORE_INSN ("drps", 0xd6bf03e0, 0xffffffff, branch_reg, 0, OP0 (), {}, 0),
   V8_3_INSN ("braa", 0xd71f0800, 0xfffffc00, branch_reg, OP2 (Rn, Rd_SP), QL_I2SAMEX, 0),
@@ -3986,10 +3986,10 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("mov",  0x52800000, 0x7f800000, movewide, OP_MOV_IMM_WIDE, OP2 (Rd, IMM_MOV), QL_DST_R, F_SF | F_ALIAS | F_CONV),
   CORE_INSN ("movk", 0x72800000, 0x7f800000, movewide, OP_MOVK, OP2 (Rd, HALF), QL_DST_R, F_SF),
   /* PC-rel. addressing.  */
-  CORE_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_PCREL21), QL_ADRP, 0),
-  CORE_INSN ("adrp", 0x90000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_ADRP), QL_ADRP, 0),
+  CORE_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_PCREL21), QL_ADRP,F_NONC64),
+  CORE_INSN ("adrp", 0x90000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_ADRP), QL_ADRP, F_NONC64),
   /* Pc-rel. addressing with capabilities.  */
-  A64C_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Cad, ADDR_PCREL21), QL2_A64C_CA_NIL, 0),
+  A64C_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Cad, ADDR_PCREL21), QL2_A64C_CA_NIL, F_C64ONLY),
   A64C_INSN ("adrp", 0x90000000, 0x9f000000, pcreladdr, 0, OP2 (Cad, ADDR_ADRP), QL2_A64C_CA_NIL, 0),
   A64C_INSN ("adrdp", 0x90000000, 0x9f800000, pcreladdr, 0, OP2 (Cad, A64C_ADDR_ADRDP), QL2_A64C_CA_NIL, 0),
   /* A64C Instructions.  */

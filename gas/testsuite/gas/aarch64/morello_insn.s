@@ -72,7 +72,12 @@ Label:
 	    \op    \cd, Label
 	  .endr
 	.endm
-morello_adrx c0
+
+	.ifdef C64MODE
+	morello_adrx c0
+	.else
+	morello_adrx x0
+	.endif
 
 	.ifdef C64MODE
 	adrdp   c0, #4096

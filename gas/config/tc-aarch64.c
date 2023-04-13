@@ -7642,6 +7642,36 @@ dump_opcode_operands (const aarch64_opcode *opcode)
 }
 #endif /* DEBUG_AARCH64 */
 
+/* With the introduction of Morello, some CORE_INSNs are no longer
+   valid if IS_C64 is true.  It is important that such instructions
+   are no longer treated as core in such contexts and are
+   disconsidered, rather being treated as belonging to any other
+   unavailable architectural extension.  Likewise, reject purecap-specific
+   instructions when assembling for hybrid (or any other) tartgets.  */
+
+static bfd_boolean
+validate_opcode_for_feature (const aarch64_opcode *opcode,
+			     aarch64_feature_set features)
+{
+  /* If opcode is memory-related, Ensure this CPU does not impose any
+     restriction on allowed operands.  */
+  if (opcode->flags & F_NONC64
+      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_C64))
+    {
+      set_default_error ();
+      return FALSE;
+    }
+  /* Reject purecap-specific instructions when assembling for any other
+     target.  */
+  if (opcode->flags & F_C64ONLY
+      && !(AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_C64)))
+    {
+      set_default_error ();
+      return FALSE;
+    }
+  return TRUE;
+}
+
 /* This is the guts of the machine-dependent assembler.  STR points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
@@ -7736,7 +7766,8 @@ md_assemble (char *str)
 	  continue;
 	}
 
-      if (parse_operands (p, opcode)
+      if (validate_opcode_for_feature (opcode, cpu_variant)
+	  && parse_operands (p, opcode)
 	  && programmer_friendly_fixup (&inst)
 	  && do_encode (inst_base->opcode, &inst.base, &inst_base->value))
 	{
