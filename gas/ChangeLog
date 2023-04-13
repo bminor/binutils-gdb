@@ -1,3 +1,8 @@
+2023-04-13  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/gas/arc/dsp.s: Remove unimplemented dsp instructions.
+	* testsuite/gas/arc/dsp.d: Update the test.
+
 2023-03-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 30206
