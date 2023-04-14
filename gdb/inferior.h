@@ -225,8 +225,6 @@ extern void post_create_inferior (int from_tty);
 
 extern void attach_command (const char *, int);
 
-extern void set_inferior_args_vector (int, char **);
-
 extern void registers_info (const char *, int);
 
 extern void continue_1 (int all_threads);
@@ -529,6 +527,9 @@ public:
   {
     m_args = std::move (args);
   };
+
+  /* Set the argument string from some strings.  */
+  void set_args (gdb::array_view<char * const> args);
 
   /* Get the argument string to use when running this inferior.
 

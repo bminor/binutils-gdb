@@ -120,14 +120,6 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
 		"is \"%s\".\n"), inferior_tty.c_str ());
 }
 
-void
-set_inferior_args_vector (int argc, char **argv)
-{
-  gdb::array_view<char * const> args (argv, argc);
-  std::string n = construct_inferior_arguments (args);
-  current_inferior ()->set_args (std::move (n));
-}
-
 /* Store the new value passed to 'set args'.  */
 
 static void

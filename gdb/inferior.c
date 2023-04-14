@@ -164,6 +164,14 @@ inferior::tty ()
   return m_terminal;
 }
 
+/* See inferior.h.  */
+
+void
+inferior::set_args (gdb::array_view<char * const> args)
+{
+  set_args (construct_inferior_arguments (args));
+}
+
 void
 inferior::add_continuation (std::function<void ()> &&cont)
 {
