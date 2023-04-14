@@ -761,8 +761,9 @@ struct symbol *
 
 extern void language_info ();
 
-extern enum language set_language (enum language);
-
+/* Set the current language to LANG.  */
+
+extern void set_language (enum language lang);
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,

@@ -353,18 +353,13 @@ set_range_case (void)
     case_sensitivity = current_language->case_sensitivity ();
 }
 
-/* Set current language to (enum language) LANG.  Returns previous
-   language.  */
+/* See language.h.  */
 
-enum language
+void
 set_language (enum language lang)
 {
-  enum language prev_language;
-
-  prev_language = current_language->la_language;
   current_language = language_def (lang);
   set_range_case ();
-  return prev_language;
 }
 
 
@@ -1124,11 +1119,6 @@ For Fortran the default is off; for other languages the default is on."),
 			set_case_command,
 			show_case_command,
 			&setlist, &showlist);
-
-  /* In order to call SET_LANGUAGE (below) we need to make sure that
-     CURRENT_LANGUAGE is not NULL.  So first set the language to unknown,
-     then we can change the language to 'auto'.  */
-  current_language = language_def (language_unknown);
 
   add_set_language_command ();
 
