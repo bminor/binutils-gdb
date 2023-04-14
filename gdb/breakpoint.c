@@ -13214,17 +13214,6 @@ create_sals_from_location_spec_default (location_spec *locspec,
   parse_breakpoint_sals (locspec, canonical);
 }
 
-/* Reset a breakpoint.  */
-
-static void
-breakpoint_re_set_one (breakpoint *b)
-{
-  input_radix = b->input_radix;
-  set_language (b->language);
-
-  b->re_set ();
-}
-
 /* Re-set breakpoint locations for the current program space.
    Locations bound to other program spaces are left untouched.  */
 
@@ -13236,12 +13225,11 @@ breakpoint_re_set (void)
     scoped_restore save_input_radix = make_scoped_restore (&input_radix);
     scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
-    /* breakpoint_re_set_one sets the current_language to the language
-       of the breakpoint it is resetting (see prepare_re_set_context)
-       before re-evaluating the breakpoint's location.  This change can
-       unfortunately get undone by accident if the language_mode is set
-       to auto, and we either switch frames, or more likely in this context,
-       we select the current frame.
+    /* To ::re_set each breakpoint we set the current_language to the
+       language of the breakpoint before re-evaluating the breakpoint's
+       location.  This change can unfortunately get undone by accident if
+       the language_mode is set to auto, and we either switch frames, or
+       more likely in this context, we select the current frame.
 
        We prevent this by temporarily turning the language_mode to
        language_mode_manual.  We restore it once all breakpoints
@@ -13258,7 +13246,9 @@ breakpoint_re_set (void)
       {
 	try
 	  {
-	    breakpoint_re_set_one (&b);
+	    input_radix = b.input_radix;
+	    set_language (b.language);
+	    b.re_set ();
 	  }
 	catch (const gdb_exception &ex)
 	  {
