@@ -283,9 +283,6 @@ static bool strace_marker_p (struct breakpoint *b);
 static void bkpt_probe_create_sals_from_location_spec
      (location_spec *locspec,
       struct linespec_result *canonical);
-static void tracepoint_probe_create_sals_from_location_spec
-     (location_spec *locspec,
-      struct linespec_result *canonical);
 
 const struct breakpoint_ops code_breakpoint_ops =
 {
@@ -300,10 +297,11 @@ static const struct breakpoint_ops bkpt_probe_breakpoint_ops =
   create_breakpoints_sal,
 };
 
-/* Tracepoints set on probes.  */
+/* Tracepoints set on probes.  We use the same methods as for breakpoints
+   on probes.  */
 static const struct breakpoint_ops tracepoint_probe_breakpoint_ops =
 {
-  tracepoint_probe_create_sals_from_location_spec,
+  bkpt_probe_create_sals_from_location_spec,
   create_breakpoints_sal,
 };
 
@@ -12403,17 +12401,6 @@ tracepoint::print_recreate (struct ui_file *fp) const
 
   if (pass_count)
     gdb_printf (fp, "  passcount %d\n", pass_count);
-}
-
-/* Virtual table for tracepoints on static probes.  */
-
-static void
-tracepoint_probe_create_sals_from_location_spec
-  (location_spec *locspec,
-   struct linespec_result *canonical)
-{
-  /* We use the same method for breakpoint on probes.  */
-  bkpt_probe_create_sals_from_location_spec (locspec, canonical);
 }
 
 void
