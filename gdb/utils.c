@@ -166,12 +166,6 @@ verror (const char *string, va_list args)
   throw_verror (GENERIC_ERROR, string, args);
 }
 
-void
-error_stream (const string_file &stream)
-{
-  error (("%s"), stream.c_str ());
-}
-
 /* Emit a message and abort.  */
 
 static void ATTRIBUTE_NORETURN

@@ -3138,7 +3138,7 @@ update_inserted_breakpoint_locations (void)
   if (error_flag)
     {
       target_terminal::ours_for_output ();
-      error_stream (tmp_error_stream);
+      error (("%s"), tmp_error_stream.c_str ());
     }
 }
 
@@ -3235,7 +3235,7 @@ insert_breakpoint_locations (void)
 You may have requested too many hardware breakpoints/watchpoints.\n");
 	}
       target_terminal::ours_for_output ();
-      error_stream (tmp_error_stream);
+      error (("%s"), tmp_error_stream.c_str ());
     }
 }
 
