@@ -682,8 +682,6 @@ init_lineage_intf ()
   __real_execlp = dlsym (dlflag, "execlp");
   __real_execl = dlsym (dlflag, "execl");
   __real_clone = dlsym (dlflag, "clone");
-  __real_posix_spawn = dlsym (dlflag, "posix_spawn");
-  __real_posix_spawnp = dlsym (dlflag, "posix_spawnp");
 
   __real_popen_2_17 = dlvsym (dlflag, "popen", "GLIBC_2.17");
   __real_popen_2_2_5 = dlvsym (dlflag, "popen", "GLIBC_2.2.5");
@@ -704,11 +702,31 @@ init_lineage_intf ()
   __real_posix_spawn_2_15 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.15");
   __real_posix_spawn_2_2_5 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.2.5");
   __real_posix_spawn_2_2 = dlvsym (dlflag, "posix_spawn", "GLIBC_2.2");
+  if (__real_posix_spawn_2_17)
+    __real_posix_spawn = __real_posix_spawn_2_17;
+  else if (__real_posix_spawn_2_15)
+    __real_posix_spawn = __real_posix_spawn_2_15;
+  else if (__real_posix_spawn_2_2_5)
+    __real_posix_spawn = __real_posix_spawn_2_2_5;
+  else if (__real_posix_spawn_2_2)
+    __real_posix_spawn = __real_posix_spawn_2_2;
+  else
+    __real_posix_spawn = dlsym (dlflag, "posix_spawn");
 
   __real_posix_spawnp_2_17 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.17");
   __real_posix_spawnp_2_15 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.15");
   __real_posix_spawnp_2_2_5 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.2.5");
   __real_posix_spawnp_2_2 = dlvsym (dlflag, "posix_spawnp", "GLIBC_2.2");
+  if (__real_posix_spawnp_2_17)
+    __real_posix_spawnp = __real_posix_spawnp_2_17;
+  else if (__real_posix_spawnp_2_15)
+    __real_posix_spawnp = __real_posix_spawnp_2_15;
+  else if (__real_posix_spawnp_2_2_5)
+    __real_posix_spawnp = __real_posix_spawnp_2_2_5;
+  else if (__real_posix_spawnp_2_2)
+    __real_posix_spawnp = __real_posix_spawnp_2_2;
+  else
+    __real_posix_spawnp = dlsym (dlflag, "posix_spawnp");
 
   __real_grantpt = dlsym (dlflag, "grantpt");
   __real_ptsname = dlsym (dlflag, "ptsname");
@@ -1427,16 +1445,16 @@ gprofng_posix_spawn (int(real_posix_spawn) (),
   return ret;
 }
 
-#define DCL_POSIX_SPAWN(dcl_f, real_f) \
+#define DCL_POSIX_SPAWN(dcl_f) \
 int dcl_f (pid_t *pidp, const char *path, \
 	   const posix_spawn_file_actions_t *file_actions, \
 	   const posix_spawnattr_t *attrp, \
 	   char *const argv[], char *const envp[]) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_posix_spawn == NULL) \
       init_lineage_intf (); \
-    return gprofng_posix_spawn (real_f, pidp, path, file_actions, attrp, \
-				argv, envp); \
+    return gprofng_posix_spawn (__real_posix_spawn, pidp, path, file_actions, \
+				attrp, argv, envp); \
   }
 
 
@@ -1444,7 +1462,7 @@ DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_17, posix_spawn@GLIBC_2.17)
 DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_15, posix_spawn@GLIBC_2.15)
 DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_2_5, posix_spawn@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_POSIX_SPAWN, posix_spawn_2_2, posix_spawn@GLIBC_2.2)
-DCL_POSIX_SPAWN (posix_spawn, CALL_REAL (posix_spawn))
+DCL_POSIX_SPAWN (posix_spawn)
 
 /*-------------------------------------------------------- posix_spawnp */
 static int
@@ -1484,15 +1502,15 @@ gprofng_posix_spawnp (int (real_posix_spawnp) (),
   return ret;
 }
 
-#define DCL_POSIX_SPAWNP(dcl_f, real_f) \
+#define DCL_POSIX_SPAWNP(dcl_f) \
 int dcl_f (pid_t *pidp, const char *path, \
 	   const posix_spawn_file_actions_t *file_actions, \
 	   const posix_spawnattr_t *attrp, \
 	   char *const argv[], char *const envp[]) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_posix_spawnp == NULL) \
       init_lineage_intf (); \
-    return gprofng_posix_spawnp (real_f, pidp, path, \
+    return gprofng_posix_spawnp (__real_posix_spawnp, pidp, path, \
 				 file_actions, attrp, argv, envp); \
   }
 
@@ -1500,7 +1518,7 @@ DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_17, posix_spawnp@GLIBC_2.17)
 DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_15, posix_spawnp@GLIBC_2.15)
 DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_2_5, posix_spawnp@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_2, posix_spawnp@GLIBC_2.2)
-DCL_POSIX_SPAWNP (posix_spawnp, CALL_REAL (posix_spawnp))
+DCL_POSIX_SPAWNP (posix_spawnp)
 
 /*------------------------------------------------------------- system */
 int system () __attribute__ ((weak, alias ("__collector_system")));
@@ -1529,10 +1547,10 @@ __collector_system (const char *cmd)
 
 /*------------------------------------------------------------- popen */
 // map interposed symbol versions
-#define DCL_POPEN(dcl_f, real_f) \
+#define DCL_POPEN(dcl_f) \
   FILE *dcl_f (const char *cmd, const char *mode) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_popen == NULL) \
       init_lineage_intf (); \
     TprintfT (DBG_LT0, #dcl_f " (%s) interposing: line_mode=%d combo=%d\n", \
 	      cmd ? cmd : "NULL", line_mode, get_combo_flag ()); \
@@ -1540,11 +1558,11 @@ __collector_system (const char *cmd)
     if (line_mode == LM_TRACK_LINEAGE) \
       INIT_REENTRANCE (guard); \
     if (guard == NULL) \
-      return (real_f) (cmd, mode); \
+      return __real_popen (cmd, mode); \
     int following_combo = 0; \
     linetrace_ext_combo_prologue ("popen", cmd, &following_combo); \
     PUSH_REENTRANCE (guard); \
-    FILE *ret = (real_f) (cmd, mode); \
+    FILE *ret = __real_popen (cmd, mode); \
     POP_REENTRANCE (guard); \
     linetrace_ext_combo_epilogue ("popen", ret == NULL ? -1 : 0, \
 				  &following_combo); \
@@ -1555,7 +1573,7 @@ DCL_FUNC_VER (DCL_POPEN, popen_2_17, popen@GLIBC_2.17)
 DCL_FUNC_VER (DCL_POPEN, popen_2_2_5, popen@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_POPEN, popen_2_1, popen@GLIBC_2.1)
 DCL_FUNC_VER (DCL_POPEN, popen_2_0, popen@GLIBC_2.0)
-DCL_POPEN (popen, CALL_REAL (popen))
+DCL_POPEN (popen)
 
 /*------------------------------------------------------------- grantpt */
 int grantpt () __attribute__ ((weak, alias ("__collector_grantpt")));

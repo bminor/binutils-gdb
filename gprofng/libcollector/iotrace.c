@@ -450,6 +450,21 @@ init_io_intf ()
   else
     __real_fgetpos64 = dlsym (dlflag, "fgetpos64");
 
+  __real_fsetpos64_2_17 = dlvsym (dlflag, "fsetpos64", "GLIBC_2.17");
+  __real_fsetpos64_2_2_5 = dlvsym (dlflag, "fsetpos64", "GLIBC_2.2.5");
+  __real_fsetpos64_2_2 = dlvsym (dlflag, "fsetpos64", "GLIBC_2.2");
+  __real_fsetpos64_2_1 = dlvsym (dlflag, "fsetpos64", "GLIBC_2.1");
+  if (__real_fsetpos64_2_17)
+    __real_fsetpos64 = __real_fsetpos64_2_17;
+  else if (__real_fsetpos64_2_2_5)
+    __real_fsetpos64 = __real_fsetpos64_2_2_5;
+  else if (__real_fsetpos64_2_2)
+    __real_fsetpos64 = __real_fsetpos64_2_2;
+  else if (__real_fsetpos64_2_1)
+    __real_fsetpos64 = __real_fsetpos64_2_1;
+  else
+    __real_fsetpos64 = dlsym (dlflag, "fsetpos64");
+
   __real_pread_2_2 = dlvsym (dlflag, "pread", "GLIBC_2.2");
   if (__real_pread_2_2)
     __real_pread = __real_pread_2_2;
@@ -1001,21 +1016,21 @@ gprofng_open64 (int(real_open64) (const char *, int, ...),
   return fd;
 }
 
-#define DCL_OPEN64(dcl_f, real_f) \
+#define DCL_OPEN64(dcl_f) \
   int dcl_f (const char *path, int oflag, ...) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_open64 == NULL) \
       init_io_intf (); \
     mode_t mode; \
     va_list ap; \
     va_start (ap, oflag); \
     mode = va_arg (ap, mode_t); \
     va_end (ap); \
-    return gprofng_open64 (real_f, path, oflag, mode); \
+    return gprofng_open64 (__real_open64, path, oflag, mode); \
   }
 
 DCL_FUNC_VER (DCL_OPEN64, open64_2_2, open64@GLIBC_2.2)
-DCL_OPEN64 (open64, CALL_REAL(open64))
+DCL_OPEN64 (open64)
 
 
 #define F_ERROR_ARG     0
@@ -1516,19 +1531,19 @@ gprofng_fopen (FILE*(real_fopen) (), const char *filename, const char *mode)
   return fp;
 }
 
-#define DCL_FOPEN(dcl_f, real_f) \
+#define DCL_FOPEN(dcl_f) \
   FILE *dcl_f (const char *filename, const char *mode) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_fopen == NULL) \
       init_io_intf (); \
-    return gprofng_fopen (real_f, filename, mode); \
+    return gprofng_fopen (__real_fopen, filename, mode); \
   }
 
 DCL_FUNC_VER (DCL_FOPEN, fopen_2_17, fopen@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FOPEN, fopen_2_2_5, fopen@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FOPEN, fopen_2_1, fopen@GLIBC_2.1)
 DCL_FUNC_VER (DCL_FOPEN, fopen_2_0, fopen@GLIBC_2.0)
-DCL_FOPEN (fopen, CALL_REAL(fopen))
+DCL_FOPEN (fopen)
 
 /*------------------------------------------------------------- fclose */
 static int
@@ -1564,19 +1579,19 @@ gprofng_fclose (int(real_fclose) (), FILE *stream)
   return stat;
 }
 
-#define DCL_FCLOSE(dcl_f, real_f) \
+#define DCL_FCLOSE(dcl_f) \
   int dcl_f (FILE *stream) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_fclose == NULL) \
       init_io_intf (); \
-    return gprofng_fclose (real_f, stream); \
+    return gprofng_fclose (__real_fclose, stream); \
   }
 
 DCL_FUNC_VER (DCL_FCLOSE, fclose_2_17, fclose@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FCLOSE, fclose_2_2_5, fclose@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FCLOSE, fclose_2_1, fclose@GLIBC_2.1)
 DCL_FUNC_VER (DCL_FCLOSE, fclose_2_0, fclose@GLIBC_2.0)
-DCL_FCLOSE (fclose, CALL_REAL(fclose))
+DCL_FCLOSE (fclose)
 
 /*------------------------------------------------------------- fflush */
 int
@@ -1653,19 +1668,19 @@ gprofng_fdopen (FILE*(real_fdopen) (), int fildes, const char *mode)
   return fp;
 }
 
-#define DCL_FDOPEN(dcl_f, real_f) \
+#define DCL_FDOPEN(dcl_f) \
   FILE *dcl_f (int fildes, const char *mode) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_fdopen == NULL) \
       init_io_intf (); \
-    return gprofng_fdopen (real_f, fildes, mode); \
+    return gprofng_fdopen (__real_fdopen, fildes, mode); \
   }
 
 DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_17, fdopen@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_2_5, fdopen@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_1, fdopen@GLIBC_2.1)
 DCL_FUNC_VER (DCL_FDOPEN, fdopen_2_0, fdopen@GLIBC_2.0)
-DCL_FDOPEN (fdopen, CALL_REAL(fdopen))
+DCL_FDOPEN (fdopen)
 
 /*------------------------------------------------------------- dup */
 int
@@ -2088,16 +2103,16 @@ gprofng_pread (ssize_t(real_pread) (int, void *, size_t, off_t),
   return ret;
 }
 
-#define DCL_PREAD(dcl_f, real_f) \
+#define DCL_PREAD(dcl_f) \
   ssize_t dcl_f (int fildes, void *buf, size_t nbyte, off_t offset) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_pread == NULL) \
       init_io_intf (); \
-    return gprofng_pread (real_f, fildes, buf, nbyte, offset); \
+    return gprofng_pread (__real_pread, fildes, buf, nbyte, offset); \
   }
 
 DCL_FUNC_VER (DCL_PREAD, pread_2_2, pread@GLIBC_2.2)
-DCL_PREAD (pread, CALL_REAL(pread))
+DCL_PREAD (pread)
 
 /*------------------------------------------------------------- pwrite */
 
@@ -2914,19 +2929,19 @@ gprofng_fgetpos (int(real_fgetpos) (FILE *stream, fpos_t *pos),
   return ret;
 }
 
-#define DCL_FGETPOS(dcl_f, real_f) \
+#define DCL_FGETPOS(dcl_f) \
   int dcl_f (FILE *stream, fpos_t *pos) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_fgetpos == NULL) \
       init_io_intf (); \
-    return gprofng_fgetpos (real_f, stream, pos); \
+    return gprofng_fgetpos (__real_fgetpos, stream, pos); \
   }
 
 DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_17, fgetpos@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_2_5, fgetpos@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_2, fgetpos@GLIBC_2.2)
 DCL_FUNC_VER (DCL_FGETPOS, fgetpos_2_0, fgetpos@GLIBC_2.0)
-DCL_FGETPOS (fgetpos, CALL_REAL(fgetpos))
+DCL_FGETPOS (fgetpos)
 
 /*------------------------------------------------------------- fgetpos64 */
 static int
@@ -2962,19 +2977,19 @@ gprofng_fgetpos64 (int(real_fgetpos64) (), FILE *stream, fpos64_t *pos)
   return ret;
 }
 
-#define DCL_FGETPOS64(dcl_f, real_f) \
+#define DCL_FGETPOS64(dcl_f) \
   int dcl_f (FILE *stream, fpos64_t *pos) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_fgetpos64 == NULL) \
       init_io_intf (); \
-    return gprofng_fgetpos64 (real_f, stream, pos); \
+    return gprofng_fgetpos64 (__real_fgetpos64, stream, pos); \
   }
 
 DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_17, fgetpos64@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_2_5, fgetpos64@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_2, fgetpos64@GLIBC_2.2)
 DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_1, fgetpos64@GLIBC_2.1)
-DCL_FGETPOS64 (fgetpos64, CALL_REAL(fgetpos64))
+DCL_FGETPOS64 (fgetpos64)
 
 /*------------------------------------------------------------- fsetpos */
 static int
@@ -3011,19 +3026,19 @@ gprofng_fsetpos (int(real_fsetpos) (FILE *, const fpos_t *),
   return ret;
 }
 
-#define DCL_FSETPOS(dcl_f, real_f) \
+#define DCL_FSETPOS(dcl_f) \
   int dcl_f (FILE *stream, const fpos_t *pos) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_fsetpos == NULL) \
       init_io_intf (); \
-    return gprofng_fsetpos (real_f, stream, pos); \
+    return gprofng_fsetpos (__real_fsetpos, stream, pos); \
   }
 
 DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_17, fsetpos@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_2_5, fsetpos@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_2, fsetpos@GLIBC_2.2)
 DCL_FUNC_VER (DCL_FSETPOS, fsetpos_2_0, fsetpos@GLIBC_2.0)
-DCL_FSETPOS (fsetpos, CALL_REAL(fsetpos))
+DCL_FSETPOS (fsetpos)
 
 /*------------------------------------------------------------- fsetpos64 */
 static int
@@ -3060,19 +3075,19 @@ gprofng_fsetpos64 (int(real_fsetpos64) (FILE *, const fpos64_t *),
   return ret;
 }
 
-#define DCL_FSETPOS64(dcl_f, real_f) \
+#define DCL_FSETPOS64(dcl_f) \
   int dcl_f (FILE *stream, const fpos64_t *pos) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_fsetpos64 == NULL) \
       init_io_intf (); \
-    return gprofng_fsetpos64 (real_f, stream, pos); \
+    return gprofng_fsetpos64 (__real_fsetpos64, stream, pos); \
   }
 
 DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_17, fsetpos64@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_2_5, fsetpos64@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_2, fsetpos64@GLIBC_2.2)
 DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_1, fsetpos64@GLIBC_2.1)
-DCL_FSETPOS64 (fsetpos64, CALL_REAL(fsetpos64))
+DCL_FSETPOS64 (fsetpos64)
 
 /*------------------------------------------------------------- fsync */
 int

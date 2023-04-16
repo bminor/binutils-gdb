@@ -607,18 +607,18 @@ gprofng_pthread_mutex_lock (int (real_func) (pthread_mutex_t *),
   return ret;
 }
 
-#define DCL_PTHREAD_MUTEX_LOCK(dcl_f, real_f) \
+#define DCL_PTHREAD_MUTEX_LOCK(dcl_f) \
   int dcl_f (pthread_mutex_t *mp) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_pthread_mutex_lock == NULL) \
       init_thread_intf (); \
-    return gprofng_pthread_mutex_lock (real_f, mp); \
+    return gprofng_pthread_mutex_lock (__real_pthread_mutex_lock, mp); \
   }
 
 DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_17, pthread_mutex_lock@GLIBC_2.17)
 DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_2_5, pthread_mutex_lock@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_PTHREAD_MUTEX_LOCK, pthread_mutex_lock_2_0, pthread_mutex_lock@GLIBC_2.0)
-DCL_PTHREAD_MUTEX_LOCK (pthread_mutex_lock, CALL_REAL (pthread_mutex_lock))
+DCL_PTHREAD_MUTEX_LOCK (pthread_mutex_lock)
 
 /*------------------------------------------------------------- pthread_cond_wait */
 static int
@@ -654,19 +654,19 @@ gprofng_pthread_cond_wait (int(real_func) (pthread_cond_t *, pthread_mutex_t *),
   return ret;
 }
 
-#define DCL_PTHREAD_COND_WAIT(dcl_f, real_f) \
+#define DCL_PTHREAD_COND_WAIT(dcl_f) \
   int dcl_f (pthread_cond_t *cond, pthread_mutex_t *mutex) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_pthread_cond_wait == NULL) \
       init_thread_intf (); \
-    return gprofng_pthread_cond_wait (real_f, cond, mutex); \
+    return gprofng_pthread_cond_wait (__real_pthread_cond_wait, cond, mutex); \
   }
 
 DCL_FUNC_VER (DCL_PTHREAD_COND_WAIT, pthread_cond_wait_2_17, pthread_cond_wait@GLIBC_2.17)
 DCL_FUNC_VER (DCL_PTHREAD_COND_WAIT, pthread_cond_wait_2_3_2, pthread_cond_wait@GLIBC_2.3.2)
 DCL_FUNC_VER (DCL_PTHREAD_COND_WAIT, pthread_cond_wait_2_2_5, pthread_cond_wait@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_PTHREAD_COND_WAIT, pthread_cond_wait_2_0, pthread_cond_wait@GLIBC_2.0)
-DCL_PTHREAD_COND_WAIT (pthread_cond_wait, CALL_REAL (pthread_cond_wait))
+DCL_PTHREAD_COND_WAIT (pthread_cond_wait)
 
 /*---------------------------------------------------- pthread_cond_timedwait */
 static int
@@ -704,20 +704,20 @@ gprofng_pthread_cond_timedwait (int(real_func) (pthread_cond_t *,
   return ret;
 }
 
-#define DCL_PTHREAD_COND_TIMEDWAIT(dcl_f, real_f) \
+#define DCL_PTHREAD_COND_TIMEDWAIT(dcl_f) \
   int dcl_f (pthread_cond_t *cond, pthread_mutex_t *mutex, \
 	     const struct timespec *abstime) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_pthread_cond_timedwait == NULL) \
       init_thread_intf (); \
-    return gprofng_pthread_cond_timedwait (real_f, cond, mutex, abstime); \
+    return gprofng_pthread_cond_timedwait (__real_pthread_cond_timedwait, cond, mutex, abstime); \
   }
 
 DCL_FUNC_VER (DCL_PTHREAD_COND_TIMEDWAIT, pthread_cond_timedwait_2_17, pthread_cond_timedwait@GLIBC_2.17)
 DCL_FUNC_VER (DCL_PTHREAD_COND_TIMEDWAIT, pthread_cond_timedwait_2_3_2, pthread_cond_timedwait@GLIBC_2.3.2)
 DCL_FUNC_VER (DCL_PTHREAD_COND_TIMEDWAIT, pthread_cond_timedwait_2_2_5, pthread_cond_timedwait@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_PTHREAD_COND_TIMEDWAIT, pthread_cond_timedwait_2_0, pthread_cond_timedwait@GLIBC_2.0)
-DCL_PTHREAD_COND_TIMEDWAIT (pthread_cond_timedwait, CALL_REAL (pthread_cond_timedwait))
+DCL_PTHREAD_COND_TIMEDWAIT (pthread_cond_timedwait)
 
 
 /*------------------------------------------------------------- pthread_join */
@@ -753,19 +753,19 @@ gprofng_pthread_join (int(real_func) (pthread_t, void **),
   return ret;
 }
 
-#define DCL_PTHREAD_JOIN(dcl_f, real_f) \
+#define DCL_PTHREAD_JOIN(dcl_f) \
   int dcl_f (pthread_t target_thread, void **status) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_pthread_join == NULL) \
       init_thread_intf (); \
-    return gprofng_pthread_join (real_f, target_thread, status); \
+    return gprofng_pthread_join (__real_pthread_join, target_thread, status); \
   }
 
 DCL_FUNC_VER (DCL_PTHREAD_JOIN, pthread_join_2_34, pthread_join@GLIBC_2.34)
 DCL_FUNC_VER (DCL_PTHREAD_JOIN, pthread_join_2_17, pthread_join@GLIBC_2.17)
 DCL_FUNC_VER (DCL_PTHREAD_JOIN, pthread_join_2_2_5, pthread_join@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_PTHREAD_JOIN, pthread_join_2_0, pthread_join@GLIBC_2.0)
-DCL_PTHREAD_JOIN (pthread_join, CALL_REAL (pthread_join))
+DCL_PTHREAD_JOIN (pthread_join)
 
 /*------------------------------------------------------------- sem_wait */
 static int
@@ -800,12 +800,12 @@ gprofng_sem_wait (int (real_func) (sem_t *), sem_t *sp)
   return ret;
 }
 
-#define DCL_SEM_WAIT(dcl_f, real_f) \
+#define DCL_SEM_WAIT(dcl_f) \
   int dcl_f (sem_t *sp) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_sem_wait == NULL) \
       init_thread_intf (); \
-    return gprofng_sem_wait (real_f, sp); \
+    return gprofng_sem_wait (__real_sem_wait, sp); \
   }
 
 DCL_FUNC_VER (DCL_SEM_WAIT, sem_wait_2_34, sem_wait@GLIBC_2.34)
@@ -813,4 +813,4 @@ DCL_FUNC_VER (DCL_SEM_WAIT, sem_wait_2_17, sem_wait@GLIBC_2.17)
 DCL_FUNC_VER (DCL_SEM_WAIT, sem_wait_2_2_5, sem_wait@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_SEM_WAIT, sem_wait_2_0, sem_wait@GLIBC_2.0)
 DCL_FUNC_VER (DCL_SEM_WAIT, sem_wait_2_1, sem_wait@GLIBC_2.1)
-DCL_SEM_WAIT (sem_wait, CALL_REAL (sem_wait))
+DCL_SEM_WAIT (sem_wait)

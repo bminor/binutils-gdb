@@ -695,7 +695,16 @@ init_interposition_intf ()
   __real_pthread_sigmask_2_17 = dlvsym (dlflag, "pthread_sigmask", "GLIBC_2.17");
   __real_pthread_sigmask_2_2_5 = dlvsym (dlflag, "pthread_sigmask", "GLIBC_2.2.5");
   __real_pthread_sigmask_2_0 = dlvsym (dlflag, "pthread_sigmask", "GLIBC_2.0");
-  __real_pthread_sigmask = dlsym (dlflag, "pthread_sigmask");
+  if (__real_pthread_sigmask_2_32)
+    __real_pthread_sigmask = __real_pthread_sigmask_2_32;
+  else if (__real_pthread_sigmask_2_17)
+    __real_pthread_sigmask = __real_pthread_sigmask_2_17;
+  else if (__real_pthread_sigmask_2_2_5)
+    __real_pthread_sigmask = __real_pthread_sigmask_2_2_5;
+  else if (__real_pthread_sigmask_2_0)
+    __real_pthread_sigmask = __real_pthread_sigmask_2_0;
+  else
+    __real_pthread_sigmask = dlsym (dlflag, "pthread_sigmask");
 
   __real_pthread_create_2_34 = dlvsym (dlflag, "pthread_create", "GLIBC_2.34");
   __real_pthread_create_2_17 = dlvsym (dlflag, "pthread_create", "GLIBC_2.17");
@@ -922,12 +931,12 @@ gprofng_timer_create (int (real_func) (), clockid_t clockid,
   return -1;
 }
 
-#define DCL_TIMER_CREATE(dcl_f, real_f) \
+#define DCL_TIMER_CREATE(dcl_f) \
   int dcl_f (clockid_t clockid, struct sigevent *sevp, timer_t *timerid) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_timer_create == NULL) \
       init_interposition_intf (); \
-    return gprofng_timer_create (real_f, clockid, sevp, timerid); \
+    return gprofng_timer_create (__real_timer_create, clockid, sevp, timerid); \
   }
 
 DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_34, timer_create@GLIBC_2.34)
@@ -935,7 +944,7 @@ DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_17, timer_create@GLIBC_2.17)
 DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_3_3, timer_create@GLIBC_2.3.3)
 DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_2_5, timer_create@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_TIMER_CREATE, timer_create_2_2, timer_create@GLIBC_2.2)
-DCL_TIMER_CREATE (timer_create, CALL_REAL (timer_create))
+DCL_TIMER_CREATE (timer_create)
 
 /*------------------------------------------------------------- setitimer */
 int
@@ -1055,19 +1064,19 @@ gprofng_pthread_sigmask (int (real_func) (),
 
 }
 
-#define DCL_PTHREAD_SIGMASK(dcl_f, real_f) \
+#define DCL_PTHREAD_SIGMASK(dcl_f) \
   int dcl_f (int how, const sigset_t *iset, sigset_t* oset) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_pthread_sigmask == NULL) \
       init_interposition_intf (); \
-    return gprofng_pthread_sigmask (real_f, how, iset, oset); \
+    return gprofng_pthread_sigmask (__real_pthread_sigmask, how, iset, oset); \
   }
 
 DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_32, pthread_sigmask@GLIBC_2.32)
 DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_17, pthread_sigmask@GLIBC_2.17)
 DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_2_5, pthread_sigmask@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_PTHREAD_SIGMASK, pthread_sigmask_2_0, pthread_sigmask@GLIBC_2.0)
-DCL_PTHREAD_SIGMASK (pthread_sigmask, CALL_REAL(pthread_sigmask))
+DCL_PTHREAD_SIGMASK (pthread_sigmask)
 
 /*----------------------------------------------------------- pthread_create */
 typedef struct _CollectorArgs
@@ -1154,13 +1163,13 @@ gprofng_pthread_create (int (real_func) (), pthread_t *thread,
 }
 
 
-#define DCL_PTHREAD_CREATE(dcl_f, real_f) \
+#define DCL_PTHREAD_CREATE(dcl_f) \
   int dcl_f (pthread_t *thread, const pthread_attr_t *attr, \
              void *(*func)(void*), void *arg) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_pthread_create == NULL) \
       init_interposition_intf (); \
-     return gprofng_pthread_create (real_f, thread, attr, func, arg); \
+     return gprofng_pthread_create (__real_pthread_create, thread, attr, func, arg); \
   }
 
 DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_34, pthread_create@GLIBC_2.34)
@@ -1168,7 +1177,7 @@ DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_17, pthread_create@GLIBC_2.17
 DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_2_5, pthread_create@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_1, pthread_create@GLIBC_2.1)
 DCL_FUNC_VER (DCL_PTHREAD_CREATE, pthread_create_2_0, pthread_create@GLIBC_2.0)
-DCL_PTHREAD_CREATE (pthread_create, CALL_REAL (pthread_create))
+DCL_PTHREAD_CREATE (pthread_create)
 
 int
 __collector_ext_clone_pthread (int (*fn)(void *), void *child_stack, int flags, void *arg,

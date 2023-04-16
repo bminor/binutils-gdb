@@ -1609,13 +1609,13 @@ gprofng_dlopen (void*(real_dlopen) (const char *, int),
   return ret;
 }
 
-#define DCL_DLOPEN(dcl_f, real_f) \
+#define DCL_DLOPEN(dcl_f) \
 void *dcl_f (const char *pathname, int mode) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_dlopen == NULL) \
       init_mmap_intf (); \
     void *caller = __builtin_return_address (0); \
-    return gprofng_dlopen (real_f, caller, pathname, mode); \
+    return gprofng_dlopen (__real_dlopen, caller, pathname, mode); \
   }
 
 DCL_FUNC_VER (DCL_DLOPEN, dlopen_2_34, dlopen@GLIBC_2.34)
@@ -1623,7 +1623,7 @@ DCL_FUNC_VER (DCL_DLOPEN, dlopen_2_17, dlopen@GLIBC_2.17)
 DCL_FUNC_VER (DCL_DLOPEN, dlopen_2_2_5, dlopen@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_DLOPEN, dlopen_2_1, dlopen@GLIBC_2.1)
 DCL_FUNC_VER (DCL_DLOPEN, dlopen_2_0, dlopen@GLIBC_2.0)
-DCL_DLOPEN (dlopen, CALL_REAL (dlopen))
+DCL_DLOPEN (dlopen)
 
 /*------------------------------------------------------------- dlclose */
 static int
@@ -1651,16 +1651,16 @@ gprofng_dlclose (int (real_dlclose) (void *), void *handle)
   return ret;
 }
 
-#define DCL_DLCLOSE(dcl_f, real_f) \
+#define DCL_DLCLOSE(dcl_f) \
 int dcl_f (void *handle) \
   { \
-    if ((real_f) == NULL) \
+    if (__real_dlclose == NULL) \
       init_mmap_intf (); \
-    return gprofng_dlclose (real_f, handle); \
+    return gprofng_dlclose (__real_dlclose, handle); \
   }
 
 DCL_FUNC_VER (DCL_DLCLOSE, dlclose_2_34, dlclose@GLIBC_2.34)
 DCL_FUNC_VER (DCL_DLCLOSE, dlclose_2_17, dlclose@GLIBC_2.17)
 DCL_FUNC_VER (DCL_DLCLOSE, dlclose_2_2_5, dlclose@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_DLCLOSE, dlclose_2_0, dlclose@GLIBC_2.0)
-DCL_DLCLOSE (dlclose, CALL_REAL (dlclose))
+DCL_DLCLOSE (dlclose)

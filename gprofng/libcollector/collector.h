@@ -50,7 +50,7 @@
 #else
 #define DCL_FUNC_VER(REAL_DCL, sym, ver) \
   SYMVER_ATTRIBUTE (__collector_ ## sym, ver) \
-  REAL_DCL (__collector_ ## sym, CALL_REAL (sym))
+  REAL_DCL (__collector_ ## sym)
 #endif
 
 extern hrtime_t __collector_start_time;
