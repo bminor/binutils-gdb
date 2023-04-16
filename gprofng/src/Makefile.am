@@ -121,7 +121,7 @@ QLParser.tab.cc QLParser.tab.hh: QLParser.yy
 	$(BISON) $^
 
 BUILT_SOURCES = QLParser.tab.hh
-EXTRA_DIST = QLParser.yy $(man_MANS)
+EXTRA_DIST = QLParser.yy
 
 
 lib_LTLIBRARIES = $(LIBGPROFNG)
@@ -156,60 +156,6 @@ gp_display_src_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 
 gp_display_text_SOURCES = gp-display-text.cc ipc.cc ipcio.cc
 gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
-
-
-if BUILD_MAN
-
-man_MANS = \
-	gp-archive.1 \
-	gp-collect-app.1 \
-	gp-display-src.1 \
-	gp-display-text.1
-
-MAINTAINERCLEANFILES = $(man_MANS)
-
-# The man pages depend on the version number and on a help2man include file.
-common_mandeps = $(top_srcdir)/../bfd/version.m4
-
-# Use -o so that the `missing' program can infer the output file.
-# Embolden subcommand names in the output, and include a SEE ALSO.
-# Arrange to regenerate the output if we have help2man, but leave the
-# disted output there otherwise.
-# Some extra annoying complexity is in place so that people without
-# help2man dno't accidentally overwrite the manpage.
-
-INFO_PAGE            = "gprofng"
-MANUAL               = "User Commands"
-TEXT_GPROFNG         = "the driver for the gprofng tool suite"
-TEXT_GP_ARCHIVE      = "archive gprofng experiment data"
-TEXT_GP_COLLECT_APP  = "collect performance data for the target application"
-TEXT_GP_DISPLAY_SRC  = "display the source code, optionally interleaved with the disassembly of the target object"
-TEXT_GP_DISPLAY_TEXT = "display the performance data in plain text format"
-
-HELP2MAN_OPT = --libtool --no-info --info-page=$(INFO_PAGE) --manual=$(MANUAL)
-H2M_FILTER = | sed 's/\.TP/\.TP\n.B/' | sed 's/Commands:/\.SH COMMANDS/' \
-  | sed 's/See also:/\.SH SEE ALSO/' | sed 's/Documentation:/.SH DOCUMENTATION/' \
-  | sed 's/Limitations:/.SH LIMITATIONS/'
-
-gp-archive.1: $(srcdir)/gp-archive.cc $(common_mandeps) | ./gp-archive$(EXEEXT)
-	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
-	  --name=$(TEXT_GP_ARCHIVE) ./gp-archive$(EXEEXT) $(H2M_FILTER) > $@
-
-gp-collect-app.1: $(srcdir)/gp-collect-app.cc $(common_mandeps) | ./gp-collect-app$(EXEEXT)
-	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
-	  --name=$(TEXT_GP_COLLECT_APP) ./gp-collect-app$(EXEEXT) $(H2M_FILTER) > $@
-
-gp-display-src.1: $(srcdir)/gp-display-src.cc $(srcdir)/Command.cc \
-		$(common_mandeps) | ./gp-display-src$(EXEEXT)
-	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
-	  --name=$(TEXT_GP_DISPLAY_SRC) ./gp-display-src$(EXEEXT) $(H2M_FILTER) > $@
-
-gp-display-text.1: $(srcdir)/gp-display-text.cc $(srcdir)/Command.cc \
-		$(common_mandeps) | ./gp-display-text$(EXEEXT)
-	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \
-	  --name=$(TEXT_GP_DISPLAY_TEXT) ./gp-display-text$(EXEEXT) $(H2M_FILTER) > $@
-
-endif
 
 # Distribution involves building the binaries to generate the manpage,
 # so ensure that the necessary libraries are built at dist time.
