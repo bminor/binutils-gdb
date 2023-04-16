@@ -625,9 +625,6 @@ objfile_relocate1 (struct objfile *objfile,
 
       for (block *b : bv->blocks ())
 	{
-	  struct symbol *sym;
-	  struct mdict_iterator miter;
-
 	  b->set_start (b->start () + delta[block_line_section]);
 	  b->set_end (b->end () + delta[block_line_section]);
 
@@ -639,10 +636,8 @@ objfile_relocate1 (struct objfile *objfile,
 
 	  /* We only want to iterate over the local symbols, not any
 	     symbols in included symtabs.  */
-	  ALL_DICT_SYMBOLS (b->multidict (), miter, sym)
-	    {
-	      relocate_one_symbol (sym, objfile, delta);
-	    }
+	  for (struct symbol *sym : b->multidict_symbols ())
+	    relocate_one_symbol (sym, objfile, delta);
 	}
     }
 

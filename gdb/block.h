@@ -143,6 +143,10 @@ struct block : public allocate_on_obstack
   multidictionary *multidict () const
   { return m_multidict; }
 
+  /* Return an iterator range for this block's multidict.  */
+  iterator_range<mdict_iterator_wrapper> multidict_symbols () const
+  { return iterator_range<mdict_iterator_wrapper> (m_multidict); }
+
   /* Set this block's multidict.  */
   void set_multidict (multidictionary *multidict)
   { m_multidict = multidict; }

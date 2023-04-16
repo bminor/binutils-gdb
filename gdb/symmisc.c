@@ -236,9 +236,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 {
   struct objfile *objfile = symtab->compunit ()->objfile ();
   struct gdbarch *gdbarch = objfile->arch ();
-  struct mdict_iterator miter;
   const struct linetable *l;
-  struct symbol *sym;
   int depth;
 
   gdb_printf (outfile, "\nSymtab for file %s at %s\n",
@@ -307,7 +305,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  /* Now print each symbol in this block (in no particular order, if
 	     we're using a hashtable).  Note that we only want this
 	     block, not any blocks from included symtabs.  */
-	  ALL_DICT_SYMBOLS (b->multidict (), miter, sym)
+	  for (struct symbol *sym : b->multidict_symbols ())
 	    {
 	      try
 		{

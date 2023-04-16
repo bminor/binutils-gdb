@@ -244,7 +244,6 @@ buildsym_compunit::finish_block_internal
   if (symbol)
     {
       struct type *ftype = symbol->type ();
-      struct mdict_iterator miter;
       symbol->set_value_block (block);
       symbol->set_section_index (SECT_OFF_TEXT (m_objfile));
       block->set_function (symbol);
@@ -255,11 +254,10 @@ buildsym_compunit::finish_block_internal
 	     function's type.  Set that from the type of the
 	     parameter symbols.  */
 	  int nparams = 0, iparams;
-	  struct symbol *sym;
 
 	  /* Here we want to directly access the dictionary, because
 	     we haven't fully initialized the block yet.  */
-	  ALL_DICT_SYMBOLS (block->multidict (), miter, sym)
+	  for (struct symbol *sym : block->multidict_symbols ())
 	    {
 	      if (sym->is_argument ())
 		nparams++;
@@ -274,7 +272,7 @@ buildsym_compunit::finish_block_internal
 	      iparams = 0;
 	      /* Here we want to directly access the dictionary, because
 		 we haven't fully initialized the block yet.  */
-	      ALL_DICT_SYMBOLS (block->multidict (), miter, sym)
+	      for (struct symbol *sym : block->multidict_symbols ())
 		{
 		  if (iparams == nparams)
 		    break;
@@ -975,8 +973,6 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
     for (block_i = 0; block_i < blockvector->num_blocks (); block_i++)
       {
 	struct block *block = blockvector->block (block_i);
-	struct symbol *sym;
-	struct mdict_iterator miter;
 
 	/* Inlined functions may have symbols not in the global or
 	   static symbol lists.  */
@@ -985,9 +981,10 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	    block->function ()->set_symtab (symtab);
 
 	/* Note that we only want to fix up symbols from the local
-	   blocks, not blocks coming from included symtabs.  That is why
-	   we use ALL_DICT_SYMBOLS here and not a block iterator.  */
-	ALL_DICT_SYMBOLS (block->multidict (), miter, sym)
+	   blocks, not blocks coming from included symtabs.  That is
+	   why we use an mdict iterator here and not a block
+	   iterator.  */
+	for (struct symbol *sym : block->multidict_symbols ())
 	  if (sym->symtab () == NULL)
 	    sym->set_symtab (symtab);
       }
