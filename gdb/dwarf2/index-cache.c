@@ -216,6 +216,33 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
   return {};
 }
 
+/* See index-cache.h.  */
+
+gdb::array_view<const gdb_byte>
+index_cache::lookup_gdb_index_debuginfod (const char *index_path,
+					  std::unique_ptr<index_cache_resource> *resource)
+{
+  try
+    {
+      /* Try to map that file.  */
+      index_cache_resource_mmap *mmap_resource
+	= new index_cache_resource_mmap (index_path);
+
+      /* Hand the resource to the caller.  */
+      resource->reset (mmap_resource);
+
+      return gdb::array_view<const gdb_byte>
+	  ((const gdb_byte *) mmap_resource->mapping.get (),
+	   mmap_resource->mapping.size ());
+    }
+  catch (const gdb_exception_error &except)
+    {
+      warning (_("Unable to read %s: %s"), index_path, except.what ());
+    }
+
+  return {};
+}
+
 #else /* !HAVE_SYS_MMAN_H */
 
 /* See dwarf-index-cache.h.  This is a no-op on unsupported systems.  */
@@ -227,6 +254,12 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
   return {};
 }
 
+gdb::array_view<const gdb_byte>
+index_cache::lookup_gdb_index_debuginfod (const char *index_path,
+					  std::unique_ptr<index_cache_resource> *resource)
+{
+  return {};
+}
 #endif
 
 /* See dwarf-index-cache.h.  */

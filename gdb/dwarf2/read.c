@@ -34,6 +34,7 @@
 #include "dwarf2/attribute.h"
 #include "dwarf2/comp-unit-head.h"
 #include "dwarf2/cu.h"
+#include "dwarf2/frame.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/index-common.h"
 #include "dwarf2/leb.h"
@@ -95,6 +96,8 @@
 #include "split-name.h"
 #include "gdbsupport/parallel-for.h"
 #include "gdbsupport/thread-pool.h"
+#include "inferior.h"
+#include "debuginfod-support.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -3168,7 +3171,7 @@ dwarf2_base_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
 }
 
 struct compunit_symtab *
-dwarf2_base_index_functions::find_pc_sect_compunit_symtab
+dwarf2_base_index_functions::do_find_pc_sect_compunit_symtab
      (struct objfile *objfile,
       struct bound_minimal_symbol msymbol,
       CORE_ADDR pc,
@@ -3197,6 +3200,32 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
 	     paddress (objfile->arch (), pc));
 
   return result;
+}
+
+struct compunit_symtab *
+dwarf2_base_index_functions::find_pc_sect_compunit_symtab
+     (struct objfile *objfile,
+      struct bound_minimal_symbol msymbol,
+      CORE_ADDR pc,
+      struct obj_section *section,
+      int warn_if_readin)
+{
+  if (objfile->flags & OBJF_READNEVER)
+    return nullptr;
+
+  try
+    {
+      return do_find_pc_sect_compunit_symtab (objfile, msymbol, pc,
+					      section, warn_if_readin);
+    }
+  catch (gdb_exception e)
+    {
+      if ((objfile->flags & OBJF_DOWNLOAD_DEFERRED) == 0)
+	exception_print (gdb_stderr, e);
+      else
+	read_full_dwarf_from_debuginfod (objfile, this);
+      return nullptr;
+    }
 }
 
 void
@@ -3355,6 +3384,29 @@ get_gdb_index_contents_from_cache_dwz (objfile *obj, dwz_file *dwz)
   return global_index_cache.lookup_gdb_index (build_id, &dwz->index_cache_res);
 }
 
+/* Query debuginfod for the .gdb_index matching OBJFILE's build-id.  Return the
+   contents if successful.  */
+
+static gdb::array_view<const gdb_byte>
+get_gdb_index_contents_from_debuginfod (objfile *objfile, dwarf2_per_bfd *per_bfd)
+{
+  const bfd_build_id *build_id = build_id_bfd_get (objfile->obfd.get ());
+  if (build_id == nullptr)
+    return {};
+
+  gdb::unique_xmalloc_ptr<char> index_path;
+  scoped_fd fd = debuginfod_section_query (build_id->data, build_id->size,
+					   bfd_get_filename
+					     (objfile->obfd.get ()),
+					   ".gdb_index",
+					   &index_path);
+  if (fd.get () < 0)
+    return {};
+
+  return global_index_cache.lookup_gdb_index_debuginfod
+    (index_path.get (), &per_bfd->index_cache_res);
+}
+
 static quick_symbol_functions_up make_cooked_index_funcs ();
 
 /* See dwarf2/public.h.  */
@@ -3420,8 +3472,104 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       return;
     }
 
+  if ((objfile->flags & OBJF_DOWNLOAD_DEFERRED)
+      && dwarf2_read_gdb_index (per_objfile,
+				get_gdb_index_contents_from_debuginfod,
+				nullptr))
+    {
+      dwarf_read_debug_printf ("found .gdb_index from debuginfod");
+      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
+      return;
+    }
+
   global_index_cache.miss ();
   objfile->qf.push_front (make_cooked_index_funcs ());
+}
+
+/* See read.h.  */
+
+void
+read_full_dwarf_from_debuginfod (struct objfile *objfile,
+				 dwarf2_base_index_functions *fncs)
+{
+  gdb_assert (objfile->flags & OBJF_DOWNLOAD_DEFERRED);
+
+  const struct bfd_build_id *build_id = build_id_bfd_get (objfile->obfd.get ());
+  const char *filename;
+  gdb_bfd_ref_ptr debug_bfd;
+  gdb::unique_xmalloc_ptr<char> symfile_path;
+  scoped_fd fd;
+
+  if (build_id == nullptr)
+    goto unset;
+
+  filename = bfd_get_filename (objfile->obfd.get ());
+  fd = debuginfod_debuginfo_query (build_id->data, build_id->size,
+				   filename, &symfile_path);
+  if (fd.get () < 0)
+    goto unset;
+
+  /* Separate debuginfo successfully retrieved from server.  */
+  debug_bfd = symfile_bfd_open (symfile_path.get ());
+  if (debug_bfd == nullptr
+      || !build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
+    {
+      warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),
+	       filename);
+      goto unset;
+    }
+
+  /* This may also trigger a dwz download.  */
+  symbol_file_add_separate (debug_bfd, symfile_path.get (),
+			    current_inferior ()->symfile_flags, objfile);
+
+  /* Clear frame data so it can be recalculated using DWARF.  */
+  dwarf2_clear_frame_data (objfile);
+
+unset:
+  objfile->flags &= ~OBJF_DOWNLOAD_DEFERRED;
+
+  /* Avoid reading this objfile's index from now on.  If available the
+     separate debug objfile's index will be used instead, since it actually
+     contains the symbols and CUs referenced in the index.  */
+  objfile->remove_partial_symbol (fncs);
+}
+
+/* See public.h.  */
+
+bool
+dwarf2_has_separate_index (struct objfile *objfile)
+{
+  if (objfile->flags & OBJF_DOWNLOAD_DEFERRED)
+    return true;
+  if (objfile->flags & OBJF_MAINLINE)
+    return false;
+  if (!IS_DIR_SEPARATOR (*objfile_filename (objfile)))
+    return false;
+
+  gdb::unique_xmalloc_ptr<char> index_path;
+  const bfd_build_id *build_id = build_id_bfd_get (objfile->obfd.get ());
+
+  if (build_id == nullptr)
+    return false;
+
+  scoped_fd fd = debuginfod_section_query (build_id->data,
+					   build_id->size,
+					   bfd_get_filename
+					     (objfile->obfd.get ()),
+					   ".gdb_index",
+					   &index_path);
+
+  if (fd.get () < 0)
+    return false;
+
+  /* We found a separate .gdb_index file so a separate debuginfo file
+     should exist, but we don't want to download it until necessary.
+     Attach the index to this objfile and defer the debuginfo download
+     until gdb needs to expand symtabs referenced by the index.  */
+  objfile->flags |= OBJF_DOWNLOAD_DEFERRED;
+  dwarf2_initialize_objfile (objfile);
+  return true;
 }
 
 

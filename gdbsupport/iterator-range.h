@@ -60,5 +60,4 @@ struct iterator_range
 private:
   IteratorType m_begin, m_end;
 };
-
 #endif /* GDBSUPPORT_ITERATOR_RANGE_H */

@@ -1242,7 +1242,7 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 	    symbol_file_add_separate (debug_bfd, debugfile.c_str (),
 				      symfile_flags, objfile);
 	}
-      else
+      else if (!dwarf2_has_separate_index (objfile))
 	{
 	  has_dwarf2 = false;
 	  const struct bfd_build_id *build_id

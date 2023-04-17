@@ -52,6 +52,7 @@
 #include "gdb_bfd.h"
 #include "btrace.h"
 #include "gdbsupport/pathstuff.h"
+#include "symfile.h"
 
 #include <algorithm>
 #include <vector>

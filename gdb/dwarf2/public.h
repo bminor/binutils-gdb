@@ -40,4 +40,11 @@ extern void dwarf2_initialize_objfile (struct objfile *objfile);
 
 extern void dwarf2_build_frame_info (struct objfile *);
 
+/* Query debuginfod for the .gdb_index associated with OBJFILE.  If
+   successful, create an objfile to hold the .gdb_index information
+   and act as a placeholder until the full debuginfo needs to be
+   downloaded.  */
+
+extern bool dwarf2_has_separate_index (struct objfile *);
+
 #endif /* DWARF2_PUBLIC_H */

@@ -613,6 +613,17 @@ public:
   /* See quick_symbol_functions.  */
   void require_partial_symbols (bool verbose);
 
+  /* Remove TARGET from this objfile's collection of quick_symbol_functions.  */
+  void remove_partial_symbol (quick_symbol_functions *target)
+  {
+    for (quick_symbol_functions_up &qf_up : qf)
+      if (qf_up.get () == target)
+	{
+	  qf.remove (qf_up);
+	  return;
+	}
+  }
+
   /* Return the relocation offset applied to SECTION.  */
   CORE_ADDR section_offset (bfd_section *section) const
   {
@@ -699,13 +710,20 @@ public:
 
 private:
 
+  using qf_list = std::forward_list<quick_symbol_functions_up>;
+  using unwrapping_qf_range = iterator_range<unwrapping_iterator<qf_list::iterator>>;
+  using qf_safe_range = basic_safe_range<unwrapping_qf_range>;
+
   /* Ensure that partial symbols have been read and return the "quick" (aka
      partial) symbol functions for this symbol reader.  */
-  const std::forward_list<quick_symbol_functions_up> &
+  qf_safe_range
   qf_require_partial_symbols ()
   {
     this->require_partial_symbols (true);
-    return qf;
+    return qf_safe_range
+      (unwrapping_qf_range
+	(unwrapping_iterator<qf_list::iterator> (qf.begin ()),
+	 unwrapping_iterator<qf_list::iterator> (qf.end ())));
   }
 
 public:

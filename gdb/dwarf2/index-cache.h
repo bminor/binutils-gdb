@@ -67,6 +67,19 @@ public:
   lookup_gdb_index (const bfd_build_id *build_id,
 		    std::unique_ptr<index_cache_resource> *resource);
 
+  /* Look for an index file located at INDEX_PATH in the debuginfod cache.
+     Unlike lookup_gdb_index, this function does not exit early if the
+     index cache has not been enabled.
+
+     If found, return the contents as an array_view and store the underlying
+     resources (allocated memory, mapped file, etc) in RESOURCE.  The returned
+     array_view is valid as long as RESOURCE is not destroyed.
+
+     If no matching index file is found, return an empty array view.  */
+  gdb::array_view<const gdb_byte>
+  lookup_gdb_index_debuginfod (const char *index_path,
+			       std::unique_ptr<index_cache_resource> *resource);
+
   /* Return the number of cache hits.  */
   unsigned int n_hits () const
   { return m_n_hits; }

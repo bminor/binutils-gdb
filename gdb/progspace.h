@@ -40,56 +40,141 @@ struct address_space;
 struct program_space;
 struct so_list;
 
-typedef std::list<std::unique_ptr<objfile>> objfile_list;
+/* An iterator that wraps an iterator over std::unique_ptr, and dereferences
+   the returned object.  This is useful for iterating over a list of shared
+   pointers and returning raw pointers -- which helped avoid touching a lot
+   of code when changing how objfiles are managed.  */
 
-/* An iterator that wraps an iterator over std::unique_ptr<objfile>,
-   and dereferences the returned object.  This is useful for iterating
-   over a list of shared pointers and returning raw pointers -- which
-   helped avoid touching a lot of code when changing how objfiles are
-   managed.  */
-
-class unwrapping_objfile_iterator
+template<typename UniquePtrIter>
+class unwrapping_iterator
 {
 public:
+  typedef unwrapping_iterator self_type;
+  typedef typename UniquePtrIter::value_type::pointer value_type;
+  typedef typename UniquePtrIter::reference  reference;
+  typedef typename UniquePtrIter::pointer pointer;
+  typedef typename UniquePtrIter::iterator_category iterator_category;
+  typedef typename UniquePtrIter::difference_type difference_type;
 
-  typedef unwrapping_objfile_iterator self_type;
+  unwrapping_iterator (UniquePtrIter iter)
+    : m_iter (std::move (iter))
+  {
+  }
+
+  value_type operator* () const
+  {
+    return m_iter->get ();
+  }
+
+  unwrapping_iterator operator++ ()
+  {
+    ++m_iter;
+    return *this;
+  }
+
+  bool operator!= (const unwrapping_iterator &other) const
+  {
+    return m_iter != other.m_iter;
+  }
+
+private:
+  /* The underlying iterator.  */
+  UniquePtrIter m_iter;
+};
+
+typedef std::list<std::unique_ptr<objfile>> objfile_list;
+
+/* An reverse iterator that wraps an iterator over objfile_list, and
+   dereferences the returned object.  This is useful for reverse iterating
+   over a list of shared pointers and returning raw pointers -- which helped
+   avoid touching a lot of code when changing how objfiles are managed.  */
+
+class unwrapping_reverse_objfile_iterator
+{
+public:
+  typedef unwrapping_reverse_objfile_iterator self_type;
   typedef typename ::objfile *value_type;
   typedef typename ::objfile &reference;
   typedef typename ::objfile **pointer;
   typedef typename objfile_list::iterator::iterator_category iterator_category;
   typedef typename objfile_list::iterator::difference_type difference_type;
 
-  unwrapping_objfile_iterator (objfile_list::iterator iter)
-    : m_iter (std::move (iter))
-  {
-  }
-
-  objfile *operator* () const
+  value_type operator* () const
   {
     return m_iter->get ();
   }
 
-  unwrapping_objfile_iterator operator++ ()
+  unwrapping_reverse_objfile_iterator operator++ ()
   {
-    ++m_iter;
+    if (m_iter != m_begin)
+      --m_iter;
+    else
+      {
+	/* We can't decrement M_ITER since it is the begin iterator of the
+	   objfile list.  Set M_ITER to the list's end iterator to indicate
+	   this is now one-past-the-end.  */
+	m_iter = m_end;
+
+	/* Overwrite M_BEGIN to avoid possibly copying an invalid iterator.  */
+	m_begin = m_end;
+      }
+
     return *this;
   }
 
-  bool operator!= (const unwrapping_objfile_iterator &other) const
+  bool operator!= (const unwrapping_reverse_objfile_iterator &other) const
   {
     return m_iter != other.m_iter;
   }
 
-private:
+  /* Return an unwrapping reverse iterator starting at the last element of
+     OBJF_LIST.  */
+  static unwrapping_reverse_objfile_iterator begin (objfile_list &objf_list)
+  {
+    auto begin = objf_list.begin ();
+    auto end = objf_list.end ();
+    auto rev_begin = objf_list.end ();
 
-  /* The underlying iterator.  */
-  objfile_list::iterator m_iter;
+    /* Start REV_BEGIN on the last objfile in OBJF_LIST.  */
+    if (begin != end)
+      --rev_begin;
+
+    return unwrapping_reverse_objfile_iterator (rev_begin, begin, end);
+  }
+
+  /* Return a one-past-the-end unwrapping reverse iterator.  */
+  static unwrapping_reverse_objfile_iterator end (objfile_list &objf_list)
+  {
+    return unwrapping_reverse_objfile_iterator (objf_list.end (),
+						objf_list.end (),
+						objf_list.end ());
+  }
+
+private:
+  /* This begin and end methods should be used to create these objects.  */
+  unwrapping_reverse_objfile_iterator (objfile_list::iterator iter,
+				       objfile_list::iterator begin,
+				       objfile_list::iterator end)
+    : m_iter (std::move (iter)), m_begin (std::move (begin)),
+      m_end (std::move (end))
+  {
+  }
+
+ /* The underlying iterator.  */
+ objfile_list::iterator m_iter;
+
+ /* The underlying iterator pointing to the first objfile in the sequence.  Used
+    to track when to stop decrementing M_ITER.  */
+ objfile_list::iterator m_begin;
+
+  /* The underlying iterator's one-past-the-end.  */
+ objfile_list::iterator m_end;
 };
 
+/* A range that returns unwrapping_iterators.  */
 
-/* A range that returns unwrapping_objfile_iterators.  */
-
-using unwrapping_objfile_range = iterator_range<unwrapping_objfile_iterator>;
+using unwrapping_objfile_range
+  = iterator_range<unwrapping_iterator<objfile_list::iterator>>;
 
 /* A program space represents a symbolic view of an address space.
    Roughly speaking, it holds all the data associated with a
@@ -209,11 +294,12 @@ struct program_space
   objfiles_range objfiles ()
   {
     return objfiles_range
-      (unwrapping_objfile_iterator (objfiles_list.begin ()),
-       unwrapping_objfile_iterator (objfiles_list.end ()));
+      (unwrapping_iterator<objfile_list::iterator> (objfiles_list.begin ()),
+       unwrapping_iterator<objfile_list::iterator> (objfiles_list.end ()));
   }
 
-  using objfiles_safe_range = basic_safe_range<objfiles_range>;
+  using objfiles_reverse_range = iterator_range<unwrapping_reverse_objfile_iterator>;
+  using objfiles_safe_reverse_range = basic_safe_range<objfiles_reverse_range>;
 
   /* An iterable object that can be used to iterate over all objfiles.
      The basic use is in a foreach, like:
@@ -221,20 +307,25 @@ struct program_space
      for (objfile *objf : pspace->objfiles_safe ()) { ... }
 
      This variant uses a basic_safe_iterator so that objfiles can be
-     deleted during iteration.  */
-  objfiles_safe_range objfiles_safe ()
+     deleted during iteration.
+
+     The use of a reverse iterator helps ensure that separate debug
+     objfiles are deleted before their parent objfile.  This prevents
+     the invalidation of an iterator due to the deletion of a parent
+     objfile.  */
+  objfiles_safe_reverse_range objfiles_safe ()
   {
-    return objfiles_safe_range
-      (objfiles_range
-	 (unwrapping_objfile_iterator (objfiles_list.begin ()),
-	  unwrapping_objfile_iterator (objfiles_list.end ())));
+    return objfiles_safe_reverse_range
+      (objfiles_reverse_range
+	(unwrapping_reverse_objfile_iterator::begin (objfiles_list),
+	 unwrapping_reverse_objfile_iterator::end (objfiles_list)));
   }
 
-  /* Add OBJFILE to the list of objfiles, putting it just before
-     BEFORE.  If BEFORE is nullptr, it will go at the end of the
+  /* Add OBJFILE to the list of objfiles, putting it just after
+     AFTER.  If AFTER is nullptr, it will go at the end of the
      list.  */
   void add_objfile (std::unique_ptr<objfile> &&objfile,
-		    struct objfile *before);
+		    struct objfile *after);
 
   /* Remove OBJFILE from the list of objfiles.  */
   void remove_objfile (struct objfile *objfile);

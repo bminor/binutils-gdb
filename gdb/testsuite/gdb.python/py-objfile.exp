@@ -135,7 +135,7 @@ gdb_test "p main" "= {<text variable, no debug info>} $hex <main>" \
 gdb_py_test_silent_cmd "python objfile.add_separate_debug_file(\"${binfile}\")" \
     "Add separate debug file file" 1
 
-gdb_py_test_silent_cmd "python sep_objfile = gdb.objfiles()\[0\]" \
+gdb_py_test_silent_cmd "python sep_objfile = gdb.objfiles()\[1\]" \
     "Get separate debug info objfile" 1
 
 gdb_test "python print (sep_objfile.owner.filename)" "${testfile}2" \

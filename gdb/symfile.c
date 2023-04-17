@@ -991,6 +991,10 @@ syms_from_objfile (struct objfile *objfile,
 static void
 finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
 {
+  struct objfile *parent = objfile->separate_debug_objfile_backlink;
+  bool was_deferred
+    = (parent != nullptr) && (parent->flags & OBJF_DOWNLOAD_DEFERRED);
+
   /* If this is the main symbol file we have to clean up all users of the
      old main symbol file.  Otherwise it is sufficient to fixup all the
      breakpoints that may have been redefined by this symbol file.  */
@@ -1001,7 +1005,8 @@ finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
 
       clear_symtab_users (add_flags);
     }
-  else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
+  else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0
+	   && !was_deferred)
     {
       breakpoint_re_set ();
     }

@@ -238,6 +238,10 @@ void dwarf2_append_unwinders (struct gdbarch *gdbarch);
 extern const struct frame_base *
   dwarf2_frame_base_sniffer (frame_info_ptr this_frame);
 
+/* Delete OBJFILEs comp_unit.  */
+
+extern void dwarf2_clear_frame_data (struct objfile * objfile);
+
 /* Compute the DWARF CFA for a frame.  */
 
 CORE_ADDR dwarf2_frame_cfa (frame_info_ptr this_frame);

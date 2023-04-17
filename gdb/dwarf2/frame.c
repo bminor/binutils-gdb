@@ -1609,6 +1609,19 @@ set_comp_unit (struct objfile *objfile, struct comp_unit *unit)
   return dwarf2_frame_bfd_data.set (abfd, unit);
 }
 
+/* See frame.h.  */
+
+void
+dwarf2_clear_frame_data (struct objfile *objfile)
+{
+  bfd *abfd = objfile->obfd.get ();
+
+  if (gdb_bfd_requires_relocations (abfd))
+    dwarf2_frame_objfile_data.clear (objfile);
+  else
+    dwarf2_frame_bfd_data.clear (abfd);
+}
+
 /* Find the FDE for *PC.  Return a pointer to the FDE, and store the
    initial location associated with it into *PC.  */
 
