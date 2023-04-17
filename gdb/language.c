@@ -93,7 +93,6 @@ const struct language_defn *language_defn::languages[nr_languages];
 
 /* The current values of the "set language/range/case-sensitive" enum
    commands.  */
-static const char *language;
 static const char *range;
 static const char *case_sensitive;
 
@@ -135,10 +134,10 @@ show_language_command (struct ui_file *file, int from_tty,
     }
 }
 
-/* Set command.  Change the current working language.  */
+/* Set callback for the "set/show language" setting.  */
+
 static void
-set_language_command (const char *ignore,
-		      int from_tty, struct cmd_list_element *c)
+set_language (const char *language)
 {
   enum language flang = language_unknown;
 
@@ -190,6 +189,17 @@ set_language_command (const char *ignore,
 
   internal_error ("Couldn't find language `%s' in known languages list.",
 		  language);
+}
+
+/* Get callback for the "set/show language" setting.  */
+
+static const char *
+get_language ()
+{
+  if (language_mode == language_mode_auto)
+    return "auto";
+
+  return current_language->name ();
 }
 
 /* Show command.  Display a warning if the range setting does
@@ -372,7 +382,7 @@ language_info ()
     return;
 
   expected_language = current_language;
-  gdb_printf (_("Current language:  %s\n"), language);
+  gdb_printf (_("Current language:  %s\n"), get_language ());
   show_language_command (gdb_stdout, 1, NULL, NULL);
 }
 
@@ -465,8 +475,7 @@ add_set_language_command ()
   /* Display "auto", "local" and "unknown" first, and then the rest,
      alpha sorted.  */
   const char **language_names_p = language_names;
-  language = language_def (language_auto)->name ();
-  *language_names_p++ = language;
+  *language_names_p++ = language_def (language_auto)->name ();;
   *language_names_p++ = "local";
   *language_names_p++ = language_def (language_unknown)->name ();
   const char **sort_begin = language_names_p;
@@ -509,10 +518,11 @@ add_set_language_command ()
 
   add_setshow_enum_cmd ("language", class_support,
 			language_names,
-			&language,
 			doc.c_str (),
 			_("Show the current source language."),
-			NULL, set_language_command,
+			NULL,
+			set_language,
+			get_language,
 			show_language_command,
 			&setlist, &showlist);
 }
