@@ -210,7 +210,6 @@ extern void quit_serial_event_clear (void);
 enum language
   {
     language_unknown,		/* Language not known */
-    language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
     language_objc,		/* Objective-C */
     language_rust,		/* Rust */

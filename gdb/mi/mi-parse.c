@@ -351,8 +351,7 @@ mi_parse (const char *cmd, char **token)
 	  std::string lang_name = extract_arg (&chp);
 
 	  parse->language = language_enum (lang_name.c_str ());
-	  if (parse->language == language_unknown
-	      || parse->language == language_auto)
+	  if (parse->language == language_unknown)
 	    error (_("Invalid --language argument: %s"), lang_name.c_str ());
 	}
       else

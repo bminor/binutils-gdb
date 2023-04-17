@@ -13700,7 +13700,7 @@ public:
 	       C++ symbols (using an old mangling scheme), such as "name__2Xn"
 	       -> "Xn::name(void)" and thus some Ada minimal symbols end up
 	       with the wrong language set.  Paper over that issue here.  */
-	    if (symbol_language == language_auto
+	    if (symbol_language == language_unknown
 		|| symbol_language == language_cplus)
 	      symbol_language = language_ada;
 

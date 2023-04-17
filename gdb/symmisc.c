@@ -365,8 +365,7 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
      because certain routines used during dump_symtab() use the current
      language to print an image of the symbol.  We'll restore it later.
      But use only real languages, not placeholders.  */
-  if (symtab->language () != language_unknown
-      && symtab->language () != language_auto)
+  if (symtab->language () != language_unknown)
     {
       scoped_restore_current_language save_lang;
       set_language (symtab->language ());
