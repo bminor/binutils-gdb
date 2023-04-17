@@ -34,6 +34,7 @@
 #include "gdbsupport/hash_enum.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/packed.h"
+#include "dwarf2/line-header.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
 extern struct cmd_list_element *set_dwarf_cmdlist;
@@ -952,4 +953,34 @@ extern bool read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 extern void read_full_dwarf_from_debuginfod (struct objfile *,
 					     dwarf2_base_index_functions *);
 
+struct mapped_debug_line
+{
+  mapped_debug_line (objfile *objfile);
+
+  /* Return true if any of the mapped .debug_line's filenames match
+     FILE_MATCHER.  */
+
+  bool contains_matching_filename
+    (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher);
+
+private:
+  std::vector<line_header_up> line_headers;
+
+  gdb::array_view<const gdb_byte> line_data;
+  gdb::array_view<const gdb_byte> line_str_data;
+
+  std::unique_ptr<index_cache_resource> line_resource;
+  std::unique_ptr<index_cache_resource> line_str_resource;
+
+  /* Download the .debug_line and .debug_line_str associated with OBJFILE
+     and populate line_headers.  */
+
+  bool read_debug_line_from_debuginfod (objfile *objfile);
+
+  /* Initialize line_data and line_str_data with the .debug_line and
+    .debug_line_str downloaded read_debug_line_from_debuginfod.  */
+
+  gdb::array_view<const gdb_byte> read_debug_line_separate
+    (char *filename, std::unique_ptr<index_cache_resource> *resource);
+};
 #endif /* DWARF2READ_H */

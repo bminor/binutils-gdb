@@ -102,50 +102,57 @@ read_checked_initial_length_and_offset (bfd *abfd, const gdb_byte *buf,
 {
   LONGEST length = read_initial_length (abfd, buf, bytes_read);
 
-  gdb_assert (cu_header->initial_length_size == 4
-	      || cu_header->initial_length_size == 8
-	      || cu_header->initial_length_size == 12);
+  if (cu_header != nullptr)
+    {
+      gdb_assert (cu_header->initial_length_size == 4
+		  || cu_header->initial_length_size == 8
+		  || cu_header->initial_length_size == 12);
 
-  if (cu_header->initial_length_size != *bytes_read)
-    complaint (_("intermixed 32-bit and 64-bit DWARF sections"));
+      if (cu_header->initial_length_size != *bytes_read)
+	complaint (_("intermixed 32-bit and 64-bit DWARF sections"));
+    }
 
   *offset_size = (*bytes_read == 4) ? 4 : 8;
   return length;
 }
 
-/* Read directory or file name entry format, starting with byte of
-   format count entries, ULEB128 pairs of entry formats, ULEB128 of
-   entries count and the entries themselves in the described entry
-   format.  */
+
+/* Like read_formatted_entries but the .debug_line and .debug_line_str
+   are stored in LINE_BUFP and LINE_STR_DATA.  This is used for cases
+   where these sections are read from separate files without necessarily
+   having access to the entire debuginfo file they originate from.  */
 
 static void
-read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
-			const gdb_byte **bufp, struct line_header *lh,
-			unsigned int offset_size,
-			void (*callback) (struct line_header *lh,
-					  const char *name,
-					  dir_index d_index,
-					  unsigned int mod_time,
-					  unsigned int length))
+read_formatted_entries
+  (bfd *parent_bfd, const gdb_byte **line_bufp,
+   const gdb::array_view<const gdb_byte> line_str_data,
+   struct line_header *lh,
+   unsigned int offset_size,
+   void (*callback) (struct line_header *lh,
+		     const char *name,
+		     dir_index d_index,
+		     unsigned int mod_time,
+		     unsigned int length))
 {
   gdb_byte format_count, formati;
   ULONGEST data_count, datai;
-  const gdb_byte *buf = *bufp;
+  const gdb_byte *buf = *line_bufp;
+  const gdb_byte *str_buf = line_str_data.data ();
   const gdb_byte *format_header_data;
   unsigned int bytes_read;
 
-  format_count = read_1_byte (abfd, buf);
+  format_count = read_1_byte (parent_bfd, buf);
   buf += 1;
   format_header_data = buf;
   for (formati = 0; formati < format_count; formati++)
     {
-      read_unsigned_leb128 (abfd, buf, &bytes_read);
+      read_unsigned_leb128 (parent_bfd, buf, &bytes_read);
       buf += bytes_read;
-      read_unsigned_leb128 (abfd, buf, &bytes_read);
+      read_unsigned_leb128 (parent_bfd, buf, &bytes_read);
       buf += bytes_read;
     }
 
-  data_count = read_unsigned_leb128 (abfd, buf, &bytes_read);
+  data_count = read_unsigned_leb128 (parent_bfd, buf, &bytes_read);
   buf += bytes_read;
   for (datai = 0; datai < data_count; datai++)
     {
@@ -154,10 +161,10 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 
       for (formati = 0; formati < format_count; formati++)
 	{
-	  ULONGEST content_type = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  ULONGEST content_type = read_unsigned_leb128 (parent_bfd, format, &bytes_read);
 	  format += bytes_read;
 
-	  ULONGEST form  = read_unsigned_leb128 (abfd, format, &bytes_read);
+	  ULONGEST form  = read_unsigned_leb128 (parent_bfd, format, &bytes_read);
 	  format += bytes_read;
 
 	  gdb::optional<const char *> string;
@@ -166,36 +173,48 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 	  switch (form)
 	    {
 	    case DW_FORM_string:
-	      string.emplace (read_direct_string (abfd, buf, &bytes_read));
+	      string.emplace (read_direct_string (parent_bfd, buf, &bytes_read));
 	      buf += bytes_read;
 	      break;
 
 	    case DW_FORM_line_strp:
 	      {
-		const char *str
-		  = per_objfile->read_line_string (buf, offset_size);
+		if (line_str_data.empty ())
+		  error (_("Dwarf Error: DW_FORM_line_strp used without " \
+			   "required section"));
+		if (line_str_data.size () <= offset_size)
+		  error (_("Dwarf Error: DW_FORM_line_strp pointing outside " \
+			   "of section .debug_line"));
+
+		ULONGEST str_offset = read_offset (parent_bfd, buf, offset_size);
+
+		const char *str;
+		if (str_buf[str_offset] == '\0')
+		  str = nullptr;
+		else
+		  str = (const char *) (str_buf + str_offset);
 		string.emplace (str);
 		buf += offset_size;
+		break;
 	      }
-	      break;
 
 	    case DW_FORM_data1:
-	      uint.emplace (read_1_byte (abfd, buf));
+	      uint.emplace (read_1_byte (parent_bfd, buf));
 	      buf += 1;
 	      break;
 
 	    case DW_FORM_data2:
-	      uint.emplace (read_2_bytes (abfd, buf));
+	      uint.emplace (read_2_bytes (parent_bfd, buf));
 	      buf += 2;
 	      break;
 
 	    case DW_FORM_data4:
-	      uint.emplace (read_4_bytes (abfd, buf));
+	      uint.emplace (read_4_bytes (parent_bfd, buf));
 	      buf += 4;
 	      break;
 
 	    case DW_FORM_data8:
-	      uint.emplace (read_8_bytes (abfd, buf));
+	      uint.emplace (read_8_bytes (parent_bfd, buf));
 	      buf += 8;
 	      break;
 
@@ -205,7 +224,7 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 	      break;
 
 	    case DW_FORM_udata:
-	      uint.emplace (read_unsigned_leb128 (abfd, buf, &bytes_read));
+	      uint.emplace (read_unsigned_leb128 (parent_bfd, buf, &bytes_read));
 	      buf += bytes_read;
 	      break;
 
@@ -248,28 +267,30 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
       callback (lh, fe.name, fe.d_index, fe.mod_time, fe.length);
     }
 
-  *bufp = buf;
+  *line_bufp = buf;
 }
 
 /* See line-header.h.  */
 
 line_header_up
-dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
-			   dwarf2_per_objfile *per_objfile,
-			   struct dwarf2_section_info *section,
-			   const struct comp_unit_head *cu_header,
-			   const char *comp_dir)
+dwarf_decode_line_header (bfd *parent_bfd,
+			  gdb::array_view<const gdb_byte> line_data,
+			  gdb::array_view<const gdb_byte> line_str_data,
+			  const gdb_byte **debug_line_ptr,
+			  bool is_dwz,
+			  const struct comp_unit_head *cu_header,
+			  const char *comp_dir)
 {
-  const gdb_byte *line_ptr;
+  const gdb_byte *line_ptr, *buf;
   unsigned int bytes_read, offset_size;
   int i;
   const char *cur_dir, *cur_file;
 
-  bfd *abfd = section->get_bfd_owner ();
+  buf = *debug_line_ptr;
 
   /* Make sure that at least there's room for the total_length field.
      That could be 12 bytes long, but we're just going to fudge that.  */
-  if (to_underlying (sect_off) + 4 >= section->size)
+  if (buf + 4 >= line_data.data () + line_data.size ())
     {
       dwarf2_statement_list_fits_in_line_number_section_complaint ();
       return 0;
@@ -277,62 +298,65 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
 
   line_header_up lh (new line_header (comp_dir));
 
-  lh->sect_off = sect_off;
+  lh->sect_off = (sect_offset) (buf - line_data.data ());
   lh->offset_in_dwz = is_dwz;
 
-  line_ptr = section->buffer + to_underlying (sect_off);
+  line_ptr = buf;
 
   /* Read in the header.  */
   LONGEST unit_length
-    = read_checked_initial_length_and_offset (abfd, line_ptr, cu_header,
+    = read_checked_initial_length_and_offset (parent_bfd, buf, cu_header,
 					      &bytes_read, &offset_size);
+
   line_ptr += bytes_read;
 
-  const gdb_byte *start_here = line_ptr;
-
-  if (line_ptr + unit_length > (section->buffer + section->size))
+  if (line_ptr + unit_length > buf + line_data.size ())
     {
       dwarf2_statement_list_fits_in_line_number_section_complaint ();
       return 0;
     }
+
+  const gdb_byte *start_here = line_ptr;
+
   lh->statement_program_end = start_here + unit_length;
-  lh->version = read_2_bytes (abfd, line_ptr);
+  lh->version = read_2_bytes (parent_bfd, line_ptr);
   line_ptr += 2;
   if (lh->version > 5)
     {
       /* This is a version we don't understand.  The format could have
 	 changed in ways we don't handle properly so just punt.  */
       complaint (_("unsupported version in .debug_line section"));
-      return NULL;
+      return nullptr;
     }
   if (lh->version >= 5)
     {
       gdb_byte segment_selector_size;
 
       /* Skip address size.  */
-      read_1_byte (abfd, line_ptr);
+      read_1_byte (parent_bfd, line_ptr);
       line_ptr += 1;
 
-      segment_selector_size = read_1_byte (abfd, line_ptr);
+      segment_selector_size = read_1_byte (parent_bfd, line_ptr);
       line_ptr += 1;
       if (segment_selector_size != 0)
 	{
 	  complaint (_("unsupported segment selector size %u "
 		       "in .debug_line section"),
 		     segment_selector_size);
-	  return NULL;
+	  return nullptr;
 	}
     }
 
-  LONGEST header_length = read_offset (abfd, line_ptr, offset_size);
+  LONGEST header_length = read_offset (parent_bfd, line_ptr, offset_size);
   line_ptr += offset_size;
   lh->statement_program_start = line_ptr + header_length;
-  lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
+
+  lh->minimum_instruction_length = read_1_byte (parent_bfd, line_ptr);
   line_ptr += 1;
 
   if (lh->version >= 4)
     {
-      lh->maximum_ops_per_instruction = read_1_byte (abfd, line_ptr);
+      lh->maximum_ops_per_instruction = read_1_byte (parent_bfd, line_ptr);
       line_ptr += 1;
     }
   else
@@ -345,41 +369,47 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
 		   "in `.debug_line' section"));
     }
 
-  lh->default_is_stmt = read_1_byte (abfd, line_ptr);
+  lh->default_is_stmt = read_1_byte (parent_bfd, line_ptr);
   line_ptr += 1;
-  lh->line_base = read_1_signed_byte (abfd, line_ptr);
+
+  lh->line_base = read_1_signed_byte (parent_bfd, line_ptr);
   line_ptr += 1;
-  lh->line_range = read_1_byte (abfd, line_ptr);
+
+  lh->line_range = read_1_byte (parent_bfd, line_ptr);
   line_ptr += 1;
-  lh->opcode_base = read_1_byte (abfd, line_ptr);
+
+  lh->opcode_base = read_1_byte (parent_bfd, line_ptr);
   line_ptr += 1;
+
   lh->standard_opcode_lengths.reset (new unsigned char[lh->opcode_base]);
 
   lh->standard_opcode_lengths[0] = 1;  /* This should never be used anyway.  */
   for (i = 1; i < lh->opcode_base; ++i)
     {
-      lh->standard_opcode_lengths[i] = read_1_byte (abfd, line_ptr);
+      lh->standard_opcode_lengths[i] = read_1_byte (parent_bfd, line_ptr);
       line_ptr += 1;
     }
 
   if (lh->version >= 5)
     {
       /* Read directory table.  */
-      read_formatted_entries (per_objfile, abfd, &line_ptr, lh.get (),
-			      offset_size,
-			      [] (struct line_header *header, const char *name,
-				  dir_index d_index, unsigned int mod_time,
-				  unsigned int length)
+      read_formatted_entries
+	(parent_bfd, &line_ptr, line_str_data,
+	 lh.get (), offset_size,
+	 [] (struct line_header *header, const char *name,
+	     dir_index d_index, unsigned int mod_time,
+	     unsigned int length)
 	{
 	  header->add_include_dir (name);
 	});
 
       /* Read file name table.  */
-      read_formatted_entries (per_objfile, abfd, &line_ptr, lh.get (),
-			      offset_size,
-			      [] (struct line_header *header, const char *name,
-				  dir_index d_index, unsigned int mod_time,
-				  unsigned int length)
+      read_formatted_entries
+	(parent_bfd, &line_ptr, line_str_data,
+	 lh.get (), offset_size,
+	 [] (struct line_header *header, const char *name,
+	     dir_index d_index, unsigned int mod_time,
+	     unsigned int length)
 	{
 	  header->add_file_name (name, d_index, mod_time, length);
 	});
@@ -387,7 +417,7 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
   else
     {
       /* Read directory table.  */
-      while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+      while ((cur_dir = read_direct_string (parent_bfd, line_ptr, &bytes_read)) != nullptr)
 	{
 	  line_ptr += bytes_read;
 	  lh->add_include_dir (cur_dir);
@@ -395,17 +425,17 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
       line_ptr += bytes_read;
 
       /* Read file name table.  */
-      while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+      while ((cur_file = read_direct_string (parent_bfd, line_ptr, &bytes_read)) != nullptr)
 	{
 	  unsigned int mod_time, length;
 	  dir_index d_index;
 
 	  line_ptr += bytes_read;
-	  d_index = (dir_index) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  d_index = (dir_index) read_unsigned_leb128 (parent_bfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
-	  mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  mod_time = read_unsigned_leb128 (parent_bfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
-	  length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	  length = read_unsigned_leb128 (parent_bfd, line_ptr, &bytes_read);
 	  line_ptr += bytes_read;
 
 	  lh->add_file_name (cur_file, d_index, mod_time, length);
@@ -413,9 +443,40 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
       line_ptr += bytes_read;
     }
 
-  if (line_ptr > (section->buffer + section->size))
+  if (line_ptr > (buf + line_data.size ()))
     complaint (_("line number info header doesn't "
 		 "fit in `.debug_line' section"));
 
+  *debug_line_ptr += unit_length + offset_size;
   return lh;
+}
+
+line_header_up
+dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
+			   dwarf2_per_objfile *per_objfile,
+			   struct dwarf2_section_info *section,
+			   const struct comp_unit_head *cu_header,
+			   const char *comp_dir)
+{
+  struct objfile *objfile = per_objfile->objfile;
+  struct dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+
+  /* Read .debug_line.  */
+  dwarf2_section_info *line_sec = &per_bfd->line;
+  bfd_size_type line_size = line_sec->get_size (objfile);
+
+  gdb::array_view<const gdb_byte> line (line_sec->buffer, line_size);
+
+  /* Read .debug_line_str.  */
+  dwarf2_section_info *line_str_sec = &per_bfd->line_str;
+  bfd_size_type line_str_size = line_str_sec->get_size (objfile);
+
+  gdb::array_view<const gdb_byte> line_str (line_str_sec->buffer,
+					    line_str_size);
+
+  const gdb_byte *line_ptr = line.data () + to_underlying (sect_off);
+
+  return dwarf_decode_line_header
+    (per_bfd->obfd, line, line_str, &line_ptr,
+     is_dwz, cu_header, comp_dir);
 }

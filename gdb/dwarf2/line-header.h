@@ -217,4 +217,14 @@ extern line_header_up dwarf_decode_line_header
    struct dwarf2_section_info *section, const struct comp_unit_head *cu_header,
    const char *comp_dir);
 
+/* Like above but the .debug_line and .debug_line_str are stored in
+   LINE_DATA and LINE_STR_DATA. *DEBUG_LINE_PTR should point to a
+   statement program header within LINE_DATA.  */
+
+extern line_header_up dwarf_decode_line_header
+  (bfd *parent_bfd, gdb::array_view<const gdb_byte> line_data,
+   gdb::array_view<const gdb_byte> line_str_data,
+   const gdb_byte **debug_line_ptr, bool is_dwz,
+  const comp_unit_head *cu_header, const char *comp_dir);
+
 #endif /* DWARF2_LINE_HEADER_H */

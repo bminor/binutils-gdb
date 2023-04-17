@@ -81,6 +81,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/hash_enum.h"
+#include "gdbsupport/scoped_mmap.h"
 #include "filename-seen-cache.h"
 #include "producer.h"
 #include <fcntl.h>
@@ -2113,6 +2114,170 @@ dw2_get_file_names (dwarf2_per_cu_data *this_cu,
     dw2_get_file_names_reader (&reader, reader.comp_unit_die);
 
   return this_cu->file_names;
+}
+
+#if !HAVE_SYS_MMAN_H
+
+bool
+mapped_debug_line::contains_matching_filename
+  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher)
+{
+  return false;
+}
+
+gdb::array_view<const gdb_byte>
+mapped_debug_line::read_debug_line_separate
+  (char *filename, std::unique_ptr<index_cache_resource> *resource)
+{
+  return {};
+}
+
+bool
+mapped_debug_line::read_debug_line_from_debuginfod (objfile *objfile)
+{
+  return false;
+}
+
+#else /* !HAVE_SYS_MMAN_H */
+
+struct line_resource_mmap final : public index_cache_resource
+{
+  /* Try to mmap FILENAME.  Throw an exception on failure, including if the
+     file doesn't exist. */
+  line_resource_mmap (const char *filename)
+    : mapping (mmap_file (filename))
+  {}
+
+  scoped_mmap mapping;
+};
+
+/* See read.h.  */
+
+bool
+mapped_debug_line::contains_matching_filename
+  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher)
+{
+  for (line_header_up &lh : line_headers)
+    for (file_entry &fe : lh->file_names ())
+      {
+	const char *filename = fe.name;
+
+	if (file_matcher (fe.name, false))
+	  return true;
+
+	bool basename_match = file_matcher (lbasename (fe.name), true);
+
+	if (!basenames_may_differ && !basename_match)
+	  continue;
+
+	/* DW_AT_comp_dir is not explicitly mentioned in the .debug_line
+	   until DWARF5.  Since we don't have access to the CU at this
+	   point we just check for a partial match on the filename.
+	   If there is a match, the full debuginfo will be downloaded
+	   ane the match will be re-evalute with DW_AT_comp_dir.  */
+	if (lh->version < 5 && fe.d_index == 0)
+	  return basename_match;
+
+	const char *dirname = fe.include_dir (&*lh);
+	std::string fullname;
+
+	if (dirname == nullptr || IS_ABSOLUTE_PATH (filename))
+	  fullname = filename;
+	else
+	  fullname = std::string (dirname) + SLASH_STRING + filename;
+
+	gdb::unique_xmalloc_ptr<char> rewritten
+	  = rewrite_source_path (fullname.c_str ());
+	if (rewritten != nullptr)
+	  fullname = rewritten.release ();
+
+	if (file_matcher (fullname.c_str (), false))
+	  return true;
+      }
+
+  return false;
+}
+
+/* See read.h.  */
+
+gdb::array_view<const gdb_byte>
+mapped_debug_line::read_debug_line_separate
+  (char *filename, std::unique_ptr<index_cache_resource> *resource)
+{
+  if (filename == nullptr)
+    return {};
+
+  try
+  {
+    line_resource_mmap *mmap_resource
+      = new line_resource_mmap (filename);
+
+    resource->reset (mmap_resource);
+
+    return gdb::array_view<const gdb_byte>
+      ((const gdb_byte *) mmap_resource->mapping.get (),
+       mmap_resource->mapping.size ());
+  }
+  catch (const gdb_exception &except)
+  {
+    exception_print (gdb_stderr, except);
+  }
+
+  return {};
+}
+
+/* See read.h.  */
+
+bool
+mapped_debug_line::read_debug_line_from_debuginfod (objfile *objfile)
+{
+  const bfd_build_id *build_id = build_id_bfd_get (objfile->obfd.get ());
+  if (build_id == nullptr)
+    return false;
+
+  gdb::unique_xmalloc_ptr<char> line_path;
+  scoped_fd line_fd = debuginfod_section_query (build_id->data,
+						build_id->size,
+						bfd_get_filename
+						  (objfile->obfd.get ()),
+						".debug_line",
+						&line_path);
+
+  if (line_fd.get () < 0)
+    return false;
+
+  gdb::unique_xmalloc_ptr<char> line_str_path;
+  scoped_fd line_str_fd = debuginfod_section_query (build_id->data,
+						    build_id->size,
+						    bfd_get_filename
+						      (objfile->obfd.get ()),
+						    ".debug_line_str",
+						    &line_str_path);
+
+  line_data = read_debug_line_separate (line_path.get (), &line_resource);
+  line_str_data = read_debug_line_separate (line_str_path.get (),
+					    &line_str_resource);
+
+  const gdb_byte *line_ptr = line_data.data ();
+
+  while (line_ptr < line_data.data () + line_data.size ())
+    {
+      line_header_up lh
+	= dwarf_decode_line_header (objfile->obfd.get (),
+				    line_data, line_str_data,
+				    &line_ptr, false,
+				    nullptr, nullptr);
+      line_headers.emplace_back (lh.release ());
+    }
+
+  return true;
+}
+#endif /* !HAVE_SYS_MMAN_H */
+
+mapped_debug_line::mapped_debug_line (objfile *objfile)
+{
+  if (!read_debug_line_from_debuginfod (objfile))
+    line_headers.clear ();
 }
 
 /* A helper for the "quick" functions which computes and caches the

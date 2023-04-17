@@ -128,6 +128,9 @@ struct mapped_gdb_index final : public mapped_index_base
   }
 };
 
+struct mapped_debug_line;
+typedef std::unique_ptr<mapped_debug_line> mapped_debug_line_up;
+
 struct dwarf2_gdb_index : public dwarf2_base_index_functions
 {
   /* This dumps minimal information about the index.
@@ -179,6 +182,15 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
   /* Calls dwarf2_base_index_functions::find_last_source_symtab and downloads
      debuginfo if necessary.  */
   struct symtab *find_last_source_symtab (struct objfile *objfile) override;
+
+  /* Filename information related to this .gdb_index.  */
+  mapped_debug_line_up mdl;
+
+  /* Return true if any of the filenames in this .gdb_index's .debug_line
+     mapping match FILE_MATCHER.  Initializes the mapping if necessary.  */
+  bool filename_in_debug_line
+  (objfile *objfile,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher);
 };
 
 void
@@ -588,6 +600,17 @@ dwarf2_gdb_index::do_expand_symtabs_matching
 }
 
 bool
+dwarf2_gdb_index::filename_in_debug_line
+  (objfile *objfile,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher)
+{
+  if (mdl == nullptr)
+    mdl.reset (new mapped_debug_line (objfile));
+
+  return mdl->contains_matching_filename (file_matcher);
+}
+
+bool
 dwarf2_gdb_index::expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -614,6 +637,10 @@ dwarf2_gdb_index::expand_symtabs_matching
 	  exception_print (gdb_stderr, e);
 	  return false;
 	}
+
+      if (file_matcher != nullptr
+	  && !filename_in_debug_line (objfile, file_matcher))
+	return true;
 
       read_full_dwarf_from_debuginfod (objfile, this);
       return true;
