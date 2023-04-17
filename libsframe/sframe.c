@@ -665,11 +665,15 @@ int32_t
 sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,
 			  sframe_frame_row_entry *fre, int *errp)
 {
-  sframe_header *dhp = sframe_decoder_get_header (dctx);
-  /* If the RA offset was not being tracked, return an error code so the caller
-     can gather the fixed RA offset from the SFrame header.  */
-  if (dhp->sfh_cfa_fixed_ra_offset != SFRAME_CFA_FIXED_RA_INVALID)
-    return sframe_set_errno (errp, SFRAME_ERR_FREOFFSET_NOPRESENT);
+  int8_t ra_offset = sframe_decoder_get_fixed_ra_offset (dctx);
+  /* If the RA offset was not being tracked, return the fixed RA offset
+     from the SFrame header.  */
+  if (ra_offset != SFRAME_CFA_FIXED_RA_INVALID)
+    {
+      if (errp)
+	*errp = 0;
+      return ra_offset;
+    }
 
   /* Otherwise, get the RA offset from the FRE.  */
   return sframe_get_fre_offset (fre, SFRAME_FRE_RA_OFFSET_IDX, errp);
