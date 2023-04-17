@@ -171,13 +171,13 @@ def request(name):
     return wrap
 
 
-def capability(name):
+def capability(name, value=True):
     """A decorator that indicates that the wrapper function implements
     the DAP capability NAME."""
 
     def wrap(func):
         global _capabilities
-        _capabilities[name] = True
+        _capabilities[name] = value
         return func
 
     return wrap

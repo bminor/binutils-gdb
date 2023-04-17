@@ -37,12 +37,11 @@ def breakpoint_descriptor(bp):
         # https://github.com/microsoft/debug-adapter-protocol/issues/13
         loc = bp.locations[0]
         (basename, line) = loc.source
-        return {
+        result = {
             "id": bp.number,
             "verified": True,
             "source": {
                 "name": os.path.basename(basename),
-                "path": loc.fullname,
                 # We probably don't need this but it doesn't hurt to
                 # be explicit.
                 "sourceReference": 0,
@@ -50,6 +49,10 @@ def breakpoint_descriptor(bp):
             "line": line,
             "instructionReference": hex(loc.address),
         }
+        path = loc.fullname
+        if path is not None:
+            result["source"]["path"] = path
+        return result
     else:
         return {
             "id": bp.number,
@@ -58,9 +61,10 @@ def breakpoint_descriptor(bp):
 
 
 # Helper function to set some breakpoints according to a list of
-# specifications.
+# specifications and a callback function to do the work of creating
+# the breakpoint.
 @in_gdb_thread
-def _set_breakpoints(kind, specs):
+def _set_breakpoints_callback(kind, specs, creator):
     global breakpoint_map
     # Try to reuse existing breakpoints if possible.
     if kind in breakpoint_map:
@@ -75,13 +79,20 @@ def _set_breakpoints(kind, specs):
             bp = saved_map.pop(keyspec)
         else:
             # FIXME handle exceptions here
-            bp = gdb.Breakpoint(**spec)
+            bp = creator(**spec)
         breakpoint_map[kind][keyspec] = bp
         result.append(breakpoint_descriptor(bp))
     # Delete any breakpoints that were not reused.
     for entry in saved_map.values():
         entry.delete()
     return result
+
+
+# Helper function to set odinary breakpoints according to a list of
+# specifications.
+@in_gdb_thread
+def _set_breakpoints(kind, specs):
+    return _set_breakpoints_callback(kind, specs, gdb.Breakpoint)
 
 
 @request("setBreakpoints")
@@ -138,6 +149,50 @@ def set_insn_breakpoints(*, breakpoints, offset=None, **args):
             }
         )
     result = send_gdb_with_response(lambda: _set_breakpoints("instruction", specs))
+    return {
+        "breakpoints": result,
+    }
+
+
+@in_gdb_thread
+def _catch_exception(filterId, condition=None, **args):
+    if filterId == "assert":
+        args = ["-catch-assert"]
+    elif filterId == "exception":
+        args = ["-catch-exception"]
+    else:
+        raise Exception(f"Invalid exception filterID: {filterId}")
+    if condition is not None:
+        args.extend(["-c", condition])
+    result = gdb.execute_mi(*args)
+    # A little lame that there's no more direct way.
+    for bp in gdb.breakpoints():
+        if bp.number == result["bkptno"]:
+            return bp
+    raise Exception("Could not find catchpoint after creating")
+
+
+@in_gdb_thread
+def _set_exception_catchpoints(filter_options):
+    return _set_breakpoints_callback("exception", filter_options, _catch_exception)
+
+
+@request("setExceptionBreakpoints")
+@capability("supportsExceptionFilterOptions")
+@capability("exceptionBreakpointFilters", ({
+    "filter": "assert",
+    "label": "Ada assertions",
+    "supportsCondition": True,
+}, {
+    "filter": "exception",
+    "label": "Ada exceptions",
+    "supportsCondition": True,
+}))
+def set_exception_breakpoints(*, filters, filterOptions=[], **args):
+    # Convert the 'filters' to the filter-options style.
+    options = [{"filterId": filter} for filter in filters]
+    options.extend(filterOptions)
+    result = send_gdb_with_response(lambda: _set_exception_catchpoints(options))
     return {
         "breakpoints": result,
     }
