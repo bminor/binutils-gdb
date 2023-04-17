@@ -56,7 +56,7 @@
 #include "prologue-value.h"
 #include "arch/riscv.h"
 #include "riscv-ravenscar-thread.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 
 /* The stack must be 16-byte aligned.  */
 #define SP_ALIGNMENT 16

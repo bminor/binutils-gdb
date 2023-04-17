@@ -27,7 +27,7 @@
 #include "gdbcmd.h"
 #include "dis-asm.h"
 #include "source.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include <algorithm>
 #include "gdbsupport/gdb_optional.h"
 #include "valprint.h"

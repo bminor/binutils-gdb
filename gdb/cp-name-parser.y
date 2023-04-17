@@ -40,7 +40,7 @@
 #include "defs.h"
 
 #include <unistd.h>
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "demangle.h"
 #include "cp-support.h"
 #include "c-support.h"

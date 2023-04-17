@@ -53,7 +53,7 @@
 #include "source.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_optional.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/rsp-low.h"
 
 /* Chain containing all defined memory-tag subcommands.  */

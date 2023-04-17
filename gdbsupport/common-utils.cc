@@ -20,7 +20,7 @@
 #include "common-defs.h"
 #include "common-utils.h"
 #include "host-defs.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/gdb-xfree.h"
 
 void *

@@ -26,7 +26,7 @@
 #include "symtab.h"
 #include "buildsym.h"
 #include "dictionary.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include <unordered_map>
 #include "language.h"
 

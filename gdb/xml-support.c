@@ -22,7 +22,7 @@
 #include "xml-builtin.h"
 #include "xml-support.h"
 #include "gdbsupport/filestuff.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include <vector>
 #include <string>
 

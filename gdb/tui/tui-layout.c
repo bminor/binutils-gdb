@@ -43,7 +43,7 @@
 #include "tui/tui-layout.h"
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 

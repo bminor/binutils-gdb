@@ -29,7 +29,7 @@
 #include "gdbtypes.h"
 #include "target.h"
 #include "regcache.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "reggroups.h"
 #include "arch-utils.h"
 #include "frame-unwind.h"

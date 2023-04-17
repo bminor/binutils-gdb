@@ -29,7 +29,7 @@
 #include "observable.h"
 #include "run-on-main-thread.h"
 #include <algorithm>
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/selftest.h"
 #include <chrono>
 #include <unordered_set>

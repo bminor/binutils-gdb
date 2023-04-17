@@ -36,7 +36,7 @@
 #include "namespace.h"
 #include <signal.h>
 #include "gdbsupport/gdb_setjmp.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/gdb-sigmask.h"
 #include <atomic>

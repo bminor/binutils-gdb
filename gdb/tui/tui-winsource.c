@@ -28,7 +28,7 @@
 #include "source.h"
 #include "objfiles.h"
 #include "filenames.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"

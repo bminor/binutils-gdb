@@ -35,7 +35,7 @@
 #include <ctype.h>
 #include "mi-parse.h"
 #include "gdbsupport/gdb_optional.h"
-#include "safe-ctype.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "inferior.h"
 #include "observable.h"
 
