@@ -323,31 +323,25 @@ struct gdb_mpz
     return mpz_cmp_si (m_val, other) < 0;
   }
 
-  bool operator== (int other) const
+  /* We want an operator== that can handle all integer types.  For
+     types that are 'long' or narrower, we can use a GMP function and
+     avoid boxing the RHS.  But, because overloading based on integer
+     type is a pain in C++, we accept all such types here and check
+     the size in the body.  */
+  template<typename T, typename = gdb::Requires<std::is_integral<T>>>
+  bool operator== (T other) const
   {
-    return mpz_cmp_si (m_val, other) == 0;
-  }
-
-  bool operator== (long other) const
-  {
-    return mpz_cmp_si (m_val, other) == 0;
-  }
-
-  bool operator== (unsigned long other) const
-  {
-    return mpz_cmp_ui (m_val, other) == 0;
-  }
-
-  template<typename T,
-	   typename = gdb::Requires<
-	     gdb::And<std::is_integral<T>,
-		      std::integral_constant<bool,
-					     (sizeof (T) > sizeof (long))>>
-	     >
-	   >
-  bool operator== (T src)
-  {
-    return *this == gdb_mpz (src);
+    if (std::is_signed<T>::value)
+      {
+	if (sizeof (T) <= sizeof (long))
+	  return mpz_cmp_si (m_val, other) == 0;
+      }
+    else
+      {
+	if (sizeof (T) <= sizeof (unsigned long))
+	  return mpz_cmp_ui (m_val, other) == 0;
+      }
+    return *this == gdb_mpz (other);
   }
 
   bool operator== (const gdb_mpz &other) const
