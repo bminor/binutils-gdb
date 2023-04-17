@@ -204,5 +204,7 @@ gdb_caching_proc gnat_runtime_has_debug_info {} {
 	}
     }
 
+    gdb_exit
+
     return $has_debug_info
 }
