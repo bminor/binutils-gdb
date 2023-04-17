@@ -64,6 +64,9 @@ struct riscv_private_data
 /* Used for mapping symbols.  */
 static int last_map_symbol = -1;
 static bfd_vma last_stop_offset = 0;
+static bfd_vma last_map_symbol_boundary = 0;
+static enum riscv_seg_mstate last_map_state = MAP_NONE;
+static asection *last_map_section = NULL;
 
 /* Register names as used by the disassembler.  */
 static const char * const *riscv_gpr_names;
@@ -868,6 +871,14 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
   int symbol = -1;
   int n;
 
+  /* Return the last map state if the address is still within the range of the
+     last mapping symbol.  */
+  if (last_map_section == info->section
+      && (memaddr < last_map_symbol_boundary))
+    return last_map_state;
+
+  last_map_section = info->section;
+
   /* Decide whether to print the data or instruction by default, in case
      we can not find the corresponding mapping symbols.  */
   mstate = MAP_DATA;
@@ -937,6 +948,36 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 	      break;
 	    }
 	}
+    }
+
+  if (found)
+    {
+      /* Find the next mapping symbol to determine the boundary of this mapping
+	 symbol.  */
+
+      bool found_next = false;
+      /* Try to found next mapping symbol.  */
+      for (n = symbol + 1; n < info->symtab_size; n++)
+	{
+	  if (info->symtab[symbol]->section != info->symtab[n]->section)
+	    continue;
+
+	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
+	  const char *sym_name = bfd_asymbol_name(info->symtab[n]);
+	  if (sym_name[0] == '$' && (sym_name[1] == 'x' || sym_name[1] == 'd'))
+	    {
+	      /* The next mapping symbol has been found, and it represents the
+		 boundary of this mapping symbol.  */
+	      found_next = true;
+	      last_map_symbol_boundary = addr;
+	      break;
+	    }
+	}
+
+      /* No further mapping symbol has been found, indicating that the boundary
+	 of the current mapping symbol is the end of this section.  */
+      if (!found_next)
+	last_map_symbol_boundary = info->section->vma + info->section->size;
     }
 
   /* Save the information for next use.  */
@@ -1059,6 +1100,8 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
     set_default_riscv_dis_options ();
 
   mstate = riscv_search_mapping_symbol (memaddr, info);
+  /* Save the last mapping state.  */
+  last_map_state = mstate;
 
   /* Set the size to dump.  */
   if (mstate == MAP_DATA
