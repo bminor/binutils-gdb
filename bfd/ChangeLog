@@ -1,3 +1,9 @@
+2023-04-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 30142
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Do not force the .rsrc
+	section to be writeable.
+
 2023-03-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 30285

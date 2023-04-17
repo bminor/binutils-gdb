@@ -1,3 +1,9 @@
+2023-04-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 30142
+	* rescoff.c (write_coff_file): Add the SEC_READONLY flag to the
+	.rsrc section. 
+
 2023-04-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 30327

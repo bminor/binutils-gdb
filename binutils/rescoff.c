@@ -477,7 +477,7 @@ write_coff_file (const char *filename, const char *target,
 
   sec = bfd_make_section_with_flags (abfd, ".rsrc",
 				     (SEC_HAS_CONTENTS | SEC_ALLOC
-				      | SEC_LOAD | SEC_DATA));
+				      | SEC_LOAD | SEC_DATA | SEC_READONLY));
   if (sec == NULL)
     bfd_fatal ("bfd_make_section");
 
