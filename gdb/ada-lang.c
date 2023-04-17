@@ -3286,7 +3286,7 @@ ada_array_bound_from_type (struct type *arr_type, int n, int which)
     arr_type = decode_constrained_packed_array_type (arr_type);
 
   if (arr_type == NULL || !ada_is_simple_array_type (arr_type))
-    return (LONGEST) - which;
+    return - which;
 
   if (arr_type->code () == TYPE_CODE_PTR)
     type = arr_type->target_type ();
@@ -3319,10 +3319,9 @@ ada_array_bound_from_type (struct type *arr_type, int n, int which)
       index_type = elt_type->index_type ();
     }
 
-  return
-    (LONGEST) (which == 0
-	       ? ada_discrete_type_low_bound (index_type)
-	       : ada_discrete_type_high_bound (index_type));
+  return (which == 0
+	  ? ada_discrete_type_low_bound (index_type)
+	  : ada_discrete_type_high_bound (index_type));
 }
 
 /* Given that arr is an array value, returns the lower bound of the
@@ -10113,7 +10112,7 @@ ada_unop_in_range (struct type *expect_type,
       lim_warning (_("Membership test incompletely implemented; "
 		     "always returns true"));
       type = language_bool_type (exp->language_defn, exp->gdbarch);
-      return value_from_longest (type, (LONGEST) 1);
+      return value_from_longest (type, 1);
 
     case TYPE_CODE_RANGE:
       arg2 = value_from_longest (type,
@@ -10223,7 +10222,7 @@ ada_equal_binop (struct type *expect_type,
   if (op == BINOP_NOTEQUAL)
     tem = !tem;
   struct type *type = language_bool_type (exp->language_defn, exp->gdbarch);
-  return value_from_longest (type, (LONGEST) tem);
+  return value_from_longest (type, tem);
 }
 
 /* A helper function for TERNOP_SLICE.  */
