@@ -1,3 +1,9 @@
+2023-04-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 30354
+	* emulparams/armelf.sh (OTHER_PLT_SECTIONS): Define in order to
+	handle the .gnu.sgstubs section.
+
 2023-04-13  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/ld-arc/arc.exp: Update execution predicate.
