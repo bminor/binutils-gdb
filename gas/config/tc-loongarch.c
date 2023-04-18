@@ -1270,6 +1270,21 @@ loongarch_fix_adjustable (fixS *fix)
       || S_FORCE_RELOC (fix->fx_addsy, true))
     return 0;
 
+  /* Loongarch loads extern symbols by GOT, and if there are embedded
+     asm(".local S"), gcc just output ".local S" to assembly file.
+     For a local symbol with GOT relocations, this adjustments will make
+     GOT relocation's addend not equal to zero. So this adjustments is
+     forbidden for got relocs.  */
+  if(fix->fx_r_type == BFD_RELOC_LARCH_GOT_PC_HI20
+      || fix->fx_r_type == BFD_RELOC_LARCH_GOT_PC_LO12
+      || fix->fx_r_type == BFD_RELOC_LARCH_GOT64_PC_LO20
+      || fix->fx_r_type == BFD_RELOC_LARCH_GOT64_PC_HI12
+      || fix->fx_r_type == BFD_RELOC_LARCH_GOT_HI20
+      || fix->fx_r_type == BFD_RELOC_LARCH_GOT_LO12
+      || fix->fx_r_type == BFD_RELOC_LARCH_GOT64_LO20
+      || fix->fx_r_type == BFD_RELOC_LARCH_GOT64_HI12)
+    return 0;
+
   return 1;
 }
 

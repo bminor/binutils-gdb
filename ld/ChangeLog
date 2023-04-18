@@ -1,3 +1,7 @@
+2023-04-18  mengqinggang  <mengqinggang@loongson.cn>
+
+	* testsuite/ld-loongarch-elf/macro_op.d: Regenerated.
+
 2023-04-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 30354
