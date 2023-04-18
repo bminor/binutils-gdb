@@ -385,7 +385,8 @@ parse_coff_struct_type (bfd *abfd, struct coff_symbols *symbols,
 
 	case C_FIELD:
 	  bitpos = bfd_asymbol_value (sym);
-	  bitsize = auxent.x_sym.x_misc.x_lnsz.x_size;
+	  if (psubaux != NULL)
+	    bitsize = psubaux->x_sym.x_misc.x_lnsz.x_size;
 	  break;
 
 	case C_EOS:
