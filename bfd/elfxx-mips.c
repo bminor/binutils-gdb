@@ -12327,9 +12327,9 @@ mips_set_isa_flags (bfd *abfd)
     {
     default:
       if (ABI_N32_P (abfd) || ABI_64_P (abfd))
-        val = E_MIPS_ARCH_3;
+        val = MIPS_DEFAULT_R6 ? E_MIPS_ARCH_64R6 : E_MIPS_ARCH_3;
       else
-        val = E_MIPS_ARCH_1;
+        val = MIPS_DEFAULT_R6 ? E_MIPS_ARCH_32R6 : E_MIPS_ARCH_1;
       break;
 
     case bfd_mach_mips3000:

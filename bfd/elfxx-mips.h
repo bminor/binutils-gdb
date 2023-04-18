@@ -29,6 +29,10 @@ enum reloc_check
   check_shuffle
 };
 
+#ifndef MIPS_DEFAULT_R6
+#define MIPS_DEFAULT_R6 0
+#endif
+
 extern bool _bfd_mips_elf_mkobject
   (bfd *);
 extern bool _bfd_mips_elf_close_and_cleanup
