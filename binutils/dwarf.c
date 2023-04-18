@@ -659,14 +659,13 @@ fetch_indexed_string (uint64_t idx,
     return (dwo ? _("<no .debug_str.dwo section>")
 		: _("<no .debug_str section>"));
 
-  index_offset = idx * offset_size;
-
-  if (this_set != NULL)
-    index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
-
-  index_offset += str_offsets_base;
-
-  if (index_offset + offset_size > index_section->size)
+  if (_mul_overflow (idx, offset_size, &index_offset)
+      || (this_set != NULL
+	  && ((index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS])
+	      < this_set->section_offsets [DW_SECT_STR_OFFSETS]))
+      || (index_offset += str_offsets_base) < str_offsets_base
+      || index_offset + offset_size < offset_size
+      || index_offset + offset_size > index_section->size)
     {
       warn (_("string index of %" PRIu64 " converts to an offset of %#" PRIx64
 	      " which is too big for section %s"),
@@ -674,11 +673,6 @@ fetch_indexed_string (uint64_t idx,
 
       return _("<string index too big>");
     }
-
-  /* FIXME: If we are being paranoid then we should also check to see if
-     IDX references an entry beyond the end of the string table pointed to
-     by STR_OFFSETS_BASE.  (Since there can be more than one string table
-     in a DWARF string section).  */
 
   str_offset = byte_get (index_section->start + index_offset, offset_size);
 
