@@ -1,4 +1,5 @@
 #PROG: objcopy
+#as: -n32
 #readelf: --notes --wide
 #objcopy: --merge-notes
 #name: MIPS merge notes section (n32)
