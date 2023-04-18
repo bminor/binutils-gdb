@@ -918,8 +918,11 @@ Return true if the typedef record needs to be replaced.".
 Return 0 by default""",
     type="bool",
     name="dwarf2_omit_typedef_p",
-    params=[("struct type *", "target_type"), ("const char *", "producer"),
-            ("const char *", "name")],
+    params=[
+        ("struct type *", "target_type"),
+        ("const char *", "producer"),
+        ("const char *", "name"),
+    ],
     predefault="default_dwarf2_omit_typedef_p",
     invalid=False,
 )

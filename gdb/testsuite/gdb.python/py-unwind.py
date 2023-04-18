@@ -198,6 +198,7 @@ def capture_frame_information(frame):
 # capture_all_frame_information.
 all_frame_information = []
 
+
 # Fill in the global ALL_FRAME_INFORMATION list.
 def capture_all_frame_information():
     global all_frame_information
