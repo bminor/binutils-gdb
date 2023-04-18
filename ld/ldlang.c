@@ -433,10 +433,18 @@ walk_wild_section_match (lang_wild_statement_type *ptr,
     }
   else
     {
-      lang_input_statement_type *f;
-      /* Perform the iteration over a single file.  */
-      f = lookup_name (file_spec);
-      if (f != file)
+      /* XXX Matching against non-wildcard filename in wild statements
+	 was done by going through lookup_name, which uses
+	 ->local_sym_name to compare against, not ->filename.  We retain
+	 this behaviour even though the above code paths use filename.
+	 It would be more logical to use it here as well, in which
+	 case the above wildcard() arm could be folded into this by using
+	 name_match.  This would also solve the worry of what to do
+	 about unset local_sym_name (in which case lookup_name simply adds
+	 the input file again).  */
+      const char *filename = file->local_sym_name;
+      if (filename == NULL
+	  || filename_cmp (filename, file_spec) != 0)
 	return;
     }
 
