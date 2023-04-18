@@ -215,6 +215,10 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 	      break;
 	    }
 
+	  /* Normalize nullptr string.  */
+	  if (string.has_value () && *string == nullptr)
+	    string.emplace ("");
+
 	  switch (content_type)
 	    {
 	    case DW_LNCT_path:
