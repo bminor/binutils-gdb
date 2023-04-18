@@ -37,15 +37,6 @@ static int print_field_values (struct value *, struct value *,
 
 
 
-/* Make TYPE unsigned if its range of values includes no negatives.  */
-static void
-adjust_type_signedness (struct type *type)
-{
-  if (type != NULL && type->code () == TYPE_CODE_RANGE
-      && type->bounds ()->low.const_val () >= 0)
-    type->set_is_unsigned (true);
-}
-
 /* Assuming TYPE is a simple array type, prints its lower bound on STREAM,
    if non-standard (i.e., other than 1 for numbers, other than lower bound
    of index type for enumerated type).  Returns 1 if something printed,
@@ -652,7 +643,6 @@ print_field_values (struct value *value, struct value *outer_value,
 	      int bit_size = TYPE_FIELD_BITSIZE (type, i);
 	      struct value_print_options opts;
 
-	      adjust_type_signedness (type->field (i).type ());
 	      v = ada_value_primitive_packed_val
 		    (value, nullptr,
 		     bit_pos / HOST_CHAR_BIT,
