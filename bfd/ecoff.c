@@ -599,6 +599,12 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   FIX (cbExtOffset, iextMax, external_ext, void *);
 #undef FIX
 
+  /* Ensure string sections are zero terminated.  */
+  if (debug->ss)
+    debug->ss[internal_symhdr->issMax - 1] = 0;
+  if (debug->ssext)
+    debug->ssext[internal_symhdr->issExtMax - 1] = 0;
+
   /* I don't want to always swap all the data, because it will just
      waste time and most programs will never look at it.  The only
      time the linker needs most of the debugging information swapped
