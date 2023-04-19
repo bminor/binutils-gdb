@@ -661,7 +661,7 @@ output_sframe_internal (void)
   out_one (fixed_bp_offset);
 
   /* Offset for the return address from CFA is fixed for some ABIs
-     (e.g., AMD64), output a zero otherwise.  */
+     (e.g., AMD64), output a SFRAME_CFA_FIXED_RA_INVALID otherwise.  */
 #ifdef sframe_ra_tracking_p
   if (!sframe_ra_tracking_p ())
     fixed_ra_offset = sframe_cfa_ra_offset ();
