@@ -1832,7 +1832,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
   bool plt0_generated_p;
   unsigned int plt0_entry_size;
   unsigned char func_info;
-  unsigned int fre_type;
+  uint32_t fre_type;
   /* The dynamic plt section for which .sframe stack trace information is being
      created.  */
   asection *dpltsec;

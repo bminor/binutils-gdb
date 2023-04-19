@@ -98,7 +98,7 @@ sframe_fde_create_func_info (uint32_t fre_type, uint32_t fde_type);
 
 /* Gather the FRE type given the function size.  */
 
-extern unsigned int
+extern uint32_t
 sframe_calc_fre_type (size_t func_size);
 
 /* The SFrame Decoder.  */
