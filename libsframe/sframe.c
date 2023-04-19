@@ -201,7 +201,7 @@ flip_fde (sframe_func_desc_entry *fdep)
 
 /* Check if SFrame header has valid data.  */
 
-static int
+static bool
 sframe_header_sanity_check_p (sframe_header *hp)
 {
   unsigned char all_flags = SFRAME_F_FDE_SORTED | SFRAME_F_FRAME_POINTER;
@@ -209,13 +209,13 @@ sframe_header_sanity_check_p (sframe_header *hp)
   if ((hp->sfh_preamble.sfp_magic != SFRAME_MAGIC)
       || (hp->sfh_preamble.sfp_version != SFRAME_VERSION)
       || ((hp->sfh_preamble.sfp_flags | all_flags) != all_flags))
-    return 0;
+    return false;
 
   /* Check offsets are valid.  */
   if (hp->sfh_fdeoff > hp->sfh_freoff)
-    return 0;
+    return false;
 
-  return 1;
+  return true;
 }
 
 /* Flip the start address pointed to by FP.  */
@@ -284,14 +284,14 @@ sframe_fre_start_addr_size (unsigned int fre_type)
 
 /* Check if the FREP has valid data.  */
 
-static int
+static bool
 sframe_fre_sanity_check_p (sframe_frame_row_entry *frep)
 {
   unsigned int offset_size, offset_cnt;
   unsigned int fre_info;
 
   if (frep == NULL)
-    return 0;
+    return false;
 
   fre_info = frep->fre_info;
   offset_size = sframe_fre_get_offset_size (fre_info);
@@ -299,13 +299,13 @@ sframe_fre_sanity_check_p (sframe_frame_row_entry *frep)
   if (offset_size != SFRAME_FRE_OFFSET_1B
       && offset_size != SFRAME_FRE_OFFSET_2B
       && offset_size != SFRAME_FRE_OFFSET_4B)
-    return 0;
+    return false;
 
   offset_cnt = sframe_fre_get_offset_count (fre_info);
   if (offset_cnt > 3)
-    return 0;
+    return false;
 
-  return 1;
+  return true;
 }
 
 /* Get FRE_INFO's offset size in bytes.  */
