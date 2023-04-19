@@ -906,7 +906,7 @@ static void get_scope_pc_bounds (struct die_info *,
 				 struct dwarf2_cu *);
 
 static void dwarf2_record_block_ranges (struct die_info *, struct block *,
-					CORE_ADDR, struct dwarf2_cu *);
+					struct dwarf2_cu *);
 
 static void dwarf2_add_field (struct field_info *, struct die_info *,
 			      struct dwarf2_cu *);
@@ -6428,7 +6428,7 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
      (such as virtual method tables).  Record the ranges in STATIC_BLOCK's
      addrmap to help ensure it has an accurate map of pc values belonging to
      this comp unit.  */
-  dwarf2_record_block_ranges (cu->dies, static_block, baseaddr, cu);
+  dwarf2_record_block_ranges (cu->dies, static_block, cu);
 
   cust = cu->get_builder ()->end_compunit_symtab_from_static_block
     (static_block, 0);
@@ -10226,7 +10226,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 		      &objfile->objfile_obstack);
 
   /* If we have address ranges, record them.  */
-  dwarf2_record_block_ranges (die, block, baseaddr, cu);
+  dwarf2_record_block_ranges (die, block, cu);
 
   gdbarch_make_symbol_special (gdbarch, cstk.name, objfile);
 
@@ -10339,7 +10339,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 	 there.  But since we don't even decide whether to create a
 	 block until after we've traversed its children, that's hard
 	 to do.  */
-      dwarf2_record_block_ranges (die, block, baseaddr, cu);
+      dwarf2_record_block_ranges (die, block, cu);
     }
   *cu->get_builder ()->get_local_symbols () = cstk.locals;
   cu->get_builder ()->set_local_using_directives (cstk.local_using_directives);
@@ -11316,9 +11316,10 @@ get_scope_pc_bounds (struct die_info *die,
 
 static void
 dwarf2_record_block_ranges (struct die_info *die, struct block *block,
-			    CORE_ADDR baseaddr, struct dwarf2_cu *cu)
+			    struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->per_objfile->objfile;
+  CORE_ADDR baseaddr = objfile->text_section_offset ();
   struct gdbarch *gdbarch = objfile->arch ();
   struct attribute *attr;
   struct attribute *attr_high;
