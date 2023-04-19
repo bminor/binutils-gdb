@@ -2388,12 +2388,17 @@ resolve_expression (expressionS *expressionP)
    here lessens the crowd at read.c.
 
    Assume input_line_pointer is at start of symbol name, or the
-    start of a double quote enclosed symbol name.
-   Advance input_line_pointer past symbol name.
-   Turn that character into a '\0', returning its former value,
-    which may be the closing double quote.
+   start of a double quote enclosed symbol name.  Advance
+   input_line_pointer past symbol name.  Turn that character into a '\0',
+   returning its former value, which may be the closing double quote.
+
    This allows a string compare (RMS wants symbol names to be strings)
-    of the symbol name.
+   of the symbol name.
+
+   NOTE: The input buffer is further altered when adjacent strings are
+   concatenated by the function.  Callers caring about the original buffer
+   contents will need to make a copy before calling here.
+
    There will always be a char following symbol name, because all good
    lines end in end-of-line.  */
 
