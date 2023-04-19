@@ -146,9 +146,9 @@ typedef struct sframe_header
      not fixed, it is set to SFRAME_CFA_FIXED_RA_INVALID, and individual
      FREs provide the applicable stack frame offset, if any.  */
   int8_t sfh_cfa_fixed_ra_offset;
-  /* Number of bytes making up the auxilliary header, if any.
+  /* Number of bytes making up the auxiliary header, if any.
      Some ABI/arch, in the future, may use this space for extending the
-     information in SFrame header.  Auxilliary header is contained in
+     information in SFrame header.  Auxiliary header is contained in
      bytes sequentially following the sframe_header.  */
   uint8_t sfh_auxhdr_len;
   /* Number of SFrame FDEs in this SFrame section.  */

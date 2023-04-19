@@ -970,7 +970,7 @@ sframe_get_funcdesc_with_addr (sframe_decoder_ctx *ctx,
       if (fdp[mid].sfde_func_start_address < addr)
 	{
 	  if (mid == (cnt - 1)) 	/* Check if it's the last one.  */
-	    return fdp + (cnt - 1) ;
+	    return fdp + (cnt - 1);
 	  else if (fdp[mid+1].sfde_func_start_address > addr)
 	    return fdp + mid;
 	  low = mid + 1;
