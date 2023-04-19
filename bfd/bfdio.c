@@ -524,6 +524,7 @@ ufile_ptr
 bfd_get_file_size (bfd *abfd)
 {
   ufile_ptr file_size, archive_size = (ufile_ptr) -1;
+  unsigned int compression_p2 = 0;
 
   if (abfd->my_archive != NULL
       && !bfd_is_thin_archive (abfd->my_archive))
@@ -532,17 +533,17 @@ bfd_get_file_size (bfd *abfd)
       if (adata != NULL)
 	{
 	  archive_size = adata->parsed_size;
-	  /* If the archive is compressed we can't compare against
-	     file size.  */
+	  /* If the archive is compressed, assume an element won't
+	     expand more than eight times file size.  */
 	  if (adata->arch_header != NULL
 	      && memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
 			 "Z\012", 2) == 0)
-	    return archive_size;
+	    compression_p2 = 3;
 	  abfd = abfd->my_archive;
 	}
     }
 
-  file_size = bfd_get_size (abfd);
+  file_size = bfd_get_size (abfd) << compression_p2;
   if (archive_size < file_size)
     return archive_size;
   return file_size;
