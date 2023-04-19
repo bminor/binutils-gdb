@@ -673,7 +673,7 @@ ada_discrete_type_high_bound (struct type *type)
       {
 	const dynamic_prop &high = type->bounds ()->high;
 
-	if (high.kind () == PROP_CONST)
+	if (high.is_constant ())
 	  return high.const_val ();
 	else
 	  {
@@ -708,7 +708,7 @@ ada_discrete_type_low_bound (struct type *type)
       {
 	const dynamic_prop &low = type->bounds ()->low;
 
-	if (low.kind () == PROP_CONST)
+	if (low.is_constant ())
 	  return low.const_val ();
 	else
 	  {
@@ -11576,7 +11576,7 @@ ada_modulus (struct type *type)
 {
   const dynamic_prop &high = type->bounds ()->high;
 
-  if (high.kind () == PROP_CONST)
+  if (high.is_constant ())
     return (ULONGEST) high.const_val () + 1;
 
   /* If TYPE is unresolved, the high bound might be a location list.  Return

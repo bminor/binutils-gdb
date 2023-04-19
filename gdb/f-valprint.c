@@ -43,7 +43,7 @@ static void f77_get_dynamic_length_of_aggregate (struct type *);
 LONGEST
 f77_get_lowerbound (struct type *type)
 {
-  if (type->bounds ()->low.kind () != PROP_CONST)
+  if (!type->bounds ()->low.is_constant ())
     error (_("Lower bound may not be '*' in F77"));
 
   return type->bounds ()->low.const_val ();
@@ -52,7 +52,7 @@ f77_get_lowerbound (struct type *type)
 LONGEST
 f77_get_upperbound (struct type *type)
 {
-  if (type->bounds ()->high.kind () != PROP_CONST)
+  if (!type->bounds ()->high.is_constant ())
     {
       /* We have an assumed size array on our hands.  Assume that
 	 upper_bound == lower_bound so that we show at least 1 element.

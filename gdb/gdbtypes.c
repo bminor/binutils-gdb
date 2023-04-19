@@ -974,14 +974,14 @@ create_range_type (type_allocator &alloc, struct type *index_type,
      case, if we copy the underlying type's sign, then reading some
      range values will cause an unwanted sign extension.  So, we have
      some heuristics here instead.  */
-  else if (low_bound->kind () == PROP_CONST && low_bound->const_val () >= 0)
+  else if (low_bound->is_constant () && low_bound->const_val () >= 0)
     {
       result_type->set_is_unsigned (true);
       /* Ada allows the declaration of range types whose upper bound is
 	 less than the lower bound, so checking the lower bound is not
 	 enough.  Make sure we do not mark a range type whose upper bound
 	 is negative as unsigned.  */
-      if (high_bound->kind () == PROP_CONST && high_bound->const_val () < 0)
+      if (high_bound->is_constant () && high_bound->const_val () < 0)
 	result_type->set_is_unsigned (false);
     }
 
@@ -1037,9 +1037,9 @@ has_static_range (const struct range_bounds *bounds)
 {
   /* If the range doesn't have a defined stride then its stride field will
      be initialized to the constant 0.  */
-  return (bounds->low.kind () == PROP_CONST
-	  && bounds->high.kind () == PROP_CONST
-	  && bounds->stride.kind () == PROP_CONST);
+  return (bounds->low.is_constant ()
+	  && bounds->high.is_constant ()
+	  && bounds->stride.is_constant ());
 }
 
 /* See gdbtypes.h.  */
@@ -1053,7 +1053,7 @@ get_discrete_low_bound (struct type *type)
     case TYPE_CODE_RANGE:
       {
 	/* This function only works for ranges with a constant low bound.  */
-	if (type->bounds ()->low.kind () != PROP_CONST)
+	if (!type->bounds ()->low.is_constant ())
 	  return {};
 
 	LONGEST low = type->bounds ()->low.const_val ();
@@ -1120,7 +1120,7 @@ get_discrete_high_bound (struct type *type)
     case TYPE_CODE_RANGE:
       {
 	/* This function only works for ranges with a constant high bound.  */
-	if (type->bounds ()->high.kind () != PROP_CONST)
+	if (!type->bounds ()->high.is_constant ())
 	  return {};
 
 	LONGEST high = type->bounds ()->high.const_val ();
@@ -1341,8 +1341,7 @@ create_array_type_with_stride (type_allocator &alloc,
 			       struct dynamic_prop *byte_stride_prop,
 			       unsigned int bit_stride)
 {
-  if (byte_stride_prop != NULL
-      && byte_stride_prop->kind () == PROP_CONST)
+  if (byte_stride_prop != nullptr && byte_stride_prop->is_constant ())
     {
       /* The byte stride is actually not dynamic.  Pretend we were
 	 called with bit_stride set instead of byte_stride_prop.
@@ -2033,7 +2032,7 @@ array_type_has_dynamic_stride (struct type *type)
 {
   struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_BYTE_STRIDE);
 
-  return (prop != NULL && prop->kind () != PROP_CONST);
+  return prop != nullptr && prop->is_constant ();
 }
 
 /* Worker for is_dynamic_type.  */
@@ -4377,8 +4376,7 @@ type_not_allocated (const struct type *type)
 {
   struct dynamic_prop *prop = TYPE_ALLOCATED_PROP (type);
 
-  return (prop != nullptr && prop->kind () == PROP_CONST
-	  && prop->const_val () == 0);
+  return prop != nullptr && prop->is_constant () && prop->const_val () == 0;
 }
 
 /* Associated status of type TYPE.  Return zero if type TYPE is associated.
@@ -4389,8 +4387,7 @@ type_not_associated (const struct type *type)
 {
   struct dynamic_prop *prop = TYPE_ASSOCIATED_PROP (type);
 
-  return (prop != nullptr && prop->kind () == PROP_CONST
-	  && prop->const_val () == 0);
+  return prop != nullptr && prop->is_constant () && prop->const_val () == 0;
 }
 
 /* rank_one_type helper for when PARM's type code is TYPE_CODE_PTR.  */

@@ -455,7 +455,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
   struct type *range = type->index_type ();
   gcc_type element_type = instance->convert_type (type->target_type ());
 
-  if (range->bounds ()->low.kind () != PROP_CONST)
+  if (!range->bounds ()->low.is_constant ())
     {
       const char *s = _("array type with non-constant"
 			" lower bound is not supported");

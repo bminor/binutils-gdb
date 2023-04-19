@@ -238,7 +238,7 @@ pascal_language::type_print_varspec_prefix (struct type *type,
 	gdb_printf (stream, "(");
       gdb_printf (stream, "array ");
       if (type->target_type ()->length () > 0
-	  && type->bounds ()->high.kind () != PROP_UNDEFINED)
+	  && type->bounds ()->high.is_constant ())
 	gdb_printf (stream, "[%s..%s] ",
 		    plongest (type->bounds ()->low.const_val ()),
 		    plongest (type->bounds ()->high.const_val ()));

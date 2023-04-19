@@ -827,12 +827,12 @@ gdbscm_type_range (SCM self)
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRING:
     case TYPE_CODE_RANGE:
-      if (type->bounds ()->low.kind () == PROP_CONST)
+      if (type->bounds ()->low.is_constant ())
 	low = type->bounds ()->low.const_val ();
       else
 	low = 0;
 
-      if (type->bounds ()->high.kind () == PROP_CONST)
+      if (type->bounds ()->high.is_constant ())
 	high = type->bounds ()->high.const_val ();
       else
 	high = 0;

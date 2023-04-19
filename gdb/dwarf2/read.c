@@ -12424,8 +12424,8 @@ rewrite_array_type (struct type *type)
   if (new_target == nullptr)
     {
       /* Maybe we don't need to rewrite this array.  */
-      if (current_bounds->low.kind () == PROP_CONST
-	  && current_bounds->high.kind () == PROP_CONST)
+      if (current_bounds->low.is_constant ()
+	  && current_bounds->high.is_constant ())
 	return nullptr;
     }
 
@@ -15673,7 +15673,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       if (attr_to_dynamic_prop (attr, die, cu, &high, base_type))
 	{
 	  /* If bounds are constant do the final calculation here.  */
-	  if (low.kind () == PROP_CONST && high.kind () == PROP_CONST)
+	  if (low.is_constant () && high.is_constant ())
 	    high.set_const_val (low.const_val () + high.const_val () - 1);
 	  else
 	    high_bound_is_count = 1;
@@ -15715,11 +15715,11 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       ULONGEST negative_mask
 	= -((ULONGEST) 1 << (base_type->length () * TARGET_CHAR_BIT - 1));
 
-      if (low.kind () == PROP_CONST
+      if (low.is_constant ()
 	  && !base_type->is_unsigned () && (low.const_val () & negative_mask))
 	low.set_const_val (low.const_val () | negative_mask);
 
-      if (high.kind () == PROP_CONST
+      if (high.is_constant ()
 	  && !base_type->is_unsigned () && (high.const_val () & negative_mask))
 	high.set_const_val (high.const_val () | negative_mask);
     }

@@ -340,6 +340,11 @@ struct dynamic_prop
     m_data.const_val = const_val;
   }
 
+  /* Return true if this property has a constant value, false
+     otherwise.  */
+  bool is_constant () const
+  { return m_kind == PROP_CONST; }
+
   const dwarf2_property_baton *baton () const
   {
     gdb_assert (m_kind == PROP_LOCEXPR

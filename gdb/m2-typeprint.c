@@ -227,7 +227,7 @@ static void m2_array (struct type *type, struct ui_file *stream,
 {
   gdb_printf (stream, "ARRAY [");
   if (type->target_type ()->length () > 0
-      && type->bounds ()->high.kind () != PROP_UNDEFINED)
+      && type->bounds ()->high.is_constant ())
     {
       if (type->index_type () != 0)
 	{

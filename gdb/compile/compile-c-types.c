@@ -44,7 +44,7 @@ convert_array (compile_c_instance *context, struct type *type)
 
   element_type = context->convert_type (type->target_type ());
 
-  if (range->bounds ()->low.kind () != PROP_CONST)
+  if (!range->bounds ()->low.is_constant ())
     return context->plugin ().error (_("array type with non-constant"
 				       " lower bound is not supported"));
   if (range->bounds ()->low.const_val () != 0)
