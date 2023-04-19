@@ -276,7 +276,7 @@ sframe_v1_set_func_info (unsigned int fde_type, unsigned int fre_type,
 /* SFrame version specific operations setup.  */
 
 static void
-sframe_set_version (uint32_t sframe_version __attribute__((unused)))
+sframe_set_version (uint32_t sframe_version ATTRIBUTE_UNUSED)
 {
   sframe_ver_ops.format_version = SFRAME_VERSION_1;
 
@@ -297,7 +297,7 @@ sframe_set_fre_info (unsigned int base_reg, unsigned int num_offsets,
 
 /* SFrame set func info. */
 
-ATTRIBUTE_UNUSED static unsigned char
+static unsigned char
 sframe_set_func_info (unsigned int fde_type, unsigned int fre_type,
 		      unsigned int pauth_key)
 {
@@ -1366,7 +1366,7 @@ output_sframe (segT sframe_seg)
 #else  /*  support_sframe_p  */
 
 void
-output_sframe (segT sframe_seg __attribute__((unused)))
+output_sframe (segT sframe_seg ATTRIBUTE_UNUSED)
 {
 }
 
