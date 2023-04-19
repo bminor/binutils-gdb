@@ -469,14 +469,14 @@ bad:
 
 /* The SFrame Decoder.  */
 
-/* Get DECODER's SFrame header.  */
+/* Get SFrame header from the given decoder context DCTX.  */
 
 static sframe_header *
-sframe_decoder_get_header (sframe_decoder_ctx *decoder)
+sframe_decoder_get_header (sframe_decoder_ctx *dctx)
 {
   sframe_header *hp = NULL;
-  if (decoder != NULL)
-    hp = &decoder->sfd_header;
+  if (dctx != NULL)
+    hp = &dctx->sfd_header;
   return hp;
 }
 
@@ -534,11 +534,11 @@ sframe_get_fre_offset (sframe_frame_row_entry *fre, int idx, int *errp)
 /* Free the decoder context.  */
 
 void
-sframe_decoder_free (sframe_decoder_ctx **decoder)
+sframe_decoder_free (sframe_decoder_ctx **dctxp)
 {
-  if (decoder != NULL)
+  if (dctxp != NULL)
     {
-      sframe_decoder_ctx *dctx = *decoder;
+      sframe_decoder_ctx *dctx = *dctxp;
       if (dctx == NULL)
 	return;
 
@@ -558,8 +558,8 @@ sframe_decoder_free (sframe_decoder_ctx **decoder)
 	  dctx->sfd_buf = NULL;
 	}
 
-      free (*decoder);
-      *decoder = NULL;
+      free (*dctxp);
+      *dctxp = NULL;
     }
 }
 
@@ -1221,18 +1221,18 @@ sframe_encode (unsigned char ver, unsigned char flags, int abi_arch,
 	       int8_t fixed_fp_offset, int8_t fixed_ra_offset, int *errp)
 {
   sframe_header *hp;
-  sframe_encoder_ctx *fp;
+  sframe_encoder_ctx *encoder;
 
   if (ver != SFRAME_VERSION)
     return sframe_ret_set_errno (errp, SFRAME_ERR_VERSION_INVAL);
 
-  if ((fp = malloc (sizeof (sframe_encoder_ctx))) == NULL)
+  if ((encoder = malloc (sizeof (sframe_encoder_ctx))) == NULL)
     return sframe_ret_set_errno (errp, SFRAME_ERR_NOMEM);
 
-  memset (fp, 0, sizeof (sframe_encoder_ctx));
+  memset (encoder, 0, sizeof (sframe_encoder_ctx));
 
   /* Get the SFrame header and update it.  */
-  hp = sframe_encoder_get_header (fp);
+  hp = sframe_encoder_get_header (encoder);
   hp->sfh_preamble.sfp_version = ver;
   hp->sfh_preamble.sfp_magic = SFRAME_MAGIC;
   hp->sfh_preamble.sfp_flags = flags;
@@ -1241,7 +1241,7 @@ sframe_encode (unsigned char ver, unsigned char flags, int abi_arch,
   hp->sfh_cfa_fixed_fp_offset = fixed_fp_offset;
   hp->sfh_cfa_fixed_ra_offset = fixed_ra_offset;
 
-  return fp;
+  return encoder;
 }
 
 /* Free the encoder context.  */
