@@ -159,7 +159,7 @@ static int i386_att_operand (char *);
 static int i386_intel_operand (char *, int);
 static int i386_intel_simplify (expressionS *);
 static int i386_intel_parse_name (const char *, expressionS *);
-static const reg_entry *parse_register (char *, char **);
+static const reg_entry *parse_register (const char *, char **);
 static const char *parse_insn (const char *, char *, bool);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
@@ -12498,11 +12498,7 @@ i386_att_operand (char *operand_string)
 	  temp_string = base_string;
 
 	  /* Skip past '(' and whitespace.  */
-	  if (*base_string != '(')
-	    {
-	      as_bad (_("unbalanced braces"));
-	      return 0;
-	    }
+	  gas_assert (*base_string == '(');
 	  ++base_string;
 	  if (is_space_char (*base_string))
 	    ++base_string;
@@ -13819,7 +13815,7 @@ parse_real_register (const char *reg_string, char **end_op)
 /* REG_STRING starts *before* REGISTER_PREFIX.  */
 
 static const reg_entry *
-parse_register (char *reg_string, char **end_op)
+parse_register (const char *reg_string, char **end_op)
 {
   const reg_entry *r;
 
@@ -13830,12 +13826,12 @@ parse_register (char *reg_string, char **end_op)
   if (!r)
     {
       char *save = input_line_pointer;
-      char c;
+      char *buf = xstrdup (reg_string), *name;
       symbolS *symbolP;
 
-      input_line_pointer = reg_string;
-      c = get_symbol_name (&reg_string);
-      symbolP = symbol_find (reg_string);
+      input_line_pointer = buf;
+      get_symbol_name (&name);
+      symbolP = symbol_find (name);
       while (symbolP && S_GET_SEGMENT (symbolP) != reg_section)
 	{
 	  const expressionS *e = symbol_get_value_expression(symbolP);
@@ -13853,7 +13849,7 @@ parse_register (char *reg_string, char **end_op)
 	      know (e->X_add_number >= 0
 		    && (valueT) e->X_add_number < i386_regtab_size);
 	      r = i386_regtab + e->X_add_number;
-	      *end_op = input_line_pointer;
+	      *end_op = (char *) reg_string + (input_line_pointer - buf);
 	    }
 	  if (r && !check_register (r))
 	    {
@@ -13862,8 +13858,8 @@ parse_register (char *reg_string, char **end_op)
 	      r = &bad_reg;
 	    }
 	}
-      *input_line_pointer = c;
       input_line_pointer = save;
+      free (buf);
     }
   return r;
 }
