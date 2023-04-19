@@ -13750,9 +13750,9 @@ static bool check_register (const reg_entry *r)
 /* REG_STRING starts *before* REGISTER_PREFIX.  */
 
 static const reg_entry *
-parse_real_register (char *reg_string, char **end_op)
+parse_real_register (const char *reg_string, char **end_op)
 {
-  char *s = reg_string;
+  const char *s = reg_string;
   char *p;
   char reg_name_given[MAX_REG_NAME_SIZE + 1];
   const reg_entry *r;
@@ -13775,7 +13775,7 @@ parse_real_register (char *reg_string, char **end_op)
   if (is_part_of_name (*s))
     return (const reg_entry *) NULL;
 
-  *end_op = s;
+  *end_op = (char *) s;
 
   r = (const reg_entry *) str_hash_find (reg_hash, reg_name_given);
 
@@ -13803,7 +13803,7 @@ parse_real_register (char *reg_string, char **end_op)
 		++s;
 	      if (*s == ')')
 		{
-		  *end_op = s + 1;
+		  *end_op = (char *) s + 1;
 		  know (r[fpr].reg_num == fpr);
 		  return r + fpr;
 		}
