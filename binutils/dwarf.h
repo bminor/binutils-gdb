@@ -23,18 +23,19 @@
 /* Structure found in the .debug_line section.  */
 typedef struct
 {
-  uint64_t	 li_length;
-  unsigned short li_version;
-  unsigned char  li_address_size;
-  unsigned char  li_segment_size;
-  uint64_t	 li_prologue_length;
-  unsigned char  li_min_insn_length;
-  unsigned char  li_max_ops_per_insn;
-  unsigned char  li_default_is_stmt;
-  int            li_line_base;
-  unsigned char  li_line_range;
-  unsigned char  li_opcode_base;
-  unsigned int   li_offset_size;
+  uint64_t li_length;
+  uint16_t li_version;
+  uint8_t  li_address_size;
+  uint8_t  li_segment_size;
+  uint64_t li_prologue_length;
+  uint8_t  li_min_insn_length;
+  uint8_t  li_max_ops_per_insn;
+  uint8_t  li_default_is_stmt;
+  int8_t   li_line_base;
+  uint8_t  li_line_range;
+  uint8_t  li_opcode_base;
+  /* Not part of the header.  4 for 32-bit dwarf, 8 for 64-bit.  */
+  unsigned int li_offset_size;
 }
 DWARF2_Internal_LineInfo;
 

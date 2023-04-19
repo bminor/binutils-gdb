@@ -4670,7 +4670,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 	  while (data < end_of_sequence)
 	    {
 	      unsigned char op_code;
-	      int64_t adv;
+	      int adv;
 	      uint64_t uladv;
 
 	      printf ("  [0x%08tx]", data - start);
@@ -4717,7 +4717,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		    }
 		  adv = (op_code % linfo.li_line_range) + linfo.li_line_base;
 		  state_machine_regs.line += adv;
-		  printf (_(" and Line by %" PRId64 " to %d"),
+		  printf (_(" and Line by %d to %d"),
 			  adv, state_machine_regs.line);
 		  if (verbose_view || state_machine_regs.view)
 		    printf (_(" (view %u)\n"), state_machine_regs.view);
@@ -4782,7 +4782,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		  case DW_LNS_advance_line:
 		    READ_SLEB (adv, data, end);
 		    state_machine_regs.line += adv;
-		    printf (_("  Advance Line by %" PRId64 " to %d\n"),
+		    printf (_("  Advance Line by %d to %d\n"),
 			    adv, state_machine_regs.line);
 		    break;
 
@@ -4802,7 +4802,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		  case DW_LNS_negate_stmt:
 		    adv = state_machine_regs.is_stmt;
 		    adv = ! adv;
-		    printf (_("  Set is_stmt to %" PRId64 "\n"), adv);
+		    printf (_("  Set is_stmt to %d\n"), adv);
 		    state_machine_regs.is_stmt = adv;
 		    break;
 
