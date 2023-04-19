@@ -6174,6 +6174,8 @@ sh_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
       if (bfd_link_pic (info)
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
 	  && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  if (htab->fdpic_p)
