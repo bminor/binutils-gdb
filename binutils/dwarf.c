@@ -2725,7 +2725,7 @@ read_and_display_attr_value (unsigned long attribute,
 		  if (idx != (uint64_t) -1)
 		    idx += (offset_size == 8) ? 20 : 12;
 		}
-	      else if (debug_info_p == NULL)
+	      else if (debug_info_p == NULL || dwarf_version > 4)
 		{
 		  idx = fetch_indexed_value (uvalue, loclists, 0);
 		}

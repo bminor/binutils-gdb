@@ -1,8 +1,15 @@
+2023-04-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 30355
+	* dwarf.c (read_and_display_attr_value): Correctly handle
+	DW_loclistx attributes that index a version 5 .debug_loclists
+	section.
+
 2023-04-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 30142
 	* rescoff.c (write_coff_file): Add the SEC_READONLY flag to the
-	.rsrc section. 
+	.rsrc section.
 
 2023-04-11  Nick Clifton  <nickc@redhat.com>
 
