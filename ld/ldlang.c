@@ -7964,13 +7964,13 @@ lang_process (void)
      statements we can give values to symbolic origin/length now.  */
   lang_do_memory_regions (true);
 
+  ldemul_before_plugin_all_symbols_read ();
+
 #if BFD_SUPPORTS_PLUGINS
   if (link_info.lto_plugin_active)
     {
       lang_statement_list_type added;
       lang_statement_list_type files, inputfiles;
-
-      ldemul_before_plugin_all_symbols_read ();
 
       /* Now all files are read, let the plugin(s) decide if there
 	 are any more to be added to the link before we call the
@@ -8074,17 +8074,17 @@ lang_process (void)
     }
 #endif /* BFD_SUPPORTS_PLUGINS */
 
-  /* Make sure that nobody has tried to add a symbol to this list
-     before now.  */
-  ASSERT (link_info.gc_sym_list == NULL);
+  struct bfd_sym_chain **sym = &link_info.gc_sym_list;
+  while (*sym)
+    sym = &(*sym)->next;
 
-  link_info.gc_sym_list = &entry_symbol;
+  *sym = &entry_symbol;
 
   if (entry_symbol.name == NULL)
     {
-      link_info.gc_sym_list = ldlang_undef_chain_list_head;
+      *sym = ldlang_undef_chain_list_head;
 
-      /* entry_symbol is normally initialied by a ENTRY definition in the
+      /* entry_symbol is normally initialised by an ENTRY definition in the
 	 linker script or the -e command line option.  But if neither of
 	 these have been used, the target specific backend may still have
 	 provided an entry symbol via a call to lang_default_entry().
