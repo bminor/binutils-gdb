@@ -1552,7 +1552,7 @@ static int
 sframe_encoder_write_fre (char *contents, sframe_frame_row_entry *frep,
 			  unsigned int fre_type, size_t *esz)
 {
-  size_t fre_size;
+  size_t fre_sz;
   size_t fre_start_addr_sz;
   size_t fre_stack_offsets_sz;
   int err = 0;
@@ -1572,23 +1572,19 @@ sframe_encoder_write_fre (char *contents, sframe_frame_row_entry *frep,
 				       fre_type, fre_start_addr_sz);
   contents += fre_start_addr_sz;
 
-  memcpy (contents,
-	  &frep->fre_info,
-	  sizeof (frep->fre_info));
+  memcpy (contents, &frep->fre_info, sizeof (frep->fre_info));
   contents += sizeof (frep->fre_info);
 
-  memcpy (contents,
-	  frep->fre_offsets,
-	  fre_stack_offsets_sz);
+  memcpy (contents, frep->fre_offsets, fre_stack_offsets_sz);
   contents+= fre_stack_offsets_sz;
 
-  fre_size = sframe_fre_entry_size (frep, fre_type);
+  fre_sz = sframe_fre_entry_size (frep, fre_type);
   /* Sanity checking.  */
   sframe_assert ((fre_start_addr_sz
-		     + sizeof (frep->fre_info)
-		     + fre_stack_offsets_sz) == fre_size);
+		  + sizeof (frep->fre_info)
+		  + fre_stack_offsets_sz) == fre_sz);
 
-  *esz = fre_size;
+  *esz = fre_sz;
 
   return 0;
 }
