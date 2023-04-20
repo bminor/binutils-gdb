@@ -1,3 +1,7 @@
+2023-04-20  Nick Clifton  <nickc@redhat.com>
+
+	* SECURITY.txt: New file.
+
 2023-04-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 30355
