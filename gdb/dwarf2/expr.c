@@ -411,11 +411,11 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	  break;
 
 	case DWARF_VALUE_IMPLICIT_POINTER:
-	    if (from != nullptr)
-	      {
-		v->mark_bits_optimized_out (offset, this_size_bits);
-		break;
-	      }
+	  if (from != nullptr)
+	    {
+	      v->mark_bits_optimized_out (offset, this_size_bits);
+	      break;
+	    }
 
 	  /* These bits show up as zeros -- but do not cause the value to
 	     be considered optimized-out.  */
@@ -433,6 +433,13 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 
       offset += this_size_bits;
       bits_to_skip = 0;
+    }
+
+  if (offset < max_offset)
+    {
+      if (check_optimized)
+	return true;
+      v->mark_bits_optimized_out (offset, max_offset - offset);
     }
 
   return false;
@@ -493,7 +500,7 @@ check_pieced_synthetic_pointer (const value *value, LONGEST bit_offset,
 	return false;
     }
 
-  return true;
+  return bit_length == 0;
 }
 
 /* An implementation of an lval_funcs method to indirect through a
