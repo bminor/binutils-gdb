@@ -193,11 +193,11 @@ read_and_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
   return info_ptr;
 }
 
-CORE_ADDR
+unrelocated_addr
 comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
 			      unsigned int *bytes_read) const
 {
-  CORE_ADDR retval = 0;
+  ULONGEST retval = 0;
 
   if (signed_addr_p)
     {
@@ -238,5 +238,5 @@ comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
     }
 
   *bytes_read = addr_size;
-  return retval;
+  return (unrelocated_addr) retval;
 }

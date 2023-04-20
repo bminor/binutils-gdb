@@ -91,7 +91,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_addrx:
 	case DW_FORM_GNU_addr_index:
 	  gdb_printf (f, "address: ");
-	  gdb_puts (hex_string (die->attrs[i].as_address ()), f);
+	  gdb_puts (hex_string ((CORE_ADDR) die->attrs[i].as_address ()), f);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:

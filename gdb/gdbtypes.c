@@ -6134,8 +6134,7 @@ builtin_type (struct objfile *objfile)
 CORE_ADDR
 call_site::pc () const
 {
-  CORE_ADDR delta = this->per_objfile->objfile->text_section_offset ();
-  return m_unrelocated_pc + delta;
+  return per_objfile->relocate (m_unrelocated_pc);
 }
 
 void _initialize_gdbtypes ();

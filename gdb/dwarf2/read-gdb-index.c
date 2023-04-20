@@ -717,18 +717,13 @@ static void
 create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 			       mapped_gdb_index *index)
 {
-  struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  struct gdbarch *gdbarch = objfile->arch ();
   const gdb_byte *iter, *end;
-  CORE_ADDR baseaddr;
 
   addrmap_mutable mutable_map;
 
   iter = index->address_table.data ();
   end = iter + index->address_table.size ();
-
-  baseaddr = objfile->text_section_offset ();
 
   while (iter < end)
     {
@@ -754,8 +749,8 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 	  continue;
 	}
 
-      lo = gdbarch_adjust_dwarf2_addr (gdbarch, lo + baseaddr) - baseaddr;
-      hi = gdbarch_adjust_dwarf2_addr (gdbarch, hi + baseaddr) - baseaddr;
+      lo = (ULONGEST) per_objfile->adjust ((unrelocated_addr) lo);
+      hi = (ULONGEST) per_objfile->adjust ((unrelocated_addr) hi);
       mutable_map.set_empty (lo, hi - 1, per_bfd->get_cu (cu_index));
     }
 

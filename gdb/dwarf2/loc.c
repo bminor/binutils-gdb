@@ -107,7 +107,7 @@ invalid_synthetic_pointer (void)
 static enum debug_loc_kind
 decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
 			    const gdb_byte **new_ptr,
-			    CORE_ADDR *low, CORE_ADDR *high,
+			    unrelocated_addr *lowp, unrelocated_addr *highp,
 			    enum bfd_endian byte_order,
 			    unsigned int addr_size,
 			    int signed_addr_p)
@@ -117,26 +117,29 @@ decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
   if (buf_end - loc_ptr < 2 * addr_size)
     return DEBUG_LOC_BUFFER_OVERFLOW;
 
+  CORE_ADDR low, high;
   if (signed_addr_p)
-    *low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+    low = extract_signed_integer (loc_ptr, addr_size, byte_order);
   else
-    *low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+    low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
   loc_ptr += addr_size;
 
   if (signed_addr_p)
-    *high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+    high = extract_signed_integer (loc_ptr, addr_size, byte_order);
   else
-    *high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+    high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
   loc_ptr += addr_size;
 
   *new_ptr = loc_ptr;
+  *lowp = (unrelocated_addr) low;
+  *highp = (unrelocated_addr) high;
 
   /* A base-address-selection entry.  */
-  if ((*low & base_mask) == base_mask)
+  if ((low & base_mask) == base_mask)
     return DEBUG_LOC_BASE_ADDRESS;
 
   /* An end-of-list entry.  */
-  if (*low == 0 && *high == 0)
+  if (low == 0 && high == 0)
     return DEBUG_LOC_END_OF_LIST;
 
   /* We want the caller to apply the base address, so we must return
@@ -155,7 +158,8 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
 				 const gdb_byte *loc_ptr,
 				 const gdb_byte *buf_end,
 				 const gdb_byte **new_ptr,
-				 CORE_ADDR *low, CORE_ADDR *high,
+				 unrelocated_addr *low,
+				 unrelocated_addr *high,
 				 enum bfd_endian byte_order,
 				 unsigned int addr_size,
 				 int signed_addr_p)
@@ -168,7 +172,7 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
   switch (*loc_ptr++)
     {
     case DW_LLE_base_addressx:
-      *low = 0;
+      *low = {};
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
       if (loc_ptr == NULL)
 	 return DEBUG_LOC_BUFFER_OVERFLOW;
@@ -188,7 +192,7 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
       if (loc_ptr == NULL)
 	 return DEBUG_LOC_BUFFER_OVERFLOW;
 
-      *high += u64;
+      *high = (unrelocated_addr) ((uint64_t) *high + u64);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_START_LENGTH;
 
@@ -197,9 +201,11 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
 	 return DEBUG_LOC_BUFFER_OVERFLOW;
 
       if (signed_addr_p)
-	 *low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+	*low = (unrelocated_addr) extract_signed_integer (loc_ptr, addr_size,
+							  byte_order);
       else
-	 *low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+	*low = (unrelocated_addr) extract_unsigned_integer (loc_ptr, addr_size,
+							    byte_order);
 
       loc_ptr += addr_size;
       *high = *low;
@@ -208,7 +214,7 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
       if (loc_ptr == NULL)
 	 return DEBUG_LOC_BUFFER_OVERFLOW;
 
-      *high += u64;
+      *high = (unrelocated_addr) ((uint64_t) *high + u64);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_START_LENGTH;
 
@@ -221,9 +227,11 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
 	return DEBUG_LOC_BUFFER_OVERFLOW;
 
       if (signed_addr_p)
-	*high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+	*high = (unrelocated_addr) extract_signed_integer (loc_ptr, addr_size,
+							   byte_order);
       else
-	*high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+	*high = (unrelocated_addr) extract_unsigned_integer (loc_ptr, addr_size,
+							     byte_order);
 
       loc_ptr += addr_size;
       *new_ptr = loc_ptr;
@@ -234,12 +242,12 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
 
-      *low = u64;
+      *low = (unrelocated_addr) u64;
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
 
-      *high = u64;
+      *high = (unrelocated_addr) u64;
       *new_ptr = loc_ptr;
       return DEBUG_LOC_OFFSET_PAIR;
 
@@ -248,15 +256,19 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
 	return DEBUG_LOC_BUFFER_OVERFLOW;
 
       if (signed_addr_p)
-	*low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+	*low = (unrelocated_addr) extract_signed_integer (loc_ptr, addr_size,
+							  byte_order);
       else
-	*low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+	*low = (unrelocated_addr) extract_unsigned_integer (loc_ptr, addr_size,
+							    byte_order);
 
       loc_ptr += addr_size;
       if (signed_addr_p)
-	*high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+	*high = (unrelocated_addr) extract_signed_integer (loc_ptr, addr_size,
+							   byte_order);
       else
-	*high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+	*high = (unrelocated_addr) extract_unsigned_integer (loc_ptr, addr_size,
+							     byte_order);
 
       loc_ptr += addr_size;
       *new_ptr = loc_ptr;
@@ -281,7 +293,8 @@ decode_debug_loc_dwo_addresses (dwarf2_per_cu_data *per_cu,
 				const gdb_byte *loc_ptr,
 				const gdb_byte *buf_end,
 				const gdb_byte **new_ptr,
-				CORE_ADDR *low, CORE_ADDR *high,
+				unrelocated_addr *low,
+				unrelocated_addr *high,
 				enum bfd_endian byte_order)
 {
   uint64_t low_index, high_index;
@@ -296,7 +309,7 @@ decode_debug_loc_dwo_addresses (dwarf2_per_cu_data *per_cu,
       return DEBUG_LOC_END_OF_LIST;
 
     case DW_LLE_GNU_base_address_selection_entry:
-      *low = 0;
+      *low = {};
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
@@ -329,7 +342,9 @@ decode_debug_loc_dwo_addresses (dwarf2_per_cu_data *per_cu,
 	return DEBUG_LOC_BUFFER_OVERFLOW;
 
       *high = *low;
-      *high += extract_unsigned_integer (loc_ptr, 4, byte_order);
+      *high = (unrelocated_addr) ((CORE_ADDR) *high
+				  + extract_unsigned_integer (loc_ptr, 4,
+							      byte_order));
       *new_ptr = loc_ptr + 4;
       return DEBUG_LOC_START_LENGTH;
 
@@ -348,7 +363,7 @@ decode_debug_loc_dwo_addresses (dwarf2_per_cu_data *per_cu,
 
 const gdb_byte *
 dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
-				 size_t *locexpr_length, CORE_ADDR pc)
+				 size_t *locexpr_length, const CORE_ADDR pc)
 {
   dwarf2_per_objfile *per_objfile = baton->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
@@ -358,7 +373,8 @@ dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd.get ());
   /* Adjustment for relocatable objects.  */
   CORE_ADDR text_offset = baton->per_objfile->objfile->text_section_offset ();
-  CORE_ADDR base_address = baton->base_address;
+  unrelocated_addr unrel_pc = (unrelocated_addr) (pc - text_offset);
+  unrelocated_addr base_address = baton->base_address;
   const gdb_byte *loc_ptr, *buf_end;
 
   loc_ptr = baton->data;
@@ -366,7 +382,7 @@ dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
 
   while (1)
     {
-      CORE_ADDR low = 0, high = 0; /* init for gcc -Wall */
+      unrelocated_addr low = {}, high = {}; /* init for gcc -Wall */
       int length;
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
@@ -421,12 +437,10 @@ dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
 	 operands are offsets relative to the applicable base address.
 	 If the entry is DW_LLE_start_end or DW_LLE_start_length, then
 	 it already is an address, and we don't need to add the base.  */
-      low += text_offset;
-      high += text_offset;
       if (!baton->from_dwo && kind == DEBUG_LOC_OFFSET_PAIR)
 	{
-	  low += base_address;
-	  high += base_address;
+	  low = (unrelocated_addr) ((CORE_ADDR) low + (CORE_ADDR) base_address);
+	  high = (unrelocated_addr) ((CORE_ADDR) high + (CORE_ADDR) base_address);
 	}
 
       if (baton->per_cu->version () < 5)
@@ -442,7 +456,7 @@ dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
 	  loc_ptr += bytes_read;
 	}
 
-      if (low == high && pc == low)
+      if (low == high && unrel_pc == low)
 	{
 	  /* This is entry PC record present only at entry point
 	     of a function.  Verify it is really the function entry point.  */
@@ -460,7 +474,7 @@ dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
 	    }
 	}
 
-      if (pc >= low && pc < high)
+      if (unrel_pc >= low && unrel_pc < high)
 	{
 	  *locexpr_length = length;
 	  return loc_ptr;
@@ -722,19 +736,17 @@ call_site_target::iterate_over_addresses
     case call_site_target::PHYSADDR:
       {
 	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
-	CORE_ADDR delta = per_objfile->objfile->text_section_offset ();
 
-	callback (m_loc.physaddr + delta);
+	callback (per_objfile->relocate (m_loc.physaddr));
       }
       break;
 
     case call_site_target::ADDRESSES:
       {
 	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
-	CORE_ADDR delta = per_objfile->objfile->text_section_offset ();
 
 	for (unsigned i = 0; i < m_loc.addresses.length; ++i)
-	  callback (m_loc.addresses.values[i] + delta);
+	  callback (per_objfile->relocate (m_loc.addresses.values[i]));
       }
       break;
 
@@ -3269,7 +3281,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       uint64_t offset;
 
       data = safe_read_uleb128 (data + 1, end, &offset);
-      offset = dwarf2_read_addr_index (per_cu, per_objfile, offset);
+      offset = (uint64_t) dwarf2_read_addr_index (per_cu, per_objfile, offset);
       gdb_printf (stream, 
 		  _("a thread-local variable at offset 0x%s "
 		    "in the thread-local storage for `%s'"),
@@ -3663,13 +3675,13 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
+	  ul = (uint64_t) dwarf2_read_addr_index (per_cu, per_objfile, ul);
 	  gdb_printf (stream, " 0x%s", phex_nz (ul, addr_size));
 	  break;
 
 	case DW_OP_GNU_const_index:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
+	  ul = (uint64_t) dwarf2_read_addr_index (per_cu, per_objfile, ul);
 	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
@@ -3948,9 +3960,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd.get ());
-  /* Adjustment for relocatable objects.  */
-  CORE_ADDR text_offset = objfile->text_section_offset ();
-  CORE_ADDR base_address = dlbaton->base_address;
+  unrelocated_addr base_address = dlbaton->base_address;
   int done = 0;
 
   loc_ptr = dlbaton->data;
@@ -3961,7 +3971,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   /* Iterate through locations until we run out.  */
   while (!done)
     {
-      CORE_ADDR low = 0, high = 0; /* init for gcc -Wall */
+      unrelocated_addr low = {}, high = {}; /* init for gcc -Wall */
       int length;
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
@@ -3992,7 +4002,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	case DEBUG_LOC_BASE_ADDRESS:
 	  base_address = high;
 	  gdb_printf (stream, _("  Base address %s"),
-		      paddress (gdbarch, base_address));
+		      paddress (gdbarch, (CORE_ADDR) base_address));
 	  continue;
 
 	case DEBUG_LOC_START_END:
@@ -4010,16 +4020,16 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	}
 
       /* Otherwise, a location expression entry.  */
-      low += text_offset;
-      high += text_offset;
       if (!dlbaton->from_dwo && kind == DEBUG_LOC_OFFSET_PAIR)
 	{
-	  low += base_address;
-	  high += base_address;
+	  low = (unrelocated_addr) ((CORE_ADDR) low
+				    + (CORE_ADDR) base_address);
+	  high = (unrelocated_addr) ((CORE_ADDR) high
+				     + (CORE_ADDR) base_address);
 	}
 
-      low = gdbarch_adjust_dwarf2_addr (gdbarch, low);
-      high = gdbarch_adjust_dwarf2_addr (gdbarch, high);
+      CORE_ADDR low_reloc = per_objfile->relocate (low);
+      CORE_ADDR high_reloc = per_objfile->relocate (high);
 
       if (dlbaton->per_cu->version () < 5)
 	 {
@@ -4036,10 +4046,11 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       /* (It would improve readability to print only the minimum
 	 necessary digits of the second number of the range.)  */
       gdb_printf (stream, _("  Range %s-%s: "),
-		  paddress (gdbarch, low), paddress (gdbarch, high));
+		  paddress (gdbarch, low_reloc),
+		  paddress (gdbarch, high_reloc));
 
       /* Now describe this particular location.  */
-      locexpr_describe_location_1 (symbol, low, stream, loc_ptr, length,
+      locexpr_describe_location_1 (symbol, low_reloc, stream, loc_ptr, length,
 				   addr_size, offset_size,
 				   dlbaton->per_cu, per_objfile);
 

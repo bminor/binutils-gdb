@@ -101,7 +101,7 @@ struct dwarf2_cu
   struct comp_unit_head header;
 
   /* Base address of this compilation unit.  */
-  gdb::optional<CORE_ADDR> base_address;
+  gdb::optional<unrelocated_addr> base_address;
 
   /* The language we are debugging.  */
   const struct language_defn *language_defn = nullptr;

@@ -180,7 +180,7 @@ struct dwarf2_loclist_baton
 {
   /* The initial base address for the location list, based on the compilation
      unit.  */
-  CORE_ADDR base_address;
+  unrelocated_addr base_address;
 
   /* Pointer to the start of the location list.  */
   const gdb_byte *data;

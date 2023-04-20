@@ -108,8 +108,8 @@ public:
   }
 
   /* Read an address from BUF.  BYTES_READ is updated.  */
-  CORE_ADDR read_address (bfd *abfd, const gdb_byte *buf,
-			  unsigned int *bytes_read) const;
+  unrelocated_addr read_address (bfd *abfd, const gdb_byte *buf,
+				 unsigned int *bytes_read) const;
 };
 
 /* Expected enum dwarf_unit_type for read_comp_unit_head.  */

@@ -769,7 +769,8 @@ static void read_attribute_reprocess (const struct die_reader_specs *reader,
 				      struct attribute *attr,
 				      dwarf_tag tag = DW_TAG_padding);
 
-static CORE_ADDR read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index);
+static unrelocated_addr read_addr_index (struct dwarf2_cu *cu,
+					 unsigned int addr_index);
 
 static sect_offset read_abbrev_offset (dwarf2_per_objfile *per_objfile,
 				       dwarf2_section_info *, sect_offset);
@@ -778,9 +779,9 @@ static const char *read_indirect_string
   (dwarf2_per_objfile *per_objfile, bfd *, const gdb_byte *,
    const struct comp_unit_head *, unsigned int *);
 
-static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
-					      const gdb_byte *,
-					      unsigned int *);
+static unrelocated_addr read_addr_index_from_leb128 (struct dwarf2_cu *,
+						     const gdb_byte *,
+						     unsigned int *);
 
 static const char *read_dwo_str_index (const struct die_reader_specs *reader,
 				       ULONGEST str_index);
@@ -896,13 +897,14 @@ enum pc_bounds_kind
 };
 
 static enum pc_bounds_kind dwarf2_get_pc_bounds (struct die_info *,
-						 CORE_ADDR *, CORE_ADDR *,
+						 unrelocated_addr *,
+						 unrelocated_addr *,
 						 struct dwarf2_cu *,
 						 addrmap *,
 						 void *);
 
 static void get_scope_pc_bounds (struct die_info *,
-				 CORE_ADDR *, CORE_ADDR *,
+				 unrelocated_addr *, unrelocated_addr *,
 				 struct dwarf2_cu *);
 
 static void dwarf2_record_block_ranges (struct die_info *, struct block *,
@@ -1198,6 +1200,27 @@ dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
 {
   complaint (_("invalid attribute class or form for '%s' in '%s'"),
 	     arg1, arg2);
+}
+
+/* See read.h.  */
+
+unrelocated_addr
+dwarf2_per_objfile::adjust (unrelocated_addr addr)
+{
+  CORE_ADDR baseaddr = objfile->text_section_offset ();
+  CORE_ADDR tem = (CORE_ADDR) addr + baseaddr;
+  tem = gdbarch_adjust_dwarf2_addr (objfile->arch (), tem);
+  return (unrelocated_addr) (tem - baseaddr);
+}
+
+/* See read.h.  */
+
+CORE_ADDR
+dwarf2_per_objfile::relocate (unrelocated_addr addr)
+{
+  CORE_ADDR baseaddr = objfile->text_section_offset ();
+  CORE_ADDR tem = (CORE_ADDR) addr + baseaddr;
+  return gdbarch_adjust_dwarf2_addr (objfile->arch (), tem);
 }
 
 /* Hash function for line_header_hash.  */
@@ -1823,7 +1846,6 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd = objfile->obfd.get ();
   struct gdbarch *gdbarch = objfile->arch ();
-  const CORE_ADDR baseaddr = objfile->text_section_offset ();
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   std::unordered_map<sect_offset,
@@ -1981,10 +2003,8 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	      continue;
 	    }
 	  ULONGEST end = start + length;
-	  start = (gdbarch_adjust_dwarf2_addr (gdbarch, start + baseaddr)
-		   - baseaddr);
-	  end = (gdbarch_adjust_dwarf2_addr (gdbarch, end + baseaddr)
-		 - baseaddr);
+	  start = (ULONGEST) per_objfile->adjust ((unrelocated_addr) start);
+	  end = (ULONGEST) per_objfile->adjust ((unrelocated_addr) end);
 	  mutable_map->set_empty (start, end - 1, per_cu);
 	}
 
@@ -6369,15 +6389,10 @@ static void
 process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
-  struct objfile *objfile = per_objfile->objfile;
-  struct gdbarch *gdbarch = objfile->arch ();
-  CORE_ADDR lowpc, highpc;
+  unrelocated_addr lowpc, highpc;
   struct compunit_symtab *cust;
-  CORE_ADDR baseaddr;
   struct block *static_block;
   CORE_ADDR addr;
-
-  baseaddr = objfile->text_section_offset ();
 
   /* Clear the list here in case something was left over.  */
   cu->method_list.clear ();
@@ -6419,7 +6434,7 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
      it, by scanning the DIE's below the compilation unit.  */
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
-  addr = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
+  addr = per_objfile->relocate (highpc);
   static_block
     = cu->get_builder ()->end_compunit_symtab_get_static_block (addr, 0, 1);
 
@@ -7629,23 +7644,20 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  struct gdbarch *gdbarch = objfile->arch ();
-  CORE_ADDR lowpc = ((CORE_ADDR) -1);
-  CORE_ADDR highpc = ((CORE_ADDR) 0);
+  CORE_ADDR lowpc;
   struct attribute *attr;
   struct die_info *child_die;
-  CORE_ADDR baseaddr;
 
   prepare_one_comp_unit (cu, die, cu->lang ());
-  baseaddr = objfile->text_section_offset ();
 
-  get_scope_pc_bounds (die, &lowpc, &highpc, cu);
+  unrelocated_addr unrel_low, unrel_high;
+  get_scope_pc_bounds (die, &unrel_low, &unrel_high, cu);
 
   /* If we didn't find a lowpc, set it to highpc to avoid complaints
      from finish_block.  */
-  if (lowpc == ((CORE_ADDR) -1))
-    lowpc = highpc;
-  lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
+  if (unrel_low == ((unrelocated_addr) -1))
+    unrel_low = unrel_high;
+  lowpc = per_objfile->relocate (unrel_low);
 
   file_and_directory &fnd = find_file_and_directory (die, cu);
 
@@ -7659,7 +7671,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
      for DW_AT_decl_file.  */
-  handle_DW_AT_stmt_list (die, cu, fnd, lowpc, lowpc != highpc);
+  handle_DW_AT_stmt_list (die, cu, fnd, lowpc, unrel_low != unrel_high);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -10047,7 +10059,8 @@ check_ada_pragma_import (struct die_info *die, struct dwarf2_cu *cu)
 static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->per_objfile->objfile;
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   struct context_stack *newobj;
   CORE_ADDR lowpc;
@@ -10055,7 +10068,6 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct die_info *child_die;
   struct attribute *attr, *call_line, *call_file;
   const char *name;
-  CORE_ADDR baseaddr;
   struct block *block;
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
   std::vector<struct symbol *> template_args;
@@ -10074,8 +10086,6 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  return;
 	}
     }
-
-  baseaddr = objfile->text_section_offset ();
 
   name = dwarf2_name (die, cu);
   if (name == nullptr)
@@ -10099,7 +10109,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   /* Ignore functions with missing or invalid low and high pc attributes.  */
-  if (dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, nullptr, nullptr)
+  unrelocated_addr unrel_low, unrel_high;
+  if (dwarf2_get_pc_bounds (die, &unrel_low, &unrel_high, cu, nullptr, nullptr)
       <= PC_BOUNDS_INVALID)
     {
       if (have_complaint ())
@@ -10122,8 +10133,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
-  highpc = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
+  lowpc = per_objfile->relocate (unrel_low);
+  highpc = per_objfile->relocate (unrel_high);
 
   /* If we have any template arguments, then we must allocate a
      different sort of symbol.  */
@@ -10270,20 +10281,18 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 static void
 read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->per_objfile->objfile;
-  struct gdbarch *gdbarch = objfile->arch ();
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
   CORE_ADDR lowpc, highpc;
   struct die_info *child_die;
-  CORE_ADDR baseaddr;
-
-  baseaddr = objfile->text_section_offset ();
 
   /* Ignore blocks with missing or invalid low and high pc attributes.  */
   /* ??? Perhaps consider discontiguous blocks defined by DW_AT_ranges
      as multiple lexical blocks?  Handling children in a sane way would
      be nasty.  Might be easier to properly extend generic blocks to
      describe ranges.  */
-  switch (dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, nullptr, nullptr))
+  unrelocated_addr unrel_low, unrel_high;
+  switch (dwarf2_get_pc_bounds (die, &unrel_low, &unrel_high, cu,
+				nullptr, nullptr))
     {
     case PC_BOUNDS_NOT_PRESENT:
       /* DW_TAG_lexical_block has no attributes, process its children as if
@@ -10306,8 +10315,8 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
     case PC_BOUNDS_INVALID:
       return;
     }
-  lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
-  highpc = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
+  lowpc = per_objfile->relocate (unrel_low);
+  highpc = per_objfile->relocate (unrel_high);
 
   cu->get_builder ()->push_context (0, lowpc);
   if (die->child != NULL)
@@ -10345,10 +10354,11 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   cu->get_builder ()->set_local_using_directives (cstk.local_using_directives);
 }
 
-static void dwarf2_ranges_read_low_addrs (unsigned offset,
-					  struct dwarf2_cu *cu,
-					  dwarf_tag tag,
-					  std::vector<CORE_ADDR> &result);
+static void dwarf2_ranges_read_low_addrs
+     (unsigned offset,
+      struct dwarf2_cu *cu,
+      dwarf_tag tag,
+      std::vector<unrelocated_addr> &result);
 
 /* Read in DW_TAG_call_site and insert it to CU->call_site_htab.  */
 
@@ -10358,13 +10368,10 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
-  CORE_ADDR pc, baseaddr;
   struct attribute *attr;
   void **slot;
   int nparams;
   struct die_info *child_die;
-
-  baseaddr = objfile->text_section_offset ();
 
   attr = dwarf2_attr (die, DW_AT_call_return_pc, cu);
   if (attr == NULL)
@@ -10380,9 +10387,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		 sect_offset_str (die->sect_off), objfile_name (objfile));
       return;
     }
-  pc = attr->as_address () + baseaddr;
-  pc = gdbarch_adjust_dwarf2_addr (gdbarch, pc);
-  pc -= baseaddr;
+  unrelocated_addr pc = per_objfile->adjust (attr->as_address ());
 
   if (cu->call_site_htab == NULL)
     cu->call_site_htab = htab_create_alloc_ex (16, call_site::hash,
@@ -10395,7 +10400,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       complaint (_("Duplicate PC %s for DW_TAG_call_site "
 		   "DIE %s [in module %s]"),
-		 paddress (gdbarch, pc), sect_offset_str (die->sect_off),
+		 paddress (gdbarch, (CORE_ADDR) pc), sect_offset_str (die->sect_off),
 		 objfile_name (objfile));
       return;
     }
@@ -10536,17 +10541,18 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  ULONGEST ranges_offset = (ranges_attr->as_unsigned ()
 				    + target_cu->gnu_ranges_base);
-	  std::vector<CORE_ADDR> addresses;
+	  std::vector<unrelocated_addr> addresses;
 	  dwarf2_ranges_read_low_addrs (ranges_offset, target_cu,
 					target_die->tag, addresses);
-	  CORE_ADDR *saved = XOBNEWVAR (&objfile->objfile_obstack, CORE_ADDR,
-					addresses.size ());
+	  unrelocated_addr *saved = XOBNEWVAR (&objfile->objfile_obstack,
+					       unrelocated_addr,
+					       addresses.size ());
 	  std::copy (addresses.begin (), addresses.end (), saved);
 	  call_site->target.set_loc_array (addresses.size (), saved);
 	}
       else
 	{
-	  CORE_ADDR lowpc;
+	  unrelocated_addr lowpc;
 
 	  /* DW_AT_entry_pc should be preferred.  */
 	  if (dwarf2_get_pc_bounds (target_die, &lowpc, NULL, target_cu,
@@ -10557,8 +10563,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		       sect_offset_str (die->sect_off), objfile_name (objfile));
 	  else
 	    {
-	      lowpc = (gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr)
-		       - baseaddr);
+	      lowpc = per_objfile->adjust (lowpc);
 	      call_site->target.set_loc_physaddr (lowpc);
 	    }
 	}
@@ -10769,7 +10774,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
   struct objfile *objfile = per_objfile->objfile;
   bfd *obfd = objfile->obfd.get ();
   /* Base address selection entry.  */
-  gdb::optional<CORE_ADDR> base;
+  gdb::optional<unrelocated_addr> base;
   const gdb_byte *buffer;
   bool overflow = false;
   ULONGEST addr_index;
@@ -10790,7 +10795,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
   while (1)
     {
       /* Initialize it due to a false compiler warning.  */
-      CORE_ADDR range_beginning = 0, range_end = 0;
+      unrelocated_addr range_beginning = {}, range_end = {};
       const gdb_byte *buf_end = (rnglists_section->buffer
 				 + rnglists_section->size);
       unsigned int bytes_read;
@@ -10828,8 +10833,10 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	  range_beginning = cu->header.read_address (obfd, buffer,
 						     &bytes_read);
 	  buffer += bytes_read;
-	  range_end = (range_beginning
-		       + read_unsigned_leb128 (obfd, buffer, &bytes_read));
+	  range_end
+	    = (unrelocated_addr) ((CORE_ADDR) range_beginning
+				  + read_unsigned_leb128 (obfd, buffer,
+							  &bytes_read));
 	  buffer += bytes_read;
 	  if (buffer > buf_end)
 	    {
@@ -10846,19 +10853,23 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	      overflow = true;
 	      break;
 	    }
-	  range_end = (range_beginning
-		       + read_unsigned_leb128 (obfd, buffer, &bytes_read));
+	  range_end
+	    = (unrelocated_addr) ((CORE_ADDR) range_beginning
+				  + read_unsigned_leb128 (obfd, buffer,
+							  &bytes_read));
 	  buffer += bytes_read;
 	  break;
 	case DW_RLE_offset_pair:
-	  range_beginning = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+	  range_beginning = (unrelocated_addr) read_unsigned_leb128 (obfd, buffer,
+								     &bytes_read);
 	  buffer += bytes_read;
 	  if (buffer > buf_end)
 	    {
 	      overflow = true;
 	      break;
 	    }
-	  range_end = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+	  range_end = (unrelocated_addr) read_unsigned_leb128 (obfd, buffer,
+							       &bytes_read);
 	  buffer += bytes_read;
 	  if (buffer > buf_end)
 	    {
@@ -10922,13 +10933,15 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	      return false;
 	    }
 
-	  range_beginning += *base;
-	  range_end += *base;
+	  range_beginning = (unrelocated_addr) ((CORE_ADDR) range_beginning
+						+ (CORE_ADDR) *base);
+	  range_end = (unrelocated_addr) ((CORE_ADDR) range_end
+					  + (CORE_ADDR) *base);
 	}
 
       /* A not-uncommon case of bad debug info.
 	 Don't pollute the addrmap with bad data.  */
-      if (range_beginning == 0
+      if (range_beginning == (unrelocated_addr) 0
 	  && !per_objfile->per_bfd->has_section_at_zero)
 	{
 	  complaint (_(".debug_rnglists entry has start address of zero"
@@ -10952,7 +10965,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 
 /* Call CALLBACK from DW_AT_ranges attribute value OFFSET reading .debug_ranges.
    Callback's type should be:
-    void (CORE_ADDR range_beginning, CORE_ADDR range_end)
+    void (unrelocated_addr range_beginning, unrelocated_addr range_end)
    Return 1 if the attributes are present and valid, otherwise, return 0.  */
 
 template <typename Callback>
@@ -10967,7 +10980,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
   unsigned int addr_size = cu_header->addr_size;
   CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Base address selection entry.  */
-  gdb::optional<CORE_ADDR> base;
+  gdb::optional<unrelocated_addr> base;
   unsigned int dummy;
   const gdb_byte *buffer;
 
@@ -10987,7 +11000,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
 
   while (1)
     {
-      CORE_ADDR range_beginning, range_end;
+      unrelocated_addr range_beginning, range_end;
 
       range_beginning = cu->header.read_address (obfd, buffer, &dummy);
       buffer += addr_size;
@@ -10996,14 +11009,15 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
       offset += 2 * addr_size;
 
       /* An end of list marker is a pair of zero addresses.  */
-      if (range_beginning == 0 && range_end == 0)
+      if (range_beginning == (unrelocated_addr) 0
+	  && range_end == (unrelocated_addr) 0)
 	/* Found the end of list entry.  */
 	break;
 
       /* Each base address selection entry is a pair of 2 values.
 	 The first is the largest possible address, the second is
 	 the base address.  Check for a base address here.  */
-      if ((range_beginning & mask) == mask)
+      if (((CORE_ADDR) range_beginning & mask) == mask)
 	{
 	  /* If we found the largest possible address, then we already
 	     have the base address in range_end.  */
@@ -11030,12 +11044,14 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
       if (range_beginning == range_end)
 	continue;
 
-      range_beginning += *base;
-      range_end += *base;
+      range_beginning = (unrelocated_addr) ((CORE_ADDR) range_beginning
+					    + (CORE_ADDR) *base);
+      range_end = (unrelocated_addr) ((CORE_ADDR) range_end
+				      + (CORE_ADDR) *base);
 
       /* A not-uncommon case of bad debug info.
 	 Don't pollute the addrmap with bad data.  */
-      if (range_beginning == 0
+      if (range_beginning == (unrelocated_addr) 0
 	  && !per_objfile->per_bfd->has_section_at_zero)
 	{
 	  complaint (_(".debug_ranges entry has start address of zero"
@@ -11055,33 +11071,28 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
    ranges in MAP are set, using DATUM as the value.  */
 
 static int
-dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
-		    CORE_ADDR *high_return, struct dwarf2_cu *cu,
+dwarf2_ranges_read (unsigned offset, unrelocated_addr *low_return,
+		    unrelocated_addr *high_return, struct dwarf2_cu *cu,
 		    addrmap *map, void *datum, dwarf_tag tag)
 {
-  struct objfile *objfile = cu->per_objfile->objfile;
-  struct gdbarch *gdbarch = objfile->arch ();
-  const CORE_ADDR baseaddr = objfile->text_section_offset ();
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
   int low_set = 0;
-  CORE_ADDR low = 0;
-  CORE_ADDR high = 0;
+  unrelocated_addr low = {};
+  unrelocated_addr high = {};
   int retval;
 
   retval = dwarf2_ranges_process (offset, cu, tag,
-    [&] (CORE_ADDR range_beginning, CORE_ADDR range_end)
+    [&] (unrelocated_addr range_beginning, unrelocated_addr range_end)
     {
       if (map != nullptr)
 	{
-	  CORE_ADDR lowpc;
-	  CORE_ADDR highpc;
+	  unrelocated_addr lowpc;
+	  unrelocated_addr highpc;
 
-	  lowpc = (gdbarch_adjust_dwarf2_addr (gdbarch,
-					       range_beginning + baseaddr)
-		   - baseaddr);
-	  highpc = (gdbarch_adjust_dwarf2_addr (gdbarch,
-						range_end + baseaddr)
-		    - baseaddr);
-	  map->set_empty (lowpc, highpc - 1, datum);
+	  lowpc = per_objfile->adjust (range_beginning);
+	  highpc = per_objfile->adjust (range_end);
+	  /* addrmap only accepts CORE_ADDR, so we must cast here.  */
+	  map->set_empty ((CORE_ADDR) lowpc, (CORE_ADDR) highpc - 1, datum);
 	}
 
       /* FIXME: This is recording everything as a low-high
@@ -11122,10 +11133,10 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 static void
 dwarf2_ranges_read_low_addrs (unsigned offset, struct dwarf2_cu *cu,
 			      dwarf_tag tag,
-			      std::vector<CORE_ADDR> &result)
+			      std::vector<unrelocated_addr> &result)
 {
   dwarf2_ranges_process (offset, cu, tag,
-			 [&] (CORE_ADDR start, CORE_ADDR end)
+			 [&] (unrelocated_addr start, unrelocated_addr end)
     {
       result.push_back (start);
     });
@@ -11136,15 +11147,15 @@ dwarf2_ranges_read_low_addrs (unsigned offset, struct dwarf2_cu *cu,
    neither PC_BOUNDS_NOT_PRESENT nor PC_BOUNDS_INVALID are returned.  */
 
 static enum pc_bounds_kind
-dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
-		      CORE_ADDR *highpc, struct dwarf2_cu *cu,
+dwarf2_get_pc_bounds (struct die_info *die, unrelocated_addr *lowpc,
+		      unrelocated_addr *highpc, struct dwarf2_cu *cu,
 		      addrmap *map, void *datum)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct attribute *attr;
   struct attribute *attr_high;
-  CORE_ADDR low = 0;
-  CORE_ADDR high = 0;
+  unrelocated_addr low = {};
+  unrelocated_addr high = {};
   enum pc_bounds_kind ret;
 
   attr_high = dwarf2_attr (die, DW_AT_high_pc, cu);
@@ -11156,7 +11167,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	  low = attr->as_address ();
 	  high = attr_high->as_address ();
 	  if (cu->header.version >= 4 && attr_high->form_is_constant ())
-	    high += low;
+	    high = (unrelocated_addr) ((ULONGEST) high + (ULONGEST) low);
 	}
       else
 	/* Found high w/o low attribute.  */
@@ -11203,7 +11214,8 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
      labels are not in the output, so the relocs get a value of 0.
      If this is a discarded function, mark the pc bounds as invalid,
      so that GDB will ignore it.  */
-  if (low == 0 && !per_objfile->per_bfd->has_section_at_zero)
+  if (low == (unrelocated_addr) 0
+      && !per_objfile->per_bfd->has_section_at_zero)
     return PC_BOUNDS_INVALID;
 
   *lowpc = low;
@@ -11219,10 +11231,11 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 
 static void
 dwarf2_get_subprogram_pc_bounds (struct die_info *die,
-				 CORE_ADDR *lowpc, CORE_ADDR *highpc,
+				 unrelocated_addr *lowpc,
+				 unrelocated_addr *highpc,
 				 struct dwarf2_cu *cu)
 {
-  CORE_ADDR low, high;
+  unrelocated_addr low, high;
   struct die_info *child = die->child;
 
   if (dwarf2_get_pc_bounds (die, &low, &high, cu, nullptr, nullptr)
@@ -11256,12 +11269,12 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
 
 static void
 get_scope_pc_bounds (struct die_info *die,
-		     CORE_ADDR *lowpc, CORE_ADDR *highpc,
+		     unrelocated_addr *lowpc, unrelocated_addr *highpc,
 		     struct dwarf2_cu *cu)
 {
-  CORE_ADDR best_low = (CORE_ADDR) -1;
-  CORE_ADDR best_high = (CORE_ADDR) 0;
-  CORE_ADDR current_low, current_high;
+  unrelocated_addr best_low = (unrelocated_addr) -1;
+  unrelocated_addr best_high = {};
+  unrelocated_addr current_low, current_high;
 
   if (dwarf2_get_pc_bounds (die, &current_low, &current_high, cu,
 			    nullptr, nullptr)
@@ -11292,7 +11305,7 @@ get_scope_pc_bounds (struct die_info *die,
 	       standards says that they have to be there.  */
 	    get_scope_pc_bounds (child, &current_low, &current_high, cu);
 
-	    if (current_low != ((CORE_ADDR) -1))
+	    if (current_low != ((unrelocated_addr) -1))
 	      {
 		best_low = std::min (best_low, current_low);
 		best_high = std::max (best_high, current_high);
@@ -11318,9 +11331,8 @@ static void
 dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 			    struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->per_objfile->objfile;
-  CORE_ADDR baseaddr = objfile->text_section_offset ();
-  struct gdbarch *gdbarch = objfile->arch ();
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   struct attribute *attr;
   struct attribute *attr_high;
 
@@ -11330,14 +11342,15 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
 	{
-	  CORE_ADDR low = attr->as_address ();
-	  CORE_ADDR high = attr_high->as_address ();
+	  unrelocated_addr unrel_low = attr->as_address ();
+	  unrelocated_addr unrel_high = attr_high->as_address ();
 
 	  if (cu->header.version >= 4 && attr_high->form_is_constant ())
-	    high += low;
+	    unrel_high = (unrelocated_addr) ((ULONGEST) unrel_high
+					     + (ULONGEST) unrel_low);
 
-	  low = gdbarch_adjust_dwarf2_addr (gdbarch, low + baseaddr);
-	  high = gdbarch_adjust_dwarf2_addr (gdbarch, high + baseaddr);
+	  CORE_ADDR low = per_objfile->relocate (unrel_low);
+	  CORE_ADDR high = per_objfile->relocate (unrel_high);
 	  cu->get_builder ()->record_block_range (block, low, high - 1);
 	}
     }
@@ -11356,14 +11369,13 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 
       std::vector<blockrange> blockvec;
       dwarf2_ranges_process (ranges_offset, cu, die->tag,
-	[&] (CORE_ADDR start, CORE_ADDR end)
+	[&] (unrelocated_addr start, unrelocated_addr end)
 	{
-	  start += baseaddr;
-	  end += baseaddr;
-	  start = gdbarch_adjust_dwarf2_addr (gdbarch, start);
-	  end = gdbarch_adjust_dwarf2_addr (gdbarch, end);
-	  cu->get_builder ()->record_block_range (block, start, end - 1);
-	  blockvec.emplace_back (start, end);
+	  CORE_ADDR abs_start = per_objfile->relocate (start);
+	  CORE_ADDR abs_end = per_objfile->relocate (end);
+	  cu->get_builder ()->record_block_range (block, abs_start,
+						  abs_end - 1);
+	  blockvec.emplace_back (abs_start, abs_end);
 	});
 
       block->set_ranges (make_blockranges (objfile, blockvec));
@@ -16071,7 +16083,7 @@ cooked_indexer::check_bounds (cutu_reader *reader)
 
   dwarf2_cu *cu = reader->cu;
 
-  CORE_ADDR best_lowpc = 0, best_highpc = 0;
+  unrelocated_addr best_lowpc = {}, best_highpc = {};
   /* Possibly set the default values of LOWPC and HIGHPC from
      `DW_AT_ranges'.  */
   dwarf2_find_base_address (reader->comp_unit_die, cu);
@@ -16080,18 +16092,15 @@ cooked_indexer::check_bounds (cutu_reader *reader)
 			    cu, m_index_storage->get_addrmap (), cu->per_cu);
   if (cu_bounds_kind == PC_BOUNDS_HIGH_LOW && best_lowpc < best_highpc)
     {
-      struct objfile *objfile = cu->per_objfile->objfile;
-      CORE_ADDR baseaddr = objfile->text_section_offset ();
-      struct gdbarch *gdbarch = objfile->arch ();
-      CORE_ADDR low
-	= (gdbarch_adjust_dwarf2_addr (gdbarch, best_lowpc + baseaddr)
-	   - baseaddr);
-      CORE_ADDR high
-	= (gdbarch_adjust_dwarf2_addr (gdbarch, best_highpc + baseaddr)
-	   - baseaddr - 1);
+      dwarf2_per_objfile *per_objfile = cu->per_objfile;
+      unrelocated_addr low = per_objfile->adjust (best_lowpc);
+      unrelocated_addr high = per_objfile->adjust (best_highpc);
       /* Store the contiguous range if it is not empty; it can be
-	 empty for CUs with no code.  */
-      m_index_storage->get_addrmap ()->set_empty (low, high, cu->per_cu);
+	 empty for CUs with no code.  addrmap requires CORE_ADDR, so
+	 we cast here.  */
+      m_index_storage->get_addrmap ()->set_empty ((CORE_ADDR) low,
+						  (CORE_ADDR) high - 1,
+						  cu->per_cu);
 
       cu->per_cu->addresses_seen = true;
     }
@@ -16181,8 +16190,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
   bool is_declaration = false;
   sect_offset origin_offset {};
 
-  gdb::optional<CORE_ADDR> low_pc;
-  gdb::optional<CORE_ADDR> high_pc;
+  gdb::optional<unrelocated_addr> low_pc;
+  gdb::optional<unrelocated_addr> high_pc;
   bool high_pc_relative = false;
 
   for (int i = 0; i < abbrev->num_attrs; ++i)
@@ -16280,11 +16289,11 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 		  && (addr != 0
 		      || reader->cu->per_objfile->per_bfd->has_section_at_zero))
 		{
-		  low_pc = addr;
+		  low_pc = (unrelocated_addr) addr;
 		  /* For variables, we don't want to try decoding the
 		     type just to find the size -- for gdb's purposes
 		     we only need the address of a variable.  */
-		  high_pc = addr + 1;
+		  high_pc = (unrelocated_addr) (addr + 1);
 		  high_pc_relative = false;
 		}
 	    }
@@ -16301,7 +16310,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 		 want to add this value.  */
 	      ranges_offset += reader->cu->gnu_ranges_base;
 
-	      CORE_ADDR lowpc, highpc;
+	      unrelocated_addr lowpc, highpc;
 	      dwarf2_ranges_read (ranges_offset, &lowpc, &highpc, reader->cu,
 				  m_index_storage->get_addrmap (),
 				  scanning_per_cu, abbrev->tag);
@@ -16375,24 +16384,21 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
       if (!scanning_per_cu->addresses_seen
 	  && low_pc.has_value ()
 	  && (reader->cu->per_objfile->per_bfd->has_section_at_zero
-	      || *low_pc != 0)
+	      || *low_pc != (unrelocated_addr) 0)
 	  && high_pc.has_value ())
 	{
 	  if (high_pc_relative)
-	    high_pc = *high_pc + *low_pc;
+	    high_pc = (unrelocated_addr) ((ULONGEST) *high_pc
+					  + (ULONGEST) *low_pc);
 
 	  if (*high_pc > *low_pc)
 	    {
-	      struct objfile *objfile = reader->cu->per_objfile->objfile;
-	      CORE_ADDR baseaddr = objfile->text_section_offset ();
-	      struct gdbarch *gdbarch = objfile->arch ();
-	      CORE_ADDR lo
-		= (gdbarch_adjust_dwarf2_addr (gdbarch, *low_pc + baseaddr)
-		   - baseaddr);
-	      CORE_ADDR hi
-		= (gdbarch_adjust_dwarf2_addr (gdbarch, *high_pc + baseaddr)
-		   - baseaddr);
-	      m_index_storage->get_addrmap ()->set_empty (lo, hi - 1,
+	      dwarf2_per_objfile *per_objfile = reader->cu->per_objfile;
+	      unrelocated_addr lo = per_objfile->adjust (*low_pc);
+	      unrelocated_addr hi = per_objfile->adjust (*high_pc);
+	      /* Need CORE_ADDR casts for addrmap.  */
+	      m_index_storage->get_addrmap ()->set_empty ((CORE_ADDR) lo,
+							  (CORE_ADDR) hi - 1,
 							  scanning_per_cu);
 	    }
 	}
@@ -17175,8 +17181,8 @@ read_attribute_value (const struct die_reader_specs *reader,
     {
     case DW_FORM_ref_addr:
       if (cu_header->version == 2)
-	attr->set_unsigned (cu_header->read_address (abfd, info_ptr,
-						     &bytes_read));
+	attr->set_unsigned ((ULONGEST) cu_header->read_address (abfd, info_ptr,
+								&bytes_read));
       else
 	attr->set_unsigned (cu_header->read_offset (abfd, info_ptr,
 						    &bytes_read));
@@ -17189,9 +17195,9 @@ read_attribute_value (const struct die_reader_specs *reader,
       break;
     case DW_FORM_addr:
       {
-	struct gdbarch *gdbarch = objfile->arch ();
-	CORE_ADDR addr = cu_header->read_address (abfd, info_ptr, &bytes_read);
-	addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr);
+	unrelocated_addr addr = cu_header->read_address (abfd, info_ptr,
+							 &bytes_read);
+	addr = per_objfile->adjust (addr);
 	attr->set_address (addr);
 	info_ptr += bytes_read;
       }
@@ -17512,7 +17518,7 @@ dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
    ADDR_BASE is the DW_AT_addr_base (DW_AT_GNU_addr_base) attribute or zero.
    ADDR_SIZE is the size of addresses from the CU header.  */
 
-static CORE_ADDR
+static unrelocated_addr
 read_addr_index_1 (dwarf2_per_objfile *per_objfile, unsigned int addr_index,
 		   gdb::optional<ULONGEST> addr_base, int addr_size)
 {
@@ -17533,14 +17539,14 @@ read_addr_index_1 (dwarf2_per_objfile *per_objfile, unsigned int addr_index,
   info_ptr = (per_objfile->per_bfd->addr.buffer + addr_base_or_zero
 	      + addr_index * addr_size);
   if (addr_size == 4)
-    return bfd_get_32 (abfd, info_ptr);
+    return (unrelocated_addr) bfd_get_32 (abfd, info_ptr);
   else
-    return bfd_get_64 (abfd, info_ptr);
+    return (unrelocated_addr) bfd_get_64 (abfd, info_ptr);
 }
 
 /* Given index ADDR_INDEX in .debug_addr, fetch the value.  */
 
-static CORE_ADDR
+static unrelocated_addr
 read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index)
 {
   return read_addr_index_1 (cu->per_objfile, addr_index,
@@ -17549,7 +17555,7 @@ read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index)
 
 /* Given a pointer to an leb128 value, fetch the value from .debug_addr.  */
 
-static CORE_ADDR
+static unrelocated_addr
 read_addr_index_from_leb128 (struct dwarf2_cu *cu, const gdb_byte *info_ptr,
 			     unsigned int *bytes_read)
 {
@@ -17561,7 +17567,7 @@ read_addr_index_from_leb128 (struct dwarf2_cu *cu, const gdb_byte *info_ptr,
 
 /* See read.h.  */
 
-CORE_ADDR
+unrelocated_addr
 dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
 			dwarf2_per_objfile *per_objfile,
 			unsigned int addr_index)
@@ -18072,7 +18078,8 @@ public:
      nop-out rest of the lines in this sequence.  */
   void check_line_address (struct dwarf2_cu *cu,
 			   const gdb_byte *line_ptr,
-			   CORE_ADDR unrelocated_lowpc, CORE_ADDR address);
+			   unrelocated_addr unrelocated_lowpc,
+			   unrelocated_addr address);
 
   void handle_set_discriminator (unsigned int discriminator)
   {
@@ -18081,10 +18088,13 @@ public:
   }
 
   /* Handle DW_LNE_set_address.  */
-  void handle_set_address (CORE_ADDR address)
+  void handle_set_address (unrelocated_addr address)
   {
     m_op_index = 0;
-    m_address = gdbarch_adjust_dwarf2_line (m_gdbarch, address, false);
+    m_address
+      = (unrelocated_addr) gdbarch_adjust_dwarf2_line (m_gdbarch,
+						       (CORE_ADDR) address,
+						       false);
   }
 
   /* Handle DW_LNS_advance_pc.  */
@@ -18114,7 +18124,8 @@ public:
   /* Handle DW_LNS_fixed_advance_pc.  */
   void handle_fixed_advance_pc (CORE_ADDR addr_adj)
   {
-    m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+    addr_adj = gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+    m_address = (unrelocated_addr) ((CORE_ADDR) m_address + addr_adj);
     m_op_index = 0;
   }
 
@@ -18165,7 +18176,7 @@ private:
 
   /* These are initialized in the constructor.  */
 
-  CORE_ADDR m_address;
+  unrelocated_addr m_address;
   linetable_entry_flags m_flags;
   unsigned int m_discriminator = 0;
 
@@ -18178,7 +18189,7 @@ private:
   struct subfile *m_last_subfile = NULL;
 
   /* The address of the last line entry.  */
-  CORE_ADDR m_last_address;
+  unrelocated_addr m_last_address;
 
   /* Set to true when a previous line at the same address (using
      m_last_address) had LEF_IS_STMT set in m_flags.  This is reset to false
@@ -18202,7 +18213,8 @@ lnp_state_machine::handle_advance_pc (CORE_ADDR adjust)
   CORE_ADDR addr_adj = (((m_op_index + adjust)
 			 / m_line_header->maximum_ops_per_instruction)
 			* m_line_header->minimum_instruction_length);
-  m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  addr_adj = gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  m_address = (unrelocated_addr) ((CORE_ADDR) m_address + addr_adj);
   m_op_index = ((m_op_index + adjust)
 		% m_line_header->maximum_ops_per_instruction);
 }
@@ -18216,7 +18228,8 @@ lnp_state_machine::handle_special_opcode (unsigned char op_code)
   CORE_ADDR addr_adj = (((m_op_index + adj_opcode_d)
 			 / m_line_header->maximum_ops_per_instruction)
 			* m_line_header->minimum_instruction_length);
-  m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  addr_adj = gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  m_address = (unrelocated_addr) ((CORE_ADDR) m_address + addr_adj);
   m_op_index = ((m_op_index + adj_opcode_d)
 		% m_line_header->maximum_ops_per_instruction);
 
@@ -18254,7 +18267,8 @@ lnp_state_machine::handle_const_add_pc ()
 	/ m_line_header->maximum_ops_per_instruction)
        * m_line_header->minimum_instruction_length);
 
-  m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  addr_adj = gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
+  m_address = (unrelocated_addr) ((CORE_ADDR) m_address + addr_adj);
   m_op_index = ((m_op_index + adjust)
 		% m_line_header->maximum_ops_per_instruction);
 }
@@ -18312,19 +18326,20 @@ dwarf_record_line_p (struct dwarf2_cu *cu,
 
 static void
 dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
-		     unsigned int line, CORE_ADDR address,
+		     unsigned int line, unrelocated_addr address,
 		     linetable_entry_flags flags,
 		     struct dwarf2_cu *cu)
 {
   unrelocated_addr addr
-    = unrelocated_addr (gdbarch_addr_bits_remove (gdbarch, address));
+    = unrelocated_addr (gdbarch_addr_bits_remove (gdbarch,
+						  (CORE_ADDR) address));
 
   if (dwarf_line_debug)
     {
       gdb_printf (gdb_stdlog,
 		  "Recording line %u, file %s, address %s\n",
 		  line, lbasename (subfile->name.c_str ()),
-		  paddress (gdbarch, address));
+		  paddress (gdbarch, (CORE_ADDR) address));
     }
 
   if (cu != nullptr)
@@ -18338,7 +18353,7 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
 
 static void
 dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
-		   CORE_ADDR address, struct dwarf2_cu *cu)
+		   unrelocated_addr address, struct dwarf2_cu *cu)
 {
   if (subfile == NULL)
     return;
@@ -18348,7 +18363,7 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
       gdb_printf (gdb_stdlog,
 		  "Finishing current line, file %s, address %s\n",
 		  lbasename (subfile->name.c_str ()),
-		  paddress (gdbarch, address));
+		  paddress (gdbarch, (CORE_ADDR) address));
     }
 
   dwarf_record_line_1 (gdbarch, subfile, 0, address, LEF_IS_STMT, cu);
@@ -18363,7 +18378,7 @@ lnp_state_machine::record_line (bool end_sequence)
 		  "Processing actual line %u: file %u,"
 		  " address %s, is_stmt %u, prologue_end %u, discrim %u%s\n",
 		  m_line, m_file,
-		  paddress (m_gdbarch, m_address),
+		  paddress (m_gdbarch, (CORE_ADDR) m_address),
 		  (m_flags & LEF_IS_STMT) != 0,
 		  (m_flags & LEF_PROLOGUE_END) != 0,
 		  m_discriminator,
@@ -18449,7 +18464,7 @@ lnp_state_machine::lnp_state_machine (struct dwarf2_cu *cu, gdbarch *arch,
        chance to adjust it and also record it in case it needs it.
        This is currently used by MIPS code,
        cf. `mips_adjust_dwarf2_line'.  */
-    m_address (gdbarch_adjust_dwarf2_line (arch, 0, 0)),
+    m_address ((unrelocated_addr) gdbarch_adjust_dwarf2_line (arch, 0, 0)),
     m_flags (lh->default_is_stmt ? LEF_IS_STMT : (linetable_entry_flags) 0),
     m_last_address (m_address)
 {
@@ -18458,15 +18473,16 @@ lnp_state_machine::lnp_state_machine (struct dwarf2_cu *cu, gdbarch *arch,
 void
 lnp_state_machine::check_line_address (struct dwarf2_cu *cu,
 				       const gdb_byte *line_ptr,
-				       CORE_ADDR unrelocated_lowpc, CORE_ADDR address)
+				       unrelocated_addr unrelocated_lowpc,
+				       unrelocated_addr address)
 {
   /* Linkers resolve a symbolic relocation referencing a GC'd function to 0 or
      -1.  If ADDRESS is 0, ignoring the opcode will err if the text section is
      located at 0x0.  In this case, additionally check that if
      ADDRESS < UNRELOCATED_LOWPC.  */
 
-  if ((address == 0 && address < unrelocated_lowpc)
-      || address == (CORE_ADDR) -1)
+  if ((address == (unrelocated_addr) 0 && address < unrelocated_lowpc)
+      || address == (unrelocated_addr) -1)
     {
       /* This line table is for a function which has been
 	 GCd by the linker.  Ignore it.  PR gdb/12528 */
@@ -18553,12 +18569,13 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		  break;
 		case DW_LNE_set_address:
 		  {
-		    CORE_ADDR address
+		    unrelocated_addr address
 		      = cu->header.read_address (abfd, line_ptr, &bytes_read);
 		    line_ptr += bytes_read;
 
-		    state_machine.check_line_address (cu, line_ptr,
-						      lowpc - baseaddr, address);
+		    state_machine.check_line_address
+		      (cu, line_ptr, (unrelocated_addr) (lowpc - baseaddr),
+		       address);
 		    state_machine.handle_set_address (address);
 		  }
 		  break;
@@ -18830,13 +18847,14 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 	{
 	  unsigned int dummy;
 
+	  unrelocated_addr tem;
 	  if (block->data[0] == DW_OP_addr)
-	    sym->set_value_address
-	      (cu->header.read_address (objfile->obfd.get (), block->data + 1,
-					&dummy));
+	    tem = cu->header.read_address (objfile->obfd.get (),
+					   block->data + 1,
+					   &dummy);
 	  else
-	    sym->set_value_address
-	      (read_addr_index_from_leb128 (cu, block->data + 1, &dummy));
+	    tem = read_addr_index_from_leb128 (cu, block->data + 1, &dummy);
+	  sym->set_value_address ((CORE_ADDR) tem);
 	  sym->set_aclass_index (LOC_STATIC);
 	  fixup_symbol_section (sym, objfile);
 	  sym->set_value_address
@@ -18918,17 +18936,13 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  struct gdbarch *gdbarch = objfile->arch ();
   struct symbol *sym = NULL;
   const char *name;
   struct attribute *attr = NULL;
   struct attribute *attr2 = NULL;
-  CORE_ADDR baseaddr;
   struct pending **list_to_add = NULL;
 
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
-
-  baseaddr = objfile->text_section_offset ();
 
   name = dwarf2_name (die, cu);
   if (name == nullptr && (die->tag == DW_TAG_subprogram
@@ -19009,10 +19023,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  attr = dwarf2_attr (die, DW_AT_low_pc, cu);
 	  if (attr != nullptr)
 	    {
-	      CORE_ADDR addr;
-
-	      addr = attr->as_address ();
-	      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + baseaddr);
+	      CORE_ADDR addr = per_objfile->relocate (attr->as_address ());
 	      sym->set_section_index (SECT_OFF_TEXT (objfile));
 	      sym->set_value_address (addr);
 	      sym->set_aclass_index (LOC_LABEL);
@@ -19463,7 +19474,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 
 	data[0] = DW_OP_addr;
 	store_unsigned_integer (&data[1], cu_header->addr_size,
-				byte_order, attr->as_address ());
+				byte_order, (ULONGEST) attr->as_address ());
 	data[cu_header->addr_size + 1] = DW_OP_stack_value;
       }
       break;
@@ -20532,8 +20543,6 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 	  != per_objfile->per_bfd->abstract_to_concrete.end ()))
     {
       CORE_ADDR pc = get_frame_pc ();
-      CORE_ADDR baseaddr = objfile->text_section_offset ();
-      struct gdbarch *gdbarch = objfile->arch ();
 
       for (const auto &cand_off
 	     : per_objfile->per_bfd->abstract_to_concrete[die->sect_off])
@@ -20546,12 +20555,12 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 	      || cand->parent->tag != DW_TAG_subprogram)
 	    continue;
 
-	  CORE_ADDR pc_low, pc_high;
-	  get_scope_pc_bounds (cand->parent, &pc_low, &pc_high, cu);
-	  if (pc_low == ((CORE_ADDR) -1))
+	  unrelocated_addr unrel_low, unrel_high;
+	  get_scope_pc_bounds (cand->parent, &unrel_low, &unrel_high, cu);
+	  if (unrel_low == ((unrelocated_addr) -1))
 	    continue;
-	  pc_low = gdbarch_adjust_dwarf2_addr (gdbarch, pc_low + baseaddr);
-	  pc_high = gdbarch_adjust_dwarf2_addr (gdbarch, pc_high + baseaddr);
+	  CORE_ADDR pc_low = per_objfile->relocate (unrel_low);
+	  CORE_ADDR pc_high = per_objfile->relocate (unrel_high);
 	  if (!(pc_low <= pc && pc < pc_high))
 	    continue;
 
@@ -20684,7 +20693,8 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
 
 	*len = cu->header.addr_size;
 	tem = (gdb_byte *) obstack_alloc (obstack, *len);
-	store_unsigned_integer (tem, *len, byte_order, attr->as_address ());
+	store_unsigned_integer (tem, *len, byte_order,
+				(ULONGEST) attr->as_address ());
 	result = tem;
       }
       break;
@@ -21146,9 +21156,10 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu,
 	  break;
 
 	case DW_OP_addr:
-	  stack[++stacki] = cu->header.read_address (objfile->obfd.get (),
-						     &data[i],
-						     &bytes_read);
+	  stack[++stacki]
+	    = (CORE_ADDR) cu->header.read_address (objfile->obfd.get (),
+						   &data[i],
+						   &bytes_read);
 	  i += bytes_read;
 	  break;
 
@@ -21231,8 +21242,9 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu,
 	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
 	case DW_OP_GNU_const_index:
-	  stack[++stacki] = read_addr_index_from_leb128 (cu, &data[i],
-							 &bytes_read);
+	  stack[++stacki]
+	    = (CORE_ADDR) read_addr_index_from_leb128 (cu, &data[i],
+						       &bytes_read);
 	  i += bytes_read;
 	  break;
 
@@ -21412,7 +21424,7 @@ fill_in_loclist_baton (struct dwarf2_cu *cu,
   if (cu->base_address.has_value ())
     baton->base_address = *cu->base_address;
   else
-    baton->base_address = 0;
+    baton->base_address = {};
   baton->from_dwo = cu->dwo_unit != NULL;
 }
 

@@ -59,7 +59,7 @@ struct call_site_target
     ADDRESSES,
   };
 
-  void set_loc_physaddr (CORE_ADDR physaddr)
+  void set_loc_physaddr (unrelocated_addr physaddr)
   {
     m_loc_kind = PHYSADDR;
     m_loc.physaddr = physaddr;
@@ -77,7 +77,7 @@ struct call_site_target
       m_loc.dwarf_block = dwarf_block;
     }
 
-  void set_loc_array (unsigned length, const CORE_ADDR *data)
+  void set_loc_array (unsigned length, const unrelocated_addr *data)
   {
     m_loc_kind = ADDRESSES;
     m_loc.addresses.length = length;
@@ -102,7 +102,7 @@ private:
   union
   {
     /* Address.  */
-    CORE_ADDR physaddr;
+    unrelocated_addr physaddr;
     /* Mangled name.  */
     const char *physname;
     /* DWARF block.  */
@@ -111,7 +111,7 @@ private:
     struct
     {
       unsigned length;
-      const CORE_ADDR *values;
+      const unrelocated_addr *values;
     } addresses;
   } m_loc;
 
@@ -163,7 +163,7 @@ struct call_site_parameter
 
 struct call_site
 {
-  call_site (CORE_ADDR pc, dwarf2_per_cu_data *per_cu,
+  call_site (unrelocated_addr pc, dwarf2_per_cu_data *per_cu,
 	     dwarf2_per_objfile *per_objfile)
     : per_cu (per_cu), per_objfile (per_objfile), m_unrelocated_pc (pc)
   {}
@@ -177,7 +177,7 @@ struct call_site
   static hashval_t
   hash (const call_site *a)
   {
-    return a->m_unrelocated_pc;
+    return (hashval_t) a->m_unrelocated_pc;
   }
 
   static int
@@ -233,7 +233,7 @@ struct call_site
 
 private:
   /* Unrelocated address of the first instruction after this call.  */
-  const CORE_ADDR m_unrelocated_pc;
+  const unrelocated_addr m_unrelocated_pc;
 
 public:
   /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */

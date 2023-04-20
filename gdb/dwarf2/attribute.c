@@ -31,10 +31,10 @@
 
 /* See attribute.h.  */
 
-CORE_ADDR
+unrelocated_addr
 attribute::as_address () const
 {
-  CORE_ADDR addr;
+  unrelocated_addr addr;
 
   gdb_assert (!requires_reprocessing);
 
@@ -53,7 +53,7 @@ attribute::as_address () const
 	 as well as update callers to pass in at least the CU's DWARF
 	 version.  This is more overhead than what we're willing to
 	 expand for a pretty rare case.  */
-      addr = u.unsnd;
+      addr = (unrelocated_addr) u.unsnd;
     }
   else
     addr = u.addr;

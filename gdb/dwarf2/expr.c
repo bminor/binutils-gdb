@@ -1588,17 +1588,19 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  ensure_have_per_cu (this->m_per_cu, "DW_OP_addrx");
 
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = dwarf2_read_addr_index (this->m_per_cu, this->m_per_objfile,
-					   uoffset);
-	  result += this->m_per_objfile->objfile->text_section_offset ();
+	  result = (m_per_objfile->relocate
+		    (dwarf2_read_addr_index (this->m_per_cu,
+					     this->m_per_objfile,
+					     uoffset)));
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 	case DW_OP_GNU_const_index:
 	  ensure_have_per_cu (this->m_per_cu, "DW_OP_GNU_const_index");
 
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = dwarf2_read_addr_index (this->m_per_cu, this->m_per_objfile,
-					   uoffset);
+	  result = (ULONGEST) dwarf2_read_addr_index (this->m_per_cu,
+						      this->m_per_objfile,
+						      uoffset);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 

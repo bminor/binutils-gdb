@@ -711,6 +711,15 @@ struct dwarf2_per_objfile
      any that are too old.  */
   void age_comp_units ();
 
+  /* Apply any needed adjustments to ADDR, returning an adjusted but
+     still unrelocated address.  */
+  unrelocated_addr adjust (unrelocated_addr addr);
+
+  /* Apply any needed adjustments to ADDR and then relocate the
+     address according to the objfile's section offsets, returning a
+     relocated address.  */
+  CORE_ADDR relocate (unrelocated_addr addr);
+
   /* Back link.  */
   struct objfile *objfile;
 
@@ -771,9 +780,9 @@ struct type *dwarf2_get_die_type (cu_offset die_offset,
    long after the debug information has been read, and thus per_cu->cu
    may no longer exist.  */
 
-CORE_ADDR dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
-				  dwarf2_per_objfile *per_objfile,
-				  unsigned int addr_index);
+unrelocated_addr dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
+					 dwarf2_per_objfile *per_objfile,
+					 unsigned int addr_index);
 
 /* Return DWARF block referenced by DW_AT_location of DIE at SECT_OFF at PER_CU.
    Returned value is intended for DW_OP_call*.  Returned
