@@ -57,9 +57,6 @@ extern observable<struct bpstat */* bs */, int /* print_frame */> normal_stop;
 /* The inferior was stopped by a signal.  */
 extern observable<enum gdb_signal /* siggnal */> signal_received;
 
-/* Reverse execution: target ran out of history info.  */
-extern observable<> no_history;
-
 /* A synchronous command finished.  */
 extern observable<> sync_execution_done;
 

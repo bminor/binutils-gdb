@@ -60,8 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_on_no_history (void);
-
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t, int silent);
 static void mi_record_changed (struct inferior*, int, const char *,
@@ -497,26 +495,6 @@ mi_inferior_removed (struct inferior *inf)
     }
 }
 
-/* Return the MI interpreter, if it is active -- either because it's
-   the top-level interpreter or the interpreter executing the current
-   command.  Returns NULL if the MI interpreter is not being used.  */
-
-static struct mi_interp *
-find_mi_interp (void)
-{
-  struct mi_interp *mi;
-
-  mi = as_mi_interp (top_level_interpreter ());
-  if (mi != NULL)
-    return mi;
-
-  mi = as_mi_interp (command_interp ());
-  if (mi != NULL)
-    return mi;
-
-  return NULL;
-}
-
 /* Observers for several run control events that print why the
    inferior has stopped to both the MI event channel and to the MI
    console.  If the MI interpreter is not active, print nothing.  */
@@ -542,21 +520,11 @@ mi_interp::on_exited (int status)
   print_exited_reason (this->cli_uiout, status);
 }
 
-/* Observer for the no_history notification.  */
-
-static void
-mi_on_no_history (void)
+void
+mi_interp::on_no_history ()
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = find_mi_interp ();
-
-      if (mi == NULL)
-	continue;
-
-      print_no_history_reason (mi->mi_uiout);
-      print_no_history_reason (mi->cli_uiout);
-    }
+  print_no_history_reason (this->mi_uiout);
+  print_no_history_reason (this->cli_uiout);
 }
 
 void
@@ -1253,7 +1221,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::no_history.attach (mi_on_no_history, "mi-interp");
   gdb::observers::new_thread.attach (mi_new_thread, "mi-interp");
   gdb::observers::thread_exit.attach (mi_thread_exit, "mi-interp");
   gdb::observers::inferior_added.attach (mi_inferior_added, "mi-interp");

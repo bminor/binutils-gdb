@@ -46,6 +46,7 @@ public:
   void on_signal_exited (gdb_signal sig) override;
   void on_normal_stop (struct bpstat *bs, int print_frame) override;
   void on_exited (int status) override;
+  void on_no_history () override;
 
   /* MI's output channels */
   mi_console_file *out;

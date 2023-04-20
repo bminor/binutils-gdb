@@ -6039,7 +6039,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (handle_stop_requested (ecs))
 	return;
 
-      gdb::observers::no_history.notify ();
+      interps_notify_no_history ();
       stop_waiting (ecs);
       return;
     }

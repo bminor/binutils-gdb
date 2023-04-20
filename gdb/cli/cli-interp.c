@@ -146,19 +146,10 @@ cli_interp_base::on_exited (int status)
   print_exited_reason (this->interp_ui_out (), status);
 }
 
-/* Observer for the no_history notification.  */
-
-static void
-cli_base_on_no_history ()
+void
+cli_interp_base::on_no_history ()
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      cli_interp_base *cli = as_cli_interp_base (top_level_interpreter ());
-      if (cli == nullptr)
-	continue;
-
-      print_no_history_reason (cli->interp_ui_out ());
-    }
+  print_no_history_reason (this->interp_ui_out ());
 }
 
 /* Observer for the sync_execution_done notification.  */
@@ -370,7 +361,6 @@ _initialize_cli_interp ()
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 
   /* Note these all work for both the CLI and TUI interpreters.  */
-  gdb::observers::no_history.attach (cli_base_on_no_history, "cli-interp-base");
   gdb::observers::sync_execution_done.attach (cli_base_on_sync_execution_done,
 					      "cli-interp-base");
   gdb::observers::command_error.attach (cli_base_on_command_error,

@@ -98,6 +98,10 @@ public:
      status STATUS.  */
   virtual void on_exited (int status) {}
 
+  /* Notify the interpreter that the current inferior has stopped reverse
+     execution because there is no more history.  */
+  virtual void on_no_history () {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -196,6 +200,10 @@ extern void interps_notify_signal_exited (gdb_signal sig);
 
 /* Notify all interpreters that the current inferior has stopped normally.  */
 extern void interps_notify_normal_stop (bpstat *bs, int print_frame);
+
+/* Notify all interpreters that the current inferior has stopped reverse
+   execution because there is no more history.  */
+extern void interps_notify_no_history ();
 
 /* Notify all interpreters that the current inferior has exited normally with
    status STATUS.  */
