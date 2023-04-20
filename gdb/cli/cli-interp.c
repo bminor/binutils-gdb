@@ -67,15 +67,6 @@ cli_interp::cli_interp (const char *name)
 /* Suppress notification struct.  */
 struct cli_suppress_notification cli_suppress_notification;
 
-/* Returns the INTERP's data cast as cli_interp_base if INTERP is a
-   console-like interpreter, and returns NULL otherwise.  */
-
-static cli_interp_base *
-as_cli_interp_base (interp *interp)
-{
-  return dynamic_cast<cli_interp_base *> (interp);
-}
-
 /* See cli-interp.h.
 
    Breakpoint hits should always be mirrored to a console.  Deciding
@@ -164,10 +155,8 @@ cli_interp_base::on_command_error ()
   display_gdb_prompt (NULL);
 }
 
-/* Observer for the user_selected_context_changed notification.  */
-
-static void
-cli_base_on_user_selected_context_changed (user_selected_what selection)
+void
+cli_interp_base::on_user_selected_context_changed (user_selected_what selection)
 {
   /* This event is suppressed.  */
   if (cli_suppress_notification.user_selected_context)
@@ -175,19 +164,12 @@ cli_base_on_user_selected_context_changed (user_selected_what selection)
 
   thread_info *tp = inferior_ptid != null_ptid ? inferior_thread () : nullptr;
 
-  SWITCH_THRU_ALL_UIS ()
-    {
-      cli_interp_base *cli = as_cli_interp_base (top_level_interpreter ());
-      if (cli == nullptr)
-	continue;
+  if (selection & USER_SELECTED_INFERIOR)
+    print_selected_inferior (this->interp_ui_out ());
 
-      if (selection & USER_SELECTED_INFERIOR)
-	print_selected_inferior (cli->interp_ui_out ());
-
-      if (tp != nullptr
-	  && ((selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME))))
-	print_selected_thread_frame (cli->interp_ui_out (), selection);
-    }
+  if (tp != nullptr
+      && ((selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME))))
+    print_selected_thread_frame (this->interp_ui_out (), selection);
 }
 
 /* pre_command_loop implementation.  */
@@ -347,8 +329,4 @@ void
 _initialize_cli_interp ()
 {
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
-
-  /* Note these all work for both the CLI and TUI interpreters.  */
-  gdb::observers::user_selected_context_changed.attach
-    (cli_base_on_user_selected_context_changed, "cli-interp-base");
 }

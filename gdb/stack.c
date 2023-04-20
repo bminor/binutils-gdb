@@ -1831,7 +1831,7 @@ select_frame_command_core (frame_info_ptr fi, bool ignored)
   frame_info_ptr prev_frame = get_selected_frame ();
   select_frame (fi);
   if (get_selected_frame () != prev_frame)
-    gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
+    notify_user_selected_context_changed (USER_SELECTED_FRAME);
 }
 
 /* The core of all the "frame" sub-commands.  Select frame FI, and if this
@@ -1844,7 +1844,7 @@ frame_command_core (frame_info_ptr fi, bool ignored)
   frame_info_ptr prev_frame = get_selected_frame ();
   select_frame (fi);
   if (get_selected_frame () != prev_frame)
-    gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
+    notify_user_selected_context_changed (USER_SELECTED_FRAME);
   else
     print_selected_thread_frame (current_uiout, USER_SELECTED_FRAME);
 }
@@ -2644,7 +2644,7 @@ static void
 up_command (const char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
+  notify_user_selected_context_changed (USER_SELECTED_FRAME);
 }
 
 /* Select the frame down one or COUNT_EXP stack levels from the previously
@@ -2683,7 +2683,7 @@ static void
 down_command (const char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
+  notify_user_selected_context_changed (USER_SELECTED_FRAME);
 }
 
 void

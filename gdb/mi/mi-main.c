@@ -2138,7 +2138,7 @@ mi_cmd_execute (struct mi_parse *parse)
 
   if (!parse->cmd->preserve_user_selected_context ()
       && current_user_selected_context.has_changed ())
-    gdb::observers::user_selected_context_changed.notify
+    interps_notify_user_selected_context_changed
       (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 }
 

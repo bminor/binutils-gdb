@@ -6283,6 +6283,14 @@ notify_normal_stop (bpstat *bs, int print_frame)
   gdb::observers::normal_stop.notify (bs, print_frame);
 }
 
+/* See infrun.h.  */
+
+void notify_user_selected_context_changed (user_selected_what selection)
+{
+  interps_notify_user_selected_context_changed (selection);
+  gdb::observers::user_selected_context_changed.notify (selection);
+}
+
 /* Come here when the program has stopped with a signal.  */
 
 static void

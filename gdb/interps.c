@@ -438,6 +438,14 @@ interps_notify_exited (int status)
   interps_notify (&interp::on_exited, status);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_user_selected_context_changed (user_selected_what selection)
+{
+  interps_notify (&interp::on_user_selected_context_changed, selection);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

@@ -1087,60 +1087,40 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
     }
 }
 
-/* Emit an event when the selection context (inferior, thread, frame)
-   changed.  */
-
-static void
-mi_user_selected_context_changed (user_selected_what selection)
+void
+mi_interp::on_user_selected_context_changed (user_selected_what selection)
 {
-  struct thread_info *tp;
-
   /* Don't send an event if we're responding to an MI command.  */
   if (mi_suppress_notification.user_selected_context)
     return;
 
-  if (inferior_ptid != null_ptid)
-    tp = inferior_thread ();
-  else
-    tp = NULL;
+  thread_info *tp = inferior_ptid != null_ptid ? inferior_thread () : nullptr;
+  ui_out *mi_uiout = this->interp_ui_out ();
+  ui_out_redirect_pop redirect_popper (mi_uiout, this->event_channel);
 
-  SWITCH_THRU_ALL_UIS ()
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
+
+  if (selection & USER_SELECTED_INFERIOR)
+    print_selected_inferior (this->cli_uiout);
+
+  if (tp != NULL
+      && (selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME)))
     {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
-      struct ui_out *mi_uiout;
+      print_selected_thread_frame (this->cli_uiout, selection);
 
-      if (mi == NULL)
-	continue;
+      gdb_printf (this->event_channel, "thread-selected,id=\"%d\"",
+		  tp->global_num);
 
-      mi_uiout = top_level_interpreter ()->interp_ui_out ();
-
-      ui_out_redirect_pop redirect_popper (mi_uiout, mi->event_channel);
-
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      if (selection & USER_SELECTED_INFERIOR)
-	print_selected_inferior (mi->cli_uiout);
-
-      if (tp != NULL
-	  && (selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME)))
+      if (tp->state != THREAD_RUNNING)
 	{
-	  print_selected_thread_frame (mi->cli_uiout, selection);
-
-	  gdb_printf (mi->event_channel,
-		      "thread-selected,id=\"%d\"",
-		      tp->global_num);
-
-	  if (tp->state != THREAD_RUNNING)
-	    {
-	      if (has_stack_frames ())
-		print_stack_frame_to_uiout (mi_uiout, get_selected_frame (NULL),
-					    1, SRC_AND_LOC, 1);
-	    }
+	  if (has_stack_frames ())
+	    print_stack_frame_to_uiout (mi_uiout, get_selected_frame (NULL),
+					1, SRC_AND_LOC, 1);
 	}
-
-      gdb_flush (mi->event_channel);
     }
+
+  gdb_flush (this->event_channel);
 }
 
 ui_out *
@@ -1234,6 +1214,4 @@ _initialize_mi_interp ()
   gdb::observers::command_param_changed.attach (mi_command_param_changed,
 						"mi-interp");
   gdb::observers::memory_changed.attach (mi_memory_changed, "mi-interp");
-  gdb::observers::user_selected_context_changed.attach
-    (mi_user_selected_context_changed, "mi-interp");
 }

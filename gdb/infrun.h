@@ -218,6 +218,9 @@ extern void notify_signal_received (gdb_signal sig);
    normally.  */
 extern void notify_normal_stop (bpstat *bs, int print_frame);
 
+/* Notify interpreters and observers that the user focus has changed.  */
+extern void notify_user_selected_context_changed (user_selected_what selection);
+
 /* Several print_*_reason helper functions to print why the inferior
    has stopped to the passed in UIOUT.  */
 

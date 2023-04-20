@@ -40,6 +40,7 @@ public:
   void on_no_history () override;
   void on_sync_execution_done () override;
   void on_command_error () override;
+  void on_user_selected_context_changed (user_selected_what selection) override;
 
 private:
   struct saved_output_files

@@ -1846,10 +1846,8 @@ thread_command (const char *tidstr, int from_tty)
 				       | USER_SELECTED_FRAME);
 	}
       else
-	{
-	  gdb::observers::user_selected_context_changed.notify
-	    (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
-	}
+	notify_user_selected_context_changed
+	  (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
     }
 }
 

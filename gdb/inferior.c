@@ -745,7 +745,7 @@ inferior_command (const char *args, int from_tty)
 	      switch_to_thread (tp);
 	    }
 
-	  gdb::observers::user_selected_context_changed.notify
+	  notify_user_selected_context_changed
 	    (USER_SELECTED_INFERIOR
 	     | USER_SELECTED_THREAD
 	     | USER_SELECTED_FRAME);
@@ -754,7 +754,7 @@ inferior_command (const char *args, int from_tty)
 	{
 	  switch_to_inferior_no_thread (inf);
 
-	  gdb::observers::user_selected_context_changed.notify
+	  notify_user_selected_context_changed
 	    (USER_SELECTED_INFERIOR);
 	}
     }

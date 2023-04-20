@@ -110,6 +110,10 @@ public:
      command on this interpreter.  */
   virtual void on_command_error () {}
 
+  /* Notify the interpreter that the user focus has changed.  */
+  virtual void on_user_selected_context_changed (user_selected_what selection)
+    {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -216,6 +220,10 @@ extern void interps_notify_no_history ();
 /* Notify all interpreters that the current inferior has exited normally with
    status STATUS.  */
 extern void interps_notify_exited (int status);
+
+/* Notify all interpreters that the user focus has changed.  */
+extern void interps_notify_user_selected_context_changed
+  (user_selected_what selection);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"
