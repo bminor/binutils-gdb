@@ -1811,13 +1811,13 @@ xcoff64_slurp_armap (bfd *abfd)
   /* This is for the new format.  */
   struct xcoff_ar_hdr_big hdr;
 
-  if (xcoff_ardata (abfd) == NULL)
+  if (x_artdata (abfd) == NULL)
     {
       abfd->has_armap = false;
       return true;
     }
 
-  off = bfd_scan_vma (xcoff_ardata_big (abfd)->symoff64,
+  off = bfd_scan_vma (x_artdata (abfd)->u.bhdr.symoff64,
 		      (const char **) NULL, 10);
   if (off == 0)
     {
@@ -1943,12 +1943,12 @@ xcoff64_archive_p (bfd *abfd)
 							(const char **) NULL,
 							10);
 
-  amt = SIZEOF_AR_FILE_HDR_BIG;
+  amt = sizeof (struct xcoff_artdata);
   bfd_ardata (abfd)->tdata = bfd_zalloc (abfd, amt);
   if (bfd_ardata (abfd)->tdata == NULL)
     goto error_ret;
 
-  memcpy (bfd_ardata (abfd)->tdata, &hdr, SIZEOF_AR_FILE_HDR_BIG);
+  memcpy (&x_artdata (abfd)->u.bhdr, &hdr, SIZEOF_AR_FILE_HDR_BIG);
 
   if (! xcoff64_slurp_armap (abfd))
     {
@@ -1968,7 +1968,7 @@ xcoff64_archive_p (bfd *abfd)
 static bfd *
 xcoff64_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
-  if ((xcoff_ardata (archive) == NULL)
+  if (x_artdata (archive) == NULL
       || ! xcoff_big_format_p (archive))
     {
       bfd_set_error (bfd_error_invalid_operation);
