@@ -409,6 +409,14 @@ interps_notify_signal_received (gdb_signal sig)
 /* See interps.h.  */
 
 void
+interps_notify_signal_exited (gdb_signal sig)
+{
+  interps_notify (&interp::on_signal_exited, sig);
+}
+
+/* See interps.h.  */
+
+void
 interps_notify_normal_stop (bpstat *bs, int print_frame)
 {
   interps_notify (&interp::on_normal_stop, bs, print_frame);

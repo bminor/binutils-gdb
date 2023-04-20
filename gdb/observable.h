@@ -57,9 +57,6 @@ extern observable<struct bpstat */* bs */, int /* print_frame */> normal_stop;
 /* The inferior was stopped by a signal.  */
 extern observable<enum gdb_signal /* siggnal */> signal_received;
 
-/* The inferior was terminated by a signal.  */
-extern observable<enum gdb_signal /* siggnal */> signal_exited;
-
 /* The inferior program is finished.  */
 extern observable<int /* exitstatus */> exited;
 

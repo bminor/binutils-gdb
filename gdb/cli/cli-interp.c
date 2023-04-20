@@ -134,19 +134,10 @@ cli_interp_base::on_signal_received (enum gdb_signal siggnal)
   print_signal_received_reason (this->interp_ui_out (), siggnal);
 }
 
-/* Observer for the signalled notification.  */
-
-static void
-cli_base_on_signal_exited (enum gdb_signal siggnal)
+void
+cli_interp_base::on_signal_exited (gdb_signal sig)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      cli_interp_base *cli = as_cli_interp_base (top_level_interpreter ());
-      if (cli == nullptr)
-	continue;
-
-      print_signal_exited_reason (cli->interp_ui_out (), siggnal);
-    }
+  print_signal_exited_reason (this->interp_ui_out (), sig);
 }
 
 /* Observer for the exited notification.  */
@@ -388,8 +379,6 @@ _initialize_cli_interp ()
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 
   /* Note these all work for both the CLI and TUI interpreters.  */
-  gdb::observers::signal_exited.attach (cli_base_on_signal_exited,
-					"cli-interp-base");
   gdb::observers::exited.attach (cli_base_on_exited, "cli-interp-base");
   gdb::observers::no_history.attach (cli_base_on_no_history, "cli-interp-base");
   gdb::observers::sync_execution_done.attach (cli_base_on_sync_execution_done,

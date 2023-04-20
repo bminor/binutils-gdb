@@ -87,6 +87,10 @@ public:
      SIG.  */
   virtual void on_signal_received (gdb_signal sig) {}
 
+  /* Notify the interpreter that the current inferior has exited with signal
+     SIG. */
+  virtual void on_signal_exited (gdb_signal sig) {}
+
   /* Notify the interpreter that the current inferior has stopped normally.  */
   virtual void on_normal_stop (bpstat *bs, int print_frame) {}
 
@@ -181,6 +185,10 @@ extern void interpreter_completer (struct cmd_list_element *ignore,
 /* Notify all interpreters that the current inferior has stopped with signal
    SIG.  */
 extern void interps_notify_signal_received (gdb_signal sig);
+
+/* Notify all interpreters that the current inferior has exited with signal
+   SIG.  */
+extern void interps_notify_signal_exited (gdb_signal sig);
 
 /* Notify all interpreters that the current inferior has stopped normally.  */
 extern void interps_notify_normal_stop (bpstat *bs, int print_frame);

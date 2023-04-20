@@ -5755,7 +5755,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 				   "signal number.");
 	    }
 
-	  gdb::observers::signal_exited.notify (ecs->ws.sig ());
+	  interps_notify_signal_exited (ecs->ws.sig ());
 	}
 
       gdb_flush (gdb_stdout);

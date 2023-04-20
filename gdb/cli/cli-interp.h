@@ -34,7 +34,8 @@ public:
   bool supports_command_editing () override;
 
   void on_signal_received (gdb_signal sig) override;
-  void on_normal_stop(bpstat *bs, int print_frame) override;
+  void on_signal_exited (gdb_signal sig) override;
+  void on_normal_stop (bpstat *bs, int print_frame) override;
 
 private:
   struct saved_output_files
