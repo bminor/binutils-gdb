@@ -15,7 +15,7 @@
 
 load_lib "ada.exp"
 
-require allow_ada_tests
+require allow_ada_tests gnat_runtime_has_debug_info
 
 standard_ada_testfile foo
 
@@ -40,31 +40,17 @@ set catchpoint_program_error_msg \
 set catchpoint_storage_error_msg \
   "Catchpoint $decimal, exception at $hex in foo \\\(\\\).*at .*foo.adb:$decimal$eol$decimal$sp$when Storage_Error =>"
 
-############################################
-# Check that runtime supports catchpoint.  #
-############################################
-
 if {![runto_main]} {
    return 0
-}
-
-set msg "insert catchpoint on all Ada exceptions handlers"
-gdb_test_multiple "catch handlers" $msg {
-    -re "Catchpoint $decimal: all Ada exceptions handlers$eol$gdb_prompt $" {
-	pass $msg
-    }
-    -re "Your Ada runtime appears to be missing some debugging information.*$eol$gdb_prompt $" {
-	# If the runtime was not built with enough debug information,
-	# or if it was stripped, we can not test exception handlers
-	# catchpoints.
-	unsupported $msg
-	return -1
-    }
 }
 
 ############################################
 # 1. Try catching all exceptions handlers. #
 ############################################
+
+gdb_test "catch handlers" \
+    "Catchpoint $decimal: all Ada exceptions handlers" \
+    "insert catchpoint on all Ada exceptions handlers"
 
 # Continue.  The program should stop at first exception handling.
 
