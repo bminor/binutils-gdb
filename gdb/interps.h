@@ -102,6 +102,10 @@ public:
      execution because there is no more history.  */
   virtual void on_no_history () {}
 
+  /* Notify the interpreter that a synchronous command it started has
+     finished.  */
+  virtual void on_sync_execution_done () {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;

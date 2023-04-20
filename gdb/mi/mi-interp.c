@@ -82,7 +82,6 @@ static void mi_breakpoint_modified (struct breakpoint *b);
 static void mi_command_param_changed (const char *param, const char *value);
 static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
 			       ssize_t len, const bfd_byte *myaddr);
-static void mi_on_sync_execution_done (void);
 
 /* Display the MI prompt.  */
 
@@ -269,20 +268,13 @@ mi_execute_command_wrapper (const char *cmd)
   mi_execute_command (cmd, ui->instream == ui->stdin_stream);
 }
 
-/* Observer for the synchronous_command_done notification.  */
-
-static void
-mi_on_sync_execution_done (void)
+void
+mi_interp::on_sync_execution_done ()
 {
-  struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
-
-  if (mi == NULL)
-    return;
-
   /* If MI is sync, then output the MI prompt now, indicating we're
      ready for further input.  */
   if (!mi_async_p ())
-    display_mi_prompt (mi);
+    display_mi_prompt (this);
 }
 
 /* mi_execute_command_wrapper wrapper suitable for INPUT_HANDLER.  */
@@ -1247,8 +1239,6 @@ _initialize_mi_interp ()
 						"mi-interp");
   gdb::observers::command_error.attach (mi_on_command_error, "mi-interp");
   gdb::observers::memory_changed.attach (mi_memory_changed, "mi-interp");
-  gdb::observers::sync_execution_done.attach (mi_on_sync_execution_done,
-					      "mi-interp");
   gdb::observers::user_selected_context_changed.attach
     (mi_user_selected_context_changed, "mi-interp");
 }

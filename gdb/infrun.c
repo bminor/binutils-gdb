@@ -4207,7 +4207,7 @@ check_curr_ui_sync_execution_done (void)
       && !gdb_in_secondary_prompt_p (ui))
     {
       target_terminal::ours ();
-      gdb::observers::sync_execution_done.notify ();
+      top_level_interpreter ()->on_sync_execution_done ();
       ui->register_file_handler ();
     }
 }

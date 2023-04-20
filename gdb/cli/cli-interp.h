@@ -38,6 +38,7 @@ public:
   void on_normal_stop (bpstat *bs, int print_frame) override;
   void on_exited (int status) override;
   void on_no_history () override;
+  void on_sync_execution_done () override;
 
 private:
   struct saved_output_files
