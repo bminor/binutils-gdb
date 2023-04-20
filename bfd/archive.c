@@ -215,18 +215,7 @@ _bfd_generic_mkarchive (bfd *abfd)
   size_t amt = sizeof (struct artdata);
 
   abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc (abfd, amt);
-  if (bfd_ardata (abfd) == NULL)
-    return false;
-
-  /* Already cleared by bfd_zalloc above.
-     bfd_ardata (abfd)->cache = NULL;
-     bfd_ardata (abfd)->archive_head = NULL;
-     bfd_ardata (abfd)->symdefs = NULL;
-     bfd_ardata (abfd)->extended_names = NULL;
-     bfd_ardata (abfd)->extended_names_size = 0;
-     bfd_ardata (abfd)->tdata = NULL;  */
-
-  return true;
+  return bfd_ardata (abfd) != NULL;
 }
 
 /*
@@ -905,13 +894,6 @@ bfd_generic_archive_p (bfd *abfd)
     }
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
-  /* Cleared by bfd_zalloc above.
-     bfd_ardata (abfd)->cache = NULL;
-     bfd_ardata (abfd)->archive_head = NULL;
-     bfd_ardata (abfd)->symdefs = NULL;
-     bfd_ardata (abfd)->extended_names = NULL;
-     bfd_ardata (abfd)->extended_names_size = 0;
-     bfd_ardata (abfd)->tdata = NULL;  */
 
   if (!BFD_SEND (abfd, _bfd_slurp_armap, (abfd))
       || !BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd)))

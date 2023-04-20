@@ -81,7 +81,6 @@ struct artdata
   file_ptr first_file_filepos;
   /* Speed up searching the armap */
   htab_t cache;
-  bfd *archive_head;		/* Only interesting in output routines.  */
   carsym *symdefs;		/* The symdef entries.  */
   symindex symdef_count;	/* How many there are.  */
   char *extended_names;		/* Clever intel extension.  */
