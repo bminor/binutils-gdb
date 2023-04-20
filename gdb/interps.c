@@ -422,6 +422,14 @@ interps_notify_normal_stop (bpstat *bs, int print_frame)
   interps_notify (&interp::on_normal_stop, bs, print_frame);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_exited (int status)
+{
+  interps_notify (&interp::on_exited, status);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

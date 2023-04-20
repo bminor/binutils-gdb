@@ -5728,7 +5728,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* Support the --return-child-result option.  */
 	  return_child_result_value = ecs->ws.exit_status ();
 
-	  gdb::observers::exited.notify (ecs->ws.exit_status ());
+	  interps_notify_exited (ecs->ws.exit_status ());
 	}
       else
 	{

@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_on_exited (int exitstatus);
 static void mi_on_no_history (void);
 
 static void mi_new_thread (struct thread_info *t);
@@ -536,21 +535,11 @@ mi_interp::on_signal_exited (gdb_signal sig)
   print_signal_exited_reason (this->cli_uiout, sig);
 }
 
-/* Observer for the exited notification.  */
-
-static void
-mi_on_exited (int exitstatus)
+void
+mi_interp::on_exited (int status)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = find_mi_interp ();
-
-      if (mi == NULL)
-	continue;
-
-      print_exited_reason (mi->mi_uiout, exitstatus);
-      print_exited_reason (mi->cli_uiout, exitstatus);
-    }
+  print_exited_reason (this->mi_uiout, status);
+  print_exited_reason (this->cli_uiout, status);
 }
 
 /* Observer for the no_history notification.  */
@@ -1264,7 +1253,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::exited.attach (mi_on_exited, "mi-interp");
   gdb::observers::no_history.attach (mi_on_no_history, "mi-interp");
   gdb::observers::new_thread.attach (mi_new_thread, "mi-interp");
   gdb::observers::thread_exit.attach (mi_thread_exit, "mi-interp");

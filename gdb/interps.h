@@ -94,6 +94,10 @@ public:
   /* Notify the interpreter that the current inferior has stopped normally.  */
   virtual void on_normal_stop (bpstat *bs, int print_frame) {}
 
+  /* Notify the intepreter that the current inferior has exited normally with
+     status STATUS.  */
+  virtual void on_exited (int status) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -192,6 +196,10 @@ extern void interps_notify_signal_exited (gdb_signal sig);
 
 /* Notify all interpreters that the current inferior has stopped normally.  */
 extern void interps_notify_normal_stop (bpstat *bs, int print_frame);
+
+/* Notify all interpreters that the current inferior has exited normally with
+   status STATUS.  */
+extern void interps_notify_exited (int status);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"
