@@ -1,3 +1,8 @@
+2023-04-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	PR gas/29757
+	* doc/c-bpf.texi (BPF Pseudo-C Syntax): New section.
+
 2023-04-20  Guillermo E. Martinez  <guillermo.e.martinez@oracle.com>
 
 	PR gas/29728

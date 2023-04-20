@@ -19,6 +19,7 @@
 * BPF Syntax::		        Syntax
 * BPF Directives::		Machine Directives
 * BPF Opcodes::			Opcodes
+* BPF Pseudo-C Syntax::         Alternative Pseudo-C Assembly Syntax
 @end menu
 
 @node BPF Options
@@ -228,11 +229,11 @@ in @code{%d}.
 @subsubsection Endianness conversion instructions
 
 @table @code
-@item endle %d, (8|16|32)
-Convert the 8-bit, 16-bit or 32-bit value in @code{%d} to
+@item endle %d, (16|32|64)
+Convert the 16-bit, 32-bit or 64-bit value in @code{%d} to
 little-endian.
-@item endbe %d, (8|16|32)
-Convert the 8-bit, 16-bit or 32-bit value in @code{%d} to big-endian.
+@item endbe %d, (16|32|64)
+Convert the 16-bit, 32-bit or 64-bit value in @code{%d} to big-endian.
 @end table
 
 @subsubsection 64-bit load and pseudo maps
@@ -335,9 +336,9 @@ holds true.
 @item ja %d,(%s|imm32),disp16
 Jump-always.
 @item jeq %d,(%s|imm32),disp16
-Jump if equal.
+Jump if equal, unsigned.
 @item jgt %d,(%s|imm32),disp16
-Jump if greater.
+Jump if greater, unsigned.
 @item jge %d,(%s|imm32),disp16
 Jump if greater or equal.
 @item jlt %d,(%s|imm32),disp16
@@ -383,5 +384,194 @@ for swapping 64-bit quantities and another for 32-bit quantities.
 @item xadddw [%d+offset16],%s
 Exchange-and-add a 64-bit value at the specified location.
 @item xaddw [%d+offset16],%s
+Exchange-and-add a 32-bit value at the specified location.
+@end table
+
+@node BPF Pseudo-C Syntax
+@section BPF Pseudo-C Syntax
+
+This assembler supports another syntax to denote BPF instructions,
+which is an alternative to the normal looking syntax documented above.
+This alternatative syntax, which we call @dfn{pseudo-C syntax}, is
+supported by the LLVM/clang integrated assembler.
+
+This syntax is very unconventional, but we need to support it in order
+to support inline assembly in existing BPF programs.
+
+Note that the assembler is able to parse sources in which both
+syntaxes coexist: some instructions can use the usual assembly like
+syntax, whereas some other instructions in the same file can use the
+pseudo-C syntax.
+
+@subsubsection Pseudo-C Register Names
+
+All BPF registers are 64-bit long.  However, in the Pseudo-C syntax
+registers can be referred using different names, which actually
+reflect the kind of instruction they appear on:
+
+@table @samp
+@item r0..r9
+General-purpose register in an instruction that operates on its value
+as if it was a 64-bit value.
+@item w0..w9
+General-purpose register in an instruction that operates on its value
+as if it was a 32-bit value.
+@end table
+
+@noindent
+Note that in the Pseudo-C syntax register names are not preceded by
+@code{%} characters.
+
+@subsubsection Arithmetic instructions
+
+In all the instructions below, the operations are 64-bit or 32-bit
+depending on the names used to refer to the registers.  For example
+@code{r3 += r2} will perform 64-bit addition, whereas @code{w3 += w2}
+will perform 32-bit addition.  Mixing register prefixes is an error,
+for example @code{r3 += w2}.
+
+@table @code
+@item dst_reg += (imm32|src_reg)
+Arithmetic addition.
+@item dst_reg -= (imm32|src_reg)
+Arithmetic subtraction.
+@item dst_reg *= (imm32|src_reg)
+Arithmetic multiplication.
+@item dst_reg /= (imm32|src_reg)
+Arithmetic integer unsigned division.
+@item dst_reg %= (imm32|src_reg)
+Arithmetic integer unsigned remainder.
+@item dst_reg &= (imm32|src_reg)
+Bit-wise ``and'' operation.
+@item dst_reg |= (imm32|src_reg)
+Bit-wise ``or'' operation.
+@item dst_reg ^= (imm32|src_reg)
+Bit-wise exclusive-or operation.
+@item dst_reg <<= (imm32|src_reg)
+Left shift, by whatever specified number of bits.
+@item dst_reg >>= (imm32|src_reg)
+Right logical shift, by whatever specified number of bits.
+@item dst_reg s>>= (imm32|src_reg)
+Right arithmetic shift, by whatever specified number of bits.
+@item dst_reg = (imm32|src_reg)
+Move the value in @code{imm32} or @code{src_reg} in @code{dst_reg}.
+@item dst_reg = -dst_reg
+Arithmetic negation.
+@end table
+
+@subsubsection Endianness conversion instructions
+
+@table @code
+@item dst_reg = le16 src_reg
+Convert the 16-bit value in @code{src_reg} to little-endian.
+@item dst_reg = le32 src_reg
+Convert the 32-bit value in @code{src_reg} to little-endian.
+@item dst_reg = le64 src_reg
+Convert the 64-bit value in @code{src_reg} to little-endian.
+@item dst_reg = be16 src_reg
+Convert the 16-bit value in @code{src_reg} to big-endian.
+@item dst_reg = be32 src_reg
+Convert the 32-bit value in @code{src_reg} to big-endian.
+@item dst_reg = be64 src_reg
+Convert the 64-bit value in @code{src_reg} to big-endian.
+@end table
+
+@subsubsection 64-bit load and pseudo maps
+
+@table @code
+@item dst_reg = imm64 ll
+Load the given signed 64-bit immediate, or pseudo map descriptor, to
+the destination register @code{dst_reg}.
+@end table
+
+@subsubsection Load instructions for socket filters
+
+@table @code
+@item r0 = *(u8 *)skb[imm32]
+Absolute 8-bit load.
+@item r0 = *(u16 *)skb[imm32]
+Absolute 16-bit load.
+@item r0 = *(u32 *)skb[imm32]
+Absolute 32-bit load.
+@item r0 = *(u64 *)skb[imm32]
+Absolute 64-bit load.
+@item r0 = *(u8 *)skb[src_reg + imm32]
+Indirect 8-bit load.
+@item r0 = *(u16 *)skb[src_reg + imm32]
+Indirect 16-bit load.
+@item r0 = *(u32 *)skb[src_reg + imm32]
+Indirect 32-bit load.
+@item r0 = *(u64 *)skb[src_reg + imm32]
+Indirect 64-bit load.
+@end table
+
+@subsubsection Generic load/store instructions
+
+@table @code
+@item dst_reg = *(u8 *)(src_reg + offset16)
+Generic 8-bit load.
+@item dst_reg = *(u16 *)(src_reg + offset16)
+Generic 16-bit load.
+@item dst_reg = *(u32 *)(src_reg + offset16)
+Generic 32-bit load.
+@item dst_reg = *(u64 *)(src_reg + offset16)
+Generic 64-bit load.
+@c XXX stb
+@c NO PSEUDOC-SYNTAX
+@c XXX sth
+@c NO PSEUDOC-SYNTAX
+@c XXX stw
+@c NO PSEUDOC-SYNTAX
+@c XXX stdw
+@c NO PSEUDOC-SYNTAX
+@item *(u8 *)(dst_reg + offset16) = src_reg
+Generic 8-bit store.
+@item *(u16 *)(dst_reg + offset16) = src_reg
+Generic 16-bit store.
+@item *(u32 *)(dst_reg + offset16) = src_reg
+Generic 32-bit store.
+@item *(u64 *)(dst_reg + offset16) = src_reg
+Generic 64-bit store.
+@end table
+
+@subsubsection Jump instructions
+
+@table @code
+@item goto disp16
+Jump-always.
+@item if dst_reg == (imm32|src_reg) goto disp16
+Jump if equal.
+@item if dst_reg & (imm32|src_reg) goto disp16
+Jump if signed equal.
+@item if dst_reg != (imm32|src_reg) goto disp16
+Jump if not equal.
+@item if dst_reg > (imm32|src_reg) goto disp16
+Jump if bigger, unsigned.
+@item if dst_reg < (imm32|src_reg) goto disp16
+Jump if smaller, unsigned.
+@item if dst_reg >= (imm32|src_reg) goto disp16
+Jump if bigger or equal, unsigned.
+@item if dst_reg <= (imm32|src_reg) goto disp16
+Jump if smaller or equal, unsigned.
+@item if dst_reg s> (imm32|src_reg) goto disp16
+Jump if bigger, signed.
+@item if dst_reg s< (imm32|src_reg) goto disp16
+Jump if smaller, signed.
+@item if dst_reg s>= (imm32|src_reg) goto disp16
+Jump if bigger or equal, signed.
+@item if dst_reg s<= (imm32|src_reg) goto disp16
+Jump if smaller or equal, signed.
+@item call imm32
+Jump and link.
+@item exit
+Terminate the eBPF program.
+@end table
+
+@subsubsection Atomic instructions
+
+@table @code
+@item lock *(u64 *)(dst_reg + offset16) += src_reg
+Exchange-and-add a 64-bit value at the specified location.
+@item lock *(u32 *)(dst_reg + offset16) += src_reg
 Exchange-and-add a 32-bit value at the specified location.
 @end table
