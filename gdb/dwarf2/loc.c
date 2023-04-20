@@ -3968,7 +3968,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 
       if (dlbaton->per_cu->version () < 5 && dlbaton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (dlbaton->per_cu,
-					       dlbaton->per_objfile,
+					       per_objfile,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
       else if (dlbaton->per_cu->version () < 5)
@@ -3978,7 +3978,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 					   signed_addr_p);
       else
 	kind = decode_debug_loclists_addresses (dlbaton->per_cu,
-						dlbaton->per_objfile,
+						per_objfile,
 						loc_ptr, buf_end, &new_ptr,
 						&low, &high, byte_order,
 						addr_size, signed_addr_p);
@@ -4041,7 +4041,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       /* Now describe this particular location.  */
       locexpr_describe_location_1 (symbol, low, stream, loc_ptr, length,
 				   addr_size, offset_size,
-				   dlbaton->per_cu, dlbaton->per_objfile);
+				   dlbaton->per_cu, per_objfile);
 
       gdb_printf (stream, "\n");
 
