@@ -811,7 +811,7 @@ static line_header_up dwarf_decode_line_header (sect_offset sect_off,
 
 static void dwarf_decode_lines (struct line_header *,
 				struct dwarf2_cu *,
-				CORE_ADDR, int decode_mapping);
+				unrelocated_addr, int decode_mapping);
 
 static void dwarf2_start_subfile (dwarf2_cu *cu, const file_entry &fe,
 				  const line_header &lh);
@@ -7542,7 +7542,7 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
-			const file_and_directory &fnd, CORE_ADDR lowpc,
+			const file_and_directory &fnd, unrelocated_addr lowpc,
 			bool have_code) /* ARI: editCase function */
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
@@ -7671,7 +7671,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
      for DW_AT_decl_file.  */
-  handle_DW_AT_stmt_list (die, cu, fnd, lowpc, unrel_low != unrel_high);
+  handle_DW_AT_stmt_list (die, cu, fnd, unrel_low, unrel_low != unrel_high);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -18503,18 +18503,15 @@ lnp_state_machine::check_line_address (struct dwarf2_cu *cu,
 
 static void
 dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
-		      CORE_ADDR lowpc)
+		      unrelocated_addr lowpc)
 {
   const gdb_byte *line_ptr, *extended_end;
   const gdb_byte *line_end;
   unsigned int bytes_read, extended_len;
   unsigned char op_code, extended_op;
-  CORE_ADDR baseaddr;
   struct objfile *objfile = cu->per_objfile->objfile;
   bfd *abfd = objfile->obfd.get ();
   struct gdbarch *gdbarch = objfile->arch ();
-
-  baseaddr = objfile->text_section_offset ();
 
   line_ptr = lh->statement_program_start;
   line_end = lh->statement_program_end;
@@ -18573,9 +18570,8 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		      = cu->header.read_address (abfd, line_ptr, &bytes_read);
 		    line_ptr += bytes_read;
 
-		    state_machine.check_line_address
-		      (cu, line_ptr, (unrelocated_addr) (lowpc - baseaddr),
-		       address);
+		    state_machine.check_line_address (cu, line_ptr, lowpc,
+						      address);
 		    state_machine.handle_set_address (address);
 		  }
 		  break;
@@ -18732,7 +18728,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 
 static void
 dwarf_decode_lines (struct line_header *lh, struct dwarf2_cu *cu,
-		    CORE_ADDR lowpc, int decode_mapping)
+		    unrelocated_addr lowpc, int decode_mapping)
 {
   if (decode_mapping)
     dwarf_decode_lines_1 (lh, cu, lowpc);
