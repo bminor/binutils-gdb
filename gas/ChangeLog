@@ -1,3 +1,35 @@
+2023-04-20  Guillermo E. Martinez  <guillermo.e.martinez@oracle.com>
+
+	PR gas/29728
+	* config/tc-bpf.h (TC_EQUAL_IN_INSN): Define.
+	* config/tc-bpf.c (LEX_IS_SYMBOL_COMPONENT): Define.
+	(LEX_IS_WHITESPACE): Likewise.
+	(LEX_IS_NEWLINE): Likewise.
+	(LEX_IS_ARITHM_OP): Likewise.
+	(LEX_IS_STAR): Likewise.
+	(LEX_IS_CLSE_BR): Likewise.
+	(LEX_IS_OPEN_BR): Likewise.
+	(LEX_IS_EQUAL): Likewise.
+	(LEX_IS_EXCLA): Likewise.
+	(ST_EOI): Likewise.
+	(MAX_TOKEN_SZ): Likewise.
+	(init_pseudoc_lex): New function.
+	(md_begin): Call init_pseudoc_lex.
+	(valid_expr): New function.
+	(build_bpf_non_generic_load): Likewise.
+	(build_bpf_atomic_insn): Likewise.
+	(build_bpf_jmp_insn): Likewise.
+	(build_bpf_arithm_insn): Likewise.
+	(build_bpf_endianness): Likewise.
+	(build_bpf_load_store_insn): Likewise.
+	(look_for_reserved_word): Likewise.
+	(is_register): Likewise.
+	(is_cast): Likewise.
+	(get_token): Likewise.
+	(bpf_pseudoc_to_normal_syntax): Likewise.
+	(md_assemble): Try pseudo-C syntax if an instruction cannot be
+	parsed.
+
 2023-04-18  mengqinggang  <mengqinggang@loongson.cn>
 
 	* config/tc-loongarch.c (loongarch_fix_adjustable): Symbols with

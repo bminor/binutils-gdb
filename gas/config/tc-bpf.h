@@ -51,3 +51,5 @@
 /* The Linux kernel verifier expects NOPs to be encoded in this way;
    a jump to offset 0 means jump to the next instruction.  */
 #define md_single_noop_insn "ja 0"
+
+#define TC_EQUAL_IN_INSN(c, s) 1
