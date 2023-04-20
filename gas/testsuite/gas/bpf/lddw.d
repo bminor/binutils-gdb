@@ -1,5 +1,7 @@
 #as: --EL
 #objdump: -dr
+#source: lddw.s
+#source: lddw-pseudoc.s
 #name: eBPF LDDW
 
 .*: +file format .*bpf.*

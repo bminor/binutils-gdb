@@ -1,5 +1,6 @@
 #as: --EB
 #source: atomic.s
+#source: atomic-pseudoc.s
 #objdump: -dr
 #name: eBPF atomic instructions, big endian
 

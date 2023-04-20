@@ -1,5 +1,6 @@
 #as: --EB
 #source: mem.s
+#source: mem-pseudoc.s
 #objdump: -dr
 #name: eBPF MEM instructions, modulus lddw, big endian
 

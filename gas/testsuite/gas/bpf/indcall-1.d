@@ -1,5 +1,7 @@
 #as: -mxbpf --EL
 #objdump: -mxbpf -dr
+#source: indcall-1.s
+#source: indcall-1-pseudoc.s
 #name: BPF indirect call 1
 
 .*: +file format .*bpf.*

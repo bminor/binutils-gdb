@@ -1,5 +1,7 @@
 #as: --EL
 #objdump: -dr
+#source: jump32.s
+#source: jump32-pseudoc.s
 #name: eBPF JUMP32 instructions
 
 .*: +file format .*bpf.*

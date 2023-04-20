@@ -1,5 +1,7 @@
 #as: --EL
 #objdump: -dr
+#source: alu32.s
+#source: alu32-pseudoc.s
 #name: eBPF ALU instructions
 
 .*: +file format .*bpf.*

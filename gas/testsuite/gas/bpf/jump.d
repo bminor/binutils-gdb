@@ -1,5 +1,7 @@
 #as: --EL
 #objdump: -dr
+#source: jump.s
+#source: jump-pseudoc.s
 #name: eBPF JUMP instructions
 
 .*: +file format .*bpf.*

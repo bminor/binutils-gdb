@@ -1,6 +1,26 @@
 2023-04-20  Guillermo E. Martinez  <guillermo.e.martinez@oracle.com>
 
 	PR gas/29728
+	* testsuite/gas/all/assign-bad-recursive.d: Skip test in bpf-*
+	targets.
+	* testsuite/gas/all/eqv-dot.d: Likewise.
+	* testsuite/gas/all/gas.exp: Skip other assignment tests in bpf-*.
+	* testsuite/gas/bpf/alu-pseudoc.s: New file.
+	* testsuite/gas/bpf/pseudoc-normal.s: Likewise.
+	* testsuite/gas/bpf/pseudoc-normal.d: Likewise.
+	* testsuite/gas/bpf/pseudoc-normal-be.d: Likewise.
+	* testsuite/gas/bpf/mem-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/lddw-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/jump32-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/jump-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/indcall-1-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/atomic-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/*.d: Add -pseudoc variants of the tests.
+
+2023-04-20  Guillermo E. Martinez  <guillermo.e.martinez@oracle.com>
+
+	PR gas/29728
 	* config/tc-bpf.h (TC_EQUAL_IN_INSN): Define.
 	* config/tc-bpf.c (LEX_IS_SYMBOL_COMPONENT): Define.
 	(LEX_IS_WHITESPACE): Likewise.

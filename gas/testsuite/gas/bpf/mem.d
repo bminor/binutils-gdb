@@ -1,5 +1,7 @@
 #as: --EL
 #objdump: -dr
+#source: mem.s
+#source: mem-pseudoc.s
 #name: eBPF MEM instructions, modulus lddw
 
 .*: +file format .*bpf.*

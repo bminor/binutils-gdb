@@ -82,6 +82,7 @@ switch -glob $target_triplet {
     rl78-*-* { }
     rx-*-* { }
     vax-*-* { }
+    bpf-*-* { }
     default { run_list_test dot "-alm" }
 }
 run_list_test end ""

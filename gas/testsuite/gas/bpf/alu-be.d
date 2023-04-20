@@ -1,5 +1,6 @@
 #as: --EB
 #source: alu.s
+#source: alu-pseudoc.s
 #objdump: -dr
 #name: eBPF ALU64 instructions, big endian
 

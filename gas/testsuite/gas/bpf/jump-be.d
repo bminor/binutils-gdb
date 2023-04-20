@@ -1,5 +1,6 @@
 #as: --EB
 #source: jump.s
+#source: jump-pseudoc.s
 #objdump: -dr
 #name: eBPF JUMP instructions, big endian
 

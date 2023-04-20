@@ -1,5 +1,6 @@
 #as: --EB
 #source: lddw.s
+#source: lddw-pseudoc.s
 #objdump: -dr
 #name: eBPF LDDW, big-endian
 

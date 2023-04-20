@@ -1,5 +1,7 @@
 #as: --EL
 #objdump: -dr
+#source: atomic.s
+#source: atomic-pseudoc.s
 #name: eBPF atomic instructions
 
 .*: +file format .*bpf.*
