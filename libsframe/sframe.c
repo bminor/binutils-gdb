@@ -644,16 +644,21 @@ sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
 			  sframe_frame_row_entry *fre, int *errp)
 {
   uint32_t fp_offset_idx = 0;
-  sframe_header *dhp = sframe_decoder_get_header (dctx);
-  /* If the FP offset is not being tracked, return an error code so the caller
-     can gather the fixed FP offset from the SFrame header.  */
-  if (dhp->sfh_cfa_fixed_fp_offset != SFRAME_CFA_FIXED_FP_INVALID)
-    return sframe_set_errno (errp, SFRAME_ERR_FREOFFSET_NOPRESENT);
+  int8_t fp_offset = sframe_decoder_get_fixed_fp_offset (dctx);
+  /* If the FP offset is not being tracked, return the fixed FP offset
+     from the SFrame header.  */
+  if (fp_offset != SFRAME_CFA_FIXED_FP_INVALID)
+    {
+      if (errp)
+	*errp = 0;
+      return fp_offset;
+    }
 
   /* In some ABIs, the stack offset to recover RA (using the CFA) from is
      fixed (like AMD64).  In such cases, the stack offset to recover FP will
      appear at the second index.  */
-  fp_offset_idx = ((dhp->sfh_cfa_fixed_ra_offset != SFRAME_CFA_FIXED_RA_INVALID)
+  fp_offset_idx = ((sframe_decoder_get_fixed_ra_offset (dctx)
+		    != SFRAME_CFA_FIXED_RA_INVALID)
 		   ? SFRAME_FRE_RA_OFFSET_IDX
 		   : SFRAME_FRE_FP_OFFSET_IDX);
   return sframe_get_fre_offset (fre, fp_offset_idx, errp);
