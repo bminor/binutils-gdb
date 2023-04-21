@@ -7979,6 +7979,15 @@ catchpoint::catchpoint (struct gdbarch *gdbarch, bool temp,
   pspace = current_program_space;
 }
 
+/* Notify interpreters and observers that breakpoint B was created.  */
+
+static void
+notify_breakpoint_created (breakpoint *b)
+{
+  interps_notify_breakpoint_created (b);
+  gdb::observers::breakpoint_created.notify (b);
+}
+
 breakpoint *
 install_breakpoint (int internal, std::unique_ptr<breakpoint> &&arg, int update_gll)
 {
@@ -7988,7 +7997,8 @@ install_breakpoint (int internal, std::unique_ptr<breakpoint> &&arg, int update_
     set_tracepoint_count (breakpoint_count);
   if (!internal)
     mention (b);
-  gdb::observers::breakpoint_created.notify (b);
+
+  notify_breakpoint_created (b);
 
   if (update_gll)
     update_global_location_list (UGLL_MAY_INSERT);

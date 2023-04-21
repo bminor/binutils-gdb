@@ -559,6 +559,14 @@ interps_notify_tsv_modified (const trace_state_variable *tsv)
   interps_notify (&interp::on_tsv_modified, tsv);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_breakpoint_created (breakpoint *b)
+{
+  interps_notify (&interp::on_breakpoint_created, b);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void
