@@ -29,6 +29,7 @@ struct ui_out;
 struct interp;
 struct ui;
 class completion_tracker;
+struct thread_info;
 
 typedef struct interp *(*interp_factory_func) (const char *name);
 
@@ -113,6 +114,9 @@ public:
   /* Notify the interpreter that the user focus has changed.  */
   virtual void on_user_selected_context_changed (user_selected_what selection)
     {}
+
+  /* Notify the interpreter that thread T has been created.  */
+  virtual void on_new_thread (thread_info *t) {}
 
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
@@ -224,6 +228,9 @@ extern void interps_notify_exited (int status);
 /* Notify all interpreters that the user focus has changed.  */
 extern void interps_notify_user_selected_context_changed
   (user_selected_what selection);
+
+/* Notify all interpreters that thread T has been created.  */
+extern void interps_notify_new_thread (thread_info *t);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

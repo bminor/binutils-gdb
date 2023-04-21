@@ -446,6 +446,14 @@ interps_notify_user_selected_context_changed (user_selected_what selection)
   interps_notify (&interp::on_user_selected_context_changed, selection);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_new_thread (thread_info *t)
+{
+  interps_notify (&interp::on_new_thread, t);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

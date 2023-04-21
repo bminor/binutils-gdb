@@ -49,6 +49,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "inline-frame.h"
 #include "stack.h"
+#include "interps.h"
 
 /* See gdbthread.h.  */
 
@@ -260,6 +261,15 @@ new_thread (struct inferior *inf, ptid_t ptid)
   return tp;
 }
 
+/* Notify interpreters and observers that thread T has been created.  */
+
+static void
+notify_new_thread (thread_info *t)
+{
+  interps_notify_new_thread (t);
+  gdb::observers::new_thread.notify (t);
+}
+
 struct thread_info *
 add_thread_silent (process_stratum_target *targ, ptid_t ptid)
 {
@@ -280,7 +290,7 @@ add_thread_silent (process_stratum_target *targ, ptid_t ptid)
     delete_thread (tp);
 
   tp = new_thread (inf, ptid);
-  gdb::observers::new_thread.notify (tp);
+  notify_new_thread (tp);
 
   return tp;
 }

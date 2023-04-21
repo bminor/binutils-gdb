@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t, int silent);
 static void mi_record_changed (struct inferior*, int, const char *,
 			       const char *);
@@ -307,24 +306,15 @@ mi_interp::pre_command_loop ()
   display_mi_prompt (mi);
 }
 
-static void
-mi_new_thread (struct thread_info *t)
+void
+mi_interp::on_new_thread (thread_info *t)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      if (mi == NULL)
-	continue;
-
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      gdb_printf (mi->event_channel,
-		  "thread-created,id=\"%d\",group-id=\"i%d\"",
-		  t->global_num, t->inf->num);
-      gdb_flush (mi->event_channel);
-    }
+  gdb_printf (this->event_channel, "thread-created,id=\"%d\",group-id=\"i%d\"",
+	      t->global_num, t->inf->num);
+  gdb_flush (this->event_channel);
 }
 
 static void
@@ -1189,7 +1179,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::new_thread.attach (mi_new_thread, "mi-interp");
   gdb::observers::thread_exit.attach (mi_thread_exit, "mi-interp");
   gdb::observers::inferior_added.attach (mi_inferior_added, "mi-interp");
   gdb::observers::inferior_appeared.attach (mi_inferior_appeared, "mi-interp");
