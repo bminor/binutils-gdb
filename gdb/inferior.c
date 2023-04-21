@@ -345,6 +345,15 @@ detach_inferior (inferior *inf)
 		target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
+/* Notify interpreters and observers that inferior INF appeared.  */
+
+static void
+notify_inferior_appeared (inferior *inf)
+{
+  interps_notify_inferior_appeared (inf);
+  gdb::observers::inferior_appeared.notify (inf);
+}
+
 void
 inferior_appeared (struct inferior *inf, int pid)
 {
@@ -358,7 +367,7 @@ inferior_appeared (struct inferior *inf, int pid)
   inf->has_exit_code = false;
   inf->exit_code = 0;
 
-  gdb::observers::inferior_appeared.notify (inf);
+  notify_inferior_appeared (inf);
 }
 
 struct inferior *

@@ -470,6 +470,14 @@ interps_notify_inferior_added (inferior *inf)
   interps_notify (&interp::on_inferior_added, inf);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_inferior_appeared (inferior *inf)
+{
+  interps_notify (&interp::on_inferior_appeared, inf);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

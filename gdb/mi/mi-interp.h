@@ -53,6 +53,7 @@ public:
   void on_new_thread (thread_info *t) override;
   void on_thread_exited (thread_info *t, int silent) override;
   void on_inferior_added (inferior *inf) override;
+  void on_inferior_appeared (inferior *inf) override;
 
   /* MI's output channels */
   mi_console_file *out;
