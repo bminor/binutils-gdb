@@ -4552,27 +4552,11 @@ _bfd_riscv_relax_lui (bfd *abfd,
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
 	case R_RISCV_LO12_I:
-	  if (undefined_weak)
-	    {
-	      /* Change the RS1 to zero.  */
-	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
-	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_putl32 (insn, contents + rel->r_offset);
-	    }
-	  else
-	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_I);
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_I);
 	  return true;
 
 	case R_RISCV_LO12_S:
-	  if (undefined_weak)
-	    {
-	      /* Change the RS1 to zero.  */
-	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
-	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_putl32 (insn, contents + rel->r_offset);
-	    }
-	  else
-	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_S);
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_S);
 	  return true;
 
 	case R_RISCV_HI20:
@@ -4737,7 +4721,6 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 		     bool undefined_weak)
 {
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
-  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   bfd_vma gp = riscv_global_pointer_value (link_info);
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
@@ -4830,39 +4813,13 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
 	case R_RISCV_PCREL_LO12_I:
-	  if (undefined_weak)
-	    {
-	      /* Change the RS1 to zero, and then modify the relocation
-		 type to R_RISCV_LO12_I.  */
-	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
-	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_putl32 (insn, contents + rel->r_offset);
-	      rel->r_info = ELFNN_R_INFO (sym, R_RISCV_LO12_I);
-	      rel->r_addend = hi_reloc.hi_addend;
-	    }
-	  else
-	    {
-	      rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_I);
-	      rel->r_addend += hi_reloc.hi_addend;
-	    }
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_I);
+	  rel->r_addend += hi_reloc.hi_addend;
 	  return true;
 
 	case R_RISCV_PCREL_LO12_S:
-	  if (undefined_weak)
-	    {
-	      /* Change the RS1 to zero, and then modify the relocation
-		 type to R_RISCV_LO12_S.  */
-	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
-	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_putl32 (insn, contents + rel->r_offset);
-	      rel->r_info = ELFNN_R_INFO (sym, R_RISCV_LO12_S);
-	      rel->r_addend = hi_reloc.hi_addend;
-	    }
-	  else
-	    {
-	      rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_S);
-	      rel->r_addend += hi_reloc.hi_addend;
-	    }
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_S);
+	  rel->r_addend += hi_reloc.hi_addend;
 	  return true;
 
 	case R_RISCV_PCREL_HI20:
