@@ -653,7 +653,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 	  linetable_entry *last = &subfile->line_vector_entries.back ();
 	  last_line = last->line;
 
-	  if (last->raw_pc () != pc)
+	  if (last->unrelocated_pc () != pc)
 	    break;
 
 	  subfile->line_vector_entries.pop_back ();
@@ -668,7 +668,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
   linetable_entry &e = subfile->line_vector_entries.back ();
   e.line = line;
   e.is_stmt = (flags & LEF_IS_STMT) != 0;
-  e.set_raw_pc (pc);
+  e.set_unrelocated_pc (pc);
   e.prologue_end = (flags & LEF_PROLOGUE_END) != 0;
 }
 

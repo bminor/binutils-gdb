@@ -606,11 +606,11 @@ do_mixed_source_and_assembly_deprecated
 
   /* First, skip all the preceding functions.  */
 
-  for (i = 0; i < nlines - 1 && le[i].raw_pc () < unrel_low; i++);
+  for (i = 0; i < nlines - 1 && le[i].unrelocated_pc () < unrel_low; i++);
 
   /* Now, copy all entries before the end of this function.  */
 
-  for (; i < nlines - 1 && le[i].raw_pc () < unrel_high; i++)
+  for (; i < nlines - 1 && le[i].unrelocated_pc () < unrel_high; i++)
     {
       if (le[i] == le[i + 1])
 	continue;		/* Ignore duplicates.  */
@@ -630,7 +630,7 @@ do_mixed_source_and_assembly_deprecated
   /* If we're on the last line, and it's part of the function,
      then we need to get the end pc in a special way.  */
 
-  if (i == nlines - 1 && le[i].raw_pc () < unrel_high)
+  if (i == nlines - 1 && le[i].unrelocated_pc () < unrel_high)
     {
       mle[newlines].line = le[i].line;
       mle[newlines].start_pc = le[i].pc (objfile);
@@ -761,10 +761,10 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
   first_le = NULL;
 
   /* Skip all the preceding functions.  */
-  for (i = 0; i < nlines && le[i].raw_pc () < unrel_low; i++)
+  for (i = 0; i < nlines && le[i].unrelocated_pc () < unrel_low; i++)
     continue;
 
-  if (i < nlines && le[i].raw_pc () < unrel_high)
+  if (i < nlines && le[i].unrelocated_pc () < unrel_high)
     first_le = &le[i];
 
   /* Add lines for every pc value.  */

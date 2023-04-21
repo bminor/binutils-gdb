@@ -3164,13 +3164,13 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       /* Is this file's first line closer than the first lines of other files?
 	 If so, record this file, and its first line, as best alternate.  */
       if (item->pc (objfile) > pc
-	  && (!alt || item->raw_pc () < alt->raw_pc ()))
+	  && (!alt || item->unrelocated_pc () < alt->unrelocated_pc ()))
 	alt = item;
 
       auto pc_compare = [] (const unrelocated_addr &comp_pc,
 			    const struct linetable_entry & lhs)
       {
-	return comp_pc < lhs.raw_pc ();
+	return comp_pc < lhs.unrelocated_pc ();
       };
 
       const linetable_entry *first = item;
@@ -3192,7 +3192,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	 save prev if it represents the end of a function (i.e. line number
 	 0) instead of a real line.  */
 
-      if (prev && prev->line && (!best || prev->raw_pc () > best->raw_pc ()))
+      if (prev && prev->line
+	  && (!best || prev->unrelocated_pc () > best->unrelocated_pc ()))
 	{
 	  best = prev;
 	  best_symtab = iter_s;
@@ -3207,7 +3208,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  if (!best->is_stmt)
 	    {
 	      const linetable_entry *tmp = best;
-	      while (tmp > first && (tmp - 1)->raw_pc () == tmp->raw_pc ()
+	      while (tmp > first
+		     && (tmp - 1)->unrelocated_pc () == tmp->unrelocated_pc ()
 		     && (tmp - 1)->line != 0 && !tmp->is_stmt)
 		--tmp;
 	      if (tmp->is_stmt)
@@ -3222,7 +3224,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       /* If another line (denoted by ITEM) is in the linetable and its
 	 PC is after BEST's PC, but before the current BEST_END, then
 	 use ITEM's PC as the new best_end.  */
-      if (best && item < last && item->raw_pc () > best->raw_pc ()
+      if (best && item < last
+	  && item->unrelocated_pc () > best->unrelocated_pc ()
 	  && (best_end == 0 || best_end > item->pc (objfile)))
 	best_end = item->pc (objfile);
     }
@@ -3709,12 +3712,12 @@ skip_prologue_using_linetable (CORE_ADDR func_addr)
 	(linetable->item, linetable->item + linetable->nitems, unrel_start,
 	 [] (const linetable_entry &lte, unrelocated_addr pc)
 	 {
-	   return lte.raw_pc () < pc;
+	   return lte.unrelocated_pc () < pc;
 	 });
 
       for (;
 	   (it < linetable->item + linetable->nitems
-	    && it->raw_pc () < unrel_end);
+	    && it->unrelocated_pc () < unrel_end);
 	   it++)
 	if (it->prologue_end)
 	  return {it->pc (objfile)};

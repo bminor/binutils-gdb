@@ -4546,7 +4546,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
     return lineno;
 
   lt->item[lt->nitems].line = lineno;
-  lt->item[lt->nitems++].set_raw_pc (unrelocated_addr (adr << 2));
+  lt->item[lt->nitems++].set_unrelocated_pc (unrelocated_addr (adr << 2));
   return lineno;
 }
 

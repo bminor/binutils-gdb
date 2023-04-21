@@ -996,7 +996,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 	  uiout->field_core_addr ("rel-address", objfile->arch (),
 				  item->pc (objfile));
 	  uiout->field_core_addr ("unrel-address", objfile->arch (),
-				  CORE_ADDR (item->raw_pc ()));
+				  CORE_ADDR (item->unrelocated_pc ()));
 	  uiout->field_string ("is-stmt", item->is_stmt ? "Y" : "");
 	  uiout->field_string ("prologue-end", item->prologue_end ? "Y" : "");
 	  uiout->text ("\n");
