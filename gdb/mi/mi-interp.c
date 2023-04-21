@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_on_resume (ptid_t ptid);
 static void mi_solib_loaded (struct so_list *solib);
 static void mi_solib_unloaded (struct so_list *solib);
 static void mi_about_to_proceed (void);
@@ -802,8 +801,8 @@ mi_on_resume_1 (struct mi_interp *mi,
   gdb_flush (mi->raw_stdout);
 }
 
-static void
-mi_on_resume (ptid_t ptid)
+void
+mi_interp::on_target_resumed (ptid_t ptid)
 {
   struct thread_info *tp = NULL;
 
@@ -817,18 +816,10 @@ mi_on_resume (ptid_t ptid)
   if (tp->control.in_infcall)
     return;
 
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      if (mi == NULL)
-	continue;
-
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      mi_on_resume_1 (mi, target, ptid);
-    }
+  mi_on_resume_1 (this, target, ptid);
 }
 
 /* See mi-interp.h.  */
@@ -1092,7 +1083,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::target_resumed.attach (mi_on_resume, "mi-interp");
   gdb::observers::solib_loaded.attach (mi_solib_loaded, "mi-interp");
   gdb::observers::solib_unloaded.attach (mi_solib_unloaded, "mi-interp");
   gdb::observers::about_to_proceed.attach (mi_about_to_proceed, "mi-interp");

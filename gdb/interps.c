@@ -503,6 +503,14 @@ interps_notify_record_changed (inferior *inf, int started, const char *method,
   interps_notify (&interp::on_record_changed, inf, started, method, format);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_target_resumed (ptid_t ptid)
+{
+  interps_notify (&interp::on_target_resumed, ptid);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

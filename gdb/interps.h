@@ -139,6 +139,9 @@ public:
   virtual void on_record_changed (inferior *inf, int started,
 				  const char *method, const char *format) {}
 
+  /* Notify the interpreter that the target was resumed.  */
+  virtual void on_target_resumed (ptid_t ptid) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -280,6 +283,9 @@ extern void interps_notify_inferior_removed (inferior *inf);
 extern void interps_notify_record_changed (inferior *inf, int started,
 					   const char *method,
 					   const char *format);
+
+/* Notify all interpreters that the target was resumed.  */
+extern void interps_notify_target_resumed (ptid_t ptid);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

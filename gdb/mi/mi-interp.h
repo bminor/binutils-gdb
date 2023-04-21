@@ -58,6 +58,7 @@ public:
   void on_inferior_removed (inferior *inf) override;
   void on_record_changed (inferior *inf, int started, const char *method,
 			  const char *format) override;
+  void on_target_resumed (ptid_t ptid) override;
 
   /* MI's output channels */
   mi_console_file *out;

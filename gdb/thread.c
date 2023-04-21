@@ -845,13 +845,22 @@ set_running_thread (struct thread_info *tp, bool running)
   return started;
 }
 
+/* Notify interpreters and observers that the target was resumed.  */
+
+static void
+notify_target_resumed (ptid_t ptid)
+{
+  interps_notify_target_resumed (ptid);
+  gdb::observers::target_resumed.notify (ptid);
+}
+
 /* See gdbthread.h.  */
 
 void
 thread_info::set_running (bool running)
 {
   if (set_running_thread (this, running))
-    gdb::observers::target_resumed.notify (this->ptid);
+    notify_target_resumed (this->ptid);
 }
 
 void
@@ -868,7 +877,7 @@ set_running (process_stratum_target *targ, ptid_t ptid, bool running)
       any_started = true;
 
   if (any_started)
-    gdb::observers::target_resumed.notify (ptid);
+    notify_target_resumed (ptid);
 }
 
 void
@@ -916,7 +925,7 @@ finish_thread_state (process_stratum_target *targ, ptid_t ptid)
       any_started = true;
 
   if (any_started)
-    gdb::observers::target_resumed.notify (ptid);
+    notify_target_resumed (ptid);
 }
 
 /* See gdbthread.h.  */
