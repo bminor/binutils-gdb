@@ -1200,6 +1200,15 @@ set_batch_flag_and_restore_page_info::~set_batch_flag_and_restore_page_info ()
   set_width ();
 }
 
+/* An approximation of SQRT(INT_MAX) that is:
+   - cheap to calculate,
+   - guaranteed to be smaller than SQRT(INT_MAX), such that
+     sqrt_int_max * sqrt_int_max doesn't overflow, and
+   - "close enough" to SQRT(INT_MAX), for instance for INT_MAX == 2147483647,
+     SQRT(INT_MAX) is ~46341 and sqrt_int_max == 32767.  */
+
+static const int sqrt_int_max = INT_MAX >> (sizeof (int) * 8 / 2);
+
 /* Set the screen size based on LINES_PER_PAGE and CHARS_PER_LINE.  */
 
 static void
@@ -1218,8 +1227,6 @@ set_screen_size (void)
      Cap "infinity" to approximately sqrt(INT_MAX) so that we don't
      overflow in rl_set_screen_size, which multiplies rows and columns
      to compute the number of characters on the screen.  */
-
-  const int sqrt_int_max = INT_MAX >> (sizeof (int) * 8 / 2);
 
   if (rows <= 0 || rows > sqrt_int_max)
     {
@@ -1271,6 +1278,62 @@ set_screen_width_and_height (int width, int height)
 
   set_screen_size ();
   set_width ();
+}
+
+/* Implement "maint info screen".  */
+
+static void
+maintenance_info_screen (const char *args, int from_tty)
+{
+  int rows, cols;
+  rl_get_screen_size (&rows, &cols);
+
+  gdb_printf (gdb_stdout,
+	      _("Number of characters gdb thinks "
+		"are in a line is %u%s.\n"),
+	      chars_per_line,
+	      chars_per_line == UINT_MAX ? " (unlimited)" : "");
+
+  gdb_printf (gdb_stdout,
+	      _("Number of characters readline reports "
+		"are in a line is %d%s.\n"),
+	      cols,
+	      (cols == sqrt_int_max
+	       ? " (unlimited)"
+	       : (cols == sqrt_int_max - 1
+		  ? " (unlimited - 1)"
+		  : "")));
+
+  gdb_printf (gdb_stdout,
+	     _("Number of characters curses thinks "
+	       "are in a line is %d.\n"),
+	     COLS);
+
+  gdb_printf (gdb_stdout,
+	      _("Number of characters environment thinks "
+		"are in a line is %s (COLUMNS).\n"),
+	      getenv ("COLUMNS"));
+
+  gdb_printf (gdb_stdout,
+	      _("Number of lines gdb thinks are in a page is %u%s.\n"),
+	      lines_per_page,
+	      lines_per_page == UINT_MAX ? " (unlimited)" : "");
+
+  gdb_printf (gdb_stdout,
+	      _("Number of lines readline reports "
+		"are in a page is %d%s.\n"),
+	      rows,
+	      rows == sqrt_int_max ? " (unlimited)" : "");
+
+  gdb_printf (gdb_stdout,
+	     _("Number of lines curses thinks "
+	       "are in a page is %d.\n"),
+	      LINES);
+
+  gdb_printf (gdb_stdout,
+	      _("Number of lines environment thinks "
+		"are in a page is %s (LINES).\n"),
+	      getenv ("LINES"));
 }
 
 void
@@ -3647,6 +3710,9 @@ When set, debugging messages will be marked with seconds and microseconds."),
   add_internal_problem_command (&internal_error_problem);
   add_internal_problem_command (&internal_warning_problem);
   add_internal_problem_command (&demangler_warning_problem);
+
+  add_cmd ("screen", class_maintenance, &maintenance_info_screen,
+	 _("Show screen characteristics."), &maintenanceinfolist);
 
 #if GDB_SELF_TEST
   selftests::register_test ("gdb_realpath", gdb_realpath_tests);

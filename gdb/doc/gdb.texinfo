@@ -41363,6 +41363,13 @@ This option is @samp{on} by default for supported architectures.
 This option is useful for debugging @value{GDBN}'s use of the Pygments
 library when @value{GDBN} is built for an architecture that supports
 styling with the builtin disassembler
+
+@kindex maint info screen
+@cindex show screen characteristics
+@item maint info screen
+Print various characteristics of the screen, such as various notions
+of width and height.
+
 @kindex maint space
 @cindex memory used by commands
 @item maint space @var{value}
