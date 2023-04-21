@@ -2007,4 +2007,9 @@ extern void describe_other_breakpoints (struct gdbarch *,
 
 extern void enable_disable_bp_location (bp_location *loc, bool enable);
 
+
+/* Notify interpreters and observers that breakpoint B was modified.  */
+
+extern void notify_breakpoint_modified (breakpoint *b);
+
 #endif /* !defined (BREAKPOINT_H) */

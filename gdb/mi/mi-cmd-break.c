@@ -470,7 +470,7 @@ mi_cmd_break_passcount (const char *command, const char *const *argv,
   if (t)
     {
       t->pass_count = p;
-      gdb::observers::breakpoint_modified.notify (t);
+      notify_breakpoint_modified (t);
     }
   else
     {

@@ -1640,7 +1640,7 @@ start_tracing (const char *notes)
 	  loc.probe.prob->set_semaphore (loc.probe.objfile, loc.gdbarch);
 
       if (bp_location_downloaded)
-	gdb::observers::breakpoint_modified.notify (&b);
+	notify_breakpoint_modified (&b);
     }
 
   /* Send down all the trace state variables too.  */
@@ -3134,7 +3134,7 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
   /* Notify 'breakpoint-modified' observer that at least one of B's
      locations was changed.  */
   for (breakpoint *b : modified_tp)
-    gdb::observers::breakpoint_modified.notify (b);
+    notify_breakpoint_modified (b);
 
   free_uploaded_tps (uploaded_tps);
 }
