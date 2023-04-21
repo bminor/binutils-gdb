@@ -454,6 +454,14 @@ interps_notify_new_thread (thread_info *t)
   interps_notify (&interp::on_new_thread, t);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_thread_exited (thread_info *t, int silent)
+{
+  interps_notify (&interp::on_thread_exited, t, silent);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

@@ -191,6 +191,15 @@ clear_thread_inferior_resources (struct thread_info *tp)
   clear_inline_frame_state (tp);
 }
 
+/* Notify interpreters and observers that thread T has exited.  */
+
+static void
+notify_thread_exited (thread_info *t, int silent)
+{
+  interps_notify_thread_exited (t, silent);
+  gdb::observers::thread_exit.notify (t, silent);
+}
+
 /* See gdbthread.h.  */
 
 void
@@ -213,7 +222,7 @@ set_thread_exited (thread_info *tp, bool silent)
       if (proc_target != nullptr)
 	proc_target->maybe_remove_resumed_with_pending_wait_status (tp);
 
-      gdb::observers::thread_exit.notify (tp, silent);
+      notify_thread_exited (tp, silent);
 
       /* Tag it as exited.  */
       tp->state = THREAD_EXITED;
