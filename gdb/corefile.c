@@ -33,6 +33,7 @@
 #include "observable.h"
 #include "cli/cli-utils.h"
 #include "gdbarch.h"
+#include "interps.h"
 
 /* You can have any number of hooks for `exec_file_command' command to
    call.  If there's only one hook, it is set in exec_file_display
@@ -353,6 +354,16 @@ write_memory (CORE_ADDR memaddr,
     memory_error (TARGET_XFER_E_IO, memaddr);
 }
 
+/* Notify interpreters and observers that INF's memory was changed.  */
+
+static void
+notify_memory_changed (inferior *inf, CORE_ADDR addr, ssize_t len,
+		       const bfd_byte *data)
+{
+  interps_notify_memory_changed (inf, addr, len, data);
+  gdb::observers::memory_changed.notify (inf, addr, len, data);
+}
+
 /* Same as write_memory, but notify 'memory_changed' observers.  */
 
 void
@@ -360,7 +371,7 @@ write_memory_with_notification (CORE_ADDR memaddr, const bfd_byte *myaddr,
 				ssize_t len)
 {
   write_memory (memaddr, myaddr, len);
-  gdb::observers::memory_changed.notify (current_inferior (), memaddr, len, myaddr);
+  notify_memory_changed (current_inferior (), memaddr, len, myaddr);
 }
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned

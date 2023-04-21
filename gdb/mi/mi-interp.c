@@ -60,9 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
-			       ssize_t len, const bfd_byte *myaddr);
-
 /* Display the MI prompt.  */
 
 static void
@@ -813,50 +810,39 @@ mi_interp::on_param_changed (const char *param, const char *value)
   gdb_flush (this->event_channel);
 }
 
-/* Emit notification about the target memory change.  */
-
-static void
-mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
-		   ssize_t len, const bfd_byte *myaddr)
+void
+mi_interp::on_memory_changed (inferior *inferior, CORE_ADDR memaddr,
+			      ssize_t len, const bfd_byte *myaddr)
 {
   if (mi_suppress_notification.memory)
     return;
 
-  SWITCH_THRU_ALL_UIS ()
+
+  ui_out *mi_uiout = this->interp_ui_out ();
+
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
+
+  gdb_printf (this->event_channel, "memory-changed");
+
+  ui_out_redirect_pop redir (mi_uiout, this->event_channel);
+
+  mi_uiout->field_fmt ("thread-group", "i%d", inferior->num);
+  mi_uiout->field_core_addr ("addr", target_gdbarch (), memaddr);
+  mi_uiout->field_string ("len", hex_string (len));
+
+  /* Append 'type=code' into notification if MEMADDR falls in the range of
+     sections contain code.  */
+  obj_section *sec = find_pc_section (memaddr);
+  if (sec != nullptr && sec->objfile != nullptr)
     {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
-      struct ui_out *mi_uiout;
-      struct obj_section *sec;
+      flagword flags = bfd_section_flags (sec->the_bfd_section);
 
-      if (mi == NULL)
-	continue;
-
-      mi_uiout = top_level_interpreter ()->interp_ui_out ();
-
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      gdb_printf (mi->event_channel, "memory-changed");
-
-      ui_out_redirect_pop redir (mi_uiout, mi->event_channel);
-
-      mi_uiout->field_fmt ("thread-group", "i%d", inferior->num);
-      mi_uiout->field_core_addr ("addr", target_gdbarch (), memaddr);
-      mi_uiout->field_string ("len", hex_string (len));
-
-      /* Append 'type=code' into notification if MEMADDR falls in the range of
-	 sections contain code.  */
-      sec = find_pc_section (memaddr);
-      if (sec != NULL && sec->objfile != NULL)
-	{
-	  flagword flags = bfd_section_flags (sec->the_bfd_section);
-
-	  if (flags & SEC_CODE)
-	    mi_uiout->field_string ("type", "code");
-	}
-
-      gdb_flush (mi->event_channel);
+      if (flags & SEC_CODE)
+	mi_uiout->field_string ("type", "code");
     }
+
+  gdb_flush (this->event_channel);
 }
 
 void
@@ -960,6 +946,4 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI3, mi_interp_factory);
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
-
-  gdb::observers::memory_changed.attach (mi_memory_changed, "mi-interp");
 }

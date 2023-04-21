@@ -178,6 +178,10 @@ public:
   /* Notify the interpreter that parameter PARAM changed to VALUE.  */
   virtual void on_param_changed (const char *param, const char *value) {}
 
+  /* Notify the interpreter that inferior INF's memory was changed.  */
+  virtual void on_memory_changed (inferior *inf, CORE_ADDR addr, ssize_t len,
+				  const bfd_byte *data) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -358,6 +362,10 @@ extern void interps_notify_breakpoint_modified (breakpoint *b);
 
 /* Notify all interpreters that parameter PARAM changed to VALUE.  */
 extern void interps_notify_param_changed (const char *param, const char *value);
+
+/* Notify all interpreters that inferior INF's memory was changed.  */
+extern void interps_notify_memory_changed (inferior *inf, CORE_ADDR addr,
+					   ssize_t len, const bfd_byte *data);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

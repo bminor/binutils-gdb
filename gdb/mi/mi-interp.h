@@ -70,6 +70,8 @@ public:
   void on_breakpoint_deleted (breakpoint *b) override;
   void on_breakpoint_modified (breakpoint *b) override;
   void on_param_changed (const char *param, const char *value) override;
+  void on_memory_changed (inferior *inf, CORE_ADDR addr, ssize_t len,
+			  const bfd_byte *data) override;
 
   /* MI's output channels */
   mi_console_file *out;

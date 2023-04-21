@@ -591,6 +591,15 @@ interps_notify_param_changed (const char *param, const char *value)
   interps_notify (&interp::on_param_changed, param, value);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_memory_changed (inferior *inf, CORE_ADDR addr, ssize_t len,
+			       const bfd_byte *data)
+{
+  interps_notify (&interp::on_memory_changed, inf, addr, len, data);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void
