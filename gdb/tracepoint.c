@@ -289,7 +289,7 @@ delete_trace_state_variable (const char *name)
   for (auto it = tvariables.begin (); it != tvariables.end (); it++)
     if (it->name == name)
       {
-	gdb::observers::tsv_deleted.notify (&*it);
+	interps_notify_tsv_deleted (&*it);
 	tvariables.erase (it);
 	return;
       }
@@ -388,7 +388,7 @@ delete_trace_variable_command (const char *args, int from_tty)
       if (query (_("Delete all trace state variables? ")))
 	tvariables.clear ();
       dont_repeat ();
-      gdb::observers::tsv_deleted.notify (NULL);
+      interps_notify_tsv_deleted (nullptr);
       return;
     }
 

@@ -543,6 +543,14 @@ interps_notify_tsv_created (const trace_state_variable *tsv)
   interps_notify (&interp::on_tsv_created, tsv);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_tsv_deleted (const trace_state_variable *tsv)
+{
+  interps_notify (&interp::on_tsv_deleted, tsv);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void
