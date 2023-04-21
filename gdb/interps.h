@@ -146,6 +146,9 @@ public:
   /* Notify the interpreter that solib SO has been loaded.  */
   virtual void on_solib_loaded (so_list *so) {}
 
+  /* Notify the interpreter that solib SO has been unloaded.  */
+  virtual void on_solib_unloaded (so_list *so) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -293,6 +296,9 @@ extern void interps_notify_target_resumed (ptid_t ptid);
 
 /* Notify all interpreters that solib SO has been loaded.  */
 extern void interps_notify_solib_loaded (so_list *so);
+
+/* Notify all interpreters that solib SO has been unloaded.  */
+extern void interps_notify_solib_unloaded (so_list *so);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

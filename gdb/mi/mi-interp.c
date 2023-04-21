@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_solib_unloaded (struct so_list *solib);
 static void mi_about_to_proceed (void);
 static void mi_traceframe_changed (int tfnum, int tpnum);
 static void mi_tsv_created (const struct trace_state_variable *tsv);
@@ -861,36 +860,25 @@ mi_interp::on_solib_loaded (so_list *solib)
   gdb_flush (this->event_channel);
 }
 
-static void
-mi_solib_unloaded (struct so_list *solib)
+void
+mi_interp::on_solib_unloaded (so_list *solib)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
-      struct ui_out *uiout;
+  ui_out *uiout = this->interp_ui_out ();
 
-      if (mi == NULL)
-	continue;
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      uiout = top_level_interpreter ()->interp_ui_out ();
+  gdb_printf (this->event_channel, "library-unloaded");
 
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
+  ui_out_redirect_pop redir (uiout, this->event_channel);
 
-      gdb_printf (mi->event_channel, "library-unloaded");
+  uiout->field_string ("id", solib->so_original_name);
+  uiout->field_string ("target-name", solib->so_original_name);
+  uiout->field_string ("host-name", solib->so_name);
+  if (!gdbarch_has_global_solist (target_gdbarch ()))
+    uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 
-      ui_out_redirect_pop redir (uiout, mi->event_channel);
-
-      uiout->field_string ("id", solib->so_original_name);
-      uiout->field_string ("target-name", solib->so_original_name);
-      uiout->field_string ("host-name", solib->so_name);
-      if (!gdbarch_has_global_solist (target_gdbarch ()))
-	{
-	  uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
-	}
-
-      gdb_flush (mi->event_channel);
-    }
+  gdb_flush (this->event_channel);
 }
 
 /* Emit notification about the command parameter change.  */
@@ -1073,7 +1061,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::solib_unloaded.attach (mi_solib_unloaded, "mi-interp");
   gdb::observers::about_to_proceed.attach (mi_about_to_proceed, "mi-interp");
   gdb::observers::traceframe_changed.attach (mi_traceframe_changed,
 					     "mi-interp");

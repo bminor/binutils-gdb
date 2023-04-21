@@ -60,6 +60,7 @@ public:
 			  const char *format) override;
   void on_target_resumed (ptid_t ptid) override;
   void on_solib_loaded (so_list *so) override;
+  void on_solib_unloaded (so_list *so) override;
 
   /* MI's output channels */
   mi_console_file *out;

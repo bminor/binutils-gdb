@@ -519,6 +519,14 @@ interps_notify_solib_loaded (so_list *so)
   interps_notify (&interp::on_solib_loaded, so);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_solib_unloaded (so_list *so)
+{
+  interps_notify (&interp::on_solib_unloaded, so);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void
