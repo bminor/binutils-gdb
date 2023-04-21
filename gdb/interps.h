@@ -175,6 +175,9 @@ public:
   /* Notify the interpreter that breakpoint B was modified.  */
   virtual void on_breakpoint_modified (breakpoint *b) {}
 
+  /* Notify the interpreter that parameter PARAM changed to VALUE.  */
+  virtual void on_param_changed (const char *param, const char *value) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -352,6 +355,9 @@ extern void interps_notify_breakpoint_deleted (breakpoint *b);
 
 /* Notify all interpreters that breakpoint B was modified.  */
 extern void interps_notify_breakpoint_modified (breakpoint *b);
+
+/* Notify all interpreters that parameter PARAM changed to VALUE.  */
+extern void interps_notify_param_changed (const char *param, const char *value);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

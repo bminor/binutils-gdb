@@ -69,6 +69,7 @@ public:
   void on_breakpoint_created (breakpoint *b) override;
   void on_breakpoint_deleted (breakpoint *b) override;
   void on_breakpoint_modified (breakpoint *b) override;
+  void on_param_changed (const char *param, const char *value) override;
 
   /* MI's output channels */
   mi_console_file *out;

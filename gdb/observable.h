@@ -183,13 +183,6 @@ extern observable<const char */* current_prompt */> before_prompt;
    change.  */
 extern observable<> gdb_datadir_changed;
 
-/* The parameter of some 'set' commands in console are changed.
-   This method is called after a command 'set param value'.  PARAM
-   is the parameter of 'set' command, and VALUE is the value of
-   changed parameter.  */
-extern observable<const char */* param */, const char */* value */>
-    command_param_changed;
-
 /* An inferior function at ADDRESS is about to be called in thread
    THREAD.  */
 extern observable<ptid_t /* thread */, CORE_ADDR /* address */>

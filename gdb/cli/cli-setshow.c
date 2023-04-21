@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include "arch-utils.h"
 #include "observable.h"
+#include "interps.h"
 
 #include "ui-out.h"
 
@@ -521,18 +522,18 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	case var_string_noescape:
 	case var_filename:
 	case var_optional_filename:
-	  gdb::observers::command_param_changed.notify
+	  interps_notify_param_changed
 	    (name, c->var->get<std::string> ().c_str ());
 	  break;
 	case var_enum:
-	  gdb::observers::command_param_changed.notify
+	  interps_notify_param_changed
 	    (name, c->var->get<const char *> ());
 	  break;
 	case var_boolean:
 	  {
 	    const char *opt = c->var->get<bool> () ? "on" : "off";
 
-	    gdb::observers::command_param_changed.notify (name, opt);
+	    interps_notify_param_changed (name, opt);
 	  }
 	  break;
 	case var_auto_boolean:
@@ -540,7 +541,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	    const char *s
 	      = auto_boolean_enums[c->var->get<enum auto_boolean> ()];
 
-	    gdb::observers::command_param_changed.notify (name, s);
+	    interps_notify_param_changed (name, s);
 	  }
 	  break;
 	case var_uinteger:
@@ -548,7 +549,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	    char s[64];
 
 	    xsnprintf (s, sizeof s, "%u", c->var->get<unsigned int> ());
-	    gdb::observers::command_param_changed.notify (name, s);
+	    interps_notify_param_changed (name, s);
 	  }
 	  break;
 	case var_integer:
@@ -557,7 +558,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	    char s[64];
 
 	    xsnprintf (s, sizeof s, "%d", c->var->get<int> ());
-	    gdb::observers::command_param_changed.notify (name, s);
+	    interps_notify_param_changed (name, s);
 	  }
 	  break;
 	}

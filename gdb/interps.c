@@ -583,6 +583,14 @@ interps_notify_breakpoint_modified (breakpoint *b)
   interps_notify (&interp::on_breakpoint_modified, b);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_param_changed (const char *param, const char *value)
+{
+  interps_notify (&interp::on_param_changed, param, value);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

@@ -51,6 +51,7 @@
 #include "build-id.h"
 #include "debuginfod-support.h"
 #include "gdbsupport/buildargv.h"
+#include "interps.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -454,8 +455,8 @@ directory_command (const char *dirname, int from_tty)
     }
   if (value_changed)
     {
-      gdb::observers::command_param_changed.notify ("directories",
-						    source_path.c_str ());
+      interps_notify_param_changed ("directories", source_path.c_str ());
+
       if (from_tty)
 	show_directories_1 (gdb_stdout, (char *) 0, from_tty);
     }

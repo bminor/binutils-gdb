@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_command_param_changed (const char *param, const char *value);
 static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
 			       ssize_t len, const bfd_byte *myaddr);
 
@@ -793,36 +792,25 @@ mi_interp::on_solib_unloaded (so_list *solib)
   gdb_flush (this->event_channel);
 }
 
-/* Emit notification about the command parameter change.  */
-
-static void
-mi_command_param_changed (const char *param, const char *value)
+void
+mi_interp::on_param_changed (const char *param, const char *value)
 {
   if (mi_suppress_notification.cmd_param_changed)
     return;
 
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
-      struct ui_out *mi_uiout;
+  ui_out *mi_uiout = this->interp_ui_out ();
 
-      if (mi == NULL)
-	continue;
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      mi_uiout = top_level_interpreter ()->interp_ui_out ();
+  gdb_printf (this->event_channel, "cmd-param-changed");
 
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
+  ui_out_redirect_pop redir (mi_uiout, this->event_channel);
 
-      gdb_printf (mi->event_channel, "cmd-param-changed");
+  mi_uiout->field_string ("param", param);
+  mi_uiout->field_string ("value", value);
 
-      ui_out_redirect_pop redir (mi_uiout, mi->event_channel);
-
-      mi_uiout->field_string ("param", param);
-      mi_uiout->field_string ("value", value);
-
-      gdb_flush (mi->event_channel);
-    }
+  gdb_flush (this->event_channel);
 }
 
 /* Emit notification about the target memory change.  */
@@ -973,7 +961,5 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::command_param_changed.attach (mi_command_param_changed,
-						"mi-interp");
   gdb::observers::memory_changed.attach (mi_memory_changed, "mi-interp");
 }
