@@ -116,6 +116,11 @@ static void MOVSXD_Fixup (instr_info *, int, int);
 static void DistinctDest_Fixup (instr_info *, int, int);
 static void PREFETCHI_Fixup (instr_info *, int, int);
 
+static void ATTRIBUTE_PRINTF_3 i386_dis_printf (const instr_info *,
+						enum disassembler_style,
+						const char *, ...);
+static const char *prefix_name (const instr_info *, int, int);
+
 /* This character is used to encode style information within the output
    buffers.  See oappend_insert_style for more details.  */
 #define STYLE_MARKER_CHAR '\002'
@@ -321,6 +326,33 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
     }
   else
     priv->max_fetched = addr;
+  return 1;
+}
+
+static int
+fetch_error (const instr_info *ins)
+{
+  /* Getting here means we tried for data but didn't get it.  That
+     means we have an incomplete instruction of some sort.  Just
+     print the first byte as a prefix or a .byte pseudo-op.  */
+  const struct dis_private *priv = ins->info->private_data;
+  const char *name = NULL;
+
+  if (ins->codep <= priv->the_buffer)
+    return -1;
+
+  if (ins->prefixes || ins->fwait_prefix >= 0 || (ins->rex & REX_OPCODE))
+    name = prefix_name (ins, priv->the_buffer[0], priv->orig_sizeflag);
+  if (name != NULL)
+    i386_dis_printf (ins, dis_style_mnemonic, "%s", name);
+  else
+    {
+      /* Just print the first byte as a .byte instruction.  */
+      i386_dis_printf (ins, dis_style_assembler_directive, ".byte ");
+      i386_dis_printf (ins, dis_style_immediate, "%#x",
+		       (unsigned int) priv->the_buffer[0]);
+    }
+
   return 1;
 }
 
@@ -9007,7 +9039,7 @@ ckprefix (instr_info *ins)
    prefix byte.  */
 
 static const char *
-prefix_name (instr_info *ins, int pref, int sizeflag)
+prefix_name (const instr_info *ins, int pref, int sizeflag)
 {
   static const char *rexes [16] =
     {
@@ -9608,7 +9640,7 @@ oappend_register (instr_info *ins, const char *s)
    used in the next fprintf_styled_func call.  */
 
 static void ATTRIBUTE_PRINTF_3
-i386_dis_printf (instr_info *ins, enum disassembler_style style,
+i386_dis_printf (const instr_info *ins, enum disassembler_style style,
 		 const char *fmt, ...)
 {
   va_list ap;
@@ -9836,32 +9868,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
     }
 
   if (OPCODES_SIGSETJMP (priv.bailout) != 0)
-    {
-      /* Getting here means we tried for data but didn't get it.  That
-	 means we have an incomplete instruction of some sort.  Just
-	 print the first byte as a prefix or a .byte pseudo-op.  */
-      if (ins.codep > priv.the_buffer)
-	{
-	  const char *name = NULL;
-
-	  if (ins.prefixes || ins.fwait_prefix >= 0 || (ins.rex & REX_OPCODE))
-	    name = prefix_name (&ins, priv.the_buffer[0], priv.orig_sizeflag);
-	  if (name != NULL)
-	    i386_dis_printf (&ins, dis_style_mnemonic, "%s", name);
-	  else
-	    {
-	      /* Just print the first byte as a .byte instruction.  */
-	      i386_dis_printf (&ins, dis_style_assembler_directive,
-			       ".byte ");
-	      i386_dis_printf (&ins, dis_style_immediate, "0x%x",
-			       (unsigned int) priv.the_buffer[0]);
-	    }
-
-	  return 1;
-	}
-
-      return -1;
-    }
+    return fetch_error (&ins);
 
   sizeflag = priv.orig_sizeflag;
 
