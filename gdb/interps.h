@@ -30,6 +30,7 @@ struct interp;
 struct ui;
 class completion_tracker;
 struct thread_info;
+struct inferior;
 
 typedef struct interp *(*interp_factory_func) (const char *name);
 
@@ -120,6 +121,9 @@ public:
 
   /* Notify the interpreter that thread T has exited.  */
   virtual void on_thread_exited (thread_info *, int silent) {}
+
+  /* Notify the intepreter that inferior INF was added.  */
+  virtual void on_inferior_added (inferior *inf) {}
 
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
@@ -237,6 +241,9 @@ extern void interps_notify_new_thread (thread_info *t);
 
 /* Notify all interpreters that thread T has exited.  */
 extern void interps_notify_thread_exited (thread_info *t, int silent);
+
+/* Notify all intepreters that inferior INF was added.  */
+extern void interps_notify_inferior_added (inferior *inf);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

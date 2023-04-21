@@ -462,6 +462,14 @@ interps_notify_thread_exited (thread_info *t, int silent)
   interps_notify (&interp::on_thread_exited, t, silent);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_inferior_added (inferior *inf)
+{
+  interps_notify (&interp::on_inferior_added, inf);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

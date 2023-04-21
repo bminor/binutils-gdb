@@ -38,6 +38,7 @@
 #include "progspace-and-thread.h"
 #include "gdbsupport/buildargv.h"
 #include "cli/cli-style.h"
+#include "interps.h"
 
 intrusive_list<inferior> inferior_list;
 static int highest_inferior_num;
@@ -189,6 +190,15 @@ inferior::do_all_continuations ()
     }
 }
 
+/* Notify interpreters and observers that inferior INF was added.  */
+
+static void
+notify_inferior_added (inferior *inf)
+{
+  interps_notify_inferior_added (inf);
+  gdb::observers::inferior_added.notify (inf);
+}
+
 struct inferior *
 add_inferior_silent (int pid)
 {
@@ -196,7 +206,7 @@ add_inferior_silent (int pid)
 
   inferior_list.push_back (*inf);
 
-  gdb::observers::inferior_added.notify (inf);
+  notify_inferior_added (inf);
 
   if (pid != 0)
     inferior_appeared (inf, pid);

@@ -52,6 +52,7 @@ public:
   void on_user_selected_context_changed (user_selected_what selection) override;
   void on_new_thread (thread_info *t) override;
   void on_thread_exited (thread_info *t, int silent) override;
+  void on_inferior_added (inferior *inf) override;
 
   /* MI's output channels */
   mi_console_file *out;

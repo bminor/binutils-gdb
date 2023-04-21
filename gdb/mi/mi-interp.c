@@ -62,7 +62,6 @@ static void mi_remove_notify_hooks (void);
 
 static void mi_record_changed (struct inferior*, int, const char *,
 			       const char *);
-static void mi_inferior_added (struct inferior *inf);
 static void mi_inferior_appeared (struct inferior *inf);
 static void mi_inferior_exit (struct inferior *inf);
 static void mi_inferior_removed (struct inferior *inf);
@@ -137,20 +136,10 @@ mi_interp::init (bool top_level)
 
 	 This is also called when additional MI interpreters are added (using
 	 the new-ui command), when multiple inferiors possibly exist, so we need
-	 to use iteration to report all the inferiors.  mi_inferior_added can't
-	 be used, because it would print the event on all the other MI UIs.  */
+	 to use iteration to report all the inferiors.  */
 
       for (inferior *inf : all_inferiors ())
-	{
-	  target_terminal::scoped_restore_terminal_state term_state;
-	  target_terminal::ours_for_output ();
-
-	  gdb_printf (mi->event_channel,
-		      "thread-group-added,id=\"i%d\"",
-		      inf->num);
-
-	  gdb_flush (mi->event_channel);
-	}
+	mi->on_inferior_added (inf);
   }
 }
 
@@ -370,32 +359,14 @@ mi_record_changed (struct inferior *inferior, int started, const char *method,
     }
 }
 
-static void
-mi_inferior_added (struct inferior *inf)
+void
+mi_interp::on_inferior_added (inferior *inf)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct interp *interp;
-      struct mi_interp *mi;
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      /* We'll be called once for the initial inferior, before the top
-	 level interpreter is set.  */
-      interp = top_level_interpreter ();
-      if (interp == NULL)
-	continue;
-
-      mi = as_mi_interp (interp);
-      if (mi == NULL)
-	continue;
-
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      gdb_printf (mi->event_channel,
-		  "thread-group-added,id=\"i%d\"",
-		  inf->num);
-      gdb_flush (mi->event_channel);
-    }
+  gdb_printf (this->event_channel, "thread-group-added,id=\"i%d\"", inf->num);
+  gdb_flush (this->event_channel);
 }
 
 static void
@@ -1169,7 +1140,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::inferior_added.attach (mi_inferior_added, "mi-interp");
   gdb::observers::inferior_appeared.attach (mi_inferior_appeared, "mi-interp");
   gdb::observers::inferior_exit.attach (mi_inferior_exit, "mi-interp");
   gdb::observers::inferior_removed.attach (mi_inferior_removed, "mi-interp");
