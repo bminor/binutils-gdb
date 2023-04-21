@@ -283,6 +283,15 @@ delete_inferior (struct inferior *inf)
   delete inf;
 }
 
+/* Notify interpreters and observers that inferior INF disappeared.  */
+
+static void
+notify_inferior_disappeared (inferior *inf)
+{
+  interps_notify_inferior_disappeared (inf);
+  gdb::observers::inferior_exit.notify (inf);
+}
+
 /* If SILENT then be quiet -- don't announce a inferior exit, or the
    exit of its threads.  */
 
@@ -291,7 +300,7 @@ exit_inferior_1 (struct inferior *inf, int silent)
 {
   inf->clear_thread_list (silent);
 
-  gdb::observers::inferior_exit.notify (inf);
+  notify_inferior_disappeared (inf);
 
   inf->pid = 0;
   inf->fake_pid_p = false;

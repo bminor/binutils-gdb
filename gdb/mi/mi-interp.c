@@ -62,7 +62,6 @@ static void mi_remove_notify_hooks (void);
 
 static void mi_record_changed (struct inferior*, int, const char *,
 			       const char *);
-static void mi_inferior_exit (struct inferior *inf);
 static void mi_inferior_removed (struct inferior *inf);
 static void mi_on_resume (ptid_t ptid);
 static void mi_solib_loaded (struct so_list *solib);
@@ -379,29 +378,21 @@ mi_interp::on_inferior_appeared (inferior *inf)
   gdb_flush (this->event_channel);
 }
 
-static void
-mi_inferior_exit (struct inferior *inf)
+void
+mi_interp::on_inferior_disappeared (inferior *inf)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      if (mi == NULL)
-	continue;
+  if (inf->has_exit_code)
+    gdb_printf (this->event_channel,
+		"thread-group-exited,id=\"i%d\",exit-code=\"%s\"",
+		inf->num, int_string (inf->exit_code, 8, 0, 0, 1));
+  else
+    gdb_printf (this->event_channel,
+		"thread-group-exited,id=\"i%d\"", inf->num);
 
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      if (inf->has_exit_code)
-	gdb_printf (mi->event_channel,
-		    "thread-group-exited,id=\"i%d\",exit-code=\"%s\"",
-		    inf->num, int_string (inf->exit_code, 8, 0, 0, 1));
-      else
-	gdb_printf (mi->event_channel,
-		    "thread-group-exited,id=\"i%d\"", inf->num);
-
-      gdb_flush (mi->event_channel);
-    }
+  gdb_flush (this->event_channel);
 }
 
 static void
@@ -1130,7 +1121,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::inferior_exit.attach (mi_inferior_exit, "mi-interp");
   gdb::observers::inferior_removed.attach (mi_inferior_removed, "mi-interp");
   gdb::observers::record_changed.attach (mi_record_changed, "mi-interp");
   gdb::observers::target_resumed.attach (mi_on_resume, "mi-interp");
