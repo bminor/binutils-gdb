@@ -80,7 +80,7 @@ struct dwarf2_cie
   const gdb_byte *end;
 
   /* Saved augmentation, in case it's needed later.  */
-  char *augmentation;
+  const char *augmentation;
 
   /* Encoding of addresses.  */
   gdb_byte encoding;
@@ -1746,7 +1746,7 @@ decode_frame_entry_1 (struct gdbarch *gdbarch,
     {
       /* This is a CIE.  */
       struct dwarf2_cie *cie;
-      char *augmentation;
+      const char *augmentation;
       unsigned int cie_version;
 
       /* Check that a CIE was expected.  */
@@ -1780,7 +1780,7 @@ decode_frame_entry_1 (struct gdbarch *gdbarch,
       buf += 1;
 
       /* Interpret the interesting bits of the augmentation.  */
-      cie->augmentation = augmentation = (char *) buf;
+      cie->augmentation = augmentation = (const char *) buf;
       buf += (strlen (augmentation) + 1);
 
       /* Ignore armcc augmentations.  We only use them for quirks,
