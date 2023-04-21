@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
 static void mi_command_param_changed (const char *param, const char *value);
 static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
@@ -606,10 +605,8 @@ mi_interp::on_breakpoint_created (breakpoint *b)
   gdb_flush (this->event_channel);
 }
 
-/* Emit notification about deleted breakpoint.  */
-
-static void
-mi_breakpoint_deleted (struct breakpoint *b)
+void
+mi_interp::on_breakpoint_deleted (breakpoint *b)
 {
   if (mi_suppress_notification.breakpoint)
     return;
@@ -617,21 +614,11 @@ mi_breakpoint_deleted (struct breakpoint *b)
   if (b->number <= 0)
     return;
 
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      if (mi == NULL)
-	continue;
-
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      gdb_printf (mi->event_channel, "breakpoint-deleted,id=\"%d\"",
-		  b->number);
-
-      gdb_flush (mi->event_channel);
-    }
+  gdb_printf (this->event_channel, "breakpoint-deleted,id=\"%d\"", b->number);
+  gdb_flush (this->event_channel);
 }
 
 /* Emit notification about modified breakpoint.  */
@@ -998,8 +985,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::breakpoint_deleted.attach (mi_breakpoint_deleted,
-					     "mi-interp");
   gdb::observers::breakpoint_modified.attach (mi_breakpoint_modified,
 					      "mi-interp");
   gdb::observers::command_param_changed.attach (mi_command_param_changed,

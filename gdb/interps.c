@@ -567,6 +567,14 @@ interps_notify_breakpoint_created (breakpoint *b)
   interps_notify (&interp::on_breakpoint_created, b);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_breakpoint_deleted (breakpoint *b)
+{
+  interps_notify (&interp::on_breakpoint_deleted, b);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

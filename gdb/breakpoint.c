@@ -12316,6 +12316,15 @@ strace_marker_p (struct breakpoint *b)
   return b->type == bp_static_marker_tracepoint;
 }
 
+/* Notify interpreters and observers that breakpoint B was deleted.  */
+
+static void
+notify_breakpoint_deleted (breakpoint *b)
+{
+  interps_notify_breakpoint_deleted (b);
+  gdb::observers::breakpoint_deleted.notify (b);
+}
+
 /* Delete a breakpoint and clean up all traces of it in the data
    structures.  */
 
@@ -12371,7 +12380,7 @@ delete_breakpoint (struct breakpoint *bpt)
      a problem in that process, we'll be asked to delete the half-created
      watchpoint.  In that case, don't announce the deletion.  */
   if (bpt->number)
-    gdb::observers::breakpoint_deleted.notify (bpt);
+    notify_breakpoint_deleted (bpt);
 
   breakpoint_chain.erase (breakpoint_chain.iterator_to (*bpt));
 

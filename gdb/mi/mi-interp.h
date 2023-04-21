@@ -67,6 +67,7 @@ public:
   void on_tsv_deleted (const trace_state_variable *tsv) override;
   void on_tsv_modified (const trace_state_variable *tsv) override;
   void on_breakpoint_created (breakpoint *b) override;
+  void on_breakpoint_deleted (breakpoint *b) override;
 
   /* MI's output channels */
   mi_console_file *out;

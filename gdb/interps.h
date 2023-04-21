@@ -169,6 +169,9 @@ public:
   /* Notify the interpreter that breakpoint B was created.  */
   virtual void on_breakpoint_created (breakpoint *b) {}
 
+  /* Notify the interpreter that breakpoint B was deleted.  */
+  virtual void on_breakpoint_deleted (breakpoint *b) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -340,6 +343,9 @@ extern void interps_notify_tsv_modified (const trace_state_variable *tsv);
 
 /* Notify all interpreters that breakpoint B was created.  */
 extern void interps_notify_breakpoint_created (breakpoint *b);
+
+/* Notify all interpreters that breakpoint B was deleted.  */
+extern void interps_notify_breakpoint_deleted (breakpoint *b);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"
