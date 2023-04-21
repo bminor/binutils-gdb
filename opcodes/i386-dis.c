@@ -12361,9 +12361,8 @@ OP_G (instr_info *ins, int bytemode, int sizeflag)
   return true;
 }
 
-#ifdef BFD64
 static bool
-get64 (instr_info *ins, bfd_vma *res)
+get64 (instr_info *ins, uint64_t *res)
 {
   unsigned int a;
   unsigned int b;
@@ -12378,17 +12377,9 @@ get64 (instr_info *ins, bfd_vma *res)
   b |= (*ins->codep++ & 0xff) << 8;
   b |= (*ins->codep++ & 0xff) << 16;
   b |= (*ins->codep++ & 0xffu) << 24;
-  *res = a + ((bfd_vma) b << 32);
+  *res = a + ((uint64_t) b << 32);
   return true;
 }
-#else
-static bool
-get64 (instr_info *ins ATTRIBUTE_UNUSED, bfd_vma *res ATTRIBUTE_UNUSED)
-{
-  abort ();
-  return false;
-}
-#endif
 
 static bool
 get32 (instr_info *ins, bfd_signed_vma *res)
@@ -12603,7 +12594,7 @@ OP_I (instr_info *ins, int bytemode, int sizeflag)
 static bool
 OP_I64 (instr_info *ins, int bytemode, int sizeflag)
 {
-  bfd_vma op;
+  uint64_t op;
 
   if (bytemode != v_mode || ins->address_mode != mode_64bit
       || !(ins->rex & REX_W))
@@ -12817,7 +12808,7 @@ OP_OFF (instr_info *ins, int bytemode, int sizeflag)
 static bool
 OP_OFF64 (instr_info *ins, int bytemode, int sizeflag)
 {
-  bfd_vma off;
+  uint64_t off;
 
   if (ins->address_mode != mode_64bit
       || (ins->prefixes & PREFIX_ADDR))
