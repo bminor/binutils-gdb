@@ -190,9 +190,6 @@ extern observable<> gdb_datadir_changed;
 extern observable<const char */* param */, const char */* value */>
     command_param_changed;
 
-/* The new trace state variable TSV is created.  */
-extern observable<const struct trace_state_variable */* tsv */> tsv_created;
-
 /* The trace state variable TSV is deleted.  If TSV is NULL, all
    trace state variables are deleted.  */
 extern observable<const struct trace_state_variable */* tsv */> tsv_deleted;

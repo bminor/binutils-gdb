@@ -535,6 +535,14 @@ interps_notify_traceframe_changed (int tfnum, int tpnum)
   interps_notify (&interp::on_traceframe_changed, tfnum, tpnum);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_tsv_created (const trace_state_variable *tsv)
+{
+  interps_notify (&interp::on_tsv_created, tsv);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

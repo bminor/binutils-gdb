@@ -32,6 +32,7 @@ class completion_tracker;
 struct thread_info;
 struct inferior;
 struct so_list;
+struct trace_state_variable;
 
 typedef struct interp *(*interp_factory_func) (const char *name);
 
@@ -155,6 +156,9 @@ public:
 
   /* Notify the interpreter that the selected traceframe changed.  */
   virtual void on_traceframe_changed (int tfnum, int tpnum) {}
+
+  /* Notify the interpreter that trace state variable TSV was created.  */
+  virtual void on_tsv_created (const trace_state_variable *tsv) {}
 
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
@@ -313,6 +317,9 @@ extern void interps_notify_solib_unloaded (so_list *so);
    If TFNUM is negative, it means gdb resumed live debugging.  The number of
    the tracepoint associated with this traceframe is TPNUM.  */
 extern void interps_notify_traceframe_changed (int tfnum, int tpnum);
+
+/* Notify all interpreters that trace state variable TSV was created.  */
+extern void interps_notify_tsv_created (const trace_state_variable *tsv);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

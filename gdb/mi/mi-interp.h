@@ -63,6 +63,7 @@ public:
   void on_solib_unloaded (so_list *so) override;
   void on_about_to_proceed () override;
   void on_traceframe_changed (int tfnum, int tpnum) override;
+  void on_tsv_created (const trace_state_variable *tsv) override;
 
   /* MI's output channels */
   mi_console_file *out;

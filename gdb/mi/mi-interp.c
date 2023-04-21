@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_tsv_created (const struct trace_state_variable *tsv);
 static void mi_tsv_deleted (const struct trace_state_variable *tsv);
 static void mi_tsv_modified (const struct trace_state_variable *tsv);
 static void mi_breakpoint_created (struct breakpoint *b);
@@ -513,27 +512,17 @@ mi_interp::on_traceframe_changed (int tfnum, int tpnum)
   gdb_flush (this->event_channel);
 }
 
-/* Emit notification on creating a trace state variable.  */
-
-static void
-mi_tsv_created (const struct trace_state_variable *tsv)
+void
+mi_interp::on_tsv_created (const trace_state_variable *tsv)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      if (mi == NULL)
-	continue;
+  gdb_printf (this->event_channel, "tsv-created,"
+	      "name=\"%s\",initial=\"%s\"",
+	      tsv->name.c_str (), plongest (tsv->initial_value));
 
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      gdb_printf (mi->event_channel, "tsv-created,"
-		  "name=\"%s\",initial=\"%s\"",
-		  tsv->name.c_str (), plongest (tsv->initial_value));
-
-      gdb_flush (mi->event_channel);
-    }
+  gdb_flush (this->event_channel);
 }
 
 /* Emit notification on deleting a trace state variable.  */
@@ -1044,7 +1033,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::tsv_created.attach (mi_tsv_created, "mi-interp");
   gdb::observers::tsv_deleted.attach (mi_tsv_deleted, "mi-interp");
   gdb::observers::tsv_modified.attach (mi_tsv_modified, "mi-interp");
   gdb::observers::breakpoint_created.attach (mi_breakpoint_created,

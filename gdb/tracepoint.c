@@ -373,7 +373,7 @@ trace_variable_command (const char *args, int from_tty)
   tsv = create_trace_state_variable (name.c_str ());
   tsv->initial_value = initval;
 
-  gdb::observers::tsv_created.notify (tsv);
+  interps_notify_tsv_created (tsv);
 
   gdb_printf (_("Trace state variable $%s "
 		"created, with initial value %s.\n"),
@@ -3180,7 +3180,7 @@ create_tsv_from_upload (struct uploaded_tsv *utsv)
   tsv->initial_value = utsv->initial_value;
   tsv->builtin = utsv->builtin;
 
-  gdb::observers::tsv_created.notify (tsv);
+  interps_notify_tsv_created (tsv);
 
   return tsv;
 }
