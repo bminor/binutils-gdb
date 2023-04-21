@@ -760,6 +760,15 @@ solib_used (const struct so_list *const known)
   return false;
 }
 
+/* Notify interpreters and observers that solib SO has been loaded.  */
+
+static void
+notify_solib_loaded (so_list *so)
+{
+  interps_notify_solib_loaded (so);
+  gdb::observers::solib_loaded.notify (so);
+}
+
 /* See solib.h.  */
 
 void
@@ -920,7 +929,7 @@ update_solib_list (int from_tty)
 
 	  /* Notify any observer that the shared object has been
 	     loaded now that we've added it to GDB's tables.  */
-	  gdb::observers::solib_loaded.notify (i);
+	  notify_solib_loaded (i);
 	}
 
       /* If a library was not found, issue an appropriate warning

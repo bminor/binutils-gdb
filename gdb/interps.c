@@ -511,6 +511,14 @@ interps_notify_target_resumed (ptid_t ptid)
   interps_notify (&interp::on_target_resumed, ptid);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_solib_loaded (so_list *so)
+{
+  interps_notify (&interp::on_solib_loaded, so);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

@@ -31,6 +31,7 @@ struct ui;
 class completion_tracker;
 struct thread_info;
 struct inferior;
+struct so_list;
 
 typedef struct interp *(*interp_factory_func) (const char *name);
 
@@ -141,6 +142,9 @@ public:
 
   /* Notify the interpreter that the target was resumed.  */
   virtual void on_target_resumed (ptid_t ptid) {}
+
+  /* Notify the interpreter that solib SO has been loaded.  */
+  virtual void on_solib_loaded (so_list *so) {}
 
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
@@ -286,6 +290,9 @@ extern void interps_notify_record_changed (inferior *inf, int started,
 
 /* Notify all interpreters that the target was resumed.  */
 extern void interps_notify_target_resumed (ptid_t ptid);
+
+/* Notify all interpreters that solib SO has been loaded.  */
+extern void interps_notify_solib_loaded (so_list *so);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"
