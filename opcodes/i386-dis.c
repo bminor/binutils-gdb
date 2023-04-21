@@ -48,10 +48,8 @@ static void oappend_with_style (instr_info *, const char *,
 				enum disassembler_style);
 static void oappend (instr_info *, const char *);
 static void append_seg (instr_info *);
-static bfd_vma get64 (instr_info *);
-static bfd_signed_vma get32 (instr_info *);
-static bfd_signed_vma get32s (instr_info *);
-static int get16 (instr_info *);
+static bool get32s (instr_info *, bfd_signed_vma *);
+static bool get16 (instr_info *, int *);
 static void set_op (instr_info *, bfd_vma, bool);
 
 static bool OP_E (instr_info *, int, int);
@@ -295,41 +293,8 @@ struct instr_info
 #define PREFIX_FWAIT 0x800
 
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
-   to ADDR (exclusive) are valid.  Returns 1 for success, longjmps
+   to ADDR (exclusive) are valid.  Returns true for success, false
    on error.  */
-#define FETCH_DATA(info, addr) \
-  ((addr) <= ((struct dis_private *) (info->private_data))->max_fetched \
-   ? 1 : fetch_data ((info), (addr)))
-
-static int
-fetch_data (struct disassemble_info *info, bfd_byte *addr)
-{
-  int status;
-  struct dis_private *priv = (struct dis_private *) info->private_data;
-  bfd_vma start = priv->insn_start + (priv->max_fetched - priv->the_buffer);
-
-  if (addr <= priv->the_buffer + MAX_MNEM_SIZE)
-    status = (*info->read_memory_func) (start,
-					priv->max_fetched,
-					addr - priv->max_fetched,
-					info);
-  else
-    status = -1;
-  if (status != 0)
-    {
-      /* If we did manage to read at least one byte, then
-	 print_insn_i386 will do something sensible.  Otherwise, print
-	 an error.  We do that here because this is where we know
-	 STATUS.  */
-      if (priv->max_fetched == priv->the_buffer)
-	(*info->memory_error_func) (status, start, info);
-      OPCODES_SIGLONGJMP (priv->bailout, 1);
-    }
-  else
-    priv->max_fetched = addr;
-  return 1;
-}
-
 static bool
 fetch_code (struct disassemble_info *info, bfd_byte *until)
 {
@@ -11444,15 +11409,14 @@ oappend_immediate (instr_info *ins, bfd_vma imm)
 /* Put DISP in BUF as signed hex number.  */
 
 static void
-print_displacement (instr_info *ins, bfd_vma disp)
+print_displacement (instr_info *ins, bfd_signed_vma val)
 {
-  bfd_signed_vma val = disp;
   char tmp[30];
 
   if (val < 0)
     {
       oappend_char_with_style (ins, '-', dis_style_address_offset);
-      val = -disp;
+      val = (bfd_vma) 0 - val;
 
       /* Check for possible overflow.  */
       if (val < 0)
@@ -11862,7 +11826,6 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
 static bool
 OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 {
-  bfd_vma disp = 0;
   int add = (ins->rex & REX_B) ? 8 : 0;
   int riprel = 0;
   int shift;
@@ -11971,6 +11934,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
   if ((sizeflag & AFLAG) || ins->address_mode == mode_64bit)
     {
       /* 32/64 bit address mode */
+      bfd_signed_vma disp = 0;
       int havedisp;
       int havebase;
       int needindex;
@@ -12062,7 +12026,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	      havebase = 0;
 	      if (ins->address_mode == mode_64bit && !ins->has_sib)
 		riprel = 1;
-	      disp = get32s (ins);
+	      if (!get32s (ins, &disp))
+		return false;
 	      if (riprel && bytemode == v_bndmk_mode)
 		{
 		  oappend (ins, "(bad)");
@@ -12080,7 +12045,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    disp <<= shift;
 	  break;
 	case 2:
-	  disp = get32s (ins);
+	  if (!get32s (ins, &disp))
+	    return false;
 	  break;
 	}
 
@@ -12186,14 +12152,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	  if (ins->intel_syntax
 	      && (disp || ins->modrm.mod != 0 || base == 5))
 	    {
-	      if (!havedisp || (bfd_signed_vma) disp >= 0)
+	      if (!havedisp || disp >= 0)
 		  oappend_char (ins, '+');
-	      else if (ins->modrm.mod != 1 && disp != -disp)
-		{
-		  oappend_char (ins, '-');
-		  disp = -disp;
-		}
-
 	      if (havedisp)
 		print_displacement (ins, disp);
 	      else
@@ -12241,13 +12201,17 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
   else
     {
       /* 16 bit address mode */
+      int disp = 0;
+
       ins->used_prefixes |= ins->prefixes & PREFIX_ADDR;
       switch (ins->modrm.mod)
 	{
 	case 0:
 	  if (ins->modrm.rm == 6)
 	    {
-	      disp = get16 (ins);
+	case 2:
+	      if (!get16 (ins, &disp))
+		return false;
 	      if ((disp & 0x8000) != 0)
 		disp -= 0x10000;
 	    }
@@ -12260,11 +12224,6 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    disp -= 0x100;
 	  if (ins->vex.evex && shift > 0)
 	    disp <<= shift;
-	  break;
-	case 2:
-	  disp = get16 (ins);
-	  if ((disp & 0x8000) != 0)
-	    disp -= 0x10000;
 	  break;
 	}
 
@@ -12280,14 +12239,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	  if (ins->intel_syntax
 	      && (disp || ins->modrm.mod != 0 || ins->modrm.rm == 6))
 	    {
-	      if ((bfd_signed_vma) disp >= 0)
+	      if (disp >= 0)
 		oappend_char (ins, '+');
-	      else if (ins->modrm.mod != 1)
-		{
-		  oappend_char (ins, '-');
-		  disp = -disp;
-		}
-
 	      print_displacement (ins, disp);
 	    }
 
@@ -12414,14 +12367,14 @@ OP_G (instr_info *ins, int bytemode, int sizeflag)
 }
 
 #ifdef BFD64
-static bfd_vma
-get64 (instr_info *ins)
+static bool
+get64 (instr_info *ins, bfd_vma *res)
 {
-  bfd_vma x;
   unsigned int a;
   unsigned int b;
 
-  FETCH_DATA (ins->info, ins->codep + 8);
+  if (!fetch_code (ins->info, ins->codep + 8))
+    return false;
   a = *ins->codep++ & 0xff;
   a |= (*ins->codep++ & 0xff) << 8;
   a |= (*ins->codep++ & 0xff) << 16;
@@ -12430,56 +12383,49 @@ get64 (instr_info *ins)
   b |= (*ins->codep++ & 0xff) << 8;
   b |= (*ins->codep++ & 0xff) << 16;
   b |= (*ins->codep++ & 0xffu) << 24;
-  x = a + ((bfd_vma) b << 32);
-  return x;
+  *res = a + ((bfd_vma) b << 32);
+  return true;
 }
 #else
-static bfd_vma
-get64 (instr_info *ins ATTRIBUTE_UNUSED)
+static bool
+get64 (instr_info *ins ATTRIBUTE_UNUSED, bfd_vma *res ATTRIBUTE_UNUSED)
 {
   abort ();
-  return 0;
+  return false;
 }
 #endif
 
-static bfd_signed_vma
-get32 (instr_info *ins)
+static bool
+get32 (instr_info *ins, bfd_signed_vma *res)
 {
-  bfd_vma x = 0;
-
-  FETCH_DATA (ins->info, ins->codep + 4);
-  x = *ins->codep++ & (bfd_vma) 0xff;
-  x |= (*ins->codep++ & (bfd_vma) 0xff) << 8;
-  x |= (*ins->codep++ & (bfd_vma) 0xff) << 16;
-  x |= (*ins->codep++ & (bfd_vma) 0xff) << 24;
-  return x;
+  if (!fetch_code (ins->info, ins->codep + 4))
+    return false;
+  *res = *ins->codep++ & (bfd_vma) 0xff;
+  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 8;
+  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 16;
+  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 24;
+  return true;
 }
 
-static bfd_signed_vma
-get32s (instr_info *ins)
+static bool
+get32s (instr_info *ins, bfd_signed_vma *res)
 {
-  bfd_vma x = 0;
+  if (!get32 (ins, res))
+    return false;
 
-  FETCH_DATA (ins->info, ins->codep + 4);
-  x = *ins->codep++ & (bfd_vma) 0xff;
-  x |= (*ins->codep++ & (bfd_vma) 0xff) << 8;
-  x |= (*ins->codep++ & (bfd_vma) 0xff) << 16;
-  x |= (*ins->codep++ & (bfd_vma) 0xff) << 24;
+  *res = (*res ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
 
-  x = (x ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
-
-  return x;
+  return true;
 }
 
-static int
-get16 (instr_info *ins)
+static bool
+get16 (instr_info *ins, int *res)
 {
-  int x = 0;
-
-  FETCH_DATA (ins->info, ins->codep + 2);
-  x = *ins->codep++ & 0xff;
-  x |= (*ins->codep++ & 0xff) << 8;
-  return x;
+  if (!fetch_code (ins->info, ins->codep + 2))
+    return false;
+  *res = *ins->codep++ & 0xff;
+  *res |= (*ins->codep++ & 0xff) << 8;
+  return true;
 }
 
 static void
@@ -12619,29 +12565,31 @@ OP_I (instr_info *ins, int bytemode, int sizeflag)
     case v_mode:
       USED_REX (REX_W);
       if (ins->rex & REX_W)
-	op = get32s (ins);
+	{
+	  if (!get32s (ins, &op))
+	    return false;
+	}
       else
 	{
+	  ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
 	  if (sizeflag & DFLAG)
 	    {
-	      op = get32 (ins);
+    case d_mode:
+	      if (!get32 (ins, &op))
+		return false;
 	      mask = 0xffffffff;
 	    }
 	  else
 	    {
-	      op = get16 (ins);
+	      int num;
+
+    case w_mode:
+	      if (!get16 (ins, &num))
+		return false;
+	      op = num;
 	      mask = 0xfffff;
 	    }
-	  ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
 	}
-      break;
-    case d_mode:
-      mask = 0xffffffff;
-      op = get32 (ins);
-      break;
-    case w_mode:
-      mask = 0xfffff;
-      op = get16 (ins);
       break;
     case const_1_mode:
       if (ins->intel_syntax)
@@ -12660,13 +12608,18 @@ OP_I (instr_info *ins, int bytemode, int sizeflag)
 static bool
 OP_I64 (instr_info *ins, int bytemode, int sizeflag)
 {
+  bfd_vma op;
+
   if (bytemode != v_mode || ins->address_mode != mode_64bit
       || !(ins->rex & REX_W))
     return OP_I (ins, bytemode, sizeflag);
 
   USED_REX (REX_W);
 
-  oappend_immediate (ins, get64 (ins));
+  if (!get64 (ins, &op))
+    return false;
+
+  oappend_immediate (ins, op);
   return true;
 }
 
@@ -12709,10 +12662,16 @@ OP_sI (instr_info *ins, int bytemode, int sizeflag)
       break;
     case v_mode:
       /* The operand-size prefix is overridden by a REX prefix.  */
-      if ((sizeflag & DFLAG) || (ins->rex & REX_W))
-	op = get32s (ins);
-      else
-	op = get16 (ins);
+      if (!(sizeflag & DFLAG) && !(ins->rex & REX_W))
+	{
+	  int val;
+
+	  if (!get16 (ins, &val))
+	    return false;
+	  op = val;
+	}
+      else if (!get32s (ins, &op))
+	return false;
       break;
     default:
       oappend (ins, INTERNAL_DISASSEMBLER_ERROR);
@@ -12745,12 +12704,19 @@ OP_J (instr_info *ins, int bytemode, int sizeflag)
 	  || (ins->address_mode == mode_64bit
 	      && ((ins->isa64 == intel64 && bytemode != dqw_mode)
 		  || (ins->rex & REX_W))))
-	disp = get32s (ins);
+	{
+	  bfd_signed_vma val;
+
+	  if (!get32s (ins, &val))
+	    return false;
+	  disp = val;
+	}
       else
 	{
-	  disp = get16 (ins);
-	  if ((disp & 0x8000) != 0)
-	    disp -= 0x10000;
+	  int val;
+
+	  get16 (ins, &val);
+	  disp = val & 0x8000 ? val - 0x10000 : val;
 	  /* In 16bit mode, address is wrapped around at 64k within
 	     the same segment.  Otherwise, a data16 prefix on a jump
 	     instruction means that the pc is masked to 16 bits after
@@ -12794,14 +12760,16 @@ OP_DIR (instr_info *ins, int dummy ATTRIBUTE_UNUSED, int sizeflag)
 
   if (sizeflag & DFLAG)
     {
-      offset = get32 (ins);
-      seg = get16 (ins);
+      bfd_signed_vma val;
+
+      if (!get32 (ins, &val))
+	return false;;
+      offset = val;
     }
-  else
-    {
-      offset = get16 (ins);
-      seg = get16 (ins);
-    }
+  else if (!get16 (ins, &offset))
+    return false;
+  if (!get16 (ins, &seg))
+    return false;;
   ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
 
   res = snprintf (scratch, ARRAY_SIZE (scratch),
@@ -12823,9 +12791,21 @@ OP_OFF (instr_info *ins, int bytemode, int sizeflag)
   append_seg (ins);
 
   if ((sizeflag & AFLAG) || ins->address_mode == mode_64bit)
-    off = get32 (ins);
+    {
+      bfd_signed_vma val;
+
+      if (!get32 (ins, &val))
+	return false;
+      off = val;
+    }
   else
-    off = get16 (ins);
+    {
+      int val;
+
+      if (!get16 (ins, &val))
+	return false;
+      off = val;
+    }
 
   if (ins->intel_syntax)
     {
@@ -12852,7 +12832,8 @@ OP_OFF64 (instr_info *ins, int bytemode, int sizeflag)
     intel_operand_size (ins, bytemode, sizeflag);
   append_seg (ins);
 
-  off = get64 (ins);
+  if (!get64 (ins, &off))
+    return false;
 
   if (ins->intel_syntax)
     {
