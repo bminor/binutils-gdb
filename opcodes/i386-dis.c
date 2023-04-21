@@ -329,6 +329,49 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
   return 1;
 }
 
+static bool
+fetch_code (struct disassemble_info *info, bfd_byte *until)
+{
+  int status = -1;
+  struct dis_private *priv = info->private_data;
+  bfd_vma start = priv->insn_start + (priv->max_fetched - priv->the_buffer);
+
+  if (until <= priv->max_fetched)
+    return true;
+
+  if (until <= priv->the_buffer + MAX_MNEM_SIZE)
+    status = (*info->read_memory_func) (start,
+					priv->max_fetched,
+					until - priv->max_fetched,
+					info);
+  if (status != 0)
+    {
+      /* If we did manage to read at least one byte, then
+	 print_insn_i386 will do something sensible.  Otherwise, print
+	 an error.  We do that here because this is where we know
+	 STATUS.  */
+      if (priv->max_fetched == priv->the_buffer)
+	(*info->memory_error_func) (status, start, info);
+      return false;
+    }
+
+  priv->max_fetched = until;
+  return true;
+}
+
+static bool
+fetch_modrm (instr_info *ins)
+{
+  if (!fetch_code (ins->info, ins->codep + 1))
+    return false;
+
+  ins->modrm.mod = (*ins->codep >> 6) & 3;
+  ins->modrm.reg = (*ins->codep >> 3) & 7;
+  ins->modrm.rm = *ins->codep & 7;
+
+  return true;
+}
+
 static int
 fetch_error (const instr_info *ins)
 {
@@ -9605,7 +9648,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
     return get_valid_dis386 (dp, ins);
 }
 
-static void
+static bool
 get_sib (instr_info *ins, int sizeflag)
 {
   /* If modrm.mod == 3, operand must be register.  */
@@ -9614,7 +9657,8 @@ get_sib (instr_info *ins, int sizeflag)
       && ins->modrm.mod != 3
       && ins->modrm.rm == 4)
     {
-      FETCH_DATA (ins->info, ins->codep + 2);
+      if (!fetch_code (ins->info, ins->codep + 2))
+	return false;
       ins->sib.index = (ins->codep[1] >> 3) & 7;
       ins->sib.scale = (ins->codep[1] >> 6) & 3;
       ins->sib.base = ins->codep[1] & 7;
@@ -9622,6 +9666,8 @@ get_sib (instr_info *ins, int sizeflag)
     }
   else
     ins->has_sib = false;
+
+  return true;
 }
 
 /* Like oappend (below), but S is a string starting with '%'.  In
@@ -9886,7 +9932,9 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 
   ins.insn_codep = ins.codep;
 
-  FETCH_DATA (info, ins.codep + 1);
+  if (!fetch_code (info, ins.codep + 1))
+    return fetch_error (&ins);
+
   ins.two_source_ops = (*ins.codep == 0x62) || (*ins.codep == 0xc8);
 
   if (((ins.prefixes & PREFIX_FWAIT)
@@ -9906,7 +9954,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       unsigned char threebyte;
 
       ins.codep++;
-      FETCH_DATA (info, ins.codep + 1);
+      if (!fetch_code (info, ins.codep + 1))
+	return fetch_error (&ins);
       threebyte = *ins.codep;
       dp = &dis386_twobyte[threebyte];
       ins.need_modrm = twobyte_has_modrm[threebyte];
@@ -9929,17 +9978,13 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
     sizeflag ^= DFLAG;
 
   ins.end_codep = ins.codep;
-  if (ins.need_modrm)
-    {
-      FETCH_DATA (info, ins.codep + 1);
-      ins.modrm.mod = (*ins.codep >> 6) & 3;
-      ins.modrm.reg = (*ins.codep >> 3) & 7;
-      ins.modrm.rm = *ins.codep & 7;
-    }
+  if (ins.need_modrm && !fetch_modrm (&ins))
+    return fetch_error (&ins);
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
     {
-      get_sib (&ins, sizeflag);
+      if (!get_sib (&ins, sizeflag))
+	return fetch_error (&ins);
       dofloat (&ins, sizeflag);
     }
   else
@@ -9947,7 +9992,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       dp = get_valid_dis386 (dp, &ins);
       if (dp != NULL && putop (&ins, dp->name, sizeflag) == 0)
 	{
-	  get_sib (&ins, sizeflag);
+	  if (!get_sib (&ins, sizeflag))
+	    return fetch_error (&ins);
 	  for (i = 0; i < MAX_OPERANDS; ++i)
 	    {
 	      ins.obufp = ins.op_out[i];
