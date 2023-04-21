@@ -7245,7 +7245,7 @@ Currently there is only one plugin shipped by default, but more may
 be added here later.
 
 Plugins are enabled via the use of the @option{-plugin @var{name}}
-command line option. @xref{Options}
+command line option. @xref{Options}.
 
 @menu
 * libdep Plugin::	Static Library Dependencies Plugin
