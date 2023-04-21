@@ -9196,6 +9196,9 @@ with the -M switch (multiple options should be separated by commas):\n"));
 /* Bad opcode.  */
 static const struct dis386 bad_opcode = { "(bad)", { XX }, 0 };
 
+/* Fetch error indicator.  */
+static const struct dis386 err_opcode = { NULL, { XX }, 0 };
+
 /* Get a pointer to struct dis386 with a valid name.  */
 
 static const struct dis386 *
@@ -9297,13 +9300,13 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       break;
 
     case USE_3BYTE_TABLE:
-      FETCH_DATA (ins->info, ins->codep + 2);
+      if (!fetch_code (ins->info, ins->codep + 2))
+	return &err_opcode;
       vindex = *ins->codep++;
       dp = &three_byte_table[dp->op[1].bytemode][vindex];
       ins->end_codep = ins->codep;
-      ins->modrm.mod = (*ins->codep >> 6) & 3;
-      ins->modrm.reg = (*ins->codep >> 3) & 7;
-      ins->modrm.rm = *ins->codep & 7;
+      if (!fetch_modrm (ins))
+	return &err_opcode;
       break;
 
     case USE_VEX_LEN_TABLE:
@@ -9357,7 +9360,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       break;
 
     case USE_XOP_8F_TABLE:
-      FETCH_DATA (ins->info, ins->codep + 3);
+      if (!fetch_code (ins->info, ins->codep + 3))
+	return &err_opcode;
       ins->rex = ~(*ins->codep >> 5) & 0x7;
 
       /* VEX_TABLE_INDEX is the mmmmm part of the XOP byte 1 "RCB.mmmmm".  */
@@ -9409,10 +9413,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       dp = &xop_table[vex_table_index][vindex];
 
       ins->end_codep = ins->codep;
-      FETCH_DATA (ins->info, ins->codep + 1);
-      ins->modrm.mod = (*ins->codep >> 6) & 3;
-      ins->modrm.reg = (*ins->codep >> 3) & 7;
-      ins->modrm.rm = *ins->codep & 7;
+      if (!fetch_modrm (ins))
+	return &err_opcode;
 
       /* No XOP encoding so far allows for a non-zero embedded prefix. Avoid
 	 having to decode the bits for every otherwise valid encoding.  */
@@ -9422,7 +9424,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 
     case USE_VEX_C4_TABLE:
       /* VEX prefix.  */
-      FETCH_DATA (ins->info, ins->codep + 3);
+      if (!fetch_code (ins->info, ins->codep + 3))
+	return &err_opcode;
       ins->rex = ~(*ins->codep >> 5) & 0x7;
       switch ((*ins->codep & 0x1f))
 	{
@@ -9475,18 +9478,15 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       dp = &vex_table[vex_table_index][vindex];
       ins->end_codep = ins->codep;
       /* There is no MODRM byte for VEX0F 77.  */
-      if (vex_table_index != VEX_0F || vindex != 0x77)
-	{
-	  FETCH_DATA (ins->info, ins->codep + 1);
-	  ins->modrm.mod = (*ins->codep >> 6) & 3;
-	  ins->modrm.reg = (*ins->codep >> 3) & 7;
-	  ins->modrm.rm = *ins->codep & 7;
-	}
+      if ((vex_table_index != VEX_0F || vindex != 0x77)
+	  && !fetch_modrm (ins))
+	return &err_opcode;
       break;
 
     case USE_VEX_C5_TABLE:
       /* VEX prefix.  */
-      FETCH_DATA (ins->info, ins->codep + 2);
+      if (!fetch_code (ins->info, ins->codep + 2))
+	return &err_opcode;
       ins->rex = (*ins->codep & 0x80) ? 0 : REX_R;
 
       /* For the 2-byte VEX prefix in 32-bit mode, the highest bit in
@@ -9513,13 +9513,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       dp = &vex_table[dp->op[1].bytemode][vindex];
       ins->end_codep = ins->codep;
       /* There is no MODRM byte for VEX 77.  */
-      if (vindex != 0x77)
-	{
-	  FETCH_DATA (ins->info, ins->codep + 1);
-	  ins->modrm.mod = (*ins->codep >> 6) & 3;
-	  ins->modrm.reg = (*ins->codep >> 3) & 7;
-	  ins->modrm.rm = *ins->codep & 7;
-	}
+      if (vindex != 0x77 && !fetch_modrm (ins))
+	return &err_opcode;
       break;
 
     case USE_VEX_W_TABLE:
@@ -9533,7 +9528,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       ins->two_source_ops = false;
       /* EVEX prefix.  */
       ins->vex.evex = true;
-      FETCH_DATA (ins->info, ins->codep + 4);
+      if (!fetch_code (ins->info, ins->codep + 4))
+	return &err_opcode;
       /* The first byte after 0x62.  */
       ins->rex = ~(*ins->codep >> 5) & 0x7;
       ins->vex.r = *ins->codep & 0x10;
@@ -9608,10 +9604,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       vindex = *ins->codep++;
       dp = &evex_table[vex_table_index][vindex];
       ins->end_codep = ins->codep;
-      FETCH_DATA (ins->info, ins->codep + 1);
-      ins->modrm.mod = (*ins->codep >> 6) & 3;
-      ins->modrm.reg = (*ins->codep >> 3) & 7;
-      ins->modrm.rm = *ins->codep & 7;
+      if (!fetch_modrm (ins))
+	return &err_opcode;
 
       /* Set vector length.  */
       if (ins->modrm.mod == 3 && ins->vex.b)
@@ -9998,6 +9992,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   else
     {
       dp = get_valid_dis386 (dp, &ins);
+      if (dp == &err_opcode)
+	return fetch_error (&ins);
       if (dp != NULL && putop (&ins, dp->name, sizeflag) == 0)
 	{
 	  if (!get_sib (&ins, sizeflag))
