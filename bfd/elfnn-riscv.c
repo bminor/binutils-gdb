@@ -4508,6 +4508,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
 {
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  /* Can relax to x0 even when gp relaxation is disabled.  */
   bfd_vma gp = htab->params->relax_gp
 	       ? riscv_global_pointer_value (link_info)
 	       : 0;
@@ -4721,7 +4722,10 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 		     bool undefined_weak)
 {
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
-  bfd_vma gp = riscv_global_pointer_value (link_info);
+  /* Can relax to x0 even when gp relaxation is disabled.  */
+  bfd_vma gp = htab->params->relax_gp
+	       ? riscv_global_pointer_value (link_info)
+	       : 0;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
@@ -4942,7 +4946,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		   || type == R_RISCV_TPREL_LO12_I
 		   || type == R_RISCV_TPREL_LO12_S)
 	    relax_func = _bfd_riscv_relax_tls_le;
-	  else if (!bfd_link_pic (info) && htab->params->relax_gp
+	  else if (!bfd_link_pic (info)
 		   && (type == R_RISCV_PCREL_HI20
 		       || type == R_RISCV_PCREL_LO12_I
 		       || type == R_RISCV_PCREL_LO12_S))
