@@ -149,6 +149,10 @@ public:
   /* Notify the interpreter that solib SO has been unloaded.  */
   virtual void on_solib_unloaded (so_list *so) {}
 
+  /* Notify the interpreter that a command it is executing is about to cause
+     the inferior to proceed.  */
+  virtual void on_about_to_proceed () {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;

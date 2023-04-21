@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_about_to_proceed (void);
 static void mi_traceframe_changed (int tfnum, int tpnum);
 static void mi_tsv_created (const struct trace_state_variable *tsv);
 static void mi_tsv_deleted (const struct trace_state_variable *tsv);
@@ -469,8 +468,8 @@ mi_interp::on_normal_stop (struct bpstat *bs, int print_frame)
   gdb_flush (this->raw_stdout);
 }
 
-static void
-mi_about_to_proceed (void)
+void
+mi_interp::on_about_to_proceed ()
 {
   /* Suppress output while calling an inferior function.  */
 
@@ -482,12 +481,7 @@ mi_about_to_proceed (void)
 	return;
     }
 
-  mi_interp *mi = as_mi_interp (top_level_interpreter ());
-
-  if (mi == nullptr)
-    return;
-
-  mi->mi_proceeded = 1;
+  this->mi_proceeded = 1;
 }
 
 /* When the element is non-zero, no MI notifications will be emitted in
@@ -1061,7 +1055,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::about_to_proceed.attach (mi_about_to_proceed, "mi-interp");
   gdb::observers::traceframe_changed.attach (mi_traceframe_changed,
 					     "mi-interp");
   gdb::observers::tsv_created.attach (mi_tsv_created, "mi-interp");

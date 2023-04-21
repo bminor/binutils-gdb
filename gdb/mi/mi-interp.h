@@ -61,6 +61,7 @@ public:
   void on_target_resumed (ptid_t ptid) override;
   void on_solib_loaded (so_list *so) override;
   void on_solib_unloaded (so_list *so) override;
+  void on_about_to_proceed () override;
 
   /* MI's output channels */
   mi_console_file *out;
