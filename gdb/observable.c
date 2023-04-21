@@ -62,7 +62,6 @@ DEFINE_OBSERVABLE (memory_changed);
 DEFINE_OBSERVABLE (before_prompt);
 DEFINE_OBSERVABLE (gdb_datadir_changed);
 DEFINE_OBSERVABLE (command_param_changed);
-DEFINE_OBSERVABLE (tsv_modified);
 DEFINE_OBSERVABLE (inferior_call_pre);
 DEFINE_OBSERVABLE (inferior_call_post);
 DEFINE_OBSERVABLE (register_changed);

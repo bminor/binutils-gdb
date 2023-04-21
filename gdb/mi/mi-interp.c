@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_tsv_modified (const struct trace_state_variable *tsv);
 static void mi_breakpoint_created (struct breakpoint *b);
 static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
@@ -539,37 +538,26 @@ mi_interp::on_tsv_deleted (const trace_state_variable *tsv)
   gdb_flush (this->event_channel);
 }
 
-/* Emit notification on modifying a trace state variable.  */
-
-static void
-mi_tsv_modified (const struct trace_state_variable *tsv)
+void
+mi_interp::on_tsv_modified (const trace_state_variable *tsv)
 {
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
-      struct ui_out *mi_uiout;
+  ui_out *mi_uiout = this->interp_ui_out ();
 
-      if (mi == NULL)
-	continue;
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      mi_uiout = top_level_interpreter ()->interp_ui_out ();
+  gdb_printf (this->event_channel,
+	      "tsv-modified");
 
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
+  ui_out_redirect_pop redir (mi_uiout, this->event_channel);
 
-      gdb_printf (mi->event_channel,
-		  "tsv-modified");
+  mi_uiout->field_string ("name", tsv->name);
+  mi_uiout->field_string ("initial",
+			  plongest (tsv->initial_value));
+  if (tsv->value_known)
+    mi_uiout->field_string ("current", plongest (tsv->value));
 
-      ui_out_redirect_pop redir (mi_uiout, mi->event_channel);
-
-      mi_uiout->field_string ("name", tsv->name);
-      mi_uiout->field_string ("initial",
-			      plongest (tsv->initial_value));
-      if (tsv->value_known)
-	mi_uiout->field_string ("current", plongest (tsv->value));
-
-      gdb_flush (mi->event_channel);
-    }
+  gdb_flush (this->event_channel);
 }
 
 /* Print breakpoint BP on MI's event channel.  */
@@ -1022,7 +1010,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::tsv_modified.attach (mi_tsv_modified, "mi-interp");
   gdb::observers::breakpoint_created.attach (mi_breakpoint_created,
 					     "mi-interp");
   gdb::observers::breakpoint_deleted.attach (mi_breakpoint_deleted,

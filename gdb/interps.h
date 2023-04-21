@@ -163,6 +163,9 @@ public:
   /* Notify the interpreter that trace state variable TSV was deleted.  */
   virtual void on_tsv_deleted (const trace_state_variable *tsv) {}
 
+  /* Notify the interpreter that trace state variable TSV was modified.  */
+  virtual void on_tsv_modified (const trace_state_variable *tsv) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -328,6 +331,9 @@ extern void interps_notify_tsv_created (const trace_state_variable *tsv);
    
    If TSV is nullptr, it means that all trace state variables were deleted.  */
 extern void interps_notify_tsv_deleted (const trace_state_variable *tsv);
+
+/* Notify all interpreters that trace state variable TSV was modified.  */
+extern void interps_notify_tsv_modified (const trace_state_variable *tsv);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

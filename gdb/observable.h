@@ -190,9 +190,6 @@ extern observable<> gdb_datadir_changed;
 extern observable<const char */* param */, const char */* value */>
     command_param_changed;
 
-/* The trace state value TSV is modified.  */
-extern observable<const struct trace_state_variable */* tsv */> tsv_modified;
-
 /* An inferior function at ADDRESS is about to be called in thread
    THREAD.  */
 extern observable<ptid_t /* thread */, CORE_ADDR /* address */>

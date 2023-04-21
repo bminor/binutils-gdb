@@ -361,7 +361,7 @@ trace_variable_command (const char *args, int from_tty)
       if (tsv->initial_value != initval)
 	{
 	  tsv->initial_value = initval;
-	  gdb::observers::tsv_modified.notify (tsv);
+	  interps_notify_tsv_modified (tsv);
 	}
       gdb_printf (_("Trace state variable $%s "
 		    "now has initial value %s.\n"),
