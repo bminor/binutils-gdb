@@ -5028,11 +5028,11 @@ coff_classify_symbol (bfd *abfd,
 	 breaks gas generated objects.  */
       if (syment->n_value == 0)
 	{
-	  asection *sec;
-	  char * name;
+	  const asection *sec;
+	  const char *name;
 	  char buf[SYMNMLEN + 1];
 
-	  name = _bfd_coff_internal_syment_name (abfd, syment, buf)
+	  name = _bfd_coff_internal_syment_name (abfd, syment, buf);
 	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
 	  if (sec != NULL && name != NULL
 	      && (strcmp (bfd_section_name (sec), name) == 0))
