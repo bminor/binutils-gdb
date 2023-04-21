@@ -39,7 +39,6 @@
 #include "libiberty.h"
 #include "safe-ctype.h"
 
-#include <setjmp.h>
 typedef struct instr_info instr_info;
 
 static bool dofloat (instr_info *, int);
@@ -133,7 +132,6 @@ struct dis_private {
   bfd_byte the_buffer[MAX_MNEM_SIZE];
   bfd_vma insn_start;
   int orig_sizeflag;
-  OPCODES_SIGJMP_BUF bailout;
 };
 
 enum address_mode
@@ -9873,9 +9871,6 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       op_out[i][0] = 0;
       ins.op_out[i] = op_out[i];
     }
-
-  if (OPCODES_SIGSETJMP (priv.bailout) != 0)
-    return fetch_error (&ins);
 
   sizeflag = priv.orig_sizeflag;
 
