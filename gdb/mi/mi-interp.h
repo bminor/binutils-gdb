@@ -56,6 +56,8 @@ public:
   void on_inferior_appeared (inferior *inf) override;
   void on_inferior_disappeared (inferior *inf) override;
   void on_inferior_removed (inferior *inf) override;
+  void on_record_changed (inferior *inf, int started, const char *method,
+			  const char *format) override;
 
   /* MI's output channels */
   mi_console_file *out;

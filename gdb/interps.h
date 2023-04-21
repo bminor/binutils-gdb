@@ -134,6 +134,11 @@ public:
   /* Notify the interpreter that inferior INF was removed.  */
   virtual void on_inferior_removed (inferior *inf) {}
 
+  /* Notify the interpreter that the status of process record for INF
+     changed.  */
+  virtual void on_record_changed (inferior *inf, int started,
+				  const char *method, const char *format) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -262,6 +267,19 @@ extern void interps_notify_inferior_disappeared (inferior *inf);
 
 /* Notify all interpreters that inferior INF was removed.  */
 extern void interps_notify_inferior_removed (inferior *inf);
+
+/* Notify all interpreters that the status of process record for INF changed.
+
+   The process record is started if STARTED is true, and the process record is
+   stopped if STARTED is false.
+
+   When STARTED is true, METHOD indicates the short name of the method used for
+   recording.  If the method supports multiple formats, FORMAT indicates which
+   one is being used, otherwise it is nullptr.  When STARTED is false, they are
+   both nullptr.  */
+extern void interps_notify_record_changed (inferior *inf, int started,
+					   const char *method,
+					   const char *format);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

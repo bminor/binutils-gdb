@@ -26,6 +26,7 @@
 #include "gdbsupport/common-utils.h"
 #include "cli/cli-utils.h"
 #include "disasm.h"
+#include "interps.h"
 
 #include <ctype.h>
 
@@ -311,7 +312,7 @@ cmd_record_stop (const char *args, int from_tty)
   gdb_printf (_("Process record is stopped and all execution "
 		"logs are deleted.\n"));
 
-  gdb::observers::record_changed.notify (current_inferior (), 0, NULL, NULL);
+  interps_notify_record_changed (current_inferior (), 0, NULL, NULL);
 }
 
 

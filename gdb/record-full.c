@@ -40,6 +40,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "async-event.h"
 #include "valprint.h"
+#include "interps.h"
 
 #include <signal.h>
 
@@ -981,7 +982,7 @@ record_full_open (const char *name, int from_tty)
 
   record_full_init_record_breakpoints ();
 
-  gdb::observers::record_changed.notify (current_inferior (),  1, "full", NULL);
+  interps_notify_record_changed (current_inferior (),  1, "full", NULL);
 }
 
 /* "close" target method.  Close the process record target.  */

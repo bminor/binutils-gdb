@@ -45,6 +45,7 @@
 #include "async-event.h"
 #include <forward_list>
 #include "objfiles.h"
+#include "interps.h"
 
 static const target_info record_btrace_target_info = {
   "record-btrace",
@@ -347,7 +348,7 @@ record_btrace_push_target (void)
   record_btrace_generating_corefile = 0;
 
   format = btrace_format_short_string (record_btrace_conf.format);
-  gdb::observers::record_changed.notify (current_inferior (), 1, "btrace", format);
+  interps_notify_record_changed (current_inferior (), 1, "btrace", format);
 }
 
 /* Disable btrace on a set of threads on scope exit.  */

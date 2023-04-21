@@ -494,6 +494,15 @@ interps_notify_inferior_removed (inferior *inf)
   interps_notify (&interp::on_inferior_removed, inf);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_record_changed (inferior *inf, int started, const char *method,
+			       const char *format)
+{
+  interps_notify (&interp::on_record_changed, inf, started, method, format);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void

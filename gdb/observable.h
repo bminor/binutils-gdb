@@ -88,18 +88,6 @@ extern observable<inferior */* exec_inf */, inferior */* follow_inf */>
 extern observable<inferior */* parent_inf */, inferior */* child_inf */,
 		  target_waitkind /* fork_kind */> inferior_forked;
 
-/* The status of process record for inferior inferior in gdb has
-   changed.  The process record is started if STARTED is true, and
-   the process record is stopped if STARTED is false.
-
-   When STARTED is true, METHOD indicates the short name of the
-   method used for recording.  If the method supports multiple
-   formats, FORMAT indicates which one is being used, otherwise it
-   is NULL.  When STARTED is false, they are both NULL.  */
-extern observable<struct inferior */* inferior */, int /* started */,
-		  const char */* method */, const char */* format */>
-    record_changed;
-
 /* The shared library specified by SOLIB has been loaded.  Note that
    when gdb calls this observer, the library's symbols probably
    haven't been loaded yet.  */
