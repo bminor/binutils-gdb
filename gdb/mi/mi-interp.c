@@ -677,7 +677,12 @@ mi_about_to_proceed (void)
 	return;
     }
 
-  mi_proceeded = 1;
+  mi_interp *mi = as_mi_interp (top_level_interpreter ());
+
+  if (mi == nullptr)
+    return;
+
+  mi->mi_proceeded = 1;
 }
 
 /* When the element is non-zero, no MI notifications will be emitted in
@@ -961,7 +966,7 @@ mi_on_resume_1 (struct mi_interp *mi,
      will make it impossible for frontend to know what's going on.
 
      In future (MI3), we'll be outputting "^done" here.  */
-  if (!running_result_record_printed && mi_proceeded)
+  if (!mi->running_result_record_printed && mi->mi_proceeded)
     {
       gdb_printf (mi->raw_stdout, "%s^running\n",
 		  current_token ? current_token : "");
@@ -977,9 +982,9 @@ mi_on_resume_1 (struct mi_interp *mi,
     for (thread_info *tp : all_non_exited_threads (targ, ptid))
       mi_output_running (tp);
 
-  if (!running_result_record_printed && mi_proceeded)
+  if (!mi->running_result_record_printed && mi->mi_proceeded)
     {
-      running_result_record_printed = 1;
+      mi->running_result_record_printed = 1;
       /* This is what gdb used to do historically -- printing prompt
 	 even if it cannot actually accept any input.  This will be
 	 surely removed for MI3, and may be removed even earlier.  */

@@ -36,9 +36,6 @@ extern int mi_async_p (void);
 
 extern char *current_token;
 
-extern int running_result_record_printed;
-extern int mi_proceeded;
-
 struct mi_suppress_notification
 {
   /* Breakpoint notification suppressed?  */

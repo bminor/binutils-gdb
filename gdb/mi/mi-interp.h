@@ -64,6 +64,12 @@ public:
 
   /* MI's CLI builder (wraps OUT).  */
   struct ui_out *cli_uiout;
+
+  int running_result_record_printed = 1;
+
+  /* Flag indicating that the target has proceeded since the last
+     command was issued.  */
+  int mi_proceeded;
 };
 
 /* Output the shared object attributes to UIOUT.  */

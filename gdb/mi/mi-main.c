@@ -84,12 +84,6 @@ char *current_token;
    command including all option, and make it possible.  */
 static struct mi_parse *current_context;
 
-int running_result_record_printed = 1;
-
-/* Flag indicating that the target has proceeded since the last
-   command was issued.  */
-int mi_proceeded;
-
 static void mi_cmd_execute (struct mi_parse *parse);
 
 static void mi_execute_async_cli_command (const char *cli_command,
@@ -1818,8 +1812,8 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
   scoped_restore save_token = make_scoped_restore (&current_token,
 						   context->token);
 
-  running_result_record_printed = 0;
-  mi_proceeded = 0;
+  mi->running_result_record_printed = 0;
+  mi->mi_proceeded = 0;
   switch (context->op)
     {
     case MI_COMMAND:
@@ -1837,7 +1831,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	 to directly use the mi_interp's uiout, since the command
 	 could have reset the interpreter, in which case the current
 	 uiout will most likely crash in the mi_out_* routines.  */
-      if (!running_result_record_printed)
+      if (!mi->running_result_record_printed)
 	{
 	  gdb_puts (context->token, mi->raw_stdout);
 	  /* There's no particularly good reason why target-connect results
@@ -1876,7 +1870,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	    || current_interp_named_p (INTERP_MI3)
 	    || current_interp_named_p (INTERP_MI4))
 	  {
-	    if (!running_result_record_printed)
+	    if (!mi->running_result_record_printed)
 	      {
 		gdb_puts (context->token, mi->raw_stdout);
 		gdb_puts ("^done", mi->raw_stdout);

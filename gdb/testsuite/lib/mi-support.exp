@@ -131,6 +131,21 @@ proc mi_create_inferior_pty {} {
     }
 }
 
+# Create a new pty, and reate a new MI UI (using the new-ui command) on it.
+#
+# Return a list with the spawn id for that pty and the pty file name.
+
+proc create_mi_ui {} {
+    spawn -pty
+    set tty_name $spawn_out(slave,name)
+    gdb_test_multiple "new-ui mi $tty_name" "new-ui" {
+	-re "New UI allocated\r\n$::gdb_prompt $" {
+	}
+    }
+
+    return [list $spawn_id $tty_name]
+}
+
 #
 # Like default_mi_gdb_start below, but the MI is created as a separate
 # ui in a new tty.  The global MI_SPAWN_ID is updated to point at the
@@ -154,13 +169,7 @@ proc mi_gdb_start_separate_mi_tty { { flags {} } } {
     gdb_start
 
     # Create the new PTY for the MI UI.
-    spawn -pty
-    set mi_spawn_id $spawn_id
-    set mi_tty_name $spawn_out(slave,name)
-    gdb_test_multiple "new-ui mi $mi_tty_name" "new-ui" {
-	-re "New UI allocated\r\n$gdb_prompt $" {
-	}
-    }
+    lassign [create_mi_ui] mi_spawn_id mi_tty_name
 
     # Switch to the MI channel.
     set gdb_main_spawn_id $gdb_spawn_id
@@ -822,7 +831,7 @@ proc mi_gdb_test { args } {
 	    fail "$errmsg"
 	    return -1
 	}
-	 -re ".*$mi_gdb_prompt\[ \]*$" {
+	 -re "(.*$mi_gdb_prompt\[ \]*)$" {
 	    if {![string match "" $message]} {
 		fail "$message (unexpected output)"
 	    }
@@ -1082,6 +1091,7 @@ proc mi_runto_helper {func run_or_continue args} {
       # file.", etc. to the CLI stream.
       set extra_output "&\"\[^\r\n\]+\"\r\n"
   }
+
   mi_gdb_test "200-break-insert [join $extra_opts " "] -t $func" "${extra_output}200\\^done,$bp" \
       "breakpoint at $func"
 
