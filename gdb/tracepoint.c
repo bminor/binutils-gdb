@@ -59,6 +59,7 @@
 #include "cli/cli-style.h"
 #include "expop.h"
 #include "gdbsupport/buildargv.h"
+#include "interps.h"
 
 #include <unistd.h>
 
@@ -2139,7 +2140,7 @@ tfind_1 (enum trace_find_type type, int num,
   set_tracepoint_num (tp ? tp->number : target_tracept);
 
   if (target_frameno != get_traceframe_number ())
-    gdb::observers::traceframe_changed.notify (target_frameno, tracepoint_number);
+    interps_notify_traceframe_changed (target_frameno, tracepoint_number);
 
   set_current_traceframe (target_frameno);
 

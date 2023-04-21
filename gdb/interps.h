@@ -153,6 +153,9 @@ public:
      the inferior to proceed.  */
   virtual void on_about_to_proceed () {}
 
+  /* Notify the interpreter that the selected traceframe changed.  */
+  virtual void on_traceframe_changed (int tfnum, int tpnum) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -303,6 +306,13 @@ extern void interps_notify_solib_loaded (so_list *so);
 
 /* Notify all interpreters that solib SO has been unloaded.  */
 extern void interps_notify_solib_unloaded (so_list *so);
+
+/* Notify all interpreters that the selected traceframe changed.
+
+   The trace frame is changed to TFNUM (e.g., by using the 'tfind' command).
+   If TFNUM is negative, it means gdb resumed live debugging.  The number of
+   the tracepoint associated with this traceframe is TPNUM.  */
+extern void interps_notify_traceframe_changed (int tfnum, int tpnum);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

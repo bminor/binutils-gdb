@@ -62,6 +62,7 @@ public:
   void on_solib_loaded (so_list *so) override;
   void on_solib_unloaded (so_list *so) override;
   void on_about_to_proceed () override;
+  void on_traceframe_changed (int tfnum, int tpnum) override;
 
   /* MI's output channels */
   mi_console_file *out;

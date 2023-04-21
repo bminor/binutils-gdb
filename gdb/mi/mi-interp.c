@@ -60,7 +60,6 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap)
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static void mi_traceframe_changed (int tfnum, int tpnum);
 static void mi_tsv_created (const struct trace_state_variable *tsv);
 static void mi_tsv_deleted (const struct trace_state_variable *tsv);
 static void mi_tsv_modified (const struct trace_state_variable *tsv);
@@ -495,33 +494,23 @@ struct mi_suppress_notification mi_suppress_notification =
     0,
   };
 
-/* Emit notification on changing a traceframe.  */
-
-static void
-mi_traceframe_changed (int tfnum, int tpnum)
+void
+mi_interp::on_traceframe_changed (int tfnum, int tpnum)
 {
   if (mi_suppress_notification.traceframe)
     return;
 
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+  target_terminal::scoped_restore_terminal_state term_state;
+  target_terminal::ours_for_output ();
 
-      if (mi == NULL)
-	continue;
+  if (tfnum >= 0)
+    gdb_printf (this->event_channel, "traceframe-changed,"
+		"num=\"%d\",tracepoint=\"%d\"",
+		tfnum, tpnum);
+  else
+    gdb_printf (this->event_channel, "traceframe-changed,end");
 
-      target_terminal::scoped_restore_terminal_state term_state;
-      target_terminal::ours_for_output ();
-
-      if (tfnum >= 0)
-	gdb_printf (mi->event_channel, "traceframe-changed,"
-		    "num=\"%d\",tracepoint=\"%d\"",
-		    tfnum, tpnum);
-      else
-	gdb_printf (mi->event_channel, "traceframe-changed,end");
-
-      gdb_flush (mi->event_channel);
-    }
+  gdb_flush (this->event_channel);
 }
 
 /* Emit notification on creating a trace state variable.  */
@@ -1055,8 +1044,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::traceframe_changed.attach (mi_traceframe_changed,
-					     "mi-interp");
   gdb::observers::tsv_created.attach (mi_tsv_created, "mi-interp");
   gdb::observers::tsv_deleted.attach (mi_tsv_deleted, "mi-interp");
   gdb::observers::tsv_modified.attach (mi_tsv_modified, "mi-interp");

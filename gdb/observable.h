@@ -140,12 +140,6 @@ extern observable<struct breakpoint */* b */> breakpoint_deleted;
    is the modified breakpoint.  */
 extern observable<struct breakpoint */* b */> breakpoint_modified;
 
-/* The trace frame is changed to TFNUM (e.g., by using the 'tfind'
-   command).  If TFNUM is negative, it means gdb resumes live
-   debugging.  The number of the tracepoint associated with this
-   traceframe is TPNUM.  */
-extern observable<int /* tfnum */, int /* tpnum */> traceframe_changed;
-
 /* The current architecture has changed.  The argument NEWARCH is a
    pointer to the new architecture.  */
 extern observable<struct gdbarch */* newarch */> architecture_changed;

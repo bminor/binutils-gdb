@@ -51,7 +51,6 @@ DEFINE_OBSERVABLE (about_to_proceed);
 DEFINE_OBSERVABLE (breakpoint_created);
 DEFINE_OBSERVABLE (breakpoint_deleted);
 DEFINE_OBSERVABLE (breakpoint_modified);
-DEFINE_OBSERVABLE (traceframe_changed);
 DEFINE_OBSERVABLE (architecture_changed);
 DEFINE_OBSERVABLE (thread_ptid_changed);
 DEFINE_OBSERVABLE (inferior_added);

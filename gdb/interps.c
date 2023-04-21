@@ -527,6 +527,14 @@ interps_notify_solib_unloaded (so_list *so)
   interps_notify (&interp::on_solib_unloaded, so);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_traceframe_changed (int tfnum, int tpnum)
+{
+  interps_notify (&interp::on_traceframe_changed, tfnum, tpnum);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void
