@@ -12701,7 +12701,8 @@ OP_J (instr_info *ins, int bytemode, int sizeflag)
 	{
 	  int val;
 
-	  get16 (ins, &val);
+	  if (!get16 (ins, &val))
+	    return false;
 	  disp = val & 0x8000 ? val - 0x10000 : val;
 	  /* In 16bit mode, address is wrapped around at 64k within
 	     the same segment.  Otherwise, a data16 prefix on a jump
