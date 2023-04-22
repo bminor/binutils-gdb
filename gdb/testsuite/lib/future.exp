@@ -43,7 +43,6 @@ proc gdb_find_gnatmake {} {
 
 proc gdb_find_gdc {} {
     global tool_root_dir
-    print "Tool Root: $tool_root_dir"
 
     if {![is_remote host]} {
 	set file [lookfor_file $tool_root_dir gdc]
@@ -58,7 +57,7 @@ proc gdb_find_gdc {} {
     } else {
 	set CC [transform gdc]
     }
-    print "CC: $CC"
+
     return $CC
 }
 
