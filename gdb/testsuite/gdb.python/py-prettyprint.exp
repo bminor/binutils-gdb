@@ -82,6 +82,11 @@ proc run_lang_tests {exefile lang} {
 	gdb_test "print ns" "embedded\\\\000n\.\.\.." \
 	    "print ns with element limit of 10"
 	gdb_test_no_output "set print elements 200"
+
+	gdb_test "print has_member" \
+	    "=  a=<23> b=<$hex <has_static_member::global>>.*"
+	gdb_test "print has_static_member::global" \
+	    "=  a=<23> b=<$hex <has_static_member::global>>"
     }
 
     if { ![is_address_zero_readable] } {

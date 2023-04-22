@@ -110,6 +110,14 @@ class Fake
   {
   }
 };
+
+struct has_static_member
+{
+  static s global;
+};
+
+s has_static_member::global;
+
 #endif
 
 struct to_string_returns_value_inner
@@ -356,6 +364,9 @@ main ()
   Derived derived;
   
   Fake fake (42);
+
+  init_s (&has_static_member::global, 23);
+  has_static_member has_member;
 #endif
 
   add_item (&c, 23);		/* MI breakpoint here */
