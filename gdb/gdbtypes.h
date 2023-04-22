@@ -559,6 +559,18 @@ struct field
     m_name = name;
   }
 
+  /* Return true if this field is static; false if not.  */
+  bool is_static () const
+  {
+    /* "static" fields are the fields whose location is not relative
+       to the address of the enclosing struct.  It would be nice to
+       have a dedicated flag that would be set for static fields when
+       the type is being created.  But in practice, checking the field
+       loc_kind should give us an accurate answer.  */
+    return (m_loc_kind == FIELD_LOC_KIND_PHYSNAME
+	    || m_loc_kind == FIELD_LOC_KIND_PHYSADDR);
+  }
+
   /* Location getters / setters.  */
 
   field_loc_kind loc_kind () const
@@ -2685,8 +2697,6 @@ extern struct rank rank_one_type (struct type *, struct type *,
 				  struct value *);
 
 extern void recursive_dump_type (struct type *, int);
-
-extern int field_is_static (struct field *);
 
 /* printcmd.c */
 

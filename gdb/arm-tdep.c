@@ -4524,7 +4524,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	  {
 	    int sub_count = 0;
 
-	    if (!field_is_static (&t->field (i)))
+	    if (!t->field (i).is_static ())
 	      sub_count = arm_vfp_cprc_sub_candidate (t->field (i).type (),
 						      base_type);
 	    if (sub_count == -1)

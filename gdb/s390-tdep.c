@@ -1648,7 +1648,7 @@ s390_effective_inner_type (struct type *type, unsigned int min_size)
 	{
 	  struct field f = type->field (i);
 
-	  if (field_is_static (&f))
+	  if (f.is_static ())
 	    continue;
 	  if (inner != NULL)
 	    return type;

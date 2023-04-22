@@ -254,7 +254,7 @@ value_struct_element_index (struct value *value, int type_index)
 
   try
     {
-      if (field_is_static (&type->field (type_index)))
+      if (type->field (type_index).is_static ())
 	result = value_static_field (type, type_index);
       else
 	result = value->primitive_field (0, type_index, type);

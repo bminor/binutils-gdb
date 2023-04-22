@@ -193,7 +193,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  /* If requested, skip printing of static fields.  */
 	  if (!options->static_field_print
-	      && field_is_static (&type->field (i)))
+	      && type->field (i).is_static ())
 	    continue;
 
 	  if (fields_seen)
@@ -227,7 +227,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  annotate_field_begin (type->field (i).type ());
 
-	  if (field_is_static (&type->field (i)))
+	  if (type->field (i).is_static ())
 	    {
 	      gdb_puts ("static ", stream);
 	      fprintf_symbol (stream,
@@ -258,7 +258,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	    }
 	  annotate_field_value ();
 
-	  if (!field_is_static (&type->field (i))
+	  if (!type->field (i).is_static ()
 	      && TYPE_FIELD_PACKED (type, i))
 	    {
 	      struct value *v;
@@ -295,7 +295,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		  fputs_styled ("<optimized out or zero length>",
 				metadata_style.style (), stream);
 		}
-	      else if (field_is_static (&type->field (i)))
+	      else if (type->field (i).is_static ())
 		{
 		  try
 		    {
@@ -637,7 +637,7 @@ cp_find_class_member (struct type **self_p, int *fieldno,
   for (i = TYPE_N_BASECLASSES (self); i < len; i++)
     {
       field &f = self->field (i);
-      if (field_is_static (&f))
+      if (f.is_static ())
 	continue;
       LONGEST bitpos = f.loc_bitpos ();
 

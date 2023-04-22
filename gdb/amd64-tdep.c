@@ -557,7 +557,7 @@ amd64_has_unaligned_fields (struct type *type)
 	  /* Ignore static fields, empty fields (for example nested
 	     empty structures), and bitfields (these are handled by
 	     the caller).  */
-	  if (field_is_static (&type->field (i))
+	  if (type->field (i).is_static ()
 	      || (TYPE_FIELD_BITSIZE (type, i) == 0
 		  && subtype->length () == 0)
 	      || TYPE_FIELD_PACKED (type, i))
@@ -601,7 +601,7 @@ amd64_classify_aggregate_field (struct type *type, int i,
 
   /* Ignore static fields, or empty fields, for example nested
      empty structures.*/
-  if (field_is_static (&type->field (i)) || bitsize == 0)
+  if (type->field (i).is_static () || bitsize == 0)
     return;
 
   int bitpos = bitoffset + type->field (i).loc_bitpos ();

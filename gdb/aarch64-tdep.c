@@ -1537,7 +1537,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	for (int i = 0; i < type->num_fields (); i++)
 	  {
 	    /* Ignore any static fields.  */
-	    if (field_is_static (&type->field (i)))
+	    if (type->field (i).is_static ())
 	      continue;
 
 	    struct type *member = check_typedef (type->field (i).type ());
@@ -1813,7 +1813,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
       for (int i = 0; i < arg_type->num_fields (); i++)
 	{
 	  /* Don't include static fields.  */
-	  if (field_is_static (&arg_type->field (i)))
+	  if (arg_type->field (i).is_static ())
 	    continue;
 
 	  struct value *field = arg->primitive_field (0, i, arg_type);

@@ -2017,7 +2017,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	  {
 	    struct value *v;
 
-	    if (field_is_static (&type->field (i)))
+	    if (type->field (i).is_static ())
 	      v = value_static_field (type, i);
 	    else
 	      v = arg1->primitive_field (offset, i, type);
@@ -2462,7 +2462,7 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
 
   for (i = TYPE_N_BASECLASSES (t); i < t->num_fields (); i++)
     {
-      if (!field_is_static (&t->field (i))
+      if (!t->field (i).is_static ()
 	  && bitpos == t->field (i).loc_bitpos ()
 	  && types_equal (ftype, t->field (i).type ()))
 	return (*argp)->primitive_field (0, i, t);
@@ -3581,7 +3581,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
       if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
-	  if (field_is_static (&t->field (i)))
+	  if (t->field (i).is_static ())
 	    {
 	      struct value *v = value_static_field (t, i);
 	      if (want_address)

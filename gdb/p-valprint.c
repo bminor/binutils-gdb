@@ -553,7 +553,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	{
 	  /* If requested, skip printing of static fields.  */
 	  if (!options->pascal_static_field_print
-	      && field_is_static (&type->field (i)))
+	      && type->field (i).is_static ())
 	    continue;
 	  if (fields_seen)
 	    gdb_printf (stream, ", ");
@@ -582,7 +582,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  annotate_field_begin (type->field (i).type ());
 
-	  if (field_is_static (&type->field (i)))
+	  if (type->field (i).is_static ())
 	    {
 	      gdb_puts ("static ", stream);
 	      fprintf_symbol (stream,
@@ -597,7 +597,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	  gdb_puts (" = ", stream);
 	  annotate_field_value ();
 
-	  if (!field_is_static (&type->field (i))
+	  if (!type->field (i).is_static ()
 	      && TYPE_FIELD_PACKED (type, i))
 	    {
 	      struct value *v;
@@ -634,7 +634,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 		  fputs_styled ("<optimized out or zero length>",
 				metadata_style.style (), stream);
 		}
-	      else if (field_is_static (&type->field (i)))
+	      else if (type->field (i).is_static ())
 		{
 		  /* struct value *v = value_static_field (type, i);
 		     v4.17 specific.  */

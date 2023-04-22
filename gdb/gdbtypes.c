@@ -2113,7 +2113,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	for (i = 0; i < type->num_fields (); ++i)
 	  {
 	    /* Static fields can be ignored here.  */
-	    if (field_is_static (&type->field (i)))
+	    if (type->field (i).is_static ())
 	      continue;
 	    /* If the field has dynamic type, then so does TYPE.  */
 	    if (is_dynamic_type_internal (type->field (i).type (), 0))
@@ -2461,7 +2461,7 @@ resolve_dynamic_union (struct type *type,
     {
       struct type *t;
 
-      if (field_is_static (&type->field (i)))
+      if (type->field (i).is_static ())
 	continue;
 
       t = resolve_dynamic_type_internal (resolved_type->field (i).type (),
@@ -2677,7 +2677,7 @@ resolve_dynamic_struct (struct type *type,
       unsigned new_bit_length;
       struct property_addr_info pinfo;
 
-      if (field_is_static (&resolved_type->field (i)))
+      if (resolved_type->field (i).is_static ())
 	continue;
 
       if (resolved_type->field (i).loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
@@ -3582,7 +3582,7 @@ type_align (struct type *type)
 	int number_of_non_static_fields = 0;
 	for (unsigned i = 0; i < type->num_fields (); ++i)
 	  {
-	    if (!field_is_static (&type->field (i)))
+	    if (!type->field (i).is_static ())
 	      {
 		number_of_non_static_fields++;
 		ULONGEST f_align = type_align (type->field (i).type ());
@@ -4939,18 +4939,6 @@ print_args (struct field *args, int nargs, int spaces)
 	  recursive_dump_type (args[i].type (), spaces + 2);
 	}
     }
-}
-
-int
-field_is_static (struct field *f)
-{
-  /* "static" fields are the fields whose location is not relative
-     to the address of the enclosing struct.  It would be nice to
-     have a dedicated flag that would be set for static fields when
-     the type is being created.  But in practice, checking the field
-     loc_kind should give us an accurate answer.  */
-  return (f->loc_kind () == FIELD_LOC_KIND_PHYSNAME
-	  || f->loc_kind () == FIELD_LOC_KIND_PHYSADDR);
 }
 
 static void

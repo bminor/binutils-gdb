@@ -125,7 +125,7 @@ void
 print_offset_data::update (struct type *type, unsigned int field_idx,
 			   struct ui_file *stream)
 {
-  if (field_is_static (&type->field (field_idx)))
+  if (type->field (field_idx).is_static ())
     {
       print_spaces (indentation, stream);
       return;

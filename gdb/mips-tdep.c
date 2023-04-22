@@ -4886,7 +4886,7 @@ mips_n32n64_fp_arg_chunk_p (struct gdbarch *gdbarch, struct type *arg_type,
       struct type *field_type;
 
       /* We're only looking at normal fields.  */
-      if (field_is_static (&arg_type->field (i))
+      if (arg_type->field (i).is_static ()
 	  || (arg_type->field (i).loc_bitpos () % 8) != 0)
 	continue;
 

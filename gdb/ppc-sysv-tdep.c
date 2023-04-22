@@ -1149,7 +1149,7 @@ ppc64_aggregate_candidate (struct type *type,
 	    {
 	      LONGEST sub_count;
 
-	      if (field_is_static (&type->field (i)))
+	      if (type->field (i).is_static ())
 		continue;
 
 	      sub_count = ppc64_aggregate_candidate

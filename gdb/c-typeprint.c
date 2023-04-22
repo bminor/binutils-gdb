@@ -1113,7 +1113,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		 TYPE_FIELD_PRIVATE (type, i), flags);
 	    }
 
-	  bool is_static = field_is_static (&type->field (i));
+	  bool is_static = type->field (i).is_static ();
 
 	  if (flags->print_offsets)
 	    podata->update (type, i, stream);

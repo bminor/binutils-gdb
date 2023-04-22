@@ -516,12 +516,12 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		}
 
 	      print_spaces (level + 4, stream);
-	      if (field_is_static (&type->field (i)))
+	      if (type->field (i).is_static ())
 		gdb_printf (stream, "static ");
 	      print_type (type->field (i).type (),
 				 type->field (i).name (),
 				 stream, show - 1, level + 4, flags);
-	      if (!field_is_static (&type->field (i))
+	      if (!type->field (i).is_static ()
 		  && TYPE_FIELD_PACKED (type, i))
 		{
 		  /* It is a bitfield.  This code does not attempt

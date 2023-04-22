@@ -2698,7 +2698,7 @@ i386_16_byte_align_p (struct type *type)
       int i;
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  if (field_is_static (&type->field (i)))
+	  if (type->field (i).is_static ())
 	    continue;
 	  if (i386_16_byte_align_p (type->field (i).type ()))
 	    return 1;

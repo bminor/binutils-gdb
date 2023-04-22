@@ -2366,7 +2366,7 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
       fieldno++;
       /* Skip static fields.  */
       while (fieldno < struct_type->num_fields ()
-	     && field_is_static (&struct_type->field (fieldno)))
+	     && struct_type->field (fieldno).is_static ())
 	fieldno++;
       if (fieldno >= struct_type->num_fields ())
 	error (_("too many initializers"));
