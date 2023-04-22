@@ -3715,7 +3715,7 @@ skip_prologue_using_linetable (CORE_ADDR func_addr)
 
       for (;
 	   (it < linetable->item + linetable->nitems
-	    && it->raw_pc () <= unrel_end);
+	    && it->raw_pc () < unrel_end);
 	   it++)
 	if (it->prologue_end)
 	  return {it->pc (objfile)};
