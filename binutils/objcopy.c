@@ -3625,8 +3625,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   while (!status && this_element != NULL)
     {
       char *output_name;
-      bfd *output_bfd;
-      bfd *last_element;
+      bfd *output_element;
       struct stat buf;
       int stat_status = 0;
       bool del = true;
@@ -3638,6 +3637,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	{
 	  non_fatal (_("illegal pathname found in archive member: %s"),
 		     bfd_get_filename (this_element));
+	  bfd_close (this_element);
 	  status = 1;
 	  goto cleanup_and_exit;
 	}
@@ -3656,6 +3656,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	    {
 	      non_fatal (_("cannot create tempdir for archive copying (error: %s)"),
 			 strerror (errno));
+	      bfd_close (this_element);
 	      status = 1;
 	      goto cleanup_and_exit;
 	    }
@@ -3693,20 +3694,21 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       /* PR binutils/3110: Cope with archives
 	 containing multiple target types.  */
       if (force_output_target || !ok_object)
-	output_bfd = bfd_openw (output_name, output_target);
+	output_element = bfd_openw (output_name, output_target);
       else
-	output_bfd = bfd_openw (output_name, bfd_get_target (this_element));
+	output_element = bfd_openw (output_name, bfd_get_target (this_element));
 
-      if (output_bfd == NULL)
+      if (output_element == NULL)
 	{
 	  bfd_nonfatal_message (output_name, NULL, NULL, NULL);
+	  bfd_close (this_element);
 	  status = 1;
 	  goto cleanup_and_exit;
 	}
 
       if (ok_object)
 	{
-	  del = !copy_object (this_element, output_bfd, input_arch);
+	  del = !copy_object (this_element, output_element, input_arch);
 
 	  if (del && bfd_get_arch (this_element) == bfd_arch_unknown)
 	    /* Try again as an unknown object file.  */
@@ -3714,10 +3716,10 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	}
 
       if (!ok_object)
-	del = !copy_unknown_object (this_element, output_bfd);
+	del = !copy_unknown_object (this_element, output_element);
 
       if (!(ok_object && !del && !status
-	    ? bfd_close : bfd_close_all_done) (output_bfd))
+	    ? bfd_close : bfd_close_all_done) (output_element))
 	{
 	  bfd_nonfatal_message (output_name, NULL, NULL, NULL);
 	  /* Error in new object file. Don't change archive.  */
@@ -3729,23 +3731,24 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  unlink (output_name);
 	  status = 1;
 	}
+
+      if (status)
+	bfd_close (this_element);
       else
 	{
 	  if (preserve_dates && stat_status == 0)
 	    set_times (output_name, &buf);
 
-	  /* Open the newly output file and attach to our list.  */
-	  output_bfd = bfd_openr (output_name, output_target);
+	  /* Open the newly created output file and attach to our list.  */
+	  output_element = bfd_openr (output_name, output_target);
 
-	  l->obfd = output_bfd;
+	  l->obfd = output_element;
 
-	  *ptr = output_bfd;
-	  ptr = &output_bfd->archive_next;
+	  *ptr = output_element;
+	  ptr = &output_element->archive_next;
 
-	  last_element = this_element;
-
+	  bfd *last_element = this_element;
 	  this_element = bfd_openr_next_archived_file (ibfd, last_element);
-
 	  bfd_close (last_element);
 	}
     }
