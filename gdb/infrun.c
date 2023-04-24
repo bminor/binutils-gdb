@@ -8499,18 +8499,6 @@ end_stepping_range (struct execution_control_state *ecs)
    with whatever uiout is right.  */
 
 void
-print_end_stepping_range_reason (struct ui_out *uiout)
-{
-  /* For CLI-like interpreters, print nothing.  */
-
-  if (uiout->is_mi_like_p ())
-    {
-      uiout->field_string ("reason",
-			   async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
-    }
-}
-
-void
 print_signal_exited_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 {
   annotate_signalled ();

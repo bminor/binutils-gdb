@@ -61,7 +61,6 @@ static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
 static void mi_on_signal_received (enum gdb_signal siggnal);
-static void mi_on_end_stepping_range (void);
 static void mi_on_signal_exited (enum gdb_signal siggnal);
 static void mi_on_exited (int exitstatus);
 static void mi_on_normal_stop (struct bpstat *bs, int print_frame);
@@ -539,23 +538,6 @@ mi_on_signal_received (enum gdb_signal siggnal)
 
       print_signal_received_reason (mi->mi_uiout, siggnal);
       print_signal_received_reason (mi->cli_uiout, siggnal);
-    }
-}
-
-/* Observer for the end_stepping_range notification.  */
-
-static void
-mi_on_end_stepping_range (void)
-{
-  SWITCH_THRU_ALL_UIS ()
-    {
-      struct mi_interp *mi = find_mi_interp ();
-
-      if (mi == NULL)
-	continue;
-
-      print_end_stepping_range_reason (mi->mi_uiout);
-      print_end_stepping_range_reason (mi->cli_uiout);
     }
 }
 
@@ -1317,8 +1299,6 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
   gdb::observers::signal_received.attach (mi_on_signal_received, "mi-interp");
-  gdb::observers::end_stepping_range.attach (mi_on_end_stepping_range,
-					     "mi-interp");
   gdb::observers::signal_exited.attach (mi_on_signal_exited, "mi-interp");
   gdb::observers::exited.attach (mi_on_exited, "mi-interp");
   gdb::observers::no_history.attach (mi_on_no_history, "mi-interp");

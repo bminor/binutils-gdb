@@ -217,10 +217,6 @@ extern void set_step_info (thread_info *tp,
 extern void print_signal_received_reason (struct ui_out *uiout,
 					  enum gdb_signal siggnal);
 
-/* Print why the inferior has stopped.  We are done with a
-   step/next/si/ni command, print why the inferior has stopped.  */
-extern void print_end_stepping_range_reason (struct ui_out *uiout);
-
 /* The inferior was terminated by a signal, print why it stopped.  */
 extern void print_signal_exited_reason (struct ui_out *uiout,
 					enum gdb_signal siggnal);

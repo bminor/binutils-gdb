@@ -57,9 +57,6 @@ extern observable<struct bpstat */* bs */, int /* print_frame */> normal_stop;
 /* The inferior was stopped by a signal.  */
 extern observable<enum gdb_signal /* siggnal */> signal_received;
 
-/* We are done with a step/next/si/ni command.  */
-extern observable<> end_stepping_range;
-
 /* The inferior was terminated by a signal.  */
 extern observable<enum gdb_signal /* siggnal */> signal_exited;
 

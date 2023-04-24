@@ -34,7 +34,6 @@ bool observer_debug = false;
 
 DEFINE_OBSERVABLE (normal_stop);
 DEFINE_OBSERVABLE (signal_received);
-DEFINE_OBSERVABLE (end_stepping_range);
 DEFINE_OBSERVABLE (signal_exited);
 DEFINE_OBSERVABLE (exited);
 DEFINE_OBSERVABLE (no_history);

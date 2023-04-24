@@ -151,21 +151,6 @@ cli_base_on_signal_received (enum gdb_signal siggnal)
     }
 }
 
-/* Observer for the end_stepping_range notification.  */
-
-static void
-cli_base_on_end_stepping_range ()
-{
-  SWITCH_THRU_ALL_UIS ()
-    {
-      cli_interp_base *cli = as_cli_interp_base (top_level_interpreter ());
-      if (cli == nullptr)
-	continue;
-
-      print_end_stepping_range_reason (cli->interp_ui_out ());
-    }
-}
-
 /* Observer for the signalled notification.  */
 
 static void
@@ -422,8 +407,6 @@ _initialize_cli_interp ()
   /* Note these all work for both the CLI and TUI interpreters.  */
   gdb::observers::normal_stop.attach (cli_base_on_normal_stop,
 				      "cli-interp-base");
-  gdb::observers::end_stepping_range.attach (cli_base_on_end_stepping_range,
-					     "cli-interp-base");
   gdb::observers::signal_received.attach (cli_base_on_signal_received,
 					  "cli-interp-base");
   gdb::observers::signal_exited.attach (cli_base_on_signal_exited,
