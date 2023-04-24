@@ -21,6 +21,11 @@
 
 load_lib completion-support.exp
 
+if { [is_c_compiler_gcc] } {
+    # Gcc fully supports fextended-identifiers starting GCC 5.
+    require {expr [gcc_major_version] >= 5}
+}
+
 standard_testfile
 
 # Enable basic use of UTF-8.  LC_ALL gets reset for each testfile.
