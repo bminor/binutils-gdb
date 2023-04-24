@@ -37,7 +37,7 @@ proc run_one_test { non-stop target-non-stop } {
 	}
 
 	if { [prepare_for_testing "failed to prepare" $::testfile $::srcfile \
-		{debug pthreads}] } {
+		{debug pthreads additional_flags=-std=gnu99}] } {
 	    return -1
 	}
     }
