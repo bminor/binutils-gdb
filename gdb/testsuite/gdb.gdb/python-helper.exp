@@ -124,7 +124,9 @@ proc test_python_helper {} {
     # GDB, this should result in the outer GDB stopping at one of the
     # breakpoints we created..
     send_inferior "print 1\n"
-    gdb_test -prompt $outer_prompt_re "" "Breakpoint $decimal, value_print.*" "hit breakpoint in outer gdb"
+    gdb_test -prompt $outer_prompt_re "" \
+	"Breakpoint $bkptno_numopt_re, value_print.*" \
+	"hit breakpoint in outer gdb"
 
     # Now inspect the type of parameter VAL, this should trigger the
     # pretty printers.
@@ -162,8 +164,10 @@ proc test_python_helper {} {
     # information, this will include the TYPE_SPECIFIC_INT
     # information.
     send_inferior "print global_c.m_val\n"
-    gdb_test -prompt $outer_prompt_re "" "Breakpoint $decimal, value_print.*" "print integer from DWARF info"
-	
+    gdb_test -prompt $outer_prompt_re "" \
+	"Breakpoint $bkptno_numopt_re, value_print.*" \
+	"print integer from DWARF info"
+
     set answer [multi_line \
 		    "$decimal = " \
 		    "{name = $hex \"int\"," \
@@ -187,23 +191,58 @@ proc test_python_helper {} {
     # Send a command to the inner GDB, this should result in the outer
     # GDB stopping at the value_print breakpoint again.
     send_inferior "ptype global_c\n"
-    gdb_test -prompt $outer_prompt_re "" "Breakpoint $bkptno_numopt_re, c_print_type.*" "hit breakpoint in outer gdb again"
+    set test "hit breakpoint in outer gdb again"
+    set in_outer_gdb 0
+    gdb_test_multiple "" $test  -prompt $outer_prompt_re {
+	-re -wrap "Breakpoint $bkptno_numopt_re, c_print_type.*" {
+	    pass $gdb_test_name
+	    set in_outer_gdb 1
+	}
+	-re "\r\n$gdb_prompt $" {
+	    unsupported $gdb_test_name
+	}
+    }
 
-    set answer [multi_line \
-		    "$decimal = " \
-		    "{name = $hex \"CC\"," \
-		    " code = TYPE_CODE_STRUCT," \
-		    " flags = \[^\r\n\]+," \
-		    " owner = $hex \\(objfile\\)," \
-		    " target_type = 0x0," \
-		    " flds_bnds\\.fields\\\[0\\\]:" \
-		    "  {m_name = $hex \"m_val\"," \
-		    "   m_type = $hex," \
-		    "   m_loc_kind = FIELD_LOC_KIND_BITPOS," \
-		    "   bitsize = 0," \
-		    "   bitpos = 0}," \
-		    " cplus_stuff = $hex}"]
-    gdb_test -prompt $outer_prompt_re "print *type->main_type" $answer
+    if { ! $in_outer_gdb } {
+	return 0
+    }
+
+    set cmd "print *type->main_type"
+    set cmd_supported 1
+    foreach sub_expr { type type->main_type } {
+	set ok 0
+	gdb_test_multiple "print $sub_expr" "" -prompt $outer_prompt_re {
+	    -re -wrap " = \\(\[^\r\n\]+ \\*\\) $hex" {
+		set ok 1
+	    }
+	    -re -wrap "" {
+	    }
+	}
+	if { ! $ok } {
+	    set cmd_supported 0
+	    break
+	}
+    }
+
+    if { $cmd_supported } {
+	set answer [multi_line \
+			"$decimal = " \
+			"{name = $hex \"CC\"," \
+			" code = TYPE_CODE_STRUCT," \
+			" flags = \[^\r\n\]+," \
+			" owner = $hex \\(objfile\\)," \
+			" target_type = 0x0," \
+			" flds_bnds\\.fields\\\[0\\\]:" \
+			"  {m_name = $hex \"m_val\"," \
+			"   m_type = $hex," \
+			"   m_loc_kind = FIELD_LOC_KIND_BITPOS," \
+			"   bitsize = 0," \
+			"   bitpos = 0}," \
+			" cplus_stuff = $hex}"]
+	gdb_test -prompt $outer_prompt_re $cmd $answer
+    } else {
+	unsupported $cmd
+    }
 
     # Test the htab_t pretty-printer.
     gdb_test -prompt $outer_prompt_re "print all_bfds" "htab_t with ${::decimal} elements = \\{${::hex}.*\\}"
