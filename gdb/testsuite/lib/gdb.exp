@@ -1516,6 +1516,21 @@ if { [tcl_version_at_least 8 5] == 0 } {
     }
 }
 
+if { [tcl_version_at_least 8 6] == 0 } {
+    # lmap was added in tcl 8.6.  Only add if missing.
+
+    # Note that we only implement the simple variant for now.
+    proc lmap { varname list body } {
+	set res {}
+	foreach val $list {
+	    uplevel 1 "set $varname $val"
+	    lappend res [uplevel 1 $body]
+	}
+
+	return $res
+    }
+}
+
 # gdb_test_no_output [-prompt PROMPT_REGEXP] [-nopass] COMMAND [MESSAGE]
 # Send a command to GDB and verify that this command generated no output.
 #
