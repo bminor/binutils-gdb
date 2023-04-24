@@ -24,7 +24,8 @@ set sources \
 	 ${testfile}.c \
 	 ${testfile}-hello.c \
 	 ${testfile}-world.c]
-set sources [lmap i $sources { string cat "${srcdir}/${subdir}/" $i }]
+set sources [lmap i $sources { expr { "$srcdir/$subdir/$i" } }]
+
 lassign [function_range hello $sources] \
     hello_start hello_len
 lassign [function_range world $sources] \
