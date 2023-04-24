@@ -4852,13 +4852,18 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_BSTAT:
 	      dst->symbol.flags = BSF_DEBUGGING;
 
-	      /* The value is actually a symbol index.  Save a pointer
-		 to the symbol instead of the index.  FIXME: This
-		 should use a union.  */
-	      src->u.syment.n_value
-		= (uintptr_t) (native_symbols + src->u.syment.n_value);
-	      dst->symbol.value = src->u.syment.n_value;
-	      src->fix_value = 1;
+	      if (src->u.syment.n_value >= obj_raw_syment_count (abfd))
+		dst->symbol.value = 0;
+	      else
+		{
+		  /* The value is actually a symbol index.  Save a pointer
+		     to the symbol instead of the index.  FIXME: This
+		     should use a union.  */
+		  src->u.syment.n_value
+		    = (uintptr_t) (native_symbols + src->u.syment.n_value);
+		  dst->symbol.value = src->u.syment.n_value;
+		  src->fix_value = 1;
+		}
 	      break;
 #endif
 
