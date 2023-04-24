@@ -9668,6 +9668,14 @@ gdb_caching_proc have_compile_flag { flag } {
 		additional_flags=$flag]
 }
 
+# Return 1 if we can create an executable using compile and link flag FLAG.
+
+gdb_caching_proc have_compile_and_link_flag { flag } {
+    set src { int main () { return 0; } }
+    return [gdb_can_simple_compile have_compile_and_link_flag_$flag $src executable \
+		additional_flags=$flag]
+}
+
 # Handle include file $srcdir/$subdir/FILE.
 
 proc include_file { file } {

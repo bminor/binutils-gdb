@@ -50,6 +50,14 @@ if [istarget "s390*-*-*"] {
     set march2 "-m32"
 }
 
+if { $march1 != "" } {
+    require "have_compile_and_link_flag $march1"
+}
+
+if { $march2 != "" } {
+    require "have_compile_and_link_flag $march2"
+}
+
 if { [build_executable "failed to prepare" ${exec1} "${srcfile1}" \
 	  [list debug additional_flags=${march1}]] } {
     return -1
