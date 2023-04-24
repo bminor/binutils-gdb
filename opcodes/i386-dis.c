@@ -345,6 +345,12 @@ fetch_error (const instr_info *ins)
   const struct dis_private *priv = ins->info->private_data;
   const char *name = NULL;
 
+  /* Our caller has put a pointer to a local variable in info->private_data
+     and it is going to return right after this function has returned.  Some
+     compilers diagnose this as a dangling pointer.  Zap the pointer here to
+     avoid needing to do so on all involved return paths in the caller.  */
+  ins->info->private_data = NULL;
+
   if (ins->codep <= priv->the_buffer)
     return -1;
 
