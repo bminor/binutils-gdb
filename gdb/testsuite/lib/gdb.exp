@@ -1126,7 +1126,7 @@ proc gdb_test_multiple { command message args } {
 	if { $wrap_pattern } {
 	    # Wrap subst_item as is done for the gdb_test PATTERN argument.
 	    lappend $current_list \
-		"\[\r\n\]*(?:$subst_item)\[\r\n\]+$gdb_prompt $"
+		"\[\r\n\]*(?:$subst_item)\[\r\n\]+$prompt_regexp"
 	    set wrap_pattern 0
 	} else {
 	    lappend $current_list $subst_item
