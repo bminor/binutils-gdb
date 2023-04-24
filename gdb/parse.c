@@ -268,7 +268,8 @@ parser_state::push_dollar (struct stoken str)
     {
       /* Just dollars (one or two).  */
       i = -negate;
-      goto handle_last;
+      push_new<expr::last_operation> (i);
+      return;
     }
   /* Is the rest of the token digits?  */
   for (; i < str.length; i++)
@@ -279,7 +280,8 @@ parser_state::push_dollar (struct stoken str)
       i = atoi (str.ptr + 1 + negate);
       if (negate)
 	i = -i;
-      goto handle_last;
+      push_new<expr::last_operation> (i);
+      return;
     }
 
   /* Handle tokens that refer to machine registers:
@@ -287,7 +289,14 @@ parser_state::push_dollar (struct stoken str)
   i = user_reg_map_name_to_regnum (gdbarch (),
 				   str.ptr + 1, str.length - 1);
   if (i >= 0)
-    goto handle_register;
+    {
+      str.length--;
+      str.ptr++;
+      push_new<expr::register_operation> (copy_name (str));
+      block_tracker->update (expression_context_block,
+			     INNERMOST_BLOCK_FOR_REGISTERS);
+      return;
+    }
 
   /* Any names starting with $ are probably debugger internal variables.  */
 
@@ -319,17 +328,6 @@ parser_state::push_dollar (struct stoken str)
 
   push_new<expr::internalvar_operation>
     (create_internalvar (copy.c_str () + 1));
-  return;
-handle_last:
-  push_new<expr::last_operation> (i);
-  return;
-handle_register:
-  str.length--;
-  str.ptr++;
-  push_new<expr::register_operation> (copy_name (str));
-  block_tracker->update (expression_context_block,
-			 INNERMOST_BLOCK_FOR_REGISTERS);
-  return;
 }
 
 
