@@ -132,22 +132,22 @@ proc test_python_helper {} {
     # pretty printers.
     set answer [multi_line \
 		    "${decimal} = " \
-		    "{pointer_type = 0x0," \
+		    "\{pointer_type = 0x0," \
 		    " reference_type = 0x0," \
 		    " chain = 0x0," \
 		    " instance_flags = 0," \
 		    " length = $decimal," \
-		    " main_type = $hex}"]
+		    " main_type = $hex\}"]
     gdb_test -prompt $outer_prompt_re "print *val->m_type" $answer "pretty print type"
 
     set answer [multi_line \
 		    "$decimal = " \
-		    "{name = $hex \"int\"," \
+		    "\{name = $hex \"int\"," \
 		    " code = TYPE_CODE_INT," \
 		    " flags = \[^\r\n\]+," \
 		    " owner = $hex \\(gdbarch\\)," \
 		    " target_type = 0x0," \
-		    " int_stuff = { bit_size = $decimal, bit_offset = $decimal }}"]
+		    " int_stuff = \{ bit_size = $decimal, bit_offset = $decimal \}\}"]
     gdb_test -prompt $outer_prompt_re "print *val->m_type->main_type" $answer "pretty print type->main_type"
 
     # Send the continue to the outer GDB, which resumes the inner GDB,
@@ -170,12 +170,12 @@ proc test_python_helper {} {
 
     set answer [multi_line \
 		    "$decimal = " \
-		    "{name = $hex \"int\"," \
+		    "\{name = $hex \"int\"," \
 		    " code = TYPE_CODE_INT," \
 		    " flags = \[^\r\n\]+," \
 		    " owner = $hex \\(objfile\\)," \
 		    " target_type = 0x0," \
-		    " int_stuff = { bit_size = $decimal, bit_offset = $decimal }}"]
+		    " int_stuff = \{ bit_size = $decimal, bit_offset = $decimal \}\}"]
     gdb_test -prompt $outer_prompt_re "print *val->m_type->main_type" $answer "pretty print type->main_type for DWARF type"
 
     # Send the continue to the outer GDB, which resumes the inner GDB,
@@ -227,18 +227,18 @@ proc test_python_helper {} {
     if { $cmd_supported } {
 	set answer [multi_line \
 			"$decimal = " \
-			"{name = $hex \"CC\"," \
+			"\{name = $hex \"CC\"," \
 			" code = TYPE_CODE_STRUCT," \
 			" flags = \[^\r\n\]+," \
 			" owner = $hex \\(objfile\\)," \
 			" target_type = 0x0," \
 			" flds_bnds\\.fields\\\[0\\\]:" \
-			"  {m_name = $hex \"m_val\"," \
+			"  \{m_name = $hex \"m_val\"," \
 			"   m_type = $hex," \
 			"   m_loc_kind = FIELD_LOC_KIND_BITPOS," \
 			"   bitsize = 0," \
-			"   bitpos = 0}," \
-			" cplus_stuff = $hex}"]
+			"   bitpos = 0\}," \
+			" cplus_stuff = $hex\}"]
 	gdb_test -prompt $outer_prompt_re $cmd $answer
     } else {
 	unsupported $cmd
