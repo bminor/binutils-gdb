@@ -20618,6 +20618,14 @@ makes the next @code{continue} command or stepping command execute at
 address @code{0x485}, rather than at the address where your program stopped.
 @xref{Continuing and Stepping, ,Continuing and Stepping}.
 
+However, writing directly to @code{$pc} will only change the value of
+the program-counter register, while using @code{jump} will ensure that
+any additional auxiliary state is also updated.  For example, on
+SPARC, @code{jump} will update both @code{$pc} and @code{$npc}
+registers prior to resuming execution.  When using the approach of
+writing directly to @code{$pc} it is your job to also update the
+@code{$npc} register.
+
 The most common occasion to use the @code{jump} command is to back
 up---perhaps with more breakpoints set---over a portion of a program
 that has already executed, in order to examine its execution in more
