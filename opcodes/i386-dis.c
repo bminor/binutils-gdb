@@ -9737,6 +9737,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 {
   const struct dis386 *dp;
   int i;
+  int ret;
   char *op_txt[MAX_OPERANDS];
   int needcomma;
   bool intel_swap_2_3;
@@ -9893,16 +9894,21 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	i386_dis_printf (&ins, dis_style_mnemonic, "%s%s",
 			 (i == 0 ? "" : " "),
 			 prefix_name (&ins, ins.all_prefixes[i], sizeflag));
-      return i;
+      ret = i;
+      goto out;
 
     case ckp_fetch_error:
-      return fetch_error (&ins);
+      goto fetch_error_out;
     }
 
   ins.insn_codep = ins.codep;
 
   if (!fetch_code (info, ins.codep + 1))
-    return fetch_error (&ins);
+    {
+    fetch_error_out:
+      ret = fetch_error (&ins);
+      goto out;
+    }
 
   ins.two_source_ops = (*ins.codep == 0x62) || (*ins.codep == 0xc8);
 
@@ -9915,7 +9921,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	i386_dis_printf (&ins, dis_style_mnemonic, "%s ",
 			 prefix_name (&ins, ins.all_prefixes[i], sizeflag));
       i386_dis_printf (&ins, dis_style_mnemonic, "fwait");
-      return i + 1;
+      ret = i + 1;
+      goto out;
     }
 
   if (*ins.codep == 0x0f)
@@ -9924,7 +9931,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 
       ins.codep++;
       if (!fetch_code (info, ins.codep + 1))
-	return fetch_error (&ins);
+	goto fetch_error_out;
       threebyte = *ins.codep;
       dp = &dis386_twobyte[threebyte];
       ins.need_modrm = twobyte_has_modrm[threebyte];
@@ -9948,30 +9955,30 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 
   ins.end_codep = ins.codep;
   if (ins.need_modrm && !fetch_modrm (&ins))
-    return fetch_error (&ins);
+    goto fetch_error_out;
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
     {
       if (!get_sib (&ins, sizeflag)
 	  || !dofloat (&ins, sizeflag))
-	return fetch_error (&ins);
+	goto fetch_error_out;
     }
   else
     {
       dp = get_valid_dis386 (dp, &ins);
       if (dp == &err_opcode)
-	return fetch_error (&ins);
+	goto fetch_error_out;
       if (dp != NULL && putop (&ins, dp->name, sizeflag) == 0)
 	{
 	  if (!get_sib (&ins, sizeflag))
-	    return fetch_error (&ins);
+	    goto fetch_error_out;
 	  for (i = 0; i < MAX_OPERANDS; ++i)
 	    {
 	      ins.obufp = ins.op_out[i];
 	      ins.op_ad = MAX_OPERANDS - 1 - i;
 	      if (dp->op[i].rtn
 		  && !dp->op[i].rtn (&ins, dp->op[i].bytemode, sizeflag))
-		return fetch_error (&ins);
+		goto fetch_error_out;
 	      /* For EVEX instruction after the last operand masking
 		 should be printed.  */
 	      if (i == 0 && ins.vex.evex)
@@ -10061,14 +10068,16 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   if (ins.need_vex && ins.vex.register_specifier != 0)
     {
       i386_dis_printf (&ins, dis_style_text, "(bad)");
-      return ins.end_codep - priv.the_buffer;
+      ret = ins.end_codep - priv.the_buffer;
+      goto out;
     }
 
   /* If EVEX.z is set, there must be an actual mask register in use.  */
   if (ins.vex.zeroing && ins.vex.mask_register_specifier == 0)
     {
       i386_dis_printf (&ins, dis_style_text, "(bad)");
-      return ins.end_codep - priv.the_buffer;
+      ret = ins.end_codep - priv.the_buffer;
+      goto out;
     }
 
   switch (dp->prefix_requirement)
@@ -10079,7 +10088,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       if (ins.need_vex ? !ins.vex.prefix : !(ins.prefixes & PREFIX_DATA))
 	{
 	  i386_dis_printf (&ins, dis_style_text, "(bad)");
-	  return ins.end_codep - priv.the_buffer;
+	  ret = ins.end_codep - priv.the_buffer;
+	  goto out;
 	}
       ins.used_prefixes |= PREFIX_DATA;
       /* Fall through.  */
@@ -10106,7 +10116,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	      && !ins.vex.w != !(ins.used_prefixes & PREFIX_DATA)))
 	{
 	  i386_dis_printf (&ins, dis_style_text, "(bad)");
-	  return ins.end_codep - priv.the_buffer;
+	  ret = ins.end_codep - priv.the_buffer;
+	  goto out;
 	}
       break;
 
@@ -10162,7 +10173,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   if ((ins.codep - ins.start_codep) > MAX_CODE_LENGTH)
     {
       i386_dis_printf (&ins, dis_style_text, "(bad)");
-      return MAX_CODE_LENGTH;
+      ret = MAX_CODE_LENGTH;
+      goto out;
     }
 
   /* Calculate the number of operands this instruction has.  */
@@ -10270,7 +10282,10 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	  info);
 	break;
       }
-  return ins.codep - priv.the_buffer;
+  ret = ins.codep - priv.the_buffer;
+ out:
+  info->private_data = NULL;
+  return ret;
 }
 
 /* Here for backwards compatibility.  When gdb stops using
