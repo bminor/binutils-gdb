@@ -2515,6 +2515,11 @@ gdb_caching_proc allow_dap_tests {} {
 	return 0
     }
 
+    # ton.tcl uses "string is entier", supported starting tcl 8.6.
+    if { ![tcl_version_at_least 8 6] } {
+	return 0
+    }
+
     # With set auto-connect-native-target off, we run into:
     # +++ run
     # Traceback (most recent call last):
