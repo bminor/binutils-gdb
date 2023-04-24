@@ -112,14 +112,21 @@ typedef std::unordered_map<ULONGEST, dwarf2_cie *> dwarf2_cie_table;
 
 struct dwarf2_fde
 {
+  /* Return the final location in this FDE.  */
+  unrelocated_addr end_addr () const
+  {
+    return (unrelocated_addr) ((ULONGEST) initial_location
+			       + address_range);
+  }
+
   /* CIE for this FDE.  */
   struct dwarf2_cie *cie;
 
   /* First location associated with this FDE.  */
-  CORE_ADDR initial_location;
+  unrelocated_addr initial_location;
 
   /* Number of bytes of program instructions described by this FDE.  */
-  CORE_ADDR address_range;
+  ULONGEST address_range;
 
   /* Instruction sequence.  */
   const gdb_byte *instructions;
@@ -173,10 +180,10 @@ static struct dwarf2_fde *dwarf2_frame_find_fde
 static int dwarf2_frame_adjust_regnum (struct gdbarch *gdbarch, int regnum,
 				       int eh_frame_p);
 
-static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
-				     int ptr_len, const gdb_byte *buf,
-				     unsigned int *bytes_read_ptr,
-				     CORE_ADDR func_base);
+static ULONGEST read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
+				    int ptr_len, const gdb_byte *buf,
+				    unsigned int *bytes_read_ptr,
+				    unrelocated_addr func_base);
 
 
 /* See dwarf2/frame.h.  */
@@ -948,8 +955,8 @@ dwarf2_frame_cache (frame_info_ptr this_frame, void **this_cache)
   LONGEST entry_cfa_sp_offset;
   int entry_cfa_sp_offset_p = 0;
   if (get_frame_func_if_available (this_frame, &entry_pc)
-      && fde->initial_location <= entry_pc
-      && entry_pc < fde->initial_location + fde->address_range)
+      && fde->initial_location <= (unrelocated_addr) (entry_pc - text_offset)
+      && (unrelocated_addr) (entry_pc - text_offset) < fde->end_addr ())
     {
       /* Decode the insns in the FDE up to the entry PC.  */
       instr = execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
@@ -1469,14 +1476,14 @@ encoding_for_size (unsigned int size)
     }
 }
 
-static CORE_ADDR
+static ULONGEST
 read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 		    int ptr_len, const gdb_byte *buf,
 		    unsigned int *bytes_read_ptr,
-		    CORE_ADDR func_base)
+		    unrelocated_addr func_base)
 {
   ptrdiff_t offset;
-  CORE_ADDR base;
+  ULONGEST base;
 
   /* GCC currently doesn't generate DW_EH_PE_indirect encodings for
      FDE's.  */
@@ -1501,7 +1508,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       base = unit->tbase;
       break;
     case DW_EH_PE_funcrel:
-      base = func_base;
+      base = (ULONGEST) func_base;
       break;
     case DW_EH_PE_aligned:
       base = 0;
@@ -1576,9 +1583,9 @@ find_cie (const dwarf2_cie_table &cie_table, ULONGEST cie_pointer)
 }
 
 static inline int
-bsearch_fde_cmp (const dwarf2_fde *fde, CORE_ADDR seek_pc)
+bsearch_fde_cmp (const dwarf2_fde *fde, unrelocated_addr seek_pc)
 {
-  if (fde->initial_location + fde->address_range <= seek_pc)
+  if (fde->end_addr () <= seek_pc)
     return -1;
   if (fde->initial_location <= seek_pc)
     return 0;
@@ -1619,7 +1626,6 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile)
   for (objfile *objfile : current_program_space->objfiles ())
     {
       CORE_ADDR offset;
-      CORE_ADDR seek_pc;
 
       if (objfile->obfd == nullptr)
 	continue;
@@ -1640,15 +1646,15 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile)
       offset = objfile->text_section_offset ();
 
       gdb_assert (!fde_table->empty ());
-      if (*pc < offset + (*fde_table)[0]->initial_location)
+      unrelocated_addr seek_pc = (unrelocated_addr) (*pc - offset);
+      if (seek_pc < (*fde_table)[0]->initial_location)
 	continue;
 
-      seek_pc = *pc - offset;
       auto it = gdb::binary_search (fde_table->begin (), fde_table->end (),
 				    seek_pc, bsearch_fde_cmp);
       if (it != fde_table->end ())
 	{
-	  *pc = (*it)->initial_location + offset;
+	  *pc = (CORE_ADDR) (*it)->initial_location + offset;
 	  if (out_per_objfile != nullptr)
 	    *out_per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -1884,7 +1890,7 @@ decode_frame_entry_1 (struct gdbarch *gdbarch,
 	      /* Skip.  Avoid indirection since we throw away the result.  */
 	      gdb_byte encoding = (*buf++) & ~DW_EH_PE_indirect;
 	      read_encoded_value (unit, encoding, cie->ptr_size,
-				  buf, &bytes_read, 0);
+				  buf, &bytes_read, (unrelocated_addr) 0);
 	      buf += bytes_read;
 	      augmentation++;
 	    }
@@ -1920,7 +1926,6 @@ decode_frame_entry_1 (struct gdbarch *gdbarch,
     {
       /* This is a FDE.  */
       struct dwarf2_fde *fde;
-      CORE_ADDR addr;
 
       /* Check that an FDE was expected.  */
       if ((entry_type & EH_FDE_TYPE_ID) == 0)
@@ -1953,16 +1958,19 @@ decode_frame_entry_1 (struct gdbarch *gdbarch,
 
       gdb_assert (fde->cie != NULL);
 
-      addr = read_encoded_value (unit, fde->cie->encoding, fde->cie->ptr_size,
-				 buf, &bytes_read, 0);
-      fde->initial_location = gdbarch_adjust_dwarf2_addr (gdbarch, addr);
+      ULONGEST init_addr
+	= read_encoded_value (unit, fde->cie->encoding, fde->cie->ptr_size,
+			      buf, &bytes_read, (unrelocated_addr) 0);
+      fde->initial_location
+	= (unrelocated_addr) gdbarch_adjust_dwarf2_addr (gdbarch, init_addr);
       buf += bytes_read;
 
-      fde->address_range =
-	read_encoded_value (unit, fde->cie->encoding & 0x0f,
-			    fde->cie->ptr_size, buf, &bytes_read, 0);
-      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + fde->address_range);
-      fde->address_range = addr - fde->initial_location;
+      ULONGEST range
+	= read_encoded_value (unit, fde->cie->encoding & 0x0f,
+			      fde->cie->ptr_size, buf, &bytes_read,
+			      (unrelocated_addr) 0);
+      ULONGEST addr = gdbarch_adjust_dwarf2_addr (gdbarch, init_addr + range);
+      fde->address_range = addr - (ULONGEST) fde->initial_location;
       buf += bytes_read;
 
       /* A 'z' augmentation in the CIE implies the presence of an
@@ -2214,7 +2222,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
      one.  */
   for (struct dwarf2_fde *fde : fde_table)
     {
-      if (fde->initial_location != 0)
+      if (fde->initial_location != (unrelocated_addr) 0)
 	{
 	  first_non_zero_fde = fde;
 	  break;
@@ -2226,10 +2234,9 @@ dwarf2_build_frame_info (struct objfile *objfile)
      Also discard leftovers from --gc-sections.  */
   for (struct dwarf2_fde *fde : fde_table)
     {
-      if (fde->initial_location == 0
+      if (fde->initial_location == (unrelocated_addr) 0
 	  && first_non_zero_fde != NULL
-	  && (first_non_zero_fde->initial_location
-	      < fde->initial_location + fde->address_range))
+	  && first_non_zero_fde->initial_location < fde->end_addr ())
 	continue;
 
       if (fde_prev != NULL
