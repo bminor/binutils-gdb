@@ -970,12 +970,12 @@ varobj_set_value (struct varobj *var, const char *expression)
      We need to first construct a legal expression for this -- ugh!  */
   /* Does this cover all the bases?  */
   struct value *value = NULL; /* Initialize to keep gcc happy.  */
-  int saved_input_radix = input_radix;
   const char *s = expression;
 
   gdb_assert (varobj_editable_p (var));
 
-  input_radix = 10;		/* ALWAYS reset to decimal temporarily.  */
+  /* ALWAYS reset to decimal temporarily.  */
+  auto save_input_radix = make_scoped_restore (&input_radix, 10);
   expression_up exp = parse_exp_1 (&s, 0, 0, 0);
   try
     {
@@ -1022,7 +1022,6 @@ varobj_set_value (struct varobj *var, const char *expression)
      'updated' flag.  There's no need to optimize that, because return value
      of -var-update should be considered an approximation.  */
   var->updated = install_new_value (var, val, false /* Compare values.  */);
-  input_radix = saved_input_radix;
   return true;
 }
 
