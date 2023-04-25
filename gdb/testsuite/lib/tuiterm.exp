@@ -716,6 +716,20 @@ namespace eval Term {
 	return 1
     }
 
+    # Print arg using "verbose -log" if DEBUG_TUI_MATCHING == 1.
+    proc debug_tui_matching { arg } {
+	set debug 0
+	if { [info exists ::DEBUG_TUI_MATCHING] } {
+	    set debug $::DEBUG_TUI_MATCHING
+	}
+
+	if { ! $debug } {
+	    return
+	}
+
+	verbose -log "$arg"
+    }
+
     # Accept some output from gdb and update the screen.  WAIT_FOR is
     # a regexp matching the line to wait for.  Return 0 on timeout, 1
     # on success.
@@ -724,7 +738,10 @@ namespace eval Term {
 	variable _cur_col
 	variable _cur_row
 
+	set fn "wait_for"
+	
 	set prompt_wait_for "$gdb_prompt \$"
+	debug_tui_matching "$fn: regexp: '$wait_for'"
 
 	while 1 {
 	    if { [accept_gdb_output] == 0 } {
@@ -740,10 +757,14 @@ namespace eval Term {
 		set prev [get_line $_cur_row]
 	    }
 	    if {[regexp -- $wait_for $prev]} {
+		debug_tui_matching "$fn: match: '$prev'"
 		if {$wait_for == "$prompt_wait_for"} {
 		    break
 		}
 		set wait_for $prompt_wait_for
+		debug_tui_matching "$fn: regexp prompt: '$wait_for'"
+	    } else {
+		debug_tui_matching "$fn: mismatch: '$prev'"
 	    }
 	}
 
