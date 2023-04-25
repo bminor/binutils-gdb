@@ -63,7 +63,8 @@ set text [Term::get_all_lines]
 gdb_assert {![string match "No Source Available" $text]} \
     "initial source listing"
 
-Term::command "core-file $core"
+send_gdb "core-file $core\n"
+Term::wait_for "Program terminated"
 Term::check_contents "load corefile" "$src_line_nr *$src_line.*$gdb_prompt .*"
 
 Term::command "run"
