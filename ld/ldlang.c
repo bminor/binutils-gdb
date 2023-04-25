@@ -80,6 +80,8 @@ static unsigned int opb_shift = 0;
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
 static lang_input_statement_type *lookup_name (const char *);
+static bool wont_add_section_p (asection *,
+				lang_output_section_statement_type *);
 static void insert_undefined (const char *);
 static bool sort_def_symbol (struct bfd_link_hash_entry *, void *);
 static lang_statement_union_type *new_statement (enum statement_enum type,
@@ -685,6 +687,11 @@ output_section_callback_sort (lang_wild_statement_type *ptr,
   os = (lang_output_section_statement_type *) output;
 
   if (unique_section_p (section, os))
+    return;
+
+  /* Don't add sections to the tree when we already know that
+     lang_add_section won't do anything with it.  */
+  if (wont_add_section_p (section, os))
     return;
 
   node = (lang_section_bst_type *) xmalloc (sizeof (lang_section_bst_type));
@@ -2514,6 +2521,79 @@ lang_discard_section_p (asection *section)
   return discard;
 }
 
+/* Return TRUE if SECTION is never going to be added to output statement
+   OUTPUT.  lang_add_section() definitely won't do anything with SECTION
+   if this returns TRUE.  It may do something (or not) if this returns FALSE.
+
+   Can be used as early-out to filter matches.  This may set
+   output_section of SECTION, if it was unset, to the abs section in case
+   we discover SECTION to be always discarded.  This may also give
+   warning messages.  */
+
+static bool
+wont_add_section_p (asection *section,
+		    lang_output_section_statement_type *output)
+{
+  bool discard;
+
+  /* Is this section one we know should be discarded?  */
+  discard = lang_discard_section_p (section);
+
+  /* Discard input sections which are assigned to a section named
+     DISCARD_SECTION_NAME.  */
+  if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
+    discard = true;
+
+  if (discard)
+    {
+      if (section->output_section == NULL)
+	{
+	  /* This prevents future calls from assigning this section or
+	     warning about it again.  */
+	  section->output_section = bfd_abs_section_ptr;
+	}
+      else if (bfd_is_abs_section (section->output_section))
+	;
+      else if (link_info.non_contiguous_regions_warnings)
+	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions makes "
+		 "section `%pA' from `%pB' match /DISCARD/ clause.\n"),
+	       NULL, section, section->owner);
+
+      return true;
+    }
+
+  if (section->output_section != NULL)
+    {
+      if (!link_info.non_contiguous_regions)
+	return true;
+
+      /* SECTION has already been handled in a special way
+	 (eg. LINK_ONCE): skip it.  */
+      if (bfd_is_abs_section (section->output_section))
+	return true;
+
+      /* Already assigned to the same output section, do not process
+	 it again, to avoid creating loops between duplicate sections
+	 later.  */
+      if (section->output_section == output->bfd_section)
+	return true;
+
+      if (link_info.non_contiguous_regions_warnings && output->bfd_section)
+	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions may "
+		 "change behaviour for section `%pA' from `%pB' (assigned to "
+		 "%pA, but additional match: %pA)\n"),
+	       NULL, section, section->owner, section->output_section,
+	       output->bfd_section);
+
+      /* SECTION has already been assigned to an output section, but
+	 the user allows it to be mapped to another one in case it
+	 overflows. We'll later update the actual output section in
+	 size_input_section as appropriate.  */
+    }
+
+  return false;
+}
+
 /* The wild routines.
 
    These expand statements like *(.text) and foo.o to a list of
@@ -2532,32 +2612,11 @@ lang_add_section (lang_statement_list_type *ptr,
 {
   flagword flags = section->flags;
 
-  bool discard;
   lang_input_section_type *new_section;
   bfd *abfd = link_info.output_bfd;
 
-  /* Is this section one we know should be discarded?  */
-  discard = lang_discard_section_p (section);
-
-  /* Discard input sections which are assigned to a section named
-     DISCARD_SECTION_NAME.  */
-  if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
-    discard = true;
-
-  if (discard)
-    {
-      if (section->output_section == NULL)
-	{
-	  /* This prevents future calls from assigning this section.  */
-	  section->output_section = bfd_abs_section_ptr;
-	}
-      else if (link_info.non_contiguous_regions_warnings)
-	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions makes "
-		 "section `%pA' from `%pB' match /DISCARD/ clause.\n"),
-	       NULL, section, section->owner);
-
-      return;
-    }
+  if (wont_add_section_p (section, output))
+    return;
 
   if (sflag_info)
     {
@@ -2566,35 +2625,6 @@ lang_add_section (lang_statement_list_type *ptr,
       keep = bfd_lookup_section_flags (&link_info, sflag_info, section);
       if (!keep)
 	return;
-    }
-
-  if (section->output_section != NULL)
-    {
-      if (!link_info.non_contiguous_regions)
-	return;
-
-      /* SECTION has already been handled in a special way
-	 (eg. LINK_ONCE): skip it.  */
-      if (bfd_is_abs_section (section->output_section))
-	return;
-
-      /* Already assigned to the same output section, do not process
-	 it again, to avoid creating loops between duplicate sections
-	 later.  */
-      if (section->output_section == output->bfd_section)
-	return;
-
-      if (link_info.non_contiguous_regions_warnings && output->bfd_section)
-	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions may "
-		 "change behaviour for section `%pA' from `%pB' (assigned to "
-		 "%pA, but additional match: %pA)\n"),
-	       NULL, section, section->owner, section->output_section,
-	       output->bfd_section);
-
-      /* SECTION has already been assigned to an output section, but
-	 the user allows it to be mapped to another one in case it
-	 overflows. We'll later update the actual output section in
-	 size_input_section as appropriate.  */
     }
 
   /* We don't copy the SEC_NEVER_LOAD flag from an input section
