@@ -215,6 +215,8 @@ aarch64_fbsd_nat_target::probe_debug_regs (int pid)
 	    case AARCH64_DEBUG_ARCH_V8_1:
 	    case AARCH64_DEBUG_ARCH_V8_2:
 	    case AARCH64_DEBUG_ARCH_V8_4:
+	    case AARCH64_DEBUG_ARCH_V8_8:
+	    case AARCH64_DEBUG_ARCH_V8_9:
 	      break;
 	    default:
 	      return;
