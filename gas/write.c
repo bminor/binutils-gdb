@@ -380,7 +380,7 @@ chain_frchains_together_1 (segT section, struct frchain *frchp)
   fragS dummy, *prev_frag = &dummy;
   fixS fix_dummy, *prev_fix = &fix_dummy;
 
-  for (; frchp; frchp = frchp->frch_next)
+  do
     {
       prev_frag->fr_next = frchp->frch_root;
       prev_frag = frchp->frch_last;
@@ -393,7 +393,8 @@ chain_frchains_together_1 (segT section, struct frchain *frchp)
 	  seg_info (section)->fix_tail = frchp->fix_tail;
 	  prev_fix = frchp->fix_tail;
 	}
-    }
+      frchp = frchp->frch_next;
+    } while (frchp);
   gas_assert (prev_frag != &dummy
 	      && prev_frag->fr_type != 0);
   prev_frag->fr_next = 0;
