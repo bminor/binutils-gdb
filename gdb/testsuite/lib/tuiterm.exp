@@ -707,6 +707,8 @@ namespace eval Term {
 	    timeout {
 		# Assume a timeout means we somehow missed the
 		# expected result, and carry on.
+		warning "timeout in accept_gdb_output"
+		dump_screen
 		return 0
 	    }
 	}
