@@ -2279,6 +2279,15 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 	 && reloc_index < 1
 	 && parse_relocation (&str, reloc, percent_op));
 
+  if (*str == '%')
+    {
+       /* expression() will choke on anything looking like an (unrecognized)
+	  relocation specifier.  Don't even call it, avoiding multiple (and
+	  perhaps redundant) error messages; our caller will issue one.  */
+       ep->X_op = O_illegal;
+       return 0;
+    }
+
   my_getExpression (ep, crux);
   str = expr_parse_end;
 
