@@ -850,7 +850,7 @@ namespace eval Term {
 	global gdb_prompt
 	send_gdb "$cmd\n"
 	set str [string_to_regexp $cmd]
-	set str "^$gdb_prompt $str"
+	set str "(^|\|)$gdb_prompt $str"
 	wait_for $str
     }
 
