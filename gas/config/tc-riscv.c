@@ -2531,7 +2531,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
       imm_expr->X_op = O_absent;
       *imm_reloc = BFD_RELOC_UNUSED;
-      p = percent_op_itype;
+      p = percent_op_null;
 
       for (oparg = insn->args;; ++oparg)
 	{
@@ -3247,7 +3247,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      p = percent_op_rtype;
 	      goto alu_op;
 	    case '0': /* AMO displacement, which must be zero.  */
-	      p = percent_op_null;
 	    load_store:
 	      if (riscv_handle_implicit_zero_offset (imm_expr, asarg))
 		continue;
