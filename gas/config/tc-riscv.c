@@ -2149,34 +2149,34 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
 
 static const struct percent_op_match percent_op_utype[] =
 {
-  {"%tprel_hi", BFD_RELOC_RISCV_TPREL_HI20},
-  {"%pcrel_hi", BFD_RELOC_RISCV_PCREL_HI20},
-  {"%got_pcrel_hi", BFD_RELOC_RISCV_GOT_HI20},
-  {"%tls_ie_pcrel_hi", BFD_RELOC_RISCV_TLS_GOT_HI20},
-  {"%tls_gd_pcrel_hi", BFD_RELOC_RISCV_TLS_GD_HI20},
-  {"%hi", BFD_RELOC_RISCV_HI20},
+  {"tprel_hi", BFD_RELOC_RISCV_TPREL_HI20},
+  {"pcrel_hi", BFD_RELOC_RISCV_PCREL_HI20},
+  {"got_pcrel_hi", BFD_RELOC_RISCV_GOT_HI20},
+  {"tls_ie_pcrel_hi", BFD_RELOC_RISCV_TLS_GOT_HI20},
+  {"tls_gd_pcrel_hi", BFD_RELOC_RISCV_TLS_GD_HI20},
+  {"hi", BFD_RELOC_RISCV_HI20},
   {0, 0}
 };
 
 static const struct percent_op_match percent_op_itype[] =
 {
-  {"%lo", BFD_RELOC_RISCV_LO12_I},
-  {"%tprel_lo", BFD_RELOC_RISCV_TPREL_LO12_I},
-  {"%pcrel_lo", BFD_RELOC_RISCV_PCREL_LO12_I},
+  {"lo", BFD_RELOC_RISCV_LO12_I},
+  {"tprel_lo", BFD_RELOC_RISCV_TPREL_LO12_I},
+  {"pcrel_lo", BFD_RELOC_RISCV_PCREL_LO12_I},
   {0, 0}
 };
 
 static const struct percent_op_match percent_op_stype[] =
 {
-  {"%lo", BFD_RELOC_RISCV_LO12_S},
-  {"%tprel_lo", BFD_RELOC_RISCV_TPREL_LO12_S},
-  {"%pcrel_lo", BFD_RELOC_RISCV_PCREL_LO12_S},
+  {"lo", BFD_RELOC_RISCV_LO12_S},
+  {"tprel_lo", BFD_RELOC_RISCV_TPREL_LO12_S},
+  {"pcrel_lo", BFD_RELOC_RISCV_PCREL_LO12_S},
   {0, 0}
 };
 
 static const struct percent_op_match percent_op_rtype[] =
 {
-  {"%tprel_add", BFD_RELOC_RISCV_TPREL_ADD},
+  {"tprel_add", BFD_RELOC_RISCV_TPREL_ADD},
   {0, 0}
 };
 
@@ -2194,14 +2194,14 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc,
 		  const struct percent_op_match *percent_op)
 {
   for ( ; percent_op->str; percent_op++)
-    if (strncasecmp (*str, percent_op->str, strlen (percent_op->str)) == 0)
+    if (strncasecmp (*str + 1, percent_op->str, strlen (percent_op->str)) == 0)
       {
-	int len = strlen (percent_op->str);
+	size_t len = 1 + strlen (percent_op->str);
 
 	if (!ISSPACE ((*str)[len]) && (*str)[len] != '(')
 	  continue;
 
-	*str += strlen (percent_op->str);
+	*str += len;
 	*reloc = percent_op->reloc;
 
 	/* Check whether the output BFD supports this relocation.
