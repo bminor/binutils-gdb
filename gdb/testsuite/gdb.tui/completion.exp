@@ -66,7 +66,7 @@ if {![Term::prepare_for_tui]} {
     return
 }
 
-Term::command "layout src"
+Term::command_no_prompt_prefix "layout src"
 Term::command "complete focus "
 Term::dump_screen
 Term::check_region_contents "check focus completions" 0 17 80 5 \
