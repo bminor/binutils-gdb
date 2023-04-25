@@ -2299,7 +2299,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 
 static size_t
 my_getOpcodeExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
-			char *str, const struct percent_op_match *percent_op)
+			char *str)
 {
   const struct opcode_name_t *o = opcode_name_lookup (&str);
 
@@ -2310,7 +2310,7 @@ my_getOpcodeExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
       return 0;
     }
 
-  return my_getSmallExpression (ep, reloc, str, percent_op);
+  return my_getSmallExpression (ep, reloc, str, percent_op_null);
 }
 
 /* Parse string STR as a vsetvli operand.  Store the expression in *EP.
@@ -3314,7 +3314,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      switch (*++oparg)
 		{
 		case '4':
-		  if (my_getOpcodeExpression (imm_expr, imm_reloc, asarg, p)
+		  if (my_getOpcodeExpression (imm_expr, imm_reloc, asarg)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number < 0
 		      || imm_expr->X_add_number >= 128
@@ -3331,7 +3331,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  continue;
 
 		case '2':
-		  if (my_getOpcodeExpression (imm_expr, imm_reloc, asarg, p)
+		  if (my_getOpcodeExpression (imm_expr, imm_reloc, asarg)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number < 0
 		      || imm_expr->X_add_number >= 3)
