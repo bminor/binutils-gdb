@@ -40,7 +40,8 @@ if {![Term::enter_tui]} {
     return
 }
 
-Term::command "file [standard_output_file $testfile]"
+send_gdb "file [standard_output_file $testfile]\n"
+gdb_assert { [Term::wait_for "Reading symbols from"] } "file command"
 Term::check_contents "show main after file" \
     [string_to_regexp "|___[format %06d $nr]_$line"]
 
