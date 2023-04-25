@@ -1124,8 +1124,8 @@ namespace eval Term {
 	stty rows $_rows < $::gdb_tty_name
 	# Due to the strange column resizing behavior, and because we
 	# don't care about this intermediate resize, we don't check
-	# the size here.
-	wait_for "@@ resize done $_resize_count"
+	# the size and the "@@ " prefix here.
+	wait_for "resize done $_resize_count"
 	incr _resize_count
 	# Somehow the number of columns transmitted to gdb is one less
 	# than what we request from expect.  We hide this weird
