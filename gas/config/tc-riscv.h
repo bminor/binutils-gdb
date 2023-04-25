@@ -123,6 +123,10 @@ extern void riscv_elf_final_processing (void);
 /* Adjust debug_line after relaxation.  */
 #define DWARF2_USE_FIXED_ADVANCE_PC 1
 
+#define md_parse_name(name, exp, mode, c) \
+  riscv_parse_name (name, exp, mode)
+bool riscv_parse_name (const char *, struct expressionS *, enum expr_mode);
+
 #define md_finish riscv_md_finish
 #define CONVERT_SYMBOLIC_ATTRIBUTE riscv_convert_symbolic_attribute
 
