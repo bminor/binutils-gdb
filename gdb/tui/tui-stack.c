@@ -183,10 +183,13 @@ tui_locator_window::make_status_line () const
 
   std::string string_val = string.release ();
 
-  if (string.size () < status_size)
-    string_val.append (status_size - string.size (), ' ');
-  else if (string.size () > status_size)
-    string_val.erase (status_size, string.size ());
+  size_t len = string_val.size ();
+  if (len < status_size)
+    string_val.append (status_size - len, ' ');
+  else if (len > status_size)
+    string_val.erase (status_size, len);
+
+  gdb_assert (string_val.size () == status_size);
 
   return string_val;
 }
