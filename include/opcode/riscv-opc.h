@@ -2342,6 +2342,11 @@
 #define MASK_TH_SYNC_IS 0xffffffff
 #define MATCH_TH_SYNC_S 0x0190000b
 #define MASK_TH_SYNC_S 0xffffffff
+/* Vendor-specific (Ventana Microsystems) XVentanaCondOps instructions */
+#define MATCH_VT_MASKC 0x607b
+#define MASK_VT_MASKC 0xfe00707f
+#define MATCH_VT_MASKCN 0x707b
+#define MASK_VT_MASKCN 0xfe00707f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
@@ -3236,6 +3241,9 @@ DECLARE_INSN(th_sync, MATCH_TH_SYNC, MASK_TH_SYNC)
 DECLARE_INSN(th_sync_i, MATCH_TH_SYNC_I, MASK_TH_SYNC_I)
 DECLARE_INSN(th_sync_is, MATCH_TH_SYNC_IS, MASK_TH_SYNC_IS)
 DECLARE_INSN(th_sync_s, MATCH_TH_SYNC_S, MASK_TH_SYNC_S)
+/* XVentanaCondOps instructions. */
+DECLARE_INSN(vt_maskc, MATCH_VT_MASKC, MASK_VT_MASKC)
+DECLARE_INSN(vt_maskcn, MATCH_VT_MASKCN, MASK_VT_MASKCN)
 #endif /* DECLARE_INSN */
 #ifdef DECLARE_CSR
 /* Unprivileged Counter/Timers CSRs.  */
