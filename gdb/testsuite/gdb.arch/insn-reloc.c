@@ -49,10 +49,9 @@ fail (void)
      JMP set_point0
    f:
      MOV $1, %[ok]
-     JMP end
+     RET
    set_point0:
      CALL f ; tracepoint here.
-   end:
 
    */
 
@@ -65,10 +64,9 @@ can_relocate_call (void)
        "  jmp " SYMBOL (set_point0) "\n"
        "0:\n"
        "  mov $1, %[ok]\n"
-       "  jmp 1f\n"
+       "  ret\n"
        SYMBOL (set_point0) ":\n"
        "  call 0b\n"
-       "1:\n"
        : [ok] "=r" (ok));
 
   if (ok == 1)
