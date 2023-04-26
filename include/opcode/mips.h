@@ -170,6 +170,10 @@ extern "C" {
 #define OP_MASK_SA3		0x7
 #define OP_SH_SA4		21
 #define OP_MASK_SA4		0xf
+#define OP_SH_SA5		21
+#define OP_MASK_SA5		0x1f
+#define OP_SH_SA5_D		11
+#define OP_MASK_SA5_D		0x1f
 #define OP_SH_IMM8		16
 #define OP_MASK_IMM8		0xff
 #define OP_SH_IMM10		16
@@ -190,6 +194,10 @@ extern "C" {
 #define OP_MASK_MTACC_T		0x3
 #define OP_SH_MTACC_D		13
 #define OP_MASK_MTACC_D		0x3
+#define OP_MASK_MT_RX		0x1f
+#define OP_SH_MT_RX		6
+#define OP_MASK_MT_SEL		0x7	/* The sel field of mftr and mttr.  */
+#define OP_SH_MT_SEL		0
 
 /* MIPS MCU ASE */
 #define OP_MASK_3BITPOS		0x7
@@ -890,7 +898,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "3" 3 bit unsigned immediate (OP_*_SA3)
    "4" 4 bit unsigned immediate (OP_*_SA4)
    "5" 8 bit unsigned immediate (OP_*_IMM8)
-   "6" 5 bit unsigned immediate (OP_*_RS)
+   "6" 5 bit unsigned immediate (OP_*_SA5)
    "7" 2 bit dsp accumulator register (OP_*_DSPACC)
    "8" 6 bit unsigned immediate (OP_*_WRDSP)
    "9" 2 bit dsp accumulator register (OP_*_DSPACC_S)
@@ -898,14 +906,16 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    ":" 7 bit signed immediate (OP_*_DSPSFT_7)
    "'" 6 bit unsigned immediate (OP_*_RDDSP)
    "@" 10 bit signed immediate (OP_*_IMM10)
+   "^" 5 bit unsigned immediate (OP_*_SA5_D)
 
    MT ASE usage:
    "!" 1 bit usermode flag (OP_*_MT_U)
    "$" 1 bit load high flag (OP_*_MT_H)
    "*" 2 bit dsp/smartmips accumulator register (OP_*_MTACC_T)
    "&" 2 bit dsp/smartmips accumulator register (OP_*_MTACC_D)
+   "?" 3-bit MFTR and MTTR sel (OP_SH_MT_SEL)
    "y" 5 bit control target register (OP_*_RT)
-   "+t" 5 bit coprocessor 0 destination register (OP_*_RT)
+   "+t" 5 bit control rx register (OP_*_MT_RX)
 
    MCU ASE usage:
    "~" 12 bit offset (OP_*_OFFSET12)

@@ -117,7 +117,7 @@ decode_mips_operand (const char *p)
 	case 'q': REG (0, 0, R5900_Q);
 	case 'r': REG (0, 0, R5900_R);
 	case 's': MSB (5, 11, 0, false, 31);	/* (0 .. 31) */
-	case 't': REG (5, 16, COPRO);
+	case 't': UINT (5, 6);
 	case 'u': SPECIAL (3, 16, IMM_INDEX);
 	case 'v': SPECIAL (2, 16, IMM_INDEX);
 	case 'w': SPECIAL (1, 16, IMM_INDEX);
@@ -151,10 +151,12 @@ decode_mips_operand (const char *p)
     case '@': SINT (10, 16);
     case '!': UINT (1, 5);
     case '$': UINT (1, 4);
+    case '^': HINT (5, 11);
     case '*': REG (2, 18, ACC);
     case '&': REG (2, 13, ACC);
     case '~': SINT (12, 0);
     case '\\': BIT (3, 12, 0);			/* (0 .. 7) */
+    case '?': UINT (3, 0);
 
     case '0': SINT (6, 20);
     case '1': HINT (5, 6);
@@ -985,6 +987,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"cftc1",		"d,y",		0x41000023, 0xffe007ff, WR_1|RD_C1|TRAP|LC,	0,		0,		MT32,	0 },
 {"cftc1",		"d,T",		0x41000023, 0xffe007ff, WR_1|RD_C1|TRAP|LC,	0,		0,		MT32,	0 },
 {"cftc2",		"d,y",		0x41000025, 0xffe007ff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"cftc2",		"d,y,+t",	0x41000025, 0xffe0003f,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
 {"cins32",		"t,r,+p,+s",	0x70000033, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 },
 {"cins",		"t,r,+P,+S",	0x70000033, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 }, /* cins32 */
 {"cins",		"t,r,+p,+S",	0x70000032, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 },
@@ -1000,6 +1003,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"cttc1",		"t,g",		0x41800023, 0xffe007ff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
 {"cttc1",		"t,S",		0x41800023, 0xffe007ff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
 {"cttc2",		"t,g",		0x41800025, 0xffe007ff,	RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"cttc2",		"t,g,+t",	0x41800025, 0xffe0003f,	RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
 {"cvt.d.l",		"D,S",		0x46a00021, 0xffff003f,	WR_1|RD_2|FP_D,		0,		I3_33,		0,	0 },
 {"cvt.d.s",		"D,S",		0x46000021, 0xffff003f,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	SF },
 {"cvt.d.w",		"D,S",		0x46800021, 0xffff003f,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	SF },
@@ -1400,21 +1404,23 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mfps",		"t,P",		0x4000c800, 0xffe0ffc1,	WR_1|RD_C0|LC,		0,		M1|N5|EE,	0,	0 },
 {"mftacx",		"d",		0x41020021, 0xffff07ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
 {"mftacx",		"d,*",		0x41020021, 0xfff307ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
-{"mftc0",		"d,+t",		0x41000000, 0xffe007ff, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
-{"mftc0",		"d,E,H",	0x41000000, 0xffe007f8, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
+{"mftc0",		"d,E",		0x41000000, 0xffe007ff, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
+{"mftc0",		"d,E,?",	0x41000000, 0xffe007f8, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
 {"mftc1",		"d,T",		0x41000022, 0xffe007ff, WR_1|RD_2|TRAP|LC|FP_S, 0,		0,		MT32,	0 },
 {"mftc1",		"d,E",		0x41000022, 0xffe007ff, WR_1|RD_2|TRAP|LC|FP_S, 0,		0,		MT32,	0 },
 {"mftc2",		"d,E",		0x41000024, 0xffe007ff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"mftc2",		"d,E,+t",	0x41000024, 0xffe0003f,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
 {"mftdsp",		"d",		0x41100021, 0xffff07ff, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"mftgpr",		"d,t",		0x41000020, 0xffe007ff, WR_1|RD_2|TRAP,		0,		0,		MT32,	0 },
 {"mfthc1",		"d,T",		0x41000032, 0xffe007ff, WR_1|RD_2|TRAP|LC|FP_D, 0,		0,		MT32,	0 },
 {"mfthc1",		"d,E",		0x41000032, 0xffe007ff, WR_1|RD_2|TRAP|LC|FP_D, 0,		0,		MT32,	0 },
 {"mfthc2",		"d,E",		0x41000034, 0xffe007ff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"mfthc2",		"d,E,+t",	0x41000034, 0xffe0003f,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
 {"mfthi",		"d",		0x41010021, 0xffff07ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
 {"mfthi",		"d,*",		0x41010021, 0xfff307ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
 {"mftlo",		"d",		0x41000021, 0xffff07ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
 {"mftlo",		"d,*",		0x41000021, 0xfff307ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
-{"mftr",		"d,t,!,H,$",	0x41000000, 0xffe007c8, WR_1|TRAP,		0,		0,		MT32,	0 },
+{"mftr",		"d,t,!,?,$",	0x41000000, 0xffe007c8, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"mfc0",		"t,G",		0x40000000, 0xffe007ff,	WR_1|RD_C0|LC,		0,		I1,		0,	0 },
 {"mfc0",		"t,G,H",	0x40000000, 0xffe007f8,	WR_1|RD_C0|LC,		0,		I32,		0,	0 },
 {"mfgc0",		"t,G",		0x40600000, 0xffe007ff,	WR_1|RD_C0|LC,		0,		0,		IVIRT,	0 },
@@ -1553,10 +1559,11 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mtsab",		"s,j",		0x04180000, 0xfc1f0000,	RD_1,			0,		EE,		0,	0 },
 {"mtsah",		"s,j",		0x04190000, 0xfc1f0000,	RD_1,			0,		EE,		0,	0 },
 {"mttc0",		"t,G",		0x41800000, 0xffe007ff, RD_1|WR_C0|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
-{"mttc0",		"t,G,H",	0x41800000, 0xffe007f8, RD_1|WR_C0|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
+{"mttc0",		"t,G,?",	0x41800000, 0xffe007f8, RD_1|WR_C0|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
 {"mttc1",		"t,S",		0x41800022, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_S, 0,		0,		MT32,	0 },
 {"mttc1",		"t,G",		0x41800022, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_S, 0,		0,		MT32,	0 },
 {"mttc2",		"t,G",		0x41800024, 0xffe007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"mttc2",		"t,G,+t",	0x41800024, 0xffe0003f,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
 {"mttacx",		"t",		0x41801021, 0xffe0ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mttacx",		"t,&",		0x41801021, 0xffe09fff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mttdsp",		"t",		0x41808021, 0xffe0ffff, RD_1|TRAP,		0,		0,		MT32,	0 },
@@ -1564,11 +1571,12 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mtthc1",		"t,S",		0x41800032, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_D, 0,		0,		MT32,	0 },
 {"mtthc1",		"t,G",		0x41800032, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_D, 0,		0,		MT32,	0 },
 {"mtthc2",		"t,G",		0x41800034, 0xffe007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"mtthc2",		"t,G,+t",	0x41800034, 0xffe0003f,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
 {"mtthi",		"t",		0x41800821, 0xffe0ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mtthi",		"t,&",		0x41800821, 0xffe09fff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mttlo",		"t",		0x41800021, 0xffe0ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mttlo",		"t,&",		0x41800021, 0xffe09fff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
-{"mttr",		"t,d,!,H,$",	0x41800000, 0xffe007c8, RD_1|TRAP,		0,		0,		MT32,	0 },
+{"mttr",		"t,d,!,?,$",	0x41800000, 0xffe007c8, RD_1|TRAP,		0,		0,		MT32,	0 },
 {"mul.d",		"D,V,T",	0x46200002, 0xffe0003f,	WR_1|RD_2|RD_3|FP_D,	0,		I1,		0,	SF },
 {"mul.s",		"D,V,T",	0x46000002, 0xffe0003f,	WR_1|RD_2|RD_3|FP_S,	0,		I1,		0,	0 },
 {"mul.ob",		"X,Y,Q",	0x78000030, 0xfc20003f,	WR_1|RD_2|RD_3|FP_D,	0,		SB1,		MX,	0 },
@@ -2347,7 +2355,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"addu_s.ph",		"d,s,t",	0x7c000310, 0xfc0007ff, WR_1|RD_2|RD_3,         0,              0,		D33,	0 },
 {"adduh.qb",		"d,s,t",	0x7c000018, 0xfc0007ff, WR_1|RD_2|RD_3,         0,              0,		D33,	0 },
 {"adduh_r.qb",		"d,s,t",	0x7c000098, 0xfc0007ff, WR_1|RD_2|RD_3,         0,              0,		D33,	0 },
-{"append",		"t,s,h",	0x7c000031, 0xfc0007ff, MOD_1|RD_2,         0,              0,		D33,	0 },
+{"append",		"t,s,^",	0x7c000031, 0xfc0007ff, MOD_1|RD_2,         0,              0,		D33,	0 },
 {"balign",		"t,s,I",	0,    (int) M_BALIGN,	INSN_MACRO,             0,              0,		D33,	0 },
 {"balign",		"t,s,2",	0x7c000431, 0xfc00e7ff, MOD_1|RD_2,         0,              0,		D33,	0 },
 {"cmpgdu.eq.qb",	"d,s,t",	0x7c000611, 0xfc0007ff, WR_1|RD_2|RD_3,		0,              0,		D33,	0 },
@@ -2362,9 +2370,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mulq_s.w",		"d,s,t",	0x7c000598, 0xfc0007ff, WR_1|RD_2|RD_3|WR_HILO, 0,              0,		D33,	0 },
 {"mulsa.w.ph",		"7,s,t",	0x7c0000b0, 0xfc00e7ff, RD_2|RD_3|MOD_a,        0,              0,		D33,	0 },
 {"precr.qb.ph",		"d,s,t",	0x7c000351, 0xfc0007ff, WR_1|RD_2|RD_3,		0,              0,		D33,	0 },
-{"precr_sra.ph.w",	"t,s,h",	0x7c000791, 0xfc0007ff, MOD_1|RD_2,		0,              0,		D33,	0 },
-{"precr_sra_r.ph.w",	"t,s,h",	0x7c0007d1, 0xfc0007ff, MOD_1|RD_2,		0,              0,		D33,	0 },
-{"prepend",		"t,s,h",	0x7c000071, 0xfc0007ff, MOD_1|RD_2,         0,              0,		D33,	0 },
+{"precr_sra.ph.w",	"t,s,^",	0x7c000791, 0xfc0007ff, MOD_1|RD_2,		0,              0,		D33,	0 },
+{"precr_sra_r.ph.w",	"t,s,^",	0x7c0007d1, 0xfc0007ff, MOD_1|RD_2,		0,              0,		D33,	0 },
+{"prepend",		"t,s,^",	0x7c000071, 0xfc0007ff, MOD_1|RD_2,         0,              0,		D33,	0 },
 {"shra.qb",		"d,t,3",	0x7c000113, 0xff0007ff, WR_1|RD_2,              0,              0,		D33,	0 },
 {"shra_r.qb",		"d,t,3",	0x7c000153, 0xff0007ff, WR_1|RD_2,              0,              0,		D33,	0 },
 {"shrav.qb",		"d,t,s",	0x7c000193, 0xfc0007ff, WR_1|RD_2|RD_3,         0,              0,		D33,	0 },
