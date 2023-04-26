@@ -1074,34 +1074,6 @@ bfd_generic_is_local_label_name (bfd *abfd, const char *name)
   return name[0] == locals_prefix;
 }
 
-/* Give a warning at runtime if someone compiles code which calls
-   old routines.  */
-
-void
-_bfd_warn_deprecated (const char *what,
-		      const char *file,
-		      int line,
-		      const char *func)
-{
-  /* Poor man's tracking of functions we've already warned about.  */
-  static size_t mask = 0;
-
-  if (~(size_t) func & ~mask)
-    {
-      fflush (stdout);
-      /* Note: separate sentences in order to allow
-	 for translation into other languages.  */
-      if (func)
-	/* xgettext:c-format */
-	fprintf (stderr, _("Deprecated %s called at %s line %d in %s\n"),
-		 what, file, line, func);
-      else
-	fprintf (stderr, _("Deprecated %s called\n"), what);
-      fflush (stderr);
-      mask |= ~(size_t) func;
-    }
-}
-
 /* Helper function for reading uleb128 encoded data.  */
 
 bfd_vma
