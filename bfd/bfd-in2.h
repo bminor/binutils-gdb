@@ -122,10 +122,10 @@ typedef uint64_t symvalue;
 
 #else /* not BFD64  */
 
-typedef unsigned long bfd_vma;
-typedef long bfd_signed_vma;
-typedef unsigned long symvalue;
-typedef unsigned long bfd_size_type;
+typedef uint32_t bfd_vma;
+typedef int32_t bfd_signed_vma;
+typedef uint32_t bfd_size_type;
+typedef uint32_t symvalue;
 
 #endif /* not BFD64  */
 
@@ -142,8 +142,8 @@ extern void bfd_fprintf_vma (bfd *, void *, bfd_vma);
 
 #define bfd_printf_vma(abfd,x) bfd_fprintf_vma (abfd,stdout,x)
 
-typedef unsigned int flagword;	/* 32 bits of flags */
-typedef unsigned char bfd_byte;
+typedef uint32_t flagword;	/* 32 bits of flags */
+typedef uint8_t bfd_byte;
 
 /* File formats.  */
 
