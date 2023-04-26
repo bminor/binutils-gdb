@@ -6,7 +6,7 @@ mpass:
     .string "pass\n"
     .text
 _pass:
-    mov         %r1, mpass      ; point to "pass\n" string
+    lddw        %r1, mpass      ; point to "pass\n" string
     mov         %r2, 5          ; strlen mpass
     call        7               ; printk
     mov         %r0, 0          ;
