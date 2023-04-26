@@ -44,7 +44,7 @@ if { [which $OBJDUMP] == 0} {
 }
 
 # Compile testprog.c, move the debuginfo to a separate file and add .gnu_debuglink.
-if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != ""} {
+if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable "debug additional_flags=-Wl,--build-id"] != ""} {
     unsupported "$test (compilation failed)"
     return
 }
