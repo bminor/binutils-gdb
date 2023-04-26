@@ -122,6 +122,7 @@ decode_micromips_operand (const char *p)
 	case 'l': REG (5, 6, MSA_CTRL);
 	case 'n': REG (5, 11, MSA_CTRL);
 	case 'o': SPECIAL (4, 16, IMM_INDEX);
+	case 't': UINT (5, 11);
 	case 'u': SPECIAL (3, 16, IMM_INDEX);
 	case 'v': SPECIAL (2, 16, IMM_INDEX);
 	case 'w': SPECIAL (1, 16, IMM_INDEX);
@@ -148,6 +149,11 @@ decode_micromips_operand (const char *p)
     case '~': SINT (12, 0);
     case '@': SINT (10, 16);
     case '^': HINT (5, 11);
+    case '*': REG (2, 23, ACC);
+    case '!': UINT (1, 10);
+    case '$': UINT (1, 9);
+    case '&': REG (2, 18, ACC);
+    case '?': UINT (3, 4);
 
     case '0': SINT (6, 16);
     case '1': HINT (5, 16);
@@ -176,6 +182,7 @@ decode_micromips_operand (const char *p)
     case 'b': REG (5, 16, GP);
     case 'c': HINT (10, 16);
     case 'd': REG (5, 11, GP);
+    case 'e': REG (5, 21, CONTROL);
     case 'g': REG (5, 16, CONTROL);
     case 'h': HINT (5, 11);
     case 'i': HINT (16, 0);
@@ -263,6 +270,9 @@ decode_micromips_operand (const char *p)
 #define DSP_VOLA INSN_NO_DELAY_SLOT
 #define D32	ASE_DSP
 #define D33	ASE_DSPR2
+
+/* microMIPS MT ASE support.  */
+#define MT32	ASE_MT
 
 /* MIPS MCU (MicroController) ASE support.  */
 #define MC	ASE_MCU
@@ -552,11 +562,19 @@ const struct mips_opcode micromips_opcodes[] =
 {"cfc1",		"t,g",		0x5400103b, 0xfc00ffff,	WR_1|RD_C1,		0,		I1,		0,	0 },
 {"cfc1",		"t,S",		0x5400103b, 0xfc00ffff,	WR_1|RD_C1,		0,		I1,		0,	0 },
 {"cfc2",		"t,g",		0x0000cd3c, 0xfc00ffff,	WR_1|RD_C2,		0,		I1,		0,	0 },
+{"cftc1",		"s,e",		0x0000043e, 0xfc00ffff, WR_1|RD_C1|TRAP|LC,	0,		0,		MT32,	0 },
+{"cftc1",		"s,T",		0x0000043e, 0xfc00ffff, WR_1|RD_C1|TRAP|LC,	0,		0,		MT32,	0 },
+{"cftc2",		"s,e",		0x0000045e, 0xfc00ffff, WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
+{"cftc2",		"s,e,+t",	0x0000045e, 0xfc0007ff, WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
 {"clo",			"t,s",		0x00004b3c, 0xfc00ffff,	WR_1|RD_2,		0,		I1,		0,	0 },
 {"clz",			"t,s",		0x00005b3c, 0xfc00ffff,	WR_1|RD_2,		0,		I1,		0,	0 },
 {"cop2",		"C",		0x00000002, 0xfc000007,	CP,			0,		I1,		0,	0 },
 {"ctc1",		"t,g",		0x5400183b, 0xfc00ffff,	RD_1|WR_CC,		0,		I1,		0,	0 },
 {"ctc1",		"t,S",		0x5400183b, 0xfc00ffff,	RD_1|WR_CC,		0,		I1,		0,	0 },
+{"cttc1",		"t,g",		0x00000436, 0xfc00ffff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
+{"cttc1",		"t,S",		0x00000436, 0xfc00ffff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
+{"cttc2",		"t,G",		0x00000456, 0xfc00ffff, WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
+{"cttc2",		"t,G,+t",	0x00000456, 0xfc0007ff, WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
 {"ctc2",		"t,g",		0x0000dd3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I1,		0,	0 },
 {"cvt.d.l",		"T,S",		0x5400537b, 0xfc00ffff,	WR_1|RD_2|FP_D,		0,		I1,		0,	0 },
 {"cvt.d.s",		"T,S",		0x5400137b, 0xfc00ffff,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	0 },
@@ -640,6 +658,8 @@ const struct mips_opcode micromips_opcodes[] =
 /*{"dmfc2",		"t,G,H",	0x58000283, 0xfc001fff,	WR_1|RD_C2,		0,		I3,		0,	0 },*/
 {"dmtc2",		"t,G",		0x00007d3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I3,		0,	0 },
 /*{"dmtc2",		"t,G,H",	0x58000683, 0xfc001fff,	RD_1|WR_C2|WR_CC,	0,		I3,		0,	0 },*/
+{"dmt",			"",		0x0000057c, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
+{"dmt",			"t",		0x0000057c, 0xfc1fffff, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"dmul",		"d,v,t",	0,    (int) M_DMUL,	INSN_MACRO,		0,		I3,		0,	0 },
 {"dmul",		"d,v,I",	0,    (int) M_DMUL_I,	INSN_MACRO,		0,		I3,		0,	0 },
 {"dmulo",		"d,v,t",	0,    (int) M_DMULO,	INSN_MACRO,		0,		I3,		0,	0 },
@@ -648,6 +668,8 @@ const struct mips_opcode micromips_opcodes[] =
 {"dmulou",		"d,v,I",	0,    (int) M_DMULOU_I,	INSN_MACRO,		0,		I3,		0,	0 },
 {"dmult",		"s,t",		0x58008b3c, 0xfc00ffff,	RD_1|RD_2|WR_HILO,	0,		I3,		0,	0 },
 {"dmultu",		"s,t",		0x58009b3c, 0xfc00ffff,	RD_1|RD_2|WR_HILO,	0,		I3,		0,	0 },
+{"dvpe",		"",		0x0000157c, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
+{"dvpe",		"t",		0x0000157c, 0xfc1fffff, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"dneg",		"d,w",		0x58000190, 0xfc1f07ff,	WR_1|RD_2,		0,		I3,		0,	0 }, /* dsub 0 */
 {"dnegu",		"d,w",		0x580001d0, 0xfc1f07ff,	WR_1|RD_2,		0,		I3,		0,	0 }, /* dsubu 0 */
 {"drem",		"z,s,t",	0x5800ab3c, 0xfc00ffff,	RD_2|RD_3|WR_HILO,	0,		I3,		0,	0 },
@@ -692,13 +714,18 @@ const struct mips_opcode micromips_opcodes[] =
 {"dsubu",		"d,v,I",	0,    (int) M_DSUBU_I,	INSN_MACRO,		0,		I3,		0,	0 },
 {"ei",			"",		0x0000577c, 0xffffffff,	WR_C0,			0,		I1,		0,	0 },
 {"ei",			"s",		0x0000577c, 0xffe0ffff,	WR_1|WR_C0,		0,		I1,		0,	0 },
+{"emt",			"",		0x0000257c, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
+{"emt",			"t",		0x0000257c, 0xfc1fffff, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"eret",		"",		0x0000f37c, 0xffffffff,	NODS,			0,		I1,		0,	0 },
 {"eretnc",		"",		0x0001f37c, 0xffffffff,	NODS,			0,		I36,		0,	0 },
+{"evpe",		"",		0x0000357c, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
+{"evpe",		"t",		0x0000357c, 0xfc1fffff, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"ext",			"t,r,+A,+C",	0x0000002c, 0xfc00003f, WR_1|RD_2,		0,		I1,		0,	0 },
 {"floor.l.d",		"T,V",		0x5400433b, 0xfc00ffff,	WR_1|RD_2|FP_D,		0,		I1,		0,	0 },
 {"floor.l.s",		"T,V",		0x5400033b, 0xfc00ffff,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	0 },
 {"floor.w.d",		"T,V",		0x54004b3b, 0xfc00ffff,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	0 },
 {"floor.w.s",		"T,V",		0x54000b3b, 0xfc00ffff,	WR_1|RD_2|FP_S,		0,		I1,		0,	0 },
+{"fork",		"d,s,t",	0x00000027, 0xfc0007ff, WR_1|RD_2|RD_3|TRAP,	0,		0,		MT32,	0 },
 {"hypcall",		"",		0x0000c37c, 0xffffffff,	TRAP,			0,		0,		IVIRT,	0 },
 {"hypcall",		"+J",		0x0000c37c, 0xfc00ffff,	TRAP,			0,		0,		IVIRT,	0 },
 {"ins",			"t,r,+A,+B",	0x0000000c, 0xfc00003f, WR_1|RD_2,		0,		I1,		0,	0 },
@@ -853,6 +880,25 @@ const struct mips_opcode micromips_opcodes[] =
 {"mflo",		"mj",		    0x4640,     0xffe0,	WR_1|RD_LO,		0,		I1,		0,	0 },
 {"mflo",		"s",		0x00001d7c, 0xffe0ffff,	WR_1|RD_LO,		0,		I1,		0,	0 },
 {"mflo",		"s,7",		0x0000107c, 0xffe03fff,	WR_1|RD_LO,		0,		0,		D32,	0 },
+{"mftacx",		"s",		0x0040041e, 0xffe0ffff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
+{"mftacx",		"s,*",		0x0040041e, 0xfe60ffff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
+{"mftc0",		"s,E",		0x0000000e, 0xfc00ffff, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
+{"mftc0",		"s,E,?",	0x0000000e, 0xfc00ff8f, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
+{"mftc1",		"s,T",		0x0000042e, 0xfc00ffff, WR_1|RD_2|TRAP|LC|FP_S, 0,		0,		MT32,	0 },
+{"mftc1",		"s,E",		0x0000042e, 0xfc00ffff, WR_1|RD_2|TRAP|LC|FP_S, 0,		0,		MT32,	0 },
+{"mftc2",		"s,E",		0x0000044e, 0xfc00ffff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
+{"mftc2",		"s,E,+t",	0x0000044e, 0xfc0007ff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
+{"mfthc1",		"s,T",		0x0000062e, 0xfc00ffff, WR_1|RD_2|TRAP|LC|FP_D, 0,		0,		MT32,	0 },
+{"mfthc1",		"s,E",		0x0000062e, 0xfc00ffff, WR_1|RD_2|TRAP|LC|FP_D, 0,		0,		MT32,	0 },
+{"mfthc2",		"s,E",		0x0000064e, 0xfc00ffff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
+{"mfthc2",		"s,E,+t",	0x0000064e, 0xfc0007ff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	0 },
+{"mftdsp",		"s",		0x0200041e, 0xffe0ffff, WR_1|TRAP,		0,		0,		MT32,	0 },
+{"mftgpr",		"s,t",		0x0000040e, 0xfc00ffff, WR_1|RD_2|TRAP,		0,		0,		MT32,	0 },
+{"mfthi",		"s",		0x0020041e, 0xffe0ffff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
+{"mfthi",		"s,*",		0x0020041e, 0xfe60ffff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
+{"mftlo",		"s",		0x0000041e, 0xffe0ffff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
+{"mftlo",		"s,*",		0x0000041e, 0xfe60ffff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
+{"mftr",		"s,t,!,?,$",	0x0000000e, 0xfc00f98f, WR_1|TRAP,		0,		0,		MT32,	0 },
 {"mov.d",		"T,S",		0x5400207b, 0xfc00ffff,	WR_1|RD_2|FP_D,		0,		I1,		0,	0 },
 {"mov.s",		"T,S",		0x5400007b, 0xfc00ffff,	WR_1|RD_2|FP_S,		0,		I1,		0,	0 },
 {"mov.ps",		"T,S",		0x5400407b, 0xfc00ffff,	WR_1|RD_2|FP_D,		0,		I1,		0,	0 },
@@ -901,6 +947,25 @@ const struct mips_opcode micromips_opcodes[] =
 {"mthi",		"s,7",		0x0000207c, 0xffe03fff,	RD_1|WR_HI,		0,		0,		D32,	0 },
 {"mtlo",		"s",		0x00003d7c, 0xffe0ffff,	RD_1|WR_LO,		0,		I1,		0,	0 },
 {"mtlo",		"s,7",		0x0000307c, 0xffe03fff,	RD_1|WR_LO,		0,		0,		D32,	0 },
+{"mttacx",		"t",		0x00020416, 0xfc1fffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
+{"mttacx",		"t,&",		0x00020416, 0xfc13ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
+{"mttc0",		"t,G",		0x00000006, 0xfc00ffff, RD_1|WR_C0|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
+{"mttc0",		"t,G,?",	0x00000006, 0xfc00ff8f, RD_1|WR_C0|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
+{"mttc1",		"t,S",		0x00000426, 0xfc00ffff, RD_1|WR_2|TRAP|CM|FP_S, 0,		0,		MT32,	0 },
+{"mttc1",		"t,G",		0x00000426, 0xfc00ffff, RD_1|WR_2|TRAP|CM|FP_S, 0,		0,		MT32,	0 },
+{"mttc2",		"t,G",		0x00000446, 0xfc00ffff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
+{"mttc2",		"t,G,+t",	0x00000446, 0xfc0007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
+{"mtthc1",		"t,S",		0x00000626, 0xfc00ffff, RD_1|WR_2|TRAP|CM|FP_D, 0,		0,		MT32,	0 },
+{"mtthc1",		"t,G",		0x00000626, 0xfc00ffff, RD_1|WR_2|TRAP|CM|FP_D, 0,		0,		MT32,	0 },
+{"mtthc2",		"t,G",		0x00000646, 0xfc00ffff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
+{"mtthc2",		"t,G,+t",	0x00000646, 0xfc0007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
+{"mttdsp",		"t",		0x00100416, 0xfc1fffff, RD_1|TRAP,		0,		0,		MT32,	0 },
+{"mttgpr",		"t,s",		0x00000406, 0xfc00ffff, RD_1|WR_2|TRAP,		0,		0,		MT32,	0 },
+{"mtthi",		"t",		0x00010416, 0xfc1fffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
+{"mtthi",		"t,&",		0x00010416, 0xfc13ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
+{"mttlo",		"t",		0x00000416, 0xfc1fffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
+{"mttlo",		"t,&",		0x00000416, 0xfc13ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
+{"mttr",		"t,s,!,?,$",	0x00000006, 0xfc00f98f, RD_1|TRAP,		0,		0,		MT32,	0 },
 {"mul",			"d,v,t",	0x00000210, 0xfc0007ff,	WR_1|RD_2|RD_3|WR_HILO,	0,		I1,		0,	0 },
 {"mul",			"d,v,I",	0,    (int) M_MUL_I,	INSN_MACRO,		0,		I1,		0,	0 },
 {"mul.d",		"D,V,T",	0x540001b0, 0xfc0007ff,	WR_1|RD_2|RD_3|FP_D,	0,		I1,		0,	0 },
@@ -1151,6 +1216,8 @@ const struct mips_opcode micromips_opcodes[] =
 {"xor",			"d,v,t",	0x00000310, 0xfc0007ff,	WR_1|RD_2|RD_3,		0,		I1,		0,	0 },
 {"xor",			"t,r,I",	0,    (int) M_XOR_I,	INSN_MACRO,		0,		I1,		0,	0 },
 {"xori",		"t,r,i",	0x70000000, 0xfc000000,	WR_1|RD_2,		0,		I1,		0,	0 },
+{"yield",		"t",		0x000009bc, 0xfc1fffff, RD_1|NODS,		0,		0,		MT32,	0 },
+{"yield",		"s,t",		0x000009bc, 0xfc00ffff, WR_1|RD_2|NODS,		0,		0,		MT32,	0 },
 /* microMIPS Enhanced VA Scheme */
 {"lbue",		"t,+j(b)",	0x60006000, 0xfc00fe00, WR_1|RD_3|LM,		0,		0,		EVA,	0 },
 {"lbue",		"t,A(b)",	0,    (int) M_LBUE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },

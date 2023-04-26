@@ -15,9 +15,6 @@
 .*:34: Warning: the 64-bit microMIPS architecture does not support the `mips3d' extension
 .*:35: Error: unrecognized opcode `addr.ps \$f4,\$f6,\$f8'
 # ----------------------------------------------------------------------------
-.*:39: Warning: the 64-bit microMIPS architecture does not support the `mt' extension
-.*:40: Error: unrecognized opcode `dmt *'
-# ----------------------------------------------------------------------------
 .*:44: Warning: the 64-bit microMIPS architecture does not support the `smartmips' extension
 .*:45: Error: unrecognized opcode `maddp \$4,\$5'
 # ----------------------------------------------------------------------------

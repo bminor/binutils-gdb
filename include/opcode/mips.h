@@ -2106,6 +2106,8 @@ extern const int bfd_mips16_num_opcodes;
 #define MICROMIPSOP_SH_SA3		13
 #define MICROMIPSOP_MASK_SA4		0xf
 #define MICROMIPSOP_SH_SA4		12
+#define MICROMIPSOP_MASK_SA5		0x1f
+#define MICROMIPSOP_SH_SA5		11
 #define MICROMIPSOP_MASK_IMM8		0xff
 #define MICROMIPSOP_SH_IMM8		13
 #define MICROMIPSOP_MASK_IMM10		0x3ff
@@ -2135,14 +2137,18 @@ extern const int bfd_mips16_num_opcodes;
 #define MICROMIPSOP_SH_DSPSFT_7	 	0
 #define MICROMIPSOP_MASK_RDDSP		0
 #define MICROMIPSOP_SH_RDDSP		0
-#define MICROMIPSOP_MASK_MT_U		0
-#define MICROMIPSOP_SH_MT_U		0
-#define MICROMIPSOP_MASK_MT_H		0
-#define MICROMIPSOP_SH_MT_H		0
-#define MICROMIPSOP_MASK_MTACC_T	0
-#define MICROMIPSOP_SH_MTACC_T		0
-#define MICROMIPSOP_MASK_MTACC_D	0
-#define MICROMIPSOP_SH_MTACC_D		0
+#define MICROMIPSOP_MASK_MT_U		0x1
+#define MICROMIPSOP_SH_MT_U		10
+#define MICROMIPSOP_MASK_MT_H		0x1
+#define MICROMIPSOP_SH_MT_H		9
+#define MICROMIPSOP_MASK_MTACC_T	0x3
+#define MICROMIPSOP_SH_MTACC_T		23
+#define MICROMIPSOP_MASK_MTACC_S	0x3
+#define MICROMIPSOP_SH_MTACC_S		18
+#define MICROMIPSOP_MASK_MT_SEL		0x7      /* The sel field of mftr and mttr.  */
+#define MICROMIPSOP_SH_MT_SEL		4
+#define MICROMIPSOP_MASK_MT_RX		0x1f
+#define MICROMIPSOP_SH_MT_RX		11
 #define MICROMIPSOP_MASK_BBITIND	0
 #define MICROMIPSOP_SH_BBITIND		0
 #define MICROMIPSOP_MASK_CINSPOS	0
@@ -2298,7 +2304,8 @@ extern const int bfd_mips16_num_opcodes;
    Coprocessor instructions:
    "E" 5-bit target register (MICROMIPSOP_*_RT)
    "G" 5-bit source register (MICROMIPSOP_*_RS)
-   "H" 3-bit sel field for (D)MTC* and (D)MFC* (MICROMIPSOP_*_SEL)
+   "H" 3-bit sel field for (D)MTC* and (D)MFC* (MICROMIPSOP_*_SEL), not for MTTR and MFTR
+   "e" 5-bit control target register (MICROMIPSOP_*_RT)
    "g" 5-bit control source register (MICROMIPSOP_*_RS)
 
    Macro instructions:
@@ -2319,7 +2326,7 @@ extern const int bfd_mips16_num_opcodes;
    "8" 6-bit unsigned immediate (MICROMIPSOP_*_WRDSP)
    "0" 6-bit signed immediate (MICROMIPSOP_*_DSPSFT)
    "@" 10-bit signed immediate (MICROMIPSOP_*_IMM10)
-   "^" 5-bit unsigned immediate (MICROMIPSOP_*_RD)
+   "^" 5-bit unsigned immediate (MICROMIPSOP_*_SA5)
 
    microMIPS Enhanced VA Scheme:
    "+j" 9-bit signed offset in bit 0 (OP_*_EVAOFFSET)
@@ -2350,6 +2357,14 @@ extern const int bfd_mips16_num_opcodes;
    "+&" 0 vector element index
    "+*" 5-bit register vector element index at bit 16
    "+|" 8-bit mask at bit 16
+
+   microMIPS MT ASE usage:
+   "!" 1-bit usermode flag (MICROMIPSOP_*_MT_U)
+   "$" 1-bit load high flag (MICROMIPSOP_*_MT_H)
+   "*" 2-bit dsp accumulator register (MICROMIPSOP_*_MTACC_T)
+   "&" 2-bit dsp accumulator register (MICROMIPSOP_*_MTACC_S)
+   "?" 3-bit MFTR and MTTR sel (MICROMIPSOP_SH_MT_SEL)
+   "+t" 5-bit control rx register (MICROMIPSOP_*_MT_RX)
 
    Other:
    "()" parens surrounding optional value
