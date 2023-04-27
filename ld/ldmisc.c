@@ -52,6 +52,7 @@
  %d integer, like printf
  %ld long, like printf
  %lu unsigned long, like printf
+ %lx unsigned long, like printf
  %p native (host) void* pointer, like printf
  %pA section name from a section
  %pB filename from a bfd
@@ -63,6 +64,7 @@
  %s arbitrary string, like printf
  %u integer, like printf
  %v hex bfd_vma, no leading zeros
+ %x integer, like printf
 */
 
 void
@@ -152,11 +154,12 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 
 	    case 'd':
 	    case 'u':
+	    case 'x':
 	      arg_type = Int;
 	      break;
 
 	    case 'l':
-	      if (*scan == 'd' || *scan == 'u')
+	      if (*scan == 'd' || *scan == 'u' || *scan == 'x')
 		{
 		  ++scan;
 		  arg_type = Long;
@@ -544,6 +547,12 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 	      ++arg_count;
 	      break;
 
+	    case 'x':
+	      /* unsigned integer, like printf */
+	      fprintf (fp, "%x", args[arg_no].i);
+	      ++arg_count;
+	      break;
+
 	    case 'l':
 	      if (*fmt == 'd')
 		{
@@ -555,6 +564,13 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 	      else if (*fmt == 'u')
 		{
 		  fprintf (fp, "%lu", args[arg_no].l);
+		  ++arg_count;
+		  ++fmt;
+		  break;
+		}
+	      else if (*fmt == 'x')
+		{
+		  fprintf (fp, "%lx", args[arg_no].l);
 		  ++arg_count;
 		  ++fmt;
 		  break;

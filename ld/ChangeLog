@@ -1,3 +1,7 @@
+2023-04-27  Nick Clifton  <nickc@redhat.com>
+
+	* ldmisc.c (vfinfo): Add support for %x and %lx.
+
 2023-04-18  mengqinggang  <mengqinggang@loongson.cn>
 
 	* testsuite/ld-loongarch-elf/macro_op.d: Regenerated.
