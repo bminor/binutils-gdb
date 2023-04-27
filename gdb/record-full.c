@@ -1094,6 +1094,13 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
       /* Make sure the target beneath reports all signals.  */
       target_pass_signals ({});
 
+      /* Disable range-stepping, forcing the process target to report stops for
+	 all executed instructions, so we can record them all.  */
+      process_stratum_target *proc_target
+	= current_inferior ()->process_target ();
+      for (thread_info *thread : all_non_exited_threads (proc_target, ptid))
+	thread->control.may_range_step = 0;
+
       this->beneath ()->resume (ptid, step, signal);
     }
 }
