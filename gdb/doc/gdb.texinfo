@@ -3654,6 +3654,7 @@ program's ``main thread'' even if the program is not multi-threaded.
 
 @vindex $_thread@r{, convenience variable}
 @vindex $_gthread@r{, convenience variable}
+@vindex $_inferior_thread_count@r{, convenience variable}
 The debugger convenience variables @samp{$_thread} and
 @samp{$_gthread} contain, respectively, the per-inferior thread number
 and the global thread number of the current thread.  You may find this
