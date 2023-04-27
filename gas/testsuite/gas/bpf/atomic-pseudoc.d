@@ -1,5 +1,5 @@
 #as: --EL
 #objdump: -dr
-#source: atomic.s
+#source: atomic-pseudoc.s
 #dump: atomic.dump
 #name: eBPF atomic instructions, normal syntax

@@ -5,7 +5,7 @@ main:
 	r0 = 1
 	r1 = 1
 	r2 = 2
-	r6 = 56 ll
+	r6 = bar ll
 	callx r6
 	exit
 bar:
