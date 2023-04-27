@@ -1084,10 +1084,6 @@ get_discrete_low_bound (struct type *type)
 		  low = type->field (i).loc_enumval ();
 	      }
 
-	    /* Set unsigned indicator if warranted.  */
-	    if (low >= 0)
-	      type->set_is_unsigned (true);
-
 	    return low;
 	  }
 	else
