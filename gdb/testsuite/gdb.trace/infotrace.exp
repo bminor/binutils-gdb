@@ -114,12 +114,13 @@ gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
 gdb_test_no_output "tstop"
 gdb_test "tstatus"
 gdb_test "info tracepoints" \
-    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
-\[\t \]+tracepoint already hit 1 time.
-\[\t \]+trace buffer usage ${decimal} bytes.
-\[\t \]+collect gdb_struct1_test.
-\tinstalled on target.
-\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
-\tinstalled on target." \
+    [multi_line \
+	 "Num     Type\[ \]+Disp Enb Address\[ \]+What.*" \
+	 "\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+" \
+	 "\[\t \]+tracepoint already hit 1 time" \
+	 "\[\t \]+trace buffer usage ${decimal} bytes" \
+	 "\[\t \]+collect gdb_struct1_test" \
+	 "\tinstalled on target" \
+	 "\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+" \
+	 "\tinstalled on target"] \
     "2.6: info tracepoints (trace buffer usage)"

@@ -154,7 +154,7 @@ proc pending_tracepoint_works { trace_type } {
 	gdb_test "continue" "Continuing.\r\n\r\n(Thread .* hit )?Breakpoint.*marker.*at.*$srcfile.*" \
 	    "continue to marker"
 
-	gdb_test "tstop" "\[\r\n\]+" "stop trace experiment"
+	gdb_test_no_output "tstop" "stop trace experiment"
 
 	gdb_test "tfind start" "#0 .*" "tfind test frame 0"
 	gdb_test "tfind" "Found trace frame 1, tracepoint 1.*" \
@@ -222,7 +222,7 @@ proc pending_tracepoint_resolved_during_trace { trace_type } \
 	}
     }
 
-    gdb_test "tstop" "\[\r\n\]+" "stop trace experiment"
+    gdb_test_no_output "tstop" "stop trace experiment"
 
     # tracepoint should be resolved.
     gdb_test "info trace" \
@@ -294,7 +294,7 @@ proc pending_tracepoint_installed_during_trace { trace_type } \
        }
     }
 
-    gdb_test "tstop" "\[\r\n\]+" "stop trace experiment"
+    gdb_test_no_output "tstop" "stop trace experiment"
 
     # tracepoint should be resolved.
     gdb_test "info trace" \
@@ -466,7 +466,7 @@ proc pending_tracepoint_with_action_resolved { trace_type } \
 
     }
 
-    gdb_test "tstop" "\[\r\n\]+" "stop trace experiment"
+    gdb_test_no_output "tstop" "stop trace experiment"
 
     # tracepoint should be resolved.
     gdb_test "info trace" \

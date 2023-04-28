@@ -190,7 +190,7 @@ proc tracepoint_change_loc_2 { trace_type } {
 	# else is displayed.
 	gdb_test "info trace" \
 	    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+\(|fast \)tracepoint\[ \]+keep y.*PENDING.*set_tracepoint\r\n\[\t \]+collect \\$$pcreg\r" \
+\[0-9\]+\[\t \]+\(|fast \)tracepoint\[ \]+keep y.*PENDING.*set_tracepoint\r\n\[\t \]+collect \\$$pcreg" \
 	    "single pending tracepoint info (without symbols)"
 
 	gdb_load ${binfile}
