@@ -30,10 +30,12 @@ class EvaluateResult(VariableReference):
 # Helper function to evaluate an expression in a certain frame.
 @in_gdb_thread
 def _evaluate(expr, frame_id):
+    global_context = True
     if frame_id is not None:
         frame = frame_for_id(frame_id)
         frame.select()
-    val = gdb.parse_and_eval(expr)
+        global_context = False
+    val = gdb.parse_and_eval(expr, global_context=global_context)
     ref = EvaluateResult(val)
     return ref.to_object()
 
