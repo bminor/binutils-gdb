@@ -1954,14 +1954,6 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	      as_warn (_("division by zero"));
 	      v = 1;
 	    }
-	  if ((valueT) v >= sizeof(valueT) * CHAR_BIT
-	      && (op_left == O_left_shift || op_left == O_right_shift))
-	    {
-	      as_warn_value_out_of_range (_("shift count"), v, 0,
-					  sizeof(valueT) * CHAR_BIT - 1,
-					  NULL, 0);
-	      resultP->X_add_number = v = 0;
-	    }
 	  switch (op_left)
 	    {
 	    default:			goto general;
@@ -1974,6 +1966,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	    case O_divide:		resultP->X_add_number /= v; break;
 	    case O_modulus:		resultP->X_add_number %= v; break;
 	    case O_left_shift:
+	    case O_right_shift:
 	      /* We always use unsigned shifts.  According to the ISO
 		 C standard, left shift of a signed type having a
 		 negative value is undefined behaviour, and right
@@ -1982,12 +1975,19 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 		 when the result overflows is also undefined
 		 behaviour.  So don't trigger ubsan warnings or rely
 		 on characteristics of the compiler.  */
-	      resultP->X_add_number
-		= (valueT) resultP->X_add_number << (valueT) v;
-	      break;
-	    case O_right_shift:
-	      resultP->X_add_number
-		= (valueT) resultP->X_add_number >> (valueT) v;
+	      if ((valueT) v >= sizeof (valueT) * CHAR_BIT)
+		{
+		  as_warn_value_out_of_range (_("shift count"), v, 0,
+					      sizeof (valueT) * CHAR_BIT - 1,
+					      NULL, 0);
+		  resultP->X_add_number = 0;
+		}
+	      else if (op_left == O_left_shift)
+		resultP->X_add_number
+		  = (valueT) resultP->X_add_number << (valueT) v;
+	      else
+		resultP->X_add_number
+		  = (valueT) resultP->X_add_number >> (valueT) v;
 	      break;
 	    case O_bit_inclusive_or:	resultP->X_add_number |= v; break;
 	    case O_bit_or_not:		resultP->X_add_number |= ~v; break;
