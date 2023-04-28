@@ -19,7 +19,10 @@
 #define UI_H
 
 #include "gdbsupport/event-loop.h"
+#include "gdbsupport/intrusive_list.h"
 #include "gdbsupport/next-iterator.h"
+
+struct interp;
 
 /* Prompt state.  */
 
@@ -84,7 +87,13 @@ struct ui
   int command_editing = 0;
 
   /* Each UI has its own independent set of interpreters.  */
-  struct ui_interp_info *interp_info = nullptr;
+  intrusive_list<interp> interp_list;
+  interp *current_interpreter = nullptr;
+  interp *top_level_interpreter = nullptr;
+
+  /* The interpreter that is active while `interp_exec' is active, NULL
+     at all other times.  */
+  interp *command_interpreter = nullptr;
 
   /* True if the UI is in async mode, false if in sync mode.  If in
      sync mode, a synchronous execution command (e.g, "next") does not
