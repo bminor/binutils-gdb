@@ -653,7 +653,7 @@ struct xcoff_artdata
   } u;
   struct ar_ranges ranges;
   /* Anything less than this size can't hold an archive element.  */
-  unsigned int min_elt;
+  unsigned int ar_hdr_size;
 };
 
 #define x_artdata(abfd) ((struct xcoff_artdata *) bfd_ardata (abfd)->tdata)
@@ -663,13 +663,13 @@ struct xcoff_artdata
 #ifndef SMALL_ARCHIVE
 /* Creates big archives by default */
 #define xcoff_big_format_p(abfd) \
-  (bfd_ardata (abfd) != NULL				\
-   && (x_artdata (abfd) == NULL			\
-       || x_artdata (abfd)->u.hdr.magic[1] == 'b'))
+  (bfd_ardata (abfd) == NULL			\
+   || x_artdata (abfd) == NULL			\
+   || x_artdata (abfd)->u.hdr.magic[1] != 'a')
 #else
 /* Creates small archives by default. */
 #define xcoff_big_format_p(abfd) \
-  (bfd_ardata (abfd) != NULL				\
+  (bfd_ardata (abfd) != NULL			\
    && x_artdata (abfd) != NULL			\
    && x_artdata (abfd)->u.hdr.magic[1] == 'b')
 #endif

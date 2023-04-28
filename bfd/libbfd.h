@@ -78,7 +78,7 @@ extern unsigned int _bfd_section_id ATTRIBUTE_HIDDEN;
 
 struct artdata
 {
-  file_ptr first_file_filepos;
+  ufile_ptr first_file_filepos;
   /* Speed up searching the armap */
   htab_t cache;
   carsym *symdefs;		/* The symdef entries.  */

@@ -1294,7 +1294,7 @@ _bfd_xcoff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
    take a maximum length as an additional parameter.  Also - just to save space,
    we omit the endptr return parameter, since we know that it is never used.  */
 
-static long
+static unsigned long
 _bfd_strntol (const char * nptr, int base, unsigned int maxlen)
 {
   char buf[24]; /* Should be enough.  */
@@ -1306,7 +1306,7 @@ _bfd_strntol (const char * nptr, int base, unsigned int maxlen)
   return strtol (buf, NULL, base);
 }
 
-static long long
+static unsigned long long
 _bfd_strntoll (const char * nptr, int base, unsigned int maxlen)
 {
   char buf[32]; /* Should be enough.  */
@@ -1338,7 +1338,7 @@ _bfd_strntoll (const char * nptr, int base, unsigned int maxlen)
 bool
 _bfd_xcoff_slurp_armap (bfd *abfd)
 {
-  file_ptr off;
+  ufile_ptr off;
   size_t namlen;
   bfd_size_type sz;
   bfd_byte *contents, *cend;
@@ -1636,7 +1636,8 @@ add_range (bfd *abfd, ufile_ptr start, ufile_ptr end)
     /* Overlap with another element.  */
     goto err;
 
-  unsigned min_elt = x_artdata (abfd)->min_elt;
+  /* A zero size element with a one char name is this big.  */
+  unsigned min_elt = x_artdata (abfd)->ar_hdr_size + 2 + SXCOFFARFMAG;
   if (start - lo->end < min_elt)
     {
       /* Merge into an existing range.  */
@@ -1757,7 +1758,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
 bfd *
 _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
-  file_ptr filestart;
+  ufile_ptr filestart;
 
   if (x_artdata (archive) == NULL)
     {
@@ -1770,10 +1771,10 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
       if (last_file == NULL)
 	{
 	  filestart = bfd_ardata (archive)->first_file_filepos;
-	  if (x_artdata (archive)->min_elt == 0)
+	  if (x_artdata (archive)->ar_hdr_size == 0)
 	    {
 	      x_artdata (archive)->ranges.end = SIZEOF_AR_FILE_HDR;
-	      x_artdata (archive)->min_elt = SIZEOF_AR_HDR + SXCOFFARFMAG + 2;
+	      x_artdata (archive)->ar_hdr_size = SIZEOF_AR_HDR;
 	    }
 	}
       else
@@ -1794,10 +1795,10 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
       if (last_file == NULL)
 	{
 	  filestart = bfd_ardata (archive)->first_file_filepos;
-	  if (x_artdata (archive)->min_elt == 0)
+	  if (x_artdata (archive)->ar_hdr_size == 0)
 	    {
 	      x_artdata (archive)->ranges.end = SIZEOF_AR_FILE_HDR_BIG;
-	      x_artdata (archive)->min_elt = SIZEOF_AR_HDR_BIG + SXCOFFARFMAG + 2;
+	      x_artdata (archive)->ar_hdr_size = SIZEOF_AR_HDR_BIG;
 	    }
 	}
       else
@@ -1810,6 +1811,22 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 				x_artdata (archive)->u.bhdr.symoff, 10))
 	{
 	  bfd_set_error (bfd_error_no_more_archived_files);
+	  return NULL;
+	}
+    }
+
+  /* Check that we aren't pointing back at the last element.  This is
+     necessary depite the add_range checking in _bfd_xcoff_read_ar_hdr
+     because archive.c leaves the last element open and thus in the
+     archive element cache until the next element is opened.  */
+  if (last_file != NULL)
+    {
+      ufile_ptr laststart = last_file->proxy_origin;
+      laststart -= x_artdata (archive)->ar_hdr_size;
+      laststart -= arch_eltdata (last_file)->extra_size;
+      if (filestart == laststart)
+	{
+	  bfd_set_error (bfd_error_malformed_archive);
 	  return NULL;
 	}
     }
