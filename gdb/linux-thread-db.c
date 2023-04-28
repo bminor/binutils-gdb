@@ -694,7 +694,7 @@ check_thread_db_callback (const td_thrhandle_t *th, void *arg)
       switch_to_thread (thread_info);
 
       expression_up expr = parse_expression ("(int) errno");
-      struct value *val = evaluate_expression (expr.get ());
+      struct value *val = expr->evaluate ();
 
       if (tdb_testinfo->log_progress)
 	{

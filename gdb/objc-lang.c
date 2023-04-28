@@ -1164,9 +1164,7 @@ print_object_command (const char *args, int from_tty)
   {
     expression_up expr = parse_expression (args);
 
-    object
-      = evaluate_expression (expr.get (),
-			     builtin_type (expr->gdbarch)->builtin_data_ptr);
+    object = expr->evaluate (builtin_type (expr->gdbarch)->builtin_data_ptr);
   }
 
   /* Validate the address for sanity.  */

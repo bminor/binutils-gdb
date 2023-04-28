@@ -4339,7 +4339,7 @@ ada_read_renaming_var_value (struct symbol *renaming_sym,
 
   sym_name = renaming_sym->linkage_name ();
   expression_up expr = parse_exp_1 (&sym_name, 0, block, 0);
-  return evaluate_expression (expr.get ());
+  return expr->evaluate ();
 }
 
 
@@ -12318,7 +12318,7 @@ should_stop_exception (const struct bp_location *bl)
   try
     {
       scoped_value_mark mark;
-      stop = value_true (evaluate_expression (ada_loc->excep_cond_expr.get ()));
+      stop = value_true (ada_loc->excep_cond_expr->evaluate ());
     }
   catch (const gdb_exception_error &ex)
     {

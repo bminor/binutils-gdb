@@ -1316,7 +1316,7 @@ process_print_command_args (const char *args, value_print_options *print_opts,
       /* VOIDPRINT is true to indicate that we do want to print a void
 	 value, so invert it for parse_expression.  */
       expression_up expr = parse_expression (exp, nullptr, !voidprint);
-      return evaluate_expression (expr.get ());
+      return expr->evaluate ();
     }
 
   return access_value_history (0);
@@ -1495,7 +1495,7 @@ output_command (const char *exp, int from_tty)
 
   expression_up expr = parse_expression (exp);
 
-  val = evaluate_expression (expr.get ());
+  val = expr->evaluate ();
 
   annotate_value_begin (val->type ());
 
@@ -1534,7 +1534,7 @@ set_command (const char *exp, int from_tty)
 	(_("Expression is not an assignment (and might have no effect)"));
     }
 
-  evaluate_expression (expr.get ());
+  expr->evaluate ();
 }
 
 static void
@@ -1900,7 +1900,7 @@ x_command (const char *exp, int from_tty)
 	 command's definition.  */
       if (from_tty)
 	set_repeat_arguments ("");
-      val = evaluate_expression (expr.get ());
+      val = expr->evaluate ();
       if (TYPE_IS_REFERENCE (val->type ()))
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
@@ -2188,7 +2188,7 @@ do_one_display (struct display *d)
 	  struct value *val;
 	  CORE_ADDR addr;
 
-	  val = evaluate_expression (d->exp.get ());
+	  val = d->exp->evaluate ();
 	  addr = value_as_address (val);
 	  if (d->format.format == 'i')
 	    addr = gdbarch_addr_bits_remove (d->exp->gdbarch, addr);
@@ -2226,7 +2226,7 @@ do_one_display (struct display *d)
 	{
 	  struct value *val;
 
-	  val = evaluate_expression (d->exp.get ());
+	  val = d->exp->evaluate ();
 	  print_formatted (val, d->format.size, &opts, gdb_stdout);
 	}
       catch (const gdb_exception_error &ex)

@@ -1444,7 +1444,7 @@ stap_probe::evaluate_argument (unsigned n, frame_info_ptr frame)
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
   arg = this->get_arg_by_number (n, gdbarch);
-  return evaluate_expression (arg->aexpr.get (), arg->atype);
+  return arg->aexpr->evaluate (arg->atype);
 }
 
 /* Compile the probe's argument N (indexed from 0) to agent expression.

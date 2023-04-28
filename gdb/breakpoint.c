@@ -4984,7 +4984,7 @@ static bool
 breakpoint_cond_eval (expression *exp)
 {
   scoped_value_mark mark;
-  return value_true (evaluate_expression (exp));
+  return value_true (exp->evaluate ());
 }
 
 /* Allocate a new bpstat.  Link it to the FIFO list by BS_LINK_POINTER.  */

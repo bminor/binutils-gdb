@@ -2722,7 +2722,7 @@ return_command (const char *retval_exp, int from_tty)
 
       /* Compute the return value.  Should the computation fail, this
 	 call throws an error.  */
-      return_value = evaluate_expression (retval_expr.get ());
+      return_value = retval_expr->evaluate ();
 
       /* Cast return value to the return type of the function.  Should
 	 the cast fail, this call throws an error.  */

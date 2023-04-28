@@ -222,7 +222,8 @@ struct expression
   /* Evaluate the expression.  EXPECT_TYPE is the context type of the
      expression; normally this should be nullptr.  NOSIDE controls how
      evaluation is performed.  */
-  struct value *evaluate (struct type *expect_type, enum noside noside);
+  struct value *evaluate (struct type *expect_type = nullptr,
+			  enum noside noside = EVAL_NORMAL);
 
   /* Language it was entered in.  */
   const struct language_defn *language_defn;

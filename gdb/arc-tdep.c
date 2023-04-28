@@ -2434,7 +2434,7 @@ dump_arc_instruction_command (const char *args, int from_tty)
 {
   struct value *val;
   if (args != NULL && strlen (args) > 0)
-    val = evaluate_expression (parse_expression (args).get ());
+    val = parse_expression (args)->evaluate ();
   else
     val = access_value_history (0);
   val->record_latest ();

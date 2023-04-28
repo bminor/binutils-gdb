@@ -53,7 +53,7 @@ parse_and_eval_address (const char *exp)
 {
   expression_up expr = parse_expression (exp);
 
-  return value_as_address (evaluate_expression (expr.get ()));
+  return value_as_address (expr->evaluate ());
 }
 
 /* Like parse_and_eval_address, but treats the value of the expression
@@ -63,7 +63,7 @@ parse_and_eval_long (const char *exp)
 {
   expression_up expr = parse_expression (exp);
 
-  return value_as_long (evaluate_expression (expr.get ()));
+  return value_as_long (expr->evaluate ());
 }
 
 struct value *
@@ -71,7 +71,7 @@ parse_and_eval (const char *exp)
 {
   expression_up expr = parse_expression (exp);
 
-  return evaluate_expression (expr.get ());
+  return expr->evaluate ();
 }
 
 /* Parse up to a comma (or to a closeparen)
@@ -83,7 +83,7 @@ parse_to_comma_and_eval (const char **expp)
 {
   expression_up expr = parse_exp_1 (expp, 0, nullptr, 1);
 
-  return evaluate_expression (expr.get ());
+  return expr->evaluate ();
 }
 
 
@@ -114,14 +114,6 @@ expression::evaluate (struct type *expect_type, enum noside noside)
     retval = retval->non_lval ();
 
   return retval;
-}
-
-/* See value.h.  */
-
-struct value *
-evaluate_expression (struct expression *exp, struct type *expect_type)
-{
-  return exp->evaluate (expect_type, EVAL_NORMAL);
 }
 
 /* Evaluate an expression, avoiding all memory references

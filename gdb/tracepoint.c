@@ -1375,7 +1375,7 @@ encode_actions_1 (struct command_line *action,
 		    case UNOP_MEMVAL:
 		      {
 			/* Safe because we know it's a simple expression.  */
-			tempval = evaluate_expression (exp.get ());
+			tempval = exp->evaluate ();
 			addr = tempval->address ();
 			expr::unop_memval_operation *memop
 			  = (gdb::checked_static_cast<expr::unop_memval_operation *>

@@ -567,7 +567,7 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
 	    /* Evaluate the expression.  */
 	    {
 	      scoped_value_mark mark;
-	      value *val = evaluate_expression (expr.get ());
+	      value *val = expr->evaluate ();
 	      cond_result = value_true (val);
 	    }
 
@@ -622,7 +622,7 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
 	/* Evaluate the conditional.  */
 	{
 	  scoped_value_mark mark;
-	  value *val = evaluate_expression (expr.get ());
+	  value *val = expr->evaluate ();
 
 	  /* Choose which arm to take commands from based on the value
 	     of the conditional expression.  */
