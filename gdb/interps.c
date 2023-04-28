@@ -36,7 +36,7 @@
 #include "event-top.h"
 #include "interps.h"
 #include "completer.h"
-#include "top.h"		/* For command_loop.  */
+#include "ui.h"
 #include "main.h"
 #include "gdbsupport/buildargv.h"
 #include "gdbsupport/scope-exit.h"

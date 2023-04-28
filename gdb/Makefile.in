@@ -1209,6 +1209,7 @@ COMMON_SFILES = \
 	target-float.c \
 	type-stack.c \
 	typeprint.c \
+	ui.c \
 	ui-file.c \
 	ui-out.c \
 	ui-style.c \
@@ -1496,6 +1497,7 @@ HFILES_NO_SRCDIR = \
 	tramp-frame.h \
 	type-stack.h \
 	typeprint.h \
+	ui.h \
 	ui-file.h \
 	ui-out.h \
 	ui-style.h \

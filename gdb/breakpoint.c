@@ -53,6 +53,7 @@
 #include "memattr.h"
 #include "ada-lang.h"
 #include "top.h"
+#include "ui.h"
 #include "valprint.h"
 #include "jit.h"
 #include "parser-defs.h"

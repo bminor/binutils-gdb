@@ -28,6 +28,7 @@
 #include "gdbthread.h"
 #include "interps.h"
 #include "top.h"
+#include "ui.h"
 #include "observable.h"
 
 /* General function to handle events in the inferior.  */

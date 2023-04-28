@@ -23,6 +23,7 @@
 
 #include "ui-out.h"
 #include "top.h"
+#include "ui.h"
 #include "breakpoint.h"
 #include "tracepoint.h"
 #include "cli/cli-cmds.h"

@@ -25,11 +25,10 @@
 #include "observable.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "top.h"
 #include "source.h"
 #include "objfiles.h"
 #include "source-cache.h"
-
+#include "ui.h"
 
 /* Prototypes for local functions.  */
 

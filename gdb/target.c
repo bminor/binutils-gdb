@@ -44,7 +44,7 @@
 #include "gdbsupport/agent.h"
 #include "auxv.h"
 #include "target-debug.h"
-#include "top.h"
+#include "ui.h"
 #include "event-top.h"
 #include <algorithm>
 #include "gdbsupport/byte-vector.h"

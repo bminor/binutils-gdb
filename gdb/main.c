@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "top.h"
+#include "ui.h"
 #include "target.h"
 #include "inferior.h"
 #include "symfile.h"

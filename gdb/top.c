@@ -39,6 +39,7 @@
 #include "annotate.h"
 #include "completer.h"
 #include "top.h"
+#include "ui.h"
 #include "gdbsupport/version.h"
 #include "serial.h"
 #include "main.h"
@@ -253,13 +254,9 @@ void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 
 void (*deprecated_context_hook) (int id);
 
-/* The highest UI number ever assigned.  */
-static int highest_ui_num;
+/* See top.h.  */
 
-/* Unbuffer STREAM.  This is a wrapper around setbuf(STREAM, nullptr)
-   which applies some special rules for MS-Windows hosts.  */
-
-static void
+void
 unbuffer_stream (FILE *stream)
 {
   /* Unbuffer the input stream so that in gdb_readline_no_editing_callback,
@@ -289,118 +286,6 @@ unbuffer_stream (FILE *stream)
      stream for everyone except MS-Windows.  */
   setbuf (stream, nullptr);
 #endif
-}
-
-/* See top.h.  */
-
-ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
-  : num (++highest_ui_num),
-    stdin_stream (instream_),
-    instream (instream_),
-    outstream (outstream_),
-    errstream (errstream_),
-    input_fd (fileno (instream)),
-    m_input_interactive_p (ISATTY (instream)),
-    m_gdb_stdout (new pager_file (new stdio_file (outstream))),
-    m_gdb_stdin (new stdio_file (instream)),
-    m_gdb_stderr (new stderr_file (errstream)),
-    m_gdb_stdlog (new timestamped_file (m_gdb_stderr))
-{
-  unbuffer_stream (instream_);
-
-  if (ui_list == NULL)
-    ui_list = this;
-  else
-    {
-      struct ui *last;
-
-      for (last = ui_list; last->next != NULL; last = last->next)
-	;
-      last->next = this;
-    }
-}
-
-ui::~ui ()
-{
-  struct ui *ui, *uiprev;
-
-  uiprev = NULL;
-
-  for (ui = ui_list; ui != NULL; uiprev = ui, ui = ui->next)
-    if (ui == this)
-      break;
-
-  gdb_assert (ui != NULL);
-
-  if (uiprev != NULL)
-    uiprev->next = next;
-  else
-    ui_list = next;
-
-  delete m_gdb_stdin;
-  delete m_gdb_stdout;
-  delete m_gdb_stderr;
-}
-
-/* Open file named NAME for read/write, making sure not to make it the
-   controlling terminal.  */
-
-static gdb_file_up
-open_terminal_stream (const char *name)
-{
-  scoped_fd fd = gdb_open_cloexec (name, O_RDWR | O_NOCTTY, 0);
-  if (fd.get () < 0)
-    perror_with_name  (_("opening terminal failed"));
-
-  return fd.to_file ("w+");
-}
-
-/* Implementation of the "new-ui" command.  */
-
-static void
-new_ui_command (const char *args, int from_tty)
-{
-  int argc;
-  const char *interpreter_name;
-  const char *tty_name;
-
-  dont_repeat ();
-
-  gdb_argv argv (args);
-  argc = argv.count ();
-
-  if (argc < 2)
-    error (_("Usage: new-ui INTERPRETER TTY"));
-
-  interpreter_name = argv[0];
-  tty_name = argv[1];
-
-  {
-    scoped_restore save_ui = make_scoped_restore (&current_ui);
-
-    /* Open specified terminal.  Note: we used to open it three times,
-       once for each of stdin/stdout/stderr, but that does not work
-       with Windows named pipes.  */
-    gdb_file_up stream = open_terminal_stream (tty_name);
-
-    std::unique_ptr<ui> ui
-      (new struct ui (stream.get (), stream.get (), stream.get ()));
-
-    ui->async = 1;
-
-    current_ui = ui.get ();
-
-    set_top_level_interpreter (interpreter_name);
-
-    interp_pre_command_loop (top_level_interpreter ());
-
-    /* Make sure the file is not closed.  */
-    stream.release ();
-
-    ui.release ();
-  }
-
-  gdb_printf ("New UI allocated\n");
 }
 
 /* Handler for SIGHUP.  */
@@ -1917,8 +1802,9 @@ quit_force (int *exit_arg, int from_tty)
   exit (exit_code);
 }
 
-/* The value of the "interactive-mode" setting.  */
-static enum auto_boolean interactive_mode = AUTO_BOOLEAN_AUTO;
+/* See top.h.  */
+
+auto_boolean interactive_mode = AUTO_BOOLEAN_AUTO;
 
 /* Implement the "show interactive-mode" option.  */
 
@@ -1935,20 +1821,6 @@ show_interactive_mode (struct ui_file *file, int from_tty,
     gdb_printf (file, "Debugger's interactive mode is %s.\n", value);
 }
 
-/* Returns whether GDB is running on an interactive terminal.  */
-
-bool
-ui::input_interactive_p () const
-{
-  if (batch_flag)
-    return false;
-
-  if (interactive_mode != AUTO_BOOLEAN_AUTO)
-    return interactive_mode == AUTO_BOOLEAN_TRUE;
-
-  return m_input_interactive_p;
-}
-
 static void
 dont_repeat_command (const char *ignored, int from_tty)
 {
@@ -2241,8 +2113,6 @@ show_startup_quiet (struct ui_file *file, int from_tty,
 static void
 init_main (void)
 {
-  struct cmd_list_element *c;
-
   /* Initialize the prompt to a simple "(gdb) " prompt or to whatever
      the DEFAULT_PROMPT is.  */
   set_prompt (DEFAULT_PROMPT);
@@ -2394,13 +2264,6 @@ affect future GDB sessions."),
 			       NULL,
 			       show_startup_quiet,
 			       &setlist, &showlist);
-
-  c = add_cmd ("new-ui", class_support, new_ui_command, _("\
-Create a new UI.\n\
-Usage: new-ui INTERPRETER TTY\n\
-The first argument is the name of the interpreter to run.\n\
-The second argument is the terminal the UI runs on."), &cmdlist);
-  set_cmd_completer (c, interpreter_completer);
 
   struct internalvar *major_version_var = create_internalvar ("_gdb_major");
   struct internalvar *minor_version_var = create_internalvar ("_gdb_minor");

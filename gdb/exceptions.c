@@ -26,7 +26,7 @@
 #include "ui-out.h"
 #include "serial.h"
 #include "gdbthread.h"
-#include "top.h"
+#include "ui.h"
 #include "gdbsupport/gdb_optional.h"
 
 static void

@@ -21,6 +21,7 @@
 
 #include "ser-event.h"
 #include "top.h"
+#include "ui.h"
 
 /* PROC is a function to be invoked when the READY flag is set.  This
    happens when there has been a signal and the corresponding signal

@@ -23,7 +23,7 @@
 
 #include "defs.h"
 #include "gdbsupport/gdb_select.h"
-#include "top.h"
+#include "ui.h"
 #include "target.h"
 #include "guile-internal.h"
 #include "gdbsupport/gdb_optional.h"

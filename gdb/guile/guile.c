@@ -28,6 +28,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "top.h"
+#include "ui.h"
 #include "extension-priv.h"
 #include "utils.h"
 #include "gdbsupport/version.h"

@@ -25,6 +25,7 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "top.h"
+#include "ui.h"
 #include "gdbthread.h"
 #include "mi-cmds.h"
 #include "mi-parse.h"

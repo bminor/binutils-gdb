@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "cli/cli-interp.h"
 #include "interps.h"
-#include "top.h"
+#include "ui.h"
 #include "event-top.h"
 #include "gdbsupport/event-loop.h"
 #include "ui-out.h"

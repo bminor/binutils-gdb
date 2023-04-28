@@ -24,7 +24,7 @@
 #include "gdbcmd.h"
 #include "terminal.h"
 #include "gdbthread.h"
-#include "top.h"
+#include "ui.h"
 #include "gdbsupport/job-control.h"
 #include "gdbsupport/filestuff.h"
 #include "nat/fork-inferior.h"

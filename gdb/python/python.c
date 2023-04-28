@@ -64,6 +64,7 @@ static const char *gdbpy_should_print_stack = python_excp_message;
 #include "cli/cli-decode.h"
 #include "charset.h"
 #include "top.h"
+#include "ui.h"
 #include "python-internal.h"
 #include "linespec.h"
 #include "source.h"

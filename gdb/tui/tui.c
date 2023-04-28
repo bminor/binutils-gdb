@@ -41,6 +41,7 @@
 #include "source.h"
 #include "terminal.h"
 #include "top.h"
+#include "ui.h"
 
 #include <ctype.h>
 #include <signal.h>

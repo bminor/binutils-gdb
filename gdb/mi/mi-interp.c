@@ -27,7 +27,7 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "ui-out.h"
-#include "top.h"
+#include "ui.h"
 #include "mi-main.h"
 #include "mi-cmds.h"
 #include "mi-out.h"

@@ -26,7 +26,7 @@
 #include "completer.h"
 #include "readline/readline.h"
 #include "cli/cli-style.h"
-#include "top.h"
+#include "ui.h"
 
 /* These are the CLI output functions */
 

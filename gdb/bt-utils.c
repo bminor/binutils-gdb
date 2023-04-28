@@ -19,7 +19,7 @@
 #include "bt-utils.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "top.h"
+#include "ui.h"
 #include "cli/cli-decode.h"
 
 /* See bt-utils.h.  */

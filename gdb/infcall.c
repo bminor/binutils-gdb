@@ -38,6 +38,7 @@
 #include "event-top.h"
 #include "observable.h"
 #include "top.h"
+#include "ui.h"
 #include "interps.h"
 #include "thread-fsm.h"
 #include <algorithm>

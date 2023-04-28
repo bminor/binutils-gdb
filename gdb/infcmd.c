@@ -49,7 +49,7 @@
 #include "inf-loop.h"
 #include "linespec.h"
 #include "thread-fsm.h"
-#include "top.h"
+#include "ui.h"
 #include "interps.h"
 #include "skip.h"
 #include "gdbsupport/gdb_optional.h"

@@ -21,7 +21,7 @@
 #include "python-internal.h"
 #include "interps.h"
 #include "cli-out.h"
-#include "top.h"
+#include "ui.h"
 
 class dap_interp final : public interp
 {

@@ -45,6 +45,7 @@
 #include "interps.h"
 
 #include "top.h"
+#include "ui.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
 #include "cli/cli-setshow.h"

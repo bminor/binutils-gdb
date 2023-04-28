@@ -25,6 +25,7 @@
 #include "event-top.h"
 #include "command.h"
 #include "top.h"
+#include "ui.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui/tui-io.h"

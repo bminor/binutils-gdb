@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "top.h"
+#include "ui.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "target.h"
@@ -480,12 +481,6 @@ top_level_prompt (void)
   return prompt;
 }
 
-/* See top.h.  */
-
-struct ui *main_ui;
-struct ui *current_ui;
-struct ui *ui_list;
-
 /* Get a reference to the current UI's line buffer.  This is used to
    construct a whole line of input from partial input.  */
 
@@ -493,77 +488,6 @@ static std::string &
 get_command_line_buffer (void)
 {
   return current_ui->line_buffer;
-}
-
-/* When there is an event ready on the stdin file descriptor, instead
-   of calling readline directly throught the callback function, or
-   instead of calling gdb_readline_no_editing_callback, give gdb a
-   chance to detect errors and do something.  */
-
-static void
-stdin_event_handler (int error, gdb_client_data client_data)
-{
-  struct ui *ui = (struct ui *) client_data;
-
-  if (error)
-    {
-      /* Switch to the main UI, so diagnostics always go there.  */
-      current_ui = main_ui;
-
-      ui->unregister_file_handler ();
-      if (main_ui == ui)
-	{
-	  /* If stdin died, we may as well kill gdb.  */
-	  gdb_printf (gdb_stderr, _("error detected on stdin\n"));
-	  quit_command ((char *) 0, 0);
-	}
-      else
-	{
-	  /* Simply delete the UI.  */
-	  delete ui;
-	}
-    }
-  else
-    {
-      /* Switch to the UI whose input descriptor woke up the event
-	 loop.  */
-      current_ui = ui;
-
-      /* This makes sure a ^C immediately followed by further input is
-	 always processed in that order.  E.g,. with input like
-	 "^Cprint 1\n", the SIGINT handler runs, marks the async
-	 signal handler, and then select/poll may return with stdin
-	 ready, instead of -1/EINTR.  The
-	 gdb.base/double-prompt-target-event-error.exp test exercises
-	 this.  */
-      QUIT;
-
-      do
-	{
-	  call_stdin_event_handler_again_p = 0;
-	  ui->call_readline (client_data);
-	}
-      while (call_stdin_event_handler_again_p != 0);
-    }
-}
-
-/* See top.h.  */
-
-void
-ui::register_file_handler ()
-{
-  if (input_fd != -1)
-    add_file_handler (input_fd, stdin_event_handler, this,
-		      string_printf ("ui-%d", num), true);
-}
-
-/* See top.h.  */
-
-void
-ui::unregister_file_handler ()
-{
-  if (input_fd != -1)
-    delete_file_handler (input_fd);
 }
 
 /* Re-enable stdin after the end of an execution command in

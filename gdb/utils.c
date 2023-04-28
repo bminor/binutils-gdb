@@ -52,6 +52,7 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbcore.h"
 #include "top.h"
+#include "ui.h"
 #include "main.h"
 #include "solist.h"
 
