@@ -36,29 +36,6 @@
 
 #include <ctype.h>
 
-/* Default name for the standard operator OPCODE (i.e., one defined in
-   the definition of enum exp_opcode).  */
-
-const char *
-op_name (enum exp_opcode opcode)
-{
-  switch (opcode)
-    {
-    default:
-      {
-	static char buf[30];
-
-	xsnprintf (buf, sizeof (buf), "<unknown %d>", opcode);
-	return buf;
-      }
-#define OP(name)	\
-    case name:		\
-      return #name ;
-#include "std-operator.def"
-#undef OP
-    }
-}
-
 /* Meant to be used in debug sessions, so don't export it in a header file.  */
 extern void ATTRIBUTE_USED debug_exp (struct expression *exp);
 
@@ -84,7 +61,23 @@ check_objfile (const struct block *block, struct objfile *objfile)
 void
 dump_for_expression (struct ui_file *stream, int depth, enum exp_opcode op)
 {
-  gdb_printf (stream, _("%*sOperation: %s\n"), depth, "", op_name (op));
+  gdb_printf (stream, _("%*sOperation: "), depth, "");
+
+  switch (op)
+    {
+    default:
+      gdb_printf (stream, "<unknown %d>", op);
+      break;
+
+#define OP(name)	\
+    case name:		\
+      gdb_puts (#name, stream); \
+      break;
+#include "std-operator.def"
+#undef OP
+    }
+
+  gdb_puts ("\n", stream);
 }
 
 void

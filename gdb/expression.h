@@ -284,10 +284,6 @@ extern struct value *evaluate_subexp_do_call (expression *exp,
 					      const char *function_name,
 					      type *default_return_type);
 
-/* From expprint.c */
-
-extern const char *op_name (enum exp_opcode opcode);
-
 /* In an OP_RANGE expression, either bound could be empty, indicating
    that its value is by default that of the corresponding bound of the
    array or string.  Also, the upper end of the range can be exclusive
