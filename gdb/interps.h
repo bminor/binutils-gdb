@@ -22,6 +22,8 @@
 #ifndef INTERPS_H
 #define INTERPS_H
 
+#include "gdbsupport/intrusive_list.h"
+
 struct ui_out;
 struct interp;
 struct ui;
@@ -40,7 +42,7 @@ extern void interp_factory_register (const char *name,
 
 extern void interp_exec (struct interp *interp, const char *command);
 
-class interp
+class interp : public intrusive_list_node<interp>
 {
 public:
   explicit interp (const char *name);
@@ -85,10 +87,6 @@ private:
   const char *m_name;
 
 public:
-  /* Interpreters are stored in a linked list, this is the next
-     one...  */
-  interp *next = nullptr;
-
   /* Has the init method been run?  */
   bool inited = false;
 };

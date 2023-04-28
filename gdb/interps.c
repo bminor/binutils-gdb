@@ -49,7 +49,7 @@ struct ui_interp_info
   DISABLE_COPY_AND_ASSIGN (ui_interp_info);
 
   /* Each top level has its own independent set of interpreters.  */
-  interp *interp_list = nullptr;
+  intrusive_list<interp> interp_list;
   interp *current_interpreter = nullptr;
   interp *top_level_interpreter = nullptr;
 
@@ -132,8 +132,7 @@ interp_add (struct ui *ui, struct interp *interp)
 
   gdb_assert (interp_lookup_existing (ui, interp->name ()) == NULL);
 
-  interp->next = ui_interp.interp_list;
-  ui_interp.interp_list = interp;
+  ui_interp.interp_list.push_back (*interp);
 }
 
 /* This sets the current interpreter to be INTERP.  If INTERP has not
@@ -204,17 +203,12 @@ static struct interp *
 interp_lookup_existing (struct ui *ui, const char *name)
 {
   ui_interp_info &ui_interp = get_interp_info (ui);
-  struct interp *interp;
 
-  for (interp = ui_interp.interp_list;
-       interp != NULL;
-       interp = interp->next)
-    {
-      if (strcmp (interp->name (), name) == 0)
-	return interp;
-    }
+  for (interp &interp : ui_interp.interp_list)
+    if (strcmp (interp.name (), name) == 0)
+      return &interp;
 
-  return NULL;
+  return nullptr;
 }
 
 /* See interps.h.  */
