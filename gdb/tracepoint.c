@@ -680,7 +680,8 @@ validate_actionline (const char *line, struct breakpoint *b)
 	    {
 	      p = tmp_p;
 	      expression_up exp = parse_exp_1 (&p, loc->address,
-					       block_for_pc (loc->address), 1);
+					       block_for_pc (loc->address),
+					       PARSER_COMMA_TERMINATES);
 
 	      if (exp->first_opcode () == OP_VAR_VALUE)
 		{
@@ -732,7 +733,8 @@ validate_actionline (const char *line, struct breakpoint *b)
 
 	      /* Only expressions are allowed for this action.  */
 	      expression_up exp = parse_exp_1 (&p, loc->address,
-					       block_for_pc (loc->address), 1);
+					       block_for_pc (loc->address),
+					       PARSER_COMMA_TERMINATES);
 
 	      /* We have something to evaluate, make sure that the expr to
 		 bytecode translator can handle it and that it's not too
@@ -1349,7 +1351,7 @@ encode_actions_1 (struct command_line *action,
 		  const char *exp_start = action_exp;
 		  expression_up exp = parse_exp_1 (&action_exp, tloc->address,
 						   block_for_pc (tloc->address),
-						   1);
+						   PARSER_COMMA_TERMINATES);
 
 		  switch (exp->first_opcode ())
 		    {
@@ -1439,7 +1441,7 @@ encode_actions_1 (struct command_line *action,
 		{
 		  expression_up exp = parse_exp_1 (&action_exp, tloc->address,
 						   block_for_pc (tloc->address),
-						   1);
+						   PARSER_COMMA_TERMINATES);
 
 		  agent_expr_up aexpr = gen_eval_for_expr (tloc->address,
 							   exp.get ());

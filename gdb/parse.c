@@ -328,7 +328,7 @@ copy_name (struct stoken token)
 static expression_up
 parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      const struct block *block,
-		      int comma, bool void_context_p,
+		      parser_flags flags,
 		      innermost_block_tracker *tracker,
 		      std::unique_ptr<expr_completion_base> *completer)
 {
@@ -398,8 +398,11 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
-		   expression_context_pc, comma, *stringptr,
-		   completer != nullptr, tracker, void_context_p);
+		   expression_context_pc,
+		   (flags & PARSER_COMMA_TERMINATES) != 0,
+		   *stringptr,
+		   completer != nullptr, tracker,
+		   (flags & PARSER_VOID_CONTEXT) != 0);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
@@ -435,31 +438,25 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
    if BLOCK is zero, use the block of the selected stack frame.
    Meanwhile, advance *STRINGPTR to point after the expression,
    at the first nonwhite character that is not part of the expression
-   (possibly a null character).
-
-   If COMMA is nonzero, stop if a comma is reached.  */
+   (possibly a null character).  FLAGS are passed to the parser.  */
 
 expression_up
 parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
-	     int comma, innermost_block_tracker *tracker)
+	     parser_flags flags, innermost_block_tracker *tracker)
 {
-  return parse_exp_in_context (stringptr, pc, block, comma, false,
+  return parse_exp_in_context (stringptr, pc, block, flags,
 			       tracker, nullptr);
 }
 
 /* Parse STRING as an expression, and complain if this fails to use up
    all of the contents of STRING.  TRACKER, if non-null, will be
-   updated by the parser.  VOID_CONTEXT_P should be true to indicate
-   that the expression may be expected to return a value with void
-   type.  Parsers are free to ignore this, or to use it to help with
-   overload resolution decisions.  */
+   updated by the parser.  FLAGS are passed to the parser.  */
 
 expression_up
 parse_expression (const char *string, innermost_block_tracker *tracker,
-		  bool void_context_p)
+		  parser_flags flags)
 {
-  expression_up exp = parse_exp_in_context (&string, 0, nullptr, 0,
-					    void_context_p,
+  expression_up exp = parse_exp_in_context (&string, 0, nullptr, flags,
 					    tracker, nullptr);
   if (*string)
     error (_("Junk after end of expression."));
@@ -495,7 +492,7 @@ parse_expression_for_completion
 
   try
     {
-      exp = parse_exp_in_context (&string, 0, 0, 0, false, nullptr, completer);
+      exp = parse_exp_in_context (&string, 0, 0, 0, nullptr, completer);
     }
   catch (const gdb_exception_error &except)
     {

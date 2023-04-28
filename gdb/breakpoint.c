@@ -2519,7 +2519,8 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
       const char *cmd1;
 
       cmd1 = cmdrest;
-      expression_up expr = parse_exp_1 (&cmd1, scope, block_for_pc (scope), 1);
+      expression_up expr = parse_exp_1 (&cmd1, scope, block_for_pc (scope),
+					PARSER_COMMA_TERMINATES);
       argvec.push_back (expr.release ());
       cmdrest = cmd1;
       if (*cmdrest == ',')

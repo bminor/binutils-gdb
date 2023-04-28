@@ -2615,7 +2615,8 @@ maint_agent_printf_command (const char *cmdrest, int from_tty)
       const char *cmd1;
 
       cmd1 = cmdrest;
-      expression_up expr = parse_exp_1 (&cmd1, 0, (struct block *) 0, 1);
+      expression_up expr = parse_exp_1 (&cmd1, 0, (struct block *) 0,
+					PARSER_COMMA_TERMINATES);
       argvec.push_back (expr.release ());
       cmdrest = cmd1;
       if (*cmdrest == ',')

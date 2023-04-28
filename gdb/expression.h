@@ -283,11 +283,27 @@ private:
   const struct block *m_innermost_block;
 };
 
+/* Flags that can affect the parsers.  */
+
+enum parser_flag
+{
+  /* This flag is set if the expression is being evaluated in a
+     context where a 'void' result type is expected.  Parsers are free
+     to ignore this, or to use it to help with overload resolution
+     decisions.  */
+  PARSER_VOID_CONTEXT = (1 << 0),
+
+  /* This flag is set if a top-level comma terminates the
+     expression.  */
+  PARSER_COMMA_TERMINATES = (1 << 1),
+};
+DEF_ENUM_FLAGS_TYPE (enum parser_flag, parser_flags);
+
 /* From parse.c */
 
 extern expression_up parse_expression (const char *,
 				       innermost_block_tracker * = nullptr,
-				       bool void_context_p = false);
+				       parser_flags flags = 0);
 
 extern expression_up parse_expression_with_language (const char *string,
 						     enum language lang);
@@ -314,7 +330,8 @@ extern expression_up parse_expression_for_completion
      (const char *, std::unique_ptr<expr_completion_base> *completer);
 
 extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
-				  const struct block *, int,
+				  const struct block *,
+				  parser_flags flags,
 				  innermost_block_tracker * = nullptr);
 
 /* From eval.c */
