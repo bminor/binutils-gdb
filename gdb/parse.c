@@ -72,12 +72,6 @@ show_parserdebug (struct ui_file *file, int from_tty,
 }
 
 
-static expression_up parse_exp_in_context
-     (const char **, CORE_ADDR,
-      const struct block *, int,
-      bool, innermost_block_tracker *,
-      std::unique_ptr<expr_completion_base> *);
-
 /* Documented at it's declaration.  */
 
 void
@@ -328,24 +322,6 @@ copy_name (struct stoken token)
 }
 
 
-/* Read an expression from the string *STRINGPTR points to,
-   parse it, and return a pointer to a struct expression that we malloc.
-   Use block BLOCK as the lexical context for variable names;
-   if BLOCK is zero, use the block of the selected stack frame.
-   Meanwhile, advance *STRINGPTR to point after the expression,
-   at the first nonwhite character that is not part of the expression
-   (possibly a null character).
-
-   If COMMA is nonzero, stop if a comma is reached.  */
-
-expression_up
-parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
-	     int comma, innermost_block_tracker *tracker)
-{
-  return parse_exp_in_context (stringptr, pc, block, comma, false,
-			       tracker, nullptr);
-}
-
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
    no value is expected from the expression.  */
 
@@ -451,6 +427,24 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
     *completer = std::move (ps.m_completion_state);
   *stringptr = ps.lexptr;
   return result;
+}
+
+/* Read an expression from the string *STRINGPTR points to,
+   parse it, and return a pointer to a struct expression that we malloc.
+   Use block BLOCK as the lexical context for variable names;
+   if BLOCK is zero, use the block of the selected stack frame.
+   Meanwhile, advance *STRINGPTR to point after the expression,
+   at the first nonwhite character that is not part of the expression
+   (possibly a null character).
+
+   If COMMA is nonzero, stop if a comma is reached.  */
+
+expression_up
+parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
+	     int comma, innermost_block_tracker *tracker)
+{
+  return parse_exp_in_context (stringptr, pc, block, comma, false,
+			       tracker, nullptr);
 }
 
 /* Parse STRING as an expression, and complain if this fails to use up
