@@ -1313,7 +1313,7 @@ extern void fetch_subexp_value (struct expression *exp,
 				std::vector<value_ref_ptr> *val_chain,
 				bool preserve_errors);
 
-extern struct value *parse_and_eval (const char *exp);
+extern struct value *parse_and_eval (const char *exp, parser_flags flags = 0);
 
 extern struct value *parse_to_comma_and_eval (const char **expp);
 
