@@ -1211,7 +1211,7 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
      internal form to reconstruct the type somehow.  */
   std::string type_name = gnuv3_get_typename_from_type_info (type_info_ptr);
   expression_up expr (parse_expression (type_name.c_str ()));
-  struct value *type_val = evaluate_type (expr.get ());
+  struct value *type_val = expr->evaluate_type ();
   return type_val->type ();
 }
 

@@ -1299,8 +1299,6 @@ extern int using_struct_return (struct gdbarch *gdbarch,
 				struct value *function,
 				struct type *value_type);
 
-extern struct value *evaluate_type (struct expression *exp);
-
 extern value *evaluate_var_value (enum noside noside, const block *blk,
 				  symbol *var);
 

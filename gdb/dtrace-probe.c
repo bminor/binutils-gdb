@@ -494,7 +494,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 	    }
 
 	  if (expr != NULL && expr->first_opcode () == OP_TYPE)
-	    type = evaluate_type (expr.get ())->type ();
+	    type = expr->evaluate_type ()->type ();
 
 	  args.emplace_back (type, std::move (type_str), std::move (expr));
 	}

@@ -116,15 +116,6 @@ expression::evaluate (struct type *expect_type, enum noside noside)
   return retval;
 }
 
-/* Evaluate an expression, avoiding all memory references
-   and getting a value whose type alone is correct.  */
-
-struct value *
-evaluate_type (struct expression *exp)
-{
-  return exp->evaluate (nullptr, EVAL_AVOID_SIDE_EFFECTS);
-}
-
 /* Find the current value of a watchpoint on EXP.  Return the value in
    *VALP and *RESULTP and the chain of intermediate and final values
    in *VAL_CHAIN.  RESULTP and VAL_CHAIN may be NULL if the caller does

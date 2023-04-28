@@ -511,7 +511,7 @@ whatis_exp (const char *exp, int show)
 	 "whatis" prints the type of the expression without stripping
 	 any typedef level.  "ptype" always strips all levels of
 	 typedefs.  */
-      val = evaluate_type (expr.get ());
+      val = expr->evaluate_type ();
       type = val->type ();
 
       if (show == -1 && expr->first_opcode () == OP_TYPE)
@@ -708,7 +708,7 @@ maintenance_print_type (const char *type_name, int from_tty)
   if (type_name != NULL)
     {
       expression_up expr = parse_expression (type_name);
-      struct value *val = evaluate_type (expr.get ());
+      struct value *val = expr->evaluate_type ();
       struct type *type = val->type ();
 
       if (type != nullptr)

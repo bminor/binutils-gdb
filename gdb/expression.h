@@ -225,6 +225,11 @@ struct expression
   struct value *evaluate (struct type *expect_type = nullptr,
 			  enum noside noside = EVAL_NORMAL);
 
+  /* Evaluate an expression, avoiding all memory references
+     and getting a value whose type alone is correct.  */
+  struct value *evaluate_type ()
+  { return evaluate (nullptr, EVAL_AVOID_SIDE_EFFECTS); }
+
   /* Language it was entered in.  */
   const struct language_defn *language_defn;
   /* Architecture it was parsed in.  */

@@ -2466,7 +2466,7 @@ print_variable_or_computed (const char *expression, enum print_values values)
   expression_up expr = parse_expression (expression);
 
   if (values == PRINT_SIMPLE_VALUES)
-    val = evaluate_type (expr.get ());
+    val = expr->evaluate_type ();
   else
     val = expr->evaluate ();
 

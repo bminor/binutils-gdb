@@ -375,7 +375,7 @@ varobj_create (const char *objname,
 	{
 	  /* Error getting the value.  Try to at least get the
 	     right type.  */
-	  struct value *type_only_value = evaluate_type (var->root->exp.get ());
+	  struct value *type_only_value = var->root->exp->evaluate_type ();
 
 	  var->type = type_only_value->type ();
 	}
