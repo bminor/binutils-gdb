@@ -277,7 +277,7 @@ struct parser_state : public expr_builder
 
   /* Nonzero means stop parsing on first comma (if not within parentheses).  */
 
-  int comma_terminates;
+  bool comma_terminates;
 
   /* During parsing of a C expression, the pointer to the next character
      is in this variable.  */
