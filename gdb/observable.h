@@ -57,9 +57,6 @@ extern observable<struct bpstat */* bs */, int /* print_frame */> normal_stop;
 /* The inferior was stopped by a signal.  */
 extern observable<enum gdb_signal /* siggnal */> signal_received;
 
-/* An error was caught while executing a command.  */
-extern observable<> command_error;
-
 /* The target's register contents have changed.  */
 extern observable<struct target_ops */* target */> target_changed;
 

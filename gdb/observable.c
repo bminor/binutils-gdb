@@ -34,7 +34,6 @@ bool observer_debug = false;
 
 DEFINE_OBSERVABLE (normal_stop);
 DEFINE_OBSERVABLE (signal_received);
-DEFINE_OBSERVABLE (command_error);
 DEFINE_OBSERVABLE (target_changed);
 DEFINE_OBSERVABLE (executable_changed);
 DEFINE_OBSERVABLE (inferior_created);

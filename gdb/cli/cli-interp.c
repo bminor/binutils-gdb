@@ -158,15 +158,9 @@ cli_interp_base::on_sync_execution_done ()
   display_gdb_prompt (NULL);
 }
 
-/* Observer for the command_error notification.  */
-
-static void
-cli_base_on_command_error ()
+void
+cli_interp_base::on_command_error ()
 {
-  cli_interp_base *cli = as_cli_interp_base (top_level_interpreter ());
-  if (cli == nullptr)
-    return;
-
   display_gdb_prompt (NULL);
 }
 
@@ -355,8 +349,6 @@ _initialize_cli_interp ()
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 
   /* Note these all work for both the CLI and TUI interpreters.  */
-  gdb::observers::command_error.attach (cli_base_on_command_error,
-					"cli-interp-base");
   gdb::observers::user_selected_context_changed.attach
     (cli_base_on_user_selected_context_changed, "cli-interp-base");
 }

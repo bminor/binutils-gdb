@@ -104,14 +104,10 @@ as_mi_interp (struct interp *interp)
   return dynamic_cast<mi_interp *> (interp);
 }
 
-/* Observer for the command_error notification.  */
-
-static void
-mi_on_command_error ()
+void
+mi_interp::on_command_error ()
 {
-  mi_interp *mi = as_mi_interp (top_level_interpreter ());
-  if (mi != nullptr)
-    display_mi_prompt (mi);
+  display_mi_prompt (this);
 }
 
 void
@@ -1237,7 +1233,6 @@ _initialize_mi_interp ()
 					      "mi-interp");
   gdb::observers::command_param_changed.attach (mi_command_param_changed,
 						"mi-interp");
-  gdb::observers::command_error.attach (mi_on_command_error, "mi-interp");
   gdb::observers::memory_changed.attach (mi_memory_changed, "mi-interp");
   gdb::observers::user_selected_context_changed.attach
     (mi_user_selected_context_changed, "mi-interp");

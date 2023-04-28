@@ -106,6 +106,10 @@ public:
      finished.  */
   virtual void on_sync_execution_done () {}
 
+  /* Notify the interpreter that an error was caught while executing a
+     command on this interpreter.  */
+  virtual void on_command_error () {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;

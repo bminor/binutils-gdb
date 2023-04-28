@@ -39,6 +39,7 @@ public:
   void on_exited (int status) override;
   void on_no_history () override;
   void on_sync_execution_done () override;
+  void on_command_error () override;
 
 private:
   struct saved_output_files
