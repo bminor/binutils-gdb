@@ -1611,3 +1611,81 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
 
   return result;
 }
+
+/* See minsyms.h.  */
+
+type *
+find_minsym_type_and_address (minimal_symbol *msymbol,
+			      struct objfile *objfile,
+			      CORE_ADDR *address_p)
+{
+  bound_minimal_symbol bound_msym = {msymbol, objfile};
+  struct obj_section *section = msymbol->obj_section (objfile);
+  enum minimal_symbol_type type = msymbol->type ();
+
+  bool is_tls = (section != NULL
+		 && section->the_bfd_section->flags & SEC_THREAD_LOCAL);
+
+  /* The minimal symbol might point to a function descriptor;
+     resolve it to the actual code address instead.  */
+  CORE_ADDR addr;
+  if (is_tls)
+    {
+      /* Addresses of TLS symbols are really offsets into a
+	 per-objfile/per-thread storage block.  */
+      addr = CORE_ADDR (bound_msym.minsym->unrelocated_address ());
+    }
+  else if (msymbol_is_function (objfile, msymbol, &addr))
+    {
+      if (addr != bound_msym.value_address ())
+	{
+	  /* This means we resolved a function descriptor, and we now
+	     have an address for a code/text symbol instead of a data
+	     symbol.  */
+	  if (msymbol->type () == mst_data_gnu_ifunc)
+	    type = mst_text_gnu_ifunc;
+	  else
+	    type = mst_text;
+	  section = NULL;
+	}
+    }
+  else
+    addr = bound_msym.value_address ();
+
+  if (overlay_debugging)
+    addr = symbol_overlayed_address (addr, section);
+
+  if (is_tls)
+    {
+      /* Skip translation if caller does not need the address.  */
+      if (address_p != NULL)
+	*address_p = target_translate_tls_address (objfile, addr);
+      return builtin_type (objfile)->nodebug_tls_symbol;
+    }
+
+  if (address_p != NULL)
+    *address_p = addr;
+
+  switch (type)
+    {
+    case mst_text:
+    case mst_file_text:
+    case mst_solib_trampoline:
+      return builtin_type (objfile)->nodebug_text_symbol;
+
+    case mst_text_gnu_ifunc:
+      return builtin_type (objfile)->nodebug_text_gnu_ifunc_symbol;
+
+    case mst_data:
+    case mst_file_data:
+    case mst_bss:
+    case mst_file_bss:
+      return builtin_type (objfile)->nodebug_data_symbol;
+
+    case mst_slot_got_plt:
+      return builtin_type (objfile)->nodebug_got_plt_symbol;
+
+    default:
+      return builtin_type (objfile)->nodebug_unknown_symbol;
+    }
+}
