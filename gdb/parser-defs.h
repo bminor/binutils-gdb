@@ -316,49 +316,6 @@ private:
   std::vector<expr::operation_up> m_operations;
 };
 
-/* When parsing expressions we track the innermost block that was
-   referenced.  */
-
-class innermost_block_tracker
-{
-public:
-  innermost_block_tracker (innermost_block_tracker_types types
-			   = INNERMOST_BLOCK_FOR_SYMBOLS)
-    : m_types (types),
-      m_innermost_block (NULL)
-  { /* Nothing.  */ }
-
-  /* Update the stored innermost block if the new block B is more inner
-     than the currently stored block, or if no block is stored yet.  The
-     type T tells us whether the block B was for a symbol or for a
-     register.  The stored innermost block is only updated if the type T is
-     a type we are interested in, the types we are interested in are held
-     in M_TYPES and set during RESET.  */
-  void update (const struct block *b, innermost_block_tracker_types t);
-
-  /* Overload of main UPDATE method which extracts the block from BS.  */
-  void update (const struct block_symbol &bs)
-  {
-    update (bs.block, INNERMOST_BLOCK_FOR_SYMBOLS);
-  }
-
-  /* Return the stored innermost block.  Can be nullptr if no symbols or
-     registers were found during an expression parse, and so no innermost
-     block was defined.  */
-  const struct block *block () const
-  {
-    return m_innermost_block;
-  }
-
-private:
-  /* The type of innermost block being looked for.  */
-  innermost_block_tracker_types m_types;
-
-  /* The currently stored innermost block found while parsing an
-     expression.  */
-  const struct block *m_innermost_block;
-};
-
 /* A string token, either a char-string or bit-string.  Char-strings are
    used, for example, for the names of symbols.  */
 
