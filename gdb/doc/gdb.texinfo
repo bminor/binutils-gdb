@@ -5977,7 +5977,7 @@ support running commands on the target.
 
 @item set dprintf-function @var{function}
 Set the function to call if the dprintf style is @code{call}.  By
-default its value is @code{printf}.  You may set it to any expression.
+default its value is @code{printf}.  You may set it to any expression
 that @value{GDBN} can evaluate to a function, as per the @code{call}
 command.
 
