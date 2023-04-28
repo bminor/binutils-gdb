@@ -18550,9 +18550,8 @@ cooked_indexer::make_index (cutu_reader *reader)
 
   for (const auto &entry : m_deferred_entries)
     {
-      CORE_ADDR key = form_addr (entry.die_offset, m_per_cu->is_dwz);
-      cooked_index_entry *parent
-	= (cooked_index_entry *) m_die_range_map.find (key);
+      void *obj = m_die_range_map.find (entry.spec_offset);
+      cooked_index_entry *parent = static_cast<cooked_index_entry *> (obj);
       m_index_storage->add (entry.die_offset, entry.tag, entry.flags,
 			    entry.name, parent, m_per_cu);
     }
