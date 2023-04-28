@@ -66,10 +66,6 @@ static void step_1 (int, int, const char *);
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution ()) error (_("The program is not being run."));
 
-/* Scratch area where the new cwd will be stored by 'set cwd'.  */
-
-static std::string inferior_cwd_scratch;
-
 /* Scratch area where 'set inferior-tty' will store user-provided value.
    We'll immediate copy it into per-inferior storage.  */
 
@@ -165,12 +161,12 @@ get_inferior_cwd ()
   return current_inferior ()->cwd ();
 }
 
-/* Handle the 'set cwd' command.  */
+/* Store the new value passed to 'set cwd'.  */
 
 static void
-set_cwd_command (const char *args, int from_tty, struct cmd_list_element *c)
+set_cwd_value (const std::string &args)
 {
-  current_inferior ()->set_cwd (inferior_cwd_scratch);
+  current_inferior ()->set_cwd (args);
 }
 
 /* Handle the 'show cwd' command.  */
@@ -3164,8 +3160,7 @@ Follow this command with any number of args, to be passed to the program."),
   set_cmd_completer (args_set_show.set, filename_completer);
 
   auto cwd_set_show
-    = add_setshow_string_noescape_cmd ("cwd", class_run,
-				       &inferior_cwd_scratch, _("\
+    = add_setshow_string_noescape_cmd ("cwd", class_run, _("\
 Set the current working directory to be used when the inferior is started.\n \
 Changing this setting does not have any effect on inferiors that are\n	\
 already running."),
@@ -3175,7 +3170,7 @@ Show the current working directory that is used when the inferior is started."),
 Use this command to change the current working directory that will be used\n\
 when the inferior is started.  This setting does not affect GDB's current\n\
 working directory."),
-				       set_cwd_command,
+				       set_cwd_value, get_inferior_cwd,
 				       show_cwd_command,
 				       &setlist, &showlist);
   set_cmd_completer (cwd_set_show.set, filename_completer);
