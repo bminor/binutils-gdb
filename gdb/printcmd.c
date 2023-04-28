@@ -2447,8 +2447,8 @@ printf_c_string (struct ui_file *stream, const char *format,
 {
   const gdb_byte *str;
 
-  if (value->type ()->code () != TYPE_CODE_PTR
-      && value->lval () == lval_internalvar
+  if (((value->type ()->code () != TYPE_CODE_PTR && value->lval () == lval_internalvar)
+       || value->type ()->code () == TYPE_CODE_ARRAY)
       && c_is_string_type_p (value->type ()))
     {
       size_t len = value->type ()->length ();

@@ -957,6 +957,30 @@ proc test_printf_with_dfp {} {
     gdb_test "printf \"%Hf %Hf\\n\",1.2df,1.3df" "1.2 1.3"
 }
 
+# Test printf with strings.
+proc test_printf_with_strings {} {
+    global gdb_prompt
+
+    gdb_test {printf "I ate a %s yesterday; it was very %s!\n", "clock", "time-consuming"} \
+	"I ate a clock yesterday; it was very time-consuming!"
+    gdb_test_no_output "set var \$hello = \"Hello\""
+
+    gdb_test {printf "%s, %s%c\n", $hello, "world", '!'} "Hello, world!"
+
+    set listsize_value -1
+    gdb_test_multiple "show listsize" "get listsize value" {
+	-re "Number of source lines gdb will list by default is (\[0-9\]+)\.\r\n$gdb_prompt $" {
+	    set listsize_value $expect_out(1,string)
+	}
+    }
+
+    if {$listsize_value > -1} {
+	gdb_test {printf "%s\n", $_gdb_setting_str("listsize")} $listsize_value
+    } else {
+	send_log "warning: could not get listsize\n"
+    }
+}
+
 proc test_print_symbol {} {
     gdb_test_no_output "set print symbol on"
 
@@ -1171,6 +1195,7 @@ test_print_array_constants
 test_print_enums
 test_printf
 test_printf_with_dfp
+test_printf_with_strings
 test_print_symbol
 test_repeat_bytes
 test_radices
