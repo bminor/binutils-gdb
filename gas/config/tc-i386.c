@@ -10506,12 +10506,12 @@ x86_cons (expressionS *exp, int size)
 {
   bfd_reloc_code_real_type got_reloc = NO_RELOC;
 
+  intel_syntax = -intel_syntax;
+  exp->X_md = 0;
+
 #if ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) \
       && !defined (LEX_AT)) \
     || defined (TE_PE)
-  intel_syntax = -intel_syntax;
-
-  exp->X_md = 0;
   if (size == 4 || (object_64bit && size == 8))
     {
       /* Handle @GOTOFF and the like in an expression.  */
@@ -10558,15 +10558,13 @@ x86_cons (expressionS *exp, int size)
 	}
     }
   else
+#endif
     expression (exp);
 
   intel_syntax = -intel_syntax;
 
   if (intel_syntax)
     i386_intel_simplify (exp);
-#else
-  expression (exp);
-#endif
 
   /* If not 64bit, massage value, to account for wraparound when !BFD64.  */
   if (size == 4 && exp->X_op == O_constant && !object_64bit)
