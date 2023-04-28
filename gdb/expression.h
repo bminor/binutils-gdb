@@ -301,6 +301,12 @@ enum parser_flag
      it parses.  For yacc-based parsers, this translates to setting
      yydebug.  */
   PARSER_DEBUG = (1 << 2),
+
+  /* Normally the expression-parsing functions like parse_exp_1 will
+     attempt to find a context block if one is not passed in.  If set,
+     this flag suppresses this search and uses a null context for the
+     parse.  */
+  PARSER_LEAVE_BLOCK_ALONE = (1 << 3),
 };
 DEF_ENUM_FLAGS_TYPE (enum parser_flag, parser_flags);
 
