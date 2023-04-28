@@ -385,7 +385,7 @@ sharing_input_terminal (int pid)
       len = GetConsoleProcessList (results.data (), results.size ());
       /* Note that LEN == 0 is a failure, but we can treat it the same
 	 as a "no".  */
-      if (len < results.size ())
+      if (len <= results.size ())
 	break;
 
       results.resize (len);
