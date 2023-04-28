@@ -969,19 +969,34 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
 /* Parse a string and evaluate it as an expression.  */
 static PyObject *
-gdbpy_parse_and_eval (PyObject *self, PyObject *args)
+gdbpy_parse_and_eval (PyObject *self, PyObject *args, PyObject *kw)
 {
-  const char *expr_str;
+  static const char *keywords[] = { "expression", "global_context", nullptr };
 
-  if (!PyArg_ParseTuple (args, "s", &expr_str))
-    return NULL;
+  const char *expr_str;
+  PyObject *global_context_obj = nullptr;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|O!", keywords,
+					&expr_str,
+					&PyBool_Type, &global_context_obj))
+    return nullptr;
+
+  parser_flags flags = 0;
+  if (global_context_obj != NULL)
+    {
+      int cmp = PyObject_IsTrue (global_context_obj);
+      if (cmp < 0)
+	return nullptr;
+      if (cmp)
+	flags |= PARSER_LEAVE_BLOCK_ALONE;
+    }
 
   PyObject *result = nullptr;
   try
     {
       gdbpy_allow_threads allow_threads;
       scoped_value_mark free_values;
-      struct value *val = parse_and_eval (expr_str);
+      struct value *val = parse_and_eval (expr_str, flags);
       result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
@@ -2563,8 +2578,9 @@ The first element contains any unparsed portion of the String parameter\n\
 (or None if the string was fully parsed).  The second element contains\n\
 a tuple that contains all the locations that match, represented as\n\
 gdb.Symtab_and_line objects (or None)."},
-  { "parse_and_eval", gdbpy_parse_and_eval, METH_VARARGS,
-    "parse_and_eval (String) -> Value.\n\
+  { "parse_and_eval", (PyCFunction) gdbpy_parse_and_eval,
+    METH_VARARGS | METH_KEYWORDS,
+    "parse_and_eval (String, [Boolean]) -> Value.\n\
 Parse String as an expression, evaluate it, and return the result as a Value."
   },
 

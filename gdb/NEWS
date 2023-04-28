@@ -195,6 +195,10 @@ info main
   ** New function gdb.execute_mi(COMMAND, [ARG]...), that invokes a
      GDB/MI command and returns the output as a Python dictionary.
 
+  ** gdb.parse_and_eval now has a new "global_context" parameter.
+     This can be used to request that the parse only examine global
+     symbols.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

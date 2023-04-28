@@ -79,6 +79,8 @@ int func2 (int arg1, int arg2)
 
 char **save_argv;
 
+int shadowed = 23;
+
 int
 main (int argc, char *argv[])
 {
@@ -96,6 +98,7 @@ main (int argc, char *argv[])
   int i = 2;
   int *ptr_i = &i;
   struct str *xstr;
+  int shadowed = 97;
 
   /* Prevent gcc from optimizing argv[] out.  */
 

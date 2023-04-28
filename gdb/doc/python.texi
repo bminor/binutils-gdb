@@ -419,10 +419,15 @@ using the @code{gdb.Value} constructor.
 @end defun
 
 @findex gdb.parse_and_eval
-@defun gdb.parse_and_eval (expression)
+@defun gdb.parse_and_eval (expression @r{[}, global_context@r{]})
 Parse @var{expression}, which must be a string, as an expression in
 the current language, evaluate it, and return the result as a
 @code{gdb.Value}.
+
+@var{global_context}, if provided, is a boolean indicating whether the
+parsing should be done in the global context.  The default is
+@samp{False}, meaning that the current frame or current static context
+should be used.
 
 This function can be useful when implementing a new command
 (@pxref{CLI Commands In Python}, @pxref{GDB/MI Commands In Python}),

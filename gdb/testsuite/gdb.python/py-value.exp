@@ -338,6 +338,11 @@ proc test_value_in_inferior {} {
   gdb_py_test_silent_cmd "python str = '\"str\"'" "set up str variable" 1
   gdb_test "python print (gdb.parse_and_eval (str).string (length = 10))" \
       "gdb.error: Attempt to take address of value not located in memory.\r\nError while executing Python code."
+
+  gdb_test "python print (gdb.parse_and_eval ('shadowed'))" \
+      97 "shadowed local value"
+  gdb_test "python print (gdb.parse_and_eval ('shadowed', global_context=True))" \
+      23 "shadowed global value"
 }
 
 proc test_inferior_function_call {} {
