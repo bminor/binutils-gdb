@@ -153,10 +153,10 @@ struct parser_state : public expr_builder
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
       expression_context_pc (context_pc),
-      comma_terminates ((flags & PARSER_COMMA_TERMINATES) != 0),
       lexptr (input),
-      parse_completion (completion),
       block_tracker (tracker),
+      comma_terminates ((flags & PARSER_COMMA_TERMINATES) != 0),
+      parse_completion (completion),
       void_context_p ((flags & PARSER_VOID_CONTEXT) != 0)
   {
   }
@@ -275,10 +275,6 @@ struct parser_state : public expr_builder
      point.  */
   const CORE_ADDR expression_context_pc;
 
-  /* Nonzero means stop parsing on first comma (if not within parentheses).  */
-
-  bool comma_terminates;
-
   /* During parsing of a C expression, the pointer to the next character
      is in this variable.  */
 
@@ -292,14 +288,17 @@ struct parser_state : public expr_builder
 
   int arglist_len = 0;
 
-  /* True if parsing an expression to attempt completion.  */
-  bool parse_completion;
-
   /* Completion state is updated here.  */
   std::unique_ptr<expr_completion_base> m_completion_state;
 
   /* The innermost block tracker.  */
   innermost_block_tracker *block_tracker;
+
+  /* Nonzero means stop parsing on first comma (if not within parentheses).  */
+  bool comma_terminates;
+
+  /* True if parsing an expression to attempt completion.  */
+  bool parse_completion;
 
   /* True if no value is expected from the expression.  */
   bool void_context_p;
