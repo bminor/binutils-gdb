@@ -1150,7 +1150,7 @@ ada_parse (struct parser_state *par_state)
   original_expr = par_state->lexptr;
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
-							parser_debug);
+							par_state->debug);
 
   lexer_init (yyin);		/* (Re-)initialize lexer.  */
   obstack_free (&temp_parse_space, NULL);

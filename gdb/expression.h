@@ -296,6 +296,11 @@ enum parser_flag
   /* This flag is set if a top-level comma terminates the
      expression.  */
   PARSER_COMMA_TERMINATES = (1 << 1),
+
+  /* This flag is set if the parser should print debugging output as
+     it parses.  For yacc-based parsers, this translates to setting
+     yydebug.  */
+  PARSER_DEBUG = (1 << 2),
 };
 DEF_ENUM_FLAGS_TYPE (enum parser_flag, parser_flags);
 

@@ -1525,7 +1525,7 @@ go_language::parser (struct parser_state *par_state) const
   pstate = par_state;
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
-							parser_debug);
+							par_state->debug);
 
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;

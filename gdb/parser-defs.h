@@ -32,8 +32,6 @@ struct language_defn;
 struct internalvar;
 class innermost_block_tracker;
 
-extern bool parser_debug;
-
 /* A class that can be used to build a "struct expression".  */
 
 struct expr_builder
@@ -157,7 +155,8 @@ struct parser_state : public expr_builder
       block_tracker (tracker),
       comma_terminates ((flags & PARSER_COMMA_TERMINATES) != 0),
       parse_completion (completion),
-      void_context_p ((flags & PARSER_VOID_CONTEXT) != 0)
+      void_context_p ((flags & PARSER_VOID_CONTEXT) != 0),
+      debug ((flags & PARSER_DEBUG) != 0)
   {
   }
 
@@ -302,6 +301,9 @@ struct parser_state : public expr_builder
 
   /* True if no value is expected from the expression.  */
   bool void_context_p;
+
+  /* True if parser debugging should be enabled.  */
+  bool debug;
 
 private:
 

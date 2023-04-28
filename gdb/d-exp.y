@@ -1607,7 +1607,7 @@ d_parse (struct parser_state *par_state)
   pstate = par_state;
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
-							parser_debug);
+							par_state->debug);
 
   struct type_stack stack;
   scoped_restore restore_type_stack = make_scoped_restore (&type_stack,

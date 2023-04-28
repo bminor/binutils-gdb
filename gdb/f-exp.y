@@ -1697,7 +1697,7 @@ f_language::parser (struct parser_state *par_state) const
   /* Setting up the parser state.  */
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
-							parser_debug);
+							par_state->debug);
   gdb_assert (par_state != NULL);
   pstate = par_state;
   last_was_structop = false;
