@@ -146,19 +146,18 @@ struct parser_state : public expr_builder
 		struct gdbarch *gdbarch,
 		const struct block *context_block,
 		CORE_ADDR context_pc,
-		int comma,
+		parser_flags flags,
 		const char *input,
 		bool completion,
-		innermost_block_tracker *tracker,
-		bool void_p)
+		innermost_block_tracker *tracker)
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
       expression_context_pc (context_pc),
-      comma_terminates (comma),
+      comma_terminates ((flags & PARSER_COMMA_TERMINATES) != 0),
       lexptr (input),
       parse_completion (completion),
       block_tracker (tracker),
-      void_context_p (void_p)
+      void_context_p ((flags & PARSER_VOID_CONTEXT) != 0)
   {
   }
 

@@ -398,11 +398,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
-		   expression_context_pc,
-		   (flags & PARSER_COMMA_TERMINATES) != 0,
-		   *stringptr,
-		   completer != nullptr, tracker,
-		   (flags & PARSER_VOID_CONTEXT) != 0);
+		   expression_context_pc, flags, *stringptr,
+		   completer != nullptr, tracker);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
