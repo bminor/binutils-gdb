@@ -119,7 +119,6 @@ static bool PREFETCHI_Fixup (instr_info *, int, int);
 static void ATTRIBUTE_PRINTF_3 i386_dis_printf (const instr_info *,
 						enum disassembler_style,
 						const char *, ...);
-static const char *prefix_name (const instr_info *, int, int);
 
 /* This character is used to encode style information within the output
    buffers.  See oappend_insert_style for more details.  */
@@ -142,6 +141,8 @@ enum address_mode
   mode_32bit,
   mode_64bit
 };
+
+static const char *prefix_name (enum address_mode, int, int);
 
 enum x86_64_isa
 {
@@ -351,7 +352,8 @@ fetch_error (const instr_info *ins)
     return -1;
 
   if (ins->prefixes || ins->fwait_prefix >= 0 || (ins->rex & REX_OPCODE))
-    name = prefix_name (ins, priv->the_buffer[0], priv->orig_sizeflag);
+    name = prefix_name (ins->address_mode, priv->the_buffer[0],
+			priv->orig_sizeflag);
   if (name != NULL)
     i386_dis_printf (ins, dis_style_mnemonic, "%s", name);
   else
@@ -8924,7 +8926,7 @@ ckprefix (instr_info *ins)
    prefix byte.  */
 
 static const char *
-prefix_name (const instr_info *ins, int pref, int sizeflag)
+prefix_name (enum address_mode mode, int pref, int sizeflag)
 {
   static const char *rexes [16] =
     {
@@ -8987,7 +8989,7 @@ prefix_name (const instr_info *ins, int pref, int sizeflag)
     case 0x66:
       return (sizeflag & DFLAG) ? "data16" : "data32";
     case 0x67:
-      if (ins->address_mode == mode_64bit)
+      if (mode == mode_64bit)
 	return (sizeflag & AFLAG) ? "addr32" : "addr64";
       else
 	return (sizeflag & AFLAG) ? "addr16" : "addr32";
@@ -9764,7 +9766,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	   i++)
 	i386_dis_printf (&ins, dis_style_mnemonic, "%s%s",
 			 (i == 0 ? "" : " "),
-			 prefix_name (&ins, ins.all_prefixes[i], sizeflag));
+			 prefix_name (ins.address_mode, ins.all_prefixes[i],
+				      sizeflag));
       ret = i;
       goto out;
 
@@ -9791,7 +9794,8 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       for (i = 0; i < ins.fwait_prefix && ins.all_prefixes[i];
 	   i++)
 	i386_dis_printf (&ins, dis_style_mnemonic, "%s ",
-			 prefix_name (&ins, ins.all_prefixes[i], sizeflag));
+			 prefix_name (ins.address_mode, ins.all_prefixes[i],
+				      sizeflag));
       i386_dis_printf (&ins, dis_style_mnemonic, "fwait");
       ret = i + 1;
       goto out;
@@ -10033,8 +10037,9 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   for (i = 0; i < (int) ARRAY_SIZE (ins.all_prefixes); i++)
     if (ins.all_prefixes[i])
       {
-	const char *name;
-	name = prefix_name (&ins, ins.all_prefixes[i], orig_sizeflag);
+	const char *name = prefix_name (ins.address_mode, ins.all_prefixes[i],
+					orig_sizeflag);
+
 	if (name == NULL)
 	  abort ();
 	prefix_length += strlen (name) + 1;
