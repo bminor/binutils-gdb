@@ -1304,10 +1304,12 @@ maintenance_info_screen (const char *args, int from_tty)
 		  ? " (unlimited - 1)"
 		  : "")));
 
+#ifdef HAVE_LIBCURSES
   gdb_printf (gdb_stdout,
 	     _("Number of characters curses thinks "
 	       "are in a line is %d.\n"),
 	     COLS);
+#endif
 
   gdb_printf (gdb_stdout,
 	      _("Number of characters environment thinks "
@@ -1325,10 +1327,12 @@ maintenance_info_screen (const char *args, int from_tty)
 	      rows,
 	      rows == sqrt_int_max ? " (unlimited)" : "");
 
+#ifdef HAVE_LIBCURSES
   gdb_printf (gdb_stdout,
 	     _("Number of lines curses thinks "
 	       "are in a page is %d.\n"),
 	      LINES);
+#endif
 
   gdb_printf (gdb_stdout,
 	      _("Number of lines environment thinks "
