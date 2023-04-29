@@ -477,13 +477,13 @@ DESCRIPTION
 .{* Byte swapping macros for user section data.  *}
 .
 .#define bfd_put_8(abfd, val, ptr) \
-.  ((void) (*((unsigned char *) (ptr)) = (val) & 0xff))
+.  ((void) (*((bfd_byte *) (ptr)) = (val) & 0xff))
 .#define bfd_put_signed_8 \
 .  bfd_put_8
 .#define bfd_get_8(abfd, ptr) \
-.  ((bfd_vma) *(const unsigned char *) (ptr) & 0xff)
+.  ((bfd_vma) *(const bfd_byte *) (ptr) & 0xff)
 .#define bfd_get_signed_8(abfd, ptr) \
-.  ((((bfd_signed_vma) *(const unsigned char *) (ptr) & 0xff) ^ 0x80) - 0x80)
+.  ((((bfd_signed_vma) *(const bfd_byte *) (ptr) & 0xff) ^ 0x80) - 0x80)
 .
 .#define bfd_put_16(abfd, val, ptr) \
 .  BFD_SEND (abfd, bfd_putx16, ((val),(ptr)))
@@ -685,11 +685,11 @@ bfd_vma
 bfd_getb24 (const void *p)
 {
   const bfd_byte *addr = (const bfd_byte *) p;
-  unsigned long v;
+  uint32_t v;
 
-  v =  (unsigned long) addr[0] << 16;
-  v |= (unsigned long) addr[1] << 8;
-  v |= (unsigned long) addr[2];
+  v =  (uint32_t) addr[0] << 16;
+  v |= (uint32_t) addr[1] << 8;
+  v |= (uint32_t) addr[2];
   return v;
 }
 
@@ -697,11 +697,11 @@ bfd_vma
 bfd_getl24 (const void *p)
 {
   const bfd_byte *addr = (const bfd_byte *) p;
-  unsigned long v;
+  uint32_t v;
 
-  v = (unsigned long) addr[0];
-  v |= (unsigned long) addr[1] << 8;
-  v |= (unsigned long) addr[2] << 16;
+  v = (uint32_t) addr[0];
+  v |= (uint32_t) addr[1] << 8;
+  v |= (uint32_t) addr[2] << 16;
   return v;
 }
 
@@ -709,12 +709,12 @@ bfd_vma
 bfd_getb32 (const void *p)
 {
   const bfd_byte *addr = (const bfd_byte *) p;
-  unsigned long v;
+  uint32_t v;
 
-  v = (unsigned long) addr[0] << 24;
-  v |= (unsigned long) addr[1] << 16;
-  v |= (unsigned long) addr[2] << 8;
-  v |= (unsigned long) addr[3];
+  v = (uint32_t) addr[0] << 24;
+  v |= (uint32_t) addr[1] << 16;
+  v |= (uint32_t) addr[2] << 8;
+  v |= (uint32_t) addr[3];
   return v;
 }
 
@@ -722,12 +722,12 @@ bfd_vma
 bfd_getl32 (const void *p)
 {
   const bfd_byte *addr = (const bfd_byte *) p;
-  unsigned long v;
+  uint32_t v;
 
-  v = (unsigned long) addr[0];
-  v |= (unsigned long) addr[1] << 8;
-  v |= (unsigned long) addr[2] << 16;
-  v |= (unsigned long) addr[3] << 24;
+  v = (uint32_t) addr[0];
+  v |= (uint32_t) addr[1] << 8;
+  v |= (uint32_t) addr[2] << 16;
+  v |= (uint32_t) addr[3] << 24;
   return v;
 }
 
@@ -735,12 +735,12 @@ bfd_signed_vma
 bfd_getb_signed_32 (const void *p)
 {
   const bfd_byte *addr = (const bfd_byte *) p;
-  unsigned long v;
+  uint32_t v;
 
-  v = (unsigned long) addr[0] << 24;
-  v |= (unsigned long) addr[1] << 16;
-  v |= (unsigned long) addr[2] << 8;
-  v |= (unsigned long) addr[3];
+  v = (uint32_t) addr[0] << 24;
+  v |= (uint32_t) addr[1] << 16;
+  v |= (uint32_t) addr[2] << 8;
+  v |= (uint32_t) addr[3];
   return COERCE32 (v);
 }
 
@@ -748,12 +748,12 @@ bfd_signed_vma
 bfd_getl_signed_32 (const void *p)
 {
   const bfd_byte *addr = (const bfd_byte *) p;
-  unsigned long v;
+  uint32_t v;
 
-  v = (unsigned long) addr[0];
-  v |= (unsigned long) addr[1] << 8;
-  v |= (unsigned long) addr[2] << 16;
-  v |= (unsigned long) addr[3] << 24;
+  v = (uint32_t) addr[0];
+  v |= (uint32_t) addr[1] << 8;
+  v |= (uint32_t) addr[2] << 16;
+  v |= (uint32_t) addr[3] << 24;
   return COERCE32 (v);
 }
 
@@ -1084,7 +1084,7 @@ _bfd_read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
   bfd_vma result;
   unsigned int num_read;
   unsigned int shift;
-  unsigned char byte;
+  bfd_byte byte;
 
   result = 0;
   shift = 0;
@@ -1118,7 +1118,7 @@ _bfd_safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
 {
   bfd_vma result = 0;
   unsigned int shift = 0;
-  unsigned char byte = 0;
+  bfd_byte byte = 0;
   bfd_byte *data = *ptr;
 
   while (data < end)
@@ -1152,7 +1152,7 @@ _bfd_read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
   bfd_vma result;
   unsigned int shift;
   unsigned int num_read;
-  unsigned char byte;
+  bfd_byte byte;
 
   result = 0;
   shift = 0;

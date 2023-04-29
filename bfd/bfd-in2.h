@@ -544,13 +544,13 @@ const char *bfd_set_filename (bfd *abfd, const char *filename);
 /* Byte swapping macros for user section data.  */
 
 #define bfd_put_8(abfd, val, ptr) \
-  ((void) (*((unsigned char *) (ptr)) = (val) & 0xff))
+  ((void) (*((bfd_byte *) (ptr)) = (val) & 0xff))
 #define bfd_put_signed_8 \
   bfd_put_8
 #define bfd_get_8(abfd, ptr) \
-  ((bfd_vma) *(const unsigned char *) (ptr) & 0xff)
+  ((bfd_vma) *(const bfd_byte *) (ptr) & 0xff)
 #define bfd_get_signed_8(abfd, ptr) \
-  ((((bfd_signed_vma) *(const unsigned char *) (ptr) & 0xff) ^ 0x80) - 0x80)
+  ((((bfd_signed_vma) *(const bfd_byte *) (ptr) & 0xff) ^ 0x80) - 0x80)
 
 #define bfd_put_16(abfd, val, ptr) \
   BFD_SEND (abfd, bfd_putx16, ((val),(ptr)))
