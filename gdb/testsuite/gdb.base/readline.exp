@@ -219,31 +219,44 @@ save_vars { env(TERM) } {
 	set char_total 4500
 	set char_sent 0
 
-	# Adjust the terminal width.
-	gdb_test_no_output "set width 7"
-
-	# Send the command prefix, then lots of additional characters
-	# that create a really long command that wraps over multiple
-	# lines.
-	send_gdb "help X"
-	gdb_test_multiple "" "send long command to GDB" {
-	    -re "X" {
-		incr char_sent
-		if {$char_sent <= $char_total} {
-		    send_gdb "X"
-		    exp_continue
-		}
+	# Adjust the terminal width.  Detect horizontal scrolling, which
+	# happens with stub-termcap.c.
+	set horizontal_scrolling 0
+	set cmd "set width 7"
+	gdb_test_multiple $cmd "" {
+	    -re "^$cmd\r\n$gdb_prompt $" {
+		pass $gdb_test_name
 	    }
-	    -re "\[ \b\r\n\]" {
-		exp_continue
+	    -re "^$cmd\r\n<b\\) $" {
+		set horizontal_scrolling 1
+		pass $gdb_test_name
 	    }
 	}
 
-	# Send the final newline so that GDB will process the command.
-	# Check GDB returns a suitable error.
-	send_gdb "\n"
-	gdb_test "" \
-	    "Undefined command: \"X+\"\\.  Try \"help\"\\." \
-	    "All the characters transferred"
+	if { !$horizontal_scrolling } {
+	    # Send the command prefix, then lots of additional characters
+	    # that create a really long command that wraps over multiple
+	    # lines.
+	    send_gdb "help X"
+	    gdb_test_multiple "" "send long command to GDB" {
+		-re "X" {
+		    incr char_sent
+		    if {$char_sent <= $char_total} {
+			send_gdb "X"
+			exp_continue
+		    }
+		}
+		-re "\[ \b\r\n\]" {
+		    exp_continue
+		}
+	    }
+
+	    # Send the final newline so that GDB will process the command.
+	    # Check GDB returns a suitable error.
+	    send_gdb "\n"
+	    gdb_test "" \
+		"Undefined command: \"X+\"\\.  Try \"help\"\\." \
+		"All the characters transferred"
+	}
     }
 }
