@@ -69,8 +69,8 @@ gdb_test_multiple "catch handlers" $msg {
 # Continue.  The program should stop at first exception handling.
 
 gdb_test "continue" \
-         "Continuing\.$eol$catchpoint_constraint_error_msg$eol.*" \
-         "continuing to first Constraint_Error exception handlers"
+    "Continuing\.$eol$catchpoint_constraint_error_msg" \
+    "continuing to first Constraint_Error exception handlers"
 
 # Resume the program's exception.
 #
@@ -80,8 +80,8 @@ gdb_test "continue" \
 # the next exception being raised.
 
 gdb_test "continue" \
-         "Continuing\.$eol$catchpoint_storage_error_msg$eol.*" \
-         "continuing and stopping in Storage_Error exception handlers"
+    "Continuing\.$eol$catchpoint_storage_error_msg" \
+    "continuing and stopping in Storage_Error exception handlers"
 
 gdb_test_no_output "delete 2" \
                    "delete catchpoint on all Ada exceptions handlers"
@@ -99,8 +99,8 @@ gdb_test "catch handlers Program_Error" \
 # Continue, we should not stop at ABORT_SIGNAL but at Program_Error one.
 
 gdb_test "continue" \
-         "Continuing\.$eol$catchpoint_program_error_msg$eol.*" \
-         "continuing without stopping to Program_Error exception handlers"
+    "Continuing\.$eol$catchpoint_program_error_msg" \
+    "continuing without stopping to Program_Error exception handlers"
 
 gdb_test_no_output \
     "delete 3" \
@@ -115,8 +115,8 @@ gdb_test "catch handlers Storage_Error" \
 # Continue, we should stop at Storage_Error handlers.
 
 gdb_test "continue" \
-         "Continuing\.$eol$catchpoint_storage_error_msg$eol.*" \
-         "continuing without stopping to Storage_Error exception handlers"
+    "Continuing\.$eol$catchpoint_storage_error_msg" \
+    "continuing without stopping to Storage_Error exception handlers"
 
 gdb_test_no_output \
     "delete 4" \
@@ -140,8 +140,8 @@ gdb_test "info breakpoint" "stop only if Global_Var = 2" \
 # Continue, we should not stop at ABORT_SIGNAL but at Program_Error one.
 
 gdb_test "continue" \
-         "Continuing\.$eol$catchpoint_constraint_error_msg$eol.*" \
-         "continuing to second Constraint_Error exception handlers"
+    "Continuing\.$eol$catchpoint_constraint_error_msg" \
+    "continuing to second Constraint_Error exception handlers"
 
 gdb_test_no_output \
     "delete 5" \
@@ -162,8 +162,8 @@ gdb_test "catch handlers Program_Error if Global_Var = 4" \
 # the second one.
 
 gdb_test "continue" \
-         "Continuing\.$eol$catchpoint_program_error_msg$eol.*" \
-         "continuing to Program_Error exception handlers"
+    "Continuing\.$eol$catchpoint_program_error_msg" \
+    "continuing to Program_Error exception handlers"
 
 # Continue, the program should exit properly.
 
