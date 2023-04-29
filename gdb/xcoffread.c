@@ -498,6 +498,9 @@ static int inclIndx;		/* last entry to table */
 static int inclLength;		/* table length */
 static int inclDepth;		/* nested include depth */
 
+/* subfile structure for the main compilation unit.  */
+static subfile *main_subfile;
+
 static void allocate_include_entry (void);
 
 static void
@@ -548,6 +551,7 @@ allocate_include_entry (void)
       inclTable = XCNEWVEC (InclTable, INITIAL_INCLUDE_TABLE_LENGTH);
       inclLength = INITIAL_INCLUDE_TABLE_LENGTH;
       inclIndx = 0;
+      main_subfile = new subfile;
     }
   else if (inclIndx >= inclLength)
     {
@@ -575,9 +579,6 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
   file_ptr max_offset
     = XCOFF_DATA (this_symtab_objfile)->max_lineno_offset;
 
-  /* subfile structure for the main compilation unit.  */
-  struct subfile main_subfile;
-
   /* In the main source file, any time we see a function entry, we
      reset this variable to function's absolute starting line number.
      All the following line numbers in the function are relative to
@@ -596,7 +597,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
     /* All source lines were in the main source file.  None in include
        files.  */
 
-    enter_line_range (&main_subfile, offset, 0, start, end,
+    enter_line_range (main_subfile, offset, 0, start, end,
 		      &main_source_baseline);
 
   else
@@ -613,7 +614,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	  if (offset < inclTable[ii].begin)
 	    {
 	      enter_line_range
-		(&main_subfile, offset, inclTable[ii].begin - linesz,
+		(main_subfile, offset, inclTable[ii].begin - linesz,
 		 start, 0, &main_source_baseline);
 	    }
 
@@ -624,9 +625,9 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 
 	      main_source_baseline = inclTable[ii].funStartLine;
 	      enter_line_range
-		(&main_subfile, inclTable[ii].begin, inclTable[ii].end,
+		(main_subfile, inclTable[ii].begin, inclTable[ii].end,
 		 start, 0, &main_source_baseline);
-	      inclTable[ii].subfile = &main_subfile;
+	      inclTable[ii].subfile = main_subfile;
 	    }
 	  else
 	    {
@@ -648,24 +649,24 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	 enter remaining lines of the main file, if any left.  */
       if (offset < max_offset + 1 - linesz)
 	{
-	  enter_line_range (&main_subfile, offset, 0, start, end,
+	  enter_line_range (main_subfile, offset, 0, start, end,
 			    &main_source_baseline);
 	}
     }
 
   /* Process main file's line numbers.  */
-  if (!main_subfile.line_vector_entries.empty ())
+  if (!main_subfile->line_vector_entries.empty ())
     {
       /* Line numbers are not necessarily ordered.  xlc compilation will
 	 put static function to the end.  */
-      arrange_linetable (main_subfile.line_vector_entries);
+      arrange_linetable (main_subfile->line_vector_entries);
     }
 
   /* Now, process included files' line numbers.  */
 
   for (int ii = 0; ii < inclIndx; ++ii)
     {
-      if (inclTable[ii].subfile != ((struct subfile *) &main_subfile)
+      if (inclTable[ii].subfile != main_subfile
 	  && !inclTable[ii].subfile->line_vector_entries.empty ())
 	{
 	  /* Line numbers are not necessarily ordered.  xlc compilation will
@@ -1803,6 +1804,7 @@ xcoff_symfile_finish (struct objfile *objfile)
     {
       xfree (inclTable);
       inclTable = NULL;
+      delete main_subfile;
     }
   inclIndx = inclLength = inclDepth = 0;
 }
