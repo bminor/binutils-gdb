@@ -1091,8 +1091,8 @@ FUNCTION
 	bfd_calc_gnu_debuglink_crc32
 
 SYNOPSIS
-	unsigned long bfd_calc_gnu_debuglink_crc32
-	  (unsigned long crc, const unsigned char *buf, bfd_size_type len);
+	uint32_t bfd_calc_gnu_debuglink_crc32
+	  (uint32_t crc, const bfd_byte *buf, bfd_size_type len);
 
 DESCRIPTION
 	Computes a CRC value as used in the .gnu_debuglink section.
@@ -1102,12 +1102,12 @@ DESCRIPTION
 	Return the updated CRC32 value.
 */
 
-unsigned long
-bfd_calc_gnu_debuglink_crc32 (unsigned long crc,
-			      const unsigned char *buf,
+uint32_t
+bfd_calc_gnu_debuglink_crc32 (uint32_t crc,
+			      const bfd_byte *buf,
 			      bfd_size_type len)
 {
-  static const unsigned long crc32_table[256] =
+  static const uint32_t crc32_table[256] =
     {
       0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,
       0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4,
@@ -1162,7 +1162,7 @@ bfd_calc_gnu_debuglink_crc32 (unsigned long crc,
       0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b,
       0x2d02ef8d
     };
-  const unsigned char *end;
+  const bfd_byte *end;
 
   crc = ~crc & 0xffffffff;
   for (end = buf + len; buf < end; ++ buf)
@@ -1176,7 +1176,7 @@ bfd_calc_gnu_debuglink_crc32 (unsigned long crc,
 
    The @var{crc32_out} parameter is an untyped pointer because
    this routine is used as a @code{get_func_type} function, but it
-   is expected to be an unsigned long pointer.
+   is expected to be a uint32_t pointer.
 
    Returns the filename of the associated debug information file,
    or NULL if there is no such file.  If the filename was found
@@ -1190,7 +1190,7 @@ static char *
 bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
 {
   asection *sect;
-  unsigned long *crc32 = (unsigned long *) crc32_out;
+  uint32_t *crc32 = crc32_out;
   bfd_byte *contents;
   unsigned int crc_offset;
   char *name;
@@ -1234,7 +1234,7 @@ FUNCTION
 	bfd_get_debug_link_info
 
 SYNOPSIS
-	char *bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out);
+	char *bfd_get_debug_link_info (bfd *abfd, uint32_t *crc32_out);
 
 DESCRIPTION
 	Extracts the filename and CRC32 value for any separate debug
@@ -1250,7 +1250,7 @@ DESCRIPTION
 */
 
 char *
-bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
+bfd_get_debug_link_info (bfd *abfd, uint32_t *crc32_out)
 {
   return bfd_get_debug_link_info_1 (abfd, crc32_out);
 }
@@ -1313,7 +1313,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
 }
 
 /* Checks to see if @var{name} is a file and if its contents match
-   @var{crc32}, which is a pointer to an @code{unsigned long}
+   @var{crc32}, which is a pointer to a @code{uint32_t}
    containing a CRC32.
 
    The @var{crc32_p} parameter is an untyped pointer because this
@@ -1323,15 +1323,15 @@ static bool
 separate_debug_file_exists (const char *name, void *crc32_p)
 {
   unsigned char buffer[8 * 1024];
-  unsigned long file_crc = 0;
+  uint32_t file_crc = 0;
   FILE *f;
   bfd_size_type count;
-  unsigned long crc;
+  uint32_t crc;
 
   BFD_ASSERT (name);
   BFD_ASSERT (crc32_p);
 
-  crc = *(unsigned long *) crc32_p;
+  crc = *(uint32_t *) crc32_p;
 
   f = _bfd_real_fopen (name, FOPEN_RB);
   if (f == NULL)
@@ -1567,7 +1567,7 @@ DESCRIPTION
 char *
 bfd_follow_gnu_debuglink (bfd *abfd, const char *dir)
 {
-  unsigned long crc32;
+  uint32_t crc32;
 
   return find_separate_debug_file (abfd, dir, true,
 				   bfd_get_debug_link_info_1,
@@ -1712,7 +1712,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
 				   const char *filename)
 {
   bfd_size_type debuglink_size;
-  unsigned long crc32;
+  uint32_t crc32;
   char * contents;
   bfd_size_type crc_offset;
   FILE * handle;

@@ -822,7 +822,7 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
 static int
 get_file_crc (bfd *abfd, unsigned long *file_crc_return)
 {
-  unsigned long file_crc = 0;
+  uint32_t file_crc = 0;
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     {

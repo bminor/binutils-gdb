@@ -856,7 +856,7 @@ auto_load_objfile_script (struct objfile *objfile,
   struct objfile *parent = objfile->separate_debug_objfile_backlink;
   if (parent != nullptr)
     {
-      unsigned long crc32;
+      uint32_t crc32;
       gdb::unique_xmalloc_ptr<char> debuglink
 	(bfd_get_debug_link_info (parent->obfd.get (), &crc32));
 

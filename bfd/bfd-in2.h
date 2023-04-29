@@ -516,10 +516,10 @@ void *bfd_alloc (bfd *abfd, bfd_size_type wanted);
 
 void *bfd_zalloc (bfd *abfd, bfd_size_type wanted);
 
-unsigned long bfd_calc_gnu_debuglink_crc32
-   (unsigned long crc, const unsigned char *buf, bfd_size_type len);
+uint32_t bfd_calc_gnu_debuglink_crc32
+   (uint32_t crc, const bfd_byte *buf, bfd_size_type len);
 
-char *bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out);
+char *bfd_get_debug_link_info (bfd *abfd, uint32_t *crc32_out);
 
 char *bfd_get_alt_debug_link_info (bfd * abfd,
     bfd_size_type *buildid_len,

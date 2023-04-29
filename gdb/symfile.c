@@ -1536,7 +1536,7 @@ std::string
 find_separate_debug_file_by_debuglink
   (struct objfile *objfile, std::vector<std::string> *warnings_vector)
 {
-  unsigned long crc32;
+  uint32_t crc32;
 
   gdb::unique_xmalloc_ptr<char> debuglink
     (bfd_get_debug_link_info (objfile->obfd.get (), &crc32));
