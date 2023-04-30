@@ -16,13 +16,35 @@
 -  along with this program; if not, write to the Free Software
 -  Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+- chew.c keywords defined here put output into bfd-in2.h and libbfd.h or
+- libcoff.h, from comments in the source.  See also doc.str.
+- Output lines generally come from comment lines starting with a dot,
+- or from keywords like SYNOPSIS.  Output switches to bfd-in2.h at the
+- end of each comment.  Use INTERNAL* to output to libbfd.h.
+-
+- EXTERNAL: output to bfd-in2.h, nothing to docs
+- INTERNAL: output to libbfd.h, nothing to docs
+- CODE_FRAGMENT: output to header and docs
+- FUNCTION: output to bfd-in2.h and docs
+- INTERNAL_FUNCTION: output to libbfd.h and docs
+- DEFINITION: alias for FUNCTION, but generally doesn't have SYNOPSIS,
+-	used for structs and other random code
+- INTERNAL_DEFINITION: as above, but output to libbfd.h and docs
+- ENUM* outputs to bfd-in2.h, libbfd.h and docs.
+
 : SYNOPSIS
 	skip_past_newline
 	get_stuff_in_command	
+	translatecomments
+	strip_trailing_newlines
+	remchar
+	" ATTRIBUTE_HIDDEN" internalmode @ catstrif
+	";\n\n" catstr
 	indent
 	maybecatstr
 ;
 
+- Ignore stuff that is for the docs.  Output lines starting with dots.
 : ignore
 	skip_past_newline 
 	get_stuff_in_command
@@ -33,10 +55,12 @@
 : CODE_FRAGMENT
 	ignore ;
 
-: external
+- Output goes to bfd-in2.h
+: EXTERNAL
 	0 internalmode ! ignore ;
 
-: internal 
+- Output goes to libbfd.h/libcoff.h
+: INTERNAL 
 	1 internalmode ! ignore ;
 
 - input stack { a b } output b if internal, a if external
@@ -137,14 +161,13 @@
 	swap
 	catstr catstr
 	;
-: ENDDD external ;
 : SECTION ignore ;
 : SUBSECTION ignore ;
 : SUBSUBSECTION ignore ;
-: INTERNAL_DEFINITION internal ;
-: DESCRIPTION ignore ;
-: FUNCTION external ;
-: TYPEDEF external ;
-: INTERNAL_FUNCTION internal ;
-: INTERNAL internal ;
 : INODE ignore ;
+: DESCRIPTION ignore ;
+: ENDDD EXTERNAL ;
+: FUNCTION EXTERNAL ;
+: INTERNAL_FUNCTION INTERNAL ;
+: DEFINITION EXTERNAL ;
+: INTERNAL_DEFINITION INTERNAL ;

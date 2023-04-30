@@ -225,11 +225,21 @@ DESCRIPTION
 .};
 
 .extern const struct bfd_iovec _bfd_memory_iovec;
-
+.
 */
 
 
-/* Return value is amount read.  */
+/*
+FUNCTION
+	bfd_bread
+
+SYNOPSIS
+	bfd_size_type bfd_bread (void *, bfd_size_type, bfd *);
+
+DESCRIPTION
+	Attempt to read SIZE bytes from ABFD's iostream to PTR.
+	Return the amount read.
+*/
 
 bfd_size_type
 bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
@@ -276,6 +286,18 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
   return nread;
 }
 
+/*
+FUNCTION
+	bfd_bwrite
+
+SYNOPSIS
+	bfd_size_type bfd_bwrite (const void *, bfd_size_type, bfd *);
+
+DESCRIPTION
+	Attempt to write SIZE bytes to ABFD's iostream from PTR.
+	Return the amount written.
+*/
+
 bfd_size_type
 bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
 {
@@ -304,6 +326,17 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
   return nwrote;
 }
 
+/*
+FUNCTION
+	bfd_tell
+
+SYNOPSIS
+	file_ptr bfd_tell (bfd *);
+
+DESCRIPTION
+	Return ABFD's iostream file position.
+*/
+
 file_ptr
 bfd_tell (bfd *abfd)
 {
@@ -326,6 +359,17 @@ bfd_tell (bfd *abfd)
   return ptr - offset;
 }
 
+/*
+FUNCTION
+	bfd_flush
+
+SYNOPSIS
+	int bfd_flush (bfd *);
+
+DESCRIPTION
+	Flush ABFD's iostream pending IO.
+*/
+
 int
 bfd_flush (bfd *abfd)
 {
@@ -339,8 +383,18 @@ bfd_flush (bfd *abfd)
   return abfd->iovec->bflush (abfd);
 }
 
-/* Returns 0 for success, negative value for failure (in which case
-   bfd_get_error can retrieve the error code).  */
+/*
+FUNCTION
+	bfd_stat
+
+SYNOPSIS
+	int bfd_stat (bfd *, struct stat *);
+
+DESCRIPTION
+	Call fstat on ABFD's iostream.  Return 0 on success, and a
+	negative value on failure.
+*/
+
 int
 bfd_stat (bfd *abfd, struct stat *statbuf)
 {
@@ -362,8 +416,17 @@ bfd_stat (bfd *abfd, struct stat *statbuf)
   return result;
 }
 
-/* Returns 0 for success, nonzero for failure (in which case bfd_get_error
-   can retrieve the error code).  */
+/*
+FUNCTION
+	bfd_seek
+
+SYNOPSIS
+	int bfd_seek (bfd *, file_ptr, int);
+
+DESCRIPTION
+	Call fseek on ABFD's iostream.  Return 0 on success, and a
+	negative value on failure.
+*/
 
 int
 bfd_seek (bfd *abfd, file_ptr position, int direction)

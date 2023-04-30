@@ -947,6 +947,7 @@ DESCRIPTION
 	architecture of the file.
 
 .extern const bfd_arch_info_type bfd_default_arch_struct;
+.
 */
 
 const bfd_arch_info_type bfd_default_arch_struct =

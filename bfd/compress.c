@@ -32,7 +32,7 @@
 #define MAX_COMPRESSION_HEADER_SIZE 24
 
 /*
-CODE_FRAGMENT
+EXTERNAL
 .{* Types of compressed DWARF debug sections.  *}
 .enum compressed_debug_section_type
 .{

@@ -904,13 +904,14 @@ stmp-bfd-h: bfd-in3.h
 	rm -f bfd-tmp.h
 	touch stmp-bfd-h
 
-BFD_H_FILES = bfd-in.h opncls.c libbfd.c \
-	bfdio.c bfdwin.c section.c archures.c reloc.c \
-	syms.c bfd.c archive.c corefile.c targets.c format.c \
-	linker.c simple.c compress.c
+BFD_H_FILES = bfd-in.h libbfd.c hash.c section.c syms.c \
+	archive.c archures.c bfd.c bfdio.c bfdwin.c \
+	cache.c compress.c corefile.c format.c linker.c opncls.c \
+	reloc.c simple.c stab-syms.c stabs.c targets.c
 BFD64_H_FILES = archive64.c
-LIBBFD_H_FILES = libbfd-in.h libbfd.c bfd.c bfdio.c bfdwin.c \
-	cache.c reloc.c section.c targets.c archures.c linker.c
+LIBBFD_H_FILES = libbfd-in.h libbfd.c bfd.c bfdio.c \
+	archive.c archures.c bfdwin.c cache.c hash.c linker.c opncls.c \
+	reloc.c section.c stabs.c targets.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
 headers: stmp-bin2-h stmp-lbfd-h stmp-lcoff-h

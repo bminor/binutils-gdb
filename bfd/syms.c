@@ -168,19 +168,12 @@ DOCDD
 INODE
 typedef asymbol, symbol handling functions, Mini Symbols, Symbols
 
-*/
-/*
 SUBSECTION
 	typedef asymbol
 
 	An <<asymbol>> has the form:
 
-*/
-
-/*
 CODE_FRAGMENT
-
-.
 .typedef struct bfd_symbol
 .{
 .  {* A pointer to the BFD which owns the symbol. This information
@@ -326,6 +319,28 @@ CODE_FRAGMENT
 .  udata;
 .}
 .asymbol;
+.
+
+EXTERNAL
+.typedef enum bfd_print_symbol
+.{
+.  bfd_print_symbol_name,
+.  bfd_print_symbol_more,
+.  bfd_print_symbol_all
+.} bfd_print_symbol_type;
+.
+.{* Information about a symbol that nm needs.  *}
+.
+.typedef struct _symbol_info
+.{
+.  symvalue value;
+.  char type;
+.  const char *name;		{* Symbol name.  *}
+.  unsigned char stab_type;	{* Stab type.  *}
+.  char stab_other;		{* Stab other.  *}
+.  short stab_desc;		{* Stab desc.  *}
+.  const char *stab_name;	{* String for stab type.  *}
+.} symbol_info;
 .
 */
 

@@ -146,6 +146,37 @@ SUBSECTION
 extern int errno;
 #endif
 
+/*
+EXTERNAL
+.{* A canonical archive symbol.  *}
+.{* This is a type pun with struct symdef/struct ranlib on purpose!  *}
+.typedef struct carsym
+.{
+.  const char *name;
+.  file_ptr file_offset;	{* Look here to find the file.  *}
+.}
+.carsym;
+.
+.{* A count of carsyms (canonical archive symbols).  *}
+. typedef unsigned long symindex;
+.#define BFD_NO_MORE_SYMBOLS ((symindex) ~0)
+.
+
+INTERNAL
+.{* Used in generating armaps (archive tables of contents).  *}
+.struct orl		{* Output ranlib.  *}
+.{
+.  char **name;		{* Symbol name.  *}
+.  union
+.  {
+.    file_ptr pos;
+.    bfd *abfd;
+.  } u;			{* bfd* or file position.  *}
+.  int namidx;		{* Index into string table.  *}
+.};
+.
+*/
+
 /* We keep a cache of archive filepointers to archive elements to
    speed up searching the archive by filepos.  We only add an entry to
    the cache when we actually read one.  We also don't sort the cache;

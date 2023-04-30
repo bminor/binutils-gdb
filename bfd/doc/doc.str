@@ -16,6 +16,9 @@
 -  along with this program; if not, write to the Free Software
 -  Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+- chew.c keywords defined here put output into doc/*.texi files
+- from comments in the source.  See also proto.str.
+
 -  True if SYNOPSIS was seen.
 variable synopsis_seen
 
@@ -32,7 +35,6 @@ variable synopsis_seen
 	skip_past_newline	
 	get_stuff_in_command kill_bogus_lines do_fancy_stuff translatecomments 
 	courierize catstr
-
 	;
 
 : INODE 
@@ -73,10 +75,6 @@ variable synopsis_seen
 	catstr 	catstr 	catstr 	catstr 	catstr 
 	;
 
-: FUNCTION
-	func
-	;
-
 : bodytext
 	get_stuff_in_command 
 	bulletize
@@ -109,28 +107,29 @@ variable synopsis_seen
 	bodytext
 	;
 
-
-
-	
 : DESCRIPTION 
 	subhead
 	"@end deftypefn\n" synopsis_seen @ catstrif
 	0 synopsis_seen !
 	;
 
+: FUNCTION
+	func ;
+
 : INTERNAL_FUNCTION
 	func ;
 
-
-: INTERNAL_DEFINITION 
+: DEFINITION
 	func ;
 
+: INTERNAL_DEFINITION
+	func ;
+
+: EXTERNAL
+	COMMENT ;
 
 : INTERNAL
-	func ;
-
-: TYPEDEF
-	FUNCTION ;
+	COMMENT ;
 
 : SENUM
 	skip_past_newline

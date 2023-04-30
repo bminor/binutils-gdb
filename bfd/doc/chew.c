@@ -515,11 +515,31 @@ outputdots (void)
       if (at (tos, idx) == '.')
 	{
 	  char c;
+	  int spaces;
 
 	  idx++;
-
+	  spaces = 0;
 	  while ((c = at (tos, idx)) && c != '\n')
 	    {
+	      if (spaces >= 0)
+		{
+		  if (c == ' ')
+		    {
+		      spaces++;
+		      idx++;
+		      continue;
+		    }
+		  else
+		    {
+		      while (spaces >= 8)
+			{
+			  catchar (&out, '\t');
+			  spaces -= 8;
+			}
+		      while (spaces-- > 0)
+			catchar (&out, ' ');
+		    }
+		}
 	      if (c == '{' && at (tos, idx + 1) == '*')
 		{
 		  cattext (&out, "/*");
@@ -795,9 +815,6 @@ icopy_past_newline (void)
   pc++;
 }
 
-/* indent
-   Take the string at the top of the stack, do some prettying.  */
-
 static void
 kill_bogus_lines (void)
 {
@@ -917,6 +934,9 @@ collapse_whitespace (void)
   *tos = out;
 }
 
+/* indent
+   Take the string at the top of the stack, do some prettying.  */
+
 static void
 indent (void)
 {
@@ -930,33 +950,42 @@ indent (void)
       switch (at (tos, idx))
 	{
 	case '\n':
-	  cattext (&out, "\n");
+	  catchar (&out, '\n');
 	  idx++;
 	  if (tab && at (tos, idx))
 	    {
-	      cattext (&out, "    ");
+	      int i;
+	      for (i = 0; i < tab - 1; i += 2)
+		catchar (&out, '\t');
+	      if (i < tab)
+		cattext (&out, "    ");
 	    }
 	  ol = 0;
 	  break;
 	case '(':
-	  tab++;
 	  if (ol == 0)
-	    cattext (&out, "   ");
+	    {
+	      int i;
+	      for (i = 1; i < tab - 1; i += 2)
+		catchar (&out, '\t');
+	      if (i < tab)
+		cattext (&out, "    ");
+	      cattext (&out, "   ");
+	    }
+	  tab++;
 	  idx++;
-	  cattext (&out, "(");
+	  catchar (&out, '(');
 	  ol = 1;
 	  break;
 	case ')':
 	  tab--;
-	  cattext (&out, ")");
+	  catchar (&out, ')');
 	  idx++;
 	  ol = 1;
-
 	  break;
 	default:
 	  catchar (&out, at (tos, idx));
 	  ol = 1;
-
 	  idx++;
 	  break;
 	}

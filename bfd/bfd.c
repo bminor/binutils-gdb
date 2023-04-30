@@ -34,7 +34,16 @@ SECTION
 	contains the major data about the file and pointers
 	to the rest of the data.
 
-CODE_FRAGMENT
+EXTERNAL
+.typedef enum bfd_format
+.  {
+.    bfd_unknown = 0,	{* File format is unknown.  *}
+.    bfd_object,	{* Linker/assembler/compiler output.  *}
+.    bfd_archive,	{* Object archive file.  *}
+.    bfd_core,		{* Core dump.  *}
+.    bfd_type_end	{* Marks the end; don't use it!  *}
+.  }
+.bfd_format;
 .
 .enum bfd_direction
 .  {
@@ -57,6 +66,8 @@ CODE_FRAGMENT
 .    bfd_byte data[1];
 .  };
 .
+
+CODE_FRAGMENT
 .struct bfd
 .{
 .  {* The filename the application opened the BFD with.  *}
@@ -371,6 +382,8 @@ CODE_FRAGMENT
 .  const struct bfd_build_id *build_id;
 .};
 .
+
+EXTERNAL
 .static inline const char *
 .bfd_get_filename (const bfd *abfd)
 .{
@@ -659,7 +672,6 @@ SUBSECTION
 	enumerated type <<bfd_error_type>>.
 
 CODE_FRAGMENT
-.
 .typedef enum bfd_error
 .{
 .  bfd_error_no_error = 0,
@@ -863,7 +875,6 @@ SUBSECTION
 	The BFD error handler acts like vprintf.
 
 CODE_FRAGMENT
-.
 .typedef void (*bfd_error_handler_type) (const char *, va_list);
 .
 */
@@ -1571,7 +1582,6 @@ SUBSECTION
 	_bfd_error_handler and continues.
 
 CODE_FRAGMENT
-.
 .typedef void (*bfd_assert_handler_type) (const char *bfd_formatmsg,
 .					  const char *bfd_version,
 .					  const char *bfd_file,
@@ -2289,11 +2299,21 @@ DESCRIPTION
 .#define bfd_canonicalize_dynamic_reloc(abfd, arels, asyms) \
 .	BFD_SEND (abfd, _bfd_canonicalize_dynamic_reloc, (abfd, arels, asyms))
 .
-.extern bfd_byte *bfd_get_relocated_section_contents
-.  (bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
-.   bool, asymbol **);
-.
+*/
 
+/*
+FUNCTION
+	bfd_get_relocated_section_contents
+
+SYNOPSIS
+	bfd_byte *bfd_get_relocated_section_contents
+	  (bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
+	   bool, asymbol **);
+
+DESCRIPTION
+	Read and relocate the indirect link_order section, into DATA
+	(if non-NULL) or to a malloc'd buffer.  Return the buffer, or
+	NULL on errors.
 */
 
 bfd_byte *
@@ -2322,7 +2342,18 @@ bfd_get_relocated_section_contents (bfd *abfd,
   return (*fn) (abfd, link_info, link_order, data, relocatable, symbols);
 }
 
-/* Record information about an ELF program header.  */
+/*
+FUNCTION
+	bfd_record_phdr
+
+SYNOPSIS
+	bool bfd_record_phdr
+	  (bfd *, unsigned long, bool, flagword, bool, bfd_vma,
+	   bool, bool, unsigned int, struct bfd_section **);
+
+DESCRIPTION
+	Record information about an ELF program header.
+*/
 
 bool
 bfd_record_phdr (bfd *abfd,
@@ -2384,8 +2415,23 @@ is32bit (bfd *abfd)
 }
 #endif
 
-/* bfd_sprintf_vma and bfd_fprintf_vma display an address in the
-   target's address size.  */
+/*
+FUNCTION
+	bfd_sprintf_vma
+	bfd_fprintf_vma
+
+SYNOPSIS
+	void bfd_sprintf_vma (bfd *, char *, bfd_vma);
+	void bfd_fprintf_vma (bfd *, void *, bfd_vma);
+
+DESCRIPTION
+	bfd_sprintf_vma and bfd_fprintf_vma display an address in the
+	target's address size.
+
+EXTERNAL
+.#define bfd_printf_vma(abfd,x) bfd_fprintf_vma (abfd, stdout, x)
+.
+*/
 
 void
 bfd_sprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, char *buf, bfd_vma value)

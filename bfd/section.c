@@ -137,14 +137,27 @@ SUBSECTION
 /*
 DOCDD
 INODE
-typedef asection, section prototypes, Section Output, Sections
+	typedef asection, section prototypes, Section Output, Sections
 SUBSECTION
 	typedef asection
 
 	Here is the section structure:
 
-CODE_FRAGMENT
+EXTERNAL
+.{* Linenumber stuff.  *}
+.typedef struct lineno_cache_entry
+.{
+.  unsigned int line_number;	{* Linenumber from start of function.  *}
+.  union
+.  {
+.    struct bfd_symbol *sym;	{* Function name.  *}
+.    bfd_vma offset;		{* Offset into section.  *}
+.  } u;
+.}
+.alent;
 .
+
+CODE_FRAGMENT
 .typedef struct bfd_section
 .{
 .  {* The name of the section; the name isn't a copy, the pointer is
@@ -493,7 +506,7 @@ CODE_FRAGMENT
 .
 .  {* If the SEC_IN_MEMORY flag is set, this points to the actual
 .     contents.  *}
-.  unsigned char *contents;
+.  bfd_byte *contents;
 .
 .  {* Attached line number information.  *}
 .  alent *lineno;
@@ -549,6 +562,8 @@ CODE_FRAGMENT
 .
 .} asection;
 .
+
+EXTERNAL
 .static inline const char *
 .bfd_section_name (const asection *sec)
 .{

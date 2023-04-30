@@ -264,7 +264,7 @@ INTERNAL_FUNCTION
 	bfd_malloc
 
 SYNOPSIS
-	extern void * bfd_malloc (bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+	void *bfd_malloc (bfd_size_type {*size*});
 
 DESCRIPTION
 	Returns a pointer to an allocated block of memory that is at least
@@ -299,7 +299,7 @@ INTERNAL_FUNCTION
 	bfd_realloc
 
 SYNOPSIS
-	extern void * bfd_realloc (void * MEM, bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+	void *bfd_realloc (void *{*mem*}, bfd_size_type {*size*});
 
 DESCRIPTION
 	Returns a pointer to an allocated block of memory that is at least
@@ -349,7 +349,7 @@ INTERNAL_FUNCTION
 	bfd_realloc_or_free
 
 SYNOPSIS
-	extern void * bfd_realloc_or_free (void * MEM, bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+	void *bfd_realloc_or_free (void *{*mem*}, bfd_size_type {*size*});
 
 DESCRIPTION
 	Returns a pointer to an allocated block of memory that is at least
@@ -394,7 +394,7 @@ INTERNAL_FUNCTION
 	bfd_zmalloc
 
 SYNOPSIS
-	extern void * bfd_zmalloc (bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+	void *bfd_zmalloc (bfd_size_type {*size*});
 
 DESCRIPTION
 	Returns a pointer to an allocated block of memory that is at least
@@ -700,6 +700,35 @@ DESCRIPTION
 #define COERCE32(x) (((bfd_vma) (x) ^ 0x80000000) - 0x80000000)
 #define COERCE64(x) \
   (((uint64_t) (x) ^ ((uint64_t) 1 << 63)) - ((uint64_t) 1 << 63))
+
+/*
+FUNCTION
+	Byte swapping routines.
+
+SYNOPSIS
+	uint64_t bfd_getb64 (const void *);
+	uint64_t bfd_getl64 (const void *);
+	int64_t bfd_getb_signed_64 (const void *);
+	int64_t bfd_getl_signed_64 (const void *);
+	bfd_vma bfd_getb32 (const void *);
+	bfd_vma bfd_getl32 (const void *);
+	bfd_signed_vma bfd_getb_signed_32 (const void *);
+	bfd_signed_vma bfd_getl_signed_32 (const void *);
+	bfd_vma bfd_getb16 (const void *);
+	bfd_vma bfd_getl16 (const void *);
+	bfd_signed_vma bfd_getb_signed_16 (const void *);
+	bfd_signed_vma bfd_getl_signed_16 (const void *);
+	void bfd_putb64 (uint64_t, void *);
+	void bfd_putl64 (uint64_t, void *);
+	void bfd_putb32 (bfd_vma, void *);
+	void bfd_putl32 (bfd_vma, void *);
+	void bfd_putb24 (bfd_vma, void *);
+	void bfd_putl24 (bfd_vma, void *);
+	void bfd_putb16 (bfd_vma, void *);
+	void bfd_putl16 (bfd_vma, void *);
+	uint64_t bfd_get_bits (const void *, int, bool);
+	void bfd_put_bits (uint64_t, void *, int, bool);
+*/
 
 bfd_vma
 bfd_getb16 (const void *p)

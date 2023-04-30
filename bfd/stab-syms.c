@@ -44,6 +44,17 @@
   __define_name (N_INDR, "INDR") \
   __define_name (N_WARNING, "WARNING")
 
+/*
+FUNCTION
+	bfd_get_stab_name
+
+SYNOPSIS
+	const char *bfd_get_stab_name (int);
+
+DESCRIPTION
+	Get the name of a stabs type code.
+*/
+
 const char *
 bfd_get_stab_name (int code)
 {

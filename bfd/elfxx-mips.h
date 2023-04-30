@@ -33,6 +33,8 @@ enum reloc_check
 #define MIPS_DEFAULT_R6 0
 #endif
 
+struct ecoff_debug_info;
+
 extern bool _bfd_mips_elf_mkobject
   (bfd *);
 extern bool _bfd_mips_elf_close_and_cleanup

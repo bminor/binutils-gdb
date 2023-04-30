@@ -290,7 +290,6 @@ DESCRIPTION
 	<<combined_entry_type>>:
 
 CODE_FRAGMENT
-.
 .typedef struct coff_ptr_struct
 .{
 .  {* Remembers the offset from the first symbol in the file for
@@ -333,7 +332,6 @@ CODE_FRAGMENT
 . void *extrap;
 .} combined_entry_type;
 .
-.
 .{* Each canonical asymbol really looks like this: *}
 .
 .typedef struct coff_symbol_struct
@@ -350,7 +348,7 @@ CODE_FRAGMENT
 .  {* Have the line numbers been relocated yet ? *}
 .  bool done_lineno;
 .} coff_symbol_type;
-
+.
 */
 
 #include "libiberty.h"
@@ -1380,8 +1378,7 @@ styp_to_sec_flags (bfd *abfd,
 INTERNAL_DEFINITION
 	bfd_coff_backend_data
 
-CODE_FRAGMENT
-
+INTERNAL
 .{* COFF symbol classifications.  *}
 .
 .enum coff_symbol_classification
@@ -1402,7 +1399,10 @@ CODE_FRAGMENT
 .  (asection *, struct bfd_link_info *, struct internal_reloc *,
 .   struct coff_link_hash_entry *, struct internal_syment *);
 .
+
 Special entry points for gdb to swap in coff symbol table parts:
+
+CODE_FRAGMENT
 .typedef struct
 .{
 .  void (*_bfd_coff_swap_aux_in)
@@ -1540,6 +1540,8 @@ Special entry points for gdb to swap in coff symbol table parts:
 .
 .} bfd_coff_backend_data;
 .
+
+INTERNAL
 .#define coff_backend_info(abfd) \
 .  ((const bfd_coff_backend_data *) (abfd)->xvec->backend_data)
 .
@@ -5459,6 +5461,8 @@ coff_final_link_postscript (bfd * abfd ATTRIBUTE_UNUSED,
 #ifndef coff_SWAP_scnhdr_in
 #define coff_SWAP_scnhdr_in coff_swap_scnhdr_in
 #endif
+
+#define COFF_SWAP_TABLE (void *) &bfd_coff_std_swap_table
 
 static const bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 {

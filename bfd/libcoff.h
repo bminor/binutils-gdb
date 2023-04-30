@@ -629,7 +629,6 @@ extern bool _bfd_ppc_xcoff_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    struct internal_reloc *, struct internal_syment *, asection **);
 /* Extracted from coffcode.h.  */
-
 typedef struct coff_ptr_struct
 {
   /* Remembers the offset from the first symbol in the file for
@@ -672,7 +671,6 @@ typedef struct coff_ptr_struct
  void *extrap;
 } combined_entry_type;
 
-
 /* Each canonical asymbol really looks like this: */
 
 typedef struct coff_symbol_struct
@@ -689,6 +687,7 @@ typedef struct coff_symbol_struct
   /* Have the line numbers been relocated yet ? */
   bool done_lineno;
 } coff_symbol_type;
+
 /* COFF symbol classifications.  */
 
 enum coff_symbol_classification
@@ -943,7 +942,7 @@ typedef struct
    (abfd, file, base, symbol, aux, indaux))
 
 #define bfd_coff_reloc16_extra_cases(abfd, link_info, link_order,\
-                                     reloc, data, src_ptr, dst_ptr)\
+				     reloc, data, src_ptr, dst_ptr)\
   ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\
    (abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr))
 
@@ -972,7 +971,7 @@ typedef struct
   ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
    (obfd, info, ibfd, sec, rel, adjustedp))
 #define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section,\
-                                     value, string, cp, coll, hashp)\
+				     value, string, cp, coll, hashp)\
   ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
    (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 

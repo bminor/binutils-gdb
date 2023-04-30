@@ -51,16 +51,26 @@ static unsigned int bfd_id_counter = 0;
 static unsigned int bfd_reserved_id_counter = 0;
 
 /*
-CODE_FRAGMENT
+EXTERNAL
 .{* Set to N to open the next N BFDs using an alternate id space.  *}
 .extern unsigned int bfd_use_reserved_id;
+.
 */
 unsigned int bfd_use_reserved_id = 0;
 
 /* fdopen is a loser -- we should use stdio exclusively.  Unfortunately
    if we do that we can't use fcntl.  */
 
-/* Return a new BFD.  All BFD's are allocated through this routine.  */
+/*
+INTERNAL_FUNCTION
+	_bfd_new_bfd
+
+SYNOPSIS
+	bfd *_bfd_new_bfd (void);
+
+DESCRIPTION
+	Return a new BFD.  All BFD's are allocated through this routine.
+*/
 
 bfd *
 _bfd_new_bfd (void)
@@ -104,7 +114,16 @@ _bfd_new_bfd (void)
 
 static const struct bfd_iovec opncls_iovec;
 
-/* Allocate a new BFD as a member of archive OBFD.  */
+/*
+INTERNAL_FUNCTION
+	_bfd_new_bfd_contained_in
+
+SYNOPSIS
+	bfd *_bfd_new_bfd_contained_in (bfd *);
+
+DESCRIPTION
+	Allocate a new BFD as a member of archive OBFD.
+*/
 
 bfd *
 _bfd_new_bfd_contained_in (bfd *obfd)
@@ -149,7 +168,16 @@ _bfd_delete_bfd (bfd *abfd)
   free (abfd);
 }
 
-/* Free objalloc memory.  */
+/*
+INTERNAL_FUNCTION
+	_bfd_free_cached_info
+
+SYNOPSIS
+	bool _bfd_free_cached_info (bfd *);
+
+DESCRIPTION
+	Free objalloc memory.
+*/
 
 bool
 _bfd_free_cached_info (bfd *abfd)

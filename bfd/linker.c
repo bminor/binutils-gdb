@@ -3399,6 +3399,7 @@ DESCRIPTION
 .#define bfd_merge_private_bfd_data(ibfd, info) \
 .	BFD_SEND ((info)->output_bfd, _bfd_merge_private_bfd_data, \
 .		  (ibfd, info))
+.
 */
 
 /*

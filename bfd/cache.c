@@ -509,7 +509,7 @@ bfd_cache_init (bfd *abfd)
 }
 
 /*
-INTERNAL_FUNCTION
+FUNCTION
 	bfd_cache_close
 
 SYNOPSIS

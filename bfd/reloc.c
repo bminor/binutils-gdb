@@ -62,8 +62,7 @@ SUBSECTION
 
 	This is the structure of a relocation entry:
 
-CODE_FRAGMENT
-.
+EXTERNAL
 .typedef enum bfd_reloc_status
 .{
 .  {* No errors detected.  Note - the value 2 is used so that it
@@ -97,7 +96,9 @@ CODE_FRAGMENT
 .
 .typedef const struct reloc_howto_struct reloc_howto_type;
 .
-.typedef struct reloc_cache_entry
+
+CODE_FRAGMENT
+.struct reloc_cache_entry
 .{
 .  {* A pointer into the canonical table of pointers.  *}
 .  struct bfd_symbol **sym_ptr_ptr;
@@ -111,8 +112,7 @@ CODE_FRAGMENT
 .  {* Pointer to how to perform the required relocation.  *}
 .  reloc_howto_type *howto;
 .
-.}
-.arelent;
+.};
 .
 */
 
@@ -251,7 +251,6 @@ SUBSUBSECTION
 	performing a relocation.
 
 CODE_FRAGMENT
-.
 .enum complain_overflow
 .{
 .  {* Do not complain on overflow.  *}
@@ -270,7 +269,7 @@ CODE_FRAGMENT
 .     unsigned number.  *}
 .  complain_overflow_unsigned
 .};
-
+.
 */
 
 /*
@@ -402,11 +401,10 @@ DESCRIPTION
 */
 
 /*
-TYPEDEF
+DEFINITION
 	arelent_chain
 
 DESCRIPTION
-
 	How relocs are tied together in an <<asection>>:
 
 .typedef struct relent_chain
@@ -1372,8 +1370,8 @@ SUBSECTION
 */
 
 /*
-TYPEDEF
-	bfd_reloc_code_type
+DEFINITION
+	bfd_reloc_code_real_type
 
 DESCRIPTION
 	The insides of a reloc code.  The idea is that, eventually, there
@@ -8134,9 +8132,10 @@ ENUMDOC
 
 ENDSENUM
   BFD_RELOC_UNUSED
+
 CODE_FRAGMENT
-.
 .typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
+.
 */
 
 /*
@@ -8154,7 +8153,6 @@ DESCRIPTION
 	Return a pointer to a howto structure which, when
 	invoked, will perform the relocation @var{code} on data from the
 	architecture noted.
-
 */
 
 reloc_howto_type *
@@ -8182,7 +8180,6 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides a default relocation lookup routine for any architecture.
-
 */
 
 reloc_howto_type *
@@ -8329,7 +8326,6 @@ SYNOPSIS
 DESCRIPTION
 	Provides default handling of relocation effort for back ends
 	which can't be bothered to do it efficiently.
-
 */
 
 bfd_byte *
