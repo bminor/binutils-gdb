@@ -1116,6 +1116,14 @@ static bool filter_initialized = false;
 
 
 
+/* See readline's rlprivate.h.  */
+
+EXTERN_C int _rl_term_autowrap;
+
+/* See utils.h.  */
+
+int readline_hidden_cols = 0;
+
 /* Initialize the number of lines per page and chars per line.  */
 
 void
@@ -1144,6 +1152,19 @@ init_page_info (void)
 
       /* Get the screen size from Readline.  */
       rl_get_screen_size (&rows, &cols);
+
+      /* Readline:
+	 - ignores the COLUMNS variable when detecting screen width
+	   (because rl_prefer_env_winsize defaults to 0)
+	 - puts the detected screen width in the COLUMNS variable
+	   (because rl_change_environment defaults to 1)
+	 - may report one less than the detected screen width in
+	   rl_get_screen_size (when _rl_term_autowrap == 0).
+	 We could set readline_hidden_cols by comparing COLUMNS to cols as
+	 returned by rl_get_screen_size, but instead simply use
+	 _rl_term_autowrap.  */
+      readline_hidden_cols = _rl_term_autowrap ? 0 : 1;
+
       lines_per_page = rows;
       chars_per_line = cols;
 

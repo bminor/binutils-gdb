@@ -335,4 +335,11 @@ extern void copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 			  const gdb_byte *source, ULONGEST source_offset,
 			  ULONGEST nbits, int bits_big_endian);
 
+/* When readline decides that the terminal cannot auto-wrap lines, it reduces
+   the width of the reported screen width by 1.  This variable indicates
+   whether that's the case or not, allowing us to add it back where
+   necessary.  See _rl_term_autowrap in readline/terminal.c.  */
+
+extern int readline_hidden_cols;
+
 #endif /* UTILS_H */

@@ -36,6 +36,7 @@
 #include "gdbsupport/event-loop.h"
 #include "gdbcmd.h"
 #include "async-event.h"
+#include "utils.h"
 
 #include "tui/tui.h"
 #include "tui/tui-io.h"
@@ -528,6 +529,8 @@ tui_resize_all (void)
   int screenheight, screenwidth;
 
   rl_get_screen_size (&screenheight, &screenwidth);
+  screenwidth += readline_hidden_cols;
+
   width_diff = screenwidth - tui_term_width ();
   height_diff = screenheight - tui_term_height ();
   if (height_diff || width_diff)
@@ -576,6 +579,7 @@ tui_async_resize_screen (gdb_client_data arg)
       int screen_height, screen_width;
 
       rl_get_screen_size (&screen_height, &screen_width);
+      screen_width += readline_hidden_cols;
       set_screen_width_and_height (screen_width, screen_height);
 
       /* win_resized is left set so that the next call to tui_enable()
