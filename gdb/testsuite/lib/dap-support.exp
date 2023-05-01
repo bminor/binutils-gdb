@@ -236,17 +236,38 @@ proc _dap_initialize {name} {
 # Start gdb, send a DAP initialize request, and then a launch request
 # specifying FILE as the program to use for the inferior.  Returns the
 # empty string on failure, or the response object from the launch
-# request.  After this is called, gdb will be ready to accept
-# breakpoint requests.  NAME is used as the test name.  It has a
-# reasonable default but can be overridden in case a test needs to
-# launch gdb more than once.
-proc dap_launch {file {name startup}} {
-    if {[_dap_initialize "$name - initialize"] == ""} {
+# request.  If specified, ARGS is a list of command-line arguments,
+# and ENV is a list of pairs of the form {VAR VALUE} that is used to
+# populate the inferior's environment.  After this is called, gdb will
+# be ready to accept breakpoint requests.
+proc dap_launch {file {args {}} {env {}}} {
+    if {[_dap_initialize "startup - initialize"] == ""} {
 	return ""
     }
-    return [dap_check_request_and_response "$name - launch" launch \
-		[format {o program [%s]} \
-		     [list s [standard_output_file $file]]]]
+    set params "o program"
+    append params " [format {[%s]} [list s [standard_output_file $file]]]"
+
+    if {[llength $args] > 0} {
+	append params " args"
+	set arglist ""
+	foreach arg $args {
+	    append arglist " \[s [list $arg]\]"
+	}
+	append params " \[a $arglist\]"
+    }
+
+    if {[llength $env] > 0} {
+	append params " env"
+	set envlist ""
+	foreach pair $env {
+	    lassign $pair var value
+	    append envlist " $var"
+	    append envlist " [format {[%s]} [list s $value]]"
+	}
+	append params " \[o $envlist\]"
+    }
+
+    return [dap_check_request_and_response "startup - launch" launch $params]
 }
 
 # Cleanly shut down gdb.  NAME is used as the test name.
