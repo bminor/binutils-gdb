@@ -1190,7 +1190,7 @@ rust_parser::parse_array ()
       result = make_operation<rust_array_operation> (std::move (expr),
 						     std::move (rhs));
     }
-  else if (current_token == ',')
+  else if (current_token == ',' || current_token == ']')
     {
       std::vector<operation_up> ops;
       ops.push_back (std::move (expr));
@@ -1205,7 +1205,7 @@ rust_parser::parse_array ()
       int len = ops.size () - 1;
       result = make_operation<array_operation> (0, len, std::move (ops));
     }
-  else if (current_token != ']')
+  else
     error (_("',', ';', or ']' expected"));
 
   require (']');
