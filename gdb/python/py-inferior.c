@@ -770,6 +770,162 @@ infpy_repr (PyObject *obj)
 			       inf->num, inf->pid);
 }
 
+/* Implement clear_env.  */
+
+static PyObject *
+infpy_clear_env (PyObject *obj)
+{
+  inferior_object *self = (inferior_object *) obj;
+
+  INFPY_REQUIRE_VALID (self);
+
+  self->inferior->environment.clear ();
+  Py_RETURN_NONE;
+}
+
+/* Implement set_env.  */
+
+static PyObject *
+infpy_set_env (PyObject *obj, PyObject *args, PyObject *kw)
+{
+  inferior_object *self = (inferior_object *) obj;
+  INFPY_REQUIRE_VALID (self);
+
+  const char *name, *val;
+  static const char *keywords[] = { "name", "value", nullptr };
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "ss", keywords,
+					&name, &val))
+    return nullptr;
+
+  self->inferior->environment.set (name, val);
+  Py_RETURN_NONE;
+}
+
+/* Implement unset_env.  */
+
+static PyObject *
+infpy_unset_env (PyObject *obj, PyObject *args, PyObject *kw)
+{
+  inferior_object *self = (inferior_object *) obj;
+  INFPY_REQUIRE_VALID (self);
+
+  const char *name;
+  static const char *keywords[] = { "name", nullptr };
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s", keywords, &name))
+    return nullptr;
+
+  self->inferior->environment.unset (name);
+  Py_RETURN_NONE;
+}
+
+/* Getter for "arguments".  */
+
+static PyObject *
+infpy_get_args (PyObject *self, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  const std::string &args = inf->inferior->args ();
+  if (args.empty ())
+    Py_RETURN_NONE;
+
+  return host_string_to_python_string (args.c_str ()).release ();
+}
+
+/* Setter for "arguments".  */
+
+static int
+infpy_set_args (PyObject *self, PyObject *value, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  if (!inf->inferior)
+    {
+      PyErr_SetString (PyExc_RuntimeError, _("Inferior no longer exists."));
+      return -1;
+    }
+
+  if (value == nullptr)
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Cannot delete 'arguments' attribute."));
+      return -1;
+    }
+
+  if (gdbpy_is_string (value))
+    {
+      gdb::unique_xmalloc_ptr<char> str = python_string_to_host_string (value);
+      if (str == nullptr)
+	return -1;
+      inf->inferior->set_args (std::string (str.get ()));
+    }
+  else if (PySequence_Check (value))
+    {
+      std::vector<gdb::unique_xmalloc_ptr<char>> args;
+      Py_ssize_t len = PySequence_Size (value);
+      if (len == -1)
+	return -1;
+      for (Py_ssize_t i = 0; i < len; ++i)
+	{
+	  gdbpy_ref<> item (PySequence_ITEM (value, i));
+	  if (item == nullptr)
+	    return -1;
+	  gdb::unique_xmalloc_ptr<char> str
+	    = python_string_to_host_string (item.get ());
+	  if (str == nullptr)
+	    return -1;
+	  args.push_back (std::move (str));
+	}
+      std::vector<char *> argvec;
+      for (const auto &arg : args)
+	argvec.push_back (arg.get ());
+      gdb::array_view<char * const> view (argvec.data (), argvec.size ());
+      inf->inferior->set_args (view);
+    }
+  else
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("string or sequence required for 'arguments'"));
+      return -1;
+    }
+  return 0;
+}
+
+/* Getter for "main_name".  */
+
+static PyObject *
+infpy_get_main_name (PyObject *self, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  const char *name = nullptr;
+  try
+    {
+      /* This is unfortunate but the implementation of main_name can
+	 reach into memory.  */
+      scoped_restore_current_inferior restore_inferior;
+      set_current_inferior (inf->inferior);
+
+      scoped_restore_current_program_space restore_current_progspace;
+      set_current_program_space (inf->inferior->pspace);
+
+      name = main_name ();
+    }
+  catch (const gdb_exception &except)
+    {
+      /* We can just ignore this.  */
+    }
+
+  if (name == nullptr)
+    Py_RETURN_NONE;
+
+  return host_string_to_python_string (name).release ();
+}
 
 static void
 infpy_dealloc (PyObject *obj)
@@ -844,6 +1000,8 @@ GDBPY_INITIALIZE_FILE (gdbpy_initialize_inferior);
 
 static gdb_PyGetSetDef inferior_object_getset[] =
 {
+  { "arguments", infpy_get_args, infpy_set_args,
+    "Arguments to this program.", nullptr },
   { "num", infpy_get_num, NULL, "ID of inferior, as assigned by GDB.", NULL },
   { "connection", infpy_get_connection, NULL,
     "The gdb.TargetConnection for this inferior.", NULL },
@@ -854,6 +1012,8 @@ static gdb_PyGetSetDef inferior_object_getset[] =
   { "was_attached", infpy_get_was_attached, NULL,
     "True if the inferior was created using 'attach'.", NULL },
   { "progspace", infpy_get_progspace, NULL, "Program space of this inferior" },
+  { "main_name", infpy_get_main_name, nullptr,
+    "Name of 'main' function, if known.", nullptr },
   { NULL }
 };
 
@@ -889,6 +1049,15 @@ Return thread object corresponding to thread handle." },
   { "architecture", (PyCFunction) infpy_architecture, METH_NOARGS,
     "architecture () -> gdb.Architecture\n\
 Return architecture of this inferior." },
+  { "clear_env", (PyCFunction) infpy_clear_env, METH_NOARGS,
+    "clear_env () -> None\n\
+Clear environment of this inferior." },
+  { "set_env", (PyCFunction) infpy_set_env, METH_VARARGS | METH_KEYWORDS,
+    "set_env (name, value) -> None\n\
+Set an environment variable of this inferior." },
+  { "unset_env", (PyCFunction) infpy_unset_env, METH_VARARGS | METH_KEYWORDS,
+    "unset_env (name) -> None\n\
+Unset an environment of this inferior." },
   { NULL }
 };
 

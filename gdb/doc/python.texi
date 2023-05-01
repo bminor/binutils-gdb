@@ -3451,8 +3451,28 @@ Boolean signaling whether the inferior was created using `attach', or
 started by @value{GDBN} itself.
 @end defvar
 
+@defvar Inferior.main_name
+A string holding the name of this inferior's ``main'' function, if it
+can be determined.  If the name of main is not known, this is
+@code{None}.
+@end defvar
+
 @defvar Inferior.progspace
 The inferior's program space.  @xref{Progspaces In Python}.
+@end defvar
+
+@defvar Inferior.arguments
+The inferior's command line arguments, if known.  This corresponds to
+the @code{set args} and @code{show args} commands.  @xref{Arguments}.
+
+When accessed, the value is a string holding all the arguments.  The
+contents are quoted as they would be when passed to the shell.  If
+there are no arguments, the value is @code{None}.
+
+Either a string or a sequence of strings can be assigned to this
+attribute.  When a string is assigned, it is assumed to have any
+necessary quoting for the shell; when a sequence is assigned, the
+quoting is applied by @value{GDBN}.
 @end defvar
 
 A @code{gdb.Inferior} object has the following methods:
@@ -3520,6 +3540,30 @@ library implementations.
 The function @code{Inferior.thread_from_thread_handle} provides
 the same functionality, but use of @code{Inferior.thread_from_thread_handle}
 is deprecated.
+@end defun
+
+
+The environment that will be passed to the inferior can be changed
+from Python by using the following methods.  These methods only take
+effect when the inferior is started -- they will not affect an
+inferior that is already executing.
+
+@findex Inferior.clear_env
+@defun Inferior.clear_env ()
+Clear the current environment variables that will be passed to this
+inferior.
+@end defun
+
+@findex Inferior.set_env
+@defun Inferior.set_env (name, value)
+Set the environment variable @var{name} to have the indicated value.
+Both parameters must be strings.
+@end defun
+
+@findex Inferior.unset_env
+@defun Inferior.unset_env (name)
+Unset the environment variable @var{name}.  @var{name} must be a
+string.
 @end defun
 
 @node Events In Python

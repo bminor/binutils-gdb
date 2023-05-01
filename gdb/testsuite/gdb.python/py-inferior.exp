@@ -342,3 +342,39 @@ with_test_prefix "architecture" {
 	"True" \
 	"inferior architecture matches frame architecture"
 }
+
+gdb_test "python print(gdb.selected_inferior().main_name)" \
+    "main" \
+    "print main name"
+
+gdb_test_no_output "set args x y z"
+gdb_test "python print(gdb.selected_inferior().arguments)" \
+    "x y z" \
+    "print arguments"
+
+gdb_test_no_output "python gdb.selected_inferior().arguments = 'a b c'" \
+    "set arguments from string"
+gdb_test "show args" \
+    [string_to_regexp "Argument list to give program being debugged when it is started is \"a b c\"."] \
+    "show args from string"
+
+gdb_test_no_output "python gdb.selected_inferior().arguments = \['a', 'b c'\]" \
+    "set arguments from list"
+gdb_test "show args" \
+    [string_to_regexp "Argument list to give program being debugged when it is started is \"a b\\ c\"."] \
+    "show args from list"
+
+gdb_test_no_output "python gdb.selected_inferior().clear_env()" \
+    "clear environment"
+gdb_test_no_output "show environment"
+
+gdb_test_no_output "python gdb.selected_inferior().set_env('DEI', 'value')" \
+    "set environment variable"
+gdb_test "show environment" \
+    "DEI=value" \
+    "examine environment variable"
+
+gdb_test_no_output "python gdb.selected_inferior().unset_env('DEI')" \
+    "unset environment variable"
+gdb_test_no_output "show environment" \
+    "environment is empty again"

@@ -42,3 +42,7 @@ gdb_test "python print(gdb.parse_and_eval('si').type)" \
     "foo\\.small_integer" "print type"
 gdb_test "python print(gdb.parse_and_eval('si').type.name)" \
     "foo\\.small_integer" "print type name"
+
+gdb_test "python print(gdb.selected_inferior().main_name)" \
+    "_ada_foo" \
+    "print main name"
