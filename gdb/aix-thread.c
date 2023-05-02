@@ -1049,17 +1049,17 @@ pd_activate (pid_t pid)
    application is pthreaded, and if so, prepare for thread debugging.  */
 
 static void
-pd_enable (void)
+pd_enable (inferior *inf)
 {
   int status;
   char *stub_name;
   struct bound_minimal_symbol ms;
   struct aix_thread_variables *data;
 
-  if (!inferior_ptid.pid ())
+  if (inf == NULL)
     return;
 
-  data = get_thread_data_helper_for_ptid (inferior_ptid);
+  data = get_aix_thread_variables_data (inf);
 
   /* Don't initialize twice.  */
   if (data->pd_able)
@@ -1070,7 +1070,7 @@ pd_enable (void)
 
   /* Check whether the application is pthreaded.  */
   stub_name = NULL;
-  status = pthdb_session_pthreaded (inferior_ptid.pid (), PTHDB_FLAG_REGS,
+  status = pthdb_session_pthreaded (inf->pid, PTHDB_FLAG_REGS,
 				    &pd_callbacks, &stub_name);
   if ((status != PTHDB_SUCCESS
        && status != PTHDB_NOT_PTHREADED) || !stub_name)
@@ -1088,7 +1088,6 @@ pd_enable (void)
   current_inferior ()->push_target (&aix_thread_ops);
   data->pd_able = 1;
 
-  inferior *inf = current_inferior ();
   /* When attaching / handling fork child, don't try activating
      thread debugging until we know about all shared libraries.  */
   if (inf->in_initial_library_scan)
@@ -1097,16 +1096,16 @@ pd_enable (void)
   /* If we're debugging a core file or an attached inferior, the
      pthread library may already have been initialized, so try to
      activate thread debugging.  */
-  pd_activate (inferior_ptid.pid ());
+  pd_activate (inf->pid);
 }
 
 /* Undo the effects of pd_enable().  */
 
 static void
-pd_disable (void)
+pd_disable (inferior *inf)
 {
   struct aix_thread_variables *data;
-  data = get_thread_data_helper_for_ptid (inferior_ptid);
+  data = get_aix_thread_variables_data (inf);
 
   if (!data->pd_able)
     return;
@@ -1129,7 +1128,7 @@ static void
 new_objfile (struct objfile *objfile)
 {
   if (objfile)
-    pd_enable ();
+    pd_enable (current_inferior ());
 }
 
 /* Attach to process specified by ARGS.  */
@@ -1137,7 +1136,7 @@ new_objfile (struct objfile *objfile)
 static void
 aix_thread_inferior_created (inferior *inf)
 {
-  pd_enable ();
+  pd_enable (inf);
 }
 
 /* Detach from the process attached to by aix_thread_attach().  */
@@ -1147,7 +1146,7 @@ aix_thread_target::detach (inferior *inf, int from_tty)
 {
   target_ops *beneath = this->beneath ();
 
-  pd_disable ();
+  pd_disable (inf);
   beneath->detach (inf, from_tty);
 }
 
@@ -2066,7 +2065,7 @@ aix_thread_target::mourn_inferior ()
 {
   target_ops *beneath = this->beneath ();
 
-  pd_disable ();
+  pd_disable (current_inferior ());
   beneath->mourn_inferior ();
 }
 
