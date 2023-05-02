@@ -725,7 +725,7 @@ maintenance deprecate set qqq_aaa"
 
 proc_with_prefix deprecated_command_alias_help_test {} {
     gdb_test_multiline "define real_command" \
-	"define real_command" "End with a line saying just \"end\".." \
+	"define real_command" "End with a line saying just \"end\"\\." \
 	"print 1" "" \
 	"end" ""
 

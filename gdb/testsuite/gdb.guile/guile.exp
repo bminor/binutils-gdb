@@ -63,7 +63,7 @@ gdb_test_multiline "show guile command" \
   "(print 23)" "" \
   "end" "" \
   "end" "" \
-  "show user zzq" "User command \"zzq\":.*  guile.*\\(print 23\\).*  end"
+  "show user zzq" "User command \"zzq\":.*  guile.*\\(print 23\\).*  end\r\n"
 
 gdb_test "source $host_source2_scm" "yes" "source source2.scm"
 

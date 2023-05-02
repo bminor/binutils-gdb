@@ -818,7 +818,7 @@ proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
 	-re "(?:Breakpoint|Temporary breakpoint) .* (at|in) $location_pattern\r\n$gdb_prompt $" {
 	    pass $full_name
 	}
-	-re "\[\r\n\]*(?:$kfail_pattern)\[\r\n\]+$gdb_prompt $" {
+	-re "(?:$kfail_pattern)\r\n$gdb_prompt $" {
 	    kfail "gdb/25038" $full_name
 	}
     }
@@ -1126,7 +1126,7 @@ proc gdb_test_multiple { command message args } {
 	if { $wrap_pattern } {
 	    # Wrap subst_item as is done for the gdb_test PATTERN argument.
 	    lappend $current_list \
-		"\[\r\n\]*(?:$subst_item)\[\r\n\]+$prompt_regexp"
+		"(?:$subst_item)\r\n$prompt_regexp"
 	    set wrap_pattern 0
 	} else {
 	    lappend $current_list $subst_item
@@ -1384,7 +1384,7 @@ proc gdb_test_multiline { name args } {
     foreach {input result} $args {
 	incr inputnr
 	if {[gdb_test_multiple $input "$name: input $inputnr: $input" {
-	    -re "\[\r\n\]*($result)\[\r\n\]+($gdb_prompt | *>)$" {
+	    -re "($result)\r\n($gdb_prompt | *>)$" {
 		pass $gdb_test_name
 	    }
 	}]} {
@@ -7746,7 +7746,7 @@ proc get_valueof { fmt exp default {test ""} } {
 
     set val ${default}
     gdb_test_multiple "print${fmt} ${exp}" "$test" {
-	-re "\\$\[0-9\]* = (\[^\r\n\]*)\[\r\n\]*$gdb_prompt $" {
+	-re "\\$\[0-9\]* = (\[^\r\n\]*)\r\n$gdb_prompt $" {
 	    set val $expect_out(1,string)
 	    pass "$test"
 	}
@@ -7770,7 +7770,7 @@ proc get_local_valueof { exp default {test ""} } {
 
     set val ${default}
     gdb_test_multiple "info locals ${exp}" "$test" {
-	-re "$exp = (\[^\r\n\]*)\[\r\n\]*$gdb_prompt $" {
+	-re "$exp = (\[^\r\n\]*)\r\n$gdb_prompt $" {
 	    set val $expect_out(1,string)
 	    pass "$test"
 	}

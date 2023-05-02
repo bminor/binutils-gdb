@@ -80,7 +80,7 @@ gdb_test_multiline "show python command" \
   "print (23)" "" \
   "end" "" \
   "end" "" \
-  "show user zzq" "User command \"zzq\":.*  python.*print \\(23\\).*  end"
+  "show user zzq" "User command \"zzq\":.*  python.*print \\(23\\).*  end\r\n"
 
 gdb_test_multiline "indented multi-line python command" \
   "python" "" \
