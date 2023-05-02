@@ -116,7 +116,6 @@ responsibility among the other maintainers.
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   MN10300	   Alexandre Oliva <aoliva@sourceware.org>
   Moxie		   Anthony Green <green@moxielogic.com>
-  MSP430	   Dmitry Diky <diwil@spec.ru>
   NDS32		   Kuan-Lin Chen <kuanlinchentw@gmail.com>
   NDS32		   Wei-Cheng Wang <cole945@gmail.com>
   NetBSD support   Matt Thomas <matt@netbsd.org>
