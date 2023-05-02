@@ -1002,7 +1002,7 @@ public:
 
   /* See language.h.  */
 
-  CORE_ADDR skip_trampoline (frame_info_ptr fi,
+  CORE_ADDR skip_trampoline (const frame_info_ptr &fi,
 			     CORE_ADDR pc) const override
   {
     return cplus_skip_trampoline (fi, pc);

@@ -471,7 +471,7 @@ struct language_defn
      If that PC falls in a trampoline belonging to this language, return
      the address of the first pc in the real function, or 0 if it isn't a
      language tramp for this language.  */
-  virtual CORE_ADDR skip_trampoline (frame_info_ptr fi, CORE_ADDR pc) const
+  virtual CORE_ADDR skip_trampoline (const frame_info_ptr &fi, CORE_ADDR pc) const
   {
     return (CORE_ADDR) 0;
   }
@@ -790,7 +790,7 @@ extern const char *language_str (enum language);
 
 /* Check for a language-specific trampoline.  */
 
-extern CORE_ADDR skip_language_trampoline (frame_info_ptr, CORE_ADDR pc);
+extern CORE_ADDR skip_language_trampoline (const frame_info_ptr &, CORE_ADDR pc);
 
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */
