@@ -1900,7 +1900,6 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
   windows_process.cygwin_load_start = 0;
   windows_process.cygwin_load_end = 0;
 #endif
-  windows_process.current_event.dwProcessId = pid;
   memset (&windows_process.current_event, 0,
 	  sizeof (windows_process.current_event));
   inf = current_inferior ();
