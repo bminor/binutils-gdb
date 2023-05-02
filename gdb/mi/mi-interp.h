@@ -55,6 +55,7 @@ public:
   void on_inferior_added (inferior *inf) override;
   void on_inferior_appeared (inferior *inf) override;
   void on_inferior_disappeared (inferior *inf) override;
+  void on_inferior_removed (inferior *inf) override;
 
   /* MI's output channels */
   mi_console_file *out;

@@ -131,6 +131,9 @@ public:
   /* Notify the interpreter that inferior INF exited or was detached.  */
   virtual void on_inferior_disappeared (inferior *inf) {}
 
+  /* Notify the interpreter that inferior INF was removed.  */
+  virtual void on_inferior_removed (inferior *inf) {}
+
 private:
   /* The memory for this is static, it comes from literal strings (e.g. "cli").  */
   const char *m_name;
@@ -256,6 +259,9 @@ extern void interps_notify_inferior_appeared (inferior *inf);
 
 /* Notify all interpreters that inferior INF exited or was detached.  */
 extern void interps_notify_inferior_disappeared (inferior *inf);
+
+/* Notify all interpreters that inferior INF was removed.  */
+extern void interps_notify_inferior_removed (inferior *inf);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

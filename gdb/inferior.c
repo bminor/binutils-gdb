@@ -260,6 +260,15 @@ inferior::clear_thread_list (bool silent)
   ptid_thread_map.clear ();
 }
 
+/* Notify interpreters and observers that inferior INF was removed.  */
+
+static void
+notify_inferior_removed (inferior *inf)
+{
+  interps_notify_inferior_removed (inf);
+  gdb::observers::inferior_removed.notify (inf);
+}
+
 void
 delete_inferior (struct inferior *inf)
 {
@@ -268,7 +277,7 @@ delete_inferior (struct inferior *inf)
   auto it = inferior_list.iterator_to (*inf);
   inferior_list.erase (it);
 
-  gdb::observers::inferior_removed.notify (inf);
+  notify_inferior_removed (inf);
 
   /* Pop all targets now, this ensures that inferior::unpush is called
      correctly.  As pop_all_targets ends up making a temporary switch to

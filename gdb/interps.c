@@ -486,6 +486,14 @@ interps_notify_inferior_disappeared (inferior *inf)
   interps_notify (&interp::on_inferior_disappeared, inf);
 }
 
+/* See interps.h.  */
+
+void
+interps_notify_inferior_removed (inferior *inf)
+{
+  interps_notify (&interp::on_inferior_removed, inf);
+}
+
 /* This just adds the "interpreter-exec" command.  */
 void _initialize_interpreter ();
 void
