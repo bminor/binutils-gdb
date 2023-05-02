@@ -309,6 +309,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
   windows_process.last_sig = GDB_SIGNAL_0;
   windows_process.handle = proch;
+  windows_process.process_id = pid;
   windows_process.main_thread_id = 0;
 
   windows_process.soft_interrupt_requested = 0;
