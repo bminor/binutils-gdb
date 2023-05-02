@@ -340,7 +340,7 @@ extern void bfd_hash_traverse
 /* Allows the default size of a hash table to be configured. New hash
    tables allocated using bfd_hash_table_init will be created with
    this size.  */
-extern unsigned long bfd_hash_set_default_size (unsigned long);
+extern unsigned int bfd_hash_set_default_size (unsigned int);
 
 /* This structure is used to keep track of stabs in sections
    information while linking.  */
