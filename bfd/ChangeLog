@@ -1,3 +1,10 @@
+2023-05-03  Oleg Tolmatcev  <oleg.tolmatcev@gmail.com>
+
+	* coffcode.h (coff_read_word_from_buffer): New function.
+	* coffcode.h (COFF_CHECKSUM_BUFFER_SIZE): New constant.
+	* coffcode.h (coff_compute_checksum): Improve speed by reducing
+	the number of seeks and reads used.
+
 2023-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/la.po: New Georgian translation.

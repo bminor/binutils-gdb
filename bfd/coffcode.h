@@ -3367,29 +3367,83 @@ coff_read_word (bfd *abfd, unsigned int *value, unsigned int *pelength)
   return true;
 }
 
+/* Read a two byte number from buffer B returning the result in VALUE.
+   No more than BUF_SIZE bytes will be read.
+   Returns true upobn success, false otherwise.
+   If successful, increases the value stored in PELENGTH by the number
+   of bytes read.  */
+
+static bool
+coff_read_word_from_buffer (unsigned char *  b,
+			    int              buf_size,
+                            unsigned int *   value,
+			    unsigned int *   pelength)
+{
+  if (buf_size < 1)
+    {
+      *value = 0;
+      return false;
+    }
+
+  if (buf_size == 1)
+    {
+      *value = (unsigned int)b[0];
+      *pelength += 1;
+    }
+  else
+    {
+      *value = (unsigned int)(b[0] + (b[1] << 8));
+      *pelength += 2;
+    }
+
+  return true;
+}
+
+#define COFF_CHECKSUM_BUFFER_SIZE 0x800000
+
 static unsigned int
 coff_compute_checksum (bfd *abfd, unsigned int *pelength)
 {
-  bool more_data;
   file_ptr filepos;
   unsigned int value;
   unsigned int total;
+  unsigned char *buf;
+  int buf_size;
 
   total = 0;
   *pelength = 0;
   filepos = (file_ptr) 0;
+  buf = (unsigned char *) bfd_malloc (COFF_CHECKSUM_BUFFER_SIZE);
+  if (buf == NULL)
+    return 0;
+  buf_size = 0;
 
   do
     {
+      unsigned char *cur_buf;
+      int cur_buf_size;
+
       if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
 	return 0;
 
-      more_data = coff_read_word (abfd, &value, pelength);
-      total += value;
-      total = 0xffff & (total + (total >> 0x10));
-      filepos += 2;
+      buf_size = bfd_bread (buf, COFF_CHECKSUM_BUFFER_SIZE, abfd);
+      cur_buf_size = buf_size;
+      cur_buf = buf;
+
+      while (cur_buf_size > 0)
+        {
+          coff_read_word_from_buffer (cur_buf, cur_buf_size, &value, pelength);
+          cur_buf += 2;
+          cur_buf_size -= 2;
+          total += value;
+          total = 0xffff & (total + (total >> 0x10));
+        }
+
+      filepos += buf_size;
     }
-  while (more_data);
+  while (buf_size > 0);
+
+  free (buf);
 
   return (0xffff & (total + (total >> 0x10)));
 }
