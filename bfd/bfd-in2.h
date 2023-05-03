@@ -1280,8 +1280,8 @@ void bfd_print_symbol_vandf (bfd *abfd, void *file, asymbol *symbol);
 
 asymbol *_bfd_generic_make_empty_symbol (bfd *);
 
-#define bfd_make_debug_symbol(abfd,ptr,size) \
-       BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
+#define bfd_make_debug_symbol(abfd) \
+       BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd))
 
 int bfd_decode_symclass (asymbol *symbol);
 
@@ -7655,7 +7655,7 @@ typedef struct bfd_target
     while using BFD for everything else.  Currently used by the assembler
     when creating COFF files.  */
   asymbol *
-       (*_bfd_make_debug_symbol) (bfd *, void *, unsigned long size);
+       (*_bfd_make_debug_symbol) (bfd *);
 #define bfd_read_minisymbols(b, d, m, s) \
        BFD_SEND (b, _read_minisymbols, (b, d, m, s))
   long (*_read_minisymbols) (bfd *, bool, void **, unsigned int *);

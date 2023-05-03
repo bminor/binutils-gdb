@@ -1991,9 +1991,7 @@ coff_make_empty_symbol (bfd *abfd)
 /* Make a debugging symbol.  */
 
 asymbol *
-coff_bfd_make_debug_symbol (bfd *abfd,
-			    void * ptr ATTRIBUTE_UNUSED,
-			    unsigned long sz ATTRIBUTE_UNUSED)
+coff_bfd_make_debug_symbol (bfd *abfd)
 {
   size_t amt = sizeof (coff_symbol_type);
   coff_symbol_type *new_symbol = (coff_symbol_type *) bfd_alloc (abfd, amt);

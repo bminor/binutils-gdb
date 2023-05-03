@@ -456,7 +456,7 @@ extern bool _bfd_nosymbols_find_line
 extern bool _bfd_nosymbols_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *) ATTRIBUTE_HIDDEN;
 extern asymbol *_bfd_nosymbols_bfd_make_debug_symbol
-  (bfd *, void *, unsigned long) ATTRIBUTE_HIDDEN;
+  (bfd *) ATTRIBUTE_HIDDEN;
 extern long _bfd_nosymbols_read_minisymbols
   (bfd *, bool, void **, unsigned int *) ATTRIBUTE_HIDDEN;
 extern asymbol *_bfd_nosymbols_minisymbol_to_symbol

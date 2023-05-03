@@ -420,7 +420,7 @@ BFD_JUMP_TABLE macros.
 .    while using BFD for everything else.  Currently used by the assembler
 .    when creating COFF files.  *}
 .  asymbol *
-.	(*_bfd_make_debug_symbol) (bfd *, void *, unsigned long size);
+.	(*_bfd_make_debug_symbol) (bfd *);
 .#define bfd_read_minisymbols(b, d, m, s) \
 .	BFD_SEND (b, _read_minisymbols, (b, d, m, s))
 .  long	(*_read_minisymbols) (bfd *, bool, void **, unsigned int *);

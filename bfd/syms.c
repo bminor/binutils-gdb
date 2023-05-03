@@ -569,11 +569,10 @@ FUNCTION
 
 DESCRIPTION
 	Create a new <<asymbol>> structure for the BFD @var{abfd},
-	to be used as a debugging symbol.  Further details of its use have
-	yet to be worked out.
+	to be used as a debugging symbol.
 
-.#define bfd_make_debug_symbol(abfd,ptr,size) \
-.	BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
+.#define bfd_make_debug_symbol(abfd) \
+.	BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd))
 .
 */
 
@@ -1577,9 +1576,7 @@ _bfd_nosymbols_find_inliner_info
 }
 
 asymbol *
-_bfd_nosymbols_bfd_make_debug_symbol (bfd *abfd,
-				      void *ptr ATTRIBUTE_UNUSED,
-				      unsigned long sz ATTRIBUTE_UNUSED)
+_bfd_nosymbols_bfd_make_debug_symbol (bfd *abfd)
 {
   return (asymbol *) _bfd_ptr_bfd_null_error (abfd);
 }

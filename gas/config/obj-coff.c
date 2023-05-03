@@ -238,7 +238,7 @@ fetch_coff_debug_section (void)
     {
       const asymbol *s;
 
-      s = bfd_make_debug_symbol (stdoutput, NULL, 0);
+      s = bfd_make_debug_symbol (stdoutput);
       gas_assert (s != 0);
       debug_section = s->section;
     }

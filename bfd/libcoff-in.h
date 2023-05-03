@@ -360,7 +360,7 @@ extern void coff_get_symbol_info
 extern bool _bfd_coff_is_local_label_name
   (bfd *, const char *);
 extern asymbol *coff_bfd_make_debug_symbol
-  (bfd *, void *, unsigned long);
+  (bfd *);
 extern bool coff_find_nearest_line
   (bfd *, asymbol **, asection *, bfd_vma,
    const char **, const char **, unsigned int *, unsigned int *);
