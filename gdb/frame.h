@@ -254,11 +254,9 @@ public:
 
   ~frame_info_ptr ()
   {
-    /* If this node has static storage, it may be deleted after
-       frame_list.  Attempting to erase ourselves would then trigger
-       internal errors, so make sure we are still linked first.  */
-    if (is_linked ())
-      frame_list.erase (frame_list.iterator_to (*this));
+    /* If this node has static storage, it should be be deleted before
+       frame_list.  */
+    frame_list.erase (frame_list.iterator_to (*this));
   }
 
   frame_info_ptr &operator= (const frame_info_ptr &other)

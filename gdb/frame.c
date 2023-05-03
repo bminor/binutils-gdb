@@ -1733,6 +1733,13 @@ get_current_frame (void)
 static frame_id selected_frame_id = null_frame_id;
 static int selected_frame_level = -1;
 
+/* See frame.h.  This definition should come before any definition of a static
+   frame_info_ptr, to ensure that frame_list is destroyed after any static
+   frame_info_ptr.  This is necessary because the destructor of frame_info_ptr
+   uses frame_list.  */
+
+intrusive_list<frame_info_ptr> frame_info_ptr::frame_list;
+
 /* The cached frame_info object pointing to the selected frame.
    Looked up on demand by get_selected_frame.  */
 static frame_info_ptr selected_frame;
@@ -3272,10 +3279,6 @@ maintenance_print_frame_id (const char *args, int from_tty)
 	      frame_relative_level (frame),
 	      get_frame_id (frame).to_string ().c_str ());
 }
-
-/* See frame-info-ptr.h.  */
-
-intrusive_list<frame_info_ptr> frame_info_ptr::frame_list;
 
 /* See frame-info-ptr.h.  */
 
