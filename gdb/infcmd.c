@@ -144,7 +144,7 @@ show_args_command (struct ui_file *file, int from_tty,
 {
   /* Ignore the passed in value, pull the argument directly from the
      inferior.  However, these should always be the same.  */
-  gdb_printf (_("\
+  gdb_printf (file, _("\
 Argument list to give program being debugged when it is started is \"%s\".\n"),
 	      current_inferior ()->args ().c_str ());
 }
