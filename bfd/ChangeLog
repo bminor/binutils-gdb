@@ -1,5 +1,10 @@
 2023-05-03  Oleg Tolmatcev  <oleg.tolmatcev@gmail.com>
 
+	* archive.c (_bfd_write_archive_contents): Use a larger buffer in
+	order to improve efficiency.
+
+2023-05-03  Oleg Tolmatcev  <oleg.tolmatcev@gmail.com>
+
 	* coffcode.h (coff_read_word_from_buffer): New function.
 	* coffcode.h (COFF_CHECKSUM_BUFFER_SIZE): New constant.
 	* coffcode.h (coff_compute_checksum): Improve speed by reducing
