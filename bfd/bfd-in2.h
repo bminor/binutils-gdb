@@ -495,10 +495,6 @@ bool bfd_make_writable (bfd *abfd);
 
 bool bfd_make_readable (bfd *abfd);
 
-void *bfd_alloc (bfd *abfd, bfd_size_type wanted);
-
-void *bfd_zalloc (bfd *abfd, bfd_size_type wanted);
-
 uint32_t bfd_calc_gnu_debuglink_crc32
    (uint32_t crc, const bfd_byte *buf, bfd_size_type len);
 
@@ -523,6 +519,12 @@ char *bfd_follow_build_id_debuglink (bfd *abfd, const char *dir);
 const char *bfd_set_filename (bfd *abfd, const char *filename);
 
 /* Extracted from libbfd.c.  */
+void *bfd_alloc (bfd *abfd, bfd_size_type wanted);
+
+void *bfd_zalloc (bfd *abfd, bfd_size_type wanted);
+
+void bfd_release (bfd *, void *);
+
 
 /* Byte swapping macros for user section data.  */
 

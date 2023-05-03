@@ -119,10 +119,6 @@ bfd_strdup (const char *str)
     memcpy (buf, str, len);
   return buf;
 }
-/* These routines allocate and free things on the BFD's objalloc.  */
-
-extern void bfd_release
-  (bfd *, void *) ATTRIBUTE_HIDDEN;
 
 extern bfd * _bfd_create_empty_archive_element_shell
   (bfd *) ATTRIBUTE_HIDDEN;
