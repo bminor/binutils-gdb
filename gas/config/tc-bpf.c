@@ -730,6 +730,8 @@ build_bpf_endianness (char *dst, enum bpf_token_type endianness)
       || endianness == BPF_LE32
       || endianness == BPF_LE64)
     be = 0;
+  else
+    gas_assert (endianness == BPF_BE16 || endianness == BPF_BE32 || endianness == BPF_BE64);
 
   bpf_insn = xasprintf ("%s %%%s,%s", be ? "endbe" : "endle",
 			dst, be ? size[endianness - BPF_BE16] : size[endianness - BPF_LE16]);
@@ -885,7 +887,7 @@ get_token (const char **insn, char *token, size_t *tlen)
     } while (0)
 
   const char *str = *insn;
-  char ch, ch2 = 0;
+  int ch, ch2 = 0;
   enum bpf_token_type ttype = BPF_UNKNOWN;
   size_t len = 0;
   const char *expr = NULL;
@@ -1362,7 +1364,7 @@ bpf_pseudoc_to_normal_syntax (const char *str, char **errmsg)
     } while (0)
 
   enum bpf_token_type ttype;
-  enum bpf_token_type bpf_endianness,
+  enum bpf_token_type bpf_endianness = BPF_UNKNOWN,
 		      bpf_atomic_insn;
   enum bpf_token_type bpf_jmp_op = BPF_JEQ; /* Arbitrary.  */
   enum bpf_token_type bpf_cast = BPF_CAST_U8; /* Arbitrary.  */
