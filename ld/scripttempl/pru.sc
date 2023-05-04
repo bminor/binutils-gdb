@@ -24,6 +24,12 @@ ENTRY (_start)
 
 EOF
 
+OUTPUT_SECTION_ALIGN="
+    ${RELOCATING+/* In case this is the last input section,
+      align to keep the loadable segment size a multiple of the common page size.
+      Some SoCs have stricter memory size requirements than others.  */
+    . = ALIGN (CONSTANT (COMMONPAGESIZE));}"
+
 cat <<EOF
 SECTIONS
 {
@@ -163,10 +169,25 @@ SECTIONS
     ${RELOCATING+*(COMMON)}
     ${RELOCATING+ PROVIDE (_bss_end = .) ; }
 
-    ${RELOCATING+/* In case this is the last input section, align to
-      keep the loadable segment size a multiple of the common page size.
-      Some SoCs have stricter memory size requirements than others.  */
-    . = ALIGN (CONSTANT (COMMONPAGESIZE));}
+    ${OUTPUT_SECTION_ALIGN}
+  } ${RELOCATING+ > dmem}
+
+  .eh_frame ${RELOCATING-0} :
+  {
+    KEEP (*(.eh_frame))${RELOCATING+ *(.eh_frame.*)}
+    ${OUTPUT_SECTION_ALIGN}
+  } ${RELOCATING+ > dmem}
+
+  .gnu_extab ${RELOCATING-0} :
+  {
+    *(.gnu_extab)
+    ${OUTPUT_SECTION_ALIGN}
+  } ${RELOCATING+ > dmem}
+
+  .gcc_except_table ${RELOCATING-0} :
+  {
+    *(.gcc_except_table${RELOCATING+ .gcc_except_table.*})
+    ${OUTPUT_SECTION_ALIGN}
   } ${RELOCATING+ > dmem}
 
   /* Linux remoteproc loader requires the resource_table section
@@ -175,10 +196,7 @@ SECTIONS
   .resource_table ${RELOCATING-0} ${RELOCATING+ ALIGN (CONSTANT (MAXPAGESIZE))} :
   {
     KEEP (*(.resource_table))
-    ${RELOCATING+/* In case this is the last input section, align to
-      keep the loadable segment size a multiple of the common page size.
-      Some SoCs have stricter memory size requirements than others.  */
-    . = ALIGN (CONSTANT (COMMONPAGESIZE));}
+    ${OUTPUT_SECTION_ALIGN}
   } ${RELOCATING+ > dmem}
 
   /* Global data not cleared after reset.  */
