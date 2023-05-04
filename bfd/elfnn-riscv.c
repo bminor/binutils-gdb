@@ -824,7 +824,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_RISCV_TLS_GOT_HI20:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  if (!riscv_elf_record_got_reference (abfd, info, h, r_symndx)
 	      || !riscv_elf_record_tls_type (abfd, h, r_symndx, GOT_TLS_IE))
@@ -920,11 +920,12 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  goto static_reloc;
 
 	case R_RISCV_TPREL_HI20:
+	  /* This is not allowed in the pic, but okay in pie.  */
 	  if (!bfd_link_executable (info))
 	    return bad_static_reloc (abfd, r_type, h);
 	  if (h != NULL)
 	    riscv_elf_record_tls_type (abfd, h, r_symndx, GOT_TLS_LE);
-	  goto static_reloc;
+	  break;
 
 	case R_RISCV_HI20:
 	  if (bfd_link_pic (info))
@@ -2880,24 +2881,20 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	      if (htab->elf.srelgot == NULL)
 		abort ();
 
-	      if (h != NULL)
-		{
-		  bool dyn, pic;
-		  dyn = htab->elf.dynamic_sections_created;
-		  pic = bfd_link_pic (info);
-
-		  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, pic, h)
-		      && (!pic || !SYMBOL_REFERENCES_LOCAL (info, h)))
-		    indx = h->dynindx;
-		}
+	      bool dyn = elf_hash_table (info)->dynamic_sections_created;
+	      if (h != NULL
+		  && h->dynindx != -1
+		  && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+		  && (bfd_link_dll (info) || !SYMBOL_REFERENCES_LOCAL (info, h)))
+		indx = h->dynindx;
 
 	      /* The GOT entries have not been initialized yet.  Do it
 		 now, and emit any relocations.  */
-	      if ((bfd_link_pic (info) || indx != 0)
+	      if ((bfd_link_dll (info) || indx != 0)
 		  && (h == NULL
 		      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		      || h->root.type != bfd_link_hash_undefweak))
-		    need_relocs = true;
+		need_relocs = true;
 
 	      if (tls_type & GOT_TLS_GD)
 		{
