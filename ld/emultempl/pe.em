@@ -659,6 +659,9 @@ set_entry_point (void)
     }
 
   lang_default_entry (entry);
+
+  if (bfd_link_executable (&link_info) && ! entry_from_cmdline)
+    ldlang_add_undef (entry, false);  
 }
 
 static void

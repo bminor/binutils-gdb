@@ -1,3 +1,10 @@
+2023-05-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 30300
+	* emultempl/pep.em (set_entry_point): Add an undefined reference
+	to the entry point if it has been constructed heuristically.
+	* emultempl/pe.em (set_entry_point): Likewise.
+
 2023-05-04  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* scripttempl/pru.sc (OUTPUT_SECTION_ALIGN): New helper variable
