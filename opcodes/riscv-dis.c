@@ -668,7 +668,7 @@ riscv_disassemble_insn (bfd_vma memaddr,
   const struct riscv_opcode *op;
   static bool init = false;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
-  struct riscv_private_data *pd;
+  struct riscv_private_data *pd = info->private_data;
   int insnlen, i;
   bool printed;
 
@@ -683,26 +683,6 @@ riscv_disassemble_insn (bfd_vma memaddr,
 
       init = true;
     }
-
-  if (info->private_data == NULL)
-    {
-      pd = info->private_data = xcalloc (1, sizeof (struct riscv_private_data));
-      pd->gp = 0;
-      pd->print_addr = 0;
-      for (i = 0; i < (int)ARRAY_SIZE (pd->hi_addr); i++)
-	pd->hi_addr[i] = -1;
-      pd->to_print_addr = false;
-      pd->has_gp = false;
-
-      for (i = 0; i < info->symtab_size; i++)
-	if (strcmp (bfd_asymbol_name (info->symtab[i]), RISCV_GP_SYMBOL) == 0)
-	  {
-	    pd->gp = bfd_asymbol_value (info->symtab[i]);
-	    pd->has_gp = true;
-	  }
-    }
-  else
-    pd = info->private_data;
 
   insnlen = riscv_insn_length (word);
 
@@ -1079,6 +1059,34 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
   return info->bytes_per_chunk;
 }
 
+static bool
+riscv_init_disasm_info (struct disassemble_info *info)
+{
+  int i;
+
+  struct riscv_private_data *pd =
+	xcalloc (1, sizeof (struct riscv_private_data));
+  pd->gp = 0;
+  pd->print_addr = 0;
+  for (i = 0; i < (int) ARRAY_SIZE (pd->hi_addr); i++)
+    pd->hi_addr[i] = -1;
+  pd->to_print_addr = false;
+  pd->has_gp = false;
+
+  for (i = 0; i < info->symtab_size; i++)
+    {
+      asymbol *sym = info->symtab[i];
+      if (strcmp (bfd_asymbol_name (sym), RISCV_GP_SYMBOL) == 0)
+	{
+	  pd->gp = bfd_asymbol_value (sym);
+	  pd->has_gp = true;
+	}
+    }
+
+  info->private_data = pd;
+  return true;
+}
+
 int
 print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 {
@@ -1098,6 +1106,9 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
     }
   else if (riscv_gpr_names == NULL)
     set_default_riscv_dis_options ();
+
+  if (info->private_data == NULL && !riscv_init_disasm_info (info))
+    return -1;
 
   mstate = riscv_search_mapping_symbol (memaddr, info);
   /* Save the last mapping state.  */
@@ -1332,4 +1343,9 @@ with the -M switch (multiple options should be separated by commas):\n"));
     }
 
   fprintf (stream, _("\n"));
+}
+
+void disassemble_free_riscv (struct disassemble_info *info ATTRIBUTE_UNUSED)
+{
+  riscv_release_subset_list (&riscv_subsets);
 }

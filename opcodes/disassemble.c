@@ -800,6 +800,7 @@ disassemble_free_target (struct disassemble_info *info)
 #endif
 #ifdef ARCH_riscv
     case bfd_arch_riscv:
+      disassemble_free_riscv (info);
       break;
 #endif
 #ifdef ARCH_rs6000
