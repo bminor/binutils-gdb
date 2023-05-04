@@ -852,9 +852,9 @@ styp_to_sec_flags (bfd *abfd,
 
 #else /* COFF_WITH_PE */
 
-static flagword
+static bool
 handle_COMDAT (bfd * abfd,
-	       flagword sec_flags,
+	       flagword *sec_flags,
 	       void * hdr,
 	       const char *name,
 	       asection *section)
@@ -864,7 +864,7 @@ handle_COMDAT (bfd * abfd,
   int seen_state = 0;
   char *target_name = NULL;
 
-  sec_flags |= SEC_LINK_ONCE;
+  *sec_flags |= SEC_LINK_ONCE;
 
   /* Unfortunately, the PE format stores essential information in
      the symbol table, of all places.  We need to extract that
@@ -884,18 +884,19 @@ handle_COMDAT (bfd * abfd,
      rather messy.  */
 
   if (! _bfd_coff_get_external_symbols (abfd))
-    return sec_flags;
+    return true;
 
   esymstart = esym = (bfd_byte *) obj_coff_external_syms (abfd);
   esymend = esym + obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd);
 
-  while (esym < esymend)
+  for (struct internal_syment isym;
+       esym < esymend;
+       esym += (isym.n_numaux + 1) * bfd_coff_symesz (abfd))
     {
-      struct internal_syment isym;
       char buf[SYMNMLEN + 1];
       const char *symname;
 
-      bfd_coff_swap_sym_in (abfd, esym, & isym);
+      bfd_coff_swap_sym_in (abfd, esym, &isym);
 
       BFD_ASSERT (sizeof (internal_s->s_name) <= SYMNMLEN);
 
@@ -933,7 +934,7 @@ handle_COMDAT (bfd * abfd,
 	    {
 	      _bfd_error_handler (_("%pB: unable to load COMDAT section name"),
 				  abfd);
-	      break;
+	      return false;
 	    }
 
 	  switch (seen_state)
@@ -968,7 +969,7 @@ handle_COMDAT (bfd * abfd,
 		       cf PR 21781.  */
 		    _bfd_error_handler (_("%pB: error: unexpected symbol '%s' in COMDAT section"),
 					abfd, symname);
-		    goto breakloop;
+		    return false;
 		  }
 
 		/* FIXME LATER: MSVC generates section names
@@ -982,22 +983,8 @@ handle_COMDAT (bfd * abfd,
 					" does not match section name '%s'"),
 				      abfd, symname, name);
 
-		seen_state = 1;
-
-		/* PR 17512: file: e2cfe54f.  */
-		if (esym + bfd_coff_symesz (abfd) >= esymend)
-		  {
-		    /* xgettext:c-format */
-		    _bfd_error_handler (_("%pB: warning: no symbol for"
-					  " section '%s' found"),
-					abfd, symname);
-		    break;
-		  }
 		/* This is the section symbol.  */
-		bfd_coff_swap_aux_in (abfd, (esym + bfd_coff_symesz (abfd)),
-				      isym.n_type, isym.n_sclass,
-				      0, isym.n_numaux, & aux);
-
+		seen_state = 1;
 		target_name = strchr (name, '$');
 		if (target_name != NULL)
 		  {
@@ -1005,6 +992,24 @@ handle_COMDAT (bfd * abfd,
 		    seen_state = 2;
 		    /* Skip the `$'.  */
 		    target_name += 1;
+		  }
+
+		if (isym.n_numaux == 0)
+		  aux.x_scn.x_comdat = 0;
+		else
+		  {
+		    /* PR 17512: file: e2cfe54f.  */
+		    if (esym + bfd_coff_symesz (abfd) >= esymend)
+		      {
+			/* xgettext:c-format */
+			_bfd_error_handler (_("%pB: warning: no symbol for"
+					      " section '%s' found"),
+					    abfd, symname);
+			break;
+		      }
+		    bfd_coff_swap_aux_in (abfd, esym + bfd_coff_symesz (abfd),
+					  isym.n_type, isym.n_sclass,
+					  0, isym.n_numaux, &aux);
 		  }
 
 		/* FIXME: Microsoft uses NODUPLICATES and
@@ -1027,23 +1032,23 @@ handle_COMDAT (bfd * abfd,
 		  {
 		  case IMAGE_COMDAT_SELECT_NODUPLICATES:
 #ifdef STRICT_PE_FORMAT
-		    sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
+		    *sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
 #else
-		    sec_flags &= ~SEC_LINK_ONCE;
+		    *sec_flags &= ~SEC_LINK_ONCE;
 #endif
 		    break;
 
 		  case IMAGE_COMDAT_SELECT_ANY:
-		    sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+		    *sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 		    break;
 
 		  case IMAGE_COMDAT_SELECT_SAME_SIZE:
-		    sec_flags |= SEC_LINK_DUPLICATES_SAME_SIZE;
+		    *sec_flags |= SEC_LINK_DUPLICATES_SAME_SIZE;
 		    break;
 
 		  case IMAGE_COMDAT_SELECT_EXACT_MATCH:
 		    /* Not yet fully implemented ??? */
-		    sec_flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
+		    *sec_flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
 		    break;
 
 		    /* debug$S gets this case; other
@@ -1056,16 +1061,16 @@ handle_COMDAT (bfd * abfd,
 		  case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
 #ifdef STRICT_PE_FORMAT
 		    /* FIXME: This is not currently implemented.  */
-		    sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+		    *sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 #else
-		    sec_flags &= ~SEC_LINK_ONCE;
+		    *sec_flags &= ~SEC_LINK_ONCE;
 #endif
 		    break;
 
 		  default:  /* 0 means "no symbol" */
 		    /* debug$F gets this case; other
 		       implications ??? */
-		    sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+		    *sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 		    break;
 		  }
 	      }
@@ -1082,7 +1087,6 @@ handle_COMDAT (bfd * abfd,
 			  symname + (TARGET_UNDERSCORE ? 1 : 0)) != 0)
 		{
 		  /* Not the name we're looking for */
-		  esym += (isym.n_numaux + 1) * bfd_coff_symesz (abfd);
 		  continue;
 		}
 	      /* Fall through.  */
@@ -1090,42 +1094,30 @@ handle_COMDAT (bfd * abfd,
 	      /* MSVC mode: the lexically second symbol (or
 		 drop through from the above).  */
 	      {
-		char *newname;
-		size_t amt;
-
 		/* This must the second symbol with the
 		   section #.  It is the actual symbol name.
 		   Intel puts the two adjacent, but Alpha (at
 		   least) spreads them out.  */
 
-		amt = sizeof (struct coff_comdat_info);
-		coff_section_data (abfd, section)->comdat
-		  = (struct coff_comdat_info *) bfd_alloc (abfd, amt);
-		if (coff_section_data (abfd, section)->comdat == NULL)
-		  abort ();
+		struct coff_comdat_info *comdat;
+		size_t len = strlen (symname) + 1;
 
-		coff_section_data (abfd, section)->comdat->symbol =
-		  (esym - esymstart) / bfd_coff_symesz (abfd);
+		comdat = bfd_alloc (abfd, sizeof (*comdat) + len);
+		if (comdat == NULL)
+		  return false;
 
-		amt = strlen (symname) + 1;
-		newname = (char *) bfd_alloc (abfd, amt);
-		if (newname == NULL)
-		  abort ();
-
-		strcpy (newname, symname);
-		coff_section_data (abfd, section)->comdat->name
-		  = newname;
+		coff_section_data (abfd, section)->comdat = comdat;
+		comdat->symbol = (esym - esymstart) / bfd_coff_symesz (abfd);
+		char *newname = (char *) (comdat + 1);
+		comdat->name = newname;
+		memcpy (newname, symname, len);
+		return true;
 	      }
-
-	      goto breakloop;
 	    }
 	}
-
-      esym += (isym.n_numaux + 1) * bfd_coff_symesz (abfd);
     }
 
- breakloop:
-  return sec_flags;
+  return true;
 }
 
 
@@ -1276,7 +1268,8 @@ styp_to_sec_flags (bfd *abfd,
 	  break;
 	case IMAGE_SCN_LNK_COMDAT:
 	  /* COMDAT gets very special treatment.  */
-	  sec_flags = handle_COMDAT (abfd, sec_flags, hdr, name, section);
+	  if (!handle_COMDAT (abfd, &sec_flags, hdr, name, section))
+	    result = false;
 	  break;
 	default:
 	  /* Silently ignore for now.  */
