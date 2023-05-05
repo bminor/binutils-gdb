@@ -15937,7 +15937,7 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
   struct elf_link_hash_entry **sym_hashes;
   struct elf32_arm_link_hash_entry *cmse_hash;
   bool again, is_v8m, first_bfd_browse = true;
-  bool debug_sec_need_to_be_marked = false;
+  bool extra_marks_added = false;
   asection *isec;
 
   _bfd_elf_gc_mark_extra_sections (info, gc_mark_hook);
@@ -15981,6 +15981,8 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 	     of them so no need for a second browsing.  */
 	  if (is_v8m && first_bfd_browse)
 	    {
+	      bool debug_sec_need_to_be_marked = false;
+
 	      sym_hashes = elf_sym_hashes (sub);
 	      bed = get_elf_backend_data (sub);
 	      symtab_hdr = &elf_tdata (sub)->symtab_hdr;
@@ -15997,7 +15999,7 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 		  /* Assume it is a special symbol.  If not, cmse_scan will
 		     warn about it and user can do something about it.  */
 		  if (startswith (cmse_hash->root.root.root.string,
-				    CMSE_PREFIX))
+				  CMSE_PREFIX))
 		    {
 		      cmse_sec = cmse_hash->root.root.u.def.section;
 		      if (!cmse_sec->gc_mark
@@ -16018,14 +16020,23 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 		    {
 		      /* If not a debug sections, skip it.  */
 		      if (!isec->gc_mark && (isec->flags & SEC_DEBUGGING))
-			isec->gc_mark = 1 ;
+			{
+			  isec->gc_mark = 1;
+			  extra_marks_added = true;
+			}
 		    }
 		  debug_sec_need_to_be_marked = false;
 		}
 	    }
 	}
+
       first_bfd_browse = false;
     }
+
+  /* PR 30354: If we have added extra marks then make sure that any
+     dependencies of the newly marked sections are also marked.  */
+  if (extra_marks_added)
+    _bfd_elf_gc_mark_extra_sections (info, gc_mark_hook);
 
   return true;
 }

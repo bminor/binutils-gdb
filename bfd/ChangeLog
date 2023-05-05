@@ -1,3 +1,10 @@
+2023-05-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 30354
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): If any debug
+	sections are marked then rerun the extra marking in order to pick
+	up any dependencies.
+
 2023-05-03  Oleg Tolmatcev  <oleg.tolmatcev@gmail.com>
 
 	* archive.c (_bfd_write_archive_contents): Use a larger buffer in
