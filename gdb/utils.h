@@ -367,4 +367,56 @@ assign_return_if_changed (T &lval, const T &val)
   return true;
 }
 
+/* In some cases GDB needs to try several different solutions to a problem,
+   if any of the solutions work then as far as the user is concerned the
+   problem is solved, and GDB should continue without warnings.  However,
+   if none of the solutions work then GDB should emit any warnings that
+   occurred while trying each possible solution.
+
+   One example of this is locating separate debug info.  There are several
+   different approaches for this; following the .gnu_debuglink, a build-id
+   based lookup, or using debuginfod.  If any works, and debug info is
+   located, then the user doesn't want to see warnings from the earlier
+   approaches that were tried and failed.
+
+   However, GDB should emit all the warnings using separate calls to
+   warning -- this ensures that each warning is formatted on its own line,
+   and that any styling is emitted correctly.
+
+   This class helps with deferring warnings.  Warnings can be added to an
+   instance of this class with the 'warn' function, and all warnings can be
+   emitted with a single call to 'emit'.  */
+
+struct deferred_warnings
+{
+  /* Add a warning to the list of deferred warnings.  */
+  void warn (const char *format, ...) ATTRIBUTE_PRINTF(2,3)
+  {
+    /* Generate the warning text into a string_file.  We allow the text to
+       be styled only if gdb_stderr allows styling -- warnings are sent to
+       gdb_stderr.  */
+    string_file msg (gdb_stderr->can_emit_style_escape ());
+
+    va_list args;
+    va_start (args, format);
+    msg.vprintf (format, args);
+    va_end (args);
+
+    /* Move the text into the list of deferred warnings.  */
+    m_warnings.emplace_back (std::move (msg));
+  }
+
+  /* Emit all warnings.  */
+  void emit () const
+  {
+    for (const auto &w : m_warnings)
+      warning ("%s", w.c_str ());
+  }
+
+private:
+
+  /* The list of all deferred warnings.  */
+  std::vector<string_file> m_warnings;
+};
+
 #endif /* UTILS_H */

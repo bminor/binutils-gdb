@@ -58,12 +58,39 @@ if {[build_executable crc_mismatch.exp crc_mismatch-2 crc_mismatch-2.c debug] !=
     # to trigger the "CRC mismatch" warning.
     remote_exec build "mv ${debugfile} [standard_output_file crc_mismatch-2.debug]"
 
-    gdb_exit
-    gdb_start
+    clean_restart
 
     set escapedobjdirsubdir [string_to_regexp [standard_output_file {}]]
+    gdb_test "file [standard_output_file crc_mismatch-2]" \
+	[multi_line \
+	     "Reading symbols from ${escapedobjdirsubdir}/crc_mismatch-2\\.\\.\\." \
+	     "warning: the debug information found in \"${escapedobjdirsubdir}/crc_mismatch-2\\.debug\" does not match \"${escapedobjdirsubdir}/crc_mismatch-2\" \\(CRC mismatch\\)\\." \
+	     "\\(No debugging symbols found in .*\\)"] \
+	"CRC mismatch is reported"
 
-    gdb_test "file [standard_output_file crc_mismatch-2]" "warning: the debug information found in \"${escapedobjdirsubdir}/crc_mismatch-2\\.debug\" does not match \"${escapedobjdirsubdir}/crc_mismatch-2\" \\(CRC mismatch\\)\\..*\\(No debugging symbols found in .*\\).*" "CRC mismatch is reported"
+    # Do the same thing again, but this time check that the styling is
+    # correct.
+    with_test_prefix "check styling" {
+	save_vars { env(TERM) } {
+	    # We need an ANSI-capable terminal to get styled output.
+	    setenv TERM ansi
+
+	    clean_restart
+
+	    set debug_file_re [style "${escapedobjdirsubdir}/crc_mismatch-2\\.debug" file]
+	    set exe_file_re [style "${escapedobjdirsubdir}/crc_mismatch-2" file]
+
+	    gdb_test "file [standard_output_file crc_mismatch-2]" \
+		[multi_line \
+		     "Reading symbols from ${exe_file_re}\\.\\.\\." \
+		     "warning: the debug information found in \"${debug_file_re}\" does not match \"${exe_file_re}\" \\(CRC mismatch\\)\\." \
+		     "\\(No debugging symbols found in \[^\r\n\]+\\)"] \
+		"CRC mismatch is reported"
+	}
+    }
+
+    # Restart GDB with styling disabled.
+    clean_restart
 }
 
 # Create CACHE and DB directories ready for debuginfod to use.

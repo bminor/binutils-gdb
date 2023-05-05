@@ -95,6 +95,30 @@ gdb_test "file ${build_id_debug_file}" \
 	 "\\(No debugging symbols found in \[^\r\n\]+\\)"] \
     "load test file, expect a warning"
 
+# Do the same thing again, but this time check that the styling is
+# correct.
+with_test_prefix "check styling" {
+    save_vars { env(TERM) } {
+	# We need an ANSI-capable terminal to get styled output.
+	setenv TERM ansi
+
+	clean_restart
+
+	gdb_test_no_output "set debug-file-directory ${debug_file_directory}" \
+	    "set debug-file-directory"
+
+	# Now load the file into GDB, and look for the warning.
+	set debug_file_re [style [string_to_regexp $build_id_debug_file] file]
+
+	gdb_test "file ${build_id_debug_file}" \
+	    [multi_line \
+		 "Reading symbols from $debug_file_re\\.\\.\\." \
+		 "warning: \"$debug_file_re\": separate debug info file has no debug info" \
+		 "\\(No debugging symbols found in \[^\r\n\]+\\)"] \
+	    "load test file, expect a warning"
+    }
+}
+
 # Now we should close GDB.
 gdb_exit
 

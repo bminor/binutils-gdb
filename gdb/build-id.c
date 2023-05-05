@@ -26,6 +26,7 @@
 #include "objfiles.h"
 #include "filenames.h"
 #include "gdbcore.h"
+#include "cli/cli-style.h"
 
 /* See build-id.h.  */
 
@@ -209,7 +210,7 @@ build_id_to_exec_bfd (size_t build_id_len, const bfd_byte *build_id)
 
 std::string
 find_separate_debug_file_by_buildid (struct objfile *objfile,
-				     std::vector<std::string> *warnings_vector)
+				     deferred_warnings *warnings)
 {
   const struct bfd_build_id *build_id;
 
@@ -228,12 +229,13 @@ find_separate_debug_file_by_buildid (struct objfile *objfile,
 	  && filename_cmp (bfd_get_filename (abfd.get ()),
 			   objfile_name (objfile)) == 0)
 	{
-	  std::string msg
-	    = string_printf (_("\"%s\": separate debug info file has no "
-			       "debug info"), bfd_get_filename (abfd.get ()));
 	  if (separate_debug_file_debug)
-	    gdb_printf (gdb_stdlog, "%s", msg.c_str ());
-	  warnings_vector->emplace_back (std::move (msg));
+	    gdb_printf (gdb_stdlog, "\"%s\": separate debug info file has no "
+			"debug info", bfd_get_filename (abfd.get ()));
+	  warnings->warn (_("\"%ps\": separate debug info file has no "
+			    "debug info"),
+			  styled_string (file_name_style.style (),
+					 bfd_get_filename (abfd.get ())));
 	}
       else if (abfd != NULL)
 	return std::string (bfd_get_filename (abfd.get ()));

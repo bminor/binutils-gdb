@@ -729,13 +729,13 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   /* Try to add separate debug file if no symbols table found.   */
   if (!objfile->has_partial_symbols ())
     {
-      std::vector<std::string> warnings_vector;
+      deferred_warnings warnings;
       std::string debugfile
-	= find_separate_debug_file_by_buildid (objfile, &warnings_vector);
+	= find_separate_debug_file_by_buildid (objfile, &warnings);
 
       if (debugfile.empty ())
 	debugfile
-	  = find_separate_debug_file_by_debuglink (objfile, &warnings_vector);
+	  = find_separate_debug_file_by_debuglink (objfile, &warnings);
 
       if (!debugfile.empty ())
 	{
@@ -745,10 +745,10 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 				    symfile_flags, objfile);
 	}
       /* If all the methods to collect the debuginfo failed, print any
-	 warnings that were collected.  */
-      if (debugfile.empty () && !warnings_vector.empty ())
-	for (const std::string &w : warnings_vector)
-	  warning ("%s", w.c_str ());
+	 warnings that were collected, this is a no-op if there are no
+	 warnings.  */
+      if (debugfile.empty ())
+	warnings.emit ();
     }
 }
 

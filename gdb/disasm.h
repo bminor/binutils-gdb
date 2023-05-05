@@ -150,7 +150,7 @@ protected:
      DIS_INFO pointer is a pointer to a gdb_printing_disassembler object.
      Content is written to the m_stream extracted from DIS_INFO.  */
   static int fprintf_func (void *dis_info, const char *format, ...) noexcept
-    ATTRIBUTE_PRINTF(2,3);
+    ATTRIBUTE_PRINTF (2, 3);
 
   /* Callback used as the disassemble_info's fprintf_styled_func callback.
      The DIS_INFO pointer is a pointer to a gdb_printing_disassembler

@@ -244,11 +244,14 @@ extern void symbol_file_add_separate (const gdb_bfd_ref_ptr &, const char *,
 /* Find separate debuginfo for OBJFILE (using .gnu_debuglink section).
    Returns pathname, or an empty string.
 
-   Any warnings generated as part of this lookup are added to
-   WARNINGS_VECTOR, one std::string per warning.  */
+   Any warnings generated as part of this lookup are added to WARNINGS.  If
+   some other mechanism can be used to lookup the debug information then
+   the warning will not be shown, however, if GDB fails to find suitable
+   debug information using any approach, then any warnings will be
+   printed.  */
 
 extern std::string find_separate_debug_file_by_debuglink
-  (struct objfile *objfile, std::vector<std::string> *warnings_vector);
+  (struct objfile *objfile, deferred_warnings *warnings);
 
 /* Build (allocate and populate) a section_addr_info struct from an
    existing section table.  */
