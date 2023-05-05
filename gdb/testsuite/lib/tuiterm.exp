@@ -788,26 +788,37 @@ namespace eval Term {
 	return 1
     }
 
+    # Setup the terminal with dimensions ROWSxCOLS, TERM=ansi, and execute
+    # BODY.
+    proc with_tuiterm {rows cols body} {
+	global env stty_init
+	save_vars {env(TERM) stty_init} {
+	    setenv TERM ansi
+	    _setup $rows $cols
+
+	    uplevel $body
+	}
+    }
+
     # Like ::clean_restart, but ensures that gdb starts in an
     # environment where the TUI can work.  ROWS and COLS are the size
     # of the terminal.  EXECUTABLE, if given, is passed to
     # clean_restart.
     proc clean_restart {rows cols {executable {}}} {
-	global env stty_init
-	save_vars {env(TERM) stty_init ::GDBFLAGS} {
-	    setenv TERM ansi
-	    _setup $rows $cols
+	with_tuiterm $rows $cols {
+	    save_vars { ::GDBFLAGS } {
+		# Make GDB not print the directory names.  Use this setting to
+		# remove the differences in test runs due to varying directory
+		# names.
+		append ::GDBFLAGS " -ex \"set filename-display basename\""
 
-	    # Make GDB not print the directory names.  Use this setting to
-	    # remove the differences in test runs due to varying directory
-	    # names.
-	    append ::GDBFLAGS " -ex \"set filename-display basename\""
-
-	    if {$executable == ""} {
-		::clean_restart
-	    } else {
-		::clean_restart $executable
+		if {$executable == ""} {
+		    ::clean_restart
+		} else {
+		    ::clean_restart $executable
+		}
 	    }
+
 	    ::gdb_test_no_output "set pagination off"
 	}
     }
