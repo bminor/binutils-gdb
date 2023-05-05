@@ -7816,6 +7816,17 @@ registers and 32-bit general-purpose registers.
 registers, 32-bit general-purpose registers and a rule that forbids the
 direct use of odd-numbered single-precision floating-point registers.
 @end itemize
+
+@item Tag_GNU_MIPS_ABI_MSA (8)
+The MIPS SIMD Architecture (MSA) ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for file not tagged or not using any ABIs affected by MSA.
+@item
+1 for files using 128 bit MSA.
+@end itemize
+
 @end table
 
 @subsection PowerPC Attributes
