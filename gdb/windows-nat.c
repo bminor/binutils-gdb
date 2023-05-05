@@ -535,6 +535,9 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
   void stop (ptid_t) override;
   void pass_ctrlc () override;
 
+  void stop_interrupt (ptid_t ptid, bool stop_on_first_match);
+  bool dbg_break_process ();
+
   void thread_events (bool enable) override;
 
   bool any_resumed_thread ();
@@ -587,7 +590,7 @@ private:
   void delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p);
   DWORD fake_create_process (const DEBUG_EVENT &current_event);
 
-  void stop_one_thread (windows_thread_info *th,
+  bool stop_one_thread (windows_thread_info *th,
 			enum stopping_kind stopping_kind);
 
   DWORD continue_status_for_event_detaching
@@ -1904,6 +1907,21 @@ void
 windows_nat_target::interrupt ()
 {
   DEBUG_EVENTS ("interrupt");
+
+  if (target_is_non_stop_p ())
+    {
+      stop_interrupt (minus_one_ptid, true);
+      return;
+    }
+
+  if (!dbg_break_process ())
+    warning (_("Could not interrupt program.  "
+	       "Press Ctrl-c in the program console."));
+}
+
+bool
+windows_nat_target::dbg_break_process ()
+{
 #ifdef __x86_64__
   if (windows_process.wow64_process)
     {
@@ -1927,23 +1945,23 @@ windows_nat_target::interrupt ()
 	  if (thread)
 	    {
 	      CloseHandle (thread);
-	      return;
+	      return true;
 	    }
 	}
     }
   else
 #endif
     if (DebugBreakProcess (windows_process.handle))
-      return;
-  warning (_("Could not interrupt program.  "
-	     "Press Ctrl-c in the program console."));
+      return true;
+
+  return false;
 }
 
 /* Stop thread TH, for STOPPING_KIND reason.  This leaves a
    GDB_SIGNAL_0 pending in the thread, which is later consumed by
    windows_nat_target::wait.  */
 
-void
+bool
 windows_nat_target::stop_one_thread (windows_thread_info *th,
 				     enum stopping_kind stopping_kind)
 {
@@ -1957,6 +1975,7 @@ windows_nat_target::stop_one_thread (windows_thread_info *th,
       DEBUG_EVENTS ("already suspended %s: suspended=%d, stopping=%d",
 		    thr_ptid.to_string ().c_str (),
 		    th->suspended, th->stopping);
+      return false;
     }
 #ifdef __CYGWIN__
   else if (th->suspended
@@ -1976,6 +1995,7 @@ windows_nat_target::stop_one_thread (windows_thread_info *th,
       th->pending_status.set_stopped (GDB_SIGNAL_0);
       th->last_event = {};
       serial_event_set (m_wait_event);
+      return true;
     }
 #endif
   else if (th->suspended)
@@ -1989,6 +2009,7 @@ windows_nat_target::stop_one_thread (windows_thread_info *th,
       /* Upgrade stopping.  */
       if (stopping_kind > th->stopping)
 	th->stopping = stopping_kind;
+      return false;
     }
   else
     {
@@ -2005,7 +2026,7 @@ windows_nat_target::stop_one_thread (windows_thread_info *th,
 			thr_ptid.to_string ().c_str ());
 	  if (stopping_kind > th->stopping)
 	    th->stopping = stopping_kind;
-	  return;
+	  return false;
 	}
 
       gdb_assert (th->suspended == 1);
@@ -2018,19 +2039,30 @@ windows_nat_target::stop_one_thread (windows_thread_info *th,
 	}
 
       serial_event_set (m_wait_event);
+      return true;
     }
 }
 
 /* Implementation of target_ops::stop.  */
 
 void
-windows_nat_target::stop (ptid_t ptid)
+windows_nat_target::stop_interrupt (ptid_t ptid, bool stop_on_first_match)
 {
   for (thread_info *thr : all_non_exited_threads (this))
     {
       if (thr->ptid.matches (ptid))
-	stop_one_thread (as_windows_thread_info (thr), SK_EXTERNAL);
+	if (stop_one_thread (as_windows_thread_info (thr), SK_EXTERNAL))
+	  {
+	    if (stop_on_first_match)
+	      return;
+	  }
     }
+}
+
+void
+windows_nat_target::stop (ptid_t ptid)
+{
+  stop_interrupt (ptid, false);
 }
 
 void
