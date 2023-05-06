@@ -556,7 +556,7 @@ if { [istarget mips*-*-vxworks*] } {
 	"MIPS invalid switch to SVR4 PIC from VxWorks PIC"
 } elseif { [istarget mips*-*-*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] \
-		     || [istarget mipsisa32-*-linux*] || [istarget mipsisa32el-*-linux*]]
+		     || [istarget mipsisa32*-*-linux*] || [istarget mipsisa32*el-*-linux*]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips*-*-linux*] \
                          || [istarget mips*-sde-elf*] || [istarget mips*-mti-elf*] \
                          || [istarget mips*-img-elf*]]
@@ -2045,7 +2045,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "module-override"
     run_dump_test "module-defer-warn1"
-    run_list_test "module-defer-warn2" "-32"
+    run_list_test "module-defer-warn2" "-32 -mips1"
 
     foreach testopt [list -mfp32 -mfpxx -mfp64 "-mfp64-noodd" \
 			  -msingle-float -msoft-float] {
