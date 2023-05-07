@@ -2720,6 +2720,7 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
 
   rt_rel
     = quick_section (abfd, ".rdata_runtime_pseudo_reloc", SEC_HAS_CONTENTS, 2);
+  bfd_coff_set_long_section_names (abfd, true);
 
   quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
 
