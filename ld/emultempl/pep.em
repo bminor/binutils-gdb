@@ -1197,63 +1197,80 @@ pep_fixup_stdcalls (void)
       }
 }
 
+static bfd_vma
+read_addend (arelent *rel, asection *s)
+{
+  char buf[8];
+  bfd_vma addend = 0;
+  bool ok = false;
+
+  switch (rel->howto->bitsize)
+    {
+    case 8:
+      ok = bfd_get_section_contents (s->owner, s, buf, rel->address, 1);
+      if (ok)
+	{
+	  if (rel->howto->pc_relative)
+	    addend = bfd_get_signed_8 (s->owner, buf);
+	  else
+	    addend = bfd_get_8 (s->owner, buf);
+	}
+      break;
+    case 16:
+      ok = bfd_get_section_contents (s->owner, s, buf, rel->address, 2);
+      if (ok)
+	{
+	  if (rel->howto->pc_relative)
+	    addend = bfd_get_signed_16 (s->owner, buf);
+	  else
+	    addend = bfd_get_16 (s->owner, buf);
+	}
+      break;
+    case 26:
+    case 32:
+      ok = bfd_get_section_contents (s->owner, s, buf, rel->address, 4);
+      if (ok)
+	{
+	  if (rel->howto->pc_relative)
+	    addend = bfd_get_signed_32 (s->owner, buf);
+	  else
+	    addend = bfd_get_32 (s->owner, buf);
+	}
+      break;
+    case 64:
+      ok = bfd_get_section_contents (s->owner, s, buf, rel->address, 8);
+      if (ok)
+	addend = bfd_get_64 (s->owner, buf);
+      break;
+    }
+  if (!ok)
+    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
+	   s->owner, s, rel->address);
+  return addend;
+}
+
 static void
 make_import_fixup (arelent *rel, asection *s, char *name, const char *symname)
 {
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
-  char addend[8];
-  bfd_vma _addend = 0;
-  int suc = 0;
+  bfd_vma addend;
 
   if (pep_dll_extra_pe_debug)
     printf ("arelent: %s@%#lx: add=%li\n", sym->name,
 	    (unsigned long) rel->address, (long) rel->addend);
 
-  memset (addend, 0, sizeof (addend));
-  switch ((rel->howto->bitsize))
-    {
-    case 8:
-      suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 1);
-      if (suc && rel->howto->pc_relative)
-	_addend = bfd_get_signed_8 (s->owner, addend);
-      else if (suc)
-	_addend = bfd_get_8 (s->owner, addend);
-      break;
-    case 16:
-      suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 2);
-      if (suc && rel->howto->pc_relative)
-	_addend = bfd_get_signed_16 (s->owner, addend);
-      else if (suc)
-	_addend = bfd_get_16 (s->owner, addend);
-      break;
-    case 26:
-    case 32:
-      suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 4);
-      if (suc && rel->howto->pc_relative)
-	_addend = bfd_get_signed_32 (s->owner, addend);
-      else if (suc)
-	_addend = bfd_get_32 (s->owner, addend);
-      break;
-    case 64:
-      suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 8);
-      if (suc)
-	_addend = bfd_get_64 (s->owner, addend);
-      break;
-    }
-  if (! suc)
-    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
-	   s->owner, s, rel->address);
+  addend = read_addend (rel, s);
 
   if (pep_dll_extra_pe_debug)
     {
       printf ("import of 0x%lx(0x%lx) sec_addr=0x%lx",
-	      (long) _addend, (long) rel->addend, (long) rel->address);
+	      (long) addend, (long) rel->addend, (long) rel->address);
       if (rel->howto->pc_relative)
 	printf (" pcrel");
       printf (" %d bit rel.\n", (int) rel->howto->bitsize);
     }
 
-  pep_create_import_fixup (rel, s, _addend, name, symname);
+  pep_create_import_fixup (rel, s, addend, name, symname);
 }
 
 static void

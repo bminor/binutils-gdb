@@ -1236,23 +1236,42 @@ pe_fixup_stdcalls (void)
       }
 }
 
+static bfd_vma
+read_addend (arelent *rel, asection *s)
+{
+  char buf[4];
+  bfd_vma addend = 0;
+
+  if (!bfd_get_section_contents (s->owner, s, buf, rel->address, sizeof (buf)))
+    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
+	   s->owner, s, rel->address);
+  else
+    addend = bfd_get_32 (s->owner, buf);
+  return addend;
+}
+
 static void
 make_import_fixup (arelent *rel, asection *s, char *name, const char *symname)
 {
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
-  char addend[4];
-  bfd_vma _addend;
+  bfd_vma addend;
 
   if (pe_dll_extra_pe_debug)
     printf ("arelent: %s@%#lx: add=%li\n", sym->name,
 	    (unsigned long) rel->address, (long) rel->addend);
 
-  if (! bfd_get_section_contents (s->owner, s, addend, rel->address, sizeof (addend)))
-    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
-	   s->owner, s, rel->address);
+  addend = read_addend (rel, s);
 
-  _addend = bfd_get_32 (s->owner, addend);
-  pe_create_import_fixup (rel, s, _addend, name, symname);
+  if (pe_dll_extra_pe_debug)
+    {
+      printf ("import of 0x%lx(0x%lx) sec_addr=0x%lx",
+	      (long) addend, (long) rel->addend, (long) rel->address);
+      if (rel->howto->pc_relative)
+	printf (" pcrel");
+      printf (" %d bit rel.\n", (int) rel->howto->bitsize);
+    }
+
+  pe_create_import_fixup (rel, s, addend, name, symname);
 }
 
 static void
