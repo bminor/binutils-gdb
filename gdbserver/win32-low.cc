@@ -443,9 +443,8 @@ static void
 child_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  windows_thread_info *th
-    = windows_process.thread_rec (current_thread->id,
-				  INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (current_thread->id);
+  win32_require_context (th);
   if (r == -1 || r > NUM_REGS)
     child_fetch_inferior_registers (regcache, NUM_REGS);
   else
@@ -459,9 +458,8 @@ static void
 child_store_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  windows_thread_info *th
-    = windows_process.thread_rec (current_thread->id,
-				  INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (current_thread->id);
+  win32_require_context (th);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (regcache, NUM_REGS);
   else
