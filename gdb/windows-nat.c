@@ -541,11 +541,6 @@ windows_per_inferior::thread_rec (ptid_t ptid,
     {
       switch (disposition)
 	{
-	case INVALIDATE_CONTEXT:
-	  if (ptid.lwp () != current_event.dwThreadId)
-	    th->suspend ();
-	  invalidate_context (th);
-	  break;
 	case DONT_SUSPEND:
 	  th->suspended = -1;
 	  invalidate_context (th);
@@ -717,8 +712,7 @@ windows_fetch_one_register (struct regcache *regcache,
 void
 windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 {
-  windows_thread_info *th
-    = windows_process.thread_rec (regcache->ptid (), INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (regcache->ptid ());
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
@@ -729,6 +723,7 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
      {
        if (context->ContextFlags == 0)
 	 {
+	   th->suspend ();
 	   context->ContextFlags = WindowsContext<decltype(context)>::all;
 	   CHECK (get_thread_context (th->h, context));
 	 }
@@ -755,6 +750,7 @@ windows_store_one_register (const struct regcache *regcache,
 
   char *context_ptr = windows_process.with_context (th, [] (auto *context)
     {
+      gdb_assert (context->ContextFlags != 0);
       return (char *) context;
     });
 
@@ -789,8 +785,7 @@ windows_store_one_register (const struct regcache *regcache,
 void
 windows_nat_target::store_registers (struct regcache *regcache, int r)
 {
-  windows_thread_info *th
-    = windows_process.thread_rec (regcache->ptid (), INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (regcache->ptid ());
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
@@ -1452,7 +1447,9 @@ windows_nat_target::get_windows_debug_event
       *ourstatus = stop->status;
 
       ptid_t ptid (windows_process.current_event.dwProcessId, thread_id);
-      windows_process.thread_rec (ptid, INVALIDATE_CONTEXT);
+      windows_thread_info *th = windows_process.find_thread (ptid);
+      if (th != nullptr)
+	windows_process.invalidate_context (th);
       return ptid;
     }
 
@@ -1673,8 +1670,7 @@ windows_nat_target::get_windows_debug_event
 	  && windows_process.windows_initialization_done)
 	{
 	  ptid_t ptid = ptid_t (current_event->dwProcessId, thread_id, 0);
-	  windows_thread_info *th
-	    = windows_process.thread_rec (ptid, INVALIDATE_CONTEXT);
+	  windows_thread_info *th = windows_process.find_thread (ptid);
 	  th->stopped_at_software_breakpoint = true;
 	  th->pc_adjusted = false;
 	}
@@ -1712,8 +1708,7 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  if (ourstatus->kind () != TARGET_WAITKIND_EXITED
 	      && ourstatus->kind () !=  TARGET_WAITKIND_SIGNALLED)
 	    {
-	      windows_thread_info *th
-		= windows_process.thread_rec (result, INVALIDATE_CONTEXT);
+	      windows_thread_info *th = windows_process.find_thread (result);
 
 	      if (th != nullptr)
 		{
