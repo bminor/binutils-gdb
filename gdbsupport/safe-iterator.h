@@ -19,6 +19,8 @@
 #ifndef COMMON_SAFE_ITERATOR_H
 #define COMMON_SAFE_ITERATOR_H
 
+#include "gdbsupport/invoke-result.h"
+
 /* A forward iterator that wraps Iterator, such that when iterating
    with iterator IT, it is possible to delete *IT without invalidating
    IT.  Suitably wrapped in a range type and used with range-for, this
@@ -75,7 +77,9 @@ public:
   basic_safe_iterator ()
   {}
 
-  value_type operator* () const { return *m_it; }
+  typename gdb::invoke_result<decltype(&Iterator::operator*), Iterator>::type
+    operator* () const
+  { return *m_it; }
 
   self_type &operator++ ()
   {
