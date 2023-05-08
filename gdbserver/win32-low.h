@@ -174,6 +174,7 @@ public:
 
 struct gdbserver_windows_process : public windows_nat::windows_process_info
 {
+  windows_nat::windows_thread_info *find_thread (ptid_t ptid) override;
   windows_nat::windows_thread_info *thread_rec
        (ptid_t ptid,
 	windows_nat::thread_disposition_type disposition) override;

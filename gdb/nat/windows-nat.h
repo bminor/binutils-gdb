@@ -105,9 +105,6 @@ struct windows_thread_info
 /* Possible values to pass to 'thread_rec'.  */
 enum thread_disposition_type
 {
-  /* Do not invalidate the thread's context, and do not suspend the
-     thread.  */
-  DONT_INVALIDATE_CONTEXT,
   /* Invalidate the context, but do not suspend the thread.  */
   DONT_SUSPEND,
   /* Invalidate the context and suspend the thread.  */
@@ -178,6 +175,10 @@ struct windows_process_info
   bool ignore_first_breakpoint = false;
 #endif
 
+  /* Find a thread record given a thread id.
+
+     This function must be supplied by the embedding application.  */
+  virtual windows_thread_info *find_thread (ptid_t ptid) = 0;
 
   /* Find a thread record given a thread id.  THREAD_DISPOSITION
      controls whether the thread is suspended, and whether the context

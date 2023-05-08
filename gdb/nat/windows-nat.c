@@ -325,9 +325,8 @@ windows_process_info::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
       if (named_thread_id == (DWORD) -1)
 	named_thread_id = current_event.dwThreadId;
 
-      named_thread = thread_rec (ptid_t (current_event.dwProcessId,
-					 named_thread_id, 0),
-				 DONT_INVALIDATE_CONTEXT);
+      named_thread = find_thread (ptid_t (current_event.dwProcessId,
+					  named_thread_id, 0));
       if (named_thread != NULL)
 	{
 	  int thread_name_len;
