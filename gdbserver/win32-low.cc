@@ -124,6 +124,17 @@ win32_require_context (windows_thread_info *th)
 /* See nat/windows-nat.h.  */
 
 windows_thread_info *
+gdbserver_windows_process::find_thread (ptid_t ptid)
+{
+  thread_info *thread = find_thread_ptid (ptid);
+  if (thread == nullptr)
+    return nullptr;
+  return static_cast<windows_thread_info *> (thread->target_data ());
+}
+
+/* See nat/windows-nat.h.  */
+
+windows_thread_info *
 gdbserver_windows_process::thread_rec
      (ptid_t ptid, thread_disposition_type disposition)
 {
@@ -132,8 +143,7 @@ gdbserver_windows_process::thread_rec
     return NULL;
 
   auto th = static_cast<windows_thread_info *> (thread->target_data ());
-  if (disposition != DONT_INVALIDATE_CONTEXT)
-    win32_require_context (th);
+  win32_require_context (th);
   return th;
 }
 
@@ -144,7 +154,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
   windows_thread_info *th;
   ptid_t ptid = ptid_t (pid, tid, 0);
 
-  if ((th = windows_process.thread_rec (ptid, DONT_INVALIDATE_CONTEXT)))
+  if ((th = windows_process.find_thread (ptid)))
     return th;
 
   CORE_ADDR base = (CORE_ADDR) (uintptr_t) tlb;
@@ -798,7 +808,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 
   /* Get context for the currently selected thread.  */
   ptid = debug_event_ptid (&windows_process.current_event);
-  th = windows_process.thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
+  th = windows_process.find_thread (ptid);
   if (th)
     {
       win32_prepare_to_resume (th);
@@ -944,8 +954,7 @@ maybe_adjust_pc ()
   child_fetch_inferior_registers (regcache, -1);
 
   windows_thread_info *th
-    = windows_process.thread_rec (current_thread->id,
-				  DONT_INVALIDATE_CONTEXT);
+    = windows_process.find_thread (current_thread->id);
   th->stopped_at_software_breakpoint = false;
 
   if (windows_process.current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
@@ -1345,8 +1354,7 @@ win32_process_target::supports_get_tib_address ()
 int
 win32_process_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
-  windows_thread_info *th;
-  th = windows_process.thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (ptid);
   if (th == NULL)
     return 0;
   if (addr != NULL)
@@ -1366,9 +1374,7 @@ win32_process_target::sw_breakpoint_from_kind (int kind, int *size)
 bool
 win32_process_target::stopped_by_sw_breakpoint ()
 {
-  windows_thread_info *th
-    = windows_process.thread_rec (current_thread->id,
-				  DONT_INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (current_thread->id);
   return th == nullptr ? false : th->stopped_at_software_breakpoint;
 }
 
@@ -1393,9 +1399,7 @@ win32_process_target::write_pc (struct regcache *regcache, CORE_ADDR pc)
 const char *
 win32_process_target::thread_name (ptid_t thread)
 {
-  windows_thread_info *th
-    = windows_process.thread_rec (current_thread->id,
-				  DONT_INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (current_thread->id);
   return th->thread_name ();
 }
 
