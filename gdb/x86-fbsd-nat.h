@@ -27,6 +27,7 @@
 
 class x86_fbsd_nat_target : public x86bsd_nat_target<fbsd_nat_target>
 {
+public:
   bool supports_stopped_by_hw_breakpoint () override
   { return true; }
 
