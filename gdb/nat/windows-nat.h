@@ -196,7 +196,7 @@ struct windows_process_info
      a Cygwin signal.  Otherwise just print the string as a warning.
 
      This function must be supplied by the embedding application.  */
-  virtual int handle_output_debug_string (struct target_waitstatus *ourstatus) = 0;
+  virtual DWORD handle_output_debug_string (struct target_waitstatus *ourstatus) = 0;
 
   /* Handle a DLL load event.
 

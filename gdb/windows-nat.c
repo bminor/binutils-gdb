@@ -93,7 +93,7 @@ struct windows_per_inferior : public windows_process_info
   windows_thread_info *find_thread (ptid_t ptid) override;
   windows_thread_info *thread_rec (ptid_t ptid,
 				   thread_disposition_type disposition) override;
-  int handle_output_debug_string (struct target_waitstatus *ourstatus) override;
+  DWORD handle_output_debug_string (struct target_waitstatus *ourstatus) override;
   void handle_load_dll (const char *dll_name, LPVOID base) override;
   void handle_unload_dll () override;
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;
@@ -996,11 +996,11 @@ signal_event_command (const char *args, int from_tty)
 
 /* See nat/windows-nat.h.  */
 
-int
+DWORD
 windows_per_inferior::handle_output_debug_string
      (struct target_waitstatus *ourstatus)
 {
-  int retval = 0;
+  DWORD thread_id = 0;
 
   gdb::unique_xmalloc_ptr<char> s
     = (target_read_string
@@ -1041,19 +1041,19 @@ windows_per_inferior::handle_output_debug_string
       if (gotasig)
 	{
 	  ourstatus->set_stopped (gotasig);
-	  retval = strtoul (p, &p, 0);
-	  if (!retval)
-	    retval = current_event.dwThreadId;
+	  thread_id = strtoul (p, &p, 0);
+	  if (thread_id == 0)
+	    thread_id = current_event.dwThreadId;
 	  else
 	    x = (LPCVOID) (uintptr_t) strtoull (p, NULL, 0);
 	}
 
       DEBUG_EVENTS ("gdb: cygwin signal %d, thread 0x%x, CONTEXT @ %p",
-		    gotasig, retval, x);
+		    gotasig, thread_id, x);
     }
 #endif
 
-  return retval;
+  return thread_id;
 }
 
 static int

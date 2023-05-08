@@ -642,7 +642,7 @@ win32_process_target::attach (unsigned long pid)
 
 /* See nat/windows-nat.h.  */
 
-int
+DWORD
 gdbserver_windows_process::handle_output_debug_string
      (struct target_waitstatus *ourstatus)
 {
