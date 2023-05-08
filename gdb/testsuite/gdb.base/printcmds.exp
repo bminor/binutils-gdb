@@ -1027,6 +1027,9 @@ proc test_repeat_bytes {} {
     set fmt(SR) "\"%s\", %s"
     set fmt(SS) "\"%s%s\""
 
+    # We have up to 60 elements to print.
+    gdb_test_no_output "set print elements 100"
+
     # Set the target-charset to ASCII, because the output varies from
     # different charset.
     with_target_charset "ASCII" {
@@ -1072,6 +1075,17 @@ proc test_repeat_bytes {} {
 	    }
 	}
     }
+}
+
+# Test for BZ#24331
+proc test_repeat_bytes_limit {} {
+   gdb_test "print -elem 3 -- \"AAAAA\"" "= \"AAA\"..."
+   gdb_test "print -char 3 -elem 10 -- \"AAAAA\"" "= \"AAA\"..."
+   gdb_test "print -elem 3 -- \"ABBBB\"" "= \"ABB\"..."
+   gdb_test "print -char 3 -elem 10 -- \"ABBBB\"" "= \"ABB\"..."
+
+   gdb_test "print -elem 3 -repeats 2 -- \"AAABBB\"" "= 'A' <repeats 3 times>..."
+   gdb_test "print -elem 4 -repeats 2 -- \"AAABBB\"" "= 'A' <repeats 3 times>, 'B' <repeats 3 times>"
 }
 
 # Test printf of convenience variables.
@@ -1199,3 +1213,4 @@ test_printf_with_strings
 test_print_symbol
 test_repeat_bytes
 test_radices
+test_repeat_bytes_limit

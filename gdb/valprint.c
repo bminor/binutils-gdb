@@ -2356,23 +2356,27 @@ count_next_character (wchar_iterator *iter,
 /* Print the characters in CHARS to the OBSTACK.  QUOTE_CHAR is the quote
    character to use with string output.  WIDTH is the size of the output
    character type.  BYTE_ORDER is the target byte order.  OPTIONS
-   is the user's print options.  */
+   is the user's print options.  *FINISHED is set to 0 if we didn't print
+   all the elements in CHARS.  */
 
 static void
 print_converted_chars_to_obstack (struct obstack *obstack,
 				  const std::vector<converted_character> &chars,
 				  int quote_char, int width,
 				  enum bfd_endian byte_order,
-				  const struct value_print_options *options)
+				  const struct value_print_options *options,
+				  int *finished)
 {
-  unsigned int idx;
+  unsigned int idx, num_elements;
   const converted_character *elem;
   enum {START, SINGLE, REPEAT, INCOMPLETE, FINISH} state, last;
   gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
   bool need_escape = false;
+  const int print_max = options->print_max_chars > 0
+      ? options->print_max_chars : options->print_max;
 
   /* Set the start state.  */
-  idx = 0;
+  idx = num_elements = 0;
   last = state = START;
   elem = NULL;
 
@@ -2400,7 +2404,13 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 		obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
 	      }
 	    /* Output the character.  */
-	    for (j = 0; j < elem->repeat_count; ++j)
+	    int repeat_count = elem->repeat_count;
+	    if (print_max < repeat_count + num_elements)
+	      {
+		repeat_count = print_max - num_elements;
+		*finished = 0;
+	      }
+	    for (j = 0; j < repeat_count; ++j)
 	      {
 		if (elem->result == wchar_iterate_ok)
 		  print_wchar (elem->chars[0], elem->buf, elem->buflen, width,
@@ -2408,6 +2418,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 		else
 		  print_wchar (gdb_WEOF, elem->buf, elem->buflen, width,
 			       byte_order, obstack, quote_char, &need_escape);
+		num_elements += 1;
 	      }
 	  }
 	  break;
@@ -2439,6 +2450,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	    obstack_grow_wstr (obstack, LCST ("'"));
 	    std::string s = string_printf (_(" <repeats %u times>"),
 					   elem->repeat_count);
+	    num_elements += elem->repeat_count;
 	    for (j = 0; s[j]; ++j)
 	      {
 		gdb_wchar_t w = gdb_btowc (s[j]);
@@ -2463,6 +2475,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	  print_wchar (gdb_WEOF, elem->buf, elem->buflen, width, byte_order,
 		       obstack, 0, &need_escape);
 	  obstack_grow_wstr (obstack, LCST (">"));
+	  num_elements += 1;
 
 	  /* We do not attempt to output anything after this.  */
 	  state = FINISH;
@@ -2597,7 +2610,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 
   /* Print the output string to the obstack.  */
   print_converted_chars_to_obstack (&wchar_buf, converted_chars, quote_char,
-				    width, byte_order, options);
+				    width, byte_order, options, &finished);
 
   if (force_ellipses || !finished)
     obstack_grow_wstr (&wchar_buf, LCST ("..."));
