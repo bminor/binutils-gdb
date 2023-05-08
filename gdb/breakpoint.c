@@ -69,6 +69,7 @@
 #include "tid-parse.h"
 #include "cli/cli-style.h"
 #include "cli/cli-decode.h"
+#include <unordered_set>
 
 /* readline include files */
 #include "readline/tilde.h"
@@ -7608,9 +7609,13 @@ set_longjmp_breakpoint_for_call_dummy (void)
 void
 check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
 {
-  for (struct breakpoint *b : all_breakpoints_safe ())
+  /* We would need to delete breakpoints other than the current one while
+     iterating, so all_breakpoints_safe is not sufficient to make that safe.
+     Save all breakpoints to delete in that set and delete them at the end.  */
+  std::unordered_set<breakpoint *> to_delete;
+
+  for (struct breakpoint *b : all_breakpoints ())
     {
-      struct breakpoint *b_tmp = b->next;
       if (b->type == bp_longjmp_call_dummy && b->thread == tp->global_num)
 	{
 	  struct breakpoint *dummy_b = b->related_breakpoint;
@@ -7666,15 +7671,17 @@ check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
 
 	  dummy_frame_discard (dummy_b->frame_id, tp);
 
-	  while (b->related_breakpoint != b)
-	    {
-	      if (b_tmp == b->related_breakpoint)
-		b_tmp = b->related_breakpoint->next;
-	      delete_breakpoint (b->related_breakpoint);
-	    }
-	  delete_breakpoint (b);
+	  for (breakpoint *related_breakpoint = b->related_breakpoint;
+	       related_breakpoint != b;
+	       related_breakpoint = related_breakpoint->related_breakpoint)
+	    to_delete.insert (b->related_breakpoint);
+
+	  to_delete.insert (b);
 	}
     }
+
+  for (breakpoint *b : to_delete)
+    delete_breakpoint (b);
 }
 
 void
