@@ -190,7 +190,6 @@ enum print_stop_action
 syscall_catchpoint::print_it (const bpstat *bs) const
 {
   struct ui_out *uiout = current_uiout;
-  struct breakpoint *b = bs->breakpoint_at;
   /* These are needed because we want to know in which state a
      syscall is.  It can be in the TARGET_WAITKIND_SYSCALL_ENTRY
      or TARGET_WAITKIND_SYSCALL_RETURN, and depending on it we
@@ -202,10 +201,10 @@ syscall_catchpoint::print_it (const bpstat *bs) const
 
   get_syscall_by_number (gdbarch, last.syscall_number (), &s);
 
-  annotate_catchpoint (b->number);
+  annotate_catchpoint (this->number);
   maybe_print_thread_hit_breakpoint (uiout);
 
-  if (b->disposition == disp_del)
+  if (this->disposition == disp_del)
     uiout->text ("Temporary catchpoint ");
   else
     uiout->text ("Catchpoint ");
@@ -215,7 +214,7 @@ syscall_catchpoint::print_it (const bpstat *bs) const
 			   async_reason_lookup (last.kind () == TARGET_WAITKIND_SYSCALL_ENTRY
 						? EXEC_ASYNC_SYSCALL_ENTRY
 						: EXEC_ASYNC_SYSCALL_RETURN));
-      uiout->field_string ("disp", bpdisp_text (b->disposition));
+      uiout->field_string ("disp", bpdisp_text (this->disposition));
     }
   print_num_locno (bs, uiout);
 

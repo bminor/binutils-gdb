@@ -160,15 +160,13 @@ fetch_probe_arguments (struct value **arg0, struct value **arg1)
 void
 exception_catchpoint::check_status (struct bpstat *bs)
 {
-  struct exception_catchpoint *self
-    = (struct exception_catchpoint *) bs->breakpoint_at;
   std::string type_name;
 
   this->breakpoint::check_status (bs);
   if (!bs->stop)
     return;
 
-  if (self->pattern == NULL)
+  if (this->pattern == NULL)
     return;
 
   const char *name = nullptr;
@@ -192,7 +190,7 @@ exception_catchpoint::check_status (struct bpstat *bs)
 
   if (name != nullptr)
     {
-      if (self->pattern->exec (name, 0, NULL, 0) != 0)
+      if (this->pattern->exec (name, 0, NULL, 0) != 0)
 	bs->stop = false;
     }
 }

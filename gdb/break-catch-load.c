@@ -141,19 +141,18 @@ solib_catchpoint::check_status (struct bpstat *bs)
 enum print_stop_action
 solib_catchpoint::print_it (const bpstat *bs) const
 {
-  struct breakpoint *b = bs->breakpoint_at;
   struct ui_out *uiout = current_uiout;
 
-  annotate_catchpoint (b->number);
+  annotate_catchpoint (this->number);
   maybe_print_thread_hit_breakpoint (uiout);
-  if (b->disposition == disp_del)
+  if (this->disposition == disp_del)
     uiout->text ("Temporary catchpoint ");
   else
     uiout->text ("Catchpoint ");
-  uiout->field_signed ("bkptno", b->number);
+  uiout->field_signed ("bkptno", this->number);
   uiout->text ("\n");
   if (uiout->is_mi_like_p ())
-    uiout->field_string ("disp", bpdisp_text (b->disposition));
+    uiout->field_string ("disp", bpdisp_text (this->disposition));
   print_solib_event (true);
   return PRINT_SRC_AND_LOC;
 }

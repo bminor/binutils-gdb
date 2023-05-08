@@ -9701,8 +9701,6 @@ watchpoint::breakpoint_hit (const struct bp_location *bl,
 void
 watchpoint::check_status (bpstat *bs)
 {
-  gdb_assert (is_watchpoint (bs->breakpoint_at));
-
   bpstat_check_watchpoint (bs);
 }
 
@@ -9730,28 +9728,25 @@ watchpoint::works_in_software_mode () const
 enum print_stop_action
 watchpoint::print_it (const bpstat *bs) const
 {
-  struct breakpoint *b;
   enum print_stop_action result;
   struct ui_out *uiout = current_uiout;
 
   gdb_assert (bs->bp_location_at != NULL);
 
-  b = bs->breakpoint_at;
-
-  annotate_watchpoint (b->number);
+  annotate_watchpoint (this->number);
   maybe_print_thread_hit_breakpoint (uiout);
 
   string_file stb;
 
   gdb::optional<ui_out_emit_tuple> tuple_emitter;
-  switch (b->type)
+  switch (this->type)
     {
     case bp_watchpoint:
     case bp_hardware_watchpoint:
       if (uiout->is_mi_like_p ())
 	uiout->field_string
 	  ("reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_TRIGGER));
-      mention (b);
+      mention (this);
       tuple_emitter.emplace (uiout, "value");
       uiout->text ("\nOld value = ");
       watchpoint_value_print (bs->old_val.get (), &stb);
@@ -9768,7 +9763,7 @@ watchpoint::print_it (const bpstat *bs) const
       if (uiout->is_mi_like_p ())
 	uiout->field_string
 	  ("reason", async_reason_lookup (EXEC_ASYNC_READ_WATCHPOINT_TRIGGER));
-      mention (b);
+      mention (this);
       tuple_emitter.emplace (uiout, "value");
       uiout->text ("\nValue = ");
       watchpoint_value_print (val.get (), &stb);
@@ -9784,7 +9779,7 @@ watchpoint::print_it (const bpstat *bs) const
 	    uiout->field_string
 	      ("reason",
 	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
-	  mention (b);
+	  mention (this);
 	  tuple_emitter.emplace (uiout, "value");
 	  uiout->text ("\nOld value = ");
 	  watchpoint_value_print (bs->old_val.get (), &stb);
@@ -9793,7 +9788,7 @@ watchpoint::print_it (const bpstat *bs) const
 	}
       else
 	{
-	  mention (b);
+	  mention (this);
 	  if (uiout->is_mi_like_p ())
 	    uiout->field_string
 	      ("reason",
@@ -9945,16 +9940,15 @@ masked_watchpoint::works_in_software_mode () const
 enum print_stop_action
 masked_watchpoint::print_it (const bpstat *bs) const
 {
-  struct breakpoint *b = bs->breakpoint_at;
   struct ui_out *uiout = current_uiout;
 
   /* Masked watchpoints have only one location.  */
-  gdb_assert (b->loc && b->loc->next == NULL);
+  gdb_assert (this->loc && this->loc->next == nullptr);
 
-  annotate_watchpoint (b->number);
+  annotate_watchpoint (this->number);
   maybe_print_thread_hit_breakpoint (uiout);
 
-  switch (b->type)
+  switch (this->type)
     {
     case bp_hardware_watchpoint:
       if (uiout->is_mi_like_p ())
@@ -9978,7 +9972,7 @@ masked_watchpoint::print_it (const bpstat *bs) const
       internal_error (_("Invalid hardware watchpoint type."));
     }
 
-  mention (b);
+  mention (this);
   uiout->text (_("\n\
 Check the underlying instruction at PC for the memory\n\
 address and value which triggered this watchpoint.\n"));
