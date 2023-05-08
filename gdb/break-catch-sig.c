@@ -57,7 +57,7 @@ struct signal_catchpoint : public catchpoint
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (bp_location **) const override;
+  bool print_one (const bp_location **) const override;
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
   bool explains_signal (enum gdb_signal) override;
@@ -213,7 +213,7 @@ signal_catchpoint::print_it (const bpstat *bs) const
 /* Implement the "print_one" method for signal catchpoints.  */
 
 bool
-signal_catchpoint::print_one (bp_location **last_loc) const
+signal_catchpoint::print_one (const bp_location **last_loc) const
 {
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;

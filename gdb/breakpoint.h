@@ -684,7 +684,7 @@ struct breakpoint
   /* Display information about this breakpoint, for "info
      breakpoints".  Returns false if this method should use the
      default behavior.  */
-  virtual bool print_one (bp_location **) const
+  virtual bool print_one (const bp_location **) const
   {
     return false;
   }

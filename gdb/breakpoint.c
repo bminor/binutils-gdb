@@ -369,7 +369,7 @@ struct ranged_breakpoint : public ordinary_breakpoint
 		      const target_waitstatus &ws) override;
   int resources_needed (const struct bp_location *) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (bp_location **) const override;
+  bool print_one (const bp_location **) const override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
@@ -6342,7 +6342,7 @@ static bool
 print_one_breakpoint_location (struct breakpoint *b,
 			       struct bp_location *loc,
 			       int loc_number,
-			       struct bp_location **last_loc,
+			       const bp_location **last_loc,
 			       int allflag, bool raw_loc)
 {
   struct command_line *l;
@@ -6705,9 +6705,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 bool fix_multi_location_breakpoint_output_globally = false;
 
 static void
-print_one_breakpoint (struct breakpoint *b,
-		      struct bp_location **last_loc, 
-		      int allflag)
+print_one_breakpoint (breakpoint *b, const bp_location **last_loc, int allflag)
 {
   struct ui_out *uiout = current_uiout;
   bool use_fixed_output
@@ -6791,7 +6789,7 @@ breakpoint_address_bits (struct breakpoint *b)
 void
 print_breakpoint (breakpoint *b)
 {
-  struct bp_location *dummy_loc = NULL;
+  const bp_location *dummy_loc = nullptr;
   print_one_breakpoint (b, &dummy_loc, 0);
 }
 
@@ -6829,7 +6827,7 @@ static int
 breakpoint_1 (const char *bp_num_list, bool show_internal,
 	      bool (*filter) (const struct breakpoint *))
 {
-  struct bp_location *last_loc = NULL;
+  const bp_location *last_loc = nullptr;
   int nr_printable_breakpoints;
   struct value_print_options opts;
   int print_address_bits = 0;
@@ -9409,7 +9407,7 @@ ranged_breakpoint::print_it (const bpstat *bs) const
 /* Implement the "print_one" method for ranged breakpoints.  */
 
 bool
-ranged_breakpoint::print_one (bp_location **last_loc) const
+ranged_breakpoint::print_one (const bp_location **last_loc) const
 {
   struct bp_location *bl = loc;
   struct value_print_options opts;
