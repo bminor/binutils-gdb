@@ -547,11 +547,6 @@ windows_per_inferior::thread_rec
     {
       switch (disposition)
 	{
-	case INVALIDATE_CONTEXT:
-	  if (ptid.lwp () != current_event.dwThreadId)
-	    th->suspend ();
-	  invalidate_context (th);
-	  break;
 	case DONT_SUSPEND:
 	  th->suspended = -1;
 	  invalidate_context (th);
@@ -724,8 +719,7 @@ windows_fetch_one_register (struct regcache *regcache,
 void
 windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 {
-  windows_thread_info *th
-    = windows_process.thread_rec (regcache->ptid (), INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (regcache->ptid ());
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
@@ -737,6 +731,7 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
     {
       if (th->wow64_context.ContextFlags == 0)
 	{
+	  th->suspend ();
 	  th->wow64_context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  CHECK (Wow64GetThreadContext (th->h, &th->wow64_context));
 	}
@@ -746,6 +741,7 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
     {
       if (th->context.ContextFlags == 0)
 	{
+	  th->suspend ();
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  CHECK (GetThreadContext (th->h, &th->context));
 	}
@@ -770,11 +766,23 @@ windows_store_one_register (const struct regcache *regcache,
 {
   gdb_assert (r >= 0);
 
-  char *context_ptr = (char *) &th->context;
+  DWORD context_flags;
+  char *context_ptr;
+
 #ifdef __x86_64__
   if (windows_process.wow64_process)
-    context_ptr = (char *) &th->wow64_context;
+    {
+      context_flags = th->wow64_context.ContextFlags;
+      context_ptr = (char *) &th->wow64_context;
+    }
+  else
 #endif
+    {
+      context_flags = th->context.ContextFlags;
+      context_ptr = (char *) &th->context;
+    }
+
+  gdb_assert (context_flags != 0);
 
   struct gdbarch *gdbarch = regcache->arch ();
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
@@ -807,8 +815,7 @@ windows_store_one_register (const struct regcache *regcache,
 void
 windows_nat_target::store_registers (struct regcache *regcache, int r)
 {
-  windows_thread_info *th
-    = windows_process.thread_rec (regcache->ptid (), INVALIDATE_CONTEXT);
+  windows_thread_info *th = windows_process.find_thread (regcache->ptid ());
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
@@ -1544,7 +1551,8 @@ windows_nat_target::get_windows_debug_event
       *ourstatus = stop->status;
 
       ptid_t ptid (windows_process.current_event.dwProcessId, thread_id);
-      windows_process.thread_rec (ptid, INVALIDATE_CONTEXT);
+      windows_thread_info *th = windows_process.find_thread (ptid);
+      windows_process.invalidate_context (th);
       return ptid;
     }
 
@@ -1765,8 +1773,7 @@ windows_nat_target::get_windows_debug_event
 	  && windows_process.windows_initialization_done)
 	{
 	  ptid_t ptid = ptid_t (current_event->dwProcessId, thread_id, 0);
-	  windows_thread_info *th
-	    = windows_process.thread_rec (ptid, INVALIDATE_CONTEXT);
+	  windows_thread_info *th = windows_process.find_thread (ptid);
 	  th->stopped_at_software_breakpoint = true;
 	  th->pc_adjusted = false;
 	}
@@ -1804,8 +1811,7 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  if (ourstatus->kind () != TARGET_WAITKIND_EXITED
 	      && ourstatus->kind () !=  TARGET_WAITKIND_SIGNALLED)
 	    {
-	      windows_thread_info *th
-		= windows_process.thread_rec (result, INVALIDATE_CONTEXT);
+	      windows_thread_info *th = windows_process.find_thread (result);
 
 	      if (th != nullptr)
 		{

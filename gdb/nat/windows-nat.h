@@ -103,8 +103,6 @@ enum thread_disposition_type
 {
   /* Invalidate the context, but do not suspend the thread.  */
   DONT_SUSPEND,
-  /* Invalidate the context and suspend the thread.  */
-  INVALIDATE_CONTEXT
 };
 
 /* A single pending stop.  See "pending_stops" for more
