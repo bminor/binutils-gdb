@@ -625,6 +625,19 @@ proc test-string {variant} {
     test_gdb_complete_none "$show_cmd "
 }
 
+# Check that $_gdb_setting & co report the correct error strings.
+proc test-setting-error {} {
+    gdb_test {print $_gdb_setting("xxx")} \
+	"First argument of \\\$_gdb_setting must be a valid setting of the 'show' command\\."
+    gdb_test {print $_gdb_setting_str("xxx")} \
+	"First argument of \\\$_gdb_setting_str must be a valid setting of the 'show' command\\."
+
+    gdb_test {print $_gdb_maint_setting("xxx")} \
+	"First argument of \\\$_gdb_maint_setting must be a valid setting of the 'maintenance show' command\\."
+    gdb_test {print $_gdb_maint_setting_str("xxx")} \
+	"First argument of \\\$_gdb_maint_setting_str must be a valid setting of the 'maintenance show' command\\."
+}
+
 foreach variant {
     uinteger
     integer
@@ -651,3 +664,5 @@ foreach variant {
 	test-string $variant
     }
 }
+
+test-setting-error

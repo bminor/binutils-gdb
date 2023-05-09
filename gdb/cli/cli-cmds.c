@@ -2219,8 +2219,16 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
   cmd_list_element *cmd = lookup_cmd (&a0, showlist, "", NULL, -1, 0);
 
   if (cmd == nullptr || cmd->type != show_cmd)
-    error (_("First argument of %s must be a "
-	     "valid setting of the 'show' command."), fnname);
+    {
+      gdb_assert (showlist->prefix != nullptr);
+      std::vector<std::string> components
+	= showlist->prefix->command_components ();
+      std::string full_name = components[0];
+      for (int i = 1; i < components.size (); ++i)
+	full_name += " " + components[i];
+      error (_("First argument of %s must be a valid setting of the "
+	       "'%s' command."), fnname, full_name.c_str ());
+    }
 
   return cmd;
 }
