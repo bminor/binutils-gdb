@@ -5292,12 +5292,18 @@ alpha_vms_slurp_relocs (bfd *abfd)
       begin = PRIV (recrd.rec) + 4;
       end = PRIV (recrd.rec) + PRIV (recrd.rec_size);
 
-      for (ptr = begin; ptr < end; ptr += length)
+      for (ptr = begin; ptr + 4 <= end; ptr += length)
 	{
 	  int cmd;
 
 	  cmd = bfd_getl16 (ptr);
 	  length = bfd_getl16 (ptr + 2);
+	  if (length < 4 || length > end - ptr)
+	    {
+	    bad_rec:
+	      _bfd_error_handler (_("corrupt reloc record"));
+	      goto fail;
+	    }
 
 	  cur_address = vaddr;
 
@@ -5313,6 +5319,8 @@ alpha_vms_slurp_relocs (bfd *abfd)
 	      continue;
 
 	    case ETIR__C_STA_PQ: /* ALPHA_R_REF{LONG|QUAD}, others part 1 */
+	      if (length < 16)
+		goto bad_rec;
 	      cur_psidx = bfd_getl32 (ptr + 4);
 	      cur_addend = bfd_getl64 (ptr + 8);
 	      prev_cmd = cmd;
@@ -5346,6 +5354,8 @@ alpha_vms_slurp_relocs (bfd *abfd)
 		      goto fail;
 		    }
 		}
+	      if (length < 8)
+		goto bad_rec;
 	      cur_addend = bfd_getl32 (ptr + 4);
 	      prev_cmd = cmd;
 	      continue;
@@ -5360,6 +5370,8 @@ alpha_vms_slurp_relocs (bfd *abfd)
 		     _bfd_vms_etir_name (ETIR__C_STA_QW));
 		  goto fail;
 		}
+	      if (length < 12)
+		goto bad_rec;
 	      cur_addend = bfd_getl64 (ptr + 4);
 	      prev_cmd = cmd;
 	      continue;
@@ -5455,12 +5467,16 @@ alpha_vms_slurp_relocs (bfd *abfd)
 	      goto call_reloc;
 
 	    call_reloc:
+	      if (length < 36)
+		goto bad_rec;
 	      cur_sym = ptr + 4 + 32;
 	      cur_address = bfd_getl64 (ptr + 4 + 8);
 	      cur_addend = bfd_getl64 (ptr + 4 + 24);
 	      break;
 
 	    case ETIR__C_STO_IMM:
+	      if (length < 8)
+		goto bad_rec;
 	      vaddr += bfd_getl32 (ptr + 4);
 	      continue;
 
@@ -5520,12 +5536,16 @@ alpha_vms_slurp_relocs (bfd *abfd)
 	    if (cur_sym != NULL)
 	      {
 		unsigned int j;
-		unsigned int symlen = *cur_sym;
+		int symlen;
 		asymbol **sym;
 
 		/* Linear search.  */
+		if (end - cur_sym < 1)
+		  goto bad_rec;
 		symlen = *cur_sym;
 		cur_sym++;
+		if (end - cur_sym < symlen)
+		  goto bad_rec;
 		sym = NULL;
 
 		for (j = 0; j < PRIV (gsd_sym_count); j++)
