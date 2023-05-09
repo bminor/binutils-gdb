@@ -56,7 +56,7 @@ def next(*, threadId, singleThread=False, granularity="statement", **args):
 @capability("supportsSteppingGranularity")
 @capability("supportsSingleThreadExecutionRequests")
 @request("stepIn")
-def stepIn(*, threadId, singleThread=False, granularity="statement", **args):
+def step_in(*, threadId, singleThread=False, granularity="statement", **args):
     send_gdb(lambda: _handle_thread_step(threadId, singleThread))
     cmd = "step"
     if granularity == "instruction":
