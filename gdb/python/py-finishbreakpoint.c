@@ -416,9 +416,9 @@ bpfinishpy_handle_stop (struct bpstat *bs, int print_frame)
 {
   gdbpy_enter enter_py;
 
-  for (breakpoint *bp : all_breakpoints_safe ())
+  for (breakpoint &bp : all_breakpoints_safe ())
     bpfinishpy_detect_out_scope_cb
-      (bp, bs == NULL ? NULL : bs->breakpoint_at, true);
+      (&bp, bs == NULL ? NULL : bs->breakpoint_at, true);
 }
 
 /* Attached to `exit' notifications, triggers all the necessary out of
@@ -429,8 +429,8 @@ bpfinishpy_handle_exit (struct inferior *inf)
 {
   gdbpy_enter enter_py (target_gdbarch ());
 
-  for (breakpoint *bp : all_breakpoints_safe ())
-    bpfinishpy_detect_out_scope_cb (bp, nullptr, true);
+  for (breakpoint &bp : all_breakpoints_safe ())
+    bpfinishpy_detect_out_scope_cb (&bp, nullptr, true);
 }
 
 /* Initialize the Python finish breakpoint code.  */

@@ -1522,16 +1522,16 @@ process_tracepoint_on_disconnect (void)
 
   /* Check whether we still have pending tracepoint.  If we have, warn the
      user that pending tracepoint will no longer work.  */
-  for (breakpoint *b : all_tracepoints ())
+  for (breakpoint &b : all_tracepoints ())
     {
-      if (!b->has_locations ())
+      if (!b.has_locations ())
 	{
 	  has_pending_p = 1;
 	  break;
 	}
       else
 	{
-	  for (bp_location &loc1 : b->locations ())
+	  for (bp_location &loc1 : b.locations ())
 	    {
 	      if (loc1.shlib_disabled)
 		{
@@ -1573,18 +1573,18 @@ start_tracing (const char *notes)
   if (tracepoint_range.begin () == tracepoint_range.end ())
     error (_("No tracepoints defined, not starting trace"));
 
-  for (breakpoint *b : tracepoint_range)
+  for (breakpoint &b : tracepoint_range)
     {
-      if (b->enable_state == bp_enabled)
+      if (b.enable_state == bp_enabled)
 	any_enabled = 1;
 
-      if ((b->type == bp_fast_tracepoint
+      if ((b.type == bp_fast_tracepoint
 	   ? may_insert_fast_tracepoints
 	   : may_insert_tracepoints))
 	++num_to_download;
       else
 	warning (_("May not insert %stracepoints, skipping tracepoint %d"),
-		 (b->type == bp_fast_tracepoint ? "fast " : ""), b->number);
+		 (b.type == bp_fast_tracepoint ? "fast " : ""), b.number);
     }
 
   if (!any_enabled)
@@ -1604,23 +1604,23 @@ start_tracing (const char *notes)
 
   target_trace_init ();
 
-  for (breakpoint *b : tracepoint_range)
+  for (breakpoint &b : tracepoint_range)
     {
-      struct tracepoint *t = (struct tracepoint *) b;
+      tracepoint &t = gdb::checked_static_cast<tracepoint &> (b);
       int bp_location_downloaded = 0;
 
       /* Clear `inserted' flag.  */
-      for (bp_location &loc : b->locations ())
+      for (bp_location &loc : b.locations ())
 	loc.inserted = 0;
 
-      if ((b->type == bp_fast_tracepoint
+      if ((b.type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
 
-      t->number_on_target = 0;
+      t.number_on_target = 0;
 
-      for (bp_location &loc : b->locations ())
+      for (bp_location &loc : b.locations ())
 	{
 	  /* Since tracepoint locations are never duplicated, `inserted'
 	     flag should be zero.  */
@@ -1632,14 +1632,14 @@ start_tracing (const char *notes)
 	  bp_location_downloaded = 1;
 	}
 
-      t->number_on_target = b->number;
+      t.number_on_target = b.number;
 
-      for (bp_location &loc : b->locations ())
+      for (bp_location &loc : b.locations ())
 	if (loc.probe.prob != NULL)
 	  loc.probe.prob->set_semaphore (loc.probe.objfile, loc.gdbarch);
 
       if (bp_location_downloaded)
-	gdb::observers::breakpoint_modified.notify (b);
+	gdb::observers::breakpoint_modified.notify (&b);
     }
 
   /* Send down all the trace state variables too.  */
@@ -1711,14 +1711,14 @@ stop_tracing (const char *note)
 
   target_trace_stop ();
 
-  for (breakpoint *t : all_tracepoints ())
+  for (breakpoint &t : all_tracepoints ())
     {
-      if ((t->type == bp_fast_tracepoint
+      if ((t.type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
 
-      for (bp_location &loc : t->locations ())
+      for (bp_location &loc : t.locations ())
 	{
 	  /* GDB can be totally absent in some disconnected trace scenarios,
 	     but we don't really care if this semaphore goes out of sync.
@@ -1889,8 +1889,8 @@ tstatus_command (const char *args, int from_tty)
 		(long int) (ts->stop_time % 1000000));
 
   /* Now report any per-tracepoint status available.  */
-  for (breakpoint *t : all_tracepoints ())
-    target_get_tracepoint_status (t, NULL);
+  for (breakpoint &t : all_tracepoints ())
+    target_get_tracepoint_status (&t, NULL);
 }
 
 /* Report the trace status to uiout, in a way suitable for MI, and not
@@ -3044,20 +3044,20 @@ cond_string_is_same (char *str1, char *str2)
 static struct bp_location *
 find_matching_tracepoint_location (struct uploaded_tp *utp)
 {
-  for (breakpoint *b : all_tracepoints ())
+  for (breakpoint &b : all_tracepoints ())
     {
-      struct tracepoint *t = (struct tracepoint *) b;
+      tracepoint &t = gdb::checked_static_cast<tracepoint &> (b);
 
-      if (b->type == utp->type
-	  && t->step_count == utp->step
-	  && t->pass_count == utp->pass
-	  && cond_string_is_same (t->cond_string.get (),
+      if (b.type == utp->type
+	  && t.step_count == utp->step
+	  && t.pass_count == utp->pass
+	  && cond_string_is_same (t.cond_string.get (),
 				  utp->cond_string.get ())
 	  /* FIXME also test actions.  */
 	  )
 	{
 	  /* Scan the locations for an address match.  */
-	  for (bp_location &loc : b->locations ())
+	  for (bp_location &loc : b.locations ())
 	    if (loc.address == utp->addr)
 	      return &loc;
 	}

@@ -569,8 +569,8 @@ gdbscm_breakpoints (void)
 {
   SCM list = SCM_EOL;
 
-  for (breakpoint *bp : all_breakpoints ())
-    bpscm_build_bp_list (bp, &list);
+  for (breakpoint &bp : all_breakpoints ())
+    bpscm_build_bp_list (&bp, &list);
 
   return scm_reverse_x (list, SCM_EOL);
 }

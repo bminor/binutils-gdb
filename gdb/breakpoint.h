@@ -33,7 +33,6 @@
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/refcounted-object.h"
-#include "gdbsupport/reference-to-pointer-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include "cli/cli-script.h"
 #include "target/waitstatus.h"
@@ -1897,11 +1896,9 @@ using breakpoint_list = intrusive_list<breakpoint>;
 
 using breakpoint_iterator = breakpoint_list::iterator;
 
-using breakpoint_pointer_iterator = reference_to_pointer_iterator<breakpoint_iterator>;
-
 /* Breakpoint linked list range.  */
 
-using breakpoint_range = iterator_range<breakpoint_pointer_iterator>;
+using breakpoint_range = iterator_range<breakpoint_iterator>;
 
 /* Return a range to iterate over all breakpoints.  */
 
@@ -1921,14 +1918,14 @@ breakpoint_safe_range all_breakpoints_safe ();
 
 struct tracepoint_filter
 {
-  bool operator() (breakpoint *b)
-  { return is_tracepoint (b); }
+  bool operator() (breakpoint &b)
+  { return is_tracepoint (&b); }
 };
 
 /* Breakpoint linked list iterator, filtering to only keep tracepoints.  */
 
 using tracepoint_iterator
-  = filtered_iterator<breakpoint_pointer_iterator, tracepoint_filter>;
+  = filtered_iterator<breakpoint_iterator, tracepoint_filter>;
 
 /* Breakpoint linked list range, filtering to only keep tracepoints.  */
 

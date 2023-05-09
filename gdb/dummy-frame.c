@@ -166,8 +166,8 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
 
   restore_infcall_suspend_state (dummy->caller_state);
 
-  for (breakpoint *bp : all_breakpoints_safe ())
-    if (pop_dummy_frame_bpt (bp, dummy))
+  for (breakpoint &bp : all_breakpoints_safe ())
+    if (pop_dummy_frame_bpt (&bp, dummy))
       break;
 
   /* restore_infcall_control_state frees inf_state,

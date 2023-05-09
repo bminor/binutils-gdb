@@ -1035,8 +1035,8 @@ gdbpy_breakpoints (PyObject *self, PyObject *args)
 
   /* If build_bp_list returns false, it signals an error condition.  In that
      case abandon building the list and return nullptr.  */
-  for (breakpoint *bp : all_breakpoints ())
-    if (!build_bp_list (bp, list.get ()))
+  for (breakpoint &bp : all_breakpoints ())
+    if (!build_bp_list (&bp, list.get ()))
       return nullptr;
 
   return PyList_AsTuple (list.get ());

@@ -91,20 +91,20 @@ solib_catchpoint::breakpoint_hit (const struct bp_location *bl,
   if (ws.kind () == TARGET_WAITKIND_LOADED)
     return 1;
 
-  for (breakpoint *other : all_breakpoints ())
+  for (breakpoint &other : all_breakpoints ())
     {
-      if (other == bl->owner)
+      if (&other == bl->owner)
 	continue;
 
-      if (other->type != bp_shlib_event)
+      if (other.type != bp_shlib_event)
 	continue;
 
-      if (pspace != NULL && other->pspace != pspace)
+      if (pspace != NULL && other.pspace != pspace)
 	continue;
 
-      for (bp_location &other_bl : other->locations ())
+      for (bp_location &other_bl : other.locations ())
 	{
-	  if (other->breakpoint_hit (&other_bl, aspace, bp_addr, ws))
+	  if (other.breakpoint_hit (&other_bl, aspace, bp_addr, ws))
 	    return 1;
 	}
     }

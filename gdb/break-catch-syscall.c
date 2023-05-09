@@ -501,8 +501,8 @@ catching_syscall_number_1 (struct breakpoint *b, int syscall_number)
 bool
 catching_syscall_number (int syscall_number)
 {
-  for (breakpoint *b : all_breakpoints ())
-    if (catching_syscall_number_1 (b, syscall_number))
+  for (breakpoint &b : all_breakpoints ())
+    if (catching_syscall_number_1 (&b, syscall_number))
       return true;
 
   return false;

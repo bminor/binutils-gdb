@@ -625,24 +625,24 @@ tui_source_window_base::update_breakpoint_info
 	 do with it.  Identify enable/disabled breakpoints as well as
 	 those that we already hit.  */
       tui_bp_flags mode = 0;
-      for (breakpoint *bp : all_breakpoints ())
+      for (breakpoint &bp : all_breakpoints ())
 	{
-	  if (bp == being_deleted)
+	  if (&bp == being_deleted)
 	    continue;
 
-	  for (bp_location &loc : bp->locations ())
+	  for (bp_location &loc : bp.locations ())
 	    {
 	      if (location_matches_p (&loc, i))
 		{
-		  if (bp->enable_state == bp_disabled)
+		  if (bp.enable_state == bp_disabled)
 		    mode |= TUI_BP_DISABLED;
 		  else
 		    mode |= TUI_BP_ENABLED;
-		  if (bp->hit_count)
+		  if (bp.hit_count)
 		    mode |= TUI_BP_HIT;
-		  if (bp->first_loc ().cond)
+		  if (bp.first_loc ().cond)
 		    mode |= TUI_BP_CONDITIONAL;
-		  if (bp->type == bp_hardware_breakpoint)
+		  if (bp.type == bp_hardware_breakpoint)
 		    mode |= TUI_BP_HARDWARE;
 		}
 	    }
