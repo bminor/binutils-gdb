@@ -105,6 +105,8 @@ struct debug_type_s
   enum debug_type_kind kind;
   /* Size of type (0 if not known).  */
   unsigned int size;
+  /* Used by debug_write to stop DEBUG_KIND_INDIRECT infinite recursion.  */
+  unsigned int mark;
   /* Type which is a pointer to this type.  */
   debug_type pointer;
   /* Tagged union with additional information about the type.  */
@@ -2422,6 +2424,9 @@ debug_write_type (struct debug_handle *info,
   if (type == DEBUG_TYPE_NULL)
     return (*fns->empty_type) (fhandle);
 
+  /* Mark the type so that we don't define a type in terms of itself.  */
+  type->mark = info->mark;
+
   /* If we have a name for this type, just output it.  We only output
      typedef names after they have been defined.  We output type tags
      whenever we are not actually defining them.  */
@@ -2485,7 +2490,7 @@ debug_write_type (struct debug_handle *info,
       return false;
     case DEBUG_KIND_INDIRECT:
       /* Prevent infinite recursion.  */
-      if (*type->u.kindirect->slot == type)
+      if ((*type->u.kindirect->slot)->mark == info->mark)
 	return (*fns->empty_type) (fhandle);
       return debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
 			       name);
