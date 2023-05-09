@@ -110,7 +110,7 @@ Native Language Support
 By default Native Language Support will be enabled for binutils.  On
 some systems however this support is not present and can lead to error
 messages such as "undefined reference to `libintl_gettext'" when
-building there tools.  If that happens the NLS support can be disabled
+building these tools.  If that happens the NLS support can be disabled
 by adding the --disable-nls switch to the configure line like this:
 
 	../binutils-XXX/configure --disable-nls

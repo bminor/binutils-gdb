@@ -1,3 +1,7 @@
+2023-05-09  Enze Li  <enze.li@gmx.com>
+
+	* README:  Correct a typo.
+
 2023-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Remove Dimity Diky as MSP430 maintainer.
