@@ -314,7 +314,10 @@ static inline void
 dump_for_expression (struct ui_file *stream, int depth,
 		     const operation_up &op)
 {
-  op->dump (stream, depth);
+  if (op == nullptr)
+    gdb_printf (stream, _("%*snullptr\n"), depth, "");
+  else
+    op->dump (stream, depth);
 }
 
 extern void dump_for_expression (struct ui_file *stream, int depth,

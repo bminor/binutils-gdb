@@ -148,3 +148,24 @@ gdb_test "print r#" "No symbol 'r' in current context"
 gdb_test "printf \"%d %d\\n\", 23+1, 23-1" "24 22"
 
 gdb_test "print 5," "Syntax error near ','"
+
+# Check expression debug works for strings.
+gdb_test "with debug expression 1 -- print \"foo\"" \
+    [multi_line \
+	 "Operation: OP_AGGREGATE" \
+	 " Type: &str" \
+	 " nullptr" \
+	 " Vector:" \
+	 "  String: data_ptr" \
+	 "  Operation: UNOP_ADDR" \
+	 "   Operation: OP_STRING" \
+	 "    String: foo" \
+	 "  String: length" \
+	 "  Operation: OP_LONG" \
+	 "   Type: usize" \
+	 "   Constant: 3" \
+	 "Operation: OP_LONG" \
+	 " Type: i32" \
+	 " Constant: 0" \
+	 "evaluation of this expression requires the target program to be active"] \
+    "print a string with expression debug turned on"
