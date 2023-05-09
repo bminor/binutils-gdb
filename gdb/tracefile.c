@@ -412,7 +412,7 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 
   /* Guess what we can from the tracepoint location.  */
   gdbarch_guess_tracepoint_registers (gdbarch, regcache,
-				      tp->loc->address);
+				      tp->first_loc ().address);
 }
 
 /* This is the implementation of target_ops method to_has_all_memory.  */

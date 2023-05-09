@@ -950,14 +950,14 @@ follow_inferior_reset_breakpoints (void)
   if (tp->control.step_resume_breakpoint)
     {
       breakpoint_re_set_thread (tp->control.step_resume_breakpoint);
-      tp->control.step_resume_breakpoint->loc->enabled = 1;
+      tp->control.step_resume_breakpoint->first_loc ().enabled = 1;
     }
 
   /* Treat exception_resume breakpoints like step_resume breakpoints.  */
   if (tp->control.exception_resume_breakpoint)
     {
       breakpoint_re_set_thread (tp->control.exception_resume_breakpoint);
-      tp->control.exception_resume_breakpoint->loc->enabled = 1;
+      tp->control.exception_resume_breakpoint->first_loc ().enabled = 1;
     }
 
   /* Reinsert all breakpoints in the child.  The user may have set
@@ -2551,7 +2551,8 @@ resume_1 (enum gdb_signal sig)
 		 user breakpoints at PC to trigger (again) when this
 		 hits.  */
 	      insert_hp_step_resume_breakpoint_at_frame (get_current_frame ());
-	      gdb_assert (tp->control.step_resume_breakpoint->loc->permanent);
+	      gdb_assert (tp->control.step_resume_breakpoint->first_loc ()
+			  .permanent);
 
 	      tp->step_after_step_resume_breakpoint = step;
 	    }
@@ -7008,9 +7009,9 @@ process_event_stop_test (struct execution_control_state *ecs)
 	= ecs->event_thread->control.step_resume_breakpoint;
 
       if (sr_bp != nullptr
-	  && sr_bp->loc->permanent
+	  && sr_bp->first_loc ().permanent
 	  && sr_bp->type == bp_hp_step_resume
-	  && sr_bp->loc->address == ecs->event_thread->prev_pc)
+	  && sr_bp->first_loc ().address == ecs->event_thread->prev_pc)
 	{
 	  infrun_debug_printf ("stepped permanent breakpoint, stopped in handler");
 	  delete_step_resume_breakpoint (ecs->event_thread);

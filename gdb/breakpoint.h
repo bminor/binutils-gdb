@@ -645,6 +645,20 @@ struct breakpoint
   bool has_multiple_locations () const
   { return this->loc != nullptr && this->loc->next != nullptr; }
 
+  /* Return a reference to the first location of this breakpoint.  */
+  bp_location &first_loc ()
+  {
+    gdb_assert (this->has_locations ());
+    return *this->loc;
+  }
+
+  /* Return a reference to the first location of this breakpoint.  */
+  const bp_location &first_loc () const
+  {
+    gdb_assert (this->has_locations ());
+    return *this->loc;
+  }
+
   /* Reevaluate a breakpoint.  This is necessary after symbols change
      (e.g., an executable or DSO was loaded, or the inferior just
      started).  */

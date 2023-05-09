@@ -977,7 +977,7 @@ elf_gnu_ifunc_resolver_stop (code_breakpoint *b)
       gdb_assert (frame_id_p (b_return->frame_id));
 
       if (b_return->thread == thread_id
-	  && b_return->loc->requested_address == prev_pc
+	  && b_return->first_loc ().requested_address == prev_pc
 	  && b_return->frame_id == prev_frame_id)
 	break;
     }
@@ -1046,7 +1046,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
 
   func_func = value::allocate (func_func_type);
   func_func->set_lval (lval_memory);
-  func_func->set_address (b->loc->related_address);
+  func_func->set_address (b->first_loc ().related_address);
 
   value = value::allocate (value_type);
   gdbarch_return_value_as_value (gdbarch, func_func, value_type, regcache,

@@ -2752,7 +2752,7 @@ get_traceframe_location (int *stepping_frame_p)
   /* If this is a stepping frame, we don't know which location
      triggered.  The first is as good (or bad) a guess as any...  */
   *stepping_frame_p = 1;
-  return t->loc;
+  return &t->first_loc ();
 }
 
 /* Return the default collect actions of a tracepoint T.  */

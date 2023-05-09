@@ -4108,7 +4108,7 @@ breakpoint_init_inferior (enum inf_context context)
 
   for (breakpoint *b : all_breakpoints_safe ())
     {
-      if (b->has_locations () && b->loc->pspace != pspace)
+      if (b->has_locations () && b->first_loc ().pspace != pspace)
 	continue;
 
       switch (b->type)
@@ -5635,7 +5635,7 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
 	     entire expression, not the individual locations.  For
 	     read watchpoints, the watchpoints_triggered function has
 	     checked all locations already.  */
-	  if (b->type == bp_hardware_watchpoint && bl != b->loc)
+	  if (b->type == bp_hardware_watchpoint && bl != &b->first_loc ())
 	    break;
 
 	  if (!bl->enabled || bl->disabled_by_cond || bl->shlib_disabled)
@@ -6162,8 +6162,7 @@ bp_location_condition_evaluator (const struct bp_location *bl)
 /* Print the LOC location out of the list of B->LOC locations.  */
 
 static void
-print_breakpoint_location (const breakpoint *b,
-			   struct bp_location *loc)
+print_breakpoint_location (const breakpoint *b, const bp_location *loc)
 {
   struct ui_out *uiout = current_uiout;
 
@@ -6363,11 +6362,11 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (loc == NULL 
       && (b->has_locations ()
 	  && (b->has_multiple_locations ()
-	      || !b->loc->enabled || b->loc->disabled_by_cond)))
+	      || !b->first_loc ().enabled || b->first_loc ().disabled_by_cond)))
     header_of_multiple = true;
 
-  if (loc == NULL)
-    loc = b->loc;
+  if (loc == NULL && b->has_locations ())
+    loc = &b->first_loc ();
 
   annotate_record ();
 
@@ -6467,7 +6466,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  if (!header_of_multiple)
 	    print_breakpoint_location (b, loc);
 	  if (b->has_locations ())
-	    *last_loc = b->loc;
+	    *last_loc = &b->first_loc ();
 	}
     }
 
@@ -6747,8 +6746,8 @@ print_one_breakpoint (breakpoint *b, const bp_location **last_loc, int allflag)
 	  && (allflag
 	      || (b->has_locations ()
 		  && (b->has_multiple_locations ()
-		      || !b->loc->enabled
-		      || b->loc->disabled_by_cond))))
+		      || !b->first_loc ().enabled
+		      || b->first_loc ().disabled_by_cond))))
 	{
 	  gdb::optional<ui_out_emit_list> locations_list;
 
@@ -7745,7 +7744,7 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 
   b->enable_state = bp_enabled;
   /* locspec has to be used or breakpoint_re_set will delete me.  */
-  b->locspec = new_address_location_spec (b->loc->address, NULL, 0);
+  b->locspec = new_address_location_spec (b->first_loc ().address, NULL, 0);
 
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
@@ -7773,7 +7772,7 @@ remove_jit_event_breakpoints (void)
 {
   for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_jit_event
-	&& b->loc->pspace == current_program_space)
+	&& b->first_loc ().pspace == current_program_space)
       delete_breakpoint (b);
 }
 
@@ -7782,7 +7781,7 @@ remove_solib_event_breakpoints (void)
 {
   for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_shlib_event
-	&& b->loc->pspace == current_program_space)
+	&& b->first_loc ().pspace == current_program_space)
       delete_breakpoint (b);
 }
 
@@ -7793,7 +7792,7 @@ remove_solib_event_breakpoints_at_next_stop (void)
 {
   for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_shlib_event
-	&& b->loc->pspace == current_program_space)
+	&& b->first_loc ().pspace == current_program_space)
       b->disposition = disp_del_at_next_stop;
 }
 
@@ -7828,7 +7827,7 @@ create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR add
   /* Explicitly tell update_global_location_list to insert
      locations.  */
   b = create_solib_event_breakpoint_1 (gdbarch, address, UGLL_INSERT);
-  if (!b->loc->inserted)
+  if (!b->first_loc ().inserted)
     {
       delete_breakpoint (b);
       return NULL;
@@ -8180,17 +8179,18 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   std::unique_ptr<breakpoint> copy
     (new_momentary_breakpoint (orig->gdbarch, type, orig->pspace,
 			       orig->frame_id, thread));
+  const bp_location &orig_loc = orig->first_loc ();
   copy->loc = copy->allocate_location ();
   set_breakpoint_location_function (copy->loc);
 
-  copy->loc->gdbarch = orig->loc->gdbarch;
-  copy->loc->requested_address = orig->loc->requested_address;
-  copy->loc->address = orig->loc->address;
-  copy->loc->section = orig->loc->section;
-  copy->loc->pspace = orig->loc->pspace;
-  copy->loc->probe = orig->loc->probe;
-  copy->loc->line_number = orig->loc->line_number;
-  copy->loc->symtab = orig->loc->symtab;
+  copy->loc->gdbarch = orig_loc.gdbarch;
+  copy->loc->requested_address = orig_loc.requested_address;
+  copy->loc->address = orig_loc.address;
+  copy->loc->section = orig_loc.section;
+  copy->loc->pspace = orig_loc.pspace;
+  copy->loc->probe = orig_loc.probe;
+  copy->loc->line_number = orig_loc.line_number;
+  copy->loc->symtab = orig_loc.symtab;
   copy->loc->enabled = loc_enabled;
 
   breakpoint *b = add_to_breakpoint_chain (std::move (copy));
@@ -8577,7 +8577,7 @@ code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
   if (locspec_ != nullptr)
     locspec = std::move (locspec_);
   else
-    locspec = new_address_location_spec (this->loc->address, NULL, 0);
+    locspec = new_address_location_spec (this->first_loc ().address, NULL, 0);
   filter = std::move (filter_);
 }
 
@@ -9413,7 +9413,6 @@ ranged_breakpoint::print_it (const bpstat *bs) const
 bool
 ranged_breakpoint::print_one (const bp_location **last_loc) const
 {
-  struct bp_location *bl = loc;
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
 
@@ -9427,8 +9426,8 @@ ranged_breakpoint::print_one (const bp_location **last_loc) const
        by ranged_breakpoint::print_one_detail.  */
     uiout->field_skip ("addr");
   annotate_field (5);
-  print_breakpoint_location (this, bl);
-  *last_loc = bl;
+  print_breakpoint_location (this, &this->first_loc ());
+  *last_loc = &this->first_loc ();
 
   return true;
 }
@@ -9439,18 +9438,16 @@ void
 ranged_breakpoint::print_one_detail (struct ui_out *uiout) const
 {
   CORE_ADDR address_start, address_end;
-  struct bp_location *bl = loc;
+  const bp_location &bl = this->first_loc ();
   string_file stb;
 
-  gdb_assert (bl);
-
-  address_start = bl->address;
-  address_end = address_start + bl->length - 1;
+  address_start = bl.address;
+  address_end = address_start + bl.length - 1;
 
   uiout->text ("\taddress range: ");
   stb.printf ("[%s, %s]",
-	      print_core_address (bl->gdbarch, address_start),
-	      print_core_address (bl->gdbarch, address_end));
+	      print_core_address (bl.gdbarch, address_start),
+	      print_core_address (bl.gdbarch, address_end));
   uiout->field_stream ("addr", stb);
   uiout->text ("\n");
 }
@@ -9460,15 +9457,14 @@ ranged_breakpoint::print_one_detail (struct ui_out *uiout) const
 void
 ranged_breakpoint::print_mention () const
 {
-  struct bp_location *bl = loc;
+  const bp_location &bl = this->first_loc ();
   struct ui_out *uiout = current_uiout;
 
-  gdb_assert (bl);
   gdb_assert (type == bp_hardware_breakpoint);
 
   uiout->message (_("Hardware assisted ranged breakpoint %d from %s to %s."),
-		  number, paddress (bl->gdbarch, bl->address),
-		  paddress (bl->gdbarch, bl->address + bl->length - 1));
+		  number, paddress (bl.gdbarch, bl.address),
+		  paddress (bl.gdbarch, bl.address + bl.length - 1));
 }
 
 /* Implement the "print_recreate" method for ranged breakpoints.  */
@@ -9994,7 +9990,7 @@ masked_watchpoint::print_one_detail (struct ui_out *uiout) const
   gdb_assert (this->has_single_location ());
 
   uiout->text ("\tmask ");
-  uiout->field_core_addr ("mask", loc->gdbarch, hw_wp_mask);
+  uiout->field_core_addr ("mask", this->first_loc ().gdbarch, hw_wp_mask);
   uiout->text ("\n");
 }
 
@@ -10304,11 +10300,11 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  scope_breakpoint->frame_id = caller_frame_id;
 
 	  /* Set the address at which we will stop.  */
-	  scope_breakpoint->loc->gdbarch = caller_arch;
-	  scope_breakpoint->loc->requested_address = caller_pc;
-	  scope_breakpoint->loc->address
-	    = adjust_breakpoint_address (scope_breakpoint->loc->gdbarch,
-					 scope_breakpoint->loc->requested_address,
+	  bp_location &loc = scope_breakpoint->first_loc ();
+	  loc.gdbarch = caller_arch;
+	  loc.requested_address = caller_pc;
+	  loc.address
+	    = adjust_breakpoint_address (loc.gdbarch, loc.requested_address,
 					 scope_breakpoint->type,
 					 current_program_space);
 	}
@@ -11601,23 +11597,24 @@ code_breakpoint::say_where () const
     }
   else
     {
-      if (opts.addressprint || loc->symtab == NULL)
+      const bp_location &bl = this->first_loc ();
+      if (opts.addressprint || bl.symtab == nullptr)
 	gdb_printf (" at %ps",
 		    styled_string (address_style.style (),
-				   paddress (loc->gdbarch,
-					     loc->address)));
-      if (loc->symtab != NULL)
+				   paddress (bl.gdbarch,
+					     bl.address)));
+      if (bl.symtab != NULL)
 	{
 	  /* If there is a single location, we can print the location
 	     more nicely.  */
 	  if (!this->has_multiple_locations ())
 	    {
 	      const char *filename
-		= symtab_to_filename_for_display (loc->symtab);
+		= symtab_to_filename_for_display (bl.symtab);
 	      gdb_printf (": file %ps, line %d.",
 			  styled_string (file_name_style.style (),
 					 filename),
-			  loc->line_number);
+			  bl.line_number);
 	    }
 	  else
 	    /* This is not ideal, but each location may have a
@@ -12631,14 +12628,14 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  uiout->field_signed ("line", sal2.line);
 	  uiout->text ("\n");
 
-	  b->loc->line_number = sal2.line;
-	  b->loc->symtab = sym != NULL ? sal2.symtab : NULL;
+	  b->first_loc ().line_number = sal2.line;
+	  b->first_loc ().symtab = sym != NULL ? sal2.symtab : NULL;
 
 	  std::unique_ptr<explicit_location_spec> els
 	    (new explicit_location_spec ());
 	  els->source_filename
 	    = xstrdup (symtab_to_filename_for_display (sal2.symtab));
-	  els->line_offset.offset = b->loc->line_number;
+	  els->line_offset.offset = b->first_loc ().line_number;
 	  els->line_offset.sign = LINE_OFFSET_NONE;
 
 	  b->locspec = std::move (els);
@@ -12875,9 +12872,10 @@ code_breakpoint::location_spec_to_sals (location_spec *locspec,
 	  && (condition_not_parsed
 	      || (this->has_locations ()
 		  && search_pspace != NULL
-		  && loc->pspace != search_pspace)
-	      || (this->has_locations () && loc->shlib_disabled)
-	      || (this->has_locations () && loc->pspace->executing_startup)
+		  && this->first_loc ().pspace != search_pspace)
+	      || (this->has_locations () && this->first_loc ().shlib_disabled)
+	      || (this->has_locations ()
+		  && this->first_loc ().pspace->executing_startup)
 	      || enable_state == bp_disabled))
 	not_found_and_ok = true;
 
@@ -13049,7 +13047,7 @@ breakpoint_re_set_thread (struct breakpoint *b)
 	 selected as current, and unless this was a vfork will have a
 	 different program space from the original thread.  Reset that
 	 as well.  */
-      b->loc->pspace = current_program_space;
+      b->first_loc ().pspace = current_program_space;
     }
 }
 

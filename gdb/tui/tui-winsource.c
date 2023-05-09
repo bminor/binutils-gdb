@@ -640,7 +640,7 @@ tui_source_window_base::update_breakpoint_info
 		    mode |= TUI_BP_ENABLED;
 		  if (bp->hit_count)
 		    mode |= TUI_BP_HIT;
-		  if (bp->loc->cond)
+		  if (bp->first_loc ().cond)
 		    mode |= TUI_BP_CONDITIONAL;
 		  if (bp->type == bp_hardware_breakpoint)
 		    mode |= TUI_BP_HARDWARE;
