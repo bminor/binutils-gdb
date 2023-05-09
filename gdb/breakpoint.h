@@ -616,7 +616,7 @@ using bp_location_range = iterator_range<bp_location_iterator>;
 
 /* Abstract base class representing all kinds of breakpoints.  */
 
-struct breakpoint
+struct breakpoint : public intrusive_list_node<breakpoint>
 {
   breakpoint (struct gdbarch *gdbarch_, enum bptype bptype,
 	      bool temp = true, const char *cond_string = nullptr);
@@ -791,7 +791,6 @@ struct breakpoint
     /* Nothing to do.  */
   }
 
-  breakpoint *next = NULL;
   /* Type of breakpoint.  */
   bptype type = bp_none;
   /* Zero means disabled; remember the info but don't break here.  */
@@ -1894,11 +1893,15 @@ public:
 
 /* Breakpoint linked list iterator.  */
 
-using breakpoint_iterator = next_iterator<breakpoint>;
+using breakpoint_list = intrusive_list<breakpoint>;
+
+using breakpoint_iterator = breakpoint_list::iterator;
+
+using breakpoint_pointer_iterator = reference_to_pointer_iterator<breakpoint_iterator>;
 
 /* Breakpoint linked list range.  */
 
-using breakpoint_range = iterator_range<breakpoint_iterator>;
+using breakpoint_range = iterator_range<breakpoint_pointer_iterator>;
 
 /* Return a range to iterate over all breakpoints.  */
 
@@ -1925,7 +1928,7 @@ struct tracepoint_filter
 /* Breakpoint linked list iterator, filtering to only keep tracepoints.  */
 
 using tracepoint_iterator
-  = filtered_iterator<breakpoint_iterator, tracepoint_filter>;
+  = filtered_iterator<breakpoint_pointer_iterator, tracepoint_filter>;
 
 /* Breakpoint linked list range, filtering to only keep tracepoints.  */
 

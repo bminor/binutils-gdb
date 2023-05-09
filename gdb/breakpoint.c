@@ -614,14 +614,16 @@ bool target_exact_watchpoints = false;
 
 /* Chains of all breakpoints defined.  */
 
-static struct breakpoint *breakpoint_chain;
+static intrusive_list<breakpoint> breakpoint_chain;
 
 /* See breakpoint.h.  */
 
 breakpoint_range
 all_breakpoints ()
 {
-  return breakpoint_range (breakpoint_chain);
+  return breakpoint_range
+    (breakpoint_pointer_iterator (breakpoint_chain.begin ()),
+     breakpoint_pointer_iterator (breakpoint_chain.end ()));
 }
 
 /* See breakpoint.h.  */
@@ -637,7 +639,9 @@ all_breakpoints_safe ()
 tracepoint_range
 all_tracepoints ()
 {
-  return tracepoint_range (breakpoint_chain);
+  return tracepoint_range
+    (tracepoint_iterator (breakpoint_pointer_iterator (breakpoint_chain.begin ())),
+     tracepoint_iterator (breakpoint_pointer_iterator (breakpoint_chain.end ())));
 }
 
 /* Array is sorted by bp_location_is_less_than - primarily by the ADDRESS.  */
@@ -7428,23 +7432,12 @@ decref_bp_location (struct bp_location **blp)
 static breakpoint *
 add_to_breakpoint_chain (std::unique_ptr<breakpoint> &&b)
 {
-  struct breakpoint *b1;
-  struct breakpoint *result = b.get ();
-
   /* Add this breakpoint to the end of the chain so that a list of
      breakpoints will come out in order of increasing numbers.  */
 
-  b1 = breakpoint_chain;
-  if (b1 == 0)
-    breakpoint_chain = b.release ();
-  else
-    {
-      while (b1->next)
-	b1 = b1->next;
-      b1->next = b.release ();
-    }
+  breakpoint_chain.push_back (*b.release ());
 
-  return result;
+  return &breakpoint_chain.back ();
 }
 
 /* Initialize loc->function_name.  */
@@ -12372,15 +12365,7 @@ delete_breakpoint (struct breakpoint *bpt)
   if (bpt->number)
     gdb::observers::breakpoint_deleted.notify (bpt);
 
-  if (breakpoint_chain == bpt)
-    breakpoint_chain = bpt->next;
-
-  for (breakpoint *b : all_breakpoints ())
-    if (b->next == bpt)
-      {
-	b->next = bpt->next;
-	break;
-      }
+  breakpoint_chain.erase (breakpoint_chain.iterator_to (*bpt));
 
   /* Be sure no bpstat's are pointing at the breakpoint after it's
      been freed.  */
@@ -14442,7 +14427,6 @@ _initialize_breakpoint ()
   gdb::observers::memory_changed.attach (invalidate_bp_value_on_memory_change,
 					 "breakpoint");
 
-  breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful
      before a breakpoint is set.  */
   breakpoint_count = 0;
