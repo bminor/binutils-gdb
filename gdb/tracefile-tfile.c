@@ -667,7 +667,7 @@ tfile_get_traceframe_address (off_t tframe_offset)
 
   tp = get_tracepoint_by_number_on_target (tpnum);
   /* FIXME this is a poor heuristic if multiple locations.  */
-  if (tp && tp->loc)
+  if (tp != nullptr && tp->has_locations ())
     addr = tp->loc->address;
 
   /* Restore our seek position.  */

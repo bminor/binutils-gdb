@@ -1524,7 +1524,7 @@ process_tracepoint_on_disconnect (void)
      user that pending tracepoint will no longer work.  */
   for (breakpoint *b : all_tracepoints ())
     {
-      if (b->loc == NULL)
+      if (!b->has_locations ())
 	{
 	  has_pending_p = 1;
 	  break;

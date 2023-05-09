@@ -633,6 +633,18 @@ struct breakpoint
   /* Allocate a location for this breakpoint.  */
   virtual struct bp_location *allocate_location ();
 
+  /* Return true if this breakpoint has a least one location.  */
+  bool has_locations () const
+  { return this->loc != nullptr; }
+
+  /* Return true if this breakpoint has a single location.  */
+  bool has_single_location () const
+  { return this->loc != nullptr && this->loc->next == nullptr; }
+
+  /* Return true if this breakpoint has multiple locations.  */
+  bool has_multiple_locations () const
+  { return this->loc != nullptr && this->loc->next != nullptr; }
+
   /* Reevaluate a breakpoint.  This is necessary after symbols change
      (e.g., an executable or DSO was loaded, or the inferior just
      started).  */

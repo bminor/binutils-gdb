@@ -12218,7 +12218,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
     return;
 
   /* Same if there are no locations... */
-  if (c->loc == NULL)
+  if (!c->has_locations ())
     return;
 
   /* Compute the condition expression in text form, from the specific

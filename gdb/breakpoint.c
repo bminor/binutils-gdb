@@ -818,7 +818,7 @@ has_multiple_locations (int num)
 {
   for (breakpoint *b : all_breakpoints ())
     if (b->number == num)
-      return b->loc != nullptr && b->loc->next != nullptr;
+      return b->has_multiple_locations ();
 
   return false;
 }
@@ -1877,7 +1877,7 @@ static void
 add_dummy_location (struct breakpoint *b,
 		    struct program_space *pspace)
 {
-  gdb_assert (b->loc == NULL);
+  gdb_assert (!b->has_locations ());
 
   b->loc = new bp_location (b, bp_loc_other);
   b->loc->pspace = pspace;
@@ -2242,7 +2242,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 	 above left it without any location set up.  But,
 	 bpstat_stop_status requires a location to be able to report
 	 stops, so make sure there's at least a dummy one.  */
-      if (b->type == bp_watchpoint && b->loc == NULL)
+      if (b->type == bp_watchpoint && !b->has_locations ())
 	add_dummy_location (b, frame_pspace);
     }
   else if (!within_current_scope)
@@ -4108,7 +4108,7 @@ breakpoint_init_inferior (enum inf_context context)
 
   for (breakpoint *b : all_breakpoints_safe ())
     {
-      if (b->loc && b->loc->pspace != pspace)
+      if (b->has_locations () && b->loc->pspace != pspace)
 	continue;
 
       switch (b->type)
@@ -4522,7 +4522,7 @@ bpstat_locno (const bpstat *bs)
 
   int locno = 0;
 
-  if (b != nullptr && b->loc != nullptr && b->loc->next != nullptr)
+  if (b != nullptr && b->has_multiple_locations ())
     {
       const bp_location *bl_i;
 
@@ -6056,7 +6056,9 @@ bool
 bpstat_should_step ()
 {
   for (breakpoint *b : all_breakpoints ())
-    if (breakpoint_enabled (b) && b->type == bp_watchpoint && b->loc != NULL)
+    if (breakpoint_enabled (b)
+	&& b->type == bp_watchpoint
+	&& b->has_locations ())
       return true;
 
   return false;
@@ -6359,10 +6361,11 @@ print_one_breakpoint_location (struct breakpoint *b,
   /* See comment in print_one_breakpoint concerning treatment of
      breakpoints with single disabled location.  */
   if (loc == NULL 
-      && (b->loc != NULL 
-	  && (b->loc->next != NULL
+      && (b->has_locations ()
+	  && (b->has_multiple_locations ()
 	      || !b->loc->enabled || b->loc->disabled_by_cond)))
     header_of_multiple = true;
+
   if (loc == NULL)
     loc = b->loc;
 
@@ -6453,7 +6456,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	      if (header_of_multiple)
 		uiout->field_string ("addr", "<MULTIPLE>",
 				     metadata_style.style ());
-	      else if (b->loc == NULL || loc->shlib_disabled)
+	      else if (!b->has_locations () || loc->shlib_disabled)
 		uiout->field_string ("addr", "<PENDING>",
 				     metadata_style.style ());
 	      else
@@ -6463,7 +6466,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  annotate_field (5);
 	  if (!header_of_multiple)
 	    print_breakpoint_location (b, loc);
-	  if (b->loc)
+	  if (b->has_locations ())
 	    *last_loc = b->loc;
 	}
     }
@@ -6742,9 +6745,10 @@ print_one_breakpoint (breakpoint *b, const bp_location **last_loc, int allflag)
 	  && (!is_catchpoint (b) || is_exception_catchpoint (b)
 	      || is_ada_exception_catchpoint (b))
 	  && (allflag
-	      || (b->loc && (b->loc->next
-			     || !b->loc->enabled
-			     || b->loc->disabled_by_cond))))
+	      || (b->has_locations ()
+		  && (b->has_multiple_locations ()
+		      || !b->loc->enabled
+		      || b->loc->disabled_by_cond))))
 	{
 	  gdb::optional<ui_out_emit_list> locations_list;
 
@@ -6807,7 +6811,7 @@ user_breakpoint_p (struct breakpoint *b)
 int
 pending_breakpoint_p (struct breakpoint *b)
 {
-  return b->loc == NULL;
+  return !b->has_locations ();
 }
 
 /* Print information on breakpoints (including watchpoints and tracepoints).
@@ -7484,8 +7488,9 @@ set_breakpoint_location_function (struct bp_location *loc)
 
 	  function_name = loc->msymbol->linkage_name ();
 
-	  if (b->type == bp_breakpoint && b->loc == loc
-	      && loc->next == NULL && b->related_breakpoint == b)
+	  if (b->type == bp_breakpoint
+	      && b->has_single_location ()
+	      && b->related_breakpoint == b)
 	    {
 	      /* Create only the whole new breakpoint of this type but do not
 		 mess more complicated breakpoints with multiple locations.  */
@@ -9376,13 +9381,12 @@ ranged_breakpoint::resources_needed (const struct bp_location *bl)
 enum print_stop_action
 ranged_breakpoint::print_it (const bpstat *bs) const
 {
-  struct bp_location *bl = loc;
   struct ui_out *uiout = current_uiout;
 
   gdb_assert (type == bp_hardware_breakpoint);
 
   /* Ranged breakpoints have only one location.  */
-  gdb_assert (bl && bl->next == NULL);
+  gdb_assert (this->has_single_location ());
 
   annotate_breakpoint (number);
 
@@ -9414,7 +9418,7 @@ ranged_breakpoint::print_one (const bp_location **last_loc) const
   struct ui_out *uiout = current_uiout;
 
   /* Ranged breakpoints have only one location.  */
-  gdb_assert (bl && bl->next == NULL);
+  gdb_assert (this->has_single_location ());
 
   get_user_print_options (&opts);
 
@@ -9941,7 +9945,7 @@ masked_watchpoint::print_it (const bpstat *bs) const
   struct ui_out *uiout = current_uiout;
 
   /* Masked watchpoints have only one location.  */
-  gdb_assert (this->loc && this->loc->next == nullptr);
+  gdb_assert (this->has_single_location ());
 
   annotate_watchpoint (this->number);
   maybe_print_thread_hit_breakpoint (uiout);
@@ -9987,7 +9991,7 @@ void
 masked_watchpoint::print_one_detail (struct ui_out *uiout) const
 {
   /* Masked watchpoints have only one location.  */
-  gdb_assert (loc && loc->next == NULL);
+  gdb_assert (this->has_single_location ());
 
   uiout->text ("\tmask ");
   uiout->field_core_addr ("mask", loc->gdbarch, hw_wp_mask);
@@ -11573,7 +11577,7 @@ code_breakpoint::say_where () const
 
   /* i18n: cagney/2005-02-11: Below needs to be merged into a
      single string.  */
-  if (loc == NULL)
+  if (!this->has_locations ())
     {
       /* For pending locations, the output differs slightly based
 	 on extra_string.  If this is non-NULL, it contains either
@@ -11606,7 +11610,7 @@ code_breakpoint::say_where () const
 	{
 	  /* If there is a single location, we can print the location
 	     more nicely.  */
-	  if (loc->next == NULL)
+	  if (!this->has_multiple_locations ())
 	    {
 	      const char *filename
 		= symtab_to_filename_for_display (loc->symtab);
@@ -11622,7 +11626,7 @@ code_breakpoint::say_where () const
 	    gdb_printf (": %s.", locspec->to_string ());
 	}
 
-      if (loc->next)
+      if (this->has_multiple_locations ())
 	{
 	  struct bp_location *iter = loc;
 	  int n = 0;
@@ -11881,7 +11885,7 @@ ordinary_breakpoint::print_recreate (struct ui_file *fp) const
 
   /* Print out extra_string if this breakpoint is pending.  It might
      contain, for example, conditions that were set by the user.  */
-  if (loc == NULL && extra_string != NULL)
+  if (!this->has_locations () && extra_string != NULL)
     gdb_printf (fp, " %s", extra_string.get ());
 
   print_recreate_thread (fp);
@@ -12869,11 +12873,11 @@ code_breakpoint::location_spec_to_sals (location_spec *locspec,
 	 errors.  */
       if (e.error == NOT_FOUND_ERROR
 	  && (condition_not_parsed
-	      || (loc != NULL
+	      || (this->has_locations ()
 		  && search_pspace != NULL
 		  && loc->pspace != search_pspace)
-	      || (loc && loc->shlib_disabled)
-	      || (loc && loc->pspace->executing_startup)
+	      || (this->has_locations () && loc->shlib_disabled)
+	      || (this->has_locations () && loc->pspace->executing_startup)
 	      || enable_state == bp_disabled))
 	not_found_and_ok = true;
 
@@ -14267,7 +14271,7 @@ save_breakpoints (const char *filename, int from_tty,
       /* If this is a multi-location breakpoint, check if the locations
 	 should be individually disabled.  Watchpoint locations are
 	 special, and not user visible.  */
-      if (!is_watchpoint (tp) && tp->loc && tp->loc->next)
+      if (!is_watchpoint (tp) && tp->has_multiple_locations ())
 	{
 	  int n = 1;
 

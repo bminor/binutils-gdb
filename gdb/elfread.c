@@ -973,7 +973,7 @@ elf_gnu_ifunc_resolver_stop (code_breakpoint *b)
        b_return = b_return->related_breakpoint)
     {
       gdb_assert (b_return->type == bp_gnu_ifunc_resolver_return);
-      gdb_assert (b_return->loc != NULL && b_return->loc->next == NULL);
+      gdb_assert (b_return->has_single_location ());
       gdb_assert (frame_id_p (b_return->frame_id));
 
       if (b_return->thread == thread_id
@@ -1042,7 +1042,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
       b = (code_breakpoint *) b_next;
     }
   gdb_assert (b->type == bp_gnu_ifunc_resolver);
-  gdb_assert (b->loc->next == NULL);
+  gdb_assert (b->has_single_location ());
 
   func_func = value::allocate (func_func_type);
   func_func->set_lval (lval_memory);

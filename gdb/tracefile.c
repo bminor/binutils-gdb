@@ -390,11 +390,11 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 
   /* We can often usefully guess that the PC is going to be the same
      as the address of the tracepoint.  */
-  if (tp == NULL || tp->loc == NULL)
+  if (tp == nullptr || !tp->has_locations ())
     return;
 
   /* But don't try to guess if tracepoint is multi-location...  */
-  if (tp->loc->next)
+  if (tp->has_multiple_locations ())
     {
       warning (_("Tracepoint %d has multiple "
 		 "locations, cannot infer $pc"),
