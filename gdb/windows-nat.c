@@ -117,6 +117,9 @@ struct windows_per_inferior : public windows_process_info
 
   void invalidate_context (windows_thread_info *th);
 
+  void continue_one_thread (windows_thread_info *th,
+			    windows_continue_flags cont_flags);
+
   int windows_initialization_done = 0;
 
   std::vector<std::unique_ptr<windows_thread_info>> thread_list;
@@ -1213,6 +1216,44 @@ windows_per_inferior::handle_access_violation
   return false;
 }
 
+void
+windows_per_inferior::continue_one_thread (windows_thread_info *th,
+					   windows_continue_flags cont_flags)
+{
+  struct x86_debug_reg_state *state = x86_debug_reg_state (process_id);
+
+  windows_process.with_context (th, [&] (auto *context)
+    {
+      if (th->debug_registers_changed)
+	{
+	  context->ContextFlags |= WindowsContext<decltype(context)>::debug;
+	  context->Dr0 = state->dr_mirror[0];
+	  context->Dr1 = state->dr_mirror[1];
+	  context->Dr2 = state->dr_mirror[2];
+	  context->Dr3 = state->dr_mirror[3];
+	  context->Dr6 = DR6_CLEAR_VALUE;
+	  context->Dr7 = state->dr_control_mirror;
+	  th->debug_registers_changed = false;
+	}
+      if (context->ContextFlags)
+	{
+	  DWORD ec = 0;
+
+	  if (GetExitCodeThread (th->h, &ec)
+	      && ec == STILL_ACTIVE)
+	    {
+	      BOOL status = set_thread_context (th->h, context);
+
+	      if ((cont_flags & WCONT_KILLED) == 0)
+		CHECK (status);
+	    }
+	  context->ContextFlags = 0;
+	}
+    });
+
+  th->resume ();
+}
+
 /* Resume thread specified by ID, or all artificially suspended
    threads, if we are continuing execution.  See description of
    windows_continue_flags for CONT_FLAGS.  */
@@ -1234,42 +1275,7 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
 
   for (auto &th : windows_process.thread_list)
     if (id == -1 || id == (int) th->tid)
-      {
-	struct x86_debug_reg_state *state
-	  = x86_debug_reg_state (windows_process.process_id);
-
-	windows_process.with_context (th.get (), [&] (auto *context)
-	  {
-	    if (th->debug_registers_changed)
-	      {
-		context->ContextFlags
-		  |= WindowsContext<decltype(context)>::debug;
-		context->Dr0 = state->dr_mirror[0];
-		context->Dr1 = state->dr_mirror[1];
-		context->Dr2 = state->dr_mirror[2];
-		context->Dr3 = state->dr_mirror[3];
-		context->Dr6 = DR6_CLEAR_VALUE;
-		context->Dr7 = state->dr_control_mirror;
-		th->debug_registers_changed = false;
-	      }
-	    if (context->ContextFlags)
-	      {
-		DWORD ec = 0;
-
-		if (GetExitCodeThread (th->h, &ec)
-		    && ec == STILL_ACTIVE)
-		  {
-		    BOOL status = set_thread_context (th->h, context);
-
-		    if ((cont_flags & WCONT_KILLED) == 0)
-		      CHECK (status);
-		  }
-		context->ContextFlags = 0;
-	      }
-	  });
-
-	th->resume ();
-      }
+      windows_process.continue_one_thread (th.get (), cont_flags);
 
   continue_last_debug_event_main_thread
     (_("Failed to resume program execution"), continue_status,
