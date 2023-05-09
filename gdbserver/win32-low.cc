@@ -132,21 +132,6 @@ gdbserver_windows_process::find_thread (ptid_t ptid)
   return static_cast<windows_thread_info *> (thread->target_data ());
 }
 
-/* See nat/windows-nat.h.  */
-
-windows_thread_info *
-gdbserver_windows_process::thread_rec
-     (ptid_t ptid, thread_disposition_type disposition)
-{
-  thread_info *thread = find_thread_ptid (ptid);
-  if (thread == NULL)
-    return NULL;
-
-  auto th = static_cast<windows_thread_info *> (thread->target_data ());
-  win32_require_context (th);
-  return th;
-}
-
 /* Add a thread to the thread list.  */
 static windows_thread_info *
 child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
