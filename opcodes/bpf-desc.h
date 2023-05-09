@@ -50,7 +50,7 @@ extern "C" {
 #define CGEN_INT_INSN_P 0
 
 /* Maximum number of syntax elements in an instruction.  */
-#define CGEN_ACTUAL_MAX_SYNTAX_ELEMENTS 16
+#define CGEN_ACTUAL_MAX_SYNTAX_ELEMENTS 17
 
 /* CGEN_MNEMONIC_OPERANDS is defined if mnemonics have operands.
    e.g. In "b,a foo" the ",a" is an operand.  If mnemonics have operands
@@ -85,10 +85,24 @@ typedef enum insn_op_class {
  , OP_CLASS_ALU, OP_CLASS_JMP, OP_CLASS_JMP32, OP_CLASS_ALU64
 } INSN_OP_CLASS;
 
+/* Enum declaration for eBPF atomic insn opcode.  */
+typedef enum insn_atomic_op_le {
+  OP_ATOMIC_LE_ADD = 0, OP_ATOMIC_LE_OR = 64, OP_ATOMIC_LE_AND = 80, OP_ATOMIC_LE_XOR = 160
+ , OP_ATOMIC_LE_FADD = 1, OP_ATOMIC_LE_FOR = 65, OP_ATOMIC_LE_FAND = 81, OP_ATOMIC_LE_FXOR = 161
+ , OP_ATOMIC_LE_CHG = 225, OP_ATOMIC_LE_CMP = 241
+} INSN_ATOMIC_OP_LE;
+
+/* Enum declaration for eBPF atomic insn opcode.  */
+typedef enum insn_atomic_op_be {
+  OP_ATOMIC_BE_ADD = 0, OP_ATOMIC_BE_OR = 1073741824, OP_ATOMIC_BE_AND = 1342177280, OP_ATOMIC_BE_XOR = 0xa0000000
+ , OP_ATOMIC_BE_FADD = 16777216, OP_ATOMIC_BE_FOR = 1090519040, OP_ATOMIC_BE_FAND = 1358954496, OP_ATOMIC_BE_FXOR = 0xa1000000
+ , OP_ATOMIC_BE_CHG = 0xe1000000, OP_ATOMIC_BE_CMP = 0xf1000000
+} INSN_ATOMIC_OP_BE;
+
 /* Enum declaration for eBPF load/store instruction modes.  */
 typedef enum insn_op_mode {
   OP_MODE_IMM = 0, OP_MODE_ABS = 1, OP_MODE_IND = 2, OP_MODE_MEM = 3
- , OP_MODE_XADD = 6
+ , OP_MODE_ATOMIC = 6
 } INSN_OP_MODE;
 
 /* Enum declaration for eBPF load/store instruction sizes.  */
@@ -140,10 +154,10 @@ typedef enum cgen_ifld_attr {
 /* Enum declaration for bpf ifield types.  */
 typedef enum ifield_type {
   BPF_F_NIL, BPF_F_ANYOF, BPF_F_OP_CODE, BPF_F_OP_SRC
- , BPF_F_OP_CLASS, BPF_F_OP_MODE, BPF_F_OP_SIZE, BPF_F_DSTLE
- , BPF_F_SRCLE, BPF_F_DSTBE, BPF_F_SRCBE, BPF_F_REGS
- , BPF_F_OFFSET16, BPF_F_IMM32, BPF_F_IMM64_A, BPF_F_IMM64_B
- , BPF_F_IMM64_C, BPF_F_IMM64, BPF_F_MAX
+ , BPF_F_OP_CLASS, BPF_F_OP_MODE, BPF_F_OP_SIZE, BPF_F_OP_ATOMIC
+ , BPF_F_DSTLE, BPF_F_SRCLE, BPF_F_DSTBE, BPF_F_SRCBE
+ , BPF_F_REGS, BPF_F_OFFSET16, BPF_F_IMM32, BPF_F_IMM64_A
+ , BPF_F_IMM64_B, BPF_F_IMM64_C, BPF_F_IMM64, BPF_F_MAX
 } IFIELD_TYPE;
 
 #define MAX_IFLD ((int) BPF_F_MAX)
@@ -171,8 +185,8 @@ typedef enum cgen_hw_attr {
 /* Enum declaration for bpf hardware types.  */
 typedef enum cgen_hw_type {
   HW_H_MEMORY, HW_H_SINT, HW_H_UINT, HW_H_ADDR
- , HW_H_IADDR, HW_H_GPR, HW_H_PC, HW_H_SINT64
- , HW_MAX
+ , HW_H_IADDR, HW_H_GPR, HW_H_PC, HW_H_R0
+ , HW_H_SINT64, HW_MAX
 } CGEN_HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)

@@ -1,5 +1,12 @@
 2023-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* bpf-desc.c: Regenerate.
+	* bpf-desc.h: Likewise.
+	* bpf-opc.h: Likewise.
+	* bpf-opc.c: Likewise.
+
+2023-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* cgen-dis.in (print_insn): Use CGEN_INSN_LGUINT for instruction
 	base values.
 	* cgen-dis.c (cgen_dis_lookup_insn): Likewise.

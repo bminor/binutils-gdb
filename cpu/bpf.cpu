@@ -51,7 +51,7 @@
 ;; Whereas the 128-bit instructions (at the moment there is only one
 ;; of such instructions, lddw) have the form:
 ;;
-;;      code:8 regs:8 offset:16 imm:32 unused:32 imm:32 
+;;      code:8 regs:8 offset:16 imm:32 unused:32 imm:32
 ;;
 ;; In both formats `regs' is itself composed by two fields:
 ;;
@@ -83,7 +83,7 @@
 ;;
 ;; and another for big-endian with instructions like:
 ;;
-;;   code:8 dst:4 src:4 offset:16 imm:32 [unused:32 imm:32]
+;;   code:8 dst:4 src:4x offset:16 imm:32 [unused:32 imm:32]
 ;;
 ;; where `offset' and the immediate fields are encoded in
 ;; little-endian and big-endian byte-order, respectively.
@@ -206,7 +206,19 @@
   (type pc UDI)
   (get () (raw-reg h-pc))
   (set (newval) (set (raw-reg h-pc) newval)))
-  
+
+;; r0 register is used by compare and exchange atomic operation
+;; used in addressing by offset mode, so they compare/xchange
+;; values in memory with r0.
+
+(define-hardware
+  (name h-r0)
+  (comment "r0 register")
+  (attrs all-isas)
+  (type register DI)
+  (get () (raw-reg h-r0))
+  (set (newval) (set (raw-reg h-r0) newval)))
+
 ;; A 64-bit h-sint to be used by the imm64 operand below.  XXX this
 ;; shouldn't be needed, as h-sint is supposed to be able to hold
 ;; 64-bit values.  However, in practice CGEN limits h-sint to 32 bits
@@ -233,6 +245,7 @@
     (start x-start)
     (length x-length)
     (mode x-mode)))
+
 
 ;; For arithmetic and jump instructions the 8-bit code field is
 ;; subdivided in:
@@ -274,11 +287,54 @@
 (dwf f-op-mode "eBPF opcode mode" (all-isas) 0 8 7 3 UINT)
 (dwf f-op-size "eBPF opcode size" (all-isas) 0 8 4 2 UINT)
 
+;; Atomic instructions abuse f-imm32 to hold extra opcodes.
+;; These opcodes are structured like:
+;;
+;;
+;;          31       imm32        0
+;;         +-----------+-----+-----+
+;;         |           | op  |flags|
+;;         +-----------+-----+-----+
+;;                      --4-- --4--
+;;
+;; Where:
+;;
+;;   OP is one of ADD, AND, OR, XOR, CHG, CMP.
+;;   FLAGS is either 0 or FETCH.
+
+(dwf f-op-atomic "eBPF atomic insn opcode" (all-isas) 32 64 31 32 UINT)
+
+(define-normal-insn-enum insn-atomic-op-le "eBPF atomic insn opcode"
+    ((ISA ebpfle xbpfle)) OP_ATOMIC_LE_ f-op-atomic
+      ((ADD #x00)
+       (OR  #x40)
+       (AND #x50)
+       (XOR #xa0)
+       (FADD #x01)
+       (FOR  #x41)
+       (FAND #x51)
+       (FXOR #xa1)
+       (CHG #xe1)
+       (CMP #xf1)))
+
+(define-normal-insn-enum insn-atomic-op-be "eBPF atomic insn opcode"
+    ((ISA ebpfbe xbpfbe)) OP_ATOMIC_BE_ f-op-atomic
+      ((ADD #x00000000)
+       (OR  #x40000000)
+       (AND #x50000000)
+       (XOR #xa0000000)
+       (FADD #x01000000)
+       (FOR  #x41000000)
+       (FAND #x51000000)
+       (FXOR #xa1000000)
+       (CHG #xe1000000)
+       (CMP #xf1000000)))
+
 (define-normal-insn-enum insn-op-mode "eBPF load/store instruction modes"
   (all-isas) OP_MODE_ f-op-mode
   ((IMM #b000) (ABS #b001) (IND #b010) (MEM #b011)
    ;; #b100 and #b101 are used in classic BPF only, reserved in eBPF.
-   (XADD #b110)))
+   (ATOMIC #b110)))
 
 (define-normal-insn-enum insn-op-size "eBPF load/store instruction sizes"
   (all-isas) OP_SIZE_ f-op-size
@@ -541,7 +597,7 @@
 ;; variant for each ISA:
 ;;
 ;;  LDDWle for the little-endian ISA
-;;  LDDWbe for the big-endian ISA  
+;;  LDDWbe for the big-endian ISA
 
 (define-pmacro (define-lddw x-endian)
   (dni (.sym lddw x-endian)
@@ -614,7 +670,7 @@
        ()))
 
 (define-pmacro (define-ldind x-endian)
-  (begin    
+  (begin
     (dlind "w" W x-endian SI)
     (dlind "h" H x-endian HI)
     (dlind "b" B x-endian QI)
@@ -810,35 +866,91 @@
 
 ;;; Atomic instructions
 
-;; The atomic exchange-and-add instructions come in two flavors: one
+;; The atomic exchange-and-op instructions come in two flavors: one
 ;; for swapping 64-bit quantities and another for 32-bit quantities.
 
-(define-pmacro (sem-exchange-and-add x-endian x-mode)
+;; Semantic routines for regular atomic operations.
+(define-pmacro (sem-atomic-op x-semop x-endian x-mode)
   (sequence VOID ((x-mode tmp))
-            ;; XXX acquire lock in simulator...  as a hardware element?
             (set x-mode tmp (mem x-mode (add DI (.sym dst x-endian) offset16)))
             (set x-mode
                  (mem x-mode (add DI (.sym dst x-endian) offset16))
-                 (add x-mode tmp (.sym src x-endian)))))
+                 (x-semop x-mode tmp (.sym src x-endian)))))
+
+;; Semantic routines for atomic operations that involve exchange.
+(define-pmacro (sem-atomic-op-fetch x-semop x-endian x-mode)
+  (sequence VOID ((x-mode tmp))
+            (set x-mode tmp (mem x-mode (add DI (.sym dst x-endian) offset16)))
+            (set x-mode
+                 (mem x-mode (add DI (.sym dst x-endian) offset16))
+                 (x-semop x-mode tmp (.sym src x-endian)))
+            (set x-mode (.sym src x-endian) tmp)))
+
+;; Semantic routine for the atomic exchange.
+(define-pmacro (sem-exchange x-semop x-endian x-mode)
+  (sequence VOID ((x-mode tmp))
+            (set x-mode tmp (mem x-mode (add DI (.sym dst x-endian) offset16)))
+            (set x-mode (mem x-mode (add DI (.sym dst x-endian) offset16)) (.sym src x-endian))
+            (set x-mode (.sym src x-endian) tmp)))
+
+;; Semantic routine for compare-and-exchange.
+(define-pmacro (sem-cmp-exchange x-semop x-endian x-mode)
+  (sequence VOID ((x-mode tmp))
+            (set x-mode tmp (mem x-mode (add DI (.sym dst x-endian) offset16)))
+            (if (eq x-mode (reg h-r0) tmp)
+                 (set x-mode (mem x-mode (add DI (.sym dst x-endian) offset16)) (.sym src x-endian)))
+            (set x-mode (reg h-r0) (zext tmp))))
+
+;; Atomic operation without fetching.
+(define-pmacro (dai x-basename x-suffix x-size x-op-code x-endian x-mode semproc semop)
+  (begin
+     (dni (.str "x" x-basename x-suffix x-endian)
+          (.str "x" x-basename x-suffix x-endian)
+          (endian-isas x-endian)
+          (.str "x" x-basename x-suffix " [$dst" x-endian "+$offset16],$src" x-endian)
+          (+ (.sym src x-endian) (.sym dst x-endian)
+             offset16 OP_MODE_ATOMIC x-size OP_CLASS_STX x-op-code)
+          (semproc semop x-endian x-mode)
+          ())))
+
+(define-pmacro (dais x-basename x-op-code x-endian semproc semop)
+  (begin
+    (dai x-basename "dw" OP_SIZE_DW x-op-code x-endian DI semproc semop)
+    (dai x-basename "w" OP_SIZE_W x-op-code x-endian SI semproc semop)))
 
 (define-pmacro (define-atomic-insns x-endian)
   (begin
-    (dni (.str "xadddw" x-endian)
-         "xadddw"
-         (endian-isas x-endian)
-         (.str "xadddw [$dst" x-endian "+$offset16],$src" x-endian)
-         (+ (f-imm32 0) (.sym src x-endian) (.sym dst x-endian)
-            offset16 OP_MODE_XADD OP_SIZE_DW OP_CLASS_STX)
-         (sem-exchange-and-add x-endian DI)
-         ())
-    (dni (.str "xaddw" x-endian)
-         "xaddw"
-         (endian-isas x-endian)
-         (.str "xaddw [$dst" x-endian "+$offset16],$src" x-endian)
-         (+ (f-imm32 0) (.sym src x-endian) (.sym dst x-endian)
-            offset16 OP_MODE_XADD OP_SIZE_W OP_CLASS_STX)
-         (sem-exchange-and-add x-endian SI)
-         ())))
+    (dais add
+          (.if (.eq x-endian le) OP_ATOMIC_LE_ADD OP_ATOMIC_BE_ADD)
+          x-endian sem-atomic-op add)
+    (dais fadd
+          (.if (.eq x-endian le) OP_ATOMIC_LE_FADD OP_ATOMIC_BE_FADD)
+          x-endian sem-atomic-op-fetch add)
+    (dais or
+          (.if (.eq x-endian le) OP_ATOMIC_LE_OR OP_ATOMIC_BE_OR)
+          x-endian sem-atomic-op or)
+    (dais for
+          (.if (.eq x-endian le) OP_ATOMIC_LE_FOR OP_ATOMIC_BE_FOR)
+          x-endian sem-atomic-op-fetch or)
+    (dais and
+          (.if (.eq x-endian le) OP_ATOMIC_LE_AND OP_ATOMIC_BE_AND)
+          x-endian sem-atomic-op and)
+    (dais fand
+          (.if (.eq x-endian le) OP_ATOMIC_LE_FAND OP_ATOMIC_BE_FAND)
+          x-endian sem-atomic-op-fetch and)
+    (dais xor
+          (.if (.eq x-endian le) OP_ATOMIC_LE_XOR OP_ATOMIC_BE_XOR)
+          x-endian sem-atomic-op xor)
+    (dais fxor
+          (.if (.eq x-endian le) OP_ATOMIC_LE_FXOR OP_ATOMIC_BE_FXOR)
+          x-endian sem-atomic-op-fetch xor)
+    ;; CHG and CMP have only "fetch" variants.
+    (dais chg
+          (.if (.eq x-endian le) OP_ATOMIC_LE_CHG OP_ATOMIC_BE_CHG)
+          x-endian sem-exchange ())
+    (dais cmp
+          (.if (.eq x-endian le) OP_ATOMIC_LE_CMP OP_ATOMIC_BE_CMP)
+          x-endian sem-cmp-exchange ())))
 
 (define-atomic-insns le)
 (define-atomic-insns be)

@@ -149,6 +149,14 @@ static const CGEN_IFMT ifmt_exit ATTRIBUTE_UNUSED = {
   64, 64, 0xffffffffffffffff, { { F (F_IMM32) }, { F (F_OFFSET16) }, { F (F_REGS) }, { F (F_OP_CODE) }, { F (F_OP_SRC) }, { F (F_OP_CLASS) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_xadddwle ATTRIBUTE_UNUSED = {
+  64, 64, 0xffffffff000000ff, { { F (F_OP_ATOMIC) }, { F (F_OFFSET16) }, { F (F_SRCLE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_DSTLE) }, { F (F_OP_CLASS) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_xadddwbe ATTRIBUTE_UNUSED = {
+  64, 64, 0xffffffff000000ff, { { F (F_OP_ATOMIC) }, { F (F_OFFSET16) }, { F (F_DSTBE) }, { F (F_OP_MODE) }, { F (F_OP_SIZE) }, { F (F_SRCBE) }, { F (F_OP_CLASS) }, { 0 } }
+};
+
 #undef F
 
 #define A(a) (1 << CGEN_INSN_##a)
@@ -1680,25 +1688,241 @@ static const CGEN_OPCODE bpf_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
-    & ifmt_ldxwle, { 0xdb }
+    & ifmt_xadddwle, { 0xdb }
   },
 /* xaddw [$dstle+$offset16],$srcle */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
-    & ifmt_ldxwle, { 0xc3 }
+    & ifmt_xadddwle, { 0xc3 }
+  },
+/* xfadddw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x1000000db }
+  },
+/* xfaddw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x1000000c3 }
+  },
+/* xordw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x40000000db }
+  },
+/* xorw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x40000000c3 }
+  },
+/* xfordw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x41000000db }
+  },
+/* xforw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x41000000c3 }
+  },
+/* xanddw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x50000000db }
+  },
+/* xandw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x50000000c3 }
+  },
+/* xfanddw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x51000000db }
+  },
+/* xfandw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0x51000000c3 }
+  },
+/* xxordw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xa0000000db }
+  },
+/* xxorw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xa0000000c3 }
+  },
+/* xfxordw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xa1000000db }
+  },
+/* xfxorw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xa1000000c3 }
+  },
+/* xchgdw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xe1000000db }
+  },
+/* xchgw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xe1000000c3 }
+  },
+/* xcmpdw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xf1000000db }
+  },
+/* xcmpw [$dstle+$offset16],$srcle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTLE), '+', OP (OFFSET16), ']', ',', OP (SRCLE), 0 } },
+    & ifmt_xadddwle, { 0xf1000000c3 }
   },
 /* xadddw [$dstbe+$offset16],$srcbe */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
-    & ifmt_ldxwbe, { 0xdb }
+    & ifmt_xadddwbe, { 0xdb }
   },
 /* xaddw [$dstbe+$offset16],$srcbe */
   {
     { 0, 0, 0, 0 },
     { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
-    & ifmt_ldxwbe, { 0xc3 }
+    & ifmt_xadddwbe, { 0xc3 }
+  },
+/* xfadddw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x1000000000000db }
+  },
+/* xfaddw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x1000000000000c3 }
+  },
+/* xordw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x40000000000000db }
+  },
+/* xorw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x40000000000000c3 }
+  },
+/* xfordw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x41000000000000db }
+  },
+/* xforw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x41000000000000c3 }
+  },
+/* xanddw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x50000000000000db }
+  },
+/* xandw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x50000000000000c3 }
+  },
+/* xfanddw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x51000000000000db }
+  },
+/* xfandw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0x51000000000000c3 }
+  },
+/* xxordw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xa0000000000000db }
+  },
+/* xxorw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xa0000000000000c3 }
+  },
+/* xfxordw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xa1000000000000db }
+  },
+/* xfxorw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xa1000000000000c3 }
+  },
+/* xchgdw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xe1000000000000db }
+  },
+/* xchgw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xe1000000000000c3 }
+  },
+/* xcmpdw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xf1000000000000db }
+  },
+/* xcmpw [$dstbe+$offset16],$srcbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '[', OP (DSTBE), '+', OP (OFFSET16), ']', ',', OP (SRCBE), 0 } },
+    & ifmt_xadddwbe, { 0xf1000000000000c3 }
   },
 /* brkpt */
   {

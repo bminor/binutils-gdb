@@ -177,6 +177,7 @@ const CGEN_HW_ENTRY bpf_cgen_hw_table[] =
   { "h-iaddr", HW_H_IADDR, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
   { "h-gpr", HW_H_GPR, CGEN_ASM_KEYWORD, & bpf_cgen_opval_h_gpr, { 0, { { { (1<<MACH_BPF)|(1<<MACH_XBPF), 0 } }, { { 1, "\xf0" } } } } },
   { "h-pc", HW_H_PC, CGEN_ASM_NONE, 0, { 0|A(PROFILE)|A(PC), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
+  { "h-r0", HW_H_R0, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
   { "h-sint64", HW_H_SINT64, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } } },
   { 0, 0, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } } }
 };
@@ -197,6 +198,7 @@ const CGEN_IFLD bpf_cgen_ifld_table[] =
   { BPF_F_OP_CLASS, "f-op-class", 0, 8, 2, 3, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
   { BPF_F_OP_MODE, "f-op-mode", 0, 8, 7, 3, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
   { BPF_F_OP_SIZE, "f-op-size", 0, 8, 4, 2, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
+  { BPF_F_OP_ATOMIC, "f-op-atomic", 32, 64, 31, 32, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xf0" } } } }  },
   { BPF_F_DSTLE, "f-dstle", 8, 8, 3, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }  },
   { BPF_F_SRCLE, "f-srcle", 8, 8, 7, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }  },
   { BPF_F_DSTBE, "f-dstbe", 8, 8, 7, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }  },
@@ -1571,6 +1573,96 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
     BPF_INSN_XADDWLE, "xaddwle", "xaddw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
   },
+/* xfadddw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFADDDWLE, "xfadddwle", "xfadddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xfaddw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFADDWLE, "xfaddwle", "xfaddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xordw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XORDWLE, "xordwle", "xordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xorw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XORWLE, "xorwle", "xorw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xfordw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFORDWLE, "xfordwle", "xfordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xforw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFORWLE, "xforwle", "xforw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xanddw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XANDDWLE, "xanddwle", "xanddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xandw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XANDWLE, "xandwle", "xandw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xfanddw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFANDDWLE, "xfanddwle", "xfanddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xfandw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFANDWLE, "xfandwle", "xfandw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xxordw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XXORDWLE, "xxordwle", "xxordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xxorw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XXORWLE, "xxorwle", "xxorw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xfxordw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFXORDWLE, "xfxordwle", "xfxordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xfxorw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XFXORWLE, "xfxorwle", "xfxorw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xchgdw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XCHGDWLE, "xchgdwle", "xchgdw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xchgw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XCHGWLE, "xchgwle", "xchgw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xcmpdw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XCMPDWLE, "xcmpdwle", "xcmpdw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
+/* xcmpw [$dstle+$offset16],$srcle */
+  {
+    BPF_INSN_XCMPWLE, "xcmpwle", "xcmpw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xa0" } } } }
+  },
 /* xadddw [$dstbe+$offset16],$srcbe */
   {
     BPF_INSN_XADDDWBE, "xadddwbe", "xadddw", 64,
@@ -1579,6 +1671,96 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
 /* xaddw [$dstbe+$offset16],$srcbe */
   {
     BPF_INSN_XADDWBE, "xaddwbe", "xaddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xfadddw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFADDDWBE, "xfadddwbe", "xfadddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xfaddw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFADDWBE, "xfaddwbe", "xfaddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xordw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XORDWBE, "xordwbe", "xordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xorw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XORWBE, "xorwbe", "xorw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xfordw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFORDWBE, "xfordwbe", "xfordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xforw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFORWBE, "xforwbe", "xforw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xanddw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XANDDWBE, "xanddwbe", "xanddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xandw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XANDWBE, "xandwbe", "xandw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xfanddw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFANDDWBE, "xfanddwbe", "xfanddw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xfandw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFANDWBE, "xfandwbe", "xfandw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xxordw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XXORDWBE, "xxordwbe", "xxordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xxorw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XXORWBE, "xxorwbe", "xxorw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xfxordw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFXORDWBE, "xfxordwbe", "xfxordw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xfxorw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XFXORWBE, "xfxorwbe", "xfxorw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xchgdw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XCHGDWBE, "xchgdwbe", "xchgdw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xchgw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XCHGWBE, "xchgwbe", "xchgw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xcmpdw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XCMPDWBE, "xcmpdwbe", "xcmpdw", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
+  },
+/* xcmpw [$dstbe+$offset16],$srcbe */
+  {
+    BPF_INSN_XCMPWBE, "xcmpwbe", "xcmpw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x50" } } } }
   },
 /* brkpt */

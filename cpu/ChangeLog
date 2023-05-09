@@ -1,3 +1,7 @@
+2023-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.cpu: Add BPF V3 atomic instructions, along with semantics.
+
 2023-03-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 30231
