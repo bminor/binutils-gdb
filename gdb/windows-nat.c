@@ -91,8 +91,6 @@ struct windows_solib
 struct windows_per_inferior : public windows_process_info
 {
   windows_thread_info *find_thread (ptid_t ptid) override;
-  windows_thread_info *thread_rec (ptid_t ptid,
-				   thread_disposition_type disposition) override;
   DWORD handle_output_debug_string (struct target_waitstatus *ourstatus) override;
   void handle_load_dll (const char *dll_name, LPVOID base) override;
   void handle_unload_dll () override;
@@ -535,14 +533,6 @@ windows_per_inferior::invalidate_context (windows_thread_info *th)
   else
 #endif
     th->context.ContextFlags = 0;
-}
-
-windows_thread_info *
-windows_per_inferior::thread_rec
-     (ptid_t ptid, thread_disposition_type disposition)
-{
-  windows_thread_info *th = find_thread (ptid);
-  return th;
 }
 
 /* Add a thread to the thread list.

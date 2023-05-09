@@ -98,11 +98,6 @@ struct windows_thread_info
 };
 
 
-/* Possible values to pass to 'thread_rec'.  */
-enum thread_disposition_type
-{
-};
-
 /* A single pending stop.  See "pending_stops" for more
    information.  */
 struct pending_stop
@@ -171,14 +166,6 @@ struct windows_process_info
 
      This function must be supplied by the embedding application.  */
   virtual windows_thread_info *find_thread (ptid_t ptid) = 0;
-
-  /* Find a thread record given a thread id.  THREAD_DISPOSITION
-     controls whether the thread is suspended, and whether the context
-     is invalidated.
-
-     This function must be supplied by the embedding application.  */
-  virtual windows_thread_info *thread_rec (ptid_t ptid,
-					   thread_disposition_type disposition) = 0;
 
   /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  Updates
      OURSTATUS and returns the thread id if this represents a thread
