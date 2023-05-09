@@ -702,7 +702,6 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
      {
        if (context->ContextFlags == 0)
 	 {
-	   th->suspend ();
 	   context->ContextFlags = WindowsContext<decltype(context)>::all;
 	   CHECK (get_thread_context (th->h, context));
 	 }
@@ -1229,12 +1228,6 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
 
 	th->resume ();
       }
-    else
-      {
-	/* When single-stepping a specific thread, other threads must
-	   be suspended.  */
-	th->suspend ();
-      }
 
   std::optional<unsigned> err;
   do_synchronously ([&] ()
@@ -1713,6 +1706,11 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		  th->stopped_at_software_breakpoint = true;
 		  th->pc_adjusted = false;
 		}
+
+	      /* All-stop, suspend all threads until they are
+		 explicitly resumed.  */
+	      for (auto &thr : windows_process.thread_list)
+		thr->suspend ();
 	    }
 
 	  return result;
