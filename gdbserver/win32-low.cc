@@ -1226,6 +1226,11 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	    OUTMSG2 (("Child Stopped with signal = %d \n",
 		      ourstatus->sig ()));
 	    maybe_adjust_pc ();
+
+	    /* All-stop, suspend all threads until they are explicitly
+	       resumed.  */
+	    for_each_thread (suspend_one_thread);
+
 	    return debug_event_ptid (&windows_process.current_event);
 	  }
 	default:
