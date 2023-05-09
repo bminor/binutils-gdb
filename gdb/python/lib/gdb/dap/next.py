@@ -44,6 +44,12 @@ def stepIn(*, threadId, granularity="statement", **args):
     send_gdb(ExecutionInvoker(cmd, StopKinds.STEP))
 
 
+@request("stepOut")
+def step_out(*, threadId):
+    _handle_thread_step(threadId)
+    send_gdb(ExecutionInvoker("finish", StopKinds.STEP))
+
+
 @request("continue")
 def continue_request(**args):
     send_gdb(ExecutionInvoker("continue", None))

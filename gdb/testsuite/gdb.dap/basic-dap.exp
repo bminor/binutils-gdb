@@ -146,6 +146,11 @@ dap_wait_for_event_and_check "stopped at line breakpoint" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" $line_bpno
 
+dap_check_request_and_response "return from function" stepOut \
+    {o threadId [i 1]}
+dap_wait_for_event_and_check "stopped after return" stopped \
+    "body reason" step
+
 set obj [dap_check_request_and_response "evaluate global in main" \
 	     evaluate {o expression [s global_variable]}]
 dap_match_values "global value in main" [lindex $obj 0] \

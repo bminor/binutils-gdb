@@ -35,10 +35,18 @@ address_breakpoint_here ()
 {
 }
 
-int main ()
+int
+line_breakpoint_here ()
 {
   do_not_stop_here ();
   function_breakpoint_here ();
   address_breakpoint_here ();
   return 0;			/* BREAK */
+}
+
+
+int
+main ()
+{
+  return line_breakpoint_here ();
 }
