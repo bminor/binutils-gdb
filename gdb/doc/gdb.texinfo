@@ -39070,6 +39070,14 @@ If provided, this is a string that specifies the program to use.  This
 corresponds to the @code{file} command.  @xref{Files}.
 @end table
 
+@value{GDBN} defines a parameter that can be passed to the
+@code{attach} request:
+
+@table @code
+@item pid
+The process ID to which @value{GDBN} should attach.  @xref{Attach}.
+@end table
+
 @node JIT Interface
 @chapter JIT Compilation Interface
 @cindex just-in-time compilation

@@ -16,7 +16,7 @@
 import gdb
 from .events import ExecutionInvoker
 from .server import request, capability
-from .startup import send_gdb, in_gdb_thread
+from .startup import send_gdb, send_gdb_with_response, in_gdb_thread
 
 
 _program = None
@@ -43,6 +43,17 @@ def launch(*, program=None, args=[], env=None, **extra):
         send_gdb(f"file {_program}")
     if len(args) > 0 or env is not None:
         send_gdb(lambda: _set_args_env(args, env))
+
+
+@request("attach")
+def attach(*, pid, **args):
+    # Ensure configurationDone does not try to run.
+    global _program
+    _program = None
+    # Use send_gdb_with_response to ensure we get an error if the
+    # attach fails.
+    send_gdb_with_response("attach " + str(pid))
+    return None
 
 
 @capability("supportsConfigurationDoneRequest")
