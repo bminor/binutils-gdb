@@ -24,19 +24,17 @@ clean_restart
 # expected error.  If WARNING_OR_ERROR is empty, it is expected that
 # GDB prints no text other than the print result.
 proc test_shift {lang cmd result_re {warning_or_error ""}} {
-    set cmd_re [string_to_regexp $cmd]
-
     if {$lang == "go"} {
 	if {$warning_or_error != ""} {
 	    set error_re "[string_to_regexp $warning_or_error]"
 	    gdb_test_multiple $cmd "" {
-		-re -wrap "^$cmd_re\r\n$error_re" {
+		-re -wrap "^$error_re" {
 		    pass $gdb_test_name
 		}
 	    }
 	} else {
 	    gdb_test_multiple $cmd "" {
-		-re -wrap "^$cmd_re\r\n\\$$::decimal$result_re" {
+		-re -wrap "^\\$$::decimal$result_re" {
 		    pass $gdb_test_name
 		}
 	    }
@@ -49,7 +47,7 @@ proc test_shift {lang cmd result_re {warning_or_error ""}} {
 	}
 
 	gdb_test_multiple $cmd "" {
-	    -re -wrap "^$cmd_re\r\n$warning_re\\$$::decimal$result_re" {
+	    -re -wrap "^$warning_re\\$$::decimal$result_re" {
 		pass $gdb_test_name
 	    }
 	}

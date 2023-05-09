@@ -80,8 +80,7 @@ proc test_wrap_cli_tui { auto_detected_width } {
     set cmd "maint info screen"
     set re \
 	[multi_line \
-	     "^$cmd" \
-	     $re1 \
+	     "^$re1" \
 	     $re2 \
 	    ".*"]
     gdb_test_multiple $cmd "" {

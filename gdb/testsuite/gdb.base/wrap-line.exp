@@ -57,8 +57,7 @@ proc get_screen_width { } {
     set cmd "maint info screen"
     set re \
 	[multi_line \
-	     ^$cmd \
-	     $re1 \
+	     ^$re1 \
 	     $re2 \
 	     "(?:$re3" \
 	     ")?$re4" \

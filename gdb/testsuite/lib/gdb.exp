@@ -980,6 +980,8 @@ proc fill_in_default_prompt {prompt_regexp with_anchor} {
 #           pass $gdb_test_name
 #       }
 #   }
+# The special handling of '^' that is available in gdb_test is also
+# supported in gdb_test_multiple when -wrap is used.
 #
 # In EXPECT_ARGUMENTS, a pattern flag -early can be used.  It makes sure the
 # pattern is inserted before any implicit pattern added by gdb_test_multiple.
@@ -1125,6 +1127,19 @@ proc gdb_test_multiple { command message args } {
 	set expecting_action 1
 	if { $wrap_pattern } {
 	    # Wrap subst_item as is done for the gdb_test PATTERN argument.
+	    if {[string range $subst_item 0 0] eq "^"} {
+		if {$command ne ""} {
+		    set command_regex [string_to_regexp $command]
+		    set subst_item [string range $subst_item 1 end]
+		    if {[string length "$subst_item"] > 0} {
+			# We have an output pattern (other than the '^'),
+			# add a newline at the start, this will eventually
+			# sit between the command and the output pattern.
+			set subst_item "\r\n${subst_item}"
+		    }
+		    set subst_item "^${command_regex}${subst_item}"
+		}
+	    }
 	    lappend $current_list \
 		"(?:$subst_item)\r\n$prompt_regexp"
 	    set wrap_pattern 0
@@ -1465,10 +1480,16 @@ proc gdb_test { args } {
     # additional pattern that matches the command immediately after
     # the '^'.
     if {[string range $pattern 0 0] eq "^"} {
-	set command_regex [string_to_regexp $command]
-	set pattern [string range $pattern 1 end]
-	if {$command_regex ne ""} {
-	    set pattern "^${command_regex}\r\n$pattern"
+	if {$command ne ""} {
+	    set command_regex [string_to_regexp $command]
+	    set pattern [string range $pattern 1 end]
+	    if {[string length "$pattern"] > 0} {
+		# We have an output pattern (other than the '^'), add a
+		# newline at the start, this will eventually sit between the
+		# command and the output pattern.
+		set pattern "\r\n$pattern"
+	    }
+	    set pattern "^${command_regex}${pattern}"
 	}
     }
 
@@ -6174,9 +6195,8 @@ proc with_set { var val body } {
 	perror "Did not manage to set $var"
     } else {
 	# Set var.
-	set cmd "set $var $val"
-	gdb_test_multiple $cmd "" {
-	    -re -wrap "^$cmd" {
+	gdb_test_multiple "set $var $val" "" {
+	    -re -wrap "^" {
 	    }
 	    -re -wrap " is set to \"?$val\"?\\." {
 	    }
@@ -6187,9 +6207,8 @@ proc with_set { var val body } {
 
     # Restore saved setting.
     if { $save != "" } {
-	set cmd "set $var $save"
-	gdb_test_multiple $cmd "" {
-	    -re -wrap "^$cmd" {
+	gdb_test_multiple "set $var $save" "" {
+	    -re -wrap "^" {
 	    }
 	    -re -wrap "is set to \"?$save\"?( \\(\[^)\]*\\))?\\." {
 	    }
@@ -7753,7 +7772,7 @@ proc get_valueof { fmt exp default {test ""} } {
 
     set val ${default}
     gdb_test_multiple "print${fmt} ${exp}" "$test" {
-	-re "\\$\[0-9\]* = (\[^\r\n\]*)\r\n$gdb_prompt $" {
+	-re -wrap "^\\$\[0-9\]* = (\[^\r\n\]*)" {
 	    set val $expect_out(1,string)
 	    pass "$test"
 	}
@@ -7802,7 +7821,7 @@ proc get_integer_valueof { exp default {test ""} } {
 
     set val ${default}
     gdb_test_multiple "print /d ${exp}" "$test" {
-	-re "\\$\[0-9\]* = (\[-\]*\[0-9\]*).*$gdb_prompt $" {
+	-re -wrap "^\\$\[0-9\]* = (\[-\]*\[0-9\]*).*" {
 	    set val $expect_out(1,string)
 	    pass "$test"
 	}
