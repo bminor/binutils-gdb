@@ -301,7 +301,7 @@ AM_V_texidevnull = $(am__v_texidevnull_@AM_V@)
 am__v_texidevnull_ = $(am__v_texidevnull_@AM_DEFAULT_V@)
 am__v_texidevnull_0 = > /dev/null
 am__v_texidevnull_1 = 
-INFO_DEPS = ld.info
+INFO_DEPS = ld.info ldint.info
 am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
 DVIS = ld.dvi ldint.dvi
 PDFS = ld.pdf ldint.pdf
@@ -632,7 +632,7 @@ CXX_FOR_TARGET = ` \
 # Strip out sanitization options as we want to test building binaries without any extra paraphernalia
 CFLAGS_FOR_TARGET = `echo $(CFLAGS) | sed -e 's/-fsanitize=[^ ]*//g'`
 CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=[^ ]*//g'`
-info_TEXINFOS = ld.texi
+info_TEXINFOS = ld.texi ldint.texi
 ld_TEXINFOS = configdoc.texi
 noinst_TEXINFOS = ldint.texi
 man_MANS = ld.1
@@ -994,6 +994,7 @@ GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 # tracking will not cause them to be built beforehand.
 BUILT_SOURCES = $(GENERATED_HFILES) @MAINT@ $(GENERATED_CFILES) \
 	$(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
+
 OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ \
 	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ plugin.@OBJEXT@ \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
@@ -1053,7 +1054,7 @@ libdep_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libdep_la_LDFLAGS) $(LDFLAGS) -o $@
 
-MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
+MAINTAINERCLEANFILES = configdoc.texi ld.1 ldint.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.
 # development.sh is used to determine -Werror default.
@@ -1672,7 +1673,29 @@ ld.info: ld.texi $(ld_TEXINFOS)
 	fi; \
 	rm -rf $$backupdir; exit $$rc
 
-ldint.info: ld.texi $(ld_TEXINFOS)
+ld.dvi: ld.texi $(ld_TEXINFOS) 
+	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
+	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
+	$(TEXI2DVI) $(AM_V_texinfo) --build-dir=$(@:.dvi=.t2d) -o $@ $(AM_V_texidevnull) \
+	`test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi
+
+ld.pdf: ld.texi $(ld_TEXINFOS) 
+	$(AM_V_TEXI2PDF)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
+	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
+	$(TEXI2PDF) $(AM_V_texinfo) --build-dir=$(@:.pdf=.t2p) -o $@ $(AM_V_texidevnull) \
+	`test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi
+
+ld.html: ld.texi $(ld_TEXINFOS) 
+	$(AM_V_MAKEINFO)rm -rf $(@:.html=.htp)
+	$(AM_V_at)if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
+	 -o $(@:.html=.htp) `test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi; \
+	then \
+	  rm -rf $@ && mv $(@:.html=.htp) $@; \
+	else \
+	  rm -rf $(@:.html=.htp); exit 1; \
+	fi
+
+ldint.info: ldint.texi 
 	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
 	rm -rf $$backupdir && mkdir $$backupdir && \
 	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
@@ -1690,41 +1713,19 @@ ldint.info: ld.texi $(ld_TEXINFOS)
 	fi; \
 	rm -rf $$backupdir; exit $$rc
 
-ld.dvi: ld.texi $(ld_TEXINFOS) 
-	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
-	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
-	$(TEXI2DVI) $(AM_V_texinfo) --build-dir=$(@:.dvi=.t2d) -o $@ $(AM_V_texidevnull) \
-	`test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi
-
-ldint.dvi: ldint.texi $(ld_TEXINFOS)
+ldint.dvi: ldint.texi  
 	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2DVI) $(AM_V_texinfo) --build-dir=$(@:.dvi=.t2d) -o $@ $(AM_V_texidevnull) \
 	`test -f 'ldint.texi' || echo '$(srcdir)/'`ldint.texi
 
-ld.pdf: ld.texi $(ld_TEXINFOS)
-	$(AM_V_TEXI2PDF)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
-	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
-	$(TEXI2PDF) $(AM_V_texinfo) --build-dir=$(@:.pdf=.t2p) -o $@ $(AM_V_texidevnull) \
-	`test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi
-
-ldint.pdf: ldint.texi $(ld_TEXINFOS)
+ldint.pdf: ldint.texi  
 	$(AM_V_TEXI2PDF)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) $(AM_V_texinfo) --build-dir=$(@:.pdf=.t2p) -o $@ $(AM_V_texidevnull) \
 	`test -f 'ldint.texi' || echo '$(srcdir)/'`ldint.texi
 
-ld.html: ld.texi $(ld_TEXINFOS) 
-	$(AM_V_MAKEINFO)rm -rf $(@:.html=.htp)
-	$(AM_V_at)if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
-	 -o $(@:.html=.htp) `test -f 'ld.texi' || echo '$(srcdir)/'`ld.texi; \
-	then \
-	  rm -rf $@ && mv $(@:.html=.htp) $@; \
-	else \
-	  rm -rf $(@:.html=.htp); exit 1; \
-	fi
-
-ldint.html: ldint.texi $(ld_TEXINFOS)
+ldint.html: ldint.texi  
 	$(AM_V_MAKEINFO)rm -rf $(@:.html=.htp)
 	$(AM_V_at)if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
 	 -o $(@:.html=.htp) `test -f 'ldint.texi' || echo '$(srcdir)/'`ldint.texi; \
@@ -1733,7 +1734,6 @@ ldint.html: ldint.texi $(ld_TEXINFOS)
 	else \
 	  rm -rf $(@:.html=.htp); exit 1; \
 	fi
-
 .dvi.ps:
 	$(AM_V_DVIPS)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	$(DVIPS) $(AM_V_texinfo) -o $@ $<
@@ -1815,11 +1815,11 @@ dist-info: $(INFO_DEPS)
 	done
 
 mostlyclean-aminfo:
-	-rm -rf ld.t2d ld.t2p
+	-rm -rf ld.t2d ld.t2p ldint.t2d ldint.t2p
 
 clean-aminfo:
-	-test -z "ld.dvi ld.pdf ld.ps ld.html" \
-	|| rm -rf ld.dvi ld.pdf ld.ps ld.html
+	-test -z "ld.dvi ld.pdf ld.ps ld.html ldint.dvi ldint.pdf ldint.ps ldint.html" \
+	|| rm -rf ld.dvi ld.pdf ld.ps ld.html ldint.dvi ldint.pdf ldint.ps ldint.html
 
 maintainer-clean-aminfo:
 	@list='$(INFO_DEPS)'; for i in $$list; do \
@@ -2726,6 +2726,18 @@ ld.1: $(srcdir)/ld.texi configdoc.texi
 		mv -f $@.T$$$$ $@) || \
 		(rm -f $@.T$$$$ && exit 1)
 	$(AM_V_at)rm -f ld.pod
+
+# Build the man page from the texinfo file
+# The sed command removes the no-adjust Nroff command so that
+# the man output looks standard.
+ldint.1: $(srcdir)/ldint.texi configdoc.texi
+	$(AM_V_GEN)touch $@
+	$(AM_V_at)-$(TEXI2POD) $(MANCONF) < $(srcdir)/ldint.texi > ldint.pod
+	$(AM_V_at)-($(POD2MAN) ldint.pod | \
+		sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || \
+		(rm -f $@.T$$$$ && exit 1)
+	$(AM_V_at)rm -f ldint.pod
 mostlyclean-local:
 	-rm -rf tmpdir
 
