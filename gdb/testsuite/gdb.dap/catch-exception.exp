@@ -57,7 +57,8 @@ dap_wait_for_event_and_check "stopped at first raise" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" 2
 
-dap_check_request_and_response "continue to assert" continue
+dap_check_request_and_response "continue to assert" continue \
+    {o threadId [i 1]}
 dap_wait_for_event_and_check "stopped at assert" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" 1

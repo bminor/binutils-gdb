@@ -136,15 +136,18 @@ set obj [dap_check_request_and_response "evaluate global second time" \
 dap_match_values "global value after step" [lindex $obj 0] \
     "body result" 24
 
-dap_check_request_and_response "continue to address" continue
+dap_check_request_and_response "continue to address" continue \
+    {o threadId [i 1]}
 dap_wait_for_event_and_check "stopped at address breakpoint" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" $insn_bpno
 
-dap_check_request_and_response "continue to line" continue
+dap_check_request_and_response "continue to line" continue \
+    {o threadId [i 1]}
 dap_wait_for_event_and_check "stopped at line breakpoint" stopped \
     "body reason" breakpoint \
-    "body hitBreakpointIds" $line_bpno
+    "body hitBreakpointIds" $line_bpno \
+    "body allThreadsStopped" true
 
 dap_check_request_and_response "return from function" stepOut \
     {o threadId [i 1]}
