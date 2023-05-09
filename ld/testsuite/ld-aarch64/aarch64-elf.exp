@@ -401,6 +401,8 @@ run_dump_test_lp64 "rela-abs-relative"
 run_dump_test_lp64 "rela-abs-relative-be"
 run_dump_test_lp64 "rela-abs-relative-opt"
 
+run_dump_test_lp64 "rela-idempotent"
+
 run_dump_test_lp64 "pie-bind-locally"
 
 run_dump_test "property-bti-pac1"

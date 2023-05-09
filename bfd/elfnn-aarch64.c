@@ -478,7 +478,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ABS64),	/* name */
 	 false,			/* partial_inplace */
-	 ALL_ONES,		/* src_mask */
+	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -493,7 +493,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ABS32),	/* name */
 	 false,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -508,7 +508,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ABS16),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -523,7 +523,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (PREL64),	/* name */
 	 false,			/* partial_inplace */
-	 ALL_ONES,		/* src_mask */
+	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -538,7 +538,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (PREL32),	/* name */
 	 false,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -553,7 +553,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (PREL16),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -571,7 +571,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_UABS_G0),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -586,7 +586,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_UABS_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -601,7 +601,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_UABS_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -616,7 +616,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_UABS_G1_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -631,7 +631,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_UABS_G2),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -646,7 +646,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_UABS_G2_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -661,7 +661,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_UABS_G3),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -680,7 +680,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_SABS_G0),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -695,7 +695,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_SABS_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -710,7 +710,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_SABS_G2),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -728,7 +728,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_PREL_G0),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
 
@@ -743,7 +743,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_PREL_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
 
@@ -758,7 +758,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_PREL_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
 
@@ -773,7 +773,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_PREL_G1_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
 
@@ -788,7 +788,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_PREL_G2),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
 
@@ -803,7 +803,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_PREL_G2_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
 
@@ -818,7 +818,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_PREL_G3),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
 
@@ -836,7 +836,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LD_PREL_LO19),	/* name */
 	 false,			/* partial_inplace */
-	 0x7ffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x7ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -851,7 +851,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ADR_PREL_LO21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -866,7 +866,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ADR_PREL_PG_HI21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -881,7 +881,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ADR_PREL_PG_HI21_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -896,7 +896,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ADD_ABS_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -911,7 +911,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LDST8_ABS_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,				/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -928,7 +928,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TSTBR14),	/* name */
 	 false,			/* partial_inplace */
-	 0x3fff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3fff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -943,7 +943,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (CONDBR19),	/* name */
 	 false,			/* partial_inplace */
-	 0x7ffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x7ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -958,7 +958,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (JUMP26),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -973,7 +973,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (CALL26),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -988,7 +988,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LDST16_ABS_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffe,			/* src_mask */
+	 0,			/* src_mask */
 	 0xffe,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1003,7 +1003,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LDST32_ABS_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffc,			/* src_mask */
+	 0,			/* src_mask */
 	 0xffc,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1018,7 +1018,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LDST64_ABS_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xff8,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff8,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1033,7 +1033,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LDST128_ABS_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xff0,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1049,7 +1049,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,		/* special_function */
 	 AARCH64_R_STR (GOT_LD_PREL19),	/* name */
 	 false,				/* partial_inplace */
-	 0xffffe0,			/* src_mask */
+	 0,				/* src_mask */
 	 0xffffe0,			/* dst_mask */
 	 true),				/* pcrel_offset */
 
@@ -1065,7 +1065,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (ADR_GOT_PAGE),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1080,7 +1080,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LD64_GOT_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xff8,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff8,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1095,7 +1095,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LD32_GOT_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffc,			/* src_mask */
+	 0,			/* src_mask */
 	 0xffc,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1110,7 +1110,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_GOTOFF_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1125,7 +1125,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (MOVW_GOTOFF_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1140,7 +1140,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LD64_GOTOFF_LO15),	/* name */
 	 false,			/* partial_inplace */
-	 0x7ff8,			/* src_mask */
+	 0,				/* src_mask */
 	 0x7ff8,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1156,7 +1156,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LD32_GOTPAGE_LO14),	/* name */
 	 false,			/* partial_inplace */
-	 0x5ffc,		/* src_mask */
+	 0,			/* src_mask */
 	 0x5ffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1172,7 +1172,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (LD64_GOTPAGE_LO15),	/* name */
 	 false,			/* partial_inplace */
-	 0x7ff8,		/* src_mask */
+	 0,			/* src_mask */
 	 0x7ff8,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1188,7 +1188,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSGD_ADR_PAGE21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1202,7 +1202,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSGD_ADR_PREL21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1217,7 +1217,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSGD_ADD_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1232,7 +1232,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSGD_MOVW_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1247,7 +1247,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSGD_MOVW_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1261,7 +1261,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSIE_ADR_GOTTPREL_PAGE21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1275,7 +1275,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSIE_LD64_GOTTPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xff8,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff8,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1289,7 +1289,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSIE_LD32_GOTTPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffc,			/* src_mask */
+	 0,			/* src_mask */
 	 0xffc,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1303,7 +1303,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSIE_LD_GOTTPREL_PREL19),	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffffc,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1ffffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1317,7 +1317,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSIE_MOVW_GOTTPREL_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1331,7 +1331,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSIE_MOVW_GOTTPREL_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1346,7 +1346,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_ADD_DTPREL_HI12),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1361,7 +1361,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_ADD_DTPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1376,7 +1376,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_ADD_DTPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1391,7 +1391,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_ADD_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1407,7 +1407,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_ADR_PAGE21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1421,7 +1421,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_ADR_PREL21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1436,7 +1436,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST16_DTPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1451,7 +1451,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST16_DTPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1466,7 +1466,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST32_DTPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1481,7 +1481,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST32_DTPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1496,7 +1496,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST64_DTPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1511,7 +1511,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST64_DTPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x7fc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x7fc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1526,7 +1526,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST8_DTPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1541,7 +1541,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_LDST8_DTPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1556,7 +1556,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G0),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1571,7 +1571,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1586,7 +1586,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1601,7 +1601,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G1_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1616,7 +1616,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G2),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1630,7 +1630,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_MOVW_TPREL_G2),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1644,7 +1644,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_MOVW_TPREL_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1658,7 +1658,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_MOVW_TPREL_G1_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1672,7 +1672,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_MOVW_TPREL_G0),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1686,7 +1686,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_MOVW_TPREL_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1700,7 +1700,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_ADD_TPREL_HI12),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1714,7 +1714,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_ADD_TPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1728,7 +1728,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_ADD_TPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1743,7 +1743,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST16_TPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1758,7 +1758,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST16_TPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1773,7 +1773,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST32_TPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0xffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1788,7 +1788,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST32_TPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1803,7 +1803,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST64_TPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0x7fc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x7fc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1818,7 +1818,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST64_TPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x7fc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x7fc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1833,7 +1833,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST8_TPREL_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1848,7 +1848,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSLE_LDST8_TPREL_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0x3ffc00,		/* src_mask */
+	 0,			/* src_mask */
 	 0x3ffc00,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1862,7 +1862,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_LD_PREL19),	/* name */
 	 false,			/* partial_inplace */
-	 0x0ffffe0,		/* src_mask */
+	 0,			/* src_mask */
 	 0x0ffffe0,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1876,7 +1876,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_ADR_PREL21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1892,7 +1892,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_ADR_PAGE21),	/* name */
 	 false,			/* partial_inplace */
-	 0x1fffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -1907,7 +1907,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_LD64_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0xff8,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff8,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1922,7 +1922,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_LD32_LO12_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffc,			/* src_mask */
+	 0,			/* src_mask */
 	 0xffc,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1937,7 +1937,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_ADD_LO12),	/* name */
 	 false,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1951,7 +1951,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_OFF_G1),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1965,7 +1965,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_OFF_G0_NC),	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -2021,7 +2021,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (COPY),	/* name */
 	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -2035,7 +2035,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (GLOB_DAT),	/* name */
 	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -2049,7 +2049,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (JUMP_SLOT),	/* name */
 	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -2063,7 +2063,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (RELATIVE),	/* name */
 	 true,			/* partial_inplace */
-	 ALL_ONES,		/* src_mask */
+	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
