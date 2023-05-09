@@ -101,8 +101,6 @@ struct windows_thread_info
 /* Possible values to pass to 'thread_rec'.  */
 enum thread_disposition_type
 {
-  /* Invalidate the context, but do not suspend the thread.  */
-  DONT_SUSPEND,
 };
 
 /* A single pending stop.  See "pending_stops" for more

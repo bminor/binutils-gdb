@@ -366,10 +366,6 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 
   memcpy (&siginfo_er, rec, sizeof siginfo_er);
 
-  /* Record the context of the current thread.  */
-  thread_rec (ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
-	      DONT_SUSPEND);
-
   last_sig = GDB_SIGNAL_0;
 
   switch (code)

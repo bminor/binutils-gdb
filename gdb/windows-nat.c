@@ -542,17 +542,6 @@ windows_per_inferior::thread_rec
      (ptid_t ptid, thread_disposition_type disposition)
 {
   windows_thread_info *th = find_thread (ptid);
-
-  if (th != nullptr && !th->suspended)
-    {
-      switch (disposition)
-	{
-	case DONT_SUSPEND:
-	  th->suspended = -1;
-	  invalidate_context (th);
-	  break;
-	}
-    }
   return th;
 }
 
