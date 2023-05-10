@@ -1,6 +1,6 @@
 #objdump: -d --prefix-addresses --show-raw-insn
 #name: MIPS16 argumentless instruction size override
-#as: -32
+#as: -32 -mips32
 
 .*: +file format .*mips.*
 

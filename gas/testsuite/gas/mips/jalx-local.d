@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS JALX local symbol relocation
-#as: -32
+#as: -32 -mips32r2
 
 .*: +file format .*mips.*
 

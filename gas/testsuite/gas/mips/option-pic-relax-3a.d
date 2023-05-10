@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS `.option picX' with relaxation 3a
-#as: -32
+#as: -32 -mips1
 #source: option-pic-relax-3.s
 #dump: option-pic-relax-3.d
 

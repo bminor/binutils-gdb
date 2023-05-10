@@ -15,7 +15,7 @@ Disassembly of section \.plt:
 00000000100002a0 <bar@plt>:
     100002a0:	3c0f7fff 	lui	t3,0x7fff
     100002a4:	ddf97ff8 	ld	t9,32760\(t3\)
-    100002a8:	03200008 	jr	t9
+    100002a8:	0320000[89] 	jr	t9
     100002ac:	25f87ff8 	addiu	t8,t3,32760
 
 Disassembly of section \.text:

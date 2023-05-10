@@ -9,6 +9,6 @@ Disassembly of section \.text:
    c:	00000000 	nop
 
 0+000010 <\$bar>:
-  10:	03e00008 	jr	ra
+  10:	03e0000[89] 	jr	ra
   14:	00000000 	nop
 	\.\.\.

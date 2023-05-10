@@ -1,7 +1,7 @@
 #name: MIPS legacy NaN setting 4
 #source: empty.s
 #objdump: -p
-#as: -mnan=legacy
+#as: -mnan=legacy -march=from-abi
 
 .*:.*file format.*mips.*
 #failif

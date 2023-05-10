@@ -1,5 +1,6 @@
 #objdump: -dtz -j .text --prefix-addresses --show-raw-insn
 #name: MIPS .insn default file options
+#as: -march=from-abi
 
 # Check that .insn at the beginning of assembly sees default file options
 # such as the ISA mode right.

@@ -136,6 +136,7 @@ bar\@ :
 	.endm
 
 	.align	4
+	.set	mips32r2
 	.set	micromips
 	obj	16
 	fun	8

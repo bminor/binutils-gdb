@@ -1,4 +1,4 @@
-#as: -32
+#as: -32 -mips1
 #readelf: -A
 #name: MIPS module fp=32
 

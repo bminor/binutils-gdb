@@ -1,5 +1,5 @@
 #nm: -g --defined-only
-#as: -32
+#as: -32 -mips1
 #name: MIPS .org test 2
 
 0+001000 . bar

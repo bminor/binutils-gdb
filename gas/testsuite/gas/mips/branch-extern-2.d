@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: microMIPS branch to an external symbol
-#as: -32 -KPIC -mmicromips
+#as: -32 -KPIC -mips32r2 -mmicromips
 #source: branch-extern.s
 
 .*: +file format .*mips.*

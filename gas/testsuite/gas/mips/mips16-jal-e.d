@@ -1,6 +1,6 @@
 #objdump: -d --prefix-addresses --show-raw-insn
 #name: MIPS16 explicit extended JAL instructions
-#as: -32
+#as: -32 -mips32
 
 .*: +file format .*mips.*
 

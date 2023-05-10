@@ -1,4 +1,4 @@
-#as: -mfix-loongson2f-jump
+#as: -march=loongson2f -mfix-loongson2f-jump
 #objdump: -M reg-names=numeric -dr
 #name: ST Microelectronics Loongson-2F workarounds of Jump Instruction issue
 

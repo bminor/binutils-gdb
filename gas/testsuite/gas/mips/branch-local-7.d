@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS branch local symbol relocation 7
-#as: -32
+#as: -32 -mips32r2
 #source: branch-local-7.s
 
 .*: +file format .*mips.*

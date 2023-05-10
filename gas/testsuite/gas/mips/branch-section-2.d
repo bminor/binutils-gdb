@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: microMIPS branch to a different section
-#as: -32 -mmicromips
+#as: -32 -mips32r2 -mmicromips
 #source: branch-section.s
 
 .*: +file format .*mips.*

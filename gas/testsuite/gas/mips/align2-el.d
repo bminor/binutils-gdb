@@ -1,5 +1,5 @@
 # source: align2.s
-# as: -EL
+# as: -EL -march=from-abi
 # objdump: -dr
 
 .* file format .*

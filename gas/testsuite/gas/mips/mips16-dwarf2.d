@@ -1,6 +1,6 @@
 #readelf: -r -wl
 #name: MIPS16 DWARF2
-#as: -mabi=32 -mips16 -no-mdebug -g0
+#as: -mabi=32 -mips16 -no-mdebug -g0 -mips32
 #source: mips16-dwarf2.s
 
 Relocation section '\.rel\.debug_info' at offset .* contains 4 entries:

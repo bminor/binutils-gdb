@@ -1,6 +1,6 @@
 #objdump: -dr --show-raw-insn
 #name: microMIPS b16, bnez16, beqz16
-#as: -32 -mmicromips
+#as: -32 -mmicromips -mips32r2
 #source: micromips-b16.s
 
 .*: +file format .*mips.*

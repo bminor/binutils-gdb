@@ -1,5 +1,5 @@
-#source: mips16-1a.s -no-mips16
-#source: mips16-1b.s -mips16
+#source: mips16-1a.s -no-mips16 -march=from-abi
+#source: mips16-1b.s -mips16 -march=from-abi
 #ld: -r
 #objdump: -pd
 

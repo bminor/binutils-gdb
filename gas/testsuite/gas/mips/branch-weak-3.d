@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS relaxed branch to a weak symbol
-#as: -32 --relax-branch --defsym align=12
+#as: -32 -mips1 --relax-branch --defsym align=12
 #source: branch-weak.s
 #warning_output: branch-weak.l
 

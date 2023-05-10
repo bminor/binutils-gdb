@@ -1,7 +1,7 @@
 #objdump: -sr
 #name: Compact EH EB #3 with personality id and large FDE data
 #source: compact-eh-3.s
-#as: -EB -mno-pdr
+#as: -march=from-abi -EB -mno-pdr
 
 .*:     file format.*
 

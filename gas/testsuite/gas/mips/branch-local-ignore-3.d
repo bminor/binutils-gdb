@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -mmips:isa32r6
 #name: MIPS branch local symbol relocation 3 (ignore branch ISA)
-#as: -32 -mignore-branch-isa
+#as: -32 -mips32r2 -mignore-branch-isa
 #source: branch-local-3.s
 
 .*: +file format .*mips.*

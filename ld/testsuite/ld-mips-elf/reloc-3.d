@@ -1,5 +1,5 @@
 #name: R_MIPS16_GPREL reloc
-#source: ../../../gas/testsuite/gas/mips/elf-rel6.s
+#source: ../../../gas/testsuite/gas/mips/elf-rel6.s -march=from-abi
 #objdump: --prefix-addresses -tdr --show-raw-insn
 #ld: -Ttext 0x20000000 -e 0x20000000 -N
 

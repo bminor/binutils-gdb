@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 PC-relative relaxation 1
-#as: -32 --defsym align=1
+#as: -32 -mips1 --defsym align=1
 #source: mips16-pcrel-relax-0.s
 
 # Check that PC-relative relaxation chooses the short encoding

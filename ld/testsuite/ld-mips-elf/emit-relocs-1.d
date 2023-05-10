@@ -23,7 +23,7 @@ OFFSET +TYPE +VALUE
 
 
 Contents of section \.text:
- 80000 03e00008 00000000 00000000 00000000  .*
+ 80000 03e0000[89] 00000000 00000000 00000000  .*
 Contents of section \.merge1:
  80400 666c7574 74657200                    flutter.*
 Contents of section \.merge2:

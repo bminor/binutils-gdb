@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: microMIPS relaxed branch to an external symbol
-#as: -32 -KPIC -mmicromips --relax-branch
+#as: -32 -KPIC -mips32r2 -mmicromips --relax-branch
 #source: branch-extern.s
 #warning_output: branch-extern.l
 

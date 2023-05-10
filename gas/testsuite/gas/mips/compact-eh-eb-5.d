@@ -1,7 +1,7 @@
 #objdump: -sr
 #name: Compact EH EB #5 with personality routine, FDE data and LSDA
 #source: compact-eh-5.s
-#as: -EB -mno-pdr
+#as: -march=from-abi -EB -mno-pdr
 
 .*:     file format.*
 

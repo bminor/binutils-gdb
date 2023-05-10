@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 branch relocation 0
-#as: -32
+#as: -32 -mips1
 
 .*: +file format .*mips.*
 

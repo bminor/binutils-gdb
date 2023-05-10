@@ -17,6 +17,6 @@ Disassembly of section \.text:
    4101c:	27391020 	addiu	t9,t9,4128
 
 00041020 <foo2>:
-   41020:	03e00008 	jr	ra
+   41020:	03e0000[89] 	jr	ra
    41024:	00000000 	nop
 	\.\.\.

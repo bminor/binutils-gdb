@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: microMIPS short branch to a weak symbol
-#as: -32 -mmicromips --defsym align=4
+#as: -32 -mips32r2 -mmicromips --defsym align=4
 #source: branch-weak.s
 
 .*: +file format .*mips.*

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -m mips:isa64r6
 #name: MIPSr6 branch to unaligned symbol 5
-#as: -n32 -march=from-abi
+#as: -n32 -march=mips64r6
 #source: unaligned-branch-r6-3.s
 
 .*: +file format .*mips.*

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS branch to absolute expression with addend
-#as: -32
+#as: -32 -mips2
 
 .*: +file format .*mips.*
 

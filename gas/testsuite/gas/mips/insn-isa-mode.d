@@ -1,6 +1,6 @@
 #objdump: -dr --show-raw-insn
 #name: microMIPS ISA mode for .insn label references
-#as: -32
+#as: -32 -mips32r2
 
 .*: +file format .*mips.*
 

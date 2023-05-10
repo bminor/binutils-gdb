@@ -1,5 +1,5 @@
 #name: MIPS jalx-1
-#source: jalx-1.s
+#source: jalx-1.s -march=from-abi
 #ld: -T jalx-1.ld
 #objdump: -d
 

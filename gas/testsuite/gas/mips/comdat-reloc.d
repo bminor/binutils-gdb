@@ -1,6 +1,6 @@
 #readelf: -gr
 #name: MIPS ELF o32 PIC comdat GOT16/LO16 relocation pairing
-#as: -32 -mno-pdr
+#as: -32 -mno-pdr -mips1
 
 # Make sure the orphan GOT16 relocation is paired with LO16 for a local
 # symbol in a comdat section, i.e. rather than this:

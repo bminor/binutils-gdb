@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: microMIPS relaxed branch to a different section
-#as: -32 -mmicromips --relax-branch
+#as: -32 -mips32r2 -mmicromips --relax-branch
 #source: branch-section.s
 #warning_output: branch-section.l
 
