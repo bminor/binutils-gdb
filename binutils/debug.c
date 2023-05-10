@@ -2490,7 +2490,8 @@ debug_write_type (struct debug_handle *info,
       return false;
     case DEBUG_KIND_INDIRECT:
       /* Prevent infinite recursion.  */
-      if ((*type->u.kindirect->slot)->mark == info->mark)
+      if (*type->u.kindirect->slot != DEBUG_TYPE_NULL
+	  && (*type->u.kindirect->slot)->mark == info->mark)
 	return (*fns->empty_type) (fhandle);
       return debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
 			       name);
