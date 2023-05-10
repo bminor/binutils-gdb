@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <.text>:
+0+000000 <.text>:
    0:	3c01cfff 	lui	\$1,0xcfff
    4:	3421ffff 	ori	\$1,\$1,0xffff
    8:	03c1f024 	and	\$30,\$30,\$1
@@ -30,5 +30,7 @@ Disassembly of section .text:
 
   44:	08000000 	j	0x0
 			44: R_MIPS_26	external_label
+#?.*R_MIPS_NONE.*
+#?.*R_MIPS_NONE.*
   48:	00000000 	nop
   4c:	00000000 	nop

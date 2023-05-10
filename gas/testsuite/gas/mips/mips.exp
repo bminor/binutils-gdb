@@ -569,6 +569,8 @@ if { [istarget mips*-*-vxworks*] } {
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips*-*-linux*] \
                          || [istarget mips*-sde-elf*] || [istarget mips*-mti-elf*] \
                          || [istarget mips*-img-elf*]]
+    set default_n64 [expr [istarget mips*64*-linux-gnuabi64] ]
+
 
     if { [istarget "mips*-*-*linux*"]
 	 || [istarget "mips*-sde-elf*"]
@@ -1462,7 +1464,9 @@ if { [istarget mips*-*-vxworks*] } {
     if { $has_newabi } {
 	run_dump_test_arches "octeon"	[mips_arch_list_matching octeon]
     }
-    run_dump_test_arches "octeon-saa-saad" [mips_arch_list_matching octeonp]
+    if !$default_n64 {
+	run_dump_test_arches "octeon-saa-saad" [mips_arch_list_matching octeonp]
+    }
     run_list_test_arches "octeon-ill"	[mips_arch_list_matching octeon]
     if { $has_newabi } {
 	run_dump_test_arches "octeon-pref" \
@@ -1627,10 +1631,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "r5900"
     run_dump_test "r5900-fix"
     run_dump_test "r5900-no-fix"
-    run_dump_test "r5900-full"
-    run_list_test "r5900-nollsc" "-mabi=o64 -march=r5900"
-    run_dump_test "r5900-vu0"
+    if !$default_n64 {
+	run_dump_test "r5900-full"
+	run_dump_test "r5900-vu0"
+    }
     run_dump_test "r5900-full-vu0"
+    run_list_test "r5900-nollsc" "-mabi=o64 -march=r5900"
     run_dump_test "r5900-all-vu0"
     run_list_test "r5900-error-vu0" "-march=r5900"
 

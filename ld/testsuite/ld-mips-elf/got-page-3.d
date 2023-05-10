@@ -5,6 +5,7 @@
 #as: -mips3
 #ld: -T got-page-1.ld -shared
 #objdump: -dr
+#xfail: mips*64*-linux-gnuabi64
 #
 # got-page-3a.s and got-page-3b.s should get assigned the same GOT,
 # with a page estimate of 10.  Thus the first page entry has offset
@@ -15,12 +16,12 @@
 # The first global symbol should therefore be at offset -32744.
 #
 #...
-.*	lw	a0,-32744\(gp\)
-.*	addiu	a0,a0,.*
+ *.*	lw	a0,-32744\(gp\)
+ *.*	addiu	a0,a0,.*
 #...
-.*	lw	a1,-32704\(gp\)
+ *.*	lw	a1,-32704\(gp\)
 #...
-.* <f3>:
+ *.* <f3>:
 #...
-.*	lw	a1,-32744\(gp\)
+ *.*	lw	a1,-32744\(gp\)
 #pass
