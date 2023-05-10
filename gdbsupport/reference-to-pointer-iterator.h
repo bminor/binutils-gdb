@@ -68,6 +68,24 @@ struct reference_to_pointer_iterator
     return *this;
   }
 
+  self_type &operator++ (int)
+  {
+    m_it++;
+    return *this;
+  }
+
+  self_type &operator-- ()
+  {
+    --m_it;
+    return *this;
+  }
+
+  self_type &operator-- (int)
+  {
+    m_it--;
+    return *this;
+  }
+
   bool operator== (const self_type &other) const
   { return m_it == other.m_it; }
 
