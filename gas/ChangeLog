@@ -1,8 +1,15 @@
+2023-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/bpf/atomic-v3.s: New file.
+	* testsuite/gas/bpf/atomic-v3.d: Likewise.
+	* testsuite/gas/bpf/atomic-v3-be.d: Likewise.
+	* testsuite/gas/bpf/bpf.exp: Run atomic-v3 and atomic-v3-be.
+
 2023-04-27  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/bpf/mem.dump: New file.
 	* testsuite/gas/bpf/mem-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/mem.d: #dump mem.dump.	
+	* testsuite/gas/bpf/mem.d: #dump mem.dump.
 	* testsuite/gas/bpf/lddw.dump: New file.
 	* testsuite/gas/bpf/lddw-pseudoc.d: Likewise.
 	* testsuite/gas/bpf/lddw.d: #dump lddw.dump.
