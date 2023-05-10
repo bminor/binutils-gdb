@@ -23,14 +23,15 @@ standard_testfile
 
 # Let's generate the source file.  We want a short file, with less than 10
 # lines, and the copyright notice by itself is already more that that.
-set src_txt \
-    [join \
-	 [list \
-	      "int" \
-	      "main (void)" \
-	      "{" \
-	      "  return 0;" \
-	      "}"] "\n"]
+set src_list \
+    [list \
+	 "int" \
+	 "main (void)" \
+	 "{" \
+	 "  return 0;" \
+	 "}"]
+set re_line_four [string_to_regexp [lindex $src_list 3]]
+set src_txt [join $src_list "\n"]
 set srcfile [standard_output_file $srcfile]
 set fd [open $srcfile w]
 puts $fd $src_txt
@@ -40,7 +41,7 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
     return -1
 }
 
-Term::clean_restart 17 80 $binfile
+Term::clean_restart 24 80 $binfile
 
 gdb_test_no_output "maint set tui-left-margin-verbose on"
 gdb_test_no_output "set tui compact-source on"
@@ -51,11 +52,23 @@ if {![Term::enter_tui]} {
 }
 
 set re_border "\\|"
-Term::check_contents "compact source format" \
-    "${re_border}___04_  return 0; *$re_border"
 
-with_test_prefix window-resize=1 {
-    Term::command "wh src -1"
-    Term::check_contents "compact source" \
-	"${re_border}___4_  return 0; *$re_border"
+foreach_with_prefix src_window_size {7 8} {
+    set src_window_lines [expr $src_window_size - 2]
+    set max_line_nr_in_source_file [llength $src_list]
+    set max_line_nr_in_source_window \
+	[expr $max_line_nr_in_source_file + $src_window_lines - 1]
+
+    Term::command "wh src $src_window_size"
+
+    if { $max_line_nr_in_source_window == 9 } {
+	set re_left_margin "___4_"
+    } elseif { $max_line_nr_in_source_window == 10 }  {
+	set re_left_margin "___04_"
+    } else {
+	error "unhandled max_line_nr_in_source_window"
+    }
+
+    Term::check_contents "compact source format" \
+	"$re_border$re_left_margin$re_line_four *$re_border"
 }
