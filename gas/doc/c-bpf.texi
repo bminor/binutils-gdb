@@ -377,14 +377,60 @@ Terminate the eBPF program.
 
 @subsubsection Atomic instructions
 
-Atomic exchange-and-add instructions are provided in two flavors: one
-for swapping 64-bit quantities and another for 32-bit quantities.
+BPF provides a set of instructions to perform arithmetic and logical
+operations on stored data atomically.  These are:
 
 @table @code
-@item xadddw [%d+offset16],%s
-Exchange-and-add a 64-bit value at the specified location.
 @item xaddw [%d+offset16],%s
-Exchange-and-add a 32-bit value at the specified location.
+@itemx xadddw [%d+offset16],%s
+Add @code{%s} to the 32 or 64 bit signed integer stored in the
+specified memory location and store the result, atomically.
+@item xorw [%d+offset16],%s
+@itemx xordw [%d+offset16],%s
+Perform a bit-wise or operation between @code{%s} and the 32 or 64 bit
+signed integer stored in the specified memory location and store the
+result, atomically.
+@item xxorw [%d+offset16],%s
+@itemx xxordw [%d+offset16],%s
+Perform a bit-wise xor operation between @code{%s} and the 32 or 64 bit
+signed integer stored in the specified memory location and store the
+result, atomically.
+@end table
+
+@noindent
+Additionally, the following instructions allow to perform arithmetic
+and logical operations on stored data and then fetching the original
+stored value in a register, atomically:
+
+@table @code
+@item xfaddw [%d+offset16],%s
+@itemx xfadddw [%d+offset16],%s
+Add @code{%s} to the 32 or 64 bit signed integer stored in the
+specified memory location, store the result, and set @code{%s} to the
+value originally stored in the memory location, atomically.
+@item xforw [%d+offset16],%s
+@itemx xfordw [%d+offset16],%s
+Perform a bit-wise or operation between @code{%s} and the 32 or 64 bit
+signed integer stored in the specified memory location, store the
+result, and set @code{%s} to the value originally stored in the memory
+location, atomically.
+@item xfxorw [%d+offset16],%s
+@itemx xfxordw [%d+offset16],%s
+Perform a bit-wise xor operation between @code{%s} and the 32 or 64
+bit signed integer stored in the specified memory location, store the
+result, and set @code{%s} to the value originally stored in the memory
+location, atomically.
+@item xchgw [%d+offset16],%s
+@itemx xchgdw [%d+offset16],%s
+Exchange the 32 or 64 bit values in @code{%s} and the specified memory
+location, atomically.
+@item xcmpw [%d+offset16],%s
+@itemx xcmpdw [%d+offset16],%s
+Compare and exchange operation.  Compare the 32 or 64 bit value stored
+in the specified memory location to the contents of the @code{%r0}
+register.  If they are equal, store @code{%s} in the memory location.
+In any case, update @code{%r0} with the original contents of the
+memory location.
 @end table
 
 @node BPF Pseudo-C Syntax

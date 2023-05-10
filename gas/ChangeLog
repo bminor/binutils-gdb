@@ -1,5 +1,10 @@
 2023-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* doc/c-bpf.texi (BPF Opcodes): Document the V3 BPF atomic
+	instructions.
+
+2023-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* testsuite/gas/bpf/atomic-v3.s: New file.
 	* testsuite/gas/bpf/atomic-v3.d: Likewise.
 	* testsuite/gas/bpf/atomic-v3-be.d: Likewise.
