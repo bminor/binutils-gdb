@@ -1274,8 +1274,7 @@ When enabled GDB will print a message when the terminal is resized."),
 Set whether the TUI source window is compact."), _("\
 Show whether the TUI source window is compact."), _("\
 This variable controls whether the TUI source window is shown\n\
-in a compact form.  The compact form puts the source closer to\n\
-the line numbers and uses less horizontal space."),
+in a compact form.  The compact form uses less horizontal space."),
 			   tui_set_compact_source, tui_show_compact_source,
 			   &tui_setlist, &tui_showlist);
 

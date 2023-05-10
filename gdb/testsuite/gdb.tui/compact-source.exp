@@ -1,0 +1,61 @@
+# Copyright 2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Check that "set tui compact-source on" has the intended effect.
+
+require allow_tui_tests
+
+tuiterm_env
+
+standard_testfile
+
+# Let's generate the source file.  We want a short file, with less than 10
+# lines, and the copyright notice by itself is already more that that.
+set src_txt \
+    [join \
+	 [list \
+	      "int" \
+	      "main (void)" \
+	      "{" \
+	      "  return 0;" \
+	      "}"] "\n"]
+set srcfile [standard_output_file $srcfile]
+set fd [open $srcfile w]
+puts $fd $src_txt
+close $fd
+
+if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
+    return -1
+}
+
+Term::clean_restart 17 80 $binfile
+
+gdb_test_no_output "maint set tui-left-margin-verbose on"
+gdb_test_no_output "set tui compact-source on"
+
+if {![Term::enter_tui]} {
+    unsupported "TUI not supported"
+    return
+}
+
+set re_border "\\|"
+Term::check_contents "compact source format" \
+    "${re_border}___04_  return 0; *$re_border"
+
+with_test_prefix window-resize=1 {
+    Term::command "wh src -1"
+    Term::check_contents "compact source" \
+	"${re_border}___4_  return 0; *$re_border"
+}

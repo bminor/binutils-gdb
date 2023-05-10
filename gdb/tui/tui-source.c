@@ -79,8 +79,12 @@ tui_source_window::set_contents (struct gdbarch *arch,
     {
       /* Solaris 11+gcc 5.5 has ambiguous overloads of log10, so we
 	 cast to double to get the right one.  */
-      double l = log10 ((double) offsets->size ());
-      m_digits = 1 + (int) l;
+      int lines_in_file = offsets->size ();
+      int last_line_nr_in_window = line_no + nlines - 1;
+      int max_line_nr = std::max (lines_in_file, last_line_nr_in_window);
+      int digits_needed = 1 + (int)log10 ((double) max_line_nr);
+      int trailing_space = 1;
+      m_digits = digits_needed + trailing_space;
     }
 
   m_max_length = -1;

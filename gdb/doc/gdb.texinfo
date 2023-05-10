@@ -30311,10 +30311,9 @@ assembly windows.
 @item set tui compact-source @r{[}on@r{|}off@r{]}
 @kindex set tui compact-source
 Set whether the TUI source window is displayed in ``compact'' form.
-The default display uses more space for line numbers and starts the
-source text at the next tab stop; the compact display uses only as
-much space as is needed for the line numbers in the current file, and
-only a single space to separate the line numbers from the source.
+The default display uses more space for line numbers; the compact
+display uses only as much space as is needed for the line numbers in
+the current file.
 
 @kindex set debug tui
 @item set debug tui @r{[}on|off@r{]}
