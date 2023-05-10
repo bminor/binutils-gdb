@@ -12228,22 +12228,20 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 
   /* Iterate over all the catchpoint's locations, and parse an
      expression for each.  */
-  for (bp_location *bl : c->locations ())
+  for (bp_location &bl : c->locations ())
     {
-      struct ada_catchpoint_location *ada_loc
-	= (struct ada_catchpoint_location *) bl;
+      ada_catchpoint_location &ada_loc
+	= static_cast<ada_catchpoint_location &> (bl);
       expression_up exp;
 
-      if (!bl->shlib_disabled)
+      if (!bl.shlib_disabled)
 	{
 	  const char *s;
 
 	  s = cond_string.c_str ();
 	  try
 	    {
-	      exp = parse_exp_1 (&s, bl->address,
-				 block_for_pc (bl->address),
-				 0);
+	      exp = parse_exp_1 (&s, bl.address, block_for_pc (bl.address), 0);
 	    }
 	  catch (const gdb_exception_error &e)
 	    {
@@ -12253,7 +12251,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 	    }
 	}
 
-      ada_loc->excep_cond_expr = std::move (exp);
+      ada_loc.excep_cond_expr = std::move (exp);
     }
 }
 

@@ -13720,14 +13720,14 @@ remote_target::get_tracepoint_status (struct breakpoint *bp,
     {
       tp->hit_count = 0;
       tp->traceframe_usage = 0;
-      for (bp_location *loc : tp->locations ())
+      for (bp_location &loc : tp->locations ())
 	{
 	  /* If the tracepoint was never downloaded, don't go asking for
 	     any status.  */
 	  if (tp->number_on_target == 0)
 	    continue;
 	  xsnprintf (rs->buf.data (), size, "qTP:%x:%s", tp->number_on_target,
-		     phex_nz (loc->address, 0));
+		     phex_nz (loc.address, 0));
 	  putpkt (rs->buf);
 	  reply = remote_get_noisy_reply ();
 	  if (reply && *reply)

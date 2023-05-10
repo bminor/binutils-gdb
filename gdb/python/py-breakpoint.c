@@ -752,14 +752,14 @@ bppy_get_locations (PyObject *self, void *closure)
   if (list == nullptr)
     return nullptr;
 
-  for (bp_location *loc : self_bp->bp->locations ())
+  for (bp_location &loc : self_bp->bp->locations ())
     {
       gdbpy_ref<py_bploc_t> py_bploc
 	(PyObject_New (py_bploc_t, &breakpoint_location_object_type));
       if (py_bploc == nullptr)
 	return nullptr;
 
-      bp_location_ref_ptr ref = bp_location_ref_ptr::new_reference (loc);
+      bp_location_ref_ptr ref = bp_location_ref_ptr::new_reference (&loc);
       /* The location takes a reference to the owner breakpoint.
 	 Decrements when they are de-allocated in bplocpy_dealloc */
       Py_INCREF (self);

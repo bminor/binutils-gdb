@@ -630,9 +630,9 @@ tui_source_window_base::update_breakpoint_info
 	  if (bp == being_deleted)
 	    continue;
 
-	  for (bp_location *loc : bp->locations ())
+	  for (bp_location &loc : bp->locations ())
 	    {
-	      if (location_matches_p (loc, i))
+	      if (location_matches_p (&loc, i))
 		{
 		  if (bp->enable_state == bp_disabled)
 		    mode |= TUI_BP_DISABLED;

@@ -606,9 +606,7 @@ extern bool target_exact_watchpoints;
 
 using bp_location_list = intrusive_list<bp_location>;
 using bp_location_iterator = bp_location_list::iterator;
-using bp_location_pointer_iterator
-  = reference_to_pointer_iterator<bp_location_iterator>;
-using bp_location_range = iterator_range<bp_location_pointer_iterator>;
+using bp_location_range = iterator_range<bp_location_iterator>;
 
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint

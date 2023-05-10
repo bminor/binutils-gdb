@@ -676,11 +676,11 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      /* else fall thru, treat p as an expression and parse it!  */
 	    }
 	  tmp_p = p;
-	  for (bp_location *loc : t->locations ())
+	  for (bp_location &loc : t->locations ())
 	    {
 	      p = tmp_p;
-	      expression_up exp = parse_exp_1 (&p, loc->address,
-					       block_for_pc (loc->address),
+	      expression_up exp = parse_exp_1 (&p, loc.address,
+					       block_for_pc (loc.address),
 					       PARSER_COMMA_TERMINATES);
 
 	      if (exp->first_opcode () == OP_VAR_VALUE)
@@ -709,7 +709,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      /* We have something to collect, make sure that the expr to
 		 bytecode translator can handle it and that it's not too
 		 long.  */
-	      agent_expr_up aexpr = gen_trace_for_expr (loc->address,
+	      agent_expr_up aexpr = gen_trace_for_expr (loc.address,
 							exp.get (),
 							trace_string);
 
@@ -727,19 +727,19 @@ validate_actionline (const char *line, struct breakpoint *b)
 	  p = skip_spaces (p);
 
 	  tmp_p = p;
-	  for (bp_location *loc : t->locations ())
+	  for (bp_location &loc : t->locations ())
 	    {
 	      p = tmp_p;
 
 	      /* Only expressions are allowed for this action.  */
-	      expression_up exp = parse_exp_1 (&p, loc->address,
-					       block_for_pc (loc->address),
+	      expression_up exp = parse_exp_1 (&p, loc.address,
+					       block_for_pc (loc.address),
 					       PARSER_COMMA_TERMINATES);
 
 	      /* We have something to evaluate, make sure that the expr to
 		 bytecode translator can handle it and that it's not too
 		 long.  */
-	      agent_expr_up aexpr = gen_eval_for_expr (loc->address, exp.get ());
+	      agent_expr_up aexpr = gen_eval_for_expr (loc.address, exp.get ());
 
 	      finalize_tracepoint_aexpr (aexpr.get ());
 	    }
@@ -1531,9 +1531,9 @@ process_tracepoint_on_disconnect (void)
 	}
       else
 	{
-	  for (bp_location *loc1 : b->locations ())
+	  for (bp_location &loc1 : b->locations ())
 	    {
-	      if (loc1->shlib_disabled)
+	      if (loc1.shlib_disabled)
 		{
 		  has_pending_p = 1;
 		  break;
@@ -1610,8 +1610,8 @@ start_tracing (const char *notes)
       int bp_location_downloaded = 0;
 
       /* Clear `inserted' flag.  */
-      for (bp_location *loc : b->locations ())
-	loc->inserted = 0;
+      for (bp_location &loc : b->locations ())
+	loc.inserted = 0;
 
       if ((b->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
@@ -1620,24 +1620,23 @@ start_tracing (const char *notes)
 
       t->number_on_target = 0;
 
-      for (bp_location *loc : b->locations ())
+      for (bp_location &loc : b->locations ())
 	{
 	  /* Since tracepoint locations are never duplicated, `inserted'
 	     flag should be zero.  */
-	  gdb_assert (!loc->inserted);
+	  gdb_assert (!loc.inserted);
 
-	  target_download_tracepoint (loc);
+	  target_download_tracepoint (&loc);
 
-	  loc->inserted = 1;
+	  loc.inserted = 1;
 	  bp_location_downloaded = 1;
 	}
 
       t->number_on_target = b->number;
 
-      for (bp_location *loc : b->locations ())
-	if (loc->probe.prob != NULL)
-	  loc->probe.prob->set_semaphore (loc->probe.objfile,
-					  loc->gdbarch);
+      for (bp_location &loc : b->locations ())
+	if (loc.probe.prob != NULL)
+	  loc.probe.prob->set_semaphore (loc.probe.objfile, loc.gdbarch);
 
       if (bp_location_downloaded)
 	gdb::observers::breakpoint_modified.notify (b);
@@ -1719,15 +1718,14 @@ stop_tracing (const char *note)
 	   : !may_insert_tracepoints))
 	continue;
 
-      for (bp_location *loc : t->locations ())
+      for (bp_location &loc : t->locations ())
 	{
 	  /* GDB can be totally absent in some disconnected trace scenarios,
 	     but we don't really care if this semaphore goes out of sync.
 	     That's why we are decrementing it here, but not taking care
 	     in other places.  */
-	  if (loc->probe.prob != NULL)
-	    loc->probe.prob->clear_semaphore (loc->probe.objfile,
-					      loc->gdbarch);
+	  if (loc.probe.prob != NULL)
+	    loc.probe.prob->clear_semaphore (loc.probe.objfile, loc.gdbarch);
 	}
     }
 
@@ -2742,11 +2740,11 @@ get_traceframe_location (int *stepping_frame_p)
      locations, assume it is a direct hit rather than a while-stepping
      frame.  (FIXME this is not reliable, should record each frame's
      type.)  */
-  for (bp_location *tloc : t->locations ())
-    if (tloc->address == regcache_read_pc (regcache))
+  for (bp_location &tloc : t->locations ())
+    if (tloc.address == regcache_read_pc (regcache))
       {
 	*stepping_frame_p = 0;
-	return tloc;
+	return &tloc;
       }
 
   /* If this is a stepping frame, we don't know which location
@@ -3059,11 +3057,9 @@ find_matching_tracepoint_location (struct uploaded_tp *utp)
 	  )
 	{
 	  /* Scan the locations for an address match.  */
-	  for (bp_location *loc : b->locations ())
-	    {
-	      if (loc->address == utp->addr)
-		return loc;
-	    }
+	  for (bp_location &loc : b->locations ())
+	    if (loc.address == utp->addr)
+	      return &loc;
 	}
     }
   return NULL;

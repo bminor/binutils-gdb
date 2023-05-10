@@ -2117,16 +2117,16 @@ svr4_update_solib_event_breakpoint (struct breakpoint *b)
       return false;
     }
 
-  for (bp_location *loc : b->locations ())
+  for (bp_location &loc : b->locations ())
     {
       struct svr4_info *info;
       struct probe_and_action *pa;
 
-      info = solib_svr4_pspace_data.get (loc->pspace);
+      info = solib_svr4_pspace_data.get (loc.pspace);
       if (info == NULL || info->probes_table == NULL)
 	continue;
 
-      pa = solib_event_probe_at (info, loc->address);
+      pa = solib_event_probe_at (info, loc.address);
       if (pa == NULL)
 	continue;
 
