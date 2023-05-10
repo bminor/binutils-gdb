@@ -2296,13 +2296,15 @@ lang_map (void)
 	    {
 	      if (! dis_header_printed)
 		{
-		  fprintf (config.map_file, _("\nDiscarded input sections\n\n"));
+		  minfo (_("\nDiscarded input sections\n\n"));
 		  dis_header_printed = true;
 		}
 
 	      print_input_section (s, true);
 	    }
     }
+  if (config.print_map_discarded && ! dis_header_printed)
+    minfo (_("\nThere are no discarded input sections\n"));
 
   minfo (_("\nMemory Configuration\n\n"));
   fprintf (config.map_file, "%-16s %-18s %-18s %s\n",
@@ -2330,7 +2332,7 @@ lang_map (void)
       print_nl ();
     }
 
-  fprintf (config.map_file, _("\nLinker script and memory map\n\n"));
+  minfo (_("\nLinker script and memory map\n\n"));
 
   if (!link_info.reduce_memory_overheads)
     {
@@ -4797,6 +4799,50 @@ print_all_symbols (asection *sec)
   obstack_free (&map_obstack, entries);
 }
 
+/* Returns TRUE if SYM is a symbol suitable for printing
+   in a linker map as a local symbol.  */
+
+static bool
+ld_is_local_symbol (asymbol * sym)
+{
+  const char * name = bfd_asymbol_name (sym);
+
+  if (name == NULL || *name == 0)
+    return false;
+
+  if (strcmp (name, "(null)") == 0)
+    return false;
+
+  /* Skip .Lxxx and such like.  */
+  if (bfd_is_local_label (link_info.output_bfd, sym))
+    return false;
+
+  /* FIXME: This is intended to skip ARM mapping symbols,
+     which for some reason are not excluded by bfd_is_local_label,
+     but maybe it is wrong for other architectures.
+     It would be better to fix bfd_is_local_label.  */  
+  if (*name == '$')
+    return false;
+
+  /* Some local symbols, eg _GLOBAL_OFFSET_TABLE_, are present
+     in the hash table, so do not print duplicates here.  */
+  struct bfd_link_hash_entry * h;
+  h = bfd_link_hash_lookup (link_info.hash, name, false /* create */, 
+			    false /* copy */, true /* follow */);
+  if (h == NULL)
+    return true;
+  
+  /* Symbols from the plugin owned BFD will not get their own
+     iteration of this function, but can be on the link_info
+     list.  So include them here.  */
+  if (h->u.def.section->owner != NULL
+      && ((bfd_get_file_flags (h->u.def.section->owner) & (BFD_LINKER_CREATED | BFD_PLUGIN))
+	  == (BFD_LINKER_CREATED | BFD_PLUGIN)))
+    return true;
+
+  return false;
+}
+
 /* Print information about an input section to the map file.  */
 
 static void
@@ -4852,6 +4898,44 @@ print_input_section (asection *i, bool is_discarded)
 	 later overlay is shorter than an earier one.  */
       if (addr + TO_ADDR (size) > print_dot)
 	print_dot = addr + TO_ADDR (size);
+
+      if (config.print_map_locals)
+	{
+	  long  storage_needed;
+
+	  /* FIXME: It would be better to cache this table, rather
+	     than recreating it for each output section.  */
+	  /* FIXME: This call is not working for non-ELF based targets.
+	     Find out why.  */
+	  storage_needed = bfd_get_symtab_upper_bound (link_info.output_bfd);
+	  if (storage_needed > 0)
+	    {
+	      asymbol **  symbol_table;
+	      long        number_of_symbols;
+	      long        j;
+
+	      symbol_table = xmalloc (storage_needed);
+	      number_of_symbols = bfd_canonicalize_symtab (link_info.output_bfd, symbol_table);
+
+	      for (j = 0; j < number_of_symbols; j++)
+		{
+		  asymbol *     sym = symbol_table[j];
+		  bfd_vma       sym_addr = sym->value + i->output_section->vma;
+		  
+		  if (sym->section == i->output_section
+		      && (sym->flags & BSF_LOCAL) != 0
+		      && sym_addr >= addr
+		      && sym_addr < print_dot
+		      && ld_is_local_symbol (sym))
+		    {
+		      print_spaces (SECTION_NAME_MAP_LENGTH);
+		      minfo ("0x%V        (local) %s\n", sym_addr, bfd_asymbol_name (sym));
+		    }
+		}
+
+	      free (symbol_table);
+	    }
+	}
     }
 }
 

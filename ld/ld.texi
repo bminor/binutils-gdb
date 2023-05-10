@@ -870,6 +870,16 @@ is 0x1, and @file{bar.o}, whose 0xc0010001 property value is 0x1.
 Print (or do not print) the list of discarded and garbage collected sections
 in the link map.  Enabled by default.
 
+@kindex --print-map-locals
+@kindex --no-print-map-locals
+@item --print-map-locals
+@itemx --no-print-map-locals
+Print (or do not print) local symbols in the link map.  Local symbols
+will have the text @samp{(local)} printed before their name, and will
+be listed after all of the global symbols in a given section.
+Temporary local symbols (typically those that start with @samp{.L})
+will not be included in the output.  Disabled by default.
+
 @kindex -n
 @cindex read-only text
 @cindex NMAGIC

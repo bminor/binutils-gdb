@@ -297,6 +297,9 @@ typedef struct
   /* If set, print discarded sections in map file output.  */
   bool print_map_discarded;
 
+  /* If set, print local symbols in map file output.  */
+  bool print_map_locals;
+
   /* If set, emit the names and types of statically-linked variables
      into the CTF.  */
   bool ctf_variables;

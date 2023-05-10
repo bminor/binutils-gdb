@@ -1,3 +1,20 @@
+2023-05-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 16566
+	* ldlang.c (ld_is_local_symbol): New function.
+	(print_input_section): Add code to display local symbols in the
+	section.
+	* ldlex.h (enum option_values): Add OPTION_PRINT_MAP_LOCALS and
+	OPTION_PRINT_MAP_LOCALS.
+	* lexsup.c (ld_options[]): Add entries for --print-map-locals
+	and --no-print-map-locals.
+	* NEWS: Mention the new feature.
+	* ld.h (struct ld_config_type): Add print_map_locals field.
+	* ld.texi: Document the new command line option.
+	* testsuite/ld-scripts/sizeof.s: Add a local symbol.
+	* testsuite/ld-scripts/map-locals.d: New test control file.
+	* testsuite/ld-scripts/map-address.exp: Run the new test.
+
 2023-05-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 30300

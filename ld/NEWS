@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The linker command line option --print-map-locals can be used to include
+  local symbols in a linker map.  (ELF targets only).
+
 * For most ELF based targets, if the --enable-linker-version option is used
   then the version of the linker will be inserted as a string into the .comment
   section.

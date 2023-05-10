@@ -605,6 +605,12 @@ static const struct ld_option ld_options[] =
   { {"no-print-map-discarded", no_argument, NULL, OPTION_NO_PRINT_MAP_DISCARDED},
     '\0', NULL, N_("Do not show discarded sections in map file output"),
     TWO_DASHES },
+  { {"print-map-locals", no_argument, NULL, OPTION_PRINT_MAP_LOCALS},
+    '\0', NULL, N_("Show local symbols in map file output"),
+    TWO_DASHES },
+  { {"no-print-map-locals", no_argument, NULL, OPTION_NO_PRINT_MAP_LOCALS},
+    '\0', NULL, N_("Do not show local symbols in map file output (default)"),
+    TWO_DASHES },
   { {"ctf-variables", no_argument, NULL, OPTION_CTF_VARIABLES},
     '\0', NULL, N_("Emit names and types of static variables in CTF"),
     TWO_DASHES },
@@ -1746,6 +1752,14 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_PRINT_MAP_DISCARDED:
 	  config.print_map_discarded = true;
+	  break;
+
+	case OPTION_NO_PRINT_MAP_LOCALS:
+	  config.print_map_locals = false;
+	  break;
+
+	case OPTION_PRINT_MAP_LOCALS:
+	  config.print_map_locals = true;
 	  break;
 
 	case OPTION_DEPENDENCY_FILE:
