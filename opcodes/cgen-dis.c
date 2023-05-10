@@ -232,7 +232,7 @@ build_dis_hash_table (CGEN_CPU_DESC cd)
 /* Return the first entry in the hash list for INSN.  */
 
 CGEN_INSN_LIST *
-cgen_dis_lookup_insn (CGEN_CPU_DESC cd, const char * buf, CGEN_INSN_INT value)
+cgen_dis_lookup_insn (CGEN_CPU_DESC cd, const char * buf, CGEN_INSN_LGUINT value)
 {
   unsigned int hash;
 

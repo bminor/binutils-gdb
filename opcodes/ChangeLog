@@ -1,3 +1,22 @@
+2023-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* cgen-dis.in (print_insn): Use CGEN_INSN_LGUINT for instruction
+	base values.
+	* cgen-dis.c (cgen_dis_lookup_insn): Likewise.
+	* cgen-opc.c (cgen_macro_insn_count): Likewise.
+	* epiphany-dis.c: Regenerate.
+	* fr30-dis.c: Likewise.
+	* frv-dis.c: Likewise.
+	* ip2k-dis.c: Likewise.
+	* iq2000-dis.c: Likewise.
+	* lm32-dis.c: Likewise.
+	* m32c-dis.c: Likewise.
+	* m32r-dis.c: Likewise.
+	* mep-dis.c: Likewise.
+	* mt-dis.c: Likewise.
+	* or1k-dis.c: Likewise.
+	* xstormy16-dis.c: Likewise.
+
 2023-04-21  Tom Tromey  <tromey@adacore.com>
 
 	* i386-dis.c (OP_J): Check result of get16.

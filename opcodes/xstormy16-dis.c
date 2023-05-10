@@ -333,7 +333,7 @@ print_insn (CGEN_CPU_DESC cd,
 	    bfd_byte *buf,
 	    unsigned int buflen)
 {
-  CGEN_INSN_INT insn_value;
+  CGEN_INSN_LGUINT insn_value;
   const CGEN_INSN_LIST *insn_list;
   CGEN_EXTRACT_INFO ex_info;
   int basesize;

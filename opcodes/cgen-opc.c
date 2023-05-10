@@ -355,13 +355,13 @@ cgen_macro_insn_count (CGEN_CPU_DESC cd)
 
 /* Cover function to read and properly byteswap an insn value.  */
 
-CGEN_INSN_INT
+CGEN_INSN_LGUINT
 cgen_get_insn_value (CGEN_CPU_DESC cd, unsigned char *buf, int length,
                      int endian)
 {
   int big_p = (endian == CGEN_ENDIAN_BIG);
   int insn_chunk_bitsize = cd->insn_chunk_bitsize;
-  CGEN_INSN_INT value = 0;
+  CGEN_INSN_LGUINT value = 0;
 
   if (insn_chunk_bitsize != 0 && insn_chunk_bitsize < length)
     {
@@ -397,7 +397,7 @@ void
 cgen_put_insn_value (CGEN_CPU_DESC cd,
 		     unsigned char *buf,
 		     int length,
-		     CGEN_INSN_INT value,
+		     CGEN_INSN_LGUINT value,
                      int endian)
 {
   int big_p = (endian == CGEN_ENDIAN_BIG);
@@ -446,7 +446,7 @@ cgen_put_insn_value (CGEN_CPU_DESC cd,
 const CGEN_INSN *
 cgen_lookup_insn (CGEN_CPU_DESC cd,
 		  const CGEN_INSN *insn,
-		  CGEN_INSN_INT insn_int_value,
+		  CGEN_INSN_LGUINT insn_int_value,
 		  /* ??? CGEN_INSN_BYTES would be a nice type name to use here.  */
 		  unsigned char *insn_bytes_value,
 		  int length,

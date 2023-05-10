@@ -928,7 +928,7 @@ typedef struct
 typedef struct
 {
   /* The opcode portion of the base insn.  */
-  CGEN_INSN_INT base_value;
+  CGEN_INSN_LGUINT base_value;
 
 #ifdef CGEN_MAX_EXTRA_OPCODE_OPERANDS
   /* Extra opcode values beyond base_value.  */
@@ -1186,7 +1186,7 @@ extern CGEN_INSN_LIST * cgen_asm_lookup_insn
    instruction (the actually hashing done is up to the target).  */
 
 extern CGEN_INSN_LIST * cgen_dis_lookup_insn
-  (CGEN_CPU_DESC, const char *, CGEN_INSN_INT);
+  (CGEN_CPU_DESC, const char *, CGEN_INSN_LGUINT);
 /* FIXME: delete these two */
 #define CGEN_DIS_LOOKUP_INSN(cd, buf, value) cgen_dis_lookup_insn ((cd), (buf), (value))
 #define CGEN_DIS_NEXT_INSN(insn) ((insn)->next)
@@ -1449,7 +1449,7 @@ extern int CGEN_SYM (get_mach) (const char *);
 /* Operand index computation.  */
 extern const CGEN_INSN * cgen_lookup_insn
   (CGEN_CPU_DESC, const CGEN_INSN * insn_,
-   CGEN_INSN_INT int_value_, unsigned char *bytes_value_,
+   CGEN_INSN_LGUINT int_value_, unsigned char *bytes_value_,
    int length_, CGEN_FIELDS *fields_, int alias_p_);
 extern void cgen_get_insn_operands
   (CGEN_CPU_DESC, const CGEN_INSN * insn_,
@@ -1461,10 +1461,10 @@ extern const CGEN_INSN * cgen_lookup_get_insn_operands
 
 /* Cover fns to bfd_get/set.  */
 
-extern CGEN_INSN_INT cgen_get_insn_value
+extern CGEN_INSN_LGUINT cgen_get_insn_value
   (CGEN_CPU_DESC, unsigned char *, int, int);
 extern void cgen_put_insn_value
-  (CGEN_CPU_DESC, unsigned char *, int, CGEN_INSN_INT, int);
+  (CGEN_CPU_DESC, unsigned char *, int, CGEN_INSN_LGUINT, int);
 
 extern CGEN_INSN_INT cgen_get_base_insn_value
   (CGEN_CPU_DESC, unsigned char *, int);
