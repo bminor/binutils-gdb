@@ -1,3 +1,10 @@
+2023-05-10  Luca Bonissi  <gcc@scarsita.it>
+
+	PR 30422
+	* elf32-or1k.c (or1k_elf_relocate_section): Prescan for
+	R_OR1K_GOT_AHI16 relocs as they may occur after R_OR1K_GOT16
+	relocs.
+
 2023-05-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 30354
