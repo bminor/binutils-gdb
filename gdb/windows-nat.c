@@ -261,6 +261,9 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   void close () override;
 
+  thread_control_capabilities get_thread_control_capabilities () override
+  { return tc_schedlock; }
+
   void attach (const char *, int) override;
 
   bool attach_no_wait () override
