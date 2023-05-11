@@ -97,7 +97,7 @@ proc_with_prefix local_debuginfod { } {
     gdb_test "file [standard_output_file crc_mismatch-2]" \
 	[multi_line \
 	     "Reading symbols from ${escapedobjdirsubdir}/crc_mismatch-2\\.\\.\\." \
-	     "Downloading separate debug info for ${escapedobjdirsubdir}/crc_mismatch-2\\.\\.\\." \
+	     "Downloading.*separate debug info for ${escapedobjdirsubdir}/crc_mismatch-2\\.\\.\\." \
 	     "Reading symbols from ${cache}/\[^\r\n\]+\\.\\.\\.(?:\r\nExpanding full symbols from \[^\r\n\]+)*"] \
 	 "debuginfod running, info downloaded, no CRC mismatch"
 }
