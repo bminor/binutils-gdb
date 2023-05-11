@@ -155,7 +155,7 @@ cmd_list_element::command_components () const
   if (this->prefix != nullptr)
     result = this->prefix->command_components ();
 
-  result.emplace_back (std::string (this->name));
+  result.emplace_back (this->name);
   return result;
 }
 
