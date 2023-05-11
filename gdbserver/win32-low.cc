@@ -307,8 +307,6 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
   windows_process.process_id = pid;
   windows_process.main_thread_id = 0;
 
-  windows_process.soft_interrupt_requested = 0;
-  windows_process.faked_breakpoint = 0;
   windows_process.open_process_used = true;
 
   memset (&windows_process.current_event, 0,
@@ -433,7 +431,6 @@ child_continue_for_kill (DWORD continue_status, int thread_id)
     {
       continue_one_thread (thread, thread_id);
     });
-  windows_process.faked_breakpoint = 0;
 
   return continue_last_debug_event (continue_status, debug_threads);
 }
@@ -941,23 +938,6 @@ suspend_one_thread (thread_info *thread)
   th->suspend ();
 }
 
-static void
-fake_breakpoint_event (void)
-{
-  OUTMSG2(("fake_breakpoint_event\n"));
-
-  windows_process.faked_breakpoint = 1;
-
-  memset (&windows_process.current_event, 0,
-	  sizeof (windows_process.current_event));
-  windows_process.current_event.dwThreadId = windows_process.main_thread_id;
-  windows_process.current_event.dwDebugEventCode = EXCEPTION_DEBUG_EVENT;
-  windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
-    = EXCEPTION_BREAKPOINT;
-
-  for_each_thread (suspend_one_thread);
-}
-
 /* See nat/windows-nat.h.  */
 
 bool
@@ -1012,13 +992,6 @@ get_child_debug_event (DWORD *continue_status,
 
   DEBUG_EVENT *current_event = &windows_process.current_event;
 
-  if (windows_process.soft_interrupt_requested)
-    {
-      windows_process.soft_interrupt_requested = 0;
-      fake_breakpoint_event ();
-      goto gotevent;
-    }
-
   windows_process.attaching = 0;
   {
     for (thread_info *thread : all_threads)
@@ -1057,8 +1030,6 @@ get_child_debug_event (DWORD *continue_status,
 	return 0;
       }
   }
-
- gotevent:
 
   switch (current_event->dwDebugEventCode)
     {
@@ -1313,8 +1284,7 @@ win32_process_target::request_interrupt ()
   if (DebugBreakProcess (windows_process.handle))
     return;
 
-  /* Last resort, suspend all threads manually.  */
-  windows_process.soft_interrupt_requested = 1;
+  OUTMSG2 (("Could not interrupt.\n"));
 }
 
 bool

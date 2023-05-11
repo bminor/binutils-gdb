@@ -187,14 +187,6 @@ struct gdbserver_windows_process : public windows_nat::windows_process_info
      debug event off the win32 API.  */
   struct target_waitstatus cached_status;
 
-  /* Non zero if an interrupt request is to be satisfied by suspending
-     all threads.  */
-  int soft_interrupt_requested = 0;
-
-  /* Non zero if the inferior is stopped in a simulated breakpoint done
-     by suspending all the threads.  */
-  int faked_breakpoint = 0;
-
   /* True if current_process_handle needs to be closed.  */
   bool open_process_used = false;
 
