@@ -666,6 +666,14 @@ windows_process_info::add_all_dlls ()
 
 /* See nat/windows-nat.h.  */
 
+ptid_t
+get_last_debug_event_ptid ()
+{
+  return ptid_t (last_wait_event.dwProcessId, last_wait_event.dwThreadId, 0);
+}
+
+/* See nat/windows-nat.h.  */
+
 BOOL
 continue_last_debug_event (DWORD continue_status, bool debug_events)
 {

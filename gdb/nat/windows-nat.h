@@ -253,6 +253,11 @@ private:
 extern BOOL continue_last_debug_event (DWORD continue_status,
 				       bool debug_events);
 
+/* Return the ptid_t of the thread that the last waited-for event was
+   for.  */
+
+extern ptid_t get_last_debug_event_ptid ();
+
 /* A simple wrapper for WaitForDebugEvent that also sets the internal
    'last_wait_event' on success.  */
 
