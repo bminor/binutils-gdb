@@ -425,17 +425,8 @@ continue_one_thread (thread_info *thread, int thread_id)
 }
 
 static BOOL
-child_continue (DWORD continue_status, int thread_id)
+child_continue_for_kill (DWORD continue_status, int thread_id)
 {
-  for (thread_info *thread : all_threads)
-    {
-      auto *th = (windows_thread_info *) thread_target_data (thread);
-      if ((thread_id == -1 || thread_id == (int) th->tid)
-	  && !th->suspended
-	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
-	return TRUE;
-    }
-
   /* The inferior will only continue after the ContinueDebugEvent
      call.  */
   for_each_thread ([&] (thread_info *thread)
@@ -701,7 +692,7 @@ win32_process_target::kill (process_info *process)
   TerminateProcess (windows_process.handle, 0);
   for (;;)
     {
-      if (!child_continue (DBG_CONTINUE, -1))
+      if (!child_continue_for_kill (DBG_CONTINUE, -1))
 	break;
       if (!wait_for_debug_event (&windows_process.current_event, INFINITE))
 	break;
@@ -768,96 +759,109 @@ win32_process_target::thread_alive (ptid_t ptid)
   return find_thread_ptid (ptid) != NULL;
 }
 
-/* Resume the inferior process.  RESUME_INFO describes how we want
-   to resume.  */
-void
-win32_process_target::resume (thread_resume *resume_info, size_t n)
+static void
+resume_one_thread (thread_info *thread, bool step, gdb_signal sig,
+		   DWORD *continue_status)
 {
-  DWORD tid;
-  enum gdb_signal sig;
-  int step;
-  windows_thread_info *th;
-  DWORD continue_status = DBG_CONTINUE;
-  ptid_t ptid;
-
-  /* This handles the very limited set of resume packets that GDB can
-     currently produce.  */
-
-  if (n == 1 && resume_info[0].thread == minus_one_ptid)
-    tid = -1;
-  else if (n > 1)
-    tid = -1;
-  else
-    /* Yes, we're ignoring resume_info[0].thread.  It'd be tricky to make
-       the Windows resume code do the right thing for thread switching.  */
-    tid = windows_process.current_event.dwThreadId;
-
-  if (resume_info[0].thread != minus_one_ptid)
-    {
-      sig = gdb_signal_from_host (resume_info[0].sig);
-      step = resume_info[0].kind == resume_step;
-    }
-  else
-    {
-      sig = GDB_SIGNAL_0;
-      step = 0;
-    }
+  auto *th = (windows_thread_info *) thread_target_data (thread);
 
   if (sig != GDB_SIGNAL_0)
     {
-      if (windows_process.current_event.dwDebugEventCode
-	  != EXCEPTION_DEBUG_EVENT)
+      /* Allow continuing with the same signal that interrupted us.
+	 Otherwise complain.  */
+      if (thread->id != get_last_debug_event_ptid ())
 	{
-	  OUTMSG (("Cannot continue with signal %s here.\n",
+	  /* ContinueDebugEvent will be for a different thread.  */
+	  OUTMSG (("Cannot continue with signal %d here.  "
+		   "Not last-event thread", sig));
+	}
+      else if (windows_process.current_event.dwDebugEventCode
+	       != EXCEPTION_DEBUG_EVENT)
+	{
+	  OUTMSG (("Cannot continue with signal %s here.  "
+		   "Not stopped for EXCEPTION_DEBUG_EVENT.\n",
 		   gdb_signal_to_string (sig)));
 	}
       else if (sig == windows_process.last_sig)
-	continue_status = DBG_EXCEPTION_NOT_HANDLED;
+	*continue_status = DBG_EXCEPTION_NOT_HANDLED;
       else
 	OUTMSG (("Can only continue with received signal %s.\n",
 		 gdb_signal_to_string (windows_process.last_sig)));
     }
 
-  windows_process.last_sig = GDB_SIGNAL_0;
+  win32_prepare_to_resume (th);
 
-  /* Get context for the currently selected thread.  */
-  ptid = debug_event_ptid (&windows_process.current_event);
-  th = windows_process.find_thread (ptid);
-  if (th)
-    {
-      win32_prepare_to_resume (th);
-
-      DWORD *context_flags;
+  DWORD *context_flags;
 #ifdef __x86_64__
-      if (windows_process.wow64_process)
-	context_flags = &th->wow64_context.ContextFlags;
-      else
+  if (windows_process.wow64_process)
+    context_flags = &th->wow64_context.ContextFlags;
+  else
 #endif
-	context_flags = &th->context.ContextFlags;
-      if (*context_flags)
+    context_flags = &th->context.ContextFlags;
+  if (*context_flags)
+    {
+      /* Move register values from the inferior into the thread
+	 context structure.  */
+      regcache_invalidate ();
+
+      if (step)
 	{
-	  /* Move register values from the inferior into the thread
-	     context structure.  */
-	  regcache_invalidate ();
-
-	  if (step)
-	    {
-	      if (the_low_target.single_step != NULL)
-		(*the_low_target.single_step) (th);
-	      else
-		error ("Single stepping is not supported "
-		       "in this configuration.\n");
-	    }
-
-	  win32_set_thread_context (th);
-	  *context_flags = 0;
+	  if (the_low_target.single_step != NULL)
+	    (*the_low_target.single_step) (th);
+	  else
+	    error ("Single stepping is not supported "
+		   "in this configuration.\n");
 	}
+
+      win32_set_thread_context (th);
+      *context_flags = 0;
     }
 
-  /* Allow continuing with the same signal that interrupted us.
-     Otherwise complain.  */
+  continue_one_thread (thread, th->tid);
+}
 
-  child_continue (continue_status, tid);
+/* Resume the inferior process.  RESUME_INFO describes how we want
+   to resume.  */
+void
+win32_process_target::resume (thread_resume *resume_info, size_t n)
+{
+  DWORD continue_status = DBG_CONTINUE;
+  bool any_pending = false;
+
+  for (thread_info *thread : all_threads)
+    {
+      auto *th = (windows_thread_info *) thread_target_data (thread);
+
+      for (int ndx = 0; ndx < n; ndx++)
+	{
+	  thread_resume &r = resume_info[ndx];
+	  ptid_t ptid = r.thread;
+	  gdb_signal sig = gdb_signal_from_host (r.sig);
+	  bool step = r.kind == resume_step;
+
+	  if (ptid == minus_one_ptid || ptid == thread->id
+	      /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
+		 of PID'.  */
+	      || (ptid.pid () == pid_of (thread)
+		  && (ptid.is_pid () || ptid.lwp () == -1)))
+	    {
+	      /* Ignore (wildcard) resume requests for already-resumed
+		 threads.  */
+	      if (!th->suspended)
+		continue;
+
+	      resume_one_thread (thread, step, sig, &continue_status);
+	      break;
+	    }
+	}
+
+      if (!th->suspended
+	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	any_pending = true;
+    }
+
+  if (!any_pending)
+    continue_last_debug_event (continue_status, debug_threads);
 }
 
 /* See nat/windows-nat.h.  */
