@@ -8610,11 +8610,29 @@ proc cd { dir } {
 }
 
 # Return a list of all languages supported by GDB, suitable for use in
-# 'set language NAME'.  This doesn't include either the 'local' or
-# 'auto' keywords.
-proc gdb_supported_languages {} {
-    return [list c objective-c c++ d go fortran modula-2 asm pascal \
-		opencl rust minimal ada]
+# 'set language NAME'.  This doesn't include the languages auto,
+# local, or unknown.
+gdb_caching_proc gdb_supported_languages {} {
+    # The extra space after 'complete set language ' in the command below is
+    # critical.  Only with that space will GDB complete the next level of
+    # the command, i.e. fill in the actual language names.
+    set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS -batch -ex \"complete set language \""]
+
+    if {[lindex $output 0] != 0} {
+	error "failed to get list of supported languages"
+    }
+
+    set langs {}
+    foreach line [split [lindex $output 1] \n] {
+	if {[regexp "set language (\[^\r\]+)" $line full_match lang]} {
+	    # If LANG is not one of the languages that we ignore, then
+	    # add it to our list of languages.
+	    if {[lsearch -exact {auto local unknown} $lang] == -1} {
+		lappend langs $lang
+	    }
+	}
+    }
+    return $langs
 }
 
 # Check if debugging is enabled for gdb.
