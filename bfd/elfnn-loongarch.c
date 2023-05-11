@@ -980,7 +980,7 @@ loongarch_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      (although we could actually do it here).  */
   if (h->type == STT_FUNC || h->type == STT_GNU_IFUNC || h->needs_plt)
     {
-      if (h->plt.refcount < 0
+      if (h->plt.refcount <= 0
 	  || (h->type != STT_GNU_IFUNC
 	      && (SYMBOL_REFERENCES_LOCAL (info, h)
 		  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
@@ -993,8 +993,6 @@ loongarch_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->plt.offset = MINUS_ONE;
 	  h->needs_plt = 0;
 	}
-      else
-	h->needs_plt = 1;
 
       return true;
     }

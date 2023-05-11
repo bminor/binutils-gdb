@@ -504,7 +504,8 @@ run_ld_link_tests [list \
 # but that is just an optimization so don't complain loudly.
 setup_xfail *-*-*
 clear_xfail alpha-*-* bfin-*-linux* csky-*-* frv-*-* hppa*-*-* i?86-*-*
-clear_xfail ia64-*-* microblaze-*-* powerpc*-*-* x86_64-*-* xtensa-*-*
+clear_xfail ia64-*-* loongarch*-*-* microblaze-*-* powerpc*-*-* x86_64-*-*
+clear_xfail xtensa-*-*
 run_ld_link_tests {
     {"pr22374 function pointer initialization"
 	"" "tmpdir/pr22374.so" "" "pr22374a.s"
