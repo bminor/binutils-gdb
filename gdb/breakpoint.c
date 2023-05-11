@@ -1844,6 +1844,7 @@ watchpoint_del_at_next_stop (struct watchpoint *w)
       w->related_breakpoint = w;
     }
   w->disposition = disp_del_at_next_stop;
+  disable_breakpoint (w);
 }
 
 /* Extract a bitfield value from value VAL using the bit parameters contained in
