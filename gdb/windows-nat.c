@@ -1764,7 +1764,10 @@ windows_nat_target::get_windows_debug_event
     }
 
   if (thread_id == 0)
-    return null_ptid;
+    {
+      ourstatus->set_ignore ();
+      return null_ptid;
+    }
   return ptid_t (windows_process.current_event.dwProcessId, thread_id, 0);
 }
 
@@ -1785,27 +1788,33 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     {
       ptid_t result = get_windows_debug_event (pid, ourstatus, options);
 
-      if (result != null_ptid)
+      if ((options & TARGET_WNOHANG) != 0
+	  && ourstatus->kind () == TARGET_WAITKIND_IGNORE)
+	return result;
+
+      if (ourstatus->kind () == TARGET_WAITKIND_SPURIOUS)
+	{
+	  CHECK (windows_continue (DBG_CONTINUE,
+				   windows_process.desired_stop_thread_id, 0));
+	}
+      else if (ourstatus->kind () != TARGET_WAITKIND_IGNORE)
 	{
 	  if (ourstatus->kind () != TARGET_WAITKIND_EXITED
-	      && ourstatus->kind () !=  TARGET_WAITKIND_SIGNALLED)
+	      && ourstatus->kind () != TARGET_WAITKIND_SIGNALLED)
 	    {
 	      windows_thread_info *th = windows_process.find_thread (result);
 
-	      if (th != nullptr)
+	      th->stopped_at_software_breakpoint = false;
+	      if (windows_process.current_event.dwDebugEventCode
+		  == EXCEPTION_DEBUG_EVENT
+		  && ((windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
+		       == EXCEPTION_BREAKPOINT)
+		      || (windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
+			  == STATUS_WX86_BREAKPOINT))
+		  && windows_process.windows_initialization_done)
 		{
-		  th->stopped_at_software_breakpoint = false;
-		  if (windows_process.current_event.dwDebugEventCode
-		      == EXCEPTION_DEBUG_EVENT
-		      && ((windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
-			   == EXCEPTION_BREAKPOINT)
-			  || (windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
-			      == STATUS_WX86_BREAKPOINT))
-		      && windows_process.windows_initialization_done)
-		    {
-		      th->stopped_at_software_breakpoint = true;
-		      th->pc_adjusted = false;
-		    }
+		  th->stopped_at_software_breakpoint = true;
+		  th->pc_adjusted = false;
 		}
 	    }
 
