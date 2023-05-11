@@ -1422,10 +1422,21 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
   if (sig != GDB_SIGNAL_0)
     {
-      if (windows_process.current_event.dwDebugEventCode
+      /* Note it is OK to call get_last_debug_event_ptid() from the
+	 main thread here, because we know the process_thread thread
+	 isn't waiting for an event at this point, so there's no data
+	 race.  */
+      if (inferior_ptid != get_last_debug_event_ptid ())
+	{
+	  /* ContinueDebugEvent will be for a different thread.  */
+	  DEBUG_EXCEPT ("Cannot continue with signal %d here.  "
+			"Not last-event thread", sig);
+	}
+      else if (windows_process.current_event.dwDebugEventCode
 	  != EXCEPTION_DEBUG_EVENT)
 	{
-	  DEBUG_EXCEPT ("Cannot continue with signal %d here.", sig);
+	  DEBUG_EXCEPT ("Cannot continue with signal %d here.  "
+			"Not stopped for EXCEPTION_DEBUG_EVENT", sig);
 	}
       else if (sig == windows_process.last_sig)
 	continue_status = DBG_EXCEPTION_NOT_HANDLED;
