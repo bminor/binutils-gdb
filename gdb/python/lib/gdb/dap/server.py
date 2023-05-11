@@ -164,9 +164,10 @@ def request(name):
 
     def wrap(func):
         global _commands
-        _commands[name] = func
         # All requests must run in the DAP thread.
-        return in_dap_thread(func)
+        func = in_dap_thread(func)
+        _commands[name] = func
+        return func
 
     return wrap
 
