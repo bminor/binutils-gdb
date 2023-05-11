@@ -28,7 +28,7 @@ def _read_memory(addr, count):
 
 @request("readMemory")
 @capability("supportsReadMemoryRequest")
-def read_memory(*, memoryReference, offset=0, count, **extra):
+def read_memory(*, memoryReference: str, offset: int = 0, count: int, **extra):
     addr = int(memoryReference, 0) + offset
     buf = send_gdb_with_response(lambda: _read_memory(addr, count))
     return {
@@ -45,7 +45,7 @@ def _write_memory(addr, contents):
 
 @request("writeMemory")
 @capability("supportsWriteMemoryRequest")
-def write_memory(*, memoryReference, offset=0, data, **extra):
+def write_memory(*, memoryReference: str, offset: int = 0, data: str, **extra):
     addr = int(memoryReference, 0) + offset
     send_gdb_with_response(lambda: _write_memory(addr, data))
     return {}

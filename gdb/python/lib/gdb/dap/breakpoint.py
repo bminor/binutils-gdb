@@ -16,6 +16,9 @@
 import gdb
 import os
 
+# These are deprecated in 3.9, but required in older versions.
+from typing import Optional, Sequence
+
 from .server import request, capability
 from .startup import send_gdb_with_response, in_gdb_thread
 
@@ -95,8 +98,10 @@ def _set_breakpoints(kind, specs):
     return _set_breakpoints_callback(kind, specs, gdb.Breakpoint)
 
 
+# FIXME we do not specify a type for 'source'.
+# FIXME 'breakpoints' is really a list[SourceBreakpoint].
 @request("setBreakpoints")
-def set_breakpoint(*, source, breakpoints=(), **args):
+def set_breakpoint(*, source, breakpoints: Sequence = (), **args):
     if "path" not in source:
         result = []
     else:
@@ -119,7 +124,7 @@ def set_breakpoint(*, source, breakpoints=(), **args):
 
 @request("setFunctionBreakpoints")
 @capability("supportsFunctionBreakpoints")
-def set_fn_breakpoint(*, breakpoints, **args):
+def set_fn_breakpoint(*, breakpoints: Sequence, **args):
     specs = []
     for bp in breakpoints:
         specs.append(
@@ -135,7 +140,9 @@ def set_fn_breakpoint(*, breakpoints, **args):
 
 @request("setInstructionBreakpoints")
 @capability("supportsInstructionBreakpoints")
-def set_insn_breakpoints(*, breakpoints, offset=None, **args):
+def set_insn_breakpoints(
+    *, breakpoints: Sequence, offset: Optional[int] = None, **args
+):
     specs = []
     for bp in breakpoints:
         # There's no way to set an explicit address breakpoint
@@ -179,16 +186,24 @@ def _set_exception_catchpoints(filter_options):
 
 @request("setExceptionBreakpoints")
 @capability("supportsExceptionFilterOptions")
-@capability("exceptionBreakpointFilters", ({
-    "filter": "assert",
-    "label": "Ada assertions",
-    "supportsCondition": True,
-}, {
-    "filter": "exception",
-    "label": "Ada exceptions",
-    "supportsCondition": True,
-}))
-def set_exception_breakpoints(*, filters, filterOptions=(), **args):
+@capability(
+    "exceptionBreakpointFilters",
+    (
+        {
+            "filter": "assert",
+            "label": "Ada assertions",
+            "supportsCondition": True,
+        },
+        {
+            "filter": "exception",
+            "label": "Ada exceptions",
+            "supportsCondition": True,
+        },
+    ),
+)
+def set_exception_breakpoints(
+    *, filters: Sequence[str], filterOptions: Sequence = (), **args
+):
     # Convert the 'filters' to the filter-options style.
     options = [{"filterId": filter} for filter in filters]
     options.extend(filterOptions)

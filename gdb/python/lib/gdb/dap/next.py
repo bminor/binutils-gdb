@@ -45,7 +45,9 @@ def _handle_thread_step(thread_id, single_thread):
 
 
 @request("next")
-def next(*, threadId, singleThread=False, granularity="statement", **args):
+def next(
+    *, threadId: int, singleThread: bool = False, granularity: str = "statement", **args
+):
     send_gdb(lambda: _handle_thread_step(threadId, singleThread))
     cmd = "next"
     if granularity == "instruction":
@@ -56,7 +58,9 @@ def next(*, threadId, singleThread=False, granularity="statement", **args):
 @capability("supportsSteppingGranularity")
 @capability("supportsSingleThreadExecutionRequests")
 @request("stepIn")
-def step_in(*, threadId, singleThread=False, granularity="statement", **args):
+def step_in(
+    *, threadId: int, singleThread: bool = False, granularity: str = "statement", **args
+):
     send_gdb(lambda: _handle_thread_step(threadId, singleThread))
     cmd = "step"
     if granularity == "instruction":
@@ -65,13 +69,13 @@ def step_in(*, threadId, singleThread=False, granularity="statement", **args):
 
 
 @request("stepOut")
-def step_out(*, threadId, singleThread=False):
+def step_out(*, threadId: int, singleThread: bool = False):
     send_gdb(lambda: _handle_thread_step(threadId, singleThread))
     send_gdb(ExecutionInvoker("finish", StopKinds.STEP))
 
 
 @request("continue")
-def continue_request(*, threadId, singleThread=False, **args):
+def continue_request(*, threadId: int, singleThread: bool = False, **args):
     locked = send_gdb_with_response(lambda: _handle_thread_step(threadId, singleThread))
     send_gdb(ExecutionInvoker("continue", None))
     return {"allThreadsContinued": not locked}

@@ -109,6 +109,6 @@ def _get_scope(id):
 
 
 @request("scopes")
-def scopes(*, frameId, **extra):
+def scopes(*, frameId: int, **extra):
     scopes = send_gdb_with_response(lambda: _get_scope(frameId))
     return {"scopes": scopes}

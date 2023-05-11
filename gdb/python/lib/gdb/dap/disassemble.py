@@ -43,7 +43,12 @@ def _disassemble(pc, skip_insns, count):
 @request("disassemble")
 @capability("supportsDisassembleRequest")
 def disassemble(
-    *, memoryReference, offset=0, instructionOffset=0, instructionCount, **extra
+    *,
+    memoryReference: str,
+    offset: int = 0,
+    instructionOffset: int = 0,
+    instructionCount: int,
+    **extra
 ):
     pc = int(memoryReference, 0) + offset
     return send_gdb_with_response(

@@ -16,6 +16,9 @@
 import gdb
 import gdb.printing
 
+# This is deprecated in 3.9, but required in older versions.
+from typing import Optional
+
 from .frames import frame_for_id
 from .server import request
 from .startup import send_gdb_with_response, in_gdb_thread
@@ -55,7 +58,13 @@ def _repl(command, frame_id):
 
 # FIXME supportsVariableType handling
 @request("evaluate")
-def eval_request(*, expression, frameId=None, context="variables", **args):
+def eval_request(
+    *,
+    expression: str,
+    frameId: Optional[int] = None,
+    context: str = "variables",
+    **args,
+):
     if context in ("watch", "variables"):
         # These seem to be expression-like.
         return send_gdb_with_response(lambda: _evaluate(expression, frameId))
@@ -75,7 +84,7 @@ def _variables(ref, start, count):
 @request("variables")
 # Note that we ignore the 'filter' field.  That seems to be
 # specific to javascript.
-def variables(*, variablesReference, start=0, count=0, **args):
+def variables(*, variablesReference: int, start: int = 0, count: int = 0, **args):
     result = send_gdb_with_response(
         lambda: _variables(variablesReference, start, count)
     )

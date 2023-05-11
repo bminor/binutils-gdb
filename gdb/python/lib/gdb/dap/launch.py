@@ -14,6 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gdb
+
+# These are deprecated in 3.9, but required in older versions.
+from typing import Mapping, Optional, Sequence
+
 from .events import ExecutionInvoker
 from .server import request, capability
 from .startup import send_gdb, send_gdb_with_response, in_gdb_thread
@@ -36,7 +40,13 @@ def _set_args_env(args, env):
 # from implementations.  Any additions or changes here should be
 # documented in the gdb manual.
 @request("launch")
-def launch(*, program=None, args=(), env=None, **extra):
+def launch(
+    *,
+    program: Optional[str] = None,
+    args: Sequence[str] = (),
+    env: Optional[Mapping[str, str]] = None,
+    **extra,
+):
     if program is not None:
         global _program
         _program = program
@@ -46,7 +56,7 @@ def launch(*, program=None, args=(), env=None, **extra):
 
 
 @request("attach")
-def attach(*, pid, **args):
+def attach(*, pid: int, **args):
     # Ensure configurationDone does not try to run.
     global _program
     _program = None

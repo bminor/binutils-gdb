@@ -88,5 +88,5 @@ def _backtrace(thread_id, levels, startFrame):
 
 @request("stackTrace")
 @capability("supportsDelayedStackTraceLoading")
-def stacktrace(*, levels=0, startFrame=0, threadId, **extra):
+def stacktrace(*, levels: int = 0, startFrame: int = 0, threadId: int, **extra):
     return send_gdb_with_response(lambda: _backtrace(threadId, levels, startFrame))

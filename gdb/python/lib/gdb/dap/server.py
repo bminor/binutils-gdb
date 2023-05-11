@@ -25,6 +25,7 @@ from .startup import (
     log_stack,
     send_gdb_with_response,
 )
+from .typecheck import type_check
 
 
 # Map capability names to values.
@@ -165,7 +166,8 @@ def request(name):
     def wrap(func):
         global _commands
         # All requests must run in the DAP thread.
-        func = in_dap_thread(func)
+        # Also type-check the calls.
+        func = in_dap_thread(type_check(func))
         _commands[name] = func
         return func
 
@@ -202,7 +204,7 @@ def terminate(**args):
 
 @request("disconnect")
 @capability("supportTerminateDebuggee")
-def disconnect(*, terminateDebuggee=False, **args):
+def disconnect(*, terminateDebuggee: bool = False, **args):
     if terminateDebuggee:
         terminate()
     _server.shutdown()
