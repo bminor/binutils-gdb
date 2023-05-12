@@ -92,12 +92,6 @@ proc test_wrap_cli_tui { auto_detected_width } {
 	}
     }
 
-    if { $auto_detected_width } {
-	if { $gdb_width == [expr $::cols - 1] || $gdb_width == $::cols } {
-	    # Generate KFAIL or KPASS.
-	    setup_kfail "cli/30346" "*-*-*"
-	}
-    }
     gdb_assert { $gdb_width == $::cols } "width"
 
     # TERM=ansi, so readline hides the last column.

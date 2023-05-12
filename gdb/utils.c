@@ -1161,7 +1161,7 @@ init_page_info (void)
       readline_hidden_cols = _rl_term_autowrap ? 0 : 1;
 
       lines_per_page = rows;
-      chars_per_line = cols;
+      chars_per_line = cols + readline_hidden_cols;
 
       /* Readline should have fetched the termcap entry for us.
 	 Only try to use tgetnum function if rl_get_screen_size
