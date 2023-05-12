@@ -96,7 +96,7 @@ def _set_breakpoints(kind, specs):
 
 
 @request("setBreakpoints")
-def set_breakpoint(*, source, breakpoints=[], **args):
+def set_breakpoint(*, source, breakpoints=(), **args):
     if "path" not in source:
         result = []
     else:
@@ -188,7 +188,7 @@ def _set_exception_catchpoints(filter_options):
     "label": "Ada exceptions",
     "supportsCondition": True,
 }))
-def set_exception_breakpoints(*, filters, filterOptions=[], **args):
+def set_exception_breakpoints(*, filters, filterOptions=(), **args):
     # Convert the 'filters' to the filter-options style.
     options = [{"filterId": filter} for filter in filters]
     options.extend(filterOptions)

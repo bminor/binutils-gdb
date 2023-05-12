@@ -36,7 +36,7 @@ def _set_args_env(args, env):
 # from implementations.  Any additions or changes here should be
 # documented in the gdb manual.
 @request("launch")
-def launch(*, program=None, args=[], env=None, **extra):
+def launch(*, program=None, args=(), env=None, **extra):
     if program is not None:
         global _program
         _program = program
