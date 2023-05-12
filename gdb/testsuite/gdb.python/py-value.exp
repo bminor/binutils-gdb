@@ -633,6 +633,19 @@ proc test_history_count {} {
     }
 }
 
+# Test Value.assign.
+proc test_assign {} {
+    gdb_test_no_output "python i_value = gdb.parse_and_eval('i')" \
+	"evaluate i"
+    gdb_test_no_output "python i_value.assign(27)" \
+	"set i to 27"
+    gdb_test "print i" " = 27"
+    gdb_test_no_output "python i_value = gdb.Value(27)" \
+	"reset i_value"
+    gdb_test "python i_value.assign(89)" "not an lvalue.*" \
+	"cannot assign to integer"
+}
+
 # Build C version of executable.  C++ is built later.
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return -1
@@ -663,6 +676,7 @@ test_value_in_inferior
 test_value_from_buffer
 test_value_sub_classes
 test_inferior_function_call
+test_assign
 test_value_after_death
 
 # Test either C or C++ values. 

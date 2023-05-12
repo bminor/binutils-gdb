@@ -220,6 +220,8 @@ info main
      "unset_env".  These can be used to modify the inferior's
      environment before it is started.
 
+  ** gdb.Value now has the 'assign' method.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

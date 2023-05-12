@@ -947,6 +947,12 @@ If @var{type} is @code{None} then this version of @code{__init__}
 behaves as though @var{type} was not passed at all.
 @end defun
 
+@defun Value.assign (rhs)
+Assign @var{rhs} to this value, and return @code{None}.  If this value
+cannot be assigned to, or if the assignment is invalid for some reason
+(for example a type-checking failure), an exception will be thrown.
+@end defun
+
 @defun Value.cast (type)
 Return a new instance of @code{gdb.Value} that is the result of
 casting this instance to the type described by @var{type}, which must

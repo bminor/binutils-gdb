@@ -853,6 +853,33 @@ valpy_reinterpret_cast (PyObject *self, PyObject *args)
   return valpy_do_cast (self, args, UNOP_REINTERPRET_CAST);
 }
 
+/* Implementation of the "assign" method.  */
+
+static PyObject *
+valpy_assign (PyObject *self_obj, PyObject *args)
+{
+  PyObject *val_obj;
+
+  if (! PyArg_ParseTuple (args, "O", &val_obj))
+    return nullptr;
+
+  struct value *val = convert_value_from_python (val_obj);
+  if (val == nullptr)
+    return nullptr;
+
+  try
+    {
+      value_object *self = (value_object *) self_obj;
+      value_assign (self->value, val);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  Py_RETURN_NONE;
+}
+
 static Py_ssize_t
 valpy_length (PyObject *self)
 {
@@ -2119,6 +2146,9 @@ Return Unicode string representation of the value." },
     "format_string (...) -> string\n\
 Return a string representation of the value using the specified\n\
 formatting options" },
+  { "assign", (PyCFunction) valpy_assign, METH_VARARGS,
+    "assign (VAL) -> None\n\
+Assign VAL to this value." },
   {NULL}  /* Sentinel */
 };
 
