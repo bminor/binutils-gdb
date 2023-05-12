@@ -45,9 +45,6 @@ static bool dofloat (instr_info *, int);
 static int putop (instr_info *, const char *, int);
 static void oappend_with_style (instr_info *, const char *,
 				enum disassembler_style);
-static void oappend (instr_info *, const char *);
-static void append_seg (instr_info *);
-static void set_op (instr_info *, bfd_vma, bool);
 
 static bool OP_E (instr_info *, int, int);
 static bool OP_E_memory (instr_info *, int, int);
@@ -89,8 +86,6 @@ static bool OP_VexI4 (instr_info *, int, int);
 static bool OP_0f07 (instr_info *, int, int);
 static bool OP_Monitor (instr_info *, int, int);
 static bool OP_Mwait (instr_info *, int, int);
-
-static bool BadOp (instr_info *);
 
 static bool PCLMUL_Fixup (instr_info *, int, int);
 static bool VPCMP_Fixup (instr_info *, int, int);
@@ -9504,7 +9499,15 @@ get_sib (instr_info *ins, int sizeflag)
   return true;
 }
 
-/* Like oappend (below), but S is a string starting with '%'.  In
+/* Like oappend_with_style (below) but always with text style.  */
+
+static void
+oappend (instr_info *ins, const char *s)
+{
+  oappend_with_style (ins, s, dis_style_text);
+}
+
+/* Like oappend (above), but S is a string starting with '%'.  In
    Intel syntax, the '%' is elided.  */
 
 static void
@@ -11201,14 +11204,6 @@ oappend_with_style (instr_info *ins, const char *s,
   ins->obufp = stpcpy (ins->obufp, s);
 }
 
-/* Like oappend_with_style but always with text style.  */
-
-static void
-oappend (instr_info *ins, const char *s)
-{
-  oappend_with_style (ins, s, dis_style_text);
-}
-
 /* Add a single character C to the buffer pointer to by INS->obufp, marking
    the style for the character as STYLE.  */
 
@@ -11781,6 +11776,26 @@ get64 (instr_info *ins, uint64_t *res)
   return true;
 }
 
+static void
+set_op (instr_info *ins, bfd_vma op, bool riprel)
+{
+  ins->op_index[ins->op_ad] = ins->op_ad;
+  if (ins->address_mode == mode_64bit)
+    ins->op_address[ins->op_ad] = op;
+  else /* Mask to get a 32-bit address.  */
+    ins->op_address[ins->op_ad] = op & 0xffffffff;
+  ins->op_riprel[ins->op_ad] = riprel;
+}
+
+static bool
+BadOp (instr_info *ins)
+{
+  /* Throw away prefixes and 1st. opcode byte.  */
+  ins->codep = ins->insn_codep + 1;
+  ins->obufp = stpcpy (ins->obufp, "(bad)");
+  return true;
+}
+
 static bool
 OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 {
@@ -12314,17 +12329,6 @@ OP_G (instr_info *ins, int bytemode, int sizeflag)
   else
     print_register (ins, ins->modrm.reg, REX_R, bytemode, sizeflag);
   return true;
-}
-
-static void
-set_op (instr_info *ins, bfd_vma op, bool riprel)
-{
-  ins->op_index[ins->op_ad] = ins->op_ad;
-  if (ins->address_mode == mode_64bit)
-    ins->op_address[ins->op_ad] = op;
-  else /* Mask to get a 32-bit address.  */
-    ins->op_address[ins->op_ad] = op & 0xffffffff;
-  ins->op_riprel[ins->op_ad] = riprel;
 }
 
 static bool
@@ -13347,15 +13351,6 @@ OP_Monitor (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   ins->codep++;
-  return true;
-}
-
-static bool
-BadOp (instr_info *ins)
-{
-  /* Throw away prefixes and 1st. opcode byte.  */
-  ins->codep = ins->insn_codep + 1;
-  ins->obufp = stpcpy (ins->obufp, "(bad)");
   return true;
 }
 
