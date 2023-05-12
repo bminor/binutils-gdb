@@ -47,10 +47,6 @@ static void oappend_with_style (instr_info *, const char *,
 				enum disassembler_style);
 static void oappend (instr_info *, const char *);
 static void append_seg (instr_info *);
-static bool get32s (instr_info *, bfd_vma *);
-static bool get16 (instr_info *, bfd_vma *);
-static bool get16s (instr_info *, bfd_vma *);
-static bool get8s (instr_info *, bfd_vma *);
 static void set_op (instr_info *, bfd_vma, bool);
 
 static bool OP_E (instr_info *, int, int);
@@ -11715,6 +11711,77 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
 }
 
 static bool
+get8s (instr_info *ins, bfd_vma *res)
+{
+  if (!fetch_code (ins->info, ins->codep + 1))
+    return false;
+  *res = (((bfd_vma) *ins->codep++ & 0xff) ^ 0x80) - 0x80;
+  return true;
+}
+
+static bool
+get16 (instr_info *ins, bfd_vma *res)
+{
+  if (!fetch_code (ins->info, ins->codep + 2))
+    return false;
+  *res = (bfd_vma) *ins->codep++ & 0xff;
+  *res |= ((bfd_vma) *ins->codep++ & 0xff) << 8;
+  return true;
+}
+
+static bool
+get16s (instr_info *ins, bfd_vma *res)
+{
+  if (!get16 (ins, res))
+    return false;
+  *res = (*res ^ 0x8000) - 0x8000;
+  return true;
+}
+
+static bool
+get32 (instr_info *ins, bfd_vma *res)
+{
+  if (!fetch_code (ins->info, ins->codep + 4))
+    return false;
+  *res = *ins->codep++ & (bfd_vma) 0xff;
+  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 8;
+  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 16;
+  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 24;
+  return true;
+}
+
+static bool
+get32s (instr_info *ins, bfd_vma *res)
+{
+  if (!get32 (ins, res))
+    return false;
+
+  *res = (*res ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
+
+  return true;
+}
+
+static bool
+get64 (instr_info *ins, uint64_t *res)
+{
+  unsigned int a;
+  unsigned int b;
+
+  if (!fetch_code (ins->info, ins->codep + 8))
+    return false;
+  a = *ins->codep++ & 0xff;
+  a |= (*ins->codep++ & 0xff) << 8;
+  a |= (*ins->codep++ & 0xff) << 16;
+  a |= (*ins->codep++ & 0xffu) << 24;
+  b = *ins->codep++ & 0xff;
+  b |= (*ins->codep++ & 0xff) << 8;
+  b |= (*ins->codep++ & 0xff) << 16;
+  b |= (*ins->codep++ & 0xffu) << 24;
+  *res = a + ((uint64_t) b << 32);
+  return true;
+}
+
+static bool
 OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 {
   int add = (ins->rex & REX_B) ? 8 : 0;
@@ -12246,77 +12313,6 @@ OP_G (instr_info *ins, int bytemode, int sizeflag)
     oappend (ins, "(bad)");
   else
     print_register (ins, ins->modrm.reg, REX_R, bytemode, sizeflag);
-  return true;
-}
-
-static bool
-get64 (instr_info *ins, uint64_t *res)
-{
-  unsigned int a;
-  unsigned int b;
-
-  if (!fetch_code (ins->info, ins->codep + 8))
-    return false;
-  a = *ins->codep++ & 0xff;
-  a |= (*ins->codep++ & 0xff) << 8;
-  a |= (*ins->codep++ & 0xff) << 16;
-  a |= (*ins->codep++ & 0xffu) << 24;
-  b = *ins->codep++ & 0xff;
-  b |= (*ins->codep++ & 0xff) << 8;
-  b |= (*ins->codep++ & 0xff) << 16;
-  b |= (*ins->codep++ & 0xffu) << 24;
-  *res = a + ((uint64_t) b << 32);
-  return true;
-}
-
-static bool
-get32 (instr_info *ins, bfd_vma *res)
-{
-  if (!fetch_code (ins->info, ins->codep + 4))
-    return false;
-  *res = *ins->codep++ & (bfd_vma) 0xff;
-  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 8;
-  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 16;
-  *res |= (*ins->codep++ & (bfd_vma) 0xff) << 24;
-  return true;
-}
-
-static bool
-get32s (instr_info *ins, bfd_vma *res)
-{
-  if (!get32 (ins, res))
-    return false;
-
-  *res = (*res ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
-
-  return true;
-}
-
-static bool
-get16 (instr_info *ins, bfd_vma *res)
-{
-  if (!fetch_code (ins->info, ins->codep + 2))
-    return false;
-  *res = (bfd_vma) *ins->codep++ & 0xff;
-  *res |= ((bfd_vma) *ins->codep++ & 0xff) << 8;
-  return true;
-}
-
-static bool
-get16s (instr_info *ins, bfd_vma *res)
-{
-  if (!get16 (ins, res))
-    return false;
-  *res = (*res ^ 0x8000) - 0x8000;
-  return true;
-}
-
-static bool
-get8s (instr_info *ins, bfd_vma *res)
-{
-  if (!fetch_code (ins->info, ins->codep + 1))
-    return false;
-  *res = (((bfd_vma) *ins->codep++ & 0xff) ^ 0x80) - 0x80;
   return true;
 }
 
