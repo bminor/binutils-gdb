@@ -13875,13 +13875,8 @@ i386_parse_name (char *name, expressionS *e, char *nextcharP)
     {
       *nextcharP = *input_line_pointer;
       *input_line_pointer = 0;
-      if (r != &bad_reg)
-	{
-	  e->X_op = O_register;
-	  e->X_add_number = r - i386_regtab;
-	}
-      else
-	  e->X_op = O_illegal;
+      e->X_op = O_register;
+      e->X_add_number = r - i386_regtab;
       return 1;
     }
   input_line_pointer = end;
