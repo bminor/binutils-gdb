@@ -167,6 +167,7 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "attr-merge-stack-align-failed"
     run_dump_test "attr-phdr"
     run_dump_test "relax-max-align-gp"
+    run_dump_test "relax-data-segment-align"
     run_dump_test "uleb128"
     run_dump_test "pr31179"
     run_dump_test "pr31179-r"

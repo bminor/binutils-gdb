@@ -4755,6 +4755,9 @@ _bfd_riscv_relax_lui (bfd *abfd,
   bfd_vma gp = htab->params->relax_gp
 	       ? riscv_global_pointer_value (link_info)
 	       : 0;
+  bfd_vma data_segment_alignment = link_info->relro
+				   ? ELF_MAXPAGESIZE + ELF_COMMONPAGESIZE
+				   : ELF_MAXPAGESIZE;
   int use_rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
@@ -4779,6 +4782,16 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	      htab->max_alignment_for_gp = max_alignment;
 	    }
 	}
+
+      /* PR27566, for default linker script, if a symbol's value outsides the
+	 bounds of the defined section, then it may cross the data segment
+	 alignment, so we should reserve more size about MAXPAGESIZE and
+	 COMMONPAGESIZE, since the data segment alignment might move the
+	 section forward.  */
+      if (symval < sec_addr (sym_sec)
+	  || symval > (sec_addr (sym_sec) + sym_sec->size))
+	max_alignment = data_segment_alignment > max_alignment
+			? data_segment_alignment : max_alignment;
     }
 
   /* Is the reference in range of x0 or gp?
@@ -4823,8 +4836,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
       && ELFNN_R_TYPE (rel->r_info) == R_RISCV_HI20
       && VALID_CITYPE_LUI_IMM (RISCV_CONST_HIGH_PART (symval))
       && VALID_CITYPE_LUI_IMM (RISCV_CONST_HIGH_PART (symval)
-			    + (link_info->relro ? 2 * ELF_MAXPAGESIZE
-			       : ELF_MAXPAGESIZE)))
+			       + data_segment_alignment))
     {
       /* Replace LUI with C.LUI if legal (i.e., rd != x0 and rd != x2/sp).  */
       bfd_vma lui = bfd_getl32 (contents + rel->r_offset);
@@ -4969,6 +4981,9 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
   bfd_vma gp = htab->params->relax_gp
 	       ? riscv_global_pointer_value (link_info)
 	       : 0;
+  bfd_vma data_segment_alignment = link_info->relro
+				   ? ELF_MAXPAGESIZE + ELF_COMMONPAGESIZE
+				   : ELF_MAXPAGESIZE;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
@@ -5043,6 +5058,16 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	      htab->max_alignment_for_gp = max_alignment;
 	    }
 	}
+
+      /* PR27566, for default linker script, if a symbol's value outsides the
+	 bounds of the defined section, then it may cross the data segment
+	 alignment, so we should reserve more size about MAXPAGESIZE and
+	 COMMONPAGESIZE, since the data segment alignment might move the
+	 section forward.  */
+      if (symval < sec_addr (sym_sec)
+	  || symval > (sec_addr (sym_sec) + sym_sec->size))
+	max_alignment = data_segment_alignment > max_alignment
+			? data_segment_alignment : max_alignment;
     }
 
   /* Is the reference in range of x0 or gp?
