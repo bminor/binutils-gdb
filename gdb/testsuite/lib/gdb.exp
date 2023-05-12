@@ -3492,7 +3492,7 @@ gdb_caching_proc is_lp64_target {} {
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
 gdb_caching_proc is_64_target {} {
-    return [gdb_can_simple_compile is_64_target {
+    return [gdb_can_simple_compile_nodebug is_64_target {
 	int function(void) { return 3; }
 	int dummy[sizeof (&function) == 8 ? 1 : -1];
     }]
@@ -4734,6 +4734,13 @@ proc gdb_can_simple_compile {name code {type object} {compile_flags ""} {default
 		 $default_compile_flags]
     file delete $temp_obj
     return $ret
+}
+
+# As gdb_can_simple_compile, but defaults to using nodebug instead of debug.
+proc gdb_can_simple_compile_nodebug {name code {type object} {compile_flags ""}
+				     {default_compile_flags "nodebug nowarning quiet"}} {
+    return [gdb_can_simple_compile $name $code $type $compile_flags \
+		$default_compile_flags]
 }
 
 # Some targets need to always link a special object in.  Save its path here.
