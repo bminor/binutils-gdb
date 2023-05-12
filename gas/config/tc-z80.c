@@ -926,6 +926,7 @@ parse_exp_not_indexed (const char *s, expressionS *op)
     }
   input_line_pointer = (char*) s ;
   expression (op);
+  resolve_register (op);
   switch (op->X_op)
     {
     case O_absent:

@@ -385,6 +385,8 @@ gas_cgen_parse_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
   /* FIXME: Need to check `want'.  */
 
+  resolve_register (&exp);
+
   switch (exp.X_op)
     {
     case O_illegal:

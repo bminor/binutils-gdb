@@ -415,6 +415,8 @@ parse_exp (char * s, expressionS * op)
   expression (op);
   if (op->X_op == O_absent)
     as_bad (_("missing operand"));
+  else
+    resolve_register (op);
 
   /* Our caller is likely to check that the entire expression was parsed.
      If we have found a hex constant with an 'h' suffix, ilp will be left

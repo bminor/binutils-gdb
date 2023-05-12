@@ -632,6 +632,7 @@ parse_operand (char *s, expressionS *operandp)
       /* Normal operand parsing.  */
       input_line_pointer = s;
       (void) expression (operandp);
+      resolve_register (operandp);
     }
 
   new_pos = input_line_pointer;

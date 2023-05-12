@@ -987,6 +987,7 @@ tokenize_arguments (char *str,
 
 	    /* First try for parenthesized register ...  */
 	    expression (tok);
+	    resolve_register (tok);
 	    if (*input_line_pointer == ')' && tok->X_op == O_register)
 	      {
 		tok->X_op = (saw_comma ? O_cpregister : O_pregister);
@@ -1009,6 +1010,8 @@ tokenize_arguments (char *str,
 	  expression (tok);
 	  if (tok->X_op == O_illegal || tok->X_op == O_absent)
 	    goto err;
+
+	  resolve_register (tok);
 
 	  saw_comma = 0;
 	  saw_arg = 1;

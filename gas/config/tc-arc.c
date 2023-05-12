@@ -1312,6 +1312,8 @@ tokenize_arguments (char *str,
 	     relocation type as well.  */
 	  if (*input_line_pointer == '@')
 	    parse_reloc_symbol (tok);
+	  else
+	    resolve_register (tok);
 
 	  debug_exp (tok);
 

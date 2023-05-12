@@ -1308,7 +1308,10 @@ md_gather_operands (char *str,
 
       /* Parse the operand.  */
       if (! register_name (&ex))
-	expression (&ex);
+	{
+	  expression (&ex);
+	  resolve_register (&ex);
+	}
 
       str = input_line_pointer;
       input_line_pointer = hold;

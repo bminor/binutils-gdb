@@ -2382,6 +2382,31 @@ resolve_expression (expressionS *expressionP)
 
   return 1;
 }
+
+/* "Look through" register equates.  */
+void resolve_register (expressionS *expP)
+{
+  symbolS *sym;
+  offsetT acc = 0;
+  const expressionS *e = expP;
+
+  if (expP->X_op != O_symbol)
+    return;
+
+  do
+    {
+      sym = e->X_add_symbol;
+      acc += e->X_add_number;
+      e = symbol_get_value_expression (sym);
+    }
+  while (symbol_equated_p (sym));
+
+  if (e->X_op == O_register)
+    {
+      *expP = *e;
+      expP->X_add_number += acc;
+    }
+}
 
 /* This lives here because it belongs equally in expr.c & read.c.
    expr.c is just a branch office read.c anyway, and putting it

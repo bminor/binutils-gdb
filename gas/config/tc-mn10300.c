@@ -1669,6 +1669,7 @@ md_assemble (char *str)
 	  else
 	    {
 	      expression (&ex);
+	      resolve_register (&ex);
 	    }
 
 	  switch (ex.X_op)

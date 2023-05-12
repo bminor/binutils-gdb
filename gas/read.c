@@ -4000,6 +4000,10 @@ pseudo_set (symbolS *symbolP)
 	  return;
 	}
 #endif
+      /* Make sure symbol_equated_p() recognizes the symbol as an equate.  */
+      exp.X_add_symbol = make_expr_symbol (&exp);
+      exp.X_add_number = 0;
+      exp.X_op = O_symbol;
       symbol_set_value_expression (symbolP, &exp);
       S_SET_SEGMENT (symbolP, reg_section);
       set_zero_frag (symbolP);

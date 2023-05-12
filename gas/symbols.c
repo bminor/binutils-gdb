@@ -387,6 +387,8 @@ symbol_init (symbolS *symbolP, const char *name, asection *sec,
     }
 
   S_SET_VALUE (symbolP, valu);
+  if (sec == reg_section)
+    symbolP->x->value.X_op = O_register;
 
   symbol_clear_list_pointers (symbolP);
 
@@ -2463,7 +2465,7 @@ S_CAN_BE_REDEFINED (const symbolS *s)
     return (((struct local_symbol *) s)->frag
 	    == &predefined_address_frag);
   /* Permit register names to be redefined.  */
-  return s->bsym->section == reg_section;
+  return s->x->value.X_op == O_register;
 }
 
 int

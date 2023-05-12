@@ -13830,11 +13830,11 @@ parse_register (const char *reg_string, char **end_op)
       input_line_pointer = buf;
       get_symbol_name (&name);
       symbolP = symbol_find (name);
-      while (symbolP && S_GET_SEGMENT (symbolP) != reg_section)
+      while (symbolP && symbol_equated_p (symbolP))
 	{
 	  const expressionS *e = symbol_get_value_expression(symbolP);
 
-	  if (e->X_op != O_symbol || e->X_add_number)
+	  if (e->X_add_number)
 	    break;
 	  symbolP = e->X_add_symbol;
 	}

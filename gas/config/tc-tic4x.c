@@ -649,6 +649,7 @@ tic4x_expression (char *str, expressionS *exp)
   t = input_line_pointer;	/* Save line pointer.  */
   input_line_pointer = str;
   expression (exp);
+  resolve_register (exp);
   s = input_line_pointer;
   input_line_pointer = t;	/* Restore line pointer.  */
   return s;			/* Return pointer to where parsing stopped.  */

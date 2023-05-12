@@ -3475,6 +3475,8 @@ md_assemble (char *str)
       str = input_line_pointer;
       input_line_pointer = hold;
 
+      resolve_register (&ex);
+
       if (ex.X_op == O_illegal)
 	as_bad (_("illegal operand"));
       else if (ex.X_op == O_absent)

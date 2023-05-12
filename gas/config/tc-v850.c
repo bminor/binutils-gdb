@@ -2909,6 +2909,7 @@ md_assemble (char *str)
 	      else
 		{
 		  expression (&ex);
+		  resolve_register (&ex);
 
 		  if ((operand->flags & V850_NOT_IMM0)
 		      && ex.X_op == O_constant

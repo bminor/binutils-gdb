@@ -190,5 +190,6 @@ extern symbolS *expr_build_dot (void);
 extern uint32_t generic_bignum_to_int32 (void);
 extern uint64_t generic_bignum_to_int64 (void);
 extern int resolve_expression (expressionS *);
+extern void resolve_register (expressionS *);
 
 extern bool literal_prefix_dollar_hex;

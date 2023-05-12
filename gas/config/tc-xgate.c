@@ -893,6 +893,8 @@ xgate_parse_exp (char *s, expressionS * op)
   expression (op);
   if (op->X_op == O_absent)
     as_bad (_("missing operand"));
+  else
+    resolve_register (op);
   return input_line_pointer;
 }
 

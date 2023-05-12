@@ -5987,6 +5987,7 @@ parse_operand (expressionS *e, int more)
   e->X_op = O_absent;
   SKIP_WHITESPACE ();
   expression (e);
+  resolve_register (e);
   sep = *input_line_pointer;
   if (more && (sep == ',' || sep == more))
     ++input_line_pointer;

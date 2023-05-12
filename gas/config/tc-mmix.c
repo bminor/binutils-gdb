@@ -624,6 +624,8 @@ get_putget_operands (struct mmix_opcode *insn, char *operands,
   regno = get_spec_regno (sregp);
   *sregend = c;
 
+  resolve_register (expp_reg);
+
   /* Let the caller issue errors; we've made sure the operands are
      invalid.  */
   if (expp_reg->X_op != O_illegal
