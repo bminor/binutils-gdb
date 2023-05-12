@@ -1070,7 +1070,19 @@ jump_command (const char *arg, int from_tty)
   std::vector<symtab_and_line> sals
     = decode_line_with_last_displayed (arg, DECODE_LINE_FUNFIRSTLINE);
   if (sals.size () != 1)
-    error (_("Unreasonable jump request"));
+    {
+      /* If multiple sal-objects were found, try dropping those that aren't
+	 from the current symtab.  */
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      sals.erase (std::remove_if (sals.begin (), sals.end (),
+		  [&] (const symtab_and_line &sal)
+		    {
+		      return sal.symtab != cursal.symtab;
+		    }), sals.end ());
+      if (sals.size () != 1)
+	error (_("Jump request is ambiguous: "
+		 "does not resolve to a single address"));
+    }
 
   symtab_and_line &sal = sals[0];
 

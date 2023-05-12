@@ -20587,7 +20587,9 @@ an address of your own choosing, with the following commands:
 Resume execution at the address of the code location that results from
 resolving @var{locspec}.
 @xref{Location Specifications}, for a description of the different
-forms of @var{locspec}.  If @var{locspec} resolves to more than one
+forms of @var{locspec}.  If @var{locspec} resolves to more than one address,
+those outside the current compilation unit are ignored.  If considering just
+the addresses in the current compilation unit still doesn't yield a unique
 address, the command aborts before jumping.
 Execution stops again immediately if there is a breakpoint there.  It
 is common practice to use the @code{tbreak} command in conjunction
