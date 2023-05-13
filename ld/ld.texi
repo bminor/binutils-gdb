@@ -1085,7 +1085,8 @@ a linker bug report.
 @item -T @var{scriptfile}
 @itemx --script=@var{scriptfile}
 Use @var{scriptfile} as the linker script.  This script replaces
-@command{ld}'s default linker script (rather than adding to it), so
+@command{ld}'s default linker script (rather than adding to it),
+unless the script contains @code{INSERT}, so
 @var{commandfile} must specify everything necessary to describe the
 output file.  @xref{Scripts}.  If @var{scriptfile} does not exist in
 the current directory, @code{ld} looks for it in the directories
@@ -4441,6 +4442,12 @@ SECTIONS
 @}
 INSERT AFTER .text;
 @end smallexample
+
+Note that when @samp{-T} is used twice, once to override the default
+script and once to augment that script using @code{INSERT} the order
+of parsing and section assignments apply as for the default script.
+The script with @code{INSERT} should be specified @emph{first} on the
+command line.
 
 @item NOCROSSREFS(@var{section} @var{section} @dots{})
 @kindex NOCROSSREFS(@var{sections})
