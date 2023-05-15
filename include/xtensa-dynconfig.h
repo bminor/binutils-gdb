@@ -104,8 +104,6 @@ struct xtensa_config_v2
   int xtensa_march_earliest;
 };
 
-typedef struct xtensa_isa_internal_struct xtensa_isa_internal;
-
 extern const void *xtensa_load_config (const char *name,
 				       const void *no_plugin_def,
 				       const void *no_name_def);

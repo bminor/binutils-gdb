@@ -1942,8 +1942,7 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  struct elf_dyn_relocs *p;
 
-	  for (p = *((struct elf_dyn_relocs **)
-		     &elf_section_data (s)->local_dynrel);
+	  for (p = elf_section_data (s)->local_dynrel;
 	       p != NULL;
 	       p = p->next)
 	    {

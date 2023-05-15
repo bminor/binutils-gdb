@@ -100,7 +100,7 @@ compress_finish (bool use_zstd, void *ctx, char **next_out,
     {
 #if HAVE_ZSTD
       ZSTD_outBuffer ob = { *next_out, *avail_out, 0 };
-      ZSTD_inBuffer ib = { 0 };
+      ZSTD_inBuffer ib = { 0, 0, 0 };
       size_t ret = ZSTD_compressStream2 (ctx, &ob, &ib, ZSTD_e_end);
       *out_size = ob.pos;
       *next_out += ob.pos;

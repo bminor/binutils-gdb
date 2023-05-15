@@ -328,7 +328,7 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
   { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64_LARGE_ABS,	0 },
   { 0, 0, "la.tls.gd",	"r,r,l",  INSN_LA_TLS_GD64_LARGE_PCREL,	0 },
 
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_fix_opcodes[] =
@@ -428,7 +428,7 @@ static struct loongarch_opcode loongarch_fix_opcodes[] =
   { 0x00608000, 0xffe08000,	"bstrpick.w",	"r0:5,r5:5,u16:5,u10:5",	0,			0,	0,	0 },
   { 0x00800000, 0xffc00000,	"bstrins.d",	"r0:5,r5:5,u16:6,u10:6",	0,			0,	0,	0 },
   { 0x00c00000, 0xffc00000,	"bstrpick.d",	"r0:5,r5:5,u16:6,u10:6",	0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_single_float_opcodes[] =
@@ -475,7 +475,7 @@ static struct loongarch_opcode loongarch_single_float_opcodes[] =
   { 0x011d1000, 0xfffffc00,	"ffint.s.w",	"f0:5,f5:5",			0,			0,	0,	0 },
   { 0x011d1800, 0xfffffc00,	"ffint.s.l",	"f0:5,f5:5",			0,			0,	0,	0 },
   { 0x011e4400, 0xfffffc00,	"frint.s",	"f0:5,f5:5",			0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 static struct loongarch_opcode loongarch_double_float_opcodes[] =
 {
@@ -515,7 +515,7 @@ static struct loongarch_opcode loongarch_double_float_opcodes[] =
   { 0x011d2000, 0xfffffc00,	"ffint.d.w",	"f0:5,f5:5",			0,			0,	0,	0 },
   { 0x011d2800, 0xfffffc00,	"ffint.d.l",	"f0:5,f5:5",			0,			0,	0,	0 },
   { 0x011e4800, 0xfffffc00,	"frint.d",	"f0:5,f5:5",			0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_imm_opcodes[] =
@@ -537,7 +537,7 @@ static struct loongarch_opcode loongarch_imm_opcodes[] =
   { 0x1a000000, 0xfe000000,	"pcalau12i",	"r0:5,s5:20",			0,			0,	0,	0 },
   { 0x1c000000, 0xfe000000,	"pcaddu12i",	"r0:5,s5:20",			0,			0,	0,	0 },
   { 0x1e000000, 0xfe000000,	"pcaddu18i",	"r0:5,s5:20",			0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_privilege_opcodes[] =
@@ -566,7 +566,7 @@ static struct loongarch_opcode loongarch_privilege_opcodes[] =
   { 0x06483800, 0xffffffff,	"ertn",		"",				0,			0,	0,	0 },
   { 0x06488000, 0xffff8000,	"idle",		"u0:15",			0,			0,	0,	0 },
   { 0x06498000, 0xffff8000,	"invtlb",	"u0:5,r5:5,r10:5",		0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_4opt_single_float_opcodes[] =
@@ -603,7 +603,7 @@ static struct loongarch_opcode loongarch_4opt_single_float_opcodes[] =
   { 0x0c1c0000, 0xffff8018,	"fcmp.cune.s",	"c0:3,f5:5,f10:5",		0,			0,	0,	0 },
   { 0x0c1c8000, 0xffff8018,	"fcmp.sune.s",	"c0:3,f5:5,f10:5",		0,			0,	0,	0 },
   { 0x0d000000, 0xfffc0000,	"fsel",		"f0:5,f5:5,f10:5,c15:3",	0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_4opt_double_float_opcodes[] =
@@ -639,7 +639,7 @@ static struct loongarch_opcode loongarch_4opt_double_float_opcodes[] =
   { 0x0c2a8000, 0xffff8018,	"fcmp.sor.d",	"c0:3,f5:5,f10:5",		0,			0,	0,	0 },
   { 0x0c2c0000, 0xffff8018,	"fcmp.cune.d",	"c0:3,f5:5,f10:5",		0,			0,	0,	0 },
   { 0x0c2c8000, 0xffff8018,	"fcmp.sune.d",	"c0:3,f5:5,f10:5",		0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_load_store_opcodes[] =
@@ -767,7 +767,7 @@ static struct loongarch_opcode loongarch_load_store_opcodes[] =
   { 0x387e8000, 0xffff8000,	"stle.h",	"r0:5,r5:5,r10:5",		0,			0,	0,	0 },
   { 0x387f0000, 0xffff8000,	"stle.w",	"r0:5,r5:5,r10:5",		0,			0,	0,	0 },
   { 0x387f8000, 0xffff8000,	"stle.d",	"r0:5,r5:5,r10:5",		0,			0,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_single_float_load_store_opcodes[] =
@@ -781,7 +781,7 @@ static struct loongarch_opcode loongarch_single_float_load_store_opcodes[] =
   { 0x38750000, 0xffff8000,	"fldle.s",	"f0:5,r5:5,r10:5",		0,	&LARCH_opts.ase_lp64,	0,	0 },
   { 0x38760000, 0xffff8000,	"fstgt.s",	"f0:5,r5:5,r10:5",		0,	&LARCH_opts.ase_lp64,	0,	0 },
   { 0x38770000, 0xffff8000,	"fstle.s",	"f0:5,r5:5,r10:5",		0,	&LARCH_opts.ase_lp64,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_double_float_load_store_opcodes[] =
@@ -795,7 +795,7 @@ static struct loongarch_opcode loongarch_double_float_load_store_opcodes[] =
   { 0x38758000, 0xffff8000,	"fldle.d",	"f0:5,r5:5,r10:5",		0,	&LARCH_opts.ase_lp64,	0,	0 },
   { 0x38768000, 0xffff8000,	"fstgt.d",	"f0:5,r5:5,r10:5",		0,	&LARCH_opts.ase_lp64,	0,	0 },
   { 0x38778000, 0xffff8000,	"fstle.d",	"f0:5,r5:5,r10:5",		0,	&LARCH_opts.ase_lp64,	0,	0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_float_jmp_opcodes[] =
@@ -804,7 +804,7 @@ static struct loongarch_opcode loongarch_float_jmp_opcodes[] =
   { 0x48000000, 0xfc000300,	"bceqz",	"c5:3,sb0:5|10:16<<2",		0,				0, 0, 0 },
   { 0x0,	0x0,		"bcnez",	"c,la",				"bcnez %1,%%b21(%2)",		0, 0, 0 },
   { 0x48000100, 0xfc000300,	"bcnez",	"c5:3,sb0:5|10:16<<2",		0,				0, 0, 0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 static struct loongarch_opcode loongarch_jmp_opcodes[] =
@@ -842,7 +842,7 @@ static struct loongarch_opcode loongarch_jmp_opcodes[] =
   { 0x0,	0x0,		"bleu",		"r,r,la",			"bgeu %2,%1,%%b16(%3)",		0, 0, 0 },
   { 0x0,	0x0,		"jr",		"r",				"jirl $r0,%1,0",		0, 0, 0 },
   { 0x0,	0x0,		"ret",		"",				"jirl $r0,$r1,0",		0, 0, 0 },
-  { 0 } /* Terminate the list.  */
+  { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
 struct loongarch_ase loongarch_ASEs[] =
@@ -860,5 +860,5 @@ struct loongarch_ase loongarch_ASEs[] =
   { &LARCH_opts.ase_df, loongarch_4opt_double_float_opcodes,		0, 0, { 0 }, 0, 0 },
   { &LARCH_opts.ase_sf, loongarch_single_float_load_store_opcodes,	0, 0, { 0 }, 0, 0 },
   { &LARCH_opts.ase_df, loongarch_double_float_load_store_opcodes,	0, 0, { 0 }, 0, 0 },
-  { 0 },
+  { 0, 0, 0, 0, { 0 }, 0, 0 },
 };
