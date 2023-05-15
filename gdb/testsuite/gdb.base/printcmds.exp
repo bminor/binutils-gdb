@@ -1077,7 +1077,10 @@ proc test_repeat_bytes {} {
     }
 }
 
-# Test for BZ#24331
+# Test that 'set elements' correctly limits the number of characters
+# printed from a string when a string ends with repeated characters.
+# This is gdb/24331
+
 proc test_repeat_bytes_limit {} {
    gdb_test "print -elem 3 -- \"AAAAA\"" "= \"AAA\"..."
    gdb_test "print -char 3 -elem 10 -- \"AAAAA\"" "= \"AAA\"..."
