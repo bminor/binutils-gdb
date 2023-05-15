@@ -89,7 +89,22 @@ proc test_remove_bp { initial_load } {
 	set align_addr [expr $bp_addr - $bp_addr % $pagesize]
 	set munmap_prototype "int (*) (void *, size_t)"
 	set munmap_expr "(($munmap_prototype) munmap) ($align_addr, $pagesize)"
-	set munmap [get_integer_valueof $munmap_expr -1]
+
+	# Use gdb_test_multiple here rather than get_integer_valueof.
+	# Targets that use the AT_ENTRY_POINT strategy for inferior
+	# function calls will place a breakpoint near the entry point
+	# to catch the return from the inferior function call, and
+	# this is likely on the page we are about to unmap.  As a
+	# consequence we will see the warning about being unable to
+	# remove the breakpoint here, which throws off
+	# get_integer_valueof.
+	set munmap -1
+	gdb_test_multiple "print /d ${munmap_expr}" "get result of munmap call" {
+	    -re -wrap "^(?:warning: Error removing breakpoint $::decimal\r\n)?\\$\[0-9\]* = (\[-\]*\[0-9\]*).*" {
+		set munmap $expect_out(1,string)
+		pass $gdb_test_name
+	    }
+	}
 
 	if {$munmap != 0} {
 	    unsupported "can't munmap foo's page"
