@@ -8556,6 +8556,39 @@ archive.  The cygwin and mingw ports of @command{ld} have specific
 support for creating such libraries provided with the
 @samp{--out-implib} command-line option.
 
+@item Resource only DLLs
+It is possible to create a DLL that only contains resources, ie just a
+@samp{.rsrc} section, but in order to do so a custom linker script
+must be used.  This is because the built-in default linker scripts
+will always create @samp{.text} amd @samp {.idata} sections, even if
+there is no input to go into them.
+
+The script should look like this, although the @code{OUTPUT_FORMAT}
+should be changed to match the desired format.
+
+@example
+OUTPUT_FORMAT(pei-i386)
+SECTIONS
+@{
+  . = SIZEOF_HEADERS;
+  . = ALIGN(__section_alignment__);
+  .rsrc __image_base__ + __section_alignment__ : ALIGN(4)
+  @{
+    KEEP (*(.rsrc))
+    KEEP (*(.rsrc$*))
+  @}
+  /DISCARD/ : @{ *(*) @}
+@}
+@end example
+
+With this script saved to a file called, eg @file{rsrc.ld}, a command
+line like this can be used to create the resource only DLL
+@file{rsrc.dll} from an input file called @file{rsrc.o}:
+
+@smallexample
+ld -dll --subsystem windows -e 0 -s rsrc.o -o rsrc.dll -T rsrc.ld
+@end smallexample
+
 @item   exporting DLL symbols
 @cindex exporting DLL symbols
 The cygwin/mingw @command{ld} has several ways to export symbols for dll's.

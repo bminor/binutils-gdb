@@ -1,5 +1,10 @@
 2023-05-16  Nick Clifton  <nickc@redhat.com>
 
+	PR 30359
+	* ld.texi (WIN32): Document how to create a resource only DLL.
+
+2023-05-16  Nick Clifton  <nickc@redhat.com>
+
 	* ld.texi (-Ur): Clarify the actions of this option.
 
 2023-05-10  Nick Clifton  <nickc@redhat.com>
