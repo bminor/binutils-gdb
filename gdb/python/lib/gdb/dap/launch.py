@@ -20,7 +20,7 @@ from typing import Mapping, Optional, Sequence
 
 from .events import ExecutionInvoker
 from .server import request, capability
-from .startup import send_gdb, send_gdb_with_response, in_gdb_thread
+from .startup import send_gdb, send_gdb_with_response, in_gdb_thread, exec_and_log
 
 
 _program = None
@@ -36,6 +36,14 @@ def _set_args_env(args, env):
             inf.set_env(name, value)
 
 
+@in_gdb_thread
+def _break_at_main():
+    inf = gdb.selected_inferior()
+    main = inf.main_name
+    if main is not None:
+        exec_and_log("tbreak " + main)
+
+
 # Any parameters here are necessarily extensions -- DAP requires this
 # from implementations.  Any additions or changes here should be
 # documented in the gdb manual.
@@ -45,12 +53,15 @@ def launch(
     program: Optional[str] = None,
     args: Sequence[str] = (),
     env: Optional[Mapping[str, str]] = None,
+    stopAtBeginningOfMainSubprogram: bool = False,
     **extra,
 ):
     if program is not None:
         global _program
         _program = program
         send_gdb(f"file {_program}")
+    if stopAtBeginningOfMainSubprogram:
+        send_gdb(_break_at_main)
     if len(args) > 0 or env is not None:
         send_gdb(lambda: _set_args_env(args, env))
 

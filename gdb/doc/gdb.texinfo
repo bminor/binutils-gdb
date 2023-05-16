@@ -39068,6 +39068,11 @@ inferior will be set to exactly as passed in.  @xref{Environment}.
 @item program
 If provided, this is a string that specifies the program to use.  This
 corresponds to the @code{file} command.  @xref{Files}.
+
+@item stopAtBeginningOfMainSubprogram
+If provided, this must be a boolean.  When @samp{True}, @value{GDBN}
+will set a temporary breakpoint at the program's main procedure, using
+the same approach as the @code{start} command.  @xref{Starting}.
 @end table
 
 @value{GDBN} defines some parameters that can be passed to the
