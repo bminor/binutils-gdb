@@ -70,7 +70,6 @@ def _repl(command, frame_id):
     }
 
 
-# FIXME supportsVariableType handling
 @request("evaluate")
 def eval_request(
     *,

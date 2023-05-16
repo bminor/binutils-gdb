@@ -186,6 +186,17 @@ def capability(name, value=True):
     return wrap
 
 
+def client_bool_capability(name):
+    """Return the value of a boolean client capability.
+
+    If the capability was not specified, or did not have boolean type,
+    False is returned."""
+    global _server
+    if name in _server.config and isinstance(_server.config[name], bool):
+        return _server.config[name]
+    return False
+
+
 @request("initialize")
 def initialize(**args):
     global _server, _capabilities

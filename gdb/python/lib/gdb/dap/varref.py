@@ -15,6 +15,7 @@
 
 import gdb
 from .startup import in_gdb_thread
+from .server import client_bool_capability
 from abc import abstractmethod
 
 
@@ -165,6 +166,8 @@ class VariableReference(BaseReference):
             result["memoryReference"] = hex(int(self.value))
         elif self.value.address is not None:
             result["memoryReference"] = hex(int(self.value.address))
+        if client_bool_capability("supportsVariableType"):
+            result["type"] = str(self.value.type)
         return result
 
     @in_gdb_thread
