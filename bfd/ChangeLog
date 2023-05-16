@@ -1,3 +1,20 @@
+2023-05-16  Oleg Tolmatcev  <oleg.tolmatcev@gmail.com>
+
+	* libcoff-in.h (struct coff_tdata): Add section_by_index and
+	section_by_target_index hash tables.
+	* libcoff.h: Regenerate.
+	* coffcode.h (htab_hash_section_index): New function.
+	(htab_eq_section_index): New function.
+	(htab_hash_section_target_index): New function.
+	(htab_eq_section_target_index): New function.
+	(coff_mkobject_hool): Create the hash tables.
+	* peicode.h: Add the same new functions.
+	(pe_mkobject_hook): Create the hash tables.
+	* coff-x86_64.c (coff_amd64_rtype_to_howto): Use the new tables to
+	speed up lookups.
+	* coffgen.c (coff_section_from_bfd_index): Likewise.
+	(_bfd_coff_close_and_cleanup): Delete the hash tables.
+
 2023-05-10  Luca Bonissi  <gcc@scarsita.it>
 
 	PR 30422

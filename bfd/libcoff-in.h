@@ -24,6 +24,7 @@
 
 #include "bfdlink.h"
 #include "coff-bfd.h"
+#include "hashtab.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -129,6 +130,13 @@ typedef struct coff_tdata
      COFF object into memory.  */
   char * stub;
   bfd_size_type stub_size;
+
+  /* Hash table containing sections by target index.  */
+  htab_t section_by_target_index;
+
+  /* Hash table containing sections by index.  */
+  htab_t section_by_index;
+
 } coff_data_type;
 
 /* Tdata for pe image files.  */

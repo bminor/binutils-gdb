@@ -42,6 +42,7 @@
 #include "libbfd.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+#include "hashtab.h"
 
 /* Take a section header read from a coff file (in HOST byte order),
    and make a BFD "section" out of it.  This is used by ECOFF.  */
@@ -360,14 +361,38 @@ coff_object_p (bfd *abfd)
 asection *
 coff_section_from_bfd_index (bfd *abfd, int section_index)
 {
-  struct bfd_section *answer = abfd->sections;
-
   if (section_index == N_ABS)
     return bfd_abs_section_ptr;
   if (section_index == N_UNDEF)
     return bfd_und_section_ptr;
   if (section_index == N_DEBUG)
     return bfd_abs_section_ptr;
+
+  struct bfd_section *answer;
+  htab_t table = coff_data (abfd)->section_by_target_index;
+
+  if (htab_elements (table) == 0)
+    {
+      answer = abfd->sections;
+
+      while (answer)
+	{
+	  void **slot = htab_find_slot (table, answer, INSERT);
+	  if (slot == NULL)
+	    return bfd_und_section_ptr;
+	  *slot = answer;
+	  answer = answer->next;
+	}
+    }
+
+  struct bfd_section needle;
+  needle.target_index = section_index;
+
+  answer = htab_find (table, &needle);
+  if (answer != NULL)
+    return answer;
+
+  answer = abfd->sections;
 
   while (answer)
     {
@@ -3142,6 +3167,21 @@ _bfd_coff_close_and_cleanup (bfd *abfd)
 
   if (tdata != NULL)
     {
+      if (bfd_family_coff (abfd) && bfd_get_format (abfd) == bfd_object)
+	{
+	  if (tdata->section_by_index)
+	    {
+	      htab_delete (tdata->section_by_index);
+	      tdata->section_by_index = NULL;
+	    }
+
+	  if (tdata->section_by_target_index)
+	    {
+	      htab_delete (tdata->section_by_target_index);
+	      tdata->section_by_target_index = NULL;
+	    }
+	}
+
       /* PR 25447:
 	 Do not clear the keep_syms and keep_strings flags.
 	 These may have been set by pe_ILF_build_a_bfd() indicating
@@ -3158,5 +3198,6 @@ _bfd_coff_close_and_cleanup (bfd *abfd)
 	  _bfd_stab_cleanup (abfd, &tdata->line_info);
 	}
     }
+
   return _bfd_generic_close_and_cleanup (abfd);
 }
