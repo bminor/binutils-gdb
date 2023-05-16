@@ -31,7 +31,7 @@ def builtin_disassemble_wrapper(info):
     assert len(result.parts) > 0
     tmp_str = ""
     for p in result.parts:
-        assert(p.string == str(p))
+        assert p.string == str(p)
         tmp_str += p.string
     assert tmp_str == result.string
     return result
@@ -586,9 +586,9 @@ class All_Text_Part_Styles(TestDisassembler):
         result = builtin_disassemble_wrapper(info)
         result = DisassemblerResult(length=result.length, parts=parts)
 
-        tmp_str = "";
+        tmp_str = ""
         for p in parts:
-            assert (p.string == str(p))
+            assert p.string == str(p)
             tmp_str += str(p)
         assert tmp_str == result.string
 
