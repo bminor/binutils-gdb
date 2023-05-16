@@ -1769,12 +1769,18 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 static CORE_ADDR
 arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  CORE_ADDR func_addr, limit_pc;
+  CORE_ADDR func_addr, func_end_addr, limit_pc;
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
-  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+  bool func_addr_found
+    = find_pc_partial_function (pc, NULL, &func_addr, &func_end_addr);
+
+  /* Whether the function is thumb mode or not.  */
+  bool func_is_thumb = false;
+
+  if (func_addr_found)
     {
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
@@ -1811,7 +1817,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	     associate prologue code with the opening brace; so this
 	     lets us skip the first line if we think it is the opening
 	     brace.  */
-	  if (arm_pc_is_thumb (gdbarch, func_addr))
+	  func_is_thumb = arm_pc_is_thumb (gdbarch, func_addr);
+	  if (func_is_thumb)
 	    analyzed_limit = thumb_analyze_prologue (gdbarch, func_addr,
 						     post_prologue_pc, NULL);
 	  else
@@ -1837,6 +1844,14 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (limit_pc == 0)
     limit_pc = pc + 64;          /* Magic.  */
 
+  /* Set the correct adjustment based on whether the function is thumb mode or
+     not.  We use it to get the address of the last instruction in the
+     function (as opposed to the first address of the next function).  */
+  CORE_ADDR adjustment = func_is_thumb? 2 : 4;
+
+  limit_pc
+    = func_end_addr == 0? limit_pc : std::min (limit_pc,
+					       func_end_addr - adjustment);
 
   /* Check if this is Thumb code.  */
   if (arm_pc_is_thumb (gdbarch, pc))
