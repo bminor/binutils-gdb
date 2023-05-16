@@ -80,7 +80,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
       /* Solaris 11+gcc 5.5 has ambiguous overloads of log10, so we
 	 cast to double to get the right one.  */
       int lines_in_file = offsets->size ();
-      int max_line_nr = lines_in_file + nlines - 1;
+      int max_line_nr = lines_in_file;
       int digits_needed = 1 + (int)log10 ((double) max_line_nr);
       int trailing_space = 1;
       m_digits = digits_needed + trailing_space;
@@ -99,6 +99,11 @@ tui_source_window::set_contents (struct gdbarch *arch,
 	  int line_len;
 	  text = tui_copy_source_line (&iter, &line_len);
 	  m_max_length = std::max (m_max_length, line_len);
+	}
+      else
+	{
+	  /* Line not in source file.  */
+	  cur_line_no = -1;
 	}
 
       /* Set whether element is the execution point
@@ -233,11 +238,20 @@ tui_source_window::display_start_addr (struct gdbarch **gdbarch_p,
 void
 tui_source_window::show_line_number (int offset) const
 {
-  int lineno = m_content[0].line_or_addr.u.line_no + offset;
+  int lineno = m_content[offset].line_or_addr.u.line_no;
   char text[20];
   char space = tui_left_margin_verbose ? '_' : ' ';
-  xsnprintf (text, sizeof (text),
-	     tui_left_margin_verbose ? "%0*d%c" : "%*d%c", m_digits - 1,
-	     lineno, space);
+  if (lineno == -1)
+    {
+      /* Line not in source file, don't show line number.  */
+      for (int i = 0; i <= m_digits; ++i)
+	text[i] = (i == m_digits) ? '\0' : space;
+    }
+  else
+    {
+      xsnprintf (text, sizeof (text),
+		 tui_left_margin_verbose ? "%0*d%c" : "%*d%c", m_digits - 1,
+		 lineno, space);
+    }
   waddstr (handle.get (), text);
 }

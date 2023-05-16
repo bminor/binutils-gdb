@@ -1004,6 +1004,14 @@ namespace eval Term {
 	gdb_assert {[regexp -- $regexp $contents]} $test_name
     }
 
+    # As check_contents, but check that the text contents of the terminal does
+    # not match the regular expression.
+    proc check_contents_not {test_name regexp} {
+	dump_screen
+	set contents [get_all_lines]
+	gdb_assert {![regexp -- $regexp $contents]} $test_name
+    }
+
     # Get the region of the screen described by X, Y, WIDTH,
     # and HEIGHT, and separate the lines using SEP.
     proc get_region { x y width height sep } {

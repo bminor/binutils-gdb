@@ -53,22 +53,18 @@ if {![Term::enter_tui]} {
 
 set re_border "\\|"
 
-foreach_with_prefix src_window_size {7 8} {
-    set src_window_lines [expr $src_window_size - 2]
-    set max_line_nr_in_source_file [llength $src_list]
-    set max_line_nr_in_source_window \
-	[expr $max_line_nr_in_source_file + $src_window_lines - 1]
+set max_line_nr_in_source_file [llength $src_list]
+# Ensure there are more lines in the window than in the source file.
+set src_window_lines [expr $max_line_nr_in_source_file + 2]
+# Account for border size.
+set src_window_size [expr $src_window_lines + 2]
+Term::command "wh src $src_window_size"
 
-    Term::command "wh src $src_window_size"
+set re_left_margin "___4_"
 
-    if { $max_line_nr_in_source_window == 9 } {
-	set re_left_margin "___4_"
-    } elseif { $max_line_nr_in_source_window == 10 }  {
-	set re_left_margin "___04_"
-    } else {
-	error "unhandled max_line_nr_in_source_window"
-    }
+Term::check_contents "compact source format" \
+    "$re_border$re_left_margin$re_line_four *$re_border"
 
-    Term::check_contents "compact source format" \
-	"$re_border$re_left_margin$re_line_four *$re_border"
-}
+set re_left_margin "___0*[expr $max_line_nr_in_source_file + 1]_"
+Term::check_contents_not "no surplus line number" \
+    "$re_border$re_left_margin *$re_border"
