@@ -43,14 +43,9 @@ patch without review from another maintainer.  This especially includes
 patches which change internal interfaces (e.g. global functions, data
 structures) or external interfaces (e.g. user, remote, MI, et cetera).
 
-The term "review" is used in this file to describe several kinds of feedback
-from a maintainer: approval, rejection, and requests for changes or
-clarification with the intention of approving a revised version.  Review is
-a privilege and/or responsibility of various positions among the GDB
-Maintainers.  Of course, anyone - whether they hold a position but not the
-relevant one for a particular patch, or are just following along on the
-mailing lists for fun, or anything in between - may suggest changes or
-ask questions about a patch!
+The word "contributor" is used in this document to refer to any GDB
+developer listed above as well as folks who may have suggested some
+patches but aren't part of one of those categories for any reason.
 
 There's also a couple of other people who play special roles in the GDB
 community, separately from the patch process:
@@ -77,6 +72,93 @@ Most changes to the list of maintainers in this file are handled by
 consensus among the global maintainers and any other involved parties.
 In cases where consensus can not be reached, the global maintainers may
 ask the official FSF-appointed GDB maintainers for a final decision.
+
+The term "review" is used in this file to describe several kinds of
+feedback from a maintainer: approval, rejection, and requests for changes
+or clarification with the intention of approving a revised version.
+Approval is a privilege and/or responsibility of various positions among
+the GDB Maintainers.  Of course, anyone - whether they hold a position, but
+not the relevant one for a particular patch, or are just following along on
+the mailing lists for fun, or anything in between - may suggest changes, ask
+questions about a patch or say if they believe a patch is fit for upstreaming!
+
+To ensure that patches are only pushed when approved, and to properly credit
+the contributors who take the time to improve this project, the following
+trailers are used to identify who contributed and how.  The trailers (or tags)
+currently in use are:
+
+ - Tested-By:
+
+   Used when a contributor has tested the patch and finds that it
+   fixes the claimed problem.  It may also be used to indicate that
+   the contributor has performed regression testing.  By itself, this
+   tag says nothing about the quality of the fix implemented by the
+   patch, nor the amount of testing that was actually performed.
+
+   Usage: "Tested-By: Your Name <your@email>"
+
+ - Acked-By:
+
+   Used when a responsible or global maintainer has taken a superficial
+   look at a patch and agrees with its direction, but has not done further
+   review on the subject.
+   This trailer can be specific to one or more areas of the project, as
+   defined by the "Responsible maintainers" section of this file.  If
+   that is the case, the area(s) should be added at the end of the tag in
+   parenthesis in a comma-separated list.
+
+   Usage: "Acked-By: Your Name <your@email> (area1, area2)"
+
+ - Reviewed-By:
+
+   Used when a contributor has looked at the code and agrees with
+   the changes, but either doesn't have the authority or doesn't
+   feel comfortable approving the patch.
+   This trailer can be specific to one or more areas of the project, as
+   defined by the "Responsible maintainers" section of this file.  If
+   that is the case, the area(s) should be added at the end of the tag in
+   parenthesis in a comma-separated list.
+
+   Usage: "Reviewed-By: Your Name <your@email> (area1, area2)"
+
+ - Approved-By:
+
+   Used by responsible maintainers or global maintainers when a patch is
+   ready to be upstreamed.  If a patch requires multiple approvals, only
+   the last reviewer should use this tag, making it obvious to the
+   contributor that the patch is ready to be pushed.
+   This trailer can be specific to one or more areas of the project, as
+   defined by the "Responsible maintainers" section of this file.  If
+   that is the case, the area(s) should be added at the end of the tag in
+   parenthesis in a comma separated list.  Patches must have all areas
+   approved before being pushed.  If a patch has had some areas approved,
+   it is recommended that the final approver makes it explicit that the
+   patch is ready for pushing.
+   Responsible, Global and Official FSF-appointed maintainers may approve
+   their own patches, but it is recommended that they seek external approval
+   before doing so.
+
+   Usage: "Approved-By: Your Name <your@email>"
+
+ - Co-Authored-By:
+
+   Used when the commit includes meaningful contributions from multiple people.
+
+   Usage: "Co-Authored-By: Contributor's Name <their@email>"
+
+ - Bug:
+
+   This trailer is added with a link to the GDB bug tracker bug for
+   added context on relevant commits.
+
+   Usage: "Bug: <link>"
+
+Sometimes, contributors may request small changes, such as fixing typos, before
+granting the review or approval trailer. When the contributor thinks that
+these changes are so small that it isn't necessary to send a new version, they
+may add some text like "with these changes, I'm ok with the patch", followed by
+their trailer.  In those situations, the trailer is only valid after the
+changes are made.
 
 
 			The Obvious Fix Rule
