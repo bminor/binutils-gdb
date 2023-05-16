@@ -283,6 +283,17 @@ proc dap_attach {pid} {
 		[format {o pid [i %s]} $pid]]
 }
 
+# Start gdb, send a DAP initialize request, and then an attach request
+# specifying TARGET as the remote target.  Returns the empty string on
+# failure, or the response object from the attach request.
+proc dap_target_remote {target} {
+    if {[_dap_initialize "startup - initialize"] == ""} {
+	return ""
+    }
+    return [dap_check_request_and_response "startup - target" attach \
+		[format {o target [s %s]} $target]]
+}
+
 # Cleanly shut down gdb.  TERMINATE is passed as the terminateDebuggee
 # parameter to the request.
 proc dap_shutdown {{terminate false}} {

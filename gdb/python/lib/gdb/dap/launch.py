@@ -56,13 +56,19 @@ def launch(
 
 
 @request("attach")
-def attach(*, pid: int, **args):
+def attach(*, pid: Optional[int] = None, target: Optional[str] = None, **args):
     # Ensure configurationDone does not try to run.
     global _program
     _program = None
+    if pid is not None:
+        cmd = "attach " + str(pid)
+    elif target is not None:
+        cmd = "target remote " + target
+    else:
+        raise Exception("attach requires either 'pid' or 'target'")
     # Use send_gdb_with_response to ensure we get an error if the
     # attach fails.
-    send_gdb_with_response("attach " + str(pid))
+    send_gdb_with_response(cmd)
     return None
 
 

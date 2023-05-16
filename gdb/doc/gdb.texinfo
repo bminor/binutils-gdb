@@ -39070,12 +39070,16 @@ If provided, this is a string that specifies the program to use.  This
 corresponds to the @code{file} command.  @xref{Files}.
 @end table
 
-@value{GDBN} defines a parameter that can be passed to the
-@code{attach} request:
+@value{GDBN} defines some parameters that can be passed to the
+@code{attach} request.  One of these must be specified.
 
 @table @code
 @item pid
 The process ID to which @value{GDBN} should attach.  @xref{Attach}.
+
+@item target
+The target to which @value{GDBN} should connect.  This is a string and
+is passed to the @code{target remote} command.  @xref{Connecting}.
 @end table
 
 @node JIT Interface
