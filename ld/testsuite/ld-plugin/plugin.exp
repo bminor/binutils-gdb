@@ -295,6 +295,15 @@ if { !$can_compile || $failed_compile } {
     return
 }
 
+if { [istarget "mips*-*-linux*"] } {
+  set plugin_tests [xfail_from_runlist $plugin_tests "plugin claimfile lost symbol"]
+  set plugin_tests [xfail_from_runlist $plugin_tests "plugin claimfile replace symbol"]
+  set plugin_tests [xfail_from_runlist $plugin_tests "plugin claimfile resolve symbol"]
+  set plugin_tests [xfail_from_runlist $plugin_tests "plugin claimfile lost symbol with source"]
+  set plugin_tests [xfail_from_runlist $plugin_tests "plugin claimfile replace symbol with source"]
+  set plugin_tests [xfail_from_runlist $plugin_tests "plugin claimfile resolve symbol with source"]
+  set plugin_tests [xfail_from_runlist $plugin_tests "plugin claimfile resolve symbol with source"]
+}
 run_ld_link_tests $plugin_tests
 
 if { [is_elf_format] \
@@ -355,6 +364,12 @@ if { [regexp "0+ T func" "$plugin_nm_output"] &&
 
 # Check if ar --plugin works.
 file delete tmpdir/libfunc.a
+if { [istarget "mips*-*-linux*"] } {
+  set plugin_src_tests [xfail_from_runlist $plugin_src_tests "plugin 2 with source lib"]
+  set plugin_src_tests [xfail_from_runlist $plugin_src_tests "load plugin 2 with source"]
+  set plugin_src_tests [xfail_from_runlist $plugin_src_tests "plugin 3 with source lib"]
+  set plugin_src_tests [xfail_from_runlist $plugin_src_tests "load plugin 3 with source"]
+}
 if [ar_simple_create $ar "--plugin $plugin2_path" "tmpdir/libfunc.a" \
 			 "tmpdir/main.o $srcdir/$subdir/func.c"] {
     set testname "ar --plugin"

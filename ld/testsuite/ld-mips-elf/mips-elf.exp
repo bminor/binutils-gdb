@@ -1101,7 +1101,7 @@ if { $has_abi(o32) } {
 }
 
 run_dump_test_o32 "mips16-local-stubs-1"
-run_dump_test_n32 "mips16-local-stubs-1"
+run_dump_test_n32 "mips16-local-stubs-1" noarch
 
 set mips16_fp_stub_test [list \
     [list "Floating-point stub for mips16 functions" \

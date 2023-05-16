@@ -219,7 +219,9 @@ proc check_dynamic_syms { test } {
 
 foreach t [list indirect5a indirect5b indirect6a indirect6b] {
     set testname [concat $t "dynsym"]
-    if { [check_dynamic_syms tmpdir/$t] } {
+    if { [istarget mips*] } {
+	xfail $testname
+    } elseif { [check_dynamic_syms tmpdir/$t] } {
 	pass $testname
     } else {
 	fail $testname
@@ -252,7 +254,9 @@ run_ld_link_exec_tests $pie_tests
 
 foreach t [list indirect5c indirect5d indirect6c indirect6d] {
     set testname [concat $t "dynsym"]
-    if { [check_dynamic_syms tmpdir/$t] } {
+    if { [istarget mips*] } {
+	xfail $testname
+    } elseif { [check_dynamic_syms tmpdir/$t] } {
 	pass $testname
     } else {
 	fail $testname

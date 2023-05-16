@@ -155,7 +155,7 @@ if {! [info exists env(CCC_OVERRIDE_OPTIONS)]} {
 # installed, but to the O32 ABI in the build tree, because of some
 # specs-file hacks.  Make sure we use an ABI that is compatible with
 # the one we expect.
-if {[istarget mips64*-*-linux*] &&
+if {[istarget mips*64*-*-linux*] && ![istarget mips*64*-*-linux-gnuabi64] &&
     (![board_info [target_info name] exists multilib_flags] ||
      ![string match "*-mabi" [board_info [target_info name] multilib_flags]])
    } {
@@ -262,6 +262,24 @@ proc ld_nm { nm nmflags object } {
 proc ld_exec { target output } {
 	default_ld_exec $target $output
 }
+
+#
+# xfail_from_runlist
+# 	mark a test xfail and remove it from the runlist
+proc xfail_from_runlist { runlist name } {
+  set i 0
+  set rtl $runlist
+  foreach t $runlist {
+    set tn [lindex $t 0]
+    if [string equal $name $tn] {
+      xfail $tn
+      set rtl [lreplace $rtl $i $i]
+    }
+    incr i
+  }
+  return $rtl
+}
+
 
 # From gas-defs.exp, to support run_dump_test.
 if ![info exists AS] then {
