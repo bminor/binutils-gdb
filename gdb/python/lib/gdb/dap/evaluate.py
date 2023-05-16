@@ -20,7 +20,7 @@ import gdb.printing
 from typing import Optional
 
 from .frames import frame_for_id
-from .server import request
+from .server import capability, request
 from .startup import send_gdb_with_response, in_gdb_thread
 from .varref import find_variable, VariableReference
 
@@ -41,6 +41,20 @@ def _evaluate(expr, frame_id):
     val = gdb.parse_and_eval(expr, global_context=global_context)
     ref = EvaluateResult(val)
     return ref.to_object()
+
+
+# Helper function to perform an assignment.
+@in_gdb_thread
+def _set_expression(expression, value, frame_id):
+    global_context = True
+    if frame_id is not None:
+        frame = frame_for_id(frame_id)
+        frame.select()
+        global_context = False
+    lhs = gdb.parse_and_eval(expression, global_context=global_context)
+    rhs = gdb.parse_and_eval(value, global_context=global_context)
+    lhs.assign(rhs)
+    return EvaluateResult(lhs).to_object()
 
 
 # Helper function to evaluate a gdb command in a certain frame.
@@ -89,3 +103,11 @@ def variables(*, variablesReference: int, start: int = 0, count: int = 0, **args
         lambda: _variables(variablesReference, start, count)
     )
     return {"variables": result}
+
+
+@capability("supportsSetExpression")
+@request("setExpression")
+def set_expression(
+    *, expression: str, value: str, frameId: Optional[int] = None, **args
+):
+    return send_gdb_with_response(lambda: _set_expression(expression, value, frameId))
