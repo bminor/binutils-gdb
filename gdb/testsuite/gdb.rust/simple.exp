@@ -68,6 +68,9 @@ gdb_test "print simple::Unit{23}" "'}', '\.\.', or identifier expected"
 gdb_test "print f" " = \"hi bob\""
 gdb_test "print fslice" " = \"bob\""
 gdb_test "print &f\[3..\]" " = \"bob\""
+gdb_test "whatis f" "type = &str"
+gdb_test "print *(&f as *mut &str)" " = \"hi bob\"" \
+    "print via cast to &str"
 
 gdb_test "print g" " = \\(\\*mut \\\[u8; 6\\\]\\) $hex b\"hi bob\""
 gdb_test "ptype g" " = \\*mut \\\[u8; 6\\\]"
