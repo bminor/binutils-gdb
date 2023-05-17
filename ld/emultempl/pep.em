@@ -1120,6 +1120,30 @@ pep_undef_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
 }
 
 static void
+set_decoration (const char *undecorated_name,
+		struct bfd_link_hash_entry * decoration)
+{
+  static bool  gave_warning_message = false;
+  struct decoration_hash_entry *entry;
+
+  if (is_underscoring () && undecorated_name[0] == '_')
+    undecorated_name++;
+
+  entry = (struct decoration_hash_entry *)
+	  bfd_hash_lookup (&(coff_hash_table (&link_info)->decoration_hash),
+			   undecorated_name, true /* create */, false /* copy */);
+
+  if (entry->decorated_link != NULL && !gave_warning_message)
+    {
+      einfo (_("%P: warning: overwriting decorated name %s with %s\n"),
+	     entry->decorated_link->root.string, undecorated_name);
+      gave_warning_message = true;
+    }
+
+  entry->decorated_link = decoration;
+}
+
+static void
 pep_fixup_stdcalls (void)
 {
   static int gave_warning_message = 0;
@@ -1180,6 +1204,7 @@ pep_fixup_stdcalls (void)
 		undef->type = bfd_link_hash_defined;
 		undef->u.def.value = sym->u.def.value;
 		undef->u.def.section = sym->u.def.section;
+		set_decoration (undef->root.string, sym);
 
 		if (pep_enable_stdcall_fixup == -1)
 		  {

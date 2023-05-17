@@ -89,6 +89,34 @@ _bfd_coff_link_hash_newfunc (struct bfd_hash_entry *entry,
   return (struct bfd_hash_entry *) ret;
 }
 
+struct bfd_hash_entry *
+_decoration_hash_newfunc (struct bfd_hash_entry *entry,
+			  struct bfd_hash_table *table,
+			  const char *string)
+{
+  struct decoration_hash_entry *ret = (struct decoration_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == NULL)
+    {
+      ret = (struct decoration_hash_entry *)
+	    bfd_hash_allocate (table, sizeof (struct decoration_hash_entry));
+      if (ret == NULL)
+	return NULL;
+    }
+
+  /* Call the allocation method of the superclass.  */
+  ret = (struct decoration_hash_entry *)
+	_bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret, table, string);
+  if (ret != NULL)
+    {
+      ret->decorated_link = NULL;
+    }
+
+  return (struct bfd_hash_entry *) ret;
+}
+
 /* Initialize a COFF linker hash table.  */
 
 bool
@@ -100,7 +128,11 @@ _bfd_coff_link_hash_table_init (struct coff_link_hash_table *table,
 				unsigned int entsize)
 {
   memset (&table->stab_info, 0, sizeof (table->stab_info));
-  return _bfd_link_hash_table_init (&table->root, abfd, newfunc, entsize);
+
+  return bfd_hash_table_init (&table->decoration_hash,
+			      _decoration_hash_newfunc,
+			      sizeof (struct decoration_hash_entry))
+	 &&_bfd_link_hash_table_init (&table->root, abfd, newfunc, entsize);
 }
 
 /* Create a COFF linker hash table.  */

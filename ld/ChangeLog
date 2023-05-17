@@ -1,3 +1,12 @@
+2023-05-17  Luca Bacci  <luca.bacci@outlook.com>
+
+	PR 30421
+	* emultempl/pe.em (set_decoration): New function.
+	(pe_fixup_stdcalls): Call the new function.
+	* emultempl/pep.em (set_decoration): New function.
+	(pep_fixup_stdcalls): Call the new function.
+	* pe-dll.c (make_one): Check for decoated symbols.
+
 2023-05-16  Nick Clifton  <nickc@redhat.com>
 
 	PR 30359

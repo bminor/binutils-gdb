@@ -294,6 +294,9 @@ struct coff_link_hash_table
   struct bfd_link_hash_table root;
   /* A pointer to information used to link stabs in sections.  */
   struct stab_info stab_info;
+  /* Hash table that maps undecorated names to their respective
+   * decorated coff_link_hash_entry as found in fixup_stdcalls  */
+  struct bfd_hash_table decoration_hash;
 };
 
 struct coff_reloc_cookie
@@ -324,6 +327,12 @@ struct coff_reloc_cookie
 /* Get the COFF linker hash table from a link_info structure.  */
 
 #define coff_hash_table(p) ((struct coff_link_hash_table *) ((p)->hash))
+
+struct decoration_hash_entry
+{
+  struct bfd_hash_entry root;
+  struct bfd_link_hash_entry *decorated_link;
+};
 
 /* Functions in coffgen.c.  */
 extern bfd_cleanup coff_object_p
@@ -572,6 +581,8 @@ struct coff_section_alignment_entry
   unsigned int alignment_power;
 };
 
+extern struct bfd_hash_entry *_decoration_hash_newfunc
+  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 extern struct bfd_hash_entry *_bfd_coff_link_hash_newfunc
   (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 extern bool _bfd_coff_link_hash_table_init

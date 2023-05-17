@@ -1,3 +1,14 @@
+2023-05-17  Luca Bacci  <luca.bacci@outlook.com>
+
+	PR 30421
+	* cofflink.c (_decoration_hash_newfunc): New function.
+	(_bfd_coff_link_hash_table_init): Call it.
+	* libcoff-in.h (struct coff_link_hash_table): Add decoration_hash
+	field.
+	(struct decoration_hash_entry): Declare.
+	(_decoration_hash_newfunc): Prototype.
+	* libcoff.h: Regenerate.
+
 2023-05-16  Oleg Tolmatcev  <oleg.tolmatcev@gmail.com>
 
 	* libcoff-in.h (struct coff_tdata): Add section_by_index and
