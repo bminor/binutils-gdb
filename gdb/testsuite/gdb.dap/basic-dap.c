@@ -38,7 +38,7 @@ address_breakpoint_here ()
 int
 line_breakpoint_here ()
 {
-  do_not_stop_here ();
+  do_not_stop_here ();		/* FIRST */
   function_breakpoint_here ();
   address_breakpoint_here ();
   return 0;			/* BREAK */

@@ -71,6 +71,21 @@ if {!$ok} {
     fail "check new breakpoint event"
 }
 
+# Check that there are breakpoint locations on each line between FIRST
+# and BREAK.
+set first_line [gdb_get_line_number "FIRST"]
+set last_line [expr {$line - 1}]
+set obj [dap_check_request_and_response "breakpoint locations" \
+	     breakpointLocations \
+	     [format {o source [o path [%s]] line [i %d] endLine [i %d]} \
+		  [list s $srcfile] $first_line $last_line]]
+# We know gdb returns the lines in sorted order.
+foreach entry [dict get [lindex $obj 0] body breakpoints] {
+    gdb_assert {[dict get $entry line] == $first_line} \
+	"line $first_line in result"
+    incr first_line
+}
+
 set obj [dap_check_request_and_response "reset breakpoint by line number" \
 	     setBreakpoints \
 	     [format {o source [o path [%s]] breakpoints [a [o line [i %d]]]} \
