@@ -75,6 +75,16 @@ proc make_exception_pattern { type msg } {
     return "${::addr_pattern}Python Exception <class '$type'>: $msg\r\n\r\n${::unknown_error_pattern}"
 }
 
+# Helper proc to build a pattern for the text Python emits when a
+# function argument is missing.  This string changed in Python 3.7 and
+# later.  NAME is the parameter name, and POS is its integer position
+# in the argument list.
+proc missing_arg_pattern { name pos } {
+    set pattern_1 "function missing required argument '$name' \\(pos $pos\\)"
+    set pattern_2 "Required argument '$name' \\(pos $pos\\) not found"
+    return "(?:${pattern_1}|${pattern_2})"
+}
+
 set test_plans \
     [list \
 	 [list "" "${base_pattern}\r\n.*"] \
@@ -113,16 +123,16 @@ set test_plans \
 		   "Result is not a DisassemblerResult."]] \
 	 [list "ErrorCreatingTextPart_NoArgs" \
 	      [make_exception_pattern "TypeError" \
-		  "function missing required argument 'style' \\(pos 1\\)"]] \
+		   [missing_arg_pattern "style" 1]]] \
 	 [list "ErrorCreatingAddressPart_NoArgs" \
 	      [make_exception_pattern "TypeError" \
-		  "function missing required argument 'address' \\(pos 1\\)"]] \
+		   [missing_arg_pattern "address" 1]]] \
 	 [list "ErrorCreatingTextPart_NoString" \
 	      [make_exception_pattern "TypeError" \
-		  "function missing required argument 'string' \\(pos 2\\)"]] \
+		   [missing_arg_pattern "string" 2]]] \
 	 [list "ErrorCreatingTextPart_NoStyle" \
 	      [make_exception_pattern "TypeError" \
-		  "function missing required argument 'style' \\(pos 1\\)"]] \
+		   [missing_arg_pattern "style" 1]]] \
 	 [list "All_Text_Part_Styles" "${addr_pattern}p1p2p3p4p5p6p7p8p9p10\r\n.*"] \
 	 [list "ErrorCreatingTextPart_StringAndParts" \
 	      [make_exception_pattern "ValueError" \
@@ -273,7 +283,7 @@ with_test_prefix "check inheritance" {
 # Test some error conditions when creating a DisassemblerResult object.
 gdb_test "python result = gdb.disassembler.DisassemblerResult()" \
     [multi_line \
-	 "TypeError: function missing required argument 'length' \\(pos 1\\)" \
+	 "TypeError: [missing_arg_pattern length 1]" \
 	 "Error while executing Python code\\."] \
     "try to create a DisassemblerResult without a length argument"
 
