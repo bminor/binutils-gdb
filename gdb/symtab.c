@@ -3953,15 +3953,17 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	  struct objfile *objfile
 	    = prologue_sal.symtab->compunit ()->objfile ();
 	  const linetable *linetable = prologue_sal.symtab->linetable ();
+	  gdb_assert (linetable->nitems > 0);
 	  int idx = 0;
 
 	  /* Skip any earlier lines, and any end-of-sequence marker
 	     from a previous function.  */
-	  while (linetable->item[idx].pc (objfile) != prologue_sal.pc
-		 || linetable->item[idx].line == 0)
+	  while (idx + 1 < linetable->nitems
+		 && (linetable->item[idx].pc (objfile) != prologue_sal.pc
+		     || linetable->item[idx].line == 0))
 	    idx++;
 
-	  if (idx+1 < linetable->nitems
+	  if (idx + 1 < linetable->nitems
 	      && linetable->item[idx+1].line != 0
 	      && linetable->item[idx+1].pc (objfile) == start_pc)
 	    return start_pc;
