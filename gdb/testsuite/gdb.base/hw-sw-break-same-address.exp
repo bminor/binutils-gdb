@@ -50,7 +50,7 @@ with_test_prefix "hw-sw" {
     # A bad GDB debugging against GDBserver would output a warning
     # here:
     #  delete breakpoints
-    #  warning: Error removing breakpoint 3
+    #  warning: error removing breakpoint 3 at <ADDRESS>
     #  (gdb) FAIL: gdb.base/hw-sw-break-same-address.exp: hw-sw: delete breakpoints
     gdb_test_no_output "delete breakpoints"
 }

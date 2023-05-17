@@ -100,7 +100,7 @@ proc test_remove_bp { initial_load } {
 	# get_integer_valueof.
 	set munmap -1
 	gdb_test_multiple "print /d ${munmap_expr}" "get result of munmap call" {
-	    -re -wrap "^(?:warning: Error removing breakpoint $::decimal\r\n)?\\$\[0-9\]* = (\[-\]*\[0-9\]*).*" {
+	    -re -wrap "^(?:warning: error removing breakpoint $::decimal at $::hex\r\n)?\\$\[0-9\]* = (\[-\]*\[0-9\]*).*" {
 		set munmap $expect_out(1,string)
 		pass $gdb_test_name
 	    }
@@ -112,7 +112,7 @@ proc test_remove_bp { initial_load } {
 	}
 
 	gdb_test "delete \$bpnum" \
-	    "warning: Error removing breakpoint .*" \
+	    "^warning: error removing breakpoint $::decimal at $::hex" \
 	    "failure to remove breakpoint warns"
     }
 }

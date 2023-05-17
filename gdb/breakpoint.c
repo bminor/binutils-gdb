@@ -11342,9 +11342,9 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 		     Note that at this point, old_loc->owner is still
 		     valid, as delete_breakpoint frees the breakpoint
 		     only after calling us.  */
-		  gdb_printf (_("warning: Error removing "
-				"breakpoint %d\n"), 
-			      old_loc->owner->number);
+		  warning (_("error removing breakpoint %d at %s"),
+			   old_loc->owner->number,
+			   paddress (old_loc->gdbarch, old_loc->address));
 		}
 	      removed = true;
 	    }
