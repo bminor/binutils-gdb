@@ -206,11 +206,11 @@ enum
   debug_prefixed_printf_cond (debug_exceptions, "windows except", fmt, \
 			      ## __VA_ARGS__)
 
-static void cygwin_set_dr (int i, CORE_ADDR addr);
-static void cygwin_set_dr7 (unsigned long val);
-static CORE_ADDR cygwin_get_dr (int i);
-static unsigned long cygwin_get_dr6 (void);
-static unsigned long cygwin_get_dr7 (void);
+static void windows_set_dr (int i, CORE_ADDR addr);
+static void windows_set_dr7 (unsigned long val);
+static CORE_ADDR windows_get_dr (int i);
+static unsigned long windows_get_dr6 (void);
+static unsigned long windows_get_dr7 (void);
 
 /* User options.  */
 static bool new_console = false;
@@ -3094,11 +3094,11 @@ void _initialize_windows_nat ();
 void
 _initialize_windows_nat ()
 {
-  x86_dr_low.set_control = cygwin_set_dr7;
-  x86_dr_low.set_addr = cygwin_set_dr;
-  x86_dr_low.get_addr = cygwin_get_dr;
-  x86_dr_low.get_status = cygwin_get_dr6;
-  x86_dr_low.get_control = cygwin_get_dr7;
+  x86_dr_low.set_control = windows_set_dr7;
+  x86_dr_low.set_addr = windows_set_dr;
+  x86_dr_low.get_addr = windows_get_dr;
+  x86_dr_low.get_status = windows_get_dr6;
+  x86_dr_low.get_control = windows_get_dr7;
 
   /* x86_dr_low.debug_register_length field is set by
      calling x86_set_debug_register_length function
@@ -3203,10 +3203,10 @@ Use \"%ps\" or \"%ps\" command to load executable/libraries directly."),
    Here we just store the address in dr array, the registers will be
    actually set up when windows_continue is called.  */
 static void
-cygwin_set_dr (int i, CORE_ADDR addr)
+windows_set_dr (int i, CORE_ADDR addr)
 {
   if (i < 0 || i > 3)
-    internal_error (_("Invalid register %d in cygwin_set_dr.\n"), i);
+    internal_error (_("Invalid register %d in windows_set_dr.\n"), i);
 
   for (auto &th : windows_process.thread_list)
     th->debug_registers_changed = true;
@@ -3216,7 +3216,7 @@ cygwin_set_dr (int i, CORE_ADDR addr)
    register.  Here we just store the address in D_REGS, the watchpoint
    will be actually set up in windows_wait.  */
 static void
-cygwin_set_dr7 (unsigned long val)
+windows_set_dr7 (unsigned long val)
 {
   for (auto &th : windows_process.thread_list)
     th->debug_registers_changed = true;
@@ -3225,7 +3225,7 @@ cygwin_set_dr7 (unsigned long val)
 /* Get the value of debug register I from the inferior.  */
 
 static CORE_ADDR
-cygwin_get_dr (int i)
+windows_get_dr (int i)
 {
   windows_thread_info *th = windows_process.find_thread (inferior_ptid);
 
@@ -3256,18 +3256,18 @@ cygwin_get_dr (int i)
    inferior.  */
 
 static unsigned long
-cygwin_get_dr6 (void)
+windows_get_dr6 (void)
 {
-  return cygwin_get_dr (6);
+  return windows_get_dr (6);
 }
 
 /* Get the value of the DR7 debug status register from the
    inferior.  */
 
 static unsigned long
-cygwin_get_dr7 (void)
+windows_get_dr7 (void)
 {
-  return cygwin_get_dr (7);
+  return windows_get_dr (7);
 }
 
 /* Determine if the thread referenced by "ptid" is alive
