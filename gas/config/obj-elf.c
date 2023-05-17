@@ -974,6 +974,7 @@ obj_elf_section_type (char *str, size_t len, bool warn)
   return 0;
 }
 
+#ifdef TC_SPARC
 static bfd_vma
 obj_elf_section_word (char *str, size_t len, int *type)
 {
@@ -1006,6 +1007,7 @@ obj_elf_section_word (char *str, size_t len, int *type)
 
   return 0;
 }
+#endif
 
 /* Get name of section.  */
 const char *
@@ -1388,6 +1390,7 @@ obj_elf_section (int push)
 		input_line_pointer = save;
 	    }
 	}
+#ifdef TC_SPARC
       else
 	{
 	  do
@@ -1413,6 +1416,7 @@ obj_elf_section (int push)
 	  while (*input_line_pointer++ == ',');
 	  --input_line_pointer;
 	}
+#endif
     }
 
  done:

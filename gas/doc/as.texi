@@ -6958,7 +6958,7 @@ the section name is not recognized, the default will be for the section to have
 none of the above flags: it will not be allocated in memory, nor writable, nor
 executable.  The section will contain data.
 
-For ELF targets, the assembler supports another type of @code{.section}
+For SPARC ELF targets, the assembler supports another type of @code{.section}
 directive for compatibility with the Solaris assembler:
 
 @smallexample
