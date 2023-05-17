@@ -32,16 +32,6 @@
 namespace windows_nat
 {
 
-/* Info about a potential pending stop.  Each thread holds one of
-   these.  See "windows_thread_info::pending_stop" for more
-   information.  */
-struct pending_stop
-{
-  /* The target waitstatus we computed.  TARGET_WAITKIND_IGNORE if the
-     thread does not have a pending stop.  */
-  target_waitstatus status;
-};
-
 struct windows_process_info;
 
 /* Thread information structure used to track extra information about
@@ -106,8 +96,11 @@ struct windows_thread_info
    effect of trying to single step thread A -- leaving all other
    threads suspended -- and then seeing a stop in thread B.  To handle
    this scenario, we queue all such "pending" stops here, and then
-   process them once the step has completed.  See PR gdb/22992.  */
-  struct pending_stop pending_stop {};
+   process them once the step has completed.  See PR gdb/22992.
+
+   TARGET_WAITKIND_IGNORE if the thread does not have a pending
+   stop.  */
+  target_waitstatus pending_status;
 
   /* The last Windows event returned by WaitForDebugEvent for this
      thread.  */

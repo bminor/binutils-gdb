@@ -848,7 +848,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 	}
 
       if (!th->suspended
-	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	  && th->pending_status.kind () != TARGET_WAITKIND_IGNORE)
 	any_pending = true;
     }
 
@@ -992,10 +992,10 @@ get_child_debug_event (DWORD *continue_status,
 	auto *th = (windows_thread_info *) thread_target_data (thread);
 
 	if (!th->suspended
-	    && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	    && th->pending_status.kind () != TARGET_WAITKIND_IGNORE)
 	  {
-	    *ourstatus = th->pending_stop.status;
-	    th->pending_stop.status.set_ignore ();
+	    *ourstatus = th->pending_status;
+	    th->pending_status.set_ignore ();
 	    *current_event = th->last_event;
 	    ptid = debug_event_ptid (current_event);
 	    switch_to_thread (find_thread_ptid (ptid));
@@ -1155,13 +1155,13 @@ get_child_debug_event (DWORD *continue_status,
   if (th != nullptr && th->suspended)
     {
       /* Pending stop.  See the comment by the definition of
-	 "windows_thread_info::pending_stop" for details on why this
+	 "windows_thread_info::pending_status" for details on why this
 	 is needed.  */
       OUTMSG2 (("get_windows_debug_event - "
 		"unexpected stop in suspended thread 0x%x\n",
 		th->tid));
       maybe_adjust_pc (*current_event);
-      th->pending_stop.status = *ourstatus;
+      th->pending_status = *ourstatus;
       ourstatus->set_spurious ();
     }
   else

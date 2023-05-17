@@ -1364,7 +1364,7 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
     {
       if ((id == -1 || id == (int) th->tid)
 	  && !th->suspended
-	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	  && th->pending_status.kind () != TARGET_WAITKIND_IGNORE)
 	{
 	  DEBUG_EVENTS ("got matching pending stop event "
 			"for 0x%x, not resuming",
@@ -1569,18 +1569,18 @@ windows_nat_target::get_windows_debug_event
   DWORD thread_id = 0;
 
   /* If there is a relevant pending stop, report it now.  See the
-     comment by the definition of "windows_thread_info::pending_stop"
+     comment by the definition of "windows_thread_info::pending_status"
      for details on why this is needed.  */
   for (auto &th : windows_process.thread_list)
     {
       if (!th->suspended
-	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	  && th->pending_status.kind () != TARGET_WAITKIND_IGNORE)
 	{
 	  DEBUG_EVENTS ("reporting pending event for 0x%x", th->tid);
 
 	  thread_id = th->tid;
-	  *ourstatus = th->pending_stop.status;
-	  th->pending_stop.status.set_ignore ();
+	  *ourstatus = th->pending_status;
+	  th->pending_status.set_ignore ();
 	  *current_event = th->last_event;
 
 	  ptid_t ptid (windows_process.process_id, thread_id);
@@ -1805,7 +1805,7 @@ windows_nat_target::get_windows_debug_event
   if (th->suspended)
     {
       /* Pending stop.  See the comment by the definition of
-	 "pending_stops" for details on why this is needed.  */
+	 "pending_status" for details on why this is needed.  */
       DEBUG_EVENTS ("get_windows_debug_event - "
 		    "unexpected stop in suspended thread 0x%x",
 		    thread_id);
@@ -1821,7 +1821,7 @@ windows_nat_target::get_windows_debug_event
 	  th->pc_adjusted = false;
 	}
 
-      th->pending_stop.status = *ourstatus;
+      th->pending_status = *ourstatus;
       ourstatus->set_ignore ();
 
       continue_last_debug_event_main_thread
