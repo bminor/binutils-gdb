@@ -66,6 +66,22 @@ checked_static_cast (V *v)
   return result;
 }
 
+/* Same as the above, but to cast from a reference type to another.  */
+
+template<typename T, typename V, typename = gdb::Requires<std::is_reference<T>>>
+T
+checked_static_cast (V &v)
+{
+  static_assert (std::is_reference<T>::value, "target must be a reference type");
+
+  using T_no_R = typename std::remove_reference<T>::type;
+  using T_P = typename std::add_pointer<T_no_R>::type;
+
+  using V_no_R = typename std::remove_reference<V>::type;
+
+  return *checked_static_cast<T_P, V_no_R> (&v);
+}
+
 }
 
 #endif /* COMMON_GDB_CHECKED_DYNAMIC_CAST_H */
