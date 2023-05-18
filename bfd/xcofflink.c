@@ -7076,6 +7076,8 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	  /* Reset the section indices after inserting the new
 	     sections.  */
+	  if (xcoff_data (abfd)->coff.section_by_target_index)
+	    htab_empty (xcoff_data (abfd)->coff.section_by_target_index);
 	  indx = 0;
 	  for (o = abfd->sections; o != NULL; o = o->next)
 	    {

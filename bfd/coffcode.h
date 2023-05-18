@@ -3067,6 +3067,9 @@ coff_compute_section_file_positions (bfd * abfd)
       sofar += bfd_coff_scnhsz (abfd);
 #endif
 
+  if (coff_data (abfd)->section_by_target_index)
+    htab_empty (coff_data (abfd)->section_by_target_index);
+
 #ifdef COFF_IMAGE_WITH_PE
   {
     /* PE requires the sections to be in memory order when listed in
