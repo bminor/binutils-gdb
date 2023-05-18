@@ -3046,8 +3046,6 @@ cond_string_is_same (char *str1, char *str2)
 static struct bp_location *
 find_matching_tracepoint_location (struct uploaded_tp *utp)
 {
-  struct bp_location *loc;
-
   for (breakpoint *b : all_tracepoints ())
     {
       struct tracepoint *t = (struct tracepoint *) b;
@@ -3061,7 +3059,7 @@ find_matching_tracepoint_location (struct uploaded_tp *utp)
 	  )
 	{
 	  /* Scan the locations for an address match.  */
-	  for (loc = b->loc; loc; loc = loc->next)
+	  for (bp_location *loc : b->locations ())
 	    {
 	      if (loc->address == utp->addr)
 		return loc;

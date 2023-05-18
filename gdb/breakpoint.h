@@ -33,6 +33,7 @@
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/refcounted-object.h"
+#include "gdbsupport/reference-to-pointer-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include "cli/cli-script.h"
 #include "target/waitstatus.h"
@@ -321,11 +322,9 @@ enum bp_loc_type
   bp_loc_other			/* Miscellaneous...  */
 };
 
-class bp_location : public refcounted_object
+class bp_location : public refcounted_object, public intrusive_list_node<bp_location>
 {
 public:
-  bp_location () = default;
-
   /* Construct a bp_location with the type inferred from OWNER's
      type.  */
   explicit bp_location (breakpoint *owner);
@@ -334,10 +333,6 @@ public:
   bp_location (breakpoint *owner, bp_loc_type type);
 
   virtual ~bp_location () = default;
-
-  /* Chain pointer to the next breakpoint location for
-     the same parent breakpoint.  */
-  bp_location *next = NULL;
 
   /* Type of this breakpoint location.  */
   bp_loc_type loc_type {};
@@ -609,9 +604,11 @@ enum watchpoint_triggered
 
 extern bool target_exact_watchpoints;
 
-/* bp_location linked list range.  */
-
-using bp_location_range = next_range<bp_location>;
+using bp_location_list = intrusive_list<bp_location>;
+using bp_location_iterator = bp_location_list::iterator;
+using bp_location_pointer_iterator
+  = reference_to_pointer_iterator<bp_location_iterator>;
+using bp_location_range = iterator_range<bp_location_pointer_iterator>;
 
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
@@ -633,30 +630,73 @@ struct breakpoint
   /* Allocate a location for this breakpoint.  */
   virtual struct bp_location *allocate_location ();
 
+  /* Return a range of this breakpoint's locations.  */
+  bp_location_range locations () const;
+
+  /* Add LOC to the location list of this breakpoint, sorted by address
+     (using LOC.ADDRESS).
+
+     LOC must have this breakpoint as its owner.  LOC must not already be linked
+     in a location list.  */
+  void add_location (bp_location &loc);
+
+  /* Remove LOC from this breakpoint's location list.  The name is a bit funny
+     because remove_location is already taken, and means something else.
+
+     LOC must be have this breakpoints as its owner.  LOC must be linked in this
+     breakpoint's location list.  */
+  void unadd_location (bp_location &loc);
+
+  /* Clear the location list of this breakpoint.  */
+  void clear_locations ()
+  { m_locations.clear (); }
+
+  /* Split all locations of this breakpoint that are bound to PSPACE out of its
+     location list to a separate list and return that list.  If
+     PSPACE is nullptr, hoist out all locations.  */
+  bp_location_list steal_locations (program_space *pspace);
+
   /* Return true if this breakpoint has a least one location.  */
   bool has_locations () const
-  { return this->loc != nullptr; }
+  { return !m_locations.empty (); }
 
   /* Return true if this breakpoint has a single location.  */
   bool has_single_location () const
-  { return this->loc != nullptr && this->loc->next == nullptr; }
+  {
+    if (!this->has_locations ())
+      return false;
+
+    return std::next (m_locations.begin ()) == m_locations.end ();
+  }
 
   /* Return true if this breakpoint has multiple locations.  */
   bool has_multiple_locations () const
-  { return this->loc != nullptr && this->loc->next != nullptr; }
+  {
+    if (!this->has_locations ())
+      return false;
+
+    return std::next (m_locations.begin ()) != m_locations.end ();
+  }
 
   /* Return a reference to the first location of this breakpoint.  */
   bp_location &first_loc ()
   {
     gdb_assert (this->has_locations ());
-    return *this->loc;
+    return m_locations.front ();
   }
 
   /* Return a reference to the first location of this breakpoint.  */
   const bp_location &first_loc () const
   {
     gdb_assert (this->has_locations ());
-    return *this->loc;
+    return m_locations.front ();
+  }
+
+  /* Return a reference to the last location of this breakpoint.  */
+  const bp_location &last_loc () const
+  {
+    gdb_assert (this->has_locations ());
+    return m_locations.back ();
   }
 
   /* Reevaluate a breakpoint.  This is necessary after symbols change
@@ -753,9 +793,6 @@ struct breakpoint
     /* Nothing to do.  */
   }
 
-  /* Return a range of this breakpoint's locations.  */
-  bp_location_range locations () const;
-
   breakpoint *next = NULL;
   /* Type of breakpoint.  */
   bptype type = bp_none;
@@ -765,9 +802,6 @@ struct breakpoint
   bpdisp disposition = disp_del;
   /* Number assigned to distinguish breakpoints.  */
   int number = 0;
-
-  /* Location(s) associated with this high-level breakpoint.  */
-  bp_location *loc = NULL;
 
   /* True means a silent breakpoint (don't print frame info if we stop
      here).  */
@@ -864,6 +898,9 @@ protected:
      thread 1", which needs outputting before any breakpoint-type
      specific extra command necessary for B's recreation.  */
   void print_recreate_thread (struct ui_file *fp) const;
+
+  /* Location(s) associated with this high-level breakpoint.  */
+  bp_location_list m_locations;
 };
 
 /* Abstract base class representing code breakpoints.  User "break"

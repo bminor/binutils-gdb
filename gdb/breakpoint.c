@@ -1049,7 +1049,7 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 	     the error and the condition string will be rejected.
 	     This two-pass approach is taken to avoid setting the
 	     state of locations in case of a reject.  */
-	  for (bp_location *loc : b->locations ())
+	  for (const bp_location *loc : b->locations ())
 	    {
 	      try
 		{
@@ -1065,7 +1065,7 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 		  /* Condition string is invalid.  If this happens to
 		     be the last loc, abandon (if not forced) or continue
 		     (if forced).  */
-		  if (loc->next == nullptr && !force)
+		  if (loc == &b->last_loc () && !force)
 		    throw;
 		}
 	    }
@@ -1879,8 +1879,9 @@ add_dummy_location (struct breakpoint *b,
 {
   gdb_assert (!b->has_locations ());
 
-  b->loc = new bp_location (b, bp_loc_other);
-  b->loc->pspace = pspace;
+  bp_location *loc = new bp_location (b, bp_loc_other);
+  loc->pspace = pspace;
+  b->add_location (*loc);
 }
 
 /* Assuming that B is a watchpoint:
@@ -1983,7 +1984,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
   /* We don't free locations.  They are stored in the bp_location array
      and update_global_location_list will eventually delete them and
      remove breakpoints if needed.  */
-  b->loc = NULL;
+  b->clear_locations ();
 
   if (within_current_scope && reparse)
     {
@@ -2082,7 +2083,6 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 		{
 		  CORE_ADDR addr;
 		  enum target_hw_bp_type type;
-		  struct bp_location *loc, **tmp;
 		  int bitpos = 0, bitsize = 0;
 
 		  if (v->bitsize () != 0)
@@ -2114,15 +2114,12 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 		  else if (b->type == bp_access_watchpoint)
 		    type = hw_access;
 
-		  loc = b->allocate_location ();
-		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
-		    ;
-		  *tmp = loc;
+		  bp_location *loc = b->allocate_location ();
 		  loc->gdbarch = v->type ()->arch ();
-
 		  loc->pspace = frame_pspace;
 		  loc->address
 		    = gdbarch_remove_non_address_bits (loc->gdbarch, addr);
+		  b->add_location (*loc);
 
 		  if (bitsize != 0)
 		    {
@@ -3031,23 +3028,11 @@ breakpoint_program_space_exit (struct program_space *pspace)
   /* Breakpoints set through other program spaces could have locations
      bound to PSPACE as well.  Remove those.  */
   for (bp_location *loc : all_bp_locations ())
-    {
-      struct bp_location *tmp;
-
-      if (loc->pspace == pspace)
-	{
-	  /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
-	  if (loc->owner->loc == loc)
-	    loc->owner->loc = loc->next;
-	  else
-	    for (tmp = loc->owner->loc; tmp->next != NULL; tmp = tmp->next)
-	      if (tmp->next == loc)
-		{
-		  tmp->next = loc->next;
-		  break;
-		}
-	}
-    }
+    if (loc->pspace == pspace)
+      {
+	/* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
+	loc->owner->unadd_location (*loc);
+      }
 
   /* Now update the global location list to permanently delete the
      removed locations above.  */
@@ -4168,7 +4153,7 @@ breakpoint_init_inferior (enum inf_context context)
 		   update_watchpoint, when the inferior is restarted.
 		   The next update_global_location_list call will
 		   garbage collect them.  */
-		b->loc = NULL;
+		b->clear_locations ();
 
 		if (context == inf_starting)
 		  {
@@ -4520,28 +4505,23 @@ bpstat_locno (const bpstat *bs)
   const struct breakpoint *b = bs->breakpoint_at;
   const struct bp_location *bl = bs->bp_location_at.get ();
 
-  int locno = 0;
-
   if (b != nullptr && b->has_multiple_locations ())
     {
-      const bp_location *bl_i;
+      int locno = 1;
 
-      for (bl_i = b->loc;
-	   bl_i != bl && bl_i->next != nullptr;
-	   bl_i = bl_i->next)
-	locno++;
-
-      if (bl_i == bl)
-	locno++;
-      else
+      for (bp_location *loc : b->locations ())
 	{
-	  warning (_("location number not found for breakpoint %d address %s."),
-		   b->number, paddress (bl->gdbarch, bl->address));
-	  locno = 0;
+	  if (bl == loc)
+	    return locno;
+
+	  ++locno;
 	}
+
+      warning (_("location number not found for breakpoint %d address %s."),
+	       b->number, paddress (bl->gdbarch, bl->address));
     }
 
-  return locno;
+  return 0;
 }
 
 /* See breakpoint.h.  */
@@ -8180,18 +8160,19 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
     (new_momentary_breakpoint (orig->gdbarch, type, orig->pspace,
 			       orig->frame_id, thread));
   const bp_location &orig_loc = orig->first_loc ();
-  copy->loc = copy->allocate_location ();
-  set_breakpoint_location_function (copy->loc);
+  bp_location *copy_loc = copy->allocate_location ();
+  copy->add_location (*copy_loc);
+  set_breakpoint_location_function (copy_loc);
 
-  copy->loc->gdbarch = orig_loc.gdbarch;
-  copy->loc->requested_address = orig_loc.requested_address;
-  copy->loc->address = orig_loc.address;
-  copy->loc->section = orig_loc.section;
-  copy->loc->pspace = orig_loc.pspace;
-  copy->loc->probe = orig_loc.probe;
-  copy->loc->line_number = orig_loc.line_number;
-  copy->loc->symtab = orig_loc.symtab;
-  copy->loc->enabled = loc_enabled;
+  copy_loc->gdbarch = orig_loc.gdbarch;
+  copy_loc->requested_address = orig_loc.requested_address;
+  copy_loc->address = orig_loc.address;
+  copy_loc->section = orig_loc.section;
+  copy_loc->pspace = orig_loc.pspace;
+  copy_loc->probe = orig_loc.probe;
+  copy_loc->line_number = orig_loc.line_number;
+  copy_loc->symtab = orig_loc.symtab;
+  copy_loc->enabled = loc_enabled;
 
   breakpoint *b = add_to_breakpoint_chain (std::move (copy));
   update_global_location_list_nothrow (UGLL_DONT_INSERT);
@@ -8296,7 +8277,6 @@ handle_automatic_hardware_breakpoints (bp_location *bl)
 bp_location *
 code_breakpoint::add_location (const symtab_and_line &sal)
 {
-  struct bp_location *new_loc, **tmp;
   CORE_ADDR adjusted_address;
   struct gdbarch *loc_gdbarch = get_sal_arch (sal);
 
@@ -8314,12 +8294,7 @@ code_breakpoint::add_location (const symtab_and_line &sal)
 						sal.pspace);
 
   /* Sort the locations by their ADDRESS.  */
-  new_loc = allocate_location ();
-  for (tmp = &(loc); *tmp != NULL && (*tmp)->address <= adjusted_address;
-       tmp = &((*tmp)->next))
-    ;
-  new_loc->next = *tmp;
-  *tmp = new_loc;
+  bp_location *new_loc = this->allocate_location ();
 
   new_loc->requested_address = sal.pc;
   new_loc->address = adjusted_address;
@@ -8334,6 +8309,8 @@ code_breakpoint::add_location (const symtab_and_line &sal)
   new_loc->symbol = sal.symbol;
   new_loc->msymbol = sal.msymbol;
   new_loc->objfile = sal.objfile;
+
+  breakpoint::add_location (*new_loc);
 
   set_breakpoint_location_function (new_loc);
 
@@ -11625,10 +11602,7 @@ code_breakpoint::say_where () const
 
       if (this->has_multiple_locations ())
 	{
-	  struct bp_location *iter = loc;
-	  int n = 0;
-	  for (; iter; iter = iter->next)
-	    ++n;
+	  int n = std::distance (m_locations.begin (), m_locations.end ());
 	  gdb_printf (" (%d locations)", n);
 	}
     }
@@ -11638,13 +11612,42 @@ code_breakpoint::say_where () const
 
 bp_location_range breakpoint::locations () const
 {
-  return bp_location_range (this->loc);
+  return bp_location_range
+    (bp_location_pointer_iterator (m_locations.begin ()),
+     bp_location_pointer_iterator (m_locations.end ()));
 }
 
 struct bp_location *
 breakpoint::allocate_location ()
 {
   return new bp_location (this);
+}
+
+/* See breakpoint.h.  */
+
+void
+breakpoint::add_location (bp_location &loc)
+{
+  gdb_assert (loc.owner == this);
+  gdb_assert (!loc.is_linked ());
+
+  auto ub = std::upper_bound (m_locations.begin (), m_locations.end (),
+			      loc,
+			      [] (const bp_location &left,
+				  const bp_location &right)
+				{ return left.address < right.address; });
+  m_locations.insert (ub, loc);
+}
+
+/* See breakpoint.h.  */
+
+void
+breakpoint::unadd_location (bp_location &loc)
+{
+  gdb_assert (loc.owner == this);
+  gdb_assert (loc.is_linked ());
+
+  m_locations.erase (m_locations.iterator_to (loc));
 }
 
 #define internal_error_pure_virtual_called() \
@@ -12397,7 +12400,11 @@ delete_breakpoint (struct breakpoint *bpt)
      belong to this breakpoint.  Do this before freeing the breakpoint
      itself, since remove_breakpoint looks at location's owner.  It
      might be better design to have location completely
-     self-contained, but it's not the case now.  */
+     self-contained, but it's not the case now.
+
+     Clear the location linked list first, otherwise, the intrusive_list
+     destructor accesses the locations after they are freed.  */
+  bpt->clear_locations ();
   update_global_location_list (UGLL_DONT_INSERT);
 
   /* On the chance that someone will soon try again to delete this
@@ -12492,17 +12499,16 @@ all_locations_are_pending (struct breakpoint *b, struct program_space *pspace)
 }
 
 /* Subroutine of update_breakpoint_locations to simplify it.
-   Return true if multiple fns in list LOC have the same name.
+   Return true if multiple fns in list LOCS have the same name.
    Null names are ignored.  */
 
 static bool
-ambiguous_names_p (struct bp_location *loc)
+ambiguous_names_p (const bp_location_range &locs)
 {
-  struct bp_location *l;
   htab_up htab (htab_create_alloc (13, htab_hash_string, htab_eq_string, NULL,
 				   xcalloc, xfree));
 
-  for (l = loc; l != NULL; l = l->next)
+  for (const bp_location *l : locs)
     {
       const char **slot;
       const char *name = l->function_name.get ();
@@ -12647,72 +12653,56 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
   return sal;
 }
 
-/* Returns true iff locations A and B are sufficiently same that
+/* Returns true iff location lists A and B are sufficiently same that
    we don't need to report breakpoint as changed.  */
 
 static bool
-locations_are_equal (struct bp_location *a, struct bp_location *b)
+locations_are_equal (const bp_location_list &a, const bp_location_range &b)
 {
-  while (a && b)
+  auto a_iter = a.begin ();
+  auto b_iter = b.begin ();
+
+  for (; a_iter != a.end () && b_iter != b.end (); ++a_iter, ++b_iter)
     {
-      if (a->address != b->address)
+      if (a_iter->address != (*b_iter)->address)
 	return false;
 
-      if (a->shlib_disabled != b->shlib_disabled)
+      if (a_iter->shlib_disabled != (*b_iter)->shlib_disabled)
 	return false;
 
-      if (a->enabled != b->enabled)
+      if (a_iter->enabled != (*b_iter)->enabled)
 	return false;
 
-      if (a->disabled_by_cond != b->disabled_by_cond)
+      if (a_iter->disabled_by_cond != (*b_iter)->disabled_by_cond)
 	return false;
-
-      a = a->next;
-      b = b->next;
     }
 
-  if ((a == NULL) != (b == NULL))
-    return false;
-
-  return true;
+  return (a_iter == a.end ()) == (b_iter == b.end ());
 }
 
-/* Split all locations of B that are bound to PSPACE out of B's
-   location list to a separate list and return that list's head.  If
-   PSPACE is NULL, hoist out all locations of B.  */
+/* See breakpoint.h.  */
 
-static struct bp_location *
-hoist_existing_locations (struct breakpoint *b, struct program_space *pspace)
+bp_location_list
+breakpoint::steal_locations (program_space *pspace)
 {
-  struct bp_location head;
-  struct bp_location *i = b->loc;
-  struct bp_location **i_link = &b->loc;
-  struct bp_location *hoisted = &head;
-
   if (pspace == NULL)
-    {
-      i = b->loc;
-      b->loc = NULL;
-      return i;
-    }
+    return std::move (m_locations);
 
-  head.next = NULL;
+  bp_location_list ret;
 
-  while (i != NULL)
+  for (auto it = m_locations.begin (); it != m_locations.end (); )
     {
-      if (i->pspace == pspace)
+      if (it->pspace == pspace)
 	{
-	  *i_link = i->next;
-	  i->next = NULL;
-	  hoisted->next = i;
-	  hoisted = i;
+	  bp_location &loc = *it;
+	  it = m_locations.erase (it);
+	  ret.push_back (loc);
 	}
       else
-	i_link = &i->next;
-      i = *i_link;
+	++it;
     }
 
-  return head.next;
+  return ret;
 }
 
 /* Create new breakpoint locations for B (a hardware or software
@@ -12727,8 +12717,6 @@ update_breakpoint_locations (code_breakpoint *b,
 			     gdb::array_view<const symtab_and_line> sals,
 			     gdb::array_view<const symtab_and_line> sals_end)
 {
-  struct bp_location *existing_locations;
-
   if (!sals_end.empty () && (sals.size () != 1 || sals_end.size () != 1))
     {
       /* Ranged breakpoints have only one start location and one end
@@ -12750,7 +12738,7 @@ update_breakpoint_locations (code_breakpoint *b,
   if (all_locations_are_pending (b, filter_pspace) && sals.empty ())
     return;
 
-  existing_locations = hoist_existing_locations (b, filter_pspace);
+  bp_location_list existing_locations = b->steal_locations (filter_pspace);
 
   for (const auto &sal : sals)
     {
@@ -12790,17 +12778,16 @@ update_breakpoint_locations (code_breakpoint *b,
   /* If possible, carry over 'disable' status from existing
      breakpoints.  */
   {
-    struct bp_location *e = existing_locations;
     /* If there are multiple breakpoints with the same function name,
        e.g. for inline functions, comparing function names won't work.
        Instead compare pc addresses; this is just a heuristic as things
        may have moved, but in practice it gives the correct answer
        often enough until a better solution is found.  */
-    int have_ambiguous_names = ambiguous_names_p (b->loc);
+    int have_ambiguous_names = ambiguous_names_p (b->locations ());
 
-    for (; e; e = e->next)
+    for (const bp_location &e : existing_locations)
       {
-	if ((!e->enabled || e->disabled_by_cond) && e->function_name)
+	if ((!e.enabled || e.disabled_by_cond) && e.function_name)
 	  {
 	    if (have_ambiguous_names)
 	      {
@@ -12813,10 +12800,10 @@ update_breakpoint_locations (code_breakpoint *b,
 		       As mentioned above, this is an heuristic and in
 		       practice should give the correct answer often
 		       enough.  */
-		    if (breakpoint_locations_match (e, l, true))
+		    if (breakpoint_locations_match (&e, l, true))
 		      {
-			l->enabled = e->enabled;
-			l->disabled_by_cond = e->disabled_by_cond;
+			l->enabled = e.enabled;
+			l->disabled_by_cond = e.disabled_by_cond;
 			break;
 		      }
 		  }
@@ -12825,11 +12812,11 @@ update_breakpoint_locations (code_breakpoint *b,
 	      {
 		for (bp_location *l : b->locations ())
 		  if (l->function_name
-		      && strcmp (e->function_name.get (),
+		      && strcmp (e.function_name.get (),
 				 l->function_name.get ()) == 0)
 		    {
-		      l->enabled = e->enabled;
-		      l->disabled_by_cond = e->disabled_by_cond;
+		      l->enabled = e.enabled;
+		      l->disabled_by_cond = e.disabled_by_cond;
 		      break;
 		    }
 	      }
@@ -12837,7 +12824,7 @@ update_breakpoint_locations (code_breakpoint *b,
       }
   }
 
-  if (!locations_are_equal (existing_locations, b->loc))
+  if (!locations_are_equal (existing_locations, b->locations ()))
     gdb::observers::breakpoint_modified.notify (b);
 }
 
