@@ -356,6 +356,21 @@ coff_object_p (bfd *abfd)
 			      : (struct internal_aouthdr *) NULL));
 }
 
+static hashval_t
+htab_hash_section_target_index (const void * entry)
+{
+  const struct bfd_section * sec = entry;
+  return sec->target_index;
+}
+
+static int
+htab_eq_section_target_index (const void * e1, const void * e2)
+{
+  const struct bfd_section * sec1 = e1;
+  const struct bfd_section * sec2 = e2;
+  return sec1->target_index == sec2->target_index;
+}
+
 /* Get the BFD section from a COFF symbol section number.  */
 
 asection *
@@ -371,17 +386,23 @@ coff_section_from_bfd_index (bfd *abfd, int section_index)
   struct bfd_section *answer;
   htab_t table = coff_data (abfd)->section_by_target_index;
 
+  if (!table)
+    {
+      table = htab_create (10, htab_hash_section_target_index,
+			   htab_eq_section_target_index, NULL);
+      if (table == NULL)
+	return bfd_und_section_ptr;
+      coff_data (abfd)->section_by_target_index = table;
+    }
+
   if (htab_elements (table) == 0)
     {
-      answer = abfd->sections;
-
-      while (answer)
+      for (answer = abfd->sections; answer; answer = answer->next)
 	{
 	  void **slot = htab_find_slot (table, answer, INSERT);
 	  if (slot == NULL)
 	    return bfd_und_section_ptr;
 	  *slot = answer;
-	  answer = answer->next;
 	}
     }
 
@@ -392,14 +413,16 @@ coff_section_from_bfd_index (bfd *abfd, int section_index)
   if (answer != NULL)
     return answer;
 
-  answer = abfd->sections;
-
-  while (answer)
-    {
-      if (answer->target_index == section_index)
+  /* Cover the unlikely case of sections added after the first call to
+     this function.  */
+  for (answer = abfd->sections; answer; answer = answer->next)
+    if (answer->target_index == section_index)
+      {
+	void **slot = htab_find_slot (table, answer, INSERT);
+	if (slot != NULL)
+	  *slot = answer;
 	return answer;
-      answer = answer->next;
-    }
+      }
 
   /* We should not reach this point, but the SCO 3.2v4 /lib/libc_s.a
      has a bad symbol table in biglitpow.o.  */

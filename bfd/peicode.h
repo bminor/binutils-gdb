@@ -255,36 +255,6 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
 #endif
 }
 
-static hashval_t
-htab_hash_section_index (const void * entry)
-{
-  const struct bfd_section * sec = entry;
-  return sec->index;
-}
-
-static int
-htab_eq_section_index (const void * e1, const void * e2)
-{
-  const struct bfd_section * sec1 = e1;
-  const struct bfd_section * sec2 = e2;
-  return sec1->index == sec2->index;
-}
-
-static hashval_t
-htab_hash_section_target_index (const void * entry)
-{
-  const struct bfd_section * sec = entry;
-  return sec->target_index;
-}
-
-static int
-htab_eq_section_target_index (const void * e1, const void * e2)
-{
-  const struct bfd_section * sec1 = e1;
-  const struct bfd_section * sec2 = e2;
-  return sec1->target_index == sec2->target_index;
-}
-
 static bool
 pe_mkobject (bfd * abfd)
 {
@@ -381,11 +351,6 @@ pe_mkobject_hook (bfd * abfd,
 
   memcpy (pe->dos_message, internal_f->pe.dos_message,
 	  sizeof (pe->dos_message));
-
-  pe->coff.section_by_index
-    = htab_create (10, htab_hash_section_index, htab_eq_section_index, NULL);
-  pe->coff.section_by_target_index = htab_create
-    (10, htab_hash_section_target_index, htab_eq_section_target_index, NULL);
 
   return (void *) pe;
 }

@@ -656,6 +656,20 @@ coff_pe_amd64_relocate_section (bfd *output_bfd,
 
 #define coff_relocate_section coff_pe_amd64_relocate_section
 
+static hashval_t
+htab_hash_section_index (const void * entry)
+{
+  const struct bfd_section * sec = entry;
+  return sec->index;
+}
+
+static int
+htab_eq_section_index (const void * e1, const void * e2)
+{
+  const struct bfd_section * sec1 = e1;
+  const struct bfd_section * sec2 = e2;
+  return sec1->index == sec2->index;
+}
 #endif /* COFF_WITH_PE */
 
 /* Convert an rtype to howto for the COFF backend linker.  */
@@ -756,11 +770,17 @@ coff_amd64_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 	  htab_t table = coff_data (abfd)->section_by_index;
 	  asection *s;
 
+	  if (!table)
+	    {
+	      table = htab_create (10, htab_hash_section_index,
+				   htab_eq_section_index, NULL);
+	      if (table == NULL)
+		return NULL;
+	      coff_data (abfd)->section_by_index = table;
+	    }
+
 	  if (htab_elements (table) == 0)
 	    {
-	      /* Sigh - if we do not have a section index then the only way
-		 to get the section to offset against is to find it the hard
-		 way.  */
 	      for (s = abfd->sections; s != NULL; s = s->next)
 		{
 		  void ** slot = htab_find_slot (table, s, INSERT);

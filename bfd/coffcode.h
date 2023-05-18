@@ -731,36 +731,6 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
 
 #ifndef COFF_WITH_PE
 
-static hashval_t
-htab_hash_section_index (const void * entry)
-{
-  const struct bfd_section * sec = entry;
-  return sec->index;
-}
-
-static int
-htab_eq_section_index (const void * e1, const void * e2)
-{
-  const struct bfd_section * sec1 = e1;
-  const struct bfd_section * sec2 = e2;
-  return sec1->index == sec2->index;
-}
-
-static hashval_t
-htab_hash_section_target_index (const void * entry)
-{
-  const struct bfd_section * sec = entry;
-  return sec->target_index;
-}
-
-static int
-htab_eq_section_target_index (const void * e1, const void * e2)
-{
-  const struct bfd_section * sec1 = e1;
-  const struct bfd_section * sec2 = e2;
-  return sec1->target_index == sec2->target_index;
-}
-
 static bool
 styp_to_sec_flags (bfd *abfd,
 		   void * hdr,
@@ -2184,11 +2154,6 @@ coff_mkobject_hook (bfd * abfd,
   if ((internal_f->f_flags & IMAGE_FILE_DEBUG_STRIPPED) == 0)
     abfd->flags |= HAS_DEBUG;
 #endif
-
-  coff->section_by_index
-    = htab_create (10, htab_hash_section_index, htab_eq_section_index, NULL);
-  coff->section_by_target_index = htab_create
-    (10, htab_hash_section_target_index, htab_eq_section_target_index, NULL);
 
   return coff;
 }
