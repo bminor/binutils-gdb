@@ -33,6 +33,7 @@
 #include "location.h"
 #include "py-event.h"
 #include "linespec.h"
+#include "gdbsupport/common-utils.h"
 
 extern PyTypeObject breakpoint_location_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_location_object");
@@ -981,6 +982,31 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   return 0;
 }
 
+/* __repr__ implementation for gdb.Breakpoint.  */
+
+static PyObject *
+bppy_repr (PyObject *self)
+{
+  const auto bp = (struct gdbpy_breakpoint_object*) self;
+  if (bp->bp == nullptr)
+    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+
+  std::string str = " ";
+  if (bp->bp->thread != -1)
+    str += string_printf ("thread=%d ", bp->bp->thread);
+  if (bp->bp->task > 0)
+    str += string_printf ("task=%d ", bp->bp->task);
+  if (bp->bp->enable_count > 0)
+    str += string_printf ("enable_count=%d ", bp->bp->enable_count);
+  str.pop_back ();
+
+  return PyUnicode_FromFormat ("<%s%s number=%d hits=%d%s>",
+			       Py_TYPE (self)->tp_name,
+			       (bp->bp->enable_state == bp_enabled
+				? "" : " disabled"), bp->bp->number,
+			       bp->bp->hit_count, str.c_str ());
+}
+
 /* Append to LIST the breakpoint Python object associated to B.
 
    Return true on success.  Return false on failure, with the Python error
@@ -1406,7 +1432,7 @@ PyTypeObject breakpoint_object_type =
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
   0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
+  bppy_repr,                     /*tp_repr*/
   0,				  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
   0,				  /*tp_as_mapping*/
@@ -1624,6 +1650,43 @@ bplocpy_dealloc (PyObject *py_self)
   Py_TYPE (py_self)->tp_free (py_self);
 }
 
+/* __repr__ implementation for gdb.BreakpointLocation.  */
+
+static PyObject *
+bplocpy_repr (PyObject *py_self)
+{
+  const auto self = (gdbpy_breakpoint_location_object *) py_self;
+  if (self->owner == nullptr || self->owner->bp == nullptr
+    || self->owner->bp != self->bp_loc->owner)
+    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+
+  const auto enabled = self->bp_loc->enabled ? "enabled" : "disabled";
+
+  std::string str (enabled);
+
+  str += string_printf (" address=%s",
+			paddress (self->bp_loc->owner->gdbarch,
+				  self->bp_loc->address));
+
+  if (self->bp_loc->requested_address != self->bp_loc->address)
+    str += string_printf (" requested_address=%s",
+			  paddress (self->bp_loc->owner->gdbarch,
+				    self->bp_loc->requested_address));
+  if (self->bp_loc->symtab != nullptr)
+    str += string_printf (" source=%s:%d", self->bp_loc->symtab->filename,
+			  self->bp_loc->line_number);
+
+  const auto fn_name = self->bp_loc->function_name.get ();
+  if (fn_name != nullptr)
+    {
+      str += " in ";
+      str += fn_name;
+    }
+
+  return PyUnicode_FromFormat ("<%s %s>", Py_TYPE (self)->tp_name,
+			       str.c_str ());
+}
+
 /* Attribute get/set Python definitions. */
 
 static gdb_PyGetSetDef bp_location_object_getset[] = {
@@ -1655,7 +1718,7 @@ PyTypeObject breakpoint_location_object_type =
   0,					/*tp_getattr*/
   0,					/*tp_setattr*/
   0,					/*tp_compare*/
-  0,					/*tp_repr*/
+  bplocpy_repr,                        /*tp_repr*/
   0,					/*tp_as_number*/
   0,					/*tp_as_sequence*/
   0,					/*tp_as_mapping*/

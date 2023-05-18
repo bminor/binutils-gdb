@@ -43,6 +43,8 @@ clean_restart ${binfile}
 # point where we don't have a current frame, and we don't want to
 # require one.
 gdb_py_test_silent_cmd "python main_func = gdb.lookup_global_symbol(\"main\")" "Lookup main" 1
+gdb_test "python print (repr (main_func))" "<gdb.Symbol print_name=main>" \
+    "test main_func.__repr__"
 gdb_test "python print (main_func.is_function)" "True" "test main_func.is_function"
 gdb_test "python print (gdb.lookup_global_symbol(\"junk\"))" "None" "test lookup_global_symbol(\"junk\")"
 

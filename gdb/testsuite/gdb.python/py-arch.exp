@@ -27,6 +27,8 @@ if ![runto_main] {
 # Test python/15461.  Invalid architectures should not trigger an
 # internal GDB assert.
 gdb_py_test_silent_cmd "python empty = gdb.Architecture()" "get empty arch" 0
+gdb_test "python print(repr (empty))" "<gdb\\.Architecture \\(invalid\\)>" \
+    "Test empty achitecture __repr__ does not trigger an assert"
 gdb_test "python print(empty.name())" ".*Architecture is invalid.*" \
     "Test empty architecture.name does not trigger an assert"
 gdb_test "python print(empty.disassemble())" ".*Architecture is invalid.*" \
@@ -43,6 +45,10 @@ gdb_py_test_silent_cmd "python insn_list3 = arch.disassemble(pc, count=1)" \
   "disassemble no end" 0
 gdb_py_test_silent_cmd "python insn_list4 = arch.disassemble(gdb.Value(pc))" \
   "disassemble no end no count" 0
+
+gdb_test "python print (repr (arch))" \
+    "<gdb.Architecture arch_name=.* printable_name=.*>" \
+    "test __repr__ for architecture"
 
 gdb_test "python print (len(insn_list1))" "1" "test number of instructions 1"
 gdb_test "python print (len(insn_list2))" "1" "test number of instructions 2"

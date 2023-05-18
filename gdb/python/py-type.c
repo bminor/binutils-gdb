@@ -1028,6 +1028,34 @@ typy_template_argument (PyObject *self, PyObject *args)
   return result;
 }
 
+/* __repr__ implementation for gdb.Type.  */
+
+static PyObject *
+typy_repr (PyObject *self)
+{
+  const auto type = type_object_to_type (self);
+  if (type == nullptr)
+    return PyUnicode_FromFormat ("<%s (invalid)>",
+				 Py_TYPE (self)->tp_name);
+
+  const char *code = pyty_codes[type->code ()].name;
+  string_file type_name;
+  try
+    {
+      current_language->print_type (type, "", &type_name, -1, 0,
+				    &type_print_raw_options);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  auto py_typename = PyUnicode_Decode (type_name.c_str (), type_name.size (),
+				       host_charset (), NULL);
+
+  return PyUnicode_FromFormat ("<%s code=%s name=%U>", Py_TYPE (self)->tp_name,
+			       code, py_typename);
+}
+
 static PyObject *
 typy_str (PyObject *self)
 {
@@ -1617,7 +1645,7 @@ PyTypeObject type_object_type =
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
   0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
+  typy_repr,                     /*tp_repr*/
   &type_object_as_number,	  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
   &typy_mapping,		  /*tp_as_mapping*/

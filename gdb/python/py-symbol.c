@@ -378,6 +378,19 @@ sympy_dealloc (PyObject *obj)
   Py_TYPE (obj)->tp_free (obj);
 }
 
+/* __repr__ implementation for gdb.Symbol.  */
+
+static PyObject *
+sympy_repr (PyObject *self)
+{
+  const auto symbol = symbol_object_to_symbol (self);
+  if (symbol == nullptr)
+    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+
+  return PyUnicode_FromFormat ("<%s print_name=%s>", Py_TYPE (self)->tp_name,
+			       symbol->print_name ());
+}
+
 /* Implementation of
    gdb.lookup_symbol (name [, block] [, domain]) -> (symbol, is_field_of_this)
    A tuple with 2 elements is always returned.  The first is the symbol
@@ -741,7 +754,7 @@ PyTypeObject symbol_object_type = {
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
   0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
+  sympy_repr,                    /*tp_repr*/
   0,				  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
   0,				  /*tp_as_mapping*/

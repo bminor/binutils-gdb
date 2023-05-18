@@ -388,3 +388,7 @@ if { [build_inferior "${binfile}-cxx" "c++"] == 0 } {
       test_type_equality
   }
 }
+
+# Test __repr__().
+gdb_test "python print (repr (gdb.lookup_type ('char')))" \
+      "<gdb.Type code=TYPE_CODE_INT name=char>" "test __repr__()"

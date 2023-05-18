@@ -418,6 +418,41 @@ blpy_iter_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+/* __repr__ implementation for gdb.Block.  */
+
+static PyObject *
+blpy_repr (PyObject *self)
+{
+  const auto block = block_object_to_block (self);
+  if (block == nullptr)
+    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+
+  const auto name = block->function () ?
+    block->function ()->print_name () : "<anonymous>";
+
+  std::string str;
+  unsigned int written_symbols = 0;
+  const int len = mdict_size (block->multidict ());
+  static constexpr int SYMBOLS_TO_SHOW = 5;
+  for (struct symbol *symbol : block_iterator_range (block))
+    {
+      if (written_symbols == SYMBOLS_TO_SHOW)
+	{
+	  const int remaining = len - SYMBOLS_TO_SHOW;
+	  if (remaining == 1)
+	    str += string_printf ("... (%d more symbol)", remaining);
+	  else
+	    str += string_printf ("... (%d more symbols)", remaining);
+	  break;
+	}
+      str += symbol->print_name ();
+      if (++written_symbols < len)
+	str += ", ";
+    }
+  return PyUnicode_FromFormat ("<%s %s {%s}>", Py_TYPE (self)->tp_name,
+			       name, str.c_str ());
+}
+
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_blocks (void)
 {
@@ -482,7 +517,7 @@ PyTypeObject block_object_type = {
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
   0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
+  blpy_repr,                      /*tp_repr*/
   0,				  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
   &block_object_as_mapping,	  /*tp_as_mapping*/
