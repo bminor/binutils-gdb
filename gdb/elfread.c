@@ -726,6 +726,9 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   if (len > 4 && strcmp (target_name + len - 4, "@plt") == 0)
     return 0;
 
+  if (strcmp (target_name, "_PROCEDURE_LINKAGE_TABLE_") == 0)
+    return 0;
+
   htab = elf_objfile_gnu_ifunc_cache_data.get (objfile);
   if (htab == NULL)
     {
