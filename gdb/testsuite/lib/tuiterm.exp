@@ -552,52 +552,52 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/SGR.html
     proc _csi_m {args} {
 	_log_cur "Select Graphic Rendition ([join $args {, }])" {
-	  variable _attrs
+	    variable _attrs
 
-	  foreach item $args {
-	      switch -exact -- $item {
-		  "" - 0 {
-		      set _attrs(intensity) normal
-		      set _attrs(fg) default
-		      set _attrs(bg) default
-		      set _attrs(underline) 0
-		      set _attrs(reverse) 0
-		  }
-		  1 {
-		      set _attrs(intensity) bold
-		  }
-		  2 {
-		      set _attrs(intensity) dim
-		  }
-		  4 {
-		      set _attrs(underline) 1
-		  }
-		  7 {
-		      set _attrs(reverse) 1
-		  }
-		  22 {
-		      set _attrs(intensity) normal
-		  }
-		  24 {
-		      set _attrs(underline) 0
-		  }
-		  27 {
-		      set _attrs(reverse) 1
-		  }
-		  30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
-		      set _attrs(fg) $item
-		  }
-		  39 {
-		      set _attrs(fg) default
-		  }
-		  40 - 41 - 42 - 43 - 44 - 45 - 46 - 47 {
-		      set _attrs(bg) $item
-		  }
-		  49 {
-		      set _attrs(bg) default
-		  }
-	      }
-	  }
+	    foreach item $args {
+		switch -exact -- $item {
+		    "" - 0 {
+			set _attrs(intensity) normal
+			set _attrs(fg) default
+			set _attrs(bg) default
+			set _attrs(underline) 0
+			set _attrs(reverse) 0
+		    }
+		    1 {
+			set _attrs(intensity) bold
+		    }
+		    2 {
+			set _attrs(intensity) dim
+		    }
+		    4 {
+			set _attrs(underline) 1
+		    }
+		    7 {
+			set _attrs(reverse) 1
+		    }
+		    22 {
+			set _attrs(intensity) normal
+		    }
+		    24 {
+			set _attrs(underline) 0
+		    }
+		    27 {
+			set _attrs(reverse) 1
+		    }
+		    30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
+			set _attrs(fg) $item
+		    }
+		    39 {
+			set _attrs(fg) default
+		    }
+		    40 - 41 - 42 - 43 - 44 - 45 - 46 - 47 {
+			set _attrs(bg) $item
+		    }
+		    49 {
+			set _attrs(bg) default
+		    }
+		}
+	    }
 	}
     }
 
@@ -614,7 +614,7 @@ namespace eval Term {
 	    variable _chars
 	    set lattr [array get _attrs]
 	    foreach char [split $str {}] {
-		  _log_cur "  Inserted char '$char'" {
+		_log_cur "  Inserted char '$char'" {
 		    set _chars($_cur_col,$_cur_row) [list $char $lattr]
 		    incr _cur_col
 		    if {$_cur_col >= $_cols} {
@@ -739,7 +739,7 @@ namespace eval Term {
 	variable _cur_row
 
 	set fn "wait_for"
-	
+
 	set prompt_wait_for "$gdb_prompt \$"
 	debug_tui_matching "$fn: regexp: '$wait_for'"
 
