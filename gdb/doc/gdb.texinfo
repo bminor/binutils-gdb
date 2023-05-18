@@ -30560,7 +30560,7 @@ occurs exactly once.
 @section @sc{gdb/mi} General Design
 @cindex GDB/MI General Design
 
-Interaction of a @sc{GDB/MI} frontend with @value{GDBN} involves three
+Interaction of a @sc{gdb/mi} frontend with @value{GDBN} involves three
 parts---commands sent to @value{GDBN}, responses to those commands
 and notifications.  Each command results in exactly one response,
 indicating either successful completion of the command, or an error.
@@ -34999,7 +34999,7 @@ objects.
 @end table
 
 In the future new values may be added to this list so the front should
-be prepared for this possibility.  @xref{GDB/MI Development and Front Ends, ,@sc{GDB/MI} Development and Front Ends}.
+be prepared for this possibility.  @xref{GDB/MI Development and Front Ends, ,@sc{gdb/mi} Development and Front Ends}.
 
 @item type_changed
 This is only present if the varobj is still valid.  If the type
