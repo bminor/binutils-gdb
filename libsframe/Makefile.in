@@ -114,7 +114,8 @@ check_PROGRAMS = $(am__EXEEXT_1)
 @HAVE_COMPAT_DEJAGNU_TRUE@am__append_4 = testsuite/libsframe.decode/be-flipping \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-1 \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-2 \
-@HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.encode/encode-1
+@HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.encode/encode-1 \
+@HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.find/findfre-1
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
@@ -182,7 +183,8 @@ am__v_lt_1 =
 @HAVE_COMPAT_DEJAGNU_TRUE@am__EXEEXT_1 = testsuite/libsframe.decode/be-flipping$(EXEEXT) \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-1$(EXEEXT) \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-2$(EXEEXT) \
-@HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.encode/encode-1$(EXEEXT)
+@HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.encode/encode-1$(EXEEXT) \
+@HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.find/findfre-1$(EXEEXT)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_testsuite_libsframe_decode_be_flipping_OBJECTS = testsuite/libsframe.decode/testsuite_libsframe_decode_be_flipping-be-flipping.$(OBJEXT)
 testsuite_libsframe_decode_be_flipping_OBJECTS =  \
@@ -203,6 +205,11 @@ am_testsuite_libsframe_encode_encode_1_OBJECTS = testsuite/libsframe.encode/test
 testsuite_libsframe_encode_encode_1_OBJECTS =  \
 	$(am_testsuite_libsframe_encode_encode_1_OBJECTS)
 testsuite_libsframe_encode_encode_1_DEPENDENCIES =  \
+	${top_builddir}/libsframe.la
+am_testsuite_libsframe_find_findfre_1_OBJECTS = testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.$(OBJEXT)
+testsuite_libsframe_find_findfre_1_OBJECTS =  \
+	$(am_testsuite_libsframe_find_findfre_1_OBJECTS)
+testsuite_libsframe_find_findfre_1_DEPENDENCIES =  \
 	${top_builddir}/libsframe.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -242,12 +249,14 @@ SOURCES = $(libsframe_la_SOURCES) \
 	$(testsuite_libsframe_decode_be_flipping_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_1_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_2_SOURCES) \
-	$(testsuite_libsframe_encode_encode_1_SOURCES)
+	$(testsuite_libsframe_encode_encode_1_SOURCES) \
+	$(testsuite_libsframe_find_findfre_1_SOURCES)
 DIST_SOURCES = $(libsframe_la_SOURCES) \
 	$(testsuite_libsframe_decode_be_flipping_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_1_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_2_SOURCES) \
-	$(testsuite_libsframe_encode_encode_1_SOURCES)
+	$(testsuite_libsframe_encode_encode_1_SOURCES) \
+	$(testsuite_libsframe_find_findfre_1_SOURCES)
 AM_V_DVIPS = $(am__v_DVIPS_@AM_V@)
 am__v_DVIPS_ = $(am__v_DVIPS_@AM_DEFAULT_V@)
 am__v_DVIPS_0 = @echo "  DVIPS   " $@;
@@ -323,6 +332,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(srcdir)/doc/local.mk \
 	$(srcdir)/testsuite/libsframe.decode/local.mk \
 	$(srcdir)/testsuite/libsframe.encode/local.mk \
+	$(srcdir)/testsuite/libsframe.find/local.mk \
 	$(srcdir)/testsuite/local.mk $(top_srcdir)/../ar-lib \
 	$(top_srcdir)/../compile $(top_srcdir)/../config.guess \
 	$(top_srcdir)/../config.sub $(top_srcdir)/../depcomp \
@@ -515,6 +525,9 @@ testsuite_libsframe_decode_frecnt_2_CPPFLAGS = -I${top_srcdir}/../include -Wall
 testsuite_libsframe_encode_encode_1_SOURCES = testsuite/libsframe.encode/encode-1.c
 testsuite_libsframe_encode_encode_1_LDADD = ${top_builddir}/libsframe.la
 testsuite_libsframe_encode_encode_1_CPPFLAGS = -I${top_srcdir}/../include -Wall
+testsuite_libsframe_find_findfre_1_SOURCES = testsuite/libsframe.find/findfre-1.c
+testsuite_libsframe_find_findfre_1_LDADD = ${top_builddir}/libsframe.la
+testsuite_libsframe_find_findfre_1_CPPFLAGS = -I${top_srcdir}/../include -Wall
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -522,7 +535,7 @@ all: config.h
 .SUFFIXES: .c .dvi .lo .o .obj .ps
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/doc/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/doc/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(srcdir)/testsuite/libsframe.find/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -544,7 +557,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/doc/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(am__empty):
+$(srcdir)/doc/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(srcdir)/testsuite/libsframe.find/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -667,11 +680,25 @@ testsuite/libsframe.encode/testsuite_libsframe_encode_encode_1-encode-1.$(OBJEXT
 testsuite/libsframe.encode/encode-1$(EXEEXT): $(testsuite_libsframe_encode_encode_1_OBJECTS) $(testsuite_libsframe_encode_encode_1_DEPENDENCIES) $(EXTRA_testsuite_libsframe_encode_encode_1_DEPENDENCIES) testsuite/libsframe.encode/$(am__dirstamp)
 	@rm -f testsuite/libsframe.encode/encode-1$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(testsuite_libsframe_encode_encode_1_OBJECTS) $(testsuite_libsframe_encode_encode_1_LDADD) $(LIBS)
+testsuite/libsframe.find/$(am__dirstamp):
+	@$(MKDIR_P) testsuite/libsframe.find
+	@: > testsuite/libsframe.find/$(am__dirstamp)
+testsuite/libsframe.find/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) testsuite/libsframe.find/$(DEPDIR)
+	@: > testsuite/libsframe.find/$(DEPDIR)/$(am__dirstamp)
+testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.$(OBJEXT):  \
+	testsuite/libsframe.find/$(am__dirstamp) \
+	testsuite/libsframe.find/$(DEPDIR)/$(am__dirstamp)
+
+testsuite/libsframe.find/findfre-1$(EXEEXT): $(testsuite_libsframe_find_findfre_1_OBJECTS) $(testsuite_libsframe_find_findfre_1_DEPENDENCIES) $(EXTRA_testsuite_libsframe_find_findfre_1_DEPENDENCIES) testsuite/libsframe.find/$(am__dirstamp)
+	@rm -f testsuite/libsframe.find/findfre-1$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(testsuite_libsframe_find_findfre_1_OBJECTS) $(testsuite_libsframe_find_findfre_1_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f testsuite/libsframe.decode/*.$(OBJEXT)
 	-rm -f testsuite/libsframe.encode/*.$(OBJEXT)
+	-rm -f testsuite/libsframe.find/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -683,6 +710,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.decode/$(DEPDIR)/testsuite_libsframe_decode_frecnt_1-frecnt-1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.decode/$(DEPDIR)/testsuite_libsframe_decode_frecnt_2-frecnt-2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.encode/$(DEPDIR)/testsuite_libsframe_encode_encode_1-encode-1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.find/$(DEPDIR)/testsuite_libsframe_find_findfre_1-findfre-1.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -785,6 +813,20 @@ testsuite/libsframe.encode/testsuite_libsframe_encode_encode_1-encode-1.obj: tes
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testsuite_libsframe_encode_encode_1_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testsuite/libsframe.encode/testsuite_libsframe_encode_encode_1-encode-1.obj `if test -f 'testsuite/libsframe.encode/encode-1.c'; then $(CYGPATH_W) 'testsuite/libsframe.encode/encode-1.c'; else $(CYGPATH_W) '$(srcdir)/testsuite/libsframe.encode/encode-1.c'; fi`
 
+testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.o: testsuite/libsframe.find/findfre-1.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testsuite_libsframe_find_findfre_1_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.o -MD -MP -MF testsuite/libsframe.find/$(DEPDIR)/testsuite_libsframe_find_findfre_1-findfre-1.Tpo -c -o testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.o `test -f 'testsuite/libsframe.find/findfre-1.c' || echo '$(srcdir)/'`testsuite/libsframe.find/findfre-1.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) testsuite/libsframe.find/$(DEPDIR)/testsuite_libsframe_find_findfre_1-findfre-1.Tpo testsuite/libsframe.find/$(DEPDIR)/testsuite_libsframe_find_findfre_1-findfre-1.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testsuite/libsframe.find/findfre-1.c' object='testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testsuite_libsframe_find_findfre_1_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.o `test -f 'testsuite/libsframe.find/findfre-1.c' || echo '$(srcdir)/'`testsuite/libsframe.find/findfre-1.c
+
+testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.obj: testsuite/libsframe.find/findfre-1.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testsuite_libsframe_find_findfre_1_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.obj -MD -MP -MF testsuite/libsframe.find/$(DEPDIR)/testsuite_libsframe_find_findfre_1-findfre-1.Tpo -c -o testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.obj `if test -f 'testsuite/libsframe.find/findfre-1.c'; then $(CYGPATH_W) 'testsuite/libsframe.find/findfre-1.c'; else $(CYGPATH_W) '$(srcdir)/testsuite/libsframe.find/findfre-1.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) testsuite/libsframe.find/$(DEPDIR)/testsuite_libsframe_find_findfre_1-findfre-1.Tpo testsuite/libsframe.find/$(DEPDIR)/testsuite_libsframe_find_findfre_1-findfre-1.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testsuite/libsframe.find/findfre-1.c' object='testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testsuite_libsframe_find_findfre_1_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testsuite/libsframe.find/testsuite_libsframe_find_findfre_1-findfre-1.obj `if test -f 'testsuite/libsframe.find/findfre-1.c'; then $(CYGPATH_W) 'testsuite/libsframe.find/findfre-1.c'; else $(CYGPATH_W) '$(srcdir)/testsuite/libsframe.find/findfre-1.c'; fi`
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -792,6 +834,7 @@ clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf testsuite/libsframe.decode/.libs testsuite/libsframe.decode/_libs
 	-rm -rf testsuite/libsframe.encode/.libs testsuite/libsframe.encode/_libs
+	-rm -rf testsuite/libsframe.find/.libs testsuite/libsframe.find/_libs
 
 distclean-libtool:
 	-rm -f libtool config.lt
@@ -1251,6 +1294,8 @@ distclean-generic:
 	-rm -f testsuite/libsframe.decode/$(am__dirstamp)
 	-rm -f testsuite/libsframe.encode/$(DEPDIR)/$(am__dirstamp)
 	-rm -f testsuite/libsframe.encode/$(am__dirstamp)
+	-rm -f testsuite/libsframe.find/$(DEPDIR)/$(am__dirstamp)
+	-rm -f testsuite/libsframe.find/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
@@ -1266,7 +1311,7 @@ clean-am: clean-aminfo clean-checkPROGRAMS clean-generic \
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf ./$(DEPDIR) testsuite/libsframe.decode/$(DEPDIR) testsuite/libsframe.encode/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) testsuite/libsframe.decode/$(DEPDIR) testsuite/libsframe.encode/$(DEPDIR) testsuite/libsframe.find/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-hdr distclean-libtool \
@@ -1406,7 +1451,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf ./$(DEPDIR) testsuite/libsframe.decode/$(DEPDIR) testsuite/libsframe.encode/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) testsuite/libsframe.decode/$(DEPDIR) testsuite/libsframe.encode/$(DEPDIR) testsuite/libsframe.find/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-aminfo \
 	maintainer-clean-generic
@@ -1481,7 +1526,7 @@ check-DEJAGNU: site.exp
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
-# libsframe encoder/decoder testsuite
+# libsframe encoder/decoder/find testsuite
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
