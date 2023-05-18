@@ -1556,6 +1556,7 @@ windows_nat_target::get_windows_debug_event
     {
       thread_id = stop->thread_id;
       *ourstatus = stop->status;
+      windows_process.current_event = stop->event;
 
       ptid_t ptid (windows_process.current_event.dwProcessId, thread_id);
       windows_thread_info *th = windows_process.find_thread (ptid);
