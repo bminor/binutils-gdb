@@ -24,9 +24,14 @@ load_lib dejagnu.exp
 if [string equal $COMPAT_DEJAGNU "no"] {
     verbose -log "SFrame testsuite needs perhaps a more recent DejaGnu"
     unsupported findfre-1
+    unsupported findfunc-1
     return;
 }
 
 if { [host_execute "testsuite/libsframe.find/findfre-1"] ne "" } {
     fail "findfre-1"
+}
+
+if { [host_execute "testsuite/libsframe.find/findfunc-1"] ne "" } {
+    fail "findfunc-1"
 }
