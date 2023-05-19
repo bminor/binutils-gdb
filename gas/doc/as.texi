@@ -4631,7 +4631,7 @@ Some machine configurations provide additional directives.
 @end ifclear
 * 2byte::                       @code{.2byte @var{expressions}}
 * 4byte::                       @code{.4byte @var{expressions}}
-* 8byte::                       @code{.8byte @var{bignums}}
+* 8byte::                       @code{.8byte @var{expressions}}
 * Deprecated::                  Deprecated Directives
 @end menu
 
@@ -6579,14 +6579,16 @@ as in the @code{.section} (@pxref{Section}) directive.
 @end ifset
 
 @node Quad
-@section @code{.quad @var{bignums}}
+@section @code{.quad @var{expressions}}
 
 @cindex @code{quad} directive
-@code{.quad} expects zero or more bignums, separated by commas.  For
-each bignum, it emits
 @ifclear bignum-16
-an 8-byte integer.  If the bignum won't fit in 8 bytes, it prints a
-warning message; and just takes the lowest order 8 bytes of the bignum.
+For 64-bit architectures, or more generally with any GAS configured to support
+64-bit target virtual addresses, this is like @samp{.int}, but emitting 64-bit
+quantities.  Otherwise @code{.quad} expects zero or more bignums, separated by
+commas.  For each item, it emits an 8-byte integer.  If a bignum won't fit in
+8 bytes, a warning message is printed and just the lowest order 8 bytes of the
+bignum are taken.
 @cindex eight-byte integer
 @cindex integer, 8-byte
 
@@ -6594,8 +6596,11 @@ The term ``quad'' comes from contexts in which a ``word'' is two bytes;
 hence @emph{quad}-word for 8 bytes.
 @end ifclear
 @ifset bignum-16
-a 16-byte integer.  If the bignum won't fit in 16 bytes, it prints a
-warning message; and just takes the lowest order 16 bytes of the bignum.
+@code{.quad} expects zero or more bignums, separated by commas.  For
+each bignum, it emits a 16-byte integer.  If the bignum won't fit in 16
+bytes, it prints a warning message; and just takes the lowest order 16
+bytes of the bignum.
+@xref{Octa,,@code{.octa @var{bignums}}}.
 @cindex sixteen-byte integer
 @cindex integer, 16-byte
 @end ifset
@@ -7693,8 +7698,11 @@ long values into the output.
 @cindex eight-byte integer
 @cindex integer, 8-byte
 
-Like the @option{.2byte} directive, except that it inserts unaligned, eight
-byte long bignum values into the output.
+For 64-bit architectures, or more generally with any GAS configured to support
+64-bit target virtual addresses, this is like the @option{.2byte} directive,
+except that it inserts unaligned, eight byte long values into the output.
+Otherwise, like @ref{Quad,,@code{.quad @var{expressions}}}, it expects zero or
+more bignums, separated by commas.
 
 @node Deprecated
 @section Deprecated Directives

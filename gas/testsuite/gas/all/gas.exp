@@ -428,6 +428,11 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] && ![istarget "hppa*-
 
 run_dump_test quad
 
+# ~ isn't an operator on PDP-11
+if { ![istarget "pdp11-*-*"] } {
+    run_dump_test quad2
+}
+
 # poor little PDP-11 can't handle 16-byte values
 if { ![istarget "pdp11-*-*"] } {
     run_dump_test octa

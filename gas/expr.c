@@ -1056,6 +1056,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      {
 		expressionP->X_add_number = ~ expressionP->X_add_number;
 		expressionP->X_extrabit ^= 1;
+		expressionP->X_unsigned = 0;
 	      }
 	    else if (c == '!')
 	      {
@@ -1816,6 +1817,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
   while (op_left != O_illegal && op_rank[(int) op_left] > rank)
     {
       segT rightseg;
+      bool is_unsigned;
       offsetT frag_off;
 
       input_line_pointer += op_chars;	/* -> after operator.  */
@@ -1883,6 +1885,8 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  right.X_op_symbol = NULL;
 	}
 
+      is_unsigned = resultP->X_unsigned && right.X_unsigned;
+
       if (mode == expr_defer
 	  && ((resultP->X_add_symbol != NULL
 	       && S_IS_FORWARD_REF (resultP->X_add_symbol))
@@ -1895,7 +1899,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
       if (md_optimize_expr (resultP, op_left, &right))
 	{
 	  /* Skip.  */
-	  ;
+	  is_unsigned = resultP->X_unsigned;
 	}
       else
 #endif
@@ -1928,12 +1932,14 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  add_to_result (resultP, symval_diff, symval_diff < 0);
 	  resultP->X_op = O_constant;
 	  resultP->X_add_symbol = 0;
+	  is_unsigned = false;
 	}
       else if (op_left == O_subtract && right.X_op == O_constant
 	       && (md_register_arithmetic || resultP->X_op != O_register))
 	{
 	  /* X - constant.  */
 	  subtract_from_result (resultP, right.X_add_number, right.X_extrabit);
+	  is_unsigned = false;
 	}
       else if (op_left == O_add && resultP->X_op == O_constant
 	       && (md_register_arithmetic || right.X_op != O_register))
@@ -1988,6 +1994,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	      else
 		resultP->X_add_number
 		  = (valueT) resultP->X_add_number >> (valueT) v;
+	      is_unsigned = resultP->X_unsigned;
 	      break;
 	    case O_bit_inclusive_or:	resultP->X_add_number |= v; break;
 	    case O_bit_or_not:		resultP->X_add_number |= ~v; break;
@@ -1998,36 +2005,45 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 		 here.  */
 	    case O_subtract:
 	      subtract_from_result (resultP, v, 0);
+	      is_unsigned = false;
 	      break;
 	    case O_eq:
 	      resultP->X_add_number =
 		resultP->X_add_number == v ? ~ (offsetT) 0 : 0;
+	      is_unsigned = false;
 	      break;
 	    case O_ne:
 	      resultP->X_add_number =
 		resultP->X_add_number != v ? ~ (offsetT) 0 : 0;
+	      is_unsigned = false;
 	      break;
 	    case O_lt:
 	      resultP->X_add_number =
 		resultP->X_add_number <  v ? ~ (offsetT) 0 : 0;
+	      is_unsigned = false;
 	      break;
 	    case O_le:
 	      resultP->X_add_number =
 		resultP->X_add_number <= v ? ~ (offsetT) 0 : 0;
+	      is_unsigned = false;
 	      break;
 	    case O_ge:
 	      resultP->X_add_number =
 		resultP->X_add_number >= v ? ~ (offsetT) 0 : 0;
+	      is_unsigned = false;
 	      break;
 	    case O_gt:
 	      resultP->X_add_number =
 		resultP->X_add_number >  v ? ~ (offsetT) 0 : 0;
+	      is_unsigned = false;
 	      break;
 	    case O_logical_and:
 	      resultP->X_add_number = resultP->X_add_number && v;
+	      is_unsigned = true;
 	      break;
 	    case O_logical_or:
 	      resultP->X_add_number = resultP->X_add_number || v;
+	      is_unsigned = true;
 	      break;
 	    }
 	}
@@ -2065,9 +2081,10 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  resultP->X_op_symbol = make_expr_symbol (&right);
 	  resultP->X_op = op_left;
 	  resultP->X_add_number = 0;
-	  resultP->X_unsigned = 1;
 	  resultP->X_extrabit = 0;
 	}
+
+      resultP->X_unsigned = is_unsigned;
 
       if (retval != rightseg)
 	{
