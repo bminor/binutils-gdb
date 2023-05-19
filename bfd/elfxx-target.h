@@ -667,6 +667,10 @@
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
 #endif
+#ifndef elf_backend_add_glibc_version_dependency
+#define elf_backend_add_glibc_version_dependency \
+  _bfd_elf_link_add_dt_relr_dependency
+#endif
 #ifndef elf_backend_elfsym_local_is_section
 #define elf_backend_elfsym_local_is_section	NULL
 #endif
@@ -897,6 +901,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_can_make_multiple_eh_frame,
   elf_backend_encode_eh_address,
   elf_backend_write_section,
+  elf_backend_add_glibc_version_dependency,
   elf_backend_elfsym_local_is_section,
   elf_backend_mips_irix_compat,
   elf_backend_mips_rtype_to_howto,

@@ -46,19 +46,6 @@ struct elf_info_failed
   bool failed;
 };
 
-/* This structure is used to pass information to
-   _bfd_elf_link_find_version_dependencies.  */
-
-struct elf_find_verdep_info
-{
-  /* General link information.  */
-  struct bfd_link_info *info;
-  /* The number of dependencies.  */
-  unsigned int vers;
-  /* Whether we had a failure.  */
-  bool failed;
-};
-
 static bool _bfd_elf_fix_symbol_flags
   (struct elf_link_hash_entry *, struct elf_info_failed *);
 
@@ -2217,64 +2204,64 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
   return true;
 }
 
-/* Return true if GLIBC_ABI_DT_RELR is added to the list of version
-   dependencies successfully.  GLIBC_ABI_DT_RELR will be put into the
-   .gnu.version_r section.  */
+/* Return the glibc version reference if VERSION_DEP is added to the
+   list of glibc version dependencies successfully.  VERSION_DEP will
+   be put into the .gnu.version_r section.  */
 
-static bool
-elf_link_add_dt_relr_dependency (struct elf_find_verdep_info *rinfo)
+static Elf_Internal_Verneed *
+elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
+			    Elf_Internal_Verneed *glibc_verref,
+			    const char *version_dep)
 {
-  bfd *glibc_bfd = NULL;
   Elf_Internal_Verneed *t;
   Elf_Internal_Vernaux *a;
   size_t amt;
-  const char *relr = "GLIBC_ABI_DT_RELR";
 
-  /* See if we already know about GLIBC_PRIVATE_DT_RELR.  */
-  for (t = elf_tdata (rinfo->info->output_bfd)->verref;
-       t != NULL;
-       t = t->vn_nextref)
+  if (glibc_verref != NULL)
     {
-      const char *soname = bfd_elf_get_dt_soname (t->vn_bfd);
-      /* Skip the shared library if it isn't libc.so.  */
-      if (!soname || !startswith (soname, "libc.so."))
-	continue;
+      t = glibc_verref;
 
       for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
 	{
-	  /* Return if GLIBC_PRIVATE_DT_RELR dependency has been
-	     added.  */
-	  if (a->vna_nodename == relr
-	      || strcmp (a->vna_nodename, relr) == 0)
-	    return true;
+	  /* Return if VERSION_DEP dependency has been added.  */
+	  if (a->vna_nodename == version_dep
+	      || strcmp (a->vna_nodename, version_dep) == 0)
+	    return t;
+	}
+    }
+  else
+    {
+      bool is_glibc;
+
+      for (t = elf_tdata (rinfo->info->output_bfd)->verref;
+	   t != NULL;
+	   t = t->vn_nextref)
+	{
+	  const char *soname = bfd_elf_get_dt_soname (t->vn_bfd);
+	  if (soname != NULL && startswith (soname, "libc.so."))
+	    break;
+	}
+
+      /* Skip the shared library if it isn't libc.so.  */
+      if (t == NULL)
+	return t;
+
+      is_glibc = false;
+      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+	{
+	  /* Return if VERSION_DEP dependency has been added.  */
+	  if (a->vna_nodename == version_dep
+	      || strcmp (a->vna_nodename, version_dep) == 0)
+	    return t;
 
 	  /* Check if libc.so provides GLIBC_2.XX version.  */
-	  if (!glibc_bfd && startswith (a->vna_nodename, "GLIBC_2."))
-	    glibc_bfd = t->vn_bfd;
+	  if (!is_glibc && startswith (a->vna_nodename, "GLIBC_2."))
+	    is_glibc = true;
 	}
 
-      break;
-    }
-
-  /* Skip if it isn't linked against glibc.  */
-  if (glibc_bfd == NULL)
-    return true;
-
-  /* This is a new version.  Add it to tree we are building.  */
-  if (t == NULL)
-    {
-      amt = sizeof *t;
-      t = (Elf_Internal_Verneed *) bfd_zalloc (rinfo->info->output_bfd,
-					       amt);
-      if (t == NULL)
-	{
-	  rinfo->failed = true;
-	  return false;
-	}
-
-      t->vn_bfd = glibc_bfd;
-      t->vn_nextref = elf_tdata (rinfo->info->output_bfd)->verref;
-      elf_tdata (rinfo->info->output_bfd)->verref = t;
+      /* Skip if it isn't linked against glibc.  */
+      if (!is_glibc)
+	return NULL;
     }
 
   amt = sizeof *a;
@@ -2282,10 +2269,10 @@ elf_link_add_dt_relr_dependency (struct elf_find_verdep_info *rinfo)
   if (a == NULL)
     {
       rinfo->failed = true;
-      return false;
+      return NULL;
     }
 
-  a->vna_nodename = relr;
+  a->vna_nodename = version_dep;
   a->vna_flags = 0;
   a->vna_nextptr = t->vn_auxptr;
   a->vna_other = rinfo->vers + 1;
@@ -2293,7 +2280,45 @@ elf_link_add_dt_relr_dependency (struct elf_find_verdep_info *rinfo)
 
   t->vn_auxptr = a;
 
-  return true;
+  return t;
+}
+
+/* Add VERSION_DEP to the list of version dependencies when linked
+   against glibc.  */
+
+void
+_bfd_elf_link_add_glibc_version_dependency
+  (struct elf_find_verdep_info *rinfo,
+   const char *version_dep[])
+{
+  Elf_Internal_Verneed *t = NULL;
+
+  do
+    {
+      t = elf_link_add_glibc_verneed (rinfo, t, *version_dep);
+      /* Return if there is no glibc version reference.  */
+      if (t == NULL)
+	return;
+      version_dep++;
+    }
+  while (*version_dep != NULL);
+}
+
+/* Add GLIBC_ABI_DT_RELR to the list of version dependencies when
+   linked against glibc.  */
+
+void
+_bfd_elf_link_add_dt_relr_dependency (struct elf_find_verdep_info *rinfo)
+{
+  if (rinfo->info->enable_dt_relr)
+    {
+      const char *version[] =
+	{
+	  "GLIBC_ABI_DT_RELR",
+	  NULL
+	};
+      _bfd_elf_link_add_glibc_version_dependency (rinfo, version);
+    }
 }
 
 /* Look through the symbols which are defined in other shared
@@ -7047,12 +7072,9 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       if (sinfo.failed)
 	return false;
 
-      if (info->enable_dt_relr)
-	{
-	  elf_link_add_dt_relr_dependency (&sinfo);
-	  if (sinfo.failed)
-	    return false;
-	}
+      bed->elf_backend_add_glibc_version_dependency (&sinfo);
+      if (sinfo.failed)
+	return false;
 
       if (elf_tdata (output_bfd)->verref == NULL)
 	s->flags |= SEC_EXCLUDE;

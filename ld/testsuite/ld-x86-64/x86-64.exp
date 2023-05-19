@@ -2259,4 +2259,18 @@ run_dump_test "mark-plt-1b-x32"
 run_dump_test "mark-plt-1c-x32"
 run_dump_test "mark-plt-1d-x32"
 
+if { [check_compiler_available] } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build mark-plt-1.so" \
+	    "-shared -Wl,-z,mark-plt,-z,pack-relative-relocs" \
+	    "-fPIC" \
+	    { mark-plt-1.s } \
+	    {{readelf {-W --version-info} mark-plt-1a.rd} \
+	     {readelf {-W --version-info} mark-plt-1b.rd}} \
+	    "mark-plt-1.so" \
+	] \
+    ]
+}
+
 set ASFLAGS "$saved_ASFLAGS"

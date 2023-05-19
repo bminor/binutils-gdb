@@ -5572,6 +5572,31 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
   return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
 
+static void
+elf_x86_64_add_glibc_version_dependency
+  (struct elf_find_verdep_info *rinfo)
+{
+  unsigned int i = 0;
+  const char *version[3] = { NULL, NULL, NULL };
+  struct elf_x86_link_hash_table *htab;
+
+  if (rinfo->info->enable_dt_relr)
+    {
+      version[i] = "GLIBC_ABI_DT_RELR";
+      i++;
+    }
+
+  htab = elf_x86_hash_table (rinfo->info, X86_64_ELF_DATA);
+  if (htab != NULL && htab->params->mark_plt)
+    {
+      version[i] = "GLIBC_2.36";
+      i++;
+    }
+
+  if (i != 0)
+    _bfd_elf_link_add_glibc_version_dependency (rinfo, version);
+}
+
 static const struct bfd_elf_special_section
 elf_x86_64_special_sections[]=
 {
@@ -5656,6 +5681,8 @@ elf_x86_64_special_sections[]=
   elf_x86_64_link_setup_gnu_properties
 #define elf_backend_hide_symbol \
   _bfd_x86_elf_hide_symbol
+#define elf_backend_add_glibc_version_dependency \
+  elf_x86_64_add_glibc_version_dependency
 
 #undef	elf64_bed
 #define elf64_bed elf64_x86_64_bed

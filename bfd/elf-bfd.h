@@ -957,6 +957,19 @@ typedef struct elf_property_list
   struct elf_property property;
 } elf_property_list;
 
+/* This structure is used to pass information to
+   elf_backend_add_glibc_version_dependency.  */
+
+struct elf_find_verdep_info
+{
+  /* General link information.  */
+  struct bfd_link_info *info;
+  /* The number of dependencies.  */
+  unsigned int vers;
+  /* Whether we had a failure.  */
+  bool failed;
+};
+
 struct bfd_elf_section_reloc_data;
 
 struct elf_backend_data
@@ -1487,6 +1500,10 @@ struct elf_backend_data
      Returns TRUE if it did so and FALSE if the caller should.  */
   bool (*elf_backend_write_section)
     (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
+
+  /* This function adds glibc version dependency.  */
+  void (*elf_backend_add_glibc_version_dependency)
+    (struct elf_find_verdep_info *);
 
   /* This function, if defined, returns TRUE if it is section symbols
      only that are considered local for the purpose of partitioning the
@@ -2582,6 +2599,12 @@ extern Elf_Internal_Rela *_bfd_elf_link_info_read_relocs
 extern bool _bfd_elf_link_output_relocs
   (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
    struct elf_link_hash_entry **);
+
+extern void _bfd_elf_link_add_glibc_version_dependency
+  (struct elf_find_verdep_info *, const char *[]);
+
+extern void _bfd_elf_link_add_dt_relr_dependency
+  (struct elf_find_verdep_info *);
 
 extern bool _bfd_elf_adjust_dynamic_copy
   (struct bfd_link_info *, struct elf_link_hash_entry *, asection *);
