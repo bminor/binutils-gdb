@@ -92,6 +92,18 @@ proc run_tests { lang } {
 	    }
 	}
 
+	# Check backtrace arguments in MI mode.
+	set mi_a "\{name=\"a\",value=\"1\"\}"
+	set mi_b "\{name=\"b\",value=\"2\"\}"
+	set mi_c "\{name=\"c\",value=\"3\"\}"
+	set mi_d "\{name=\"d\",value=\"\\(4,5\\)\"\}"
+	set mi_e "\{name=\"e\",value=\"$e_arg\"\}"
+	set mi_g "\{name=\"g\",value=\"\\( a = 1.5, b = 2.5 \\)\"\}"
+	# Hidden argument name changes depending on compiler.
+	set mi_hidden "\{name=\"\[^\r\n\]+\",value=\"6\"\}"
+	gdb_test "interpreter-exec mi '-stack-list-arguments --no-frame-filters --all-values 7 7'" \
+		 "\\^done,stack-args=\\\[frame=\{level=\"7\",args=\\\[$mi_a,$mi_b,$mi_c,$mi_d,$mi_e,$mi_g,$mi_hidden\\\]\}\\\]"
+
 	# Check the language for frame #0.
 	gdb_test "info frame" "source language fortran\..*" \
 	    "info frame in frame #0"
