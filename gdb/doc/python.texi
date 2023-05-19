@@ -5367,11 +5367,13 @@ Return the symbol for the function corresponding to this frame.
 @end defun
 
 @defun Frame.older ()
-Return the frame that called this frame.
+Return the frame that called this frame.  If this is the oldest frame,
+return @code{None}.
 @end defun
 
 @defun Frame.newer ()
-Return the frame called by this frame.
+Return the frame called by this frame.  If this is the newest frame,
+return @code{None}.
 @end defun
 
 @defun Frame.find_sal ()
