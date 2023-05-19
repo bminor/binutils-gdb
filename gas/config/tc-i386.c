@@ -547,7 +547,7 @@ static char operand_chars[256];
 #define is_space_char(x) ((x) == ' ')
 
 /* All non-digit non-letter characters that may occur in an operand.  */
-static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
+static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!=:[@]";
 
 /* md_assemble() always leaves the strings it's passed unaltered.  To
    effect this we maintain a stack of saved characters that we've smashed
