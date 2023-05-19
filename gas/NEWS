@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add support for Intel FRED instructions.
+
+* Add support for Intel LKGS instructions.
+
 * Add support for Intel AMX-COMPLEX instructions.
 
 * Add SME2 support to the AArch64 port.

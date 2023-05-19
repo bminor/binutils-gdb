@@ -1608,737 +1608,740 @@ extern const char i386_mnemonics[];
 #define MN_xsaves 0x30e1
 #define MN_fs (MN_lfs + 1)
 #define MN_lfs 0x30e8
-#define MN_gs (MN_lgs + 1)
-#define MN_lgs 0x30ec
-#define MN_swapgs 0x30f0
-#define MN_fchs 0x30f7
-#define MN_js 0x30fc
-#define MN_encls 0x30ff
+#define MN_gs (MN_lkgs + 2)
+#define MN_lkgs 0x30ec
+#define MN_lgs 0x30f1
+#define MN_swapgs 0x30f5
+#define MN_fchs 0x30fc
+#define MN_js 0x3101
+#define MN_encls 0x3104
 #define MN_emms (MN_femms + 1)
-#define MN_femms 0x3105
+#define MN_femms 0x310a
 #define MN_ins (MN_lwpins + 3)
-#define MN_lwpins 0x310b
-#define MN_jns 0x3112
-#define MN_wrmsrns 0x3116
-#define MN_setns 0x311e
-#define MN_cmovns 0x3124
-#define MN_fcos 0x312b
-#define MN_fsincos 0x3130
-#define MN_stos 0x3138
-#define MN_vfmaddsub231ps 0x313d
-#define MN_vfmsub231ps 0x314c
-#define MN_vfnmsub231ps 0x3158
-#define MN_vfmsubadd231ps 0x3165
-#define MN_vfmadd231ps 0x3174
-#define MN_vfnmadd231ps 0x3180
-#define MN_vfmaddsub132ps 0x318d
-#define MN_vfmsub132ps 0x319c
-#define MN_vfnmsub132ps 0x31a8
-#define MN_vfmsubadd132ps 0x31b5
-#define MN_vfmadd132ps 0x31c4
-#define MN_vfnmadd132ps 0x31d0
-#define MN_vcvtneebf162ps 0x31dd
-#define MN_vbcstnebf162ps 0x31ec
-#define MN_vcvtneobf162ps 0x31fb
+#define MN_lwpins 0x3110
+#define MN_jns 0x3117
+#define MN_wrmsrns 0x311b
+#define MN_setns 0x3123
+#define MN_cmovns 0x3129
+#define MN_fcos 0x3130
+#define MN_fsincos 0x3135
+#define MN_stos 0x313d
+#define MN_vfmaddsub231ps 0x3142
+#define MN_vfmsub231ps 0x3151
+#define MN_vfnmsub231ps 0x315d
+#define MN_vfmsubadd231ps 0x316a
+#define MN_vfmadd231ps 0x3179
+#define MN_vfnmadd231ps 0x3185
+#define MN_vfmaddsub132ps 0x3192
+#define MN_vfmsub132ps 0x31a1
+#define MN_vfnmsub132ps 0x31ad
+#define MN_vfmsubadd132ps 0x31ba
+#define MN_vfmadd132ps 0x31c9
+#define MN_vfnmadd132ps 0x31d5
+#define MN_vcvtneebf162ps 0x31e2
+#define MN_vbcstnebf162ps 0x31f1
+#define MN_vcvtneobf162ps 0x3200
 #define MN_cvtpd2ps (MN_vcvtpd2ps + 1)
-#define MN_vcvtpd2ps 0x320a
-#define MN_vcvtneeph2ps 0x3214
-#define MN_vcvtneoph2ps 0x3221
-#define MN_vcvtph2ps 0x322e
-#define MN_vbcstnesh2ps 0x3238
-#define MN_vpermi2ps 0x3245
-#define MN_cvtpi2ps 0x324f
-#define MN_vpermil2ps 0x3258
-#define MN_vexp2ps 0x3263
+#define MN_vcvtpd2ps 0x320f
+#define MN_vcvtneeph2ps 0x3219
+#define MN_vcvtneoph2ps 0x3226
+#define MN_vcvtph2ps 0x3233
+#define MN_vbcstnesh2ps 0x323d
+#define MN_vpermi2ps 0x324a
+#define MN_cvtpi2ps 0x3254
+#define MN_vpermil2ps 0x325d
+#define MN_vexp2ps 0x3268
 #define MN_cvtdq2ps (MN_vcvtdq2ps + 1)
-#define MN_vcvtdq2ps 0x326b
-#define MN_vcvtudq2ps 0x3275
-#define MN_vcvtqq2ps 0x3280
-#define MN_vcvtuqq2ps 0x328a
-#define MN_vpermt2ps 0x3295
-#define MN_vfmaddsub213ps 0x329f
-#define MN_vfmsub213ps 0x32ae
-#define MN_vfnmsub213ps 0x32ba
-#define MN_vfmsubadd213ps 0x32c7
-#define MN_vfmadd213ps 0x32d6
-#define MN_vfnmadd213ps 0x32e2
-#define MN_vrcp14ps 0x32ef
-#define MN_vrsqrt14ps 0x32f8
-#define MN_tdpbf16ps 0x3303
-#define MN_vdpbf16ps 0x330d
-#define MN_tcmmrlfp16ps 0x3317
-#define MN_tcmmimfp16ps 0x3324
-#define MN_tdpfp16ps 0x3331
-#define MN_vrcp28ps 0x333b
-#define MN_vrsqrt28ps 0x3344
+#define MN_vcvtdq2ps 0x3270
+#define MN_vcvtudq2ps 0x327a
+#define MN_vcvtqq2ps 0x3285
+#define MN_vcvtuqq2ps 0x328f
+#define MN_vpermt2ps 0x329a
+#define MN_vfmaddsub213ps 0x32a4
+#define MN_vfmsub213ps 0x32b3
+#define MN_vfnmsub213ps 0x32bf
+#define MN_vfmsubadd213ps 0x32cc
+#define MN_vfmadd213ps 0x32db
+#define MN_vfnmadd213ps 0x32e7
+#define MN_vrcp14ps 0x32f4
+#define MN_vrsqrt14ps 0x32fd
+#define MN_tdpbf16ps 0x3308
+#define MN_vdpbf16ps 0x3312
+#define MN_tcmmrlfp16ps 0x331c
+#define MN_tcmmimfp16ps 0x3329
+#define MN_tdpfp16ps 0x3336
+#define MN_vrcp28ps 0x3340
+#define MN_vrsqrt28ps 0x3349
 #define MN_movaps (MN_vmovaps + 1)
-#define MN_vmovaps 0x334f
+#define MN_vmovaps 0x3354
 #define MN_subps (MN_addsubps + 3)
 #define MN_addsubps (MN_vfmaddsubps + 3)
-#define MN_vfmaddsubps 0x3357
-#define MN_vaddsubps 0x3363
+#define MN_vfmaddsubps 0x335c
+#define MN_vaddsubps 0x3368
 #define MN_hsubps (MN_vhsubps + 1)
-#define MN_vhsubps 0x336d
-#define MN_vfmsubps 0x3375
-#define MN_vfnmsubps 0x337e
-#define MN_vsubps 0x3388
-#define MN_vgatherpf0dps 0x338f
-#define MN_vscatterpf0dps 0x339d
-#define MN_vgatherpf1dps 0x33ac
-#define MN_vscatterpf1dps 0x33ba
+#define MN_vhsubps 0x3372
+#define MN_vfmsubps 0x337a
+#define MN_vfnmsubps 0x3383
+#define MN_vsubps 0x338d
+#define MN_vgatherpf0dps 0x3394
+#define MN_vscatterpf0dps 0x33a2
+#define MN_vgatherpf1dps 0x33b1
+#define MN_vscatterpf1dps 0x33bf
 #define MN_addps (MN_vfmsubaddps + 6)
-#define MN_vfmsubaddps 0x33c9
+#define MN_vfmsubaddps 0x33ce
 #define MN_haddps (MN_vhaddps + 1)
-#define MN_vhaddps 0x33d5
-#define MN_v4fmaddps 0x33dd
-#define MN_vfmaddps 0x33e7
-#define MN_v4fnmaddps 0x33f0
-#define MN_vfnmaddps 0x33fb
-#define MN_vaddps 0x3405
+#define MN_vhaddps 0x33da
+#define MN_v4fmaddps 0x33e2
+#define MN_vfmaddps 0x33ec
+#define MN_v4fnmaddps 0x33f5
+#define MN_vfnmaddps 0x3400
+#define MN_vaddps 0x340a
 #define MN_andps (MN_vexpandps + 4)
-#define MN_vexpandps 0x340c
-#define MN_vandps 0x3416
+#define MN_vexpandps 0x3411
+#define MN_vandps 0x341b
 #define MN_blendps (MN_vblendps + 1)
-#define MN_vblendps 0x341d
+#define MN_vblendps 0x3422
 #define MN_roundps (MN_vroundps + 1)
-#define MN_vroundps 0x3426
-#define MN_vgatherdps 0x342f
-#define MN_vscatterdps 0x343a
+#define MN_vroundps 0x342b
+#define MN_vgatherdps 0x3434
+#define MN_vscatterdps 0x343f
 #define MN_cmpunordps (MN_vcmpunordps + 1)
-#define MN_vcmpunordps 0x3446
+#define MN_vcmpunordps 0x344b
 #define MN_cmpordps (MN_vcmpordps + 1)
-#define MN_vcmpordps 0x3452
-#define MN_vreduceps 0x345c
-#define MN_vrangeps 0x3466
-#define MN_vcmpngeps 0x346f
-#define MN_vcmpgeps 0x3479
-#define MN_vrndscaleps 0x3482
+#define MN_vcmpordps 0x3457
+#define MN_vreduceps 0x3461
+#define MN_vrangeps 0x346b
+#define MN_vcmpngeps 0x3474
+#define MN_vcmpgeps 0x347e
+#define MN_vrndscaleps 0x3487
 #define MN_cmpnleps (MN_vcmpnleps + 1)
-#define MN_vcmpnleps 0x348e
+#define MN_vcmpnleps 0x3493
 #define MN_cmpleps (MN_vcmpleps + 1)
-#define MN_vcmpleps 0x3498
-#define MN_vcmpfalseps 0x34a1
-#define MN_vcmptrueps 0x34ad
-#define MN_vscalefps 0x34b8
+#define MN_vcmpleps 0x349d
+#define MN_vcmpfalseps 0x34a6
+#define MN_vcmptrueps 0x34b2
+#define MN_vscalefps 0x34bd
 #define MN_shufps (MN_vshufps + 1)
-#define MN_vshufps 0x34c2
+#define MN_vshufps 0x34c7
 #define MN_unpckhps (MN_vunpckhps + 1)
-#define MN_vunpckhps 0x34ca
+#define MN_vunpckhps 0x34cf
 #define MN_movlhps (MN_vmovlhps + 1)
-#define MN_vmovlhps 0x34d4
+#define MN_vmovlhps 0x34d9
 #define MN_movhps (MN_vmovhps + 1)
-#define MN_vmovhps 0x34dd
+#define MN_vmovhps 0x34e2
 #define MN_movmskps (MN_vmovmskps + 1)
-#define MN_vmovmskps 0x34e5
+#define MN_vmovmskps 0x34ea
 #define MN_movhlps (MN_vmovhlps + 1)
-#define MN_vmovhlps 0x34ef
-#define MN_vpermilps 0x34f8
+#define MN_vmovhlps 0x34f4
+#define MN_vpermilps 0x34fd
 #define MN_unpcklps (MN_vunpcklps + 1)
-#define MN_vunpcklps 0x3502
+#define MN_vunpcklps 0x3507
 #define MN_mulps (MN_vmulps + 1)
-#define MN_vmulps 0x350c
+#define MN_vmulps 0x3511
 #define MN_movlps (MN_vmovlps + 1)
-#define MN_vmovlps 0x3513
-#define MN_cmps 0x351b
-#define MN_vblendmps 0x3520
-#define MN_vfixupimmps 0x352a
-#define MN_vpermps 0x3536
+#define MN_vmovlps 0x3518
+#define MN_cmps 0x3520
+#define MN_vblendmps 0x3525
+#define MN_vfixupimmps 0x352f
+#define MN_vpermps 0x353b
 #define MN_andnps (MN_vandnps + 1)
-#define MN_vandnps 0x353e
+#define MN_vandnps 0x3543
 #define MN_minps (MN_vminps + 1)
-#define MN_vminps 0x3546
-#define MN_seamops 0x354d
+#define MN_vminps 0x354b
+#define MN_seamops 0x3552
 #define MN_rcpps (MN_vrcpps + 1)
-#define MN_vrcpps 0x3555
+#define MN_vrcpps 0x355a
 #define MN_dpps (MN_vdpps + 1)
-#define MN_vdpps 0x355c
+#define MN_vdpps 0x3561
 #define MN_cmpps (MN_vcmpps + 1)
-#define MN_vcmpps 0x3562
-#define MN_vgetexpps 0x3569
-#define MN_vgatherpf0qps 0x3573
-#define MN_vscatterpf0qps 0x3581
-#define MN_vgatherpf1qps 0x3590
-#define MN_vscatterpf1qps 0x359e
-#define MN_vcmpunord_qps 0x35ad
-#define MN_vcmpord_qps 0x35bb
+#define MN_vcmpps 0x3567
+#define MN_vgetexpps 0x356e
+#define MN_vgatherpf0qps 0x3578
+#define MN_vscatterpf0qps 0x3586
+#define MN_vgatherpf1qps 0x3595
+#define MN_vscatterpf1qps 0x35a3
+#define MN_vcmpunord_qps 0x35b2
+#define MN_vcmpord_qps 0x35c0
 #define MN_cmpneqps (MN_vcmpneqps + 1)
-#define MN_vcmpneqps 0x35c7
+#define MN_vcmpneqps 0x35cc
 #define MN_cmpeqps (MN_vcmpeqps + 1)
-#define MN_vcmpeqps 0x35d1
-#define MN_vcmpge_oqps 0x35da
-#define MN_vcmple_oqps 0x35e6
-#define MN_vcmpfalse_oqps 0x35f2
-#define MN_vcmpneq_oqps 0x3601
-#define MN_vcmpeq_oqps 0x360e
-#define MN_vcmpgt_oqps 0x361a
-#define MN_vcmplt_oqps 0x3626
-#define MN_vgatherqps 0x3632
-#define MN_vscatterqps 0x363d
-#define MN_vcmpnge_uqps 0x3649
-#define MN_vcmpnle_uqps 0x3656
-#define MN_vcmptrue_uqps 0x3663
-#define MN_vcmpneq_uqps 0x3671
-#define MN_vcmpeq_uqps 0x367e
-#define MN_vcmpngt_uqps 0x368a
-#define MN_vcmpnlt_uqps 0x3697
+#define MN_vcmpeqps 0x35d6
+#define MN_vcmpge_oqps 0x35df
+#define MN_vcmple_oqps 0x35eb
+#define MN_vcmpfalse_oqps 0x35f7
+#define MN_vcmpneq_oqps 0x3606
+#define MN_vcmpeq_oqps 0x3613
+#define MN_vcmpgt_oqps 0x361f
+#define MN_vcmplt_oqps 0x362b
+#define MN_vgatherqps 0x3637
+#define MN_vscatterqps 0x3642
+#define MN_vcmpnge_uqps 0x364e
+#define MN_vcmpnle_uqps 0x365b
+#define MN_vcmptrue_uqps 0x3668
+#define MN_vcmpneq_uqps 0x3676
+#define MN_vcmpeq_uqps 0x3683
+#define MN_vcmpngt_uqps 0x368f
+#define MN_vcmpnlt_uqps 0x369c
 #define MN_orps (MN_vorps + 1)
-#define MN_vorps 0x36a4
+#define MN_vorps 0x36a9
 #define MN_xorps (MN_vxorps + 1)
-#define MN_vxorps 0x36aa
-#define MN_vcmpunord_sps 0x36b1
-#define MN_vcmpord_sps 0x36bf
-#define MN_vcmpge_osps 0x36cb
-#define MN_vcmple_osps 0x36d7
-#define MN_vcmpfalse_osps 0x36e3
-#define MN_vcmpneq_osps 0x36f2
-#define MN_vcmpeq_osps 0x36ff
-#define MN_vcmpgt_osps 0x370b
-#define MN_vcmplt_osps 0x3717
-#define MN_vfpclassps 0x3723
-#define MN_vcompressps 0x372e
-#define MN_vcmpnge_usps 0x373a
-#define MN_vcmpnle_usps 0x3747
-#define MN_vcmptrue_usps 0x3754
-#define MN_vcmpneq_usps 0x3762
-#define MN_vcmpeq_usps 0x376f
-#define MN_vcmpngt_usps 0x377b
-#define MN_vcmpnlt_usps 0x3788
+#define MN_vxorps 0x36af
+#define MN_vcmpunord_sps 0x36b6
+#define MN_vcmpord_sps 0x36c4
+#define MN_vcmpge_osps 0x36d0
+#define MN_vcmple_osps 0x36dc
+#define MN_vcmpfalse_osps 0x36e8
+#define MN_vcmpneq_osps 0x36f7
+#define MN_vcmpeq_osps 0x3704
+#define MN_vcmpgt_osps 0x3710
+#define MN_vcmplt_osps 0x371c
+#define MN_vfpclassps 0x3728
+#define MN_vcompressps 0x3733
+#define MN_vcmpnge_usps 0x373f
+#define MN_vcmpnle_usps 0x374c
+#define MN_vcmptrue_usps 0x3759
+#define MN_vcmpneq_usps 0x3767
+#define MN_vcmpeq_usps 0x3774
+#define MN_vcmpngt_usps 0x3780
+#define MN_vcmpnlt_usps 0x378d
 #define MN_extractps (MN_vextractps + 1)
-#define MN_vextractps 0x3795
-#define MN_vcmpngtps 0x37a0
-#define MN_vcmpgtps 0x37aa
+#define MN_vextractps 0x379a
+#define MN_vcmpngtps 0x37a5
+#define MN_vcmpgtps 0x37af
 #define MN_cmpnltps (MN_vcmpnltps + 1)
-#define MN_vcmpnltps 0x37b3
+#define MN_vcmpnltps 0x37b8
 #define MN_cmpltps (MN_vcmpltps + 1)
-#define MN_vcmpltps 0x37bd
-#define MN_vgetmantps 0x37c6
+#define MN_vcmpltps 0x37c2
+#define MN_vgetmantps 0x37cb
 #define MN_movntps (MN_vmovntps + 1)
-#define MN_vmovntps 0x37d1
+#define MN_vmovntps 0x37d6
 #define MN_insertps (MN_vinsertps + 1)
-#define MN_vinsertps 0x37da
+#define MN_vinsertps 0x37df
 #define MN_sqrtps (MN_rsqrtps + 1)
 #define MN_rsqrtps (MN_vrsqrtps + 1)
-#define MN_vrsqrtps 0x37e4
-#define MN_vsqrtps 0x37ed
-#define MN_vtestps 0x37f5
+#define MN_vrsqrtps 0x37e9
+#define MN_vsqrtps 0x37f2
+#define MN_vtestps 0x37fa
 #define MN_movups (MN_vmovups + 1)
-#define MN_vmovups 0x37fd
+#define MN_vmovups 0x3802
 #define MN_blendvps (MN_vblendvps + 1)
-#define MN_vblendvps 0x3805
+#define MN_vblendvps 0x380a
 #define MN_divps (MN_vdivps + 1)
-#define MN_vdivps 0x380f
-#define MN_vmaskmovps 0x3816
+#define MN_vdivps 0x3814
+#define MN_vmaskmovps 0x381b
 #define MN_maxps (MN_vmaxps + 1)
-#define MN_vmaxps 0x3821
-#define MN_vfrczps 0x3828
-#define MN_xrstors 0x3830
+#define MN_vmaxps 0x3826
+#define MN_vfrczps 0x382d
+#define MN_xrstors 0x3835
 #define MN_ss (MN_vfmsub231ss + 9)
-#define MN_vfmsub231ss 0x3838
-#define MN_vfnmsub231ss 0x3844
-#define MN_vfmadd231ss 0x3851
-#define MN_vfnmadd231ss 0x385d
-#define MN_vfmsub132ss 0x386a
-#define MN_vfnmsub132ss 0x3876
-#define MN_vfmadd132ss 0x3883
-#define MN_vfnmadd132ss 0x388f
+#define MN_vfmsub231ss 0x383d
+#define MN_vfnmsub231ss 0x3849
+#define MN_vfmadd231ss 0x3856
+#define MN_vfnmadd231ss 0x3862
+#define MN_vfmsub132ss 0x386f
+#define MN_vfnmsub132ss 0x387b
+#define MN_vfmadd132ss 0x3888
+#define MN_vfnmadd132ss 0x3894
 #define MN_cvtsd2ss (MN_vcvtsd2ss + 1)
-#define MN_vcvtsd2ss 0x389c
-#define MN_vcvtsh2ss 0x38a6
+#define MN_vcvtsd2ss 0x38a1
+#define MN_vcvtsh2ss 0x38ab
 #define MN_cvtsi2ss (MN_vcvtsi2ss + 1)
-#define MN_vcvtsi2ss 0x38b0
-#define MN_vcvtusi2ss 0x38ba
-#define MN_vfmsub213ss 0x38c5
-#define MN_vfnmsub213ss 0x38d1
-#define MN_vfmadd213ss 0x38de
-#define MN_vfnmadd213ss 0x38ea
-#define MN_vrcp14ss 0x38f7
-#define MN_vrsqrt14ss 0x3900
-#define MN_vrcp28ss 0x390b
-#define MN_vrsqrt28ss 0x3914
+#define MN_vcvtsi2ss 0x38b5
+#define MN_vcvtusi2ss 0x38bf
+#define MN_vfmsub213ss 0x38ca
+#define MN_vfnmsub213ss 0x38d6
+#define MN_vfmadd213ss 0x38e3
+#define MN_vfnmadd213ss 0x38ef
+#define MN_vrcp14ss 0x38fc
+#define MN_vrsqrt14ss 0x3905
+#define MN_vrcp28ss 0x3910
+#define MN_vrsqrt28ss 0x3919
 #define MN_subss (MN_vfmsubss + 3)
-#define MN_vfmsubss 0x391f
-#define MN_vfnmsubss 0x3928
-#define MN_vsubss 0x3932
+#define MN_vfmsubss 0x3924
+#define MN_vfnmsubss 0x392d
+#define MN_vsubss 0x3937
 #define MN_addss (MN_v4fmaddss + 4)
-#define MN_v4fmaddss 0x3939
-#define MN_vfmaddss 0x3943
-#define MN_v4fnmaddss 0x394c
-#define MN_vfnmaddss 0x3957
-#define MN_vaddss 0x3961
+#define MN_v4fmaddss 0x393e
+#define MN_vfmaddss 0x3948
+#define MN_v4fnmaddss 0x3951
+#define MN_vfnmaddss 0x395c
+#define MN_vaddss 0x3966
 #define MN_roundss (MN_vroundss + 1)
-#define MN_vroundss 0x3968
+#define MN_vroundss 0x396d
 #define MN_cmpunordss (MN_vcmpunordss + 1)
-#define MN_vcmpunordss 0x3971
+#define MN_vcmpunordss 0x3976
 #define MN_cmpordss (MN_vcmpordss + 1)
-#define MN_vcmpordss 0x397d
-#define MN_vreducess 0x3987
-#define MN_vrangess 0x3991
-#define MN_vcmpngess 0x399a
-#define MN_vcmpgess 0x39a4
-#define MN_vrndscaless 0x39ad
+#define MN_vcmpordss 0x3982
+#define MN_vreducess 0x398c
+#define MN_vrangess 0x3996
+#define MN_vcmpngess 0x399f
+#define MN_vcmpgess 0x39a9
+#define MN_vrndscaless 0x39b2
 #define MN_cmpnless (MN_vcmpnless + 1)
-#define MN_vcmpnless 0x39b9
+#define MN_vcmpnless 0x39be
 #define MN_cmpless (MN_vcmpless + 1)
-#define MN_vcmpless 0x39c3
-#define MN_vcmpfalsess 0x39cc
-#define MN_vcmptruess 0x39d8
-#define MN_vscalefss 0x39e3
+#define MN_vcmpless 0x39c8
+#define MN_vcmpfalsess 0x39d1
+#define MN_vcmptruess 0x39dd
+#define MN_vscalefss 0x39e8
 #define MN_comiss (MN_ucomiss + 1)
 #define MN_ucomiss (MN_vucomiss + 1)
-#define MN_vucomiss 0x39ed
-#define MN_vcomiss 0x39f6
+#define MN_vucomiss 0x39f2
+#define MN_vcomiss 0x39fb
 #define MN_lss (MN_mulss + 2)
 #define MN_mulss (MN_vmulss + 1)
-#define MN_vmulss 0x39fe
-#define MN_vfixupimmss 0x3a05
+#define MN_vmulss 0x3a03
+#define MN_vfixupimmss 0x3a0a
 #define MN_minss (MN_vminss + 1)
-#define MN_vminss 0x3a11
+#define MN_vminss 0x3a16
 #define MN_rcpss (MN_vrcpss + 1)
-#define MN_vrcpss 0x3a18
+#define MN_vrcpss 0x3a1d
 #define MN_cmpss (MN_vcmpss + 1)
-#define MN_vcmpss 0x3a1f
-#define MN_vgetexpss 0x3a26
-#define MN_vcmpunord_qss 0x3a30
-#define MN_vcmpord_qss 0x3a3e
+#define MN_vcmpss 0x3a24
+#define MN_vgetexpss 0x3a2b
+#define MN_vcmpunord_qss 0x3a35
+#define MN_vcmpord_qss 0x3a43
 #define MN_cmpneqss (MN_vcmpneqss + 1)
-#define MN_vcmpneqss 0x3a4a
+#define MN_vcmpneqss 0x3a4f
 #define MN_cmpeqss (MN_vcmpeqss + 1)
-#define MN_vcmpeqss 0x3a54
-#define MN_vcmpge_oqss 0x3a5d
-#define MN_vcmple_oqss 0x3a69
-#define MN_vcmpfalse_oqss 0x3a75
-#define MN_vcmpneq_oqss 0x3a84
-#define MN_vcmpeq_oqss 0x3a91
-#define MN_vcmpgt_oqss 0x3a9d
-#define MN_vcmplt_oqss 0x3aa9
-#define MN_vcmpnge_uqss 0x3ab5
-#define MN_vcmpnle_uqss 0x3ac2
-#define MN_vcmptrue_uqss 0x3acf
-#define MN_vcmpneq_uqss 0x3add
-#define MN_vcmpeq_uqss 0x3aea
-#define MN_vcmpngt_uqss 0x3af6
-#define MN_vcmpnlt_uqss 0x3b03
-#define MN_vcmpunord_sss 0x3b10
-#define MN_vcmpord_sss 0x3b1e
-#define MN_vcmpge_osss 0x3b2a
-#define MN_vcmple_osss 0x3b36
-#define MN_vcmpfalse_osss 0x3b42
-#define MN_vcmpneq_osss 0x3b51
-#define MN_vcmpeq_osss 0x3b5e
-#define MN_vcmpgt_osss 0x3b6a
-#define MN_vcmplt_osss 0x3b76
-#define MN_vfpclassss 0x3b82
-#define MN_vcmpnge_usss 0x3b8d
-#define MN_vcmpnle_usss 0x3b9a
-#define MN_vcmptrue_usss 0x3ba7
-#define MN_vcmpneq_usss 0x3bb5
-#define MN_vcmpeq_usss 0x3bc2
-#define MN_vcmpngt_usss 0x3bce
-#define MN_vcmpnlt_usss 0x3bdb
-#define MN_vcmpngtss 0x3be8
-#define MN_vcmpgtss 0x3bf2
+#define MN_vcmpeqss 0x3a59
+#define MN_vcmpge_oqss 0x3a62
+#define MN_vcmple_oqss 0x3a6e
+#define MN_vcmpfalse_oqss 0x3a7a
+#define MN_vcmpneq_oqss 0x3a89
+#define MN_vcmpeq_oqss 0x3a96
+#define MN_vcmpgt_oqss 0x3aa2
+#define MN_vcmplt_oqss 0x3aae
+#define MN_vcmpnge_uqss 0x3aba
+#define MN_vcmpnle_uqss 0x3ac7
+#define MN_vcmptrue_uqss 0x3ad4
+#define MN_vcmpneq_uqss 0x3ae2
+#define MN_vcmpeq_uqss 0x3aef
+#define MN_vcmpngt_uqss 0x3afb
+#define MN_vcmpnlt_uqss 0x3b08
+#define MN_vcmpunord_sss 0x3b15
+#define MN_vcmpord_sss 0x3b23
+#define MN_vcmpge_osss 0x3b2f
+#define MN_vcmple_osss 0x3b3b
+#define MN_vcmpfalse_osss 0x3b47
+#define MN_vcmpneq_osss 0x3b56
+#define MN_vcmpeq_osss 0x3b63
+#define MN_vcmpgt_osss 0x3b6f
+#define MN_vcmplt_osss 0x3b7b
+#define MN_vfpclassss 0x3b87
+#define MN_vcmpnge_usss 0x3b92
+#define MN_vcmpnle_usss 0x3b9f
+#define MN_vcmptrue_usss 0x3bac
+#define MN_vcmpneq_usss 0x3bba
+#define MN_vcmpeq_usss 0x3bc7
+#define MN_vcmpngt_usss 0x3bd3
+#define MN_vcmpnlt_usss 0x3be0
+#define MN_vcmpngtss 0x3bed
+#define MN_vcmpgtss 0x3bf7
 #define MN_cmpnltss (MN_vcmpnltss + 1)
-#define MN_vcmpnltss 0x3bfb
+#define MN_vcmpnltss 0x3c00
 #define MN_cmpltss (MN_vcmpltss + 1)
-#define MN_vcmpltss 0x3c05
-#define MN_vgetmantss 0x3c0e
-#define MN_movntss 0x3c19
+#define MN_vcmpltss 0x3c0a
+#define MN_vgetmantss 0x3c13
+#define MN_movntss 0x3c1e
 #define MN_sqrtss (MN_rsqrtss + 1)
 #define MN_rsqrtss (MN_vrsqrtss + 1)
-#define MN_vrsqrtss 0x3c21
-#define MN_vsqrtss 0x3c2a
-#define MN_vbroadcastss 0x3c32
+#define MN_vrsqrtss 0x3c26
+#define MN_vsqrtss 0x3c2f
+#define MN_vbroadcastss 0x3c37
 #define MN_divss (MN_vdivss + 1)
-#define MN_vdivss 0x3c3f
+#define MN_vdivss 0x3c44
 #define MN_movss (MN_vmovss + 1)
-#define MN_vmovss 0x3c46
+#define MN_vmovss 0x3c4b
 #define MN_maxss (MN_vmaxss + 1)
-#define MN_vmaxss 0x3c4d
-#define MN_vfrczss 0x3c54
-#define MN_bts 0x3c5c
-#define MN_sets 0x3c60
-#define MN_clts 0x3c65
-#define MN_outs 0x3c6a
+#define MN_vmaxss 0x3c52
+#define MN_vfrczss 0x3c59
+#define MN_bts 0x3c61
+#define MN_erets 0x3c65
+#define MN_sets 0x3c6b
+#define MN_clts 0x3c70
+#define MN_outs 0x3c75
 #define MN_movs (MN_cmovs + 1)
-#define MN_cmovs 0x3c6f
-#define MN_fldl2t 0x3c75
-#define MN_xlat 0x3c7c
-#define MN_bt 0x3c81
-#define MN_fxtract 0x3c84
-#define MN_lgdt 0x3c8c
-#define MN_sgdt 0x3c91
-#define MN_lidt 0x3c96
-#define MN_sidt 0x3c9b
-#define MN_fldt 0x3ca0
-#define MN_lldt 0x3ca5
-#define MN_sldt 0x3caa
+#define MN_cmovs 0x3c7a
+#define MN_fldl2t 0x3c80
+#define MN_xlat 0x3c87
+#define MN_bt 0x3c8c
+#define MN_fxtract 0x3c8f
+#define MN_lgdt 0x3c97
+#define MN_sgdt 0x3c9c
+#define MN_lidt 0x3ca1
+#define MN_sidt 0x3ca6
+#define MN_fldt 0x3cab
+#define MN_lldt 0x3cb0
+#define MN_sldt 0x3cb5
 #define MN_ret (MN_iret + 1)
 #define MN_iret (MN_uiret + 1)
-#define MN_uiret 0x3caf
-#define MN_lret 0x3cb5
-#define MN_seamret 0x3cba
-#define MN_sysret 0x3cc2
-#define MN_hreset 0x3cc9
-#define MN_pfcmpgt 0x3cd0
-#define MN_ht 0x3cd8
+#define MN_uiret 0x3cba
+#define MN_lret 0x3cc0
+#define MN_seamret 0x3cc5
+#define MN_sysret 0x3ccd
+#define MN_hreset 0x3cd4
+#define MN_pfcmpgt 0x3cdb
+#define MN_ht 0x3ce3
 #define MN_wait (MN_fwait + 1)
-#define MN_fwait 0x3cdb
+#define MN_fwait 0x3ce6
 #define MN_mwait (MN_umwait + 1)
-#define MN_umwait 0x3ce1
-#define MN_mcommit 0x3ce8
-#define MN_finit 0x3cf0
-#define MN_skinit 0x3cf6
-#define MN_fninit 0x3cfd
-#define MN_vmgexit 0x3d04
-#define MN_sysexit 0x3d0c
-#define MN_hlt 0x3d14
-#define MN_popcnt 0x3d18
-#define MN_lzcnt 0x3d1f
-#define MN_tzcnt 0x3d25
-#define MN_hnt 0x3d2b
+#define MN_umwait 0x3cec
+#define MN_mcommit 0x3cf3
+#define MN_finit 0x3cfb
+#define MN_skinit 0x3d01
+#define MN_fninit 0x3d08
+#define MN_vmgexit 0x3d0f
+#define MN_sysexit 0x3d17
+#define MN_hlt 0x3d1f
+#define MN_popcnt 0x3d23
+#define MN_lzcnt 0x3d2a
+#define MN_tzcnt 0x3d30
+#define MN_hnt 0x3d36
 #define MN_int (MN_frndint + 4)
-#define MN_frndint 0x3d2f
-#define MN_not 0x3d37
-#define MN_invept 0x3d3b
-#define MN_xsaveopt 0x3d42
-#define MN_clflushopt 0x3d4b
-#define MN_fstpt 0x3d56
-#define MN_xabort 0x3d5c
-#define MN_fsqrt 0x3d63
-#define MN_pfrsqrt 0x3d69
+#define MN_frndint 0x3d3a
+#define MN_not 0x3d42
+#define MN_invept 0x3d46
+#define MN_xsaveopt 0x3d4d
+#define MN_clflushopt 0x3d56
+#define MN_fstpt 0x3d61
+#define MN_xabort 0x3d67
+#define MN_fsqrt 0x3d6e
+#define MN_pfrsqrt 0x3d74
 #define MN_aesdeclast (MN_vaesdeclast + 1)
-#define MN_vaesdeclast 0x3d71
+#define MN_vaesdeclast 0x3d7c
 #define MN_aesenclast (MN_vaesenclast + 1)
-#define MN_vaesenclast 0x3d7d
+#define MN_vaesenclast 0x3d88
 #define MN_test (MN_ptest + 1)
 #define MN_ptest (MN_vptest + 1)
-#define MN_vptest 0x3d89
-#define MN_xtest 0x3d90
-#define MN_fst 0x3d96
-#define MN_fist 0x3d9a
-#define MN_rdmsrlist 0x3d9f
-#define MN_wrmsrlist 0x3da9
+#define MN_vptest 0x3d94
+#define MN_xtest 0x3d9b
+#define MN_fst 0x3da1
+#define MN_fist 0x3da5
+#define MN_rdmsrlist 0x3daa
+#define MN_wrmsrlist 0x3db4
 #define MN_aeskeygenassist (MN_vaeskeygenassist + 1)
-#define MN_vaeskeygenassist 0x3db3
-#define MN_vmptrst 0x3dc4
-#define MN_ftst 0x3dcc
-#define MN_rmpadjust 0x3dd1
-#define MN_out 0x3ddb
-#define MN_pext 0x3ddf
-#define MN_bndcu 0x3de4
-#define MN_enclu 0x3dea
-#define MN_fcmovnu 0x3df0
+#define MN_vaeskeygenassist 0x3dbe
+#define MN_vmptrst 0x3dcf
+#define MN_ftst 0x3dd7
+#define MN_rmpadjust 0x3ddc
+#define MN_out 0x3de6
+#define MN_pext 0x3dea
+#define MN_bndcu 0x3def
+#define MN_enclu 0x3df5
+#define MN_fcmovnu 0x3dfb
 #define MN_lddqu (MN_vlddqu + 1)
-#define MN_vlddqu 0x3df8
+#define MN_vlddqu 0x3e03
 #define MN_movdqu (MN_maskmovdqu + 4)
 #define MN_maskmovdqu (MN_vmaskmovdqu + 1)
-#define MN_vmaskmovdqu 0x3dff
-#define MN_vmovdqu 0x3e0b
-#define MN_rdpkru 0x3e13
-#define MN_wrpkru 0x3e1a
-#define MN_rdpru 0x3e21
-#define MN_fcmovu 0x3e27
-#define MN_xgetbv 0x3e2e
-#define MN_xsetbv 0x3e35
+#define MN_vmaskmovdqu 0x3e0a
+#define MN_vmovdqu 0x3e16
+#define MN_rdpkru 0x3e1e
+#define MN_wrpkru 0x3e25
+#define MN_rdpru 0x3e2c
+#define MN_eretu 0x3e32
+#define MN_fcmovu 0x3e38
+#define MN_xgetbv 0x3e3f
+#define MN_xsetbv 0x3e46
 #define MN_div (MN_fdiv + 1)
-#define MN_fdiv 0x3e3c
+#define MN_fdiv 0x3e4d
 #define MN_idiv (MN_fidiv + 1)
-#define MN_fidiv 0x3e41
-#define MN_enclv 0x3e47
-#define MN_fldenv 0x3e4d
-#define MN_fstenv 0x3e54
-#define MN_fnstenv 0x3e5b
+#define MN_fidiv 0x3e52
+#define MN_enclv 0x3e58
+#define MN_fldenv 0x3e5e
+#define MN_fstenv 0x3e65
+#define MN_fnstenv 0x3e6c
 #define MN_mov (MN_vpcmov + 3)
-#define MN_vpcmov 0x3e63
-#define MN_bndmov 0x3e6a
-#define MN_smov 0x3e71
-#define MN_rex_w 0x3e76
-#define MN_vcvttph2w 0x3e7c
-#define MN_vcvtph2w 0x3e86
-#define MN_vpermi2w 0x3e8f
-#define MN_vpmovm2w 0x3e98
-#define MN_vpermt2w 0x3ea1
-#define MN_vpshaw 0x3eaa
+#define MN_vpcmov 0x3e74
+#define MN_bndmov 0x3e7b
+#define MN_smov 0x3e82
+#define MN_rex_w 0x3e87
+#define MN_vcvttph2w 0x3e8d
+#define MN_vcvtph2w 0x3e97
+#define MN_vpermi2w 0x3ea0
+#define MN_vpmovm2w 0x3ea9
+#define MN_vpermt2w 0x3eb2
+#define MN_vpshaw 0x3ebb
 #define MN_psraw (MN_vpsraw + 1)
-#define MN_vpsraw 0x3eb1
-#define MN_vphsubbw 0x3eb8
-#define MN_cbw 0x3ec1
+#define MN_vpsraw 0x3ec2
+#define MN_vphsubbw 0x3ec9
+#define MN_cbw 0x3ed2
 #define MN_psadbw (MN_vdbpsadbw + 3)
-#define MN_vdbpsadbw 0x3ec5
+#define MN_vdbpsadbw 0x3ed6
 #define MN_mpsadbw (MN_vmpsadbw + 1)
-#define MN_vmpsadbw 0x3ecf
-#define MN_vpsadbw 0x3ed8
-#define MN_vphaddbw 0x3ee0
+#define MN_vmpsadbw 0x3ee0
+#define MN_vpsadbw 0x3ee9
+#define MN_vphaddbw 0x3ef1
 #define MN_punpckhbw (MN_vpunpckhbw + 1)
-#define MN_vpunpckhbw 0x3ee9
-#define MN_kunpckbw 0x3ef4
+#define MN_vpunpckhbw 0x3efa
+#define MN_kunpckbw 0x3f05
 #define MN_punpcklbw (MN_vpunpcklbw + 1)
-#define MN_vpunpcklbw 0x3efd
-#define MN_vphaddubw 0x3f08
+#define MN_vpunpcklbw 0x3f0e
+#define MN_vphaddubw 0x3f19
 #define MN_phsubw (MN_vphsubw + 1)
-#define MN_vphsubw 0x3f12
+#define MN_vphsubw 0x3f23
 #define MN_psubw (MN_vpsubw + 1)
-#define MN_vpsubw 0x3f1a
+#define MN_vpsubw 0x3f2b
 #define MN_pmovsxbw (MN_vpmovsxbw + 1)
-#define MN_vpmovsxbw 0x3f21
+#define MN_vpmovsxbw 0x3f32
 #define MN_pmovzxbw (MN_vpmovzxbw + 1)
-#define MN_vpmovzxbw 0x3f2b
-#define MN_fldcw 0x3f35
-#define MN_fstcw 0x3f3b
-#define MN_fnstcw 0x3f41
+#define MN_vpmovzxbw 0x3f3c
+#define MN_fldcw 0x3f46
+#define MN_fstcw 0x3f4c
+#define MN_fnstcw 0x3f52
 #define MN_phaddw (MN_vphaddw + 1)
-#define MN_vphaddw 0x3f48
-#define MN_kaddw 0x3f50
+#define MN_vphaddw 0x3f59
+#define MN_kaddw 0x3f61
 #define MN_paddw (MN_vpaddw + 1)
-#define MN_vpaddw 0x3f56
-#define MN_vpshldw 0x3f5d
-#define MN_kandw 0x3f65
-#define MN_vpexpandw 0x3f6b
+#define MN_vpaddw 0x3f67
+#define MN_vpshldw 0x3f6e
+#define MN_kandw 0x3f76
+#define MN_vpexpandw 0x3f7c
 #define MN_pblendw (MN_vpblendw + 1)
-#define MN_vpblendw 0x3f75
-#define MN_vpshrdw 0x3f7e
+#define MN_vpblendw 0x3f86
+#define MN_vpshrdw 0x3f8f
 #define MN_packssdw (MN_vpackssdw + 1)
-#define MN_vpackssdw 0x3f86
+#define MN_vpackssdw 0x3f97
 #define MN_packusdw (MN_vpackusdw + 1)
-#define MN_vpackusdw 0x3f90
-#define MN_vpmovusdw 0x3f9a
-#define MN_vpmovsdw 0x3fa4
-#define MN_vpmovdw 0x3fad
-#define MN_vpcomgew 0x3fb5
-#define MN_vpcomlew 0x3fbe
-#define MN_vpcmpnlew 0x3fc7
-#define MN_vpcmplew 0x3fd1
-#define MN_vpcomfalsew 0x3fda
-#define MN_vpcomtruew 0x3fe6
-#define MN_pi2fw 0x3ff1
-#define MN_pshufw 0x3ff7
+#define MN_vpackusdw 0x3fa1
+#define MN_vpmovusdw 0x3fab
+#define MN_vpmovsdw 0x3fb5
+#define MN_vpmovdw 0x3fbe
+#define MN_vpcomgew 0x3fc6
+#define MN_vpcomlew 0x3fcf
+#define MN_vpcmpnlew 0x3fd8
+#define MN_vpcmplew 0x3fe2
+#define MN_vpcomfalsew 0x3feb
+#define MN_vpcomtruew 0x3ff7
+#define MN_pi2fw 0x4002
+#define MN_pshufw 0x4008
 #define MN_pavgw (MN_vpavgw + 1)
-#define MN_vpavgw 0x3ffe
-#define MN_prefetchw 0x4005
+#define MN_vpavgw 0x400f
+#define MN_prefetchw 0x4016
 #define MN_pshufhw (MN_vpshufhw + 1)
-#define MN_vpshufhw 0x400f
+#define MN_vpshufhw 0x4020
 #define MN_pmulhw (MN_vpmulhw + 1)
-#define MN_vpmulhw 0x4018
-#define MN_pf2iw 0x4020
+#define MN_vpmulhw 0x4029
+#define MN_pf2iw 0x4031
 #define MN_pshuflw (MN_vpshuflw + 1)
-#define MN_vpshuflw 0x4026
-#define MN_vpshlw 0x402f
+#define MN_vpshuflw 0x4037
+#define MN_vpshlw 0x4040
 #define MN_psllw (MN_vpsllw + 1)
-#define MN_vpsllw 0x4036
+#define MN_vpsllw 0x4047
 #define MN_pmullw (MN_vpmullw + 1)
-#define MN_vpmullw 0x403d
+#define MN_vpmullw 0x404e
 #define MN_psrlw (MN_vpsrlw + 1)
-#define MN_vpsrlw 0x4045
-#define MN_kshiftlw 0x404c
-#define MN_vpblendmw 0x4055
-#define MN_vptestnmw 0x405f
-#define MN_vpcomw 0x4069
-#define MN_vpermw 0x4070
-#define MN_vptestmw 0x4077
-#define MN_kandnw 0x4080
+#define MN_vpsrlw 0x4056
+#define MN_kshiftlw 0x405d
+#define MN_vpblendmw 0x4066
+#define MN_vptestnmw 0x4070
+#define MN_vpcomw 0x407a
+#define MN_vpermw 0x4081
+#define MN_vptestmw 0x4088
+#define MN_kandnw 0x4091
 #define MN_psignw (MN_vpsignw + 1)
-#define MN_vpsignw 0x4087
-#define MN_vpcmpw 0x408f
-#define MN_vpcomeqw 0x4096
-#define MN_vpcomneqw 0x409f
-#define MN_vpcmpneqw 0x40a9
+#define MN_vpsignw 0x4098
+#define MN_vpcmpw 0x40a0
+#define MN_vpcomeqw 0x40a7
+#define MN_vpcomneqw 0x40b0
+#define MN_vpcmpneqw 0x40ba
 #define MN_pcmpeqw (MN_vpcmpeqw + 1)
-#define MN_vpcmpeqw 0x40b3
-#define MN_vpmovusqw 0x40bc
-#define MN_vpmovsqw 0x40c6
-#define MN_vpmovqw 0x40cf
-#define MN_verw 0x40d7
-#define MN_pmulhrw 0x40dc
-#define MN_korw 0x40e4
-#define MN_kxnorw 0x40e9
-#define MN_kxorw 0x40f0
+#define MN_vpcmpeqw 0x40c4
+#define MN_vpmovusqw 0x40cd
+#define MN_vpmovsqw 0x40d7
+#define MN_vpmovqw 0x40e0
+#define MN_verw 0x40e8
+#define MN_pmulhrw 0x40ed
+#define MN_korw 0x40f5
+#define MN_kxnorw 0x40fa
+#define MN_kxorw 0x4101
 #define MN_pinsrw (MN_vpinsrw + 1)
-#define MN_vpinsrw 0x40f6
-#define MN_kshiftrw 0x40fe
+#define MN_vpinsrw 0x4107
+#define MN_kshiftrw 0x410f
 #define MN_pextrw (MN_vpextrw + 1)
-#define MN_vpextrw 0x4107
+#define MN_vpextrw 0x4118
 #define MN_pabsw (MN_vpabsw + 1)
-#define MN_vpabsw 0x410f
+#define MN_vpabsw 0x4120
 #define MN_pmaddubsw (MN_vpmaddubsw + 1)
-#define MN_vpmaddubsw 0x4116
+#define MN_vpmaddubsw 0x4127
 #define MN_phsubsw (MN_vphsubsw + 1)
-#define MN_vphsubsw 0x4121
+#define MN_vphsubsw 0x4132
 #define MN_psubsw (MN_vpsubsw + 1)
-#define MN_vpsubsw 0x412a
+#define MN_vpsubsw 0x413b
 #define MN_phaddsw (MN_vphaddsw + 1)
-#define MN_vphaddsw 0x4132
+#define MN_vphaddsw 0x4143
 #define MN_paddsw (MN_vpaddsw + 1)
-#define MN_vpaddsw 0x413b
-#define MN_lmsw 0x4143
-#define MN_smsw 0x4148
+#define MN_vpaddsw 0x414c
+#define MN_lmsw 0x4154
+#define MN_smsw 0x4159
 #define MN_pminsw (MN_vpminsw + 1)
-#define MN_vpminsw 0x414d
+#define MN_vpminsw 0x415e
 #define MN_pmulhrsw (MN_vpmulhrsw + 1)
-#define MN_vpmulhrsw 0x4155
-#define MN_vpcompressw 0x415f
-#define MN_fstsw 0x416b
-#define MN_fnstsw 0x4171
+#define MN_vpmulhrsw 0x4166
+#define MN_vpcompressw 0x4170
+#define MN_fstsw 0x417c
+#define MN_fnstsw 0x4182
 #define MN_psubusw (MN_vpsubusw + 1)
-#define MN_vpsubusw 0x4178
+#define MN_vpsubusw 0x4189
 #define MN_paddusw (MN_vpaddusw + 1)
-#define MN_vpaddusw 0x4181
-#define MN_movsw 0x418a
+#define MN_vpaddusw 0x4192
+#define MN_movsw 0x419b
 #define MN_pmaxsw (MN_vpmaxsw + 1)
-#define MN_vpmaxsw 0x4190
-#define MN_cbtw 0x4198
-#define MN_vpcomgtw 0x419d
+#define MN_vpmaxsw 0x41a1
+#define MN_cbtw 0x41a9
+#define MN_vpcomgtw 0x41ae
 #define MN_pcmpgtw (MN_vpcmpgtw + 1)
-#define MN_vpcmpgtw 0x41a6
-#define MN_vpcomltw 0x41af
-#define MN_vpcmpnltw 0x41b8
-#define MN_vpcmpltw 0x41c2
-#define MN_vpopcntw 0x41cb
-#define MN_knotw 0x41d4
-#define MN_vprotw 0x41da
-#define MN_vpbroadcastw 0x41e1
-#define MN_ktestw 0x41ee
-#define MN_kortestw 0x41f5
-#define MN_vcvttph2uw 0x41fe
-#define MN_vcvtph2uw 0x4209
-#define MN_vpcomgeuw 0x4213
-#define MN_vpcomleuw 0x421d
-#define MN_vpcmpnleuw 0x4227
-#define MN_vpcmpleuw 0x4232
-#define MN_vpcomfalseuw 0x423c
-#define MN_vpcomtrueuw 0x4249
+#define MN_vpcmpgtw 0x41b7
+#define MN_vpcomltw 0x41c0
+#define MN_vpcmpnltw 0x41c9
+#define MN_vpcmpltw 0x41d3
+#define MN_vpopcntw 0x41dc
+#define MN_knotw 0x41e5
+#define MN_vprotw 0x41eb
+#define MN_vpbroadcastw 0x41f2
+#define MN_ktestw 0x41ff
+#define MN_kortestw 0x4206
+#define MN_vcvttph2uw 0x420f
+#define MN_vcvtph2uw 0x421a
+#define MN_vpcomgeuw 0x4224
+#define MN_vpcomleuw 0x422e
+#define MN_vpcmpnleuw 0x4238
+#define MN_vpcmpleuw 0x4243
+#define MN_vpcomfalseuw 0x424d
+#define MN_vpcomtrueuw 0x425a
 #define MN_pmulhuw (MN_vpmulhuw + 1)
-#define MN_vpmulhuw 0x4255
-#define MN_vpcomuw 0x425e
+#define MN_vpmulhuw 0x4266
+#define MN_vpcomuw 0x426f
 #define MN_pminuw (MN_vpminuw + 1)
-#define MN_vpminuw 0x4266
-#define MN_vpcmpuw 0x426e
-#define MN_vpcomequw 0x4276
-#define MN_vpcomnequw 0x4280
-#define MN_vpcmpnequw 0x428b
-#define MN_vpcmpequw 0x4296
+#define MN_vpminuw 0x4277
+#define MN_vpcmpuw 0x427f
+#define MN_vpcomequw 0x4287
+#define MN_vpcomnequw 0x4291
+#define MN_vpcmpnequw 0x429c
+#define MN_vpcmpequw 0x42a7
 #define MN_phminposuw (MN_vphminposuw + 1)
-#define MN_vphminposuw 0x42a0
-#define MN_vpcomgtuw 0x42ac
-#define MN_vpcomltuw 0x42b6
-#define MN_vpcmpnltuw 0x42c0
-#define MN_vpcmpltuw 0x42cb
+#define MN_vphminposuw 0x42b1
+#define MN_vpcomgtuw 0x42bd
+#define MN_vpcomltuw 0x42c7
+#define MN_vpcmpnltuw 0x42d1
+#define MN_vpcmpltuw 0x42dc
 #define MN_pmaxuw (MN_vpmaxuw + 1)
-#define MN_vpmaxuw 0x42d5
-#define MN_vpsravw 0x42dd
-#define MN_vpshldvw 0x42e5
-#define MN_vpshrdvw 0x42ee
-#define MN_vpsllvw 0x42f7
-#define MN_vpsrlvw 0x42ff
-#define MN_kmovw 0x4307
-#define MN_vmovw 0x430d
-#define MN_vpmacsww 0x4313
-#define MN_vpmacssww 0x431c
-#define MN_movzw 0x4326
-#define MN_rex_x 0x432c
-#define MN_fyl2x 0x4332
-#define MN_rex64x 0x4338
-#define MN_vcvtneps2bf16x 0x433f
-#define MN_pfmax 0x434e
-#define MN_adcx 0x4354
-#define MN_bndldx 0x4359
-#define MN_vfpclasspdx 0x4360
-#define MN_fclex 0x436c
-#define MN_fnclex 0x4372
-#define MN_rex 0x4379
-#define MN_vcvtpd2phx 0x437d
-#define MN_vcvtdq2phx 0x4388
-#define MN_vcvtudq2phx 0x4393
-#define MN_vcvtqq2phx 0x439f
-#define MN_vcvtuqq2phx 0x43aa
-#define MN_vcvtps2phx 0x43b6
-#define MN_vfpclassphx 0x43c1
-#define MN_shlx 0x43cd
-#define MN_mulx 0x43d2
-#define MN_adox 0x43d7
-#define MN_vcvttpd2dqx 0x43dc
-#define MN_vcvtpd2dqx 0x43e8
-#define MN_vcvttpd2udqx 0x43f3
-#define MN_vcvtpd2udqx 0x4400
-#define MN_rex_rx 0x440c
-#define MN_sarx 0x4413
-#define MN_shrx 0x4418
-#define MN_rorx 0x441d
-#define MN_monitorx 0x4422
-#define MN_rex_wrx 0x442b
-#define MN_vcvtpd2psx 0x4433
-#define MN_vcvtph2psx 0x443e
-#define MN_vcvtqq2psx 0x4449
-#define MN_vcvtuqq2psx 0x4454
-#define MN_vfpclasspsx 0x4460
-#define MN_movsx 0x446c
-#define MN_mwaitx 0x4472
-#define MN_bndstx 0x4479
-#define MN_rex_wx 0x4480
-#define MN_rexx 0x4487
-#define MN_vcvtps2phxx 0x448c
-#define MN_movzx 0x4498
-#define MN_rex64y 0x449e
-#define MN_vcvtneps2bf16y 0x44a5
-#define MN_vfpclasspdy 0x44b4
-#define MN_loadiwkey 0x44c0
-#define MN_vcvtpd2phy 0x44ca
-#define MN_vcvtdq2phy 0x44d5
-#define MN_vcvtudq2phy 0x44e0
-#define MN_vcvtqq2phy 0x44ec
-#define MN_vcvtuqq2phy 0x44f7
-#define MN_vfpclassphy 0x4503
-#define MN_vcvttpd2dqy 0x450f
-#define MN_vcvtpd2dqy 0x451b
-#define MN_vcvttpd2udqy 0x4526
-#define MN_vcvtpd2udqy 0x4533
-#define MN_rmpquery 0x453f
-#define MN_clrssbsy 0x4548
-#define MN_setssbsy 0x4551
-#define MN_vcvtpd2psy 0x455a
-#define MN_vcvtqq2psy 0x4565
-#define MN_vcvtuqq2psy 0x4570
-#define MN_vfpclasspsy 0x457c
-#define MN_rex64xy 0x4588
-#define MN_rexy 0x4590
-#define MN_vcvtps2phxy 0x4595
-#define MN_rexxy 0x45a1
-#define MN_rex64z 0x45a7
-#define MN_fldz 0x45ae
-#define MN_vfpclasspdz 0x45b3
-#define MN_vcvtpd2phz 0x45bf
-#define MN_vcvtqq2phz 0x45ca
-#define MN_vcvtuqq2phz 0x45d5
-#define MN_vfpclassphz 0x45e1
-#define MN_jz 0x45ed
-#define MN_jnz 0x45f0
-#define MN_repnz 0x45f4
-#define MN_loopnz 0x45fa
-#define MN_setnz 0x4601
-#define MN_cmovnz 0x4607
-#define MN_repz 0x460e
-#define MN_loopz 0x4613
-#define MN_vfpclasspsz 0x4619
-#define MN_setz 0x4625
-#define MN_cmovz 0x462a
-#define MN_rex64xz 0x4630
-#define MN_jecxz 0x4638
-#define MN_jcxz 0x463e
-#define MN_jrcxz 0x4643
-#define MN_rexz 0x4649
-#define MN_rexxz 0x464e
-#define MN_rex64yz 0x4654
-#define MN_rex64xyz 0x465c
-#define MN_rexyz 0x4665
-#define MN_rexxyz 0x466b
-#define MN__disp32_ 0x4672
-#define MN__vex2_ 0x467b
-#define MN__vex3_ 0x4682
-#define MN__disp16_ 0x4689
-#define MN__disp8_ 0x4692
-#define MN__load_ 0x469a
-#define MN__store_ 0x46a1
-#define MN__nooptimize_ 0x46a9
-#define MN__rex_ 0x46b6
-#define MN__evex_ 0x46bc
-#define MN__vex_ 0x46c3
-#define MN__insn 0x46c9
+#define MN_vpmaxuw 0x42e6
+#define MN_vpsravw 0x42ee
+#define MN_vpshldvw 0x42f6
+#define MN_vpshrdvw 0x42ff
+#define MN_vpsllvw 0x4308
+#define MN_vpsrlvw 0x4310
+#define MN_kmovw 0x4318
+#define MN_vmovw 0x431e
+#define MN_vpmacsww 0x4324
+#define MN_vpmacssww 0x432d
+#define MN_movzw 0x4337
+#define MN_rex_x 0x433d
+#define MN_fyl2x 0x4343
+#define MN_rex64x 0x4349
+#define MN_vcvtneps2bf16x 0x4350
+#define MN_pfmax 0x435f
+#define MN_adcx 0x4365
+#define MN_bndldx 0x436a
+#define MN_vfpclasspdx 0x4371
+#define MN_fclex 0x437d
+#define MN_fnclex 0x4383
+#define MN_rex 0x438a
+#define MN_vcvtpd2phx 0x438e
+#define MN_vcvtdq2phx 0x4399
+#define MN_vcvtudq2phx 0x43a4
+#define MN_vcvtqq2phx 0x43b0
+#define MN_vcvtuqq2phx 0x43bb
+#define MN_vcvtps2phx 0x43c7
+#define MN_vfpclassphx 0x43d2
+#define MN_shlx 0x43de
+#define MN_mulx 0x43e3
+#define MN_adox 0x43e8
+#define MN_vcvttpd2dqx 0x43ed
+#define MN_vcvtpd2dqx 0x43f9
+#define MN_vcvttpd2udqx 0x4404
+#define MN_vcvtpd2udqx 0x4411
+#define MN_rex_rx 0x441d
+#define MN_sarx 0x4424
+#define MN_shrx 0x4429
+#define MN_rorx 0x442e
+#define MN_monitorx 0x4433
+#define MN_rex_wrx 0x443c
+#define MN_vcvtpd2psx 0x4444
+#define MN_vcvtph2psx 0x444f
+#define MN_vcvtqq2psx 0x445a
+#define MN_vcvtuqq2psx 0x4465
+#define MN_vfpclasspsx 0x4471
+#define MN_movsx 0x447d
+#define MN_mwaitx 0x4483
+#define MN_bndstx 0x448a
+#define MN_rex_wx 0x4491
+#define MN_rexx 0x4498
+#define MN_vcvtps2phxx 0x449d
+#define MN_movzx 0x44a9
+#define MN_rex64y 0x44af
+#define MN_vcvtneps2bf16y 0x44b6
+#define MN_vfpclasspdy 0x44c5
+#define MN_loadiwkey 0x44d1
+#define MN_vcvtpd2phy 0x44db
+#define MN_vcvtdq2phy 0x44e6
+#define MN_vcvtudq2phy 0x44f1
+#define MN_vcvtqq2phy 0x44fd
+#define MN_vcvtuqq2phy 0x4508
+#define MN_vfpclassphy 0x4514
+#define MN_vcvttpd2dqy 0x4520
+#define MN_vcvtpd2dqy 0x452c
+#define MN_vcvttpd2udqy 0x4537
+#define MN_vcvtpd2udqy 0x4544
+#define MN_rmpquery 0x4550
+#define MN_clrssbsy 0x4559
+#define MN_setssbsy 0x4562
+#define MN_vcvtpd2psy 0x456b
+#define MN_vcvtqq2psy 0x4576
+#define MN_vcvtuqq2psy 0x4581
+#define MN_vfpclasspsy 0x458d
+#define MN_rex64xy 0x4599
+#define MN_rexy 0x45a1
+#define MN_vcvtps2phxy 0x45a6
+#define MN_rexxy 0x45b2
+#define MN_rex64z 0x45b8
+#define MN_fldz 0x45bf
+#define MN_vfpclasspdz 0x45c4
+#define MN_vcvtpd2phz 0x45d0
+#define MN_vcvtqq2phz 0x45db
+#define MN_vcvtuqq2phz 0x45e6
+#define MN_vfpclassphz 0x45f2
+#define MN_jz 0x45fe
+#define MN_jnz 0x4601
+#define MN_repnz 0x4605
+#define MN_loopnz 0x460b
+#define MN_setnz 0x4612
+#define MN_cmovnz 0x4618
+#define MN_repz 0x461f
+#define MN_loopz 0x4624
+#define MN_vfpclasspsz 0x462a
+#define MN_setz 0x4636
+#define MN_cmovz 0x463b
+#define MN_rex64xz 0x4641
+#define MN_jecxz 0x4649
+#define MN_jcxz 0x464f
+#define MN_jrcxz 0x4654
+#define MN_rexz 0x465a
+#define MN_rexxz 0x465f
+#define MN_rex64yz 0x4665
+#define MN_rex64xyz 0x466d
+#define MN_rexyz 0x4676
+#define MN_rexxyz 0x467c
+#define MN__disp32_ 0x4683
+#define MN__vex2_ 0x468c
+#define MN__vex3_ 0x4693
+#define MN__disp16_ 0x469a
+#define MN__disp8_ 0x46a3
+#define MN__load_ 0x46ab
+#define MN__store_ 0x46b2
+#define MN__nooptimize_ 0x46ba
+#define MN__rex_ 0x46c7
+#define MN__evex_ 0x46cd
+#define MN__vex_ 0x46d4
+#define MN__insn 0x46da
