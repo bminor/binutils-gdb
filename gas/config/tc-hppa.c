@@ -6354,6 +6354,7 @@ hppa_force_reg_syms_absolute (expressionS *resultP,
 			      expressionS *rightP)
 {
   if (fudge_reg_expressions
+      && resultP
       && rightP->X_op == O_register
       && resultP->X_op == O_register)
     {

@@ -945,9 +945,9 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
     }
 
   /* Accept the above plus <cr bit>, and <cr bit> plus the above.  */
-  if (right->X_op == O_register
+  if (op == O_add
       && left->X_op == O_register
-      && op == O_add
+      && right->X_op == O_register
       && ((right->X_md == PPC_OPERAND_CR_BIT
 	   && left->X_md == (PPC_OPERAND_CR_REG | PPC_OPERAND_CR_BIT))
 	  || (right->X_md == (PPC_OPERAND_CR_REG | PPC_OPERAND_CR_BIT)
@@ -959,7 +959,7 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
     }
 
   /* Accept reg +/- constant.  */
-  if (left->X_op == O_register
+  if (left && left->X_op == O_register
       && !((op == O_add || op == O_subtract) && right->X_op == O_constant))
     as_warn (_("invalid register expression"));
 

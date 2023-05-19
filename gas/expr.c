@@ -764,6 +764,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
   symbolS *symbolP;	/* Points to symbol.  */
   char *name;		/* Points to name of symbol.  */
   segT segment;
+  operatorT op = O_absent; /* For unary operators.  */
 
   /* All integers are regarded as unsigned unless they are negated.
      This is because the only thing which cares whether a number is
@@ -1029,19 +1030,33 @@ operand (expressionS *expressionP, enum expr_mode mode)
       /* '~' is permitted to start a label on the Delta.  */
       if (is_name_beginner (c))
 	goto isname;
-      /* Fall through.  */
+      op = O_bit_not;
+      goto unary;
+
     case '!':
+      op = O_logical_not;
+      goto unary;
+
     case '-':
+      op = O_uminus;
+      /* Fall through.  */
     case '+':
       {
-#ifdef md_operator
       unary:
-#endif
 	operand (expressionP, mode);
+
+#ifdef md_optimize_expr
+	if (md_optimize_expr (NULL, op, expressionP))
+	{
+	  /* Skip.  */
+	  ;
+	}
+	else
+#endif
 	if (expressionP->X_op == O_constant)
 	  {
 	    /* input_line_pointer -> char after operand.  */
-	    if (c == '-')
+	    if (op == O_uminus)
 	      {
 		expressionP->X_add_number
 		  = - (addressT) expressionP->X_add_number;
@@ -1052,13 +1067,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		if (expressionP->X_add_number)
 		  expressionP->X_extrabit ^= 1;
 	      }
-	    else if (c == '~' || c == '"')
+	    else if (op == O_bit_not)
 	      {
 		expressionP->X_add_number = ~ expressionP->X_add_number;
 		expressionP->X_extrabit ^= 1;
 		expressionP->X_unsigned = 0;
 	      }
-	    else if (c == '!')
+	    else if (op == O_logical_not)
 	      {
 		expressionP->X_add_number = ! expressionP->X_add_number;
 		expressionP->X_unsigned = 1;
@@ -1067,7 +1082,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	  }
 	else if (expressionP->X_op == O_big
 		 && expressionP->X_add_number <= 0
-		 && c == '-'
+		 && op == O_uminus
 		 && (generic_floating_point_number.sign == '+'
 		     || generic_floating_point_number.sign == 'P'))
 	  {
@@ -1082,7 +1097,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	  {
 	    int i;
 
-	    if (c == '~' || c == '-')
+	    if (op == O_uminus || op == O_bit_not)
 	      {
 		for (i = 0; i < expressionP->X_add_number; ++i)
 		  generic_bignum[i] = ~generic_bignum[i];
@@ -1095,7 +1110,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		      generic_bignum[i] = ~(LITTLENUM_TYPE) 0;
 		  }
 
-		if (c == '-')
+		if (op == O_uminus)
 		  for (i = 0; i < expressionP->X_add_number; ++i)
 		    {
 		      generic_bignum[i] += 1;
@@ -1103,7 +1118,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 			break;
 		    }
 	      }
-	    else if (c == '!')
+	    else if (op == O_logical_not)
 	      {
 		for (i = 0; i < expressionP->X_add_number; ++i)
 		  if (generic_bignum[i] != 0)
@@ -1117,15 +1132,10 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	else if (expressionP->X_op != O_illegal
 		 && expressionP->X_op != O_absent)
 	  {
-	    if (c != '+')
+	    if (op != O_absent)
 	      {
 		expressionP->X_add_symbol = make_expr_symbol (expressionP);
-		if (c == '-')
-		  expressionP->X_op = O_uminus;
-		else if (c == '~' || c == '"')
-		  expressionP->X_op = O_bit_not;
-		else
-		  expressionP->X_op = O_logical_not;
+		expressionP->X_op = op;
 		expressionP->X_add_number = 0;
 	      }
 	    else if (!md_register_arithmetic && expressionP->X_op == O_register)
@@ -1288,8 +1298,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 
 #ifdef md_operator
 	  {
-	    operatorT op = md_operator (name, 1, &c);
-
+	    op = md_operator (name, 1, &c);
 	    switch (op)
 	      {
 	      case O_uminus:

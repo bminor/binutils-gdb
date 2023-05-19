@@ -1047,6 +1047,14 @@ pointer, for any expression that can not be recognized.  When the function
 is called, @code{input_line_pointer} will point to the start of the
 expression.
 
+@item md_optimize_expr
+@cindex md_optimize_expr
+GAS will call this function before trying to carry out certain operations,
+like the adding of two constants.  The function is passed the left-hand
+operand, an @code{expressionS} pointer, the operator, an @code{operatorT}
+value, and the right-hand operand, again an @code{expressionS} pointer.  For
+unary expressions NULL is passed as first argument.
+
 @item md_register_arithmetic
 @cindex md_register_arithmetic
 If this macro is defined and evaluates to zero then GAS will not fold
