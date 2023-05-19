@@ -11684,7 +11684,7 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 
       /* If not 64bit, sign/zero extend val, to account for wraparound
 	 when !BFD64.  */
-      if (flag_code != CODE_64BIT)
+      if (flag_code != CODE_64BIT && !object_64bit)
 	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
     }
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
@@ -11976,7 +11976,7 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 
 	 If not 64bit, sign/zero extend val, to account for wraparound
 	 when !BFD64.  */
-      if (flag_code != CODE_64BIT)
+      if (flag_code != CODE_64BIT && !object_64bit)
 	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
     }
 
