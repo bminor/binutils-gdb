@@ -8560,7 +8560,7 @@ support for creating such libraries provided with the
 It is possible to create a DLL that only contains resources, ie just a
 @samp{.rsrc} section, but in order to do so a custom linker script
 must be used.  This is because the built-in default linker scripts
-will always create @samp{.text} amd @samp {.idata} sections, even if
+will always create @samp{.text} and @samp{.idata} sections, even if
 there is no input to go into them.
 
 The script should look like this, although the @code{OUTPUT_FORMAT}
