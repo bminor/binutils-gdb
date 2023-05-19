@@ -2148,9 +2148,12 @@ insert_arange_in_trie (bfd *abfd,
 		       bfd_vma low_pc,
 		       bfd_vma high_pc)
 {
+  bfd_vma bucket_high_pc =
+    trie_pc + ((bfd_vma) -1 >> trie_pc_bits);  /* Inclusive.  */
   bfd_vma clamped_low_pc, clamped_high_pc;
   int ch, from_ch, to_ch;
   bool is_full_leaf = false;
+  bool splitting_leaf_will_help = false;
 
   /* See if we can extend any of the existing ranges.  This merging
      isn't perfect (if merging opens up the possibility of merging two existing
@@ -2176,11 +2179,29 @@ insert_arange_in_trie (bfd *abfd,
 	}
 
       is_full_leaf = leaf->num_stored_in_leaf == trie->num_room_in_leaf;
+
+      if (is_full_leaf)
+	{
+	  /* See if we have at least one leaf that does _not_ cover the
+	     entire bucket, so that splitting will actually reduce the number
+	     of elements in at least one of the child nodes.  (For simplicity,
+	     we don't test the range we're inserting, but it will be counted
+	     on the next insertion where we're full, if any.)   */
+	  for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+	    {
+	      if (leaf->ranges[i].low_pc > trie_pc
+		  || leaf->ranges[i].high_pc <= bucket_high_pc)
+		{
+		  splitting_leaf_will_help = true;
+		  break;
+		}
+	    }
+	}
     }
 
   /* If we're a leaf with no more room and we're _not_ at the bottom,
      convert to an interior node.  */
-  if (is_full_leaf && trie_pc_bits < VMA_BITS)
+  if (is_full_leaf && splitting_leaf_will_help && trie_pc_bits < VMA_BITS)
     {
       const struct trie_leaf *leaf = (struct trie_leaf *) trie;
       unsigned int i;
@@ -2202,8 +2223,9 @@ insert_arange_in_trie (bfd *abfd,
 	}
     }
 
-  /* If we're a leaf with no more room and we _are_ at the bottom,
-     we have no choice but to just make it larger. */
+  /* If we're a leaf with no more room and we _are_ at the bottom
+     (or splitting it won't help), we have no choice but to just
+     make it larger.  */
   if (is_full_leaf)
     {
       const struct trie_leaf *leaf = (struct trie_leaf *) trie;
@@ -2243,8 +2265,6 @@ insert_arange_in_trie (bfd *abfd,
   clamped_high_pc = high_pc;
   if (trie_pc_bits > 0)
     {
-      bfd_vma bucket_high_pc =
-	trie_pc + ((bfd_vma) -1 >> trie_pc_bits);  /* Inclusive.  */
       if (clamped_low_pc < trie_pc)
 	clamped_low_pc = trie_pc;
       if (clamped_high_pc > bucket_high_pc)
