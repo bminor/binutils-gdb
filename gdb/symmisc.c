@@ -286,7 +286,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  /* drow/2002-07-10: We could save the total symbols count
 	     even if we're using a hashtable, but nothing else but this message
 	     wants it.  */
-	  gdb_printf (outfile, ", %d syms/buckets in ",
+	  gdb_printf (outfile, ", %d symbols in ",
 		      mdict_size (b->multidict ()));
 	  gdb_puts (paddress (gdbarch, b->start ()), outfile);
 	  gdb_printf (outfile, "..");

@@ -159,8 +159,7 @@ extern struct symbol *
 extern struct symbol *mdict_iter_match_next (const lookup_name_info &name,
 					     struct mdict_iterator *miterator);
 
-/* Return some notion of the size of the multidictionary: the number of
-   symbols if we have that, the number of hash buckets otherwise.  */
+/* Return the number of symbols in multidictionary MDICT.  */
 
 extern int mdict_size (const struct multidictionary *mdict);
 

@@ -650,7 +650,18 @@ insert_symbol_hashed (struct dictionary *dict,
 static int
 size_hashed (const struct dictionary *dict)
 {
-  return DICT_HASHED_NBUCKETS (dict);
+  int nbuckets = DICT_HASHED_NBUCKETS (dict);
+  int total = 0;
+
+  for (int i = 0; i < nbuckets; ++i)
+    {
+      for (struct symbol *sym = DICT_HASHED_BUCKET (dict, i);
+	   sym != nullptr;
+	   sym = sym->hash_next)
+	total++;
+    }
+
+  return total;
 }
 
 /* Functions only for DICT_HASHED_EXPANDABLE.  */
