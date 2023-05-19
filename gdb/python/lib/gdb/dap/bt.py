@@ -50,13 +50,9 @@ def _backtrace(thread_id, levels, startFrame):
         current_frame = gdb.newest_frame()
     except gdb.error:
         current_frame = None
-    # Note that we always iterate over all frames, which is lame, but
-    # seemingly necessary to support the totalFrames response.
-    # FIXME maybe the mildly mysterious note about "monotonically
-    # increasing totalFrames values" would let us fix this.
-    while current_frame is not None:
+    while current_frame is not None and (levels == 0 or len(frames) < levels):
         # This condition handles the startFrame==0 case as well.
-        if current_number >= startFrame and (levels == 0 or len(frames) < levels):
+        if current_number >= startFrame:
             newframe = {
                 "id": frame_id(current_frame),
                 "name": _frame_name(current_frame),
@@ -80,9 +76,11 @@ def _backtrace(thread_id, levels, startFrame):
             frames.append(newframe)
         current_number = current_number + 1
         current_frame = current_frame.older()
+    # Note that we do not calculate totalFrames here.  Its absence
+    # tells the client that it may simply ask for frames until a
+    # response yields fewer frames than requested.
     return {
         "stackFrames": frames,
-        "totalFrames": current_number,
     }
 
 
