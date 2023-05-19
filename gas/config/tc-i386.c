@@ -827,6 +827,14 @@ i386_cpu_flags cpu_arch_isa_flags;
    larger than a byte offset.  */
 static bool no_cond_jump_promotion = false;
 
+/* This will be set from an expression parser hook if there's any
+   applicable operator involved in an expression.  */
+static enum {
+  expr_operator_none,
+  expr_operator_present,
+  expr_large_value,
+} expr_mode;
+
 /* Encode SSE instructions with VEX prefix.  */
 static unsigned int sse2avx;
 
@@ -6016,6 +6024,8 @@ optimize_imm (void)
     }
   else if ((flag_code == CODE_16BIT) ^ (i.prefix[DATA_PREFIX] != 0))
     guess_suffix = WORD_MNEM_SUFFIX;
+  else if (flag_code != CODE_64BIT || !(i.prefix[REX_PREFIX] & REX_W))
+    guess_suffix = LONG_MNEM_SUFFIX;
 
   for (op = i.operands; --op >= 0;)
     if (operand_type_check (i.types[op], imm))
@@ -10508,6 +10518,7 @@ x86_cons (expressionS *exp, int size)
 
   intel_syntax = -intel_syntax;
   exp->X_md = 0;
+  expr_mode = expr_operator_none;
 
 #if ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) \
       && !defined (LEX_AT)) \
@@ -10567,7 +10578,8 @@ x86_cons (expressionS *exp, int size)
     i386_intel_simplify (exp);
 
   /* If not 64bit, massage value, to account for wraparound when !BFD64.  */
-  if (size == 4 && exp->X_op == O_constant && !object_64bit)
+  if (size <= 4 && expr_mode == expr_operator_present
+      && exp->X_op == O_constant && !object_64bit)
     exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
 
   return got_reloc;
@@ -11626,6 +11638,7 @@ i386_immediate (char *imm_start)
   if (gotfree_input_line)
     input_line_pointer = gotfree_input_line;
 
+  expr_mode = expr_operator_none;
   exp_seg = expression (exp);
 
   /* For .insn immediates there may be a size specifier.  */
@@ -11684,7 +11697,8 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 
       /* If not 64bit, sign/zero extend val, to account for wraparound
 	 when !BFD64.  */
-      if (flag_code != CODE_64BIT && !object_64bit)
+      if (expr_mode == expr_operator_present
+	  && flag_code != CODE_64BIT && !object_64bit)
 	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
     }
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
@@ -11906,6 +11920,7 @@ i386_displacement (char *disp_start, char *disp_end)
   if (gotfree_input_line)
     input_line_pointer = gotfree_input_line;
 
+  expr_mode = expr_operator_none;
   exp_seg = expression (exp);
 
   SKIP_WHITESPACE ();
@@ -11976,7 +11991,8 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 
 	 If not 64bit, sign/zero extend val, to account for wraparound
 	 when !BFD64.  */
-      if (flag_code != CODE_64BIT && !object_64bit)
+      if (expr_mode == expr_operator_present
+	  && flag_code != CODE_64BIT && !object_64bit)
 	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
     }
 
@@ -13923,6 +13939,41 @@ md_operand (expressionS *e)
     }
 }
 
+#ifdef BFD64
+/* To maintain consistency with !BFD64 builds of gas record, whether any
+   (binary) operator was involved in an expression.  As expressions are
+   evaluated in only 32 bits when !BFD64, we use this to decide whether to
+   truncate results.  */
+bool i386_record_operator (operatorT op,
+			   const expressionS *left,
+			   const expressionS *right)
+{
+  if (op == O_absent)
+    return false;
+
+  if (!left)
+    {
+      /* Since the expression parser applies unary operators fine to bignum
+	 operands, we don't need to be concerned of respective operands not
+	 fitting in 32 bits.  */
+      if (right->X_op == O_constant && right->X_unsigned
+	  && !fits_in_unsigned_long (right->X_add_number))
+	return false;
+    }
+  /* This isn't entirely right: The pattern can also result when constant
+     expressions are folded (e.g. 0xffffffff + 1).  */
+  else if ((left->X_op == O_constant && left->X_unsigned
+	    && !fits_in_unsigned_long (left->X_add_number))
+	   || (right->X_op == O_constant && right->X_unsigned
+	       && !fits_in_unsigned_long (right->X_add_number)))
+    expr_mode = expr_large_value;
+
+  if (expr_mode != expr_large_value)
+    expr_mode = expr_operator_present;
+
+  return false;
+}
+#endif
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 const char *md_shortopts = "kVQ:sqnO::";

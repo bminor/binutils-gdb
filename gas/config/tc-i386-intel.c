@@ -633,6 +633,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
   input_line_pointer = buf = xstrdup (operand_string);
 
   intel_syntax = -1;
+  expr_mode = expr_operator_none;
   memset (&exp, 0, sizeof(exp));
   exp_seg = expression (&exp);
   ret = i386_intel_simplify (&exp);

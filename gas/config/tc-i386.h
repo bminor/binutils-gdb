@@ -188,6 +188,12 @@ extern operatorT i386_operator (const char *name, unsigned int operands, char *)
 extern int i386_need_index_operator (void);
 #define md_need_index_operator i386_need_index_operator
 
+#ifdef BFD64
+extern bool i386_record_operator
+  (operatorT, const expressionS *, const expressionS *);
+#define md_optimize_expr(l, o, r) i386_record_operator (o, l, r)
+#endif
+
 #define md_register_arithmetic 0
 
 extern const struct relax_type md_relax_table[];
