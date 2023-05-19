@@ -47,5 +47,4 @@ def stepIn(*, threadId, granularity="statement", **args):
 @request("continue")
 def continue_request(**args):
     send_gdb(ExecutionInvoker("continue", None))
-    # FIXME Just ignore threadId for the time being, and assume all-stop.
     return {"allThreadsContinued": True}

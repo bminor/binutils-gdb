@@ -46,7 +46,6 @@ def _backtrace(thread_id, levels, startFrame):
     set_thread(thread_id)
     frames = []
     current_number = 0
-    # FIXME could invoke frame filters here.
     try:
         current_frame = gdb.newest_frame()
     except gdb.error:

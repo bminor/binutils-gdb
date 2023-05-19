@@ -140,13 +140,10 @@ def _on_stop(event):
     global _expected_stop
     obj = {
         "threadId": gdb.selected_thread().global_num,
-        # FIXME we don't support non-stop for now.
         "allThreadsStopped": True,
     }
     if isinstance(event, gdb.BreakpointEvent):
         # Ignore the expected stop, we hit a breakpoint instead.
-        # FIXME differentiate between 'breakpoint', 'function breakpoint',
-        # 'data breakpoint' and 'instruction breakpoint' here.
         _expected_stop = StopKinds.BREAKPOINT
         obj["hitBreakpointIds"] = [x.number for x in event.breakpoints]
     elif _expected_stop is None:

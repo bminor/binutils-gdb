@@ -51,7 +51,6 @@ def _repl(command, frame_id):
     }
 
 
-# FIXME 'format' & hex
 # FIXME supportsVariableType handling
 @request("evaluate")
 def eval_request(*, expression, frameId=None, context="variables", **args):
@@ -74,7 +73,6 @@ def _variables(ref, start, count):
 @request("variables")
 # Note that we ignore the 'filter' field.  That seems to be
 # specific to javascript.
-# FIXME: implement format
 def variables(*, variablesReference, start=0, count=0, **args):
     result = send_gdb_with_response(
         lambda: _variables(variablesReference, start, count)
