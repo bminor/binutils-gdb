@@ -398,62 +398,8 @@ CODE_FRAGMENT
 #define COFF_DEFAULT_LONG_SECTION_NAMES  (false), COFF_LONG_SECTION_NAMES_SETTER
 #endif /* COFF_ENABLE_LONG_SECTION_NAMES */
 
-#if defined (COFF_LONG_SECTION_NAMES)
-static bool bfd_coff_set_long_section_names_allowed
-  (bfd *, int);
-#else /* !defined (COFF_LONG_SECTION_NAMES) */
-static bool bfd_coff_set_long_section_names_disallowed
-  (bfd *, int);
-#endif /* defined (COFF_LONG_SECTION_NAMES) */
-static long sec_to_styp_flags
-  (const char *, flagword);
-static bool styp_to_sec_flags
-  (bfd *, void *, const char *, asection *, flagword *);
-static bool coff_bad_format_hook
-  (bfd *, void *);
-static void coff_set_custom_section_alignment
-  (bfd *, asection *, const struct coff_section_alignment_entry *,
-   const unsigned int);
-static bool coff_new_section_hook
-  (bfd *, asection *);
-static bool coff_set_arch_mach_hook
-  (bfd *, void *);
-static bool coff_write_relocs
-  (bfd *, int);
-static bool coff_set_flags
-  (bfd *, unsigned int *, unsigned short *);
-static bool coff_set_arch_mach
-  (bfd *, enum bfd_architecture, unsigned long) ATTRIBUTE_UNUSED;
-static bool coff_compute_section_file_positions
-  (bfd *);
-static bool coff_write_object_contents
-  (bfd *) ATTRIBUTE_UNUSED;
-static bool coff_set_section_contents
-  (bfd *, asection *, const void *, file_ptr, bfd_size_type);
-static bool coff_slurp_line_table
-  (bfd *, asection *);
-static bool coff_slurp_symbol_table
-  (bfd *);
 static enum coff_symbol_classification coff_classify_symbol
   (bfd *, struct internal_syment *);
-static bool coff_slurp_reloc_table
-  (bfd *, asection *, asymbol **);
-static long coff_canonicalize_reloc
-  (bfd *, asection *, arelent **, asymbol **);
-#ifndef coff_mkobject_hook
-static void * coff_mkobject_hook
-  (bfd *, void *,  void *);
-#endif
-#ifdef COFF_WITH_PE
-static flagword handle_COMDAT
-  (bfd *, flagword, void *, const char *, asection *);
-#endif
-#ifdef TICOFF
-static bool ticoff0_bad_format_hook
-  (bfd *, void * );
-static bool ticoff1_bad_format_hook
-  (bfd *, void * );
-#endif
 
 /* void warning(); */
 
