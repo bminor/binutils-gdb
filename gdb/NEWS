@@ -9,6 +9,9 @@
 * Building GDB and GDBserver now requires a C++17 compiler.
   For example, GCC 9 or later.
 
+* The Windows native target now supports non-stop mode.  This feature
+  requires Windows 10 or later.
+
 * GDB index now contains information about the main function.  This speeds up
   startup when it is being used for some large binaries.
 
