@@ -48,6 +48,12 @@
 
 * Add record full support for rv64gc architectures
 
+* The Windows native target now supports scheduler-locking.  E.g.,
+  "set scheduler-locking on" now works.  Previously it gave an error.
+
+* The Windows native target now supports non-stop mode.  This feature
+  requires Windows 10 or later.
+
 * New commands
 
 maintenance check psymtabs
