@@ -367,8 +367,6 @@ windows_process_info::handle_exception (DEBUG_EVENT &current_event,
   DWORD code = rec->ExceptionCode;
   handle_exception_result result = HANDLE_EXCEPTION_HANDLED;
 
-  memcpy (&siginfo_er, rec, sizeof siginfo_er);
-
   switch (code)
     {
     case EXCEPTION_ACCESS_VIOLATION:

@@ -675,7 +675,6 @@ win32_clear_inferiors (void)
     }
 
   for_each_thread (delete_thread_info);
-  windows_process.siginfo_er.ExceptionCode = 0;
   clear_inferiors ();
 }
 
@@ -1306,14 +1305,19 @@ win32_process_target::qxfer_siginfo (const char *annex,
 				     unsigned const char *writebuf,
 				     CORE_ADDR offset, int len)
 {
-  if (windows_process.siginfo_er.ExceptionCode == 0)
+  windows_thread_info *th
+    = windows_process.find_thread (current_thread_ptid ());
+
+  if (th->last_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
     return -1;
 
   if (readbuf == nullptr)
     return -1;
 
-  char *buf = (char *) &windows_process.siginfo_er;
-  size_t bufsize = sizeof (windows_process.siginfo_er);
+  EXCEPTION_RECORD &er = th->last_event.u.Exception.ExceptionRecord;
+
+  char *buf = (char *) &er;
+  size_t bufsize = sizeof (er);
 
 #ifdef __x86_64__
   EXCEPTION_RECORD32 er32;
@@ -1322,17 +1326,15 @@ win32_process_target::qxfer_siginfo (const char *annex,
       buf = (char *) &er32;
       bufsize = sizeof (er32);
 
-      er32.ExceptionCode = windows_process.siginfo_er.ExceptionCode;
-      er32.ExceptionFlags = windows_process.siginfo_er.ExceptionFlags;
+      er32.ExceptionCode = er.ExceptionCode;
+      er32.ExceptionFlags = er.ExceptionFlags;
       er32.ExceptionRecord
-	= (uintptr_t) windows_process.siginfo_er.ExceptionRecord;
+	= (uintptr_t) er.ExceptionRecord;
       er32.ExceptionAddress
-	= (uintptr_t) windows_process.siginfo_er.ExceptionAddress;
-      er32.NumberParameters = windows_process.siginfo_er.NumberParameters;
-      int i;
-      for (i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
-	er32.ExceptionInformation[i]
-	  = windows_process.siginfo_er.ExceptionInformation[i];
+	= (uintptr_t) er.ExceptionAddress;
+      er32.NumberParameters = er.NumberParameters;
+      for (int i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
+	er32.ExceptionInformation[i] = er.ExceptionInformation[i];
     }
 #endif
 

@@ -2993,7 +2993,6 @@ windows_nat_target::mourn_inferior ()
       CHECK (CloseHandle (windows_process.handle));
       windows_process.open_process_used = 0;
     }
-  windows_process.siginfo_er.ExceptionCode = 0;
   inf_child_target::mourn_inferior ();
 }
 
@@ -3110,8 +3109,15 @@ static enum target_xfer_status
 windows_xfer_siginfo (gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
 		      ULONGEST *xfered_len)
 {
-  char *buf = (char *) &windows_process.siginfo_er;
-  size_t bufsize = sizeof (windows_process.siginfo_er);
+  windows_thread_info *th = windows_process.find_thread (inferior_ptid);
+
+  if (th->last_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
+    return TARGET_XFER_E_IO;
+
+  EXCEPTION_RECORD &er = th->last_event.u.Exception.ExceptionRecord;
+
+  char *buf = (char *) &er;
+  size_t bufsize = sizeof (er);
 
 #ifdef __x86_64__
   EXCEPTION_RECORD32 er32;
@@ -3120,22 +3126,15 @@ windows_xfer_siginfo (gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
       buf = (char *) &er32;
       bufsize = sizeof (er32);
 
-      er32.ExceptionCode = windows_process.siginfo_er.ExceptionCode;
-      er32.ExceptionFlags = windows_process.siginfo_er.ExceptionFlags;
-      er32.ExceptionRecord
-	= (uintptr_t) windows_process.siginfo_er.ExceptionRecord;
-      er32.ExceptionAddress
-	= (uintptr_t) windows_process.siginfo_er.ExceptionAddress;
-      er32.NumberParameters = windows_process.siginfo_er.NumberParameters;
-      int i;
-      for (i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
-	er32.ExceptionInformation[i]
-	  = windows_process.siginfo_er.ExceptionInformation[i];
+      er32.ExceptionCode = er.ExceptionCode;
+      er32.ExceptionFlags = er.ExceptionFlags;
+      er32.ExceptionRecord = (uintptr_t) er.ExceptionRecord;
+      er32.ExceptionAddress = (uintptr_t) er.ExceptionAddress;
+      er32.NumberParameters = er.NumberParameters;
+      for (int i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
+	er32.ExceptionInformation[i] = er.ExceptionInformation[i];
     }
 #endif
-
-  if (windows_process.siginfo_er.ExceptionCode == 0)
-    return TARGET_XFER_E_IO;
 
   if (readbuf == nullptr)
     return TARGET_XFER_E_IO;

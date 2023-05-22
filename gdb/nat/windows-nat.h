@@ -146,9 +146,6 @@ struct windows_process_info
   DWORD process_id = 0;
   DWORD main_thread_id = 0;
 
-  /* Contents of $_siginfo */
-  EXCEPTION_RECORD siginfo_er {};
-
 #ifdef __x86_64__
   /* The target is a WOW64 process */
   bool wow64_process = false;
