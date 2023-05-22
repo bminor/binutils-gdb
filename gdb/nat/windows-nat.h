@@ -70,6 +70,15 @@ struct windows_thread_info
      the next call.  */
   const char *thread_name ();
 
+  /* Read LEN bytes of the thread's $_siginfo into READBUF, starting
+     at OFFSET.  Store the number of actually-read bytes in
+     XFERED_LEN.  Returns true on success, false on failure.  Passing
+     READBUF as NULL indicates that the caller is trying to write to
+     $_siginfo, which is a failure case.  */
+  bool xfer_siginfo (gdb_byte *readbuf,
+		     ULONGEST offset, ULONGEST len,
+		     ULONGEST *xfered_len);
+
   /* The process this thread belongs to.  */
   windows_process_info *proc;
 

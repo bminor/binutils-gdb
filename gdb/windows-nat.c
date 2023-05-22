@@ -3111,44 +3111,10 @@ windows_xfer_siginfo (gdb_byte *readbuf, ULONGEST offset, ULONGEST len,
 {
   windows_thread_info *th = windows_process.find_thread (inferior_ptid);
 
-  if (th->last_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
+  if (th->xfer_siginfo (readbuf, offset, len, xfered_len))
+    return TARGET_XFER_OK;
+  else
     return TARGET_XFER_E_IO;
-
-  EXCEPTION_RECORD &er = th->last_event.u.Exception.ExceptionRecord;
-
-  char *buf = (char *) &er;
-  size_t bufsize = sizeof (er);
-
-#ifdef __x86_64__
-  EXCEPTION_RECORD32 er32;
-  if (windows_process.wow64_process)
-    {
-      buf = (char *) &er32;
-      bufsize = sizeof (er32);
-
-      er32.ExceptionCode = er.ExceptionCode;
-      er32.ExceptionFlags = er.ExceptionFlags;
-      er32.ExceptionRecord = (uintptr_t) er.ExceptionRecord;
-      er32.ExceptionAddress = (uintptr_t) er.ExceptionAddress;
-      er32.NumberParameters = er.NumberParameters;
-      for (int i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
-	er32.ExceptionInformation[i] = er.ExceptionInformation[i];
-    }
-#endif
-
-  if (readbuf == nullptr)
-    return TARGET_XFER_E_IO;
-
-  if (offset > bufsize)
-    return TARGET_XFER_E_IO;
-
-  if (offset + len > bufsize)
-    len = bufsize - offset;
-
-  memcpy (readbuf, buf + offset, len);
-  *xfered_len = len;
-
-  return TARGET_XFER_OK;
 }
 
 enum target_xfer_status
