@@ -15320,19 +15320,19 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
     {
       char *groupmsg;
       if (asprintf (&groupmsg,
-		    ngettext ("linker stubs in %u group\n",
-			      "linker stubs in %u groups\n",
+		    ngettext ("linker stubs in %u group",
+			      "linker stubs in %u groups",
 			      stub_sec_count),
 		    stub_sec_count) < 0)
 	*stats = NULL;
       else
 	{
-	  if (asprintf (stats, _("%s"
+	  if (asprintf (stats, _("%s, iter %u\n"
 				 "  branch         %lu\n"
 				 "  long branch    %lu\n"
 				 "  plt call       %lu\n"
 				 "  global entry   %lu"),
-			groupmsg,
+			groupmsg, htab->stub_iteration,
 			htab->stub_count[ppc_stub_long_branch - 1],
 			htab->stub_count[ppc_stub_plt_branch - 1],
 			htab->stub_count[ppc_stub_plt_call - 1],
