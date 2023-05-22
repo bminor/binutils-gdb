@@ -532,7 +532,6 @@ windows_nat_target::wait_for_debug_event_main_thread (DEBUG_EVENT *event)
 	{
 	  *event = m_last_debug_event;
 	  m_debug_event_pending = false;
-	  serial_event_clear (m_wait_event);
 	}
       else
 	wait_for_debug_event (event, INFINITE);
@@ -1839,6 +1838,11 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 {
   int pid = -1;
 
+  /* serial_event is a manual-reset event.  Clear it first.  We'll set
+     it again if we may need to wake up the event loop to get here
+     again.  */
+  serial_event_clear (m_wait_event);
+
   /* We loop when we get a non-standard exception rather than return
      with a SPURIOUS because resume can try and step or modify things,
      which needs a current_thread->h.  But some of these exceptions mark
@@ -1887,6 +1891,10 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		thr->suspend ();
 	    }
 
+	  /* If something came out, assume there may be more.  This is
+	     needed because there may be pending events ready to
+	     consume.  */
+	  serial_event_set (m_wait_event);
 	  return result;
 	}
       else
