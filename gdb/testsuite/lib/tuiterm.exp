@@ -547,6 +547,18 @@ namespace eval Term {
 	}
     }
 
+    # Reset the attributes in attributes array UPVAR_NAME to the default values.
+    proc _reset_attrs { upvar_name } {
+	upvar $upvar_name var
+	array set var {
+	    intensity normal
+	    fg default
+	    bg default
+	    underline 0
+	    reverse 0
+	}
+    }
+
     # Select Graphic Rendition.
     #
     # https://vt100.net/docs/vt510-rm/SGR.html
@@ -557,11 +569,7 @@ namespace eval Term {
 	    foreach item $args {
 		switch -exact -- $item {
 		    "" - 0 {
-			set _attrs(intensity) normal
-			set _attrs(fg) default
-			set _attrs(bg) default
-			set _attrs(underline) 0
-			set _attrs(reverse) 0
+			_reset_attrs _attrs
 		    }
 		    1 {
 			set _attrs(intensity) bold
@@ -666,13 +674,7 @@ namespace eval Term {
 	set _cur_col 0
 	set _cur_row 0
 	set _resize_count 0
-	array set _attrs {
-	    intensity normal
-	    fg default
-	    bg default
-	    underline 0
-	    reverse 0
-	}
+	_reset_attrs _attrs
 
 	_clear_lines 0 $_rows
     }
