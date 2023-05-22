@@ -300,9 +300,10 @@ tui_update_variables ()
      Only check the first one.  The ACS characters are determined at
      run time by curses terminal management.  */
   entry = translate (tui_border_kind, tui_border_kind_translate_lrcorner);
-  if (tui_border_lrcorner != (chtype) entry->value)
+  int val = (entry->value < 0) ? ACS_LRCORNER : entry->value;
+  if (tui_border_lrcorner != (chtype) val)
     {
-      tui_border_lrcorner = (entry->value < 0) ? ACS_LRCORNER : entry->value;
+      tui_border_lrcorner = val;
       need_redraw = true;
     }
   entry = translate (tui_border_kind, tui_border_kind_translate_llcorner);
