@@ -98,6 +98,10 @@ struct windows_thread_info
      thread.  */
   DEBUG_EVENT last_event {};
 
+  /* The last signal reported for this thread, extracted out of
+     last_event.  */
+  enum gdb_signal last_sig = GDB_SIGNAL_0;
+
   /* The context of the thread, including any manipulations.  */
   union
   {
@@ -141,7 +145,6 @@ struct windows_process_info
   HANDLE handle = 0;
   DWORD process_id = 0;
   DWORD main_thread_id = 0;
-  enum gdb_signal last_sig = GDB_SIGNAL_0;
 
   /* Contents of $_siginfo */
   EXCEPTION_RECORD siginfo_er {};

@@ -302,7 +302,6 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 {
   struct process_info *proc;
 
-  windows_process.last_sig = GDB_SIGNAL_0;
   windows_process.handle = proch;
   windows_process.process_id = pid;
   windows_process.main_thread_id = 0;
@@ -415,6 +414,7 @@ continue_one_thread (thread_info *thread, int thread_id)
 	    }
 
 	  th->resume ();
+	  th->last_sig = GDB_SIGNAL_0;
 	}
     }
 }
@@ -775,11 +775,11 @@ resume_one_thread (thread_info *thread, bool step, gdb_signal sig,
 		   "Not stopped for EXCEPTION_DEBUG_EVENT.\n",
 		   gdb_signal_to_string (sig)));
 	}
-      else if (sig == windows_process.last_sig)
+      else if (sig == th->last_sig)
 	*continue_status = DBG_EXCEPTION_NOT_HANDLED;
       else
 	OUTMSG (("Can only continue with received signal %s.\n",
-		 gdb_signal_to_string (windows_process.last_sig)));
+		 gdb_signal_to_string (th->last_sig)));
     }
 
   win32_prepare_to_resume (th);
@@ -980,7 +980,6 @@ get_child_debug_event (DWORD *continue_status,
 {
   ptid_t ptid;
 
-  windows_process.last_sig = GDB_SIGNAL_0;
   ourstatus->set_spurious ();
   *continue_status = DBG_CONTINUE;
 

@@ -369,8 +369,6 @@ windows_process_info::handle_exception (DEBUG_EVENT &current_event,
 
   memcpy (&siginfo_er, rec, sizeof siginfo_er);
 
-  last_sig = GDB_SIGNAL_0;
-
   switch (code)
     {
     case EXCEPTION_ACCESS_VIOLATION:
@@ -504,7 +502,11 @@ windows_process_info::handle_exception (DEBUG_EVENT &current_event,
     }
 
   if (ourstatus->kind () == TARGET_WAITKIND_STOPPED)
-    last_sig = ourstatus->sig ();
+    {
+      ptid_t ptid (current_event.dwProcessId, current_event.dwThreadId, 0);
+      windows_thread_info *th = find_thread (ptid);
+      th->last_sig = ourstatus->sig ();
+    }
 
   return result;
 
