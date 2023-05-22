@@ -304,7 +304,7 @@ typedef struct filedata
   uint64_t *           mipsxlat;
   uint64_t             gnusymidx;
   char *               program_interpreter;
-  uint64_t             dynamic_info[DT_ENCODING];
+  uint64_t             dynamic_info[DT_RELRENT + 1];
   uint64_t             dynamic_info_DT_GNU_HASH;
   uint64_t             dynamic_info_DT_MIPS_XHASH;
   elf_section_list *   symtab_shndx_list;
