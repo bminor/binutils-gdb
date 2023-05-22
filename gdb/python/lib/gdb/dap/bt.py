@@ -15,11 +15,8 @@
 
 import gdb
 import os
-import itertools
 
 from gdb.frames import frame_iterator
-from gdb.FrameIterator import FrameIterator
-from gdb.FrameDecorator import FrameDecorator
 from .frames import frame_id
 from .server import request, capability
 from .startup import send_gdb_with_response, in_gdb_thread

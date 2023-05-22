@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gdb
-import gdb.printing
 
 # This is deprecated in 3.9, but required in older versions.
 from typing import Optional
