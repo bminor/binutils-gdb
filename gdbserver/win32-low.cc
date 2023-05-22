@@ -167,7 +167,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
   if (windows_process.wow64_process)
     base += 2 * 4096; /* page size = 4096 */
 #endif
-  th = new windows_thread_info (tid, h, base);
+  th = new windows_thread_info (&windows_process, tid, h, base);
 
   add_thread (ptid, th);
 

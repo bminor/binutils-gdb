@@ -613,7 +613,7 @@ windows_nat_target::add_thread (ptid_t ptid, HANDLE h, void *tlb,
   if (windows_process.wow64_process)
     base += 0x2000;
 #endif
-  th = new windows_thread_info (ptid.lwp (), h, base);
+  th = new windows_thread_info (&windows_process, ptid.lwp (), h, base);
   windows_process.thread_list.emplace_back (th);
 
   /* Add this new thread to the list of threads.

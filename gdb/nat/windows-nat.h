@@ -42,13 +42,16 @@ struct pending_stop
   target_waitstatus status;
 };
 
+struct windows_process_info;
 
 /* Thread information structure used to track extra information about
    each thread.  */
 struct windows_thread_info
 {
-  windows_thread_info (DWORD tid_, HANDLE h_, CORE_ADDR tlb)
-    : tid (tid_),
+  windows_thread_info (windows_process_info *proc_,
+		       DWORD tid_, HANDLE h_, CORE_ADDR tlb)
+    : proc (proc_),
+      tid (tid_),
       h (h_),
       thread_local_base (tlb)
   {
@@ -66,6 +69,9 @@ struct windows_thread_info
      stored in this thread and is guaranteed to live until at least
      the next call.  */
   const char *thread_name ();
+
+  /* The process this thread belongs to.  */
+  windows_process_info *proc;
 
   /* The Win32 thread identifier.  */
   DWORD tid;
