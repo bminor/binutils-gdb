@@ -3351,3 +3351,17 @@ aor, 0xf20f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64
 axor, 0xf30f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 
 // RAO-INT instructions end.
+
+// LKGS instruction.
+
+lkgs, 0xf20f00/6, LKGS|x64, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+lkgs, 0xf20f00/6, LKGS|x64, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+
+// LKGS instruction end.
+
+// FRED instructions.
+
+erets, 0xf20f01ca, FRED|x64, NoSuf, {}
+eretu, 0xf30f01ca, FRED|x64, NoSuf, {}
+
+// FRED instructions end.

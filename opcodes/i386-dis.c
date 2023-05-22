@@ -1016,7 +1016,9 @@ enum
 enum
 {
   PREFIX_90 = 0,
+  PREFIX_0F00_REG_6_X86_64,
   PREFIX_0F01_REG_0_MOD_3_RM_6,
+  PREFIX_0F01_REG_1_RM_2,
   PREFIX_0F01_REG_1_RM_4,
   PREFIX_0F01_REG_1_RM_5,
   PREFIX_0F01_REG_1_RM_6,
@@ -1301,10 +1303,13 @@ enum
   X86_64_E8,
   X86_64_E9,
   X86_64_EA,
+  X86_64_0F00_REG_6,
   X86_64_0F01_REG_0,
   X86_64_0F01_REG_0_MOD_3_RM_6_P_1,
   X86_64_0F01_REG_0_MOD_3_RM_6_P_3,
   X86_64_0F01_REG_1,
+  X86_64_0F01_REG_1_RM_2_PREFIX_1,
+  X86_64_0F01_REG_1_RM_2_PREFIX_3,
   X86_64_0F01_REG_1_RM_5_PREFIX_2,
   X86_64_0F01_REG_1_RM_6_PREFIX_2,
   X86_64_0F01_REG_1_RM_7_PREFIX_2,
@@ -2746,7 +2751,7 @@ static const struct dis386 reg_table[][8] = {
     { "ltr",	{ Ew }, 0 },
     { "verr",	{ Ew }, 0 },
     { "verw",	{ Ew }, 0 },
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F00_REG_6) },
     { Bad_Opcode },
   },
   /* REG_0F01 */
@@ -2987,12 +2992,28 @@ static const struct dis386 prefix_table[][4] = {
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
   },
 
+  /* PREFIX_0F00_REG_6_X86_64 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "lkgs",  { Ew }, 0 },
+  },
+
   /* PREFIX_0F01_REG_0_MOD_3_RM_6 */
   {
     { "wrmsrns",        { Skip_MODRM }, 0 },
     { X86_64_TABLE (X86_64_0F01_REG_0_MOD_3_RM_6_P_1) },
     { Bad_Opcode },
     { X86_64_TABLE (X86_64_0F01_REG_0_MOD_3_RM_6_P_3) },
+  },
+
+  /* PREFIX_0F01_REG_1_RM_2 */
+  {
+    { "clac",		{ Skip_MODRM }, 0 },
+    { X86_64_TABLE (X86_64_0F01_REG_1_RM_2_PREFIX_1) },
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_1_RM_2_PREFIX_3)},
   },
 
   /* PREFIX_0F01_REG_1_RM_4 */
@@ -4362,6 +4383,12 @@ static const struct dis386 x86_64_table[][2] = {
     { "{l|}jmp{P|}", { Ap }, 0 },
   },
 
+  /* X86_64_0F00_REG_6 */
+  {
+    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F00_REG_6_X86_64) },
+  },
+
   /* X86_64_0F01_REG_0 */
   {
     { "sgdt{Q|Q}", { M }, 0 },
@@ -4384,6 +4411,18 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { "sidt{Q|Q}", { M }, 0 },
     { "sidt", { M }, 0 },
+  },
+
+  /* X86_64_0F01_REG_1_RM_2_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "eretu",		{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_1_RM_2_PREFIX_3 */
+  {
+    { Bad_Opcode },
+    { "erets",		{ Skip_MODRM }, 0 },
   },
 
   /* X86_64_0F01_REG_1_RM_5_PREFIX_2 */
@@ -8693,7 +8732,7 @@ static const struct dis386 rm_table[][8] = {
     /* RM_0F01_REG_1 */
     { "monitor",	{ { OP_Monitor, 0 } }, 0 },
     { "mwait",		{ { OP_Mwait, 0 } }, 0 },
-    { "clac",		{ Skip_MODRM }, 0 },
+    { PREFIX_TABLE (PREFIX_0F01_REG_1_RM_2) },
     { "stac",		{ Skip_MODRM }, 0 },
     { PREFIX_TABLE (PREFIX_0F01_REG_1_RM_4) },
     { PREFIX_TABLE (PREFIX_0F01_REG_1_RM_5) },

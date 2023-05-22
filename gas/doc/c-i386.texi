@@ -205,6 +205,8 @@ accept various extension mnemonics.  For example,
 @code{msrlist},
 @code{avx_ne_convert},
 @code{rao_int},
+@code{fred},
+@code{lkgs},
 @code{amx_int8},
 @code{amx_bf16},
 @code{amx_fp16},
@@ -1634,6 +1636,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.prefetchi} @tab @samp{.avx_ifma} @tab @samp{.avx_vnni_int8}
 @item @samp{.cmpccxadd} @tab @samp{.wrmsrns} @tab @samp{.msrlist}
 @item @samp{.avx_ne_convert} @tab @samp{.rao_int}
+@item @samp{.fred} @tab @samp{.lkgs}
 @item @samp{.wbnoinvd} @tab @samp{.pconfig} @tab @samp{.waitpkg} @tab @samp{.cldemote}
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
 @item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd} @tab @samp{.tsxldtrk}
