@@ -19,6 +19,7 @@ import gdb
 from .server import send_event
 from .startup import in_gdb_thread, Invoker, log
 from .breakpoint import breakpoint_descriptor
+from .modules import is_module, make_module
 
 
 @in_gdb_thread
@@ -76,6 +77,18 @@ def _new_thread(event):
             "threadId": event.inferior_thread.global_num,
         },
     )
+
+
+@in_gdb_thread
+def _new_objfile(event):
+    if is_module(event.new_objfile):
+        send_event(
+            "module",
+            {
+                "reason": "new",
+                "module": make_module(event.new_objfile),
+            },
+        )
 
 
 _suppress_cont = False
@@ -161,3 +174,4 @@ gdb.events.breakpoint_modified.connect(_bp_modified)
 gdb.events.breakpoint_deleted.connect(_bp_deleted)
 gdb.events.new_thread.connect(_new_thread)
 gdb.events.cont.connect(_cont)
+gdb.events.new_objfile.connect(_new_objfile)

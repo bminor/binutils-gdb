@@ -98,6 +98,7 @@ PYTHON_FILE_LIST = \
 	gdb/dap/launch.py \
 	gdb/dap/locations.py \
 	gdb/dap/memory.py \
+	gdb/dap/modules.py \
 	gdb/dap/next.py \
 	gdb/dap/pause.py \
 	gdb/dap/scopes.py \

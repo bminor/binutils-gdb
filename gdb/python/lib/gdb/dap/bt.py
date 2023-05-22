@@ -18,6 +18,7 @@ import os
 
 from gdb.frames import frame_iterator
 from .frames import frame_id
+from .modules import module_id
 from .server import request, capability
 from .startup import send_gdb_with_response, in_gdb_thread
 from .state import set_thread
@@ -39,6 +40,7 @@ def _backtrace(thread_id, levels, startFrame):
     except gdb.error:
         frame_iter = ()
     for current_frame in frame_iter:
+        pc = current_frame.address()
         newframe = {
             "id": frame_id(current_frame),
             "name": current_frame.function(),
@@ -47,8 +49,11 @@ def _backtrace(thread_id, levels, startFrame):
             "line": 0,
             # GDB doesn't support columns.
             "column": 0,
-            "instructionPointerReference": hex(current_frame.address()),
+            "instructionPointerReference": hex(pc),
         }
+        objfile = gdb.current_progspace().objfile_for_address(pc)
+        if objfile is not None:
+            newframe["moduleId"] = module_id(objfile)
         line = current_frame.line()
         if line is not None:
             newframe["line"] = line

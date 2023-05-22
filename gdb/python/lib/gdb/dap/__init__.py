@@ -27,6 +27,7 @@ from . import evaluate
 from . import launch
 from . import locations
 from . import memory
+from . import modules
 from . import next
 from . import pause
 from . import scopes
