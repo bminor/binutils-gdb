@@ -875,10 +875,25 @@ namespace eval Term {
 	wait_for "^$str"
     }
 
-    # Return the text of screen line N, without attributes.  Lines are
-    # 0-based.  If C is given, stop before column C.  Columns are also
-    # zero-based.
-    proc get_line {n {c ""}} {
+    # Apply the attribute list in ATTRS to attributes array UPVAR_NAME.
+    # Return a string annotating the changed attributes.
+    proc apply_attrs { upvar_name attrs } {
+	set res ""
+	upvar $upvar_name var
+	foreach { attr val } $attrs {
+	    if { $var($attr) != $val } {
+		append res "<$attr:$val>"
+		set var($attr) $val
+	    }
+	}
+
+	return $res
+    }
+
+    # Return the text of screen line N.  Lines are 0-based.  If C is given,
+    # stop before column C.  Columns are also zero-based.  If ATTRS, annotate
+    # with attributes.
+    proc get_line_1 {n c attrs} {
 	variable _rows
 	# This can happen during resizing, if the cursor seems to
 	# temporarily be off-screen.
@@ -891,11 +906,35 @@ namespace eval Term {
 	variable _chars
 	set c [_default $c $_cols]
 	set x 0
+	if { $attrs } {
+	    _reset_attrs line_attrs
+	}
 	while {$x < $c} {
+	    if { $attrs } {
+		set char_attrs [lindex $_chars($x,$n) 1]
+		append result [apply_attrs line_attrs $char_attrs]
+	    }
 	    append result [lindex $_chars($x,$n) 0]
 	    incr x
 	}
+	if { $attrs } {
+	    _reset_attrs zero_attrs
+	    set char_attrs [array get zero_attrs]
+	    append result [apply_attrs line_attrs $char_attrs]
+	}
 	return $result
+    }
+
+    # Return the text of screen line N, without attributes.  Lines are
+    # 0-based.  If C is given, stop before column C.  Columns are also
+    # zero-based.
+    proc get_line {n {c ""} } {
+	return [get_line_1 $n $c 0]
+    }
+
+    # As get_line, but annotate with attributes.
+    proc get_line_with_attrs {n {c ""}} {
+	return [get_line_1 $n $c 1]
     }
 
     # Get just the character at (X, Y).
@@ -1079,8 +1118,8 @@ namespace eval Term {
     }
 
     # A debugging function to dump the current screen, with line
-    # numbers.
-    proc dump_screen {} {
+    # numbers.  If ATTRS, annotate with attributes.
+    proc dump_screen { {attrs 0} } {
 	variable _rows
 	variable _cols
 	variable _cur_row
@@ -1090,8 +1129,13 @@ namespace eval Term {
 
 	for {set y 0} {$y < $_rows} {incr y} {
 	    set fmt [format %5d $y]
-	    verbose -log "$fmt [get_line $y]"
+	    verbose -log "$fmt [get_line_1 $y "" $attrs]"
 	}
+    }
+
+    # As dump_screen, but with attributes annotation.
+    proc dump_screen_with_attrs {} {
+	return [dump_screen 1]
     }
 
     # A debugging function to dump a box from the current screen, with line
