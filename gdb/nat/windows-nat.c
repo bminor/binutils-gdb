@@ -153,6 +153,55 @@ windows_thread_info::thread_name ()
   return name.get ();
 }
 
+/* Read Windows signal info.  See nat/windows-nat.h.  */
+
+bool
+windows_thread_info::xfer_siginfo (gdb_byte *readbuf,
+				   ULONGEST offset, ULONGEST len,
+				   ULONGEST *xfered_len)
+{
+  if (last_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
+    return false;
+
+  if (readbuf == nullptr)
+    return false;
+
+  EXCEPTION_RECORD &er = last_event.u.Exception.ExceptionRecord;
+
+  char *buf = (char *) &er;
+  size_t bufsize = sizeof (er);
+
+#ifdef __x86_64__
+  EXCEPTION_RECORD32 er32;
+  if (proc->wow64_process)
+    {
+      buf = (char *) &er32;
+      bufsize = sizeof (er32);
+
+      er32.ExceptionCode = er.ExceptionCode;
+      er32.ExceptionFlags = er.ExceptionFlags;
+      er32.ExceptionRecord
+	= (uintptr_t) er.ExceptionRecord;
+      er32.ExceptionAddress
+	= (uintptr_t) er.ExceptionAddress;
+      er32.NumberParameters = er.NumberParameters;
+      for (int i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
+	er32.ExceptionInformation[i] = er.ExceptionInformation[i];
+    }
+#endif
+
+  if (offset > bufsize)
+    return false;
+
+  if (offset + len > bufsize)
+    len = bufsize - offset;
+
+  memcpy (readbuf, buf + offset, len);
+  *xfered_len = len;
+
+  return true;
+}
+
 /* Try to determine the executable filename.
 
    EXE_NAME_RET is a pointer to a buffer whose size is EXE_NAME_MAX_LEN.
