@@ -180,6 +180,22 @@ program_space::remove_objfile (struct objfile *objfile)
 
 /* See progspace.h.  */
 
+struct objfile *
+program_space::objfile_for_address (CORE_ADDR address)
+{
+  for (auto iter : objfiles ())
+    {
+      /* Don't check separate debug objfiles.  */
+      if (iter->separate_debug_objfile_backlink != nullptr)
+	continue;
+      if (is_addr_in_objfile (address, iter))
+	return iter;
+    }
+  return nullptr;
+}
+
+/* See progspace.h.  */
+
 void
 program_space::exec_close ()
 {

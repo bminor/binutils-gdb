@@ -392,6 +392,30 @@ pspy_solib_name (PyObject *o, PyObject *args)
   return host_string_to_python_string (soname).release ();
 }
 
+/* Implement objfile_for_address.  */
+
+static PyObject *
+pspy_objfile_for_address (PyObject *o, PyObject *args)
+{
+  CORE_ADDR addr;
+  PyObject *addr_obj;
+
+  pspace_object *self = (pspace_object *) o;
+
+  PSPY_REQUIRE_VALID (self);
+
+  if (!PyArg_ParseTuple (args, "O", &addr_obj))
+    return nullptr;
+  if (get_addr_from_python (addr_obj, &addr) < 0)
+    return nullptr;
+
+  struct objfile *objf = self->pspace->objfile_for_address (addr);
+  if (objf == nullptr)
+    Py_RETURN_NONE;
+
+  return objfile_to_objfile_object (objf).release ();
+}
+
 /* Return the innermost lexical block containing the specified pc value,
    or 0 if there is none.  */
 static PyObject *
@@ -569,6 +593,9 @@ static PyMethodDef progspace_object_methods[] =
   { "solib_name", pspy_solib_name, METH_VARARGS,
     "solib_name (Long) -> String.\n\
 Return the name of the shared library holding a given address, or None." },
+  { "objfile_for_address", pspy_objfile_for_address, METH_VARARGS,
+    "objfile_for_address (int) -> gdb.Objfile\n\
+Return the objfile containing the given address, or None." },
   { "block_for_pc", pspy_block_for_pc, METH_VARARGS,
     "Return the block containing the given pc value, or None." },
   { "find_pc_line", pspy_find_pc_line, METH_VARARGS,

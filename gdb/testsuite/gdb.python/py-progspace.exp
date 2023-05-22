@@ -68,6 +68,13 @@ if ![is_address_zero_readable] {
     gdb_test "python print (gdb.current_progspace ().block_for_pc (0))" "None"
 }
 
+gdb_test "python print(gdb.current_progspace().objfile_for_address(${pc_val}).username)" \
+    ".*py-progspace" \
+    "objfile for pc"
+gdb_test "python print(gdb.current_progspace().objfile_for_address(0))" \
+    "None" \
+    "no objfile for 0"
+
 # With a single inferior, progspace.objfiles () and gdb.objfiles () should
 # be identical.
 gdb_test "python print (progspace.objfiles () == gdb.objfiles ())" "True"

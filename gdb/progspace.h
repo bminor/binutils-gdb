@@ -249,6 +249,10 @@ struct program_space
   /* Free all the objfiles associated with this program space.  */
   void free_all_objfiles ();
 
+  /* Return the objfile containing ADDRESS, or nullptr if the address
+     is outside all objfiles in this progspace.  */
+  struct objfile *objfile_for_address (CORE_ADDR address);
+
   /* Return a range adapter for iterating over all the solibs in this
      program space.  Use it like:
 

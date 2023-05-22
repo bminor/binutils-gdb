@@ -5036,6 +5036,11 @@ Return the name of the shared library holding the given @var{address}
 as a string, or @code{None}.
 @end defun
 
+@defun Progspace.objfile_for_address (address)
+Return the @code{gdb.Objfile} holding the given address, or
+@code{None} if no objfile covers it.
+@end defun
+
 One may add arbitrary attributes to @code{gdb.Progspace} objects
 in the usual Python way.
 This is useful if, for example, one needs to do some extra record keeping
