@@ -405,6 +405,153 @@ core_file_command (const char *filename, int from_tty)
     core_target_open (filename, from_tty);
 }
 
+/* A vmcore file is a core file created by the Linux kernel at the point of
+   a crash.  Each thread in the core file represents a real CPU core, and
+   the lwpid for each thread is the pid of the process that was running on
+   that core at the moment of the crash.
+
+   However, not every CPU core will have been running a process, some cores
+   will be idle.  For these idle cores the CPU writes an lwpid of 0.  And
+   of course, multiple cores might be idle, so there could be multiple
+   threads with an lwpid of 0.
+
+   The problem is GDB doesn't really like threads with an lwpid of 0; GDB
+   presents such a thread as a process rather than a thread.  And GDB
+   certainly doesn't like multiple threads having the same lwpid, each time
+   a new thread is seen with the same lwpid the earlier thread (with the
+   same lwpid) will be deleted.
+
+   This function addresses both of these problems by assigning a fake lwpid
+   to any thread with an lwpid of 0.
+
+   GDB finds the lwpid information by looking at the bfd section names
+   which include the lwpid, e.g. .reg/NN where NN is the lwpid.  This
+   function looks though all the section names looking for sections named
+   .reg/NN.  If any sections are found where NN == 0, then we assign a new
+   unique value of NN.  Then, in a second pass, any sections ending /0 are
+   assigned their new number.
+
+   Remember, a core file may contain multiple register sections for
+   different register sets, but the sets are always grouped by thread, so
+   we can figure out which registers should be assigned the same new
+   lwpid.  For example, consider a core file containing:
+
+     .reg/0, .reg2/0, .reg/0, .reg2/0
+
+   This represents two threads, each thread contains a .reg and .reg2
+   register set.  The .reg represents the start of each thread.  After
+   renaming the sections will now look like this:
+
+     .reg/1, .reg2/1, .reg/2, .reg2/2
+
+   After calling this function the rest of the core file handling code can
+   treat this core file just like any other core file.  */
+
+static void
+rename_vmcore_idle_reg_sections (bfd *abfd, inferior *inf)
+{
+  /* Map from the bfd section to its lwpid (the /NN number).  */
+  std::vector<std::pair<asection *, int>> sections_and_lwpids;
+
+  /* The set of all /NN numbers found.  Needed so we can easily find unused
+     numbers in the case that we need to rename some sections.  */
+  std::unordered_set<int> all_lwpids;
+
+  /* A count of how many sections called .reg/0 we have found.  */
+  unsigned zero_lwpid_count = 0;
+
+  /* Look for all the .reg sections.  Record the section object and the
+     lwpid which is extracted from the section name.  Spot if any have an
+     lwpid of zero.  */
+  for (asection *sect : gdb_bfd_sections (core_bfd))
+    {
+      if (startswith (bfd_section_name (sect), ".reg/"))
+	{
+	  int lwpid = atoi (bfd_section_name (sect) + 5);
+	  sections_and_lwpids.emplace_back (sect, lwpid);
+	  all_lwpids.insert (lwpid);
+	  if (lwpid == 0)
+	    zero_lwpid_count++;
+	}
+    }
+
+  /* If every ".reg/NN" section has a non-zero lwpid then we don't need to
+     do any renaming.  */
+  if (zero_lwpid_count == 0)
+    return;
+
+  /* Assign a new number to any .reg sections with an lwpid of 0.  */
+  int new_lwpid = 1;
+  for (auto &sect_and_lwpid : sections_and_lwpids)
+    if (sect_and_lwpid.second == 0)
+      {
+	while (all_lwpids.find (new_lwpid) != all_lwpids.end ())
+	  new_lwpid++;
+	sect_and_lwpid.second = new_lwpid;
+	new_lwpid++;
+      }
+
+  /* Now update the names of any sections with an lwpid of 0.  This is
+     more than just the .reg sections we originally found.  */
+  std::string replacement_lwpid_str;
+  auto iter = sections_and_lwpids.begin ();
+  int replacement_lwpid = 0;
+  for (asection *sect : gdb_bfd_sections (core_bfd))
+    {
+      if (iter != sections_and_lwpids.end () && sect == iter->first)
+	{
+	  gdb_assert (startswith (bfd_section_name (sect), ".reg/"));
+
+	  int lwpid = atoi (bfd_section_name (sect) + 5);
+	  if (lwpid == iter->second)
+	    {
+	      /* This section was not given a new number.  */
+	      gdb_assert (lwpid != 0);
+	      replacement_lwpid = 0;
+	    }
+	  else
+	    {
+	      replacement_lwpid = iter->second;
+	      ptid_t ptid (inf->pid, replacement_lwpid);
+	      if (!replacement_lwpid_str.empty ())
+		replacement_lwpid_str += ", ";
+	      replacement_lwpid_str += target_pid_to_str (ptid);
+	    }
+
+	  iter++;
+	}
+
+      if (replacement_lwpid != 0)
+	{
+	  const char *name = bfd_section_name (sect);
+	  size_t len = strlen (name);
+
+	  if (strncmp (name + len - 2, "/0", 2) == 0)
+	    {
+	      /* This section needs a new name.  */
+	      std::string name_str
+		= string_printf ("%.*s/%d",
+				 static_cast<int> (len - 2),
+				 name, replacement_lwpid);
+	      char *name_buf
+		= static_cast<char *> (bfd_alloc (abfd, name_str.size () + 1));
+	      if (name_buf == nullptr)
+		error (_("failed to allocate space for section name '%s'"),
+		       name_str.c_str ());
+	      memcpy (name_buf, name_str.c_str(), name_str.size () + 1);
+	      bfd_rename_section (sect, name_buf);
+	    }
+	}
+    }
+
+  if (zero_lwpid_count == 1)
+    warning (_("found thread with pid 0, assigned replacement Target Id: %s"),
+	     replacement_lwpid_str.c_str ());
+  else
+    warning (_("found threads with pid 0, assigned replacement Target Ids: %s"),
+	     replacement_lwpid_str.c_str ());
+}
+
 /* Locate (and load) an executable file (and symbols) given the core file
    BFD ABFD.  */
 
@@ -539,6 +686,9 @@ core_target_open (const char *arg, int from_tty)
   gdb_assert (inf->pid == 0);
   inferior_appeared (inf, pid);
   inf->fake_pid_p = fake_pid_p;
+
+  /* Rename any .reg/0 sections, giving them each a fake lwpid.  */
+  rename_vmcore_idle_reg_sections (core_bfd, inf);
 
   /* Build up thread list from BFD sections, and possibly set the
      current thread to the .reg/NN section matching the .reg
