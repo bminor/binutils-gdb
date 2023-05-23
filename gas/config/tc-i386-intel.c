@@ -169,6 +169,10 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
       return O_illegal;
     }
 
+  /* See the quotation related comment in i386_parse_name().  */
+  if (*pc == '"')
+    return O_absent;
+
   for (j = 0; i386_operators[j].name; ++j)
     if (strcasecmp (i386_operators[j].name, name) == 0)
       {

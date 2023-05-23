@@ -13886,6 +13886,13 @@ i386_parse_name (char *name, expressionS *e, char *nextcharP)
   const reg_entry *r = NULL;
   char *end = input_line_pointer;
 
+  /* We only know the terminating character here.  It being double quote could
+     be the closing one of a quoted symbol name, or an opening one from a
+     following string (or another quoted symbol name).  Since the latter can't
+     be valid syntax for anything, bailing in either case is good enough.  */
+  if (*nextcharP == '"')
+    return 0;
+
   *end = *nextcharP;
   if (*name == REGISTER_PREFIX || allow_naked_reg)
     r = parse_real_register (name, &input_line_pointer);
