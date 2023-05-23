@@ -378,14 +378,17 @@ cli_ui_out::do_progress_notify (const std::string &msg,
   return;
 }
 
-/* Clear the current line of the most recent progress update.  Overwrites
-   the current line with whitespace.  */
+/* Clear do_progress_notify output from the current line.  Overwrites the
+   notification with whitespace.  */
 
 void
-cli_ui_out::clear_current_line ()
+cli_ui_out::clear_progress_notify ()
 {
   struct ui_file *stream = m_streams.back ();
   int chars_per_line = get_chars_per_line ();
+
+  scoped_restore save_pagination
+    = make_scoped_restore (&pagination_enabled, false);
 
   if (!stream->isatty ()
       || !current_ui->input_interactive_p ()
@@ -413,7 +416,7 @@ cli_ui_out::do_progress_end ()
   m_progress_info.pop_back ();
 
   if (stream->isatty ())
-    clear_current_line ();
+    clear_progress_notify ();
 }
 
 /* local functions */

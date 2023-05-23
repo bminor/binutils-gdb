@@ -104,7 +104,7 @@ private:
 
   /* Stack of progress info.  */
   std::vector<cli_progress_info> m_progress_info;
-  void clear_current_line ();
+  void clear_progress_notify ();
 };
 
 extern void cli_display_match_list (char **matches, int len, int max);
