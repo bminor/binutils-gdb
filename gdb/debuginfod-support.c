@@ -96,20 +96,6 @@ struct user_data
   ui_out::progress_update progress;
 };
 
-/* Deleter for a debuginfod_client.  */
-
-struct debuginfod_client_deleter
-{
-  void operator() (debuginfod_client *c)
-  {
-    debuginfod_end (c);
-  }
-};
-
-using debuginfod_client_up
-  = std::unique_ptr<debuginfod_client, debuginfod_client_deleter>;
-
-
 /* Convert SIZE into a unit suitable for use with progress updates.
    SIZE should in given in bytes and will be converted into KB, MB, GB
    or remain unchanged. UNIT will be set to "B", "KB", "MB" or "GB"
@@ -180,20 +166,45 @@ progressfn (debuginfod_client *c, long cur, long total)
   return 0;
 }
 
+/* Cleanup ARG, which is a debuginfod_client pointer.  */
+
+static void
+cleanup_debuginfod_client (void *arg)
+{
+  debuginfod_client *client = static_cast<debuginfod_client *> (arg);
+  debuginfod_end (client);
+}
+
+/* Return a pointer to the single global debuginfod_client, initialising it
+   first if needed.  */
+
 static debuginfod_client *
 get_debuginfod_client ()
 {
-  static debuginfod_client_up global_client;
+  static debuginfod_client *global_client = nullptr;
 
   if (global_client == nullptr)
     {
-      global_client.reset (debuginfod_begin ());
+      global_client = debuginfod_begin ();
 
       if (global_client != nullptr)
-	debuginfod_set_progressfn (global_client.get (), progressfn);
+	{
+	  /* It is important that we cleanup the debuginfod_client object
+	     before calling exit.  Some of the libraries used by debuginfod
+	     make use of at_exit handlers to perform cleanup.
+
+	     If we wrapped the debuginfod_client in a unique_ptr and relied
+	     on its destructor to cleanup then this would be run as part of
+	     the global C++ object destructors, which is after the at_exit
+	     handlers, which is too late.
+
+	     So instead, we make use of GDB's final cleanup mechanism.  */
+	  make_final_cleanup (cleanup_debuginfod_client, global_client);
+	  debuginfod_set_progressfn (global_client, progressfn);
+	}
     }
 
-  return global_client.get ();
+  return global_client;
 }
 
 /* Check if debuginfod is enabled.  If configured to do so, ask the user
