@@ -262,6 +262,9 @@ class ui_out
   /* Redirect the output of a ui_out object temporarily.  */
   void redirect (ui_file *outstream);
 
+  /* Redirect the output of a ui_out object to a buffer_file temporarily.  */
+  void redirect_to_buffer (buffer_file *buf_file);
+
   ui_out_flags test_flags (ui_out_flags mask);
 
   /* HACK: Code in GDB is currently checking to see the type of ui_out
@@ -360,6 +363,7 @@ protected:
   virtual void do_wrap_hint (int indent) = 0;
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
+  virtual void do_redirect_to_buffer (buffer_file *buf_file) = 0;
 
   virtual void do_progress_start () = 0;
   virtual void do_progress_notify (const std::string &, const char *,
@@ -470,4 +474,66 @@ private:
   struct ui_out *m_uiout;
 };
 
+/* On construction, redirect a uiout and gdb_stdout to a buffer_file.
+   On destruction restore uiout and gdb_stdout.  */
+
+class ui_out_buffer_pop
+{
+public:
+  ui_out_buffer_pop (ui_out *uiout);
+
+  ~ui_out_buffer_pop ();
+
+  /* Flush buffered output to the underlying output stream.  */
+  void flush ()
+  {
+    m_buf_file.flush_to_stream ();
+  }
+
+  ui_out_buffer_pop (const ui_out_buffer_pop &) = delete;
+  ui_out_buffer_pop &operator= (const ui_out_buffer_pop &) = delete;
+
+private:
+  /* ui_out being temporarily redirected.  */
+  struct ui_out *m_uiout;
+
+  /* Buffer which output is temporarily redirected to for the lifetime of
+     this object.  */
+  buffer_file m_buf_file;
+
+  /* Original gdb_stdout at the time of this object's construction.  */
+  ui_file *m_prev_gdb_stdout;
+};
+
+/* Redirect output to a buffer_file for the duration of FUNC.  */
+
+template<typename F, typename... Arg>
+void
+do_with_buffered_output (F func, ui_out *uiout, Arg... args)
+{
+  ui_out_buffer_pop buf (uiout);
+
+  try
+    {
+      func (uiout, std::forward<Arg> (args)...);
+    }
+  catch (gdb_exception &ex)
+    {
+      /* Ideally flush would be called in the destructor of buf,
+	 however flushing might cause an exception to be thrown.
+	 Catch it and ensure the first exception propagates.  */
+      try
+	{
+	  buf.flush ();
+	}
+      catch (const gdb_exception &ignore)
+	{
+	}
+
+      throw_exception (std::move (ex));
+    }
+
+  /* Try was successful.  Let any further exceptions propagate.  */
+  buf.flush ();
+}
 #endif /* UI_OUT_H */

@@ -220,11 +220,51 @@ public:
   bool empty () const { return m_string.empty (); }
   void clear () { return m_string.clear (); }
 
-private:
+protected:
   /* The internal buffer.  */
   std::string m_string;
 
   bool m_term_out;
+};
+
+/* A string_file implementation that collects output on behalf of a
+   given ui_file.  Provides access to the underlying ui_file so
+   that buffering can be selectively bypassed.  */
+
+class buffer_file : public string_file
+{
+public:
+  explicit buffer_file (bool term_out)
+    : string_file (term_out), m_stream (nullptr)
+  {}
+
+  /* Associate STREAM with this buffer_file.  */
+  void set_stream (ui_file *stream);
+
+  /* Record the wrap hint.  When flushing the buffer, the underlying
+     ui_file's wrap_here will be called at the current point in the output.  */
+  void wrap_here (int indent) override;
+
+  /* Flush collected output to the underlying ui_file.  */
+  void flush_to_stream ();
+
+  /* Return true if the underlying stream is a tty.  */
+  bool isatty () override;
+
+  /* Return a pointer to STREAM's underlying ui_file.  Recursively called until
+     a non-buffer_file is found.  */
+  static ui_file *get_unbuffered_stream (ui_file *stream);
+
+private:
+
+  /* The underlying output stream.  */
+  ui_file *m_stream;
+
+  typedef std::pair<std::string, int> string_wrap_pair;
+
+  /* A collection of strings paired with an int representing the argument
+     to a wrap_here call.  */
+  std::vector<string_wrap_pair> m_string_wraps;
 };
 
 /* A ui_file implementation that maps directly onto <stdio.h>'s FILE.

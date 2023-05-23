@@ -234,6 +234,83 @@ string_file::can_emit_style_escape ()
 
 
 
+/* See ui-file.h.  */
+
+void
+buffer_file::wrap_here (int indent)
+{
+  m_string_wraps.emplace (m_string_wraps.end (),
+			  string_wrap_pair (m_string, indent));
+  m_string.clear ();
+}
+
+/* See ui-file.h.  */
+
+void
+buffer_file::flush_to_stream ()
+{
+  if (m_stream == nullptr)
+    return;
+
+  /* Add m_string to m_string_wraps with no corresponding wrap_here.  */
+  wrap_here (-1);
+
+  for (string_wrap_pair pair : m_string_wraps)
+    {
+      std::string buf = std::move (pair.first);
+      size_t size = buf.size ();
+
+      /* Write each line separately.  */
+      for (size_t prev = 0, cur = 0; cur < size; ++cur)
+	if (buf.at (cur) == '\n' || cur == size - 1)
+	  {
+	    std::string sub = buf.substr (prev, cur - prev + 1);
+	    m_stream->puts (sub.c_str ());
+	    prev = cur + 1;
+	  }
+
+      if (pair.second >= 0)
+	m_stream->wrap_here (pair.second);
+    }
+
+  m_string_wraps.clear ();
+}
+
+/* See ui-file.h.  */
+
+ui_file *
+buffer_file::get_unbuffered_stream (ui_file *stream)
+{
+  buffer_file *buf = dynamic_cast<buffer_file *> (stream);
+
+  if (buf == nullptr || buf->m_stream == nullptr)
+    return stream;
+
+  return get_unbuffered_stream (buf->m_stream);
+}
+
+/* See ui-file.h.  */
+
+void
+buffer_file::set_stream (ui_file *stream)
+{
+  if (m_stream == nullptr)
+    m_stream = stream;
+}
+
+/* See ui-file.h.  */
+
+bool
+buffer_file::isatty ()
+{
+  if (m_stream != nullptr)
+    return m_stream->isatty ();
+
+  return false;
+}
+
+
+
 stdio_file::stdio_file (FILE *file, bool close_p)
 {
   set_stream (file);

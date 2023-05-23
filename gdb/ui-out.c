@@ -799,6 +799,12 @@ ui_out::redirect (ui_file *outstream)
   do_redirect (outstream);
 }
 
+void
+ui_out::redirect_to_buffer (buffer_file *buf_file)
+{
+  do_redirect_to_buffer (buf_file);
+}
+
 /* Test the flags against the mask given.  */
 ui_out_flags
 ui_out::test_flags (ui_out_flags mask)
@@ -870,4 +876,18 @@ ui_out::ui_out (ui_out_flags flags)
 
 ui_out::~ui_out ()
 {
+}
+
+ui_out_buffer_pop::ui_out_buffer_pop (ui_out *uiout)
+: m_uiout (uiout), m_buf_file (uiout->can_emit_style_escape ()),
+  m_prev_gdb_stdout (gdb_stdout)
+{
+  m_uiout->redirect_to_buffer (&m_buf_file);
+  gdb_stdout = &m_buf_file;
+}
+
+ui_out_buffer_pop::~ui_out_buffer_pop ()
+{
+  m_uiout->redirect_to_buffer (nullptr);
+  gdb_stdout = m_prev_gdb_stdout;
 }

@@ -71,6 +71,7 @@ protected:
   virtual void do_wrap_hint (int indent) override;
   virtual void do_flush () override;
   virtual void do_redirect (struct ui_file *outstream) override;
+  virtual void do_redirect_to_buffer (buffer_file *buf_file) override;
 
   virtual void do_progress_start () override;
   virtual void do_progress_notify (const std::string &, const char *,

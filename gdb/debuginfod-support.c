@@ -159,7 +159,8 @@ progressfn (debuginfod_client *c, long cur, long total)
 
   if (check_quit_flag ())
     {
-      gdb_printf ("Cancelling download of %s %s...\n",
+      ui_file *outstream = buffer_file::get_unbuffered_stream (gdb_stdout);
+      gdb_printf (outstream, "Cancelling download of %s %s...\n",
 		  data->desc, styled_fname.c_str ());
       return 1;
     }
@@ -275,10 +276,14 @@ static void
 print_outcome (int fd, const char *desc, const char *fname)
 {
   if (fd < 0 && fd != -ENOENT)
-    gdb_printf (_("Download failed: %s.  Continuing without %s %ps.\n"),
-		safe_strerror (-fd),
-		desc,
-		styled_string (file_name_style.style (), fname));
+    {
+      ui_file *outstream = buffer_file::get_unbuffered_stream (gdb_stdout);
+      gdb_printf (outstream,
+		  _("Download failed: %s.  Continuing without %s %ps.\n"),
+		  safe_strerror (-fd),
+		  desc,
+		  styled_string (file_name_style.style (), fname));
+    }
 }
 
 /* See debuginfod-support.h  */

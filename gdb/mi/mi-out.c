@@ -195,6 +195,28 @@ mi_ui_out::do_redirect (ui_file *outstream)
 }
 
 void
+mi_ui_out::do_redirect_to_buffer (buffer_file *buf_file)
+{
+  if (buf_file != nullptr)
+    {
+      gdb_assert (m_streams.size () >= 1);
+      ui_file *stream = m_streams.back ();
+
+      string_file *sstream = dynamic_cast<string_file *>(stream);
+      if (sstream != nullptr)
+	{
+	  buf_file->write (sstream->data (), sstream->size ());
+	  sstream->clear ();
+	}
+
+      buf_file->set_stream (stream);
+      m_streams.push_back (buf_file);
+    }
+  else
+    m_streams.pop_back ();
+}
+
+void
 mi_ui_out::field_separator ()
 {
   if (m_suppress_field_separator)

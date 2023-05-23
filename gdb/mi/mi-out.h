@@ -79,6 +79,7 @@ protected:
   virtual void do_wrap_hint (int indent) override;
   virtual void do_flush () override;
   virtual void do_redirect (struct ui_file *outstream) override;
+  virtual void do_redirect_to_buffer (buffer_file *buf_file) override;
 
   virtual bool do_is_mi_like_p () const override
   { return true; }
