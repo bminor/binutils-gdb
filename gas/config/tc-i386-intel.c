@@ -188,15 +188,12 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 
   if (i386_types[j].name && *pc == ' ')
     {
+      const char *start = ++input_line_pointer;
       char *pname;
-      char c;
+      char c = get_symbol_name (&pname);
 
-      ++input_line_pointer;
-      c = get_symbol_name (&pname);
-
-      if (strcasecmp (pname, "ptr") == 0)
+      if (strcasecmp (pname, "ptr") == 0 && (c != '"' || pname == start))
 	{
-	  /* FIXME: What if c == '"' ?  */
 	  pname[-1] = *pc;
 	  *pc = c;
 	  if (intel_syntax > 0 || operands != 1)
@@ -204,9 +201,8 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	  return i386_types[j].op;
 	}
 
-      if (strcasecmp (pname, "bcst") == 0)
+      if (strcasecmp (pname, "bcst") == 0 && (c != '"' || pname == start))
 	{
-	  /* FIXME: Again, what if c == '"' ?  */
 	  pname[-1] = *pc;
 	  *pc = c;
 	  if (intel_syntax > 0 || operands != 1
