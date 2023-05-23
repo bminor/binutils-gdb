@@ -1,3 +1,7 @@
+2023-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated translation.
+
 2023-04-21  Tom Tromey  <tromey@adacore.com>
 
 	* i386-dis.c (OP_J): Check result of get16.
