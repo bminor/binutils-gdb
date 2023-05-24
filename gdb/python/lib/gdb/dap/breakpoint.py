@@ -85,9 +85,11 @@ def _set_breakpoints_callback(kind, specs, creator):
     breakpoint_map[kind] = {}
     result = []
     for spec in specs:
-        keyspec = frozenset(spec.items())
-
+        # It makes sense to reuse a breakpoint even if the condition
+        # or ignore count differs, so remove these entries from the
+        # spec first.
         (condition, hit_condition) = _remove_entries(spec, "condition", "hitCondition")
+        keyspec = frozenset(spec.items())
 
         if keyspec in saved_map:
             bp = saved_map.pop(keyspec)
