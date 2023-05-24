@@ -95,10 +95,13 @@ def _set_breakpoints_callback(kind, specs, creator):
             # FIXME handle exceptions here
             bp = creator(**spec)
 
-        if condition is not None:
-            bp.condition = condition
-        if hit_condition is not None:
-            bp.ignore_count = hit_condition
+        bp.condition = condition
+        if hit_condition is None:
+            bp.ignore_count = 0
+        else:
+            bp.ignore_count = int(
+                gdb.parse_and_eval(hit_condition, global_context=True)
+            )
 
         breakpoint_map[kind][keyspec] = bp
         result.append(breakpoint_descriptor(bp))

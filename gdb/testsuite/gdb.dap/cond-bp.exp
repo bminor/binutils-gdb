@@ -35,7 +35,7 @@ set obj [dap_check_request_and_response "set conditional breakpoint" \
 	     [format {o source [o path [%s]] \
 			  breakpoints [a [o line [i %d] \
 					      condition [s "i == 3"] \
-					      hitCondition [i 3]]]} \
+					      hitCondition [s 3]]]} \
 		  [list s $srcfile] $line]]
 set fn_bpno [dap_get_breakpoint_number $obj]
 
