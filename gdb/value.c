@@ -3879,7 +3879,9 @@ value::fetch_lazy_register ()
   frame_info_ptr next_frame;
   int regnum;
   struct type *type = check_typedef (this->type ());
-  struct value *new_val = this, *mark = value_mark ();
+  struct value *new_val = this;
+
+  scoped_value_mark mark;
 
   /* Offsets are not supported here; lazy register values must
      refer to the entire register.  */
@@ -3983,10 +3985,6 @@ value::fetch_lazy_register ()
 
       frame_debug_printf ("%s", debug_file.c_str ());
     }
-
-  /* Dispose of the intermediate values.  This prevents
-     watchpoints from trying to watch the saved frame pointer.  */
-  value_free_to_mark (mark);
 }
 
 /* See value.h.  */

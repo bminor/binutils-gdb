@@ -271,8 +271,8 @@ public:
   {
     if (inner_p)
       {
-	gdb_assert (m_mark == nullptr);
-	m_mark = value_mark ();
+	gdb_assert (!m_mark.has_value ());
+	m_mark.emplace ();
       }
   }
 
@@ -282,9 +282,8 @@ public:
   {
     if (inner_p)
       {
-	gdb_assert (m_mark != nullptr);
-	value_free_to_mark (m_mark);
-	m_mark = nullptr;
+	gdb_assert (m_mark.has_value ());
+	m_mark.reset ();
       }
   }
 
@@ -305,9 +304,9 @@ protected:
      written.  */
   LONGEST m_dest_offset;
 
-  /* Set with a call to VALUE_MARK, and then reset after calling
-     VALUE_FREE_TO_MARK.  */
-  struct value *m_mark = nullptr;
+  /* Set and reset to handle removing intermediate values from the
+     value chain.  */
+  gdb::optional<scoped_value_mark> m_mark;
 };
 
 /* A class used by FORTRAN_VALUE_SUBARRAY when repacking Fortran array
