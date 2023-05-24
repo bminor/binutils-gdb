@@ -106,7 +106,7 @@ with_spawn_id $gdb_main_spawn_id {
 # Get the gdbserver PID.
 set gdbserver_pid 0
 with_spawn_id $gdb_main_spawn_id {
-    gdb_test "interrupt"
+    gdb_test -no-prompt-anchor "interrupt"
 
     gdb_test_multiple "" "interrupt arrived" {
 	-re "Program received signal SIGINT, Interrupt\\.\r\n" {
