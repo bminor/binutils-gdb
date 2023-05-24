@@ -456,10 +456,6 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
   if (direction != SEEK_CUR)
     position += offset;
 
-  if ((direction == SEEK_CUR && position == 0)
-      || (direction == SEEK_SET && (ufile_ptr) position == abfd->where))
-    return 0;
-
   result = abfd->iovec->bseek (abfd, position, direction);
   if (result != 0)
     {
