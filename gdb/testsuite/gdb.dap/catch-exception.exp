@@ -31,22 +31,32 @@ if {[dap_launch $binfile] == ""} {
 
 set obj [dap_check_request_and_response "set exception catchpoints" \
 	     setExceptionBreakpoints \
-	     {o filters [a [s assert]] \
+	     {o filters [a [s nosuchfilter] [s assert]] \
 		  filterOptions [a [o filterId [s exception] \
 					condition [s "Global_Var = 23"]]]}]
 
 set bps [dict get [lindex $obj 0] body breakpoints]
-gdb_assert {[llength $bps] == 2} "two breakpoints"
+# We should get three responses, because we requested three
+# breakpoints.  However, one of them should fail.
+gdb_assert {[llength $bps] == 3} "three breakpoints"
 
 # The "path" should never be "null".
 set i 1
 foreach spec $bps {
-    # If "path" does not exist, then that is fine as well.
-    if {![dict exists $spec source path]} {
-	pass "breakpoint $i path"
+    if {$i == 1} {
+	# First one should fail.
+	gdb_assert {[dict get $spec verified] == "false"} \
+	    "invalid first exception"
+	gdb_assert {[dict get $spec message] != ""} \
+	    "first exception had message"
     } else {
-	gdb_assert {[dict get $spec source path] != "null"} \
-	    "breakpoint $i path"
+	# If "path" does not exist, then that is fine as well.
+	if {![dict exists $spec source path]} {
+	    pass "breakpoint $i path"
+	} else {
+	    gdb_assert {[dict get $spec source path] != "null"} \
+		"breakpoint $i path"
+	}
     }
     incr i
 }

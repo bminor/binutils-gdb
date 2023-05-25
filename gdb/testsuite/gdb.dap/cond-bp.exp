@@ -30,6 +30,25 @@ if {[dap_launch $testfile] == ""} {
 }
 
 set line [gdb_get_line_number "STOP"]
+
+# Test some breakpoint-setting failure modes.
+set obj [dap_check_request_and_response "set invalid breakpoints" \
+	     setBreakpoints \
+	     [format {o source [o path [%s]] \
+			  breakpoints \
+			  [a [o line [i %d] condition [s "DEI@@++"]] \
+			       [o line [i %d] hitCondition [s "DEI@@++"]]]} \
+		  [list s $srcfile] $line $line]]
+
+set i 1
+foreach bp [dict get [lindex $obj 0] body breakpoints] {
+    gdb_assert {[dict get $bp verified] == "false"} \
+	"breakpoint $i invalid"
+    gdb_assert {[dict get $bp message] != ""} \
+	"breakpoint $i has message"
+    incr i
+}
+
 set obj [dap_check_request_and_response "set conditional breakpoint" \
 	     setBreakpoints \
 	     [format {o source [o path [%s]] \

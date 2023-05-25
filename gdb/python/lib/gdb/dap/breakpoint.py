@@ -20,7 +20,8 @@ import os
 from typing import Optional, Sequence
 
 from .server import request, capability
-from .startup import send_gdb_with_response, in_gdb_thread
+from .startup import send_gdb_with_response, in_gdb_thread, log_stack
+from .typecheck import type_check
 
 
 # Map from the breakpoint "kind" (like "function") to a second map, of
@@ -34,33 +35,35 @@ breakpoint_map = {}
 @in_gdb_thread
 def breakpoint_descriptor(bp):
     "Return the Breakpoint object descriptor given a gdb Breakpoint."
+    result = {
+        "id": bp.number,
+        # We always use True here, because this field just indicates
+        # that breakpoint creation was successful -- and if we have a
+        # breakpoint, the creation succeeded.
+        "verified": True,
+    }
     if bp.locations:
         # Just choose the first location, because DAP doesn't allow
         # multiple locations.  See
         # https://github.com/microsoft/debug-adapter-protocol/issues/13
         loc = bp.locations[0]
         (basename, line) = loc.source
-        result = {
-            "id": bp.number,
-            "verified": True,
-            "source": {
-                "name": os.path.basename(basename),
-                # We probably don't need this but it doesn't hurt to
-                # be explicit.
-                "sourceReference": 0,
-            },
-            "line": line,
-            "instructionReference": hex(loc.address),
-        }
+        result.update(
+            {
+                "source": {
+                    "name": os.path.basename(basename),
+                    # We probably don't need this but it doesn't hurt to
+                    # be explicit.
+                    "sourceReference": 0,
+                },
+                "line": line,
+                "instructionReference": hex(loc.address),
+            }
+        )
         path = loc.fullname
         if path is not None:
             result["source"]["path"] = path
-        return result
-    else:
-        return {
-            "id": bp.number,
-            "verified": False,
-        }
+    return result
 
 
 # Extract entries from a hash table and return a list of them.  Each
@@ -91,22 +94,42 @@ def _set_breakpoints_callback(kind, specs, creator):
         (condition, hit_condition) = _remove_entries(spec, "condition", "hitCondition")
         keyspec = frozenset(spec.items())
 
-        if keyspec in saved_map:
-            bp = saved_map.pop(keyspec)
-        else:
-            # FIXME handle exceptions here
-            bp = creator(**spec)
+        # Create or reuse a breakpoint.  If asked, set the condition
+        # or the ignore count.  Catch errors coming from gdb and
+        # report these as an "unverified" breakpoint.
+        bp = None
+        try:
+            if keyspec in saved_map:
+                bp = saved_map.pop(keyspec)
+            else:
+                bp = creator(**spec)
 
-        bp.condition = condition
-        if hit_condition is None:
-            bp.ignore_count = 0
-        else:
-            bp.ignore_count = int(
-                gdb.parse_and_eval(hit_condition, global_context=True)
+            bp.condition = condition
+            if hit_condition is None:
+                bp.ignore_count = 0
+            else:
+                bp.ignore_count = int(
+                    gdb.parse_and_eval(hit_condition, global_context=True)
+                )
+
+            # Reaching this spot means success.
+            breakpoint_map[kind][keyspec] = bp
+            result.append(breakpoint_descriptor(bp))
+        # Exceptions other than gdb.error are possible here.
+        except Exception as e:
+            log_stack()
+            # Maybe the breakpoint was made but setting an attribute
+            # failed.  We still want this to fail.
+            if bp is not None:
+                bp.delete()
+            # Breakpoint creation failed.
+            result.append(
+                {
+                    "verified": False,
+                    "message": str(e),
+                }
             )
 
-        breakpoint_map[kind][keyspec] = bp
-        result.append(breakpoint_descriptor(bp))
     # Delete any breakpoints that were not reused.
     for entry in saved_map.values():
         entry.delete()
