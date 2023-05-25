@@ -1,3 +1,8 @@
+2023-05-25  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* coff/pe.h (IMAGE_FILE_MACHINE_AMD64): Remove duplicate
+	definition.  Alphabetize.
+
 2023-03-23  Frederic Cambus  <fred@statdns.com>
 
 	* elf/common.h (PT_OPENBSD_MUTABLE): Define.
