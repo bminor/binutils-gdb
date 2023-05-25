@@ -1170,16 +1170,17 @@ class scoped_value_mark
   /* Free the values currently on the value stack.  */
   void free_to_mark ()
   {
-    if (m_value != NULL)
+    if (!m_freed)
       {
 	value_free_to_mark (m_value);
-	m_value = NULL;
+	m_freed = true;
       }
   }
 
  private:
 
   const struct value *m_value;
+  bool m_freed = false;
 };
 
 extern struct value *value_cstring (const char *ptr, ssize_t len,
