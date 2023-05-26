@@ -541,7 +541,6 @@ static char register_chars[256];
 static char operand_chars[256];
 
 /* Lexical macros.  */
-#define is_mnemonic_char(x) (mnemonic_chars[(unsigned char) x])
 #define is_operand_char(x) (operand_chars[(unsigned char) x])
 #define is_register_char(x) (register_chars[(unsigned char) x])
 #define is_space_char(x) ((x) == ' ')
@@ -3087,8 +3086,6 @@ md_begin (void)
 	    register_chars[c] = mnemonic_chars[c];
 	    operand_chars[c] = c;
 	  }
-	else if (c == '{' || c == '}')
-	  mnemonic_chars[c] = c;
 #ifdef SVR4_COMMENT_CHARS
 	else if (c == '\\' && strchr (i386_comment_chars, '/'))
 	  operand_chars[c] = c;
@@ -5478,6 +5475,12 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
   while (1)
     {
       mnem_p = mnemonic;
+      /* Pseudo-prefixes start with an opening figure brace.  */
+      if ((*mnem_p = *l) == '{')
+	{
+	  ++mnem_p;
+	  ++l;
+	}
       while ((*mnem_p = mnemonic_chars[(unsigned char) *l]) != 0)
 	{
 	  if (*mnem_p == '.')
@@ -5485,16 +5488,29 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	  mnem_p++;
 	  if (mnem_p >= mnemonic + MAX_MNEM_SIZE)
 	    {
+	    too_long:
 	      as_bad (_("no such instruction: `%s'"), token_start);
 	      return NULL;
 	    }
 	  l++;
 	}
-      if (!is_space_char (*l)
-	  && *l != END_OF_INSN
-	  && (intel_syntax
-	      || (*l != PREFIX_SEPARATOR
-		  && *l != ',')))
+      /* Pseudo-prefixes end with a closing figure brace.  */
+      if (*mnemonic == '{' && *l == '}')
+	{
+	  *mnem_p++ = *l++;
+	  if (mnem_p >= mnemonic + MAX_MNEM_SIZE)
+	    goto too_long;
+	  *mnem_p = '\0';
+
+	  /* Point l at the closing brace if there's no other separator.  */
+	  if (*l != END_OF_INSN && !is_space_char (*l)
+	      && *l != PREFIX_SEPARATOR)
+	    --l;
+	}
+      else if (!is_space_char (*l)
+	       && *l != END_OF_INSN
+	       && (intel_syntax
+		   || (*l != PREFIX_SEPARATOR && *l != ',')))
 	{
 	  if (prefix_only)
 	    break;
