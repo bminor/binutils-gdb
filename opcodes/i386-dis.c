@@ -161,9 +161,9 @@ struct instr_info
   char *obufp;
   char *mnemonicendp;
   const uint8_t *start_codep;
-  uint8_t *insn_codep;
   uint8_t *codep;
   const uint8_t *end_codep;
+  unsigned char nr_prefixes;
   signed char last_lock_prefix;
   signed char last_repz_prefix;
   signed char last_repnz_prefix;
@@ -247,8 +247,8 @@ struct dis_private {
   bfd_vma insn_start;
   int orig_sizeflag;
 
-  /* Points to first byte not fetched.  */
-  uint8_t *max_fetched;
+  /* Indexes first byte not fetched.  */
+  unsigned int fetched;
   uint8_t the_buffer[2 * MAX_CODE_LENGTH - 1];
 };
 
@@ -289,32 +289,31 @@ struct dis_private {
    to ADDR (exclusive) are valid.  Returns true for success, false
    on error.  */
 static bool
-fetch_code (struct disassemble_info *info, uint8_t *until)
+fetch_code (struct disassemble_info *info, const uint8_t *until)
 {
   int status = -1;
   struct dis_private *priv = info->private_data;
-  bfd_vma start = priv->insn_start + (priv->max_fetched - priv->the_buffer);
+  bfd_vma start = priv->insn_start + priv->fetched;
+  uint8_t *fetch_end = priv->the_buffer + priv->fetched;
+  ptrdiff_t needed = until - fetch_end;
 
-  if (until <= priv->max_fetched)
+  if (needed <= 0)
     return true;
 
-  if (until <= priv->the_buffer + ARRAY_SIZE (priv->the_buffer))
-    status = (*info->read_memory_func) (start,
-					priv->max_fetched,
-					until - priv->max_fetched,
-					info);
+  if (priv->fetched + needed <= ARRAY_SIZE (priv->the_buffer))
+    status = (*info->read_memory_func) (start, fetch_end, needed, info);
   if (status != 0)
     {
       /* If we did manage to read at least one byte, then
 	 print_insn_i386 will do something sensible.  Otherwise, print
 	 an error.  We do that here because this is where we know
 	 STATUS.  */
-      if (priv->max_fetched == priv->the_buffer)
+      if (!priv->fetched)
 	(*info->memory_error_func) (status, start, info);
       return false;
     }
 
-  priv->max_fetched = until;
+  priv->fetched += needed;
   return true;
 }
 
@@ -9782,7 +9781,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   info->bytes_per_line = 7;
 
   info->private_data = &priv;
-  priv.max_fetched = priv.the_buffer;
+  priv.fetched = 0;
   priv.insn_start = pc;
 
   for (i = 0; i < MAX_OPERANDS; ++i)
@@ -9814,7 +9813,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       goto fetch_error_out;
     }
 
-  ins.insn_codep = ins.codep;
+  ins.nr_prefixes = ins.codep - ins.start_codep;
 
   if (!fetch_code (info, ins.codep + 1))
     {
@@ -11829,7 +11828,9 @@ static bool
 BadOp (instr_info *ins)
 {
   /* Throw away prefixes and 1st. opcode byte.  */
-  ins->codep = ins->insn_codep + 1;
+  struct dis_private *priv = ins->info->private_data;
+
+  ins->codep = priv->the_buffer + ins->nr_prefixes + 1;
   ins->obufp = stpcpy (ins->obufp, "(bad)");
   return true;
 }
