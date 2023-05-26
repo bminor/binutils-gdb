@@ -749,7 +749,9 @@ if {![istarget "i*86-*-elfiamcu"] && [gas_64_check]} then {
 run_list_test "string-bad" ""
 run_list_test "reg-bad" ""
 run_list_test "space1" "-al"
-run_list_test "xmmword" ""
+if {![istarget "i*86-*-elfiamcu"]} then {
+    run_list_test "xmmword"
+}
 # Disabled due to large memory requirement.
 # run_dump_test rept
 run_dump_test pr19498
@@ -769,23 +771,26 @@ if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     run_dump_test "dw2-compressed-3a"
     run_dump_test "dw2-compressed-3b"
 
-    run_dump_test "property-2"
-    run_dump_test "property-3"
-    run_dump_test "property-4"
-    run_dump_test "property-5"
-    run_dump_test "property-6"
-    run_dump_test "property-10"
-    run_dump_test "property-11"
-    run_dump_test "property-12"
-    run_dump_test "property-13"
-    run_dump_test "property-cvtpi2pd"
-    run_dump_test "property-cvtpi2ps"
-    run_dump_test "property-ldmxcsr"
-    run_dump_test "property-v4fmaddps"
-    run_dump_test "property-vfmaddps"
-    run_dump_test "property-vldmxcsr"
-    run_dump_test "property-vpcmov"
-    run_dump_test "property-vzeroall"
+    if {![istarget "i*86-*-elfiamcu"]} then {
+	run_dump_test "property-2"
+	run_dump_test "property-3"
+	run_dump_test "property-4"
+	run_dump_test "property-5"
+	run_dump_test "property-6"
+	run_dump_test "property-10"
+	run_dump_test "property-11"
+	run_dump_test "property-12"
+	run_dump_test "property-13"
+	run_dump_test "property-cvtpi2pd"
+	run_dump_test "property-cvtpi2ps"
+	run_dump_test "property-ldmxcsr"
+	run_dump_test "property-v4fmaddps"
+	run_dump_test "property-vfmaddps"
+	run_dump_test "property-vldmxcsr"
+	run_dump_test "property-vpcmov"
+	run_dump_test "property-vzeroall"
+    }
+
     run_dump_test "code16-2"
 
     if {![istarget "*-*-dragonfly*"]
