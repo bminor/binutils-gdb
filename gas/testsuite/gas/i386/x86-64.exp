@@ -33,6 +33,14 @@ if { ![gas_64_check] } then {
     return
 }
 
+proc gas_32_check { } {
+    global NM
+    global NMFLAGS
+
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "targets:.*i386" [lindex $status 1]];
+}
+
 global ASFLAGS
 set old_ASFLAGS "$ASFLAGS"
 set ASFLAGS "$ASFLAGS --64 --defsym x86_64=1 --strip-local-absolute"
@@ -582,8 +590,10 @@ if [is_elf_format] then {
     run_dump_test "mixed-mode-reloc64"
     run_dump_test "rela"
     run_dump_test "x86-64-ifunc"
-    run_dump_test "x86-64-opcode-inval"
-    run_dump_test "x86-64-opcode-inval-intel"
+    if { [gas_32_check] } then {
+	run_dump_test "x86-64-opcode-inval"
+	run_dump_test "x86-64-opcode-inval-intel"
+    }
     run_dump_test "intel-got64"
     run_dump_test "x86-64-localpic"
     run_dump_test "debug1"
