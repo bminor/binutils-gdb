@@ -20,7 +20,7 @@ import gdb.printing
 from typing import Optional
 
 from .frames import frame_for_id
-from .server import capability, request
+from .server import capability, request, client_bool_capability
 from .startup import send_gdb_with_response, in_gdb_thread
 from .varref import find_variable, VariableReference
 
@@ -98,6 +98,11 @@ def _variables(ref, start, count):
 # Note that we ignore the 'filter' field.  That seems to be
 # specific to javascript.
 def variables(*, variablesReference: int, start: int = 0, count: int = 0, **args):
+    # This behavior was clarified here:
+    # https://github.com/microsoft/debug-adapter-protocol/pull/394
+    if not client_bool_capability("supportsVariablePaging"):
+        start = 0
+        count = 0
     result = send_gdb_with_response(
         lambda: _variables(variablesReference, start, count)
     )

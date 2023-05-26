@@ -67,13 +67,23 @@ gdb_assert {[dict get $reg_scope presentationHint] == "registers"} \
 gdb_assert {[dict get $reg_scope namedVariables] > 0} "at least one register"
 
 set num [dict get $scope variablesReference]
-set refs [lindex [dap_check_request_and_response "fetch variables" \
-		      "variables" \
-		      [format {o variablesReference [i %d] count [i 3]} \
-			   $num]] \
-	      0]
+# Send two requests and combine them, to verify that using a range
+# works.
+set refs1 [lindex [dap_check_request_and_response "fetch variables 0,1" \
+		       "variables" \
+		       [format {o variablesReference [i %d] count [i 2]} \
+			    $num]] \
+	       0]
+set refs2 [lindex [dap_check_request_and_response "fetch variables 2" \
+		       "variables" \
+		       [format {o variablesReference [i %d] \
+				    start [i 2] count [i 1]} \
+			    $num]] \
+	       0]
 
-foreach var [dict get $refs body variables] {
+set vars [concat [dict get $refs1 body variables] \
+	      [dict get $refs2 body variables]]
+foreach var $vars {
     set name [dict get $var name]
 
     if {$name != "dei"} {
