@@ -112,20 +112,20 @@ sframe_get_hdr_size (sframe_header *sfh)
 
 /* Access functions for frame row entry data.  */
 
-static unsigned int
-sframe_fre_get_offset_count (unsigned char fre_info)
+static uint8_t
+sframe_fre_get_offset_count (uint8_t fre_info)
 {
   return SFRAME_V1_FRE_OFFSET_COUNT (fre_info);
 }
 
-static unsigned int
-sframe_fre_get_offset_size (unsigned char fre_info)
+static uint8_t
+sframe_fre_get_offset_size (uint8_t fre_info)
 {
   return SFRAME_V1_FRE_OFFSET_SIZE (fre_info);
 }
 
 static bool
-sframe_get_fre_ra_mangled_p (unsigned char fre_info)
+sframe_get_fre_ra_mangled_p (uint8_t fre_info)
 {
   return SFRAME_V1_FRE_MANGLED_RA_P (fre_info);
 }
@@ -237,8 +237,7 @@ flip_fre_start_address (char *fp, unsigned int fre_type)
 }
 
 static void
-flip_fre_stack_offsets (char *fp, unsigned char offset_size,
-			unsigned char offset_cnt)
+flip_fre_stack_offsets (char *fp, uint8_t offset_size, uint8_t offset_cnt)
 {
   int j;
   void *offsets = (void *)fp;
@@ -287,8 +286,8 @@ sframe_fre_start_addr_size (unsigned int fre_type)
 static bool
 sframe_fre_sanity_check_p (sframe_frame_row_entry *frep)
 {
-  unsigned int offset_size, offset_cnt;
-  unsigned int fre_info;
+  uint8_t offset_size, offset_cnt;
+  uint8_t fre_info;
 
   if (frep == NULL)
     return false;
@@ -311,9 +310,9 @@ sframe_fre_sanity_check_p (sframe_frame_row_entry *frep)
 /* Get FRE_INFO's offset size in bytes.  */
 
 static size_t
-sframe_fre_offset_bytes_size (unsigned char fre_info)
+sframe_fre_offset_bytes_size (uint8_t fre_info)
 {
-  unsigned int offset_size, offset_cnt;
+  uint8_t offset_size, offset_cnt;
 
   offset_size = sframe_fre_get_offset_size (fre_info);
 
@@ -337,7 +336,7 @@ sframe_fre_entry_size (sframe_frame_row_entry *frep, unsigned int fre_type)
   if (frep == NULL)
     return 0;
 
-  unsigned char fre_info = frep->fre_info;
+  uint8_t fre_info = frep->fre_info;
   size_t addr_size = sframe_fre_start_addr_size (fre_type);
 
   return (addr_size + sizeof (frep->fre_info)
@@ -347,8 +346,8 @@ sframe_fre_entry_size (sframe_frame_row_entry *frep, unsigned int fre_type)
 static int
 flip_fre (char *fp, unsigned int fre_type, size_t *fre_size)
 {
-  unsigned char fre_info;
-  unsigned int offset_size, offset_cnt;
+  uint8_t fre_info;
+  uint8_t offset_size, offset_cnt;
   size_t addr_size, fre_info_size = 0;
   int err = 0;
 
@@ -361,13 +360,13 @@ flip_fre (char *fp, unsigned int fre_type, size_t *fre_size)
   addr_size = sframe_fre_start_addr_size (fre_type);
   fp += addr_size;
 
-  /* FRE info is unsigned char.  No need to flip.  */
-  fre_info = *(unsigned char*)fp;
+  /* FRE info is uint8_t.  No need to flip.  */
+  fre_info = *(uint8_t*)fp;
   offset_size = sframe_fre_get_offset_size (fre_info);
   offset_cnt = sframe_fre_get_offset_count (fre_info);
 
   /* Advance the buffer pointer to where the stack offsets are.  */
-  fre_info_size = sizeof (unsigned char);
+  fre_info_size = sizeof (uint8_t);
   fp += fre_info_size;
   flip_fre_stack_offsets (fp, offset_size, offset_cnt);
 
@@ -500,7 +499,7 @@ fde_func (const void *p1, const void *p2)
 static int32_t
 sframe_get_fre_offset (sframe_frame_row_entry *fre, int idx, int *errp)
 {
-  int offset_cnt, offset_size;
+  uint8_t offset_cnt, offset_size;
 
   if (fre == NULL || !sframe_fre_sanity_check_p (fre))
     return sframe_set_errno (errp, SFRAME_ERR_FRE_INVAL);
@@ -606,7 +605,7 @@ sframe_fre_get_base_reg_id (sframe_frame_row_entry *fre, int *errp)
   if (fre == NULL)
     return sframe_set_errno (errp, SFRAME_ERR_FRE_INVAL);
 
-  unsigned int fre_info = fre->fre_info;
+  uint8_t fre_info = fre->fre_info;
   return SFRAME_V1_FRE_CFA_BASE_REG_ID (fre_info);
 }
 
@@ -750,9 +749,9 @@ sframe_decode_fre (const char *fre_buf, sframe_frame_row_entry *fre,
   sframe_decode_fre_start_address (fre_buf, &fre->fre_start_addr, fre_type);
 
   addr_size = sframe_fre_start_addr_size (fre_type);
-  fre->fre_info = *(unsigned char *)(fre_buf + addr_size);
+  fre->fre_info = *(uint8_t *)(fre_buf + addr_size);
   /* Sanity check as the API works closely with the binary format.  */
-  sframe_assert (sizeof (fre->fre_info) == sizeof (unsigned char));
+  sframe_assert (sizeof (fre->fre_info) == sizeof (uint8_t));
 
   /* Cleanup the space for fre_offsets first, then copy over the valid
      bytes.  */
