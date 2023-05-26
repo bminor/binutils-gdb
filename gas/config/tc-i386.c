@@ -546,8 +546,9 @@ static char operand_chars[256];
 #define is_register_char(x) (register_chars[(unsigned char) x])
 #define is_space_char(x) ((x) == ' ')
 
-/* All non-digit non-letter characters that may occur in an operand.  */
-static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!=:[@]";
+/* All non-digit non-letter characters that may occur in an operand and
+   which aren't already in extra_symbol_chars[].  */
+static const char operand_special_chars[] = "$+,)._~/<>|&^!=:@]";
 
 /* md_assemble() always leaves the strings it's passed unaltered.  To
    effect this we maintain a stack of saved characters that we've smashed
@@ -3070,7 +3071,7 @@ md_begin (void)
   /* Fill in lexical tables:  mnemonic_chars, operand_chars.  */
   {
     int c;
-    char *p;
+    const char *p;
 
     for (c = 0; c < 256; c++)
       {
@@ -3087,10 +3088,7 @@ md_begin (void)
 	    operand_chars[c] = c;
 	  }
 	else if (c == '{' || c == '}')
-	  {
-	    mnemonic_chars[c] = c;
-	    operand_chars[c] = c;
-	  }
+	  mnemonic_chars[c] = c;
 #ifdef SVR4_COMMENT_CHARS
 	else if (c == '\\' && strchr (i386_comment_chars, '/'))
 	  operand_chars[c] = c;
@@ -3100,13 +3098,12 @@ md_begin (void)
 	  operand_chars[c] = c;
       }
 
-#ifdef LEX_QM
-    operand_chars['?'] = '?';
-#endif
     mnemonic_chars['_'] = '_';
     mnemonic_chars['-'] = '-';
     mnemonic_chars['.'] = '.';
 
+    for (p = extra_symbol_chars; *p != '\0'; p++)
+      operand_chars[(unsigned char) *p] = *p;
     for (p = operand_special_chars; *p != '\0'; p++)
       operand_chars[(unsigned char) *p] = *p;
   }
