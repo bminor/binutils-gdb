@@ -699,8 +699,30 @@ proc test_attrs {} {
 	    5 1
 	    25 0
 	}
+	fg {
+	    30 black
+	    31 red
+	    32 green
+	    33 yellow
+	    34 blue
+	    35 magenta
+	    36 cyan
+	    37 white
+	    39 default
+	}
+	bg {
+	    40 black
+	    41 red
+	    42 green
+	    43 yellow
+	    44 blue
+	    45 magenta
+	    46 cyan
+	    47 white
+	    49 default
+	}
     } {
-	setup_terminal 8 1
+	setup_terminal 12 1
 	set re ""
 	foreach { arg val } $vals {
 	    Term::_insert "a"

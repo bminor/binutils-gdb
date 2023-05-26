@@ -561,6 +561,37 @@ namespace eval Term {
 	}
     }
 
+    # Translate the color numbers as used in proc _csi_m to a name.
+    proc _color_attr { n } {
+	switch -exact -- $n {
+	    0 {
+		return black
+	    }
+	    1 {
+		return red
+	    }
+	    2 {
+		return green
+	    }
+	    3 {
+		return yellow
+	    }
+	    4 {
+		return blue
+	    }
+	    5 {
+		return magenta
+	    }
+	    6 {
+		return cyan
+	    }
+	    7 {
+		return white
+	    }
+	    default { error "unsupported color number: $n" }
+	}
+    }
+
     # Select Graphic Rendition.
     #
     # https://vt100.net/docs/vt510-rm/SGR.html
@@ -607,13 +638,13 @@ namespace eval Term {
 			set _attrs(invisible) 0
 		    }
 		    30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
-			set _attrs(fg) $item
+			set _attrs(fg) [_color_attr [expr $item - 30]]
 		    }
 		    39 {
 			set _attrs(fg) default
 		    }
 		    40 - 41 - 42 - 43 - 44 - 45 - 46 - 47 {
-			set _attrs(bg) $item
+			set _attrs(bg) [_color_attr [expr $item - 40]]
 		    }
 		    49 {
 			set _attrs(bg) default
