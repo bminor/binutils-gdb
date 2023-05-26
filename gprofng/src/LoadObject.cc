@@ -463,7 +463,8 @@ LoadObject::find_function (uint64_t foff)
 	    {
 	      // Function is already created
 	      func = fp;
-	      if (func->size < foff - func->img_offset)
+	      uint64_t sz = func->size < 0 ? 0 : func->size;
+	      if (sz + func->img_offset < foff)
 		func->size = foff - func->img_offset;
 	    }
 	  else
