@@ -149,7 +149,7 @@ static int CLONE_FLAGS[] = {
 /* the default script */
 static char DEFAULT_COMMAND[] =
         "icpu.md.cpu.rec.recd.dousl.gpf.fitos.ec.tco.b.nap.uf."
-        "sys.sig.so.sx.so.sched.uwdc";
+        "sys.sig.so.sx.so.sched";
 
 struct scripttab scripttab[] = {
   {"abt",       doabort,        "doabort",      0,  0},

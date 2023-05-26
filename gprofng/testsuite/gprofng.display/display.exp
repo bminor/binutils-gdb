@@ -31,34 +31,37 @@ if { ![istarget $pltf-*-*]
     return
 }
 
-switch $pltf {
-  x86_64 {
-    # Columns in the table represent:
-    #   dir      cflags         gprofflags       Others
+if { "$pltf" == "aarch64" } {
+# Use a filter for not leaf functions due to the unwind problem in libgp-collector.so
+    set ::env(ACCT_FILTER) [join { "|egrep -vw 'gpf|tailcallopt|"
+      "cache_trash|calladd|computeF|cond_global|cond_timeout_global|"
+      "lock_global|lock_local|lock_none|nothreads|sema_global|trylock_global'"
+      } "" ]
+}
+if { "$CHECK_TARGET" == "check-extra" || "$CHECK_TARGET" == "check-install" } {
+#         dir       cflags       gprofflags     tflags
     set table {
-      {"jsynprog" "-g -Wall"        "-p on -j on"}
-      {"mttest"   "-g -O0"          "-p on"}
-      {"mttest"   "-g -O0"          "-p on -h on"}
-      {"synprog"  "-g -O0"          "-p on"}
-      {"synprog"  "-g -O0"           "-p on -h on"}
+      {"mttest"   "-g -O0"      "-p on"}
+      {"mttest"   "-g -O0"      "-p on -h on"}
+      {"mttest"   "-g -O"       "-p on -a on"}
+      {"mttest"   "-g -O"       "-p on -a off"}
+      {"mttest"   "-g -O"       "-p on -h on"}
+      {"jsynprog" "-g -Wall"    "-p on -a on"}
+      {"jsynprog" "-g -Wall"    "-p on -a off"}
+      {"jsynprog" "-g -Wall"    "-p on -j on"}
+      {"synprog"  "-g -O0"      "-p on"}
+      {"synprog"  "-g -O0"      "-p on -h on"}
+      {"synprog"  "-g -O"       "-p on -a on"}
+      {"synprog"  "-g -O"       "-p on -a off"}
+      {"synprog"  "-g -O"       "-p on -h on"}
     }
-  }
-  aarch64 {
+} else {  # "$CHECK_TARGET" is "check" or "check-DEJAGNU"
+#         dir       cflags     gprofflags     tflags
     set table {
-      {"jsynprog" "-g -Wall"        "-p on -j on"}
-      {"mttest"   "-g -O0"          "-p on"}
-      {"synprog"  "-g -O0"          "-p on"}
+      {"jsynprog" "-g -Wall" "-p on -j on"  "-j add_int"}
+      {"mttest"   "-g -O0"   "-p on"        "-j calladd"}
+      {"synprog"  "-g -O0"   "-p on"        "cpu"}
     }
-  }
-  default {
-    # Columns in the table represent:
-    #   dir      cflags         gprofflags       Others
-    set table {
-      {"jsynprog" ""              ""}
-      {"mttest"   ""              ""}
-      {"synprog"  ""              ""}
-    }
-  }
 }
 
 global JDK_INC
@@ -68,6 +71,11 @@ foreach line $table {
   set dir [lindex $line 0]
   set cflags [lindex $line 1]
   set gprofflags [lindex $line 2]
+  if { [llength $line] > 3 } {
+    set tflags [lindex $line 3]
+  } else {
+    set tflags " "
+  }
 
   verbose [file rootname $line]
   verbose running display test $line
@@ -75,7 +83,7 @@ foreach line $table {
        && ($JDK_INC == "" || $GPROFNG_BROKEN_JAVAC == "yes") } {
     unsupported $dir
   } else {
-    run_display_test $dir $cflags $gprofflags
+    run_display_test $dir $cflags $gprofflags $tflags
   }
 }
     

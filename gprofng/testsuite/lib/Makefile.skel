@@ -56,7 +56,8 @@ $(DISPLAY_LOG): $(EXPERIMENT)
 	$(DISPLAY) $(DISPLAY_FLAGS) $(EXPERIMENT) > $@
 
 compare: $(DISPLAY_LOG)
-	perl -I $(srcdir)/../../lib $(srcdir)/check_results.pl $(ACCT_FILE) $(DISPLAY_LOG)
+	cat $(ACCT_FILE) $(ACCT_FILTER) > $(ACCT_FILE).fltr
+	perl -I $(srcdir)/../../lib $(srcdir)/check_results.pl $(ACCT_FILE).fltr $(DISPLAY_LOG)
 
 clobber clean:
 	rm -rf *.er

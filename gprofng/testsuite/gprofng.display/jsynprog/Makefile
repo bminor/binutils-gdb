@@ -52,5 +52,5 @@ jsynprog.class: $(JAVA_SRCS)
 $(EXPERIMENT): $(TARGETS)
 	@echo " ---- Build: $@ -----"
 	rm -rf $@ 
-	$(COLLECT) $(COLLECT_FLAGS) -o $@ $(JAVA) $(JAVACFLAGS) jsynprog
+	$(COLLECT) $(COLLECT_FLAGS) -o $@ $(JAVA) $(JAVACFLAGS) jsynprog $(TARGET_FLAGS)
 

@@ -50,7 +50,7 @@ proc run_native_host_cmd { command } {
 # display options, collect flags, app options?  Do we want these to be
 # set on a per-app basis? (If so, they should probably be driven by a
 # file in the test dir.)
-proc run_display_test { dir cflags gprofflags } {
+proc run_display_test { dir cflags gprofflags tflags } {
     global srcdir MAKE CC CFLAGS LDFLAGS LIBS BUILDDIR
     set stripped [string map {" " ""} $dir]
     set testdir [string map {" " ""} "$dir.$cflags,$gprofflags"]
@@ -58,7 +58,7 @@ proc run_display_test { dir cflags gprofflags } {
     set tdir "tmpdir/$testdir"
 	send_log "create dir: $tdir\n"
 	set output [run_native_host_cmd "mkdir -p $tdir"]
-	set gprofng $BUILDDIR/src/gprofng
+	set gprofng $::env(GPROFNG)
 
 	set fd [open "$tdir/rules.txt" "w"]
 	switch -regexp -- $testdir {
@@ -80,6 +80,7 @@ proc run_display_test { dir cflags gprofflags } {
 
     set make_args "-f $sdir/Makefile srcdir=\"$sdir\" builddir=\"$BUILDDIR\" \
         VPATH=\"$dir\" CC=\"$CC\" CFLAGS=\"$cflags\" LDFLAGS=\"$LDFLAGS\" \
+        TARGET_FLAGS=\"$tflags\" \
         DISPLAY_FLAGS=\"$DISPLAY_FLAGS\" \
         COLLECT_FLAGS=\"$gprofflags\" GPROFNG=\"$gprofng\" MAKE=\"$MAKE\""
     set output [run_native_host_cmd "cd $tdir && $MAKE $make_args all"]
