@@ -118,14 +118,6 @@ static void ATTRIBUTE_PRINTF_3 i386_dis_printf (const disassemble_info *,
 /* The maximum operand buffer size.  */
 #define MAX_OPERAND_BUFFER_SIZE 128
 
-struct dis_private {
-  /* Points to first byte not fetched.  */
-  uint8_t *max_fetched;
-  uint8_t the_buffer[MAX_MNEM_SIZE];
-  bfd_vma insn_start;
-  int orig_sizeflag;
-};
-
 enum address_mode
 {
   mode_16bit,
@@ -251,6 +243,15 @@ struct instr_info
   enum x86_64_isa isa64;
 };
 
+struct dis_private {
+  bfd_vma insn_start;
+  int orig_sizeflag;
+
+  /* Points to first byte not fetched.  */
+  uint8_t *max_fetched;
+  uint8_t the_buffer[2 * MAX_CODE_LENGTH - 1];
+};
+
 /* Mark parts used in the REX prefix.  When we are testing for
    empty prefix (for 8bit register REX extension), just mask it
    out.  Otherwise test for REX bit is excuse for existence of REX
@@ -297,7 +298,7 @@ fetch_code (struct disassemble_info *info, uint8_t *until)
   if (until <= priv->max_fetched)
     return true;
 
-  if (until <= priv->the_buffer + MAX_MNEM_SIZE)
+  if (until <= priv->the_buffer + ARRAY_SIZE (priv->the_buffer))
     status = (*info->read_memory_func) (start,
 					priv->max_fetched,
 					until - priv->max_fetched,
