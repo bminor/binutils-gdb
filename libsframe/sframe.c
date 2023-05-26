@@ -980,6 +980,32 @@ sframe_get_funcdesc_with_addr (sframe_decoder_ctx *ctx,
   return sframe_ret_set_errno (errp, SFRAME_ERR_FDE_NOTFOUND);
 }
 
+/* Get the end IP offset for the FRE at index i in the FDEP.  The buffer FRES
+   is the starting location for the FRE.  */
+
+static uint32_t
+sframe_fre_get_end_ip_offset (sframe_func_desc_entry *fdep, unsigned int i,
+			      const char *fres)
+{
+  uint32_t end_ip_offset;
+  uint32_t fre_type;
+
+  fre_type = sframe_get_fre_type (fdep);
+
+  /* Get the start address of the next FRE in sequence.  */
+  if (i < fdep->sfde_func_num_fres - 1)
+    {
+      sframe_decode_fre_start_address (fres, &end_ip_offset, fre_type);
+      end_ip_offset -= 1;
+    }
+  else
+    /* The end IP offset for the FRE needs to be deduced from the function
+       size.  */
+    end_ip_offset = fdep->sfde_func_size - 1;
+
+  return end_ip_offset;
+}
+
 /* Find the SFrame Row Entry which contains the PC.  Returns
    SFRAME_ERR if failure.  */
 
@@ -987,14 +1013,15 @@ int
 sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
 		 sframe_frame_row_entry *frep)
 {
+  sframe_frame_row_entry cur_fre;
   sframe_func_desc_entry *fdep;
-  uint32_t start_address, i;
-  sframe_frame_row_entry cur_fre, next_fre;
-  const char *fres;
   unsigned int fre_type, fde_type;
-  size_t esz;
-  int err = 0;
+  uint32_t end_ip_offset, i;
+  int32_t start_ip, end_ip;
+  int32_t func_start_addr;
+  const char *fres;
   size_t size = 0;
+  int err = 0;
   /* For regular FDEs (i.e. fde_type SFRAME_FDE_TYPE_PCINC),
      where the start address in the FRE is an offset from start pc,
      use a bitmask with all bits set so that none of the address bits are
@@ -1022,40 +1049,28 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
     bitmask = 0xff;
 
   fres = ctx->sfd_fres + fdep->sfde_func_start_fre_off;
+  func_start_addr = fdep->sfde_func_start_address;
+
   for (i = 0; i < fdep->sfde_func_num_fres; i++)
    {
-     err = sframe_decode_fre (fres, &next_fre, fre_type, &esz);
-     start_address = next_fre.fre_start_addr;
-
-     if (((fdep->sfde_func_start_address
-	   + (int32_t) start_address) & bitmask) <= (pc & bitmask))
-       {
-	 sframe_frame_row_entry_copy (&cur_fre, &next_fre);
-
-	 /* Get the next FRE in sequence.  */
-	 if (i < fdep->sfde_func_num_fres - 1)
-	   {
-	     sp += esz;
-	     err = sframe_decode_fre (fres, &next_fre, fre_type, &esz);
-
-	     /* Sanity check the next FRE.  */
-	     if (!sframe_fre_sanity_check_p (&next_fre))
-	       return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
-
-	     size = next_fre.fre_start_addr;
-	   }
-	 else size = fdep->sfde_func_size;
-
-	 /* If the cur FRE is the one that contains the PC, return it.  */
-	 if (((fdep->sfde_func_start_address
-	       + (int32_t)size) & bitmask) > (pc & bitmask))
-	   {
-	     sframe_frame_row_entry_copy (frep, &cur_fre);
-	     return 0;
-	   }
-       }
-     else
+     err = sframe_decode_fre (fres, &cur_fre, fre_type, &size);
+     if (err)
        return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
+
+     start_ip = func_start_addr + cur_fre.fre_start_addr;
+     end_ip_offset = sframe_fre_get_end_ip_offset (fdep, i, fres + size);
+     end_ip = func_start_addr + end_ip_offset;
+
+     if ((start_ip & bitmask) > (pc & bitmask))
+       return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
+
+     if (((start_ip & bitmask) <= (pc & bitmask))
+	 && (end_ip & bitmask) >= (pc & bitmask))
+       {
+	 sframe_frame_row_entry_copy (frep, &cur_fre);
+	 return 0;
+       }
+     fres += size;
    }
   return sframe_set_errno (&err, SFRAME_ERR_FDE_INVAL);
 }
