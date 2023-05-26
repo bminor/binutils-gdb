@@ -923,6 +923,60 @@ proc test_objdump_S { } {
 
 test_objdump_S
 
+# Test objdump --private
+proc test_objdump_P {} {
+    global srcdir
+    global subdir
+    global OBJDUMP
+    global OBJDUMPFLAGS
+    global obj
+    
+    set test "objdump -P"
+    
+    if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}]} then {
+	unsupported "$test (build)"
+	return
+    }
+
+    if [is_remote host] {
+	set testfile [remote_download host tmpdir/bintest.${obj}]
+    } else {
+	set testfile tmpdir/bintest.${obj}
+    }
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -P header $testfile"]
+
+    # FIXME: We should probably test the output further than this...
+    set want "Machine Num"
+    
+    if [regexp $want $got] then {
+	pass "$test (dump headers)"
+    } else {
+	fail "$test (dump headers)"
+    }
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --private=sections $testfile"]
+
+    # FIXME: We should probably test the output further than this...
+    set want "EXECUTE,READ"
+
+    if [regexp $want $got] then {
+	pass "$test (dump sections)"
+    } else {
+	fail "$test (dump sections)"
+    }
+
+    # remote_file host delete $testfile
+}
+
+# Test objdump --private of a PE format file.
+if { [istarget "*-*-pe*"]
+     || [istarget "*-*-cygwin*"]
+     || [istarget "*-*-mingw*"]
+} then {
+    test_objdump_P
+}
+
 # Options which are not tested: -a -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.
 # Tests could be written for specific targets, and that should be done

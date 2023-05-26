@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Objdump's --private option can now be used on PE format files to display the
+  fields in the file header and section headers.
+  
 Changes in 2.40:
 
 * Objdump has a new command line option --show-all-symbols which will make it

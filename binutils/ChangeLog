@@ -1,3 +1,20 @@
+2023-05-26  Nick Clifton  <nickc@redhat.com>
+
+	* od-pe.c: New file: Dumps fields in PE format headers.
+	* configure.ac (od_vectors): Add objdump_private_desc_pe for PE
+	format targets.
+	(od_files): Add od-pe for PE format targets.
+	* configure: Regenerate.
+	* Makefile.am (CFILES): Add od-pe.c
+	(EXTRA_objdump_SOURCE): Likewise.
+	* Makefile.in: Generate.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new support.
+	* objdump.c (wide_output): Change from local to global.
+	* objdump.h (wide_output): Prototype.
+	(objdump_private_desc_pe): Prototype.
+	* testsuite/binutils-all/objdump.exp: Add a test of the new feature.
+
 2023-05-09  Enze Li  <enze.li@gmx.com>
 
 	* README:  Correct a typo.

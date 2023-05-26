@@ -140,7 +140,7 @@ CFILES = \
 	is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c \
-	od-elf32_avr.c od-macho.c od-xcoff.c \
+	od-elf32_avr.c od-macho.c od-pe.c od-xcoff.c \
 	rclex.c rdcoff.c rddbg.c readelf.c rename.c \
 	resbin.c rescoff.c resrc.c resres.c \
 	size.c srconv.c stabs.c strings.c sysdump.c \
@@ -270,7 +270,7 @@ strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c demanguse.c $(BULIBS)
 
 objdump_SOURCES = objdump.c dwarf.c prdbg.c demanguse.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
-EXTRA_objdump_SOURCES = od-xcoff.c
+EXTRA_objdump_SOURCES = od-elf32_avr.c od-macho.c od-xcoff.c od-pe.c
 objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(DEBUGINFOD_LIBS) $(LIBSFRAME)
 
 objdump.@OBJEXT@:objdump.c

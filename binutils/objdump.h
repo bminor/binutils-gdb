@@ -18,6 +18,9 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+/* Non-zero if wide output has been enabled.  */
+extern int wide_output;	
+
 struct objdump_private_option
 {
   /* Option name.  */
@@ -43,11 +46,15 @@ struct objdump_private_desc
   /* List of options.  Terminated by a NULL name.  */
   struct objdump_private_option *options;
 };
+
 /* ELF32_AVR specific target.  */
 extern const struct objdump_private_desc objdump_private_desc_elf32_avr;
 
 /* XCOFF specific target.  */
 extern const struct objdump_private_desc objdump_private_desc_xcoff;
+
+/* PE specific target.  */
+extern const struct objdump_private_desc objdump_private_desc_pe;
 
 /* Mach-O specific target.  */
 extern const struct objdump_private_desc objdump_private_desc_mach_o;

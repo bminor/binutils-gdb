@@ -348,7 +348,7 @@ do
 	fi
 	DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
-	od_vectors="$od_vectors objdump_private_desc_xcoff"
+	od_vectors="$od_vectors objdump_private_desc_xcoff objdump_private_desc_pe"
     else
 	case $targ in
 	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
@@ -470,6 +470,9 @@ changequote([,])dnl
 	powerpc*-*-aix* | rs6000-*-aix*)
 	  od_vectors="$od_vectors objdump_private_desc_xcoff"
 	  ;;
+	*-*-pe* | *-*-cygwin* | *-*-mingw*)
+	  od_vectors="$od_vectors objdump_private_desc_pe"
+	  ;;
         *-*-darwin*)
 	  od_vectors="$od_vectors objdump_private_desc_mach_o"
 	  ;;
@@ -491,6 +494,8 @@ for i in $od_vectors ; do
 	    od_files="$od_files od-elf32_avr" ;;
 	objdump_private_desc_xcoff)
 	    od_files="$od_files od-xcoff" ;;
+	objdump_private_desc_pe)
+	    od_files="$od_files od-pe" ;;
 	objdump_private_desc_mach_o)
 	    od_files="$od_files od-macho" ;;
 	*) AC_MSG_ERROR(*** unknown private vector $i) ;;

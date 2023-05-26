@@ -2754,6 +2754,12 @@ For XCOFF, the available options are:
 @item ldinfo
 @end table
 
+For PE, the available options are:
+@table @code
+@item header
+@item sections
+@end table
+
 Not all object formats support this option.  In particular the ELF
 format does not use it.
 

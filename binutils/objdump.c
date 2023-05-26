@@ -115,7 +115,7 @@ static bool disassemble;		/* -d */
 static bool disassemble_all;		/* -D */
 static int disassemble_zeroes;		/* --disassemble-zeroes */
 static bool formats_info;		/* -i */
-static int wide_output;			/* -w */
+int wide_output;			/* -w */
 static int insn_width;			/* --insn-width */
 static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
