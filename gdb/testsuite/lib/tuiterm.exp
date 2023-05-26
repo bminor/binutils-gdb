@@ -590,7 +590,7 @@ namespace eval Term {
 			set _attrs(underline) 0
 		    }
 		    27 {
-			set _attrs(reverse) 1
+			set _attrs(reverse) 0
 		    }
 		    30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
 			set _attrs(fg) $item

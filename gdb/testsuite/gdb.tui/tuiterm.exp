@@ -676,6 +676,40 @@ proc test_insert_line { } {
     } 2 0
 }
 
+proc test_attrs {} {
+    foreach { attr vals } {
+	reverse {
+	    7 1
+	    27 0
+	}
+	underline {
+	    4 1
+	    24 0
+	}
+	intensity {
+	    1 bold
+	    2 dim
+	    22 normal
+	}
+    } {
+	setup_terminal 8 1
+	set re ""
+	foreach { arg val } $vals {
+	    Term::_insert "a"
+	    Term::_csi_m $arg
+	    append re "a<$attr:$val>"
+	}
+
+	Term::_insert "a"
+	append re "a"
+
+	set re "^$re *$"
+
+	set line [Term::get_line_with_attrs 0]
+	gdb_assert { [regexp $re $line] } "attribute: $attr"
+    }
+}
+
 # Run proc TEST_PROC_NAME with a "small" terminal.
 
 proc run_one_test_small { test_proc_name } {
@@ -727,3 +761,5 @@ foreach_with_prefix test {
 } {
     run_one_test_large $test
 }
+
+test_attrs
