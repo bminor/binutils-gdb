@@ -300,7 +300,7 @@ fetch_code (struct disassemble_info *info, const uint8_t *until)
   if (needed <= 0)
     return true;
 
-  if (priv->fetched + needed <= ARRAY_SIZE (priv->the_buffer))
+  if (priv->fetched + (size_t) needed <= ARRAY_SIZE (priv->the_buffer))
     status = (*info->read_memory_func) (start, fetch_end, needed, info);
   if (status != 0)
     {
