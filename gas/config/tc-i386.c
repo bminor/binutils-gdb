@@ -14188,7 +14188,21 @@ md_parse_option (int c, const char *arg)
 #endif
 
     case OPTION_32:
-      default_arch = "i386";
+      {
+	const char **list, **l;
+
+	list = bfd_target_list ();
+	for (l = list; *l != NULL; l++)
+	  if (strstr (*l, "-i386")
+	      || strstr (*l, "-go32"))
+	    {
+	      default_arch = "i386";
+	      break;
+	    }
+	if (*l == NULL)
+	  as_fatal (_("no compiled in support for ix86"));
+	free (list);
+      }
       break;
 
     case OPTION_DIVIDE:
