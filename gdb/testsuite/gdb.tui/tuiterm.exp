@@ -691,6 +691,14 @@ proc test_attrs {} {
 	    2 dim
 	    22 normal
 	}
+	invisible {
+	    8 1
+	    28 0
+	}
+	blinking {
+	    5 1
+	    25 0
+	}
     } {
 	setup_terminal 8 1
 	set re ""

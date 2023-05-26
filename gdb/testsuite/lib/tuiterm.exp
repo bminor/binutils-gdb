@@ -556,6 +556,8 @@ namespace eval Term {
 	    bg default
 	    underline 0
 	    reverse 0
+	    invisible 0
+	    blinking 0
 	}
     }
 
@@ -580,8 +582,14 @@ namespace eval Term {
 		    4 {
 			set _attrs(underline) 1
 		    }
+		    5 {
+			set _attrs(blinking) 1
+		    }
 		    7 {
 			set _attrs(reverse) 1
+		    }
+		    8 {
+			set _attrs(invisible) 1
 		    }
 		    22 {
 			set _attrs(intensity) normal
@@ -589,8 +597,14 @@ namespace eval Term {
 		    24 {
 			set _attrs(underline) 0
 		    }
+		    25 {
+			set _attrs(blinking) 0
+		    }
 		    27 {
 			set _attrs(reverse) 0
+		    }
+		    28 {
+			set _attrs(invisible) 0
 		    }
 		    30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
 			set _attrs(fg) $item
