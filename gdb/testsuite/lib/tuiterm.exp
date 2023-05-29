@@ -115,8 +115,9 @@ namespace eval Term {
 		    for {set x 0} {$x < $_cols} {incr x} {
 			set _chars($x,$y) $_chars($x,$next_y)
 		    }
-		    incr _cur_row -1
 		}
+
+		incr _cur_row -1
 	    }
 	}
     }

@@ -131,6 +131,18 @@ proc test_linefeed { } {
     } 1 3
 }
 
+proc test_linefeed_scroll { } {
+    Term::_move_cursor 0 3
+    Term::_ctl_0x0a
+    check "linefeed_scroll" {
+	"ijklmnop"
+	"qrstuvwx"
+	"yz01234 "
+	"yz01234 "
+    } 0 3
+    Term::dump_screen
+}
+
 proc test_carriage_return { } {
     Term::_move_cursor 1 2
     Term::_ctl_0x0d
@@ -761,6 +773,7 @@ proc run_one_test_large { test_proc_name } {
 foreach_with_prefix test {
     test_backspace
     test_linefeed
+    test_linefeed_scroll
     test_carriage_return
     test_insert_characters
     test_cursor_up
