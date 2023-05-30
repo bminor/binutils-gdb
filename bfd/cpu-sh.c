@@ -117,9 +117,6 @@ sh_get_arch_from_bfd_mach (unsigned long mach)
     else
       i++;
 
-  /* Machine not found.   */
-  BFD_FAIL();
-
   return SH_ARCH_UNKNOWN_ARCH;
 }
 
@@ -138,9 +135,6 @@ sh_get_arch_up_from_bfd_mach (unsigned long mach)
       return bfd_to_arch_table[i].arch_up;
     else
       i++;
-
-  /* Machine not found.  */
-  BFD_FAIL();
 
   return SH_ARCH_UNKNOWN_ARCH;
 }
