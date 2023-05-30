@@ -1147,10 +1147,11 @@ input to @command{ld}.  For other binaries however the @option{-Ur}
 option is similar to @option{-r} but it also resolves references to
 constructors and destructors.
 
-It does not work to use @option{-Ur} on files that were themselves
-linked with @option{-Ur}; once the constructor table has been built,
-it cannot be added to.  Use @option{-Ur} only for the last partial
-link, and @option{-r} for the others.
+For those systems where @option{-r} and @option{-Ur} behave
+differently, it does not work to use @option{-Ur} on files that were
+themselves linked with @option{-Ur}; once the constructor table has
+been built, it cannot be added to.  Use @option{-Ur} only for the last
+partial link, and @option{-r} for the others.
 
 @kindex --orphan-handling=@var{MODE}
 @cindex orphan sections
