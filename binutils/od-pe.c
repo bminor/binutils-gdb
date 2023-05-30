@@ -450,6 +450,7 @@ is_pe_object_magic (unsigned short magic)
     case IMAGE_FILE_MACHINE_ALPHA:
     case IMAGE_FILE_MACHINE_ARM:
     case IMAGE_FILE_MACHINE_ARM64:
+    case IMAGE_FILE_MACHINE_ARMNT:
     case IMAGE_FILE_MACHINE_I386:
     case IMAGE_FILE_MACHINE_IA64:
     case IMAGE_FILE_MACHINE_POWERPC:
@@ -457,6 +458,7 @@ is_pe_object_magic (unsigned short magic)
     case IMAGE_FILE_MACHINE_AMD64:
       // FIXME: Add more machine numbers.
       return true;
+    case 0x0a00: /* ARMMAGIC */
     case 0x0500: /* SH_ARCH_MAGIC_BIG */
     case 0x0550: /* SH_ARCH_MAGIC_LITTLE */
     case 0x0b00: /* MCore */
