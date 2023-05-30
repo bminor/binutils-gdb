@@ -27,7 +27,6 @@ struct internal_reloc;
 
 #define WORKING_DOT_WORD
 
-#define COFF_MAGIC 0x8000
 #define IGNORE_NONSTANDARD_ESCAPES
 #undef WARN_SIGNED_OVERFLOW_WORD
 

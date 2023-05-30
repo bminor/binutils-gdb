@@ -28,7 +28,6 @@
 
 #define WORKING_DOT_WORD
 
-#define COFF_MAGIC 	ARMMAGIC
 #define TARGET_ARCH 	bfd_arch_arm
 
 #define DIFF_EXPR_OK
