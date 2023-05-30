@@ -335,6 +335,10 @@ struct decoration_hash_entry
 };
 
 /* Functions in coffgen.c.  */
+extern void coff_object_cleanup
+  (bfd *);
+extern bfd_cleanup coff_real_object_p
+  (bfd *, unsigned, struct internal_filehdr *, struct internal_aouthdr *);
 extern bfd_cleanup coff_object_p
   (bfd *);
 extern struct bfd_section *coff_section_from_bfd_index

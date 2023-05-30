@@ -248,6 +248,7 @@ static void
 go32exe_cleanup (bfd *abfd)
 {
   abfd->origin = 0;
+  coff_object_cleanup (abfd);
 
   free (go32exe_temp_stub);
   go32exe_temp_stub = NULL;
@@ -323,7 +324,7 @@ go32exe_check_format (bfd *abfd)
   bfd_cleanup cleanup = coff_object_p (abfd);
   if (cleanup == NULL)
     goto fail;
-  BFD_ASSERT (cleanup == _bfd_no_cleanup);
+  BFD_ASSERT (cleanup == coff_object_cleanup);
 
   return go32exe_cleanup;
 

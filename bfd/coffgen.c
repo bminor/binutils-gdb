@@ -281,13 +281,24 @@ make_a_section_from_file (bfd *abfd,
   return result;
 }
 
+void
+coff_object_cleanup (bfd *abfd)
+{
+  if (bfd_family_coff (abfd) && bfd_get_format (abfd) == bfd_object)
+    {
+      struct coff_tdata *td = coff_data (abfd);
+      if (td != NULL)
+	{
+	  if (td->section_by_index)
+	    htab_delete (td->section_by_index);
+	  if (td->section_by_target_index)
+	    htab_delete (td->section_by_target_index);
+	}
+    }
+}
+
 /* Read in a COFF object and make it into a BFD.  This is used by
    ECOFF as well.  */
-bfd_cleanup
-coff_real_object_p (bfd *,
-		    unsigned,
-		    struct internal_filehdr *,
-		    struct internal_aouthdr *);
 bfd_cleanup
 coff_real_object_p (bfd *abfd,
 		    unsigned nscns,
@@ -358,9 +369,10 @@ coff_real_object_p (bfd *abfd,
     }
 
   _bfd_coff_free_symbols (abfd);
-  return _bfd_no_cleanup;
+  return coff_object_cleanup;
 
  fail:
+  coff_object_cleanup (abfd);
   _bfd_coff_free_symbols (abfd);
   bfd_release (abfd, tdata);
  fail2:
