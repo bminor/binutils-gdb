@@ -1,5 +1,16 @@
 2023-05-30  Nick Clifton  <nickc@redhat.com>
 
+	* od-pe.c (targ_info): New array.
+	(get_target_specific_info): New function
+	(decode_machine_number): Retire.  Use get_target_specific_info
+	instead.
+	(is_pe_object_magic): Likewise.
+	(dump_pe_file_header): Display more information.
+	Rework layout to be similar to that from 'objdump -p'.
+	Add code to handle larger than normnal AOUT headers.
+
+2023-05-30  Nick Clifton  <nickc@redhat.com>
+
 	* od-pe.c (decode_machine_number): Add ARMMAGIC value of 0xa00.
 	(is_pe_object_magic): Likewise.
 

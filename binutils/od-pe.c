@@ -33,6 +33,7 @@
 #include "coff/pe.h"
 #include "libcoff.h"
 #include "libpei.h"
+#include "libiberty.h"
 
 /* Index of the options in the options[] array.  */
 #define OPT_FILE_HEADER 0
@@ -141,6 +142,69 @@ static const struct xlat_table section_flag_xlat[] =
   { 0, NULL }
 };
 
+typedef struct target_specific_info
+{
+  unsigned int  machine_number;
+  const char *  name;
+  unsigned int  aout_hdr_size;
+} target_specific_info;
+
+const struct target_specific_info targ_info[] =
+{
+  { IMAGE_FILE_MACHINE_ALPHA, "ALPHA", 80 },
+  { IMAGE_FILE_MACHINE_ALPHA64, "ALPHA64", 80 },
+  { IMAGE_FILE_MACHINE_AM33, "AM33", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_AMD64, "AMD64", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_ARM, "ARM", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_ARM64, "ARM64", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_ARMNT, "ARM NT", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_CEE, "CEE", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_CEF, "CEF", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_EBC, "EBC", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_I386, "I386", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_IA64, "IA64", 108 },
+  { IMAGE_FILE_MACHINE_LOONGARCH64, "LOONGARCH64", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_M32R, "M32R", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_M68K, "M68K", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_MIPS16, "MIPS16", 56 },
+  { IMAGE_FILE_MACHINE_MIPSFPU, "MIPSFPU", 56 },
+  { IMAGE_FILE_MACHINE_MIPSFPU16, "MIPSFPU16", 56 },
+  { IMAGE_FILE_MACHINE_POWERPC, "POWERPC", 72 },
+  { IMAGE_FILE_MACHINE_POWERPCFP, "POWERPCFP", 72 },
+  { IMAGE_FILE_MACHINE_R10000, "R10000", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_R3000, "R3000", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_R4000, "R4000", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_SH3, "SH3", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_SH3DSP, "SH3DSP", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_SH3E, "SH3E", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_SH4, "SH4", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_SH5, "SH5", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_THUMB, "THUMB", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_TRICORE, "TRICORE", AOUTHDRSZ },
+  { IMAGE_FILE_MACHINE_WCEMIPSV2, "WCEMIPSV2", AOUTHDRSZ },
+
+  { 0x0093, "TI C4X", 28 },
+  { 0x00C1, "TI C4X", 28 },
+  { 0x00C2, "TI C4X", 28 },
+  { 0x0500, "SH (big endian)", AOUTHDRSZ },
+  { 0x0550, "SH (little endian)", AOUTHDRSZ },
+  { 0x0a00, "ARM", AOUTHDRSZ },
+  { 0x0b00, "MCore", AOUTHDRSZ }
+};
+
+static const struct target_specific_info unknown_info = { 0, "unknown", AOUTHDRSZ };
+
+static const struct target_specific_info *
+get_target_specific_info (unsigned int machine)
+{
+  unsigned int i;
+
+  for (i = ARRAY_SIZE (targ_info); i--;)
+    if (targ_info[i].machine_number == machine)
+      return targ_info + i;
+
+  return & unknown_info;
+}
 
 /* Display help.  */
 
@@ -193,34 +257,6 @@ dump_flags (const struct xlat_table * table, unsigned int flags)
     }
 }
 
-static const char *
-decode_machine_number (unsigned int machine)
-{
-  switch (machine)
-    {
-    case IMAGE_FILE_MACHINE_ALPHA:       return "ALPHA";
-    case IMAGE_FILE_MACHINE_AMD64:       return "AMD64";
-    case IMAGE_FILE_MACHINE_ARM:         return "ARM";
-    case IMAGE_FILE_MACHINE_ARM64:       return "ARM64";
-    case IMAGE_FILE_MACHINE_ARMNT:       return "ARM NT";
-    case IMAGE_FILE_MACHINE_I386:        return "I386";
-    case IMAGE_FILE_MACHINE_IA64:        return "IA64";
-    case IMAGE_FILE_MACHINE_LOONGARCH64: return "LOONGARCH64";
-    case IMAGE_FILE_MACHINE_POWERPC:     return "POWERPC";
-      
-      /* Note - when adding numbers here, also add them to
-	 is_pe_object_magic() below.  */
-    case 0x0093:                         return "TI C4X";
-    case 0x0500:                         return "SH (big endian)";
-    case 0x0550:                         return "SH (little endian)";
-    case 0x0a00:                         return "ARM";
-    case 0x0b00:                         return "MCore";
-      // FIXME: Add more machine numbers.
-
-    default: return N_("unknown");
-    }
-}
-
 /* Dump the file header.  */
 
 static void
@@ -228,15 +264,67 @@ dump_pe_file_header (bfd *                            abfd,
 		     struct external_PEI_filehdr *    fhdr,
 		     struct external_PEI_IMAGE_hdr *  ihdr)
 {
+  unsigned int data;
+  unsigned long ldata;
   unsigned long ihdr_off = 0;
 
-  if (fhdr != NULL)
+  if (fhdr == NULL)
+    printf (_("\n  File header not present\n"));
+  else
     {
-      printf (_("\nFile Header:\n"));
+      printf (_("\n  File Header (at offset 0):\n"));
 
-      /* FIXME: The fields in the file header are boring an generally have
-	 fixed values.  Is there any benefit in displaying them ?  */
+      // The values of the following fields are normally fixed.
+      // But we display them anyway, in case there are discrepancies.
 
+      data = bfd_h_get_16 (abfd, fhdr->e_cblp);
+      printf (_("Bytes on Last Page:\t\t%d\n"), data);
+
+      data = bfd_h_get_16 (abfd, fhdr->e_cp);
+      printf (_("Pages In File:\t\t\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_crlc);
+      printf (_("Relocations:\t\t\t%d\n"), data);
+
+      data = bfd_h_get_16 (abfd, fhdr->e_cparhdr);
+      printf (_("Size of header in paragraphs:\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_minalloc);
+      printf (_("Min extra paragraphs needed:\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_maxalloc);
+      printf (_("Max extra paragraphs needed:\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_ss);
+      printf (_("Initial (relative) SS value:\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_sp);
+      printf (_("Initial SP value:\t\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_csum);
+      printf (_("Checksum:\t\t\t%#x\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_ip);
+      printf (_("Initial IP value:\t\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_cs);
+      printf (_("Initial (relative) CS value:\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_lfarlc);
+      printf (_("File address of reloc table:\t%d\n"), data);
+      
+      data = bfd_h_get_16 (abfd, fhdr->e_ovno);
+      printf (_("Overlay number:\t\t\t%d\n"), data);
+
+      data = bfd_h_get_16 (abfd, fhdr->e_oemid);
+      printf (_("OEM identifier:\t\t\t%d\n"), data);
+  
+      data = bfd_h_get_16 (abfd, fhdr->e_oeminfo);
+      printf (_("OEM information:\t\t%#x\n"), data);
+  
+      ldata = bfd_h_get_32 (abfd, fhdr->e_lfanew);
+      printf (_("File address of new exe header:\t%#lx\n"), ldata);
+        
       /* Display the first string found in the stub.
 	 FIXME: Look for more than one string ?
 	 FIXME: Strictly speaking we may not have read the full stub, since
@@ -266,7 +354,7 @@ dump_pe_file_header (bfd *                            abfd,
 
       if (seen_count > 4)
 	{
-	  printf (_("  Stub message:  "));
+	  printf (_("Stub message:\t\t\t"));
 	  while (string_start < len)
 	    {
 	      char c = message[string_start ++];
@@ -280,16 +368,21 @@ dump_pe_file_header (bfd *                            abfd,
       ihdr_off = (long) bfd_h_get_32 (abfd, fhdr->e_lfanew);
     }
 
-  printf (_("\nImage Header (at offset %#lx):\n"), ihdr_off);
-	  
-  unsigned int machine = (int) bfd_h_get_16 (abfd, ihdr->f_magic);
-  printf (_("  Machine Num:   %#x\t\t- %s\n"), machine,
-	  decode_machine_number (machine));
+  printf (_("\n  Image Header (at offset %#lx):\n"), ihdr_off);
 
-  printf (_("  Num sections:  %d\n"), (int) bfd_h_get_16 (abfd, ihdr->f_nscns));
+  /* Note - we try to make this output use the same format as the output from -p.
+     But since there are multiple headers to display and the order of the fields
+     in the headers do not match the order of information displayed by -p, there
+     are some discrepancies.  */
+
+  unsigned int machine = (int) bfd_h_get_16 (abfd, ihdr->f_magic);
+  printf (_("Machine Number:\t\t\t%#x\t\t- %s\n"), machine,
+	  get_target_specific_info (machine)->name);
+
+  printf (_("Number of sections:\t\t\%d\n"), (int) bfd_h_get_16 (abfd, ihdr->f_nscns));
 
   long timedat = bfd_h_get_32 (abfd, ihdr->f_timdat);
-  printf (_("  Time and date: %#08lx\t- "), timedat);
+  printf (_("Time/Date:\t\t\t%#08lx\t- "), timedat);
   if (timedat == 0)
     printf (_("not set\n"));
   else
@@ -298,17 +391,17 @@ dump_pe_file_header (bfd *                            abfd,
       time_t t = timedat;
       fputs (ctime (& t), stdout);
     }
-
-  printf (_("  Symbols off:   %#08lx\n"),
+  
+  printf (_("Symbol table offset:\t\t%#08lx\n"),
 	  (long) bfd_h_get_32 (abfd, ihdr->f_symptr));
-  printf (_("  Num symbols:   %ld\n"),
+  printf (_("Number of symbols:\t\t\%ld\n"),
 	  (long) bfd_h_get_32 (abfd, ihdr->f_nsyms));
 
   unsigned int opt_header_size = (int) bfd_h_get_16 (abfd, ihdr->f_opthdr);
-  printf (_("  Opt hdr sz:    %#x\n"), opt_header_size);
+  printf (_("Optional header size:\t\t%#x\n"), opt_header_size);
 
   unsigned int flags = (int) bfd_h_get_16 (abfd, ihdr->f_flags);
-  printf (_("  Flags:         0x%04x\t\t- "), flags);
+  printf (_("Flags:\t\t\t\t0x%04x\t\t- "), flags);
   dump_flags (file_flag_xlat, flags);
   putchar ('\n');
 
@@ -316,46 +409,185 @@ dump_pe_file_header (bfd *                            abfd,
     {
       PEPAOUTHDR xhdr;
 
-      printf (_("\nOptional PE+ Header (at offset %#lx):\n"),
+      printf (_("\n  Optional 64-bit AOUT Header (at offset %#lx):\n"),
 	      ihdr_off + sizeof (* ihdr));
 
+      // Fortunately, it appears that the size and layout of the
+      // PEPAOUTHDR header is consistent across all architectures.
       if (bfd_seek (abfd, ihdr_off + sizeof (* ihdr), SEEK_SET) != 0
 	  || bfd_bread (& xhdr, sizeof (xhdr), abfd) != sizeof (xhdr))
-	printf ("error: unable to read PE+ header\n");
+	printf (_("error: unable to read AOUT and PE+ headers\n"));
       else
 	{
-	  /* FIXME: Check that the magic number is 0x020b ?  */
-	  printf (_("  Magic:         %x\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.standard.magic));
-	  printf (_("  Image Base:    %lx\n"),
-		  (long) bfd_h_get_64 (abfd, xhdr.ImageBase));
-	  /* FIXME: Print more fields.  */
+	  data = (int) bfd_h_get_16 (abfd, xhdr.standard.magic);
+	  printf (_("Magic:\t\t\t\t%x\t\t- %s\n"), data,
+		    data == 0x020b ? "PE32+" : _("Unknown"));
+	  
+	  printf (_("Version:\t\t\t%x\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.standard.vstamp));
+
+	  printf (_("Text Size:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.tsize));
+	  printf (_("Data Size:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.dsize));
+	  printf (_("BSS Size:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.bsize));
+	  printf (_("Entry Point:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.entry));
+	  printf (_("Text Start:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.text_start));
+	  /* There is no data_start field in the PE+ standard header.  */
+
+	  printf (_("\n  Optional PE+ Header (at offset %#lx):\n"),
+		  ihdr_off + sizeof (* ihdr) + sizeof (xhdr.standard));
+
+	  printf (_("Image Base:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.ImageBase));
+	  printf (_("Section Alignment:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SectionAlignment));
+	  printf (_("File Alignment:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.FileAlignment));
+	  printf (_("Major OS Version:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorOperatingSystemVersion));
+	  printf (_("Minor OS ersion:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorOperatingSystemVersion));
+	  printf (_("Major Image Version:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorImageVersion));
+	  printf (_("Minor Image Version:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorImageVersion));
+	  printf (_("Major Subsystem Version:\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorSubsystemVersion));
+	  printf (_("Minor Subsystem Version:\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorSubsystemVersion));
+	  printf (_("Size Of Image:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfImage));
+	  printf (_("Size Of Headers:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfHeaders));
+	  printf (_("CheckSum:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.CheckSum));
+	  printf (_("Subsystem:\t\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.Subsystem));
+	  // FIXME: Decode the characteristics.
+	  printf (_("DllCharacteristics:\t\t%#x\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.DllCharacteristics));
+	  printf (_("Size Of Stack Reserve:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfStackReserve));
+	  printf (_("Size Of Stack Commit:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfStackCommit));
+	  printf (_("Size Of Heap Reserve:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfHeapReserve));
+	  printf (_("Size Of Heap Commit:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfHeapCommit));
+	  printf (_("Loader Flags:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.LoaderFlags));
+	  printf (_("Number Of Rva and Sizes:\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.NumberOfRvaAndSizes));
+
+	  // FIXME: Decode the Data Directory.
 	}
     }
   else if (opt_header_size == AOUTSZ)
     {
       PEAOUTHDR xhdr;
 
-      printf (_("\nOptional PE Header (at offset %#lx):\n"),
-	      ihdr_off + sizeof (* ihdr));
+      /* Different architectures have different sizes of AOUT header.  */
+      unsigned int aout_hdr_size = get_target_specific_info (machine)->aout_hdr_size;
 
-      if (bfd_seek (abfd, ihdr_off + sizeof (* ihdr), SEEK_SET) != 0
-	  || bfd_bread (& xhdr, sizeof (xhdr), abfd) != sizeof (xhdr))
-	printf ("error: unable to read PE+ header\n");
+      unsigned long off  = ihdr_off + sizeof (* ihdr);
+      unsigned long size = sizeof (xhdr.standard);
+
+      printf (_("\n  Optional 32-bit AOUT Header (at offset %#lx, size %d):\n"),
+	      off, aout_hdr_size);
+
+      if (bfd_seek (abfd, off, SEEK_SET) != 0
+	  || bfd_bread (& xhdr.standard, size, abfd) != size)
+	printf (_("error: unable to seek to/read AOUT header\n"));
       else
 	{
-	  /* FIXME: Check that the magic number is 0x010b ?  */
-	  printf (_("  Magic:         %x\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.standard.magic));
-	  printf (_("  Image Base:    %lx\n"),
+	  data = (int) bfd_h_get_16 (abfd, xhdr.standard.magic);
+	  printf (_("Magic:\t\t\t\t%x\t\t- %s\n"), data,
+		    data == 0x010b ? "PE32" : _("Unknown"));
+	  
+	  printf (_("Version:\t\t\t%x\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.standard.vstamp));
+
+	  printf (_("Text Size:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.tsize));
+	  printf (_("Data Size:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.dsize));
+	  printf (_("BSS Size:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.bsize));
+	  printf (_("Entry Point:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.entry));
+	  printf (_("Text Start:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.text_start));
+	  printf (_("Data Start:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.standard.data_start));
+	}
+
+      off  = ihdr_off + sizeof (* ihdr) + aout_hdr_size;
+      size = sizeof (xhdr) - sizeof (xhdr.standard);
+
+      printf (_("\n  Optional PE Header (at offset %#lx):\n"), off);
+
+      /* FIXME: Sanitizers might complain about reading more bytes than
+	 fit into the ImageBase field.  Find a way to solve this.  */
+      if (bfd_seek (abfd, off, SEEK_SET) != 0
+	  || bfd_bread (& xhdr.ImageBase, size, abfd) != size)
+	printf (_("error: unable to seek to/read PE header\n"));
+      else
+	{
+	  printf (_("Image Base:\t\t\t%#lx\n"),
 		  (long) bfd_h_get_32 (abfd, xhdr.ImageBase));
-	  /* FIXME: Print more fields.  */
+	  printf (_("Section Alignment:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SectionAlignment));
+	  printf (_("File Alignment:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.FileAlignment));
+	  printf (_("Major OS Version:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorOperatingSystemVersion));
+	  printf (_("Minor OS ersion:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorOperatingSystemVersion));
+	  printf (_("Major Image Version:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorImageVersion));
+	  printf (_("Minor Image Version:\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorImageVersion));
+	  printf (_("Major Subsystem Version:\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorSubsystemVersion));
+	  printf (_("Minor Subsystem Version:\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorSubsystemVersion));
+	  printf (_("Size Of Image:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfImage));
+	  printf (_("Size Of Headers:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfHeaders));
+	  printf (_("CheckSum:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.CheckSum));
+	  printf (_("Subsystem:\t\t\t%d\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.Subsystem));
+	  // FIXME: Decode the characteristics.
+	  printf (_("DllCharacteristics:\t\t%#x\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.DllCharacteristics));
+	  printf (_("Size Of Stack Reserve:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfStackReserve));
+	  printf (_("Size Of Stack Commit:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfStackCommit));
+	  printf (_("Size Of Heap Reserve:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfHeapReserve));
+	  printf (_("Size Of Heap Commit:\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfHeapCommit));
+	  printf (_("Loader Flags:\t\t\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.LoaderFlags));
+	  printf (_("Number Of Rva and Sizes:\t%#lx\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.NumberOfRvaAndSizes));
+
+	  // FIXME: Decode the Data Directory.
 	}
     }
   else if (opt_header_size != 0)
     {
       printf (_("\nUnsupported size of Optional Header\n"));
     }
+  else
+    printf (_("\n  Optional header not present\n"));
 }
 
 /* Dump the sections header.  */
@@ -448,37 +680,6 @@ dump_pe (bfd *                            abfd,
     dump_pe_sections_header (abfd, fhdr, ihdr);
 }
 
-static bool
-is_pe_object_magic (unsigned short magic)
-{
-  switch (magic)
-    {
-    case IMAGE_FILE_MACHINE_ALPHA:
-    case IMAGE_FILE_MACHINE_AMD64:
-    case IMAGE_FILE_MACHINE_ARM64:
-    case IMAGE_FILE_MACHINE_ARM:
-    case IMAGE_FILE_MACHINE_ARMNT:
-    case IMAGE_FILE_MACHINE_I386:
-    case IMAGE_FILE_MACHINE_IA64:
-    case IMAGE_FILE_MACHINE_LOONGARCH64:
-    case IMAGE_FILE_MACHINE_POWERPC:
-      // FIXME: Add more machine numbers.
-      return true;
-
-      /* Note - when adding numbers here, also add them to
-	 decode_machine_number() above.  */
-    case 0x0093: /* TI C4x */
-    case 0x0500: /* SH_ARCH_MAGIC_BIG */
-    case 0x0550: /* SH_ARCH_MAGIC_LITTLE */
-    case 0x0a00: /* ARMMAGIC */
-    case 0x0b00: /* MCore */
-      return true;
-
-    default:
-      return false;
-    }
-}
-
 /* Dump ABFD (according to the options[] array).  */
 
 static void
@@ -525,7 +726,8 @@ pe_dump_obj (bfd *abfd)
   
       dump_pe (abfd, & fhdr, & ihdr);
     }
-  else if (is_pe_object_magic (magic))
+  /* See if we recognise this particular PE object file.  */
+  else if (get_target_specific_info (magic)->machine_number)
     {
       struct external_filehdr ehdr;
 
@@ -542,7 +744,7 @@ pe_dump_obj (bfd *abfd)
     }
   else
     {
-      non_fatal ("not a PE format binary - unexpected magic number: %#x",
+      non_fatal ("unknown PE format binary - unsupported magic number: %#x",
 		 magic);
       return;
     }
