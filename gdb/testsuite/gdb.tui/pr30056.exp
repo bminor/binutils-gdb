@@ -15,6 +15,10 @@
 
 # Regression test for PR30056.
 
+# This PR is fixed in the in-repo copy of readline.  System readline may or
+# may not be fixed, so skip this test-case.
+require !with_system_readline
+
 tuiterm_env
 
 save_vars { env(LC_ALL) } {

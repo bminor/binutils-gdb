@@ -2565,6 +2565,14 @@ gdb_caching_proc allow_python_tests {} {
     return [expr {[string first "--with-python" $output] != -1}]
 }
 
+# Return a 1 for configurations that use system readline rather than the
+# in-repo copy.
+
+gdb_caching_proc with_system_readline {} {
+    set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS --configuration"]
+    return [expr {[string first "--with-system-readline" $output] != -1}]
+}
+
 gdb_caching_proc allow_dap_tests {} {
     if { ![allow_python_tests] } {
 	return 0

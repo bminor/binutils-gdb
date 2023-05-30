@@ -1560,6 +1560,16 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
+#ifdef HAVE_READLINE_READLINE_H
+  gdb_printf (stream, _("\
+	     --with-system-readline\n\
+"));
+#else
+  gdb_printf (stream, _("\
+	     --without-system-readline\n\
+"));
+#endif
+
 #ifdef RELOC_SRCDIR
   gdb_printf (stream, _("\
 	     --with-relocated-sources=%s\n\
