@@ -1,3 +1,8 @@
+2023-05-30  Nick Clifton  <nickc@redhat.com>
+
+	* od-pe.c (decode_machine_number): Add ARMMAGIC value of 0xa00.
+	(is_pe_object_magic): Likewise.
+
 2023-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* od-pe.c: New file: Dumps fields in PE format headers.

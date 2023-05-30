@@ -202,15 +202,21 @@ decode_machine_number (unsigned int machine)
     case IMAGE_FILE_MACHINE_AMD64:       return "AMD64";
     case IMAGE_FILE_MACHINE_ARM:         return "ARM";
     case IMAGE_FILE_MACHINE_ARM64:       return "ARM64";
+    case IMAGE_FILE_MACHINE_ARMNT:       return "ARM NT";
     case IMAGE_FILE_MACHINE_I386:        return "I386";
     case IMAGE_FILE_MACHINE_IA64:        return "IA64";
     case IMAGE_FILE_MACHINE_LOONGARCH64: return "LOONGARCH64";
     case IMAGE_FILE_MACHINE_POWERPC:     return "POWERPC";
+      
+      /* Note - when adding numbers here, also add them to
+	 is_pe_object_magic() below.  */
+    case 0x0093:                         return "TI C4X";
     case 0x0500:                         return "SH (big endian)";
     case 0x0550:                         return "SH (little endian)";
+    case 0x0a00:                         return "ARM";
     case 0x0b00:                         return "MCore";
-    case 0x0093:                         return "TI C4X";
       // FIXME: Add more machine numbers.
+
     default: return N_("unknown");
     }
 }
@@ -448,22 +454,26 @@ is_pe_object_magic (unsigned short magic)
   switch (magic)
     {
     case IMAGE_FILE_MACHINE_ALPHA:
-    case IMAGE_FILE_MACHINE_ARM:
+    case IMAGE_FILE_MACHINE_AMD64:
     case IMAGE_FILE_MACHINE_ARM64:
+    case IMAGE_FILE_MACHINE_ARM:
     case IMAGE_FILE_MACHINE_ARMNT:
     case IMAGE_FILE_MACHINE_I386:
     case IMAGE_FILE_MACHINE_IA64:
-    case IMAGE_FILE_MACHINE_POWERPC:
     case IMAGE_FILE_MACHINE_LOONGARCH64:
-    case IMAGE_FILE_MACHINE_AMD64:
+    case IMAGE_FILE_MACHINE_POWERPC:
       // FIXME: Add more machine numbers.
       return true;
-    case 0x0a00: /* ARMMAGIC */
+
+      /* Note - when adding numbers here, also add them to
+	 decode_machine_number() above.  */
+    case 0x0093: /* TI C4x */
     case 0x0500: /* SH_ARCH_MAGIC_BIG */
     case 0x0550: /* SH_ARCH_MAGIC_LITTLE */
+    case 0x0a00: /* ARMMAGIC */
     case 0x0b00: /* MCore */
-    case 0x0093: /* TI C4x */
       return true;
+
     default:
       return false;
     }
