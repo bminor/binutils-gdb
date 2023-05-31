@@ -2538,6 +2538,10 @@ lang_discard_section_p (asection *section)
       && (flags & SEC_DEBUGGING) != 0)
     discard = true;
 
+  /* Discard non-alloc sections if we are stripping section headers.  */
+  else if (config.no_section_header && (flags & SEC_ALLOC) == 0)
+    discard = true;
+
   return discard;
 }
 

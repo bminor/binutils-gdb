@@ -6601,6 +6601,10 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
   Elf_Internal_Ehdr *i_ehdrp;
   const struct elf_backend_data *bed;
 
+  /* Skip non-load sections without section header.  */
+  if ((abfd->flags & BFD_NO_SECTION_HEADER) != 0)
+    return true;
+
   off = elf_next_file_pos (abfd);
 
   shdrpp = elf_elfsections (abfd);
@@ -6724,9 +6728,11 @@ _bfd_elf_write_object_contents (bfd *abfd)
   num_sec = elf_numsections (abfd);
   for (count = 1; count < num_sec; count++)
     {
-      i_shdrp[count]->sh_name
-	= _bfd_elf_strtab_offset (elf_shstrtab (abfd),
-				  i_shdrp[count]->sh_name);
+      /* Don't set the sh_name field without section header.  */
+      if ((abfd->flags & BFD_NO_SECTION_HEADER) == 0)
+	i_shdrp[count]->sh_name
+	  = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
+				    i_shdrp[count]->sh_name);
       if (bed->elf_backend_section_processing)
 	if (!(*bed->elf_backend_section_processing) (abfd, i_shdrp[count]))
 	  return false;
@@ -6743,6 +6749,7 @@ _bfd_elf_write_object_contents (bfd *abfd)
   /* Write out the section header names.  */
   t = elf_tdata (abfd);
   if (elf_shstrtab (abfd) != NULL
+      && t->shstrtab_hdr.sh_offset != -1
       && (bfd_seek (abfd, t->shstrtab_hdr.sh_offset, SEEK_SET) != 0
 	  || !_bfd_elf_strtab_emit (abfd, elf_shstrtab (abfd))))
     return false;

@@ -1377,6 +1377,11 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	return true;
     }
 
+  /* Remove non-alloc sections for --strip-section-headers.  */
+  if (strip_section_headers
+      && (bfd_section_flags (sec) & SEC_ALLOC) == 0)
+    return true;
+
   if ((bfd_section_flags (sec) & SEC_DEBUGGING) != 0)
     {
       if (strip_symbols == STRIP_DEBUG
@@ -2730,7 +2735,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
       if (strip_section_headers)
 	{
-	  non_fatal (_("--strip_section_headers is unsupported on `%s'"),
+	  non_fatal (_("--strip-section-headers is unsupported on `%s'"),
 		     bfd_get_archive_filename (ibfd));
 	  return false;
 	}
