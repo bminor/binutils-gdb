@@ -1648,9 +1648,7 @@ type_name_or_error (struct type *type)
 	 objfile ? objfile_name (objfile) : "<arch>");
 }
 
-/* Lookup a typedef or primitive type named NAME, visible in lexical
-   block BLOCK.  If NOERR is nonzero, return zero if NAME is not
-   suitably defined.  */
+/* See gdbtypes.h.  */
 
 struct type *
 lookup_typename (const struct language_defn *language,
@@ -1662,7 +1660,12 @@ lookup_typename (const struct language_defn *language,
   sym = lookup_symbol_in_language (name, block, VAR_DOMAIN,
 				   language->la_language, NULL).symbol;
   if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
-    return sym->type ();
+    {
+      struct type *type = sym->type ();
+      /* Ensure the length of TYPE is valid.  */
+      check_typedef (type);
+      return type;
+    }
 
   if (noerr)
     return NULL;

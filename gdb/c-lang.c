@@ -615,9 +615,6 @@ c_string_operation::evaluate (struct type *expect_type,
       internal_error (_("unhandled c_string_type"));
     }
 
-  /* Ensure TYPE_LENGTH is valid for TYPE.  */
-  check_typedef (type);
-
   /* If the caller expects an array of some integral type,
      satisfy them.  If something odder is expected, rely on the
      caller to cast.  */

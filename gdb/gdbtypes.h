@@ -2586,8 +2586,18 @@ extern void check_stub_method_group (struct type *, int);
 
 extern char *gdb_mangle_name (struct type *, int, int);
 
-extern struct type *lookup_typename (const struct language_defn *,
-				     const char *, const struct block *, int);
+/* Lookup a typedef or primitive type named NAME, visible in lexical block
+   BLOCK.  If NOERR is nonzero, return zero if NAME is not suitably
+   defined.
+
+   If this function finds a suitable type then check_typedef is called on
+   the type, this ensures that if the type being returned is a typedef
+   then the length of the type will be correct.  The original typedef will
+   still be returned, not the result of calling check_typedef.  */
+
+extern struct type *lookup_typename (const struct language_defn *language,
+				     const char *name,
+				     const struct block *block, int noerr);
 
 extern struct type *lookup_template_type (const char *, struct type *,
 					  const struct block *);
