@@ -156,6 +156,11 @@ _bfd_new_bfd_contained_in (bfd *obfd)
 static void
 _bfd_delete_bfd (bfd *abfd)
 {
+  /* Give the target _bfd_free_cached_info a chance to free memory.  */
+  if (abfd->memory)
+    bfd_free_cached_info (abfd);
+
+  /* The target _bfd_free_cached_info may not have done anything..  */
   if (abfd->memory)
     {
       bfd_hash_table_free (&abfd->section_htab);

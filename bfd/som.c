@@ -6813,7 +6813,9 @@ som_bfd_free_cached_info (bfd *abfd)
 #undef FREE
     }
 
-  return _bfd_generic_close_and_cleanup (abfd);
+  /* Do not call _bfd_free_cached_info here.  som_write_armap needs
+     to access the bfd obj_alloc memory.  */
+  return true;
 }
 
 /* End of miscellaneous support functions.  */
@@ -6828,7 +6830,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 
 #define som_find_line				_bfd_nosymbols_find_line
 #define som_get_symbol_version_string		_bfd_nosymbols_get_symbol_version_string
-#define	som_close_and_cleanup			som_bfd_free_cached_info
+#define som_close_and_cleanup			_bfd_generic_close_and_cleanup
 #define som_read_ar_hdr				_bfd_generic_read_ar_hdr
 #define som_write_ar_hdr			_bfd_generic_write_ar_hdr
 #define som_openr_next_archived_file		bfd_generic_openr_next_archived_file
