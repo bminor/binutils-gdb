@@ -5972,8 +5972,8 @@ Handle the output by calling a function in your program (normally
 @code{printf}).  When using this style the supported format specifiers
 depend entirely on the function being called.
 
-Most of @value{GDB}'s format specifiers align with those supported by
-the @code{printf} function, however, @value{GDB}'s @samp{%V} format
+Most of @value{GDBN}'s format specifiers align with those supported by
+the @code{printf} function, however, @value{GDBN}'s @samp{%V} format
 specifier extension is not supported by @code{printf}.  When using
 @samp{call} style dprintf, care should be taken to ensure that only
 format specifiers supported by the output function are used, otherwise
