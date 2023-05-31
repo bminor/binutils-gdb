@@ -19,6 +19,8 @@
 * Remove support for RISC-V privileged spec 1.9.1, but linker can still
   recognize it in case of linking old objects.
 
+* Add support for RISC-V Zacas extension with version 1.0.
+
 * Add support for RISC-V Zcmp extension with version 1.0.
 
 * Add support for RISC-V Zfbfmin extension with version 1.0.
