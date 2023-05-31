@@ -15,11 +15,12 @@
 
 import gdb
 import os
+import re
 
 # These are deprecated in 3.9, but required in older versions.
 from typing import Optional, Sequence
 
-from .server import request, capability
+from .server import request, capability, send_event
 from .startup import send_gdb_with_response, in_gdb_thread, log_stack
 from .typecheck import type_check
 
@@ -136,11 +137,54 @@ def _set_breakpoints_callback(kind, specs, creator):
     return result
 
 
-# Helper function to set odinary breakpoints according to a list of
+class _PrintBreakpoint(gdb.Breakpoint):
+    def __init__(self, logMessage, **args):
+        super().__init__(**args)
+        # Split the message up for easier processing.
+        self.message = re.split("{(.*?)}", logMessage)
+
+    def stop(self):
+        output = ""
+        for idx, item in enumerate(self.message):
+            if idx % 2 == 0:
+                # Even indices are plain text.
+                output += item
+            else:
+                # Odd indices are expressions to substitute.  The {}
+                # have already been stripped by the placement of the
+                # regex capture in the 'split' call.
+                try:
+                    val = gdb.parse_and_eval(item)
+                    output += str(val)
+                except Exception as e:
+                    output += "<" + str(e) + ">"
+        send_event(
+            "output",
+            {
+                "category": "console",
+                "output": output,
+            },
+        )
+        # Do not stop.
+        return False
+
+
+# Set a single breakpoint or a log point.  Returns the new breakpoint.
+# Note that not every spec will pass logMessage, so here we use a
+# default.
+@in_gdb_thread
+def _set_one_breakpoint(*, logMessage=None, **args):
+    if logMessage is not None:
+        return _PrintBreakpoint(logMessage, **args)
+    else:
+        return gdb.Breakpoint(**args)
+
+
+# Helper function to set ordinary breakpoints according to a list of
 # specifications.
 @in_gdb_thread
 def _set_breakpoints(kind, specs):
-    return _set_breakpoints_callback(kind, specs, gdb.Breakpoint)
+    return _set_breakpoints_callback(kind, specs, _set_one_breakpoint)
 
 
 # A helper function that rewrites a SourceBreakpoint into the internal
@@ -154,6 +198,7 @@ def _rewrite_src_breakpoint(
     line: int,
     condition: Optional[str] = None,
     hitCondition: Optional[str] = None,
+    logMessage: Optional[str] = None,
     **args,
 ):
     return {
@@ -161,6 +206,7 @@ def _rewrite_src_breakpoint(
         "line": line,
         "condition": condition,
         "hitCondition": hitCondition,
+        "logMessage": logMessage,
     }
 
 
@@ -168,6 +214,7 @@ def _rewrite_src_breakpoint(
 @request("setBreakpoints")
 @capability("supportsHitConditionalBreakpoints")
 @capability("supportsConditionalBreakpoints")
+@capability("supportsLogPoints")
 def set_breakpoint(*, source, breakpoints: Sequence = (), **args):
     if "path" not in source:
         result = []
