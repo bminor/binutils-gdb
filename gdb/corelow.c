@@ -263,18 +263,11 @@ core_target::build_file_mappings ()
 	    if (bfd == nullptr || !bfd_check_format (bfd, bfd_object))
 	      {
 		m_core_unavailable_mappings.emplace_back (start, end - start);
-		/* If we get here, there's a good chance that it's due to
-		   an internal error.  We issue a warning instead of an
-		   internal error because of the possibility that the
-		   file was removed in between checking for its
-		   existence during the expansion in exec_file_find()
-		   and the calls to bfd_openr() / bfd_check_format(). 
-		   Output both the path from the core file note along
-		   with its expansion to make debugging this problem
-		   easier.  */
-		warning (_("Can't open file %s which was expanded to %s "
-			   "during file-backed mapping note processing"),
-			 filename, expanded_fname.get ());
+		if (unavailable_paths.insert (filename).second)
+		  warning (_("Can't open file %s which was expanded to %s "
+			     "during file-backed mapping note processing"),
+			   filename, expanded_fname.get ());
+
 		if (bfd != nullptr)
 		  bfd_close (bfd);
 		return;
