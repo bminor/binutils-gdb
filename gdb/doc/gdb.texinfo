@@ -32328,9 +32328,14 @@ times="0"@}]@}
 @smallexample
  -dprintf-insert [ -t ] [ -f ] [ -d ] [ --qualified ]
     [ -c @var{condition} ] [--force-condition] [ -i @var{ignore-count} ]
-    [ -p @var{thread-id} ] [ @var{locspec} ] [ @var{format} ]
-    [ @var{argument} ]
+    [ -p @var{thread-id} ] [ @var{locspec} ] @var{format}
+    [ @var{argument}@dots{} ]
 @end smallexample
+
+@noindent
+Insert a new dynamic print breakpoint at the given location.
+@xref{Dynamic Printf}.  @var{format} is the format to use, and any
+remaining arguments are passed as expressions to substitute.
 
 @noindent
 If supplied, @var{locspec} and @code{--qualified} may be specified

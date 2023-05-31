@@ -93,8 +93,8 @@ setup_breakpoint_reporting (void)
 }
 
 
-/* Convert arguments in ARGV to the string in "format",argv,argv...
-   and return it.  */
+/* Convert arguments in ARGV to a string suitable for parsing by
+   dprintf like "FORMAT",ARG,ARG... and return it.  */
 
 static std::string
 mi_argv_to_format (const char *const *argv, int argc)
@@ -102,9 +102,9 @@ mi_argv_to_format (const char *const *argv, int argc)
   int i;
   std::string result;
 
-  /* Convert ARGV[OIND + 1] to format string and save to FORMAT.  */
+  /* Convert ARGV[0] to format string and save to FORMAT.  */
   result += '\"';
-  for (i = 0; i < strlen (argv[0]); i++)
+  for (i = 0; argv[0][i] != '\0'; i++)
     {
       switch (argv[0][i])
 	{
@@ -151,7 +151,7 @@ mi_argv_to_format (const char *const *argv, int argc)
     }
   result += '\"';
 
-  /* Apply other argv to FORMAT.  */
+  /* Append other arguments.  */
   for (i = 1; i < argc; i++)
     {
       result += ',';
