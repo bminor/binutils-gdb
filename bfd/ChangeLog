@@ -1,3 +1,14 @@
+2023-05-31  Tristan Gingold  <tgingold@free.fr>
+
+	PR 30444
+	* coffcode.h (coff_write_object_contents): Handle base64 encoding
+	on PE.  Also check for too large string table.
+	* coffgen.c (extract_long_section_name): New function extracted
+	from ...
+	(make_a_section_from_file): ... here.  Add support for base64
+	long section names.
+	(decode_base64): New function.
+
 2023-05-17  Luca Bacci  <luca.bacci@outlook.com>
 
 	PR 30421

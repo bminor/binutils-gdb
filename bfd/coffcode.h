@@ -3568,18 +3568,55 @@ coff_write_object_contents (bfd * abfd)
 	  len = strlen (current->name);
 	  if (len > SCNNMLEN)
 	    {
-	      /* The s_name field is defined to be NUL-padded but need not be
-		 NUL-terminated.  We use a temporary buffer so that we can still
-		 sprintf all eight chars without splatting a terminating NUL
-		 over the first byte of the following member (s_paddr).  */
-	      /* PR 21096: The +20 is to stop a bogus warning from gcc7 about
-		 a possible buffer overflow.  */
-	      char s_name_buf[SCNNMLEN + 1 + 20];
 
 	      /* An inherent limitation of the /nnnnnnn notation used to indicate
 		 the offset of the long name in the string table is that we
 		 cannot address entries beyone the ten million byte boundary.  */
-	      if (string_size >= 10000000)
+	      if (string_size < 10000000)
+		{
+		  /* The s_name field is defined to be NUL-padded but need not
+		     be NUL-terminated.  We use a temporary buffer so that we
+		     can still sprintf all eight chars without splatting a
+		     terminating NUL over the first byte of the following
+		     member (s_paddr).  */
+		  /* PR 21096: The +20 is to stop a bogus warning from gcc7
+		     about a possible buffer overflow.  */
+		  char s_name_buf[SCNNMLEN + 1 + 20];
+
+		  /* We do not need to use snprintf here as we have already
+		     verified that string_size is not too big, plus we have
+		     an overlarge buffer, just in case.  */
+		  sprintf (s_name_buf, "/%lu", (unsigned long) string_size);
+		  /* Then strncpy takes care of any padding for us.  */
+		  strncpy (section.s_name, s_name_buf, SCNNMLEN);
+		}
+	      else
+#ifdef COFF_WITH_PE
+		{
+		  /* PE use a base 64 encoding for long section names whose
+		     index is very large.  But contrary to RFC 4648, there is
+		     no padding: 6 characters must be generated.  */
+		  static const char base64[] =
+		    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		    "abcdefghijklmnopqrstuvwxyz"
+		    "0123456789+/";
+		  unsigned long off = string_size;
+		  unsigned i;
+
+		  section.s_name[0] = '/';
+		  section.s_name[1] = '/';
+		  for (i = SCNNMLEN - 1; i >= 2; i--)
+		    {
+		      section.s_name[i] = base64[off & 0x3f];
+		      off >>= 6;
+		    }
+		}
+#endif
+	      if (string_size > 0xffffffffUL - (len + 1)
+#ifndef COFF_WITH_PE
+		  || string_size >= 10000000
+#endif
+		  )
 		{
 		  bfd_set_error (bfd_error_file_too_big);
 		  _bfd_error_handler
@@ -3589,12 +3626,6 @@ coff_write_object_contents (bfd * abfd)
 		  return false;
 		}
 
-	      /* We do not need to use snprintf here as we have already verfied
-		 that string_size is not too big, plus we have an overlarge
-		 buffer, just in case.  */
-	      sprintf (s_name_buf, "/%lu", (unsigned long) string_size);
-	      /* Then strncpy takes care of any padding for us.  */
-	      strncpy (section.s_name, s_name_buf, SCNNMLEN);
 	      string_size += len + 1;
 	      long_section_names = true;
 	    }
