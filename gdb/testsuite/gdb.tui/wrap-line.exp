@@ -69,8 +69,10 @@ proc test_wrap { wrap_width } {
 
 # Test wrapping in both CLI and TUI.
 proc test_wrap_cli_tui { auto_detected_width } {
-    # Use a TUI layout with just a command window.
-    gdb_test_no_output "tui new-layout command-layout cmd 1"
+    if { [allow_tui_tests] } {
+	# Use a TUI layout with just a command window.
+	gdb_test_no_output "tui new-layout command-layout cmd 1"
+    }
 
     set gdb_width 0
     set readline_width 0
