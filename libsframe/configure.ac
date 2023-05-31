@@ -81,6 +81,34 @@ else
 fi
 AM_CONDITIONAL(BUILD_INFO, test "${build_info}" = yes)
 
+dnl Determine if using Solaris linker
+AC_MSG_CHECKING([if using Solaris linker])
+SLD=`$LD --version 2>&1 | grep Solaris`
+if test "$SLD"; then
+  have_solaris_ld=yes
+  AC_MSG_RESULT(yes)
+else
+  have_solaris_ld=no
+  AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(HAVE_SOLARIS_LD, test "$have_solaris_ld" = "yes")
+
+if test "$have_solaris_ld" = "yes"; then
+  GLD=`$LD --help < /dev/null 2>&1 | grep 'M mapfile'`
+else
+  GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
+fi
+
+if test "$GLD"; then
+  have_ld_version_script=yes
+  AC_MSG_RESULT(yes)
+else
+  have_ld_version_script=no
+  AC_MSG_RESULT(no)
+  AC_MSG_WARN(*** Versioned symbols not enabled.)
+fi
+AM_CONDITIONAL(HAVE_LD_VERSION_SCRIPT, test "$have_ld_version_script" = "yes")
+
 AM_MAINTAINER_MODE
 AM_INSTALL_LIBBFD
 
