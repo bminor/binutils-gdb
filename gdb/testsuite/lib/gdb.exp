@@ -3192,6 +3192,36 @@ proc with_target_charset { target_charset body } {
     }
 }
 
+# Run tests in BODY with max-value-size set to SIZE.  When BODY is
+# finished restore max-value-size.
+
+proc with_max_value_size { size body } {
+    global gdb_prompt
+
+    set saved ""
+    gdb_test_multiple "show max-value-size" "" {
+	-re -wrap "Maximum value size is ($::decimal) bytes\\." {
+	    set saved $expect_out(1,string)
+	}
+	-re ".*$gdb_prompt " {
+	    fail "get max-value-size"
+	}
+    }
+
+    gdb_test_no_output -nopass "set max-value-size $size"
+
+    set code [catch {uplevel 1 $body} result]
+
+    gdb_test_no_output -nopass "set max-value-size $saved"
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
 # Switch the default spawn id to SPAWN_ID, so that gdb_test,
 # mi_gdb_test etc. default to using it.
 

@@ -78,6 +78,12 @@
   functionality is also available for dprintf when dprintf-style is
   'gdb'.
 
+* When the printf command requires a string to be fetched from the
+  inferior, GDB now uses the existing 'max-value-size' setting to the
+  limit the memory allocated within GDB.  The default 'max-value-size'
+  is 64k.  To print longer strings you should increase
+  'max-value-size'.
+
 * New commands
 
 maintenance print record-instruction [ N ]

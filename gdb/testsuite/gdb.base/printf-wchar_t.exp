@@ -24,3 +24,9 @@ if {![runto_main]} {
 }
 
 gdb_test {printf "%ls\n", wide_str} "^wide string"
+
+# Check that if the max-value-size will kick in when using printf on strings.
+with_max_value_size 20 {
+    gdb_test {printf "%ls\n", long_wide_str} \
+	"^printed string requires 240 bytes, which is more than max-value-size"
+}

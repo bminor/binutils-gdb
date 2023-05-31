@@ -18,6 +18,8 @@
 #include <wchar.h>
 
 const wchar_t wide_str[] = L"wide string";
+const wchar_t long_wide_str[]
+  = L"this is a much longer wide string that we can use if needed";
 
 int
 main (void)

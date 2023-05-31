@@ -2480,16 +2480,23 @@ printf_c_string (struct ui_file *stream, const char *format,
       /* This is a %s argument.  Build the string in STR which is
 	 currently empty.  */
       gdb_assert (str.size () == 0);
-      for (size_t len = 0;; len++)
+      size_t len;
+      for (len = 0;; len++)
 	{
 	  gdb_byte c;
 
 	  QUIT;
+
 	  read_memory (tem + len, &c, 1);
-	  str.push_back (c);
+	  if (!exceeds_max_value_size (len + 1))
+	    str.push_back (c);
 	  if (c == 0)
 	    break;
 	}
+
+      if (exceeds_max_value_size (len + 1))
+	error (_("printed string requires %s bytes, which is more than "
+		 "max-value-size"), plongest (len + 1));
 
       /* We will have passed through the above loop at least once, and will
 	 only exit the loop when we have pushed a zero byte onto the end of
@@ -2547,12 +2554,36 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
       for (len = 0;; len += wcwidth)
 	{
 	  QUIT;
-	  tem_str->resize (tem_str->size () + wcwidth);
-	  gdb_byte *dst = tem_str->data () + len;
+	  gdb_byte *dst;
+	  if (!exceeds_max_value_size (len + wcwidth))
+	    {
+	      tem_str->resize (tem_str->size () + wcwidth);
+	      dst = tem_str->data () + len;
+	    }
+	  else
+	    {
+	      /* We still need to check for the null-character, so we need
+		 somewhere to place the data read from the inferior.  We
+		 can't keep growing TEM_STR, it's gotten too big, so
+		 instead just read the new character into the start of
+		 TEMS_STR.  This will corrupt the previously read contents,
+		 but we're not going to print this string anyway, we just
+		 want to know how big it would have been so we can tell the
+		 user in the error message (see below).
+
+		 And we know there will be space in this buffer so long as
+		 WCWIDTH is smaller than our LONGEST type, the
+		 max-value-size can't be smaller than a LONGEST.  */
+	      dst = tem_str->data ();
+	    }
 	  read_memory (tem + len, dst, wcwidth);
 	  if (extract_unsigned_integer (dst, wcwidth, byte_order) == 0)
 	    break;
 	}
+
+      if (exceeds_max_value_size (len + wcwidth))
+	error (_("printed string requires %s bytes, which is more than "
+		 "max-value-size"), plongest (len + wcwidth));
 
       str = tem_str->data ();
     }

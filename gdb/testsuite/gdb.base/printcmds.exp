@@ -901,6 +901,11 @@ proc test_printf {} {
 
     # PR cli/14977.
     gdb_test "printf \"%s\\n\", 0" "\\(null\\)"
+
+    with_max_value_size 20 {
+	gdb_test {printf "%s", teststring3} \
+	    "^printed string requires 45 bytes, which is more than max-value-size"
+    }
 }
 
 #Test printing DFP values with printf

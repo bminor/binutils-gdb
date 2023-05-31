@@ -75,6 +75,8 @@ char *teststring = (char*)"teststring contents";
 typedef char *charptr;
 charptr teststring2 = "more contents";
 
+const char *teststring3 = "this is a longer test string that we can use";
+
 /* Test printing of a struct containing character arrays. */
 
 struct some_arrays {

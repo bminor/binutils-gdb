@@ -804,7 +804,7 @@ check_type_length_before_alloc (const struct type *type)
 {
   ULONGEST length = type->length ();
 
-  if (max_value_size > -1 && length > max_value_size)
+  if (exceeds_max_value_size (length))
     {
       if (type->name () != NULL)
 	error (_("value of type `%s' requires %s bytes, which is more "
@@ -813,6 +813,14 @@ check_type_length_before_alloc (const struct type *type)
 	error (_("value requires %s bytes, which is more than "
 		 "max-value-size"), pulongest (length));
     }
+}
+
+/* See value.h.  */
+
+bool
+exceeds_max_value_size (ULONGEST length)
+{
+  return max_value_size > -1 && length > max_value_size;
 }
 
 /* When this has a value, it is used to limit the number of array elements

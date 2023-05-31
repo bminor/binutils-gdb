@@ -1612,6 +1612,11 @@ extern void finalize_values ();
    of floating-point, fixed-point, or integer type.  */
 extern gdb_mpq value_to_gdb_mpq (struct value *value);
 
+/* Return true if LEN (in bytes) exceeds the max-value-size setting,
+   otherwise, return false.  If the user has disabled (set to unlimited)
+   the max-value-size setting then this function will always return false.  */
+extern bool exceeds_max_value_size (ULONGEST length);
+
 /* While an instance of this class is live, and array values that are
    created, that are larger than max_value_size, will be restricted in size
    to a particular number of elements.  */
