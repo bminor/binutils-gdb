@@ -258,8 +258,7 @@ core_target::build_file_mappings ()
 		return;
 	      }
 
-	    bfd = bfd_map[filename] = bfd_openr (expanded_fname.get (),
-						 "binary");
+	    bfd = bfd_openr (expanded_fname.get (), "binary");
 
 	    if (bfd == nullptr || !bfd_check_format (bfd, bfd_object))
 	      {
@@ -284,6 +283,7 @@ core_target::build_file_mappings ()
 	       This can be checked before/after a core file detach via
 	       "maint info bfds".  */
 	    gdb_bfd_record_inclusion (core_bfd, bfd);
+	    bfd_map[filename] = bfd;
 	  }
 
 	/* Make new BFD section.  All sections have the same name,
