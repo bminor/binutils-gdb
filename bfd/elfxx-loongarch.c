@@ -1669,7 +1669,7 @@ reloc_bits_pcrel20_s2 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
       && (val & ((((bfd_signed_vma) 1) << howto->rightshift) - 1)))
     {
       (*_bfd_error_handler) (_("%pB: relocation %s right shift %d error 0x%lx"),
-			     abfd, howto->name, howto->rightshift, val);
+			     abfd, howto->name, howto->rightshift, (long) val);
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
@@ -1679,7 +1679,7 @@ reloc_bits_pcrel20_s2 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
   if ((val & ~mask) && ((val & ~mask) != ~mask))
     {
       (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, val);
+			     abfd, howto->name, (long) val);
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
@@ -1715,7 +1715,7 @@ reloc_bits_b16 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
   if ((val & ~mask) && ((val & ~mask) != ~mask))
     {
       (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, val);
+			     abfd, howto->name, (long) val);
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
@@ -1750,7 +1750,7 @@ reloc_bits_b21 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
   if ((val & ~mask) && ((val & ~mask) != ~mask))
     {
       (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, val);
+			     abfd, howto->name, (long) val);
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
@@ -1787,7 +1787,7 @@ reloc_bits_b26 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
   if ((val & ~mask) && ((val & ~mask) != ~mask))
     {
       (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, val);
+			     abfd, howto->name, (long) val);
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
