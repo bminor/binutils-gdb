@@ -218,6 +218,8 @@ EXCLUDE_LIST = (
     "gdb/nat/glibc_thread_db.h",
     "gdb/CONTRIBUTE",
     "gdbsupport/Makefile.in",
+    "gnulib/doc/gendocs_template",
+    "gnulib/doc/gendocs_template_min",
     "gnulib/import",
     "gnulib/config.in",
     "gnulib/Makefile.in",

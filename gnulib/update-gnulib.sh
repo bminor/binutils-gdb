@@ -49,7 +49,7 @@ IMPORTED_GNULIB_MODULES="\
     gettimeofday \
     gitlog-to-changelog \
     glob \
-    inet_ntop
+    inet_ntop \
     inttypes \
     lstat \
     limits-h \
