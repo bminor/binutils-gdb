@@ -2653,62 +2653,58 @@ printf_pointer (struct ui_file *stream, const char *format,
      modifier for %p is a width; extract that, and then
      handle %p as glibc would: %#x or a literal "(nil)".  */
 
-  const char *p;
-  char *fmt, *fmt_p;
 #ifdef PRINTF_HAS_LONG_LONG
   long long val = value_as_long (value);
 #else
   long val = value_as_long (value);
 #endif
 
-  fmt = (char *) alloca (strlen (format) + 5);
+  /* Build the new output format in FMT.  */
+  std::string fmt;
 
   /* Copy up to the leading %.  */
-  p = format;
-  fmt_p = fmt;
+  const char *p = format;
   while (*p)
     {
       int is_percent = (*p == '%');
 
-      *fmt_p++ = *p++;
+      fmt.push_back (*p++);
       if (is_percent)
 	{
 	  if (*p == '%')
-	    *fmt_p++ = *p++;
+	    fmt.push_back (*p++);
 	  else
 	    break;
 	}
     }
 
   if (val != 0)
-    *fmt_p++ = '#';
+    fmt.push_back ('#');
 
   /* Copy any width or flags.  Only the "-" flag is valid for pointers
      -- see the format_pieces constructor.  */
   while (*p == '-' || (*p >= '0' && *p < '9'))
-    *fmt_p++ = *p++;
+    fmt.push_back (*p++);
 
   gdb_assert (*p == 'p' && *(p + 1) == '\0');
   if (val != 0)
     {
 #ifdef PRINTF_HAS_LONG_LONG
-      *fmt_p++ = 'l';
+      fmt.push_back ('l');
 #endif
-      *fmt_p++ = 'l';
-      *fmt_p++ = 'x';
-      *fmt_p++ = '\0';
+      fmt.push_back ('l');
+      fmt.push_back ('x');
       DIAGNOSTIC_PUSH
       DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-	gdb_printf (stream, fmt, val);
+	gdb_printf (stream, fmt.c_str (), val);
       DIAGNOSTIC_POP
     }
   else
     {
-      *fmt_p++ = 's';
-      *fmt_p++ = '\0';
+      fmt.push_back ('s');
       DIAGNOSTIC_PUSH
       DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-	gdb_printf (stream, fmt, "(nil)");
+	gdb_printf (stream, fmt.c_str (), "(nil)");
       DIAGNOSTIC_POP
     }
 }
