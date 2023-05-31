@@ -111,7 +111,8 @@ public:
      non-empty string made of 'V' and 'H' characters, followed by a single
      'C' character.  Each 'V' and 'H' represents a vertical or horizontal
      layout that must be passed through in order to find the cmd
-     window.
+     window.  A vertical or horizontal layout of just one window does not add
+     a 'V' or 'H' character.
 
      Of course, layouts are built recursively, so, when called on a partial
      layout, if this object represents a single window, then either the
@@ -119,7 +120,7 @@ public:
      containing a single 'C' is returned.
 
      For object representing layouts, if the layout contains the cmd
-     window then we will get back a valid fingerprint string (contains 'V'
+     window then we will get back a valid fingerprint string (may contain 'V'
      and 'H', ends with 'C'), or, if this layout doesn't contain the cmd
      window, an empty string is returned.  */
   virtual std::string layout_fingerprint () const = 0;

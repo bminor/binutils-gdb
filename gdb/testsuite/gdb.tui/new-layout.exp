@@ -142,3 +142,12 @@ foreach_with_prefix layout $layouts {
 			   "$gdb_prompt\\s+"]
     }
 }
+
+Term::command "layout src"
+Term::command "winheight cmd 8"
+Term::check_box "before cmd_only: src box in src layout" 0 0 80 15
+
+Term::command "layout cmd_only"
+
+Term::command "layout src"
+Term::check_box "after cmd_only: src box in src layout" 0 0 80 15

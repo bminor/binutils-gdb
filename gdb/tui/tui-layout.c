@@ -1101,7 +1101,7 @@ tui_layout_split::layout_fingerprint () const
   for (auto &item : m_splits)
     {
       std::string fp = item.layout->layout_fingerprint ();
-      if (!fp.empty ())
+      if (!fp.empty () && m_splits.size () != 1)
 	return std::string (m_vertical ? "V" : "H") + fp;
     }
 
