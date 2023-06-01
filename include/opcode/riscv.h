@@ -502,6 +502,7 @@ enum
 {
   M_LA,
   M_LLA,
+  M_LGA,
   M_LA_TLS_GD,
   M_LA_TLS_IE,
   M_LB,

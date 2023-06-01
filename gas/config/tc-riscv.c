@@ -2010,16 +2010,20 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
 
     case M_LA:
     case M_LLA:
+    case M_LGA:
       /* Load the address of a symbol into a register.  */
       if (!IS_SEXT_32BIT_NUM (imm_expr->X_add_number))
 	as_bad (_("offset too large"));
 
       if (imm_expr->X_op == O_constant)
 	load_const (rd, imm_expr);
-      else if (riscv_opts.pic && mask == M_LA) /* Global PIC symbol.  */
+      /* Global PIC symbol.  */
+      else if ((riscv_opts.pic && mask == M_LA)
+	       || mask == M_LGA)
 	pcrel_load (rd, rd, imm_expr, LOAD_ADDRESS_INSN,
 		    BFD_RELOC_RISCV_GOT_HI20, BFD_RELOC_RISCV_PCREL_LO12_I);
-      else /* Local PIC symbol, or any non-PIC symbol.  */
+      /* Local PIC symbol, or any non-PIC symbol.  */
+      else
 	pcrel_load (rd, rd, imm_expr, "addi",
 		    BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_I);
       break;
