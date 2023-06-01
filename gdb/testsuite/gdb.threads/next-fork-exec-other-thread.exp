@@ -25,6 +25,8 @@
 # 20.04.5 LTS with 32-bit kernel + 32-bit userland.  It was NOT reproducible
 # using a circa 2023 Raspberry Pi OS w/ 64-bit kernel and 32-bit userland.
 
+require allow_fork_tests
+
 standard_testfile
 
 # Line where to stop the main thread.

@@ -16,6 +16,8 @@
 # This test verifies that several threads forking while another thread
 # is constantly stepping over a breakpoint is properly handled.
 
+require allow_fork_tests
+
 standard_testfile
 
 set linenum [gdb_get_line_number "set break here"]

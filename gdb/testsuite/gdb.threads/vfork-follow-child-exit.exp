@@ -16,6 +16,8 @@
 # Test following a vfork child that exits, when the vfork parent is a
 # threaded program, and it's a non-main thread that vforks.
 
+require allow_fork_tests
+
 standard_testfile
 
 if {[build_executable "failed to prepare" $testfile $srcfile {debug pthreads}]} {

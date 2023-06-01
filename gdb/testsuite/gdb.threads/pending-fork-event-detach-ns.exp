@@ -29,6 +29,8 @@
 #     parent thread from waitpid'ing it, preventing the main thread from joining
 #     it, prevent it from writing the flag file, failing the test.
 
+require allow_fork_tests
+
 standard_testfile
 
 if { [is_remote target] } {

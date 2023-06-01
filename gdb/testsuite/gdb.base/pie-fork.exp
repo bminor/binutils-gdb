@@ -16,6 +16,8 @@
 # Test that we can follow forks properly when the executable is
 # position-independent.
 
+require allow_fork_tests
+
 standard_testfile
 
 set opts [list debug pie]

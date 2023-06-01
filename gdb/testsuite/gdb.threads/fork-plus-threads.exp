@@ -20,6 +20,8 @@
 #
 # See https://sourceware.org/bugzilla/show_bug.cgi?id=18600
 
+require allow_fork_tests
+
 # In remote mode, we cannot continue debugging after all
 # inferiors have terminated, and this test requires that.
 if { [target_info exists gdb_protocol]

@@ -17,6 +17,8 @@
 
 standard_testfile .c
 
+require allow_fork_tests
+
 if { [build_executable ${testfile}.exp ${testfile} $srcfile {debug}] } {
     untested "failed to compile"
     return -1

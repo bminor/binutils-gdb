@@ -5095,6 +5095,22 @@ proc skip_inline_var_tests {} {
     return 0
 }
 
+# Return whether we allow running fork-related testcases.  Targets
+# that don't even have any concept of fork will just fail to compile
+# the testcases and skip the tests that way if this returns true for
+# them.  Unix targets that do have a fork system call, but don't
+# support intercepting forks will want to return false here, otherwise
+# the testcases that exercise fork may hit a number of long cascading
+# time out sequences.
+
+proc allow_fork_tests {} {
+    if {[istarget "*-*-cygwin*"] || [istarget "*-*-mingw*"]} {
+	return 0
+    }
+
+    return 1
+}
+
 # Return a 1 if we should run tests that require hardware breakpoints
 
 proc allow_hw_breakpoint_tests {} {

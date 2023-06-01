@@ -18,12 +18,7 @@
 # either execs or exits --- since those events take somewhat different
 # code paths in GDB, both variants are exercised.
 
-# Until "set follow-fork-mode" and "catch vfork" are implemented on
-# other targets...
-#
-if {![istarget "*-linux*"]} {
-    continue
-}
+require allow_fork_tests
 
 standard_testfile .c -exit.c vforked-prog.c
 

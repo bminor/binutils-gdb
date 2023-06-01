@@ -20,6 +20,7 @@
 load_lib rocm.exp
 
 require allow_hipcc_tests
+require allow_fork_tests
 
 standard_testfile -execer.cpp -execee.cpp
 

@@ -19,6 +19,8 @@
 # schedule-multiple on" or "set detach-on-fork on".  Test these two resolution
 # methods.
 
+require allow_fork_tests
+
 standard_testfile .c vforked-prog.c
 
 set binfile ${testfile}-exit
