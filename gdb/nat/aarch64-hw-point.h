@@ -58,9 +58,9 @@
 #define AARCH64_DEBUG_ARCH_V8_1 0x7
 #define AARCH64_DEBUG_ARCH_V8_2 0x8
 #define AARCH64_DEBUG_ARCH_V8_4 0x9
-#define AARCH64_DEBUG_ARCH_V8_8 0x10
+#define AARCH64_DEBUG_ARCH_V8_8 0xa
 /* Armv8.9 debug architecture.  */
-#define AARCH64_DEBUG_ARCH_V8_9 0x11
+#define AARCH64_DEBUG_ARCH_V8_9 0xb
 
 /* ptrace expects control registers to be formatted as follows:
 
