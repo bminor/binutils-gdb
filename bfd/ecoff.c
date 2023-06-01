@@ -942,7 +942,9 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
       if (fdr_ptr->isymBase < 0
 	  || fdr_ptr->isymBase > symhdr->isymMax
 	  || fdr_ptr->csym <= 0
-	  || fdr_ptr->csym > symhdr->isymMax - fdr_ptr->isymBase)
+	  || fdr_ptr->csym > symhdr->isymMax - fdr_ptr->isymBase
+	  || fdr_ptr->issBase < 0
+	  || fdr_ptr->issBase > symhdr->issMax)
 	continue;
       lraw_src = ((char *) ecoff_data (abfd)->debug_info.external_sym
 		  + fdr_ptr->isymBase * external_sym_size);
@@ -955,7 +957,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
 
 	  (*swap_sym_in) (abfd, (void *) lraw_src, &internal_sym);
 
-	  if (internal_sym.iss >= symhdr->issMax
+	  if (internal_sym.iss >= symhdr->issMax - fdr_ptr->issBase
 	      || internal_sym.iss < 0)
 	    {
 	      bfd_set_error (bfd_error_bad_value);
