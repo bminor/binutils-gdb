@@ -19,6 +19,8 @@
 # Also check that the correct thread-ids are used in the saved
 # breakpoints file.
 
+require allow_multi_inferior_tests
+
 # The plain remote target can't do multiple inferiors.
 require !use_gdb_stub
 

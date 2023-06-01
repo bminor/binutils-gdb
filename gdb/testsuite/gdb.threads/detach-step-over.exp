@@ -50,6 +50,8 @@
 
 require can_spawn_for_attach
 
+require allow_multi_inferior_tests
+
 standard_testfile
 
 set bp_lineno [gdb_get_line_number "Set breakpoint here"]

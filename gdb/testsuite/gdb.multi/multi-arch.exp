@@ -18,6 +18,8 @@
 
 set testfile "multi-arch"
 
+require allow_multi_inferior_tests
+
 # The plain remote target can't do multiple inferiors.
 require !use_gdb_stub
 

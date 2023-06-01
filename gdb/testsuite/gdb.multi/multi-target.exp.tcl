@@ -175,6 +175,10 @@ proc multi_target_prepare {} {
 	return 0
     }
 
+    if {![allow_multi_inferior_tests]} {
+	return 0
+    }
+
     # The plain remote target can't do multiple inferiors.
     if {[target_info gdb_protocol] != ""} {
 	return 0

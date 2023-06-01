@@ -49,6 +49,11 @@ if {[build_executable "failed to prepare" $testfile $srcfile]} {
 #  - run: use the run command
 #  - attach: start a process outside of GDB and attach it
 proc do_test { action1 action2 } {
+
+    if {$action1 == "add" && ![allow_multi_inferior_tests]} {
+	return
+    }
+
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS " -ex \"maintenance set target-non-stop on\""
 	clean_restart $::binfile

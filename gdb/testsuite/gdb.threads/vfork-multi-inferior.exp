@@ -27,6 +27,8 @@
 
 require allow_fork_tests
 
+require allow_multi_inferior_tests
+
 require !use_gdb_stub
 
 standard_testfile .c -sleep.c

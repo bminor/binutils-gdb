@@ -19,6 +19,7 @@
 # commands.
 
 require can_spawn_for_attach
+require allow_multi_inferior_tests
 
 standard_testfile
 set executable $testfile

@@ -37,6 +37,7 @@
 standard_testfile
 
 require can_spawn_for_attach
+require allow_multi_inferior_tests
 
 if { [build_executable "failed to prepare" ${testfile} ${srcfile}] } {
     return

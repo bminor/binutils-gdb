@@ -18,6 +18,8 @@
 # Test that in all-stop mode with multiple inferiors, GDB stops all
 # threads upon receiving an exit event from one of the inferiors.
 
+require allow_multi_inferior_tests
+
 # This is a test specific for a native target, where we use the
 # "-exec" argument to "add-inferior" and we explicitly don't do
 # "maint set target-non-stop on".

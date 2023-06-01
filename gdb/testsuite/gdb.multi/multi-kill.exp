@@ -24,6 +24,8 @@
 
 standard_testfile
 
+require allow_multi_inferior_tests
+
 require !use_gdb_stub
 
 if {[build_executable "failed to prepare" $testfile $srcfile {debug}]} {

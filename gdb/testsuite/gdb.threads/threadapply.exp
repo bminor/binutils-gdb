@@ -224,6 +224,8 @@ proc kill_and_remove_inferior {thread_set} {
 
 # Test both "all" and a thread list, because those are implemented as
 # different commands in GDB.
-foreach_with_prefix thread_set {"all" "1.1"} {
-    kill_and_remove_inferior $thread_set
+if {[allow_multi_inferior_tests]} {
+    foreach_with_prefix thread_set {"all" "1.1"} {
+	kill_and_remove_inferior $thread_set
+    }
 }

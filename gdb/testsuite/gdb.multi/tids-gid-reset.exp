@@ -54,6 +54,8 @@ with_test_prefix "single-inferior" {
 # non-extended gdbserver is not supported.
 require !use_gdb_stub
 
+require allow_multi_inferior_tests
+
 # Test with multiple inferiors.  This time, since we restart inferior
 # 1 while inferior 2 still has threads, then the new thread 1.1 should
 # end up with GID == 3, since we won't be able to reset the global
