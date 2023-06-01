@@ -20,6 +20,8 @@
 # This test uses "awatch".
 require allow_hw_watchpoint_access_tests
 
+require allow_fork_tests
+
 standard_testfile
 
 if {[build_executable "failed to prepare" $testfile $srcfile debug]} {

@@ -17,6 +17,8 @@
 # another thread, in different combinations of "set follow-fork
 # parent/child", and other execution modes.
 
+require allow_fork_tests
+
 standard_testfile
 
 # Line where to stop the main thread.

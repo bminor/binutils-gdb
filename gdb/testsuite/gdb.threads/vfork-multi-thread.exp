@@ -30,6 +30,8 @@
 # breakpoints are removed, so the main thread would miss the breakpoint and run
 # until exit.
 
+require allow_fork_tests
+
 standard_testfile
 
 if { [build_executable "failed to prepare" ${testfile} ${srcfile} {debug pthreads}] } {

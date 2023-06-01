@@ -16,6 +16,8 @@
 # Test doing a "next" on a thread during which forks or vforks happen in other
 # threads.
 
+require allow_fork_tests
+
 standard_testfile
 
 # Line where to stop the main thread.

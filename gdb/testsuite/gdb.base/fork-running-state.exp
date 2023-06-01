@@ -17,6 +17,8 @@
 # in non-stop).  GDB used to miss updating the parent/child running
 # states after a fork.
 
+require allow_fork_tests
+
 standard_testfile
 
 # The test proper.

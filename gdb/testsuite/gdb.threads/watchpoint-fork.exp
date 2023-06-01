@@ -21,6 +21,8 @@
 # must be done before starting the test so as to not disrupt the execution
 # of the actual test.
 
+require allow_fork_tests
+
 set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 set testfile watchpoint-fork

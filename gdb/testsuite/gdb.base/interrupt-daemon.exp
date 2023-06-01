@@ -16,6 +16,8 @@
 # Make sure that we can interrupt an inferior that forks and moves to
 # its own session.
 
+require allow_fork_tests
+
 standard_testfile
 
 if {[build_executable "failed to build" $testfile $srcfile {debug}]} {

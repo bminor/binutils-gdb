@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require {!target_info exists gdb,nosignals}
+require allow_fork_tests
 
 standard_testfile
 

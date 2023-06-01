@@ -23,6 +23,7 @@
 # in the source of the shlib, and "list" should display the source where
 # the program stopped.
 
+require allow_fork_tests
 require allow_shlib_tests
 
 standard_testfile .c -shlib.c
