@@ -4343,6 +4343,8 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* Core files and DWO files do not need to be relocated.  */
   if (bfd_get_format (obfd) == bfd_core
       || strip_symbols == STRIP_NONDWO
+      || (strip_symbols == STRIP_ALL
+	  && htab_elements (keep_specific_htab) == 0)
       || discard_relocations (ibfd, isection))
     relsize = 0;
   else
