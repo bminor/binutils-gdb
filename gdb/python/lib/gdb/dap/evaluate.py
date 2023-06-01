@@ -43,6 +43,16 @@ def _evaluate(expr, frame_id):
     return ref.to_object()
 
 
+# Like _evaluate but ensure that the expression cannot cause side
+# effects.
+@in_gdb_thread
+def _eval_for_hover(expr, frame_id):
+    with gdb.with_parameter("may-write-registers", "off"):
+        with gdb.with_parameter("may-write-memory", "off"):
+            with gdb.with_parameter("may-call-functions", "off"):
+                return _evaluate(expr, frame_id)
+
+
 # Helper function to perform an assignment.
 @in_gdb_thread
 def _set_expression(expression, value, frame_id):
@@ -71,6 +81,7 @@ def _repl(command, frame_id):
 
 
 @request("evaluate")
+@capability("supportsEvaluateForHovers")
 def eval_request(
     *,
     expression: str,
@@ -81,6 +92,8 @@ def eval_request(
     if context in ("watch", "variables"):
         # These seem to be expression-like.
         return send_gdb_with_response(lambda: _evaluate(expression, frameId))
+    elif context == "hover":
+        return send_gdb_with_response(lambda: _eval_for_hover(expression, frameId))
     elif context == "repl":
         return send_gdb_with_response(lambda: _repl(expression, frameId))
     else:
