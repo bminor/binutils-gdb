@@ -7,6 +7,12 @@
 
 * Objdump's --private option can now be used on PE format files to display the
   fields in the file header and section headers.
+
+* New versioned release of libsframe: libsframe.so.1.  This release introduces
+  versioned symbols with version node name LIBSFRAME_1.0.  This release also
+  updates the ABI in an incompatible way: this includes removal of
+  sframe_get_funcdesc_with_addr API, change in the behavior of
+  sframe_fre_get_ra_offset and sframe_fre_get_fp_offset APIs.
   
 Changes in 2.40:
 
