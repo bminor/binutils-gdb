@@ -157,7 +157,7 @@ static void
 _bfd_delete_bfd (bfd *abfd)
 {
   /* Give the target _bfd_free_cached_info a chance to free memory.  */
-  if (abfd->memory)
+  if (abfd->memory && abfd->xvec)
     bfd_free_cached_info (abfd);
 
   /* The target _bfd_free_cached_info may not have done anything..  */
