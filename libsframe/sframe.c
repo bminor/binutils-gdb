@@ -221,30 +221,28 @@ sframe_header_sanity_check_p (sframe_header *hp)
 /* Flip the start address pointed to by FP.  */
 
 static void
-flip_fre_start_address (char *fp, unsigned int fre_type)
+flip_fre_start_address (char *addr, unsigned int fre_type)
 {
-  void *start = (void*)fp;
   if (fre_type == SFRAME_FRE_TYPE_ADDR2)
     {
-      unsigned short *start_addr = (unsigned short *)(start);
+      uint16_t *start_addr = (uint16_t *)addr;
       swap_thing (*start_addr);
     }
   else if (fre_type == SFRAME_FRE_TYPE_ADDR4)
     {
-      uint32_t *start_addr = (uint32_t *)(start);
+      uint32_t *start_addr = (uint32_t *)addr;
       swap_thing (*start_addr);
     }
 }
 
 static void
-flip_fre_stack_offsets (char *fp, uint8_t offset_size, uint8_t offset_cnt)
+flip_fre_stack_offsets (char *offsets, uint8_t offset_size, uint8_t offset_cnt)
 {
   int j;
-  void *offsets = (void *)fp;
 
   if (offset_size == SFRAME_FRE_OFFSET_2B)
     {
-      unsigned short *ust = (unsigned short *)offsets;
+      uint16_t *ust = (uint16_t *)offsets;
       for (j = offset_cnt; j > 0; ust++, j--)
 	swap_thing (*ust);
     }
