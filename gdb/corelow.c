@@ -353,40 +353,24 @@ core_target::close ()
 /* Look for sections whose names start with `.reg/' so that we can
    extract the list of threads in a core file.  */
 
-static void
-add_to_thread_list (asection *asect, asection *reg_sect)
-{
-  int core_tid;
-  int pid, lwpid;
-  bool fake_pid_p = false;
-  struct inferior *inf;
+/* If ASECT is a section whose name begins with '.reg/' then extract the
+   lwpid after the '/' and create a new thread in INF.
 
+   If REG_SECT is not nullptr, and the both ASECT and REG_SECT point at the
+   same position in the parent bfd object then switch to the newly created
+   thread, otherwise, the selected thread is left unchanged.  */
+
+static void
+add_to_thread_list (asection *asect, asection *reg_sect, inferior *inf)
+{
   if (!startswith (bfd_section_name (asect), ".reg/"))
     return;
 
-  core_tid = atoi (bfd_section_name (asect) + 5);
-
-  pid = bfd_core_file_pid (core_bfd);
-  if (pid == 0)
-    {
-      fake_pid_p = true;
-      pid = CORELOW_PID;
-    }
-
-  lwpid = core_tid;
-
-  inf = current_inferior ();
-  if (inf->pid == 0)
-    {
-      inferior_appeared (inf, pid);
-      inf->fake_pid_p = fake_pid_p;
-    }
-
-  ptid_t ptid (pid, lwpid);
-
+  int lwpid = atoi (bfd_section_name (asect) + 5);
+  ptid_t ptid (inf->pid, lwpid);
   thread_info *thr = add_thread (inf->process_target (), ptid);
 
-/* Warning, Will Robinson, looking at BFD private data! */
+  /* Warning, Will Robinson, looking at BFD private data! */
 
   if (reg_sect != NULL
       && asect->filepos == reg_sect->filepos)	/* Did we find .reg?  */
@@ -543,12 +527,27 @@ core_target_open (const char *arg, int from_tty)
      previous session, and the frame cache being stale.  */
   registers_changed ();
 
+  /* Find (or fake) the pid for the process in this core file, and
+     initialise the current inferior with that pid.  */
+  bool fake_pid_p = false;
+  int pid = bfd_core_file_pid (core_bfd);
+  if (pid == 0)
+    {
+      fake_pid_p = true;
+      pid = CORELOW_PID;
+    }
+
+  inferior *inf = current_inferior ();
+  gdb_assert (inf->pid == 0);
+  inferior_appeared (inf, pid);
+  inf->fake_pid_p = fake_pid_p;
+
   /* Build up thread list from BFD sections, and possibly set the
      current thread to the .reg/NN section matching the .reg
      section.  */
   asection *reg_sect = bfd_get_section_by_name (core_bfd, ".reg");
   for (asection *sect : gdb_bfd_sections (core_bfd))
-    add_to_thread_list (sect, reg_sect);
+    add_to_thread_list (sect, reg_sect, inf);
 
   if (inferior_ptid == null_ptid)
     {
@@ -558,13 +557,10 @@ core_target_open (const char *arg, int from_tty)
 	 which was the "main" thread.  The latter case shouldn't
 	 usually happen, but we're dealing with input here, which can
 	 always be broken in different ways.  */
-      thread_info *thread = first_thread_of_inferior (current_inferior ());
+      thread_info *thread = first_thread_of_inferior (inf);
 
       if (thread == NULL)
-	{
-	  inferior_appeared (current_inferior (), CORELOW_PID);
-	  thread = add_thread_silent (target, ptid_t (CORELOW_PID));
-	}
+	thread = add_thread_silent (target, ptid_t (CORELOW_PID));
 
       switch_to_thread (thread);
     }
