@@ -14028,24 +14028,32 @@ target_specific_reloc_handling (Filedata *filedata,
 			   "ULEB128 value\n"),
 			 (long) reloc->r_offset);
 
-		if (107 == reloc_type)
-		  value += (reloc->r_addend + symtab[sym_index].st_value);
-		else if (108 == reloc_type)
-		  value -= (reloc->r_addend + symtab[sym_index].st_value);
-
-		/* Write uleb128 value to p.  */
-		bfd_byte c;
-		bfd_byte *p = start + reloc->r_offset;
-		do
+		else if (sym_index >= num_syms)
+		  error (_("%s reloc contains invalid symbol index "
+			   "%" PRIu64 "\n"),
+			 (reloc_type == 107
+			  ? "R_LARCH_ADD_ULEB128"
+			  : "R_LARCH_SUB_ULEB128"),
+			 sym_index);
+		else
 		  {
-		    c = value & 0x7f;
-		    if (reloc_size > 1)
-		      c |= 0x80;
-		    *(p++) = c;
-		    value >>= 7;
-		    reloc_size--;
+		    if (reloc_type == 107)
+		      value += reloc->r_addend + symtab[sym_index].st_value;
+		    else
+		      value -= reloc->r_addend + symtab[sym_index].st_value;
+
+		    /* Write uleb128 value to p.  */
+		    bfd_byte *p = start + reloc->r_offset;
+		    do
+		      {
+			bfd_byte c = value & 0x7f;
+			value >>= 7;
+			if (--reloc_size != 0)
+			  c |= 0x80;
+			*p++ = c;
+		      }
+		    while (reloc_size);
 		  }
-		while (reloc_size);
 
 		return true;
 	      }
@@ -14075,8 +14083,8 @@ target_specific_reloc_handling (Filedata *filedata,
 	  case 23: /* R_MSP430X_GNU_SUB_ULEB128 */
 	    /* PR 21139.  */
 	    if (sym_index >= num_syms)
-	      error (_("MSP430 SYM_DIFF reloc contains invalid symbol index"
-		       " %" PRIu64 "\n"), sym_index);
+	      error (_("%s reloc contains invalid symbol index "
+		       "%" PRIu64 "\n"), "MSP430 SYM_DIFF", sym_index);
 	    else
 	      saved_sym = symtab + sym_index;
 	    return true;
@@ -14126,9 +14134,8 @@ target_specific_reloc_handling (Filedata *filedata,
 			   " contains invalid ULEB128 value\n"),
 			 reloc->r_offset);
 		else if (sym_index >= num_syms)
-		  error (_("MSP430 reloc contains invalid symbol index "
-			   "%" PRIu64 "\n"),
-			 sym_index);
+		  error (_("%s reloc contains invalid symbol index "
+			   "%" PRIu64 "\n"), "MSP430", sym_index);
 		else
 		  {
 		    value = reloc->r_addend + (symtab[sym_index].st_value
@@ -14173,9 +14180,8 @@ target_specific_reloc_handling (Filedata *filedata,
 	    return true;
 	  case 33: /* R_MN10300_SYM_DIFF */
 	    if (sym_index >= num_syms)
-	      error (_("MN10300_SYM_DIFF reloc contains invalid symbol index "
-		       "%" PRIu64 "\n"),
-		     sym_index);
+	      error (_("%s reloc contains invalid symbol index "
+		       "%" PRIu64 "\n"), "MN10300_SYM_DIFF", sym_index);
 	    else
 	      saved_sym = symtab + sym_index;
 	    return true;
@@ -14188,9 +14194,8 @@ target_specific_reloc_handling (Filedata *filedata,
 		uint64_t value;
 
 		if (sym_index >= num_syms)
-		  error (_("MN10300 reloc contains invalid symbol index "
-			   "%" PRIu64 "\n"),
-			 sym_index);
+		  error (_("%s reloc contains invalid symbol index "
+			   "%" PRIu64 "\n"), "MN10300", sym_index);
 		else
 		  {
 		    value = reloc->r_addend + (symtab[sym_index].st_value
@@ -14233,8 +14238,8 @@ target_specific_reloc_handling (Filedata *filedata,
 	  case 0x80: /* R_RL78_SYM.  */
 	    saved_sym1 = saved_sym2;
 	    if (sym_index >= num_syms)
-	      error (_("RL78_SYM reloc contains invalid symbol index "
-		       "%" PRIu64 "\n"), sym_index);
+	      error (_("%s reloc contains invalid symbol index "
+		       "%" PRIu64 "\n"), "RL78_SYM", sym_index);
 	    else
 	      {
 		saved_sym2 = symtab[sym_index].st_value;
