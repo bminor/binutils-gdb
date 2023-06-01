@@ -31,7 +31,10 @@ extern "C"
 typedef struct sframe_decoder_ctx sframe_decoder_ctx;
 typedef struct sframe_encoder_ctx sframe_encoder_ctx;
 
-#define MAX_OFFSET_BYTES (SFRAME_FRE_OFFSET_4B * 2 * 3)
+#define MAX_NUM_STACK_OFFSETS	3
+
+#define MAX_OFFSET_BYTES  \
+  ((SFRAME_FRE_OFFSET_4B * 2 * MAX_NUM_STACK_OFFSETS))
 
 /* User interfacing SFrame Row Entry.
    An abstraction provided by libsframe so the consumer is decoupled from

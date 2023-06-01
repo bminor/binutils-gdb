@@ -299,7 +299,7 @@ sframe_fre_sanity_check_p (sframe_frame_row_entry *frep)
     return false;
 
   offset_cnt = sframe_fre_get_offset_count (fre_info);
-  if (offset_cnt > 3)
+  if (offset_cnt > MAX_NUM_STACK_OFFSETS)
     return false;
 
   return true;
