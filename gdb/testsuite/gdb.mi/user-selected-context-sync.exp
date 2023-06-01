@@ -40,6 +40,8 @@ standard_testfile
 # gdbserver modes are supported.
 require !use_gdb_stub
 
+require allow_multi_inferior_tests
+
 set compile_options "debug pthreads"
 if {[build_executable $testfile.exp $testfile ${srcfile} ${compile_options}] == -1} {
     untested "failed to compile"

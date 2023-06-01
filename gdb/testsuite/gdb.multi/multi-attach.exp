@@ -17,6 +17,8 @@
 
 # Test attaching to multiple threaded programs.
 
+require allow_multi_inferior_tests
+
 standard_testfile
 
 require can_spawn_for_attach

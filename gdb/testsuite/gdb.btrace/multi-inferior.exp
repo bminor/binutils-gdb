@@ -24,6 +24,8 @@
 
 require allow_btrace_tests
 
+require allow_multi_inferior_tests
+
 require !use_gdb_stub
 
 standard_testfile

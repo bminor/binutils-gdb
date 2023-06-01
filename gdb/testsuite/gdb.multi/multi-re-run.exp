@@ -20,6 +20,8 @@
 # misbehave, including failing to load libthread_db.so.  See PR
 # gdb/25410.
 
+require allow_multi_inferior_tests
+
 # Build two executables, with different symbols.
 
 set exec1 "multi-re-run-1"

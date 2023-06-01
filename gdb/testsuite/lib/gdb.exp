@@ -5111,6 +5111,24 @@ proc allow_fork_tests {} {
     return 1
 }
 
+# Return whether we allow running testcases that want to debug
+# multiple inferiors with the same target.  Not all targets support
+# this.  Note that some tests add a second inferior but never start
+# it.  Those tests should not be skipped due to this proc returning
+# false.
+
+proc allow_multi_inferior_tests {} {
+    if {[istarget "*-*-cygwin*"] || [istarget "*-*-mingw*"]} {
+	return 0
+    }
+
+    if {[use_gdb_stub]} {
+	return 0
+    }
+
+    return 1
+}
+
 # Return a 1 if we should run tests that require hardware breakpoints
 
 proc allow_hw_breakpoint_tests {} {

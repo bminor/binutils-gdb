@@ -124,6 +124,9 @@ with_test_prefix "single inferior" {
     gdb_test "print \$_inferior_thread_count" " = 1"
 }
 
+# The rest of the tests require running multiple inferiors.
+require allow_multi_inferior_tests
+
 # "info threads" while there are multiple inferiors should show
 # qualified thread IDs.
 with_test_prefix "two inferiors" {

@@ -25,6 +25,8 @@
 
 standard_testfile .c -other.c
 
+require allow_multi_inferior_tests
+
 require !use_gdb_stub
 
 set srcfile_other ${srcfile2}
