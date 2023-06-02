@@ -2059,7 +2059,7 @@ windows_nat_target::attach (const char *args, int from_tty)
       if (!ok)
 	err = (unsigned) GetLastError ();
 
-      return true;
+      return ok;
     });
 
   if (err.has_value ())
@@ -2784,12 +2784,15 @@ windows_nat_target::create_inferior (const char *exec_file,
   windows_init_thread_list ();
   do_synchronously ([&] ()
     {
-      if (!create_process (nullptr, args, flags, w32_env,
-			   inferior_cwd != nullptr ? infcwd : nullptr,
-			   disable_randomization,
-			   &si, &pi))
+      BOOL ok = create_process (nullptr, args, flags, w32_env,
+				inferior_cwd != nullptr ? infcwd : nullptr,
+				disable_randomization,
+				&si, &pi);
+
+      if (!ok)
 	ret = (unsigned) GetLastError ();
-      return true;
+
+      return ok;
     });
 
   if (w32_env)
@@ -2910,16 +2913,18 @@ windows_nat_target::create_inferior (const char *exec_file,
   windows_init_thread_list ();
   do_synchronously ([&] ()
     {
-      if (!create_process (nullptr, /* image */
-			   args,	/* command line */
-			   flags,	/* start flags */
-			   w32env,	/* environment */
-			   inferior_cwd, /* current directory */
-			   disable_randomization,
-			   &si,
-			   &pi))
+      BOOL ok = create_process (nullptr, /* image */
+				args,	/* command line */
+				flags,	/* start flags */
+				w32env,	/* environment */
+				inferior_cwd, /* current directory */
+				disable_randomization,
+				&si,
+				&pi);
+      if (!ok)
 	ret = (unsigned) GetLastError ();
-      return true;
+
+      return ok;
     });
   if (tty != INVALID_HANDLE_VALUE)
     CloseHandle (tty);
