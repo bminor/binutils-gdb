@@ -7210,10 +7210,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	     no sections, but ordinary, loadable segments should contain
 	     something.  They are allowed by the ELF spec however, so only
 	     a warning is produced.
+	     Don't warn if an empty PT_LOAD contains the program headers.
 	     There is however the valid use case of embedded systems which
 	     have segments with p_filesz of 0 and a p_memsz > 0 to initialize
 	     flash memory with zeros.  No warning is shown for that case.  */
 	  if (segment->p_type == PT_LOAD
+	      && !map->includes_phdrs
 	      && (segment->p_filesz > 0 || segment->p_memsz == 0))
 	    /* xgettext:c-format */
 	    _bfd_error_handler
