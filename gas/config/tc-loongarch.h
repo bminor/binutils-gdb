@@ -21,6 +21,8 @@
 #ifndef TC_LOONGARCH
 #define TC_LOONGARCH
 
+#include "opcode/loongarch.h"
+
 #define TARGET_BYTES_BIG_ENDIAN 0
 #define TARGET_ARCH bfd_arch_loongarch
 
@@ -57,23 +59,33 @@ extern bool loongarch_frag_align_code (int);
 
 /* The following two macros let the linker resolve all the relocs
    due to relaxation.
+
    This is called to see whether a reloc against a defined symbol
-   should be converted into a reloc against a section.  */
+   should be converted into a reloc against a section.
+
+   If relax and norelax have different value may cause ld ".eh_frame_hdr
+   refers to overlapping FDEs" error when link relax .o and norelax .o.  */
 #define tc_fix_adjustable(fixp) 0
-/* The difference between same-section symbols may be affected by linker
+
+/* Tne difference between same-section symbols may be affected by linker
    relaxation, so do not resolve such expressions in the assembler.  */
 #define md_allow_local_subtract(l,r,s) 0
 
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) 1
+
 #define TC_VALIDATE_FIX_SUB(FIX, SEG) 1
 #define DIFF_EXPR_OK 1
 
+/* Postpone text-section label subtraction calculation until linking, since
+   linker relaxations might change the deltas.  */
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
-  (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)	\
-   || ((SEC)->flags & SEC_CODE) != 0		\
-   || ((SEC)->flags & SEC_DEBUGGING) != 0	\
-   || TC_FORCE_RELOCATION (FIX))
+  (LARCH_opts.relax ?  \
+    (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)	\
+      || ((SEC)->flags & SEC_CODE) != 0		\
+      || ((SEC)->flags & SEC_DEBUGGING) != 0	\
+      || TC_FORCE_RELOCATION (FIX)) \
+    : (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC))) \
 
 #define TC_LINKRELAX_FIXUP(seg) ((seg->flags & SEC_CODE)  \
 				    || (seg->flags & SEC_DEBUGGING))

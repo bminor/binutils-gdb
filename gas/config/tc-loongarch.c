@@ -915,8 +915,9 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
      symbol is not in the same frag, it will generate relocs to calculate
      symbol subtraction. (gas/dw2gencfi.c:output_cfi_insn:
      if (symbol_get_frag (to) == symbol_get_frag (from)))  */
-  if (BFD_RELOC_LARCH_PCALA_HI20 == reloc_info[0].type
-      || BFD_RELOC_LARCH_GOT_PC_HI20 == reloc_info[0].type)
+  if (LARCH_opts.relax
+      && (BFD_RELOC_LARCH_PCALA_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_GOT_PC_HI20 == reloc_info[0].type))
     {
       frag_wane (frag_now);
       frag_new (0);
@@ -1470,6 +1471,9 @@ loongarch_pre_output_hook (void)
   const frchainS *frch;
   segT s;
 
+  if (!LARCH_opts.relax)
+    return;
+
   /* Save the current segment info.  */
   segT seg = now_seg;
   subsegT subseg = now_subseg;
@@ -1665,7 +1669,8 @@ loongarch_md_finish (void)
 {
   /* Insert relocations for uleb128 directives, so the values can be recomputed
      at link time.  */
-  bfd_map_over_sections (stdoutput, loongarch_insert_uleb128_fixes, NULL);
+  if (LARCH_opts.relax)
+    bfd_map_over_sections (stdoutput, loongarch_insert_uleb128_fixes, NULL);
 }
 
 void
