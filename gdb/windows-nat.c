@@ -2048,11 +2048,20 @@ windows_nat_target::attach (const char *args, int from_tty)
 #ifdef __CYGWIN__
       if (!ok)
 	{
-	  /* Try fall back to Cygwin pid.  */
-	  pid = cygwin_internal (CW_CYGWIN_PID_TO_WINPID, pid);
+	  /* Maybe PID was a Cygwin PID.  Try the corresponding native
+	     Windows PID.  */
+	  DWORD winpid = cygwin_internal (CW_CYGWIN_PID_TO_WINPID, pid);
 
-	  if (pid > 0)
-	    ok = DebugActiveProcess (pid);
+	  if (winpid != 0)
+	    {
+	      /* It was indeed a Cygwin PID.  Fully switch to the
+		 Windows PID from here on.  We don't do this
+		 unconditionally to avoid ending up with PID=0 in the
+		 error message below.  */
+	      pid = winpid;
+
+	      ok = DebugActiveProcess (winpid);
+	    }
 	}
 #endif
 
