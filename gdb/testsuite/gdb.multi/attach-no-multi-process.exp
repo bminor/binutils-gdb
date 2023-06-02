@@ -59,7 +59,10 @@ proc test {target_non_stop} {
 	"switch to inferior 2"
     set res [gdbserver_start "--multi" ""]
     set gdbserver_gdbport [lindex $res 1]
-    gdb_target_cmd "extended-remote" $gdbserver_gdbport
+    if { [gdb_target_cmd_ext "extended-remote" $gdbserver_gdbport] == 2 } {
+	unsupported "non-stop RSP"
+	return
+    }
 
     # Start a program, then attach to it.
     set spawn_id_list [spawn_wait_for_attach [list $binfile]]
