@@ -906,6 +906,7 @@ enable_fast_install
 with_gnu_ld
 enable_libtool_lock
 with_separate_debug_dir
+with_additional_debug_dirs
 with_gdb_datadir
 with_relocated_sources
 with_auto_load_dir
@@ -1660,6 +1661,9 @@ Optional Packages:
   --with-separate-debug-dir=PATH
                           look for global separate debug info in this path
                           [LIBDIR/debug]
+  --with-additional-debug-dirs=PATHs
+                          colon-separated list of additional directories to
+                          search for separate debug info
   --with-gdb-datadir=PATH look for global separate data files in this path
                           [DATADIR/gdb]
   --with-relocated-sources=PATH
@@ -11479,7 +11483,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11482 "configure"
+#line 11486 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11585,7 +11589,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11588 "configure"
+#line 11592 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17884,6 +17888,17 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+
+
+
+# Check whether --with-additional-debug-dirs was given.
+if test "${with_additional_debug_dirs+set}" = set; then :
+  withval=$with_additional_debug_dirs;
+cat >>confdefs.h <<_ACEOF
+#define ADDITIONAL_DEBUG_DIRS "${withval}"
+_ACEOF
+
+fi
 
 
 # We can't pass paths as command line arguments.

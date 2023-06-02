@@ -124,6 +124,14 @@
   'inferior' keyword with either the 'thread' or 'task' keywords when
   creating a breakpoint.
 
+* Configure changes
+
+--additional-debug-dirs=PATHs
+
+  Provide a colon-separated list of additional directories to search for
+  separate debug info.  These directories are added to the default value of
+  the 'debug-file-directory' GDB parameter.
+
 * New commands
 
 set debug breakpoint on|off

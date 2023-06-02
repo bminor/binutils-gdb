@@ -718,6 +718,11 @@ captured_main_1 (struct captured_main_args *context)
   debug_file_directory
     = relocate_gdb_directory (DEBUGDIR, DEBUGDIR_RELOCATABLE);
 
+#ifdef ADDITIONAL_DEBUG_DIRS
+  debug_file_directory = (debug_file_directory + DIRNAME_SEPARATOR
+			  + ADDITIONAL_DEBUG_DIRS);
+#endif
+
   gdb_datadir = relocate_gdb_directory (GDB_DATADIR,
 					GDB_DATADIR_RELOCATABLE);
 

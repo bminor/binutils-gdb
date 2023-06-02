@@ -22275,8 +22275,10 @@ file from @code{debuginfod} servers.
 
 @anchor{debug-file-directory}
 Global debugging info directories default to what is set by @value{GDBN}
-configure option @option{--with-separate-debug-dir}.  During @value{GDBN} run
-you can also set the global debugging info directories, and view the list
+configure option @option{--with-separate-debug-dir} and augmented by the
+colon-separated list of directories provided via @value{GDBN} configure
+option @option{--additional-debug-dirs}.  During @value{GDBN} run you can
+also set the global debugging info directories, and view the list
 @value{GDBN} is currently using.
 
 @table @code

@@ -1587,6 +1587,12 @@ This GDB was configured as follows:\n\
 	     --with-separate-debug-dir=%s%s\n\
 "), DEBUGDIR, DEBUGDIR_RELOCATABLE ? " (relocatable)" : "");
 
+#ifdef ADDITIONAL_DEBUG_DIRS
+  gdb_printf (stream, _ ("\
+	     --with-additional-debug-dirs=%s\n\
+"), ADDITIONAL_DEBUG_DIRS);
+#endif
+
   if (TARGET_SYSTEM_ROOT[0])
     gdb_printf (stream, _("\
 	     --with-sysroot=%s%s\n\

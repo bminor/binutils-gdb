@@ -3,6 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Additional directories to look for separate debug info. */
+#undef ADDITIONAL_DEBUG_DIRS
+
 /* Directories from which to load auto-loaded scripts. */
 #undef AUTO_LOAD_DIR
 
