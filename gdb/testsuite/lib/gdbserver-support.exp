@@ -69,7 +69,7 @@ proc gdb_target_cmd_ext { targetname serialport {additional_text ""} } {
 	    }
 	    -re "Non-stop mode requested, but remote does not support non-stop.*$gdb_prompt $" {
 		verbose "remote does not support non-stop"
-		return 1
+		return 2
 	    }
 	    -re "Remote MIPS debugging.*$additional_text.*$gdb_prompt" {
 		verbose "Set target to $targetname"
