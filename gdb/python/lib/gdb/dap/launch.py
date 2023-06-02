@@ -59,7 +59,7 @@ def launch(
     if program is not None:
         global _program
         _program = program
-        send_gdb(f"file {_program}")
+        send_gdb("file " + _program)
     if stopAtBeginningOfMainSubprogram:
         send_gdb(_break_at_main)
     if len(args) > 0 or env is not None:

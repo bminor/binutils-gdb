@@ -60,7 +60,7 @@ def start_json_writer(stream, queue):
             seq = seq + 1
             encoded = json.dumps(obj)
             body_bytes = encoded.encode("utf-8")
-            header = f"Content-Length: {len(body_bytes)}\r\n\r\n"
+            header = "Content-Length: " + str(len(body_bytes)) + "\r\n\r\n"
             header_bytes = header.encode("ASCII")
             stream.write(header_bytes)
             stream.write(body_bytes)

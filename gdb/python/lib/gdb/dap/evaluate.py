@@ -84,7 +84,7 @@ def eval_request(
     elif context == "repl":
         return send_gdb_with_response(lambda: _repl(expression, frameId))
     else:
-        raise Exception(f'unknown evaluate context "{context}"')
+        raise Exception('unknown evaluate context "' + context + '"')
 
 
 @in_gdb_thread
