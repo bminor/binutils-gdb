@@ -1358,7 +1358,7 @@ Typically this is used to convert numbers and strings to\n\
   { "value-optimized-out?", 1, 0, 0,
     as_a_scm_t_subr (gdbscm_value_optimized_out_p),
     "\
-Return #t if the value has been optimizd out." },
+Return #t if the value has been optimized out." },
 
   { "value-address", 1, 0, 0, as_a_scm_t_subr (gdbscm_value_address),
     "\
