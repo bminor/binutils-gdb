@@ -757,7 +757,7 @@ compile_object_load (const compile_file_names &file_names,
 	  bfd_set_gp_value(abfd.get(), toc_fallback->vma);
 	  if (compile_debug)
 	    gdb_printf (gdb_stdlog,
-			"Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
+			"Connecting ELF symbol \"%s\" to the .toc section (%s)\n",
 			sym->name,
 			paddress (target_gdbarch (), sym->value));
 	  continue;
