@@ -14021,8 +14021,9 @@ target_specific_reloc_handling (Filedata *filedata,
 		unsigned int reloc_size = 0;
 		int leb_ret = 0;
 
-		value = read_leb128 (start + reloc->r_offset, end, false,
-			      &reloc_size, &leb_ret);
+		if (reloc->r_offset < (size_t) (end - start))
+		  value = read_leb128 (start + reloc->r_offset, end, false,
+				       &reloc_size, &leb_ret);
 		if (leb_ret != 0 || reloc_size == 0 || reloc_size > 8)
 		  error (_("LoongArch ULEB128 field at 0x%lx contains invalid "
 			   "ULEB128 value\n"),
