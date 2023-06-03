@@ -468,6 +468,23 @@ ecoff_slurp_symbolic_header (bfd *abfd)
       goto error_return;
     }
 
+#define FIX(start, count) \
+  if (internal_symhdr->start == 0)	\
+    internal_symhdr->count = 0;
+
+  FIX (cbLineOffset, cbLine);
+  FIX (cbDnOffset, idnMax);
+  FIX (cbPdOffset, ipdMax);
+  FIX (cbSymOffset, isymMax);
+  FIX (cbOptOffset, ioptMax);
+  FIX (cbAuxOffset, iauxMax);
+  FIX (cbSsOffset, issMax);
+  FIX (cbSsExtOffset, issExtMax);
+  FIX (cbFdOffset, ifdMax);
+  FIX (cbRfdOffset, crfd);
+  FIX (cbExtOffset, iextMax);
+#undef FIX
+
   /* Now we can get the correct number of symbols.  */
   abfd->symcount = internal_symhdr->isymMax + internal_symhdr->iextMax;
 
@@ -580,7 +597,7 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
 
   /* Get pointers for the numeric offsets in the HDRR structure.  */
 #define FIX(start, count, ptr, type) \
-  if (internal_symhdr->start == 0 || internal_symhdr->count == 0)	\
+  if (internal_symhdr->count == 0)					\
     debug->ptr = NULL;							\
   else									\
     debug->ptr = (type) ((char *) raw					\
