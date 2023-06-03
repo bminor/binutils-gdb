@@ -2521,7 +2521,7 @@ emit_ops_insns (const uint32_t *start, int len)
 {
   CORE_ADDR buildaddr = current_insn_ptr;
 
-  threads_debug_printf ("Adding %d instrucions at %s",
+  threads_debug_printf ("Adding %d instructions at %s",
 			len, paddress (buildaddr));
 
   append_insns (&buildaddr, len, start);
