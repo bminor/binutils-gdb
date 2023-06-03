@@ -6977,7 +6977,7 @@ If zero then the symbol cache is disabled."),
 			   _("Show if the PROLOGUE-END flag is ignored."),
 			   _("\
 The PROLOGUE-END flag from the line-table entries is used to place \
-breakpoints past the prologue of functions.  Disabeling its use use forces \
+breakpoints past the prologue of functions.  Disabling its use forces \
 the use of prologue scanners."),
 			   nullptr, nullptr,
 			   &maintenance_set_cmdlist,
