@@ -247,7 +247,7 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	 only instructions in the prologue.  */
       if (IS_UPDATE_SP(op, rd, ra))
 	{
-	  microblaze_debug ("got addi r1,r1,%d; contnuing\n", imm);
+	  microblaze_debug ("got addi r1,r1,%d; continuing\n", imm);
 	  if (cache->framesize)
 	    break;	/* break if framesize already computed.  */
 	  cache->framesize = -imm; /* stack grows towards low memory.  */
