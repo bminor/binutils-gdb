@@ -2106,7 +2106,7 @@ reinterpret_cast operator."
   { "rvalue_reference_value", valpy_rvalue_reference_value, METH_NOARGS,
     "Return a value of type TYPE_CODE_RVALUE_REF referencing this value." },
   { "const_value", valpy_const_value, METH_NOARGS,
-    "Return a 'const' qualied version of the same value." },
+    "Return a 'const' qualified version of the same value." },
   { "lazy_string", (PyCFunction) valpy_lazy_string,
     METH_VARARGS | METH_KEYWORDS,
     "lazy_string ([encoding]  [, length]) -> lazy_string\n\
