@@ -2446,7 +2446,7 @@ versions.  Using it, you could write:
 (define reason (frame-unwind-stop-readon (selected-frame)))
 (define reason-str (unwind-stop-reason-string reason))
 (if (>= reason FRAME_UNWIND_FIRST_ERROR)
-    (format #t "An error occured: ~s\n" reason-str))
+    (format #t "An error occurred: ~s\n" reason-str))
 @end smallexample
 @end table
 @end deffn

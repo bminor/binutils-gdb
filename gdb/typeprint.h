@@ -68,7 +68,7 @@ struct print_offset_data
   /* The offset to be applied to bitpos when PRINT_OFFSETS is true.
      This is needed for when we are printing nested structs and want
      to make sure that the printed offset for each field carries over
-     the offset of the outter struct.  */
+     the offset of the outer struct.  */
   unsigned int offset_bitpos = 0;
 
   /* END_BITPOS is the one-past-the-end bit position of the previous

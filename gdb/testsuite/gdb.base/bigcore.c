@@ -222,7 +222,7 @@ main ()
      the file for unmodified pages - while others handle this poorly -
      writing out all pages including those that weren't modified.  */
 
-  print_string ("Alocating the entire heap ...\n");
+  print_string ("Allocating the entire heap ...\n");
   {
     size_t chunk_size;
     unsigned long chunks_allocated = 0;

@@ -1039,7 +1039,7 @@ get_child_debug_event (DWORD *continue_status,
 
 	if (e == ERROR_PIPE_NOT_CONNECTED)
 	  {
-	    /* This will happen if the loader fails to succesfully
+	    /* This will happen if the loader fails to successfully
 	       load the application, e.g., if the main executable
 	       tries to pull in a non-existing export from a
 	       DLL.  */

@@ -748,7 +748,7 @@ z80_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
       break_insn[0] = kind | 0307;
       *size = 1;
     }
-  else /* kind is non-RST address, use CALL instead, but it is dungerous */
+  else /* kind is non-RST address, use CALL instead, but it is dangerous */
     {
       z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
       gdb_byte *p = break_insn;

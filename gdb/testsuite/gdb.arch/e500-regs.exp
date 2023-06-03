@@ -71,7 +71,7 @@ for {set i 0} {$i < 32} {incr i 1} {
         gdb_test "info reg ev$i" "ev$i.*$vector_register" "info reg ev$i"
 }
 
-# Test wether the GPRs are updated accordingly. (GPRs are just the lower
+# Test whether the GPRs are updated accordingly. (GPRs are just the lower
 # 32 bits of the EV registers.)
 
 set general_register "0x1\[ \t\]+1"

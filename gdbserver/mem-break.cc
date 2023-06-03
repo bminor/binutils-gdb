@@ -70,7 +70,7 @@
    software breakpoints, a buffer holding a copy of the instructions
    that would be in memory had not been a breakpoint there (we call
    that the shadow memory of the breakpoint).  We occasionally need to
-   temporarilly uninsert a breakpoint without the client knowing about
+   temporarily uninsert a breakpoint without the client knowing about
    it (e.g., to step over an internal breakpoint), so we keep an
    `inserted' state associated with this low level breakpoint
    structure.  There can only be one such object for a given address.

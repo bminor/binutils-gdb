@@ -201,7 +201,7 @@ gdbarch_tdep (struct gdbarch *gdbarch)
    The more traditional mega-struct containing architecture specific
    data for all the various GDB components was also considered.  Since
    GDB is built from a variable number of (fairly independent)
-   components it was determined that the global aproach was not
+   components it was determined that the global approach was not
    applicable.  */
 
 
@@ -301,7 +301,7 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info,
 
 
 /* Helper function.  Free a partially-constructed ``struct gdbarch''.
-   It is assumed that the caller freeds the ``struct
+   It is assumed that the caller frees the ``struct
    gdbarch_tdep''.  */
 
 extern void gdbarch_free (struct gdbarch *);

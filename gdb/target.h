@@ -2034,7 +2034,7 @@ extern bool target_have_steppable_watchpoint ();
 
 /* Provide defaults for hardware watchpoint functions.  */
 
-/* If the *_hw_beakpoint functions have not been defined
+/* If the *_hw_breakpoint functions have not been defined
    elsewhere use the definitions in the target vector.  */
 
 /* Returns positive if we can set a hardware watchpoint of type TYPE.

@@ -22,7 +22,7 @@
  *            -- call print_long_arg_list from inside print_small_structs
  ***************************************************************************/
 
-/* Some enumerated types -- used to test that the structureal data type is
+/* Some enumerated types -- used to test that the structural data type is
  * retrieved for function arguments with typedef data types.
  */
 typedef int id_int;

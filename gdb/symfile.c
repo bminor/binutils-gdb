@@ -300,7 +300,7 @@ init_objfile_sect_indices (struct objfile *objfile)
   /* This is where things get really weird...  We MUST have valid
      indices for the various sect_index_* members or gdb will abort.
      So if for example, there is no ".text" section, we have to
-     accomodate that.  First, check for a file with the standard
+     accommodate that.  First, check for a file with the standard
      one or two segments.  */
 
   symfile_find_segment_sections (objfile);

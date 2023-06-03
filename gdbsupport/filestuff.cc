@@ -517,7 +517,7 @@ read_text_file_to_string (const char *path)
       std::string::size_type start_size = res.size ();
       constexpr int chunk_size = 1024;
 
-      /* Resize to accomodate CHUNK_SIZE bytes.  */
+      /* Resize to accommodate CHUNK_SIZE bytes.  */
       res.resize (start_size + chunk_size);
 
       int n = fread (&res[start_size], 1, chunk_size, file.get ());

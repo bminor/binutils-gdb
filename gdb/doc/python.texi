@@ -732,7 +732,7 @@ prompt) is translated to a Python @code{KeyboardInterrupt} exception.
 
 In all cases, your exception handler will see the @value{GDBN} error
 message as its value and the Python call stack backtrace at the Python
-statement closest to where the @value{GDBN} error occured as the
+statement closest to where the @value{GDBN} error occurred as the
 traceback.
 
 
@@ -4074,7 +4074,7 @@ available.
 A boolean indicating whether the instruction was executed speculatively.
 @end defvar
 
-If an error occured during recording or decoding a recording, this error is
+If an error occurred during recording or decoding a recording, this error is
 represented by a @code{gdb.RecordGap} object in the instruction list.  It has
 the following attributes:
 
@@ -5423,7 +5423,7 @@ versions.  Using it, you could write:
 reason = gdb.selected_frame().unwind_stop_reason ()
 reason_str =  gdb.frame_stop_reason_string (reason)
 if reason >=  gdb.FRAME_UNWIND_FIRST_ERROR:
-    print ("An error occured: %s" % reason_str)
+    print ("An error occurred: %s" % reason_str)
 @end smallexample
 @end table
 

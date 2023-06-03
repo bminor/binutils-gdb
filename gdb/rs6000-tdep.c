@@ -7622,7 +7622,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  PPC_XER_REGNUM, "xer");
 
-      /* Allow alternate names for these registers, to accomodate GDB's
+      /* Allow alternate names for these registers, to accommodate GDB's
 	 historic naming.  */
       valid_p &= tdesc_numbered_register_choices (feature, tdesc_data.get (),
 						  PPC_MSR_REGNUM, msr_names);

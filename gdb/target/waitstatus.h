@@ -77,7 +77,7 @@ enum target_waitkind
      should be resuming the inferior.  */
   TARGET_WAITKIND_SPURIOUS,
 
-  /* An event has occured, but we should wait again.
+  /* An event has occurred, but we should wait again.
      Remote_async_wait() returns this when there is an event
      on the inferior, but the rest of the world is not interested in
      it.  The inferior has not stopped, but has just sent some output

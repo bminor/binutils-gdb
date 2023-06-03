@@ -102,7 +102,7 @@ extern int in_queued_stop_replies (ptid_t ptid);
 #define MAXBUFBYTES(N) (((N)-32)/2)
 
 /* Buffer sizes for transferring memory, registers, etc.   Set to a constant
-   value to accomodate multiple register formats.  This value must be at least
+   value to accommodate multiple register formats.  This value must be at least
    as large as the largest register set supported by gdbserver.  */
 #define PBUFSIZ 18432
 

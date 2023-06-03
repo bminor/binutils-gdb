@@ -260,7 +260,7 @@ public:
   void operator delete[] (void* ptr) { // base::operator delete[]
     free (ptr); }
 
-  base const* operator-> (void) const { // base::opeartor->
+  base const* operator-> (void) const { // base::operator->
     return this; }
 
   int operator->* (base const& b) const { // base::operator->*

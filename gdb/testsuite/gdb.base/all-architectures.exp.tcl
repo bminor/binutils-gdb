@@ -182,7 +182,7 @@ proc gdb_test_no_output_osabi {cmd test} {
 
 # It'd be nicer/safer to restart GDB on each iteration, but, that
 # increases the testcase's run time several times fold.  At the time
-# of writting, it'd jump from 20s to 4min on x86-64 GNU/Linux with
+# of writing, it'd jump from 20s to 4min on x86-64 GNU/Linux with
 # --enable-targets=all.
 
 set num_slices 8

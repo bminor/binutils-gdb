@@ -11,7 +11,7 @@
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>
   <!-- This description is slightly different from the standard
-       org.gnu.gdb.power.core, to accomodate mq.  -->
+       org.gnu.gdb.power.core, to accommodate mq.  -->
   <feature name="org.gnu.gdb.power.core">
     <reg name="r0" bitsize="32"/>
     <reg name="r1" bitsize="32"/>

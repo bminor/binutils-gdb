@@ -98,7 +98,7 @@ public:
   /* Notify the interpreter that the current inferior has stopped normally.  */
   virtual void on_normal_stop (bpstat *bs, int print_frame) {}
 
-  /* Notify the intepreter that the current inferior has exited normally with
+  /* Notify the interpreter that the current inferior has exited normally with
      status STATUS.  */
   virtual void on_exited (int status) {}
 

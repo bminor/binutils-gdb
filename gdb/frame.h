@@ -595,7 +595,7 @@ void set_current_sal_from_frame (frame_info_ptr);
 
 extern CORE_ADDR get_frame_base (frame_info_ptr);
 
-/* Return the per-frame unique identifer.  Can be used to relocate a
+/* Return the per-frame unique identifier.  Can be used to relocate a
    frame after a frame cache flush (and other similar operations).  If
    FI is NULL, return the null_frame_id.  */
 extern struct frame_id get_frame_id (frame_info_ptr fi);
@@ -937,7 +937,7 @@ struct frame_arg
   struct value *val = nullptr;
 
   /* String containing the error message, it is more usually NULL indicating no
-     error occured reading this parameter.  */
+     error occurred reading this parameter.  */
   gdb::unique_xmalloc_ptr<char> error;
 
   /* One of the print_entry_values_* entries as appropriate specifically for

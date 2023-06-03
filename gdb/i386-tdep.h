@@ -387,8 +387,8 @@ extern int i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
 
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */
-#define I386_SEL_UPL	0x0003	/* User Privilige Level.  */
-#define I386_SEL_KPL	0x0000	/* Kernel Privilige Level.  */
+#define I386_SEL_UPL	0x0003	/* User Privilege Level.  */
+#define I386_SEL_KPL	0x0000	/* Kernel Privilege Level.  */
 
 /* The length of the longest i386 instruction (according to
    include/asm-i386/kprobes.h in Linux 2.6.  */

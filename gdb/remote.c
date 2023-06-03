@@ -3197,7 +3197,7 @@ remote_target::thread_name (struct thread_info *info)
 
 /* WARNING: This threadref data structure comes from the remote O.S.,
    libstub protocol encoding, and remote.c.  It is not particularly
-   changable.  */
+   changeable.  */
 
 /* Right now, the internal structure is int. We want it to be bigger.
    Plan to fix this.  */
@@ -5724,7 +5724,7 @@ remote_target::remote_query_supported ()
 
       getpkt (&rs->buf, 0);
 
-      /* If an error occured, warn, but do not return - just reset the
+      /* If an error occurred, warn, but do not return - just reset the
 	 buffer to empty and go on to disable features.  */
       if (m_features.packet_ok (rs->buf, PACKET_qSupported) == PACKET_ERROR)
 	{

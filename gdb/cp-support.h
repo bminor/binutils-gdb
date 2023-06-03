@@ -99,7 +99,7 @@ extern unsigned int cp_entire_prefix_len (const char *name);
 extern gdb::unique_xmalloc_ptr<char> cp_func_name (const char *full_name);
 
 extern gdb::unique_xmalloc_ptr<char> cp_remove_params
-  (const char *demanged_name);
+  (const char *demangled_name);
 
 /* DEMANGLED_NAME is the name of a function, (optionally) including
    parameters and (optionally) a return type.  Return the name of the

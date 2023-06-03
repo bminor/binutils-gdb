@@ -249,7 +249,7 @@ def munge_type(typename: str):
     typename = re.sub("[ ()<>:]", "_", typename)
     typename = re.sub("[*]", "p", typename)
     typename = re.sub("&", "r", typename)
-    # Identifers with double underscores are reserved to the C++
+    # Identifiers with double underscores are reserved to the C++
     # implementation.
     typename = re.sub("_+", "_", typename)
     # Avoid ending the function name with underscore, for

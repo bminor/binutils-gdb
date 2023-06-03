@@ -112,7 +112,7 @@ enum
   AVR_LAST_PUSHED_REGNUM = 17,
 
   AVR_ARG1_REGNUM = 24,         /* Single byte argument */
-  AVR_ARGN_REGNUM = 25,         /* Multi byte argments */
+  AVR_ARGN_REGNUM = 25,         /* Multi byte arguments */
   AVR_LAST_ARG_REGNUM = 8,      /* Last argument register */
 
   AVR_RET1_REGNUM = 24,         /* Single byte return value */
@@ -240,7 +240,7 @@ avr_register_type (struct gdbarch *gdbarch, int reg_nr)
   return builtin_type (gdbarch)->builtin_uint8;
 }
 
-/* Instruction address checks and convertions.  */
+/* Instruction address checks and conversions.  */
 
 static CORE_ADDR
 avr_make_iaddr (CORE_ADDR x)
@@ -259,7 +259,7 @@ avr_convert_iaddr_to_raw (CORE_ADDR x)
   return ((x) & 0xffffffff);
 }
 
-/* SRAM address checks and convertions.  */
+/* SRAM address checks and conversions.  */
 
 static CORE_ADDR
 avr_make_saddr (CORE_ADDR x)
@@ -277,7 +277,7 @@ avr_convert_saddr_to_raw (CORE_ADDR x)
   return ((x) & 0xffffffff);
 }
 
-/* EEPROM address checks and convertions.  I don't know if these will ever
+/* EEPROM address checks and conversions.  I don't know if these will ever
    actually be used, but I've added them just the same.  TRoth */
 
 /* TRoth/2002-04-08: Commented out for now to allow fix for problem with large

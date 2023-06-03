@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/> .
 
 # Print a 2 dimensional assumed shape array.  We pass different slices
-# of the array to a subroutine and print the array as recieved within
+# of the array to a subroutine and print the array as received within
 # the subroutine.  This should exercise GDB's ability to handle
 # different strides for the different dimensions.
 

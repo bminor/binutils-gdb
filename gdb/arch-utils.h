@@ -309,7 +309,7 @@ extern void default_read_core_file_mappings
 extern CORE_ADDR default_get_return_buf_addr (struct type *val_typegdbarch,
 					      frame_info_ptr cur_frame);
 
-/* Default implementation of gdbaarch default_dwarf2_omit_typedef_p method.  */
+/* Default implementation of gdbarch default_dwarf2_omit_typedef_p method.  */
 extern bool default_dwarf2_omit_typedef_p (struct type *target_type,
 					   const char *producer,
 					   const char *name);

@@ -2634,7 +2634,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       pst->legacy_expand_psymtab = mdebug_expand_psymtab;
 
       /* Set up language for the pst.
-	 The language from the FDR is used if it is unambigious (e.g. cfront
+	 The language from the FDR is used if it is unambiguous (e.g. cfront
 	 with native cc and g++ will set the language to C).
 	 Otherwise we have to deduce the language from the filename.
 	 Native ecoff has every header file in a separate FDR, so

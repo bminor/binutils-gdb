@@ -454,7 +454,7 @@ private:
 
      UNAVAILABLE can indicate that the kernel doesn't support any of the
      two sets of requests or that there was an error when we tried to
-     detect wich interface is available.  */
+     detect which interface is available.  */
 
   enum debug_reg_interface
     {
@@ -2880,7 +2880,7 @@ ppc_linux_nat_target::low_prepare_to_resume (struct lwp_info *lp)
 		  perror_with_name (_("Error deleting hardware "
 				      "breakpoint or watchpoint"));
 
-	      /* We erase the entries one at a time after successfuly
+	      /* We erase the entries one at a time after successfully
 		 removing the corresponding slot form the thread so that
 		 if we throw an exception above in a future iteration the
 		 map remains consistent.  */

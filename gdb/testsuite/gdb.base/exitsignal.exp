@@ -17,7 +17,7 @@
 # purpose of this checking is to ensure that the variables are
 # mutually exclusive, i.e., that when $_exitsignal is set, $_exitcode
 # is not, and vice-versa.  This mutual exclusion happens because if an
-# inferior exited (either successfuly or not), it certainly was not
+# inferior exited (either successfully or not), it certainly was not
 # killed by a signal.  However, if it was killed by an uncaught
 # signal, then there is no way for it to have exited.
 

@@ -1872,7 +1872,7 @@ emit_insns (uint32_t *buf, int n)
 
 /* Regardless of endian, register 3 is always high part, 4 is low part.
    These defines are used when the register pair is stored/loaded.
-   Likewise, to simplify code, have a similiar define for 5:6. */
+   Likewise, to simplify code, have a similar define for 5:6. */
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define TOP_FIRST	"4"

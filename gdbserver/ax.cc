@@ -985,7 +985,7 @@ gdb_eval_agent_expr (struct eval_agent_expr_context *ctx,
     }
 
   /* Cache the stack top in its own variable. Much of the time we can
-     operate on this variable, rather than dinking with the stack. It
+     operate on this variable, rather than syncing with the stack. It
      needs to be copied to the stack when sp changes.  */
   top = 0;
 

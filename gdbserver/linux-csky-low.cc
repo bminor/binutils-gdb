@@ -278,7 +278,7 @@ static struct regsets_info csky_regsets_info =
 static struct regs_info csky_regs_info =
 {
   NULL, /* FIXME: what's this  */
-  NULL, /* PEEKUSER/PORKUSR isn't supported by kernel > 4.x */
+  NULL, /* PEEKUSER/POKEUSR isn't supported by kernel > 4.x */
   &csky_regsets_info
 };
 

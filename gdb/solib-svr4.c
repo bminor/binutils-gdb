@@ -374,7 +374,7 @@ struct svr4_info
      probes-based interface.
 
      The namespace is represented by the address of its corresponding
-     r_debug[_ext] object.  We get the namespace id as agrument to the
+     r_debug[_ext] object.  We get the namespace id as argument to the
      'reloc_complete' probe but we don't get it when scanning the load map
      on attach.
 
@@ -1912,7 +1912,7 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
 	 covers one namespace.
 
 	 We expect gdbserver to provide updates for the namespace that
-	 contains LM, which whould be this namespace...  */
+	 contains LM, which would be this namespace...  */
       so_list *sos = nullptr;
       if (library_list.solib_lists.find (debug_base)
 	  != library_list.solib_lists.end ())
@@ -2684,7 +2684,7 @@ read_program_headers_from_bfd (bfd *abfd)
      whose e_type member in the ELF header is not ET_DYN.  There may
      be a time in the future when it is desirable to do relocations
      on other types of files as well in which case this condition
-     should either be removed or modified to accomodate the new file
+     should either be removed or modified to accommodate the new file
      type.  - Kevin, Nov 2000. ]  */
 
 static int

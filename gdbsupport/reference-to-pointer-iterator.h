@@ -36,7 +36,7 @@ struct reference_to_pointer_iterator
   using iterator_category = typename IteratorType::iterator_category;
   using difference_type = typename IteratorType::difference_type;
 
-  /* Construct a reference_to_pointer_iterator, passing args to the underyling
+  /* Construct a reference_to_pointer_iterator, passing args to the underlying
      iterator.  */
   template <typename... Args>
   reference_to_pointer_iterator (Args &&...args)

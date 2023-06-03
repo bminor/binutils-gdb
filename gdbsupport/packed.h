@@ -37,7 +37,7 @@
    an enum -- but may not work on all compilers.  */
 
 /* Clang targeting Windows does not support attribute gcc_struct, so
-   we use the alternative byte array implemention there. */
+   we use the alternative byte array implementation there. */
 #if defined _WIN32 && defined __clang__
 # define PACKED_USE_ARRAY 1
 #else

@@ -631,7 +631,7 @@ struct language_defn
   { return false; }
 
   /* Is this language case sensitive?  The return value from this function
-     provides the automativ setting for 'set case-sensitive', as a
+     provides the automatic setting for 'set case-sensitive', as a
      consequence, a user is free to override this setting if they want.  */
 
   virtual enum case_sensitivity case_sensitivity () const

@@ -1894,7 +1894,7 @@ proc gdb_test_list_exact { cmd name elm_find_regexp elm_extract_regexp result_ma
 #
 # Both inferior and gdb patterns must match for a PASS.
 #
-# If MESSAGE is ommitted, then COMMAND will be used as the message.
+# If MESSAGE is omitted, then COMMAND will be used as the message.
 #
 # Returns:
 #    1 if the test failed,

@@ -560,7 +560,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
   if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
     return regcache->raw_read (regnum, buffer);
 
-  /* We have to find out how to deal with priveleged registers.
+  /* We have to find out how to deal with privileged registers.
      Let's treat them as pseudo-registers, but we cannot read/write them.  */
      
   else if (tdep->call_abi == CallAbiCall0Only
@@ -648,7 +648,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
   if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
     regcache->raw_write (regnum, buffer);
 
-  /* We have to find out how to deal with priveleged registers.
+  /* We have to find out how to deal with privileged registers.
      Let's treat them as pseudo-registers, but we cannot read/write them.  */
 
   else if (regnum < tdep->a0_base)

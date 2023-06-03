@@ -9863,7 +9863,7 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
      same.  This is a shallow traversal and it is not bullet-proof;
      the compiler can trick the debugger into believing that the trees
      are isomorphic, whereas they actually are not.  However, the
-     likelyhood of this happening is pretty low, and a full-fledged
+     likelihood of this happening is pretty low, and a full-fledged
      check would be an overkill.  */
   bool are_isomorphic = true;
   die_info *concrete_child = die->child;
@@ -13740,7 +13740,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
 	  if (child_type != NULL)
 	    {
-	      /* The range type was succesfully read.  Save it for the
+	      /* The range type was successfully read.  Save it for the
 		 array type creation.  */
 	      range_types.push_back (child_type);
 	    }
@@ -19989,7 +19989,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	    DW_AT_specification   // refers to die #3
 
      Thus, when processing die #4, we have to pretend that we're in
-     the context of its DW_AT_specification, namely the contex of die
+     the context of its DW_AT_specification, namely the context of die
      #3.  */
   spec_cu = cu;
   spec_die = die_specification (die, &spec_cu);

@@ -2391,7 +2391,7 @@ varobj_invalidate_if_uses_objfile (struct objfile *objfile)
 	    {
 	      /* The varobj is tied to a block which is going away.  There is
 		 no way to reconstruct something later, so invalidate the
-		 varobj completly and drop the reference to the block which is
+		 varobj completely and drop the reference to the block which is
 		 being freed.  */
 	      var->root->is_valid = false;
 	      var->root->valid_block = nullptr;

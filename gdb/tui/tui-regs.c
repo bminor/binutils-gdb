@@ -102,7 +102,7 @@ tui_register_format (frame_info_ptr frame, int regnum)
 }
 
 /* Get the register value from the given frame and format it for the
-   display.  When changep is set, check if the new register value has
+   display.  When changedp is set, check if the new register value has
    changed with respect to the previous call.  */
 static void
 tui_get_register (frame_info_ptr frame,

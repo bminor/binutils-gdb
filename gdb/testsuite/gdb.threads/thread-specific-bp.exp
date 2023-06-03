@@ -72,7 +72,7 @@ proc check_thread_specific_breakpoint {non_stop} {
     gdb_breakpoint "main thread $start_thre"
     gdb_test "info break" ".*breakpoint.*thread $start_thre" "breakpoint set"
 
-    # Set breakpoint at a place only reacheable after the "start"
+    # Set breakpoint at a place only reachable after the "start"
     # thread exits.
     gdb_breakpoint "end"
 

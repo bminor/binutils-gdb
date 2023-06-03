@@ -43252,7 +43252,7 @@ Hex encoded (big endian) bytes representing the linear address of the
 thread information block.
 
 @item E @var{nn}
-An error occured.  This means that either the thread was not found, or the
+An error occurred.  This means that either the thread was not found, or the
 address could not be retrieved.
 
 @item @w{}
@@ -43303,7 +43303,7 @@ Hex encoded sequence of uninterpreted bytes, @var{xx}@dots{}, representing the
 tags found in the requested memory range.
 
 @item E @var{nn}
-An error occured.  This means that fetching of memory tags failed for some
+An error occurred.  This means that fetching of memory tags failed for some
 reason.
 
 @item @w{}
@@ -43352,7 +43352,7 @@ The request was successful and the memory tag granules were modified
 accordingly.
 
 @item E @var{nn}
-An error occured.  This means that modifying the memory tag granules failed
+An error occurred.  This means that modifying the memory tag granules failed
 for some reason.
 
 @item @w{}
@@ -45402,7 +45402,7 @@ The valid responses to Host I/O packets are:
 
 @item F @var{result} [, @var{errno}] [; @var{attachment}]
 @var{result} is the integer value returned by this operation, usually
-non-negative for success and -1 for errors.  If an error has occured,
+non-negative for success and -1 for errors.  If an error has occurred,
 @var{errno} will be included in the result specifying a
 value defined by the File-I/O protocol (@pxref{Errno Values}).  For
 operations which return data, @var{attachment} supplies the data as a
@@ -49663,7 +49663,7 @@ terminates) is not issued when running in batch mode.
 
 @item --batch-silent
 Run in batch mode, just like @option{--batch}, but totally silent.  All @value{GDBN}
-output is supressed (stderr is unaffected).  This is much quieter than
+output is suppressed (stderr is unaffected).  This is much quieter than
 @option{--silent} and would be useless for an interactive session.
 
 This is particularly useful when using targets that give @samp{Loading section}

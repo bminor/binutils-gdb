@@ -1261,7 +1261,7 @@ struct PSWreg
 /* Upon entry the value for LR to save has been pushed.
    We unpush that so that the value for the stack pointer saved is correct.
    Upon entry, all other registers are assumed to have not been modified
-   since the interrupt/trap occured.  */
+   since the interrupt/trap occurred.  */
 
 asm ("\n\
 stash_registers:\n\

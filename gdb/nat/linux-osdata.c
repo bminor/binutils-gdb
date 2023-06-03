@@ -321,7 +321,7 @@ get_core_array_size_using_sys_possible ()
 static size_t
 get_core_array_size ()
 {
-  /* Using /sys/.../possible is prefered, because it handles the case where
+  /* Using /sys/.../possible is preferred, because it handles the case where
      we are in a container that has access to a subset of the host's cores.
      It will return a size that considers all the CPU cores available to the
      host.  If that fials for some reason, fall back to sysconf.  */

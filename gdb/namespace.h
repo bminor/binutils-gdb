@@ -110,7 +110,7 @@ struct using_direct
      EXCLUDES entries, the last entry is NULL.  */
   const char *excludes[1];
 
-  /* Returns true if the using_direcive USING_DIR is valid in CURR_LINE.
+  /* Returns true if the using_directive USING_DIR is valid in CURR_LINE.
      Because current GCC (at least version 12.2) sets the decl_line as
      the last line in the current block, we need to take this into
      consideration when checking the validity, by comparing it to

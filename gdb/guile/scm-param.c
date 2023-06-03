@@ -101,7 +101,7 @@ struct param_smob
      space, it will be freed with the smob.  */
   const char * const *enumeration;
 
-  /* The set_func funcion or #f if not specified.
+  /* The set_func function or #f if not specified.
      This function is called *after* the parameter is set.
      It returns a string that will be displayed to the user.  */
   SCM set_func;

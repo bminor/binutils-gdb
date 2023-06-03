@@ -451,7 +451,7 @@ gdb_test "rbreak" "rbreak"
 gdb_test "restore" "You can't do that without a process to debug\."
 
 #test return
-# The middle case accomodated the obsolete a29k, where doing the "ni"
+# The middle case accommodated the obsolete a29k, where doing the "ni"
 # above causes an initial stack to be created.
 gdb_test "return" "No selected frame..*"
 

@@ -1521,7 +1521,7 @@ amd_dbgapi_target::store_registers (struct regcache *regcache, int regno)
     regcache->invalidate (regno);
 
   /* Invalidate all volatile registers if this register has the invalidate
-     volatile property.  For example, writting to VCC may change the content
+     volatile property.  For example, writing to VCC may change the content
      of STATUS.VCCZ.  */
   if (tdep->register_properties[regno]
       & AMD_DBGAPI_REGISTER_PROPERTY_INVALIDATE_VOLATILE)

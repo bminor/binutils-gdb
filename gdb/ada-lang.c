@@ -6420,7 +6420,7 @@ ada_tag_value_at_base_address (struct value *obj)
 
   obj_type = obj->type ();
 
-  /* It is the responsability of the caller to deref pointers.  */
+  /* It is the responsibility of the caller to deref pointers.  */
 
   if (obj_type->code () == TYPE_CODE_PTR || obj_type->code () == TYPE_CODE_REF)
     return obj;
@@ -9878,7 +9878,7 @@ ada_value_cast (struct type *type, struct value *arg2)
        No  : Rec := (empty => True);
 
     The size and contents of that record depends on the value of the
-    descriminant (Rec.Empty).  At this point, neither the debugging
+    discriminant (Rec.Empty).  At this point, neither the debugging
     information nor the associated type structure in GDB are able to
     express such dynamic types.  So what the debugger does is to create
     "fixed" versions of the type that applies to the specific object.
@@ -12222,7 +12222,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
     return;
 
   /* Compute the condition expression in text form, from the specific
-     expection we want to catch.  */
+     exception we want to catch.  */
   std::string cond_string
     = ada_exception_catchpoint_cond_string (c->excep_string.c_str (), ex);
 

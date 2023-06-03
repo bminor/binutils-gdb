@@ -139,7 +139,7 @@ m2_language::language_arch_info (struct gdbarch *gdbarch,
   lai->set_bool_type (builtin->builtin_bool, "BOOLEAN");
 }
 
-/* See languge.h.  */
+/* See language.h.  */
 
 void
 m2_language::printchar (int c, struct type *type,

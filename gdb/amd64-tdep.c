@@ -3293,7 +3293,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
   set_gdbarch_dummy_id (gdbarch, amd64_dummy_id);
 
   /* Hook the function epilogue frame unwinder.  This unwinder is
-     appended to the list first, so that it supercedes the other
+     appended to the list first, so that it supersedes the other
      unwinders in function epilogues.  */
   frame_unwind_prepend_unwinder (gdbarch, &amd64_epilogue_override_frame_unwind);
 

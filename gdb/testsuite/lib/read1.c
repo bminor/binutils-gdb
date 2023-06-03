@@ -31,7 +31,7 @@
 /* Default READMORE sleep time in miliseconds.  */
 #define READMORE_SLEEP_DEFAULT 10
 
-/* Helper function.  Intialize *METHOD according to environment variable
+/* Helper function.  Initialize *METHOD according to environment variable
    READMORE_METHOD, and *SLEEP according to environment variable
    READMORE_SLEEP.  */
 

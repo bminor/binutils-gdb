@@ -635,7 +635,7 @@ architecture than the host machine running GDB).
 Reporting Bugs in GDB
 =====================
 
-   There are several ways of reporting bugs in GDB.  The prefered
+   There are several ways of reporting bugs in GDB.  The preferred
 method is to use the World Wide Web:
 
       http://www.gnu.org/software/gdb/bugs/

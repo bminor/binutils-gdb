@@ -188,7 +188,7 @@ gdb_test "python print (a)" ".*aliases -- User-defined aliases of other commands
 
 # Test PR 12212, using InfThread.selected_thread() when no inferior is
 # loaded.
-gdb_py_test_silent_cmd "python nothread = gdb.selected_thread()" "Attempt to aquire thread with no inferior" 1
+gdb_py_test_silent_cmd "python nothread = gdb.selected_thread()" "Attempt to acquire thread with no inferior" 1
 gdb_test "python print (nothread is None)" "True" "ensure that no threads are returned"
 
 gdb_test_multiline "register atexit function" \

@@ -47,7 +47,7 @@ if { [build_executable "failed to prepare" $testfile $srcfile debug] } {
 set reading_re "(Reading.*from remote target\\.\\.\\.\r\n)*"
 set exited_normally_re "${reading_re}\\\[Inferior $decimal \\(.*\\) exited normally\\\]"
 # gdbserver produces a slightly different message when attaching after
-# a fork, so we have to tweak the regexp to accomodate that.
+# a fork, so we have to tweak the regexp to accommodate that.
 set attach_child_re "${reading_re}\\\[Attaching after .* fork to child .*\\\]\r\n"
 set detach_child_re "${reading_re}\\\[Detaching after fork from child .*\\\]\r\n"
 set detach_parent_re "${reading_re}\\\[Detaching after fork from parent .*\\\]\r\n"

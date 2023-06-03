@@ -465,7 +465,7 @@ rs6000_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 				  follow_child, detach_fork);
 
   /* If we detach fork and follow child we do not want the child
-     process to geneate events that ptrace can trace.  Hence we
+     process to generate events that ptrace can trace.  Hence we
      detach it.  */
 
   if (detach_fork && !follow_child)

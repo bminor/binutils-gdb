@@ -23,7 +23,7 @@
 #include "alpha-tdep.h"
 #include "alpha-bsd-tdep.h"
 
-/* Conviently, GDB uses the same register numbering as the
+/* Conveniently, GDB uses the same register numbering as the
    ptrace register structure used by BSD on Alpha.  */
 
 void

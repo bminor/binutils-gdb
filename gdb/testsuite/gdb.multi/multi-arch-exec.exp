@@ -166,7 +166,7 @@ proc do_test { first_arch mode selected_thread } {
 
 	gdb_test_no_output "set follow-exec-mode $mode"
 
-	# Test that GDB updates the target description / arch successfuly
+	# Test that GDB updates the target description / arch successfully
 	# after the exec.
 	gdb_test "continue" "Breakpoint $bkptno_numopt_re, main.*" "continue across exec that changes architecture"
 }

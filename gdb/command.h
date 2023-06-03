@@ -633,7 +633,7 @@ extern cmd_list_element *add_com_alias (const char *name,
 extern struct cmd_list_element *add_com_suppress_notification
 		       (const char *name, enum command_class theclass,
 			cmd_simple_func_ftype *fun, const char *doc,
-			bool *supress_notification);
+			bool *suppress_notification);
 
 extern struct cmd_list_element *add_info (const char *,
 					  cmd_simple_func_ftype *fun,

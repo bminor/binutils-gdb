@@ -255,7 +255,7 @@ proc run_tests {lang} {
 		# We try all combinations, even those that don't
 		# parse, or are invalid, to catch the case of a
 		# regression making them inadvertently valid.  For
-		# example, these convertions are invalid:
+		# example, these conversions are invalid:
 		#
 		#  float <-> array   [iff sizeof pointer != sizeof float]
 		#  array -> function (not function pointer)

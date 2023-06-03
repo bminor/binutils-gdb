@@ -10942,7 +10942,7 @@ breakpoint_auto_delete (bpstat *bs)
 /* A comparison function for bp_location AP and BP being interfaced to
    std::sort.  Sort elements primarily by their ADDRESS (no matter what
    bl_address_is_meaningful says), secondarily by ordering first
-   permanent elements and terciarily just ensuring the array is sorted
+   permanent elements and tertiarily just ensuring the array is sorted
    stable way despite std::sort being an unstable algorithm.  */
 
 static int

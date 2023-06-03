@@ -153,9 +153,9 @@ gdb_mpz::export_bits (gdb::array_view<gdb_byte> buf, int endian, bool unsigned_p
 
   /* Do the export into a buffer allocated by GMP itself; that way,
      we can detect cases where BUF is not large enough to export
-     our value, and thus avoid a buffer overlow.  Normally, this should
+     our value, and thus avoid a buffer overflow.  Normally, this should
      never happen, since we verified earlier that the buffer is large
-     enough to accomodate our value, but doing this allows us to be
+     enough to accommodate our value, but doing this allows us to be
      extra safe with the export.
 
      After verification that the export behaved as expected, we will

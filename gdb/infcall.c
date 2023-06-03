@@ -1361,7 +1361,7 @@ call_function_by_hand_dummy (struct value *function,
 	    /* Get the return value.  */
 	    retval = sm->return_value;
 
-	    /* Restore the original FSM and clean up / destroh the call FSM.
+	    /* Restore the original FSM and clean up / destroy the call FSM.
 	       Doing it in this order ensures that if the call to clean_up
 	       throws, the original FSM is properly restored.  */
 	    {

@@ -200,7 +200,7 @@ public:
   /* Convert this object to a std::string, using MAPPING as
      enumerator-to-string mapping array.  This is not meant to be
      called directly.  Instead, enum_flags specializations should have
-     their own to_string function wrapping this one, thus hidding the
+     their own to_string function wrapping this one, thus hiding the
      mapping array from callers.
 
      Note: this is defined outside the template class so it can use
@@ -338,7 +338,7 @@ ENUM_FLAGS_GEN_COMPOUND_ASSIGN (operator^=, ^)
    make.  It's important to disable comparison with unrelated types to
    prevent accidentally comparing with unrelated enum values, which
    are convertible to integer, and thus coupled with enum_flags
-   convertion to underlying type too, would trigger the built-in 'bool
+   conversion to underlying type too, would trigger the built-in 'bool
    operator==(unsigned, int)' operator.  */
 
 #define ENUM_FLAGS_GEN_COMP(OPERATOR_OP, OP)				\

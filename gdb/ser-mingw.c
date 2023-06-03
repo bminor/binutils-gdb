@@ -557,7 +557,7 @@ console_select_thread (void *arg)
 
 	  if (event_index != WAIT_OBJECT_0 + 1)
 	    {
-	      /* Wait must have failed; assume an error has occured, e.g.
+	      /* Wait must have failed; assume an error has occurred, e.g.
 		 the handle has been closed.  */
 	      SetEvent (state->except_event);
 	      break;
@@ -1127,7 +1127,7 @@ net_windows_select_thread (void *arg)
 
 	  if (event_index != WAIT_OBJECT_0 + 1)
 	    {
-	      /* Some error has occured.  Assume that this is an error
+	      /* Some error has occurred.  Assume that this is an error
 		 condition.  */
 	      SetEvent (state->base.except_event);
 	      break;

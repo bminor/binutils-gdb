@@ -1428,7 +1428,7 @@ gnu_nat_target::inf_continue (struct inf *inf)
 /* The inferior used for all gdb target ops.  */
 struct inf *gnu_current_inf = 0;
 
-/* The inferior being waited for by gnu_wait.  Since GDB is decidely not
+/* The inferior being waited for by gnu_wait.  Since GDB is decidedly not
    multi-threaded, we don't bother to lock this.  */
 static struct inf *waiting_inf;
 
@@ -1561,7 +1561,7 @@ rewait:
       else if (kind == TARGET_WAITKIND_STOPPED
 	       && w->status.sig () == GDB_SIGNAL_TRAP)
 	/* Ah hah!  A SIGTRAP from the inferior while starting up probably
-	   means we've succesfully completed an exec!  */
+	   means we've successfully completed an exec!  */
 	{
 	  inf_debug (inf, "one pending exec completed");
 	}

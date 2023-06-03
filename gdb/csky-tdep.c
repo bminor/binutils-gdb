@@ -713,7 +713,7 @@ csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 
   /* Vector register has 128 bits, and only in ck810. Just return
      csky_vector_type(), not check tdesc_has_registers(), is in case
-     of some GDB stub does not describe type for Vector resgisters
+     of some GDB stub does not describe type for Vector registers
      in the target-description-xml.  */
   if ((reg_nr >= CSKY_VR0_REGNUM) && (reg_nr <= CSKY_VR0_REGNUM + 15))
     return csky_vector_type (gdbarch);

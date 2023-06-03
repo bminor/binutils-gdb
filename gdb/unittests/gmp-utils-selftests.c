@@ -29,7 +29,7 @@ namespace selftests {
 
    This function limits itself to values which are in range (out-of-range
    values will be tested separately).  In doing so, it tries to be reasonably
-   exhaustive, by testing the edges, as well as a resonable set of values
+   exhaustive, by testing the edges, as well as a reasonable set of values
    including negative ones, zero, and positive values.  */
 
 static void

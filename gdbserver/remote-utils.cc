@@ -1198,7 +1198,7 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 	   we would not burden it with a thread status response.  This
 	   was for the benefit of GDB 4.13 and older.  However, in
 	   recent GDB versions the check (``if (cont_thread != 0)'')
-	   does not have the desired effect because of sillyness in
+	   does not have the desired effect because of silliness in
 	   the way that the remote protocol handles specifying a
 	   thread.  Since thread support relies on qSymbol support
 	   anyway, assume GDB can handle threads.  */

@@ -178,7 +178,7 @@ tui_source_window_base::update_source_window_as_is
 }
 
 
-/* Function to ensure that the source and/or disassemly windows
+/* Function to ensure that the source and/or disassembly windows
    reflect the input address.  */
 void
 tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)

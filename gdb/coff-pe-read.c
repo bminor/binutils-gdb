@@ -163,7 +163,7 @@ add_pe_exported_sym (minimal_symbol_reader &reader,
 /* Create a minimal symbol entry for an exported forward symbol.
    Return 1 if the forwarded function was found 0 otherwise.
    SYM_NAME contains the exported name or NULL if exported by ordinal,
-   FORWARD_DLL_NAME is the name of the DLL in which the target symobl resides,
+   FORWARD_DLL_NAME is the name of the DLL in which the target symbol resides,
    FORWARD_FUNC_NAME is the name of the target symbol in that DLL,
    ORDINAL is the ordinal index value of the symbol,
    DLL_NAME is the internal name of the DLL file,

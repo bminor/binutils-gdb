@@ -1347,7 +1347,7 @@ value_assign (struct value *toval, struct value *fromval)
 
   /* We copy over the enclosing type and pointed-to offset from FROMVAL
      in the case of pointer types.  For object types, the enclosing type
-     and embedded offset must *not* be copied: the target object refered
+     and embedded offset must *not* be copied: the target object referred
      to by TOVAL retains its original dynamic type after assignment.  */
   if (type->code () == TYPE_CODE_PTR)
     {

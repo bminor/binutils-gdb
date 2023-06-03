@@ -116,7 +116,7 @@
 
    Say a developer starts out with:
    ...
-   extern void foo (void *ptr) __atttribute__((nonnull (1)));
+   extern void foo (void *ptr) __attribute__((nonnull (1)));
    void foo (void *ptr) {}
    ...
    with the idea in mind to catch:

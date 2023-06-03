@@ -41,7 +41,7 @@ gdb_realpath (const char *filename)
 
    But the situation is slightly more complex on Windows, due to some
    versions of GCC which were reported to generate paths where
-   backlashes (the directory separator) were doubled.  For instance:
+   backslashes (the directory separator) were doubled.  For instance:
       c:\\some\\double\\slashes\\dir
    ... instead of ...
       c:\some\double\slashes\dir

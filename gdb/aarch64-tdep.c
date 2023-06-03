@@ -282,7 +282,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
   /* Whether the stack has been set.  This should be true when we notice a SP
      to FP move or if we are using the SP as the base register for storing
-     data, in case the FP is ommitted.  */
+     data, in case the FP is omitted.  */
   bool seen_stack_set = false;
 
   /* Track X registers and D registers in prologue.  */

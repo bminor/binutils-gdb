@@ -221,7 +221,7 @@ arc_fill_gregset (struct regcache *regcache, void *buf)
   /* Currently ARC Linux ptrace doesn't allow writes to status32 because
      some of its bits are kernel mode-only and shoudn't be writable from
      user-space.  Writing status32 from debugger could be useful, though,
-     so ability to write non-priviliged bits will be added to kernel
+     so ability to write non-privileged bits will be added to kernel
      sooner or later.  */
 
   /* BTA.  */

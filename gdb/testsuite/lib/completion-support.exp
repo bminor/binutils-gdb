@@ -318,7 +318,7 @@ proc test_gdb_complete_multiple {
 
 # Test that all the substring prefixes of INPUT from [0..START) to
 # [0..END) complete to COMPLETION_RE (a regular expression).  If END
-# is ommitted, default to the length of INPUT.
+# is omitted, default to the length of INPUT.
 
 proc test_complete_prefix_range_re {input completion_re start {end -1}} {
     if {$end == -1} {
@@ -345,7 +345,7 @@ proc test_complete_prefix_range_re {input completion_re start {end -1}} {
 }
 
 # Test that all the substring prefixes of COMPLETION from [0..START)
-# to [0..END) complete to COMPLETION.  If END is ommitted, default to
+# to [0..END) complete to COMPLETION.  If END is omitted, default to
 # the length of COMPLETION.
 
 proc test_complete_prefix_range {completion start {end -1}} {

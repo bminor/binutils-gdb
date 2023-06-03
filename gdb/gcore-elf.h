@@ -37,7 +37,7 @@ extern void gcore_elf_build_thread_register_notes
    bfd *obfd, gdb::unique_xmalloc_ptr<char> *note_data, int *note_size);
 
 /* Add content to *NOTE_DATA (and update *NOTE_SIZE) to include a note
-   containing the current targtet's target description.  The core file is
+   containing the current target's target description.  The core file is
    being written to OBFD.  If something goes wrong then *NOTE_DATA can be
    set to nullptr.  */
 

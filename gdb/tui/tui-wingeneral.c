@@ -77,7 +77,7 @@ tui_win_info::refresh_window ()
     tui_wrefresh (handle.get ());
 }
 
-/* Draw a border arround the window.  */
+/* Draw a border around the window.  */
 static void
 box_win (struct tui_win_info *win_info, 
 	 bool highlight_flag)

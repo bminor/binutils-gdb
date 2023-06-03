@@ -151,7 +151,7 @@ static int bsd_uthread_thread_ctx_offset;
 /* Name of shared threads library.  */
 static const char *bsd_uthread_solib_name;
 
-/* Non-zero if the thread startum implemented by this module is active.  */
+/* Non-zero if the thread stratum implemented by this module is active.  */
 static int bsd_uthread_active;
 
 static CORE_ADDR

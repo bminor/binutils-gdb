@@ -1260,7 +1260,7 @@ static struct gdbarch_registration *gdbarch_registry = NULL;
 std::vector<const char *>
 gdbarch_printable_names ()
 {
-  /* Accumulate a list of names based on the registed list of
+  /* Accumulate a list of names based on the registered list of
      architectures.  */
   std::vector<const char *> arches;
 

@@ -80,7 +80,7 @@ exceptions_state_mc (enum catcher_action action)
       switch (action)
 	{
 	case CATCH_ITER:
-	  /* No error/quit has occured.  */
+	  /* No error/quit has occurred.  */
 	  return 0;
 	case CATCH_ITER_1:
 	  catchers.front ().state = CATCHER_RUNNING_1;

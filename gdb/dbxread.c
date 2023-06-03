@@ -1077,7 +1077,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	 *) The call to strchr.
 	 *) The addition of a partial symbol the two partial
 	 symbol lists.  This last is a large section of code, so
-	 I've imbedded it in the following macro.  */
+	 I've embedded it in the following macro.  */
 
       switch (nlist.n_type)
 	{

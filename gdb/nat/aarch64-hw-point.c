@@ -314,7 +314,7 @@ aarch64_dr_state_insert_one_point (ptid_t ptid,
 	{
 	  gdb_assert (dr_ref_count[i] == 0);
 	  idx = i;
-	  /* no break; continue hunting for an exising one.  */
+	  /* no break; continue hunting for an existing one.  */
 	}
       else if (dr_addr_p[i] == addr
 	       && (dr_addr_orig_p == nullptr || dr_addr_orig_p[i] == addr_orig)

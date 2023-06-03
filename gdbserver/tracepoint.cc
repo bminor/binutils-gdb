@@ -6338,7 +6338,7 @@ upload_fast_traceframes (void)
     unsigned int prev, counter;
 
     /* Update the token, with new counters, and the GDBserver stamp
-       bit.  Alway reuse the current TBC index.  */
+       bit.  Always reuse the current TBC index.  */
     prev = ipa_trace_buffer_ctrl_curr & GDBSERVER_FLUSH_COUNT_MASK_CURR;
     counter = (prev + 0x100) & GDBSERVER_FLUSH_COUNT_MASK_CURR;
 

@@ -225,7 +225,7 @@ tui_rl_command_key (int count, int key)
 	  rl_newline (1, '\n');
 
 	  /* Switch to gdb command mode while executing the command.
-	     This way the gdb's continue prompty will be displayed.  */
+	     This way the gdb's continue prompt will be displayed.  */
 	  tui_set_key_mode (TUI_ONE_COMMAND_MODE);
 	  return 0;
 	}

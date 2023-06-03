@@ -5680,7 +5680,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		 In older ABIs, the caller reserved space for
 		 registers that contained arguments.  This was loosely
-		 refered to as their "home".  Consequently, space is
+		 referred to as their "home".  Consequently, space is
 		 always allocated.  */
 
 	      stack_offset += align_up (partial_len, MIPS32_REGSIZE);
@@ -6126,7 +6126,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		 In older ABIs, the caller reserved space for
 		 registers that contained arguments.  This was loosely
-		 refered to as their "home".  Consequently, space is
+		 referred to as their "home".  Consequently, space is
 		 always allocated.  */
 
 	      stack_offset += align_up (partial_len, MIPS64_REGSIZE);

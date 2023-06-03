@@ -2429,7 +2429,7 @@ struct struct_elt
 
    TYPE can be either a struct or union, or a pointer or reference to
    a struct or union.  If it is a pointer or reference, its target
-   type is automatically used.  Thus '.' and '->' are interchangable,
+   type is automatically used.  Thus '.' and '->' are interchangeable,
    as specified for the definitions of the expression element types
    STRUCTOP_STRUCT and STRUCTOP_PTR.
 
@@ -2446,7 +2446,7 @@ extern struct_elt lookup_struct_elt (struct type *, const char *, int);
 
    TYPE can be either a struct or union, or a pointer or reference to
    a struct or union.  If it is a pointer or reference, its target
-   type is automatically used.  Thus '.' and '->' are interchangable,
+   type is automatically used.  Thus '.' and '->' are interchangeable,
    as specified for the definitions of the expression element types
    STRUCTOP_STRUCT and STRUCTOP_PTR.
 

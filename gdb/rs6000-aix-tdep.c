@@ -900,7 +900,7 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 	}
       catch (const gdb_exception_error &e)
 	{
-	  /* An error occured during reading.  Probably a memory error
+	  /* An error occurred during reading.  Probably a memory error
 	     due to the section not being loaded yet.  This address
 	     cannot be a function descriptor.  */
 	  return addr;

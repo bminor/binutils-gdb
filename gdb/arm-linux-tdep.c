@@ -60,7 +60,7 @@
 
 /* Under ARM GNU/Linux the traditional way of performing a breakpoint
    is to execute a particular software interrupt, rather than use a
-   particular undefined instruction to provoke a trap.  Upon exection
+   particular undefined instruction to provoke a trap.  Upon execution
    of the software interrupt the kernel stops the inferior with a
    SIGTRAP, and wakes the debugger.  */
 

@@ -815,7 +815,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	      /* Cast the parent to the base' type.  Note that in gdb,
 		 expression like 
 			 (Base1)d
-		 will create an lvalue, for all appearences, so we don't
+		 will create an lvalue, for all appearances, so we don't
 		 need to use more fancy:
 			 *(Base1*)(&d)
 		 construct.

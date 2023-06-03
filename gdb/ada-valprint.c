@@ -747,7 +747,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
       /* For enum-valued ranges, we want to recurse, because we'll end
 	 up printing the constant's name rather than its numeric
 	 value.  Character and fixed-point types are also printed
-	 differently, so recuse for those as well.  */
+	 differently, so recurse for those as well.  */
       struct type *target_type = type->target_type ();
       val = value_cast (target_type, val);
       common_val_print (val, stream, recurse + 1, options,
