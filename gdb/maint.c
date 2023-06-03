@@ -1259,7 +1259,7 @@ List GDB's internal section table.\n\
 \n\
 Print the current targets section list.  This is a sub-set of all\n\
 sections, from all objects currently loaded.  Usually the ALLOC\n\
-sectoins."),
+sections."),
 	   &maintenanceinfolist);
 
   add_basic_prefix_cmd ("print", class_maintenance,
