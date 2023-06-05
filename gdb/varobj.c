@@ -2414,7 +2414,7 @@ varobj_invalidate_if_uses_objfile (struct objfile *objfile)
 
       /* var->value->type and var->type might also reference the objfile.
 	 This is taken care of in value.c:preserve_values which deals with
-	 making sure that objfile-owend types are replaced with
+	 making sure that objfile-owned types are replaced with
 	 gdbarch-owned equivalents.  */
     });
 }

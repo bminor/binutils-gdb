@@ -2459,7 +2459,7 @@ build_target_condition_list (struct bp_location *bl)
   /* No NULL conditions or failed bytecode generation.  Build a
      condition list for this location's address.  If we have software
      and hardware locations at the same address, they aren't
-     considered duplicates, but we still marge all the conditions
+     considered duplicates, but we still merge all the conditions
      anyway, as it's simpler, and doesn't really make a practical
      difference.  */
   for (bp_location *loc : loc_range)

@@ -174,7 +174,7 @@ verbose "using GDB = $GDB" 2
 
 # The data directory the testing GDB will use.  By default, assume
 # we're testing a non-installed GDB in the build directory.  Users may
-# also explictly override the -data-directory from the command line.
+# also explicitly override the -data-directory from the command line.
 if ![info exists GDB_DATA_DIRECTORY] {
     set GDB_DATA_DIRECTORY [file normalize "[pwd]/../data-directory"]
 }

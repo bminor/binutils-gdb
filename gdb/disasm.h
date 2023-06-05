@@ -248,7 +248,7 @@ struct gdb_non_printing_memory_disassembler
   { /* Nothing.  */ }
 };
 
-/* A dissassembler class that provides 'print_insn', a method for
+/* A disassembler class that provides 'print_insn', a method for
    disassembling a single instruction to the output stream.  */
 
 struct gdb_disassembler : public gdb_printing_disassembler,

@@ -653,7 +653,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		     all future arguments will also be passed on the stack,
 		     i.e., the last argument register may be left unused
 		     due to the aligned register pair rule.
-		     long double data tpye is passed in an aligned GAR pair,
+		     long double data type is passed in an aligned GAR pair,
 		     the first register in the pair is even-numbered.  */
 		  if (gar >= 2)
 		    {

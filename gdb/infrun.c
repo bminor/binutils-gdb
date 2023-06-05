@@ -7500,7 +7500,7 @@ process_event_stop_test (struct execution_control_state *ecs)
     {
       /* We are executing the reverse-finish command.
 	 If the system supports multiple entry points and we are finishing a
-	 function in reverse.   If we are between the entry points singe-step
+	 function in reverse.   If we are between the entry points single-step
 	 back to the alternate entry point.  If we are at the alternate entry
 	 point -- just   need to back up by one more single-step, which
 	 should take us back to the function call.  */

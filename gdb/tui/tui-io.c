@@ -1191,7 +1191,7 @@ tui_getc_1 (FILE *fp)
 #endif
 	}
 
-      /* Keycodes above KEY_MAX are not garanteed to be stable.
+      /* Keycodes above KEY_MAX are not guaranteed to be stable.
 	 Compare keyname instead.  */
       if (ch >= KEY_MAX)
 	{

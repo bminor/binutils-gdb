@@ -1175,7 +1175,7 @@ struct scoped_disasm_info_object
 		      memaddr, info, nullptr);
   }
 
-  /* Upon destruction mark m_diasm_info as invalid.  */
+  /* Upon destruction mark m_disasm_info as invalid.  */
   ~scoped_disasm_info_object ()
   {
     /* Invalidate the original DisassembleInfo object as well as any copies

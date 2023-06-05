@@ -386,7 +386,7 @@ i386_canonicalize_syscall (int syscall)
 
 /* Value of the sigcode in case of a boundary fault.  */
 
-#define SIG_CODE_BONDARY_FAULT 3
+#define SIG_CODE_BOUNDARY_FAULT 3
 
 /* i386 GNU/Linux implementation of the report_signal_info
    gdbarch hook.  Displays information related to MPX bound
@@ -421,7 +421,7 @@ i386_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
     }
 
   /* If this is not a boundary violation just return.  */
-  if (sig_code != SIG_CODE_BONDARY_FAULT)
+  if (sig_code != SIG_CODE_BOUNDARY_FAULT)
     return;
 
   is_upper = (access > upper_bound ? 1 : 0);

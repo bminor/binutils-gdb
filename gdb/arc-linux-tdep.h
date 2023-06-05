@@ -31,7 +31,7 @@ void arc_linux_supply_gregset (const struct regset *regset,
 			       struct regcache *regcache, int regnum,
 			       const void *gregs, size_t size);
 
-/* Reads regsiters from the NT_ARC_V2 data array into the regcache.  */
+/* Reads registers from the NT_ARC_V2 data array into the regcache.  */
 
 void arc_linux_supply_v2_regset (const struct regset *regset,
 				 struct regcache *regcache, int regnum,

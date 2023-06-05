@@ -2116,7 +2116,7 @@ reinit_frame_cache (void)
   if (sentinel_frame != nullptr)
     {
       /* If frame 0's id is not computed, it is not in the frame stash, so its
-	 dealloc functions will not be called when emptying the frash stash.
+	 dealloc functions will not be called when emptying the frame stash.
 	 Call frame_info_del manually in that case.  */
       frame_info *current_frame = sentinel_frame->prev;
       if (current_frame != nullptr

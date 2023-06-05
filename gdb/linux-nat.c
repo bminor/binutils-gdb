@@ -3968,7 +3968,7 @@ linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
    return true if so.  It wasn't writable before Linux 2.6.39, but
    there's no way to know whether the feature was backported to older
    kernels.  So we check to see if it works.  The result is cached,
-   and this is garanteed to be called once early during inferior
+   and this is guaranteed to be called once early during inferior
    startup, so that any warning is printed out consistently between
    GDB invocations.  Note we don't call it during GDB startup instead
    though, because then we might warn with e.g. just "gdb --version"

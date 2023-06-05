@@ -324,7 +324,7 @@ get_core_array_size ()
   /* Using /sys/.../possible is preferred, because it handles the case where
      we are in a container that has access to a subset of the host's cores.
      It will return a size that considers all the CPU cores available to the
-     host.  If that fials for some reason, fall back to sysconf.  */
+     host.  If that fails for some reason, fall back to sysconf.  */
   gdb::optional<size_t> count = get_core_array_size_using_sys_possible ();
   if (count.has_value ())
     return *count;

@@ -279,7 +279,7 @@ operator!= (const gdb::array_view<T> &lhs, const gdb::array_view<T> &rhs)
      foo (1, 2, gdb::array_view<value *>(values, nargs));
 
    Or, better, using make_array_view, which has the advantage of
-   inferring the arrav_view element's type:
+   inferring the array_view element's type:
 
      foo (1, 2, gdb::make_array_view (values, nargs));
 */

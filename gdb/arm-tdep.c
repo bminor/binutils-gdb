@@ -3971,7 +3971,7 @@ struct frame_base arm_normal_base = {
 
 struct arm_dwarf2_prev_register_cache
 {
-  /* Cached value of the coresponding stack pointer for the inner frame.  */
+  /* Cached value of the corresponding stack pointer for the inner frame.  */
   CORE_ADDR sp;
   CORE_ADDR msp;
   CORE_ADDR msp_s;

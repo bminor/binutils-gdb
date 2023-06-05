@@ -2581,7 +2581,7 @@ csky_pseudo_register_read (struct gdbarch *gdbarch,
       int offset = 0;
       gdb_byte reg_buf[16];
 
-      /* Ensure getting s0~s63 from vrx if tdep->has_vr0 is ture.  */
+      /* Ensure getting s0~s63 from vrx if tdep->has_vr0 is true.  */
       if (tdep->has_vr0)
 	{
 	  if (regnum < 64)

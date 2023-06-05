@@ -333,7 +333,7 @@ public:
 
   /* One and only one of these three functions returns true, indicating
      whether the corresponding interface is the one we detected.  The
-     interface must already have been detected as a precontidion.  */
+     interface must already have been detected as a precondition.  */
 
   bool hwdebug_p ()
   {
@@ -2126,7 +2126,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	  /* DAWR interface allows to watch up to 512 byte wide ranges.  */
 	  region_size = 512;
 	  /* DAWR interface allows to watch up to 512 byte wide ranges which
-	     can't cross a 512 byte bondary on machines that doesn't have a
+	     can't cross a 512 byte boundary on machines that doesn't have a
 	     second DAWR (P9 or less).  */
 	  if (!(hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_ARCH_31))
 	    region_align = 512;
@@ -2733,7 +2733,7 @@ ppc_linux_nat_target::low_forget_process (pid_t pid)
 }
 
 /* Copy the per-process state associated with the pid of PARENT to the
-   sate of CHILD_PID.  GDB expects that a forked process will have the
+   state of CHILD_PID.  GDB expects that a forked process will have the
    same hardware breakpoints and watchpoints as the parent.
 
    If we're using the HWDEBUG interface, also copy the thread debug

@@ -14779,7 +14779,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
       /* The long double is defined as a base type in C.  GCC creates a long
 	 double typedef with target-type _Float128 for the long double to
 	 identify it as the IEEE Float128 value.  This is a GCC hack since the
-	 DWARF doesn't distinquish between the IBM long double and IEEE
+	 DWARF doesn't distinguish between the IBM long double and IEEE
 	 128-bit float.	 Replace the GCC workaround for the long double
 	 typedef with the actual type information copied from the target-type
 	 with the correct long double base type name.  */

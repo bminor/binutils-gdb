@@ -2103,7 +2103,7 @@ quote (const char *str)
 /* Check that removing parameter info out of NAME produces EXPECTED.
    COMPLETION_MODE indicates whether we're testing normal and
    completion mode.  FILE and LINE are used to provide better test
-   location information in case ithe check fails.  */
+   location information in case the check fails.  */
 
 static void
 check_remove_params (const char *file, int line,

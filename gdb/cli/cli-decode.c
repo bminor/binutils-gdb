@@ -1779,7 +1779,7 @@ help_cmd (const char *command, struct ui_file *stream)
 
   if (alias == nullptr || !user_documented_alias (*alias))
     {
-      /* Case of a normal command, or an alias not explictly
+      /* Case of a normal command, or an alias not explicitly
 	 documented by the user.  */
       /* If the user asked 'help somecommand' and there is no alias,
 	 the false indicates to not output the (single) command name.  */
@@ -1789,7 +1789,7 @@ help_cmd (const char *command, struct ui_file *stream)
     }
   else
     {
-      /* Case of an alias explictly documented by the user.
+      /* Case of an alias explicitly documented by the user.
 	 Only output the alias definition and its explicit documentation.  */
       fput_alias_definition_styled (*alias, stream);
       fput_command_names_styled (*alias, false, "\n", stream);

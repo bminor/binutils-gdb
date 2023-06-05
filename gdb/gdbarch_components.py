@@ -902,7 +902,7 @@ May return 0 when unable to determine that address.""",
 )
 
 
-# The DWARF info currently does not distinquish between IEEE 128-bit floating
+# The DWARF info currently does not distinguish between IEEE 128-bit floating
 # point values and the IBM 128-bit floating point format.  GCC has an internal
 # hack to identify the IEEE 128-bit floating point value.  The long double is a
 # defined base type in C.  The GCC hack uses a typedef for long double to

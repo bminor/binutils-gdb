@@ -376,7 +376,7 @@ get_thread_arch_aspace_regcache (inferior *inf_for_target_calls,
   regcache *new_regcache = new regcache (inf_for_target_calls, arch, aspace);
   new_regcache->set_ptid (ptid);
   /* Work around a problem with g++ 4.8 (PR96537): Call the regcache_up
-     constructor explictly instead of implicitly.  */
+     constructor explicitly instead of implicitly.  */
   ptid_regc_map.insert (std::make_pair (ptid, regcache_up (new_regcache)));
 
   return new_regcache;

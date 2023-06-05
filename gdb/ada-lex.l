@@ -371,7 +371,7 @@ canonicalizeNumeral (char *s1, const char *s2)
 /* Interprets the prefix of NUM that consists of digits of the given BASE
    as an integer of that BASE, with the string EXP as an exponent.
    Puts value in yylval, and returns INT, if the string is valid.  Causes
-   an error if the number is improperly formated.   BASE, if NULL, defaults
+   an error if the number is improperly formatted.   BASE, if NULL, defaults
    to "10", and EXP to "1".  The EXP does not contain a leading 'e' or 'E'.
  */
 

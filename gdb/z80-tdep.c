@@ -1403,7 +1403,7 @@ z80_get_insn_info (struct gdbarch *gdbarch, const gdb_byte *buf, int *size)
       info = &ez80_adl_main_insn_table[4]; /* skip force_nops */
       break;
     default:
-      info = &ez80_main_insn_table[8]; /* skip eZ80 prefices and force_nops */
+      info = &ez80_main_insn_table[8]; /* skip eZ80 prefixes and force_nops */
       break;
     }
   do
