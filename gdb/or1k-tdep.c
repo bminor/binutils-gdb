@@ -360,7 +360,7 @@ or1k_delay_slot_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 			   NULL, 32, &tmp_fields, 0);
 
   /* NULL here would mean the last instruction was not understood by cgen.
-     This should not usually happen, but if does its not a delay slot.  */
+     This should not usually happen, but if it does it's not a delay slot.  */
   if (insn == NULL)
     return 0;
 

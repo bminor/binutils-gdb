@@ -574,7 +574,7 @@ extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbar
 extern CORE_ADDR gdbarch_decr_pc_after_break (struct gdbarch *gdbarch);
 extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR decr_pc_after_break);
 
-/* A function can be addressed by either it's "pointer" (possibly a
+/* A function can be addressed by either its "pointer" (possibly a
    descriptor address) or "entry point" (first executable instruction).
    The method "convert_from_func_ptr_addr" converting the former to the
    latter.  gdbarch_deprecated_function_start_offset is being used to implement

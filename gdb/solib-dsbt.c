@@ -853,7 +853,7 @@ dsbt_relocate_main_executable (void)
 }
 
 /* When gdb starts up the inferior, it nurses it along (through the
-   shell) until it is ready to execute it's first instruction.  At this
+   shell) until it is ready to execute its first instruction.  At this
    point, this function gets called via solib_create_inferior_hook.
 
    For the DSBT shared library, the main executable needs to be relocated.

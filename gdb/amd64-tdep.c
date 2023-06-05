@@ -1750,7 +1750,7 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 	 system calls.	*/
       if (amd64_syscall_p (insn_details, &insn_len)
 	  /* GDB can get control back after the insn after the syscall.
-	     Presumably this is a kernel bug.  Fixup ensures its a nop, we
+	     Presumably this is a kernel bug.  Fixup ensures it's a nop, we
 	     add one to the length for it.  */
 	  && (pc < to || pc > (to + insn_len + 1)))
 	displaced_debug_printf ("syscall changed %%rip; not relocating");

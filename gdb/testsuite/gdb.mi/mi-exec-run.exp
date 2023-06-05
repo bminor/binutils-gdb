@@ -62,7 +62,7 @@ proc test {inftty_mode mi_mode force_fail} {
     }
 
     if {$force_fail} {
-	# Disable the shell so that its the first exec that fails,
+	# Disable the shell so that it's the first exec that fails,
 	# instead of the shell starting and then failing with some
 	# unspecified output.
 	mi_gdb_test "-gdb-set startup-with-shell off" ".*"

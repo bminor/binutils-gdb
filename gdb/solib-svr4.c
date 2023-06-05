@@ -2312,7 +2312,7 @@ svr4_create_solib_event_breakpoints (svr4_info *info, struct gdbarch *gdbarch,
    set to 1.  When the dynamic linker sees this flag set, it will set
    a breakpoint at a location known only to itself, after saving the
    original contents of that place and the breakpoint address itself,
-   in it's own internal structures.  When we resume the inferior, it
+   in its own internal structures.  When we resume the inferior, it
    will eventually take a SIGTRAP when it runs into the breakpoint.
    We handle this (in a different place) by restoring the contents of
    the breakpointed location (which is only known after it stops),

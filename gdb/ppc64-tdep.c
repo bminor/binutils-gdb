@@ -688,7 +688,7 @@ ppc64_skip_trampoline_code_1 (frame_info_ptr frame, CORE_ADDR pc)
 	pc = ppc64_standard_linkage1_target (frame, insns);
       else
 	{
-	  /* Scan backward one more instructions if doesn't match.  */
+	  /* Scan backward one more instruction if it doesn't match.  */
 	  pc -= 4;
 	  continue;
 	}

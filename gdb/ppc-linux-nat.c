@@ -2126,7 +2126,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	  /* DAWR interface allows to watch up to 512 byte wide ranges.  */
 	  region_size = 512;
 	  /* DAWR interface allows to watch up to 512 byte wide ranges which
-	     can't cross a 512 byte boundary on machines that doesn't have a
+	     can't cross a 512 byte boundary on machines that don't have a
 	     second DAWR (P9 or less).  */
 	  if (!(hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_ARCH_31))
 	    region_align = 512;

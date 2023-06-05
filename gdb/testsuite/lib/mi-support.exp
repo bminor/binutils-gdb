@@ -201,7 +201,7 @@ proc mi_gdb_start_separate_mi_tty { { flags {} } } {
 # FLAGS is a list of flags, each flag is a string.
 #
 # If "separate-inferior-tty" is specified, the inferior works with
-# it's own PTY.
+# its own PTY.
 #
 # If "separate-mi-tty" is specified, the gdb starts in CLI mode, with
 # MI running on a secondary UI, on its own tty.

@@ -1072,7 +1072,7 @@ Value(
 
 Value(
     comment="""
-A function can be addressed by either it's "pointer" (possibly a
+A function can be addressed by either its "pointer" (possibly a
 descriptor address) or "entry point" (first executable instruction).
 The method "convert_from_func_ptr_addr" converting the former to the
 latter.  gdbarch_deprecated_function_start_offset is being used to implement
