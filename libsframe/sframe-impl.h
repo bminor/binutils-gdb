@@ -35,9 +35,9 @@ struct sframe_decoder_ctx
   /* SFrame header.  */
   sframe_header sfd_header;
   /* SFrame function desc entries table.  */
-  uint32_t *sfd_funcdesc;
+  sframe_func_desc_entry *sfd_funcdesc;
   /* SFrame FRE table.  */
-  void *sfd_fres;
+  char *sfd_fres;
   /* Number of bytes needed for SFrame FREs.  */
   int sfd_fre_nbytes;
   /* Reference to the internally malloc'd buffer, if any, for endian flipping
@@ -45,14 +45,23 @@ struct sframe_decoder_ctx
   void *sfd_buf;
 };
 
+typedef struct sf_fde_tbl sf_fde_tbl;
+typedef struct sf_fre_tbl sf_fre_tbl;
+
 struct sframe_encoder_ctx
 {
-  sframe_header sfe_header;		/* SFrame header.  */
-  uint32_t *sfe_funcdesc;		/* SFrame function desc entries table.  */
-  sframe_frame_row_entry *sfe_fres;	/* SFrame FRE table.  */
-  uint32_t sfe_fre_nbytes;		/* Number of bytes needed for SFrame FREs.  */
-  char *sfe_data;			/* SFrame data buffer.  */
-  size_t sfe_data_size;			/* Size of the SFrame data buffer.  */
+  /* SFrame header.  */
+  sframe_header sfe_header;
+  /* SFrame function desc entries table.  */
+  sf_fde_tbl *sfe_funcdesc;
+  /* SFrame FRE table.  */
+  sf_fre_tbl *sfe_fres;
+  /* Number of bytes needed for SFrame FREs.  */
+  uint32_t sfe_fre_nbytes;
+  /* SFrame output data buffer.  */
+  char *sfe_data;
+  /* Size of the SFrame output data buffer.  */
+  size_t sfe_data_size;
 };
 
 #ifdef  __cplusplus

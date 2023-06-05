@@ -25,19 +25,19 @@
 #include "sframe-impl.h"
 #include "swap.h"
 
-typedef struct sf_funidx_tbl
+struct sf_fde_tbl
 {
   unsigned int count;
   unsigned int alloced;
   sframe_func_desc_entry entry[1];
-} sf_funidx_tbl;
+};
 
-typedef struct sf_fre_tbl
+struct sf_fre_tbl
 {
   unsigned int count;
   unsigned int alloced;
   sframe_frame_row_entry entry[1];
-} sf_fre_tbl;
+};
 
 #define _sf_printflike_(string_index,first_to_check) \
     __attribute__ ((__format__ (__printf__, (string_index), (first_to_check))))
@@ -867,7 +867,7 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
   frame_buf += (fidx_size);
 
   /* Handle the SFrame Frame Row Entry section.  */
-  dctx->sfd_fres = malloc (sfheaderp->sfh_fre_len);
+  dctx->sfd_fres = (char *) malloc (sfheaderp->sfh_fre_len);
   if (dctx->sfd_fres == NULL)
     {
       sframe_ret_set_errno (errp, SFRAME_ERR_NOMEM);
@@ -1217,7 +1217,7 @@ sframe_encoder_get_funcdesc_at_index (sframe_encoder_ctx *encoder,
   sframe_func_desc_entry *fde = NULL;
   if (func_idx < sframe_encoder_get_num_fidx (encoder))
     {
-      sf_funidx_tbl *func_tbl = (sf_funidx_tbl *) encoder->sfe_funcdesc;
+      sf_fde_tbl *func_tbl = encoder->sfe_funcdesc;
       fde = func_tbl->entry + func_idx;
     }
   return fde;
@@ -1351,7 +1351,7 @@ sframe_encoder_add_fre (sframe_encoder_ctx *encoder,
     return sframe_set_errno (&err, SFRAME_ERR_FDE_NOTFOUND);
 
   fre_type = sframe_get_fre_type (fdep);
-  sf_fre_tbl *fre_tbl = (sf_fre_tbl *) encoder->sfe_fres;
+  sf_fre_tbl *fre_tbl = encoder->sfe_fres;
 
   if (fre_tbl == NULL)
     {
@@ -1402,7 +1402,7 @@ sframe_encoder_add_fre (sframe_encoder_ctx *encoder,
   esz = sframe_fre_entry_size (frep, fre_type);
   fre_tbl->count++;
 
-  encoder->sfe_fres = (void *) fre_tbl;
+  encoder->sfe_fres = fre_tbl;
   encoder->sfe_fre_nbytes += esz;
 
   ehp = sframe_encoder_get_header (encoder);
@@ -1432,7 +1432,7 @@ sframe_encoder_add_funcdesc (sframe_encoder_ctx *encoder,
 			     uint32_t num_fres __attribute__ ((unused)))
 {
   sframe_header *ehp;
-  sf_funidx_tbl *fd_info;
+  sf_fde_tbl *fd_info;
   size_t fd_tbl_sz;
   int err = 0;
 
@@ -1440,12 +1440,12 @@ sframe_encoder_add_funcdesc (sframe_encoder_ctx *encoder,
   if (encoder == NULL)
     return sframe_set_errno (&err, SFRAME_ERR_INVAL);
 
-  fd_info = (sf_funidx_tbl *) encoder->sfe_funcdesc;
+  fd_info = encoder->sfe_funcdesc;
   ehp = sframe_encoder_get_header (encoder);
 
   if (fd_info == NULL)
     {
-      fd_tbl_sz = (sizeof (sf_funidx_tbl)
+      fd_tbl_sz = (sizeof (sf_fde_tbl)
 		   + (number_of_entries * sizeof (sframe_func_desc_entry)));
       fd_info = malloc (fd_tbl_sz);
       if (fd_info == NULL)
@@ -1458,7 +1458,7 @@ sframe_encoder_add_funcdesc (sframe_encoder_ctx *encoder,
     }
   else if (fd_info->count == fd_info->alloced)
     {
-      fd_tbl_sz = (sizeof (sf_funidx_tbl)
+      fd_tbl_sz = (sizeof (sf_fde_tbl)
 		   + ((fd_info->alloced + number_of_entries)
 		      * sizeof (sframe_func_desc_entry)));
       fd_info = realloc (fd_info, fd_tbl_sz);
@@ -1488,7 +1488,7 @@ sframe_encoder_add_funcdesc (sframe_encoder_ctx *encoder,
 #endif
   fd_info->entry[fd_info->count].sfde_func_info = func_info;
   fd_info->count++;
-  encoder->sfe_funcdesc = (void *) fd_info;
+  encoder->sfe_funcdesc = fd_info;
   ehp->sfh_num_fdes++;
   return 0;
 
@@ -1507,7 +1507,7 @@ sframe_sort_funcdesc (sframe_encoder_ctx *encoder)
 
   ehp = sframe_encoder_get_header (encoder);
   /* Sort and write out the FDE table.  */
-  sf_funidx_tbl *fd_info = (sf_funidx_tbl *) encoder->sfe_funcdesc;
+  sf_fde_tbl *fd_info = encoder->sfe_funcdesc;
   if (fd_info)
     {
       qsort (fd_info->entry, fd_info->count,
@@ -1613,7 +1613,7 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *encoder)
   size_t esz = 0;
   sframe_header *ehp;
   unsigned char flags;
-  sf_funidx_tbl *fd_info;
+  sf_fde_tbl *fd_info;
   sf_fre_tbl *fr_info;
   uint32_t i, num_fdes;
   uint32_t j, num_fres;
@@ -1630,8 +1630,8 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *encoder)
   ehp = sframe_encoder_get_header (encoder);
   hdr_size = sframe_get_hdr_size (ehp);
 
-  fd_info = (sf_funidx_tbl *) encoder->sfe_funcdesc;
-  fr_info = (sf_fre_tbl *) encoder->sfe_fres;
+  fd_info = encoder->sfe_funcdesc;
+  fr_info = encoder->sfe_fres;
 
   /* Sanity checks:
      - buffers must be malloc'd by the caller.  */
