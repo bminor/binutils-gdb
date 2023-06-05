@@ -58,23 +58,33 @@ def _bp_created(event):
 
 
 @in_gdb_thread
-def _bp_deleted(event):
+def thread_event(event, reason):
     send_event(
-        "breakpoint",
+        "thread",
         {
-            "reason": "removed",
-            "breakpoint": breakpoint_descriptor(event),
+            "reason": reason,
+            "threadId": event.inferior_thread.global_num,
         },
     )
 
 
 @in_gdb_thread
 def _new_thread(event):
+    thread_event(event, "started")
+
+
+@in_gdb_thread
+def _thread_exited(event):
+    thread_event(event, "exited")
+
+
+@in_gdb_thread
+def _bp_deleted(event):
     send_event(
-        "thread",
+        "breakpoint",
         {
-            "reason": "started",
-            "threadId": event.inferior_thread.global_num,
+            "reason": "removed",
+            "breakpoint": breakpoint_descriptor(event),
         },
     )
 
@@ -173,5 +183,6 @@ gdb.events.breakpoint_created.connect(_bp_created)
 gdb.events.breakpoint_modified.connect(_bp_modified)
 gdb.events.breakpoint_deleted.connect(_bp_deleted)
 gdb.events.new_thread.connect(_new_thread)
+gdb.events.thread_exited.connect(_thread_exited)
 gdb.events.cont.connect(_cont)
 gdb.events.new_objfile.connect(_new_objfile)
