@@ -7267,9 +7267,6 @@ type_as_string (struct type *type)
 }
 
 /* Given a type TYPE, look up the type of the component of type named NAME.
-   If DISPP is non-null, add its byte displacement from the beginning of a
-   structure (pointed to by a value) of type TYPE to *DISPP (does not
-   work for packed fields).
 
    Matches any field whose name has NAME as a prefix, possibly
    followed by "___".
@@ -7290,9 +7287,6 @@ static struct type *
 ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
 			    int noerr)
 {
-  int i;
-  int parent_offset = -1;
-
   if (name == NULL)
     goto BadName;
 
@@ -7318,78 +7312,11 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
 
   type = to_static_fixed_type (type);
 
-  for (i = 0; i < type->num_fields (); i += 1)
-    {
-      const char *t_field_name = type->field (i).name ();
-      struct type *t;
-
-      if (t_field_name == NULL)
-	continue;
-
-      else if (ada_is_parent_field (type, i))
-	{
-	  /* This is a field pointing us to the parent type of a tagged
-	     type.  As hinted in this function's documentation, we give
-	     preference to fields in the current record first, so what
-	     we do here is just record the index of this field before
-	     we skip it.  If it turns out we couldn't find our field
-	     in the current record, then we'll get back to it and search
-	     inside it whether the field might exist in the parent.  */
-
-	  parent_offset = i;
-	  continue;
-	}
-
-      else if (field_name_match (t_field_name, name))
-	return type->field (i).type ();
-
-      else if (ada_is_wrapper_field (type, i))
-	{
-	  t = ada_lookup_struct_elt_type (type->field (i).type (), name,
-					  0, 1);
-	  if (t != NULL)
-	    return t;
-	}
-
-      else if (ada_is_variant_part (type, i))
-	{
-	  int j;
-	  struct type *field_type = ada_check_typedef (type->field (i).type ());
-
-	  for (j = field_type->num_fields () - 1; j >= 0; j -= 1)
-	    {
-	      /* FIXME pnh 2008/01/26: We check for a field that is
-		 NOT wrapped in a struct, since the compiler sometimes
-		 generates these for unchecked variant types.  Revisit
-		 if the compiler changes this practice.  */
-	      const char *v_field_name = field_type->field (j).name ();
-
-	      if (v_field_name != NULL 
-		  && field_name_match (v_field_name, name))
-		t = field_type->field (j).type ();
-	      else
-		t = ada_lookup_struct_elt_type (field_type->field (j).type (),
-						name, 0, 1);
-
-	      if (t != NULL)
-		return t;
-	    }
-	}
-
-    }
-
-    /* Field not found so far.  If this is a tagged type which
-       has a parent, try finding that field in the parent now.  */
-
-    if (parent_offset != -1)
-      {
-	struct type *t;
-
-	t = ada_lookup_struct_elt_type (type->field (parent_offset).type (),
-					name, 0, 1);
-	if (t != NULL)
-	  return t;
-      }
+  struct type *result;
+  find_struct_field (name, type, 0, &result, nullptr, nullptr, nullptr,
+		     nullptr);
+  if (result != nullptr)
+    return result;
 
 BadName:
   if (!noerr)
