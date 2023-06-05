@@ -956,13 +956,19 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
       char *lraw_end;
       HDRR *symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
 
+      if (fdr_ptr->csym == 0)
+	continue;
       if (fdr_ptr->isymBase < 0
 	  || fdr_ptr->isymBase > symhdr->isymMax
-	  || fdr_ptr->csym <= 0
-	  || fdr_ptr->csym > symhdr->isymMax - fdr_ptr->isymBase
+	  || fdr_ptr->csym < 0
+	  || fdr_ptr->csym > ((long) bfd_get_symcount (abfd)
+			      - (internal_ptr - internal))
 	  || fdr_ptr->issBase < 0
 	  || fdr_ptr->issBase > symhdr->issMax)
-	continue;
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
       lraw_src = ((char *) ecoff_data (abfd)->debug_info.external_sym
 		  + fdr_ptr->isymBase * external_sym_size);
       lraw_end = lraw_src + fdr_ptr->csym * external_sym_size;
