@@ -3821,6 +3821,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
   if (ibfd == NULL || bfd_stat (ibfd, in_stat) != 0)
     {
       bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
+      if (ibfd != NULL)
+	bfd_close (ibfd);
       status = 1;
       return;
     }
@@ -3890,6 +3892,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	{
 	  close (ofd);
 	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
+	  bfd_close (ibfd);
 	  status = 1;
 	  return;
 	}
@@ -3922,6 +3925,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	{
 	  close (ofd);
  	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
+	  bfd_close (ibfd);
  	  status = 1;
  	  return;
  	}
@@ -3970,6 +3974,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       if (core_error == bfd_error_file_ambiguously_recognized)
 	list_matching_formats (core_matching);
 
+      bfd_close (ibfd);
       status = 1;
     }
 }
