@@ -14017,7 +14017,7 @@ target_specific_reloc_handling (Filedata *filedata,
 	    case 107: /* R_LARCH_ADD_ULEB128.  */
 	    case 108: /* R_LARCH_SUB_ULEB128.  */
 	      {
-		uint64_t value;
+		uint64_t value = 0;
 		unsigned int reloc_size = 0;
 		int leb_ret = 0;
 
