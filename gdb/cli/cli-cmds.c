@@ -2215,7 +2215,13 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
       && type0->code () != TYPE_CODE_STRING)
     error (_("First argument of %s must be a string."), fnname);
 
-  const char *a0 = (const char *) argv[0]->contents ().data ();
+  /* Not all languages null-terminate their strings, by moving the string
+     content into a std::string we ensure that a null-terminator is added.
+     For languages that do add a null-terminator the std::string might end
+     up with two null characters at the end, but that's harmless.  */
+  const std::string setting ((const char *) argv[0]->contents ().data (),
+			     type0->length ());
+  const char *a0 = setting.c_str ();
   cmd_list_element *cmd = lookup_cmd (&a0, showlist, "", NULL, -1, 0);
 
   if (cmd == nullptr || cmd->type != show_cmd)
