@@ -122,7 +122,7 @@ sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx);
 
 /* Return the number of function descriptor entries in the SFrame decoder
    DCTX.  */
-unsigned int
+extern unsigned int
 sframe_decoder_get_num_fidx (sframe_decoder_ctx *dctx);
 
 /* Get the fixed FP offset from the decoder context DCTX.  */

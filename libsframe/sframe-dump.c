@@ -2,7 +2,7 @@
 
    Copyright (C) 2022-2023 Free Software Foundation, Inc.
 
-   his file is part of libsframe.
+   This file is part of libsframe.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -134,7 +134,8 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 
   char temp[100];
 
-  printf ("\n    %-7s%-8s %-10s%-10s%-13s", "STARTPC", fde_type_marker, "CFA", "FP", "RA");
+  printf ("\n    %-7s%-8s %-10s%-10s%-13s",
+	  "STARTPC", fde_type_marker, "CFA", "FP", "RA");
   for (j = 0; j < num_fres; j++)
     {
       sframe_decoder_get_fre (sfd_ctx, funcidx, j, &fre);

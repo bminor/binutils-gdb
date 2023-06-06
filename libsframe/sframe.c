@@ -667,7 +667,8 @@ sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
 }
 
 static int
-sframe_frame_row_entry_copy (sframe_frame_row_entry *dst, sframe_frame_row_entry *src)
+sframe_frame_row_entry_copy (sframe_frame_row_entry *dst,
+			     sframe_frame_row_entry *src)
 {
   int err = 0;
 
@@ -711,7 +712,7 @@ sframe_decode_fre_start_address (const char *fre_buf,
   else if (fre_type == SFRAME_FRE_TYPE_ADDR4)
     {
       uint32_t *uit = (uint32_t *)fre_buf;
-      int32_t tmp = 0;
+      uint32_t tmp = 0;
       memcpy (&tmp, uit, addr_size);
       saddr = (uint32_t)tmp;
     }
