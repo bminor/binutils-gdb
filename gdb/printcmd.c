@@ -3196,7 +3196,7 @@ memory_tag_check_command (const char *args, int from_tty)
     show_memory_tagging_unsupported ();
 
   if (args == nullptr)
-    error (_("Argument required (address or pointer)"));
+    error_no_arg (_("address or pointer"));
 
   /* Parse the expression into a value.  If the value is an address or
      pointer, then check its logical tag against the allocation tag.  */
