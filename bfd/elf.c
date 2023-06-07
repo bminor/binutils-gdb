@@ -4254,7 +4254,11 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
     {
       bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);
       if (failed)
-	return false;
+	{
+	  if (need_symtab)
+	    _bfd_elf_strtab_free (strtab);
+	  return false;
+	}
     }
 
   shstrtab_hdr = &elf_tdata (abfd)->shstrtab_hdr;
