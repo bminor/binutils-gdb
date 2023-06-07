@@ -137,6 +137,9 @@ static struct async_signal_handler *async_sigterm_token;
    character is processed.  */
 void (*after_char_processing_hook) (void);
 
+#if RL_VERSION_MAJOR == 7
+EXTERN_C void _rl_signal_handler (int);
+#endif
 
 /* Wrapper function for calling into the readline library.  This takes
    care of a couple things:
@@ -203,8 +206,14 @@ gdb_rl_callback_read_char_wrapper_noexcept () noexcept
 	   pending signal.  I'm not sure if that's possible, but it seems
 	   better to handle the scenario than to assert.  */
 	rl_check_signals ();
+#elif RL_VERSION_MAJOR == 7
+      /* Unfortunately, rl_check_signals is not available.  Use private
+	 function _rl_signal_handler instead.  */
+
+      while (rl_pending_signal () != 0)
+	_rl_signal_handler (rl_pending_signal ());
 #else
-      /* Unfortunately, rl_check_signals is not available.  */
+#error "Readline major version >= 7 expected"
 #endif
       if (after_char_processing_hook)
 	(*after_char_processing_hook) ();
