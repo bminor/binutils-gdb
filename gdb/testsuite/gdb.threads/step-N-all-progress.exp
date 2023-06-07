@@ -44,7 +44,7 @@ proc test {non-stop target-non-stop} {
 
     gdb_continue_to_breakpoint "break here"
 
-    gdb_test "next 3" "return 0;"
+    gdb_test -no-prompt-anchor "next 3" "return 0;"
 }
 
 foreach_with_prefix non-stop {off on} {
