@@ -3909,18 +3909,26 @@ linux_proc_xfer_memory_partial_fd (int fd, int pid,
 
   gdb_assert (fd != -1);
 
-  /* Use pread64/pwrite64 if available, since they save a syscall and can
-     handle 64-bit offsets even on 32-bit platforms (for instance, SPARC
-     debugging a SPARC64 application).  */
+  /* Use pread64/pwrite64 if available, since they save a syscall and
+     can handle 64-bit offsets even on 32-bit platforms (for instance,
+     SPARC debugging a SPARC64 application).  But only use them if the
+     offset isn't so high that when cast to off_t it'd be negative, as
+     seen on SPARC64.  pread64/pwrite64 outright reject such offsets.
+     lseek does not.  */
 #ifdef HAVE_PREAD64
-  ret = (readbuf ? pread64 (fd, readbuf, len, offset)
-	 : pwrite64 (fd, writebuf, len, offset));
-#else
-  ret = lseek (fd, offset, SEEK_SET);
-  if (ret != -1)
-    ret = (readbuf ? read (fd, readbuf, len)
-	   : write (fd, writebuf, len));
+  if ((off_t) offset >= 0)
+    ret = (readbuf != nullptr
+	   ? pread64 (fd, readbuf, len, offset)
+	   : pwrite64 (fd, writebuf, len, offset));
+  else
 #endif
+    {
+      ret = lseek (fd, offset, SEEK_SET);
+      if (ret != -1)
+	ret = (readbuf != nullptr
+	       ? read (fd, readbuf, len)
+	       : write (fd, writebuf, len));
+    }
 
   if (ret == -1)
     {

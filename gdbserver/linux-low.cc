@@ -5377,21 +5377,26 @@ proc_xfer_memory (CORE_ADDR memaddr, unsigned char *readbuf,
     {
       int bytes;
 
-      /* If pread64 is available, use it.  It's faster if the kernel
-	 supports it (only one syscall), and it's 64-bit safe even on
-	 32-bit platforms (for instance, SPARC debugging a SPARC64
-	 application).  */
+      /* Use pread64/pwrite64 if available, since they save a syscall
+	 and can handle 64-bit offsets even on 32-bit platforms (for
+	 instance, SPARC debugging a SPARC64 application).  But only
+	 use them if the offset isn't so high that when cast to off_t
+	 it'd be negative, as seen on SPARC64.  pread64/pwrite64
+	 outright reject such offsets.  lseek does not.  */
 #ifdef HAVE_PREAD64
-      bytes = (readbuf != nullptr
-	       ? pread64 (fd, readbuf, len, memaddr)
-	       : pwrite64 (fd, writebuf, len, memaddr));
-#else
-      bytes = -1;
-      if (lseek (fd, memaddr, SEEK_SET) != -1)
+      if ((off_t) memaddr >= 0)
 	bytes = (readbuf != nullptr
-		 ? read (fd, readbuf, len)
-		 : write (fd, writebuf, len));
+		 ? pread64 (fd, readbuf, len, memaddr)
+		 : pwrite64 (fd, writebuf, len, memaddr));
+      else
 #endif
+	{
+	  bytes = -1;
+	  if (lseek (fd, memaddr, SEEK_SET) != -1)
+	    bytes = (readbuf != nullptr
+		     ? read (fd, readbuf, len)
+		     : write (fd, writebuf, len));
+	}
 
       if (bytes < 0)
 	return errno;
