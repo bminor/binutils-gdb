@@ -4,7 +4,7 @@
 #ld:
 #readelf: -wf
 #target: [check_as_cfi]
-#xfail: alpha-*-*ecoff hppa64-*-* tile*-*-* visium-*-*
+#xfail: alpha-*-*ecoff tile*-*-* visium-*-*
 
 Contents of the .eh_frame section:
 
@@ -14,7 +14,7 @@ Contents of the .eh_frame section:
   Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
-  Augmentation data:     (0b|0c|1b)
+  Augmentation data:     [01][bc]
 
   DW_CFA_nop
   DW_CFA_nop
@@ -37,7 +37,7 @@ Contents of the .eh_frame section:
   Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
-  Augmentation data:     03 .. .. .. .. (0b|0c|1b)
+  Augmentation data:     03 .. .. .. .. [01][bc]
 
   DW_CFA_nop
 
@@ -61,7 +61,7 @@ Contents of the .eh_frame section:
   Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
-  Augmentation data:     03 .. .. .. .. 0c (0b|0c|1b)
+  Augmentation data:     03 .. .. .. .. 0c [01][bc]
 
   DW_CFA_nop
   DW_CFA_nop
@@ -86,7 +86,7 @@ Contents of the .eh_frame section:
   Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
-  Augmentation data:     (0b|0c|1b)
+  Augmentation data:     [01][bc]
 
   DW_CFA_def_cfa: r0(.*) ofs 16
 #?  DW_CFA_nop
@@ -109,7 +109,7 @@ Contents of the .eh_frame section:
   Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
-  Augmentation data:     03 .. .. .. .. (0b|0c|1b)
+  Augmentation data:     03 .. .. .. .. [01][bc]
 
   DW_CFA_nop
 #?  DW_CFA_nop
@@ -139,7 +139,7 @@ Contents of the .eh_frame section:
   Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
-  Augmentation data:     03 .. .. .. .. 0c (0b|0c|1b)
+  Augmentation data:     03 .. .. .. .. 0c [01][bc]
 
   DW_CFA_nop
   DW_CFA_nop
