@@ -1,3 +1,11 @@
+2023-06-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 30499
+	* elflink.c (elf_link_add_object_symbols): Add a message
+	indicating that alignment and size discrepancies between the
+	definition of common symbols and normal symbols are serious and
+	should be investigated.
+
 2023-05-31  Tristan Gingold  <tgingold@free.fr>
 
 	PR 30444

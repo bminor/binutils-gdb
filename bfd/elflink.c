@@ -5302,10 +5302,14 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  else
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("warning: alignment %u of symbol `%s' in %pB"
-			 " is smaller than %u in %pB"),
+		      (_("warning: alignment %u of normal symbol `%s' in %pB"
+			 " is smaller than %u used by the common definition in %pB"),
 		       1 << normal_align, name, normal_bfd,
 		       1 << common_align, common_bfd);
+
+		  /* PR 30499: make sure that users understand that this warning is serious.  */
+		  _bfd_error_handler
+		    (_("warning: NOTE: alignment discrepancies can cause real problems.  Investigation is advised."));
 		}
 	    }
 
@@ -5317,12 +5321,18 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      if (h->size != 0
 		  && h->size != isym->st_size
 		  && ! size_change_ok)
-		_bfd_error_handler
-		  /* xgettext:c-format */
-		  (_("warning: size of symbol `%s' changed"
-		     " from %" PRIu64 " in %pB to %" PRIu64 " in %pB"),
-		   name, (uint64_t) h->size, old_bfd,
-		   (uint64_t) isym->st_size, abfd);
+		{
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("warning: size of symbol `%s' changed"
+		       " from %" PRIu64 " in %pB to %" PRIu64 " in %pB"),
+		     name, (uint64_t) h->size, old_bfd,
+		     (uint64_t) isym->st_size, abfd);
+
+		  /* PR 30499: make sure that users understand that this warning is serious.  */
+		  _bfd_error_handler
+		    (_("warning: NOTE: size discrepancies can cause real problems.  Investigation is advised."));
+		}
 
 	      h->size = isym->st_size;
 	    }
