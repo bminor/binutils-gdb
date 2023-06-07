@@ -93,8 +93,6 @@ static void insert_step_resume_breakpoint_at_caller (const frame_info_ptr &);
 
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
-static bool maybe_software_singlestep (struct gdbarch *gdbarch);
-
 static void resume (gdb_signal sig);
 
 static void wait_for_inferior (inferior *inf);
@@ -2358,23 +2356,6 @@ set_schedlock_func (const char *args, int from_tty, struct cmd_list_element *c)
    default; otherwise, resume only threads of the current inferior
    process.  */
 bool sched_multi = false;
-
-/* Try to setup for software single stepping.  Return true if target_resume()
-   should use hardware single step.
-
-   GDBARCH the current gdbarch.  */
-
-static bool
-maybe_software_singlestep (struct gdbarch *gdbarch)
-{
-  bool hw_step = true;
-
-  if (execution_direction == EXEC_FORWARD
-      && gdbarch_software_single_step_p (gdbarch))
-    hw_step = !insert_single_step_breakpoints (gdbarch);
-
-  return hw_step;
-}
 
 /* See infrun.h.  */
 

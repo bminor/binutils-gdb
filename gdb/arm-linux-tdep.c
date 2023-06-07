@@ -960,11 +960,6 @@ arm_linux_software_single_step (struct regcache *regcache)
   struct gdbarch *gdbarch = regcache->arch ();
   struct arm_get_next_pcs next_pcs_ctx;
 
-  /* If the target does have hardware single step, GDB doesn't have
-     to bother software single step.  */
-  if (target_can_do_single_step () == 1)
-    return {};
-
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &arm_linux_get_next_pcs_ops,
 			 gdbarch_byte_order (gdbarch),

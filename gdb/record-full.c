@@ -1105,7 +1105,7 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 		  record_full_resume_step = 1;
 		}
 	      else
-		step = !insert_single_step_breakpoints (gdbarch);
+		step = maybe_software_singlestep (gdbarch);
 	    }
 	}
 
@@ -1277,7 +1277,7 @@ record_full_wait_1 (struct target_ops *ops,
 			    };
 
 			  reinit_frame_cache ();
-			  step = !insert_single_step_breakpoints (gdbarch);
+			  step = maybe_software_singlestep (gdbarch);
 			}
 
 		      if (record_debug)

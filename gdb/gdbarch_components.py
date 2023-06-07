@@ -1378,16 +1378,10 @@ For a non-zero value, this represents the number of bytes of memory per tag.
 
 Function(
     comment="""
-FIXME/cagney/2001-01-18: This should be split in two.  A target method that
-indicates if the target needs software single step.  An ISA method to
-implement it.
+Return a vector of addresses at which the software single step
+breakpoints should be inserted.  An empty vector means software single
+step is not used.
 
-FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
-target can single step.  If not, then implement single step using breakpoints.
-
-Return a vector of addresses on which the software single step
-breakpoints should be inserted.  NULL means software single step is
-not used.
 Multiple breakpoints may be inserted for some instructions such as
 conditional branch.  However, each implementation must always evaluate
 the condition and only put the breakpoint at the branch destination if

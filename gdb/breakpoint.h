@@ -1884,10 +1884,10 @@ extern void insert_single_step_breakpoint (struct gdbarch *,
 					   const address_space *,
 					   CORE_ADDR);
 
-/* Insert all software single step breakpoints for the current frame.
-   Return true if any software single step breakpoints are inserted,
-   otherwise, return false.  */
-extern int insert_single_step_breakpoints (struct gdbarch *);
+/* Try to setup for software single stepping.  Return true if
+   target_resume() should use hardware single step.  GDBARCH is the
+   current gdbarch.  */
+extern bool maybe_software_singlestep (struct gdbarch *);
 
 /* Check whether any hardware watchpoints have triggered or not,
    according to the target, and record it in each watchpoint's
