@@ -1419,25 +1419,25 @@ free_ecoff_debug (struct ecoff_debug_info *debug)
 }
 
 bool
-_bfd_mips_elf_close_and_cleanup (bfd *abfd)
+_bfd_mips_elf_free_cached_info (bfd *abfd)
 {
-  if (bfd_get_format (abfd) == bfd_object)
+  struct mips_elf_obj_tdata *tdata;
+
+  if ((bfd_get_format (abfd) == bfd_object
+       || bfd_get_format (abfd) == bfd_core)
+      && (tdata = mips_elf_tdata (abfd)) != NULL)
     {
-      struct mips_elf_obj_tdata *tdata = mips_elf_tdata (abfd);
-      if (tdata != NULL)
+      BFD_ASSERT (tdata->root.object_id == MIPS_ELF_DATA);
+      while (tdata->mips_hi16_list != NULL)
 	{
-	  BFD_ASSERT (tdata->root.object_id == MIPS_ELF_DATA);
-	  while (tdata->mips_hi16_list != NULL)
-	    {
-	      struct mips_hi16 *hi = tdata->mips_hi16_list;
-	      tdata->mips_hi16_list = hi->next;
-	      free (hi);
-	    }
-	  if (tdata->find_line_info != NULL)
-	    free_ecoff_debug (&tdata->find_line_info->d);
+	  struct mips_hi16 *hi = tdata->mips_hi16_list;
+	  tdata->mips_hi16_list = hi->next;
+	  free (hi);
 	}
+      if (tdata->find_line_info != NULL)
+	free_ecoff_debug (&tdata->find_line_info->d);
     }
-  return _bfd_elf_close_and_cleanup (abfd);
+  return _bfd_elf_free_cached_info (abfd);
 }
 
 bool

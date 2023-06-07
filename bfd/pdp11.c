@@ -2531,35 +2531,33 @@ NAME (aout, sizeof_headers) (bfd *abfd,
   return adata (abfd).exec_bytes_size;
 }
 
-/* Free all information we have cached for this BFD.  We can always
-   read it again later if we need it.  */
+/* Throw away most malloc'd and alloc'd information for this BFD.  */
 
 bool
 NAME (aout, bfd_free_cached_info) (bfd *abfd)
 {
-  asection *o;
-
-  if (bfd_get_format (abfd) != bfd_object
-      || abfd->tdata.aout_data == NULL)
-    return true;
-
+  if ((bfd_get_format (abfd) == bfd_object
+       || bfd_get_format (abfd) == bfd_core)
+      && abfd->tdata.aout_data != NULL)
+    {
 #define BFCI_FREE(x) do { free (x); x = NULL; } while (0)
-  BFCI_FREE (adata (abfd).line_buf);
-  BFCI_FREE (obj_aout_symbols (abfd));
+      BFCI_FREE (adata (abfd).line_buf);
+      BFCI_FREE (obj_aout_symbols (abfd));
 #ifdef USE_MMAP
-  obj_aout_external_syms (abfd) = 0;
-  bfd_free_window (&obj_aout_sym_window (abfd));
-  bfd_free_window (&obj_aout_string_window (abfd));
-  obj_aout_external_strings (abfd) = 0;
+      obj_aout_external_syms (abfd) = 0;
+      bfd_free_window (&obj_aout_sym_window (abfd));
+      bfd_free_window (&obj_aout_string_window (abfd));
+      obj_aout_external_strings (abfd) = 0;
 #else
-  BFCI_FREE (obj_aout_external_syms (abfd));
-  BFCI_FREE (obj_aout_external_strings (abfd));
+      BFCI_FREE (obj_aout_external_syms (abfd));
+      BFCI_FREE (obj_aout_external_strings (abfd));
 #endif
-  for (o = abfd->sections; o != NULL; o = o->next)
-    BFCI_FREE (o->relocation);
+      for (asection *o = abfd->sections; o != NULL; o = o->next)
+	BFCI_FREE (o->relocation);
 #undef BFCI_FREE
+    }
 
-  return true;
+  return _bfd_generic_bfd_free_cached_info (abfd);
 }
 
 /* Routine to create an entry in an a.out link hash table.  */

@@ -243,8 +243,8 @@ extern bool _bfd_ecoff_slurp_symbolic_info
 
 extern bool _bfd_ecoff_write_object_contents (bfd *);
 
-extern bool _bfd_ecoff_close_and_cleanup (bfd *);
-#define _bfd_ecoff_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
+#define _bfd_ecoff_close_and_cleanup _bfd_generic_close_and_cleanup
+extern bool _bfd_ecoff_bfd_free_cached_info (bfd *);
 extern bool _bfd_ecoff_new_section_hook
   (bfd *, asection *);
 extern bool _bfd_ecoff_get_section_contents

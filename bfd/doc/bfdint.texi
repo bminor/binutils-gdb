@@ -493,22 +493,25 @@ functions which don't easily fit into other categories.
 
 @table @samp
 @item _close_and_cleanup
-Free any target specific information associated with the BFD.  This is
-called when any BFD is closed (the @samp{bfd_write_contents} function
-mentioned earlier is only called for a BFD opened for writing).  Most
-targets use @samp{bfd_alloc} to allocate all target specific
-information, and therefore don't have to do anything in this function.
-This function pointer is typically set to
-@samp{_bfd_generic_close_and_cleanup}, which simply returns true.
+Free any target specific information associated with the BFD that
+isn't freed by @samp{_bfd_free_cached_info}.  This is called when any
+BFD is closed (the @samp{bfd_write_contents} function mentioned
+earlier is only called for a BFD opened for writing).  This function
+pointer is typically set to @samp{_bfd_generic_close_and_cleanup},
+which simply returns true.
 
 @item _bfd_free_cached_info
-Free any cached information associated with the BFD which can be
-recreated later if necessary.  This is used to reduce the memory
-consumption required by programs using BFD.  This is normally called via
-the @samp{bfd_free_cached_info} macro.  It is used by the default
-archive routines when computing the archive map.  Most targets do not
-do anything special for this entry point, and just set it to
-@samp{_bfd_generic_free_cached_info}, which simply returns true.
+This function is designed for use by the generic archive routines, and
+is also called by bfd_close.  After creating the archive map archive
+element bfds don't need symbols and other structures.  Many targets
+use @samp{bfd_alloc} to allocate target specific information and thus
+do not need to do anything special for this entry point, and just set
+it to @samp{_bfd_generic_free_cached_info} which throws away objalloc
+memory for the bfd.  Note that this means the bfd tdata and sections
+are no longer available.  Targets that malloc memory, attaching it to
+the bfd tdata or to section used_by_bfd should implement a target
+version of this function to free that memory before calling
+@samp{_bfd_generic_free_cached_info}.
 
 @item _new_section_hook
 This is called from @samp{bfd_make_section_anyway} whenever a new

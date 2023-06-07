@@ -409,7 +409,7 @@ extern bfd_vma bfd_coff_reloc16_get_value
   (arelent *, struct bfd_link_info *, asection *);
 extern void bfd_perform_slip
   (bfd *, unsigned int, asection *, bfd_vma);
-extern bool _bfd_coff_close_and_cleanup
+extern bool _bfd_coff_free_cached_info
   (bfd *);
 
 /* Functions and types in cofflink.c.  */

@@ -6789,13 +6789,13 @@ som_write_armap (bfd *abfd,
   return true;
 }
 
-/* Free all information we have cached for this BFD.  We can always
-   read it again later if we need it.  */
+/* Throw away some malloc'd information for this BFD.  */
 
 static bool
 som_bfd_free_cached_info (bfd *abfd)
 {
-  if (bfd_get_format (abfd) == bfd_object)
+  if (bfd_get_format (abfd) == bfd_object
+      || bfd_get_format (abfd) == bfd_core)
     {
       asection *o;
 
@@ -6813,8 +6813,8 @@ som_bfd_free_cached_info (bfd *abfd)
 #undef FREE
     }
 
-  /* Do not call _bfd_free_cached_info here.  som_write_armap needs
-     to access the bfd obj_alloc memory.  */
+  /* Do not call _bfd_generic_bfd_free_cached_info here.
+     som_write_armap needs to access the bfd objalloc memory.  */
   return true;
 }
 

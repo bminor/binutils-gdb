@@ -6199,8 +6199,6 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   if (bfd_get_format (abfd) == bfd_object && mdata != NULL)
     {
-      _bfd_dwarf2_cleanup_debug_info (abfd, &mdata->dwarf2_find_line_info);
-      bfd_mach_o_free_cached_info (abfd);
       if (mdata->dsym_bfd != NULL)
 	{
 	  bfd *fat_bfd = mdata->dsym_bfd->my_archive;
@@ -6231,18 +6229,27 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
 }
 
 bool
-bfd_mach_o_free_cached_info (bfd *abfd)
+bfd_mach_o_bfd_free_cached_info (bfd *abfd)
 {
-  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
-  asection *asect;
-  free (mdata->dyn_reloc_cache);
-  mdata->dyn_reloc_cache = NULL;
-  for (asect = abfd->sections; asect != NULL; asect = asect->next)
+  bfd_mach_o_data_struct *mdata;
+
+  if ((bfd_get_format (abfd) == bfd_object
+       || bfd_get_format (abfd) == bfd_core)
+      && (mdata = bfd_mach_o_get_data (abfd)) != NULL)
     {
-      free (asect->relocation);
-      asect->relocation = NULL;
+      _bfd_dwarf2_cleanup_debug_info (abfd, &mdata->dwarf2_find_line_info);
+      free (mdata->dyn_reloc_cache);
+      mdata->dyn_reloc_cache = NULL;
+
+      for (asection *asect = abfd->sections; asect; asect = asect->next)
+	{
+	  free (asect->relocation);
+	  asect->relocation = NULL;
+	}
     }
 
+  /* Do not call _bfd_generic_bfd_free_cached_info here.
+     bfd_mach_o_close_and_cleanup uses tdata.  */
   return true;
 }
 

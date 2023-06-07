@@ -4728,7 +4728,7 @@ elf64_vms_close_and_cleanup (bfd *abfd)
 	}
     }
 
-  return _bfd_elf_close_and_cleanup (abfd);
+  return _bfd_generic_close_and_cleanup (abfd);
 }
 
 /* Add symbols from an ELF object file to the linker hash table.  */

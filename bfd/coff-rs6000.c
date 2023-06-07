@@ -4436,8 +4436,8 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
 };
 
 /* For generic entry points.  */
-#define _bfd_xcoff_close_and_cleanup _bfd_coff_close_and_cleanup
-#define _bfd_xcoff_bfd_free_cached_info _bfd_bool_bfd_true
+#define _bfd_xcoff_close_and_cleanup coff_close_and_cleanup
+#define _bfd_xcoff_bfd_free_cached_info coff_bfd_free_cached_info
 #define _bfd_xcoff_new_section_hook coff_new_section_hook
 #define _bfd_xcoff_get_section_contents _bfd_generic_get_section_contents
 #define _bfd_xcoff_get_section_contents_in_window \

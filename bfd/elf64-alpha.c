@@ -1519,13 +1519,6 @@ elf64_alpha_find_nearest_line (bfd *abfd, asymbol **symbols,
 	    (*swap->swap_fdr_in) (abfd, fraw_src, fdr_ptr);
 
 	  alpha_elf_tdata (abfd)->find_line_info = fi;
-
-	  /* Note that we don't bother to ever free this information.
-	     find_nearest_line is either called all the time, as in
-	     objdump -l, so the information should be saved, or it is
-	     rarely called, as in ld error messages, so the memory
-	     wasted is unimportant.  Still, it would probably be a
-	     good idea for free_cached_info to throw it away.  */
 	}
 
       if (_bfd_ecoff_locate_line (abfd, section, offset, &fi->d, swap,

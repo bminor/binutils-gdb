@@ -10103,25 +10103,12 @@ bfd_vms_get_data (bfd *abfd)
   return (struct vms_private_data_struct *)abfd->tdata.any;
 }
 
-#define vms_bfd_is_target_special_symbol  _bfd_bool_bfd_asymbol_false
-#define vms_bfd_link_just_syms		  _bfd_generic_link_just_syms
-#define vms_bfd_copy_link_hash_symbol_type \
-  _bfd_generic_copy_link_hash_symbol_type
-#define vms_bfd_is_group_section	  bfd_generic_is_group_section
-#define vms_bfd_group_name		  bfd_generic_group_name
-#define vms_bfd_discard_group		  bfd_generic_discard_group
-#define vms_section_already_linked	  _bfd_generic_section_already_linked
-#define vms_bfd_define_common_symbol	  bfd_generic_define_common_symbol
-#define vms_bfd_link_hide_symbol	  _bfd_generic_link_hide_symbol
-#define vms_bfd_define_start_stop         bfd_generic_define_start_stop
-#define vms_bfd_copy_private_header_data  _bfd_generic_bfd_copy_private_header_data
-
 #define vms_bfd_copy_private_bfd_data	  _bfd_generic_bfd_copy_private_bfd_data
-#define vms_bfd_free_cached_info	  _bfd_generic_bfd_free_cached_info
+#define vms_bfd_merge_private_bfd_data	  _bfd_generic_bfd_merge_private_bfd_data
 #define vms_bfd_copy_private_section_data _bfd_generic_bfd_copy_private_section_data
 #define vms_bfd_copy_private_symbol_data  _bfd_generic_bfd_copy_private_symbol_data
+#define vms_bfd_copy_private_header_data  _bfd_generic_bfd_copy_private_header_data
 #define vms_bfd_set_private_flags	  _bfd_generic_bfd_set_private_flags
-#define vms_bfd_merge_private_bfd_data	  _bfd_generic_bfd_merge_private_bfd_data
 
 /* Symbols table.  */
 #define alpha_vms_make_empty_symbol	   _bfd_generic_make_empty_symbol
@@ -10144,7 +10131,7 @@ bfd_vms_get_data (bfd *abfd)
 
 /* Generic table.  */
 #define alpha_vms_close_and_cleanup	   vms_close_and_cleanup
-#define alpha_vms_bfd_free_cached_info	   vms_bfd_free_cached_info
+#define alpha_vms_bfd_free_cached_info	   _bfd_bool_bfd_true
 #define alpha_vms_new_section_hook	   vms_new_section_hook
 #define alpha_vms_set_section_contents	   _bfd_vms_set_section_contents
 #define alpha_vms_get_section_contents_in_window _bfd_generic_get_section_contents_in_window

@@ -2721,7 +2721,7 @@ extern bool bfd_elf_link_record_dynamic_symbol
 extern int bfd_elf_link_record_local_dynamic_symbol
   (struct bfd_link_info *, bfd *, long);
 
-extern bool _bfd_elf_close_and_cleanup
+extern bool _bfd_elf_free_cached_info
   (bfd *);
 
 extern bool _bfd_elf_common_definition

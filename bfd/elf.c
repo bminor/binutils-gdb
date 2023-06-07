@@ -9589,21 +9589,22 @@ _bfd_elf_validate_reloc (bfd *abfd, arelent *areloc)
 }
 
 bool
-_bfd_elf_close_and_cleanup (bfd *abfd)
+_bfd_elf_free_cached_info (bfd *abfd)
 {
-  struct elf_obj_tdata *tdata = elf_tdata (abfd);
-  if (tdata != NULL
-      && (bfd_get_format (abfd) == bfd_object
-	  || bfd_get_format (abfd) == bfd_core))
+  struct elf_obj_tdata *tdata;
+
+  if ((bfd_get_format (abfd) == bfd_object
+       || bfd_get_format (abfd) == bfd_core)
+      && (tdata = elf_tdata (abfd)) != NULL)
     {
-      if (elf_tdata (abfd)->o != NULL && elf_shstrtab (abfd) != NULL)
+      if (tdata->o != NULL && elf_shstrtab (abfd) != NULL)
 	_bfd_elf_strtab_free (elf_shstrtab (abfd));
       _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
       _bfd_dwarf1_cleanup_debug_info (abfd, &tdata->dwarf1_find_line_info);
       _bfd_stab_cleanup (abfd, &tdata->line_info);
     }
 
-  return _bfd_generic_close_and_cleanup (abfd);
+  return _bfd_generic_bfd_free_cached_info (abfd);
 }
 
 /* For Rel targets, we encode meaningful data for BFD_RELOC_VTABLE_ENTRY

@@ -3275,43 +3275,37 @@ bfd_coff_group_name (bfd *abfd, const asection *sec)
 }
 
 bool
-_bfd_coff_close_and_cleanup (bfd *abfd)
+_bfd_coff_free_cached_info (bfd *abfd)
 {
-  struct coff_tdata *tdata = coff_data (abfd);
+  struct coff_tdata *tdata;
 
-  if (tdata != NULL)
+  if (bfd_family_coff (abfd)
+      && (bfd_get_format (abfd) == bfd_object
+	  || bfd_get_format (abfd) == bfd_core)
+      && (tdata = coff_data (abfd)) != NULL)
     {
-      if (bfd_family_coff (abfd) && bfd_get_format (abfd) == bfd_object)
+      if (tdata->section_by_index)
 	{
-	  if (tdata->section_by_index)
-	    {
-	      htab_delete (tdata->section_by_index);
-	      tdata->section_by_index = NULL;
-	    }
-
-	  if (tdata->section_by_target_index)
-	    {
-	      htab_delete (tdata->section_by_target_index);
-	      tdata->section_by_target_index = NULL;
-	    }
+	  htab_delete (tdata->section_by_index);
+	  tdata->section_by_index = NULL;
 	}
+
+      if (tdata->section_by_target_index)
+	{
+	  htab_delete (tdata->section_by_target_index);
+	  tdata->section_by_target_index = NULL;
+	}
+
+      _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
+      _bfd_stab_cleanup (abfd, &tdata->line_info);
 
       /* PR 25447:
 	 Do not clear the keep_syms and keep_strings flags.
 	 These may have been set by pe_ILF_build_a_bfd() indicating
 	 that the syms and strings pointers are not to be freed.  */
-      if (bfd_get_format (abfd) == bfd_object
-	  && bfd_family_coff (abfd)
-	  && !_bfd_coff_free_symbols (abfd))
+      if (!_bfd_coff_free_symbols (abfd))
 	return false;
-
-      if (bfd_get_format (abfd) == bfd_object
-	  || bfd_get_format (abfd) == bfd_core)
-	{
-	  _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
-	  _bfd_stab_cleanup (abfd, &tdata->line_info);
-	}
     }
 
-  return _bfd_generic_close_and_cleanup (abfd);
+  return _bfd_generic_bfd_free_cached_info (abfd);
 }
