@@ -132,7 +132,7 @@ proc run_test { cleanup_properly } {
     gdb_test "print 2 + 2 + 2" " = 6"
 
     # Now tell the Python code not to check the window is valid before
-    # calling rerended.  The result is the Python code will try to draw to
+    # calling render.  The result is the Python code will try to draw to
     # the screen.  This should throw a Python exception.
     gdb_test_no_output "python perform_valid_check = False"
     set exception_pattern "\r\nPython Exception\[^\n\r\]+TUI window is invalid\[^\n\r\]+"
@@ -153,7 +153,7 @@ proc run_test { cleanup_properly } {
     # Set 'update_title' to True.  The Python script will now try to set
     # the window title when an event occurs (instead of trying to redraw
     # the window). As the window is still not displayed this will again
-    # through an exception.
+    # throw an exception.
     gdb_test_no_output "python update_title = True"
     gdb_test_multiple "next" "next at cli, with an exception for setting the title" {
 	-re -wrap "func \\(5\\);${exception_pattern}" {
