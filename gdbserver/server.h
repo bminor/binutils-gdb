@@ -68,6 +68,7 @@ void initialize_low ();
 extern bool server_waiting;
 
 extern bool disable_packet_vCont;
+extern bool disable_packet_vCont_step;
 extern bool disable_packet_Tthread;
 extern bool disable_packet_qC;
 extern bool disable_packet_qfThreadInfo;

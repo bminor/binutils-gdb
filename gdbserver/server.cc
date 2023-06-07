@@ -143,6 +143,7 @@ unsigned long signal_pid;
    in gdbserver, for the sake of testing GDB against stubs that don't
    support them.  */
 bool disable_packet_vCont;
+bool disable_packet_vCont_step;
 bool disable_packet_Tthread;
 bool disable_packet_qC;
 bool disable_packet_qfThreadInfo;
@@ -3538,9 +3539,10 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 	{
 	  strcpy (own_buf, "vCont;c;C;t");
 
-	  if (target_supports_hardware_single_step ()
-	      || target_supports_software_single_step ()
-	      || !cs.vCont_supported)
+	  if (!disable_packet_vCont_step
+	      && (target_supports_hardware_single_step ()
+		  || target_supports_software_single_step ()
+		  || !cs.vCont_supported))
 	    {
 	      /* If target supports single step either by hardware or by
 		 software, add actions s and S to the list of supported
@@ -3873,7 +3875,7 @@ gdbserver_usage (FILE *stream)
 	   "  --disable-packet=OPT1[,OPT2,...]\n"
 	   "                        Disable support for RSP packets or features.\n"
 	   "                          Options:\n"
-	   "                            vCont, T, Tthread, qC, qfThreadInfo and \n"
+	   "                            vCont, vConts, T, Tthread, qC, qfThreadInfo and\n"
 	   "                            threads (disable all threading packets).\n"
 	   "\n"
 	   "For more information, consult the GDB manual (available as on-line \n"
@@ -4293,6 +4295,8 @@ captured_main (int argc, char *argv[])
 	      {
 		if (strcmp ("vCont", tok) == 0)
 		  disable_packet_vCont = true;
+		else if (strcmp ("vConts", tok) == 0)
+		  disable_packet_vCont_step = true;
 		else if (strcmp ("Tthread", tok) == 0)
 		  disable_packet_Tthread = true;
 		else if (strcmp ("qC", tok) == 0)
