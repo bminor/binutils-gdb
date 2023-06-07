@@ -186,7 +186,10 @@ proc run_test { cleanup_properly } {
 
     Term::command "layout test"
     Term::command "tui disable"
+
     send_gdb "tui enable\n"
+    gdb_assert { [Term::wait_for "^$::gdb_prompt tui disable"] } "TUI renabled"
+
     Term::check_box "check for python window" 0 0 80 16
 }
 
