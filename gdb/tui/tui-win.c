@@ -1220,18 +1220,22 @@ This variable controls the border of TUI windows:\n\
 			show_tui_border_kind,
 			&tui_setlist, &tui_showlist);
 
-  add_setshow_enum_cmd ("border-mode", no_class, tui_border_mode_enums,
-			&tui_border_mode, _("\
-Set the attribute mode to use for the TUI window borders."), _("\
-Show the attribute mode to use for the TUI window borders."), _("\
-This variable controls the attributes to use for the window borders:\n\
+#define HELP_ATTRIBUTE_MODE "\
    normal          normal display\n\
    standout        use highlight mode of terminal\n\
    reverse         use reverse video mode\n\
    half            use half bright\n\
    half-standout   use half bright and standout mode\n\
    bold            use extra bright or bold\n\
-   bold-standout   use extra bright or bold with standout mode"),
+   bold-standout   use extra bright or bold with standout mode"
+
+  add_setshow_enum_cmd ("border-mode", no_class, tui_border_mode_enums,
+			&tui_border_mode, _("\
+Set the attribute mode to use for the TUI window borders."), _("\
+Show the attribute mode to use for the TUI window borders."),
+			_("\
+This variable controls the attributes to use for the window borders:\n"
+			  HELP_ATTRIBUTE_MODE),
 			tui_set_var_cmd,
 			show_tui_border_mode,
 			&tui_setlist, &tui_showlist);
@@ -1239,18 +1243,15 @@ This variable controls the attributes to use for the window borders:\n\
   add_setshow_enum_cmd ("active-border-mode", no_class, tui_border_mode_enums,
 			&tui_active_border_mode, _("\
 Set the attribute mode to use for the active TUI window border."), _("\
-Show the attribute mode to use for the active TUI window border."), _("\
-This variable controls the attributes to use for the active window border:\n\
-   normal          normal display\n\
-   standout        use highlight mode of terminal\n\
-   reverse         use reverse video mode\n\
-   half            use half bright\n\
-   half-standout   use half bright and standout mode\n\
-   bold            use extra bright or bold\n\
-   bold-standout   use extra bright or bold with standout mode"),
+Show the attribute mode to use for the active TUI window border."),
+			_("\
+This variable controls the attributes to use for the active window border:\n"
+			  HELP_ATTRIBUTE_MODE),
 			tui_set_var_cmd,
 			show_tui_active_border_mode,
 			&tui_setlist, &tui_showlist);
+
+#undef HELP_ATTRIBUTE_MODE
 
   add_setshow_zuinteger_cmd ("tab-width", no_class,
 			     &internal_tab_width, _("\
