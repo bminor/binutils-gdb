@@ -70,6 +70,10 @@ proc stop_process { description } {
       {
 	pass $description
       }
+    -re "Thread .* received signal SIGTRAP.*$gdb_prompt $"
+      {
+	pass $description
+      }
     timeout
       {
 	fail "$description (timeout)"
@@ -94,7 +98,7 @@ proc get_current_thread { description } {
 # Make sure we're stopped in the loop, in one of the non-main threads.
 
 proc goto_loop { msg } {
-    gdb_breakpoint [concat [gdb_get_line_number "schedlock.exp: main loop"] " if arg != 0"]
+    gdb_breakpoint [concat "$::srcfile:" [gdb_get_line_number "schedlock.exp: main loop"] " if arg != 0"]
 
     set test "return to loop"
     if {$msg != ""} {
