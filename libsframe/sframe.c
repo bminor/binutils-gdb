@@ -341,6 +341,27 @@ sframe_fre_entry_size (sframe_frame_row_entry *frep, unsigned int fre_type)
 	  + sframe_fre_offset_bytes_size (fre_info));
 }
 
+/* Get the function descriptor entry at index FUNC_IDX in the decoder
+   context CTX.  */
+
+static sframe_func_desc_entry *
+sframe_decoder_get_funcdesc_at_index (sframe_decoder_ctx *ctx,
+				      uint32_t func_idx)
+{
+  sframe_func_desc_entry *fdep;
+  unsigned int num_fdes;
+  int err;
+
+  num_fdes = sframe_decoder_get_num_fidx (ctx);
+  if (num_fdes == 0
+      || func_idx >= num_fdes
+      || ctx->sfd_funcdesc == NULL)
+    return sframe_ret_set_errno (&err, SFRAME_ERR_DCTX_INVAL);
+
+  fdep = &ctx->sfd_funcdesc[func_idx];
+  return fdep;
+}
+
 static int
 flip_fre (char *fp, unsigned int fre_type, size_t *fre_size)
 {
@@ -1103,42 +1124,23 @@ sframe_decoder_get_funcdesc (sframe_decoder_ctx *ctx,
 			     unsigned char *func_info)
 {
   sframe_func_desc_entry *fdp;
-  unsigned int num_fdes;
   int err = 0;
 
   if (ctx == NULL || func_start_address == NULL || num_fres == NULL
       || func_size == NULL)
     return sframe_set_errno (&err, SFRAME_ERR_INVAL);
 
-  num_fdes = sframe_decoder_get_num_fidx (ctx);
-  if (num_fdes == 0
-      || i >= num_fdes
-      || ctx->sfd_funcdesc == NULL)
-    return sframe_set_errno (&err, SFRAME_ERR_DCTX_INVAL);
+  fdp = sframe_decoder_get_funcdesc_at_index (ctx, i);
 
-  fdp = (sframe_func_desc_entry *) ctx->sfd_funcdesc + i;
+  if (fdp == NULL)
+    return sframe_set_errno (&err, SFRAME_ERR_FDE_NOTFOUND);
+
   *num_fres = fdp->sfde_func_num_fres;
   *func_start_address = fdp->sfde_func_start_address;
   *func_size = fdp->sfde_func_size;
   *func_info = fdp->sfde_func_info;
 
   return 0;
-}
-
-/* Get the function descriptor entry at index FUNC_IDX in the decoder
-   context CTX.  */
-
-static sframe_func_desc_entry *
-sframe_decoder_get_funcdesc_at_index (sframe_decoder_ctx *ctx,
-				      uint32_t func_idx)
-{
-  /* Invalid argument.  No FDE will be found.  */
-  if (func_idx >= sframe_decoder_get_num_fidx (ctx))
-    return NULL;
-
-  sframe_func_desc_entry *fdep;
-  fdep = (sframe_func_desc_entry *) ctx->sfd_funcdesc;
-  return fdep + func_idx;
 }
 
 /* Get the FRE_IDX'th FRE of the function at FUNC_IDX'th function
