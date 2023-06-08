@@ -9823,12 +9823,14 @@ display_debug_frames (struct dwarf_section *section,
 		    {
 		      warn (_("Invalid column number in saved frame state\n"));
 		      fc->ncols = 0;
-		      break;
 		    }
-		  memcpy (fc->col_type, rs->col_type,
-			  rs->ncols * sizeof (*rs->col_type));
-		  memcpy (fc->col_offset, rs->col_offset,
-			  rs->ncols * sizeof (*rs->col_offset));
+		  else
+		    {
+		      memcpy (fc->col_type, rs->col_type,
+			      rs->ncols * sizeof (*rs->col_type));
+		      memcpy (fc->col_offset, rs->col_offset,
+			      rs->ncols * sizeof (*rs->col_offset));
+		    }
 		  free (rs->col_type);
 		  free (rs->col_offset);
 		  free (rs);
