@@ -4815,7 +4815,7 @@ const struct elf_size_info mips_elf64_size_info =
 
 #define bfd_elf64_get_dynamic_reloc_upper_bound mips_elf64_get_dynamic_reloc_upper_bound
 #define bfd_elf64_mkobject		_bfd_mips_elf_mkobject
-#define bfd_elf64_free_cached_info	_bfd_mips_elf_free_cached_info
+#define bfd_elf64_bfd_free_cached_info	_bfd_mips_elf_free_cached_info
 
 /* The SGI style (n)64 NewABI.  */
 #define TARGET_LITTLE_SYM		mips_elf64_le_vec
